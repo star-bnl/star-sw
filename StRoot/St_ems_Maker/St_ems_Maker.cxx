@@ -1,5 +1,8 @@
-// $Id: St_ems_Maker.cxx,v 1.8 1999/03/03 04:12:14 fisyak Exp $
+// $Id: St_ems_Maker.cxx,v 1.9 1999/03/03 17:34:15 akio Exp $
 // $Log: St_ems_Maker.cxx,v $
+// Revision 1.9  1999/03/03 17:34:15  akio
+// small corrections
+//
 // Revision 1.8  1999/03/03 04:12:14  fisyak
 // replace kStErr to kStWarn
 //
@@ -69,7 +72,7 @@ Int_t St_ems_Maker::Init(){
 Int_t St_ems_Maker::Make(){
   if (gStChain->DataSet("geom")){
     St_DataSetIter       geom(gStChain->DataSet("geom"));
-    m_calb_calg   = (St_calb_calg   *) geom("calb_calg");
+    m_calb_calg   = (St_calb_calg   *) geom("Run/calb_calg");
     if (!m_DataSet->GetList())  {    //if DataSet is empty, create table and fill it
       St_ems_hits *ems_hits_bemc = new St_ems_hits("ems_hits_bemc", 9600);m_DataSet->Add(ems_hits_bemc);
       St_ems_hits *ems_hits_bsmd = new St_ems_hits("ems_hits_bsmd",38000);m_DataSet->Add(ems_hits_bsmd);
@@ -96,20 +99,16 @@ Int_t St_ems_Maker::Make(){
       
       //if there is no g2t_hit table, create dummy one 
       int i1=0, i2=0, i3=0, i4=0;
-      if (!g2t_emc_hit) {g2t_emc_hit = new St_g2t_emc_hit("g2t_emc_hit",1); i1=1;}
-      if (!g2t_smd_hit) {g2t_smd_hit = new St_g2t_emc_hit("g2t_smd_hit",1); i2=1;}
-      if (!g2t_eem_hit) {g2t_eem_hit = new St_g2t_emc_hit("g2t_eem_hit",1); i3=1;}
-      if (!g2t_esm_hit) {g2t_esm_hit = new St_g2t_emc_hit("g2t_esm_hit",1); i4=1;}
+      if (!g2t_emc_hit) {g2t_emc_hit = new St_g2t_emc_hit("g2t_emc_hit",1); m_DataSet->Add(g2t_emc_hit);}
+      if (!g2t_smd_hit) {g2t_smd_hit = new St_g2t_emc_hit("g2t_smd_hit",1); m_DataSet->Add(g2t_smd_hit);}
+      if (!g2t_eem_hit) {g2t_eem_hit = new St_g2t_emc_hit("g2t_eem_hit",1); m_DataSet->Add(g2t_eem_hit);}
+      if (!g2t_esm_hit) {g2t_esm_hit = new St_g2t_emc_hit("g2t_esm_hit",1); m_DataSet->Add(g2t_esm_hit);}
       
       //calling emc_interface2 which get hit from g2t_hit, store in ems_hit
       Int_t Res_ems =  ems_interface2 (g2t_event, g2t_vertex, g2t_track,
 				       g2t_emc_hit, g2t_smd_hit, g2t_eem_hit, g2t_esm_hit,
 				       m_calb_calg, m_ems_control,
 				       ems_hits_bemc, ems_hits_bsmd, ems_hits_eemc, ems_hits_esmd);
-      if(!i1){delete g2t_emc_hit;}
-      if(!i2){delete g2t_smd_hit;}
-      if(!i3){delete g2t_eem_hit;}
-      if(!i4){delete g2t_esm_hit;}
       if (Res_ems != kSTAFCV_OK) {
 	cout << "***** Problem with ems_interface2 *****" << endl; return kStWarn;
       }
@@ -147,7 +146,7 @@ Int_t St_ems_Maker::Make(){
 //_____________________________________________________________________________
 void St_ems_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_ems_Maker.cxx,v 1.8 1999/03/03 04:12:14 fisyak Exp $\n");
+  printf("* $Id: St_ems_Maker.cxx,v 1.9 1999/03/03 17:34:15 akio Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
