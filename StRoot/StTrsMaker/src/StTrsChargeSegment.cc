@@ -1,18 +1,19 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.6 1999/02/16 18:15:41 fisyak Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.7 1999/02/18 21:18:33 lasiuk Exp $
  *
  * Author: brian May 18, 1998
  *
  ***************************************************************************
  *
- * Description: g2t wrapper with added functionality
+ * Description: Input charge segment...much like a g2t_tpc_hit but
+ *              with added functionality
  *
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
- * Revision 1.6  1999/02/16 18:15:41  fisyak
- * Check in the latest updates to fix them
+ * Revision 1.7  1999/02/18 21:18:33  lasiuk
+ * rotate() mods to StTpcCoordinateTranform
  *
  * Revision 1.8  1999/02/28 20:15:17  lasiuk
  * splitting test/add muon to pid
@@ -95,9 +96,9 @@ StTrsChargeSegment::StTrsChargeSegment(StThreeVector<double>& pos,
     mDs = ds;
     mPid = pid;                // default is -1
     mSectorOfOrigin = 0;
-void StTrsChargeSegment::rotate(StTpcGeometry* geodb, StTpcSlowControl* SCdb)
+    mSector12Position = mPosition;
 }
-    StTpcCoordinateTransform transformer(geodb, SCdb);
+
 StTrsChargeSegment::~StTrsChargeSegment() {/* nopt */ }
 
 

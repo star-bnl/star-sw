@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.hh,v 1.4 1999/02/10 18:02:09 lasiuk Exp $
+ * $Id: StTrsChargeSegment.hh,v 1.5 1999/02/18 21:18:43 lasiuk Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.hh,v $
- * Revision 1.4  1999/02/10 18:02:09  lasiuk
- * ostream (const)
+ * Revision 1.5  1999/02/18 21:18:43  lasiuk
+ * rotate() mods to StTpcCoordinateTranform
  *
  * Revision 1.5  1999/02/18 21:18:43  lasiuk
  * rotate() mods to StTpcCoordinateTranform
@@ -60,6 +60,7 @@
 #include "StThreeVector.hh"
 #include "StMatrix.hh"
 
+//#include "g2t_tpc_hit.hh"
 #include "StTpcSlowControl.hh"
 #include "StTpcGeometry.hh"
 #include "StTpcElectronics.hh"
@@ -89,7 +90,7 @@ public:
     const StThreeVector<double>& momentum()          const;
     double                 dE()                const;
     double                 ds()                const;
-    void  rotate(StTpcGeometry*, StTpcSlowControl*);
+    int                    pid()               const;
     float                  numberOfElectrons() const;
     
     void  rotate(StTpcGeometry*, StTpcSlowControl*, StTpcElectronics*);
