@@ -15,7 +15,7 @@
 >GUIDANCE
 Dataset_Unix_like_Interface commands.
 .
- #(@)$Id: dui_def.cdf,v 1.10 1998/05/12 02:53:32 dave Exp $  Edited by Bill Love - 24 Feb 1998
+ #(@)$Id: dui_def.cdf,v 1.11 1998/05/12 03:01:02 dave Exp $  Edited by Bill Love - 24 Feb 1998
 .
 DUI is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -575,4 +575,3 @@ BUGS:
    None known.
 .
 >ACTION kam_dui_rmdir_%C
-
