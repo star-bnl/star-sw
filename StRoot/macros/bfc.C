@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.40 1999/02/08 20:13:05 didenko Exp $
+// $Id: bfc.C,v 1.41 1999/02/11 15:44:28 wenaus Exp $
 // $Log: bfc.C,v $
+// Revision 1.41  1999/02/11 15:44:28  wenaus
+// macro to read DSTs into StEvent and analyze
+//
 // Revision 1.40  1999/02/08 20:13:05  didenko
 // added St_QA_Maker
 //
@@ -101,6 +104,8 @@ void Load(){
     gSystem->Load("St_emc_Maker");
     gSystem->Load("St_ctf");
     gSystem->Load("St_ctf_Maker");
+    gSystem->Load("St_mwc");
+    gSystem->Load("St_mwc_Maker");
     gSystem->Load("St_svt");
     gSystem->Load("St_srs_Maker");
     gSystem->Load("St_stk_Maker");
@@ -108,7 +113,7 @@ void Load(){
     gSystem->Load("St_global");
     gSystem->Load("St_dst_Maker");
     gSystem->Load("St_run_summary_Maker");
-     gSystem->Load("St_QA_Maker");
+    gSystem->Load("St_QA_Maker");
 }
 
 /*------------------------------------- Begin_Html <font color="#800000" size="-1">
@@ -185,11 +190,12 @@ files require a maker to read in the data file.
   St_srs_Maker         *svt_hits = new St_srs_Maker("svt_hits","event/data/svt/hits");
   St_fcl_Maker         *fcl_hits = new St_fcl_Maker("ftpc_hits","event/data/ftpc/hits");
   St_ctf_Maker         *ctf      = new St_ctf_Maker("ctf","event/data/ctf");
+  St_mwc_Maker         *mwc      = new St_mwc_Maker("mwc","event/data/mwc");
   St_tpt_Maker       *tpc_tracks = new St_tpt_Maker("tpc_tracks","event/data/tpc/tracks");
   St_stk_Maker       *stk_tracks = new St_stk_Maker("svt_tracks","event/data/svt/tracks");
   St_fpt_Maker      *ftpc_tracks = new St_fpt_Maker("ftpc_tracks","event/data/ftpc/tracks");
   St_glb_Maker           *global = new St_glb_Maker("global","event/data/global");
-  St_dst_Maker        *dst_Maker = new St_dst_Maker("dst","dst");
+  //  St_dst_Maker        *dst_Maker = new St_dst_Maker("dst","dst");
   //  St_dst_Maker        *dst_Maker = new St_dst_Maker("dst","event/data/global/dst");
   //  dst_Maker->Save();
   St_run_summary_Maker  *summary = new St_run_summary_Maker("run_summary","run/dst");
