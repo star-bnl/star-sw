@@ -133,7 +133,7 @@ void StEmcFilter::calcCentrality(StEvent* event)
   
   if(fabs(mBField)>0.4) //full field
   {
-    Int_t cent[]  = {14,33,59,98,150,221,311,428,500,1000};
+    Int_t cent[]  = {14,30,56,94,146,217,312,431,510,1000};
     for(Int_t i=0;i<10;i++) mCentrality[i] = cent[i];
   }
   else // half field
