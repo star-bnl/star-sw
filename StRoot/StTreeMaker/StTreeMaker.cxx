@@ -92,9 +92,9 @@ Int_t StTreeMaker::Init()
 //    		?????? Compatibility ???????
       if ( fTreeName=="bfcTree") SetBranch("dstBranch");
 
-//   	Set filename for runcontBranch
+//   	Set filename for runcoBranch
     StBranch *h = (StBranch*)fTree->Find("histBranch");
-    StBranch *r = (StBranch*)fTree->Find("runcontBranch");
+    StBranch *r = (StBranch*)fTree->Find("runcoBranch");
     if (h && r) r->SetFile(h->GetFile(),0,1);
       
 
@@ -307,7 +307,7 @@ void StTreeMaker::FillHistBranch(StBranch *histBr)
 
     TString ts(ds->GetName());
     if (strncmp(bname,"hist"   ,4)==0) ts +="Hist";
-    if (strncmp(bname,"runcont",7)==0) ts +="RunCont";
+    if (strncmp(bname,"runco",7)==0) ts +="Runco";
 
 
     St_ObjectSet *os = new St_ObjectSet(ts);
@@ -329,8 +329,8 @@ void StTreeMaker::FillHistBranch(StBranch *histBr)
       if (!tl || !tl->First())		continue;
       os->SetObject(tl,0);}
       
-    if (strncmp(bname,"runcont",7)==0) {//Run Control Branch
-      dotrcp = ds->Find(".runcont");
+    if (strncmp(bname,"runco",5)==0) {//Run Control Branch
+      dotrcp = ds->Find(".runco");
       if (!dotrcp)			continue;
       os->Update(dotrcp); dotrcp->Delete();}
       
