@@ -1,0 +1,27 @@
+/* sce_am.idl
+*  Module: sce_am
+*  Description: Idl of the sce Ssd Chain Evaluator module
+*/
+
+#include "PAM.idl"
+#include "g2t_svt_hit.idl"
+#include "sls_spt.idl"
+#include "scf_cluster.idl"
+#include "scm_spt.idl"
+#include "svg_geom.idl"
+#include "sdm_geom_par.idl"
+#include "sce_dspt.idl"
+#include "sce_ctrl.idl"
+
+interface sce_am : amiModule {
+        STAFCV_T call
+                ( in    g2t_svt_hit     svt_hit 
+		, in    sls_spt         sls_spt
+		, in    scf_cluster     scf_cluster
+	        , in    scm_spt         scm_spt
+		, in    svg_geom        geom
+	        , in    sdm_geom_par    geom_par
+                , out   sce_dspt        sce_dspt
+		, inout sce_ctrl        ctrl     );
+};
+/*  Last mod. for sce_am: $Date: 2000/07/21 15:05:26 $ */
