@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.hh,v 1.10 2000/02/18 23:44:53 posk Exp $
+// $Id: StFlowAnalysisMaker.hh,v 1.11 2000/02/29 21:55:14 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.hh,v $
+// Revision 1.11  2000/02/29 21:55:14  posk
+// Removed static const int& statements.
+//
 // Revision 1.10  2000/02/18 23:44:53  posk
 // Added PID and centrality.
 //
@@ -80,13 +83,12 @@ public:
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
 
-protected:
+private:
 
-  void     fillFromTags();
-  void     fillFromFlowEvent();
-
-  StFlowEvent*  pFlowEvent; //! pointer to StFlowEvent
-  FlowTag_st*   pFlowTag;   //! pointer to StEvent
+  void     FillFromTags();
+  void     FillFromFlowEvent();
+  void     FillEventHistograms();
+  void     FillParticleHistograms();
 
   TVector2 mQ[Flow::nSels][Flow::nHars];                     // flow vector
   Float_t  mPsi[Flow::nSels][Flow::nHars];                   // event plane angle
@@ -100,10 +102,8 @@ protected:
   Float_t  mRes[Flow::nSels][Flow::nHars];      // event plane resolution
   Float_t  mResErr[Flow::nSels][Flow::nHars];   // event plane resolution error
  
-private:
-
-  void     fillEventHistograms();
-  void     fillParticleHistograms();
+  StFlowEvent*  pFlowEvent; //! pointer to StFlowEvent
+  FlowTag_st*   pFlowTag;   //! pointer to StEvent
 
   // for single histograms
   TH1F*     mHistCharge;        //!

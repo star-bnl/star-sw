@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.16 2000/02/23 22:14:08 posk Exp $
+// $Id: StFlowTagMaker.cxx,v 1.17 2000/02/29 21:53:29 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTagMaker.cxx,v $
+// Revision 1.17  2000/02/29 21:53:29  posk
+// Removed static const int& statements.
+//
 // Revision 1.16  2000/02/23 22:14:08  posk
 // Renamed histograms to contain "Flow".
 //
@@ -129,7 +132,7 @@ Int_t StFlowTagMaker::Make() {
 //-------------------------------------------------------------
 
 void StFlowTagMaker::PrintInfo() {
-  cout << "$Id: StFlowTagMaker.cxx,v 1.16 2000/02/23 22:14:08 posk Exp $" << endl;
+  cout << "$Id: StFlowTagMaker.cxx,v 1.17 2000/02/29 21:53:29 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
@@ -159,10 +162,6 @@ Int_t StFlowTagMaker::Finish() {
 Int_t StFlowTagMaker::Init() {
   // Book histograms
 
-  static const int& nHars = Flow::nHars;
-  static const int& nSels = Flow::nSels;
-  static const int& nSubs = Flow::nSubs;
-
   enum { nPsiBins    = 100,
 	 nMeanPtBins = 100,
 	 nMultBins   = 100,
@@ -177,12 +176,12 @@ Int_t StFlowTagMaker::Init() {
   const Float_t qMin      =  0.;
   const Float_t qMax      =  2.;
 
-  for (int i = 0; i < nSels+nSubs; i++) {
+  for (int i = 0; i < Flow::nSels + Flow::nSubs; i++) {
     TString* histTitle;
     char countSubEvents[5];
     sprintf(countSubEvents,"%d",i);
 
-    for (int j = 0; j < nHars; j++) {
+    for (int j = 0; j < Flow::nHars; j++) {
       char countHarmonics[5];
       sprintf(countHarmonics,"%d",j);
 
@@ -242,11 +241,10 @@ Int_t StFlowTagMaker::Init() {
 void StFlowTagMaker::FillFlowTag() {  
   // Fill Tag table
 
-  static const int& nHars = Flow::nHars;
   TVector2 Q;
   int selN, subN;
 
-  for (int j = 0; j < nHars ; j++) {
+  for (int j = 0; j < Flow::nHars ; j++) {
 
     // fill sub1 tags
     selN = 0, subN = 0;
@@ -288,9 +286,7 @@ void StFlowTagMaker::FillFlowTag() {
 Int_t StFlowTagMaker::FillHistograms() {
   // Fill histograms from Tag table
 
-  static const int& nHars = Flow::nHars;
-
-  for (int j = 0; j < nHars; j++) {
+  for (int j = 0; j < Flow::nHars; j++) {
     float order = (float)(j+1);
 
     histSubEvents[0].histHarmonics[j].mHistMeanPt->
