@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.cxx,v 1.9 2002/01/24 20:53:51 aihong Exp $
+// $Id: StFlowCumulantMaker.cxx,v 1.10 2002/02/02 01:10:12 posk Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -10,7 +10,8 @@
 // Description:  Maker to analyze Flow using the latest cumulant method.
 //                refer to Phy. Rev. C63 (2001) 054906 (old new method)
 //                and      Phy. Rev. C64 (2001) 054901 (new new method)
-//                all Eq. numbers are from new method paper if not specified.
+//                and      nucl-ex/0110016             (Practical Guide)
+//                Eq. numbers are from the PG or new new if not specified.
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -23,7 +24,6 @@
 #include "StFlowMaker/StFlowEvent.h"
 #include "StFlowMaker/StFlowConstants.h"
 #include "StFlowMaker/StFlowSelection.h"
-//#include "StFlowMaker/StFlowCutTrack.h"
 #include "StEnumerations.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
@@ -33,10 +33,8 @@
 #include "TVectorD.h"
 #include "TH1.h"
 #include "TH2.h"
-//#include "TH3.h"
 #include "TProfile.h"
 #include "TProfile2D.h"
-//#include "TF1.h"
 #include "TOrdCollection.h"
 #include "StMessMgr.h"
 #include "TMath.h"
@@ -91,6 +89,7 @@ Int_t StFlowCumulantMaker::Make() {
 
 Int_t StFlowCumulantMaker::Init() {
   // Book histograms
+
   float ptMaxPart = Flow::ptMaxPart;
   if (pFlowSelect->PtMaxPart()) {
     ptMaxPart = pFlowSelect->PtMaxPart();
@@ -137,7 +136,6 @@ Int_t StFlowCumulantMaker::Init() {
       char countHars[2];
       sprintf(countHars,"%d",j+1);
 
-
       histTitle = new TString("Flow_CumulMultSum_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
@@ -145,8 +143,6 @@ Int_t StFlowCumulantMaker::Init() {
       histFull[k].histFullHar[j].mHistMultSum =
         new TH1D(histTitle->Data(),histTitle->Data(),1,0.,1.);
       delete histTitle;
-
-
 
       histTitle = new TString("Flow_CumulWgtMultSumq4_Sel");
       histTitle->Append(*countSels);
@@ -156,7 +152,6 @@ Int_t StFlowCumulantMaker::Init() {
         new TH1D(histTitle->Data(),histTitle->Data(),1,0.,1.);
       delete histTitle;
 
-
       histTitle = new TString("Flow_CumulWgtMultSumq6_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
@@ -164,7 +159,6 @@ Int_t StFlowCumulantMaker::Init() {
       histFull[k].histFullHar[j].mHistWgtMultSum_q6 =
         new TH1D(histTitle->Data(),histTitle->Data(),1,0.,1.);
       delete histTitle;
-
 
       histTitle = new TString("Flow_CumulNEvent_Sel");
       histTitle->Append(*countSels);
@@ -174,22 +168,19 @@ Int_t StFlowCumulantMaker::Init() {
         new TH1D(histTitle->Data(),histTitle->Data(),1,0.,1.);
       delete histTitle;
 
-
-
-
       // ****  for differential flow   ****
       
-      // cumulant        dp/n{k}      
+      // cumulant        d_p/n{k}      
       // p is the harmonic of the differential flow 
       // n is the harmonic of the integrated flow used for the differential flow
-      // measurment. p = either n or 2n.
+      // measurment. p = mn = either n or 2n.
       
       // if m_M=1, k=2    dn/n{2}  : cumulant from 2-part corr.
       // if m_M=1, k=4    dn/n{4}  : cumulant from 4-part corr.
       // if m_M=2, k=2    d2n/n{3} : cumulant from 3-part corr., mixed harmonic
       // if m_M=2, k=4    d2n/n{5} : cumulant from 5-part corr., mixed harmonic
-      // where {2},{3} corresponds to theCumulOrder=1 below.
-      // {4},{5} corresponds to theCumulOrder=2 below.
+      // where {2},{3} corresponds to theCumulIndex=1 below.
+      // {4},{5} corresponds to theCumulIndex=2 below.
       
       histFull[k].histFullHar[j].mHistCumul2D  =  
 	new TProfile2D*[Flow::nCumulDiffOrders];
@@ -255,12 +246,12 @@ Int_t StFlowCumulantMaker::Init() {
       // For each cumulant order * qMax orders
       for (int pq  = 0; pq < Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax; pq++) { 
 	
-	TString* histTitleIntegratedDenom; //for read in
+	TString* histTitleIntegDenom; //for read in
 	
 	int cumulIndex = (pq/Flow::nCumulDiff_qMax) + 1; // like 1,2,3.
-	// for cumulant order 2,4,6 not begining with 0. This is "p" in Eq. (B1).
+	// for cumulant order 2,4,6 not begining with 0. This is "p" in Eq. (B1, PG5).
         int qIndex        = pq%Flow::nCumulDiff_qMax; // like 0,1,..._qMax-1  
-	// begin with 0. This is "q" in Eq. (B3).
+	// begin with 0. This is "q" in Eq. (B3, PG5).
 	
 	char theCumulOrderChar[2];
         char qIndexOrderChar[2]; // if >10, need to use char*
@@ -324,7 +315,7 @@ Int_t StFlowCumulantMaker::Init() {
 	histFull[k].histFullHar[j].mCumulG0Denom[pq] = 
 	  new TProfile(histTitle->Data(),histTitle->Data(), 1,0., 1., -1.*FLT_MAX, FLT_MAX, "");
 	histFull[k].histFullHar[j].mCumulG0Denom[pq]->SetYTitle("<G>");
-	histTitleIntegratedDenom = new TString(histTitle->Data());
+	histTitleIntegDenom = new TString(histTitle->Data());
 	delete histTitle;
 	
 	// Open the file and get the histograms 
@@ -336,13 +327,13 @@ Int_t StFlowCumulantMaker::Init() {
 	  
 	  f.cd();
 	  TProfile* tempDenomPtProfile = 
-	    dynamic_cast<TProfile*>(f.Get(histTitleIntegratedDenom->Data()));
+	    dynamic_cast<TProfile*>(f.Get(histTitleIntegDenom->Data()));
 	  if (!tempDenomPtProfile) {
 	    cout << "##### FlowCumulantAnalysis: can not find " <<
-	      histTitleIntegratedDenom->Data() << endl;
+	      histTitleIntegDenom->Data() << endl;
 	    return kFALSE;
 	  }   
-	  delete  histTitleIntegratedDenom;     
+	  delete  histTitleIntegDenom;     
 
 	  histFull[k].histFullHar[j].mCumulG0DenomRead[pq]
 	    = tempDenomPtProfile->GetBinContent(1);
@@ -359,7 +350,7 @@ Int_t StFlowCumulantMaker::Init() {
 
 	}
 	
-	double theTempPhi = twopi*((double)qIndex) /
+	double theTempPhi = twopi*((double)qIndex) /  // Eq. (PG5)
 	  ((double)Flow::nCumulDiff_qMax); 
 	double theRz = r0*sqrt(cumulIndex);
 	histFull[k].histFullHar[j].mDiffXz[pq] = theRz*cos(theTempPhi);
@@ -368,15 +359,14 @@ Int_t StFlowCumulantMaker::Init() {
       
       // ***  for integrated flow  ***
 
-    
-    histFull[k].histFullHar[j].mHistCumulIntegG0 =
+      histFull[k].histFullHar[j].mHistCumulIntegG0 =
       new TH1D*[Flow::nCumulIntegOrders*Flow::nCumulInteg_qMax];
 
       for (int pq = 0; pq <  Flow::nCumulIntegOrders*Flow::nCumulInteg_qMax; pq++) {
 	int cumulIndex = (pq/Flow::nCumulInteg_qMax) + 1; // like 1,2,3. 
-	//not begining with 0. That is "p" in Eq. (B1).
-        int qIndex = pq%(Flow::nCumulInteg_qMax); // like 0,1,...5 
-	//begining with 0. Just like Eq. (B3).
+	//not begining with 0. That is "p" in Eq. (B1, PG5).
+        int qIndex = pq%(Flow::nCumulInteg_qMax); // like 0,1,..qMax-1 
+	//begining with 0. Just like Eq. (B3, PG5).
 
 	char theCumulOrderChar[2];
         char qIndexOrderChar[2]; // if >10, need to use char*
@@ -386,7 +376,6 @@ Int_t StFlowCumulantMaker::Init() {
 	double theTempPhi = twopi*((double)qIndex) /
 	  ((double)Flow::nCumulInteg_qMax); 
 	double theRz = r0*sqrt(cumulIndex);
-	
 	histFull[k].histFullHar[j].mIntegXz[pq] = theRz*cos(theTempPhi);
 	histFull[k].histFullHar[j].mIntegYz[pq] = theRz*sin(theTempPhi);
 	
@@ -413,7 +402,7 @@ Int_t StFlowCumulantMaker::Init() {
   }
   
   gMessMgr->SetLimit("##### FlowCumulantAnalysis", 2);
-  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.9 2002/01/24 20:53:51 aihong Exp $");
+  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.10 2002/02/02 01:10:12 posk Exp $");
 
   return StMaker::Init();
 }
@@ -487,13 +476,13 @@ void StFlowCumulantMaker::FillParticleHistograms() {
   // he/she has to change pFlowSelect in this block for consistency. 
   // Selections have to be consistent between here and the loop.
 
-  double* theEvtCrossTerm[Flow::nSels][Flow::nHars];
+  double* evtG[Flow::nSels][Flow::nHars];
   double* theCrossterm[Flow::nSels][Flow::nHars];
   double  theSqrtOfSumWgtSqr[Flow::nSels][Flow::nHars];
   
   for (int k = 0; k < Flow::nSels; k++) {
     for (int j = 0; j < Flow::nHars; j++) { 
-       theEvtCrossTerm[k][j] = 
+       evtG[k][j] = 
 	new double[Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax];
        theCrossterm[k][j]    = 
         new double[Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax];
@@ -509,15 +498,15 @@ void StFlowCumulantMaker::FillParticleHistograms() {
       
       for (int pq = 0; pq < Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax; pq++) {
 	
-	theEvtCrossTerm[k][j][pq] = (mOldMethod) ?
+	evtG[k][j][pq] = (mOldMethod) ?
 	  (pFlowEvent->G_Old( pFlowSelect,
 			      histFull[k].histFullHar[j].mDiffXz[pq],
 			      histFull[k].histFullHar[j].mDiffYz[pq] )) :
 	  (pFlowEvent->G_New( pFlowSelect,
 			      histFull[k].histFullHar[j].mDiffXz[pq],
 			      histFull[k].histFullHar[j].mDiffYz[pq] )) ;
-	theCrossterm[k][j][pq] =theEvtCrossTerm[k][j][pq];
-        histFull[k].histFullHar[j].mCumulG0Denom[pq]->Fill(0.5,theEvtCrossTerm[k][j][pq]);
+	theCrossterm[k][j][pq] =evtG[k][j][pq];
+        histFull[k].histFullHar[j].mCumulG0Denom[pq]->Fill(0.5,evtG[k][j][pq]);
       } 
     }
   }
@@ -567,16 +556,17 @@ void StFlowCumulantMaker::FillParticleHistograms() {
 	  float yOrEta = 
 	    (strlen(pFlowSelect->PidPart()) != 0) ?  pFlowTrack->Y() : eta;
 	  
-	  double Dp[Flow::nCumulDiffOrders]; // the Dp in (D6)
+	  double Dp[Flow::nCumulDiffOrders]; // the Dp in (B7, PG11)
 	  for (int pq = 0; pq < Flow::nCumulDiffOrders; pq++) {
 	    Dp[pq] = 0.; }
 	  
 	  for (int pq = 0; pq < Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax; pq++) {
 	    int theCumulOrder = (pq/Flow::nCumulDiff_qMax) + 1; // like 1,2. 
-	    // not begin with 0. which is "p" in (B6)
-	    int qIndex        = pq%(Flow::nCumulDiff_qMax); // like 0,1,...5 
-	    // begin with 0. which is "q" in (B6)
+	    // not begin with 0. which is "p" in (B6, PG5)
+	    int qIndex        = pq%(Flow::nCumulDiff_qMax); // like 0,1,..qMax-1 
+	    // begin with 0. which is "q" in (B6, PG5)
 	    
+	    //Calculate PG11
 	    double theCoeff = pow(r0*sqrt(theCumulOrder), m_M) /
 	      float(Flow::nCumulDiff_qMax); // first term in (B7)
 	    double theCosTerm = cos(twopi*float(qIndex)*float(m_M) /
@@ -587,12 +577,12 @@ void StFlowCumulantMaker::FillParticleHistograms() {
 	    if ( (pFlowSelect->SelectPart(pFlowTrack)) && 
 		 (pFlowSelect->Select(pFlowTrack)) ) { // remove autocorrelation
 	      if (mOldMethod) {           
-		theCrossterm[k][j][pq] = theEvtCrossTerm[k][j][pq] / 
+		theCrossterm[k][j][pq] = evtG[k][j][pq] / 
 		  exp( (phiWgt/theSqrtOfSumWgtSqr[k][j]) *
 		       (2.*histFull[k].histFullHar[j].mDiffXz[pq]*cos(phi*order) +
 			2.*histFull[k].histFullHar[j].mDiffYz[pq]*sin(phi*order) ) );
 	      } else {
-		theCrossterm[k][j][pq] = theEvtCrossTerm[k][j][pq] / 
+		theCrossterm[k][j][pq] = evtG[k][j][pq] / 
 		  (1. + (phiWgt/mMult[k][j]) *
 		   (2.*histFull[k].histFullHar[j].mDiffXz[pq]*cos(phi*order) +
 		    2.*histFull[k].histFullHar[j].mDiffYz[pq]*sin(phi * order) ) ); 
@@ -600,7 +590,7 @@ void StFlowCumulantMaker::FillParticleHistograms() {
 	      }
 	    }
 
-	    // for writting out the denominator in (B6)
+	    // for writting out <G>, the denominator in (B6, PG10)
 	    histFull[k].histFullHar[j].mCumulG0Denom2D[pq]->
 	      Fill(yOrEta, pt, theCrossterm[k][j][pq]); 
 	    histFull[k].histFullHar[j].mCumulG0DenomPt[pq]->
@@ -614,12 +604,12 @@ void StFlowCumulantMaker::FillParticleHistograms() {
 	      histFull[k].histFullHar[j].mCumulG0DenomRead[pq];
 	    
 	    Dp[theCumulOrder-1] += 
-	      theCoeff*(theCosTerm*theXpq + theSinTerm*theYpq); // (B7)
+	      theCoeff*(theCosTerm*theXpq + theSinTerm*theYpq); // (B7, PG11)
 	    
 	  }
 	  
 	  if (m_M==1) {
-	    cumuTemp[0] = ((2.*Dp[1-1])-(0.5*Dp[2-1]))/r0Sq; // (B9)
+	    cumuTemp[0] = ((2.*Dp[1-1])-(0.5*Dp[2-1]))/r0Sq; // (B9, PG12)
 	    cumuTemp[1] = ((-2.*Dp[1-1])+Dp[2-1])/(r0Sq*r0Sq);
 	  } else if (m_M==2) {
 	    cumuTemp[0] = ((4.*Dp[1-1])-(0.5*Dp[2-1]))/(r0Sq*r0Sq); // (B10)
@@ -664,7 +654,7 @@ Int_t StFlowCumulantMaker::Finish() {
     char countSels[2];
     sprintf(countSels,"%d",k+1);
     
-    cout << "##### selection "<<k+1<<"  #### "<<endl;
+    cout << "##### selection "<< k+1 <<"  #### "<<endl;
     
     // integrated flow from cumulant
     histFull[k].mHist_v = new TH1D*[Flow::nCumulDiffOrders];
@@ -723,7 +713,6 @@ Int_t StFlowCumulantMaker::Finish() {
 	float(histFull[k].histFullHar[j].mWgtMultSum_q6)/
 	(float(histFull[k].histFullHar[j].mNEvent));
       
-
        histFull[k].histFullHar[j].mHistMultSum->
 	 SetBinContent(1,double(histFull[k].histFullHar[j].mMultSum));
        histFull[k].histFullHar[j].mHistWgtMultSum_q4->
@@ -733,16 +722,16 @@ Int_t StFlowCumulantMaker::Finish() {
        histFull[k].histFullHar[j].mHistNEvent->
 	 SetBinContent(1,double(histFull[k].histFullHar[j].mNEvent));
 
-      double CpInteg[Flow::nCumulIntegOrders]; // Cp in (B4)
+      double CpInteg[Flow::nCumulIntegOrders]; // Cp in (B4, PG6)
       
       for (int pq = 0; pq < Flow::nCumulIntegOrders; pq ++) CpInteg[pq] = 0.;
       for (int pq = 0; pq < Flow::nCumulIntegOrders*Flow::nCumulInteg_qMax; pq++) {   
 	int theCumulOrder = (pq/Flow::nCumulInteg_qMax) + 1; // like 1,2,3. 
-	// not begining with 0. That is "p" in (B3)
-	//int qIndex = pq%(Flow::nCumulInteg_qMax); // like 0,1,...5 
-	// begining with 0. "q" in (B3)
+	// not begining with 0. That is "p" in (B3, PG5)
+	//int qIndex = pq%(Flow::nCumulInteg_qMax); // like 0,1,..qMax-1 
+	// begining with 0. "q" in (B3, PG5)
 	histFull[k].histFullHar[j].mCumulIntegG0[pq] /= 
-	  float(histFull[k].histFullHar[j].mNEvent);        // <Gn(z)> 
+	  float(histFull[k].histFullHar[j].mNEvent);        // <Gn(z)> (PG 4)
 
 	histFull[k].histFullHar[j].mHistCumulIntegG0[pq]->
           SetBinContent(1,histFull[k].histFullHar[j].mCumulIntegG0[pq]);
@@ -753,8 +742,8 @@ Int_t StFlowCumulantMaker::Finish() {
 	     ((float)Flow::nCumulInteg_qMax));
 	} else {
 	  CpInteg[theCumulOrder-1] +=
-	    (mAvMult*(pow(histFull[k].histFullHar[j].mCumulIntegG0[pq], 1./mAvMult)-1.) /
-	     float(Flow::nCumulInteg_qMax)); // (B3) 
+	    (mAvMult*(pow(histFull[k].histFullHar[j].mCumulIntegG0[pq], 1./mAvMult) -1.) /
+	     float(Flow::nCumulInteg_qMax)); // (B3, PG6) 
 	}
       }
       
@@ -764,20 +753,16 @@ Int_t StFlowCumulantMaker::Finish() {
 	XpqYpqDenomNames->AddLast(histFull[k].histFullHar[j].mCumulG0DenomPt[pq]);
 	XpqYpqDenomNames->AddLast(histFull[k].histFullHar[j].mCumulG0DenomEta[pq]);
 	XpqYpqDenomNames->AddLast(histFull[k].histFullHar[j].mCumulG0Denom[pq]);
-
       }
-      cumulInteg1[j] = // (B5)
-	(3.*CpInteg[1-1] -
-	 (3./2.)*CpInteg[2-1] +
-	 (1./3.)*CpInteg[3-1])/r0Sq;
+
+      cumulInteg1[j] = // (B5, PG7)
+	(3.*CpInteg[1-1] - (3./2.)*CpInteg[2-1] + (1./3.)*CpInteg[3-1]) / r0Sq;
       
-      cumulInteg2[j] = 
-	((((-10.)*CpInteg[1-1]) + 
-	  (8.*CpInteg[2-1]) - 
-	  (2.*CpInteg[3-1]))/(r0Sq*r0Sq)); 
+      cumulInteg2[j] = ((-10.*CpInteg[1-1]) + (8.*CpInteg[2-1]) - 
+			 (2.*CpInteg[3-1])) / (r0Sq*r0Sq); 
       
-      cumulInteg3[j] = (( (18.*CpInteg[1-1]) - (18.*CpInteg[2-1]) + (6.*CpInteg[3-1]))
-			/ (r0Sq*r0Sq*r0Sq));
+      cumulInteg3[j] = ( (18.*CpInteg[1-1]) - (18.*CpInteg[2-1]) + (6.*CpInteg[3-1]))
+			/ (r0Sq*r0Sq*r0Sq);
       
       // now histograms for flow results:
       histFull[k].histFullHar[j].mHist_v2D  = new TH2D*[Flow::nCumulDiffOrders];
@@ -846,7 +831,7 @@ Int_t StFlowCumulantMaker::Finish() {
 	if (q4[j]<0.) cout<<" Sel"<<k+1<<", <Q**4> less than zero ! v"
 			  <<j+1<<" from 4 particle correlation failed."<<endl;
          
-      } else { // new method
+      } else { // new method, Eq. (PG8)
 	meanIntegV[j]  = sqrt(cumulInteg1[j]);           // <v>    2-part, m=1
 	meanIntegV2[j] = cumulInteg1[j];                 // <v**2> 2-part, m=2
 	meanIntegV3[j] = pow(-1.*cumulInteg2[j], 3./4.); // <v**3> 4-part, m=1
@@ -859,7 +844,7 @@ Int_t StFlowCumulantMaker::Finish() {
 
       }
       
-      if (m_M==1) {
+      if (m_M==1) { // Eq. (PG14)
 	histFull[k].histFullHar[j].mHist_v2D[0]->Scale(1./(meanIntegV[j]*perCent)); // (34a)
 	histFull[k].histFullHar[j].mHist_v2D[1]->Scale(-1./(meanIntegV3[j]*perCent));// (34b)
 	histFull[k].histFullHar[j].mHist_vEta[0]->Scale(1./(meanIntegV[j]*perCent)); // (34a)
@@ -968,8 +953,6 @@ Int_t StFlowCumulantMaker::Finish() {
     
   }
 
-
-
   // GetHistList()->ls();
   
   // Write most histograms
@@ -1005,12 +988,11 @@ Int_t StFlowCumulantMaker::Finish() {
        = new TObjString( (mOldMethod) ? "cumulOld" : "cumulNew" );
   cumulMethodTag->Write("CumulMethodTag",TObject::kOverwrite | TObject::kSingleKey);
 
-
   hisList->Write();
   
   histFile.Close();
   
-  // write profile for the denominator of XpqYpq.
+  // write profile for <G>, the denominator of XpqYpq.
   TFile XpqYpqDenomNewFile("denominatorNew.root","RECREATE"); 
   XpqYpqDenomNames->Write();
   XpqYpqDenomNewFile.Close();
@@ -1025,6 +1007,9 @@ Int_t StFlowCumulantMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.cxx,v $
+// Revision 1.10  2002/02/02 01:10:12  posk
+// Added documentation
+//
 // Revision 1.9  2002/01/24 20:53:51  aihong
 // add histograms for combining results from parallel jobs
 //
