@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.h,v 1.4 2004/06/25 03:11:49 porter Exp $
+ * $Id: StEStructBinning.h,v 1.5 2004/07/23 21:50:33 chunhuih Exp $
  *
  * Author: Jeff Porter 
  *
@@ -30,8 +30,8 @@
 #define EBYE_MT_BINS 26
 #define EBYE_DELTAMT_BINS 26
 
-#define EBYE_DPHI_BINS 26
-#define EBYE_DETA_BINS 26
+#define EBYE_DPHI_BINS 29
+#define EBYE_DETA_BINS 29
 #define EBYE_DMT_BINS 26
 
 #define EBYE_SPHI_BINS 26
@@ -39,38 +39,38 @@
 #define EBYE_SMT_BINS 51
 
 struct phiBins {
-  float phi[EBYE_PHI_BINS]; 
+  double phi[EBYE_PHI_BINS]; 
 };
 struct dphiBins {
-  float dphi[EBYE_DPHI_BINS]; 
+  double dphi[EBYE_DPHI_BINS]; 
 };
 struct sphiBins {
-  float sphi[EBYE_SPHI_BINS]; 
+  double sphi[EBYE_SPHI_BINS]; 
 };
 
 struct etaBins {
-  float eta[EBYE_ETA_BINS];
+  double eta[EBYE_ETA_BINS];
 };
 struct detaBins {
-  float deta[EBYE_DETA_BINS];
+  double deta[EBYE_DETA_BINS];
 };
 struct setaBins {
-  float seta[EBYE_SETA_BINS];
+  double seta[EBYE_SETA_BINS];
 };
 
 
 struct mtBins {
-  float mt[EBYE_MT_BINS]; 
+  double mt[EBYE_MT_BINS]; 
 };
 struct dmtBins {
-  float dmt[EBYE_DMT_BINS]; 
+  double dmt[EBYE_DMT_BINS]; 
 };
 struct smtBins {
-  float smt[EBYE_SMT_BINS]; 
+  double smt[EBYE_SMT_BINS]; 
 };
 
 struct deltaMtBins {
-  float dmt[EBYE_DELTAMT_BINS];
+  double dmt[EBYE_DELTAMT_BINS];
 };
 
 
@@ -298,6 +298,12 @@ inline float StEStructBinning::deltaMtVal(int ideltaMt){
 /***********************************************************************
  *
  * $Log: StEStructBinning.h,v $
+ * Revision 1.5  2004/07/23 21:50:33  chunhuih
+ * changed float to double in the structs. This is necessary when analyzing large
+ * number of particle pairs. When a float reaches (int)2**24, adding 1 to it has no effect
+ * due to IEEE floating point encoding scheme. A double has a much larger value
+ * to meet this problem.
+ *
  * Revision 1.4  2004/06/25 03:11:49  porter
  * New cut-binning implementation and modified pair-cuts for chunhui to review
  *
