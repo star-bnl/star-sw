@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTriplet.hh,v 1.2 2000/04/12 01:56:03 willson Exp $
+ * $Id: StHbtTriplet.hh,v 1.3 2001/06/05 00:59:30 willson Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtTriplet.hh,v $
+ * Revision 1.3  2001/06/05 00:59:30  willson
+ * Added entrance separation and quality methods
+ *
  * Revision 1.2  2000/04/12 01:56:03  willson
  * Qinv Correlation Functions corrected
  *
@@ -53,6 +56,17 @@ public:
   double qInv31() const;
   double kT()   const;
   double mInv() const;
+
+  double quality() const;
+  
+  // the following two methods calculate the "nominal" separation of the tracks 
+  // at the inner field cage (EntranceSeparation) and when they exit the TPC,
+  // which may be at the outer field cage, or at the endcaps.
+  // "nominal" means that the tracks are assumed to start at (0,0,0).  Making this
+  // assumption is important for the Event Mixing-- it is not a mistake. - MALisa
+  double NominalTpcExitSeparation() const;
+  double NominalTpcEntranceSeparation() const;
+  double NominalTpcAverageSeparation() const;
 
 private:
   StHbtParticle* mTrack1;
