@@ -70,6 +70,26 @@ macro svm
 
  return
 * ---------------------------------------------------------------
+ 
+* 6aug98 K.T. ==>
+ 
+* ** this kumac is for use in $STAR/kumacs/run_ebye!!
+* it will eventually be replaced
+ 
+ macro sca
+   
+  macro/global/import *
+
+    cd [dst]
+    
+    tdm/newtable dstrack  dst_track 10000
+    
+    cd /dui
+
+return
+
+*------------------------------------------------------------------*
+
 
 
 
