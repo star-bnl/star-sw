@@ -4,7 +4,7 @@
 *        auther:      OGAWA, Akio
 */
    struct emc_energy { 
-       long      rl;          /* 1&2 for R&L endcap,3=barrel,4=charged track*/
+       long      det;         /* 1=barrel, 2=endcap, 3=charged track */
        long      ieta;        /* Pseudorapidity bin number */
        long      iphi;        /* Phi bin number */
        float     eta;         /* Pseudorapidity */

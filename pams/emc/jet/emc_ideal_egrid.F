@@ -94,7 +94,7 @@ C*-Calculate (phi,eta) bin for Track at vertex
             phi=(pbin-0.5)*PI2
      +           /float(ems_control(1).chrg_phi_nbin)
             id(pbin,ebin)=nout
-            emc_energy(nout).rl    =0
+            emc_energy(nout).det   =0
             emc_energy(nout).ieta  =ebin
             emc_energy(nout).iphi  =pbin
             emc_energy(nout).eta   =eta

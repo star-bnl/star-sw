@@ -26,30 +26,20 @@ CC: AUTHOR:     First version Llope,
 CC:             K.Shestermanov    shestermanov@mx.ihep.su
 CC: ARGUMENTS:
 CC:          IN:
+CC:       g2t_vertex     - g2t vertex
+CC:        g2t_track     - g2t track
+CC:          emc_hit     - g2t emc hits
+CC:          smd_hit     - g2t smd hits
 CC:       INOUT:
-CC:       g2t_vertex     - description here
-CC:     g2t_vertex_h     - Header Structure for g2t_vertex
-CC:        g2t_track     - description here
-CC:      g2t_track_h     - Header Structure for g2t_track
-CC:          emc_hit     - description here
-CC:        emc_hit_h     - Header Structure for emc_hit
-CC:          smd_hit     - description here
-CC:        smd_hit_h     - Header Structure for smd_hit
-CC:        hits_bemc     - description here
-CC:      hits_bemc_h     - Header Structure for hits_bemc
-CC:        hits_bsmd     - description here
-CC:      hits_bsmd_h     - Header Structure for hits_bsmd
 CC:         OUT:
+CC:        hits_bemc     - barrel EMC hits
+CC:        hits_bsmd     - barrel SMD hits
 CC: RETURNS:    STAF Condition Value
 CC:>--------------------------------------------------------------------
 C
       integer i,nout
       integer ivid,rl,eta,phi,sphi,dep,ihit 
       integer pid,type,strip
-      INTEGER emc_ivid(5)/10000000,100000,100,10,1/ ! matched with AGI and G2T
-      INTEGER emc_chid(5)                           ! matched with AGI and G2T
-      INTEGER smd_ivid(5)/100000000,1000000,1000,100,1/ ! matched with AGI&G2T
-      INTEGER smd_chid(5)                            !matched with AGI and G2T
 c
       REAL    emc_de_tower(-20:20,120,2),emc_ne_tower(-20:20,120,2)
       real    smd_de(-10:10,60,3,75)     
@@ -66,29 +56,7 @@ c---- start the loop over the BEMC hits ------------------------------------
 c---- get the g2t information...
           pid   = emc_hit(ihit).track_p
           ivid  = emc_hit(ihit).volume_id
-c      print *,'    '
-c      print *,'pid,ivid',pid,ivid
-          do i = 1,5
-            emc_chid(i) = ivid/emc_ivid(i)
-            ivid        = ivid - emc_chid(i)*emc_ivid(i)
-          end do
-          if(ivid.ne.0)then
-            type *,'EMS_INTERFACE -- error decoding EMC volume_id...',ivid
-            goto 999
-          end if
-          rl   = emc_chid(1)         ! right/left: =1 for Z>0, and =2 for Z<0
-          eta  = emc_chid(2)         ! pseudorapidity bin number [1,20]
-          phi  = emc_chid(3)         ! module phi [1,120]
-          sphi = emc_chid(4)         ! d(eta)=0.1 tower number [1,10]
-          dep  = emc_chid(5)         ! depth section [1,2]
-c        print *,'rl,eta,phi,sphi,dep',rl,eta,phi,sphi,dep
-          if(rl.eq.1) then
-            phi=phi*2-2+sphi
-          elseif(rl.eq.2) then
-            eta=-eta
-            phi=(120-phi)*2+3-sphi
-          endif
-c        print *,'eta,phi',eta,phi
+          call volid_bemc(ivid,eta,phi,dep)
           if(pid.ne.0) then
             if(g2t_track(pid).charge.eq.0.) then
               emc_ne_tower(eta,phi,2)=emc_ne_tower(eta,phi,2)+emc_hit(ihit).de
@@ -133,23 +101,7 @@ c---- start the loop over the BSMD hits----
         do ihit = 1, smd_hit_h.nok
 c---- get the g2t information...
           ivid  = smd_hit(ihit).volume_id
-          do i = 1,5
-           smd_chid(i) = ivid/smd_ivid(i)
-           ivid        = ivid - smd_chid(i)*smd_ivid(i)
-          end do
-          if(ivid.ne.0) then
-            type *,'EMS_INTERFACE -- error decoding SMD volume_id...',ivid
-            goto 999
-          end if
-          rl   = smd_chid(1)         ! right/left: =1 for Z>0, and =2 for Z<0
-          eta  = smd_chid(2)         ! pseudorapidity bin number [-10,10]
-          phi  = smd_chid(3)         ! module phi [1,60]
-          type = smd_chid(4) 
-          strip= smd_chid(5) 
-          if(rl.eq.2) then
-            eta=-eta
-            phi=121-phi
-          endif
+          call volid_bsmd(ivid,eta,phi,type,strip)
           smd_de(eta,phi,type,strip)=smd_de(eta,phi,type,strip)+
      +                               smd_hit(ihit).de
         enddo 

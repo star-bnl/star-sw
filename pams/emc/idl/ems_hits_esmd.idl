@@ -8,6 +8,6 @@
        long    phi_mod;        /* Phi module number, 1 -> 60 */
        long    phi_strip;      /* phi subcell */
        long    eta_strip;      /* eta subcell */
-       float   edep;           /* Sum of deposited energy (GeV!)*/
+       float   e_sum;           /* Sum of deposited energy (GeV!)*/
    };
 
