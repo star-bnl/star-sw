@@ -1,12 +1,15 @@
-//$Id: St_srs_Maker.cxx,v 1.24 2001/04/20 14:36:22 caines Exp $
+//$Id: St_srs_Maker.cxx,v 1.25 2001/04/23 23:22:43 caines Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
 // Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
 //$Log: St_srs_Maker.cxx,v $
+//Revision 1.25  2001/04/23 23:22:43  caines
+//Fix setPosition error on Solaris
+//
 //Revision 1.24  2001/04/20 14:36:22  caines
-//Added code to do pp pile up
+// Added code to do pp pile up
 //
 //Revision 1.23  2000/06/23 16:52:41  fisyak
 //remove params
@@ -192,9 +195,9 @@ Int_t St_srs_Maker::Make()
 	VertexId=GeantTrack[spc->id_mctrack-1].start_vertex_p-1;
 	TimeBucketShift =  GeantVertex[VertexId].ge_tof*mSvtSrsPar[0].fsca;
 	// Shuffle space points if a pile up event
-	GlobalCoord.position().setX(spc->x[0]);
-	GlobalCoord.position().setY(spc->x[1]);
-	GlobalCoord.position().setZ(spc->x[2]);
+	GlobalCoord.setPosition(StThreeVector<double>(spc->x[0],spc->x[1],
+						      spc->x[2]));	 
+
 	//cout << GlobalCoord ;
 	mCoordTransform->operator()(GlobalCoord,WaferCoord);
 	WaferCoord.setTimeBucket(WaferCoord.timebucket()+TimeBucketShift);
