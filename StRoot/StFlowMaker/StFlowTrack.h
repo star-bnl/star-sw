@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.10 2000/09/05 17:57:13 snelling Exp $
+// $Id: StFlowTrack.h,v 1.11 2000/09/15 01:20:04 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.11  2000/09/15 01:20:04  snelling
+// Added methods for P and Y and added selection on Y
+//
 // Revision 1.10  2000/09/05 17:57:13  snelling
 // Solaris needs math.h for fabs
 //
@@ -100,6 +103,8 @@ public:
   Float_t       Eta()        const;
   Float_t       Dedx()       const;
   Float_t       Pt()         const;
+  Float_t       P()          const;
+  Float_t       Y()          const;
   Short_t       Charge()     const;
   Float_t       Dca()        const;
   Float_t       DcaGlobal()  const;
@@ -184,7 +189,29 @@ inline Float_t  StFlowTrack::Chi2()       const { return mChi2; }
 inline Int_t    StFlowTrack::FitPts()     const { return mFitPts; }  
 inline Int_t    StFlowTrack::MaxPts()     const { return mMaxPts; }  
 
-inline Int_t    StFlowTrack::Select(Int_t harmonic, Int_t selection,
+inline Float_t StFlowTrack::P()          const { 
+  float momentum = mPt/sqrt(1-(tanh(mEta)*tanh(mEta)));
+  return momentum; }
+
+inline Float_t StFlowTrack::Y()          const { 
+  float M = 0.139; 
+  if (strcmp(mPid, "none") == 0)     M = 0.139;
+  if (strcmp(mPid, "pi+") == 0)      M = 0.139;
+  if (strcmp(mPid, "pi-") == 0)      M = 0.139;
+  if (strcmp(mPid, "proton") == 0)   M = 0.938;
+  if (strcmp(mPid, "pbar") == 0)     M = 0.938;
+  if (strcmp(mPid, "k+") == 0)       M = 0.494;
+  if (strcmp(mPid, "k-") == 0)       M = 0.494;
+  if (strcmp(mPid, "d") == 0)        M = 1.876;
+  if (strcmp(mPid, "dbar") == 0)     M = 1.876;
+  if (strcmp(mPid, "e-") == 0)       M = 0.0005;
+  if (strcmp(mPid, "e+") == 0)       M = 0.0005;
+  float Pz = sqrt(this->P()*this->P() - mPt*mPt); 
+  float E = sqrt(this->P()*this->P() + M*M);
+  float rapidity = 0.5*log((E + Pz)/(E - Pz));
+  return rapidity; }
+
+inline Int_t StFlowTrack::Select(Int_t harmonic, Int_t selection,
  Int_t subevent) const {
   if (subevent == -1 || subevent == mSubevent[harmonic][selection]) {
     int bitShift = harmonic + Flow::nHars * selection;
