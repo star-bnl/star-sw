@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.78 1999/09/01 22:32:54 fine Exp $ 
+// $Id: St_Table.cxx,v 1.79 1999/09/04 00:28:02 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.79  1999/09/04 00:28:02  fine
+// St_Table::NaN from VP and gloabl dataset have been introduced
+//
 // Revision 1.78  1999/09/01 22:32:54  fine
 // St_Table::Fit fixed Rene\'s bug
 //
@@ -329,21 +332,39 @@ const void *St_Table::At(Int_t i) const
       i = 0;
    return (const void *)(s_Table+i*(*s_Size));
 }
- 
+
 //______________________________________________________________________________
-void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *option,Int_t nentries, Int_t firstentry)
+TH1  *St_Table::Draw(TCut varexp, TCut selection, Option_t *option, Int_t nentries, Int_t firstentry)
+{
+//*-*-*-*-*-*-*-*-*-*-*Draw expression varexp for specified entries-*-*-*-*-*
+//*-*                  ===========================================
+//
+//   This function accepts TCut objects as arguments.
+//   Useful to use the string operator +
+//         example:
+//            table.Draw("x",cut1+cut2+cut3);
+//
+//   TCutG object with "CUTG" name can be created via the graphics editor. 
+//
+ 
+   return St_Table::Draw(varexp.GetTitle(), selection.GetTitle(), option, nentries, firstentry);
+}
+
+//______________________________________________________________________________
+TH1 *St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *option,Int_t nentries, Int_t firstentry)
 {
 
 //*-*-*-*-*-*-*-*-*-*-*Draw expression varexp for specified entries-*-*-*-*-*
 //*-*                  ===========================================
 //
 //  varexp is an expression of the general form e1:e2:e3
-//    where e1,etc is a C++ expression referencing a combination of the columns
+//    where e1,etc is a C++ expression referencing a combination of the St_Table columns
 //  Example:
 //     varexp = x     simplest case: draw a 1-Dim distribution of column named x
 //            = sqrt(x)            : draw distribution of sqrt(x)
 //            = x*y/z
 //            = y:sqrt(x) 2-Dim dsitribution of y versus sqrt(x)
+//            = phep[0]:sqrt(phep[3]) 2-Dim dsitribution of phep[0] versus sqrt(phep[3])
 //  Note that the variables e1, e2 or e3 may contain a boolean expression as well.
 //  example, if e1= x*(y<0), the value histogrammed will be x if y<0
 //  and will be 0 otherwise.
@@ -360,9 +381,11 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
 //  Examples:
 //      selection1 = "x<y && sqrt(z)>3.2"
 //      selection2 = "(x+y)*(sqrt(z)>3.2"
+//      selection3 = "signal*(log(signal)>1.2)"
 //  selection1 returns a weigth = 0 or 1
 //  selection2 returns a weight = x+y if sqrt(z)>3.2
 //             returns a weight = 0 otherwise.
+//  selection3 returns a weight = signal if log(signal)>1.2
 //
 //  option is the drawing option
 //      see TH1::Draw for the list of all drawing options.
@@ -385,7 +408,7 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
 //  By default, the specified histogram is reset.
 //  To continue to append data to an existing histogram, use "+" in front
 //  of the histogram name;
-//    tree.Draw("sqrt(x)>>+hsqrt","y>0")
+//    table.Draw("sqrt(x)>>+hsqrt","y>0")
 //      will not reset hsqrt, but will continue filling.
 //
 //     Making a Profile histogram
@@ -397,7 +420,7 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
 //
 //     Saving the result of Draw to a TEventList
 //     =========================================
-//  TTree::Draw can be used to fill a TEventList object (list of entry numbers)
+//  St_Table::Draw can be used to fill a TEventList object (list of entry numbers)
 //  instead of histogramming one variable.
 //  If varexp0 has the form >>elist , a TEventList object named "elist"
 //  is created in the current directory. elist will contain the list
@@ -405,29 +428,19 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
 //  Example:
 //    tree.Draw(">>yplus","y>0")
 //    will create a TEventList object named "yplus" in the current directory.
-//    In an interactive session, one can type (after TTree::Draw)
+//    In an interactive session, one can type (after St_Table::Draw)
 //       yplus.Print("all")
 //    to print the list of entry numbers in the list.
 //
 //  By default, the specified entry list is reset.
 //  To continue to append data to an existing list, use "+" in front
 //  of the list name;
-//    tree.Draw(">>+yplus","y>0")
+//    table.Draw(">>+yplus","y>0")
 //      will not reset yplus, but will enter the selected entries at the end
 //      of the existing list.
 //
-//      Using a TEventList as Input
-//      ===========================
-//  Once a TEventList object has been generated, it can be used as input
-//  for TTree::Draw. Use TTree::SetEventList to set the current event list
-//  Example:
-//     TEventList *elist = (TEventList*)gDirectory->Get("yplus");
-//     tree->SetEventList(elist);
-//     tree->Draw("py");
-//
-//  Note: Use tree->SetEventList(0) if you do not want use the list as input.
-//
-   if (GetNRows() == 0 || varexp00 == 0 || varexp00[0]==0) return;
+
+   if (GetNRows() == 0 || varexp00 == 0 || varexp00[0]==0) return 0;
    TString  opt;
    Text_t *hdefault = (char *)"htemp";
    Text_t *varexp;
@@ -499,10 +512,10 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
 //--------------------------------------------------
     printf(" Draw %s for <%s>\n", varexp00, selection);
     Char_t *exprFileName = MakeExpression(expressions,colIndex+1);
-    if (!exprFileName) return;
+    if (!exprFileName) return 0;
 
 //--------------------------------------------------
-//   if (!fVar1 && !elist) return;
+//   if (!fVar1 && !elist) return 0;
  
 //*-*- In case oldh1 exists, check dimensionality
    Int_t dimension = colIndex;
@@ -540,7 +553,7 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
    }
 //*-*- Create a default canvas if none exists
    if (!gPad && !opt.Contains("goff") && dimension > 0) {
-      if (!gROOT->GetMakeDefCanvas()) return;
+      if (!gROOT->GetMakeDefCanvas()) return 0;
       (gROOT->GetMakeDefCanvas())();
    }
 #if 0
@@ -704,6 +717,7 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
    }
   if (exprFileName) delete [] exprFileName;
   if (hkeep) delete [] varexp;
+  return gCurrentHist;
 }
 //______________________________________________________________________________
 static void FindGoodLimits(Int_t nbins, Int_t &newbins, Float_t &xmin, Float_t &xmax)
@@ -1364,6 +1378,55 @@ void St_Table::ls(Option_t *option)
       <<endl;
    //   Print();
    DecreaseDirLevel();
+}
+
+#ifdef WIN32
+# ifndef finite
+#   define finit _finite;
+# endif
+#endif
+
+int finite( double x );
+
+//______________________________________________________________________________
+Int_t St_Table::NaN() {
+//
+// return the total number of the NaN for float/double cells of this table
+// Thanks Victor Perevoztchikov
+//
+
+  EColumnType code;
+  char const *cell,*colname,*table;
+  double word;
+  int icol,irow,colsize,wordsize,nwords,iword,nerr,offset;
+
+  St_tableDescriptor *rowDes = GetRowDescriptors();
+  assert(rowDes);
+  table = (const char*)GetArray();
+
+  int ncols = rowDes->GetNumberOfColumns();
+
+  int lrow  = GetRowSize();
+  int nrows = GetNRows  ();
+  nerr =0; 
+  for (icol=0; icol < ncols; icol++) {// loop over cols
+    code = rowDes->GetColumnType(icol);
+    if (code!=kFloat && code!=kDouble) continue;
+     
+    offset   = rowDes->GetOffset    (icol); 
+    colsize  = rowDes->GetColumnSize(icol); 
+    wordsize = rowDes->GetTypeSize  (icol);
+    nwords = colsize/wordsize;
+    for (irow=0; irow < nrows; irow++) { //loop over rows
+      cell = table + offset + irow*lrow;
+      for (iword=0;iword<nwords; iword++,cell+=wordsize) { //words in col        
+        word = (code==kDouble) ? *(double*)cell : *(float*)cell;   
+        if (::finite(word)) 	continue;
+//		ERROR FOUND
+        nerr++; colname = rowDes->GetColumnName(icol);
+        Warning("NaN"," Table %s.%s.%d\n",GetName(),colname,irow);
+  }  }  } 
+return nerr;
 }
 
 //______________________________________________________________________________
