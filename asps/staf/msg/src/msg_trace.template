@@ -37,7 +37,7 @@
 *	significantly to CPU usage.
 
 *	  Note:  Use Message inside of a MSG_Enabled_Trace block, since
-*	  MSG_Enabled_Trace does not perform msg accounting -- it only tests
+*	  MSG_Enabled_Trace does not ever perform msg accounting -- it only tests
 *	  the enabled status of the specified prefix: '<Subroutine Name>-T1'
 *	  If Message_Out is used instead of Message (as would occur inside
 *	  a MSG_Enabled block), then msg accounting is never performed

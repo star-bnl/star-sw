@@ -43,9 +43,8 @@
 *	Here's how to generate a message with a WRITE statement, and
 *	with the WRITE executing only if the message is enabled:
 
-*	  Note:  Use Message_Out inside of a MSG_Enabled block, since
-*	  MSG_Enabled already performed msg accounting -- using Message
-*	  instead of Message_Out would cause double-counting of messages.
+*	  Note:  Use Message inside of a MSG_Enabled block, since
+*	  MSG_Enabled performs msg accounting only if it returns false.
 *	  If the prefix '<Subroutine Name>-T1' is undefined when this
 *	  call occurs, it gets defined, and is initialized to be Active,
 *	  unless all messages have been disabled with a wildcard-name.
@@ -53,7 +52,7 @@
 	IF (MSG_Enabled( '<Subroutine Name>-T1', IDI1 ) ) THEN
 *	  This write is strictly an example -- it's a two-line message:
 	  WRITE( M132, 101 ) Junque, Stuff, Nonsense
-	  CALL Message_Out( M132, 2 ) !2 line message -- note that "_Out" takes no ID.
+	  CALL Message( M132, 2 ) !2 line message -- note that "_Out" takes no ID.
 	END IF
 101	FORMAT('<Subroutine Name>-T1  Junque:  'I11'  Stuff:'E15.8 /
      1	       '                      Nonsense:'I11 )
@@ -62,10 +61,11 @@
 
 	Here's how to make a table -- MSG_Enabled & Message do msg accounting, Message_Out does't:
 	IF (MSG_Enabled( '<Subroutine Name>-I2', IDI2 ) THEN
-	  CALL Message_Out( '<Subroutine Name>-I2  This is a pedagogical table:', 1 )
+	  CALL Message( '<Subroutine Name>-I2  This is a pedagogical table:', 1 )
 	  DO Irow = 1, Nrows
 	    WRITE( M132, 102 ) Irow
-	    CALL Message_Out( M132, 1 )
+	    CALL Message_Out( M132, 1 )  !Use Message_Out here, since no msg accounting
+	                                 !should be done for table rows.
 	  END DO
 	END IF
 102	FORMAT( '                      Row 'I3' ----------------------' )
