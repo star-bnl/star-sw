@@ -2,8 +2,11 @@
 //                                                                      //
 // StXiMaker class                                                    //
 //                                                                      //
-// $Id: StXiMaker.cxx,v 1.8 1999/07/17 19:00:21 fisyak Exp $
+// $Id: StXiMaker.cxx,v 1.9 1999/09/12 23:03:04 fisyak Exp $
 // $Log: StXiMaker.cxx,v $
+// Revision 1.9  1999/09/12 23:03:04  fisyak
+// Move parameters into makers
+//
 // Revision 1.8  1999/07/17 19:00:21  fisyak
 // Add sanctimonious checks
 //
@@ -51,57 +54,48 @@ StXiMaker::~StXiMaker(){
 }
 //_____________________________________________________________________________
 Int_t StXiMaker::Init(){
-  St_DataSet *globalParams = GetInputDB("params/global");
-  assert(globalParams);
-  St_DataSetIter params(globalParams);
 
   if (!m_exiaux) m_exiaux = new St_exi_aux("exi_aux",1);
-  m_exipar = (St_exi_exipar *)  params("exipars/exipar");
-  if (!m_exipar) {
-    m_exipar = new St_exi_exipar("exipar",3);
-    //    AddConst(m_exipar);
-    // m_exipar->SetNRows(3);
+  //  m_exipar = (St_exi_exipar *)  params("exipars/exipar");
+  m_exipar = new St_exi_exipar("exipar",3);
+  {
+    exi_exipar_st row;
+    //
+    memset(&row,0,m_exipar->GetRowSize());
+    // TPC only cuts
+    row.use_pid	 =          0; // logical flag to control usage of global pid ;
+    row.dca_max	 =          1; // cut on dca between the two tracks ;
+    row.bxi_max	 =          1; // cut on impact param. of xi from prim. vertex ;
+    row.rv_xi	 =          2; // cut on min. dist. of decay from prim. vertex ;
+    row.rv_v0	 =          5; // cut on min. dist. of decay from prim. vertex ;
+    row.dmass	 =       0.01; // v0 mass cut +/- [dmass] ;
+    row.bpn_v0	 =          2; // cut on v0 pion daught. impact param. ;
+    row.pchisq	 =          0; // cut on chi^2 probability of vertex fit;
+    m_exipar->AddAt(&row,0);
+    memset(&row,0,m_exipar->GetRowSize());
+    //SVT only cuts
+    row.use_pid	 =          0; // logical flag to control usage of global pid ;
+    row.dca_max	 =          0; // cut on dca between the two tracks ;
+    row.bxi_max	 =          0; // cut on impact param. of xi from prim. vertex ;
+    row.rv_xi	 =        999; // cut on min. dist. of decay from prim. vertex ;
+    row.rv_v0	 =        999; // cut on min. dist. of decay from prim. vertex ;
+    row.dmass	 =          0; // v0 mass cut +/- [dmass] ;
+    row.bpn_v0	 =        999; // cut on v0 pion daught. impact param. ;
+    row.pchisq	 =          0; // cut on chi^2 probability of vertex fit;
+    m_exipar->AddAt(&row,1);
+    memset(&row,0,m_exipar->GetRowSize());
+    // SVT+TPC cuts
+    row.use_pid	 =          0; // logical flag to control usage of global pid ;
+    row.dca_max	 =          1; // cut on dca between the two tracks ;
+    row.bxi_max	 =          1; // cut on impact param. of xi from prim. vertex ;
+    row.rv_xi	 =          2; // cut on min. dist. of decay from prim. vertex ;
+    row.rv_v0	 =          5; // cut on min. dist. of decay from prim. vertex ;
+    row.dmass	 =       0.01; // v0 mass cut +/- [dmass] ;
+    row.bpn_v0	 =          2; // cut on v0 pion daught. impact param. ;
+    row.pchisq	 =          0; // cut on chi^2 probability of vertex fit;
+    m_exipar->AddAt(&row,2);
   }
-  AddConst(m_exipar);
-  m_exipar->SetNRows(3);
-  exi_exipar_st *exipar = m_exipar->GetTable();
-  
-  // TPC only cuts
-  
-  exipar->use_pid = 0;
-  exipar->dca_max = 1.;
-  exipar->bxi_max = 1.;
-  exipar->rv_xi   = 2.;
-  exipar->rv_v0   = 5.;
-  exipar->dmass   = 0.01;
-  exipar->bpn_v0  = 2.;
-  exipar->pchisq  = 0.;
-  exipar++;
-  
-  //SVT only cuts
-  
-  exipar->use_pid = 0;
-  exipar->dca_max = 0.;
-  exipar->bxi_max = 0.;
-  exipar->rv_xi   = 999.;
-  exipar->rv_v0   = 999.;
-  exipar->dmass   = 0.;
-  exipar->bpn_v0  = 999.;
-  exipar->pchisq  = 0.;
-  exipar++;
-  
-  // SVT+TPC cuts
-  
-  exipar->use_pid = 0;
-  exipar->dca_max = 1.;
-  exipar->bxi_max = 1.;
-  exipar->rv_xi   = 2.;
-  exipar->rv_v0   = 5.;
-  exipar->dmass   = 0.01;
-  exipar->bpn_v0  = 2.;
-  exipar->pchisq  = 0.;
-  exipar++;
-
+  AddRunCont(m_exipar);
   return StMaker::Init();
 }
 //_____________________________________________________________________________

@@ -5,8 +5,11 @@
 //                                                                      //
 // StPrimaryMaker virtual base class for Maker                          //
 //                                                                      //
-// $Id: StPrimaryMaker.h,v 1.5 1999/07/15 13:57:53 perev Exp $
+// $Id: StPrimaryMaker.h,v 1.6 1999/09/12 23:03:04 fisyak Exp $
 // $Log: StPrimaryMaker.h,v $
+// Revision 1.6  1999/09/12 23:03:04  fisyak
+// Move parameters into makers
+//
 // Revision 1.5  1999/07/15 13:57:53  perev
 // cleanup
 //
@@ -21,8 +24,6 @@
 #include "StMaker.h"
 #endif
 
-class St_svm_ctrl;
-class St_est_ctrl;
 class St_evr_privert;
 class St_evr_evrpar;
 class St_egr_propagate;
@@ -53,7 +54,7 @@ class StPrimaryMaker : public StMaker {
   virtual Int_t  Init();
   virtual Int_t  Make();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.5 1999/07/15 13:57:53 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.6 1999/09/12 23:03:04 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StPrimaryMaker, 1)   //StAF chain virtual base class for Makers
     };

@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.10 1999/07/17 00:31:25 genevb Exp $
+// $Id: StV0Maker.cxx,v 1.11 1999/09/12 23:03:04 fisyak Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.11  1999/09/12 23:03:04  fisyak
+// Move parameters into makers
+//
 // Revision 1.10  1999/07/17 00:31:25  genevb
 // Use StMessMgr
 //
@@ -55,45 +58,41 @@ StV0Maker::~StV0Maker(){
 }
 //_____________________________________________________________________________
 Int_t StV0Maker::Init(){
-  St_DataSet *globalParams = GetInputDB("params/global");
-  assert(globalParams);
-  St_DataSetIter params(globalParams);
-  
-  m_ev0par2 = (St_ev0_ev0par2 *)  params("ev0pars/ev0par2");
-  if (!m_ev0par2) {
-    m_ev0par2 = new St_ev0_ev0par2("ev0par2",3);
-    //AddConst(m_ev0par2);
-  }
-  AddConst(m_ev0par2);
-  ev0_ev0par2_st *ev0par2 = m_ev0par2->GetTable();
-  m_ev0par2->SetNRows(3);
+  m_ev0par2 = new St_ev0_ev0par2("ev0par2",3);
+  {
+    ev0_ev0par2_st row;
+    memset(&row,0,m_ev0par2->GetRowSize());
   // TPC only cuts
-  
-  ev0par2->dca        =  0.8;
-  ev0par2->dcav0      =  0.7;
-  ev0par2->dlen       =  2.0;
-  ev0par2->alpha_max  = 1.2;
-  ev0par2->ptarm_max  = 0.3;
-  ev0par2->dcapnmin   = 0.7;
-  ev0par2++;
-  
+    row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
+    row.dca	 =        0.8; // cut on dca between the two tracks ;
+    row.dcav0	 =        0.3; // cut on dca(impact parameter) of V0 from event vertex ;
+    row.dlen	 =        0.6; // cut on dist. of decay from prim. vertex ;
+    row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
+    row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
+    row.dcapnmin=        0.7; // Min. value of tracks at interaction ;
+    m_ev0par2->AddAt(&row,0);
+    memset(&row,0,m_ev0par2->GetRowSize());
   //SVT only cuts
-  
-  ev0par2->dca        = 0.8;
-  ev0par2->dcav0      = 0.3;
-  ev0par2->dlen       = 10000.;
-  ev0par2->alpha_max  = 1.2;
-  ev0par2->ptarm_max  = 0.3;
-  ev0par2->dcapnmin   = 100;
-  ev0par2++;
-  
+    row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
+    row.dca	 =        0.8; // cut on dca between the two tracks ;
+    row.dcav0	 =        0.7; // cut on dca(impact parameter) of V0 from event vertex ;
+    row.dlen	 =      10000; // cut on dist. of decay from prim. vertex ;
+    row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
+    row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
+    row.dcapnmin=         100; // Min. value of tracks at interaction ;
+    m_ev0par2->AddAt(&row,1);
+    memset(&row,0,m_ev0par2->GetRowSize());
   // SVT+TPC cuts
-  ev0par2->dca        = 0.8;
-  ev0par2->dcav0      = 0.3;
-  ev0par2->dlen       = 0.6;
-  ev0par2->alpha_max  = 1.2;
-  ev0par2->ptarm_max  = 0.3;
-  ev0par2->dcapnmin   = 0.7;
+    row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
+    row.dca	 =        0.8; // cut on dca between the two tracks ;
+    row.dcav0	 =        0.3; // cut on dca(impact parameter) of V0 from event vertex ;
+    row.dlen	 =        0.6; // cut on dist. of decay from prim. vertex ;
+    row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
+    row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
+    row.dcapnmin =        0.7; // Min. value of tracks at interaction ;
+    m_ev0par2->AddAt(&row,2);
+  }
+  AddRunCont(m_ev0par2);
   
   return StMaker::Init();
 }
