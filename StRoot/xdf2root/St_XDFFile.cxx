@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.8 1998/07/23 22:12:01 fisyak Exp $ 
+// $Id: St_XDFFile.cxx,v 1.9 1998/08/10 02:33:09 fisyak Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.9  1998/08/10 02:33:09  fisyak
+// Add St_fileSet
+//
 // Revision 1.8  1998/07/23 22:12:01  fisyak
 // Recover after Correction for root 2.09
 //
@@ -344,9 +347,10 @@ Int_t St_XDFFile::CloseXDF()
   return ians;
 }
 //______________________________________________________________________________
-void St_XDFFile::GetXdFile(Char_t *filename, St_DataSet *dataset)
+void St_XDFFile::GetXdFile(const Char_t *filename, St_DataSet *dataset)
 {
   if (!(dataset && filename && strlen(filename))) return;
+  printf(" GetXdfFile: read from %s to DataSet %s",filename,dataset->GetName());
   St_XDFFile xdf;
   if (xdf.OpenXDF(filename) == 0){
     St_DataSet *set = xdf.NextEventGet();

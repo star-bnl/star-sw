@@ -148,7 +148,7 @@ St_DataSet *St_DataSetIter::Ls(const Char_t *dirname,Option_t *opt) {
 }
  
 //______________________________________________________________________________
-St_DataSet *St_DataSetIter::Ls(const Char_t *dirname,Int_t deep) {
+St_DataSet *St_DataSetIter::Ls(const Char_t *dirname,Int_t depth) {
 //
 //   Ls(const Char_t *dirname,Option_t)
 //
@@ -160,7 +160,7 @@ St_DataSet *St_DataSetIter::Ls(const Char_t *dirname,Int_t deep) {
 //
  
   St_DataSet *set= Next(dirname);
-  if (set) set->ls(deep);
+  if (set) set->ls(depth);
   return set;
 }
  
@@ -183,6 +183,25 @@ Int_t St_DataSetIter::Rmdir(St_DataSet *dataset,Option_t *option){
   return (Int_t)dataset;
 }
  
+#if 0
+//______________________________________________________________________________
+St_DataSet *St_DataSetIter::Next()
+{
+  fDataSetIter  = 0
+  fListIter     = 0
+  St_DataSet *dataset = 0;
+  if (fDataSetIter) {
+    dataset = fDataSetIter->Next();
+    if (!dataset) SafeDelete(fDataSet);    
+  }
+  else {
+    dataset = fListIter->Next();
+    if (dataset && fDepth) fDataSetIter = new St_DataSetIter(dataset);
+  }
+  return dataset;
+}
+#endif
+
 //______________________________________________________________________________
 St_DataSet *St_DataSetIter::Next(const Char_t *path, St_DataSet *rootset,
                                  Bool_t mkdirflag)
@@ -336,43 +355,6 @@ St_DataSet::St_DataSet(const Char_t *name, St_DataSet *parent) : TNamed(), fList
    SetTitle("St_DataSet");
 }
 //______________________________________________________________________________
-St_DataSet::St_DataSet(TString &dirname,const Char_t *rootname,Bool_t expand) : TNamed(), fList(0), fMother(0)
-{
-  // Convert the "opearting system" file system tree into the memory resided St_DataSet
-
-  // expand = kTRUE  -  Expands "dirname" (by default)
-  //
-  St_DataSet *set = 0;
-  Long_t id, size, flags, modtime;
-  TString dirbuf = dirname;
-  if (expand) gSystem->ExpandPathName(dirbuf);
-  const Char_t *name = dirbuf.Data();
-  if (gSystem->GetPathInfo(name, &id, &size, &flags, &modtime)==0) {
-    TString nextobj = name;
-    if (!addname) SetName(name);
-    else          SetName(rootname);
-
-    // Check if "dirname" is a directory.
-    void *dir = 0;
-    if (flags & 2 ) 
-       dir = gSystem->OpenDirectory(name);
-    if (dir) {   // this is a directory
-      SetTitle("directory");
-      while (name = gSystem->GetDirEntry(dir)) {
-         // skip some "special" names
-         if (strcmp(name,"..")!=0 && strcmp(name,".")!=0) {
-           Char_t *file = gSystem->ConcatFileName(dirbuf,name);
-           TString nextdir = file;
-           delete [] file;
-           Add(new St_DataSet(nextdir,name,kFALSE));
-         }
-      }
-    }
-    else 
-       SetTitle("file");
-  }
-}
-//______________________________________________________________________________
 St_DataSet::~St_DataSet(){
  // Delete list of the St_DataSet
   if (fMother) {
@@ -426,19 +408,18 @@ void  St_DataSet::ls(Option_t *option)
   if (option && !strcmp(option,"*")) ls(Int_t(0));
   else                               ls(Int_t(1));
 }
- 
 //______________________________________________________________________________
-void  St_DataSet::ls(Int_t deep)
+void St_DataSet::ls(Int_t depth)
 {
  /////////////////////////////////////////////////////////////////////
  //                                                                 //
- //  ls(Int_t deep)                                                 //
+ //  ls(Int_t depth)                                                 //
  //                                                                 //
  //  Prints the list of the this St_DataSet.                        //
  //                                                                 //
  //  Parameter:                                                     //
  //  =========                                                      //
- //    Int_t deep >0 the number of levels to be printed             //
+ //    Int_t depth >0 the number of levels to be printed             //
  //               =0 all levels will be printed                     //
  //            No par - ls() prints only level out                  //
  //                                                                 //
@@ -446,12 +427,12 @@ void  St_DataSet::ls(Int_t deep)
  
   TNamed::ls();
  
-  if (fList && deep != 1 ) {
+  if (fList && depth != 1 ) {
     TIter next(fList);
     St_DataSet *d=0;
     while (d = (St_DataSet *)next()) {
         IncreaseDirLevel();
-        d->ls(deep == 0 ? 0 : --deep);
+        d->ls(depth == 0 ? 0 : --depth);
         DecreaseDirLevel();
     }
   }
@@ -464,12 +445,12 @@ TTree *MakeTree(St_DataSet *dataset)
  
   strcat(path,GetName());
  
-  if (fList && deep != 1 ) {
+  if (fList && depth != 1 ) {
     TIter next(fList);
     St_DataSet *d=0;
     while (d = (St_DataSet *)next()) {
         IncreaseDirLevel();
-        d->ls(deep == 0 ? 0 : --deep);
+        d->ls(depth == 0 ? 0 : --depth);
         DecreaseDirLevel();
     }
   }
@@ -485,9 +466,11 @@ TString St_DataSet::Path()
  // return the full path of this data set 
    TString str;
    St_DataSet *parent = GetParent();
-   if (parent) str = parent->Path();
-   str += "/";
-   str += GetName();
+   if (parent) { 
+       str = parent->Path();
+       str += "/";
+   }
+   str +=  GetName();
    return str;
 }
 //______________________________________________________________________________
@@ -496,6 +479,44 @@ void St_DataSet::Remove(St_DataSet *set)
   if (fList && set) fList->Remove(set);
 }
  
+//______________________________________________________________________________
+EDataSetPass St_DataSet::Pass(EDataSetPass ( *callback)(St_DataSet *),Int_t depth)
+{
+ /////////////////////////////////////////////////////////////////////
+ //                                                                 //
+ // Pass (callback,depth)                                           //
+ //                                                                 //
+ // Calls callback(this) for all datasets those recursively         //
+ //                                                                 //
+ //  Parameter:                                                     //
+ //  =========                                                      //
+ //    Int_t depth >0 the number of levels to be passed             //
+ //                =0 all levels will be passed                     //
+ //                                                                 //
+ //  Return:                                                        //
+ //  ======                                                         //
+ //  kContinue - continue passing                                   //
+ //  kPrune    - stop passing the current branch, go to the next one//
+ //  kStop     - stop passing, leave all braches                    //
+ //                                                                 //
+ /////////////////////////////////////////////////////////////////////
+ 
+  if (!callback) return kStop;
+
+  EDataSetPass condition = callback(this);
+
+  if (condition == kContinue){
+    if (fList && depth != 1 ) {
+      TIter next(fList);
+      St_DataSet *d=0;
+      while (d = (St_DataSet *)next()) {
+         condition = d->Pass(callback, depth == 0 ? 0 : --depth);
+         if (condition == kStop) break;
+      }
+    }
+  }
+  return condition;
+}
 //______________________________________________________________________________
 void  St_DataSet::SetParent(St_DataSet *parent){
 //
