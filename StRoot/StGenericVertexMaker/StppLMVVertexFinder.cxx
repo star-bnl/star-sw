@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.11 2004/09/01 18:45:01 balewski Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.12 2004/09/03 00:09:08 jeromel Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -31,28 +31,45 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 
 StppLMVVertexFinder::StppLMVVertexFinder() {
   gMessMgr->Info() << "StppLMVVertexFinder::StppLMVVertexFinder is in use." << endm;
-
-    mBeamHelix=0;
-    mExternalSeedPresent = false;
-    mVertexConstrain = false;
-    mRequireCTB = false;
-    mUseITTF = false;
-    mTotEve=0;
-    mdxdz=mdydz=mX0=mY0=0;
-
-
-    //jan default cuts
-    mMaxTrkDcaRxy=2.0;// was 3.9
-    mMinTrkPt=0.2; // was 0.2
-    mMinNumberOfFitPointsOnTrack = 15; // was 10 
-    mMaxZrange=150; // for tracks
-    mDVtxMax=4.0;  // max sigma multipl between tracks and current vertex, used for tracks rejection
-    mMinMatchTr=2; // minimal # of tracks matched to CTB // was 1
-    mBLequivNtr=20; // equivalent # of tracks for BeamLine
-    mMatchCtbMax_eta=mCtbEtaSeg/2.+0.02;
-    mMatchCtbMax_phi=mCtbPhiSeg/2.+C_PI*0./180.;
-    ppLMV4swith=false;
+  mBeamHelix           = 0;
+  mExternalSeedPresent = false;
+  mVertexConstrain     = false;
+  mRequireCTB          = false;
+  mUseITTF             = false;
+  mTotEve              = 0;
+  mdxdz=mdydz=mX0=mY0  = 0;
+  mMode                = 1;
 }
+
+
+void StppLMVVertexFinder::Init() {
+
+  //jan default cuts
+  if (mMode==0){
+    gMessMgr->Info() << "The  ppLMV4 cuts have been activated" << endm; 
+    mMaxTrkDcaRxy    = 3.9;
+    mMinTrkPt        = 0.2;
+    mMinNumberOfFitPointsOnTrack = 10;
+    mMaxZrange       = 250;            // for tracks
+    mDVtxMax         = 4.0;            // max sigma multipl between tracks and current vertex, used for tracks rejection
+    mMinMatchTr      = 1;              // minimal # of tracks matched to CTB 
+    mBLequivNtr      = 100;            // equivalent # of tracks for BeamLine
+    mMatchCtbMax_eta = mCtbEtaSeg/2.+0.02;
+    mMatchCtbMax_phi = mCtbPhiSeg/2.+C_PI*1./180.;
+  } else {
+    gMessMgr->Info() << "The  ppLMV5 cuts have been activated" << endm; 
+    mMaxTrkDcaRxy    = 2.0;            
+    mMinTrkPt        = 0.2;            
+    mMinNumberOfFitPointsOnTrack = 15; 
+    mMaxZrange       = 150;            
+    mDVtxMax         = 4.0;            
+    mMinMatchTr      = 2;              
+    mBLequivNtr      = 20;             
+    mMatchCtbMax_eta = mCtbEtaSeg/2.+0.02;
+    mMatchCtbMax_phi = mCtbPhiSeg/2.+C_PI*0./180.;
+  }
+}
+
 
 //==========================================================
 //==========================================================
@@ -235,18 +252,18 @@ void StppLMVVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz,
   StThreeVectorD origin(mX0,mY0,0.0);
   double pt  = 88889999;   
   double nxy=::sqrt(mdxdz*mdxdz +  mdydz*mdydz);
-    if(nxy<1.e-5){ // beam line _MUST_ be tilted
-      gMessMgr->Warning() << "StppLMVVertexFinder:: Beam line must be tilted!" << endm;
-      nxy=mdxdz=1.e-5; 
-    }
-    double p0=pt/nxy;  
-    double px   = p0*mdxdz;
-    double py   = p0*mdydz;
-    double pz   = p0; // approximation: nx,ny<<0
-    StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
-    delete mBeamHelix;
-    mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
-    mExternalSeedPresent = false;
+  if(nxy<1.e-5){ // beam line _MUST_ be tilted
+    gMessMgr->Warning() << "StppLMVVertexFinder:: Beam line must be tilted!" << endm;
+    nxy=mdxdz=1.e-5; 
+  }
+  double p0=pt/nxy;  
+  double px   = p0*mdxdz;
+  double py   = p0*mdydz;
+  double pz   = p0; // approximation: nx,ny<<0
+  StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
+  delete mBeamHelix;
+  mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
+  mExternalSeedPresent = false;
 }
 
 
@@ -314,13 +331,17 @@ bool StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
 
   // ppLMV face-lift : attenuated weights 
   float pmomM=pmom.mag();
-  if(!ppLMV4swith && pmomM >4 )pmomM=4; //inhibit domination of high pT tracks
   float spathL=fabs(spath); // reduce advantage of SVT matched tracks
-  if(ppLMV4swith) { // ignore SVT contribution , ~aproximately
-    if( spathL<60) spathL=60;
-  } else {
+
+  if(mMode ==1){
+    if (pmomM >4 ) pmomM=4; //inhibit domination of high pT tracks
     if( spathL<40) spathL=40;
-  }
+  } else {
+    // tHis is really mode 1
+    // ignore SVT contribution , ~aproximately
+    if( spathL<60) spathL=60;
+  } 
+
   float strag=0.0136/beta/pmomM*spathL; 
   if(fabs(mBfield)<0.01) strag=0.0136*spathL; // no field case, pT makes no sense
 
@@ -385,7 +406,7 @@ bool StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
 //==========================================================
 bool  StppLMVVertexFinder::ppLMV5() { 
   //  ----------  D O   F I N D    V E R T E X
-  if(ppLMV4swith)gMessMgr->Warning()<<"ppLMV4 cuts have been activated"<<endm; 
+  if(mMode == 0) gMessMgr->Warning()<<"ppLMV4 cuts have been activated"<<endm; 
 
   int totTr=mPrimCand.size();
   uint minTr=mMinMatchTr;
@@ -555,7 +576,7 @@ void  StppLMVVertexFinder::changeCuts(){
   StGenericVertexMaker *mk=(StGenericVertexMaker *)mDumMaker->GetMaker("GenericVertex");
   int mode2=mk->GetMode2();
 
-  printf("ccc m_mode2=%d\n",mode2);
+  gMessMgr->Info()<< "ccc m_mode2=%d" << mode2 << endm;
   switch(mode2) {
   case 'a': mMaxTrkDcaRxy=1.5; break;
   case 'b': mMaxTrkDcaRxy=2.5; break;
@@ -572,25 +593,15 @@ void  StppLMVVertexFinder::changeCuts(){
   }
 }
 
-//==========================================================
-//==========================================================
-void  StppLMVVertexFinder::forceppLMV4(){ 
-  gMessMgr->Warning()<<"abandon ppLMV5, the  ppLMV4 cuts have been activated"<<endm; 
-  ppLMV4swith=true;
-  mMaxTrkDcaRxy=3.9;
-  mMinTrkPt=0.2;
-  mMinNumberOfFitPointsOnTrack = 10;
-  mMaxZrange=250; // for tracks
-  mDVtxMax=4.0;  // max sigma multipl between tracks and current vertex, used for tracks rejection
-  mMinMatchTr=1; // minimal # of tracks matched to CTB 
-  mBLequivNtr=100; // equivalent # of tracks for BeamLine
-  mMatchCtbMax_eta=mCtbEtaSeg/2.+0.02;
-  mMatchCtbMax_phi=mCtbPhiSeg/2.+C_PI*1./180.;
-  
-}
+
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.12  2004/09/03 00:09:08  jeromel
+ * Modified code to Implement Init() and SetMode() and allow passing a switch
+ * to chose the vertex finder from within the same code implementation. Was
+ * needed for ppLMV (one implementation, two algorithm)
+ *
  * Revision 1.11  2004/09/01 18:45:01  balewski
  * ppLMV5/4 switch added
  *
