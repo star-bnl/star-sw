@@ -1,6 +1,6 @@
-// $Id: StHistUtil.cxx,v 1.25 2000/01/12 23:10:34 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.26 2000/01/12 23:17:49 kathy Exp $
 // $Log: StHistUtil.cxx,v $
-// Revision 1.25  2000/01/12 23:10:34  kathy
+// Revision 1.26  2000/01/12 23:17:49  kathy
 // changes so it can print from a list
 //
 // Revision 1.24  2000/01/12 16:49:04  kathy
@@ -270,7 +270,6 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
 	  padCount=0;
 	}
 //...........................................................................
-
 
 // go to next pad 
 	 graphPad->cd(++padCount);
