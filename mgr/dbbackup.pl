@@ -1,6 +1,6 @@
 #!/opt/star/bin/perl -w
 #
-# $Id: dbbackup.pl,v 1.4 1999/07/10 13:15:33 wenaus Exp $
+# $Id: dbbackup.pl,v 1.5 1999/07/21 09:15:10 wenaus Exp $
 #
 ######################################################################
 #
@@ -13,6 +13,9 @@
 # Usage:    dbbackup.pl 
 #
 # $Log: dbbackup.pl,v $
+# Revision 1.5  1999/07/21 09:15:10  wenaus
+# Add params db to backup
+#
 # Revision 1.4  1999/07/10 13:15:33  wenaus
 # Use full mysqldump path
 #
@@ -32,6 +35,7 @@ $debugOn = 0;
 ## Databases to be backed up, and the number of backup files to keep
 %dbToBackup = (
                'system_data' => 10,
+               'params' => 10,
                'mysql' => 10
                );
 
