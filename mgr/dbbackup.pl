@@ -1,6 +1,6 @@
 #!/opt/star/bin/perl -w
 #
-# $Id: dbbackup.pl,v 1.2 1999/07/09 12:47:19 wenaus Exp $
+# $Id: dbbackup.pl,v 1.3 1999/07/09 13:10:26 wenaus Exp $
 #
 ######################################################################
 #
@@ -13,6 +13,9 @@
 # Usage:    dbbackup.pl 
 #
 # $Log: dbbackup.pl,v $
+# Revision 1.3  1999/07/09 13:10:26  wenaus
+# Keep backups permanently once a month
+#
 # Revision 1.2  1999/07/09 12:47:19  wenaus
 # Keep 10 days of backups
 #
@@ -41,6 +44,11 @@ foreach $db ( keys %dbToBackup ) {
     $out = `mysqldump --opt $db | gzip > $backupDir/$fname`;
     if ( $out ne '' ) {print $out}
 
+    ## Keep the backup permanently once a month
+    if ( $dy == 1 ) {
+        $out = `cp $backupDir/$fname $backupDir/old/$fname`;
+        if ( $out ne '' ) {print $out}
+    }
     ## Keep only the most recent nToKeep for each DB
     @files = split(/\n/,`cd $backupDir; ls -1 $db*`);
     # sort the list and delete from the top
