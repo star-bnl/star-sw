@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.hh,v 1.16 2002/02/28 14:18:36 rcwells Exp $
+ * $Id: StHbtPair.hh,v 1.17 2002/09/25 19:23:25 rcwells Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.hh,v $
+ * Revision 1.17  2002/09/25 19:23:25  rcwells
+ * Added const to emissionAngle()
+ *
  * Revision 1.16  2002/02/28 14:18:36  rcwells
  * Added emissionAngle function to StHbtPair
  *
@@ -111,7 +114,7 @@ public:
   double mInv() const;
   // pair rapidity
   double rap() const;
-  double emissionAngle();
+  double emissionAngle() const;
 
   // Bertsch-Pratt momentum components in Pair Frame - written by Bekele/Humanic
   double qSidePf() const;
