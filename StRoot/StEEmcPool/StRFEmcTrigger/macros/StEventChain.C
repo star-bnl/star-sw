@@ -1,14 +1,12 @@
 
-// NOTE - chain needs to be declared global so for StHbtEventReader
-//=========================================================================================
 class  StChain;
 StChain *chain;
 
 
-void StEventChain( char *fname ="/star/data35/reco/productionPP/ReversedFullField/DEV/2004/117/st_physics_5117072_raw_2010005.event.root")
-//char *fname="/star/data29/reco/pp200/pythia6_203/default/pt15/year2003/gheisha_on/trs_if/rcf1205_2012_1000evts.event.root")
-{
-  int nevents =5;
+void StEventChain( char *fname ="/star/data35/reco/productionPP/ReversedFullField/DEV/2004/117/st_physics_5117072_raw_2010005.event.root"){
+
+  fname ="/star/data05/scratch/balewski/mcMinA/minB-P00-1001+.event.root";
+  int nevents =50;
   int total=0;
 
   if (gClassTable->GetID("TTable") < 0) {
@@ -37,7 +35,8 @@ gSystem->Load("St_base");
   gSystem->Load("StEEmcUtil"); 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
-  assert(gSystem->Load("StRFEmcTrigMaker")==0);
+  assert(gSystem->Load("StRFEmcTrigger")==0);
+  assert(gSystem->Load("St_TLA_Maker")==0);
 
   chain= new StChain("StChain"); 
   // chain->SetDebug(1);   
@@ -54,7 +53,13 @@ gSystem->Load("St_base");
  
   
   StRFEmcTrigMaker *trig = new StRFEmcTrigMaker("RFTrig"); 
-  trig->setDataMode(1);//0 for MuDst and 1 for StEvent
+  //  trig->useMuDst();// or ..
+  trig->useStEvent();
+
+  // use filtering capabilities
+  trig->requireBBC();
+
+  St_TLA_Maker *jan=new St_TLA_Maker;
 
   Int_t EHT;
   Int_t EJP;
@@ -91,7 +96,7 @@ gSystem->Load("St_base");
     cout << "BBCtrig = " << BBCtrig<<endl;
     */
 
-    if (iret) {
+    if (iret && iert!=kStWarn) {
       cout << "Bad return code!" << endl;
       break;
     }
