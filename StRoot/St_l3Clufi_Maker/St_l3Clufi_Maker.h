@@ -1,5 +1,8 @@
-// $Id: St_l3Clufi_Maker.h,v 1.6 2001/04/26 18:28:55 flierl Exp $
+// $Id: St_l3Clufi_Maker.h,v 1.7 2001/05/14 19:39:18 flierl Exp $
 // $Log: St_l3Clufi_Maker.h,v $
+// Revision 1.7  2001/05/14 19:39:18  flierl
+// fix severe bug : wrong adc values were extracted from rawdata
+//
 // Revision 1.6  2001/04/26 18:28:55  flierl
 // add two member functions
 //
@@ -57,8 +60,6 @@
 //                                                                      //
 // St_l3Clufi_Maker virtual base class for Maker                        //
 //                                                                      //
-//  Submit any problem with this code via begin_html <A HREF="http://www.rhic.bnl.gov/STAR/html/comp_l/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html
-//
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
@@ -69,9 +70,10 @@
 #include "St_DataSet.h"
 
 //class St_stk_stkpar;
+
 class St_l3Clufi_Maker : public StMaker {
  private:
-    // static Char_t  m_VersionCVS = "$Id: St_l3Clufi_Maker.h,v 1.6 2001/04/26 18:28:55 flierl Exp $";
+    // static Char_t  m_VersionCVS = "$Id: St_l3Clufi_Maker.h,v 1.7 2001/05/14 19:39:18 flierl Exp $";
      
     //
     // l3 clusterfinding variables
@@ -102,26 +104,26 @@ class St_l3Clufi_Maker : public StMaker {
     // some constants
     Int_t Buffer_size ; // define max buffer_size
 
- protected:
+ 
  public: 
-    //
     // l3 clusterfinding functions
-    //
-    Int_t Fill_pixel_of_inner_rows();
-    Int_t Fill_pixel_of_outer_rows();
+    Int_t FillPixel(Int_t Sect) ;
     Int_t WriteClustersIntoFile() ;
     Int_t WriteClustersIntoTables() ;
+    
+    // constructors
+    St_l3Clufi_Maker(const char *name="l3Clufi") ;
+    virtual       ~St_l3Clufi_Maker() ;
 
-                  St_l3Clufi_Maker(const char *name="l3Clufi");
-   virtual       ~St_l3Clufi_Maker();
-   virtual Int_t Init();
-   virtual Int_t  Make();
+    // mandatory Maker functins
+    virtual Int_t Init() ;
+    virtual Int_t Make() ;
    
-// virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
-  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_l3Clufi_Maker.h,v 1.6 2001/04/26 18:28:55 flierl Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-
-   ClassDef(St_l3Clufi_Maker, 1)   //StAF chain virtual base class for Makers
+    // cvs
+    virtual const char *GetCVS() const
+	{static const char cvs[]="Tag $Name:  $ $Id: St_l3Clufi_Maker.h,v 1.7 2001/05/14 19:39:18 flierl Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    
+    ClassDef(St_l3Clufi_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
 #endif
