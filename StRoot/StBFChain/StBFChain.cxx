@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.366 2003/12/09 17:33:42 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.367 2003/12/09 23:05:20 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1437,15 +1437,17 @@ Int_t StBFChain::Instantiate()
 	    if      (GetOption("Trs"))   tcpdaqMk->SetMode(1); // trs
 	    else if (GetOption("Simu"))  tcpdaqMk->SetMode(2); // daq, no gain
 	    else                         tcpdaqMk->SetMode(0); // daq
-
-	    // Correction depending on DAQ100 or not
-	    if ( GetOption("fcf")   )    tcpdaqMk->SetCorrection(0x0);
-	    else                         tcpdaqMk->SetCorrection(0x7);
-
 	    // DAQ100 or Raw switch options
 	    if ( GetOption("onlcl") )   DMode = DMode | 0x2;  // use the online TPC clusters (DAQ100) info if any
 	    if ( GetOption("onlraw") )  DMode = DMode | 0x1;  // use the TPC raw hit information
 	    tcpdaqMk->SetDAQFlag(DMode);                      // set flag
+	    // Correction depending on DAQ100 or not
+	    // bit 0  =   do GAIN_CORRECTION
+	    // bit 1  =   do NOISE_ELIM
+	    // bit 2  =   do ASIC_THRESHOLDS
+	    if ( GetOption("fcf")   )    tcpdaqMk->SetCorrection(0x0);
+	    else                         tcpdaqMk->SetCorrection(0x7);
+	    if ( GetOption("Trs")   )    tcpdaqMk->SetCorrection(0x5); // ASIC + GAIN 
 
 	    (void) printf("StBFChain:: maker==St_tpcdaq_Maker SetDAQFlag(%d) SetMode(%d) SetCorrection(%d)\n",
 			  DMode,tcpdaqMk->GetMode(),tcpdaqMk->GetCorrection());
