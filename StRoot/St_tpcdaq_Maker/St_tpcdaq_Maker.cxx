@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.15  1999/04/05 22:57:48  ward
+// Update version tag, Joe Friday.
+//
 // Revision 1.14  1999/04/05 22:56:56  ward
 // Further adjustments for 0-511.
 //
@@ -354,7 +357,7 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
 Int_t St_tpcdaq_Maker::Make() {
   int ii,errorCode;
   mErr=0;
-  printf("I am Doctor Spock. St_tpcdaq_Maker::Make().\n");
+  printf("I am Joe Friday. St_tpcdaq_Maker::Make().\n");
   errorCode=GetEventAndDecoder();
   printf("GetEventAndDecoder() = %d\n",errorCode);
   if(errorCode) {
@@ -375,7 +378,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.14 1999/04/05 22:56:56 ward Exp $ \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.15 1999/04/05 22:57:48 ward Exp $ \n");
   printf("**************************************************************\n");
   if(Debug()) StMaker::PrintInfo();
 }
