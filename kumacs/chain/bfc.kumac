@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.49 1998/09/14 16:49:41 kathy Exp $
+* $Id: bfc.kumac,v 1.50 1998/09/14 21:34:25 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.50  1998/09/14 21:34:25  kathy
+* put print stmt in bfc to tell # events; put new chain variable dstin in bfc_util; call_bfc_read_dst is shell to read in dst
+*
 * Revision 1.49  1998/09/14 16:49:41  kathy
 * clean up
 *
@@ -463,6 +466,7 @@ MACRO bfc _
  
  message cpu time = $cptime
  do ievent=[first],[last]	| loop over events
+   message ' =====> BFC is processing event # ' [ievent]
    tabclear [event]          | zero all tables
    exec bfc_util#bfc_process [chain]
    if (STAF_STATUS(1).ne. 1) goto ABEND
