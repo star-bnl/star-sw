@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3.h,v 1.3 2000/01/07 17:51:24 fisyak Exp $ */
+/* $Id: TGeant3.h,v 1.4 2000/01/10 16:21:29 fisyak Exp $ */
 
 //////////////////////////////////////////////// 
 //  C++ interface to Geant3 basic routines    // 
@@ -808,7 +808,7 @@ public:
 			Int_t &ipa,  Option_t *chopt);
    virtual void Eufill(Int_t &n, Float_t* ein, Float_t* xlf);
    virtual void Eufilp(Int_t &n, Float_t* ein, Float_t* pli, Float_t * plf);
-   virtual void Eufilv(Int_t &n, Float_t* ein, const Char_t *cnamv, Int_t *numv, Int_t &Iovl);
+   virtual void Eufilv(Int_t &n, Float_t* ein, const Char_t *cnamv, Int_t *numv, Int_t *Iovl);
    virtual void     Agmain(Int_t &nwgeant,Int_t &nwpaw,Int_t &iwtype);
    virtual Float_t* Gufld(Float_t *x, Float_t *bf);  
    virtual void     Agxuser();
