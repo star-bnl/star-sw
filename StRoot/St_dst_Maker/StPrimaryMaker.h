@@ -5,8 +5,11 @@
 //                                                                      //
 // StPrimaryMaker virtual base class for Maker                          //
 //                                                                      //
-// $Id: StPrimaryMaker.h,v 1.7 1999/12/10 17:38:42 genevb Exp $
+// $Id: StPrimaryMaker.h,v 1.8 2001/04/12 15:46:27 balewski Exp $
 // $Log: StPrimaryMaker.h,v $
+// Revision 1.8  2001/04/12 15:46:27  balewski
+// *** empty log message ***
+//
 // Revision 1.7  1999/12/10 17:38:42  genevb
 // Added fixed vtx functionality, allow lmv and fixed vtx only one vtx entry
 //
@@ -38,7 +41,9 @@ class St_svg_geom ;
 class St_srs_activea;
 class St_srs_srspar;
 class dst_vertex_st;
-
+class St_dst_track;
+class  St_dst_vertex;
+ 
 class StPrimaryMaker : public StMaker {
   
  private:
@@ -49,6 +54,10 @@ class StPrimaryMaker : public StMaker {
   St_egr_egrpar  *m_egr_egrpar;  //!
   St_egr_egrpar  *m_egr2_egrpar; //!
   dst_vertex_st  *m_fixedVertex; //!
+  float zCutppLMV;
+  long ppLMV(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate);
+  TH1F *hppLMV1[16];
+  TH1F *hppLMV2[16];
  protected:
   
   
@@ -59,10 +68,12 @@ class StPrimaryMaker : public StMaker {
   virtual Int_t  Make();
   virtual void  FixVertex(Float_t x=0, Float_t y=0, Float_t z=0);
   virtual void  UnFixVertex();
+  void ppLMVuse(float z)
+    { zCutppLMV=z; printf("ppLMVuse(z=%f cm) called\n", zCutppLMV=z);}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.7 1999/12/10 17:38:42 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.8 2001/04/12 15:46:27 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-  ClassDef(StPrimaryMaker, 1)   //StAF chain virtual base class for Makers
+  ClassDef(StPrimaryMaker, 0)   //StAF chain virtual base class for Makers
     };
     
 #endif
