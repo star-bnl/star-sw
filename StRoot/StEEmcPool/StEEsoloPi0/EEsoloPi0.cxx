@@ -1,4 +1,4 @@
-// $Id: EEsoloPi0.cxx,v 1.3 2004/05/07 21:38:38 balewski Exp $
+// $Id: EEsoloPi0.cxx,v 1.4 2004/08/09 20:28:30 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -47,6 +47,9 @@ EEsoloPi0::EEsoloPi0(){
   float XmassLo=0.07, XmassHi=0.22;
   set(XscaleFactor, XseedEnergy,XshapeLimit,XmassLo,XmassHi);
   memset(soloMipDb,0,sizeof(soloMipDb));
+  memset(hA,0, sizeof(hA));
+  memset(hR,0, sizeof(hR));
+  memset(hM,0, sizeof(hM));
 
 }
 
@@ -333,7 +336,7 @@ int  EEsoloPi0:: findTowerClust() {
      soloMip[k1].id=nClust;
      tagCluster(k1);     
   }
-  //printf("nClust=%d\n",nClust);
+  printf("nClust=%d\n",nClust);
   //if(nClust<2) return ;
   
   //............  sum energy of clusters, find centroid
