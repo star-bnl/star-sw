@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.106 2000/11/25 18:59:48 fisyak Exp $
+// $Id: StMaker.cxx,v 1.107 2001/01/23 22:02:51 fine Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -557,10 +557,11 @@ EDataSetPass StMaker::ClearDS (TDataSet* ds,void * )
      Int_t setSize =  table->GetTableSize();
      table->ReAllocate();
      memset((void *)table->At(table->GetNRows()),127,table->GetRowSize());
-     //yf     if (setSize && (setSize - table->GetTableSize() > 100))
-     if (setSize && table->GetTableSize() == 0)
+     if (setSize && (setSize - table->GetTableSize() > 100)) {
+     // if (setSize && table->GetTableSize() == 0)
         table->Warning("ReAllocate"," Table %s has purged from %d to %d "
                ,table->GetName(),setSize,table->GetTableSize());
+	       }
      table->NaN();
   }
   return kContinue; 
@@ -1074,6 +1075,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.107  2001/01/23 22:02:51  fine
+// warning message has been re-introduced
+//
 // Revision 1.106  2000/11/25 18:59:48  fisyak
 // Add warning for failed Initialization
 //
