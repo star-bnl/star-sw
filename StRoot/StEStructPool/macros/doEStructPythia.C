@@ -1,5 +1,5 @@
 /************************************************************************
- * $Id: doEStructPythia.C,v 1.1 2003/11/21 06:26:40 porter Exp $
+ * $Id: doEStructPythia.C,v 1.2 2004/04/15 18:46:33 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -39,7 +39,7 @@ void doEStructPythia(const char* fileListFile, const char* outputDir, const char
   // simple (global) centrality definition ...not persistant to event file.. 
   // and not used in this particular example
   StEStructCentrality* cent=StEStructCentrality::Instance();
-  const int temp[4]={0,4,7,50};
+  const double temp[4]={0,4,7,50};
   cent->setCentralities(temp,4);
 
   // create the low-level reader (here for MuDst)
@@ -138,6 +138,9 @@ void doEStructPythia(const char* fileListFile, const char* outputDir, const char
 /**********************************************************************
  *
  * $Log: doEStructPythia.C,v $
+ * Revision 1.2  2004/04/15 18:46:33  msd
+ * Updated centrality variable types
+ *
  * Revision 1.1  2003/11/21 06:26:40  porter
  * macros for running pythia
  *

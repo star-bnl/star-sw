@@ -1,5 +1,5 @@
 /************************************************************************
- * $Id: writeEStructExample.C,v 1.1 2003/10/15 18:20:57 porter Exp $
+ * $Id: writeEStructExample.C,v 1.2 2004/04/15 18:46:34 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -34,7 +34,7 @@ void writeEStructExample(const char* fileListFile, const char* outputDir, const 
   // simple (global) centrality definition ...not persistant to event file.. 
   // and not used in this particular example
   StEStructCentrality* cent=StEStructCentrality::Instance();
-  const int temp[4]={0,4,7,50};
+  const double temp[4]={0,4,7,50};
   cent->setCentralities(temp,4);
 
 
@@ -129,6 +129,9 @@ void writeEStructExample(const char* fileListFile, const char* outputDir, const 
 /**********************************************************************
  *
  * $Log: writeEStructExample.C,v $
+ * Revision 1.2  2004/04/15 18:46:34  msd
+ * Updated centrality variable types
+ *
  * Revision 1.1  2003/10/15 18:20:57  porter
  * initial check in of Estruct Analysis maker codes.
  *
