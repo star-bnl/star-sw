@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0.cxx,v 1.6 1999/07/21 21:32:39 levine Exp $
+ * $Id: TPCV2P0.cxx,v 1.7 1999/07/27 23:19:32 levine Exp $
  * Author: Jeff Landgraf and M.J. LeVine
  ***************************************************************************
  * Description: common TPC (V2) implementation stuff
@@ -14,11 +14,18 @@
  * 09-Jul-99 MJL removed navigation code from TPC_Reader. Introduced
  *               Bank_TPCP argument to TPCV2P0_Reader constructor
  * 20-Jul-99 MJL add error logging. Add bank type checking for every getBank...()
- *
+ * 27-Jul-99 MJL implement TPCV2P0_Reader::getBankTPCPEDR()
+ * 27-Jul-99 MJL implement TPCV2P0_Reader::getBankTPCRMSR()
  *
  ***************************************************************************
  * $Log: TPCV2P0.cxx,v $
+ * Revision 1.7  1999/07/27 23:19:32  levine
+ * implemented methods TPCV2P0_Reader::getBankTPCPEDR()
+ *                     TPCV2P0_Reader::getBankTPCRMSR()
+ *
  * Revision 1.6  1999/07/21 21:32:39  levine
+ *
+ *
  * changes to include error logging to file.
  *
  * There are now 2 constructors for EventReader:
@@ -755,13 +762,83 @@ classname(Bank_TPCCFGR) *TPCV2P0_Reader::getBankTPCCFGR(int sector, int rb, int 
 
 classname(Bank_TPCPEDR) *TPCV2P0_Reader::getBankTPCPEDR(int sector, int rb, int mz)
 {
-  return NULL;
+  errnum = 0;
+  errstr0[0] = '\0';
+  
+  classname(Bank_TPCMZP) *mzp = getBankTPCMZP(sector, rb, mz);
+  if(!mzp) return NULL;
+
+  if((!mzp->TPCPEDR.offset) || (!mzp->TPCPEDR.length))
+  { 
+    char str0[40];
+    sprintf(str0,"getBankTPCPEDR(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(INFO_MISSING_BANK,__FILE__,__LINE__,str0); 
+    return NULL; 
+  }
+
+  classname(Bank_TPCPEDR) *ptr = (classname(Bank_TPCPEDR) *)
+                      (((INT32 *)mzp) +
+			mzp->TPCPEDR.offset);
+
+  if(strncmp(ptr->header.BankType,"TPCPEDR",7)) {
+    char str0[40];
+    sprintf(str0,"getBankTPCPEDR(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_BAD_HEADER,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(!ptr->test_CRC()) { 
+    char str0[40];
+    sprintf(str0,"getBankTPCPEDR(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_CRC,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(ptr->swap() < 0) { 
+    char str0[40];
+    sprintf(str0,"getBankTPCPEDR(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_SWAP,__FILE__,__LINE__,str0); return NULL; 
+  }
+  ptr->header.CRC = 0;
+
+  return ptr;       
 }
 
 
 classname(Bank_TPCRMSR) *TPCV2P0_Reader::getBankTPCRMSR(int sector, int rb, int mz)
 {
-  return NULL;
+  errnum = 0;
+  errstr0[0] = '\0';
+  
+  classname(Bank_TPCMZP) *mzp = getBankTPCMZP(sector, rb, mz);
+  if(!mzp) return NULL;
+
+  if((!mzp->TPCRMSR.offset) || (!mzp->TPCRMSR.length))
+  { 
+    char str0[40];
+    sprintf(str0,"getBankTPCRMSR(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(INFO_MISSING_BANK,__FILE__,__LINE__,str0); 
+    return NULL; 
+  }
+
+  classname(Bank_TPCRMSR) *ptr = (classname(Bank_TPCRMSR) *)
+                      (((INT32 *)mzp) +
+			mzp->TPCRMSR.offset);
+
+  if(strncmp(ptr->header.BankType,"TPCRMSR",7)) {
+    char str0[40];
+    sprintf(str0,"getBankTPCRMSR(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_BAD_HEADER,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(!ptr->test_CRC()) { 
+    char str0[40];
+    sprintf(str0,"getBankTPCRMSR(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_CRC,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(ptr->swap() < 0) { 
+    char str0[40];
+    sprintf(str0,"getBankTPCRMSR(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_SWAP,__FILE__,__LINE__,str0); return NULL; 
+  }
+  ptr->header.CRC = 0;
+
+  return ptr;       
 }
 
 classname(Bank_TPCGAINR) *TPCV2P0_Reader::getBankTPCGAINR(int sector, int rb, int mz)
