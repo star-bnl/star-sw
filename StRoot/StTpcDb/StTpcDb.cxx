@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.21 2000/05/11 17:17:27 hardtke Exp $
+ * $Id: StTpcDb.cxx,v 1.22 2000/05/12 20:31:38 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.22  2000/05/12 20:31:38  fisyak
+ * Add ClassImp for abstract classes, new rootcint requires them
+ *
  * Revision 1.21  2000/05/11 17:17:27  hardtke
  * make trigger time offset available -- currently NOT different for beam and laser events
  *
@@ -62,6 +65,13 @@ StTpcDb* gStTpcDb = 0;
 
 #ifdef __ROOT__
 ClassImp(StTpcDb)
+ClassImp(StTpcWirePlaneI)
+ClassImp(StTpcDimensionsI)
+ClassImp(StTpcElectronicsI)
+ClassImp(StTpcGainI)
+ClassImp(StTpcPadPlaneI)
+ClassImp(StTpcSlowControlSimI)
+ClassImp(StTpcT0I)
 #endif
 //_____________________________________________________________________________
 StTpcDb::StTpcDb(St_DataSet* input) {
