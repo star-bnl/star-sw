@@ -9,7 +9,7 @@ use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.15 1999/10/08 12:55:43 fisyak Exp $
+# $Id: cons,v 1.16 1999/10/09 23:33:15 fisyak Exp $
 $cons_history =
   q(
     Modification History:
@@ -44,7 +44,7 @@ $cons_history =
 $ver_num = 1.6;
 $ver_rev = "b1";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.15 1999/10/08 12:55:43 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.16 1999/10/09 23:33:15 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -68,7 +68,7 @@ $version = "This is Cons $ver_num$ver_rev " .
 require 5.002;
 use integer;
 use File::Copy;
-
+my $errors = 0;
 #------------------------------------------------------------------
 # Determine if running on win32 platform - either Windows NT or 95
 #------------------------------------------------------------------
@@ -748,6 +748,243 @@ sub Salt($) {
     # We append the value, so that UseCache and Salt may be used
     # in either order without changing the signature calculation.
     $param::salt .= $_[0];
+}
+sub find_sources {
+  @search_files   = ();
+  if (-d $_[0]) {
+    &File::Find::find(\&wanted, @_);
+    for my $dir (@_) {
+      if ( -d $dir ) { 
+	my $i = 0;
+	for ($i=0;$i<=$#search_files;$i++) {
+	  #      print "i = ",$i, "src =", $search_files[$i],"\n";
+	  my $file = $search_files[$i];
+	  $file =~ s/$dir\///g;
+	  $search_files[$i] = $file;
+	}
+      }
+    }
+  }
+#  print "find_source found $#search_files + 1 files\n";
+  return @search_files;
+}
+#________________________________________
+sub find_inc {
+  @search_files   = ();
+  &File::Find::find(\&wanted_inc, @_);
+  return @search_files;
+}
+#________________________________________
+sub find_obj {
+  @search_files   = ();
+  &File::Find::find(\&wanted_obj, @_);
+  return @search_files;
+}
+#________________________________________
+sub find_idlM {
+  @search_files   = ();
+  &File::Find::find(\&wanted_idlM, @_);
+  for my $dir (@_) {
+    if ( -d $dir ) { 
+      my $i = 0;
+      for ($i=0;$i<=$#search_files;$i++) {
+	#      print "i = ",$i, "src =", $search_files[$i],"\n";
+	my $file = $search_files[$i];
+	$file =~ s/$dir\///g;
+	$search_files[$i] = $file;
+      }
+    }
+  }
+#  print "find_source found $#search_files + 1 files\n";
+  return @search_files;
+}
+#________________________________________
+sub wanted {
+  #  print "wanted ",$_,"\n";
+  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
+  if ( -d _ &&
+       (/^CVS$/ ||
+	/^macros$/ ||
+	/^html$/ ||
+	/^idl$/ ||
+	/^exa$/ ||
+	/^inc$/ ||
+	/^doc$/ ||
+	/^run$/ ||
+	/^examples$/ ||
+	/^local$/ ||
+	/^hold$/ ||
+	/^wrk$/)
+     ) {$prune = 1; return;}
+  if (
+      /^.*\.c$/       ||
+      /^.*\.cc$/      ||
+      /^.*\.cxx$/     ||
+      /^.*\.g$/       ||
+      /^.*\.cdf$/       ||
+      /^.*\.F$/) {# print "$name\n";
+    push @search_files, $name; 
+  }
+}
+#________________________________________
+sub wanted_idlM {
+  #  print "wanted ",$_,"\n";
+  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
+  if ( -d _ &&
+       (/^CVS$/ ||
+	/^macros$/ ||
+	/^html$/ ||
+	/^idl$/ ||
+	/^exa$/ ||
+	/^inc$/ ||
+	/^doc$/ ||
+	/^run$/ ||
+	/^examples$/ ||
+	/^local$/ ||
+	/^hold$/ ||
+	/^wrk$/)
+     ) {$prune = 1; return;}
+  if (/^.*\.idl$/) {# print "$name\n";
+    push @search_files, $name; 
+  }
+}
+#________________________________________
+sub wanted_inc {
+  #  print "wanted ",$_,"\n";
+  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
+  if ( -d _ &&
+       (/^CVS$/ ||
+	/^macros$/ ||
+	/^html$/ ||
+	/^idl$/ ||
+	/^exa$/ ||
+	/^doc$/ ||
+	/^run$/ ||
+	/^examples$/ ||
+	/^local$/ ||
+	/^hold$/ ||
+	/^wrk$/)
+     ) {$prune = 1; return;}
+  if ( /^.*\.h$/|| /^.*\.hh$/ || /^.*\.inc$/  || /^.*\.hpp$/) {# print "$name\n"; 
+      push @search_files, $name;
+  }
+}
+#________________________________________
+sub wanted_obj {
+  #  print "wanted ",$_,"\n";
+  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
+  if ( -d _ &&
+       (/^CVS$/ ||
+	/^macros$/ ||
+	/^html$/ ||
+	/^idl$/ ||
+	/^exa$/ ||
+	/^doc$/ ||
+	/^run$/ ||
+	/^examples$/ ||
+	/^local$/ ||
+	/^hold$/ ||
+	/^wrk$/)
+     ) {$prune = 1; return;}
+  if ( /^.*\.o$/|| /^.*\.obj$/) {# print "$name\n"; 
+      push @search_files, $name;
+  }
+}
+#____________________________________________________________
+sub rmkdir {
+  (my $Dir = $_[0]) =~ s/\\/\//g; 
+  my @terms = split "/", $Dir;
+  my $dir = "";
+  foreach my $term (@terms) {
+    if ($dir) {$dir .= "/";}
+    $dir .= $term;
+    if (!-d $dir && ! mkdir($dir,0755)) {die "$0: can't create directory $path ($!).\n";}
+  }
+}
+#________________________________________
+sub sortu {
+  my $old = "";
+  my @sorted_and_uniq = ();
+  foreach my $name (sort @_) {
+    (my $base_name = $name) =~ s/\.[^\.]*$//g;
+    next if "$old" eq "$base_name";
+    push @sorted_and_uniq, $name; $old = $base_name;
+  }
+  return @sorted_and_uniq;
+}
+#________________________________________
+sub find_hfiles {
+  @search_files   = ();
+  &File::Find::find(\&wanted_Def, @_);
+  for my $dir (@_) {
+    if ( -d $dir ) { 
+      my $i = 0;
+      for ($i=0;$i<=$#search_files;$i++) {
+	#      print "i = ",$i, "src =", $search_files[$i],"\n";
+	my $file = $search_files[$i];
+	$file =~ s/$dir\///g;
+	$search_files[$i] = $file;
+      }
+    }
+  }
+#  print "find_source found $#search_files + 1 files\n";
+  return @search_files;
+}
+#________________________________________
+sub wanted_Def {
+  #  print "wanted ",$_,"\n";
+  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);#  print "wanted $_ \n";
+  if ( -d _ &&
+       (/^CVS$/      ||
+	/^macros$/ ||
+	/^html$/ ||
+	/^idl$/      ||
+	/^exa$/      ||
+	/^inc$/      ||
+	/^doc$/      ||
+	/^run$/      ||
+	/^examples$/ ||
+	/^local$/    ||
+	/^hold$/     ||
+	/^wrk$/))       {$prune = 1; return;}
+  if (/^.*\.h$/      || /^.*\.hh$/ ) { #print "$name\n"; 
+					 push @search_files, $name; }
+}
+#________________________________________
+sub find_idl {
+  if (defined($AFS)) {$File::Find::dont_use_nlink;}
+  @search_files   = ();
+  &File::Find::find(\&wanted_idl, @_);
+  for my $dir (@_) {
+    my $i = 0;
+    for ($i=0;$i<=$#search_files;$i++) {
+      #      print "i = ",$i, "src =", $search_files[$i],"\n";
+      my $file = $search_files[$i];
+      $file =~ s/$dir\///g;
+      $search_files[$i] = $file;
+    }
+  }
+  #  print "find_source found $#search_files + 1 files\n";
+  return @search_files;
+}
+#________________________________________
+sub wanted_idl {
+  #  print "wanted ",$_,"\n";
+  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
+  if ( -d $_ &&
+       (/^CVS$/ ||
+	/^exa$/ ||
+	/^inc$/ ||
+	/^doc$/ ||
+	/^run$/ ||
+	/^examples$/ ||
+	/^local$/ ||
+	/^hold$/ ||
+	/^wrk$/)
+     ) {$prune = 1; return;}
+  if (/^.*\.idl$/) {#print "$name\n";
+    push @search_files, $name; 
+  }
 }
 
 
@@ -1516,6 +1753,131 @@ sub find {
 # Invoke the associated	 C scanner to get signature of included files.
 sub includes {
 # print "==========\tDebug:","In build::command::cc-includes- parameters = ", @_, "\n";
+    my($self, $tgt) = @_;
+    $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
+}
+#________________________________________________________________________________
+# Builder for a C++ module
+package build::command::cxx;
+
+BEGIN { @ISA = qw(build::command) }
+
+#________________________________________
+sub find {
+# print "==========\tDebug:","In build::command::cxx-find- parameters = ", @_, "\n";
+    $_[1]->{_cxx} || do {
+	my($class, $env) = @_;
+	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
+	$env->{_IFLAGS} = "%(" . $cscanner->iflags . "%)";
+	my($self) = find build::command($env, $env->{CXXCOM});
+	$self->{scanner} = $cscanner;
+	bless $env->{_cxx} = $self;
+    }
+}
+#________________________________________
+# Invoke the associated	 C scanner to get signature of included files.
+sub includes {
+# print "==========\tDebug:","In build::command::cxx-includes- parameters = ", @_, "\n";
+    my($self, $tgt) = @_;
+    $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
+}
+#________________________________________________________________________________
+# Builder for a kuip module
+package build::command::kuip;
+
+BEGIN { @ISA = qw(build::command) }
+
+#________________________________________
+sub find {
+# print "==========\tDebug:","In build::command::kuip-find- parameters = ", @_, "\n";
+    $_[1]->{_kuip} || do {
+	my($class, $env) = @_;
+	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
+	$env->{_IFLAGS} = "%(" . $cscanner->iflags . "%)";
+	my($self) = find build::command($env, $env->{KUIPCOM});
+	$self->{scanner} = $cscanner;
+	bless $env->{_kuip} = $self;
+    }
+}
+#________________________________________
+# Invoke the associated	 C scanner to get signature of included files.
+sub includes {
+# print "==========\tDebug:","In build::command::kuip-includes- parameters = ", @_, "\n";
+    my($self, $tgt) = @_;
+    $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
+}
+#________________________________________________________________________________
+# Builder for a stic module
+package build::command::stic;
+
+BEGIN { @ISA = qw(build::command) }
+
+#________________________________________
+sub find {
+# print "==========\tDebug:","In build::command::stic-find- parameters = ", @_, "\n";
+    $_[1]->{_stic} || do {
+	my($class, $env) = @_;
+	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
+	$env->{_IFLAGS} = "%(" . $cscanner->iflags . "%)";
+	my($self) = find build::command($env, $env->{STICCOM});
+	$self->{scanner} = $cscanner;
+	bless $env->{_stic} = $self;
+    }
+}
+#________________________________________
+# Invoke the associated	 C scanner to get signature of included files.
+sub includes {
+# print "==========\tDebug:","In build::command::stic-includes- parameters = ", @_, "\n";
+    my($self, $tgt) = @_;
+    $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
+}
+#________________________________________________________________________________
+# Builder for a F77 module
+package build::command::fc;
+
+BEGIN { @ISA = qw(build::command) }
+
+#________________________________________
+sub find {
+# print "==========\tDebug:","In build::command::fc-find- parameters = ", @_, "\n";
+    $_[1]->{_fc} || do {
+	my($class, $env) = @_;
+	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
+	$env->{_IFLAGS} = "%(" . $cscanner->iflags . "%)";
+	my($self) = find build::command($env, $env->{FCCOM});
+	$self->{scanner} = $cscanner;
+	bless $env->{_fc} = $self;
+    }
+}
+#________________________________________
+# Invoke the associated	 C scanner to get signature of included files.
+sub includes {
+# print "==========\tDebug:","In build::command::fc-includes- parameters = ", @_, "\n";
+    my($self, $tgt) = @_;
+    $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
+}
+#________________________________________________________________________________
+# Builder for a geant3 module
+package build::command::geant3;
+
+BEGIN { @ISA = qw(build::command) }
+
+#________________________________________
+sub find {
+# print "==========\tDebug:","In build::command::geant3-find- parameters = ", @_, "\n";
+    $_[1]->{_geant3} || do {
+	my($class, $env) = @_;
+	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
+	$env->{_IFLAGS} = "%(" . $cscanner->iflags . "%)";
+	my($self) = find build::command($env, $env->{GEANT3COM});
+	$self->{scanner} = $cscanner;
+	bless $env->{_geant3} = $self;
+    }
+}
+#________________________________________
+# Invoke the associated	 C scanner to get signature of included files.
+sub includes {
+# print "==========\tDebug:","In build::command::geant3-includes- parameters = ", @_, "\n";
     my($self, $tgt) = @_;
     $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
 }
@@ -2621,9 +2983,13 @@ sub signature {
 sub current {
 # print "==========\tDebug:","In sig::md5-current- parameters = ", @_, "\n";
     my($self, $file, $sig) = @_;
+    if ($param::debug) {
     # Uncomment this to debug checks for signature currency.
     # <knight@baldmt.com> 1998-10-29
-#   my $fsig = $self->signature($file); print STDOUT "\$self->signature(${\$file->path}) '$fsig' eq \$sig '$sig'\n"; return $fsig eq $sig;
+      my $fsig = $self->signature($file); 
+      print STDOUT "\$self->signature(${\$file->path}) '$fsig' eq \$sig '$sig'\n"; 
+      return $fsig eq $sig;
+    }
     $self->signature($file) eq $sig
 }
 
@@ -2644,13 +3010,14 @@ sub collect {
     $md5->reset();
     $md5->add(join('', $param::salt, @sigs));
 
+    if ($param::debug) {
     # Uncomment this to debug dependency signatures.
     # <schwarze@isa.de> 1998-05-08
-#   my $buf = join(', ', $param::salt, @sigs); print STDOUT "sigbuf=|$buf|\n";
+      my $buf = join(', ', $param::salt, @sigs); print STDOUT "sigbuf=|$buf|\n";
     # Uncomment this to print the result of dependency signature calculation.
     # <knight@baldmt.com> 1998-10-13
-#   $buf = unpack("H*", $md5->digest()); print STDOUT "\t=>|$buf|\n"; return $buf;
-
+      $buf = unpack("H*", $md5->digest()); print STDOUT "\t=>|$buf|\n"; return $buf;
+    }
     unpack("H*", $md5->digest());
 }
 
@@ -2663,342 +3030,13 @@ sub srcsig {
     open(FILE, $path) || die("$0: couldn't read $path ($!)\n");
     $md5->addfile(FILE);
     close(FILE);
-    # Uncomment this to print the result of file signature calculation.
-    # <knight@baldmt.com> 1998-10-13
-#   my $buf = unpack("H*", $md5->digest()); print STDOUT "$path=|$buf|\n"; return $buf;
+    if ($param::debug) {
+      # Uncomment this to print the result of file signature calculation.
+      # <knight@baldmt.com> 1998-10-13
+      my $buf = unpack("H*", $md5->digest()); print STDOUT "$path=|$buf|\n"; return $buf;
+    }
     unpack("H*", $md5->digest());
 }
-__END__;
-#________________________________________________________________________________
-# Builder for a C++ module
-package build::command::cxx;
-
-BEGIN { @ISA = qw(build::command) }
-
-#________________________________________
-sub find {
-# print "==========\tDebug:","In build::command::cxx-find- parameters = ", @_, "\n";
-    $_[1]->{_cxx} || do {
-	my($class, $env) = @_;
-	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH}, $env->{CPPFLAGS});
-	$env->{_IFLAGS} = "%(" . $cscanner->iflags . "%)";
-	my($self) = find build::command($env, $env->{CXXCOM});
-	$self->{scanner} = $cscanner;
-	bless $env->{_cxx} = $self;
-    }
-}
-#________________________________________
-# Invoke the associated	 C scanner to get signature of included files.
-sub includes {
-# print "==========\tDebug:","In build::command::cxx-includes- parameters = ", @_, "\n";
-    my($self, $tgt) = @_;
-    $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
-}
-#________________________________________________________________________________
-# Builder for a kuip module
-package build::command::kuip;
-
-BEGIN { @ISA = qw(build::command) }
-
-#________________________________________
-sub find {
-# print "==========\tDebug:","In build::command::kuip-find- parameters = ", @_, "\n";
-    $_[1]->{_kuip} || do {
-	my($class, $env) = @_;
-	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH}, $env->{CPPFLAGS});
-	$env->{_IFLAGS} = "%(" . $cscanner->iflags . "%)";
-	my($self) = find build::command($env, $env->{KUIPCOM});
-	$self->{scanner} = $cscanner;
-	bless $env->{_kuip} = $self;
-    }
-}
-#________________________________________
-# Invoke the associated	 C scanner to get signature of included files.
-sub includes {
-# print "==========\tDebug:","In build::command::kuip-includes- parameters = ", @_, "\n";
-    my($self, $tgt) = @_;
-    $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
-}
-#________________________________________________________________________________
-# Builder for a stic module
-package build::command::stic;
-
-BEGIN { @ISA = qw(build::command) }
-
-#________________________________________
-sub find {
-# print "==========\tDebug:","In build::command::stic-find- parameters = ", @_, "\n";
-    $_[1]->{_stic} || do {
-	my($class, $env) = @_;
-	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH}, $env->{CPPFLAGS});
-	$env->{_IFLAGS} = "%(" . $cscanner->iflags . "%)";
-	my($self) = find build::command($env, $env->{STICCOM});
-	$self->{scanner} = $cscanner;
-	bless $env->{_stic} = $self;
-    }
-}
-#________________________________________
-# Invoke the associated	 C scanner to get signature of included files.
-sub includes {
-# print "==========\tDebug:","In build::command::stic-includes- parameters = ", @_, "\n";
-    my($self, $tgt) = @_;
-    $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
-}
-#________________________________________________________________________________
-# Builder for a F77 module
-package build::command::fc;
-
-BEGIN { @ISA = qw(build::command) }
-
-#________________________________________
-sub find {
-# print "==========\tDebug:","In build::command::fc-find- parameters = ", @_, "\n";
-    $_[1]->{_fc} || do {
-	my($class, $env) = @_;
-	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH}, $env->{CPPFLAGS});
-	$env->{_IFLAGS} = "%(" . $cscanner->iflags . "%)";
-	my($self) = find build::command($env, $env->{FCCOM});
-	$self->{scanner} = $cscanner;
-	bless $env->{_fc} = $self;
-    }
-}
-#________________________________________
-# Invoke the associated	 C scanner to get signature of included files.
-sub includes {
-# print "==========\tDebug:","In build::command::fc-includes- parameters = ", @_, "\n";
-    my($self, $tgt) = @_;
-    $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
-}
-#________________________________________________________________________________
-# Builder for a geant3 module
-package build::command::geant3;
-
-BEGIN { @ISA = qw(build::command) }
-
-#________________________________________
-sub find {
-# print "==========\tDebug:","In build::command::geant3-find- parameters = ", @_, "\n";
-    $_[1]->{_geant3} || do {
-	my($class, $env) = @_;
-	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH}, $env->{CPPFLAGS});
-	$env->{_IFLAGS} = "%(" . $cscanner->iflags . "%)";
-	my($self) = find build::command($env, $env->{GEANT3COM});
-	$self->{scanner} = $cscanner;
-	bless $env->{_geant3} = $self;
-    }
-}
-#________________________________________
-# Invoke the associated	 C scanner to get signature of included files.
-sub includes {
-# print "==========\tDebug:","In build::command::geant3-includes- parameters = ", @_, "\n";
-    my($self, $tgt) = @_;
-    $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
-}
-#________________________________________________________________________________
-#________________________________________________________________________________
-package script;
-#________________________________________
-*name           = *File::Find::name;
-*prune          = *File::Find::prune;
-*dir            = *File::Find::dir;
-*topdir         = *File::Find::topdir;
-*topdev         = *File::Find::topdev;
-*topino         = *File::Find::topino;
-*topmode        = *File::Find::topmode;
-*topnlink       = *File::Find::topnlink;
-sub find_sources {
-  my $pwd = cwd();
-  if ($pwd =~ '^/afs/') {$File::Find::dont_use_nlink;}
-  @search_files   = ();
-  if (-d $_[0]) {
-    &File::Find::find(\&wanted, @_);
-    for my $dir (@_) {
-      if ( -d $dir ) { 
-	my $i = 0;
-	for ($i=0;$i<=$#search_files;$i++) {
-	  #      print "i = ",$i, "src =", $search_files[$i],"\n";
-	  my $file = $search_files[$i];
-	  $file =~ s/$dir\///g;
-	  $search_files[$i] = $file;
-	}
-      }
-    }
-  }
-#  print "find_source found $#search_files + 1 files\n";
-  return @search_files;
-}
-#________________________________________
-sub find_hfiles {
-  if (defined($AFS)) {$File::Find::dont_use_nlink;}
-  @search_files   = ();
-  &File::Find::find(\&wanted_Def, @_);
-  for my $dir (@_) {
-    if ( -d $dir ) { 
-      my $i = 0;
-      for ($i=0;$i<=$#search_files;$i++) {
-	#      print "i = ",$i, "src =", $search_files[$i],"\n";
-	my $file = $search_files[$i];
-	$file =~ s/$dir\///g;
-	$search_files[$i] = $file;
-      }
-    }
-  }
-#  print "find_source found $#search_files + 1 files\n";
-  return @search_files;
-}
-#________________________________________
-sub find_inc {
-  if (defined($AFS)) {$File::Find::dont_use_nlink;}
-  @search_files   = ();
-  &File::Find::find(\&wanted_inc, @_);
-  for my $dir (@_) {
-    if ( -d $dir ) { 
-      my $i = 0;
-      for ($i=0;$i<=$#search_files;$i++) {
-	#      print "i = ",$i, "src =", $search_files[$i],"\n";
-	my $file = $search_files[$i];
-	$file =~ s/$dir\///g;
-	$search_files[$i] = $file;
-      }
-    }
-  }
-#  print "find_source found $#search_files + 1 files\n";
-  return @search_files;
-}
-#________________________________________
-sub find_idlM {
-  if (defined($AFS)) {$File::Find::dont_use_nlink;}
-  @search_files   = ();
-  &File::Find::find(\&wanted_idlM, @_);
-  for my $dir (@_) {
-    if ( -d $dir ) { 
-      my $i = 0;
-      for ($i=0;$i<=$#search_files;$i++) {
-	#      print "i = ",$i, "src =", $search_files[$i],"\n";
-	my $file = $search_files[$i];
-	$file =~ s/$dir\///g;
-	$search_files[$i] = $file;
-      }
-    }
-  }
-#  print "find_source found $#search_files + 1 files\n";
-  return @search_files;
-}
-#________________________________________
-sub script::wanted {
-  #  print "wanted ",$_,"\n";
-  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
-  if ( -d _ &&
-       (/^CVS$/ ||
-	/^macros$/ ||
-	/^html$/ ||
-	/^idl$/ ||
-	/^exa$/ ||
-	/^inc$/ ||
-	/^doc$/ ||
-	/^run$/ ||
-	/^examples$/ ||
-	/^local$/ ||
-	/^hold$/ ||
-	/^wrk$/)
-     ) {$prune = 1; return;}
-  if (
-      /^.*\.c$/       ||
-      /^.*\.cc$/      ||
-      /^.*\.cxx$/     ||
-      /^.*\.g$/       ||
-      /^.*\.cdf$/       ||
-      /^.*\.F$/) {# print "$name\n";
-    push @search_files, $name; 
-  }
-}
-#________________________________________
-sub script::wanted_idlM {
-  #  print "wanted ",$_,"\n";
-  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
-  if ( -d _ &&
-       (/^CVS$/ ||
-	/^macros$/ ||
-	/^html$/ ||
-	/^idl$/ ||
-	/^exa$/ ||
-	/^inc$/ ||
-	/^doc$/ ||
-	/^run$/ ||
-	/^examples$/ ||
-	/^local$/ ||
-	/^hold$/ ||
-	/^wrk$/)
-     ) {$prune = 1; return;}
-  if (/^.*\.idl$/) {# print "$name\n";
-    push @search_files, $name; 
-  }
-}
-#________________________________________
-sub script::wanted_Def {
-  #  print "wanted ",$_,"\n";
-  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);#  print "wanted $_ \n";
-  if ( -d _ &&
-       (/^CVS$/      ||
-	/^macros$/ ||
-	/^html$/ ||
-	/^idl$/      ||
-	/^exa$/      ||
-	/^inc$/      ||
-	/^doc$/      ||
-	/^run$/      ||
-	/^examples$/ ||
-	/^local$/    ||
-	/^hold$/     ||
-	/^wrk$/))       {$prune = 1; return;}
-  if (/^.*\.h$/      || /^.*\.hh$/ ) {# print "$name\n"; 
-					 push @search_files, $name; }
-}
-#________________________________________
-sub script::wanted_inc {
-  #  print "wanted ",$_,"\n";
-  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);#  print "wanted $_ \n";
-  if ( -d $_ &&
-       (/^CVS$/ ||
-	/^macros$/ ||
-	/^html$/ ||
-	/^idl$/ ||
-	/^exa$/ ||
-	/^doc$/ ||
-	/^run$/ ||
-	/^examples$/ ||
-	/^local$/ ||
-	/^hold$/ ||
-	/^wrk$/)
-     ) {$prune = 1; return;}
-  if ( /^.*\.h$/|| /^.*\.hh$/ || /^.*\.inc$/  || /^.*\.hpp$/) { 
-#    if ($name =~ '/inc/' || $name =~ '/\w*cdes/') { print "$name\n"; 
-    if ($name =~ '/inc/' ) {# print "$name\n"; 
-      push @search_files, $name; }
-  }
-}
-#____________________________________________________________
-sub rmkdir {
-  (my $Dir = $_[0]) =~ s/\\/\//g; 
-  my @terms = split "/", $Dir;
-  my $dir = "";
-  foreach my $term (@terms) {
-    if ($dir) {$dir .= "/";}
-    $dir .= $term;
-    if (!-d $dir && ! mkdir($dir,0755)) {die "$0: can't create directory $path ($!).\n";}
-  }
-}
-#________________________________________
-sub sortu {
-  my $old = "";
-  my @sorted_and_uniq = ();
-  foreach my $name (sort @_) {
-    next if "$old" eq "$name";
-    push @sorted_and_uniq, $name; $old = $name;
-  }
-  return @sorted_and_uniq;
-}
-
 __END__;
 
 =head1 NAME
