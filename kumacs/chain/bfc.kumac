@@ -1,5 +1,8 @@
-* * $Id: bfc.kumac,v 1.68 1998/09/25 15:38:55 kathy Exp $
+* * $Id: bfc.kumac,v 1.69 1998/09/25 19:25:07 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.69  1998/09/25 19:25:07  kathy
+* fix error conditions; correct nev_total and nev_proc for EOF or end run records
+*
 * Revision 1.68  1998/09/25 15:38:55  kathy
 * bfc & bfc_util --> corrected how parts are skipped out of if there are errors; for rg2t -> had to create newtable with large rowcount for hepe_gent in order to copy it since copy does not take care of extending rows
 *
@@ -432,6 +435,7 @@ MACRO bfc _
 * ****************************************
  
 FINISH:
+  vec/input staf_status(1) stafcv_ok 
   exec bfc_util#bfc_finish [chain]
   if (STAF_STATUS(1).ne. stafcv_ok) goto ABEND
   
