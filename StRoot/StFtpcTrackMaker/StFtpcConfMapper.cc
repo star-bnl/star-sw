@@ -1,15 +1,18 @@
-// $Id: StFtpcConfMapper.cc,v 1.1 2000/05/10 13:39:09 oldi Exp $
+// $Id: StFtpcConfMapper.cc,v 1.2 2000/05/11 15:14:41 oldi Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.2  2000/05/11 15:14:41  oldi
+// Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
+//
 // Revision 1.1  2000/05/10 13:39:09  oldi
 // Initial version of StFtpcTrackMaker
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 09.05.2000
+//----------Last Modified: 11.05.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include "StFtpcConfMapper.hh"
-#include "StFtpcConfMapHit.hh"
+#include "StFtpcConfMapPoint.hh"
 #include "StFtpcTrack.hh"
 #include "StFormulary.hh"
 #include "TMath.h"
@@ -83,13 +86,13 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *const fcl_fppoint, Double_t v
 
   fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
 
-  mHit = new TClonesArray("StFtpcConfMapHit", n_clusters);    // create TClonesArray
+  mHit = new TClonesArray("StFtpcConfMapPoint", n_clusters);    // create TClonesArray
 
   TClonesArray &hit = *mHit;
   
   for (Int_t i = 0; i < n_clusters; i++) {
-    new(hit[i]) StFtpcConfMapHit(point_st++, mVertex);
-    ((StFtpcConfMapHit *)mHit->At(i))->SetHitNumber(i);
+    new(hit[i]) StFtpcConfMapPoint(point_st++, mVertex);
+    ((StFtpcConfMapPoint *)mHit->At(i))->SetHitNumber(i);
   }
 
   mVolume = new TObjArray(mBounds, 0);  // create ObjArray for volume cells (of size bounds)
@@ -99,10 +102,10 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *const fcl_fppoint, Double_t v
     mVolume->AddLast(mSegment);
   }
 
-  StFtpcConfMapHit *h;
+  StFtpcConfMapPoint *h;
 
   for (Int_t i = 0; i < mHit->GetEntriesFast(); i++) {
-    h = (StFtpcConfMapHit *)mHit->At(i);   
+    h = (StFtpcConfMapPoint *)mHit->At(i);   
     ((TObjArray *)mVolume->At(GetSegm(GetRowSegm(h), GetPhiSegm(h), GetEtaSegm(h))))->AddLast(h);
   }
 
@@ -338,7 +341,7 @@ void StFtpcConfMapper::SetTrackletCuts(Double_t maxangle, Bool_t vertex_constrai
 }
 
 
-Int_t StFtpcConfMapper::GetRowSegm(StFtpcConfMapHit *hit)
+Int_t StFtpcConfMapper::GetRowSegm(StFtpcConfMapPoint *hit)
 {
  // Returns number of pad segment of a specific hit.
 
@@ -346,7 +349,7 @@ Int_t StFtpcConfMapper::GetRowSegm(StFtpcConfMapHit *hit)
 }
 
 
-Int_t StFtpcConfMapper::GetPhiSegm(StFtpcConfMapHit *hit)
+Int_t StFtpcConfMapper::GetPhiSegm(StFtpcConfMapPoint *hit)
 {
   // Returns number of phi segment of a specific hit.
   
@@ -354,7 +357,7 @@ Int_t StFtpcConfMapper::GetPhiSegm(StFtpcConfMapHit *hit)
 }
 
 
-Int_t StFtpcConfMapper::GetEtaSegm(StFtpcConfMapHit *hit)
+Int_t StFtpcConfMapper::GetEtaSegm(StFtpcConfMapPoint *hit)
 {
   // Returns number of eta segment of a specific hit.
 
@@ -415,7 +418,7 @@ Int_t StFtpcConfMapper::GetEtaSegm(Int_t segm)
 }
 
 
-Double_t const StFtpcConfMapper::CalcDistance(const StFtpcConfMapHit *hit1, const StFtpcConfMapHit *hit2)
+Double_t const StFtpcConfMapper::CalcDistance(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2)
 {
   // Returns the distance of two given clusters. The distance in this respect (conformal mapping)
   // is defined in the paper "A Fast track pattern recognition" by Pablo Yepes, NIM A 380 (1996) 585-585.
@@ -427,7 +430,7 @@ Double_t const StFtpcConfMapper::CalcDistance(const StFtpcConfMapHit *hit1, cons
 }
 
 
-Double_t const StFtpcConfMapper::CalcDistance(const StFtpcConfMapHit *hit, Double_t *coeff) 
+Double_t const StFtpcConfMapper::CalcDistance(const StFtpcConfMapPoint *hit, Double_t *coeff) 
 {
   // Returns the distance of a point to a straight line.
   // The point is given by the to conformal coordinates of a cluster and the
@@ -439,7 +442,7 @@ Double_t const StFtpcConfMapper::CalcDistance(const StFtpcConfMapHit *hit, Doubl
 } 
 
 
-Bool_t const StFtpcConfMapper::VerifyCuts(const StFtpcConfMapHit *lasttrackhit, const StFtpcConfMapHit *newhit)
+Bool_t const StFtpcConfMapper::VerifyCuts(const StFtpcConfMapPoint *lasttrackhit, const StFtpcConfMapPoint *newhit)
 {
   // Returns true if circle, length, and angle cut holds.
   
@@ -455,7 +458,7 @@ Bool_t const StFtpcConfMapper::VerifyCuts(const StFtpcConfMapHit *lasttrackhit, 
 }
 
 
-Double_t const StFtpcConfMapper::TrackAngle(const StFtpcHit *lasthitoftrack, const StFtpcHit *hit)
+Double_t const StFtpcConfMapper::TrackAngle(const StFtpcPoint *lasthitoftrack, const StFtpcPoint *hit)
 {
   // Returns the 'angle' between the last two points on the track (of which the last point is
   // given as input) and the second given point.
@@ -469,18 +472,18 @@ Double_t const StFtpcConfMapper::TrackAngle(const StFtpcHit *lasthitoftrack, con
   Int_t n = track->GetNumberOfPoints();
   
   if (n<2) {
-    cout << "StFtpcConfMapper::TrackAngle(StFtpcHit *lasthitoftrack, StFtpcHit *hit)" << endl 
+    cout << "StFtpcConfMapper::TrackAngle(StFtpcPoint *lasthitoftrack, StFtpcPoint *hit)" << endl 
 	 << " - Call this function only if you are sure to have at least two points on the track already!" << endl;
     return false;
   }
 
-  x1[0] = ((StFtpcHit *)hits->At(n-1))->GetX() - ((StFtpcHit *)hits->At(n-2))->GetX();
-  x1[1] = ((StFtpcHit *)hits->At(n-1))->GetY() - ((StFtpcHit *)hits->At(n-2))->GetY();
-  x1[2] = ((StFtpcHit *)hits->At(n-1))->GetZ() - ((StFtpcHit *)hits->At(n-2))->GetZ();
+  x1[0] = ((StFtpcPoint *)hits->At(n-1))->GetX() - ((StFtpcPoint *)hits->At(n-2))->GetX();
+  x1[1] = ((StFtpcPoint *)hits->At(n-1))->GetY() - ((StFtpcPoint *)hits->At(n-2))->GetY();
+  x1[2] = ((StFtpcPoint *)hits->At(n-1))->GetZ() - ((StFtpcPoint *)hits->At(n-2))->GetZ();
 
-  x2[0] = hit->GetX() - ((StFtpcHit *)hits->At(n-1))->GetX();
-  x2[1] = hit->GetY() - ((StFtpcHit *)hits->At(n-1))->GetY();
-  x2[2] = hit->GetZ() - ((StFtpcHit *)hits->At(n-1))->GetZ();
+  x2[0] = hit->GetX() - ((StFtpcPoint *)hits->At(n-1))->GetX();
+  x2[1] = hit->GetY() - ((StFtpcPoint *)hits->At(n-1))->GetY();
+  x2[2] = hit->GetZ() - ((StFtpcPoint *)hits->At(n-1))->GetZ();
 
   return f.Angle(x1, x2, 3);
 }
@@ -505,19 +508,19 @@ Double_t const StFtpcConfMapper::TrackletAngle(StFtpcTrack *track, Int_t n)
     return false;
   }
     
-  x1[0] = ((StFtpcHit *)hits->At(n-2))->GetX() - ((StFtpcHit *)hits->At(n-3))->GetX();
-  x1[1] = ((StFtpcHit *)hits->At(n-2))->GetY() - ((StFtpcHit *)hits->At(n-3))->GetY();
-  x1[2] = ((StFtpcHit *)hits->At(n-2))->GetZ() - ((StFtpcHit *)hits->At(n-3))->GetZ();
+  x1[0] = ((StFtpcPoint *)hits->At(n-2))->GetX() - ((StFtpcPoint *)hits->At(n-3))->GetX();
+  x1[1] = ((StFtpcPoint *)hits->At(n-2))->GetY() - ((StFtpcPoint *)hits->At(n-3))->GetY();
+  x1[2] = ((StFtpcPoint *)hits->At(n-2))->GetZ() - ((StFtpcPoint *)hits->At(n-3))->GetZ();
 
-  x2[0] = ((StFtpcHit *)hits->At(n-1))->GetX() - ((StFtpcHit *)hits->At(n-2))->GetX();
-  x2[1] = ((StFtpcHit *)hits->At(n-1))->GetY() - ((StFtpcHit *)hits->At(n-2))->GetY();
-  x2[2] = ((StFtpcHit *)hits->At(n-1))->GetZ() - ((StFtpcHit *)hits->At(n-2))->GetZ();  
+  x2[0] = ((StFtpcPoint *)hits->At(n-1))->GetX() - ((StFtpcPoint *)hits->At(n-2))->GetX();
+  x2[1] = ((StFtpcPoint *)hits->At(n-1))->GetY() - ((StFtpcPoint *)hits->At(n-2))->GetY();
+  x2[2] = ((StFtpcPoint *)hits->At(n-1))->GetZ() - ((StFtpcPoint *)hits->At(n-2))->GetZ();  
   
   return f.Angle(x1, x2, 3);
 }
 
 
-Double_t const StFtpcConfMapper::GetPhiDiff(const StFtpcConfMapHit *hit1, const StFtpcConfMapHit *hit2)
+Double_t const StFtpcConfMapper::GetPhiDiff(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2)
 {
   // Returns the difference in angle phi of the two given clusters.
   // Normalizes the result to the arbitrary angle between two subsequent padrows.
@@ -531,7 +534,7 @@ Double_t const StFtpcConfMapper::GetPhiDiff(const StFtpcConfMapHit *hit1, const 
 }
 
 
-Double_t const StFtpcConfMapper::GetEtaDiff(const StFtpcConfMapHit *hit1, const StFtpcConfMapHit *hit2)
+Double_t const StFtpcConfMapper::GetEtaDiff(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2)
 {
   // Returns the difference in pseudrapidity eta of the two given clusters.
   // Normalizes the result to the arbitrary pseudorapidity between two subsequent padrows.
@@ -543,7 +546,7 @@ Double_t const StFtpcConfMapper::GetEtaDiff(const StFtpcConfMapHit *hit1, const 
 }
 
 
-Double_t const StFtpcConfMapper::GetClusterDistance(const StFtpcConfMapHit *hit1, const StFtpcConfMapHit *hit2)
+Double_t const StFtpcConfMapper::GetClusterDistance(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2)
 {
   // Returns the distance of two clusters measured in terms of angle phi and pseudorapidity eta weighted by the
   // maximal allowed values for phi and eta.
@@ -552,7 +555,7 @@ Double_t const StFtpcConfMapper::GetClusterDistance(const StFtpcConfMapHit *hit1
 }
 
 
-Double_t const StFtpcConfMapper::GetDistanceFromFit(const StFtpcConfMapHit *hit)
+Double_t const StFtpcConfMapper::GetDistanceFromFit(const StFtpcConfMapPoint *hit)
 {
   // Returns the distance of the given cluster to the track to which it probably belongs.
   // The distances to the circle and length fit are weighted by the cuts on these values.
@@ -592,10 +595,10 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
 
   // Circle Fit
     
-  StFtpcConfMapHit *trackpoint;
+  StFtpcConfMapPoint *trackpoint;
   
   for (Int_t i = 0; i < n; i++ ) {
-    trackpoint = (StFtpcConfMapHit *)trackpoints->At(i);
+    trackpoint = (StFtpcConfMapPoint *)trackpoints->At(i);
     L11 += 1./* / (trackpoint->GetYprimeerr() * trackpoint->GetYprimeerr())*/;
     L12 +=  trackpoint->GetXprime()/* / (trackpoint->GetYprimeerr() * trackpoint->GetYprimeerr())*/;
     L22 += (trackpoint->GetXprime() * trackpoint->GetXprime())/* / (trackpoint->GetYprimeerr() * trackpoint->GetYprimeerr())*/;
@@ -625,7 +628,7 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
 
   for (Int_t i = 0; i < n; i++ ) {
     
-    trackpoint= (StFtpcConfMapHit *)trackpoints->At(i);
+    trackpoint= (StFtpcConfMapPoint *)trackpoints->At(i);
     
     asin_arg = (trackpoint->GetYv() - track->GetCenterY()) / track->GetRadius();
 
@@ -673,8 +676,8 @@ void StFtpcConfMapper::ClusterLoop()
   StFtpcTrack *track = 0;
 
   TObjArray *segment;
-  StFtpcConfMapHit *closest_hit;
-  StFtpcConfMapHit *hit;
+  StFtpcConfMapPoint *closest_hit;
+  StFtpcConfMapPoint *hit;
   
   // loop over two Ftpcs
   for (mFtpc = 1; mFtpc <= 2; mFtpc++) {
@@ -702,7 +705,7 @@ void StFtpcConfMapper::ClusterLoop()
 	  if ((entries = (segment = (TObjArray *)mVolume->At(GetSegm(row_segm, phi_segm, eta_segm)))->GetEntriesFast())) {    
 	    
 	    for (hit_num = 0; hit_num < entries; hit_num++) {  
-	      hit = (StFtpcConfMapHit *)segment->At(hit_num);
+	      hit = (StFtpcConfMapPoint *)segment->At(hit_num);
 	      
 	      if (hit->GetUsage() == true) { // start hit was used before 
 		continue;
@@ -761,7 +764,7 @@ void StFtpcConfMapper::ClusterLoop()
 		      
 		      if (!coeff) coeff = new Double_t[4];
 		      StraightLineFit(track, coeff);
-		      closest_hit = GetNextNeighbor((StFtpcConfMapHit *)trackpoint->Last(), coeff);
+		      closest_hit = GetNextNeighbor((StFtpcConfMapPoint *)trackpoint->Last(), coeff);
 		      
 		      if (closest_hit) {
 
@@ -824,7 +827,7 @@ void StFtpcConfMapper::ClusterLoop()
 }  
 
 
-StFtpcConfMapHit *StFtpcConfMapper::GetNextNeighbor(StFtpcConfMapHit *start_hit, Double_t *coeff = 0)
+StFtpcConfMapPoint *StFtpcConfMapper::GetNextNeighbor(StFtpcConfMapPoint *start_hit, Double_t *coeff = 0)
 { 
   // Returns the nearest cluster to a given start_hit. 
   
@@ -832,10 +835,10 @@ StFtpcConfMapHit *StFtpcConfMapper::GetNextNeighbor(StFtpcConfMapHit *start_hit,
   Double_t closest_circle_dist = 1.e7;
   Double_t closest_length_dist = 1.e7;    
 
-  StFtpcConfMapHit *hit = 0;
-  StFtpcConfMapHit *closest_hit = 0;
-  StFtpcConfMapHit *closest_circle_hit = 0;
-  StFtpcConfMapHit *closest_length_hit = 0;
+  StFtpcConfMapPoint *hit = 0;
+  StFtpcConfMapPoint *closest_hit = 0;
+  StFtpcConfMapPoint *closest_circle_hit = 0;
+  StFtpcConfMapPoint *closest_length_hit = 0;
   
   TObjArray *sub_segment;
   Int_t sub_entries;
@@ -893,9 +896,9 @@ StFtpcConfMapHit *StFtpcConfMapper::GetNextNeighbor(StFtpcConfMapHit *start_hit,
 	    
 	    for (sub_hit_num = 0; sub_hit_num < sub_entries; sub_hit_num++) {  
 	      
-	      hit = (StFtpcConfMapHit *)sub_segment->At(sub_hit_num);
+	      hit = (StFtpcConfMapPoint *)sub_segment->At(sub_hit_num);
 	      
-	      if (!(hit = (StFtpcConfMapHit *)sub_segment->At(sub_hit_num))->GetUsage()) {  
+	      if (!(hit = (StFtpcConfMapPoint *)sub_segment->At(sub_hit_num))->GetUsage()) {  
 		// hit was not used before
 		
 		// set conformal mapping coordinates if looking for non vertex tracks

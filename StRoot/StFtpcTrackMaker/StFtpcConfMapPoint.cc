@@ -1,31 +1,31 @@
-// $Id: StFtpcConfMapHit.cc,v 1.1 2000/05/10 13:39:07 oldi Exp $
-// $Log: StFtpcConfMapHit.cc,v $
-// Revision 1.1  2000/05/10 13:39:07  oldi
-// Initial version of StFtpcTrackMaker
+// $Id: StFtpcConfMapPoint.cc,v 1.1 2000/05/11 15:14:38 oldi Exp $
+// $Log: StFtpcConfMapPoint.cc,v $
+// Revision 1.1  2000/05/11 15:14:38  oldi
+// Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 20.04.2000
+//----------Last Modified: 11.05.2000
 //----------Copyright:     &copy MDO Production 1999
 
-#include "StFtpcConfMapHit.hh"
+#include "StFtpcConfMapPoint.hh"
 
 /////////////////////////////////////////////////////////////////////////////////////
 //                                                                                 //
-// StFtpcConfMapHit class - representation of one cluster for the conformal        //
+// StFtpcConfMapPoint class - representation of one cluster for the conformal      //
 //                          mapping track algorithm.                               //
 //                                                                                 //
-// This class inherits all data members from StFtpcHit which are the output        //
+// This class inherits all data members from StFtpcPoint which are the output      //
 // of the FTPC cluster finder. Additionally it provides some data members and      //
 // member functions which are necessary for the tracking algorithm.                //
 // The errors are calulated using the Gaussian law of error propagation.           //
 //                                                                                 //
 /////////////////////////////////////////////////////////////////////////////////////
 
-ClassImp(StFtpcConfMapHit)
+ClassImp(StFtpcConfMapPoint)
 
 
-StFtpcConfMapHit::StFtpcConfMapHit() : StFtpcHit()
+StFtpcConfMapPoint::StFtpcConfMapPoint() : StFtpcPoint()
 {
   // Default constructor.
   // Sets additioanl values to zero.
@@ -43,10 +43,10 @@ StFtpcConfMapHit::StFtpcConfMapHit() : StFtpcHit()
 }
 
 
-StFtpcConfMapHit::StFtpcConfMapHit(fcl_fppoint_st *point_st, StFtpcVertex *vertex) : StFtpcHit(point_st)
+StFtpcConfMapPoint::StFtpcConfMapPoint(fcl_fppoint_st *point_st, StFtpcVertex *vertex) : StFtpcPoint(point_st)
 {
   // Standard constructor.
-  // This is the usual way to create a StFtpcConfMapHit object. By giving the pointer
+  // This is the usual way to create a StFtpcConfMapPoint object. By giving the pointer
   // to the fcl_fppoint_st(ructure) the constructor copies the pointers to the cluster information
   // into its data members and calculates necessary information for the confromal mapping 
   // track algorithm. 
@@ -55,16 +55,16 @@ StFtpcConfMapHit::StFtpcConfMapHit(fcl_fppoint_st *point_st, StFtpcVertex *verte
 }
 
 
-StFtpcConfMapHit::~StFtpcConfMapHit() 
+StFtpcConfMapPoint::~StFtpcConfMapPoint() 
 {
   // Destructor.
   // Does nothing except destruct.
 }
 
 
-void StFtpcConfMapHit::Setup(StFtpcVertex *vertex)
+void StFtpcConfMapPoint::Setup(StFtpcVertex *vertex)
 {
-  // Does the usual setup of a StFtpcConfMapHit. It does it in the right order, especially.
+  // Does the usual setup of a StFtpcConfMapPoint. It does it in the right order, especially.
   
   SetIntPoint(vertex->GetX(),    vertex->GetY(),    vertex->GetZ(), 
 	      vertex->GetXerr(), vertex->GetYerr(), vertex->GetZerr());
@@ -78,7 +78,7 @@ void StFtpcConfMapHit::Setup(StFtpcVertex *vertex)
 }
 
 
-void StFtpcConfMapHit::SetIntPoint(const Double_t in_x,     const Double_t in_y,     const Double_t in_z,
+void StFtpcConfMapPoint::SetIntPoint(const Double_t in_x,     const Double_t in_y,     const Double_t in_z,
 				   const Double_t in_x_err, const Double_t in_y_err, const Double_t in_z_err)
 {
   // Defines a new interaction point. This point is needed to calculate
@@ -95,7 +95,7 @@ void StFtpcConfMapHit::SetIntPoint(const Double_t in_x,     const Double_t in_y,
 }
 
 
-void StFtpcConfMapHit::SetAllCoord(const StFtpcConfMapHit *preceding_hit)
+void StFtpcConfMapPoint::SetAllCoord(const StFtpcConfMapPoint *preceding_hit)
 {
   // Sets the interaction point, the shifted coordinates, and the conformal mapping coordinates.
   // These values are calculated from the interaction point of the given cluster which should be a
@@ -118,7 +118,7 @@ void StFtpcConfMapHit::SetAllCoord(const StFtpcConfMapHit *preceding_hit)
 }
 
 
-void StFtpcConfMapHit::SetShiftedCoord()
+void StFtpcConfMapPoint::SetShiftedCoord()
 {
   // Sets the coordinates with resepct to the given vertex point
   
@@ -133,7 +133,7 @@ void StFtpcConfMapHit::SetShiftedCoord()
 }
 
 
-void StFtpcConfMapHit::SetConfCoord() 
+void StFtpcConfMapPoint::SetConfCoord() 
 {
   // Calculates the conformal coordinates of one cluster.
   // If the option "vertex_constraint" applies the interaction point is 
@@ -160,7 +160,7 @@ void StFtpcConfMapHit::SetConfCoord()
 }
 
 
-void StFtpcConfMapHit::SetAngles()
+void StFtpcConfMapPoint::SetAngles()
 {
   // Calculates the angle phi and the pseudorapidity eta for each cluster.
   // So to say this is just a transformation of the coordinate system.

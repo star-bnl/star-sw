@@ -1,17 +1,20 @@
-// $Id: StFtpcTrackEvaluator.cc,v 1.1 2000/05/10 13:39:25 oldi Exp $
+// $Id: StFtpcTrackEvaluator.cc,v 1.2 2000/05/11 15:14:51 oldi Exp $
 // $Log: StFtpcTrackEvaluator.cc,v $
+// Revision 1.2  2000/05/11 15:14:51  oldi
+// Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
+//
 // Revision 1.1  2000/05/10 13:39:25  oldi
 // Initial version of StFtpcTrackMaker
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 10.05.2000
+//----------Last Modified: 11.05.2000
 //----------Copyright:     &copy MDO Production 2000
 
 #include "StFtpcTrackEvaluator.hh"
 #include "StFtpcConfMapper.hh"
-#include "StFtpcHit.hh"
-#include "StFtpcConfMapHit.hh"
+#include "StFtpcPoint.hh"
+#include "StFtpcConfMapPoint.hh"
 #include "StFtpcTrack.hh"
 #include "StFormulary.hh"
 #include "StFtpcDisplay.hh"
@@ -209,13 +212,13 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_d
   Int_t n_clusters = fcl_fppoint->GetNRows();          // number of clusters
   fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
 
-  mFoundHits = new TClonesArray("StFtpcConfMapHit", n_clusters);    // create TClonesArray
+  mFoundHits = new TClonesArray("StFtpcConfMapPoint", n_clusters);    // create TClonesArray
 
   TClonesArray &hit = *mFoundHits;
   
   for (Int_t i = 0; i < n_clusters; i++) {
-    new(hit[i]) StFtpcConfMapHit(point_st++, mVertex);
-    ((StFtpcHit *)mFoundHits->At(i))->SetHitNumber(i);
+    new(hit[i]) StFtpcConfMapPoint(point_st++, mVertex);
+    ((StFtpcPoint *)mFoundHits->At(i))->SetHitNumber(i);
   }
 
   // Copy tracks into ClonesArray.
@@ -921,18 +924,18 @@ void StFtpcTrackEvaluator::GeantHitInit(St_g2t_ftp_hit *g2t_ftp_hit)
     Int_t NumGeantHits = g2t_ftp_hit->GetNRows();       // number of generated clusters
     g2t_ftp_hit_st *point_st = g2t_ftp_hit->GetTable(); // pointer to generated clusters
     
-    mGeantHits = new TClonesArray("StFtpcConfMapHit", NumGeantHits);    // create TClonesArray
+    mGeantHits = new TClonesArray("StFtpcConfMapPoint", NumGeantHits);    // create TClonesArray
     TClonesArray &hit = *mGeantHits;
     
     // Loop ovver all generated clusters
     for (Int_t i = 0; i < NumGeantHits; i++, point_st++) { 
-      new(hit[i]) StFtpcConfMapHit();                              // create StFtpcConfMapHit
-      ((StFtpcConfMapHit *)mGeantHits->At(i))->SetHitNumber(i);
-      ((StFtpcConfMapHit *)mGeantHits->At(i))->SetNextHitNumber(point_st->next_tr_hit_p-1);
-      ((StFtpcConfMapHit *)mGeantHits->At(i))->SetX(point_st->x[0]);
-      ((StFtpcConfMapHit *)mGeantHits->At(i))->SetY(point_st->x[1]);
-      ((StFtpcConfMapHit *)mGeantHits->At(i))->SetZ(point_st->x[2]);
-      ((StFtpcConfMapHit *)mGeantHits->At(i))->Setup(mVertex);
+      new(hit[i]) StFtpcConfMapPoint();                              // create StFtpcConfMapPoint
+      ((StFtpcConfMapPoint *)mGeantHits->At(i))->SetHitNumber(i);
+      ((StFtpcConfMapPoint *)mGeantHits->At(i))->SetNextHitNumber(point_st->next_tr_hit_p-1);
+      ((StFtpcConfMapPoint *)mGeantHits->At(i))->SetX(point_st->x[0]);
+      ((StFtpcConfMapPoint *)mGeantHits->At(i))->SetY(point_st->x[1]);
+      ((StFtpcConfMapPoint *)mGeantHits->At(i))->SetZ(point_st->x[2]);
+      ((StFtpcConfMapPoint *)mGeantHits->At(i))->Setup(mVertex);
     }
   }
 }
@@ -990,7 +993,7 @@ void StFtpcTrackEvaluator::GeantTrackInit(St_g2t_track *g2t_track, St_g2t_ftp_hi
 	MIntArray *hitnumber = t->GetHitNumbers();
 	hitnumber->Set(ftpc_hits);
 	
-	((StFtpcConfMapHit *)mGeantHits->At(track_st->hit_ftp_p - 1))->SetTrackNumber(NumFtpcGeantTracks);
+	((StFtpcConfMapPoint *)mGeantHits->At(track_st->hit_ftp_p - 1))->SetTrackNumber(NumFtpcGeantTracks);
 	mFtpcTrackNum->AddAt(NumFtpcGeantTracks, i);
 	points->Expand(ftpc_hits);
 	points->AddAt(mGeantHits->At(track_st->hit_ftp_p - 1), 0);
@@ -998,8 +1001,8 @@ void StFtpcTrackEvaluator::GeantTrackInit(St_g2t_track *g2t_track, St_g2t_ftp_hi
 
 	// Loop over all hits in Ftpc
 	for(Int_t j = 1; j < ftpc_hits; j++) {
-	  Int_t number = ((StFtpcConfMapHit *)mGeantHits->At(hitnumber->At(j-1)))->GetNextHitNumber();
-	  ((StFtpcConfMapHit *)mGeantHits->At(number))->SetTrackNumber(NumFtpcGeantTracks);
+	  Int_t number = ((StFtpcConfMapPoint *)mGeantHits->At(hitnumber->At(j-1)))->GetNextHitNumber();
+	  ((StFtpcConfMapPoint *)mGeantHits->At(number))->SetTrackNumber(NumFtpcGeantTracks);
 	  points->AddAt(mGeantHits->At(number), j);
 	  hitnumber->AddAt(number, j);
 	}
@@ -1040,14 +1043,14 @@ void StFtpcTrackEvaluator::FastSimHitInit(St_ffs_gepoint *ffs_hit)
     
     Int_t NumFastSimHits = ffs_hit->GetNRows();       // number of generated clusters
     ffs_gepoint_st *point_st = ffs_hit->GetTable();   // pointer to fast simulated clusters
-    mFastSimHits = new TClonesArray("StFtpcHit", NumFastSimHits);    // create TClonesArray
+    mFastSimHits = new TClonesArray("StFtpcPoint", NumFastSimHits);    // create TClonesArray
     TClonesArray &hit = *mFastSimHits;
     
     // Loop ovver all generated clusters
     for (Int_t i = 0; i < NumFastSimHits; i++, point_st++) { 
-      new(hit[i]) StFtpcHit();                              // create StFtpcHit
-      ((StFtpcHit *)mFastSimHits->At(i))->SetHitNumber(i);
-      ((StFtpcHit *)mFastSimHits->At(i))->SetTrackNumber(mFtpcTrackNum->At(point_st->ge_track_p - 1));
+      new(hit[i]) StFtpcPoint();                              // create StFtpcPoint
+      ((StFtpcPoint *)mFastSimHits->At(i))->SetHitNumber(i);
+      ((StFtpcPoint *)mFastSimHits->At(i))->SetTrackNumber(mFtpcTrackNum->At(point_st->ge_track_p - 1));
     }
   }
 }
@@ -1081,8 +1084,8 @@ void StFtpcTrackEvaluator::ParentTrackInit()
     for (Int_t h_counter = 0; h_counter < 10; h_counter++) {
 
       if (h_counter < max_hits) {
-	StFtpcHit *hit = (StFtpcHit *) hits->At(h_counter);
-	mParentTrack->AddLast(((StFtpcHit*)mFastSimHits->At(hit->GetHitNumber()))->GetTrackNumber());
+	StFtpcPoint *hit = (StFtpcPoint *) hits->At(h_counter);
+	mParentTrack->AddLast(((StFtpcPoint*)mFastSimHits->At(hit->GetHitNumber()))->GetTrackNumber());
 	mParentTracks->AddLast(mParentTrack->AtLast());
       }
       
@@ -1226,7 +1229,7 @@ void StFtpcTrackEvaluator::FillGCutHistos()
 
       for (Int_t h_counter = 2; h_counter < hits->GetEntriesFast() && h_counter < 10; h_counter++) {
 
-	StFtpcConfMapHit *hit = (StFtpcConfMapHit *)hits->At(h_counter);
+	StFtpcConfMapPoint *hit = (StFtpcConfMapPoint *)hits->At(h_counter);
 	
 	if (h_counter == 2) {
 	  mGTracklAngAll->Fill(t.StFtpcConfMapper::TrackletAngle(track, h_counter+1));
@@ -1278,7 +1281,7 @@ void StFtpcTrackEvaluator::FillFCutHistos()
 
       for (Int_t h_counter = 3; h_counter < hits->GetEntriesFast(); h_counter++) {
 
-	StFtpcConfMapHit *hit = (StFtpcConfMapHit *)hits->At(h_counter);
+	StFtpcConfMapPoint *hit = (StFtpcConfMapPoint *)hits->At(h_counter);
 	
 	if (h_counter == 3) {
 	  mFTracklAngAll->Fill(t.StFtpcConfMapper::TrackletAngle(track, h_counter));
@@ -1321,7 +1324,7 @@ void StFtpcTrackEvaluator::Loop()
     for (Int_t h_counter = 0; h_counter < fhits->GetEntriesFast(); h_counter++) {
 	
 	
-      //StFtpcHit *hit = (StFtpcHit *) fhits->At(h_counter);
+      //StFtpcPoint *hit = (StFtpcPoint *) fhits->At(h_counter);
       
     }
   }

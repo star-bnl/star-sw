@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.hh,v 1.1 2000/05/10 13:39:11 oldi Exp $
+// $Id: StFtpcConfMapper.hh,v 1.2 2000/05/11 15:14:42 oldi Exp $
 // $Log: StFtpcConfMapper.hh,v $
+// Revision 1.2  2000/05/11 15:14:42  oldi
+// Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
+//
 // Revision 1.1  2000/05/10 13:39:11  oldi
 // Initial version of StFtpcTrackMaker
 //
@@ -14,7 +17,7 @@
 #define STAR_StFtpcConfMapper
 
 #include "StFtpcTracker.hh"
-#include "StFtpcConfMapHit.hh"
+#include "StFtpcConfMapPoint.hh"
 #include "StFtpcTrack.hh"
 #include "TObjArray.h"
 #include "TBenchmark.h"
@@ -27,7 +30,7 @@ private:
 
   // Volume segemnts
   TObjArray *mVolume;             // array of volume (pad, phi, eta) elements
-  TObjArray *mSegment;            // array of StFtpcConfMapHits (all hits of/in one mVolume cell)
+  TObjArray *mSegment;            // array of StFtpcConfMapPoints (all hits of/in one mVolume cell)
 
   // Number of cells (segments)
   Int_t  mNumRowSegment;  // this is (and has to be at most) the number of padrows
@@ -135,28 +138,28 @@ public:
      Int_t  GetNumLengthFitNaN()     { return mLengthFitNaN;     }  // retruns number of settings of argumnet of arcsin to +/-1
      Int_t  GetNumClustersUnused()   { return mClustersUnused;   }  // returns number of unused clusters
 
-     Int_t  GetRowSegm(StFtpcConfMapHit *hit);                        // returns number of pad segment of a specific hit
-     Int_t  GetPhiSegm(StFtpcConfMapHit *hit);                        // returns number of phi segment of a specific hit
-     Int_t  GetEtaSegm(StFtpcConfMapHit *hit);                        // returns number of eta segment of a specific hit
+     Int_t  GetRowSegm(StFtpcConfMapPoint *hit);                      // returns number of pad segment of a specific hit
+     Int_t  GetPhiSegm(StFtpcConfMapPoint *hit);                      // returns number of phi segment of a specific hit
+     Int_t  GetEtaSegm(StFtpcConfMapPoint *hit);                      // returns number of eta segment of a specific hit
      Int_t  GetRowSegm(Int_t segm);                                   // returns number of pad segment of a specific segment
      Int_t  GetPhiSegm(Int_t segm);                                   // returns number of phi segment of a specific segment
      Int_t  GetEtaSegm(Int_t segm);                                   // returns number of eta segment of a specific segment
      Int_t  GetSegm(Int_t row_segm, Int_t phi_segm, Int_t eta_segm);  // returns number of segment
 
-  Double_t const  GetPhiDiff(const StFtpcConfMapHit *hit1, const StFtpcConfMapHit *hit2);          //returns normalized difference of phi
-  Double_t const  GetEtaDiff(const StFtpcConfMapHit *hit1, const StFtpcConfMapHit *hit2);          //returns normalized difference of eta
-  Double_t const  GetClusterDistance(const StFtpcConfMapHit *hit1, const StFtpcConfMapHit *hit2);  // returns distance between to clusters
-  Double_t const  GetDistanceFromFit(const StFtpcConfMapHit *hit);                                 // returns distance of cluster from fit
+  Double_t const  GetPhiDiff(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2);          //returns normalized difference of phi
+  Double_t const  GetEtaDiff(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2);          //returns normalized difference of eta
+  Double_t const  GetClusterDistance(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2);  // returns distance between to clusters
+  Double_t const  GetDistanceFromFit(const StFtpcConfMapPoint *hit);                                   // returns distance of cluster from fit
 
   // Tracking procedures
-            void  ClusterLoop();                                                                       // loops over clusters
-StFtpcConfMapHit *GetNextNeighbor(StFtpcConfMapHit *start_hit, Double_t *coeff);                       // returns next cluster to start cluster
-  Double_t const  TrackAngle(const StFtpcHit *lasthitoftrack, const StFtpcHit *hit);                   // returns angle
-  Double_t const  TrackletAngle(StFtpcTrack *track, Int_t n = 3);                                      // returns angle
-  Double_t const  CalcDistance(const StFtpcConfMapHit *hit1, const StFtpcConfMapHit *hit2);            // returns distance of two hits
-  Double_t const  CalcDistance(const StFtpcConfMapHit *hit, Double_t *coeff);                          // returns distance between a hit and straight line
-            void  StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n = 0);                       // calculates a straight line fit for given clusters 
-    Bool_t const  VerifyCuts(const StFtpcConfMapHit *lasttrackhithit, const StFtpcConfMapHit *newhit); // returns true if phi and eta cut holds
+            void  ClusterLoop();                                                                           // loops over clusters
+StFtpcConfMapPoint *GetNextNeighbor(StFtpcConfMapPoint *start_hit, Double_t *coeff);                       // returns next cluster to start cluster
+  Double_t const  TrackAngle(const StFtpcPoint *lasthitoftrack, const StFtpcPoint *hit);                   // returns angle
+  Double_t const  TrackletAngle(StFtpcTrack *track, Int_t n = 3);                                          // returns angle
+  Double_t const  CalcDistance(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2);            // returns distance of two hits
+  Double_t const  CalcDistance(const StFtpcConfMapPoint *hit, Double_t *coeff);                            // returns distance between a hit and straight line
+            void  StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n = 0);                           // calculates a straight line fit for given clusters 
+    Bool_t const  VerifyCuts(const StFtpcConfMapPoint *lasttrackhithit, const StFtpcConfMapPoint *newhit); // returns true if phi and eta cut holds
 
   // Start tracking
   void MainVertexTracking(); // tracking of main vertex tracks (vertex constraint on)

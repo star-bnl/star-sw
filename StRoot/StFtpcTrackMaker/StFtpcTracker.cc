@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.cc,v 1.1 2000/05/10 13:39:31 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.2 2000/05/11 15:14:53 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.2  2000/05/11 15:14:53  oldi
+// Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
+//
 // Revision 1.1  2000/05/10 13:39:31  oldi
 // Initial version of StFtpcTrackMaker
 //
@@ -9,7 +12,7 @@
 //----------Copyright:     &copy MDO Production 1999
 
 #include "StFtpcTracker.hh"
-#include "StFtpcHit.hh"
+#include "StFtpcPoint.hh"
 #include "StFtpcTrack.hh"
 
 ///////////////////////////////////////////////////////////////////////////////////

@@ -1,28 +1,28 @@
-// $Id: StFtpcHit.cc,v 1.1 2000/05/10 13:39:16 oldi Exp $
-// $Log: StFtpcHit.cc,v $
-// Revision 1.1  2000/05/10 13:39:16  oldi
-// Initial version of StFtpcTrackMaker
+// $Id: StFtpcPoint.cc,v 1.1 2000/05/11 15:14:47 oldi Exp $
+// $Log: StFtpcPoint.cc,v $
+// Revision 1.1  2000/05/11 15:14:47  oldi
+// Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 20.04.2000
+//----------Last Modified: 11.05.2000
 //----------Copyright:     &copy MDO Production 1999
 
-#include "StFtpcHit.hh"
+#include "StFtpcPoint.hh"
 
-////////////////////////////////////////////////////////////////////////////
-//                                                                        //
-// StFtpcHit class - representation of one cluster for the FTPC trackers. //
-//                                                                        //
-// This class contains all data members which are the output of the FTPC  //
-// cluster finder.                                                        //
-//                                                                        //
-////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//                                                                          //
+// StFtpcPoint class - representation of one cluster for the FTPC trackers. //
+//                                                                          //
+// This class contains all data members which are the output of the FTPC    //
+// cluster finder.                                                          //
+//                                                                          //
+//////////////////////////////////////////////////////////////////////////////
 
-ClassImp(StFtpcHit)
+ClassImp(StFtpcPoint)
 
 
-StFtpcHit::StFtpcHit()
+StFtpcPoint::StFtpcPoint()
 {
   // Default constructor.
   // Sets all pointers to zero.
@@ -55,10 +55,10 @@ StFtpcHit::StFtpcHit()
 }
 
 
-StFtpcHit::StFtpcHit(fcl_fppoint_st *point_st)
+StFtpcPoint::StFtpcPoint(fcl_fppoint_st *point_st)
 {
   // Standard constructor.
-  // This is the usual way to create a StFtpcHit object. By giving the pointer
+  // This is the usual way to create a StFtpcPoint object. By giving the pointer
   // to the fcl_fppoint_st(ructure) (cluster data found by the cluster finder) the 
   // constructor copies the cluster information into its data members.
 
@@ -90,14 +90,14 @@ StFtpcHit::StFtpcHit(fcl_fppoint_st *point_st)
 }
 
 
-StFtpcHit::~StFtpcHit() 
+StFtpcPoint::~StFtpcPoint() 
 {
   // Destructor.
   // Does nothing except destruct.
 }
 
 
-StFtpcTrack *StFtpcHit::GetTrack(TClonesArray *tracks) const
+StFtpcTrack *StFtpcPoint::GetTrack(TClonesArray *tracks) const
 {
   // Returns the pointer to the track to which this hit belongs.
 
@@ -105,7 +105,7 @@ StFtpcTrack *StFtpcHit::GetTrack(TClonesArray *tracks) const
 }
 
 
-Int_t StFtpcHit::Write()
+Int_t StFtpcPoint::Write()
 {
   // Writes cluster to disc.
   // Does nothing up to now.

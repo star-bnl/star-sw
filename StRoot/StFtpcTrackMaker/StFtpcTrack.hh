@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.hh,v 1.1 2000/05/10 13:39:23 oldi Exp $
+// $Id: StFtpcTrack.hh,v 1.2 2000/05/11 15:14:51 oldi Exp $
 // $Log: StFtpcTrack.hh,v $
+// Revision 1.2  2000/05/11 15:14:51  oldi
+// Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
+//
 // Revision 1.1  2000/05/10 13:39:23  oldi
 // Initial version of StFtpcTrackMaker
 //
@@ -96,6 +99,7 @@ public:
             void   SetAlpha0(Double_t f)         {         mAlpha0 = f; }
             void   SetCharge(Int_t f)            {              mQ = f; }
             void   SetPid(Int_t f)               {            mPid = f; }
+            void   SetDca(Double_t f)            {            mDca = f; }
             void   SetNMax(Short_t f)            {           mNMax = f; }
             void   ComesFromMainVertex(Bool_t f) { mFromMainVertex = f; }
 
