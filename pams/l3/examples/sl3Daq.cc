@@ -3,6 +3,7 @@
 **: HISTORY:
 **:
 **: 10/21/99 ppy Demo version from Christof Struck
+**: 11/05/99 ppy tracker.reset() added in case parameters are modified
 **:
 **:<------------------------------------------------------------------*/
 
@@ -51,6 +52,8 @@ int main(int argc, char *argv[])
 	FtfPara* para = &(tracker.para);
 	tracker.setup();
 	tracker.para.fillTracks = 1 ;
+	// Tracker needs to be reset if parameters are modified
+	tracker.reset();  
 
 	char* bufferC; 
 	char* fileName = "/afs/rhic/star/users/yepes/try/cos_B1.dta";
