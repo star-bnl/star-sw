@@ -1,5 +1,8 @@
-// $Id: St_ems_Maker.h,v 1.5 1998/12/15 22:38:47 akio Exp $ 
+// $Id: St_ems_Maker.h,v 1.6 1999/03/20 22:36:35 perev Exp $ 
 // $Log: St_ems_Maker.h,v $
+// Revision 1.6  1999/03/20 22:36:35  perev
+// maker new schema
+//
 // Revision 1.5  1998/12/15 22:38:47  akio
 // Add some comments
 //
@@ -57,7 +60,7 @@ class St_ems_Maker : public StMaker {
    St_calb_calg        *m_calb_calg;       //!  
  protected:
  public: 
-  St_ems_Maker(const char *name="emc_raw", const char *title="event/raw_data/emc");
+  St_ems_Maker(const char *name="emc_raw");
   virtual       ~St_ems_Maker();
   virtual Int_t Init();
   virtual Int_t Make();
