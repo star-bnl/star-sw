@@ -51,6 +51,7 @@ Int_t StTreeMaker::Init()
     }
     
     fTree->SetIOMode("w");
+    fTree->Open();
     fTree->Close("keep");
   } 
   return 0;
