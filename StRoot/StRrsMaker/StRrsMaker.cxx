@@ -1,14 +1,17 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 1.11 2000/02/29 18:05:00 lasiuk Exp $
+ * $Id: StRrsMaker.cxx,v 1.12 2000/03/13 21:58:01 lasiuk Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
- * Revision 1.11  2000/02/29 18:05:00  lasiuk
- * include FREO, QUAR volumes
- * rotate coordinate inputs (x->-x, y->-y) for local
- * use units consistently
+ * Revision 1.12  2000/03/13 21:58:01  lasiuk
+ * singleton classes
  *
+ * Revision 1.14  2000/03/17 14:55:12  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
+ *
+ * Revision 1.13  2000/03/13 22:17:37  lasiuk
+ * unbelievable!  I can't stand it.
  * Comment the Ring drawing routines
  *
  * Revision 1.12  2000/03/13 21:58:01  lasiuk
@@ -41,6 +44,7 @@
  * namespace std is NOT in!
  *
  * Revision 1.4  2000/01/27 17:10:03  lasiuk
+ * modify to work stand-alone from ROOT
  *
  ******************************************************/
 #ifdef __ROOT__
@@ -59,6 +63,7 @@
 //#include <iostream.h>
 #include "StMemoryInfo.hh"
 #endif
+
 #include "StParticleTable.hh"
 
 // DataBases
@@ -69,6 +74,17 @@
 #include "StRichPadPlane.h"
 #include "StRichPadPlane.h"
 #include "StRichWriter.h"
+
+#include "StRichGHit.h"
+#ifdef RICH_WITH_RINGS
+#include "StRichRingDefinition.h"
+#include "StRichTrack.h"
+#include "StRichRingPoint.h"
+#include "StRichRingCalculator.h"
+#include "StParticleDefinition.hh"
+#include "StParticleTypes.hh"
+#endif
+//////
 #endif
 // #include "StRichRingDefinition.h"
 // #include "StRichTrack.h"
@@ -151,7 +167,6 @@ void StRrsMaker::addElectricNoise(int b)
     mAddElectricNoise = b;
 }
 ///////////////////////////////////////////////////////
- 
 {
 #ifdef USE_MEMORY_INFO
     StMemoryInfo* info = StMemoryInfo::instance();
@@ -162,10 +177,12 @@ void StRrsMaker::addElectricNoise(int b)
     mPhysicsDb  = StRichPhysicsDb::getDb();
     mGeometryDb = StRichGeometryDb::getDb();
 
-    
     if ( !mGeometryDb ) {
       cerr << "Geometry database could not be initialized. Aborting!!!\n";
       return 1;
+    }
+
+    if ( !mPhysicsDb ) {
       cerr << "Physics database could not be initialized. Aborting!!!\n";
     //mPhysicsDb->print();
 
@@ -248,14 +265,25 @@ int StRrsMaker::whichVolume(int val, string* vName)
 	break;	
     default:
 	*vName = string("");
+	cerr << "StRchMaker::whicVolume() UNKNOWN Volume" << endl;
+	break;
+    }
+    int volumeNumber = (val - (volume*1000));
     return volumeNumber;
 //     cout << "-- Press return to continue -- ";
-    ofstream raw("/afs/rhic/star/users/lasiuk/data/rrs_gerd.txt");
+//     char c = cin.get();
 //       char c = cin.get();
 #ifdef USE_MEMORY_INFO
     StMemoryInfo* info = StMemoryInfo::instance();
     info->snapshot();
     info->print();
+#endif
+
+    mPadPlane->clear();
+#ifdef RICH_DIAGNOSTIC
+    // Make a list of segments to process:
+    //
+    list<StRichMiniHit*> theList;
     list<StRichMiniHit*>::iterator iter;
     
     //
@@ -328,29 +356,35 @@ int StRrsMaker::whichVolume(int val, string* vName)
 		cout << "\treturn from StRrsMaker::Make()" << endl;
 		return kStWarn;
 	    }
-	    // Make Transformations available
-	    int numberOfRichHits        =  g2t_rch_hit->GetNRows();
 	    
-	    StRichCoordinateTransform tmpTform(mGeometryDb);
+	    int numberOfRichHits        =  g2t_rch_hit->GetNRows();
 	    PR(numberOfRichHits);
+
 	    g2t_rch_hit_st *rch_hit     =  g2t_rch_hit->GetTable();
+
 	    string volumeName;
 	    int    quadrant;
-
-		StThreeVector<double>
-		    momentum(rch_hit->p[0]*GeV,
-			     rch_hit->p[1]*GeV,
-			     rch_hit->p[2]*GeV);
 
 	    //
 	    // Declarations for Transformation routines
 	    //
 	    StRichLocalCoordinate  local;
+	    StThreeVector<double>  momentum;
+
+	    
+	    for(int ii=0; ii<numberOfRichHits; ii++) {
+		quadrant = whichVolume(rch_hit->volume_id, &volumeName);
+
+		//
 		// Input is in local or global coordinates
+		// By default we read GLOBAL coordinates
+		//
 		StThreeVector<double> tmpMomentum(rch_hit->p[0]*GeV,
 						  rch_hit->p[1]*GeV,
 						  rch_hit->p[2]*GeV);
-		    tmpTform(global,local);
+
+		//
+		// Default: READ Global.  Must Transform to RichLocal
 		//
 		if(!mUseLocalCoordinate) {
 		    //
@@ -359,12 +393,20 @@ int StRrsMaker::whichVolume(int val, string* vName)
 					      rch_hit->x[1]*centimeter,
 					      rch_hit->x[2]*centimeter);
 
-		    tmpTform(quad,local);
+		    (*mCoordinateTransform)(global,local);
+		    mMomentumTransform->localMomentum(tmpMomentum,momentum);
+		}
+		//
+		// if expecting local, the RCSI is in quadrant format
 		// and x-> -x, y-> -y
 		else if (mUseLocalCoordinate && volumeName == "RCSI") {
 		    StRichQuadrantCoordinate quad(-1.*rch_hit->x[0]*centimeter,
 						  -1.*rch_hit->x[1]*centimeter,
 						  rch_hit->x[2]*centimeter,quadrant);
+		    (*mCoordinateTransform)(quad,local);
+
+		    momentum.setX(-1.*rch_hit->p[0]*GeV);
+		    momentum.setY(-1.*rch_hit->p[1]*GeV);
 		    // z-component okay
 		}
 		else {  // if in the gap, freon, quartz AND in local:
@@ -379,23 +421,33 @@ int StRrsMaker::whichVolume(int val, string* vName)
 		    0. : mTable->findParticleByGeantId((track[(rch_hit->track_p)-1].ge_pid))->mass();
 		    
 		hit.fill(local.position(),
+			 momentum,
+			 (momentum.x()/abs(momentum)),
+			 (momentum.y()/abs(momentum)),
+			 mTable->findParticleByGeantId((track[(rch_hit->track_p)-1].ge_pid))->mass(),
+#ifdef RICH_WITH_PADMONITOR
+		// momentum of track...needed for drawing tracks/rings
+		if(volumeName == "RGAP" && track[(rch_hit->track_p)-1].ge_pid == 9) {
+		    gTrackMomentum.setX(track[(rch_hit->track_p)-1].p[0]*GeV);
+		    gTrackMomentum.setY(track[(rch_hit->track_p)-1].p[1]*GeV);
 		    gTrackMomentum.setZ(track[(rch_hit->track_p)-1].p[2]*GeV);
 		    mMomentumTransform->localMomentum(gTrackMomentum,lTrackMomentum);
-// 		raw << volumeName.c_str() << endl;
-		//raw << "volume_id= "  << rch_hit->volume_id << endl;
-		//raw << " hit= "        << hit;
-// 		raw << abs(momentum)/GeV << endl;
-// 		raw << momentum.perp()/GeV << endl;
-// 		raw << rch_hit->id << endl;
-// 		raw << track[(rch_hit->track_p)-1].eg_label  << endl;
-// 		raw << track[(rch_hit->track_p)-1].eg_pid    << endl;
-// 		raw << track[(rch_hit->track_p)-1].ge_pid    << endl;
-// 		raw << track[(rch_hit->track_p)-1].pt        << endl;
-// 		raw << track[(rch_hit->track_p)-1].ptot      << endl;
-// 		raw << track[(rch_hit->track_p)-1].p[0]      << endl;
-// 		raw << track[(rch_hit->track_p)-1].p[1]      << endl;
-// 		raw << track[(rch_hit->track_p)-1].p[2]      << endl;
-// 		raw << track[(rch_hit->track_p)-1].n_tpc_hit << endl;
+		}
+#endif
+			 rch_hit->ds*centimeter,
+			 rch_hit->de*GeV,
+			 particleMass,
+			 rch_hit->id,
+			 volumeName);
+
+		//cout << "ii " << ii << "/" << numberOfRichHits << hit << endl;
+#ifdef RICH_DIAGNOSTIC
+//  		raw << volumeName.c_str() << endl;
+// 		raw << "volume_id= "  << rch_hit->volume_id << endl;
+// 		//raw << " hit= "        << hit;
+//  		raw << abs(momentum)/GeV << endl;
+//  		raw << momentum.perp()/GeV << endl;
+//  		raw << rch_hit->id << endl;
 //  		raw << track[(rch_hit->track_p)-1].eg_label  << endl;
 //  		raw << track[(rch_hit->track_p)-1].eg_pid    << endl;
 //  		raw << track[(rch_hit->track_p)-1].ge_pid    << endl;
@@ -411,9 +463,8 @@ int StRrsMaker::whichVolume(int val, string* vName)
 // 		    raw << tpc_hit[zz].track_p << " ";
 // 		    if (tpc_hit[zz].track_p == (rch_hit->track_p) ) {
 // 			ctr++;
-		//raw << "ctr= " << ctr << endl;
-		//raw << endl;
-
+// 			raw << zz << " "
+// 			    << tpc_hit[zz].x[0] << " "
 // 			    << tpc_hit[zz].x[1] << " "
 // 			    << tpc_hit[zz].x[2] << " ";
 // 			double ptot = (sqrt(tpc_hit[zz].p[0]*tpc_hit[zz].p[0]+
@@ -481,9 +532,11 @@ int StRrsMaker::whichVolume(int val, string* vName)
 
 #ifdef RICH_WITH_PADMONITOR
     cout << "Get Instance of Pad Monitor" << endl;
-	    theADCValue = theReader.GetADCFromCoord(iRow,iCol);
+    StRichPadMonitor* thePadMonitor = StRichPadMonitor::getInstance(mGeometryDb);
     cout << "Try Clear" << endl;
+    thePadMonitor->clearPads();  
 #endif
+    StRrsReader theReader(mPadPlane,version);
     cout << "DECODER " << endl;
     int ctr = 0;
     for(int iRow=0; iRow<(mGeometryDb->numberOfRowsInAColumn()); iRow++) {
@@ -506,15 +559,43 @@ int StRrsMaker::whichVolume(int val, string* vName)
 // 		    iter!= MCInfo.end();
 // 		    iter++) {
 // #ifdef __SUNPRO_CC
-// 		}
+// 		    raw << ">>* MCinfo.G_ID= "
 // 			<< (*iter).mG_ID << "MCinfo.trackp= "
-		
+// 			<< (*iter).mTrackp << "MCinfo.amount= "
 // 			<< (*iter).mAmount << endl;
 // #else
 // 		    raw << ">>* MCinfo.G_ID= "
 // 			<< iter->mG_ID << "MCinfo.trackp= "
 // 			<< iter->mTrackp << "MCinfo.amount= "
 // 			<< iter->mAmount << endl;
+// #endif
+//	    }
+#ifdef RICH_WITH_RINGS
+    //try draw a ring:
+    StGlobalCoordinate gIP;
+    StRichLocalCoordinate localIP(10.4*centimeter,23.4*centimeter,0.);
+    (*mCoordinateTransform)(localIP,gIP);
+    StRichTrack theTrack(lTrackMomentum, gIP.position());
+    PR(lTrackMomentum);
+    PR(gIP);
+    StRichRingCalculator myCalculator(&theTrack);
+    StPionMinus* pion = StPionMinus::instance();
+    StKaonMinus* kaon = StKaonMinus::instance();
+    StProton* proton = StProton::instance();
+    myCalculator.getRing(eInnerRing)->setParticleType(proton);
+    myCalculator.getRing(eOuterRing)->setParticleType(proton);
+
+    StThreeVector<double> aPoint;
+    StThreeVector<double> bPoint;
+    for(int kk=90; kk<270;kk+=5) {
+	bool status = myCalculator.getRing(eInnerRing)->getPoint(kk*degree, aPoint);
+	thePadMonitor->addInnerRingPoint(aPoint.x(), aPoint.y());
+	status = myCalculator.getRing(eOuterRing)->getPoint(kk*degree, bPoint);
+	thePadMonitor->addOuterRingPoint(bPoint.x(), bPoint.y());
+    }
+    thePadMonitor->drawRing();
+#endif
+//     StThreeVector<double> aPoint;
 //     StThreeVector<double> bPoint;
 //     for(int kk=90; kk<270;kk+=5) {
 // 	bool status = myCalculator.getRing(eInnerRing)->getPoint(kk*degree, aPoint);

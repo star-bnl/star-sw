@@ -1,5 +1,5 @@
 /**********************************************************
- * $Id: StRrsMaker.h,v 1.8 2000/02/14 01:08:02 lasiuk Exp $
+ * $Id: StRrsMaker.h,v 1.9 2000/03/13 21:58:02 lasiuk Exp $
  *
  * Description:
  *  StRrsMaker is the main module
@@ -15,12 +15,15 @@
  *  memory.
  ***********************************************************
  *  $Log: StRrsMaker.h,v $
+ *  Revision 1.9  2000/03/13 21:58:02  lasiuk
+ *  singleton classes
+ *
+ *  Revision 1.9  2000/03/13 21:58:02  lasiuk
+ *  singleton classes
+ *
  *  Revision 1.8  2000/02/14 01:08:02  lasiuk
  *  write the data set
  *  add two member functions for pedestal and noise switches
- *  add coordinate conditional and StCoordinateTransform
- *  incorporate track_p into GHit
- *
  *  add coordinate conditional and StCoordinateTransform
  *  incorporate track_p into GHit
  *
@@ -84,6 +87,8 @@ using namespace units;
 
 #include "StRichRrsMacros.h"
 
+// DataBases
+class StRichGeometryDb;
 class StRichPhysicsDb;
 class StRichCoordinateTransform;
 class StRichMomentumTransform;
@@ -137,7 +142,9 @@ private:
     // Decode the volume ID into quadrant and RICH element
     int whichVolume(int val, string* vName);
 
-
+private:
+    StRichGeometryDb               *mGeometryDb;//!
+    StRichPhysicsDb                *mPhysicsDb;//!
     StRichCoordinateTransform      *mCoordinateTransform;//!
     StRichMomentumTransform        *mMomentumTransform;//!
     
@@ -165,10 +172,10 @@ private:
 
     int       mUseLocalCoordinate;
     int       mAddPedestal;
-    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.8 2000/02/14 01:08:02 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
+    int       mAddElectricNoise;
     
     virtual const char *GetCVS() const
-    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.8 2000/02/14 01:08:02 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
+    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.9 2000/03/13 21:58:02 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
 
     ClassDef(StRrsMaker, 1)            // StAF chain
 };
