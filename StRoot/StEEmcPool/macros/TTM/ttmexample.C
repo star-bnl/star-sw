@@ -21,8 +21,7 @@ void
 ttmexample
 (
  char*  inpDir    = "",         // MuDST directory
- char*  inpFile   = "show.lis", // MuDST file(s);                      
- char*  outFile   = "show.root",// output tree file
+ char*  inpFile   = "ttm.lis", // MuDST file(s);                      
  Int_t  nFiles    = 50,         // # of MuDST file(s)
  Int_t  nEvents   = 100,        // # of events
  Int_t timeStamp  = 20040331    // format: yyyymmdd
