@@ -2,12 +2,12 @@
 
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.1.1.4 1999/10/29 23:13:06 fisyak Exp $
+# $Id: cons,v 1.1.1.5 2000/01/20 18:52:25 fisyak Exp $
 
 $ver_num = 1.7;
 $ver_rev = "";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.1.1.4 1999/10/29 23:13:06 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.1.1.5 2000/01/20 18:52:25 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -809,7 +809,7 @@ sub Objects {
 sub _Objects {
     my($env) = shift;
     my($suffix) = $env->{SUFOBJ};
-    map(_Object($env, $_, $_->{dir}->lookup($_->base . $suffix)), @_);
+    map(_Object($env, $_, $dir::cwd->lookup($_->base . $suffix)), @_);
 }
 
 # Called with an object and source reference.  If no object reference
@@ -1610,6 +1610,7 @@ sub scan {
 		push(@includes, $include) unless $include->ignore;
 		last;
 	    }
+	    $include->forget();
 	}
     }
 
@@ -1620,6 +1621,7 @@ sub scan {
 		push(@includes, $include) unless $include->ignore;
 		last;
 	    }
+	    $include->forget();
 	}
     }
 
@@ -1735,6 +1737,25 @@ sub lookupdir {
 	$dir->{member}->{'.'} = $dir;
 	bless $dir;
     }
+}
+
+# "Forget" that we ever considered the dirname
+# of this pathname to be a directory, if in fact,
+# it does not name a directory that exists.
+sub forget {
+    my($self) = shift;
+    my($dir) = $self->{dir};
+    if (ref($dir->{dir})) {
+      if (!$dir->dir_exists) {
+          delete $dir::cache{$dir->{dir},$dir->{entry}};
+          bless $dir, file;
+      }
+    }
+}
+
+sub dir_exists {
+    return $_[0]->{isdir} if exists $_[0]->{isdir};
+    $_[0]->{isdir} = (-d $_[0]->path);
 }
 
 # Return the path of the directory (file paths implemented
@@ -1869,7 +1890,13 @@ sub source_exists {
     return $_[0]->{source_exists} if defined $_[0]->{source_exists};
     my($self) = @_;
     my($path) = $self->path;
-    my($time) = (stat($path))[9];
+    my($dir) = $self->{dir};
+    my($time);
+
+    if ($dir->dir_exists) {
+      $time = (stat($path))[9];
+    }
+
     if ($self->is_linked) {
 	# Linked directory, local logic.
 	my($srcpath) = $self->srcpath;
