@@ -1,32 +1,31 @@
-// $Id: tpctest.C,v 1.5 1999/03/31 13:53:31 fisyak Exp $
+// $Id: tpctest.C,v 1.6 1999/05/06 03:21:30 fisyak Exp $
 // $Log: tpctest.C,v $
+// Revision 1.6  1999/05/06 03:21:30  fisyak
+// synchronize FTPC and TPC slow/fast
+//
 // Revision 1.5  1999/03/31 13:53:31  fisyak
 // Set exactly no field option
 //
 // Revision 1.4  1999/03/17 02:59:47  fisyak
 // New makers
 //
-
-
 //
 /*************************************************************\
-							      tpctest99.C is a CINT script package to analyse data from the
-							      1997 (LBL) and 1998 (BNL) TPC tests which included both
-							      Cosmic Ray triggers and laser events.  The 99 version uses
-							      StMinidaqmaker and the 99 versions of tcl, tph and the tpt
-							      tracking code.
-							      There are four functions:  start() defines and
-							      initializes the system.  loop(n) analyses the next n events
-							      on the input file.  skip(n) skips n input records.  end()
-							      writes the final ntuple to the output.-- WALove 22 Feb 1999
-							      \*************************************************************/
+tpctest99.C is a CINT script package to analyse data from the
+1997 (LBL) and 1998 (BNL) TPC tests which included both
+Cosmic Ray triggers and laser events.  The 99 version uses
+StMinidaqmaker and the 99 versions of tcl, tph and the tpt
+tracking code.
+There are four functions:  start() defines and
+initializes the system.  loop(n) analyses the next n events
+on the input file.  skip(n) skips n input records.  end()
+writes the final ntuple to the output.-- WALove 22 Feb 1999
+\*************************************************************/
 
 // Define globals over this package
 TFile *f=0;
 //TBrowser b=0;
 Int_t ievt=0;  //local event counter 
-#include "iostream.h"
-#pragma includepath "/afs/rhic/star/packages/dev/StRoot/StChain"
 class  StChain;
 StChain *chain = 0;
 class St_xdfin_Maker;

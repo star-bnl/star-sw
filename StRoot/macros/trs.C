@@ -1,5 +1,8 @@
-// $Id: trs.C,v 1.9 1999/04/01 23:39:48 fisyak Exp $
+// $Id: trs.C,v 1.10 1999/05/06 03:21:30 fisyak Exp $
 // $Log: trs.C,v $
+// Revision 1.10  1999/05/06 03:21:30  fisyak
+// synchronize FTPC and TPC slow/fast
+//
 // Revision 1.9  1999/04/01 23:39:48  fisyak
 // Cleanup old macros
 //
@@ -51,15 +54,21 @@ void trs(const Int_t Nevents=1)
   geant->SetDebug();
   //  geant->SetNwPAW(1000000);
   geant->SetIwtype(1);
-  TString InFile("/disk1/star/test/psc0049_08_40evts.fzd");
-  geant->SetInputFile(InFile.Data());
+  //  TString InFile("/disk1/star/test/psc0049_08_40evts.fzd");
+  //  geant->SetInputFile(InFile.Data());
   chain->SetInput("geom","geant:geom");
   //  geant->Do("gfile p /disk1/star/test/psc0049_08_40evts.fzd");
   //geant->Do("gfile p /star/u2b/lasiuk/onemuon.fz");
   //geant->Do("gfile p /star/u2b/lasiuk/msector.fz");
   //geant->Do("mode tpce prin 1 digi 2");   // make tpc_hit in local coordinates
   //  geant->LoadGeometry("detp geometry field_only");
+  geant->LoadGeometry("detp geometry year_1b");
+  geant->Do("subevent 0;");
+  geant->Do("gkine 10 6 1. 1. -1. 1. 0 6.28  -1. 1.;");
+  geant->Do("mode g2tm prin 1;");
+
   StTrsMaker    *tpc_raw = new StTrsMaker("Trs");
+  tpc_raw->setTestData(kTRUE);
   //  chain->PrintInfo();
 // Init the mai chain and all its makers
   int iInit = chain->Init();

@@ -1,5 +1,8 @@
-// $Id: geant.C,v 1.8 1999/04/01 23:39:47 fisyak Exp $
+// $Id: geant.C,v 1.9 1999/05/06 03:21:28 fisyak Exp $
 // $Log: geant.C,v $
+// Revision 1.9  1999/05/06 03:21:28  fisyak
+// synchronize FTPC and TPC slow/fast
+//
 // Revision 1.8  1999/04/01 23:39:47  fisyak
 // Cleanup old macros
 //
@@ -24,6 +27,7 @@
 // Revision 1.1  1999/01/05 01:38:03  fisyak
 // geant with St_Nodes
 //
+#define gtrack
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -49,12 +53,23 @@ void geant(const Int_t Nevents=0,const Char_t *fzfile ="/disk1/star/test/psc0049
   //  Create the makers to be called by the current chain
   if (! geant) geant = new St_geant_Maker;
   geant->SetNwGEANT(20 000 000);
-  //  geant->SetIwtype(1);
-  //  geant->SetNwPAW(1000000);
-  geant->Do("gdebug 1;");
+#ifdef gtrack
+  geant->SetIwtype(1);
+  geant->Do("debug on;");
+  //  geant->LoadGeometry("detp geometry field_only");
+  geant->LoadGeometry("detp geometry year_1b");
+  geant->Do("subevent 0;");
+  geant->Do("gkine 10 6 1. 1. -1. 1. 0 6.28  -1. 1.;");
+  geant->Do("mode g2tm prin 1;");
+  //  geant->Do("next;");
+  //  geant->Do("dcut cave z 1 10 10 0.03 0.03;");
+  geant->Do("debug on;");
+  geant->Do("swit 2 3;");
+#else
   TString cmd("gfile p ");
   cmd += fzfile;
   geant->Do(cmd.Data());
+#endif
   chain->PrintInfo();
 // Init the main chain and all its makers
   int iInit = chain->Init();
@@ -62,7 +77,7 @@ void geant(const Int_t Nevents=0,const Char_t *fzfile ="/disk1/star/test/psc0049
   Int_t i=0;
   for (Int_t i =1; i <= Nevents; i++)
   {
-    if (chain->Make(i)) break;
+    if (chain->Make(i)>=kStEOF) break;
     if (i != Nevents) chain->Clear();
     printf ("===========================================\n");
     printf ("=========================================== Done with Event no. %d\n",i);

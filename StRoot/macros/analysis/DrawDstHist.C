@@ -91,7 +91,7 @@ void DrawDstHist(
       St_FileSet dstDirs(exFileName,".");
       St_DataSetIter nextDataSet(&dstDirs,0);
       St_DataSet *set = 0;      
-      while ( (set = nextDataSet()) ) {           
+      while ( set = nextDataSet() ) {           
         if (strcmp(set->GetTitle(),"file") || !(strstr(set->GetName(),"evts.root"))) continue;
         TString p = set->Path();
         Char_t *rootfilename = gSystem->ConcatFileName(exFileName,p.Data());

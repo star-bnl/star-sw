@@ -1,7 +1,10 @@
-// $Id: bfc_trs.C,v 1.3 1999/05/05 00:41:26 fisyak Exp $
+// $Id: bfc_trs.C,v 1.4 1999/05/06 03:21:26 fisyak Exp $
 // $Log: bfc_trs.C,v $
-// Revision 1.3  1999/05/05 00:41:26  fisyak
-// Add StEvent
+// Revision 1.4  1999/05/06 03:21:26  fisyak
+// synchronize FTPC and TPC slow/fast
+//
+// Revision 1.18  1999/05/04 22:42:29  fisyak
+// bfc with StEvent
 //
 // Revision 1.17  1999/05/01 01:47:37  fisyak
 // Add new set of bfc s'
@@ -52,9 +55,9 @@
 #define TPC
 //#define tclPixTransOn // additional flat pixel table
 //#define tptResOn // fill table with residuals from tracking
+#if defined(FZIN) || defined(GTRACK)
 #define TRS
 //#define TSS
-#if defined(FZIN) || defined(GTRACK)
 #define FTPC
 #define FSS
 #define SVT
@@ -64,6 +67,7 @@
 #define GLOBAL
 //#define DST
 #define ANALYSIS
+#define TREE
 #endif  /* new data only FZIN or GTRACK */
 //#define XDFOUT
 
@@ -385,15 +389,16 @@ void bfc_trs (const Int_t Nevents=1,Char_t *infile=0, Char_t *outfile=0)
   St_ctf_Maker         *ctf      = new St_ctf_Maker("ctf");
   St_mwc_Maker         *mwc      = new St_mwc_Maker("mwc");
   St_trg_Maker         *trg      = new St_trg_Maker("trg");
-#endif
+#endif /* CTF */
 #ifdef GLOBAL
 //		global
   St_dst_Maker *dstMk = 0;
   St_glb_Maker *glbMk = new St_glb_Maker("global");
 #ifndef DST
   chain->SetInput("dst",".make/global/.data/dst");
-#endif
+#endif /* DST */
   glbMk->SetDebug();
+#endif /* GLOBAL */
 #ifdef L3
 //		l3t
   St_l3t_Maker  *l3tMk  = new St_l3t_Maker("l3Tracks");
@@ -404,43 +409,45 @@ void bfc_trs (const Int_t Nevents=1,Char_t *infile=0, Char_t *outfile=0)
                  dstMk = new St_dst_Maker("dst");
     chain->SetInput("dst",".make/dst/.data/dst");
     dstMk->SetDebug();
-#endif  
+#endif  /* DST */
+#ifdef GLOBAL
   StEventMaker *evMk  = new StEventMaker;
 #ifdef ANALYSIS
   StAnalysisMaker *anaMk = new StAnalysisMaker;
-#endif
+  anaMk->SetDebug(0);
+#endif /* ANALYSIS */
   St_QA_Maker          *qa         = new St_QA_Maker;  
-#ifdef GLOBAL
+#ifdef TREE
 //		Tree
   if (dstMk || evMk) {
     StTreeMaker *treeMk = new StTreeMaker("tree",FileOut.Data());
     treeMk->SetIOMode("w");
     treeMk->SetDebug();
 #ifdef GEANT
-//  treeMk->IntoBranch("geantBranch","geant/.data");
+    treeMk->IntoBranch("geantBranch","geant/.data");
 //  treeMk->SetBranch("geantBranch",FileOut.Data());
     //    treeMk->IntoBranch("geantBranch","geant/.data/particle");
     //    treeMk->IntoBranch("geantBranch","geant/.data/g2t_rch_hit");
 #endif
-#if definde(TSS) || defined(TRS)
+#if defined(TSS) || defined(TRS)
 //  treeMk->SetBranch("tpc_rawBranch",FileOut.Data());
     treeMk->IntoBranch("tpc_rawBranch","tpc_raw/.data");
-#endif
+#endif /* TSS or TRS */
 #ifdef FSS
 //  treeMk->SetBranch("ftpc_rawBranch",FileOut.Data());
     treeMk->IntoBranch("ftpc_rawBranch","ftpc_raw/.data");
-#endif
+#endif /* FSS */
 #ifdef CTF
 //  treeMk->SetBranch("trgBranch",FileOut.Data());
     treeMk->IntoBranch("trgBranch","ctf");
     treeMk->IntoBranch("trgBranch","mwc");
     treeMk->IntoBranch("trgBranch","trg");
 //  treeMk->IntoBranch("trgBranch","trg/.data/dst_TriggerDetectors");
-#endif
+#endif /* CTF */
 #ifdef L3
 //  treeMk->SetBranch("l3TBranch",FileOut.Data());
     treeMk->IntoBranch("l3TBranch","l3Tracks");
-#endif
+#endif /* L3 */
 //  treeMk->SetBranch("globalBranch",FileOut.Data());
 //    treeMk->IntoBranch("globalBranch","global/.data/dst");
     if (dstMk) {
@@ -453,6 +460,7 @@ void bfc_trs (const Int_t Nevents=1,Char_t *infile=0, Char_t *outfile=0)
     }
 //  treeMk->SetInput(".default","Others");
   }
+#endif  /* TREE */
 #endif  /* GLOBAL */
   
   // START the chain (may the force be with you)
