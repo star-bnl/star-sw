@@ -1,7 +1,10 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: St2eemcFeeRawMaker.cxx,v 1.5 2003/02/21 22:21:39 balewski Exp $
+// $Id: St2eemcFeeRawMaker.cxx,v 1.6 2003/03/07 15:35:53 balewski Exp $
 // $Log: St2eemcFeeRawMaker.cxx,v $
+// Revision 1.6  2003/03/07 15:35:53  balewski
+// towards EEMC daq reader
+//
 // Revision 1.5  2003/02/21 22:21:39  balewski
 // time stamp added
 //
@@ -179,7 +182,7 @@ Int_t St2eemcFeeRawMaker::Make(){
       int slot=dbItem->crate;        
       adc=adc+(int)dbItem->ped; // add pedestal for each channel
 
-      printf("j=%d, sec=%d, sub=%c, eta=%d adc=%d  -->crate/chan=%d/%d\n",j,sec,sub,eta,adc,slot,chan);
+      //printf("j=%d, sec=%d, sub=%c, eta=%d adc=%d  -->crate/chan=%d/%d\n",j,sec,sub,eta,adc,slot,chan);
 
       // record this entry
       if(adc<=0) continue;

@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.3 2003/02/18 22:01:40 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.4 2003/03/07 15:35:44 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -46,7 +46,7 @@ class  StEEmcDbIndexItem1;
 
 class StEEmcDbMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.3 2003/02/18 22:01:40 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.4 2003/03/07 15:35:44 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -72,7 +72,7 @@ class StEEmcDbMaker : public StMaker {
  public: 
   void setSectors(int ,int); ///< limit range for speed, default [5-8]
 
-  const  StEEmcDbIndexItem1* getT(int sec, int sub, int eta); ///< returns full DB info for one Tower channel
+  const  StEEmcDbIndexItem1* getT(int sec, char sub, int eta); ///< returns full DB info for one Tower channel
 
   void setTimeStampDay( int ); ///< to fix  time stamp for all events, default =not fixed 
 
@@ -86,7 +86,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.3 2003/02/18 22:01:40 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.4 2003/03/07 15:35:44 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
