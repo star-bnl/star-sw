@@ -1,0 +1,55 @@
+macro init
+* load native gains from the minidaq structures
+  
+  macro/global/import *
+  message 'start run tfc_load_native_gains'
+
+  alias/create STAFCV_OK 1
+  alias/create STAFCV_BAD 0
+  
+  do j = 1,6
+     cd [params]/tpc/BEGIN_RUN
+     rowcount IT[j]
+     entries=staf_result(1)
+     current_sector = -1
+     n_sector=0
+     ve/create sector_list(24) i
+     do i=0,[entries]-1
+     tdm/table/cell/getvalue 'IT'//[j]//'['//[i]//'].sector'
+     if ( staf_result(1) .ne. [current_sector]) then
+         current_sector=staf_result(1)
+         n_sector = [n_sector]+1
+         ve/input sector_list([n_sector]) staf_result(1)
+     endif
+     enddo
+     do k= 1,[n_sector]
+     current_sector=sector_list([n_sector])
+     cd  [params]/tpc/tfcpars
+     rowcount tfc_sector_index 1
+     tdm/table/cell/putvalue 'tfc_sector_index[0].CurrentSector' [current_sector]
+     cd /dui 
+     ami/module/call tfc_load_native_gains _
+       [params]/tpc/tfcpars/tfc_sector_index_
+       [params]/tpc/BEGIN_RUN/IT[j]_
+       [params]/tpc/BEGIN_RUN/GN[j]_
+       [params]/tpc/BEGIN_RUN/ST[j]_
+       [calib]/tpc/gain_sec_m_
+       [calib]/tpc/Sector_[current_sector]/gain_row_in_
+       [calib]/tpc/Sector_[current_sector]/gain_data_in_
+       [calib]/tpc/Sector_[current_sector]/gain_row_out_
+       [calib]/tpc/Sector_[current_sector]/gain_data_out
+
+     if ( staf_status(1) .ne. STAFCV_OK) then
+        message 'Problem running tfc_load_native_gains'
+        goto RTRN
+     endif
+     enddo
+      
+enddo      
+ 
+   RTRN:
+
+  message 'finish tfc_load_native_gains'
+wait
+
+return
