@@ -1,9 +1,12 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.23 2004/03/28 04:09:08 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.24 2004/03/30 04:44:57 balewski Exp $
  
-#include <TDatime.h>
+
 #include <time.h>
+#include <string.h>
+
+#include <TDatime.h>
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -23,6 +26,7 @@
 #include "tables/St_eemcDbPMTcal_Table.h"
 #include "tables/St_eemcDbPMTped_Table.h"
 #include "tables/St_eemcDbPMTstat_Table.h"
+#include "tables/St_kretDbBlobS_Table.h"
 #include "cstructs/eemcConstDB.hh"
 
 
@@ -288,6 +292,7 @@ Int_t  StEEmcDbMaker::InitRun  (int runumber){
   
   mReloadDb();
   mOptimizeDb();
+  mOptimizeCrates();
 
   printf("%s::InitRun()  Found %d EEMC related tables for the present time stamp\n",GetName(),nFound);
 
@@ -298,77 +303,44 @@ Int_t  StEEmcDbMaker::InitRun  (int runumber){
 //__________________________________________________
 //__________________________________________________
 
-void  StEEmcDbMaker::mReloadCrateDb2003(){
-  nCrate=3;
-  mDbCrate=new EEmcDbCrate[ nCrate];
-  //tmp : valid in 2003 run
-  {
-    int i;
-    char tt[100];
-    for(i=0;i<3;i++) {// tower crates
-      EEmcDbCrate *cr=mDbCrate+i;
-      sprintf(tt,"crT%d",i+3);
-      cr->setName(tt);
-      cr->crID=i+3;
-      cr->crIDswitch= cr->crID;
-      cr->fiber=i;
-      if(i==2)  cr->fiber=3;
-      cr->nCh=128;
-      cr->nHead=4;
-      cr->type='T';
-    }// end towers
-
-  }
-  //tmp
+void  StEEmcDbMaker::mOptimizeCrates  (){
+  assert(mDbCrateConfBlob);
+  assert(nCrate==0);
   
-}
-//__________________________________________________
-//__________________________________________________
-//__________________________________________________
-
-void  StEEmcDbMaker::mReloadCrateDb2004(){
-  nCrate=22;
-  mDbCrate=new EEmcDbCrate[ nCrate];
-  //tmp : valid after  mar 9, ~23:00  R5069111
-  {
-    int i;
-    char tt[100];
-    for(i=0;i<6;i++) {// tower crates
-      EEmcDbCrate *cr=mDbCrate+i;
-      sprintf(tt,"crT%d",i+1);
-      cr->setName(tt);
-      cr->crID=i+1;
-      cr->crIDswitch= i+1;
-      cr->fiber=i;
-      cr->nCh=128;
-      cr->nHead=4;
-      cr->type='T';
-    }// end towers
-
-    for(i=0;i<16;i++) {// smd/pre/post  crates
-      EEmcDbCrate *cr=mDbCrate+6+i;
-      int sec=5+i/4;
-      int box=1+i%4;
-      sprintf(tt,"%02dS%d",sec,box);
-      if (box==4) sprintf(tt,"%02dP1",sec);
-      cr->setName(tt);
-      cr->crID=84+i;
-      cr->crIDswitch= 84+1;
-      cr->fiber=i+2;
-      if(i==4) cr->fiber=0; // 6S1
-      if(i==7) cr->fiber=1; // 6P1
-      cr->nCh=192;
-      cr->nHead=4;
-      cr->type='S';
-    }// end smd
-
-
-  }
-  //tmp
+  //  printf("dataS='%s'\n",mDbCrateConfBlob->dataS);
+  char *blob=mDbCrateConfBlob->dataS;
   
-}
+  blob=strtok(blob,";"); // init iterator
+  if(strstr(blob,"<ver1>")==0) {
+    printf("%s::mOptimizeCrates() FATAL, missing opening key for DB mDbCrateConfBlob->dataS\n",GetName());
+    assert(2==3); // beginning of record, tmp
+  }
+  
+  int i=0;
+  int icr=0;
+  while((blob=strtok(0,";"))) {  // advance by one nam{
+    i++;
+    if(strstr(blob,"<#>")) continue; // ignore some records
+    if(strstr(blob,"</ver1>")) goto done; // end of record, tmp
+    
+    // printf("i=%d -->'%s' \n",i,blob);
+    if(nCrate==0) {
+      nCrate=atoi(blob);
+      mDbCrate=new EEmcDbCrate[ nCrate];
+      printf("%s::mOptimizeCrates() map %d fibers to crates\n",GetName(),nCrate);
+      icr=0;
+      continue;
+    }
+    mDbCrate[icr].setAll(blob);
+    mDbCrate[icr].print();
+    icr++;
+  };
+  printf("%s::mOptimizeCrates() FATAL, missing terminating key for DB mDbCrateConfBlob->dataS\n",GetName());
+  assert(3==4);
+ done:
+  return;
+} 
 
-//__________________________________________________
 //__________________________________________________
 //__________________________________________________
 
@@ -388,7 +360,12 @@ void  StEEmcDbMaker::mReloadDb  (){
     delete mDbPMTstat [i]; mDbPMTstat [i]=0;
     mDbsectorID[i]=-1;
   }
-  
+
+  delete mDbCrateConfBlob;
+  if(mDbCrate) delete [] mDbCrate;
+  nCrate=0;
+  mDbCrateConfBlob=0;
+
   for(i=0; i<EEindexMax; i++)
     mDbItem1[i].clear();
   
@@ -455,33 +432,34 @@ void  StEEmcDbMaker::mReloadDb  (){
       int secID=is+mfirstSecID;
       
       mDbsectorID[is]=secID;
-      getTable<St_eemcDbADCconf,eemcDbADCconf_st>
-	(eedb,secID,"eemcADCconf",mask, mDbADCconf+is);
-
-      //      getTable<St_eemcDbPMTconf,eemcDbPMTconf_st>(eedb,secID,"eemcPMTconf",mask,mDbPMTconf+is);
-      
+      getTable<St_eemcDbADCconf,eemcDbADCconf_st>(eedb,secID,"eemcADCconf",mask,mDbADCconf+is);
    
-      getTable<St_eemcDbPMTcal,eemcDbPMTcal_st>(eedb,secID,"eemcPMTcal",mask,   mDbPMTcal+is);
+      getTable<St_eemcDbPMTcal,eemcDbPMTcal_st>(eedb,secID,"eemcPMTcal",mask,mDbPMTcal+is);
    
       
-      getTable<St_eemcDbPMTped,eemcDbPMTped_st>(eedb,secID,"eemcPMTped",mask, mDbPMTped+is);
+      getTable<St_eemcDbPMTped,eemcDbPMTped_st>(eedb,secID,"eemcPMTped",mask,mDbPMTped+is);
       
       
       getTable<St_eemcDbPMTstat,eemcDbPMTstat_st>(eedb,secID,"eemcPMTstat",mask,mDbPMTstat+is);
-
+      
 
     } // end of loop over sectors
     
+    // misc tables 
+    
+    getTable<St_kretDbBlobS,kretDbBlobS_st>(eedb,13,"eemcCrateConf",mask,&mDbCrateConfBlob);
+    //printf("AdataS='%s'\n",mDbCrateConfBlob->dataS);
+    
+    
   }// end of loop over flavors
  
+#if 0
 
   //tmp
-  TDatime aa1=mydb->GetDateTime();
- 
- if (aa1.GetDate()<20040101)
-   mReloadCrateDb2003();
- else
-   mReloadCrateDb2004();
+  TDatime aa1=mydb->GetDateTime(); 
+  if (aa1.GetDate()<20040101) xxx;
+
+#endif
 
 }
  
@@ -503,7 +481,7 @@ void  StEEmcDbMaker::print(int k){
     n++;
     if(k>0) mDbItem1[i].print();
   }
-  printf(" total non-empty DB records is %d\n",n);
+  printf(" total non-empty DB records: %d pixels, %d data blocks\n",n,nCrate);
 }
  
 //__________________________________________________
@@ -511,6 +489,7 @@ void  StEEmcDbMaker::print(int k){
 //__________________________________________________
 
 void  StEEmcDbMaker::mOptimizeDb(){
+  
 
   int i, j;
   printf("\noptimizeDb :::::: %s\n\n",GetName());
@@ -698,16 +677,20 @@ Int_t StEEmcDbMaker::Make(){
 //_________________________________________________________
 //_________________________________________________________
 
-template <class St_T, class T_st>  void StEEmcDbMaker 
-::getTable(TDataSet *eedb, int secID, TString tabName, TString mask,  T_st **outTab){
+template <class St_T, class T_st> void StEEmcDbMaker 
+::getTable(TDataSet *eedb, int secID, TString tabName, TString mask,  T_st** outTab ){
 
   //  printf("\n\n%s ::TTT --> %s, size=%d\n\n\n",GetName(),tabName.Data(),sizeof(T_st));
 
   //   printf("\n\n%s ::TTT --> mask='%s' p=%p ss=%d\n",tabName.Data(),mask.Data(),*outTab,tabName.Contains(mask));
 
-  if(!mask.IsNull() && !tabName.Contains(mask)) return;
+  if(!mask.IsNull() && !tabName.Contains(mask)) return ;
   char name[1000];
-  sprintf(name,"sector%2.2d/%s",secID,tabName.Data());
+  if(secID<13) 
+    sprintf(name,"sector%2.2d/%s",secID,tabName.Data());
+  else
+    sprintf(name,"misc/%s",tabName.Data());
+
 
   printf("request=%s==>", name);
   St_T *ds= (St_T *)eedb->Find(name);
@@ -725,19 +708,21 @@ template <class St_T, class T_st>  void StEEmcDbMaker
 
   if(tab==0) {
     printf(" GetArray() failed\n");
-    return ;
+    return  ;
   }
 
-  *outTab= new T_st (*tab); // copy the whole s-struct to allow flavor change
-  // mCleanDbNames((*outTab)->name, EEMCDbMaxAdcName);
+  *outTab=new T_st (*tab);
   printf("'%s'\n",tab->comment);
 
   nFound++;
-  return ;
+  return ; // copy the whole s-struct to allow flavor change;
 }
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.24  2004/03/30 04:44:57  balewski
+// *** empty log message ***
+//
 // Revision 1.23  2004/03/28 04:09:08  balewski
 // storage of EEMC raw data, not finished
 //
