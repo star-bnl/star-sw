@@ -1,5 +1,9 @@
-* $Id: tpt_cross_fact.F,v 1.6 1999/10/15 00:54:08 nevski Exp $
+* $Id: tpt_cross_fact.F,v 1.7 1999/12/16 16:06:16 sakrejda Exp $
 * $Log: tpt_cross_fact.F,v $
+* Revision 1.7  1999/12/16 16:06:16  sakrejda
+* Argument that passes tphit.row word of the tohit table changed to INTEGER*2
+* (idet) to catch up with Raymond's changes of tphit.row to short from long.
+*
 * Revision 1.6  1999/10/15 00:54:08  nevski
 * pgf->g77 cleanup
 *
@@ -43,7 +47,7 @@ C           Eliminate unused variables.
 C
       IMPLICIT NONE
 C______________________________________________________________________
-      INTEGER idet
+      INTEGER*2 idet
       REAL    xnew,ynew,xold,yold,cf,theta
       real    vlocal(3),vglobal(3)
       integer iret, isect
