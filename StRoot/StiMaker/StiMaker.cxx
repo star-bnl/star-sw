@@ -83,10 +83,11 @@ StiMaker::StiMaker(const Char_t *name) : StMaker(name),
 					 mSeedFinder(0),
 					 //Tracker
 					 mtracker(0),
+					 //flags
+					 mBuilt(false),
 					 //Members
 					 mevent(0), mMcEvent(0), mMcEventMaker(0),
-					 mAssociationMaker(0),
-					 mBuilt(false)
+					 mAssociationMaker(0)
 {
     cout <<"StiMaker::StiMaker()"<<endl;
     sinstance = this;
@@ -318,38 +319,40 @@ Int_t StiMaker::InitRun(int run)
 	StiCompositeSeedFinder* temp = new StiCompositeSeedFinder(mtrackfactory, mhitstore);
 	mSeedFinder=temp;
     }
-    else if (StiIOBroker::instance()->seedFinderType()==StiIOBroker::kUndefined) { //not initialized
-	cout <<"StiMaker::init(). ERROR:\t SeedFinderType==StiIOBroker::kUndefined"<<endl;
-    }
-    else { //catch all
-	cout <<"StiMaker::init(). ERROR:\t unkown SeedFinderType"<<endl;
-    }
-    
-    //The Tracker
-    mtracker = new StiKalmanTrackFinder();
-    mtracker->setTrackNodeFactory(mktracknodefactory);
-    mtracker->setTrackSeedFinder(mSeedFinder);
-    mtracker->setHitContainer(mhitstore);
-    mtracker->isValid(true);
-
-    if (StiIOBroker::instance()->useGui()) {
-	mdisplay->setSkeletonView();
-	mdisplay->draw();
-	mdisplay->update();
-	//mdisplay->print();
-    }
-
-    //The Evaluator
-    //First call to instance must specify then output file name
-    StiEvaluator::instance(mEvalFileName);
-
+	else if (StiIOBroker::instance()->seedFinderType()==StiIOBroker::kUndefined) { //not initialized
+	    cout <<"StiMaker::init(). ERROR:\t SeedFinderType==StiIOBroker::kUndefined"<<endl;
+	}
+	else { //catch all
+	    cout <<"StiMaker::init(). ERROR:\t unkown SeedFinderType"<<endl;
+	}
+	
+	//The Tracker
+	mtracker = new StiKalmanTrackFinder();
+	mtracker->setTrackNodeFactory(mktracknodefactory);
+	mtracker->setTrackSeedFinder(mSeedFinder);
+	mtracker->setHitContainer(mhitstore);
+	mtracker->isValid(true);
+	
+	if (StiIOBroker::instance()->useGui()) {
+	    mdisplay->setSkeletonView();
+	    mdisplay->draw();
+	    mdisplay->update();
+	    //mdisplay->print();
+	}
+	
+	//The Evaluator
+	//First call to instance must specify then output file name
+	if (StiIOBroker::instance()->simulated()==true) {
+	    StiEvaluator::instance(mEvalFileName);
+	}
+	
     }
     return StMaker::Init();
 }
 
 Int_t StiMaker::Make()
 {
-    //cout <<" \n\n ------------ You have entered StiMaker::Make() ----------- \n\n"<<endl;
+    cout <<" \n\n ------------ You have entered StiMaker::Make() ----------- \n\n"<<endl;
     
     StEvent* rEvent = 0;
     rEvent = (StEvent*) GetInputDS("StEvent");
@@ -372,7 +375,6 @@ Int_t StiMaker::Make()
     if (rEvent) {
 	mevent = rEvent;
 	
-	cout <<"\n---------- StiMaker::Make() ------------\n"<<endl;
 	cout <<"Number of Primary Vertices:\t"<<mevent->numberOfPrimaryVertices()<<endl;
 
 	//Fill hits, organize the container
@@ -440,10 +442,12 @@ void StiMaker::finishEvent()
 	//mTrackMerger->mergeTracks();
 	//clock.stop();
 	//cout <<"Time to merge tracks: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
-	cout <<"Associate for event\t";
-	StiEventAssociator::instance()->associate(mMcEvent);
-	cout <<"done"<<endl;
-	StiEvaluator::instance()->evaluateForEvent(mtrackstore);
+	if (StiIOBroker::instance()->simulated()==true) {
+	    cout <<"Associate for event\t";
+	    StiEventAssociator::instance()->associate(mMcEvent);
+	    cout <<"done"<<endl;
+	    StiEvaluator::instance()->evaluateForEvent(mtrackstore);
+	}
     }
     else {
 	cout <<"Test cleanup algorithm:"<<endl;
