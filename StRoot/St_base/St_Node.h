@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_Node.h,v 1.4 1998/12/27 04:16:44 fine Exp $
+// $Id: St_Node.h,v 1.5 1999/01/25 23:36:41 fine Exp $
 // $Log: St_Node.h,v $
+// Revision 1.5  1999/01/25 23:36:41  fine
+// St_DataSet fixed, St_DataSetIter::operator[] introduced, St_Node with own Hash methdo
+//
 // Revision 1.4  1998/12/27 04:16:44  fine
 // *** empty log message ***
 //
@@ -75,6 +78,7 @@ class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill {
                 TShape     *GetShape()  const {return fShape;}
         Int_t               GetVisibility() const {return fVisibility;}
         virtual TList      *GetListOfPositions() { return (TList *)(GetObject());}
+        virtual ULong_t   Hash() { return TObject::Hash();}
         virtual void        ImportShapeAttributes();
         virtual Bool_t      Is3D()  {return kTRUE;}
         virtual TList      *Nodes() const { return GetList(); }
