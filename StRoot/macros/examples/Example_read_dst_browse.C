@@ -1,5 +1,8 @@
-// $Id: Example_read_dst_browse.C,v 1.6 2000/04/13 21:46:20 kathy Exp $
+// $Id: Example_read_dst_browse.C,v 1.7 2000/06/14 19:21:40 kathy Exp $
 // $Log: Example_read_dst_browse.C,v $
+// Revision 1.7  2000/06/14 19:21:40  kathy
+// use MainFile input
+//
 // Revision 1.6  2000/04/13 21:46:20  kathy
 // remove loading of libtpc_Tables since l3Track table is now dst_track type from global
 //
@@ -36,8 +39,8 @@
 //     the tree_Maker and set up a chain
 //
 //===============================================================
-
 {
+Char_t *MainFile="/afs/rhic/star/data/samples/gstar.dst.root";
 
 gSystem->Load("St_base");
 
@@ -45,9 +48,9 @@ gSystem->Load("libglobal_Tables");
 gSystem->Load("libgen_Tables");
 gSystem->Load("libsim_Tables");
 
+
 TFile *root_file=0;
-root_file  =  new TFile(
- "/afs/rhic/star/data/samples/gstar.dst.root","read");
+root_file  =  new TFile(MainFile,"read");
 root_file.ls();
 root_file.Dump();
 TBrowser browser1;
