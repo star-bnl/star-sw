@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofCell.cxx,v 2.3 2003/08/28 23:24:17 jeromel Exp $
+ * $Id: StTofCell.cxx,v 2.4 2004/02/05 17:59:30 ullrich Exp $
  *
  * Author: F. Geurts, May 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofCell.cxx,v $
+ * Revision 2.4  2004/02/05 17:59:30  ullrich
+ * Changed $LINK to StLink mechanism and add new member.
+ *
  * Revision 2.3  2003/08/28 23:24:17  jeromel
  * Modif in class
  *
@@ -24,7 +27,7 @@
 #include "StTrack.h"
 #include "StThreeVectorD.hh"
 
-static const char rcsid[] = "$Id: StTofCell.cxx,v 2.3 2003/08/28 23:24:17 jeromel Exp $";
+static const char rcsid[] = "$Id: StTofCell.cxx,v 2.4 2004/02/05 17:59:30 ullrich Exp $";
 
 ClassImp(StTofCell)
 
@@ -32,8 +35,12 @@ StTofCell::StTofCell()
   : mTrayIndex(0), mModuleIndex(0), mCellIndex(0), mAdc(0), mTdc(0), mAssociatedTrack(0)
 { /* noop */ }
 
-StTofCell::StTofCell(int trayId, int moduleId, int cellId, int rawAdc, int rawTdc, StTrack* track, float zhit, int flag, StThreeVectorD& pos)
-  : mTrayIndex(trayId), mModuleIndex(moduleId), mCellIndex(cellId), mAdc(rawAdc), mTdc(rawTdc), mAssociatedTrack(track), mZhit(zhit), mMatchFlag(flag), mPosition(pos)
+StTofCell::StTofCell(int trayId, int moduleId, int cellId, int daqId, int rawAdc,
+		     int rawTdc, StTrack *track, float zhit,
+		     int flag, const StThreeVectorD& pos)
+  : mTrayIndex(trayId), mModuleIndex(moduleId), mCellIndex(cellId),
+    mDaqIndex(daqId), mAdc(rawAdc), mTdc(rawTdc), mAssociatedTrack(track),
+    mZhit(zhit), mMatchFlag(flag), mPosition(pos)
 { /* noop */ }
 
 StTofCell::~StTofCell() { /* noop */ }
@@ -60,7 +67,8 @@ int
 StTofCell::operator==(const StTofCell& p) const
 {
     return (p.mTrayIndex == mTrayIndex && p.mModuleIndex == mModuleIndex &&
-	    p.mCellIndex == mCellIndex && p.mAdc  == mAdc && p.mTdc  == mTdc &&
+	    p.mCellIndex == mCellIndex && p.mDaqIndex == mDaqIndex &&
+	    p.mAdc  == mAdc && p.mTdc  == mTdc &&
 	    p.mAssociatedTrack == mAssociatedTrack &&
 	    p.mZhit == mZhit &&
             p.mMatchFlag == mMatchFlag);
