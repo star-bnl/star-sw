@@ -22,27 +22,30 @@ my $debugOn=0;
 
 my @Sets = (
              "auau200/nexus/default/b0_3/year_1h/hadronic_on",
-             "auau200/mevsim/vanilla/central/year_1h/hadronic_on",
-             "auau200/mevsim/cascade/central/year_1h/hadronic_on",
-             "auau200/mevsim/vanilla/flow/year_1h/hadronic_on", 
-             "auau200/mevsim/vanilla/resonance/year_1h/hadronic_on",
-             "auau200/mevsim/vanilla/trigger/year_1h/hadronic_on",
+             "auau200/venus412/default/b0_3/year_1h/hadronic_on",
+              "pp200/pythia/default/minibias/year_2a/hadronic_on",
+              "auau200/strongcp/broken/eb-400_90/year_1h/hadronic_on", 
+#             "auau200/mevsim/vanilla/central/year_1h/hadronic_on",
+#             "auau200/mevsim/cascade/central/year_1h/hadronic_on",
+#             "auau200/mevsim/vanilla/flow/year_1h/hadronic_on", 
+#             "auau200/mevsim/vanilla/resonance/year_1h/hadronic_on",
+#             "auau200/mevsim/vanilla/trigger/year_1h/hadronic_on",
              "auau200/hijing/b8_15_jetq_off/jet05/year_1h/hadronic_on",
              "auau200/hijing/b8_15_jetq_on/jet05/year_1h/hadronic_on",
              "auau200/hijing/b0_3_jetq_off/jet05/year_1h/hadronic_on",
              "auau200/hijing/b0_3_jetq_on/jet05/year_1h/hadronic_on",
-             "auau200/hbt/default/peripheral/year_1h/hadronic_on",
-             "auau200/hbt/default/midperipheral/year_1h/hadronic_on",
-             "auau200/mevsim/vanilla/fluct/year_1h/hadronic_on",
-             "auau200/hbt/default/middle/year_1h/hadronic_on",
-             "auau200/hbt/default/central/year_1h/hadronic_on", 
-             "auau200/hbt/default/midcentral/year_1h/hadronic_on",  
+#             "auau200/hbt/default/peripheral/year_1h/hadronic_on",
+#             "auau200/hbt/default/midperipheral/year_1h/hadronic_on",
+#             "auau200/mevsim/vanilla/fluct/year_1h/hadronic_on",
+#             "auau200/hbt/default/middle/year_1h/hadronic_on",
+#             "auau200/hbt/default/central/year_1h/hadronic_on", 
+#             "auau200/hbt/default/midcentral/year_1h/hadronic_on",  
 );
 
-my $SetD = "daq/2000/02/";
+my $SetD = "daq/1999/12/";
 
 my $prodPeriod = "mdc3"; 
-my @chName = ("tfs1h", "tdaq4");
+my @chName = ("tfs4h", "tdaq4");
 my $prodDir = "tfs_6";              
 my @chainDir = ("tfs","daq","trs");
 
@@ -219,6 +222,7 @@ my $filename;
      my $flname = ($$jobnm)->fileN;
      my $jfile = $flname;
      next if ($flname =~ /^psc/);
+     next if ($flname =~ /rcf0201_01_14000evts/);
      if($jfile =~ /fzd/) {
       $jfile =~ s/.fzd//g;
     }
@@ -232,10 +236,6 @@ my $filename;
         my $mlibVer  = ($$optchain)->libVer; 
         my $mNikName = ($$optchain)->chaName;
 
-#      if($jset =~ /jets/) {
-#          $mNikName = "tfs6a";
-#          $mchain = "tfs_cy2a_eval_big_fzin";
-#     }    
 
           $mprodSr = $prodPeriod; 
           $myID = 100000000 + $new_id;

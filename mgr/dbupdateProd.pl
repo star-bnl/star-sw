@@ -60,6 +60,7 @@ my @SetG = (
              "pau200/hijing/b0_7/gam15/year_2a/hadronic_on",
              "pau200/hijing/b0_7/jet15/year_2a/hadronic_on",
              "pp200/pythia/default/minibias/year_2a/hadronic_on",
+             "auau200/strongcp/broken/eb-400_90/year_1h/hadronic_on",
              "auau200/mevsim/vcascade/central/year_1h/hadronic_on",       
              "auau200/mevsim/vcascade/flow/year_1h/hadronic_on", 
              "auau200/mevsim/vcascade/fluct/year_1h/hadronic_on",
@@ -198,11 +199,11 @@ my $inext =scalar(@SetG);
 #  $diskRecoDirs[$ll] = $DISK1 . "/" . $SetG[$ll] . "/tfs_6";
 #  print "diskRecoDir: $diskRecoDirs[$ll]\n" if $debugOn;
 #}
-for( $ll = 0; $ll< 35; $ll++) { 
+for( $ll = 0; $ll< 36; $ll++) { 
   $diskRecoDirs[$ll] = $DISK2 . "/" . $SetG[$ll] . "/tfs_6";
   print "diskRecoDir: $diskRecoDirs[$ll]\n";
 }
-for( $ii = 35; $ii< 42; $ii++) { 
+for( $ii = 36; $ii< 43; $ii++) { 
 $diskRecoDirs[$ii] = $DISK1 . "/" . $SetG[$ii] . "/tfs_6";
   print "diskRecoDir: $diskRecoDirs[$ii]\n";
 }
