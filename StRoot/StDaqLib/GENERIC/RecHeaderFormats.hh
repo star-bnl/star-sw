@@ -1,9 +1,22 @@
-// Record Formats for Version 1.10
-// The headers
+/***************************************************************************
+ * $Id: RecHeaderFormats.hh,v 1.3 1999/07/02 04:37:42 levine Exp $
+ * Author: M.W. Schulz, Jeff Landgraf, M.J. LeVine
+ ***************************************************************************
+ * Description: Bank header formats common to all detectors in STAR:
+ *              declarations and definitions
+ *
+ * change log
+ * 03-Jun-99 MJL add Pointer RICH to DATAP
+ * 23-Jun-99 MJL reinstate Pointer TRG to DATAP (deleted accidentally)
+ *
+ ***************************************************************************
+ * $Log: RecHeaderFormats.hh,v $
+ * Revision 1.3  1999/07/02 04:37:42  levine
+ * Many changes - see change logs in individual programs
+ *
+ *
+ **************************************************************************/
 
-// change log
-// 03-Jun-99 MJL add Pointer RICH to DATAP
-// 23-Jun-99 MJL reinstate Pointer TRG to DATAP (deleted accidentally)
 
 #ifndef RECHEADERFORMATS_HH
 #define RECHEADERFORMATS_HH
@@ -115,7 +128,20 @@ struct Bank_DATAP : public Bank
   Pointer RICH;
   Pointer TRG;
   Pointer L3;
-  INT32 reserved[101];
+  INT32 reserved[102];
 };
+
+// some unavoidable detector-specific definitions:
+//
+struct ASIC_params 
+  // these params used to emulate ASIC behavior in the reader
+{
+  unsigned char thresh_lo;
+  unsigned char thresh_hi;
+  unsigned char n_seq_lo;
+  unsigned char n_seq_hi;
+};
+
+
 
 #endif

@@ -1,6 +1,19 @@
-/* this one helps you to calculate and check the CRC */
-/* it takes care of the endiness of your banks */
-
+/***************************************************************************
+ * $Id: CRC.cxx,v 1.2 1999/07/02 04:37:41 levine Exp $
+ * Author: M.W. Schulz
+ ***************************************************************************
+ * Description: calculate and check the CRC
+ *      
+ *
+ *   change log
+ *
+ ***************************************************************************
+ * $Log: CRC.cxx,v $
+ * Revision 1.2  1999/07/02 04:37:41  levine
+ * Many changes - see change logs in individual programs
+ *
+ *
+ **************************************************************************/
 #include "CRC.hh" 
 
 

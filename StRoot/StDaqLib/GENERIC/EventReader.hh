@@ -1,11 +1,30 @@
+/***************************************************************************
+ * $Id: EventReader.hh,v 1.3 1999/07/02 04:37:41 levine Exp $
+ * Author: M.J. LeVine
+ ***************************************************************************
+ * Description: common definitions for all detectors
+ *      
+ *
+ *   change log
+ * 06-June-99 MJL added EventInfo struct, changed method getEventInfo()
+ * 06-June-99 MJL added printEventInfo()
+ * 17-June-99 Herb Ward changed the dimension of errstr0 from 50 to 250
+ * 23-Jun-99 MJL add verbose flag and setVerbose() method
+ * 25-Jun-99 MJL added TPCV2P0_CPP_SR::getAsicParams(ASIC_params *);
+ *
+ ***************************************************************************
+ * $Log: EventReader.hh,v $
+ * Revision 1.3  1999/07/02 04:37:41  levine
+ * Many changes - see change logs in individual programs
+ *
+ *
+ **************************************************************************/
 #ifndef EVENTREADER_HH
 #define EVENTREADER_HH
 
 
-//   change log
-// 06-June-99 MJL added EventInfo struct, changed method getEventInfo()
-// 06-June-99 MJL added printEventInfo()
-// 17-June-99 Herb Ward changed the dimension of errstr0 from 50 to 250
+
+
 #include <sys/types.h>
 
 #include <string>
@@ -79,6 +98,7 @@ struct ASIC_Cluster
   short start_time_bin;
   short stop_time_bin;
 };
+
 
 // The sector reader virtual classes
 class ZeroSuppressedReader
@@ -198,6 +218,8 @@ public:
 	// returns 0 if OK
 	// returns negative if call fails
 
+  virtual int getAsicParams(ASIC_params *)=0;
+
   virtual int MemUsed()=0;
   virtual ~CPPReader() {};
 };
@@ -291,6 +313,8 @@ public:
       //  They store the DATAP pointer
 
   long NextEventOffset();
+  void setVerbose(int); // 0 turns off all internal printout
+  int verbose;
 
   ~EventReader();
 
@@ -334,5 +358,3 @@ EventReader *getEventReader(int fd, long offset, int MMap=1);
 EventReader *getEventReader(char *event);
 
 #endif
-
-

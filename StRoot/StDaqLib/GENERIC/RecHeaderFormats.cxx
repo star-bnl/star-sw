@@ -1,8 +1,25 @@
-// History of modifications
-// 06/11/99
-//Loop index changed from l to ll to compensate for the problems this
-//compiler has with the scope ov variables that are in parentheses
-//Place in the code marked with the above comment.
+/***************************************************************************
+ * $Id: RecHeaderFormats.cxx,v 1.3 1999/07/02 04:37:41 levine Exp $
+ * Author: M.W. Schulz, Jeff Landgraf, M.J. LeVine
+ ***************************************************************************
+ * Description: Bank header formats common to all detectors in STAR:
+ *              methods
+ *
+ * History of modifications
+ * 06/11/99
+ *  Loop index changed from l to ll to compensate for the problems this
+ *  compiler has with the scope ov variables that are in parentheses
+ *  Place in the code marked with the above comment.
+ *
+ ***************************************************************************
+ * $Log: RecHeaderFormats.cxx,v $
+ * Revision 1.3  1999/07/02 04:37:41  levine
+ * Many changes - see change logs in individual programs
+ *
+ *
+ **************************************************************************/
+
+
 
 #include <stdio.h>
 #include <assert.h>
