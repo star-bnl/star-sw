@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofPidTraits.h,v 2.5 2004/07/08 16:56:35 ullrich Exp $
+ * $Id: StTofPidTraits.h,v 2.6 2004/07/12 21:04:16 jeromel Exp $
  *
  * Author: Thomas Ullrich, Dec 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofPidTraits.h,v $
+ * Revision 2.6  2004/07/12 21:04:16  jeromel
+ * Commented out clone()
+ *
  * Revision 2.5  2004/07/08 16:56:35  ullrich
  * New class member introduced.
  *
@@ -77,7 +80,7 @@ private:
     Float_t   mSigmaKaon;
     Float_t   mSigmaProton;
 
-    StObject* clone() const;
+    //StObject* clone() const;
     ClassDef(StTofPidTraits,2)
 };
 
