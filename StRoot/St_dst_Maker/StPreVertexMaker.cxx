@@ -1,5 +1,8 @@
-// $Id: StPreVertexMaker.cxx,v 1.5 2000/03/16 21:31:21 wdeng Exp $
+// $Id: StPreVertexMaker.cxx,v 1.6 2000/05/08 20:20:42 wdeng Exp $
 // $Log: StPreVertexMaker.cxx,v $
+// Revision 1.6  2000/05/08 20:20:42  wdeng
+// Install a switch to call lmv if the tracks are less than 15. Flag pre-vertex the same numbers as that in evr_am if lmv get called.
+//
 // Revision 1.5  2000/03/16 21:31:21  wdeng
 // Change the name of evr_evrpar to pre_evr_evrpar.
 //
@@ -27,6 +30,9 @@
 #include "St_DataSetIter.h"
 #include "StMessMgr.h"
 #include "global/St_evr_am_Module.h"
+#include "St_db_Maker/St_db_Maker.h"
+
+long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate);
 
 ClassImp(StPreVertexMaker)
   
@@ -65,7 +71,6 @@ Int_t StPreVertexMaker::Init(){
 Int_t StPreVertexMaker::Make(){
   PrintInfo();  
 
-  // Set up in order to call evr_am
   St_dst_vertex *preVertex = new St_dst_vertex("preVertex",4); 
   AddData(preVertex);   
   
@@ -76,7 +81,6 @@ Int_t StPreVertexMaker::Make(){
     tptrack   = (St_tpt_track  *) tpctracksI("tptrack");
   }
 
-  // If tptrack exists, we call evr_am
   if( !tptrack ) {
     gMessMgr->Warning() << "no tptrack. Exit from StPreVertexMaker!" << endm;
     return kStWarn;    
@@ -90,7 +94,6 @@ Int_t StPreVertexMaker::Make(){
     tpt_track_st *tptrackTable = tptrack->GetTable();
     dst_track_st globtpcRow;
 
-    // Copy tptrack to globtpc if good quality
     Int_t counter = 0;
     for( Int_t i=0; i<numRowTptrack; i++) {
       if( tptrackTable[i].flag < 0 ) continue;
@@ -108,9 +111,22 @@ Int_t StPreVertexMaker::Make(){
       counter++;
     }
 
-    Int_t iRes = evr_am(m_pre_evrpar,&globtpc,preVertex);
+    Int_t iRes = kStOK;
+    if( globtpc.GetNRows() >= 15 ) {
+      iRes = evr_am(m_pre_evrpar,&globtpc,preVertex);
+    } else {
+      St_db_Maker *db = ( St_db_Maker *)GetMaker("db");
+      Int_t mdate = db->GetDateTime().GetDate();
+      iRes = lmv(&globtpc,preVertex,mdate);
+      
+      // use the same flag convention as that in evr_am 
+      Int_t flagArray[] = {-103, -102, -101, 101};
+      dst_vertex_st* preVertexT = preVertex->GetTable();
+      for( Int_t i=0; i< preVertex->GetNRows(); i++)
+	(preVertexT+i)->iflag = flagArray[i];
+    }
     if (iRes !=kSTAFCV_OK) return kStWarn;
   }
- 
+  
   return kStOK;
 }
