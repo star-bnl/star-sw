@@ -1,6 +1,6 @@
 #!/opt/star/bin/perl -w
 #
-# $Id: dbbackup.pl,v 1.7 1999/09/21 12:26:38 wenaus Exp $
+# $Id: dbbackup.pl,v 1.8 1999/10/30 15:10:56 wenaus Exp $
 #
 ######################################################################
 #
@@ -13,6 +13,9 @@
 # Usage:    dbbackup.pl 
 #
 # $Log: dbbackup.pl,v $
+# Revision 1.8  1999/10/30 15:10:56  wenaus
+# more robust wildcarding
+#
 # Revision 1.7  1999/09/21 12:26:38  wenaus
 # Add calib/param databases to backup list
 #
@@ -79,7 +82,7 @@ foreach $db ( keys %dbToBackup ) {
         if ( $out ne '' ) {print $out}
     }
     ## Keep only the most recent nToKeep for each DB
-    @files = split(/\n/,`cd $backupDir; ls -1 $db*`);
+    @files = split(/\n/,`cd $backupDir; ls -1 $db-*.gz`);
     # sort the list and delete from the top
     $nf = 0;
     foreach $fl ( reverse sort @files ) {
