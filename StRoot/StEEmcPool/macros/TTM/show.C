@@ -8,6 +8,11 @@ class StThreeVectorD;
 
 class StChain;
 class StMuTrack;
+class StMuDstMaker;
+class StEventInfo;
+class StEventSummary;
+
+
 class EEmcTower;
 class EEmcTTDisplay;
 class EEmcTTMMaker;
@@ -16,6 +21,8 @@ class EEmcTTMMaker;
 StChain       *chain=0;
 EEmcTTDisplay *eemc =0;
 EEmcTTMMaker  *ttm  =0;
+StMuDstMaker  *muDstMaker=0;
+TPaveText     *eventInfo =0;
 
 void      printNodeTree(TObjArray *nodeList, Int_t level=0);
 TGeoNode *findNode     (TObjArray *nodeList,const char *name);
@@ -53,7 +60,13 @@ show
   //
 
   // for display
-  TCanvas      *c1    = new TCanvas("eemc","eemc",10,10,1000,1000);
+  TCanvas    *c1   = new TCanvas("eemc","eemc",10,10,1000,1000);
+  TPaveLabel *tlab = new TPaveLabel(-0.95,+0.95,+0.95,+0.90,"EEMC TOWERS & TPC TRACKS");
+  TDatime    *now  = new TDatime; 
+  TPaveLabel *date = new TPaveLabel(+0.2,-0.99,+0.92,-0.95,
+				    TString("Piotr A. Zolnierczuk (IU) ") + now->AsString());
+  eventInfo = new TPaveText(-0.95,-0.99,+0.0,-0.90);
+
   TGeoManager  *gm    = new TGeoManager("eemc", "eemc tower display");
   TGeoVolume   *top   = gm->MakeBox("star",0, 200., 200., 350.);
   TGeoVolume   *smbox = gm->MakeBox("smbox1",0, 1., 1., 1.);
@@ -70,19 +83,25 @@ show
 
   c1->SetTheta(90);
   c1->SetPhi(0);
+
   top->Draw();
+  tlab->Draw();
+  date->Draw();
+
+  gPad->Update();
+
   
   // now we add Makers to the chain...  some of that is black magic :) 
-  muDstMaker       = new StMuDstMaker(0,0,inpDir,inpFile,"MuDst.root",nFiles);  // muDST main chain
-  StMuDbReader* db = StMuDbReader::instance();                                  // need the database
-  StEEmcDbMaker  *eemcDbMaker=new StEEmcDbMaker("eemcDb");                      // need EEMC database  
-  St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");                // need the database (???)
+  muDstMaker = new StMuDstMaker(0,0,inpDir,inpFile,"MuDst.root",nFiles);  // muDST main chain
+  StMuDbReader  *db          = StMuDbReader::instance();                        // need the database
+  StEEmcDbMaker *eemcDbMaker =new StEEmcDbMaker("eemcDb");                      // need EEMC database  
+  St_db_Maker   *dbMk        = new St_db_Maker("StarDb", "MySQL:StarDb");       // need the database (???)
 
   // now comment in/out/change the below if you want it your way
   eemcDbMaker->setSectors(5,8);            // request EEMC DB for sectors you need (dafault:1-12)
   eemcDbMaker->setTimeStampDay(20030514);  // format: yyyymmdd
-  // eemcDbMaker->setDBname("TestScheme/eemc");               // use alternative database
-  // eemcDbMaker->setPreferedFlavor("set430","eemcPMTcal");   // request alternative flavor of DB table (if needed)
+  // eemcDbMaker->setDBname("TestScheme/eemc");             // use alternative database (if needed)
+  // eemcDbMaker->setPreferedFlavor("set430","eemcPMTcal"); // request alternative flavor (if needed)
 
   // finally after so many lines we arrive at the good stuff
   ttm = new  EEmcTTMMaker ("TTM",muDstMaker,eemcDbMaker);
@@ -95,19 +114,20 @@ show
   chain->ls(3);
 
   //---------------------------------------------------
-  run(2);
+  next();
 }
 
 
 
 void 
-run(int nEvents=-1)
+next(int nMatch=1)
 {
-  int stat=0;
-  for(int counter=0; nEvents<0 || counter<nEvents ; ++counter) {
+  char buffer[1024];
+  int  stat=0;
+  int  match=0;
+  while(match<nMatch) {
     if( (stat = chain->Make()) != 0 ) break;
  
-    TIter  nextTower(ttm->GetTowers());
     TIter  nextMatch(ttm->GetMatch()->GetTable());
     
     EEmcTower *tower;
@@ -115,34 +135,36 @@ run(int nEvents=-1)
     TPair     *mapPair;
     if(ttm->GetMatch()->GetTable()->IsEmpty()) continue;
 
+    match++;
+
+    
+    StEventInfo    &evinfo = muDstMaker->muDst()->event()->eventInfo();   // event info
+    StEventSummary &evsumm = muDstMaker->muDst()->event()->eventSummary();// event summary
+    sprintf(buffer,"Run #%d Event #%d\n",evinfo.runId(),evinfo.id());
+    eventInfo->Clear();
+    eventInfo->SetTextAlign(12);
+    eventInfo->AddText(buffer);
+
     eemc->Clear();
-    cerr << "<Event>\n";
+    cerr << "<Event";
+    cerr << "Run=\""  << evinfo.runId() << "\"\t";
+    cerr << "Event=\""<< evinfo.id()    << "\">\n";
     while ((mapPair = (TPair*) nextMatch())) {
+      TString outs;
       tower = (EEmcTower *)mapPair->Key();
       track = (StMuTrack *)mapPair->Value();
       eemc->towerHit(*tower);
       eemc->trackHit(*track);
       eemc->Out(cerr,*track,*tower);
-#if FOR_DEBUGG
-      StPhysicalHelixD helix = track->helix();
-      Float_t zPos[] = { 270.290, 279.542 , 306.058 , -1.0 };
-      for(int i=0; zPos[i]>0.0; i++) {
-	double             dipAng = helix.dipAngle();
-	double             z0     = helix.origin().z();
-	if(dipAng<1.0e-10) continue;
-	double s  = ( zPos[i] - z0 ) / sin(dipAng)  ;
-	StThreeVectorD hit = helix.at(s);
-	cerr << hit.x() << " " << hit.y() << " " << hit.z() << "\t";
-	gm->SetCurrentPoint(hit.x(),hit.y(),hit.z());
-	TGeoNode *gnode=gm->FindNode();
-	if(gnode!=NULL) cerr << gnode->GetVolume()->GetName() << endl;
-	else cerr << "node not found " << endl;
-      }
-#endif
+      eemc->Out(outs,*track,*tower);
+      eventInfo->AddText(outs);
     }
     cerr << "</Event>" << endl;
     eemc->DrawHits();
+    eventInfo->Draw();
+
     gPad->Update();
+
   }
   ttm->Summary(cerr);
 }
