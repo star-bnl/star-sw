@@ -46,8 +46,6 @@ class StiKalmanTrackNode : public StiTrackNode
   void updateNode() throw (Exception);
   void extendToVertex() throw (Exception);
   void rotate(double alpha) throw ( Exception);
-  void setDetector(const StiDetector * det);
-  const StiDetector* getDetector() const;
   
   double fAlpha;          // rotation angle
   double fX;              // X-coordinate of this track (reference plane)
