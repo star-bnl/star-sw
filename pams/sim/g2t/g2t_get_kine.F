@@ -23,7 +23,7 @@ CC:>-----+---------+---------+---------+---------+---------+---------+---------+
      >          Iv0, Ip0, Mecat, Meca, Ivol, N_parent, numed, Jv, Kv 
       REAL      VMOD, VDIST, Pvert(4), Vert(3), Ubuf(Lbuf), Par(50),
      >          Amass, Tlife, Charge, Tofg, Pt, tet, Eta, rap, 
-     >          P(4),V(3),am,time,Vcut/0.0010/
+     >          d,P(4),V(3),am,time,Vcut/0.0010/
       CHARACTER NAPART*24,Cvol*4,Cshap*4
       Integer   NUM(100000),ISTAT,IDPDG,MOTH(2),IDAU(2)
 
