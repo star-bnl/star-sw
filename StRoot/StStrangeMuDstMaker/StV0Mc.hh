@@ -1,7 +1,10 @@
 /***********************************************************************
  *
- * $Id: StV0Mc.hh,v 3.0 2000/07/14 12:56:50 genevb Exp $
+ * $Id: StV0Mc.hh,v 3.1 2001/05/04 20:15:14 genevb Exp $
  * $Log: StV0Mc.hh,v $
+ * Revision 3.1  2001/05/04 20:15:14  genevb
+ * Common interfaces and reorganization of components, add MC event info
+ *
  * Revision 3.0  2000/07/14 12:56:50  genevb
  * Revision 3 has event multiplicities and dedx information for vertex tracks
  *
@@ -16,19 +19,19 @@
  ***********************************************************************/
 #ifndef  STAR_StV0Mc
 #define  STAR_StV0Mc
+#include "StV0I.hh"
 #include "StStrangeMuDst.hh"
 
 class StMcVertex;
 class StMcTrack;
 
-class StV0Mc : public StStrangeMuDst
-{
+class StV0Mc : public virtual StV0I, public StStrangeMuDst {
 
 public:
   StV0Mc();
-  StV0Mc(StMcVertex*, StMcTrack*, StMcTrack*);
+  StV0Mc(StMcVertex*, StMcTrack*, StMcTrack*, StStrangeEvMuDst*);
   ~StV0Mc();
-
+ 
   Int_t    decayMode() const;
   Int_t    geantIdParent() const;
   Int_t    geantIdPositive() const;
@@ -54,6 +57,26 @@ public:
   void SetHitInfoPositive(Int_t commonHits);
   void SetHitInfoNegative(Int_t commonHits);
   
+  // Coordinates of decay vertex
+  Float_t decayVertexV0X() const {return positionX();}
+  Float_t decayVertexV0Y() const {return positionY();}
+  Float_t decayVertexV0Z() const {return positionZ();}
+  // Momentum components of pos. daughter
+  Float_t momPosX() const {return positiveMomentumX();}
+  Float_t momPosY() const {return positiveMomentumY();}
+  Float_t momPosZ() const {return positiveMomentumZ();}
+  // Momentum components of neg. daughter
+  Float_t momNegX() const {return negativeMomentumX();}
+  Float_t momNegY() const {return negativeMomentumY();}
+  Float_t momNegZ() const {return negativeMomentumZ();}
+  // Momentum components of V0
+  Float_t momV0X() const {return parentMomentumX();}
+  Float_t momV0Y() const {return parentMomentumY();}
+  Float_t momV0Z() const {return parentMomentumZ();}
+
+protected:
+//  StStrangeEvMuDst *mEvent;       //!
+
   Int_t mPositiveSimTpcHits;
   Int_t mPositiveCommonTpcHits;
   
@@ -78,7 +101,7 @@ public:
   Float_t  mPositionZ;
 
 private:
-  ClassDef(StV0Mc,3)
+  ClassDef(StV0Mc,4)
 };
 
 inline Int_t StV0Mc::decayMode() const

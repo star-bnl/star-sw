@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiMuDst.cc,v 3.1 2000/08/10 01:16:25 genevb Exp $
+ * $Id: StXiMuDst.cc,v 3.2 2001/05/04 20:15:15 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 30-Mar-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StXiMuDst.cc,v $
+ * Revision 3.2  2001/05/04 20:15:15  genevb
+ * Common interfaces and reorganization of components, add MC event info
+ *
  * Revision 3.1  2000/08/10 01:16:25  genevb
  * Added number of dedx points
  *
@@ -32,7 +35,6 @@
  *
  *
  ***********************************************************************/
-#include "phys_constants.h"
 #include "StXiMuDst.hh"
 #include "StXiVertex.h"
 #include "StTrack.h"
@@ -42,7 +44,7 @@
 
 ClassImp(StXiMuDst)
 
-StXiMuDst::StXiMuDst() { 
+StXiMuDst::StXiMuDst() : StXiI() { 
 }
 
 void StXiMuDst::Fill(StXiVertex* xiVertex, 
@@ -83,138 +85,7 @@ void StXiMuDst::FillXi(StXiVertex* xiVertex) {
   }
 }
 
-void StXiMuDst::Clear() {
-  StV0MuDst::Clear();
-}
-
 StXiMuDst::~StXiMuDst() {
-}
-
-Float_t StXiMuDst::decayLengthV0() const {
-  return sqrt(pow(mDecayVertexV0X - mDecayVertexXiX,2) +
-              pow(mDecayVertexV0Y - mDecayVertexXiY,2) +
-              pow(mDecayVertexV0Z - mDecayVertexXiZ,2));
-}
-
-Float_t StXiMuDst::decayLengthXi() const {
-  return sqrt(pow(mDecayVertexXiX - mEvent->primaryVertexX(),2) +
-              pow(mDecayVertexXiY - mEvent->primaryVertexY(),2) +
-              pow(mDecayVertexXiZ - mEvent->primaryVertexZ(),2));
-}
-
-Float_t StXiMuDst::Ptot2Bachelor () {
-  return (mMomBachelorX*mMomBachelorX +
-          mMomBachelorY*mMomBachelorY + 
-          mMomBachelorZ*mMomBachelorZ);
-}
-
-Float_t StXiMuDst::Pt2Xi() {
-     Float_t mMomXiX = momXiX();
-     Float_t mMomXiY = momXiY();
-     return (mMomXiX*mMomXiX + mMomXiY*mMomXiY);
-}
-
-Float_t StXiMuDst::Ptot2Xi() {
-     Float_t mMomXiZ = momXiZ();
-     return (Pt2Xi() + mMomXiZ*mMomXiZ);
-}
-
-Float_t StXiMuDst::MomBachelorAlongXi() {
-  Float_t mPtot2Xi = Ptot2Xi();
-  if (mPtot2Xi)
-    return (mMomBachelorX*momXiX() + 
-            mMomBachelorY*momXiY() +
-            mMomBachelorZ*momXiZ()) / sqrt(mPtot2Xi);
-  return 0.;
-}
-
-Float_t StXiMuDst::MomV0AlongXi() {
-  Float_t mPtot2Xi = Ptot2Xi();
-  if (mPtot2Xi)
-    return (momV0X()*momXiX() + 
-            momV0Y()*momXiY() + 
-            momV0Z()*momXiZ()) / sqrt(mPtot2Xi);
-  return 0.;
-}
-
-Float_t StXiMuDst::alphaXi() {
-  Float_t mMomBachelorAlongXi = MomBachelorAlongXi();
-  Float_t mMomV0AlongXi = MomV0AlongXi();
-  switch (mCharge) {
-  case 1:
-    return (mMomBachelorAlongXi-mMomV0AlongXi)/
-           (mMomBachelorAlongXi+mMomV0AlongXi);
-  case -1:
-    return (mMomV0AlongXi-mMomBachelorAlongXi)/
-           (mMomV0AlongXi+mMomBachelorAlongXi);
-  default:
-    return 0.;
-  }
-}
-
-Float_t StXiMuDst::ptArmXi() {
-  Float_t mMomV0AlongXi = MomV0AlongXi();
-  return sqrt(Ptot2V0() - mMomV0AlongXi*mMomV0AlongXi);
-}
-
-Float_t StXiMuDst::eXi() {
-  return sqrt(Ptot2Xi()+M_XI_MINUS*M_XI_MINUS);
-}
-
-Float_t StXiMuDst::eOmega() {
-  return sqrt(Ptot2Xi()+M_OMEGA_MINUS*M_OMEGA_MINUS);
-}
-
-Float_t StXiMuDst::eBachelorPion() {
-  return sqrt(Ptot2Bachelor()+M_PION_MINUS*M_PION_MINUS);
-}
-
-Float_t StXiMuDst::eBachelorKaon() {
-  return sqrt(Ptot2Bachelor()+M_KAON_MINUS*M_KAON_MINUS);
-}
-
-Float_t StXiMuDst::massOmega() {
-  return sqrt(pow(eLambda()+eBachelorKaon(),2)-Ptot2Xi());
-}
-
-Float_t StXiMuDst::massXi() {
-  return sqrt(pow(eLambda()+eBachelorPion(),2)-Ptot2Xi());
-}
-
-Float_t StXiMuDst::rapXi() {
-  Float_t mMomXiZ = momXiZ();
-  Float_t exi = eXi();
-  return 0.5*log((exi+mMomXiZ)/(exi-mMomXiZ));
-}
-
-Float_t StXiMuDst::rapOmega() {
-  Float_t mMomXiZ = momXiZ();
-  Float_t eom = eOmega();
-  return 0.5*log((eom+mMomXiZ)/(eom-mMomXiZ));
-}
-
-Float_t StXiMuDst::cTauOmega() {
-  return massOmega()*decayLengthXi()/sqrt(Ptot2Xi());
-}
-
-Float_t StXiMuDst::cTauXi() {
-  return massXi()*decayLengthXi()/sqrt(Ptot2Xi());
-}
-
-Float_t StXiMuDst::ptBachelor() {
-  return sqrt(Ptot2Bachelor()-mMomBachelorZ*mMomBachelorZ);
-}
-
-Float_t StXiMuDst::ptotBachelor() {
-  return sqrt(Ptot2Bachelor());
-}
-
-Float_t StXiMuDst::ptXi() {
-  return sqrt(Pt2Xi());
-}
-
-Float_t StXiMuDst::ptotXi() {
-  return sqrt(Ptot2Xi());
 }
 
 Long_t StXiMuDst::detectorIdXi() {

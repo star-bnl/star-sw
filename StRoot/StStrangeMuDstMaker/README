@@ -28,9 +28,11 @@ History:
 290300 GVB Added Wensheng's StKinkMuDst, replaced arrays
 020600 GVB Addition of MC classes, version 2 of software
 121200 PGJ Added StStrangeMuDstPlayer front-end
+040501 GVB Data/MC classes given common interfaces
 
 ____________________________________________________________
 Files:
+St*I.hh                   : Interfaces classes for components of muDST
 StStrangeMuDstMaker.*     : Maker which oversees processing of muDST
 StStrangeControllerBase.* : Functions for processing all muDST components
 St*Controller.cxx         : Functions for processing specific muDST components

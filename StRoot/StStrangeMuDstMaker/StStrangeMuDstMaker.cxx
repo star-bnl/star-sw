@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 3.10 2001/04/25 18:20:53 perev Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.11 2001/05/04 20:15:14 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.11  2001/05/04 20:15:14  genevb
+// Common interfaces and reorganization of components, add MC event info
+//
 // Revision 3.10  2001/04/25 18:20:53  perev
 // HPcorrs
 //
@@ -97,6 +100,7 @@ StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
   muDst = 0;
   tree = 0;
   evClonesArray = 0;
+  evMcArray = 0;
   dstMaker = 0;
   cuts = new StStrangeCuts();
   SetNumber(-2);
@@ -132,6 +136,7 @@ StStrangeMuDstMaker::~StStrangeMuDstMaker() {
 
   if (!dstMaker) {           // Don't delete other maker's array!
     delete evClonesArray; evClonesArray = 0;
+    if (evMcArray) { delete evMcArray; evMcArray = 0; }
   }
   delete cuts; cuts = 0;
 }
@@ -146,6 +151,7 @@ Int_t StStrangeMuDstMaker::Init() {
   if (OpenFile() == kStErr) return kStErr;
   if (!dstMaker) {
     evClonesArray = new TClonesArray("StStrangeEvMuDst",1);
+    if (doMc) evMcArray = new TClonesArray("StStrangeEvMuDst",1);
   }
   StStrangeControllerBase::currentMaker = this;
   {EachDoT(cont[i] = StStrangeControllerBase::Instantiate(i));}
@@ -180,6 +186,7 @@ void StStrangeMuDstMaker::InitReadDst() {
     return;
   }
   tree->SetBranchAddress("Event",&evClonesArray);
+  if (doMc) tree->SetBranchAddress("McEvent",&evMcArray);
   EachController(InitReadDst());
   cuts->Append((TOrdCollection*) muDst->Get("StrangeCuts"));
 }
@@ -194,16 +201,25 @@ void StStrangeMuDstMaker::InitCreateDst() {
     Int_t split=2;
     TBranch* branch = tree->Branch("Event",&evClonesArray,bsize[evT],split);
     branch->SetFile(file[evT]);
+    if (doMc) {
+      branch = tree->Branch("McEvent",&evMcArray,bsize[evT],split);
+      branch->SetFile(file[evT]);
+    }
     cuts->Assure();
   }
 }
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::InitCreateSubDst() {
 
-  evClonesArray = dstMaker->GetEvClonesArray();
   Int_t split=2;
+  evClonesArray = dstMaker->GetEvClonesArray();
   TBranch* branch = tree->Branch("Event",&evClonesArray,bsize[evT],split);
   branch->SetFile(file[evT]);
+  if (doMc) {
+    evMcArray = dstMaker->GetEvMcArray();
+    TBranch* branch = tree->Branch("McEvent",&evMcArray,bsize[evT],split);
+    branch->SetFile(file[evT]);
+  }
   EachController(InitCreateSubDst());
   cuts->Append(dstMaker->Cuts().GetCollection());
 }
@@ -310,6 +326,7 @@ Int_t StStrangeMuDstMaker::MakeCreateMcDst() {
 	 << " mc branch and assoc branch  will not be filled. " << endm;       
     return 0;
   }
+  new((*evMcArray)[0]) StStrangeEvMuDst(*mcEvent);
   if (!GetMaker("StAssociationMaker")) {
     gMessMgr->Warning() << "StStrangeMuDstMaker: no associated info! \n" 
 		      << " assoc branch will not be filled. " << endm;
@@ -376,7 +393,10 @@ void StStrangeMuDstMaker::Clear(Option_t *option) {
   if (tree) {
     if (dstMaker) {                                   // Making a subDST
       MakeCreateSubDst();
-    } else if (evClonesArray) evClonesArray->Clear(); // Not if making a subDST
+    } else {
+      if (evClonesArray) evClonesArray->Clear();      // Not if making a subDST
+      if (evMcArray) evMcArray->Clear();              // Not if making a subDST
+    }
 
     EachController(Clear());
     if (rw == StrangeNoKeep) tree->Reset();
@@ -457,7 +477,10 @@ Int_t StStrangeMuDstMaker::OpenFile() {
                       << file[evT] << endm;
     return kStErr;
   }
-  if (rw == StrangeWrite) muDst->SetFormat(1);   // Necessary to read MuDst in plain root
+  // 4/26/01 - GVB
+  // The following line became outdated with switching to Root I/O instead
+  // of STAR I/O as of Root version 3.
+  //if (rw == StrangeWrite) muDst->SetFormat(1);   // Necessary to read MuDst in plain root
   gMessMgr->Info() << "StStrangeMuDstMaker: Opened event file for " << inout
                    << ":\n  " << file[evT] << endm;     
   return kStOk;

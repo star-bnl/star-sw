@@ -1,5 +1,8 @@
-// $Id: StXiController.cxx,v 3.3 2000/09/18 19:25:19 genevb Exp $
+// $Id: StXiController.cxx,v 3.4 2001/05/04 20:15:15 genevb Exp $
 // $Log: StXiController.cxx,v $
+// Revision 3.4  2001/05/04 20:15:15  genevb
+// Common interfaces and reorganization of components, add MC event info
+//
 // Revision 3.3  2000/09/18 19:25:19  genevb
 // Additional protection for missing MC info
 //
@@ -51,14 +54,24 @@ StXiController::~StXiController() {
 //_____________________________________________________________________________
 Int_t StXiController::MakeReadDst() {
 
+  Int_t j;
   StStrangeEvMuDst* ev = masterMaker->GetEvent();      // Tell the vertices
   entries = GetN();                                    // about the event
-  for (Int_t j = 0; j<entries; j++) {
+  for (j = 0; j<entries; j++) {
     StXiMuDst* xi = (StXiMuDst*) (*dataArray)[j];
     xi->SetEvent(ev);
   }
   PrintNumCand("read",entries);
   nEntries += entries;
+
+  if (doMc) {
+    ev = masterMaker->GetMcEvent();
+    Int_t mc_entries = GetNMc();
+    for (j = 0; j<mc_entries; j++) {
+      StXiMc* mc_xi = (StXiMc*) (*mcArray)[j];
+      mc_xi->SetEvent(ev);
+    }
+  }
 
   return kStOK;
 }
@@ -96,6 +109,7 @@ Int_t StXiController::MakeCreateMcDst(StMcVertex* mcVert) {
     theMcTrackMap = assocMaker->mcTrackMap();
   }
   if (!((assocMaker)&&(theMcXiMap)&&(theMcTrackMap))) return kStOk;
+  StStrangeEvMuDst* ev = masterMaker->GetMcEvent();
   StXiVertex* rcXiPartner = 0;
   StMcTrack* Bach = 0;
   StMcTrack* V0daughter = 0;
@@ -112,7 +126,7 @@ Int_t StXiController::MakeCreateMcDst(StMcVertex* mcVert) {
   }
 
   if (Bach) {
-    StXiMc* xiMc = new((*mcArray)[mcEntries++]) StXiMc(mcVert,Bach);
+    StXiMc* xiMc = new((*mcArray)[mcEntries++]) StXiMc(mcVert,Bach,ev);
     if (V0daughter) {
       StStrangeControllerBase* v0Cont = masterMaker->Get(v0T);
       if (v0Cont) {

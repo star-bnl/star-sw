@@ -1,7 +1,10 @@
 /***********************************************************************
  *
- * $Id: StDecayMode.cc,v 3.0 2000/07/14 12:56:47 genevb Exp $
+ * $Id: StDecayMode.cc,v 3.1 2001/05/04 20:15:13 genevb Exp $
  * $Log: StDecayMode.cc,v $
+ * Revision 3.1  2001/05/04 20:15:13  genevb
+ * Common interfaces and reorganization of components, add MC event info
+ *
  * Revision 3.0  2000/07/14 12:56:47  genevb
  * Revision 3 has event multiplicities and dedx information for vertex tracks
  *
@@ -188,4 +191,30 @@ Int_t StDecayMode::AntiOmegaProcess(Int_t ID)
     case (217) : return kAntiOmega2AntiCascadePiZero;
     default    : return kWrongDecay;
   }
+}
+//____________________________________________________________________
+Int_t StDecayMode::ParentCharge(Int_t mode) 
+{
+  switch (mode) {
+    case (kKPlus2MuNu)                   :
+    case (kKPlus2PiPlusPiZero)           :
+    case (kKPlus2PiPlusPiPlusPiMinus)    :
+    case (kKPlus2ENuPiZero)              :
+    case (kKPlus2MuNuPiZero)             :
+    case (kKPlus2PiPlusPiZeroPiZero)     :
+    case (kAntiCascade2AntiLambdaPiPlus) :
+    case (kAntiOmega2AntiLambdaKPlus)    :
+    case (kAntiOmega2AntiCascadePiPlus)  : return  1;
+    case (kKMinus2MuNu)                  :
+    case (kKMinus2PiMinusPiZero)         :
+    case (kKMinus2PiPlusPiMinusPiMinus)  :
+    case (kKMinus2ENuPiZero)             :
+    case (kKMinus2MuNuPiZero)            :
+    case (kKMinus2PiMinusPiZeroPiZero)   :
+    case (kCascade2LambdaPiMinus)        :
+    case (kOmega2LambdaKMinus)           :
+    case (kOmega2CascadePiMinus)         : return -1;
+    default : {}
+  }
+  return 0;                                                                     
 }

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeEvMuDst.hh,v 3.0 2000/07/14 12:56:49 genevb Exp $
+ * $Id: StStrangeEvMuDst.hh,v 3.1 2001/05/04 20:15:14 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 19-Aug-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeEvMuDst.hh,v $
+ * Revision 3.1  2001/05/04 20:15:14  genevb
+ * Common interfaces and reorganization of components, add MC event info
+ *
  * Revision 3.0  2000/07/14 12:56:49  genevb
  * Revision 3 has event multiplicities and dedx information for vertex tracks
  *
@@ -37,13 +40,16 @@
 #include "StStrangeMuDst.hh"
 
 class StEvent;
+class StMcEvent;
 
 class StStrangeEvMuDst : public StStrangeMuDst {
 public:
   StStrangeEvMuDst();
   ~StStrangeEvMuDst();
   StStrangeEvMuDst(StEvent&);
+  StStrangeEvMuDst(StMcEvent&);
   void Fill(StEvent&);
+  void Fill(StMcEvent&);
   void Clear() {}
 
   Int_t   run() const;            // Run number
@@ -63,10 +69,12 @@ protected:
   Int_t   mGlobalTracks;
   Int_t   mPrimaryTracks;
 
-  ClassDef(StStrangeEvMuDst,3)
+  ClassDef(StStrangeEvMuDst,4)
 };
 
 inline         StStrangeEvMuDst::StStrangeEvMuDst(StEvent& event)
+               { Fill(event); }
+inline         StStrangeEvMuDst::StStrangeEvMuDst(StMcEvent& event)
                { Fill(event); }
 inline Int_t   StStrangeEvMuDst::run() const
                { return mRun; }

@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.h,v 3.4 2000/12/18 21:35:18 genevb Exp $
+// $Id: StStrangeMuDstMaker.h,v 3.5 2001/05/04 20:15:14 genevb Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 3.5  2001/05/04 20:15:14  genevb
+// Common interfaces and reorganization of components, add MC event info
+//
 // Revision 3.4  2000/12/18 21:35:18  genevb
 // Introduced variable buffer-sizing
 //
@@ -90,6 +93,7 @@ class StStrangeMuDstMaker : public StMaker {
   StStrangeControllerBase* Get(Int_t dstType) const;
   
   TClonesArray* GetEvClonesArray();
+  TClonesArray* GetEvMcArray();
 
   TClonesArray* GetV0ClonesArray()   { return v0->GetDataArray(); }
   TClonesArray* GetV0McArray()       { return v0->GetMcArray(); }
@@ -112,6 +116,7 @@ class StStrangeMuDstMaker : public StMaker {
   Int_t GetNKinkAssoc() { return kink->GetNAssoc(); }
 
   StStrangeEvMuDst* GetEvent();
+  StStrangeEvMuDst* GetMcEvent();
 
   StV0MuDst* GetV0(Int_t i=0)              { return (StV0MuDst*) v0->Get(i); }
   StV0Mc* GetV0Mc(Int_t i=0)               { return (StV0Mc*) v0->GetMc(i); }
@@ -190,6 +195,7 @@ class StStrangeMuDstMaker : public StMaker {
 
   StrangeEnum rw;
   TClonesArray* evClonesArray;   //!
+  TClonesArray* evMcArray;   //!
 
   StStrangeMuDstMaker* dstMaker; //!
 
@@ -200,7 +206,7 @@ class StStrangeMuDstMaker : public StMaker {
   StStrangeControllerBase* kink;  //!
   StStrangeControllerBase* cont[strDstT];  //!
  private:
-  ClassDef(StStrangeMuDstMaker,3)
+  ClassDef(StStrangeMuDstMaker,4)
 };
 
 inline StrangeEnum StStrangeMuDstMaker::GetMode()
@@ -223,9 +229,14 @@ inline Bool_t StStrangeMuDstMaker::GetDoMc()
             { return doMc; }
 inline TClonesArray* StStrangeMuDstMaker::GetEvClonesArray()
             { return evClonesArray; }
+inline TClonesArray* StStrangeMuDstMaker::GetEvMcArray()
+            { return evMcArray; }
 inline StStrangeEvMuDst* StStrangeMuDstMaker::GetEvent()
             { return (evClonesArray ?
             (StStrangeEvMuDst*) (*evClonesArray)[0] : 0); }
+inline StStrangeEvMuDst* StStrangeMuDstMaker::GetMcEvent()
+            { return (evMcArray ?
+            (StStrangeEvMuDst*) (*evMcArray)[0] : 0); }
 inline TTree* StStrangeMuDstMaker::GetTree()
             { return tree; }
 inline StStrangeCuts& StStrangeMuDstMaker::Cuts()

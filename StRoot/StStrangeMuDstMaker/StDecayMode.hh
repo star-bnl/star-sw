@@ -1,7 +1,10 @@
 /***********************************************************************
  *
- * $Id: StDecayMode.hh,v 3.0 2000/07/14 12:56:47 genevb Exp $
+ * $Id: StDecayMode.hh,v 3.1 2001/05/04 20:15:13 genevb Exp $
  * $Log: StDecayMode.hh,v $
+ * Revision 3.1  2001/05/04 20:15:13  genevb
+ * Common interfaces and reorganization of components, add MC event info
+ *
  * Revision 3.0  2000/07/14 12:56:47  genevb
  * Revision 3 has event multiplicities and dedx information for vertex tracks
  *
@@ -73,6 +76,8 @@ public:
   Int_t AntiXiProcess(Int_t ID); 
   Int_t OmegaProcess(Int_t ID); 
   Int_t AntiOmegaProcess(Int_t ID); 
+
+  Int_t ParentCharge(Int_t mode);
 
 private:
   static StDecayMode* mInstance;

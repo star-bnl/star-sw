@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkMuDst.cc,v 3.5 2001/04/25 18:20:17 perev Exp $
+ * $Id: StKinkMuDst.cc,v 3.6 2001/05/04 20:15:14 genevb Exp $
  *
  * Author: Wensheng Deng, Kent State University, 29-Mar-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StKinkMuDst.cc,v $
+ * Revision 3.6  2001/05/04 20:15:14  genevb
+ * Common interfaces and reorganization of components, add MC event info
+ *
  * Revision 3.5  2001/04/25 18:20:17  perev
  * HPcorrs
  *
@@ -48,12 +51,13 @@
 #include <stdlib.h>
 #include "phys_constants.h"
 
+ClassImp(StKinkBase)
 ClassImp(StKinkMuDst)
 
-StKinkMuDst::StKinkMuDst()
+StKinkMuDst::StKinkMuDst() : StKinkBase()
 {}
 
-StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex)
+StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex) : StKinkBase()
 {
   mParentGeantId   = kinkVertex->geantIdParent();
   mDaughterGeantId = kinkVertex->geantIdDaughter();
@@ -99,28 +103,29 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex)
   mClParent = trk->fitTraits().chi2(1);
   // For now, get the truncated mean dE/dX from the TPC
   StPtrVecTrackPidTraits pidParent = trk->pidTraits(kTpcId);
-  {for (UInt_t i=0; i<pidParent.size(); i++) {
+  UInt_t i;
+  for (i=0; i<pidParent.size(); i++) {
     StDedxPidTraits* pid = (StDedxPidTraits*) pidParent[i];
     if (pid->method() == kTruncatedMeanId) {
       mDedxParent = pid->mean();
       mNumDedxParent = pid->numberOfPoints();
       break;
     }
-  }}
+  }
 
   trk = kinkVertex->daughter();
   mChi2Daughter = trk->fitTraits().chi2(0);
   mClDaughter = trk->fitTraits().chi2(1);
   // For now, get the truncated mean dE/dX from the TPC
   StPtrVecTrackPidTraits pidDaughter = trk->pidTraits(kTpcId);
-  {for (UInt_t i=0; i<pidDaughter.size(); i++) {
+  for (i=0; i<pidDaughter.size(); i++) {
     StDedxPidTraits* pid = (StDedxPidTraits*) pidDaughter[i];
     if (pid->method() == kTruncatedMeanId) {
       mDedxDaughter = pid->mean();
       mNumDedxDaughter = pid->numberOfPoints();
       break;
     }
-  }}
+  }
 
   findMinDeltaEnergy(kinkVertex);
   findDecayLength(kinkVertex);
