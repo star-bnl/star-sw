@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.24 2004/07/01 13:54:29 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.25 2004/07/09 00:17:45 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,8 +18,8 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
- * Revision 1.24  2004/07/01 13:54:29  caines
- * Changes to the simulation maker from the review
+ * Revision 1.25  2004/07/09 00:17:45  caines
+ * Code no longer kill code is things go wrong, also  by default dont do anthing if SVT not there
  *
  * Revision 1.20  2004/02/24 15:53:22  caines
  * Read all params from database
@@ -261,7 +261,7 @@ Int_t StSvtSimulationMaker::InitRun(int runumber)
   //read from database
   Int_t res;
   getConfig();
-  getSvtGeometry();
+  if ((res=getSvtGeometry())!=kStOk) return res;
   if ((res=getSvtDriftSpeeds())!=kStOk) return res;
   if ((res=getSvtT0())!=kStOk) return res;
   if ((res=getPedestalOffset())!=kStOk) return res; 
@@ -407,10 +407,18 @@ Int_t  StSvtSimulationMaker::getSvtGeometry()
     
   St_DataSet* dataSet;
   dataSet = GetDataSet("StSvtGeometry");
-  assert(dataSet);
+  if (!dataSet){
+    gMessMgr->Error()<<"BIG TROUBLE:No SVT geometry -impossible to run!!!!"<<endm;
+    return kStFatal;
+    }
+ 
 
   mSvtGeom = (StSvtGeometry*)dataSet->GetObject();
-  assert(mSvtGeom);
+  if (!mSvtGeom){
+    gMessMgr->Error()<<"BIG TROUBLE:No SVT geometry -impossible to run!!!!"<<endm;
+    return kStFatal;
+    }
+  
   
   return kStOk;
 }
@@ -421,12 +429,16 @@ Int_t  StSvtSimulationMaker::getPedestalOffset()
     
   St_DataSet* dataSet;
   dataSet = GetDataSet("StSvtDaq");
-  assert(dataSet);
+  if (dataSet==NULL){
+    gMessMgr->Error()<<"BIG TROUBLE:No DAQ parameters for SVT!!!!"<<endm;
+    return kStFatal;
+  }
+ 
 
   StSvtDaq *daq = (StSvtDaq*)dataSet->GetObject();
   if (daq==NULL){
     gMessMgr->Error()<<"BIG TROUBLE:No DAQ parameters are empty!!!!"<<endm;
-    return kStErr;
+    return kStFatal;
     }
 
 

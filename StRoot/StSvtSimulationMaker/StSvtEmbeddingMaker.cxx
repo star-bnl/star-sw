@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtEmbeddingMaker.cxx,v 1.7 2004/07/01 13:54:29 caines Exp $
+ * $Id: StSvtEmbeddingMaker.cxx,v 1.8 2004/07/09 00:17:45 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtEmbeddingMaker.cxx,v $
- * Revision 1.7  2004/07/01 13:54:29  caines
- * Changes to the simulation maker from the review
+ * Revision 1.8  2004/07/09 00:17:45  caines
+ * Code no longer kill code is things go wrong, also  by default dont do anthing if SVT not there
  *
  * Revision 1.5  2004/02/24 15:53:21  caines
  * Read all params from database
@@ -53,6 +53,7 @@ using namespace std;
 #include "StSvtClassLibrary/StSvtHybridPixels.hh"
 #include "StSvtClassLibrary/StSvtConfig.hh"
 #include "StSvtClassLibrary/StSvtHybridPed.hh"
+#include "StDAQMaker/StSVTReader.h"
 
 ClassImp(StSvtEmbeddingMaker)
   /*!
@@ -66,12 +67,13 @@ ClassImp(StSvtEmbeddingMaker)
 //____________________________________________________________________________
 StSvtEmbeddingMaker::StSvtEmbeddingMaker(const char *name):StMaker(name)
 {
-///By default we want to use maxim information contained in the dabase and run embedding if possible.
-  mDoEmbedding=kTRUE;     
+  ///By default we want to use maxim information contained in the dabase and run embedding if possible.
+  mDoEmbedding=kTRUE;                  ///embedding mode set as default    
+  mPlainSimIfNoSVT=kFALSE;            /// if true it will run plain simulation insted of embedding if there's no SVT in real data
   setBackGround(kTRUE,cDefaultBckgRMS);//sets to default true and sigma 1.8
   SetPedRmsPreferences(kTRUE, kTRUE);  //read database
-
- 
+  
+  
   mSimPixelColl = NULL;
   mRealDataColl = NULL;
   mPedColl = NULL;
@@ -91,37 +93,47 @@ Int_t StSvtEmbeddingMaker::Init()
 }
 
 //____________________________________________________________________________
-///All database dependent data are read here. If SvtDaqMaker is found inside of the main chain
-///the simulation is run as an embedding, otherwise the EmbeddingMaker creates
-//only white noise as a background.
+///All database dependent data are read here. 
 Int_t StSvtEmbeddingMaker::InitRun(int runumber)
 {
+  
   ReadPedRMSfromDb();
   GetPedRMS();
-  if (mDoEmbedding) //now decide if it's true embedding into raw data or just simple background
-   {
-    mRunningEmbedding= (GetMaker("SvtDaq")!=NULL);
-    if (!mRunningEmbedding) gMessMgr->Info()<<"StSvtEmbeddingMaker::InitRun: No SvtDaq Maker found - SWITCHING TO PLAIN SIMULATION "<<endm;
-   }
-  else mRunningEmbedding=kFALSE;
 
-  //write out the state of simulation
-  char st[20];
-  if (mRunningEmbedding) sprintf(st,"EMBEDDING");
-  else sprintf(st,"PLAIN SIMULATION");
-  gMessMgr->Info()<<"SVT SlowSimualtion is running in the state of :"<<st<<endm;
-  
   return StMaker::InitRun(runumber);
 }
 
 //____________________________________________________________________________
 Int_t StSvtEmbeddingMaker::Make()
 {
- 
-  GetSvtData();
-  ClearMask(); //it has to be cleared here - needed for plain simulation
+  //now decide in which mode to realy run, based on options
+  //this could be done in InitRun, but could there be mixed event in one run with SVT and without SVT, ie.. some trigger mix
+  mRunningEmbedding=mDoEmbedding;
 
-  if (mSimPixelColl==NULL) return kStErr;
+  if (mDoEmbedding &&NoSvt() ){//check if SVT is present if not skip simulation
+
+    if (mPlainSimIfNoSVT){//run plain simulation instead of embedding
+      mRunningEmbedding=kFALSE; //run plain simulation
+    }
+    else
+      { //clear data and get out
+	ClearOutputData();
+	gMessMgr->Info()<<"SVT SlowSimulation: SKIPPING THIS EVENT - no SVT in rela data!!"<<endm;
+	return kStOk;
+      }  
+  }
+
+  //write out the state of simulation
+  char st[20];
+  if (mRunningEmbedding) sprintf(st,"EMBEDDING");
+  else sprintf(st,"PLAIN SIMULATION");
+  gMessMgr->Info()<<"SVT SlowSimulation is running in the state of :"<<st<<endm;
+ 
+  Int_t res;
+  res=GetSvtData();
+  if (res!=kStOk) return res;
+
+  ClearMask(); //it has to be cleared here - needed for plain simulation
 
   for(int Barrel = 1;Barrel <= mSimPixelColl->getNumberOfBarrels();Barrel++) {
     for (int Ladder = 1;Ladder <= mSimPixelColl->getNumberOfLadders(Barrel);Ladder++) {
@@ -140,7 +152,7 @@ Int_t StSvtEmbeddingMaker::Make()
           }
 	   
           if (mRunningEmbedding){  //do the embedding
-            ClearMask();
+            ClearMask(); //just in case..
             AddRawData();
           }
           
@@ -203,30 +215,31 @@ void  StSvtEmbeddingMaker::GetPedRMS()
 
 
 //____________________________________________________________________________
-void StSvtEmbeddingMaker::GetSvtData()
+Int_t StSvtEmbeddingMaker::GetSvtData()
 {
   //EmbeddingMaker requires some data(at least empty) from the SimulationMaker
   mSimPixelColl=NULL;
   mRealDataColl=NULL;
-   
+    
   St_DataSet* dataSet = GetDataSet("StSvtPixelData");
   if (dataSet==NULL){
     gMessMgr->Error()<<"BIG TROUBLE:No data from simulator to work with!!!!"<<endm;
-    assert(dataSet); //for safety reasons, we could theoreticaly go on, but...
-    //return;
+    return kStErr;
   }
 
   mSimPixelColl= (StSvtData*)(dataSet->GetObject());
   if ( mSimPixelColl==NULL){
     gMessMgr->Error()<<"BIG TROUBLE:Data from simulator is empty!!!!"<<endm;
-    return;
+    return kStErr;
   }
   
-  if (!mRunningEmbedding) return; //in case it's forbiden to embed
+  if (!mRunningEmbedding) return kStOk; //dont read real data if you don't need them
   dataSet = GetDataSet("StSvtRawData");
   if (dataSet) mRealDataColl= (StSvtData*)(dataSet->GetObject());
   if (!mRealDataColl)      //switching to plain simulation, because there is no raw data
-     gMessMgr->Info()<<"Note: StSvtEmbeddingMaker is set to do embbeding, but found no raw data."<<endm;
+     gMessMgr->Info()<<"Note: StSvtEmbeddingMaker is set to do embbeding, but found no raw data- embedding into empty event!!!"<<endm;
+
+  return kStOk;
 }
  
 //____________________________________________________________________________
@@ -368,6 +381,10 @@ void  StSvtEmbeddingMaker::setDoEmbedding(Bool_t doIt){
 }
 
 //____________________________________________________________________________
+void StSvtEmbeddingMaker::setPlainSimEvenIfNoSVT(Bool_t doIt){
+  mPlainSimIfNoSVT= doIt;
+}
+//____________________________________________________________________________
 void  StSvtEmbeddingMaker::setBackGround(Bool_t backgr,double backgSigma){
   mBackGrOption = backgr;
   mBackGSigma = backgSigma;
@@ -379,3 +396,55 @@ void  StSvtEmbeddingMaker::ClearMask()
   for (int  i=0;i<128*240;i++)mMask[i]=kTRUE;
 }
 
+//_____________________________________________________________
+Int_t StSvtEmbeddingMaker::NoSvt()
+{  
+  St_DataSet *dataSet;
+
+  dataSet = GetDataSet("StDAQReader");
+  if(!dataSet){
+    gMessMgr->Error()<<("BIG TROUBLE: cannot find StDAQReader in the chain and you want to run embedding")<<endm;
+    return kTRUE;
+  }
+  StDAQReader* daqReader = (StDAQReader*)(dataSet->GetObject());
+  if (!daqReader){
+    gMessMgr->Error()<<("BIG TROUBLE: StDAQReader is empty and you want to run embedding")<<endm;
+    return kTRUE;
+  }
+  
+  if (!daqReader->SVTPresent ())return kTRUE; //No SVT in the datastream 
+  
+  return kFALSE;
+}
+
+
+//_____________________________________________________________
+//this resets mSvtSimPixelColl
+void StSvtEmbeddingMaker::ClearOutputData()
+{
+  StSvtHybridPixelsD* tmpPixels;
+ 
+  for(int Barrel = 1;Barrel <= mSimPixelColl->getNumberOfBarrels();Barrel++) {
+     for (int Ladder = 1;Ladder <= mSimPixelColl->getNumberOfLadders(Barrel);Ladder++) {
+       for (int Wafer = 1;Wafer <= mSimPixelColl->getNumberOfWafers(Barrel);Wafer++) {
+         for( int Hybrid = 1;Hybrid <= mSimPixelColl->getNumberOfHybrids();Hybrid++){
+           
+           int index = mSimPixelColl->getHybridIndex(Barrel,Ladder,Wafer,Hybrid);
+           if( index < 0) continue; 
+           
+           tmpPixels  = (StSvtHybridPixelsD*)mSimPixelColl->at(index);
+          
+           if(!tmpPixels) {
+             tmpPixels = new StSvtHybridPixelsD(Barrel, Ladder, Wafer, Hybrid);
+             mSimPixelColl->put_at(tmpPixels,index);
+           }
+
+	   tmpPixels->setPedOffset(0);
+           tmpPixels->reset();
+
+         }
+       }
+     }
+  }
+
+}
