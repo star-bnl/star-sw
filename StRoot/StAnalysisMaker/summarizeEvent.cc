@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: summarizeEvent.cc,v 2.2 2000/01/05 16:06:27 ullrich Exp $
+ * $Id: summarizeEvent.cc,v 2.3 2000/07/12 05:24:39 ullrich Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: summarizeEvent.cc,v $
+ * Revision 2.3  2000/07/12 05:24:39  ullrich
+ * Minor updates to cope with revised StAnalysisMaker.
+ *
  * Revision 2.2  2000/01/05 16:06:27  ullrich
  * Added SSD hits.
  *
@@ -27,12 +30,11 @@
 #include "StEventTypes.h"
 #include "StMessMgr.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.2 2000/01/05 16:06:27 ullrich Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.3 2000/07/12 05:24:39 ullrich Exp $";
 
 void
-summarizeEvent(StEvent& event, Int_t &nevents)
+summarizeEvent(StEvent& event, const int &nevents)
 {
-    nevents++;
     gMessMgr->QAInfo() << "StAnalysisMaker,  Reading Event: " << nevents
 		       << "  Type: " << event.type()
 		       << "  Run: " << event.runId() << endm;
