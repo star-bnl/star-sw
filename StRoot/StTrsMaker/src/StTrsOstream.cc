@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsOstream.cc,v 1.6 2000/01/10 23:14:30 lasiuk Exp $
+ * $Id: StTrsOstream.cc,v 1.7 2000/02/10 01:21:50 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsOstream.cc,v $
+ * Revision 1.7  2000/02/10 01:21:50  calderon
+ * Switch to use StTpcDb.
+ * Coordinates checked for consistency.
+ * Fixed problems with StTrsIstream & StTrsOstream.
+ *
  * Revision 1.6  2000/01/10 23:14:30  lasiuk
  * Include MACROS for compatiblity with SUN CC5
  *
@@ -65,7 +70,7 @@ using std::transform;
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 typedef vector<int> intVec;
 typedef vector<unsigned char> digitalTimeBins;
-#if !defined __SUNPRO_CC >= 0x500
+#if !defined (__SUNPRO_CC)  
 typedef istream_iterator<unsigned char> istream_iter_uns_char;
 typedef ostream_iterator<int> ostream_iter_int;
 #endif
@@ -73,7 +78,7 @@ typedef ostream_iterator<int> ostream_iter_int;
 #else
 typedef vector<int, allocator<int> > intVec;
 typedef vector<unsigned char, allocator<unsigned char> > digitalTimeBins;
-#if !defined __SUNPRO_CC >= 0x500
+#if (__SUNPRO_CC < 0x500)
 typedef istream_iterator<unsigned char,ptrdiff_t> istream_iter_uns_char;
 typedef ostream_iterator<int> ostream_iter_int;
 #endif
@@ -137,25 +142,26 @@ void StTrsOstream::writeTrsEvent(StTrsRawDataEvent* EventData)
 		for (iRow = 0; iRow < mRows; iRow++) { // row loop
 		    if (aDigitalSector->mData[iRow].size()>0) { //Make sure the row has data
 			ofs << static_cast<unsigned short>(iRow) << " ";
-// 			cout << endl;
-// 			PR(iRow);
+			//cout << endl;
+			//PR(iRow);
 			int iPad;
 			for (iPad = 0; iPad < padsAtRow[iRow]; iPad++) { // pad loop
-// 			    PR(iPad);
+			    //PR(iPad);
 			    int lengthData = aDigitalSector->mData[iRow][iPad].size();
+			    //PR(lengthData);
 			    if (lengthData){ // Make sure the pad has data
 								
 				ofs << static_cast<unsigned short>(iPad) << " ";
 								
 				ofs << static_cast<unsigned short>(lengthData);
-				
-				ofs.write(static_cast<const unsigned char*>(aDigitalSector->mData[iRow][iPad].begin()),lengthData);
+				ofs.put(' ');
+				ofs.write(static_cast<const unsigned char*>(&(aDigitalSector->mData[iRow][iPad][0])),lengthData);
 				ofs << " ";
 
 				if (false) { // to debug, change to true
 				intVec DataOut(lengthData);
 				transform (aDigitalSector->mData[iRow][iPad].begin(), aDigitalSector->mData[iRow][iPad].end(), DataOut.begin(), getInt2);
-#if !defined __SUNPRO_CC >= 0x500
+#if ((!__SUNPRO_CC) || __SUNPRO_CC < 0x500)
 				copy (DataOut.begin(), DataOut.end(), ostream_iter_int(cout, " "));
 #endif
 				cout << endl;
@@ -163,6 +169,7 @@ void StTrsOstream::writeTrsEvent(StTrsRawDataEvent* EventData)
 				}
 				
 			    } // if pad has data
+			    else ofs << " ";
 			} // Pads
 			ofs << static_cast<unsigned short>(iPad) << " " ;
 		    } // if row has data

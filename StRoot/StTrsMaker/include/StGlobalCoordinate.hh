@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StGlobalCoordinate.hh,v 1.3 1999/10/25 18:38:29 calderon Exp $
+ * $Id: StGlobalCoordinate.hh,v 1.4 2000/02/10 01:21:46 calderon Exp $
  *
  * Author:  brian Feb 6, 1998
  *
@@ -11,6 +11,11 @@
  *************************************************************************
  *
  * $Log: StGlobalCoordinate.hh,v $
+ * Revision 1.4  2000/02/10 01:21:46  calderon
+ * Switch to use StTpcDb.
+ * Coordinates checked for consistency.
+ * Fixed problems with StTrsIstream & StTrsOstream.
+ *
  * Revision 1.3  1999/10/25 18:38:29  calderon
  * changed mPos and pos() to mPosition and position() to
  * be compatible with StEvent/StMcEvent.
@@ -35,7 +40,7 @@
 
 #include <iostream.h>
 
-#include "StGlobals.hh"
+//#include "StGlobals.hh"
 #include "StThreeVector.hh"
 
 class StGlobalCoordinate {         

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcDbGeometry.hh,v 1.2 2000/01/10 23:11:29 lasiuk Exp $
+ * $Id: StTpcDbGeometry.hh,v 1.3 2000/02/10 01:21:46 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez & Brian Lasiuk Sept 13, 1999
  *
@@ -12,6 +12,11 @@
  **********************************************************************
  *
  * $Log: StTpcDbGeometry.hh,v $
+ * Revision 1.3  2000/02/10 01:21:46  calderon
+ * Switch to use StTpcDb.
+ * Coordinates checked for consistency.
+ * Fixed problems with StTrsIstream & StTrsOstream.
+ *
  * Revision 1.2  2000/01/10 23:11:29  lasiuk
  * Include MACROS for compatibility with SUN CC5.0
  *
@@ -23,7 +28,6 @@
  * files in repository.
  *
  ***********************************************************************/
-#ifdef __ROOT__
 #ifndef ST_TPC_DB_GEOMETRY_HH
 #define ST_TPC_DB_GEOMETRY_HH
 #include <iostream.h>
@@ -162,17 +166,12 @@ private:
     double mInnerSectorzOffSet;
     double mOuterSectorzOffSet;
     
-#ifdef __CINT__    
-typedef int mPadsInRow;
-typedef double mRadialDistanceAtRow;
-#else
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
     vector<int> mPadsInRow;
     vector<double> mRadialDistanceAtRow;
 #else
     vector<int, allocator<int> > mPadsInRow;
     vector<double, allocator<double> > mRadialDistanceAtRow;
-#endif
 #endif
     // Wires
     double mAnodeWireRadius;
@@ -198,7 +197,6 @@ typedef double mRadialDistanceAtRow;
     double mFirstOuterSectorAnodeWire;
     double mLastOuterSectorAnodeWire;
     int    mNumberOfOuterSectorAnodeWires;
- // ClassDef(StTpcDbGeometry,0)
 };
 
 inline int StTpcDbGeometry::numberOfRows() const {return(mPadRows);}
@@ -258,4 +256,3 @@ inline double StTpcDbGeometry::innerSectorEdge() const { return (mInnerSectorEdg
 inline double StTpcDbGeometry::outerSectorEdge() const { return (mOuterSectorEdge);}
 inline double StTpcDbGeometry::ioSectorSpacing() const { return (mIoSectorSpacing);}
 #endif
-#endif // __ROOT__

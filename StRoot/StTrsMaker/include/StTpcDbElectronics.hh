@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcDbElectronics.hh,v 1.1 1999/10/11 23:55:09 calderon Exp $
+ * $Id: StTpcDbElectronics.hh,v 1.2 2000/02/10 01:21:46 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez & Brian Lasiuk Sept 13, 1999
  *
@@ -12,6 +12,11 @@
  **********************************************************************
  *
  * $Log: StTpcDbElectronics.hh,v $
+ * Revision 1.2  2000/02/10 01:21:46  calderon
+ * Switch to use StTpcDb.
+ * Coordinates checked for consistency.
+ * Fixed problems with StTrsIstream & StTrsOstream.
+ *
  * Revision 1.1  1999/10/11 23:55:09  calderon
  * Version with Database Access and persistent file.
  * Not fully tested due to problems with cons, it
@@ -21,7 +26,6 @@
  *
  *
  **********************************************************************/
-#ifdef __ROOT__
 #ifndef ST_TPC_DB_ELECTRONICS_HH
 #define ST_TPC_DB_ELECTRONICS_HH
 
@@ -76,7 +80,6 @@ private:
     double mAdcConversionCharge;
     int    mNumberOfTimeBins;
     int    mAveragePedestal;
-    // ClassDef(StTpcDbElectronics,0)
 };
 
 inline double StTpcDbElectronics::nominalGain() const {return mNominalGain;}
@@ -88,5 +91,4 @@ inline double StTpcDbElectronics::adcConversion() const {return mAdcConversion;}
 inline double StTpcDbElectronics::adcConversionCharge() const {return mAdcConversionCharge;}
 inline int StTpcDbElectronics::numberOfTimeBins() const {return mNumberOfTimeBins;}
 inline int StTpcDbElectronics::averagePedestal() const {return mAveragePedestal;}
-#endif
 #endif

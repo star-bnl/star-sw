@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
+ * Revision 1.23  2000/02/10 01:21:50  calderon
+ * Switch to use StTpcDb.
+ * Coordinates checked for consistency.
+ * Fixed problems with StTrsIstream & StTrsOstream.
+ *
  * Revision 1.22  2000/01/10 23:14:30  lasiuk
  * Include MACROS for compatiblity with SUN CC5
  *
@@ -232,6 +237,8 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 	    
 	    // print it out:
 //   	    PR(digitalPadData.size());
+// 	    PR(irow);
+// 	    PR(ipad);
 //   	    for(int ii=0; ii<digitalPadData.size(); ii++) {
 //   		cout << (ii) << '\t' << dec << (int)(digitalPadData[ii]) << endl;
 //   	    }

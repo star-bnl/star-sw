@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsAnalogSignalGenerator.cc,v 1.8 2000/01/10 23:14:30 lasiuk Exp $
+ * $Id: StTrsAnalogSignalGenerator.cc,v 1.9 2000/02/10 01:21:49 calderon Exp $
  *
  * Author: brian Nov 3, 1998 
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsAnalogSignalGenerator.cc,v $
+ * Revision 1.9  2000/02/10 01:21:49  calderon
+ * Switch to use StTpcDb.
+ * Coordinates checked for consistency.
+ * Fixed problems with StTrsIstream & StTrsOstream.
+ *
  * Revision 1.8  2000/01/10 23:14:30  lasiuk
  * Include MACROS for compatiblity with SUN CC5
  *
@@ -65,7 +70,11 @@ RandGauss       StTrsAnalogSignalGenerator::mGaussDistribution(mEngine);
 
 StTrsAnalogSignalGenerator::StTrsAnalogSignalGenerator(StTpcGeometry* geo, StTpcSlowControl* sc, StTpcElectronics* el, StTrsSector* sec)
     : mGeomDb(geo), mSCDb(sc), mElectronicsDb(el),
+#ifndef TPC_DATABASE_PARAMETERS      
       transformer(mGeomDb, mSCDb, mElectronicsDb),
+#else
+      transformer(gStTpcDb),
+#endif
       mDeltaPad(6),
       mDeltaRow(1),
       mSector(sec),

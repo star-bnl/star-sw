@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.10 2000/01/10 23:14:31 lasiuk Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.11 2000/02/10 01:21:50 calderon Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.11  2000/02/10 01:21:50  calderon
+ * Switch to use StTpcDb.
+ * Coordinates checked for consistency.
+ * Fixed problems with StTrsIstream & StTrsOstream.
+ *
  * Revision 1.10  2000/01/10 23:14:31  lasiuk
  * Include MACROS for compatiblity with SUN CC5
  *
@@ -70,12 +75,16 @@
 #include <ctime>
 #include "SystemOfUnits.h"
 #include "PhysicalConstants.h"
-#include "StCoordinates.hh"
+#include "StTrsParameterizedAnalogSignalGenerator.hh"
+#ifndef TPC_DATABASE_PARAMETERS
+#include "StTpcLocalSectorCoordinate.hh"
+#else
+#include "StDbUtilities/StTpcLocalSectorCoordinate.hh"
+#endif
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using std::sort;
 #endif
 
-#include "StTrsParameterizedAnalogSignalGenerator.hh"
 
 
 static const double sigmaL = .037*centimeter/sqrt(centimeter);
@@ -220,7 +229,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 	    // center of Pad that is being processed?
 	    // the y coordinate is the position of the wire
 
-  	    //PR(*iter);
+//   	    PR(*iter);
 	    
 	  //  Info for segment:
 	  // x =>  iter->position().x()
@@ -334,7 +343,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 		    xCentroidOfPad = xyCoord.position().x();
 		    yCentroidOfPad = xyCoord.position().y();
 		    delx           = xCentroidOfPad-iter->position().x();
-		    gridMinusZ     = mFrischGrid-iter->position().z();
+		    gridMinusZ     = iter->position().z(); // for new coordinates
 		    sigma_x        = sigmaT*sqrt(gridMinusZ);
 		    sigma_x=sqrt(sqr(sigma_x )+sqr( mPadResponseFunctionSigma)); 
 		     
@@ -374,9 +383,11 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 		    //
 		    // This should really be from the Coordinate transform!
 		    // otherwise code has to be changed twice!
-		    //
-		   timeOfSignal =
-		       ((gridMinusZ-zoffset)/mDriftVelocity)+mElectronicsDb->tZero();
+		    // time = (localz + zoffset)/v_drift + tZero
+		    // The z position already has a z offset, it was put in
+		    // the fast charge transporter.
+		    timeOfSignal =
+			((iter->position().z())/mDriftVelocity)+mElectronicsDb->tZero();
 		    	
 		 
 		    // OH-OH OFFSET (replaced!...)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsIstream.cc,v 1.9 2000/01/25 20:26:03 calderon Exp $
+ * $Id: StTrsIstream.cc,v 1.10 2000/02/10 01:21:50 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsIstream.cc,v $
+ * Revision 1.10  2000/02/10 01:21:50  calderon
+ * Switch to use StTpcDb.
+ * Coordinates checked for consistency.
+ * Fixed problems with StTrsIstream & StTrsOstream.
+ *
  * Revision 1.9  2000/01/25 20:26:03  calderon
  * fix istream>> string for both CC5 and Linux.
  *
@@ -72,14 +77,14 @@ using std::transform;
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 typedef vector<int> intVec;
 typedef vector<unsigned char> digitalTimeBins;
-#if !defined __SUNPRO_CC >= 0x500
+#if !defined (__SUNPRO_CC) 
 typedef istream_iterator<unsigned char> istream_iter_uns_char;
 typedef ostream_iterator<int> ostream_iter_int;
 #endif
 #else
 typedef vector<int, allocator<int> > intVec;
 typedef vector<unsigned char, allocator<unsigned char> > digitalTimeBins;
-#if !defined __SUNPRO_CC >= 0x500
+#if (__SUNPRO_CC < 0x500)
 typedef istream_iterator<unsigned char,ptrdiff_t> istream_iter_uns_char;
 typedef ostream_iterator<int> ostream_iter_int;
 #endif
@@ -149,7 +154,9 @@ void StTrsIstream::fillTrsEvent(StTrsRawDataEvent* EventData)
     unsigned short currentSectorNum;
     unsigned short currentRowNum;
     unsigned short currentPadNum;
+
     ifs >> currentSectorNum;
+    cout << "Reading Sector " << currentSectorNum+1 << endl;
     while (currentSectorNum < static_cast<unsigned short>(mSectors)) {
 	//PR(currentSectorNum);
 	StTrsDigitalSector* aDigitalSector = new StTrsDigitalSector(mGeomDb);
@@ -157,36 +164,66 @@ void StTrsIstream::fillTrsEvent(StTrsRawDataEvent* EventData)
 	digitalTimeBins digitalPadData;
 	
 	ifs >> currentRowNum;
+	//PR(currentRowNum);
+    
+ 
+
 	while (currentRowNum < static_cast<unsigned short>(mRows)) {
-	    //PR(currentRowNum);
 	    
+// 	    int d;
+// 	    cin >> d;
+// 	    if (d==2) exit(1);
 	    aDigitalSector->mData[currentRowNum].resize(padsAtRow[currentRowNum]);
 	    
 	    ifs >> currentPadNum;
+	    //PR(currentPadNum);
+    
+ 
 	    while (static_cast<int>(currentPadNum) < padsAtRow[currentRowNum]) {
 		
-		//PR(currentPadNum);
+		
 		ifs >> lengthData;
 		//PR(lengthData);
+		ifs.get();
+// 		int d;
+// 		cin >> d;
+// 		if (d==2) exit(1);
+		
 		digitalPadData.clear();
 		if (lengthData>0) { // We have data, read it in
 		    digitalPadData.resize(lengthData);
 		    ifs.read(static_cast<unsigned char*>(digitalPadData.begin()), lengthData);
+    
+		    bool PrintToScreen = false;
+		    if (PrintToScreen) {
+			intVec DataOut;
+			DataOut.clear();
+			DataOut.resize(digitalPadData.size());
+			transform (digitalPadData.begin(), digitalPadData.end(), DataOut.begin(), getInt);
+#if ((!__SUNPRO_CC) || __SUNPRO_CC < 0x500) 
+			copy (DataOut.begin(), DataOut.end(), ostream_iter_int(cout, " "));
+#endif
+		    }
 		}
 		aDigitalSector->assignTimeBins(currentRowNum+1,currentPadNum+1,&digitalPadData);
 		ifs >> currentPadNum;
+		//PR(currentPadNum);
+		
 	    } // while currentPadNum is not = padsAtRow[currentRowNum] 
 	    ifs >> currentRowNum;
+	    //PR(currentRowNum);
+
 	} // while currentRowNum is not = mRows
 	EventData->mSectors[currentSectorNum] = aDigitalSector;
 	ifs >> currentSectorNum;
+	
     } // While currentSectorNum is not = mSectors
 
     // See what we read
     bool PrintToScreen = false;
     if (PrintToScreen) {
 	intVec DataOut;
-	intVec ZeroOut;
+	
 	cout << "Sector   Row   Pad    TimeBins" << endl;
 	cout << "==========================================" << endl;
 	for (unsigned int iSector = 0; iSector < mSectors; iSector++) { // sector loop
@@ -207,8 +244,8 @@ void StTrsIstream::fillTrsEvent(StTrsRawDataEvent* EventData)
 			    cout << "     " << iRow+1;
 			    cout << "     " << iPad+1;
 			    cout << "     ";
-#if !defined __SUNPRO_CC >= 0x500
-			    // DO NOT DO THIS WITH CC5 &^&*%
+#if ((!__SUNPRO_CC) || __SUNPRO_CC < 0x500)
+			    // DO NOT DO THIS WITH CC5 &^#*%
 			    copy (DataOut.begin(), DataOut.end(), ostream_iter_int(cout, " "));
 #endif
 			    cout << endl;
