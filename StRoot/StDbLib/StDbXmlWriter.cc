@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlWriter.cc,v 1.4 1999/09/30 02:06:12 porter Exp $
+ * $Id: StDbXmlWriter.cc,v 1.5 1999/12/03 17:03:24 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbXmlWriter.cc,v $
+ * Revision 1.5  1999/12/03 17:03:24  porter
+ * added multi-row support for the Xml reader & writer
+ *
  * Revision 1.4  1999/09/30 02:06:12  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -18,7 +21,7 @@
  **************************************************************************/
 
 #include "StDbXmlWriter.h"
-
+#include "StDbTable.h"
 
 //----------------------------------------------------
 
@@ -51,6 +54,19 @@ StDbXmlWriter::streamTail(){
 //----------------------------------------------------
 
 void
+StDbXmlWriter::streamRow(int row){
+  *os << "<TabRow>" << row << endl;
+}
+
+//----------------------------------------------------
+
+void
+StDbXmlWriter::streamEndRow(){
+  *os << "</TabRow>" << endl;
+}
+//----------------------------------------------------
+
+void
 StDbXmlWriter::streamTableName(const char* name){
   *os << "<StDbTable>"<<name << endl;
 }
@@ -64,18 +80,72 @@ StDbXmlWriter::streamEndTableName(){
 //----------------------------------------------------
 
 void
-StDbXmlWriter::pass(char* name, char* i,  int len){
+StDbXmlWriter::ioTable(StDbTable* table){
+
+    char * name = table->getTableName();
+    streamTableName(name); delete [] name;
+    streamAccessor();
+    table->StreamAccessor((typeAcceptor*)this, false);
+    endAccessor();
+
+    int k;
+    int nrows = table->GetNRows();
+    int* elements = table->getElementID();
+
+    if(!elements){
+      elements = new int[nrows];
+      for(k=0;k<nrows;k++)elements[k]=k;
+    }
+
+    table->setRowNumber(); // set to 0
+
+    for(k=0;k<nrows;k++){    
+      streamRow(k);
+      table->dbStreamer((typeAcceptor*)this, false);
+      streamEndRow();
+    }
+    streamEndTableName();
+}
+
+//----------------------------------------------------
+
+void
+StDbXmlWriter::pass(char* name, char*& i,  int len){
 *os << "<dbString> "<<name<<" <value> "<< i <<" </value> </dbString>" << endl;
 }
 
+//----------------------------------------------------
+
 void
-StDbXmlWriter::pass(char* name, unsigned char* i,  int len){
-*os << "<dbUChar> "<<name<<" <value> "<< i <<" </value> </dbUChar>" << endl;
+StDbXmlWriter::pass(char* name, unsigned char& i,  int len){
+*os << "<dbUChar> "<<name<<" <value> "<< (int)i <<" </value> </dbUChar>" << endl;
+}
+
+//----------------------------------------------------
+
+void
+StDbXmlWriter::pass(char* name, unsigned char*& i,  int len){
+  *os << "<dbUCharArray> " << name << " <length> ";
+  *os << len << " </length>" << endl;
+  *os << "<value>" << endl;
+
+  int icount = 0;
+  for(int j=0; j<len-1;j++){ 
+    *os << (int)i[j] << ", ";
+    icount++;
+    if(icount==8){
+      *os << endl;
+      icount = 0;
+    }
+  }   
+
+  *os << (int)i[len-1] << endl;
+  *os << "</value> </dbUCharArray> " << endl;
 }
 
 
 //----------------------------------------------------
-//----------------------------------------------------
+
 void
 StDbXmlWriter::pass(char* name, short& i,  int len){
 *os << "<dbShort> "<<name<<" <value> "<< i <<" </value> </dbShort>" << endl;
@@ -84,7 +154,7 @@ StDbXmlWriter::pass(char* name, short& i,  int len){
 //----------------------------------------------------
 
 void
-StDbXmlWriter::pass(char* name, short* i,  int len){
+StDbXmlWriter::pass(char* name, short*& i,  int len){
 
   *os << "<dbShortArray> " << name << " <length> ";
   *os << len << " </length>" << endl;
@@ -114,7 +184,7 @@ StDbXmlWriter::pass(char* name, unsigned short& i,  int len){
 //----------------------------------------------------
 
 void
-StDbXmlWriter::pass(char* name, unsigned short* i,  int len){
+StDbXmlWriter::pass(char* name, unsigned short*& i,  int len){
 
   *os << "<dbUShortArray> " << name << " <length> ";
   *os << len << " </length>" << endl;
@@ -144,7 +214,7 @@ StDbXmlWriter::pass(char* name, int& i,  int len){
 //----------------------------------------------------
 
 void
-StDbXmlWriter::pass(char* name, int* i,  int len){
+StDbXmlWriter::pass(char* name, int*& i,  int len){
 
   *os << "<dbIntArray> " << name << " <length> ";
   *os << len << " </length>" << endl;
@@ -174,7 +244,7 @@ StDbXmlWriter::pass(char* name, unsigned int& i,  int len){
 //----------------------------------------------------
 
 void
-StDbXmlWriter::pass(char* name, unsigned int* i,  int len){
+StDbXmlWriter::pass(char* name, unsigned int*& i,  int len){
 
   *os << "<dbUIntArray> " << name << " <length> ";
   *os << len << " </length>" << endl;
@@ -204,7 +274,7 @@ StDbXmlWriter::pass(char* name, float& i,  int len){
 //----------------------------------------------------
 
 void
-StDbXmlWriter::pass(char* name, float* i,  int len){
+StDbXmlWriter::pass(char* name, float*& i,  int len){
 
   *os << "<dbFloatArray> " << name << " <length> ";
   *os << len << " </length>" << endl;
@@ -234,7 +304,7 @@ StDbXmlWriter::pass(char* name, double& i,  int len){
 //----------------------------------------------------
 
 void
-StDbXmlWriter::pass(char* name, double* i,  int len){
+StDbXmlWriter::pass(char* name, double*& i,  int len){
 
   *os << "<dbDoubleArray> " << name << " <length> ";
   *os << len << " </length>" << endl;
@@ -263,7 +333,7 @@ StDbXmlWriter::pass(char* name, long& i,  int len){
 //----------------------------------------------------
 
 void
-StDbXmlWriter::pass(char* name, long* i,  int len){
+StDbXmlWriter::pass(char* name, long*& i,  int len){
 
   *os << "<dbLongArray> " << name << " <length> ";
   *os << len << " </length>" << endl;
@@ -293,7 +363,7 @@ StDbXmlWriter::pass(char* name, unsigned long& i,  int len){
 //----------------------------------------------------
 
 void
-StDbXmlWriter::pass(char* name, unsigned long* i,  int len){
+StDbXmlWriter::pass(char* name, unsigned long*& i,  int len){
 
   *os << "<dbULongArray> " << name << " <length> ";
   *os << len << " </length>" << endl;
