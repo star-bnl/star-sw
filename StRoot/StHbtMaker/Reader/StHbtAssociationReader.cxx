@@ -34,8 +34,6 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
-//#include "TStyle.h"
-//#include "TCanvas.h"
 #include "StMcEventMaker/StMcEventMaker.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
@@ -61,15 +59,6 @@
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
 
-// #include "StMcEvent/StMemoryInfo.hh"
-
-//#include "StMcEvent/StMcEvent.hh"
-//#include "StMcEvent/StMcTrack.hh"
-//#include "StMcEvent/StMcTpcHit.hh"
-//#include "StMcEvent/StMcFtpcHit.hh"
-//#include "StMcEvent/StMcSvtHit.hh"
-//#include "StMcEvent/StMcVertex.hh"
-
 #include "StMcEvent.hh"
 #include "StMcTrack.hh"
 #include "StMcTpcHit.hh"
@@ -83,21 +72,12 @@
   
 
 #ifndef ST_NO_NAMESPACES
-using namespace std;
+  using namespace units;
 #endif
 
-//static double vertexCut = .0000025; // 25 nm (lifetime of the pi0)
 struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
-
-// Here one gives values to data members that need them.
-// So far the only data members I have are drawinit and currentMcEvent.
-// but might be useful later on.  Look at St_QA_Maker.cxx file
-
-
-
-
 
 //__________________
 StHbtAssociationReader::StHbtAssociationReader() {

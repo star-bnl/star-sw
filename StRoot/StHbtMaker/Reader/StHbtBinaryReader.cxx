@@ -80,7 +80,7 @@ int StHbtBinaryReader::Init(const char* ReadWrite, StHbtString Message){
     // create input object and open file 
     binaryIO = new StHbtIOBinary(mFileName,"r");
     binaryIO->readString(Message);
-    cout << Message << endl;
+    cout << Message.c_str() << endl;
   }
   else{                                      // this object will be a writer
     // create output object and open file

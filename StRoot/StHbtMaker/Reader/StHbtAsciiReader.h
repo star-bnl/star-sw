@@ -18,8 +18,8 @@
 #define StHbtAsciiReader_hh
 
 #include "StHbtMaker/Base/StHbtEventReader.hh"
-#include <iostream>
-#include <fstream>
+#include <iostream.h>
+#include <fstream.h>
 
 class StHbtAsciiReader : public StHbtEventReader{
 

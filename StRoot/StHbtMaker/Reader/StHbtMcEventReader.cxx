@@ -24,15 +24,10 @@
 #include "StV0MiniDstMaker/StV0MiniDstMaker.h"  
 #include "StV0MiniDstMaker/StV0MiniDst.hh"
 
-//#include "StAssociationMaker/StAssociationMaker.h"
-
 #include <iostream.h>
 #include <stdlib.h>
 #include <string>
 #include <vector>
-//#include "TStyle.h"
-//#include "TCanvas.h"
-
 
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
@@ -57,8 +52,6 @@
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
 
-// #include "StMcEvent/StMemoryInfo.hh"
-
 #include "StMcEvent.hh"
 #include "StMcTrack.hh"
 #include "StMcTpcHit.hh"
@@ -66,7 +59,6 @@
 #include "StMcSvtHit.hh"
 #include "StMcVertex.hh"
 
-//#include "StAssociationMaker/StTrackPairInfo.hh"
 #include "StParticleDefinition.hh"
 #include "StPhysicalHelix.hh"
 
@@ -75,17 +67,12 @@ ClassImp(StHbtMcEventReader)
 #endif
 
 #ifndef ST_NO_NAMESPACES
-using namespace std;
+  using namespace units;
 #endif
 
 struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
-
-// Here one gives values to data members that need them.
-// So far the only data members I have are drawinit and currentMcEvent.
-// but might be useful later on.  Look at St_QA_Maker.cxx file
-
 
 double dedxMean(double mass, double momentum){
   double dedxMean;

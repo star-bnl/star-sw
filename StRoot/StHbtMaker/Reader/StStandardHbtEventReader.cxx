@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.15 2000/01/25 17:35:27 laue Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.16 2000/02/01 00:35:29 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,10 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.16  2000/02/01 00:35:29  laue
+ * namespaces and other little things (see Thomas CC5 migration page) changed
+ * to run on the new Solaris Compiler CC5
+ *
  * Revision 1.15  2000/01/25 17:35:27  laue
  * I. In order to run the stand alone version of the StHbtMaker the following
  * changes have been done:
@@ -76,15 +80,15 @@
  * Installation of StHbtMaker
  *
  **************************************************************************/
+#define HBT_BFIELD 0.5*tesla
 
 #include "StHbtMaker/Reader/StStandardHbtEventReader.h"
 #include "StChain.h"
 #include "TOrdCollection.h"
 
 
-
 // these StEvent files keep oscillating between ".hh" and ".h" files
-// fortunately, they are used only here
+// fortunatey, they are used only here
 
 #include "StEvent.h"
 #include "StGlobalTrack.h"
@@ -103,7 +107,7 @@
 #include "StTpcDedxPidAlgorithm.h"
 
 #include <typeinfo>
-#include <cmath>
+#include <math.h>
 
 
 /* .hh files
@@ -120,11 +124,15 @@
 #include "StV0MiniDstMaker/StV0MiniDst.hh"
 
 #include "StEventMaker/StEventMaker.h"
-#define HBT_B_FIELD 0.5*tesla
 
 #ifdef __ROOT__
 ClassImp(StStandardHbtEventReader)
 #endif
+
+#if !(ST_NO_NAMESPACES)
+  using namespace units;
+#endif
+
 
 //__________________
 StStandardHbtEventReader::StStandardHbtEventReader(){
@@ -280,7 +288,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     // while getting the bestGuess, the pidAlgorithm (StTpcDedxPidAlgorithm) is set up.
     // pointers to track and pidTraits are set 
     //cout << "look for best guess " << endl;
-    StParticleDefinition* BestGuess = rTrack->pidTraits(*PidAlgorithm);
+    StParticleDefinition* BestGuess = (StParticleDefinition*)rTrack->pidTraits(*PidAlgorithm);
     //    if (BestGuess) cout << "best guess for particle is " << BestGuess->name() << endl; //2dec9
     
     if (!BestGuess){
@@ -330,7 +338,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     
     double pathlength = rTrack->geometry()->helix().pathLength(vp);
     //cout << "pathlength\t" << pathlength << endl;
-    StHbtThreeVector p = rTrack->geometry()->helix().momentumAt(pathlength,HBT_B_FIELD);
+    StHbtThreeVector p = rTrack->geometry()->helix().momentumAt(pathlength,HBT_BFIELD);
     //cout << "p: " << p << endl;
     hbtTrack->SetP(p);
 
