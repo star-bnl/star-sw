@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMCReader.cxx,v 1.1 2004/02/26 20:06:25 chunhuih Exp $
+ * $Id: StEStructMCReader.cxx,v 1.2 2004/03/02 21:34:47 chunhuih Exp $
  *
  * Author: Chunhui Han
  *
@@ -13,6 +13,9 @@
  **********************************************************************
  *
  * $Log: StEStructMCReader.cxx,v $
+ * Revision 1.2  2004/03/02 21:34:47  chunhuih
+ * added impact parameter information to the StEStructEvent
+ *
  * Revision 1.1  2004/02/26 20:06:25  chunhuih
  * initial import
  *
@@ -29,11 +32,11 @@
 
 ClassImp(StEStructMCReader)
 
-StEStructMCReader::StEStructMCReader(TTree *tree) : meventsToDo(0), meventCount(0), mloopIndex(0), mAmDone(false), mECuts(0), mTCuts(0) {
+StEStructMCReader::StEStructMCReader(TTree *tree) : meventsToDo(0), meventCount(0), mloopIndex(0), mAmDone(false), mECuts(0), mTCuts(0), mIPMAX(1000000) {
   Init(tree);
 }
 
-StEStructMCReader::StEStructMCReader(int nevents, TTree *tree, StEStructEventCuts *ecuts, StEStructTrackCuts *tcuts) : meventsToDo(nevents), meventCount(0), mloopIndex(0), mAmDone(false), mECuts(ecuts), mTCuts(tcuts) {
+StEStructMCReader::StEStructMCReader(int nevents, TTree *tree, StEStructEventCuts *ecuts, StEStructTrackCuts *tcuts) : meventsToDo(nevents), meventCount(0), mloopIndex(0), mAmDone(false), mECuts(ecuts), mTCuts(tcuts), mIPMAX(1000000) {
   Init(tree);
   int n = getTotalEventCount();
   if( nevents > n || nevents == 0 )
@@ -251,6 +254,24 @@ void StEStructMCReader::fillTracks(StEStructEvent* estructEvent) {
     eTrack->SetInComplete();
     if(itrac == -1 ) {
       meventCount++;
+    }
+    // if(istat == 11 && ipdg == mIPMAX - 1):
+    // this event header contains:
+    // Pxyz[0]: run ID
+    // Pxyz[1]: evt ID
+    // Pxyz[2]: Date
+    if(istat == 11 && ipdg == mIPMAX - 2) {
+      // this header contains:
+      // Pxyz[0]: Impact Parameter
+      // Pxyz[1]: 
+      // Pxyz[2]: 
+      estructEvent->SetCentrality(Pxyz[0]);
+    }
+    if(istat == 11 && ipdg == mIPMAX - 3) {
+      // this header contains:
+      // Pxyz[0]: A1
+      // Pxyz[1]: Z1
+      // Pxyz[2]: A2
     }
     if(istat != 1 || !measureable(ipdg) ) continue;
 
