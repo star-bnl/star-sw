@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.cxx,v $
+// Revision 1.16  2003/05/26 13:44:18  suaide
+// added setPrint() method
+//
 // Revision 1.15  2003/01/23 03:49:59  jeromel
 // Include changed
 //
@@ -56,7 +59,7 @@
 // Revision 1.3  2000/08/24 19:45:37  suaide
 //
 //
-// small modifications: some cout has been removed
+// small modifications: some if(mPrint) cout has been removed
 //
 // Revision 1.2  2000/08/24 11:26:48  suaide
 //
@@ -118,6 +121,7 @@ StEmcGeom *geo;
 StEmcPreClusterCollection::StEmcPreClusterCollection():TDataSet("Default")
 {
   SetTitle("ecl");
+  mPrint =kTRUE;
 }
 //_____________________________________________________________________________
 StEmcPreClusterCollection::StEmcPreClusterCollection(const Char_t *Name):TDataSet("Default")
@@ -162,7 +166,7 @@ StEmcPreClusterCollection::StEmcPreClusterCollection(const Char_t *Name, StEmcDe
   else
   {
     mEnergySeed = -1.0; mEnergyAdd = 0.0; mEnergyThresholdAll = 0.0; 
-    cout<<"For detector "<<Name<<" PreCluster Finder has not ipmlimented yet:"<<endl;
+    if(mPrint) cout<<"For detector "<<Name<<" PreCluster Finder has not ipmlimented yet:"<<endl;
     kIsOk=kFALSE;
     return; 
   }
@@ -189,7 +193,7 @@ Int_t StEmcPreClusterCollection::findClusters()
   nhits=mDet->numberOfHits();
   if(nhits<=0)
   {
-    cout <<"***** StEmcClusterCollection: No hits in this detector\n";
+    if(mPrint) cout <<"***** StEmcClusterCollection: No hits in this detector\n";
     return 1;
   }
   nmodule=mDet->numberOfModules();
@@ -228,12 +232,12 @@ Int_t StEmcPreClusterCollection::findClusters()
   }
   if(kCheckClustersOk)
   {
-    printf("before check: Det %s #Clusters %i \n",GetName(), mNclusters);
+    if(mPrint) printf("before check: Det %s #Clusters %i \n",GetName(), mNclusters);
     mClusters.Compress();
     mNclusters=mClusters.GetLast()+1;
-    printf("after check: Det %s #Clusters %i \n",GetName(), mNclusters);
+    if(mPrint) printf("after check: Det %s #Clusters %i \n",GetName(), mNclusters);
   }
-  else printf("Det %s #Clusters %i \n",GetName(), mNclusters);
+  else if(mPrint) printf("Det %s #Clusters %i \n",GetName(), mNclusters);
   return 0;
 }
 //_____________________________________________________________________________
@@ -698,21 +702,21 @@ void StEmcPreClusterCollection::addPreCluster(Int_t mod, TArrayI *hid)
 //_____________________________________________________________________________
 void StEmcPreClusterCollection::printCluster(Int_t ic, StEmcPreCluster *cl)
 {
-  cout <<" =========  PreCluster  "<<ic<<" =========== "<<endl;
-  cout << (*cl) << endl;
+  if(mPrint) cout <<" =========  PreCluster  "<<ic<<" =========== "<<endl;
+  if(mPrint) cout << (*cl) << endl;
 }
 //_____________________________________________________________________________
 void StEmcPreClusterCollection::printClusters(Int_t n, Int_t start, Int_t m)
 {
   Int_t iprint=0;
-  cout << endl << mDetector << "  " << GetName() << " : ";
-  if(mNclusters<=0){cout << "No Clusters" << endl; return;}
-  else{cout << mNclusters << " clusters" << endl;} 
-  cout<<" mEnergySeed " << mEnergySeed;
-  cout<<" mEnergyAdd "  << mEnergyAdd; 
-  cout<<" mEnergyThresholdAll " << mEnergyThresholdAll << endl;
-  cout<<" mSizeMax " << mSizeMax;
-  cout<<" Capacity "<<mClusters.Capacity()<<endl<<endl;
+  if(mPrint) cout << endl << mDetector << "  " << GetName() << " : ";
+  if(mNclusters<=0){if(mPrint) cout << "No Clusters" << endl; return;}
+  else{if(mPrint) cout << mNclusters << " clusters" << endl;} 
+  if(mPrint) cout<<" mEnergySeed " << mEnergySeed;
+  if(mPrint) cout<<" mEnergyAdd "  << mEnergyAdd; 
+  if(mPrint) cout<<" mEnergyThresholdAll " << mEnergyThresholdAll << endl;
+  if(mPrint) cout<<" mSizeMax " << mSizeMax;
+  if(mPrint) cout<<" Capacity "<<mClusters.Capacity()<<endl<<endl;
 
   TIter next(&mClusters);
   StEmcPreCluster *cl;
@@ -731,9 +735,9 @@ void StEmcPreClusterCollection::printClusters(Int_t n, Int_t start, Int_t m)
         if(m==cl->Module()) iprint++;
       }
     }
-    else cout<<" PreCluster "<<i<<" out of capacity "<<endl;
+    else if(mPrint) cout<<" PreCluster "<<i<<" out of capacity "<<endl;
   }
-  if(m) cout<<"Module "<<m<<" has "<<iprint<<" clustes(s)"<<endl;
+  if(m) if(mPrint) cout<<"Module "<<m<<" has "<<iprint<<" clustes(s)"<<endl;
 }
 
 void 

@@ -1,8 +1,11 @@
 //
-// $Id: StPreEclMaker.h,v 1.14 2003/03/20 23:45:37 jeromel Exp $
+// $Id: StPreEclMaker.h,v 1.15 2003/05/26 13:44:19 suaide Exp $
 //
 //
 // $Log: StPreEclMaker.h,v $
+// Revision 1.15  2003/05/26 13:44:19  suaide
+// added setPrint() method
+//
 // Revision 1.14  2003/03/20 23:45:37  jeromel
 // GetCVS() added
 //
@@ -100,6 +103,8 @@ protected:
   TH1F          *m_EtaInCl[MAXDET]; //!
   TH1F          *m_PhiInCl[MAXDET]; //!
 
+  Bool_t        mPrint;
+
   St_emcClusterParam* mParam;       //!
 public: 
                 StPreEclMaker(const char *name="ecl", const char *title="event/data/emc/hits");
@@ -113,11 +118,12 @@ public:
           void  SetClusterConditions(char*,Int_t,Float_t,Float_t,Float_t);
           void  SetClusterConditions(char*,Int_t,Float_t,Float_t,Float_t,Bool_t);
   St_emcClusterParam* getParam() {return mParam;} 
+          void  setPrint(Bool_t a) { mPrint = a;}
   
   Bool_t doClearEmc;
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPreEclMaker.h,v 1.14 2003/03/20 23:45:37 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPreEclMaker.h,v 1.15 2003/05/26 13:44:19 suaide Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   

@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.h,v $
+// Revision 1.6  2003/05/26 13:44:35  suaide
+// added setPrint() method
+//
 // Revision 1.5  2001/12/01 02:44:50  pavlinov
 // Cleanp for events with zero number of tracks
 //
@@ -78,6 +81,7 @@ class StPointCollection : public TDataSet
     Int_t             mNPoints;
     Int_t             mNPointsReal;
     double            mBField;
+    Bool_t            mPrint;
   protected:   
 
   public: 
@@ -116,6 +120,7 @@ class StPointCollection : public TDataSet
                                            Int_t *);
 
     virtual Int_t     addPoints(Float_t*);
+    void    setPrint(Bool_t a) {mPrint = a;}
 
   ClassDef(StPointCollection,1)// Base class for electromagnetic calorimeter Point collection 
 };

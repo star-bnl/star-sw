@@ -1,6 +1,9 @@
 //
-// $Id: StEpcMaker.cxx,v 1.21 2003/04/30 16:08:30 alexst Exp $
+// $Id: StEpcMaker.cxx,v 1.22 2003/05/26 13:44:34 suaide Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.22  2003/05/26 13:44:34  suaide
+// added setPrint() method
+//
 // Revision 1.21  2003/04/30 16:08:30  alexst
 // Two changes:
 // 1. Clear vector of existing barrel points in StEvent. This accounts for the case when one needs to redo points with different parameters.
@@ -124,6 +127,7 @@ const TString detname[] = {"Bemc", "Bsmde", "Bsmdp"};
 StEpcMaker::StEpcMaker(const char *name):StMaker(name)
 {
   mPoint = 0;
+  mPrint = kTRUE;
   //  drawinit=kFALSE;
 }
 //_____________________________________________________________________________
@@ -191,13 +195,13 @@ Int_t StEpcMaker::Make()
  
       if (!mEvent) 
 	{
-	  cout << "No StEvent! Can not continue. " << endl;
+	  if(mPrint) cout << "No StEvent! Can not continue. " << endl;
 	  return kStOK; // If no event, we're done
 	}
       mTheEmcCollection = mEvent->emcCollection();
       if(!mTheEmcCollection)
 	{
-	  cout<<" EPC:: No EmcCollection, Cannot continue**"<<endl;
+	  if(mPrint) cout<<" EPC:: No EmcCollection, Cannot continue**"<<endl;
 	  return kStOK;
 	}
 
@@ -228,7 +232,7 @@ Int_t StEpcMaker::Make()
 
 	      if(idet==0 && ncl==0)
 		{
-		  cout << "EPC:: No BEMC tower clusters, cannot continue" << endl;
+		  if(mPrint) cout << "EPC:: No BEMC tower clusters, cannot continue" << endl;
 		  return kStWarn;
 		}
 
@@ -249,24 +253,24 @@ Int_t StEpcMaker::Make()
       if(summary) 
 	{
 	  mBField = summary->magneticField()/10.; // mBField in Tesla
-	  cout << "StEpcMaker::Make() -> mBField(summary->magneticField()) = "
+	  if(mPrint) cout << "StEpcMaker::Make() -> mBField(summary->magneticField()) = "
 	       << mBField << "(tesla)" << endl;
 	}
       if(fabs(mBField) < 0.01)
 	{
 	  // Sometimes StEventSummary get wrong value of field - 3 Dec 2001
 	  // Get mBField from gufld(,)
-	  cout <<"Trying to Get the mBField ..."<<endl;
+	  if(mPrint) cout <<"Trying to Get the mBField ..."<<endl;
 	  float x[3] = {0,0,0};
 	  float b[3];
 	  gufld(x,b);
 	  mBField = 0.1*b[2]; // This is mBField in Tesla.        
-	  cout << "StEpcMaker::Make() -> mBField(gufld) = "
+	  if(mPrint) cout << "StEpcMaker::Make() -> mBField(gufld) = "
 	       << mBField << "(tesla)" << endl;
 	}
       if(fabs(mBField) < 0.01) 
 	{
-	  cout << "StEpcMaker::Make() finished => wrong mBField !!!" << endl; 
+	  if(mPrint) cout << "StEpcMaker::Make() finished => wrong mBField !!!" << endl; 
 	  return kStWarn;
 	}
   
@@ -277,7 +281,7 @@ Int_t StEpcMaker::Make()
       //------------------- 
 
       StSPtrVecTrackNode& theTrackNodes = mEvent->trackNodes();
-      cout << "StEpcMaker:: Node size **" << theTrackNodes.size() << endl;
+      if(mPrint) cout << "StEpcMaker:: Node size **" << theTrackNodes.size() << endl;
 
       int allGlobals = 0;
       int goodGlobals = 0;                                                       
@@ -303,6 +307,7 @@ Int_t StEpcMaker::Make()
       StTrackVec& TrackToFit = TrackVecForEmc;
       //******Creating StPointCollection and calling findPoints
       mPoint = new StPointCollection("point");
+      mPoint->setPrint(mPrint);
       mPoint->SetBField(mBField);  // set correct magnetic field
       m_DataSet->Add(mPoint);      // for convinience only
 
@@ -310,7 +315,7 @@ Int_t StEpcMaker::Make()
 	{
 	  return kStWarn;
 	} 
-      else cout << "findEmcPoint == kStOK" << endl;
+      else if(mPrint) cout << "findEmcPoint == kStOK" << endl;
 
       MakeHistograms(); // Fill QA histgrams
       //------------------------------------------
@@ -320,21 +325,21 @@ Int_t StEpcMaker::Make()
       //Search for StEvent pointer , where EmcCollection is to be added
       //  mEvent=(StEvent *) GetInputDS("StEvent");
       //  if(mEvent){
-      //      cout<<"Epc::StEvent found **"<<endl;
+      //      if(mPrint) cout<<"Epc::StEvent found **"<<endl;
       //   if(!mTheEmcCollection){
       //        mTheEmcCollection = mEvent->emcCollection();
       //   }
       //  }
       //else{
-      //    cout<<" *** Epc:: StEvent Structure does not exist***"<<endl;
-      //    cout<<" *** Epc:: Try make one yourself***"<<endl;
+      //    if(mPrint) cout<<" *** Epc:: StEvent Structure does not exist***"<<endl;
+      //    if(mPrint) cout<<" *** Epc:: Try make one yourself***"<<endl;
       //    mEvent= new StEvent();
       //  }
       //   if(mTheEmcCollection){
-      //   cout<<" StEvent EmcCollection exists**"<<endl;
+      //   if(mPrint) cout<<" StEvent EmcCollection exists**"<<endl;
       //   }
-      cout << "Epc: ***  Filling StEvent ***" << endl;
-      if(fillStEvent() != kStOK){cout<< "StEvent filling is not OK"<<endl;}
+      if(mPrint) cout << "Epc: ***  Filling StEvent ***" << endl;
+      if(fillStEvent() != kStOK){if(mPrint) cout<< "StEvent filling is not OK"<<endl;}
     }
   return kStOK;
 }
@@ -356,7 +361,7 @@ void StEpcMaker::MakeHistograms()
     if(cluster->GetTitle() == tit)
     {
       Int_t n = cluster->NPoints();
-	    cout<<"Make hist**n***"<<n<<endl;
+	    if(mPrint) cout<<"Make hist**n***"<<n<<endl;
 //	    m_emc_points->Fill(Float_t(n));
       if(n>0)
       {
@@ -403,13 +408,13 @@ Int_t
 StEpcMaker::fillStEvent()
 {
   // mTheEmcCollection  -> must be defined -> see Make() 
-  cout<<"Epc::fillStEvent() ***"<<endl;
+  if(mPrint) cout<<"Epc::fillStEvent() ***"<<endl;
 
   if(mPoint) {
     Int_t nR = mPoint->NPointsReal();
 
     if(nR>0) {
-      cout << "Number of Emc points " << nR << endl;
+      if(mPrint) cout << "Number of Emc points " << nR << endl;
       TIter next(mPoint->PointsReal());
       StEmcPoint *cl;
 
@@ -421,7 +426,7 @@ StEpcMaker::fillStEvent()
     }
 
   } 
-  else cout << "mPoint iz zero !!!" <<endl;
+  else if(mPrint) cout << "mPoint iz zero !!!" <<endl;
   return kStOK;
 }
 //-------------------------------------------------------
