@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.35 2001/09/17 13:37:57 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.36 2001/09/25 21:17:03 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -283,11 +283,13 @@
         }
         $OSFID .= " SUN Solaris sun sun4os5 " . $STAR_SYS;
         $EXTRA_CPPPATH = $main::PATH_SEPARATOR . "/usr/openwin/include";
-        $CC     = "/opt/WS5.0/bin/cc";
-        $CXX    = "/opt/WS5.0/bin/CC";
+	$SUNWS = $ENV{'SUNWS'};
+	if( ! defined($SUNWS) ){ $SUNWS = "WS5.0";}
+        $CC     = "/opt/$SUNWS/bin/cc";
+        $CXX    = "/opt/$SUNWS/bin/CC";
         $CXXCOM =
 "%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS -I%<:d -ptr%ObjDir %_IFLAGS -c %CXXinp%< %Cout%>";
-        $FC             = "/opt/WS5.0/bin/f77";
+        $FC             = "/opt/$SUNWS/bin/f77";
         $CXXFLAGS       = "-KPIC";                # -library=iostream,no%%Cstd";
         $EXTRA_CXXFLAGS = " -D__CC5__";
         $EXTRA_CFLAGS   = " -D__CC5__";
@@ -296,7 +298,7 @@
         $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
         $CLIBS        =
           "-lmalloc -lm -ltermcap -ldl -lnsl -lsocket -lgen";# -L" . $OPTSTAR  . "/lib -lCstd -liostream -lCrun";
-        $FLIBS = "-L/opt/WS5.0/lib -lM77 -lF77 -lsunmath";
+        $FLIBS = "-L/opt/$SUNWS/lib -lM77 -lF77 -lsunmath";
         $XLIBS = "-L" . $ROOTSYS . "/lib -lXpm -L/usr/openwin/lib -lX11";
 
         #   $XLIBS     = "-L/usr/local/lib -lXpm -L/usr/openwin/lib -lX11";
