@@ -3,11 +3,14 @@
 
 /***************************************************************************
  *
- * $Id: FCFMaker.h,v 1.4 2004/01/22 14:20:36 jml Exp $
+ * $Id: FCFMaker.h,v 1.5 2004/01/22 18:36:11 jml Exp $
  *
  *--------------------------------------------------------------------------
  *
  * $Log: FCFMaker.h,v $
+ * Revision 1.5  2004/01/22 18:36:11  jml
+ * more updates to the logging
+ *
  * Revision 1.4  2004/01/22 14:20:36  jml
  * Added cluster reading
  *
@@ -130,7 +133,8 @@ class StRTSClientFCFMaker:public StMaker
   Int_t BuildCPP(int nrows, 
 		 raw_row_st *row, 
 		 raw_pad_st *pad, 
-		 raw_seq_st *seq);
+		 raw_seq_st *seq,
+		 int sector);
 
   StDaqClfCppRow *GetCPPRow(int r, int i, StDaqClfCppRow *storage);     // split the row along mezzanine banks
 
