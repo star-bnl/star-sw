@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetOutputMaker.cxx,v 1.2 2003/05/28 23:46:06 thenry Exp $
+ * $Id: StJetOutputMaker.cxx,v 1.3 2003/06/25 23:05:41 thenry Exp $
  * 
  * Author: Thomas Henry May 2003
  ***************************************************************************
@@ -41,10 +41,17 @@ Int_t StJetOutputMaker::Init()
   if(ofile == NULL)
     ofile = new ofstream(ofilename.c_str(), ofstream::out | ofstream::trunc);
   eventsProcessed = 0;
+  jetMaker->SetMaker(this);
   return StMaker::Init();
 }
 
 Int_t StJetOutputMaker::Make() {
+  //doMake();
+  return kStOk;
+}
+
+Int_t StJetOutputMaker::doMake() {
+
   cout <<" Start StJetOutputMaker :: "<< GetName() <<" mode="<<m_Mode<<endl;   
 
   oJetEvent.clear();
@@ -72,7 +79,8 @@ Int_t StJetOutputMaker::Make() {
   for(StJetMaker::jetBranchesMap::iterator it = jetAnalyzers.begin(); 
       it != jetAnalyzers.end(); ++it)
     {
-      oJetEvent.jet.jetname = (*it).first;
+      string anaName = (*it).first;
+      oJetEvent.jet.jetname = anaName;
       StppJetAnalyzer* ana = (*it).second;
       StJets* muDstJets = ana->getmuDstJets();
       int nJets = muDstJets->nJets();
@@ -82,7 +90,8 @@ Int_t StJetOutputMaker::Make() {
 	  vector<int> trackIndices = muDstJets->jetTrackIndices(i);
 	  TLorentzVector* jet = dynamic_cast<TLorentzVector*> 
 	    ((muDstJets->jets())->UncheckedAt(i));
-	  oJetEvent.jet.jet.energy = muDstJets->e(i);
+	  //oJetEvent.jet.jet.energy = muDstJets->e(i);
+	  oJetEvent.jet.jet.energy = jet->E();
 	  oJetEvent.jet.jet.px = jet->Px();
 	  oJetEvent.jet.jet.py = jet->Py();
 	  oJetEvent.jet.jet.pz = jet->Pz();
@@ -90,31 +99,40 @@ Int_t StJetOutputMaker::Make() {
 	  oJetEvent.jet.jet.phi = jet->Phi();
 	  oJetEvent.jet.jet.numCharges = muDstJets->nCell(i);
 	  oJetEvent.jet.jet.charge = muDstJets->charge(i);
+	  double jet_energy = 0.0;
 	  for(vector<int>::iterator trackit = trackIndices.begin();
 	      trackit != trackIndices.end(); ++trackit)
 	    {
 	      if(*trackit >= numberPrimaryTracks)
-		if(muEmc)
-		  {
-		    StMuEmcPoint* muPoint = muEmc->getPoint(*trackit);
-		    StCorrectedEmcPoint &point = fourPMaker->binmap.
-		      moddPoints[muPoint];
-		    oJetEvent.track.trackE = point.E();
-		    oJetEvent.track.trackPhi = point.Phi();
-		    oJetEvent.track.trackEta = point.Eta();
-		    oJetEvent.track.isTpcTrack = false;
-		    oJetEvent.push_track();
-		    continue;
-		  }
+		{
+		  if(muEmc)
+		    {
+		      StMuEmcPoint* muPoint = 
+			muEmc->getPoint(*trackit-numberPrimaryTracks);
+		      StCorrectedEmcPoint &point = fourPMaker->binmap.
+		        moddPoints[muPoint];
+		      oJetEvent.track.trackE = point.E();
+		      jet_energy += oJetEvent.track.trackE;
+		      oJetEvent.track.trackPhi = point.Phi();
+		      oJetEvent.track.trackEta = point.Eta();
+		      oJetEvent.track.isTpcTrack = false;
+		      oJetEvent.push_track();
+		      continue;
+		    }
+		  continue;
+		}
 	      StMuTrack* muTrack = muDst->primaryTracks(*trackit);
 	      tempTrack.initProbabilities(muTrack);
               oJetEvent.track.trackE = 
 		sqrt(tempTrack.masssqr() + muTrack->p().mag2());
+	      jet_energy += oJetEvent.track.trackE;
 	      oJetEvent.track.trackPhi = muTrack->phi();
 	      oJetEvent.track.trackEta = muTrack->eta();
 	      oJetEvent.track.isTpcTrack = true;
 	      oJetEvent.push_track();
 	    }
+	  cout << "Jet Energy from track sum: " 
+	       << jet_energy << endl;
 	  oJetEvent.push_jet();
 	}
     }

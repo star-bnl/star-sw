@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetOutputMaker.h,v 1.2 2003/05/28 23:46:07 thenry Exp $
+ * $Id: StJetOutputMaker.h,v 1.3 2003/06/25 23:05:41 thenry Exp $
  * $Log: StJetOutputMaker.h,v $
+ * Revision 1.3  2003/06/25 23:05:41  thenry
+ * Fixed bugs
+ *
  * Revision 1.2  2003/05/28 23:46:07  thenry
  * The file JetEvent.cxx, JetEvent.h has been eliminated.
  *
@@ -318,6 +321,7 @@ public:
 		     StEmcTpcFourPMaker* emcTpcFourPMaker);
     virtual Int_t Init();
     virtual Int_t Make();
+    virtual Int_t doMake();
     virtual Int_t Finish();
 
 protected:
