@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.36 2000/05/25 04:02:51 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.37 2000/05/25 15:27:05 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.37  2000/05/25 15:27:05  lansdell
+// changed primtrk iflag check: 300<=iflag<400 (TPC), 600<=iflag<700 (TPC+SVT)
+//
 // Revision 1.36  2000/05/25 04:02:51  lansdell
 // fill primtrk TPC histograms for iflag>0
 //
@@ -578,7 +581,7 @@ void StEventQAMaker::MakeHistPrim() {
 	m_pdet_id->Fill(primtrk->pidTraits()[0]->detector());
 
 // now fill all TPC histograms ------------------------------------------------
-	if (primtrk->flag()>0) {
+	if (primtrk->flag()>=300 && primtrk->flag()<400) {
 
 // these are TPC only
 	  m_prim_xf0->Fill(dif.x());
@@ -654,7 +657,7 @@ void StEventQAMaker::MakeHistPrim() {
 
 // now fill all TPC+SVT histograms --------------------------------------------
 
-	if (primtrk->flag()>=500 && primtrk->flag()<600) {
+	if (primtrk->flag()>=600 && primtrk->flag()<700) {
 
 	  m_prim_xf0TS->Fill(dif.x());
 	  m_prim_yf0TS->Fill(dif.y());
