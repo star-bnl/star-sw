@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.h,v 1.8 1999/03/13 00:26:48 perev Exp $
+// $Id: St_stk_Maker.h,v 1.9 1999/07/15 00:19:59 caines Exp $
 // $Log: St_stk_Maker.h,v $
+// Revision 1.9  1999/07/15 00:19:59  caines
+// Switch to turn tracking on/off
+//
 // Revision 1.8  1999/03/13 00:26:48  perev
 // New maker schema
 //
@@ -54,7 +57,7 @@ class TH2F;
 
 class St_stk_Maker : public StMaker {
 protected:
-// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.8 1999/03/13 00:26:48 perev Exp $";
+// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.9 1999/07/15 00:19:59 caines Exp $";
    Int_t  m_mode;      // mode 1 = primaries;
 	               // mode 2 = secondaries;
 	               // mode 3 = primaries to secondaries 
@@ -89,7 +92,7 @@ protected:
    Int_t   m_nitermax; // maximum number of iterations
    Int_t   m_niternull;// maximum number of iterations allowed to find no tracks
    Float_t m_sec_factor;//factor for cone angle for secondaries
-   Bool_t  m_ifstk;    // flag to swit between stk and sgr
+   Bool_t  m_ifstk;    // flag to switch on stk and sgr
 
 // 		parameter tables
 
@@ -119,6 +122,9 @@ public:
    virtual Int_t Init();
    virtual Int_t  Make();
    virtual void   PrintInfo();
+   virtual void   TrackSwitch(Bool_t flag=kFALSE){m_ifstk=flag;} // *MENU*
+   virtual void   TrackSwitchon() {TrackSwitch(kTRUE);} 
+   virtual void   TrackSwitchoff(){TrackSwitch();}
    ClassDef(St_stk_Maker, 1)   //STAR chain virtual base class for Makers
 };
 

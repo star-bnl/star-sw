@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.14 1999/05/05 19:31:52 fisyak Exp $
+// $Id: St_stk_Maker.cxx,v 1.15 1999/07/15 00:19:59 caines Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.15  1999/07/15 00:19:59  caines
+// Switch to turn tracking on/off
+//
 // Revision 1.14  1999/05/05 19:31:52  fisyak
 // Add sanity check and simplify
 //
@@ -183,54 +186,72 @@ Int_t St_stk_Maker::Make()
     cout << "St_stk_Maker:: No GEANT information" << endl;
     return kStWarn;
   }
-  St_sgr_groups *candidate_groups = new St_sgr_groups("candidate_groups",maxNofTracks);
+  St_sgr_groups *groups      = 0;
+  St_sgr_groups *candidate_groups   = 0;
+  St_sgr_groups *mcgroups    = 0;
+  St_stk_track  *stk_track   = 0;
+  St_stk_kine   *stk_kine    = 0;
+  St_stk_track  *stk_mctrack = 0;
+  St_stk_kine   *stk_mckine  = 0;
+
+  if( m_ifstk ){
+  candidate_groups = new St_sgr_groups("candidate_groups",maxNofTracks);
   m_DataSet->Add(candidate_groups);
-  St_sgr_groups *groups      = new St_sgr_groups("groups",4*maxNofTracks);
+  groups      = new St_sgr_groups("groups",4*maxNofTracks);
   m_DataSet->Add(groups);
-  St_sgr_groups *mcgroups    = new St_sgr_groups("mcgroups",maxNofTracks);  
+  mcgroups    = new St_sgr_groups("mcgroups",maxNofTracks);  
   m_DataSet->Add(mcgroups);
-  St_stk_track  *stk_track   = new St_stk_track("stk_track",maxNofTracks);
+  stk_track   = new St_stk_track("stk_track",maxNofTracks);
   m_DataSet->Add(stk_track);
-  St_stk_kine   *stk_kine    = new St_stk_kine("stk_kine",maxNofTracks/5);
+  stk_kine    = new St_stk_kine("stk_kine",maxNofTracks/5);
   m_DataSet->Add(stk_kine);
-  St_stk_track  *stk_mctrack = new St_stk_track("stk_mctrack",maxNofTracks/5);
+  stk_mctrack = new St_stk_track("stk_mctrack",maxNofTracks/5);
   m_DataSet->Add(stk_mctrack);
-  St_stk_kine   *stk_mckine  = new St_stk_kine("stk_mckine",maxNofTracks/5);
+  stk_mckine  = new St_stk_kine("stk_mckine",maxNofTracks/5);
   m_DataSet->Add(stk_mckine);
+  }
   //
   St_scs_spt    *scs_spt      = (St_scs_spt *)GetDataSet("svt_hits/.data/scs_spt");
   if (! scs_spt) {
     cout << "St_stk_Maker:: No SVT space points" << endl;
     return kStWarn;
   }
-  // 			exec run_stk  
-  Int_t Res_stk_init = stk_am_init(m_stk_stkpar,
-				   groups,stk_track,stk_kine,mcgroups,
-				   stk_mctrack,stk_mckine);
-  if (Res_stk_init !=  kSTAFCV_OK) {
-    cout << "Problem on return from STK_AM_INIT" << endl;
-  }
-  Int_t Res_sgr = sgr_am(m_stk_vtx,m_geom,
-			 scs_spt,groups,
-			 m_pix_info,candidate_groups,stk_track);
-  if (Res_sgr !=  kSTAFCV_OK) {cout << " Problem on return from SGR" << endl;}
-  
-  stk_stkpar_st *stk_stkpar = m_stk_stkpar->GetTable();
-  stk_stkpar->direct = 1;
-  Int_t Res_stk =  stk_am(m_stk_stkpar,
-			  g2t_track,g2t_event,g2t_vertex,
-			  scs_spt,
-			  m_stk_vtx,m_stk_vtx_direct,
+  if( m_ifstk ){
+    // 			exec run_stk  
+    Int_t Res_stk_init = stk_am_init(m_stk_stkpar,
+				     groups,stk_track,stk_kine,mcgroups,
+				     stk_mctrack,stk_mckine);
+    if (Res_stk_init !=  kSTAFCV_OK) {
+      cout << "Problem on return from STK_AM_INIT" << endl;
+    }
+    
+    stk_vtx_st *stk_vtx = m_stk_vtx->GetTable();
+    g2t_vertex_st *g_vertex = g2t_vertex->GetTable();
+    printf("*************************** Warning cheating with vtx using geant\n");
+    stk_vtx->x[2] = g_vertex->ge_x[2];
+    
+    Int_t Res_sgr = sgr_am(m_stk_vtx,m_geom,
+			   scs_spt,groups,
+			   m_pix_info,candidate_groups,stk_track);
+    if (Res_sgr !=  kSTAFCV_OK) {cout << " Problem on return from SGR" << endl;}
+    
+    stk_stkpar_st *stk_stkpar = m_stk_stkpar->GetTable();
+    stk_stkpar->direct = 1;
+    Int_t Res_stk =  stk_am(m_stk_stkpar,
+			    g2t_track,g2t_event,g2t_vertex,
+			    scs_spt,
+			    m_stk_vtx,m_stk_vtx_direct,
 			  groups,stk_track,stk_kine,mcgroups,
-			  stk_mctrack,stk_mckine,
-			  m_stk_filler,m_config,m_geom );
-  if (Res_stk !=  kSTAFCV_OK) {cout << " Problem on return from STK_AM" << endl;}
-  Int_t Res_spr_svt = spr_svt(m_sprpar, stk_kine,
-			      m_geom, scs_spt,
+			    stk_mctrack,stk_mckine,
+			    m_stk_filler,m_config,m_geom );
+    if (Res_stk !=  kSTAFCV_OK) {cout << " Problem on return from STK_AM" << endl;}
+    Int_t Res_spr_svt = spr_svt(m_sprpar, stk_kine,
+				m_geom, scs_spt,
 			      groups, stk_track);
-  if (Res_spr_svt != kSTAFCV_OK) {cout << "Problem on return from SPR_SVT"<< endl;}
-  
-  MakeHistograms(); //tracking histograms
+    if (Res_spr_svt != kSTAFCV_OK) {cout << "Problem on return from SPR_SVT"<< endl;}
+    
+    MakeHistograms(); //tracking histograms
+  } // If tracking turned on
   return kStOK;
 }
 // --------------------------------------------------------------------------
@@ -278,7 +299,7 @@ void St_stk_Maker::MakeHistograms() {
 //_____________________________________________________________________________
 void St_stk_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_stk_Maker.cxx,v 1.14 1999/05/05 19:31:52 fisyak Exp $\n");
+  printf("* $Id: St_stk_Maker.cxx,v 1.15 1999/07/15 00:19:59 caines Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
