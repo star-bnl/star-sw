@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.32 2004/06/21 20:18:34 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.33 2004/07/07 18:09:24 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.33  2004/07/07 18:09:24  caines
+ * Save out fraction drfi5 velocity scaler to StEvent
+ *
  * Revision 1.32  2004/06/21 20:18:34  caines
  * Add number of anodes count to res[0] variable for use in dedx calc
  *
@@ -138,6 +141,7 @@ StSvtHitMaker::StSvtHitMaker(const char *name) : StMaker(name)
 {
   int n = (char*)&filenameC - (char*)&iWrite + sizeof(filenameC);
   memset(&iWrite,0,n);
+  svt_drift_mon = 0;
 }
 
 //_____________________________________________________________________________
@@ -370,6 +374,10 @@ Int_t StSvtHitMaker::Make()
   St_scs_spt    *scs_spt    = new St_scs_spt("scs_spt",100);
   m_DataSet->Add(scs_spt);
 
+  //              Create output tables
+  svt_drift_mon    = new St_dst_mon_soft_svt("svtDrift",1);
+  m_DataSet->Add(svt_drift_mon);
+
 // Get pointer to StSvtData
 
   if( GetSvtRawData()){
@@ -402,7 +410,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
   int index, TotHits=0, GoodHit=0;
   
   
-  StSvtCoordinateTransform SvtGeomTrans;;
+  StSvtCoordinateTransform SvtGeomTrans;
   //SvtGeomTrans.setParamPointers(&srs_par[0], &geom[0], &shape[0], mSvtData->getSvtConfig());
   if(m_geom)  SvtGeomTrans.setParamPointers(m_geom, mSvtData->getSvtConfig(), m_driftVeloc, m_t0);
   StSvtLocalCoordinate localCoord(0,0,0);
@@ -411,8 +419,13 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
   StThreeVectorF mPos(0,0,0);
 
   //here is applied laser correction for temperature variations;
-  SvtGeomTrans.setVelocityScale(LaserTemperatureCorrection());
-  
+
+  dst_mon_soft_svt_st* drift_vel =  svt_drift_mon->GetTable();
+  drift_vel->res_drf_svt = LaserTemperatureCorrection();
+  svt_drift_mon->SetNRows(1);
+  SvtGeomTrans.setVelocityScale(drift_vel->res_drf_svt);
+
+
   for(int barrel = 1;barrel <= mSvtData->getNumberOfBarrels();barrel++) {
 
     for (int ladder = 1;ladder <= mSvtData->getNumberOfLadders(barrel);ladder++) {
@@ -704,7 +717,7 @@ void StSvtHitMaker::SetFileNames(char* filen, char* filec){
   filenameC = filec;
 }
 
-
+//________________________________________________________________________
 double StSvtHitMaker::LaserTemperatureCorrection() {
   // This function returns a percentage change of the drift velocity
   // obtained from the laser spot positions. It is actually a ratio of the 
@@ -753,6 +766,6 @@ double StSvtHitMaker::LaserTemperatureCorrection() {
     cout << "spot 2 status " << tbin2 << endl;
     return driftVelocityChange;
   }
-  
+
   return driftVelocityChange;
 }
