@@ -93,24 +93,26 @@ void PrintMenuGroup::printTracks()
   cout << "PrintMenuGroup::printTracks() -I- Started"<<endl;
   cout << "Reconstructed Tracks ==========================" <<endl;
   StiTrackContainer * trackContainer = getToolkit()->getTrackContainer(); 
-  TrackToTrackMap::const_iterator iter;
+  vector<StiTrack*>::const_iterator iter;
+  StiTrack * track;
   for (iter=trackContainer->begin();
        iter!=trackContainer->end();
        ++iter)
     {
+      track = *iter;
       Filter<StiTrack> * filter = getDisplay()->getTrackFilter();
       if (filter)
 	{
 	  filter->reset();
-	  if (filter->filter((*iter).second) )
+	  if (filter->filter(track))
 	    {
-	      double chi2 = (*iter).second->getChi2();
-	      double ndf  = (*iter).second->getPointCount();
+	      double chi2 = track->getChi2();
+	      double ndf  = track->getPointCount();
 	      cout << "--------------------"<<endl
-		   << *((*iter).second) << "chi2/ndf:"<< chi2/ndf << endl
-		   << " pt: " << (*iter).second->getPt()
-		   << " eta:" << (*iter).second->getPseudoRapidity()
-		   << " phi:" << (180./3.1415)*(*iter).second->getPhi()<<endl;
+		   << *track << "chi2/ndf:"<< chi2/ndf << endl
+		   << " pt: " << track->getPt()
+		   << " eta:" << track->getPseudoRapidity()
+		   << " phi:" << (180./3.1415)*track->getPhi()<<endl;
 	    }
 	}
     }
@@ -120,19 +122,20 @@ void PrintMenuGroup::printTracks()
        iter!=mcTrackContainer->end();
        ++iter)
     {
+      track = *iter;
       Filter<StiTrack> * filter = getDisplay()->getTrackFilter();
       if (filter)
 	{
 	  filter->reset();
-	  if (filter->filter((*iter).second) )
+	  if (filter->filter(track))
 	    {
-	      double chi2 = (*iter).second->getChi2();
-	      double ndf  = (*iter).second->getPointCount();
-	      cout << "+++++++++++++++++"<<endl
-		   << *((*iter).second) << "chi2/ndf:"<< chi2/ndf << endl
-		   << " pt: " << (*iter).second->getPt()
-		   << " eta:" << (*iter).second->getPseudoRapidity()
-		   << " phi:" << (180./3.1415)*(*iter).second->getPhi()<<endl;
+	      double chi2 = track->getChi2();
+	      double ndf  = track->getPointCount();
+	      cout << "--------------------"<<endl
+		   << *track << "chi2/ndf:"<< chi2/ndf << endl
+		   << " pt: " << track->getPt()
+		   << " eta:" << track->getPseudoRapidity()
+		   << " phi:" << (180./3.1415)*track->getPhi()<<endl;
 	    }
 	}
     }

@@ -260,20 +260,16 @@ void EventDisplay::draw(StiTrackContainer * container,
   //cout << "EventDisplay::draw() -I- Started" << endl;
   if (!container) return;
   //cout << "EventDisplay::draw() -I- Processing tracks from  container:"<< container->getName()<<endl;
-  for (TrackToTrackMap::const_iterator i=container->begin();i!=container->end(); ++i) 
+  for (vector<StiTrack*>::const_iterator i=container->begin();i!=container->end(); ++i) 
     {
-      if (filter)
-	{
-	  if (!filter->filter( (*i).second) )
-	      continue;
-	}
-      StiRootDrawableTrack * t = dynamic_cast<StiRootDrawableTrack *>((*i).second);
+      StiTrack * track = *i;
+      if (filter && (!filter->filter(track))) continue;
+      StiRootDrawableTrack * t = dynamic_cast<StiRootDrawableTrack *>(track);
       if (!t) continue; // cast failed...
       t->setColor(1);
       t->setStyle(1);
       t->setSize(1.);
-      if (policy)
-	policy->police(t);
+      if (policy) policy->police(t);
       t->draw(); 
     }
   //cout << "EventDisplay::draw() -I- Done" << endl;
