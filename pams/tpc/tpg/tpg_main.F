@@ -28,6 +28,7 @@ C  I. Sakrejda 19/12/97
       integer tgc_time_to_z,tgc_z_to_time ! added 05feb97 - mal
       integer tgc_drift_volume_length
       integer tgc_drift_velocity, tgc_clock_frequency
+      integer tgc_z_inner_offset
       integer iret
       integer init_flag, idebug
 
@@ -44,6 +45,7 @@ CCCCCCCCCCCC
 *
       if(init_flag.eq.0) then
          iret=tgc_drift_volume_length(dummy5,tpg_detector_h,tpg_detector)
+         iret=tgc_z_inner_offset(dummy5,tpg_detector_h,tpg_detector)
          iret=tgc_drift_velocity(dummy1,tpg_detector_h,tpg_detector)
          iret=tgc_clock_frequency(dummy1, tpg_detector_h,tpg_detector)
          iret=tgc_pad_to_x(1.0,1.0,dummy3,pad_plane_h,pad_plane)
@@ -310,36 +312,28 @@ C     z - z coodinate in the local coordinate system
       integer flag/1/
       integer tgc_drift_velocity
       integer tgc_clock_frequency
+      integer tgc_z_inner_offset
       integer iret, pad, padrow, sector, time
-      integer tgc_drift_volume_length
+
       real dummy1, dvel, clock, z
       real dvel_local, clock_local, t0_offset
-      real drift_vol_length, drift_length
+      real z_inner_offset, z_offset
       save
 
       if (flag.eq.1) then
          flag=0
          iret = tgc_drift_velocity(dvel, dummy1, dummy1)
          iret = tgc_clock_frequency(clock, dummy1, dummy1)
-         iret = tgc_drift_volume_length(drift_vol_length, dummy1, dummy1)
+         iret = tgc_z_inner_offset(z_inner_offset, dummy1, dummy1)
 *
          dvel_local   = dvel
          clock_local  = clock
-         drift_length = drift_vol_length
+         z_offset     = z_inner_offset
       endif
 *     iret = tgc_t0(t0, pad, padrow, sector, dummy1, dummy1)
       t0_offset=0.0
 
-      z = dvel_local*(time/clock_local - t0_offset)
-
-      if (z.lt.0.0) then
-         write(6,*)'TGC_TIME_TO_Z - z < 0 ! setting to 0'
-         z = 0.0
-      elseif (z.gt.drift_length) then
-         write(6,*)'TGC_TIME_TO_Z - z > drift ! setting to ',
-     +        drift_length
-         z= drift_length
-      endif
+      z = dvel_local*(time/clock_local - t0_offset)-z_offset
 
       tgc_time_to_z = STAFCV_OK      
 
@@ -362,28 +356,26 @@ C     time - time bucket number
       integer flag/1/
       integer tgc_drift_velocity
       integer tgc_clock_frequency
+      integer tgc_z_inner_offset
       integer iret, pad, padrow, sector, time
       real dummy1, dvel, clock, z
       real vdrift, clock_local, t0_offset
+      real z_offset, z_inner_offset
       save
 
       if (flag.eq.1) then
          flag=0
          iret = tgc_drift_velocity(dvel, dummy1, dummy1)
          iret = tgc_clock_frequency(clock, dummy1, dummy1)
+         iret = tgc_z_inner_offset(z_inner_offset, dummy1, dummy1)
          vdrift=dvel
          clock_local=clock
+         z_offset=z_inner_offset
       endif
 *     iret = tgc_t0(t0, pad, padrow, sector, dummy1, dummy1)
       t0_offset=0.0
-      time=(z/vdrift + t0_offset)*clock_local
-      if (time.lt.0.0) then
-           write(6,*)'Time < 0 ! setting to 0'
-           time=0.0
-      elseif (time.ge.513.0) then
-           write(6,*)'Time > 513! setting to 512.9'
-           time=0.0
-      endif
+      time=((z+z_offset)/vdrift + t0_offset)*clock_local
+
       tgc_z_to_time = STAFCV_OK      
 
       end
@@ -435,6 +427,31 @@ ccc
 ccc
       clock=clock_local
       tgc_clock_frequency = STAFCV_OK
+
+      end
+
+      integer function tgc_z_inner_offset(z_offset,TPG_DETECTOR_H,TPG_DETECTOR)
+      implicit none
+#include "PAM.inc"
+#include "tpg_detector.inc"
+
+      RECORD / table_head_st /tpg_detector_h
+      RECORD / tpg_detector_st /tpg_detector(*) 
+
+
+      integer iflag/1/
+      real z_offset, z_offset_local
+
+      save
+
+ccc
+      if (iflag.eq.1) then      ! initialize: set up t0_offset table.
+         iflag = 0
+         z_offset_local = tpg_detector(1).z_inner_offset
+      endif
+ccc
+      z_offset=z_offset_local
+      tgc_z_inner_offset = STAFCV_OK
 
       end
 

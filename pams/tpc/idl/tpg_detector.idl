@@ -16,9 +16,10 @@
        float     radius_in;       /* Inner radius, to center of row. */
        float     radius_out;      /* Outer radius, to outside of last-row end*/
        float     sector_angle;    /* Angle between sectors, radians */
-       float	 vdrift;	  /* drift velocity (cm/us) */
-       float	 e_vdrift;	  /* error on thedrift velocity (cm/us) */
-       float	 clock_frequency; /* time duration of time bucket (us) */
+       float	 vdrift;	  /* drift velocity (cm/s) */
+       float	 e_vdrift;	  /* error on thedrift velocity (cm/s) */
+       float	 clock_frequency; /* frequency of the clock driving FEE(1/s) */
+       float     z_inner_offset;  /* offset in z between the inner and the outer sector (cm) */
    } ;
-/*  Last mod. for tpg_detector:   $Date: 1997/12/23 01:40:20 $ */
+/*  Last mod. for tpg_detector:   $Date: 1998/01/02 02:19:36 $ */
 
