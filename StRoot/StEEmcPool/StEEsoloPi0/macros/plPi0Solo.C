@@ -6,7 +6,7 @@ TPad *pad=0;
 //==========================
 //==========================
 
-void plPi0Solo( int page=1,TString fName="aa2" ) {
+void plPi0Solo( int page=1,TString fName="bb5" ) {
   int pr=0;
 
   // fName="ctbSum70-801sec1-12thr0.8";

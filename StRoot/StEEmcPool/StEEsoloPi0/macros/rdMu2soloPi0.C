@@ -11,17 +11,15 @@ StMuDstMaker* muMk;
 StChain *chain=0;
 
 
-int rdMu2soloPi0
-(
- TString fullName="aa3",
- int nEve=100000000,
- Int_t nFiles  = 200,
+int rdMu2soloPi0(
+ TString fullName="aa6",
+ int nEve=10000,
+ Int_t nFiles  = 2,
  char* file="inp/R5107005.lis", 
- char* inDir   = "./"
+ char* inDir   = "./",
+ char* outDir   = "outPi0/"
 ){ 
   
-
-
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
   cout << " loading done " << endl;
@@ -41,19 +39,21 @@ int rdMu2soloPi0
   TChain* tree=muMk->chain(); assert(tree); 
   int nEntries=tree->GetEntries();
   printf("total eve in chain =%d\n",nEntries);
-  //  return;  
-  myDb=new StEEmcDbMaker("eemcDb");
+
   St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
+
+  myDb=new StEEmcDbMaker("eemcDb");
 
   myMk3=new StEEsoloPi0Maker("soloPi0","MuDst");
   TObjArray  HList;
-  myMk3->Set(&HList);
+  myMk3->SetHList(&HList);
   // myMk1->setSectors(1,8);
   // myDb->setTimeStampDay(20040320);  // format: yyyymmdd
   //myMk1->setPreferedFlavor("set-b","eemcPMTcal");
 
-
-
+  gMessMgr->SwitchOff("D");
+  gMessMgr->SwitchOn("I");
+ 
   chain->Init();
   chain->ls(3);
   //  return;
@@ -81,7 +81,7 @@ int rdMu2soloPi0
    chain->Finish();
    //   HList.ls();
    fullName+=".hist.root";
-   TFile f( fullName,"recreate");
+   TFile f( outDir+fullName,"recreate");
    assert(f.IsOpen());
    printf("%d histos are written  to '%s' ...\n",HList.GetEntries(),fullName.Data());
    HList.Write();
