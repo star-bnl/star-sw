@@ -2,8 +2,8 @@
 rdEz2histoExample(int mxEve=5000,
        char *runL="R5132028 R5132029 ",
        TString iPath="/star/data04/sim/balewski/daq/ezTree/pp200/pp2/",
-       int firstSec=1,
-       int lastSec=12,
+       int firstSec=5,
+       int lastSec=5,
        int oflTrigId=0
       ) {
   
@@ -65,7 +65,7 @@ rdEz2histoExample(int mxEve=5000,
 
   TObjArray  HList;
   //........... sorters ..........
-  EzEEtowerExmaple *sorter=new  EzEEtowerExmaple;
+  EzEEtowerExample *sorter=new  EzEEtowerExample;
   sorter->set(&HList,db,eFee,eHead,eTrig);
   sorter->init();
    
