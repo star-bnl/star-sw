@@ -8,6 +8,7 @@
 *:HISTORY:      20jul95-v000a-cet- creation (from John Thomas Berry)
 *:<---------------------------------------------------------------------
 */
+#ifdef __cplusplus
 #ifndef SUTCLASSES_HH
 #define SUTCLASSES_HH
 
@@ -50,3 +51,4 @@ private:
    int myLen;
 };
 #endif /*SUTCLASSES_HH*/
+#endif /*__cplusplus*/

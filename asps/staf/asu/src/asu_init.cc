@@ -9,6 +9,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include "asuAlloc.h"
 #include "asuLib.h"	/* Analysis Service Utilities */
 #include "emlLib.h"	/* Error Messaging & Logging */
 
@@ -55,6 +56,7 @@ int asu_stop()
 {
    EML_MESSAGE("Stopping ASU.");
 
+   asuAllocStats();			/* show allocation stats */
    return TRUE;
 }
 

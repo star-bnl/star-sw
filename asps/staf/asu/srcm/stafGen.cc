@@ -207,8 +207,8 @@ char* pam_includes()
    s[0]=NULL;
    for( i=0;i<npam;i++ ){
       sprintf(s+strlen(s),
-"#include \"%s_load.h\" \n"
-      ,pam[i]);
+"int %s_init(), %s_start(), %s_stop(); \n"
+      ,pam[i] ,pam[i] ,pam[i]);
    }
    s[strlen(s)]=NULL;
    return s;
@@ -274,8 +274,8 @@ char* ami_load_func()
    );
    for( i=npam-1;i>=0;i-- ){
       sprintf(s+strlen(s),
-"#include \"%s_load.cc\" \n"
-      ,pam[i]);
+"\t%s_init(); %s_start(); \n"
+      ,pam[i] ,pam[i]);
    }
    sprintf(s+strlen(s),
 " \n"
