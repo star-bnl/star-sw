@@ -1,5 +1,8 @@
-// $Id: g2r.C,v 1.2 1999/01/26 16:04:15 fine Exp $
+// $Id: g2r.C,v 1.3 1999/01/28 00:11:55 fisyak Exp $
 // $Log: g2r.C,v $
+// Revision 1.3  1999/01/28 00:11:55  fisyak
+// add g2r
+//
 // Revision 1.2  1999/01/26 16:04:15  fine
 // GetEvent.C print out of the current input file name
 //
@@ -40,7 +43,6 @@ g2r(const Int_t   Nevents=0,
   }
   St_TLA_Maker    *geant = new St_TLA_Maker("geant","event/geant/Event");
   St_io_Maker *out  = new St_io_Maker("Output","all");
-  geant->Save();
   chain->PrintInfo();
   int iInit = chain->Init();
   if (iInit) chain->Fatal(iInit,"on init");
