@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.11 2003/01/10 16:40:55 oldi Exp $
+// $Id: plotCen.C,v 1.12 2003/02/25 19:25:33 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -18,14 +18,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <math.h>
+#include "TMath.h" 
  
-const  Int_t nCens = 8;
+const  Int_t nCens = 10;
 int    runNumber   = 0;
 char   runName[6];
 char   fileName[30];
 char   histTitle[30];
 TFile* histFile[nCens];
 char   tmp[10];
+TCanvas* c;
 
 TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
 
@@ -46,6 +48,9 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     "Flow_Cos_Sel",
     "Flow_Res_Sel",
     "Flow_v_Sel",
+    "Flow_v_ScalarProd_Sel",
+    "Flow_Cumul_v_Order2_Sel",
+    "Flow_Cumul_v_Order4_Sel",
     "Flow_VertexZ",
     "Flow_VertexXY2D",
     "Flow_EtaSymVerZ2D_Tpc",
@@ -124,11 +129,17 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     "Flow_v2D_Sel",
     "Flow_vEta_Sel",
     "Flow_vPt_Sel",
-    "Flow_q_Sel"
-  };
+    "Flow_q_Sel",
+    "Flow_vObs2D_ScalarProd_Sel",
+    "Flow_v2D_ScalarProd_Sel",
+    "Flow_vEta_ScalarProd_Sel",
+    "Flow_vPt_ScalarProd_Sel", 
+    "Flow_Cumul_vEta_Order2_Sel",
+    "Flow_Cumul_vPt_Order2_Sel" 
+};
   const int nNames = sizeof(baseName) / sizeof(char*);
-  const int nDoubles = 3;
-  const int nSingles = 43 + nDoubles;
+  const int nDoubles = 6;
+  const int nSingles = 46 + nDoubles;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -199,6 +210,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
   sprintf(sel,"%d",selN);
   char har[2];
   sprintf(har,"%d",harN);
+  float order = (float)harN;
   char* temp = new char[35];                       // construct histName
   strcpy(temp,shortName[pageNumber]);
   char* cproj = strstr(temp,".");
@@ -233,7 +245,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
   cout << " graph name= " << histName->Data() << endl;
 
   // make the graph page
-  TCanvas* c = new TCanvas(shortName[pageNumber], shortName[pageNumber],
+  c = new TCanvas(shortName[pageNumber], shortName[pageNumber],
 			   canvasWidth, canvasHeight);
   c->ToggleEventStatus();
   TPaveLabel* title = new TPaveLabel(0.1,0.96,0.9,0.99,histName->Data());
@@ -249,11 +261,13 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
   graphPad->Divide(columns, rows);
   TLine* lineZeroY = new TLine(yMin, 0., yMax, 0.);
   TLine* lineYcm   = new TLine(Ycm, -10., Ycm, 10.);
+  float v;
+  float err;
   for (int i = 0; i < pads; i++) {
     int fileN = i;                           // file number
     int padN = fileN + 1;                    // pad number
-    sprintf(histTitle,"Centrality %d",padN);
-    cout << "centrality= " << padN << endl;
+    sprintf(histTitle,"Centrality %d",fileN);
+    cout << "centrality= " << fileN << endl;
 
     // get the histogram
     bool twoD;
@@ -374,22 +388,28 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
       cout << "  Normalized by: " << norm << endl;
       hist->Scale(norm);                           // normalize height to one
       if (strstr(shortName[pageNumber],"Sub")!=0) { 
-	TF1* funcCos1 = new TF1("funcCos1",
-				"1+[0]*2/100*cos([1]*x)", 0., twopi);
-	funcCos1->SetParNames("k=1", "har");
-	if (strstr(shortName[pageNumber],"Diff")!=0) {
-	  funcCos1->SetParameters(0, harN+1);             // initial values
-	} else {
-	  funcCos1->SetParameters(0, harN);               // initial values
-	}
-	funcCos1->SetParLimits(1, 1, 1);                  // har is fixed
-	hist->Fit("funcCos1");
-	delete funcCos1;
+// 	TF1* funcCos1 = new TF1("funcCos1",
+// 				"1+[0]*2/100*cos([1]*x)", 0., twopi/order);
+// 	funcCos1->SetParNames("res_sub", "har");
+// 	if (strstr(shortName[pageNumber],"Diff")!=0) {
+// 	  funcCos1->SetParameters(0, order+1);             // initial values
+// 	} else {
+// 	  funcCos1->SetParameters(0, order);               // initial values
+// 	}
+// 	funcCos1->SetParLimits(1, 1, 1);                  // har is fixed
+// 	hist->Fit("funcCos1");
+// 	delete funcCos1;
+	TF1* funcSubCorr = new TF1("SubCorr", SubCorr, 0., twopi/order, 2);
+	funcSubCorr->SetParNames("chiJYO", "har");
+	funcSubCorr->SetParameters(0.5, order);            // initial value
+	funcSubCorr->SetParLimits(1, 1, 1);                // har is fixed
+	hist->Fit("SubCorr");
+	delete funcSubCorr;
       } else {
 	TF1* funcCos2 = new TF1("funcCos2",
-           "1+[0]*2/100*cos([2]*x)+[1]*2/100*cos(([2]+1)*x)", 0., twopi);
+           "1+[0]*2/100*cos([2]*x)+[1]*2/100*cos(([2]+1)*x)", 0., twopi/order);
 	funcCos2->SetParNames("k=1", "k=2", "har");
-	funcCos2->SetParameters(0, 0, harN);              // initial values
+	funcCos2->SetParameters(0, 0, order);              // initial values
 	funcCos2->SetParLimits(2, 1, 1);                  // har is fixed
 	hist->Fit("funcCos2");
 	delete funcCos2;
@@ -434,7 +454,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
       lineYcm->Draw();
     } else if (strstr(shortName[pageNumber],"Pt")!=0) {     // Pt distibutions
       if (strstr(shortName[pageNumber],"_v")!=0 ) {
-	hist->SetMaximum(15.);
+	hist->SetMaximum(30.);
 	hist->SetMinimum(-5.);
       }
       gStyle->SetOptStat(100110);
@@ -455,7 +475,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
       hist->Draw();
       lineDiagonal->Draw();
     } else if (strstr(shortName[pageNumber],"CosPhi")!=0) {  // CosPhiLab
-      TLine* lineZeroHar = new TLine(0.5, 0., 6.5, 0.);
+      TLine* lineZeroHar = new TLine(0.5, 0., 3.5, 0.);
       gStyle->SetOptStat(0);
       hist->Draw();
       lineZeroHar->Draw();
@@ -464,11 +484,23 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
       gStyle->SetOptStat(0);
       hist->Draw();
     } else if (strstr(shortName[pageNumber],"_v")!=0 ) {      // v 1D
-      TLine* lineZeroHar = new TLine(0.5, 0., 6.5, 0.);
+      TLine* lineZeroHar = new TLine(0.5, 0., 3.5, 0.);
       hist->SetMaximum(10.);
-      gStyle->SetOptStat(-5.);
+      gStyle->SetOptStat(0);
       hist->Draw();
       lineZeroHar->Draw();
+//       v   = hist->GetBinContent(2);                       // output v values
+//       err = hist->GetBinError(2);
+	for (int n=1; n < 4; n++) {
+	  v   = hist->GetBinContent(n);                       // output v values
+	  err = hist->GetBinError(n);
+	  if (n==2) cout << " v2 = " << v << " +/- " << err << endl;
+	  if (TMath::IsNaN(v)) {
+	    hist->SetBinContent(n, 0.);
+	    hist->SetBinError(n, 0.);
+	  }
+	}
+	//cout << "  v2 = " << v << " +/- " << err << endl;
     } else {                                              // all other 1D
       gStyle->SetOptStat(100110);
       hist->Draw(); 
@@ -488,21 +520,41 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
 
 void plotCenAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
   for (int i =  first; i < nNames + 1; i++) {
-    TCanvas* c = plotCen(i, selN, harN);
+    c = plotCen(i, selN, harN);
     c->Update();
     cout << "save? y/[n], quit? q" << endl;
     fgets(tmp, sizeof(tmp), stdin);
     if (strstr(tmp,"y")!=0) c->Print(".ps");
     else if (strstr(tmp,"q")!=0) return;
-    c->Delete();
   }
   cout << "  Done" << endl;
 }
 
+//-----------------------------------------------------------------------
+
+static Double_t SubCorr(double* x, double* par) {
+  // Calculates the cos(n(Psi_a - Psi_b)) distribution by fitting chi of JYO
+  // From J.-Y. Ollitrault, Nucl. Phys. A590, 561c (1995), Eq. 6, with corrs.
+  // The Struve function is available stating with ROOT 3.03/08.
+
+  double chi2 = par[0] * par[0];
+  double z = chi2 * cos(par[1]*x[0]);
+  double TwoOverPi = 2./TMath::Pi();
+
+  Double_t dNdPsi = exp(-chi2)/TwoOverPi * (TwoOverPi*(1.+chi2) 
+		    + z*(TMath::BesselI0(z) + TMath::Struve(0,z))
+		    + chi2*(TMath::BesselI1(z) + TMath::Struve(1,z)));
+  return dNdPsi;
+}
+
+//-----------------------------------------------------------------------
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.12  2003/02/25 19:25:33  posk
+// Improved plotting.
+//
 // Revision 1.11  2003/01/10 16:40:55  oldi
 // Several changes to comply with FTPC tracks:
 // - Switch to include/exclude FTPC tracks introduced.

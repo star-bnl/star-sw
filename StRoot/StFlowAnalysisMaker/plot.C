@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.45 2003/02/05 18:52:50 posk Exp $
+// $Id: plot.C,v 1.46 2003/02/25 19:25:32 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -18,7 +18,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <math.h> 
+#include "TMath.h" 
 #include <iostream.h>
+
 //const Int_t nHars     = 6;
 const    Int_t nHars    = 3;
 const    Int_t nSels    = 2;
@@ -33,8 +35,8 @@ TCanvas* can;
 
 TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
-  Bool_t includeFtpc = kTRUE;
-  //Bool_t includeFtpc = kFALSE;
+  //Bool_t includeFtpc = kTRUE;
+  Bool_t includeFtpc = kFALSE;
 
   bool multiGraph  = kFALSE;                            // set flags
   bool singleGraph = kFALSE;
@@ -147,8 +149,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_vPt_Sel",
     "Flow_q_Sel",
     "Flow_vObs2D_ScalarProd_Sel",
-    "Flow_vObsEta_ScalarProd_Sel",
-    "Flow_vObsPt_ScalarProd_Sel",
     "Flow_v2D_ScalarProd_Sel",
     "Flow_vEta_ScalarProd_Sel",
     "Flow_vPt_ScalarProd_Sel"
@@ -232,8 +232,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_vPt_Sel",
     "Flow_q_Sel",
     "Flow_vObs2D_ScalarProd_Sel",
-    "Flow_vObsEta_ScalarProd_Sel",
-    "Flow_vObsPt_ScalarProd_Sel",
     "Flow_v2D_ScalarProd_Sel",
     "Flow_vEta_ScalarProd_Sel",
     "Flow_vPt_ScalarProd_Sel"
@@ -362,6 +360,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   for (int j = firstJ; j < lastJ; j++) {
     char countRows[2];
     sprintf(countRows,"%d",j+1);
+    float order = (float)(j+1);
     for (int k = firstK ; k < lastK; k++) {
       char countColumns[2];
       sprintf(countColumns,"%d",k+1);
@@ -399,7 +398,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	histName->Append("_Har");
 	histName->Append(*countRows);
       }
-      cout << " col= " << k+1 << " row= " << j+1 << " pad= " << padN << "\t" 
+      cout << " col= " << k+1 << " row= " << order << " pad= " << padN << "\t" 
 	   << histName->Data() << endl;
 
       // get the histogram
@@ -529,36 +528,41 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  TF1* funcCos1 = new TF1("funcCos1",
 				  "1+[0]*2/100*cos([1]*x)", 0., twopi);
 	  funcCos1->SetParNames("k=1", "har");
-	  funcCos1->SetParameters(0, j+2);                  // initial values
+	  funcCos1->SetParameters(0, order+1);              // initial values
 	  funcCos1->SetParLimits(1, 1, 1);                  // har is fixed
 	  hist->Fit("funcCos1");
 	  delete funcCos1;
 	} else if (strstr(shortName[pageNumber],"Sub")!=0) { 
+	  TF1* funcSubCorr = new TF1("SubCorr", SubCorr, 0., twopi/order, 2);
+	  funcSubCorr->SetParNames("chiJYO", "har");
+	  funcSubCorr->SetParameters(0.5, order);            // initial value
+	  funcSubCorr->SetParLimits(1, 1, 1);                // har is fixed
+	  hist->Fit("SubCorr");
+	  delete funcSubCorr;
 	  TF1* funcCos1 = new TF1("funcCos1",
-				  "1+[0]*2/100*cos([1]*x)", 0., twopi);
-	  funcCos1->SetParNames("k=1", "har");
-	  funcCos1->SetParameters(0, j+1);                  // initial values
+				  "1+[0]*2*cos([1]*x)", 0., twopi/order);
+	  funcCos1->SetParNames("res_sub", "har");
+	  funcCos1->SetParameters(0, order);                // initial values
 	  funcCos1->SetParLimits(1, 1, 1);                  // har is fixed
-// 	  funcCos1->SetLineStyle(kDashed);
-	  hist->Fit("funcCos1");
+	  funcCos1->SetLineStyle(kDashed);
+	  hist->Fit("funcCos1", "+");
 	  delete funcCos1;
-// 	  TF1* funcSubCorr = new TF1("SubCorr", SubCorr, 0., twopi, 1);
-// 	  funcSubCorr->SetParNames("chiJYO");
-// 	  hist->Fit("SubCorr", "Q");
-// 	  delete funcSubCorr;
+	  TF1* gauss = new TF1("gauss", "gaus(0)+gaus(3)", 0., twopi/order);
+	  gauss->SetParameter(1, 0.);
+	  gauss->SetParameter(2, 1.);
+	  gauss->SetParameter(4, twopi/order);
+	  gauss->SetParameter(5, 1.);
+	  gauss->SetParLimits(1, 1, 1);
+	  gauss->SetParLimits(4, 1, 1);
+	  gauss->SetLineStyle(kDotted);
+	  hist->Fit("gauss", "+");
+	  delete gauss;
 	} else {
-// 	  TF1* funcCos2 = new TF1("funcCos2",
-// 	 "1+[0]*2/100*cos([2]*x)+[1]*2/100*cos(([2]+1)*x)", 0., twopi);
-// 	  funcCos2->SetParNames("n=har", "n=har+1", "har");
-// 	  funcCos2->SetParameters(0, 0, j+1);               // initial values
-// 	  funcCos2->SetParLimits(2, 1, 1);                  // har is fixed
-// 	  hist->Fit("funcCos2");
-// 	  delete funcCos2;
 	  TF1* funcCos3 = new TF1("funcCos3",
 	 "1+[0]*2/100*cos([3]*x)+[1]*2/100*cos(([3]+1)*x)+[2]*2/100*cos(([3]+2)*x)",
-				  0., twopi);
+				  0., twopi/order);
 	  funcCos3->SetParNames("n=har", "n=har+1", "n=har+2", "har");
-	  funcCos3->SetParameters(0, 0, 0, j+1);            // initial values
+	  funcCos3->SetParameters(0, 0, 0, order);          // initial values
 	  funcCos3->SetParLimits(3, 1, 1);                  // har is fixed
 	  hist->Fit("funcCos3");
 	  delete funcCos3;
@@ -590,7 +594,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	float qMean = hist->GetMean();
 	float v2N = (qMean > 1.) ? qMean - 1. : 0.;
 	float vGuess = 100. * sqrt(v2N / mult);
-	//float vGuess = (qMean > 2.) ? 8. : 1.;
 	fit_q->SetParameters(vGuess, mult, area); // initial values
 	fit_q->SetParLimits(1, 1, 1);             // mult is fixed
 	fit_q->SetParLimits(2, 1, 1);             // area is fixed
@@ -675,9 +678,16 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
 // macro for the resolution plot
 TCanvas* plotResolution(){
-  char* resName[] = {"Flow_Cos_Sel","Flow_Res_Sel","Flow_v_Sel"};
+  char* resName[] = {
+    "Flow_Cos_Sel",
+    "Flow_Res_Sel",
+    "Flow_v_Sel",
+    "Flow_v_ScalarProd_Sel",
+    "Flow_Cumul_v_Order2_Sel",
+    "Flow_Cumul_v_Order4_Sel"
+  };
   int columns = nSels;
-  int rows = 3;
+  int rows = sizeof(resName) / sizeof(char*);
   int pads = rows*columns;
 
   // make the graph page
@@ -695,6 +705,8 @@ TCanvas* plotResolution(){
   graphPad->Divide(columns,rows);
 
   // make the plots
+  float v;
+  float err;
   for (int j = 0; j < rows; j++) {
     int resNumber = j;
     cout << "resolution name= " << resName[resNumber] << endl;
@@ -716,13 +728,21 @@ TCanvas* plotResolution(){
       if (strstr(resName[resNumber],"_v")!=0) {
 	hist->SetMaximum(10.);
 	hist->SetMinimum(-5.);
+	for (int n=1; n < 4; n++) {
+	  v   = hist->GetBinContent(n);                       // output v values
+	  err = hist->GetBinError(n);
+	  if (n==2 && k==1) cout << " v2 = " << v << " +/- " << err << endl;
+	  if (TMath::IsNaN(v)) {
+	    hist->SetBinContent(n, 0.);
+	    hist->SetBinError(n, 0.);
+	  }
+	}
       } else {
 	hist->SetMaximum(1.1);
 	hist->SetMinimum(0.);
       }
       hist->Draw();
       lineZeroHar->Draw();
-      hist->Print("all");
       delete histName;
     }
   }
@@ -738,7 +758,6 @@ void plotAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
     fgets(tmp, sizeof(tmp), stdin);
     if (strstr(tmp,"y")!=0) can->Print(".ps");
     else if (strstr(tmp,"q")!=0) return;
-    //can->Delete();
   }
   cout << "  plotAll Done" << endl;
 }
@@ -759,17 +778,16 @@ static Double_t qDist(double* q, double* par) {
 
 static Double_t SubCorr(double* x, double* par) {
   // Calculates the cos(n(Psi_a - Psi_b)) distribution by fitting chi of JYO
-  // From J.-Y. Ollitrault, Nucl. Phys. A590, 561c (1995), Eq. 6.
-  // The Struve function will be available stating with ROOT 3.03/08.
+  // From J.-Y. Ollitrault, Nucl. Phys. A590, 561c (1995), Eq. 6, with corrs.
+  // The Struve function is available stating with ROOT 3.03/08.
 
   double chi2 = par[0] * par[0];
-  double z = chi2 * cos(x);
+  double z = chi2 * cos(par[1]*x[0]);
   double TwoOverPi = 2./TMath::Pi();
 
-  Double_t dNdPsi = exp(-chi2)/2. * (TwoOverPi*(1.+chi2) 
+  Double_t dNdPsi = exp(-chi2)/TwoOverPi * (TwoOverPi*(1.+chi2) 
 		    + z*(TMath::BesselI0(z) + TMath::Struve(0,z))
 		    + chi2*(TMath::BesselI1(z) + TMath::Struve(1,z)));
-  
   return dNdPsi;
 }
 
@@ -778,6 +796,9 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.46  2003/02/25 19:25:32  posk
+// Improved plotting.
+//
 // Revision 1.45  2003/02/05 18:52:50  posk
 // Added Bool_t includeFtpc
 //
