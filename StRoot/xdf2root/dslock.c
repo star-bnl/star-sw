@@ -21,7 +21,7 @@ routines for sharing structures in VxWorks or other multi-threaded OS
 SEM_ID errSemID = NULL;
 SEM_ID tidSemID = NULL;
 #endif
-static int errSemVal = 0, nErrTake, nTidTake = 0, tidSemVal = 0;
+static int errSemVal = 0, nErrTake = 0, nTidTake = 0, tidSemVal = 0;
 /******************************************************************************
 *
 * dsErrSemGive - unlock error structures
@@ -31,7 +31,7 @@ static int errSemVal = 0, nErrTake, nTidTake = 0, tidSemVal = 0;
 int dsErrSemGive(void)
 {
 #ifdef VXWORKS
-	if (errGive(tidSemID)) {
+	if (semGive(tidSemID)) {
 #else
 	if (--errSemVal){
 #endif
@@ -70,8 +70,8 @@ int dsErrSemTake(void)
 int dsSemInit(void)
 {
 #ifdef VXWORKS
-	if (errSemId != NULLtidSemID != NULL ||
-		(errSemID = semBCreate(SEM_Q_PRIORITY, SEM_FULL)) == NULL) ||
+	if (errSemID != NULL || tidSemID != NULL ||
+		(errSemID = semBCreate(SEM_Q_PRIORITY, SEM_FULL)) == NULL ||
 		(tidSemID = semBCreate(SEM_Q_PRIORITY, SEM_FULL)) == NULL) {
 		dsErrorPrint("dsSemInit FAILED");
 		dsErrorPrint(" - %s(%d)\n", __FILE__, __LINE__);

@@ -19,10 +19,7 @@ file to keep and print to do list
 void dsToDo(void)
 {
 	char *list[] = {
-		"* Uniform use of name args in API",
-		"* Convert error handling to match Microsoft ",
-		"* Only allow struct types.",
-		"* Sort and search for tables.",
+		"* Allow path in dsFindEntry??? ",
 		NULL};
 	int i;
 		

@@ -7,6 +7,7 @@ modification history
 --------------------
 24apr93,whg  written.
 23feb95,whg  CORBA style types
+29may96,whg  ds_dataset_t struct with link indirection
 */				
 /*
 DESCRIPTION
@@ -39,17 +40,23 @@ extern "C" {
 * parameters and sizes
 *
 */
-#define DS_MAX_DATASET	100		/* max number of datasets in dataset */
+#define DS_ALLOC_FACTOR	1.5		/* realloc factor for dynamic tables */
+#define DS_ALLOC_INC	100		/* alloc increment for dynamic datasets */
+#define DS_BUF_ALLOC	500		/* allocation increment for string buffers */
+#define DS_LIST_INC		100		/* number of items for list realloc */
 #define DS_MAX_DIMS		4		/* max number of dimensions for a field */
+#define DS_MAX_ERR		20		/* max number of thread error structures */
 #define DS_MAX_JOIN 	100 	/* max number of fields in a join */
 #define DS_MAX_NAME_LEN	31		/* max length of a name */
 #define DS_MAX_NEST		10		/* max levels of nested structs */
-#define DS_MAX_SPEC_LEN	10000	/* maximum length of specifier string */
+#ifndef VXWORKS
+#define DS_MAX_SPEC_LEN	10000	/* max length of specifier string */
+#else
+#define DS_MAX_SPEC_LEN	1000	/* max length of specifier string */
+#endif
 #define DS_MAX_STRUCT	100		/* max number of struct defs in a type */
-#define DS_MAX_ERR		20		/* max number of thread error structures */
 #define DS_MAX_TID		1000	/* max number of tids */
 #define DS_NAME_DIM	(DS_MAX_NAME_LEN+1)/* size of name plus zero byte */ 
-#define DS_ALLOC_FACTOR	1.5		/* realloc factor for dynamic tables */
 #define DS_TID_HASH_LEN	255		/* size of tid closed hash (2^N -1) */
 /******************************************************************************
 *
@@ -69,7 +76,7 @@ typedef enum ds_type_code_t {
 }DS_TYPE_CODE_T;
 /******************************************************************************
 *
-* type defs for basic types  
+* union for basic types  
 */
 typedef unsigned char octet;	/* CORBA transparent eight bit type */
 
@@ -95,34 +102,37 @@ typedef struct ds_dataset_t {
 	size_t tid;				/* typeID of p.data or zero */
 	size_t elcount;			/* number of children or rows */
 	size_t maxcount;		/* max value for elcount */
+	size_t refcount;		/* refrence count of pointers to this node */
+	size_t visit;			/* used in graph theory algorithms */
 	union {						
-		struct ds_dataset_t *child;	/* children if tid == zero */
+		struct ds_dataset_t **link;	/* dataset if tid == zero */
 		void *data;					/* table if tid != zero */
 	}p;
 }DS_DATASET_T;
-/*
- * macros to check for dataset or table
- * they return FALSE for invalid structs
- */
-#define DS_IS_DATASET(pd) (dsValidDataset(pd) && (pd)->tid == 0)
-#define DS_IS_TABLE(pd)   (dsValidDataset(pd) && (pd)->tid != 0)
-/*
- * DATASET flags and macros for dynamic memory
- */
-#define DS_ALLOC_P		0X01	/* p.child or p.data is allocated */
-#define DS_ALLOC_NODE	0X02	/* this node is allocated */
-#define DS_DATASET_FLAGS (DS_ALLOC_P | DS_ALLOC_NODE)
 
-#define DS_DYNAMIC_TABLE(pd) ((pd)->p.data == NULL ||\
-	((pd)->flags & DS_ALLOC_P) != 0)
+/*
+ * DATASET flags
+ */
+#define DS_F_ALLOC_P	0X01	/* p.link/p.data is allocated and not NULL*/
+#define DS_F_ALLOC_NODE	0X02	/* this dataset struct is allocated */
+#define DS_F_INVALID ((unsigned)~(DS_F_ALLOC_P|DS_F_ALLOC_NODE))
+/*
+ * DATASET flags macros
+ */
+#define DS_IS_VALID(pd) ((pd) != NULL &&\
+	((pd)->flags & DS_F_INVALID) == 0 &&\
+ 	((pd)->p.data != NULL ? (pd)->elcount <= (pd)->maxcount:\
+	(pd)->elcount == 0 && ((pd)->flags & DS_F_ALLOC_P) == 0))
+#define DS_IS_DATASET(pd) (DS_IS_VALID(pd) && (pd)->tid == 0)
+#define DS_IS_TABLE(pd)   (DS_IS_VALID(pd) && (pd)->tid != 0)
+#define DS_IS_DYNAMIC(pd) ((pd)->p.data == NULL ||\
+	((pd)->flags & DS_F_ALLOC_P) != 0)
 #define DS_REALLOC_COUNT(x) ((size_t)(DS_ALLOC_FACTOR*((x)->maxcount + 1)))
 /******************************************************************************
 *
 * function prototypes
 *
 */
-int dsAddDataset(DS_DATASET_T *pDataset, char *dsetName,
-	size_t setDim, DS_DATASET_T *pChild);
 int dsAddTable(DS_DATASET_T *pDataset, char *name,
 	char *typeSpecifier, size_t nRow, char **ppData);
 int dsAllocTables(DS_DATASET_T *pDataset); 
@@ -135,13 +145,12 @@ int dsColumnName(char **pName, DS_DATASET_T *pTable, size_t colNumber);
 int dsColumnSize(size_t *pSize, DS_DATASET_T *pTable, size_t colNumber);
 int dsColumnTypeCode(DS_TYPE_CODE_T *pCode, DS_DATASET_T *pTable, size_t colNumber);
 int dsColumnTypeName(char **pName, DS_DATASET_T *pTable, size_t colNumber);
-void dsDatasetAllocStats(void);
+void dsAllocStats(void);
 int dsDatasetEntry(DS_DATASET_T **ppEntry, DS_DATASET_T *pDataset,
 	size_t entryNumber); 
 int dsDatasetEntryCount(size_t *pCount, DS_DATASET_T *pDataset);
 int dsDatasetMaxEntryCount(size_t *pCount, DS_DATASET_T *pDataset);  
 int dsDatasetName(char **pName, DS_DATASET_T *pDataset);
-int dsDeleteEntry(DS_DATASET_T *pEntry, DS_DATASET_T *pDataset);
 int dsEquijoin(DS_DATASET_T *pJoinTable,DS_DATASET_T *pTableOne,
 	DS_DATASET_T *pTableTwo, char *aliases, char *joinLst, char *projectList);
 int dsErrorCode(void);
@@ -150,19 +159,26 @@ int dsFindEntry(DS_DATASET_T **ppEntry, DS_DATASET_T *pDataset, char *path);
 int dsFreeDataset(DS_DATASET_T *pDataset);
 int dsGetCell(char *address, DS_DATASET_T *pTable,
 	size_t rowNumber , size_t colNumber); 
+int dsInitTable(DS_DATASET_T *pTable, char *tableName,
+	char *typeSpecifier, unsigned rowCount, void *pData);
+int dsIsAcyclic(DS_DATASET_T *dataset);
 int dsIsDataset(bool_t *pResult, DS_DATASET_T *handle);
 int dsIsTable(bool_t *pResult, DS_DATASET_T *handle);
+int dsLink(DS_DATASET_T *pParent, DS_DATASET_T *pChild);
+int dsLinkAcyclic(DS_DATASET_T *pParent, DS_DATASET_T *pChild);
 void dsLogError(DS_ERROR_CODE_T code, char *msg, char *file, size_t line);
 int dsPutCell(char *address, DS_DATASET_T *pTable,
 	size_t rowNumber , size_t colNumber);
 int dsMapTable(DS_DATASET_T *pDataset, char *name,
 	char *typeSpecifier, size_t *pCount, char **ppData);
-int dsNewDataset(DS_DATASET_T **ppDataset, char *name, size_t setDim);
+int dsNewDataset(DS_DATASET_T **ppDataset, char *name);
 int dsNewTable(DS_DATASET_T **ppTable, char *tableName,
 	char *typeSpecifier,  unsigned rowCount, void *pData);
 void dsPerror(char *msg);
 int dsProjectTable(DS_DATASET_T *pDst, DS_DATASET_T *pSrc, char *projectList);
+int dsRealloc(DS_DATASET_T *dataset, size_t maxcount);
 int dsReallocTable(DS_DATASET_T *pTable, size_t nRow);
+int dsRefcount(size_t *pCount, DS_DATASET_T *pDataset);
 int dsSetTableRowCount(DS_DATASET_T *pTable, size_t rowCount);
 int dsTableColumnCount(size_t *pCount, DS_DATASET_T *pTable);
 int dsTableDataAddress(char **pAddress, DS_DATASET_T *pTable);
@@ -178,12 +194,23 @@ int dsTargetTable(DS_DATASET_T **ppTable, char *tableName, char *typeName,
 	char *aliases, char *projectList);
 int dsTasProject(DS_DATASET_T *pDataset, char *name,
 	char *typeSpecifier, size_t *pCount, void *ppData);
+ int dsUnlink(DS_DATASET_T *pParent, DS_DATASET_T *pChild);
 /******************************************************************************
 *
 * Not recommended for applications
 *
 */
 #if defined(DS_ADVANCED) || defined(DS_PRIVATE)
+/*****************************************************************************
+*
+* ds_list_t - structure for list of tables or datasets
+*
+*/
+typedef struct ds_list_t {
+	size_t count;			/* number of items */
+	size_t maxcount;		/* max value for count */
+	DS_DATASET_T **pItem;	/* list items */
+}DS_LIST_T;
 /******************************************************************************
 *
 * ds_type_t - type node in parse tree
@@ -226,7 +253,7 @@ typedef  struct	ds_field_t {
 	struct ds_type_t *type;		/* field element type */
 	size_t count;				/* number of elements in field */
 	size_t offset;				/* field offset from start of struct */
-	size_t stdoffset;			/* field offset in standard encoding */								
+	size_t stdoffset;			/* field offset in standard encoding */
 	size_t dim[DS_MAX_DIMS];	/* array dimension or zero */
 }DS_FIELD_T;
 
@@ -241,14 +268,18 @@ int dsCheckDataset(DS_DATASET_T *pSet);
 int dsCheckTable(void *pData, char *decl, size_t nRow, size_t checkNRow);
 int dsCmpFieldType(DS_FIELD_T *f1, DS_FIELD_T *f2);
 int dsColumnField(DS_FIELD_T **ppField, DS_DATASET_T *pTable, size_t colNumber);
-int dsCreateDataset(DS_DATASET_T **pDataset,
-	size_t dim, size_t *tList, char *str, char **ptr);
+int dsCreateDataset(DS_DATASET_T **ppDataset,
+					 size_t *tList, char *str, char **ptr);
 int dsErrorPrint(char *fmt, ...);
 int dsFindField(DS_FIELD_T **pFound, DS_TYPE_T *pType, char *name);
 int dsFindTable(DS_DATASET_T **ppTable, DS_DATASET_T *pDataset, char *name,
 	char *typeSpecifier);
-int dsDatasetSpecifier(char *str, size_t maxSize, DS_DATASET_T *pDataset);
 int dsFormatTypeSpecifier(char *str, size_t maxSize, DS_TYPE_T *type);
+int dsListAppend(DS_LIST_T *list, DS_DATASET_T *item);
+int dsListFree(DS_LIST_T *list);
+int dsListInit(DS_LIST_T *list);
+int dsListRealloc(DS_LIST_T *list, size_t maxcount);
+int dsMark(DS_LIST_T *list, DS_DATASET_T *item);
 int dsParseType(DS_TYPE_T **pType, size_t *pSize, char *str, char **ptr);
 void dsPrintData(FILE *stream, DS_TYPE_T *type, unsigned count, void *data);
 int dsPrintDatasetSpecifier(FILE *stream, DS_DATASET_T *pDataset);
@@ -267,6 +298,10 @@ int dsTypeCmp(DS_TYPE_T *t1, DS_TYPE_T *t2);
 int dsTypeSpecifier(char **ptr, size_t *pLen, size_t tid);
 int dsTypeId(size_t *pTid, char *str, char **ptr);
 int dsTypePtr(DS_TYPE_T **pType, size_t tid);
+int dsVisited(DS_LIST_T *list, DS_DATASET_T *item);
+int dsVisitClear(DS_DATASET_T *dataset);
+int dsVisitCount(DS_DATASET_T *dataset);
+int dsVisitList(DS_LIST_T *list, DS_DATASET_T *dataset);
 #endif /* DS_ADVANCED */
 
 /******************************************************************************
@@ -317,14 +352,12 @@ typedef struct ds_buf_t {
 		(bp)->in = (bp)->limit = NULL;}
 #define DS_GETC(bp) (((bp)->in == NULL && *(bp)->out) || ((bp)->in &&\
 		(bp)->in > (bp)->out) ? 0XFF & (char)*(bp)->out++ : EOF)
-
 #define DS_PEEK(bp) (((bp)->in == NULL && *(bp)->out) || ((bp)->in &&\
 		(bp)->in > (bp)->out) ? 0XFF & (char)*(bp)->out : EOF)
-#define DS_PUT_INIT(bp, buf, size) {(bp)->limit = (buf) + (size);\
+#define DS_PUT_INIT(bp, buf, size) {(bp)->limit = (buf) + ((buf) ? (size) : 0);\
 		(bp)->first = (bp)->in = (bp)->out = (buf);}		
 #define DS_PUTC(c, bp) ((bp)->in < (bp)->limit ?\
-		0XFF & (*(bp)->in++ = (char)(c)) : EOF)
-
+		0XFF & (*(bp)->in++ = (char)(c)) : dsPutc(c, bp))
 /******************************************************************************
 *
 * descriptor for table key
@@ -337,37 +370,23 @@ typedef struct ds_key_t {
 }DS_KEY_T;
 /******************************************************************************
 *
-* descriptor for memory region
-*
-*/
-typedef struct {
-	char *first;	/* address of memory region */
-	char *next;		/* next free byte of region */
-	char *limit;	/* address of last byte of region plus one */
-	int *map;
-}DS_MEM_T;
-/******************************************************************************
-*
 * private functions
 *
 */
-int dsCheckDuplicate(char *name, size_t count, size_t stride);
+int dsBufFree(DS_BUF_T *bp);
+int dsBufRealloc(DS_BUF_T *bp, size_t size);
 int dsCmpKeys(char *baseOne, char *baseTwo, DS_KEY_T *key);
 int dsCmpName(char *s1, char *s2);
-int dsCopyName(char *dst, char *str, char **ptr);
-void *dsDsetAlloc(size_t size);
-void dsDsetFree(void *ptr);
-void *dsDsetRealloc(char *old, size_t size);
+int dsCopyName(char *dst, char *str, char **ptr);\
+int dsDatasetSpecifier(DS_BUF_T *bp, DS_DATASET_T *pDataset);
 int dsDumpTypes(void);
 int dsErrSemGive(void);
 int dsErrSemTake(void);
-int dsFirstPass(int *pSepCount, int *map, int *pMapCount,
-	int maxMapCount, char *str);
 int dsGetc(DS_BUF_T *mp);
 int dsGetColumnSpecifier(char *tableName, char *columnName, DS_BUF_T *bp);
 int dsGetName(char *name, DS_BUF_T *bp);
 int dsGetNonSpace(DS_BUF_T *mp);
-int dsGetNumber(unsigned *pNumber, DS_BUF_T *bp);
+int dsGetNumber(size_t *pNumber, DS_BUF_T *bp);
 int dsPutc(int c, DS_BUF_T *bp);
 int dsPutNumber(int n, DS_BUF_T *bp);
 int dsPuts(char *s, DS_BUF_T *bp);
@@ -388,22 +407,6 @@ int dsTypeListFree(size_t *list);
 int dsTypeSemGive(void);
 int dsTypeSemTake(void);
 int dsUngetc(int c, DS_BUF_T *bp);
-int dsValidDataset(DS_DATASET_T *pDset);
-/******************************************************************************
-*
-* ANSI stuff for sun
-*/
-/*
-#ifdef sun
-#ifndef VXWORKS
-#include <stdio.h>
-int fprintf(FILE *stream, char *fmt, ...);
-char *memset(char *ptr, int val, int len);
-int printf(char *fmt, ...);
-long strtol(char *str, char **ptr, int base);
-#endif
-#endif
-*/
 #endif  /* DS_PRIVATE */
 #ifdef __cplusplus
 }

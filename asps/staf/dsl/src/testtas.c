@@ -16,14 +16,6 @@ TBS ...
 #include <string.h>
 #define DS_PRIVATE
 #include "dsxdr.h"
-/*
-#ifdef sun
-int printf(char *fmt, ...);
-int fprintf(FILE *stream, char *fmt, ...);
-char *memset(void *ptr, int val , int n);
-void fclose(FILE *stream);
-#endif
-*/
 
 typedef struct base_type {float x, y, z;}BASE_TYPE;
 #define BASE_DECL "struct base_type {float x, y, z;}"
@@ -273,7 +265,7 @@ int writeFile(char *fileName)
 	char *pBase;
 	size_t i;
 	BASE_TYPE base[TABLE_DIM];
-	DS_DATASET_T srcDset[DSET_DIM], *pSrcDset = srcDset;
+	DS_DATASET_T *pSrcDset;
 	XDR xdr;
 
 
@@ -284,7 +276,7 @@ int writeFile(char *fileName)
 	}
 	pBase = (char *)base;
 	if (
-		!dsNewDataset(&pSrcDset, "data", DSET_DIM) ||
+		!dsNewDataset(&pSrcDset, "data") ||
 		!dsAddTable(pSrcDset, "base", BASE_DECL, BASE_LEN, &pBase) ||
 		!dsAddTable(pSrcDset, "long", BASE_DECL, LONG_LEN, &pBase) ||
 		!dsAddTable(pSrcDset, "zero", BASE_DECL, 0, &pBase)
@@ -296,6 +288,10 @@ int writeFile(char *fileName)
 		!xdr_dataset(&xdr, &pSrcDset)
 	){
 		dsPerror("writeFile: xdr failed\n");
+		return FALSE;
+	}
+	if (!dsFreeDataset(pSrcDset)) {
+		dsPerror("writeFile free failed");
 		return FALSE;
 	}
 	return TRUE;

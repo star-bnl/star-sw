@@ -20,7 +20,9 @@ main program to run test code for dsl
 int dsTestApi(void);
 int dsTestType(void);
 int dsTestCorba(void);
+int dsTestDag(void);
 int dsTestErr(void);
+int dsTestGraph(void);
 int dsTestMisc(void);
 int dsTestDset(void);
 int dsTestTree(void);
@@ -70,8 +72,9 @@ void main(int argc, char **argv)
 	 		   	break;
 
 			case 'd':
-				status = dsTestDset();
-				status = dsTestTree();
+				if (TRUE == (status = dsTestDset())) {
+					status = dsTestTree();
+				}
 				break;
 
 			case 'e':
@@ -81,7 +84,11 @@ void main(int argc, char **argv)
 			case 'f':
 				status = xdrReadTest(1);
 				break;
-				
+
+			case 'g':
+				status = dsTestGraph();
+				break;
+
 			case 'j':
 				status = dsTestJoin();
 				break;
@@ -118,7 +125,6 @@ void main(int argc, char **argv)
 				errflag = 1;
 				break;
 		}
-		
 	}
 	if (!errflag) {
 		testStats();
@@ -136,11 +142,20 @@ void main(int argc, char **argv)
 */
 void usage(char *name)
 {
-	printf("usage: %s [a | b | c | d | f | j | m | p | q | r | s| t | w]\n", name);
+	printf("usage: %s [a | b | c | d | f | g |j | m | p | q | r | s| t | w]\n", name);
 	printf("\ta - dsTestApi\n");
-	printf("\tb - dumpBasic\n\tc - testCorba\n\td - dsTestDset\n");
-	printf("\te - dsTestErr\n\tf - fast xdrReadTest\n\tj - joinTest\n");
-	printf("\tm - dsMemTest\n\tp - projectTest\n\tq - testQuickSort\n");
+	printf("\tb - dumpBasic\n");
+	printf("\tc - testCorba\n");
+	printf("\td - dsTestDset\n");
+	printf("\te - dsTestErr\n");
+	printf("\tf - fast xdrReadTest\n");
+	printf("\tg - dsTestGraph\n");
+	printf("\tj - joinTest\n");
+	printf("\tm - dsMemTest\n");
+	printf("\tp - projectTest\n");
+	printf("\tq - testQuickSort\n");
 	printf("\tr - xdrReadTest\n");
-	printf("\ts - sample\n\tt - testType\n\tw - xdrWriteTest\n");
+	printf("\ts - sample\n");
+	printf("\tt - testType\n");
+	printf("\tw - xdrWriteTest\n");
 }

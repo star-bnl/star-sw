@@ -6,6 +6,7 @@
 modification history
 --------------------
 24apr93,whg  written.
+11jun96,whg  added indirection to dataset structure
 */
 
 /*
@@ -143,7 +144,7 @@ bool_t xdr_dataset(XDR *xdrs, DS_DATASET_T **ppDataset)
 		*ppDataset = NULL;
 		return TRUE;
 	}
-	if (!xdr_dataset_type(xdrs, &pDataset, 0)) {
+	if (!xdr_dataset_type(xdrs, &pDataset)) {
 		return FALSE;
 	}
 	if (xdrs->x_op == XDR_DECODE &&  !dsAllocTables(pDataset)) {
@@ -170,31 +171,33 @@ fail:
 bool_t xdr_dataset_data(XDR *xdrs, DS_DATASET_T *pDataset)
 {
 	size_t i;
+	DS_DATASET_T *item;
+	DS_LIST_T list;
 
-	if (DS_IS_TABLE(pDataset)) {
-		if(xdrs->x_op == XDR_ENCODE) {
-			return xdr_table(xdrs, pDataset->p.data,
-				pDataset->tid, pDataset->elcount);
-		}
-		if (xdrs->x_op != XDR_DECODE) {
-			DS_ERROR(DS_E_INVALID_XDR_OP);
-		}
-		if (!xdr_table(xdrs, pDataset->p.data,
-			pDataset->tid, pDataset->maxcount)) {
-			return FALSE;
-		}
-		pDataset->elcount = pDataset->maxcount;
-		return TRUE;
+	if (xdrs->x_op != XDR_DECODE && xdrs->x_op != XDR_ENCODE) {
+		DS_ERROR(DS_E_INVALID_XDR_OP);
 	}
-	if (DS_IS_DATASET(pDataset)) {
-		for (i = 0; i < pDataset->elcount; i++) {
-			if (!xdr_dataset_data(xdrs, &pDataset->p.child[i])) {
-				return FALSE;
+	if (!dsListInit(&list)) {
+		return FALSE;
+	}
+	if (!dsVisitList(&list, pDataset)) {
+		goto fail;
+	}
+	for (i = 0; i < list.count; i++) {
+		item = list.pItem[i];
+		if (DS_IS_TABLE(item)) {
+			if (xdrs->x_op == XDR_DECODE) {
+				item->elcount = item->maxcount;
+			}
+			if (!xdr_table(xdrs, item->p.data, item->tid, item->elcount)) {
+				goto fail;
 			}
 		}
-		return TRUE;
 	}
-	DS_ERROR(DS_E_SYSTEM_ERROR);
+	return dsListFree(&list);
+fail:
+	dsListFree(&list);
+	return FALSE;
 }
 /******************************************************************************
 *
@@ -202,10 +205,11 @@ bool_t xdr_dataset_data(XDR *xdrs, DS_DATASET_T *pDataset)
 *
 * RETURNS: TRUE if success else FALSE
 */
-bool_t xdr_dataset_type(XDR *xdrs, DS_DATASET_T **ppDataset, size_t dim)
+bool_t xdr_dataset_type(XDR *xdrs, DS_DATASET_T **ppDataset)
 {
 	char buf[DS_MAX_SPEC_LEN+1], *str;
 	size_t *tList = NULL;
+	DS_BUF_T bp;
 	DS_DATASET_T *pDataset = *ppDataset;
 
 	if (!dsTypeListCreate(&tList, DS_XDR_HASH_LEN + 1)) {
@@ -216,7 +220,8 @@ bool_t xdr_dataset_type(XDR *xdrs, DS_DATASET_T **ppDataset, size_t dim)
 			goto fail;
 		}
 		str = buf;
-		if (!dsDatasetSpecifier(str, sizeof(buf), pDataset)) {
+		DS_PUT_INIT(&bp, buf, sizeof(buf));
+		if (!dsDatasetSpecifier(&bp, pDataset)) {
 			goto fail;
 		}
 		if (!xdr_string(xdrs, &str, sizeof(buf))) {
@@ -242,7 +247,7 @@ bool_t xdr_dataset_type(XDR *xdrs, DS_DATASET_T **ppDataset, size_t dim)
 		}
 		else if (strncmp(buf, "data", 4) == 0) {
 			if (!dsCreateDataset(&pDataset,
-				dim, tList, buf+4, &str)) {
+				tList, buf+4, &str)) {
 				goto fail;
 			}
 			*ppDataset = pDataset;
@@ -397,44 +402,50 @@ static bool_t xdr_table(XDR *xdrs, void *ptr, size_t tid, size_t nrow)
 static bool_t xdr_types(XDR *xdrs, DS_DATASET_T *pDataset, size_t *tList)
 {
 	char *str, *typeStr = "type ";
-	size_t h, i, npad;
+	size_t h, i, len, npad;
 	long size;
+	DS_DATASET_T *item;
+	DS_LIST_T list;
 	DS_TYPE_T *pType;
 
-	if (DS_IS_TABLE(pDataset)) {
-		if (!dsTypePtr(&pType, pDataset->tid)) {
-			return FALSE;
+	if (!dsListInit(&list)) {
+		return FALSE;
+	}
+	if (!dsVisitList(&list, pDataset)) {
+		goto fail;
+	}
+	for (i = 0; i < list.count; i++) {
+		item = list.pItem[i];
+		if (!DS_IS_TABLE(item)) {
+			continue;
 		}
-		if (!dsTypeListFind(&h, tList, pType->name)) {
-			return FALSE;
+		if (!dsTypePtr(&pType, item->tid) ||
+			!dsTypeListFind(&h, tList, pType->name)) {
+			goto fail;
 		}
-		if (tList[h] == pDataset->tid) {
-			return TRUE;
+		if (tList[h] == item->tid) {
+			continue;
 		}
 		if (tList[h]) {
-			DS_ERROR(DS_E_DUPLICATE_TYPE_NAME);
+			DS_LOG_ERROR(DS_E_DUPLICATE_TYPE_NAME);
+			goto fail;
 		}
-		if (!dsTypeSpecifier(&str, &i, pDataset->tid)) {
-			return FALSE;
+		if (!dsTypeSpecifier(&str, &len, item->tid)) {
+			goto fail;
 		}
-		size = i + strlen(typeStr);
+		size = len + strlen(typeStr);
 		npad = DS_PAD((size_t)size, BYTES_PER_XDR_UNIT);
 		if (!xdr_long(xdrs, &size) ||
 			!XDR_PUTBYTES(xdrs, typeStr, strlen(typeStr)) ||
-			!XDR_PUTBYTES(xdrs, str, i) ||
+			!XDR_PUTBYTES(xdrs, str, len) ||
 			!XDR_PAD(xdrs, npad)) {
-			DS_ERROR(DS_E_XDR_IO_ERROR);
+			DS_LOG_ERROR(DS_E_XDR_IO_ERROR);
+			goto fail;
 		}
-		tList[h] = pDataset->tid;
-		return TRUE;
+		tList[h] = item->tid;
 	}
-	if (DS_IS_DATASET(pDataset)) {
-		for (i = 0; i < pDataset->elcount; i++) {
-			if (!xdr_types(xdrs, &pDataset->p.child[i], tList)) {
-				return FALSE;
-			}
-		}
-		return TRUE;
-	}
-	DS_ERROR(DS_E_SYSTEM_ERROR);
+	return dsListFree(&list);
+fail:
+	dsListFree(&list);
+	return FALSE;
 }

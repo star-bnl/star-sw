@@ -7,6 +7,7 @@ modification history
 --------------------
 24apr93,whg  written.
 28feb95,whg  change to CORBA IDL
+11jun96,whg  added indirection to dataset structure
 */
 
 /*
@@ -321,15 +322,15 @@ int dsTypeListCreate(size_t **pList, size_t listDim)
 			listDim = n;
 		}
 		size = listDim*sizeof(list[0]);
-		if ((list = dsDsetAlloc(size)) == NULL) {
+		if ((list = dsTypeCalloc(size)) == NULL) {
 			return FALSE;
 		}
 		*pList = list;
 	}
 	else {
 		size = listDim*sizeof(list[0]);
+		memset((char *)list, 0, size);
 	}
-	memset((char *)list, 0, size);
 	list[0] = listDim - 1;
 	return TRUE;
 }
@@ -399,6 +400,6 @@ int dsTypeListFind(size_t *pH, size_t *list, char *str)
 */
 int  dsTypeListFree(size_t *list)
 {
-	dsDsetFree(list);
+	dsTypeFree(list, (1 + list[0])*sizeof(list[0]));
 	return TRUE;
 }

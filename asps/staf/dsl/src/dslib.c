@@ -8,6 +8,7 @@ modification history
 30jul93,whg  written.
 11feb95,whg  removed pUser from functions
 26apr95,whg  add new API functions
+11jun96,whg  added indirection to dataset structure
 */
 /*
 DESCRIPTION
@@ -19,89 +20,6 @@ tables to program variables
 #include <string.h>
 #include "dstype.h"
 
-/******************************************************************************
-*
-* dsAddDataset - add child dataset to dataset
-*
-* RETURNS: TRUE if success else FALSE
-*/
-int dsAddDataset(DS_DATASET_T *pDataset, char *dsetName, size_t setDim,
-	DS_DATASET_T *pChild)
-{
-	size_t n;
-	DS_DATASET_T *pAdded;
-
-	if (!DS_IS_DATASET(pDataset)) {
-		DS_ERROR(DS_E_INVALID_DATASET);
-	}
-	if (pDataset->elcount >= pDataset->maxcount) {
-		DS_ERROR(DS_E_DATASET_FULL);
-	}
-	if (setDim < 1) {
-		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
-	}
-	pAdded= &pDataset->p.child[pDataset->elcount];
-	memset((char *)pAdded, 0, sizeof(DS_DATASET_T));
-	if (!dsCopyName(pAdded->name, dsetName, NULL)) {
-		DS_ERROR(DS_E_INVALID_DATASET_NAME);	
-	}
-
-	for (n = pDataset->elcount; n-- > 0;) {
-		if (dsCmpName(pAdded->name, pDataset->p.child[n].name) <= 0) {
-			DS_ERROR(DS_E_DUPLICATE_ENTRY_NAME);
-		}
-	}
-	if (pChild == NULL) {
-		if ((pChild = dsDsetAlloc(setDim*sizeof(DS_DATASET_T))) == NULL) {
-			return FALSE;
-		}
-		pAdded->flags |= DS_ALLOC_P;
-	}
-	pDataset->elcount++;
-	pAdded->maxcount = setDim;
-	pAdded->p.child = pChild;
-	return TRUE;
-}
-/******************************************************************************
-*
-* dsAddTable - add table to dataset
-*
-* RETURNS: TRUE if success else FALSE
-*/
-int dsAddTable(DS_DATASET_T *pDataset, char *name,
-	char *typeSpecifier, size_t nRow, char **ppData)
-{
-	char *pData;
-	size_t n;
-	DS_DATASET_T *pTable;
-
-	if (!DS_IS_DATASET(pDataset)) {
-		DS_ERROR(DS_E_INVALID_DATASET);
-	}
-	if (pDataset->elcount >= pDataset->maxcount) {
-		DS_ERROR(DS_E_DATASET_FULL);
-	}
-	pTable = &pDataset->p.child[pDataset->elcount];
-	pData = ppData == NULL ? NULL : *ppData;
-	if (!dsNewTable(&pTable, name, typeSpecifier, nRow, pData)) {
-		return FALSE;
-	}
-	for (n = pDataset->elcount; n-- > 0;) {
-		if (dsCmpName(pTable->name, pDataset->p.child[n].name) <= 0) {
-			DS_ERROR(DS_E_DUPLICATE_TABLE_NAME);
-		}
-	}
-	if (pTable->p.data == NULL && nRow != 0) {
-		if (!dsAllocTables(pTable)) {
-			return FALSE;
-		}
-		if (ppData != NULL) {
-			*ppData = pTable->p.data;
-		}
-	}
-	pDataset->elcount++;
-	return TRUE;
-}
 /*****************************************************************************
 *
 * dsCellAddress - return address of a table cell
@@ -319,12 +237,12 @@ int dsDatasetEntry(DS_DATASET_T **ppEntry,
 	DS_DATASET_T *pDataset, size_t entryNumber)
 {
 	if (!DS_IS_DATASET(pDataset)) {
-		DS_ERROR(DS_E_INVLAID_DATASET);
+		DS_ERROR(DS_E_INVALID_DATASET);
 	}
 	if (pDataset->elcount < entryNumber) {
 		DS_ERROR(DS_E_INVALID_ENTRY_NUMBER);
 	}
-	*ppEntry = &pDataset->p.child[entryNumber];
+	*ppEntry = pDataset->p.link[entryNumber];
 	return TRUE;
 }
 /*****************************************************************************
@@ -336,7 +254,7 @@ int dsDatasetEntry(DS_DATASET_T **ppEntry,
 int dsDatasetEntryCount(size_t *pCount, DS_DATASET_T *pDataset)
 {
 	if (!DS_IS_DATASET(pDataset)) {
-		DS_ERROR(DS_E_INVLAID_DATASET);
+		DS_ERROR(DS_E_INVALID_DATASET);
 	}
 	*pCount = pDataset->elcount;
 	return TRUE;
@@ -350,7 +268,7 @@ int dsDatasetEntryCount(size_t *pCount, DS_DATASET_T *pDataset)
 int dsDatasetMaxEntryCount(size_t *pCount, DS_DATASET_T *pDataset)
 {
 	if (!DS_IS_DATASET(pDataset)) {
-		DS_ERROR(DS_E_INVLAID_DATASET);
+		DS_ERROR(DS_E_INVALID_DATASET);
 	}
 	*pCount = pDataset->maxcount;
 	return TRUE;
@@ -364,23 +282,10 @@ int dsDatasetMaxEntryCount(size_t *pCount, DS_DATASET_T *pDataset)
 int dsDatasetName(char **pName, DS_DATASET_T *pDataset)
 {
 	if (!DS_IS_DATASET(pDataset)) {
-		DS_ERROR(DS_E_INVLAID_DATASET);
+		DS_ERROR(DS_E_INVALID_DATASET);
 	}
 	*pName = pDataset->name;
 	return TRUE;
-}
-/*****************************************************************************
-*
-* dsDeleteEntry - delete an entry from a dataset
-*
-* RETURNS: TRUE if success else FALSE
-*/
-int dsDeleteEntry(DS_DATASET_T *pEntry, DS_DATASET_T *pDataset)
-{
-	if(pEntry == NULL || pDataset == NULL) {
-		DS_ERROR(DS_E_NULL_POINTER_ERROR);
-	}
-	DS_ERROR(DS_E_NOT_IMPLEMENTED);
 }
 /*****************************************************************************
 *
@@ -418,11 +323,11 @@ int dsFindEntry(DS_DATASET_T **ppEntry, DS_DATASET_T *pDataset, char *path)
 		DS_ERROR(DS_E_DATASET_REQUIRED);
 	}
 	for (i = 0; i < pDataset->elcount; i++) {
-		if ((c = dsCmpName(pDataset->p.child[i].name, path)) <= 0) {
+		if ((c = dsCmpName(pDataset->p.link[i]->name, path)) <= 0) {
 			if (c < 0) {
 				DS_ERROR(DS_E_NAMES_COLLIDE);
 			}
-			*ppEntry = &pDataset->p.child[i];
+			*ppEntry = pDataset->p.link[i];
 			return TRUE;
 		}
 	}
@@ -458,8 +363,8 @@ int dsFindTable(DS_DATASET_T **ppTable,
 */
 int dsIsDataset(bool_t *pResult, DS_DATASET_T *handle)
 {
-	if (!dsValidDataset(handle)) {
-		DS_ERROR(DS_E_INVLAID_DATASET);
+	if (!DS_IS_VALID(handle)) {
+		DS_ERROR(DS_E_INVALID_DATASET);
 	}
 	*pResult = DS_IS_DATASET(handle);
 	return TRUE;
@@ -472,8 +377,8 @@ int dsIsDataset(bool_t *pResult, DS_DATASET_T *handle)
 */
 int dsIsTable(bool_t *pResult, DS_DATASET_T *handle)
 {
-	if (!dsValidDataset(handle)) {
-		DS_ERROR(DS_E_INVLAID_DATASET);
+	if (!DS_IS_VALID(handle)) {
+		DS_ERROR(DS_E_INVALID_DATASET);
 	}
 	*pResult = DS_IS_TABLE(handle);
 	return TRUE;
@@ -517,76 +422,16 @@ int dsMapTable(DS_DATASET_T *pDataset, char *tableName,
 }
 /*****************************************************************************
 *
-* dsNewDataset - create an empty dataset with up to setDim -1 entries
-* 
-* RETURNS: TRUE if success else FALSE
-*/
-int dsNewDataset(DS_DATASET_T **ppDataset, char *name, size_t setDim)
-{
-	char tmpName[DS_NAME_DIM];
-	size_t flags = 0;
-	DS_DATASET_T *pDataset;
-
-	if (ppDataset == NULL) {
-		DS_ERROR(DS_E_NULL_POINTER_ERROR);
-	}
-	if (setDim < 2) {
-		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
-	}
-	if (!dsCopyName(tmpName, name, NULL)) {
-		DS_ERROR(DS_E_INVALID_DATASET_NAME);	
-	}
-	if ((pDataset = *ppDataset) == NULL) {
-		if ((pDataset = dsDsetAlloc(setDim*sizeof(DS_DATASET_T))) == NULL) {
-			return FALSE;
-		}
-		flags |= DS_ALLOC_NODE;
-		*ppDataset = pDataset;
-	}
-	memset((char *)pDataset, 0, sizeof(DS_DATASET_T));
-	strcpy(pDataset->name, tmpName);
-	pDataset->flags = flags;
-	pDataset->maxcount = setDim - 1;
-	pDataset->p.child = &pDataset[1];
-	return TRUE;
-}
-/*****************************************************************************
-*
-* dsNewTable - create a table descriptor
+* dsRefcount - reference count for dataset
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsNewTable(DS_DATASET_T **ppTable, char *tableName,
-	char *typeSpecifier, unsigned rowCount, void *pData)
+int dsRefcount(size_t *pCount, DS_DATASET_T *pDataset)
 {
-	char name[DS_NAME_DIM];
-	DS_DATASET_T *pTable;
-	unsigned flags = 0, tid;
-
-	if (ppTable == NULL) {
+	if (pDataset == NULL || pCount == NULL) {
 		DS_ERROR(DS_E_NULL_POINTER_ERROR);
 	}
-	if (!dsCopyName(name, tableName, NULL)) {
-		DS_ERROR(DS_E_INVALID_TABLE_NAME);
-	}		
-	if (!dsTypeId(&tid, typeSpecifier, NULL)) {
-		return FALSE;
-	}
-	if ((pTable = *ppTable) == NULL) {
-		if ((pTable = dsDsetAlloc(sizeof(DS_DATASET_T))) == NULL) {
-			return FALSE;
-		}
-		flags |= DS_ALLOC_NODE;
-		*ppTable = pTable;
-	}
-	memset((char *)pTable, 0 , sizeof(DS_DATASET_T));
-	strcpy(pTable->name, name);
-	pTable->flags = flags;
-	pTable->tid = tid;
-	pTable->maxcount = rowCount;
-	if ((pTable->p.data = pData) != NULL) {
-		pTable->elcount = rowCount;
-	}
+	*pCount = pDataset->refcount;
 	return TRUE;
 }
 /*****************************************************************************

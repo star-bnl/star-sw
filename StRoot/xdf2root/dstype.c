@@ -6,11 +6,12 @@
 modification history
 --------------------
 12feb95,whg	written.
+11jun96,whg  added indirection to dataset structure
 */
 
 /*
 DESCRIPTION
-These routines parse struct defs defined by the CORBA IDL version 1.2
+These routines parse struct defs defined by the CORBA IDL version 2
 */
 #include <ctype.h>
 #include <stdlib.h>
@@ -18,19 +19,31 @@ These routines parse struct defs defined by the CORBA IDL version 1.2
 #define DS_PRIVATE
 #define DS_GLOBAL_ONE
 #include "dstype.h"
-
+/******************************************************************************
+*
+* descriptor for memory region
+*
+*/
+typedef struct {
+	char *first;	/* address of memory region */
+	char *next;		/* next free byte of region */
+	char *limit;	/* address of last byte of region plus one */
+	int *map;		/* number of fields in type */
+}DS_MEM_T;
 /*****************************************************************************
 *
 * prototypes for static functions
 *
 */
 static int dsBasicInit(void);
+static int dsFirstPass(int *pSepCount, int *map,
+	int *pMapCount, int maxMapCount, char *str);
+static int dsFormatTypeSpecifierR(DS_BUF_T *bp,
+	DS_TYPE_T *type, int level, size_t *pNTag, DS_TYPE_T **tag);
 static int dsParseTypeR(DS_TYPE_T **pType, DS_BUF_T *bp,
 	DS_MEM_T *mem, DS_TYPE_T **scope, unsigned level);
 static int dsSearchScope(DS_TYPE_T **ppType, char *name,
 	DS_TYPE_T **scope, unsigned level, int top);
-static int dsFormatTypeSpecifierR(DS_BUF_T *bp,
-	DS_TYPE_T *type, int level, size_t *pNTag, DS_TYPE_T **tag);
 /******************************************************************************
 *
 * basicType - definition of basic types
@@ -94,6 +107,33 @@ fail:
 	}
 	/********** end critical section *******************************/
 	DS_ERROR(DS_E_SYSTEM_ERROR);
+}
+/******************************************************************************
+*
+* dsCheckDupField - verify field names are unique 
+*
+* RETURNS: TRUE if unique names, FALSE if duplicate or names collide
+*/
+static int dsCheckDupField(DS_TYPE_T *pType)
+{
+	int c, n;
+	DS_FIELD_T *f1, *f2, *last;
+
+	if ((n = pType->nField - 1) > 0) {
+		for (f1 = DS_FIELD_PTR(pType), last = f1 + n; f1 < last; f1++) {
+			for (f2 = f1 + 1; f2 <= last; f2++) {
+				if ((c = dsCmpName(f1->name, f2->name)) <= 0) {
+					if (c < 0) {
+						DS_ERROR(DS_E_NAMES_COLLIDE);
+					}
+					else {
+						DS_ERROR(DS_E_DUPLICATE_NAME);
+					}
+				}
+			}
+		}
+	}
+	return TRUE;
 }
 /*****************************************************************************
 *
@@ -168,6 +208,63 @@ int dsFindField(DS_FIELD_T **ppField, DS_TYPE_T *pType, char *name)
 }
 /******************************************************************************
 *
+* dsFirstPass - first pass parse of type specifier to get memory map
+*
+* RETURNS: TRUE for success or FALSE for error
+*/
+static int dsFirstPass(int *pSepCount, int *map,
+	int *pMapCount, int maxMapCount, char *str)
+{
+	int mapCount = 0, nest = -1, sepCount = 0, stack[DS_MAX_NEST];
+
+	for (; isalnum(*str) || isspace(*str) || *str == '_'; str++);
+
+	if (*str != '{') {
+		*pMapCount = mapCount;
+		*pSepCount = 0;
+		return TRUE;
+	}
+	for (;;) {
+		for (; isalnum(*str) || isspace(*str) || *str == '_'; str++);
+		switch (*str++) {
+
+			case ';':
+			case ',':
+				map[stack[nest]]++;
+				sepCount++;
+				break;
+
+			case '{':
+				if (++nest >= DS_MAX_NEST) {
+					DS_ERROR(DS_E_NESTED_TOO_DEEP);
+				}
+				stack[nest] = mapCount++;
+				if (mapCount > maxMapCount) {
+					DS_ERROR(DS_E_TOO_MANY_MEMBERS);
+				}
+				map[stack[nest]] = 0;
+				break;
+
+			case '}':
+				if (nest == 0) {
+					*pMapCount = mapCount;
+					*pSepCount = sepCount;
+					return TRUE;
+				}
+				nest--;
+				break;
+
+			case '[':
+				while(*str != '\0' && *str++ != ']');
+				break;
+
+			default: 
+				DS_ERROR(DS_E_SYNTAX_ERROR);
+		}
+	}
+}
+/******************************************************************************
+*
 * dsFormatTypeSpecifier - format a declaration string for a structure
 *
 * RETURNS: TRUE if success else FALSE
@@ -222,11 +319,10 @@ static int dsFormatTypeSpecifierR(DS_BUF_T *bp,
 		dsPuts(" {\n", bp) < 0) {
 		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
 	}
-	field = DS_FIELD_PTR(type);
-	if (!dsCheckDuplicate(field->name, type->nField, sizeof(DS_FIELD_T))) {
+	if (!dsCheckDupField(type)) {
 		return FALSE;
 	}
-	for (i = 0; i < type->nField; i++) {
+	for (field = DS_FIELD_PTR(type), i = 0; i < type->nField; i++) {
 		ft = field[i].type;
 		if (ft != lastType) {
 			if (lastType && dsPuts(";\n", bp) < 0) {
@@ -285,7 +381,6 @@ int dsParseType(DS_TYPE_T **pType, size_t *pSize, char *str, char **ptr)
 	if (nBasic == 0  && !dsBasicInit()) {
 		return FALSE;
 	}
-
 	if (!dsFirstPass(&nSep, map, &nMap, DS_MAX_STRUCT, str)) {
 		return FALSE;
 	}
@@ -459,8 +554,7 @@ static int dsParseTypeR(DS_TYPE_T **pType, DS_BUF_T *bp,
 			DS_ERROR(DS_E_SYNTAX_ERROR);
 		}
 	}
-	field = DS_FIELD_PTR(type);
-	if (!dsCheckDuplicate(field->name, type->nField, sizeof(DS_FIELD_T))) {
+	if (!dsCheckDupField(type)) {
 		return FALSE;
 	}
 	if (dsGetNonSpace(bp) != '}') {

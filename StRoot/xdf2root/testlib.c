@@ -7,6 +7,7 @@ modification history
 --------------------
 26jul93,whg  made from testadt.c testhash.c testtree.c testxdr.c.
 25feb95,whg  modify for CORBA IDL type system
+11jun96,whg  added indirection to dataset structure
 */
 
 /*
@@ -21,11 +22,7 @@ collection of routine to test ds lib
 #include "dsxdr.h"
 
 
-#ifdef _MSDOS
-#define NLOOP 20
-#else
 #define NLOOP 100
-#endif
 #define XDR_MEM_SIZE(nloop) ((nloop)*(300 + 40*(nloop)))
 #define DS_TEST_FAILED(msg) {dsErrorPrint("TEST FAILED: %s - %s.%d\n",\
 	 msg, __FILE__, __LINE__); dsPerror(""); return FALSE;}
@@ -34,62 +31,43 @@ void dumpType(DS_TYPE_T *type);
 static void dumpTypeR(DS_TYPE_T *type, char *prefix);
 /******************************************************************************
 *
-* dsTestAdt - simple test of abstract data type routines
+* dumpType - print info about type
 *
 */
-int dsTestType()
+void dumpType(DS_TYPE_T *type)
 {
-	char *str =	"struct test {struct s {double d; long l;}h;\n"
-			"\tstruct z {short v; struct s{char c;}r; long t;}a;\n"
-			"\tstruct t {z r[5][20]; short y; octet z;}b;\n"
-			"\tstruct m {t w; struct s{long l;}v;}u;\n"
-			"\t m e;\n"
-			"\tchar end;}\n";
-	char *str2 =	"struct  test  {struct s {double d; long l;}h;\n"
-			"\tstruct z {short v; struct s{char c;}r; long t;}a;\n"
-			"\tstruct t {z r[5][20]; short y; octet z;}b;\n"
-			"\tstruct m {t w; struct\n"
-			" s{long l;}v;}u;\n"
-			"\t m e;\n"
-			"\tchar end;}\n";
-	char *ptr;
-	size_t i, n, tid;
-	DS_TYPE_T *type;
+	printf(" offset  count std type\n\n");
+	dumpTypeR(type, "");
+}
+/******************************************************************************
+*
+* dumpTypeR - recursive part of dumpType
+*
+*/
+static void dumpTypeR(DS_TYPE_T *type, char *prefix)
+{
+	char s[100];
+	size_t i, j;
+	DS_FIELD_T *field;
 
-	printf("%s", str);
-	if (!dsTypeId(&tid, str, &ptr)) {
-		dsPerror("dsTypeId failed");
-		return FALSE;
-	}
-	if (!dsTypeSpecifier(&ptr, &i, tid)) {
-		dsPerror("dsTypeSpecifier failed");
-		return FALSE;
-	}
-	printf("len: %d\n%s\n", i, ptr);
-	printf("first tid %d\n", tid);
-	if (!dsTypeId(&tid, str, &ptr)) {
-		dsPerror("dsTypeId failed");
-		return FALSE;
-	}
-	printf("second tid %d\n", tid);
-	if (!dsTypePtr(&type, tid)) {
-		dsPerror("dsTypePtr failed");
-		return FALSE;
-	}
-	for (i = 0; i < 1000; i++) {
-		if (!dsTypeId(&n, str2, &ptr)) {
-			dsPerror("dsTypeId failed");
-			return FALSE;
+	for (field = DS_FIELD_PTR(type), i = 0; i < type->nField; i++, field++) {
+		printf("%7d%7d",field->offset,  field->count);
+		printf("  %c  ", DS_REP_IS_STD(field->type) ? 'T' : 'F');
+		printf("%10s |", field->type->name);
+		printf("%s%s", prefix, field->name);
+		for (j = 0; field->dim[j] && j < DS_MAX_DIMS; j++) {
+			printf("[%d]", field->dim[j]);
 		}
-		if (n != tid) {
-			printf("tidCmp failure %d != %d\n", n, tid);
-			dsPerror("");
-			return FALSE;
+		printf("\n");
+		if (field->type->code == DS_TYPE_STRUCT) {
+			strcpy(s, "    ");
+			strcat(s, prefix);
+			strcat(s, field->name);
+			strcat(s, ".");
+			dumpTypeR(field->type, s);
+			continue;
 		}
 	}
-	dumpType(type);
-	return TRUE;
-
 }
 /******************************************************************************
 *
@@ -107,14 +85,13 @@ int dsTestApi(void)
 	TYPE_TWO *pRow;
 	char *tableNameOne = "tableNameOne", *tableNameTwo = "tableNameTwo";
 	bool_t result;
-	size_t count, dsDim = 5, rowCountOne = 10, rowCountTwo = 13;
+	size_t count, rowCountOne = 10, rowCountTwo = 13;
 	char *specifier;
 	size_t colNumber = 0, dims[5], size;
 	DS_DATASET_T *pDataset, *pEntry, *pTable;
 	DS_TYPE_CODE_T code;
 
-	pDataset = NULL;
-	if (!dsNewDataset(&pDataset, dsName, dsDim) ||
+	if (!dsNewDataset(&pDataset, dsName) ||
 		!dsIsDataset(&result, pDataset) || !result ||
 		!dsDatasetName(&name, pDataset) ||
 		strcmp(name, dsName)) {
@@ -159,16 +136,13 @@ int dsTestApi(void)
 		!dsFindColumn(&count, pTable, "flag") || count != 2) {
 		DS_TEST_FAILED("column attributes failed");
  	}
-	if (!dsAddDataset(pDataset, "childDataset", 6, NULL) ||
-		!dsFindEntry(&pEntry, pDataset, "childDataset") ||
+	if (!dsNewDataset(&pEntry, "childDataset") ||
+		!dsLink(pDataset, pEntry) ||
 		!dsIsDataset(&result, pEntry) || !result ||
 		!dsAddTable(pEntry, "tableThree", specThree, 7, NULL)) {
-		DS_TEST_FAILED("dsAddDataset failed");
+		DS_TEST_FAILED("dsLink failed");
 	}
 	dsPrintSpecifiers(stdout, pDataset);
-	if (dsDeleteEntry(pEntry, pDataset)) {
-		DS_TEST_FAILED("dsDeleteEntry should fail");
-	}
 	dsFreeDataset(pDataset);
 	return TRUE;
 }
@@ -234,46 +208,6 @@ int dsTestCorba()
 }
 /******************************************************************************
 *
-* dumpType - print info about type
-*
-*/
-void dumpType(DS_TYPE_T *type)
-{
-	printf(" offset  count std type\n\n");
-	dumpTypeR(type, "");
-}
-/******************************************************************************
-*
-* dumpTypeR - recursive part of dumpType
-*
-*/
-static void dumpTypeR(DS_TYPE_T *type, char *prefix)
-{
-	char s[100];
-	size_t i, j;
-	DS_FIELD_T *field;
-
-	for (field = DS_FIELD_PTR(type), i = 0; i < type->nField; i++, field++) {
-		printf("%7d%7d",field->offset,  field->count);
-		printf("  %c  ", DS_REP_IS_STD(field->type) ? 'T' : 'F');
-		printf("%10s |", field->type->name);
-		printf("%s%s", prefix, field->name);
-		for (j = 0; field->dim[j] && j < DS_MAX_DIMS; j++) {
-			printf("[%d]", field->dim[j]);
-		}
-		printf("\n");
-		if (field->type->code == DS_TYPE_STRUCT) {
-			strcpy(s, "    ");
-			strcat(s, prefix);
-			strcat(s, field->name);
-			strcat(s, ".");
-			dumpTypeR(field->type, s);
-			continue;
-		}
-	}
-}
-/******************************************************************************
-*
 */
 int dsTestErr()
 {
@@ -291,6 +225,53 @@ int dsTestErr()
 	dsPerror("after dsLogError");
 	return TRUE;
 }
+/*****************************************************************************
+*/
+#define TEST_FAIL(b) {fprintf(stderr, "%s(%d) %s\n", __FILE__, __LINE__, #b);\
+	dsPerror(""); return 0;}
+#define F(b) {if(b)TEST_FAIL(b);}
+#define T(b) {if(!(b))TEST_FAIL(b);}
+/*****************************************************************************
+*/
+int dsTestGraph(void)
+{
+	char buf[200];
+	DS_BUF_T bp;
+	DS_DATASET_T *a, *b, *c, *d, *e;
+	DS_LIST_T list;
+
+	T(dsNewDataset(&a, "a"));
+	T(dsLink(a,a));
+	T(dsUnlink(a,a));
+	T(dsNewDataset(&b, "b"));
+	T(dsNewDataset(&c, "c"));
+	T(dsNewDataset(&d, "d"));
+	T(dsLink(a, b));
+	T(dsLink(a, c));
+	T(dsLink(a, d));
+	T(dsLink(b, c));
+	T(dsLink(b, d));
+	T(dsLink(c, d));
+	T(dsListInit(&list));
+	T(dsVisitList(&list, a));
+	T(dsListFree(&list));
+	T(a->visit == 1);
+	T(b->visit == 2);
+	T(c->visit == 3);
+	T(d->visit == 4);
+	T(dsPrintDatasetSpecifier(stdout, a));
+	T(dsIsAcyclic(a));
+	T(dsLink(d, a));
+	F(dsIsAcyclic(a));
+	T(dsPrintDatasetSpecifier(stdout, a));
+	DS_PUT_INIT(&bp, buf, sizeof(buf));
+	T(dsDatasetSpecifier(&bp, a));
+	T(dsCreateDataset(&e, NULL, &buf[4], NULL));
+	T(dsPrintDatasetSpecifier(stdout, e));
+	T(dsFreeDataset(e));
+	T(dsFreeDataset(a));
+	return TRUE;
+}
 /******************************************************************************
 *
 * dsTestTree - test dataset routines
@@ -299,7 +280,7 @@ int dsTestErr()
 int dsTestTree()
 {
 	char *ptr;
-	DS_DATASET_T dataset, *pDataset;
+	DS_DATASET_T *pDataset;
 	char *typeDef1 = "struct type1 {long v1, v2;}";
 	char *typeDef2 = "struct tableType {long v1, v2; char name[20];}";
 	char *treeDef = "event{first{table1(type1,4000), table2(tableType, 0),"
@@ -320,8 +301,7 @@ int dsTestTree()
 		printf("dsTypeListEnter failed for typeDef2\n");
 		return FALSE;
 	}
-	pDataset = NULL;
-	if (!dsCreateDataset(&pDataset, 0, typeList, treeDef, &ptr)) {
+	if (!dsCreateDataset(&pDataset, typeList, treeDef, &ptr)) {
 		dsPerror("dsCreateDataset failed for dataset");
 		return FALSE;
 	}
@@ -334,8 +314,7 @@ int dsTestTree()
 		dsPerror("dsFreeDataset");
 		return FALSE;
 	}
-	pDataset = &dataset;
-	if (!dsCreateDataset(&pDataset, 1, typeList, table, &ptr)) {
+	if (!dsCreateDataset(&pDataset, typeList, table, &ptr)) {
 		dsPerror("dsCreateDataset failed for table");
 		return FALSE;
 	}
@@ -343,6 +322,10 @@ int dsTestTree()
 	printf("ptr = %s\n", ptr);
 	if (!dsPrintDatasetSpecifier(stdout, pDataset)) {
 		dsPerror("dsPrintDatasetSpecifier failed for table");
+		return FALSE;
+	}
+	if (!dsFreeDataset(pDataset)) {
+		dsPerror("dsFreeDataset");
 		return FALSE;
 	}
 	return TRUE;
@@ -361,30 +344,105 @@ int dsTestDset()
 	long l[5];
 	char *pData[] = {NULL, NULL, NULL, NULL};
 	size_t dim[] = {10, 5, 12, 31, 8, 4, 12, 2};
-	DS_DATASET_T dataset[21], *pDataset = dataset;
+	DS_DATASET_T *pChild, *pParent, *pTable;
 
-	pData[0] = (char *)a;
-	pData[1] = (char *)l;
-
-	if (!dsNewDataset(&pDataset, "myDset", 21)) {
-		printf("dsNewDataset failed\n");
+	if (!dsNewDataset(&pParent, "parent")) {
+		dsPerror("NewDataset failed for parent");
 		return FALSE;
 	}
+	if (!dsNewDataset(&pChild, "childDataset")) {
+		dsPerror("NewDataset failed for child");
+		return FALSE;
+	}
+	if (!dsLink(pParent, pChild)) {
+		dsPerror("Link failed");
+		return FALSE;
+	}
+	pData[0] = (char *)a;
+	pData[1] = (char *)l;
 	for (i = 0; i < 20; i++) {
 		sprintf(buf, "tbl%d", i);
 		ptr =pData[i%2];
-		if (!dsAddTable(pDataset,
+		pTable = NULL;
+		if (!dsNewTable(&pTable,
 			buf, tblDecl[i%4], dim[i%8], &ptr)) {
-			dsPerror("dsAddTable failed");
+			dsPerror("dsNewTable failed");
+			return FALSE;
+		}
+		if (!dsLink(pParent, pTable)) {
+			dsPerror("Link failed for pTable");
 			return FALSE;
 		}
 	}
-	if (!dsPrintDatasetSpecifier(stdout, pDataset)) {
+	if (!dsPrintDatasetSpecifier(stdout, pParent)) {
 		dsPerror("dsPrintDatasetSpecifier failed");
 		return FALSE;
 	}
-	dsFreeDataset(pDataset);
+	if (!dsFreeDataset(pParent)) {
+		dsPerror("dsFreeDataset failed");
+		return FALSE;
+	}
 	return TRUE;
+}
+/******************************************************************************
+*
+* dsTestType - simple test of abstract data type routines
+*
+*/
+int dsTestType()
+{
+	char *str =	"struct test {struct s {double d; long l;}h;\n"
+			"\tstruct z {short v; struct s{char c;}r; long t;}a;\n"
+			"\tstruct t {z r[5][20]; short y; octet z;}b;\n"
+			"\tstruct m {t w; struct s{long l;}v;}u;\n"
+			"\t m e;\n"
+			"\tchar end;}\n";
+	char *str2 =	"struct  test  {struct s {double d; long l;}h;\n"
+			"\tstruct z {short v; struct s{char c;}r; long t;}a;\n"
+			"\tstruct t {z r[5][20]; short y; octet z;}b;\n"
+			"\tstruct m {t w; struct\n"
+			" s{long l;}v;}u;\n"
+			"\t m e;\n"
+			"\tchar end;}\n";
+	char *ptr;
+	size_t i, n, tid1, tid2;
+	DS_TYPE_T *type;
+
+	T(dsTypeId(&tid1, "struct a{char a;struct d{char b;}c;}", &ptr))
+	printf("%s", str);
+	if (!dsTypeId(&tid1, str, &ptr)) {
+		dsPerror("dsTypeId failed");
+		return FALSE;
+	}
+	if (!dsTypeSpecifier(&ptr, &i, tid1)) {
+		dsPerror("dsTypeSpecifier failed");
+		return FALSE;
+	}
+	printf("len: %d\n%s\n", i, ptr);
+	printf("first tid %d\n", tid1);
+	if (!dsTypeId(&tid2, str, &ptr) || tid1 != tid2) {
+		dsPerror("dsTypeId failed");
+		return FALSE;
+	}
+	printf("second tid %d\n", tid2);
+	if (!dsTypePtr(&type, tid2)) {
+		dsPerror("dsTypePtr failed");
+		return FALSE;
+	}
+	for (i = 0; i < 1000; i++) {
+		if (!dsTypeId(&n, str2, &ptr)) {
+			dsPerror("dsTypeId failed");
+			return FALSE;
+		}
+		if (n != tid1) {
+			printf("tidCmp failure %d != %d\n", n, tid1);
+			dsPerror("");
+			return FALSE;
+		}
+	}
+	dumpType(type);
+	return TRUE;
+
 }
 /******************************************************************************
 *
@@ -474,7 +532,7 @@ int xdrWriteTest()
 void testStats(void)
 {
 	printf("\n");
-	dsDatasetAllocStats();
+	dsAllocStats();
 	dsTidHashStats();
 	dsSemStats();
 }

@@ -82,7 +82,7 @@ int dsEquijoin(DS_DATASET_T *pJoinTable, DS_DATASET_T *pTableOne,
 					if (pJoinTable->elcount != pJoinTable->maxcount) {
 						DS_ERROR(DS_E_SYSTEM_ERROR);
 					}
-					if (DS_DYNAMIC_TABLE(pJoinTable)) {
+					if (DS_IS_DYNAMIC(pJoinTable)) {
 						if (!dsReallocTable(pJoinTable,
 							DS_REALLOC_COUNT(pJoinTable))) {
 							return FALSE;
@@ -106,7 +106,7 @@ int dsEquijoin(DS_DATASET_T *pJoinTable, DS_DATASET_T *pTableOne,
 		}
 		baseOne += types[1]->size;
 	}
-	if (DS_DYNAMIC_TABLE(pJoinTable)) {
+	if (DS_IS_DYNAMIC(pJoinTable)) {
 		if (!dsReallocTable(pJoinTable, pJoinTable->elcount)) {
 			return FALSE;
 		}
@@ -325,7 +325,7 @@ int dsProjectTable(DS_DATASET_T *pDst, DS_DATASET_T *pSrc, char *projectList)
 		return FALSE;
 	}
 	if ((nRow = pSrc->elcount) > pDst->maxcount) {
-		if (DS_DYNAMIC_TABLE(pDst)) {
+		if (DS_IS_DYNAMIC(pDst)) {
 			if (!dsReallocTable(pDst, nRow)) {
 				return FALSE;
 			}
