@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.17 2000/06/06 18:17:49 calderon Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.18 2000/06/24 00:20:35 hardtke Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.18  2000/06/24 00:20:35  hardtke
+ * remove shaping time from time-to-z conversion
+ *
  * Revision 1.17  2000/06/06 18:17:49  calderon
  * change exit to assert
  *
@@ -545,8 +548,7 @@ double StTpcCoordinateTransform::zFromTB(const int tb) const
          gTpcDbPtr->DriftVelocity()*1e-6*         //cm/s->cm/us
 	 (gTpcDbPtr->triggerTimeOffset()*1e6   // units are s
 	+ gTpcDbPtr->Electronics()->tZero()    // units are us 
-	- gTpcDbPtr->Electronics()->shapingTime()*1e-3 +  //units are ns
-            (timeBin)*mTimeBinWidth );  // 
+        +    (timeBin)*mTimeBinWidth );  // 
    
     return(z);
 }
@@ -560,8 +562,7 @@ int StTpcCoordinateTransform::tBFromZ(const double z) const
    
     double time = (
 	 -1*(gTpcDbPtr->triggerTimeOffset()*1e6  // units are s
-	   + gTpcDbPtr->Electronics()->tZero()   // units are us 
-	   - gTpcDbPtr->Electronics()->shapingTime() * 1e-3)  //units are ns
+	   + gTpcDbPtr->Electronics()->tZero())   // units are us 
 	 + ( z / (gTpcDbPtr->DriftVelocity()*1e-6))
 		   ); // tZero + (z/v_drift); the z already has the proper offset
     
