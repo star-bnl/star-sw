@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.2 1999/09/30 02:06:01 porter Exp $
+ * $Id: StDbBuffer.cc,v 1.3 1999/12/07 21:25:25 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.3  1999/12/07 21:25:25  porter
+ * some fixes for linux warnings
+ *
  * Revision 1.2  1999/09/30 02:06:01  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -51,7 +54,7 @@ void StDbBuffer::Raz(){
       if (mCol[i].type>=_ascii){
 	char ** tTextVal= (char**)mCol[i].val;
 	int j;
-	for(j=0;j<mCol[i].length;j++) {
+	for(j=0;j<(int)mCol[i].length;j++) {
 	  if (tTextVal[j]) delete [] tTextVal[j];
 	};
 	delete [] tTextVal ;
@@ -248,10 +251,15 @@ bool StDbBuffer::WriteMem( char **s,void* aVal, myctype type) {
 #define Rscal(tpe) \
 bool  StDbBuffer::ReadScalar(tpe s,const char *aName) \
 {bool tRetVal=false; \
- if (Find_Col(aName)) \
-  { char* tSwapVal=new char[mycsize[mCol[mCur].type]];\
-  if(WriteMem(&s,mCol[mCur].val,mCol[mCur].type)) tRetVal=true;}\
+  if(Find_Col(aName) && WriteMem(&s,mCol[mCur].val,mCol[mCur].type)) \
+    tRetVal=true;\
   return tRetVal;}
+
+// --> old 
+// if (Find_Col(aName)) \
+//  { char* tSwapVal=new char[mycsize[mCol[mCur].type]];\
+//  if(WriteMem(&s,mCol[mCur].val,mCol[mCur].type)) tRetVal=true;}\
+//  return tRetVal;}
 
 Rscal(char&); 
 Rscal(unsigned char&); 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.9 1999/12/03 19:01:59 porter Exp $
+ * $Id: StDbTable.cc,v 1.10 1999/12/07 21:25:25 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.10  1999/12/07 21:25:25  porter
+ * some fixes for linux warnings
+ *
  * Revision 1.9  1999/12/03 19:01:59  porter
  * modified descriptor to accept tableDescriptor once this St_base object
  * has been updated to have longer name lengths.
@@ -23,6 +26,9 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.10  1999/12/07 21:25:25  porter
+ * some fixes for linux warnings
+ *
  * Revision 1.9  1999/12/03 19:01:59  porter
  * modified descriptor to accept tableDescriptor once this St_base object
  * has been updated to have longer name lengths.
@@ -286,7 +292,7 @@ StDbTable::StreamAccessor(typeAcceptor* accept, bool isReading){
 
    accept->pass("beginTime",maccessor.beginTime.mdateTime,len);
    accept->pass("version",maccessor.version,len);
-   int * eids;
+   //   int * eids;
    accept->pass("elementID",maccessor.elementID, mrows);
    if(isReading)cout << mtableName << " & " << mrows << endl;
  
@@ -399,7 +405,7 @@ void
 StDbTable::dbTableStreamer(StDbBufferI* buff, const char* name, bool isReading){
 
 int max = mdescriptor->getNumElements();
-int size = mdescriptor->getTotalSizeInBytes();
+//int size = mdescriptor->getTotalSizeInBytes();
 StTypeE type = mdescriptor->getElementType(0);
 unsigned int length = (unsigned int) mrows*max;
 

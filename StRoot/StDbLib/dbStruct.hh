@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: dbStruct.hh,v 1.6 1999/12/03 17:03:24 porter Exp $
+ * $Id: dbStruct.hh,v 1.7 1999/12/07 21:25:25 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: dbStruct.hh,v $
+ * Revision 1.7  1999/12/07 21:25:25  porter
+ * some fixes for linux warnings
+ *
  * Revision 1.6  1999/12/03 17:03:24  porter
  * added multi-row support for the Xml reader & writer
  *
@@ -28,6 +31,7 @@ class basic {
 
  public:
 
+  virtual ~basic(){};
  char startKey[20];
  char endKey[20];
  int istart;
@@ -87,6 +91,7 @@ class accessor : public basic {
 
    accessor() { setStartKey("<StDbAccessor>");
                 setEndKey("</StDbAccessor>");};
+  virtual ~accessor(){};
 
  
 };
@@ -101,7 +106,7 @@ public:
 
   dbRow() { setStartKey("<TabRow>");
             setEndKey("</TabRow>"); };
-
+  virtual ~dbRow(){};
 };
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
@@ -124,6 +129,7 @@ class dbTable : public basic {
 
    dbTable() { setStartKey("<StDbTable>");
                setEndKey("</StDbTable>");};
+  virtual ~dbTable(){};
 
 };
 
