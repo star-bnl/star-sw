@@ -7,8 +7,8 @@
 
 <h3> Comments on the StV0MiniDst Class </h3>
 When the class is written out to file only a subset of the protected 
-data members are saved. This currently amounts to 20 words per V0 candidate
-(or instance of the class) instead of 30, a reduction of 30%. The
+data members are saved. This currently amounts to 16 words per V0 candidate
+(or instance of the class) instead of 26, a reduction of 30%. The
 redundant information is calculated when the class is instantiated
 but since it is not written to the mini-DST file, it must be
 recalculated when the mini-DST is read in. The member function
@@ -18,18 +18,23 @@ provided by StV0MiniDstMaker as shown in the example
 <a href=readV0MiniDst.html> readV0MiniDst.C </a>, which should is
 avialable from the $STAR/StRoot/macros/analysis directory. </p>
 
+Event-wise information, such as the primary vertex position and the
+event and run numbers are now stored in a separate <a href=StEvMiniDst.html>
+class </a>. This is because it is very likely that even with tight cuts
+there will be more than one V0 candidate per event. For reasons of memory
+and file size, we only want to store this common information once.
+It is accessible via a pointer from the V0 class. </p>
+
 <h3> The StV0MiniDst Class Definition </h3>
 <pre>
 class StV0MiniDst : public StHFillObject {
 public:
   StV0MiniDst();
   ~StV0MiniDst();
-  StV0MiniDst(StV0Vertex*,StVertex*);
+  StV0MiniDst(StV0Vertex*,StEvMiniDst*);
   void UpdateV0();
 
-  int run() const;              // Run number
-  int event() const;            // Event number
-  float *primaryVertex();       // Primary Vertex Position
+  StEvMiniDst *event();         // Pointer to event information
 
   float decayLengthV0() const;       // 3-d decay distance
   float *decayVertexV0();            // Coordinates of decay vertex
@@ -67,9 +72,7 @@ public:
   float ptotNeg();              // Total momentum of neg. daughter  
 
 protected:
-  int   mRun;                   // These are written out
-  int   mEvent;
-  float mPrimaryVertex[3];
+  StEvMiniDst *mEvent;          // These are written out
 
   float mDecayVertexV0[3];
   float mDcaV0Daughters;
