@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.8 1999/11/05 22:50:40 kathy Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.9 1999/11/19 20:13:22 kathy Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.9  1999/11/19 20:13:22  kathy
+// cleaned up macros to remove uneccessary lines; also added info about new tables to QA* macros
+//
 // Revision 1.8  1999/11/05 22:50:40  kathy
 // now input global title for all output pages in the macro for printing & drawing histograms
 //
@@ -48,9 +51,6 @@
 //
 //
 //======================================================================
-
-class St_DataSet;
-St_DataSet *Event;
 
 class StChain;
 StChain *chain;

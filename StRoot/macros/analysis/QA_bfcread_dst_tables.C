@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.14 1999/11/10 17:06:58 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.15 1999/11/19 20:13:21 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.15  1999/11/19 20:13:21  kathy
+// cleaned up macros to remove uneccessary lines; also added info about new tables to QA* macros
+//
 // Revision 1.14  1999/11/10 17:06:58  kathy
 // remove check on globtrk_aux and primtrk_aux tables for 99i and above since these tables are obsolete now - in QA_bfcread_dst_tables.C
 //
@@ -59,14 +62,12 @@
 class StChain;
 StChain *chain;
 
-class St_DataSet;
-St_DataSet *Event;
 
 void QA_bfcread_dst_tables(
  Int_t nevents=1, 
  const char *MainFile=
-  "/disk00000/star/test/new/tfs_Linux/year_2a/psc0208_01_40evts.dst.root",
- const char *fname="qa_tables.out") {
+  "/star/rcf/test/dev/tfs_Linux/Wed/year_2a/psc0208_01_40evts.dst.root",
+ const char *fname="qa_tables_tfs_lin_wed_y2a.out") {
 
   gSystem->Load("St_base");
   gSystem->Load("StChain");
@@ -98,25 +99,30 @@ void QA_bfcread_dst_tables(
   Int_t tabcntr=0;
   Int_t tabmiss=0;
 
-  Int_t cnt_event_header=0;
-  Int_t cnt_event_summary=0;
   Int_t cnt_globtrk=0;
-  Int_t cnt_vertex=0;
-  Int_t cnt_point=0;
   Int_t cnt_globtrk2=0;
   Int_t cnt_primtrk=0;
+  Int_t cnt_vertex=0;
   Int_t cnt_dst_v0_vertex=0;
+  Int_t cnt_ev0_eval=0;
   Int_t cnt_dst_xi_vertex=0;
-  Int_t cnt_dst_dedx=0;
+  Int_t cnt_kinkVertex=0;
   Int_t cnt_particle=0;
+  Int_t cnt_g2t_rch_hit=0;
   Int_t cnt_TrgDet=0;
+  Int_t cnt_l3Track=0;
+  Int_t cnt_event_header=0;
+  Int_t cnt_event_summary=0;
+  Int_t cnt_point=0;
+  Int_t cnt_dst_dedx=0;
   Int_t cnt_mon_soft_ftpc=0;
   Int_t cnt_mon_soft_glob=0;
   Int_t cnt_mon_soft_svt=0;
   Int_t cnt_mon_soft_tpc=0;
-  Int_t cnt_g2t_rch_hit=0;
-  Int_t cnt_kinkVertex=0;
-  Int_t cnt_ev0_eval=0;
+  Int_t cnt_mon_soft_ctb=0;
+  Int_t cnt_mon_soft_emc=0;
+  Int_t cnt_mon_soft_l3=0;
+  Int_t cnt_mon_soft_rich=0;
 
 
   ofstream fout(fname);
@@ -160,7 +166,12 @@ void QA_bfcread_dst_tables(
    cnt_mon_soft_glob=0;
    cnt_mon_soft_svt=0;
    cnt_mon_soft_tpc=0;
+   cnt_mon_soft_ctb=0;
+   cnt_mon_soft_emc=0;
+   cnt_mon_soft_l3=0;
+   cnt_mon_soft_rich=0;
    cnt_g2t_rch_hit=0;
+   cnt_l3Track=0;
    cnt_kinkVertex=0;
    cnt_ev0_eval=0;
 
@@ -235,6 +246,16 @@ void QA_bfcread_dst_tables(
                 cnt_mon_soft_svt++;
               if (strcmp(obj->GetName(),"mon_soft_tpc")==0) 
                 cnt_mon_soft_tpc++;
+              if (strcmp(obj->GetName(),"mon_soft_ctb")==0) 
+                cnt_mon_soft_ctb++;
+              if (strcmp(obj->GetName(),"mon_soft_emc")==0) 
+                cnt_mon_soft_emc++;
+              if (strcmp(obj->GetName(),"mon_soft_l3")==0) 
+                cnt_mon_soft_l3++;
+              if (strcmp(obj->GetName(),"mon_soft_rich")==0) 
+                cnt_mon_soft_rich++;
+              if (strcmp(obj->GetName(),"l3Track")==0) 
+                cnt_l3Track++;
               if (strcmp(obj->GetName(),"g2t_rch_hit")==0) 
                 cnt_g2t_rch_hit++;
 
@@ -338,6 +359,31 @@ void QA_bfcread_dst_tables(
        if (cnt_mon_soft_tpc == 0){
           cout << endl << "QA-> Missing Table: " << "mon_soft_tpc" << endl;
           fout << endl << "QA-> Missing Table: " << "mon_soft_tpc" << endl;
+          tabmiss++;
+        } 
+       if (cnt_mon_soft_ctb == 0){
+          cout << endl << "QA-> Missing Table: " << "mon_soft_ctb" << endl;
+          fout << endl << "QA-> Missing Table: " << "mon_soft_ctb" << endl;
+          tabmiss++;
+        } 
+       if (cnt_mon_soft_emc == 0){
+          cout << endl << "QA-> Missing Table: " << "mon_soft_emc" << endl;
+          fout << endl << "QA-> Missing Table: " << "mon_soft_emc" << endl;
+          tabmiss++;
+        } 
+       if (cnt_mon_soft_l3 == 0){
+          cout << endl << "QA-> Missing Table: " << "mon_soft_l3" << endl;
+          fout << endl << "QA-> Missing Table: " << "mon_soft_l3" << endl;
+          tabmiss++;
+        } 
+       if (cnt_mon_soft_rich == 0){
+          cout << endl << "QA-> Missing Table: " << "mon_soft_rich" << endl;
+          fout << endl << "QA-> Missing Table: " << "mon_soft_rich" << endl;
+          tabmiss++;
+        } 
+       if (cnt_l3Track == 0){
+          cout << endl << "QA-> Missing Table: " << "l3Track" << endl;
+          fout << endl << "QA-> Missing Table: " << "l3Track" << endl;
           tabmiss++;
         } 
         if (cnt_g2t_rch_hit == 0){

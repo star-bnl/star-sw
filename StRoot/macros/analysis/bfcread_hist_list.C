@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list.C,v 1.7 1999/11/05 16:30:16 kathy Exp $ 
+// $Id: bfcread_hist_list.C,v 1.8 1999/11/19 20:13:21 kathy Exp $ 
 // $Log: bfcread_hist_list.C,v $
+// Revision 1.8  1999/11/19 20:13:21  kathy
+// cleaned up macros to remove uneccessary lines; also added info about new tables to QA* macros
+//
 // Revision 1.7  1999/11/05 16:30:16  kathy
 // minor changes to documentation in macro
 //
@@ -42,8 +45,6 @@
 //
 //======================================================================
 
-class St_DataSet;
-St_DataSet *Event;
 
 class StChain;
 StChain *chain;
@@ -54,7 +55,7 @@ StIOMaker *IOMk=0;
 //------------------------------------------------------------------------
 
 void bfcread_hist_list(
-  const Char_t *MainFile="/disk00000/star/test/new/tfs_Solaris/year_1b/set0352_01_35evts.hist.root",
+  const Char_t *MainFile="/star/rcf/test/dev/tfs_Linux/Wed/year_1b/set0352_01_35evts.hist.root",
   const Char_t *MakerHist="tpc_hits")
 {
 

@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.9 1999/11/05 22:50:39 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.10 1999/11/19 20:13:21 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.10  1999/11/19 20:13:21  kathy
+// cleaned up macros to remove uneccessary lines; also added info about new tables to QA* macros
+//
 // Revision 1.9  1999/11/05 22:50:39  kathy
 // now input global title for all output pages in the macro for printing & drawing histograms
 //
@@ -65,11 +68,8 @@
 //======================================================================
 
 class StChain;
-class St_DataSet;
 
 StChain *chain;
-St_DataSet *Event;
-
 
 void bfcread_dst_QAhist(Int_t nevents=1, 
              const char *MainFile="/disk00000/star/test/new/tfs_Solaris/year_1b/set0352_01_35evts.dst.root",
