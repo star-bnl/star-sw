@@ -1,12 +1,12 @@
-/*    emcCalibration.idl
+/*    bemcCalibration.idl
 *
-*  Table: emcCalibration
+*  Table: bemcCalibration
 *
 *       description: //:  Table which contains all calibration information
 */ 
 
 
-struct emcCalibration { 
+struct bemcCalibration { 
 
    long  Status;   /*   status of the tower/wire (0=problem, 1=ok)  */
    long  CalibStatus;   /*   calibration status (0=failed, 1=ok)  */
