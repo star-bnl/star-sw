@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.8 2001/02/18 00:10:48 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.9 2001/02/19 23:37:59 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.9  2001/02/19 23:37:59  caines
+ * Ensure hits have a unique id for ALL svt, remover print statement
+ *
  * Revision 1.8  2001/02/18 00:10:48  caines
  * Improve and use StSvtConfig
  *
@@ -209,7 +212,7 @@ Int_t StSvtHitMaker::Make()
 
 void StSvtHitMaker::TransformIntoSpacePoint(){
 
-  int index;
+  int index, TotHits=0;
   
   srs_srspar_st *srs_par = m_srs_srspar->GetTable();
   svg_geom_st* geom = m_geom->GetTable();
@@ -238,7 +241,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 	  if( !mSvtBigHit) continue;
 	  
 	  for( int clu=0; clu<mSvtBigHit->numOfHits(); clu++){
-	    
+	    mSvtBigHit->svtHitData()[clu].id = TotHits;
 	    waferCoord.setTimeBucket(mSvtBigHit->WaferPosition()[clu].x());
 	    waferCoord.setAnode(mSvtBigHit->WaferPosition()[clu].y());
 	    waferCoord.setLayer(mSvtBigHit->getLayerID());
@@ -268,7 +271,8 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 	    mPos.setY(globalCoord.position().y());
 	    mPos.setZ(globalCoord.position().z());
 	    mSvtBigHit->svtHit()[clu].setPosition(mPos);
-
+	 
+	    TotHits++;
 	  }
 	  
 	  if( mSvtBigHit->numOfHits() > 0){
@@ -368,7 +372,7 @@ Int_t StSvtHitMaker::FillHistograms(){
 	    if( mSvtBigHit->svtHit()[clu].flag() < 255){
 	      int layer = mSvtBigHit->getLayerID()-1;
 	      int ladder = (int)(mSvtBigHit->svtHit()[clu].ladder());
-	      cout << " Hit is on " << layer << " and  ladder " << ladder << endl;
+	   
 	      m_x_vs_y->Fill(mSvtBigHit->svtHit()[clu].position().x(),mSvtBigHit->svtHit()[clu].position().y());
 	      m_waf_no[layer]->Fill(mSvtBigHit->svtHit()[clu].position().z(),ladder,1);
 	    }
