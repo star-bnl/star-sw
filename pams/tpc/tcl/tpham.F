@@ -155,6 +155,10 @@ c     4apr96
 c      - we finally get rid of the convention in which the pad is numbered
 c	 *in the sector*.  Now it is the pad number in the row...
 c
+C     22Dec1997-WAL
+C      - Change to real data approach - i.e. every pad can have a different
+C        z calibration.  For now do it by converting every pixel to z
+C        when passing the cluster time averages to tph_weighted_mean.
 C
 C   Error conditions : 
 C   ================
@@ -202,8 +206,6 @@ c
         real outvec(3)                ! Global x,y,z vector
         real pad_width                ! Pad width (cm)
 	real rad                      ! Radius at hit (cm)
-        real time_bin                 ! Sampling period of pixel (sec)
-        real time_bucket              ! Length of pixel (cm)
         real white_noise              ! SCA and digitization noise
 
         logical first                 ! .T. iff first call to this routine
@@ -244,8 +246,6 @@ C-----------------------------------------------------------------------
      &        142, 144, 144, 144, 144 /
 C-----------------------------------------------------------------------
 	save first
-	save time_bin
-	save time_bucket
 C-----------------------------------------------------------------------
 c
 c       set status
@@ -257,9 +257,6 @@ c
 c     
 c->         constants...
 c
-           time_bucket = detector(1).drift_length/tsspar(1).ntime
-           time_bin = time_bucket/tsspar(1).v_drift
-           
         endif
 
 c noise in ADC counts...
@@ -278,21 +275,20 @@ c ??? Check index?
            npads = pads_per_row(irow)
            if(nseq.ge.tclpar(1).min_nseq)then
 
-              call tph_get_cls_data(jseq, nseq, irow, npads
+              call tph_get_cls_data(jseq, nseq, irow, isec, npads
      +,                             tpseq_h, tpseq 
      +,                             tppixel_h, tppixel
      +,                             tpmcpix_h, tpmcpix
      +,                             nclspix, ipad, itdc, iadc, itrk
-     +,				    nclpix_max
-     +,				    npix_seq
-     +,				    ipad_lo, ipad_hi, itdc_lo, itdc_hi)
+     +,				    nclpix_max, npix_seq, ipad_lo
+     +,				    ipad_hi, itdc_lo, itdc_hi)
  
 	      call tph_fit_cluster(tclpar,nseq, nclspix, npix_seq,
-     +             ipad, itdc, iadc, itrk,
+     +             ipad, itdc, iadc, itrk, 
      +             white_noise, filtered_noise, nhits,
-     +             max_hits_in_cluster,
-     +             qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
-     +             irow, npads, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
+     +             max_hits_in_cluster, qq, x, dx, prf, z, dz, zrf,
+     +             phi,track,mu1,mu2,mu3,mu4,mu5, irow, isec, npads,
+     +             ipad_lo, ipad_hi, itdc_lo, itdc_hi)
 
            else
 c
@@ -351,7 +347,7 @@ c     finally, transform everything to global coordinates !
 c     
 c     account for "lower-edge" binning in z coordinate
 c     
-              invec(3)=tphit(tphit_h.nok).z*time_bucket
+              invec(3)=tphit(tphit_h.nok).z
               
 c     correct (in average way) for time-offset -- (this is not beautiful)
 c     22jun95 mal
@@ -375,10 +371,7 @@ c     (effective) time constant.  For STAR, n=2, and tau is set by tss.
               tphit(tphit_h.nok).y = outvec(2)
               tphit(tphit_h.nok).z = outvec(3) 
 c     
-c     zrf in units of time bins --> cm
-c     
-              tphit(tphit_h.nok).zrf 
-     +             = (tphit(tphit_h.nok).zrf)*time_bucket
+c     zrf already in units of cm
 c     
 c     prf in units of pads --> cm
 c     
@@ -388,11 +381,9 @@ c
 c     also, calculate "orientation" of hit in terms of spatial quantities
               
               tphit(tphit_h.nok).phi = atand(
-     +             tphit(tphit_h.nok).phi *
-     +             time_bucket / pad_width )
+     +             tphit(tphit_h.nok).phi / pad_width )
               
 c     must also rotate dx,dy into global coordinates...
-              tphit(tphit_h.nok).dz = time_bucket*tphit(tphit_h.nok).dz
               dx_prime = pad_width*tphit(tphit_h.nok).dx
 c     for explanation of what follows, see bottom of notebook p95
               rad = sqrt((tphit(tphit_h.nok).x)**2+
@@ -482,7 +473,7 @@ c
 
 
 C-----------------------------------------------------------------------
-        Subroutine tph_get_cls_data(jseq, nseq, irow, npads
+        Subroutine tph_get_cls_data(jseq, nseq, irow, isec, npads
      +,                            tpseq_h, tpseq 
      +,                            tppixel_h, tppixel
      +,                            tpmcpix_h, tpmcpix
@@ -499,6 +490,7 @@ C
 C     jseq:        Index for tpseq
 C     nseq:        Number of sequences in cluster
 C     irow:        Row number for cluster (1-45)
+C     isec:        Sector number for the cluster (1-24)
 C     npads:       Number of pads in pad row
 C     tpseq_h:
 C     tpseq:
@@ -572,6 +564,7 @@ c
         integer ipad(*)               ! Pads for cluster pixels
         integer ipad_lo, ipad_hi      ! Pad number extent for cluster
         integer irow                  ! Row number for cluster (1-45)
+        integer isec                  ! Sector number for cluster (1-24)
         integer itdc(*)               ! Time buckets for cluster pixels
         integer itdc_lo, itdc_hi      ! Time bucket extent for cluster
         integer itrk(*)               ! Track ID for MC data
@@ -685,7 +678,7 @@ C-----------------------------------------------------------------------
      +     white_noise,  filtered_noise, nhits,
      +     max_hits_in_cluster,
      +     qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
-     +     irow, npads, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
+     +     irow, isec, npads, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -703,7 +696,8 @@ C     itrk:           for each pixel, what MC track contributed most
 C     white_noise:    SCA and digitization noise
 C     filtered_noise: Noise from SAS chip, after shaping
 C     max_hits_in_cluster: max # hits allowed in an overlapping pattern
-C     irow:           Row number for pad
+C     irow:           Row number for cluster
+C     isec:           Sector number for cluster
 C     npads:          Number of pads in row
 C     ipad_lo:        Lower limit for pad number in cluster
 C     ipad_hi:        Upper limit for pad number in cluster
@@ -758,6 +752,7 @@ c
         integer ipad(*)               ! Pads for cluster pixels
         integer ipad_lo, ipad_hi      ! Pad number extent for cluster
         integer irow                  ! Row number for cluster (1-45)
+        integer isec                  ! Sector number for cluster (1-24)
         integer itdc(*)               ! Time buckets for cluster pixels
         integer itdc_lo, itdc_hi      ! Time bucket extent for cluster
         integer itrk(*)               ! Track ID for MC data
@@ -812,10 +807,9 @@ c*** skip the neural net for now..... mal 21jun95
          if (look_for_many) then
             call mountain_finder(tclpar, nseq, nclspix, npix_seq,
      +           ipad, itdc, iadc, itrk,
-     +           white_noise, filtered_noise,
-     +           nhits,
-     +           qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
-     +           npads, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
+     +           white_noise, filtered_noise,nhits, qq, x, dx, prf,
+     +           z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5, npads,
+     +           irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
 c ??? Direct write is forbidden
             if (nhits.gt.max_hits_in_cluster) 
      +           write(6,*)'TPHAM - ERROR! array overrun! - fix this!'
@@ -825,7 +819,7 @@ c ??? Direct write is forbidden
      +           ipad, itdc, iadc, itrk,
      +           white_noise, filtered_noise,
      +           qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
-     +           npads, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
+     +           npads, irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
             nhits=1
          endif
 c
@@ -842,7 +836,7 @@ c  calls to tph_fit_isolated_cluster!! - fixed mal
      +        ipad, itdc, iadc, itrk,
      +        white_noise, filtered_noise,
      +        qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
-     +        npads, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
+     +        npads, irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
          nhits=1
       endif
       
@@ -987,7 +981,7 @@ C-----------------------------------------------------------------------
      +     white_noise, filtered_noise,
      +     nhits,
      +     qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
-     +     npads, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
+     +     npads, irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -1005,6 +999,8 @@ C     itrk:           for each pixel, what MC track contributed most
 C     white_noise:    SCA and digitization noise
 C     filtered_noise: Noise from SAS chip, after shaping
 C     npads:          Number of pads in row
+C     irow:           Row number for the cluster
+C     isec:           Sector number for the cluster 
 C     ipad_lo:        Lower limit for pad number in cluster
 C     ipad_hi:        Upper limit for pad number in cluster
 C     itdc_lo:        Lower limit for time bucket in cluster
@@ -1083,6 +1079,8 @@ c
         integer nclspix               ! Number of pixels in cluster
         integer nhits                 ! Number of hits in cluster
         integer npads                 ! Number of pads in cluster's pad row
+        integer irow                  ! Row number for cluster (1-45)
+        integer isec                  ! Sector number for cluster (1-24)
 	integer npix_seq(*)           ! Number of pixels in sequence on pad
         integer nseq                  ! Number of sequences in cluster
 
@@ -1363,7 +1361,7 @@ c
      +        z,dz,zrf,
      +        phi,track,
      +        mu1,mu2,mu3,mu4,mu5,
-     +        npads,
+     +        npads, irow, isec,
      +        ipad_lo, ipad_hi, itdc_lo, itdc_hi)
          goto 999
       end if
@@ -1644,7 +1642,7 @@ c Fit the peak:
      +           z(i),dz(i),zrf(i),
      +           phi(i),track(i),
      +           mu1(i),mu2(i),mu3(i),mu4(i),mu5(i),
-     +           npads,
+     +           npads, irow, isec,
      +           ipad_lo_temp, ipad_hi_temp, itdc_lo_temp, itdc_hi_temp)
          else
 c
@@ -1675,7 +1673,7 @@ C-----------------------------------------------------------------------
      +     white_noise, filtered_noise,
      +     qq,x,dx,prf,z,dz,zrf,phi,track,
      +     mu1,mu2,mu3,mu4,mu5,
-     +     npads, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
+     +     npads, irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
 
 C-----------------------------------------------------------------------
 
@@ -1692,6 +1690,8 @@ C     itrk:           for each pixel, what MC track contributed most
 C     white_noise:    SCA and digitization noise
 C     filtered_noise: Noise from SAS chip, after shaping
 C     npads:          number of pads in row
+C     irow:           Row number for cluster
+C     isec:           Sector number for cluster
 C     ipad_lo:        pad number lower limit for cluster
 C     ipad_hi:        pad number upper limit for cluster
 C     itdc_lo:        TDC lower limit (1-512) for cluster
@@ -1702,6 +1702,7 @@ C
 C     qq         - "integrated charge" (sum of adc counts)
 C     x,dx,prf  - position, uncertainty, and width along row (units=pads)
 C     z,dz,zrf  - position, uncertainty, and width along time (units=buckets)
+C               - as of 22Dec97 units are cm and z's are real?
 C     phi       - "orientation" of cluster
 C     track     - MC track contributing the most pixels
 C     mu1       - 1st moment of hit (mean)
@@ -1758,6 +1759,8 @@ c
         integer itrk(*)               ! Track ID for MC data
         integer nclspix               ! Number of pixels in cluster
         integer npads                 ! Number of pads in cluster's pad row
+        integer irow                  ! Row number for cluster (1-45)
+        integer isec                  ! Sector number for cluster (1-24)
 
 c passed outputs
 	real centroid                 ! Centroid of hit along pad row
@@ -1798,6 +1801,7 @@ c
         integer ipad_range            ! Number of pads in cluster
         integer ipix                  ! Cluster pixel index
         integer ir                    ! Index of cluster moments
+        integer iret                  ! general return status indication
         integer itdc_ipix             ! Time bucket for pixel
         integer ktrk                  ! Temp. MC track number 
         integer mtrk                  ! Index for nocc_track array
@@ -1813,9 +1817,11 @@ c
         real d_rvec_cor(nbuck_max)    ! SCA noise
         real d_rvec_uncor(nbuck_max)  ! SAS noise
         real diff(4)                  ! Temp. values for effic.
-        real identity_vector(nbuck_max)  ! useful for x-axis of proj.
+        real identity_vector(npads_max)  ! useful for x-axis of proj.
         real numpix_pad_proj(npads_max)  ! Sum of pixels used in proj.
         real numpix_time_proj(nbuck_max) ! Sum of pixels used in proj.
+        real z_vector(nbuck_max)      ! Z's for every time bin.
+        real zdummy                   ! Local debug aid
         real pad_proj(npads_max)      ! Pad projection of cluster
         real rmu(4)                   ! Cluster moments
         real rvec(nbuck_max)          ! temp array
@@ -1831,7 +1837,8 @@ c functions:
 c
         integer iucomp
         integer lvsimx
-        integer tph_3point_gauss
+        integer tgc_time_to_z
+C        integer tph_3point_gauss   ! not in use?
 C-----------------------------------------------------------------------
         data first/.true./
         data imc_track /nmc_tracks_max*0/
@@ -1844,10 +1851,10 @@ C-----------------------------------------------------------------------
         save nocc_track
 C-----------------------------------------------------------------------
 
-c set up the identity vector
+c set up the identity vector for x (pad) calculation
         if (first) then
            first = .false.
-           do indx=1,nbuck_max
+           do indx=1,npads_max
               identity_vector(indx) = float(indx)
            enddo
            lookat_mc = (tclpar(1).mc.eq.1)
@@ -1880,12 +1887,16 @@ c
            ipad_ipix = ipad(ipix)
            itdc_ipix = itdc(ipix)
 
+C pad direction projection
            pad_proj(ipad_ipix)  = pad_proj(ipad_ipix) + adc_ipix
            tdc_x_adc(ipad_ipix) = tdc_x_adc(ipad_ipix)
      +                          + FLOAT(itdc_ipix)*adc_ipix
            numpix_pad_proj(ipad_ipix)  = numpix_pad_proj(ipad_ipix)+1.
-           time_proj(itdc_ipix) = time_proj(itdc_ipix) + adc_ipix
-           numpix_time_proj(itdc_ipix) = numpix_time_proj(itdc_ipix)+1.
+C time direction projection
+           time_proj(ipix) = time_proj(ipix) + adc_ipix
+           iret=tgc_time_to_z(itdc_ipix,ipad_ipix,irow,isec,zdummy) 
+           if(iret.eq.1)z_vector(ipix) = zdummy
+           numpix_time_proj(ipix) = numpix_time_proj(ipix)+1.
         enddo
 	if (adc_sum.eq.0.) stop 'Hey -- ADCSUM=0!!!!'
 
@@ -1960,7 +1971,7 @@ cmal     +       call tph_weighted_mean(identity_vector, rvec,
 c z,dz,zrf: - do weighted mean
 c  for uncertainties, see notebook2 p113
 c
-        do indx=itdc_lo,itdc_hi
+        do indx=1,nclspix
            rvec(indx) = time_proj(indx)
            if (time_proj(indx).ne.0.) then
               d_rvec_cor(indx) = 
@@ -1978,9 +1989,9 @@ c     +                        d_rvec,
 c     +                        itdc_lo, itdc_hi, nbuck_max,
 c     +                        centroid, sigma, uncertainty)
 c       else                          ! simple weighted mean
-        call tph_weighted_mean(identity_vector, rvec,
+        call tph_weighted_mean(z_vector, rvec,
      +       d_rvec_cor, d_rvec_uncor,
-     +       itdc_lo, itdc_hi, nbuck_max,
+     +       1, nclspix, nbuck_max,
      +       centroid, sigma, uncertainty)
 c ??? Curious line?
         centroid = centroid     ! phase correction done at top level....
