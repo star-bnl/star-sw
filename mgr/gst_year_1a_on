@@ -1,7 +1,7 @@
 #! /usr/local/bin/tcsh -f
-#  $Id: gst_year_1a,v 1.3 1998/09/25 00:27:00 fisyak Exp $
-#  $Log: gst_year_1a,v $
-#  Revision 1.3  1998/09/25 00:27:00  fisyak
+#  $Id: gst_year_1a_on,v 1.1 1998/09/25 00:27:00 fisyak Exp $
+#  $Log: gst_year_1a_on,v $
+#  Revision 1.1  1998/09/25 00:27:00  fisyak
 #  Add job control scripts
 #
 #  Revision 1.1  1998/09/08 23:10:12  fisyak
@@ -19,7 +19,7 @@
 # create the default running environment.
 #  
 # During the execution output files are written at the directory you
-# submitted the script. Check if your quota space is enough.
+# submitted the script. Check if your quota space is enough. 
 #
 #  
 # DQS embedded directives  follow
@@ -37,11 +37,11 @@
 #   
 echo Starting job execution at `date`
 setenv NODEBUG on
-source /afs/rhic/rhstar/group/.starnew
+source /afs/rhic/rhstar/group/.starpro
 echo $STAR_LIB
 set first  = 1
 set prefix_in  = "/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2"
-set prefix_out = "/disk1/star/auau200/year1a/central/hijing/set0001/regular/gst/auau_ce_b0-2"
+set prefix_out = "/disk1/star/auau200/hijing135/default/b0_2/year1a/hadronic_on/Gstardata/rcf"
 set no_events  = 50
 while ( $#argv > 0 )
         switch ($1)
@@ -61,29 +61,29 @@ while ( $#argv > 0 )
 end
 if ( -d $HOME/MDC1 == 0) mkdir -p $HOME/MDC1
 if ( -d $HOME/MDC1/log == 0) mkdir -p $HOME/MDC1/log
-if ( -d $HOME/MDC1/log/gst_year_1a == 0) mkdir -p $HOME/MDC1/log/gst_year_1a
-if ( -d $HOME/MDC1/requests/gst_year_1a == 0) mkdir -p $HOME/MDC1/requests/gst_year_1a
+if ( -d $HOME/MDC1/log/gst_year_1a_on == 0) mkdir -p $HOME/MDC1/log/gst_year_1a_on
+if ( -d $HOME/MDC1/requests/gst_year_1a_on == 0) mkdir -p $HOME/MDC1/requests/gst_year_1a_on
 if (! ${?JOB_ID}) then
   set JOB_ID = 000 
-  set DQS_STDOUT = "$HOME/MDC1/requests/gst_year_1a/run_${first}_${JOB_ID}_`hostname`_gst_year_1a"
+  set DQS_STDOUT = "$HOME/MDC1/requests/gst_year_1a_on/run_${first}_${JOB_ID}_`hostname`_gst_year_1a_on"
 endif
   set log_file = `basename $DQS_STDOUT`
-  set log      = ${SCRATCH}/gst_year_1a/`hostname`_job_${JOB_ID}_gst_year_1a_${first}_${no_events}
+  set log      = ${SCRATCH}/gst_year_1a_on/`hostname`_job_${JOB_ID}_gst_year_1a_on_${first}_${no_events}
   set log_dir  = `dirname ${log}`
   if ( -d ${log_dir} == 0) mkdir -p ${log_dir}
-  set log_done = $HOME/MDC1/log/gst_year_1a/hadronic_off_${first}_${no_events}_`hostname`_job_${JOB_ID}_gst_year_1a
+  set log_done = $HOME/MDC1/log/gst_year_1a_on/hadronic_on_${first}_${no_events}_`hostname`_job_${JOB_ID}_gst_year_1a_on
 touch ${DQS_STDOUT}
 STAR_LEVELS >> ${DQS_STDOUT}
 if ( -e ${log}) rm ${log}
-cd ${SCRATCH}/gst_year_1a
-if ( -d gst_year_1a_${first}_${no_events} == 0) mkdir -p gst_year_1a_${first}_${no_events}
-cd gst_year_1a_${first}_${no_events}
+cd ${SCRATCH}/gst_year_1a_on
+if ( -d gst_year_1a_on_${first}_${no_events} == 0) mkdir -p gst_year_1a_on_${first}_${no_events}
+cd gst_year_1a_on_${first}_${no_events}
 if ( -e  batch_${first}.kumac ) rm  batch_${first}.kumac 
 echo `pwd` batch_${first}.kumac
 cat > batch_${first}.kumac <<EOF
 trace off full
 debug on 
-   exec $STAR/kumacs/chain/gst_year_1a _ 
+   exec $STAR/kumacs/chain/gst_year_1a_on _ 
    first=$first _
    no_events=$no_events _
    prefix_in=$prefix_in _

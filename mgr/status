@@ -1,0 +1,171 @@
+#! /usr/local/bin/tcsh -f
+# top level on HPSS = /home/starsink/raw/auau200/hijing135/default/
+set PROCESS = tfs_dst
+set TOPHPSS_SINK =  /home/starsink/raw/auau200/hijing135/default
+set TOPHPSS_RECO =  /home/starreco/reco/auau200/hijing135/default
+set TOP_TEST     =  /star/scr2f/starreco/MDC1/tests/auau200/hijing135/default
+set REQUEST      =  /star/u2e/starreco/MDC1/requests
+set JOB_SUMMARY  =  /star/u2e/starreco/MDC1/summary
+set JOB_LOG      =  /star/scr2h/starreco/MDC1/auau200/hijing135/default
+set SETS = " b0_3/year2x/hadronic_on    \
+             b0_3/year2a/hadronic_on    \
+             b0_3/year1a/hadronic_off   \
+             b0_20/year2x/hadronic_on   \
+             b0_20/year2a/hadronic_on   \
+             b0_2/year1a/hadronic_off   \
+             b0_2/year1a/hadronic_on    \
+             b0_2/year2a/hadronic_off   \
+             b0_2/year2a/hadronic_on    \
+             b0_2/year2y/hadronic_on "
+foreach set ($SETS)
+# raw data
+  set gen_set = `echo $set | sed -e 's/ear//g' -e 's/hadronic//g' -e 's/\///g'`
+  set raw_set = ${gen_set}.list; 
+  set catalog = ${gen_set}.catalog
+  if ( $gen_set == "" ) then
+    echo $set $gen_set $raw_set $catalog
+    conitnue
+  endif
+  if (! -f $raw_set) then
+    ftp -i rmds01 2121 <<EOF
+cd ${TOPHPSS_SINK}
+cd ${set}/gstardata
+mdir *.fzd ${raw_set}
+EOF
+  endif
+# reconstructed data
+  set reco_set = reco_${gen_set}.list; 
+  if (! -f $reco_set) then
+    ftp -i rmds01 2121 <<EOF
+cd ${TOPHPSS_RECO}
+cd ${set}/${PROCESS}
+mdir *.xdf ${reco_set}
+EOF
+  endif
+  set list_of_files = `cat $raw_set | awk '{print $9}'`
+  set no_of_files   = $#list_of_files
+  set size_of_files = `cat $raw_set | awk '{print $5}'`
+  set total_size    = \
+`awk  'BEGIN {n=0;j = 0;}{j++; n += $5;} END {print "Total = "n/1.e9"(GB) in "j" files"}' $raw_set`
+  set reco_size    = \
+`awk  'BEGIN {n=0;j = 0;}{if ($5 != 728 && $5 !=16) {j++; n += $5;}} END {print "Total = "n/1.e9 "(GB) in "j" files"}' $reco_set`
+  touch ${catalog}
+  date >> ${catalog};
+  echo set = $set Input ${total_size} "->" Output ${reco_size}
+  echo set = $set Input ${total_size} "->" Output ${reco_size} >> ${catalog}
+  if ( $no_of_files == 0) continue
+  @ file_no = 0;
+# updated logs
+  set olddir = `pwd`
+  cd  ${JOB_LOG}/${set}/${PROCESS}
+  $STAR/mgr/mv_log; $STAR/mgr/no.csh;
+  cd ${olddir}
+  while ($file_no < $no_of_files)
+    @ file_no++;
+    set MB  = `expr $size_of_files[$file_no] / 1000000`
+    set tag = `echo $list_of_files[$file_no] | sed -e 's/\.fzd//'`
+    set QWE = `grep $tag $reco_set | awk '{print $5}'`
+    if ($QWE == "") then
+      set dst_size = ""
+    else
+      set dst_size = `expr $QWE / 1000000`
+    endif
+# geant test
+    set pet =  `echo ${tag} | cut -c1-6`
+    set plist = `find $TOP_TEST/$set/Gstardata/ -name "${pet}*.log"`
+    if ( -z "$plist" ) then
+      set Gtest = "No"
+    else
+       set Gtest = "Yes"
+    endif
+# jobfile
+    set jobfile = "No"
+    if (-f ${REQUEST}/${PROCESS}/jobfiles_hold/${gen_set}_${tag}) then
+      set jobfile = `ls -l ${REQUEST}/${PROCESS}/jobfiles_hold/${gen_set}_${tag} | awk '{print $6"_"$7"_"$8}'`
+    endif 
+    set submitted = "No"
+    if (-f ${REQUEST}/${PROCESS}/archive/${gen_set}_${tag}) then
+      set submitted = `ls -l ${REQUEST}/${PROCESS}/archive/${gen_set}_${tag} | awk '{print $6"_"$7"_"$8}'`
+    endif
+    set running   = "No"
+    set run_file_log = ${JOB_SUMMARY}/${PROCESS}/${tag}
+    set processed = ""
+    if (-f ${run_file_log})       set running = "Yes" 
+    if (-f ${run_file_log}.done)  then
+      set running = "Done"
+      set processed = `grep 'total\ CPU\ to\ process' ${run_file_log}.done`
+      if ("${processed}" != "") then
+#        echo "T I M E    P E R    E V E N T "
+        set ev   = `echo ${processed} | awk  '{print $6 }' | awk -Fe '{print $1}'`
+        set time = `echo ${processed} | awk  '{print $8 }'`
+#        echo Events = $ev time = $time 
+        set tpev = `echo $time $ev | awk '{t = $1/$2/60; printf ("%5.2f",t)}'`
+        set date = `ls -l ${run_file_log}.done |  awk '{print $6"_"$7"_"$8}'`
+        set processed = "Processed $ev events with $tpev mins/ev. ${date}"
+#        echo $processed
+      endif
+    endif 
+# log files
+    set logs = `find  ${JOB_LOG}/${set}/$PROCESS/ -name "${tag}*"`
+    set comment =""
+    foreach logg ($logs)
+      set log = `basename $logg .err`
+      set com = `echo $log | awk -F. '{print $2$3$4$5}'`
+      if ($com != "err") set comment = " $comment $com"
+      set com = `echo $log | awk -F_ '{print $4$5$6$7}'`
+      if ($com != "") set comment = " $comment $com"
+    end
+#        fzd            Gtest   jobfile     submitted     running  dst             status
+    echo $tag sz=$MB G=$Gtest j=$jobfile s=$submitted  dsz=$dst_size r=$running $processed $comment |\
+    awk '{print $1 " \t" $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t" $7 "\t" $8" \t"$9" "$10" "$11" "$12" "$13" "$14" "$15}'
+    echo $tag sz=$MB G=$Gtest j=$jobfile s=$submitted  dsz=$dst_size r=$running $processed $comment |\
+    awk '{print $1 " \t" $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t" $7 "\t" $8" \t"$9" "$10" "$11" "$12" "$13" "$14" "$15}' >>\
+    ${catalog}
+
+# create submition job
+    if ($jobfile == "No" && $submitted == "No" && ${dst_size} == "" && ${running} == "No") then
+      cat > ${REQUEST}/${PROCESS}/jobfiles_hold/${gen_set}_${tag} <<EOF
+#
+#  This is a sample Central Reconstruction Job Specification File
+#
+
+mergefactor=1
+#input
+      inputnumstreams=1
+      inputstreamtype[0]= HPSS
+      inputdir[0]=${TOPHPSS_SINK}/${set}/gstardata
+      inputfile[0]=${tag}.fzd
+
+#output
+      outputnumstreams=1
+#output stream 
+      outputstreamtype[0]= HPSS
+      outputdir[0]=${TOPHPSS_RECO}/${set}/${PROCESS}
+      outputfile[0]=${tag}_dst.xdf
+
+#standard out -- Should be five outputs
+      stdoutdir=${JOB_LOG}/${set}/${PROCESS}
+      stdout=${tag}
+
+#standard error -- Should be five
+      stderrdir=${JOB_LOG}/${set}/${PROCESS}
+      stderr=${tag}.err
+
+      notify=starreco@rcf.rhic.bnl.gov
+
+#program to run
+      executable=${REQUEST}/${PROCESS}/${PROCESS}
+EOF
+#    else
+#      if ($jobfile == "No" && $submitted == "Yes" && ${dst_size} == "" && ${running} == "No") then
+#        mv ${REQUEST}/${PROCESS}/archive/${gen_set}_${tag}  ${REQUEST}/${PROCESS}/jobfiles_hold/${gen_set}_${tag}
+#      endif
+    endif     
+  end  
+end
+# total statistics 
+set grand_size = \
+`awk  'BEGIN {n=0;j = 0;}{j++; n += $5;} END {print "Total = "n/1.e9"(GB) in "j" files"}' b*.list`
+set grand_dst  = \
+`awk  'BEGIN {n=0;j = 0;}{j++; n += $5;} END {print "Total = "n/1.e9"(GB) in "j" files"}' reco*.list`
+echo "Grand size: Input " ${grand_size} " -> Output " ${grand_dst} 
