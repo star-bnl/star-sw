@@ -8,10 +8,33 @@ StBemcData::StBemcData(char* name):TDataSet(name)
 {
   mDecoder = NULL;
   zeroAll();
+  for(int i=0;i<4800;i++) 
+  {
+    TowerStatus[i] = 0;
+    PsdStatus[i] = 0;
+  }
+  for(int i=0;i<18000;i++) 
+  {
+    SmdeStatus[i] = 0;
+    SmdpStatus[i] = 0;
+  }
+
 }
 void StBemcData::zeroAll()
 {
   //mDecoder = NULL;
+  ///////////////////////////////////////////////////////////
+  // NOTE from AAPSUAIDE
+  //
+  // the status flags (TowerStatus, SmdeStatus, etc) should
+  // not be zeroed event by event. This should only clear the
+  // detector data, such as ADC, energies and headers
+  //
+  // Status come from the database and are filled only once
+  // per run, so, if it is zeroed it will not be set again
+  // until the next run starts
+  //////////////////////////////////////////////////////////
+  
   for(int i=0;i<30;i++)
     {
       TDCError[i]    = 0;
@@ -30,7 +53,6 @@ void StBemcData::zeroAll()
       SmdpEnergy[i]  = 0;
       PsdADC[i]      = 0;
       PsdEnergy[i]   = 0;
-      TowerStatus[i] = 0;
     }
   for(int i=4800;i<18000;i++)
     {
@@ -90,13 +112,17 @@ Bool_t StBemcData::checkTDC(Int_t i)
   int id=0;
   if(TDCTrigger[i]==4)  //physics trigger only
     for(int j=0;j<160;j++)
-      {
-	mDecoder->GetTowerIdFromTDC(i,j,id);
-	if(id>=1 && id<=4800) if(TowerStatus[id-1]==1) { sum+=TowerADC[id-1]; nt++; }
-	if(!ok) TowerADC[id-1] = 0;
-      }
+    {
+	    mDecoder->GetTowerIdFromTDC(i,j,id);
+	    if(id>=1 && id<=4800) if(TowerStatus[id-1]==1) { sum+=TowerADC[id-1]; nt++; }
+    }
   if(nt>0) avg = sum/nt;
   if(avg>towerTh) ok = kFALSE;
+  if(!ok) for(int j=0;j<160;j++)
+  {
+	  mDecoder->GetTowerIdFromTDC(i,j,id);
+	  TowerADC[id-1] = 0;
+  }
   return ok;
 }
 void StBemcData::validateData()
