@@ -1,11 +1,11 @@
 .rn '' }`
-''' $RCSfile: cons.1,v $$Revision: 1.4 $$Date: 2000/11/06 01:20:12 $
+''' $RCSfile: cons.1,v $$Revision: 1.5 $$Date: 2000/11/13 01:27:04 $
 '''
 ''' $Log: cons.1,v $
-''' Revision 1.4  2000/11/06 01:20:12  fisyak
-''' Merge new cons documentation
+''' Revision 1.5  2000/11/13 01:27:04  fisyak
+''' *** empty log message ***
 '''
-''' Revision 1.1.1.5  2000/11/06 01:05:27  fisyak
+''' Revision 1.1.1.6  2000/11/13 01:21:34  fisyak
 ''' *** empty log message ***
 '''
 ''' Revision 1.1.1.4  2000/06/14 22:44:42  fisyak
@@ -105,7 +105,7 @@
 .nr % 0
 .rr F
 .\}
-.TH CONS 1 "2.1.3" "5/Nov/2000" "Cons - Software Construction System"
+.TH CONS 1 "2.1.3" "12/Nov/100" "Cons - Software Construction System"
 .UC
 .if n .hy 0
 .if n .na
@@ -1748,7 +1748,7 @@ the following suffixes to select a portion of the expanded path name:
 \&  :s    the file name suffix
 \&  :F    the file name stripped of any suffix
 .Ve
-Continuing with the above example, \f(CW%<:f\fR would expand to \f(CWfoo bar baz\fR,
+Continuing with the above example, C<%<:f> would expand to \f(CWfoo bar baz\fR,
 and \f(CW%\fR:d> would expand to \f(CWtest\fR.
 .PP
 It is possible to programmatically rewrite part of the command by
@@ -1990,8 +1990,126 @@ This may be occasionally useful, especially in cases where no scanner exists
 (or is writable) for particular types of files. Normally, dependencies are
 calculated automatically from a combination of the explicit dependencies set
 up by the method invocation or by scanning source files.
-.SH "\fBExtending Cons\fR"
-.Ip "\fBOverriding construction variables\fR" 0
+.PP
+A set of identical dependencies for multiple targets may be specified
+using a reference to a list of targets. In Perl, a list reference can
+be created by enclosing a list in square brackets. Hence the following
+command:
+.PP
+.Vb 1
+\&  Depends $env ['foo', 'bar'], 'input_file_1', 'input_file_2';
+.Ve
+specifies that both the \fIfoo\fR and \fIbar\fR files depend on the listed
+input files.
+.Sh "The \f(CWIgnore\fR method"
+The \f(CWIgnore\fR method allows you to ignore explicitly dependencies that
+Cons infers on its own.  It is invoked as follows:
+.PP
+.Vb 1
+\&  Ignore <patterns>;
+.Ve
+This can be used to avoid recompilations due to changes in system header
+files or utilities that are known to not affect the generated targets.
+.PP
+If, for example, a program is built in an \s-1NFS\s0\-mounted directory on
+multiple systems that have different copies of \fIstdio.h\fR, the differences
+will affect the signatures of all derived targets built from source files
+that \f(CW#include <stdio.h>\fR.  This will cause all those targets to
+be rebuilt when changing systems.  If this is not desirable behavior, then
+the following line will remove the dependencies on the \fIstdio.h\fR file:
+.PP
+.Vb 1
+\&  Ignore '^/usr/include/stdio\e.h$';
+.Ve
+Note that the arguments to the \f(CWIgnore\fR method are regular expressions,
+so special characters must be escaped and you may wish to anchor the
+beginning or end of the expression with \f(CW^\fR or \f(CW$\fR characters.
+.Sh "The \f(CWSalt\fR method"
+The \f(CWSalt\fR method adds a constant value to the signature calculation
+for every derived file.  It is invoked as follows:
+.PP
+.Vb 1
+\&  Salt $string;
+.Ve
+Changing the Salt value will force a complete rebuild of every derived
+file.  This can be used to force rebuilds in certain desired
+circumstances.  For example,
+.PP
+.Vb 1
+\&  Salt `uname -s`;
+.Ve
+Would force a complete rebuild of every derived file whenever the
+operating system on which the build is performed (as reported by \f(CWuname
+-s\fR) changes.
+.Sh "The \f(CWUseCache\fR method"
+The \f(CWUseCache\fR method instructs Cons to maintain a cache of derived
+files, to be shared among separate build trees of the same project.
+.PP
+.Vb 1
+\&  UseCache("cache/<buildname>") || warn("cache directory not found");
+.Ve
+.Sh "The \f(CWSourcePath\fR method"
+The \f(CWSourcePath\fR mathod returns the real source path name of a file,
+as opposted to the path name within a build directory.  It is invoked
+as follows:
+.PP
+.Vb 1
+\&  $path = SourcePath <buildpath>;
+.Ve
+.Sh "The \f(CWConsPath\fR method"
+The \f(CWConsPath\fR method returns true if the supplied path is a derivable
+file, and returns undef (false) otherwise.
+It is invoked as follows:
+.PP
+.Vb 1
+\&  $result = ConsPath <path>;
+.Ve
+.Sh "The \f(CWSplitPath\fR method"
+The \f(CWSplitPath\fR method looks up multiple path names in a string separated
+by the default path separator for the operating system (':\*(R' on \s-1UNIX\s0
+systems, \*(L';\*(R' on Windows \s-1NT\s0), and returns the fully-qualified names.
+It is invoked as follows:
+.PP
+.Vb 1
+\&  @paths = SplitPath <pathlist>;
+.Ve
+The \f(CWSplitPath\fR method will convert  names prefixed \*(L'#\*(R' to the
+appropriate top-level build name (without the \*(L'#') and will convert
+relative names to top-level names.
+.Sh "The \f(CWDirPath\fR method"
+The \f(CWDirPath\fR method returns the build path \fIname\fR\|(s) of a directory or
+list of directories.  It is invoked as follows:
+.PP
+.Vb 1
+\&  $cwd = DirPath <paths>;
+.Ve
+The most common use for the \f(CWDirPath\fR method is:
+.PP
+.Vb 1
+\&  $cwd = DirPath '.';
+.Ve
+to fetch the path to the current directory of a subsidiary \fIConscript\fR
+file.
+.Sh "The \f(CWFilePath\fR method"
+The \f(CWFilePath\fR method returns the build path \fIname\fR\|(s) of a file or
+list of files.  It is invoked as follows:
+.PP
+.Vb 1
+\&  $file = FilePath <path>;
+.Ve
+.Sh "The \f(CWHelp\fR method"
+The \f(CWHelp\fR method specifies help text that will be displayed when the
+user invokes \f(CWcons -h\fR.  This can be used to provide documentation
+of specific targets, values, build options, etc. for the build tree.
+It is invoked as follows:
+.PP
+.Vb 1
+\&  Help <helptext>;
+.Ve
+The \f(CWHelp\fR method may only be called once, and should typically be
+specified in the top-level \fIConstruct\fR file.
+.SH "Extending Cons"
+.Sh "Overriding construction variables"
 There are several ways of extending Cons, which vary in degree of
 difficulty. The simplest method is to define your own construction
 environment, based on the default environment, but modified to reflect your
@@ -2171,11 +2289,75 @@ installs \f(CWexport/include/foo.h\fR, for example, just type:
 .Vb 1
 \&  cons -pw export/include/foo.h
 .Ve
-.SH "\fBUsing and writing dependency scanners\fR"
-T.B.S.
-.SH "\fBSupport and Suggestions\fR"
-Cons is maintained by the user community.  To subscribe, send mail to
-\fBcons-discuss-request@eng.fore.com\fR with body \fBsubscribe\fR.
+.SH "Using and writing dependency scanners"
+QuickScan allows simple target-independent scanners to be set up for source
+files. Only one QuickScan scanner may be associated with any given source
+file and environment.
+.PP
+QuickScan is invoked as follows:
+.PP
+.Vb 1
+\&  QuickScan CONSENV CODEREF, FILENAME [, PATH]
+.Ve
+The subroutine referenced by CODEREF is expected to return a list of
+filenames included directly by FILE. These filenames will, in turn, be
+scanned. The optional PATH argument supplies a lookup path for finding
+FILENAME and/or files returned by the user-supplied subroutine.  The PATH
+may be a reference to an array of lookup-directory names, or a string of
+names separated by the system's separator character (':\*(R' on UNIX systems,
+\&\*(R';\*(R' on Windows NT).
+.PP
+The subroutine is called once for each line in the file, with \f(CW$_\fR set to the
+current line. If the subroutine needs to look at additional lines, or, for
+that matter, the entire file, then it may read them itself, from the
+filehandle SCAN. It may also terminate the loop, if it knows that no further
+include information is available, by closing the filehandle.
+.PP
+Whether or not a lookup path is provided, QuickScan first tries to lookup
+the file relative to the current directory (for the top-level file supplied
+directly to QuickScan), or from the directory containing the file which
+referenced the file. This is not very general, but seems good
+enough\*(--especially if you have the luxury of writing your own utilities and
+can control the use of the search path in a standard way. Finally, the
+search path is, currently, colon separated. This may not make the NT camp
+happy.
+.PP
+Here's a real example, taken from a \fIConstruct\fR file here:
+.PP
+.Vb 14
+\&  sub cons::SMFgen {
+\&      my($env, @tables) = @_;
+\&      foreach $t (@tables) {
+\&          $env->QuickScan(sub { /\eb\eS*?\e.smf\eb/g }, "$t.smf",
+\&                          $env->{SMF_INCLUDE_PATH});
+\&          $env->Command(
+\&              ["$t.smdb.cc","$t.smdb.h","$t.snmp.cc","$t.ami.cc", "$t.http.cc"],
+\&              "$t.smf",
+\&              q(
+\&                smfgen %( %SMF_INCLUDE_OPT %) %<
+\&              )
+\&          );
+\&      }
+\&  }
+.Ve
+[NOTE that the form \f(CW$env->QuickScan ...\fR  and \f(CW$env->Command
+\&...\fR should not be necessary, but, for some reason, is required
+for this particular invocation. This appears to be a bug in Perl or
+a misunderstanding on my part; this invocation style does not always
+appear to be necessary.]
+.PP
+This finds all names of the form <name>.smf in the file. It will return the
+names even if they're found within comments, but that's OK (the mechanism is
+forgiving of extra files; they're just ignored on the assumption that the
+missing file will be noticed when the program, in this example, smfgen, is
+actually invoked).
+.PP
+A scanner is only invoked for a given source file if it is needed by some
+target in the tree. It is only ever invoked once for a given source file.
+.PP
+Here is another way to build the same scanner. This one uses an
+explicit code reference, and also (unecessarily, in this case) reads
+the whole file itself:
 .PP
 .Vb 7
 \&  sub myscan {
