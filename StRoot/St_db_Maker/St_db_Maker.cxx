@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.84 2004/07/22 20:47:40 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.85 2004/08/18 20:33:56 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.85  2004/08/18 20:33:56  perev
+// Timers added for MySQL and maker itself
+//
 // Revision 1.84  2004/07/22 20:47:40  perev
 // Cleanup. 0 nrows for no table found
 //
@@ -171,6 +174,10 @@ St_db_Maker::St_db_Maker(const char *name
 :StMaker(name)
 {
 
+   fTimer[0].Stop();
+   fTimer[1].Stop();
+   fTimer[2].Stop();
+   fTimer[3].Stop();
    fDirs[0] = dir0;
    fDirs[1] = dir1;
    fDirs[2] = dir2;
@@ -197,7 +204,9 @@ delete fHierarchy;fHierarchy=0;
 Int_t St_db_Maker::InitRun(int runumber)
 {
   if (!fDBBroker) return 0;
+  fTimer[3].Start(0);
   fDBBroker->SetRunNumber((UInt_t) runumber);
+  fTimer[3].Stop();
   return 0;
 }
 //_____________________________________________________________________________
@@ -205,7 +214,7 @@ Int_t St_db_Maker::Init()
 {
    TDataSet *fileset;
    TString dir;
-
+   fTimer[0].Start(0);
    SetBit(kInitBeg);
    fDataBase=0;
    for (int idir=0; !fDirs[idir].IsNull(); idir++) {//loop over dirs
@@ -241,12 +250,26 @@ Int_t St_db_Maker::Init()
    OnOff();
    SetFlavor(0,0);	// Apply all collected before flavors
    ResetBit(kInitBeg); SetBit(kInitEnd);
+   fTimer[0].Stop ();
    return 0;
 }
+//_____________________________________________________________________________
+Int_t St_db_Maker::Finish()
+{
+   for (int i=0;i<4;i++) fTimer[i].Stop();
+   printf("St_db_Maker::Init ");fTimer[0].Print();
+   printf("      MySQL::Init ");fTimer[2].Print();
+   printf("St_db_Maker::Make ");fTimer[1].Print();
+   printf("      MySQL::Make ");fTimer[3].Print();
+   return 0;
+}
+
+
 //_____________________________________________________________________________
 Int_t St_db_Maker::Make()
 {
 
+  fTimer[1].Start(0);
   TDatime td = GetDateTime();
   if (td.GetDate() >= 20330101) {
      Error("Make", "TimeStamp not set. Can not make request to DB");	    
@@ -255,6 +278,7 @@ Int_t St_db_Maker::Make()
   fUpdateMode = 1;
   UpdateDB(fDataBase);  
   fUpdateMode = 0;
+  fTimer[1].Stop();
   return kStOK;
 }
 
@@ -305,12 +329,14 @@ TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
    dbConfig_st *thy,*ihy,*jhy;
    TDataSet *top,*node,*ds;
    
+   fTimer[0].Stop(); fTimer[2].Start(0);
    fDBBroker  = new StDbBroker();
    if (fMaxEntryTime) fDBBroker->SetProdTime(fMaxEntryTime);
 
    TString ts(dbname); ts+="_hierarchy";
    fHierarchy = new St_dbConfig((char*)ts.Data());    
    thy = fDBBroker->InitConfig(dbname,nrows);
+   fTimer[0].Start(0); fTimer[2].Stop();
    if (!thy || !nrows){
      Warning("OpenMySQL","***Can not open MySQL DB %s ***",dbname);
      return 0;}
@@ -383,6 +409,7 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
   assert(fDBBroker);assert(dat);
   fDBBroker->SetDateTime(GetDateTime().GetDate(),GetDateTime().GetTime());
   TTableDescriptor *rowTL = ((TTable*)dat)->GetRowDescriptors();
+  fTimer[1].Stop(); fTimer[3].Start(0);
   fDBBroker->SetDictionary(rowTL);
   fDBBroker->SetTableName (dat->GetName());
   fDBBroker->SetStructName(dat->GetTitle());
@@ -404,6 +431,7 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
 	    fDBBroker->GetBeginTime(),fDBBroker->GetEndTime()
 	    );
   }
+  fTimer[1].Start(0); fTimer[3].Stop();
 
   if (!dbstruct) {
     dat->SetNRows(0);
@@ -647,27 +675,29 @@ EDataSetPass St_db_Maker::PrepareDB(TDataSet* ds, void *user)
 //______________________________________________________________________________
 TDataSet *St_db_Maker::GetDataBase(const char* logInput)
 {
+  fTimer[1].Start(0);  
   TString ts;
-  TDataSet *ds;
-  int idir = 1;
+  TDataSet *ds=0;
+  int idir = 1,lst;
   ds = GetDataSet(logInput);
   if (!ds || strncmp(ds->GetTitle(),"directory",9)!=0) 
   {		// We did not find it or it is not a directory.
    		// May be concrete object name is here
      idir = 0;
-     int lst=-1; 
+     lst  =-1; 
      for (int i=0;logInput[i];i++) if (logInput[i]=='/') lst=i;
-     if (lst<0) 		return 0;
+     if (lst<0) { ds=0; 	goto RETN;}
 //		path/obj  ==> path/.obj
      ts = logInput;
      ts.Insert(lst+1,".");
      ds =  GetDataSet(ts.Data());
-     if (!ds) 		return 0;
+     if (!ds) 			goto RETN;
   }
 
   UpdateDB(ds);
-  if (idir) return ds;
-  return GetDataSet(logInput);
+  if (idir) 			goto RETN;
+  ds = GetDataSet(logInput);
+RETN: fTimer[1].Stop();  	return ds;
 }
 //_____________________________________________________________________________
 TDatime St_db_Maker::GetDateTime() const
@@ -771,7 +801,9 @@ void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
        int tabID = (int)val->fDat->GetUniqueID();
        int parID = (int)par->GetUniqueID();
           
+       fTimer[1].Stop(); fTimer[3].Start(0);
        fDBBroker->SetTableFlavor(flaType,tabID, parID);
+       fTimer[1].Start(0); fTimer[3].Stop();
        fl->SetUniqueID(fl->GetUniqueID()+1);
 
        if (Debug()<2)				continue;
