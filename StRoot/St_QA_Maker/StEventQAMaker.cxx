@@ -302,7 +302,7 @@ Int_t StEventQAMaker::Make() {
     for (int i=0; i<nEvClasses; i++) {
       eventClass = evClasses[i];
       makeStat = StQAMakerBase::Make();
-      if ((eventClass) && (histsSet != StQA_MC) && (hists))
+      if ((evClasses[i]) && (histsSet != StQA_MC) && (hists))
         hists->mNullPrimVtxClass->Fill(vertExists);
       if (makeStat != kStOk) break;
     }
@@ -2107,8 +2107,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.58 2004/03/03 01:22:31 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.59 2004/03/25 21:11:10 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.59  2004/03/25 21:11:10  genevb
+// Fixed filling of eventClass=1 null vertex hist (generally minbias)
+//
 // Revision 2.58  2004/03/03 01:22:31  genevb
 // Small addendum to previous checkin
 //
