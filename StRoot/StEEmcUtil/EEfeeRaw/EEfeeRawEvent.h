@@ -1,12 +1,15 @@
 #ifndef EEfeeRawEvent_h
 #define EEfeeRawEvent_h
 /*********************************************************************
- * $Id: EEfeeRawEvent.h,v 1.1 2003/01/28 23:17:14 balewski Exp $
+ * $Id: EEfeeRawEvent.h,v 1.2 2003/11/20 16:01:46 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw FEE Events
  *********************************************************************
  * $Log: EEfeeRawEvent.h,v $
+ * Revision 1.2  2003/11/20 16:01:46  balewski
+ * towars run 4
+ *
  * Revision 1.1  2003/01/28 23:17:14  balewski
  * start
  *
@@ -32,6 +35,8 @@ public:
   void setID(int i){ ID=i; }
   int  getID() const{return ID;};
   void addFeeDataBlock(EEfeeDataBlock*);
+  void maskWrongCrates( long timeStamp);
+
   ClassDef(EEfeeRawEvent,1) 
 };
 #endif
