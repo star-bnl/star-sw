@@ -1,5 +1,8 @@
-// $Id: StFtpcVertex.hh,v 1.13 2004/02/12 19:37:11 oldi Exp $
+// $Id: StFtpcVertex.hh,v 1.14 2004/04/06 18:59:21 oldi Exp $
 // $Log: StFtpcVertex.hh,v $
+// Revision 1.14  2004/04/06 18:59:21  oldi
+// New constructor which takes input data from StVertex added.
+//
 // Revision 1.13  2004/02/12 19:37:11  oldi
 // *** empty log message ***
 //
@@ -86,6 +89,8 @@
 #include "St_DataSet.h"
 #include "tables/St_dst_vertex_Table.h"
 
+class StVertex;
+
 class StFtpcVertex : public TObject {
 
 private:
@@ -101,6 +106,7 @@ public:
   StFtpcVertex(TObjArray *hits, TH1F *vtx_pos = 0);                                  // constructor from point array   
   StFtpcVertex(St_DataSet *const geant);                                             // constructor from geant
   StFtpcVertex(dst_vertex_st *vertex);                                               // constructor from dst vertex
+  StFtpcVertex(StVertex *vertex);                                               // constructor from StPrimaryVertex
   StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemisphere);          // constructor form track array
   StFtpcVertex(Double_t pos[6], Int_t iFlag = 0, Int_t id = 0);                      // constructor from array of doubles
   StFtpcVertex(Double_t pos[3], Double_t err[3],

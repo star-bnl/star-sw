@@ -1,5 +1,8 @@
-// $Id: StFtpcVertex.cc,v 1.20 2004/02/12 19:37:11 oldi Exp $
+// $Id: StFtpcVertex.cc,v 1.21 2004/04/06 18:59:21 oldi Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.21  2004/04/06 18:59:21  oldi
+// New constructor which takes input data from StVertex added.
+//
 // Revision 1.20  2004/02/12 19:37:11  oldi
 // *** empty log message ***
 //
@@ -102,6 +105,8 @@
 #include "St_DataSetIter.h"
 #include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_dst_vertex_Table.h"
+
+#include "StVertex.h"
 
 #include "TF1.h"
 
@@ -291,9 +296,25 @@ StFtpcVertex::StFtpcVertex(St_DataSet *const geant)
 }
 
 
+StFtpcVertex::StFtpcVertex(StVertex *vertex)
+{
+  // constructor from StVertex
+  
+  SetX(vertex->position().x());
+  SetY(vertex->position().y());
+  SetZ(vertex->position().z());
+  SetXerr(vertex->positionError().x());
+  SetYerr(vertex->positionError().y());
+  SetZerr(vertex->positionError().z());  
+
+  SetIFlag(vertex->flag());
+  SetId(vertex->type());
+}  
+
+
 StFtpcVertex::StFtpcVertex(dst_vertex_st *vertex)
 {
-  // constructor from Doubles
+  // constructor from dst vertex
   
   SetX(vertex->x);
   SetY(vertex->y);
@@ -494,7 +515,7 @@ Int_t StFtpcVertex::CheckVertex()
 
   if (GetIFlag() == 1) {
     // TPC  Vertex used
-    gMessMgr->Message("", "I", "OS") << "Using Tpc Vertex (" << *this <<  ") for Ftpc tracking." << endm;
+    gMessMgr->Message("", "I", "OS") << "Using primary vertex from StEvent (" << *this <<  ") for Ftpc tracking." << endm;
   }
   
   else if (GetIFlag() == 101) {
