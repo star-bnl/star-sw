@@ -1,0 +1,22 @@
+/*  est_prerefit2.idl
+*   Module est_prerefit2
+*	Makes a refit of the helix
+*/
+
+#include "PAM.idl"
+#include "tcl_tphit.idl"
+#include "tpt_track.idl"
+#include "est_ctrl.idl"
+#include "est_match.idl"
+#include "egr_egrpar.idl"
+/*#include "egr_fitter.idl"*/
+
+interface est_prerefit2 : amiModule {
+	STAFCV_T call
+		(in tcl_tphit tphit,
+		 in tpt_track tptrack, 
+		 in est_ctrl est_ctrl,
+		 inout est_match est_match,
+ 		 in egr_egrpar egrpar);
+};
+
