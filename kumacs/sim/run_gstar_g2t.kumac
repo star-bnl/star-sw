@@ -1,5 +1,5 @@
 * ********************************************************************
-* run_gstar.kumac
+* run_gstar_g2t.kumac
 * 
 * This kumac reads from a file and runs gstar then g2t.
 * 
@@ -15,6 +15,8 @@
 * editted 7/8/98 Kathy Turner - put in default STAR geometry
 *                               and make kumac more standard
 * editted 7/10/98 Kathy Turner - change directories where tables get written
+* editted 7/21/98 Kathy Turner - changed names of kumacs to make them
+*                                more standard 
 * 
 * *******************************************************************
 * ---------available values of input parameters ---------------
@@ -91,11 +93,11 @@
    macro/global/import *
      
  
-*  THESE NEXT 3 MUST BE DONE IN THIS ORDER!!!!
-   exec bfc_util#bfc_gstar [chain]
-   exec bfc_util#bfc_load [domain]
-   exec bfc_util#bfc_g2t [chain]
-   
+*  THESE NEXT 4 MUST BE DONE IN THIS ORDER!!!!
+   exec bfc_util#bfc_gstar_setup    [chain]
+   exec bfc_util#bfc_g2t_b4_load    [chain]
+   exec bfc_util#bfc_load          [domain]
+   exec bfc_util#bfc_g2t_after_load [chain]
  
 ******** turn debugger on just for GSTAR! ******************************
  if [debugger].eq.on then
