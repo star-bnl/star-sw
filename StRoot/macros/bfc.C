@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.8 1998/08/18 14:05:08 fisyak Exp $
+// $Id: bfc.C,v 1.9 1998/08/20 12:33:32 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.9  1998/08/20 12:33:32  fisyak
+// Splitted base libraries
+//
 // Revision 1.8  1998/08/18 14:05:08  fisyak
 // Add to bfc dst
 //
@@ -22,9 +25,10 @@
 // Add tcl and tpt
 //
 {
+   gSystem->Load("St_base.so");
    gSystem->Load("libasu.so");
    gSystem->Load("libdsl.so");
-   gSystem->Load("St_base.so");
+   gSystem->Load("xdf2root.so");
    gSystem->Load("St_Tables.so");
    gSystem->Load("libmsg.so");
    gSystem->Load("libtls.so");
@@ -47,8 +51,9 @@
 //  Char_t *filename = "/star/mds/data/SD98/auau200/bfc/central/hijing/set0001/regular/tss/auau_ce_b0-2_0001_0020.xdf";
 //  Char_t *filename = "/afs/rhic/star/data/samples/event_0000050.xdf";
 //  Char_t *filename = "/afs/rhic/star/data/samples/muons_100_ctb.dsl";
-  Char_t *filename = "/afs/rhic/star/data/samples/muons_100_ctb.dsl";
-  //  Char_t *filename = "/disk0/star/tss/auau_ce_b0-2_4281_4300.xdf";
+//  
+   //  Char_t *filename = "/afs/rhic/star/data/samples/muons_100_ctb.dsl";
+  Char_t *filename = "/disk1/star/tss/auau_ce_b0-2_4281_4300.xdf";
   St_XDFFile *xdf_in   = new St_XDFFile(filename,"r");
   St_XDFFile *xdf_out  = new St_XDFFile("muons_100_ctb.xdf","w");
   TFile      *root_out=  new TFile("muons_100_ctb.root","RECREATE");
@@ -64,7 +69,7 @@
   St_tss_Maker tss_Maker("tss_Maker","event/raw_data/tpc");
   St_tcl_Maker tcl_Maker("tcl_Maker","event/data/tpc/hits");
   St_stk_Maker stk_Maker("stk_Maker","event/data/svt/tracks");
-  St_tpt_Maker tpt_Maker("tpt_Maker","event/data/tpc/tracks");
+  St_tpt_Maker tpt_Maker("tpt_Maker","event/data/tpc/trackas");
   St_dst_Maker dst_Maker("dst_Maker","event/data/dst");
 // Set parameters
 //  tss_Maker.adcxyzon();
@@ -92,6 +97,7 @@
   //  histCanvas->Update();
   //  chain.Clear();
   }
+  chain.Finish();
   gBenchmark->Stop("bfc");
   gBenchmark->Print("bfc");
   // delete xdf_in;

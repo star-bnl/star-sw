@@ -1,5 +1,8 @@
-// $Id: laser.C,v 1.2 1998/08/14 18:18:14 love Exp $
+// $Id: laser.C,v 1.3 1998/08/20 12:33:33 fisyak Exp $
 // $Log: laser.C,v $
+// Revision 1.3  1998/08/20 12:33:33  fisyak
+// Splitted base libraries
+//
 // Revision 1.2  1998/08/14 18:18:14  love
 // An example analysis of 10 events
 //
@@ -22,9 +25,10 @@
 // Add tcl and tpt
 //
 {
+   gSystem->Load("St_base.so");
    gSystem->Load("libasu.so");
    gSystem->Load("libdsl.so");
-   gSystem->Load("St_base.so");
+   gSystem->Load("xdf2root.so");
    gSystem->Load("St_Tables.so");
    gSystem->Load("libmsg.so");
    gSystem->Load("libtls.so");

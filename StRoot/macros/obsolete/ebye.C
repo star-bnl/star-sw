@@ -1,5 +1,8 @@
-// $Id: ebye.C,v 1.2 1998/08/07 19:27:05 dhammika Exp $
+// $Id: ebye.C,v 1.3 1998/08/20 12:33:32 fisyak Exp $
 // $Log: ebye.C,v $
+// Revision 1.3  1998/08/20 12:33:32  fisyak
+// Splitted base libraries
+//
 // Revision 1.2  1998/08/07 19:27:05  dhammika
 // event by event chain in root
 //
@@ -22,9 +25,10 @@
 // Add tcl and tpt
 //
 {
+   gSystem->Load("St_base.so");
    gSystem->Load("libasu.so");
    gSystem->Load("libdsl.so");
-   gSystem->Load("St_base.so");
+   gSystem->Load("xdf2root.so");
    gSystem->Load("St_Tables.so");
    gSystem->Load("libmsg.so");
    gSystem->Load("libtls.so");
