@@ -1,8 +1,3 @@
-* $Id: bfc_util.kumac,v 1.15 1998/07/21 18:34:05 fisyak Exp $  
-* $Log: bfc_util.kumac,v $
-* Revision 1.15  1998/07/21 18:34:05  fisyak
-* Add brackets
-*
 * 2Jul98 K. Turner - tpc code now requires geometry so make it default
 *                    in domain
 * 3Jul98 K. Turner - changed tpc kumacs so that pam kumacs are called directly
@@ -14,6 +9,8 @@
 * 11Jul98 K. Turner - changed to load gstar more standard way 
 *                   - changed inputs to bfc_start!
 * 13Jul98 K. Turner - change to separate out parts of setup 
+* 21Jul98 K. Turner - removed gethij & gst - not needed
+* 21Jul98 K. Turner - changed to separate out the gstar & g2t parts
 * 
 *************************************************************
 *                     BFC_UTIL.KUMAC
@@ -34,20 +31,20 @@
 * import global macros
  macro/global/import *
    
-*  THESE NEXT 3 MUST BE DONE IN THIS ORDER!!!!
-   exec bfc_util#bfc_gstar [chain]
-   exec bfc_util#bfc_load [domain]
-   exec bfc_util#bfc_g2t [chain]
+*  THESE NEXT 4 MUST BE DONE IN THIS ORDER!!!!
+   exec bfc_util#bfc_gstar_setup    [chain]
+   exec bfc_util#bfc_g2t_b4_load    [chain]
+   exec bfc_util#bfc_load          [domain]
+   exec bfc_util#bfc_g2t_after_load [chain]
  
 return
  
 *********************************************************************
-
 *********************************************************************
 **********************************************************************
  
 macro bfc_init _
-         chain=' g2t svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout' 
+         chain=' evg2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout' 
   
   macro/global/import *
     
@@ -60,26 +57,21 @@ macro bfc_init _
    message ' !!! bfc_util#init ==> chain initialization for  ' [mod]
    vec/create v[mod]
    vec/create t[mod]
-   CASE [mod] in 
-   (gethij) 
-           newfile hij_in [input_file] r; 
-           user/input u [evgen]/particle.staf
-   (gst)   if ($vexist(geometry_done)=0) then
-             exec [TOP]/kumacs/chain/bfc_util#bfc_start domain=geometry 
-           endif  
-  (evgin)  user/input dummy [input_file]
-   (rgst)
-   (rg2t)
-    (fzd)  user/output o [output_fzd_file]
-    (g2t)  
-           exec input_g2t_file#init [input_file]
+   CASE [mod] in
+    (oldin)  user/input dummy [input_file]
+    (evgin) newfile hij_in [input_file] r; 
+            user/input u [evgen]/particle.staf
+     (fzin)
+  (evg2tin) exec input_g2t_file#init [input_file]
             if (STAF_STATUS(1).ne. STAFCV_OK) then
               message 'problem opening input file '
               goto EOF 
             endif
-    (evin)
+     (evin)
           exec read_table_from_file#init inev [input_file]
           exec read_table_from_file#read inev 
+     (rgst)
+     (rg2t)
       (svg) exec init_svg         | SVT initialization - geometry
       (tpg) exec tpg_init#init    | TPC geometry initialization
       (sss) exec svt_slow_sim#initialize | SVT initialization - slow simulation
@@ -131,7 +123,8 @@ macro bfc_init _
       (emc)
             exec init_ems;  
             exec init_jet;     |  EMC geometry &  pam initialization 
-   (evout) if output_file="" then
+    (fzout)  user/output o [output_fzd_file]
+    (evout) if output_file="" then
               message "empty output file"
             else
 	      exec write_table_to_file#init evout [output_file]
@@ -155,7 +148,7 @@ EOF:
 **********************************************************************
 
  macro bfc_process _
-      chain=' g2t svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'_
+      chain=' evg2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'_
    
   macro/global/import *
   test = [chain]
@@ -165,19 +158,18 @@ EOF:
    mod = $word([test],[i],1)
    message ' !!! bfc_util ==> chain processing for  ' [mod]
    CASE [mod] in 
-     (gethij)    
-                cd [event]; getev hij_in
-                user/input u [evgen]/particle.staf
-*                exec $STAR/pams/gen/kumac/particle
-      (gst)    trig 1; cd [geantE]; for/call g2t; cd /dui; 
-    (evgin) nextl 1
+    (oldin) nextl 1
+    (evgin) cd [event]; getev hij_in
+            user/input u [evgen]/particle.staf
+*           exec $STAR/pams/gen/kumac/particle
+  (evg2tin) exec input_g2t_file#read
+            if (staf_status(1).ne.STAFCV_OK) goto EOF
+     (evin) exec read_table_from_file#read inev
+     (fzin) nextl 1 
      (rgst) trig 1
      (rg2t) cd [geantE]
             for/call g2t
-      (g2t)    
-               exec input_g2t_file#read
-               if (staf_status(1).ne.STAFCV_OK) goto EOF
-     (evin)    exec read_table_from_file#read inev 
+            cd /dui
       (svg)    nextl 1
       (tpg)    nextl 1
       (sss)    exec svt_slow_sim#process_event;
@@ -235,17 +227,19 @@ EOF:
       if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
    ENDCASE
 	     
- sigma v[mod] = v[mod] + abs($cptime)
- sigma t[mod] = t[mod] + v[mod]
- ccc = '---'
- fmt = [ccc]//'<bfc>: Event  '//[ievent]//[ccc]//[mod]//' =' 
- fmt = $quote($quote([fmt]))//',2f12.5'
- vec/wr  v[mod],t[mod] ! [fmt]
- vec/inp v[mod] 0.0
+   sigma v[mod] = v[mod] + abs($cptime)
+   sigma t[mod] = t[mod] + v[mod]
+   ccc = '---'
+   fmt = [ccc]//'<bfc>: Event  '//[ievent]//[ccc]//[mod]//' =' 
+   fmt = $quote($quote([fmt]))//',2f12.5'
+   vec/wr  v[mod],t[mod] ! [fmt]
+   vec/inp v[mod] 0.0
    
-enddo
-NEXT_EVENT:
-EOF:
+  enddo
+ 
+ NEXT_EVENT:
+ EOF:
+ 
 return
  
 **********************************************************************
@@ -253,7 +247,7 @@ return
 **********************************************************************
 
 macro bfc_finish _
-   chain=' g2t svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'
+   chain=' evg2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'
   
   macro/global/import *
   test = [chain]
@@ -261,17 +255,13 @@ macro bfc_finish _
   do i = 1, [nw]
     mod = $word([test],[i],1)
     CASE [mod] in 
-      (gethij) dio/stream/close hij_in; 
-               soc/object/oid hij_in; 
-               oid = staf_result(1); 
-	       soc/deleteoid [oid] 
-      (gst)   ge/rz/cd //PAWC; 
-	       hi/list;		| show histograms
-      (g2t)  exec input_g2t_file#close
-      (evout) exec write_table_to_file#close evout;
+   (evg2tin)  exec input_g2t_file#close
+      (rgst)  ge/rz/cd //PAWC;
+	        hi/list;  | show histograms
+     (evout) exec write_table_to_file#close evout;
               oid = staf_result(1); 
               soc/deleteoid [oid] 
-      (*) message " !!! bfc_util: No final stage for package " [mod]
+      (*) message " !!! bfc_util#bfc_finish No final stage for package " [mod]
     ENDCASE
   enddo
 return
@@ -280,7 +270,8 @@ return
 **********************************************************************
 **********************************************************************
  
-macro bfc_print chain='evout'
+ macro bfc_print chain='evout'
+   
   macro/global/import *
   test = [chain]
   nw = $words([test])
@@ -291,14 +282,15 @@ macro bfc_print chain='evout'
     fmt = $quote($quote([fmt]))//',2f10.5'
     vec/wr  v[mod],t[mod] ! [fmt]
   enddo
-return
+  
+ return
  
 **********************************************************************
 **********************************************************************
 ***********************************************************************
 ******************************************************************
  
- macro bfc_g2t chain
+ macro bfc_g2t_after_load chain
    
    macro/global/import *
      
@@ -306,12 +298,12 @@ return
 *  has to be done after loading
  test2 = [chain]
  nw2=$words([test2])
- message ' !!! bfc_util#bfc_g2t ==> Number of words in chain = ',[nw2]
+ message ' !!! bfc_g2t_after_load ==> Number of words in chain = ',[nw2]
  do i=1,[nw2]
    mod2 = $word([test2],[i],1)
    CASE [mod2] in
      (rg2t) 
-        message ' !!! bfc_util#bfc_g2t ==> setup for chain:' [mod2]
+       message ' !!! bfc_g2t_after_load ==> setup for chain:' [mod2]
 * this command fills geant Run tables
         tables ' ' [geant_Run]
    ENDCASE
@@ -358,19 +350,19 @@ return
 **********************************************************************
 ************************************************************
  
-macro bfc_gstar chain
+macro bfc_gstar_setup chain
    
    macro/global/import *
      
       
  test1 = [chain]
  nw1=$words([test1])
- message ' !!! bfc_util#bfc_gstar ==> Number of words in chain = ',[nw1]
+ message ' !!! bfc_gstar_setup ==> Number of words in chain = ',[nw1]
  do i=1,[nw1]
    mod1 = $word([test1],[i],1)
    CASE [mod1] in
      (rgst)
-         message ' !!! bfc_util#bfc_gstar ==> set params for chain:' [mod1]
+         message ' !!! bfc_gstar_setup ==> set params for chain:' [mod1]
 * initialize physics types for running gstar
 	 exec set_hadr_phys_[phystype]
          message ' gstar: set hadronic physics ' [phystype]
@@ -386,9 +378,28 @@ macro bfc_gstar chain
 	   exec load_star_geom#tpc_field
          else 
            message ' gstar: geometry type not available!! '
-         endif
+         endif	  
+   ENDCASE
+ enddo
+       
+return
+ 
+*********************************************************************
+**********************************************************************
+************************************************************
+ 
+macro bfc_g2t_b4_load chain
+   
+   macro/global/import *
+           
+ test1 = [chain]
+ nw1=$words([test1])
+ message ' !!! bfc_g2t_b4_load ==> Number of words in chain = ',[nw1]
+ do i=1,[nw1]
+   mod1 = $word([test1],[i],1)
+   CASE [mod1] in
      (rg2t)
-         message ' !!! bfc_util#bfc_gstar ==> set params for chain:' [mod1]
+         message ' !!! bfc_g2t_b4_load ==> set params for chain:' [mod1]
 * initialize for g2t: tell g2t where to put tables
          detp g2tmain gttc.rdir=0		  
    ENDCASE
@@ -401,7 +412,8 @@ return
 *********************************************************************
 
 macro bfc_defaults
- macro/global/import *
+  
+macro/global/import *
  DEFAULT = _
 [TOP]/kumacs/sim,_
 [TOP]/kumacs/util,_
@@ -430,7 +442,7 @@ $STAR/pams/tpc/kumac,_
 $STAR/pams/trg/kumac
 
  def [DEFAULT]
- message 'Define default kumac search path as' [default]
+ message ' bfc_defaults: Define default kumac search path as' [default]
  
 return
 
