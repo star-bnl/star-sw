@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.10 2000/12/13 00:08:59 akio Exp $
+// $Id: StPeCMaker.cxx,v 1.11 2000/12/22 22:38:15 akio Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.11  2000/12/22 22:38:15  akio
+// bug fix for solaris
+//
 // Revision 1.10  2000/12/13 00:08:59  akio
 // Added trigger sim and histograms
 //
@@ -54,7 +57,7 @@
 #include "StPeCMaker.h"
 #include "StEventTypes.h"
 #include "StChain.h"
-#include "Stypes.h"
+//#include "StTypes.h"
 #include "StMessMgr.h"
 #include "TH1.h"
 #include <vector>
@@ -68,7 +71,7 @@ using std::vector;
 #include "StVpdTriggerDetector.h"
 #include "StZdcTriggerDetector.h"
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.10 2000/12/13 00:08:59 akio Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.11 2000/12/22 22:38:15 akio Exp $";
 
 int l0sim(StEvent*, TH1F*);
 
@@ -124,7 +127,7 @@ Int_t StPeCMaker::Init() {
   m_hpairsumpt  = new TH1F("hpsumpt","Pair sum pT",50,0.0,1.0);
   m_hpairminvpi = new TH1F("hpminvpi","Pair Minv pions",50,0.2,1.5);
   m_hpairminvk  = new TH1F("hpminvk","Pair Minv kaons",50,0.8,2.0);
-  m_hpairdedx   = new TH2F("hpdedx","P (GeV) vs dE/dx (*10**6)",200,0.0,2.0,100,0.0,20.0);
+  m_hpairdedx   = new TH2F("hpdedx","P (GeV) vs dE/dx (*10**6)",200,0.0,2.0,100,0.0,5.0);
 
   m_hcpairsumq   = new TH1F("hcpsumq","Pair sum Q (rho0 mass)",11,-5.5,5.5);
   m_hlpairsumq   = new TH1F("hlpsumq","Pair sum Q (low mass) ",11,-5.5,5.5);
@@ -132,7 +135,7 @@ Int_t StPeCMaker::Init() {
   m_hcpairsumpt  = new TH1F("hcpsumpt","Pair sum pT",50,0.0,1.0);
   m_hcpairminvpi = new TH1F("hcpminvpi","Pair Minv pions",50,0.2,1.5);
   m_hcpairminvk  = new TH1F("hcpminvk","Pair Minv kaons",50,0.8,2.0);
-  m_hcpairdedx   = new TH2F("hpcdedx","P (GeV) vs dE/dx (*10**6)",200,0.0,2.0,100,0.0,20.0);
+  m_hcpairdedx   = new TH2F("hpcdedx","P (GeV) vs dE/dx (*10**6)",200,0.0,2.0,100,0.0,5.0);
 
   m_hrhoptall    = new TH1F("hrhoptall","Rho pt",50,0.0,1.00);
 
@@ -145,11 +148,13 @@ Int_t StPeCMaker::Init() {
   m_hrhozvert    = new TH1F("hrhozvert","Z rho0 Vertex (cm)",100,-200.0,200.0);
   m_hrhocost     = new TH1F("hrhocost","Cos(Theta*) for rho",50,-0.1,1.1);
   m_hrhopt       = new TH1F("hrhopt","Rho0 pT",25,0.0,0.25);
-  m_hrhodedx     = new TH2F("hrhodedx","P (GeV) vs dE/dx (*10**6)",200,0.0,2.0,100,0.0,20.0);
+  m_hrhodedx     = new TH2F("hrhodedx","P (GeV) vs dE/dx (*10**6)",200,0.0,2.0,100,0.0,5.0);
   m_hrhodedx1    = new TH1F("hrhodedx1","dE/dx (*10**6) rho0",100,0.0,5.0);
+  m_hrhodedx2    = new TH2F("hrhodedx2","dE/dx trk1 vs trk2",100,0.0,5.0,100,0.0,5.0);
   m_hrhorapidity = new TH1F("hrhorapidity","Rho0 rapidity",40,-2.0,2.0);
   m_hrhodndpt2   = new TH1F("hrhodndpt2","Rho0 dN/dpt^2",25,.0,0.25);
   m_hrhozdcsum   = new TH1F("rhozdcsum","zdc sum for rho0",100,0.0,100.0);
+  m_hrhozdcew    = new TH2F("rhozdcew","zdc e.vs.w for rho0",100,0.0,100.0,100,0.0,100.0);
 
   m_hlowmasspt   = new TH1F("hlowmasspt","mass<Rho0 pT",25,0.0,0.25);
   m_hlowmasszdcsum= new TH1F("hlowmasszdcsum","zdc sum for low mass",100,0.0,100.0);
@@ -175,6 +180,9 @@ Int_t StPeCMaker::Make() {
 
   // trigger simulations
   int trig = triggerSim(event);
+  if (trig>0){
+    cout<<"StPeCMaker: Won't pass trigger!  Return."<<endl;
+  }
 
   // Do this way since call to event->summary->numberOfTracks() crashes
   StSPtrVecTrackNode& tempn = event->trackNodes();
@@ -227,11 +235,11 @@ Int_t StPeCMaker::FillStPeCEvent(StEvent *event, StPeCEvent *pevent){
   pevent->setEventNumber(runo);
 
   //get trigger info
-  StTriggerDetectorCollection* trg = event->triggerDetectorCollection();
-  StCtbTriggerDetector& ctb = trg->ctb();
-  StMwcTriggerDetector& mwc = trg->mwc();
-  StVpdTriggerDetector& vpd = trg->vpd();
-  StZdcTriggerDetector& zdc = trg->zdc();
+  //StTriggerDetectorCollection* trg = event->triggerDetectorCollection();
+  //StCtbTriggerDetector& ctb = trg->ctb();
+  //StMwcTriggerDetector& mwc = trg->mwc();
+  //StVpdTriggerDetector& vpd = trg->vpd();
+  //StZdcTriggerDetector& zdc = trg->zdc();
 
   Int_t   NGlobal=0; 
   Int_t   NPrimaries=0; 
@@ -315,17 +323,17 @@ Int_t StPeCMaker::FillStPeCEvent(StEvent *event, StPeCEvent *pevent){
     StTrackGeometry *trk1 = pair->getTrack1()->geometry();
     StTrackGeometry *trk2 = pair->getTrack2()->geometry();
     StSPtrVecTrackPidTraits& traits1 = pair->getTrack1()->pidTraits();
-    StSPtrVecTrackPidTraits& traits2 = pair->getTrack1()->pidTraits();
+    StSPtrVecTrackPidTraits& traits2 = pair->getTrack2()->pidTraits();
     StDedxPidTraits *dedx1, *dedx2;
     Int_t NTraits = traits1.size();
-    for( Int_t i=0; i<NTraits; i++) {
+    for(Int_t i=0; i<NTraits; i++) {
       if ( traits1[i]->detector() == kTpcId ){
 	dedx1 = dynamic_cast<StDedxPidTraits*>(traits1[i]);
         if ( dedx1 && dedx1->method() == kTruncatedMeanIdentifier )break;
       }
     }
     NTraits = traits2.size();
-    for(i=0; i<NTraits; i++) {
+    for(Int_t i=0; i<NTraits; i++) {
       if ( traits2[i]->detector() == kTpcId ){
 	dedx2 = dynamic_cast<StDedxPidTraits*>(traits2[i]);
         if ( dedx2 && dedx2->method() == kTruncatedMeanIdentifier )break;
@@ -350,6 +358,7 @@ Int_t StPeCMaker::FillStPeCEvent(StEvent *event, StPeCEvent *pevent){
     m_hpairdedx->Fill(trk2->momentum().mag(),1000000.0*dedx2->mean());  
     itr++;
   }
+  return kStOK;
 }
 
 Int_t StPeCMaker::Cuts(StEvent *event, StPeCEvent *pevent){
@@ -358,8 +367,8 @@ Int_t StPeCMaker::Cuts(StEvent *event, StPeCEvent *pevent){
   //get trigger info
   StTriggerDetectorCollection* trg = event->triggerDetectorCollection();
   StCtbTriggerDetector& ctb = trg->ctb();
-  StMwcTriggerDetector& mwc = trg->mwc();
-  StVpdTriggerDetector& vpd = trg->vpd();
+  //StMwcTriggerDetector& mwc = trg->mwc();
+  //StVpdTriggerDetector& vpd = trg->vpd();
   StZdcTriggerDetector& zdc = trg->zdc();
 
   //get vertex info
@@ -374,17 +383,17 @@ Int_t StPeCMaker::Cuts(StEvent *event, StPeCEvent *pevent){
     StTrackGeometry *trk1 = pair->getTrack1()->geometry();
     StTrackGeometry *trk2 = pair->getTrack2()->geometry();
     StSPtrVecTrackPidTraits& traits1 = pair->getTrack1()->pidTraits();
-    StSPtrVecTrackPidTraits& traits2 = pair->getTrack1()->pidTraits();
+    StSPtrVecTrackPidTraits& traits2 = pair->getTrack2()->pidTraits();
     StDedxPidTraits *dedx1, *dedx2;
     Int_t NTraits = traits1.size();
-    for( Int_t i=0; i<NTraits; i++) {
+    for(Int_t i=0; i<NTraits; i++) {
       if ( traits1[i]->detector() == kTpcId ){
 	dedx1 = dynamic_cast<StDedxPidTraits*>(traits1[i]);
         if ( dedx1 && dedx1->method() == kTruncatedMeanIdentifier )break;
       }
     }
     NTraits = traits2.size();
-    for(i=0; i<NTraits; i++) {
+    for(Int_t i=0; i<NTraits; i++) {
       if ( traits2[i]->detector() == kTpcId ){
 	dedx2 = dynamic_cast<StDedxPidTraits*>(traits2[i]);
         if ( dedx2 && dedx2->method() == kTruncatedMeanIdentifier )break;
@@ -398,9 +407,10 @@ Int_t StPeCMaker::Cuts(StEvent *event, StPeCEvent *pevent){
        pair->openingAngle()<3.0 &&
        pairs->size()==1){
       
-      // different mass cut
-      float mmin = 0.47, mmax = 1.07;
-      //float mmin = 0.62, mmax = 0.92;
+      // different mass cu
+      //      float mmin = 0.47, mmax = 1.07;
+      //      float mmin = 0.47, mmax = 1.07;
+      float mmin = 0.2, mmax = 0.55;
 
       if(pair->sumPt()<0.3){
 	if(mmin<pair->mInv(pion) && pair->mInv(pion)<mmax){
@@ -418,7 +428,7 @@ Int_t StPeCMaker::Cuts(StEvent *event, StPeCEvent *pevent){
 	m_hcpairdedx->Fill(trk2->momentum().mag(),1000000.0*dedx2->mean());
 	
 	//to make smaller dst with tight cut
-	if(pair->sumPt()<0.3) flag=1;
+	if(pair->sumPt()<1.0) flag=1;
 		
 	if(mmin<pair->mInv(pion) && pair->mInv(pion)<mmax){
 	  m_hrhoptall->Fill(pair->sumPt());
@@ -441,6 +451,7 @@ Int_t StPeCMaker::Cuts(StEvent *event, StPeCEvent *pevent){
 	    m_hrhodedx->Fill(trk2->momentum().mag(),1000000.0*dedx2->mean());
 	    m_hrhodedx1->Fill(1000000.0*dedx1->mean());
 	    m_hrhodedx1->Fill(1000000.0*dedx2->mean());
+	    m_hrhodedx2->Fill(1000000.0*dedx1->mean(),1000000.0*dedx2->mean());
 	    
 	    StLorentzVectorF p = pair->getPair4Momentum(pion);	    
 	    m_hrhorapidity->Fill(p.rapidity());
@@ -448,10 +459,11 @@ Int_t StPeCMaker::Cuts(StEvent *event, StPeCEvent *pevent){
 	    m_hrhodndpt2->Fill(pair->sumPt(),1.0/pair->sumPt());
 	    if(&zdc){
 	      m_hrhozdcsum->Fill(zdc.adcSum());
+	      m_hrhozdcew->Fill(zdc.adcSum(east),zdc.adcSum(west));
 	    }
 	  }
 	  
-	  if(mmin>pair->mInv(pion)){
+	  if(0.55>pair->mInv(pion)){
 	    m_hlowmasspt->Fill(pair->sumPt());
 	    m_hlowmassdedx1->Fill(1000000.0*dedx1->mean());
 	    m_hlowmassdedx1->Fill(1000000.0*dedx2->mean());
@@ -466,14 +478,20 @@ Int_t StPeCMaker::Cuts(StEvent *event, StPeCEvent *pevent){
   }
   
   //Return kStErr if this event shouldn't go into uDST
-  if(pairs->size()!=1){
+  if(flag==0) {
+    cout<<"StPeCMaker: No sumPt<1.0GeV pair"<<endl;
+    return kStErr;
+  }
+  if( -1.5<vtx->position().x() && vtx->position().x()<2.5 &&
+      -1.5<vtx->position().y() && vtx->position().y()<2.5 &&
+      -200.0<vtx->position().z() && vtx->position().z()<200.0 &&
+      pairs->size()==1){
+    cout<<"StPeCMaker: Pass the cuts, writing to udst"<<endl;
+  }else{
     cout<<"StPeCMaker: Number of pairs does not match"<<endl;
     return kStErr;
   }    
-  if(flag==0) {
-    cout<<"StPeCMaker: No sumPt<0.3GeV pair"<<endl;
-    // return kStErr;
-  }
+
   
 #endif /* __CINT__ */
 
@@ -594,9 +612,9 @@ Int_t StPeCMaker::ExampleAnalysis(StPeCEvent *pevent) {
   while( it != pcoll->end() ){
     StTrack *ttp = *it;
     StTrackGeometry *geo = ttp->geometry();
-    Float_t px = geo->momentum().x();
-    Float_t py = geo->momentum().y();
-    Float_t pz = geo->momentum().z();
+    //Float_t px = geo->momentum().x();
+    //Float_t py = geo->momentum().y();
+    //Float_t pz = geo->momentum().z();
     it++;
   }
 
@@ -607,13 +625,13 @@ Int_t StPeCMaker::ExampleAnalysis(StPeCEvent *pevent) {
 }
 
 Int_t StPeCMaker::triggerSim(StEvent *event){
-  int i,j,k;
+  int i,j;
   
   StL0Trigger* l0 = event->l0Trigger();
   StTriggerDetectorCollection* trg = event->triggerDetectorCollection();
   StCtbTriggerDetector& ctb = trg->ctb();
   StMwcTriggerDetector& mwc = trg->mwc();
-  StVpdTriggerDetector& vpd = trg->vpd();
+  //StVpdTriggerDetector& vpd = trg->vpd();
   StZdcTriggerDetector& zdc = trg->zdc();
 
   if(l0){

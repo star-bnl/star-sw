@@ -1,6 +1,9 @@
-// $Id: StPeCMaker.h,v 1.8 2000/12/13 00:08:59 akio Exp $
+// $Id: StPeCMaker.h,v 1.9 2000/12/22 22:38:17 akio Exp $
 //
 // $Log: StPeCMaker.h,v $
+// Revision 1.9  2000/12/22 22:38:17  akio
+// bug fix for solaris
+//
 // Revision 1.8  2000/12/13 00:08:59  akio
 // Added trigger sim and histograms
 //
@@ -122,12 +125,14 @@ protected:
   TH1F *m_hrhodndpt2;     
   TH2F *m_hrhodedx;
   TH1F *m_hrhozdcsum;
+  TH2F *m_hrhozdcew;
 
   TH1F *m_hlowmasspt;       
   TH1F *m_hlowmasszdcsum;
 
   TH1F *m_hdedx1;
   TH1F *m_hrhodedx1;
+  TH2F *m_hrhodedx2;
   TH1F *m_hlowmassdedx1;
   TH1F *m_rhozdcsum;
 
@@ -149,7 +154,7 @@ private:
   Int_t triggerSim(StEvent *);
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.8 2000/12/13 00:08:59 akio Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.9 2000/12/22 22:38:17 akio Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StPeCMaker, 1)
 };

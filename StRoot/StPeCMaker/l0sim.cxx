@@ -1,4 +1,4 @@
-// $Id: l0sim.cxx,v 1.1 2000/12/13 00:09:25 akio Exp $
+// $Id: l0sim.cxx,v 1.2 2000/12/22 22:38:18 akio Exp $
 ///////////////////////////////////////////////////////////////////////////////
 // l0sim
 //
@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "StEventTypes.h"
-#include "Stypes.h"
+//#include "Stypes.h"
 #include "TH1.h"
 #include "StL0Trigger.h"
 #include "StTriggerDetectorCollection.h"
@@ -147,7 +147,7 @@ void lut2pc4(int c[2], int r[2] , int p=0){
 }
 
 void dsm2sum(int c[2], int r[1], int p=0){
-  r[0]=0; for(int i=0; i<<2; i++){r[0]+=c[i];}
+  r[0]=0; for(int i=0; i<2; i++){r[0]+=c[i];}
   if(p>0) cout << "DSM2 sum total = " << r[0] << endl;
 }
 
