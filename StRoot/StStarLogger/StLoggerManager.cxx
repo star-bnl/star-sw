@@ -185,6 +185,8 @@ bool  StLoggerManager::isInfoEnabled()   const{ return fLogger->isInfoEnabled();
 bool  StLoggerManager::isFatalEnabled()  const{ return fLogger->isFatalEnabled(); }
 //______________________________________________________________________________
 bool  StLoggerManager::isEnabledFor()    const{ return true; /*fLogger->isEnabledFor();*/ }
+//______________________________________________________________________________
+bool  StLoggerManager::isQAInfoEnabled() const{ return fgQALogger? fgQALogger->isInfoEnabled():false; }
 //_____________________________________________________________________________
 StMessMgr& StLoggerManager::Message(const char* mess, const char* type,
   const char* opt,const char *sourceFileName,int lineNumber) {
@@ -373,7 +375,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.6 2004/11/03 01:33:22 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.7 2004/11/03 16:39:32 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -679,8 +681,11 @@ _NO_IMPLEMENTATION_;   return 5;
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.6 2004/11/03 01:33:22 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.7 2004/11/03 16:39:32 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.7  2004/11/03 16:39:32  fine
+// add extra method to checl STAR QA info logger
+//
 // Revision 1.6  2004/11/03 01:33:22  fine
 // add the implemantions of the new based methods and clean up
 //
