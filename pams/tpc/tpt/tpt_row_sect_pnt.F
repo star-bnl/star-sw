@@ -1,5 +1,8 @@
-* $Id: tpt_row_sect_pnt.F,v 1.19 2000/02/23 21:05:53 hardtke Exp $
+* $Id: tpt_row_sect_pnt.F,v 1.20 2000/03/17 09:05:51 sakrejda Exp $
 * $Log: tpt_row_sect_pnt.F,v $
+* Revision 1.20  2000/03/17 09:05:51  sakrejda
+* Protection against indeces out of range (unphysical z) added.
+*
 * Revision 1.19  2000/02/23 21:05:53  hardtke
 * replace tpg functions with tpc functions
 *
@@ -207,7 +210,7 @@ c        if(hit(ipnt).track.le.0.and.hit(ipnt).flag.lt.14) then
             else
                tpcount(irow,isect) = 1
                tpstart(irow,isect) = i
-               inew = rhit(ipnt)
+cont               inew = rhit(ipnt)
             endif
           endif
         endif
@@ -280,14 +283,21 @@ C               if(hit(loc_hit(ipnt+kc)).track.le.0.and.hit(loc_hit(ipnt+kc)).fl
                   itim1=itim
                endif
 *
-               ipos = slice_loc(i,j,itim)
-               ipos1=  slice_loc(i,j,itim1)
-               slice_pnt(2,ipos) = slice_pnt(2,ipos) + 1
-               slice_pnt(2,ipos1) = slice_pnt(2,ipos1) + 1
-               if(slice_pnt(2,ipos).eq.1)slice_pnt(1,ipos)=
-     >         loc_hit(ipnt+k-1)
-               if(slice_pnt(2,ipos1).eq.1)slice_pnt(1,ipos1)=
-     >         loc_hit(ipnt+k-1)
+               if((itim.gt.0.and.itim.le.mxslic).and.(itim1.gt.0.and.itim1.le.mxslic)) then
+                 ipos = slice_loc(i,j,itim)
+                 ipos1=  slice_loc(i,j,itim1)
+                 slice_pnt(2,ipos) = slice_pnt(2,ipos) + 1
+                 slice_pnt(2,ipos1) = slice_pnt(2,ipos1) + 1
+                 if(slice_pnt(2,ipos).eq.1)slice_pnt(1,ipos)=
+     >           loc_hit(ipnt+k-1)
+                 if(slice_pnt(2,ipos1).eq.1)slice_pnt(1,ipos1)=
+     >           loc_hit(ipnt+k-1)
+               else
+                 write(m132,*) 'TPTRSP-E2 z value of hit out of range',
+     >           itim,itim1,hit(loc_hit(ipnt+k-1)).z,hit(loc_hit(ipnt+k-1)).id,
+     >           hit(loc_hit(ipnt+k-1)).flag
+                 call Message( m132, 1, id1 )
+               endif
             end do
            else if(ic.gt.4000) then
                write(m132,*) 'TPTRSP-E1 not enough storage to sort data in z',ic
