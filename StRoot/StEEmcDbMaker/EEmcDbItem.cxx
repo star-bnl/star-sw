@@ -1,4 +1,4 @@
-// $Id: EEmcDbItem.cxx,v 1.2 2003/11/22 05:35:36 balewski Exp $
+// $Id: EEmcDbItem.cxx,v 1.3 2003/12/01 05:01:40 balewski Exp $
 
 #include <stdio.h>
 #include <string.h>
@@ -33,7 +33,7 @@ void EEmcDbItem::print() const{
   }
 
   if(strchr(name,'U') || strchr(name,'V') )
-    printf(" %s crate=%d chan=%3d sec=%d  strip=%d gain=%.3f  ped=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x pix=%s key=%d\n",name,crate,chan,sec,strip,gain,ped,thr,stat,fail,tube,key);
+    printf(" %s crate=%d chan=%3d sec=%d plane=%c strip=%d gain=%.3f  ped=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x pix=%s key=%d\n",name,crate,chan,sec,plane,strip,gain,ped,thr,stat,fail,tube,key);
   else
     printf(" %s crate=%d chan=%3d sec=%d sub=%c eta=%d gain=%.3f  ped=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x tube=%s key=%d\n",name,crate,chan,sec,sub,eta,gain,ped,thr,stat,fail,tube,key);
 }
@@ -55,6 +55,20 @@ void EEmcDbItem::clear() {
   key=-999;
 }
 
+//--------------------------------------------------
+//--------------------------------------------------
+void EEmcDbItem::setDefaultTube(int cr_off) {
+  if(name[2]=='T') return; // do nothing for towers
+  char text[100], box[100];
+  int icr=(crate-cr_off)%4;
+  sprintf(box,"S%d",icr+1);
+  if (icr==3)sprintf(box,"P1");
+  int mapmt=1+(chan/16);
+  int pix=1+chan%16;
+  sprintf(text,"%2.2d%2s-%2.2d-%2.2d%c",sec,box,mapmt,pix,EEMCDbStringDelim);
+  //printf("\ncrate=%d, chan=%d '%s'-->'%s'\n",crate,chan,name,text);
+  setTube(text);
+}
 //--------------------------------------------------
 //--------------------------------------------------
 void EEmcDbItem::setTube(char *text) {
@@ -97,6 +111,9 @@ void EEmcDbItem::setName(char *text) {
 }
 
 // $Log: EEmcDbItem.cxx,v $
+// Revision 1.3  2003/12/01 05:01:40  balewski
+// DB & SMD
+//
 // Revision 1.2  2003/11/22 05:35:36  balewski
 // saves ped in DB format
 //

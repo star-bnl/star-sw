@@ -30,6 +30,7 @@ class EEmcDbItem {
   void print() const;
   void setName(char *text);
   void setTube(char *text);
+  void setDefaultTube(int cr_off);
   int isEmpty() const;
   int isSMD() const { return (plane=='U' || plane=='V');}
 };
