@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.h,v 1.8 2004/01/26 13:59:26 calderon Exp $
+ * $Id: StMiniMcMaker.h,v 1.9 2004/03/15 18:59:47 calderon Exp $
  * \file  StMiniMcMaker.h
  * \brief Filling of StMiniMcEvent classes from StMcEvent, StEvent, StAssociationMaker
  * 
@@ -12,6 +12,13 @@
  * manuel calderon de la barca's code.
  *
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.9  2004/03/15 18:59:47  calderon
+ * - Added support for encoded common hits.  Now the common hits of the TPC and
+ * the SVT are stored, with the corresponding methods to decode and return these
+ * values.
+ * - Added protection for tracks with no particle definition.
+ * - Added () around call to mcMergedPair[i] to make Insure++ happy.
+ *
  * Revision 1.8  2004/01/26 13:59:26  calderon
  * Added the code to fill the global track matches of StMiniMcEvent.
  *
@@ -50,6 +57,13 @@
  * Revision 1.4  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.9  2004/03/15 18:59:47  calderon
+ * - Added support for encoded common hits.  Now the common hits of the TPC and
+ * the SVT are stored, with the corresponding methods to decode and return these
+ * values.
+ * - Added protection for tracks with no particle definition.
+ * - Added () around call to mcMergedPair[i] to make Insure++ happy.
+ *
  * Revision 1.8  2004/01/26 13:59:26  calderon
  * Added the code to fill the global track matches of StMiniMcEvent.
  *
@@ -84,7 +98,7 @@
  * but in order not to break Jenn's scripts if she was already using this macro,
  * this parameter was added at the end and defaults to "rcf", which is appropriate
  * for hijing files reconstructed in rcf.
- * and $Id: StMiniMcMaker.h,v 1.8 2004/01/26 13:59:26 calderon Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.h,v 1.9 2004/03/15 18:59:47 calderon Exp $ plus header comments for the macros
  *
  */
 
@@ -156,6 +170,8 @@ class StMiniMcMaker : public StMaker{
   Int_t InitRun(int runnumber);
   Int_t Make();
   Int_t Finish();
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StMiniMcMaker.h,v 1.9 2004/03/15 18:59:47 calderon Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   //---- SETS -------
 
