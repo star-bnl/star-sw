@@ -22,16 +22,6 @@ my $debugOn=0;
 
 my $DISK1 = "/star/rcf/disk00001/star";
 
-my @DISKR = (
-#              "/star/rcf/data03/reco",
-#              "/star/rcf/disk00001/star/reco",
-#              "/star/rcf/data09/reco",
-#              "/star/rcf/data10/reco",
-#              "/star/rcf/data05/reco",
-#              "/star/rcf/data08/reco",
-#              "/star/rcf/data07/reco",
-); 
-
 my $prodSr = "P00hi";
 my $jobFDir = "/star/u2e/starreco/" . $prodSr ."/requests/";
 
@@ -39,21 +29,21 @@ my $topHpssReco  =  "/home/starreco/reco";
 
 my @SetD = (
 #             "P00hg/2000/06",
-#             "P00hg/2000/07",
+             "P00hg/2000/07",
              "P00hi/2000/08", 
              "P00hi/2000/09", 
 );
 
 my @SetS = (
 #             "daq/2000/06",
-#             "daq/2000/07",
+             "daq/2000/07",
              "daq/2000/08",
              "daq/2000/09", 
 );
 
 my @DirD = (
 #            "2000/06",
-#            "2000/07",
+            "2000/07",
             "2000/08",
             "2000/09",
 );
@@ -210,68 +200,6 @@ my $ndbOnFiles = 0;
 my $maccess; 
 my $mdowner; 
 my $flname;
-my $nDiskFiles = 0;
-my $ndir = 0;
-
-#####  find daq reco files on disk
-
- my @diskDstDirs;
- $nDiskFiles = 0;
- print "\nFinding daq reco files in disk\n";
-
- for( $kk = 0; $kk<scalar(@DISKR); $kk++)  { 
- for( $ll = 0; $ll<scalar(@SetD); $ll++) {
-   $diskDstDirs[$ndir] = $DISKR[$kk] . "/" . $SetD[$ll];
-   print "diskDstDir: $diskDstDirs[$ndir]\n";
-   $ndir++;   
- }
-}
-
-
- foreach $diskDir (@diskDstDirs) {
-             if (-d $diskDir) {
-    opendir(DIR, $diskDir) or die "can't open $diskDir\n";
-   while( defined($flname = readdir(DIR)) ) {
-      next if $flname =~ /^\.\.?$/;
-
-         $maccess = "-rw-r--r--"; 
-         $mdowner = "starreco";
-
-      $fullname = $diskDir."/".$flname;
-   
-      my @dirF = split(/\//, $diskDir); 
-#      my $set = sprintf("%s\/%s\/%s\/%s",$dirF[3],$dirF[4],$dirF[5],$dirF[6]);
-#    print "Dst Set = ", $set, "\n";                                       
-     ($size, $mTime) = (stat($fullname))[7, 9];
-
-    ($sec,$min,$hr,$dy,$mo,$yr) = (localtime($mTime))[0,1,2,3,4,5];
-     $mo = sprintf("%2.2d", $mo+1);
-     $dy = sprintf("%2.2d", $dy);
-  
-     if( $yr > 98 ) {
-       $fullyear = 1900 + $yr;
-     } else {
-       $fullyear = 2000 + $yr;
-     }
-
-     $timeS = sprintf ("%4.4d%2.2d%2.2d",
-                       $fullyear,$mo,$dy);
-    
-     $fObjAdr = \(FileAttr->new());
-     ($$fObjAdr)->filename($flname);
-     ($$fObjAdr)->fpath($diskDir);
-     ($$fObjAdr)->dsize($size);
-     ($$fObjAdr)->timeS($timeS);
-     ($$fObjAdr)->faccess($maccess);
-     ($$fObjAdr)->fowner($mdowner);
-     $hpssDstFiles[$nDHpssFiles] = $fObjAdr;
-    $nDHpssFiles++;
-    $nDiskFiles++;
-  }
- closedir DIR;
- }
-}
- print "Total daq reco files: $nDiskFiles\n";
 
 ##### connect to the DB
 
@@ -341,7 +269,7 @@ my $ndir = 0;
 
 ##### select from JobStatus table files which should be updated
 
- $sql="SELECT prodSeries, JobID, sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobfileName like 'P00h%' AND jobStatus = 'n/a' ";
+ $sql="SELECT prodSeries, JobID, sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobfileName like 'P00hi%' AND jobStatus = 'n/a' ";
 
 
    $cursor =$dbh->prepare($sql)
@@ -825,7 +753,7 @@ sub fillDbTable {
   
     $sql="update $FileCatalogT set ";   
     $sql.="dataset='$mdataset'";
-    $sql.=" WHERE runID = '$mrunID'"; 
+    $sql.=" WHERE runID = '$mrunID' AND jobID like '%$prodSr%' "; 
     print "$sql\n" if $debugOn;
     $rv = $dbh->do($sql) || die $dbh->errstr;
   
