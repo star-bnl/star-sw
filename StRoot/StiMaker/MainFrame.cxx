@@ -647,9 +647,11 @@ void MainFrame::doNextTrackStep()
 
 void MainFrame::finishTrack()
 {
+    // cout <<"MainFrame::finishTrack()"<<endl;
     setCurrentDetectorToDefault();
     StiMaker::instance()->finishTrack();
     showCurrentDetector();
+    // cout <<"\tMainFramefinishTrack() done"<<endl;
 }
 
 void MainFrame::finishEvent()
@@ -1706,7 +1708,7 @@ void EntryTestDlg::makeNumberEntries()
     fNumericEntries.push_back( NamedNumberEntry("MarkedHitSize",
 						new TGNumberEntry( fF.back() ) ) );
     fNumericEntries.back().second->SetNumber( broker->markedHitSize() );
-    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESRealTwo, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESRealOne, TGNumberFormat::kNEAPositive);
     fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 1.);
     fNumericEntries.back().second->Associate(this);
     fF.back()->AddFrame(fNumericEntries.back().second, fL2);
@@ -1719,7 +1721,7 @@ void EntryTestDlg::makeNumberEntries()
     fNumericEntries.push_back( NamedNumberEntry("UnMarkedHitSize",
 						new TGNumberEntry( fF.back() ) ) );
     fNumericEntries.back().second->SetNumber( broker->unMarkedHitSize() );
-    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESRealTwo, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESRealOne, TGNumberFormat::kNEAPositive);
     fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 1.);
     fNumericEntries.back().second->Associate(this);
     fF.back()->AddFrame(fNumericEntries.back().second, fL2);
