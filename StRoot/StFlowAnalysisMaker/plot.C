@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.29 2000/10/12 21:01:32 posk Exp $
+// $Id: plot.C,v 1.30 2000/12/06 15:37:18 oldi Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -16,6 +16,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.30  2000/12/06 15:37:18  oldi
+// Including FTPC.
+//
 // Revision 1.29  2000/10/12 21:01:32  posk
 // Minor update.
 //
@@ -115,9 +118,12 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_Dca",
 			     "Flow_DcaGlobal",
 			     "Flow_Chi2",
-			     "Flow_FitPts",
-			     "Flow_MaxPts",
-			     "Flow_FitOverMax",
+			     "Flow_FitPts_Tpc",
+			     "Flow_FitPts_Ftpc",
+			     "Flow_MaxPts_Tpc",
+			     "Flow_MaxPts_Ftpc",
+			     "Flow_FitOverMax_Tpc",
+			     "Flow_FitOverMax_Ftpc",
 			     "Flow_Mult",
 			     "Flow_OrigMult",
 			     "Flow_MultOverOrig",
@@ -174,7 +180,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_vEta_Sel",
 			     "Flow_vPt_Sel"};
   const int nNames = sizeof(baseName) / sizeof(char*);
-  const int nSingles = 39 + 1;
+  const int nSingles = 42 + 1;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -199,7 +205,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     cin >> fileNumber;
     if (strlen(fileNumber) == 1 && strstr(fileNumber,"0")) {
       sprintf(fileName, "flow.hist.root");
-    } else {
+    } else { 
       sprintf(fileName, "ana%s.root", fileNumber);       // insert
     }
     cout << " file name = " << fileName << endl;
@@ -208,7 +214,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
   // input the page number
   while (pageNumber <= nSingles || pageNumber > nNames) {
-    if (pageNumber < 0) {                                // plot all
+    if (pageNumber < 0) {
       plotAll(nNames, selN, harN, -pageNumber);
       return;
     }
@@ -603,11 +609,13 @@ TCanvas* plotSingles(char* shortName){
 void plotAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
   char temp[3];
   for (int i =  first; i < nNames + 1; i++) {
-    TCanvas* c = plot(i, selN, harN);
+    TCanvas *c = plot(i, selN, harN);
     c->Update();
-    cout << "save? y/[n]" << endl;
+    cout << "save? y/[n], quit? q" << endl;
     fgets(temp, sizeof(temp), stdin);
+
     if (strstr(temp,"y")!=0) c->Print(".ps");
+    else if (strstr(temp,"q")!=0) return;
     c->Delete();
   }
   cout << "  plotAll Done" << endl;

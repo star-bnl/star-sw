@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.25 2000/09/29 22:53:16 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.26 2000/12/06 15:37:18 oldi Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.26  2000/12/06 15:37:18  oldi
+// Including FTPC.
+//
 // Revision 1.25  2000/09/29 22:53:16  posk
 // More histograms.
 //
@@ -128,8 +131,9 @@ public:
   Int_t    Finish();
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
+  Int_t    DetId(Float_t eta) const;
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.25 2000/09/29 22:53:16 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.26 2000/12/06 15:37:18 oldi Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -160,9 +164,12 @@ private:
   TH1F*     mHistDca;                  //!
   TH1F*     mHistDcaGlobal;            //!
   TH1F*     mHistChi2;                 //!
-  TH1F*     mHistFitPts;               //!
-  TH1F*     mHistMaxPts;               //!
-  TH1F*     mHistFitOverMax;           //!
+  TH1F*     mHistFitPtsTpc;            //!
+  TH1F*     mHistMaxPtsTpc;            //!
+  TH1F*     mHistFitOverMaxTpc;        //!
+  TH1F*     mHistFitPtsFtpc;           //!
+  TH1F*     mHistMaxPtsFtpc;           //!
+  TH1F*     mHistFitOverMaxFtpc;       //!
   TH1F*     mHistOrigMult;             //!
   TH1F*     mHistMultEta;              //!
   TH1F*     mHistMult;                 //!

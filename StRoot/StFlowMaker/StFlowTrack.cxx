@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.cxx,v 1.4 2000/09/05 16:11:39 snelling Exp $
+// $Id: StFlowTrack.cxx,v 1.5 2000/12/06 15:38:46 oldi Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.cxx,v $
+// Revision 1.5  2000/12/06 15:38:46  oldi
+// Including FTPC.
+//
 // Revision 1.4  2000/09/05 16:11:39  snelling
 // Added global DCA, electron and positron
 //
@@ -26,6 +29,8 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "StFlowTrack.h"
+#include "TMath.h"
+#include "StEnumerations.h"
 
 ClassImp(StFlowTrack)
 
@@ -34,5 +39,21 @@ Float_t StFlowTrack::maxInt  = 32.;
 StFlowTrack::StFlowTrack() : mSelection(0) {
 }
 
+
 StFlowTrack::~StFlowTrack() {
+}
+
+
+void StFlowTrack::SetDetId(Float_t eta) {
+    // Sets the detector Id depending on the pseudorapidity eta.
+
+    if (TMath::Abs(eta) < 2.) {
+	SetDetId(kTpcId);
+    }
+
+    else if (TMath::Abs(eta) < 4.5) {
+	eta > 0. ? SetDetId(kFtpcWestId) :SetDetId(kFtpcEastId);
+    } 
+
+    return;
 }

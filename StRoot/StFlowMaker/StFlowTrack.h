@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.15 2000/10/12 22:46:40 snelling Exp $
+// $Id: StFlowTrack.h,v 1.16 2000/12/06 15:38:46 oldi Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.16  2000/12/06 15:38:46  oldi
+// Including FTPC.
+//
 // Revision 1.15  2000/10/12 22:46:40  snelling
 // Added support for the new pDST's and the probability pid method
 //
@@ -125,6 +128,7 @@ public:
   Float_t       Dca()        const;
   Float_t       DcaGlobal()  const;
   Float_t       Chi2()       const;
+  Int_t         DetId()      const;
   Int_t         FitPts()     const;
   Int_t         MaxPts()     const;
   Int_t Select(Int_t harmonic, Int_t selection, Int_t subevent= -1) const;
@@ -154,6 +158,8 @@ public:
   void SetDca(Float_t);
   void SetDcaGlobal(Float_t);
   void SetChi2(Float_t);
+  void SetDetId(Int_t);
+  void SetDetId(Float_t);
   void SetFitPts(Int_t);
   void SetMaxPts(Int_t);
   void SetSelect(Int_t harmonic, Int_t selection);
@@ -186,6 +192,7 @@ private:
   Float_t mDca;
   Float_t mDcaGlobal;
   Float_t mChi2;
+  Int_t   mDetId;
   Int_t   mFitPts;
   Int_t   mMaxPts;
   Int_t   mSelection;
@@ -220,6 +227,7 @@ inline Short_t  StFlowTrack::Charge()       const { return mCharge; }
 inline Float_t  StFlowTrack::Dca()          const { return mDca; }
 inline Float_t  StFlowTrack::DcaGlobal()    const { return mDcaGlobal; }
 inline Float_t  StFlowTrack::Chi2()         const { return mChi2; } 
+inline Int_t    StFlowTrack::DetId()        const { return mDetId; }
 inline Int_t    StFlowTrack::FitPts()       const { return mFitPts; }  
 inline Int_t    StFlowTrack::MaxPts()       const { return mMaxPts; }  
 inline Int_t    StFlowTrack::MostLikelihoodPID() const
@@ -329,6 +337,8 @@ inline void StFlowTrack::SetDca(Float_t dca)        { mDca = dca; }
 inline void StFlowTrack::SetDcaGlobal(Float_t gdca) { mDcaGlobal = gdca; }
 
 inline void StFlowTrack::SetChi2(Float_t chi2)      { mChi2 = chi2; }
+
+inline void StFlowTrack::SetDetId(Int_t detId)      { mDetId = detId; }
 
 inline void StFlowTrack::SetFitPts(Int_t fitPts)    { mFitPts = fitPts; }
 
