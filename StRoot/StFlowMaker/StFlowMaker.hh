@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.hh,v 1.9 2000/02/18 22:49:57 posk Exp $
+//  $Id: StFlowMaker.hh,v 1.10 2000/02/29 22:00:55 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -13,6 +13,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.hh,v $
+//  Revision 1.10  2000/02/29 22:00:55  posk
+//  Made SetPhiWeight inline, changed ImpactPar to Dca, etc.
+//
 //  Revision 1.9  2000/02/18 22:49:57  posk
 //  Added PID and centrality.
 //
@@ -75,10 +78,8 @@ protected:
 
 private:
 
-  Int_t           readPhiWgtFile();
-  void            fillFlowEvent();
-  Float_t         PidSigmas(const StPrimaryTrack*, 
-			    const StParticleDefinition* particle);
+  Int_t           ReadPhiWgtFile();
+  void            FillFlowEvent();
   StEvent*        pEvent;                    //! pointer to DST data
   StFlowEvent*    pFlowEvent;                //! pointer to micro-DST data
 

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.6 2000/02/11 20:53:08 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.7 2000/02/29 22:00:52 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.7  2000/02/29 22:00:52  posk
+// Made SetPhiWeight inline, changed ImpactPar to Dca, etc.
+//
 // Revision 1.6  2000/02/11 20:53:08  posk
 // Commented out random_shuffle and cout formatting so as to work under CC5.
 //
@@ -49,15 +52,15 @@
 
 //-----------------------------------------------------------------------
 
-Int_t    StFlowCutTrack::mFitPtsCuts[2]     = {15, 200};
-Float_t  StFlowCutTrack::mFitOverMaxCuts[2] = {0.55, 2.};
+Int_t   StFlowCutTrack::mFitPtsCuts[2]     = {15, 200};
+Float_t StFlowCutTrack::mFitOverMaxCuts[2] = {0.55, 2.};
 
-UInt_t   StFlowCutTrack::mTrackN            = 0;     
-UInt_t   StFlowCutTrack::mGoodTrackN        = 0;
-UInt_t   StFlowCutTrack::mEtaSymPosN        = 0;     
-UInt_t   StFlowCutTrack::mEtaSymNegN        = 0;     
-UInt_t   StFlowCutTrack::mFitPtsCutN        = 0;
-UInt_t   StFlowCutTrack::mFitOverMaxCutN    = 0;
+UInt_t  StFlowCutTrack::mTrackN            = 0;     
+UInt_t  StFlowCutTrack::mGoodTrackN        = 0;
+UInt_t  StFlowCutTrack::mEtaSymPosN        = 0;     
+UInt_t  StFlowCutTrack::mEtaSymNegN        = 0;     
+UInt_t  StFlowCutTrack::mFitPtsCutN        = 0;
+UInt_t  StFlowCutTrack::mFitOverMaxCutN    = 0;
 
 //-----------------------------------------------------------------------
 
@@ -97,11 +100,8 @@ Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
 
   // Increment counters for Eta symmetry cut
   StThreeVectorD p = pTrack->geometry()->momentum(); 
-  if (p.pseudoRapidity() > 0.) {
-    mEtaSymPosN++;
-  } else {
-    mEtaSymNegN++;
-  }
+  if (p.pseudoRapidity() > 0.) { mEtaSymPosN++; }
+  else { mEtaSymNegN++; }
   mGoodTrackN++;
   return kTRUE;
 }

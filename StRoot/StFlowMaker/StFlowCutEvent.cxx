@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.7 2000/02/11 20:53:06 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.8 2000/02/29 22:00:51 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.8  2000/02/29 22:00:51  posk
+// Made SetPhiWeight inline, changed ImpactPar to Dca, etc.
+//
 // Revision 1.7  2000/02/11 20:53:06  posk
 // Commented out random_shuffle and cout formatting so as to work under CC5.
 //
@@ -87,9 +90,6 @@ Int_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
   Long_t nvtx = pEvent->numberOfPrimaryVertices();
   if (nvtx == 0) return kFALSE;
 
-  // have to add a mechanism to select the most relevant primary
-  // vertex and use only this one (for now only one vertex is assumed)
-
   StPrimaryVertex* pVertex = pEvent->primaryVertex(0);
   if (!pVertex) return kFALSE;
 
@@ -138,13 +138,13 @@ Int_t StFlowCutEvent::CheckEtaSymmetry() {
   // Call at the end of the event after doing CheckTrack for each track
   // If kFALSE you should delete the last event
 
-  Float_t mEtaSymPosN = (float)StFlowCutTrack::EtaSymPos();
-  Float_t mEtaSymNegN = (float)StFlowCutTrack::EtaSymNeg();
-  Float_t EtaSym = (mEtaSymPosN - mEtaSymNegN) / 
-    (mEtaSymPosN + mEtaSymNegN);
+  float etaSymPosN = (float)StFlowCutTrack::EtaSymPos();
+  float etaSymNegN = (float)StFlowCutTrack::EtaSymNeg();
+  float etaSym = (etaSymPosN - etaSymNegN) / 
+    (etaSymPosN + etaSymNegN);
   StFlowCutTrack::EtaSymClear();
   if (mEtaSymCuts[1] > mEtaSymCuts[0] && 
-      (EtaSym < mEtaSymCuts[0] || EtaSym >= mEtaSymCuts[1])) {
+      (etaSym < mEtaSymCuts[0] || etaSym >= mEtaSymCuts[1])) {
     mEtaSymCutN++;
     mGoodEventN--;
     return kFALSE;
