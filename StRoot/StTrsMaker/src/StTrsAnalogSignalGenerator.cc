@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsAnalogSignalGenerator.cc,v 1.2 1999/01/18 21:00:32 lasiuk Exp $
+ * $Id: StTrsAnalogSignalGenerator.cc,v 1.3 1999/02/28 20:13:29 lasiuk Exp $
  *
  * Author: brian Nov 3, 1998 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsAnalogSignalGenerator.cc,v $
- * Revision 1.2  1999/01/18 21:00:32  lasiuk
- * add fractionSampled(); reorder initialization
+ * Revision 1.3  1999/02/28 20:13:29  lasiuk
+ * noise additions
  *
  * Revision 1.2  1999/01/18 21:00:32  lasiuk
  * add fractionSampled(); reorder initialization
@@ -34,22 +34,32 @@
 #ifndef ST_NO_NAMESPACES
 using namespace units;
 #endif
+
+HepJamesRandom  StTrsAnalogSignalGenerator::mEngine;
+RandGauss       StTrsAnalogSignalGenerator::mGaussDistribution(mEngine);
+
 StTrsAnalogSignalGenerator::StTrsAnalogSignalGenerator(StTpcGeometry* geo, StTpcSlowControl* sc, StTpcElectronics* el, StTrsSector* sec)
     : mGeomDb(geo), mSCDb(sc), mElectronicsDb(el), mSector(sec)
 {
     mDeltaRow = 0;
     mDeltaPad = 0;
 
-    mSignalThreshold = .1*(.001*volt);
+    mSignalThreshold = .0*volt;
     mSuppressEmptyTimeBins = true;
 
+    //
     // Initialization
+    // signal generation
     mSigma1 = mElectronicsDb->shapingTime();
     mSigma2 = 2.*mSigma1;
     mTau    = mElectronicsDb->tau();
     mSamplingFrequency = mElectronicsDb->samplingFrequency();
     mGain              = mElectronicsDb->nominalGain();
     fractionSampled();
+    // noise
+    mAddNoise = false;
+    mAddNoiseUnderSignalOnly = false;
+    mNoiseRMS = 0.; 
 }
 
 void StTrsAnalogSignalGenerator::fractionSampled()
