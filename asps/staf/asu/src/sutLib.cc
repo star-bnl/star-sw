@@ -85,13 +85,20 @@ sutMatchWild(char *pattern,char* string)
 *:RETURN VALUE: TRUE or FALSE
 *:<---------------------------------------------------------------------
 */
-int sutMatchReg(char *pattern,char* string)
+int 
+sutMatchReg(char *pattern, char* string)
 {
+  // This is commented out to quell pedantic compilers.  If the code
+  // after `return FALSE' is put back in, revisit these decls.
+  static void *pp = &pattern;
+  static void *ps = &string;
+#if 0 
    int isMatch=FALSE;
    char *rexp=NULL;
    char *ret0[9];		/* HACK - string limit */
    char *newcursor=NULL;
    char *name=NULL;
+#endif
 
    return FALSE;
    /* -----------------------------------------------------------
@@ -269,7 +276,7 @@ int isInteger(char *c)
    int i;
    char *signs="+-";
    if( (!isdigit(c[0])) && (NULL == strchr(signs,c[0])) )return FALSE;
-   for(i=1;i<strlen(c);i++)if(!isdigit(c[i]))return FALSE;
+   for(i=1;i<(int)strlen(c);i++)if(!isdigit(c[i]))return FALSE;
    return TRUE;
 }
 

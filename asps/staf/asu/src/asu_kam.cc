@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
-#if defined(irix) || defined(irix64) || defined(Linux)
+#if defined(irix) || defined(irix64) || defined(linux)
 # include <sys/time.h>
 #else
 # include <time.h>
@@ -53,10 +53,9 @@
 void 
 kam_asu_hello_()
 {
-   long npars = ku_npar();      /* number of KUIP parameters */
    char*  msg = ku_gets();	/* message */
 
-	STAFCV_T status = asu_hello(msg);
+   asu_hello(msg);
 }
 
 /*
@@ -89,9 +88,7 @@ kam_asu_pretty_() {
 void 
 kam_asu_time_()
 {
-   long npars = ku_npar();      /* number of KUIP parameters */
-
-   STAFCV_T status = asu_time();
+  asu_time();
 }
 
 /*
@@ -106,9 +103,7 @@ kam_asu_time_()
 void 
 kam_asu_date_()
 {
-   long npars = ku_npar();      /* number of KUIP parameters */
-
-   STAFCV_T status = asu_date();
+  asu_date();
 }
 
 /*
@@ -123,9 +118,7 @@ kam_asu_date_()
 void 
 kam_asu_fflush_()
 {
-   long npars = ku_npar();      /* number of KUIP parameters */
-
-   STAFCV_T status = asu_fflush();
+  asu_fflush();
 }
 
 /*
@@ -140,7 +133,7 @@ kam_asu_fflush_()
 void 
 kam_asumalloc_stats_()
 {
-  STAFCV_T status = asumalloc_stats();
+  asumalloc_stats();
 }
 
 /*
@@ -156,5 +149,6 @@ void
 kam_asumalloc_level_()
 {
   int level = ku_geti();
-  STAFCV_T status = asumalloc_level(level);
+
+  asumalloc_level(level);
 }

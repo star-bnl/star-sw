@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "asuAlloc.h"
 
 static ASU_MALLOCLEVEL_T asu_mallocLevel=ASU_MALLOC_INIT;
@@ -116,7 +117,7 @@ void asuMallocPrintTrace(void *p, size_t size, char* file, int line)
    memcpy(&v,p,4);
    memcpy(s,p,4);
    c[4]=0;
-   fprintf(stderr,"(%p:%d) %s.%d [%x:%4s]", p, size, file, line, v, s);
+   fprintf(stderr,"(%p:%d) %s.%d [%lx:%4s]", p, size, file, line, v, s);
 }
 
 /*--------------------------------------------------------------------*/
