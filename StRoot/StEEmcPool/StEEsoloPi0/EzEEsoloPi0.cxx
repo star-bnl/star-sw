@@ -1,4 +1,4 @@
-// $Id: EzEEsoloPi0.cxx,v 1.2 2004/09/03 04:50:52 balewski Exp $
+// $Id: EzEEsoloPi0.cxx,v 1.3 2005/02/05 04:56:31 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -111,8 +111,8 @@ void EzEEsoloPi0:: unpackEzTail(){
       int ieta=x->eta-1;
       assert(iphi>=0 && iphi<MaxPhiBins);
       assert(ieta>=0 && ieta<MaxEtaBins);
-      int ispir=iphi*MaxEtaBins+ieta; // unified spiral index
-      assert(ispir>=0 && ispir<EEsoloPi0::MxTw);
+      int irad=iphi*MaxEtaBins+ieta; // unified spiral index
+      assert(irad>=0 && irad<EEsoloPi0::MxTw);
 
       int iT=-1;// store T,P,Q,R depending on 'iT'
       if(x->name[2]=='T'){
@@ -130,7 +130,7 @@ void EzEEsoloPi0:: unpackEzTail(){
       // ........ only elements with valid gains are processed below
       float  ene=adc/x->gain;
       float recoEner=ene/scaleFactor; // ideal 
-      if(iT==0)   soloMip[ispir].e= recoEner;
+      if(iT==0)   soloMip[irad].e= recoEner;
       //aa tileEne[iT][ieta][iphi]=adc/x->gain; 
       
     }

@@ -1,0 +1,209 @@
+// *-- Author : Jan Balewski
+// 
+// $Id: MuEzSoloPi0Maker.cxx,v 1.1 2005/02/05 04:56:31 balewski Exp $
+
+#include <TFile.h>
+#include <TH1.h>
+#include <TH2.h>
+#include <StMessMgr.h>
+
+#include "MuEzSoloPi0Maker.h"
+
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
+#include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
+
+#include "StMuDSTMaker/EZTREE/EztEventHeader.h"
+#include "StMuDSTMaker/EZTREE/EztTrigBlob.h"
+#include "StMuDSTMaker/EZTREE/EztEmcRawData.h"
+#include "StMuDSTMaker/EZTREE/StTriggerDataMother.h"
+
+#include "StEEmcDbMaker/StEEmcDbMaker.h"
+#include "StEEmcDbMaker/EEmcDbItem.h"
+
+ClassImp(MuEzSoloPi0Maker)
+
+//________________________________________________
+//________________________________________________
+MuEzSoloPi0Maker::MuEzSoloPi0Maker( const char* self ,const char* muDstMakerName) : StMaker(self){
+  mMuDstMaker = (StMuDstMaker*)GetMaker(muDstMakerName);
+  assert(mMuDstMaker);
+
+  trgAkio=0;
+  nTrigEve=nInpEve=0;
+  HList=0;
+  trigID=0;
+}
+
+
+//___________________ _____________________________
+//________________________________________________
+MuEzSoloPi0Maker::~MuEzSoloPi0Maker(){
+  delete trgAkio;
+}
+
+//___________________ _____________________________
+//________________________________________________
+void 
+MuEzSoloPi0Maker::saveHisto(TString fname){
+  TString outName=fname+".hist.root";
+  TFile f( outName,"recreate");
+  assert(f.IsOpen());
+  printf("%d histos are written  to '%s' ...\n",HList->GetEntries(),outName.Data());
+
+  HList->Write();
+  f.Close();
+
+}
+ 
+//________________________________________________
+//________________________________________________
+Int_t 
+MuEzSoloPi0Maker::Init(){
+
+  assert(HList);
+  eeDb=(StEEmcDbMaker*)GetMaker("eemcDb");
+  assert(eeDb);  
+  EEsoloPi0::init();
+  
+  gMessMgr->Message("","I") <<GetName()<<"::Init() filter trigID="<<trigID<<endm;  
+  return StMaker::Init();
+}
+
+//________________________________________________
+//________________________________________________
+Int_t 
+MuEzSoloPi0Maker::InitRun(int runNo){
+  static int first=1;
+  if(first) return kStOK;
+  initRun(runNo);
+  first=0;
+  return kStOK;
+}
+
+//________________________________________________
+//________________________________________________
+Int_t 
+MuEzSoloPi0Maker::Finish(){
+  finish();
+  gMessMgr->Message("","I") <<GetName()<<"::Finish() inputEve="<<nInpEve<<" trigFilterEve="<<nTrigEve<<endm;
+  return kStOK;
+}
+
+//________________________________________________
+//________________________________________________
+void 
+MuEzSoloPi0Maker::Clear(const Option_t*){
+  eHead=0;
+  eETow=0;
+  eESmd=0;
+  eTrig=0;
+  //  delete trgAkio; //JAN: perhaps is a memory leak? But crashes
+}
+
+
+
+//________________________________________________
+//________________________________________________
+Int_t 
+MuEzSoloPi0Maker::Make(){
+  clear();
+  nInpEve++;
+  gMessMgr->Message("","D") <<GetName()<<"::Make() is called "<<endm;
+  
+  //..........  acquire EztHeader
+  eHead= mMuDstMaker->muDst()->eztHeader();
+  if(eHead==0) {
+    gMessMgr->Message("","E") <<GetName()<<"::Make() no  EztEventHeader, skip event  "<<endm;    return kStOK;
+  }
+
+
+  if(trigID ) {// filter by triggerID on demand
+    if (! mMuDstMaker->muDst()->event()->triggerIdCollection().nominal().isTrigger(trigID)) return kStOK;
+  }
+  nTrigEve++;
+
+  //.... get data .....
+  eETow=mMuDstMaker->muDst()->eztETow();
+  eESmd=mMuDstMaker->muDst()->eztESmd();
+  eTrig=mMuDstMaker->muDst()->eztTrig(); 
+  // printf("pp %p %p %p\n",eETow, eESmd, eTrig);
+
+  trgAkio=new StTriggerDataMother(eTrig);
+  //trgAkio->dump();
+  // eETow->print();
+  // eESmd->print();
+  //  eHead->print();
+  
+  assert(trgAkio->token()!=0) ; // I want to see zer-token events, JB
+  
+  //  test1(eETow,6);
+  // .... process adata ......
+ if(unpackMuEzTowers(trgAkio->token())==false )  return kStOK;;
+  findTowerClust();
+  findTowerPi0();
+
+
+  return kStOK;
+} 
+
+//________________________________________________
+//________________________________________________
+bool 
+MuEzSoloPi0Maker::unpackMuEzTowers(int token){
+
+  // tower
+  if(eETow==0) return false; // no ETOW data 
+  int lenCount=0xa4;
+  int errFlag=0;
+  int trigComm=0x4; // physics, 9=laser/LED, 8=??
+
+  int nCr=0;
+  int icr;
+  for(icr=0;icr<eETow->getNBlocks();icr++) {
+    if(eETow->isCrateVoid(icr)) continue;
+    if(eETow->purgeCrateOFF(icr)) continue;
+
+    int crID=icr+1;
+    //........... hader..........
+    eETow->tagHeadValid(icr,token, crID,lenCount,trigComm,errFlag);
+    const UShort_t isSick=eETow ->getCorruption(icr);
+    if (isSick) return false; // abort on first corrupted crate
+    nCr++; // count number of valid crates
+    int crateID=eETow->getCrateID(icr);
+
+    int chan;
+    const UShort_t* data=eETow->data(icr);
+    for(chan=0;chan<eETow->sizeData(icr);chan++) {
+      const  EEmcDbItem  *x=eeDb->getByCrate(crateID,chan);
+      if(x==0) continue; 
+      if(x->fail ) continue; // drop broken channels
+      float rawAdc=data[chan];  
+      if(rawAdc<x->thr) continue; // drop small ADC values
+
+      // accept this hit
+      int iphi=(x->sec-1)*MaxSubSec+(x->sub-'A');
+      int ieta=x->eta-1;
+      assert(iphi>=0 && iphi<MaxPhiBins);
+      assert(ieta>=0 && ieta<MaxEtaBins);
+      int irad=iphi*MaxEtaBins+ieta; // unified spiral index
+      assert(irad>=0 && irad<EEsoloPi0::MxTw);
+
+      float adc=rawAdc-x->ped; 
+      if(x->gain<=0) continue;
+      float  ene=adc/x->gain;
+      soloMip[irad].e= ene;
+      // if(nTrigEve==1) printf("%s adc=%f ene=%f iphi=%d ieta=%d irad=%d\n",x->name,adc,ene,iphi,ieta,irad); 
+    }
+  }
+  
+  return true;
+}
+
+//---------------------------------------------------
+// $Log: MuEzSoloPi0Maker.cxx,v $
+// Revision 1.1  2005/02/05 04:56:31  balewski
+// reads ezTree from muDst
+//
+//
+  
