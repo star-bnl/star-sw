@@ -7,7 +7,7 @@
 #include "St_l3banks_2_tphits.h"
 #include "tables/St_tcl_tphit_Table.h"
 #include "tables/St_hitarray_Table.h"
-#include "St_l3_Coord_Trans.h"
+#include "St_l3_Coordinate_Transformer.h"
 #include "TStopwatch.h"
 
 ClassImp(St_l3banks_2_tphits);
@@ -28,7 +28,7 @@ St_l3banks_2_tphits::~St_l3banks_2_tphits()
 Int_t St_l3banks_2_tphits::Filltclpoints()
 {
     // Prepare transformation
-    St_l3_Coord_Trans transform;
+    St_l3_Coordinate_Transformer transformer;
 
     // Prepare tcl_tphit_stucts to be filled
     tcl_tphit_st* mytclhits_st = (tcl_tphit_st*) mytclhits->GetTable();
@@ -143,7 +143,7 @@ Int_t St_l3banks_2_tphits::Filltclpoints()
 					    ptrs[3] = sector;
 
 					    // transform
-					    Double_t* xyz = transform.raw_to_global(ptrs);
+					    Double_t* xyz = transformer.raw_to_global(ptrs);
 					    
 					    // fill tphits
 					    mytclhits_st[tphit_index].x = (Float_t) xyz[0];

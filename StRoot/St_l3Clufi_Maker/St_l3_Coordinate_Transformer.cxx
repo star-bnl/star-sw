@@ -4,26 +4,26 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <Rtypes.h> /* use ROOT variables: ..._t */
-#include "St_l3_Coord_Trans.h"
+#include "St_l3_Coordinate_Transformer.h"
 
-ClassImp(St_l3_Coord_Trans);
+ClassImp(St_l3_Coordinate_Transformer);
 
 
 //______________________________
-St_l3_Coord_Trans::St_l3_Coord_Trans()
+St_l3_Coordinate_Transformer::St_l3_Coordinate_Transformer()
 {
     // allocate memory for varialbes
     xyz_local = new Double_t[3];
     xyz_global = new Double_t[3];
 }
 //______________________________
-St_l3_Coord_Trans::~St_l3_Coord_Trans()
+St_l3_Coordinate_Transformer::~St_l3_Coordinate_Transformer()
 {
     delete [] xyz_local;
     delete [] xyz_global;
 }
 //______________________________
-inline void St_l3_Coord_Trans::raw_to_local()
+inline void St_l3_Coordinate_Transformer::raw_to_local()
 {
   /*Double_t pad =  pa_ti_ro_se[0];
   Double_t tb  =  pa_ti_ro_se[1];
@@ -59,7 +59,7 @@ inline void St_l3_Coord_Trans::raw_to_local()
       }  
 }
 //______________________________
-inline void St_l3_Coord_Trans::local_to_global()
+inline void St_l3_Coordinate_Transformer::local_to_global()
 {
     Int_t sector = (Int_t) pa_ti_ro_se[3];
     xyz_global[0] = SectorCos[sector-1] * xyz_local[0] + SectorSin[sector-1] * xyz_local[1] ;
@@ -69,7 +69,7 @@ inline void St_l3_Coord_Trans::local_to_global()
 
  }
 //______________________________
-Double_t* St_l3_Coord_Trans::raw_to_global(Double_t* Pa_Ti_Ro_Se)
+Double_t* St_l3_Coordinate_Transformer::raw_to_global(Double_t* Pa_Ti_Ro_Se)
 {
     pa_ti_ro_se = Pa_Ti_Ro_Se;
     raw_to_local();
@@ -80,20 +80,20 @@ Double_t* St_l3_Coord_Trans::raw_to_global(Double_t* Pa_Ti_Ro_Se)
 /////////
 // init our statics
 /////////
-Double_t St_l3_Coord_Trans::lengthPerTb =  0.5977;          // = 208/348
-Double_t St_l3_Coord_Trans::driftLength =  208;             // cm
-Double_t St_l3_Coord_Trans::outerSectorPadPitch = 0.67;     // cm
-Double_t St_l3_Coord_Trans::innerSectorPadPitch = 0.335;    // cm
+Double_t St_l3_Coordinate_Transformer::lengthPerTb =  0.5977;          // = 208/348
+Double_t St_l3_Coordinate_Transformer::driftLength =  208;             // cm
+Double_t St_l3_Coordinate_Transformer::outerSectorPadPitch = 0.67;     // cm
+Double_t St_l3_Coordinate_Transformer::innerSectorPadPitch = 0.335;    // cm
 
 // number of pads in padrow
-Int_t St_l3_Coord_Trans::numberOfPadsAtRow[45] = {
+Int_t St_l3_Coordinate_Transformer::numberOfPadsAtRow[45] = {
     88,96,104,112,118,126,134,142,150,158,166,174,182,
     98,100,102,104,106,106,108,110,112,112,114,116,
     118,120,122,122,124,126,128,128,130,132,134,136,
     138,138,140,142,144,144,144,144 
 };
 // radial distance (center pad) from detector center in cm
-Double_t St_l3_Coord_Trans::radialDistanceAtRow[45] = {
+Double_t St_l3_Coordinate_Transformer::radialDistanceAtRow[45] = {
     60.0, 64.8, 69.6, 74.4, 79.2, 84.0, 88.8, 93.60,     //   7 * 4.80 cm spacing
     98.8, 104., 109.20, 114.4, 119.6,                    //   5 * 5.20 cm spacing
     127.195, 129.195, 131.195, 133.195, 135.195,         //  32 * 2.00 cm spacing
@@ -105,7 +105,7 @@ Double_t St_l3_Coord_Trans::radialDistanceAtRow[45] = {
     187.195, 189.195
 };
 // sector-rotation factors: 30 degree steps
-Double_t St_l3_Coord_Trans::SectorSin[24] = {
+Double_t St_l3_Coordinate_Transformer::SectorSin[24] = {
      0.5,  0.866025404,
      1.0,  0.866025404,
      0.5,  0.,
@@ -120,7 +120,7 @@ Double_t St_l3_Coord_Trans::SectorSin[24] = {
      0.5,  0.,
 };
 // sector-rotation factors: 30 degree steps
-Double_t St_l3_Coord_Trans::SectorCos[24] = {
+Double_t St_l3_Coordinate_Transformer::SectorCos[24] = {
     0.866025404,  0.5,
      0.,          -0.5,
     -0.866025404, -1.0,
