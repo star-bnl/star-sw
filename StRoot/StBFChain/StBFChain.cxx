@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.234 2001/09/27 22:51:49 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.235 2001/10/01 23:06:32 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1011,12 +1011,11 @@ void StBFChain::SetDbOptions(){
   else {if (GetOption("Y1d"))  db->SetDateTime("year_1d");
   else {if (GetOption("Y1e"))  db->SetDateTime("year_1e");
   else {if (GetOption("Y1h"))  db->SetDateTime("year_1h");
-  else {if (GetOption("Y2000"))  db->SetDateTime("year_1h");
+  else {if (GetOption("Y2000"))db->SetDateTime("year_1h");
   else {if (GetOption("Y2a"))  db->SetDateTime("year_2a");
   else {if (GetOption("Y2b"))  db->SetDateTime("year_2b"); 
-  else {if (GetOption("Simu")) db->SetDateTime("year_2b");
-  else {if (GetOption("Y2001"))  db->SetDateTime("year_2b"); 
-  }}}}}}}}}}}}}}}
+  else {if (GetOption("Y2001"))db->SetDateTime("year_2b"); 
+  }}}}}}}}}}}}}}
 	gMessMgr->QAInfo() << db->GetName() 
 			   << " Maker set time = " 
 			   << db->GetDateTime().GetDate() << "." 
