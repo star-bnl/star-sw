@@ -1,8 +1,8 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.34 2000/06/23 16:44:42 fisyak Exp $
+// $Id: St_db_Maker.cxx,v 1.35 2000/06/26 20:58:41 perev Exp $
 // $Log: St_db_Maker.cxx,v $
-// Revision 1.34  2000/06/23 16:44:42  fisyak
-// remove params
+// Revision 1.35  2000/06/26 20:58:41  perev
+// multiple DBs
 //
 // Revision 1.33  2000/06/20 20:39:49  fisyak
 // Add debug print out
@@ -116,17 +116,25 @@ void St_ValiSet::ls(Int_t lev)
 //__________________________ class St_db_Maker  ____________________________
 ClassImp(St_db_Maker)
 //_____________________________________________________________________________
-St_db_Maker::St_db_Maker(const char *name, const char *maindir,const char *userdir)
+St_db_Maker::St_db_Maker(const char *name
+, const char *dir0
+, const char *dir1
+, const char *dir2
+, const char *dir3
+)
 :StMaker(name)
 {
+
+   fDirs[0] = dir0;
+   fDirs[1] = dir1;
+   fDirs[2] = dir2;
+   fDirs[3] = dir3;
+   fDirs[4] = "";
 
    fDBBroker = 0;
 
    fHierarchy = 0;
    fIsDBTime = 0;
-   fMainDir = maindir;
-   if (userdir && strlen(userdir)) fUserDir=userdir;
-   else if (maindir && strncmp(maindir,"MySQL:",6)==0) fUserDir = maindir+6; 
      
    fDataBase = 0;
    fUpdateMode = 0;
@@ -137,52 +145,33 @@ St_db_Maker::~St_db_Maker(){
 //_____________________________________________________________________________
 Int_t St_db_Maker::Init()
 {
-   TFileSet *fileset;
-   TString fullpath,topdir;
-   TString STAR("$STAR");
-   gSystem->ExpandPathName(STAR);
-   TString PWD(gSystem->pwd());
+   TDataSet *fileset;
+   TString dir;
 
    fDataBase=0;
-   if (!fMainDir.IsNull() && strncmp("MySQL:",(const char*)fMainDir,6)==0){
-     fDataBase = OpenMySQL(((const char*)fMainDir)+6);
-     if (!fDataBase) return kStErr;
-     fDataBase->Pass(PrepareDB,0);
-   }
-   for (int k = 0; k<3; k++) {
+   for (int idir=0; !fDirs[idir].IsNull(); idir++) {//loop over dirs
+
+     dir = fDirs[idir];
+     gSystem->ExpandPathName(dir);
+     if (strncmp("MySQL:",  (const char*)dir,6)==0){
+       fileset = OpenMySQL(((const char*)dir)+6);
+       if (!fileset) return kStErr;
+       fileset->Pass(PrepareDB,0);
+     } else {
+
 // 		recreate a memory resided data-structure
-     
-     if (k == 0)    {
-       if (fDataBase) continue;
-       fCurrentDir = fMainDir;
-     }
-     if (k == 1) {
-       if (STAR == PWD) continue;
-       fCurrentDir = STAR;
-       fCurrentDir+= "/";
-       fCurrentDir+= fUserDir;
-     }
-     if (k == 2) {
-       fCurrentDir = fUserDir;
-     }
-     if (fCurrentDir == "") continue;
-     fileset = 0;
-     if (!fCurrentDir.IsNull()) {
-       fileset = new TFileSet(fCurrentDir,gSystem->BaseName(fCurrentDir));
-       if (!fileset->First()) {delete fileset; fileset = 0;}
-       if(fileset) {
-	 fileset->Purge(); 
-	 fileset->Sort(); 
-	 fileset->Pass(PrepareDB,&fCurrentDir);
-	 fileset->Purge(); 
-	 if (fDataBase) {
-	   assert(strcmp(fDataBase->GetName(),fileset->GetName())==0);
-	   fDataBase->Update(fileset); delete fileset;
-	 } else          {fDataBase = fileset; }
-       } 
-     }
-   }
-   fDataBase->Sort();
+       fileset = new TFileSet(dir,gSystem->BaseName(dir));
+       if (!fileset->First()) {delete fileset; fileset = 0; continue;}
+       fileset->Purge(); 
+       fileset->Sort(); 
+       fileset->Pass(PrepareDB,&dir);
+       fileset->Purge(); 
+       if (fDataBase) {
+	 assert(strcmp(fDataBase->GetName(),fileset->GetName())==0);
+	 fDataBase->Update(fileset); delete fileset;
+       } else          {fDataBase = fileset; }
+   } }
+
 
    AddData(fDataBase);
    SetOutputAll(fDataBase,2); //  
@@ -582,12 +571,6 @@ EDataSetPass St_db_Maker::PrepareDB(TDataSet* ds, void *user)
   }
   return kContinue;
 }
-//_____________________________________________________________________________
-void    St_db_Maker::SetMainDir(const Char_t *db)
-{fMainDir = db; gSystem->ExpandPathName(fMainDir);}
-//_____________________________________________________________________________
-void    St_db_Maker::SetUserDir(const Char_t *db)
-{fUserDir = db; gSystem->ExpandPathName(fUserDir);}
 //_____________________________________________________________________________
 TDatime St_db_Maker::GetDateTime()
 { 
