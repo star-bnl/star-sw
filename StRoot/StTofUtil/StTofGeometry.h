@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofGeometry.h,v 1.5 2004/06/09 21:26:32 dongx Exp $
+ * $Id: StTofGeometry.h,v 1.6 2004/06/10 15:53:50 dongx Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,10 @@
  *****************************************************************
  *
  * $Log: StTofGeometry.h,v $
+ * Revision 1.6  2004/06/10 15:53:50  dongx
+ * -head file "StHelixD.hh" included
+ * -simplify the macro definition
+ *
  * Revision 1.5  2004/06/09 21:26:32  dongx
  * add function projTrayVector(..) to increase the matching speed
  *
@@ -35,20 +39,11 @@
 #define STTOFGEOMETRY_H
 #include "tofSlatGeom.h"
 #include "Rtypes.h"
+#include "StHelixD.hh"
 
 #include <vector>
 #ifndef ST_NO_NAMESPACES
 using std::vector;
-#endif
-
-#if !defined(ST_NO_TEMPLATE_DEF_ARGS) || defined(__CINT__)
-typedef vector<Int_t>  IntVec;
-typedef vector<Double_t>  DoubleVec;
-typedef vector<StThreeVectorD> PointVec;
-#else
-typedef vector<Int_t, allocator<Int_t>>  IntVec;
-typedef vector<Double_t, allocator<Double_t>>  DoubleVec;
-typedef vector<StThreeVectorD, allocator<StThreeVectorD>> PointVec;
 #endif
 
 class StMaker;
@@ -181,7 +176,7 @@ class StTofGeometry{
   idVector slatNeighbours(const int);
   idVector slatNeighboursWide(const int);
 
-  Bool_t  projTrayVector(const StHelixD &helix, IntVec &trayVec) const;
+  Bool_t  projTrayVector(const StHelixD &helix, idVector &trayVec) const;
 
 };
 
