@@ -1,5 +1,5 @@
-/******************************************************
- * $Id: StRichGasGain.cxx,v 1.2 2000/01/25 22:02:20 lasiuk Exp $
+/****************************************************************
+ * $Id: StRichGasGain.cxx,v 1.3 2000/02/08 16:24:08 lasiuk Exp $
  *
  * Description:
  *  StRichGasGain computes an amplification factor of an
@@ -16,8 +16,6 @@
  *    - Polia is generated using RnGamma from CERNLIB
  *    - the hit x coordinate is changed so that it 
  *      reflects its position on the wire
- *
- *
  *  
  *  Each avalanche may also produce feedback photons,
  *  which frequency depends on the gas' characteristics. 
@@ -35,10 +33,10 @@
  *      on CsI layer, and induce signal. 
  *      
  *
- **********************************************************
+ ****************************************************************
  * $Log: StRichGasGain.cxx,v $
- * Revision 1.2  2000/01/25 22:02:20  lasiuk
- * Second Revision
+ * Revision 1.3  2000/02/08 16:24:08  lasiuk
+ * use of dbs
  *
  *
  * Revision 1.4  2000/02/08 23:51:13  lasiuk
@@ -46,78 +44,83 @@
  *
  * Revision 1.3  2000/02/08 16:24:08  lasiuk
  * use of dbs
- **********************************************************/
+ *
  * Revision 1.2  2000/01/25 22:02:20  lasiuk
  * Second Revision
  *
-#include "StRichGeometryDb.h"
-#include "StRichPhysicsDb.h"
+#ifndef ST_NO_NAMESPACES
+//namespace StRichRawData {
+#endif
 
 
 #include "StRichInduceSignal.h"
-#include "StRichOtherAlgorithms.h"
-#include "StRichInduceSignal.h"
-#include "StRichGHit.h"
-#include "StRichGasGain.h"
 #include "StRichGHit.h"
 #ifndef ST_NO_NAMESPACES
 //namespace StRichRawData {
 #endif
 
-    double StRichGasGain::operator()(StRichGHit& hit, double wirePos )
-    {
-	static StRichGeometryDb* geoDB = StRichGeometryDb::getDb();         // DBs
-	static StRichPhysicsDb* physDB = StRichPhysicsDb::getDb();          // idem
-	static Randoms random;
-
-	double q;
-	hit.x = wirePos;
-	hit.y = 0;
-	double p = random.Polia(physDB->polia());
+#include "StRichGeometryDb.h"
+#include "StRichPhysicsDb.h"
+#include "StRichOtherAlgorithms.h"
+#ifdef RICH_WITH_VIEWER
+#include "StRichViewer.h" 
+#endif
+    mPhysicsDb  = StRichPhysicsDb::getDb();
+    mGeometryDb = StRichGeometryDb::getDb();
+{
+    mAnodePadPlaneSeparation = mGeometryDb->anodeToPadSpacing();
+    mPhotonFeedback          = mPhysicsDb->feedBackPhotonProbability();
+    mPhotoConversion         = mPhysicsDb->photoConversionEfficiency();
+    mPhotoConversion         = tmpPhysicsDb->photoConversionEfficiency();
+    mGasGainAmplification    = tmpPhysicsDb->gasGainAmplification();
+    mPolia                   = tmpPhysicsDb->polia();
+}
+    hit.position().setX(wirePos);
+    hit.position().setY(0);
+{
+    hit.position().setY(wirePos);
     hit.position().setZ(mAnodePadPlaneSeparation);
-	if ( StRichViewer::histograms )
-	    StRichViewer::getView()->mPolia->Fill(p);
+    // X better stay where it is
+    double p = mRandom.Polia(mPhysicsDb->polia());
     hit->position().setZ(mAnodePadPlaneSeparation);
-	q = geoDB->ampl_factor * p;    
-                                                          
-	feedbackPhoton( hit, q );                               // produce feedback photon
 
-	return q ; 
-    }
+    double p = mRandom.Polia(mPolia);
 
-  
-    void StRichGasGain::feedbackPhoton( const StRichGHit& hit, double q ) const
-    {
-	StRichInduceSignal induceSignal;
-	static StRichPhysicsDb* physDB = StRichPhysicsDb::getDb();          // declarations
-	static StRichGeometryDb* geoDB = StRichGeometryDb::getDb();         // of temporaries
-	static Randoms random;
-	static const double pi = 3.1415926535897928;
-	static double height    = geoDB->height;
+#ifdef RICH_WITH_VIEWER
+    if ( StRichViewer::histograms )
+    rrs << "StRichGasGain::operator() q = " << q << endl;
+    //q = mPhysDB->ampl_factor * p;
+    feedbackPhoton( hit, q );
 
-	double elec2feed = physDB->avl2phot*q;                
-	double phot2elec = elec2feed*physDB->phot2elec/2;
-	int P = random.Poisson(phot2elec);
-	
-    //StRichInduceSignal induceSignal;
-	if ( StRichViewer::histograms )
-	    StRichViewer::getView()->mFeedback->Fill(P);
-    double phot2elec = elec2feed*(mPhotoConversion)/2;
-	double dist, x, y, z, cost, phi;
+    // produce feedback photon?
+    feedbackPhoton(hit, q, aList);
     if(RRS_DEBUG)
-	for (int i=1; i<=P; i++) {
-	    cost = random.Flat();
-	    phi  = 2*pi *  random.Flat();
-	    
-	    dist = height * sqrt( 1 - cost*cost ) / cost;
-	    x    = hit.x + dist * sin(phi);
-	    z    = hit.z + dist * cos(phi);
-	    y    = height;
+	cout << "StRichGasGain::operator() q = " << q << endl;
+void StRichGasGain::feedbackPhoton( const StRichGHit& hit, double q ) const
+}
+    StRichInduceSignal induceSignal;
+    rrs << "StRichGasGain::feedbackPhoton() P = " << P << endl;
+    //StRichInduceSignal induceSignal;
 
-	    StRichGHit aGHit(x,y,z, hit.quad, hit.id);
-	    induceSignal(aGHit);
-	}
+    double elec2feed = mPhotonFeedback*q;                
+    double phot2elec = elec2feed*(mPhotoConversion)/2;
+    int P = mRandom.Poisson(phot2elec);
+    if(RRS_DEBUG)
+	cout << "StRichGasGain::feedbackPhoton() P = " << P << endl;
+#ifdef RICH_WITH_VIEWER
+    if ( StRichViewer::histograms )
+	StRichViewer::getView()->mFeedback->Fill(P);
+#endif
+	x    = hit.position().x() + dist * sin(phi);
+	z    = hit.position().z() + dist * cos(phi);
+	y    = mAnodePadPlaneSeparation;
+	dist = mAnodePadPlaneSeparation * sqrt( 1 - cost*cost ) / cost;
+	StRichGHit aGHit(x,y,z, hit.id());
+	rrs << "StRichGasGain::feedbackPhoton()-->induceSignal! " << endl; 
+// 	x    = hit.position().x() + dist * sin(phi);
+	StRichGHit aGHit(x,y,z, hit.trackp(), hit.id());
 					    hit->id(),
+					    hit->mass(),
 					    eFeedback));
 	induceSignal(aGHit);
 	cout << "StRichGasGain::feedbackPhoton()-->induceSignal! " << endl; 
