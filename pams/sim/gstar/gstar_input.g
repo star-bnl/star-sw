@@ -1,3 +1,10 @@
+* $Id: gstar_input.g,v 1.25 2000/01/22 17:25:24 nevski Exp $
+*
+* $Log: gstar_input.g,v $
+* Revision 1.25  2000/01/22 17:25:24  nevski
+* unused ier removed
+*
+*
    subroutine gstar_input
 +CDE,typing,gcnum.
    print *,' Gstar User Input for TEXT, TXOLD and FZ formats activated '
