@@ -462,7 +462,7 @@ Bool_t StEmcCalibrationMaker::MakeCalibration()
     Float_t A[5];
     Float_t status = 0;
     for(Int_t i=0;i<5;i++) A[i]=0;
-    if(np==1 && x[1]!=0) // one point only
+    if(np==1 && x[0]!=0) // one point only
     {
       A[0] = 0;
       if(x[0]>0) A[1] = y[0]/x[0]; else A[1] = 0;
@@ -470,7 +470,7 @@ Bool_t StEmcCalibrationMaker::MakeCalibration()
     }
     char line[200];
 		sprintf(line,"ID = %4d  MIP E = %7.5f MipADC = %7.5f E = %7.5f  + %7.5f * ADC ",id,MipE,x[0],A[0],A[1]);
-		if(status!=1 && id<=2400) cout <<line<<endl;
+		if(id<=2400) cout <<line<<endl;
     for(Int_t i=0;i<5;i++)
     {
       Int_t ibin = mCalib->FindBin((Float_t)id,(Float_t)i);
