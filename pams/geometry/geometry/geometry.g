@@ -1,5 +1,13 @@
-* $Id: geometry.g,v 1.69 2003/10/29 22:07:30 potekhin Exp $
+* $Id: geometry.g,v 1.70 2003/10/30 00:15:42 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.70  2003/10/30 00:15:42  potekhin
+* To perfect our already sophisticated taxonomy of
+* the geometry tags, we rename Y2003C into Y2004,
+* because the run for which it is meant will start
+* in early 2004 anyway. Anyone to confuse 2003
+* and 2004, from now on, will be jailed and
+* possibly deported.
+*
 * Revision 1.69  2003/10/29 22:07:30  potekhin
 * Two changes:
 * 1) As agreed, I swap the tags y2003(b,c) to arrange
@@ -541,6 +549,7 @@ If LL>1
 * approximation for the early 2003 run) which we were lacking so far.
 * This is achieved by setting CorrNum to 2.
 * The endcap EMC has one third of one wheel, as before
+* For more info on the extra material in SVT -- see web page
 ****************************************************************************************
   on Y2003B    { correction 2 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
                   "svt: 3 layers ";
@@ -569,18 +578,48 @@ If LL>1
                      CorrNum = 2;
                 }
 
+****************************************************************************************
+  on Y2003X    { same as year2003 (with all its deficiencies) but with full calorimeters and phmd
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     btofconfig=5;
+                  "calb" 
+                     ems=on ;
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
+                  "ecal" 
+                     ecal_config=3   "both wheels"
+                     ecal_fill=3     "all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+                  "geometry correction "
+                     CorrNum = 1;
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdVersion = 1;
+                }
+
 *
 **********************************************************************
-* Corrections and enhancements in y2003c:
-*    extra material in SVT (see web page)
+* Corrections and enhancements in y2004:
 *    added the Photon Multiplicity Detector (PHMD)
 *    The endcap EMC has one complete wheel in the west
 *    To be done: 3/4 of the second half of the barrel!
 *
-*                >>>THIS IS THE MASTER GEOMETRY FOR THE FALL'03<<<
+*                >>>THIS IS THE MASTER GEOMETRY FOR THE SPRING'04<<<
 *
 ****************************************************************************************
-  on Y2003C    { correction 2 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD; 
+  on Y2004     { baseline 2004 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD; 
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
@@ -612,37 +651,6 @@ If LL>1
                      sisd=on;
                      SisdVersion = 1;
                 }
-****************************************************************************************
-  on Y2003X    { same as year2003 (with all its deficiencies) but with full calorimeters
-                  "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
-                  "tpc: standard, i.e.  "
-                     mwc=on " Wultiwire chambers are read-out ";
-                     pse=on " inner sector has pseudo padrows ";
-                  "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
-                     btofconfig=5;
-                  "calb" 
-                     ems=on ;
-                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
-                  "ecal" 
-                     ecal_config=3   "both wheels"
-                     ecal_fill=3     "all sectors filled "
-                  "beam-beam counter "
-                     bbcm=on
-                  "forward pion detector "
-                     fpdm=on
-                  "field version "
-                     Mf=4;      "tabulated field, with correction "
-                  "geometry correction "
-                     CorrNum = 1;
-                  "Photon Multiplicity Detector Version "
-                     phmd=on;
-                     PhmdVersion = 1;
-                }
-
 
   on HADR_ON    { all Geant Physics On;                                       }
   on HADR_OFF   { all Geant Physics on, except for hadronic interactions; 
