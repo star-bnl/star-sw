@@ -1,5 +1,8 @@
-* $Id: tpt_row_sect_pnt.F,v 1.7 1998/09/01 13:32:39 sakrejda Exp $
+* $Id: tpt_row_sect_pnt.F,v 1.8 1998/09/04 14:44:19 sakrejda Exp $
 * $Log: tpt_row_sect_pnt.F,v $
+* Revision 1.8  1998/09/04 14:44:19  sakrejda
+* sector assignement for poorly reconstructed hits around sector edges fixed
+*
 * Revision 1.7  1998/09/01 13:32:39  sakrejda
 * restored sector numbering 1-24 in tphit.row
 *
@@ -91,6 +94,8 @@ c        check what xy and z says about the sector.
            write(m132,*) 'TPTI1-E1 sector missmatch',isec3,isec2,xglobal
            call message(m132,1,idI1)
            isec3=isec2
+c          repair it
+           hit(i).row = isec3*100+mod(hit(i).row,100)
          endif
          if(xglobal(3).gt.0) then
             rhit(i)=hit(i).row
