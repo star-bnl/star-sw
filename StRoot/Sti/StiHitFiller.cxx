@@ -10,7 +10,7 @@
 //Sti
 #include "StiHit.h"
 #include "StiHitContainer.h"
-#include "StiHitFactory.h"
+#include "StiObjectFactory.h"
 #include "StiHitTranslator.h"
 
 #include "StiHitFiller.h"
@@ -55,7 +55,7 @@ void StiHitFiller::fillTpcHits(StiHitContainer* store, StiHitFactory* factory) c
 	    const StSPtrVecTpcHit& hitvec = padrowHits->hits();
 	    //Loop over hits
 	    for (StSPtrVecTpcHitIterator iter = hitvec.begin(); iter != hitvec.end(); iter++) {
-		const StTpcHit* hit = dynamic_cast<const StTpcHit*>(*iter);
+		StTpcHit* hit = dynamic_cast<StTpcHit*>(*iter);
 		if (hit) {
 		    //Now we have the hit
 		    StiHit* stihit = new StiHit();

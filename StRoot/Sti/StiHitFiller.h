@@ -9,10 +9,10 @@
 
 #include <vector>
 #include "../pams/global/inc/StDetectorId.h" //for detector enumerations
+#include "StiFactoryTypedefs.h"
 
 class ostream;
 class StiHitContainer;
-class StiHitFactory;
 class StiHitTranslator;
 class StEvent;
 
