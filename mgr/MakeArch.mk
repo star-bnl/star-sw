@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.79  1999/06/24 22:46:20  fisyak
+#  adjust for egcs-1.1.2 on Linux
+#
 #  Revision 1.78  1999/06/21 12:48:44  fisyak
 #  Fix ROOT_LEVEL for dev
 #
@@ -212,7 +215,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/06/21 12:48:44 $ 
+#             Last modification $Date: 1999/06/24 22:46:20 $ 
 #. default setings
 
 MAKE  := gmake
@@ -444,7 +447,7 @@ endif
 ##FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
 #  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -lg2c -lI77
 #  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib -lg2c -lI77 -lF77
-  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -lg2c
+  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c
 # -L/usr/local/lib -L/usr/local/egcs-1.1.1 -L/usr/local/egcs-1.1.1/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.60 -lg2c 
 #  SL_EXTRA_LIB := -L/usr/pgi/linux86/lib -lpgc
 ifneq (,$(findstring $(STAR_SYS),i386_linux2))
