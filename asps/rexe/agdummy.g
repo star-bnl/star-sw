@@ -43,7 +43,13 @@ Replace[LIST #;] with [ #1 _
              HMINUT,HDIFFB,HRENAME,HNTDUP,HIJE,HMCINI,HMCMLL,
  "somesg "   rm48,rm48in,rsfact,rsfinv,rsfeqn,dsfact,rfft,cfft,
  " math  "   sortrq,dgmlt1,dgmlt2,
-             dzddiv
+             dzddiv,
+             SBIT0,SBIT1,SBYT,JBIT,JBYT,UCTOH,UHTOC,PROB,FREQ,
+             DENLAN,DSTLAN,DIFLAN,XM1LAN,XM2LAN,RANLAN,
+             CHISIN,VDOT,VADD,VSCALE,CROSS,
+             VMOD,VDIST,VDOTN2,VSUB,VUNIT,
+             BESJ0,BESJ1,BESY0,BESY1,BESI0,BESI1,BESK0,BESK1,
+             ERF,ERFC,GAMMA
  "tr-prop    trprfn,trprop,trscsp,trspsc,trscsd,trsdsc,Ssmt5t,Xmm55 "
  ]
 +CDE,GCFLAG.
