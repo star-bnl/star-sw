@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.25 2001/05/30 17:45:53 perev Exp $
+ * $Id: StEvent.cxx,v 2.26 2001/06/05 21:59:56 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.26  2001/06/05 21:59:56  perev
+ * Split in Streamer added
+ *
  * Revision 2.25  2001/05/30 17:45:53  perev
  * StEvent branching
  *
@@ -126,8 +129,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.25 2001/05/30 17:45:53 perev Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.25 2001/05/30 17:45:53 perev Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.26 2001/06/05 21:59:56 perev Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.26 2001/06/05 21:59:56 perev Exp $";
 
 ClassImp(StEvent)
 
@@ -183,6 +186,7 @@ _LOOKUP(StSPtrVecXiVertex)
 _LOOKUP(StSPtrVecKinkVertex)
 _LOOKUP(StSPtrVecPsd)
 _LOOKUP(StPsd)
+_LOOKUP(StEventClusteringHints)
 
 #else /*-HPUX*/
 template<class T> void
@@ -959,6 +963,12 @@ void StEvent::Streamer(TBuffer &R__b)
       }
 
    }  else /*writing*/ {
+
+      TDataSetIter next(this);
+      TDataSet *ds;
+      while ((ds=next())) 
+      { if (ds->IsA()==StEventBranch::Class()) break;}
+      if (!ds) Split();
 
       R__c = R__b.WriteVersion(Class(), kTRUE);
       StXRefMain::Streamer(R__b);
