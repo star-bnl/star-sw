@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.15 2000/04/25 18:27:48 porter Exp $
+ * $Id: StDbBroker.h,v 1.16 2000/06/14 13:39:05 didenko Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.16  2000/06/14 13:39:05  didenko
+ * Add ClassDef/ClassImp
+ *
  * Revision 1.15  2000/04/25 18:27:48  porter
  * Added flavor and production time as query fields to pass to db-api
  *
@@ -229,7 +232,7 @@ struct oldDescriptor {
     StDbManager* mgr;
 
 
-  //ClassDef(StDbBroker,0)
+  ClassDef(StDbBroker,0)
 };
 
 extern "C" void DbFill(unsigned int *,         //datetime[4]

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.21 2000/06/05 22:13:53 vanyashi Exp $
+ * $Id: StDbBroker.cxx,v 1.22 2000/06/14 13:39:05 didenko Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.22  2000/06/14 13:39:05  didenko
+ * Add ClassDef/ClassImp
+ *
  * Revision 1.21  2000/06/05 22:13:53  vanyashi
  * added const needed for tableDescriptor
  *
@@ -103,7 +106,7 @@
 #include "StDbLib/StDbTableDescriptor.h" 
 
 //
-//ClassImp(StDbBroker)
+ClassImp(StDbBroker)
 //______________________________________________________________________________
 //the only remaining St_Table dependence is in this function 
 char **StDbBroker::GetComments(St_Table *parentTable)
