@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.34 2004/07/29 01:36:59 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.35 2004/11/03 21:36:04 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.35  2004/11/03 21:36:04  caines
+ * Remove calls that need database and event time information to correct place in InitRun not Init
+ *
  * Revision 1.34  2004/07/29 01:36:59  caines
  * Changes for using the drift curves
  *
@@ -194,13 +197,13 @@ Int_t StSvtHitMaker::Init()
 
  // 		geometry parameters
 
-  if( GetSvtGeometry() != kStOK) return kStWarn;
+  //if( GetSvtGeometry() != kStOK) return kStWarn;
 
   // drift velocity
-  if( GetSvtDriftVelocity() != kStOK) return kStWarn;
+  //  if( GetSvtDriftVelocity() != kStOK) return kStWarn;
 
   // drift curves from Robert
-  if( GetSvtDriftCurve() != kStOK) return kStWarn;
+  //if( GetSvtDriftCurve() != kStOK) return kStWarn;
 
   m_x_vs_y = new TH2F("si_x_vs_y","X vs Y of Si space points",
 		      300,-30,30,300,-30,30);
