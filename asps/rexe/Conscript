@@ -6,101 +6,83 @@ $build =~ s/\\/\//g;
 (my $Dir = $obj_dir) =~ s/$build\///g;
 my $ObjDir = "#" . $obj_dir; 
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
-my $OPTSTAR  = $env->{ENV}->{OPTSTAR};
 my $pkg  = "root4star";
 my $pkgN = $pkg . "N";
 my $ROOTLIBS = $env->{ROOTLIBS};
 if ($ROOTLIBS =~ /-lNew/) {$ROOTLIBS =~ s/-lNew//;}
-my @GDIRS = qw(.
-	       ../agi/gst/agsim
-	       ../agi/gst/geant
-	       ../agi/gst/zebra
-	       ../agi/gst/dzdoc
-	      );
-
 my $PKG  = $pkg . $env->{SUFEXE};
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB};
 my $LIBPKG = $PKG . "." . $env->{SUFLIB};
-my @h_files = script::find_hfiles($Dir);
 my $FCPATH = $env->{FCPATH};
 my $FFLAGS = $env->{FFLAGS};
 my $FPPFLAGS = $env->{FPPFLAGS};
 my $CPPFLAGS = $env->{CPPFLAGS};
 my $FLIBS = $env->{FLIBS};
-my $PGI = $env->{ENV}->{PGI};
-my $PGILIBS = "";
-my $Libraries =  $env->{Libraries};
 my $LD = $env->{LD};
-my $LDFLAGS = "";#$env->{LDFLAGS};
-if ($LD eq 'gcc' or $LD eq 'g++' or $LD eq 'icc'){
-  $LDFLAGS = "-Wl,-export-dynamic -Wl,-noinhibit-exec,-Bdynamic";
-}
-if ($PGI) {
-  if ($STAR_SYS =~ /^i386/) {
-    if( -e "$OPTSTAR/lib/libpgf77S.so"){
-      $PGILIBS .= " -L" . $OPTSTAR . "/lib -lpgf77S";
-      if( -e "$OPTSTAR/lib/libpgf77A.a"){
-	$PGILIBS .= " -lpgf77A";
-      }
-    }
+my $LDFLAGS = $env->{LDFLAGS};
+my $LIBS = "";#$env->{LIBS};
+my $Libraries = $env->{Libraries};
+my $FC        = $env->{FC};
+my $PGI       = $env->{ENV}->{PGI};
+my $FLIBS     = $env->{FLIBS};
+$LDFLAGS .= $env->{LDEXPORT};
+$LIBS    .= $env->{LDALL} . "  -lstarsim " . $env->{LDNONE};
+if ($FC =~ /pgf77/) {
+#  if ($env->{CXX_VERSION} < 3) {
+#    if( -e "$OPTSTAR/lib/libpgf77S.so"){
+#      $LIBS .= " -L" . $OPTSTAR . "/lib -lpgf77S";
+#      if( -e "$OPTSTAR/lib/libpgf77A.a"){
+#	$LIBS .= " -lpgf77A";
+#      }
+#    }
+#  }
+#  else {
+    $LIBS .= " -L$PGI/linux86/lib " . $env->{LDALL};
     if ( -e "$PGI/linux86/lib/libpgftnrtl.a"){
-      $PGILIBS .= " $PGI/linux86/lib/libpgftnrtl.a ";
-    } else {
-      $PGILIBS .= " -L$PGI/linux86/lib -lpgftnrtl ";
-    }
+      $LIBS .= " $PGI/linux86/lib/libpgftnrtl.a";
+    } 
     if ( -e "$PGI/linux86/lib/libpgc.a"){
-      $PGILIBS .= " $PGI/linux86/lib/libpgc.a ";
-    } else {
-      $PGILIBS .= " -L$PGI/linux86/lib -lpgc";
+      $LIBS .= " $PGI/linux86/lib/libpgc.a";
     }
-  }
-  else {
-    $PGILIBS .= " -L$PGI/linux86/lib";
-    $PGILIBS .= " -Wl,--whole-archive -Wl,-Bstatic";
-    if ( -e "$PGI/linux86/lib/libpgftnrtl.a"){
-      $PGILIBS .= " -lpgftnrtl";
-    }
-    if ( -e "$PGI/linux86/lib/libpgc.a"){
-      $PGILIBS .= " -lpgc";
-    }
-    if ( -e "$PGI/linux86/lib/libpgnod_prof.a"){
-      $PGILIBS .= " -lpgnod_prof";
-    }
-    $PGILIBS .= " -Wl,--no-whole-archive -Wl,-Bdynamic";
-    $Libraries  .= " ". $PGILIBS;
-  }
-  
-#  print "PGILIBS = $PGILIBS ====================================\n";
+#    if ( -e "$PGI/linux86/lib/libpgnod_prof.a"){
+#      $LIBS .= " -lpgnod_prof";
+#    }
+    $LIBS .= $env->{LDNONE};
+#  }
+    $FLIBS .= " -lpgf90  -lpgf90_rpm1 -lpgf902 -lpgf90rtl";
 }
-$FCPATH  = "#asps/agi" . $main::PATH_SEPARATOR . "#asps/agi/gst" . $main::PATH_SEPARATOR . $env->{FCPATH};
+#if ($LD eq 'gcc' or $LD eq 'g++' or $LD eq 'icc') {
+#  $LIBS .= $env->{LDALL} . " " . $env->{LIBG2C};
+#  if ($LD ne 'icc') {$LIBS .= " " . $env->{LIBSTDC}}
+#  $LIBS .= $env->{LDNONE};
+#}
+
 $FPPFLAGS = "-D__ROOT__ -DCERNLIB_TYPE -DCERNLIB_UNIX -DCERNLIB_BSLASH -DCERNLIB_DZDOC -DCERNLIB_SHL ".
   "-DCERNLIB_NONEWL -DCERNLIB_HIGZ -DCERNLIB_CG  -DCERNLIB_HADRON";
   $CPPFLAGS  = "-D__ROOT__ -DCERNLIB_QMGLIBC -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL " .
   "-DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
-if ($STAR_SYS =~ /egcs$/) {$CPPFLAGS .= " -DPrivateMalloc";}
+if ($STAR_SYS =~ /g77/) {$CPPFLAGS .= " -DPrivateMalloc";}
 print "build $pkg with cons\n";
 my $LIBPATH = $env->{ENV}->{ROOTSYS} . "/lib" . $main::PATH_SEPARATOR . $env->{LIBPATH};
-my $LIBS  = $env->{ROOTLIBS} . " " . $env->{ROOTGLIBS} . " " . $env->{RINTLIBS};
+$LIBS .= $env->{ROOTLIBS} . " " . $env->{ROOTGLIBS} . " " . $env->{RINTLIBS};
 $LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{LIBDIR};
-if ($env->{ENV}->{STAR}) {$LIBS .= " -lTable";}
-my $FC        = $env->{FC};
+if ($env->{ENV}->{STAR}) {$LIBS .= " -lGeom -lTable";}
 my $FEXTEND   = $env->{FEXTEND};
-if ($PGI && $STAR_SYS =~ /^rh/ or  $STAR_SYS =~ /i386/) {
+if ($FC =~ /^pgf/) {
   $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
   $FFLAGS   = $env->{G77FLAGS}; 
   $FEXTEND  = $env->{G77EXTEND};
   $FPPFLAGS .= " -DCERNLIB_LINUX";
 }
-
-$Libraries  .= " " . $env->{CERNLIBS};
-$Libraries  .= " " . $env->{Packages}->{MYSQL}->{LIBS};
-$Libraries  .= " " . $env->{FLIBS} . " " . $env->{CLIBS} . " " . $env->{SYSLIBS} . " -lstdc++";
-chomp($Libraries); print "Libraries = $Libraries\n" if $param::debug;
-if ($STAR_SYS =~ /^i386/) {$Libraries  .= " ". $PGILIBS;}
+$LIBS .= " -lgeant321 -lgcalor"; 
+$LIBS  .= " " . $env->{CERNLIBS};
+$LIBS  .= $env->{LDALL};
+$LIBS  .= " " . $env->{Packages}->{MYSQL}->{LIBS};
+$LIBS  .= $env->{LDNONE};
+$LIBS  .= " " . $FLIBS . " " . $env->{CLIBS};#   " " . $env->{SYSLIBS} ;
 if ($STAR_SYS =~ /^sun4x_5.$/) {
     if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }
     $LIBS .= " -lCstd";
-  
 }
 $env2 = $env->clone('FC'           => $FC,
 		    'FPPFLAGS'     => $FPPFLAGS,
@@ -117,19 +99,9 @@ $env2 = $env->clone('FC'           => $FC,
 		   );
 my $LIBSN = $LIBS; $LIBSN =~ s/-lRint/-lRint -lNew/;
 $envN = $env2->clone('LIBS'         => $LIBSN);
-my @src = ();
-foreach my $d (@GDIRS){
-  my $dir = $Dir . "/" . $d;
-  my @sources  = script::find_sources($dir); print "In Dir = $dir sources = @sources\n" if $param::debug;
-  foreach my $s (@sources) {
-    my $ss = $d . "/" . $s;
-    next if $ss =~ /\/gst\/agsim\/agdummy\.g/ or $ss =~ /traceqc/ or $ss =~ /ighcxy/;
-    next if $ss =~ /\/gst\/geant\/grndm\.F/ or $ss =~ /\/gst\/geant\/grndmq\.F/;
-    next if $FC !~ /g77/ and $ss =~ /df\.F$/;
-    push @src, $ss; 
-  }
-}
+my @src = qw(MAIN_rmain.cxx);#  dummy.g);
 my @dirs = split /$main::PATH_SEPARATOR/,$env->{CPPPATH};
+if ($STAR_HOST_SYS =~ /g77/) {push @src, "df.F";}
 for my $cpp (@dirs,$Dir) {
   next if $cpp =~ ' ';
   if ($cpp =~ /cern/ ||
@@ -143,30 +115,29 @@ my $ROOTCINT_CPPPATH = $cscanner->iflags($env2);
 my $DIR = Cwd::cwd(); 
 my $line;
 my @Defs = ();
-if ($Dir !~ /pams\//) {
-  foreach $h (@h_files) {
-    if ($h =~ /LinkDef/ || $h =~ /Stypes/) {push @Defs, $h; next;}
-    my $hh = $Dir . "/" . $h;
-    if (-r $hh) {
-      open (In,$hh) or die "Can't open $hh";
-      while ($line = <In>) {if ($line =~/ClassDef/ || $line =~ /StCollectionDef/) {push @Defs, $h; goto ENDL;}}
-      close(In);
-    }
-    else {      
-      foreach my $Rep (@Repo) {
-	my $RepDir = $Rep . "/" . $Dir;
-	if (-d $RepDir) {
-	  my $hh = $RepDir . "/" . $h;
-	  if (-r $hh) {
-	    open (In,$hh) or die "Can't open $hh";
-	    while ($line = <In>) {if ($line =~/ClassDef/ || $line =~ /StCollectionDef/) {push @Defs, $h; goto ENDL;}}
-	    close(In);
-	  }
+my @h_files = script::find_hfiles($Dir);# print "$Dir : h_files = @h_files\n";
+foreach $h (@h_files) {#print "h = $h\n";
+  if ($h =~ /LinkDef/ || $h =~ /Stypes/) {push @Defs, $h; next;}
+  my $hh = $Dir . "/" . $h;
+  if (-r $hh) {
+    open (In,$hh) or die "Can't open $hh";
+    while ($line = <In>) {if ($line =~/ClassDef/ || $line =~ /StCollectionDef/) {push @Defs, $h; goto ENDL;}}
+    close(In);
+  }
+  else {      
+    foreach my $Rep (@Repo) {
+      my $RepDir = $Rep . "/" . $Dir;
+      if (-d $RepDir) {
+	my $hh = $RepDir . "/" . $h;
+	if (-r $hh) {
+	  open (In,$hh) or die "Can't open $hh";
+	  while ($line = <In>) {if ($line =~/ClassDef/ || $line =~ /StCollectionDef/) {push @Defs, $h; goto ENDL;}}
+	  close(In);
 	}
       }
     }
-  ENDL:
   }
+ ENDL:
 }
 if ($#Defs > -1) {
   my @CintFiles = 
@@ -180,6 +151,17 @@ if ($#Defs > -1) {
   my $cint =  $CintFiles[0];
   push @src, $cint; 
 }
+my $TG3dir = "TGeant3";
+foreach my $d ($TG3dir){
+  my $dir = $Dir . "/" . $d;
+  my @sources  = script::find_sources($dir); print "In Dir = $dir sources = @sources\n" if $param::debug;
+  foreach my $s (@sources) {
+    my $ss = $d . "/" . $s;
+    my $ss = $d . "/" . $s;# print "FC = $FC and $ss\n";
+    if ($FC != /g77/ and $ss =~ /\/df\.F$/) {print "$ss ==========skipped\n" if $param::debug; next;}
+    push @src, $ss; 
+  }
+}
 
 if ($#src > -1) {
   script::Keep $pkg;
@@ -187,10 +169,15 @@ if ($#src > -1) {
   Depends $env2 $pkg, $BIN . "/stic";
   Program      $env2 $pkg, @src;
   Install $env2 $BIN, $pkg;
-  
   InstallAs $env2 $BIN . "/Root.exe", $pkg;
   my @o = Objects $env2 @src;
   script::Keep $pkgN;
   Program      $envN $pkgN, @o;
   Install $envN $BIN, $pkgN;
+  my $Starsim = "#asps/Simulation/starsim/";
+  my @list = qw(atlsim.makefile atlsim.bank atlsim.logon.kumac);
+  foreach my $f (@list) {
+    my $s = $f; $s =~ s/atlsim/starsim/; #  print "$l => $s\n";
+    InstallAs $env2 $s, $Starsim . $f;
+  } 
 }  

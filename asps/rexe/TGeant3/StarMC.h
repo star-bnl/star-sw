@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: StarMC.h,v 1.3 2000/04/24 15:37:35 fisyak Exp $ */
+/* $Id: StarMC.h,v 1.4 2004/03/01 16:02:49 fisyak Exp $ */
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
@@ -15,12 +15,14 @@
 
 #include <TNamed.h>
 #include <TLorentzVector.h>
+#include "TRandom.h"
 
 class StarMC : public TNamed 
 {
 
 private:
   static StarMC* fgMC;
+  TRandom*            fRandom;  //! Random number generator
 
 public:
   StarMC(const char *name, const char *title);
@@ -125,7 +127,8 @@ public:
   virtual  void  InitLego()=0;
   virtual  void  Gfpart(Int_t, char*, Int_t&, Float_t&, Float_t&, Float_t&)=0; 
   virtual  void  Gspart(Int_t, const char*, Int_t, Float_t, Float_t, Float_t)=0; 
-
+  virtual void SetRandom(TRandom* random);
+  virtual TRandom*           GetRandom() const  { return fRandom; }
   ClassDef(StarMC,1) //Generic MonteCarlo Class
 
 };

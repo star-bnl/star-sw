@@ -12,9 +12,11 @@
  * about the suitability of this software for any purpose. It is          *
  * provided "as is" without express or implied warranty.                  *
  **************************************************************************/
-
 /*
 $Log: TGeant3.cxx,v $
+Revision 1.11  2004/03/01 16:02:49  fisyak
+new interface to simulation based on starsim
+
 Revision 1.10  2001/03/30 21:26:19  jeromel
 Return type fix for Insure smooth compilation
 
@@ -88,6 +90,7 @@ Introduction of the Copyright and cvs Log
 
 #include "TGeant3.h" 
 #include "TROOT.h" 
+#include "TRegexp.h"
 #ifdef __HIGZ__
 #include <THIGZ.h>
 #endif
@@ -157,14 +160,19 @@ Introduction of the Copyright and cvs Log
 #define    glvolu	 F77_NAME(glvolu,GLVOLU)
 #define    gufld	 F77_NAME(gufld,GUFLD)
 #define    gprint	 F77_NAME(gprint,GPRINT)
-#define    agmain	 F77_NAME(agmain,AGMAIN)
+#define    aginit	 F77_NAME(aginit,AGINIT)
+#define    agpawq	 F77_NAME(agpawq,AGPAWQ)
+#define    agexit	 F77_NAME(agexit,AGEXIT)
 #define    agxuser	 F77_NAME(agxuser,AGXUSER)
 #define    agxinit	 F77_NAME(agxinit,AGXINIT)
 #define    kuexel	 F77_NAME(kuexel,KUEXEL)
+#define    kuexec	 F77_NAME(kuexec,KUEXEC)
 #define    dzddiv	 F77_NAME(dzddiv,DZDDIV)
 #define    gfrotm	 F77_NAME(gfrotm,GFROTM)
 #define    gfxzrm	 F77_NAME(gfxzrm,GFXZRM)
+#if 0
 #define    agsens	 F77_NAME(agsens,AGSENS)
+#endif
 #define    gdinit	 F77_NAME(gdinit,GDINIT)
 #define    gdopt	 F77_NAME(gdopt,GDOPT)
 #define    gdraw	 F77_NAME(gdraw,GDRAW)
@@ -202,6 +210,7 @@ Introduction of the Copyright and cvs Log
 #define    gfnhit	 F77_NAME(gfnhit,GFNHIT)
 #define    gfrung	 F77_NAME(gfrung,GFRUNG)
 #define    gfhead	 F77_NAME(gfhead,GFHEAD)
+#define    gfpath	 F77_NAME(gfpath,GFPATH)
 #if 0
 #define    csaddr	 F77_NAME(csaddr,CSADDR)
 #define    csjcal	 F77_NAME(csjcal,CSJCAL)
@@ -215,8 +224,11 @@ Introduction of the Copyright and cvs Log
 #endif 
 
 //____________________________________________________________________________ 
+extern Int_t       Margc;  
+extern Char_t **   Margv;   // local
 extern "C" 
 {
+  void k_setar(int,char**);
   //
   // Prototypes for GEANT functions
   //
@@ -283,12 +295,17 @@ extern "C"
   void type_of_call gtreve(); 
 
   void type_of_call gtreve_root(); 
-
-  void type_of_call grndm(Float_t *, const Int_t &); 
+#if 0
+  void type_of_call grndm(Float_t *r, const Int_t &n)
+  {  
+    TRandom *rr=gMC->GetRandom();
+    for(Int_t i=0; i<n; r[i++]=rr->Rndm());
+  }
 
   void type_of_call grndmq(Int_t &, Int_t &, const Int_t &,
-			   DEFCHARD DEFCHARL); 
-
+			   DEFCHARD DEFCHARL)
+  {/*printf("Dummy grndmq called\n");*/}
+#endif
   void type_of_call gdtom(Float_t *, Float_t *, Int_t &); 
 
   void type_of_call glmoth(DEFCHARD, Int_t &, Int_t &, Int_t *,
@@ -437,19 +454,25 @@ extern "C"
   void type_of_call eufill (Int_t &, Float_t*, Float_t*);
   void type_of_call eufilp (Int_t &, Float_t*, Float_t*, Float_t*);
   void type_of_call eufilv (Int_t &, Float_t*, DEFCHARD, Int_t *, Int_t * DEFCHARL);
-  void type_of_call agmain(Int_t &,Int_t &,Int_t &);
+  void type_of_call aginit();
+  void type_of_call agpawq();
+  void type_of_call agexit();
   void type_of_call gufld(Float_t *, Float_t *);
   void type_of_call agxuser();
   void type_of_call agxinit();
+  void type_of_call kuexec   (DEFCHARD DEFCHARL);
   void type_of_call kuexel   (DEFCHARD DEFCHARL);
   void type_of_call set_kupatl (DEFCHARD,Int_t* DEFCHARL);
   void type_of_call gfrotm   (Int_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&);
   void type_of_call gfxzrm   (Int_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&,
 			      Float_t&,Float_t&,Float_t&,Float_t&);
+#if 0
   Int_t type_of_call agsens   (DEFCHARD DEFCHARL);
+#endif
   void type_of_call gfnhit (DEFCHARD,DEFCHARD,int& DEFCHARL DEFCHARL);
   void type_of_call gfrung (Int_t &, Int_t *, Int_t &, Float_t *);
   void type_of_call gfhead (Int_t &, Int_t *, Int_t &, Float_t *);
+  void type_of_call gfpath (Int_t &, Int_t &, Int_t *, Int_t &, Int_t *, Int_t *);
 #if 0
   ULong_t*  type_of_call csaddr(DEFCHARD DEFCHARL);
   long int type_of_call csjcal(
@@ -479,7 +502,14 @@ TGeant3::TGeant3()
   // Default constructor
   //
 } 
- 
+//____________________________________________________________________________ 
+TGeant3::~TGeant3() {
+  if(fVolNames) {
+    delete [] fVolNames;
+    fVolNames=0;
+  }
+  Agexit();
+} 
 //____________________________________________________________________________ 
 TGeant3::TGeant3(const char *title, Int_t nwgeant, Int_t nwpaw, Int_t iwtype) 
        :StarMC("TGeant3",title) 
@@ -488,11 +518,11 @@ TGeant3::TGeant3(const char *title, Int_t nwgeant, Int_t nwpaw, Int_t iwtype)
   // Standard constructor for TGeant3 with ZEBRA initialisation
   // 
   fgGeant = this;   
-  printf (" calling agmain \n");
+  printf (" calling aginit \n");
 #ifdef __HIGZ__
   if (!higz) higz = new THIGZ(defSize);
 #endif
-  Agmain(nwgeant,nwpaw,iwtype); 
+  Aginit(nwgeant,nwpaw,iwtype); 
 #if 0
    
   if(nwgeant) {
@@ -509,6 +539,9 @@ TGeant3::TGeant3(const char *title, Int_t nwgeant, Int_t nwpaw, Int_t iwtype)
   //
   // Zero number of particles
   fNPDGCodes=0;
+#if 0
+  DefineParticles();
+#endif
 } 
 
 //____________________________________________________________________________ 
@@ -1563,7 +1596,6 @@ Float_t TGeant3::Etot() const
   //
   return fGctrak->getot;
 }
-
 //_____________________________________________________________________________
 void TGeant3::Rndm(Float_t* r, const Int_t n) const
 {
@@ -1573,7 +1605,6 @@ void TGeant3::Rndm(Float_t* r, const Int_t n) const
   //
   Grndm(r,n);
 }
-
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 //
 //                        Functions from GBASE
@@ -1753,7 +1784,7 @@ void  TGeant3::Gfpart(Int_t ipart, char *name, Int_t &itrtyp,
   //
   Float_t *ubuf=0; 
   Int_t   nbuf; 
-  Int_t igpart = IdFromPDG(ipart);
+  Int_t igpart = ipart; //IdFromPDG(ipart);
   gfpart(igpart, PASSCHARD(name), itrtyp, amass, charge, tlife, ubuf, nbuf
 	 PASSCHARL(name)); 
 } 
@@ -2178,7 +2209,26 @@ void  TGeant3::Gtreve_root()
   gtreve_root(); 
 #endif
 } 
+//_____________________________________________________________________________
+void  TGeant3::Grndm(Float_t *rvec, const Int_t len) const 
+{
+  //
+  //  To set/retrieve the seed of the random number generator
+  //
+  TRandom* r=gMC->GetRandom();
+  for(Int_t i=0; i<len; rvec[i++]=r->Rndm());
+}
 
+//_____________________________________________________________________________
+void  TGeant3::Grndmq(Int_t &/*is1*/, Int_t &/*is2*/, const Int_t /*iseq*/,
+		      const Text_t */*chopt*/)
+{
+  //
+  //  To set/retrieve the seed of the random number generator
+  //
+  /*printf("Dummy grndmq called\n");*/
+}
+#if 0
 //_____________________________________________________________________________
 void  TGeant3::Grndm(Float_t *rvec, const Int_t len) const
 {
@@ -2197,6 +2247,7 @@ void  TGeant3::Grndmq(Int_t &is1, Int_t &is2, const Int_t iseq,
   //
   grndmq(is1,is2,iseq,PASSCHARD(chopt) PASSCHARL(chopt));
 }
+#endif
 
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 //
@@ -2556,13 +2607,14 @@ Float_t* TGeant3::Gufld(Float_t *x, Float_t *bf)
 void TGeant3::Gfnhit(const Char_t *cset, const Char_t *cdet, Int_t &nhits){
   gfnhit(PASSCHARD(cset), PASSCHARD(cdet), nhits PASSCHARL(cset) PASSCHARL(cdet));
 }
+#if 0
 //___________________________________________ 
 Bool_t  TGeant3::Agsens(const Char_t *name)
 { 
   // defines whether the node "name" is "sensible"
    return (Bool_t) agsens(PASSCHARD(name) PASSCHARL(name));
 } 
- 
+#endif 
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 //
 //           T H E    D R A W I N G   P A C K A G E
@@ -3563,13 +3615,76 @@ void TGeant3::Eufilv(Int_t &n, Float_t* ein, const Char_t *cnamv, Int_t *numv, I
   eufilv (n ,ein, PASSCHARD(cnamv), numv, Iovl PASSCHARL(cnamv));
 }
 //______________________________________________________________________________
-void TGeant3::Agmain(Int_t &nwgeant,Int_t &nwpaw,Int_t &iwtype) {agmain(nwgeant,nwpaw,iwtype);}
+void TGeant3::Agmain(Int_t &nwgeant,Int_t &nwpaw,Int_t &iwtype) {
+  Aginit(nwgeant,nwpaw,iwtype);
+  Agpawq();
+}
 //______________________________________________________________________________
 void TGeant3::Agxuser() {agxuser();}
 //______________________________________________________________________________
 void TGeant3::Agxinit() {agxinit();}
+//______________________________________________________________________________
+void TGeant3::Aginit(Int_t &nwgeant, Int_t &nwpaw, Int_t &iwtype) {
+  TString command("");
+  command += " -g "; command += nwgeant;
+  command += " -p "; command += nwpaw;
+  command += " -w "; command += iwtype;
+  Aginit(command.Data());
+}
+//______________________________________________________________________________
+void TGeant3::Aginit(const Char_t *command) {
+  TString tChain(command);
+  //  static Int_t argc = 0;
+  //  static Char_t *argv[200];
+  static TString ProgName(Margv[0]);
+  ProgName.ReplaceAll("root4star","starsim");
+  Margv[0] = (Char_t *) ProgName.Data();
+  Ssiz_t begin, index, end, end2;
+  begin = index = end = end2 = 0;
+  TRegexp separator("[^ ;,\\t\\s]+");
+#if 0
+  int ig, ip, iw; ig = ip = iw = 0;
+  // filter root4star options
+  for (int i = 0; i < Margc; i++) {
+    TString t(Margv[i]);
+    t.ToLower();
+    if (t == "-g") ig = 1;
+    if (t == "-p") ip = 1;
+    if (t == "-w") iw = 1;
+    if (t == "-q" || t == "-b") continue;
+    argv[argc] = Margv[i];
+    argc++;
+  }
+#endif
+  Margc = 1; // keep program name
+  //  Margc = 0; // don't keep program name
+  while ( (begin < tChain.Length()) && (index != kNPOS) ) {
+    // loop over given Chain options
+    index = tChain.Index(separator,&end,begin);
+    if (index >= 0 && end >= 1) {
+      TString *t = new TString(tChain(index,end));
+      Margv[Margc] = (Char_t *) t->Data();
+      Margc++;
+    }
+    begin += end+1;
+  }
+  // configure atlsim:
+#if 0
+  Margc = argc;
+  Margv = &argv[0];
+#endif
+  k_setar(Margc, Margv);
+
+  aginit();
+}
+//______________________________________________________________________________
+void TGeant3::Agpawq() {agpawq();}
+//______________________________________________________________________________
+void TGeant3::Agexit() {agexit();}
 //_____________________________________________________________________________
 void TGeant3::Kuexel(const Char_t *line) {kuexel(PASSCHARD(line) PASSCHARL(line));}
+//_____________________________________________________________________________
+void TGeant3::Kuexec(const Char_t *line) {Kuexel(line);}
 //_____________________________________________________________________________
 void TGeant3::Gfrotm(Int_t & Nmat, 
 		     Float_t &Theta1, Float_t & Phi1,
@@ -3584,6 +3699,10 @@ void TGeant3::Gfrung(Int_t & Nwrung, Int_t *Irung, Int_t & Nwbuf, Float_t * Ubuf
 //_____________________________________________________________________________
 void TGeant3::Gfhead(Int_t & Nwhead, Int_t *Ihead, Int_t & Nwbuf, Float_t * Ubuf) {
   gfhead(Nwhead,Ihead,Nwbuf,Ubuf); 
+}
+//_____________________________________________________________________________
+void TGeant3::Gfpath(Int_t &iSet, Int_t &iDet, Int_t *numBv, Int_t & nLev, Int_t *lNam, Int_t *lNum) {
+  gfpath(iSet, iDet, numBv, nLev, lNam, lNum); 
 }
 #if 0
 //_____________________________________________________________________________

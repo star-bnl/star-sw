@@ -3,14 +3,14 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3.h,v 1.9 2003/09/10 19:36:56 perev Exp $ */
+/* $Id: TGeant3.h,v 1.10 2004/03/01 16:02:49 fisyak Exp $ */
 
 //////////////////////////////////////////////// 
 //  C++ interface to Geant3 basic routines    // 
 //////////////////////////////////////////////// 
  
 #include <StarMC.h> 
-  
+#include "TRandom.h"  
 //______________________________________________________________
 //
 //       Geant3 prototypes for commons
@@ -563,10 +563,7 @@ protected:
 public: 
   TGeant3(); 
   TGeant3(const char *title, Int_t nwgeant=5000000, Int_t nwpaw=0, Int_t iwtype=1);
-  virtual ~TGeant3() {if(fVolNames) {
-    delete [] fVolNames;
-    fVolNames=0;}
-  } 
+  virtual ~TGeant3();
   virtual void LoadAddress(); 
  
 ///////////////////////////////////////////////////////////////////////
@@ -623,7 +620,9 @@ public:
   virtual Int_t GetMedium() const;
   virtual Float_t Edep() const;
   virtual Float_t Etot() const;
+
   virtual void    Rndm(Float_t* r, const Int_t n) const;
+
   virtual void    Material(Int_t&, const char*, Float_t, Float_t, Float_t, Float_t,
 			    Float_t, Float_t* buf=0, Int_t nwbuf=0);
   virtual void    Mixture(Int_t&, const char*, Float_t*, Float_t*, Float_t, Int_t, Float_t*);
@@ -850,16 +849,25 @@ public:
    virtual void     Agmain(Int_t &nwgeant,Int_t &nwpaw,Int_t &iwtype);
    virtual Float_t* Gufld(Float_t *x, Float_t *bf);  
    virtual void     Agxuser();
+   virtual void     Aginit(const Char_t *command);
+   virtual void     Aginit(Int_t &nwgeant, Int_t &nwpaw, Int_t &iwtype);
    virtual void     Agxinit();
+   virtual void     Agpawq();
+   virtual void     GetKuipPrompt() {Agpawq();}
+   virtual void     Agexit();
    virtual void     Kuexel(const char* line);
+   virtual void     Kuexec(const char* line);
    virtual void     Gfrotm(Int_t & Nmat, 
 			   Float_t &Theta1, Float_t & Phi1,
 			   Float_t &Theta2, Float_t & Phi2,
 			   Float_t &Theta3, Float_t & Phi3);
+#if 0
    virtual Bool_t   Agsens(const Char_t *name);
+#endif
    virtual void     Gfnhit(const Char_t *cset, const Char_t *cdet, Int_t &nhits);
    virtual void     Gfrung(Int_t & Nwrung, Int_t *Irung, Int_t & Nwbuf, Float_t * Ubuf);
    virtual void     Gfhead(Int_t & Nwhead, Int_t *Ihead, Int_t & Nwbuf, Float_t * Ubuf);
+   virtual void     Gfpath(Int_t &iSet, Int_t &iDet, Int_t *numBv, Int_t & nLev, Int_t *lNam, Int_t *lNum);
 #if 0
    virtual ULong_t  Csaddr(const Char_t *name);
    virtual Int_t    Csjcal(
