@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.h,v 1.4 2001/02/23 13:46:13 lmartin Exp $
+ * $Id: StEstTracker.h,v 1.5 2001/03/02 16:18:10 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.h,v $
+ * Revision 1.5  2001/03/02 16:18:10  lmartin
+ * Data members added to store the cumulated numbers of ideal,good and bad tracks.
+ * CumulEval method added.
+ *
  * Revision 1.4  2001/02/23 13:46:13  lmartin
  * Two arguments (hittmp,exclhit) of the RefitBranch method removed.
  *
@@ -110,6 +114,13 @@ class StEstTracker {
   long     mNSvtHit;        //! number of SVT hits
   long     mNWafers;        //! number of wafers
   int      mPreprojNumber;  //!
+  
+  long    mNIdealPrim; //! number of Ideal primary track in the event
+  long    mNIdealSeco; //! number of Ideal primary track in the event
+  long    mNGoodPrim; //! number of Good primary track in the event
+  long    mNGoodSeco; //! number of Good primary track in the event
+  long    mNBadPrim; //! number of Bad primary track in the event
+  long    mNBadSeco; //! number of Bad primary track in the event
 
   int  Preprojection(StEstBranch&, int);
   int  Tracking(int);
@@ -158,6 +169,13 @@ class StEstTracker {
   void EsttoGlobtrk(St_stk_track* Ststktrk,
 		    St_sgr_groups* Stsgrgrps,
 		    St_svm_evt_match* StEstMatch);
+  void CumulEval(long* mCumulNIdealPrim,
+		 long* mCumulNIdealSeco,
+		 long* mCumulNGoodPrim,
+		 long* mCumulNGoodSeco,
+		 long* mCumulNBadPrim,
+		 long* mCumulNBadSeco,
+		 long* mCumulNEvents);
   void CleanUp();
   ClassDef(StEstTracker, 1)
 };
