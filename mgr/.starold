@@ -1,7 +1,0 @@
-# Set up STAR enviroment
-setenv DIR_STAR /afs/rhic/star/packages
-setenv LEVEL_STAR old
-if ( -e $DIR_STAR/mgr/login_star.csh ) then
-        source $DIR_STAR/mgr/login_star.csh
-endif
-
