@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcDetector.cxx,v 2.11 2004/07/20 17:07:49 perev Exp $
+ * $Id: StEmcDetector.cxx,v 2.12 2004/10/14 20:00:18 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcDetector.cxx,v $
+ * Revision 2.12  2004/10/14 20:00:18  ullrich
+ * Added member and methods to deal with crate status flags.
+ *
  * Revision 2.11  2004/07/20 17:07:49  perev
  * Pavlinov corrs for TBrowser
  *
@@ -51,24 +54,21 @@
 #include <TBrowser.h>
 #include <StAutoBrowse.h>
 
-static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.11 2004/07/20 17:07:49 perev Exp $";
+static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.12 2004/10/14 20:00:18 ullrich Exp $";
 
 ClassImp(StEmcDetector)
 
-StEmcDetector::StEmcDetector() { 
-  Zero();
-}
+StEmcDetector::StEmcDetector() { clear(); }
 
 StEmcDetector::StEmcDetector(StDetectorId id, unsigned int n)
 {
-  Zero();
-  mDetectorId = id;
-  mNumberOfModules = n;
-  for(int i=0; i<120;i++)
-    {
-      mModules[i] = new StEmcModule();
-      //StEmcModule * module = new StEmcModule();
-      //this->setModule(new StEmcModule(),i);
+    clear();
+    mDetectorId = id;
+    mNumberOfModules = n;
+    for(int i=0; i<120;i++) {
+        mModules[i] = new StEmcModule();
+        //StEmcModule * module = new StEmcModule();
+        //this->setModule(new StEmcModule(),i);
     }
 }
 
@@ -79,25 +79,26 @@ StEmcDetector::~StEmcDetector()
 }
 
 void
-StEmcDetector::Zero()
+StEmcDetector::clear()
 {
-  for(int i=0; i<120;i++) mModules[i] = 0;
-  mClusters = 0;
+    for(int i=0; i<120;i++) mModules[i] = 0;
+    mClusters = 0;
+    for(int i=0; i<mMaxNumberOfCrates; i++)
+        mCrateStatusFlag[i] = crateUnknown;
 }
 
 
 bool
 StEmcDetector::addHit(StEmcRawHit* hit)
 {
-    if (hit){
-      unsigned int m = hit->module();
-      if (m > 0 && m <= mNumberOfModules)
-      {
-              mModules[m-1]->hits().push_back(hit);
-              return kTRUE;
-      }
+    if (hit) {
+        unsigned int m = hit->module();
+        if (m > 0 && m <= mNumberOfModules) {
+	  mModules[m-1]->hits().push_back(hit);
+	  return true;
+        }
     }
-    return kFALSE;
+    return false;
 }
 
 StDetectorId
@@ -126,18 +127,18 @@ StEmcDetector::getEnergy(const int pri) const
 {
     float e = 0., eM = 0.;
     for (unsigned int m=0;m<mNumberOfModules;m++) {
-      if(mModules[m]->numberOfHits()==0) continue; 
-      eM = mModules[m]->getEnergy();
-      e += eM;
-      if(pri>1) {
-        if(eM !=0 ) printf("%3i(m) : e %9.4f ", m+1, eM);
-        if(eM < 0.) printf(" !!");
-        printf("\n");
-      }
+        if(mModules[m]->numberOfHits()==0) continue; 
+        eM = mModules[m]->getEnergy();
+        e += eM;
+        if(pri>1) {
+	  if(eM !=0 ) printf("%3i(m) : e %9.4f ", m+1, eM);
+	  if(eM < 0.) printf(" !!");
+	  printf("\n");
+        }
     }
-
+    
     if(pri>0) printf("det %i : energy %9.4f GeV/c \n", int(mDetectorId), e);
-
+    
     return e;
 }
 
@@ -161,6 +162,13 @@ StEmcDetector::cluster() {return mClusters;}
 const StEmcClusterCollection*
 StEmcDetector::cluster() const {return mClusters;}
 
+StEmcCrateStatus StEmcDetector::crateStatus(int crate) const {
+    if (crate > 0 && crate <= mMaxNumberOfCrates)
+        return mCrateStatusFlag[crate-1];
+    else 
+        return crateUnknown;
+}
+
 void
 StEmcDetector::setCluster(StEmcClusterCollection* val)
 {
@@ -171,34 +179,37 @@ StEmcDetector::setCluster(StEmcClusterCollection* val)
 void
 StEmcDetector::setModule(StEmcModule* val,int IdMod)
 {
-    if (val)
-    {
-      if (IdMod >= 0 && IdMod < static_cast<int>(mNumberOfModules))
-      {
-        if (mModules[IdMod]) delete mModules[IdMod];
-        mModules[IdMod] = val;
-      }
-   }
+    if (val) {
+        if (IdMod >= 0 && IdMod < static_cast<int>(mNumberOfModules)) {
+	  if (mModules[IdMod]) delete mModules[IdMod];
+	  mModules[IdMod] = val;
+        }
+    }
+}
+
+void StEmcDetector::setCrateStatus(int crate, StEmcCrateStatus flag) {
+    if (crate > 0 && crate <= mMaxNumberOfCrates)
+        mCrateStatusFlag[crate-1] = flag;
 }
 
 bool  StEmcDetector::IsFolder() const
 {
-  if(numberOfHits()) return kTRUE;
-  else               return kFALSE;
+    if(numberOfHits()) return true;
+    else               return false;
 }
 
 void
 StEmcDetector::Browse(TBrowser *b)
 {
-  char name[10];
+    char name[10];
     for (unsigned int m=0;m<mNumberOfModules;m++) {
-      if(mModules[m]->IsFolder()) {
-	// 1 var; module[01] -> mHits 
-	// StAutoBrowse::Browse(mModules[m], b); 
-	// 2 var; mHits StEmcModule
-        sprintf(name,"Module%3.3i",m+1);
-	b->Add(mModules[m],name); 
-      }
+        if(mModules[m]->IsFolder()) {
+	  // 1 var; module[01] -> mHits 
+	  // StAutoBrowse::Browse(mModules[m], b); 
+	  // 2 var; mHits StEmcModule
+	  sprintf(name,"Module%3.3i",m+1);
+	  b->Add(mModules[m],name); 
+        }
     }
     StAutoBrowse::Browse(mClusters, b);
 }
