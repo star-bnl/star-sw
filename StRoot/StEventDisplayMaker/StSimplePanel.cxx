@@ -2,7 +2,7 @@
 ** Form implementation generated from reading ui file 'Panel.ui'
 **
 ** Created: Wed Jan 8 14:32:54 2003
-**      by: The User Interface Compiler ($Id: StSimplePanel.cxx,v 1.1 2003/01/17 01:36:16 fine Exp $)
+**      by: The User Interface Compiler ($Id: StSimplePanel.cxx,v 1.2 2003/01/17 02:19:40 fine Exp $)
 **
 ** WARNING! All changes made in this file will be lost!
 ****************************************************************************/
@@ -32,6 +32,8 @@ StSimplePanel::StSimplePanel( QWidget* parent, const char* name, int nColumns )
     QVBoxLayout * l = new QVBoxLayout( this );
     l->addItem(new QSpacerItem(10,10));
     fLayout = new QGridLayout ( l, 1, nColumns,4,name);
+    fLayout->setMargin ( 5 );
+
 }
 //______________________________________________________________________________
 StSimplePanel::~StSimplePanel()

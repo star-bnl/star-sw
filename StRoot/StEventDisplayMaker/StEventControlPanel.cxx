@@ -3,7 +3,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.cxx,v 1.3 2003/01/17 01:49:41 fine Exp $
+// $Id: StEventControlPanel.cxx,v 1.4 2003/01/17 02:19:40 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -223,11 +223,13 @@ void StEventControlPanel::Build()
       }
       // Add all butoons
       panel->Add(all[0],n,0); panel->Add(all[1],n,1); panel->Add(all[2],n,3);
+#ifndef STAR_BUTTON
 #include "starIconTrans.xpm"
       QPushButton *detectorBrowser = new QPushButton(panel,"STAR");
       detectorBrowser->setPixmap(QPixmap(starIconTrans));
       connect(detectorBrowser,SIGNAL(clicked()),this,SLOT(ShowVolumeBrowser()));
       panel->Add(detectorBrowser,n,2);
+#endif
       
       //----------------------------
       // StEvent tracks
@@ -292,11 +294,12 @@ void StEventControlPanel::Build()
 
          l->addItem(new QSpacerItem(10,1));
 
+#ifdef  SELECTION_BUTTON
          button = new QPushButton("Selection",buttons,"print");
          // if (!fFilter) button->setDisabled(true);
          connect(button,SIGNAL(clicked()),this,SLOT(PrntNames()));
          l->addWidget( button );
-
+#endif 
          l->addItem(new QSpacerItem(10,1));
       }
 
