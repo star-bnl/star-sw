@@ -502,7 +502,7 @@ void StTree::SetBaseName(const char *baseName)
   fBaseName = baseName;
   const char *dot = strchr(baseName,'.');
   if (!dot) return;
-  if (isdigit(dot[1])) dot = strchr(dot,'.');
+  if (isdigit(dot[1])) dot = strchr(dot+1,'.');
   if (!dot) return;
   fBaseName.Remove(dot-baseName);
 }  
