@@ -36,7 +36,8 @@ long type_of_call tte_hit_match_(
 **:>------------------------------------------------------------------*/
 #define tls_qsort_herb_i_ F77_NAME(tls_qsort_herb_i,TLS_QSORT_HERB_I)
 extern void type_of_call tls_qsort_herb_i_(long *, void *,void *,long *);
-
+#define tls_quick_sort_ii_ F77_NAME(tls_quick_sort_ii,TLS_QUICK_SORT_II)
+extern void type_of_call tls_quick_sort_ii_(long *, void *,void *,long *);
 #define tls_quick_sort_r_ F77_NAME(tls_quick_sort_r,TLS_QUICK_SORT_R)
 extern void type_of_call tls_quick_sort_r_(long *, float *,float *,long *);
 
@@ -80,7 +81,7 @@ float dist_current; /* current sqared smallest distance between the geant and re
 
    
 /* Sort all the reconstructed hits according to sector/row*/
-    tls_qsort_herb_i_(&tphit_h[0].nok, &tphit[0].row,
+    tls_quick_sort_ii_(&tphit_h[0].nok, &tphit[0].row,
 		      &tphit[1].row,&tphit[0].cluster);
 
 /* Sort all the geant hits according to sector/row*/
