@@ -380,7 +380,7 @@ Int_t StEmcSimulatorMaker::Make()
 
   fillStEvent();
 
-  return retBemc;
+  return retBemc;   // wait !! and what about retEemc ??
 }
 
 Int_t StEmcSimulatorMaker::makeBemc()
@@ -449,7 +449,8 @@ Int_t StEmcSimulatorMaker::makeBemcAndBprsMcHits()
     if (detector == BEMC || detector == BPRS) 
     {
       emchBemc = new StMcCalorimeterHit(module,eta,sub,de); // Don't trace for track
-      if (emchBprs) delete emchBprs;  emchBprs = 0;         // For safety
+      //if (emchBprs) delete emchBprs;  
+      emchBprs = 0;         // For safety
       StMcEmcHitCollection::EAddHit bemcNew = mEmcMcHits[BEMC-1]->addHit(emchBemc);
 
       if (bemcNew == StMcEmcHitCollection::kNew)
@@ -974,8 +975,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.21 2003/09/28 01:57:55 jeromel Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.22 2003/09/28 03:06:01 jeromel Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.22  2003/09/28 03:06:01  jeromel
+// restored leak_assign (logic needs to be modified to get rid of it)
+//
 // Revision 1.21  2003/09/28 01:57:55  jeromel
 // LEAK_SCOPE and LEAK_ASSIGN removed
 //
