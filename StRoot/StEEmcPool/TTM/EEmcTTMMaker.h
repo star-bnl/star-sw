@@ -1,7 +1,7 @@
 // Hey Emacs this is -*-c++-*-
 #ifndef STAR_EEmcTTMMaker
 #define STAR_EEmcTTMMaker
-// $Id: EEmcTTMMaker.h,v 1.10 2004/04/14 16:40:34 zolnie Exp $
+// $Id: EEmcTTMMaker.h,v 1.11 2004/05/04 18:28:56 zolnie Exp $
 
 /*!
  *                                                                     
@@ -26,7 +26,6 @@
 #include <map>
 
 #include "TString.h"
-#include "TVector3.h"
 
 #if !defined(ST_NO_NAMESPACES)
 using std::map;
@@ -38,7 +37,6 @@ class TTree;
 class TFile;
 class TString;
 class TList;
-class TMap;
 
 class StChain;
 class StMuTrack;
@@ -47,72 +45,33 @@ class EEmcGeomSimple;
 class StMuDstMaker;
 class StEEmcDbMaker;
 
-const int       kNTupleTTM_MaxTracks  =  128;
-const int       kNTupleTTM_MaxTrigger =   32;
-const unsigned  kNTupleTTM_MaxZ       =    8;
+class EEmcTower;
+
+//const int       kNTupleTTM_MaxTracks  =  128;
+//const int       kNTupleTTM_MaxTrigger =   32;
+//const unsigned  kNTupleTTM_MaxZ       =    8;
 
 
-class EEmcTower : public TObject  {
-public:
-  EEmcTower()  { sec=sub=eta=0; edep=0.0; };
-  ~EEmcTower() {}
-  EEmcTower(int s, int ss, int e, float ene) { 
-    sec =(unsigned char)s;
-    sub =(unsigned char)ss;
-    eta =(unsigned char)e;
-    edep=ene;
-  };
-  ostream& Out ( ostream &out ) const ;  
-  unsigned char sec;
-  unsigned char sub;
-  unsigned char eta;
-  float         edep;
 
-  ClassDef(EEmcTower, 1)   // 
-};
 
 class EEmcTTMMaker : public StMaker {
 public: 
-
+  /// default values for the cuts
+  static const Int_t    kDefMaxCTBsum      ;
   /// default values for the cuts
   static const Int_t    kDefMinTrackHits   ;  
   /// default values for the cuts
   static const Double_t kDefMinTrackLength ;  
   /// default values for the cuts
   static const Double_t kDefMinTrackPt     ;  
-
-
-  /// structure to hold the results from EEmcTTMMaker
-  struct NTupleTTM_t {
-    Int_t    numtracks;                      /**<- number of tracks */
-    Int_t    sector  [kNTupleTTM_MaxTracks]; /**<- sector */
-    Int_t    subsec  [kNTupleTTM_MaxTracks]; /**<- subsector */
-    Int_t    etabin  [kNTupleTTM_MaxTracks]; /**<- tower# a.k.a eta bin */
-    Float_t  adc     [kNTupleTTM_MaxTracks]; /**<- pedestal subtracted adc = adc - pedestal */
-    Float_t  edep    [kNTupleTTM_MaxTracks]; /**<- energy deposited : (adc-pedestal)/gain */
-    Int_t    ntrack  [kNTupleTTM_MaxTracks]; /**<- number of tracks in an event that hit a tower */
-    //
-    Int_t    nhits   [kNTupleTTM_MaxTracks]; /**<- number of hits/track */
-    Float_t  pt      [kNTupleTTM_MaxTracks]; /**<- track transverse momentum */
-    Float_t  ptot    [kNTupleTTM_MaxTracks]; /**<- track total momentum  */
-    Float_t  length  [kNTupleTTM_MaxTracks]; /**<- track length */
-    Float_t  dedx    [kNTupleTTM_MaxTracks]; /**<- track energy loss (dE/dx) */
-    // 
-    Int_t    numz;                           /**<- number of z positions to match */
-    Float_t  zpos[kNTupleTTM_MaxZ];          /**<- z positions to match */
-    Float_t  deta[kNTupleTTM_MaxZ][kNTupleTTM_MaxTracks]; /**<- distance in eta between track hit and the tower center */
-    Float_t  dphi[kNTupleTTM_MaxZ][kNTupleTTM_MaxTracks]; /**<- distance in eta between track hit and the tower center */
-    
-    // for Trigger Info 
-    Int_t    numtrig;                        /**<- number of trigger present */
-    Int_t    trigid[kNTupleTTM_MaxTrigger];  /**<- a list of trigger id's    */
-    Int_t    daqbits;                        /**<- DAQ trigger bits          */
-    Int_t    ctbsum;                         /**<- CTB sum                   */
-
-    /// zeroes the structure
-    inline void Clear() { memset(this,0x00,sizeof(*this)); }
-  };
-  
+  /// default values for the cuts
+  static const Double_t kDefMinTrackEta    ;  
+  /// default values for the cuts
+  static const Double_t kDefMaxTrackEta    ;  
+  /// default values for the cuts
+  static const Double_t kDefDeltaPhiCut    ;
+  /// default values for the cuts
+  static const Double_t kDefDeltaEtaCut    ;
   
   //! the TTM constructor
   /// \param self     this maker name (const char*)
@@ -135,29 +94,53 @@ public:
   /// adds a z position to z positions array
   void     AddZPosition(const TString s, const double zpos) { mZ[zpos]=s; }
 
+
+  /// returns max CTB sum allowed
+  Int_t    GetMaxCTBSum     () const  { return mMaxCTBsum   ; }
+  /// sets max track eta cut value
+  void     SetMaxCTBSum     (Int_t    v) { mMaxCTBsum=v     ; }
+
+
   /// returns min hits/track cut value
-  Int_t    GetMinTrackHits  () const  { return mMinTrackHits  ;}
-  /// returns min track length cut value
-  Double_t GetMinTrackLength() const  { return mMinTrackLength;}
-  /// returns min pt cut value
-  Double_t GetMinTrackPt    () const  { return mMinTrackPt    ;}
+  Int_t    GetMinTrackHits  () const  { return mMinTrackHits; }
   /// sets min hits/track cut value
-  void     SetMinTrackHits  (Int_t    v) { mMinTrackHits=v  ;}
+  void     SetMinTrackHits  (Int_t    v) { mMinTrackHits=v  ; }
+
+
+  /// returns min track length cut value
+  Double_t GetMinTrackLength() const  { return mMinTrackLength ; }
   /// sets min track length cut value
-  void     SetMinTrackLength(Double_t v) { mMinTrackLength=v;}
+  void     SetMinTrackLength(Double_t v) { mMinTrackLength=v   ; }
+
+  /// returns min pt cut value
+  Double_t GetMinTrackPt    () const  { return mMinTrackPt    ; }
   /// sets min pt cut value
-  void     SetMinTrackPt    (Double_t v) { mMinTrackPt=v    ;}
+  void     SetMinTrackPt    (Double_t v) { mMinTrackPt=v      ; }
+
+  /// returns min track eta cut value
+  Double_t GetMinTrackEta   () const  { return mMinTrackEta   ; }
+  /// sets min track eta cut value
+  void     SetMinTrackEta   (Double_t v) { mMinTrackEta=v     ; }
+
+  /// returns max track eta cut value
+  Double_t GetMaxTrackEta   () const  { return mMaxTrackEta   ; }
+  /// sets max track eta cut value
+  void     SetMaxTrackEta   (Double_t v) { mMaxTrackEta=v     ; }
+
   
-  /// gets phi factor
-  Double_t GetPhiFactor() const { return mPhiFac; }
-  /// gets eta factor
-  Double_t GetEtaFactor() const { return mEtaFac; }
-  /// sets phi factor
-  void     SetPhiFactor(Double_t v=1.0) { mPhiFac=v;  }
-  /// sets eta factor
-  void     SetEtaFactor(Double_t v=1.0) { mEtaFac=v;  }
+  /// gets delta phi cut
+  Double_t GetDeltaPhiCut() const { return mPhiFac; }
+  /// sets delta phi cut
+  void     SetDeltaPhiCut(Double_t v=1.0) { mPhiFac=v;  }
+
+  /// gets delta eta cut
+  Double_t GetDeltaEtaCut() const { return mEtaFac; }
+  /// sets delta eta cut
+  void     SetDeltaEtaCut(Double_t v=1.0) { mEtaFac=v;  }
+
   /// set output file name 
   void     SetFileName( const char *string) { mFileName=TString(string); }
+
   /// returns number of matched tracks
   ULong_t  GetNMatched() const { return mNMatched; };
 
@@ -166,52 +149,37 @@ public:
   /// returns a list of good EEmcTower
   TList *GetTowers() { return mTowerList; };
   /// returns a map  of matches
-  TMap  *GetMatch()  { return mMatchMap ; }; 
+  TList *GetMatchList()  { return mMatchList ; }; 
 
   /// prints a summary of run
   ostream&   Summary    ( ostream &out ) const ;
 
-  //! a static method to be called from root4star (also an example how to use TTM)
-  /// \param chain     - a pointer to StChain instance
-  /// \param inpDir    - MuDST directory 
-  /// \param inpFile   - MuDST file or file list
-  /// \param outFile   - output ROOT tree
-  /// \param nFiles    - max number of MuDST to process  
-  /// \param nEvents   - max number of events to process (-1 == all)
-  /// \param timeStamp - database time stamp to be used (e.g. 20040331)
-  static void Run(
-	    StChain* chain, 
-	    char*    inpDir    ,
-	    char*    inpFile   ,
-	    char*    outFile   ,
-	    Int_t    nFiles    ,
-	    Int_t    nEvents   ,
-	    Int_t    timeStamp );
-
  protected:
-
-  Int_t    mMinTrackHits         ;  /**<- min hits per track required   */
-  Double_t mMinTrackLength       ;  /**<- min track length required */
+  Int_t    mMaxCTBsum            ;  /**<- max CTB sum allowed                 */
+  Int_t    mMinTrackHits         ;  /**<- min hits per track required         */
+  Double_t mMinTrackLength       ;  /**<- min track length required           */
   Double_t mMinTrackPt           ;  /**<- min track transv. momentum required */
+  Double_t mMinTrackEta          ;  /**<- min track pseudorapidity required   */
+  Double_t mMaxTrackEta          ;  /**<- min track pseudorapidity required   */
   
   Double_t mPhiFac;                 /**<- phi factor */
-  Double_t mEtaFac;                 /**<- phi factor */
+  Double_t mEtaFac;                 /**<- eta factor */
 
   /// resets the collected statistics 
   void     ResetStats() { mNMatched=mNEvents=0L; };  
   Bool_t   AcceptTrack( const StMuTrack *track);
   Bool_t   MatchTrack ( const double dphi,   const double deta,  const double phihw,  const double etahw); 
 
-  static  Bool_t  ExtrapolateToZ    ( const StMuTrack *track , const double  z, TVector3 &r); 
+
 
   // control histograms for tracks
-  TH1F *hTrackNHits; /**<- phi factor */
-  TH1F *hTrackLen;   /**<- phi factor */
-  TH1F *hTrackPt ;   /**<- phi factor */
-  TH1F *hTrackPtot;  /**<- phi factor */
+  TH1F *hTrackNHits; /**<- number of hits/track */
+  TH1F *hTrackLen;   /**<- track  length        */
+  TH1F *hTrackPt ;   /**<- track  p_T           */
+  TH1F *hTrackPtot;  /**<- track  p_tot         */
 
-  TH1F *hTrackDCA[3];/**<- phi factor */
-  TH1F *hVertex[3]  ;/**<- phi factor */
+  TH1F *hTrackDCA[3];/**<- tracks DCA           */
+  TH1F *hVertex[3]  ;/**<- vertex               */
 
  private:
   StMuDstMaker   *mMuDstMaker; // toplevel muDST maker
@@ -222,8 +190,6 @@ public:
   TFile          *mFile;       // output file
   TTree          *mTree;       // output tree
 
-  NTupleTTM_t    *mMatch;      // output data in "ntuple" format 
-
   map<double,TString> mZ;      // a map that hold z positions 
 
   // stats
@@ -233,14 +199,14 @@ public:
   //
   TList          *mTrackList;
   TList          *mTowerList;
-  TMap           *mMatchMap;
+  TList          *mMatchList;
 
  public:
   //  StMaker jumbo mumbo
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.10 2004/04/14 16:40:34 zolnie Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.11 2004/05/04 18:28:56 zolnie Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -248,15 +214,13 @@ public:
 };
 
 /// for nice printing
-ostream&  Out(ostream &out , const StMuTrack &t);
-ostream&  Out(ostream &out , const EEmcTower &t);
 ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm); 
-ostream&  operator<<(ostream &out, const EEmcTower    &t  );
-ostream&  operator<<(ostream &out, const StMuTrack    &t  );  
 #endif
 
-
 // $Log: EEmcTTMMaker.h,v $
+// Revision 1.11  2004/05/04 18:28:56  zolnie
+// version after split
+//
 // Revision 1.10  2004/04/14 16:40:34  zolnie
 // *** empty log message ***
 //
