@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSimpleHit.cxx,v 2.0 2000/08/09 16:22:12 gans Exp $
+ * $Id: StRichSimpleHit.cxx,v 2.1 2000/09/29 19:01:24 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -10,8 +10,10 @@
  ***************************************************************************
  *
  * $Log: StRichSimpleHit.cxx,v $
- * Revision 2.0  2000/08/09 16:22:12  gans
- * Cosmetic Changes. Naming convention for TDrawable objects
+ * Revision 2.1  2000/09/29 19:01:24  lasiuk
+ * enumerated types added for flags
+ * c'tor includes cp from persistent hit
+ * number of pads added as a member
  *
  * Revision 2.1  2000/09/29 19:01:24  lasiuk
  * enumerated types added for flags
@@ -34,13 +36,21 @@
  *
  **************************************************************************/
 
-    : mLocal(xl), mSigma(dx)
+#include "StRichSimpleHit.h"
 
 StRichSimpleHit::StRichSimpleHit() {/* nopt */}
 
 StRichSimpleHit::StRichSimpleHit(const StThreeVector<double>& xl, const StThreeVector<double>& dx)
     : mLocal(xl), mSigma(dx), mFlags(0)
-StRichSimpleHit::StRichSimpleHit(const StRichHit*)
+{
+    // This is used for off-line
+}
+
+#ifdef __ROOT__
+StRichSimpleHit::StRichSimpleHit(const StRichHit* hit)
+    : mGlobal(hit->position().x(),hit->position().y(),hit->position().z()),
+      mLocal(hit->local().x(), hit->local().y(), hit->local().z()),
+      mInternal(hit->internal().x(), hit->internal().y(), hit->internal().z()),
       mSigma(hit->positionError().x(), hit->positionError().y(), hit->positionError().z()),
       mCharge(hit->charge()),
       mMaxAmplitude(hit->maxAmplitude()),
@@ -53,6 +63,17 @@ StRichSimpleHit::StRichSimpleHit(const StRichHit*)
 
 StRichSimpleHit::~StRichSimpleHit() {/* nopt */}
 
+ostream& operator<<(ostream& os, const StRichSimpleHit& hit)
+{
+    return (os << "StRichSimpleHit::> " << hit.internal() << ", q= "
+	                          << hit.charge()   << ", (#"
+	                          << hit.clusterNumber() << ')');
+}
+
+void StRichSimpleHit::printBits() const
+{
+    const int numberOfBits = 10;  // a long is really 32 bits you know
+    cout << "StRichSimpleHitFlags: ";
     for(int ii=0; ii<numberOfBits; ii++) {
 	unsigned long mask = pow(2.,ii);
 	cout << ((mFlags & mask) == 0 ? 0 : 1);
