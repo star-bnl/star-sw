@@ -1,4 +1,4 @@
-// $Id: bfcx.C,v 1.4 1999/02/19 22:36:47 fisyak Exp $
+// $Id: bfcx.C,v 1.5 1999/02/19 22:38:15 fisyak Exp $
 #define gtrack
 #define trs
 #define emc
