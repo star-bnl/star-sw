@@ -325,6 +325,7 @@ foreach $eachSet (@Sets) {
     $geantInputEvts += $3;
 
 ## check if jobfile is created
+
  my $run_chain = "tfs";
  my $jSet;
  my @hSet =  split ("/",$eachSet);
@@ -335,10 +336,8 @@ foreach $eachSet (@Sets) {
     $jSet = $hSet[0]."_".$hSet[1]."_".$hSet[2]."_".$hSet[3] ."_". $hSet[4] ."_". $hSet[5];
 }    
    $jobfile_nm = $jSet . "_" . $basename;
-    print $jobfile_nm, "\n";
     job_file($run_chain,$jobfile_nm); 
-    print $jfile_status, "\n";
-
+  
 ## summary info check
 
     $sumDirTfs = $sumDir . "/tfs";
@@ -359,6 +358,31 @@ foreach $eachSet (@Sets) {
       }
     }
     closedir DIR;
+
+
+## check if job is running
+
+   if($job_status eq "n\/a") {
+
+  my @CRS_JOB = `ssh rcf.rhic.bnl.gov crs_node_status.pl -c`;
+  foreach my $job_line (@CRS_JOB) {
+     chop $job_line;
+    print $job_line, "\n";
+    my @job_word = split ("_", $job_line);
+    my @word_part = split ("%", $job_word[12]);
+    my $j_name = $job_word[10]."_". $job_word[11]."_". $word_part[0];
+    if( $j_name =~ /$basename/ ) {
+      $job_status = $word_part[1];
+#   print $j_name, "\n";
+#   print $basename, "\n";
+#   print $job_status, "\n";
+  last;
+}
+   else {   
+    next; 
+  } 
+ }
+}
 
 ## 
 #    next if ( $sum_File eq 'no' );
