@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.36 2001/07/05 17:00:36 nevski Exp $
+* $Id: g2t_volume_id.g,v 1.37 2001/09/06 00:22:00 nevski Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.37  2001/09/06 00:22:00  nevski
+* new svt geometry numbering intrroduced
+*
 * Revision 1.36  2001/07/05 17:00:36  nevski
 * forward pion detector added
 *
@@ -48,12 +51,13 @@
       integer  g2t_volume_id
 * 
       Character*3      Csys
-      Integer          NUMBV(15),itpc/0/,ibtf/0/,ical/0/,ivpd/0/,ieem/0/
+      Integer          NUMBV(15)
       Integer          innout,sector,sub_sector,volume_id
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
-      Integer          endcap,zslice,innour,lnumber,wafer,phi_30d
-      Integer          section,tpgv,tpss,tpad,isdet,ladder,is
+      Integer          endcap,zslice,innour,lnumber,wafer,lsub,phi_30d
+      Integer          section,tpgv,tpss,tpad,isdet,ladder,is,nladder
       Integer          nEndcap,nFpd,depth
+      Integer          itpc/0/,ibtf/0/,ical/0/,ivpd/0/,ieem/0/,isvt/0/
 *
 *    this is an internal agfhit/digi information - need a better access.
       integer          idigi
@@ -61,6 +65,7 @@
       Integer          Iprin,Nvb
       Character*4                   cs,cd
       COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
+      Structure  SVTG  {version}
       Structure  TPCG  {version}
       Structure  VPDG  {version}
       Structure  BTOG  {version, int choice, posit1 }
@@ -76,6 +81,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           call RBPUSHD
 *        in simulations done in MDC1 (1998) btog_posit1 was not saved
           btog_posit1 = 23
+          USE  /DETM/SVTT/SVTG  stat=isvt
           USE  /DETM/TPCE/TPCG  stat=itpc
           USE  /DETM/BTOF/BTOG  stat=ibtf
           USE  /DETM/CALB/CALG  stat=ical
@@ -120,115 +126,45 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
            ladder     = numbv(2)
            wafer      = numbv(3)
         
-           If ( ladder .eq. 0 .and. wafer .eq. 0) then
+           If ( ladder .eq. 0) then
 * This is the year 1 ladder
-                wafer = lnumber
-                ladder = 12
+                nladder = 1
+                wafer   = lnumber
+                ladder  = 12
                 lnumber = 4
-                                                                               * Set First barrel ids            
+* Set First barrel ids
            else If (lnumber.le.2) then
-*             wafer    = 5-wafer 
-             If (lnumber .eq. 1) then
-               If( ladder .eq. 1) then
-                   ladder = 2
-               else If(ladder .eq.2) then 
-                  ladder= 8
-               else If(ladder .eq.3) then
-                  ladder= 6
-               else If(ladder .eq.4) then
-                  ladder = 4
-               endif
-             else
-               If( ladder .eq. 1) then
-                   ladder = 1
-               else If(ladder .eq.2) then 
-                  ladder= 7
-               else If(ladder .eq.3) then
-                  ladder= 5
-               else If(ladder .eq.4) then
-                  ladder = 3
-               endif
-             endif 
+                nladder = 8
+*               wafer   = 5-wafer 
 * Set 2nd barrel ids
            else If (lnumber.le.4) then
-*             wafer    = 7-wafer   
-             If (lnumber .eq. 4) then
-               If( ladder .eq.1) then 
-                  ladder= 2
-               else If(ladder .eq.2) then 
-                  ladder= 12
-               else If(ladder .eq.3) then
-                  ladder= 10
-               else If(ladder .eq.4) then
-                  ladder= 8
-               else If(ladder .eq.5) then
-                  ladder= 6
-               else If(ladder .eq.6) then 
-                  ladder= 4
-               endif
-             else
-               If( ladder .eq.1) then 
-                  ladder= 3
-               else If(ladder .eq.2) then 
-                  ladder= 1
-               else If(ladder .eq.3) then
-                  ladder= 11
-               else If(ladder .eq.4) then
-                  ladder= 9
-               else If(ladder .eq.5) then
-                  ladder= 7
-               else If(ladder .eq.6) then 
-                  ladder= 5
-               endif
-
-             endif
-
+                nladder  = 12
+*               wafer   = 7-wafer   
 * Set 3rd barrel ids
-
            else If (lnumber.le.6) then
-*             wafer    = 8-wafer
-             If (lnumber .eq. 6)  then
-               If( ladder .eq.1) then 
-                   ladder= 3
-               else If(ladder .eq.2) then 
-                   ladder= 1
-               else If(ladder .eq.3) then
-                   ladder= 15
-               else If(ladder .eq.4) then
-                   ladder= 13
-               else If(ladder .eq.5) then 
-                   ladder= 11
-               else If(ladder .eq.6) then
-                    ladder= 9
-               else If(ladder .eq.7) then
-                    ladder= 7
-               else If(ladder .eq.8) then
-                    ladder= 5
-               endif
-             else
-               If( ladder .eq.1) then 
-                  ladder= 4
-               else If(ladder .eq.2) then 
-                  ladder= 2
-               else If(ladder .eq.3) then
-                  ladder= 16
-               else If(ladder .eq.4) then
-                  ladder= 14
-               else If(ladder .eq.5) then
-                  ladder= 12
-               else If(ladder .eq.6) then 
-                  ladder= 10
-               else If(ladder .eq.7) then
-                  ladder= 8
-               else If(ladder .eq.8) then
-                  ladder= 6
-               endif
-             endif 
+                nladder  = 16
+*               wafer   = 8-wafer
            else
              print *,' G2T warning: layer number ',lnumber,
      >               '     in svt hits not found' 
            endif
+
+* PN: change geant numbering (CCW) to STAR numbering(CW):
+           if (nladder>1) then
+*             inner sub-layer - 0, outer - 1:
+              lsub    = mod(lnumber-1,2)
+              if (svtg_version==1) then 
+*             OLD: 3 o'clock is geant's first and STAR N/4 element:
+                ladder=nladder/4-(ladder-1)*2-lsub
+                ladder=mod(nladder+ladder-1,nladder)+1
+              else
+*             NEW: 12 o'clock is geant's first and STAR last element:
+                ladder=nladder-(ladder-1)*2-lsub
+              endif
+           endif
+
            volume_id  = 1000*lnumber+100*wafer+ladder
+
         else If (Cd=='SFSD') then
            volume_id =  7000+100*numbv(2)+numbv(1)
         endif
