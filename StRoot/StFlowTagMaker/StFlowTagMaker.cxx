@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.18 2000/03/02 23:00:08 posk Exp $
+// $Id: StFlowTagMaker.cxx,v 1.19 2000/03/08 02:28:28 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTagMaker.cxx,v $
+// Revision 1.19  2000/03/08 02:28:28  posk
+// Increased the range of the multiplicity histograms to prevent overflow.
+//
 // Revision 1.18  2000/03/02 23:00:08  posk
 // Changed header file extensions from .hh to .h .
 //
@@ -135,7 +138,7 @@ Int_t StFlowTagMaker::Make() {
 //-------------------------------------------------------------
 
 void StFlowTagMaker::PrintInfo() {
-  cout << "$Id: StFlowTagMaker.cxx,v 1.18 2000/03/02 23:00:08 posk Exp $" << endl;
+  cout << "$Id: StFlowTagMaker.cxx,v 1.19 2000/03/08 02:28:28 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
@@ -175,7 +178,7 @@ Int_t StFlowTagMaker::Init() {
   const Float_t MeanPtMin =  0.;
   const Float_t MeanPtMax =  1.;
   const Float_t MultMin   =  0.;
-  const Float_t MultMax   =  1000.;
+  const Float_t MultMax   =  2000.;
   const Float_t qMin      =  0.;
   const Float_t qMax      =  2.;
 
