@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.31 2004/10/21 02:56:35 mvl Exp $
+ * $Id: StMuDst.cxx,v 1.32 2004/10/22 23:44:07 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -122,12 +122,13 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
   StTimer timer;
   timer.start();
 
-  // fill an array with the indices to the global tracks as function of trackId
   int nGlobals = global->GetEntries();
-  int nIndex=2*nGlobals;
-  Int_t *globalIndex=new Int_t(nIndex);
+  int nPrimaries = primary->GetEntries();
+  // fill an array with the indices to the global tracks as function of trackId
+  TArrayI globalIndex(2*nGlobals);
 
-  for (int i=0; i<2*nGlobals; i++) globalIndex[i]=-1;
+  int nIndex=globalIndex.GetSize();
+  for (int i=0; i<nIndex; i++) globalIndex[i]=-1;
 
   for (int i=0; i<nGlobals; i++) {
     if (globalTracks(i)->id()<nIndex) {
@@ -135,19 +136,21 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
       globalTracks(i)->setIndex2Global(i);
     }
     else {
-      gMessMgr->Warning("fixTrackIndices","Running out of array space for global indices");
+      int newSize=(int) (1.2*nIndex);
+      globalIndex.Set(newSize);
+      for (Int_t j=nIndex; j<newSize; j++)
+        globalIndex[j]=-1;
+      nIndex=newSize;
     }
   }
   // set the indices for the primary tracks
   DEBUGVALUE2(primary->GetEntries());
-  int nPrimaries = primary->GetEntries();
   for (int i=0; i<nPrimaries; i++) {
-    if (globalTracks(i)->id()<nIndex) 
+    if (primaryTracks(i)->id()<nIndex) 
       primaryTracks(i)->setIndex2Global( globalIndex[ primaryTracks(i)->id() ] );
     else
-      gMessMgr->Warning("fixTrackIndices","Running out of array space for global indices");
+      primaryTracks(i)->setIndex2Global(-1);
   }
-  delete [] globalIndex;
   DEBUGVALUE2(timer.elapsedTime());
 }
 
@@ -376,6 +379,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.32  2004/10/22 23:44:07  mvl
+ * Fixed StMuDst::fixTrackIndices()
+ *
  * Revision 1.31  2004/10/21 02:56:35  mvl
  * Added pointer to StEmcColleciton for Emc clustering etc.
  * Also made some technical changes for backward compatibility mode with

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.11 2004/08/14 00:53:42 mvl Exp $
+ * $Id: StMuTrack.h,v 1.12 2004/10/22 23:44:16 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -132,8 +132,8 @@ protected:
   StMuHelix mOuterHelix;
   StMuProbPidTraits mProbPidTraits; ///< Class holding the new Yuri Fisyac pid probabilities.
 
-  void setIndex2Global(size_t i) {mIndex2Global=i;} ///< Set index of associated global track.
-  void setIndex2RichSpectra(size_t i) {mIndex2RichSpectra=i;} ///< Set index of associated rich spectra.
+  void setIndex2Global(int i) {mIndex2Global=i;} ///< Set index of associated global track.
+  void setIndex2RichSpectra(int i) {mIndex2RichSpectra=i;} ///< Set index of associated rich spectra.
   StThreeVectorD dca(const StEvent*, const StTrack*); ///< Helper function: Calculates dca from a given StTrack and the primary vertex taken from StEvent
   StThreeVectorD momentumAtPrimaryVertex(const StEvent* event, const StTrack* track); ///< Helper function: Calculates the momentum at dca a given StTrack and the primary vertex taken from StEvent.
   void fillMuProbPidTraits(const StEvent*, const StTrack*); ///< Helper function to fill all the different pid values 
@@ -191,6 +191,9 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.12  2004/10/22 23:44:16  mvl
+ * Fixed StMuDst::fixTrackIndices()
+ *
  * Revision 1.11  2004/08/14 00:53:42  mvl
  * Added 1 to possibel points for primary tracks, like in StEvent
  *
