@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.42 2004/11/08 15:32:50 pruneau Exp $
- * $Id: StiKalmanTrack.cxx,v 2.42 2004/11/08 15:32:50 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.43 2004/11/10 21:44:26 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.43 2004/11/10 21:44:26 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.43  2004/11/10 21:44:26  pruneau
+ * adding functions for extrapolation
+ *
  * Revision 2.42  2004/11/08 15:32:50  pruneau
  * 3 sets of modifications
  * (1) Changed the StiPlacement class to hold keys to both the radial and angle placement. Propagated the use
@@ -196,6 +199,9 @@ void StiKalmanTrack::reset()
   mSeedHitCount = 0;
   m      = -1.;
   mFlag  = 0;
+
+  _vDca=-1;
+  _vChi2=-2;
 }
 
  
@@ -1051,18 +1057,20 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
       //cout << " on vertex plane:";
       chi2 = tNode->evaluateChi2(&localVertex); 
       
-	double dx,dy,dz,d;
-	dx=tNode->_x- localVertex.x();
-	dy=tNode->_p0- localVertex.y();
-	dz=tNode->_p1- localVertex.z();
-	d= ::sqrt(dx*dx+dy*dy+dz*dz);
-	//cout << "chi2 @ vtx " << chi2 << endl;
-	/*	cout << " dx:"<< dx
-	<< " dy:"<< dy
-	<< " dz:"<< dz
-	<< " d: "<< d<<endl;*/
-
-      if (chi2<pars->maxChi2Vertex)
+      double dx,dy,dz,d;
+      dx=tNode->_x- localVertex.x();
+      dy=tNode->_p0- localVertex.y();
+      dz=tNode->_p1- localVertex.z();
+      d= ::sqrt(dx*dx+dy*dy+dz*dz);
+      //cout << "chi2 @ vtx " << chi2 << endl;
+      /*	cout << " dx:"<< dx
+		<< " dy:"<< dy
+		<< " dz:"<< dz
+		<< " d: "<< d<<endl;*/
+      _vDca = d;
+      _vChi2= chi2;
+      //if (chi2<pars->maxChi2Vertex)
+      if (d<3.)
 	{
 	  _dca = ::sqrt(dy*dy+dz*dz);
 	  myHit = StiToolkit::instance()->getHitFactory()->getInstance();
@@ -1190,4 +1198,18 @@ double  StiKalmanTrack::getDca(const StiHit * vertex)    const
 			       node->getHelicity());
   double dca = physicalHelix.distance(vxDD);
   return dca;
+}
+
+///Extrapolate this track to the beam axis (x==0) to provide an estimate of the
+///track location at the beam axis.
+///Returns a null pointer is the operation cannot be completed i.e. the track does not reach
+///the beam axis plane.
+StiKalmanTrackNode * StiKalmanTrack::extrapolateToBeam()
+{
+  StiKalmanTrackNode * innerMostNode = getInnerMostNode();
+}
+
+StiKalmanTrackNode * StiKalmanTrack::extrapolateToRadius(double radius)
+{
+  StiKalmanTrackNode * innerMostNode = getInnerMostNode();
 }
