@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.13 1998/12/16 22:19:19 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.14 1998/12/18 18:37:16 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.14  1998/12/18 18:37:16  fisyak
+// account module changes
+//
 // Revision 1.13  1998/12/16 22:19:19  fisyak
 // New tfs
 //
@@ -163,7 +166,7 @@ Int_t St_tcl_Maker::Make(){
            if (sector_tot == 1) k = -k;
            tcl_sector_index->CurrentSector = k;
            Int_t tph_res =  tph(m_tcl_sector_index,m_tclpar,m_tsspar,
-                                m_tpg_detector,m_tpg_pad_plane,
+                                m_tpg_pad_plane,
                                 pixel_data_in,pixel_data_out,
                                 tpseq,tpcluster,tphit,tphitau);
 	 }
@@ -210,7 +213,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.13 1998/12/16 22:19:19 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.14 1998/12/18 18:37:16 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
