@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: swguide-cron.pl,v 1.2 1999/07/22 22:05:05 wenaus Exp $
+# $Id: swguide-cron.pl,v 1.3 1999/07/25 16:27:30 wenaus Exp $
 #
 # $Log: swguide-cron.pl,v $
+# Revision 1.3  1999/07/25 16:27:30  wenaus
+# Debug printout only
+#
 # Revision 1.2  1999/07/22 22:05:05  wenaus
 # kill printout
 #
@@ -45,7 +48,7 @@ foreach $v ( @ver ) {
         $fname = $fpath."/swguide-$v-$d.html";
         if ( -e $fname ) { unlink($fname) or die "Can't delete $fname: $!\n"; }
         open(FILE,">$fname") or die "Can't write to $fname: $!\n";
-        print "$v-$d\n";
+        print "$v-$d\n" if $debugOn;
         $command = "$pgm ver=$v detail=$d dynamic=yes";
         $output = `$command`;
         print FILE $output;
