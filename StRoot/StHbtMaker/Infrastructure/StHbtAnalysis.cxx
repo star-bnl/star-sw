@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.cxx,v 1.14 2000/08/31 22:31:30 laue Exp $
+ * $Id: StHbtAnalysis.cxx,v 1.15 2000/09/13 18:09:09 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.cxx,v $
+ * Revision 1.15  2000/09/13 18:09:09  laue
+ * Bux fix: Delete track cut only once for identical particle hbt
+ *
  * Revision 1.14  2000/08/31 22:31:30  laue
  * StHbtAnalysis: output changed (a little bit less)
  * StHbtEvent: new version, members for reference mult added
@@ -216,11 +219,12 @@ StHbtAnalysis::StHbtAnalysis(const StHbtAnalysis& a) : StHbtBaseAnalysis() {
 }
 //____________________________
 StHbtAnalysis::~StHbtAnalysis(){
-  //delete mControlSwitch     ;
-  delete mEventCut          ;
-  delete mFirstParticleCut  ;
-  delete mSecondParticleCut ;
-  delete mPairCut           ;
+  cout << " StHbtAnalysis::~StHbtAnalysis()" << endl;
+  if (mEventCut) delete mEventCut; mEventCut=0;
+  if (mFirstParticleCut == mSecondParticleCut) mSecondParticleCut=0;
+  if (mFirstParticleCut)  delete mFirstParticleCut; mFirstParticleCut=0;
+  if (mSecondParticleCut) delete mSecondParticleCut; mSecondParticleCut=0;
+  if (mPairCut) delete mPairCut; mPairCut=0;
   // now delete every CorrFunction in the Collection, and then the Collection itself
   StHbtCorrFctnIterator iter;
   for (iter=mCorrFctnCollection->begin(); iter!=mCorrFctnCollection->end();iter++){
