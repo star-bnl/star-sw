@@ -381,10 +381,18 @@ bool RPhiLessThan::operator()(const StiDetector* lhs, const StiDetector* rhs)
   StiPlacement* rhsp = rhs->getPlacement();
 
   // Center changed to Normal // March 2, 04 by CP
-
+	/*
   if (lhsp->getNormalRadius()<rhsp->getNormalRadius())
     return false;
   else if (lhsp->getNormalRadius()>rhsp->getNormalRadius())
+    return true;
+  else
+    return (lhsp->getNormalRefAngle()<rhsp->getNormalRefAngle());
+	*/
+
+  if (lhsp->getLayerRadius()<rhsp->getLayerRadius())
+    return false;
+  else if (lhsp->getLayerRadius()>rhsp->getLayerRadius())
     return true;
   else
     return (lhsp->getNormalRefAngle()<rhsp->getNormalRefAngle());
