@@ -816,7 +816,7 @@ CCC      CALL TPCSCA(R,RL,PR(1),P(1),X,CMS(1))
 *-- put in the material for beam pipe
       if((rl.gt.4.0).and.(r.lt.4.0))then
         if(abs(p(2)).lt.76.0)XLTRUE = XLTRUE + 0.003/COSL ! Beryllium
-        if(abs(p(2)).ge.76.0)XLTRUE = XLTRUE + 0.0739/COSL ! Iron
+        if(abs(p(2)).ge.76.0)XLTRUE = XLTRUE + 0.011/COSL ! Aluminum
       endif
       IF (XLTRUE.GT.1E-8) THEN
          CORR = 1. + 0.11111111 * ALOG10(XLTRUE)
