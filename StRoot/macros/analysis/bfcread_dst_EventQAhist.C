@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.9 2000/01/11 16:31:02 kathy Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.10 2000/01/13 16:55:11 kathy Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.10  2000/01/13 16:55:11  kathy
+// updating bfcread_dst*.C macros to use the new methods in StHistUtil which allow printing from a list; also make sure all libraries needed are loaded in the ones running St_QA_Maker; also update documentation
+//
 // Revision 1.9  2000/01/11 16:31:02  kathy
 // change to current input file in Root2XDF.C and bfcread_dst_EventQA*.C; load St_global library in bfcread_dst_QA_outhistfile.C which is now needed when using St_QA_Maker class
 //
@@ -35,11 +38,22 @@
 //
 //
 // inputs: nevents   - # events to process
-//         MainFile  - *.dst.root file from bfc output
+//         MainFile  - input *.dst.root file from bfc output
 //         psFile    - output postscript filename
-//         PageTitle - title you want on each output page, default is
+//         PageTitle - title you want on each output page, default = "" is
 //                       MainFile name
+//         PrintList - name of subset histogram list that you want printed
+//                   - these are defined in StHistUtil, method SetDefaultPrintList
+//                   - default = "", prints all histograms in directory
+//         MakerHistDir - this is the Maker name that you want to get histograms
+//                        from - leave as "QA" for this macro since this 
+//                        macro is setup to run St_QA_Maker!
 //
+// standard Maker names in bfc,doEvents
+//   (but if you run your own Maker here, then use whatever name you give it)
+//  are listed at 
+//  http://www.star.bnl.gov/STAR/html/comp_l/train/tut/bfc_maker_names.html
+//                                                     doEvents_maker_names.html
 //
 //======================================================================
 
@@ -53,7 +67,9 @@ void bfcread_dst_EventQAhist(
      const Char_t *MainFile=
       "/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.dst.root",
     const Char_t *psFile="Event_QA_hist.ps",
-    const Char_t *PageTitle="")
+    const Char_t *PageTitle="",
+    const Char_t *PrintList="",
+    const Char_t *MakerHistDir="EventQA")
 {
 //
   cout << "bfcread_dst_EventQAhist.C, num events to process " << 
@@ -64,6 +80,10 @@ void bfcread_dst_EventQAhist(
      psFile   << endl;
   cout << "bfcread_dst_EventQAhist.C, hist page title " << 
      PageTitle  << endl;
+  cout << "bfcread_dst_QAhist.C, Maker directory containing histograms =  " 
+       << MakerHistDir   << endl;
+  cout << "bfcread_dst_QAhist.C, subset list name of which histograms to draw,print = "
+       << PrintList  << endl;
 
   gSystem->Load("St_base");
   gSystem->Load("StChain");
@@ -76,11 +96,6 @@ void bfcread_dst_EventQAhist(
   gSystem->Load("StEvent");
   gSystem->Load("StEventMaker");
 
-// force the directory name for histograms since this macro is 
-// specifically for running StEventQAMaker
-             const Char_t *MakerHist="EventQA";
-  cout << "bfcread_dst_EventQAhist.C, directory of Maker name      " << 
-     MakerHist<< endl;
 
 //  Setup top part of chain
   chain = new StChain("MyChain");
@@ -112,7 +127,7 @@ void bfcread_dst_EventQAhist(
 // method to print out list of histograms - 
 //can do this anytime after they're booked
   Int_t NoHist=0;
-  NoHist = HU->ListHists(MakerHist);
+  NoHist = HU->ListHists(MakerHistDir);
   cout << " !!! bfcread_dst_QAhist.C, No. of Hist we have == " << NoHist << endl;
 
  
@@ -141,19 +156,25 @@ void bfcread_dst_EventQAhist(
     HU->SetPostScriptFile(psFile);
     HU->SetZones(2,3);
     HU->SetPaperSize();
-    HU->SetDefaultLogYList(MakerHist);
+    HU->SetDefaultLogYList(MakerHistDir);
       if (PageTitle=="") PageTitle=MainFile;
     HU->SetGlobalTitle(PageTitle);
+
+    HU->SetDefaultPrintList(MakerHistDir,PrintList);
 
   Int_t numLog = 0;
   numLog = HU->ExamineLogYList();
   cout << " bfcread_dst_EventQAhist.C, Number hist to plot with log scale = " << numLog << endl;
 
+  Int_t numPrint = 0;
+  numPrint = HU->ExaminePrintList();
+  cout << " bfcread_dst_EventQAhist.C, Number hist to print = " << numPrint << endl;
+
   chain->Finish();
   cout <<  "bfcread_dst_EventQAhist.C, passed chain->Finish" << endl ; 
 
 //  Now draw the actual histograms to canvas and to ps file
-    HU->DrawHists(MakerHist);
+    HU->DrawHists(MakerHistDir);
    
 }
  

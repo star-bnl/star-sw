@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QA_outhistfile.C,v 1.5 2000/01/12 23:16:37 kathy Exp $
+// $Id: bfcread_dst_QA_outhistfile.C,v 1.6 2000/01/13 16:55:11 kathy Exp $
 // $Log: bfcread_dst_QA_outhistfile.C,v $
+// Revision 1.6  2000/01/13 16:55:11  kathy
+// updating bfcread_dst*.C macros to use the new methods in StHistUtil which allow printing from a list; also make sure all libraries needed are loaded in the ones running St_QA_Maker; also update documentation
+//
 // Revision 1.5  2000/01/12 23:16:37  kathy
 // add all libraries that are now needed to load for St_QA_Maker; add code for using new print methods - can't yet print from list though....
 //
@@ -41,11 +44,11 @@
 //                   from (this will be first input when you did constructor)
 //             -- see standard Maker names note below!
 //
-// standard Maker names in bfc ==>
+//
+// standard Maker names in bfc 
 //   (but if you run your own Maker here, then use whatever name you give it)
 //  are listed at 
-// http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/St_QA_Maker/doc/
-//
+//  http://www.star.bnl.gov/STAR/html/comp_l/train/tut/bfc_maker_names.html
 //
 //======================================================================
 
