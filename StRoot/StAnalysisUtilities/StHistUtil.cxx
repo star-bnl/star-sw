@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.12 2002/09/06 02:51:34 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.13 2003/01/22 21:32:46 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.13  2003/01/22 21:32:46  genevb
+// Fix Solaris compilation errors
+//
 // Revision 2.12  2002/09/06 02:51:34  genevb
 // Remove limit on maximum number of histograms that can be copied
 //
@@ -71,6 +74,7 @@
 
 #include "StHistUtil.h"
 
+typedef TH1* TH1ptr;
 
 Int_t numOfPosPrefixes = 4;
 char* possiblePrefixes[4] = {"","LM","MM","HM"};
@@ -98,7 +102,7 @@ StHistUtil::StHistUtil(){
   m_CurPrefix = -1;
 
   maxHistCopy = 512;
-  newHist = new (TH1*)[maxHistCopy];
+  newHist = new TH1ptr[maxHistCopy];
   memset(newHist,0,maxHistCopy*sizeof(TH1*));
 
 }
@@ -140,7 +144,7 @@ Bool_t StHistUtil::CheckPSFile(const Char_t *histName) {
 
   if (newPrefix != m_CurPrefix) {
     m_CurPrefix = newPrefix;
-    TString m_CurFileName = m_PsFileName;
+    m_CurFileName = m_PsFileName;
     Ssiz_t insertPos = m_CurFileName.Index(".ps");
     if (insertPos < 0) {          // No .ps suffix in file name
       m_CurFileName.Append(possiblePrefixes[m_CurPrefix]);
@@ -608,7 +612,6 @@ Int_t StHistUtil::CopyHists(TList *dirList)
   if (!dirList) cout << " StHistUtil::CopyHists - histogram Pointer not set! " << endl;
 
 // create array of pointers to the new histograms I will create
- Int_t ilg = 0;
 
   Int_t ijk=0;
   Int_t histCopyCount = 0;
@@ -621,7 +624,7 @@ Int_t StHistUtil::CopyHists(TList *dirList)
        histCopyCount++;         
        if (ijk>=maxHistCopy){
          Int_t newMaxHistCopy = maxHistCopy * 4;
-         TH1** temp1 = new (TH1*)[newMaxHistCopy];
+         TH1** temp1 = new TH1ptr[newMaxHistCopy];
          memset(temp1,0,newMaxHistCopy*sizeof(TH1*));
          memcpy(temp1,newHist,maxHistCopy*sizeof(TH1*));
          delete newHist;
