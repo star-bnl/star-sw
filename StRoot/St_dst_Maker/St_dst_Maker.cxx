@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.64 2001/09/22 18:54:19 genevb Exp $
+// $Id: St_dst_Maker.cxx,v 1.65 2001/09/25 21:05:03 caines Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.65  2001/09/25 21:05:03  caines
+// Improve dealing of SVT hits and still not overwrite FTPC
+//
 // Revision 1.64  2001/09/22 18:54:19  genevb
 // Special handling of FTPC points
 //
@@ -199,7 +202,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.64 2001/09/22 18:54:19 genevb Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.65 2001/09/25 21:05:03 caines Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -408,6 +411,8 @@ Int_t  St_dst_Maker::Filler(){
   if (! tphit)        {tphit     = new St_tcl_tphit("tphit",1);         AddGarb(tphit);    }
   if (! tpcluster)    {tpcluster = new St_tcl_tpcluster("tpcluster",1); AddGarb(tpcluster);}
 
+
+  
   St_scs_spt     *scs_spt     = 0;
   St_DataSet     *svthits  = GetInputDS("svt_hits");
   if (svthits) {
@@ -420,6 +425,20 @@ Int_t  St_dst_Maker::Filler(){
   if (! tpc_groups)    {tpc_groups = new St_sgr_groups("tpc_groups",1); AddGarb(tpc_groups);} 
  
   if(Debug()) gMessMgr->Debug() << " run_dst: Calling dst_point_filler" << endm;
+
+ // Get pointer to svt cluster analysis 
+
+    StSvtAnalysedHybridClusters *mSvtBigHit;
+    StSvtHybridCollection *mSvtCluColl=0;
+    St_DataSet *dataSetSvt =0;
+    dataSetSvt = GetDataSet("StSvtAnalResults");
+
+    // If dataSetSvt not there then fast sim ran and need to use scs_spt else
+    // set this scs_spt nrows to zero and fill dst_point from svt collection
+
+    int NSvtPoints = scs_spt->GetNRows();
+    if( dataSetSvt) scs_spt->SetNRows(0);
+
   // dst_point_filler
   Int_t no_of_points    = tphit->GetNRows() + scs_spt->GetNRows();
   Int_t no_ftpc_points  = 0;
@@ -434,7 +453,9 @@ Int_t  St_dst_Maker::Filler(){
        point->ReAllocate(no_ftpc_points + no_of_points);
     }
     if (GetMaker("tpc_raw")) point->SetBit(kIsCalibrated); // mark that tpc_raw made calibration
+ 
     iRes = dst_point_filler(tphit, scs_spt, point);
+
   //	   ========================================
     if (iRes !=kSTAFCV_OK) {
       iMake = kStWarn;
@@ -443,9 +464,14 @@ Int_t  St_dst_Maker::Filler(){
     }
           // Fill 'used in the fit' info
 
-    dst_point_st *mypoint  = point->GetTable();
-    int HitIndex = no_ftpc_points + point->GetNRows();
 
+ 
+    dst_point_st *mypoint  = point->GetTable();
+    int HitIndex = point->GetNRows();
+    point->ReAllocate(HitIndex + NSvtPoints);
+   
+    // Get table again because pointer may have moved after realloc
+    mypoint  = point->GetTable();
 
     const float maxRange   = 22;
     const float mapFactor  = 23800;
@@ -453,12 +479,8 @@ Int_t  St_dst_Maker::Filler(){
     double cov;
     int index, index2=-1;
 
-    // Get pointer to svt cluster analysis and pack SVT info into dst_point
-
-    StSvtAnalysedHybridClusters *mSvtBigHit;
-    StSvtHybridCollection *mSvtCluColl=0;
-    St_DataSet *dataSetSvt =0;
-    dataSetSvt = GetDataSet("StSvtAnalResults");
+    //  pack SVT info into dst_point
+ 
     if( dataSetSvt)
        mSvtCluColl = (StSvtHybridCollection*)(dataSetSvt->GetObject());
     if(mSvtCluColl){
@@ -478,8 +500,9 @@ Int_t  St_dst_Maker::Filler(){
 	      
 	      for( int clu=0; clu<mSvtBigHit->numOfHits(); clu++){
 
+	       
 		mypoint[HitIndex].hw_position = 2;
- 		mypoint[HitIndex].hw_position += (1L<<4)*(index2);
+  		mypoint[HitIndex].hw_position += (1L<<4)*(index2);
 		svtx = int(mSvtBigHit-> WaferPosition()[clu].x()*4);
 		
 		mypoint[HitIndex].hw_position += (1L<<13)*(svtx);
@@ -558,9 +581,9 @@ Int_t  St_dst_Maker::Filler(){
 	  }
 	}
       }
-    }
+    } // End of if mSvtCluColl
   
-    point->SetNRows(HitIndex);
+    point->SetNRows(HitIndex-1);
     sgr_groups_st *tgroup = tpc_groups->GetTable();
     mypoint  = point->GetTable();
       
@@ -576,6 +599,7 @@ Int_t  St_dst_Maker::Filler(){
             assert(0);
 	  }
           else{
+	 
 	      mypoint[spt_id].charge |= 1UL<<24;
 	      //	    row = spc[spt_id].row/100;
 	      // row = spc[spt_id].row - row*100;
