@@ -15,11 +15,12 @@ float prop_one_track( float gtrack[8] , float target[2] , float ptrack[3] )
 **: ARGUMENTS:
 **:       IN:
 **:            float target[2]     - Where to propagate the tracks (x,y)
-**:            gtrack     - array of input track parameters
-**: DEFINITONS:[0]=x0,[1]=y0,[2]=z0,[3]=psi,[4]=tanl,[5]=(float)charge,[6]=invpt
+**:            gtrack[8]           - array of input track parameters
+**:            [0]=x0,[1]=y0,[2]=z0,[3]=psi,[4]=tanl,
+**:            [5]=(float)charge,[6]=invpt,[7]=curvature
 **:      OUT:
 **:            ptrack    - output track parameters
-**: DEFINITONS:[0]=x0,[1]=y0,[2]=z0
+**:            [0]=x0,[1]=y0,[2]=z0
 **:
 **: RETURNS:    5=o.k, 1=failed
 **:>------------------------------------------------------------------*/
