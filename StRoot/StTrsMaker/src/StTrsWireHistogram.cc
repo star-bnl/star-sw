@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.27 2003/09/02 17:59:19 perev Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.28 2003/12/17 18:22:01 fisyak Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
+ * Revision 1.28  2003/12/17 18:22:01  fisyak
+ * mIoSectorSpacing has never been defined and this causes that Inner Sector has randomly been ejected
+ *
  * Revision 1.27  2003/09/02 17:59:19  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -251,8 +254,8 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin,int sector)
     // Find closes wire to: bin.position().y()
   double Q=bin.numberOfElectrons();
    double *d=bin.d();
-    double innerSectorBoundary =
-	mGeomDb->outerSectorEdge() - mGeomDb->ioSectorSpacing();
+   double innerSectorBoundary = mGeomDb->firstOuterSectorAnodeWire() - 0.5*mGeomDb->anodeWirePitch();
+   //      mGeomDb->outerSectorEdge()  - mGeomDb->ioSectorSpacing(); mIoSectorSpacing has never been defined
     double yCoordinateOfHit = random->Gaus(bin.position().y(),(bin.sigmaT()+d[1]/12)/::sqrt(Q)); 
     double sigma=bin.sigmaT();
     double D=mGeomDb->anodeWirePitch()/2.;
