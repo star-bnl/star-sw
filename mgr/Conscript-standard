@@ -29,9 +29,21 @@ foreach my $Rep (@Repo) {
     foreach my $i (@h_filesR) {push @h_filesL, $i;}
   }
 }
-my @src     = sortu (@srcL);# print "@src\n";
+my @src     = sortu (@srcL);# print "src = @src\n";
 my @h_files = sortu (@h_filesL);
-my @idlM    = sortu (@idlML);
+my @idlM    = sortu (@idlML);# print "idlM = @idlM\n";
+if ($pkg eq "g2r") {#  print "package = $pkg\n";
+  foreach my $f ("g2t_get_event","g2t_get_kine"){
+    my $didl = $Dir . "/../g2t/" . $f . ".idl";# print "$didl\n"; 
+    my $dsrc =  $Dir . "/../g2t/" . $f . ".F";#  print "$dsrc\n";
+    if (-f $didl && -f $dsrc) {
+#      $didl = "../g2t/" . $f . ".idl"; print "$didl\n"; 
+      $dsrc = "../g2t/" . $f . ".F";#  print "$dsrc\n";
+#      push @idlM, $didl; print "Add $didl\n";
+      push @src,  $dsrc;# print "Add $dsrc\n";
+    }
+  }
+}
 my $so_pkg  = "";
 if ($#idlM > -1) {$PKG = "St_" . $PKG;}
 printf ("Run Conscript-standard in %-30s  for %-20s\n",$Dir, $PKG) unless ($param::quiet);

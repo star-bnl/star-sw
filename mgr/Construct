@@ -543,8 +543,8 @@ foreach my $dir ("StRoot","pams"){#,"StDb") {
 	    if ($#incT > -1 && ! $param::rflag) {Install $env $INCLUDE, @incT;}
 	    next;
 	  }
-	  if (($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/) &&
-	      $subsub_dir !~ /^g2t$/) {
+	  if (($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/)){
+	    # &&  $subsub_dir !~ /^g2t$/) {
 	    # one more level for gen & sim
 	    if ($SKIP_DIRS && $SKIP_DIRS =~ $subsub_dir) {
 	      print "skip dir: $subsub_dir \t=> $SKIP_DIRS\n";
