@@ -1,6 +1,9 @@
 //
-// $Id: StEpcMaker.cxx,v 1.12 2001/10/15 01:41:41 pavlinov Exp $
+// $Id: StEpcMaker.cxx,v 1.13 2001/10/24 13:55:05 suaide Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.13  2001/10/24 13:55:05  suaide
+// small bugs fixed
+//
 // Revision 1.12  2001/10/15 01:41:41  pavlinov
 // Added Clear method
 //
@@ -177,11 +180,11 @@ mTheEmcCollection=0;
 
    StDetectorId EmcId;
    StEmcDetector* EmcDet;
-   StEmcClusterCollection* cluscoll;
-   StEmcClusterCollection* Bemccluster;
-   StEmcClusterCollection* Bprscluster;
-   StEmcClusterCollection* Bsmdecluster;
-   StEmcClusterCollection* Bsmdpcluster;
+   StEmcClusterCollection* cluscoll=NULL;
+   StEmcClusterCollection* Bemccluster=NULL;
+   StEmcClusterCollection* Bprscluster=NULL;
+   StEmcClusterCollection* Bsmdecluster=NULL;
+   StEmcClusterCollection* Bsmdpcluster=NULL;
 
    if(mTheEmcCollection){
      cout<<" StEvent EmcCollection exists**"<<endl;
@@ -189,6 +192,7 @@ mTheEmcCollection=0;
      for(Int_t idet=0;idet<4;idet++){
        EmcId = static_cast<StDetectorId>(idet+kBarrelEmcTowerId); 
        EmcDet =mTheEmcCollection->detector(EmcId);
+       cluscoll=NULL;
        if(EmcDet){
          cluscoll = EmcDet->cluster();
          UInt_t ncl=0;

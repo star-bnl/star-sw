@@ -3,6 +3,9 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.11  2001/10/24 13:55:05  suaide
+// small bugs fixed
+//
 // Revision 1.10  2001/09/29 01:15:17  pavlinov
 // Clean up for production
 //
@@ -813,6 +816,7 @@ void
      }
    }
    StEmcGeom* GeomIn  = StEmcGeom::getEmcGeom("bemc");
+  cout<<" I am inside PointCalc2***"<<endl;
 
   //BEMC
 
@@ -849,6 +853,7 @@ Int_t Ncluster0=Bemccluster->numberOfClusters();
 	  }
   }
   //PRS
+  cout<<" I am inside PointCalc3***"<<endl;
   if(Bprscluster){
 Int_t Ncluster1=Bprscluster->numberOfClusters();
           if(Ncluster1>0){
@@ -881,7 +886,8 @@ Int_t Ncluster1=Bprscluster->numberOfClusters();
 	  }
 	  }
   }
-
+ cout<<" I am inside PointCalc4***"<<endl;
+ 
   //BSMD_ETA
 
   if(Bsmdecluster){
@@ -917,6 +923,7 @@ Int_t Ncluster2=Bsmdecluster->numberOfClusters();
 	  }
 	  }
   }
+ cout<<" I am inside PointCalc5***"<<endl;
 
   // BSMDP
 
