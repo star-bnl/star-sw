@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.60 2001/08/08 22:37:44 caines Exp $
+// $Id: St_dst_Maker.cxx,v 1.61 2001/08/24 21:00:47 caines Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.61  2001/08/24 21:00:47  caines
+// Write out correct index for Hyb. no matter what swapping went on
+//
 // Revision 1.60  2001/08/08 22:37:44  caines
 // IMprove packing of peakvalue for svt
 //
@@ -187,7 +190,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.60 2001/08/08 22:37:44 caines Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.61 2001/08/24 21:00:47 caines Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -438,7 +441,7 @@ Int_t  St_dst_Maker::Filler(){
     const float mapFactor  = 23800;
     unsigned int svty11,svtz,svtx,svty10,svty;
     double cov;
-    int index;
+    int index, index2=0;
 
     // Get pointer to svt cluster analysis and pack SVT info into dst_point
 
@@ -457,7 +460,7 @@ Int_t  St_dst_Maker::Filler(){
 	    
 	    for (int hybrid = 1;hybrid <=mSvtCluColl->getNumberOfHybrids();hybrid++){
 	      
-	      
+	      index2++;
 	      index = mSvtCluColl->getHybridIndex(barrel,ladder,wafer,hybrid);
 	      if(index < 0) continue;
 	      
@@ -467,7 +470,7 @@ Int_t  St_dst_Maker::Filler(){
 	      for( int clu=0; clu<mSvtBigHit->numOfHits(); clu++){
 
 		mypoint[HitIndex].hw_position = 2;
- 		mypoint[HitIndex].hw_position += (1L<<4)*(index);
+ 		mypoint[HitIndex].hw_position += (1L<<4)*(index2);
 		svtx = int(mSvtBigHit-> WaferPosition()[clu].x()*4);
 		
 		mypoint[HitIndex].hw_position += (1L<<13)*(svtx);
