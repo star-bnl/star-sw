@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.cc,v 1.17 2000/03/28 17:03:18 porter Exp $
+ * $Id: StDbConfigNode.cc,v 1.18 2000/04/25 18:26:02 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.cc,v $
+ * Revision 1.18  2000/04/25 18:26:02  porter
+ * added flavor & production time as settable query fields in
+ * table &/or node. Associated SQL updated in mysqlAccessor.
+ * Flavor key supports "+" as an OR symbol.
+ *
  * Revision 1.17  2000/03/28 17:03:18  porter
  * Several upgrades:
  * 1. configuration by timestamp for Conditions
@@ -83,14 +88,14 @@
 
 ////////////////////////////////////////////////////////////////
 
-StDbConfigNode::StDbConfigNode(StDbConfigNode* parent, const char* nodeName, const char* configName): StDbNode(*(StDbNode*)parent) {
+StDbConfigNode::StDbConfigNode(StDbConfigNode* parent, const char* nodeName, const char* configName): StDbNode(nodeName,configName) {
 
   zeroNodes();
   //  mnode.dbType = parent->getDbType();
   //  mnode.dbDomain = parent->getDbDomain();
-  setName(nodeName);
-  setVersion(configName);
+  misNode=true;
   setParentNode(parent);
+  parent->resolveNodeInfo(&mnode);  
 
   // If StarDb Type, then name holds map to real Db type
   // while the domain may still be StarDb
@@ -113,6 +118,7 @@ StDbConfigNode::StDbConfigNode(StDbConfigNode* parent, StDbNodeInfo* node): StDb
 
   zeroNodes();
   setParentNode(parent);
+  parent->resolveNodeInfo(&mnode);  
 
   // If StarDb Type, then name holds map to real Db type
   // while the domain may still be StarDb
@@ -386,6 +392,52 @@ StDbConfigNode::removeTable(StDbTable* table){
 
 ////////////////////////////////////////////////////////////////
 
+void
+StDbConfigNode::setFlavor(const char* flavor){
+
+  setLocalFlavor(flavor);
+  if(mfirstChildNode)mfirstChildNode->setFlavor(flavor);
+  if(mnextNode)mnextNode->setFlavor(flavor);
+
+}
+
+////////////////////////////////////////////////////////////////
+
+void
+StDbConfigNode::setLocalFlavor(const char* flavor){
+
+  TableList::iterator itr;
+    for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
+      if((*itr))(*itr)->setFlavor(flavor);
+   }
+
+}
+
+////////////////////////////////////////////////////////////////
+
+void
+StDbConfigNode::setProdTime(unsigned int ptime){
+
+  setLocalProdTime(ptime);
+  if(mfirstChildNode)mfirstChildNode->setProdTime(ptime);
+  if(mnextNode)mnextNode->setProdTime(ptime);
+
+}
+
+////////////////////////////////////////////////////////////////
+
+void
+StDbConfigNode::setLocalProdTime(unsigned int ptime){
+
+  TableList::iterator itr;
+    for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
+      if((*itr))(*itr)->setProdTime(ptime);
+   }
+
+}
+
+////////////////////////////////////////////////////////////////
+
 bool
 StDbConfigNode::compareTables(StDbTable* tab1, StDbTable* tab2){
 
@@ -422,7 +474,7 @@ return retVal;
 ////////////////////////////////////////////////////////////////
 
 void
-StDbConfigNode::resolveNodeInfo(StDbNodeInfo*& node){
+StDbConfigNode::resolveNodeInfo(StDbNodeInfo* node){
   //
   // used to restrict a some of a table's node Information 
   // to that of the parent node's... 
@@ -430,9 +482,54 @@ StDbConfigNode::resolveNodeInfo(StDbNodeInfo*& node){
   // 
 
   node->IsBaseLine=mnode.IsBaseLine;
+
   // if elementID="None" then Table-Node's elementID is used
   // else it is from this parent Object.
-  if(!strstr(mnode.elementID,"None"))mnode.mstrCpy(node->elementID,mnode.elementID);
+  if(!node->elementID){
+    mnode.mstrCpy(node->elementID,mnode.elementID);
+    return;
+  }
+
+  if((strstr(mnode.elementID,"None")) || (strstr(node->elementID,"None")))
+    return; // nothing to do
+
+  // Ok now filter child-list by parent-list
+
+    int prows,crows,slen;
+    slen = strlen(node->elementID)+1;
+    int* pelements = mnode.getElementID(mnode.elementID,prows);
+    int* celements = node->getElementID(node->elementID,crows);
+    char* tmpElements = new char[slen];
+    ostrstream es(tmpElements,slen);
+
+    for(int ip=0;ip<prows-1;ip++){
+      for(int ic=0;ic<crows;ic++){
+        if(celements[ic]==pelements[ip]){
+          es<<pelements[ip]<<",";
+          break;
+        }
+      }
+    }
+
+    int ip=prows-1;
+    int ifound=0;
+    for(int ic=0;ic<crows;ic++){
+      if(celements[ic]==pelements[ip]){
+        es<<pelements[ip];
+        ifound=1;
+        break;
+      }
+    }
+    es<<ends;
+
+    if(!ifound){ // then last element has ',' to be removed
+       char* id = strstr(tmpElements,"\0");
+       id--;
+       if(*id==',')*id='\0';
+    }
+     
+    if(node->elementID) delete [] node->elementID;
+    node->elementID = tmpElements;
 
 }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNode.hh,v 1.3 2000/02/15 20:27:44 porter Exp $
+ * $Id: StDbNode.hh,v 1.4 2000/04/25 18:26:03 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbNode.hh,v $
+ * Revision 1.4  2000/04/25 18:26:03  porter
+ * added flavor & production time as settable query fields in
+ * table &/or node. Associated SQL updated in mysqlAccessor.
+ * Flavor key supports "+" as an OR symbol.
+ *
  * Revision 1.3  2000/02/15 20:27:44  porter
  * Some updates to writing to the database(s) via an ensemble (should
  * not affect read methods & haven't in my tests.
@@ -49,12 +54,14 @@ bool misConfigured;
 bool misNode;
 bool mcanRollBack;
 
-
+StDbDefaults* defaults;
+bool mdefaultVersion;
 
 public:
 
    StDbNode(StDbNodeInfo* node);
    StDbNode(const char* name, const char* versionKey);
+   StDbNode(const char* name);
    StDbNode(StDbNode& node);
 
    virtual ~StDbNode() {};
@@ -81,6 +88,8 @@ public:
    virtual char* getElementID() ;
    virtual int*  getElementID(int& nrows) ;
 
+
+   virtual bool  defaultVersion() const { return mdefaultVersion; }
    virtual void  setConfigured(bool isConfigured);
    virtual bool  IsConfigured() const ;
    virtual void  setAsNode(bool isNode);
@@ -174,6 +183,8 @@ inline
 bool StDbNode::IsIndexed() const { return mnode.IsIndexed; }
 
 #endif
+
+
 
 
 

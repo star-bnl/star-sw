@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.cc,v 1.23 2000/03/28 17:03:19 porter Exp $
+ * $Id: mysqlAccessor.cc,v 1.24 2000/04/25 18:26:03 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.cc,v $
+ * Revision 1.24  2000/04/25 18:26:03  porter
+ * added flavor & production time as settable query fields in
+ * table &/or node. Associated SQL updated in mysqlAccessor.
+ * Flavor key supports "+" as an OR symbol.
+ *
  * Revision 1.23  2000/03/28 17:03:19  porter
  * Several upgrades:
  * 1. configuration by timestamp for Conditions
@@ -323,7 +328,37 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
   char baseString[256];
   ostrstream os(baseString,256);
   os<<" Where nodeID="<<currentNode.nodeID;
-  os<<" AND version='"<<currentNode.versionKey<<"' "<<ends;
+
+  // prepare "flavor" part of query 
+  char *id1,*id2,*id3;
+  char tmpString[256];
+  ostrstream ts(tmpString,256);
+  id2=table->getFlavor();
+  id1=new char[strlen(id2)+1]; strcpy(id1,id2);
+  id3=id1;
+  ts<<" flavor In(";
+  while((id2=strstr(id1,"+"))){
+       *id2='\0';
+       ts<<"'"<<id1<<"',";
+       *id2='+';
+       id2++;
+       id1=id2;
+  }
+  ts<<"'"<<id1<<"') "<<ends;
+  delete [] id3;            
+  
+
+  //  os<<" AND version='"<<currentNode.versionKey<<"' "<<ends;
+  //  os<<" AND flavor='"<<table->getFlavor()<<"' and deactive=0 "<<ends;
+  
+  os<<" AND "<< tmpString;// <<" and deactive<="<<table->getProdTime()<<ends;
+  if((int)table->getProdTime()==0){
+    os<<" and deactive=0 "<<ends;
+  } else {
+    os<<" and deactive<="<<table->getProdTime();
+    os<<" and unix_timestamp(entryTime)<="<<table->getProdTime()<<" "<<ends;
+  } 
+    
 
   int numRows;
   int* elementID = currentNode.getElementID((const char*)currentNode.elementID,numRows);
@@ -826,7 +861,11 @@ mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
     // now write to index
      buff.WriteScalar(table->getSchemaID(),"schemaID");
      buff.WriteScalar(sTime,"beginTime");
-     buff.WriteScalar(table->getVersion(),"version");
+     //buff.WriteScalar(table->getVersion(),"version");
+     if(!table->defaultFlavor()){
+       if(!strstr(table->getFlavor(),"+"))
+          buff.WriteScalar(table->getFlavor(),"flavor");
+     }
      buff.WriteScalar(dataID,"dataID");  
      buff.WriteScalar(currentNode.nodeID,"nodeID");
      buff.WriteScalar(nrows,"numRows");
@@ -861,13 +900,16 @@ mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
        if(currentNode.IsIndexed){
           eID=elements[i];
 
-          char* version = table->getVersion();
+          // char* version = table->getVersion();
           buff.WriteScalar(table->getSchemaID(),"schemaID");
           buff.WriteScalar(sTime,"beginTime");
-          if(version){
-            buff.WriteScalar(version,"version");
-            delete [] version;
-          }
+          //    if(version){
+          //  buff.WriteScalar(version,"version");
+          //  delete [] version;
+          // }
+         if(!(table->defaultFlavor())) 
+              buff.WriteScalar(table->getFlavor(),"flavor");         
+
          buff.WriteScalar(eID,"elementID");
          buff.WriteScalar(dataID,"dataID");  
          buff.WriteScalar(currentNode.nodeID,"nodeID");
@@ -1022,6 +1064,7 @@ mysqlAccessor::queryNodeInfo(StDbNodeInfo* node){
 node->IsBinary   = false;
 node->IsBaseLine = false;
 node->IsIndexed  = true;
+
 bool retVal=true;
 
     Db.Release(); buff.Raz();
@@ -1097,9 +1140,10 @@ mysqlAccessor::storeNodeInfo(StDbNodeInfo* node){
   // done after a queryNodeInfo to check if it is already
   // in the database
 
-  Db<<"insert into Nodes set name='"<<node->name<<"', versionKey='";
-  Db<<node->versionKey<<"', nodeType='"<<node->nodeType<<"', structName='";
-  Db<<node->structName<<"'";
+  Db<<"insert into Nodes set name='"<<node->name<<"' ";
+  if(!StDbDefaults::Instance()->IsDefaultVersion(node->versionKey))
+    Db<<", versionKey='"<<node->versionKey<<"' ";
+  Db<<", nodeType='"<<node->nodeType<<"', structName='"<<node->structName<<"'";
 
   if(node->IsBaseLine)Db<<", baseLine='Y'";
   if(node->IsBinary)Db<<", isBinary='Y'";
@@ -1399,6 +1443,11 @@ mysqlAccessor::IsConnected() {
 
 return Db.IsConnected();
 }
+
+
+
+
+
 
 
 

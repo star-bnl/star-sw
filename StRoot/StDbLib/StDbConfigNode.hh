@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.hh,v 1.14 2000/03/28 17:03:18 porter Exp $
+ * $Id: StDbConfigNode.hh,v 1.15 2000/04/25 18:26:02 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.hh,v $
+ * Revision 1.15  2000/04/25 18:26:02  porter
+ * added flavor & production time as settable query fields in
+ * table &/or node. Associated SQL updated in mysqlAccessor.
+ * Flavor key supports "+" as an OR symbol.
+ *
  * Revision 1.14  2000/03/28 17:03:18  porter
  * Several upgrades:
  * 1. configuration by timestamp for Conditions
@@ -116,7 +121,6 @@ protected:
 
  void deleteTables();
  bool compareTables(StDbTable* tab1, StDbTable* tab2);
- void resolveNodeInfo(StDbNodeInfo*& node);
 
 public:
 
@@ -150,6 +154,7 @@ public:
   virtual StDbConfigNode* getFirstChildNode() const {return mfirstChildNode;}; 
 
   // Tree operations
+  virtual void resolveNodeInfo(StDbNodeInfo* childNode); 
   virtual void deleteTree();
   virtual void buildTree(int opt=0);//0=get tableDescriptors from db
   virtual void deleteChildren();
@@ -172,6 +177,12 @@ public:
   virtual StDbTable* findTable(const char* name, const char* subPath="/");
   virtual StDbTable* findLocalTable(const char* name);
   virtual void removeTable(StDbTable* table);
+
+  // set the table flavors in full sub-tree or local list
+  virtual void setFlavor(const char* flavor);
+  virtual void setLocalFlavor(const char* flavor);
+  virtual void setProdTime(unsigned int ptime);
+  virtual void setLocalProdTime(unsigned int ptime);
   virtual StDbTableIter* getStDbTableIter();
 
   // node operations

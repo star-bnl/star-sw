@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNode.cc,v 1.3 2000/01/19 20:20:06 porter Exp $
+ * $Id: StDbNode.cc,v 1.4 2000/04/25 18:26:03 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbNode.cc,v $
+ * Revision 1.4  2000/04/25 18:26:03  porter
+ * added flavor & production time as settable query fields in
+ * table &/or node. Associated SQL updated in mysqlAccessor.
+ * Flavor key supports "+" as an OR symbol.
+ *
  * Revision 1.3  2000/01/19 20:20:06  porter
  * - finished transaction model needed by online
  * - fixed CC5 compile problem in StDbNodeInfo.cc
@@ -38,28 +43,53 @@ StDbNode::StDbNode(StDbNodeInfo* node) {
 
 mnode.mstrCpy(mnode.name,node->name);
 mnode.mstrCpy(mnode.versionKey,node->versionKey);
+mdefaultVersion = StDbDefaults::Instance()->IsDefaultVersion(mnode.versionKey);
+
 mnode.setNodeInfo(node);
+
 misConfigured = true;
 misNode = true;
 mcanRollBack = false;
 
 }
 
-StDbNode::StDbNode(const char* name, const char* versionKey){
+StDbNode::StDbNode(const char* name ){
 
+char* version=StDbDefaults::Instance()->getVersion();
 mnode.mstrCpy(mnode.name,name);
-mnode.mstrCpy(mnode.versionKey,versionKey);
+mnode.mstrCpy(mnode.versionKey,version); delete [] version;
+mdefaultVersion = true;
+
 misConfigured = false;
 misNode = false;
 mcanRollBack = false;
 
 }
 
+////////////////////////////////////////////////////////////////////
+
+
+StDbNode::StDbNode(const char* name, const char* versionKey){
+
+mnode.mstrCpy(mnode.name,name);
+mnode.mstrCpy(mnode.versionKey,versionKey);
+mdefaultVersion = StDbDefaults::Instance()->IsDefaultVersion(mnode.versionKey);
+
+misConfigured = false;
+misNode = false;
+mcanRollBack = false;
+
+}
+
+////////////////////////////////////////////////////////////////////
+
 StDbNode::StDbNode(StDbNode& node){
 
 mnode.name = node.getName();
 mnode.versionKey = node.getVersion();
+mdefaultVersion = node.defaultVersion();
 node.getNodeInfo(&mnode);
+
 misConfigured = node.IsConfigured();
 misNode = node.IsNode();
 mcanRollBack = false;
@@ -81,6 +111,8 @@ node->deleteInfoPointers();
 node->copyInfo(&mnode);
 }
 
+/////////////////////////////////////////////////////////////
+
 char*
 StDbNode::getName() { return mnode.mstrDup((const char*)mnode.name); };
 
@@ -100,7 +132,10 @@ void
 StDbNode::setName(const char* nodeName){ mnode.mstrCpy(mnode.name,nodeName);}
 
 void
-StDbNode::setVersion(const char* version){ mnode.mstrCpy(mnode.versionKey,version);}
+StDbNode::setVersion(const char* version){ 
+  mnode.mstrCpy(mnode.versionKey,version);
+  mdefaultVersion=StDbDefaults::Instance()->IsDefaultVersion(mnode.versionKey);
+}
 
 void
 StDbNode::setDbName(const char* nodeDbName){ mnode.mstrCpy(mnode.dbName,nodeDbName);}

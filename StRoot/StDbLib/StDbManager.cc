@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManager.cc,v 1.21 2000/03/28 17:03:18 porter Exp $
+ * $Id: StDbManager.cc,v 1.22 2000/04/25 18:26:03 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.22  2000/04/25 18:26:03  porter
+ * added flavor & production time as settable query fields in
+ * table &/or node. Associated SQL updated in mysqlAccessor.
+ * Flavor key supports "+" as an OR symbol.
+ *
  * Revision 1.21  2000/03/28 17:03:18  porter
  * Several upgrades:
  * 1. configuration by timestamp for Conditions
@@ -99,6 +104,7 @@
 #include <strings.h>
 
 StDbManager* StDbManager::mInstance=0;
+StDbDefaults* StDbDefaults::mInstance=0;
 
 ////////////////////////////////////////////////////////////////
 
@@ -765,7 +771,7 @@ StDbManager::initConfig(StDbType type, StDbDomain domain, const char* configName
 
 StDbConfigNode * configNode = 0;
 
-char* name;
+char* name = 0;
  if(domain == dbStar){
   name = getDbTypeName(type);
  } else {
@@ -774,6 +780,7 @@ char* name;
 
  configNode = new StDbConfigNode(type,domain,name,configName);
  configNode->buildTree(opt);
+ if(name) delete [] name;
  return configNode;
 }
 
