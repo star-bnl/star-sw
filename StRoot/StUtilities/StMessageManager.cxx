@@ -55,10 +55,6 @@ StMessMgr* StMessageManager::mInstance = 0;
 //
 // C++ routines:
 //_____________________________________________________________________________
-#ifdef __ROOT__
-ClassImp(StMessageManager)
-#endif
-//_____________________________________________________________________________
 StMessageManager::StMessageManager() : StMessMgr()
 {
 //
@@ -442,7 +438,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.40 2004/04/15 16:03:38 fine Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.41 2004/04/15 21:28:02 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
@@ -455,8 +451,11 @@ static StMessMgr* temp=StMessageManager::Instance();
 
 
 //_____________________________________________________________________________
-// $Id: StMessageManager.cxx,v 1.40 2004/04/15 16:03:38 fine Exp $
+// $Id: StMessageManager.cxx,v 1.41 2004/04/15 21:28:02 fine Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.41  2004/04/15 21:28:02  fine
+// Remove the redundant StMessageManager RootCint dictionary. User shoudl use the base StMessMgr class anyway
+//
 // Revision 1.40  2004/04/15 16:03:38  fine
 // move StMessMgr class to St_base and change the interface
 //
