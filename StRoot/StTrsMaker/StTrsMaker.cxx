@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.6 1999/01/23 18:47:21 fisyak Exp $
+// $Id: StTrsMaker.cxx,v 1.7 1999/01/28 02:46:09 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.7  1999/01/28 02:46:09  lasiuk
+// SUN compile with new GEANT interface
+//
 // Revision 1.6  1999/01/23 18:47:21  fisyak
 // Cleanup for SL98l
 //
@@ -36,9 +39,7 @@
 #include <iostream.h>
 #include <unistd.h>    // needed for access()
 
-#ifdef __sun
 #include <string>
-#endif
 #include <vector>
 #include <list>
 #include <utility>    // pair
@@ -90,6 +91,7 @@
 // const int TBINS      = 10;
 // #endif
 
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.7 1999/01/28 02:46:09 lasiuk Exp $";
 
 ClassImp(StTrsMaker)
 
@@ -105,158 +107,121 @@ Int_t StTrsMaker::Init()
 //     // Create tables
 //     St_DataSetIter       local(gStChain->DataSet("params"));
 
-//     //
-//     // Make the DataBase
-//     //
-//     // Check File access
-//     //
+    //
+    // Make the DataBase
+    //
+    // Check File access
+    //
+    cout << "*********************************************" << endl;
+    cout << "Try Initialize" << endl;
+    string geoFile("../run/TPCgeo.conf");
+    if (access(geoFile.c_str(),R_OK)) {
+	cerr << "ERROR:\n" << geoFile.c_str() << " cannot be opened" << endl;
+	//shell(pwd);
+	cerr << "Exitting..." << endl;
+	exit(1);
+    }
 
-// #ifndef __sun
-//     string geoFile("../run/TPCgeo.conf");
-//     if (access(geoFile.c_str(),R_OK)) {
-// #else
-//     char* geoFile = "../run/TPCgeo.conf";
-//     if (access(geoFile,R_OK)) {
-// #endif
-	
-// 	cerr << "ERROR:\n" << geoFile << " cannot be opened" << endl;
-// 	//shell(pwd);
-// 	cerr << "Exitting..." << endl;
-// 	exit(1);
-//     }
+    string scFile = "../run/sc.conf";
+    if (access(scFile.c_str(),R_OK)) {
+     cerr << "ERROR:\n" << scFile.c_str() << " cannot be opened" << endl;
+     cerr << "Exitting..." << endl;
+     exit(1);
+    }
 
-// #ifndef __sun
-//     string scFile("../run/sc.conf");
-//     if (access(scFile.c_str(),R_OK)) {
-// #else
-//     char* scFile = "../run/sc.conf";
-//     if (access(scFile,R_OK)) {
-// #endif
-//      cerr << "ERROR:\n" << scFile << " cannot be opened" << endl;
-//      cerr << "Exitting..." << endl;
-//      exit(1);
-//     }
+    string electronicsFile = "../run/electronics.conf";
+    if (access(electronicsFile.c_str(),R_OK)) {
+	cerr << "ERROR:\n" << electronicsFile.c_str() << " cannot be opened" << endl;
+	cerr << "Exitting..." << endl;
+	exit(1);
+    }
 
-// #ifndef __sun
-//     string electronicsFile("../run/electronics.conf");
-//     if (access(electronicsFile.c_str(),R_OK)) {
-// #else
-//     char* electronicsFile = "../run/electronics.conf";
-//     if (access(electronicsFile,R_OK)) {
-// #endif
-// 	cerr << "ERROR:\n" << electronicsFile << " cannot be opened" << endl;
-// 	cerr << "Exitting..." << endl;
-// 	exit(1);
-//     }
+    string magFile = "../run/example.conf";         // contains B field
+    if (access(magFile.c_str(),R_OK)) {
+	cerr << "ERROR:\n" << magFile.c_str() << " cannot be opened" << endl;
+	cerr << "Exitting..." << endl;
+	exit(1);
+    }
 
-// #ifndef __sun
-//     string magFile("../run/example.conf");         // contains B field
-//     if (access(magFile.c_str(),R_OK)) {
-// #else
-//     char* magFile = "../run/example.conf";
-//     if (access(magFile,R_OK)) {
-// #endif
-// 	cerr << "ERROR:\n" << magFile << " cannot be opened" << endl;
-// 	cerr << "Exitting..." << endl;
-// 	exit(1);
-//     }
+   //
+   // The DataBases
+   //
+   mGeometryDb =
+     StTpcSimpleGeometry::instance(geoFile.c_str());
+   mGeometryDb->print();
 
-//    //
-//    // The DataBases
-//    //
-// #ifndef __sun
-//    mGeometryDb =
-//      StTpcSimpleGeometry::instance(geoFile.c_str());
+   mSlowControlDb =
+       StTpcSimpleSlowControl::instance(scFile.c_str());
 
-//     mSlowControlDb =
-// 	StTpcSimpleSlowControl::instance(scFile.c_str());
+   mMagneticFieldDb =
+       StSimpleMagneticField::instance(magFile.c_str());
 
-//     mMagneticFieldDb =
-// 	StSimpleMagneticField::instance(magFile.c_str());
+   mElectronicsDb =
+       StTpcSimpleElectronics::instance(electronicsFile.c_str());
 
-//     mElectronicsDb =
-// 	StTpcSimpleElectronics::instance(electronicsFile.c_str());
-// #else
-//     mGeometryDb =
-// 	StTpcSimpleGeometry::instance(geoFile);
+   string gas =("Ar");
+   mGasDb = new StTrsDeDx(gas);
+   mGasDb->print();
 
-//     mSlowControlDb =
-// 	StTpcSimpleSlowControl::instance(scFile);
+    //
+    // Containers
+    //
 
-//     mMagneticFieldDb =
-// 	StSimpleMagneticField::instance(magFile);
+    // create a Sector:
+    // Analog (for calculation)
+    mSector = 
+      new StTrsSector(mGeometryDb);
 
-//     mElectronicsDb =
-// 	StTpcSimpleElectronics::instance(electronicsFile);
-// #endif
-    
-// #ifndef __sun
-//     string gas("Ar");
-//     mGasDb = new StTrsDeDx(gas);
-// #else
-//     mGasDb = new StTrsDeDx();
-// #endif
-//     mGasDb->print();
+    // Digital (for output)
+    mDigitalSector =
+	new StTrsDigitalSector(mGeometryDb);
 
-//     //
-//     // Containers
-//     //
-
-//     // create a Sector:
-//     // Analog (for calculation)
-//     mSector = 
-//       new StTrsSector(mGeometryDb);
-
-//     // Digital (for output)
-//     mDigitalSector =
-// 	new StTrsDigitalSector(mGeometryDb);
-
-//     mWireHistogram =
-//       StTrsWireHistogram::instance(mGeometryDb, mSlowControlDb);
-// //     mWireHistogram->setDoGasGain(true);  // True by default
-// //     mWireHistogram->setDoGasGainFluctuations(false);
-// //     mWireHistogram->setDoTimeDelay(false);
+    mWireHistogram =
+      StTrsWireHistogram::instance(mGeometryDb, mSlowControlDb);
+    mWireHistogram->setDoGasGain(true);  // True by default
+    mWireHistogram->setDoGasGainFluctuations(false);
+    mWireHistogram->setDoTimeDelay(false);
 
     
-//     //
-//     // Processes
-//     //
-//     mChargeTransporter =
-//       StTrsFastChargeTransporter::instance(mGeometryDb, mSlowControlDb, mGasDb, mMagneticFieldDb);
-//     // set status:
-// //     mChargeTransporter->setChargeAttachment(true);
-// //     mChargeTransporter->setGatingGridTransparency(true);
-// //     mChargeTransporter->setTransverseDiffusion(true);
-// //     mChargeTransporter->setLongitudinalDiffusion(true);
-// //     mChargeTransporter->setExB(true);
+    //
+    // Processes
+    //
+    mChargeTransporter =
+      StTrsFastChargeTransporter::instance(mGeometryDb, mSlowControlDb, mGasDb, mMagneticFieldDb);
+    // set status:
+    mChargeTransporter->setChargeAttachment(true);
+    mChargeTransporter->setGatingGridTransparency(true);
+    mChargeTransporter->setTransverseDiffusion(true);
+    mChargeTransporter->setLongitudinalDiffusion(true);
+    mChargeTransporter->setExB(true);
 
 
-//     mAnalogSignalGenerator =
-// 	StTrsSlowAnalogSignalGenerator::instance(mGeometryDb, mSlowControlDb, mElectronicsDb, mSector);
-//     //
-//     // Set the function for the induced charge on Pad
-//     //
-//     //dynamic_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
-//         //setChargeDistribution(StTrsSlowAnalogSignalGenerator::endo);
-// 	//setChargeDistribution(StTrsSlowAnalogSignalGenerator::gatti);
-// 	//setChargeDistribution(StTrsSlowAnalogSignalGenerator::dipole);
-//     //
-//     // Set the function for the Analog Electronics signal shape
-//     //
-//     //dynamic_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
-// 	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::delta);
-//         //setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianApproximation);
-// 	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianExact);
-// 	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::asymmetricGaussianApproximation);
-// 	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::realShaper); 
-// //     mAnalogSignalGenerator->setDeltaRow(0);
-// //     mAnalogSignalGenerator->setDeltaPad(0);
-// //     mAnalogSignalGenerator->setSignalThreshold(.0001*(.001*volt));
-// //     mAnalogSignalGenerator->setSuppressEmptyTimeBins(true);
+    mAnalogSignalGenerator =
+	StTrsSlowAnalogSignalGenerator::instance(mGeometryDb, mSlowControlDb, mElectronicsDb, mSector);
+    //
+    // Set the function for the induced charge on Pad
+    //
+    //dynamic_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
+        //setChargeDistribution(StTrsSlowAnalogSignalGenerator::endo);
+	//setChargeDistribution(StTrsSlowAnalogSignalGenerator::gatti);
+	//setChargeDistribution(StTrsSlowAnalogSignalGenerator::dipole);
+    //
+    // Set the function for the Analog Electronics signal shape
+    //
+    //dynamic_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
+	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::delta);
+        //setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianApproximation);
+	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianExact);
+	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::asymmetricGaussianApproximation);
+	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::realShaper); 
+    mAnalogSignalGenerator->setDeltaRow(0);
+    mAnalogSignalGenerator->setDeltaPad(0);
+    mAnalogSignalGenerator->setSignalThreshold(.0001*(.001*volt));
+    mAnalogSignalGenerator->setSuppressEmptyTimeBins(true);
 	
 
-//     mDigitalSignalGenerator =
-// 	StTrsFastDigitalSignalGenerator::instance(mElectronicsDb, mSector, mDigitalSector);
+    mDigitalSignalGenerator =
+	StTrsFastDigitalSignalGenerator::instance(mElectronicsDb, mSector, mDigitalSector);
 
 
     return StMaker::Init();
@@ -276,124 +241,140 @@ Int_t StTrsMaker::Make(){
       Int_t no_tpc_hits =  g2t_tpc_hit->GetNRows(); // $STAR/StRoot/base/St_DataSet.h & St_Table.h 
       g2t_tpc_hit_st *tpc_hit =  g2t_tpc_hit->GetTable();
 
-      for (int i=0; i< no_tpc_hits; i++, tpc_hit++){
-	cout << i << '\t' 
-	     << tpc_hit->id   << ' '
-	     << tpc_hit->de   << ' '
-	     << tpc_hit->ds   << ' '
-	     << tpc_hit->x[0] << ' '
-	     << tpc_hit->p[0] << endl;
+      StTpcCoordinateTransform transformer(mGeometryDb, mSlowControlDb);
+      //for (int i=0; i< no_tpc_hits; i++, tpc_hit++){
+      cout << "Loop over: " << no_tpc_hits << endl;
+      for (int i=0; i< 1; i++, tpc_hit++){
+	cout << tpc_hit->id                << ' '
+	     << (tpc_hit->de/eV)           << ' '
+	     << (tpc_hit->ds/centimeter)   << ' '
+	     << tpc_hit->volume_id         << endl;
 
+	int pID = 1;  // I need to know the PID for ionization calculations
+	
 	StThreeVector<double> hitPosition(tpc_hit->x[0]*centimeter,
 					  tpc_hit->x[1]*centimeter,
-					  tpc_hit->x[2]*centimeter);
+					  tpc_hit->x[2]*centimeter); 
+	PR(hitPosition);
+	
+	int decodedNumber = tpc_hit->volume_id;
+	cout << decodedNumber << endl;
+	int isdet = (decodedNumber/100000);
+	decodedNumber -= isdet*100000;
+	int sectorOfHit = decodedNumber/100;
+	decodedNumber -= sectorOfHit*100;
+	int padrow = decodedNumber;
+	
+	PR(isdet);
+	PR(sectorOfHit);
+	PR(padrow);
+
+	double fgOffSet = (padrow <= mGeometryDb->numberOfInnerRows()) ?
+	    mGeometryDb->innerSectorFrischGridPadPlaneSeparation() :
+	    mGeometryDb->innerSectorFrischGridPadPlaneSeparation();
+
+	StThreeVector<double>
+	    sector12Coordinate(tpc_hit->x[0]*centimeter,
+			       tpc_hit->x[1]*centimeter + mGeometryDb->radialDistanceAtRow(padrow),
+			       tpc_hit->x[2]*centimeter + mGeometryDb->frischGrid() + fgOffSet);
+
 	StThreeVector<double> hitMomentum(tpc_hit->p[0]*GeV,
 					  tpc_hit->p[1]*GeV,
 					  tpc_hit->p[2]*GeV);
 
-	StTrsChargeSegment aHit(hitPosition,
-				hitMomentum,
-				tpc_hit->de*GeV,
-				tpc_hit->ds*centimeter);
+	StTrsChargeSegment aSegment(sector12Coordinate,
+				    hitMomentum,
+				    tpc_hit->de*GeV,
+				    tpc_hit->ds*centimeter,
+				    pID);
 
-	PR(aHit);
+	PR(hitMomentum.mag());
 
-      }
-//     St_g2t_track   *g2t_track   = (St_g2t_track *)   geant("g2t_track");
-    
-    // Read a charge Segment (g2t) from GEANT:
-    double bg = 3; // minimum ionizing particle
-    
-    // Energy deposited per centimeter:
-    float dE = 2.444*keV;  // deposited per cm of Ar
-    float dS = 1.*centimeter;
+	PR(aSegment);
+	sleep(2);
+	cout << "*****************" << '\n' << endl;
+	
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
-    vector<int> all[3];
+	vector<int> all[3];
 #else
-    vector<int,allocator<int> > all[3];
+	vector<int,allocator<int> > all[3];
 #endif
 
-    StThreeVector<double> position(0.,1500.*millimeter,200.*millimeter);
-    StThreeVector<double> momentum(1.*GeV,0.,0.);
-
-    StTrsChargeSegment aSegment(position,
-				momentum,
-				dE,
-				dS);
-
-    PR(aSegment);
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
-    list<StTrsMiniChargeSegment> comp;
-    list<StTrsMiniChargeSegment>::iterator iter;
+	list<StTrsMiniChargeSegment> comp;
+	list<StTrsMiniChargeSegment>::iterator iter;
 #else
-    list<StTrsMiniChargeSegment,allocator<StTrsMiniChargeSegment> > comp;
-    list<StTrsMiniChargeSegment,allocator<StTrsMiniChargeSegment> >::iterator iter;
+	list<StTrsMiniChargeSegment,allocator<StTrsMiniChargeSegment> > comp;
+	list<StTrsMiniChargeSegment,allocator<StTrsMiniChargeSegment> >::iterator iter;
 #endif
-    int breakNumber = 1;
-    aSegment.split(mGasDb, mMagneticFieldDb, breakNumber, &comp);
+	int breakNumber = 1;
+	cout << "StTrsSegment::split() into " << breakNumber << " segments." << endl;
+	aSegment.split(mGasDb, mMagneticFieldDb, breakNumber, &comp);
 
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
-    copy(comp.begin(), comp.end(), ostream_iterator<StTrsMiniChargeSegment>(cout,"\n"));
+	copy(comp.begin(), comp.end(), ostream_iterator<StTrsMiniChargeSegment>(cout,"\n"));
 #endif
-    cout << endl;
+	cout << endl;
     
-    cout << "comp.size() " << (comp.size()) << endl;
+	cout << "Number of \"miniSegments\": " << (comp.size()) << endl;
 
     // Loop over the miniSegments
-    for(iter = comp.begin();
+	for(iter = comp.begin();
 	iter != comp.end();
-	iter++) {
+	    iter++) {
 
-	cout << endl;
-	cout << "*iter " << (*iter) << endl;
-	
+	    cout << endl;
+	    cout << " *iter " << (*iter) << endl;
+	    PR(*iter);
 	//
 	// TRANSPORT HERE
 	//
-	mChargeTransporter->transportToWire(*iter);
-	PR(*iter);
+	    mChargeTransporter->transportToWire(*iter);
+	    PR(*iter);
 
 	//
 	// CHARGE COLLECTION AND AMPLIFICATION
 	//
 
 #ifndef __sun
-	StTrsWireBinEntry anEntry(iter->position(), iter->charge());
- 	PR(anEntry);
+	    StTrsWireBinEntry anEntry(iter->position(), iter->charge());
+	    PR(anEntry);
 #else
-	StTrsWireBinEntry anEntry((*iter).position(), (*iter).charge());
+	    StTrsWireBinEntry anEntry((*iter).position(), (*iter).charge());
 #endif
-	mWireHistogram->addEntry(anEntry);
+	    mWireHistogram->addEntry(anEntry);
 	
-    } // Loop over the list of iterators
+	} // Loop over the list of iterators
 
-    cout << "\a***************************\a\n" << endl;
+	
+      } // Loop over the g2t_tpc_hits in the chamber
+      
+      cout << "\a***************************\a\n" << endl;
 
     //
     // Generate the ANALOG Signals on pads
     //
-    mAnalogSignalGenerator->inducedChargeOnPad(mWireHistogram);
+      mAnalogSignalGenerator->inducedChargeOnPad(mWireHistogram);
 
-    mAnalogSignalGenerator->sampleAnalogSignal();
-
+      mAnalogSignalGenerator->sampleAnalogSignal();
 
     //
     // Digitize the Signals
     //
-    mDigitalSignalGenerator->digitizeSignal();
+      mDigitalSignalGenerator->digitizeSignal();
 
 
     //
     // Write it out!
     //
     
-}
- return kStOK;
+  }
+  return kStOK;
 }
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.6 1999/01/23 18:47:21 fisyak Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.7 1999/01/28 02:46:09 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
