@@ -1,0 +1,11 @@
+# dui/Makefile.control
+#
+ASPS += dui tdm spx soc
+#PAMS += 
+#
+USER_LIBS += -ldsl -lasu
+#
+DEBUG := TRUE
+#SHARE := TRUE
+MOTIF := FALSE
+#
