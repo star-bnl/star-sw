@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.11 2001/06/13 16:24:43 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.12 2001/06/14 22:12:11 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.12  2001/06/14 22:12:11  jhthomas
+ * Speedup UndoBDistorion by adding table lookups
+ *
  * Revision 1.11  2001/06/13 16:24:43  jhthomas
  * Speed up PadRow13 Corrections
  *
@@ -69,16 +72,17 @@ class StMagUtilities {
   virtual void    BField ( const Float_t x[], Float_t B[] ) ;
   virtual void    BrBzField( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value ) ;
   virtual void    B3DField ( const Float_t x[], Float_t B[] ) ;
-  virtual void    BrBz3DField( const Float_t r, const Float_t z, const Float_t phi,
-			       Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) ;
+  virtual void    BrBz3DField ( const Float_t r, const Float_t z, const Float_t phi,
+				Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) ;
   virtual void    DoDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoBDistortion ( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    UndoPad13Distortion( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    UndoTwistDistortion( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    UndoClockDistortion( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    UndoMembraneDistortion( const Float_t x[3], Float_t Xprime[3] ) ;
-  virtual void    UndoEndcapDistortion( const Float_t x[3], Float_t Xprime[3] ) ;
+  virtual void    FastUndoBDistortion ( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    UndoPad13Distortion ( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    UndoTwistDistortion ( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    UndoClockDistortion ( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    UndoMembraneDistortion ( const Float_t x[3], Float_t Xprime[3] ) ;
+  virtual void    UndoEndcapDistortion ( const Float_t x[3], Float_t Xprime[3] ) ;
 
   ClassDef(StMagUtilities,1)    // Base class for all STAR MagField
 
