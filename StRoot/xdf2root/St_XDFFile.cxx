@@ -336,4 +336,15 @@ Int_t St_XDFFile::CloseXDF()
   fDataSet = 0;
   return ians;
 }
+//__________________________________________________________________________
+void St_XDFFile::GetXdFile(Char_t *filename, St_DataSet *dataset)
+{
+  if (!(dataset && filename && strlen(filename))) return;
+  St_XDFFile xdf;
+  if (xdf.OpenXDF(filename) == 0){
+    St_DataSet *set = xdf.NextEventGet();
+    if (set) dataset->Add(set);
+  }
+}
+
 

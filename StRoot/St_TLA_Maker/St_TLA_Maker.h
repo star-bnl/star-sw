@@ -1,3 +1,8 @@
+// $Id: St_TLA_Maker.h,v 1.2 1998/07/20 15:08:15 fisyak Exp $
+// $Log: St_TLA_Maker.h,v $
+// Revision 1.2  1998/07/20 15:08:15  fisyak
+// Add tcl and tpt
+//
 #ifndef STAR_St_TLA_Maker
 #define STAR_St_TLA_Maker
 
@@ -13,6 +18,7 @@
 class St_TLA_Maker : public StMaker {
  private:
                Bool_t drawinit;
+	       //               static Char_t m_VersionCVS = "$Id: St_TLA_Maker.h,v 1.2 1998/07/20 15:08:15 fisyak Exp $";  //Header CVS version 
  protected:
  public: 
                   St_TLA_Maker();
