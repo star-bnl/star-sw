@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.32 2001/10/04 19:22:17 ward Exp $
+ * $Id: EventReader.cxx,v 1.33 2001/12/29 22:04:31 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.33  2001/12/29 22:04:31  ward
+ * Disabled corruption checks of all FTP banks.
+ *
  * Revision 1.32  2001/10/04 19:22:17  ward
  * Disabled corruption check for the EMCP bank and all banks under it.
  *
@@ -766,6 +769,12 @@ char *EventReader::ConvertToString(unsigned long  *input) {
 void EventReader::WhereAreThePointers(int *beg,int *end,char *xx) {
   *beg=-123; *end=-123;
   assert(strcmp(xx,  "TPCMZP"));
+
+  // Dec 29 2001.
+  // FTPP points to itself, and FTPMZP points to FTPP.  This is too much confusion for me to deal with.
+  // I'm just going to disable all checks of all FTP banks (next line).
+  if(xx[0]=='F'&&xx[1]=='T'&&xx[2]=='P') { *beg=0; *end= 0; return; }
+
   if(!strcmp(xx,   "DATAP")) { *beg=7; *end=26; }
   if(!strcmp(xx,    "RICP")) { *beg=1; *end=36; }
   if(!strcmp(xx,"RICCRAMP")) { *beg=1; *end=16; }
@@ -775,7 +784,7 @@ void EventReader::WhereAreThePointers(int *beg,int *end,char *xx) {
   if(!strcmp(xx,  "TPCRBP")) { *beg=1; *end= 6; }
   if(!strcmp(xx,"L3_SECTP")) { *beg=9; *end=14; }
   if(!strcmp(xx, "L3_SECP")) { *beg=6; *end=11; }
-  if(!strcmp(xx,    "L3_P")) { *beg=0; *end= 0; return; } // bbb I don't have good doc for L3_P yet.
+  if(!strcmp(xx,    "L3_P")) { *beg=0; *end= 0; return; } // I don't have good doc for L3_P yet.
   if(!strcmp(xx,    "SVTP")) { *beg=1; *end= 8; }
   if(!strcmp(xx, "SVTSECP")) { *beg=1; *end=24; }
   if(!strcmp(xx,  "SVTRBP")) { *beg=1; *end= 6; }
@@ -807,9 +816,13 @@ char EventReader::BankOrItsDescendentsIsBad(int herbFd,long currentOffset) { // 
   int i,beg,end,numberOfDataWords,bytesRead;
 
 
+   
   if(lseek(herbFd,currentOffset,SEEK_SET)!=currentOffset) return TRUE;
+   
   bytesRead=read(herbFd,header,10*sizeof(unsigned long));
+   
   if(bytesRead!=10*sizeof(unsigned long)) return TRUE;
+   
 
   strcpy(bankname,ConvertToString(header));
   // PP"BBB bankname = %s\n",bankname);
@@ -846,6 +859,11 @@ char EventReader::BankOrItsDescendentsIsBad(int herbFd,long currentOffset) { // 
 
   for(i=beg;i<end;i+=2) {
     if(data[i+1]==0) continue; /* len is 0 */
+    if(data[i]==0) {
+      PP"Bank '%s' (at offset %d bytes in the .daq file) points to itself (data word %d counting from 1).\n",
+          bankname,currentOffset,i+1);
+      return TRUE; 
+    }
     strncpy(mLastBank,bankname,25);
     mWordIndex=i; // mWordIndex is 1 off from the DAQ Data Format document (starts from 0 instead of 1).
     if(BankOrItsDescendentsIsBad(herbFd,4*data[i]+currentOffset)) return TRUE;
