@@ -23,35 +23,36 @@ my $debugOn=0;
 my $DISK1 = "/star/rcf/disk00001/star";
 
 my @DISKR = (
-              "/star/rcf/data09/reco",
-              "/star/rcf/data10/reco",
-              "/star/rcf/data05/reco",
-              "/star/rcf/data08/reco",
-              "/star/rcf/data07/reco",
+              "/star/rcf/data03/reco",
+#              "/star/rcf/data09/reco",
+#              "/star/rcf/data10/reco",
+#              "/star/rcf/data05/reco",
+#              "/star/rcf/data08/reco",
+#              "/star/rcf/data07/reco",
 ); 
 
-my $prodSr = "P00hg";
+my $prodSr = "P00hi";
 my $jobFDir = "/star/u2e/starreco/" . $prodSr ."/requests/";
 
 my $topHpssReco  =  "/home/starreco/reco";
 
 my @SetD = (
-             "P00hg/2000/06",
-             "P00hg/2000/07",
-             "P00hg/2000/08", 
-             "P00hg/2000/09", 
+#             "P00hg/2000/06",
+#             "P00hg/2000/07",
+             "P00hi/2000/08", 
+#             "P00hg/2000/09", 
 );
 
 my @SetS = (
-             "daq/2000/06",
-             "daq/2000/07",
+#             "daq/2000/06",
+#             "daq/2000/07",
              "daq/2000/08",
              "daq/2000/09", 
 );
 
 my @DirD = (
-            "2000/06",
-            "2000/07",
+#            "2000/06",
+#            "2000/07",
             "2000/08",
             "2000/09",
 );
@@ -339,7 +340,7 @@ my $ndir = 0;
 
 ##### select from JobStatus table files which should be updated
 
- $sql="SELECT prodSeries, JobID, sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobStatus = 'n/a' ";
+ $sql="SELECT prodSeries, JobID, sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobfileName like 'P00h%' AND jobStatus = 'n/a' ";
 
 
    $cursor =$dbh->prepare($sql)
