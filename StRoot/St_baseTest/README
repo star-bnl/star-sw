@@ -1,0 +1,31 @@
+ $Id: README,v 1.1 1999/09/23 18:35:13 fine Exp $
+ $Log: README,v $
+ Revision 1.1  1999/09/23 18:35:13  fine
+ Readme
+
+  This directory contains some classes and
+  subroutines to test other STAR classes.
+  Those can not be tested with CINT macros only
+
+To run this test one needs the ROOT seesion as follows:
+
+root.exe -b 
+
+root.exe [0] gSystem->Load("St_base"); gSystem->Load("St_baseTest"); test a;
+ MICKY executing.
+   MICKY    2.71  950712  9.30
+ ---------------------------------------------------------------
+ Routing TMXM     testing MXMPY-1-2-3.
+ Tests pass 1    11    21    31    10    110    210    310    12    0    
+ ---------------------------------------------------------------
+ Routing TMXM     testing MXMAD-1-2-3.
+ Tests pass 1    11    21    31    10    110    210    310    12    0    
+ ---------------------------------------------------------------
+ Routing TMXM     testing MXMUB-1-2-3.
+ Tests pass 1    11    21    31    10    110    210    310    12    0    
+ ---------------------------------------------------------------
+ Routing TMXM     testing MXMLRT - MXMLTR.
+
+
+     Valery Fine September, 23, 1999
+
