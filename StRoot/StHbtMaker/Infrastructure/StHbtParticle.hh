@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.hh,v 1.17 2002/11/19 23:35:52 renault Exp $
+ * $Id: StHbtParticle.hh,v 1.18 2002/12/12 17:01:50 kisiel Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.hh,v $
+ * Revision 1.18  2002/12/12 17:01:50  kisiel
+ * Hidden Information handling and purity calculation
+ *
  * Revision 1.17  2002/11/19 23:35:52  renault
  * Enable calculation of exit/entrance separation for V0 daughters
  *
@@ -142,6 +145,10 @@ public:
   // Fab private
   StHbtHiddenInfo*  getHiddenInfo() const;
   void SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo);
+  void CalculatePurity();
+  double GetPionPurity();
+  double GetKaonPurity();
+  double GetProtonPurity();
   void CalculateTpcExitAndEntrancePoints( const StPhysicalHelixD* tHelix,
 					  StHbtThreeVector* PrimVert,
 					  StHbtThreeVector* tmpTpcEntrancePoint,
@@ -177,9 +184,24 @@ private:
   int mNhits;
   StHbtThreeVector mNominalTpcExitPoint;
   StHbtThreeVector mNominalTpcEntrancePoint;
-  mutable StHbtHiddenInfo* mHiddenInfo;  // Fab private
+  StHbtHiddenInfo* mHiddenInfo;  // Fab private
 
-  // For V0 Daugthers TpcEntrance/ExitPoints
+  double mPurity[6];
+
+  static double mPrimPimPar0;
+  static double mPrimPimPar1;
+  static double mPrimPimPar2;
+  static double mPrimPipPar0;
+  static double mPrimPipPar1;
+  static double mPrimPipPar2;
+  static double mPrimPmPar0;
+  static double mPrimPmPar1;
+  static double mPrimPmPar2;
+  static double mPrimPpPar0;
+  static double mPrimPpPar1;
+  static double mPrimPpPar2;
+
+   // For V0 Daugthers TpcEntrance/ExitPoints
   StHbtThreeVector mPrimaryVertex;
 
   StPhysicalHelixD mHelixV0Pos;
@@ -212,12 +234,11 @@ inline StHbtHiddenInfo* StHbtParticle::getHiddenInfo() const
 inline const StHbtHiddenInfo* StHbtParticle::HiddenInfo() const
 {return mHiddenInfo;}
 inline void StHbtParticle::SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo)
-{ mHiddenInfo = aHiddenInfo;}
+{ mHiddenInfo = aHiddenInfo->clone();}
 // ***
 
 inline void StHbtParticle::ResetFourMomentum(const StHbtLorentzVector& vec){mFourMomentum = vec;}
 
 inline StHbtKink* StHbtParticle::Kink() const { return mKink; }
-
 
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.18 2002/11/19 23:36:00 renault Exp $
+ * $Id: StHbtParticle.cc,v 1.19 2002/12/12 17:01:49 kisiel Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
+ * Revision 1.19  2002/12/12 17:01:49  kisiel
+ * Hidden Information handling and purity calculation
+ *
  * Revision 1.18  2002/11/19 23:36:00  renault
  * Enable calculation of exit/entrance separation for V0 daughters
  *
@@ -94,6 +97,20 @@
 #else
   #include <cmath>
 #endif
+
+double StHbtParticle::mPrimPimPar0= 9.05632e-01;
+double StHbtParticle::mPrimPimPar1= -2.26737e-01;
+double StHbtParticle::mPrimPimPar2= -1.03922e-01;
+double StHbtParticle::mPrimPipPar0= 9.09616e-01;
+double StHbtParticle::mPrimPipPar1= -9.00511e-02;
+double StHbtParticle::mPrimPipPar2= -6.02940e-02;
+double StHbtParticle::mPrimPmPar0= 0.;
+double StHbtParticle::mPrimPmPar1= 0.;
+double StHbtParticle::mPrimPmPar2= 0.;
+double StHbtParticle::mPrimPpPar0= 0.;
+double StHbtParticle::mPrimPpPar1= 0.;
+double StHbtParticle::mPrimPpPar2= 0.;
+
 int TpcLocalTransform(StThreeVectorD& xgl, 
 		      int& iSector, 
 		      int& iPadrow, 
@@ -102,17 +119,27 @@ int TpcLocalTransform(StThreeVectorD& xgl,
 
 
 //_____________________
-StHbtParticle::StHbtParticle() : mTrack(0), mV0(0), mKink(0) {
+StHbtParticle::StHbtParticle() : mTrack(0), mV0(0), mKink(0), mHiddenInfo(0) {
   /* no-op for default */
 }
 //_____________________
 StHbtParticle::~StHbtParticle(){
+  //  cout << "Issuing delete for StHbtParticle." << endl;
+
   if (mTrack) delete mTrack;
   if (mV0) delete mV0;
   if (mKink) delete mKink;
+  //  cout << "Trying to delete HiddenInfo: " << mHiddenInfo << endl;
+  if (mHiddenInfo) 
+    {
+      //      cout << "Deleting HiddenInfo." << endl;
+      delete mHiddenInfo;
+    }
 }
 //_____________________
-StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass) : mTrack(0), mV0(0), mKink(0) {
+StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass) : mTrack(0), mV0(0), mKink(0), mHiddenInfo(0) {
+  
+  
   // I know there is a better way to do this...
   mTrack = new StHbtTrack(*hbtTrack);
   StHbtThreeVector temp = hbtTrack->P();
@@ -124,6 +151,8 @@ StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass
   mNhits = hbtTrack->NHits();
   mHelix = hbtTrack->Helix();
   CalculateNominalTpcExitAndEntrancePoints();
+  CalculatePurity();
+  
   // test
   mHelixTrackTest = hbtTrack->Helix();
 
@@ -152,13 +181,13 @@ StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass
   // ***
   mHiddenInfo= 0;
   if(hbtTrack->ValidHiddenInfo()){
-    mHiddenInfo= hbtTrack->getHiddenInfo()->clone();
+    mHiddenInfo= hbtTrack->getHiddenInfo()->getParticleHiddenInfo();
   }
   // ***
 
 }
 //_____________________
-StHbtParticle::StHbtParticle(const StHbtV0* const hbtV0,const double& mass) : mTrack(0), mV0(0), mKink(0) {
+StHbtParticle::StHbtParticle(const StHbtV0* const hbtV0,const double& mass) : mTrack(0), mV0(0), mKink(0), mHiddenInfo(0) {
   mV0 = new StHbtV0(*hbtV0);
   mMap[0]= 0;
   mMap[1]= 0;
@@ -207,7 +236,7 @@ StHbtParticle::StHbtParticle(const StHbtV0* const hbtV0,const double& mass) : mT
 
 }
 //_____________________
-StHbtParticle::StHbtParticle(const StHbtKink* const hbtKink,const double& mass) : mTrack(0), mV0(0) {
+StHbtParticle::StHbtParticle(const StHbtKink* const hbtKink,const double& mass) : mTrack(0), mV0(0), mHiddenInfo(0) {
   mKink = new StHbtKink(*hbtKink);
   mMap[0]= 0;
   mMap[1]= 0;
@@ -219,7 +248,7 @@ StHbtParticle::StHbtParticle(const StHbtKink* const hbtKink,const double& mass) 
 }
 
 //_____________________
-StHbtParticle::StHbtParticle(const StHbtXi* const hbtXi, const double& mass){
+StHbtParticle::StHbtParticle(const StHbtXi* const hbtXi, const double& mass)  {
   mXi = new StHbtXi(*hbtXi);
   mMap[0]= 0;
   mMap[1]= 0;
@@ -227,6 +256,7 @@ StHbtParticle::StHbtParticle(const StHbtXi* const hbtXi, const double& mass){
   mFourMomentum.setVect(temp);
   double ener = sqrt(temp.mag2()+mass*mass);
   mFourMomentum.setE(ener);
+  mHiddenInfo = 0;
 }
 //_____________________
 const StHbtThreeVector& StHbtParticle::NominalTpcExitPoint() const{
@@ -414,6 +444,46 @@ void StHbtParticle::CalculateNominalTpcExitAndEntrancePoints(){
   }
 }
 //_____________________
+void StHbtParticle::CalculatePurity(){
+  double tPt = mFourMomentum.perp();
+  // pi -
+  mPurity[0] = mPrimPimPar0*(1.-exp((tPt-mPrimPimPar1)/mPrimPimPar2));
+  mPurity[0] *= mTrack->PidProbPion();
+  // pi+
+  mPurity[1] = mPrimPipPar0*(1.-exp((tPt-mPrimPipPar1)/mPrimPipPar2));
+  mPurity[1] *= mTrack->PidProbPion();
+  // K-
+  mPurity[2] = mTrack->PidProbKaon();
+  // K+
+  mPurity[3] = mTrack->PidProbKaon();
+  // pbar
+  mPurity[4] = mTrack->PidProbProton();
+  // p
+  mPurity[5] = mTrack->PidProbProton();
+}
+
+double StHbtParticle::GetPionPurity()
+{
+  if (mTrack->Charge()>0)
+    return mPurity[1];
+  else
+    return mPurity[0];
+}
+double StHbtParticle::GetKaonPurity()
+{
+  if (mTrack->Charge()>0)
+    return mPurity[3];
+  else
+    return mPurity[2];
+}
+double StHbtParticle::GetProtonPurity()
+{
+  if (mTrack->Charge()>0)
+    return mPurity[5];
+  else
+    return mPurity[4];
+}
+
 void StHbtParticle::CalculateTpcExitAndEntrancePoints( const StPhysicalHelixD* tHelix,
 						       StHbtThreeVector*  PrimVert,
 						       StHbtThreeVector* tmpTpcEntrancePoint,
