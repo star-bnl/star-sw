@@ -59,7 +59,6 @@ Int_t StDAQMaker::Open(const char*)
 void StDAQMaker::Close(Option_t *)
 {
   Clear();
-  delete fDAQReaderSet; fDAQReaderSet = 0; //Helen added ???
   fDAQReader->close();
 }
 //_____________________________________________________________________________
