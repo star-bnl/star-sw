@@ -1,6 +1,6 @@
 /*************************************************************************** 
  *
- * $Id: StEventMaker.cxx,v 2.16 2000/01/25 20:11:11 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.17 2000/02/08 21:14:16 genevb Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.16  2000/01/25 20:11:11  ullrich
- * Fixed bug in loading the Xi vertices.
+ * Revision 2.17  2000/02/08 21:14:16  genevb
+ * Handle cases with no tracks.
+ *
+ * Revision 2.28  2000/08/17 00:38:48  ullrich
+ * Allow loading of tpt tracks.
  *
  * Revision 2.27  2000/05/26 11:36:19  ullrich
  * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
@@ -92,7 +95,7 @@
  * Revision 2.5  1999/11/11 10:02:58  ullrich
  * Added warning message in case some hits cannot be stored.
  *
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.16 2000/01/25 20:11:11 ullrich Exp $";
+ * Revision 2.4  1999/11/10 22:40:27  ullrich
  * Delete hit if it cannot be added to collection.
  *
  * Revision 2.3  1999/11/08 17:04:59  ullrich
@@ -129,10 +132,10 @@ static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.16 2000/01/25 20:11:11 ul
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.16 2000/01/25 20:11:11 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.17 2000/02/08 21:14:16 genevb Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.16 2000/01/25 20:11:11 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.17 2000/02/08 21:14:16 genevb Exp $";
 
 ClassImp(StEventMaker)
     doPrintEventInfo  = kFALSE;
@@ -409,7 +412,11 @@ StEventMaker::makeEvent()
     //
     StGlobalTrack *gtrack = 0;
     dst_track_st *dstGlobalTracks = mEventManager->returnTable_dst_globtrk(nrows);
-    maxId = dstPrimaryTracks ? max((long)dstPrimaryTracks[nrows-1].id, nrows) : 0;
+    if (!dstGlobalTracks) nrows = 0;
+    int maxId = dstGlobalTracks && nrows>0 ? max((long)dstGlobalTracks[nrows-1].id, nrows) : 0;
+    StVector(StGlobalTrack*) vecGlobalTracks(maxId+1, gtrack);
+    
+    for (i=0; i<nrows; i++) {
         gtrack = new StGlobalTrack(dstGlobalTracks[i]);
         vecGlobalTracks[dstGlobalTracks[i].id] = gtrack;
         gtrack->setGeometry(new StHelixModel(dstGlobalTracks[i]));

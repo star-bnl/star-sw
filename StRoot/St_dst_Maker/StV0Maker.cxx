@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.17 2000/01/27 01:33:53 caines Exp $
+// $Id: StV0Maker.cxx,v 1.18 2000/02/08 21:14:18 genevb Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.18  2000/02/08 21:14:18  genevb
+// Handle cases with no tracks.
+//
 // Revision 1.17  2000/01/27 01:33:53  caines
 // Now only runs ev0eval if geant there
 //
@@ -191,15 +194,22 @@ Int_t StV0Maker::Make(){
       AddData(dst_v0_vertex);
     }
     vertex->ReAllocate(v0_limit);
-    St_ev0_track2 *ev0track2 = new St_ev0_track2("ev0_track2",globtrk->GetNRows());
+    Long_t NGlbTrk = globtrk->GetNRows();
+    St_ev0_track2 *ev0track2 = new St_ev0_track2("ev0_track2",NGlbTrk);
     AddGarb(ev0track2);
         
-    iRes = ev0_am2(m_ev0par2,globtrk,vertex,dst_v0_vertex,ev0track2);
+    if (NGlbTrk < 1) {
+      gMessMgr->Warning() << " Cannot call ev0 with <1 tracks" << endm;
+      iRes = kSTAFCV_ERR;
+    } else {
+      iRes = ev0_am2(m_ev0par2,globtrk,vertex,dst_v0_vertex,ev0track2);
+    }
     //       =========================================================
     
-    if (iRes !=kSTAFCV_OK) iMake = kStWarn;
-    if (iRes !=kSTAFCV_OK)
+    if (iRes !=kSTAFCV_OK) {
       gMessMgr->Warning() << " Problem on return from EV0 " << endm;
+      iMake = kStWarn;
+    }
     if(m_ev0EvalOn){   
       //ev0_eval2
 	St_DataSetIter geant(GetInputDS("geant"));

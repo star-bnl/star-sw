@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.31 2000/02/02 14:23:47 wdeng Exp $
+// $Id: StPrimaryMaker.cxx,v 1.32 2000/02/08 21:14:18 genevb Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.32  2000/02/08 21:14:18  genevb
+// Handle cases with no tracks.
+//
 // Revision 1.31  2000/02/02 14:23:47  wdeng
 // Add protection in case one runs StPrimaryMaker without running StPreVertexMaker beforehand
 //
@@ -304,6 +307,8 @@ Int_t StPrimaryMaker::Make(){
     if( !stk_track){ stk_track = new St_stk_track("stk_tracks",5000); AddGarb(stk_track);}
   } 
 
+  long NGlbTrk = globtrk->GetNRows();
+
   if (m_fixedVertex) {  // Fixed primary vertex
     gMessMgr->Warning("StPrimaryMaker: --------- WARNING!!! ---------","E-");
     gMessMgr->Warning() << "StPrimaryMaker: Fixing the primary vertex at (" <<
@@ -313,12 +318,16 @@ Int_t StPrimaryMaker::Make(){
     gMessMgr->Warning("StPrimaryMaker: --------- WARNING!!! ---------","E-");
     // evr with fixed vertex
     vertex->AddAt(m_fixedVertex,0);
-    if(Debug()) gMessMgr->Debug() <<
-        "run_evr: calling evr_am with fixed vertex" << endm;
-    iRes = evr_am(m_evr_evrpar,globtrk,vertex);
+    if (NGlbTrk < 1) {
+      gMessMgr->Warning() << "Cannot call evr with <1 tracks" << endm; 
+      iRes = kSTAFCV_ERR;
+    } else {
+      if(Debug()) gMessMgr->Debug() <<
+          "run_evr: calling evr_am with fixed vertex" << endm;
+      iRes = evr_am(m_evr_evrpar,globtrk,vertex);
+    }
   } else {  // Primary vertex is not fixed, find it
     // Switch to Low Multiplicity Primary Vertex Finder for multiplicities < 15
-    long NGlbTrk = globtrk->GetNRows();
     if( NGlbTrk < 15 ){
       // lmv
 
