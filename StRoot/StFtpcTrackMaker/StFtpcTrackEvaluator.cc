@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackEvaluator.cc,v 1.3 2000/06/07 11:09:50 oldi Exp $
+// $Id: StFtpcTrackEvaluator.cc,v 1.4 2000/06/13 14:36:19 oldi Exp $
 // $Log: StFtpcTrackEvaluator.cc,v $
+// Revision 1.4  2000/06/13 14:36:19  oldi
+// Changed cout to gMessMgr->Message() (only for non-interactive part).
+//
 // Revision 1.3  2000/06/07 11:09:50  oldi
 // Changed 0 pointers to NULL pointers.
 // In SetupHistos(): avoided exit(-1) if write permission is wrong.
@@ -14,7 +17,7 @@
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 07.06.2000
+//----------Last Modified: 09.06.2000
 //----------Copyright:     &copy MDO Production 2000
 
 #include "StFtpcTrackEvaluator.hh"
@@ -33,6 +36,8 @@
 #include "TAxis.h"
 
 #include "MIntArray.h"
+
+#include "StMessMgr.h"
 
 ////////////////////////////////////////////////////////////////////////////////////
 //                                                                                //
@@ -208,7 +213,7 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_d
 {
   // Usual used constructor if conformal mapping tracker output available.
 
-  cout << "Track evaluating started..." << endl;
+  gMessMgr->Message("Track evaluating started...", "I", "OST");
 
   mVertex = main_vertex;
 
@@ -226,7 +231,7 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_d
 {
   // Usual used constructor if the output of the tracker was written in STAF tables only.
 
-  cout << "Track evaluating started..." << endl;
+  gMessMgr->Message("Track evaluating started...", "I", "OST");
 
   mVertex = main_vertex;
 
@@ -456,7 +461,7 @@ void StFtpcTrackEvaluator::SetupFile(Char_t *filename, Char_t *write_permission)
   mFile = new TFile(mFilename, mWritePermission);
   
   if (!mFile->IsOpen()) {
-    cerr << "but that's o.k. - I'll create it immediately!" << endl; 
+    gMessMgr->Message("but that's o.k. - I'll create it immediately!", "W", "OST"); 
     delete mFile;
     mFile = new TFile(mFilename, "RECREATE");
     CreateHistos();
@@ -528,8 +533,8 @@ void StFtpcTrackEvaluator::SetupHistos()
 {
   // Sets up the histograms.
   
-  if (strcmp(mWritePermission, "RECREATE") !=0 || strcmp(mWritePermission, "UPDATE") != 0) {
-    cerr << "Wrong write permission! Has to be RECREATE or UPDATE. Set to RECREATE." << endl;
+  if (strcmp(mWritePermission, "RECREATE") !=0 && strcmp(mWritePermission, "UPDATE") != 0) {
+    gMessMgr->Message("Wrong write permission! Has to be RECREATE or UPDATE. Set to RECREATE.", "W", "OST");
     mWritePermission = "RECREATE";
   }
 
@@ -1253,6 +1258,21 @@ void StFtpcTrackEvaluator::EvaluateGoodness(Int_t t_counter)
     
     if (mParentTrack->At(t_counter*10+i) == mParent->At(t_counter)) {
       mClusterArr->AddAt(1, p->GetHitNumber());
+
+      if (i == points->GetEntriesFast()-1) {
+	// last point on track was picked up wrong
+	
+	StFtpcConfMapper c;
+
+	Double_t chi2_1[6];
+	Double_t chi2_2[6];
+
+	c.StraightLineFit(track, chi2_1, i);
+	c.StraightLineFit(track, chi2_2, i-1);
+
+	//cout << " " << chi2_1[4] << " " << chi2_2[4] << " " << chi2_1[4] - chi2_2[4] << endl;
+	//cout << " " << chi2_1[5] << " " << chi2_2[5] << " " << chi2_1[5] - chi2_2[5] << endl << endl;
+      }
     }
 
     else {
@@ -1270,8 +1290,8 @@ void StFtpcTrackEvaluator::EvaluateGoodness(Int_t t_counter)
 	c.StraightLineFit(track, chi2_1, i);
 	c.StraightLineFit(track, chi2_2, i-1);
 
-	cout << chi2_1[4] << " " << chi2_2[4] << " " << chi2_1[4] - chi2_2[4] << endl;
-	cout << chi2_1[5] << " " << chi2_2[5] << " " << chi2_1[5] - chi2_2[5] << endl << endl;
+	//cout << "u" << chi2_1[4] << " " << chi2_2[4] << " " << chi2_1[4] - chi2_2[4] << endl;
+	//cout << "u" << chi2_1[5] << " " << chi2_2[5] << " " << chi2_1[5] - chi2_2[5] << endl << endl;
       }
 
     }
@@ -1911,11 +1931,11 @@ void StFtpcTrackEvaluator::GeantInfo()
 {
   // Shows information abaout GEANT output.
 
-  cout << "Geant hits                    : " << GetNumGeantHits() << endl;
-  cout << "Geant tracks                  : " << GetNumGeantTracks() << endl;
-  cout << "Short tracks                  : " << GetNumShortTracks() << endl;
-  cout << "Long tracks                   : " << GetNumLongTracks() << endl;
-  cout << "Good tracks                   : " << GetNumGoodGeantTracks() << endl;
+  gMessMgr->Message("", "I", "OST") << "Geant hits                    : " << GetNumGeantHits() << endm;
+  gMessMgr->Message("", "I", "OST") << "Geant tracks                  : " << GetNumGeantTracks() << endm;
+  gMessMgr->Message("", "I", "OST") << "Short tracks                  : " << GetNumShortTracks() << endm;
+  gMessMgr->Message("", "I", "OST") << "Long tracks                   : " << GetNumLongTracks() << endm;
+  gMessMgr->Message("", "I", "OST") << "Good tracks                   : " << GetNumGoodGeantTracks() << endm;
 
   return;
 }
@@ -1925,12 +1945,12 @@ void StFtpcTrackEvaluator::ClusterInfo()
 {
   // Shows information abaout GEANT clusters.
   
-  cout << "Short track clusters          : " << GetNumShortTrackClusters() << endl;
-  cout << "Long track clusters           : " << GetNumLongTrackClusters() << endl;
-  cout << "Max. track clusters           : " << GetMaxClusters() << endl;
-  cout << "# of hits on good found tracks: " << GetNumGoodFoundPoints() << endl;
-  cout << "# of hits on good geant tracks: " << GetNumGoodGeantPoints() << endl;
-  cout << "Ratio of good found clusters  : " << (Float_t)GetNumGoodFoundPoints()/(Float_t)GetNumGoodGeantPoints() << endl;
+  gMessMgr->Message("", "I", "OST") << "Short track clusters          : " << GetNumShortTrackClusters() << endm;
+  gMessMgr->Message("", "I", "OST") << "Long track clusters           : " << GetNumLongTrackClusters() << endm;
+  gMessMgr->Message("", "I", "OST") << "Max. track clusters           : " << GetMaxClusters() << endm;
+  gMessMgr->Message("", "I", "OST") << "# of hits on good found tracks: " << GetNumGoodFoundPoints() << endm;
+  gMessMgr->Message("", "I", "OST") << "# of hits on good geant tracks: " << GetNumGoodGeantPoints() << endm;
+  gMessMgr->Message("", "I", "OST") << "Ratio of good found clusters  : " << (Float_t)GetNumGoodFoundPoints()/(Float_t)GetNumGoodGeantPoints() << endm;
 
   return;
 }
@@ -1940,9 +1960,9 @@ void StFtpcTrackEvaluator::ProblemsInfo()
 {
   // Shows information about problems.
 
-  cout << "Unclean tracks                : " << GetNumUncleanTracks() << endl;
-  cout << "Split tracks                  : " << GetNumSplitTracks() << endl;
-  cout << "Split good tracks             : " << GetNumSplitGoodTracks() << endl;
+  gMessMgr->Message("", "I", "OST") << "Unclean tracks                : " << GetNumUncleanTracks() << endm;
+  gMessMgr->Message("", "I", "OST") << "Split tracks                  : " << GetNumSplitTracks() << endm;
+  gMessMgr->Message("", "I", "OST") << "Split good tracks             : " << GetNumSplitGoodTracks() << endm;
 
   return;
 }
@@ -1952,15 +1972,15 @@ void StFtpcTrackEvaluator::TrackerInfo()
 {
   // Shows information about tracker output.
 
-  cout << "Found hits                    : " << GetNumFoundHits() << endl;
-  cout << "Found tracks (vtx/non vtx)    : " << GetNumFoundTracks() << " (" << GetNumFoundVertexTracks() << "/" << GetNumFoundNonVertexTracks() << ")" << endl;
-  cout << "Found good tracks             : " << GetNumGoodFoundTracks() << endl;
-  cout << "Bad found tracks looking good : " << GetNumLookLikeGoodTracks() << endl;
-  cout << "Found electron tracks         : " << GetNumElectronTracks() << endl;
-  cout << "Found non main vertex tracks  : " << GetNumNonVertexTracks() << endl;
+  gMessMgr->Message("", "I", "OST") << "Found hits                    : " << GetNumFoundHits() << endm;
+  gMessMgr->Message("", "I", "OST") << "Found tracks (vtx/non vtx)    : " << GetNumFoundTracks() << " (" << GetNumFoundVertexTracks() << "/" << GetNumFoundNonVertexTracks() << ")" << endm;
+  gMessMgr->Message("", "I", "OST") << "Found good tracks             : " << GetNumGoodFoundTracks() << endm;
+  gMessMgr->Message("", "I", "OST") << "Bad found tracks looking good : " << GetNumLookLikeGoodTracks() << endm;
+  gMessMgr->Message("", "I", "OST") << "Found electron tracks         : " << GetNumElectronTracks() << endm;
+  gMessMgr->Message("", "I", "OST") << "Found non main vertex tracks  : " << GetNumNonVertexTracks() << endm;
   
-  cout << "Ratio of good geant tracks    : " << ((Float_t)GetNumGoodFoundTracks()-(Float_t)GetNumSplitGoodTracks())/(Float_t)GetNumGoodGeantTracks() << endl;
-  cout << "Contamination                 : " << (Float_t)GetNumLookLikeGoodTracks()/(Float_t)GetNumFoundVertexTracks() << endl; 
+  gMessMgr->Message("", "I", "OST") << "Ratio of good geant tracks    : " << ((Float_t)GetNumGoodFoundTracks()-(Float_t)GetNumSplitGoodTracks())/(Float_t)GetNumGoodGeantTracks() << endm;
+  gMessMgr->Message("", "I", "OST") << "Contamination                 : " << (Float_t)GetNumLookLikeGoodTracks()/(Float_t)GetNumFoundVertexTracks() << endm; 
 
   return;
 }
@@ -1971,11 +1991,11 @@ void StFtpcTrackEvaluator::Info()
   // Shows all information.
 
   TrackerInfo();
-  cout << endl;
+  gMessMgr->Message("", "I", "OST") << endm;
   GeantInfo();
-  cout << endl;
+  gMessMgr->Message("", "I", "OST") << endm;
   ClusterInfo();
-  cout << endl;
+  gMessMgr->Message("", "I", "OST") << endm;
   ProblemsInfo();
 
   return;
