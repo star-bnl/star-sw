@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrackSelection.cxx,v 1.1 2000/12/07 11:14:22 lmartin Exp $
+ * $Id: StEstTrackSelection.cxx,v 1.2 2000/12/07 16:49:24 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTrackSelection.cxx,v $
+ * Revision 1.2  2000/12/07 16:49:24  lmartin
+ * Remove unused methods to compile under Sun
+ *
  * Revision 1.1  2000/12/07 11:14:22  lmartin
  * First CVS commit
  *
@@ -35,78 +38,6 @@ void StEstMaker::FlagTPCTracksSP(int overPass) {
   }
   
 }
-
-// void StEstMaker::RemoveOutliers(StEstTrack *tr, int overPass) {
-//   int i,j,imd,rem,nhits;
-//   double maxdist,avdist, oldchisq;
-
-//   if(mParams[mPass]->debug>2)
-//     cout << "\nStEstMaker::RemoveOutliers ****START****" <<endl;
-
-//   for (i=(tr->GetNBranches())-1;i>=0;i--) {
-//     rem = 1;
-//     nhits = tr->GetBranch(i)->GetNHits();
-//     while (nhits>0 && rem==1) {
-//       maxdist = 0;
-//       imd = 999;
-//       avdist=0;
-//       if (tr->GetBranch(i)->GetNHits()>1) {
-// 	//finding the biggest distance between projection and hit in all branch
-// 	for (j=0;j<tr->GetBranch(i)->GetNHits();j++) {
-// 	  if (tr->GetBranch(i)->GetDist(j) > maxdist) {
-// 	    maxdist = tr->GetBranch(i)->GetDist(j);
-// 	    imd = j;
-// 	  }
-// 	}
-// 	for (j=0;j<tr->GetBranch(i)->GetNHits();j++) 
-// 	  if (j!=imd) avdist += tr->GetBranch(i)->GetDist(j);
-	
-// 	avdist /= tr->GetBranch(i)->GetNHits() - 1;
-	
-// 	oldchisq = tr->GetBranch(i)->GetChiSq();
-// 	// checking if the worst hit was really very bad
-// 	// if yes, remove it
-// 	if (maxdist > avdist*mSegments[overPass]->avdist) {
-// 	  if(mParams[mPass]->debug>1)
-// 	    cout << "removing outlier  trid= "<<tr->mTPCTrack->mId<<" branch= "<<tr->GetBranch(i)<<" maxdist= "<<maxdist<<" avdist= "<<avdist<<" nhits= "<<tr->GetBranch(i)->GetNHits()<<endl;
-
-// 	  RefitBranch(tr->GetBranch(i),NULL,imd,0);
-// 	  if (oldchisq>tr->GetBranch(i)->GetChiSq()*1.2) {
-// 	    tr->GetBranch(i)->GetHit(imd)->LeaveBranch(tr->GetBranch(i));
-// 	  }
-// 	  else {
-// 	    RefitBranch(tr->GetBranch(i),NULL,-1,0);
-// 	    rem=0;
-// 	  }
-// 	}
-// 	else rem=0;
-// 	nhits = tr->GetBranch(i)->GetNHits();
-//       }  // if (tr->GetBranch(i)->GetNHits()>1)
-//       //removing bad one hit tracks
-//       if (tr->GetBranch(i)->GetNHits()==1) {
-// 	rem=0;
-// 	if ((tr->GetBranch(i)->GetChiSq() - tr->mTPCTrack->mChiSq)>5) {
-// 	  if (tr->GetNBranches()==1) {
-// 	    if(mParams[mPass]->debug>1)
-// 	      cout << "removing one-hit outlier  trid= "<<tr->mTPCTrack->mId<<" branch= "<<tr->GetBranch(i)<<" maxdist= "<<maxdist<<" avdist= "<<avdist<<" nhits= "<<tr->GetBranch(i)->GetNHits()<<endl;
-// 	    tr->GetBranch(i)->GetHit(0)->LeaveBranch(tr->GetBranch(i));
-// 	    RefitBranch(tr->GetBranch(i),NULL,-1,0);
-// 	    nhits = tr->GetBranch(i)->GetNHits();
-// 	  }
-// 	  else {
-// 	    if(mParams[mPass]->debug>1)
-// 	      cout << "killing bad branch in outlier  trid= "<<tr->mTPCTrack->mId<<" i="<<i<<endl;
-// 	    delete tr->GetBranch(i);
-// 	    nhits=0;
-// 	  }
-// 	}
-//       }
-//     }
-//   }
-//   if(mParams[mPass]->debug>2)
-//     cout << "\nStEstMaker::RemoveOutliers ****STOP****" <<endl;
-// }  
-
 
 
 void StEstMaker::ChooseBestNBranches(StEstTrack *tr, int slay) {
@@ -276,43 +207,6 @@ void StEstMaker::RemoveHitSharing() {
   cout<<HowMany<<" branches cleared"<<endl;
   if(mParams[0]->debug>2)
         cout << "StEstMaker::RemoveHitSharing ****STOP****"<<endl;
-}
-
-
-void StEstMaker::RemoveHitSharingII() {
-  // temporary hit sharing removal
-  long brmax,i,j, brmin;
-  double minbr=1.e+99;
-  StEstTrack* trmin;
-  if(mParams[0]->debug>2)
-    cout << "StEstMaker::RemoveHitSharing ****START****"<<endl;
-
-  for (i=0;i<mNSvtHit;i++) {    
-    StEstBranch **br_tmp = new StEstBranch*[mSvtHit[i]->GetNBranch()];
-
-    for (j=0;j<mSvtHit[i]->GetNBranch();j++){
-      br_tmp[j] = mSvtHit[i]->mBranch[j];
-      StThreeVector<double> temp(mSvtHit[i]->GetGlobX()->x(),
-				 mSvtHit[i]->GetGlobX()->y(),
-				 mSvtHit[i]->GetGlobX()->z());
-
-      if(br_tmp[j]->GetHelix()->distance(temp)<minbr){
-	brmin=j;
-	trmin=br_tmp[j]->GetTrack();
-      }
-    }
-    brmax = mSvtHit[i]->GetNBranch(); 
-
-    for (j=0;j<brmax;j++) {
-      if(j==brmin) continue;
-      if(br_tmp[j]->GetTrack()==trmin) continue;
-      mSvtHit[i]->LeaveBranch(br_tmp[j]);
-      RefitBranch(br_tmp[j],NULL);
-    }
-    delete[] br_tmp;
-  }
-  if(mParams[0]->debug>0)
-    cout << "StEstMaker::RemoveHitSharing ****STOP****"<<endl;
 }
 
 

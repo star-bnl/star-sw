@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.h,v 1.1 2000/12/07 11:14:21 lmartin Exp $
+ * $Id: StEstMaker.h,v 1.2 2000/12/07 16:49:23 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.h,v $
+ * Revision 1.2  2000/12/07 16:49:23  lmartin
+ * Remove unused methods to compile under Sun
+ *
  * Revision 1.1  2000/12/07 11:14:21  lmartin
  * First CVS commit
  *
@@ -341,7 +344,6 @@ class StEstMaker : public StMaker {
   void ChooseBestBranch(StEstTrack *tr, int overPass);
   void ChooseBestNBranches(StEstTrack *tr, int slay);
   void RemoveHitSharing();
-  void RemoveHitSharingII();
   void ChooseSegment(int overPass,int layer);
   void BuildIdealBranches();
   void BuildFindableBranches();
@@ -373,7 +375,7 @@ class StEstMaker : public StMaker {
   virtual Int_t Make();
   virtual Int_t Setup();
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StEstMaker.h,v 1.1 2000/12/07 11:14:21 lmartin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StEstMaker.h,v 1.2 2000/12/07 16:49:23 lmartin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   Int_t Finish();
 
