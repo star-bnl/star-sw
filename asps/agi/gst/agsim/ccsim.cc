@@ -84,7 +84,7 @@ extern "C" void type_of_call staf_start_ ()
    ami_init(); ami_start();
    top_init(); top_start();
    tnt_init(); tnt_start();
-   staf_banner(stdout);
+//   staf_banner(stdout);
 }
  
 extern "C" void type_of_call staf_stop_ ()

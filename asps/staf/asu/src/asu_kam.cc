@@ -133,7 +133,9 @@ kam_asu_fflush_()
 void 
 kam_asumalloc_stats_()
 {
-  asumalloc_stats();
+int level;
+  level = (ku_npar()>0) ? ku_geti() : -1;  
+  asuMallocStats(level);
 }
 
 /*
@@ -148,7 +150,8 @@ kam_asumalloc_stats_()
 void
 kam_asumalloc_level_()
 {
-  int level = ku_geti();
+  int level=-1;
+  if (ku_npar()>0) level = ku_geti();
 
-  asumalloc_level(level);
+  asuMallocLevel(level);
 }

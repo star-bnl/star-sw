@@ -26,7 +26,9 @@ spxFactory *spx;
 //:<--------------------------------------------------------------------
 int spx_init()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("SPX:Initializing. ");
+#endif
 
 /*- Define the SPX KUIP commands. -*/
    spx_def_();
@@ -42,7 +44,9 @@ int spx_init()
 //:<--------------------------------------------------------------------
 int spx_start()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("SPX:Starting. ");
+#endif
 
 /*- Create the SPX Factory. -*/
    spx = new spxFactory("spx");
@@ -58,7 +62,9 @@ int spx_start()
 //:<--------------------------------------------------------------------
 int spx_stop()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("SPX:Stopping. ");
+#endif
 
 /*- Delete the SPX Factory.
    delete spx;

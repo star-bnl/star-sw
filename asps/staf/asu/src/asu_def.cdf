@@ -15,7 +15,7 @@
 >GUIDANCE
 Analysis_Service_Utilities commands.
 .
- #(@)$Id: asu_def.cdf,v 1.6 1998/03/16 00:57:17 fisyak Exp $
+ #(@)$Id: asu_def.cdf,v 1.7 1998/08/23 18:27:41 perev Exp $
 .
 ASU is utility package which contains several useful functions and
 user-interface commands.
@@ -343,12 +343,9 @@ memory leaks.
 >COMMAND LEVEL
 >PARAMETERS
 +
-NEW_VALUE 'Memory allocation debug level' I D=0 R='0,2'
-*            * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-*            * restricted range 0-2, hjw 19Feb98, 3 makes seg fault  *
-*            * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+NEW_VALUE 'Memory allocation debug level' I D=-1 
 >GUIDANCE
-Get or set the "asuAlloc.h" debug level.
+Get or set the asuAlloc debug level.
 .
 DESCRIPTION: 
 .
@@ -364,37 +361,26 @@ argument NEW_VALUE.
 ARGUMENTS: 
 .
    NEW_VALUE - Memory allocation debug level.
-   - 0            Print current level.
-   - 1 = FAST     Only call normal malloc & free...
-   - 2 = COUNT    ...and count calls to malloc & free...
-   - 3 = TRACE    ...and keep trace of memory locations...
-   - 4 = FILL     ...and fill allocated memory w/ pattern...
-   - 5 = VERBOSE  ...and print a message every time.
+   - 0      	Memory occupancy.
+   - 1          Full print of all objects
    - DEFAULT: Show the current value of LEVEL, do not change it.
 .
 RETURN:
 .
-   The current value of LEVEL is pushed onto the STAF_RESULT stack
-   (see SOC).
 .
 EXAMPLES: 
 .
 EG1. Show the current MALLOC debug level.
    Kuip> ASU/MALLOC/LEVEL
-   ASU/MALLOC/LEVEL = ASU_MALLOC_FAST
+   ASU/MALLOC/LEVEL = 1
 .
 EG2. Set the MALLOC debug level to COUNT and show current level.
 .
-   Kuip> ASU/MALLOC/LEVEL 2
-   Kuip> ASU/MALLOC/LEVEL
-   ASU/MALLOC/LEVEL = ASU_MALLOC_COUNT
+   Kuip> ASU/MALLOC/LEVEL 1
 .
 EXCEPTIONS: 
 .
-   OBJECT_NOT_FOUND - No object specified by SOREF can be found which
-      implements the asuMalloc interface.
-      (See SOC/BIND to dynamically bind the proper resources, or
-      rebuild executable with the proper resources statically linked.)
+None
 .
 BUGS: 
 .
@@ -408,6 +394,8 @@ SEE ALSO:
 ** ASU/MALLOC/STATS
 >COMMAND STATS
 >PARAMETERS
++
+NEW_VALUE 'Memory allocation debug level' I D=-1 
 >GUIDANCE
 Print memory allocation statistics.
 .
@@ -432,15 +420,8 @@ EG1. Print memory allocation statistics before any work.
 .
    Kuip> ASU/MALLOC/STATS
 
-   ASU_MALLOC: Memory allocation statistics:
-           mallocCalls 0, freeCalls 0, diff 0
-           mallocSize 0, freeSize 0, diff 0
-           asuMallocSize 0
-.
-   OBJECT_NOT_FOUND - No object specified by SOREF can be found which
-      implements the asuMalloc interface.
-      (See SOC/BIND to dynamically bind the proper resources, or
-      rebuild executable with the proper resources statically linked.)
+ASU_MALLOC: Memory allocation for Event:0 
+ Size      0.066M  Blocks      54  Allocs      58  Free          4  Errors 0
 .
 BUGS: 
 .

@@ -19,9 +19,9 @@ general routines for memory allocation
 #include "asuAlloc.h"
 #include "dstype.h"
 /*
- * fix for realloc bug on some versions of UNIX
+ * fix for REALLOC bug on some versions of UNIX
  */
-#define DS_REALLOC(ptr, size) ((ptr) ? realloc(ptr, size) : MALLOC(size))
+#define DS_REALLOC(ptr, size) ((ptr) ? REALLOC(ptr, size) : MALLOC(size))
 /*
  * locations for memory allocation stats
  */
@@ -59,7 +59,7 @@ int dsBufFree(DS_BUF_T *bp)
 }
 /*****************************************************************************
 *
-* dsBufRealloc - realloc memory for buf struct
+* dsBufRealloc - REALLOC memory for buf struct
 *
 * RETURNS: TRUE if success else FALSE
 */
@@ -234,7 +234,7 @@ int dsNewDataset(DS_DATASET_T **ppDataset, const char *name)
 	if (ppDataset == NULL) {
 		DS_ERROR(DS_E_NULL_POINTER_ERROR);
 	}
-	if ((pDataset = calloc(1, sizeof(DS_DATASET_T))) == NULL) {
+	if ((pDataset = CALLOC(1, sizeof(DS_DATASET_T))) == NULL) {
 		DS_ERROR(DS_E_NOT_ENOUGH_MEMORY);
 	}
 	dsMemCalls++;
@@ -278,7 +278,7 @@ int dsNewTable(DS_DATASET_T **ppTable, const char *tableName,
 }
 /*****************************************************************************
 *
-* dsRealloc - realloc dataset or table
+* dsRealloc - REALLOC dataset or table
 *
 * RETURN TRUE if success else FALSE
 */
@@ -350,7 +350,7 @@ void *dsTypeCalloc(size_t size)
 	if (size == 0){
 		DS_LOG_ERROR(DS_E_ZERO_LENGTH_ALLOC);
 	}
-	else if ((ptr = calloc(1, size)) != NULL) {
+	else if ((ptr = CALLOC(1, size)) != NULL) {
 		dsMemCalls++;
 		dsTidSize += size;
 		return ptr;
