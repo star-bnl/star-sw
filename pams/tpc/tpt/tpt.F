@@ -1,5 +1,8 @@
-* $Id: tpt.F,v 1.8 1998/03/27 20:50:29 sakrejda Exp $
+* $Id: tpt.F,v 1.9 1998/04/22 15:57:55 sakrejda Exp $
 * $Log: tpt.F,v $
+* Revision 1.9  1998/04/22 15:57:55  sakrejda
+* write to unit 6 replaced by message calls
+*
 * Revision 1.8  1998/03/27 20:50:29  sakrejda
 * bug in sector verification removed. (old:isec2=isect, new:isec3=isec2)
 *
@@ -61,11 +64,12 @@ C
       INTEGER loc_hit(tpt_mxhit)
 C             loc_hit - pointers to the tphit table sorted acc 
 C             to row/sec field
-      INTEGER tpstart(mxrow,mxsector),tpcount(mxrow,mxsector)
+      INTEGER tpstart(mxrow,mxsector)
 C             tpstart -pointer to the first hit in the row/sector
+      INTEGER tpcount(mxrow,mxsector)
 C             tpcount -# of hits in a given row/sector
       INTEGER tls_Index_Sort_i
-C            sort hits in the TPC table according to row/sec field
+C             sort hits in the TPC table according to row/sec field
       INTEGER tpt_row_sect_pnt 
       INTEGER tgc_sec24_to_sec12
       INTEGER tpt_form_segments
@@ -73,19 +77,23 @@ C            sort hits in the TPC table according to row/sec field
       INTEGER tpt_merge_segments
       INTEGER iret  !scratch integer
       INTEGER i,ipass
-      INTEGER next_hit(tpt_mxhit),slice_loc(mxsector,mxrow,mxslic)
+      INTEGER slice_loc(mxsector,mxrow,mxslic)
+      INTEGER next_hit(tpt_mxhit)
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic),last_track
       REAL    time_now,time_all
-      COMMON /CPUTIM/ time_all
       REAL    time_sort,time_seguv,time_seg,time_ext,time_merge
       real    xglobal(3)
       integer tgc_global_to_sector
-      integer idI1, isec2, isec3, isect
-      character*132 m132  ! And some message-generating space.
-      data idI1 /0/
-      save idI1
+      integer isec2, isec3, isect
+c
+c     message-related variables
+      character*132 m132(5)  ! And some message-generating space.
+      integer idI1, idI2, idI3
+      data    idI1, idI2, idI3 /3*0/
+      save    idI1, idI2, idI3
 C______________________________________________________________________
 C     initialize timing counters
+      time_all=0
       time_sort = 0
       time_seguv = 0
       time_seg = 0
@@ -93,8 +101,14 @@ C     initialize timing counters
       time_merge = 0
       ipass=1
       if(tpar(ipass).debug(1).eq.1) then
-          write(6,*) 'starting in the main tracking subroutine ...'
+          call Msg_Enable( 'TPT-I1' )
+          call Msg_Enable( 'TPT-I2' )
+          call Msg_Enable( 'TPT-I3' )
+          call Msg_Enable( 'TPT-ROOT1' )
       endif
+
+      write(m132,*) 'TPT-I3 starting in the main tracking subroutine ...'
+      call Message( m132, 1, idI3)
 
 C     set return value to normal success
       tpt = STAFCV_OK
@@ -102,12 +116,13 @@ C     set counter for number of rows of good data to 0
       track_h.nok = 0
 C
       if(hit_h.nok.eq.0) go to 888
-      call Msg_Enable( 'TPT-I1' )
+
 c
 c     make sure that there is enough space in local arrays
 c     if not, truncate number of hits to track...
+c
       if(hit_h.nok.gt.tpt_mxhit) then
-        write(m132,*) ' TPT-I1 tpt local araays not big enough',
+        write(m132,*) ' TPT-I1 tpt local arays not big enough',
      >                  hit_h.nok,tpt_mxhit
         call Message( m132, 1, idI1 )
         hit_h.nok=tpt_mxhit
@@ -156,18 +171,16 @@ c       so deal with it separately
 c
 c     Set up tables so that hit could be found within rows and sectors.
       iret=tpt_row_sect_pnt(hit_h,hit,loc_hit,tpstart,tpcount,
-     >                                  tpar_h,tpar,
-     >                                  next_hit,slice_loc,slice_pnt,
-     >                                                        ipass)
+     >         tpar_h,tpar,next_hit,slice_loc,slice_pnt,ipass)
 
       if(iret.ne.0) then
-            write(6,*) 'unable to set pointers to hits'
-            tpt=STAFCV_BAD
-            return
+         write(m132,*) 'TPT-I2 unable to set pointers to hits'
+         call message(m132, 1, idI2)
+         tpt=STAFCV_BAD
+         return
       else 
-            if(tpar(ipass).debug(1).eq.1) then
-               write(6,*) 'pointers set, iret: ',iret
-            endif
+         write(m132,*) 'TPT-I2 pointers set, iret: ',iret
+         call message(m132, 1,id I2)
       endif
 C
 C     end of initialisation
@@ -197,13 +210,14 @@ C     Then do the regular segment formation from what is left out.
       endif
       if(iret.ne.STAFCV_OK) then
 C           failed while generating segments
-            write(6,*) 'problem in segment finding'
+            write(m132,*) 'TPT-I2 problem in segment finding'
+            call Message(m132, 1, idI2)
             tpt=STAFCV_BAD
             return
       endif
-      if(tpar(ipass).debug(1).eq.1) then
-              write(6,*) 'back from segment finding ...'
-      endif
+      write(m132,*) 'TPT-I3 back from segment finding ...'
+      call message(m132, 1, idI3)
+c
       if(tpar(ipass).extend.eq.1) then
 C             extend track segments crossing the sector boundries
               call timed(time_now)
@@ -217,36 +231,41 @@ C             extend track segments crossing the sector boundries
               time_ext = time_now
               if(iret.ne.STAFCV_OK) then
 C               failed while extending segments
-                write(6,*) 'problem in extending segments'
+                write(m132,*) 'TPT-I2 problem in extending segments'
+                call message(m132, 1, idI2)
                 tpt=STAFCV_BAD
                 return
               endif
-              if(tpar(ipass).merge.eq.1) then
-C                 merge pieces of tracks together
-                  call timed(time_now)
-                  time_all = time_all + time_now
-                  iret=tpt_merge_segments(track_h,track,trk,hit_h,hit,
+      endif
+      if(tpar(ipass).merge.eq.1) then
+C             merge pieces of tracks together
+              call timed(time_now)
+              time_all = time_all + time_now
+              iret=tpt_merge_segments(track_h,track,trk,hit_h,hit,
      >                          tpar,tpar_h,ipass)
-                  call timed(time_now)
-                  time_all = time_all + time_now
-                  time_merge = time_now
-                  if(iret.eq.STAFCV_BAD) then
-                    write(6,*) 'problems in segment merging'
-                    tpt=STAFCV_BAD
-                  endif
+              call timed(time_now)
+              time_all = time_all + time_now
+              time_merge = time_now
+              if(iret.eq.STAFCV_BAD) then
+                write(132,*) 'TPT-I2 problems in segment merging'
+                call message(m132, 1, idI2)
+                tpt=STAFCV_BAD
               endif
       endif
-
+c
 C     write out timing information
-      if( tpar(ipass).debug(1).eq.1 ) then
-        write(6,*) 'TIME_SORT  : ',time_sort
-        write(6,*) 'TIME_SEGUV : ',time_seguv
-        write(6,*) 'TIME_SEG   : ',time_seg
-        write(6,*) 'TIME_EXT   : ',time_ext
-        write(6,*) 'TIME_MERGE : ',time_merge
-      endif
+      write(m132(1),*) 'TPT-I3 TIME_SORT  : ',time_sort
+      write(m132(2),*) '       TIME_SEGUV : ',time_seguv
+      write(m132(3),*) '       TIME_SEG   : ',time_seg
+      write(m132(4),*) '       TIME_EXT   : ',time_ext
+      write(m132(5),*) '       TIME_MERGE : ',time_merge
+      call message(m132, 5, idI3)
+c
+      write(m132,*) 'TPT-I3 first pass', track_h.nok
+      call message(m132, 1, idI3)
 
-      write(6,*) 'first pass', track_h.nok
+c
+c     Second pass starts
       ipass=2
       if(tpar(ipass).pass_on.eq.1) then
       last_track=track_h.nok
@@ -256,19 +275,19 @@ C     Set up tables so that hit could be found within rows and sectors
      >                      next_hit,slice_loc,slice_pnt,ipass)
 
         if(iret.ne.0) then
-            write(6,*) 'unable to set pointers to hits'
+            write(m132,*) 'unable to set pointers to hits'
             tpt=STAFCV_BAD
             return
         else 
             if(tpar(ipass).debug(1).eq.1) then
-               write(6,*) 'pointers set, iret: ',iret
+               write(m132,*) 'pointers set, iret: ',iret
             endif
         endif
       iret=tpt_form_segments(hit_h,hit,track_h,track,tpar_h,tpar,
      >                loc_hit,tpstart,tpcount,trk,
      >                next_hit,slice_loc,slice_pnt,ipass,1.0)
       call timed(time_now)
-      write(6,*) 'second pass', track_h.nok,'time_now',time_now
+      write(m132,*) 'second pass', track_h.nok,'time_now',time_now
       if(tpar(ipass).form_xy.eq.1) then
 C     Then do the regular segment formation from what is left out.
             iret=tpt_form_segments(hit_h,hit,track_h,track,tpar_h,

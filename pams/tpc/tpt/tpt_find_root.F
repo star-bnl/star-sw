@@ -1,5 +1,8 @@
-* $Id: tpt_find_root.F,v 1.3 1998/03/23 18:25:56 sakrejda Exp $
+* $Id: tpt_find_root.F,v 1.4 1998/04/22 15:57:57 sakrejda Exp $
 * $Log: tpt_find_root.F,v $
+* Revision 1.4  1998/04/22 15:57:57  sakrejda
+* write to unit 6 replaced by message calls
+*
 * Revision 1.3  1998/03/23 18:25:56  sakrejda
 * tpg_pad-plane removed from the tpt module, it was not used there anyway
 *
@@ -29,7 +32,6 @@ C
 #include "tcl_tphit.inc"
 #include "tpt_pars.inc"
 #include "tpt_root.inc"
-#include "tpt_const.inc"
 #include "tpt_mxdim.inc"
 #include "tpt_mxhit.inc"
 
@@ -42,11 +44,15 @@ C_____________________________________________________________________
 C_____________________________________________________________________
 C     Local variables
       RECORD /track_root/     root(mxroot)
-      INTEGER next_hit(tpt_mxhit),slice_loc(mxsector,mxrow,mxslic)
+      INTEGER next_hit(tpt_mxhit)
+      INTEGER slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic)
-      INTEGER k,nroot,isect,ir3,ir2,ir1,kg1,kg2,nh1,nh2
+      INTEGER k,nroot,isect,ir3,ir2,ir1
+      INTEGER gap_1,gap_2
+      INTEGER nh1,nh2
       INTEGER tol23,i,j,iret,tol12,itest,ilc,jlc,ipass
-      INTEGER tgc_row_par,tpt_ptcrs
+      INTEGER tgc_row_par
+      INTEGER tpt_ptcrs
       INTEGER islic,is_pnt,js_pnt
       INTEGER tpt_find_slic, irets
       REAL    zp3
@@ -54,63 +60,59 @@ C     Local variables
       REAL    delx23,delz23,an,bn,sl23,pred,delrp,zp1,xp1,yp1
       REAL    as,bs,ddr,fact,delrow,dummy
       LOGICAL h2good
+
+      character*132 m132
+      integer       idR1
+      data          idR1 /0/
+      save          idR1
 C_____________________________________________________________________
-C     check debug flag
-      if( tpar(ipass).debug(3) .eq. 1 ) then
-         write(6,*) 'starting root from hit',k
-         read (5,*) itest
-         if(itest.eq.0) tpar(ipass).debug(3)=0
-      endif
 
       nroot = 0
       zorigl = 0
 
 C     get information about the seed
-      isect = hit(k).row / 100
-      ir3 = hit(k).row - isect*100
-      zp3 = hit(k).z
-      r3 = sqrt(hit(k).x**2+hit(k).y**2)
+      isect = int(hit(k).row/100)
+      ir3   = hit(k).row-isect*100
+      zp3   = hit(k).z
+      r3    = sqrt(hit(k).x**2+hit(k).y**2)
        
 C     set maximum allowable gap 
-      kg2 = tpar(ipass).g2
+      gap_2 = tpar(ipass).g2
       ir2 = ir3-1
       nh2 = 0
     
 
 C     outer do-loop for second hit on a root
-      do while ( kg2.ge.0 .and. nroot.eq.0 )
+      do while ( gap_2.ge.0 .and. nroot.eq.0 )
 
 C     find in what slice the hits for the next row are going to be
       delrow = 2.5
       if(ir2.lt.14) delrow = 6.0
-      zp2 = sign(1.0,zp3)*(r3-delrow)*abs(zp3)/r3
+      zp2 = zp3*(1.0-delrow/r3)
       irets=tpt_find_slic(zp2,tpar(ipass).nzslic,islic)
       is_pnt = slice_loc(isect,ir2,islic) 
       nh2 = slice_pnt(2,is_pnt)
-      kg2 = kg2 - 1
+      gap_2 = gap_2 - 1
+c
       if( nh2 .eq. 0 ) then
 C       total of tpar(ipass).g2 rows 
 C       allowed between the last two hits
         ir2 =ir2 - 1
         if( ir2 .le. tpar(ipass).irow_seg_end ) go to 999
-      else if( kg2 .lt. -1 ) then
+      else if( gap_2 .lt. -1 ) then
         go to 999
       else if( nh2 .ne. 0 ) then
 C       UPSTREAM point: set maximum allowable gap
-        kg1 = tpar(ipass).g1
+        gap_1 = tpar(ipass).g1
         ir1 = ir2 - 1
         nh1 = 0
 
 C       inner do-loop for first hit on a root
-        do while ( kg1.ge.0 .and. nroot.eq.0 )
-
-          if( tpar(ipass).debug(3).eq.1 ) write(6,*) 
-     >   'second loop','nh1',nh1,'kg1',kg1,'nroot',nroot
+        do while ( gap_1.ge.0 .and. nroot.eq.0 )
 	  if( ir1 .le. tpar(ipass).irow_seg_end ) go to 999
-          kg1 = kg1 - 1
-          if ( kg1 .lt. -1 ) go to 999
+          gap_1 = gap_1 - 1
+          if ( gap_1 .lt. -1 ) go to 999
 C         Start looking for a link - down to business
-
           i = slice_pnt(1,is_pnt)
 C         loop over all hits in slice-next i'th hit is set at enddo
           do ilc=1,nh2
@@ -120,11 +122,10 @@ C         loop over all hits in slice-next i'th hit is set at enddo
 	      if( delr23 .gt. 0.0000001 ) then
 C               make tolerance proportional to the gap size
                 tol23 = ir3 - ir2
-                if( ir2 .lt. 14 ) tol23 = tol23 * 2
+                fact=1.0
+                if( ir2 .lt. 14 ) fact=2.5
 C               calculate prediction
 	        zp2 = (hit(k).z - zorigl) * r2 / r3 + zorigl
-                fact = 1.0
-                if( ir2 .lt. 14 ) fact = 2.5
 	        delz2p = (hit(i).z-zp2)/sqrt(1.0+
      >                   ((hit(k).z-zorigl)/r3)**2)
                 if( abs(delz2p).lt.fact*tpar(ipass).delzlm*tol23 )
@@ -147,7 +148,6 @@ C                   calculate prediction for the row ir1
                     pred = sqrt(xp1**2+yp1**2)
                     delrp = r2 - pred
                     zp1 = hit(i).z - sl23*delrp
-                    if(abs(zp1).lt.210.0) then
                     irets=tpt_find_slic(zp1,tpar(ipass).nzslic,islic)
                     js_pnt = slice_loc(isect,ir1,islic) 
                     j = slice_pnt(1,js_pnt)
@@ -166,9 +166,8 @@ C                   next j'th hit is set at enddo
 		  	       root(nroot).hit(2) = i
 			       root(nroot).hit(3) = j
                                if(nroot.eq.mxroot) then
-                                   if (tpar(ipass).debug(2).ne.0) then
-                                   write(6,*) 'root limit!',nroot
-                                   endif
+                                   write(m132,*) 'TPT-ROOT1 root limit!',nroot
+                                   call Message(m132, 1, idR1)
                                    go to 999
                                endif
                            endif
@@ -176,7 +175,6 @@ C                   next j'th hit is set at enddo
                       endif
                       j = next_hit(j)
                     enddo          ! loop over hits in ir1
-                    endif
                   endif
                 endif
               endif

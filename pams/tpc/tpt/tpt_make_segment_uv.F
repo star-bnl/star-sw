@@ -1,5 +1,8 @@
-* $Id: tpt_make_segment_uv.F,v 1.4 1998/03/31 17:00:54 sakrejda Exp $
+* $Id: tpt_make_segment_uv.F,v 1.5 1998/04/22 15:57:58 sakrejda Exp $
 * $Log: tpt_make_segment_uv.F,v $
+* Revision 1.5  1998/04/22 15:57:58  sakrejda
+* write to unit 6 replaced by message calls
+*
 * Revision 1.4  1998/03/31 17:00:54  sakrejda
 * sector boundry crossing calculation corrected-was using old sector naming convention
 *
@@ -42,11 +45,10 @@ C
       IMPLICIT NONE
 
 #include "PAM.inc"
-
+#include "math_constants.inc"
 #include "tcl_tphit.inc"
 #include "tpt_pars.inc"
 #include "tpt_mxdim.inc"
-#include "tpt_const.inc"
 #include "tpt_pointers.inc"
 #include "tpt_mxhit.inc"
 
@@ -70,8 +72,8 @@ C     Local variables
       INTEGER next_hit(tpt_mxhit),slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic)
       INTEGER tpt_find_slic, irets, tpt_fit_uv,i_s, tpt_fit_sz
-      real    xglobal(3),xlocal(3), dummy
-      integer tgc_global_to_local
+      real    xglobal(3), dummy
+      integer tgc_global_to_sector
       REAL    as,bs,xp1,yp1,xp(2),yp(2),xlast,ylast,zlast
       REAL    zp1,sr1,dis0,dy,dx,dz,dfir,tolr2,disr2,dist1,dist2,fact
       REAL    at,bt,az,bz,stot
@@ -142,7 +144,7 @@ C              find which solution is closer
                xglobal(2)=yp1
                xglobal(3)=10.0
 C              and check whether it lies in the same sector
-               iret = tgc_global_to_local(isec1,xglobal,xlocal)
+               iret = tgc_global_to_sector(isec1,xglobal)
                if(isect.eq.isec1) then
                   ns=1
                else
@@ -159,7 +161,7 @@ C	       boundaries and find which boundary is closer
                sector_change=.true.
                lsec=15-isect
                if(lsec.ge.12) lsec=lsec-12
-               phi=real(lsec)*cpi/6.0+cpi/12.0
+               phi=real(lsec)*C_PI/6.0+C_PI/12.0
                dist1=-1.0
                dist2=-1.0
                iret = tpt_ptcrs_uv_p(-tan(phi),1.0,0,at,bt,x0,y0,xp,yp)
@@ -170,7 +172,7 @@ C	       boundaries and find which boundary is closer
                   dist1=dist2
                  endif 
                endif
-               phi=real(lsec-1)*cpi/6.0+cpi/12.0
+               phi=real(lsec-1)*C_PI/6.0+C_PI/12.0
                iret = tpt_ptcrs_uv_p(-tan(phi),1.0,0,at,bt,x0,y0,xp,yp)
                if(iret.eq.STAFCV_OK)then
                  dist2=(xlast-xp(1))**2+(ylast-yp(1))**2
