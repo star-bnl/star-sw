@@ -1,5 +1,11 @@
-// $Id: StFtpcSlowSimCluster.cc,v 1.6 2002/06/07 09:55:39 fsimon Exp $
+// $Id: StFtpcSlowSimCluster.cc,v 1.7 2003/02/14 16:56:56 fsimon Exp $
 // $Log: StFtpcSlowSimCluster.cc,v $
+// Revision 1.7  2003/02/14 16:56:56  fsimon
+// Add functionality that allows for different temperature corrections
+// in west and east, important for embedding. StFtpcSlowSimField now
+// has to be called with the full padrow (0 to 19), to be able to
+// select east/west.
+//
 // Revision 1.6  2002/06/07 09:55:39  fsimon
 // Additional debug info to trace electron drift
 //
@@ -34,9 +40,9 @@
 StFtpcSlowSimCluster::StFtpcSlowSimCluster(StFtpcParamReader *paramReader,
                                            StFtpcDbReader *dbReader,
 					   StFtpcSlowSimField *field,
-					   const float el, const float rad_offset, 
-					   const float pad_offset, const float r, 
-					   const float ph, const float time, 
+					   const float el, const float rad_offset,
+					   const float pad_offset, const float r,
+					   const float ph, const float time,
 					   const int call_padrow)
 {
   outerRadius=dbReader->sensitiveVolumeOuterRadius();
@@ -54,9 +60,11 @@ StFtpcSlowSimCluster::StFtpcSlowSimCluster(StFtpcParamReader *paramReader,
   original_padrow = call_padrow;  //needed for debug info
 
   padrow=call_padrow;
+  /*  // Now, the full padrow is needed to correct for different temperatures! Done in StFtpcSlowSimField
   if(padrow>=10)
     padrow -= 10;
-  // only absolute padrow in one chamber is needed for the field  
+  // only absolute padrow in one chamber is needed for the field
+  */
   deltaRadius = field->GetDeltaRadius();
   twoDeltaRadius = field->GetTwoDeltaRadius();
   electronLoss = -deltaRadius * dbReader->gasAttenuation();
@@ -72,20 +80,20 @@ void StFtpcSlowSimCluster::DriftDiffuse(StFtpcSlowSimField *field)
   //cout << "DriftDiffuse: Padrow: "<<original_padrow<<" Drift r = "<<currentRadius<<" ; phi = "<<currentPhi;
   int i=0;
   while(currentRadius < outerRadius )
-    { 
+    {
       float inverseRadius = 1/currentRadius;
       float deltaRadiusRelative = deltaRadius * inverseRadius;
-      
+
       int     index = field->GetGridIndex(currentRadius);
-      
+
       // deflection angle
       float lorentz, inverseVelocity;
       field->GetVelocityZ(inverseRadius, padrow, &inverseVelocity, &lorentz);
       currentPhi += deltaRadiusRelative * lorentz;
-      
+
       // accumulative drift time
       drift_time   += deltaRadius * inverseVelocity;
-      
+
       // calculate diffusion in coarser steps than the cluster center
       if(i==mIntDiffCoarseness)
 	{
@@ -94,13 +102,13 @@ void StFtpcSlowSimCluster::DriftDiffuse(StFtpcSlowSimField *field)
 	    *deltaRadius*mFlDiffCoarseness+
 	    sigma_rad_squared*(1.+field->GetDlnvDr(index)
 			       *twoDeltaRadius*mFlDiffCoarseness);
-	  
+
 	  // transverse  diffusion + radius divergence
 	  float divergenceFactor= 1.+deltaRadiusRelative*mFlDiffCoarseness;
 	  sigma_phi_squared =field->GetDiffusionXSqr(index)
 	    *mFlDiffCoarseness*deltaRadius +
 	    sigma_phi_squared*divergenceFactor*divergenceFactor;
-      
+
 	  // attenuation
 	  electron += mFlDiffCoarseness*electronLoss;
 	  i=1;
@@ -108,9 +116,9 @@ void StFtpcSlowSimCluster::DriftDiffuse(StFtpcSlowSimField *field)
       else
 	i++;
       // next step
-      currentRadius += deltaRadius; 
+      currentRadius += deltaRadius;
     }
-  //cout <<" ====> r = "<<currentRadius<<" ; phi = "<<currentPhi<<endl; 
+  //cout <<" ====> r = "<<currentRadius<<" ; phi = "<<currentPhi<<endl;
 
 }
 
