@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.49 2000/06/26 22:13:18 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.50 2000/07/29 00:16:19 margetis Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.50  2000/07/29 00:16:19  margetis
+// put information about whether a point was used in fit or not
+//
 // Revision 1.49  2000/06/26 22:13:18  fisyak
 // remove params
 //
@@ -149,8 +152,9 @@
 #include "tables/St_dst_mon_soft_emc_Table.h"
 #include "tables/St_dst_mon_soft_l3_Table.h"
 #include "tables/St_dst_mon_soft_rich_Table.h"
+#include "tables/St_sgr_groups_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.49 2000/06/26 22:13:18 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.50 2000/07/29 00:16:19 margetis Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -292,6 +296,11 @@ Int_t St_dst_Maker::Make(){
 Int_t  St_dst_Maker::Filler(){
   St_DataSetIter dstI(m_DataSet);
   St_DataSet *dst = dstI.Cd("dst");
+  
+  St_DataSet *match = GetDataSet("match"); 
+  St_DataSetIter matchI(match);         
+  
+
   if (!dst) return kStWarn;
   int iMake = kStOK;
   int iRes = 0;
@@ -332,7 +341,10 @@ Int_t  St_dst_Maker::Filler(){
     scs_spt     = (St_scs_spt    *)  svthits->Find("scs_spt");
   }
   if (!scs_spt)      {scs_spt     = new St_scs_spt("scs_spt",1);         AddGarb(scs_spt);}
-  
+   
+  St_sgr_groups     *tpc_groups = (St_sgr_groups *) matchI("tpc_groups");
+  if (! tpc_groups)    {tpc_groups = new St_sgr_groups("tpc_groups",1); AddGarb(tpc_groups);} 
+ 
   if(Debug()) gMessMgr->Debug() << " run_dst: Calling dst_point_filler" << endm;
   // dst_point_filler
   St_DataSet *ftpc_hits   = GetInputDS("ftpc_hits");
@@ -350,8 +362,42 @@ Int_t  St_dst_Maker::Filler(){
       gMessMgr->Warning() << "Problem on return from DST_POINT_FILLER" << endm;
       if(Debug()) gMessMgr->Debug() << " run_dst: finished calling dst_point_filler" << endm;
     }
-  }
-  // dst_dedx_filler
+          // Fill 'used in the fit' info
+
+      sgr_groups_st *tgroup = tpc_groups->GetTable();
+      dst_point_st *mypoint  = point->GetTable();
+      
+      int spt_id = 0;
+      int i;
+      bool isset;
+      
+      for( i=0; i<tpc_groups->GetNRows(); i++, tgroup++){
+	if( tgroup->id1 != 0 && tgroup->ident >= 0){
+	  spt_id = tgroup->id2-1;
+	  if( spt_id <0) {
+	    cout << spt_id << endl;
+            assert(0);
+	  }
+          else{
+	      mypoint[spt_id].charge |= 1UL<<24;
+	      //	    row = spc[spt_id].row/100;
+	      // row = spc[spt_id].row - row*100;
+	      // if( spc[spt_id].id_globtrk-1 < 0){
+	      // cout << tgroup->ident << " " << tgroup->id1 << " " << tgroup->id2 << " " << spc[spt_id].id << " " << endl;
+              // assert(0);
+	      // }
+	      // if( row < 25){
+	      // isset = track[spc[spt_id].id_globtrk-1].map[0] & 1UL<<(row+7);
+	      // track[spc[spt_id].id_globtrk-1].map[0] |= 1UL<<(row+7);
+	      // }
+	      // if (isset) track[spc[spt_id].id_globtrk-1].map[1] |= 1UL<<30; 
+	  }
+	}
+      }
+  
+  } //if #points>0
+
+// dst_dedx_filler
   St_dst_dedx       *dst_dedx    = 0;
   St_dst_dedx   *tpc_dedx = 0;
   St_DataSet    *tpctracks = GetInputDS("tpc_tracks");
