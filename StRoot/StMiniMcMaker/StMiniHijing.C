@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// $Id: StMiniHijing.C,v 1.3 2002/06/07 02:21:59 calderon Exp $
+// $Id: StMiniHijing.C,v 1.4 2002/06/28 22:15:12 calderon Exp $
 // owner: Manuel Calderon de la Barca Sanchez
 //
 // what it does: reads .geant.root file from hijing data, produces minimc.root file 
@@ -7,9 +7,55 @@
 //                 StMcEventMaker,StAssociationMaker,
 //                 StMiniMcEventMaker
 // $Log: StMiniHijing.C,v $
+// Revision 1.4  2002/06/28 22:15:12  calderon
+// Changes to deal with seg. faults in the file name handling:
+// Conventions:
+// StMiniMcMaker looks for the input file from the IO maker to figure out
+// if the file has changed.  This is done using TString::Contains() in Make().
+// Usually we will run one file at a time, but in order not to break Bum's scheme of being
+// able to process several files in one go, this is left as is.  However, for
+// embedding, the file name is not enough, in Eric's new scheme there are repeated
+// file names.  This is resolved by adding a prefix to the output file name.  However,
+// this prefix should not be overwritten, so the current code only replaces the
+// string inside the output file name pertaining to the input file name, and leaves
+// the prefix of the output file intact.  This was done for embedding looking for
+// st_physics, and here is where the problem arose: hijing files begin with a different
+// prefix.  To solve this problem, the input file name prefix is now an input parameter
+// in the macro.
+//
+// StMiniEmbed.C and StMiniHijing.C now conform to this convention.  StMiniEmbed.C
+// did not change its prototype, because all embedding files have st_phyics as prefix.
+// StMiniHijing.C changed its prototype, now it takes as an input argument the prefix,
+// but in order not to break Jenn's scripts if she was already using this macro,
+// this parameter was added at the end and defaults to "rcf", which is appropriate
+// for hijing files reconstructed in rcf.
+//
 // Revision 1.3  2002/06/07 02:21:59  calderon
 // Protection against empty vector in findFirstLastHit
-// $Log$ and $Id$ plus header comments for the macros
+// $Log: StMiniHijing.C,v $
+// Revision 1.4  2002/06/28 22:15:12  calderon
+// Changes to deal with seg. faults in the file name handling:
+// Conventions:
+// StMiniMcMaker looks for the input file from the IO maker to figure out
+// if the file has changed.  This is done using TString::Contains() in Make().
+// Usually we will run one file at a time, but in order not to break Bum's scheme of being
+// able to process several files in one go, this is left as is.  However, for
+// embedding, the file name is not enough, in Eric's new scheme there are repeated
+// file names.  This is resolved by adding a prefix to the output file name.  However,
+// this prefix should not be overwritten, so the current code only replaces the
+// string inside the output file name pertaining to the input file name, and leaves
+// the prefix of the output file intact.  This was done for embedding looking for
+// st_physics, and here is where the problem arose: hijing files begin with a different
+// prefix.  To solve this problem, the input file name prefix is now an input parameter
+// in the macro.
+//
+// StMiniEmbed.C and StMiniHijing.C now conform to this convention.  StMiniEmbed.C
+// did not change its prototype, because all embedding files have st_phyics as prefix.
+// StMiniHijing.C changed its prototype, now it takes as an input argument the prefix,
+// but in order not to break Jenn's scripts if she was already using this macro,
+// this parameter was added at the end and defaults to "rcf", which is appropriate
+// for hijing files reconstructed in rcf.
+// and $Id: StMiniHijing.C,v 1.4 2002/06/28 22:15:12 calderon Exp $ plus header comments for the macros
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -20,7 +66,8 @@ void StMiniHijing(Int_t nevents=3,
 		  const char* MainFile=
 		  "hijing_b0_3/rcf0147_01*geant.root",
 		  const char* outDir = "./",
-		  int commonHits=3)
+		  int commonHits=3,
+		  TString filePrefix="rcf")
 {
 
   // Dynamically link needed shared libs
@@ -90,12 +137,19 @@ void StMiniHijing(Int_t nevents=3,
   //
   // mdst of association stuff
   //
+
+  TString filename   = MainFile;
+  int fileBeginIndex = filename.Index(filePrefix,0);
+  filename.Remove(0,fileBeginIndex);
+
+  
   StMiniMcMaker *krap = new StMiniMcMaker;
   krap->setDebug(1);
   krap->setGhost();
   krap->setOutDir(outDir);
   krap->setPtCut(1);
-  krap->setFileName(MainFile);
+  krap->setFileName(filename);
+  krap->setFilePrefix(filePrefix);
 
   // Define the cuts for the Associations
   
