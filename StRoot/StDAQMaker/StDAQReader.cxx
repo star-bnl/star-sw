@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.23 2000/09/13 17:02:09 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.24 2001/01/03 23:08:35 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.24  2001/01/03 23:08:35  perev
+ * Skip over EOF added
+ *
  * Revision 1.23  2000/09/13 17:02:09  perev
  * add delete of L3Reader in close
  *
@@ -180,17 +183,22 @@ int StDAQReader::readEvent()
 //_____________________________________________________________________________
 int StDAQReader::skipEvent(int nskip)
 {
-  for (int isk=0; isk<nskip; isk++) 
+  for (int isk=0; nskip; nskip--,isk++) 
   {
     delete fEventReader;
-    if (fOffset == -1) return kStEOF;
+    if (fOffset == -1) {
+      printf("<Warning: StDAQReader::skipEvent> EOF after record %d\n",isk);
+      break;}  
+      
     fEventReader = new EventReader();
     //    fEventReader->InitEventReader(fFd, fOffset, 0);
     fEventReader->InitEventReader(fFd, fOffset);
-    if(fEventReader->errorNo()) return kStErr;  
+    if(fEventReader->errorNo()) {
+      printf("<Warning: StDAQReader::skipEvent> ReadError on record %d\n",isk);
+      fOffset = -1; break;}  
     fOffset = fEventReader->NextEventOffset();
   }
-  return 0;
+  return  nskip;
 }
 
 
@@ -236,6 +244,7 @@ StTPCReader *StDAQReader::getTPCReader()
 {
   if (!fTPCReader) {
     fTPCReader = new StTPCReader(this);
+    fTPCReader->Update();
   }
   return fTPCReader;
 }
@@ -260,6 +269,7 @@ StFTPCReader *StDAQReader::getFTPCReader()
 {
   if (!fFTPCReader) {
     fFTPCReader = new StFTPCReader(this);
+    fFTPCReader->Update();
   }
   return fFTPCReader;
 }
@@ -268,6 +278,7 @@ StTRGReader *StDAQReader::getTRGReader()
 {
   if (!fTRGReader) {
     fTRGReader = new StTRGReader(this);
+    fTRGReader->Update();
   }
   return fTRGReader;
 }
@@ -276,6 +287,7 @@ StSVTReader *StDAQReader::getSVTReader()
 {
   if (!fSVTReader) {
     fSVTReader = new StSVTReader(this);
+    fSVTReader->Update();
   }
   return fSVTReader;
 }
