@@ -1,5 +1,8 @@
-// $Id: EEmcL3Tracks.cxx,v 1.2 2003/05/26 14:44:34 zolnie Exp $ 
+// $Id: EEmcL3Tracks.cxx,v 1.3 2003/05/27 19:11:44 zolnie Exp $ 
 // $Log: EEmcL3Tracks.cxx,v $
+// Revision 1.3  2003/05/27 19:11:44  zolnie
+// added dE/dx info
+//
 // Revision 1.2  2003/05/26 14:44:34  zolnie
 // rewritten implementation of EEmcL3Tracks using TClonesArray
 // introduced a common Makefile and mklinkdef.pl
@@ -15,6 +18,8 @@
 
 
 ClassImp(EEmcHelix)
+
+
 
 
 EEmcHelix::EEmcHelix(Float_t x ,Float_t y ,Float_t z, Float_t px,Float_t py,Float_t pz,
@@ -49,20 +54,26 @@ EEmcHelix :: print(FILE *fd) const
 
 ClassImp(EEmcL3Tracks)
 
+
+const Int_t  EEmcL3Tracks::mAllocTracks=32;
+
 //--------------------------------------------------
 //
 //--------------------------------------------------
-EEmcL3Tracks ::  EEmcL3Tracks() {
+EEmcL3Tracks::EEmcL3Tracks() {
   mHelix   = new TClonesArray("EEmcHelix",1000);
+  mDedx    = new Float_t[mAllocTracks];
+  mTrackSize = mAllocTracks;
   clear();
 }
 
 //--------------------------------------------------
 //
 //--------------------------------------------------
-EEmcL3Tracks ::  ~EEmcL3Tracks() 
+EEmcL3Tracks::~EEmcL3Tracks() 
 { 
-  if(mHelix) delete mHelix;
+  if(mHelix) delete    mHelix;
+  if(mDedx)  delete [] mDedx;
 }
 
 
@@ -70,8 +81,21 @@ EEmcL3Tracks ::  ~EEmcL3Tracks()
 int
 EEmcL3Tracks::add(EEmcHelix &h, Float_t de)
 {
-  TClonesArray &helices = *mHelix;
-  EEmcHelix *helix = new(helices[mNTracks++]) EEmcHelix(h); 
+  // add dEdx
+  if(mNTracks >= mTrackSize ) { 
+    Int_t    newSize = mTrackSize + mAllocTracks;
+    Float_t *newDedx = new Float_t[newSize];
+    memcpy(newDedx,mDedx,mTrackSize*sizeof(Float_t));
+    delete [] mDedx;
+    mDedx      = newDedx;
+    mTrackSize = newSize;
+    //cerr << "more " << mTrackSize << endl;
+  }
+
+  TClonesArray &helices = *mHelix; 
+  mDedx[mNTracks]  = de;
+  EEmcHelix *helix = new(helices[mNTracks]) EEmcHelix(h); 
+  mNTracks++;
 
   return ( (helix==NULL) ? 1 : 0 );
 }
@@ -85,12 +109,19 @@ EEmcL3Tracks::clear()
 { 
   mHelix->Clear();
   mNTracks=0;
-#ifdef MAXFLOAT 
   mVertX  = mVertY = mVertZ = MAXFLOAT;
-#else
-  mVertX  = mVertY = mVertZ = 3E38;
-#endif
 }
+
+
+
+EEmcHelix* 
+EEmcL3Tracks::getHelix (int i) 
+{ 
+  return (0<=i && i<mNTracks) ?  ((EEmcHelix *)(mHelix->At(i))) : NULL;
+}
+
+
+  
 
 
 //--------------------------------------------------
@@ -102,7 +133,7 @@ void EEmcL3Tracks :: print(FILE *fd) const
   if(mNTracks<=0) return;
   fprintf(fd,"\tvertex: (%+8.3f %+8.3f %+8.3f)\n",mVertX,mVertY,mVertZ);
   for(Int_t i=0;i<mHelix->GetEntries();i++) {
-    fprintf(fd,"\ttrack#%d\n",i);
+    fprintf(fd,"\ttrack#%d dE/dx=%g\n",i,mDedx[i]);
     ((EEmcHelix *)(mHelix->At(i)))->print(fd);
   }
 }

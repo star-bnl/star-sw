@@ -1,5 +1,8 @@
-// $Id: EEmcEventHeader.cxx,v 1.2 2003/05/26 14:44:34 zolnie Exp $ 
+// $Id: EEmcEventHeader.cxx,v 1.3 2003/05/27 19:11:43 zolnie Exp $ 
 // $Log: EEmcEventHeader.cxx,v $
+// Revision 1.3  2003/05/27 19:11:43  zolnie
+// added dE/dx info
+//
 // Revision 1.2  2003/05/26 14:44:34  zolnie
 // rewritten implementation of EEmcL3Tracks using TClonesArray
 // introduced a common Makefile and mklinkdef.pl
@@ -45,9 +48,10 @@ void EEmcEventHeader :: setComment(const char* s) {
 //
 //--------------------------------------------------
 void EEmcEventHeader :: clear() {
-  mTimeStamp  = -1;
+  mTimeStamp       = -1;
   mProcessingTime  = -1;
   mCommentLen = 0;
+  mStatus     = 0;
   if(mComment) delete [] mComment;
 }
 
