@@ -1,5 +1,111 @@
-// $Id: StChain.cxx,v 1.45 2001/04/10 21:38:49 perev Exp $
+/*!
+  StChain                                                              
+
+ Main class to control the StChain program.                           
+                                                                      
+ This class was done on the base of <a href="http://root.cern.ch/root/Atlfast.html"> ATLFAST </a> 
+ C++ class library           
+ This class is a general framework for programs that needs to:       
+    - Initialise some parameters                                      
+    - Loop on events                                                  
+    - Print results and save histograms, etc                          
+                                                                      
+ The event processor StChain::Make loops on a list of Makers          
+ where each maker performs some task on the event data and generates  
+ results.                                                             
+ New Makers can be inserted by a user without modifying this class.   
+ Note that the order in which the Makers are called is the order      
+ of insertion in the list of Makers.                                  
+                                                                      
+ Makers must derive from the base class StMaker.                      
+ StMaker provides a common interface to all Makers.                   
+ Each Maker is responsible for defining its own parameters and        
+ histograms.                                                          
+ Each Maker has its own list of histograms.                           
+ The pointer supporting the created object(s) is defined in StMaker   
+   GetDataSet() points to a DataSet owned by the Maker                
+                                                                      
+ The function StChain::Maketree must be called after the creation     
+ of the StChain object to create a Root Tree (not yet implemented).   
+                                                                      
+*/
+
+
+#include <TROOT.h>
+#include <TBrowser.h>
+#include "StChain.h"
+#include "StEvtHddr.h"
+
+StChain *fgStChain=0;
+
+ClassImp(StChain)
+
+//_____________________________________________________________________________
+StChain::StChain(const char *name):
+StMaker(name)
+{
+   m_Version     = 100;       //StChain  version number and release date
+   m_VersionDate = 180698;
+   m_EvtHddr  	= new StEvtHddr(m_ConstSet);
+   gROOT->GetListOfBrowsables()->Add(this,GetName());
+
+}
+
+//_____________________________________________________________________________
+StChain::~StChain()
+{
+}
+void StChain::Streamer(TBuffer &)
+{ Error("Streamer"," attempt to write %s\n ",GetName());
+  assert(0);
+}
+//_____________________________________________________________________________
+void StChain::Clear(Option_t *option)
+{
+ // StartTimer();
+ StMaker::Clear(option);
+ // StopTimer();
+}
+//_____________________________________________________________________________
+Int_t StChain::Finish(){
+ // StartTimer();
+ Int_t res = StMaker::Finish();
+ // StopTimer();
+ PrintTotalTime();
+ return res;
+}
+//_____________________________________________________________________________
+Int_t StChain::Init()
+{
+ // StartTimer();
+ Int_t res = StMaker::Init();
+ // StopTimer();
+ return res;
+}
+//_____________________________________________________________________________
+Int_t StChain::Make() {
+ // StartTimer();
+  if (m_EvtHddr) m_EvtHddr->SetProdDateTime();
+ Int_t res = StMaker::Make();
+ // StopTimer();
+ return res;
+}
+//_____________________________________________________________________________
+Int_t StChain::MakeEvent() 
+{
+  // Make next event from the TBrowser TContextMenu
+  Clear();
+  return StMaker::IMake(GetNumber()+1);
+}
+
+
+
+
+// $Id: StChain.cxx,v 1.46 2002/02/02 23:31:13 jeromel Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.46  2002/02/02 23:31:13  jeromel
+// doxygenized. Added some text for the Make() method.
+//
 // Revision 1.45  2001/04/10 21:38:49  perev
 // Maki(int) --> IMake(int)
 //
@@ -87,103 +193,3 @@
 // Revision 1.6  1998/07/19 21:14:48  fisyak
 // add log information
 //
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// StChain                                                              //
-//                                                                      //
-// Main class to control the StChain program.                           //
-//                                                                      //
-// This class was done on the base of Begin_html <a href="http://root.cern.ch/root/Atlfast.html"> ATLFAST </a>End_Html C++ class library           //
-// This class is a general framework for programs that needs to:        //
-//    - Initialise some parameters                                      //
-//    - Loop on events                                                  //
-//    - Print results and save histograms, etc                          //
-//                                                                      //
-// The event processor StChain::Make loops on a list of Makers          //
-// where each maker performs some task on the event data and generates  //
-// results.                                                             //
-// New Makers can be inserted by a user without modifying this class.   //
-// Note that the order in which the Makers are called is the order      //
-// of insertion in the list of Makers.                                  //
-//                                                                      //
-// Makers must derive from the base class StMaker.                      //
-// StMaker provides a common interface to all Makers.                   //
-// Each Maker is responsible for defining its own parameters and        //
-// histograms.                                                          //
-// Each Maker has its own list of histograms.                           //
-// The pointer supporting the created object(s) is defined in StMaker   //
-//   GetDataSet() points to a DataSet owned by the Maker                //
-//                                                                      //
-// The function StChain::Maketree must be called after the creation     //
-// of the StChain object to create a Root Tree (not yet implemented).   //
-//                                                                      //
-//
-//////////////////////////////////////////////////////////////////////////
-
-#include <TROOT.h>
-#include <TBrowser.h>
-#include "StChain.h"
-#include "StEvtHddr.h"
-
-StChain *fgStChain=0;
-
-ClassImp(StChain)
-
-//_____________________________________________________________________________
-StChain::StChain(const char *name):
-StMaker(name)
-{
-   m_Version     = 100;       //StChain  version number and release date
-   m_VersionDate = 180698;
-   m_EvtHddr  	= new StEvtHddr(m_ConstSet);
-   gROOT->GetListOfBrowsables()->Add(this,GetName());
-
-}
-
-//_____________________________________________________________________________
-StChain::~StChain()
-{
-}
-void StChain::Streamer(TBuffer &)
-{ Error("Streamer"," attempt to write %s\n ",GetName());
-  assert(0);
-}
-//_____________________________________________________________________________
-void StChain::Clear(Option_t *option)
-{
- // StartTimer();
- StMaker::Clear(option);
- // StopTimer();
-}
-//_____________________________________________________________________________
-Int_t StChain::Finish(){
- // StartTimer();
- Int_t res = StMaker::Finish();
- // StopTimer();
- PrintTotalTime();
- return res;
-}
-//_____________________________________________________________________________
-Int_t StChain::Init()
-{
- // StartTimer();
- Int_t res = StMaker::Init();
- // StopTimer();
- return res;
-}
-//_____________________________________________________________________________
-Int_t StChain::Make() {
- // StartTimer();
-  if (m_EvtHddr) m_EvtHddr->SetProdDateTime();
- Int_t res = StMaker::Make();
- // StopTimer();
- return res;
-}
-//_____________________________________________________________________________
-Int_t StChain::MakeEvent() 
-{
-  // Make next event from the TBrowser TContextMenu
-  Clear();
-  return StMaker::IMake(GetNumber()+1);
-}
-
