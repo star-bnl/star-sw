@@ -84,10 +84,9 @@ void StiLocalTrackSeedFinder::initialize()
 		if (!detector) 
 		  throw runtime_error("StiCompositeSeedFinder::build() -F- detector==0 ");
 		if (detector->isActive()) 
-		  {
-		    cout << " Adding detector:"<< detector->getName()<<endl;
 		    addLayer(detector);
-		  }
+		else
+		  cout << " Not Adding detector:"<< detector->getName()<<endl;
 	      }
 	  }
     }
