@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.17 2003/11/30 20:51:48 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.18 2004/01/22 16:30:47 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.18  2004/01/22 16:30:47  caines
+ * Getting closer to a final simulation
+ *
  * Revision 1.17  2003/11/30 20:51:48  caines
  * New version of embedding maker and make OnlSeqAdj a stand alone maker
  *
@@ -112,12 +115,8 @@ StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
 { 
    if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::constructor"<<endm;
  
-  mPedOffset = 20;     //value taken from StSeqAdjMakeru- hardwired value, but can change run to run
+  mPedOffset = 20;     //value taken from StSeqAdjMakeru- hardwired value, but could possibly change run to run
  
-  //background settings - can be set by setBackGround
-  mBackGrOption = kTRUE;  //for embedding this has to be set to kFALSE
-  mBackGSigma = 1.8;  //1.8 seems to be so far the best value
-
   //electron cloud settings - these can be tuned;
   mDiffusionConst=0.0035;   // [mm**2/micro seconds]
   mLifeTime=1000000.0;     // [us]
@@ -137,15 +136,12 @@ StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
   mSvtSimPixelColl = NULL;
   mSvt8bitPixelColl = NULL; //final data 
   mDriftSpeedColl=NULL;
-  mPedColl=NULL;
-  mPedRMSColl=NULL;
-  mSvtBadAnodes=NULL;
- 
+  
   mCoordTransform = NULL;
 
   //this should be part of the chain
-  if (!GetMaker("StSvtPedMaker")) new StSvtPedMaker("StSvtPedMaker");
-  else gMessMgr->Info() << "StSvtPedMaker already exists in the chain"<<endm;
+  //if (!GetMaker("StSvtPedMaker")) new StSvtPedMaker("StSvtPedMaker");   //this should be later removed when Pedmaker is standard part of BFC
+  //else gMessMgr->Info() << "StSvtPedMaker already exists in the chain"<<endm;
 
   if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::constructor...END"<<endm;
  
@@ -174,12 +170,6 @@ Int_t StSvtSimulationMaker::setConst(double timBinSize, double anodeSize, int of
   return kStOK;
 }
 
-//____________________________________________________________________________
-Int_t StSvtSimulationMaker::setBackGround(Bool_t backgr,double backgSigma){
-  mBackGrOption = backgr;
-  mBackGSigma = backgSigma;
-  return kStOK;
-}
 
 //____________________________________________________________________________
 
@@ -228,15 +218,12 @@ Int_t StSvtSimulationMaker::Init()
   mElectronCloud->setDiffusionConst(mDiffusionConst);
 
   mSvtSimulation = new StSvtSimulation();
-  mSvtSimulation->setOptions(mBackGrOption,mSigOption);
+  mSvtSimulation->setOptions(mSigOption);
   mSvtSimulation->setPointers(mElectronCloud, mSvtAngles);
   mSvtSimulation->setTrappingConst(mTrapConst); 
 
   mCoordTransform=new StSvtCoordinateTransform();  
-  
-  //if there is the EmbeddingMaker leave the background to it.
-  if (GetMaker("SvtEmbedding")) mBackGrOption = kFALSE;
-  
+   
   if(Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Init() -End"<<endm;
 
   return  StMaker::Init();
@@ -255,8 +242,6 @@ Int_t StSvtSimulationMaker::InitRun(int runumber)
   getSvtGeometry();
   getSvtDriftSpeeds();
   getSvtT0();
-  getPedRMS();
-  getBadAnodes();
 
   setSvtPixelData();
   //Set up coordinate transformation 
@@ -281,8 +266,7 @@ Int_t StSvtSimulationMaker::InitRun(int runumber)
   //if(Debug()) CreateHistograms();
   cout<<"StSvtSimulationMaker::InitRun info:"<<endl;
   cout<<"  Anode size="<<mAnodeSize<<" ,time bin size="<<mTimeBinSize<<endl;
-  cout<<"  pedestal offset="<<mPedOffset<<", default backgr. sigma="<<mBackGSigma<<endl;
-  cout<<"  do backround="<<mBackGrOption<<endl;
+  cout<<"  pedestal offset="<<mPedOffset<<endl;
   cout<<"  default drift velocity="<<mDefaultDriftVelocity<<endl;
   cout<<"  T0(from database)= "<<mT0->getT0(1)<<endl;
   
@@ -332,68 +316,6 @@ void  StSvtSimulationMaker::resetPixelData(){
    }
 }
 
-//____________________________________________________________________________
-void StSvtSimulationMaker::createBackGrData()
-{ //this creates background on the whole hybrid
-  double rmsScale=16.;
-
-  //TH1D *t=new TH1D("t","t",100,0,10);
-  if(Debug()) gMessMgr->Message()<<"StSvtSimulationMaker::createBackGrData()"<<endm;
-   
-  StSvtHybridPixelsD* tmpPixels;
-
-  for(int Barrel = 1;Barrel <= mSvtSimPixelColl->getNumberOfBarrels();Barrel++) {
-    for (int Ladder = 1;Ladder <= mSvtSimPixelColl->getNumberOfLadders(Barrel);Ladder++) {
-      for (int Wafer = 1;Wafer <= mSvtSimPixelColl->getNumberOfWafers(Barrel);Wafer++) {
-        for( int Hybrid = 1;Hybrid <= mSvtSimPixelColl->getNumberOfHybrids();Hybrid++){
-          
-          int index = mSvtSimPixelColl->getHybridIndex(Barrel,Ladder,Wafer,Hybrid);
-          //cout << "Barrel = " << Barrel << ", Ladder = " << Ladder << ", Wafer = " 
-          //cout<< Wafer << ", Hybrid = " << Hybrid << endl;
-          //cout<<"index = "<<index<<endl;
-          if( index < 0) continue; 
-          
-          tmpPixels  = (StSvtHybridPixelsD*)mSvtSimPixelColl->at(index);          
-	  double *mAdcArray=tmpPixels->GetArray(); // array of [128*240]
-
-	  //find out what background to use
-	  StSvtHybridPixels* pedRms=NULL;
-	  if (mPedRMSColl) pedRms = (StSvtHybridPixels*)mPedRMSColl->at(index);
-	 	    
-	  if(pedRms)
-	    {// I have rms for each pixel
-	      for(int an = 0; an < 240; an++)  for(int tim = 0; tim < 128; tim++){
-		//cout<<pedRms<<"indiv rms="<<pedRms->At(pedRms->getPixelIndex(an+1,tim))/rmsScale<<endl;
-		mAdcArray[an*128 + tim]+=mSvtSimulation->makeGausDev(pedRms->At(pedRms->getPixelIndex(an+1,tim))/rmsScale);// !! mAdcArray already contains PedOffset
-	      }
-	    }
-	  else {
-	    //one value for hybrid
-	    double backgsigma;
-	    StSvtHybridPed *ped=NULL;
-	    if (mPedColl) ped=(StSvtHybridPed *)mPedColl->at(index);
-	    if (ped) backgsigma=ped->getRMS(); else  backgsigma=mBackGSigma; //the default value
-	    if (backgsigma<=0.){ //check agains to high RMS's
-	      cout<<"Warnig for index "<<index<<" pedestal RMS is:"<<backgsigma<<" => seting to default"<<endl;
-	      backgsigma=mBackGSigma;
-	    }
-	    if (Debug()) cout<<"for index "<<index<<" pedestal RMS is:"<< backgsigma<<endl;
-	    //t->Fill(backgsigma);
-	    for(int an = 0; an < 240; an++){
-	      for(int tim = 0; tim < 128; tim++){
-		mAdcArray[an*128 + tim]+=mSvtSimulation->makeGausDev(backgsigma);// !! mAdcArray already contains PedOffset             
-	      }
-	    }
-          }
-	  
-        }
-      }
-    }
-  } 
-  //t->Draw();
- 
-  if(Debug()) gMessMgr->Message()<<"StSvtSimulationMaker::createBackGrData() - END"<<endm;
-}
 
 //____________________________________________________________________________
 void  StSvtSimulationMaker::setSvtPixelData()
@@ -488,25 +410,6 @@ Int_t StSvtSimulationMaker::getSvtDriftSpeeds()
   return kStOk;
 }
 
-//___________________________________________________________________________
-void  StSvtSimulationMaker::getPedRMS()
-{
-  mPedRMSColl=NULL;
-  mPedColl=NULL;
-
-  St_DataSet* dataSet=NULL;
-  dataSet = GetDataSet("StSvtRMSPedestal");
-  if (dataSet)  mPedRMSColl= (StSvtHybridCollection*)dataSet->GetObject();
-      
-  dataSet=NULL;
-  dataSet = GetDataSet("StSvtPedestal");
-  if (dataSet) mPedColl= (StSvtHybridCollection*)dataSet->GetObject();
-
-  if ((!mPedRMSColl)&&(!mPedColl))
-    cout<<"Warning: no SVT RMS information available from StSvtPedestal  - using default backgroung:"<<mBackGSigma<<endl;
-    
-}
-
 
 //____________________________________________________________________________
 Int_t StSvtSimulationMaker::getSvtT0()
@@ -552,27 +455,6 @@ Int_t StSvtSimulationMaker::getConfig()
   return kStOk;
 }
 
-//____________________________________________________________________________
-Int_t StSvtSimulationMaker::getBadAnodes()
-{
-  
-  St_DataSet *dataSet;
-  
-  dataSet = GetDataSet("StSvtBadAnodes");
-  if( !dataSet) {
-    gMessMgr->Warning() << " No Svt Bad Anodes data set" << endm;
-    return kStWarn;
-  }
-
-  mSvtBadAnodes = (StSvtHybridCollection*)(dataSet->GetObject());
-  if( !mSvtBadAnodes) {
-    gMessMgr->Warning() << " No Svt Bad Anodes data " << endm;
-    return kStWarn;
-  }
-
-  if (Debug()) gMessMgr->Info()<<"Svt Bad Anode list found"<<endm;
-  return kStOk;
-}
 
 //____________________________________________________________________________
 Int_t StSvtSimulationMaker::Make()
@@ -590,8 +472,6 @@ Int_t StSvtSimulationMaker::Make()
   //########## initiating data structures ##########################
   resetPixelData();
   setGeantData(); //if this removed geant data need to be dealocated in Clear() 
-
-  if(mBackGrOption) createBackGrData(); 
   
   StSvtWaferCoordinate waferCoord (0,0,0,0,0,0);
   StSvtLocalCoordinate localCoord (0,0,0);

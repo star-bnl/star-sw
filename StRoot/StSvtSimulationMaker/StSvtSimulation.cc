@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSimulation.cc,v 1.9 2003/11/15 20:24:29 caines Exp $
+ * $Id: StSvtSimulation.cc,v 1.10 2004/01/22 16:30:47 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulation.cc,v $
+ * Revision 1.10  2004/01/22 16:30:47  caines
+ * Getting closer to a final simulation
+ *
  * Revision 1.9  2003/11/15 20:24:29  caines
  * fixes to remove warnings at compilation
  *
@@ -84,13 +87,10 @@ StSvtSimulation::~StSvtSimulation()
   delete mSvtSignal;
 }
 
-void StSvtSimulation::setOptions(Bool_t backgr, int option)
+void StSvtSimulation::setOptions(int option)
 {
-  mBackGrOption = backgr;
   mSignalOption = option;
-
-  mSvtSignal->setOption(mSignalOption);
-  
+  mSvtSignal->setOption(mSignalOption);  
 }
 
 void StSvtSimulation::setPointers(StSvtElectronCloud* elCloud,StSvtAngles* svtAngles)
@@ -350,37 +350,7 @@ void StSvtSimulation::fillBuffer(double mAnHit, double mTimeHit, StSvtHybridPixe
 	     // cout<<"time bin = "<<n-1<<"\tadc = "<<adc<<endl;
 
              int pixelIndex = svtSimDataPixels->getPixelIndex(anode + an, n - 1);	     
-
-	     /*Petr -background is done from outside
-              int offset = svtSimDataPixels->getPedOffset();
-	     //cout<<"offset = "<<offset <<endl;
 	     
-	     double adc1 = (double)svtSimDataPixels->getPixelContent(anode + an,n - 1);
-	     //if(adc1 < offset) 
-	     adc1 = adc1 - (double)offset;
-	     
-
-             if(mBackGrOption){
-	       if(adc1 == 0.0){               
-                   back = makeGausDev(backgrsigma);
-                   adc = back + adc + offset;   // (int)adc will be in counts with 1 count <-> 4 mV
-                   svtSimDataPixels->addToPixel(pixelIndex,adc);
-
-	          }
-               else{
-                    adc = adc1 + adc + offset;   // (int)adc will be in counts with 1 count <-> 4 mV
-                    svtSimDataPixels->addToPixel(pixelIndex,adc);
-	         }
-	        }
-	     else {
-
-	       adc = adc1 + adc;
-	       //adc = adc + (double)offset;
-	       //cout<<"adc = "<<adc<<endl;
-		svtSimDataPixels->addToPixel(pixelIndex,adc);
-		//svtSimDataPixels->AddAt(adc,pixelIndex);
-		}*/
-	    
 	     double adc1 = svtSimDataPixels->getPixelContent(anode + an,n - 1);
 	     adc+=adc1;
 	     svtSimDataPixels->AddAt(adc,pixelIndex);
@@ -406,37 +376,6 @@ void StSvtSimulation::fillBuffer(double mAnHit, double mTimeHit, StSvtHybridPixe
 
  }
 
-
-double StSvtSimulation::makeGausDev(double sigma)
-{
-
- static int iset = 0;
- static double gset;
- double fac,rsq,v1,v2;
-
- //if(*idum < 0) iset = 0;
-  if(iset == 0)
-   {
-       
-    do {
-        v1 = 2.0*((float)rand()/(float)RAND_MAX) - 1.0;
-        v2 = 2.0*((float)rand()/(float)RAND_MAX) - 1.0;
-        rsq = v1*v1 + v2*v2;
-        
-    } while(rsq >= 1.0 || rsq == 0.0);
-
-     fac = sigma*::sqrt(-2.0*::log(rsq)/rsq);
-
-     gset = v1*fac;  // gset = 3.0*::sqrt(-2.0*::log(rsq))*(v1/::sqrt(rsq))
-     iset = 1;
-     return v2*fac;
-   }
-  else
-    {
-     iset = 0;
-     return gset;
-    }
-}
 
 void StSvtSimulation::resetAnodeAttributes(int numOfAnodes)
 {

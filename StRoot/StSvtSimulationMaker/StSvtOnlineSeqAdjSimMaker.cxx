@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.1 2003/12/01 00:57:51 caines Exp $
+ * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.2 2004/01/22 16:30:47 caines Exp $
  *
  * Author: Petr Chaloupka
  ***************************************************************************
@@ -33,7 +33,7 @@ StSvtOnlineSeqAdjSimMaker::StSvtOnlineSeqAdjSimMaker(const char* name):StMaker(n
 
   //here are the default settings, you can override them in Init()
   SetKillBadAnodes(kTRUE);
-  SetNumberTBinsToClear(2);
+  SetNumberTBinsToClear(2); 
 
   //defaults is no raw anodes
   SetSaveAnode2Raw(kFALSE);
@@ -46,10 +46,10 @@ StSvtOnlineSeqAdjSimMaker::StSvtOnlineSeqAdjSimMaker(const char* name):StMaker(n
   SetPedOffset(20);
   //these settings are lower then those usualy used
   Set_thresh_hi(7);
-  Set_n_seq_hi(2);
+  Set_n_seq_hi(0);
 
-  Set_thresh_lo(2);
-  Set_n_seq_lo(0);
+  Set_thresh_lo(2);  
+  Set_n_seq_lo(2);
 
   //This is because of some Makers downd the chain
   GetConfig();
@@ -124,17 +124,17 @@ void StSvtOnlineSeqAdjSimMaker::GetBadAnodes()
   
   dataSet = GetDataSet("StSvtBadAnodes");
   if( !dataSet) {
-    gMessMgr->Warning() << " No Svt Bad Anodes data set" << endm;
+    gMessMgr->Warning() << "StSvtOnlineSeqAdjSimMaker: No Svt Bad Anodes data set" << endm;
     return;
   }
 
   mSvtBadAnodes = (StSvtHybridCollection*)(dataSet->GetObject());
   if( !mSvtBadAnodes) {
-    gMessMgr->Warning() << " No Svt Bad Anodes data " << endm;
+    gMessMgr->Warning() << "StSvtOnlineSeqAdjSimMaker: No Svt Bad Anodes data " << endm;
     return;
   }
 
-  if (Debug()) gMessMgr->Info()<<"Svt Bad Anode list found"<<endm;
+  /*if (Debug())*/  gMessMgr->Info()<<"StSvtOnlineSeqAdjSimMaker:Svt Bad Anode list found"<<endm;
 }
 
 
@@ -156,12 +156,12 @@ void StSvtOnlineSeqAdjSimMaker::SetRawData()
 Int_t StSvtOnlineSeqAdjSimMaker::Init()
 {
   // these are user settings - they should be read from database - so far here
-  /*
+ /* 
   SetNumberTBinsToClear(4);
   SetExtraPixelsBefore(1);
   SetExtraPixelsAfter(4);
-  SetAdjPArams(3,0,7,2)
-  */
+  SetAdjParams(3,2,7,0);
+ */
  return  StMaker::Init();
 }
 
