@@ -57,7 +57,7 @@ BfcItem BFC[] = {
   {"tdaq"        ,""  ,"","xin,tpc_daq"                                                   ,"","","",kFALSE},  
   {"miniDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE}, 
   {"fzin"        ,""  ,"","geant","" ,""                                      ,"read gstar fz-file",kFALSE},
-  {"NoFzin"      ,""  ,"","","" ,""                                             ,"No gstar fz-file",kFALSE},
+  {"NoInput"     ,""  ,"","","" ,""                                                ,"No input file",kFALSE},
   {"util"        ,""  ,"","","","StAnalysisUtilities",                   "Load StAnalysisUtilities",kFALSE},
   {"NoFieldSet"  ,""  ,"","-FieldOn,-FieldOff,-HalfField,-ReverseField,-magF" ,"","","No Field Set",kFALSE},
   {"FieldOn"     ,""  ,"","NoFieldSet"                ,"StMagFC","StMagF" ,"Constant nominal field",kFALSE},
@@ -145,7 +145,7 @@ BfcItem BFC[] = {
   {"rich"        ,"","","sim_T,globT"                                 ,"StRchMaker","StRchMaker","",kFALSE},
   {"global"      ,"global","","globT,Match,primary,v0,xi,kink,dst,SCL"
                                                          ,"StChainMaker","St_tpc,St_svt,StChain","",kFALSE},
-  {"Match"       ,"match","global","SCL,tpc_T,svt_T,globT,tls"
+  {"Match"       ,"match","global","SCL,tpc_T,svt_T,globT,tls,Kalman"
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Primary"     ,"primary","global","SCL,globT,tls"
                                                ,"StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
@@ -267,7 +267,11 @@ Int_t StBFChain::Instantiate()
 	  new StMagFC("field",FieldName.Data(),Scale);
 	  continue;
 	}
-	if (maker == "St_db_Maker") {
+	if (maker == "St_db_Maker"){
+// 	  if (GetChain()->GetMaker(fBFC[i].Chain)) {
+// 	    cout << "St_db_Maker(" << fBFC[i].Chain << ") has already existed" << endl;
+// 	    continue;
+// 	  }
 	  if (Key == "calib") {
 	    const char *calibDB = "$STAR_ROOT/calib";
 	    calibMk = new St_db_Maker("calib",calibDB);
@@ -284,7 +288,7 @@ Int_t StBFChain::Instantiate()
 	    gMessMgr->QAInfo() << " Main DataBase == " << mainDB << endm;  
 	    if (userDB) gMessMgr->QAInfo() << " User DataBase == " << PWD.Data() << "/" << userDB << endm;  
 	    dbMk = new St_db_Maker("db",mainDB,userDB);
-	    if (GetOption("tpcDB")) {
+	    if (GetOption("tpcDB")){// 
 	      GeometryMk = new St_db_Maker("Geometry","MySQL:Geometry_tpc");
 	      CalibrationsMk = new St_db_Maker("Calibrations","MySQL:Calibrations_tpc");
 	      //            ConditionsMk = new St_db_Maker("Conditions","MySQL:Conditions");
@@ -342,6 +346,7 @@ Int_t StBFChain::Instantiate()
 	  if (mk) fBFC[i].Name = (Char_t *) mk->GetName();
 	}
 	if (mk && maker == "St_dst_Maker") SetInput("dst",".make/dst/.data/dst");
+	if (mk && maker == "StMatchMaker" && !GetOption("Kalman")) mk->SetMode(-1);
 	if (mk && maker == "St_tpcdaq_Maker") {
 	  if (GetOption("Trs")) mk->SetMode(1); // trs
 	  else                  mk->SetMode(0); // daq
@@ -469,10 +474,12 @@ void StBFChain::SetFlags(const Char_t *Chain)
     if (kgo != 0) SetOption(kgo);
   }
   // Check flags consistency   
-  if (!GetOption("fzin") && !GetOption("geant") && !GetOption("NoFzin") &&
-      !GetOption("xin")  && !GetOption("gstar") && !GetOption("tdaq")) {
-    SetOption("fzin");
-    SetOption("geant");
+  if (!GetOption("NoInput")) {
+    if (!GetOption("fzin") && !GetOption("gstar") && 
+	!GetOption("xin")  && !GetOption("tdaq")) {
+      SetOption("fzin");
+      SetOption("geant");
+    }
   }
   if (!GetOption("geant") && !GetOption("FieldOn") && !GetOption("FieldOff") && 
       !GetOption("HalfField") && !GetOption("ReverseField"))     SetOption("magF"); 
@@ -496,7 +503,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
 void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
   // define input file
   if (infile) InFile = new TString(infile);
-  if (!InFile) {
+  if (!InFile && !GetOption("NoInput")) {
     if (GetOption("miniDAQ")) {
       InFile = new TString("/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf"); // laser data
       printf ("Use default input file %s for %s \n",InFile->Data(),"miniDAQ");
@@ -599,7 +606,7 @@ void StBFChain::SetGeantOptions(){
       }
     }
     else {
-      if (!InFile || geantMk->SetInputFile(InFile->Data()) > kStOK) {
+      if (InFile && geantMk->SetInputFile(InFile->Data()) > kStOK) {
 	printf ("File %s cannot be opened. Exit! \n",InFile->Data());
 	gSystem->Exit(1);
       }
@@ -663,8 +670,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("GeantOut") && geantMk) treeMk->IntoBranch("geantBranch","geant");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.78 2000/03/09 20:08:51 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.79 2000/03/12 21:09:39 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.79  2000/03/12 21:09:39  fisyak
+// Add NoInput option
+//
 // Revision 1.78  2000/03/09 20:08:51  fisyak
 // ReInstall TagsChain
 //
