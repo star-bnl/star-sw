@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.6 2001/03/09 22:44:43 hardtke Exp $
+// $Id: StTpcT0Maker.cxx,v 1.7 2001/03/15 19:49:02 hardtke Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.7  2001/03/15 19:49:02  hardtke
+// Add diagnostic ntuple t0hist file
+//
 // Revision 1.6  2001/03/09 22:44:43  hardtke
 // Add vertex diagnostic histograms, create root file with these histograms by default
 //
@@ -35,6 +38,7 @@
 #include "StTpcDb/StTpcDb.h"
 #include "St_tcl_Maker/St_tcl_Maker.h"
 #include "tables/St_dst_vertex_Table.h"
+#include "tables/St_dst_L0_Trigger_Table.h"
 #include "StMessMgr.h"
 #include "StVertexId.h"
 #include "tables/St_tpcDriftVelocity_Table.h"
@@ -74,6 +78,7 @@ Int_t StTpcT0Maker::Init(){
   xVertexDiff = new TH1F("xVertexDiff","x Vertex: East - West",600,-0.3,0.3);
   yVertexDiff = new TH1F("yVertexDiff","y Vertex: East - West",600,-0.3,0.3);
   zVertexDiff = new TH1F("zVertexDiff","z Vertex: East - West",600,-0.3,0.3);
+  resNtuple = new TNtuple("resNtuple","resNtuple","event:xEast:yEast:zEast:xWest:yWest:zWest:multEast:multWest");
   AddHist(t0result);
   AddHist(t0guessError);
   AddHist(xVertexDiff);
@@ -141,6 +146,7 @@ Int_t StTpcT0Maker::Make(){
        zVertexWest = sth->z;
        yVertexWest = sth->y;
        xVertexWest = sth->x;
+       multWest = (float)(sth->n_daughters);
        break;    // found primary vertex
      }    
     }
@@ -170,9 +176,11 @@ Int_t StTpcT0Maker::Make(){
        zVertexEast = sth1->z;
        yVertexEast = sth1->y;
        xVertexEast = sth1->x;
+       multEast = (float)(sth1->n_daughters);
        break;    // found primary vertex
      }    
     }
+
     if (zVertexEast>-999&&zVertexWest>-999){
       t0current = (zVertexEast-zVertexWest)/(2*dvel_assumed) + t0guess;
       gMessMgr->Info() << "StTpcT0Maker::zVertexWest = " << zVertexWest << endm;
@@ -183,6 +191,8 @@ Int_t StTpcT0Maker::Make(){
       xVertexDiff->Fill(xVertexEast-xVertexWest);
       yVertexDiff->Fill(yVertexEast-yVertexWest);
       zVertexDiff->Fill(zVertexEast-zVertexWest);
+      eventNumber = (float)GetEventNumber();
+      resNtuple->Fill(eventNumber,xVertexEast,yVertexEast,zVertexEast,xVertexWest,yVertexWest,zVertexWest,multEast,multWest);
       if (t0current<T0HIST_MIN||t0current>T0HIST_MAX){
          gMessMgr->Info() << "StTpcT0Maker::t0 out of defined range for histogram"<< endm;
       }
@@ -234,7 +244,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.6 2001/03/09 22:44:43 hardtke Exp $\n");
+  printf("* $Id: StTpcT0Maker.cxx,v 1.7 2001/03/15 19:49:02 hardtke Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -274,6 +284,7 @@ void StTpcT0Maker::WriteHistFile(){
   sprintf(filename,"t0hist.%08d.%06d.root",date,time);
   TFile out(filename,"RECREATE");
   GetHistList()->Write();
+  resNtuple->Write();
   out.Close();
 }
 

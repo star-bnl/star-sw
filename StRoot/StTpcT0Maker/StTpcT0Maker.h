@@ -1,5 +1,8 @@
-// $Id: StTpcT0Maker.h,v 1.5 2001/03/09 22:44:43 hardtke Exp $
+// $Id: StTpcT0Maker.h,v 1.6 2001/03/15 19:49:02 hardtke Exp $
 // $Log: StTpcT0Maker.h,v $
+// Revision 1.6  2001/03/15 19:49:02  hardtke
+// Add diagnostic ntuple t0hist file
+//
 // Revision 1.5  2001/03/09 22:44:43  hardtke
 // Add vertex diagnostic histograms, create root file with these histograms by default
 //
@@ -28,6 +31,7 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+#include "TNtuple.h"
 class StTpcDb;
 class St_tpcDriftVelocity;
 
@@ -53,7 +57,7 @@ class StTpcT0Maker : public StMaker {
    void HistFileByDefault();   // Write out file on Finish
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcT0Maker.h,v 1.5 2001/03/09 22:44:43 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcT0Maker.h,v 1.6 2001/03/15 19:49:02 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
 
@@ -63,6 +67,7 @@ class StTpcT0Maker : public StMaker {
   TH1F* zVertexDiff;
   TH1F* yVertexDiff;
   TH1F* xVertexDiff;
+  TNtuple* resNtuple;
   float t0guess;
   float t0current;
   float dvel_assumed;
@@ -74,6 +79,9 @@ class StTpcT0Maker : public StMaker {
   float yVertexEast;
   float xVertexWest;
   float xVertexEast;
+  float multEast;
+  float multWest;
+  float eventNumber;
   float T0HIST_MIN;
   float T0HIST_MAX;
   StTpcDb* theDb; //!
