@@ -67,9 +67,10 @@ StGenericVertexMaker::~StGenericVertexMaker()
   them adding vertices in the collection)
 
   m_Mode = 0x1     Minuit
-  m_Mode = 0x2     ppLMV
+  m_Mode = 0x2     ppLMV4  This will not be able to run in parrallele of ppLMV5
+  m_Mode = 0x3     ppLMV5  This will not be able to run in parrallele of ppLMV4
 
-  Default          Minuit  (to preserver bacward compatibility)
+  Default          Minuit  (to preserver backward compatibility)
 
   All VertexFinder-s need to have the same methods (like DoUseITTF()
   NCtbMatches() etc ...) described in the GenericVertexFinder() class).
@@ -87,6 +88,10 @@ Int_t StGenericVertexMaker::Init()
     theFinder= new StMinuitVertexFinder();
   } else if ( m_Mode & 0x2){
     theFinder= new StppLMVVertexFinder();
+    theFinder->SetMode(0);                 // this mode is an internal to ppLMV option switch
+  } else if ( m_Mode & 0x3){
+    theFinder= new StppLMVVertexFinder();
+    theFinder->SetMode(1);                 // this mode is an internal to ppLMV option switch
   } else {
     // Later, this would NEVER make multiple possible vertex
     // finder unlike for option 0x1 .
@@ -98,6 +103,8 @@ Int_t StGenericVertexMaker::Init()
   //    theFinder->UseVertexConstraint(-0.265,0.4088,-0.00135,0.0004333,0.0001);
   //theFinder->UseVertexConstraint(0.0,0.0,0.0,0.0,0.0001);
   if (eval) mEvalNtuple = new TNtuple("results","results","thX:thY:thZ:thStat:goodGlob:evX:evY:evZ:evStat:nPrim:nCTB:geantX:geantY:geantZ");
+
+  theFinder->Init();
   return StMaker::Init();
 }
 
