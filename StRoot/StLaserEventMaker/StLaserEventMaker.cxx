@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.cxx,v 1.9 2001/07/17 17:17:57 love Exp $
+// $Id: StLaserEventMaker.cxx,v 1.10 2001/11/28 19:14:47 jeromel Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.10  2001/11/28 19:14:47  jeromel
+// Fixed default values for Laser calibration.
+//
 // Revision 1.9  2001/07/17 17:17:57  love
 // phi variable added to lasertrack def
 //
@@ -69,8 +72,9 @@ ClassImp(StLaserEventMaker)
     m_tpt_pars(0)
 {
   m_mklaser=kTRUE;
-  m_rowmin=14;
-  m_rowmax=45;
+  m_lasers =kTRUE;
+  m_rowmin = 1;
+  m_rowmax = 1;
 }
 //_____________________________________________________________________________
 StLaserEventMaker::~StLaserEventMaker(){}
