@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.8 2000/04/03 22:09:12 rcwells Exp $
+ * $Id: StHbtPair.cc,v 1.9 2000/04/04 16:13:09 lisa Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.cc,v $
+ * Revision 1.9  2000/04/04 16:13:09  lisa
+ * StHbtPair:quality() now returns normalized value (and so is double) and add a CorrFctn which looks at quality()
+ *
  * Revision 1.8  2000/04/03 22:09:12  rcwells
  * Add member function ... quality().
  *
@@ -215,13 +218,14 @@ double StHbtPair::qLongBf(double beta) const
     return (temp);
 }
 
-int StHbtPair::quality() const {
+double StHbtPair::quality() const {
   unsigned long mapMask0 = 0xFFFFFF00;
   unsigned long mapMask1 = 0x1FFFFF;
   unsigned long padRow1To24Track1 = mTrack1->TopologyMap(0) & mapMask0;
   unsigned long padRow25To45Track1 = mTrack1->TopologyMap(1) & mapMask1;
   unsigned long padRow1To24Track2 = mTrack2->TopologyMap(0) & mapMask0;
   unsigned long padRow25To45Track2 = mTrack2->TopologyMap(1) & mapMask1;
+  cout << " pad row " << mTrack1->TopologyMap(0) << endl;
   // AND logic
   unsigned long bothPads1To24 = padRow1To24Track1 & padRow1To24Track2;
   unsigned long bothPads25To45 = padRow25To45Track1 & padRow25To45Track2;
@@ -231,6 +235,8 @@ int StHbtPair::quality() const {
   unsigned long bitI;
   int ibits;
   int Quality = 0;
+  double normQual = 0.0;
+  int MaxQuality = mTrack1->NumberOfHits() + mTrack2->NumberOfHits();
   for (ibits=8;ibits<=31;ibits++) {
     bitI = 0;
     bitI |= 1UL<<(ibits);
@@ -253,7 +259,7 @@ int StHbtPair::quality() const {
       if ( bothPads25To45 & bitI ) Quality--;
     }
   }
-
-  return ( Quality );
+  normQual = (double)Quality/( (double) MaxQuality );
+  return ( normQual );
 
 }

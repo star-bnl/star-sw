@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.hh,v 1.7 2000/04/03 22:09:12 rcwells Exp $
+ * $Id: StHbtPair.hh,v 1.8 2000/04/04 16:13:09 lisa Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.hh,v $
+ * Revision 1.8  2000/04/04 16:13:09  lisa
+ * StHbtPair:quality() now returns normalized value (and so is double) and add a CorrFctn which looks at quality()
+ *
  * Revision 1.7  2000/04/03 22:09:12  rcwells
  * Add member function ... quality().
  *
@@ -95,7 +98,7 @@ public:
   double qOutBf(double beta=0.0) const;
   double qLongBf(double beta=0.0) const;
 
-  int quality() const;
+  double quality() const;
 
 private:
   StHbtParticle* mTrack1;
