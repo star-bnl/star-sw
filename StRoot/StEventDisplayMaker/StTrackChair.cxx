@@ -8,7 +8,6 @@ static Int_t CheckName(const Char_t *key, const Char_t **values, Int_t length)
 {
   int i;
   for (i=0;i<length && strcmp(key,values[i]);i++);
-  printf(" CheckName %s %s %i\n", key, values[i],length);
   if (i == length) i=-1;
   return i;
 }
