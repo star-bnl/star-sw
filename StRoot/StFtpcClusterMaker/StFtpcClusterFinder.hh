@@ -1,9 +1,9 @@
-// $Id: StFtpcClusterFinder.hh,v 1.5 2000/08/01 12:33:05 hummler Exp $
+// $Id: StFtpcClusterFinder.hh,v 1.6 2000/08/03 14:39:00 hummler Exp $
 //
 // $Log: StFtpcClusterFinder.hh,v $
-// Revision 1.5  2000/08/01 12:33:05  hummler
-// Write points to TObjectArray of StFtpcPoints in ClusterFinder,
-// use fcl_fppoint table only in Maker
+// Revision 1.6  2000/08/03 14:39:00  hummler
+// Create param reader to keep parameter tables away from cluster finder and
+// fast simulator. StFtpcClusterFinder now knows nothing about tables anymore!
 //
 // Revision 1.4  2000/01/27 09:47:18  hummler
 // implement raw data reader, remove type ambiguities that bothered kcc
@@ -32,6 +32,7 @@
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDAQMaker/StDAQReader.h"
 #include "StDAQMaker/StFTPCReader.h"
+#include "StFtpcParamReader.hh"
 
 #define TRUE 1
 #define FALSE 0
@@ -96,29 +97,23 @@ class StFtpcClusterFinder
  private:
   TPCSequence test;
   TClonesArray *mPoint;
+  StFTPCReader *mReader; 
+  StFtpcParamReader *mParam;
 
  public:
-  StFtpcClusterFinder(TClonesArray *pointarray);
+  StFtpcClusterFinder(StFTPCReader *reader, 
+		      StFtpcParamReader *paramReader, 
+		      TClonesArray *pointarray);
   ~StFtpcClusterFinder();
-  int search(StFTPCReader *reader,
-	     fcl_det_st *det,
-	     fcl_padtrans_st *padtrans,
-	     fcl_zrow_st *zrow,
-	     fcl_ampoff_st *ampoff,
-	     fcl_ampslope_st *ampslope,
-	     fcl_timeoff_st *timeoff,
-	     int padtransRows,
-	     int ampslopeRows,
-	     int ampoffRows,
-	     int timeoffRows);
-  int findHits(TClusterUC *Cluster, int, int, double*, double*, FCL_DET_ST*, FCL_ZROW_ST*, float *, FCL_AMPSLOPE_ST*, FCL_AMPOFF_ST*, FCL_TIMEOFF_ST*);//!
-  int getSeqPeaksAndCalibAmp(TPCSequence*, int, int, int, TPadPeak*, int*, FCL_AMPSLOPE_ST*, FCL_AMPOFF_ST*);//!
-  int fitPoints(TClusterUC*, int, int, double*, double*, TPeak*, int, FCL_DET_ST*, FCL_ZROW_ST*, float*, FCL_TIMEOFF_ST*);//!
-  int padtrans(TPeak*, int, int, FCL_DET_ST*, FCL_ZROW_ST*, double*, double*);//!
+  int search();
+  int findHits(TClusterUC *Cluster, int, int, double*, double*, float *);//!
+  int getSeqPeaksAndCalibAmp(TPCSequence*, int, int, int, TPadPeak*, int*);//!
+  int fitPoints(TClusterUC*, int, int, double*, double*, TPeak*, int, float*);//!
+  int padtrans(TPeak*, int, int, double*, double*);//!
   float gauss_2d(int, int, float, float, float, float, float);//!
   float sigmax(float);//!
   float sigmat(float);//!
-  int calcpadtrans(FCL_DET_ST*, FCL_PADTRANS_ST*, double*, double*);//!
+  int calcpadtrans(double*, double*);//!
   int cucInit(TClusterUC*, int*, int*);//!
   TClusterUC *cucAlloc(TClusterUC*, int*, int*);//!
   int cucFree(TClusterUC*, int*, int*, TClusterUC*);//!

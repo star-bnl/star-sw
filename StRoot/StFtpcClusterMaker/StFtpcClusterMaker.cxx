@@ -1,8 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.10 2000/08/01 12:33:05 hummler Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.11 2000/08/03 14:39:00 hummler Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
-// Revision 1.10  2000/08/01 12:33:05  hummler
-// Write points to TObjectArray of StFtpcPoints in ClusterFinder,
-// use fcl_fppoint table only in Maker
+// Revision 1.11  2000/08/03 14:39:00  hummler
+// Create param reader to keep parameter tables away from cluster finder and
+// fast simulator. StFtpcClusterFinder now knows nothing about tables anymore!
 //
 // Revision 1.8  2000/04/13 18:08:21  fine
 // Adjusted for ROOT 2.24
@@ -41,6 +41,7 @@
 #include "StDAQMaker/StFTPCReader.h"
 
 #include "StFtpcClusterMaker.h"
+#include "StFtpcParamReader.hh"
 #include "StFtpcClusterFinder.hh"
 #include "StFtpcTrackMaker/StFtpcPoint.hh"
 #include "StFtpcFastSimu.hh"
@@ -51,7 +52,6 @@
 #include "TClonesArray.h"
 
 #include "tables/St_fcl_fppoint_Table.h"
-// #include "tables/St_fcl_ftpcndx_Table.h"
 #include "tables/St_fcl_ftpcsqndx_Table.h"
 #include "tables/St_fcl_ftpcadc_Table.h"
 
@@ -129,6 +129,15 @@ Int_t StFtpcClusterMaker::Make()
       assert(daqReader);
       ftpcReader=daqReader->getFTPCReader();
     }
+
+  // create parameter reader
+  StFtpcParamReader *paramReader = new StFtpcParamReader(m_ampoff,
+							 m_ampslope,
+							 m_timeoff,
+							 m_padtrans,
+							 m_det,
+							 m_zrow,
+							 m_gaspar);
   
   St_DataSet *raw = GetDataSet("ftpc_raw");
   if (raw) {
@@ -151,19 +160,11 @@ Int_t StFtpcClusterMaker::Make()
 
       if(Debug()) cout<<"start running StFtpcClusterFinder"<<endl;
             
-      StFtpcClusterFinder *fcl = new StFtpcClusterFinder(hitarray);
+      StFtpcClusterFinder *fcl = new StFtpcClusterFinder(ftpcReader, 
+							 paramReader, 
+							 hitarray);
 
-      int searchresult=fcl->search(ftpcReader,
-				   m_det->GetTable(),
-				   m_padtrans->GetTable(),
-				   m_zrow->GetTable(),
-				   m_ampoff->GetTable(),
-				   m_ampslope->GetTable(),
-				   m_timeoff->GetTable(),
-				   m_padtrans->GetNRows(),
-				   m_ampslope->GetNRows(),
-				   m_ampoff->GetNRows(),
-				   m_timeoff->GetNRows());
+      int searchresult=fcl->search();
       
       if (searchresult == 0)
 	{
@@ -189,6 +190,7 @@ Int_t StFtpcClusterMaker::Make()
 	  
 	}
       delete fcl;
+      delete ftpcReader;
     }
     else {
       
@@ -224,12 +226,11 @@ Int_t StFtpcClusterMaker::Make()
 					       g2t_track->GetTable(), 
 					       &numTrack,
 					       g2t_vertex->GetTable(),
-					       m_gaspar->GetTable(),
 					       ffs_gepoint->GetTable(),
 					       &numGepoint, maxGepoint,
 					       fcl_fppoint->GetTable(),
 					       &numFppoint, maxFppoint,
-					       m_det->GetTable());
+					       paramReader);
       ffs_gepoint->SetNRows(numGepoint);				      
       fcl_fppoint->SetNRows(numFppoint);				      
       if(Debug())cout<<"finished running StFtpcFastSimu"<<endl;
@@ -237,6 +238,8 @@ Int_t StFtpcClusterMaker::Make()
     }
   }
   
+  delete paramReader;
+
 // Deactivate histograms for MDC3
 //MakeHistograms(); // FTPC cluster finder histograms
   return iMake;

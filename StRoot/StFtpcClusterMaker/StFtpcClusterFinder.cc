@@ -1,9 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.7 2000/08/01 12:33:05 hummler Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.8 2000/08/03 14:39:00 hummler Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
-// Revision 1.7  2000/08/01 12:33:05  hummler
-// Write points to TObjectArray of StFtpcPoints in ClusterFinder,
-// use fcl_fppoint table only in Maker
+// Revision 1.8  2000/08/03 14:39:00  hummler
+// Create param reader to keep parameter tables away from cluster finder and
+// fast simulator. StFtpcClusterFinder now knows nothing about tables anymore!
 //
 // Revision 1.6  2000/04/13 18:08:21  fine
 // Adjusted for ROOT 2.24
@@ -22,10 +22,13 @@
 #include "math_constants.h"
 #include <math.h>
 
-StFtpcClusterFinder::StFtpcClusterFinder(TClonesArray *pointarray)
+StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,  
+					 StFtpcParamReader *paramReader,
+					 TClonesArray *pointarray)
 {
 //   cout << "StFtpcClusterFinder constructed" << endl;  
-
+mReader = reader;
+mParam = paramReader; 
 mPoint = pointarray;
 }
 
@@ -34,17 +37,7 @@ StFtpcClusterFinder::~StFtpcClusterFinder()
 //   cout << "StFtpcClusterFinder destructed" << endl;
 }
 
-int StFtpcClusterFinder::search(StFTPCReader *reader,
-				fcl_det_st *det,
-				fcl_padtrans_st *padtrans,
-				fcl_zrow_st *zrow,
-				fcl_ampoff_st *ampoff,
-				fcl_ampslope_st *ampslope,
-				fcl_timeoff_st *timeoff,
-				int padtransRows,
-				int ampslopeRows,
-				int ampoffRows,
-				int timeoffRows)
+int StFtpcClusterFinder::search()
 {
   double *pradius, *pdeflection;
   int iRow, iSec, iPad, iPadBuf, iHardSec, iHardRow;
@@ -80,39 +73,27 @@ int StFtpcClusterFinder::search(StFTPCReader *reader,
   maparray= (int *)malloc(4000000*sizeof(int));
 #endif
 
-//   cout << "maxpads: " << reader->getMaxPad(1) << endl;
+//   cout << "maxpads: " << mReader->getMaxPad(1) << endl;
 
   /* is magboltz database loaded, if not exit */
-  if(padtransRows<1)
+  if(mParam->numberOfPadtransBins()<1)
     {
       printf("Couldn't find magboltz data table, exiting!\n");
       return 0;
     }
 
   /* is calibration amplitude slope database loaded, if not load */
-  if(ampslopeRows<1)
+  if(mParam->numberOfCalibrationValues()<1)
     {
-      printf("Couldn't find calibration amplitude slope table, exiting!\n");
+      printf("Couldn't find calibration table, exiting!\n");
       return 0;
-    }
-
-  /* is calibration amplitude offset database loaded, if not load */
-  if(ampoffRows<1)
-    {
-      printf("Couldn't find calibration amplitude offset data table, exiting!\n");
-      return 0;
-    }
-
-  /* is calibration time offset database loaded, if not load */
-  if(timeoffRows<1)
-    {
-	  printf("Couldn't find calibration time offset data table, exiting!\n");
-	  return 0;
     }
 
   /* allocate memory for padtrans table */
-  pradius = (double *)malloc(det->n_int_steps*10*sizeof(double));
-  pdeflection = (double *)malloc(det->n_int_steps*10*sizeof(double));
+  pradius = (double *)malloc(mParam->numberOfDriftSteps()
+			     *mParam->numberOfPadrowsPerSide()*sizeof(double));
+  pdeflection = (double *)malloc(mParam->numberOfDriftSteps()
+				 *mParam->numberOfPadrowsPerSide()*sizeof(double));
 
   if(pradius == NULL || pdeflection == 0)
     {
@@ -121,7 +102,7 @@ int StFtpcClusterFinder::search(StFTPCReader *reader,
     }
 
   /* integrate padtrans table from magboltz database */
-  if(!calcpadtrans(det, padtrans, pradius, pdeflection))
+  if(!calcpadtrans(pradius, pdeflection))
     {
       printf("Couldn't calculate padtrans table, exiting!\n");
       return 0;
@@ -161,9 +142,13 @@ int StFtpcClusterFinder::search(StFTPCReader *reader,
   iRow=0;
   bLastSequence=0;
 
-  for(iRow=det->firstrow-1,iRowBuf=det->firstrow-1; iRow<det->lastrow; iRow++)
+  for(iRow=mParam->firstPadrowToSearch()-1,
+	iRowBuf=mParam->firstPadrowToSearch()-1; 
+      iRow<mParam->lastPadrowToSearch(); iRow++)
     {
-      for(iSec=det->firstsec-1,iSecBuf=det->firstsec-1; iSec<det->lastsec; iSec++)
+      for(iSec=mParam->firstSectorToSearch()-1,
+	    iSecBuf=mParam->firstSectorToSearch()-1; 
+	  iSec<mParam->lastSectorToSearch(); iSec++)
 	{
 	  // new sector, set pad buffer so there can be no matches
 	  iPadBuf=-2;
@@ -173,12 +158,12 @@ int StFtpcClusterFinder::search(StFTPCReader *reader,
 #endif
 	  
 	  // calculate hardware (daq) sectors from software position
-	  iHardSec = det->n_sectors*(int)(iRow/2) + iSec + 1;
+	  iHardSec = mParam->numberOfSectors()*(int)(iRow/2) + iSec + 1;
 	  iHardRow = iRow%2 + 1;
 
 	  // get list of occupied pads in sector
 	  unsigned char *(padlist[2]);
-	  int iOccPads=reader->getPadList(iHardSec, iHardRow, 
+	  int iOccPads=mReader->getPadList(iHardSec, iHardRow, 
 					  padlist[iHardRow-1]);
 	  
 	  // loop over occupied pads
@@ -204,9 +189,7 @@ int StFtpcClusterFinder::search(StFTPCReader *reader,
 			  // cluster processing: call hitfinder 
 			  if(!findHits(CurrentCUC, iRowBuf, iSecBuf, 
 				       pradius, pdeflection, 
-				       det, zrow,
-				       fastlog,
-				       ampslope, ampoff, timeoff)
+				       fastlog)
 			     )
 			    {
 #ifdef DEBUG
@@ -268,7 +251,7 @@ int StFtpcClusterFinder::search(StFTPCReader *reader,
 
 
 	      // get sequences on this pad
-	      reader->getSequences(iHardSec, iHardRow, iPad, &iNewSeqNumber,
+	      mReader->getSequences(iHardSec, iHardRow, iPad, &iNewSeqNumber,
 				   SequencePointer[iHardRow]);
 	      NewSequences=SequencePointer[iHardRow];
 	      
@@ -396,8 +379,8 @@ int StFtpcClusterFinder::search(StFTPCReader *reader,
 					      if(NewSequences[iNewSeqIndex].startTimeBin==0 ||
 						 NewSequences[iNewSeqIndex].startTimeBin
 						 +NewSequences[iNewSeqIndex].Length
-						 ==det[0].n_bins-1 || 
-						 iPad==det[0].n_pads-1)
+						 ==mParam->numberOfTimebins()-1 || 
+						 iPad==mParam->numberOfPads()-1)
 						{
 						  CurrentCUC->CutOff=1;
 						}
@@ -457,15 +440,15 @@ int StFtpcClusterFinder::search(StFTPCReader *reader,
 			      SequenceInCUC=CurrentCUC;
 			      
 			      // check if new CUC touches sector limits
-			      if(iPad==1 || iPad==det[0].n_pads-1 || 
+			      if(iPad==1 || iPad==mParam->numberOfPads()-1 || 
 				 CurrentCUC->Sequence[0].startTimeBin==0 || 
 				 CurrentCUC->Sequence[0].startTimeBin
 				 +CurrentCUC->Sequence[0].Length
-				 ==det[0].n_bins-1 || 
+				 ==mParam->numberOfTimebins()-1 || 
 				 CurrentCUC->Sequence[1].startTimeBin==0 || 
 				 CurrentCUC->Sequence[1].startTimeBin
 				 +CurrentCUC->Sequence[1].Length
-				 ==det[0].n_bins-1)
+				 ==mParam->numberOfTimebins()-1)
 				{
 				  CurrentCUC->CutOff=1;
 				}
@@ -493,8 +476,8 @@ int StFtpcClusterFinder::search(StFTPCReader *reader,
 				  if(OldSequences[iOldSeqIndex].startTimeBin==0 ||
 				     OldSequences[iOldSeqIndex].startTimeBin
 				     +OldSequences[iOldSeqIndex].Length
-				     ==det[0].n_bins-1 || 
-				     iPad==det[0].n_pads-1)
+				     ==mParam->numberOfTimebins()-1 || 
+				     iPad==mParam->numberOfPads()-1)
 				    {
 				      SequenceInCUC->CutOff=1;
 				    }
@@ -520,9 +503,7 @@ int StFtpcClusterFinder::search(StFTPCReader *reader,
 		  // cluster processing: call hitfinder 
 		  if(!findHits(CurrentCUC, iRowBuf, iSecBuf, 
 			       pradius, pdeflection, 
-			       det, zrow,
-			       fastlog, 
-			       ampslope, ampoff, timeoff)
+			       fastlog)
 		     )
 		    {
 #ifdef DEBUG
@@ -584,13 +565,13 @@ int StFtpcClusterFinder::search(StFTPCReader *reader,
 	      
 	      testpeak.PadPosition=iPad-0.5;
 	      testpeak.TimePosition=iBin-0.5;
-	      padtrans(&testpeak, iRow, iSec, det, zrow, pradius, pdeflection);
+	      padtrans(&testpeak, iRow, iSec, pradius, pdeflection);
 	      xLower=(int) ((1000 / 31) * testpeak.x + 1000);
 	      yLower=(int) ((1000 / 31) * testpeak.y + 1000);
 
 	      testpeak.PadPosition=iPad+0.5;
 	      testpeak.TimePosition=iBin+0.5;
-	      padtrans(&testpeak, iRow, iSec, det, zrow, pradius, pdeflection);
+	      padtrans(&testpeak, iRow, iSec, pradius, pdeflection);
 	      xUpper=(int) ((1000 / 31) * testpeak.x + 1000);
 	      yUpper=(int) ((1000 / 31) * testpeak.y + 1000);
 
@@ -647,13 +628,7 @@ int StFtpcClusterFinder::findHits(TClusterUC *Cluster,
 				 int iSec, 
 				 double *pRadius, 
 				 double *pDeflection, 
-				 FCL_DET_ST *det, 
-				 FCL_ZROW_ST *zrow, 
-				 float fastlog[256],
-				 FCL_AMPSLOPE_ST *ampslope,
-				 FCL_AMPOFF_ST *ampoff,
-				 FCL_TIMEOFF_ST *timeoff
-				 )
+				 float fastlog[256])
 {
   int iPad, iSequence; 
   int iPadPeaks, iThisPadPeaks;
@@ -685,10 +660,10 @@ int StFtpcClusterFinder::findHits(TClusterUC *Cluster,
 	      /* now looping over sequences in pad order */
 	      /* get peaks for this sequence */
 	      getSeqPeaksAndCalibAmp(&(Cluster->Sequence[iSequence]), 
-				     iRow*det[0].n_sectors*det[0].n_pads,
-				     iSec*det[0].n_pads, iPad,
-				     PadPeaks[iNewPeakstore], &iThisPadPeaks,
-				     ampslope, ampoff
+				     iRow*mParam->numberOfSectors()
+				     *mParam->numberOfPads(),
+				     iSec*mParam->numberOfPads(), iPad,
+				     PadPeaks[iNewPeakstore], &iThisPadPeaks
 #ifdef DEBUGFILE
 				     , fin
 #endif
@@ -861,7 +836,7 @@ int StFtpcClusterFinder::findHits(TClusterUC *Cluster,
 	}
     }
   if(!fitPoints(Cluster, iRow, iSec, pRadius, pDeflection, Peaks, 
-		iNumPeaks, det, zrow, fastlog, timeoff))
+		iNumPeaks, fastlog))
     {
 #ifdef DEBUG
       printf("Point fitting failed! Cluster is lost.\n");
@@ -888,10 +863,7 @@ int StFtpcClusterFinder::getSeqPeaksAndCalibAmp(TPCSequence *Sequence,
 					       int iSeqTimesPads,
 					       int iPad,
 					       TPadPeak *Peak, 
-					       int *pNumPeaks, 
-					       FCL_AMPSLOPE_ST *ampslope,
-					       FCL_AMPOFF_ST *ampoff
-					       )
+					       int *pNumPeaks)
 {
   int bSlope;
   int iIndex, iPadIndex;
@@ -905,7 +877,8 @@ int StFtpcClusterFinder::getSeqPeaksAndCalibAmp(TPCSequence *Sequence,
   for(iIndex=0; iIndex< Sequence->Length; iIndex++)
     {
       cTemp=(unsigned char)((float)(unsigned int)(Sequence->FirstAdc[iIndex])
-	       *ampslope[iPadIndex].slope + ampoff[iPadIndex].offset);
+			    * mParam->amplitudeSlope(iPadIndex) 
+			    + mParam->amplitudeOffset(iPadIndex));
       Sequence->FirstAdc[iIndex]=cTemp;
 
       if(cTemp < cLastADC)
@@ -968,10 +941,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 				  double *pDeflection, 
 				  TPeak *Peak, 
 				  int iNumPeaks, 
-				  FCL_DET_ST *det, 
-				  FCL_ZROW_ST *zrow, 
-				  float fastlog[256], 
-				  FCL_TIMEOFF_ST *timeoff)
+				  float fastlog[256])
 {
   int iADCValue, iADCPlus, iADCMinus;
   int iADCTimePlus, iADCTimeMinus;
@@ -990,7 +960,8 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
   float fDeltaADCTimePlus, fDeltaADCTimeMinus;
   float fDriftLength, fRadError, fPhiError;
 
-  PadtransPerTimebin=(int) det[0].n_int_steps / det[0].n_bins;
+  PadtransPerTimebin=(int) mParam->numberOfDriftSteps()
+    / mParam->numberOfTimebins();
 
   if(iNumPeaks == 0)
     {
@@ -1012,21 +983,21 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	  ChargeSum += iADCValue;
 	  PadSum += Cluster->SequencePad[iSequence] * iADCValue;
 	  TimeSum += (Cluster->Sequence[iSequence].startTimeBin + iBin + 
-		      timeoff[iRow*det[0].n_sectors*det[0].n_pads+
-			     iSec*det[0].n_pads+
-			     Cluster->SequencePad[iSequence]].offset) 
+		      mParam->timeOffset(iRow*mParam->numberOfSectors()
+					 *mParam->numberOfPads()
+					 +iSec*mParam->numberOfPads()
+					 +Cluster->SequencePad[iSequence])) 
 	    * iADCValue;
 	}
     }
 
   if(iNumPeaks == 1)
     {  
-    
       Peak->PeakHeight = 
 	Peak->Sequence.FirstAdc[Peak->Timebin - Peak->Sequence.startTimeBin];  
 
       /* one-peak cluster, fit according to preference from det */
-      iUseGauss=det[0].usegauss;
+      iUseGauss=mParam->gaussFittingFlags();
 
 
       /* calculate pad position first */
@@ -1131,8 +1102,9 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 				((2 * fastlog[iADCValue]) -
 				 (fastlog[iADCPlus] + fastlog[iADCMinus])));
 	      Peak->TimePosition = (float) Peak->Timebin + 
-		timeoff[iRow*det[0].n_sectors*det[0].n_pads+
-		       iSec*det[0].n_pads+Peak->pad].offset +
+		mParam->timeOffset(iRow*mParam->numberOfSectors()
+				   *mParam->numberOfPads()+
+				   iSec*mParam->numberOfPads()+Peak->pad) +
 		sqr(Peak->TimeSigma) * (fastlog[iADCPlus] - fastlog[iADCMinus]);
 	    }
 	}
@@ -1158,7 +1130,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	}
 
       /* transform from pad/time to x/y/z */
-      if(!padtrans(Peak, iRow, iSec, det, zrow, 
+      if(!padtrans(Peak, iRow, iSec, 
 		   pRadius, pDeflection))
 	{
 #ifdef DEBUG
@@ -1167,7 +1139,8 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	}
 
 
-      if(!isnan(Peak->x) && !isnan(Peak->y) && !isnan(Peak->PadSigma) && !isnan(Peak->TimeSigma))
+      if(!isnan(Peak->x) && !isnan(Peak->y) && !isnan(Peak->PadSigma) &&
+!isnan(Peak->TimeSigma))// && Peak->PeakHeight>=mParam->minimumClusterMaxADC())
 	{
 	  // create new point
 	  Int_t numPoint = mPoint->GetEntriesFast();
@@ -1184,29 +1157,29 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	  thispoint->SetX(Peak->x);
 	  thispoint->SetY(Peak->y);
 	  thispoint->SetZ(Peak->z);
-	  thispoint->SetSigmaPhi(Peak->PadSigma*det[0].rad_per_pad);
+	  thispoint->SetSigmaPhi(Peak->PadSigma*mParam->radiansPerPad());
 	  thispoint->SetSigmaR(Peak->TimeSigma*Peak->Rad/Peak->TimePosition);
-	  fDriftLength = det[0].r_out - Peak->Rad;
-          fPhiError = det[0].pad_err_diff[0] 
-	      + fDriftLength*det[0].pad_err_diff[1] 
-	      + fDriftLength*fDriftLength*det[0].pad_err_diff[2];
-          fRadError = det[0].time_err_diff[0] 
-	      + fDriftLength*det[0].time_err_diff[1] 
-	      + fDriftLength*fDriftLength*det[0].time_err_diff[2];
+	  fDriftLength = mParam->sensitiveVolumeOuterRadius() - Peak->Rad;
+          fPhiError = mParam->padDiffusionErrors(0) 
+	    + fDriftLength*mParam->padDiffusionErrors(1) 
+	    + fDriftLength*fDriftLength*mParam->padDiffusionErrors(2);
+          fRadError = mParam->timeDiffusionErrors(0)
+	      + fDriftLength*mParam->timeDiffusionErrors(1) 
+	      + fDriftLength*fDriftLength*mParam->timeDiffusionErrors(2);
 	  if(thispoint->GetNumberPads()==2)
 	    {
 	      fPhiError = sqrt(fPhiError * fPhiError
-			       + det[0].pad_err_2mean * det[0].pad_err_2mean);
+			       + sqr(mParam->twoPadWeightedError()));
 	    }
 	  if(thispoint->GetNumberPads()==3 && iUseGauss & 1 == 1)
 	    {
 	      fPhiError = sqrt(fPhiError * fPhiError
-			       + det[0].pad_err_3gauss * det[0].pad_err_3gauss);
+			       + sqr(mParam->threePadGaussError()));
 	    }
 	  if(thispoint->GetNumberPads()==3 && iUseGauss & 1 == 0)
 	    {
 	      fPhiError = sqrt(fPhiError * fPhiError
-			       + det[0].pad_err_3mean * det[0].pad_err_3mean);
+			       + sqr(mParam->threePadWeightedError()));
 	    }
 
 	  thispoint->SetFlags(0);
@@ -1215,22 +1188,22 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	    {
 	      thispoint->SetFlags(4);
 	      fPhiError = sqrt(fPhiError * fPhiError
-			       + det[0].pad_err_sat * det[0].pad_err_sat);
+			       + sqr(mParam->padSaturatedClusterError()));
 	      fRadError = sqrt(fRadError * fRadError
-			       + det[0].time_err_sat * det[0].time_err_sat);
+			       + sqr(mParam->timeSaturatedClusterError()));
 	    }	  
 	  if(Cluster->CutOff==1)
 	    {
 	      thispoint->SetFlags(thispoint->GetFlags() | 16);
 	      fPhiError = sqrt(fPhiError * fPhiError
-			       + det[0].pad_err_cutoff * det[0].pad_err_cutoff);
+			       + sqr(mParam->padCutoffClusterError()));
 	      fRadError = sqrt(fRadError * fRadError
-			       + det[0].time_err_cutoff * det[0].time_err_cutoff);
+			       + sqr(mParam->timeCutoffClusterError()));
 	    }
 
 	  /* transform errors to actual hit position */ 
 	  PadtransBin=(int) ((Peak->TimePosition+0.5)*PadtransPerTimebin);
-	  fPhiError *= Peak->Rad / det[0].r_out;
+	  fPhiError *= Peak->Rad / mParam->sensitiveVolumeOuterRadius();
 	  fRadError *= (pRadius[10*PadtransBin]-pRadius[10*PadtransBin+10])
 	    / (pRadius[10]-pRadius[20]);
 
@@ -1242,7 +1215,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 				  *fRadError*sin(Peak->Phi) 
 				  + fPhiError*cos(Peak->Phi)
 				  *fPhiError*cos(Peak->Phi)));
-	  thispoint->SetZerr(det[0].z_err);
+	  thispoint->SetZerr(mParam->zDirectionError());
 	}
       else
 	{
@@ -1515,8 +1488,10 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 						(fastlog[iADCTimePlus] + 
 						 fastlog[iADCTimeMinus])));
 	    NewTimePosition = (float) Peak[iPeakIndex].Timebin + 
-	      timeoff[iRow*det[0].n_sectors*det[0].n_pads+
-		     iSec*det[0].n_pads+Peak[iPeakIndex].pad].offset +
+	      mParam->timeOffset(iRow*mParam->numberOfSectors()
+				 *mParam->numberOfPads()
+				 +iSec*mParam->numberOfPads()
+				 +Peak[iPeakIndex].pad) +
 	      sqr(Peak[iPeakIndex].TimeSigma) * 
 	      (fastlog[iADCTimePlus] - fastlog[iADCTimeMinus]);
 	    
@@ -1584,7 +1559,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
       for(iPeakIndex=0; iPeakIndex < iNumPeaks; iPeakIndex++)
 	{
 	  /* transform from pad/time to x/y/z */
-	  if(!padtrans(&(Peak[iPeakIndex]), iRow, iSec, det, zrow, 
+	  if(!padtrans(&(Peak[iPeakIndex]), iRow, iSec, 
 		       pRadius, pDeflection))
 	    {
 #ifdef DEBUG
@@ -1595,7 +1570,8 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	  /* in very complicated clusters some hits may have been unfolded
 	     with errors while the rest of the cluster is okay, don't fill 
 	     these hits into array: */
-	  if(!isnan(Peak[iPeakIndex].x) && !isnan(Peak[iPeakIndex].y) && !isnan(Peak[iPeakIndex].PadSigma) && !isnan(Peak[iPeakIndex].TimeSigma))
+	  if(!isnan(Peak[iPeakIndex].x) && !isnan(Peak[iPeakIndex].y) &&
+!isnan(Peak[iPeakIndex].PadSigma) && !isnan(Peak[iPeakIndex].TimeSigma))// && Peak[iPeakIndex].PeakHeight>=mParam->minimumClusterMaxADC())
 	    {
 	      // create new point
 	      Int_t numPoint = mPoint->GetEntriesFast();
@@ -1614,62 +1590,63 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	      thispoint->SetY(Peak[iPeakIndex].y);
 	      thispoint->SetZ(Peak[iPeakIndex].z);
 	      thispoint->SetSigmaPhi(Peak[iPeakIndex].PadSigma
-				     *det[0].rad_per_pad);
+				     *mParam->radiansPerPad());
 	      thispoint->SetSigmaR(Peak[iPeakIndex].TimeSigma
 				   * Peak[iPeakIndex].Rad
 				   /Peak[iPeakIndex].TimePosition);
 
-	      fDriftLength = det[0].r_out - Peak[iPeakIndex].Rad;
-	      fPhiError = det[0].pad_err_diff[0] 
-		  + fDriftLength*det[0].pad_err_diff[1] 
-		  + fDriftLength*fDriftLength*det[0].pad_err_diff[2];
-	      fRadError = det[0].time_err_diff[0] 
-		  + fDriftLength*det[0].time_err_diff[1] 
-		  + fDriftLength*fDriftLength*det[0].time_err_diff[2];
+	      fDriftLength = mParam->sensitiveVolumeOuterRadius() 
+		- Peak[iPeakIndex].Rad;
+	      fPhiError = mParam->padDiffusionErrors(0) 
+		  + fDriftLength*mParam->padDiffusionErrors(1) 
+		  + fDriftLength*fDriftLength*mParam->padDiffusionErrors(2);
+	      fRadError = mParam->timeDiffusionErrors(0)
+		  + fDriftLength*mParam->timeDiffusionErrors(1)
+		  + fDriftLength*fDriftLength*mParam->timeDiffusionErrors(2);
 	      
 	      /* clusters are unfolded */ 
 	      thispoint->SetFlags(1);
 	      fPhiError = sqrt(fPhiError * fPhiError
-			       + det[0].pad_err_unfold * det[0].pad_err_unfold);
+			       + sqr(mParam->padUnfoldError()));
 	      fRadError = sqrt(fRadError * fRadError
-			       + det[0].time_err_unfold * det[0].time_err_unfold);
+			       + sqr(mParam->timeUnfoldError()));
 	      
 	      if(iADCValue>254)
 		{
 		  thispoint->SetFlags(5);
 		  fPhiError = sqrt(fPhiError * fPhiError
-				   + det[0].pad_err_sat * det[0].pad_err_sat);
+				   + sqr(mParam->padSaturatedClusterError()));
 		  fRadError = sqrt(fRadError * fRadError
-				   + det[0].time_err_sat * det[0].time_err_sat);
+				   + sqr(mParam->timeSaturatedClusterError()));
 		}	  
 	      if(BadFit==1)
 		{
 		  thispoint->SetFlags(thispoint->GetFlags() | 8);
 		  fPhiError = sqrt(fPhiError * fPhiError
-				   + det[0].pad_err_bad * det[0].pad_err_bad);
+				   + sqr(mParam->padBadFitError()));
 		  fRadError = sqrt(fRadError * fRadError
-				   + det[0].time_err_bad * det[0].time_err_bad);
+				   + sqr(mParam->timeBadFitError()));
 		}	  
 	      if(iNumUnfoldLoops == MAXLOOPS)
 		{
 		  thispoint->SetFlags(thispoint->GetFlags() | 10);
 		  fPhiError = sqrt(fPhiError * fPhiError
-				   + det[0].pad_err_failed * det[0].pad_err_failed);
+				   + sqr(mParam->padFailedFitError()));
 		  fRadError = sqrt(fRadError * fRadError
-				   + det[0].time_err_failed * det[0].time_err_failed);
+				   + sqr(mParam->timeFailedFitError()));
 		}	  
 	      if(Cluster->CutOff==1)
 		{
 		  thispoint->SetFlags(thispoint->GetFlags() | 16);
 		  fPhiError = sqrt(fPhiError * fPhiError
-				   + det[0].pad_err_cutoff * det[0].pad_err_cutoff);
+				   + sqr(mParam->padCutoffClusterError()));
 		  fRadError = sqrt(fRadError * fRadError
-				   + det[0].time_err_cutoff * det[0].time_err_cutoff);
+				   + sqr(mParam->timeCutoffClusterError()));
 		}
 	      
 	      /* transform errors to actual hit position */ 
 	      PadtransBin=(int) ((Peak->TimePosition+0.5)*PadtransPerTimebin);
-	      fPhiError *= Peak->Rad / det[0].r_out;
+	      fPhiError *= Peak->Rad / mParam->sensitiveVolumeOuterRadius();
 	      fRadError *= (pRadius[10*PadtransBin]-pRadius[10*PadtransBin+10])
 		/ (pRadius[10]-pRadius[20]);
 
@@ -1681,7 +1658,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 				      *fRadError*sin(Peak[iPeakIndex].Phi) 
 				      + fPhiError*cos(Peak[iPeakIndex].Phi)
 				      *fPhiError*cos(Peak[iPeakIndex].Phi)));
-	      thispoint->SetZerr(det[0].z_err);
+	      thispoint->SetZerr(mParam->zDirectionError());
 	    }
 	} /* end of: for(iPeakIndex=0;... */
     } /*end of: if(iNumPeaks==1) ... else { */
@@ -1689,12 +1666,10 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 }
 
 int StFtpcClusterFinder::padtrans(TPeak *Peak, 
-	     int iRow, 
-	     int iSec, 
-	     FCL_DET_ST *det, 
-	     FCL_ZROW_ST *zrow, 
-	     double *pRadius, 
-	     double *pDeflection)
+				  int iRow, 
+				  int iSec, 
+				  double *pRadius, 
+				  double *pDeflection)
 {  
   int PadtransPerTimebin;
   int PadtransLower;
@@ -1702,40 +1677,40 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
 
   /* preparatory calculations */
   TimeCoordinate = Peak->TimePosition + 0.5; /*time start at beginning of bin 0*/
-  PadtransPerTimebin = (int) det[0].n_int_steps / det[0].n_bins;
+  PadtransPerTimebin = (int) mParam->numberOfDriftSteps() 
+    / mParam->numberOfTimebins();
   PadtransLower= (int) (TimeCoordinate*PadtransPerTimebin);
 
   /* linear interpolation in radius table */
   Peak->Rad = ((pRadius[iRow + 10 * PadtransLower] * 
-	  ((float) (PadtransLower+1) / (float) PadtransPerTimebin - 
-	   TimeCoordinate) + pRadius[iRow + 10 * (PadtransLower+1)] * 
-	  (TimeCoordinate - (float) PadtransLower / (float) PadtransPerTimebin)) / 
-	 (((float) (PadtransLower + 1) / (float) PadtransPerTimebin - 
-	   (float) PadtransLower / (float) PadtransPerTimebin)));
-
+		((float) (PadtransLower+1) / (float) PadtransPerTimebin - 
+		 TimeCoordinate) + pRadius[iRow + 10 * (PadtransLower+1)] * 
+		(TimeCoordinate - (float) PadtransLower 
+		 / (float) PadtransPerTimebin)) / 
+	       (((float) (PadtransLower + 1) / (float) PadtransPerTimebin - 
+		 (float) PadtransLower / (float) PadtransPerTimebin)));
+  
   /* linear interpolation in deflection table */
-  PhiDeflect = det[0].magfld * ((pDeflection[iRow + 10 * PadtransLower] * 
-				 ((float) (PadtransLower + 1.0) / 
-				  (float) PadtransPerTimebin - TimeCoordinate) + 
-				 pDeflection[iRow + 10 * (PadtransLower + 1)] *
-				 (TimeCoordinate - (float) PadtransLower / 
-				  (float) PadtransPerTimebin)) /
-				(((float) (PadtransLower + 1.0) / 
-				  (float) PadtransPerTimebin - 
-				  (float) PadtransLower / 
-				  (float) PadtransPerTimebin)));
+  PhiDeflect = mParam->directionOfMagnetField() 
+    * ((pDeflection[iRow + 10 * PadtransLower]
+	* ((float) (PadtransLower + 1.0) 
+	 / (float) PadtransPerTimebin - TimeCoordinate) 
+	+ pDeflection[iRow + 10 * (PadtransLower + 1)] 
+	* (TimeCoordinate - (float) PadtransLower / (float) PadtransPerTimebin))
+       / (((float) (PadtransLower + 1.0) / (float) PadtransPerTimebin 
+	   - (float) PadtransLower / (float) PadtransPerTimebin)));
 			      
   /* calculate phi angle from pad position */
-  Peak->Phi = det[0].rad_per_gap / 2 + 
-    (Peak->PadPosition + 0.5) * det[0].rad_per_pad -
-    PhiDeflect + iSec * (det[0].n_pads * det[0].rad_per_pad + 
-			 det[0].rad_per_gap)+C_PI_2;
+  Peak->Phi = mParam->radiansPerBoundary() / 2 
+    + (Peak->PadPosition + 0.5) * mParam->radiansPerPad()
+    - PhiDeflect + iSec * (mParam->numberOfPads() * mParam->radiansPerPad()
+			   + mParam->radiansPerBoundary())+C_PI_2;
 
 
   /* transform to cartesian */
   Peak->x = Peak->Rad*cos(Peak->Phi);
   Peak->y = Peak->Rad*sin(Peak->Phi);
-  Peak->z = zrow[iRow].z;
+  Peak->z = mParam->padrowZPosition(iRow);
   return TRUE;
 }
 
@@ -1767,17 +1742,16 @@ float StFtpcClusterFinder::sigmat(float timebin)
   return 0.6;
 }
 
-int StFtpcClusterFinder::calcpadtrans(FCL_DET_ST *det, 
-		 FCL_PADTRANS_ST *padtrans, 
-		 double *pradius, 
-		 double *pdeflection)
+int StFtpcClusterFinder::calcpadtrans(double *pradius, 
+				      double *pdeflection)
 {
   int i, j, v_buf, padrow;
   double t_last, t_next, r_last, r_next, e_now, v_now, psi_now;
   double step_size, deltap;
   
-  step_size=((float) det[0].n_bins/ (float) det[0].n_int_steps);
-  deltap=det[0].p_normalized-det[0].p_standard;
+  step_size=((float) mParam->numberOfTimebins()
+	     / (float) mParam->numberOfDriftSteps());
+  deltap=mParam->normalizedNowPressure()-mParam->standardPressure();
   
 #ifdef DEBUG
   printf("integrating padtrans table...\n");
@@ -1788,42 +1762,72 @@ int StFtpcClusterFinder::calcpadtrans(FCL_DET_ST *det,
       /* determine starting values */
       t_last=0;
       v_buf=0;
-      r_last=det[0].r_out;
-      pradius[padrow]=det[0].r_out;
+      r_last=mParam->sensitiveVolumeOuterRadius();
+      pradius[padrow]=mParam->sensitiveVolumeOuterRadius();
       pdeflection[padrow]=0;
-      e_now = det[0].rad_times_field / (0.5*r_last);
-      for(j=v_buf; padtrans[j].e < e_now && j<det[0].n_magboltz_bins; j++);
-      if(j<1 || j>=det[0].n_magboltz_bins)
+      e_now = mParam->radiusTimesField() / (0.5*r_last);
+      for(j=v_buf; mParam->padtransEField(j) < e_now
+	    && j<mParam->numberOfPadtransBins(); j++);
+      if(j<1 || j>=mParam->numberOfPadtransBins())
 	{
-	  printf("Error 1: j=%d, v_buf=%d e_drift=%f, e_now=%f\n", j, v_buf, padtrans[j].e, e_now);
+	  printf("Error 1: j=%d, v_buf=%d e_drift=%f, e_now=%f\n", 
+		 j, v_buf, mParam->padtransEField(j), e_now);
 	  return FALSE;
 	}
       v_buf=j-1;
-      v_now=((padtrans[v_buf].v[padrow]+deltap*padtrans[v_buf].dv_dp[padrow])*(padtrans[j].e-e_now)+(padtrans[j].v[padrow]+deltap*padtrans[j].dv_dp[padrow])*(e_now-padtrans[v_buf].e))/(padtrans[j].e-padtrans[v_buf].e);
-      psi_now=((padtrans[v_buf].psi[padrow]+deltap*padtrans[v_buf].dpsi_dp[padrow])*(padtrans[j].e-e_now)+(padtrans[j].psi[padrow]+deltap*padtrans[j].dpsi_dp[padrow])*(e_now-padtrans[v_buf].e))/(padtrans[j].e-padtrans[v_buf].e);
-      for (i=0; i<det[0].n_int_steps && e_now < padtrans[det[0].n_magboltz_bins-2].e; i++) 
+      v_now=((mParam->padtransVDrift(v_buf, padrow)
+	      +deltap*mParam->padtransdVDriftdP(v_buf, padrow))
+	     *(mParam->padtransEField(j)-e_now)
+	     +(mParam->padtransVDrift(j, padrow)
+	       +deltap*mParam->padtransdVDriftdP(j, padrow))
+	     *(e_now-mParam->padtransEField(v_buf)))
+	/(mParam->padtransEField(j)-mParam->padtransEField(v_buf));
+      psi_now=((mParam->padtransDeflection(v_buf,padrow)
+		+deltap*mParam->padtransdDeflectiondP(v_buf,padrow))
+	       *(mParam->padtransEField(j)-e_now)
+	       +(mParam->padtransDeflection(j,padrow)
+		 +deltap*mParam->padtransdDeflectiondP(j,padrow))
+	       *(e_now-mParam->padtransEField(v_buf)))
+	/(mParam->padtransEField(j)-mParam->padtransEField(v_buf));
+      for (i=0; i<mParam->numberOfDriftSteps() 
+	     && e_now < mParam->padtransEField(mParam->numberOfPadtransBins()-2)
+	     ; i++) 
 	{
 	  t_next = t_last + step_size;
 	  /* first guess for r_next: */
-	  r_next = r_last - v_now * step_size * det[0].timebin_size;
-	  e_now = det[0].rad_times_field / (0.5*(r_last+r_next));
+	  r_next = r_last - v_now * step_size * mParam->microsecondsPerTimebin();
+	  e_now = mParam->radiusTimesField() / (0.5*(r_last+r_next));
 	  
-	  for(j=v_buf; padtrans[j].e < e_now && j<det[0].n_magboltz_bins; j++);
+	  for(j=v_buf; mParam->padtransEField(j) < e_now 
+		       && j<mParam->numberOfPadtransBins(); j++);
 	  
-	  if(j<1 || j>=det[0].n_magboltz_bins)
+	  if(j<1 || j>=mParam->numberOfPadtransBins())
 	    {
-	      printf("Error 2: j=%d, v_buf=%d e_drift=%f, e_now=%f\n", j, v_buf, padtrans[j].e, e_now);
+	      printf("Error 2: j=%d, v_buf=%d e_drift=%f, e_now=%f\n", 
+		     j, v_buf, mParam->padtransEField(j), e_now);
 	      return FALSE;
 	    }
 	  
 	  v_buf=j-1;
-	  v_now=((padtrans[v_buf].v[padrow]+deltap*padtrans[v_buf].dv_dp[padrow])*(padtrans[j].e-e_now)+(padtrans[j].v[padrow]+deltap*padtrans[j].dv_dp[padrow])*(e_now-padtrans[v_buf].e))/(padtrans[j].e-padtrans[v_buf].e);
-	  psi_now=((padtrans[v_buf].psi[padrow]+deltap*padtrans[v_buf].dpsi_dp[padrow])*(padtrans[j].e-e_now)+(padtrans[j].psi[padrow]+deltap*padtrans[j].dpsi_dp[padrow])*(e_now-padtrans[v_buf].e))/(padtrans[j].e-padtrans[v_buf].e);
+	  v_now=((mParam->padtransVDrift(v_buf, padrow)
+		  +deltap*mParam->padtransdVDriftdP(v_buf, padrow))
+		 *(mParam->padtransEField(j)-e_now)
+		 +(mParam->padtransVDrift(j, padrow)
+		   +deltap*mParam->padtransdVDriftdP(j, padrow))
+		 *(e_now-mParam->padtransEField(v_buf)))
+	  /(mParam->padtransEField(j)-mParam->padtransEField(v_buf));
+	  psi_now=((mParam->padtransDeflection(v_buf,padrow)
+		    +deltap*mParam->padtransdDeflectiondP(v_buf,padrow))
+		   *(mParam->padtransEField(j)-e_now)
+		   +(mParam->padtransDeflection(j,padrow)
+		     +deltap*mParam->padtransdDeflectiondP(j,padrow))
+		   *(e_now-mParam->padtransEField(v_buf)))
+	  /(mParam->padtransEField(j)-mParam->padtransEField(v_buf));
 	  
 	  /* correct r_next: */
-	  r_next = r_last - v_now * step_size *det[0].timebin_size;
+	  r_next = r_last - v_now * step_size *mParam->microsecondsPerTimebin();
 	  pradius[padrow+10*(i+1)]=r_next;
-	  pdeflection[padrow+10*(i+1)]=pdeflection[padrow+10*i]+((r_last-r_next)*tan(det[0].deg_to_rad * psi_now)/r_last);
+	  pdeflection[padrow+10*(i+1)]=pdeflection[padrow+10*i]+((r_last-r_next)*tan(mParam->radiansPerDegree() * psi_now)/r_last);
 	  t_last=t_next;
 	  r_last=r_next;
 	}

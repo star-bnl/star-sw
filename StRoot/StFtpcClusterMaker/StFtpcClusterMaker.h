@@ -1,8 +1,8 @@
-// $Id: StFtpcClusterMaker.h,v 1.4 2000/08/01 12:33:05 hummler Exp $
+// $Id: StFtpcClusterMaker.h,v 1.5 2000/08/03 14:39:00 hummler Exp $
 // $Log: StFtpcClusterMaker.h,v $
-// Revision 1.4  2000/08/01 12:33:05  hummler
-// Write points to TObjectArray of StFtpcPoints in ClusterFinder,
-// use fcl_fppoint table only in Maker
+// Revision 1.5  2000/08/03 14:39:00  hummler
+// Create param reader to keep parameter tables away from cluster finder and
+// fast simulator. StFtpcClusterFinder now knows nothing about tables anymore!
 //
 // Revision 1.3  2000/01/27 09:47:18  hummler
 // implement raw data reader, remove type ambiguities that bothered kcc
@@ -46,7 +46,7 @@ class DetectorReader;
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.4 2000/08/01 12:33:05 hummler Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.5 2000/08/03 14:39:00 hummler Exp $";
    St_fcl_ampoff   *m_ampoff;    //!
    St_fcl_ampslope *m_ampslope;  //!
    St_fcl_timeoff  *m_timeoff;   //!
@@ -72,7 +72,7 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.4 2000/08/01 12:33:05 hummler Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.5 2000/08/03 14:39:00 hummler Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker, 1)   //StAF chain virtual base class for Makers
 };
