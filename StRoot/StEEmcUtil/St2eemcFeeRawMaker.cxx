@@ -1,7 +1,10 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: St2eemcFeeRawMaker.cxx,v 1.3 2003/02/18 19:56:07 balewski Exp $
+// $Id: St2eemcFeeRawMaker.cxx,v 1.4 2003/02/18 22:01:47 balewski Exp $
 // $Log: St2eemcFeeRawMaker.cxx,v $
+// Revision 1.4  2003/02/18 22:01:47  balewski
+// fixes
+//
 // Revision 1.3  2003/02/18 19:56:07  balewski
 // add pedestals
 //
@@ -168,9 +171,10 @@ Int_t St2eemcFeeRawMaker::Make(){
 
       const StEEmcDbIndexItem1 *dbItem=meeDb->getT(sec,sub,eta);
       assert(dbItem); //  fatal error in EEmcDb-maker
-      dbItem->print();
+ 
       int chan=dbItem->chan;
-      int slot=dbItem->crate;        ;
+      int slot=dbItem->crate;        
+      adc=adc+(int)dbItem->ped; // add pedestal for each channel
 
       printf("j=%d, sec=%d, sub=%c, eta=%d adc=%d  -->crate/chan=%d/%d\n",j,sec,sub,eta,adc,slot,chan);
 

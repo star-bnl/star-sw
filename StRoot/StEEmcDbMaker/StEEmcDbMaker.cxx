@@ -1,7 +1,10 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.2 2003/02/18 19:55:53 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.3 2003/02/18 22:01:40 balewski Exp $
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.3  2003/02/18 22:01:40  balewski
+// fixes
+//
 // Revision 1.2  2003/02/18 19:55:53  balewski
 // add pedestals
 //
@@ -43,6 +46,7 @@
 #include "tables/St_eemcDbADCconf_Table.h"
 #include "tables/St_eemcDbPMTconf_Table.h"
 #include "tables/St_eemcDbPMTcal_Table.h"
+#include "tables/St_eemcDbPMTped_Table.h"
 #include "cstructs/eemcConstDB.hh"
 
 
@@ -71,6 +75,7 @@ StEEmcDbMaker::~StEEmcDbMaker(){
     delete [] mDbADCconf;
     delete [] mDbPMTconf;
     delete [] mDbPMTcal;
+    delete [] mDbPMTped;
     delete [] mDbsectorID;
   }
 }
@@ -133,6 +138,7 @@ void StEEmcDbMaker::setSectors(int sec1,int sec2){
   mDbADCconf=(eemcDbADCconf_st **) new void *[mNSector];
   mDbPMTconf=(eemcDbPMTconf_st **) new void *[mNSector];
   mDbPMTcal= (eemcDbPMTcal_st  **) new void *[mNSector];
+  mDbPMTped= (eemcDbPMTped_st  **) new void *[mNSector];
   mDbsectorID=  new int [mNSector];
   
   printf("\n\n%s Use sectors from %d to %d\n",GetName(),mfirstSecID,mlastSecID);
@@ -216,6 +222,7 @@ void  StEEmcDbMaker::mReloadDb  (){
     mDbADCconf[i]=0;
     mDbPMTconf[i]=0;
     mDbPMTcal [i]=0;
+    mDbPMTped [i]=0;
     mDbsectorID[i]=-1;
   }
 
@@ -235,7 +242,6 @@ void  StEEmcDbMaker::mReloadDb  (){
     St_eemcDbADCconf *ds1= (St_eemcDbADCconf *)eedb->Find(name);
 
     if(ds1) {
-      printf("Conf->NRows()=%d\n",(int)ds1->GetNRows());
       assert(ds1->GetNRows()==1); // DB TABLE HAS ONLY ONE ROW
       mDbADCconf[is]=(eemcDbADCconf_st *) ds1->GetArray();
       assert(mDbADCconf[is]); // db error if not delivered
@@ -249,7 +255,6 @@ void  StEEmcDbMaker::mReloadDb  (){
     printf("request=%s=\n",name);
     St_eemcDbPMTconf *ds2= (St_eemcDbPMTconf *)eedb->Find(name);
     if(ds2) {
-      printf("Conf->NRows()=%d\n",(int)ds2->GetNRows());
       assert(ds2->GetNRows()==1);  // DB TABLE HAS ONLY ONE ROW
       mDbPMTconf[is]=(eemcDbPMTconf_st *) ds2->GetArray();
       assert(mDbPMTconf[is]); // db error
@@ -263,11 +268,23 @@ void  StEEmcDbMaker::mReloadDb  (){
     printf("request=%s=\n",name);
     St_eemcDbPMTcal *ds3= (St_eemcDbPMTcal *)eedb->Find(name);
     if(ds3) {
-      printf("Cal->NRows()=%d\n",(int)ds3->GetNRows());
       assert(ds3->GetNRows()==1);  // DB TABLE HAS ONLY ONE ROW
       mDbPMTcal[is]=(eemcDbPMTcal_st *) ds3->GetArray();
       assert(mDbPMTcal[is]); // db error
       mCleanDbNames(mDbPMTcal[is]->name, EEMCDbMaxAdcName);
+      found++;
+    } else {
+      printf("Not Found in DB : %s , continue \n",name);
+    }
+
+    sprintf(name,"%s/eemcPMTped",secTx); //.................
+    printf("request=%s=\n",name);
+    St_eemcDbPMTped *ds4= (St_eemcDbPMTped *)eedb->Find(name);
+    if(ds4) {
+      assert(ds4->GetNRows()==1);  // DB TABLE HAS ONLY ONE ROW
+      mDbPMTped[is]=(eemcDbPMTped_st *) ds4->GetArray();
+      assert(mDbPMTped[is]); // db error
+      mCleanDbNames(mDbPMTped[is]->name, EEMCDbMaxAdcName);
       found++;
     } else {
       printf("Not Found in DB : %s , continue \n",name);
@@ -330,7 +347,7 @@ void  StEEmcDbMaker::mOptimizeDb(){
 
     char *name=item->name;
     int secID=atoi(name);
-    printf("update %s in sec=%d \n",name,secID);
+    //printf("update %s in sec=%d \n",name,secID);
 
 
     for(i=0; i<EEindexMax; i++) {
@@ -338,19 +355,28 @@ void  StEEmcDbMaker::mOptimizeDb(){
     }
     assert(i<EEindexMax ); // sector not loaded from DB ???, sth is wrong
 
-    eemcDbPMTcal_st *t= mDbPMTcal[i];
-    if(t==0) continue; // DB data for this sector not loaded from DB
+    eemcDbPMTcal_st *cal= mDbPMTcal[i];
+    if(cal==0) continue; // DB data for this sector not loaded from DB
     
-    int found=0;
     for(j=0;j<EEMCDbMaxAdc; j++) { // loop within sector
-      char *name1=t->name+j*EEMCDbMaxName;
+      char *name1=cal->name+j*EEMCDbMaxName;
+      char *p=strstr(item->name,name1);
+      if(p==0) continue;
+      mDbItem1[index].gain=cal->gain[j];
+      mDbItem1[index].hv=cal->hv[j];
+      //printf(" found=%d gain=%f hv=%f\n",found,mDbItem1[index].gain,mDbItem1[index].hv);
+      break;
+    }
+    
+    eemcDbPMTped_st *ped= mDbPMTped[i];
+    if(ped==0) continue; // DB data for this sector not loaded from DB
+    
+    for(j=0;j<EEMCDbMaxAdc; j++) { // loop within sector
+      char *name1=ped->name+j*EEMCDbMaxName;
       char *p=strstr(item->name,name1);
       //	printf("ppp %p %s %s \n",p,item->name,name1);
       if(p==0) continue;
-      found+=1;
-      mDbItem1[index].gain=t->gain[j];
-      mDbItem1[index].hv=t->hv[j];
-      printf(" found=%d gain=%f hv=%f\n",found,mDbItem1[index].gain,mDbItem1[index].hv);
+      mDbItem1[index].ped=ped->ped[j];
       break;
     }
     

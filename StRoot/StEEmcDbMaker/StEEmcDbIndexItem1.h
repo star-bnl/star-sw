@@ -14,7 +14,7 @@ class StEEmcDbIndexItem1 {
   char name[StEEmcNameLen]; ///< ASCII name of the channel, see Readme 
   int crate, chan; ///< hardware channel
   float gain, hv; 
-  float ped, sig;
+  float ped;
 
   StEEmcDbIndexItem1();
   void clear();
