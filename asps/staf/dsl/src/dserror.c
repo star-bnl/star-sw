@@ -156,8 +156,8 @@ void dsLogError(DS_ERROR_CODE_T code, char *msg, char *file, size_t line)
 *
 * RETURNS: none
 */
-void dsPerror(char *str)
+void dsPerror(const char *str)
 {
-	dsErrorPrint("%s\n", (char *)dsError(str));
+	dsErrorPrint("%s\n", (char *)dsError((char*)str));
 
 }

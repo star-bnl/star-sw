@@ -22,6 +22,9 @@ definitions for types and datasets
 extern "C" {
 #endif
 /******************************************************************************
+/* OBSOLETE - FOR TEMPORARY BACKWARDS COMPATABILITY ONLY */
+typedef int bool_t;
+/******************************************************************************
 *
 * typedefs for basic types
 *
@@ -216,7 +219,7 @@ int dsMapTable(DS_DATASET_T *pDataset, char *name,
 int dsNewDataset(DS_DATASET_T **ppDataset, char *name);
 int dsNewTable(DS_DATASET_T **ppTable, char *tableName,
 	char *typeSpecifier,  unsigned rowCount, void *pData);
-void dsPerror(char *msg);
+void dsPerror(const char *msg);
 int dsProjectTable(DS_DATASET_T *pDst, DS_DATASET_T *pSrc, char *projectList);
 int dsRealloc(DS_DATASET_T *dataset, size_t maxcount);
 int dsReallocTable(DS_DATASET_T *pTable, size_t nRow);
