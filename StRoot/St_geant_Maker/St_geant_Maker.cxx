@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.5 1999/01/10 20:37:31 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.6 1999/01/21 01:43:48 nevski Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.6  1999/01/21 01:43:48  nevski
+// zebra2root
+//
 // Revision 1.5  1999/01/10 20:37:31  fisyak
 // Give access to Zebra
 //
@@ -76,6 +79,23 @@
 #include "TGTRA.h"
 #include "TCTUB.h"
 #include "TGeant3.h"
+#include "St_g2t_ctf_hit_Table.h"
+#include "St_g2t_eem_hit_Table.h"
+#include "St_g2t_emc_hit_Table.h"
+#include "St_g2t_esm_hit_Table.h"
+#include "St_g2t_event_Table.h"
+#include "St_g2t_ftp_hit_Table.h"
+#include "St_g2t_gepart_Table.h"
+#include "St_g2t_hits_Table.h"
+#include "St_g2t_mwc_hit_Table.h"
+#include "St_g2t_run_Table.h"
+#include "St_g2t_smd_hit_Table.h"
+#include "St_g2t_svt_hit_Table.h"
+#include "g2r/St_g2t_tpc_Module.h"
+#include "St_g2t_track_Table.h"
+#include "St_g2t_vertex_Table.h"
+#include "St_g2t_vpd_hit_Table.h"
+
 common_gcbank *cbank;
 common_quest  *cquest; 
 common_gclink *clink; 
@@ -134,6 +154,9 @@ Int_t St_geant_Maker::Init(){
 Int_t St_geant_Maker::Make(){
 //  PrintInfo();
   gtrig();
+  St_g2t_tpc_hit *g2t_tpc_hit = new St_g2t_tpc_hit("g2t_tpc_hit",200000);
+  m_DataSet->Add(g2t_tpc_hit);
+  Int_t Res_tpc = g2t_tpc(g2t_tpc_hit);
 #if 0
   Char_t *g2t = "g2t_";
   Int_t  narg = 0;
@@ -151,7 +174,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.5 1999/01/10 20:37:31 fisyak Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.6 1999/01/21 01:43:48 nevski Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }

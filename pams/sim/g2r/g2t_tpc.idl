@@ -1,0 +1,7 @@
+/*          file:   g2tmain.idl
+*           Module: g2tmain
+*/
+#include "PAM.idl"
+#include "g2t_tpc_hit.idl"
+
+interface g2t_tpc : amiModule{ STAFCV_T call (out g2t_tpc_hit g2t_tpc_hit ); };
