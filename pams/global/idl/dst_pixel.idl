@@ -1,0 +1,30 @@
+/*  dst_pixel.idl         */
+/*  Table: dst_pixel      */
+
+/*  This table contains event reconstruction pixel information.
+ *  This might include, for example, the raw ADCs associated with
+ *  some rare track candidates from a search algorithm such as that
+ *  proposed to look for fractionally charged particles.  It is filled
+ *  with information for one event with one pixel per table row.  No
+ *  keys to clusters, space points or tracks are included in this table.
+ *  Data packing is used for each variable as follows:
+ *
+ *  secrow    packs the detector ID number using the definitions in
+ *            StDetectorDefinitions (4 bits), the sector number 1 to
+ *            24 (5 bits), and the pad row number 1 to 45 (6 bits)
+ *            into a 'short' integer word.
+ *
+ *  padtimeadc packs the pad number (maximum of 182) (8 bits), time
+ *             bucket number (0-511, 9 bits) and ADC value (10 bits)
+ *             into a 'long' integer word.
+ *
+ *             Similar packing schemes must be used for other detectors.
+ *
+ */
+
+ struct dst_pixel  {
+  short secrow;       /* Packed det ID, sec., row. numbers       */
+  long  padtimeadc;   /* Packed pad#, time bucket and ADC        */
+ } ;
+/*  Last mod. for dst_pixel::   $Date: 1999/09/27 16:54:08 $ */
+

@@ -1,18 +1,60 @@
 /*  dst_dedx.idl                   */
 /*  Table:  dst_dedx               */
 
-/*   Comments: Contains dE/dx and number of used hits information for 
- *             SVT, TPC and FTPC where appropriate for the charged tracks 
- *             in dst_track. For tracks with both SVT and TPC dE/dx  
- *             information this table fills two rows [with the same F.key 
- *             to the corresponding dst_track.
+/*  This table contains event reconstruction information about the
+ *  dE/dx for charged particle trajectories (tracks) listed in the
+ *  dst_track table(s).  It is filled with information for one event
+ *  with one track/detector segment and/or one dE/dx averaging method entry 
+ *  per table row.  It also includes the number of space points used.
+ *  The following cases can be accommodated:
+ *
+ *    (1)  Separate contributions from SVT, SSD, FTPC and/or TPC space 
+ *         points to an individual track-
+ *         The separate dE/dx values are listed on separate rows which refer
+ *         to the same track via 'id_track' and which are distinguished by
+ *         the value of 'det_id'.
+ *    (2)  Separate averages for TPC inner and outer sector hits -
+ *         This is handled with 2 rows, same id_track, same det_id, but
+ *         different values for 'method' (see packing algorithm below).
+ *    (3)  Different dE/dx averaging procedures (e.g. truncated mean, 
+ *         ensemble average, most probable value, Landau fit, etc.) for
+ *         some or all tracks-
+ *         This can be handled by filling additional rows and distinguishing
+ *         the averaging procedures with the value of 'method'.
+ *    (4)  Additional track tables based on alternate track finding/fitting
+ *         algorithms (e.g. 3D helix, analytic E-loss, Kalman, etc.)-
+ *         For additional space point-track assignments additional instances
+ *         of the dst_dedx table can be filled.
+ *
+ *  The rows in dst_dedx refer to the track table instance corresponding to
+ *  the fitted space points from the tracking detectors; i.e. dst_dedx does
+ *  not refer to a track table instance in which the primary vertex was
+ *  included in the fitting.
+ *
+ *  Packing algorithm for variable 'method' (this is for illustrative
+ *  purposes only.  This must be fixed by the STAR Spectra PWG):
+ *
+ *       method = 100*{0 if no TPC points included in segment, OR
+ *                     0 if both TPC inner and outer sector points included, OR
+ *                     1 if only TPC inner sector points included, OR
+ *                     2 if only TPC outer sector points included}
+ *                + {1 if standard truncated mean is used, OR
+ *                   2 if ensemble average mean is used, OR
+ *                   3 if most probable value is used, OR
+ *                   4 if Landau fit is used, OR
+ *                     etc.....}
+ *       
+ *       Definition of variable dedx[2] for each method:
+ *            (This must be fixed by the STAR Spectra PWG)
+ *
  */
 
  struct dst_dedx   {
-  long   id_track;      /* F.key to dst_track                             */
-  long   det_id;        /* Detector ID - SVT, TPC, FTPC                   */
-  long   iflag;         /* Quality/status of extacted dE/dx               */
-  long   ndedx;         /* number of points used in dE/dx calcu.          */
-  float  dedx[2];       /* Mean, most prob., or other dE/dx; and variance */
+  short  id_track;   /* Foreign key to dst_track                         */
+  short  det_id;     /* Det ID-SVT,TPC,FTPC, use StDetectorDefinitions.h */
+  short  method;     /* dE/dx calculation method (see preceeding comm.)  */
+  short  ndedx;      /* number of points used in dE/dx calcu.            */
+  float  dedx[2];    /* dE/dx summary info; depends on method (see above)*/
  } ;
-/*  Last mod. for dst_dedx:   $Date: 1998/06/03 22:26:50 $ */
+/*  Last mod. for dst_dedx:   $Date: 1999/09/27 16:54:04 $ */
+
