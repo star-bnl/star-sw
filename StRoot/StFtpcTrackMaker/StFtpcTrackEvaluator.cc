@@ -1,5 +1,12 @@
-// $Id: StFtpcTrackEvaluator.cc,v 1.11 2001/05/02 13:40:07 oldi Exp $
+// $Id: StFtpcTrackEvaluator.cc,v 1.12 2001/07/12 08:34:27 oldi Exp $
 // $Log: StFtpcTrackEvaluator.cc,v $
+// Revision 1.12  2001/07/12 08:34:27  oldi
+// Many new things were developed eg. histograms for time consumption and
+// momentum resolution.
+// File handling was debugged.
+// New constructor to evaluate tracks of good evaluated clusters of a
+// previous run.
+//
 // Revision 1.11  2001/05/02 13:40:07  oldi
 // Small change to be able to update the output file again.
 //
@@ -113,6 +120,7 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator()
   mUncleanTracksArr = NULL;
   mSplitTracksArr = NULL;
   mSplitGoodTracksArr = NULL;
+  mGoodFastSimHitsArr = NULL;
   
   mNumFoundVertexTracks = NULL;
   mNumFoundNonVertexTracks = NULL;
@@ -127,7 +135,9 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator()
   mContaWoSplit = NULL;
   mNumSplitTracks = NULL;
   mNumSplitGoodTracks = NULL;
+  mNumSplitLoliGoodTracks = NULL;
   mNumUncleanTracks = NULL;
+  mNumUncleanGoodTracks = NULL;
   mNumLongTracks = NULL;
   mNumLongTrackClusters = NULL;
   mNumShortTracks = NULL;
@@ -148,7 +158,9 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator()
 
   mSplitTracks = 0;
   mSplitGoodTracks = 0;
+  mSplitLoliGoodTracks = 0;
   mUncleanTracks = 0;
+  mUncleanGoodTracks = 0;
   mLongTracks = 0;
   mLongTrackClusters = 0;
   mShortTracks = 0;
@@ -186,6 +198,10 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator()
   mPxAcc = NULL;
   mPyAcc = NULL;
   mPzAcc = NULL;
+
+  mPRelErr = NULL;
+  mPRelErrqok = NULL;
+  mPRelDiff = NULL;
   
   mEtaNghits = NULL;
   mEtaNfhits = NULL;
@@ -196,6 +212,12 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator()
   mPtEtaBad = NULL;
   mPtEtaUnclean = NULL;
   mPtEtaMesUnclean = NULL;
+  mPtEtaUncleanGood = NULL;
+  mPtEtaMesUncleanGood = NULL;
+
+  mPtEtaSplit = NULL;
+  mPtEtaSplitGood = NULL;
+  mPtEtaSplitLoliGood = NULL;
 
   mPtEtaGoodG = NULL;
   mPtEtaGoodF = NULL;
@@ -207,6 +229,11 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator()
   mPtEtaFVtx = NULL;
   mPtEtaLookLikeGood = NULL;
   mPtEtaContamination = NULL;
+  mPtEtaContaWoSplits = NULL;
+
+  mPtEta10PointTracks = NULL;
+  mPtEtaWrongCharge = NULL;
+  mPtEtaWrongPosCharge = NULL;
 
   mGLengthDistTrackAng = NULL;
   mGCircleDistTrackAng = NULL;
@@ -248,19 +275,26 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator()
   mNumParentTracks = NULL;
 
   mUnclean = NULL;
+  
+  mSetupTime = NULL;
+  mTrackingTime = NULL;
+  mExtensionTime = NULL;
+  mSplitTime = NULL;
+  mFitTime = NULL;
+  mTotalTime = NULL;
 }
 
 
-StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_data, StFtpcVertex *main_vertex, TObjArray *hits, TObjArray *tracks, Char_t *filename, Char_t *write_permission)
+StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_data, StFtpcTracker *tracker, Char_t *filename, Char_t *write_permission)
 {
   // Usual used constructor if conformal mapping tracker output available.
 
   gMessMgr->Message("Track evaluating started...", "I", "OST");
 
-  mVertex = main_vertex;
+  mVertex = tracker->GetVertex();
 
-  mFoundHits = hits;
-  mFoundTracks = tracks;
+  mFoundHits = tracker->GetClusters();
+  mFoundTracks = tracker->GetTracks();
   mObjArraysCreated = (Bool_t)false;
 
   SetupFile(filename, write_permission);
@@ -285,6 +319,7 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_d
   }
 
   FillEventHistos();
+  FillTimeHistos(tracker);
   FillCutHistos();
   DivideHistos();
   WriteHistos();
@@ -361,6 +396,7 @@ StFtpcTrackEvaluator::~StFtpcTrackEvaluator()
   delete mUncleanTracksArr;
   delete mSplitTracksArr;
   delete mSplitGoodTracksArr;
+  delete mGoodFastSimHitsArr;
   
   mFile->Close();
   delete mFile;
@@ -422,7 +458,9 @@ void StFtpcTrackEvaluator::DeleteHistos()
   delete mContaWoSplit;
   delete mNumSplitTracks;
   delete mNumSplitGoodTracks;
+  delete mNumSplitLoliGoodTracks;
   delete mNumUncleanTracks;
+  delete mNumUncleanGoodTracks;
   delete mNumLongTracks;
   delete mNumLongTrackClusters;
   delete mNumShortTracks;
@@ -458,6 +496,10 @@ void StFtpcTrackEvaluator::DeleteHistos()
   delete mPyAcc;
   delete mPzAcc;
 
+  delete mPRelErr;
+  delete mPRelErrqok;
+  delete mPRelDiff;
+
   delete mEtaNghits;
   delete mEtaNfhits;
 
@@ -467,6 +509,12 @@ void StFtpcTrackEvaluator::DeleteHistos()
   delete mPtEtaBad;
   delete mPtEtaUnclean;
   delete mPtEtaMesUnclean;
+  delete mPtEtaUncleanGood;
+  delete mPtEtaMesUncleanGood;
+
+  delete mPtEtaSplit;
+  delete mPtEtaSplitGood;
+  delete mPtEtaSplitLoliGood;
 
   delete mPtEtaGoodG;
   delete mPtEtaGoodF;
@@ -478,6 +526,11 @@ void StFtpcTrackEvaluator::DeleteHistos()
   delete mPtEtaFVtx;
   delete mPtEtaLookLikeGood;
   delete mPtEtaContamination;
+  delete mPtEtaContaWoSplits;
+
+  delete mPtEta10PointTracks;
+  delete mPtEtaWrongCharge;
+  delete mPtEtaWrongPosCharge;
 
   delete mGLengthDistTrackAng;
   delete mGCircleDistTrackAng;
@@ -514,6 +567,13 @@ void StFtpcTrackEvaluator::DeleteHistos()
   delete mPRatioDist;
   delete mPRatioDistSplit;
 
+  delete mSetupTime;
+  delete mTrackingTime;
+  delete mExtensionTime;
+  delete mSplitTime;
+  delete mFitTime;
+  delete mTotalTime;
+
   return;
 }
 
@@ -530,7 +590,7 @@ void StFtpcTrackEvaluator::SetupFile(Char_t *filename, Char_t *write_permission)
   }
   
   else {
-    sprintf(mFilename, "evaluator.root");
+    sprintf(mFilename, "ftpc_evaluator.root");
   }
 
   if (write_permission) {
@@ -541,13 +601,31 @@ void StFtpcTrackEvaluator::SetupFile(Char_t *filename, Char_t *write_permission)
     sprintf(mWritePermission, "RECREATE");
   }
 
-  mFile = new TFile(mFilename, mWritePermission);
-  
-  if (!mFile->Get("num_fhits") && strcmp(mWritePermission, "UPDATE") == 0) {
-    gMessMgr->Message("File did not exist but that's o.k. - I'll create it immediately!", "W", "OST"); 
-    CreateHistos();
-    WriteHistos();
-    DeleteHistos();
+  if (strcmp(mWritePermission, "UPDATE") == 0) {
+    
+    mFile = new TFile(mFilename, "READ");
+    
+    if (!mFile->IsOpen()) {
+      // File not there
+      gMessMgr->Message("but that's o.k. - I'll create it immediately!", "W", "OST"); 
+      delete mFile;
+      mFile = new TFile(mFilename, "RECREATE");
+      CreateHistos();
+      WriteHistos();
+      DeleteHistos();
+    }
+
+    else {
+      // File is there
+      mFile->Close();
+      delete mFile;
+      mFile = new TFile(mFilename, "UPDATE");
+    }
+  }
+
+  else {
+    // mWritePermission != "UPDATE"
+    mFile = new TFile(mFilename, "UPDATE");
   }
 
   return;
@@ -559,11 +637,11 @@ void StFtpcTrackEvaluator::Setup(St_DataSet *geant, St_DataSet *ftpc_data)
   // Does all the setup which is common to all constructors.
   
   mClusterArr = new MIntArray();
-  mClusterArr->SetFill(mFoundHits->GetEntriesFast(), 0);
 
   mUncleanTracksArr = new MIntArray();
   mSplitTracksArr = new MIntArray();
   mSplitGoodTracksArr = new MIntArray();
+  mGoodFastSimHitsArr = new MIntArray();
 
   mFtpcTrackNum = new MIntArray();
 
@@ -584,7 +662,9 @@ void StFtpcTrackEvaluator::Setup(St_DataSet *geant, St_DataSet *ftpc_data)
   mGoodFTracks = 0;
   mSplitTracks = 0;
   mSplitGoodTracks = 0;
+  mSplitLoliGoodTracks = 0;
   mUncleanTracks = 0;
+  mUncleanGoodTracks = 0;
   mLongTracks = 0;
   mLongTrackClusters = 0;
   mShortTracks = 0;
@@ -602,12 +682,12 @@ void StFtpcTrackEvaluator::Setup(St_DataSet *geant, St_DataSet *ftpc_data)
     
     GeantHitInit((St_g2t_ftp_hit *)geantI("g2t_ftp_hit"));
     GeantTrackInit((St_g2t_track *)geantI("g2t_track"), (St_g2t_ftp_hit *)geantI("g2t_ftp_hit"));
-    
+
     St_ffs_gepoint *ffs_gepoint = (St_ffs_gepoint *)ftpc_data->Find("ffs_fgepoint");
 
     if (ffs_gepoint) {
       // event processed with fast simulator
-      FastSimHitInit(ffs_gepoint);   
+      FastSimHitInit(ffs_gepoint);
       ParentTrackInit();
       CalcSplitTracks();
     }   
@@ -647,7 +727,9 @@ void StFtpcTrackEvaluator::SetupHistos()
     mNumGoodFTracks = (TH1F *)mFile->Get("num_goodf");
     mNumSplitTracks = (TH1F *)mFile->Get("num_split");
     mNumSplitGoodTracks = (TH1F *)mFile->Get("num_split_good");
+    mNumSplitLoliGoodTracks = (TH1F *)mFile->Get("num_split_loligood");
     mNumUncleanTracks = (TH1F *)mFile->Get("num_unclean");
+    mNumUncleanGoodTracks = (TH1F *)mFile->Get("num_unclean_good");
     mNumLongTracks = (TH1F *)mFile->Get("num_long");
     mNumLongTrackClusters  = (TH1F *)mFile->Get("num_longclus");
     mNumShortTracks = (TH1F *)mFile->Get("num_short");
@@ -687,6 +769,10 @@ void StFtpcTrackEvaluator::SetupHistos()
     mPyAcc = (TH1F *)mFile->Get("py_acc");
     mPzAcc = (TH1F *)mFile->Get("pz_acc");
 
+    mPRelErr = (TH3F *)mFile->Get("p_rel_err");
+    mPRelErrqok = (TH3F *)mFile->Get("p_rel_err_q_ok");
+    mPRelDiff = (TH3F *)mFile->Get("p_rel_diff");
+
     mEtaNfhits = (TH2F *)mFile->Get("eta_fhits");
     mEtaNghits = (TH2F *)mFile->Get("eta_ghits");
 
@@ -696,7 +782,13 @@ void StFtpcTrackEvaluator::SetupHistos()
     mPtEtaBad = (TH2F *)mFile->Get("pt_eta_bad");
     mPtEtaUnclean = (TH2F *)mFile->Get("pt_eta_unclean");
     mPtEtaMesUnclean = (TH2F *)mFile->Get("pt_eta_mes_unclean");
-    
+    mPtEtaUncleanGood = (TH2F *)mFile->Get("pt_eta_unclean_good");
+    mPtEtaMesUncleanGood = (TH2F *)mFile->Get("pt_eta_mes_unclean_good");
+
+    mPtEtaSplit = (TH2F *)mFile->Get("pt_eta_split");
+    mPtEtaSplitGood = (TH2F *)mFile->Get("pt_eta_split_good");
+    mPtEtaSplitLoliGood = (TH2F *)mFile->Get("pt_eta_split_loligood");
+   
     mPtEtaGoodG = (TH2F *)mFile->Get("pt_eta_goodg");
     mPtEtaGoodF = (TH2F *)mFile->Get("pt_eta_goodf");
     mPtEtaGoodRatio = (TH2F *)mFile->Get("pt_eta_good_ratio");
@@ -707,6 +799,11 @@ void StFtpcTrackEvaluator::SetupHistos()
     mPtEtaFVtx = (TH2F *)mFile->Get("pt_eta_vtxf");
     mPtEtaLookLikeGood = (TH2F *)mFile->Get("pt_eta_loligood");
     mPtEtaContamination = (TH2F *)mFile->Get("pt_eta_contam");
+    mPtEtaContaWoSplits = (TH2F *)mFile->Get("pt_eta_contam_wo_splits");
+
+    mPtEta10PointTracks = (TH2F *)mFile->Get("pt_eta_10point_tracks");
+    mPtEtaWrongCharge = (TH2F *)mFile->Get("pt_eta_wrong_charge");
+    mPtEtaWrongPosCharge = (TH2F *)mFile->Get("pt_eta_wrong_positive_charge");
 
     mDcaFMainVertex = (TH1F *)mFile->Get("dca_mainf");
     mDcaFNonVertex = (TH1F *)mFile->Get("dca_nonf");
@@ -739,9 +836,16 @@ void StFtpcTrackEvaluator::SetupHistos()
     mFLengthDist = (TH2F *)mFile->Get("flength_dist");
 
     mFCircleLength = (TH2F *)mFile->Get("fcircle_length");
-
+    
     mPRatioDist = (TH2F *)mFile->Get("pratio_dist");
     mPRatioDistSplit = (TH2F *)mFile->Get("pratio_dist_split");
+
+    mSetupTime = (TH1F*)mFile->Get("setup_time");
+    mTrackingTime = (TH1F*)mFile->Get("tracking_time");
+    mExtensionTime = (TH1F*)mFile->Get("extension_time");
+    mSplitTime = (TH1F*)mFile->Get("split_time");
+    mFitTime = (TH1F*)mFile->Get("fit_time");
+    mTotalTime = (TH1F*)mFile->Get("total_time");
   }
 
   return;
@@ -770,7 +874,9 @@ void StFtpcTrackEvaluator::CreateHistos()
   mContaWoSplit = new TH1F("conta_wo_split", "Ratio of loli good minus split tracks to good main vertex tracks", 100, 0., 2.);
   mNumSplitTracks = new TH1F("num_split", "Split tracks", 100, 0., 300.);
   mNumSplitGoodTracks = new TH1F("num_split_good", "Split good tracks", 100, 0., 300.);
+  mNumSplitLoliGoodTracks = new TH1F("num_split_loligood", "Split look-like good tracks", 100, 0., 300.);
   mNumUncleanTracks = new TH1F("num_unclean", "Unclean tracks", 100, 0., 300.);
+  mNumUncleanGoodTracks = new TH1F("num_unclean_good", "Unclean good tracks", 100, 0., 300.);
   mNumLongTracks = new TH1F("num_long", "Simulated tracks with more than 10 clusters", 100, 0., 300.);
   mNumShortTracks = new TH1F("num_short", "Simulated tracks with less than 5 clusters", 100, 0., 5000.);
   mNumTooShortTracks = new TH1F("num_tooshort", "Tracks which should be longer", 100, 0., 1000.);
@@ -806,6 +912,10 @@ void StFtpcTrackEvaluator::CreateHistos()
   mPxAcc = new TH1F("px_acc", "Rel. accuracy in p_x", 200, 0., 5.);
   mPyAcc = new TH1F("py_acc", "Rel. accuracy in p_y", 200, 0., 5.);
   mPzAcc = new TH1F("pz_acc", "Rel. accuracy in p_z", 200, 0., 5.);
+
+  mPRelErr = new TH3F("p_rel_err", "Rel. error of p_tot", 48, 2., 4.4, 25, 0., 5., 50, -1., 1.);
+  mPRelErrqok = new TH3F("p_rel_err_q_ok", "Rel. error of p_tot (charge ok)", 48, 2., 4.4, 25, 0., 5., 50, -1., 1.);
+  mPRelDiff = new TH3F("p_rel_diff", "Rel. differnce of p_tot", 48, 2., 4.4, 25, 0., 5., 50, -1., 1.);
   
   mEtaNghits = new TH2F("eta_ghits", "Geant tracks", 10, 0.5, 10.5, 96, 2.0, 4.4);
   mEtaNfhits = new TH2F("eta_fhits", "Found tracks", 10, 0.5, 10.5, 96, 2.0, 4.4);
@@ -816,6 +926,12 @@ void StFtpcTrackEvaluator::CreateHistos()
   mPtEtaBad = new TH2F("pt_eta_bad", "Ratio of bad tracks", 96, 2.0, 4.4, 50, 0., 5.);
   mPtEtaUnclean = new TH2F("pt_eta_unclean", "Unclean tracks", 96, 2.0, 4.4, 50, 0., 5.);
   mPtEtaMesUnclean = new TH2F("pt_eta_mes_unclean", "Unclean tracks", 96, 2.0, 4.4, 50, 0., 5.);
+  mPtEtaUncleanGood = new TH2F("pt_eta_unclean_good", "Unclean good tracks", 96, 2.0, 4.4, 50, 0., 5.);
+  mPtEtaMesUncleanGood = new TH2F("pt_eta_mes_unclean_good", "Unclean good tracks", 96, 2.0, 4.4, 50, 0., 5.);
+
+  mPtEtaSplit =  new TH2F("pt_eta_split", "Split tracks", 96, 2.0, 4.4, 50, 0., 5.);
+  mPtEtaSplitGood =  new TH2F("pt_eta_split_good", "Split good tracks", 96, 2.0, 4.4, 50, 0., 5.);
+  mPtEtaSplitLoliGood =  new TH2F("pt_eta_split_loligood", "Split look-like good tracks", 96, 2.0, 4.4, 50, 0., 5.);
 
   mPtEtaGoodG = new TH2F("pt_eta_goodg", "Good geant tracks", 96, 2.0, 4.4, 50, 0., 5.);
   mPtEtaGoodF = new TH2F("pt_eta_goodf", "Good found tracks", 96, 2.0, 4.4, 50, 0., 5.);
@@ -827,6 +943,11 @@ void StFtpcTrackEvaluator::CreateHistos()
   mPtEtaFVtx = new TH2F("pt_eta_vtxf", "Found tracks with main vertex tag", 96, 2.0, 4.4, 50, 0., 5.);
   mPtEtaLookLikeGood = new TH2F("pt_eta_loligood", "Found tracks looking good but are not", 96, 2.0, 4.4, 50, 0., 5.);
   mPtEtaContamination = new TH2F("pt_eta_contam", "Contamination", 96, 2.0, 4.4, 50, 0., 5.);
+  mPtEtaContaWoSplits = new TH2F("pt_eta_contam_wo_splits", "Contamination without splits", 96, 2.0, 4.4, 50, 0., 5.);
+
+  mPtEta10PointTracks = new TH2F("pt_eta_10point_tracks", "tracks with 10 points", 96, 2.0, 4.4, 50, 0., 5.);
+  mPtEtaWrongCharge = new TH2F("pt_eta_wrong_charge", "tracks with wrong charge", 96, 2.0, 4.4, 50, 0., 5.);
+  mPtEtaWrongPosCharge = new TH2F("pt_eta_wrong_positive_charge", "tracks with wrong positiv charge", 96, 2.0, 4.4, 50, 0., 5.);
 
   mDcaFMainVertex = new TH1F("dca_mainf", "Found main vertex tracks", 100, 0., 10.);
   mDcaFNonVertex = new TH1F("dca_nonf", "Found non vertex tracks", 100, 0., 10.);
@@ -862,6 +983,13 @@ void StFtpcTrackEvaluator::CreateHistos()
 
   mPRatioDist = new TH2F("pratio_dist", "Found track pairs", 100, 0., 2., 37, 0.25, 1.0);
   mPRatioDistSplit = new TH2F("pratio_dist_split", "Split track pairs", 100, 0., 2., 37, 0.25, 1.0);
+
+  mSetupTime = new TH1F("setup_time", "Setup time", 1000, 0., 2.);
+  mTrackingTime = new TH1F("tracking_time", "Tracking time", 1000, 0., 2.);
+  mExtensionTime = new TH1F("extension_time", "Extension time", 1000, 0., 2.);
+  mSplitTime = new TH1F("split_time", "Splits time", 1000, 0., 2.);
+  mFitTime = new TH1F("fit_time", "Fit time", 1000, 0., 2.);
+  mTotalTime = new TH1F("total_time", "Total time", 1000, 0., 2.);
 
   ((TAxis *)mNumGeantHits->GetXaxis())->SetTitle("'F# of clusters");
   ((TAxis *)mNumGeantHits->GetYaxis())->SetTitle("'F# of events");
@@ -899,8 +1027,12 @@ void StFtpcTrackEvaluator::CreateHistos()
   ((TAxis *)mNumSplitTracks->GetYaxis())->SetTitle("'F# of events");
   ((TAxis *)mNumSplitGoodTracks->GetXaxis())->SetTitle("'F# of tracks");
   ((TAxis *)mNumSplitGoodTracks->GetYaxis())->SetTitle("'F# of events");
+  ((TAxis *)mNumSplitLoliGoodTracks->GetXaxis())->SetTitle("'F# of tracks");
+  ((TAxis *)mNumSplitLoliGoodTracks->GetYaxis())->SetTitle("'F# of events");
   ((TAxis *)mNumUncleanTracks->GetXaxis())->SetTitle("'F# of tracks");
   ((TAxis *)mNumUncleanTracks->GetYaxis())->SetTitle("'F# of events");
+  ((TAxis *)mNumUncleanGoodTracks->GetXaxis())->SetTitle("'F# of tracks");
+  ((TAxis *)mNumUncleanGoodTracks->GetYaxis())->SetTitle("'F# of events");
   ((TAxis *)mNumLongTracks->GetXaxis())->SetTitle("'F# of tracks");
   ((TAxis *)mNumLongTracks->GetYaxis())->SetTitle("'F# of events");
   ((TAxis *)mNumLongTrackClusters->GetXaxis())->SetTitle("'F# of clusters");
@@ -1057,6 +1189,22 @@ void StFtpcTrackEvaluator::CreateHistos()
   ((TAxis *)mPtEtaMesUnclean->GetXaxis())->SetTitle("`h# (of parent)");
   ((TAxis *)mPtEtaMesUnclean->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
   ((TAxis *)mPtEtaMesUnclean->GetZaxis())->SetTitle("'F# of tracks");
+  ((TAxis *)mPtEtaUncleanGood->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaUncleanGood->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
+  ((TAxis *)mPtEtaUncleanGood->GetZaxis())->SetTitle("'F# of tracks");
+  ((TAxis *)mPtEtaMesUncleanGood->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaMesUncleanGood->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
+  ((TAxis *)mPtEtaMesUncleanGood->GetZaxis())->SetTitle("'F# of tracks");
+
+  ((TAxis *)mPtEtaSplit->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaSplit->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
+  ((TAxis *)mPtEtaSplit->GetZaxis())->SetTitle("'F# of tracks");
+  ((TAxis *)mPtEtaSplitGood->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaSplitGood->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
+  ((TAxis *)mPtEtaSplitGood->GetZaxis())->SetTitle("'F# of tracks");
+  ((TAxis *)mPtEtaSplitLoliGood->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaSplitLoliGood->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
+  ((TAxis *)mPtEtaSplitLoliGood->GetZaxis())->SetTitle("'F# of tracks");
 
   ((TAxis *)mPtEtaFVtx->GetXaxis())->SetTitle("`h# (of parent)");
   ((TAxis *)mPtEtaFVtx->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
@@ -1067,6 +1215,19 @@ void StFtpcTrackEvaluator::CreateHistos()
   ((TAxis *)mPtEtaContamination->GetXaxis())->SetTitle("`h# (of parent)");
   ((TAxis *)mPtEtaContamination->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
   ((TAxis *)mPtEtaContamination->GetZaxis())->SetTitle("'F# of tracks");
+  ((TAxis *)mPtEtaContaWoSplits->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaContaWoSplits->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
+  ((TAxis *)mPtEtaContaWoSplits->GetZaxis())->SetTitle("'F# of tracks");
+
+  ((TAxis *)mPtEta10PointTracks->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEta10PointTracks->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
+  ((TAxis *)mPtEta10PointTracks->GetZaxis())->SetTitle("'F# of tracks");
+  ((TAxis *)mPtEtaWrongCharge->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaWrongCharge->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
+  ((TAxis *)mPtEtaWrongCharge->GetZaxis())->SetTitle("'F# of tracks");
+  ((TAxis *)mPtEtaWrongPosCharge->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaWrongPosCharge->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
+  ((TAxis *)mPtEtaWrongPosCharge->GetZaxis())->SetTitle("'F# of tracks");
 
   ((TAxis *)mPtEtaGoodG->GetXaxis())->SetTitle("`h# (of parent)");
   ((TAxis *)mPtEtaGoodG->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
@@ -1099,7 +1260,19 @@ void StFtpcTrackEvaluator::CreateHistos()
   ((TAxis *)mFCircleDistTrackAng->GetXaxis())->SetTitle("angle of track endings");
   ((TAxis *)mFCircleDistTrackAng->GetYaxis())->SetTitle("circle dist. of last point");
   ((TAxis *)mFCircleDistTrackAng->GetZaxis())->SetTitle("'F# of track endings");
-    
+  ((TAxis *)mSetupTime->GetXaxis())->SetTitle("Zeit [s]");
+  ((TAxis *)mSetupTime->GetYaxis())->SetTitle("Ereignisse");
+  ((TAxis *)mTrackingTime->GetXaxis())->SetTitle("Zeit [s]");
+  ((TAxis *)mTrackingTime->GetYaxis())->SetTitle("Ereignisse");
+  ((TAxis *)mExtensionTime->GetXaxis())->SetTitle("Zeit [s]");
+  ((TAxis *)mExtensionTime->GetYaxis())->SetTitle("Ereignisse");
+  ((TAxis *)mSplitTime->GetXaxis())->SetTitle("Zeit [s]");
+  ((TAxis *)mSplitTime->GetYaxis())->SetTitle("Ereignisse");
+  ((TAxis *)mFitTime->GetXaxis())->SetTitle("Zeit [s]");
+  ((TAxis *)mFitTime->GetYaxis())->SetTitle("Ereignisse");
+  ((TAxis *)mTotalTime->GetXaxis())->SetTitle("Zeit [s]");
+  ((TAxis *)mTotalTime->GetYaxis())->SetTitle("Ereignisse");
+
   return;
 }
 
@@ -1131,8 +1304,7 @@ void StFtpcTrackEvaluator::GeantHitInit(St_g2t_ftp_hit *g2t_ftp_hit)
 
 void StFtpcTrackEvaluator::GeantTrackInit(St_g2t_track *g2t_track, St_g2t_ftp_hit *g2t_ftp_hit)
 {
-  // Initializes Geant tracks. Therefore the Geant hits are also needed.
-
+  // Initializes Geant tracks. Therefore the Geant hits are needed as well.
   if (g2t_track) {
     
     Int_t NumGeantTracks = g2t_track->GetNRows();       // number of generated tracks
@@ -1149,6 +1321,7 @@ void StFtpcTrackEvaluator::GeantTrackInit(St_g2t_track *g2t_track, St_g2t_ftp_hi
       ftpc_hits = track_st->n_ftp_hit;
       
       if (ftpc_hits) {  // track has hits in Ftpc
+
 	mGHitsOnTrack->Fill(ftpc_hits);
 	mGeantTracks->AddAt(new StFtpcTrack(NumFtpcGeantTracks), NumFtpcGeantTracks);     // create StFtpcTrack
 	StFtpcTrack *t = (StFtpcTrack*)mGeantTracks->At(NumFtpcGeantTracks);
@@ -1162,7 +1335,6 @@ void StFtpcTrackEvaluator::GeantTrackInit(St_g2t_track *g2t_track, St_g2t_ftp_hi
 	// set charge and pid
 	t->SetCharge((Int_t)track_st->charge);
 	t->SetPid(track_st->ge_pid);
-	
 	//	if (t->GetPid() <= 3) {
 	//	  mElectronTracks++;
 	//	} 
@@ -1179,7 +1351,6 @@ void StFtpcTrackEvaluator::GeantTrackInit(St_g2t_track *g2t_track, St_g2t_ftp_hi
 
 	MIntArray *hitnumber = t->GetHitNumbers();
 	hitnumber->Set(ftpc_hits);
-	
 	((StFtpcConfMapPoint *)mGeantHits->At(track_st->hit_ftp_p - 1))->SetTrackNumber(NumFtpcGeantTracks);
 	mFtpcTrackNum->AddAt(NumFtpcGeantTracks, i);
 	points->Expand(ftpc_hits);
@@ -1214,6 +1385,11 @@ void StFtpcTrackEvaluator::GeantTrackInit(St_g2t_track *g2t_track, St_g2t_ftp_hi
 	else {
 	  
 	  if (IsGoodTrack(t)) {
+
+	    if (ftpc_hits == 10) {
+	      mPtEta10PointTracks->Fill(TMath::Abs(t->GetEta()), t->GetPt());
+	    }
+
 	    mGoodGTracks++;
 	    mGoodGeantPoints += ftpc_hits;
 	  }
@@ -1227,18 +1403,29 @@ void StFtpcTrackEvaluator::GeantTrackInit(St_g2t_track *g2t_track, St_g2t_ftp_hi
 void StFtpcTrackEvaluator::FastSimHitInit(St_ffs_gepoint *ffs_hit) 
 {
   // Initializes fast simulated hits.
-  
   if(ffs_hit) {
     
-    Int_t NumFastSimHits = ffs_hit->GetNRows();       // number of generated clusters
-    ffs_gepoint_st *point_st = ffs_hit->GetTable();   // pointer to fast simulated clusters
-    mFastSimHits = new TObjArray(NumFastSimHits);     // create TObjArray
+    Int_t NumFastSimHits = ffs_hit->GetNRows();        // number of generated clusters
+    mClusterArr->SetFill(NumFastSimHits, 0);
+    mGoodFastSimHitsArr->SetFill(NumFastSimHits, -1);  // goodness of points set to 'undefined'
+    ffs_gepoint_st *point_st = ffs_hit->GetTable();    // pointer to fast simulated clusters
+    mFastSimHits = new TObjArray(NumFastSimHits);      // create TObjArray
     
     // Loop ovver all generated clusters
     {for (Int_t i = 0; i < NumFastSimHits; i++, point_st++) { 
-      mFastSimHits->AddAt(new StFtpcPoint(), i);                              // create StFtpcPoint
-      ((StFtpcPoint *)mFastSimHits->At(i))->SetHitNumber(i);
-      ((StFtpcPoint *)mFastSimHits->At(i))->SetTrackNumber(mFtpcTrackNum->At(point_st->ge_track_p - 1));
+      mFastSimHits->AddAt(new StFtpcPoint(), i);                             // create StFtpcPoint
+      StFtpcPoint *p = (StFtpcPoint*)mFastSimHits->At(i);
+      p->SetHitNumber(i);
+      p->SetTrackNumber(mFtpcTrackNum->At(point_st->ge_track_p - 1));
+
+      // evaluate goodness of points, fill array with results
+      if (IsGoodTrack((StFtpcTrack*)mGeantTracks->At(p->GetTrackNumber()))) {
+	mGoodFastSimHitsArr->AddAt(1, i);
+      }
+      
+      else {
+	mGoodFastSimHitsArr->AddAt(0, i);
+      }
     }}
   }
 }
@@ -1255,7 +1442,7 @@ void StFtpcTrackEvaluator::ParentTrackInit()
 
   // loop over tracks
   for (Int_t t_counter = 0; t_counter < mFoundTracks->GetEntriesFast(); t_counter++) {
-    StFtpcTrack *track = (StFtpcTrack*) mFoundTracks->At(t_counter);
+    StFtpcTrack *track = (StFtpcTrack*)mFoundTracks->At(t_counter);
     TObjArray   *hits  = (TObjArray*) track->GetHits();
     mUnclean[t_counter] = (Bool_t)false;
     
@@ -1272,7 +1459,7 @@ void StFtpcTrackEvaluator::ParentTrackInit()
     for (Int_t h_counter = 0; h_counter < 10; h_counter++) {
 
       if (h_counter < max_hits) {
-	StFtpcPoint *hit = (StFtpcPoint *) hits->At(h_counter);
+	StFtpcPoint *hit = (StFtpcPoint *)hits->At(h_counter);
 	mParentTrack->AddLast(((StFtpcPoint*)mFastSimHits->At(hit->GetHitNumber()))->GetTrackNumber());
 	mParentTracks->AddLast(mParentTrack->AtLast());
       }
@@ -1391,6 +1578,9 @@ void StFtpcTrackEvaluator::EvaluateGoodness(Int_t t_counter)
     
     if (IsGoodTrack(parent) && track->ComesFromMainVertex()) {
       mGoodFoundPoints += (track->GetNumberOfPoints() - wrong_hits_on_this_track);
+      mPtEtaUncleanGood->Fill(TMath::Abs(((StFtpcTrack *)mGeantTracks->At(mParent->At(t_counter)))->GetEta()), ((StFtpcTrack *)mGeantTracks->At(mParent->At(t_counter)))->GetPt());
+      mPtEtaMesUncleanGood->Fill(TMath::Abs(track->GetEta()), track->GetPt());      
+      mUncleanGoodTracks++;
     }
   }
   
@@ -1428,12 +1618,15 @@ void StFtpcTrackEvaluator::EvaluateGoodness(Int_t t_counter)
 void StFtpcTrackEvaluator::DivideHistos()
 {
   // Divides Histograms to get the efficiency.
+  // These hostograms contain always the last event only!
 
   mPtEtaGood->Divide(mPtEtaGoodF, mPtEtaF);
   mPtEtaBad->Divide(mPtEtaBadF, mPtEtaF);
   mPtEtaGoodRatio->Divide(mPtEtaGoodF, mPtEtaGoodG);
   mPtEtaBadRatio->Divide(mPtEtaBadF, mPtEtaBadG);
   mPtEtaContamination->Divide(mPtEtaLookLikeGood, mPtEtaFVtx);
+  // Splits have to be substacted, dtill. They are available in PtEta up to now but mPtEtaLookLikeGood would be overwritten..
+  // mPtEtaContaWoSplits->Divide(mPtEtaLookLikeGood->Add(mPtEtaSplitLoliGood, -1), mPtEtaFVtx);
 
   return;
 }
@@ -1597,7 +1790,9 @@ void StFtpcTrackEvaluator::WriteHistos()
   mContaWoSplit->Write();
   mNumSplitTracks->Write();
   mNumSplitGoodTracks->Write();
+  mNumSplitLoliGoodTracks->Write();
   mNumUncleanTracks->Write();
+  mNumUncleanGoodTracks->Write();
   mNumLongTracks->Write();
   mNumLongTrackClusters->Write();
   mNumShortTracks->Write();
@@ -1633,6 +1828,10 @@ void StFtpcTrackEvaluator::WriteHistos()
   mPyAcc->Write();
   mPzAcc->Write();
 
+  mPRelErr->Write();
+  mPRelErrqok->Write();
+  mPRelDiff->Write();
+
   mEtaNghits->Write();
   mEtaNfhits->Write();
 
@@ -1642,6 +1841,12 @@ void StFtpcTrackEvaluator::WriteHistos()
   mPtEtaBad->Write();
   mPtEtaUnclean->Write();
   mPtEtaMesUnclean->Write();
+  mPtEtaUncleanGood->Write();
+  mPtEtaMesUncleanGood->Write();
+
+  mPtEtaSplit->Write();
+  mPtEtaSplitGood->Write();
+  mPtEtaSplitLoliGood->Write();
 
   mPtEtaGoodG->Write();
   mPtEtaGoodF->Write();
@@ -1653,6 +1858,11 @@ void StFtpcTrackEvaluator::WriteHistos()
   mPtEtaFVtx->Write();
   mPtEtaLookLikeGood->Write();
   mPtEtaContamination->Write();
+  mPtEtaContaWoSplits->Write();
+
+  mPtEta10PointTracks->Write();
+  mPtEtaWrongCharge->Write();
+  mPtEtaWrongPosCharge->Write();
 
   mDcaFMainVertex->Write();
   mDcaFNonVertex->Write();
@@ -1689,6 +1899,13 @@ void StFtpcTrackEvaluator::WriteHistos()
   mPRatioDist->Write();
   mPRatioDistSplit->Write();
 
+  mSetupTime->Write();
+  mTrackingTime->Write();
+  mExtensionTime->Write();
+  mSplitTime->Write();
+  mFitTime->Write();
+  mTotalTime->Write();
+
   return;
 }
 
@@ -1722,7 +1939,21 @@ void StFtpcTrackEvaluator::FillMomentumHistos()
     mPxAcc->Fill(ftrack->GetPx()/gtrack->GetPx());
     mPyAcc->Fill(ftrack->GetPy()/gtrack->GetPy());
     mPzAcc->Fill(ftrack->GetPz()/gtrack->GetPz());
+
+    mPRelErr->Fill(TMath::Abs(gtrack->GetEta()), gtrack->GetPt(), (ftrack->GetP() - gtrack->GetP())/gtrack->GetP());  
+    mPRelDiff->Fill(TMath::Abs(gtrack->GetEta()), gtrack->GetPt(), StFormulary::RelDiff(ftrack->GetP(), gtrack->GetP()));
+
+    if (ftrack->GetCharge() != gtrack->GetCharge()) {
+      mPtEtaWrongCharge->Fill(TMath::Abs(gtrack->GetEta()), gtrack->GetPt());
+      
+      if(ftrack->GetCharge() > 0.) {
+	mPtEtaWrongPosCharge->Fill(TMath::Abs(gtrack->GetEta()), gtrack->GetPt());
+      }
+    }
     
+    else {
+      mPRelErrqok->Fill(TMath::Abs(gtrack->GetEta()), gtrack->GetPt(), (ftrack->GetP() - gtrack->GetP())/gtrack->GetP());
+    }
   }
 
   return;
@@ -1753,6 +1984,21 @@ void StFtpcTrackEvaluator::FillMomentumHistos(Int_t t_counter)
   mPxAcc->Fill(ftrack->GetPx()/gtrack->GetPx());
   mPyAcc->Fill(ftrack->GetPy()/gtrack->GetPy());
   mPzAcc->Fill(ftrack->GetPz()/gtrack->GetPz()); 
+
+  mPRelErr->Fill(TMath::Abs(gtrack->GetEta()), gtrack->GetPt(), (ftrack->GetP() - gtrack->GetP())/gtrack->GetP());
+  mPRelDiff->Fill(TMath::Abs(gtrack->GetEta()), gtrack->GetPt(), StFormulary::RelDiff(ftrack->GetP(), gtrack->GetP()));
+
+  if (ftrack->GetCharge() != gtrack->GetCharge()) {
+    mPtEtaWrongCharge->Fill(TMath::Abs(gtrack->GetEta()), gtrack->GetPt());
+    
+    if(ftrack->GetCharge() > 0.) {
+      mPtEtaWrongPosCharge->Fill(TMath::Abs(gtrack->GetEta()), gtrack->GetPt());
+    }
+  }
+  
+  else {
+    mPRelErrqok->Fill(TMath::Abs(gtrack->GetEta()), gtrack->GetPt(), (ftrack->GetP() - gtrack->GetP())/gtrack->GetP());
+  }
   
   return;
 }
@@ -1877,23 +2123,47 @@ void StFtpcTrackEvaluator::CalcSplitTracks()
       }
       
       if (mParent->At(track1) == mParent->At(track2)) {
+
+	StFtpcTrack *track = (StFtpcTrack *)mGeantTracks->At(mParent->At(track1));
 	
 	mSplitTracksArr->AddLast(track1);
 	mSplitTracksArr->AddLast(track2);
 	mSplitTracks++;
 
+	mPtEtaSplit->Fill(TMath::Abs(track->GetEta()), track->GetPt());
+
 	if (ratio) mPRatioDistSplit->Fill(dist, ratio);
 
-	StFtpcTrack *track = (StFtpcTrack *)mGeantTracks->At(mParent->At(track1));
-	
+	if ((IsUncleanTrack(track1) || (IsCleanTrack(track1) && (!IsGoodTrack(track))))) {
+	  mPtEtaSplitLoliGood->Fill(TMath::Abs(track->GetPseudoRapidity()), track->GetPt());
+	  mSplitLoliGoodTracks++;
+	}
+
 	if (IsGoodTrack(track) && ((StFtpcTrack*)mFoundTracks->At(track1))->ComesFromMainVertex()) {
 	  mSplitGoodTracksArr->AddLast(track1);
 	  mSplitGoodTracks++;
+
+	  mPtEtaSplitGood->Fill(TMath::Abs(track->GetEta()), track->GetPt());
 	}
       }
     }  
   }
   
+  return;
+}
+
+
+void StFtpcTrackEvaluator::FillTimeHistos(StFtpcTracker *tracker)
+{
+  // Fills histograms of time consumption.
+
+  mSetupTime->Fill(tracker->GetTime("init"));
+  mTrackingTime->Fill(tracker->GetTime("main_vertex"));
+  mExtensionTime->Fill(tracker->GetTime("extend"));
+  mSplitTime->Fill(tracker->GetTime("splits"));
+  mFitTime->Fill(tracker->GetTime("fit"));
+  mTotalTime->Fill(tracker->GetTime());
+
   return;
 }
 
@@ -1918,10 +2188,12 @@ void StFtpcTrackEvaluator::FillEventHistos()
   mNumGoodFTracks->Fill(GetNumGoodFoundTracks());
   mGoodRatio->Fill(((Float_t)GetNumGoodFoundTracks()-(Float_t)GetNumSplitGoodTracks())/(Float_t)GetNumGoodGeantTracks());
   mContamination->Fill((Float_t)GetNumLookLikeGoodTracks()/(Float_t)GetNumFoundVertexTracks());
-  mContaWoSplit->Fill((Float_t)(GetNumLookLikeGoodTracks()-GetNumSplitGoodTracks())/(Float_t)GetNumFoundVertexTracks());
+  mContaWoSplit->Fill((Float_t)(GetNumLookLikeGoodTracks()-GetNumSplitLookLikeGoodTracks())/(Float_t)GetNumFoundVertexTracks());
   mNumSplitTracks->Fill(GetNumSplitTracks());
   mNumSplitGoodTracks->Fill(GetNumSplitGoodTracks());
+  mNumSplitLoliGoodTracks->Fill(GetNumSplitLookLikeGoodTracks());
   mNumUncleanTracks->Fill(GetNumUncleanTracks());
+  mNumUncleanGoodTracks->Fill(GetNumUncleanGoodTracks());
   mNumLongTracks->Fill(GetNumLongTracks());
   mNumLongTrackClusters->Fill(GetNumLongTrackClusters());
   mNumShortTracks->Fill(GetNumShortTracks());
@@ -1931,6 +2203,28 @@ void StFtpcTrackEvaluator::FillEventHistos()
   mNumGoodFoundPoints->Fill(GetNumGoodFoundPoints());
   mGoodPointRatio->Fill((Float_t)GetNumGoodFoundPoints()/(Float_t)GetNumGoodGeantPoints());
 
+  return;
+}
+
+void StFtpcTrackEvaluator::GetGoodHits(TObjArray *good_clusters)
+{
+  // Fills hits of good simulated tarcks in given TObjArray.
+  
+  good_clusters->Clear();
+
+  {for (Int_t i = 0; i < mGeantHits->GetEntriesFast(); i++) {
+    
+    StFtpcConfMapPoint *hit = (StFtpcConfMapPoint*)mGeantHits->At(i);
+  
+    {for (Int_t j = 0; j < mFtpcTrackNum->GetSize(); j++) {
+
+      if (mFtpcTrackNum->At(j) == hit->GetTrackNumber() && IsGoodTrack((StFtpcTrack*)mGeantTracks->At(j))) {
+	cout << i << " " << j << " " << mFtpcTrackNum->At(j) << " " << hit->GetTrackNumber() << " " << ((StFtpcTrack*)mGeantTracks->At(j))->GetEta() << endl;
+	good_clusters->AddLast(hit);
+      }
+    }}
+  }}
+  
   return;
 }
 
@@ -1969,8 +2263,10 @@ void StFtpcTrackEvaluator::ProblemsInfo()
   // Shows information about problems.
 
   gMessMgr->Message("", "I", "OST") << "Unclean tracks                : " << GetNumUncleanTracks() << endm;
+  gMessMgr->Message("", "I", "OST") << "Unclean good tracks           : " << GetNumUncleanGoodTracks() << endm;
   gMessMgr->Message("", "I", "OST") << "Split tracks                  : " << GetNumSplitTracks() << endm;
   gMessMgr->Message("", "I", "OST") << "Split good tracks             : " << GetNumSplitGoodTracks() << endm;
+  gMessMgr->Message("", "I", "OST") << "Split look like good tracks   : " << GetNumSplitLookLikeGoodTracks() << endm;
 
   return;
 }
@@ -1989,7 +2285,8 @@ void StFtpcTrackEvaluator::TrackerInfo()
   gMessMgr->Message("", "I", "OST") << "Found too short tracks        : " << GetNumTooShortTracks() << endm;
   
   gMessMgr->Message("", "I", "OST") << "Ratio of good geant tracks    : " << ((Float_t)GetNumGoodFoundTracks()-(Float_t)GetNumSplitGoodTracks())/(Float_t)GetNumGoodGeantTracks() << endm;
-  gMessMgr->Message("", "I", "OST") << "Contamination                 : " << (Float_t)GetNumLookLikeGoodTracks()/(Float_t)GetNumFoundVertexTracks() << endm; 
+  gMessMgr->Message("", "I", "OST") << "Contamination                 : " << (Float_t)GetNumLookLikeGoodTracks()/(Float_t)GetNumFoundVertexTracks() << endm;   
+  gMessMgr->Message("", "I", "OST") << "Contamination without splits  : " << ((Float_t)GetNumLookLikeGoodTracks()-(Float_t)GetNumSplitLookLikeGoodTracks())/(Float_t)GetNumFoundVertexTracks() << endm; 
 
   return;
 }
