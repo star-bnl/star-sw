@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_Table3PackedPoints.cxx,v 1.1 1999/12/20 17:32:29 fine Exp $
+// $Id: St_Table3PackedPoints.cxx,v 1.2 2000/01/24 22:56:46 fine Exp $
 
 #include <assert.h>
 
@@ -23,7 +23,7 @@ static Int_t detectId(const Char_t *name="tpc")
   // return > 0 detector index by its name
   //        = 0 wrong detector name found
   //
-  const Char_t *detectors[] = {"tpc", "svt" ,"ftpc"};
+  const Char_t *detectors[] = {"tpc", "svt" ,"ftpc","ssd"};
   Int_t l = sizeof(detectors)/sizeof(Char_t *);
   for (Int_t i=0; i < l ; i++) 
      if ( strcmp(name,detectors[i]) ) return i+1;
@@ -33,15 +33,15 @@ static Int_t detectId(const Char_t *name="tpc")
 static Float_t factor(Float_t &range,Int_t detId) 
 {
 
-//     see: CC: FILE:       dst_point_filler.F
+//     see: CC: FILE:       dst_point_filler.F (looked up on 24.01.2000 )
 //      parameter(detid_tpc  = 1)
 //      parameter(detid_svt  = 2)
 //      parameter(detid_ftpc = 3)
 //      parameter(detid_ssd  = 8) // == 0
 
-  const Float_t factors[]   = {2380 , 23800 , 2380 };
-  const Float_t ranges[]    = { 220 ,  22   ,  270 };
-
+  const Float_t factors[]   = {2380 , 23800 , 2380, 0, 0, 0, 0, 16000 };
+  const Float_t ranges[]    = { 220 ,  22   ,  270, 0, 0, 0, 0,  40   };
+  assert(detId <= sizeof(factors)/4);
   Float_t ret = factors[1];
   range =  ranges[1];
   if (detId) {
@@ -122,7 +122,7 @@ Float_t *St_Table3PackedPoints::GetXYZ(Float_t *xyz,Int_t idx, Int_t num) const
       ULong_t *pos = (ULong_t *)tablePtr;  
       ULong_t *pos1 = pos+1;
 
-      Int_t detId = (*(pos-1)) & 3;    
+      Int_t detId = (*(pos-1)) & 0xF;
       if (GetLastDetectorId() != detId ) {
         ((St_Table3PackedPoints *)this)->SetDetectorId(detId);
         ((St_Table3PackedPoints *)this)->m_MaxFactor = factor(((St_Table3PackedPoints *)this)->m_MaxRange,detId);        
@@ -147,6 +147,9 @@ Float_t *St_Table3PackedPoints::GetXYZ(Float_t *xyz,Int_t idx, Int_t num) const
 }
 //____________________________________________________________________________
 // $Log: St_Table3PackedPoints.cxx,v $
+// Revision 1.2  2000/01/24 22:56:46  fine
+// new packing schema for ssd introduced
+//
 // Revision 1.1  1999/12/20 17:32:29  fine
 // St_Table3Point has been removed from St_base
 //

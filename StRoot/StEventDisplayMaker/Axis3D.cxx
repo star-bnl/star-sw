@@ -20,7 +20,7 @@
 // * purpose.  It is provided "as is" without express or implied warranty.
 // ************************************************************************
 //
-// $Id: Axis3D.cxx,v 1.14 1999/12/17 23:28:44 fine Exp $ 
+// $Id: Axis3D.cxx,v 1.15 2000/01/24 22:56:46 fine Exp $ 
 //
 
 #include <iostream.h>
@@ -277,7 +277,7 @@ Text_t *TAxis3D::GetObjectInfo(Int_t , Int_t )
 //   Displays the histogram info (bin number, contents, integral up to bin
 //   corresponding to cursor position px,py
 //
-  return StrDup("axis");
+  return "axis";
 }
  
 //______________________________________________________________________________
@@ -689,6 +689,9 @@ TAxis3D *TAxis3D::ToggleZoom(TVirtualPad *pad)
 //_______________________________________________________________________________________
 
 // $Log: Axis3D.cxx,v $
+// Revision 1.15  2000/01/24 22:56:46  fine
+// new packing schema for ssd introduced
+//
 // Revision 1.14  1999/12/17 23:28:44  fine
 // clean up for the sake of docs + new class St_Table3DPackedPoints introduced
 //

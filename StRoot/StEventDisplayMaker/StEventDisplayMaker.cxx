@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.50 1999/12/29 18:56:44 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.51 2000/01/24 22:56:46 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -777,7 +777,6 @@ Int_t StEventDisplayMaker::MakeTableTracks(const St_Table *points,StVirtualEvent
            int h = t.q > 0 ? -1 : 1;  
            StThreeVectorD vector(t.r0*cos(angle),t.r0*sin(angle),t.z0);
            StHelixD *helix  = new  StHelixD(t.curvature, atan(t.tanl), t.psi*rad-h*pi2, vector, h);           
-//	   Int_t nSteps = Int_t(12*t.length*t.curvature + 1); 
 	   Int_t nSteps = Int_t(28*t.length*t.curvature + 1); 
 	   Float_t step = t.length / nSteps;
            StHelix3DPoints *tracksPoints  = new StHelix3DPoints(helix,step,nSteps);
@@ -971,6 +970,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.51  2000/01/24 22:56:46  fine
+// new packing schema for ssd introduced
+//
 // Revision 1.50  1999/12/29 18:56:44  fine
 // Change the default filter settings in favour of  StTable
 //
