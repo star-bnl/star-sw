@@ -1,5 +1,4 @@
 #include "StScmPoint.hh"
-#include <stdiostream.h> // a enlever 
 
 StScmPoint::StScmPoint(int rNPoint, int rNWafer, int rNumPackage, int rKindPackage)
 {
