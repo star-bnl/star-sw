@@ -22,3 +22,5 @@ Find min-bias runs (informal):
   database RunLog_onl
   select runNumber from daqSummary where comment like '%min%bias%' ;
 
+Run scripts of SQL commands:
+mysql -B -h onlsun1.star.bnl.gov --port=3501 -C RunLog < commands.sql
