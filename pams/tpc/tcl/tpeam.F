@@ -160,14 +160,14 @@ c
 
          
          integer nquota,nvar,icycle,nvar2,nvar3,nvar4,nvar5,nvar6
-         parameter (nvar=9,nvar2=23,nvar3=5,nvar4=5,nvar5=5,nvar6=4)
+         parameter (nvar=9,nvar2=24,nvar3=5,nvar4=5,nvar5=5,nvar6=4)
          character*4 chtags(nvar),chtags2(nvar2)
          character*4 chtags3(nvar3),chtags4(nvar4),chtags5(nvar5)
          character*4 chtags6(nvar6)
 C-----------------------------------------------------------------------
          logical lstat,first
 
-         real vec(23)
+         real vec(24)
          real vec2(4)
 
          integer istat
@@ -248,12 +248,24 @@ c	has changed..
 	 logical scv_state
 	 character*80  mess
 
+c this is to keep track of *all* hits and mc hits (pad-row crossings)
+c  regardless of mcid so as to make a distribution of distance to all
+c  neighboring hits in the sector/padrow  (comparing histograms of the
+c  ntuples 800+ and 850+ will tell us what is the "merging" distance)
+         integer max_nhits_in_row
+         parameter (max_nhits_in_row=300)
+         integer mc_ptr_list(mxhits*24,0:max_nhits_in_row)
+         integer rec_ptr_list(mxhits*24,0:max_nhits_in_row)
+c (as usual index2=0 tells *number* of hits in the list for that sector/padrow)
+         integer index1,index2,histid
+         real weight,xydist,zdist
+c
 C-----------------------------------------------------------------------
          data chtags/'itrk','itcl','nrow','x','y','z','prf','zrf','q'/
          data chtags2/'itrk','mcx ','mcy ','mcz ','tpx ','tpy ','tpz '
      +,              'delx','dely','delz','nrow', 'clus','nseq',
      +                'dx','dy','dz','mhit','nmc',
-     +                'phi','lamd','malf','ralf','rhit'/
+     +                'phi','lamd','malf','ralf','rhit','flag'/
          data chtags3/'prec','mce','tpe','rde','pre2'/
 *	 data chtags4/'hit ','clus','sect','row ','pad ',
 *     +		      'tdc ','adc ','mcid','xpix','ypix','zpix',
@@ -374,9 +386,27 @@ c ntuple 200 as defined has no more information than the hits table...
      +              chtags5)
          call hbookn(650+ihisto,'LOCAL MC Hit Info',nvar6,'NTUP',4000,
      +              chtags6)
+         call hbook2(1100+ihisto,'MC Neighbor Distance -Inner',
+     +              40,0.0,20.0,40,0.0,20.0,-1.0)
+         call hbook2(1200+ihisto,'MC Neighbor Distance -Outer',
+     +              40,0.0,20.0,40,0.0,20.0,-1.0)
+         call hbook2(2100+ihisto,'Rec Neighbor Distance -Inner',
+     +              40,0.0,20.0,40,0.0,20.0,-1.0)
+         call hbook2(2200+ihisto,'Rec Neighbor Distance -Outer',
+     +              40,0.0,20.0,40,0.0,20.0,-1.0)
 c
 c ok now we try the above suggestion....
 c
+
+c clear overall pointer list numbers...
+         do isect=1,24
+            do irow=1,45
+               idummy=(isect-1)*45+irow
+               mc_ptr_list(idummy,0) = 0
+               rec_ptr_list(idummy,0) = 0
+            enddo
+         enddo
+
          status=tls_quick_sort_i(tphith.nok,tphit(1).track,
      +        tphit(2).track,tphit)
          if (.not.scv_state(status,'i')) then
@@ -395,6 +425,11 @@ c must skip past any reconstructed hits with track=0
 c (these are "ghost" or "noise" hits mal 22jun95)
          do ihit_recon=1,tphith.nok
             if (tphit(ihit_recon).track.ne.0) goto 19
+c but still store it in overall pointer list
+            idummy = int(tphit(ihit_recon).row)
+            idummy = (idummy/100-1)*45+mod(idummy,100)
+            rec_ptr_list(idummy,0) = rec_ptr_list(idummy,0) + 1
+            rec_ptr_list(idummy,rec_ptr_list(idummy,0))=ihit_recon
          enddo
  19      ihit_recon=ihit_recon-1
 c
@@ -449,6 +484,14 @@ c note that iwire no longer refers to wire# - it is subvolume over row.
                      goto 99
                   endif
                   mcptr(idummy,n_incidence(isect,irow))=ihit_mc
+c also store in overall pointer list
+                  mc_ptr_list(idummy,0)=mc_ptr_list(idummy,0)+1
+                  if (mc_ptr_list(idummy,0).gt.max_nhits_in_row) then
+                     mc_ptr_list(idummy,0)=max_nhits_in_row
+                     write(6,*)' INCREASE MAX_NHITS_IN_ROW'
+                  else
+                     mc_ptr_list(idummy,mc_ptr_list(idummy,0))=ihit_mc
+                  endif
                   nmctrk = nmctrk + 1
 c     mcptr((irow-1)*numbv_row_max+iwire) = ihit_mc
                endif
@@ -485,6 +528,14 @@ c     dtptr(tphit(ihit).row) = ihit
                   goto 99
                endif
                dtptr(idummy,dtptr(idummy,0)) = ihit_recon
+c also store in overall pointer list
+               rec_ptr_list(idummy,0)=rec_ptr_list(idummy,0)+1
+               if (rec_ptr_list(idummy,0).gt.max_nhits_in_row) then
+                  rec_ptr_list(idummy,0)=max_nhits_in_row
+                  write(6,*)' INCREASE MAX_NHITS_IN_ROW!'
+               else
+                  rec_ptr_list(idummy,rec_ptr_list(idummy,0))=ihit_recon
+               endif
 c     dtptr(kdummy) = ihit_recon
 c     tphit_q(nhitrk)=tphit(ihit_recon).q
                goto 3
@@ -634,6 +685,7 @@ c-------------------------------------------
                            vec(20) = tphit(dtptr(idummy,jdummy)).lambda
                            vec(22) = tphit(dtptr(idummy,jdummy)).alpha
                            vec(23) = real(tphit(dtptr(idummy,jdummy)).id)
+                           vec(24) = real(tphit(dtptr(idummy,jdummy)).flag)
 c ok we have found a reconstructed hit... how many mc tracks contributed
 c  to its cluster???
                            nmc_found=0
@@ -874,6 +926,7 @@ c-------------------------------------------
                      vec(20) = tphit(ptr_ghost).lambda
                      vec(22) = tphit(ptr_ghost).alpha
                      vec(23) = real(tphit(ptr_ghost).id)
+                     vec(24) = real(tphit(ptr_ghost).flag)
 c find out how many mc tracks contributed to this hit's cluster...
                      nmc_found=0
                      iclstr=tphit(ptr_ghost).cluster
@@ -925,6 +978,7 @@ c-------------------------------------------
                      vec(20)=0.0
                      vec(22)=0.0
                      vec(23)=0.0
+                     vec(24)=0.0
                   endif
                   call hfn(300+ihisto,vec)
                enddo            ! i_maybe_lost
@@ -940,7 +994,7 @@ c store the correlated pair in the tpc_index table... -- ** new 24jul95 mal
                      tpc_index(tpc_indexh.nok).type = 
      +                    tpc_index_type(1).tphit_mhitstpc
                      tpc_index(tpc_indexh.nok).key1 =
-     +                    tphit(dtptr(idummy,jdummy)).id
+     +                    tphit(ptr_ghost).id
                      tpc_index(tpc_indexh.nok).key2 = 0
 c-------------------------------------------
                      vec(1)=tphit(ptr_ghost).track
@@ -960,10 +1014,10 @@ c-------------------------------------------
                      vec(16)=tphit(ptr_ghost).dz
                      vec(17)=0.0
                      vec(21)=0.0
-                     vec(19) = tphit(dtptr(idummy,jdummy)).phi
-                     vec(20) = tphit(dtptr(idummy,jdummy)).lambda
-                     vec(22) = tphit(dtptr(idummy,jdummy)).alpha
-                     vec(23) = real(tphit(dtptr(idummy,jdummy)).id)
+                     vec(19) = tphit(ptr_ghost).phi
+                     vec(20) = tphit(ptr_ghost).lambda
+                     vec(22) = tphit(ptr_ghost).alpha
+                     vec(23) = real(tphit(ptr_ghost).id)
 c find out how many mc tracks contributed to this hit's cluster...
                      nmc_found=0
                      iclstr=tphit(ptr_ghost).cluster
@@ -997,6 +1051,64 @@ c find out how many mc tracks contributed to this hit's cluster...
 
          call hrout(300+ihisto,icycle,' ')
 
+
+c now make histos that will allow us to determine merging distance
+c
+c for MC and for recon hits, fill hisogram with distance to all neighbors
+c  on a padrow for each hit on that padrow...
+
+         do isect=1,24
+            do irow=1,45
+               idummy=(isect-1)*45+irow
+c first do MC hits on this padrow/sector
+               if (mc_ptr_list(idummy,0).ne.0) 
+     +              weight=1.0/float(mc_ptr_list(idummy,0))
+               do index1=1,mc_ptr_list(idummy,0)-1
+                  do index2=index1+1,mc_ptr_list(idummy,0)
+                     xydist = sqrt(
+     +                    (mhits_tpc(mc_ptr_list(idummy,index1)).x(1)-
+     +                     mhits_tpc(mc_ptr_list(idummy,index2)).x(1))**2 +
+     +                    (mhits_tpc(mc_ptr_list(idummy,index1)).x(2)-
+     +                     mhits_tpc(mc_ptr_list(idummy,index2)).x(2))**2)
+                     zdist = abs(mhits_tpc(mc_ptr_list(idummy,index1)).x(3)-
+     +                    mhits_tpc(mc_ptr_list(idummy,index2)).x(3))
+                     if (irow.lt.14) then
+                        histid=1100+ihisto
+                        call hfill(histid,xydist,zdist,weight)
+                     else
+                        histid=1200+ihisto
+                        call hfill(histid,xydist,zdist,weight)
+                     endif
+                  enddo
+               enddo
+c now do same with reconstructed point
+               if (rec_ptr_list(idummy,0).ne.0) 
+     +              weight=1.0/float(rec_ptr_list(idummy,0))
+               do index1=1,rec_ptr_list(idummy,0)-1
+                  do index2=index1+1,rec_ptr_list(idummy,0)
+                     xydist = sqrt(
+     +                    (tphit(rec_ptr_list(idummy,index1)).x-
+     +                     tphit(rec_ptr_list(idummy,index2)).x)**2 +
+     +                    (tphit(rec_ptr_list(idummy,index1)).y-
+     +                     tphit(rec_ptr_list(idummy,index2)).y)**2)
+                     zdist = abs(tphit(rec_ptr_list(idummy,index1)).z-
+     +                    tphit(rec_ptr_list(idummy,index2)).z)
+                     if (irow.lt.14) then
+                        histid=2100+ihisto
+                        call hfill(histid,xydist,zdist,weight)
+                     else
+                        histid=2200+ihisto
+                        call hfill(histid,xydist,zdist,weight)
+                     endif
+                  enddo
+               enddo
+            enddo
+         enddo
+
+         call hrout(1100+ihisto,icycle,' ')
+         call hrout(1200+ihisto,icycle,' ')
+         call hrout(2100+ihisto,icycle,' ')
+         call hrout(2200+ihisto,icycle,' ')
 
 c now fill pixel data for each hit - added 28nov94 mal
 c	goto 119
