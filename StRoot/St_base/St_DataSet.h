@@ -36,7 +36,7 @@ class St_DataSet : public TNamed
  friend class St_DataSetIter;
  friend class St_DataSetTree;
  protected: 
-    TObject     *fMother; // pointer to mother of the directory
+    TObject     *fMother; //!pointer to mother of the directory
     TList       *fList;   // List of the the the objects included into this dataset
     virtual void SetParent(St_DataSet *parent);
     virtual void SetMother(TObject *mother) {fMother = mother;}
