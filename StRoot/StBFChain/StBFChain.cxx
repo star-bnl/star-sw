@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.235 2001/10/01 23:06:32 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.236 2001/10/02 00:09:01 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -263,11 +263,15 @@ Bfc_st BFC[] = {
   {"Fcl"    ,"ftpc_hits","ftpcChain","SCL"
                                   ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,StFtpcClusterMaker","",kFALSE},
   {"fpt"         ,"ftpc_tracks","ftpcChain","SCL"         ,"StFtpcTrackMaker","StFtpcTrackMaker","",kFALSE},
+
   {"emc"    ,"emcChain","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl"      ,"StMaker","StChain","",kFALSE},
   {"ems","emc_raw","emcChain","geant,emc_T,StEvent,EmcUtil","St_ems_Maker","St_emc,St_ems_Maker","",kFALSE},
   {"emh" ,"emc_hits","emcChain","geant,emc_T,tpc_T,EmcUtil","St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
+
   {"emcY2"    ,"emcY2","","geant,emc_T,tpc_T,db,calib,emcSim,PreEcl,epc"      ,"StMaker","StChain",
                             "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
+  {"emcDY2"   ,"emcDY2","","db,StEvent,emcADCtoE,PreEcl,epc"                ,"StMaker","StChain","",kFALSE},
+
   {"emcSim" ,"emcRaw","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker", 
                                                                            "New simulator for BEMC",kFALSE},
   {"global"      ,"globalChain","","globT,Match,primary,v0,xi,kink,dst,SCL,dEdx"
@@ -294,7 +298,7 @@ Bfc_st BFC[] = {
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",
                                          "StPreEclMaker,StEmcSimulatorMaker,St_emc,St_ems_Maker","",kFALSE},
   {"Epc"         ,"epc","PostChain","PreEcl,Match,EmcUtil"            ,"StEpcMaker","StEpcMaker","",kFALSE},
-  {"rich"        ,"RichChain","","rch,RichPiD",                    "StMaker","StChain","RICH chain",kFALSE},
+  {"emcADCtoE"   ,"emcADCtoE","",""             ,"StEmcADCtoEMaker","StEmcUtil,StEmcADCtoEMaker","",kFALSE},  {"rich"        ,"RichChain","","rch,RichPiD",                    "StMaker","StChain","RICH chain",kFALSE},
   {"Rrs"         ,"","RichChain","sim_T,Simu"                         ,"StRrsMaker","StRrsMaker","",kFALSE},
   {"rch"         ,"","RichChain","sim_T,globT"             ,"StRchMaker","StRrsMaker,StRchMaker","",kFALSE},
   {"RichPiD"     ,"","RichChain","Event"                      ,"StRichPIDMaker","StRichPIDMaker","",kFALSE},
