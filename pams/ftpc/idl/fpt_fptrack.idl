@@ -23,6 +23,7 @@
        float     v[3];        /* calculated vertex position */
        float     theta;       /* calc. angle to beamline at vertex*/
        float     curvature;   /* Track curvature (1/cm) */
+       float     impact;      /* impact parameter to vertex at z(vertex) */
     };
 
-/*  Last mod. for fpt_fptrack: $Date: 1999/11/29 12:14:22 $ */
+/*  Last mod. for fpt_fptrack: $Date: 2000/01/27 10:21:42 $ */
