@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: DoSt2feeTTree.C,v 1.5 2003/04/27 20:26:36 balewski Exp $
+// $Id: DoSt2feeTTree.C,v 1.6 2003/08/22 20:53:08 balewski Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -220,6 +220,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
   gSystem->Load("StEEmcUtil");
 // My Makers  1
   StEEmcDbMaker  *myMk1=new StEEmcDbMaker("eemcDBio");
+  // myMk1->setDBname("TestScheme/emc");
   myMk1->setSectors(1,12);
   myMk1->setTimeStampDay(20030214);  // format: yyyymmdd
 
@@ -292,8 +293,20 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     // Event loop
     //
     istat=0,iEvt=1;
-    istat = chain->EventLoop(1,nEvents);    
-   t.Print();
+
+    int eventCounter=0;
+    int stat=0;
+    //---------------------------------------------------
+    while ( stat==0 ) {// loop over events
+      if(eventCounter>=nEvents) break;
+      chain->Clear();
+      stat = chain->Make();
+      
+      printf(" event# %d\n", eventCounter++);
+      
+  }
+    //    istat = chain->EventLoop(1,nEvents);    
+    //JB   t.Print();
     
     f.Write();
     printf("\n\n============== TTree closed =========\n\n");
@@ -340,153 +353,4 @@ void doEvents(const Int_t nEvents, const Char_t *path,const Char_t *file, const 
 //--------------------------------------------------------------------------
 void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 { doEvents(1,nEvents,fileList,qaflag); }
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// $Log: DoSt2feeTTree.C,v $
-// Revision 1.5  2003/04/27 20:26:36  balewski
-// replace script
-//
-// Revision 1.82  2003/04/26 03:36:25  jeromel
-// Forgot to commit
-//
-// Revision 1.81  2003/02/27 17:01:06  fine
-// the secondary filter in example has been disabled by default
-//
-// Revision 1.80  2003/02/26 04:40:29  fine
-// add one extra filter to display
-//
-// Revision 1.79  2003/01/17 17:14:06  fine
-// fix: StEventMaker was not loaded properly
-//
-// Revision 1.78  2003/01/17 16:26:13  fine
-//  chnage display default parameters
-//
-// Revision 1.77  2002/11/26 02:30:29  perev
-// EventLoop added
-//
-// Revision 1.75  2002/04/14 22:27:29  perev
-// remove reading dst by default
-//
-// Revision 1.74  2002/02/23 19:25:55  perev
-// NotifyMe used
-//
-// Revision 1.73  2002/01/15 18:28:53  perev
-// @file logic added
-//
-// Revision 1.72  2001/12/22 03:47:27  perev
-// StTpcDb.so is not loaded for event.root case
-//
-// Revision 1.71  2001/09/27 00:51:34  perev
-// call StEventMaker conditionally
-//
-// Revision 1.69  2001/09/17 00:13:14  perev
-// Load StEventUtilities
-//
-// Revision 1.67  2001/09/07 18:32:28  perev
-// help restored
-//
-// Revision 1.66  2001/09/01 19:56:41  perev
-// EventDisplay option added
-//
-// Revision 1.65  2001/05/19 00:32:53  perev
-// Skip added
-//
-// Revision 1.64  2001/05/04 20:17:31  perev
-// remove St_dst_bfc_status::iterator
-//
-// Revision 1.63  2001/02/27 23:19:38  perev
-// test for filelist[0]!=0 added
-//
-// Revision 1.62  2001/02/21 23:16:19  perev
-// clean up
-//
-// Revision 1.61  2001/02/14 23:39:17  perev
-// classs TTable::iterator example introdiced
-//
-// Revision 1.60  2000/09/06 22:42:41  ullrich
-// Moved WriteOut StEvent block after the line where the analysis
-// maker gets created.
-//
-// Revision 1.59  2000/07/21 01:38:46  perev
-// GC query changed
-//
-// Revision 1.58  2000/07/16 23:04:27  perev
-// Remove redundunt Finish() call
-//
-// Revision 1.57  2000/07/03 02:08:00  perev
-// StEvent: vector<TObject*>
-//
-// Revision 1.56  2000/06/20 14:11:46  kathy
-// now unpack BfcStatus table in doEvents so people can see if maker errors exist
-//
-// Revision 1.55  2000/06/19 23:33:29  perev
-// GC for real data
-//
-// Revision 1.54  2000/05/18 17:44:54  kathy
-// turn off by default the writing of output *.event.root file - had it ON by default by accident
-//
-// Revision 1.53  2000/05/17 16:53:50  kathy
-// change flag to write out .event.root file to false by default
-//
-// Revision 1.52  2000/05/17 16:50:47  kathy
-// put Victor's code to write out .event.root file from doEvents.C in here with a flag to turn off and on - now we can get rid of doEventsOut.C ... don't have to keep up 2 sets of macros
-//
-// Revision 1.51  2000/05/17 15:58:08  kathy
-// added some print statements to beginning
-//
-// Revision 1.50  2000/05/09 19:38:17  kathy
-// update to use standard default input files and only process few events by default - to make it easy to run in automatic macro testing script
-//
-// Revision 1.49  2000/04/21 13:40:08  wenaus
-// correct the doc for nEvents in multifile mode
-//
-// Revision 1.48  2000/04/18 21:43:12  fine
-// make TurnDisplay macro available for doEvents
-//
-// Revision 1.47  2000/04/13 22:14:03  perev
-// StFile -> StFileI
-//
-// Revision 1.46  2000/04/13 21:46:34  kathy
-// remove loading of libtpc_Tables since l3Track table is now dst_track type from global
-//
-// Revision 1.45  2000/04/12 17:33:45  kathy
-// put loading of libtpc_Tables back in since Iwona is going back to original tpt_track table
-//
-// Revision 1.44  2000/04/12 15:29:05  kathy
-// comment out libtpc by default
-//
-// Revision 1.43  2000/04/12 15:06:53  kathy
-// changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because of a mismatch with tpt_track table
-//
-// Revision 1.42  2000/04/07 15:54:26  perev
-// GC added
-//
-// Revision 1.41  2000/03/20 17:32:55  kathy
-// setbranches in all macros so that they will work with softlinks - for StIOMaker
-//
-// Revision 1.40  2000/03/17 23:10:06  kathy
-// make sure the dst branch is explicitly set in the macros using dst.root files as input - otherwise they don't work properly with soft links
-//
-// Revision 1.39  2000/01/11 18:20:20  ullrich
-// Add latests improvements from Victor.
-//
-// Revision 1.38  2000/01/10 22:06:09  kathy
-// add owner name and comments
-//
-// Revision 1.37  1999/11/17 14:34:00  ullrich
-// Added version with no arguments which prints usage info.
-//
-// Revision 1.36  1999/11/17 14:23:40  ullrich
-// Updated for new StEvent/StEventMaker.
-//
-// owner: Torre Wenaus,Victor Perevoztchikov
-// what it does: reads .dst.root or .dst.xdf file or files, fills StEvent &
-//      then runs StAnalysisMaker 
-//////////////////////////////////////////////////////////////////////////
-
-
-
-
-
 
