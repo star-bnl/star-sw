@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.h,v 1.11 2001/08/01 19:39:50 snelling Exp $
+// $Id: StFlowPicoEvent.h,v 1.12 2002/02/01 23:06:59 snelling Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -42,6 +42,7 @@ class StFlowPicoEvent : public TObject {
   Int_t         EventID()    const { return mEventID; }
   Int_t         RunID()      const { return mRunID; }
   Double_t      CenterOfMassEnergy() const { return mCenterOfMassEnergy; }
+  Double_t      MagneticField() const { return mMagneticField; }
   Short_t       BeamMassNumberEast() const { return mBeamMassNumberEast; }
   Short_t       BeamMassNumberWest() const { return mBeamMassNumberWest; } 
   Float_t       CTB()        const { return mCTB; }
@@ -53,6 +54,7 @@ class StFlowPicoEvent : public TObject {
   void SetEventID(const Int_t id)       { mEventID = id; }
   void SetRunID(const Int_t id)         { mRunID = id; }
   void SetCenterOfMassEnergy(const Double_t cms) { mCenterOfMassEnergy = cms; }
+  void SetMagneticField(const Double_t mf) { mMagneticField = mf; }
   void SetBeamMassNumberEast(const Short_t bme) { mBeamMassNumberEast = bme; }
   void SetBeamMassNumberWest(const Short_t bmw) { mBeamMassNumberWest = bmw; }
   void SetNtrack(const Int_t ntrk)      { mNtrack = ntrk; }
@@ -74,6 +76,7 @@ class StFlowPicoEvent : public TObject {
   Int_t          mNtrack;               // track number
   Int_t          mEventID;              // event ID
   Int_t          mRunID;                // run ID
+  Double_t       mMagneticField;        // Magnetic Field 
   Double_t       mCenterOfMassEnergy;   // CMS Energy 
   Short_t        mBeamMassNumberEast;   // Mass Number of East Beam
   Short_t        mBeamMassNumberWest;   // Mass Number of West Beam
@@ -94,7 +97,7 @@ class StFlowPicoEvent : public TObject {
   TClonesArray*        fTracks;
   static TClonesArray* fgTracks;
   
-  ClassDef(StFlowPicoEvent,4)
+  ClassDef(StFlowPicoEvent,5)
 };
 
 #endif
@@ -102,6 +105,9 @@ class StFlowPicoEvent : public TObject {
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.h,v $
+// Revision 1.12  2002/02/01 23:06:59  snelling
+// Added entries for header information in flowPico (not everthing is available yet)
+//
 // Revision 1.11  2001/08/01 19:39:50  snelling
 // Added the trigger word
 //
