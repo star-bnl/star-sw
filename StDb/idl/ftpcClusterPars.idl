@@ -42,30 +42,6 @@
      float unfoldLimit;              /* accuracy of unfolding */
      float unfoldFailedLimit;        /* limit for failed unfolding */
 
-
-     // cluster geometry parameters
-
-     long minTimebin;                /* min timebin for cluster search inner */ 
-     long minTimebinMed;             /* min timebin for cluster search medium */ 
-     long minTimebinOut;             /* min timebin for cluster search out */ 
-
-     long maxTimelength;             /* max timelength of cluster inner */
-     long maxPadlength;              /* max padlength of cluster inner */
-     long maxPadlengthMed;           /* max padlength of cluster medium */
-     long maxTimelengthMed;          /* max timelength of cluster medium */
-     long maxPadlengthOut;           /* max padlength of cluster out */
-     long maxTimelengthOut;          /* max timelength of cluster out */
-
-     long deltaTime;                 /* width of unfolding window in time */
-     long deltaPad;                  /* width of unfolding window in pad */
-     float minChargeWindow;          /* minimum charge to make hit in search window */
-
-     // shift of inner cathode
-     float offsetCathodeWest;        /* inner cathode offset in cm west */
-     float offsetCathodeEast;        /* inner cathode offset in cm east */
-     float angleOffsetWest;          /* angle offset of inner cathode displ. in radians west */
-     float angleOffsetEast;          /* angle offset of inner cathode displ. in radians east */
-
      // run parameters
      float normalizedNowPressure;   /* normalized air pressure (in hPa) */
      float adjustedAirPressureWest;  /* temperature adjusted air pressure for FTPC West */
