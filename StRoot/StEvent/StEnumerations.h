@@ -1,14 +1,9 @@
 /*!
  * \file StEnumerations.h
- *
- * Enumerations for StEvent.
- * Note that lots of code depend on this file and
- * any change will force a recompilation of almost
- * all of StEvent.
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.16 2002/02/27 18:56:27 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.17 2002/04/18 23:22:41 jeromel Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -21,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.17  2002/04/18 23:22:41  jeromel
+ * Changes for SVT 2 tables scheme.
+ *
  * Revision 2.16  2002/02/27 18:56:27  ullrich
  * Added enum for l3 track finder.
  *
@@ -97,7 +95,7 @@ enum StChargeSign {negative, positive};
 /*!
  * \enum StTrackType 
  */
-enum StTrackType {global, primary, tpt, secondary};
+enum StTrackType {global, primary, tpt, secondary, estGlobal, estPrimary};
 
 /*!
  * \enum StTrackModel 
