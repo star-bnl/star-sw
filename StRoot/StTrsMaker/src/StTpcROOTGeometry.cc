@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcROOTGeometry.cc,v 1.3 1999/12/08 02:10:42 calderon Exp $
+ * $Id: StTpcROOTGeometry.cc,v 1.4 2000/01/10 23:14:29 lasiuk Exp $
  *
  * Author: brian May March 22, 1998
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcROOTGeometry.cc,v $
+ * Revision 1.4  2000/01/10 23:14:29  lasiuk
+ * Include MACROS for compatiblity with SUN CC5
+ *
  * Revision 1.3  1999/12/08 02:10:42  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -25,6 +28,13 @@
 #include "SystemOfUnits.h"
 #ifndef ST_NO_NAMESPACES
 using namespace units;
+#endif
+#ifndef ST_NO_EXCEPTIONS
+#   include <stdexcept>
+#   if !defined(ST_NO_NAMESPACES)
+        using std::invalid_argument;
+        using std::range_error;
+#   endif
 #endif
 #include "StTpcROOTGeometry.hh"
 

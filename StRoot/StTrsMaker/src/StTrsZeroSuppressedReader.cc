@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsZeroSuppressedReader.cc,v 1.2 1999/12/08 02:10:43 calderon Exp $
+ * $Id: StTrsZeroSuppressedReader.cc,v 1.3 2000/01/10 23:14:31 lasiuk Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsZeroSuppressedReader.cc,v $
+ * Revision 1.3  2000/01/10 23:14:31  lasiuk
+ * Include MACROS for compatiblity with SUN CC5
+ *
  * Revision 1.2  1999/12/08 02:10:43  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -26,10 +29,21 @@
  ***************************************************************************/
 #include "StTrsZeroSuppressedReader.hh"
 
+#include <algorithm>
+#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+using std::find;
+using std::distance;
+#endif
+#ifndef ST_NO_EXCEPTIONS
+#   include <stdexcept>
+#   if !defined(ST_NO_NAMESPACES)
+        using std::out_of_range;
+#   endif
+#endif
+
 #include "StGlobals.hh"
 #include "StTrsRawDataEvent.hh"
 #include "StTrsDigitalSector.hh"
-#include <algorithm>
 
 StTrsZeroSuppressedReader* StTrsZeroSuppressedReader::mInstance = 0;
 

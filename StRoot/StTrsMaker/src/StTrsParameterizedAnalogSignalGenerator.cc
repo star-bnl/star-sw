@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.9 1999/11/11 19:45:11 calderon Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.10 2000/01/10 23:14:31 lasiuk Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.10  2000/01/10 23:14:31  lasiuk
+ * Include MACROS for compatiblity with SUN CC5
+ *
  * Revision 1.9  1999/11/11 19:45:11  calderon
  * Made variables-> data members in analog signal generator to avoid
  * initialization time when member functions are called.
@@ -68,6 +71,9 @@
 #include "SystemOfUnits.h"
 #include "PhysicalConstants.h"
 #include "StCoordinates.hh"
+#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+using std::sort;
+#endif
 
 #include "StTrsParameterizedAnalogSignalGenerator.hh"
 

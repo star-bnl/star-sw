@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcDbGeometry.cc,v 1.2 1999/12/08 02:10:41 calderon Exp $
+ * $Id: StTpcDbGeometry.cc,v 1.3 2000/01/10 23:14:29 lasiuk Exp $
  *
  * Authors: Brain Lasiuk & Manuel Calderon de la Barca Sanchez September 8, 1999
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcDbGeometry.cc,v $
+ * Revision 1.3  2000/01/10 23:14:29  lasiuk
+ * Include MACROS for compatiblity with SUN CC5
+ *
  * Revision 1.2  1999/12/08 02:10:41  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -32,6 +35,15 @@
 #ifndef ST_NO_NAMESPACES
 using namespace units;
 #endif
+
+#ifndef ST_NO_EXCEPTIONS
+#   include <stdexcept>
+#   if !defined(ST_NO_NAMESPACES)
+        using std::invalid_argument;
+        using std::range_error;
+#   endif
+#endif
+
 #include "StTpcDbGeometry.hh"
 //#include "StUtilities/StMessMgr.h"
 #include "StTpcDb/StTpcDb.h"

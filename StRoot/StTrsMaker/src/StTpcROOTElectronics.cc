@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcROOTElectronics.cc,v 1.2 1999/12/08 02:10:41 calderon Exp $
+ * $Id: StTpcROOTElectronics.cc,v 1.3 2000/01/10 23:14:29 lasiuk Exp $
  *
  * Author: brian March 22, 1999
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcROOTElectronics.cc,v $
+ * Revision 1.3  2000/01/10 23:14:29  lasiuk
+ * Include MACROS for compatiblity with SUN CC5
+ *
  * Revision 1.2  1999/12/08 02:10:41  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -20,8 +23,17 @@
  ******************************************************************/
 #ifdef __ROOT__
 #include "SystemOfUnits.h"
+#ifndef ST_NO_NAMESPACES
+using namespace units;
+#endif
 #include "StTpcROOTElectronics.hh"
 
+#ifndef ST_NO_EXCEPTIONS
+#   include <stdexcept>
+#   if !defined(ST_NO_NAMESPACES)
+        using std::invalid_argument;
+#   endif
+#endif
 StTpcElectronics* StTpcROOTElectronics::mInstance = 0; // static data member
 
 StTpcROOTElectronics::StTpcROOTElectronics() { /* nopt */ }

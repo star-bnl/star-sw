@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcSimpleElectronics.cc,v 1.5 1999/02/28 20:17:40 lasiuk Exp $
+ * $Id: StTpcSimpleElectronics.cc,v 1.6 2000/01/10 23:14:30 lasiuk Exp $
  *
  * Author: brian Nov 3, 1998
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcSimpleElectronics.cc,v $
+ * Revision 1.6  2000/01/10 23:14:30  lasiuk
+ * Include MACROS for compatiblity with SUN CC5
+ *
  * Revision 1.5  1999/02/28 20:17:40  lasiuk
  * add numberOfTimeBins
  *
@@ -40,6 +43,12 @@
 #include "SystemOfUnits.h"
 #include "StTpcSimpleElectronics.hh"
 #include "StGetConfigValue.hh"
+#ifndef ST_NO_EXCEPTIONS
+#   include <stdexcept>
+#   if !defined(ST_NO_NAMESPACES)
+        using std::invalid_argument;
+#   endif
+#endif
 
 StTpcElectronics* StTpcSimpleElectronics::mInstance = 0; // static data member
 
