@@ -4,7 +4,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
-#include "dstype.h"
+#include "dsxdr.h"
    static FILE         *f=NULL; /* input file      */
    static XDR           x;      /* XDR stream      */
    static DS_DATASET_T *d=NULL; /* "root" dataset  */
