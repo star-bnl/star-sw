@@ -1,5 +1,8 @@
-// $Id: StFtpcRawWriter.cc,v 1.4 2002/09/13 13:36:17 fsimon Exp $
+// $Id: StFtpcRawWriter.cc,v 1.5 2002/11/26 02:20:39 perev Exp $
 // $Log: StFtpcRawWriter.cc,v $
+// Revision 1.5  2002/11/26 02:20:39  perev
+// iostream added
+//
 // Revision 1.4  2002/09/13 13:36:17  fsimon
 // Include correction for wrong pad numbering in central FEE Card in
 // each sector of the East FTPC
@@ -13,6 +16,7 @@
 // used by StFtpcSlowSimulator to write simulated data to tables
 
 
+#include <iostream.h>
 #include "StFtpcRawWriter.hh"
 
 StFtpcRawWriter::StFtpcRawWriter(St_fcl_ftpcndx *ftpcndxIn,
