@@ -1,5 +1,0 @@
- macro finish
- macro/global/import *
- message ' finish_user '
-
- return
