@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RecHeaderFormats.hh,v 1.8 2002/12/09 18:54:23 ward Exp $
+ * $Id: RecHeaderFormats.hh,v 1.9 2003/05/22 20:53:31 perev Exp $
  * Author: M.W. Schulz, Jeff Landgraf, M.J. LeVine
  ***************************************************************************
  * Description: Bank header formats common to all detectors in STAR:
@@ -11,6 +11,9 @@
  *
  ***************************************************************************
  * $Log: RecHeaderFormats.hh,v $
+ * Revision 1.9  2003/05/22 20:53:31  perev
+ * method added to remove unprintef chars
+ *
  * Revision 1.8  2002/12/09 18:54:23  ward
  * EMC stuff from Subhassis.
  *
@@ -33,7 +36,7 @@
  *
  *
  **************************************************************************/
-
+#include <ctype.h>
 
 #ifndef RECHEADERFORMATS_HH
 #define RECHEADERFORMATS_HH
@@ -113,6 +116,11 @@ struct Bank_Header
   
   int swap();
   void print();
+  const char *bankTypeString() const
+  { static char buf[20];size_t i;
+    for (i=0; (i<sizeof(BankType))&&(isprint(BankType[i]));i++) {buf[i]=BankType[i];}
+    buf[i]=0; return buf;
+  }
 };
 
 struct Bank
@@ -123,6 +131,7 @@ struct Bank
   int test_CRC();
   int swap();
   void print(int level=0);  
+  const char *bankTypeString() const {return header.bankTypeString();}
 };
 
 struct Pointer          // Used repeatedly
