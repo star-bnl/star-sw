@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Reader.hh,v 1.3 2000/07/06 18:16:01 ward Exp $
+ * $Id: L3_Reader.hh,v 1.4 2000/07/26 02:12:28 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -11,10 +11,14 @@
  *
  * change log:
  *   06 Jun 00 CS initial version
+ *   25 Jul 00 CS added i960 cluster reader
  *
  ***************************************************************************
  *
  * $Log: L3_Reader.hh,v $
+ * Revision 1.4  2000/07/26 02:12:28  struck
+ * added i960 cluster reader
+ *
  * Revision 1.3  2000/07/06 18:16:01  ward
  * Install L3 code from Christof Struck.
  *
@@ -44,6 +48,9 @@ class Bank_L3_GTD;
 class Bank_L3_SECP;
 class Bank_L3_SECTP;
 class Bank_L3_SECCD;
+class Bank_TPCSECLP;
+class Bank_TPCRBCLP;
+class Bank_TPCMZCLD;
 class GlobalTrackReader;
 class Sl3ClusterReader;
 class Sl3TrackReader;
@@ -134,6 +141,28 @@ private:
 };
 
 
+//-------------- I960ClusterReader ------------------------
+
+class I960ClusterReader {
+
+public:
+  l3_cluster *getClusterList () { return cluster; }
+  int getNumberOfClusters () { return nCluster; }
+
+  int initialize ();
+  I960ClusterReader (int sector, L3_Reader *l3r);
+  ~I960ClusterReader ();
+
+private:
+  Bank_TPCMZCLD *pBankTPCMZCLD[12][3];  // pointers to banks of one sector
+  l3_cluster *cluster;
+  int nCluster;
+  int sector;
+  L3_Reader *l3;
+
+};
+
+
 //-------------- L3_Reader --------------------------------
 
 class L3_Reader {
@@ -148,10 +177,14 @@ public:
   Bank_L3_SECP  *getL3_SECP (int sector);     // numbering conv. sector = 1...24
   Bank_L3_SECTP *getL3_SECTP (int sector);
   Bank_L3_SECCD *getL3_SECCD (int sector);
+  Bank_TPCSECLP *getTPCSECLP (int sector);
+  Bank_TPCRBCLP *getTPCRBCLP (int sector, int rb);
+  Bank_TPCMZCLD *getTPCMZCLD (int sector, int rb, int mz);
 
   GlobalTrackReader *getGlobalTrackReader ();
   Sl3ClusterReader  *getSl3ClusterReader (int sector);
   Sl3TrackReader    *getSl3TrackReader (int sector);
+  I960ClusterReader *getI960ClusterReader (int sector);
 
   int errorNo() { return errnum; };
   string errstr() { return string(errstr0); };
@@ -167,7 +200,9 @@ protected:
   Bank_L3_SECP *pBankL3SECP;
   Bank_L3_SECCD *pBankL3SECCD;
   Bank_L3_SECTP *pBankL3SECTP;
-
+  Bank_TPCSECLP *pBankTPCSECLP;
+  Bank_TPCRBCLP *pBankTPCRBCLP;
+  Bank_TPCMZCLD *pBankTPCMZCLD;
 };
 
 

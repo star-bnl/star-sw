@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3.Banks.cxx,v 1.2 2000/07/06 18:16:00 ward Exp $
+ * $Id: L3.Banks.cxx,v 1.3 2000/07/26 02:12:27 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -11,10 +11,14 @@
  *
  * change log:
  *   06 Jun 00 CS initial version
+ *   24 Jul 00 CS added i960 cluster banks
  *
  ***************************************************************************
  *
  * $Log: L3.Banks.cxx,v $
+ * Revision 1.3  2000/07/26 02:12:27  struck
+ * added i960 cluster reader
+ *
  * Revision 1.2  2000/07/06 18:16:00  ward
  * Install L3 code from Christof Struck.
  *
@@ -107,6 +111,26 @@ int Bank_L3_SECCD::swap()
   return iret;
 }
 
+
+// taken from TPCV2PO.Banks.cxx
+int Bank_TPCMZCLD::swap()
+{
+  int iret = swap_raw(header.ByteOrder, &numberOfRows, 1);
+  if(iret <= 0) return iret;
+
+  int nsp = 0;
+  int *word = &numberOfRows;
+  word++;                //bump to first instance of PadRow
+  for (int i=0; i<numberOfRows; i++) {
+        swap_raw(header.ByteOrder, word, 2);
+	nsp = word[1];
+	word += 2;       //point to first cluster
+	swap_short(header.ByteOrder, word, 2*nsp);
+	word += 2 * nsp; //bump past clusters
+  }
+
+  return header.swap();
+}
 
 
 // our own swap, which swaps shorts (and not words of shorts)

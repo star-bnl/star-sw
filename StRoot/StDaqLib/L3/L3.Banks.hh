@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3.Banks.hh,v 1.2 2000/07/06 18:16:00 ward Exp $
+ * $Id: L3.Banks.hh,v 1.3 2000/07/26 02:12:27 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -11,10 +11,14 @@
  *
  * change log:
  *   06 Jun 00 CS initial version
+ *   24 Jul 00 CS added i960 cluster banks
  *
  ***************************************************************************
  *
  * $Log: L3.Banks.hh,v $
+ * Revision 1.3  2000/07/26 02:12:27  struck
+ * added i960 cluster reader
+ *
  * Revision 1.2  2000/07/06 18:16:00  ward
  * Install L3 code from Christof Struck.
  *
@@ -38,7 +42,10 @@
 #define CHAR_L3_LTD     "L3_LTD  "
 #define CHAR_L3_GTD     "L3_GTD  "
 #define CHAR_L3_SECCD   "L3_SECCD"
-
+// i960 cluster banks
+#define CHAR_TPCSECLP   "TPCSECLP"
+#define CHAR_TPCRBCLP   "TPCRBCLP"
+#define CHAR_TPCMZCLD   "TPCMZCLD"
 
 
 // Top-level pointer bank
@@ -159,7 +166,7 @@ struct Bank_L3_LTD: public Bank
 };
 
 // pointer bank for all sl3 track data
-// here implemented: banks[0] point to local_track (L3_LTD struct)
+// here implemented: banks[0] points to local_track (L3_LTD struct)
 struct Bank_L3_SECTP: public Bank
 {
     unsigned int nHits;    // Nr of space points
@@ -189,6 +196,33 @@ struct vertex {
      float x;
      float y;
      float z;
+};
+
+
+// i960 cluster banks
+// exported by SL3
+struct Bank_TPCSECLP: public Bank
+{
+     Pointer receiverBoard[12];   // year one: rb 1-6 odd sector, rb 7-12 even sector 
+};
+
+
+struct Bank_TPCRBCLP: public Bank
+{
+     Pointer mezzBoard[3];
+     int     fiberHeader[12];
+};
+
+
+// already defined in TPCV2PO.Banks.hh
+// defined here for consistency, since bank is normally 
+// exported by SL3
+struct Bank_TPCMZCLD: public Bank
+{
+     int numberOfRows;
+     int stuff[10];     // place holder for cluster data
+
+     int swap();
 };
 
 

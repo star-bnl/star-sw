@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Reader.cxx,v 1.3 2000/07/06 18:16:01 ward Exp $
+ * $Id: L3_Reader.cxx,v 1.4 2000/07/26 02:12:28 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -11,10 +11,14 @@
  *
  * change log:
  *   06 Jun 00 CS initial version
+ *   25 Jul 00 CS added i960 cluster reader
  *
  ***************************************************************************
  *
  * $Log: L3_Reader.cxx,v $
+ * Revision 1.4  2000/07/26 02:12:28  struck
+ * added i960 cluster reader
+ *
  * Revision 1.3  2000/07/06 18:16:01  ward
  * Install L3 code from Christof Struck.
  *
@@ -133,6 +137,94 @@ Bank_L3_SECTP * L3_Reader::getL3_SECTP (int sec)
 }
 
 
+Bank_TPCSECLP * L3_Reader::getTPCSECLP (int sec)
+{
+  // get L3_SECP for this sector first
+  pBankL3SECP = getL3_SECP(sec);
+  if (pBankL3SECP==NULL) {
+        pBankTPCSECLP = NULL;
+	return pBankTPCSECLP;
+  }
+  
+  // now check on TPCSECLP
+  if (pBankL3SECP->clusterp.length==0) {
+        L3secERROR(INFO_MISSING_BANK, "no TPCSECLP bank", sec);
+        pBankTPCSECLP = NULL;
+	return pBankTPCSECLP;
+  }
+
+  pBankTPCSECLP = (Bank_TPCSECLP *) ((INT32 *)pBankL3SECP + pBankL3SECP->clusterp.offset);
+  if (strncmp(pBankTPCSECLP->header.BankType, CHAR_TPCSECLP, 8) != 0) {
+        L3secERROR(ERR_BAD_HEADER, "bad TPCSECLP header", sec);
+	pBankTPCSECLP = NULL;
+	return pBankTPCSECLP;
+  }
+
+  if (pBankTPCSECLP->swap() < 0) L3secERROR(ERR_SWAP, "swap TPCSECLP", sec);
+
+  return pBankTPCSECLP;
+
+}
+
+
+Bank_TPCRBCLP * L3_Reader::getTPCRBCLP (int sec, int rb)
+{
+  pBankTPCSECLP = getTPCSECLP(sec);
+  if (pBankTPCSECLP==NULL) {
+        pBankTPCRBCLP = NULL;
+	return pBankTPCRBCLP;
+  }
+
+  // now check on TPCSECLP
+  if (pBankTPCSECLP->receiverBoard[rb-1].length==0) {
+        L3secERROR(INFO_MISSING_BANK, "no TPCRBCLP bank", sec);
+        pBankTPCRBCLP = NULL;
+	return pBankTPCRBCLP;
+  }
+
+  pBankTPCRBCLP = (Bank_TPCRBCLP *) ((INT32 *)pBankTPCSECLP + pBankTPCSECLP->receiverBoard[rb-1].offset);
+  if (strncmp(pBankTPCRBCLP->header.BankType, CHAR_TPCRBCLP, 8) != 0) {
+        L3secERROR(ERR_BAD_HEADER, "bad TPCRBCLP header", sec);
+	pBankTPCRBCLP = NULL;
+	return pBankTPCRBCLP;
+  }
+
+  if (pBankTPCRBCLP->swap() < 0) L3secERROR(ERR_SWAP, "swap TPCRBCLP", sec);
+
+  return pBankTPCRBCLP;
+
+}
+
+
+Bank_TPCMZCLD * L3_Reader::getTPCMZCLD (int sec, int rb, int mz)
+{
+  pBankTPCRBCLP = getTPCRBCLP(sec, rb);
+  if (pBankTPCRBCLP==NULL) {
+        pBankTPCMZCLD = NULL;
+	return pBankTPCMZCLD;
+  }
+
+  // now check on TPCMZCLD
+  if (pBankTPCRBCLP->mezzBoard[mz-1].length==0) {
+        L3secERROR(INFO_MISSING_BANK, "no TPCMZCLD bank", sec);
+        pBankTPCMZCLD = NULL;
+	return pBankTPCMZCLD;
+  }
+
+  pBankTPCMZCLD = (Bank_TPCMZCLD *) ((INT32 *)pBankTPCRBCLP + pBankTPCRBCLP->mezzBoard[mz-1].offset);
+  if (strncmp(pBankTPCMZCLD->header.BankType, CHAR_TPCMZCLD, 8) != 0) {
+        L3secERROR(ERR_BAD_HEADER, "bad TPCMZCLD header", sec);
+	pBankTPCMZCLD = NULL;
+	return pBankTPCMZCLD;
+  }
+
+  if (pBankTPCMZCLD->swap() < 0) L3secERROR(ERR_SWAP, "swap TPCMZCLD", sec);
+
+  return pBankTPCMZCLD;
+
+}
+
+
 GlobalTrackReader * L3_Reader::getGlobalTrackReader ()
 {
   GlobalTrackReader *gtr = new GlobalTrackReader (this);
@@ -167,6 +259,18 @@ Sl3TrackReader * L3_Reader::getSl3TrackReader (int sec)
 	return NULL;
   }
   return tr;
+}
+
+
+I960ClusterReader * L3_Reader::getI960ClusterReader (int sec)
+{
+  I960ClusterReader *icr = new I960ClusterReader (sec, this);
+  if (!icr->initialize()) {
+        //cout << "ERROR: getI960ClusterReader FAILED" << endl;
+	delete icr;
+	return NULL;
+  }
+  return icr;
 }
 
 
@@ -227,6 +331,97 @@ int Sl3ClusterReader::initialize ()
   
   cluster  = pL3SECCD->cluster;
   nCluster = pL3SECCD->nrClusters_in_sector;
+
+  return TRUE;
+}
+
+
+// ---------- I960ClusterReader --------------------
+
+I960ClusterReader::I960ClusterReader (int sec, L3_Reader *l3r)
+{
+  l3 = l3r;
+  sector = sec;
+  cluster = NULL;
+  nCluster = 0;
+  for (int rb=0; rb<12; rb++) {
+        for (int mz=0; mz<3; mz++) {
+	      pBankTPCMZCLD[rb][mz] = NULL;
+	}
+  }
+}
+
+
+I960ClusterReader::~I960ClusterReader ()
+{
+  delete [] cluster;
+}
+
+
+int I960ClusterReader::initialize ()
+{
+  Bank_TPCMZCLD *cld;
+
+  struct Centroids {
+    unsigned short x;
+    unsigned short t;
+  }; 
+
+  struct SpacePt {
+    Centroids centroids;
+    unsigned short flags;
+    unsigned short q;
+  };
+
+  for (int rb=1; rb<=12; rb++) {
+        for (int mz=1; mz<=3; mz++) {
+	      //pointer to TPCMZCLD bank
+	      pBankTPCMZCLD[rb-1][mz-1] = l3->getTPCMZCLD(sector, rb, mz); 
+	      cld = pBankTPCMZCLD[rb-1][mz-1];
+	      if (!cld) continue;
+	      int *ptr = (int *)&cld->stuff;
+	      for (int ir=0; ir<cld->numberOfRows; ir++) {
+		    int row = *ptr++;
+		    int nHitsThisRow = *ptr++;  // bump pointer to beginning of space points
+		    nCluster += nHitsThisRow;   // add num space pts to running total
+		    ptr += 2*nHitsThisRow;
+	      }
+	}
+  }
+  cout << "sector "<<sector<<": found " 
+       <<nCluster<<" space pts" <<endl;
+  
+  cluster = new l3_cluster[nCluster];
+  if (cluster==NULL) {
+        cout << "failed to allocate cluster structures " << endl;
+	      return FALSE;
+  }
+
+  l3_cluster *pcluster;
+  pcluster = cluster;
+
+  for ( int rb=1; rb<=12; rb++) {
+        for (int mz=1; mz<=3; mz++) {
+	      cld = pBankTPCMZCLD[rb-1][mz-1];  // pointer to TPCMZCLD bank
+	      if (!cld) continue;
+	      int *ptr = &cld->stuff[0];
+	      for (int ir=0; ir<cld->numberOfRows; ir++){
+		    int row = *ptr++;
+		    int nsp = *ptr++;           // bump pointer to beginning of space points
+		    for (int isp=0; isp<nsp; isp++, ptr+=2) {
+		          SpacePt *hit = (SpacePt *)ptr;
+		          pcluster->pad     = hit->centroids.x;
+			  pcluster->time    = hit->centroids.t;
+			  pcluster->charge  = hit->q;
+			  pcluster->flags   = hit->flags;
+			  pcluster->padrow  = row;
+			  pcluster->RB_MZ   = 16 * rb + mz;
+			  pcluster->trackId = 0; // no track ass. for i960 cluster
+			  pcluster++;
+		    }
+	      }
+	}
+  }
 
   return TRUE;
 }
