@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtClassImp.cxx,v 1.2 2000/05/25 20:53:32 laue Exp $
+ * $Id: StHbtClassImp.cxx,v 1.3 2001/06/01 16:30:26 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtClassImp.cxx,v $
+ * Revision 1.3  2001/06/01 16:30:26  laue
+ * ClassDef added for StHbtKinkCut
+ *
  * Revision 1.2  2000/05/25 20:53:32  laue
  * StHbtBaseAnalysis added
  *
@@ -32,6 +35,7 @@
 #include "StHbtMaker/Base/StHbtTripletCut.h"
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 #include "StHbtMaker/Base/StHbtV0Cut.h"
+#include "StHbtMaker/Base/StHbtKinkCut.h"
 
 #ifdef __ROOT__
   ClassImp(StHbtBaseAnalysis)
@@ -41,4 +45,5 @@
   ClassImp(StHbtTripletCut)
   ClassImp(StHbtTrackCut)
   ClassImp(StHbtV0Cut)
+  ClassImp(StHbtKinkCut)
 #endif
