@@ -1,7 +1,8 @@
 
  <h2>How to draw the STAR geometry alone :</h2>
     Sometimes the only thing one wants to see is the GEANT3 definition of the STAR geometry alone.
-    To do that the simple ROOT macro GeomDraw.C has been introduced. It is as simple as type:         
+    To do that the simple ROOT macro GeomDraw.C has been introduced. It is as simple as type (Do not forget to 
+    turn <a href="http://www.rhic.bnl.gov/~fine/EventDisplay">the ROOT Qt layer ON</a> !) :         
     <small>
                      <bold><code><pre>
          root4star GeomDraw.C
@@ -12,21 +13,26 @@
 
 <p>
 <center>
-    <bold><code>
-       root4star 'GeomDraw.C(const char *geomDescriptor="complete")'
-    </code></bold>,
+    <small><bold><code>
+       root4star 'GeomDraw.C(const char *geomDescriptor="complete",Float_t bombFactor=2.0, const char *outRootFile="")'
+    </code></bold></small>,
  </center>
  <br>
-  where "geomDescriptor" value is "complete" "by default and it can be either
-  <ol>
-    <li> STAR geometry version like "year2003" <br>
-         (see: <a href ="http://www.star.bnl.gov/STAR/comp/prod/MCGeometry.html">http://www.star.bnl.gov/STAR/comp/prod/MCGeometry.html</a>)
-         <br>
-            Example: <code>root4star 'GeomDraw.C("year2003")' </code>
-    <li> The proper ZEBRA fz file. <br>
+  where 
+  <ul> 
+    <li><code>"geomDescriptor"</code> value is "complete" "by default" and it can be either
+    <ol>
+       <li> STAR geometry version like "year2003" <br>
+           (see: <a href ="http://www.star.bnl.gov/STAR/comp/prod/MCGeometry.html">http://www.star.bnl.gov/STAR/comp/prod/MCGeometry.html</a>)
+           <br>
+              Example: <code>root4star 'GeomDraw.C("year2003")' </code>
+       <li> The proper ZEBRA fz file. <br>
             Example: <code> root4star 'GeomDraw.C("/star/u/potekhin/gstardata/y2003x_complete.fz ")'</code>
-  </ol>
-
+    </ol>
+    <li> <code>"Float_t bombFactor"</code>  is the so-called <code>"bombFactor"</code> to get the exploiding view of the detector.
+                                    To get the normal view the <code>"bombFactor"</code> has to be set to 1.0. 
+                                    It is usually useless to apply bombFactor < 1.0.
+  </ul>
 <p>
 
  One can adjust the view via ROOT Browser or ROOT TCanvas
@@ -53,4 +59,25 @@
  <ol>
     <li> Turn Qt ROOT Layer on (see: <a href="http://www.rhic.bnl.gov/~fine/EventDisplay"> http://www.rhic.bnl.gov/~fine/EventDisplay</a>)
     <li> Select "OpenGL view" from the "View" menu of ROOT TCanvas
- </pl>
+ </ol>
+ <p>
+ To adjust the so-called bombFactor you can invoke
+ the C++ statement from the ROOT command prompt:
+
+<center>
+    <small><bold><code>
+            gGeometry->SetBomb(1.6);
+    </code></bold></small>,
+ </center>
+ <br>
+
+ To change the background color  call:
+<center>
+    <small><bold><code>
+         gPad->SetFillColor(kWhite);
+    </code></bold></small>,
+ </center>
+ <br>
+
+   <code>"kWhite"</code> background is advised
+   if you want to print the image to the paper
