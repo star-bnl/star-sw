@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.21 2004/12/17 22:33:05 aihong Exp $
+// $Id: StFlowConstants.h,v 1.22 2005/02/08 20:57:36 psoren Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -54,6 +54,9 @@ class Flow{
 
   static Int_t   cent200Full[nCents];
   static Int_t   cent200Half[nCents];
+  static Int_t   cent200Year4Full[nCents];
+  static Int_t   cent200Year4Full15003[nCents];
+  static Int_t   cent200Year4Half[nCents];
   static Int_t   cent130[nCents];
   static Int_t   cent62[nCents];
   static Int_t   cent22[nCents];
@@ -70,6 +73,9 @@ class Flow{
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.22  2005/02/08 20:57:36  psoren
+// trigger and centrality selections were updated for all runs after run 4 to be compatible with trigger collections. Added TriggersFound() and GetFlowTriggerBitMap() functions.
+//
 // Revision 1.21  2004/12/17 22:33:05  aihong
 // add in full Psi weight for ZDC SMD and fix a few bugs, done by Gang
 //

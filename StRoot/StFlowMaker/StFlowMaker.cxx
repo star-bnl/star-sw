@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.100 2004/12/22 15:15:16 aihong Exp $
+// $Id: StFlowMaker.cxx,v 1.101 2005/02/08 20:57:36 psoren Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -248,7 +248,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.100 2004/12/22 15:15:16 aihong Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.101 2005/02/08 20:57:36 psoren Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -586,13 +586,8 @@ void StFlowMaker::FillFlowEvent() {
   }
 
   // Get Trigger information
-  if (pFlowEvent->CenterOfMassEnergy() > 60. && pFlowEvent->CenterOfMassEnergy() < 65.) { // 62 GeV
-    UInt_t triggerId = 0;
-    if (pEvent->triggerIdCollection()->nominal()->isTrigger(35004)) triggerId = 35004;
-    else if (pEvent->triggerIdCollection()->nominal()->isTrigger(35007)) triggerId = 35007;
-    else if (pEvent->triggerIdCollection()->nominal()->isTrigger(35001)) triggerId = 35001;
-    else if (pEvent->triggerIdCollection()->nominal()->isTrigger(35009)) triggerId = 35009;
-    pFlowEvent->SetL0TriggerWord(triggerId); // reuse trigger word for trigger collection
+  if (pEvent->runId() > 4000000) { // trigger collections
+    pFlowEvent->SetL0TriggerWord(StFlowCutEvent::TriggersFound()); // triggerWord is obsolete
   } else {
     StL0Trigger* pTrigger = pEvent->l0Trigger();
     if (pTrigger) { pFlowEvent->SetL0TriggerWord(pTrigger->triggerWord()); }
@@ -1770,13 +1765,8 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
   pFlowEvent->SetRunID(pMuEvent->runId());
   pFlowEvent->SetCenterOfMassEnergy(pMuEvent->runInfo().centerOfMassEnergy());
 
-  if (pFlowEvent->CenterOfMassEnergy() > 60. && pFlowEvent->CenterOfMassEnergy() < 65. ) { // 62 GeV
-    UInt_t triggerId = 0;
-    if (pMuEvent->triggerIdCollection().nominal().isTrigger(35004)) triggerId = 35004;
-    else if (pMuEvent->triggerIdCollection().nominal().isTrigger(35007)) triggerId = 35007;
-    else if (pMuEvent->triggerIdCollection().nominal().isTrigger(35001)) triggerId = 35001;
-    else if (pMuEvent->triggerIdCollection().nominal().isTrigger(35009)) triggerId = 35009;
-    pFlowEvent->SetL0TriggerWord(triggerId); // reuse trigger word for trigger collection
+  if (pMuEvent->runId() > 4000000 ) { // After year 4 trigger collections are used
+    pFlowEvent->SetL0TriggerWord(StFlowCutEvent::TriggersFound());  // triggerWord is now obsolete
   } else { pFlowEvent->SetL0TriggerWord(pMuEvent->l0Trigger().triggerWord()); }
 
   pFlowEvent->SetMagneticField(pMuEvent->runInfo().magneticField());
@@ -2243,6 +2233,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.101  2005/02/08 20:57:36  psoren
+// trigger and centrality selections were updated for all runs after run 4 to be compatible with trigger collections. Added TriggersFound() and GetFlowTriggerBitMap() functions.
+//
 // Revision 1.100  2004/12/22 15:15:16  aihong
 // Read run-by-run beam shifts and SMD pedestal. Done by Gang
 //

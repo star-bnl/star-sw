@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.54 2004/12/17 22:33:10 aihong Exp $
+// $Id: StFlowEvent.cxx,v 1.55 2005/02/08 20:57:36 psoren Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -980,7 +980,7 @@ void StFlowEvent::SetPidsProb() {
 //-----------------------------------------------------------------------
 
 void StFlowEvent::SetCentrality() {
-  // Centrality=0 is not retieveable
+  // Centrality=0 is not retrieveable
 
   Int_t* cent = 0;
   Int_t  tracks = mMultEta; // converts UInt_t to Int_t
@@ -1091,6 +1091,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.55  2005/02/08 20:57:36  psoren
+// trigger and centrality selections were updated for all runs after run 4 to be compatible with trigger collections. Added TriggersFound() and GetFlowTriggerBitMap() functions.
+//
 // Revision 1.54  2004/12/17 22:33:10  aihong
 // add in full Psi weight for ZDC SMD and fix a few bugs, done by Gang
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.h,v 1.11 2003/09/02 17:58:11 perev Exp $
+// $Id: StFlowCutEvent.h,v 1.12 2005/02/08 20:57:36 psoren Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -44,7 +44,9 @@ class StFlowCutEvent {
   static void   SetVertexZ(const Float_t lo, const Float_t hi);
   static void   SetEtaSymTpc(Float_t lo, Float_t hi);
   static void   SetEtaSymFtpc(Float_t lo, Float_t hi);
-  static void   SetTrigger(const Float_t value);   
+  static void   SetTrigger(const UInt_t value);   
+  static UInt_t TriggersFound();
+  static UInt_t GetFlowTriggerBitMap();
 
  private:
 
@@ -73,7 +75,10 @@ class StFlowCutEvent {
   static Float_t mEtaSymFtpcCuts[2];     // range
 
   static UInt_t  mTriggerCutN;           // number not accepted
-  static Float_t mTriggerCut;            // allowed trigger value
+  static UInt_t  mTriggerCut;            // allowed trigger value
+
+  static UInt_t  mTriggersFound;
+  static UInt_t  flowTriggerBitMap;
 
   ClassDef(StFlowCutEvent,1)             // macro for rootcint
 }; 
@@ -99,7 +104,7 @@ inline void StFlowCutEvent::SetEtaSymTpc(Float_t lo, Float_t hi) {
 inline void StFlowCutEvent::SetEtaSymFtpc(Float_t lo, Float_t hi) {
   mEtaSymFtpcCuts[0] = lo; mEtaSymFtpcCuts[1] = hi; }
 
-inline void StFlowCutEvent::SetTrigger(const Float_t value) {
+inline void StFlowCutEvent::SetTrigger(const UInt_t value) {
   mTriggerCut = value; }
 
 #endif
@@ -107,6 +112,9 @@ inline void StFlowCutEvent::SetTrigger(const Float_t value) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.h,v $
+// Revision 1.12  2005/02/08 20:57:36  psoren
+// trigger and centrality selections were updated for all runs after run 4 to be compatible with trigger collections. Added TriggersFound() and GetFlowTriggerBitMap() functions.
+//
 // Revision 1.11  2003/09/02 17:58:11  perev
 // gcc 3.2 updates + WarnOff
 //
