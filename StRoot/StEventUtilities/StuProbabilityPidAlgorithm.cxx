@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.6 2000/05/24 14:35:41 ullrich Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.7 2000/07/12 16:29:38 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.7  2000/07/12 16:29:38  aihong
+ * change to avoid possible name confliction from StarClassLibary
+ *
  * Revision 1.6  2000/05/24 14:35:41  ullrich
  * Added 'const' to compile on Sun CC5.
  *
@@ -32,7 +35,7 @@
 
 #include "StuProbabilityPidAlgorithm.h"
 
-#include "StPidAmpMaker/Include/BetheBloch.hh"
+#include "StPidAmpMaker/Include/BetheBlochFunction.hh"
 #include "StPidAmpMaker/Include/MaxllBoltz.hh"
 #include "StPidAmpMaker/Include/Linear.hh"
 #include "StPidAmpMaker/Include/StPidAmpConst.hh"
@@ -52,7 +55,7 @@ StuProbabilityPidAlgorithm::StuProbabilityPidAlgorithm(StEvent& ev){
      mProb[1]=0;
      mProb[2]=0;
       
-     StuProbabilityPidAlgorithm::funcBandPt=&BetheBloch;
+     StuProbabilityPidAlgorithm::funcBandPt=&BetheBlochFunction;
      StuProbabilityPidAlgorithm::funcAmpPt =&MaxllBoltz;   
      StuProbabilityPidAlgorithm::funcResoPt=&Linear;
 
