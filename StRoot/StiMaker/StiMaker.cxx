@@ -69,16 +69,22 @@ StiMaker::~StiMaker()
 {
     StiHitContainer::kill();
     mhitstore = 0;
+    
     delete mhitfactory;
     mhitfactory = 0;
+    
     delete mhitfiller;
     mhitfiller = 0;
+    
     delete mdisplay;
     mdisplay = 0;
+    
     StiDetectorContainer::kill();
     mdetector = 0;
+    
     StiTrackContainer::kill();
     mtrackstore = 0;
+    
 }
 
 void StiMaker::Clear(const char*)
@@ -123,7 +129,7 @@ Int_t StiMaker::Init()
     mdetector->buildMaterials(mmaterialbuildpath);
     mdetector->buildDetectors(mdetectorbuildpath);
     mdetector->reset();
-    mdetector->print();
+    //mdetector->print();
       
     mdisplay->draw();
     mdisplay->update();
