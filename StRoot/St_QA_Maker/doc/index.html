@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>StRoot/St_QA_Maker classes</title>
-<!-- Changed by: Kathleen R. Turner, 19-Jan-2000 -->
+<!-- Changed by: Kathleen R. Turner, 10-Feb-2000 -->
 </head>
 <body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
 <basefont face="verdana,arial,helvetica,sans-serif">
@@ -63,8 +63,6 @@
         <li> StQABookHist - description of methods -  <a href="#doc2c"> Go </A> 
       </ul>
    <li>
-      Standard Maker Names which are set in bfc & doEvents -  <a href="#doc3"> Go </A> 
-   <li>
      Library macros that use the code in St_QA_Maker -  <a href="#doc4"> Go </A> 
   </ul>
 <font  size ="+1" color="black"> 
@@ -98,12 +96,6 @@
                 <li>
                  inherits from StQABookHist
              </ul>
-       <li> <font  size ="+1" color="red"> StHistUtil <font  size ="+1" color="black">
-              <ul>
-                <li> provides histogram utilities to find,list,print histograms 
-                <li> this class is NOT a Maker
-                <li> NOTE! Methods in this class can be used by ANY Makers to find,list,print,draw histograms!
-              </ul>
       <li> <font  size ="+1" color="red"> StQABookHist <font  size ="+1" color="black">
               <ul>
                <li> contains methods for booking histograms for St_QA_Maker & StEventQAMaker classes
@@ -140,9 +132,10 @@
     MakeHistXi();     - table dst_xi_vertex
     MakeHistPoint();  - table point
     MakeHistKink();   - table kinkVertex
-    MakeHistL3();     - table l3Track
     MakeHistV0Eval(); - table ev0_eval
     MakeHistRich();   - table g2t_rch_hit
+    MakeHistEval();   - uses table dst_vertex & g2t_vertex 
+                      (g2t_vertex not on dst & only exists for simulated data)
   </pre>
    </h4>
 
@@ -173,7 +166,6 @@
     MakeHistXi();     
     MakeHistPoint();  
     MakeHistKink();   
-    MakeHistL3();     
     MakeHistV0Eval(); 
     MakeHistRich();   
   </pre>
@@ -210,9 +202,9 @@
     BookHistXi();     
     BookHistPoint();  
     BookHistKink();   
-    BookHistL3();     
     BookHistV0Eval(); 
     BookHistRich();   
+    BookHistEval();     
   </pre>
    </h4>
 
@@ -221,22 +213,6 @@
    </ul>
 
  </ul>
-
-<hr>
-<p>
-
-<a name="doc3">
- <font  size ="+1" color="blue">
- Standard Maker Names in bfc: <br>
- &nbsp (use these as input MakerDirName to StHistUtil methods shown above) <br>
- &nbsp NOTE: ones that have histograms are *'d
- <a href="http://www.star.bnl.gov/STAR/html/comp_l/train/tut/bfc_maker_names.html"> bfc Maker names tutorial </a>
-
- <p>
- <font  size ="+1" color="blue">
- Standard Maker Names in doEvents: <br>
- &nbsp (use these as input MakerDirName to StHistUtil methods shown above) <br>
- <a href="//www.star.bnl.gov/STAR/html/comp_l/train/tut/doEvents_maker_names.html"> doEvents Maker names tutorial </a>
 
 <hr>
 <p>
