@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.12 2000/01/05 17:44:53 ullrich Exp $
+% $Id: StEvent.tex,v 2.13 2000/01/07 10:45:27 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -143,8 +143,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.12 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/05 17:44:53 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.13 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/07 10:45:27 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -168,8 +168,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.12 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/05 17:44:53 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.13 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/07 10:45:27 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -177,17 +177,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.12 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/05 17:44:53 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.13 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/07 10:45:27 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.12 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/05 17:44:53 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.13 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/07 10:45:27 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.12 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/05 17:44:53 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.13 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/07 10:45:27 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -202,8 +202,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.12 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/05 17:44:53 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.13 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/07 10:45:27 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -3807,8 +3807,15 @@ definition in the header file.
     Quality control flag (sort of). Most important: \texttt{flag()} $> 0$ good,
     the status of the refit and much more. For a detailed (and actual) description
     \verb+class StTpcSoftwareMonitor;+\\
+    The last two digits indicate the status of the refit:
     \begin{description}
-    \verb+UShort_t numberOfPossiblePoints(StDetectorId) const;+\\
+    \item[+x01] good track 
+    \item[-x01] Bad fit, outlier removal eliminated too many points 
+    \item[-x02] Bad fit, not enough points to fit 
+    \item[-x03] Bad fit, too many fit iterations 
+    \item[-x04] Bad Fit, too many outlier removal iterations 
+    \item[-x06] Bad fit, outlier could not be identified 
+    \item[-x10] Bad fit, not enough points to start 
     \end{description} 
     If no refit is performed by \texttt{egr} then the return value of flag()
     is defined as follows: 
@@ -3851,8 +3858,14 @@ definition in the header file.
      In all cases: 
      if $|q| \ne 1$ then flag() returns -1*(flag()+20)\\ 
      if $|1/p_\perp| \ge 999999$ then flag() returns -x99 
+
     \verb+StTrack(const dst_track_st&);+\\
-    \verb+UShort_t numberOfPoints(StDetectorId) const;+\\
+    \verb+StTrack(const StTrack&);+\\
+    \verb+StTrack& operator=(const StTrack&);+\\
+\item[Public Member\\ Functions]
+    \verb+StTrackType type() const = 0;+\\
+    Track type as defined in enumeration \texttt{StTrackType}.
+    See section \ref{sec:Enumerations}.
     
     \verb+const StVertex* vertex() const = 0;+\\
     Pointer to parent vertex.
@@ -3881,8 +3894,10 @@ definition in the header file.
 
     \verb+Bool_t finderScheme(StTrackFinderScheme) const;+\\
 
+    \verb+StTrackFittingMethod fittingMethod() const;+\\
 
-    Total number of points used for the fit.
+    \verb+Float_t impactParameter() const;+\\
+    Returns the impact parameter, or better the distance-of-closest
     aproach, of the track to the primary vertex.
     
     \verb+Float_t length() const;+\\
