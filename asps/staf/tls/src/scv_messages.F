@@ -1,3 +1,8 @@
+* $Id: scv_messages.F,v 1.3 1998/03/24 00:42:04 fisyak Exp $
+* $Log: scv_messages.F,v $
+* Revision 1.3  1998/03/24 00:42:04  fisyak
+* Clean
+*
       SUBROUTINE SCV_MESSAGES( ivalue, message )
       IMPLICIT NONE
       INTEGER ivalue         ! input: condition value to be translated

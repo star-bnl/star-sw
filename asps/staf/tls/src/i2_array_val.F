@@ -1,3 +1,8 @@
+* $Id: i2_array_val.F,v 1.2 1998/03/24 00:42:01 fisyak Exp $
+* $Log: i2_array_val.F,v $
+* Revision 1.2  1998/03/24 00:42:01  fisyak
+* Clean
+*
 	INTEGER*2 FUNCTION i2_array_val(buf,index)
 	
 C+

@@ -1,3 +1,4 @@
+#if !defined(Linux)
 c	This is a set of dummy routines to mask off some VMS runtime
 c	library routines.
 c						D. Olson 22-Oct-1991
@@ -102,3 +103,5 @@ c---------------------------------------------------------------------------
 	sys$wflor = 0
 	return
 	end
+#endif
+

@@ -1,3 +1,8 @@
+* $Id: scv_state.F,v 1.2 1998/03/24 00:42:05 fisyak Exp $
+* $Log: scv_state.F,v $
+* Revision 1.2  1998/03/24 00:42:05  fisyak
+* Clean
+*
       LOGICAL FUNCTION SCV_STATE( ivalue, flag )
       IMPLICIT NONE
 C   Input arguments (One to a line with definition after ! ) 
@@ -20,7 +25,7 @@ C
 C   Created  2-NOV-1991   Doug Olson, Bob Hackenburg
 C   Error conditions :   invalid values of ivalue or flag
 C----------------------------------------------------------------------
-      INTEGER mask, severity, iflag, max_severity
+      INTEGER mask, severity, iflag, max_severity, iand
       CHARACTER*80 bug_message
       INTEGER mid1, mid2, mid3
 C----------------------------------------------------------------------
@@ -28,7 +33,7 @@ C----------------------------------------------------------------------
       DATA max_severity/4/	!  maximum value for severity codes
       DATA mid1, mid2, mid3 /0,0,0/
 C----------------------------------------------------------------------
-      severity = ivalue .and. mask
+      severity = iand(ivalue,mask)
       iflag = index('SIWE',flag)
       IF(iflag .eq. 0) iflag = index('siwe',flag)
       IF( iflag .le. 0) THEN
@@ -83,8 +88,3 @@ C        a bug!  Let them know about their flawed ways:
       ENDIF
       RETURN
       END
-
-C  DEC/CMS REPLACEMENT HISTORY, Element SCV_STATE.FOR
-C  *2     9-NOV-1991 23:43:35 OLSON "include Bob Hackenburg"
-C  *1     9-NOV-1991 23:40:57 OLSON "Translates STAR condition values to TRUE/FALSE using severity flag"
-C  DEC/CMS REPLACEMENT HISTORY, Element SCV_STATE.FOR
