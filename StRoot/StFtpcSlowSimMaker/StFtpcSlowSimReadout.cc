@@ -1,5 +1,9 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.12 2002/10/16 12:31:53 fsimon Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.13 2002/10/17 13:42:11 fsimon Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.13  2002/10/17 13:42:11  fsimon
+// Charge scaling taken out (assumes high amplification)
+// use scaling to match 2001/2002 data
+//
 // Revision 1.12  2002/10/16 12:31:53  fsimon
 // gain factors and time offset included, Hardware <-> DAQ mapping taken into
 // account for Db access
@@ -345,7 +349,7 @@ void StFtpcSlowSimReadout::OutputADC()
 	  
 	  if (mADCArray[i] != 0){
 	    mADCArray[i] =(mADCArray[i] / mParam->adcConversion());
-	    mADCArray[i] =(mADCArray[i] / 1.4); // Scale ADC Values to match real data
+	    //mADCArray[i] =(mADCArray[i] / 1.4); // Scale ADC Values to match real data
 	  
 	    // include gainfactors 
 	    // remember that the Db access counts from 1 to 960 and not from 0 to 959 for the sector&pad index!
