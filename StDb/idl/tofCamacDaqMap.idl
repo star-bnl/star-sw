@@ -1,0 +1,14 @@
+/* tofCamacDaqMap.idl
+ *
+ * Tables: tofCamacDaqMap
+ *
+ * description: // CAMAC daq map of tof detectors
+ */
+
+struct tofCamacDaqMap {
+  short detectorId; /* 0-pVPD, 1-TOFp, 2-TOFr */
+  short trayId; /* pVPD east=-2, west=-1, for Tofr/p trayId */
+  long daqChannel; /* pVPD:0-5(11), TOFp:0-41, TOFr:0-71(119) */
+  long adcChan;    /* CAMAC ADC# 0-131(179) */
+  long tdcChan;    /* CAMAC TDC# 0-119(167) */
+};
