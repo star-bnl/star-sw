@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.11 1999/02/16 23:34:33 lasiuk Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.12 1999/02/19 10:35:04 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,9 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
- * Revision 1.11  1999/02/16 23:34:33  lasiuk
- * inline 2 functions
- * merge operations for speed up (after profiler0
+ * Revision 1.12  1999/02/19 10:35:04  lasiuk
+ * Function prototype for StTpcCoordinateTransform
  *
  * Revision 1.14  1999/02/28 20:12:50  lasiuk
  * threshold/noise additions
@@ -290,7 +289,9 @@ void StTrsSlowAnalogSignalGenerator::setChargeDistribution(StDistribution v)
 // 	    return imageChargeIntegral(xo,yo,xl,xu,yl,yu);
 // 	    break;
 // 	default:
-    StTpcCoordinateTransform transformer(mGeomDb, mSCDb);
+// 	    cerr << "Default Function Selected. ERROR!" << endl;
+// 	    exit(0);
+// 	    break;
 // 	}
 // }
 
