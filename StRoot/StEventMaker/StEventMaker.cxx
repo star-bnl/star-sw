@@ -1,6 +1,6 @@
 /*************************************************************************** 
  *
- * $Id: StEventMaker.cxx,v 2.11 2000/01/05 16:07:44 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.12 2000/01/10 18:20:32 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.11  2000/01/05 16:07:44  ullrich
- * Added loading of SSD hits and handling of runco branch.
+ * Revision 2.12  2000/01/10 18:20:32  ullrich
+ * Create new StTrackDetectorInfo object for primary tracks if
+ * first or last points differ from the referring global track.
  *
  * Revision 2.27  2000/05/26 11:36:19  ullrich
  * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
@@ -92,7 +93,7 @@
  * Revision 2.5  1999/11/11 10:02:58  ullrich
  * Added warning message in case some hits cannot be stored.
  *
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.11 2000/01/05 16:07:44 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.12 2000/01/10 18:20:32 ullrich Exp $";
  * Delete hit if it cannot be added to collection.
  *
  * Revision 2.3  1999/11/08 17:04:59  ullrich
@@ -129,10 +130,10 @@ static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.11 2000/01/05 16:07:44 ul
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.11 2000/01/05 16:07:44 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.12 2000/01/10 18:20:32 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.11 2000/01/05 16:07:44 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.12 2000/01/10 18:20:32 ullrich Exp $";
 
 ClassImp(StEventMaker)
     doPrintEventInfo  = kFALSE;
@@ -371,13 +372,23 @@ StEventMaker::makeEvent()
     //
     //        Load trigger & trigger detector data
     //
+    dst_TrgDet_st* dstTriggerDetectors = mEventManager->returnTable_dst_TrgDet(nrows);
+    int maxId = dstGlobalTracks ? max((long) dstGlobalTracks[nrows-1].id, nrows) : 0;
+        mCurrentEvent->setTriggerDetectorCollection(new StTriggerDetectorCollection(*dstTriggerDetectors));
+    if (dstL0Trigger)
+        mCurrentEvent->setL0Trigger(new StL0Trigger(*dstL0Trigger));
+
+    //
+    //  Some variables we need in the following
+        info = new StTrackDetectorInfo(dstGlobalTracks[i]); 
+    StSPtrVecTrackDetectorInfo &detectorInfo = mCurrentEvent->trackDetectorInfo();
     StSPtrVecTrackNode         &trackNodes   = mCurrentEvent->trackNodes();
     StSPtrVecV0Vertex          &v0Vertices   = mCurrentEvent->v0Vertices();
     StSPtrVecXiVertex          &xiVertices   = mCurrentEvent->xiVertices();
     StSPtrVecKinkVertex        &kinkVertices = mCurrentEvent->kinkVertices();
     StTrackDetectorInfo        *info;
     StTrackNode                *node;
-    
+    unsigned int               id, k, nfailed;
     int                        i;
     
     //
@@ -390,7 +401,19 @@ StEventMaker::makeEvent()
     StGlobalTrack *gtrack = 0;
     dst_track_st *dstGlobalTracks = mEventManager->returnTable_dst_globtrk(nrows);
     maxId = dstPrimaryTracks ? max((long)dstPrimaryTracks[nrows-1].id, nrows) : 0;
-            ptrack->setDetectorInfo(vecGlobalTracks[id]->detectorInfo());
+        gtrack = new StGlobalTrack(dstGlobalTracks[i]);
+        vecGlobalTracks[dstGlobalTracks[i].id] = gtrack;
+        gtrack->setGeometry(new StHelixModel(dstGlobalTracks[i]));
+        info = new StTrackDetectorInfo(dstGlobalTracks[i]);
+        gtrack->setDetectorInfo(info);
+        detectorInfo.push_back(info);
+        node = new StTrackNode();
+    if ((dstPrimaryTracks) && (nrows>0)) {
+      maxId = max((long)dstPrimaryTracks[nrows-1].id, nrows);
+    } else {
+      maxId = 0;
+    }
+    }
 
     //
 
@@ -557,6 +580,7 @@ StEventMaker::makeEvent()
 	    nfailed++;
     }
     if (nfailed) 
+	gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
 			    << " kink vertices, no valid id_vertex." << endm;
 
     }
@@ -566,10 +590,13 @@ StEventMaker::makeEvent()
 
     //
     //  Setup kinks
-		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id])
-			vecGlobalTracks[id]->detectorInfo()->addHit(tpcHit);
-		    else if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
-			vecPrimaryTracks[id]->detectorInfo()->addHit(tpcHit);
+    //
+    long nKinkVertices;
+    dst_tkf_vertex_st* dstKinkVertices = mEventManager->returnTable_dst_tkf_vertex(nKinkVertices);
+
+    nfailed = 0;
+    for (i=0; i<nKinkVertices; i++) {
+        id = dstKinkVertices[i].id_vertex - 1;
         if (id < static_cast<unsigned long>(nVertices)) {
             StKinkVertex *kink = new StKinkVertex(dstVertices[id], dstKinkVertices[i]);
             id = dstKinkVertices[i].idd;
@@ -586,6 +613,7 @@ StEventMaker::makeEvent()
                             << " kink vertices, no valid id_vertex." << endm;
 
     //
+    //  Setup hits
     //  Since the user might have decided to skip certain kind of hits
     //  we have to scan them all and get the first index and the total
     //  number of those which have to be loaded.
@@ -595,10 +623,13 @@ StEventMaker::makeEvent()
 			info->addHit(tpcHit);
 		    }
 		    if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
-		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id])
-			vecGlobalTracks[id]->detectorInfo()->addHit(svtHit);
-		    else if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
-			vecPrimaryTracks[id]->detectorInfo()->addHit(svtHit);
+			if (vecPrimaryTracks[id]->detectorInfo() != info)
+			    vecPrimaryTracks[id]->detectorInfo()->addHit(tpcHit);
+		}
+		else {
+		    nfailed++;
+		    delete tpcHit;
+		}
         int  begin, end;
         
 	    if (nfailed) 
@@ -615,6 +646,7 @@ StEventMaker::makeEvent()
                 tpcHit = new StTpcHit(dstPoints[i]);
                 if (tpcHitColl->addHit(tpcHit)) {
                     id = dstPoints[i].id_track;
+                    if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
                         info = vecGlobalTracks[id]->detectorInfo();
                         info->addHit(tpcHit);
                     }
@@ -624,10 +656,13 @@ StEventMaker::makeEvent()
 			info->addHit(svtHit);
 		    }
 		    if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
-		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id])
-			vecGlobalTracks[id]->detectorInfo()->addHit(ssdHit);
-		    else if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
-			vecPrimaryTracks[id]->detectorInfo()->addHit(ssdHit);
+			if (vecPrimaryTracks[id]->detectorInfo() != info)
+			    vecPrimaryTracks[id]->detectorInfo()->addHit(svtHit);
+		}
+		else {
+		    nfailed++;
+		    delete svtHit;
+		}
         }
         
 	    if (nfailed) 
@@ -644,6 +679,7 @@ StEventMaker::makeEvent()
                 svtHit = new StSvtHit(dstPoints[i]);
                 if (svtHitColl->addHit(svtHit)) {
                     id = dstPoints[i].id_track;
+                    if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
                         info = vecGlobalTracks[id]->detectorInfo();
                         info->addHit(svtHit);
                     }
@@ -654,10 +690,13 @@ StEventMaker::makeEvent()
 		    }
 		    if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
 			if (vecPrimaryTracks[id]->detectorInfo() != info)
-		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id])
-			vecGlobalTracks[id]->detectorInfo()->addHit(ftpcHit);
-		    else if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
-			vecPrimaryTracks[id]->detectorInfo()->addHit(ftpcHit);
+			    vecPrimaryTracks[id]->detectorInfo()->addHit(ssdHit);
+		}
+		else {
+		    nfailed++;
+		    delete ssdHit;
+		}
+        }
 
 	    if (nfailed) 
 		gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
@@ -671,10 +710,13 @@ StEventMaker::makeEvent()
 	    info    = 0;
 	    nfailed = 0;
                 ssdHit = new StSsdHit(dstPoints[i]);
-		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id])
-			vecGlobalTracks[id]->detectorInfo()->addHit(ftpcHit);
-		    else if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
-			vecPrimaryTracks[id]->detectorInfo()->addHit(ftpcHit);
+                if (ssdHitColl->addHit(ssdHit)) {
+                    id = dstPoints[i].id_track;
+                    if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
+                        info = vecGlobalTracks[id]->detectorInfo();
+                        info->addHit(ssdHit);
+                    }
+                    if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
 		    id = dstPoints[i].id_track;
 		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
 			info = vecGlobalTracks[id]->detectorInfo();
