@@ -10,11 +10,9 @@
 //  this delimiter may _not_ be a part of any name
 #define KRETDbStringDelim  '$'
 
-// number of time buckets in RHIC ring
-#define    KRETmxTBucket 360
 
 //length of character blob
-#define KRETmxBlobSlen 64000
+#define KRETmxBlobSlen 500000
 
 
 #endif
