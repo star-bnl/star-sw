@@ -1,5 +1,8 @@
-* $Id: tte_track.F,v 1.3 1998/02/13 19:33:06 fisyak Exp $
+* $Id: tte_track.F,v 1.4 1998/09/18 21:57:19 perev Exp $
 * $Log: tte_track.F,v $
+* Revision 1.4  1998/09/18 21:57:19  perev
+* WRONG calling sequence for tls_sort
+*
 * Revision 1.3  1998/02/13 19:33:06  fisyak
 * zerov => vzero
 *
@@ -156,7 +159,7 @@ c     write(6,*) 'number of mc hits used to create tfs hits = ',ng2t
 c
 c     sort on the mc hit id (key1)
       iret = tls_Quick_Sort_i(ng2t,tindex(istart).key1,
-     >       tindex(istart+1).key1,tindex)
+     >       tindex(istart+1).key1,tindex(istart))
 c
 c
 c     set up a list so the monte carlo hit can be found in the
