@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.hh,v 1.4 1999/07/19 14:24:06 hardtke Exp $
+ * $Id: StHbtEvent.hh,v 1.5 1999/09/03 22:39:15 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.hh,v $
+ * Revision 1.5  1999/09/03 22:39:15  lisa
+ * Readers now MUST have Report() methods and MAY have WriteHbtEvent() methods
+ *
  * Revision 1.4  1999/07/19 14:24:06  hardtke
  * modifications to implement uDST
  *
@@ -62,6 +65,10 @@ public:
   void SetReactionPlane(const float&);
   void SetReactionPlaneError(const float&);
   void SetPrimVertPos(const StHbtThreeVector&);
+
+  // For I/O of this object -- functions defined in StHbtIO.cc
+  friend ostream& operator<<(ostream& out, StHbtEvent& ev);
+  friend istream& operator>>(istream& in,  StHbtEvent& ev);
 
 private:
   unsigned short mEventNumber;           //

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.cxx,v 1.5 1999/07/27 10:47:04 lisa Exp $
+ * $Id: StHbtManager.cxx,v 1.6 1999/09/03 22:39:15 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.cxx,v $
+ * Revision 1.6  1999/09/03 22:39:15  lisa
+ * Readers now MUST have Report() methods and MAY have WriteHbtEvent() methods
+ *
  * Revision 1.5  1999/07/27 10:47:04  lisa
  * now works in dev on linux and solaris - mistake in deleting picoEvents fixed
  *
@@ -68,16 +71,17 @@ void StHbtManager::Finish(){
 //____________________________
 StHbtString StHbtManager::Report(){
   string stemp;
-  cout << "StHbtManager Starting report " << endl;
-  cout << mAnalysisCollection->size() << endl;
+  //  cout << "StHbtManager Starting report " << endl;
+  //cout << mAnalysisCollection->size() << endl;
   char ctemp[100];
+  stemp = mEventReader->Report();
   sprintf(ctemp,"\nStHbtManager Reporting %u Analyses\n",mAnalysisCollection->size());
-  stemp = ctemp;
+  stemp += ctemp;
   StHbtAnalysisIterator AnalysisIter;
   StHbtAnalysis* currentAnalysis;
-  cout << stemp.c_str();
+  //cout << stemp.c_str();
   for (AnalysisIter=mAnalysisCollection->begin();AnalysisIter!=mAnalysisCollection->end();AnalysisIter++){
-    cout << "StHbtManager - asking for Analysis Report" << endl;
+    //cout << "StHbtManager - asking for Analysis Report" << endl;
     currentAnalysis = *AnalysisIter;
     stemp+=currentAnalysis->Report();
   }

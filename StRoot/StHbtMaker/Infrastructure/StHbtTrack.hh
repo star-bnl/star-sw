@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtTrack.hh,v 1.6 1999/09/01 19:04:54 lisa Exp $
+ * $Id: StHbtTrack.hh,v 1.7 1999/09/03 22:39:16 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtTrack.hh,v $
+ * Revision 1.7  1999/09/03 22:39:16  lisa
+ * Readers now MUST have Report() methods and MAY have WriteHbtEvent() methods
+ *
  * Revision 1.6  1999/09/01 19:04:54  lisa
  * update Particle class AND add parity cf and Randys Coulomb correction
  *
@@ -75,6 +78,10 @@ public:
   void SetPt(const float&);
   void SetHelix(const StPhysicalHelixD&);
 
+  // For I/O of this object -- functions defined in StHbtIO.cc
+  friend ostream& operator<<(ostream& out, StHbtTrack& trk);
+  friend istream& operator>>(istream& in,  StHbtTrack& trk);
+
 private:
   char mCharge;
   int mNHits;
@@ -94,8 +101,7 @@ private:
 };
 
 inline void StHbtTrack::SetNHits(const unsigned short& nh){mNHits=nh;}
-inline void StHbtTrack::SetNHitsPossible(const unsigned short& nh){
-mNHitsPoss=nh;}
+inline void StHbtTrack::SetNHitsPossible(const unsigned short& nh){mNHitsPoss=nh;}
 inline void StHbtTrack::SetCharge(const char& ch){mCharge=ch;}
 inline void StHbtTrack::SetNSigmaPion(const float& x){mNSigmaPion = x;}
 inline void StHbtTrack::SetNSigmaKaon(const float& x){mNSigmaKaon = x;}
