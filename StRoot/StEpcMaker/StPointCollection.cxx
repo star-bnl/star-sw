@@ -2,8 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
-// Revision 1.21  2004/02/13 10:43:11  subhasis
-// track->geometry() != 0 check added
+// Revision 1.22  2004/08/13 13:08:01  suaide
+// small fixed introduced by Marco to remove ineficiencies on the
+// edges of phi bins
 //
 // Revision 1.20  2003/10/21 15:35:25  suaide
 // fix a break segmentation introduced when a memory leak was fixed
@@ -744,8 +745,10 @@ Int_t StPointCollection::TrackSort( const StTrackVec & TrackToFit) const
   {
     for(unsigned int jj=0; jj < TrackToFit.size(); jj++)
     {
-      if(TrackToFit[jj]->geometry()!=0)
-      helices.push_back(TrackToFit[jj]->geometry()->helix());
+     if (TrackToFit[jj]->geometry()!=0) {
+       //StPhysicalHelixD  Helix = TrackToFit[jj]->geometry()->helix();
+       helices.push_back(TrackToFit[jj]->geometry()->helix());
+     }
     }
   }
   //  if(mPrint) cout<<" HELIX FILLED ***Size **"<<helices.size()<<endl;
@@ -879,6 +882,7 @@ void StPointCollection::ClusterSort(StEmcClusterCollection* Bemccluster,
                                     StEmcClusterCollection* Bsmdecluster,
 	                                  StEmcClusterCollection* Bsmdpcluster)
 {
+  const Int_t eta_shift_fix=1;
   if(mPrint) cout<<" I am inside PointCalc***"<<endl;
   for(Int_t i1=0;i1<Epc::nModule;i1++)
   {
@@ -917,7 +921,7 @@ void StPointCollection::ClusterSort(StEmcClusterCollection* Bemccluster,
           //keeping the cluster very close to phibin boundry to the previous bin
           //
           //       if(mPrint) cout<<" EMC module no, phibin**"<<emc_module<<" "<<emc_phi_bin<<endl;
-          if(emc_phi_bin>0)
+          if(!eta_shift_fix && emc_phi_bin>0)
           {
             //	 if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<=0.01)
 	          if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<0.2)
@@ -957,7 +961,7 @@ void StPointCollection::ClusterSort(StEmcClusterCollection* Bemccluster,
           emc_phi_bin=Int_t(TMath::Abs(eta_emc*10));
           //keeping the cluster very close to phibin boundry to the previous bin
           //
-          if(emc_phi_bin>0)
+          if(!eta_shift_fix && emc_phi_bin>0)
           {
             //	 if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<=0.01){
 	          if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<0.2)
@@ -998,7 +1002,7 @@ void StPointCollection::ClusterSort(StEmcClusterCollection* Bemccluster,
           //keeping the cluster very close to phibin boundry to the previous bin
           //
 	        // if(mPrint) cout<<" SMDE module no, phibin**"<<emc_module<<" "<<emc_phi_bin<<endl;
-          if(emc_phi_bin>0)
+          if(!eta_shift_fix && emc_phi_bin>0)
           {
             //if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<=0.01){
 	          if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<.2)
@@ -1038,7 +1042,7 @@ void StPointCollection::ClusterSort(StEmcClusterCollection* Bemccluster,
           //keeping the cluster very close to phibin boundry to the previous bin
           //
           //       if(mPrint) cout<<" SMDP module no, phibin**"<<emc_module<<" "<<emc_phi_bin<<endl;
-          if(emc_phi_bin>0)
+          if(!eta_shift_fix && emc_phi_bin>0)
           {
 	          if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<=0.01)
             {
