@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.55 1999/05/01 00:57:04 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.56 1999/06/24 16:42:27 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.56  1999/06/24 16:42:27  fisyak
+// Preserve all space point
+//
 // Revision 1.55  1999/05/01 00:57:04  fisyak
 // Change Clear function to defualt
 //
@@ -575,6 +578,7 @@ Int_t St_glb_Maker::Make(){
   if (!globtrk)     {globtrk     = new St_dst_track("globtrk",20000);         dst.Add(globtrk);}
   if (!globtrk_aux) {globtrk_aux = new St_dst_track_aux("globtrk_aux",20000); dst.Add(globtrk_aux);}
   
+  
   if (tptrack && svtracks) {
     
     //			svm
@@ -621,6 +625,19 @@ Int_t St_glb_Maker::Make(){
   if (iRes !=kSTAFCV_OK) iMake = kStWarn;
   if (iRes !=kSTAFCV_OK) {cout << "Problem on return from EGR_FITTER" << endl;}
   if(Debug()) cout << " finished calling egr_fitter" << endl;
+  // dst_mon_soft
+  if (tphit &&  scs_spt) {
+    if(Debug()) cout << " run_dst: Calling dst_point_filler" << endl;
+    // dst_point_filler
+    point = new St_dst_point("point",200000); dst.Add(point);
+    iRes = dst_point_filler(tphit, scs_spt, point);
+    //	   ========================================
+    if (iRes !=kSTAFCV_OK) iMake = kStWarn;
+    if (iRes !=kSTAFCV_OK) cout << "Problem on return from DST_POINT_FILLER" << endl;
+    
+    
+    if(Debug()) cout << " run_dst: finished calling dst_point_filler" << endl;
+  }
   
   // evr
   if(Debug()) cout << "run_evr: calling evr_am" << endl;
@@ -755,20 +772,6 @@ Int_t St_glb_Maker::Make(){
     if(Debug()) cout << " run_dst: finshed calling dst_dedx_filler" << endl;
   }
   
-  // dst_mon_soft
-  if (tphit &&  scs_spt) {
-    if(Debug()) cout << " run_dst: Calling dst_point_filler" << endl;
-    // dst_point_filler
-    point = new St_dst_point("point",200000); dst.Add(point);
-    iRes = dst_point_filler(tphit, scs_spt, point);
-    //	   ========================================
-    if (iRes !=kSTAFCV_OK) iMake = kStWarn;
-    if (iRes !=kSTAFCV_OK) cout << "Problem on return from DST_POINT_FILLER" << endl;
-    
-    
-    if(Debug()) cout << " run_dst: finished calling dst_point_filler" << endl;
-  }
-  
   St_DataSet *ftpc_hits   = GetInputDS("ftpc_hits");
   St_fcl_fppoint *fcl_fppoint = 0;
   if (ftpc_hits) 
@@ -849,7 +852,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.55 1999/05/01 00:57:04 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.56 1999/06/24 16:42:27 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
