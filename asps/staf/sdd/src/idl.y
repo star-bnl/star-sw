@@ -89,7 +89,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.9 1998/06/06 17:35:28 ward Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.10 1998/06/06 17:38:58 ward Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -152,7 +152,7 @@ char *StrippedInFileName(int uppercase) {
 }
 void DoComment(int codeLineNum,char *xx) {
   char *cc;
-  static len=-10;
+  static int len=-10;
   char *rr="\nCOMMENTS TRUNCATED";
   if(len<0) len=strlen(rr)+5;
   if(xx[0]=='/'&&xx[1]=='/') cc=xx+2; else cc=xx;
