@@ -1,6 +1,9 @@
 #!/usr/local/bin/perl
-# $Id: bfc,v 1.7 2000/01/21 20:21:10 didenko Exp $
+# $Id: bfc,v 1.8 2000/01/26 00:00:22 didenko Exp $
 # $Log: bfc,v $
+# Revision 1.8  2000/01/26 00:00:22  didenko
+# add remove link for tpc calibration
+#
 # Revision 1.7  2000/01/21 20:21:10  didenko
 # add links of StDb/calibration/tpc for cosmic run
 #
@@ -23,7 +26,8 @@ print "STAR_LEVEL = $STAR_LEVEL\n";
 my $Chain = "";
 my $noise1 = "noiseElim.19991216.000000.tpcdaq";
 my $noise2 = "noiseElim.19991217.000000.tpcdaq";
-`rm $noise` if -e $noise;
+`rm $noise1` if -e $noise1;
+`rm $noise2` if -e $noise2;
 symlink $STAR . "/StDb/calibrations/tpc/" . $noise1, $noise1;
 symlink $STAR . "/StDb/calibrations/tpc/" . $noise2, $noise2;
 die "No input Chain defined" if ! defined($ARGV[0]);
