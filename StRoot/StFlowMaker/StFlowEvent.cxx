@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.36 2003/01/10 16:42:09 oldi Exp $
+// $Id: StFlowEvent.cxx,v 1.37 2003/02/25 19:28:40 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -792,6 +792,7 @@ void StFlowEvent::SetPidsProb() {
 //-----------------------------------------------------------------------
 
 void StFlowEvent::SetCentrality() {
+  // Centrality=0 is not retieveable
 
   Int_t* cent;
   Int_t  tracks = mMultEta; // converts UInt_t to Int_t
@@ -893,6 +894,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.37  2003/02/25 19:28:40  posk
+// Changed a few unimportant default cuts.
+//
 // Revision 1.36  2003/01/10 16:42:09  oldi
 // Several changes to comply with FTPC tracks:
 // - Switch to include/exclude FTPC tracks introduced.
