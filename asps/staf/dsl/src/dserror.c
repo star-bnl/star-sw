@@ -166,7 +166,7 @@ const char * dsError(char *str)
 	sprintf(buff,"%s - %s(%d)\n", pInfo->msg, pInfo->file
 			, pInfo->line);
 	return buff;
-/*xxx	s = (char *)malloc(strlen(buff)+1);		*/
+/*xxx	s = (char *)MALLOC(strlen(buff)+1);		*/
 /*xxx	strcpy(s,buff);					*/
 /*xxx	return s;					*/
 }

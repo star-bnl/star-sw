@@ -35,6 +35,7 @@ typedef struct asu_malloctrace_t {
 	int line;
 }ASU_MALLOCTRACE_T;
 
+extern CC_P int  asuStack(void *p);
 extern CC_P void asuMallocInit();
 extern CC_P void asuMallocInitTrace();
 extern CC_P void asuMallocGrowTrace(size_t m);
@@ -63,11 +64,11 @@ extern CC_P void asuFree(void *p
 #define CALLOC(NOBJ,SIZE) asuCalloc(NOBJ,SIZE,__FILE__,__LINE__)
 #define MALLOC(SIZE) asuMalloc(SIZE,__FILE__,__LINE__)
 #define REALLOC(P,SIZE) asuRealloc(P,SIZE,__FILE__,__LINE__)
-#define FREE(P) asuFree(P,__FILE__,__LINE__); P = NULL /*phenix*/
+#define FREE(P) { asuFree(&(P),__FILE__,__LINE__); (P) = NULL;}
 #else
 #define CALLOC(NOBJ,SIZE) calloc(NOBJ,SIZE)
 #define MALLOC(SIZE) malloc(SIZE)
 #define REALLOC(P,SIZE) realloc(P,SIZE)
-#define FREE(P) free(P);  P=NULL /*phenix*/
+#define FREE(P) { free(P); (P) = NULL;}
 #endif
 

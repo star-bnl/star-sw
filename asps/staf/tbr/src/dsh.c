@@ -250,7 +250,7 @@ void FillgDs(char *parentName,DS_DATASET_T *dsPtr) {
   if(isTable)   if(!dsTableName(&name,dsPtr))   dsu_Err( 10);
   if((int)strlen(name)>DATASET_NAME_SIZE)       dsu_Err( 12);
   if(gNDs>=MAX_DATASET)                         dsu_Err(  0);
-  gDs[gNDs]=malloc(sizeof(DATASET_INFO));
+  gDs[gNDs]=MALLOC(sizeof(DATASET_INFO));
   if(gDs[gNDs]==NULL)				dsu_Err( 11);
   strcpy(gDs[gNDs]->name  ,name);
   strcpy(gDs[gNDs]->parentName  ,parentName);

@@ -341,27 +341,27 @@ STAFCV_T duiFactory:: cp (const char * fromPath
   }
   /*fix memory leaks -akio*/
   if(!findNode_ds(fromPath,from)){
-    free(toPathExtended);                 EML_ERROR(SRC_NOT_FOUND);}
+    FREE(toPathExtended);                 EML_ERROR(SRC_NOT_FOUND);}
   if(!dsTableRowCount(&nok,from)){
-    free(toPathExtended);                 EML_ERROR(TABLE_NOT_FOUND);}
+    FREE(toPathExtended);                 EML_ERROR(TABLE_NOT_FOUND);}
   if(!dsTableMaxRowCount(&nmax,from)){
-    free(toPathExtended);                 EML_ERROR(TABLE_NOT_FOUND);}
+    FREE(toPathExtended);                 EML_ERROR(TABLE_NOT_FOUND);}
   if(!dsTableTypeSpecifier(&spec,from)){
-    free(toPathExtended);                 EML_ERROR(SPECS_NOT_FOUND);}
+    FREE(toPathExtended);                 EML_ERROR(SPECS_NOT_FOUND);}
   nmaxLong=nmax;
   newTable(toPathExtended,spec,nmaxLong);
   if(!findNode_ds(toPathExtended,to)){
-    free(toPathExtended);                 EML_ERROR(TGT_NOT_CREATED);}
+    FREE(toPathExtended);                 EML_ERROR(TGT_NOT_CREATED);}
   if(!dsSetTableRowCount(to,nok)){
-    free(toPathExtended);                 EML_ERROR(NROW_NOT_SET);}
+    FREE(toPathExtended);                 EML_ERROR(NROW_NOT_SET);}
   if(!dsAllocTables(to)){
-    free(toPathExtended);                 EML_ERROR(TBL_MEMORY_NOT_ALLOCATED);}
+    FREE(toPathExtended);                 EML_ERROR(TBL_MEMORY_NOT_ALLOCATED);}
   if(!dsTableDataAddress(&pDataTo,to)){
-    free(toPathExtended);                 EML_ERROR(TGT_DATA_ADDR_NOT_FOUND);}
+    FREE(toPathExtended);                 EML_ERROR(TGT_DATA_ADDR_NOT_FOUND);}
   if(!dsTableDataAddress(&pDataFrom,from)){
-    free(toPathExtended);                 EML_ERROR(SRC_DATA_ADDR_NOT_FOUND);}
+    FREE(toPathExtended);                 EML_ERROR(SRC_DATA_ADDR_NOT_FOUND);}
   if(!dsTableRowSize(&rowSize,to)){
-    free(toPathExtended);                 EML_ERROR(ROW_SIZE_NOT_FOUND);}
+    FREE(toPathExtended);                 EML_ERROR(ROW_SIZE_NOT_FOUND);}
   nbytes=nok*rowSize;
   memcpy(pDataTo,pDataFrom,nbytes);
 
@@ -493,7 +493,7 @@ STAFCV_T duiFactory:: unlinkAndMaybeFreeMemory (char freeMemory,
     EML_ERROR(FULL_PATH_OF_SRC_TOO_LONG);
   }
   strcpy(tmp,fullPath);
-  free(fullPath);  /*fix memory leak -akio*/
+  FREE(fullPath);  /*fix memory leak -akio*/
   for(ii=strlen(tmp)-1;ii>=0;ii--) if(tmp[ii]=='/') break; tmp[ii]=0;
   if(!strstr(tmp,"/")) EML_ERROR(NO_PARENT_DIR_FOR_SRC);
   if(!findNode_ds(tmp,parentOfFrom)) EML_ERROR(PARENT_DIR_OF_SRC_NOT_FOUND);
@@ -543,7 +543,7 @@ STAFCV_T duiFactory:: rmdir (const char * dirPath) { // www
       }	
       sprintf(newPath,"%s/%s",fullpath,theName);
       rmdir(newPath);
-      free(newPath);
+      FREE(newPath);
     } else {
       if(!dsTableName(&theName,dsp)) EML_ERROR(DATASET_NOT_FOUND);
       newPath=(char*)MALLOC((size_t)(strlen(fullpath)+strlen(theName)+2));
@@ -553,7 +553,7 @@ STAFCV_T duiFactory:: rmdir (const char * dirPath) { // www
       }	
       sprintf(newPath,"%s/%s",fullpath,theName);
       unlinkAndMaybeFreeMemory(TRUE,newPath);
-      free(newPath);
+      FREE(newPath);
     }
   }
   

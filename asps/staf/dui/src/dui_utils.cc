@@ -148,8 +148,7 @@ char * dui_pathof(const char* base,const char* mod)
          if(!d[i]) break;
          if( 0 == strcmp("..",d[i]) ){
             if(dui_deleteable(herb2,e,d[i])) FREE(d[i]);
-            i--;
-            l -= strlen(d[i]);
+            l -= strlen(d[--i]);
             if(dui_deleteable(herb2,e,d[i])) FREE(d[i]);
          }
          else if( 0 == strcmp(".",d[i]) ){

@@ -1,4 +1,4 @@
-static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.16 1998/05/05 16:12:38 ward Exp $";
+static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.17 1998/05/09 02:40:01 perev Exp $";
 //:Copyright 1995, Lawrence Berkeley National Laboratory
 //:>--------------------------------------------------------------------
 //:FILE:        amiClasses.C
@@ -40,7 +40,7 @@ amiInvoker:: amiInvoker(const char * name, long rank
       strcpy(myTblSpecs[i], specs._buffer[i]);
 //- HACK - should delete each table after creation
       dsNewTable(&pTABLE,"TABLE",myTblSpecs[i],0,pDATA);
-      if(pTABLE) free(pTABLE);  /*fix memory leak -akio*/
+      if(pTABLE) FREE(pTABLE);  /*fix memory leak -akio*/
       pTABLE=NULL; pDATA=NULL;  //- HACK  
    }
    myPamFtn = pam;
@@ -151,7 +151,7 @@ STAFCV_T amiInvoker:: stop () {
 char * amiInvoker:: tableSpec (long ntbl) {
 
   //     char * c = new char[strlen(myTblSpecs[ntbl]) + 1];    /* -akio */
-   char * c = (char *)malloc(strlen(myTblSpecs[ntbl]) + 1); /* -alloc conflict */
+   char * c = (char *)MALLOC(strlen(myTblSpecs[ntbl]) + 1); /* -alloc conflict */
    strcpy(c,myTblSpecs[ntbl]);
    return c;
 }

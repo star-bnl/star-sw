@@ -68,7 +68,7 @@ STAFCV_T ami_list()
 {
    char* amilist;
    printf("%s",(amilist = ami->list()) );
-   free(amilist);  /*fix memory leak -akio*/
+   FREE(amilist);  /*fix memory leak -akio*/
    EML_SUCCESS(STAFCV_OK);
 }
 

@@ -928,7 +928,7 @@ yylook()
 
 				yytextsz += YYTEXTSZINC;
 				if (yytext == yy_tbuf) {
-				    yytext = (char *) malloc(yytextsz);
+				    yytext = (char *) MALLOC(yytextsz);
 				    memcpy(yytext, yy_tbuf, sizeof (yy_tbuf));
 				}
 				else

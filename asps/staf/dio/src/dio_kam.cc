@@ -72,7 +72,7 @@ STAFCV_T dio_list()
 {
    char* s;
    printf("%s",s=dio->list() );
-   if(s) free(s); /*fix memory leak -akio*/
+   if(s) FREE(s); /*fix memory leak -akio*/
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -347,7 +347,7 @@ STAFCV_T diofilestream_filename(char* name)
    }
    printf("DIO:\tFile name = (%s) \n"
                 , c=stream->fileName());
-   free(c);  /*fix memory leak -akio*/
+   FREE(c);  /*fix memory leak -akio*/
    EML_SUCCESS(STAFCV_OK);
 }
  

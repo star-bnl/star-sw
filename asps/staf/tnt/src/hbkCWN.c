@@ -272,7 +272,7 @@ hbkCWNblockOffset(long hid, size_t iblock) {
       break;
     }
   }
-  free(cp);
+  FREE(cp);
 
   return blockOffset;
 }
@@ -302,7 +302,7 @@ hbkCWNblockIsChar(long hid, size_t iblock) {
       break;
     }
   }
-  free(cp);
+  FREE(cp);
 
   return (unsigned char)itype;
 }

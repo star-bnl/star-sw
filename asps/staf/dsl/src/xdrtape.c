@@ -116,7 +116,7 @@ int xdrtape_create(XDR *xdrs, enum xdr_op op, int fd, unsigned size,
 */
 static void xdrtape_destroy(XDR *xdrs)
 {
-	free((char *)xdrs->x_private);
+	FREE((char *)xdrs->x_private);
 }
 /*****************************************************************************
 *
