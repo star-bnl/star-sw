@@ -1,9 +1,12 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 1.20 2000/05/17 22:23:01 lasiuk Exp $
+ * $Id: StRrsMaker.cxx,v 1.21 2000/05/31 19:24:49 dunlop Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
+ * Revision 1.21  2000/05/31 19:24:49  dunlop
+ * Backwards compatibility when g2t_rch_hit is in dst branch
+ *
  * Revision 1.20  2000/05/17 22:23:01  lasiuk
  * get rid of compile warnings
  *
@@ -415,6 +418,12 @@ Int_t StRrsMaker::Make()
 
 	    St_g2t_rch_hit *g2t_rch_hit =
 		static_cast<St_g2t_rch_hit *>(geant("g2t_rch_hit"));
+
+	    if (!g2t_rch_hit) {
+		// For backwards compatibility look in dst branch
+		St_DataSetIter dstDstI(GetDataSet("dst"));
+		g2t_rch_hit = static_cast<St_g2t_rch_hit*>(dstDstI("g2t_rch_hit"));
+	    }
 
 	    if(!g2t_rch_hit){
 		cout << "StRrsMaker::Make()";
