@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimulator.cc,v 1.1 2000/11/23 10:16:44 hummler Exp $
+// $Id: StFtpcSlowSimulator.cc,v 1.2 2000/11/27 14:08:08 hummler Exp $
 // $Log: StFtpcSlowSimulator.cc,v $
+// Revision 1.2  2000/11/27 14:08:08  hummler
+// inplement tzero and lorentz angle correction factor
+//
 // Revision 1.1  2000/11/23 10:16:44  hummler
 // New FTPC slow simulator in pure maker form
 //
@@ -188,7 +191,7 @@ int StFtpcSlowSimulator::simulate()
          
         // define cluster for each accepted hit point
         ++counter;
-        drift_time  = 0.;                          
+        drift_time  = -mParam->tZero();                          
         electron    = de / aip;
 	
         rad_off     = rdout->GetPadLength() * tan(dip_ang);

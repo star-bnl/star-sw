@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimField.cc,v 1.1 2000/11/23 10:16:43 hummler Exp $
+// $Id: StFtpcSlowSimField.cc,v 1.2 2000/11/27 14:08:00 hummler Exp $
 // $Log: StFtpcSlowSimField.cc,v $
+// Revision 1.2  2000/11/27 14:08:00  hummler
+// inplement tzero and lorentz angle correction factor
+//
 // Revision 1.1  2000/11/23 10:16:43  hummler
 // New FTPC slow simulator in pure maker form
 //
@@ -26,6 +29,7 @@ StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader)
   // there's a job to do: fuse both tables into one!
   innerRadius = mParam->sensitiveVolumeInnerRadius();
   outerRadius = mParam->sensitiveVolumeOuterRadius();
+  angleFactor = mParam->lorentzAngleFactor();
   grid_point = new grid_data[mParam->numSlowSimGridPoints()];
   
   int i;
@@ -197,6 +201,7 @@ void StFtpcSlowSimField::Output() const
             << grid_point[i].diff_x<< space 
             << grid_point[i].lorentz*180/M_PI << space 
             << grid_point[i].dlnv_dr 
+		 *mParam->lorentzAngleFactor()
             << endl;
     }
 }
