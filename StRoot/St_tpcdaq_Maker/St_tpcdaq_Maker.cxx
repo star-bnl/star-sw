@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.50  2000/06/13 17:42:55  ward
+// asic and noise attached to db, but not yet gains
+//
 // Revision 1.49  2000/06/09 18:02:38  ward
 // Removed the gets() for mErr.
 //
@@ -154,6 +157,8 @@
 #include "tables/St_raw_pad_Table.h"
 #include "tables/St_raw_seq_Table.h"
 #include "tables/St_type_shortdata_Table.h"
+#include "tables/St_asic_thresholds_Table.h"
+#include "tables/St_noiseElim_Table.h"
 
 ClassImp(St_tpcdaq_Maker)
 
@@ -179,36 +184,6 @@ St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqOrTrs):StMaker(name),
 }
 St_tpcdaq_Maker::~St_tpcdaq_Maker() {
 }
-#ifdef ASIC_THRESHOLDS
-void St_tpcdaq_Maker::LookForAsicFile() {
-  FILE *ff; int lnum=0,cnt=0; char line[85],fo;
-  mNseqLo=-123; mNseqHi=-123; mThreshLo=-123; mThreshHi=-123;
-  ff=fopen("asic.tpcdaq","r"); if(!ff) return;
-  while(fgets(line,80,ff)) {
-    lnum++; fo=0;
-    if(strstr(line,"thresh_lo")) { cnt++; fo=7; mThreshLo=atoi(line+10); }
-    if(strstr(line,"thresh_hi")) { cnt++; fo=7; mThreshHi=atoi(line+10); }
-    if(strstr(line, "n_seq_lo")) { cnt++; fo=7; mNseqLo  =atoi(line+ 9); }
-    if(strstr(line, "n_seq_hi")) { cnt++; fo=7; mNseqHi  =atoi(line+ 9); }
-    if(!fo) {
-      PP"I did not understand line %d of your file asic.tpcdaq.  Here is a sample file:\n",lnum);
-      PP"thresh_lo 10\n");
-      PP"thresh_hi 100\n");
-      PP"n_seq_lo 15\n");
-      PP"n_seq_hi 5\n");
-      assert(0);
-    }
-  } fclose(ff);
-  if(cnt!=4) {
-    PP"Your file asic.tpcdaq is garbled.  Here is a sample file:\n");
-    PP"thresh_lo 10\n");
-    PP"thresh_hi 100\n");
-    PP"n_seq_lo 15\n");
-    PP"n_seq_hi 5\n");
-    assert(0);
-  }
-}
-#endif
 Int_t St_tpcdaq_Maker::Init() {
   St_DataSet *herb; int junk;
 #ifdef NOISE_ELIM
@@ -217,7 +192,17 @@ Int_t St_tpcdaq_Maker::Init() {
   /*WriteStructToScreenAndExit();*/
 #endif
 #ifdef ASIC_THRESHOLDS
-  LookForAsicFile();
+  TDataSet *tpc_calib  = GetDataBase("calibrations/tpc");
+  if (tpc_calib) {
+    St_asic_thresholds *asic = (St_asic_thresholds *) tpc_calib->Find("asic_thresholds");
+    if (asic) { 
+       St_asic_thresholds &kasic = *asic;
+       mThreshLo=kasic[0].thresh_lo;
+       mThreshHi=kasic[0].thresh_hi;
+       mNseqLo=kasic[0].n_seq_lo;
+       mNseqHi=kasic[0].n_seq_hi;
+    }
+  }
 #endif
   junk=log10to8_table[0]; /* to eliminate the warnings from the compiler. */
   
@@ -471,54 +456,36 @@ void St_tpcdaq_Maker::SetGainCorrectionStuff(int sector) {
 #endif
 #ifdef NOISE_ELIM
 void St_tpcdaq_Maker::SetNoiseEliminationStuff() {
-  int prevsector=-123,zz,sector,row; FILE *ff; char line[200],*cc,*dd,*ee;
+  int i,sector;
+
   for(sector=0;sector<24;sector++) { noiseElim[sector].npad=0; noiseElim[sector].nbin=0; }
-  ff=fopen("noiseElim.tpcdaq","r");
-  if(!ff) return;
-  PP"Setting noise elimination (tpcdaq) from file \"noiseElim.tpcdaq\".\n");
-  sector=0;
-  while(fgets(line,196,ff)) {
-    if(line[0]=='*') continue; if(strstr(line,"$")) continue;
-    if(!strncmp(line,"sector ",7)) {
-      if((ee=strstr(line,"time bins"))) { for(zz=0;zz<9;zz++) ee[zz]=' '; }
-      cc=strtok(line," ,\n"); cc=strtok(NULL," \n"); if(cc) sector=atoi(cc); else sector=0;
-      if(sector>=1&&sector<=24) {
-        if(sector<=prevsector) {
-          PP"You have a format error in noiseElim.tpcdaq.  The sectors do not\n");
-          PP"appear in order.  For example:\n");
-          PP"Correct:\n  sector 1 time bins 1-20\n  sector 5 time bins 1-20\n  sector 6 time bins 1-20\n");
-          PP"Wrong:\n  sector 1 time bins 1-20\n  sector 6 time bins 1-20\n  sector 5 time bins 1-20\n");
-          exit(2); // See the error message above.
-        }
-        prevsector=sector;
-        cc=strtok(NULL," ,\n");
-        while(cc) {
-          dd=strstr(cc,"-");
-          if(!dd) { PP"Format error in noiseElim.tpcdaq, St_tpcdaq_Maker is exiting...\n"); exit(2); }
-          if(noiseElim[sector-1].nbin>=BINRANGE) { PP"Error 18o tpcdaq, exiting...\n"); exit(2); }
-          noiseElim[sector-1].low[noiseElim[sector-1].nbin]=atoi(cc);
-          noiseElim[sector-1].up[noiseElim[sector-1].nbin]=atoi(dd+1);
-          (noiseElim[sector-1].nbin)++;
-          cc=strtok(NULL," ,\n");
-        }
-      }
-      continue;
+
+  TDataSet *tpc_calib  = GetDataBase("calibrations/tpc"); if(!tpc_calib) return;
+
+  St_noiseElim *noiseObj = (St_noiseElim*) tpc_calib->Find("noiseElim"); if(!noiseObj) return;
+
+  assert(noiseObj->GetNRows()==24);
+
+  noiseElim_st *noise = noiseObj->GetTable(); assert(noise);
+
+  for(sector=0;sector<24;sector++) {
+
+    noiseElim[sector].npad=noise[sector].npad;
+    assert(noise[sector].npad<=400); // Limit 400 is in both the St_tpcdaq_Maker.h and StDb/idl/noiseElim.idl.
+    for(i=0;i<noise[sector].npad;i++) {
+      noiseElim[sector].row[i]=noise[sector].row[i];
+      noiseElim[sector].pad[i]=noise[sector].pad[i];
     }
-    if(sector<1||sector>24) continue;
-    if(!strncmp(line,"row ",4)) row=atoi(line+4);
-    if(row<1||row>45) continue;
-    if(!strncmp(line,"pads ",4)) {
-      cc=strtok(line," ,\n"); cc=strtok(NULL," ,\n");
-      while(cc) {
-        if(noiseElim[sector-1].npad>=MAXROWPADPERSECTOR) { PP"Error 78n tpcdaq, exiting...\n"); exit(2); }
-        noiseElim[sector-1].row[noiseElim[sector-1].npad]=row;
-        noiseElim[sector-1].pad[noiseElim[sector-1].npad]=atoi(cc);
-        (noiseElim[sector-1].npad)++;
-        cc=strtok(NULL," ,\n");
-      }
+
+    noiseElim[sector].nbin=noise[sector].nbin;
+    assert(noise[sector].nbin<=3); // Limit (3) is in both the St_tpcdaq_Maker.h and StDb/idl/noiseElim.idl.
+    for(i=0;i<noise[sector].nbin;i++) {
+      noiseElim[sector].low[i]=noise[sector].low[i];
+      noiseElim[sector].up[i]=noise[sector].up[i];
     }
+
+
   }
-  fclose(ff);
 }
 void St_tpcdaq_Maker::WriteStructToScreenAndExit() {
   int jj,ii;
