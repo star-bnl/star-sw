@@ -185,6 +185,7 @@ StChain::StChain() : TNamed("StChain","The STAR default chain")
    m_Makers        = 0;
    m_Mode          = 0;
    m_DataSet       = 0;
+   m_DebugLevel    = kNormal;
 }
 
 //_____________________________________________________________________________
@@ -443,7 +444,7 @@ Int_t StChain::Make(Int_t i)
    StMaker *maker;
    while ((maker = (StMaker*)next())) {
       ret = maker->Make();
-      printf("%s %i\n",maker->GetName(),ret);
+      if (gStChain->Debug()) printf("%s %i\n",maker->GetName(),ret);
       if (ret < 0) return ret;
 
       if (m_DataSet) {
@@ -474,7 +475,7 @@ Int_t StChain::Make(Int_t i)
             m_DataSet->Add(topset);                     // add the new dataset instead
           }        
         }
-        m_DataSet->ls(2);
+        if (gStChain->Debug()) m_DataSet->ls(2);
       }
    }
    return 0;
