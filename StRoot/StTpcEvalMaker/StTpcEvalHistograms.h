@@ -1,11 +1,11 @@
-//-------------------------------------------------
-// For StTpcEvalMaker
-//-------------------------------------------------
-// author: milton toy
-// additions: manuel cbs
-//-------------------------------------------------
+// $Id: StTpcEvalHistograms.h,v 1.2 2000/05/25 20:38:09 snelling Exp $
+// $Log: StTpcEvalHistograms.h,v $
+// Revision 1.2  2000/05/25 20:38:09  snelling
+// Added TPC evaluation histograms
+//
+//-----------------------------------------------------------------------
 // header file for class StTpcEvalHistograms
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 #ifndef StTpcEvalHistograms_H
 #define StTpcEvalHistograms_H
 
@@ -18,6 +18,7 @@ class TClonesArray;
 class MatchedTrackPair; //!
 
 class StTpcEvalHistograms : public StObject {
+
  public:
   StTpcEvalHistograms();
   virtual ~StTpcEvalHistograms();
@@ -51,12 +52,22 @@ class StTpcEvalHistograms : public StObject {
   TH1F*     rcUnmatchedHitPositionSector; //! for rec. hits that are not matched to any M.C. hit
   TH1F*     rcUnmatchedHitPositionZ; //! for rec. hits that are not matched to any M.C. hit
 
+  TH2F*     mHitEfficiency;     //! 
+  TH2F*     mHitPurity;         //! 
+
+  TH2F*     rcPadSepEfficiencyOuter;  //! 
+  TH2F*     mcPadSepEfficiencyOuter;  //! 
+  TH2F*     rcPadSepEfficiencyInner;  //! 
+  TH2F*     mcPadSepEfficiencyInner;  //! 
+
   TNtuple*  trackNtuple; //!
     Int_t         mTrackIndex;
     Int_t         mMcMultiplicity;
     Int_t         mRcMultiplicity;
     Int_t         mPairMultiplicity;
+
  private:
+
   ClassDef(StTpcEvalHistograms,1)
 };
 

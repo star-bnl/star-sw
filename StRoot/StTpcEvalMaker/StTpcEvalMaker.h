@@ -1,11 +1,14 @@
-//-------------------------------------------------
-// For StTpcEvalMaker
-//-------------------------------------------------
+//  $Id: StTpcEvalMaker.h,v 1.2 2000/05/25 20:38:09 snelling Exp $
+//  $Log: StTpcEvalMaker.h,v $
+//  Revision 1.2  2000/05/25 20:38:09  snelling
+//  Added TPC evaluation histograms
+//
+//-----------------------------------------------------------------------
 // author: milton toy
 // additions: manuel cbs
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 // header file for class StTpcEvalMaker
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 
 #ifndef StTpcEvalMaker_H
 #define StTpcEvalMaker_H
@@ -41,25 +44,29 @@ public:
     virtual Int_t Make();
     virtual Int_t Finish();
 
-    void fillHeader(); //!
-    void mcHitIteration(); //!
-    void mcTrackIteration(); //!
-    void rcHitIteration(); //!
-    void rcTrackIteration(); //!
+    void fillHeader(); 
+    void HitIteration(); 
+    void DoHitIteration(Bool_t flag=kFALSE); 
+    void HitSeparation(); 
+    void DoHitSeparation(Bool_t flag=kFALSE); 
+    void mcTrackIteration(); 
+    void rcTrackIteration(); 
     
-    void addMcTrack(StMcTrack*, mcTrackInfo*); //!
-    void addRcTrack(StGlobalTrack*, rcTrackInfo*); //!
-    void scanTrackPair(MatchedTrackPair*, StMcTrack*, StGlobalTrack*); //!
+    void addMcTrack(StMcTrack*, mcTrackInfo*); 
+    void addRcTrack(StGlobalTrack*, rcTrackInfo*); 
+    void scanTrackPair(MatchedTrackPair*, StMcTrack*, StGlobalTrack*); 
     
     void FillTpcEvalEvent(); // Filling of persistent event
-    StTpcEvalHistograms  histograms; //!
+    StTpcEvalHistograms  histograms; 
     
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StTpcEvalMaker.h,v 1.1.1.1 2000/05/23 00:25:03 snelling Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StTpcEvalMaker.h,v 1.2 2000/05/25 20:38:09 snelling Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
     
  private:
 
+    Bool_t           mHitIteration;    // switch for hit iteration
+    Bool_t           mHitSeparation;   // switch for hit separation
     StTpcDb*         mStTpcDb; //!
     StEvent*         mStEvent; //!
     StMcEvent*       mStMcEvent; //!
@@ -74,4 +81,13 @@ public:
   ClassDef(StTpcEvalMaker,1)
 };
 
+inline void StTpcEvalMaker::DoHitIteration(Bool_t flag) 
+          { mHitIteration=flag;}
+
+inline void StTpcEvalMaker::DoHitSeparation(Bool_t flag) 
+          { mHitSeparation=flag; }
+
 #endif
+
+
+

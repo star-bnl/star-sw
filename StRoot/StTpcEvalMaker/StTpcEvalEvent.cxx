@@ -1,16 +1,19 @@
-//-------------------------------------------------
-// For StTpcEvalMaker
-//-------------------------------------------------
+//  $Id: StTpcEvalEvent.cxx,v 1.2 2000/05/25 20:38:09 snelling Exp $
+//  $Log: StTpcEvalEvent.cxx,v $
+//  Revision 1.2  2000/05/25 20:38:09  snelling
+//  Added TPC evaluation histograms
+//
+//
 // author: milton toy
 //         
 // additions: manuel cbs
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 // class definitions for MatchedHitPair
 //                       TrackInfo
 //                       rcTrackInfo:TrackInfo
 //                       mcTrackInfo:TrackInfo
 //                       MatchedTrackPair
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 #include <stdlib.h>
 #include <math.h>
 
@@ -26,10 +29,6 @@
 #include "StDbUtilities/StTpcLocalSectorCoordinate.hh"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 
-//#include "StChain.h"
-//#include "St_DataSet.h"
-//#include "St_DataSetIter.h"
-
 #include "StTpcHit.h"
 #include "StGlobalTrack.h"
 #include "StMcTpcHit.hh"
@@ -37,17 +36,15 @@
 
 #include "StTpcEvalEvent.h"
 
-#define USE_DATABASE
 //-----------------------------------------------------------------------
     
 MatchedHitPair::MatchedHitPair(StTpcDb* tpcDb)
-    : mStTpcDb(tpcDb), mResolution(-999,-999,-999){ /*noop*/}
+    : mStTpcDb(tpcDb), mResolution(-999,-999,-999) { /*noop*/}
 
 StThreeVectorF& MatchedHitPair::resolution() {return mResolution;}
 
 StThreeVectorF& MatchedHitPair::resolution(const StMcTpcHit* mcHit,
 					 const StTpcHit* rcHit) {
-#ifdef USE_DATABASE
   // transform tpc hit positions from global to internal
   StTpcLocalSectorCoordinate rcLocalHit, mcLocalHit;
 
@@ -58,11 +55,42 @@ StThreeVectorF& MatchedHitPair::resolution(const StMcTpcHit* mcHit,
   mHitTransform(rcGlobalHit,rcLocalHit);
   mHitTransform(mcGlobalHit,mcLocalHit);
   StThreeVector<double> tmp(rcLocalHit.position() - mcLocalHit.position());
-  for(size_t i= 0; i<3; i++) mResolution(i) = tmp(i); // have to do this because we can't use templates...
+  for(size_t i= 0; i<3; i++) mResolution(i) = tmp(i); 
   
-#else // GLOBAL COORDINATES
-  mResolution = mcHit->position() - rcHit->position();
-#endif
+  return mResolution;
+}
+
+StThreeVectorF& MatchedHitPair::resolution(const StTpcHit* rcHit1,
+					 const StTpcHit* rcHit2) {
+  // transform tpc hit positions from global to internal
+  StTpcLocalSectorCoordinate rcLocalHit1, rcLocalHit2;
+
+  StGlobalCoordinate rcGlobalHit1(rcHit1->position());
+  StGlobalCoordinate rcGlobalHit2(rcHit2->position());
+
+  StTpcCoordinateTransform mHitTransform(mStTpcDb);
+  mHitTransform(rcGlobalHit1,rcLocalHit1);
+  mHitTransform(rcGlobalHit2,rcLocalHit2);
+  StThreeVector<double> tmp(rcLocalHit1.position() - rcLocalHit2.position());
+  for(size_t i= 0; i<3; i++) mResolution(i) = tmp(i); 
+  
+  return mResolution;
+}
+
+StThreeVectorF& MatchedHitPair::resolution(const StMcTpcHit* mcHit1,
+					 const StMcTpcHit* mcHit2) {
+  // transform tpc hit positions from global to internal
+  StTpcLocalSectorCoordinate mcLocalHit1, mcLocalHit2;
+
+  StGlobalCoordinate mcGlobalHit1(mcHit1->position());
+  StGlobalCoordinate mcGlobalHit2(mcHit2->position());
+
+  StTpcCoordinateTransform mHitTransform(mStTpcDb);
+  mHitTransform(mcGlobalHit1,mcLocalHit1);
+  mHitTransform(mcGlobalHit2,mcLocalHit2);
+  StThreeVector<double> tmp(mcLocalHit1.position() - mcLocalHit2.position());
+  for(size_t i= 0; i<3; i++) mResolution(i) = tmp(i); 
+  
   return mResolution;
 }
 
@@ -141,13 +169,10 @@ void MatchedTrackPair::addHitResolution(StThreeVectorF& reso) {
   mSpatialResolution *= mHitCounter;
   mSpatialResolutionRMS *= mHitCounter;
   mHitCounter++;
-
+  
   mSpatialResolution += reso;
   mSpatialResolution /= mHitCounter;
 
-  // a very inelegant way to do this operation, but there aren't any
-  // member functions of StThreeVectorF that can do it...
-  // it's probably wrong anyways
   Float_t mx;
   mx = sqrt(mSpatialResolutionRMS.x()*mSpatialResolutionRMS.x()
 	    + reso.x()*reso.x());

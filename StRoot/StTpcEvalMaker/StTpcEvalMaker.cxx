@@ -1,21 +1,17 @@
 //-----------------------------------------------------------------------
-// For StTpcEvalMaker
-//-----------------------------------------------------------------------
-// author: milton toy
-// additions: manuel cbs
-//-----------------------------------------------------------------------
-// class definition of StTpcEvalMaker
-//-----------------------------------------------------------------------
-
-//-----------------------------------------------------------------------
-// * $Id: StTpcEvalMaker.cxx,v 1.2 2000/05/24 19:20:52 snelling Exp $
+// * $Id: StTpcEvalMaker.cxx,v 1.3 2000/05/25 20:38:09 snelling Exp $
 // * $Log: StTpcEvalMaker.cxx,v $
+// * Revision 1.3  2000/05/25 20:38:09  snelling
+// * Added TPC evaluation histograms
+// *
 // * Revision 1.2  2000/05/24 19:20:52  snelling
 // * Fixed distance std function for Solaris
 // *
 // * Revision 1.1.1.1  2000/05/23 00:25:03  snelling
 // * Milton's and Manuel's version
 // *
+//-----------------------------------------------------------------------
+// class definition of StTpcEvalMaker
 //-----------------------------------------------------------------------
 
 #include <iostream.h>
@@ -40,6 +36,7 @@ using std::distance;
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 #include "TFile.h"
+#include "TH2.h"
 #include "StTpcDb/StTpcDbMaker.h"
 #include "StMessMgr.h"
 
@@ -63,7 +60,7 @@ using std::distance;
 #include "StTpcEvalEvent.h"
 #include "StTpcEvalHistograms.h"
 
-static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.2 2000/05/24 19:20:52 snelling Exp $";
+static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.3 2000/05/25 20:38:09 snelling Exp $";
 ClassImp(StTpcEvalMaker)
 
 //-------------------------------------------------
@@ -174,10 +171,9 @@ Int_t StTpcEvalMaker::Make()
     }
 
     // analyze data using StTpcEvalMaker methods
-
     fillHeader();
-    mcHitIteration();
-    rcHitIteration();
+    if (mHitIteration) HitIteration();
+    if (mHitSeparation) HitSeparation();
     mcTrackIteration();
     rcTrackIteration();
     
@@ -213,110 +209,131 @@ void StTpcEvalMaker::fillHeader() {
 
 //-----------------------------------------------------------------------
 
-void StTpcEvalMaker::mcHitIteration() {
-    
-    cout << "_ StMcTpcHit iteration __________________" << endl;
-    
-    StMcTpcHitCollection* mcTpcHitCollection =
-	mStMcEvent->tpcHitCollection();
-    if (!mcTpcHitCollection) {
-	cout << "--> StTpcEvalMaker warning: no StMcTpcHits found!" << endl;
-	return;
-    }
-    MatchedHitPair hitPair(mStTpcDb);
-    
-    for (unsigned int isec=0;
-	 isec<mcTpcHitCollection->numberOfSectors(); isec++) {
-	for (unsigned int irow=0;
-	     irow<mcTpcHitCollection->sector(isec)->numberOfPadrows(); irow++) {
-	    for (StMcTpcHitIterator hitIter =
-		     mcTpcHitCollection->sector(isec)->padrow(irow)->hits().begin();
-		 hitIter !=
-		     mcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();
-		 hitIter++) {
-		
-		// access StAssociationMaker mc tpc hit map information
-		StMcTpcHit* mapKey = *hitIter;
-		pair<mcTpcHitMapIter,mcTpcHitMapIter> mapBounds =
-		    mmcTpcHitMap->equal_range(mapKey);
-		
-		histograms.mcHitPositionRad->Fill(mapKey->padrow());
-		histograms.mcHitPositionZ->Fill(mapKey->position().z());
-		
-		// iterate over matched rc hits
-		int nMatches = 0;
-		for (mcTpcHitMapIter mapIter = mapBounds.first;
-		     mapIter != mapBounds.second; mapIter++){
-		    nMatches++;
-		    hitPair.resolution((*mapIter).first,(*mapIter).second);
-		    histograms.tpcHitResX->Fill(hitPair.resolution().x());
-		    histograms.tpcHitResY->Fill(hitPair.resolution().y());
-		    histograms.tpcHitResZ->Fill(hitPair.resolution().z());
-		}
-		//
-		if (!nMatches) {
-		    histograms.mcUnmatchedHitPositionSector->Fill(mapKey->sector());
-		    histograms.mcUnmatchedHitPositionRad->Fill(mapKey->padrow());
-		    histograms.mcUnmatchedHitPositionZ->Fill(mapKey->position().z());
-		}
-		histograms.matchesToRcHits->Fill(nMatches);
-		//
-	    }
-	}
-    }
-    
-}
+void StTpcEvalMaker::HitIteration() {
 
-//-----------------------------------------------------------------------
+  cout << "_ TpcHit iteration __________________" << endl;
+  
+  StMcTpcHitCollection* mcTpcHitCollection = mStMcEvent->tpcHitCollection();
+  if (!mcTpcHitCollection) {
+    cout << "--> StTpcEvalMaker warning: no StMcTpcHits found!" << endl;
+    return;
+  }
+  
+  // create hitpair and initialize transformations using database
+  MatchedHitPair hitPair(mStTpcDb);
+  
+  unsigned int nAssociatedHits[45];
+  unsigned int nReconstructedHits[45];
+  unsigned int nGeneratedHits[45];
+  for (unsigned int i = 0; i < 45; i++) {
+    nAssociatedHits[i] = 0;
+    nReconstructedHits[i] = 0;
+    nGeneratedHits[i] = 0;
+  }
 
-void StTpcEvalMaker::rcHitIteration() {
-    
-    cout << "_ StTpcHit iteration ____________________" << endl;
-    
-    StTpcHitCollection* rcTpcHitCollection =  mStEvent->tpcHitCollection();
-    
-    if (rcTpcHitCollection) {
+  for (unsigned int isec = 0;
+       isec < mcTpcHitCollection->numberOfSectors(); isec++) {
+    for (unsigned int irow = 0;
+	 irow < mcTpcHitCollection->sector(isec)->numberOfPadrows(); irow++) {
+      for (StMcTpcHitIterator hitIter =
+	     mcTpcHitCollection->sector(isec)->padrow(irow)->hits().begin();
+	   hitIter !=
+	     mcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();
+	   hitIter++) {
+	// calculate the number of Generated Hits per padrow
+	nGeneratedHits[irow]++;
+	// access StAssociationMaker mc tpc hit map information
+	StMcTpcHit* mapKey = *hitIter;
+	pair<mcTpcHitMapIter,mcTpcHitMapIter> mapBounds =
+	  mmcTpcHitMap->equal_range(mapKey);
 	
-	for (unsigned int isec=0;
-	     isec<rcTpcHitCollection->numberOfSectors(); isec++) {
-	    for (unsigned int irow=0;
-		 irow<rcTpcHitCollection->sector(isec)->numberOfPadrows(); irow++) {
-		for (StSPtrVecTpcHitIterator hitIter =
-			 rcTpcHitCollection->sector(isec)->padrow(irow)->hits().begin();
-		     hitIter !=
-			 rcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();
-		     hitIter++) {
-		    
-		    // access StAssociationMaker recon tpc hit map information
-		    StTpcHit* mapKey = *hitIter;
-		    
-		    histograms.rcHitPositionRad->Fill(mapKey->padrow());
-		    histograms.rcHitPositionZ->Fill(mapKey->position().z());
-		    
-		    unsigned int nMatches = mrcTpcHitMap->count(mapKey);
-		    
-		    // fill histograms
-		    if (nMatches) {
-			if (nMatches==1) { // 1 to 1 matches
-			    histograms.mc1to1HitPositionRad->Fill(mapKey->padrow());
-			    histograms.mc1to1HitPositionZ->Fill(mapKey->position().z());
-			}
-			if (nMatches>1) { // Merged hits
-			    histograms.mcMergedHitPositionRad->Fill(mapKey->padrow());
-			    histograms.mcMergedHitPositionZ->Fill(mapKey->position().z());
-			}
-		    }
-		    else {
-			histograms.rcUnmatchedHitPositionSector->Fill(mapKey->sector());
-			histograms.rcUnmatchedHitPositionRad->Fill(mapKey->padrow());
-			histograms.rcUnmatchedHitPositionZ->Fill(mapKey->position().z());
-		    }
-		    histograms.matchesToMcHits->Fill(nMatches);
-		    //
-		}
-	    }
+	histograms.mcHitPositionRad->Fill(mapKey->padrow());
+	histograms.mcHitPositionZ->Fill(mapKey->position().z());
+	
+	// iterate over matched rc hits
+	int nMatches = 0;
+	for (mcTpcHitMapIter mapIter = mapBounds.first;
+	     mapIter != mapBounds.second; mapIter++){
+	  nAssociatedHits[irow]++;
+	  nMatches++;
+	  hitPair.resolution((*mapIter).first,(*mapIter).second);
+	  histograms.tpcHitResX->Fill(hitPair.resolution().x());
+	  histograms.tpcHitResY->Fill(hitPair.resolution().y());
+	  histograms.tpcHitResZ->Fill(hitPair.resolution().z());
 	}
+	//
+	if (!nMatches) {
+	      histograms.mcUnmatchedHitPositionSector->Fill(mapKey->sector());
+	      histograms.mcUnmatchedHitPositionRad->Fill(mapKey->padrow());
+	      histograms.mcUnmatchedHitPositionZ->Fill(mapKey->position().z());
+	}
+	histograms.matchesToRcHits->Fill(nMatches);
+	//
+      }
     }
+  }
+    
+    
+  StTpcHitCollection* rcTpcHitCollection =  mStEvent->tpcHitCollection();
+  if (!rcTpcHitCollection) {
+    cout << "--> StTpcEvalMaker warning: no StRcTpcHits found!" << endl;
+    return;
+  }
+  
+  
+  for (unsigned int isec=0;
+       isec<rcTpcHitCollection->numberOfSectors(); isec++) {
+    for (unsigned int irow=0;
+	 irow<rcTpcHitCollection->sector(isec)->numberOfPadrows(); irow++) {
+      for (StSPtrVecTpcHitIterator hitIter =
+	     rcTpcHitCollection->sector(isec)->padrow(irow)->hits().begin();
+	   hitIter !=
+	     rcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();
+	   hitIter++) {
+
+	// calculate the number of Reconstructed Hits per padrow
+	nReconstructedHits[irow]++;
+	// access StAssociationMaker recon tpc hit map information
+	StTpcHit* mapKey = *hitIter;
+	
+	histograms.rcHitPositionRad->Fill(mapKey->padrow());
+	histograms.rcHitPositionZ->Fill(mapKey->position().z());
+	
+	unsigned int nMatches = mrcTpcHitMap->count(mapKey);
+	
+	// fill histograms
+	if (nMatches) {
+	  if (nMatches==1) { // 1 to 1 matches
+	    histograms.mc1to1HitPositionRad->Fill(mapKey->padrow());
+	      histograms.mc1to1HitPositionZ->Fill(mapKey->position().z());
+	  }
+	  if (nMatches>1) { // Merged hits
+	    histograms.mcMergedHitPositionRad->Fill(mapKey->padrow());
+	    histograms.mcMergedHitPositionZ->Fill(mapKey->position().z());
+	  }
+	}
+	else {
+	  histograms.rcUnmatchedHitPositionSector->Fill(mapKey->sector());
+	  histograms.rcUnmatchedHitPositionRad->Fill(mapKey->padrow());
+	  histograms.rcUnmatchedHitPositionZ->Fill(mapKey->position().z());
+	}
+	histograms.matchesToMcHits->Fill(nMatches);
+      }
+    }
+  }
+
+
+  // Fill efficiency and purity histograms
+
+  float HitEfficiency[45];
+  float HitPurity[45];
+
+  for (unsigned int i = 0; i < 45; i++) {
+    HitEfficiency[i] = (float)nAssociatedHits[i] / (float)nGeneratedHits[i];
+    HitPurity[i] = (float)nAssociatedHits[i] / (float)nReconstructedHits[i];
+    histograms.mHitEfficiency->Fill((float) i+1, HitEfficiency[i]);
+    histograms.mHitPurity->Fill((float) i+1, HitPurity[i]);
+  }
 }
 
 //-----------------------------------------------------------------------
@@ -427,12 +444,6 @@ void StTpcEvalMaker::rcTrackIteration() {
   } // iterate over track nodes
 
 }
-
-//-------------------------------------------------
-// the following methods are defined here because
-// access is needed to pointers to event data and
-// association maps...
-//-------------------------------------------------
 
 //-----------------------------------------------------------------------
 
@@ -561,6 +572,85 @@ void StTpcEvalMaker::scanTrackPair(MatchedTrackPair* trackPair, StMcTrack* mcTra
     
     } // iterate over StTpcHit of StGlobalTrack
     
+}
+
+//-----------------------------------------------------------------------
+
+void StTpcEvalMaker::HitSeparation() {
+    
+    cout << " In Hit Separation module: Note very time consuming can be disabled in script" << endl;
+    
+    StMcTpcHitCollection* mcTpcHitCollection = mStMcEvent->tpcHitCollection();
+    if (!mcTpcHitCollection) {
+	cout << "--> StTpcEvalMaker warning: no StMcTpcHits found!" << endl;
+	return;
+    }
+
+    // create hitpair and initialize transformations using database
+    MatchedHitPair hitPair(mStTpcDb);
+    
+    for (unsigned int isec = 0;
+	 isec < mcTpcHitCollection->numberOfSectors(); isec++) {
+      cout << "In Sector: " << isec + 1 << endl;
+      cout << "In Row: ";
+      for (unsigned int irow = 0;
+	   irow < mcTpcHitCollection->sector(isec)->numberOfPadrows(); irow++) {
+	cout << irow + 1 << " "; flush(cout);
+	for (StMcTpcHitIterator hitIter =
+	       mcTpcHitCollection->sector(isec)->padrow(irow)->hits().begin();
+	     hitIter !=
+	       mcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();
+	     hitIter++) {
+	  for (StMcTpcHitIterator hitIter2 = hitIter;
+	       ++hitIter2 != 
+		 mcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();)
+	    {	
+	      // access StAssociationMaker mc tpc hit map information
+	      StMcTpcHit* mcTpcHit1 = *hitIter;
+	      StMcTpcHit* mcTpcHit2 = *hitIter2;
+	      hitPair.resolution(mcTpcHit1, mcTpcHit2);
+	      histograms.mcPadSepEfficiencyOuter->Fill(fabs(hitPair.resolution().x()),
+						       fabs(hitPair.resolution().z()));
+	    }
+	}
+      }
+      cout << " " << endl;
+    }
+    
+    StTpcHitCollection* rcTpcHitCollection =  mStEvent->tpcHitCollection();
+    if (!rcTpcHitCollection) {
+      cout << "--> StTpcEvalMaker warning: no StRcTpcHits found!" << endl;
+      return;
+    }
+    
+    for (unsigned int isec = 0;
+	 isec < rcTpcHitCollection->numberOfSectors(); isec++) {
+      cout << "In Sector: " << isec + 1 << endl;
+      cout << "In Row: ";
+      for (unsigned int irow = 0;
+	   irow < rcTpcHitCollection->sector(isec)->numberOfPadrows(); irow++) {
+	cout << irow + 1 << " "; flush(cout);
+	for (StSPtrVecTpcHitIterator hitIter =
+	       rcTpcHitCollection->sector(isec)->padrow(irow)->hits().begin();
+	     hitIter !=
+	       rcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();
+	     hitIter++) {
+	  for (StSPtrVecTpcHitIterator hitIter2 = hitIter;
+	       ++hitIter2 != 
+		 rcTpcHitCollection->sector(isec)->padrow(irow)->hits().end();)
+	    {
+	      
+	      // access StAssociationMaker recon tpc hit map information
+	      StTpcHit* rcTpcHit1 = *hitIter;
+	      StTpcHit* rcTpcHit2 = *hitIter2;
+	      hitPair.resolution(rcTpcHit1, rcTpcHit2);
+	      histograms.rcPadSepEfficiencyOuter->Fill(fabs(hitPair.resolution().x()),
+						       fabs(hitPair.resolution().z()));
+	    }
+	}
+      }
+      cout << " " << endl;
+    }
 }
 
 //-----------------------------------------------------------------------
