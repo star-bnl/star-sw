@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.30 2000/11/19 21:27:13 nevski Exp $
+* $Id: g2t_volume_id.g,v 1.31 2000/12/01 22:48:00 nevski Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.31  2000/12/01 22:48:00  nevski
+* phmd stuff added
+*
 * Revision 1.30  2000/11/19 21:27:13  nevski
 * comments updated
 *
@@ -445,10 +448,15 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         elseif  cd=='OQUA' { is=5 }
 
         volume_id = numbv(1) + Is*1000
-
+*14*
       else If (Csys=='zdc') then
         volume_id = numbv(1)*1000+numbv(2)
-*14*
+
+*15*                                 pmd,     Bedanga
+      else If (Csys=='pmd') then
+        volume_id = numbv(1)*1000+numbv(2)
+
+*16*
       else
         print *,' G2T warning: volume  ',Csys,'  not found '  
       endif
