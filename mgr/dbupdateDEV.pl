@@ -379,7 +379,7 @@ my $pfullName;
   print  "Changing availability for test files", "\n";
 #  print  "files to be updated:", $pvjbId, " % ",$mpath, " % ",$pvTime, " % ", $newAvail, "\n"; 
 
-         &updateJSTable();
+     &updateJSTable();
 	
         &logInfo("$fullname", "$platf");
 
