@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0I.hh,v 3.7 2002/07/30 20:07:52 genevb Exp $
+ * $Id: StV0I.hh,v 3.8 2003/02/10 15:47:14 genevb Exp $
  *
  * Author: Gene Van Buren, BNL, 24-Apr-2001
  *
@@ -13,6 +13,9 @@
  ***********************************************************************
  *
  * $Log: StV0I.hh,v $
+ * Revision 3.8  2003/02/10 15:47:14  genevb
+ * Fixed mt calculations
+ *
  * Revision 3.7  2002/07/30 20:07:52  genevb
  * Better cTau calcs
  *
@@ -437,15 +440,15 @@ inline Float_t StV0I::pseudoRapNeg() {
 }
 
 inline Float_t StV0I::mtHypV0(Float_t mass) {
-  return sqrt(Ptot2V0()+pow(mass,2));
+  return sqrt(Pt2V0()+pow(mass,2));
 }
 
 inline Float_t StV0I::mtLambda() {
-  return sqrt(Ptot2V0()+M_LAMBDA_2);
+  return sqrt(Pt2V0()+M_LAMBDA_2);
 }
 
 inline Float_t StV0I::mtK0Short() {
-  return sqrt(Ptot2V0()+M_KAON_0_SHORT_2);
+  return sqrt(Pt2V0()+M_KAON_0_SHORT_2);
 }
 
 inline Float_t StV0I::mtm0HypV0(Float_t mass) {
