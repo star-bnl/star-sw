@@ -18,32 +18,13 @@ use File::Basename;
 
 require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
 
-my $prodSr = "prod6"; 
+my $prodSr = "P00hi"; 
 
 my @Sets = (
-             "auau200/hijing/beamgas/hydrogen/year_1h/hadronic_on",
-             "auau200/hijing/beamgas/nitrogen/year_1h/hadronic_on", 
-#             "pp200/pythia/default/minibias/year_2a/hadronic_on",
-#             "auau200/single/default/central/year_1e/hadronic_on",
-             "auau130/mevsim/vanilla/central/year_1e/hadronic_on",
-             "auau130/mevsim/vanilla/central/year_1h/hadronic_on", 
-             "auau130/mevsim/vanilla_cocktail/central/year_1h/hadronic_on",
-             "auau130/mevsim/vanilla_flow/central/year_1h/hadronic_on",
-             "auau200/single/default/central/year_1e/hadronic_on",
-             "auau130/mevsim/vanilla_resonance/central/year_1h/hadronic_on",
-             "auau200/single/default/halffield/year_1e/hadronic_on",
-             "auau200/rqmd/default/b0_14/year_1h/hadronic_on",
-             "auau130/mevsim/vanilla_flow/central/year_1e/hadronic_on",
-             "auau130/mevsim/vanilla_dynamic/central/year_1e/hadronic_on",
-             "auau130/mevsim/vanilla_dynamic/central/year_1h/hadronic_on",
-             "auau130/mevsim/vanilla_omega/central/year_1e/hadronic_on",
-             "auau130/mevsim/vanilla_omega/central/year_1h/hadronic_on",
-             "auau130/mevsim/vanilla_trigger/central/year_1e/hadronic_on",
-             "auau130/mevsim/vanilla_trigger/central/year_1h/hadronic_on", 
-             "auau130/nexus/default/b0_3/year_1e/hadronic_on", 
-             "auau128/hijing/b0_12/halffield/year_1e/hadronic_on",
-             "auau128/hijing/b0_3/halffield/year_1e/hadronic_on",
-             "auau200/hijing135/default/b0_3/year_1h/hadronic_on", 
+            "auau130/hijing/b0_3_jet05/year_1h/halffield/hadronic_on",
+            "auau130/hijing/b0_15/year_1h/halffield/hadronic_on",
+            "auau130/hijing/b0_3/year_1h/halffield/hadronic_on",
+            "auau130/hijing/b3_6/year_1h/halffield/hadronic_on",
 );
 
 
@@ -66,6 +47,8 @@ struct JFileAttr => {
     gpath       => '$',
     gsize       => '$',
     gtimeS      => '$',
+    gdone       => '$',
+    gNevt       => '$',
                     };
 
 struct JSFileAttr => {
@@ -86,10 +69,9 @@ my $debugOn = 0;
 
 my $topHpssReco  =  "/home/starreco/reco";
 my $DISK1 = "/star/rcf/disk00001/star";
-my $DISK2 =  "/star/rcf/data03/reco";
 my $DISKD = "/star/rcf";
 
-my $prod_ext = "tfs_7";
+my $prod_ext = "trs_1i";
 
 my %monthHash = (
 		 "Jan" => 1,
@@ -126,12 +108,13 @@ my $jobIn_no = 0;
 my @jobSum_set;
 my $jobSum_no = 0;
 
+
 ########## Find reconstruction files in HPSS
 
 for( $ll = 0; $ll<scalar(@Sets); $ll++) {
   $hpssRecoDirs[$ll] = $topHpssReco . "/" . $Sets[$ll] . "/" . $prod_ext;
   }
-my $ftpHpss = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>100)
+my $ftpHpss = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>200)
   or die "HPSS access failed";
 $ftpHpss->login("starsink","MockData") or die "HPSS access failed";
 
@@ -141,80 +124,12 @@ print "\nFinding reco files in HPSS\n";
 print "Total files: ".@hpssRecoFiles."\n";
 $ftpHpss->quit();
 
-########## Find reco files in disk
-my $maccess; 
- my $mdowner;
- my $flname;
-my $nDiskFiles = 0;
-my @diskRecoDirs;
-
-my $inext =scalar(@Sets); 
-
-for( $ll = 0; $ll<scalar(@Sets); $ll++) { 
-  $diskRecoDirs[$ll] = $DISK2 . "/" . $Sets[$ll] . "/" . $prod_ext;
-  print "diskRecoDir: $diskRecoDirs[$ll]\n";
-}
-
-
-print "\nFinding reco files in disk\n";
- 
-my $dflag;
-
-foreach $diskDir (@diskRecoDirs) {
-#  print "diskRecoDir: ", $diskDir, "\n";
-  if (-d $diskDir) {
-  opendir(DIR, $diskDir) or die "can't open $diskDir\n";
-  while( defined($flname = readdir(DIR)) ) {
-     next if $flname =~ /^\.\.?$/;
-     next if $flname =~ /geant.root/;
-     next if $flname =~ /hold/;
-        $maccess = "-rw-r--r--"; 
-        $mdowner = "starreco";
-     $fullname = $diskDir."/".$flname;
-     my @dirF = split(/\//, $diskDir); 
-     my $set = sprintf("%s\/%s\/%s\/%s\/%s\/%s",$dirF[5],$dirF[6],$dirF[7],
-                                                $dirF[8],$dirF[9],$dirF[10]);
-    ($size, $mTime) = (stat($fullname))[7, 9];
-    ($sec,$min,$hr,$dy,$mo,$yr) = (localtime($mTime))[0,1,2,3,4,5];
-    $mo = sprintf("%2.2d", $mo+1);
-    $dy = sprintf("%2.2d", $dy);
-  
-    if( $yr > 98 ) {
-      $fullyear = 1900 + $yr;
-    } else {
-      $fullyear = 2000 + $yr;
-    }
-
-
-    $timeS = sprintf ("%4.4d%2.2d%2.2d",
-                      $fullyear,$mo,$dy);
-#  print "Set = ", $set, "File Name = ", $flname, "\n";
-    $dflag = 1;    
-
-    $fObjAdr = \(FileAttr->new());
-    ($$fObjAdr)->filename($flname);
-    ($$fObjAdr)->fpath($diskDir);
-    ($$fObjAdr)->dset($set);
-    ($$fObjAdr)->size($size);
-    ($$fObjAdr)->timeS($timeS);
-    ($$fObjAdr)->faccess($maccess);
-    ($$fObjAdr)->fowner($mdowner);
-    ($$fObjAdr)->iflag($dflag); 
-    $hpssRecoFiles[$nHpssFiles] = $fObjAdr;
-   $nHpssFiles++;
-   $nDiskFiles++;
-  }
-closedir DIR;
-}
-}
-print "Total reco files: $nDiskFiles\n";
-
 
 ###### Find reco files in Files Catalog
  &StDbProdConnect();
 
 
- $sql="SELECT dataset, fName, path, size, createTime FROM $FileCatalogT  WHERE fName LIKE '%root' AND jobID LIKE '%$prodSr%' ";
+ $sql="SELECT dataset, fName, path, size, createTime, Nevents, redone FROM $FileCatalogT  WHERE fName LIKE '%root' AND jobID LIKE '%$prodSr%' AND path like '%auau130%' ";
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
           $cursor->execute;
@@ -233,7 +148,9 @@ print "Total reco files: $nDiskFiles\n";
         ($$fObjAdr)->gpath($fvalue)     if( $fname eq 'path'); 
         ($$fObjAdr)->gsize($fvalue)     if( $fname eq 'size'); 
         ($$fObjAdr)->gtimeS($fvalue)    if( $fname eq 'createTime');
- }
+        ($$fObjAdr)->gdone($fvalue)     if( $fname eq 'redone'); 
+        ($$fObjAdr)->gNevt($fvalue)     if( $fname eq 'Nevents');
+}
 
    $jobIn_set[$jobIn_no] = $fObjAdr;
    $jobIn_no++;
@@ -242,7 +159,7 @@ print "Total reco files: $nDiskFiles\n";
 
 ### select reco files status from JobStatus
 
- $sql="SELECT JobID, prodSeries, jobfileName, sumFileName, sumFileDir, jobStatus, NoEvents, CPU_per_evt_sec FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobStatus <> 'n/a'";
+ $sql="SELECT JobID, prodSeries, jobfileName, sumFileName, sumFileDir, jobStatus, NoEvents, CPU_per_evt_sec FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobfileName like 'auau130%' AND jobStatus <> 'n/a'";
 
   $cursor =$dbh->prepare($sql)
    || die "Cannot prepare statement: $DBI::errstr\n";
@@ -334,6 +251,20 @@ foreach my $jobnm (@jobSum_set){
 
           &sumInfo("$jb_sumFile",1);
   
+       $fObjAdr = \(JSFileAttr->new());
+       
+       ($$fObjAdr)->prSer($mproSr);    
+       ($$fObjAdr)->job_id($msJobId);  
+       ($$fObjAdr)->smFile($msumFile);
+       ($$fObjAdr)->jbFile($mjobFname);
+       ($$fObjAdr)->jbSt($mjobSt);   
+       ($$fObjAdr)->NoEvt($mNev);
+       ($$fObjAdr)->FstEvt($first_evts);
+       ($$fObjAdr)->LstEvt($last_evts);               
+
+      $jobFSum_set[$jobFSum_no] = $fObjAdr;
+      $jobFSum_no++; 
+
       chop $mjobSt;
 #      if ($mjobSt ne $mjbStat) { 
 # print "Job Status :",$mjobSt," % ",$mjbStat," % ","\n";
@@ -344,21 +275,8 @@ foreach my $jobnm (@jobSum_set){
 
       print "updating JobStatus table\n";
  
-     &updateJSTable(); 
+    &updateJSTable(); 
 
-       $fObjAdr = \(JSFileAttr->new());
-       
-       ($$fObjAdr)->prSer($mproSr);    
-       ($$fObjAdr)->job_id($msJobId);  
-       ($$fObjAdr)->smFile($msumFile);
-       ($$fObjAdr)->jbFile($mjobFname);   
-       ($$fObjAdr)->NoEvt($mNev);
-       ($$fObjAdr)->FstEvt($first_evts);
-       ($$fObjAdr)->LstEvt($last_evts);               
-
-      $jobFSum_set[$jobFSum_no] = $fObjAdr;
-      $jobFSum_no++; 
-    
       }else {
        }
          last;
@@ -402,7 +320,8 @@ my $gtime;
 my $dbgtime;
 my $ztime = "000000";
 my $fullName;
-
+my $nNoEvt = 0;
+my $dbNevt = 0;
 
    foreach $eachRecoFile (@hpssRecoFiles) {
 
@@ -415,24 +334,38 @@ my $fullName;
    $flagHash{$fullName} = ($$eachRecoFile)->iflag;
 #   $mcTime = substr ($mgTime,-8) ;
 #   print "Time = ",  $mcTime, "\n";
+    foreach my $jobff (@jobFSum_set){
+
+       $mNevts    = ($$jobff)->NoEvt; 
+       $mjobFname = ($$jobff)->jbFile;
+       $msumFile  = ($$jobff)->smFile;
+       $msumFile =~ s/.sum//g;
+        if ($mfName =~ /$msumFile/ ) {   
+      $nNoEvt = $mNevts;
+last;
+}
+}
     foreach my $gtfile (@jobIn_set){
        $dbset = ($$gtfile)->gset;
        $dbfname = ($$gtfile)->gname;
        $dbfpath = ($$gtfile)->gpath;
        $dbfsize = ($$gtfile)->gsize;
        $dbgtime = ($$gtfile)->gtimeS;
+       $dbNevt  = ($$gtfile)->gNevt;
        @parts = split (" ",$dbgtime);
        $gtime =  $parts[0];
        $gtime =~ s/-//g;
        $dbctime = $gtime;
 
        if ( ($mfName eq $dbfname) and ($mpath eq $dbfpath)) { 
-# print "Name of dst on HPSS: ", $mpath, "Name of dst onDB:", $dbfpath,"\n";
-#           if ( ($msize eq $dbfsize) and ($mcTime eq $dbctime)) {
-          if ( $msize eq $dbfsize) {  
+# print "Name of File: ", $mfName , " % ", $mcTime, " % " ,$dbctime,"\n";
+           if ( ($msize eq $dbfsize) and ($mcTime eq $dbctime) and ($dbNevt == $nNoEvt)) {
+#          if ( $msize eq $dbfsize) {  
            $flagHash{$fullName} = 0;
+
           } else {
             $flagHash{$fullName} = 2;  
+# print  $mfName, " % " ,$flagHash{$fullName}," % " , $mcTime, " % " ,$dbctime, " % " , $dbNevt," % " , $nNoEvt, "\n";  
 	  }
         last;
 	}else {
@@ -446,6 +379,11 @@ my $NumMisFile = 0;
 my $NumUpFile = 0;
 my $newset;
 my @prtFS;
+my $mdone;
+my $mName;
+my $mdtstat = "OK";
+my $mcomnt = " ";
+my $mcalib;
 
    foreach $eachRecoFile (@hpssRecoFiles) {
 
@@ -473,7 +411,11 @@ my @prtFS;
   $mhpss = "Y";
   $mstatus = 0;
   $mEvtSk = 0;
-  
+  $mdone = 0;  
+  $mcalib = "n\/a";
+  $mdtstat = "OK";
+  $mcomnt = " "; 
+
 ##### end of reinitialization
 
    $mdataSet  = ($$eachRecoFile)->dset;
@@ -516,12 +458,15 @@ my @prtFS;
    $fullName = $mpath ."/" . $mfName;
    $gflag = $flagHash{$fullName}; 
      if( $gflag != 0 ) {
-    foreach my $jobnm (@jobSum_set){
+#   print $fullName, " % " , $gflag, "\n"; 
+    foreach my $jobnm (@jobFSum_set){
        $mproSr   = ($$jobnm)->prSer;
        $mJobId   = ($$jobnm)->job_id;
        $msumFile = ($$jobnm)->smFile;
        $mNevts   = ($$jobnm)->NoEvt;
+       $mjobSt   = ($$jobnm)->jbSt;       
        $mjobFname = ($$jobnm)->jbFile;
+
      my $jfile = $msumFile;
       $jfile =~ s/.sum//g;
       $mNevtLo = 1;
@@ -530,27 +475,46 @@ my @prtFS;
       $newset =~ s/\//_/g;
 
        if ($mfName =~ /$jfile/ and $mjobFname =~ /$newset/) {
+      chop $mjobSt;
+     if ( $mjobSt ne "Done") {
+       $mdtStat = "notOK";
+       $mcomnt = $mjobSt;
+} else{
+  $mdtStat = "OK";
+  $mcomnt = " ";
+}
 
-if ( $gflag eq 1) {
-
+if ( $gflag == 1) {
+     $mdone = 0;
    print "Files to be inserted :", "\n"; 
-   print "Job ID: ", $mJobId, "Path: ", $mpath, "File: ", $mfName, "Date:", $mcTime,"\n"; 
+   print "Inserted Files: ", $mJobId, " % ",$mpath, " % ",$mfName, " % ",$mcTime," % ",$mdone,"\n"; 
      $NumMisFile++;
 
    print "Filling Files Catalog\n";
    &fillDbTable();
  }
 
-elsif ( $gflag eq 2) {
+elsif ( $gflag == 2) {
     
- print "Files to be updated :", "\n";    
- print "Job ID: ", $mJobId, "Path: ", $mpath,"File:", $mfName, "Date:", $mcTime, "\n";
     $NumUpFile++; 
  
+  foreach my $rdfile (@jobIn_set){
+     $mdone = ($$rdfile)->gdone;
+     $mName = ($$rdfile)->gname;
+     if($mfName eq $mName) {
+        $mdone++;
+
+ print "Files to be updated :", "\n";    
+ print "Updated Files: ", $mJobId, " % ",$mpath, " % ",$mfName, " % ",$mcTime, " % ",$mdone," % ",$mjobSt, " % ",$mdtStat, "\n";
+
    print "Updating Files Catalog\n";
    &updateDbTable();  
-
- }
+    last;
+      }else{
+       next;
+     }
+ } 
+}
   last;
  }else{
   next;
@@ -611,11 +575,10 @@ sub fillDbTable {
     $sql.="site='$msite',"; 
     $sql.="hpss='$mhpss',";
     $sql.="status= 0,";
-    $sql.="comment=''";
+    $sql.="dataStatus='$mdtStat',";
+    $sql.="comment='$mcomnt' ";
     print "$sql\n" if $debugOn;
     $rv = $dbh->do($sql) || die $dbh->errstr;
-
-
   }
 
 #####======================================================================
@@ -627,7 +590,10 @@ sub fillDbTable {
      $sql.="Nevents='$mNevts',";
      $sql.="NevLo='$mNevtLo',";
      $sql.="NevHi='$mNevtHi',";
-     $sql.="owner='$mowner'";
+     $sql.="owner='$mowner',";
+     $sql.="redone='$mdone',";
+     $sql.="dataStatus='$mdtStat',";
+     $sql.="comment='$mcomnt' ";
      $sql.=" WHERE fName = '$mfName' AND dataset= '$mdataSet' AND path='$mpath'";
      print "$sql\n" if $debugOn;
      $rv = $dbh->do($sql) || die $dbh->errstr;
@@ -777,6 +743,7 @@ sub fillDbTable {
       } else {
 	$year = 2000 + $year;
       }
+#      $year = 2000;
       $fflag = 1;   
    
 #     $timeS = sprintf ("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:00",
