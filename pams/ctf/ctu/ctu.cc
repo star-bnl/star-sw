@@ -35,7 +35,7 @@ long type_of_call ctu_(
 //
 //    Make sure geometry table has something         
 //
-  if ( geo_h->maxlen != 1 ) {
+  if ( geo_h->maxlen < 1 ) {
      sprintf ( OutMessage, " Geo maxlen = %d is not valid ", geo_h->maxlen ) ;
      MessageOut ( OutMessage ) ;
      return STAFCV_BAD ;
