@@ -39,7 +39,7 @@ C-----------------------------------------------------------------------
 *--
 *--   SET VARIOUS CONSTANTS FOR THE RUNS
 *--
-      write (6,*) 'NEW: Im In!'
+*      write (6,*) 'NEW: Im In!'
       if ( First ) then
          First = .false.
 *--
@@ -164,7 +164,7 @@ C-----------------------------------------------------------------------
                Raw_mwc (iz,iphi,ieta) = mwc_raw(i).count
                write (9,*) 'MWC ',iz, iphi, ieta, raw_mwc(iz,iphi,ieta)
             else
-               write ( 6, * ) isector,index,
+               write ( 6, * ) 'MWC:',isector,index,
      +         iz,' or ',iphi, ' or ',ieta, ' are too high an index '
             endif
          enddo
@@ -283,7 +283,7 @@ C-----------------------------------------------------------------------
       L0_h.nok = 1
       rl0 =  STAFCV_OK
 
-      write (6,*) 'Im out'
+*      write (6,*) 'Im out'
 *--
 *--    That's it
 *--
