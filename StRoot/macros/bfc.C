@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.104 1999/08/07 19:44:55 fisyak Exp $
+// $Id: bfc.C,v 1.105 1999/08/11 13:30:31 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
@@ -126,7 +126,7 @@ void bfc(const Int_t First,
 	   i,iMake,evnt->GetRealTime("QAInfo:"),evnt->GetCpuTime("QAInfo:"));
    i++; goto EventLoop;
  }
-  if (NoEvents > 1 || gROOT->IsBatch()) {
+  if (NoEvents > First || gROOT->IsBatch()) {
     chain->Finish();
     if (xdf_out) delete xdf_out;
     fflush(stdout);
