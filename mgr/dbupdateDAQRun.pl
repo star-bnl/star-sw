@@ -153,7 +153,7 @@ my $jbSt = "n\/a";
 for( $ll = 0; $ll<scalar(@Sets); $ll++) {
   $hpssRecoDirs[$ll] = $topHpssReco . "/" . $prodSr . "/" . $Sets[$ll] ;
   }
-my $ftpHpss = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>400)
+my $ftpHpss = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>500)
   or die "HPSS access failed";
 $ftpHpss->login("starsink","MockData") or die "HPSS access failed";
 
