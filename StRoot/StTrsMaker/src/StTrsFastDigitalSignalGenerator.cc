@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.1 1998/11/10 17:12:25 fisyak Exp $
+ * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.2 1998/11/13 21:31:37 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
- * Revision 1.1  1998/11/10 17:12:25  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1998/11/13 21:31:37  lasiuk
+ * diagnostics
+ *
+ * Revision 1.7  1999/01/23 02:32:22  lasiuk
+ * sun friendly
  *
  * Revision 1.6  1999/01/22 08:08:36  lasiuk
  * unsigned char; use of pair<> for two arrays
@@ -75,7 +78,9 @@ StTrsFastDigitalSignalGenerator::instance(StTpcElectronics* el, StTrsSector* sec
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
     vector<StTrsAnalogSignal> currentPad;
 #else
+    vector<StTrsAnalogSignal, allocator<StTrsAnalogSignal> > currentPad;
 #endif    
+    for(int irow=0; irow<mSector->size(); irow++) {
         cout << "Current ROW: " << irow << endl;
     // Loop over the sector
 	  cout << " Current PAD: " << ipad << endl;
