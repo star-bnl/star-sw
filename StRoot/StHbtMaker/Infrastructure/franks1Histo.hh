@@ -4,6 +4,7 @@
 
 #ifndef __CINT__
 #include <iostream.h>
+#include <cstdio>
 #include <math.h>
 #ifdef GNU_GCC
 #   include <stddef.h>
@@ -30,10 +31,12 @@ private:
   T mXmax;
   T mStep;
   T *vec; 
+  int mEntries;
 
 public:
   // constructor and deconstructor
-  franks1Histo(const char* c1, const char* c2, int bins, T xmin, T xmax);  
+  franks1Histo(const char* c1, const char* c2, 
+	       int bins, T xmin, T xmax);  
   ~franks1Histo();  
 
   // member functions
@@ -42,26 +45,23 @@ public:
   template<class X, class Y>  void Divide( franks1Histo<X>* , franks1Histo<X>* , Y w1=1., Y w2=1., const char* c="");
   template<class X>           void Fill( X value);
   template<class X, class Y>  void Fill( X value, Y weight);
-  template<class X>           void Scale(X scale) { scale = scale*2; }
-#else
-  void Add( franks1Histo<double>* , franks1Histo<double>* , double, double, const char*);
-  void Divide( franks1Histo<double>* , franks1Histo<double>* , double, double, const char*);
-  void Fill( double value);
-  void Fill( double value, double weight);
-  void Scale(double scale) { scale = scale*2; }
+  template<class X>           int  GetBin(X value);
+  template<class X>           void Scale(X scale);
 #endif
-  void Draw();
-  void Draw(const char*);
-  T    GetBinContent(int bin) { return vec[bin]; }
-  int  GetNbinsX() { return mBins; }
-  T    GetMean() { return 0; }
-  T    GetRMS() { return 0; }
-  void Reset()  { /* no-op */};
+  // methods without template arguments
+  void Draw(const char* c="");
   void SetDirectory(int dummy) { /* no-op */};
   void Sumw2() {/* no-op */};
-  T Integral() { T bla; return bla; }
-  T GetEntries() { T bla; return bla; }
-
+  int  GetNbinsX() { return mBins; }
+  T    GetBinContent(int bin) { return vec[bin]; }
+  T    GetBinCenter(int bin);
+  T    GetMaximum();
+  T    GetMinimum();
+  T    GetMean();
+  T    GetRMS();
+  T    GetEntries();
+  T    Integral();
+  void Reset(const char* c="");
 };
 
 #ifndef __CINT__
@@ -112,6 +112,22 @@ inline franks1Histo<T>::~franks1Histo() {
   }
 // *************************************************************************************************
 template<class T>
+inline void franks1Histo<T>::Draw(const char* c) {
+  cout << c << " " << mC1 << " " << endl;
+  T min=GetMinimum();
+  T max=GetMaximum();   
+  T step = (max-min)/50.;
+  cout << " minimum=" << min << " maximum=" << max << " step=" << step << endl;
+  for (int i=0; i < mBins; i++) { 
+    printf(" (%3i) %+e %+e ",i, GetBinCenter(i), vec[i]);
+    for ( int j=0; j < floor( (vec[i]-min)/step ); j++) {
+      cout << "*";
+    }
+    cout << endl;
+  }
+};
+// *************************************************************************************************
+template<class T>
 template<class X>
 inline void franks1Histo<T>::Fill( X value) {
   mPos = (int) abs( (value-mXmin)/mStep );
@@ -128,48 +144,84 @@ inline void franks1Histo<T>::Fill( X value, Y weight) {
     vec[mPos] = vec[mPos] + weight;
   cout << ".";
 }
-#else
 // *************************************************************************************************
-  template<class T>
-  inline void franks1Histo<T>::Add( franks1Histo<double>* h1, franks1Histo<double>* h2, double w1, double w2, const char* c) {
-    for (int i=0; i < mBins; i++) {
-      vec[i] = h1->vec[i]*w1 + h2->vec[i]*w2;
-    }
-}
-// *************************************************************************************************
-  template<class T>
-  inline void franks1Histo<T>::Divide( franks1Histo<double>* h1, franks1Histo<double>* h2, double w1, double w2, const char* c) {
-    for (int i=0; i < mBins; i++) {
-      if (h2->vec[i]*w2 !=0 ) 
-	vec[i] = h1->vec[i]*w1 / h2->vec[i]*w2;
-      else
-	vec[i]=0;
-    }
+template<class T>
+template<class X>
+inline int franks1Histo<T>::GetBin(X value) {
+  int bin  = (int) floor( (value-mXmin)/mStep );
+  if( !(bin >=0 && bin < mBins) ) bin=-1;
+  return bin;
 }
 // *************************************************************************************************
 template<class T>
-inline void franks1Histo<T>::Fill( double value) {
-  mPos = (int) abs( (value-mXmin)/mStep );
-  if ( mPos>=0 && mPos < mBins) 
-    vec[mPos]++;
-  cout << ".";
+inline T franks1Histo<T>::GetBinCenter(int bin) {
+  double center=0;
+  if ( bin >=0 && bin < mBins)
+    center= mXmin + (0.5+bin)*mStep;
+  return center;
 }
 // *************************************************************************************************
 template<class T>
-inline void franks1Histo<T>::Fill( double value, double weight) {
-  mPos = (int) abs( (value-mXmin)/mStep );
-  if ( mPos>=0 && mPos < mBins) 
-    vec[mPos] = vec[mPos] + weight;
-  cout << ".";
+inline T franks1Histo<T>::GetMean() {
+  T mean=0;
+  for (int i=0; i< mBins; i++)
+    mean+=vec[i]*GetBinCenter(i);
+  mean/=mBins;
+  return mean;
+}
+// *************************************************************************************************
+template<class T>
+inline T franks1Histo<T>::GetMaximum() {
+  T max=vec[0];
+  for (int i=0; i< mBins; i++) {
+    if (vec[i] > max) 
+      max=vec[i];
+  }
+  return max;
+}
+// *************************************************************************************************
+template<class T>
+inline T franks1Histo<T>::GetMinimum() {
+  T min=vec[0];
+  for (int i=0; i< mBins; i++) {
+    if (vec[i] < min) 
+      min=vec[i];
+  }
+  return min;
+}
+// *************************************************************************************************
+template<class T>
+inline T franks1Histo<T>::GetRMS() {
+  T mean = GetMean();
+  for (int i=0; i< mBins; i++)
+    mean+=vec[i]*GetBinCenter(i);
+  mean/=mBins;
+  return mean;
+}
+// *************************************************************************************************
+template<class T>
+inline void franks1Histo<T>::Reset(const char*) {
+  for (int i=0; i < mBins; i++) 
+    vec[i] = 0;
+}
+// *************************************************************************************************
+template<class T>
+template<class X>
+inline void franks1Histo<T>::Scale(X scale) {
+  for (int i=0; i < mBins; i++) 
+    vec[i] *=scale;
+}
+// *************************************************************************************************
+template<class T>
+inline T franks1Histo<T>::Integral() {
+  T Integral=0;
+  for (int i=0; i < mBins; i++) { 
+    Integral+=vec[i];
+    //cout << i << " " << vec[i] << " " << Integral << endl;
+  }
+  return Integral;
 }
 #endif
-
-// *************************************************************************************************
-template<class T>
-inline void franks1Histo<T>::Draw() { /* no-op */ };
-template<class T>
-inline void franks1Histo<T>::Draw(const char* c) { /* no-op */ };
-
 
 #endif // __CINT__
 
