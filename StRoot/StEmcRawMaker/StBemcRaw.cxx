@@ -1,6 +1,9 @@
 // 
-// $Id: StBemcRaw.cxx,v 1.12 2005/01/14 12:20:31 suaide Exp $
+// $Id: StBemcRaw.cxx,v 1.13 2005/02/02 11:09:59 suaide Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.13  2005/02/02 11:09:59  suaide
+// crate Id check is back!
+//
 // Revision 1.12  2005/01/14 12:20:31  suaide
 // small bug fixed for the PSD
 //
@@ -361,8 +364,9 @@ void StBemcRaw::checkBtowCrates(StEmcRawData* RAW)
     mDecoder->GetTowerTDCFromCrate(crate,TDC);
     Int_t sum = header[TDC];
     Int_t err = header[TDC+BTOWTDCERROFFSET];
+    Int_t crateFromHeader = header[TDC+BTOWCRATEOFFSET]& 0x0FF;
     mCrateStatus[BTOW-1][crate-1] = crateUnknown;
-    if(sum==BTOWBYTESUM && err == BTOWERRFLAG) mCrateStatus[BTOW-1][crate-1] = crateOK;
+    if(sum==BTOWBYTESUM && err == BTOWERRFLAG && crate==crateFromHeader) mCrateStatus[BTOW-1][crate-1] = crateOK;
     else mCrateStatus[BTOW-1][crate-1] = crateHeaderCorrupt;
     
     if(sum==BTOWNOTPRESENT && err == BTOWNOTPRESENT) mCrateStatus[BTOW-1][crate-1] = crateNotPresent;
