@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.49 1998/08/28 02:10:14 nevski Exp $
+# $Id: MakePam.mk,v 1.50 1998/09/15 22:15:28 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.50  1998/09/15 22:15:28  fisyak
+# Fix root/noroot options
+#
 # Revision 1.49  1998/08/28 02:10:14  nevski
 # Add standard tables include
 #
@@ -242,6 +245,8 @@ else
 all                  : MakeInc $(LIB_PKG) $(SL_PKG) 
 ifndef NOROOT
 MakeInc  : $(FILES_ALL_TAB) $(FILES_ALL_MOD) 
+else
+MakeInc  : $(FILES_TAI) $(FILES_TAH)
 endif
 # all files:
 ifneq (,$(strip $(FILES_O) $(FILES_SL) $(FILES_OG) $(FILES_init))) 
