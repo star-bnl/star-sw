@@ -1,7 +1,11 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.16 2000/04/06 08:38:08 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.17 2000/04/06 20:26:55 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.17  2000/04/06 20:26:55  calderon
+ * All particles in the particle table are now filled.
+ * Relationships to parents can be followed to event generator particles.
+ *
  * Revision 1.16  2000/04/06 08:38:08  calderon
  * First version using the particle table.
  * The parent daughter relationship(if it exists) between tracks in the g2t_track table
@@ -71,6 +75,7 @@
 using std::vector;
 using std::string;
 using std::sort;
+using std::find;
 #endif
 
 #include "TStyle.h"
@@ -107,7 +112,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.16 2000/04/06 08:38:08 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.17 2000/04/06 20:26:55 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -405,12 +410,40 @@ Int_t StMcEventMaker::Make()
 #endif
 
 	cout << "Preparing to process and fill TRACK information ....." << endl;
+	StMcTrack* egTrk = 0;
+	size_t nParticlesInBothTables = 0;
+	cout << "Event Generator Tracks..." << endl;
+
+	// The filling of the event generator track assumes that if we encounter a particle that
+	// has a mother, the mother should ALREADY HAVE BEEN CREATED, i.e. that the mother indices
+	// of the particles in the particle table is never more than the current index.
+
+	long motherIndex = -1;  // Set it to some unused number. 
+	for (long gtrk=0; gtrk<NGeneratorTracks; gtrk++) {
+	    egTrk = new StMcTrack(&(particleTable[gtrk]));
+	    egTrk->setEventGenLabel(gtrk+1);
+	    ttempParticle[gtrk] = egTrk;
+	    mCurrentMcEvent->tracks().push_back(egTrk); // adds track egTrk to master collection 
+	    usedTracksEvGen++;
+	    // Find Mother...
+	    motherIndex = particleTable[gtrk].jmohep[0];
+	    if ((motherIndex > 0) && (motherIndex < NGeneratorTracks))
+		if (motherIndex > gtrk) 
+		    gMessMgr->Warning()
+			<< "Wrong ordering!  Track " << gtrk+1 << "from particle table: "
+			<< "Can't assign mother track " << motherIndex
+			<< "because it has not been created yet!" << endm;
+		else egTrk->setGeneratorParent(ttempParticle[motherIndex-1]);
+	    
+	} // Generator Tracks Loop
+	
 	StMcTrack* t = 0;
 	long iStartVtxId = 0;
 	long iStopVtxId = 0;
 	long iItrmdVtxId = 0;
 	
 	int nThrownTracks = 0;
+	cout << "g2t Tracks..." << endl;
 	for (long itrk=0; itrk<NTracks; itrk++) {
 	    iStopVtxId = (trackTable[itrk].stop_vertex_p) - 1;
 	    
@@ -470,34 +503,21 @@ Int_t StMcEventMaker::Make()
 	    } // Intermediate vertices
 
 	    // Look in the particle table
-	    // for parents from event generator
+	    // for particles from event generator
 	    long iEventGeneratorLabel = (trackTable[itrk].eg_label) - 1;
-	    StMcTrack* egTrk = 0;
 	    if (iEventGeneratorLabel >=0) {
-		// follow the "linked list" of indices from e.g. particle table
- 
-		while (particleTable[iEventGeneratorLabel].jmohep[0] > 0) {
-		    // we have a mother
-		    iEventGeneratorLabel = (particleTable[iEventGeneratorLabel].jmohep[0]) - 1;
-		    if ( iEventGeneratorLabel+1 > NGeneratorTracks) break; // Sometimes the id goes out of range for some reason, need to cover for this case. 
-		    if ( ((StMcTrack*) ttempParticle[iEventGeneratorLabel]) == 0) {
-			egTrk = new StMcTrack(&(particleTable[iEventGeneratorLabel]));
-			egTrk->setEventGenLabel(iEventGeneratorLabel+1);
-			ttempParticle[iEventGeneratorLabel] = egTrk;
-			mCurrentMcEvent->tracks().push_back(egTrk); // adds track egTrk to master collection
-			usedTracksEvGen++;
-		    }
-		    else {
-			t->setGeneratorParent(ttempParticle[iEventGeneratorLabel]);
-			break; // If we're here, the parent has already been created, and
-			       // from then on, we would repeat the same parent pattern, so break here.
-		    }
-		    t->setGeneratorParent(egTrk);
-		    t = egTrk; // When there are several tracks in the linked list, need to
-		               // change t, otherwise we would always be setting the parent to the
-		               // same track. 
-		}
-		    
+		// Track should already be loaded from the particle table
+		// i.e. t & ttempParticle[iEventGeneratorLabel] are the same tracks,
+		// obtained from different tables.
+		// We should rather keep the one in the g2t table, but we
+		// need to keep the information of its parentage.
+		nParticlesInBothTables++;
+		t->setGeneratorParent(ttempParticle[iEventGeneratorLabel]->generatorParent());
+		StMcTrackIterator trkToErase = find (mCurrentMcEvent->tracks().begin(),
+						     mCurrentMcEvent->tracks().end(),
+						     ttempParticle[iEventGeneratorLabel]);
+		mCurrentMcEvent->tracks().erase(trkToErase);
+		               		    
 	    }
 	    
 	} // Track loop
@@ -505,10 +525,14 @@ Int_t StMcEventMaker::Make()
 	if (nThrownTracks)
 	    gMessMgr->Warning() << "StMcEventMaker::Make(): Throwing " << nThrownTracks
 				<< " whose stop vertex is the same as primary vertex." << endm;
-	cout << "Used   tracks from g2t_track table: " << usedTracksG2t << endl;
-	cout << "Avail. tracks from g2t_track table: " << NTracks       << endl;
-	cout << "Used   tracks from particle  table: " << usedTracksEvGen  << endl;
-	cout << "Avail. tracks from particle  table: " << NGeneratorTracks << endl;
+	if (Debug()) {
+	    cout << "Used   tracks from g2t_track table: " << usedTracksG2t << endl;
+	    cout << "Avail. tracks from g2t_track table: " << NTracks       << endl;
+	    cout << "Used   tracks from particle  table: " << usedTracksEvGen  << endl;
+	    cout << "Avail. tracks from particle  table: " << NGeneratorTracks << endl;
+	    cout << "Tracks appearing in both tables   : " << nParticlesInBothTables << endl;
+	    cout << "Total tracks in StMcEvent         : " << mCurrentMcEvent->tracks().size() << endl;
+	}
 	vtemp.clear();
 	ttempParticle.clear();
 	
