@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.37 1999/11/17 14:34:00 ullrich Exp $
+// $Id: doEvents.C,v 1.38 2000/01/10 22:06:09 kathy Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -35,11 +35,17 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
-// Revision 1.37  1999/11/17 14:34:00  ullrich
-// Added version with no arguments which prints usage info.
+// Revision 1.38  2000/01/10 22:06:09  kathy
+// add owner name and comments
+//
+// Revision 1.38  2000/01/10 22:06:09  kathy
+// add owner name and comments
 //
 // Revision 1.37  1999/11/17 14:34:00  ullrich
 // Added version with no arguments which prints usage info.
+//
+// Revision 1.36  1999/11/17 14:23:40  ullrich
+// Updated for new StEvent/StEventMaker.
 //
 // owner: Torre Wenaus,Victor Perevoztchikov
 // what it does: reads .dst.root or .dst.xdf file or files, fills StEvent &

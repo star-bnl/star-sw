@@ -1,11 +1,10 @@
 //////////////////////////////////////////////////////////////////////////
-//                                                             
-// Macro for plotting hits and pixels in combination with bfc.C
-//            plotting both sides of tpc seperately
-//
-// $Id: TwoSideDraw.C,v 1.9 1999/12/11 20:13:53 snelling Exp $
+// $Id: TwoSideDraw.C,v 1.10 2000/01/10 22:06:09 kathy Exp $
 //
 // $Log: TwoSideDraw.C,v $
+// Revision 1.10  2000/01/10 22:06:09  kathy
+// add owner name and comments
+//
 // Revision 1.9  1999/12/11 20:13:53  snelling
 // Fixed logic between DAQ data and similators
 //
@@ -34,6 +33,14 @@
 // Revision 1.1.1.1  1999/08/10 18:48:22  snelling
 // macro to draw pixels and hits
 //
+//////////////////////////////////////////////////////////////////////////
+//
+// owner: Raimond Snellings
+//
+// what it does: 
+//     Macro for plotting hits and pixels in combination with bfc.C
+//            plotting both sides of tpc separately
+//                                   
 //////////////////////////////////////////////////////////////////////////
 St_tfc_adcxyz *GetPixels() {
   /* 
