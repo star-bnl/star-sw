@@ -1,5 +1,8 @@
-* $Id: tpt_fit_track.F,v 1.7 2000/01/21 07:55:46 sakrejda Exp $
+* $Id: tpt_fit_track.F,v 1.8 2000/02/15 02:49:24 sakrejda Exp $
 * $Log: tpt_fit_track.F,v $
+* Revision 1.8  2000/02/15 02:49:24  sakrejda
+* educed weight for edge and merged hits
+*
 * Revision 1.7  2000/01/21 07:55:46  sakrejda
 * Calculation of track length along the helix improved. Makes chisq and residuals symmetric.
 *
@@ -109,6 +112,10 @@ C          crossing angle
            yold = ycir(ncir)
            wcir(ncir) = wcir(ncir)/cf
            wlin(ncir) = 1.0/hit(ient).dz**2
+           if(hit(ient).flag.ne.0) then 
+              wcir(ncir)=0.01*wcir(ncir)
+              wlin(ncir)=0.01*wlin(ncir)
+           endif
            pnt(ncir)  = i ! pointer that allows to identify outliers
          endif
         end do
