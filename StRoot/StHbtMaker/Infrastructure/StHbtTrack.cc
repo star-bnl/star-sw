@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.cc,v 1.4 2001/06/21 19:15:48 laue Exp $
+ * $Id: StHbtTrack.cc,v 1.5 2001/07/12 23:20:43 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -10,6 +10,9 @@
  *
  ***************************************************************************
  * $Log: StHbtTrack.cc,v $
+ * Revision 1.5  2001/07/12 23:20:43  laue
+ * mDCAGlobal,mPGlobal,mPtGlobal added
+ *
  * Revision 1.4  2001/06/21 19:15:48  laue
  * Modified fiels:
  *   CTH.hh : new constructor added
@@ -54,10 +57,14 @@ StHbtTrack::StHbtTrack(const StHbtTrack& t) { // copy constructor
   mdEdx = t.mdEdx;
   mDCAxy = t.mDCAxy;
   mDCAz = t.mDCAz; 
+  mDCAxyGlobal = t.mDCAxyGlobal;
+  mDCAzGlobal = t.mDCAzGlobal; 
   mChiSqXY = t.mChiSqXY;
   mChiSqZ = t.mChiSqZ;
   mP = t.mP;
   mPt = t.mPt;
+  mPGlobal = t.mPGlobal;
+  mPtGlobal = t.mPtGlobal;
   mHelix = t.mHelix;
   mHelixGlobal = t.mHelixGlobal;
   mMap[0] = t.mMap[0];
@@ -104,18 +111,26 @@ StHbtTrack::StHbtTrack(const StTrack* ST, StHbtThreeVector PrimaryVertex)
   mNSigmaProton = PidAlgorithm->numberOfSigma(Proton);
   mdEdx = PidAlgorithm->traits()->mean();
 
+
+  mChiSqXY = ST->fitTraits().chi2(0);
+  mChiSqZ = ST->fitTraits().chi2(1);
+
   mP = ST->geometry()->momentum();
   mPt = mP.perp();
-
+  mHelix = ST->geometry()->helix();
   double pathlength = ST->geometry()->helix().pathLength(PrimaryVertex);
   StHbtThreeVector  DCAxyz = ST->geometry()->helix().at(pathlength)-PrimaryVertex;
   mDCAxy = DCAxyz.perp();
   mDCAz = DCAxyz.z();
 
-  mChiSqXY = ST->fitTraits().chi2(0);
-  mChiSqZ = ST->fitTraits().chi2(1);
-  mHelix = ST->geometry()->helix();
   mHelixGlobal = ST->node()->track(global)->geometry()->helix();
+  double pathlengthGlobal = mHelixGlobal.pathLength(PrimaryVertex);
+  StHbtThreeVector  DCAxyzGlobal = mHelixGlobal.at(pathlengthGlobal)-PrimaryVertex;
+  mDCAxyGlobal = DCAxyzGlobal.perp();
+  mDCAzGlobal = DCAxyzGlobal.z();
+  mPGlobal = ST->node()->track(global)->geometry()->momentum();
+  mPtGlobal = mPGlobal.perp();
+
   mMap[0] = ST->topologyMap().data(0);
   mMap[1] = ST->topologyMap().data(1);
   mTrackId = ST->key();
@@ -159,6 +174,12 @@ StHbtTrack::StHbtTrack(const StHbtTTreeEvent* ev, const StHbtTTreeTrack* t) { //
   //  cout << mP << endl;
   mDCAxy = (mHelix.at(pathlength) - vertex).perp();
   mDCAz = (mHelix.at(pathlength) - vertex).z();
+
+  double pathlengthGlobal = mHelixGlobal.pathLength(vertex);
+  mDCAxyGlobal = (mHelixGlobal.at(pathlengthGlobal) - vertex).perp();
+  mDCAzGlobal = (mHelixGlobal.at(pathlengthGlobal) - vertex).z();
+  mPGlobal = mHelixGlobal.momentumAt(pathlengthGlobal,ev->mMagneticField*kilogauss);
+  mPtGlobal = mPGlobal.perp();
   
 };
 
@@ -182,6 +203,8 @@ void StHbtTrack::SetdEdx(const float& x){mdEdx = x;}
 
 void StHbtTrack::SetDCAxy(const float& x){mDCAxy = x;}
 void StHbtTrack::SetDCAz(const float& x){mDCAz = x;}
+void StHbtTrack::SetDCAxyGlobal(const float& x){mDCAxyGlobal = x;}
+void StHbtTrack::SetDCAzGlobal(const float& x){mDCAzGlobal = x;}
 void StHbtTrack::SetChiSquaredXY(const float& x){mChiSqXY = x;} 
 void StHbtTrack::SetChiSquaredZ(const float& x){mChiSqZ = x;}   
 void StHbtTrack::SetP(const StHbtThreeVector& p){mP = p;}
@@ -208,6 +231,8 @@ float StHbtTrack::dEdx() const {return mdEdx;}
 
 float StHbtTrack::DCAxy() const {return mDCAxy;}          
 float StHbtTrack::DCAz() const {return mDCAz;}            
+float StHbtTrack::DCAxyGlobal() const {return mDCAxyGlobal;}          
+float StHbtTrack::DCAzGlobal() const {return mDCAzGlobal;}            
 float StHbtTrack::ChiSquaredXY() const {return mChiSqXY;} 
 float StHbtTrack::ChiSquaredZ() const {return mChiSqZ;}   
 StHbtThreeVector StHbtTrack::P() const {return mP;}
