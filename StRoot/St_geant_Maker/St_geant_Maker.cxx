@@ -1,5 +1,9 @@
-// $Id: St_geant_Maker.cxx,v 1.91 2004/03/01 17:29:54 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.92 2004/03/16 18:37:49 potekhin Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.92  2004/03/16 18:37:49  potekhin
+// Corrected a typo that caused an out-of-bounds
+// array error.
+//
 // Revision 1.91  2004/03/01 17:29:54  fisyak
 // switch to starsim
 //
@@ -1578,10 +1582,12 @@ TGeoVolume* St_geant_Maker::Ag2Geom() {
 
     if (volume) { 
       Float_t  xyz[3]   = {0.,0.,0.};
-      Float_t  RotAngles[6]; 
+      Float_t  RotAngles[6];
+      Float_t  type;
       gfxzrm(NLevel,xyz[0],xyz[1],xyz[2],
 	     RotAngles[0],RotAngles[1],RotAngles[2],RotAngles[3],
-	     RotAngles[4],RotAngles[5],RotAngles[6]);
+	     RotAngles[4],RotAngles[5],type);
+
       TGeoRotation Matrix("Test",
 			  RotAngles[0],RotAngles[1],RotAngles[2],
 			  RotAngles[3],RotAngles[4],RotAngles[5]); 
