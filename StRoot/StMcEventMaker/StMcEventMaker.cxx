@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.12 2000/01/18 20:53:08 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.13 2000/02/04 15:40:52 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.13  2000/02/04 15:40:52  calderon
+ * Fix dumping of vertex info when there is just one vertex.
+ *
  * Revision 1.12  2000/01/18 20:53:08  calderon
  * Changes to work with CC5
  *
@@ -83,7 +86,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.12 2000/01/18 20:53:08 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.13 2000/02/04 15:40:52 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -596,7 +599,7 @@ StMcEventMaker::printEventInfo()
     cout << "# of Vertices    : " << mCurrentMcEvent->vertices().size() << endl;
     cout << "---------------------------------------------------------" << endl;
     cout << "Dumping second element in collection (First is Primary). " << endl;
-    if (mCurrentMcEvent->vertices().size()) {
+    if (mCurrentMcEvent->vertices().size()>1) {
 	cout << "---------------------------------------------------------" << endl;
 	cout << "Second StMcVertex at "
 	     << (void*) mCurrentMcEvent->vertices()[1]                      << endl;
