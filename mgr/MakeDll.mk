@@ -14,19 +14,9 @@ TOPDIR := $(shell pwd)
 
 #include $(STAF_ROOT_HOME)/MakeEnv.mk
 include $(STAR)/mgr/MakeEnv.mk
-#include $(STAF_ROOT_HOME)/MakeArch.mk
-include $(STAR)/mgr/MakeSYS.mk
+include $(STAF_ROOT_HOME)/MakeArch.mk
+#include $(STAR)/mgr/MakeSYS.mk
 #                                   -I$(CERN_ROOT)/src/geant321 
-ifndef NODEBUG                 
-FFLAGS   += -g
-CFLAGS   += -g
-CXXFLAGS += -g
-CPPFLAGS += -DDEBUG
-else
-FFLAGS   += -O
-CFLAGS   += -O
-CXXFLAGS += -O
-endif                          
 
 #
 #	INP_DIR & OUT_DIR could be declared in invoking
@@ -48,7 +38,7 @@ ifeq (base,$(PKGNAME))
 LIBRARY := -L$(STAR)/asps/../.$(STAR_SYS)/lib -ldsl -lasu 
 #                                                            $(shell cernlib)
 endif
-
+INC_DIRS:= $(sort $(dir $(wildcard $(OUT_DIR)/.share/*/*.h  $(STAR)/.share/*/*.h)))
 #
 #	Define .src dir. If does not exist EMPTY
 #
@@ -71,6 +61,7 @@ SRC_DIR := $(INP_DIR)
 #####INCLUDES := $(addprefix -I,$(wildcard $(UPP_INP_DIR)/*/inc))
 
 INCLUDES := -I$(SRC_DIR) -I$(OUT_DIR)/StRoot/base -I$(STAR)/StRoot/base -I$(STAR)/asps/staf/inc -I$(ROOTSYS)/include -I$(OUT_DIR)/.share/tables -I$(STAR)/.share/tables
+INCL     :=  -I$(GEN_DIR) $(addprefix -I, $(INC_DIRS))
 
 
 #
@@ -91,13 +82,7 @@ INPUT_DIRS := $(SRC_DIR) $(SRM_DIR)
 #    	non existing directories
 MAKEDIRS := $(shell mkdir -p $(OUPUT_DIRS))
 
-
-
-
 VPATH =  $(INPUT_DIRS) $(OUPUT_DIRS) 
-
-
-
 
 FILES_D := $(FILES_SRC) $(FILES_SRM) 
 FILES_D := $(addsuffix .d, $(addprefix $(DEP_DIR)/,$(basename $(notdir $(FILES_D)))))
@@ -106,8 +91,11 @@ FILES_SYM  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_Module.cxx )))
 FILES_SYT  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_Table.cxx )))
 FILES_TAB  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_*_Table.cxx )))
 FILES_MOD  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_*_Module.cxx )))
+FILES_DAT  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_DataSet.cxx )))
+FILES_XDF  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_XDFFile.cxx )))
 FILES_ALL  := $(strip $(wildcard $(SRC_DIR)/St*.cxx ))
-FILES_ST   := $(strip $(wildcard $(SRC_DIR)/St_*.cxx ))
+FILES_CINT := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_*Cint.cxx)))
+FILES_ST   := $(strip $(FILES_CINT) $(FILES_SYM) $(FILES_SYT) $(FILES_TAB) $(FILES_MOD) $(FILES_DAT) $(FILES_XDF))
 FILES_ALL  := $(filter-out $(FILES_ST),  $(FILES_ALL))
 FILES_ORD  := $(FILES_ALL)
 ifdef FILES_SYM
@@ -197,7 +185,6 @@ $(FILES_CINT_SYT) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h
 $(FILES_CINT_SYM) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h
 	$(COMMON_LINKDEF)
 	@echo "#pragma link C++ class St_DataSet;"       >> $(LINKDEF);
-	@echo "#pragma link C++ class St_Event;"         >> $(LINKDEF);
 	@echo "#pragma link C++ class St_XDFFile;"       >> $(LINKDEF);
 	@echo "#pragma link C++ enum EModuleTypes;"      >> $(LINKDEF);
 	@echo "#pragma link C++ class St_TableIter;"     >> $(LINKDEF);   
@@ -216,7 +203,7 @@ $(FILES_CINT_ORD) : $(GEN_DIR)/%Cint.cxx : $(SRC_DIR)/%.h
          $(notdir $(LINKDEF));
 
 
-$(FILES_CINT_TAB) : $(GEN_DIR)/St_%_TableCint.cxx : $(SRC_DIR)/St_%_Table.h
+$(FILES_CINT_TAB) : $(GEN_DIR)/St_%_TableCint.cxx : $(SRC_DIR)/St_%_Table.h $(STAR)/StRoot/base/St_Table.h $(STAR)/StRoot/base/Stypes.h
 	$(COMMON_LINKDEF)
 	@echo "#pragma link C++ class $(STEM)_st-!;"	>> $(LINKDEF);
 	@echo "#endif"					>> $(LINKDEF);
@@ -224,7 +211,7 @@ $(FILES_CINT_TAB) : $(GEN_DIR)/St_%_TableCint.cxx : $(SRC_DIR)/St_%_Table.h
 	cd $(GEN_DIR); cd $(GEN_DIR); cp $(1ST_DEPS) .;\
 	rootcint -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCLUDES) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF));
 
-$(FILES_CINT_MOD) : $(GEN_DIR)/St_%_ModuleCint.cxx : $(GEN_DIR)/St_%_Module.h
+$(FILES_CINT_MOD) : $(GEN_DIR)/St_%_ModuleCint.cxx : $(GEN_DIR)/St_%_Module.h $(STAR)/StRoot/base/St_Module.h
 	$(COMMON_LINKDEF)
 	@echo "#pragma link C++ global $(STEM);"	>> $(LINKDEF);
 	@echo "#endif"					>> $(LINKDEF);
@@ -250,18 +237,18 @@ endif
 
 
 $(OBJ_DIR)/%.o : %.c
-	$(CC)  -c $(CPPFLAGS) $(CFLAGS)    $(INCLUDES) $(1ST_DEPS) -o $(ALL_TAGS)
+	$(CC)  -c $(CPPFLAGS) $(CFLAGS)    $(INCLUDES) $(INCL) $(1ST_DEPS) -o $(ALL_TAGS)
 
 $(OBJ_DIR)/%.o : %.cxx 
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS)  $(INCLUDES) $(1ST_DEPS) -o $(ALL_TAGS)
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS)  $(INCLUDES) $(INCL) $(1ST_DEPS) -o $(ALL_TAGS)
 
 $(DEP_DIR)/%.d: %.c 
 	$(RM) $(ALL_TAGS)
-	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES)  $(ALL_DEPS) > $(ALL_TAGS)
+	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES) $(INCL)  $(ALL_DEPS) > $(ALL_TAGS)
 
 $(DEP_DIR)/%.d: %.cxx
 	$(RM) $(ALL_TAGS)
-	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES)  $(ALL_DEPS) > $(ALL_TAGS)
+	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES) $(INCL)  $(ALL_DEPS) > $(ALL_TAGS)
 
 
 ####%.d:  %.cdf
