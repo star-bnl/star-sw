@@ -1,7 +1,7 @@
 
 /*******************************************************************
  *
- * $Id: StEEmcSmdGeom.cxx,v 1.6 2003/10/15 15:26:08 wzhang Exp $
+ * $Id: StEEmcSmdGeom.cxx,v 1.7 2003/12/05 00:06:10 jwebb Exp $
  *
  * Author: Wei-Ming Zhang 
  *****************************************************************
@@ -11,6 +11,10 @@
  *****************************************************************
  *
  * $Log: StEEmcSmdGeom.cxx,v $
+ * Revision 1.7  2003/12/05 00:06:10  jwebb
+ * Member function added to return a vector pointing to the intersection of
+ * two strips.
+ *
  * Revision 1.6  2003/10/15 15:26:08  wzhang
  * improved and reorganized
  *
@@ -392,8 +396,8 @@ StructEEmcStrip* StEEmcSmdGeom::getDcaStripPtr(const Int_t iPlane,
     }
     else {
       *stripPtr = initStrip();
-//      std::cout << "NO dca strip found in plane (sector empty or not in)" 
-//                                                                 << std::endl;
+      std::cout << "NO dca strip found in plane (sector empty or not in)" 
+                                                                 << std::endl;
       return stripPtr;
     }
 }
@@ -593,3 +597,84 @@ void StEEmcSmdGeom::printSectorPhis(const Int_t iPlane, const Int_t iSec,
      << std::endl;
 }
 
+
+/////////////////////////////////////////////////////////////////////////////
+
+//
+// Function(s) to return the position of the crossing of two strips, given
+//   either the sectorID and strip ID's, or the StructEEmcStrips.
+//
+
+// Wrapper function when we don't have the actual strips, just sector and
+//   strip ID's.
+StThreeVectorD StEEmcSmdGeom::getIntersection ( Int_t sector, Int_t uId, Int_t vId ) {
+
+  return getIntersection ( getStripPtr( uId, 0, sector ),
+			   getStripPtr( vId, 1, sector ) );
+
+}
+
+StThreeVectorD StEEmcSmdGeom::getIntersection ( StructEEmcStrip *u,
+						StructEEmcStrip *v ) {
+
+
+ 
+
+  // The strips are arranged sensibly, so that the ID's and the
+  // widths of the strips basically tell us the position of the
+  // crossing point.  However, we need to know a few things:
+
+  Int_t uSectorId = u -> stripStructId.sectorId;   // This would be easier if
+  Int_t vSectorId = v -> stripStructId.sectorId;   // we were dealing with a
+  //Int_t uPlaneId  = u -> stripStructId.planeId;  // class instead of a struct
+  //Int_t vPlaneId  = v -> stripStructId.planeId;  // 
+
+  Int_t uId = u -> stripStructId.stripId;
+  Int_t vId = v -> stripStructId.stripId;
+
+  // Get vectors pointing to the start of the u and v strips in question,
+  //   as well as the ends.  NOTE: We pass uId - 1 to getStripPtr, because
+  //   that routine expects the c++ _index_... (the convention in this
+  //   class is that quantities beginning with an "i" correspond to a
+  //   c++ index numbered from 0, rather than a fortran index numbered
+  //   from 1...)
+  StThreeVectorD u0 = getStripPtr ( uId-1, 0, uSectorId-1 ) -> end1;
+  StThreeVectorD v0 = getStripPtr ( vId-1, 1, vSectorId-1 ) -> end1;
+
+  StThreeVectorD uF = getStripPtr ( uId-1, 0, uSectorId-1 ) -> end2;
+  StThreeVectorD vF = getStripPtr ( vId-1, 1, vSectorId-1 ) -> end2;
+
+  StThreeVectorD uu = (uF - u0);
+  StThreeVectorD vv = (vF - v0);
+
+  Double_t u_x = uu * StThreeVectorD(1.,0.,0.);
+  Double_t u_y = uu * StThreeVectorD(0.,1.,0.);
+  Double_t v_x = vv * StThreeVectorD(1.,0.,0.); // This is wrong somehow...
+  Double_t v_y = vv * StThreeVectorD(0.,1.,0.);
+
+  Double_t d_x = ( v0 - u0 ) * StThreeVectorD(1.,0.,0.);
+  Double_t d_y = ( v0 - u0 ) * StThreeVectorD(0.,1.,0.);
+
+  // Calculate the positions along u and v (i.e. a*u and b*v) where the
+  //   two vectors are at closest approach.  Since the two SMD planes
+  //   are nominally parallel, we can get away with doing this in only
+  //   two dimensions.  Just work out the algebra for the condition
+  //   u0 + au = v0 + bv, for the x and y components to obtain:
+
+
+  Double_t b = ( d_y * u_x / u_y - d_x ) / ( v_x - v_y * u_x / u_y );
+  Double_t a = ( d_x + b * v_x ) / u_x;
+
+  StThreeVectorD uCross = u0 + a*uu;
+  StThreeVectorD vCross = v0 + b*vv;
+
+  StThreeVectorD uv;
+
+  for ( Int_t i = 0; i < 3; i++ ) 
+    uv[i] = 0.5 * ( uCross[i] + vCross[i] );
+
+  return uv;
+
+}
+
+/////////////////////////////////////////////////////////////////////////////

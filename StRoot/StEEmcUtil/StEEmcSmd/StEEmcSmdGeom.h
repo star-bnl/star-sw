@@ -1,7 +1,7 @@
 
 /*******************************************************************
  *
- * $Id: StEEmcSmdGeom.h,v 1.5 2003/10/15 15:26:03 wzhang Exp $
+ * $Id: StEEmcSmdGeom.h,v 1.6 2003/12/05 00:06:11 jwebb Exp $
  *
  * Author: Wei-Ming Zhang
  *****************************************************************
@@ -18,6 +18,10 @@
  *****************************************************************
  *
  * $Log: StEEmcSmdGeom.h,v $
+ * Revision 1.6  2003/12/05 00:06:11  jwebb
+ * Member function added to return a vector pointing to the intersection of
+ * two strips.
+ *
  * Revision 1.5  2003/10/15 15:26:03  wzhang
  * improved and reorganized
  *
@@ -109,19 +113,22 @@ class StEEmcSmdGeom : public TObject {
 
   void init();         // init the dbase
 
-// build mStripPtrVector   
+  // build mStripPtrVector   
   void buildStripPtrVector();
 
-// set sectors for partial EEMC
+  // set sectors for partial EEMC
   void setSectors(const intVec sectorIdVec); 
-
-// return sector status   
+  
+  // return sector status   
   bool IsSectorIn(const Int_t iSec) const; 
-
-// instance and initialize a strip 
+  
+  // instance and initialize a strip 
   StructEEmcStrip initStrip();
 
-// geometry access members
+  //
+  // geometry access members
+  //
+
   // return SMD geometry parameters  
   StructEEmcSmdParam getEEmcSmdParam() const; 
 
@@ -134,7 +141,6 @@ class StEEmcSmdGeom : public TObject {
   // return a strip pointer from indices   
   StructEEmcStrip* getStripPtr(const Int_t iStrip, const Int_t iUV, 
 		                                      const Int_t iSec);
-
   // return a DCA strip pointer from a point (float *dca carries sign)  
   StructEEmcStrip* getDcaStripPtr(const Int_t iPlane, 
 		                  const StThreeVectorD& point, Float_t* dca);
@@ -142,11 +148,35 @@ class StEEmcSmdGeom : public TObject {
   StructEEmcStrip* getDcaStripPtr(const Int_t iPlane, const Int_t iSec, 
 		                  const StThreeVectorD& point, Float_t* dca);
 
-// match two strips 
+  /////////////////////////////////////////////////////////////////////////////
+  //
+  // Given two strips (alternatively sector and strip Id's), return a 
+  //   vector pointing to the center of the trapezoid formed by their
+  //   crossing.  These functions may return non-physical locations,
+  //   for instance, when a U,V pair does not cross within the 
+  //   fiducial area of the detector.  Note: the z-component returned
+  //   will be the average z of the U and V detector planes.
+  //
+  StThreeVectorD getIntersection ( Int_t iSec, Int_t iUStrip, Int_t iVStrip );
+  StThreeVectorD getIntersection ( StructEEmcStrip *u, StructEEmcStrip *v );
+  // 
+  // Return the number of strips for the specified orientation for this
+  //   sector
+  //
+  Int_t getNStrips ( Int_t iSec, Int_t iUV ) { 
+    return getEEmcSector(iUV,iSec).stripPtrVec.size(); 
+  }
+  //
+  /////////////////////////////////////////////////////////////////////////////
+
+  // match two strips 
   bool matchStrips(const StructEEmcStripId stripStructId1, 
   	       const StructEEmcStripId stripStructId2, Int_t nTolerance);
 
-// three methods for ITTF
+  //
+  // three methods for ITTF
+  //
+
   // return phiMin and phiMax of a sector including empty sector 
   pairD getEEmcSmdPhiMinMax(const Int_t iPlane, const Int_t iSec);
 
@@ -156,11 +186,15 @@ class StEEmcSmdGeom : public TObject {
   // return center phi of a sector including empty sector 
   float getEEmcSmdCenterPhi(const Int_t iPlane, const Int_t iSec);
 
-// mehtod for C-scripts
+  // mehtod for C-scripts
+
   // return strip-end of 3D-vector   
   StThreeVectorD  getstripEnd(const StructEEmcStrip strip, const Int_t endId);
 
-// methods of printout 
+  //
+  // methods of printout 
+  //
+
   void printGeom(ostream& os = cout) const;
   void printSector(const StructEEmcSmdSector Sector, ostream& os = cout) const;
   void printStrip(const StructEEmcStrip Strip, ostream& os = cout) const;
