@@ -1,5 +1,8 @@
-// $Id: bfc_trs.C,v 1.1 1999/05/01 01:47:31 fisyak Exp $
+// $Id: bfc_trs.C,v 1.2 1999/05/02 11:47:53 fisyak Exp $
 // $Log: bfc_trs.C,v $
+// Revision 1.2  1999/05/02 11:47:53  fisyak
+// Increase default no. of event from 1 to 10000
+//
 // Revision 1.1  1999/05/01 01:47:31  fisyak
 // Add new set of bfc s'
 //
@@ -150,7 +153,7 @@ void Load(){
 #endif /* GLOBAL */
 }
 
-void bfc_trs (const Int_t Nevents=1,Char_t *infile=0, Char_t *outfile=0)
+void bfc_trs (const Int_t Nevents=10000,Char_t *infile=0, Char_t *outfile=0)
 {
   Int_t NoEvents = Nevents;
   // define input file
