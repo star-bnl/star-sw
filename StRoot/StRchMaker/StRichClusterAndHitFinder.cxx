@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.cxx,v 2.2 2000/09/29 19:04:40 lasiuk Exp $
+ * $Id: StRichClusterAndHitFinder.cxx,v 2.3 2000/10/24 00:24:56 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,14 +11,8 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.cxx,v $
- * Revision 2.2  2000/09/29 19:04:40  lasiuk
- * hit calculation factorized to allow
- * deconvolution.  A flag was added to denote
- * this process (eDeconvolution).
- * MC info restored in classifyHit() member
- * cut parameters (for decon) added in initializeCutParameters()
- * startAmplitude set to 0.  This keeps track of the local
- * max of the hit now.
+ * Revision 2.3  2000/10/24 00:24:56  lasiuk
+ * boolean flag moved to data member
  *
  * Revision 2.3  2000/10/24 00:24:56  lasiuk
  * boolean flag moved to data member
@@ -1233,7 +1227,7 @@ bool StRichClusterAndHitFinder::classifyHitType(vector<StRichSinglePixel*>& aPix
 #endif
     typedef chargeToHitIDMapType::iterator   chargeToHitIDMapIter;
     typedef chargeToHitIDMapType::value_type chargeToHitIDMapValType;		
-    bool anMCHit = false;
+    
     
     //
     // Define and fill the maps.
@@ -1281,7 +1275,7 @@ bool StRichClusterAndHitFinder::classifyHitType(vector<StRichSinglePixel*>& aPix
 		    } // if
 		} // iter over IDList
 	    } // scope for sun
-    if(anMCHit) {
+	} // if (dynamic_cast<>) is it an mc pixel?
     
     
     } // loop over all pads in cluster
