@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.2 2002/08/27 19:05:57 laue Exp $
+ * $Id: StMuEvent.cxx,v 1.3 2003/02/19 13:51:58 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -98,6 +98,10 @@ void StMuEvent::fill(const StEvent* event){
     mL0Trigger = *event->l0Trigger();
   mL3EventSummary.fill(event);
 
+  if ( event->triggerIdCollection() ) {
+    mTriggerIdCollection = *event->triggerIdCollection();
+  }
+
   mRefMultPos = uncorrectedNumberOfPositivePrimaries(*event);
   mRefMultNeg = uncorrectedNumberOfNegativePrimaries(*event); 
 
@@ -109,6 +113,9 @@ void StMuEvent::fill(const StEvent* event){
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.3  2003/02/19 13:51:58  laue
+ * added the StTriggerIdCollection
+ *
  * Revision 1.2  2002/08/27 19:05:57  laue
  * Minor updates to make the muDst from simulation work
  *
