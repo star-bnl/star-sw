@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.52 1999/09/23 16:04:33 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.53 1999/09/23 18:54:09 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.53  1999/09/23 18:54:09  kathy
+// fix some histogram limits, add about 10 histograms - just so we know number rows in each table - had to include some more tables to do this
+//
 // Revision 1.52  1999/09/23 16:04:33  kathy
 // change paths for include files to standard way according to Yuri's request
 //
@@ -184,21 +187,23 @@
 #include "StChain.h"
 #include "St_DataSetIter.h"
 
-// tables currently in 99e,99f
-#include "tables/St_dst_event_summary_Table.h"
-#include "tables/St_dst_event_header_Table.h"
-#include "tables/St_dst_track_Table.h"   // globtrk,globtrk2,primtrk
-#include "tables/St_dst_track_aux_Table.h" //primtrk_aux
-#include "tables/St_dst_vertex_Table.h"
-#include "tables/St_dst_point_Table.h"
-#include "tables/St_dst_v0_vertex_Table.h"
-#include "tables/St_dst_xi_vertex_Table.h"
-#include "tables/St_dst_dedx_Table.h"
-#include "tables/St_particle_Table.h"
-#include "tables/St_dst_TrgDet_Table.h"
-#include "tables/St_g2t_rch_hit_Table.h"
-#include "tables/St_dst_monitor_soft_Table.h"
-
+// tables  on DST
+#include "tables/St_dst_event_summary_Table.h" // event_summary (1 row)
+#include "tables/St_dst_event_header_Table.h"  // event_header (1 row)
+#include "tables/St_dst_track_Table.h"         // 3 tables: globtrk,globtrk2,primtrk
+#include "tables/St_dst_track_aux_Table.h"     // 2 tables: globtrk_aux,primtrk_aux
+#include "tables/St_dst_vertex_Table.h"        // vertex
+#include "tables/St_dst_point_Table.h"         // point
+#include "tables/St_dst_v0_vertex_Table.h"     // dst_v0_vertex
+#include "tables/St_dst_xi_vertex_Table.h"     // dst_xi_vertex
+#include "tables/St_dst_dedx_Table.h"          // dst_dedx
+#include "tables/St_dst_TrgDet_Table.h"        // TrgDet (1 row)
+#include "tables/St_dst_monitor_soft_Table.h"  // monitor_soft (1 row) 
+#include "tables/St_dst_tkf_vertex_Table.h"    // kinkVertex
+#include "tables/St_particle_Table.h"          // particle
+#include "tables/St_g2t_rch_hit_Table.h"       // g2t_rch_hit
+#include "tables/St_ev0_eval_Table.h"          // ev0_eval
+#include "tables/St_tpt_track_Table.h"         // l3Track
 
 const Int_t   St_QA_Maker::nxpT = 50;
 const Int_t   St_QA_Maker::nyeta = 50;
@@ -332,6 +337,7 @@ ClassImp(St_QA_Maker)
 
   
 // for method MakeDE - from table dst_dedx
+  m_ndedxr=0;        //! number of tracks with dedx info
   m_ndedx=0;         //! number of point to find dE/dx
   m_dedx0=0;         //! dE/dx [0]
   m_dedx1=0;         //! dE/dx [1] 
@@ -394,14 +400,16 @@ ClassImp(St_QA_Maker)
   m_H_ncpart=0;     //! number of charged e,mu,proton,kaon,pion
   
   // for MakeHistV0 - from table dst_v0_vertex
+  m_v0           =0; //! # v0 vertices
   m_ev0_lama_hist=0; //! Lambda mass
-  m_ev0_k0ma_hist=0; //! K0 mass
-  
+  m_ev0_k0ma_hist=0; //! K0 mass  
+
   // for MakeHistPID - from tables primtrk & dst_dedx 
   m_p_dedx_rec=0;   //! dedx vs p
   
   
   // for method MakeHistVertex - from table dst_vertex
+  m_v_num        =0; //! number of vertices
   m_v_detid=0; //! detector id where vertex was found 
   m_v_vtxid=0; //! vertex type
   m_v_x=0;     //! vertex coordinates in
@@ -418,7 +426,23 @@ ClassImp(St_QA_Maker)
   
 
   // for method MakeHistXi
-
+    m_xi_tot=0;   //! number of vertices
+  
+  // for method MakeHistPoint
+    m_pnt_tot=0;   //! number of tpc hits
+  
+  // for method MakeHistKink
+    m_kink_tot=0;   //! number of kinks
+  
+  // for method MakeHistL3
+    m_l3_tot=0;   //! number of l3 tracks
+  
+  // for method MakeHistV0Eval
+    m_v0eval_tot=0;   //! number of vertices
+  
+  // for method MakeHistRich
+    m_rich_tot=0;   //! number of rich hits
+  
 }
 //_____________________________________________________________________________
 
@@ -461,6 +485,12 @@ Int_t St_QA_Maker::Init(){
   BookHistPID();
   BookHistVertex();
   BookHistXi();
+  BookHistPoint();
+  BookHistKink();
+  BookHistL3();
+  BookHistV0Eval();
+  BookHistRich();
+  
 
 //  Set default values for all methods:
 //  SetDraw(kFALSE);
@@ -498,7 +528,20 @@ Int_t St_QA_Maker::Make(){
   MakeHistPID(dst);
   // histograms from table dst_vertex
   MakeHistVertex(dst);
+  // histograms from table dst_xi_vertex
   MakeHistXi(dst);
+  // histograms from table point
+  MakeHistPoint(dst);
+  // histograms from table kinkVertex
+  MakeHistKink(dst);
+  // histograms from table l3Track
+  MakeHistL3(dst);
+  // histograms from table ev0_eval
+  MakeHistV0Eval(dst);
+  // histograms from table g2t_rch_hit
+  MakeHistRich(dst);
+
+
   
   return kStOK;
 }
@@ -508,7 +551,7 @@ void St_QA_Maker::BookHistEvSum(){
   
  // for method MakeEvSum - from table event_summary
   m_trk_tot_gd    = new TH1F("QaEvsumTrkGoodDTotal","evsum: num good track over total",
-                             50,0.9,1.1);
+                             50,0.,1.0);
     m_trk_tot_gd->SetXTitle("number of good/total tracks");
   m_glb_trk_tot   = new TH1F("QaEvsumTrkTot","evsum: num tracks total ",
                              ntrk, 0., 10000.);
@@ -517,8 +560,8 @@ void St_QA_Maker::BookHistEvSum(){
   m_glb_trk_prim    = new TH1F("QaEvsumTrkPrim","evsum: num good tracks from primaries ",
                              ntrk, mintrk, maxtrk);
 	  
-  m_vert_total = new TH1F("QaEvsumVertTot", "evsum: total num of vertices",100,0.,5000.);
-  m_vert_V0    = new TH1F("QaEvsumVertV0", "evsum: num V0 vertices",100,0.,5000.); 
+  m_vert_total = new TH1F("QaEvsumVertTot", "evsum: total num of vertices",80,0.,8000.);
+  m_vert_V0    = new TH1F("QaEvsumVertV0", "evsum: num V0 vertices",80,0.,8000.); 
  
   m_mean_pt    = new TH1F("QaEvsumMeanPt",   "evsum: mean pt", nmnpt, 0., 2.0);
   m_mean_eta   = new TH1F("QaEvsumMeanEta",  "evsum: mean eta", nmneta, -0.25,0.25);
@@ -543,7 +586,7 @@ void St_QA_Maker::BookHistGlob(){
   m_globtrk_good  = new TH1F("QaGlobtrkGood", "globtrk: tot # good tracks",40,0.,10000.);  
   m_det_id     = new TH1F("QaGlobtrkDetId",   "globtrk: Detector ID for tracks",11,-0.5,10.5);
   m_point      = new TH1F("QaGlobtrkNPnt",    "globtrk: N points on track", 50, 0.,50.);
-  m_max_point  = new TH1F("QaGlobtrkNPntMax", "globtrk: N max points on track", 50, 0.,50.);
+  m_max_point  = new TH1F("QaGlobtrkNPntMax", "globtrk: N max points on track", 50, 0.,100.);
   m_fit_point  = new TH1F("QaGlobtrkNPntFit", "globtrk: N fit points on track", 50, 0.,50.);
   m_glb_charge = new TH1F("QaGlobtrkChrg",    "globtrk: charge ", 20,-2.,2.);
   m_glb_xf     = new TH1F("QaGlobtrkXf",      "globtrk: x of first hit on trk", 50,-200.,200.);
@@ -677,8 +720,8 @@ void St_QA_Maker::BookHistPrim(){
   m_peta        = new TH1F("QaPrimtrkEta",     "primtrk: eta distribution",60,-3.0,3.0);
   m_ppT         = new TH1F("QaPrimtrkPt",      "primtrk: pT distribution",50,0.,5.);
   m_pmom        = new TH1F("QaPrimtrkP",       "primtrk: momentum distribution",50,0.,5.);
-  m_pchisq0     = new TH1F("QaPrimtrkChisq0",  "primtrk: chisq0 - xy", 50, 0.,15.);
-  m_pchisq1     = new TH1F("QaPrimtrkChisq1",  "primtrk: chisq1 - z", 50, 0.,15.);
+  m_pchisq0     = new TH1F("QaPrimtrkChisq0",  "primtrk: chisq0 - xy", 50, 0.,5.);
+  m_pchisq1     = new TH1F("QaPrimtrkChisq1",  "primtrk: chisq1 - z", 50, 0.,5.);
   m_plength     = new TH1F("QaPrimtrkLength",  "primtrk: track length", 50,0.,300.);
   m_prim_impact = new TH1F("QaPrimtrkImpact",  "primtrk: impact param from prim vtx ", 50,0.,500.);
   m_prim_ndf    = new TH1F("QaPrimtrkNdof",    "primtrk: num deg of freedom", 100, 0.,100.);
@@ -767,34 +810,36 @@ void St_QA_Maker::BookHistPrim(){
 void St_QA_Maker::BookHistDE(){
   
   // for method MakeDE - from table dst_dedx
-  m_ndedx   = new TH1F("QaDstDedxNdedx", "dedx: number of point to define dE/dx", 50,0., 50.);  
-  m_dedx0   = new TH1F("QaDstDedxDedx0","dedx: dE/dx[0]", ndedx, mindedx, maxdedx/10.);
-  m_dedx1   = new TH1F("QaDstDedxDedx1","dedx: dE/dx[1]", ndedx, mindedx, maxdedx);
+  m_ndedxr  = new TH1F("QaDedxNum", "dedx: number of tracks", 50,0., 10000.); 
+  m_ndedx   = new TH1F("QaDedxNdedx", "dedx: number of point to define dE/dx", 50,0., 50.);  
+  m_dedx0   = new TH1F("QaDedxDedx0","dedx: dE/dx[0]", ndedx, mindedx, maxdedx/10.);
+  m_dedx1   = new TH1F("QaDedxDedx1","dedx: dE/dx[1]", ndedx, mindedx, maxdedx);
   
 }
 
 //_____________________________________________________________________________
 void St_QA_Maker::BookHistGen(){
   // for MakeHistGen - from table particle
-  m_H_npart   = new TH1F("QaParticleNumPart","total num particles (generated)",100,0.,30000.);
-  m_H_ncpart  = new TH1F("QaParticleNumChgPart","num chg (e,mu,pi,K,p) part (generated)",100,0.,20000.);
-  m_H_pT_gen  = new TH1F("QaParticlePt","charged: pt (generated)",nxpT,xminpT,xmaxpT);
-  m_H_eta_gen = new TH1F("QaParticleEta","charged:eta (generated)",nyeta,-4.,4.);
-  m_H_pT_eta_gen = new TH2F("QaParticlePtVsEta","charged:pT versus eta (generated)",
+  m_H_npart   = new TH1F("QaParticleNumPart","particle:total num particles (generated)",100,0.,30000.);
+  m_H_ncpart  = new TH1F("QaParticleNumChgPart","particle:num chg (e,mu,pi,K,p) part (generated)",100,0.,20000.);
+  m_H_pT_gen  = new TH1F("QaParticlePt","particle: charged pt (generated)",nxpT,xminpT,xmaxpT);
+  m_H_eta_gen = new TH1F("QaParticleEta","particle: charged eta (generated)",nyeta,-5.,5.);
+  m_H_pT_eta_gen = new TH2F("QaParticlePtVsEta","particle: charged pT versus eta (generated)",
 			    nyeta,kmineta,kmaxeta,nxpT,xminpT,xmaxpT);
   m_H_pT_eta_gen->SetXTitle("eta");
   m_H_pT_eta_gen->SetYTitle("pT (GeV)");
-  m_H_vtxx    = new TH1F("QaParticleVtxX","Generator prod vertex x (mm)",50,-100.,100.);
-  m_H_vtxy    = new TH1F("QaParticleVtxY","Generator prod vertex y (mm)",50,-100.,100.);
-  m_H_vtxz    = new TH1F("QaParticleVtxZ","Generator prod vertex z (mm)",50,-500.,500.);
+  m_H_vtxx    = new TH1F("QaParticleVtxX","particle: Generator prod vertex x (mm)",50,-10.,10.);
+  m_H_vtxy    = new TH1F("QaParticleVtxY","particle: Generator prod vertex y (mm)",50,-10.,10.);
+  m_H_vtxz    = new TH1F("QaParticleVtxZ","particle: Generator prod vertex z (mm)",50,-50.,50.);
 }
 
 //_____________________________________________________________________________
 void St_QA_Maker::BookHistV0(){
   
   // for MakeHistV0 - from table dst_v0_vertex
-  m_ev0_lama_hist  = new TH1F("QaDstV0VertexLambdaMass","dst_v0_vertex: Lambda mass",50,1.05,1.15);
-  m_ev0_k0ma_hist  = new TH1F("QaDstV0VertexK0Mass","dst_v0_vertex: k0 mass",50,.4,.6);
+  m_v0             = new TH1F("QaV0Vtx","dst_v0_vertex: Number V0 found ",50,0.,10000.);
+  m_ev0_lama_hist  = new TH1F("QaV0LambdaMass","dst_v0_vertex: Lambda mass",50,1.05,1.15);
+  m_ev0_k0ma_hist  = new TH1F("QaV0K0Mass","dst_v0_vertex: k0 mass",50,.4,.6);
   
 }
 
@@ -804,7 +849,7 @@ void St_QA_Maker::BookHistPID(){
   // for MakeHistPID - from tables primtrk & dst_dedx 
   // Spectra/pid histograms. C.Ogilvie
   
-  m_p_dedx_rec = new TH2F("QaPidPrimtrkDstdedxPVsDedx","primtrk-dst_dedx: p vs dedx (reconstructed)",
+  m_p_dedx_rec = new TH2F("QaPidPrimtrkDstdedxPVsDedx","PID: primtrk-dst_dedx,  p vs dedx (reconstructed)",
 			  cnp,cminp,cmaxp,cndedx,cmindedx,cmaxdedx);
   m_p_dedx_rec->SetYTitle("dedx");
   m_p_dedx_rec->SetXTitle("p (GeV)");
@@ -816,6 +861,7 @@ void St_QA_Maker::BookHistVertex(){
   // for MakeHistVertex - from table dst_vertex
   
   
+  m_v_num   = new TH1F("QaVertexNum"," vertex: num vertices ",50,0.,10000.);
   m_v_detid = new TH1F("QaVertexDetId"," vertex: Detector ID ",100,0.,100.);
   m_v_vtxid = new TH1F("QaVertexVtxId"," vertex: Vertex ID ",10,0.,10.);
   m_v_x     = new TH1F("QaVertexX"," vertex: x ",50,-25.,25.);
@@ -833,9 +879,44 @@ void St_QA_Maker::BookHistVertex(){
 }
 //_____________________________________________________________________________
 void St_QA_Maker::BookHistXi(){
+
+  m_xi_tot   = new TH1F("QaXiVertexTot",  "dst_xi_vertex: tot # vertices ",50,2000.,3000.);
   
 }
 
+//_____________________________________________________________________________
+void St_QA_Maker::BookHistPoint(){
+  
+  m_pnt_tot   = new TH1F("QaPointTot",  "point: # tpc hits ",50,200000.,250000.);
+}
+
+//_____________________________________________________________________________
+void St_QA_Maker::BookHistKink(){
+  
+  m_kink_tot   = new TH1F("QaKinkTot",  "kinkVertex: # kinks ",20,0.,20.);
+
+}
+
+//_____________________________________________________________________________
+void St_QA_Maker::BookHistL3(){
+  
+  m_l3_tot   = new TH1F("QaL3Tot",  "l3Track: # tracks ",50,0.,10000.);
+
+}
+
+//_____________________________________________________________________________
+void St_QA_Maker::BookHistV0Eval(){
+  
+  m_v0eval_tot   = new TH1F("QaV0EvalTot",  "ev0_eval: # vertices ",50,0.,5000.);
+
+}
+
+//_____________________________________________________________________________
+void St_QA_Maker::BookHistRich(){
+  
+  m_rich_tot   = new TH1F("QaRichTot",  "g2t_rch_hit: # vertices ",50,0.,2000.);
+
+}
 
 //_____________________________________________________________________________
 void St_QA_Maker::MakeHistEvSum(St_DataSet *dst){
@@ -982,9 +1063,14 @@ void St_QA_Maker::MakeHistDE(St_DataSet *dst) {
   
   St_DataSetIter dstI(dst);
   
-  
   St_dst_dedx *dst_dedx = (St_dst_dedx *) dstI["dst_dedx"];
+
   if(dst_dedx) {
+
+    Int_t cntrows=0;
+    cntrows = dst_dedx->GetNRows();
+    m_ndedxr->Fill(cntrows);
+
     dst_dedx_st *d = dst_dedx->GetTable();
     for (Int_t i = 0; i < dst_dedx->GetNRows(); i++,d++) {
       m_ndedx->Fill(d->ndedx);
@@ -1140,11 +1226,18 @@ void St_QA_Maker::MakeHistGen(St_DataSet *dst){
 
 void St_QA_Maker::MakeHistV0(St_DataSet *dst){
   if (Debug()) cout << " *** in St_QA_Maker - filling dst_v0_vertex histograms " << endl;
+
   St_DataSetIter dstI(dst);         
   
   St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex *) dstI["dst_v0_vertex"];
+
   if (dst_v0_vertex) {
     dst_v0_vertex_st *v0 = dst_v0_vertex->GetTable();
+
+    Int_t cntrows=0;
+    cntrows = dst_v0_vertex->GetNRows();
+    m_v0->Fill(cntrows);
+
     Float_t m_prmass2 = proton_mass_c2*proton_mass_c2;
     Float_t m_pimass2 = (0.139567*0.139567);
     for (Int_t k=0; k<dst_v0_vertex->GetNRows(); k++, v0++){
@@ -1216,10 +1309,17 @@ void St_QA_Maker::MakeHistPID(St_DataSet *dst){
 
 void St_QA_Maker::MakeHistVertex(St_DataSet *dst){
   if (Debug()) cout << " *** in St_QA_Maker - filling vertex histograms " << endl;
+
   St_DataSetIter dstI(dst);
+
   St_dst_vertex      *vertex     = (St_dst_vertex *) dstI["vertex"];
   
   if (vertex) {
+
+    Int_t cntrows=0;
+    cntrows = vertex->GetNRows();
+    m_v_num->Fill(cntrows);
+
     dst_vertex_st  *t   = vertex->GetTable();
     for (Int_t i = 0; i < vertex->GetNRows(); i++,t++){
       //         if (t->iflag>0) {  
@@ -1241,9 +1341,113 @@ void St_QA_Maker::MakeHistVertex(St_DataSet *dst){
     }
   }
 }
+
 //_____________________________________________________________________________
 void St_QA_Maker::MakeHistXi(St_DataSet *dst){
   if (Debug()) cout << " *** in St_QA_Maker - filling dst_xi_vertex histograms " << endl;
+    
+  St_DataSetIter dstI(dst);           
+
+  St_dst_xi_vertex *xi = (St_dst_xi_vertex*) dstI["dst_xi_vertex"];
+  if (xi) {
+
+    Int_t cntrows=0;
+    cntrows = xi->GetNRows();
+    m_xi_tot->Fill(cntrows);
+
+  }
+
 }
+
+//_____________________________________________________________________________
+void St_QA_Maker::MakeHistPoint(St_DataSet *dst){
+  if (Debug()) cout << " *** in St_QA_Maker - filling point histograms " << endl;
+
+
+  St_DataSetIter dstI(dst);           
+
+  St_dst_point *pt = (St_dst_point*) dstI["point"];
+  if (pt) {
+
+    Int_t cntrows=0;
+    cntrows = pt->GetNRows();
+    m_pnt_tot->Fill(cntrows);
+
+  }
+
+}
+
+
+//_____________________________________________________________________________
+void St_QA_Maker::MakeHistKink(St_DataSet *dst){
+  if (Debug()) cout << " *** in St_QA_Maker - filling kink histograms " << endl;
+
+  St_DataSetIter dstI(dst);           
+
+  St_dst_tkf_vertex *pt = (St_dst_tkf_vertex*) dstI["kinkVertex"];
+  if (pt) {
+
+    Int_t cntrows=0;
+    cntrows = pt->GetNRows();
+    m_kink_tot->Fill(cntrows);
+
+  }
+
+}
+
+
+//_____________________________________________________________________________
+void St_QA_Maker::MakeHistL3(St_DataSet *dst){
+  if (Debug()) cout << " *** in St_QA_Maker - filling L3 histograms " << endl;
+
+  St_DataSetIter dstI(dst);           
+
+  St_tpt_track *pt = (St_tpt_track*) dstI["l3Track"];
+  if (pt) {
+
+    Int_t cntrows=0;
+    cntrows = pt->GetNRows();
+    m_l3_tot->Fill(cntrows);
+
+  }
+
+}
+
+//_____________________________________________________________________________
+void St_QA_Maker::MakeHistV0Eval(St_DataSet *dst){
+  if (Debug()) cout << " *** in St_QA_Maker - filling ev0_eval histograms " << endl;
+
+  St_DataSetIter dstI(dst);           
+
+  St_ev0_eval *pt = (St_ev0_eval*) dstI["ev0_eval"];
+  if (pt) {
+
+    Int_t cntrows=0;
+    cntrows = pt->GetNRows();
+    m_v0eval_tot->Fill(cntrows);
+
+  }
+
+}
+
+//_____________________________________________________________________________
+void St_QA_Maker::MakeHistRich(St_DataSet *dst){
+  if (Debug()) cout << " *** in St_QA_Maker - filling Rich histograms " << endl;
+
+  St_DataSetIter dstI(dst);           
+
+  St_g2t_rch_hit *pt = (St_g2t_rch_hit*) dstI["g2t_rch_hit"];
+  if (pt) {
+
+    Int_t cntrows=0;
+    cntrows = pt->GetNRows();
+    m_rich_tot->Fill(cntrows);
+
+  }
+
+}
+
+
+//_____________________________________________________________________________
 
 

@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.31 1999/09/21 15:05:38 kathy Exp $
+//! $Id: St_QA_Maker.h,v 1.32 1999/09/23 18:54:11 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.32  1999/09/23 18:54:11  kathy
+//! fix some histogram limits, add about 10 histograms - just so we know number rows in each table - had to include some more tables to do this
+//!
 //! Revision 1.31  1999/09/21 15:05:38  kathy
 //! comment out unneccessary method: SetPntrToHistUtil because now I'm making it totally independent of the histograms printing at the end - also put in doc directory and html file - basically empty now
 //!
@@ -150,7 +153,7 @@ class St_QA_Maker : public StMaker {
   Bool_t drawinit;
 //  StHistUtil *m_PntrToHistUtil;    //! pointer to an StHistUtil
 
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.31 1999/09/21 15:05:38 kathy Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.32 1999/09/23 18:54:11 kathy Exp $";
 //! Histograms booking constants
   static const Int_t nxpT;
   static const Int_t nyeta;
@@ -278,6 +281,8 @@ class St_QA_Maker : public StMaker {
 
   
 // for method MakeDE - from table dst_dedx
+  
+  TH1F     *m_ndedxr;        //! number of tracks with dedx info
   TH1F     *m_ndedx;         //! number of point to find dE/dx
   TH1F     *m_dedx0;         //! dE/dx [0]
   TH1F     *m_dedx1;         //! dE/dx [1] 
@@ -342,6 +347,7 @@ class St_QA_Maker : public StMaker {
   TH1F     *m_H_ncpart;   //! number of charged e,mu,proton,kaon,pion
   
   // for MakeHistV0 - from table dst_v0_vertex
+  TH1F     *m_v0;            //! # v0 vertices
   TH1F     *m_ev0_lama_hist; //! Lambda mass
   TH1F     *m_ev0_k0ma_hist; //! K0 mass
   
@@ -350,6 +356,7 @@ class St_QA_Maker : public StMaker {
   
   
   // for method MakeHistVertex - from table dst_vertex
+  TH1F     *m_v_num;   //! number of vertices
   TH1F     *m_v_detid; //! detector id where vertex was found 
   TH1F     *m_v_vtxid; //! vertex type
   TH1F     *m_v_x;     //! vertex coordinates in
@@ -366,7 +373,22 @@ class St_QA_Maker : public StMaker {
   
   
   // for method MakeHistXi
- 
+   TH1F     *m_xi_tot;   //! number of xi vertices
+  
+  // for method MakeHistPoint
+   TH1F     *m_pnt_tot;   //! number of tpc hits
+  
+  // for method MakeHistKink
+   TH1F     *m_kink_tot;   //! number of kinks
+  
+  // for method MakeHistL3
+   TH1F     *m_l3_tot;   //! number of l3 tracks
+  
+  // for method MakeHistV0Eval
+   TH1F     *m_v0eval_tot;   //! number of vertices
+  
+  // for method MakeHistRich
+   TH1F     *m_rich_tot;   //! number of rich hits
   
   
   //------------------------------------------------------------------------
@@ -386,6 +408,11 @@ class St_QA_Maker : public StMaker {
   virtual void   MakeHistPID(St_DataSet *dst);
   virtual void   MakeHistVertex(St_DataSet *dst);
   virtual void   MakeHistXi(St_DataSet *dst);
+  virtual void   MakeHistPoint(St_DataSet *dst);
+  virtual void   MakeHistKink(St_DataSet *dst);
+  virtual void   MakeHistL3(St_DataSet *dst);
+  virtual void   MakeHistV0Eval(St_DataSet *dst);
+  virtual void   MakeHistRich(St_DataSet *dst);
   virtual void   BookHistEvSum();
   virtual void   BookHistGlob();
   virtual void   BookHistDE();
@@ -395,12 +422,19 @@ class St_QA_Maker : public StMaker {
   virtual void   BookHistPID();
   virtual void   BookHistVertex();
   virtual void   BookHistXi();
+  virtual void   BookHistPoint();
+  virtual void   BookHistKink();
+  virtual void   BookHistL3();
+  virtual void   BookHistV0Eval();
+  virtual void   BookHistRich();
+  
+
   virtual void   SetDraw(Bool_t drawFlag=kTRUE);
 //  virtual void   SetPntrToHistUtil(StHistUtil *m1);
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.31 1999/09/21 15:05:38 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.32 1999/09/23 18:54:11 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(St_QA_Maker, 1)   //StAF chain virtual base class for Makers
     };
@@ -411,6 +445,12 @@ inline void St_QA_Maker::SetDraw(Bool_t drawFlag)
                          { drawinit = drawFlag;}
 //inline void St_QA_Maker::SetPntrToHistUtil(StHistUtil *m1) 
 //                          {m_PntrToHistUtil = m1;}
+
+
+
+
+
+
 
 
 
