@@ -1,5 +1,8 @@
-// $Id: StAnalysisMaker.cxx,v 1.3 1999/02/11 15:39:15 wenaus Exp $
+// $Id: StAnalysisMaker.cxx,v 1.4 1999/02/12 02:00:26 wenaus Exp $
 // $Log: StAnalysisMaker.cxx,v $
+// Revision 1.4  1999/02/12 02:00:26  wenaus
+// Incorporate tag loading example
+//
 // Revision 1.3  1999/02/11 15:39:15  wenaus
 // cleanup
 //
@@ -15,6 +18,7 @@
 // StAnalysisMaker
 //
 // Description: 
+//  Sample maker to access and analyze StEvent
 //
 // Environment:
 //  Software developed for the STAR Detector at Brookhaven National Laboratory
@@ -31,10 +35,11 @@
 #include "StEvent/StRun.hh"
 #include "StEvent/StEvent.hh"
 
-static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.3 1999/02/11 15:39:15 wenaus Exp $";
+static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.4 1999/02/12 02:00:26 wenaus Exp $";
 #include "StMessMgr.h"
 void summarizeEvent(StEvent& event);
 //  specific analysis tasks.
+//
 void summarizeEvent(StEvent& event, Int_t &nevents);
 Int_t StAnalysisMaker::Make() {
   StEventReaderMaker* evMaker = (StEventReaderMaker*) gStChain->Maker("events");
@@ -47,12 +52,18 @@ Int_t StAnalysisMaker::Make() {
   long ntk = countPrimaryTracks(ev);
   cout << "Primary tracks: " << ntk << endl;
 
+  // Create and fill a tag
+  if (theTag) delete theTag;
+  theTag = new HighPtTag_st;
+  tagFiller(ev,*theTag);
+void tagFiller(StEvent& event, HighPtTag_st& hptTag);
   return kStOK;
     drawinit = kFALSE;
     theTag = 0;
 
 StAnalysisMaker::StAnalysisMaker(const Char_t *name, const Char_t *title) : StMaker(name, title) {
   drawinit = kFALSE;
+  theTag = 0;
 }
 
 StAnalysisMaker::~StAnalysisMaker() {
@@ -68,12 +79,16 @@ void StAnalysisMaker::MakeBranch() {
 
 void StAnalysisMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StAnalysisMaker.cxx,v 1.3 1999/02/11 15:39:15 wenaus Exp $\n");
+  printf("* $Id: StAnalysisMaker.cxx,v 1.4 1999/02/12 02:00:26 wenaus Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
 
 void StAnalysisMaker::Clear(Option_t *opt) {
+  if (theTag) {
+    delete theTag;
+    theTag = 0;
+  }
   SafeDelete(m_DataSet);
 }
 
