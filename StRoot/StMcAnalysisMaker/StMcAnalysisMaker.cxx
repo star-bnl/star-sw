@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.11 2000/01/24 22:22:24 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.12 2000/02/07 16:43:37 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.12  2000/02/07 16:43:37  calderon
+ * Find the first hit wherever it may be, instead of assuming a sector and padrow.
+ *
  * Revision 1.11  2000/01/24 22:22:24  calderon
  * use delete [] for the array of floats
  *
@@ -217,18 +220,37 @@ Int_t StMcAnalysisMaker::Make()
     // Example: look at hits associated with 1st REC hit in Tpc Hit collection.
 
     StTpcHit*     firstHit;
-    firstHit = *( rEvent->tpcHitCollection()->sector(1)->padrow(1)->hits().begin() );
-    cout << "Assigned First Hit " << endl;
-    cout << "This hit has " <<  theHitMap->count(firstHit) << " MC Hits associated with it."<< endl;
-    // To get the associated hits of the first hit we use equal_range(key), which returns
-    // 2 iterators, the lower bound and upper bound, so that then we can loop over them.
+    Bool_t        gotOneHit;
+    StTpcHitCollection* tpcColl = rEvent->tpcHitCollection();
+    unsigned int j,k, nhits;
+    nhits = tpcColl->numberOfHits();
+        if (tpcColl && nhits) {
+	    gotOneHit = kFALSE;
+	    for (k=0; !gotOneHit && k<tpcColl->numberOfSectors(); k++)
+		for (j=0; !gotOneHit && j<tpcColl->sector(k)->numberOfPadrows(); j++)
+		    if (tpcColl->sector(k)->padrow(j)->hits().size()) {
+			
+			firstHit = tpcColl->sector(k)->padrow(j)->hits()[0];
+			cout << "First Hit Found in Sector "
+			     << firstHit->sector() << " Padrow "
+			     << firstHit->padrow() << endl;
+			gotOneHit = kTRUE;
+		    }
+	    cout << "This hit has " <<  theHitMap->count(firstHit) << " MC Hits associated with it."<< endl;
+	    // To get the associated hits of the first hit we use equal_range(key), which returns
+	    // 2 iterators, the lower bound and upper bound, so that then we can loop over them.
+	    
+	    cout << "Position of First Rec. Hit and Associated (if any) MC Hit:" << endl;
+	    pair<rcTpcHitMapIter,rcTpcHitMapIter> hitBounds = theHitMap->equal_range(firstHit);
+	    
+	    for (rcTpcHitMapIter it=hitBounds.first; it!=hitBounds.second; ++it) 
+		cout << "[" << (*it).first->position() << ", " << (*it).second->position() << "]" << endl;
+	    
+	}
+	else {
+	    cout << "There are no reconstructed TPC Hits in this event" << endl;
+	}
     
-    cout << "Position of First Rec. Hit and Associated (if any) MC Hit:" << endl;
-    pair<rcTpcHitMapIter,rcTpcHitMapIter> hitBounds = theHitMap->equal_range(firstHit);
-
-    for (rcTpcHitMapIter it=hitBounds.first; it!=hitBounds.second; ++it) {
-	cout << "[" << (*it).first->position() << ", " << (*it).second->position() << "]" << endl;
-    }
 
     // Example: Make a histogram using the Hit Map.
     
