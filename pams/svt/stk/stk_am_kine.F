@@ -50,7 +50,6 @@ C                                            cylinder)
 c     error/message
       
       character msg*132
-      integer   msg_id(20)
       logical   first
       data      first/.true./
       save      first
@@ -77,14 +76,11 @@ c     check if inputs are valid, if not return with abort event status
       
       if (vtx_h.nok.le.0) then
          stk_am_kine = stafcv_bad
-         msg = 'stk_am_kine_npvi-e :'//
-     &        ' no primary vertex information '
-         call message(msg,1,msg_id(1))
+         call StError('stk_am_kine_npvi-e : no primary vertex information')
          return
       else if (track_h.nok.le.0) then
          stk_am_kine = stafcv_bad
-         msg = 'stk_am_kine_nt-e : no rows in track '
-         call message(msg,1,msg_id(3))
+         call StError('stk_am_kine_nt-e : no rows in track ')
          return
       end if
       
@@ -197,9 +193,8 @@ cccc  pt   = sqrt(p(1)**2+p(2)**2)
                kine(ikine).sec    = track(ikine).sec 
             else
                msg = 'stk_am_kine_tmt-e : '//
-     &              'number of tracks exceeds max '//
-     &              'lenght of table kine'
-               call message(msg,1,msg_id(4))
+     &              'number of tracks exceeds max length of table kine'
+               call StError(msg)
                done = .true.
             end if ! ikine
          else
@@ -208,7 +203,7 @@ c     track with bad parameters - store it with "infinity"
 
             msg = 'stk_am_kine_invpt-e : '//
      &           'found track with |invpt| out of bound'
-            call message(msg,1,msg_id(5))
+            call StErro(msg)
             ikine = ikine + 1
             if (ikine.lt.kine_h.maxlen) then
                kine(ikine).id     = ikine
@@ -224,9 +219,8 @@ c     track with bad parameters - store it with "infinity"
                kine(ikine).sec    = 0
             else
                msg = 'stk_am_kine_temlts-e : '//
-     &              'number of tracks exceeds max length '//
-     &              'of table kine '
-               call message(msg,1,msg_id(6))
+     &              'number of tracks exceeds max length of table kine'
+               call StError(msg)
                done = .true.
             end if ! ikine
          end if    ! invpt

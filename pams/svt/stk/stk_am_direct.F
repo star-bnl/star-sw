@@ -72,7 +72,6 @@ c     keys
 c     error/message
       
       character msg*132
-      integer   msg_id(30)/30*0./
 
 C     Returned Values:
 C     ================
@@ -103,17 +102,17 @@ C     check if the table of space points is empty
       
       if (spt_h.nok.eq.0) then
          write(msg,1001) 
-         call message(msg,1,msg_id(1))
+         call StError(msg)
          stk_am_direct = stafcv_bad ! no svt space point
          return
       else if (geom_h.nok.eq.0) then
          write(msg,1002) 
-         call message(msg,1,msg_id(2))
+         call StError(msg)
          stk_am_direct = stafcv_bad ! no svt geometry
          return
       else if (g2t_track_h.nok.eq.0) then
          write(msg,1004)
-         call message(msg,1,msg_id(4))
+         call StError(msg)
          stk_am_direct = stafcv_bad ! no svt vertex
          return
       end if
@@ -133,7 +132,7 @@ c     reset/establish a kine key
             g2t_trackkey( g2t_track(ig2t_track).id ) = ig2t_track
          else
             write(msg,1013) ig2t_track, g2t_track(ig2t_track).id
-            call message(msg,1,msg_id(5))
+            call StInfo(msg)
          end if
       end do
       
@@ -156,7 +155,7 @@ c     loop on all space points to find current track
             
          if (spt(ispt).id_mctrack.lt.1) then
             write(msg,1028) ispt
-            call message(msg,1,msg_id(8))
+            call StError(msg)
          else 
 c the tracking is done with 3 layers, the ssd hits have to be ignored 
             if (spt(ispt).id_wafer.lt.7000.or.stkpar(1).nlayers.eq.4) then
@@ -164,7 +163,7 @@ c the tracking is done with 3 layers, the ssd hits have to be ignored
                if (mctrackkey(mctrk).le.0) then
                   if (idtrack.ge.mctrack_h.maxlen) then
                      write(msg,1027) 
-                     call message(msg,1,msg_id(7))
+                     call StError(msg)
                      mctrack_h.nok       = idtrack
                      stk_am_direct    = stafcv_bad
                      return
@@ -177,7 +176,7 @@ c the tracking is done with 3 layers, the ssd hits have to be ignored
                      mctrack(jdtrack).nspt       = 0
                      if (mctrk.lt.1 .or. mctrk.gt.nkinemax) then
                         write(msg,1024) idtrack
-                        call message(msg,1,msg_id(6))
+                        call StError(msg)
                         sec = 0
                         pid = 0
                      else
@@ -185,7 +184,7 @@ c the tracking is done with 3 layers, the ssd hits have to be ignored
                         if (imctrk.lt.1 .or. mctrk.gt.
      >                       g2t_track_h.nok) then
                            write(msg,1025) mctrk,imctrk
-                           call message(msg,1,msg_id(9))
+                           call StError(msg)
                            sec = 0
                            pid = 0
                         else
@@ -202,7 +201,7 @@ C     sec=1 primary, sec=2 secondary, sec=0 unknown
                   jdtrack = mctrackkey(mctrk)
                   if (jdtrack.gt.mctrack_h.maxlen) then
                      write(msg,1029) jdtrack
-                     call message(msg,1,msg_id(10))
+                     call StError(msg)
                      mctrack_h.nok       = idtrack
                      stk_am_direct    = stafcv_bad
                      return

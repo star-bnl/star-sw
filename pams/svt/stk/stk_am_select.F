@@ -45,8 +45,7 @@ C     RETURN:
 C     =======
 C     FORMAT:
 C     =======
- 1001 format(1x,'<w>-stk_am_select :'//
-     &     'no rows in track')
+ 1001 format(1x,'<w>-stk_am_select : no rows in track')
 
 C     EXECUTABLE CODE:
 C     ================

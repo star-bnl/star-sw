@@ -106,7 +106,6 @@ c  integer indexed sort, integer search near nominated row
 c     error/message
       
       character msg*132
-      integer   msg_id(40)/40*0./
       logical   first
       data      first/.true./
       save first
@@ -190,52 +189,52 @@ C     ================
       if (g2t_svt_hit_h.nok.le.0) then    ! no hits in svt
          ste_am = stafcv_bad
          write(msg,1001)
-         call message(msg,1,msg_id(1))
+         call StError(msg)
          return
       else if (spt_h.nok.le.0) then ! no spt
          ste_am = stafcv_bad
          write(msg,1002)
-         call message(msg,1,msg_id(2))
+         call StError(msg)
          return
       else if (vtx_h.nok.le.0) then ! no vtx
          ste_am = stafcv_bad
          write(msg,1003)
-         call message(msg,1,msg_id(3))
+         call StError(msg)
          return
       else if (mctrack_h.nok.le.0) then ! no mctrack
 c         ste_am = stafcv_bad
          write(msg,1005)
-         call message(msg,1,msg_id(5))
+         call StError(msg)
 c         return
       else if (mckine_h.nok.le.0) then ! no kine
 c         ste_am = stafcv_bad
          write(msg,1006)
-         call message(msg,1,msg_id(6))
+         call StError(msg)
 c         return
 c      else if (track_h.nok.le.0) then ! no mctrack
 c         ste_am = stafcv_bad
 c         write(msg,1008)
-c         call message(msg,1,msg_id(8))
+c         call StError(msg)
 c         return
       else if (kine_h.nok.le.0) then ! no kine
 c         ste_am = stafcv_bad
          write(msg,1009)
-         call message(msg,1,msg_id(9))
+         call StError(msg)
 c         return
       else if (g2t_track_h.nok.le.0) then ! no g2t_track
          ste_am = stafcv_bad
          write(msg,1010)
-         call message(msg,1,msg_id(10))
+         call StError(msg)
          return
       else if (g2t_vertex_h.nok.le.0) then ! no vert
          ste_am = stafcv_bad
          write(msg,1011)
-         call message(msg,1,msg_id(11))
+         call StError(msg)
          return
       else if (g2t_gepart_h.nok.le.0) then ! no g2t_gepart
          ste_am = stafcv_bad
          write(msg,1011)
-         call message(msg,1,msg_id(12))
+         call StError(msg)
          return
       end if
       
@@ -258,7 +257,7 @@ c     reset/establish a spt key
             sptkey(spt(ispt).id) = ispt
          else
             write(msg,1012) ispt, spt(ispt).id
-            call message(msg,1,msg_id(13))
+            call StError(msg)
          end if
       end do
 
@@ -272,7 +271,7 @@ c     reset/establish a kine key
             g2t_trackkey( g2t_track(ig2t_track).id ) = ig2t_track
          else
             write(msg,1013) ig2t_track, g2t_track(ig2t_track).id
-            call message(msg,1,msg_id(14))
+            call StError(msg)
          end if
       end do
 
@@ -290,7 +289,7 @@ c     reset/establish a dtrack key
          else
             write(msg,1030) idtrack, 
      &       mctrack(idtrack).id_mctrack
-            call message(msg,1,msg_id(15))
+            call StError(msg)
          end if
       end do
 
@@ -369,7 +368,7 @@ c     use first point as the reference
             j_spt(1) = mcgroups(table_off(1)).id2 
             if (j_spt(1).lt.1 .or. j_spt(1).gt.nsptmax) then
                write(msg,1022) j_spt(1),idtrack
-               call message(msg,1,msg_id(28))
+               call StError(msg)
                goto 200
             end if
          endif
@@ -378,14 +377,14 @@ c     use first point as the reference
          ispt = sptkey(j_spt(1))
          if (ispt.lt.1 .or. ispt.gt.spt_h.nok) then
             write(msg,1023) j_spt(1),ispt
-            call message(msg,1,msg_id(29))
+            call StError(msg)
             goto 200
          end if
          
          mctrk  = spt(ispt).id_mctrack
          if (mctrk.lt.1 .or. mctrk.gt.nkinemax) then
             write(msg,1024) j_spt(1),ispt
-            call message(msg,1,msg_id(30))
+            call StError(msg)
             imctrk = 0
             kpid    = 0
             kp(1)   = infinity
@@ -405,7 +404,7 @@ c     use first point as the reference
             imctrk = g2t_trackkey(mctrk)
             if (imctrk.lt.1 .or. mctrk.gt.g2t_track_h.nok) then
                write(msg,1025) mctrk,imctrk
-               call message(msg,1,msg_id(23))
+               call StError(msg)
                imctrk = 0
                kpid    = 0
                kp(1)   = infinity
@@ -497,7 +496,7 @@ c     monte carlo track - geant kine info
                kph     = atan2d(kp(2),kp(1))
                if (kpid.lt.1 .or. kpid.gt.g2t_gepart_h.nok) then
                   write(msg,1026) imctrk,kpid
-                  call message(msg,1,msg_id(24))
+                  call StError(msg)
                   ke      = infinity
                   ky      = infinity
                else
@@ -644,7 +643,7 @@ c     start evaluation of the track reconstruction
          if (iteval1 .gt. teval_h.maxlen) then
             ste_am = stafcv_ok
             write(msg,1018)
-            call message(msg,1,msg_id(16))
+            call StError(msg)
             done = .true.
             goto 100
          end if
@@ -655,19 +654,19 @@ c     reconstructed track (candidate)
          if (ictrack .lt. 1) then
             ste_am = stafcv_ok
             write(msg,1031)
-            call message(msg,1,msg_id(27))
+            call StError(msg)
             done = .true.
             goto 100
          else if (ictrack.gt. track_h.nok) then
             ste_am = stafcv_ok
             write(msg,1021)
-            call message(msg,1,msg_id(17))
+            call StError(msg)
             done = .true.
             goto 100
          else if (ictrack.gt. kine_h.nok) then
             ste_am = stafcv_ok
             write(msg,1020)
-            call message(msg,1,msg_id(18))
+            call StError(msg)
             done = .true.
             goto 100
          end if
@@ -737,7 +736,7 @@ c     search the "real" track info
 c use first point as the reference
             if (j_spt(1).lt.1 .or. j_spt(1).gt.nsptmax) then
                write(msg,1022) j_spt(1),ictrack
-               call message(msg,1,msg_id(20))
+               call StError(msg)
                ste_am = stafcv_bad
                done = .true.
                goto 100
@@ -747,7 +746,7 @@ c use first point as the reference
          ispt = sptkey(j_spt(1))
          if (ispt.lt.1 .or. ispt.gt.spt_h.nok) then
             write(msg,1023) j_spt(1),ispt
-            call message(msg,1,msg_id(21))
+            call StError(msg)
             ste_am = stafcv_bad
             done = .true.
             goto 100
@@ -784,7 +783,7 @@ c     match the "real" ones.
             end do
          else
             write(msg,1014) ncspt, ictrack
-            call message(msg,1,msg_id(19))
+            call StError(msg)
          end if
                   
 c        if (ngspt.eq.3) ngood = ngood + 1
@@ -970,7 +969,7 @@ c     total space points accounting
          layer = spt(ispt).id_wafer/1000
          if (layer.le.0 .or. layer .gt. 8) then
             write(msg,1029) ispt
-            call message(msg,1,msg_id(24))
+            call StError(msg)
             ste_am = stafcv_bad
             return
          else
