@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.12 1999/02/12 01:26:37 lasiuk Exp $
+ * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.13 1999/02/14 20:46:07 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
- * Revision 1.12  1999/02/12 01:26:37  lasiuk
- * Limit debug output
+ * Revision 1.13  1999/02/14 20:46:07  lasiuk
+ * debug info
  *
  * Revision 1.13  1999/02/14 20:46:07  lasiuk
  * debug info
@@ -105,8 +105,7 @@ StTrsFastDigitalSignalGenerator::instance(StTpcElectronics* el, StTrsSector* sec
     
     return mInstance;
 }
-    cout << "StTrsFastDigitalSignalGenerator::digitizeSignal()" << endl;
-    //PR(mSimpleConversion);
+
 void StTrsFastDigitalSignalGenerator::digitizeSignal()
 {
 //     cout << "StTrsFastDigitalSignalGenerator::digitizeSignal()" << endl;
@@ -125,7 +124,7 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
     // Remember mSector is the "normal" analog sector!
     for(int irow=1; irow<=mSector->numberOfRows(); irow++) {
 	for(int ipad=1; ipad<=mSector->padsOfRow(irow).size(); ipad++) {
-	    //cout << "r/p " << irow << '/' << ipad << endl;
+
 	    currentPad = mSector->timeBinsOfRowAndPad(irow,ipad);
 	    if(!currentPad.size()) continue;
 // 	    cout << "dig() r/p " << irow << '/' << ipad << endl;
