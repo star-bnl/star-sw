@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StVirtualEventFilter.h,v 1.8 1999/12/21 18:57:13 fine Exp $
+// $Id: StVirtualEventFilter.h,v 1.9 2000/03/24 20:35:21 fine Exp $
 //
 #ifndef STAR_StVirtualEventFilter
 #define STAR_StVirtualEventFilter
@@ -13,14 +13,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+// #include "StTypeDefs.h"
 #include <TObject.h>
 #include <Gtypes.h>
 
 class StObjArray;
 class StGlobalTrack;
-class St_TableSorter;
 class StVertex;
-class St_Table;
+
+class TTableSorter;
+class TTable;
 
 class StVirtualEventFilter : public TObject {
  protected:
@@ -37,9 +39,9 @@ class StVirtualEventFilter : public TObject {
     Int_t Toggle() { return GetFlag()? TurnOff():TurnOn();}
     virtual Int_t Channel(StGlobalTrack *globTrack,Size_t &size,Style_t &style);
     virtual Int_t Channel(const StObjArray *hitCollection,Size_t &size,Style_t &style);
-    virtual Int_t Channel(const St_TableSorter *tableObject,Int_t index,Size_t &size,Style_t &style);
+    virtual Int_t Channel(const TTableSorter *tableObject,Int_t index,Size_t &size,Style_t &style);
     virtual Int_t Channel(const StVertex *vertexObject,Size_t &size,Style_t &style);
-    virtual Int_t Channel(const St_Table *tableObject,Int_t rowNumber,Size_t &size,Style_t &style);
+    virtual Int_t Channel(const TTable *tableObject,Int_t rowNumber,Size_t &size,Style_t &style);
     virtual Int_t Reset(Int_t reset=0){return reset;}
     ClassDef(StVirtualEventFilter,0) // virtual base class for the custom "event" filters (useful for 3D visualization)
 };
@@ -47,6 +49,9 @@ class StVirtualEventFilter : public TObject {
 inline Int_t StVirtualEventFilter::Turn(Int_t flag){ Int_t s = GetFlag(); m_ActiveFlag = flag; return s;}
 
 // $Log: StVirtualEventFilter.h,v $
+// Revision 1.9  2000/03/24 20:35:21  fine
+// adjusted to ROOT 2.24. Doesn't work yet. Under development
+//
 // Revision 1.8  1999/12/21 18:57:13  fine
 // compilation warning plus new type for SizeAttribute
 //
