@@ -55,6 +55,9 @@ C   14Dec MA Lisa
 C	- account for the fact that # Geant volumes over each row may vary
 C	  through use of numbv_row array
 C
+C   24mar95 malisa
+C       - now unpack data in the new way datum = adc+'1000'X*tdc+'1000000'X*numseq
+C
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
@@ -139,7 +142,7 @@ c
          integer iquest(100)
 
          integer nquota,nvar,icycle,nvar2,nvar3
-         character*4 chtags(9),chtags2(12),chtags3(5)
+         character*4 chtags(9),chtags2(13),chtags3(5)
 C-----------------------------------------------------------------------
          logical lstat,first
 
@@ -161,45 +164,47 @@ C-----------------------------------------------------------------------
          integer nhitrow(mxhits),wire_hits,kwir
          real tphit_q(mxhits),mchit_q(mxhits)
 
-	integer nvar4
-	character*4 chtags4(17)
-	integer khit,kclus,nseq_hit,ktpc_row,kseq_count
-	integer ksector,krow,kseq,kpix,kdatum,kpad
-	integer numpix_seq,kadc,ktdc,kpix_count
-	integer kmcid,krowtemp
-	logical kstatus,tpg_local_to_global,tpg_global_to_local
-	double precision tpg_pad_to_x,tpg_row_to_y
-	double precision invec(3),outvec(3)
-	real time_bucket
-	integer mxrow
-	parameter(mxrow=45)
-	integer id_pad(mxrow)
-	integer imal
+         integer numpix_factor/'100000'X/
+         integer tdc_factor/'400'X/
+         integer nvar4
+         character*4 chtags4(17)
+         integer khit,kclus,nseq_hit,ktpc_row,kseq_count
+         integer ksector,krow,kseq,kpix,kdatum,kpad
+         integer numpix_seq,kadc,ktdc,kpix_count
+         integer kmcid,krowtemp,ksectortemp
+         logical kstatus,tpg_local_to_global,tpg_global_to_local
+         double precision tpg_pad_to_x,tpg_row_to_y
+         double precision invec(3),outvec(3)
+         real time_bucket
+         integer mxrow
+         parameter(mxrow=45)
+         integer id_pad(mxrow)
+         integer imal
 
-	real desum
+         real desum
 
 c to account for the fact that the number or volumes per row has changed..
 
-	integer numbv_row(mxrow),numbv_row_max
-	integer numbv_row_2mm(mxrow),numbv_row_4mm(mxrow)
-	data numbv_row_2mm/13,13,13,13,13,13,13,	! inner sector
-     +		 13,13,13,13,13,13,
-     +		 10,10,10,10,10,10,10,10,10,10,10,	! outer sector
-     +		 10,10,10,10,10,10,10,10,10,10,10,
-     +		 10,10,10,10,10,10,10,10,10,10/
-	data numbv_row_4mm/9,9,9,9,9,9,9,9,9,9,9,9,9,	! inner sector
-     +		 5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,	! outer sector
-     +		 5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5/
-	parameter (numbv_row_max=13)
-	logical testcond
+         integer numbv_row(mxrow),numbv_row_max
+         integer numbv_row_2mm(mxrow),numbv_row_4mm(mxrow)
+         data numbv_row_2mm/13,13,13,13,13,13,13, ! inner sector
+     +        13,13,13,13,13,13,
+     +        10,10,10,10,10,10,10,10,10,10,10,	! outer sector
+     +        10,10,10,10,10,10,10,10,10,10,10,
+     +        10,10,10,10,10,10,10,10,10,10/
+         data numbv_row_4mm/9,9,9,9,9,9,9,9,9,9,9,9,9, ! inner sector
+     +        5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5, ! outer sector
+     +        5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5/
+         parameter (numbv_row_max=13)
+         logical testcond
 
          integer mcptr(numbv_row_max*mxhits),dtptr(mxhits)
 
 C-----------------------------------------------------------------------
-         data nvar/9/,nvar2/12/,nvar3/5/,nvar4/17/
+         data nvar/9/,nvar2/13/,nvar3/5/,nvar4/17/
          data chtags/'itrk','itcl','nrow','x','y','z','prf','zrf','q'/
          data chtags2/'itrk','mcx ','mcy ','mcz ','tpx ','tpy ','tpz '
-     +,              'delx','dely','delz','nrow', 'clus'/
+     +,              'delx','dely','delz','nrow', 'clus','nseq'/
          data chtags3/'prec','mce','tpe','rde','pre2'/
 	 data chtags4/'hit ','clus','sect','row ','pad ',
      +		      'tdc ','adc ','mcid','xpix','ypix','zpix',
@@ -268,9 +273,10 @@ c things needed for the ntuple 500+ihisto...
          call hcdir('//NTUP',' ')
 
          ihisto = ihisto+1
-         call hbookn(200+ihisto,'Hit Info',nvar,'NTUP',8000,
-     +           chtags)
-         call hbookn(300+ihisto,'Compare Info',nvar2,'NTUP',12000,
+c ntuple 200 as defined has no more information than the hits table...
+*         call hbookn(200+ihisto,'Hit Info',nvar,'NTUP',8000,
+*     +           chtags)
+         call hbookn(300+ihisto,'Compare Info',nvar2,'NTUP',13000,
      +              chtags2)
          call hbookn(400+ihisto,'Track Info',nvar3,'NTUP',4000,
      +              chtags3)
@@ -279,24 +285,24 @@ c things needed for the ntuple 500+ihisto...
 c        
 c        proceed with evaluation...
 c
-         do indx = 1, tphith.nok
+*         do indx = 1, tphith.nok
 c     
-            vec(1)=real(tphit(indx).track)
-            vec(2)=real(tphit(indx).cluster)
-            vec(3)=real(tphit(indx).row)
-            vec(4)=tphit(indx).x
-            vec(5)=tphit(indx).y
-            vec(6)=tphit(indx).z
-            vec(7)=tphit(indx).prf
-            vec(8)=tphit(indx).zrf
-            vec(9)=tphit(indx).q
+*            vec(1)=real(tphit(indx).track)
+*            vec(2)=real(tphit(indx).cluster)
+*            vec(3)=real(tphit(indx).row)
+*            vec(4)=tphit(indx).x
+*            vec(5)=tphit(indx).y
+*            vec(6)=tphit(indx).z
+*            vec(7)=tphit(indx).prf
+*            vec(8)=tphit(indx).zrf
+*            vec(9)=tphit(indx).q
 
-            call hfn(200+ihisto,vec)
-         enddo
+*            call hfn(200+ihisto,vec)
+*         enddo
 c     
 c->      close ntuple file...
 c
-         call hrout(200+ihisto,icycle,' ')
+*         call hrout(200+ihisto,icycle,' ')
 c        call hrend('ntup')
 c        close(23)
 c
@@ -435,6 +441,7 @@ c
                     vec(9) = vec(3)-vec(6)
                     vec(10) = vec(4)-vec(7)
 		    vec(12) = tphit(dtptr(irow)).cluster
+                    vec(13) = tpcluster(vec(12)).nseq
                  else
                     vec(5) = 0.
                     vec(6) = 0.
@@ -443,6 +450,7 @@ c
                     vec(9) = 0.
                     vec(10) = 0.
                     vec(12) = 0.
+                    vec(13) = 0.
                  endif
                  call hfn(300+ihisto,vec)
                  
@@ -494,15 +502,17 @@ c now fill pixel data for each hit - added 28nov94 mal
 	  invec(3)=dble(tphit(khit).z)
 	  nseq_hit = tpcluster(kclus).nseq
 	  kseq = tpcluster(kclus).jseq
-	  ktpc_row = tpcluster(kclus).secpad
+	  ktpc_row = tpcluster(kclus).tpc_row
 	  ksector = ktpc_row/100
 	  krow = ktpc_row - ksector*100
-	  if (mod(ksector,2).eq.0) then
-	    krowtemp = krow+pad_plane(1).nrow_in
+	  if (krow.gt.pad_plane(1).nrow_in) then
+	    krowtemp = krow-pad_plane(1).nrow_in
+            ksectortemp = ksector*2
 	  else
 	    krowtemp = krow
+            ksectortemp=ksector
 	  endif
-	  kstatus=tpg_global_to_local(ksector,invec,outvec)
+	  kstatus=tpg_global_to_local(ksectortemp,invec,outvec)
 	  vec(15)=real(outvec(1))
 	  vec(16)=real(outvec(2))
 	  vec(17)=real(outvec(3))
@@ -510,27 +520,30 @@ c now fill pixel data for each hit - added 28nov94 mal
 	  vec(2)=kclus
 	  vec(3)=ksector
 	  vec(4)=krow
-	  invec(2)=tpg_row_to_y(krow,ksector)
+	  invec(2)=tpg_row_to_y(krowtemp,ksectortemp)
 	  vec(13) = real(invec(2))
 	  do kseq_count=1,nseq_hit
-	    kpad = tpseq(kseq).secpad - id_pad(krowtemp)
+	    kpad = tpseq(kseq).secpad - id_pad(krow)
 	    kpix = tpseq(kseq).jpix
 	    kdatum=tppixel(kpix).datum
-	    numpix_seq=ibits(kdatum,8,6)
+c	    numpix_seq=ibits(kdatum,8,6)
+            numpix_seq=kdatum/numpix_factor ! 24mar95 malisa
 	    vec(5)=kpad
-	    invec(1)=tpg_pad_to_x(kpad,krow,ksector)
+	    invec(1)=tpg_pad_to_x(kpad,krowtemp,ksectortemp)
 	    vec(12) = real(invec(1))
 	    do kpix_count=1,numpix_seq
 	      kdatum=tppixel(kpix).datum
-	      kadc = ibits(kdatum,16,16)
-	      ktdc = ibits(kdatum,0,8) + 256*ibits(kdatum,14,2)
+c	      kadc = ibits(kdatum,16,16)
+c	      ktdc = ibits(kdatum,0,8) + 256*ibits(kdatum,14,2)
+              ktdc = (kdatum - numpix_factor*numpix_seq)/tdc_factor
+              kadc = kdatum - numpix_factor*numpix_seq - tdc_factor*ktdc
 	      kmcid = tpmcpix(kpix).mcid
 	      vec(6)=ktdc
 	      vec(7)=kadc
 	      vec(8)=kmcid
 	      invec(3) = dble(ktdc*time_bucket)
 	      vec(14) = real(invec(3))
-	      kstatus=tpg_local_to_global(ksector,invec,outvec)
+	      kstatus=tpg_local_to_global(ksectortemp,invec,outvec)
 	      if (.not.kstatus)
      +		write(6,*)'Global transform failed!!',ksector
 	      vec(9)=real(outvec(1))
