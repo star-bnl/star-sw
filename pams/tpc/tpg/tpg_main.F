@@ -27,6 +27,7 @@ C  I. Sakrejda 19/12/97
       integer tgc_y_to_row
       integer tgc_time_to_z,tgc_z_to_time ! added 05feb97 - mal
       integer tgc_drift_volume_length
+      integer tgc_drift_velocity, tgc_clock_frequency
       integer iret
       integer init_flag, idebug
 
@@ -34,6 +35,7 @@ CCCCCCCCCCCC
       integer i,j,tgc_local_to_global,tgc_global_to_local
       integer tgc_row_par
       real xlocal(3), xglobal(3), xback(3), pad
+      integer idummy
 CCCCCCCCCCCC
 
       save
@@ -42,15 +44,13 @@ CCCCCCCCCCCC
 *
       if(init_flag.eq.0) then
          iret=tgc_drift_volume_length(dummy5,tpg_detector_h,tpg_detector)
+         iret=tgc_drift_velocity(dummy1,tpg_detector_h,tpg_detector)
+         iret=tgc_clock_frequency(dummy1, tpg_detector_h,tpg_detector)
          iret=tgc_pad_to_x(1.0,1.0,dummy3,pad_plane_h,pad_plane)
          iret=tgc_row_to_y(1.0,dummy2,pad_plane_h,pad_plane)
          iret=tgc_x_to_pad(1.0,1.0,dummy3,pad_plane_h,pad_plane)
          iret=tgc_y_to_row(60.0,dummy2,pad_plane_h,pad_plane)
          iret=tgc_row_par(1,1.0,dummy3,dummy4,pad_plane_h,pad_plane)
-*         iret=tgc_time_to_z(1.0,1.0,1.0,1.0,dummy2,
-*     +        tpg_pad_h,tpg_pad,tpg_detector_h,tpg_detector)
-*         iret=tgc_z_to_time(1.0,1.0,1.0,1.0,dummy2,
-*     +        TPG_PAD_H,TPG_PAD,TPG_DETECTOR_H,TPG_DETECTOR)
          init_flag=1
       endif
 CCCCC
@@ -73,13 +73,23 @@ CCCCC
         write(33,*)i,0.5*real(pad_plane(1).npads(i))+0.5,
      >             pad,xlocal(1),xlocal(2)
         end do
-      endif
+*
       do i=1,24
          do j=1,45
          iret=tgc_row_par(i,real(j),xlocal(1),xlocal(2),dummy1,dummy2)
-c         write(66,*)i,j,xlocal(1),xlocal(2)
+         write(66,*)i,j,xlocal(1),xlocal(2)
          end do
       enddo
+      iret=tgc_drift_velocity(dummy1,tpg_detector_h,tpg_detector)
+      write(6,*) 'drift velocity',dummy1
+      iret=tgc_clock_frequency(dummy1, tpg_detector_h,tpg_detector)
+      write(6,*) 'clock frequency', dummy1
+      iret= tgc_z_to_time(210.0,1,1,1,idummy)
+      write(6,*) 'time bucket for 210cm ',idummy
+      iret= tgc_time_to_z(400,1,1,1,dummy1)
+      write(6,*) 'z for time bucket 400 ', dummy1
+
+      endif
 
 CCCCCC
       tpg_main=STAFCV_OK
@@ -281,18 +291,10 @@ C     y - y coordinate in the local coordinate system
       tgc_row_to_y=STAFCV_OK
       end
 
-      integer function tgc_time_to_z(time,pad,padrow,sector,z,
-     +     TPG_PAD_H,TPG_PAD,TPG_DETECTOR_H,TPG_DETECTOR)
+      integer function tgc_time_to_z(time,pad,padrow,sector,z)
+
       implicit none
 #include "PAM.inc"
-#include "tpg_pad.inc"
-#include "tpg_detector.inc"
-
-      RECORD / table_head_st /tpg_pad_h
-      RECORD / tpg_pad_st /tpg_pad(*) 
-      RECORD / table_head_st /tpg_detector_h
-      RECORD / tpg_detector_st /tpg_detector(*) 
-
 
 C     Description: Converts TIME BUCKET NUMBER to z in the local coordinates
 c     mal 05feb97
@@ -300,118 +302,139 @@ c
 C     Input arguments:
 C     time - time bucket number
 C     pad, padrow, sector - identifies electronics channel
-C     TPG_PAD - tells t0_offset of electronics channel
-C     TPG_DETECTOR - tells drift velocity
+
 C     Returns:
 C     z - z coodinate in the local coordinate system
 
-      real time                 ! note this is time bucket! 1..512
-      real pad,padrow,sector
-      real z                    ! z coordinate in local system (z>0)
-                                ! z_local = 0 at padplane
-      integer iflag/1/
-      integer ipadrow,isector,ipad
-      integer jj
-      real t0_offset(1:24,1:45,1:184)
-      real vdrift,buck_length
-      integer*2 jsec,jrow,jpad
+
+      integer flag/1/
+      integer tgc_drift_velocity
+      integer tgc_clock_frequency
+      integer iret, pad, padrow, sector, time
+      integer tgc_drift_volume_length
+      real dummy1, dvel, clock, z
+      real dvel_local, clock_local, t0_offset
+      real drift_vol_length, drift_length
       save
 
-	tgc_time_to_z = 1
-
-ccc
-      if (iflag.eq.1) then      ! initialize: set up t0_offset table.
-         iflag = 0
-         do jj=1,tpg_pad_h.nok
-            jsec = tpg_pad(jj).sector
-            jrow = tpg_pad(jj).padrow
-            jpad = tpg_pad(jj).pad
-            t0_offset(jsec,jrow,jpad) = tpg_pad(jj).t0
-         enddo
-         vdrift = tpg_detector(1).vdrift
-         buck_length = tpg_detector(1).bucket_length
+      if (flag.eq.1) then
+         flag=0
+         iret = tgc_drift_velocity(dvel, dummy1, dummy1)
+         iret = tgc_clock_frequency(clock, dummy1, dummy1)
+         iret = tgc_drift_volume_length(drift_vol_length, dummy1, dummy1)
+*
+         dvel_local   = dvel
+         clock_local  = clock
+         drift_length = drift_vol_length
       endif
-ccc
-      isector = int(sector)
-      ipadrow = int(padrow)
-      ipad = int(pad)
+*     iret = tgc_t0(t0, pad, padrow, sector, dummy1, dummy1)
+      t0_offset=0.0
 
-      z = vdrift*(time*buck_length - t0_offset(isector,ipadrow,ipad))
+      z = dvel_local*(time/clock_local - t0_offset)
 
       if (z.lt.0.0) then
          write(6,*)'TGC_TIME_TO_Z - z < 0 ! setting to 0'
          z = 0.0
-      elseif (z.gt.tpg_detector(1).drift_length) then
+      elseif (z.gt.drift_length) then
          write(6,*)'TGC_TIME_TO_Z - z > drift ! setting to ',
-     +        tpg_detector(1).drift_length
-         z= tpg_detector(1).drift_length
+     +        drift_length
+         z= drift_length
       endif
+
+      tgc_time_to_z = STAFCV_OK      
 
       end
 
-      integer function tgc_z_to_time(z,pad,padrow,sector,time,
-     +     TPG_PAD_H,TPG_PAD,TPG_DETECTOR_H,TPG_DETECTOR)
-      implicit none
-#include "PAM.inc"
-#include "tpg_pad.inc"
-#include "tpg_detector.inc"
-      RECORD / table_head_st /tpg_pad_h
-      RECORD / tpg_pad_st /tpg_pad(*) 
-      RECORD / table_head_st /tpg_detector_h
-      RECORD / tpg_detector_st /tpg_detector(*) 
-
-
+      integer function tgc_z_to_time(z,pad,padrow,sector,time)
 C     Description: Converts z in the local coordinates to TIME BUCKET NUMBER
 c     mal 05feb97
 c
 C     Input arguments:
 C     z - z coodinate in the local coordinate system
 C     pad, padrow, sector - identifies electronics channel
-C     TPG_PAD - tells t0_offset of electronics channel
-C     TPG_DETECTOR - tells drift velocity
+
 C     Returns:
 C     time - time bucket number
 
-      real time                 ! note this is time bucket! 1..512
-      real pad,padrow,sector
-      real z                    ! z coordinate in local system (z>0)
-                                ! z_local = 0 at padplane
-      integer iflag/1/
-      integer ipadrow,isector,ipad
-      integer jj
-      real t0_offset(1:24,1:45,1:184)
-      real vdrift,buck_length
-      integer*2 jsec,jrow,jpad
+      implicit none
+#include "PAM.inc"
+
+      integer flag/1/
+      integer tgc_drift_velocity
+      integer tgc_clock_frequency
+      integer iret, pad, padrow, sector, time
+      real dummy1, dvel, clock, z
+      real vdrift, clock_local, t0_offset
       save
 
-	tgc_z_to_time = 1
+      if (flag.eq.1) then
+         flag=0
+         iret = tgc_drift_velocity(dvel, dummy1, dummy1)
+         iret = tgc_clock_frequency(clock, dummy1, dummy1)
+         vdrift=dvel
+         clock_local=clock
+      endif
+*     iret = tgc_t0(t0, pad, padrow, sector, dummy1, dummy1)
+      t0_offset=0.0
+      time=(z/vdrift + t0_offset)*clock_local
+      if (time.lt.0.0) then
+           write(6,*)'Time < 0 ! setting to 0'
+           time=0.0
+      elseif (time.ge.513.0) then
+           write(6,*)'Time > 513! setting to 512.9'
+           time=0.0
+      endif
+      tgc_z_to_time = STAFCV_OK      
+
+      end
+
+      integer function tgc_drift_velocity(dvel,TPG_DETECTOR_H,TPG_DETECTOR)
+      implicit none
+#include "PAM.inc"
+#include "tpg_detector.inc"
+
+      RECORD / table_head_st /tpg_detector_h
+      RECORD / tpg_detector_st /tpg_detector(*) 
+
+
+      integer iflag/1/
+      real dvel, dvel_local
+
+      save
 
 ccc
       if (iflag.eq.1) then      ! initialize: set up t0_offset table.
          iflag = 0
-         do jj=1,tpg_pad_h.nok
-            jsec = tpg_pad(jj).sector
-            jrow = tpg_pad(jj).padrow
-            jpad = tpg_pad(jj).pad
-            t0_offset(jsec,jrow,jpad) = tpg_pad(jj).t0
-         enddo
-         vdrift = tpg_detector(1).vdrift
-         buck_length = tpg_detector(1).bucket_length
+         dvel_local = tpg_detector(1).vdrift
       endif
 ccc
-      isector = int(sector)
-      ipadrow = int(padrow)
-      ipad = int(pad)
+      dvel = dvel_local
+      tgc_drift_velocity = STAFCV_OK
 
-      time = (z/vdrift + t0_offset(isector,ipadrow,ipad))/buck_length
+      end
 
-      if (time.lt.0.0) then
-         write(6,*)'Time < 0 ! setting to 0'
-         time=0.0
-      elseif (time.ge.513.0) then
-         write(6,*)'Time > 513! setting to 512.9'
-         time=0.0
+      integer function tgc_clock_frequency(clock,TPG_DETECTOR_H,TPG_DETECTOR)
+      implicit none
+#include "PAM.inc"
+#include "tpg_detector.inc"
+
+      RECORD / table_head_st /tpg_detector_h
+      RECORD / tpg_detector_st /tpg_detector(*) 
+
+
+      integer iflag/1/
+      real clock, clock_local
+
+      save
+
+ccc
+      if (iflag.eq.1) then      ! initialize: set up t0_offset table.
+         iflag = 0
+         clock_local = tpg_detector(1).clock_frequency
       endif
+ccc
+      clock=clock_local
+      tgc_clock_frequency = STAFCV_OK
 
       end
 
@@ -517,7 +540,7 @@ C     pad - pad number
       integer flag,i
       real pitch_in,pitch_out,pitch
       real pad_num(45)
-      real pad_int, pad_half, pad_dif
+
       save
 
       data flag /1/
@@ -558,7 +581,7 @@ C     row - row number
 
       integer flag, i
       real row_cent(45)
-      real row_wid_in, row_wid_out,wid,int_row,dif_row
+      real row_wid_in, row_wid_out,dif_row
       real row_wid(45)
       save
 
