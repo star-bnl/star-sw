@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.140 2004/02/17 19:53:14 perev Exp $
+// $Id: StMaker.cxx,v 1.141 2004/03/15 23:57:01 jeromel Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -503,7 +503,10 @@ void StMaker::StartMaker()
     m_DataSet = Find(".data");
     if (!m_DataSet) {m_DataSet = new TObjectSet(".data"); Add(m_DataSet);}
   }
-  /*if (GetNumber()>3)*/ fMemStatMake->Start();
+  /*if (GetNumber()>3)*/ 
+  if (fMemStatMake) fMemStatMake->Start();
+  else              printf("StMaker::StartMaker : cannot use TMemStat (no Init()) in [%s]\n",GetName());
+
   
 
   StartTimer();
@@ -518,7 +521,11 @@ void StMaker::EndMaker(int ierr)
   if (m_GarbSet) m_GarbSet->Delete();
   ::doPs(GetName(),"EndMaker");
   
-  /*if (GetNumber()>3)*/ fMemStatMake->Stop();
+  /*if (GetNumber()>3)*/ 
+  if (fMemStatMake) fMemStatMake->Start();
+  else              printf("StMaker::EndMaker : cannot use TMemStat (no Init()) in [%s]\n",GetName());
+
+
   StopTimer();
 }
 
@@ -1218,6 +1225,9 @@ AGAIN: switch (fState) {
 }
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.141  2004/03/15 23:57:01  jeromel
+// Protect against NULL
+//
 // Revision 1.140  2004/02/17 19:53:14  perev
 // Make more robust
 //
