@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: SystemOfUnits.h,v 1.1 1999/01/30 03:59:06 fisyak Exp $
+ * $Id: SystemOfUnits.h,v 1.2 1999/03/02 20:15:08 ullrich Exp $
  *
  * Author: blasiuk adapted from CLHEP
  ***************************************************************************
@@ -35,8 +35,8 @@
  ***************************************************************************
  *
  * $Log: SystemOfUnits.h,v $
- * Revision 1.1  1999/01/30 03:59:06  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/03/02 20:15:08  ullrich
+ * Added millivolt.
  *
  * Revision 1.2  1999/03/02 20:15:08  ullrich
  * Added millivolt.
@@ -171,6 +171,7 @@ namespace units {
     //
     // Electric potential [E][Q^-1]
     //
+    static const double Megavolt = MeV/eplus;
     static const double kilovolt = 1.e-3*Megavolt;
     static const double     volt = 1.e-6*Megavolt;
     static const double millivolt = 1.e-3*volt;
