@@ -3,7 +3,7 @@
       INTEGER ivalue         ! input: condition value to be translated
       CHARACTER*(*) message  ! output: condition value message text
 C
-C  created by  ecvmsgf.ace on  21-Jun-1994
+C  created by  ecvmsgf.ace on  08-Dec-1993
 C
 C   SCV_MESSAGES translates a condition value (ivalue) into its
 C   associated text value (message).
@@ -185,36 +185,6 @@ C
      +     //' stream name already in use'
      +     //' '
      +     //' '
-      ELSEIF( ivalue .eq. 12548 ) THEN
-          message = 'TAS_TIO_STNOAVAIL_CV: '
-     +     //' no stream available'
-     +     //' '
-     +     //' '
-      ELSEIF( ivalue .eq. 12804 ) THEN
-          message = 'TAS_TIO_STINNOAVAIL_CV: '
-     +     //' no more input streams available'
-     +     //' '
-     +     //' '
-      ELSEIF( ivalue .eq. 13060 ) THEN
-          message = 'TAS_TIO_STOUTNOAVAIL_CV: '
-     +     //' no output streams available'
-     +     //' '
-     +     //' '
-      ELSEIF( ivalue .eq. 13316 ) THEN
-          message = 'TAS_BADSTNAME_CV: '
-     +     //' stream name does not exist or is not ini'
-     +     //' tialized'
-     +     //' '
-      ELSEIF( ivalue .eq. 13572 ) THEN
-          message = 'TAS_GETTLERR_CV: '
-     +     //' error getting save table list'
-     +     //' '
-     +     //' '
-      ELSEIF( ivalue .eq. 13828 ) THEN
-          message = 'TAS_TAP_NOTNAME_CV: '
-     +     //' table name not found'
-     +     //' '
-     +     //' '
       ELSEIF( ivalue .eq. 3585 ) THEN
           message = 'TLS_SORT_NORMAL_CV: '
      +     //' Sort or Search routine successful'
@@ -256,34 +226,14 @@ C
      +     //' '
      +     //' '
       ELSEIF( ivalue .eq. 12034 ) THEN
-          message = 'TLS_SORT_SN_LISTSHORT_CV: '
+          message = 'TLS_SORT_L_LISTSHORT_CV: '
      +     //' List to hold indices of keys too short.'
-     +     //' (Search_Near)'
+     +     //' (Locate)'
      +     //' '
       ELSEIF( ivalue .eq. 12291 ) THEN
-          message = 'TLS_SORT_SN_NOMATCH_CV: '
-     +     //' Matching key not found in table. (Search'
-     +     //' _Near)'
-     +     //' '
-      ELSEIF( ivalue .eq. 14082 ) THEN
-          message = 'TLS_SORT_SI_LISTSHORT_CV: '
-     +     //' Index array shorter than array to be sor'
-     +     //' ted (Index_Sort)'
-     +     //' '
-      ELSEIF( ivalue .eq. 14339 ) THEN
-          message = 'TLS_SORT_SNI_NOMATCH_CV: '
-     +     //' Key not found (Search_Near_Index)'
-     +     //' '
-     +     //' '
-      ELSEIF( ivalue .eq. 14594 ) THEN
-          message = 'TLS_SORT_SNI_LISTSHORT_CV: '
-     +     //' Output array too small to hold all rows'
-     +     //' found               (Search_Near_Index)'
-     +     //' '
-      ELSEIF( ivalue .eq. 14851 ) THEN
-          message = 'TLS_SORT_SI_NOMATCH_CV: '
-     +     //' Key not found in specified column of tab'
-     +     //' le (Search_Index)'
+          message = 'TLS_SORT_L_NOMATCH_CV: '
+     +     //' Matching key not found in table. (Locate'
+     +     //' )'
      +     //' '
       ELSE
           message = 'SCV- unknown condition value'

@@ -805,7 +805,7 @@ C  If ~Ascend we have el1(Jlow) => rkey >  el1(JHigh)
           inc = - 1
         END IF
       IF (el1(1+len*(ind_r(1)-1)).NE.rkey) THEN
-          Locate_r = tls_sort_sn_nomatch_cv
+          Locate_r = tls_sort_l_nomatch_cv
           RETURN
         ELSE
           IF (k_rows.GT.1) THEN
@@ -813,7 +813,7 @@ C  If ~Ascend we have el1(Jlow) => rkey >  el1(JHigh)
               JM = JM + inc
               DO WHILE (el1(1+len*(JM-1)).EQ.rkey)
                  IF (i_row.GT.k_rows) THEN
-                    Locate_r  = tls_sort_sn_listshort_cv
+                    Locate_r  = tls_sort_l_listshort_cv
                     RETURN
                     END IF
                  ind_r(i_row) = JM
@@ -937,7 +937,7 @@ C  If ~Ascend we have el1(Jlow) => rkey >  el1(JHigh)
           inc = - 1
         END IF
       IF (el1(1+len*(ind_r(1)-1)).NE.rkey) THEN
-          Locate = tls_sort_sn_nomatch_cv
+          Locate = tls_sort_l_nomatch_cv
           RETURN
         ELSE
           IF (k_rows.GT.1) THEN
@@ -945,7 +945,7 @@ C  If ~Ascend we have el1(Jlow) => rkey >  el1(JHigh)
               JM = JM + inc
               DO WHILE (el1(1+len*(JM-1)).EQ.rkey)
                  IF (i_row.GT.k_rows) THEN
-                    Locate  = tls_sort_sn_listshort_cv
+                    Locate  = tls_sort_l_listshort_cv
                     RETURN
                     END IF
                  ind_r(i_row) = JM

@@ -1,5 +1,5 @@
 /*  scv_messages_c.c
- *   created by ecvmsgc.ace 1.2  on  21-Jun-1994    at 14:17:53
+ *   created by ecvmsgc.ace 1.2  on  08-Dec-1993    at 12:10:17
  *
  */
 
@@ -228,42 +228,6 @@ int *ivalue;  /* condition value to be translated */
            strcat( mess, " ");
            result = mess;
            break;
-       case 12548 :
-           strcpy( mess,
-               "TAS_TIO_STNOAVAIL_CV: no stream available");
-           strcat( mess, " ");
-           result = mess;
-           break;
-       case 12804 :
-           strcpy( mess,
-               "TAS_TIO_STINNOAVAIL_CV: no more input streams available");
-           strcat( mess, " ");
-           result = mess;
-           break;
-       case 13060 :
-           strcpy( mess,
-               "TAS_TIO_STOUTNOAVAIL_CV: no output streams available");
-           strcat( mess, " ");
-           result = mess;
-           break;
-       case 13316 :
-           strcpy( mess,
-               "TAS_BADSTNAME_CV: stream name does not exist or is not initialized");
-           strcat( mess, " ");
-           result = mess;
-           break;
-       case 13572 :
-           strcpy( mess,
-               "TAS_GETTLERR_CV: error getting save table list");
-           strcat( mess, " ");
-           result = mess;
-           break;
-       case 13828 :
-           strcpy( mess,
-               "TAS_TAP_NOTNAME_CV: table name not found");
-           strcat( mess, " ");
-           result = mess;
-           break;
        case 3585 :
            strcpy( mess,
                "TLS_SORT_NORMAL_CV: Sort or Search routine successful");
@@ -314,37 +278,13 @@ int *ivalue;  /* condition value to be translated */
            break;
        case 12034 :
            strcpy( mess,
-               "TLS_SORT_SN_LISTSHORT_CV: List to hold indices of keys too short. (Search_Near)");
+               "TLS_SORT_L_LISTSHORT_CV: List to hold indices of keys too short. (Locate)");
            strcat( mess, " ");
            result = mess;
            break;
        case 12291 :
            strcpy( mess,
-               "TLS_SORT_SN_NOMATCH_CV: Matching key not found in table. (Search_Near)");
-           strcat( mess, " ");
-           result = mess;
-           break;
-       case 14082 :
-           strcpy( mess,
-               "TLS_SORT_SI_LISTSHORT_CV: Index array shorter than array to be sorted (Index_Sort)");
-           strcat( mess, " ");
-           result = mess;
-           break;
-       case 14339 :
-           strcpy( mess,
-               "TLS_SORT_SNI_NOMATCH_CV: Key not found (Search_Near_Index)");
-           strcat( mess, " ");
-           result = mess;
-           break;
-       case 14594 :
-           strcpy( mess,
-               "TLS_SORT_SNI_LISTSHORT_CV: Output array too small to hold all rows found");
-           strcat( mess, " (Search_Near_Index)");
-           result = mess;
-           break;
-       case 14851 :
-           strcpy( mess,
-               "TLS_SORT_SI_NOMATCH_CV: Key not found in specified column of table (Search_Index)");
+               "TLS_SORT_L_NOMATCH_CV: Matching key not found in table. (Locate)");
            strcat( mess, " ");
            result = mess;
            break;
