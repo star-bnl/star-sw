@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.8 1999/12/08 03:07:20 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.9 1999/12/13 20:08:37 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.9  1999/12/13 20:08:37  lansdell
+// added pt vs eta in ftpc histogram to match table QA changes; updated logy scale histograms
+//
 // Revision 1.8  1999/12/08 03:07:20  lansdell
 // made corresponding tpc/ftpc split in dedx histograms for StEventQAMaker
 //
@@ -248,6 +251,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_chisq1FE->Fill(chisq1);
 
 // these are for TPC & FTPC
+	m_pT_eta_recFE->Fill(eta,lmevpt);
 	m_globtrk_xf_yfFE->Fill(globtrk->detectorInfo()->firstPoint().x(),
 			       globtrk->detectorInfo()->firstPoint().y());
 	m_eta_trklengthFE->Fill(eta,globtrk->length());
@@ -284,6 +288,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_chisq1FW->Fill(chisq1);
 
 // these are for TPC & FTPC
+	m_pT_eta_recFW->Fill(eta,lmevpt);
 	m_globtrk_xf_yfFW->Fill(globtrk->detectorInfo()->firstPoint().x(),
 			       globtrk->detectorInfo()->firstPoint().y());
 	m_eta_trklengthFW->Fill(eta,globtrk->length());
