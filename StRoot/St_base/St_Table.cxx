@@ -1,6 +1,10 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.14 1998/09/15 20:55:33 fisyak Exp $ 
+// $Id: St_Table.cxx,v 1.15 1998/09/16 22:08:52 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.15  1998/09/16 22:08:52  fine
+// St_DataSetIter - big in dtor has been fixed
+// St_Table, St_DataSet - ls method has been improved
+//
 // Revision 1.14  1998/09/15 20:55:33  fisyak
 // Split St_DataSet -> St_DataSet + St_DataSetIter
 //
@@ -290,10 +294,11 @@ void St_Table::ls(Option_t *option)
   St_DataSet::ls(option);
   IncreaseDirLevel();
   IndentLevel();
-  cout       <<"Allocated rows: "<<fN
-       <<'\t'<<"Used rows: "     <<*s_MaxIndex
-       <<'\t'<<"Row size: "      <<*s_Size
-       <<endl;
+  cout       <<Path() 
+             <<"\t --> Allocated rows: "<<fN
+             <<"\t Used rows: "<<*s_MaxIndex
+             <<"\t Row size: "      << *s_Size << " bytes"
+      <<endl;
   Print();
   DecreaseDirLevel();
 }
@@ -303,10 +308,11 @@ void St_Table::ls(Option_t *option)
    St_DataSet::ls(deep);
    IncreaseDirLevel();
    IndentLevel();
-   cout       <<"Allocated rows: "<<fN
-        <<'\t'<<"Used rows: "     <<*s_MaxIndex
-        <<'\t'<<"Row size: "      <<*s_Size
-        <<endl;
+   cout      <<Path() 
+             <<"\t --> Allocated rows: "<<fN
+             <<"\t Used rows: "<<*s_MaxIndex
+             <<"\t Row size: " << *s_Size << " bytes"
+      <<endl;
    Print();
    DecreaseDirLevel();
 }

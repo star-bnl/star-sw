@@ -97,13 +97,21 @@ void  St_DataSet::ls(Option_t *option)
  //                                                                 //
  //  ls(Option_t *option)                                           //
  //                                                                 //
- //    option= "*" means print all levels                           //
+ //    option       - defines the path to be listed                 //
+ //           = "*" -  means print all levels                       //
  //                                                                 //
  /////////////////////////////////////////////////////////////////////
  
   if (option && !strcmp(option,"*")) ls(Int_t(0));
-  else                               ls(Int_t(1));
+  else {
+    St_DataSetIter local(this);
+    St_DataSet *set = local(option);
+    if (set) set->ls(Int_t(1));
+    else 
+      if (option) Warning("ls","Dataset <%s> not found",option);
+  }     
 }
+
 //______________________________________________________________________________
 void St_DataSet::ls(Int_t depth)
 {
