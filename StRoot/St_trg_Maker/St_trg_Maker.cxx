@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.22 2001/01/10 18:12:12 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.23 2001/01/16 20:27:53 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.23  2001/01/16 20:27:53  ward
+// npre=5 npost=5 instead of 0 in St_trg_Maker::HandleMwc
+//
 // Revision 1.22  2001/01/10 18:12:12  ward
 // MWC corrections from Vladimir Morozov.
 //
@@ -357,7 +360,7 @@ int St_trg_Maker::HandleMwc(St_mwc_raw *mwc_raw,St_dst_TrgDet *dst1) {
   if(!mwc_raw) { PP"Did not find the mwc_raw table mwc.\n"); return 7; }
   mwc_raw_st    *vladimir = mwc_raw->GetTable(); assert(vladimir);
   dst_TrgDet_st *herbert  = dst1->GetTable();    assert(herbert);
-  herbert->npre=0; herbert->npost=0;
+  herbert->npre=5; herbert->npost=5;
   assert(mwc_raw->GetNRows()==96*11); // We must have correct number of rows, else loops below will crash.
   for(irow=0;irow<96;irow++) {
     for(prePost=0;prePost<11;prePost++) {
