@@ -1,7 +1,7 @@
 * 11/13/98 K. Turner (for 98j)
 * Run BFC in following manner:
 * - read in simulated data file that has ONLY dst tables on it 
-* - exec ev02,smdst,ev0d,desum,drsum
+* - exec ev02,ev0d,sdst2,desum,drsum
 * - write out file with 2 ntuples
  
 
@@ -15,7 +15,7 @@
    ebye_analysis_switch=1 _
    gstar_settings=' field_only' _
    domain=' geometry tpc svt global strange  ' _
-   chain=' dstin ev02 smdst ev0d desum drsum ntup' _
+   chain=' dstin ev02 ev0d sdst2 desum drsum ntup' _
    skip=0 _
    no_events=1 _
    input_data_file=/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/tfs_dst/psc180_02_48evts_h_dst.xdf _

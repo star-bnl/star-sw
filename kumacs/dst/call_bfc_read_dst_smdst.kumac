@@ -15,7 +15,7 @@
    ebye_analysis_switch=1 _
    gstar_settings=' field_only' _
    domain=' strange  ' _
-   chain=' dstin smdst ntup evout ' _
+   chain=' dstin sdst ntup evout ' _
    skip=0 _
    no_events=1 _
    input_data_file=/star/data/kathy/set100_01_2ev_dst_dst.xdf _
