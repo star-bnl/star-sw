@@ -19,7 +19,7 @@ topFactory *top;
 //:<--------------------------------------------------------------------
 int top_init()
 {
-   EML_MESSAGE("TOP: Initializing.\n");
+   EML_MESSAGE("TOP:Initializing. ");
 
 /*- Define the TOP KUIP commands. -*/
    top_def_();
@@ -35,7 +35,7 @@ int top_init()
 //:<--------------------------------------------------------------------
 int top_start()
 {
-   EML_MESSAGE("TOP: Starting.\n");
+   EML_MESSAGE("TOP:Starting. ");
 
 /*- Create the TOP Factory. -*/
    top = new topFactory("top");
@@ -51,7 +51,7 @@ int top_start()
 //:<--------------------------------------------------------------------
 int top_stop()
 {
-   EML_MESSAGE("TOP: Stopping.\n");
+   EML_MESSAGE("TOP:Stopping. ");
 
 /*- Delete the TOP Factory.
    delete top;
