@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.47 2004/03/01 17:22:39 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.48 2004/03/16 20:44:00 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,10 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.48  2004/03/16 20:44:00  jhthomas
+ * Various minor bug fixes.  Add new (faster) 2D Bfield distortion routines.
+ * Improve spacecharge calculation so it is faster.
+ *
  * Revision 1.47  2004/03/01 17:22:39  jhthomas
  * Change Shorted Ring Algorithm over to Wieman's Bessel Function solution.  It is faster.
  * Also Fix Jerome's famous non-ascii typo.
@@ -196,6 +200,7 @@ enum   DistortSelect                                                  <br>
   kSpaceCharge       = 0x400,    // Bit 11                            <br>
   kSpaceChargeR2     = 0x800,    // Bit 12                            <br>
   kShortedRing       = 0x1000    // Bit 13                            <br>
+  kFast2DBMap        = 0x2000    // bit 14                            <br>
 } ;                                                                   <br>
 
 Note that the option flag used in the chain is 2x larger 
@@ -329,6 +334,7 @@ void StMagUtilities::GetShortedRing ()
   Ring     = shortTable->ring ;       // Location of short (in units of rings)
   Resistor = shortTable->resistor ;   // M-Ohm value of added external resistor to resistor chain 
 }
+
 /* Wish list for when the DB code is updated.
   fShortedRing   =  StDetectorDbFieldCageShort::instance() ; //copy comments
   Ring           =  fShortedRing->getRing();
@@ -373,6 +379,8 @@ void StMagUtilities::CommonStart ( Int_t mode )
     {
       CathodeV    = -27950.0 ;      // Cathode Voltage (volts)
       GG          =   -115.0 ;      // Gating Grid voltage (volts)
+      Ring        =      0   ;      // Temporary until an Instance() is created for Ring and Resistor
+      Resistor    =      0   ;
       cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected TpcVoltages setting. " << endl ; 
     }
   else  cout << "StMagUtilities::CommonSta  Using TPC voltages from the DB."   << endl ; 
@@ -396,9 +404,10 @@ void StMagUtilities::CommonStart ( Int_t mode )
   // Default behavior: no bits set gives you the following defaults
 
   mDistortionMode = mode;
-  if ( !( mode & ( kBMap | kPadrow13 | kTwist | kClock | kMembrane | kEndcap | kIFCShift | kSpaceCharge | kSpaceChargeR2 | kShortedRing ))) 
+  if ( !( mode & ( kBMap | kPadrow13 | kTwist | kClock | kMembrane | kEndcap | kIFCShift | kSpaceCharge | kSpaceChargeR2 
+                         | kShortedRing | kFast2DBMap ))) 
     {
-       mDistortionMode |= kBMap ;
+       mDistortionMode |= kFast2DBMap ;
        mDistortionMode |= kPadrow13 ;
        mDistortionMode |= kTwist ;
        mDistortionMode |= kClock ;
@@ -556,6 +565,20 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] )
 	  Xprime1[i] = Xprime2[i];
       }
   }
+      
+  if (mDistortionMode & kFast2DBMap) {
+      FastUndo2DBDistortion    ( Xprime1, Xprime2 ) ;
+      for (unsigned int i=0; i<3; ++i) {
+	  Xprime1[i] = Xprime2[i];
+      }
+  }
+
+  if ((mDistortionMode & kBMap) && (mDistortionMode & kFast2DBMap)) {
+      cout << "StMagUtilities ERROR **** Do not use kBMap and kFast2DBMap at the same time" << endl ;
+      cout << "StMagUtilities ERROR **** These routines have duplicate functionality so don't do both." << endl ;
+      exit(1) ;
+  }
+
 
   if (mDistortionMode & kPadrow13) {
       UndoPad13Distortion    ( Xprime1, Xprime2 ) ;
@@ -651,7 +674,7 @@ void StMagUtilities::DoDistortion( const Float_t x[], Float_t Xprime[] )
 
 //________________________________________
 
-/// B field distortions ( no Table ) - calculate the distortions due to the shape of the B field
+/// B field distortions in 3D ( no Table ) - calculate the distortions due to the shape of the B field
 /*! 
     Distortions are calculated point by point and integrated in real time.
     This avoids the time required to set up a table of distorted values but
@@ -681,7 +704,49 @@ void StMagUtilities::UndoBDistortion( const Float_t x[], Float_t Xprime[] )
     {
       if ( i == NSTEPS ) index = 1 ;
       Xprime[2] +=  index*(ah/3) ;
-      B3DField( Xprime, B ) ;                          // Work in kGauss, cm
+      B3DField( Xprime, B ) ;                            // Work in kGauss, cm
+      if ( TMath::Abs(B[2]) > 0.001 )                  // Protect From Divide by Zero Faults
+	{
+	  Xprime[0] +=  index*(ah/3)*( Const_2*B[0] - Const_1*B[1] ) / B[2] ;
+	  Xprime[1] +=  index*(ah/3)*( Const_2*B[1] + Const_1*B[0] ) / B[2] ;
+	}
+      if ( index != 4 ) index = 4; else index = 2 ;
+    }    
+
+}
+
+
+/// 2D - faster - B field distortions ( no Table ) - calculate the distortions due to the shape of the B field
+/*! 
+    Distortions are calculated point by point and integrated in real time.
+    This avoids the time required to set up a table of distorted values but
+    is slow for a very large number of points ( > 10,000 ).
+*/
+void StMagUtilities::Undo2DBDistortion( const Float_t x[], Float_t Xprime[] )
+{
+
+  Double_t ah ;                             // ah carries the sign opposite of E (for forward integration)
+  Float_t  B[3] ; 
+  Int_t    sign, index = 1 , NSTEPS ;              
+  
+  if ( x[2] >= 0.0 ) sign =  1 ;                       // (TPC West)
+  else               sign = -1 ;                       // (TPC East)  
+
+  Xprime[0]  =  x[0] ;                                 // Integrate backwards from TPC plane to 
+  Xprime[1]  =  x[1] ;                                 // the point the electron cluster was born. 
+  Xprime[2]  =  sign * TPC_Z0 ;                        // Prepare for different readout planes
+
+  for ( NSTEPS = 5 ; NSTEPS < 1000 ; NSTEPS += 2 )     // Choose ah to be about 1.0 cm, NSTEPS must be odd
+    {
+      ah = ( x[2] - sign * TPC_Z0 ) / ( NSTEPS - 1 ) ; // Going Backwards! See note above.
+      if ( TMath::Abs(ah) < 1.0 ) break ;
+    }
+
+  for ( Int_t i = 1; i <= NSTEPS; ++i )                // Simpson's Integration Loop
+    {
+      if ( i == NSTEPS ) index = 1 ;
+      Xprime[2] +=  index*(ah/3) ;
+      BField( Xprime, B ) ;                            // Work in kGauss, cm
       if ( TMath::Abs(B[2]) > 0.001 )                  // Protect From Divide by Zero Faults
 	{
 	  Xprime[0] +=  index*(ah/3)*( Const_2*B[0] - Const_1*B[1] ) / B[2] ;
@@ -777,6 +842,103 @@ void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] )
   Xprime[0] = Interpolate( &xarray[ilow], saved_dX, ORDER, x[0] )   ;
   Xprime[1] = Interpolate( &xarray[ilow], saved_dY, ORDER, x[0] )   ;
   Xprime[2] = x[2] ;
+  
+}
+
+
+/// 2D - faster- B field distortions (Table) - calculate the distortions due to the shape of the B field
+/*! 
+    Distortions are calculated and then stored in a table.  This calculation uses a 2D
+    magnetic field which is phi symmetric.  The real 3D field has a slight twist that
+    is not important and can be accounted for in the Twist distortion, anyway.  I recommend
+    using this faste version (JT). This method requires about 10 seconds of CPU time to 
+    generate the table but it is very fast after the table has been created.  
+    Use it when you have a large number of points ( > 10,000 ).
+*/
+void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] )
+{
+
+#define MPOINTS 50                                  // Number of points on the Z interpolation grid
+
+  static  Int_t   DoOnce = 0 ;
+  static  Float_t rarray[MPOINTS], zarray[MPOINTS] ;
+  static  Float_t dRplus[MPOINTS][MPOINTS], dRPhiplus[MPOINTS][MPOINTS] ;
+  static  Float_t dRminus[MPOINTS][MPOINTS], dRPhiminus[MPOINTS][MPOINTS] ;
+  static  Int_t   ilow=0, jlow=0 ;
+  const   Int_t   ORDER = 2 ;                         // Linear interpolation = 1, Quadratic = 2         
+
+  Int_t   i, j ;
+  Float_t xx[3] ;
+  Float_t save_dR[ORDER+1], saved_dR ;
+  Float_t save_dRPhi[ORDER+1], saved_dRPhi ;
+
+  Float_t r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
+  Float_t phi    =  TMath::ATan2(x[1],x[0]) ;
+  if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
+  Float_t z      =  x[2] ;
+  if ( z > 0 && z <  0.2 ) z =  0.2 ;               // Protect against discontinuity at CM
+  if ( z < 0 && z > -0.2 ) z = -0.2 ;               // Protect against discontinuity at CM
+
+  if ( DoOnce == 0 )
+    {
+      cout << "StMagUtilities::FastUndo2  Please wait for the tables to fill ... ~10 seconds" << endl ;
+      for ( i = 0 ; i < MPOINTS ; i++ )
+	{
+	  rarray[i] = IFCRadius + i*(OFCRadius-IFCRadius)/(MPOINTS-1) ;
+	  xx[0] = rarray[i] ;
+	  xx[1] = 0 ;
+	  for ( j = 0 ; j < MPOINTS ; j++ )
+	    {
+	      zarray[j] = j * TPC_Z0/(MPOINTS-1) ;
+	      xx[2] = zarray[j] ;
+	      if ( j == 0 ) xx[2] = 0.1 ;       // Stay off central membrane by a tiny bit
+	      Undo2DBDistortion(xx,Xprime) ;
+	      dRplus[i][j] = Xprime[0] ;
+	      dRPhiplus[i][j] = Xprime[1] ;
+	      xx[2] = -1*zarray[j] ;            // Note sign flip for Z < 0
+	      if ( j == 0 ) xx[2] = -0.1 ;      // Stay off central membrane by a tiny bit
+	      Undo2DBDistortion(xx,Xprime) ;
+	      dRminus[i][j] = Xprime[0] ;
+	      dRPhiminus[i][j] = Xprime[1] ;
+	    }
+	}
+      DoOnce = 1 ;
+    }
+
+  Search( MPOINTS, rarray, r, ilow ) ;
+  Search( MPOINTS, zarray, TMath::Abs(x[2]), jlow ) ;
+  if ( ilow < 0 ) ilow = 0 ;   // artifact of Root's binsearch, returns -1 if out of range
+  if ( jlow < 0 ) jlow = 0 ;
+  if ( ilow + ORDER  >=  MPOINTS-1 ) ilow =  MPOINTS - 1 - ORDER ;
+  if ( jlow + ORDER  >=  MPOINTS-1 ) jlow =  MPOINTS - 1 - ORDER ;
+  
+  for ( i = ilow ; i < ilow + ORDER + 1 ; i++ )
+    {
+      if ( z >= 0 )
+	{
+	  save_dR[i-ilow]    = Interpolate( &zarray[jlow], &dRplus[i][jlow], ORDER, x[2] )   ;
+	  save_dRPhi[i-ilow] = Interpolate( &zarray[jlow], &dRPhiplus[i][jlow], ORDER, x[2] )   ;
+	}
+      else
+	{
+	  save_dR[i-ilow]    = Interpolate( &zarray[jlow], &dRminus[i][jlow], ORDER, -1*x[2] )   ;
+	  save_dRPhi[i-ilow] = Interpolate( &zarray[jlow], &dRPhiminus[i][jlow], ORDER, -1*x[2] )   ;
+	}
+    }
+
+  saved_dR    = Interpolate( &rarray[ilow], save_dR, ORDER, r )   ; 
+  saved_dRPhi = Interpolate( &rarray[ilow], save_dRPhi, ORDER, r )   ; 
+
+  if ( r > 0.0 ) 
+    {
+      r   =  saved_dR ;  // Note that we calculate these quantities as if on the X axis, so phi == 0 while calculating.  
+      phi =  phi + saved_dRPhi / r ;      
+      if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
+    }
+
+  Xprime[0] = r * TMath::Cos(phi) ;
+  Xprime[1] = r * TMath::Sin(phi) ;
+  Xprime[2] = z ;
   
 }
 
@@ -1132,7 +1294,7 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
       fSpaceCharge =  StDetectorDbSpaceCharge::instance();
       SpaceCharge  =  fSpaceCharge->getSpaceChargeCoulombs((double)gFactor) ;
     }
-  
+
   // Subtract to Undo the distortions
   if ( r > 0.0 ) 
     {
@@ -1158,9 +1320,9 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
 void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xprime[] )
 { 
   
-  const Int_t     ROWS        =  31 ;
-  const Int_t     COLUMNS     =  43 ;
-  const Int_t     ITERATIONS  =  1000 ;
+  const Int_t     ROWS        =  129 ;  // (2**n + 1)    old = 32
+  const Int_t     COLUMNS     =  257 ;  // (2**m + 1)    old = 43
+  const Int_t     ITERATIONS  =  100 ;  // old = 1000 
   const Double_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
   const Double_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
   const Double_t  Ratio       =  GRIDSIZER*GRIDSIZER / (GRIDSIZEZ*GRIDSIZEZ) ;
@@ -1217,21 +1379,35 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 	}
       //Solve Poisson's equation in cylindrical coordinates by relaxation technique
       //Allow for different size grid spacing in R and Z directions
-      for ( Int_t k = 1 ; k <= ITERATIONS; k++ )
+      //Use a binary expansion of the matrix to speed up the solution of the problem
+      for ( Int_t one = 32 ; one > 0 ; one/=2 )
 	{
-	  for ( Int_t j = 1 ; j < COLUMNS-1 ; j++ )  
+	  for ( Int_t k = 1 ; k <= ITERATIONS; k++ )
 	    {
-	      for ( Int_t i = 1 ; i < ROWS-1 ; i++ )  
+	      for ( Int_t j = one ; j < COLUMNS-1 ; j+=one )  
 		{
-		  Double_t Radius = IFCRadius + i*GRIDSIZER ;
-		  ArrayV(i,j) = ( ArrayV(i+1,j) + ArrayV(i-1,j) + Ratio*ArrayV(i,j+1) + Ratio*ArrayV(i,j-1) ) 
-		    + ArrayV(i+1,j)*GRIDSIZER/(2*Radius) 
-		    - ArrayV(i-1,j)*GRIDSIZER/(2*Radius)
-		    + Charge(i,j)*GRIDSIZER*GRIDSIZER  ;
-		  ArrayV(i,j) *=  1.0/Four ;
+		  for ( Int_t i = one ; i < ROWS-1 ; i+=one )  
+		    {
+		      Float_t Radius = IFCRadius + i*GRIDSIZER ;
+		      ArrayV(i,j) = ( ArrayV(i+one,j) + ArrayV(i-one,j) + Ratio*ArrayV(i,j+one) + Ratio*ArrayV(i,j-one) ) 
+			+ ArrayV(i+one,j)*GRIDSIZER*one/(2*Radius) - ArrayV(i-one,j)*GRIDSIZER*one/(2*Radius)
+			+ Charge(i,j)*GRIDSIZER*GRIDSIZER*one*one  ;
+		      ArrayV(i,j) *=  1.0/Four ;
+		      if ( k == ITERATIONS && one > 1 ) 
+			{ 
+			  ArrayV(i+one/2,j)       = ( ArrayV(i+one,j) + ArrayV(i,j) ) / 2 ;
+			  ArrayV(i+one/2,j+one/2) = ( ArrayV(i+one,j+one) + ArrayV(i,j) ) / 2 ;
+			  ArrayV(i+one/2,j-one/2) = ( ArrayV(i+one,j-one) + ArrayV(i,j) ) / 2 ;
+			  ArrayV(i,j+one/2)       = ( ArrayV(i,j+one) + ArrayV(i,j) ) / 2 ;
+			  ArrayV(i,j-one/2)       = ( ArrayV(i,j-one) + ArrayV(i,j) ) / 2 ;
+			  ArrayV(i-one/2,j)       = ( ArrayV(i-one,j) + ArrayV(i,j) ) / 2 ;
+			  ArrayV(i-one/2,j+one/2) = ( ArrayV(i-one,j+one) + ArrayV(i,j) ) / 2 ;
+			  ArrayV(i-one/2,j-one/2) = ( ArrayV(i-one,j-one) + ArrayV(i,j) ) / 2 ;
+			}
+		    }
 		}
 	    }
-	}
+	}      
       //Differentiate V(r) and solve for E(r) using special equations for the first and last row
       //Integrate E(r)/E(z) from point of origin to pad plane
       for ( Int_t j = COLUMNS-1 ; j >= 0 ; j-- )  // Count backwards to facilitate integration over Z
@@ -1299,7 +1475,7 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
       SpaceChargeR2  =  fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ;
       SpaceChargeR2 *= 0.525 ; // Temporary until the DB has a new entry to cover this case
     }
-  
+
   // Subtract to Undo the distortions
   if ( r > 0.0 ) 
     {
@@ -1366,7 +1542,11 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 		  if ( Resistor > 0.0 ) 
 		    Ein =  2 * RStep * ( 1 - TMath::Cos(k*ZShort) ) / (k*Rtot*TPC_Z0) ;  // With Compensating resistor
 		  else
-		    Ein =  2 * ( C0 - (C2+C1*TPC_Z0)*TMath::Cos(k*TPC_Z0) - (C0-C2)*TMath::Cos(k*ZShort) )/(k*TPC_Z0) ; //Without
+		    {
+		      //ZShort = 0.0 ;    // Add this line if adding test resistor on the West End
+		      Ein =  2 * ( C0 - (C2+C1*TPC_Z0)*TMath::Cos(k*TPC_Z0) - (C0-C2)*TMath::Cos(k*ZShort) )/(k*TPC_Z0) ; //Without
+		      //Ein =  -1 * Ein ; // Add this line if adding test resistor on West End
+		    }
 		  //Ein   =  2 * RStep * -1*deltaV / ( k * Pitch * Rtot * CathodeV ) ;        // Gating Grid studies (note -1)
 		  //Eout  =  2 * RStep * -1*deltaV / ( k * Pitch * Rtot * CathodeV ) ;        // Gating Grid studies (note -1)
 		  Double_t An   =  Ein  * TMath::BesselK0( k*OFCRadius ) - Eout * TMath::BesselK0( k*IFCRadius ) ;
@@ -1410,7 +1590,153 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 
 }
 
+
   
+//________________________________________
+
+  
+/*!
+  Tilted Endap and Central Membrane 
+  Electrostatic equations solved by relaxtion.  Original work by Jim Thomas, 1/5/2004
+*/
+void StMagUtilities::UndoTiltDistortion( const Float_t x[], Float_t Xprime[] )
+{ 
+
+  const Int_t     ROWS        =   31  ;
+  const Int_t     COLUMNS     =   43  ;
+  const Int_t     ITERATIONS  =  1000 ;
+  const Double_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
+  const Double_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
+  const Double_t  Ratio       =  GRIDSIZER*GRIDSIZER / (GRIDSIZEZ*GRIDSIZEZ) ;
+  const Double_t  Four        =  2.0 + 2.0*Ratio ;
+
+  Float_t   Er_integral, Ephi_integral ;
+  Double_t  r, phi, z ;
+
+  static Int_t DoOnce = 0 ;
+
+  if ( DoOnce == 0 )
+    {
+
+      TMatrixD  ArrayV(ROWS,COLUMNS), ArrayE(ROWS,COLUMNS), EroverEz(ROWS,COLUMNS) ;
+      Float_t   Rlist[ROWS], Zedlist[COLUMNS] ;
+      
+      //Fill boundary of arrays with error potentials and "volume" of array with approximate solutions to aid convergence. 
+      for ( Int_t i = 0 ; i < ROWS ; i++ )  
+	{
+	  Double_t Radius = IFCRadius + i*GRIDSIZER ;
+	  Rlist[i] = Radius ;
+	  for ( Int_t j = 0 ; j < COLUMNS ; j++ )  // Fill Vmatrix with Boundary Conditions *and* candidate solution
+	    {
+  	      Double_t zed = j*GRIDSIZEZ ;
+	      Zedlist[j]   = zed ;
+	      ArrayV(i,j)  = Radius*zed/(TPC_Z0*OFCRadius) ; // INsert linearly decreasing trial solution, too.
+	      // Force zero error potential on the IFC
+	      if ( i == 0 ) ArrayV(i,j) = 0.0 ;  
+	      // Force zero error potential on CM
+	      if ( j == 0 && ( i != 0 && i != (ROWS-1) ) ) ArrayV(i,j) = 0.0 ;  
+	      // Force zero error potential on OFC
+	      if ( i == (ROWS-1) ) ArrayV(i,j) = 0.0 ;
+            }
+	}      
+      
+      //Solve Laplace's equation in cylindrical coordinates by relaxation technique
+      //Allow for different size grid spacing in R and Z directions
+
+      for ( Int_t k = 1 ; k <= ITERATIONS; k++ )
+	{
+	  for ( Int_t j = 1 ; j < COLUMNS-1 ; j++ )  
+	    {
+	      for ( Int_t i = 1 ; i < ROWS-1 ; i++ )  
+		{
+		  Double_t Radius = IFCRadius + i*GRIDSIZER ;
+		  ArrayV(i,j) = ( ArrayV(i+1,j) + ArrayV(i-1,j) + Ratio*ArrayV(i,j+1) + Ratio*ArrayV(i,j-1) ) 
+		                + ArrayV(i+1,j)*GRIDSIZER/(2*Radius) - ArrayV(i-1,j)*GRIDSIZER/(2*Radius)  ;
+		  ArrayV(i,j) *=  1.0/Four ;
+		}
+	    } 
+	}
+
+      //Differentiate V(r) and solve for E(r) using special equations for the first and last row
+      //Integrate E(r)/E(z) from point of origin to pad plane
+
+      for ( Int_t j = COLUMNS-1 ; j >= 0 ; j-- )  // Count backwards to facilitate integration over Z
+	{	  
+	  // Differentiate in R
+	  for ( Int_t i = 1 ; i < ROWS-1 ; i++ )  ArrayE(i,j) = -1 * ( ArrayV(i+1,j) - ArrayV(i-1,j) ) / (2*GRIDSIZER) ;
+	  ArrayE(0,j)      =  -1 * ( -0.5*ArrayV(2,j) + 2.0*ArrayV(1,j) - 1.5*ArrayV(0,j) ) / GRIDSIZER ;  
+	  ArrayE(ROWS-1,j) =  -1 * ( 1.5*ArrayV(ROWS-1,j) - 2.0*ArrayV(ROWS-2,j) + 0.5*ArrayV(ROWS-3,j) ) / GRIDSIZER ; 
+	  // Integrate over Z
+	  for ( Int_t i = 0 ; i < ROWS ; i++ ) 
+	    {
+	      Int_t Index = 1 ;   // Simpsons rule if N=odd.  If N!=odd then add extra point by trapezoidal rule.  
+	      EroverEz(i,j) = 0.0 ;
+	      for ( Int_t k = j ; k < COLUMNS ; k++ ) 
+		{ 
+		  EroverEz(i,j)  +=  Index*(GRIDSIZEZ/3.0)*ArrayE(i,(COLUMNS-1)+j-k)/(-1*StarMagE) ;
+		  if ( Index != 4 )  Index = 4; else Index = 2 ;
+		}
+	      if ( Index == 4 ) EroverEz(i,j)  -=  (GRIDSIZEZ/3.0)*ArrayE(i,COLUMNS-1)/ (-1*StarMagE) ;
+	      if ( Index == 2 ) EroverEz(i,j)  +=  
+				  (GRIDSIZEZ/3.0)*(0.5*ArrayE(i,COLUMNS-2)-2.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
+	      if ( j == COLUMNS-2 ) EroverEz(i,j) =  
+				      (GRIDSIZEZ/3.0)*(1.5*ArrayE(i,COLUMNS-2)+1.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
+	      if ( j == COLUMNS-1 ) EroverEz(i,j) =  0.0 ;
+	    }
+	}
+
+      //Interpolate results onto standard grid for Electric Fields
+
+      Int_t ilow=0, jlow=0 ;
+      Float_t save_Er[2] ;	      
+      for ( Int_t i = 0 ; i < neZ ; ++i ) 
+	{
+	  // Apply correction to EAST end of TPC, only.  Return 0 if on the West end.
+	  z = TMath::Abs(eZList[i]) ;
+	  for ( Int_t j = 0 ; j < neR ; ++j ) 
+	    { // Linear interpolation
+	      r = eRadius[j] ;
+	      Search( ROWS,   Rlist, r, ilow ) ;  // Note switch - R in rows and Z in columns
+	      Search( COLUMNS, Zedlist, z, jlow ) ;
+	      if ( ilow < 0 ) ilow = 0 ;  // artifact of Root's binsearch, returns -1 if out of range
+	      if ( jlow < 0 ) jlow = 0 ;   
+	      if ( ilow + 1  >=  ROWS - 1 ) ilow =  ROWS - 2 ;	      
+	      if ( jlow + 1  >=  COLUMNS - 1 ) jlow =  COLUMNS - 2 ; 
+	      save_Er[0] = EroverEz(ilow,jlow) + (EroverEz(ilow,jlow+1)-EroverEz(ilow,jlow))*(z-Zedlist[jlow])/GRIDSIZEZ ;
+	      save_Er[1] = EroverEz(ilow+1,jlow) + (EroverEz(ilow+1,jlow+1)-EroverEz(ilow+1,jlow))*(z-Zedlist[jlow])/GRIDSIZEZ ;
+	      tiltEr[i][j] = save_Er[0] + (save_Er[1]-save_Er[0])*(r-Rlist[ilow])/GRIDSIZER ;
+	      if ( eZList[i] > 0 ) tiltEr[i][j] = 0.0 ;  // Force West end to zero !!!!
+	    }
+	}
+
+      DoOnce = 1 ;      
+
+    }
+
+  r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
+  phi    =  TMath::ATan2(x[1],x[0]) ;
+  if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
+  z      =  x[2] ;
+  if ( z > 0 && z <  0.2 ) z =  0.2 ;               // Protect against discontinuity at CM
+  if ( z < 0 && z > -0.2 ) z = -0.2 ;               // Protect against discontinuity at CM
+
+  Interpolate2DEdistortion( r, z, tiltEr, Er_integral ) ;
+  Ephi_integral = 0.0 ;  // E field is symmetric in phi
+
+  // Subtract to Undo the distortions
+  if ( r > 0.0 ) 
+    {
+      phi =  phi - ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
+      r   =  r   - ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
+    }
+
+  Xprime[0] = r * TMath::Cos(phi) ;
+  Xprime[1] = r * TMath::Sin(phi) ;
+  Xprime[2] = x[2] ;
+
+}
+
+
 //________________________________________
 
 
@@ -1467,6 +1793,7 @@ void StMagUtilities::ReadField( )
   printf("StMagUtilities::ReadField  Version: ") ;
   
   if ( mDistortionMode & kBMap )          printf ("3D Mag Field Distortions") ;
+  if ( mDistortionMode & kFast2DBMap )    printf ("2D Mag Field Distortions") ;
   if ( mDistortionMode & kPadrow13 )      printf (" + Padrow 13") ;
   if ( mDistortionMode & kTwist )         printf (" + Twist") ;
   if ( mDistortionMode & kClock )         printf (" + Clock") ;
@@ -1482,6 +1809,7 @@ void StMagUtilities::ReadField( )
   MapLocation = BaseLocation + filename ;
   gSystem->ExpandPathName(MapLocation) ;
   magfile = fopen(MapLocation.Data(),"r") ;
+  printf("StMagUtilities::ReadField  Reading 2D Magnetic Field file: %s \n",filename.Data());
 
   if (magfile) 
 
