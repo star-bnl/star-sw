@@ -1168,73 +1168,32 @@ Float_t  *StTrackHelper::GetPoints(int &npoints)
   
   GetHelix(0); GetHelix(1);
   for (int i=0;i<2;i++) {fTHlx[i] = StEventHelper::MyHelix(fTHlx[i],fHelx[i]);}
-  fTHlx[1]->Backward();
-  len0 = fTHlx[0]->Step(fTHlx[1]->GetXYZ());
-  if (fabs(len0-len) > 1.1) 
-    Warning("GetPoints","Track length %g contradicts Out/Inn distance %g",len,len0);
-  if (len0 +0.1 < len) fTHlx[1]->Move(-(len-len0));
 
   len0 = fTHlx[0]->Step(fTHlx[1]->GetXYZ());
-  len1 = fTHlx[1]->Step(fTHlx[0]->GetXYZ());
-  
-
-
-  double curva = fabs(fTHlx[0]->GetRho());
-  double cdip  = fTHlx[0]->GetCos();
-  npoints  = abs(int(len*cdip*curva*90))+2;   
-  Float_t *arr = new Float_t[npoints*3];
-  Double_t step = 1./(npoints-1);
-  Double_t ss[4];ss[0]=0;
-  double xyz[3][3];
-#if 0
-  for (int i =0;i<npoints;i++,ss[0]+=step)
-  {
-     ss[1] = 1.-ss[0];
-     fTHlx[0]->Step(ss[0]*len0,xyz[0]);
-     fTHlx[1]->Step(ss[1]*len1,xyz[1]);
-     ss[0+2] = pow(ss[0],3);
-     ss[1+2] = pow(ss[1],3);
-     double nor = ss[2]+ss[3];
-     TCL::vlinco(xyz[0],ss[1+2]/nor,xyz[1],ss[0+2]/nor,xyz[2],3);
-     TCL::ucopy(xyz[2],arr+i*3,3);
-  }
-#endif //0
-#if 1
-  double *arr0 = new double[npoints*3*2];
-  double *arr1 = arr0+npoints*3;
-  THelixTrack hlx0 = *fTHlx[0];
-  THelixTrack hlx1 = *fTHlx[1];
-  ss[0]=0; ss[1]=0;
   double rho0 = fTHlx[0]->GetRho();
   double rho1 = fTHlx[1]->GetRho();
-  int j = npoints-1;
-  for (int i =0;i<npoints;i++,ss[0]+=step)
+  double drho = (rho1-rho0)/(len0*fTHlx[0]->GetCos());
+  fTHlx[0]->Set(rho0,drho);
+  fTHlx[1]->Set(rho1,drho);
+  fTHlx[1]->Backward();
+  npoints  = abs(int(len*fTHlx[0]->GetCos()*rho0*90))+2;   
+  double step = 1./(npoints-1);
+  len0 = fTHlx[0]->Step(fTHlx[1]->GetXYZ());
+  len1 = fTHlx[1]->Step(fTHlx[0]->GetXYZ());
+  float *arr = new Float_t[npoints*3];
+  double xyz[3][3];
+  for (int i =0;i<npoints;i++)
   {
-     ss[1] = 1.-ss[0];
-     hlx0.Step(0.,xyz[0]);
-     hlx1.Step(0.,xyz[1]);
-     TCL::ucopy(xyz[0],arr0+i*3,3);
-     TCL::ucopy(xyz[1],arr1+j*3,3); j--;
-     ss[2]=ss[0]+0.5*step;
-     ss[3] = 1.-ss[2];
-     hlx0.Set(rho0*ss[3]-rho1*ss[2]);
-     hlx1.Set(rho1*ss[3]-rho0*ss[2]);
-     hlx0.Move(len0*step);
-     hlx1.Move(len1*step);
-  }
-  ss[0]=0;
-  for (int i =0;i<npoints;i++,ss[0]+=step)
-  {
-     ss[1] = 1.-ss[0];
-     ss[0+2] = pow(ss[0],3);
-     ss[1+2] = pow(ss[1],3);
-     double nor = ss[2]+ss[3];
-     TCL::vlinco(arr0+i*3,ss[1+2]/nor,arr1+i*3,ss[0+2]/nor,xyz[2],3);
+     double s0 = i*step;
+     double s1 = 1.-s0;
+     fTHlx[0]->Step(s0*len0,xyz[0]);
+     fTHlx[1]->Step(s1*len1,xyz[1]);
+     s0 = s0*s0*s0; s1 = s1*s1*s1;
+     double tmp = s0+s1;
+     s0 /=tmp;      s1 /=tmp;
+     TCL::vlinco(xyz[0],s1,xyz[1],s0,xyz[2],3);
      TCL::ucopy(xyz[2],arr+i*3,3);
   }
-
-  delete [] arr0;
-#endif //1
   return arr;
 }
 

@@ -103,7 +103,7 @@ public:
   StErrorHelper();
  ~StErrorHelper();
        void Add(int errn);    
-       void Print(const char* option) const;
+       void Print(const char* option="") const;
        int  GetNTot() {return fNTot;}
        int  GetNErr() {return fNErr ;}
 static TString Say(int errn,const char *klas="StTrack");
