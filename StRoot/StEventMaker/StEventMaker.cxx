@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.41 2001/12/21 21:13:03 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.42 2001/12/21 22:39:32 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.42  2001/12/21 22:39:32  ullrich
+ * Disabled filling parts of StRunInfo.
+ *
  * Revision 2.41  2001/12/21 21:13:03  ullrich
  * Fixed bug: loading multiple primary vertices.
  *
@@ -179,7 +182,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.41 2001/12/21 21:13:03 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.42 2001/12/21 22:39:32 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -956,13 +959,14 @@ StEventMaker::makeEvent()
     
     //
     //  This part of run info is filled every event
+    //  NOT ENABLED YET ...
     //
-    StDetectorDbRichScalers richScalers(this);
-    mCurrentRunInfo->setZdcWestRate(richScalers.getZDCWest());
-    mCurrentRunInfo->setZdcEastRate(richScalers.getZDCEast());
-    mCurrentRunInfo->setZdcCoincidenceRate(richScalers.getZDCX());
-    mCurrentRunInfo->setBackgroundRate(richScalers.getMult());
-    mCurrentRunInfo->setL0RateToRich(richScalers.getL0());
+//     StDetectorDbRichScalers richScalers(this);
+//     mCurrentRunInfo->setZdcWestRate(richScalers.getZDCWest());
+//     mCurrentRunInfo->setZdcEastRate(richScalers.getZDCEast());
+//     mCurrentRunInfo->setZdcCoincidenceRate(richScalers.getZDCX());
+//     mCurrentRunInfo->setBackgroundRate(richScalers.getMult());
+//     mCurrentRunInfo->setL0RateToRich(richScalers.getL0());
     
     if (mCurrentRunInfo)
 	mCurrentEvent->setRunInfo(new StRunInfo(*mCurrentRunInfo));
