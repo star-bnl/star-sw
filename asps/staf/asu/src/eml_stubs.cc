@@ -11,6 +11,21 @@
 #include "asu_macros.h"
 #include "asu_types.h"
 
+#include "fortranc.h"
+
+#define set_staf_status_ F77_NAME(set_staf_status,SET_STAF_STATUS)
+#define get_staf_status_ F77_NAME(get_staf_status,GET_STAF_STATUS)
+#define set_staf_result_ F77_NAME(set_staf_result,SET_STAF_RESULT)
+#define get_staf_result_ F77_NAME(get_staf_result,GET_STAF_RESULT)
+
+extern "C" { 
+            void  type_of_call set_staf_status_(long *);
+            long  type_of_call get_staf_status_(long *);
+
+            void  type_of_call set_staf_result_(float *);
+            float type_of_call get_staf_result_(long *);
+           }
+
 void set_staf_status(long status)
 {
    set_staf_status_(&status);

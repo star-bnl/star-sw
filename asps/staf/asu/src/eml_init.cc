@@ -13,6 +13,13 @@
 #include "asuLib.h"	/* Analysis Service Utilities */
 #include "emlLib.h"	/* Error Messaging and Logging */
 
+#include "fortranc.h"   /* The definition of the Fortran/C interface */
+
+#define   eml_kuvec_init_ F77_NAME(eml_kuvec_init,EML_KUVEC_INIT)
+// #define eml_def_ F77_NAME(eml_def,EML_DEF)
+
+extern CC_P void type_of_call eml_kuvec_init_();
+// extern CC_P void type_of_call eml_def_();
 
 //:>--------------------------------------------------------------------
 //:ROUTINE:	int eml_init()
@@ -25,7 +32,7 @@ int eml_init()
    EML_MESSAGE("EML:Initializing. ");
 
 /*- Define the EML KUIP commands. -*/
-// eml_def_();
+//   eml_def_();
 
 /*- Initialize STAF vectors. -*/
 /* 23OCT96 ---- TEMPORARY DEBUG HACK ----

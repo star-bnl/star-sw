@@ -16,11 +16,15 @@
 #include <string.h>
 #include <sys/types.h>
 #ifdef irix
-#include <sys/time.h>
+# include <sys/time.h>
 #else
-#include <time.h>
+# include <time.h>
 #endif
-#include <unistd.h>
+#ifndef WIN32
+# include <unistd.h>
+#else
+# include <winsock.h>
+#endif /* WIN32 */
 
 #include "kuip.h"
 #define KUIP
@@ -28,6 +32,10 @@
 #include "asuAlloc.h"
 #include "asuLib.h"	/* Analysis Service Utilities */
 #include "emlLib.h"	/* Error Messaging & Logging */
+
+#ifdef WIN32
+  int gettimeofday(struct timeval *tp, void *ptr){return 0;}
+#endif /* WIN32 */ 
 
 /*-------------------------------------------- TYPEDEFS             --*/
 /*-------------------------------------------- GLOBALS              --*/

@@ -15,7 +15,7 @@
 >GUIDANCE
 Analysis_Service_Utilities commands.
 .
- #(@)$Id: asu_def.cdf,v 1.5 1998/03/11 21:39:47 ward Exp $
+ #(@)$Id: asu_def.cdf,v 1.6 1998/03/16 00:57:17 fisyak Exp $
 .
 ASU is utility package which contains several useful functions and
 user-interface commands.
@@ -67,7 +67,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_ASU_HELLO
+>ACTION kam_asu_hello_%C
 **
 ** ---------------------------------------------------------------------
 ** ASU/TIME
@@ -112,7 +112,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_ASU_TIME
+>ACTION kam_asu_time_%C
 **
 ** ---------------------------------------------------------------------
 ** ASU/DATE
@@ -151,7 +151,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_ASU_DATE
+>ACTION kam_asu_date_%C
 **
 ** ---------------------------------------------------------------------
 ** ASU/FFLUSH
@@ -190,7 +190,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_ASU_FFLUSH
+>ACTION kam_asu_fflush_%C
 **
 >MENU EML
 ** ASU/EML/PRETTY_FORMATTING [TRUE/FALSE/SHOW]
@@ -239,7 +239,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_ASU_PRETTY
+>ACTION kam_asu_pretty_%C
 **
 ** ASU/EML/BEEP_ON_ERROR [TRUE/FALSE/SHOW]
 >COMMAND BEEP_ON_ERROR
@@ -280,7 +280,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_ASU_BEEP
+>ACTION kam_asu_beep_%C
 **
 ** ASU/EML/DEMAND_ERROR_ACKNOWLEDGEMENT [TRUE/FALSE/SHOW]
 >COMMAND DEMAND_ERROR_ACKNOWLEDGEMENT
@@ -326,7 +326,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_ASU_DEMAND_ACK
+>ACTION kam_asu_demand_ack_%C
 **
 ************************************************************************
 ** ASU/MALLOC
@@ -402,7 +402,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_ASUMALLOC_LEVEL
+>ACTION kam_asumalloc_level_%C
 **
 ** ---------------------------------------------------------------------
 ** ASU/MALLOC/STATS
@@ -449,5 +449,5 @@ BUGS:
 SEE ALSO: 
    ASU/MALLOC/LEVEL
 .
->ACTION KAM_ASUMALLOC_STATS
+>ACTION kam_asumalloc_stats_%C
 **
