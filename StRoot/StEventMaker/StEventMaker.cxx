@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.44 2002/01/31 23:50:28 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.45 2002/02/15 23:06:58 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.45  2002/02/15 23:06:58  ullrich
+ * Fill detector state for RICH.
+ *
  * Revision 2.44  2002/01/31 23:50:28  ullrich
  * More filling of StRunInfo (by J. Gans).
  *
@@ -188,7 +191,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.44 2002/01/31 23:50:28 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.45 2002/02/15 23:06:58 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -987,6 +990,12 @@ StEventMaker::makeEvent()
     
     if (mCurrentRunInfo)
 	mCurrentEvent->setRunInfo(new StRunInfo(*mCurrentRunInfo));
+
+    //
+    //  Detector States
+    //
+    if (richScalers)
+	mCurrentEvent->addDetectorState(new StDetectorState(kRichId, richScalers->getRichHVStatus()));
 
     return kStOK;
 }
