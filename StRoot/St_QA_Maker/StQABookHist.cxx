@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.40 2000/02/17 22:00:50 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.41 2000/03/17 20:46:25 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.41  2000/03/17 20:46:25  kathy
+// change scale on the globtrk iflag histogram as requested by Spencer
+//
 // Revision 1.40  2000/02/17 22:00:50  kathy
 // changed ranges of histograms and labelled axes for diff geant vs reco vtx hist
 //
@@ -645,7 +648,7 @@ void StQABookHist::BookHistGlob(){
   m_globtrk_tot     = QAH1F("QaGtrkTot",  "globtrk: tot num tracks - all",40,0.,10000.);
   m_globtrk_tot_sm  = QAH1F("QaGtrkTotsm",  "globtrk: tot num tracks - all",40,0.,20.);
 
-  m_globtrk_iflag   = QAH1F("QaGtrkFlag", "globtrk: iflag - all ",160,-799.,801.);
+  m_globtrk_iflag   = QAH1F("QaGtrkFlag", "globtrk: iflag - all ",200,-999.,1001.);
 
   m_globtrk_good    = QAH1F("QaGtrkGood", "globtrk: tot good tracks - all",40,0.,10000.);
   m_globtrk_good_sm = QAH1F("QaGtrkGoodsm", "globtrk: tot good tracks - all",40,0.,20.);
