@@ -129,6 +129,7 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
 	mEntry->clear();
 	mEntry->setMcTrack(associatedPair->partnerMcTrack());
 	mEntry->setGlobalTrack(associatedPair->partnerTrack());
+	mEntry->setGlobalAssoc(associatedPair);
 	mEntry->setStiTrack(track);
 	mEntry->setAssociation(asPair.second); //New 11/20/01 (MLM)
 
@@ -283,13 +284,22 @@ void TrackEntry::clear()
     mArray->Clear();
     mHitCounter = 0;
 
-    mcTrackId = mcTrackPsi = 0.;
+    mcTrackId = mcTrackPsi = mcTrackRapidity = mcTrackE = 0.;
+    mcTrackPx = mcTrackPy = mcTrackPz = mcTrackEta = 0.;
+    mcTrackNTpcHits = mcTrackNSvtHits = mcTrackNFtpcHits = 0;
+    
     globalTrackQ = 0;
     globalTrackM = globalTrackPsi = globalTrackChi2 = globalTrackNHit = 0.;
+    globalTrackPx = globalTrackPy = globalTrackPz = globalTrackPt = globalTrackEta = 0.;
+    globalTrackFitPoints = 0;
+    globalTrackNAssocHits = globalTrackNAssocTpcHits = globalTrackNAssocSvtHits =
+	globalTrackNAssocFtpcHits = 0;
+    
     stiTrackM = stiTrackPsi = stiTrackChi2 = stiTrackNHit = 0.;
-
+    stiTrackY = stiTrackTanL = stiTrackPx = stiTrackPy = stiTrackPz = stiTrackPt = stiTrackEta = 0.;
     stiTrackNHits = stiTrackNTpcHits = stiTrackNSvtHits = 0;
-    stiTrackNAssocHits = stiTrackNAssocTpcHits = stiTrackNAssocSvtHits = 0;
+    stiTrackNAssocHits = stiTrackNAssocTpcHits = stiTrackNAssocSvtHits  = 0;
+
 }
 
 void TrackEntry::setStiTrack(StiTrack *newtrack)
@@ -334,6 +344,14 @@ void TrackEntry::setMcTrack(StMcTrack *newtrack)
   mcTrackNFtpcHits = newtrack->ftpcHits().size();
 }
 
+void TrackEntry::setGlobalAssoc(const StTrackPairInfo* pr)
+{
+    globalTrackNAssocTpcHits = pr->commonTpcHits();
+    globalTrackNAssocSvtHits = pr->commonSvtHits();
+    globalTrackNAssocFtpcHits = 0;
+    globalTrackNAssocHits = pr->commonTpcHits()+pr->commonSvtHits();
+}
+
 void TrackEntry::setGlobalTrack(StTrack *newtrack)
 {
   const StThreeVectorF& mom = newtrack->geometry()->momentum();
@@ -344,8 +362,7 @@ void TrackEntry::setGlobalTrack(StTrack *newtrack)
   globalTrackEta  = mom.pseudoRapidity();
   globalTrackQ  = newtrack->geometry()->charge();
   globalTrackPsi = newtrack->geometry()->psi();
-  //we can go from c casts (double) (x) to c++cast static_cast<double>(x).  Easier to read, safer
-  globalTrackFitPoints = static_cast<double>(newtrack->fitTraits().numberOfFitPoints());
+  globalTrackFitPoints = newtrack->fitTraits().numberOfFitPoints();
   globalTrackChi2 = newtrack->fitTraits().chi2();
   
 }

@@ -85,6 +85,7 @@ public:
     void setMcTrack(StMcTrack*);
     void setGlobalTrack(StTrack*);
     void setStiTrack(StiTrack*);
+    void setGlobalAssoc(const StTrackPairInfo*);
     void setAssociation(const trackPing&);
 
     
@@ -118,6 +119,8 @@ private:
     double mcTrackPz;
     double mcTrackPt;
     double mcTrackEta;
+
+    //Counters in varius detectors
     unsigned int mcTrackNTpcHits;
     unsigned int mcTrackNSvtHits;
     unsigned int mcTrackNFtpcHits;
@@ -133,7 +136,13 @@ private:
     double globalTrackPz;
     double globalTrackPt;
     double globalTrackEta;
-    double globalTrackFitPoints;
+    unsigned int globalTrackFitPoints;
+
+    //Assoc counters
+    unsigned int globalTrackNAssocHits;
+    unsigned int globalTrackNAssocTpcHits;
+    unsigned int globalTrackNAssocSvtHits;
+    unsigned int globalTrackNAssocFtpcHits;
     
     //temp kinematic info : Sti
     double stiTrackM;
