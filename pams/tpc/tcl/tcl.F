@@ -1,5 +1,8 @@
-* $Id: tcl.F,v 1.2 1998/05/22 00:18:14 hardtke Exp $
+* $Id: tcl.F,v 1.3 1998/06/20 16:07:35 fisyak Exp $
 * $Log: tcl.F,v $
+* Revision 1.3  1998/06/20 16:07:35  fisyak
+* Line width protection for msg
+*
 * Revision 1.2  1998/05/22 00:18:14  hardtke
 * modified hit finder with new data format
 *
@@ -208,8 +211,8 @@ c Look for clusters in any row with a sequence on at least one pad:
 c
              row_table = Nrows - row + 1     
              if (raw_row_out(row_table).RowID.ne.row) then
-                   write(m132,*) 'TCL-E2 raw_row_out table has 
-     +                            incorrect format.' 
+                   write(m132,*) 
+     1 'TCL-E2 raw_row_out table has incorrect format.' 
                     CALL Message( m132,
      1                   1, IDE2 )
               tcl = STAFCV_BAD
