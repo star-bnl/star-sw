@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.18 2001/10/24 04:05:20 porter Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.19 2001/12/05 17:16:35 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.19  2001/12/05 17:16:35  porter
+ * stand-alone make file no longer had "DLINUX" in compile but this is still needed
+ * and returned. Also retrieve elementID list  in query by whereClause for plotting
+ * many row instances.
+ *
  * Revision 1.18  2001/10/24 04:05:20  porter
  * added long long type to I/O and got rid of obsolete dataIndex table
  *
@@ -137,6 +142,7 @@ mcols = new tableDescriptor[mMax];
 memset(mcols,0,mMax*sizeof(tableDescriptor));
 mschemaID=mstructID=0;
 misValid=false;
+mhasDouble=false;
 
 }
 
@@ -154,6 +160,7 @@ mtableSize = d.getTotalSizeInBytes();
 mschemaID=d.getSchemaID();
 mstructID=d.getStructID();
 misValid=d.IsValid();
+mhasDouble=d.mhasDouble;
 
 }
 
@@ -207,6 +214,8 @@ StDbTableDescriptor::fillElement(StDbBuffer* buff, int tableID){
        if(length) delete [] length;
    }
 
+   if(mcols[i].type==Stlonglong || mcols[i].type==Stdouble ) mhasDouble=true;
+   
    mCur++;
    mnumElements++;
 
@@ -347,6 +356,8 @@ StDbTableDescriptor::fillSizeAndOffset(char* length, int elementNum){
       if(padsize>=8)padsize=padsize-8;
     }
   }
+ if(padsize>0 && padsize<=4) padsize=4; 
+ // padsize = 4* ((int) floor ((float) (padsize)/4 ));
 
 #endif
 }
@@ -371,7 +382,21 @@ const char* typenames[] = {"char","uchar","short","ushort","int","uint","long","
 return retVal;
 }
 
+//////////////////////////////////////////////////////////////
+void StDbTableDescriptor::endRowPadding(){
 
+  //simple item for solaris & use of doubles & longlong.
+  // if the struct contains such an entity, it's size must
+  // be divisable by 8.
+
+#ifndef LINUX
+  if(mhasDouble){
+     int checkPadding=mtableSize%8;
+     if(checkPadding>0 && checkPadding<5)mtableSize+=4;
+  }
+#endif
+
+};
 
 
 

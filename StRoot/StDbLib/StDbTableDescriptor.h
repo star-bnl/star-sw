@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.h,v 1.7 2001/01/22 18:38:00 porter Exp $
+ * $Id: StDbTableDescriptor.h,v 1.8 2001/12/05 17:16:35 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.h,v $
+ * Revision 1.8  2001/12/05 17:16:35  porter
+ * stand-alone make file no longer had "DLINUX" in compile but this is still needed
+ * and returned. Also retrieve elementID list  in query by whereClause for plotting
+ * many row instances.
+ *
  * Revision 1.7  2001/01/22 18:38:00  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -85,6 +90,7 @@ protected:
  int mstructID;
  int mschemaID;
  bool misValid;  // schema has been filled
+ bool mhasDouble;
 
   void init();
   virtual void reSize();
@@ -120,6 +126,8 @@ public:
   void setStructID(int id);
   bool IsValid() const;
   int getCurrentInternalSize();
+  void endRowPadding();
+
 };
 
 inline unsigned int
