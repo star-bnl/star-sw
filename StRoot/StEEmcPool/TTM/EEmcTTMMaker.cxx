@@ -1,34 +1,29 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.21 2004/05/05 23:00:51 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.22 2004/05/06 16:02:49 zolnie Exp $
 // doxygen info here
 /** 
  * \class  EEmcTTMMaker
  * \brief  EEMC tower to track matching
  *
- * 
- * This a MuDST based class to match TPC tracks to EEMC towers. Its main result is a list
+ * This a MuDST based class to match TPC tracks to EEMC towers. Its main result is a list 
  * of towers with associated tracks (list of EEmcTTMatch objects)
- * 
  *
  * \author Piotr A. Zolnierczuk
- * \date   2003/12/08
+ * $Date: 2004/05/06 16:02:49 $
+ * $Revision: 1.22 $
  *
-
- * \todo    
-     - write additional makers that would produce electron and MIP calibrations
-     - more documentation?
-
- * \bug     
-     - The matching algorithm assumes that z depths at which matching is performed
-     are in fact inside the EEMC, i.e. it is only phi and eta that are checked
-     at given z. So it is up to the user to ensure that z depths are really inside EEMC.
-     And the defaults are.
-     - Since cint in root/root4star does not allow to pass function pointers 
-    (that would be ideal for user defineable EEmcTTMMaker::AcceptTrack and 
-    EEmcTTMMaker::MatchTrack) we're stuck with FORTRAN++
-
-
+ * \section ttmakerremarks Remarks
+ *
+ * \bug  The matching algorithm assumes that z depths at which matching is performed 
+ * are in fact inside the EEMC, i.e. it is only phi and eta that are checked at given z. 
+ * So it is up to the user to ensure that z depths are really inside EEMC. 
+ * And the defaults are.
+ * \bug  Since cint in root/root4star does not allow to pass function pointers 
+ * (that would be ideal for user defineable EEmcTTMMaker::AcceptTrack 
+ * and EEmcTTMMaker::MatchTrack) we're stuck with FORTRAN++
+ * 
+ * \todo The maker does not produce any useful file output. Write it.
  */
 
 
@@ -181,6 +176,7 @@ EEmcTTMMaker::Init() {
   mFile->cd("histos");
 
   // remove magic constants later
+  // histList = new TList();
   hTrackNHits = new TH1F("hTrankNHits","hits/track"        ,100,  0.0,100  );
   hTrackLen   = new TH1F("hTrackLen"  ,"track length [cm]" ,500,  0.0,500.0);
   hTrackPt    = new TH1F("hTrackPt"   ,"p_T   [GeV]"       ,500,  0.0,  5.0);
@@ -349,12 +345,14 @@ EEmcTTMMaker::Make(){
 }
 
 //_____________________________________________________________________________
-/// clear maker (does nothing at the moment)
 void
 EEmcTTMMaker::Clear(Option_t *option ) {
   //TString opt = option;
   //opt.ToLower();
   //if(opt.Contains("A")) { doSth() }  elseif (opt.Contains("B")) { doSthElse() };
+  //mMatchList->Clear();
+  //mTrackList->Clear() ; // we do  not own this 
+  //mTowerList->Delete(); // we own that :) the beauty of C++
   StMaker::Clear();
 }
 
@@ -462,6 +460,9 @@ ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm)  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.22  2004/05/06 16:02:49  zolnie
+// more docs
+//
 // Revision 1.21  2004/05/05 23:00:51  zolnie
 // more docs
 //

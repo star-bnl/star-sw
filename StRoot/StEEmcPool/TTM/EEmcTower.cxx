@@ -1,22 +1,21 @@
 // Hey Emacs this is -*-c++-*-
-// $Id: EEmcTower.cxx,v 1.3 2004/05/06 15:42:47 zolnie Exp $
+// $Id: EEmcTower.cxx,v 1.4 2004/05/06 16:02:50 zolnie Exp $
 
 /**
  * \class  EEmcTower
- * \author Piotr A. Zolnierczuk
- * \date    created 2003/04/30, last modified $Date: 2004/05/06 15:42:47 $
- * \version $Revision: 1.3 $
- *
  * \brief EEmcTower holds information about an EEMC tower 'hit'
  *
- *
+ * EEmcTower holds information about an EEMC tower 'hit'.
  * The information includes tower description (sector, subsector and eta), 
  * pedestal adjusted ADC value and (optionally) calibrated energy loss
  *
+ * \author Piotr A. Zolnierczuk
  *
+ * $Date: 2004/05/06 16:02:50 $ 
+ * $Revision: 1.4 $
+ *
+ * \section towerremarks Remarks
  * \bug  implicitly assumed that labels are no longer than 16 characters
- * 
- * \todo 
  */
 
 

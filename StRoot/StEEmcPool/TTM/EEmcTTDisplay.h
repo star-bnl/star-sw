@@ -1,5 +1,5 @@
 // Hey Emacs this is -*-c++-*-
-// $Id: EEmcTTDisplay.h,v 1.10 2004/05/05 21:37:37 zolnie Exp $
+// $Id: EEmcTTDisplay.h,v 1.11 2004/05/06 16:02:49 zolnie Exp $
 #ifndef STAR_EEmcTTDisplay
 #define STAR_EEmcTTDisplay
 
@@ -29,7 +29,7 @@ public:
 
 
 
-  //! adds tower to the list
+  /// adds a tower to the list of displayed towers
   /// \param tile name (in the form of 05TC11) 
   /// \return      kTRUE on success and kFALSE on failure
   Bool_t       AddTower(const char *tile);
@@ -44,12 +44,12 @@ public:
     return AddTower(volumeName(sec,sub,eta)); 
   }  
 
-  //! adds tower to the list 
+  /// adds a tower to the list of displayed towers
   /// \param tower a reference to EEmcTower 
   /// \return      kTRUE on success and kFALSE on failure
   Bool_t       AddTower(const EEmcTower& tower)       ;
 
-  //! adds track to the list 
+  /// adds a track to the list of displayed tracks
   /// \param x     x-component of the track origin
   /// \param y     y-component of the track origin
   /// \param z     z-component of the track origin
@@ -64,39 +64,39 @@ public:
 			Double_t px, Double_t py, Double_t pz, 
 			Double_t qB, Double_t zMin=0.0, Double_t zMax=0.0);
 
-  //! adds a track to the list
+  /// adds a track to the list of displayed tracks
   /// \param track a refence to StMuTrack
   /// \return      kTRUE on success and kFALSE on failure
   Bool_t       AddTrack(const StMuTrack& track);
 
 
-  //! adds  a match to the list
+  //! adds  a tower with matched tracks to the list of displayed tower/tracks
   /// \param tmatch a refence to EEmcTTMatchp
   /// \return      kTRUE on success and kFALSE on failure
   Bool_t       AddMatch(EEmcTTMatch& tmatch);
 
-  //! draws towers/tracks from the list
+  /// draws towers/tracks 
   /// \param option - not uset at the moment
   void         Draw ( const Option_t* option = "");
 
-  //! clears tower/track lists
+  /// clears tower/track lists
   /// \param option - not uset at the moment
   void         Clear( const Option_t* option = ""); 
 
 
-  //! prints EEmcTTMatch
+  /// prints EEmcTTMatch information to an ostream
   /// \param out    a reference to std::ostream
   /// \param tmatch a reference to struct EEmcTTMatch
   void         Out(ostream &out, EEmcTTMatch &tmatch);
 
-  //! prints EEmcTTMatch 
+  /// prints EEmcTTMatch information to a TString
   /// \param out    a reference to TString
   /// \param tmatch a reference to struct EEmcTTMatch
   void         Out(TString &out, EEmcTTMatch &tmatch);
   
 
 
-  //! sets STAR magnetic field 
+  /// sets STAR magnetic field 
   /// \param B magnetic field (sign sensitive) in Tesla
   void   SetMagneticField(double B) { mBField = B;    }
   //! returns STAR magnetic fiels in Tesla
@@ -114,7 +114,7 @@ public:
   bool   GetShowExtrapolatedTracks() { return mShowExtrapolatedTracks; }
 
 
-protected:
+private:
   //! initializes EEMC geometry: sector,subsectors and towers
   /// \param topName a label of a top most volume
   void  initGeometry(const char *topName);
@@ -146,6 +146,9 @@ public:
 
 
 // $Log: EEmcTTDisplay.h,v $
+// Revision 1.11  2004/05/06 16:02:49  zolnie
+// more docs
+//
 // Revision 1.10  2004/05/05 21:37:37  zolnie
 // ver 2.0 released
 //

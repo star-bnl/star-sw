@@ -1,8 +1,7 @@
-// $Id: EEmcTTMatch.cxx,v 1.4 2004/05/05 22:11:08 zolnie Exp $
-/*!
+// $Id: EEmcTTMatch.cxx,v 1.5 2004/05/06 16:02:50 zolnie Exp $
+/**
  *                                                                     
  * \class  EEmcTTMatch
-
  * \brief  EEmcTTMatch class contains results of TPC track to EEMC tower matching
  *
  * The contents of a EEmcTTMatch is a pointer to EEmcTower object and a list of StMuTrack 
@@ -10,7 +9,9 @@
  * fulfilled certain matching criteria. 
  * 
  * \author Piotr A. Zolnierczuk
- * \date   2004/04/30
+ * 
+ * $Date: 2004/05/06 16:02:50 $ 
+ * $Revision: 1.5 $
  *
  *
  * \section eemcttmachexample Example 
@@ -23,6 +24,7 @@
     // do something with tracks
   } 
   \endverbatim
+
  */                                                                      
 
 
@@ -115,7 +117,7 @@ EEmcTTMatch::Out(ostream &out ) const
 
 
 
-// ================================================================================================
+// ===========================================================================================
 ostream&  operator<<(ostream &out, const StMuTrack    &t  )  {
   out << "<StMuTrack";
   out << " ORIGIN=\""   << t.helix().origin() << "\"";
@@ -123,7 +125,7 @@ ostream&  operator<<(ostream &out, const StMuTrack    &t  )  {
   out << "/>\n"; 
   return out;
 }
-// ================================================================================================
+// ===========================================================================================
 ostream&  operator<<(ostream &out, const EEmcTTMatch  &m  )  {
   return m.Out(out);
 }

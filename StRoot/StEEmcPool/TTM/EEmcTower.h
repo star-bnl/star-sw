@@ -1,7 +1,7 @@
 // Hey Emacs this is -*-c++-*-
 #ifndef STAR_EEmcTower_h
 #define STAR_EEmcTower_h
-// $Id: EEmcTower.h,v 1.1 2004/05/05 22:04:17 zolnie Exp $
+// $Id: EEmcTower.h,v 1.2 2004/05/06 16:02:50 zolnie Exp $
 
 
 #include <ostream>
@@ -30,8 +30,8 @@ public:
     WriteLabel();
   };
 
-  // the exp
-  //EEmcTower(const char *label, float adc=0.0, float ene=0.0);
+  /// an explicit constructor that uses labels rather intigers
+  EEmcTower(const char *label, float adc=0.0, float ene=0.0);
 
   /// the destructor
   ~EEmcTower() { if(mLabel) delete mLabel; }
@@ -85,8 +85,8 @@ public:
   ostream& Out ( ostream &out ) const ;  
   
 private:
-  void  WriteLabel();
-  void  ParseLabel(const char* label);
+  bool  WriteLabel();
+  bool  ParseLabel(const char* label);
   //
   char  mSec;   //
   char  mSub;   //

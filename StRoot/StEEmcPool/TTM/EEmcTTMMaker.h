@@ -1,5 +1,5 @@
 // Hey Emacs this is -*-c++-*-
-// $Id: EEmcTTMMaker.h,v 1.14 2004/05/05 23:00:57 zolnie Exp $
+// $Id: EEmcTTMMaker.h,v 1.15 2004/05/06 16:02:49 zolnie Exp $
 #ifndef STAR_EEmcTTMMaker
 #define STAR_EEmcTTMMaker
 
@@ -32,12 +32,6 @@ class StEEmcDbMaker;
 
 class EEmcTower;
 
-//const int       kNTupleTTM_MaxTracks  =  128;
-//const int       kNTupleTTM_MaxTrigger =   32;
-//const unsigned  kNTupleTTM_MaxZ       =    8;
-
-
-
 
 class EEmcTTMMaker : public StMaker {
 public: 
@@ -69,12 +63,11 @@ public:
   /// the destructor
   virtual       ~EEmcTTMMaker();
 
-  // MAKER STUFF 
   /// initialize maker 
   virtual Int_t  Init();   
   /// process one event
   virtual Int_t  Make();   
-  /// clears maker
+  /// clears maker 
   /// \param option not used at the moment
   virtual void   Clear(Option_t *option = ""); 
   /// cleans up at the end
@@ -131,8 +124,7 @@ public:
   /// sets delta eta cut see \ref matchparams
   void     SetDeltaEtaCut(Double_t v=1.0) { mEtaFac=v;  }
 
-  /// \depreciated
-  /// set output file name obsolete
+  /// set output file name OBSOLETE
   void     SetFileName( const char *string) { mFileName=TString(string); }
 
 
@@ -151,6 +143,15 @@ public:
   /// prints matching cuts and statistics summary
   ostream&   Summary    ( ostream &out ) const ;
 
+protected:
+  /// resets the collected statistics 
+  void     ResetStats() { mNMatched=mNEvents=0L; };  
+  /// whether accept the track or not
+  Bool_t   AcceptTrack( const StMuTrack *track);
+  /// whether track matches or not
+  Bool_t   MatchTrack ( const double dphi,   const double deta,  const double phihw,  const double etahw); 
+
+
 private:
   Int_t    mMaxCTBsum            ;  /**<- max CTB sum allowed                 */
   Int_t    mMinTrackHits         ;  /**<- min hits per track required         */
@@ -162,24 +163,17 @@ private:
   Double_t mPhiFac;                 /**<- phi factor */
   Double_t mEtaFac;                 /**<- eta factor */
 
-  /// resets the collected statistics 
-  void     ResetStats() { mNMatched=mNEvents=0L; };  
-  /// whether accept the track or not
-  Bool_t   AcceptTrack( const StMuTrack *track);
-  /// whether track matches or not
-  Bool_t   MatchTrack ( const double dphi,   const double deta,  const double phihw,  const double etahw); 
-
 
   // control histograms for tracks
-  TH1F *hTrackNHits; /**<- number of hits/track */
-  TH1F *hTrackLen;   /**<- track  length        */
-  TH1F *hTrackPt ;   /**<- track  p_T           */
-  TH1F *hTrackPtot;  /**<- track  p_tot         */
+  ///TList *histList;
+  TH1F  *hTrackNHits; /**<- number of hits/track */
+  TH1F  *hTrackLen;   /**<- track  length        */
+  TH1F  *hTrackPt ;   /**<- track  p_T           */
+  TH1F  *hTrackPtot;  /**<- track  p_tot         */
 
-  TH1F *hTrackDCA[3];/**<- tracks DCA           */
-  TH1F *hVertex[3]  ;/**<- vertex               */
+  TH1F  *hTrackDCA[3];/**<- tracks DCA           */
+  TH1F  *hVertex[3]  ;/**<- vertex               */
 
-  // private:
   StMuDstMaker   *mMuDstMaker; // toplevel muDST maker
   StEEmcDbMaker  *mEEmcDb;     // EEMC database maker
   EEmcGeomSimple *mGeom;       // tower geometry
@@ -204,7 +198,7 @@ private:
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.14 2004/05/05 23:00:57 zolnie Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.15 2004/05/06 16:02:49 zolnie Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -216,6 +210,9 @@ ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm);
 #endif
 
 // $Log: EEmcTTMMaker.h,v $
+// Revision 1.15  2004/05/06 16:02:49  zolnie
+// more docs
+//
 // Revision 1.14  2004/05/05 23:00:57  zolnie
 // more docs
 //
