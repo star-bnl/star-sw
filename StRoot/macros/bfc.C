@@ -1,5 +1,14 @@
-// $Id: bfc.C,v 1.48 1999/05/10 19:15:41 fisyak Exp $
+// $Id: bfc.C,v 1.51 1999/05/12 12:52:38 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.51  1999/05/12 12:52:38  fisyak
+// be sure that default calls once, add printout
+//
+// Revision 1.50  1999/05/11 12:43:51  fisyak
+// gtrack -> gstar
+//
+// Revision 1.49  1999/05/11 12:40:38  fisyak
+// Add tree for SL99c
+//
 // Revision 1.48  1999/05/10 19:15:41  fisyak
 // Remove bfc_*.C
 //
@@ -76,6 +85,7 @@ TString *InFile = 0;
 TString *FileOut= 0;
 TString *XdfFile = 0;
 Int_t NoEvents = 0;
+Bool_t DefaultSet = kFALSE;
 //_____________________________________________________________________
 enum EChainOptions { 
   kNULL =0 ,
@@ -135,8 +145,12 @@ void SetChainOff(){// set all OFF
 }
 //_____________________________________________________________________
 void SetDefaultChain(){// default for standard chain
-  for (Int_t k = kTPC;k<kLAST;k++) if (k != kTSS && k != kTFS) ChainFlags[k] = kTRUE;
-} 
+  if (! DefaultSet) {
+    printf ("Set default options\n");
+    for (Int_t k = kTPC;k<kLAST;k++) if (k != kTSS && k != kTFS) ChainFlags[k] = kTRUE;
+    DefaultSet = kTRUE;
+  } 
+}
 //_____________________________________________________________________
 void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
   TString STAR_VERSION("$STAR_VERSION");
@@ -146,7 +160,7 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
   printf ("============= You are in %s ===============\n",STAR_VERSION.Data());
   Int_t k, kgo;
   if (!strlen(Chain)) {
-                               printf ("============= \tPossible Options are: \n");
+                               printf ("============= \tPossible Chain Options are: \n");
     for (k=kXINDF;k<kLAST;k++) printf ("============ %2d \t[-]%s : \t%s \n",k,ChainOptions[k],ChainComments[k]);
     gSystem->Exit(1);
   }
@@ -163,7 +177,7 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
     nopt = TString("-");
     nopt += opt;
     if (strstr(tChain.Data(),nopt.Data())) kgo = -k;
-    //        printf ("Option %s/%s %d\n",opt.Data(),nopt.Data(),kgo);
+    //    printf ("Option %s/%s %d\n",opt.Data(),nopt.Data(),kgo);
     switch (kgo) {
     case kMINIDAQ:
       SetChainOff();
@@ -172,49 +186,68 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
       ChainFlags[kTPC]     = kTRUE;
       ChainFlags[kCTEST]   = kTRUE;
       ChainFlags[kNo_Field]= kTRUE;
-      ChainFlags[kLAST]    = kTRUE;
+      printf(" Switch off everything but\n");
+      printf(" Switch on  %s\n",ChainOptions[kXINDF]);
+      printf(" Switch on  %s\n",ChainOptions[kMINIDAQ]);
+      printf(" Switch on  %s\n",ChainOptions[kTPC]);
+      printf(" Switch on  %s\n",ChainOptions[kCTEST]);
+      printf(" Switch on  %s\n",ChainOptions[kNo_Field]);
       break;
     case kGSTAR:
-      if (!ChainFlags[kLAST]) SetDefaultChain();
+      SetDefaultChain();
       ChainFlags[kGEANT]   = kTRUE;
       ChainFlags[kGSTAR]   = kTRUE;
+      printf(" Switch on  %s\n",ChainOptions[kGEANT]);
+      printf(" Switch on  %s\n",ChainOptions[kGSTAR]);
       break;
     case kTSS:
-      if (!ChainFlags[kLAST]) SetDefaultChain();
+      SetDefaultChain(); 
       ChainFlags[k]    = kTRUE;
       ChainFlags[kTRS] = kFALSE;
+      printf(" Switch on  %s\n",ChainOptions[kTSS]);
+      printf(" Switch off %s\n",ChainOptions[kTRS]);
       break;
     case -kTSS:
-      if (!ChainFlags[kLAST]) SetDefaultChain();
+      SetDefaultChain();
       ChainFlags[kTSS] = kFALSE;
       ChainFlags[kTRS] = kTRUE;
+      printf(" Switch off %s\n",ChainOptions[kTSS]);
+      printf(" Switch on  %s\n",ChainOptions[kTRS]);
       break;
     case kTRS:
-      if (!ChainFlags[kLAST]) SetDefaultChain();
+      SetDefaultChain();
       ChainFlags[kTSS] = kFALSE;
       ChainFlags[kTRS] = kTRUE;
+      printf(" Switch off %s\n",ChainOptions[kTSS]);
+      printf(" Switch on  %s\n",ChainOptions[kTRS]);
       break;
     case -kTRS:
-      if (!ChainFlags[kLAST]) SetDefaultChain();
+      SetDefaultChain();
       ChainFlags[kTSS] = kTRUE;
       ChainFlags[kTRS] = kFALSE;
+      printf(" Switch on  %s\n",ChainOptions[kTSS]);
+      printf(" Switch off %s\n",ChainOptions[kTRS]);
       break;
     case  kTFS:
-      if (!ChainFlags[kLAST]) SetDefaultChain();
+      SetDefaultChain();
       ChainFlags[kTFS] = kTRUE;
       ChainFlags[kTSS] = kFALSE;
       ChainFlags[kTRS] = kFALSE;
       ChainFlags[kFSS] = kFALSE;
+      printf(" Switch on  %s\n",ChainOptions[kTFS]);
+      printf(" Switch off %s\n",ChainOptions[kTSS]);
+      printf(" Switch off %s\n",ChainOptions[kTRS]);
+      printf(" Switch off %s\n",ChainOptions[kFSS]);
       break;
     default:
       if (k <= 0 || k > kLAST ) {printf ("Option %s unrecognized\n",ChainOptions[k]);}
-      if (!ChainFlags[kLAST]) SetDefaultChain();
-      if (kgo<0) ChainFlags[k] = kFALSE;
-      else       ChainFlags[k] = kTRUE;
+      SetDefaultChain();
+      if (kgo<0) {ChainFlags[k] = kFALSE; printf(" Switch off %s\n",ChainOptions[k]);}
+      else       {ChainFlags[k] = kTRUE;  printf(" Switch on  %s\n",ChainOptions[k]);}
     }
   }
   if (!strcmp("SL99c",STAR_VERSION.Data())) {
-    ChainFlags[kTREE]     = kFALSE;
+    //    ChainFlags[kTREE]     = kFALSE;
     ChainFlags[kEVENT]    = kFALSE;
     ChainFlags[kANALYS]   = kFALSE;
   }
@@ -356,11 +389,11 @@ void Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0 ){
   }
 }
 //_____________________________________________________________________
-void bfc (const Int_t Nevents=1, const Char_t *Chain="gtrack",Char_t *infile=0, Char_t *outfile=0)
+void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar",Char_t *infile=0, Char_t *outfile=0)
 { // Chain variable define the chain configuration 
   // Only the first 3 symbols are significant
   // "-" sign before requiest means that this option is disallowed
-  // Chain = "gtrack" run GEANT on flight with 10 muons in range |eta| < 1 amd pT = 1GeV/c (default)
+  // Chain = "gstar" run GEANT on flight with 10 muons in range |eta| < 1 amd pT = 1GeV/c (default)
   // Chain = "" || "xdf" run STANDARD chain using xd-files as an input
   // Chain = "minidaq" read miniDAQ xdf file and process 
   NoEvents = Nevents;
