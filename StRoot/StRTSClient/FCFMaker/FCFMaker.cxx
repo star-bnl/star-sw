@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.4 2003/09/19 15:48:13 tonko Exp $
+ * $Id: FCFMaker.cxx,v 1.5 2003/11/12 15:59:27 tonko Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.5  2003/11/12 15:59:27  tonko
+ * Arranged the default flags
+ *
  * Revision 1.4  2003/09/19 15:48:13  tonko
  * Skip row 13. Charge cut is default.
  *
@@ -101,6 +104,13 @@
 
 ClassImp(StRTSClientFCFMaker);
 
+//#define FCF_DEBUG_OUTPUT
+
+#ifdef FCF_DEBUG_OUTPUT
+static FILE *ff ;
+#endif
+
+static class fcfAfterburner fcf_after ;
 
 StRTSClientFCFMaker::StRTSClientFCFMaker(const char *name):StMaker(name)
 {
@@ -125,8 +135,6 @@ StRTSClientFCFMaker::~StRTSClientFCFMaker()
   }
 }
 
-static FILE *ff, *dataf ;
-static class fcfAfterburner fcf_after ;
 
 Int_t StRTSClientFCFMaker::Init()
 {
@@ -155,7 +163,7 @@ Int_t StRTSClientFCFMaker::Init()
 
   splitRows = 1;        // split padrows as if real DAQ on i960s
   doT0Corrections = 1;  // do the t0 corrections
-  doGainCorrections = 0; // done by St_tpcdaq_Maker - shouldn't be!!! Tonko
+  doGainCorrections = 1; // done by St_tpcdaq_Maker - shouldn't be!!! Tonko
   doZeroTruncation = 0; // don't 
   fillDeconFlag = 1;
 
@@ -209,8 +217,10 @@ Int_t StRTSClientFCFMaker::Init()
   tss_tsspar_st *tsspar = m_tsspar->GetTable();
   tsspar->threshold = 1;
 
-  dataf = fopen("fcf.raw","w") ;
+#ifdef FCF_DEBUG_OUTPUT
+  //dataf = fopen("fcf.raw","w") ;
   ff = fopen("fcf.dta","w") ;
+#endif
 
   return StMaker::Init();
 }
@@ -288,9 +298,10 @@ Int_t StRTSClientFCFMaker::Make()
     mTpcHitColl = new StTpcHitCollection();
     assert(mTpcHitColl);
   }
- 
+#ifdef FCF_DEBUG_OUTPUT 
   fprintf(ff,"-1 0.0 0.0 0.0 1.0e-05 0 0 0 0 0\n") ;
- 
+#endif
+
   while((sector = rawIter()) != NULL) {
 
     // The dataset tpc_sec_m is also in the "tpc_raw" dataset, don't use it...
@@ -791,8 +802,7 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
   hit.zrf = (r>=13) ? mTrfout : mTrfin ;
 
 
-#define XXXX_WRITEFILE_XXXX
-#ifdef XXXX_WRITEFILE_XXXX
+#ifdef FCF_DEBUG_OUTPUT
 if(sector==24 || sector==12 || sector==6 || sector==18) {
 fprintf(ff,"%d %f %f %f %e %d %d %d %d %d\n",
 	hit.row,hit.x,hit.y,hit.z,hit.q,hit.minpad,hit.maxpad,hit.mintmbk,hit.maxtmbk,cl_f) ;
