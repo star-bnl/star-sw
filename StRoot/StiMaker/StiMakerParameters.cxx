@@ -60,7 +60,8 @@ ostream& operator<<(ostream& os, const StiMakerParameters&pars)
        << "                            doDst :" << pars.doDst <<endl
        << "                  doStEventOutput :" << pars.doStEventOutput <<endl
        << "                   doStEventInput :" << pars.doStEventInput   <<endl
-       << "                          doPlots :" << pars.doPlots << endl;
+       << "                          doPlots :" << pars.doPlots << endl
+       << "                         baseName :" << pars.baseName << endl;
   return os;
 }
 
