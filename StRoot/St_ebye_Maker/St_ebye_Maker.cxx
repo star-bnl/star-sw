@@ -1,5 +1,8 @@
-// $Id: St_ebye_Maker.cxx,v 1.15 2003/09/02 17:59:28 perev Exp $
+// $Id: St_ebye_Maker.cxx,v 1.16 2003/09/11 05:49:24 perev Exp $
 // $Log: St_ebye_Maker.cxx,v $
+// Revision 1.16  2003/09/11 05:49:24  perev
+// ansi corrs
+//
 // Revision 1.15  2003/09/02 17:59:28  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -126,7 +129,7 @@ Int_t St_ebye_Maker::Init(){
   assert(params);
 
   if (GetDebug()>2) {
-    printf(" ===> <St_ebye_Maker::Init()>: *params = %p\n",params);
+    printf(" ===> <St_ebye_Maker::Init()>: *params = %p\n",(void*)params);
   } 
   St_DataSetIter     local(params);
 
@@ -162,7 +165,7 @@ Int_t St_ebye_Maker::Init(){
   if(GetDebug()>1)m_sca_const->ls("*");
   
   if (GetDebug()>2) printf (" ===> <St_ebye_Maker::Init()>: \n \t m_sca_switch       = %p, \n \t m_sca_const        = %p, \n \t m_sca_filter_const = %p \n", 
-		     m_sca_switch,m_sca_const,m_sca_filter_const);
+		     m_sca_switch,m_sca_const,(void*)m_sca_filter_const);
   // Set switches to make propir
   sca_switch_st *sca_switch   = m_sca_switch->GetTable();
   sca_switch->makePrior       = 0;
@@ -266,7 +269,7 @@ Int_t St_ebye_Maker::SetmakeEnsembleAve(Bool_t flag){
     calib  = new St_DataSet("calib");
   }
   if (GetDebug()>2) {
-    printf(" ===> <St_ebye_Maker::Init()>: *calib  = %p\n",calib);
+    printf(" ===> <St_ebye_Maker::Init()>: *calib  = %p\n",(void*)calib);
   }
   St_DataSetIter      local(calib);
   St_DataSet *ebye  = local("ebye");
@@ -309,7 +312,7 @@ Int_t St_ebye_Maker::SetdoAnalysis(Bool_t flag){
     calib  = new St_DataSet("calib");
   }
   if (GetDebug()>2) {
-    printf(" ===> <St_ebye_Maker::SetdoAnalysis()>: *calib  = %p\n",calib);
+    printf(" ===> <St_ebye_Maker::SetdoAnalysis()>: *calib  = %p\n",(void*)calib);
   }
   St_DataSetIter      local(calib);
   St_DataSet *ebye  = local("ebye");

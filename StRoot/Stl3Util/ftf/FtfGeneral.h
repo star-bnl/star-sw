@@ -43,10 +43,10 @@ const double bFactor = 0.0029979 ;
 #define square(a)   (float)( (a) * (a) )
 
 
-extern double fmod(double,double);
-extern double ::sqrt(double);
-extern double fabs(double);
-extern double atan2(double,double);
+//VP extern double fmod(double,double);
+//VP extern double ::sqrt(double);
+//VP extern double fabs(double);
+//VP extern double atan2(double,double);
 
 
 class FtfContainer{

@@ -1,11 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.cxx,v 1.2 2003/09/09 18:16:53 laue Exp $
+ * $Id: StMuIOMaker.cxx,v 1.3 2003/09/11 05:49:20 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
-#include <fstream>
-#include <strstream>
+#include "Stiostream.h"
+#include "Stsstream.h"
 
 #include "St_base/StFileI.h"
 
@@ -38,8 +38,8 @@ ClassImp(StMuIOMaker)
    The mCurrentIndex variable is initialized to -1, indicating that no valid event was read.
  */
 StMuIOMaker::StMuIOMaker(const char* name) : StIOInterFace(name,"r"), 
-mNumberOfEvents(0),
-mCurrentIndex(-1), mEventCounter(0), mChain(0) {
+mChain(0),mNumberOfEvents(0),mCurrentIndex(-1), mEventCounter(0)
+{
 	mStMuDst = new StMuDst();
 	mEmcUtil = new StMuEmcUtil();
 	createArrays();
@@ -156,7 +156,7 @@ int StMuIOMaker::Init(){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuIOMaker::Clear(){
+void StMuIOMaker::Clear(const char *){
   DEBUGMESSAGE2("");
   clear();
   DEBUGMESSAGE3("out");
@@ -210,7 +210,7 @@ void StMuIOMaker::openRead() {
   mCurrentIndex = -1;	
   mChain = new TChain("MuDst");
   mChain->Add(fFile);
-  mNumberOfEvents = mChain->GetEntries();
+  mNumberOfEvents = (int)mChain->GetEntries();
   StTimer timer;
   timer.reset();
   timer.start();
@@ -337,6 +337,9 @@ void  StMuIOMaker::SetFile(const char *fileName)    {
 /***************************************************************************
  *
  * $Log: StMuIOMaker.cxx,v $
+ * Revision 1.3  2003/09/11 05:49:20  perev
+ * ansi corrs
+ *
  * Revision 1.2  2003/09/09 18:16:53  laue
  * StMuIOMaker: embedded documentation added
  * StMuTimer: name of define changed (was same as StTimer)

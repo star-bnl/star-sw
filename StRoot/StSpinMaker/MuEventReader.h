@@ -18,7 +18,7 @@ public:
     //Event access
     int numberOfEvents() const;
     StMuDst* getEvent();
-    StMuDst* MuEventReader::getNextEvent();
+    StMuDst* getNextEvent();
     StMuTrack* lcp() {return mLcp;}
 
 protected:

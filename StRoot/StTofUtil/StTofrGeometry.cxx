@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrGeometry.cxx,v 1.2 2003/09/07 03:49:06 perev Exp $
+ * $Id: StTofrGeometry.cxx,v 1.3 2003/09/11 05:49:23 perev Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StTofrGeometry.cxx,v $
+ * Revision 1.3  2003/09/11 05:49:23  perev
+ * ansi corrs
+ *
  * Revision 1.2  2003/09/07 03:49:06  perev
  * gcc 3.2 + WarnOff
  *
@@ -57,6 +60,10 @@ ClassImp(StTofNode)
 #endif
 
 Bool_t StTofNode::mDebug = kFALSE;
+Double_t const StTofrGeomSensor::mSensorDy = 10.35;   // Actual module length;
+char* const StTofrGeometry::sectorPref = "BSEC";
+char* const StTofrGeometry::trayPref   = "BTRA";
+char* const StTofrGeometry::senPref    = "BRMD";
 
 //_____________________________________________________________________________
 StTofNode::StTofNode(TVolumeView *element, TVolumeView *top)

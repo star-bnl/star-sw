@@ -22,7 +22,7 @@
 #include <fcntl.h>
 #endif
 
-extern int errno;
+//VP extern int errno;
 
 
 //####################################################################

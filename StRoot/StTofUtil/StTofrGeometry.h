@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrGeometry.h,v 1.1 2003/08/06 23:00:53 geurts Exp $
+ * $Id: StTofrGeometry.h,v 1.2 2003/09/11 05:49:23 perev Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StTofrGeometry.h,v $
+ * Revision 1.2  2003/09/11 05:49:23  perev
+ * ansi corrs
+ *
  * Revision 1.1  2003/08/06 23:00:53  geurts
  * First Release
  *
@@ -278,7 +281,7 @@ class StTofrGeomSensor : public StTofNode {
    Int_t               mModuleIndex;     //Module Index number
    static Int_t const  mCells  = 6;      //!Cells in one module
    Double_t            mCellY[mCells+1]; //Y Range of cells
-   static Double_t const mSensorDy = 10.35;   // Actual module length;
+   static Double_t const mSensorDy;// = 10.35;   // Actual module length;
 
  protected:
    static Bool_t       mDebug;           //!Control message printing of this class
@@ -368,9 +371,9 @@ class StTofrGeometry : public TNamed {
 
    static Bool_t   mDebug;     //!Control message printing of this class
 
-   static char* const sectorPref = "BSEC";
-   static char* const trayPref = "BTRA";
-   static char* const senPref = "BRMD";
+   static char* const sectorPref ;//= "BSEC";
+   static char* const trayPref   ;//= "BTRA";
+   static char* const senPref    ;//= "BRMD";
 
    unsigned short mTofDaqADCMap[120][33][6];   //
    unsigned short mTofDaqTDCMap[120][33][6];   //

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StppuDstMaker.cxx,v 1.8 2003/09/02 17:59:02 perev Exp $
+ * $Id: StppuDstMaker.cxx,v 1.9 2003/09/11 05:49:22 perev Exp $
  * 
  * Author: Akio Ogawa June 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StppuDstMaker.cxx,v $
+ * Revision 1.9  2003/09/11 05:49:22  perev
+ * ansi corrs
+ *
  * Revision 1.8  2003/09/02 17:59:02  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -87,8 +90,10 @@ StppuDstMaker::StppuDstMaker(const Char_t *name)
   : StMaker(name), mGoodCounter(0), mBadCounter(0){
     printf("***StppuDstMaker: Constractor*** name=%s\n",name);
     numJetBranches = 0;
-    jetBranches = new (StppJetAnalyzer*)[MAXANALYZERS];
-    names = new (char*)[MAXANALYZERS];
+    typedef StppJetAnalyzer* StppJetAnalyzerP;
+    jetBranches = new StppJetAnalyzerP[MAXANALYZERS];
+    typedef char* charP;
+    names = new charP[MAXANALYZERS];
     infoLevel = 0;
     mudst=0;
     saveEventWithNoJets = true;
