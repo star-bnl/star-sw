@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.46 2000/02/23 23:04:43 hardtke Exp $
+// $Id: St_tpt_Maker.cxx,v 1.47 2000/03/07 05:14:54 sakrejda Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.47  2000/03/07 05:14:54  sakrejda
+// Jan's modifications to run on L3 clusters (I think)
+//
 // Revision 1.46  2000/02/23 23:04:43  hardtke
 // get tpg tables from tpcDB
 //
@@ -180,7 +183,17 @@ ClassImp(St_tpt_Maker)
   m_tteEvalOn=kFALSE;
   m_tptResOn=kFALSE;
   m_mkfinal=kFALSE;
+  printf("\n TPT CONSTRUCTOR name=\"%s\"\n",GetName());
+  SetInputHits("tpc_hits","tphit"); // initialize default input
 }
+//_____________________________________________________________________________
+void St_tpt_Maker:: SetInputHits(  TString DataSet,  TString Hit)
+{
+  m_InputDataSetName=DataSet;
+  m_InputHitName=Hit;
+  printf("%s.SetInputHits to: DataSet=\"%s\", Hit=\"%s\"\n",GetName(),m_InputDataSetName.Data(), m_InputHitName.Data());
+}
+
 //_____________________________________________________________________________
 St_tpt_Maker::~St_tpt_Maker(){}
 //_____________________________________________________________________________
@@ -252,15 +265,18 @@ gMessMgr->SetLimit("TPTRSP-E1",10);
 
 //_____________________________________________________________________________
 Int_t St_tpt_Maker::Make(){
+
+  printf("\n TPT=\"%s\" Input is: DataSet=\"%s\", Hit=\"%s\"\n",GetName(),m_InputDataSetName.Data(), m_InputHitName.Data());
   
-  St_DataSet *tpc_data =  GetInputDS("tpc_hits");
+  St_DataSet *tpc_data =  GetInputDS(m_InputDataSetName);
   
   if (!tpc_data) return 0;
   
 // 		Clusters exist -> do tracking
   St_DataSetIter gime(tpc_data);
-  St_tcl_tphit     *tphit = (St_tcl_tphit     *) gime("tphit");
+  St_tcl_tphit     *tphit = (St_tcl_tphit     *) gime(m_InputHitName);
  if (! tphit) return kStWarn;
+ printf(" Input hit table size is %d\n\n",(int)tphit->GetNRows());
   St_tcl_tpc_index *index = (St_tcl_tpc_index *) gime("index");
   if (!index) {index = new St_tcl_tpc_index("index",10*maxNofTracks);  m_DataSet->Add(index);}
       
