@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEsttoGlobtrk.cc,v 1.5 2001/02/23 14:53:31 lmartin Exp $
+ * $Id: StEsttoGlobtrk.cc,v 1.6 2001/02/27 16:56:24 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEsttoGlobtrk.cc,v $
+ * Revision 1.6  2001/02/27 16:56:24  caines
+ * Get helix track info. directly from the fit track
+ *
  * Revision 1.5  2001/02/23 14:53:31  lmartin
  * cout replaced by gMessMgr.
  *
@@ -56,8 +59,8 @@ void StEstTracker::EsttoGlobtrk(St_stk_track* svttrk,
     gMessMgr->Info()<<"StEstTracker::StEsttoGlobtrk : Saving into the global tables"<<endm;
   int CountHits=0;
   int CountMatch=0;
-  int SaveHit, lsav ;
-  double r,rnew,pathl,q;
+  int SaveHit, j;
+  double q;
   
   StEstBranch *branch;
   StEstHit *hit;
@@ -75,10 +78,8 @@ void StEstTracker::EsttoGlobtrk(St_stk_track* svttrk,
     svtMatchPtr->idsvt = svtTrkPtr->id;
     svtMatchPtr->idtpc = mTrack[i]->mTPCTrack->GetId();
  
-    rnew=0.;
-    r = 999.;
 
-    for( int j=0;j<mTrack[i]->GetNBranches();j++) {
+    for( j=0;j<mTrack[i]->GetNBranches();j++) {
       branch = mTrack[i]->GetBranch(j);
       for ( int k=0;k<branch->GetNHits();k++) {
         hit = branch->GetHit(k);
@@ -92,16 +93,14 @@ void StEstTracker::EsttoGlobtrk(St_stk_track* svttrk,
 	    groups->ident = 3;
 	    groups++;
 	    CountHits++;
-	    rnew = mSvtHit[l]->mXG->x()*mSvtHit[l]->mXG->x()+
-	      mSvtHit[l]->mXG->y()*mSvtHit[l]->mXG->y();
-	    if( rnew < r) {
-	      r = rnew;
-	      lsav=l;
-	    }
+	    break;
 	  }
+
 	}
       }
     }
+
+    j = mTrack[i]->GetNBranches()-1;
     if(svtTrkPtr->nspt > 0){
       groups -= svtTrkPtr->nspt;
       //Now reorder hits so track goes from inner barrel out
@@ -111,22 +110,20 @@ void StEstTracker::EsttoGlobtrk(St_stk_track* svttrk,
 	groups[svtTrkPtr->nspt-nHits-1].id2 = SaveHit;
       }
       groups += svtTrkPtr->nspt;
-      pathl = mTrack[i]->GetHelix()->pathLength(mSvtHit[lsav]->mXG->x(),
-					  mSvtHit[lsav]->mXG->y());
-      mTrack[i]->GetHelix()->moveOrigin(pathl);
 
-      svtTrkPtr->z0 = mTrack[i]->GetHelix()->z(0);
-      svtTrkPtr->psi = mTrack[i]->GetHelix()->phase()*C_DEG_PER_RAD+
-	mTrack[i]->GetHelix()->h()*M_PI_2;
-      svtTrkPtr->tanl = tan(mTrack[i]->GetHelix()->dipAngle());
-      q = ((b[2] * mTrack[i]->GetHelix()->h()) > 0 ? -1 : 1);
+      svtTrkPtr->z0 = mTrack[i]->GetBranch(j)->GetHelix()->z(0);
+      svtTrkPtr->psi = mTrack[i]->GetBranch(j)->GetHelix()->phase()
+	*C_DEG_PER_RAD+mTrack[i]->GetBranch(j)->GetHelix()->h()*M_PI_2;
+      svtTrkPtr->tanl = tan(mTrack[i]->GetBranch(j)->GetHelix()->dipAngle());
+      q = ((b[2] * mTrack[i]->GetBranch(j)->GetHelix()->h()) > 0 ? -1 : 1);
       svtTrkPtr->invpt = q/mTrack[i]->GetTPCTrack()->GetPt();
-      svtTrkPtr->r0 = sqrt(mTrack[i]->GetHelix()->x(0)*
-			   mTrack[i]->GetHelix()->x(0)
-			   +mTrack[i]->GetHelix()->y(0)*
-			   mTrack[i]->GetHelix()->y(0));
-      svtTrkPtr->phi0 =  atan2(mTrack[i]->GetHelix()->y(0),
-			       mTrack[i]->GetHelix()->x(0))*C_DEG_PER_RAD;
+      svtTrkPtr->r0 = sqrt(mTrack[i]->GetBranch(j)->GetHelix()->x(0)*
+			   mTrack[i]->GetBranch(j)->GetHelix()->x(0)
+			   +mTrack[i]->GetBranch(j)->GetHelix()->y(0)*
+			   mTrack[i]->GetBranch(j)->GetHelix()->y(0));
+      svtTrkPtr->phi0 =  atan2(mTrack[i]->GetBranch(j)->GetHelix()->y(0),
+			       mTrack[i]->GetBranch(j)->GetHelix()->x(0))
+	*C_DEG_PER_RAD;
       svtTrkPtr++;
       svtMatchPtr++;
       
