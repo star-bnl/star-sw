@@ -1,4 +1,4 @@
-<job name=STARReco maxFilesPerProcess="1" simulateSubmission ="false">
+<job name=STARReco maxFilesPerProcess="1" simulateSubmission ="true">
 <stdout URL="file:./$JOBID.out" />
 <input URL="file:/star/simu/simu/gstardata/rcf1206/done/rcf1206_99_700evts.fzd"></input>
 <!-- 
@@ -160,7 +160,7 @@
  #   close local Web page
  # ----
     echo "</PRE></BODY><HTML>"  >>${localLogFile}
-   ]]>
+ ]]>
    </command>  
     <output fromScratch="$ZEBRAOUTPUT" >
        <copy ref="pyResult" URI="file:$packageDirectory/testpyth.$PROCESSID.fz" />
