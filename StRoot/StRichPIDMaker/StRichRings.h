@@ -1,18 +1,18 @@
 /**********************************************************
- * $Id: StRichRings.h,v 1.1 2000/05/19 19:06:11 horsley Exp $
+ * $Id: StRichRings.h,v 1.2 2000/05/22 15:14:44 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRings.h,v $
+ *  Revision 1.2  2000/05/22 15:14:44  horsley
+ *  modified StRichRings, StRichTDrawableRings to comply with sun compiler
+ *
+ *
+ *  Revision 1.2  2000/05/22 15:14:44  horsley
+ *  modified StRichRings, StRichTDrawableRings to comply with sun compiler
+ *
  *  Revision 1.1  2000/05/19 19:06:11  horsley
- *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
- *
- *
- *  initial revision
- *
- *  
- *
  *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
  *
  *  Revision 1.1  2000/04/03 19:36:09  horsley
@@ -29,11 +29,11 @@
 
 class StRichTrack;
 class TPolyLine;
-  StRichRings(StRichTrack* track, StParticleDefinition* particle);  
+
 class StRichRings {
 
-  vector<StThreeVector<double> > getInnerPoints();
-  vector<StThreeVector<double> > getOuterPoints();
+  vector<StThreeVector<double> > getInnerPoints(int );
+  vector<StThreeVector<double> > getOuterPoints(int );
   ~StRichRings();
   
   vector<StThreeVectorF > getInnerPoints(int );

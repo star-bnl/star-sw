@@ -1,13 +1,16 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 1.2 2000/05/19 19:06:10 horsley Exp $
+ * $Id: StRichPIDMaker.cxx,v 1.3 2000/05/22 15:14:44 horsley Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
- * Revision 1.2  2000/05/19 19:06:10  horsley
- * many revisions here, updated area calculation ring calc, ring, tracks , etc...
+ * Revision 1.3  2000/05/22 15:14:44  horsley
+ * modified StRichRings, StRichTDrawableRings to comply with sun compiler
  *
+ *
+ * modified StRichRings, StRichTDrawableRings to comply with sun compiler
+ * d<3 adjustment and checkTrack() naming of varaiables
  * corrected
  *
  * Revision 2.12  2000/11/07 14:11:39  lasiuk
@@ -51,20 +54,19 @@
     if(!event->primaryVertex()) {
 	cout << "\tERROR: No Vertex. Skipping..." << endl;
 // StChain, etc...
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 1.2 2000/05/19 19:06:10 horsley Exp $";
+#include "StChain.h"
 #include "St_DataSet.h"
 #include "TNtuple.h"
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 1.2 2000/05/19 19:06:10 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 1.3 2000/05/22 15:14:44 horsley Exp $";
 
 Int_t 
 StRichPIDMaker::Make() { 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 1.2 2000/05/19 19:06:10 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 1.3 2000/05/22 15:14:44 horsley Exp $";
   evtN++;
   StMemoryInfo* memory = StMemoryInfo::instance();
  
   // StEvent
   StEvent* rEvent = 0;
-      cout << "no StEvent!" << endl;
   rEvent = (StEvent *) GetInputDS("StEvent");
   
   if (!rEvent)  {
@@ -93,35 +95,26 @@ static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 1.2 2000/05/19 19:06:10 h
 
 
   //  get objects associated with this event
-    cout << "StRichPIDMaker::St_objectSet ptr is zero!" << endl; 
   St_ObjectSet *rchEvent = 0;
   rchEvent = (St_ObjectSet*)GetDataSet("richHits");
   if(!rchEvent) { 
+    return kStWarn;
+  }
   
 
-  if(!mRichHits) { 
-    cout << "StRichPIDMaker::hit collection ptr is zero!" << endl; 
+  cout << "Grab the hits ..." << endl;
   mRichHits = 0;
   mRichHits = (StRichSimpleHitCollection*)(rchEvent->GetObject());
   if(!mRichHits) {
     return kStWarn;
-  cout << "starting analysis ..." << endl;
   }
   
   // get tracks intersecting RICH, make monte carlo associations 
   // First check whether the Primary Vertex is there at all.
-    cout << "Position of Primary Vertex from StEvent:" << endl;
-    cout << VertexPos << endl;
   StThreeVectorD VertexPos(0,0,0);
   if (rEvent->primaryVertex()) {
     VertexPos = rEvent->primaryVertex()->position();
-  else {
-    cout << "----------- WARNING ------------" << endl;
-    cout << "No primary vertex from StEvent!!" << endl;
-    cout << "Assume it is at (0,0,0)         " << endl;
-  }
-
-    
+    }
 
   
      
@@ -153,15 +146,10 @@ static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 1.2 2000/05/19 19:06:10 h
       
     }  // --> end of track loop  
   } // --> end of node loop  
-  cout << "looping over tracks" << endl;
-  cout << "_________________________________" << endl << endl;  
+    
   
   // loop over the selected RICH tracks
-      cout << "track number::  " << trackIndex << endl;
-      cout << "_____________________________________" << endl << endl;
-      cout << "N tpc points = " << mListOfStRichTracks[trackIndex]->getStTrack()->fitTraits().numberOfFitPoints();
-      cout << "impact parameter b = " << mListOfStRichTracks[trackIndex]->getStTrack()->geometry()->helix().distance(VertexPos);
-
+ 
   for (size_t trackIndex=0; trackIndex<mListOfStRichTracks.size(); trackIndex++) 
     { // track
     
@@ -180,15 +168,14 @@ static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 1.2 2000/05/19 19:06:10 h
       }
       
       // loop over cut angles
-	cout << "        angle cut:: " << cut/degree << endl;
-	cout << "         ____________________________________" << endl;
+      for (size_t jj=0;jj<91;jj = jj+30) {  // cut  
 	
 	double cut  = M_PI*(((double) jj)/180.0);      
 	
 	
 	  float part_area[3] = {0,0,0};
 	  float part_hits[3] = {0,0,0};
-	      cout << "         particle = " << mListOfParticles[particleIndex]->name() << endl;
+	  float part_chi[3]  = {0,0,0};
 	  for (size_t particleIndex=0; particleIndex<mListOfParticles.size(); particleIndex++) 
 	    { // particle
 	      
@@ -345,7 +332,7 @@ Int_t StRichPIDMaker::hitFilter(StThreeVector<double>& hit,
   double meanDistance  = ringCalculator.getMeanDistance(hit,meanAngle);
   
   StThreeVector<double> innerPoint = ringCalculator.getInnerRingPoint();
-  double ringWidth = (innerPoint-outerPoint).mag();
+  StThreeVector<double> outerPoint = ringCalculator.getOuterRingPoint();
   StThreeVector<double> meanPoint  = ringCalculator.getMeanRingPoint();
 	    }
   ringWidth = (innerPoint-outerPoint).mag();

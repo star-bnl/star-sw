@@ -1,18 +1,18 @@
 /**********************************************************
- * $Id: StRichRings.cxx,v 1.1 2000/05/19 19:06:11 horsley Exp $
+ * $Id: StRichRings.cxx,v 1.2 2000/05/22 15:14:44 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRings.cxx,v $
+ *  Revision 1.2  2000/05/22 15:14:44  horsley
+ *  modified StRichRings, StRichTDrawableRings to comply with sun compiler
+ *
+ *
+ *  Revision 1.2  2000/05/22 15:14:44  horsley
+ *  modified StRichRings, StRichTDrawableRings to comply with sun compiler
+ *
  *  Revision 1.1  2000/05/19 19:06:11  horsley
- *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
- *
- *
- *  Revision 1.1  2000/05/19 19:06:11  horsley
- *
- *  
- *
  *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
  *
  *  Revision 1.1  2000/04/03 19:36:09  horsley
@@ -34,43 +34,52 @@
 #include <vector>
 
 #ifndef ST_NO_NAMESPACES
-  
-  myGeometryDb = StRichGeometryDb::getDb();
 using namespace units;
-  mTrack = track;
-  mParticle = particle;
-  StRichRingCalculator ringCalc(track);
-  
-  if (!particle || !track) {
+  if (!mParticle || !mTrack) {
 
 StRichRings::StRichRings(StRichTrack* track, StParticleDefinition* particle) {
 
   if (!particle || !track) {
-  ringCalc.setParticleType(particle);
+    cout << "StRichRings:: passed null pointer! " << endl;
+    abort();
+  } 
 
-  for (int i=0; i<360; i+=1) {
-    double psi = ((double) i)*2.0*M_PI/360.0;
+  myGeometryDb = StRichGeometryDb::getDb();
+  mTrack    = track;
+  mParticle = particle;
+vector<StThreeVector<double> > StRichRings::getInnerPoints(int points) {
+
+  StRichRingCalculator ringCalc(mTrack);
+  ringCalc.setParticleType(mParticle);
+vector<StThreeVectorF > StRichRings::getInnerPoints(int points/* number of points*/) {
+  for (int i=0; i<points; i+=1) {
+    double psi = ((double) i)*2.0*M_PI/points;
 
     StThreeVector<double> temp;
     if (ringCalc.getRing(eInnerRing)->getPoint(psi,temp)) {
       if (inBounds(temp) ) {mInnerPoints.push_back(temp);}
 	  if (inBounds(temp) )
 
-    if (ringCalc.getRing(eOuterRing)->getPoint(psi,temp)) {
-      if (inBounds(temp) ) mOuterPoints.push_back(temp);
-    }
 	    mInnerPoints.push_back(temp); // put on vector
   
-  
+	}
       }
     }
-StRichRings::~StRichRings() {}
+vector<StThreeVector<double> > StRichRings::getOuterPoints(int points) {
+  
+  StRichRingCalculator ringCalc(mTrack);
+  ringCalc.setParticleType(mParticle);
+  
+  for (int i=0; i<points; i+=1) {
+    double psi = ((double) i)*2.0*M_PI/points;
 
-vector<StThreeVector<double> > StRichRings::getInnerPoints() {
-  return mInnerPoints;
-}
+    StThreeVector<double> temp;
+    if (ringCalc.getRing(eOuterRing)->getPoint(psi,temp)) {
+      if (inBounds(temp) ) mOuterPoints.push_back(temp);
+	if (ringCalc.getRing(eOuterRing) && ringCalc.getRing(eOuterRing)->getPoint(psi,temp)) {
 
-vector<StThreeVector<double> > StRichRings::getOuterPoints() {
+	  if (inBounds(temp) ) mOuterPoints.push_back(temp);
+  
 	}
       }
     }
