@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventSummary.h,v 2.3 2001/04/05 04:00:36 ullrich Exp $
+ * $Id: StEventSummary.h,v 2.4 2001/05/17 22:56:33 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventSummary.h,v $
+ * Revision 2.4  2001/05/17 22:56:33  ullrich
+ * Removed all usage of dst_summary_param.
+ *
  * Revision 2.3  2001/04/05 04:00:36  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -32,13 +35,11 @@
 #include "TArrayL.h"
 
 class dst_event_summary_st;
-class dst_summary_param_st;
 
 class StEventSummary : public StObject {
 public:
     StEventSummary();
-    StEventSummary(const dst_event_summary_st&,
-                   const dst_summary_param_st&);
+    StEventSummary(const dst_event_summary_st&);
     virtual ~StEventSummary();
     
     // StEventSummary& operator=(const StEventSummary&); use default
@@ -92,11 +93,9 @@ public:
     void setMagneticField(double);
 
 protected:
-    enum { mVertexTypeArraySize = 5,
-           mPhiBinsSize = 10,
-           mPtAndEtaBinsSize = 9,
-           mHistogramSize = 10 };
+    void initBinRanges();
     
+protected:
     Int_t          mNumberOfTracks;
     Int_t          mNumberOfGoodTracks;
     Int_t          mNumberOfGoodPrimaryTracks;
@@ -112,6 +111,10 @@ protected:
     Float_t        mRmsEta;
     StThreeVectorF mPrimaryVertexPos;
 
+    UShort_t       mVertexTypeArraySize;        
+    UShort_t       mPhiBinsSize;        
+    UShort_t       mPtAndEtaBinsSize;        
+    UShort_t       mHistogramSize;        
     TArrayF        mEtaBins;
     TArrayF        mPtBins;
     TArrayF        mPhiBins;

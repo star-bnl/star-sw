@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.23 2001/04/25 17:42:28 perev Exp $
+ * $Id: StEvent.cxx,v 2.24 2001/05/17 22:56:18 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.24  2001/05/17 22:56:18  ullrich
+ * Removed all usage of dst_summary_param.
+ *
  * Revision 2.23  2001/04/25 17:42:28  perev
  * HPcorrs
  *
@@ -111,14 +114,13 @@
 #include "StPsd.h"
 #include "tables/St_event_header_Table.h"
 #include "tables/St_dst_event_summary_Table.h"
-#include "tables/St_dst_summary_param_Table.h"
 #include "StAutoBrowse.h"
 #ifndef ST_NO_NAMESPACES
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.23 2001/04/25 17:42:28 perev Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.23 2001/04/25 17:42:28 perev Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.24 2001/05/17 22:56:18 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.24 2001/05/17 22:56:18 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -226,13 +228,12 @@ StEvent::StEvent() : St_DataSet("StEvent")
 }
   
 StEvent::StEvent(const event_header_st& evtHdr,
-                 const dst_event_summary_st& evtSum,
-                 const dst_summary_param_st& sumPar) :
+                 const dst_event_summary_st& evtSum) :
     St_DataSet("StEvent")
 {
     initToZero();
     init(evtHdr);
-    mContent.push_back(new StEventSummary(evtSum, sumPar));
+    mContent.push_back(new StEventSummary(evtSum));
 }
 
 StEvent::StEvent(const event_header_st& evtHdr) :

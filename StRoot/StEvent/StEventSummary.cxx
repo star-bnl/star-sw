@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventSummary.cxx,v 2.8 2001/04/05 04:00:49 ullrich Exp $
+ * $Id: StEventSummary.cxx,v 2.9 2001/05/17 22:56:33 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventSummary.cxx,v $
+ * Revision 2.9  2001/05/17 22:56:33  ullrich
+ * Removed all usage of dst_summary_param.
+ *
  * Revision 2.8  2001/04/05 04:00:49  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -40,18 +43,19 @@
 #include "StEventSummary.h"
 #include "SystemOfUnits.h"
 #include "tables/St_dst_event_summary_Table.h"
-#include "tables/St_dst_summary_param_Table.h"
 #ifndef ST_NO_NAMESPACES
 using units::tesla;
 using units::degree;
 #endif
 
-static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.8 2001/04/05 04:00:49 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.9 2001/05/17 22:56:33 ullrich Exp $";
 
 ClassImp(StEventSummary)
 
 StEventSummary::StEventSummary()
 {
+    initBinRanges();
+    
     mNumberOfTracks = 0;
     mNumberOfGoodTracks = 0;
     mNumberOfGoodPrimaryTracks = 0;
@@ -78,11 +82,12 @@ StEventSummary::StEventSummary()
     mMagneticFieldZ = 0;
 }
 
-StEventSummary::StEventSummary(const dst_event_summary_st& runSum,
-                               const dst_summary_param_st& sumPar)
+StEventSummary::StEventSummary(const dst_event_summary_st& runSum)
 {
     int i;
     
+    initBinRanges();
+
     mNumberOfTracks            = runSum.glb_trk_tot;
     mNumberOfGoodTracks        = runSum.glb_trk_good;
     mNumberOfGoodPrimaryTracks = runSum.glb_trk_prim;
@@ -104,20 +109,7 @@ StEventSummary::StEventSummary(const dst_event_summary_st& runSum,
     mNumberOfVertexTypes.Set(mVertexTypeArraySize);
     for(i=0; i<mVertexTypeArraySize; i++)
         mNumberOfVertexTypes[i] = runSum.n_vert_type[i];
-    
-    //
-    //   Set the 'histo' bins
-    //
-    mEtaBins.Set(mPtAndEtaBinsSize);
-    mPtBins.Set(mPtAndEtaBinsSize);
-    mPhiBins.Set(mPhiBinsSize);
-
-    for(i=0; i<mPtAndEtaBinsSize; i++) {
-        mEtaBins[i] = sumPar.eta_bins[i];
-        mPtBins[i] = sumPar.pt_bins[i];
-    }
-    for(i=0; i<mPhiBinsSize; i++) mPhiBins[i] = sumPar.phi_bins[i]*degree;
-    
+       
     //
     //   Fill 'histos'
     //
@@ -137,7 +129,51 @@ StEventSummary::StEventSummary(const dst_event_summary_st& runSum,
 }
 
 StEventSummary::~StEventSummary() { /* noop */ }
+
+void
+StEventSummary::initBinRanges()
+{
+    mVertexTypeArraySize = 5;
+    mPhiBinsSize         = 10;
+    mPtAndEtaBinsSize    = 9;
+    mHistogramSize       = 10;
     
+    mEtaBins.Set(mPtAndEtaBinsSize);
+    mPtBins.Set(mPtAndEtaBinsSize);
+    mPhiBins.Set(mPhiBinsSize);
+        
+    mEtaBins[0] = -2.;
+    mEtaBins[1] = -1.;
+    mEtaBins[2] = -0.5;
+    mEtaBins[3] =  .5;
+    mEtaBins[4] =  1.;
+    mEtaBins[5] =  2.;
+    mEtaBins[6] =  2.;
+    mEtaBins[7] =  2.;
+    mEtaBins[8] =  2.;
+    
+    mPtBins[0] = 0.1;
+    mPtBins[1] = 0.15;
+    mPtBins[2] = 0.2;
+    mPtBins[3] = 0.3;
+    mPtBins[4] = 0.5;
+    mPtBins[5] = 1.;
+    mPtBins[6] = 1.;
+    mPtBins[7] = 1.;
+    mPtBins[8] = 1.;
+    
+    mPhiBins[0] = 0*degree;
+    mPhiBins[1] = 36*degree;
+    mPhiBins[2] = 72*degree;
+    mPhiBins[3] = 108*degree;
+    mPhiBins[4] = 144*degree;
+    mPhiBins[5] = 180*degree;
+    mPhiBins[6] = 216*degree;
+    mPhiBins[7] = 252*degree;
+    mPhiBins[8] = 288*degree;
+    mPhiBins[9] = 324*degree;
+}
+
 int StEventSummary::numberOfTracks() const { return mNumberOfTracks; }
 
 int StEventSummary::numberOfGoodTracks() const { return mNumberOfGoodTracks; }
