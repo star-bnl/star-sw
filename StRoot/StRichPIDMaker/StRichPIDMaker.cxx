@@ -1,16 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.12 2000/11/07 14:11:39 lasiuk Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.13 2000/11/07 14:30:58 lasiuk Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
- * Revision 2.12  2000/11/07 14:11:39  lasiuk
- * initCutParameters() and diagnositis print added.
- * bins for <d> and sigma_d added.
- * TPC hits for RICH tracks written out.
- * (file) ptr checked before writing ntuple.
- * check flags on Hits instead of ADC value
+ * Revision 2.13  2000/11/07 14:30:58  lasiuk
+ * d<3 adjustment and checkTrack() naming of varaiables
+ * corrected
  *
  * Revision 2.21  2000/11/27 17:19:40  lasiuk
  * fill the constant area in teh PID structure
@@ -169,7 +166,7 @@ using std::max;
 #include "StRichPid.h"
 #include "StRichPhotonInfo.h"
 #include "StRichPidTraits.h"
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.12 2000/11/07 14:11:39 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.13 2000/11/07 14:30:58 lasiuk Exp $";
 
 #include "StEventMaker/StRootEventManager.hh"
 
@@ -203,7 +200,7 @@ static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.12 2000/11/07 14:11:39 
     mPtCut = 0.*GeV; // GeV/c
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.12 2000/11/07 14:11:39 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.13 2000/11/07 14:30:58 lasiuk Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -1275,7 +1272,7 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	    bin = 4;
 	else if(trackDipAngle>10)
 	    bin = 5;
-	if( normalizedD<-1. || normalizedD>2. ) continue;
+
 	if(currentTrack->getStTrack()->geometry()->helix().h() > 0)
 	    charge = 1; // positive
 	else
@@ -1600,20 +1597,24 @@ bool StRichPIDMaker::checkEvent(StEvent* event) {
     }
 //     cout << "StRichPIDMaker::checkEvent() =>\n";
 //     cout << "event vertex z = " << mVertexPos.z() << endl;
-  if ( fabs(extrapolatedPosition.x()) < (mGeometryDb->radiatorDimension().x() - mPadPlaneCut) &&
-       fabs(extrapolatedPosition.y()) < (mGeometryDb->radiatorDimension().y() - mPadPlaneCut) &&
-       fabs(extrapolatedPosition.x()) > (mPadPlaneCut) &&
-       fabs(extrapolatedPosition.y()) > (mPadPlaneCut) &&
-       fabs(impactPoint.x()) < (mGeometryDb->radiatorDimension().x() - mRadiatorCut) &&
-       fabs(impactPoint.y()) < (mGeometryDb->radiatorDimension().y() - mRadiatorCut) &&
-       fabs(impactPoint.x()) > (mRadiatorCut) &&
-       fabs(impactPoint.y()) > (mRadiatorCut) &&
-       (track->getPathLength()>0 && track->getPathLength()<mPathCut) &&
-       track->getLastHit().perp()>mLastHitCut) {
-    return true;
-  }
+//     cout << "event run id   = " << mEventN        << endl;
 
-  return false;
+    mMagField    = 2.49117;    
+    if (event->summary()) {
+	mMagField  = event->summary()->magneticField();
+	cout << "  B field = " << mMagField << endl;
+    } 
+    else {
+	cout << "StRichPIDMaker::checkEvent().\n";
+	cout << "\tWARNING!\n";
+	cout << "\tCannot get B field from event->summary(). \n";
+	cout << "\tUse B= " << mMagField << endl;
+    } 
+    	
+    return true;
+}
+
+bool StRichPIDMaker::checkTrack(StTrack* track) {
 
     if (track &&
 	track->flag()>=0 &&
