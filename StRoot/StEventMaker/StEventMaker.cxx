@@ -1,6 +1,7 @@
+
 /*************************************************************************** 
  *
- * $Id: StEventMaker.cxx,v 2.6 1999/11/11 17:46:30 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.7 1999/11/17 14:10:27 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,9 +12,8 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.6  1999/11/11 17:46:30  ullrich
- * Added more checks and warning messages. Handling
- * of primary vertices made safer
+ * Revision 2.7  1999/11/17 14:10:27  ullrich
+ * Added more checks to protect from corrupted table data.
  *
  * Revision 2.27  2000/05/26 11:36:19  ullrich
  * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
@@ -38,7 +38,6 @@
  *
  * Revision 2.21  2000/03/22 17:11:20  ullrich
  * Added further checks for case were tables exist but have
-#include "StTrack.h"
  * zero length. Added for primary and global tracks.
  *
  * Revision 2.20  2000/02/23 12:11:49  ullrich
@@ -71,9 +70,9 @@
  *
  * Revision 2.10  1999/12/21 15:13:13  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
-    doPrintRunInfo    = kTRUE;  // TMP, set to kFALSE later
-    doPrintEventInfo  = kTRUE;  // TMP, set to kFALSE later
-    doPrintMemoryInfo = kTRUE;  // TMP, set to kFALSE later
+ *
+ * Revision 2.9  1999/12/07 18:58:39  ullrich
+ * Modified to get rid of some warnings on Linux
     doPrintRunInfo    = kFALSE; 
     doPrintEventInfo  = kFALSE;
     doPrintMemoryInfo = kTRUE;
@@ -86,7 +85,7 @@
     doPrintRunInfo    = kTRUE;  // TMP 
     doPrintEventInfo  = kTRUE;  // TMP
  *
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.6 1999/11/11 17:46:30 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.7 1999/11/17 14:10:27 ullrich Exp $";
  * Delete hit if it cannot be added to collection.
  *
  * Revision 2.3  1999/11/08 17:04:59  ullrich
@@ -123,10 +122,10 @@ static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.6 1999/11/11 17:46:30 ull
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.6 1999/11/11 17:46:30 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.7 1999/11/17 14:10:27 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.6 1999/11/11 17:46:30 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.7 1999/11/17 14:10:27 ullrich Exp $";
 
 ClassImp(StEventMaker)
     doPrintEventInfo  = kFALSE;
@@ -326,7 +325,7 @@ StEventMaker::makeEvent()
                                                             dstSoftMonFtpc,
                                                             dstSoftMonEmc,
                                                             dstSoftMonCtb,
-	id = dstPrimaryTracks[i].id_start_vertex/10;
+                                                            dstSoftMonRich,
                                                             dstSoftMonGlobal,
                                                             dstSoftMonL3));
     
@@ -390,15 +389,23 @@ StEventMaker::makeEvent()
 	    vecPrimaryTracks[id]->addPidTraits(new StDedxPidTraits(dstDedx[i]));
 	    k++;
 	}
+	if (!k) nfailed++;
     //  entry in the temprary vector (vecPrimaryTracks)
     if (nfailed) 
-        StV0Vertex *v0 = new StV0Vertex(dstVertices[id], dstV0Vertices[i]);
-        id = dstV0Vertices[i].idneg;
-        if (id < vecGlobalTracks.size()) v0->addDaughter(vecGlobalTracks[id]);
-        id = dstV0Vertices[i].idpos;
-        if (id < vecGlobalTracks.size()) v0->addDaughter(vecGlobalTracks[id]);
-        v0Vertices.push_back(v0);
+	gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
+    //  New: iflag > 0 for event (primary) vertices.
+    }
+    if (nfailed)
+        gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
+    }
+	if (id < nVertices) {
+    //  Load the dedx table and assign the dE/dx traits to all loaded
+    //  global, tpt and primary tracks.
+    //
     dst_dedx_st *dstDedx = mEventManager->returnTable_dst_dedx(nrows);
+    nfailed = 0;
+    for (i=0; i<nrows; i++) {
+        k = 0;
         id = dstDedx[i].id_track;
 	    dstVertices[i].vtx_id == kEventVtxId) {
             vecGlobalTracks[id]->addPidTraits(new StDedxPidTraits(dstDedx[i]));
@@ -406,15 +413,23 @@ StEventMaker::makeEvent()
 		if (vecPrimaryTracks[k] &&
 		    vecPrimaryVertexId[k] == (unsigned int) dstVertices[i].id) {
             vecTptTracks[id]->addPidTraits(new StDedxPidTraits(dstDedx[i]));
+		    vecPrimaryTracks[k] = 0;
 		}
         if (!k) nfailed++;
-        StXiVertex *xi = new StXiVertex(dstVertices[id], dstXiVertices[i]);
-        id = dstXiVertices[i].id_v0 - 1;
-        if (id < v0Vertices.size()) xi->setV0Vertex(v0Vertices[id]);
-        id = dstXiVertices[i].id_b;
-        if (id < vecGlobalTracks.size()) xi->addDaughter(vecGlobalTracks[id]);
-        xiVertices.push_back(xi);
+    if (nfailed)
+        gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
+                            << " dedx rows, no corresponding tracks found." << endm;
+    
+	if (vecPrimaryTracks[k]) {nfailed++; delete vecPrimaryTracks[k];}
+    if (nfailed) 
+	if (id < nVertices) {
+			    << " primary tracks, no corresponding primary vertex found." << endm;
+    
+    //  entry in the temporary vector (vecPrimaryTracks)
     //  is set to 0. At the end we delete all primary
+    //  tracks which couldn't be assigned to a vertex.
+    //  Valid iflags in this context are = +[0-9]*10+1.
+    //
     long nVertices;
     dst_vertex_st *dstVertices = mEventManager->returnTable_dst_vertex(nVertices);
 
@@ -422,15 +437,23 @@ StEventMaker::makeEvent()
         if (dstVertices[i].iflag < 100 && dstVertices[i].iflag%10 == 1 &&
 	if (id < static_cast<unsigned long>(nVertices)) {
 	    StV0Vertex *v0 = new StV0Vertex(dstVertices[id], dstV0Vertices[i]);
+	    id = dstV0Vertices[i].idneg;
 	    if (id < vecGlobalTracks.size()) v0->addDaughter(vecGlobalTracks[id]);
 	    id = dstV0Vertices[i].idpos;
-        StKinkVertex *kink = new StKinkVertex(dstVertices[id], dstKinkVertices[i]);
-        id = dstKinkVertices[i].idd;
-        if (id < vecGlobalTracks.size()) kink->addDaughter(vecGlobalTracks[id]);
-        id = dstKinkVertices[i].idp;
-        if (id < vecGlobalTracks.size()) kink->setParent(vecGlobalTracks[id]);
-        kinkVertices.push_back(kink);
+	    if (id < vecGlobalTracks.size()) v0->addDaughter(vecGlobalTracks[id]);
+    long nXiVertices;
+	}
+
+	    nfailed++;
+    }
+	if (id < nVertices) {
+	gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
+			    << " V0 vertices, no valid id_vertex." << endm;
+        if (vecPrimaryTracks[k]) {nfailed++; delete vecPrimaryTracks[k];}
     if (nfailed)
+	    id = dstXiVertices[i].id_b;
+                            << " primary tracks, no corresponding primary vertex found." << endm;
+       
     //
     //  Setup V0 vertices
     //
