@@ -38,12 +38,15 @@ if ( staf_result(1) .eq. 0) then
 endif
 
 rowcount /dui/data/global/vertices/ev0out 
-tdm/newtable /dui/data/global/vertices/ev0_eval staf_result(1)
+tdm/newtable /dui/data/global/vertices/ev0_eval ev0_eval staf_result(1)
+maxrow  /dui/data/global/vertices/ev0_eval staf_result(1)
+rowcount /dui/data/global/vertices/ev0_eval 0
 
 ami/mod/call ev0_eval2 _
       	/dui/data/svt/tracks/stk_track _
 	/dui/data/tpc/tracks/tptrack  _
-	/dui/data/tpc/tracks/tpt_eval  _
+	/dui/data/tpc/tracks/evaltrk  _
+        /dui/data/global/vertices/vertex _
         /dui/data/global/vertices/ev0out _
 	/dui/data/global/vertices/ev0_eval _
         /dui/geant/Event/g2t_track _
