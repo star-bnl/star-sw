@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.hh,v 1.6 1999/03/23 21:47:45 ullrich Exp $
+ * $Id: StVertex.hh,v 1.7 1999/04/19 15:54:10 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StVertex.hh,v $
+ * Revision 1.7  1999/04/19 15:54:10  genevb
+ * Added momentum() to vertex classes
+ *
  * Revision 1.6  1999/03/23 21:47:45  ullrich
  * Member function made virtual
  *
@@ -56,6 +59,7 @@ public:
     virtual const StGlobalTrack*        parent();
     virtual const StThreeVector<float>& position();
     virtual const StThreeVector<float>& positionError();
+    virtual StThreeVector<float>        momentum(double);
     virtual unsigned long               qualityBitmask();
     virtual float                       chiSquared();         
     virtual long                        index() {return mIndex;};

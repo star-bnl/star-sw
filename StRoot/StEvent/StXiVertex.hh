@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.hh,v 1.7 1999/04/14 22:04:30 genevb Exp $
+ * $Id: StXiVertex.hh,v 1.8 1999/04/19 15:54:10 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.hh,v $
+ * Revision 1.8  1999/04/19 15:54:10  genevb
+ * Added momentum() to vertex classes
+ *
  * Revision 1.7  1999/04/14 22:04:30  genevb
  * Fixed a memory leak
  *
@@ -58,6 +61,7 @@ public:
     float dcaParentToPrimaryVertex() const;
     const StThreeVector<float>& momentumOfBachelor() const;
     StThreeVector<float> momentumOfV0() const;
+    StThreeVector<float> momentum() const;
     StV0Vertex* v0Vertex() const;
     StGlobalTrack* bachelor();
     double chargeOfBachelor(double B);
@@ -85,6 +89,11 @@ inline float StXiVertex::dcaBachelorToPrimaryVertex () const
 
 inline const StThreeVector<float>&
 StXiVertex::momentumOfBachelor() const { return mMomentumOfBachelor; }
+
+inline StThreeVector<float> StXiVertex::momentum() const
+{
+    return (mMomentumOfBachelor + momentumOfV0());
+}
 
 inline float StXiVertex::dcaDaughters() const { return mDcaDaughters; }
 

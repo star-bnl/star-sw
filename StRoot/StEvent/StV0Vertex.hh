@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.hh,v 1.8 1999/04/09 19:34:04 genevb Exp $
+ * $Id: StV0Vertex.hh,v 1.9 1999/04/19 15:54:10 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.hh,v $
+ * Revision 1.9  1999/04/19 15:54:10  genevb
+ * Added momentum() to vertex classes
+ *
  * Revision 1.8  1999/04/09 19:34:04  genevb
  * Added vertex daughter functionality
  *
@@ -58,6 +61,7 @@ public:
     virtual float dcaDaughters() const;
     virtual float dcaParentToPrimaryVertex() const;
     virtual const StThreeVector<float>& momentumOfDaughter(StTrackSign sign) const;
+    virtual StThreeVector<float> momentum() const;
 
     virtual void setDcaDaughterToPrimaryVertex(StTrackSign sign, float);
     virtual void setMomentumOfDaughter(StTrackSign sign, const StThreeVector<float>&);
@@ -82,6 +86,12 @@ inline const StThreeVector<float>&
 StV0Vertex::momentumOfDaughter(StTrackSign sign) const
 {
     return mMomentumOfDaughters[sign];
+}
+
+inline StThreeVector<float> StV0Vertex::momentum() const
+{
+    return (mMomentumOfDaughters[negativeTrack] +
+            mMomentumOfDaughters[positiveTrack]);
 }
 
 inline float StV0Vertex::dcaDaughters() const { return mDcaDaughters; }
