@@ -1,6 +1,9 @@
 // 
-// $Id: StBemcRaw.cxx,v 1.3 2004/10/20 14:24:21 suaide Exp $
+// $Id: StBemcRaw.cxx,v 1.4 2004/10/20 15:45:19 suaide Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.4  2004/10/20 15:45:19  suaide
+// few bugs fixed
+//
 // Revision 1.3  2004/10/20 14:24:21  suaide
 // small fix to crateUnknown status in old files
 //
@@ -329,13 +332,14 @@ void StBemcRaw::printStats(Int_t det)
 */
 Int_t StBemcRaw::getBemcADCRaw(Int_t det, Int_t softId, StEmcRawData* RAW, Int_t& CRATE, Int_t& CAP)
 {
-  if(!RAW) { if(mPrint) gMessMgr->Warning() <<"Could not find StEmcRawData pointer "<<endm; return kFALSE; }
-  if(!mDecoder) { if(mPrint) gMessMgr->Warning() <<"Could not find StEmcmDecoderoder pointer "<<endm; return kFALSE; }
   CAP = 0;
+  CRATE = 0;
+  if(!RAW) { if(mPrint) gMessMgr->Warning() <<"Could not find StEmcRawData pointer "<<endm; return 0; }
+  if(!mDecoder) { if(mPrint) gMessMgr->Warning() <<"Could not find StEmcmDecoderoder pointer "<<endm; return 0; }
   if(det==BTOW) // tower
   {
     Int_t daq;
-    if(mDecoder->GetDaqIdFromTowerId(softId,daq)==1) 
+    if(mDecoder->GetDaqIdFromTowerId(softId,daq)==1 && RAW->header(BTOWBANK)) 
     {
       Int_t CR,INDEX;
       mDecoder->GetTowerCrateFromDaqId(daq,CR,INDEX);
@@ -398,7 +402,11 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
 {    
   E=0;
     
-  if((mCrateStatus[det-1][CRATE-1]!=crateOK || mCrateStatus[det-1][CRATE-1]!=crateUnknown) && !mSaveAllStEvent) return kCrate;
+  if(CRATE>0 && CRATE<=MAXCRATES) 
+    if((mCrateStatus[det-1][CRATE-1]!=crateOK || 
+        mCrateStatus[det-1][CRATE-1]!=crateUnknown) && 
+        !mSaveAllStEvent) return kCrate;
+  
   if(ADC==0 && !mSaveAllStEvent) return kZero;
   
   Int_t STATUS;
