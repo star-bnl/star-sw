@@ -43,7 +43,7 @@ gmake -f ${STAF_MAKE_HOME}/MakeStaf.mk INP_DIR=${INP} OUT_DIR=${OUT} setup
 # if you add "exes" only executables will be created (no libraries)
 
 
-gmake -f ${STAF_MAKE_HOME}/MakeStaf.mk $NODEBUG
+gmake -f ${STAF_MAKE_HOME}/MakeStaf.mk INP_DIR=${INP} OUT_DIR=${OUT} $NODEBUG
 
 
 # Makefile does not touch input area
