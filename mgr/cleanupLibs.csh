@@ -1,5 +1,8 @@
-# $Id: cleanupLibs.csh,v 1.5 1999/02/23 01:07:12 fisyak Exp $
+# $Id: cleanupLibs.csh,v 1.6 1999/05/10 19:43:38 fisyak Exp $
 # $Log: cleanupLibs.csh,v $
+# Revision 1.6  1999/05/10 19:43:38  fisyak
+# Add Victor test for last library
+#
 # Revision 1.5  1999/02/23 01:07:12  fisyak
 # Cleanup for SL99a
 #
@@ -12,6 +15,8 @@
   foreach LIB (*.s?)
     set List = `ls ${LIB}.????`
     @ NList = ${#List} 
+    set last = $List[${NList}]
+#   echo LAST = $last
     @ Ndel = $NList - $NKeep
     if ( $Ndel > 0) echo Clean ${LIB}: $List
     while ( $Ndel > 0 )
@@ -19,5 +24,8 @@
       rm $List[$Ndel] 
       @ Ndel = $Ndel - 1
     end
+    rm -f ${LIB}
+    echo    ln -sf $last ${LIB}
+    ln -sf $last ${LIB}
   end
   

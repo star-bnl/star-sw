@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.75  1999/05/10 19:43:38  fisyak
+#  Add Victor test for last library
+#
 #  Revision 1.74  1999/05/01 18:50:42  fisyak
 #  put ctf as last pams to build
 #
@@ -301,7 +304,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/05/01 18:50:42 $ 
+#           Last modification $Date: 1999/05/10 19:43:38 $ 
 #  default setings
 # Current Working Directory
 #
@@ -355,6 +358,7 @@ ifndef SUBDIRS
   SUBDIRS := $(filter-out St_hbt_Maker, $(SUBDIRS))
 #  SUBDIRS := $(filter-out StRootEvent, $(SUBDIRS))
   SUBDIRS := $(filter-out St_emc_Maker, $(SUBDIRS))
+  SUBDIRS := $(filter-out StEbyEScaMaker,$(SUBDIRS))
 #                         St_evg_Maker St_ebye_Maker St_fpt_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out vpd par crs egz fri g2x mev, $(SUBDIRS))
 ifndef OBJY_HOME
