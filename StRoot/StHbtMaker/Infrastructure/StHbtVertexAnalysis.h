@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtVertexAnalysis.h,v 1.4 2000/08/31 22:31:32 laue Exp $
+ * $Id: StHbtVertexAnalysis.h,v 1.5 2002/11/03 16:37:43 magestro Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtVertexAnalysis.h,v $
+ * Revision 1.5  2002/11/03 16:37:43  magestro
+ * Moved StHbtPicoEventCollectionVectorHideAway object to StHbtAnalysis for circular event-mixing
+ *
  * Revision 1.4  2000/08/31 22:31:32  laue
  * StHbtAnalysis: output changed (a little bit less)
  * StHbtEvent: new version, members for reference mult added
@@ -30,7 +33,6 @@
 #define StHbtVertexAnalysis_hh
 
 #include "StHbtMaker/Infrastructure/StHbtAnalysis.h"        // base analysis class
-class StHbtPicoEventCollectionVectorHideAway;
 
 class StHbtVertexAnalysis : public StHbtAnalysis {
 
@@ -48,7 +50,6 @@ protected:
   unsigned int mVertexBins;
   unsigned int mOverFlow;
   unsigned int mUnderFlow;
-  StHbtPicoEventCollectionVectorHideAway* mPicoEventCollectionVectorHideAway;
   
 #ifdef __ROOT__
   ClassDef(StHbtVertexAnalysis, 0)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtReactionPlaneAnalysis.h,v 1.2 2002/05/28 14:04:07 rcwells Exp $
+ * $Id: StHbtReactionPlaneAnalysis.h,v 1.3 2002/11/03 16:37:43 magestro Exp $
  *
  * Author: Randall Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtReactionPlaneAnalysis.h,v $
+ * Revision 1.3  2002/11/03 16:37:43  magestro
+ * Moved StHbtPicoEventCollectionVectorHideAway object to StHbtAnalysis for circular event-mixing
+ *
  * Revision 1.2  2002/05/28 14:04:07  rcwells
  * Added multiplicity binning to StHbtReactionPlaneAnalysis
  *
@@ -26,7 +29,6 @@
 #define StHbtReactionPlaneAnalysis_hh
 
 #include "StHbtMaker/Infrastructure/StHbtAnalysis.h"        // base analysis class
-class StHbtPicoEventCollectionVectorHideAway;
 
 class StHbtReactionPlaneAnalysis : public StHbtAnalysis {
 
@@ -51,7 +53,6 @@ protected:
   unsigned int mReactionPlaneBins;
   unsigned int mOverFlow;
   unsigned int mUnderFlow;
-  StHbtPicoEventCollectionVectorHideAway* mPicoEventCollectionVectorHideAway;
   
 #ifdef __ROOT__
   ClassDef(StHbtReactionPlaneAnalysis, 0)

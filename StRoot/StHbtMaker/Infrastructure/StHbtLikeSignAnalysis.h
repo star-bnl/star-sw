@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtLikeSignAnalysis.h,v 1.2 2001/06/21 19:15:46 laue Exp $
+ * $Id: StHbtLikeSignAnalysis.h,v 1.3 2002/11/03 16:37:43 magestro Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -29,7 +29,6 @@
 #include "StHbtMaker/Base/StHbtLikeSignCorrFctn.hh"    // base class
 #include "StHbtMaker/Infrastructure/StHbtAnalysis.h"
 #include "StHbtMaker/Infrastructure/StHbtCorrFctnCollection.hh"
-class StHbtPicoEventCollectionVectorHideAway;
 
 
 class StHbtLikeSignAnalysis : public StHbtAnalysis {
@@ -50,7 +49,6 @@ protected:
   unsigned int mVertexBins;
   unsigned int mOverFlow;
   unsigned int mUnderFlow;
-  StHbtPicoEventCollectionVectorHideAway* mPicoEventCollectionVectorHideAway;
 
 #ifdef __ROOT__
   ClassDef(StHbtLikeSignAnalysis, 0)
