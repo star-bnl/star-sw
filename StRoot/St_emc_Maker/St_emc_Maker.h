@@ -1,65 +1,46 @@
-// $Id: St_emc_Maker.h,v 1.1 1998/12/06 10:23:31 akio Exp $
+// $Id: St_emc_Maker.h,v 1.2 1998/12/15 22:39:52 akio Exp $
 // $Log: St_emc_Maker.h,v $
-// Revision 1.1  1998/12/06 10:23:31  akio
-// Creation
+// Revision 1.2  1998/12/15 22:39:52  akio
+// Add emc_hit object and  adc_to_energy in here.
 //
-// Revision 1.2  1998/12/06 09:57:13  akio
-// put histgrams
-//
-// Revision 1.1  1998/12/03 22:27:26  akio
-// New emc maker
 #ifndef STAR_St_emc_Maker
 #define STAR_St_emc_Maker
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// St_emc_Maker virtual base class for Maker                            //
+// St_emc_Maker class for <FONT COLOR="RED">EMc Calibration</FONT> dataset     //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-class St_emc_calib_header;
-class St_emc_pedestal;
-class St_emc_adcslope;
-class TH1F;
-class TH2F;
+#include <TH2.h>
+#include "St_ems_hits_Table.h"
+#include "St_emc_pedestal_Table.h"
+#include "St_emc_adcslope_Table.h"
+#include "St_emc_calib_header_Table.h"
+#include "St_emc_hit.h"
+#include "St_emc_hits_Table.h"
+#include "/afs/rhic/star/packages/SL98j/pams/emc/inc/emc_def.h"
+
 class St_emc_Maker : public StMaker {
- private:
-  Bool_t drawinit;
-  St_emc_calib_header *m_ped_bemc_h; //!
-  St_emc_pedestal     *m_ped_bemc;   //!
-  St_emc_calib_header *m_slp_bemc_h; //!
-  St_emc_adcslope     *m_slp_bemc;   //!
-  void MakeHistograms();             // Histograms
- protected:
-   TH1F *m_emc_etot;    //!
-   TH2F *m_emc_energy;  //! 
-   TH2F *m_emc_nhit;    //! 
-   TH2F *m_bemc_hit;    //!
-   TH2F *m_bprs_hit;    //!
-   TH2F *m_bsmde_hit;   //!
-   TH2F *m_bsmdp_hit;   //!
-   TH2F *m_eemc_hit;    //!
-   TH2F *m_eprs_hit;    //!
-   TH2F *m_esmde_hit;   //!
-   TH2F *m_esmdp_hit;   //!
- public: 
-                  St_emc_Maker(const char *name="emc_hits", const char *title="event/data/emc/hits");
-   virtual       ~St_emc_Maker();
-   virtual Int_t Init();
-   virtual Int_t  Make();
-   virtual void   PrintInfo();
-   ClassDef(St_emc_Maker, 1)   //StAF chain virtual base class for Makers
+private:
+  Bool_t drawinit; 
+  Int_t  m_mode;          // mode=0/1 No/Create copy in emc_hits Table;
+  void MakeHistograms();  // Filling QA Histograms
+protected:
+  TH2F *m_nhit;           //! 
+  TH2F *m_etot;           //!
+  TH2F *m_hits[MAXDET];   //!
+  TH2F *m_energy[MAXDET]; //!
+public: 
+  St_emc_Maker(const char *name="emc_hit", const char *title="event/data/emc/hits");
+  virtual ~St_emc_Maker();
+  virtual Int_t Init();
+  virtual Int_t Make();
+  virtual void Set_mode (Int_t m = 0){m_mode = m;} // *MENU*  
+  virtual void PrintInfo();
+  ClassDef(St_emc_Maker, 1)   //Macro
 };
 
 #endif
-
-
-
-
-
-
-
-
-
