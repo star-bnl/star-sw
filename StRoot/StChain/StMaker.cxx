@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.99 2000/07/04 02:36:01 perev Exp $
+// $Id: StMaker.cxx,v 1.100 2000/07/14 01:52:19 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -76,6 +76,7 @@ void StMaker::SetNumber(Int_t number)
  StMaker *par = GetParentMaker();
  if (par) par->SetNumber(number);
  m_Number = number;
+ SetIventNumber(number);
 }
 //______________________________________________________________________________
 Int_t StMaker::GetNumber() const
@@ -1058,6 +1059,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.100  2000/07/14 01:52:19  perev
+// SetIvent called in SetNumber
+//
 // Revision 1.99  2000/07/04 02:36:01  perev
 // AddMaker method added & gStChain removed
 //
