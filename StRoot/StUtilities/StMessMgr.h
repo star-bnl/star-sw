@@ -1,5 +1,8 @@
-// $Id: StMessMgr.h,v 1.10 2000/03/30 16:12:55 genevb Exp $
+// $Id: StMessMgr.h,v 1.11 2000/06/07 00:05:35 genevb Exp $
 // $Log: StMessMgr.h,v $
+// Revision 1.11  2000/06/07 00:05:35  genevb
+// Added FixOn(), enforcing no limits on a specific message type/string
+//
 // Revision 1.10  2000/03/30 16:12:55  genevb
 // Add NoLimits() capability to turn off message limiting.
 //
@@ -91,6 +94,7 @@ class StMessMgr : public ostrstream {
    virtual       void RemoveLimit(const char* str) =0;
    virtual       void SwitchOff(const char* str) =0;
    virtual       void SwitchOn(const char* str) =0;
+   virtual       void FixOn(const char* str) =0;
    virtual       void NoLimits() =0;
    virtual       void Summary(size_t nTerms=1) =0;
    virtual        int AddType(const char* type, const char* text) =0;

@@ -1,5 +1,8 @@
-// $Id: StMessageManager.h,v 1.18 2000/05/23 19:03:38 genevb Exp $
+// $Id: StMessageManager.h,v 1.19 2000/06/07 00:05:36 genevb Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.19  2000/06/07 00:05:36  genevb
+// Added FixOn(), enforcing no limits on a specific message type/string
+//
 // Revision 1.18  2000/05/23 19:03:38  genevb
 // Correct interface for MessageOut(), update docs
 //
@@ -51,8 +54,6 @@
 // Revision 1.1  1999/06/23 15:17:53  genevb
 // Introduction of StMessageManager
 //
-//
-// Revision 1.1 1999/01/27 10:28:29 genevb
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -178,6 +179,7 @@ class StMessageManager : public StMessMgr {
    virtual       void RemoveLimit(const char* str) {SetLimit(str,-1);}
    virtual       void SwitchOff(const char* str) {SetLimit(str,0);}
    virtual       void SwitchOn(const char* str) {RemoveLimit(str);}
+   virtual       void FixOn(const char* str) {SetLimit(str,-5);}
    virtual       void NoLimits() {messCounter->NoLimits();}
    virtual       void Summary(size_t nTerms=1);
    virtual        int AddType(const char* type, const char* text);
