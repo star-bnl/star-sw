@@ -110,9 +110,9 @@ end of ftext are replaced with blanks.
 	    *ftext_lnb=0;
 	    return;
 	  }
-	  else if ( do_blanks        ) { ftext[i] = ' '; }
-	  else if ( ctext[i] == '\0' ) { ftext[i] = ' '; do_blanks = TRUE; }
-	  else                         { ftext[i] = ctext[i]; length = i+1; }
+	  else if ( do_blanks                   ) { ftext[i] = ' '; }
+	  else if ( strcmp(&ctext[i],"\0") == 0 ) { ftext[i] = ' '; do_blanks = TRUE; }
+	  else                                    { ftext[i] = ctext[i]; length = i+1; }
 	}
 
 /*	Find the end of the specified text (this is a FORTRAN routine!!): */
