@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   09/08/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.cxx,v 1.18 2000/03/14 22:32:00 fisyak Exp $
+// $Id: St_tableDescriptor.cxx,v 1.19 2000/03/14 22:33:20 fisyak Exp $
 #include <stdlib.h> 
 #include "St_tableDescriptor.h"
 #include "St_Table.h"
@@ -50,75 +50,38 @@ St_tableDescriptor::~St_tableDescriptor()
 #ifdef NORESTRICTIONS
   if (!IsZombie()) {
     for (Int_t i=0;i<GetNRows();i++) {
-      Char_t *name = (Char_t *)GetColumnName(i);
+      Char_t *name = (Char_t *)ColumnName(i);
       if (name) delete [] name; 
-      UInt_t  *indxArray = (UInt_t *)GetIndexArray(i);
+      UInt_t  *indxArray = (UInt_t *)IndexArray(i);
       if (indxArray) delete [] indxArray; 
     }
   }
 #endif
 }
 //____________________________________________________________________________
-static void UnrollName(TString &thisBuffer,const Char_t *colName, Int_t i, UInt_t *IndexArray=0, Int_t LenIndx=0, Char_t type=0)
-{  
-  TString inBuffer = thisBuffer;
-  TString nextBuffer;
-  Char_t digBuffer[10];
-  if ( i != -1) {
-    sprintf(digBuffer,"_%d",i);
-    inBuffer += digBuffer;
-  }
-  Int_t nDim = 0;
-  if (IndexArray && (nDim = IndexArray[0])  && LenIndx) {
-    for (Int_t j=0; j < nDim; j++) { 
-       nextBuffer = "";
-       UnrollName(nextBuffer,colName,j,IndexArray+1,LenIndx-1); 
-       if (LenIndx == 1) {
-       if (type) {
-         nextBuffer += "/"; 
-         nextBuffer += type;
-         type = 0;
-       }
-
-       if (nDim - j > 1) {  // not last one
-           nextBuffer += ":";
-           nextBuffer += colName;
-         }
-       }
-       thisBuffer = inBuffer + nextBuffer;
-       printf(" ===> %s: %s-->%s nDim = %d LenIndx = %d type = %x\n", colName,inBuffer.Data(),nextBuffer.Data(),nDim,LenIndx,type); 
-    }
-  } 
-  thisBuffer = inBuffer + nextBuffer;
-  if (type) { 
-     thisBuffer += "/"; 
-     thisBuffer += type; 
-  }
-  return;
-}
-//____________________________________________________________________________
 TString St_tableDescriptor::CreateLeafList() const 
 {
   // Create a list of leaf to be useful for TBranch::TBranch ctor
   const Char_t TypeMapTBranch[]="\0FIISDiisbBC";
-  Int_t maxRows = GetNumberOfColumns();
+  Int_t maxRows = NumberOfColumns();
   TString string;
   for (Int_t i=0;i<maxRows;i++){
     if (i) string += ":";
-    Int_t nDim = GetDimensions(i);
+    Int_t nDim = Dimensions(i);
+    
     UInt_t *indx = 0;
     Int_t totalSize = 1;
     Int_t k = 0;
+    
     if (nDim) {
-      if ( !(indx = GetIndexArray(i))){ 
+      if ( !(indx = IndexArray(i))){ 
         string = ""; 
         Error("CreateLeafList()","Can not create leaflist for arrays");
         return string;
       }
       for (k=0;k< nDim; k++) totalSize *= indx[k];
     }
-    const Char_t *colName = GetColumnName(i);
-//    UnrollName(string,colName,-1,indx,nDim,TypeMapTBranch[GetColumnType(i)]);         
+    const Char_t *colName = ColumnName(i);
     if (totalSize > 1) {
        for ( k = 0; k < totalSize; k++) {
          Char_t buf[10];
@@ -127,19 +90,19 @@ TString St_tableDescriptor::CreateLeafList() const
          string += buf;  
          if (k==0) {
            string += "/"; 
-           string += TypeMapTBranch[GetColumnType(i)];
+           string += TypeMapTBranch[ColumnType(i)];
          }
          if (k != totalSize -1) string += ":";
       }
-    }
-    else {
-      string += colName;
-      string += "/"; 
-      string += TypeMapTBranch[GetColumnType(i)];
+    } else {
+       string += ColumnName(i);
+       string += "/";
+       string += TypeMapTBranch[ColumnType(i)];
     }
   }
   return string;
 }
+
 //____________________________________________________________________________
 void St_tableDescriptor::LearnTable(const St_Table *parentTable)
 {
@@ -149,6 +112,7 @@ void St_tableDescriptor::LearnTable(const St_Table *parentTable)
   }
   LearnTable(parentTable->GetRowClass());
 }
+
 //____________________________________________________________________________
 void St_tableDescriptor::LearnTable(TClass *classPtr)
 {
@@ -161,11 +125,11 @@ void St_tableDescriptor::LearnTable(TClass *classPtr)
 //
 //  This is to introduce an artificial restriction demanded by STAR database group
 //
-//    1. the name may be 19 symbols at most
-//    2. the number the dimension is 2 at most
+//    1. the name may be 31 symbols at most
+//    2. the number the dimension is 3 at most
 //
 //  To lift this restriction one has to provide -DNORESTRICTIONS CPP symbol and
-//  recompile code.
+//  recompile code (and debug code NOW!)
 //
 
   if (!classPtr) return;
@@ -234,8 +198,47 @@ void St_tableDescriptor::LearnTable(TClass *classPtr)
     AddAt(&elementDescriptor,columnIndex); columnIndex++;
   }
 }
+//______________________________________________________________________________
+Int_t St_tableDescriptor::UpdateOffsets(const St_tableDescriptor *newDescriptor)
+{
+  //                  "Schema evolution"
+  // Method updates the offsets with a new ones from another descritor
+  //
+  Int_t maxColumns = NumberOfColumns();
+  Int_t mismathes = 0;
+
+  if (   (UInt_t(maxColumns) == newDescriptor->NumberOfColumns()) 
+      && (memcmp(GetArray(),newDescriptor->GetArray(),sizeof(tableDescriptor_st)*GetNRows()) == 0)
+     ) return mismathes; // everything fine for sure !
+
+  // Something wrong here, we have to check things piece by piece
+  for (Int_t colCounter=0; colCounter < maxColumns; colCounter++) 
+  {
+    Int_t colNewIndx = newDescriptor->ColumnByName(ColumnName(colCounter));
+    // look for analog
+    if (    colNewIndx >=0
+         && Dimensions(colCounter) == newDescriptor->Dimensions(colNewIndx) 
+         && ColumnType(colCounter) == newDescriptor->ColumnType(colNewIndx)
+       )  {
+      SetOffset(newDescriptor->Offset(colNewIndx),colCounter); 
+      if (colNewIndx != colCounter) {
+        printf("Schema evolution: \t%d column of the \"%s\" table has been moved to %d-th column\n",
+        colCounter,ColumnName(colCounter),colNewIndx);  
+        mismathes++;
+      }
+    }
+    else {
+      printf("Schema evolution: \t%d column of the \"%s\" table has been lost\n",
+        colCounter,ColumnName(colCounter));  
+      printf(" Indx = %d, name = %s \n", colNewIndx, ColumnName(colCounter));
+      SetOffset(-1,colCounter);
+      mismathes++;
+    }
+  } 
+  return mismathes;
+}
 //____________________________________________________________________________
-const Int_t St_tableDescriptor::GetColumnByName(const Char_t *columnName) const 
+const Int_t St_tableDescriptor::ColumnByName(const Char_t *columnName) const 
 { 
  // Find the column index but the column name
  const tableDescriptor_st *elementDescriptor = ((St_tableDescriptor *)this)->GetTable();
@@ -250,45 +253,63 @@ const Int_t St_tableDescriptor::GetColumnByName(const Char_t *columnName) const
  return i;
 }
 //____________________________________________________________________________
-Int_t St_tableDescriptor::GetOffset(const Char_t *columnName) const 
+Int_t St_tableDescriptor::Offset(const Char_t *columnName) const 
 {  
-  Int_t indx = GetColumnByName(columnName);
-  if (indx >= 0 ) indx = GetOffset(indx);
+  Int_t indx = ColumnByName(columnName);
+  if (indx >= 0 ) indx = Offset(indx);
   return indx;
 }
 //____________________________________________________________________________
-Int_t St_tableDescriptor::GetColumnSize(const Char_t *columnName) const 
+Int_t St_tableDescriptor::ColumnSize(const Char_t *columnName) const 
 { 
-  Int_t indx = GetColumnByName(columnName);
-  if (indx >= 0 ) indx = GetColumnSize(indx);
+  Int_t indx = ColumnByName(columnName);
+  if (indx >= 0 ) indx = ColumnSize(indx);
   return indx;
 }
 //____________________________________________________________________________
-Int_t St_tableDescriptor::GetTypeSize(const Char_t *columnName) const 
+Int_t St_tableDescriptor::TypeSize(const Char_t *columnName) const 
 {
-  Int_t indx = GetColumnByName(columnName);
-  if (indx >= 0 ) indx = GetTypeSize(indx);
+  Int_t indx = ColumnByName(columnName);
+  if (indx >= 0 ) indx = TypeSize(indx);
   return indx;
 }
 //____________________________________________________________________________
-Int_t St_tableDescriptor::GetDimensions(const Char_t *columnName) const 
+Int_t St_tableDescriptor::Dimensions(const Char_t *columnName) const 
 {
-  Int_t indx = GetColumnByName(columnName);
-  if (indx >= 0 ) indx = GetDimensions(indx);
+  Int_t indx = ColumnByName(columnName);
+  if (indx >= 0 ) indx = Dimensions(indx);
   return indx;
 }
 //____________________________________________________________________________
-St_Table::EColumnType St_tableDescriptor::GetColumnType(const Char_t *columnName) const 
+St_Table::EColumnType St_tableDescriptor::ColumnType(const Char_t *columnName) const 
 {
-  Int_t indx = GetColumnByName(columnName);
-  if (indx >= 0 ) indx = GetColumnType(indx);
+  Int_t indx = ColumnByName(columnName);
+  if (indx >= 0 ) indx = ColumnType(indx);
   return EColumnType(indx);
 }
 
 //____________________________________________________________________________
 // $Log: St_tableDescriptor.cxx,v $
-// Revision 1.18  2000/03/14 22:32:00  fisyak
-// Step back with Valery's updates
+// Revision 1.19  2000/03/14 22:33:20  fisyak
+// Step forward with Valery's updates
+//
+// Revision 1.17  2000/03/10 23:30:52  fisyak
+// type fixed
+//
+// Revision 1.16  2000/03/10 22:37:25  fine
+// CreateLeaf method fixed
+//
+// Revision 1.15  2000/03/07 23:52:21  fine
+// some comments improved
+//
+// Revision 1.14  2000/03/05 04:11:48  fine
+// Automatic schema evolution for St_Table has been activated
+//
+// Revision 1.13  2000/02/29 22:13:56  fine
+// Compare method fixed
+//
+// Revision 1.12  2000/02/29 01:54:49  fine
+// St_Table -> turn automatic schema evolution for table version 2 and above
 //
 // Revision 1.11  2000/01/25 22:36:40  fine
 // Linux warning has been removed
