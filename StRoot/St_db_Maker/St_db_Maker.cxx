@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.75 2003/11/13 02:55:39 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.76 2004/01/06 16:44:42 jeromel Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.76  2004/01/06 16:44:42  jeromel
+// Logic error not(()&&())
+//
 // Revision 1.75  2003/11/13 02:55:39  perev
 // Safe destructor of TDataSet like object used
 //
@@ -484,7 +487,7 @@ SWITCH:  switch (kase) {
               goto SWITCH;
 
     case 4:   
-      if( ! (val->fTimeMin.Get()<= uevent) && (val->fTimeMax.Get()>uevent)){
+      if( ! ((val->fTimeMin.Get()<= uevent) && (val->fTimeMax.Get()>uevent) )){
 	(void) printf("CheckFail:: Assert will fail for Table %s TimeMin=%d TimeMax=%d uevent=%d\n",
 		      ds->GetName(),val->fTimeMin.Get(),val->fTimeMax.Get(),uevent);
       }
