@@ -1,6 +1,14 @@
-// $Id: StTrsMaker.cxx,v 1.57 2000/06/25 23:58:28 fisyak Exp $
+// $Id: StTrsMaker.cxx,v 1.58 2000/07/21 22:31:11 calderon Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.58  2000/07/21 22:31:11  calderon
+// Added checks at the beginning of Make() to avoid
+// seg faults when dereferencing an invalid pointer.  This
+// happens when no g2t tables are present.  For the case of
+// embedding this might happen for the very low multiplicity
+// events where none of the embedded monte carlo tracks reach
+// a sensitive volume.
+//
 // Revision 1.57  2000/06/25 23:58:28  fisyak
 // Remove params
 //
@@ -326,7 +334,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.57 2000/06/25 23:58:28 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.58 2000/07/21 22:31:11 calderon Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -688,16 +696,23 @@ Int_t StTrsMaker::Make(){
     St_g2t_tpc_hit *g2t_tpc_hit =
 	static_cast<St_g2t_tpc_hit *>(geant("g2t_tpc_hit"));
     //PR(g2t_tpc_hit);
-    int no_tpc_hits         =  g2t_tpc_hit->GetNRows();
-    g2t_tpc_hit_st *tpc_hit =  g2t_tpc_hit->GetTable();
+
+    if (!g2t_tpc_hit) return kStWarn;
+    
+    int no_tpc_hits         = g2t_tpc_hit->GetNRows();
+    g2t_tpc_hit_st *tpc_hit = g2t_tpc_hit->GetTable();
 
     St_g2t_track *g2t_track =
 	static_cast<St_g2t_track *>(geant("g2t_track"));
+    if (!g2t_track) return kStWarn;
+    
     g2t_track_st *tpc_track = g2t_track->GetTable();
     
-     St_g2t_vertex  *g2t_ver=static_cast<St_g2t_vertex *>(geant("g2t_vertex"));
-     g2t_vertex_st *gver=g2t_ver->GetTable();
-     assert(gver); 
+    St_g2t_vertex  *g2t_ver=static_cast<St_g2t_vertex *>(geant("g2t_vertex"));
+    if (!g2t_ver) return kStWarn;
+    
+    g2t_vertex_st *gver=g2t_ver->GetTable();
+    assert(gver); 
      if(PILEUP_ON)
        printf("\n  TRS(): Pileup is ON (m_Mode=%d)\n\n",m_Mode); 
      else
