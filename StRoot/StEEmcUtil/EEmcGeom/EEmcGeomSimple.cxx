@@ -1,4 +1,4 @@
-// $Id: EEmcGeomSimple.cxx,v 1.19 2004/05/24 18:33:39 zolnie Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.20 2004/05/25 15:32:36 zolnie Exp $
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   Jan 14, 2003
 /// doxygen info here
@@ -54,6 +54,9 @@ ClassImp(EEmcGeomSimple)
 
 // single instance of EEmcGeomSimple
 EEmcGeomSimple EEmcGeomSimple::sInstance;
+
+//
+const double EEmcGeomSimple::TwoPi = 2.0L*M_PI;
 
 //
 EEmcGeomSimple::EEmcGeomSimple() 
@@ -258,6 +261,9 @@ EEmcGeomSimple::getTrackPoint(const StTrack& track, Double_t z) const
 
 
 // $Log: EEmcGeomSimple.cxx,v $
+// Revision 1.20  2004/05/25 15:32:36  zolnie
+// phi angles adjusted to [0,2pi] interval
+//
 // Revision 1.19  2004/05/24 18:33:39  zolnie
 // comment cleanup, added a small exception class
 // more argument checking, exception thrown when argument invalid
