@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstBranch.cc,v 1.1 2000/12/07 11:14:27 lmartin Exp $
+ * $Id: StEstBranch.cc,v 1.2 2001/01/25 18:13:27 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,11 +10,18 @@
  ***************************************************************************
  *
  * $Log: StEstBranch.cc,v $
+ * Revision 1.2  2001/01/25 18:13:27  lmartin
+ * Minor changes in the GetHit and SetHelix methods
+ *
  * Revision 1.1  2000/12/07 11:14:27  lmartin
  * First CVS commit
  *
  **************************************************************************/
-#include "StEstMaker/Infrastructure/StEstBranch.hh"
+#include "StEstBranch.hh"
+#include "StEstWafer.hh"
+#include "StEstHit.hh"
+#include "StEstTrack.hh"
+#include "StHelix.hh"
 
 StEstBranch::StEstBranch(StEstTrack *tr, 
 			     long int maxhits, 
@@ -90,16 +97,42 @@ StEstBranch::StEstBranch(StEstTrack *tr,
   
 StEstBranch::~StEstBranch() {
   if (mDebugLevel>0) cout << endl<<"StEstBranch::~StEstBranch ***START***" << endl;
+  //  cout<<"~StEstBranch this:"<<this<<" this->mTrack="<<this->mTrack<<endl;
   for (int i=mNHits-1;i>=0;i--) {
     mHits[i]->LeaveBranch(this);
   }
-  if (mTrack!=NULL) LeaveTrack();
+  //  if (mTrack!=NULL) LeaveTrack();
   if(mHelix!=NULL) 
     delete mHelix;
-  //delete [] mHits; dont even think about it
+  delete [] mDist;
+  delete [] mHits;
+  //  delete [] mHits; dont even think about it
   if (mDebugLevel>0) cout << "StEstBranch::~StEstBranch ***STOP***" << endl;
 };
 
+
+StEstHit* StEstBranch::GetHit(long int nr) {
+  if(nr>=mNHits) {
+    cerr << "ERROR StEstBranch::GetHit  nr>=mNHits"<<endl;
+    return NULL;
+  }
+  if(nr>=mMaxHits) {
+    cout << "ERROR StEstBranch::GetHit  nr>=mMaxHits"<<endl;
+    cout << "      nr= "<<nr<<" mNHits= "<<mNHits<<" mMaxHits= "<<mMaxHits<<endl;
+    return NULL;
+  }
+  if(nr<0) {
+    cerr << "ERROR StEstBranch::GetHit  nr<0"<<endl;
+    return NULL;
+  }
+  return mHits[nr];
+}
+
+void StEstBranch::SetHelix(StHelix *hel) {
+  if (mHelix!=NULL)
+    delete mHelix;
+  mHelix=hel;
+};
 StEstBranch* StEstBranch::Duplicate() {
   // method to copy a branch. Most of the data member are assigned by 
   // calling the branch constructor. The chisqs and the fitstatus are
@@ -127,6 +160,7 @@ void StEstBranch::LeaveTrack() {
   long int i;
   for (i=0;i<mTrack->GetNBranches();i++) {
     if (mTrack->GetBranch(i) == this) {
+      cout<<"LeaveTrack this="<<this<<" i="<<i<<endl;
       mTrack->RemoveBranch(i);
       mTrack = NULL;
       break;
