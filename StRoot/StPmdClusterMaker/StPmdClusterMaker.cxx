@@ -1,6 +1,6 @@
 /*************************************************
  *
- * $Id: StPmdClusterMaker.cxx,v 1.13 2004/09/22 19:24:55 perev Exp $
+ * $Id: StPmdClusterMaker.cxx,v 1.14 2004/11/14 22:56:07 jeromel Exp $
  * Author: Subhasis Chattopadhyay
  *************************************************
  *
@@ -9,6 +9,9 @@
  *************************************************
  *
  * $Log: StPmdClusterMaker.cxx,v $
+ * Revision 1.14  2004/11/14 22:56:07  jeromel
+ * Subhasis changes (BT 489)
+ *
  * Revision 1.13  2004/09/22 19:24:55  perev
  * Leak fixed + mess with i,j indexes
  *
@@ -146,10 +149,11 @@ Int_t StPmdClusterMaker::Make()
     {
       StPmdDetector * cpv_det = cluster_hit->detector(Int_t(0)); //CPV = 0 in PmdCollection
       StPmdDetector * pmd_det = cluster_hit->detector(Int_t(1)); //PMD = 1 in PmdCollection
-      StPmdClustering *clust1; // added for getting pointer to StPmdClustering
+     // StPmdClustering *clust1; // added for getting pointer to StPmdClustering
       Int_t choice=1; // Enter choice
       if(choice==1){
-	//      StPmdClustering *clust1 = new StPmdClustering(pmd_det, cpv_det);
+      if(cpv_det && pmd_det){
+	StPmdClustering *clust1 = new StPmdClustering(pmd_det, cpv_det); //instantiates clustering
 	if(clust1)
 	  {
 	    for(Int_t d=0;d<2;d++)  // Loop over detectors
@@ -157,18 +161,18 @@ Int_t StPmdClusterMaker::Make()
 		StPmdDetector *det = cluster_hit->detector(d); //PMD = 1 and 0 for CPV in PmdCollection
 		clust1->findPmdClusters(det); //! find Clustering 
 	      } //for loop 'd'
-      }
+         }
 	else
 	  {
 	    cout<<"clust1 not made"<<endl;
+	   return kStOK;
 	  }
-      } // if loop 'choice'
-      
       FillStEvent(pmd_det,cpv_det);
       cout<<"stevent filled , to go hist "<<endl;
       if(mOptHist)FillHistograms(pmd_det,cpv_det);
       cout<<"hist filled  "<<endl;
-      
+	  }
+      } // if loop 'choice'
     }
    clock.Stop();
      cout <<"Time to run StPmdClusterEMaker::Make() real = "<<clock.RealTime()<<"  cpu = "<<clock.CpuTime()<<" \n";
