@@ -1,3 +1,22 @@
+/*******************************************************************
+ *
+ * $Id: StTofrMatchMaker.cxx,v 1.2 2004/03/09 17:44:56 dongx Exp $
+ *
+ * Author: Xin Dong
+ *****************************************************************
+ *
+ * Description: Tofr Match Maker to do the matching between the 
+ *              fired celles and TPC tracks ( similar to  Frank's
+ *              TofpMatchMaker )
+ *
+ *****************************************************************
+ *
+ * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.2  2004/03/09 17:44:56  dongx
+ * first release
+ *
+ *
+ *******************************************************************/
 #include <iostream>
 #include "StEventTypes.h"
 #include "Stypes.h"

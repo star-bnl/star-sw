@@ -1,3 +1,22 @@
+/*******************************************************************
+ *
+ * $Id: StTofrDaqMap.h,v 1.2 2004/03/09 17:43:04 dongx Exp $
+ *
+ * Author: Xin Dong
+ *****************************************************************
+ *
+ * Description: (1) Mapping between Daq channel numbers, ADC(TDC) channel
+ *              numbers and TOFr cell numbers
+ *              (2) Parameters initalize from dbase
+ *
+ *****************************************************************
+ *
+ * $Log: StTofrDaqMap.h,v $
+ * Revision 1.2  2004/03/09 17:43:04  dongx
+ * first release
+ *
+ *
+ *******************************************************************/
 #ifndef STTOFRDAQMAP_H
 #define STTOFRDAQMAP_H
 
