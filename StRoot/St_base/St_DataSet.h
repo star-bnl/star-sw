@@ -30,6 +30,7 @@ typedef enum {
       kContinue,  // continue passing 
       kPrune,     // stop passing of the current branch but continue with the next one if any
       kStop,      // break passing
+      kUp,        // break passing, return to the previous level, then continue
       kStruct,    // work with structural links only
       kAll,       // work with all links 
       kRefs,      // work with refs links only

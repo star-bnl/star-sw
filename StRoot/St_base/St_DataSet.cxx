@@ -34,10 +34,10 @@ St_DataSet::St_DataSet(const Char_t *name, St_DataSet *parent) : TNamed(), fList
       return;
    }
  
-   if (parent) SetParent(parent);
- 
    SetName(name);
    SetTitle("St_DataSet");
+   if (parent) SetParent(parent);
+//   if (parent) parent->Add(this);
 }
 //______________________________________________________________________________
 St_DataSet::St_DataSet(const St_DataSet &pattern,EDataSetPass iopt)
@@ -285,10 +285,12 @@ EDataSetPass St_DataSet::Pass(EDataSetPass ( *callback)(St_DataSet *),Int_t dept
  //    Int_t depth >0 the number of levels to be passed             //
  //                =0 all levels will be passed                     //
  //                                                                 //
- //  Return:                                                        //
+ //  Return (this value mast be returned by the user's callback):   //
  //  ======                                                         //
  //  kContinue - continue passing                                   //
  //  kPrune    - stop passing the current branch, go to the next one//
+ //  kUp       - stop passing, leave the current branch,            //
+ //              return to previous level and continue              //
  //  kStop     - stop passing, leave all braches                    //
  //                                                                 //
  /////////////////////////////////////////////////////////////////////
@@ -303,11 +305,11 @@ EDataSetPass St_DataSet::Pass(EDataSetPass ( *callback)(St_DataSet *),Int_t dept
       St_DataSet *d=0;
       while (d = (St_DataSet *)next()) {
          condition = d->Pass(callback, depth == 0 ? 0 : --depth);
-         if (condition == kStop) break;
+         if (condition == kStop || condition == kUp) break;
       }
     }
   }
-  return condition;
+  return condition==kUp ? kContinue:condition;
 }
 //______________________________________________________________________________
 Int_t St_DataSet::Purge(Option_t *opt)

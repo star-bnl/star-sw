@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.22 1998/12/30 22:30:18 fine Exp $
+// $Id: St_Table.h,v 1.23 1999/01/13 20:29:15 fine Exp $
 // $Log: St_Table.h,v $
+// Revision 1.23  1999/01/13 20:29:15  fine
+// St_DataSet::Pass() method - the option kUp has been introduced
+//
 // Revision 1.22  1998/12/30 22:30:18  fine
 // St_Table::PrintHrader method has been introduced
 //
@@ -123,7 +126,8 @@ public:
    virtual     void       ls(Int_t deep);
    virtual     Char_t    *Print(Char_t *buf,Int_t n) const ;
    virtual     void       Print(Option_t *buf="") { Print((Char_t *)0,Int_t(0)); }
-   virtual  const Char_t *Print(Int_t row, Int_t rownumber=10, const Char_t *colfirst="", const Char_t *collast="") const; // *MENU*
+   virtual  const Char_t *Print(Int_t row, Int_t rownumber=10,
+                                const Char_t *colfirst="", const Char_t *collast="") const; // *MENU*
    virtual  const Char_t *PrintHeader() const; // *MENU*
                void      *ReAllocate(Int_t newsize);
    virtual     table_head_st *GetHeader() const;

@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.5 1998/12/27 04:16:44 fine Exp $
+// $Id: St_Node.cxx,v 1.6 1999/01/13 20:29:14 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.6  1999/01/13 20:29:14  fine
+// St_DataSet::Pass() method - the option kUp has been introduced
+//
 // Revision 1.5  1998/12/27 04:16:44  fine
 // *** empty log message ***
 //
@@ -203,6 +206,8 @@ TNode *St_Node::CreateTNode(const St_NodePosition *position)
      z=position->GetZ();
      matrix = position->GetMatrix();
   }
+//  const Char_t  *path = Path();
+//  printf("%s: %s/%s, shape=%s/%s\n",path,GetName(),GetTitle(),GetShape()->GetName(),GetShape()->ClassName());
   TNode *newNode  = new TNode(GetName(),GetTitle(),GetShape(),x,y,z,matrix,GetOption());
   newNode->SetVisibility(GetVisibility());
 
