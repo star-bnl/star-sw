@@ -1,0 +1,13 @@
+/* scalars.idl */
+
+struct scalars {
+        short aShort;		/*- sort scalar -*/
+        unsigned short aUshort;	/*- unsigned sort scalar -*/
+        long aLong;		/*- long scalar -*/
+        unsigned long aUlong;	/*- unsigned long scalar -*/
+        char aChar;		/*- char scalar -*/
+        octet aOctet;		/*- unsigned char scalar -*/
+        float aFloat;		/*- float scalar -*/
+        double aDouble;		/*- double scalar -*/
+};
+
