@@ -1,10 +1,25 @@
 #ifndef ASU_ALLOC_H
 #define ASU_ALLOC_H 1
 #include <stdlib.h>
+#ifdef __ROOT__
+#define ASU_MALLOC_OFF 
+#endif /**__ROOT__**/
+
+#ifndef ASU_MALLOC_OFF
 #ifdef __cplusplus
 void * operator new(size_t sz,const char *file,int line);
 void * operator new(size_t sz);
-#endif
+
+#ifdef __GNUC__
+void * operator new[](size_t sz,const char *file,int line);
+void * operator new[](size_t sz);
+#endif /**__GNUC__**/
+
+#define new new(__FILE__,__LINE__)
+#endif /**__cplusplus**/
+#endif /** ASU_MALLOC_OFF **/
+
+
 #ifndef CC_P
         #ifdef __cplusplus
                 #define CC_P "C"
