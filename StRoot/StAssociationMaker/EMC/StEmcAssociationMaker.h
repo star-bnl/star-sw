@@ -204,7 +204,7 @@ class multiEmcPointTrackValue;
 class StEmcAssociationMaker : public StMaker
 {
   public:
-                                StEmcAssociationMaker();
+                                StEmcAssociationMaker(const char* name="EmcAssoc");
          virtual                ~StEmcAssociationMaker();
                  Int_t          Init();
                  Int_t          Make();

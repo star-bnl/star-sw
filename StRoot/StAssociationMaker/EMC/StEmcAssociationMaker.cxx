@@ -38,7 +38,7 @@ StEmcPointAssociation::StEmcPointAssociation(StMcTrack* t, StEmcPoint* p, int at
 StEmcPointAssociation::~StEmcPointAssociation() 
 { }
 //------------------------------------------------------------------------------
-StEmcAssociationMaker::StEmcAssociationMaker()
+StEmcAssociationMaker::StEmcAssociationMaker(const char* name):StMaker(name)
 {
   for(Int_t i=0;i<NDETECTORS;i++)
   {
