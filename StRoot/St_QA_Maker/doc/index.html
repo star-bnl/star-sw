@@ -1,8 +1,8 @@
 <!doctype html public "-//W3C//DTD HTML 3.2//EN">
 <html>
 <head>
-<title>Current Available Macros</title>
-<!-- Changed by: Kathleen R. Turner, 13-Jan-2000 -->
+<title>StRoot/St_QA_Maker classes</title>
+<!-- Changed by: Kathleen R. Turner, 19-Jan-2000 -->
 </head>
 <body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
 <basefont face="verdana,arial,helvetica,sans-serif">
@@ -61,7 +61,6 @@
         <li> St_QA_Maker - description of methods -  <a href="#doc2a"> Go </A> 
         <li> StEventQAMaker - description of methods -  <a href="#doc2b"> Go </A> 
         <li> StQABookHist - description of methods -  <a href="#doc2c"> Go </A> 
-        <li> StHistUtil - description and details on usage of methods -  <a href="#doc2d"> Go </A> 
       </ul>
    <li>
       Standard Maker Names which are set in bfc & doEvents -  <a href="#doc3"> Go </A> 
@@ -219,134 +218,9 @@
 
   <li> Make - calls all histogram filling methods MakeHist* from St_QA_Maker class (see above)
 
-         </ul>
+   </ul>
 
- <p>
-<a name="doc2d">
-      <li> <font  size ="+1" color="green"> StHistUtil - methods <font  size ="+1" color="black"> 
-
-         <ul>
-
-  <li> virtual void    
-    <font  size ="+1" color="red">SetPntrToMaker<font  size ="+1" color="black">(StMaker *m1);<br>
-       &nbsp - must input the pointer to a Maker (and cast as type StMaker) so that you can
-                use the StHistUtil methods <br>
-       &nbsp - do this FIRST!
-  <li> virtual TList*  
-    <font  size ="+1" color="red">FindHists<font  size ="+1" color="black">(Char_t *dirName="QA");<br>
-     &nbsp - looks for histograms from the Maker "dirName" which it takes as input <br>
-     &nbsp - searches first under the Maker and if they're not there, looks under the histogram
-             directory <br>
-     &nbsp - returns pointer to list of histograms <br>
-     &nbsp - you don't need to call this explicitly, since ListHists & DrawHists call it for you
-  <li> virtual Int_t   
-    <font  size ="+1" color="red">ListHists<font  size ="+1" color="black">(Char_t *dirName="QA");<br>
-     &nbsp - finds histograms (using FindHist method) for given input Maker "dirName" and then lists the titles 
-
-  <li> virtual Int_t  
-    <font  size ="+1" color="red">DrawHists<font  size ="+1" color="black">(Char_t *dirName="QA"); <br>
-
-     &nbsp -  creates output postscript file (if you have set a filename) <br>
-     &nbsp -  sets the global title to be written at top of output pages<br>
-     &nbsp -  sets papersize <br>
-     &nbsp -  set all statistics options on <br>
-     &nbsp -  creates histogram canvas<br>
-     &nbsp -  writes title at top of canvas & date,time at bottom<br>
-     &nbsp -  create a pad on the canvas and divide it into subpads if requested<br>
-     &nbsp -  find the pointer <br>
-     &nbsp -  finds histograms (using FindHist method) for given input Maker directory "dirName" <br>
-     &nbsp -  loop over histograms (they are in order booked) and 
-   <ol>
-        <li> if there's no print list, then print all histograms in directory
-        <li> if there is a print list, then only print if hist name is on list
-        <li> set logY scale OFF
-        <li> if there is a list of LogY=ON and this histogram name is on it, then
-             set logY scale ON
-        <li> if it's a 2D histogram, set it to print as a "box" plot
-        <li> draw all histograms to screen 
-        <li> send all histograms to postscript file 
-   </ol>
-     &nbsp - close postscript file
-  <li> virtual void    
-    <font  size ="+1" color="red">SetDefaultLogYList<font  size ="+1" color="black">(Char_t *dirName="QA");<br>
-     &nbsp -  creates a default list of histograms (using AddToLogYList), for given input
-              Maker "dirName", that should be
-              drawn in logY scale <br>
-     &nbsp - call this method *before* DrawHists
-     &nbsp - list names currently available for Maker Directory Names:
-        <ol>
-          <li> "QA" (goes with St_QA_Maker histograms)
-          <li> "EventQA" (goes with StEventQAMaker histograms)
-        </ol>
-  <li> virtual Int_t   
-    <font  size ="+1" color="red">AddToLogYList<font  size ="+1" color="black">(const Char_t *HistName="");<br>
-     &nbsp -  adds "HistName" histogram name to list of those that
-           will be drawn in logY scale <br>
-     &nbsp - creates list if there isn't one already <br>
-     &nbsp - call this method *before* DrawHists <br>
-  <li> virtual Int_t   
-    <font  size ="+1" color="red">RemoveFromLogYList<font  size ="+1" color="black">(const Char_t *HistName="");<br>
-     &nbsp -   removes "HistName" histogram name to list of those that
-           will be drawn in logY scale <br>
-     &nbsp - first checks if there is a list <br>
-     &nbsp - call this method *before* DrawHists <br>
-   <li> virtual Int_t   
-    <font  size ="+1" color="red">ExamineLogYList();<font  size ="+1" color="black"><br>
-     &nbsp - prints out list of histograms that will be drawn in logY scale  <br>
-  <li> virtual void    
-    <font  size ="+1" color="red">SetDefaultPrintList<font  size ="+1" color="black">(Char_t *dirName="QA");<br>
-     &nbsp -  creates a default list of histogram names (using AddToPrintList), for given input
-              PrintList, that should be
-              drawn,printed  <br>
-     &nbsp - this list will be a subset of the histogram names for the given Maker
-     &nbsp - call this method *before* DrawHists
-     &nbsp - list names currently available:
-        <ol>
-          <li> "Cosmic" (goes with St_QA_Maker histograms)
-          <li> "TestQATable" (goes with StQAMaker histograms)
-        </ol>
-  <li> virtual Int_t   
-    <font  size ="+1" color="red">AddToPrintList<font  size ="+1" color="black">(const Char_t *HistName="");<br>
-     &nbsp -  adds "HistName" histogram name to list of those that
-           will be drawn,printed <br>
-     &nbsp - creates list if there isn't one already <br>
-     &nbsp - call this method *before* DrawHists <br>
-  <li> virtual Int_t   
-    <font  size ="+1" color="red">RemoveFromPrintList<font  size ="+1" color="black">(const Char_t *HistName="");<br>
-     &nbsp -   removes "HistName" histogram name to list of those that
-           will be drawn,printed <br>
-     &nbsp - first checks if there is a list <br>
-     &nbsp - call this method *before* DrawHists <br>
-   <li> virtual Int_t   
-    <font  size ="+1" color="red">ExaminePrintList();<font  size ="+1" color="black"><br>
-     &nbsp - prints out list of histograms names that will be drawn,printed  <br>
-  <li> virtual void    
-    <font  size ="+1" color="red">SetHistsNamesDraw<font  size ="+1" color="black">(const Char_t *firstName="*", 
-    const Char_t *lastName="*");<br>
-      &nbsp - sets first and last histogram names to be drawn,printed <br>
-      &nbsp - default is to draw,print them all <br>
-      &nbsp - DrawHists uses these names and only draws,prints the ones between the list  <br>
-  <li> virtual void    
-    <font  size ="+1" color="red">SetZones<font  size ="+1" color="black">(Int_t columns=2, Int_t rows=3);   <br>
-       &nbsp - zone setting for drawing,printing histograms <br>
-       &nbsp - default is 2 columns by 3 rows <br>
-       &nbsp - these settings are used by DrawHists method
-  <li> virtual void    
-    <font  size ="+1" color="red">SetPaperSize<font  size ="+1" color="black">(Int_t width=20, Int_t height=24); 
-     // A4 is 20,26  US letter is 20,24<br>
-       &nbsp - set paper size to draw,print histograms to <br>
-       &nbsp - default is US size <br>
-       &nbsp - these settings are used by DrawHists method
-  <li> virtual void    
-    <font  size ="+1" color="red">SetPostScriptFile<font  size ="+1" color="black">(const Char_t *psFileName="");<br>
-       &nbsp - set output postscript file name to print histograms to <br>
-       &nbsp - this filename is  used by DrawHists method
-  <li> virtual void    
-    <font  size ="+1" color="red">SetGlobalTitle<font  size ="+1" color="black">(const Char_t *globalTitle="");<br>
-       &nbsp - set character string which gets written as a title on top of each output page <br>
-       &nbsp - this string is  used by DrawHists method
-         </ul>
-     </ul>
+ </ul>
 
 <hr>
 <p>
