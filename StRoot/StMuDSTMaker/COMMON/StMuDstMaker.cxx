@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.18 2002/11/07 17:12:22 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.19 2002/11/27 15:07:31 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -80,7 +80,8 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
   mIoMode(1), mIoNameMode((int)ioTreeMaker),
   mTrackType(256), mReadTracks(1), 
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
-  mSplit(99), mCompression(9), mBufferSize(65536*4)
+  mSplit(99), mCompression(9), mBufferSize(65536*4), 
+  mProbabilityPidAlgorithm(0),  mTrackFilter(0), mL3TrackFilter(0)
 {
   mDirName="./";
   mFileName="";
@@ -109,14 +110,19 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   mDirName(dirName), mFileName(fileName), mFilter(filter), mMaxFiles(maxFiles),
   mTrackType(256), mReadTracks(1), 
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
-  mSplit(99), mCompression(9), mBufferSize(65536*4)
+  mSplit(99), mCompression(9), mBufferSize(65536*4), 
+  mProbabilityPidAlgorithm(0), mTrackFilter(0), mL3TrackFilter(0)
 {
   streamerOff();
   if (mIoMode==ioRead) openRead();
   if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
   
+  for ( int i=0; i<__NARRAYS__; i++) { arrays[i]=0;} 
+  for ( int i=0; i<__NSTRANGEARRAYS__; i++) { strangeArrays[i]=0;}
+
   mEventCounter=0;
   mStMuDst = new StMuDst();
+
   createArrays();
   
 }
@@ -129,14 +135,17 @@ StMuDstMaker::~StMuDstMaker() {
   delete mStMuDst;
   for ( int i=0; i<__NARRAYS__; i++) { delete arrays[i]; arrays[i]=0;} 
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) { delete strangeArrays[i];strangeArrays[i]=0;}
+  DEBUGMESSAGE3("after arrays");
   saveDelete(mProbabilityPidAlgorithm);
   saveDelete(mTrackFilter);
   saveDelete(mL3TrackFilter);
+  DEBUGMESSAGE3("after filter");
   if (mIoMode== ioWrite ) closeWrite();
   if (mIoMode== ioRead ) closeRead();
-  delete mChain; mChain=0; saveDelete(mChain);
-  delete mTTree; mTTree=0; saveDelete(mTTree);
-
+  DEBUGMESSAGE3("after close");
+  saveDelete(mChain);
+  saveDelete(mTTree);
+  DEBUGMESSAGE3("out");
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -183,12 +192,15 @@ void StMuDstMaker::clear(){
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
     clear(mStrangeArrays[i],StMuArrays::strangeArrayCounters[i]);
   }
+  DEBUGMESSAGE2("out");
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::clear(TClonesArray* t, int& counter){
+  DEBUGMESSAGE3("");
   if (t) t->Clear(""); counter=0;
+  DEBUGMESSAGE3("out");
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -224,6 +236,7 @@ int StMuDstMaker::Init(){
 void StMuDstMaker::Clear(){
   DEBUGMESSAGE2("");
   clear();
+  DEBUGMESSAGE3("out");
 }
 
 //-----------------------------------------------------------------------
@@ -330,7 +343,7 @@ void StMuDstMaker::write(){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 int StMuDstMaker::Finish() {
-  cout << __PRETTY_FUNCTION__ << endl;
+  DEBUGMESSAGE2("");
   if (mFinish) {
     for ( int i=0; i<10; i++) {
       cout << "why are you calling the Finish() again  ???????" << endl;
@@ -342,6 +355,7 @@ int StMuDstMaker::Finish() {
     if (mIoMode== ioRead ) closeRead();
     mFinish = true;
   }
+  DEBUGMESSAGE3("out");
   return 0;
 }
 //-----------------------------------------------------------------------
@@ -403,9 +417,8 @@ void StMuDstMaker::read(){
 void StMuDstMaker::closeRead(){
   DEBUGMESSAGE2("");
   if (mChain) mChain->Delete();
-  //  delete mChain;
-  mChain =0;
-}
+  mChain = 0;
+ }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -783,6 +796,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.19  2002/11/27 15:07:31  laue
+ * fix to run with standard root
+ *
  * Revision 1.18  2002/11/07 17:12:22  laue
  * Comment changed.
  *

@@ -5,7 +5,10 @@ class StMuDstMaker;
 StMuDstMaker* maker;
 
 void example() {
-   if (gClassTable->GetID("TTable") < 0) gSystem->Load("libStar");
+   if (gClassTable->GetID("TTable") < 0) {
+     gSystem->Load("libStar");
+     gSystem->Load("libPhysics");
+   }     
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
@@ -27,19 +30,22 @@ void example() {
 
   cout << " loading done " << endl;
   
-  StMuDebug::setLevel(0);  // switch of some debug output
+  StMuDebug::setLevel(3);  // switch of some debug output
 
   int iret=0;
   maker = new StMuDstMaker(0,0,"","AuAu200.lis","MuDst.root",2);   // set up maker in read mode
   StMuDbReader* db = StMuDbReader::instance();
-  db->addDb("/star/u/laue/afsWork/P02gc.db");
-  db->addDb("/star/u/laue/afsWork/P02gd.db");
+  //  db->addDb("/star/u/laue/afsWork/P02gc.db");
+  //  db->addDb("/star/u/laue/afsWork/P02gd.db");
 
   iret = maker->Make();  // read an event 
+  cout << " I " << endl;
   iret = maker->Make();  
+  cout << " II " << endl;
 
 
   StMuEvent* e = maker->muDst()->event();
+  cout << " III " << endl;
   StL0Trigger t;
   StEventInfo info;
   if (e) {
