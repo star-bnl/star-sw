@@ -3,10 +3,12 @@
 #include "TTableIter.h"
 
 #include "StTclHitChair.h"
+#include "StDstPointChair.h"
 
 #include "tables/St_tcl_tphit_Table.h"
 #include "tables/St_tpt_track_Table.h"
 #include "tables/St_dst_track_Table.h"
+#include "tables/St_dst_point_Table.h"
 #include "StCL.h"
 
 
@@ -38,6 +40,7 @@ Int_t StSectorHitFilter::Reset(Int_t reset)
  m_Primtrk    = 0;
  m_badCounter = 0;
  m_trackId.clear();
+ m_TptTrackID.clear();
  return reset; 
 }
 //_____________________________________________________________________________
@@ -56,12 +59,15 @@ Int_t StSectorHitFilter::HitSubChannel(const TTableSorter *tableObject, Int_t in
         if (thisHit[rowNumber].row !=  m_row[i]) continue;
         // remember the track if of this hit
         while (thisHit[rowNumber].row == m_row[i] && rowNumber >= 0 ) { 
-//           long id = thisHit.TrackId(rowNumber);  // tpt track id
-           long id = thisHit[rowNumber].id_globtrk;
+           long id = thisHit[rowNumber].id_globtrk;       // global track id
            if (id) 
               m_trackId.insert(id);
            else 
               m_badCounter++;
+           id = thisHit.TrackId(rowNumber);  // tpt track id
+           if (id) 
+              m_TptTrackID.insert(id);
+
            indx++; 
            rowNumber = tableObject->GetIndex(indx);
         }
@@ -69,6 +75,46 @@ Int_t StSectorHitFilter::HitSubChannel(const TTableSorter *tableObject, Int_t in
           style = 6;
 //        size = 3.0;
         color = 51+rowNumber%50;        
+        return color;
+      }
+    } else {printf(" No rows defined !!!\n"); }
+    
+  }
+  else 
+      Error("HitSubChannel","No hit table supplied");
+  return 0;
+}
+//_____________________________________________________________________________
+Int_t StSectorHitFilter::DstHitSubChannel(const TTableSorter *tableObject, Int_t index,Size_t &size, Style_t &style)
+{
+  Color_t color = -1;
+  St_dst_point *hit = (St_dst_point *)tableObject->GetTable();
+  if (hit) {
+    // Take sector / padrow 
+    StDstPointChair thisHit(hit);
+    Int_t rowNumber = tableObject->GetIndex(UInt_t(index));
+    if ( m_nRow)  { 
+      UInt_t indx = UInt_t(index);
+      color = 51+rowNumber%50;        
+      for (int i =0; i < m_nRow; i++) {
+        UShort_t sectorRow = StTclHitChair::PckRow(UShort_t(thisHit.Sector(rowNumber))
+                                                  ,UShort_t(thisHit.PadRow(rowNumber)));
+        if ( sectorRow !=  m_row[i]) continue;
+        // remember the track if of this hit
+        while (sectorRow == m_row[i] && rowNumber >= 0 ) { 
+           long id = thisHit[rowNumber].id_track;       // global track id
+           if (id) 
+              m_trackId.insert(id);
+           else 
+              m_badCounter++;           
+           indx++; 
+           rowNumber = tableObject->GetIndex(indx);
+           sectorRow = StTclHitChair::PckRow(UShort_t(thisHit.Sector(rowNumber))
+                                            ,UShort_t(thisHit.PadRow(rowNumber)));
+        }
+       // printf(" %d tracks have been found\n", m_trackId.size());
+          style = 6;
+//        size = 3.0;
         return color;
       }
     } else {printf(" No rows defined !!!\n"); }
@@ -90,6 +136,8 @@ Int_t StSectorHitFilter::Channel(const TTableSorter *tableObject,Int_t index,Siz
 
   if( mStr == "tphit" ) {
     color = HitSubChannel(tableObject,index,size,style);
+  } else if( mStr == "point") {
+     color = DstHitSubChannel(tableObject, index, size, style);
   } else if( !m_Primtrk && mStr == "primtrk") {
     m_Primtrk   = tableObject;   
   }
@@ -107,7 +155,7 @@ Int_t StSectorHitFilter::Channel(const TTable *tableObject,Int_t rowNumber,Size_
   // 
   // Return value: > 0 the color index this vertex will be drawn
   //               = 0 this vertex will be not drawn
-  //               < 0 no track will be drawn fro  now untill StVirtualFilter::Reset called
+  //               < 0 no track will be drawn from now untill StVirtualFilter::Reset called
   // Output:
   //         size (option) - the marker size to be used to draw this vertex
   //         style(option) - the marker style to be used to draw this vertex
@@ -117,26 +165,37 @@ Int_t StSectorHitFilter::Channel(const TTable *tableObject,Int_t rowNumber,Size_
   // This is an example how one can separate tableObject's by the table "type"
   // rather by the table "name" as the previous "Channel" does
   //
-  static int colorIndex = 0;
+  int colorIndex = -1;
   TString mStr = tableObject->GetType();
 
   if( mStr == "dst_track_st" ) {
     St_dst_track &track = *((St_dst_track *)tableObject); 
-    return SubChannel(track, rowNumber, size, style);
-  } else {  
+    colorIndex = SubChannel(track, rowNumber, size, style);
+  } else if (mStr == "tpt_track_st") {  
     St_tpt_track &track = *((St_tpt_track *)tableObject); 
-    if (!m_trackId.empty() )  {    
-      for (  set<long>::iterator i = m_trackId.begin(); i != m_trackId.end(); i++ ) {
-         if (track[rowNumber].id != *i) continue;
-         // style = 6;  //custom line style
-         // size = 1.6; //custom line width 
-         colorIndex++;
-         if (colorIndex > 20) colorIndex = 0;
-         return kBlue+colorIndex;
-     }
-   }
- }
- return 0; 
+    colorIndex = SubChannel(track, rowNumber,size, style);
+  }
+  return colorIndex; 
+}
+//_____________________________________________________________________________
+Int_t StSectorHitFilter::SubChannel(St_tpt_track   &track, Int_t rowNumber,Size_t &size,Style_t &style)
+{ 
+  // SubChannel to provide a selections for St_tpt_track tracks.
+  // It selects all track with id provided via "set m_TptTrackID"
+  // and check it agaist of "tpt_track" table if available.
+
+  static int colorIndex = -1;
+  if (!m_TptTrackID.empty()) {
+    for (  set<long>::iterator i = m_TptTrackID.begin(); i != m_TptTrackID.end(); i++ ) {
+      if (track[rowNumber].id != *i) continue;
+        style = 2;
+        // size = 1.6; //custom line width 
+        colorIndex++;
+        if (colorIndex > 20) colorIndex = 0;
+        return kBlue+colorIndex;
+    }
+  }
+ return 0;
 }
 //_____________________________________________________________________________
 Int_t StSectorHitFilter::SubChannel(St_dst_track   &track, Int_t rowNumber,Size_t &size,Style_t &style)
