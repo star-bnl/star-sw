@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.93  1999/08/23 20:37:29  fisyak
+#  Fix nodebug fro tables
+#
 #  Revision 1.92  1999/08/20 22:59:15  fisyak
 #  Fix problem with / in ROOT_DIR
 #
@@ -355,7 +358,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/08/20 22:59:15 $ 
+#           Last modification $Date: 1999/08/23 20:37:29 $ 
 #  default setings
 # Current Working Directory
 #
@@ -420,7 +423,7 @@ St_TablesDoc:
 	$(MAKE)  -f $(MakeDll) depend NODEPEND=1999
 	$(MAKE)  -f $(MakeDll)
 St_Tables:
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables depend NODEPEND=1999
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables depend NODEPEND=1999 NODEBUG=1999
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables \
          SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/St_Tables.$(So) NODEBUG=1999
 test:   $(addsuffix _test, $(SUBDIRS))
