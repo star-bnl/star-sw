@@ -30,12 +30,12 @@ void RunStiMaker(Int_t, const Char_t **, const Char_t *qaflag = "");
 void RunStiMaker(Int_t nevents=1,
 		 //const Char_t *path="/star/data13/reco/dev/2002/01/",
 		 const Char_t *path = "/star/data22/ITTF/data/simple_geant/DEV_10_8_01/",
-		      
+		 
 		 //const Char_t *file="*3007007*.event.root",
 		 const Char_t *file= "muon_10_neg.event.root",
-		      
-		      const Char_t *qaflag = "off",
-		      const Int_t wrStEOut = 0);
+		 
+		 const Char_t *qaflag = "off",
+		 const Int_t wrStEOut = 0); //Set this to '1' to write out new StEvents,
 
 // ------------------ Here is the actual method -----------------------------------------
 void RunStiMaker(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, const Int_t wrStEOut)
@@ -325,12 +325,13 @@ void RunStiMaker(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, c
     // WriteOut StEvent
     if (wrStEOut) {
 	cout << "!!!! doEvents: will write out .event.root file !!" << endl << endl;
-	StTreeMaker *outMk = new StTreeMaker("EvOut","","bfcTree");
-        outMk->SetIOMode("w");
-        outMk->SetBranch("eventBranch","test.event.root","w");
-        outMk->IntoBranch("eventBranch","StEvent");
+	StIOMaker *outMk = new StIOMaker("EvOut","w","test.event.root","bfcTree");
+	//        outMk->SetBranch("eventBranch","test.event.root","w");
+	outMk->IntoBranch("evtselBranch","StEvent");
+	IOMk->SetNotify("CloseFile",outMk);
+	IOMk->SetNotify("OpenFile" ,outMk);
     }
-
+    
     /*
       dbaseMk->Init();
       svtDbMk->setSvtDb_Reader();
@@ -338,7 +339,7 @@ void RunStiMaker(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, c
       svtDbMk->readSvtConfig();
       svtDbMk->readSvtGeometry();
     */
-
+    
     //
     // Initialize chain
     //
