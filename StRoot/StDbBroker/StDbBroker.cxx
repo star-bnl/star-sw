@@ -110,9 +110,14 @@ void * StDbBroker::Use()
     strcpy(tmpName,m_tableName);
     char* id2 = strstr(tmpName,"_hierarchy");
     *id2 = '\0';
-    m_database = new char[strlen(tmpName)+1];
-    strcpy(m_database,tmpName);
-    *id2='_';
+    if(strcmp(tmpName,"Calib")==0){
+      m_database = new char[strlen("Calibrations")+1];
+      strcpy(m_database,"Calibrations");
+    } else {
+     m_database = new char[strlen(tmpName)+1];
+     strcpy(m_database,tmpName);
+    }
+     *id2='_';
     delete [] tmpName;
   }
 
