@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.94 1999/06/29 00:26:03 fisyak Exp $
+# $Id: MakeDll.mk,v 1.95 1999/06/29 01:59:44 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.95  1999/06/29 01:59:44  fisyak
+# Fix typo
+#
 # Revision 1.94  1999/06/29 00:26:03  fisyak
 # Fix h-files in subdirs
 #
@@ -380,9 +383,8 @@ ifdef FILES_ORD
                           $(wildcard $(addprefix $(dir)/,$(addsuffix .h,$(NAMES_ORD)) \
                                                          $(addsuffix .hh,$(NAMES_ORD)))))
     ifneq (,$(FILES_COL))
-      FILES_ORD_H  := $(FILES_COG) $(filter-out $(FILES_COL) \
-                      $(foreach dir, $(SRC_DIRS), \
-                      $(addprefix ($dir)/, $(notdir $(FILES_COL))), $(FILES_ORD_H))
+      FILES_ORD_H  := $(FILES_COG) $(filter-out \
+                      $(addprefix $(SRC_DIR)/, $(notdir $(FILES_COL))), $(FILES_ORD_H))
     endif 
     ifneq (,$(NAMES_ORDD))
       NAMES_ORD      += $(addsuffix -, $(NAMES_ORDD))
