@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StHbtV0.hh,v $
+ * Revision 1.7  2000/08/09 14:50:22  laue
+ * 'const' removed to compile on solaris
+ *
  * Revision 1.6  2000/07/16 21:38:23  laue
  * StHbtCoulomb.cxx StHbtSectoredAnalysis.cxx : updated for standalone version
  * StHbtV0.cc StHbtV0.hh : some cast to prevent compiling warnings
@@ -57,9 +60,9 @@
 class StHbtV0 {
 public:
   StHbtV0(){/* no-op */}
-  StHbtV0(const StHbtV0&); // copy constructor
+  StHbtV0( const StHbtV0&); // copy constructor
 #ifdef __ROOT__
-  StHbtV0(const StV0MuDst&); // from strangeness V0 micro dst structure
+  StHbtV0( StV0MuDst&); // from strangeness V0 micro dst structure
 #endif
   ~StHbtV0(){/* no-op */}
 

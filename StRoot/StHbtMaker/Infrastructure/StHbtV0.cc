@@ -86,7 +86,7 @@ void StHbtV0::UpdateV0(){
 // -----------------------------------------------------------------------
 #ifdef __ROOT__
 #include "StStrangeMuDstMaker/StV0MuDst.hh"
-StHbtV0::StHbtV0(const StV0MuDst& v0FromMuDst){ // from strangess micro dst structure
+StHbtV0::StHbtV0( StV0MuDst& v0FromMuDst){ // from strangess micro dst structure
     mdecayLengthV0 = v0FromMuDst.decayLengthV0();
     mdecayVertexV0 = StHbtThreeVector( v0FromMuDst.decayVertexV0X(), v0FromMuDst.decayVertexV0Y(), v0FromMuDst.decayVertexV0Z() );
   mdcaV0Daughters = v0FromMuDst.dcaV0Daughters();
