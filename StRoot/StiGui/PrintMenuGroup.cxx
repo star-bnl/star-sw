@@ -28,6 +28,7 @@ void PrintMenuGroup::create(TGMenuBar *menuBar, TGLayoutHints *itemLayout)
   menu->AddEntry("Options",       _offset+_cmdPrintOptions);
   menu->AddEntry("Detectors",     _offset+_cmdPrintDetectors);
   menu->AddEntry("Hits",          _offset+_cmdPrintHits); 
+  menu->AddEntry("Eff",           _offset+_cmdPrintEff);
   menu->AddEntry("Tracks",        _offset+_cmdPrintTracks);
   menu->AddEntry("McTracks",      _offset+_cmdPrintMcTracks);
   menu->AddEntry("HitFilter",     _offset+_cmdPrintHitFilter);
@@ -47,6 +48,7 @@ void PrintMenuGroup::dispatch(int option)
     case _cmdPrintOptions      : printOptions();       break;
     case _cmdPrintDetectors    : printDetectors();     break;
     case _cmdPrintHits         : printHits();          break;
+    case _cmdPrintEff          : printEff();           break;
     case _cmdPrintTracks       : printTracks();        break;
     case _cmdPrintMcTracks     : printMcTracks();      break;
     case _cmdPrintHitFilter    : printHitFilter();     break;
@@ -82,7 +84,28 @@ void PrintMenuGroup::printHits()
 
 void PrintMenuGroup::printTracks()
 {
-  //cout << "PrintMenuGroup::printTracks() -I- Started"<<endl;
+  cout << "PrintMenuGroup::printTracks() -I- Started"<<endl;
+  StiTrackContainer * trackContainer = getToolkit()->getTrackContainer(); 
+  TrackToTrackMap::const_iterator iter;
+  for (iter=trackContainer->begin();
+       iter!=trackContainer->end();
+       ++iter)
+    {
+      Filter<StiTrack> * filter = getDisplay()->getTrackFilter();
+      if (filter)
+	{
+	  filter->reset();
+	  if (filter->filter((*iter).second) )
+	    cout << *((*iter).second) <<endl;
+	}
+    }
+  cout << "PrintMenuGroup::printTracks() -I- Done"<<endl;
+}
+
+
+void PrintMenuGroup::printEff()
+{
+  //cout << "PrintMenuGroup::printEff() -I- Started"<<endl;
   StiTrackContainer * trackContainer = getToolkit()->getTrackContainer(); 
   StiTrackContainer * mcTrackContainer = getToolkit()->getMcTrackContainer();
   if (trackContainer&& mcTrackContainer)
