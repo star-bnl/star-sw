@@ -24,12 +24,12 @@ void fcfAfterburner::print_hit(char *str, struct fcfHit *h)
 {
         if(str) {
                 fprintf(stdout,"%s: row %d: %f %f %d %d %d %d %d %d\n",
-                        str,row,(double)h->pad/64.0+0.5,(double)h->tm/64.0+0.5!
+                        str,row,(double)h->pad/64.0+0.5,(double)h->tm/64.0+0.5,h->c,h->f,
                         h->p1,h->p2,h->t1,h->t2) ;
         }
         else {
                 fprintf(stdout,"%d %f %f %d %d %d %d %d %d\n",
-                        row,(double)h->pad/64.0+0.5,(double)h->tm/64.0+0.5,h->!
+                        row,(double)h->pad/64.0+0.5,(double)h->tm/64.0+0.5,h->c,h->f,
                         h->p1,h->p2,h->t1,h->t2) ;
 
         }
