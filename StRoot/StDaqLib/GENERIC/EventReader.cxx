@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.31 2001/07/10 18:12:47 jeromel Exp $
+ * $Id: EventReader.cxx,v 1.32 2001/10/04 19:22:17 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.32  2001/10/04 19:22:17  ward
+ * Disabled corruption check for the EMCP bank and all banks under it.
+ *
  * Revision 1.31  2001/07/10 18:12:47  jeromel
  * Changes commited for Frank Geurts (TOF) after approval from Herb Ward
  * on Tue, 10 Jul 2001 11:19:48 and review by Victor.
@@ -826,6 +829,7 @@ char EventReader::BankOrItsDescendentsIsBad(int herbFd,long currentOffset) { // 
   if(numberOfDataWords>DATA) { printf("%d %d, bankname=%s.\n",numberOfDataWords,DATA,bankname); }
   assert(numberOfDataWords<=DATA);
   if(!strcmp(bankname,"TPCMZP")||!strcmp(bankname,"SVTMZP")||!strcmp(bankname,"FTPMZP")) { beg=0; end=numberOfDataWords-1; }
+  else if(!strcmp(bankname,"EMCP")) { beg=0; end=0; }
   else WhereAreThePointers(&beg,&end,bankname); 
   if(end>=numberOfDataWords) {
     PP"end=%d, numberOfDataWords=%d, bankname=%s.\n",end,numberOfDataWords,bankname);
