@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.cc,v 1.7 2000/05/25 21:54:16 laue Exp $
+ * $Id: StHbtEvent.cc,v 1.8 2000/07/16 21:38:22 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,14 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.cc,v $
+ * Revision 1.8  2000/07/16 21:38:22  laue
+ * StHbtCoulomb.cxx StHbtSectoredAnalysis.cxx : updated for standalone version
+ * StHbtV0.cc StHbtV0.hh : some cast to prevent compiling warnings
+ * StHbtParticle.cc StHbtParticle.hh : pointers mTrack,mV0 initialized to 0
+ * StHbtIOBinary.cc : some printouts in #ifdef STHBTDEBUG
+ * StHbtEvent.cc : B-Field set to 0.25Tesla, we have to think about a better
+ *                 solution
+ *
  * Revision 1.7  2000/05/25 21:54:16  laue
  * RotateZ implemented. Rotates momentum and helix around the z axis
  *
@@ -108,7 +116,7 @@ StHbtEvent::~StHbtEvent(){
 //___________________
 void StHbtEvent::RotateZ(const double angle){
 
-  double field = 0.5;
+  double field = 0.25;
 
   StHbtTrackIterator iter;
   StHbtV0Iterator V0iter;

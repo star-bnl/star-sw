@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtCoulomb.cxx,v 1.12 2000/05/31 20:12:53 rcwells Exp $
+ * $Id: StHbtCoulomb.cxx,v 1.13 2000/07/16 21:38:22 laue Exp $
  *
  * Author: Randy Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,14 @@
  ***************************************************************************
  *
  * $Log: StHbtCoulomb.cxx,v $
+ * Revision 1.13  2000/07/16 21:38:22  laue
+ * StHbtCoulomb.cxx StHbtSectoredAnalysis.cxx : updated for standalone version
+ * StHbtV0.cc StHbtV0.hh : some cast to prevent compiling warnings
+ * StHbtParticle.cc StHbtParticle.hh : pointers mTrack,mV0 initialized to 0
+ * StHbtIOBinary.cc : some printouts in #ifdef STHBTDEBUG
+ * StHbtEvent.cc : B-Field set to 0.25Tesla, we have to think about a better
+ *                 solution
+ *
  * Revision 1.12  2000/05/31 20:12:53  rcwells
  * Modified StHbtCoulomb for Id and Log entries
  *
@@ -378,3 +386,34 @@ StHbt1DHisto* StHbtCoulomb::CorrectionHistogram(const double& mass1, const doubl
 
   return (correction);
 }
+
+#ifdef __ROOT__
+StHbt1DHisto* StHbtCoulomb::CorrectionHistogram(const StHbt1DHisto* histo, const double mass) {
+  double mass1=mass;
+  double mass2=mass;
+  if ( mass1!=mass2 ) {
+    cout << "Masses not equal ... try again.  No histogram created." << endl;
+    assert(0);
+  }
+  StHbt1DHisto* correction = (StHbt1DHisto*) ((StHbt1DHisto*)histo)->Clone();
+  correction->Reset();
+  correction->SetDirectory(0);
+  double low   = correction->GetXaxis()->GetXmin();
+  double high  = correction->GetXaxis()->GetXmax();
+  int    nBins = correction->GetXaxis()->GetNbins();
+  //cout << " low " << low << " high " << high << " nBins " << nBins << endl;
+ const double reducedMass = mass1*mass2/(mass1+mass2);
+  double qInv = low;
+  double dQinv = (high-low)/( (double)nBins );
+  double eta;
+  for (int ii=1; ii<=nBins; ii++) 
+    {
+      qInv = correction->GetBinCenter(ii);
+      eta = 2.0*mZ1Z2*reducedMass*fine_structure_const/( qInv );
+      CoulombCorrect( eta );
+      correction->Fill( qInv, CoulombCorrect(eta,mRadius) );
+    }
+
+  return (correction);
+}
+#endif

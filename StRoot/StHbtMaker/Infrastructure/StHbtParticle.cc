@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.8 2000/05/03 17:44:43 laue Exp $
+ * $Id: StHbtParticle.cc,v 1.9 2000/07/16 21:38:23 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,14 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
+ * Revision 1.9  2000/07/16 21:38:23  laue
+ * StHbtCoulomb.cxx StHbtSectoredAnalysis.cxx : updated for standalone version
+ * StHbtV0.cc StHbtV0.hh : some cast to prevent compiling warnings
+ * StHbtParticle.cc StHbtParticle.hh : pointers mTrack,mV0 initialized to 0
+ * StHbtIOBinary.cc : some printouts in #ifdef STHBTDEBUG
+ * StHbtEvent.cc : B-Field set to 0.25Tesla, we have to think about a better
+ *                 solution
+ *
  * Revision 1.8  2000/05/03 17:44:43  laue
  * StHbtEvent, StHbtTrack & StHbtV0 declared friend to StHbtIOBinary
  * StHbtParticle updated for V0 pos,neg track Id
@@ -45,16 +53,18 @@
 #include "StHbtMaker/Infrastructure/StHbtParticle.hh"
 
 //_____________________
-StHbtParticle::StHbtParticle(){
+StHbtParticle::StHbtParticle() : mTrack(0), mV0(0) {
   /* no-op for default */
 }
 //_____________________
 StHbtParticle::~StHbtParticle(){
-  /* no-op */
+  if (mTrack) delete mTrack;
+  if (mV0) delete mV0;
 }
 //_____________________
-StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass) : mPosTrackId(0), mNegTrackId(0) {
+StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass) : mTrack(0), mV0(0) {
   // I know there is a better way to do this...
+  mTrack = new StHbtTrack(*hbtTrack);
   StHbtThreeVector temp = hbtTrack->P();
   mFourMomentum.setVect(temp);
   double ener = sqrt(temp.mag2()+mass*mass);
@@ -63,10 +73,10 @@ StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass
   mMap[1] = hbtTrack->TopologyMap(1);
   mNhits = hbtTrack->NHits();
   mHelix = hbtTrack->Helix();
-  mTrackId = hbtTrack->TrackId();
 }
 //_____________________
-StHbtParticle::StHbtParticle(const StHbtV0* const hbtV0,const double& mass) : mTrackId(0) {
+StHbtParticle::StHbtParticle(const StHbtV0* const hbtV0,const double& mass) : mTrack(0), mV0(0) {
+  mV0 = new StHbtV0(*hbtV0);
   mMap[0]= 0;
   mMap[1]= 0;
   // I know there is a better way to do this...
@@ -74,9 +84,6 @@ StHbtParticle::StHbtParticle(const StHbtV0* const hbtV0,const double& mass) : mT
   mFourMomentum.setVect(temp);
   double ener = sqrt(temp.mag2()+mass*mass);
   mFourMomentum.setE(ener);
-  mDecayVertexV0 = hbtV0->decayVertexV0();
-  mPosTrackId = hbtV0->idPos();
-  mNegTrackId = hbtV0->idNeg();
   //  cout << mPosTrackId << " " << mNegTrackId << " " << hbtV0->idPos() << " " << hbtV0->idNeg() << endl;
   //  mHelix = hbtTrack->Helix(); ?? what to do with mHelix for a Particle coming from a V0?
 }

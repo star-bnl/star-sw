@@ -11,6 +11,14 @@
  ***********************************************************************
  *
  * $Log: StHbtV0.hh,v $
+ * Revision 1.6  2000/07/16 21:38:23  laue
+ * StHbtCoulomb.cxx StHbtSectoredAnalysis.cxx : updated for standalone version
+ * StHbtV0.cc StHbtV0.hh : some cast to prevent compiling warnings
+ * StHbtParticle.cc StHbtParticle.hh : pointers mTrack,mV0 initialized to 0
+ * StHbtIOBinary.cc : some printouts in #ifdef STHBTDEBUG
+ * StHbtEvent.cc : B-Field set to 0.25Tesla, we have to think about a better
+ *                 solution
+ *
  * Revision 1.5  2000/05/03 17:44:43  laue
  * StHbtEvent, StHbtTrack & StHbtV0 declared friend to StHbtIOBinary
  * StHbtParticle updated for V0 pos,neg track Id
@@ -42,11 +50,17 @@
 
 #include <fstream.h>
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh" //same as in StHbtTrack.hh
+#ifdef __ROOT__
+#include "StStrangeMuDstMaker/StV0MuDst.hh"
+#endif
 
 class StHbtV0 {
 public:
   StHbtV0(){/* no-op */}
   StHbtV0(const StHbtV0&); // copy constructor
+#ifdef __ROOT__
+  StHbtV0(const StV0MuDst&); // from strangeness V0 micro dst structure
+#endif
   ~StHbtV0(){/* no-op */}
 
 

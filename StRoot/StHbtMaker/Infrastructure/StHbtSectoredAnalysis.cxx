@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtSectoredAnalysis.cxx,v 1.1 2000/04/12 01:46:18 willson Exp $
+ * $Id: StHbtSectoredAnalysis.cxx,v 1.2 2000/07/16 21:38:23 laue Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -15,6 +15,14 @@
  ***************************************************************************
  *
  * $Log: StHbtSectoredAnalysis.cxx,v $
+ * Revision 1.2  2000/07/16 21:38:23  laue
+ * StHbtCoulomb.cxx StHbtSectoredAnalysis.cxx : updated for standalone version
+ * StHbtV0.cc StHbtV0.hh : some cast to prevent compiling warnings
+ * StHbtParticle.cc StHbtParticle.hh : pointers mTrack,mV0 initialized to 0
+ * StHbtIOBinary.cc : some printouts in #ifdef STHBTDEBUG
+ * StHbtEvent.cc : B-Field set to 0.25Tesla, we have to think about a better
+ *                 solution
+ *
  * Revision 1.1  2000/04/12 01:46:18  willson
  * Initial Installation
  *
@@ -29,13 +37,6 @@
 #ifdef __ROOT__ 
 ClassImp(StHbtSectoredAnalysis)
 #endif
-
-//Function prototypes for copy constructor fucntions:
-StHbtEventCut*    copyTheCut(StHbtEventCut*);
-StHbtParticleCut* copyTheCut(StHbtParticleCut*);
-StHbtPairCut*     copyTheCut(StHbtPairCut*);
-StHbtCorrFctn*    copyTheCorrFctn(StHbtCorrFctn*);
-
 
 //This function gives the correct linear transformation from a 3-D coordinate to a 1-D array index. 
 
@@ -165,39 +166,44 @@ StHbtSectoredAnalysis::StHbtSectoredAnalysis(const StHbtSectoredAnalysis& a) : S
   mSectoredMixingBuffer = new StHbtSectoredPicoEventCollection;
   
   // find the right event cut
-  mEventCut = copyTheCut(a.mEventCut);
+  mEventCut = a.mEventCut->Clone();
   // find the right first particle cut
-  mFirstParticleCut = copyTheCut(a.mFirstParticleCut);
+  mFirstParticleCut = a.mFirstParticleCut->Clone();
   // find the right second particle cut
-  if (a.mFirstParticleCut==a.mSecondParticleCut!=0) 
-    SetSecondParticleCut(mSecondParticleCut); // identical particle hbt
+  if (a.mFirstParticleCut==a.mSecondParticleCut) 
+    SetSecondParticleCut(mFirstParticleCut); // identical particle hbt
   else
-    mSecondParticleCut = copyTheCut(a.mSecondParticleCut);
-  mPairCut = copyTheCut(a.mPairCut);
+  mSecondParticleCut = a.mSecondParticleCut->Clone();
+
+  mPairCut = a.mPairCut->Clone();
   
-  // Need to figure out fix for analysis casts
-  /*
-  if ( mEventCut && mFirstParticleCut && mSecondParticleCut && mPairCut ) {
-    SetEventCut(mEventCut); // this will set the myAnalysis pointer inside the cut
-  cout << " event cut set " << endl;
-    SetFirstParticleCut(mFirstParticleCut); // this will set the myAnalysis pointer inside the cut
-  cout << " first particle cut set " << endl;
-    SetSecondParticleCut(mSecondParticleCut); // this will set the myAnalysis pointer inside the cut
-  cout << " second particle cut set " << endl;
-    SetPairCut(mPairCut); // this will set the myAnalysis pointer inside the cut
-  cout << " pair cut set " << endl;
+  if ( mEventCut ) {
+      SetEventCut(mEventCut); // this will set the myAnalysis pointer inside the cut
+      cout << " StHbtAnalysis::StHbtAnalysis(const StHbtAnalysis& a) - event cut set " << endl;
   }
-  */
+  if ( mFirstParticleCut ) {
+      SetFirstParticleCut(mFirstParticleCut); // this will set the myAnalysis pointer inside the cut
+      cout << " StHbtAnalysis::StHbtAnalysis(const StHbtAnalysis& a) - first particle cut set " << endl;
+  }
+  if ( mSecondParticleCut ) {
+      SetSecondParticleCut(mSecondParticleCut); // this will set the myAnalysis pointer inside the cut
+      cout << " StHbtAnalysis::StHbtAnalysis(const StHbtAnalysis& a) - second particle cut set " << endl;
+  }  if ( mPairCut ) {
+      SetPairCut(mPairCut); // this will set the myAnalysis pointer inside the cut
+      cout << " StHbtAnalysis::StHbtAnalysis(const StHbtAnalysis& a) - pair cut set " << endl;
+  }
 
   StHbtCorrFctnIterator iter;
   for (iter=a.mCorrFctnCollection->begin(); iter!=a.mCorrFctnCollection->end();iter++){
-    cout << " looking for correlation functions " << endl;
-    StHbtCorrFctn* fctn = copyTheCorrFctn(*iter);
+    cout << " StHbtAnalysis::StHbtAnalysis(const StHbtAnalysis& a) - looking for correlation functions " << endl;
+    StHbtCorrFctn* fctn = (*iter)->Clone();
     if (fctn) AddCorrFctn(fctn);
-    else cout << " correlation function not found " << endl;
+    else cout << " StHbtAnalysis::StHbtAnalysis(const StHbtAnalysis& a) - correlation function not found " << endl;
   }
 
   mNumEventsToMix = a.mNumEventsToMix;
+
+  cout << " StHbtSectoredAnalysis::StHbtSectoredAnalysis(const StHbtSectoredAnalysis& a) - analysis copied " << endl;
   
 }
 

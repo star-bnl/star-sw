@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPicoEvent.cc,v 1.3 2000/06/01 20:40:13 laue Exp $
+ * $Id: StHbtPicoEvent.cc,v 1.4 2000/07/16 21:38:23 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -16,6 +16,14 @@
  ***************************************************************************
  *
  * $Log: StHbtPicoEvent.cc,v $
+ * Revision 1.4  2000/07/16 21:38:23  laue
+ * StHbtCoulomb.cxx StHbtSectoredAnalysis.cxx : updated for standalone version
+ * StHbtV0.cc StHbtV0.hh : some cast to prevent compiling warnings
+ * StHbtParticle.cc StHbtParticle.hh : pointers mTrack,mV0 initialized to 0
+ * StHbtIOBinary.cc : some printouts in #ifdef STHBTDEBUG
+ * StHbtEvent.cc : B-Field set to 0.25Tesla, we have to think about a better
+ *                 solution
+ *
  * Revision 1.3  2000/06/01 20:40:13  laue
  * StHbtIO.cc: updated for new V0s
  * StHbtPicoEvent.cc: collections especially cleared
@@ -41,12 +49,16 @@ StHbtPicoEvent::StHbtPicoEvent(){
 //_________________
 StHbtPicoEvent::~StHbtPicoEvent(){
   StHbtParticleIterator iter;
-  for (iter=mFirstParticleCollection->begin();iter!=mFirstParticleCollection->end();iter++){
-    delete *iter;
+
+
+  if (mFirstParticleCollection){
+      for (iter=mFirstParticleCollection->begin();iter!=mFirstParticleCollection->end();iter++){
+	delete *iter;
+      }
+      mFirstParticleCollection->clear();
+      delete mFirstParticleCollection;
+      mFirstParticleCollection = 0;
   }
-  mFirstParticleCollection->clear();
-  delete mFirstParticleCollection;
-  mFirstParticleCollection = 0;
 
   if (mSecondParticleCollection){
     for (iter=mSecondParticleCollection->begin();iter!=mSecondParticleCollection->end();iter++){
@@ -55,12 +67,13 @@ StHbtPicoEvent::~StHbtPicoEvent(){
     mSecondParticleCollection->clear();
     delete mSecondParticleCollection;
     mSecondParticleCollection = 0;
-
   }
 
   if (mThirdParticleCollection){
-    for (iter=mThirdParticleCollection->begin();iter!=mThirdParticleCollection->end();iter++){
-      delete *iter;
+    if (mThirdParticleCollection->size() != 0 ) {
+      for (iter=mThirdParticleCollection->begin();iter!=mThirdParticleCollection->end();iter++){
+	delete *iter;
+      }
     }
     mThirdParticleCollection->clear();
     delete mThirdParticleCollection;
