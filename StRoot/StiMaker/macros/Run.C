@@ -12,6 +12,10 @@
 //const char * path= "/star/data06/ITTF/EvalData/MCFiles/auau200",
 //const char * path= "/data/r20b/ittf/auau200/hijing/b0_20/standard/year2001/",
 
+void Run()
+{
+	RunGui();
+}
 
 void help();
 void loadLibrairies();
@@ -41,6 +45,7 @@ void loadLibrairies(bool doProfile)
 		 "StiMaker",
 		 "StFtpcClusterMaker",
 		 "StiTpc","StiSvt","StiEmc","StiFtpc","last"};
+	//		 "StSvtSimulationMaker",
 
   int i=0;  
   cout <<"Run.C::loadLibrairies() - INFO - Started"<<endl;
@@ -165,17 +170,18 @@ void RunResiduals(int firstEvent = 0,
 void RunGui(int firstEvent = 0,
 	    int nEvents    = 1,
 	    const char * filePrefix = "st_physics_",
-	    const char* path= "/star/data06/ITTF/EvalData/Event/ppMinBias/",
-	    const char* file ="st_physics_3019045_raw_0031.event.root",
+	    //const char* path= "/star/data06/ITTF/EvalData/Event/ppMinBias/",
+	    //const char* file ="st_physics_3019045_raw_0031.event.root",
+	    //const char* outfile="",
+	    const char * path= "/data/r23b/star/hijingAuau/200GeV/b0_20/standard/2001/Unknown/",
+	    const char * file="rcf0183_02_300evts.geant.root",
 	    const char* outfile="",
-	    //const char * path= "/data/r23b/star/hijingAuau/200GeV/b0_20/standard/2001/Unknown/",
-	    //const char * file="rcf0183_02_300evts.geant.root",
 	    bool useGui=true,
 	    bool useMcAsRec=false,
 	    bool doPlots=true,
-	    bool doSimulation=false,
-	    bool doAssociation=false,
-	    bool doMiniMcEvent=false,
+	    bool doSimulation=true,
+	    bool doAssociation=true,
+	    bool doMiniMcEvent=true,
 	    bool doDst=false,
 	    bool doStEventOutput=false,
 	    bool doStEventInput=true,
@@ -352,8 +358,16 @@ void Run(Int_t firstEvent,
   pars->usePixel        = usePixel;
   pars->activePixel     = activePixel;
   pars->useResidualCalculator = useResidualCalculator;
-  pars->baseName        ="_pars.txt";
 
+  pars->trackerInputFile = "StRoot/StiMaker/macros/trackFinderPars.dat";
+  pars->fitterInputFile  = "StRoot/StiMaker/macros/trackFitterPars.dat";
+  pars->emcInputFile   = "none";
+  pars->eemcInputFile  = "none";
+  pars->svtInputFile   = "StRoot/StiMaker/macros/svtInputFile.dat";
+  pars->ssdInputFile   = "none";
+  pars->tpcInputFile   = "StRoot/StiMaker/macros/tpcInputFile.dat";
+  pars->ftpcInputFile  = "none";
+  pars->pixelInputFile = "none";
   
   if(outfile=="") outfile = fileList[0];
   miniChain->run(firstEvent,nEvents,filePrefix,fileList,outfile);
