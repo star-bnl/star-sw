@@ -38,7 +38,7 @@ ifeq (base,$(PKGNAME))
 LIBRARY := -L$(STAR)/asps/../.$(STAR_SYS)/lib -ldsl -lasu 
 #                                                            $(shell cernlib)
 endif
-INC_DIRS:= $(sort $(dir $(wildcard $(OUT_DIR)/.share/*/*.h  $(STAR)/.share/*/*.h)))
+INC_DIRS:= $(subst /TEMP,, $(addsuffix TEMP, $(sort $(dir $(wildcard $(OUT_DIR)/.share/*/*.h  $(STAR)/.share/*/*.h)))))
 #
 #	Define .src dir. If does not exist EMPTY
 #
@@ -60,7 +60,7 @@ SRC_DIR := $(INP_DIR)
 #	Includes
 #####INCLUDES := $(addprefix -I,$(wildcard $(UPP_INP_DIR)/*/inc))
 
-INCLUDES := -I$(SRC_DIR) -I$(OUT_DIR)/StRoot/base -I$(STAR)/StRoot/base -I$(STAR)/asps/staf/inc -I$(ROOTSYS)/include -I$(OUT_DIR)/.share/tables -I$(STAR)/.share/tables
+INCLUDES := -I$(SRC_DIR) -I$(OUT_DIR)/StRoot/base -I$(STAR)/StRoot/base -I$(STAR)/asps/staf/inc -I$(ROOTSYS)/include -I$(OUT_DIR)/.share/tables -I$(STAR)/.share/tables -I$(OUT_DIR)/.share  -I$(STAR)/.share
 INCL     :=  -I$(GEN_DIR) $(addprefix -I, $(INC_DIRS))
 
 
@@ -182,6 +182,8 @@ $(FILES_CINT_SYT) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h
 	cd $(GEN_DIR); cp $(1ST_DEPS) .; \
 	rootcint -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCLUDES) $(notdir $(1ST_DEPS)) $(LINKDEF); 
 
+
+$(FILES_CINT_SYM) : $(GEN_DIR)/St_%Cint.cxx : $(wildcard $(SRC_DIR)/St_*.h)
 $(FILES_CINT_SYM) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h
 	$(COMMON_LINKDEF)
 	@echo "#pragma link C++ class St_DataSet;"       >> $(LINKDEF);
@@ -199,7 +201,7 @@ $(FILES_CINT_ORD) : $(GEN_DIR)/%Cint.cxx : $(SRC_DIR)/%.h
 	$(ORD_LINKDEF)
 	@cat $(LINKDEF)
 	cd $(GEN_DIR); cp $(1ST_DEPS) .; \
-        rootcint -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCLUDES)  $(notdir $(1ST_DEPS)) \
+        rootcint -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCLUDES) $(notdir $(1ST_DEPS)) \
          $(notdir $(LINKDEF));
 
 
