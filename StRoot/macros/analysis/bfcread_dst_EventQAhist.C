@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.14 2000/01/26 19:28:15 kathy Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.15 2000/01/27 18:53:52 kathy Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.15  2000/01/27 18:53:52  kathy
+// add call to method Overlay2hists at end of macro
+//
 // Revision 1.14  2000/01/26 19:28:15  kathy
 // put in call to method SetDefaultLogXList
 //
@@ -75,7 +78,7 @@ StChain *chain;
 //TBrowser *brow=0;
 
 void bfcread_dst_EventQAhist(
-     Int_t nevents=10, 
+     Int_t nevents=1,
      const Char_t *MainFile=
       "/afs/rhic/star/data/samples/gstar.dst.root",
     const Char_t *psFile="Event_QA_hist.ps",
@@ -189,20 +192,9 @@ void bfcread_dst_EventQAhist(
 
 //  Now draw the actual histograms to canvas and to ps file
   HU->DrawHists(MakerHistDir);
-   
+
+//  overlay two histograms and print to screen -CPL
+  Int_t result = HU->Overlay2Hists(MakerHistDir,"StEQaGtrkRT","StEQaPtrkR");
+  if (result == kStErr)
+    cout << " !!! There was an error in Overlay2Hists !!!" << endl;  
 }
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
