@@ -1,5 +1,5 @@
 // Author : Dominik Flierl 
-// $Id: StClusterDisplayMaker.cxx,v 1.1 2000/07/07 02:31:31 flierl Exp $
+// $Id: StClusterDisplayMaker.cxx,v 1.2 2000/07/09 20:03:43 flierl Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 //                                                                      //
@@ -24,8 +24,8 @@
 #include "tables/St_type_shortdata_Table.h"
 #include "tables/St_tcl_tphit_Table.h"
 #include "St_l3Clufi_Maker/St_l3Clufi_Maker.h"
-#include "St_l3Clufi_Maker/St_l3_Coordinate_Transformer.h"
-#include "St_l3Clufi_Maker/St_l3_Coordinates.h"
+#include "St_l3_Coordinate_Transformer.h"
+#include "St_l3_Coordinates.h"
 #include "St_TableSorter.h"
 
 ClassImp(StClusterDisplayMaker) ;
@@ -101,18 +101,9 @@ Int_t StClusterDisplayMaker::Make(Int_t isec , Int_t irow ,Char_t* c, Int_t pad_
   myhist->SetXTitle("Pad");
   myhist->SetYTitle("Time Bucket");
 
-  // fill histo with pixel
-  //  if (row>13)
-  //  {
-  //Fill_Pixel_into_histo_outer() ;
-  //  }
-  //else
-  // {
-  Fill_Pixel_into_histo_inner() ;
-  // }
-
+  // Fill pixel for this padrow into 2dhisto
+  Fill_Pixel() ;
   
-
   // create canvas and plot histo
   TCanvas* can = new TCanvas("ClusterCockpit","ClusterCockpit",600,500) ;
   can->ToggleEventStatus();
@@ -177,9 +168,8 @@ Int_t StClusterDisplayMaker::Make(Int_t isec , Int_t irow ,Char_t* c, Int_t pad_
   // go home
   return kStOK;
 }
-
 //__________________________________________________________________
-void StClusterDisplayMaker::Fill_Pixel_into_histo_inner()
+void StClusterDisplayMaker::Fill_Pixel()
 {
 
     // prepare cood-trans
@@ -383,134 +373,12 @@ void StClusterDisplayMaker::Fill_Pixel_into_histo_inner()
   cout << "row : " << row << endl ;
 }
 //________________________________
-void StClusterDisplayMaker::Fill_Pixel_into_histo_outer()
-{  
-  Int_t number_of_found = 0 ;
-	
-  // Fill display with data
-
-  St_DataSet* raw_data_tpc = (St_DataSet*) GetInputDS("tpc_raw");
-  if (!raw_data_tpc)
-    {
-      cout << "No raw data found." << endl ;
-      return ;
-    }
-  else
-    {
-      // iterator of raw_data_tpc to navigate through it
-      St_DataSetIter rawdata(raw_data_tpc) ;
-      Char_t* sectorname = "Sector_07" ;
-      St_DataSet *sector = rawdata.FindObject(sectorname) ;
-      cout << " Examining sector : " << sectorname << endl ;	
-
-      St_DataSetIter sector_iterator(sector) ;
-      //sector_iterator.Du() ;
-      // get the raw tables of this secotor 
-      // raw_row_out
-      St_raw_row *raw_row_out = (St_raw_row*) sector_iterator("raw_row_out");
-      raw_row_st* outerrow = (raw_row_st*) raw_row_out->GetTable();
-      // raw_pad_out
-      St_raw_pad *raw_pad_out = (St_raw_pad*) sector_iterator("raw_pad_out");
-      raw_pad_st* padout = (raw_pad_st*) raw_pad_out->GetTable();
-      // raw_seq_out
-      St_raw_seq *raw_seq_out = (St_raw_seq*) sector_iterator("raw_seq_out");
-      raw_seq_st* seqout = (raw_seq_st*) raw_seq_out->GetTable();
-      // raw_shortdata_out
-      St_type_shortdata *shortdataout = (St_type_shortdata *) sector_iterator("pixel_data_out");
-      type_shortdata_st* adcarrayout = (type_shortdata_st*) shortdataout->GetTable();
-
-      ////////
-      // Get data for this row
-      ///////
-      Int_t rowindex = 45 - row ;
-      cout << "Examining rowindex  :"<< rowindex << endl ;
-      Int_t pixel_offset_row =(Int_t) (outerrow[rowindex].ipixel) ;
-      Int_t seq_offset_row =(Int_t) (outerrow[rowindex].iseq) ;
-      Int_t pad_offset_row =(Int_t) (outerrow[rowindex].ipad) ;
-      Int_t row_id = (Int_t) (outerrow[rowindex].RowId) ;
-      cout << "Row_id  :"<< row_id << endl ;
-
-      /////////
-      // loop over pads
-      /////////
-      //cout << " Number of pads we loop over " <<  Int_t (row_st[rowindex].npad) << endl;
-      for (Int_t padindex = 0 ; padindex < Int_t (outerrow[rowindex].npad) ; padindex++)
-	{
-	  Int_t pixel_offset_pad = (Int_t) (pixel_offset_row + (padout[padindex+pad_offset_row].PadOffset));
-	  Int_t seq_offset_pad = (Int_t) (seq_offset_row + (padout[padindex+pad_offset_row].SeqOffset));
-	  Int_t num_seq_pad = (Int_t) (padout[padindex+pad_offset_row].nseq);
-	    
-	  Int_t pad_id = (Int_t) (padout[padindex+(outerrow[rowindex].ipad)].PadId);
-	  Int_t seq_mod_break = (Int_t) (padout[padindex+(outerrow[rowindex].ipad)].SeqModBreak);
-	  // if (num_seq_pad>1)
-	  // 		{
-	  // 		    cout << "alert padid " << pad_id ;
-	  // 		    cout << "    row  " << row_id ;
-	  // 		    cout << "    seq  " << num_seq_pad ;
-	  // 		}
-	  ///////
-	  // loop over sequenzes
-	  ///////
-	  //cout << " Number of sequenzes we loop over " << num_seq_pad << endl;
-	  for ( Int_t sequenzindex = 0 ; sequenzindex < num_seq_pad ; sequenzindex++ )
-	    {
-	      Int_t timebucketoffset=0;
-	      if ( sequenzindex < seq_mod_break )
-		{
-		  timebucketoffset = (Int_t) (seqout[sequenzindex + seq_offset_pad].m);
-		}
-	      else if ( sequenzindex >= seq_mod_break )
-		{
-		  timebucketoffset = (Int_t) (seqout[sequenzindex + seq_offset_pad].m + 256) ;
-		} 
-		
-
-	      Int_t numberoftimebucketsinthissequenz =(Int_t) (seqout[sequenzindex + seq_offset_pad].i);
-	      //////
-	      // loop over pixel in sequenz
-	      //////
-	      //cout << " Number of pixel we loop over " << numberoftimebucketsinthissequenz << endl;
-	      for ( Int_t pixelindex = 0 ; pixelindex <= numberoftimebucketsinthissequenz ; pixelindex++ )
-		{
-		  // Get adc value
-		  Short_t adc_value = (Short_t) adcarrayout[pixelindex+pixel_offset_pad].data;
-		    
-		  // Get according bucket
-		  Int_t bucket_id = (Int_t) timebucketoffset + pixelindex;
-
-		  if ( adc_value < 1024 && adc_value > 0 && 
-		       pad_id > 1 && pad_id < 182
-		       && bucket_id >= 0 && bucket_id < 512 )
-		    {
-		      // Fill Display
-		      cout << " Filling  pad : " << pad_id << "\t" ;
-		      cout << "       row : " << row_id << "\t" ;
-		      cout << "       time : " << bucket_id << "\t" ;
-		      cout << "       adc : " << adc_value << endl;
-		      myhist->Fill(pad_id,bucket_id,adc_value) ;
-		      number_of_found++;
-		    }
-		  else 
-		    {
-		      cout << "something wrong with adc value :" << adc_value <<endl;
-		      cout << "in   pad : " << pad_id << "\t" ;
-		      cout << "       time : " << bucket_id << "\t" ;
-		      cout << "       adc : " << adc_value << endl;
-		    }
-		} // Loop over pixel in this sequenz 
-	    } // Loop over sequnezes                           
-	} // Loop over pads
-      cout << "Number of found clusters : " << number_of_found << "/t" ;
-      cout << "sec : " << sec << "/t" ;
-      cout << "row : " << row_id << endl ;
-    }
-}//_____________________
 Int_t StClusterDisplayMaker::Get_l3off_points()
 {
     // prepare cood-trans
     cout << endl << endl;
     St_l3_Coordinate_Transformer transformer ;
-    transformer.Use_transformation_provided_by_db();
+    //transformer.Use_transformation_provided_by_db();
     transformer.Print_parameters() ;
     St_l3_xyz_Coordinate XYZ(0,0,0) ;
     St_l3_ptrs_Coordinate PTRS(0,0,0,0) ;
@@ -536,7 +404,7 @@ Int_t StClusterDisplayMaker::Get_l3off_points()
     Int_t badcluster = 0 ;
 
     // loop over points
-    St_tcl_tphit* sthit = (St_tcl_tphit*) GetDataSet("bfc/.make/l3/.make/l3Clufi/.data/L3hit");
+    St_tcl_tphit* sthit = (St_tcl_tphit*) GetDataSet("bfc/.make/l3Chain/.make/l3Clufi/.data/L3hit");
     tcl_tphit_st* myl3offhit =  sthit->GetTable();
     if(!myl3offhit)
       {
@@ -609,7 +477,7 @@ Int_t StClusterDisplayMaker::Get_off_points()
   offpoints_time_err = new Float_t[max_number_of_points];
 
   // loop over points
-  St_tcl_tphit* sthit = (St_tcl_tphit*) GetDataSet("bfc/.make/tpc/.make/tpc_hits/.data/tphit");
+  St_tcl_tphit* sthit = (St_tcl_tphit*) GetDataSet("bfc/.make/tpcChain/.make/tpc_hits/.data/tphit");
   tcl_tphit_st* myoffhit =  sthit->GetTable();
   if (!myoffhit)
     {
@@ -690,7 +558,7 @@ Int_t StClusterDisplayMaker::Get_matched_points(Int_t& num_not_matched)
   St_l3_ptrs_Coordinate PTRS(0,0,0,0) ;
 
   // get offline points
-  St_tcl_tphit* st_tcl_hits = (St_tcl_tphit*) GetDataSet("bfc/.make/tpc/.make/tpc_hits/.data/tphit");
+  St_tcl_tphit* st_tcl_hits = (St_tcl_tphit*) GetDataSet("bfc/.make/tpcChain/.make/tpc_hits/.data/tphit");
   tcl_tphit_st* tcl_hits = (tcl_tphit_st*) st_tcl_hits->GetTable() ;
     if (!tcl_hits) 
 	{
@@ -703,7 +571,7 @@ Int_t StClusterDisplayMaker::Get_matched_points(Int_t& num_not_matched)
 	}
 
     // get l3 points
-    St_tcl_tphit* st_l3_hits = (St_tcl_tphit*) GetDataSet("bfc/.make/l3/.make/l3Clufi/.data/L3hit");
+    St_tcl_tphit* st_l3_hits = (St_tcl_tphit*) GetDataSet("bfc/.make/l3Chain/.make/l3Clufi/.data/L3hit");
     tcl_tphit_st* l3_hits = (tcl_tphit_st*) st_l3_hits->GetTable() ;
     if (!l3_hits) 
 	{
