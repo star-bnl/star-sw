@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.39 2001/02/22 21:10:39 lasiuk Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.40 2001/04/17 18:21:05 horsley Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.40  2001/04/17 18:21:05  horsley
+ * updated default index of refraction values, made correction to hit filter
+ *
  * Revision 2.39  2001/02/22 21:10:39  lasiuk
  * remove debug output (dca)
  *
@@ -189,6 +192,7 @@ using std::max;
 #include "StRichDisplayActivate.h"
 #include "StRichTrackingControl.h"
 #include "StRichMcSwitch.h"
+
 #define myrICH_WITH_NTUPLE 1
 
 
@@ -282,7 +286,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.39 2001/02/22 21:10:39 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.40 2001/04/17 18:21:05 horsley Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -380,8 +384,8 @@ Int_t StRichPIDMaker::Init() {
   // this->setWaveLenght(small,large)
   // can be used to change wavelenghts
   //
-  mDefaultShortWave = 160.0e-7;
-  mDefaultLongWave  = 200.0e-7;
+  mDefaultShortWave = 174.633e-7;
+  mDefaultLongWave  = 217.039e-7;
   
   if ( (mDefaultShortWave != mShortWave) &&
        (mDefaultLongWave  != mLongWave) ) {
@@ -664,11 +668,11 @@ Int_t StRichPIDMaker::Make() {
 	    //
 	    // fill PID traits
 	    //
-	    this->fillPIDTraits(ringCalc);
 	    
+	    this->fillPIDTraits(ringCalc);
+	    	    
 	    delete ringCalc;  
 	    ringCalc = 0;
-
 	  }
 
 	} // loop over particles
@@ -1277,7 +1281,7 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	// Given an initial guess for psi, find the "line of constant psi"
 	// which crosses both rings and intersects with the hit
 	//
-//  	os << "current best guess for psi " << psi << endl;
+        // os << "current best guess for psi " << psi << endl;
 		
 	//
 	// determine the outerRingPoint with the corresponding Psi
@@ -1288,38 +1292,46 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	double littleStep   = 1.*degree;
 	double modifiedPsi = psi;
 	if(modifiedPsi < 0) littleStep *= -1.;
+	
+	while (iterationNumber<maxIterForInitialPsi) {
+	  iterationNumber++;
+	  ringCalculator->getRing(eOuterRing)->getPoint(modifiedPsi,outerRingPoint);
 
-	while(iterationNumber<maxIterForInitialPsi) {
-	    iterationNumber++;
-	    ringCalculator->getRing(eOuterRing)->getPoint(modifiedPsi,outerRingPoint);
-		    
-	    if( (outerRingPoint.x() == FLT_MAX) ||
-		( (fabs(outerRingPoint.x() > mGeometryDb->padPlaneDimension().x())) ||
-		  (fabs(outerRingPoint.y()) > mGeometryDb->padPlaneDimension().y()) ) ) {
-//  		os << "An OuterRingPoint DOES NOT EXIST with this psi..( "
-//  		   << iterationNumber << ")" << endl;
-		modifiedPsi+=littleStep;
-	    }
-	    else {
-		// we found a point
-		break;
-	    }
-	};
-//  	os << "old psi " << psi << endl;
+	  // ---------> fix brackets	  
+	  if ( (outerRingPoint.x() == FLT_MAX) ||
+	       ( 
+		fabs(outerRingPoint.x()) > mGeometryDb->padPlaneDimension().x() ||
+		fabs(outerRingPoint.y()) > mGeometryDb->padPlaneDimension().y() 
+		) 
+	       ) {
+	    //  os << "An OuterRingPoint DOES NOT EXIST with this psi..( "
+	    //      << iterationNumber << ")" << endl;
+	    modifiedPsi+=littleStep;
+	  }
+	  else {
+	    // we found a point
+	    break;
+	  }
+	}
+	
+	//  	os << "old psi " << psi << endl;
 	psi = modifiedPsi;
 //  	os << "new (starting) psi " << psi << endl;
 
 	ringCalculator->getRing(eInnerRing)->getPoint(psi,innerRingPoint);
 	ringCalculator->getRing(eOuterRing)->getPoint(psi,outerRingPoint);
 
-	if( (fabs(outerRingPoint.x()  > mPadPlaneDimension.x())) ||
-	    (fabs(outerRingPoint.y()) > mPadPlaneDimension.y())  ||
-	    (fabs(innerRingPoint.x()  > mPadPlaneDimension.x())) ||
-	    (fabs(innerRingPoint.y()) > mPadPlaneDimension.y())  ) {
-//  	    os << "ERROR: PANIC BAD POINT...continue" << endl;
-	    continue;
-	}
 
+
+	// ----------->  fix brackets
+	if ( (fabs(outerRingPoint.x()) > mPadPlaneDimension.x()) || 
+	     (fabs(outerRingPoint.y()) > mPadPlaneDimension.y())  ||
+	     (fabs(innerRingPoint.x()) > mPadPlaneDimension.x()) ||
+	     (fabs(innerRingPoint.y()) > mPadPlaneDimension.y())  ) {
+	  //  	    os << "ERROR: PANIC BAD POINT...continue" << endl;
+	  continue;
+	}
+	
 
 	//
 	// the constant Psi line between the inner and outer rings
@@ -1551,8 +1563,8 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	//
 	// constant area
 	//
-	meanOfD  = 0.45;
- 	sigmaOfD = 0.20;
+	meanOfD  = 0.5;
+ 	sigmaOfD = 0.25;
 	
 	if( normalizedD<-3. || normalizedD>6. ) continue;
 
@@ -2333,7 +2345,9 @@ void StRichPIDMaker::fillPIDTraits(StRichRingCalculator* ringCalc) {
 	//
 	// assign the pid to the StRichTrack
 	//    
+	
 	richTrack->getPidTrait()->addPid(pid);
+	
     } // end of track check 
     
 }
