@@ -1,3 +1,4 @@
+#ifdef __CINT__
 #pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
@@ -14,5 +15,7 @@
 #pragma link C++ class StV0Vertex-;
 #pragma link C++ enum StVertexId;
 #pragma link C++ enum StTrackModel;
+#pragma link C++ class StTriggerData+;
+#pragma link C++ class StTriggerData2003+;
 #endif
 
