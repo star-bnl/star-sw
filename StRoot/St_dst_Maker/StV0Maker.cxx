@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.25 2000/07/07 23:06:48 caines Exp $
+// $Id: StV0Maker.cxx,v 1.26 2000/08/31 21:47:08 genevb Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.26  2000/08/31 21:47:08  genevb
+// Allow V0s to be trimmed after finding Xis
+//
 // Revision 1.25  2000/07/07 23:06:48  caines
 // Increase memory allocation for v0s
 //
@@ -90,6 +93,8 @@
 #include "global/St_ev0_am3_Module.h"
 #include "global/St_ev0_eval2_Module.h"
 
+#include "tables/St_dst_xi_vertex_Table.h"
+
 ClassImp(StV0Maker)
   
   //_____________________________________________________________________________
@@ -103,14 +108,15 @@ StV0Maker::~StV0Maker(){
 }
 //_____________________________________________________________________________
 Int_t StV0Maker::Init(){
-  m_ev0par2 = new St_ev0_ev0par2("ev0par2",3);
+  m_ev0par2 = new St_ev0_ev0par2("ev0par2",3); // For finding V0s, even for Xis
+  m_ev0parT = new St_ev0_ev0par2("ev0parT",3); // For trimming to pure V0s
   {
     ev0_ev0par2_st row;
     memset(&row,0,m_ev0par2->GetRowSize());
   // TPC only cuts
     row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
     row.dca	 =        0.8; // cut on dca between the two tracks ;
-    row.dcav0	 =        2.5; // cut on dca(impact parameter) of V0 from event vertex ;
+    row.dcav0	 =        0.7; // cut on dca(impact parameter) of V0 from event vertex ;
     row.dlen	 =        2.0; // cut on dist. of decay from prim. vertex ;
     row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
     row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
@@ -119,28 +125,37 @@ Int_t StV0Maker::Init(){
       row.dcapnmin=       0.0; // Min. value of tracks at interaction for ev03;
     }
     row.n_point  =         11; // Min. number of TPC hits on a track ;
+    m_ev0parT->AddAt(&row,0);
+    row.dcav0	 =        2.5; // cut on dca(impact parameter) of V0 from event vertex ;
+    row.dcapnmin=         0.4; // Min. value of tracks at interaction ;
     m_ev0par2->AddAt(&row,0);
     memset(&row,0,m_ev0par2->GetRowSize());
   //SVT only cuts
     row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
     row.dca	 =        0.8; // cut on dca between the two tracks ;
-    row.dcav0	 =        2.5; // cut on dca(impact parameter) of V0 from event vertex ;
+    row.dcav0	 =        1.5; // cut on dca(impact parameter) of V0 from event vertex ;
     row.dlen	 =      10000; // cut on dist. of decay from prim. vertex ;
     row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
     row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
     row.dcapnmin=         100; // Min. value of tracks at interaction ;
-    row.n_point  =         1; // Min. number of SVT hits on a track ;
+    row.n_point  =          1; // Min. number of SVT hits on a track ;
+    m_ev0parT->AddAt(&row,1);
+    row.dcav0	 =        2.5; // cut on dca(impact parameter) of V0 from event vertex ;
+    row.dcapnmin=         100; // Min. value of tracks at interaction ;
     m_ev0par2->AddAt(&row,1);
     memset(&row,0,m_ev0par2->GetRowSize());
   // SVT+TPC cuts
     row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
     row.dca	 =        0.8; // cut on dca between the two tracks ;
-    row.dcav0	 =        2.5; // cut on dca(impact parameter) of V0 from event vertex ;
+    row.dcav0	 =        0.7; // cut on dca(impact parameter) of V0 from event vertex ;
     row.dlen	 =        0.6; // cut on dist. of decay from prim. vertex ;
     row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
     row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
     row.dcapnmin =        0.7; // Min. value of tracks at interaction ;
     row.n_point  =         11; // Min. number of SVT+TPC hits on a track ;
+    m_ev0parT->AddAt(&row,2);
+    row.dcav0	 =        2.5; // cut on dca(impact parameter) of V0 from event vertex ;
+    row.dcapnmin=         0.4; // Min. value of tracks at interaction ;
     m_ev0par2->AddAt(&row,2);
   }
   AddRunCont(m_ev0par2);
@@ -180,9 +195,8 @@ Int_t StV0Maker::Make(){
     return kStWarn;
   }
   
-  St_dst_v0_vertex *dst_v0_vertex  = 0;
-  St_ev0_eval      *ev0_eval = 0;
-  
+  dst_v0_vertex = 0;
+  St_ev0_eval   *ev0_eval  = 0;
   St_DataSet    *tpctracks = GetInputDS("tpc_tracks");
   St_tpt_track  *tptrack   = 0;
   St_tte_eval   *evaltrk   = 0;
@@ -278,4 +292,67 @@ Int_t StV0Maker::Make(){
   } // For-loop to find primary vertex
   return iMake;
 }
+//_____________________________________________________________________________
+void StV0Maker::Trim(){
+  if (!dst_v0_vertex) return;
+  St_DataSet *xi = GetDataSet("xi"); 
+  if (!xi) return;
+  St_DataSetIter xiI(xi);         
+  St_dst_xi_vertex *dst_xi_vertex  = (St_dst_xi_vertex *) xiI("dst_xi_vertex");
+  if (!dst_xi_vertex) return;
 
+  Int_t ixi = dst_xi_vertex->GetNRows() - 1;
+  ev0_ev0par2_st* pars = m_ev0parT->GetTable(0);
+  Int_t rsize = dst_v0_vertex->GetRowSize();
+
+  for (Int_t iv0 = 0; iv0 < dst_v0_vertex->GetNRows(); iv0++) {
+    dst_v0_vertex_st* v0row = dst_v0_vertex->GetTable(iv0);
+    Bool_t isXiV0 = (v0row->dcav0 < 0);
+    Bool_t passV0 = (TMath::Abs(v0row->dcav0) < pars->dcav0) &&
+        (v0row->dcap > pars->dcapnmin) && (v0row->dcan > pars->dcapnmin);
+
+    if (isXiV0 && passV0) {
+      v0row->dcav0 = - (v0row->dcav0);
+    } else if (!(isXiV0 || passV0)) {
+
+      // Want to delete this V0
+      // Take last good V0 and move it here
+      Bool_t notGood = kTRUE;
+      Int_t lastV0 = dst_v0_vertex->GetNRows();
+      while (notGood) {
+        if ((--lastV0)==iv0) {
+          break;
+	}
+        dst_v0_vertex_st* v0rowL = dst_v0_vertex->GetTable(lastV0);
+        isXiV0 = (v0rowL->dcav0 < 0);
+        passV0 = (TMath::Abs(v0rowL->dcav0) < pars->dcav0) &&
+            (v0rowL->dcap > pars->dcapnmin) && (v0rowL->dcan > pars->dcapnmin);
+	if (isXiV0 || passV0) {
+	  notGood = kFALSE;
+
+	  // Move row to empty slot
+	  Long_t newId = v0row->id;
+	  Long_t oldId = v0rowL->id;
+	  v0rowL->id = newId;
+	  memcpy(v0row,v0rowL,rsize);
+	  
+	  if (isXiV0) { // Fix index in any Xis using this V0
+	    // Will assume that Xis are ordered by increasing V0 index
+	    while (ixi>=0) {
+              dst_xi_vertex_st* xirow = dst_xi_vertex->GetTable(ixi);
+	      if (xirow->id_v0 < oldId) break;
+	      if (xirow->id_v0 == oldId) xirow->id_v0 = newId;
+              ixi--;
+	    }
+	  }
+	}
+      }
+      dst_v0_vertex->SetNRows(lastV0);
+      iv0--; // Repeat analysis of this V0
+    }
+  }
+
+  dst_v0_vertex->Purge();
+  gMessMgr->Info() << "StV0Maker::Trim() saving " << dst_v0_vertex->GetNRows()
+                   << " V0 candidates" << endm;
+}
