@@ -191,7 +191,7 @@ Int_t StVertexSeedMaker::Make(){
         case (2003) :     // dAuMinBias
         case (2300) :     // dAuTOF
 
-// 2004 data
+// 2004 pp data
         case (45201) :    // pp bht-1-slow
         case (45202) :    // pp bht-2-slow
         case (45203) :    // pp eht-1-slow
@@ -311,7 +311,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.20 2004/07/23 16:56:01 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.21 2004/08/02 01:19:33 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -550,6 +550,7 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
     int timef = time;
     fileName = fileList.At(filen)->GetName();
     TString dateTime = fileName;
+    dateTime.Remove(0,dateTime.Last('/') + 1);
     dateTime.Remove(0,dateTime.First('.') + 1).Remove(15);
     TString dateStr = dateTime;
     date = atoi(dateStr.Remove(8).Data());
@@ -596,8 +597,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.20 2004/07/23 16:56:01 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.21 2004/08/02 01:19:33 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.21  2004/08/02 01:19:33  genevb
+// minor fixes for getting directories correct
+//
 // Revision 1.20  2004/07/23 16:56:01  genevb
 // 2004 pp triggers
 //
