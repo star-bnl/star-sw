@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98 
-// $Id: St_ObjectSet.h,v 1.6 1999/05/07 17:53:18 fine Exp $
+// $Id: St_ObjectSet.h,v 1.7 1999/05/07 21:35:31 fine Exp $
 // $Log: St_ObjectSet.h,v $
+// Revision 1.7  1999/05/07 21:35:31  fine
+// Fix some first implemenation bugs
+//
 // Revision 1.6  1999/05/07 17:53:18  fine
 // owner bit has been introduced to deal with the embedded objects
 //
@@ -33,7 +36,8 @@ public:
   virtual void     Browse(TBrowser *b);
   virtual void     Delete(Option_t *opt="");
   virtual TObject *GetObject() const {return fObj;};
-  virtual TObject *SetObject(TObject *obj,Bool_t makeOwner=kTRUE);
+  virtual void     SetObject(TObject *obj) { SetObject(obj,kTRUE);}
+  virtual TObject *SetObject(TObject *obj,Bool_t makeOwner);
   virtual TObject *AddObject(TObject *obj,Bool_t makeOwner=kTRUE);
   virtual Long_t   HasData() const {return fObj ? 1 : 0;} 
   virtual Bool_t   IsOwner() const {return TestBit(kIsOwner);}
