@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of ppLMV
- * $Id: StppLMVVertexFinder.h,v 1.6 2004/08/05 22:08:04 balewski Exp $
+ * $Id: StppLMVVertexFinder.h,v 1.7 2004/09/01 18:45:01 balewski Exp $
  *
  */
 
@@ -25,6 +25,7 @@ class StppLMVVertexFinder: public StGenericVertexFinder , StCtbUtility {
     bool            fit(StEvent*);         
     void            printInfo(ostream& = cout) const;
     void            UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight);
+    void forceppLMV4(); // force ppLMV4  cuts & algo 
 
 private:
     // double                   mWidthScale;
@@ -36,6 +37,7 @@ private:
     //jan--------------------
  private:
 
+    bool ppLMV4swith; 
     bool matchTrack2CTB (StTrack* rTrack, float & sigma);
     bool ppLMV5();
     double mMaxTrkDcaRxy;    //DCA to nominal beam line for each track
@@ -68,6 +70,9 @@ private:
 /***************************************************************************
  *
  * $Log: StppLMVVertexFinder.h,v $
+ * Revision 1.7  2004/09/01 18:45:01  balewski
+ * ppLMV5/4 switch added
+ *
  * Revision 1.6  2004/08/05 22:08:04  balewski
  * toward working point
  *
