@@ -1,10 +1,10 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Module.cxx,v 1.10 1999/12/21 18:57:13 fine Exp $
+// $Id: St_Module.cxx,v 1.11 2000/03/24 20:35:22 fine Exp $
 
 #include <assert.h>
 #include <string.h>
 #include "St_Module.h"
-#include "table_header.h" 
+
 
 ClassImp(St_Module)
 
@@ -33,170 +33,64 @@ ClassImp(St_Module)
 
 //______________________________________________________________________________
 St_Module::St_Module() 
-: st_Type(kUnknown),st_Name(0), fN(0), fIndex(0), st_Params(0)
+: fParams(0), fHeaders(0), fName(0), fIndex(0)
 {  // Default ctor;
 }
 //______________________________________________________________________________
-St_Module::St_Module(char *, void *,void *,void *,void *
-                            ,void *,void *,void *,void *
-                            ,void *,void *,void *,void *
-                            ,void *,void *,void *,void *
-                            ,void *,void *,void *,void *
-                            ,void *,void *,void *,void *
-                            ,void *,void *,void *,void *
-                            ,void *,void *,void *,void *
-                            ,void *,void *,void *,void *
-                            ,void *,void *
-#if 0
-                                                ,void *f39,void *f40
-                            ,void *f41,void *f42,void *f43,void *f44
-                            ,void *f45,void *f46,void *f47,void *f48
-                            ,void *f49,void *f50,void *f51,void *f52
-                            ,void *f53,void *f54,void *f55,void *f56
-                            ,void *f57,void *f58,void *f59,void *f60
-                            ,void *f61,void *f62,void *f63,void *f64
-                            ,void *f65,void *f66,void *f67,void *f68
-                            ,void *f69,void *f70,void *f71,void *f72
-                            ,void *f73,void *f74,void *f75,void *f76
-                            ,void *f77,void *f78,void *f79,void *f80
-#endif
+St_Module::St_Module(char *, TTable *,TTable *,TTable *,TTable *
+                            ,TTable *,TTable *,TTable *,TTable *
+                            ,TTable *,TTable *,TTable *,TTable *
+                            ,TTable *,TTable *,TTable *,TTable *
+                            ,TTable *,TTable *,TTable *,TTable *
+                            ,TTable *,TTable *,TTable *,TTable *
+                            ,TTable *,TTable *,TTable *,TTable *
+                            ,TTable *,TTable *,TTable *,TTable *
+                            ,TTable *,TTable *,TTable *,TTable *
+                            ,TTable *,TTable *
                             ) 
-: st_Type(kFortran), st_Name(0), fN(0), fIndex(38),  st_Params(0)
+: fParams(0), fHeaders(0), fName(0), fIndex(38)
 // : TNamed(name)
 {}
 //______________________________________________________________________________
-St_Module::St_Module(        void  *f1,void  *f2,void  *f3,void  *f4
-                            ,void  *f5,void  *f6,void  *f7,void  *f8
-                            ,void  *f9,void *f10,void *f11,void *f12
-                            ,void *f13,void *f14,void *f15,void *f16
-                            ,void *f17,void *f18,void *f19,void *f20
-                            ,void *f21,void *f22,void *f23,void *f24
-                            ,void *f25,void *f26,void *f27,void *f28
-                            ,void *f29,void *f30,void *f31,void *f32
-                            ,void *f33,void *f34,void *f35,void *f36
-                            ,void *f37,void *f38
-#if 0
-                                                ,void *f39,void *f40
-                            ,void *f41,void *f42,void *f43,void *f44
-                            ,void *f45,void *f46,void *f47,void *f48
-                            ,void *f49,void *f50,void *f51,void *f52
-                            ,void *f53,void *f54,void *f55,void *f56
-                            ,void *f57,void *f58,void *f59,void *f60
-                            ,void *f61,void *f62,void *f63,void *f64
-                            ,void *f65,void *f66,void *f67,void *f68
-                            ,void *f69,void *f70,void *f71,void *f72
-                            ,void *f73,void *f74,void *f75,void *f76
-                            ,void *f77,void *f78,void *f79,void *f80
-#endif
+St_Module::St_Module(        TTable *f1,TTable *f2,TTable *f3,TTable *f4
+                            ,TTable *f5,TTable *f6,TTable *f7,TTable *f8
+                            ,TTable *f9,TTable *f10,TTable *f11,TTable *f12
+                            ,TTable *f13,TTable *f14,TTable *f15,TTable *f16
+                            ,TTable *f17,TTable *f18,TTable *f19,TTable *f20
+                            ,TTable *f21,TTable *f22,TTable *f23,TTable *f24
+                            ,TTable *f25,TTable *f26,TTable *f27,TTable *f28
+                            ,TTable *f29,TTable *f30,TTable *f31,TTable *f32
+                            ,TTable *f33,TTable *f34,TTable *f35,TTable *f36
+                            ,TTable *f37,TTable *f38
                             ) 
-: st_Type(kFortran), st_Name(0), fN(0), fIndex(38), st_Params(0)
+: fParams(0), fHeaders(0), fName(0), fIndex(38)
 {
   SetAllParameters( f1, f2, f3, f4, f5, f6, f7, f8, f9,f10,f11,f12
                   ,f13,f14,f15,f16,f17,f18,f19,f20,f21,f22,f23,f24
                   ,f25,f26,f27,f28,f29,f30,f31,f32,f33,f34,f35,f36
                   ,f37,f38
-#if 0
-                          ,f39,f40,f41,f42,f43,f44,f45,f46,f47,f48
-                  ,f49,f50,f51,f52,f53,f54,f55,f56,f57,f58,f59,f60
-                  ,f61,f62,f63,f64,f65,f66,f67,f68,f69,f70,f71,f72
-                  ,f73,f74,f75,f76,f77,f78,f79,f80
-#endif
                   );
 }
 //______________________________________________________________________________
 St_Module::~St_Module()
 {
-  if (st_Params) 
-  {
-    for (Int_t i=0;i<fN;i++) 
-    {
-      if (st_Params[i]) {
-//          delete st_Params[i];
-          st_Params[i]=0;
-      }
-    }
-    delete [] st_Params;
-    st_Params = 0; 
-  }
-//*-*
-//*-*   Free memory with the name of the entry point
-//
-  if (st_Name)
-  {
-    delete st_Name;
-    st_Name = 0;
-  }
+  if (fHeaders) fHeaders->Delete();
+  SafeDelete(fHeaders);
+  SafeDelete(fParams);     
 }
 //______________________________________________________________________________
-void St_Module::SetAllParameters(void  *f1,void  *f2,void  *f3,void  *f4
-                               ,void  *f5,void  *f6,void  *f7,void  *f8
-                               ,void  *f9,void *f10,void *f11,void *f12
-                               ,void *f13,void *f14,void *f15,void *f16
-                               ,void *f17,void *f18,void *f19,void *f20
-                               ,void *f21,void *f22,void *f23,void *f24
-                               ,void *f25,void *f26,void *f27,void *f28
-                               ,void *f29,void *f30,void *f31,void *f32
-                               ,void *f33,void *f34,void *f35,void *f36
-                               ,void *f37,void *f38
-#if 0
-                                                ,void *f39,void *f40
-                               ,void *f41,void *f42,void *f43,void *f44
-                               ,void *f45,void *f46,void *f47,void *f48
-                               ,void *f49,void *f50,void *f51,void *f52
-                               ,void *f53,void *f54,void *f55,void *f56
-                               ,void *f57,void *f58,void *f59,void *f60
-                               ,void *f61,void *f62,void *f63,void *f64
-                               ,void *f65,void *f66,void *f67,void *f68
-                               ,void *f69,void *f70,void *f71,void *f72
-                               ,void *f73,void *f74,void *f75,void *f76
-                               ,void *f77,void *f78,void *f79,void *f80
-#endif
+void St_Module::SetAllParameters(TTable *f1,TTable *f2,TTable *f3,TTable *f4
+                               ,TTable *f5,TTable *f6,TTable *f7,TTable *f8
+                               ,TTable *f9,TTable *f10,TTable *f11,TTable *f12
+                               ,TTable *f13,TTable *f14,TTable *f15,TTable *f16
+                               ,TTable *f17,TTable *f18,TTable *f19,TTable *f20
+                               ,TTable *f21,TTable *f22,TTable *f23,TTable *f24
+                               ,TTable *f25,TTable *f26,TTable *f27,TTable *f28
+                               ,TTable *f29,TTable *f30,TTable *f31,TTable *f32
+                               ,TTable *f33,TTable *f34,TTable *f35,TTable *f36
+                               ,TTable *f37,TTable *f38
                                ) 
 {  
-#if 0
-  SetParameter(f80);
-  SetParameter(f79);
-  SetParameter(f78);
-  SetParameter(f77);
-  SetParameter(f76);
-  SetParameter(f75);
-  SetParameter(f74);
-  SetParameter(f73);
-  SetParameter(f72);
-  SetParameter(f71);
-  SetParameter(f70);
-  SetParameter(f69);
-  SetParameter(f68);
-  SetParameter(f67);
-  SetParameter(f66);
-  SetParameter(f65);
-  SetParameter(f64);
-  SetParameter(f63);
-  SetParameter(f62);
-  SetParameter(f61);
-  SetParameter(f60);
-  SetParameter(f59);
-  SetParameter(f58);
-  SetParameter(f57);
-  SetParameter(f56);
-  SetParameter(f55);
-  SetParameter(f54);
-  SetParameter(f53);
-  SetParameter(f52);
-  SetParameter(f51);
-  SetParameter(f50);
-  SetParameter(f49);
-  SetParameter(f48);
-  SetParameter(f47);
-  SetParameter(f46);
-  SetParameter(f45);
-  SetParameter(f44);
-  SetParameter(f43);
-  SetParameter(f42);
-  SetParameter(f41);
-  SetParameter(f40);
-  SetParameter(f39);
-#endif
   SetParameter(f38);
   SetParameter(f37);
   SetParameter(f36);
@@ -238,38 +132,16 @@ void St_Module::SetAllParameters(void  *f1,void  *f2,void  *f3,void  *f4
 }
 
 //______________________________________________________________________________
-void St_Module::SetParameter(void *f)
+void St_Module::SetParameter(TTable *f)
 {
   if (!fIndex) return;
-  if (f != 0 || st_Params !=0 )
-  {
-    if (!st_Params) {
-//*-*
-//*-*  Allocate the list of the parameteres
-//
-       st_Params = new void *[fIndex];
-       memset(st_Params,0,sizeof(void *)*fIndex);
-       fN = fIndex;
+  if (f) {
+    if (!fParams) {
+       fParams  = new TObjArray(fIndex);
+       fHeaders = new TObjArray(fIndex);
     }
-    else if (f !=0 && fIndex > fN)
-    {
-//*-*
-//*-*  Re-allocate the list of the parameteres
-//
-        void **obj = new void *[fIndex];
-//*-*
-//*-*  Copy old staf into the new one
-//
-       for (Int_t i=0;i<fN; i++) obj[i]=st_Params[i];
-       delete [] st_Params;
-//*-*
-//*-*  replace the old point with a new one
-//
-       st_Params = obj;  
-       fN = fIndex;
-    }
-    if (fIndex <= fN)
-        st_Params[fIndex-1] = f;
+    fParams->AddAt(f,fIndex-1);
+    fHeaders->AddAt(new St_table_header(f),fIndex-1);
   }
   fIndex--;
 }
@@ -292,25 +164,25 @@ Int_t St_Module::CheckParameters(const Char_t *names[])
  //                                                                //
  ////////////////////////////////////////////////////////////////////
    Int_t errcode = 0;
-   if (st_Params) {
-     for (Int_t i=0;i<fN;i++)
-       if (!st_Params[i]) { 
+   if (fParams) {
+     TObjArray &thisParams =  *fParams;
+     Int_t thisSize = thisParams.GetSize();
+     for (Int_t i=0;i<thisSize;i++) 
+       if (!thisParams[i]) { 
 //           errcode = St_Module::ExecuteModule();
            errcode++;
            if (errcode == 1) 
                fprintf(stderr, "\n \t ***** Error calling module <%s> *****\n"
                              ,GetName()); 
            Char_t *suffix[4]={"st","nd","d","th"};
-           Char_t *title[2] = {"header","table"};
-           Int_t  odd = i>>1;
-           Int_t indx = (odd+1)%10;
-           if ( (10 < odd && odd < 20) || indx > 3 || indx == 0) indx = 4;
+           Int_t indx = i%10;
+           if ( (10 < i && i < 20) || indx > 3 || indx == 0) indx = 4;
            indx--;
-           const Char_t *name = names ? names[odd] : "unknown" ;
-           fprintf(stderr, "\t %i-%s %s of <%s> has not been defined yet\n"
-                   ,odd+1,suffix[indx],title[i&1],name);
+           const Char_t *name = names ? names[i] : "unknown" ;
+           fprintf(stderr, "\t %i-%s table of <%s> has not been defined yet\n"
+                   ,i,suffix[indx],name);
        }
-     assert (!errcode);
+//=====     assert (!errcode);
    }
    return errcode;
 }
@@ -318,62 +190,59 @@ Int_t St_Module::CheckParameters(const Char_t *names[])
 Int_t St_Module::CheckResults(Int_t res, const Char_t *names[])
 {
    Int_t errcode = 0;
-   if (st_Params) {
-     Int_t headfl = 1;
-     for (Int_t i=0;i<fN;i++) {
-       if (headfl==1){
-          Bool_t bug = kFALSE;
-       // Check header 
-        table_head_st *h = (table_head_st *)st_Params[i];
-
-        if (h->nok > h->maxlen){
-           res = kFALSE; 
-           errcode++;
-           bug = kTRUE;
-        }
-#if 0
-        else if (h->nok == h->maxlen && h->maxlen != 1) {
-           errcode++;  
-           bug = kTRUE;
-        } 
-#endif
-        if (errcode && bug) {
+   if (fParams) {
+     Int_t thisSize = fParams->GetSize();
+     for (Int_t i=0;i<thisSize;i++) {
+        Bool_t bug = kFALSE;
+        // Get header 
+        table_head_st *h = GetHeader(i);
+        TTable *table = GetTable(i);
+        if (table) {
+          assert(table->GetTableSize() == h->maxlen 
+                && table->GetRowSize() == h->rbytes
+                && table == (TTable *)h->dsl_pointer);
+          table->SetNRows(h->nok);
+          if (h->nok > h->maxlen){
+             res = kFALSE; 
+             errcode++;
+             bug = kTRUE;
+          }
+          if (errcode && bug) {
           if (errcode == 1) 
                  fprintf(stderr,
-                 "\n \t ***** module  <%s>  returned the corrupted table *****\n \t * The number of the used rows more (or equal) of the allocated ones *\n"
-                               ,GetName()); 
+                 "\n \t ***** module  <%s>  returned the corrupted table %s *****\n \t * The number of the used rows more (or equal) of the allocated ones *\n"
+                               ,GetName(), table->GetName()); 
           Char_t *suffix[4]={"st","nd","rd","th"};
-          Char_t *title[2] = {"table","table"};
-          Int_t  odd = i>>1;
-          Int_t indx = (odd+1)%10;
-          if ( (10 < odd && odd < 20) || indx > 3 || indx == 0) indx = 4;
+          Int_t indx = i%10;
+          if ( (10 < i && i < 20) || indx > 3 || indx == 0) indx = 4;
           indx--;
-          const Char_t *name = names ? names[odd] : "unknown" ;
+          const Char_t *name = names ? names[i] : "unknown" ;
           fprintf(stderr, "\t %i-%s <%s> %s has used %d with %d allocated\n"
-          ,odd+1,suffix[indx],name,title[i&1],(int)h->nok,(int)h->maxlen);
+          ,i+1,suffix[indx],name, table->GetName(),(int)h->nok,(int)h->maxlen);
         }
-       }
-       headfl = -headfl;
      }
-     assert (!errcode);
+///=====     assert (!errcode);
    }
+}
    return res;
 }
+
 //______________________________________________________________________________
 Int_t St_Module::ExecuteModule()
 {
+
    Int_t errcode = 0;
+#if 0
    printf(" This \"%s\" module has ", GetName());
-   if (st_Params) 
+   if (fParams) 
    {
      if (fN == 1)
        printf("only one parameter: ");
      else
        printf("%i parameters: ",fN);
-     printf("\n");
      for (Int_t i=0;i<fN;i++)
      {
-        if (st_Params[i]) printf(" %lu ",*((ULong_t *)st_Params[i]));
+        if (st_Params[i]) printf(" %x ",*((ULong_t *)st_Params[i]));
         else { 
             errcode++; 
 	    //yf            Char_t *suffix[4]={"st","nd","d","th"};
@@ -386,10 +255,11 @@ Int_t St_Module::ExecuteModule()
         if (i < fN-1) printf(", ");
      }
      printf("; \n");
-     assert (!errcode);
+///=====     assert (!errcode);
    }
    else
     printf(" NO parameters \n");
+#endif
    return errcode;
 }
 #if 0
@@ -420,28 +290,28 @@ void St_Module::SetEntryName()
 }
 #endif
 //______________________________________________________________________________
-Int_t  St_Module::ExecuteModule(void  *f1,void  *f2,void  *f3,void  *f4,
-                              void  *f5,void  *f6,void  *f7,void  *f8,
-                              void  *f9,void *f10,void *f11,void *f12,
-                              void *f13,void *f14,void *f15,void *f16,
-                              void *f17,void *f18,void *f19,void *f20
-                             ,void *f21,void *f22,void *f23,void *f24,
-                              void *f25,void *f26,void *f27,void *f28,
-                              void *f29,void *f30,void *f31,void *f32,
-                              void *f33,void *f34,void *f35,void *f36,
-                              void *f37,void *f38
+Int_t  St_Module::ExecuteModule(TTable *f1,TTable *f2,TTable *f3,TTable *f4,
+                              TTable *f5,TTable *f6,TTable *f7,TTable *f8,
+                              TTable *f9,TTable *f10,TTable *f11,TTable *f12,
+                              TTable *f13,TTable *f14,TTable *f15,TTable *f16,
+                              TTable *f17,TTable *f18,TTable *f19,TTable *f20
+                             ,TTable *f21,TTable *f22,TTable *f23,TTable *f24,
+                              TTable *f25,TTable *f26,TTable *f27,TTable *f28,
+                              TTable *f29,TTable *f30,TTable *f31,TTable *f32,
+                              TTable *f33,TTable *f34,TTable *f35,TTable *f36,
+                              TTable *f37,TTable *f38
 #if 0
-                                                ,void *f39,void *f40,
-                              void *f41,void *f42,void *f43,void *f44,
-                              void *f45,void *f46,void *f47,void *f48,
-                              void *f49,void *f50,void *f51,void *f52,
-                              void *f53,void *f54,void *f55,void *f56,
-                              void *f57,void *f58,void *f59,void *f60,
-                              void *f61,void *f62,void *f63,void *f64,
-                              void *f65,void *f66,void *f67,void *f68,
-                              void *f69,void *f70,void *f71,void *f72,
-                              void *f73,void *f74,void *f75,void *f76,
-                              void *f77,void *f78,void *f79,void *f80
+                                                ,TTable *f39,TTable *f40,
+                              TTable *f41,TTable *f42,TTable *f43,TTable *f44,
+                              TTable *f45,TTable *f46,TTable *f47,TTable *f48,
+                              TTable *f49,TTable *f50,TTable *f51,TTable *f52,
+                              TTable *f53,TTable *f54,TTable *f55,TTable *f56,
+                              TTable *f57,TTable *f58,TTable *f59,TTable *f60,
+                              TTable *f61,TTable *f62,TTable *f63,TTable *f64,
+                              TTable *f65,TTable *f66,TTable *f67,TTable *f68,
+                              TTable *f69,TTable *f70,TTable *f71,TTable *f72,
+                              TTable *f73,TTable *f74,TTable *f75,TTable *f76,
+                              TTable *f77,TTable *f78,TTable *f79,TTable *f80
 #endif
                               )
 {
@@ -460,10 +330,15 @@ Int_t  St_Module::ExecuteModule(void  *f1,void  *f2,void  *f3,void  *f4,
   return ExecuteModule();
 }
 void St_Module::Streamer(TBuffer &)
-{assert(0);}
+{
+///===== assert(0);
+}
 
 //________________________________________________________________________
 // $Log: St_Module.cxx,v $
+// Revision 1.11  2000/03/24 20:35:22  fine
+// adjusted to ROOT 2.24. Doesn't work yet. Under development
+//
 // Revision 1.10  1999/12/21 18:57:13  fine
 // compilation warning plus new type for SizeAttribute
 //

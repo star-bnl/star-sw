@@ -1,8 +1,11 @@
 //*-- Author : Valeri Fine (Faine); E-mail: fine@bnl.gov, fine@mail.cern.ch
 //*CMZ : 23/03/98
 // Copyright (C) FineSoft, Valery Fine at Brookhaven National Laboratory (fine@bnl.gov)
-// $Id: St_Module.h,v 1.7 1999/12/07 22:26:27 fine Exp $
+// $Id: St_Module.h,v 1.8 2000/03/24 20:35:22 fine Exp $
 // $Log: St_Module.h,v $
+// Revision 1.8  2000/03/24 20:35:22  fine
+// adjusted to ROOT 2.24. Doesn't work yet. Under development
+//
 // Revision 1.7  1999/12/07 22:26:27  fine
 // Clean up to remove the compilation warnings
 //
@@ -35,6 +38,8 @@
 
 
 #include "Rtypes.h"
+#include "St_table_header_Table.h" 
+#include "TObjArray.h"
 
 // Copyright (C) FineSoft 1998 Valeri Fine (Faine) E-mail: fine@bnl.gov
 
@@ -42,13 +47,9 @@
 //                                                                 //
 //  St_Module                                                      //
 //                                                                 //
-//  A special class to call any Fortran subroutine from C/C++      //
-//  env. across platforms                                          //
-//                                                                 //
 /////////////////////////////////////////////////////////////////////
 
 //______________________________________________________________________________
-
 
 //*-- Author :    Valery Fine   24/03/98
 
@@ -66,107 +67,51 @@
 #endif
 
 class  St_Module {
-
-public:
-typedef enum {kUnknown=-1,   // The type of the staf module "unknown"
-              kCtype,        // Define the C module
-              kCPlusplustype,// Define C++ module
-              kFortran       // Define Fortran module
-             } EModuleTypes; // Define the original language the present module was written with
-
-typedef enum {kNoWarning     // No message
-             ,kError         // print out the severe errors (like zero pointers)
-             ,kWarning       // print out the warning too
-             ,kIgnore
-             } EModuleLogLevel;
 private:
-
-	EModuleTypes   st_Type;          // kCtype, kCPlusplustype, kFortran
-        char          *st_Name;          // Name of the module for the dynamic loading
-        Int_t          fN;               // The length of the array
-        Int_t          fIndex;           // The index pof the current element
-        EModuleLogLevel fTraceLogLevel;   // the level of the diagnostic messages (0-3)
+        TObjArray  *fParams;      // Array of the input tables
+        TObjArray  *fHeaders;     // Array of the headers of that tables
+        char       *fName;        // Name of the module for the dynamic loading
+        Int_t       fIndex;       // The index pof the current element
 protected:
-
-	void        **st_Params;        // The total 
-        virtual  void SetParameter(void *f);
+        virtual  void SetParameter(TTable *f);
         virtual  void SetAllParameters(
-                             void  *f1,void  *f2,void  *f3,void  *f4
-                            ,void  *f5,void  *f6,void  *f7,void  *f8
-                            ,void  *f9,void *f10,void *f11,void *f12
-                            ,void *f13,void *f14,void *f15,void *f16 
-                            ,void *f17,void *f18,void *f19,void *f20
-                            ,void *f21,void *f22,void *f23,void *f24
-                            ,void *f25,void *f26,void *f27,void *f28
-                            ,void *f29,void *f30,void *f31,void *f32
-                            ,void *f33,void *f34,void *f35,void *f36
-                            ,void *f37,void *f38
-#if 0
-                                                ,void *f39,void *f40
-                            ,void *f41,void *f42,void *f43,void *f44
-                            ,void *f45,void *f46,void *f47,void *f48
-                            ,void *f49,void *f50,void *f51,void *f52
-                            ,void *f53,void *f54,void *f55,void *f56
-                            ,void *f57,void *f58,void *f59,void *f60
-                            ,void *f61,void *f62,void *f63,void *f64
-                            ,void *f65,void *f66,void *f67,void *f68
-                            ,void *f69,void *f70,void *f71,void *f72
-                            ,void *f73,void *f74,void *f75,void *f76
-                            ,void *f77,void *f78,void *f79,void *f80
-#endif
+                             TTable *f1,TTable *f2,TTable *f3,TTable *f4
+                            ,TTable *f5,TTable *f6,TTable *f7,TTable *f8
+                            ,TTable *f9,TTable *f10,TTable *f11,TTable *f12
+                            ,TTable *f13,TTable *f14,TTable *f15,TTable *f16 
+                            ,TTable *f17,TTable *f18,TTable *f19,TTable *f20
+                            ,TTable *f21,TTable *f22,TTable *f23,TTable *f24
+                            ,TTable *f25,TTable *f26,TTable *f27,TTable *f28
+                            ,TTable *f29,TTable *f30,TTable *f31,TTable *f32
+                            ,TTable *f33,TTable *f34,TTable *f35,TTable *f36
+                            ,TTable *f37,TTable *f38
                        );
 
 public:
 
         St_Module();  // Default ctor;
-        St_Module(           void  *f1,  void  *f2=0, void  *f3=0, void  *f4=0
-                            ,void  *f5=0, void  *f6=0, void  *f7=0, void  *f8=0
-                            ,void  *f9=0, void *f10=0, void *f11=0, void *f12=0
-                            ,void *f13=0, void *f14=0, void *f15=0, void *f16=0
-                            ,void *f17=0, void *f18=0, void *f19=0, void *f20=0
-                            ,void *f21=0, void *f22=0, void *f23=0, void *f24=0
-                            ,void *f25=0, void *f26=0, void *f27=0, void *f28=0
-                            ,void *f29=0, void *f30=0, void *f31=0, void *f32=0
-                            ,void *f33=0, void *f34=0, void *f35=0, void *f36=0
-                            ,void *f37=0, void *f38=0
-#if 0
-                                                , void *f39=0, void *f40=0
-                            ,void *f41=0, void *f42=0, void *f43=0, void *f44=0
-                            ,void *f45=0, void *f46=0, void *f47=0, void *f48=0
-                            ,void *f49=0, void *f50=0, void *f51=0, void *f52=0
-                            ,void *f53=0, void *f54=0, void *f55=0, void *f56=0
-                            ,void *f57=0, void *f58=0, void *f59=0, void *f60=0
-                            ,void *f61=0, void *f62=0, void *f63=0, void *f64=0
-                            ,void *f65=0, void *f66=0, void *f67=0, void *f68=0
-                            ,void *f69=0, void *f70=0, void *f71=0, void *f72=0
-                            ,void *f73=0, void *f74=0, void *f75=0, void *f76=0
-                            ,void *f77=0, void *f78=0, void *f79=0, void *f80=0
-#endif
+        St_Module(           TTable *f1,  TTable *f2=0, TTable *f3=0, TTable *f4=0
+                            ,TTable *f5=0, TTable *f6=0, TTable *f7=0, TTable *f8=0
+                            ,TTable *f9=0, TTable *f10=0, TTable *f11=0, TTable *f12=0
+                            ,TTable *f13=0, TTable *f14=0, TTable *f15=0, TTable *f16=0
+                            ,TTable *f17=0, TTable *f18=0, TTable *f19=0, TTable *f20=0
+                            ,TTable *f21=0, TTable *f22=0, TTable *f23=0, TTable *f24=0
+                            ,TTable *f25=0, TTable *f26=0, TTable *f27=0, TTable *f28=0
+                            ,TTable *f29=0, TTable *f30=0, TTable *f31=0, TTable *f32=0
+                            ,TTable *f33=0, TTable *f34=0, TTable *f35=0, TTable *f36=0
+                            ,TTable *f37=0, TTable *f38=0
                 ); 
 
-      St_Module(Char_t *name,void  *f1=0, void  *f2=0, void  *f3=0, void  *f4=0
-                             ,void  *f5=0, void  *f6=0, void  *f7=0, void  *f8=0
-                             ,void  *f9=0, void *f10=0, void *f11=0, void *f12=0
-                             ,void *f13=0, void *f14=0, void *f15=0, void *f16=0
-                             ,void *f17=0, void *f18=0, void *f19=0, void *f20=0
-                             ,void *f21=0, void *f22=0, void *f23=0, void *f24=0
-                             ,void *f25=0, void *f26=0, void *f27=0, void *f28=0
-                             ,void *f29=0, void *f30=0, void *f31=0, void *f32=0
-                             ,void *f33=0, void *f34=0, void *f35=0, void *f36=0
-                             ,void *f37=0, void *f38=0
-#if 0
-                                                , void *f39=0, void *f40=0
-                             ,void *f41=0, void *f42=0, void *f43=0, void *f44=0
-                             ,void *f45=0, void *f46=0, void *f47=0, void *f48=0
-                             ,void *f49=0, void *f50=0, void *f51=0, void *f52=0
-                             ,void *f53=0, void *f54=0, void *f55=0, void *f56=0
-                             ,void *f57=0, void *f58=0, void *f59=0, void *f60=0
-                             ,void *f61=0, void *f62=0, void *f63=0, void *f64=0
-                             ,void *f65=0, void *f66=0, void *f67=0, void *f68=0
-                             ,void *f69=0, void *f70=0, void *f71=0, void *f72=0
-                             ,void *f73=0, void *f74=0, void *f75=0, void *f76=0
-                             ,void *f77=0, void *f78=0, void *f79=0, void *f80=0 
-#endif
+      St_Module(Char_t *name,TTable *f1=0, TTable *f2=0, TTable *f3=0, TTable *f4=0
+                             ,TTable *f5=0, TTable *f6=0, TTable *f7=0, TTable *f8=0
+                             ,TTable *f9=0, TTable *f10=0, TTable *f11=0, TTable *f12=0
+                             ,TTable *f13=0, TTable *f14=0, TTable *f15=0, TTable *f16=0
+                             ,TTable *f17=0, TTable *f18=0, TTable *f19=0, TTable *f20=0
+                             ,TTable *f21=0, TTable *f22=0, TTable *f23=0, TTable *f24=0
+                             ,TTable *f25=0, TTable *f26=0, TTable *f27=0, TTable *f28=0
+                             ,TTable *f29=0, TTable *f30=0, TTable *f31=0, TTable *f32=0
+                             ,TTable *f33=0, TTable *f34=0, TTable *f35=0, TTable *f36=0
+                             ,TTable *f37=0, TTable *f38=0
                );
 
 
@@ -177,73 +122,38 @@ public:
   virtual Int_t CheckParameters(const Char_t *names[]=0);
   virtual Int_t CheckResults(Int_t res, const Char_t *names[]=0);
   virtual Int_t ExecuteModule();
-  virtual const Char_t *GetEntryName(){return GetTitle();}  // Return the mangled name of the Fotran subroutines to be loaded dymanically
-  virtual void *GetParams(Int_t idx=0){ return (-1 < idx && idx<fN ) ? (void *)st_Params[idx] : (void *)-1;}   // The total 
 
-  virtual void  SetType(EModuleTypes type=kFortran){st_Type = type;}
-//  virtual void &operator[](Int_t i){return st_Params[i];}
+  table_head_st *GetHeader(Int_t i) const {return ((St_table_header *)fHeaders->At(i))->GetTable();}
+  TTable *GetTable(Int_t i) const {return (TTable *)fParams->At(i);}
 
   virtual Int_t  operator()() { return ExecuteModule(); }
-  virtual Int_t  ExecuteModule(void  *f1,   void  *f2=0, void  *f3=0, void  *f4=0
-                              ,void  *f5=0, void  *f6=0, void  *f7=0, void  *f8=0
-                              ,void  *f9=0, void *f10=0, void *f11=0, void *f12=0
-                              ,void *f13=0, void *f14=0, void *f15=0, void *f16=0
-                              ,void *f17=0, void *f18=0, void *f19=0, void *f20=0
-                              ,void *f21=0, void *f22=0, void *f23=0, void *f24=0
-                              ,void *f25=0, void *f26=0, void *f27=0, void *f28=0
-                              ,void *f29=0, void *f30=0, void *f31=0, void *f32=0
-                              ,void *f33=0, void *f34=0, void *f35=0, void *f36=0
-                              ,void *f37=0, void *f38=0
-#if 0
-                                                , void *f39=0, void *f40=0
-                              ,void *f41=0, void *f42=0, void *f43=0, void *f44=0
-                              ,void *f45=0, void *f46=0, void *f47=0, void *f48=0
-                              ,void *f49=0, void *f50=0, void *f51=0, void *f52=0
-                              ,void *f53=0, void *f54=0, void *f55=0, void *f56=0
-                              ,void *f57=0, void *f58=0, void *f59=0, void *f60=0
-                              ,void *f61=0, void *f62=0, void *f63=0, void *f64=0
-                              ,void *f65=0, void *f66=0, void *f67=0, void *f68=0
-                              ,void *f69=0, void *f70=0, void *f71=0, void *f72=0
-                              ,void *f73=0, void *f74=0, void *f75=0, void *f76=0
-                              ,void *f77=0, void *f78=0, void *f79=0, void *f80=0
-#endif
+  virtual Int_t  ExecuteModule(TTable *f1,   TTable *f2=0, TTable *f3=0, TTable *f4=0
+                              ,TTable *f5=0, TTable *f6=0, TTable *f7=0, TTable *f8=0
+                              ,TTable *f9=0, TTable *f10=0, TTable *f11=0, TTable *f12=0
+                              ,TTable *f13=0, TTable *f14=0, TTable *f15=0, TTable *f16=0
+                              ,TTable *f17=0, TTable *f18=0, TTable *f19=0, TTable *f20=0
+                              ,TTable *f21=0, TTable *f22=0, TTable *f23=0, TTable *f24=0
+                              ,TTable *f25=0, TTable *f26=0, TTable *f27=0, TTable *f28=0
+                              ,TTable *f29=0, TTable *f30=0, TTable *f31=0, TTable *f32=0
+                              ,TTable *f33=0, TTable *f34=0, TTable *f35=0, TTable *f36=0
+                              ,TTable *f37=0, TTable *f38=0
                               );
 
-  virtual Int_t  operator()   (void  *f1,   void  *f2=0, void  *f3=0, void  *f4=0
-                              ,void  *f5=0, void  *f6=0, void  *f7=0, void  *f8=0
-                              ,void  *f9=0, void *f10=0, void *f11=0, void *f12=0
-                              ,void *f13=0, void *f14=0, void *f15=0, void *f16=0
-                              ,void *f17=0, void *f18=0, void *f19=0, void *f20=0
-                              ,void *f21=0, void *f22=0, void *f23=0, void *f24=0
-                              ,void *f25=0, void *f26=0, void *f27=0, void *f28=0
-                              ,void *f29=0, void *f30=0, void *f31=0, void *f32=0
-                              ,void *f33=0, void *f34=0, void *f35=0, void *f36=0
-                              ,void *f37=0, void *f38=0
-#if 0
-                                                , void *f39=0, void *f40=0
-                              ,void *f41=0, void *f42=0, void *f43=0, void *f44=0
-                              ,void *f45=0, void *f46=0, void *f47=0, void *f48=0
-                              ,void *f49=0, void *f50=0, void *f51=0, void *f52=0
-                              ,void *f53=0, void *f54=0, void *f55=0, void *f56=0
-                              ,void *f57=0, void *f58=0, void *f59=0, void *f60=0
-                              ,void *f61=0, void *f62=0, void *f63=0, void *f64=0
-                              ,void *f65=0, void *f66=0, void *f67=0, void *f68=0
-                              ,void *f69=0, void *f70=0, void *f71=0, void *f72=0
-                              ,void *f73=0, void *f74=0, void *f75=0, void *f76=0
-                              ,void *f77=0, void *f78=0, void *f79=0, void *f80=0
-#endif
+  virtual Int_t  operator()   (TTable *f1,   TTable *f2=0, TTable *f3=0, TTable *f4=0
+                              ,TTable *f5=0, TTable *f6=0, TTable *f7=0, TTable *f8=0
+                              ,TTable *f9=0, TTable *f10=0, TTable *f11=0, TTable *f12=0
+                              ,TTable *f13=0, TTable *f14=0, TTable *f15=0, TTable *f16=0
+                              ,TTable *f17=0, TTable *f18=0, TTable *f19=0, TTable *f20=0
+                              ,TTable *f21=0, TTable *f22=0, TTable *f23=0, TTable *f24=0
+                              ,TTable *f25=0, TTable *f26=0, TTable *f27=0, TTable *f28=0
+                              ,TTable *f29=0, TTable *f30=0, TTable *f31=0, TTable *f32=0
+                              ,TTable *f33=0, TTable *f34=0, TTable *f35=0, TTable *f36=0
+                              ,TTable *f37=0, TTable *f38=0
                               )
                            { return ExecuteModule(f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14
                                                  ,f15,f16,f17,f18,f19,f20,f21,f22,f23,f24
                                                  ,f25,f26,f27,f28,f29,f30,f31,f32,f33,f34
                                                  ,f35,f36,f37,f38
-#if 0
-                                                ,f39,f40,f41,f42,f43,f44
-                                                 ,f45,f46,f47,f48,f49,f50,f51,f52,f53,f54
-                                                 ,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64
-                                                 ,f65,f66,f67,f68,f69,f70,f71,f72,f73,f74
-                                                 ,f75,f76,f77,f78,f79,f80
-#endif
                                                  );
                            }
 
@@ -252,6 +162,4 @@ public:
 
   ClassDef(St_Module,0)
 };
-
-
 #endif
