@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.13 2004/09/22 19:24:56 perev Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.14 2005/01/27 13:08:51 subhasis Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.14  2005/01/27 13:08:51  subhasis
+ *chaged to read 2005 data
+ *
  *Revision 1.13  2004/09/22 19:24:56  perev
  *Leak fixed + mess with i,j indexes
  *
@@ -78,8 +81,6 @@
 #include "StBFChain.h"
 //
 ClassImp(StPmdReadMaker) // macro
-  
-  
 //-----------------------------------------------------------------
   
 StPmdReadMaker::StPmdReadMaker(const char *name)
@@ -133,7 +134,8 @@ Int_t StPmdReadMaker::InitRun(Int_t runnr) {
 
   if(mRunNumber < 5034042) mVmeCond = 1;
   else if(mRunNumber >= 5034042 && mRunNumber < 5049020) mVmeCond = 2;
-  else mVmeCond = 3;
+  else if(mRunNumber >= 5049020 && mRunNumber < 6000000) mVmeCond = 3;
+  else mVmeCond = 4;
 
  if(mPmdPrint) cout<<"Run Number, VME Condition : "<<mRunNumber<<" "<<mVmeCond<<endl;
 					 
@@ -186,7 +188,7 @@ Int_t StPmdReadMaker::Make() {
   }
   
   int adc[2*PMD_CRAMS_MAX*2*(PMD_CRAMS_CH_MAX)];
-  
+ 
   
   int ret=mThePmdReader->getAllPmdCpvData(&adc[0]);
   if(ret){/*nothing*/}
@@ -208,6 +210,20 @@ Int_t StPmdReadMaker::Make() {
 
 Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 {
+// Get Year of run
+  char runfile[20];
+  sprintf(runfile,"%d",mRunNumber);
+  // Fetch from the run # the day
+  char iRun[8];
+  char iyear[8];
+  for (Int_t ik=0; ik<3; ik++)
+    {
+      iRun[ik] = runfile[ik+1];
+    }
+  iyear[0] = runfile[0];
+  Int_t year =0;
+  year=atoi(iyear);
+////////////////////////////////////
   mPmdGeom->readBoardDetail(mRunNumber); //!Read status of the FEE boards to apply proper mapping 
   
   mPmdCollection = new StPmdCollection("PmdCollection");
@@ -221,7 +237,6 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
     for(int CRAM=0; CRAM < PMD_CRAMS_MAX; CRAM++){
       for(int BLOCK=0; BLOCK < PMD_CRAMS_BLOCK; BLOCK++){
 	for(int CHANNEL=0; CHANNEL < PMD_CRAMS_CH_MAX; CHANNEL++){
-//	  Int_t channel=CHANNEL+1;
 	  Int_t channel=CHANNEL;  // Input to apply mapping should be 0-1727.
 	  
 	  //Added for diffrent VME Crate conditions ////////////
@@ -249,6 +264,12 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 	      else Chain_No=(CRAM+1)+(SEC*PMD_CRAMS_MAX)+(BLOCK*2*PMD_CRAMS_MAX); 
 	    }
 	    break;
+	  case 4:   // 2005 data
+	    {
+	      if(SEC==0 && BLOCK==0 && CRAM==5) Chain_No = 36;
+	      else Chain_No=(CRAM+1)+(SEC*PMD_CRAMS_MAX)+(BLOCK*2*PMD_CRAMS_MAX); 
+	    }
+	    break;
 	  }
 // On 18th access it was found that I/P to chain 45 and 46 are interchanged,
 //	  (see log book for details).
@@ -265,11 +286,18 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 
 	  
           // Apply Mapping to get the sm, row and col here
-	  // 	  
-          Int_t mapp= mPmdGeom->ChainMapping(Chain_No,channel,supmod,col,row,chtemp);
+	  // 	 initialise the refs.  
+          Int_t mapp=0;
+           supmod=0;
+	   row=0;
+	   col=0;
+	   chtemp=-1;
+
+          if(mRunNumber < 6000000)mapp=mPmdGeom->ChainMapping(Chain_No,channel,supmod,col,row,chtemp);  // 2004 data
+          if(mRunNumber >= 6000000)mapp=mPmdGeom->ChainMapping(Chain_No,channel,supmod,col,row,chtemp,year);  // 2005 data
 	  Int_t DaqADC=adc[AddCh_Count];
 	  // zeroing zeroeth channel
-	  if(chtemp==0)DaqADC=0;
+	  if(channel==0)DaqADC=0;
 
 	  AddCh_Count++;
 	  
@@ -307,7 +335,6 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 
 	    if(SubDet==2)det0->addHit(pmdhit);
 	    if(SubDet==1)det1->addHit(pmdhit);
-	    if(mPmdPrint)cout<<"Applymap:Chain "<<Chain_No<<"channel "<<channel<<"supmod "<<supmod<<"col  "<<col<<" row "<<row<<"ADC "<<DaqADC<<"BLOCK "<<BLOCK<<endl;	
 	  } //Check on non zero DaqADC
 	  
 	} //CHANNEL
@@ -345,7 +372,10 @@ Int_t StPmdReadMaker::fillStEvent(StPmdDetector* cpv_det, StPmdDetector* pmd_det
     Int_t tothit_pmd=0;
     Int_t tothit_cpv=0;
   
-  //  if(!mEvtPmdCollection){
+  StEventInfo* eventInfo = currevent->info();
+  Int_t Nevent=eventInfo->id();
+  
+//  if(!mEvtPmdCollection){
   //  cout<<"No PMDCOLLECTION **, Creating one"<<endl;
   //  mEvtPmdCollection = new StPhmdCollection();
   //  currevent->setPhmdCollection(mEvtPmdCollection);
@@ -442,8 +472,6 @@ Int_t StPmdReadMaker::fillStEvent(StPmdDetector* cpv_det, StPmdDetector* pmd_det
 	}
     }
   }
-  StEventInfo* eventInfo = currevent->info();
-  Int_t Nevent=eventInfo->id();
   m_event_tothit_pmd->Fill(Nevent,tothit_pmd);
   m_event_tothit_cpv->Fill(Nevent,tothit_cpv);
 
