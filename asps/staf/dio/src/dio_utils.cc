@@ -291,6 +291,9 @@ int dio_clearDataset(DS_DATASET_T *pDS)
 	 return (int)FALSE;
       }
    }
+  /* I have no idea what should be here, and I did 
+     this to make Microsoft compiler happy. V.Fine 11.02.98 */
+   return (int)FALSE; 
 }
 
 /*

@@ -1,4 +1,10 @@
-#include <sys/wait.h>
+#ifndef WIN32
+# include <sys/wait.h>
+#else
+# define SIGCHLD -1
+# define WNOHANG -1
+#endif
+
 #include <signal.h>
 static void reaper();
 void signal_reaper();

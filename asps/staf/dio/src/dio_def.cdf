@@ -15,7 +15,7 @@
 >GUIDANCE
 Dataset_Input_and_Output commands.
 .
- #(@)$Id: dio_def.cdf,v 1.5 1998/03/11 21:39:53 ward Exp $  Edited by Bill Love 25 Feb 98
+ #(@)$Id: dio_def.cdf,v 1.6 1998/03/16 01:29:04 fisyak Exp $  Edited by Bill Love 25 Feb 98
 .
 DIO is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -158,7 +158,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_DIO_COUNT
+>ACTION kam_dio_count_%C
 **
 ** ---------------------------------------------------------------------
 ** DIO/LIST
@@ -231,7 +231,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_DIO_LIST
+>ACTION kam_dio_list_%C
 **
 ** ---------------------------------------------------------------------
 ** DIO/NEWFILESTREAM NAME FILE [ MODE ]
@@ -288,7 +288,7 @@ SEE ALSO:
 .
    DIO/FILESTREAM
 .
->ACTION KAM_DIO_NEWFILESTREAM
+>ACTION kam_dio_newfilestream_%C
 **
 ** ---------------------------------------------------------------------
 ** DIO/NEWSOCKSTREAM NAME HOST PORT [ MODE ]
@@ -349,7 +349,7 @@ SEE ALSO:
 .
    DIO/SOCKSTREAM
 .
->ACTION KAM_DIO_NEWSOCKSTREAM
+>ACTION kam_dio_newsockstream_%C
 **
 ************************************************************************
 ** DIO/FILESTREAM
@@ -408,7 +408,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_DIOFILESTREAM_FILENAME
+>ACTION kam_diofilestream_filename_%C
 **
 ************************************************************************
 ** DIO/SOCKSTREAM
@@ -487,7 +487,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_DIOSOCKSTREAM_MAXHANDSHAKES
+>ACTION kam_diosockstream_maxhandshakes_%C
 **
 ** ---------------------------------------------------------------------
 ** DIO/SOCKSTREAM/HOST SOREF
@@ -537,7 +537,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_DIOSOCKSTREAM_HOST
+>ACTION kam_diosockstream_host_%C
 **
 ** ---------------------------------------------------------------------
 ** DIO/SOCKSTREAM/PORT SOREF
@@ -586,7 +586,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_DIOSOCKSTREAM_PORT
+>ACTION kam_diosockstream_port_%C
 **
 ************************************************************************
 ** DIO/STREAM
@@ -651,7 +651,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_DIOSTREAM_MODE
+>ACTION kam_diostream_mode_%C
 **
 ** ---------------------------------------------------------------------
 ** DIO/STREAM/STATE SOREF
@@ -706,7 +706,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_DIOSTREAM_STATE
+>ACTION kam_diostream_state_%C
 **
 ** ---------------------------------------------------------------------
 ** DIO/STREAM/CLOSE SOREF
@@ -758,7 +758,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_DIOSTREAM_CLOSE
+>ACTION kam_diostream_close_%C
 **
 ** ---------------------------------------------------------------------
 ** DIO/STREAM/GETEVENT SOREF [ DATASET ]
@@ -817,7 +817,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_DIOSTREAM_GETEVENT
+>ACTION kam_diostream_getevent_%C
 **
 ** ---------------------------------------------------------------------
 ** DIO/STREAM/OPEN SOREF [ MODE ]
@@ -874,7 +874,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_DIOSTREAM_OPEN
+>ACTION kam_diostream_open_%C
 **
 ** ---------------------------------------------------------------------
 ** DIO/STREAM/PUTEVENT SOREF [ DATASET ]
@@ -938,7 +938,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_DIOSTREAM_PUTEVENT
+>ACTION kam_diostream_putevent_%C
 **
 
 
