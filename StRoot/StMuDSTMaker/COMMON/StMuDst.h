@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.4 2002/03/20 16:04:11 laue Exp $
+ * $Id: StMuDst.h,v 1.5 2002/04/01 22:42:30 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -10,7 +10,6 @@
 
 #include "TObject.h"
 #include "TClonesArray.h"
-#include "StMuDstMaker.h"
 
 class StMuDstMaker;
 class StMuEvent;
@@ -34,7 +33,6 @@ class StTrackGeometry;
 class StPhysicalHelixD;
 
 #include "TObject.h"
-#include "StMuDstMaker.h"
 #include "StMuArrays.h"
 
 
@@ -99,6 +97,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.5  2002/04/01 22:42:30  laue
+ * improved chain filter options
+ *
  * Revision 1.4  2002/03/20 16:04:11  laue
  * minor changes, mostly added access functions
  *

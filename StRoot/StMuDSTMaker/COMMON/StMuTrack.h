@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.2 2002/03/20 16:04:12 laue Exp $
+ * $Id: StMuTrack.h,v 1.3 2002/04/01 22:42:30 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -59,6 +59,8 @@ public:
   double nSigmaKaon() const;
   double nSigmaProton() const;
   double dEdx() const;
+  double chi2() const;
+  double chi2prob() const;
   double chi2xy() const;
   double chi2z() const;
   double pt() const;
@@ -141,6 +143,8 @@ inline double StMuTrack::nSigmaProton() const    {return unPack(mNSigmaProton,  
 inline double StMuTrack::dEdx() const {return mdEdx;}
 inline double StMuTrack::chi2xy() const {return mChiSqXY;}
 inline double StMuTrack::chi2z() const {return mChiSqZ;}
+inline double StMuTrack::chi2() const {return mChiSqXY;}
+inline double StMuTrack::chi2prob() const {return mChiSqZ;}
 inline StTrackTopologyMap StMuTrack::topologyMap() const {return mTopologyMap;}
 inline short StMuTrack::charge() const {return mHelix.q();}
 inline double StMuTrack::pt() const {return mPt;}
@@ -168,6 +172,9 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.3  2002/04/01 22:42:30  laue
+ * improved chain filter options
+ *
  * Revision 1.2  2002/03/20 16:04:12  laue
  * minor changes, mostly added access functions
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.7 2002/03/28 05:10:34 laue Exp $
+ * $Id: StMuDstMaker.h,v 1.8 2002/04/01 22:42:30 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -52,13 +52,11 @@ class TTree;
 class TChain;
 class TClonesArray;
 
-enum ioMode {ioRead, ioWrite};
-enum ioNameMode {ioFix=0, ioIOMaker, ioTreeMaker};
 
 class StMuDstMaker : public StMaker {
  public:
   StMuDstMaker(const char* name="MuDst");
-  StMuDstMaker(ioMode mode, ioNameMode nameMode, const char* dirName="./", const char* fileName="", const char* filter=".", int maxfiles=10 );
+  StMuDstMaker(int mode, int nameMode, const char* dirName="./", const char* fileName="", const char* filter=".", int maxfiles=10 );
   ~StMuDstMaker();
   
   int Init();
@@ -78,6 +76,10 @@ class StMuDstMaker : public StMaker {
   void setCompression(int comp=9);
 
 private:
+  enum ioMode {ioRead, ioWrite};
+  enum ioNameMode {ioFix=0, ioIOMaker, ioTreeMaker};
+
+
   StMuDst* mStMuDst;
 
   StEvent* mStEvent;
@@ -85,8 +87,8 @@ private:
   StIOMaker* mIOMaker;
   StTreeMaker* mTreeMaker;
 
-  ioMode mIoMode;
-  ioNameMode mIoNameMode;
+  int mIoMode;
+  int mIoNameMode;
   string mDirName;
   string mFileName;
   string mFilter;
@@ -123,9 +125,6 @@ private:
   void closeWrite();
  
   void streamerOff();
-
-  string** subFilter(string filter);
-  void makeChain(string dir, string filter, int maxFiles=10);
 
   void openRead();
   void read();
@@ -211,6 +210,9 @@ inline void StMuDstMaker::setCompression(int comp) { mCompression = comp;}
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.8  2002/04/01 22:42:30  laue
+ * improved chain filter options
+ *
  * Revision 1.7  2002/03/28 05:10:34  laue
  * update for running in the production
  *
