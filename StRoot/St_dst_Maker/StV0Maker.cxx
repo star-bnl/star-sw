@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.23 2000/06/13 13:04:21 genevb Exp $
+// $Id: StV0Maker.cxx,v 1.24 2000/06/15 21:32:10 genevb Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.24  2000/06/15 21:32:10  genevb
+// Bug fix for zeroing variables
+//
 // Revision 1.23  2000/06/13 13:04:21  genevb
 // Fixed bug with not finding primary vertex
 //
@@ -213,7 +216,8 @@ Int_t StV0Maker::Make(){
     }
     vertex->ReAllocate(v0_limit);
     Long_t NGlbTrk = globtrk->GetNRows();
-    Long_t space2,space3 = 0;
+    Long_t space2 = 0;
+    Long_t space3 = 0;
     if (m_Mode == 1) {
       space3 = NGlbTrk;
     } else {
