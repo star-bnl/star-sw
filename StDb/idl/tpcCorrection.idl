@@ -6,7 +6,10 @@
 //:Reminder:
 //:Recall frequency:
 //:Size of Data:
-//:Pointer to data:  TpcDriftDistCorr.time:
-struct TpcDriftDistCorr {
-  float a[4];  // a[0]+a[1]*(2*z/190-1)+a[2]*ezp(a[3]*(z/190-1); z distance from membrane
+//:Pointer to data:  tpcCorrection.time:
+struct tpcCorrection {
+  long  npar; 	
+  float min;   // fit range
+  float max;   // 
+  float a[10];  // a[npar]
 };

@@ -1,0 +1,16 @@
+/*    tpcPressure.idl
+*
+*  Table: tpcPressure
+*
+*       description:
+* paramterization of TPC gain versus Pressure
+* Scale = Exp(-(A0 + A1*Log((*m_tpcGas)[0].barometricPressure)));
+*/ 
+
+
+struct tpcPressure { 
+
+   float  A0;
+   float  A1;
+
+ };  
