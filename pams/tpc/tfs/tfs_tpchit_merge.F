@@ -1,5 +1,8 @@
-* $Id: tfs_tpchit_merge.F,v 1.3 1998/04/07 20:56:34 hardtke Exp $
+* $Id: tfs_tpchit_merge.F,v 1.4 1998/07/28 12:54:47 sakrejda Exp $
 * $Log: tfs_tpchit_merge.F,v $
+* Revision 1.4  1998/07/28 12:54:47  sakrejda
+* problem fixed following Herb's suggestion
+*
 * Revision 1.3  1998/04/07 20:56:34  hardtke
 * AZZZZ
 * A
@@ -141,7 +144,9 @@ C     the tpc_index table after tpc hit merging.
 C     loop over sector-rows
       do i = 1, par(1).nsect
          do j = 1, par(1).nrow
-            
+*
+*     This is a very ugly patch.....
+            if(i.gt.24) go to 666
 C     chose pad size
             ipad = 2
             if (j .le. par(1).irmax) ipad = 1
@@ -415,7 +420,9 @@ C     04/16/1997  DSW
             
          enddo                  ! loop over rows
       enddo                     ! loop over sectors
-      
+*     jump here if the index gets past the loop limit 
+*     (the end of that ugly patch)
+ 666  continue
 
 C     Update  tphit.id in the index table for merged hits.
 C     04/16/1997  DSW
