@@ -46,7 +46,7 @@ class StEmcTriggerMaker : public StMaker
     TArrayF PatchTh;
     TArrayF JetTh;
     
-    StEmcTriggerMaker(char*);
+    StEmcTriggerMaker(const char *name="bemctrigger");
     virtual ~StEmcTriggerMaker();
     virtual Int_t Init();
     virtual Int_t Make();
