@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.22 2000/08/04 03:30:18 long Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.23 2001/03/13 22:08:56 long Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.23  2001/03/13 22:08:56  long
+ * *** empty log message ***
+ *
  * Revision 1.22  2000/08/04 03:30:18  long
  * 1)parameterize reponse function in Z
  * 2) add normalization factor 1.4 to match real data.It should
@@ -350,7 +353,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 
     int PadsAtRow;
     double sigma_xpad2;
-    double InOuterFactor=1.0075,normalFactor=1.4 ;;
+    double InOuterFactor=1.0075,normalFactor=1.4 ;
     double charge_fraction[7]; 
     int wire_index;
     double *SignalSum;
@@ -372,6 +375,12 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
         double electrons;
         double tZero;
         tZero=mElectronicsDb->tZero();
+	//reset all the datatbase value to keep them updated
+       mDriftVelocity             = mSCDb->driftVelocity();
+ 
+       mSamplingFrequency         = mElectronicsDb->samplingFrequency();
+       mTimeBinWidth              = 1./mSamplingFrequency;
+       mTau                       =mElectronicsDb->tau();  
     int bin_start,bin_end;
     int pad_start,pad_end=max(mPadsAtRow[mNumberOfInnerRows-1],mPadsAtRow[mNumberOfRows-1])+1;
     int row_start,row_end;
