@@ -1,6 +1,6 @@
 //*******************************************************************
 // 
-// $Id: trsIonization.cc,v 1.1 1998/11/10 17:12:00 fisyak Exp $
+// $Id: trsIonization.cc,v 1.2 1998/11/13 00:24:36 lasiuk Exp $
 //
 //*******************************************************************
 //
@@ -16,6 +16,9 @@
 //*******************************************************************
 //
 // $Log: trsIonization.cc,v $
+// Revision 1.2  1998/11/13 00:24:36  lasiuk
+// TRUE/FALSE, pntrs in Db
+//
 // Revision 1.1  1998/11/10 17:12:00  fisyak
 // Put Brian trs versin into StRoot
 //
@@ -201,7 +204,7 @@ int main(int argc, char* argv[])
     for(int itrack=0; itrack<numberOfTracks; itrack++) {
 	for (int isample=0; isample<numberOfSamples; isample++) {
 
-	    sum.assign((StTrsDeDx::numberOfElectrons),0);
+	    sum.resize((StTrsDeDx::numberOfElectrons),0);
 	    //myELoss.electrons(sum, bg);
 	    myELoss.electrons(sum);
 	    tuple2[0] = static_cast<float>(itrack);
@@ -211,7 +214,7 @@ int main(int argc, char* argv[])
 
 	    int totalInSubsegment = 0;
 	    for(int isubsample=0; isubsample<subSegments; isubsample++) {
-		sum.assign((StTrsDeDx::numberOfElectrons),0);
+		sum.resize((StTrsDeDx::numberOfElectrons),0);
 		subELoss.electrons(sum);
 		totalInSubsegment += sum[StTrsDeDx::total];
 

@@ -1,5 +1,5 @@
 //*************************************************************
-// $Id: trsTransparency.cc,v 1.1 1998/11/10 17:12:01 fisyak Exp $
+// $Id: trsTransparency.cc,v 1.2 1998/11/13 00:24:37 lasiuk Exp $
 //
 // Author: brian, October 1998
 //
@@ -9,6 +9,9 @@
 //          Data Bases.
 //
 // $Log: trsTransparency.cc,v $
+// Revision 1.2  1998/11/13 00:24:37  lasiuk
+// TRUE/FALSE, pntrs in Db
+//
 // Revision 1.1  1998/11/10 17:12:01  fisyak
 // Put Brian trs versin into StRoot
 //
@@ -100,7 +103,7 @@ int main ()
     StTrsChargeTransporter* trsTransporter =
 	StTrsFastChargeTransporter::instance(geomDb, scDb, &gasDb, magDb);
 
-    trsTransporter->setGatingGridTransparency(TRUE);
+    trsTransporter->setGatingGridTransparency(true);
 
 #ifndef ST_NO_NAMESPACES
     using namespace units;

@@ -1,6 +1,6 @@
 ############################################################################
 #
-# $Id: Makefile,v 1.2 1998/11/12 22:39:56 lasiuk Exp $
+# $Id: Makefile,v 1.3 1998/11/13 00:24:35 lasiuk Exp $
 #
 # Author: Brian, October 1998
 # --------------------------------------------------------------------------
@@ -8,6 +8,9 @@
 # --------------------------------------------------------------------------
 #
 # $Log: Makefile,v $
+# Revision 1.3  1998/11/13 00:24:35  lasiuk
+# TRUE/FALSE, pntrs in Db
+#
 # Revision 1.2  1998/11/12 22:39:56  lasiuk
 # compatibility at BNL
 #
@@ -81,9 +84,10 @@ DEST	      = .
 MAKEFILE      = Makefile
 
 #PROGRAM       = trsDataBase
-PROGRAM       = trsLandau
+#PROGRAM       = trsLandau
 #PROGRAM       = trsTransparency
 #PROGRAM       = trsDiffusion
+PROGRAM       = trsIonization
 #PROGRAM       = trsSector
 
 OBJS	      = $(PROGRAM).o

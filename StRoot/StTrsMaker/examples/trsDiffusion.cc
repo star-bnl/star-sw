@@ -1,11 +1,14 @@
 //**************************************************************/
-// $Id: trsDiffusion.cc,v 1.1 1998/11/10 17:12:00 fisyak Exp $
+// $Id: trsDiffusion.cc,v 1.2 1998/11/13 00:24:36 lasiuk Exp $
 //
 // Author: brian, Oct 1998
 //
 // Purpose: Evaluation of the diffusion characteristics of TRS
 //
 // $Log: trsDiffusion.cc,v $
+// Revision 1.2  1998/11/13 00:24:36  lasiuk
+// TRUE/FALSE, pntrs in Db
+//
 // Revision 1.1  1998/11/10 17:12:00  fisyak
 // Put Brian trs versin into StRoot
 //
@@ -151,7 +154,7 @@ int main (int argc,char* argv[])
     //
     // create a Sector:
     //
-    StTrsSector sector(geomDb);
+    StTrsSector *sector = new StTrsSector(geomDb);
     
     //
     // Processes
@@ -159,24 +162,24 @@ int main (int argc,char* argv[])
     StTrsChargeTransporter *trsTransporter =
 	StTrsFastChargeTransporter::instance(geomDb, scDb, &myEloss, magDb);
     // set status:
-//     trsTransporter->setChargeAttachment(TRUE);
-//     trsTransporter->setGatingGridTransparency(TRUE);
-     trsTransporter->setTransverseDiffusion(TRUE);
-     trsTransporter->setLongitudinalDiffusion(TRUE);
-//     trsTransporter->setExB(TRUE);
+//     trsTransporter->setChargeAttachment(true);
+//     trsTransporter->setGatingGridTransparency(true);
+     trsTransporter->setTransverseDiffusion(true);
+     trsTransporter->setLongitudinalDiffusion(true);
+//     trsTransporter->setExB(true);
 
     StTrsWireHistogram *myWireHistogram =
 	StTrsWireHistogram::instance(geomDb, scDb);
-//     myWireHistogram->setDoGasGain(TRUE);  // True by default
-//     myWireHistogram->setDoGasGainFluctuations(FALSE);
-//     myWireHistogram->setDoTimeDelay(FALSE);
+//     myWireHistogram->setDoGasGain(true);  // True by default
+//     myWireHistogram->setDoGasGainFluctuations(false);
+//     myWireHistogram->setDoTimeDelay(false);
 
     StTrsAnalogSignalGenerator *trsSignalGenerator =
 	StTrsSlowAnalogSignalGenerator::instance(geomDb, scDb, electronicsDb, sector);
 //     trsSignalGenerator->setDeltaRow(0);
 //     trsSignalGenerator->setDeltaPad(0);
 //     trsSignalGenerator->setSignalThreshold(.0001);
-//     trsSignalGenerator->setSuppressEmptyTimeBins(TRUE);
+//     trsSignalGenerator->setSuppressEmptyTimeBins(true);
     //     ??select the type of function?
 	
     StTrsDigitalSignalGenerator *trsDigitalGenerator =
@@ -243,7 +246,7 @@ int main (int argc,char* argv[])
 	}
 
 	cout << "*********" << endl;
-    }while(TRUE);
+    }while(true);
 
     hbookFile.saveAndClose();
         
