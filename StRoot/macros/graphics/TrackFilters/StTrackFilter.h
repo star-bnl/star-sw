@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StTrackFilter.h,v 1.4 1999/12/21 19:17:31 fine Exp $ 
+// $Id: StTrackFilter.h,v 1.5 2000/03/10 19:14:59 fine Exp $ 
 // $Log: StTrackFilter.h,v $
+// Revision 1.5  2000/03/10 19:14:59  fine
+// Separate SubChannel for dst_track table has been introduced
+//
 // Revision 1.4  1999/12/21 19:17:31  fine
 // Width_t type has been replaced by Size_t
 //
@@ -24,6 +27,7 @@
 
 class St_TableIter;
 class St_tcl_tphit;
+class St_dst_track;
 class St_g2t_tpc_hit;
 class St_g2t_svt_hit;
 
@@ -45,9 +49,10 @@ class StTrackFilter : public StVirtualEventFilter  {
     const St_TableSorter *m_G2t_vertex;
 
  protected:
-    Int_t SubChannel(St_tcl_tphit   &hit, Int_t rowNumber,Size_t &size,Style_t &style); 
-    Int_t SubChannel(St_g2t_tpc_hit &hit, Int_t rowNumber,Size_t &size,Style_t &style); 
-    Int_t SubChannel(St_g2t_svt_hit &hit, Int_t rowNumber,Size_t &size,Style_t &style); 
+    Int_t SubChannel(St_tcl_tphit   &hit,   Int_t rowNumber,Size_t &size,Style_t &style); 
+    Int_t SubChannel(St_dst_track   &track, Int_t rowNumber,Size_t &size,Style_t &style); 
+    Int_t SubChannel(St_g2t_tpc_hit &hit,   Int_t rowNumber,Size_t &size,Style_t &style); 
+    Int_t SubChannel(St_g2t_svt_hit &hit,   Int_t rowNumber,Size_t &size,Style_t &style); 
  public:
     StTrackFilter() : m_LTrackP(0),m_Lid_globtrk(0),m_Ltpt_track(0), m_G2t_track(0), m_NextG2tTrack(0) {}
     virtual ~StTrackFilter() {Reset();}
