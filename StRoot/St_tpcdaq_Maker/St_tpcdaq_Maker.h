@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.25 2000/06/26 18:25:20 ward Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.26 2001/02/11 17:42:00 fisyak Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.26  2001/02/11 17:42:00  fisyak
+// Make gain correction switchable
+//
 // Revision 1.25  2000/06/26 18:25:20  ward
 // mulitple veto zones for ExcludeTheseTimeBins
 //
@@ -100,7 +103,6 @@ class StTpcUnpacker;
 class StSequence;
 class TH1F;
 #define NOISE_ELIM 1
-#define GAIN_CORRECTION
 #define MAXROWPADPERSECTOR 400
 #define BINRANGE 3
 #define ASIC_THRESHOLDS
@@ -121,9 +123,8 @@ class St_tpcdaq_Maker : public StMaker {
    StTpcRawDataEvent *mEvent; //!
    void MakeHistograms();
    void SetGainCorrectionStuff(int);
-#ifdef GAIN_CORRECTION
+   Bool_t            mGAIN_CORRECTION;//!
    float fGain[45][182];
-#endif
 #ifdef NOISE_ELIM
   tpcdaq_noiseElim noiseElim[24]; //!
 #endif
@@ -183,13 +184,27 @@ class St_tpcdaq_Maker : public StMaker {
      printf("St_tpcdaq_Maker::SetConfig, getting data from %s.\n",gConfig);
    }
    Char_t   *GetConfig() {return gConfig;}
-   virtual void SetMode(Int_t mode=0) {m_Mode=mode; mode ? SetConfig("trs"): SetConfig("daq");} 
+   virtual void SetMode(Int_t mode=0) {
+     m_Mode=mode; 
+     if (m_Mode%10 == 1) {SetConfig("trs"); SetGain(kFALSE);} 
+     else {
+       SetConfig("daq"); 
+       if (m_Mode/10 == 1)  SetGain(kFALSE);
+       else                 SetGain(kTRUE);  
+     } 
+   }
+   void SetGain(Bool_t m) {mGAIN_CORRECTION = m; 
+      printf("St_tpcdaq_Maker::SetGain switch "); 
+      if (mGAIN_CORRECTION) printf(" On");
+      else                  printf(" OFF");
+      printf(" gain corrections\n");
+   }
    virtual       ~St_tpcdaq_Maker();
    virtual Int_t  Init();
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.25 2000/06/26 18:25:20 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.26 2001/02/11 17:42:00 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tpcdaq_Maker, 1)   //StAF chain virtual base class for Makers
 };
