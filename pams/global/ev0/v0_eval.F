@@ -86,6 +86,5 @@ C---------------
 
  10   CONTINUE
 
-999   V0_EVAL = 0
-      RETURN
+999   RETURN
       END

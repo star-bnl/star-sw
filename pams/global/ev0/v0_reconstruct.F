@@ -1,7 +1,9 @@
       INTEGER FUNCTION V0_RECONSTRUCT(trak_h,trak,
      +     ev0par_h,ev0par,
      +     privert_h,privert,
-     +     ev0out_h,ev0out   )
+     +     vertex_h,vertex,
+     +     ev0out_h,ev0out,
+     +     bmag_h, bmag)
  
 
       IMPLICIT NONE
@@ -17,21 +19,26 @@ C                          Order in which calcs/tests were made was altered to
 C                          improve speed of search
 C----------------------------------------------------------------------
 #include "PAM.inc"
-#include "ev0_ev0out.inc"
+#include "dst_vertex.inc"
+#include "ev0_aux.inc"
 #include "evr_privert.inc"
 #include "ev0_ev0par.inc"
 #include "ev0_track.inc"
+#include "mft_control.inc"
 C---------------
   
       RECORD/ table_head_st/ ev0par_h
       RECORD/ ev0_ev0par_st/ ev0par(*)
       RECORD/ table_head_st/ privert_h
       RECORD/ evr_privert_st/ privert(*)
+      RECORD/ table_head_st/ vertex_h
+      RECORD/ dst_vertex_st/ vertex(*)
       RECORD/ table_head_st/ ev0out_h
-      RECORD/ ev0_ev0out_st/ ev0out(*)
+      RECORD/ ev0_aux_st/ ev0out(*)
       RECORD/ table_head_st/ trak_h
       RECORD/ ev0_track_st/ trak(*)
-
+      RECORD/ table_head_st/ bmag_h
+      RECORD/ mft_control_st/ bmag(*)
     
       INTEGER 	ok
       INTEGER  	jk
@@ -46,7 +53,7 @@ C---------------
       REAL	trk1(6),trk2(6)
       REAL	xcom(2),ycom(2),inv_mass,rmin
       REAL	xp(2),xn1(2),xn2(2),rd,xpp(3),massl(2),pp(3)
-      REAL      env0,bv0,gv0,ep,ppar_cm,mainv(3)
+      REAL      env0,bv0,gv0,ep,ppar_cm,mainv(3),rap
       REAL      MASST(50)
       real      rdcheck(2),open,dot ! wkw
       LOGICAL	first, updated
@@ -87,10 +94,7 @@ C---------------
         mainv(1) = privert(1).x
         mainv(2) = privert(1).y
         mainv(3) = privert(1).z
-*        mainv(1) = 0.
-*        mainv(2) = 0.
-*        mainv(3) = 0.
-*     
+
 *-----steering routine------------------------------------------------
 *     
         
@@ -122,7 +126,7 @@ C--   calculate impact parameter at main vertex--- wkw
            
            call ev0_project_track(trak(i).xc,trak(i).rc,mainv,xn1)
            trak(i).dca=sqrt(xn1(1)**2.+xn1(2)**2.)
-           call ev0_track_mom(trak(i).r0,trak(i).rc,0,pst1)
+           call ev0_track_mom(trak(i).r0,trak(i).rc,0,pst1,bmag(1).B)
            trak(i).p=sqrt(pst1(1)*pst1(1)+pst1(2)*pst1(2)
      +          +pst1(3)*pst1(3))
 *     
@@ -155,7 +159,8 @@ C--    and total mom for trak(j) first time I see it---
 
                  call ev0_project_track(trak(j).xc,trak(j).rc,mainv,xn2)
                  trak(j).dca=sqrt(xn2(1)**2.+xn2(2)**2.)
-                 call ev0_track_mom(trak(j).r0,trak(j).rc,0,pst2)
+                 call ev0_track_mom(trak(j).r0,trak(j).rc,0,
+     +                pst2,bmag(1).B)
                  trak(j).p=sqrt(pst2(1)*pst2(1)+pst2(2)*pst2(2)
      +                +pst2(3)*pst2(3))
               endif
@@ -224,8 +229,8 @@ c
                  if(  (rv.gt.rv_cut) ) THEN
                     massl(1)=mass1(1)
                     massl(2)=mass2(1)
-                    call ev0_track_mom(trk1,trak(i).rc,0,pst1)
-                    call ev0_track_mom(trk2,trak(j).rc,0,pst2)
+                    call ev0_track_mom(trk1,trak(i).rc,0,pst1,bmag(1).B)
+                    call ev0_track_mom(trk2,trak(j).rc,0,pst2,bmag(1).B)
 C---- calculate the momentum components of the primary-----------
                     pp(1)  =pst1(1)+pst2(1)
                     pp(2)  =pst1(2)+pst2(2)
@@ -236,28 +241,40 @@ C---- find square of impact param of reconstructed particle------
      +                   ,iflag)
                     IF((rmin.le.rmin_cut).and.(iflag.ne.2)) THEN
                        ok=ok+1
-                       if (ok.gt.ev0out_h.maxlen) return ! wkw
+                       if (ok.gt.ev0out_h.maxlen .or.
+     +                      vertex_h.nok .eq.  vertex_h.maxlen) return ! wkw
                        ev0out_h.nok= ev0out_h.nok+1
-                       ev0out(ok).p(1)=pp(1)
-                       ev0out(ok).p(2)=pp(2)
-                       ev0out(ok).p(3)=pp(3)
-                       ev0out(ok).x(1)=xpp(1)
-                       ev0out(ok).x(2)=xpp(2)
-                       ev0out(ok).x(3)=xpp(3)
+                       vertex_h.nok = vertex_h.nok +1
+                       vertex(vertex_h.nok).x=xpp(1)
+                       vertex(vertex_h.nok).y=xpp(2)
+                       vertex(vertex_h.nok).z=xpp(3)
+                       vertex(vertex_h.nok).iflag = 0
+                       vertex(vertex_h.nok).id_det = 0
+                       vertex(vertex_h.nok).id_vtx= 2
+                       vertex(vertex_h.nok).sigma = 0
+                       vertex(vertex_h.nok).pchi2 = 0
+                       vertex(vertex_h.nok).id_aux_vert= ok
+                       vertex(vertex_h.nok).id = vertex_h.nok
+                       ev0out(ok).px=pp(1)
+                       ev0out(ok).py=pp(2)
+                       ev0out(ok).pz=pp(3)
                        ev0out(ok).id=ok
+                       ev0out(ok).id_vertex= vertex_h.nok                    
                        ev0out(ok).dcap = trak(i).dca
                        ev0out(ok).dcan = trak(j).dca
                        ev0out(ok).dcapn = sqrt(rd)
                        ev0out(ok).dcav0=sqrt(rmin)
                        ev0out(ok).idpos=trak(i).id
                        ev0out(ok).idneg=trak(j).id
+                       ev0out(ok).pidpos = trak(i).pid
+                       ev0out(ok).pidneg = trak(j).pid
 C--   calculate Armenteros variables---
-                       ev0out(ok).pos_p(1) = pst1(1)
-                       ev0out(ok).pos_p(2) = pst1(2)
-                       ev0out(ok).pos_p(3) = pst1(3)
-                       ev0out(ok).neg_p(1) = pst2(1)
-                       ev0out(ok).neg_p(2) = pst2(2)
-                       ev0out(ok).neg_p(3) = pst2(3)
+                       ev0out(ok).pos_px = pst1(1)
+                       ev0out(ok).pos_py = pst1(2)
+                       ev0out(ok).pos_pz = pst1(3)
+                       ev0out(ok).neg_px = pst2(1)
+                       ev0out(ok).neg_py = pst2(2)
+                       ev0out(ok).neg_pz = pst2(3)
                        
                        pdotp=pst1(1)*pp(1)+pst1(2)*pp(2)+pst1(3)*pp(3) !dot product of p+ and p(v0)
                        ndotp=pst2(1)*pp(1)+pst2(2)*pp(2)+pst2(3)*pp(3) !dot product of p- and p(v0)
@@ -267,12 +284,15 @@ C--   calculate Armenteros variables---
                        pper= sqrt(trak(i).p*trak(i).p-ppar*ppar)
                        ev0out(ok).pt = pper
                        ev0out(ok).alpha = (ppar-npar)/(ppar+npar)
+                       ev0out(ok).sagitta_pos = trak(i).sagitta
+                       ev0out(ok).sagitta_neg = trak(j).sagitta
+                       
                        
 c     Opening angles: wkw
                        dot=pst1(1)*pst2(1)+pst1(2)*pst2(2)
      +                      +pst1(3)*pst2(3)
                        open=acosd(dot/(trak(i).p*trak(j).p))
-                       ev0out(ok).cov(1)=open
+                       ev0out(ok).theta = open
 *     
 *---  if blind run test all mass hypothesis
 *     
@@ -288,19 +308,33 @@ c     Opening angles: wkw
                           ENDIF
                           
                           call ev0_inv_mass(trak(i).p,trak(j).p,massl,
-     +                         pv0sq,inv_mass,env0,ep)
+     +                         pv0sq,pp(3),inv_mass,env0,ep,rap)
                           
-                          ev0out(ok).inv_mass(index)=inv_mass
-                          
+                          if( index .eq. 1) then
+                             ev0out(ok).inv_mass_k0=inv_mass
+                             ev0out(ok).rapidity_k0 = rap
 C-- calculate proper lifetime assuming that particle originated at main vertex
-                          ev0out(ok).tau(index)=inv_mass*rv/pv0      
-                          ev0out(ok).tmin(index)=inv_mass*rv_cut/pv0 
+                             ev0out(ok).tau_k0=inv_mass*rv/pv0
+                          elseif( index .eq. 2) then
+                             ev0out(ok).inv_mass_la=inv_mass
+                             ev0out(ok).rapidity_la = rap
+C-- calculate proper lifetime assuming that particle originated at main vertex
+                             ev0out(ok).tau_la=inv_mass*rv/pv0
+                          elseif( index .eq. 3) then
+                             ev0out(ok).inv_mass_lb=inv_mass
+                             ev0out(ok).rapidity_lb = rap
+C-- calculate proper lifetime assuming that particle originated at main vertex
+                             ev0out(ok).tau_lb=inv_mass*rv/pv0
+                          endif
+                             
+     
+C                          ev0out(ok).tmin(index)=inv_mass*rv_cut/pv0 
 c--   calculate cos(theta_c.m.)
-                          bv0  =pv0/env0
-                          gv0  =env0/inv_mass
-                          ppar_cm=gv0*(ppar-bv0*ep)
-                          ev0out(ok).cos_th_cm(index)=
-     +                         cos(atan2(pper,ppar_cm))
+C                          bv0  =pv0/env0
+C                          gv0  =env0/inv_mass
+C                          ppar_cm=gv0*(ppar-bv0*ep)
+C                          ev0out(ok).cos_th_cm(index)=
+C     +                         cos(atan2(pper,ppar_cm))
 c     
 c     WRITE(7) rd,rv,rmin,inv_mass
                           
@@ -340,8 +374,7 @@ c     WRITE(7) rd,rv,rmin,inv_mass
  10     CONTINUE	
         
           
- 999    V0_RECONSTRUCT = 0
-        RETURN
+ 999    RETURN
         END
       
 

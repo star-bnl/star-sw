@@ -31,7 +31,7 @@ C
 C   Output arguments : 
 C     globtrk - global tracks
 C     svt_track 
-C     tpt_tracl
+C     tpt_track
 C     tte_eval
 C   svt_track, tpt_track and tte_eval are only filled so can be used in
 C    evaluation  routine ev0_eval2
@@ -76,63 +76,67 @@ C  set return code to normal success
 
       DO  i=1,track_h.nok
          rr = 1000.
-
+         j = 1
+         k = 0
          if( abs(track(i).charge) .eq. 1 ) then
-            if( track(i).hit_svt_p .ne. 0) then
-               j = track(i).hit_svt_p
-               do while (j .ne. 0)
+            if( track(i).n_svt_hit .ne. 0) then
+               do while (j .le. svt_hit_h.nok)
                   
-                  if( j .ne. svt_hit(j).id) then
-                     write(6,*) 'PANIC now'
-                     ev0_direct = stafcv_bad
+                  if(  svt_hit(j).track_p .eq. track(i).id ) then
+
+                     if (  sqrt((svt_hit(j).x(1))**2.+
+     >                    (svt_hit(j).x(2))**2) .lt. rr) then
+                        rr =   sqrt((svt_hit(j).x(1))**2.+
+     >                       (svt_hit(j).x(2))**2)
+                        k = j
+                     endif
                   endif
-                  if(  sqrt((svt_hit(j).x(1))**2.+
-     >                 (svt_hit(j).x(2))**2) .lt. rr) then
-                     rr =   sqrt((svt_hit(j).x(1))**2.+
-     >                    (svt_hit(j).x(2))**2)
-                     k = j
-                     j = svt_hit(j).next_tr_hit_p
-                  else
-                     j = 0
-                  endif
+                  j = j +1
                enddo
-               svtnok = svtnok + 1
-               svt_track(svtnok).id_globtrk = track(i).id
-               svt_track(svtnok).id_mctrack = track(i).id
-               if( track(i).n_tpc_hit .gt. 0 ) then
-                  tpcnok = tpcnok+1
-                  tpc_track(tpcnok).id_globtrk = track(i).id
+               if( k .ne. 0) then
+                  svtnok = svtnok + 1
+                  svt_track(svtnok).id = svtnok
+                  svt_track(svtnok).id_globtrk = track(i).id
+                  svt_track(svtnok).id_mctrack = track(i).id
+                  nok = nok + 1    
+                  charge=track(i).charge
                   
-                  tte_eval(tpcnok).rtrk = tpcnok
-                  tte_eval(tpcnok).mtrk = track(i).id
+                  pt = sqrt((svt_hit(k).p(1))**2.
+     >                 +(svt_hit(k).p(2))**2.)
+                  
+                  globtrk(nok).id   = track(i).id
+                  globtrk(nok).ndegf = track(i).n_svt_hit + 
+     >                 track(i).n_tpc_hit
+                  globtrk(nok).icharge= int(charge)
+                  globtrk(nok).r0   = sqrt((svt_hit(k).x(1))**2.
+     >                 +(svt_hit(k).x(2))**2.)
+                  globtrk(nok).phi0 = atan2( svt_hit(k).x(2), 
+     >                 svt_hit(k).x(1) )*raddeg
+                  globtrk(nok).z0   = svt_hit(k).x(3)
+                  globtrk(nok).psi  = atan2( svt_hit(k).p(2),
+     >                 svt_hit(k).p(1) )*raddeg
+                  globtrk(nok).tanl = (svt_hit(k).p(3) )/pt
+                  globtrk(nok).invpt= 1./pt
+                  globtrk(nok).sflag = 1
+                  globtrk(nok).id_global_pid = track(i).ge_pid
+                  globtrk(nok).id_pver = track(i).next_vtx_trk_p
+                  
+                  if( track(i).n_tpc_hit .gt. 0 ) then
+                     tpcnok = tpcnok+1
+                     tpc_track(tpcnok).id = tpcnok
+                     tpc_track(tpcnok).q = track(i).charge
+                     tpc_track(tpcnok).invp = 1./pt
+                     tpc_track(tpcnok).id_globtrk = track(i).id
+                     
+                     tte_eval(tpcnok).rtrk = tpcnok
+                     tte_eval(tpcnok).mtrk = track(i).id
+                  endif
+                  
                endif
-               
-               nok = nok + 1    
-               charge=track(i).charge
-               
-               pt = sqrt((svt_hit(k).p(1))**2.
-     >              +(svt_hit(k).p(2))**2.)
-               
-               globtrk(nok).id   = track(i).id
-               globtrk(nok).ndegf = track(i).n_svt_hit + 
-     >              track(i).n_tpc_hit
-               globtrk(nok).icharge= int(charge)
-               globtrk(nok).r0   = sqrt((svt_hit(k).x(1))**2.
-     >              +(svt_hit(k).x(2))**2.)
-               globtrk(nok).phi0 = atan2( svt_hit(k).x(2), 
-     >              svt_hit(k).x(1) )*raddeg
-               globtrk(nok).z0   = svt_hit(k).x(3)
-               globtrk(nok).psi  = atan2( svt_hit(k).p(2),
-     >              svt_hit(k).p(1) )*raddeg
-               globtrk(nok).tanl = (svt_hit(k).p(3) )/pt
-               globtrk(nok).invpt= 1./pt
-               globtrk(nok).sflag = 1
-               globtrk(nok).id_global_pid = track(i).ge_pid
-               globtrk(nok).id_pver = track(i).next_vtx_trk_p
-               
-               
-            elseif( track(i).hit_tpc_p .ne. 0) then
+            endif
+            if( track(i).n_tpc_hit .ne. 0 .and. k .eq. 0) then
                j = track(i).hit_tpc_p
+               rr = 999999999.0
                do while (j .ne. 0)
                   
                   if( j .ne. tpc_hit(j).id) then
@@ -148,11 +152,7 @@ C  set return code to normal success
                      j = 0
                   endif
                enddo
-               tpcnok = tpcnok+1
-               tpc_track(tpcnok).id_globtrk = track(i).id
-               
-               tte_eval(tpcnok).rtrk = tpcnok
-               tte_eval(tpcnok).mtrk = track(i).id
+
                nok = nok + 1    
                charge=track(i).charge
                
@@ -175,7 +175,13 @@ C  set return code to normal success
                globtrk(nok).sflag = 1
                globtrk(nok).id_global_pid = track(i).ge_pid
                globtrk(nok).id_pver = track(i).next_vtx_trk_p
-               
+               tpcnok = tpcnok+1
+               tpc_track(tpcnok).id_globtrk = track(i).id
+               tpc_track(tpcnok).id = tpcnok
+               tpc_track(tpcnok).q = track(i).charge
+               tpc_track(tpcnok).invp = 1./pt
+               tte_eval(tpcnok).rtrk = tpcnok
+               tte_eval(tpcnok).mtrk = track(i).id
                
             endif
             if((globtrk_h.maxlen).le.nok .or.

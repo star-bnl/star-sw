@@ -6,8 +6,10 @@
 #include "ev0_ev0par.idl"
 #include "egr_globtrk.idl"
 #include "evr_privert.idl"
-#include "ev0_ev0out.idl"
+#include "ev0_aux.idl"
+#include "dst_vertex.idl"
 #include "ev0_track.idl"
+#include "mft_control.idl"
 
 
 interface ev0_am : amiModule {
@@ -15,8 +17,10 @@ interface ev0_am : amiModule {
                         ( in    ev0_ev0par      ev0par
                         , inout egr_globtrk    globtrk
                         , in    evr_privert    privert
-                        , out   ev0_ev0out     ev0out
+		        , inout dst_vertex     vertex
+                        , out   ev0_aux        ev0out
 		        , inout ev0_track      trak
+	                , in mft_control       bmag
                 );
 };
-/* Last mod for ev0_am: $Date: 1997/12/31 14:33:26 $ */
+/* Last mod for ev0_am:  1998/5/7  */
