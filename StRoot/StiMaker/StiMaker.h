@@ -42,7 +42,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.42 2002/03/15 16:57:26 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.43 2002/03/15 22:43:39 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -92,11 +92,6 @@ private:
 
     //EventFiller
     StiStEventFiller* mStEventFiller; //!
-
-    //flags
-    bool mBuilt; //!
-    
-    static StiMaker* sinstance; //!
 
     StEvent* mevent; //!
     StMcEvent* mMcEvent; //!
