@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: fillStPidAmpTrks.cc,v 1.2 2000/04/09 18:51:19 aihong Exp $
+ * $Id: fillStPidAmpTrks.cc,v 1.3 2000/04/12 20:14:29 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: fillStPidAmpTrks.cc,v $
+ * Revision 1.3  2000/04/12 20:14:29  aihong
+ * change to adapt to ROOT 2.24 and bug fixed with help from valery
+ *
  * Revision 1.2  2000/04/09 18:51:19  aihong
  * change Make() to read directly from dst tables instead of StEvent
  *
@@ -19,7 +22,7 @@
  *
  **************************************************************************/
 #include "TH3.h"
-#include "St_Table.h"
+
 #include "StHelixModel.h"
 #include "StPhysicalHelixD.hh"
 #include "StPrimaryVertex.h"
@@ -34,7 +37,7 @@
 
 
 
-void fillStPidAmpTrks(St_Table* theTrackTable, St_Table* theDedxTable, St_Table* theVertexTable, StPidAmpTrkVector* trks,TH3D* histo){
+void fillStPidAmpTrks(St_dst_track* theTrackTable, St_dst_dedx* theDedxTable, St_dst_vertex* theVertexTable, StPidAmpTrkVector* trks,TH3D* histo){
 
 
    double dedx, rig, pt, dca;
@@ -43,30 +46,27 @@ void fillStPidAmpTrks(St_Table* theTrackTable, St_Table* theDedxTable, St_Table*
 
    StPrimaryVertex *pvtx=0;
 
- St_dst_track*  globtrk_table=(St_dst_track *)  theTrackTable;
- St_dst_dedx*     dedx_table =(St_dst_dedx *)   theDedxTable;
- St_dst_vertex* vertex_table =(St_dst_vertex *) theVertexTable;
-
-
- table_head_st* globtrk_h = globtrk_table->GetHeader();
- table_head_st* dedx_h    =    dedx_table->GetHeader();
- table_head_st* vertex_h  =  vertex_table->GetHeader();
-
- dst_track_st*  globtrk_v = globtrk_table->GetTable();
- dst_dedx_st*   dedx_v    =    dedx_table->GetTable();
- dst_vertex_st* vertex_v  =  vertex_table->GetTable();
+   dst_track_st*  globtrk_v =  theTrackTable->GetTable();
+   dst_dedx_st*   dedx_v    =   theDedxTable->GetTable();
+   dst_vertex_st* vertex_v  = theVertexTable->GetTable();
  
 
- //now get primary vetex
- for (i=0; i<vertex_h->nok;i++)
- if (vertex_v[i].iflag < 100 && vertex_v[i].iflag%10 == 1 &&
-            vertex_v[i].vtx_id == kEventVtxId) 
- pvtx = new StPrimaryVertex(vertex_v[i]);
+   //now get primary vetex
+   Int_t nVertexRows = theVertexTable->GetNRows();
+   for (i=0; i<nVertexRows;i++)
+   if (vertex_v[i].iflag < 100 && vertex_v[i].iflag%10 == 1 &&
+             vertex_v[i].vtx_id == kEventVtxId) 
+	      {
+      pvtx = new StPrimaryVertex(vertex_v[i]);
+      break;
+   }
 
+   if (pvtx){
 
+   Int_t nDedxRows    = theDedxTable->GetNRows();
+   Int_t nGlobTrkRows = theTrackTable->GetNRows();
 
-
- for (i=0; i<dedx_h->nok; i++){ //dedx loop
+ for (i=0; i<nDedxRows; i++){ //dedx loop
 
    if (dedx_v[i].det_id !=kTpcId )           continue;//not from tpc dector.
    if (dedx_v[i].method !=kTruncatedMeanId ) continue; //not from truncated Mn.
@@ -78,38 +78,39 @@ void fillStPidAmpTrks(St_Table* theTrackTable, St_Table* theDedxTable, St_Table*
 
     nhits=dedx_v[i].ndedx;
 
-   if (dedx_v[i].id_track < globtrk_h->nok){//global track bound check
-
+   if (dedx_v[i].id_track < nGlobTrkRows){//global track bound check
 
      //note that id_track begin with 1. index of globtrk begin with 0.
- StHelixModel* theHelixModel= new StHelixModel(globtrk_v[dedx_v[i].id_track-1]);
+     StHelixModel theHelixModel(globtrk_v[dedx_v[i].id_track-1]); //vf There was memory leak here
 
-   charge=theHelixModel->charge();
+     charge=theHelixModel.charge();
 
-   const  StPhysicalHelixD& thePhysicalHelix=theHelixModel->helix();
-   const  StThreeVectorF& p=theHelixModel->momentum();
-   pt=double(p.perp()); 
+    const  StPhysicalHelixD& thePhysicalHelix=theHelixModel.helix();
+    const  StThreeVectorF& p=theHelixModel.momentum();
+    pt = double(p.perp()); 
 
-   rig=double(p.mag()/double(charge));
+    rig= double(p.mag()/double(charge));
 
-   if (!rig) continue;
+    if (!rig) continue;
   
-   dca=thePhysicalHelix.distance(pvtx->position());
+    dca=thePhysicalHelix.distance(pvtx->position());
    
-    histo->Fill3(nhits,pt,1,1);
-
-    StPidAmpTrk* theAmpTrk=new StPidAmpTrk(rig, dedx, charge,pt, nhits, dca);
-
-      trks->push_back(theAmpTrk);
+ #if ROOT_VERSION_CODE >= ROOT_VERSION(2,24,0)
+        histo->Fill(nhits,pt,1,1);
+ #else
+        histo->Fill3(nhits,pt,1,1);
+ #endif
    
-   if (theHelixModel) delete theHelixModel;
+     StPidAmpTrk* theAmpTrk=new StPidAmpTrk(rig, dedx, charge,pt, nhits, dca);
+
+     trks->push_back(theAmpTrk);
+   
    }
-
 
 
  }
 
-   if (pvtx) delete pvtx;
-
+     delete pvtx;
+   }
 
 }
