@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.4 2004/03/11 11:29:46 subhasis Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.5 2004/03/12 06:36:57 subhasis Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.5  2004/03/12 06:36:57  subhasis
+ *fillStEvent argument orders done properly
+ *
  *Revision 1.4  2004/03/11 11:29:46  subhasis
  *Changes made for PMD run config
  *
@@ -226,8 +229,8 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 	  
 	  // Setting the SubDetector No.
 	  
-	  if (Chain_No >= 1 && Chain_No < 25) SubDet = 2; //! Chains from PMD 	  
-	  if (Chain_No >= 25 && Chain_No <= 48) SubDet = 1; //! Chains from CPV
+	  if (Chain_No >= 1 && Chain_No < 25) SubDet = 2; //! Chains from CPV 	  
+	  if (Chain_No >= 25 && Chain_No <= 48) SubDet = 1; //! Chains from PMD 
 
           // Apply Mapping to get the sm, row and col here
 	  // 	  
@@ -264,8 +267,8 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 	    pmdhit->setColumn(Int_t(col));         //! filling col
 	    pmdhit->setAdc(Int_t(DaqADC));         //! filling ADC   
 	    pmdhit->setEdep(Float_t(edep));        //! filling energy   
-	    if(SubDet==1)det0->addHit(pmdhit);
-	    if(SubDet==2)det1->addHit(pmdhit);
+	    if(SubDet==2)det0->addHit(pmdhit);
+	    if(SubDet==1)det1->addHit(pmdhit);
 	    if(mPmdPrint)cout<<"Applymap:Chain "<<Chain_No<<"channel "<<channel<<"supmod "<<supmod<<"col  "<<col<<" row "<<row<<"ADC "<<DaqADC<<"BLOCK "<<BLOCK<<endl;	
 	  } //Check on non zero DaqADC
 	  
@@ -275,14 +278,14 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
    } //SEC
   
   if(mPmdPrint)gMessMgr->Info("StEvent to be called **");
-  Int_t testevt=fillStEvent(det0,det1);
+  Int_t testevt=fillStEvent(det0,det1);  //called as (cpv_det,pmd_det)
   if(testevt!=kStOK)gMessMgr->Info("Problem in fillStEvent");
   
   return kStOK;
 }
 //-------------------------------------------------------------------------
 
-Int_t StPmdReadMaker::fillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_det)
+Int_t StPmdReadMaker::fillStEvent(StPmdDetector* cpv_det, StPmdDetector* pmd_det)
 {
   // Look for StEvent
   StEvent *currevent = (StEvent*)GetInputDS("StEvent");
