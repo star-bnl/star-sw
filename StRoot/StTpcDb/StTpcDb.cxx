@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.20 2000/04/05 15:44:56 hardtke Exp $
+ * $Id: StTpcDb.cxx,v 1.21 2000/05/11 17:17:27 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.21  2000/05/11 17:17:27  hardtke
+ * make trigger time offset available -- currently NOT different for beam and laser events
+ *
  * Revision 1.20  2000/04/05 15:44:56  hardtke
  * fix solaris bug -- char* was too short for table name
  *
@@ -49,6 +52,7 @@
 #include "St_Table.h"
 #include "StTpcDb.h"
 #include "tables/St_tpcDriftVelocity_Table.h"
+#include "tables/St_trgTimeOffset_Table.h"
 
 StTpcDb* gStTpcDb = 0;
 
@@ -70,6 +74,10 @@ StTpcDb::StTpcDb(St_DataSet* input) {
    for (int i = 0;i<lBases;i++,dataBase.Cd("/") )
      if ( !(tpc[i] = dataBase.Cd(bases[i]) ? dataBase("tpc") : 0 ) ){
        gMessMgr->Warning() << "StTpcDb::Error Getting TPC database: " << bases[i]       << endm;
+     }
+   for (int i = 2;i<lBases;i++,dataBase.Cd("/") )   //only need conditions for trg
+     if ( !(trg[i] = dataBase.Cd(bases[i]) ? dataBase("trg") : 0 ) ){
+       gMessMgr->Warning() << "StTpcDb::Error Getting trigger database: " << bases[i]       << endm;
      }
  }
  else{
@@ -101,6 +109,15 @@ void StTpcDb::GetDataBase(StMaker* maker) {
      if ( ( tpc[i] = maker->GetDataBase(dbPath)) || 
           ( tpc[i] = maker->GetDataBase(dbFullPath)) ) continue;
      gMessMgr->Warning() << "StTpcDb::Error Getting TPC database: " << bases[i] << "   " << endm;
+   }
+   for (int i = 2;i<lBases;i++) {
+     TString dbFullPath = "StDb/";
+     TString dbPath = bases[i];
+     dbPath += "trg";
+     dbFullPath += dbPath;
+     if ( ( trg[i] = maker->GetDataBase(dbPath)) || 
+          ( trg[i] = maker->GetDataBase(dbFullPath)) ) continue;
+     gMessMgr->Warning() << "StTpcDb::Error Getting trg database: " << bases[i] << "   " << endm;
    }
  }
  else{
@@ -290,6 +307,23 @@ float StTpcDb::DriftVelocity(){
   }
   float driftvel = 1e6*(*dvel)[0].cathodeDriftVelocityEast;
   return driftvel;
+}
+
+//-----------------------------------------------------------------------------
+float StTpcDb::triggerTimeOffset(){
+  if(!toff){              // get triggerTimeOffset
+   const int dbIndex = kConditions;
+   if (trg[dbIndex]){
+    St_DataSet* tpd = trg[dbIndex]->Find("trgTimeOffset");
+    if (!(tpd && tpd->HasData()) ){
+     gMessMgr->Message("StTpcDb::Error Finding Trigger Time Offset","E");
+     return 0;
+    }
+    toff = (St_trgTimeOffset*)tpd;
+   }
+  }
+  float theoffset = 1e-6*(*toff)[0].offset;
+  return theoffset;
 }
 
 
