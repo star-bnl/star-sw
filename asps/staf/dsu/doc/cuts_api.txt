@@ -7,7 +7,7 @@ These make a working standalone C program (77 lines), complete with a
 usage message.
    At the risk of looking difficult, these notes are detailed.
 You must link to STAR's dsl and dsu libraries.
-There are two functions (DoCuts() and RowPassedCuts()) that you call.
+There are two functions (dsuDoCuts() and dsuRowPassedCuts()) that you call.
 Here is how to use them.
  1.  Declarations:
         char ba[NBYTES];       /* ba means Boolean Array */
@@ -26,37 +26,31 @@ Here is how to use them.
            > .gt.      < .lt.      ==  eq.      >= .ge.     <= .le.
  4.  Use dsl to make a pointer named "pTable".
  5.  Call the first function
-       myBool DoCuts(size_t NBYTES,char *ba,char *cuts,DS_DATASET_T *pTable);
+       myBool dsuDoCuts(size_t NBYTES,char *ba,char *cuts,DS_DATASET_T *pTable);
      It returns FALSE (0) in case of error, TRUE (1) otherwise.
      It fills in the array ba, its primary output.
  6.  To determine whether a given row (row number rowIndex) passed the cuts,
      call the second function:
-        myBool RowPassedCuts(char *ba,size_t rowIndex);
+        myBool dsuRowPassedCuts(char *ba,size_t rowIndex);
      Here, returning FALSE does not indicate an error condition, but rather
-     simply means that the row in question failed during the call to DoCuts.
+     simply means that the row in question failed during the call to dsuDoCuts.
      NB:  set rowIndex according to C conventions, and not FORTRAN conventions
      (ie, the first row has rowIndex=0, NOT rowIndex=1).
      NB:  you CANNOT use the construction if(ba[rowIndex]), you MUST use
-     if(RowPassedCuts(ba,rowIndex)).
+     if(dsuRowPassedCuts(ba,rowIndex)).
  7.  You must provide a function void Say(char *) for error messages from
      this file.  Say() must add a newline, if required.  A simple Say() would
      be (this has to be in YOUR code for ME to call):
      void Say(char *errMessageFromCuts) {
        printf("Error message from cuts:\n%s\n",errMessageFromCuts);
      }
- 8.  You must provide a second function named Err.  You might use the
-     following code for your Err() (this has to be (this has to be in
-     YOUR code for ME to call):
-         void Err(int xx) {
-            printf("Fatal error number %d during cuts.\n",xx);
-         }
- 9.  You must provide a third function named Progress.  You might use the
-     following code for your Err() (this has to be (this has to be in
-     YOUR code for ME to call from DoCuts()):
+ 8.  You must provide a third function named Progress.  You might use the
+     following code for your Progress() (this has to be (this has to be in
+     YOUR code for ME to call from dsuDoCuts()):
           void Progress(long x) {
              printf("Cuts is currently checking row %d.\n",x);
           }
-10.  During linking, you may receive warnings that Say(), Err(), and 
+ 9.  During linking, you may receive warnings that Say() and 
      Progress() are multiply defined.  This is normal.  Check the warning 
      and see that the version used is from your code, and the version 
      ignored is from library dsu.
