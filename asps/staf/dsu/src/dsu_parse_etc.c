@@ -20,8 +20,12 @@
 #define COPY 500
 #define BITSPERCHAR 8
 #define PARSE_ERR         -1
+#ifndef FALSE
 #define FALSE              0
+#endif
+#ifndef TRUE
 #define TRUE               1
+#endif
 #define OPERATOR_TYPE_PE   0
 #define OPERATOR_TYPE_GT   1
 #define OPERATOR_TYPE_LT   2
@@ -224,6 +228,8 @@ int SingleExpressionResult(DS_DATASET_T *pTable,long row,char *cuts) {
     case OPERATOR_TYPE_PE: Say1("Parse error on cuts.");  return PARSE_ERR;
     default: PP"fatal error in module evl_vs\n");
   }
+
+  return FALSE;
 }
 void DelChar(char *cc,int pos) {
   int ii,len; len=strlen(cc);
@@ -240,7 +246,10 @@ int LeftParAtStartIsMateOfRightParAtEnd(char *cc) {
     if(cc[ii]==')') pcnt--; if(cc[ii]=='(') pcnt++;
     if(pcnt==0 && ii>0) return FALSE;
   }
-  if(pcnt==0) return TRUE;
+  if(pcnt==0) 
+     return TRUE;
+
+  return FALSE;   
 }
 void DelWhiteSpace(char *cc) {
   int didOne,ii,len;
@@ -323,7 +332,7 @@ int PassCuts(DS_DATASET_T *pTable,long row,char *cuts) {
   return ser;
 } /* wt row cc */
 void InsertChars(char *xx,int pos,char *yy) {
-  char copy[COPY]; int ii,len,len2; len=strlen(xx); len2=strlen(yy);
+  int ii,len,len2; len=strlen(xx); len2=strlen(yy);
   for(ii=len;ii>=pos;ii--) xx[ii+len2]=xx[ii];
   for(ii=len2-1;ii>=0;ii--) xx[ii+pos]=yy[ii];
 }
@@ -350,9 +359,12 @@ void ConvertFromCtoFortran(char *xx) {
     }
   }
 }
+
+void
 dsu_Progress(int a,int total,char *junk1,char *junk2) {
   printf("        %3d percent finished\n",(100*a)/total);
 }
+
 #define SHOW 35
 int dsuDoCuts(size_t nBytes,char *ba,char *cuts,DS_DATASET_T *pTable) {
   size_t numRows; long ii; char copy[COPY],litCopy[SHOW+5]; /* 5 for "..." */
