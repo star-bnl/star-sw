@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.299 2002/08/20 19:24:47 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.300 2002/08/23 14:32:24 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -325,6 +325,12 @@ Bfc_st BFC1[] = {
                                     "StFtpcSlowSimMaker","StFtpcSlowSimMaker","FTPC Slow simulator",kFALSE},
   {"Fcl"    ,"ftpc_hits","ftpcChain","SCL"
                ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,StFtpcClusterMaker","FTPC cluster finder",kFALSE},
+
+  {"pmd"    ,"pmd","","geant,pmdSim,pmdClust,pmdDis"      ,"StMaker","StChain",         "PMD chain",kFALSE},
+  {"pmdSim" ,"","","geant,PmdUtil","StPmdSimulatorMaker","StPmdSimulatorMaker", "simulator for PMD",kFALSE},
+  {"pmdClust"      ,"pmdClust","PmdSim","","StPmdClusterMaker",      "StPmdClusterMaker",        "",kFALSE},
+  {"pmdDis" ,"pmdDis","PmdClust",""   ,"StPmdDiscriminatorMaker",      "StPmdDiscriminatorMaker","",kFALSE},
+
 
 
   {"emcY2"    ,"emcY2","","geant,emc_T,tpc_T,db,calib,emcSim,PreEcl,epc"      ,"StMaker","StChain",
