@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireBinEntry.hh,v 1.5 2000/06/23 00:12:24 snelling Exp $
+ * $Id: StTrsWireBinEntry.hh,v 1.6 2000/07/30 02:42:10 long Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireBinEntry.hh,v $
+ * Revision 1.6  2000/07/30 02:42:10  long
+ * add d()
+ *
  * Revision 1.5  2000/06/23 00:12:24  snelling
  * Removed dependence on local files now pointed to StDbUtilities
  *
@@ -47,7 +50,7 @@
 
 class StTrsWireBinEntry {
 public:
-    StTrsWireBinEntry(StThreeVector<double>&, float,double,double);
+    StTrsWireBinEntry(StThreeVector<double>&, float,double,double,double *);
     ~StTrsWireBinEntry();
     //StTrsWireBinEntry(const StTrsWireBinEntry&);
     //StTrsWireBinEntry& operator=(cont StTrsWireBinEntry&);
@@ -57,6 +60,7 @@ public:
     float                 numberOfElectrons()     const;
     double                sigmaL();
     double                sigmaT();
+     double *              d();
     
     StThreeVector<double>& position()                  ;
     void                  setNumberOfElectrons(float)  ;
@@ -70,7 +74,8 @@ private:
     StThreeVector<double> mPosition;
     float                 mNumberOfElectrons;
     double                mSigmaL;
-    double                mSigmaT;
+    double                mSigmaT;  
+    double                mD[3];
 };
 inline const StThreeVector<double>&
 StTrsWireBinEntry::position() const {return mPosition;}
