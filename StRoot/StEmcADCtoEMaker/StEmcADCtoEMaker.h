@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.12 2001/12/06 17:50:08 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.13 2001/12/26 19:25:34 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.13  2001/12/26 19:25:34  suaide
+// Added documentation and few modifications
+//
 // Revision 1.12  2001/12/06 17:50:08  suaide
 // changes to save ADC without pedestal subtraction
 //
@@ -44,6 +47,7 @@
 
 class StEmcCollection;
 class StEmcDecoder;
+class StEmcGeom;
 
 class StEmcADCtoEMaker : public StMaker 
 
@@ -76,6 +80,8 @@ class StEmcADCtoEMaker : public StMaker
            Int_t             smdTimeBinTemp[18000];
            Bool_t            kCalibTemp[MAXDET];
            
+           StEmcGeom         *geo[MAXDET];
+
            StEmcCollection   *GetEmcCollectionFromDaq(TDataSet* daq);
            void              GetStatus(Int_t);
            
@@ -85,6 +91,7 @@ class StEmcADCtoEMaker : public StMaker
            Bool_t            kCalib[MAXDET];
            Bool_t            isDaqFile;
            Bool_t            subtractPedestal;
+           Bool_t            saveOnlyCalibHits;
                  
                              StEmcADCtoEMaker(const char *name="Eread");
    virtual                   ~StEmcADCtoEMaker();
