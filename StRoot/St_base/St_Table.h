@@ -1,5 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
- 
+// $Id: St_Table.h,v 1.14 1998/12/06 00:38:17 fisyak Exp $
+// $Log: St_Table.h,v $
+// Revision 1.14  1998/12/06 00:38:17  fisyak
+// Add SavePrimitive
+// 
 #ifndef STAF_St_Table
 #define STAF_St_Table
   
@@ -95,12 +99,13 @@ public:
    virtual     void       ls(Int_t deep);
    virtual     Char_t    *Print(Char_t *buf,Int_t n) const ;
    virtual     void       Print(Option_t *buf="") { Print((Char_t *)0,Int_t(0)); }
-   virtual  const Char_t *Print(Int_t row, Int_t rownumber=10, const Char_t *colfirst="", const Char_t *collast="") const;
+   virtual  const Char_t *Print(Int_t row, Int_t rownumber=10, const Char_t *colfirst="", const Char_t *collast="") const; // *MENU*
                void      *ReAllocate(Int_t newsize);
    virtual     table_head_st *GetHeader() const;
    void        MakeHeader(const Char_t *prefix,const Char_t *tablename,const Char_t *suffix, FILE *fl=0); // Create header file for STAF table class
    static Int_t MakeWrapClass(Text_t *name);
    virtual     Int_t      ReadGenericArray(TBuffer &b, void *&ii, EBufSizes membersize);
+   virtual     void       SavePrimitive(ofstream &out, Option_t *option);
    virtual     void       SetHeader(table_head_st *table);
 //   ULong_t   &operator(){ return GetTable();}
    virtual     void       SetTableName(Char_t *name);
