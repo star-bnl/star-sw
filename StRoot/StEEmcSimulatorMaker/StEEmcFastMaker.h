@@ -1,5 +1,8 @@
-// $Id: StEEmcFastMaker.h,v 1.3 2003/09/10 19:47:08 perev Exp $
+// $Id: StEEmcFastMaker.h,v 1.4 2004/04/08 21:33:49 perev Exp $
 // $Log: StEEmcFastMaker.h,v $
+// Revision 1.4  2004/04/08 21:33:49  perev
+// Leak off
+//
 // Revision 1.3  2003/09/10 19:47:08  perev
 // ansi corrs
 //
@@ -104,7 +107,7 @@ class StEEmcFastMaker : public StMaker {
 
   StEvent *mlocalStEvent; ///< for test only
 
-  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.3 2003/09/10 19:47:08 perev Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.4 2004/04/08 21:33:49 perev Exp $";
   
  protected:
  public: 
@@ -112,12 +115,14 @@ class StEEmcFastMaker : public StMaker {
   virtual       ~StEEmcFastMaker();
   virtual Int_t Init();
   virtual Int_t  Make();
+  virtual void Clear(Option_t *option="");
+ 
   void SetLocalStEvent();
   void SetDbg(int k){mdbg=k;}
   void SetSamplingFraction(float x){ msamplingFraction=x;}; ///<default 0.05
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.3 2003/09/10 19:47:08 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.4 2004/04/08 21:33:49 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   

@@ -1,4 +1,4 @@
-// $Id: EEmcMCData.cxx,v 1.10 2003/11/12 19:59:13 balewski Exp $
+// $Id: EEmcMCData.cxx,v 1.11 2004/04/08 21:34:55 perev Exp $
 
 #include "StEventTypes.h"
 
@@ -255,6 +255,7 @@ EEmcMCData::getHitArray(EEmcMCHit *h, Int_t size)
   }
   if(size<mSize) 
     cerr << "truncating to " << size << " hits  (out of " << mSize << ")" << endl;
+  int n = size; if (n > mSize) n = mSize;
   memcpy(h,mHit,size*sizeof(EEmcMCHit));
   return size;
 }
@@ -268,7 +269,8 @@ EEmcMCData::setHitArray(EEmcMCHit *h, Int_t size)
   }
   if(size>mSize) 
     cerr << "truncating to " << mSize << " hits  (out of " << size << ")" << endl;
-  memcpy(h,mHit,mSize*sizeof(EEmcMCHit));
+  int n = size; if (n > mSize) n = mSize;
+  memcpy(h,mHit,n*sizeof(EEmcMCHit));
   return mSize;
 }
 
@@ -408,6 +410,9 @@ Int_t EEmcMCData::write(EEeventDst *EEeve) {
 }
 
 // $Log: EEmcMCData.cxx,v $
+// Revision 1.11  2004/04/08 21:34:55  perev
+// Leak off
+//
 // Revision 1.10  2003/11/12 19:59:13  balewski
 // *** empty log message ***
 //

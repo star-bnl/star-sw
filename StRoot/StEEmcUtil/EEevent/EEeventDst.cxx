@@ -1,4 +1,4 @@
-// $Id: EEeventDst.cxx,v 1.7 2004/04/07 18:54:47 perev Exp $
+// $Id: EEeventDst.cxx,v 1.8 2004/04/08 21:34:17 perev Exp $
 
 #include <cassert>
 #include <TClonesArray.h>
@@ -39,14 +39,12 @@ void EEeventDst::clear(){ // only content of sectors, leave sectors
   type=kUnknown;
   token=-2;
   timeStamp=0;
-  int is;
-  for(is=0;is<Sec->GetEntries();is++) {
-    EEsectorDst *sec=(EEsectorDst*)Sec->At(is);
-    // printf("aa ID=%d sector cleared\n",sec->getID());
-    sec->clear();
-  }
-
+  Sec->Delete();
 }
+//--------------------------------------------------
+//--------------------------------------------------
+//--------------------------------------------------
+void EEeventDst::Clear(const char*){ clear();}
 
 //-------------------------------------------------
 //-------------------------------------------------
@@ -54,7 +52,7 @@ void EEeventDst::clear(){ // only content of sectors, leave sectors
 void EEeventDst::print(int k){
   printf("Event ID=%d, type=%d  token=%d nSect=%d time stamp= %d\n",ID,type,token,Sec->GetEntries(),timeStamp);
   int is;
-  for(is=0;is<Sec->GetEntries();is++) {
+  for(is=0;is<Sec->GetEntriesFast();is++) {
     EEsectorDst *sec=(EEsectorDst*)Sec->At(is);
     sec->print(k-1);
   }
@@ -72,7 +70,7 @@ EEsectorDst * EEeventDst::addSectorDst(int IDx) {
    // otherwise the previous Track[i] will be overwritten.
 
    TClonesArray &SEC1 = *Sec;
-   int nSec=SEC1.GetEntries();
+   int nSec=SEC1.GetEntriesFast();
    EEsectorDst *sec= new(SEC1[nSec]) EEsectorDst(IDx);;
    sec->clear();
    //printf("Dst-hits add sector %d Array \n",IDx);
@@ -125,6 +123,9 @@ void EEeventDst:: sumRawMC(EEeventDst* eveOut,float minE) {
 
 
 // $Log: EEeventDst.cxx,v $
+// Revision 1.8  2004/04/08 21:34:17  perev
+// Leak off
+//
 // Revision 1.7  2004/04/07 18:54:47  perev
 // Cleanup delete in destructor added
 //

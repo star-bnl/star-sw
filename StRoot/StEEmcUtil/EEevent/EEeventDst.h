@@ -4,12 +4,15 @@
 #ifndef EEeventDst_h
 #define EEeventDst_h
 /*********************************************************************
- * $Id: EEeventDst.h,v 1.3 2003/07/01 14:13:13 balewski Exp $
+ * $Id: EEeventDst.h,v 1.4 2004/04/08 21:34:32 perev Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw Hits
  *********************************************************************
  * $Log: EEeventDst.h,v $
+ * Revision 1.4  2004/04/08 21:34:32  perev
+ * Leak off
+ *
  * Revision 1.3  2003/07/01 14:13:13  balewski
  * no clue
  *
@@ -80,6 +83,7 @@ public:
   EEsectorDst *addSectorDst(int ID);
   EEsectorDst *getSec(int secID, int create=0);
   void clear();
+  void Clear(const char* opt="");
   int getID(){return ID;}
   int getNSectors();
   void setID(int id){ ID=id;}
