@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.52 2000/01/16 21:39:34 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.53 2000/01/19 22:29:07 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.53  2000/01/19 22:29:07  fisyak
+// replace l3t to l3 in chain option
+//
 // Revision 1.52  2000/01/16 21:39:34  fisyak
 // Fix problem with quotes
 //
@@ -186,7 +189,6 @@
 // Revision 1.1  1999/07/29 01:05:22  fisyak
 // move bfc to StBFChain
 //
-
 #include "TROOT.h"
 #include "TString.h"
 #include "TRegexp.h"
@@ -237,13 +239,13 @@ BfcItem BFC[] = {
   {"doEvents"    ,""  ,"","xin,event,analysis,FieldOn"                                    ,"","","",kFALSE},
   {"Kalman"      ,""  ,"","geant"                                                         ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis"                                  ,"","","",kFALSE},
-  {"Cy1a"        ,""  ,"","y1a,tpc,ftpc,l0,l3t,Cdst,tree"                ,"","","Turn on chain y1a",kFALSE},
-  {"Cy1b"        ,""  ,"","y1b,tpc,ftpc,l0,l3t,emc,rich,Cdst,tree"       ,"","","Turn on chain y1b",kFALSE},
-  {"Cy1c"        ,""  ,"","y1c,tpc,ftpc,l0,l3t,Cdst,tree"                ,"","","Turn on chain y1c",kFALSE},
+  {"Cy1a"        ,""  ,"","y1a,tpc,ftpc,l0,l3,Cdst,tree"                 ,"","","Turn on chain y1a",kFALSE},
+  {"Cy1b"        ,""  ,"","y1b,tpc,ftpc,l0,l3,emc,rich,Cdst,tree"        ,"","","Turn on chain y1b",kFALSE},
+  {"Cy1c"        ,""  ,"","y1c,tpc,ftpc,l0,l3,Cdst,tree"                 ,"","","Turn on chain y1c",kFALSE},
   {"Cy1d"        ,""  ,"","y1d,tpc,global,Cdst,qa,event,analysis,tree"   ,"","","Turn on chain y1d",kFALSE},
   {"cy1e"        ,""  ,"","y1e,tpc,Cdst,tree"                            ,"","","Turn on chain y1e",kFALSE},
-  {"cy1h"        ,""  ,"","y1h,tpc,ftpc,l0,l3t,emc,rich,Cdst,tree"       ,"","","Turn on chain y1e",kFALSE},
-  {"Cy2a"        ,""  ,"","y2a,tpc,svt,ftpc,l0,l3t,emc,rich,Cdst,tree"   ,"","","Turn on chain y2a",kFALSE},
+  {"cy1h"        ,""  ,"","y1h,tpc,ftpc,l0,l3,emc,rich,Cdst,tree"        ,"","","Turn on chain y1e",kFALSE},
+  {"Cy2a"        ,""  ,"","y2a,tpc,svt,ftpc,l0,l3,emc,rich,Cdst,tree"    ,"","","Turn on chain y2a",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
@@ -307,7 +309,7 @@ BfcItem BFC[] = {
   {"l3cl"        ,"","l3","tables"                  ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
   {"l3t"         ,"","l3","tables"                          ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
   {"rich"        ,"","","tables"                                      ,"StRchMaker","StRchMaker","",kFALSE},
-  {"global"   ,"global","","tables,Match,primary,v0,xi,kink,dst"
+  {"global"      ,"global","","tables,Match,primary,v0,xi,kink,dst"
                                                          ,"St_tpc,St_svt,StChainMaker","StChain","",kFALSE},
   {"Match"       ,"match","global","SCL,tables,tls"
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
@@ -318,8 +320,8 @@ BfcItem BFC[] = {
   {"Kink"        ,"kink","global","SCL,tables,tls","StKinkMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"dst"         ,"dst","global","SCL,tables,tls","St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Event"       ,"StEventMaker","","tables,SCL"          ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
-  {"analysis"    ,"","","HighPtTag"                                     ,"","","Alias to HighPtTag",kFALSE},
-  {"HighPtTag"   ,"","Tags","Event"                ,"StAnalysisMaker","StAnalysisMaker","HighPtTag",kFALSE},
+  {"HighPtTag"   ,"","","analysis"                                       ,"","","Alias to analysis",kFALSE},
+  {"analysis"    ,"","Tags","Event"                ,"StAnalysisMaker","StAnalysisMaker","HighPtTag",kFALSE},
   {"EbyeScaTags" ,"","Tags","Event"        ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","EbyeScaTags",kFALSE},
   {"FlowTag"     ,"","Tags","Event"                    ,"StFlowTagMaker","StFlowTagMaker","FlowTag",kFALSE},
   {"StrangeTags" ,"","Tags","Event"        ,"StStrangeTagsMaker","StStrangeTagsMaker","StrangeTags",kFALSE},
@@ -352,7 +354,9 @@ class StTreeMaker;    StTreeMaker    *treeMk  = 0;
 ClassImp(StBFChain)
 
 //_____________________________________________________________________________
-StBFChain::StBFChain(const char *name):StChain(name),xdf_out(0){}
+StBFChain::StBFChain(const char *name):StChain(name),xdf_out(0){
+  //  gSystem->RemoveOnExit(this);
+}
 //_____________________________________________________________________________
 StBFChain::~StBFChain(){
   Finish();
