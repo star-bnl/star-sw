@@ -514,7 +514,7 @@ static int AreSimilar(const Char_t *fileA, const Char_t *fileB)
 
 //_____________________________________________________________________________
 ClassImp(StFile)
- StFile::StFile(Int_t nbranches=1):St_DataSet("StFile")
+ StFile::StFile(Int_t nbranches):St_DataSet("StFile")
 {
   char buf[20];
   sprintf(buf," nbranches=%d ",nbranches);
@@ -554,7 +554,7 @@ Int_t StFile::AddFile(const Char_t *file,const Char_t *branch)
 Int_t StFile::AddWild(const Char_t *file)
 { 
   TString tfile,tdir,tname,tbase,fullname;
-  const char *name,*cc;
+  const char *name; char *cc;
   tfile = file; 
   tdir  = gSystem->DirName(tfile);
   tbase = gSystem->BaseName(tfile);
