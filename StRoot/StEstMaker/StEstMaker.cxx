@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.14 2002/02/20 17:22:02 caines Exp $
+ * $Id: StEstMaker.cxx,v 1.15 2002/04/30 22:49:19 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.15  2002/04/30 22:49:19  caines
+ * Make est work with shifted SVT geom, change search radii to 1cm
+ *
  * Revision 1.14  2002/02/20 17:22:02  caines
  * Comment out some of the print statements
  *
@@ -65,6 +68,8 @@
 #include "StEstTracker.h"
 #include "StEstParams.hh"
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
+#include "StSvtClassLibrary/StSvtGeometry.hh"
+#include "StSvtClassLibrary/StSvtWaferGeometry.hh"
 #include "tables/St_dst_vertex_Table.h"
 #include "tables/St_svg_geom_Table.h"
 #include "tables/St_svg_shape_Table.h"
@@ -352,6 +357,7 @@ Int_t StEstMaker::Init(){
   mCumulNBadSeco=0;
   mCumulNEvents=0;
 
+
   gMessMgr->Info("StEstMaker::Init STOP");
   return kStOK;
 
@@ -408,41 +414,65 @@ Int_t StEstMaker::Make() {
 
   St_DataSetIter       local(GetInputDB("svt"));
   // Getting the geometry and configuration tables
-  St_svg_geom*   Stsvggeom  =0;
+  //St_svg_geom*   Stsvggeom  =0;
   
   St_DataSet *svt = GetDataSet("StSvtAnalResults");
   StSvtHybridCollection* SvtCluColl =0;
   if( svt)
     SvtCluColl = (StSvtHybridCollection*)(svt->GetObject());
   
-  if( SvtCluColl){
-    if(  !strncmp(SvtCluColl->getConfiguration(), "Y1L", strlen("Y1L"))){
-      Stsvggeom        = (St_svg_geom  *) local("svgpars/geomy1l");
-    }
-  }
+  //  if( SvtCluColl){
+  //    if(  !strncmp(SvtCluColl->getConfiguration(), "Y1L", strlen("Y1L"))){
+  //      Stsvggeom        = (St_svg_geom  *) local("svgpars/geomy1l");
+  //    }
+  //  }
   
-  if(!Stsvggeom)  Stsvggeom = (St_svg_geom *)local("svgpars/geom");
-  if (!Stsvggeom) return kStWarn;
+  //if(!Stsvggeom)  Stsvggeom = (St_svg_geom *)local("svgpars/geom");
+  //if (!Stsvggeom) return kStWarn;
 
-  svg_geom_st* geom = Stsvggeom->GetTable();
+  //svg_geom_st* geom = Stsvggeom->GetTable();
   
+  // get geometry
+  St_DataSet* dataSet;
+  dataSet = GetDataSet("StSvtGeometry");
+  if(!dataSet) {
+    gMessMgr->Error("Failure to get SVT geometry - THINGS HAVE GONE SERIOUSLY WRONG!!!!! \n");
+    
+    return kStOK;
+  }
+
+  StSvtGeometry* m_geom = (StSvtGeometry*)dataSet->GetObject();
+  StSvtWaferGeometry* waferGeom;
+
+  int index;
+
   for (int i=0;i<mNPass;i++){
-    mParams[i]->lrad[0][0] = sqrt(geom[0].x[0]*geom[0].x[0]+
-				  geom[0].x[1]*geom[0].x[1]);
-    mParams[i]->lrad[0][1] =sqrt(geom[16].x[0]*geom[16].x[0]+
-				  geom[16].x[1]*geom[16].x[1]);
-    mParams[i]->lrad[1][0] = sqrt(geom[68].x[0]*geom[68].x[0]+
-				  geom[68].x[1]*geom[68].x[1]);
-    mParams[i]->lrad[1][1] = sqrt(geom[38].x[0]*geom[38].x[0]+
-				  geom[38].x[1]*geom[38].x[1]);
-    mParams[i]->lrad[2][0] = sqrt(geom[111].x[0]*geom[111].x[0]+
-				  geom[111].x[1]*geom[111].x[1]);
-    mParams[i]->lrad[2][1] = sqrt(geom[167].x[0]*geom[167].x[0]+
-				  geom[167].x[1]*geom[167].x[1]);
-    mParams[i]->lrad[3][0] = sqrt(geom[232].x[0]*geom[232].x[0]+
-				  geom[232].x[1]*geom[232].x[1]);
-    mParams[i]->lrad[3][1] = sqrt(geom[232].x[0]*geom[232].x[0]+
-				  geom[232].x[1]*geom[232].x[1]);
+    waferGeom = (StSvtWaferGeometry*)m_geom->at(11);
+    mParams[i]->lrad[0][0] = sqrt(waferGeom->x(0)*waferGeom->x(0)+
+				  waferGeom->x(1)*waferGeom->x(1));
+    waferGeom = (StSvtWaferGeometry*)m_geom->at(3);
+    mParams[i]->lrad[0][1] =sqrt(waferGeom->x(0)*waferGeom->x(0)+
+				  waferGeom->x(1)*waferGeom->x(1));
+    waferGeom = (StSvtWaferGeometry*)m_geom->at(72);
+    mParams[i]->lrad[1][0] = sqrt(waferGeom->x(0)*waferGeom->x(0)+
+				  waferGeom->x(1)*waferGeom->x(1));
+    waferGeom = (StSvtWaferGeometry*)m_geom->at(66);
+    mParams[i]->lrad[1][1] = sqrt(waferGeom->x(0)*waferGeom->x(0)+
+				  waferGeom->x(1)*waferGeom->x(1));
+    waferGeom = (StSvtWaferGeometry*)m_geom->at(114);
+    mParams[i]->lrad[2][0] = sqrt(waferGeom->x(0)*waferGeom->x(0)+
+				  waferGeom->x(1)*waferGeom->x(1));
+    waferGeom = (StSvtWaferGeometry*)m_geom->at(106);
+    mParams[i]->lrad[2][1] = sqrt(waferGeom->x(0)*waferGeom->x(0)+
+				  waferGeom->x(1)*waferGeom->x(1));
+    /*
+    waferGeom = (StSvtWaferGeometry*)m_geom->at(116);
+    mParams[i]->lrad[3][0] = sqrt(waferGeom->x(0)*waferGeom->x(0)+
+				  waferGeom->x(1)*waferGeom->x(1));
+    waferGeom = (StSvtWaferGeometry*)m_geom->at(116);
+    mParams[i]->lrad[3][1] = sqrt(waferGeom->x(0)*waferGeom->x(0)+
+				  waferGeom->x(1)*waferGeom->x(1));
+    */
   }
 
   St_svg_shape*   Stsvgshape =0;
@@ -530,7 +560,11 @@ Int_t StEstMaker::Make() {
 					   m_egrpar_h);
 
   gMessMgr->Info()<<"StEstMaker : Making the Wafer and Hit objects"<<endm;
-  Tracker->SVTInit(Stsvggeom,
+  //Tracker->SVTInit(Stsvggeom,
+  //		   Stsvgshape,
+  //		   Stsvgconf,
+  //		   Stscsspt);
+  Tracker->SVTInit(m_geom,
 		   Stsvgshape,
 		   Stsvgconf,
 		   Stscsspt);

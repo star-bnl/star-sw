@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.h,v 1.10 2001/07/15 20:31:31 caines Exp $
+ * $Id: StEstTracker.h,v 1.11 2002/04/30 22:49:19 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.h,v $
+ * Revision 1.11  2002/04/30 22:49:19  caines
+ * Make est work with shifted SVT geom, change search radii to 1cm
+ *
  * Revision 1.10  2001/07/15 20:31:31  caines
  * Fixes from Insure++ debugging
  *
@@ -39,6 +42,7 @@
 #ifndef STAR_StEstTracker
 #define STAR_StEstTracker
 
+
 #include "StEstConst.h"
 #include "StEstMaker.h"
 class StEstBranch;
@@ -63,6 +67,7 @@ class St_tte_eval;
 class St_stk_track;
 class St_sgr_groups;
 class St_svm_evt_match;
+class StSvtGeometry;
 #include "table_header.h"
 
 
@@ -178,7 +183,11 @@ class StEstTracker {
   float GetVertexZ(); 
 
   int DoTracking();
-  int SVTInit(St_svg_geom*   Stsvggeom,
+  //  int SVTInit(St_svg_geom*   Stsvggeom,
+  //	      St_svg_shape*   Stsvgshape,
+  //	      St_svg_config*   Stsvgconf,
+  //	      St_scs_spt*   Stscsspt);
+  int SVTInit(StSvtGeometry*   svggeom,
 	      St_svg_shape*   Stsvgshape,
 	      St_svg_config*   Stsvgconf,
 	      St_scs_spt*   Stscsspt);
@@ -201,6 +210,8 @@ class StEstTracker {
 		 int* mCumulNBadSeco,
 		 int* mCumulNEvents);
   void CleanUp();
+  void AlignmentInfo();
+
   ClassDef(StEstTracker, 1)
 };
 

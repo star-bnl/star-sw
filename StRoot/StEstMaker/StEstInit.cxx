@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstInit.cxx,v 1.11 2001/07/16 18:38:24 jecc Exp $
+ * $Id: StEstInit.cxx,v 1.12 2002/04/30 22:49:19 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstInit.cxx,v $
+ * Revision 1.12  2002/04/30 22:49:19  caines
+ * Make est work with shifted SVT geom, change search radii to 1cm
+ *
  * Revision 1.11  2001/07/16 18:38:24  jecc
  * Remove mNSvtHit reset, now calculated at first loop
  *
@@ -70,6 +73,8 @@
 #include "tables/St_tte_eval_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
+#include "StSvtClassLibrary/StSvtGeometry.hh"
+#include "StSvtClassLibrary/StSvtWaferGeometry.hh"
 
 #include "StarCallf77.h"
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
@@ -172,7 +177,7 @@ int StEstTracker::BranchInit(){
 }
   
 
-int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
+int StEstTracker::SVTInit(StSvtGeometry*   svggeom,
 			  St_svg_shape*   Stsvgshape,
 			  St_svg_config*   Stsvgconf,
 			  St_scs_spt*   Stscsspt)
@@ -189,7 +194,7 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
   StThreeVectorD *xx;
   StThreeVectorD *nn;
     
-  svg_geom_st*   svggeom;
+  //  svg_geom_st*   svggeom;
   svg_config_st*   svgconf;
   scs_spt_st*   scsspt;
   svg_shape_st*    svgshape;
@@ -198,8 +203,9 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
     gMessMgr->Info()<<"SVTInit **** Getting data from tables ***"<<endm;  
 
 
-  svggeom   = Stsvggeom->GetTable();
-  mNWafers=Stsvggeom->GetNRows();
+  //svggeom   = Stsvggeom->GetTable();
+  //mNWafers=Stsvggeom->GetNRows();
+  mNWafers=svggeom->getTotalNumberOfWafers();
   svgshape   = Stsvgshape->GetTable();
   svgconf   = Stsvgconf->GetTable();
   // Now get hits
@@ -228,18 +234,25 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
       mNSvtHit++;
     }
   }
+
+  StSvtWaferGeometry* waferGeom;
+  int id;
   for(il=0; il<mNWafers; il++){ // loop over the wafers
     
-    mWafId2IndexWaf[svggeom[il].id]=il;
+    waferGeom = (StSvtWaferGeometry*)svggeom->at(il);
+    id = 1000*waferGeom->getLayerID()+100*waferGeom->getWaferID()+waferGeom->getLadderID();
 
-    xx = new StThreeVectorD(svggeom[il].x[0],svggeom[il].x[1],svggeom[il].x[2]);
-    nn = new StThreeVectorD(svggeom[il].n[0],svggeom[il].n[1],svggeom[il].n[2]);
+    mWafId2IndexWaf[id]=il;
 
-    shape=svggeom[il].id_shape-1;
-    mIndexWaf[il]  =  new StEstWafer(svggeom[il].id, HitPerWafer[svggeom[il].id], xx, nn, shape);
+    xx = new StThreeVectorD(waferGeom->x(0),waferGeom->x(1),waferGeom->x(2));
+    nn = new StThreeVectorD(waferGeom->n(0),waferGeom->n(1),waferGeom->n(2));
+
+    //shape=svggeom[il].id_shape-1;
+    shape=0; //hard wired (04/23/2002, MM)
+    mIndexWaf[il]  =  new StEstWafer(id, HitPerWafer[id], xx, nn, shape);
     if(!mIndexWaf[il] || !xx || !nn){
       gMessMgr->Error()<<"ERROR!!! not enough memory"<<endm;
-      gMessMgr->Error()<<"mIndexWaf["<<il<<"] = new StEstWafer("<<svggeom[il].id<<", 200);"<<endm;
+      gMessMgr->Error()<<"mIndexWaf["<<il<<"] = new StEstWafer("<<id<<", 200);"<<endm;
       return 1;
     }
 
@@ -278,11 +291,15 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
     gMessMgr->Info()<<"SVTInit **** Finding neighbouring wafers ****"<<endm;  
 
   for (il=0; il<mNWafers; il++) {
-    lay=(int)svggeom[il].id/1000;
+    waferGeom = (StSvtWaferGeometry*)svggeom->at(il);
+    //lay=(int)svggeom[il].id/1000;
+    lay=waferGeom->getLayerID();
     if(lay==8)
       lay=7;
-    waf=(int)(svggeom[il].id-lay*1000)/100;
-    lad=svggeom[il].id-lay*1000-waf*100;
+    //waf=(int)(svggeom[il].id-lay*1000)/100;
+    waf=waferGeom->getWaferID();
+    //lad=svggeom[il].id-lay*1000-waf*100;
+    lad=waferGeom->getLadderID();
     maxwaf=waf+1;
     minwaf=waf-1;
     switch(lay)
