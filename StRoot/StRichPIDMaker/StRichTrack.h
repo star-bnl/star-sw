@@ -1,10 +1,17 @@
 /**********************************************************
- * $Id: StRichTrack.h,v 2.7 2000/11/14 22:31:54 lasiuk Exp $
+ * $Id: StRichTrack.h,v 2.8 2000/12/08 04:56:30 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.h,v $
+ *  Revision 2.8  2000/12/08 04:56:30  lasiuk
+ *  MC define switch for xCorrection
+ *  energyLoss() members
+ *  orignal/newhits (for refit)
+ *  assignHits()
+ *  correct-->correctTrajectory()
+ *
  *  Revision 2.7  2000/11/14 22:31:54  lasiuk
  *  associated MIP (commented)
  *  return copy instead of reference
@@ -118,7 +125,9 @@ public:
     StThreeVectorF& getImpactPoint();
     StThreeVectorF& getMomentum();
     StThreeVectorF& getMomentumAtPadPlane();
-    
+
+    bool    setEnergyLoss();
+
     double  getTheta();
     double  getPhi();
     double  getPathLength();  
@@ -127,9 +136,19 @@ public:
     double  getUnCorrectedPhi( );
     double  getLastHitDCA();
     double  getExpectedNPhots(StParticleDefinition* particle);
+    double  getEnergyLoss() const;
 
+    int     getOrigConstHits(int) const;
+    int     getNewConstHits(int)  const;
+    int     getOrigTotHits(int)   const;
+    int     getNewTotHits(int)    const;
+
+    void    assignHits(int cHits, int tHits, int refit, int pid);
+    
     bool    isGood(StParticleDefinition* );
-    bool    correct();
+    bool    correctTrajectory();
+
+
     void    useUnCorrected();
     
     int     fastEnough(StParticleDefinition* particle);
@@ -185,6 +204,18 @@ protected:
     int    mFirstRow;
     int    mMaxGap;
     int    mMaxChain;
+
+    //
+    // take into account the energy loss of the particles
+    // mEnergyLoss is the mean (currently used)
+    double mEnergyLoss;
+    double mPiondEdx;
+    double mKaondEdx;
+    double mProtondEdx;
+
+    double mPionMass;
+    double mKaonMass;
+    double mProtonMass;
     
     StThreeVectorF mImpactPoint;
     
@@ -209,6 +240,22 @@ protected:
     StRichCoordinateTransform* coordinateTransformation;
     StRichMomentumTransform*   momentumTransformation;
     StRichMaterialsDb*         myMaterialsDb;
+
+    int mOrigPiConstHits;
+    int mOrigKConstHits;
+    int mOrigPConstHits;
+
+    int mNewPiConstHits;
+    int mNewKConstHits;
+    int mNewPConstHits;
+
+    int mOrigPiTotHits;
+    int mOrigKTotHits;
+    int mOrigPTotHits;
+
+    int mNewPiTotHits;
+    int mNewKTotHits;
+    int mNewPTotHits;
 };
 
 #endif

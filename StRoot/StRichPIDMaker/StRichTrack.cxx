@@ -1,10 +1,17 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.11 2000/11/30 23:30:16 lasiuk Exp $
+ * $Id: StRichTrack.cxx,v 2.12 2000/12/08 04:56:30 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
+ *  Revision 2.12  2000/12/08 04:56:30  lasiuk
+ *  MC define switch for xCorrection
+ *  energyLoss() members
+ *  orignal/newhits (for refit)
+ *  assignHits()
+ *  correct-->correctTrajectory()
+ *
  *  Revision 2.11  2000/11/30 23:30:16  lasiuk
  *  Warning in isGood() added
  *
@@ -55,6 +62,9 @@
  *  Revision 1.1  2000/04/03 19:36:09  horsley
  *  initial revision
  **********************************************************/
+#include "StRichTrack.h"
+
+#include "StRichMcSwitch.h"
 
 #include <iostream.h>
 #include <math.h>
@@ -73,17 +83,22 @@ using std::sort;
 #endif
 #endif
 
+// SCL
 #include "StParticleTypes.hh"
 #include "StParticleDefinition.hh"
-
-#include "StRichTrack.h"
-#include "StEventTypes.h"
-#include "StRichMaterialsDb.h"
 #include "SystemOfUnits.h"
-#include "StRichRingPoint.h"
 
+//StEvent
+#include "StEventTypes.h"
 #include "StRichPidTraits.h"
+#include "StRichHit.h"
 
+//PID
+#include "StRichMaterialsDb.h"
+#include "StRichRingPoint.h"
+#include "StRichRingHit.h"
+
+// RRS
 #include "StRrsMaker/StRichGeometryDb.h"
 
 
@@ -91,9 +106,6 @@ using std::sort;
 using namespace units;
 #endif
 
-#include "StRichPidTraits.h"
-#include "StRichHit.h"
-#include "StRichRingHit.h"
 
 
 //
@@ -211,7 +223,13 @@ StRichTrack::StRichTrack(globalTrack *track, double magField)
     // use the offline hits as well
     //
     double xCorrection = 0.4*(mMomentumAtPadPlane.x()/mMomentumAtPadPlane.z());
-    //double xCorrection = 0.;
+
+#ifdef myRICH_WITH_MC
+    cout << "StRichTrack::StRichTrack() (L3)\n";
+    cout << "\tWARNING:\n";
+    cout << "\tMC flag set.  No xCorrection (px/pz) implemented" << endl;
+    double xCorrection = 0.;
+#endif
     richTransformedImpactPoint.position().setX(richTransformedImpactPoint.position().x()-xCorrection);
 
     StThreeVectorD ppMomentum;
@@ -395,6 +413,13 @@ StRichTrack::StRichTrack(StTrack* tpcTrack, double magField)
     //  .4*px/pz
     //
     double xCorrection = 0.4*(mMomentumAtPadPlane.x()/mMomentumAtPadPlane.z());
+#ifdef myRICH_WITH_MC
+    cout << "StRichTrack::StRichTrack()\n";
+    cout << "\tWARNING:\n";
+    cout << "\tMC flag set.  No xCorrection (px/pz) implemented" << endl;
+    double xCorrection = 0.;
+#endif
+
     //double xCorrection = 0.;
     
     StThreeVectorF tempHit(richTransformedImpactPoint.position().x() - xCorrection,
@@ -428,6 +453,169 @@ void StRichTrack::init()
     mRichNormal.setX(myGeometryDb->normalVectorToPadPlane().x());
     mRichNormal.setY(myGeometryDb->normalVectorToPadPlane().y());
     mRichNormal.setZ(myGeometryDb->normalVectorToPadPlane().z());
+
+    mPionMass = StPionMinus::instance()->mass();
+    mKaonMass = StKaonMinus::instance()->mass();
+    mProtonMass = StAntiProton::instance()->mass();
+}
+
+bool StRichTrack::setEnergyLoss() {
+  
+    bool energyLossCorrection = true;
+
+    //
+    // Approximation
+    // energy loss of a 2 GeV/c proton traveling thru the CTB
+    // at normal incidence  ~ 20 MeV
+    //
+
+    double protonEnergyLoss = 20.0*MeV;
+
+    //
+    // constant energy loss temporary, in future adjust for angle, mass, etc...
+    //
+    mEnergyLoss = protonEnergyLoss;
+
+    cout << "StRichTrack::setEnergyLoss()\n";
+    cout << "\tCorrection = " << protonEnergyLoss/GeV << " GeV/c" << endl;
+    cout << "\told mom = " << mMomentum.mag()/GeV << " GeV/c" << endl;
+
+    //
+    // Same units (Save an operation...do not convert to GeV)
+    //
+    mMomentum.setMag(mMomentum.mag() - mEnergyLoss);
+
+    cout << "\tnew mom after correction = " << this->getMomentum().mag()/GeV << " GeV/c" << endl;
+
+    return true;
+}
+
+double StRichTrack::getEnergyLoss() const {
+  return mEnergyLoss;
+}
+
+int StRichTrack::getOrigConstHits(int particleType) const {
+
+    switch(particleType) {
+    case -221:
+	return mOrigPiConstHits;
+    case -321:
+	return mOrigKConstHits;
+    case -2212:
+	return mOrigPConstHits;
+    default:
+	cout << "StRichTrack::getOrigConstHits()\n";
+	cout << "\tWARNING!!!!!\n";
+	cout << "\tparticle type is not recogized (" << particleType << ")" << endl;
+	return -990;
+    }
+}
+
+int StRichTrack::getNewConstHits(int particleType) const {
+
+    switch(particleType) {
+    case -221:
+	return mNewPiConstHits;
+    case -321:
+	return mNewKConstHits;
+    case -2212:
+	return mNewPConstHits;
+    default:
+	cout << "StRichTrack::getNewConstHits()\n";
+	cout << "\tWARNING!!!!!\n";
+	cout << "\tparticle type is not recogized (" << particleType << ")" << endl;
+	return -990;
+    }
+}
+
+int StRichTrack::getOrigTotHits(int particleType) const {
+
+    switch(particleType) {
+    case -221:
+	return mOrigPiTotHits;
+    case -321:
+	return mOrigKTotHits;
+    case -2212:
+	return mOrigPTotHits;
+    default:
+	cout << "StRichTrack::getOrigTotHits()\n";
+	cout << "\tWARNING!!!!!\n";
+	cout << "\tparticle type is not recogized (" << particleType << ")" << endl;
+	return -990;
+    }
+}
+
+int StRichTrack::getNewTotHits(int particleType) const {
+
+    switch(particleType) {
+    case -221:
+	return mNewPiTotHits;
+    case -321:
+	return mNewKTotHits;
+    case -2212:
+	return mNewPTotHits;
+    default:
+	cout << "StRichTrack::getNewTotHits()\n";
+	cout << "\tWARNING!!!!!\n";
+	cout << "\tparticle type is not recogized (" << particleType << ")" << endl;
+	return -990;
+    }
+}
+
+void StRichTrack::assignHits(int consthits, int tothits, int refit, int particleType) {
+
+    switch(particleType) {
+
+    case -221: // pion
+	if (refit==0) {	// no refit
+	    mOrigPiConstHits = consthits;
+	    mOrigPiTotHits = tothits;
+	}
+	else if (refit==1) { //  refit
+	    mNewPiConstHits = consthits;
+	    mNewPiTotHits = tothits;
+	}
+	else {
+	    cout << "StRichTrack::assignHits()\n";
+	    cout << "\tPion switch (" << refit  << ")" << endl;
+	}
+	break;
+	
+    case -321: // kaon
+	if (refit==0) {	// no refit
+	    mOrigKConstHits = consthits;
+	    mOrigKTotHits = tothits;
+	}
+	else if (refit==1) { //  refit
+	    mNewKConstHits = consthits;
+	    mNewKTotHits = tothits;
+	}
+	else {
+	    cout << "StRichTrack::assignHits()\n";
+	    cout << "\tKaon switch (" << refit  << ")" << endl;
+	}
+	break;
+
+    case -2212: // proton
+	if (refit==0) {	// no refit
+	    mOrigPConstHits = consthits;
+	    mOrigPTotHits = tothits;
+	}
+	else if (refit==1) { //  refit
+	    mNewPConstHits = consthits;
+	    mNewPTotHits = tothits;
+	}
+	else {
+	    cout << "StRichTrack::assignHits()\n";
+	    cout << "\tProton switch (" << refit  << ")" << endl;
+	}
+	break;
+
+    default:
+	cout << "StRichTrack::assignHits()\n";
+	cout << "\tWARNING\n";
+	cout << "\tParticle type is not recogized (" << particleType << ")" << endl;
+    }
 }
 
 vector<StRichRingHit*>
@@ -499,35 +687,54 @@ StRichTrack::~StRichTrack() {
   
 }
 
-
-
-
-bool StRichTrack::correct() {
+bool StRichTrack::correctTrajectory() {
 
   if (!mStTrack) return false;
   
   StThreeVectorF tempMip(-999,-999,-999);
-  if (mAssociatedMIP) { tempMip = mAssociatedMIP->local();}
-  else return false;
-
+  if (mAssociatedMIP) {
+      tempMip = mAssociatedMIP->local();
+  }
+  else {
+      return false;
+  }
+  
   StThreeVectorF residual = tempMip-mProjectedMIP;
-  if (residual.perp()>3.0*centimeter) { return false;}
-  
-  
 
+  //
+  // should put the cut parameter in the
+  // c'tor initialized as a const double
+  // cut is 3cm
+  
+  if (residual.perp()>3.0) {
+      cout << "StRichTrack::correctTrajectory()\n";
+      cout << "\tWarning\n";
+      cout << "\tResidual > 3 cm.  Skipping..." << endl;
+      return false;
+  }
+  
   // store original values
-  setUnCorrectedProjectedMIP(getProjectedMIP());
-  setUnCorrectedImpactPoint(getImpactPoint());
-  setUnCorrectedMomentum(getMomentum());
+  this->setUnCorrectedProjectedMIP( this->getProjectedMIP() );
+  this->setUnCorrectedImpactPoint( this->getImpactPoint() );
+  this->setUnCorrectedMomentum( this->getMomentum() );
 
 
   // get momentum, x at assumed interaction point in CTB
   StPhysicalHelixD mHelix     = mStTrack->geometry()->helix();
   float mPathLengthToCTB      = mHelix.pathLength(mCTBGlobal,mRichNormal);
-  if (mPathLengthToCTB>10000  || mPathLengthToCTB<0) return false;
+
+  //
+  // lets move the parameters to somethin initialized
+  // in the c'tor
+  //
+  if ( (mPathLengthToCTB>10000)  || (mPathLengthToCTB<0) ) return false;
   
-  StThreeVectorF CTBPoint(mHelix.x(mPathLengthToCTB),mHelix.y(mPathLengthToCTB),mHelix.z(mPathLengthToCTB));
-  StThreeVectorF globalMomentum = mHelix.momentumAt(mPathLengthToCTB, mMagneticField*kilogauss);
+  StThreeVectorF CTBPoint(mHelix.x(mPathLengthToCTB),
+			  mHelix.y(mPathLengthToCTB),
+			  mHelix.z(mPathLengthToCTB));
+
+  StThreeVectorF globalMomentum =
+      mHelix.momentumAt(mPathLengthToCTB, mMagneticField*kilogauss);
 
   float initialTheta = globalMomentum.theta();
   float initialPhi   = globalMomentum.phi();
@@ -538,79 +745,97 @@ bool StRichTrack::correct() {
   float thetaTrials=100.0;
   float phiTrials=100.0;
   
-  float thetaStart=initialTheta-thetaRange;
-  float thetaFinish=initialTheta+thetaRange;
+  float thetaStart  = initialTheta - thetaRange;
+  float thetaFinish = initialTheta + thetaRange;
 
-  float phiStart=initialPhi-phiRange;
-  float phiFinish=initialPhi+phiRange;
+  float phiStart    = initialPhi - phiRange;
+  float phiFinish   = initialPhi + phiRange;
 
-  float deltaTheta=thetaRange/thetaTrials;
-  float deltaPhi=phiRange/phiTrials;
+  float deltaTheta = thetaRange/thetaTrials;
+  float deltaPhi   = phiRange/phiTrials;
 
-  StThreeVectorF correctedMomentum(0,0,0);
-  StThreeVectorF correctedProjectedMIP(0,0,0);
+  StThreeVectorF correctedMomentum;
+  StThreeVectorF correctedProjectedMIP;
   StThreeVectorF correctedResidual = residual;
-  StThreeVectorF tempMomentum(0,0,0);
+  StThreeVectorF tempMomentum;
   
-  for (float theta=thetaStart;theta<thetaFinish;theta=theta+deltaTheta) {
-    for (float phi=phiStart;phi<phiFinish;phi=phi+deltaPhi) {
-      float p = globalMomentum.mag();
-      tempMomentum.setX(p*sin(theta)*cos(phi));
-      tempMomentum.setY(p*sin(theta)*sin(phi));
-      tempMomentum.setZ(p*cos(theta));
+  for (float theta=thetaStart; theta<thetaFinish; theta +=deltaTheta) {
+    for (float phi=phiStart; phi<phiFinish; phi+=deltaPhi) {
+	float p = globalMomentum.mag();
+	tempMomentum.setX(p*sin(theta)*cos(phi));
+	tempMomentum.setY(p*sin(theta)*sin(phi));
+	tempMomentum.setZ(p*cos(theta));
     
-      StPhysicalHelixD tempHelix(tempMomentum,CTBPoint,mMagneticField*kilogauss,mStTrack->geometry()->charge());
-      float path = tempHelix.pathLength(mAnodeGlobal,mRichNormal);
+	StPhysicalHelixD tempHelix(tempMomentum,
+				   CTBPoint,
+				   mMagneticField*kilogauss,
+				   mStTrack->geometry()->charge());
+
+	float path = tempHelix.pathLength(mAnodeGlobal,mRichNormal);
       
-      if (path>0 && path<10000) { 
-	StGlobalCoordinate globalPadPlane(tempHelix.x(path),tempHelix.y(path),tempHelix.z(path));
+	if (path>0 && path<10000) { 
+	    StGlobalCoordinate globalPadPlane(tempHelix.x(path),
+					      tempHelix.y(path),
+					      tempHelix.z(path));
 	
-	StRichLocalCoordinate localPadPlane;
-	(*coordinateTransformation)(globalPadPlane,localPadPlane);
-	StThreeVectorF tempLocal(localPadPlane.position().x(),
-				 localPadPlane.position().y(),
-				 localPadPlane.position().z());
+	    StRichLocalCoordinate localPadPlane;
+	    (*coordinateTransformation)(globalPadPlane,localPadPlane);
+	    StThreeVectorF tempLocal(localPadPlane.position().x(),
+				     localPadPlane.position().y(),
+				     localPadPlane.position().z());
 	
-	StThreeVectorF tempResidual = tempLocal-tempMip;
+	    StThreeVectorF tempResidual = tempLocal - tempMip;
 	
-	if (tempResidual.perp()<correctedResidual.perp() && 
-	    fabs(tempResidual.x()) < 1.1*fabs(tempResidual.y()) &&
-	    fabs(tempResidual.x()) > 0.9*fabs(tempResidual.y())) {
-	  correctedMomentum     = tempMomentum;
-	  correctedResidual     = tempResidual;
-	  correctedProjectedMIP = tempLocal;
+// 	if (tempResidual.perp() < correctedResidual.perp() && 
+// 	    fabs(tempResidual.x()) < 1.1*fabs(tempResidual.y()) &&
+// 	    fabs(tempResidual.x()) > 0.9*fabs(tempResidual.y())) {
+	
+	    if ( tempResidual.perp() < correctedResidual.perp() ) {
+		correctedMomentum     = tempMomentum;
+		correctedResidual     = tempResidual;
+		correctedProjectedMIP = tempLocal;
+	    }
+	
 	}
-      }
     }
   }
-  
 
-  if (correctedMomentum.mag()>0) {
-    // impact point on radiator
-    StPhysicalHelixD tempHelix(correctedMomentum,CTBPoint,mMagneticField*kilogauss,mStTrack->geometry()->charge());
-    float path = tempHelix.pathLength(mRadiatorGlobal,mRichNormal);
   
-    if (path>0 && path<10000) {
-      StGlobalCoordinate globalImpactPoint(tempHelix.x(path),tempHelix.y(path),tempHelix.z(path));
-      StRichLocalCoordinate richTransformedImpactPoint(-999,-999,-999);
-      (*coordinateTransformation)(globalImpactPoint,richTransformedImpactPoint);
+  if (correctedMomentum.mag()>0) {
+      // impact point on radiator
+      StPhysicalHelixD tempHelix(correctedMomentum,
+				 CTBPoint,
+				 mMagneticField*kilogauss,
+				 mStTrack->geometry()->charge());
+      float path = tempHelix.pathLength(mRadiatorGlobal,mRichNormal);
+  
+      if (path>0 && path<10000) {
+	  StGlobalCoordinate globalImpactPoint(tempHelix.x(path),
+					       tempHelix.y(path),
+					       tempHelix.z(path));
+	  StRichLocalCoordinate richTransformedImpactPoint;
+	  (*coordinateTransformation)(globalImpactPoint,richTransformedImpactPoint);
       
-      StThreeVectorF impact(richTransformedImpactPoint.position().x(),
-			    richTransformedImpactPoint.position().y(),
-			    richTransformedImpactPoint.position().z());
+	  StThreeVectorF impact(richTransformedImpactPoint.position().x(),
+				richTransformedImpactPoint.position().y(),
+				richTransformedImpactPoint.position().z());
       
-      // do the momentum vector rotation here
-      StThreeVector<double> tempRichLocalMom(0,0,0);
-      StThreeVector<double> tempRichGlobalMom(correctedMomentum.x(),correctedMomentum.y(),correctedMomentum.z());
+	  // do the momentum vector rotation here
+	  StThreeVector<double> tempRichLocalMom;
+	  StThreeVector<double> tempRichGlobalMom(correctedMomentum.x(),
+						  correctedMomentum.y(),
+						  correctedMomentum.z());
       
-      momentumTransformation->localMomentum(tempRichGlobalMom,tempRichLocalMom);
-      StThreeVectorF tempRichLocalMomentum(tempRichLocalMom.x(),tempRichLocalMom.y(),tempRichLocalMom.z());  
-      StThreeVectorF normalVector(0,0,-1);
+	  momentumTransformation->localMomentum(tempRichGlobalMom,tempRichLocalMom);
+	  StThreeVectorF tempRichLocalMomentum(tempRichLocalMom.x(),
+					       tempRichLocalMom.y(),
+					       tempRichLocalMom.z());  
+	  //StThreeVectorF normalVector(0,0,-1);
       
-      setProjectedMIP(correctedProjectedMIP);
-      setImpactPoint(impact);
-      setMomentum(tempRichLocalMomentum);
-    }
+	  setProjectedMIP(correctedProjectedMIP);
+	  setImpactPoint(impact);
+	  setMomentum(tempRichLocalMomentum);
+      }
   }
   
   return true;
