@@ -353,7 +353,7 @@ ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
 	   exec init_srs#init
       (tfs) 
          exec create_tables_tpc#tcl_fast
-         exec tcl_init#init
+         exec tcl_init#init_tcl
 	 exec tfs_init#init
       (tss) 
 	 exec create_tables_tpc#tss [tpc_sector_first] [tpc_sector_last]
