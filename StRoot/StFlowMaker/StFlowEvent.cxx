@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.49 2004/11/16 21:22:21 aihong Exp $
+// $Id: StFlowEvent.cxx,v 1.50 2004/12/07 17:04:44 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -68,7 +68,6 @@ Bool_t  StFlowEvent::mEtaWgt               = kTRUE;
 Bool_t  StFlowEvent::mProbPid              = kFALSE;
 Bool_t  StFlowEvent::mEtaSubs              = kFALSE;
 Bool_t  StFlowEvent::mRanSubs              = kFALSE;
-Bool_t  StFlowEvent::mOnePhiWgt            = kFALSE;
 Bool_t  StFlowEvent::mFirstLastPhiWgt      = kFALSE;
 Bool_t  StFlowEvent::mFirstLastPoints      = kFALSE;
 Bool_t  StFlowEvent::mUseZDCSMD		   = kFALSE;
@@ -109,9 +108,7 @@ Double_t StFlowEvent::PhiWeightRaw(Int_t selN, Int_t harN, StFlowTrack*
   if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) { 
     // Tpc track, or no topologyMap
     n = (int)((phi/twopi)*Flow::nPhiBins);
-    if (mOnePhiWgt) {
-      phiWgt = mPhiWgt[selN][harN][n];
-    } else if (mFirstLastPhiWgt) {
+    if (mFirstLastPhiWgt) {
       float zFirstPoint = pFlowTrack->ZFirstPoint();
       float zLastPoint  = pFlowTrack->ZLastPoint();
       if (zFirstPoint > 0. && zLastPoint > 0.) {
@@ -955,6 +952,10 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.50  2004/12/07 17:04:44  posk
+// Eliminated the very old mOnePhiWgt, which used one phiWgt histogram for flttening
+// instead of four.
+//
 // Revision 1.49  2004/11/16 21:22:21  aihong
 // removed old cumulant method
 //
