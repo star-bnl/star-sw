@@ -213,8 +213,7 @@ C -- NOTE - globtrk(i).chisq(2) is the probability that globtrk is primary
               primtrk(index).chisq(1) = primtrk(index).chisq(1)/(ndef+2)
               primtrk(index).impact = globtrk(i).impact ! use original impact
               primtrk(index).curvature = abs(1/r1)
-              primtrk(index).map(1) = globtrk(i).map(1) ! use original map
-              primtrk(index).map(2) = globtrk(i).map(2)
+C        Don't copy bit map it is filled later on in the maker (LSB)
               primtrk(index).pid = idgeant
               EGR_PRIMFIT =STAFCV_OK
             endif ! if(impfit
