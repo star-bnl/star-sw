@@ -112,8 +112,17 @@ void StiSvtDetectorBuilder::buildDetectors()
 	  pPlacement->setLayerRadius(fLayerRadius);
 	  pPlacement->setRegion(StiPlacement::kMidRapidity);
 	  float fLadderPhi = phiForSvtBarrelLadder(layer, ladder);
-	  if ((layer%2)==1)
-	    fLadderPhi +=M_PI/getNSectors(layer);
+	  switch (layer)
+	    {
+	    case 0: break;
+	    case 1: fLadderPhi +=M_PI/getNSectors(layer);break;
+	    case 2: fLadderPhi +=M_PI/getNSectors(layer);break;
+	    case 3: break;
+	    case 4: break;
+	    case 5: fLadderPhi +=M_PI/getNSectors(layer);break;
+	    }
+	  //if ((layer%2)==1)
+	  //  fLadderPhi +=M_PI/getNSectors(layer);
 	  pPlacement->setCenterRep(fLadderPhi, fLadderRadius, 0.); 
 
 	  sprintf(name, "Svt/Layer_%d/Ladder_%d/Wafers", layer, ladder);
