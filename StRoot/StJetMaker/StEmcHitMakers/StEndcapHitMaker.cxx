@@ -76,6 +76,7 @@ double StEndcapHitMaker::getZVertex()
 
 void StEndcapHitMaker::findHits()
 {
+    /*
     mMuEmcCol = mMuDst->muDst()->emcCollection();
     if(mMuEmcCol) {
 
@@ -96,11 +97,6 @@ void StEndcapHitMaker::findHits()
 
 	    //find eta and phi values from sector, subsector and etabin assuming z=0,0,0
 	    TVector3 towerCenter = mEeGeom->getTowerCenter(sec-1,sub-1,etabin-1); //careful, this is indexed from 0
-	    /*
-	      double smd = mEeGeom->getZSMD();
-	      cout <<"eemc smd:\t"<<smd<<endl;
-	      abort();
-	    */
 	    
 	    if (!mSimu){
 		const EEmcDbItem *dbItem=mEeDb->getT(sec,sub-1+'A',etabin);
@@ -148,6 +144,7 @@ void StEndcapHitMaker::findHits()
 
 	}
     }
+    */
 }
 
 Int_t StEndcapHitMaker::Make()

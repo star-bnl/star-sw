@@ -232,10 +232,10 @@ void StJetSimuReader::exampleEventAna()
     cout <<"StJetSimuReader::exampleEventAna()"<<endl;
 
     //Get pointers to retreive the emc info
-    StEmcGeom* geom = StEmcGeom::getEmcGeom(detname[0].Data());
-    StEmcADCtoEMaker* adc2e =dynamic_cast<StEmcADCtoEMaker*>( GetMaker("Eread") );
-    assert(adc2e);
-    StBemcData* data = adc2e->getBemcData();
+    //StEmcGeom* geom = StEmcGeom::getEmcGeom(detname[0].Data());
+    //StEmcADCtoEMaker* adc2e =dynamic_cast<StEmcADCtoEMaker*>( GetMaker("Eread") );
+    //assert(adc2e);
+    //StBemcData* data = adc2e->getBemcData();
     //int numHits = data->NTowerHits;
     //cout << "Number Hits: " << numHits;
 	

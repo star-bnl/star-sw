@@ -5,9 +5,9 @@ class  StChain;
 StChain *chain;
 int total=0;
 
-void RunJetFinder2(int nevents=10,
-		   const char* file,
-		   const char* outfile,
+void RunJetFinder2(int nevents=100,
+		   const char* file="/star/data44/reco/productionPP/ReversedFullField/P04ij/2004/117/st_physics_5117059_raw_1020001.MuDst.root",
+		   const char* outfile="blah.root",
 		   const char* dir = "",
 		   const char *filter = "")
 {
@@ -24,6 +24,7 @@ void RunJetFinder2(int nevents=10,
     gSystem->Load("StTpcDb");
     gSystem->Load("StDbUtilities");
     gSystem->Load("StDaqLib");
+    gSystem->Load("StEmcRawMaker");
     gSystem->Load("StEmcADCtoEMaker");
     gSystem->Load("StEpcMaker");
     gSystem->Load("StDbLib");
@@ -39,14 +40,14 @@ void RunJetFinder2(int nevents=10,
     chain->SetDebug(1);
 
     //Instantiate the MuDstReader
-    StMuDebug::setLevel(1); 
+    StMuDebug::setLevel(1);
     StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,dir,file,filter,10,"MuDst");
 
     //StMuDbReader...
     StMuDbReader* db = StMuDbReader::instance();
 
     //StMuDst2StEventMaker
-    StMuDst2StEventMaker* eventMaker = new StMuDst2StEventMaker("MuDst2StEvent");
+    //StMuDst2StEventMaker* eventMaker = new StMuDst2StEventMaker("MuDst2StEvent");
 
     //Database
     St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
@@ -54,12 +55,6 @@ void RunJetFinder2(int nevents=10,
     //EmcAdc2EMaker
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
 
-    //PrecEclMaker
-    //StPreEclMaker *pecl = new StPreEclMaker();
-
-    //EpcMaker
-    //StEpcMaker *epc = new StEpcMaker();
-  
     //Instantiate the StEmcTpcFourPMaker
     StEmcTpcFourPMaker* emcFourPMaker = new StEmcTpcFourPMaker("EmcTpcFourPMaker", muDstMaker, 30, 30, .3, .3, .003, adc);
     emcFourPMaker->setUseType(StEmcTpcFourPMaker::Hits);//if don't have this line then default is 0 (which is hits)

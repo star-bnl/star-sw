@@ -25,6 +25,7 @@ void RunJetReader(int nevents=10,
     gSystem->Load("StTpcDb");
     gSystem->Load("StDbUtilities");
     gSystem->Load("StDaqLib");
+    gSystem->Load("StEmcRawMaker");
     gSystem->Load("StEmcADCtoEMaker");
     gSystem->Load("StEpcMaker");
     gSystem->Load("StDbLib");
@@ -47,7 +48,7 @@ void RunJetReader(int nevents=10,
     StMuDbReader* db = StMuDbReader::instance();
 
     //StMuDst2StEventMaker
-    StMuDst2StEventMaker* eventMaker = new StMuDst2StEventMaker("MuDst2StEvent");
+    //StMuDst2StEventMaker* eventMaker = new StMuDst2StEventMaker("MuDst2StEvent");
 
     //Database
     St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");

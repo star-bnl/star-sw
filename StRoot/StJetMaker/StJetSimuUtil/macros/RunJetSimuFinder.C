@@ -20,7 +20,7 @@ void RunJetSimuFinder(int nevents = 10,
     if (gClassTable->GetID("TTable") < 0) {
 	gSystem->Load("libStar");
 	gSystem->Load("libPhysics");
-    } 
+    }
     gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
     loadSharedLibraries();
     gSystem->Load("StMagF");
@@ -100,6 +100,9 @@ void RunJetSimuFinder(int nevents = 10,
     StEmcTpcFourPMaker* emcFourPMaker = new StEmcTpcFourPMaker("EmcTpcFourPMaker", muDstMaker, 30, 30, .3, .3, .003, adc);
     emcFourPMaker->setUseType(StEmcTpcFourPMaker::Hits);//if don't have this line then default is 0 (which is hits)
 
+    //Pythia4pMaker
+    StPythiaFourPMaker* pythiaFourPMaker = new StPythiaFourPMaker("StPythiaFourPMaker",weight, mcEventMaker);
+
     //Instantiate the JetMaker
     StJetMaker* emcJetMaker = new StJetMaker("emcJetMaker", muDstMaker, outfile);
   
@@ -134,6 +137,38 @@ void RunJetSimuFinder(int nevents = 10,
     ktpars->setR(1.0);
     ktpars->setDebug(false);
     emcJetMaker->addAnalyzer(anapars, ktpars, emcFourPMaker, "MkKtJet");
+
+    //set the analysis cuts for pythia clustering: (see StJetMaker/StppJetAnalyzer.h -> class StppAnaPars )
+    StppAnaPars* pythiapars = new StppAnaPars();
+    pythiapars->setFlagMin(0);
+    pythiapars->setNhits(0); 
+    pythiapars->setCutPtMin(0.0001); 
+    pythiapars->setAbsEtaMax(5.0);
+    pythiapars->setJetPtMin(5.0);
+    pythiapars->setJetEtaMax(5.0);
+    pythiapars->setJetEtaMin(0);
+    pythiapars->setJetNmin(0);
+    
+
+    //Setup the cone finder (See StJetFinder/StConeJetFinder.h -> class StConePars)
+    StConePars* pythia_cpars = new StConePars();
+    pythia_cpars->setGridSpacing(200, -5.0, 5.0, 120, -pi, pi); //take everyting in 10 units of rapidity!
+    pythia_cpars->setConeRadius(0.7);
+    pythia_cpars->setSeedEtMin(0.5);
+    pythia_cpars->setAssocEtMin(0.01);
+    pythia_cpars->setSplitFraction(0.5);
+    pythia_cpars->setPerformMinimization(true);
+    pythia_cpars->setAddMidpoints(true);
+    pythia_cpars->setRequireStableMidpoints(true);
+    pythia_cpars->setDoSplitMerge(true);
+    pythia_cpars->setDebug(false);
+    emcJetMaker->addAnalyzer(pythiapars, pythia_cpars, pythiaFourPMaker, "MkPythiaConeJetsPt02R07");
+ 
+    //Setup the kt=finder (See StJetFinder/StKtCluFinder.h -> class StKtCluPars)
+    StKtCluPars* pythia_ktpars = new StKtCluPars();
+    pythia_ktpars->setR(1.0);
+    pythia_ktpars->setDebug(false);
+    emcJetMaker->addAnalyzer(pythiapars, pythia_ktpars, pythiaFourPMaker, "MkPythiaKtJet");
 
     chain->Init();
     chain->PrintInfo();
