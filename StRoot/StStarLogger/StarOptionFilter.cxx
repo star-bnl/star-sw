@@ -26,46 +26,74 @@ using namespace log4cxx::helpers;
 
 IMPLEMENT_LOG4CXX_OBJECT(StarOptionFilter)
 
-String StarOptionFilter::ACCEPT_REPEAT_COUNTER = _T("RepeatMessage");
+String StarOptionFilter::ACCEPT_REPEAT_COUNTER  = _T("RepeatMessage");
+String StarOptionFilter::STRING_TO_COUNT_OPTION =_T("StringToCount");
 // String StarOptionFilter::ACCEPT_ON_MATCH_OPTION = _T("AcceptOnMatch");
 
-StarOptionFilter::StarOptionFilter() : acceptRepeatCounter(0),currentRepeatCounter(0)
+//______________________________________________________________________________
+StarOptionFilter::StarOptionFilter() : acceptRepeatCounter(-1),currentRepeatCounter(0)
+,matchPredefinedStringOnly(false)
 {
 }
 
+//______________________________________________________________________________
 void StarOptionFilter::setOption(const String& option,
 	const String& value)
 {
 	if (StringHelper::equalsIgnoreCase(option, ACCEPT_REPEAT_COUNTER))
 	{
 		acceptRepeatCounter = OptionConverter::toInt(value,acceptRepeatCounter);
-	}
+	} 
+   else if (StringHelper::equalsIgnoreCase(option,STRING_TO_COUNT_OPTION)) 
+   {  
+      if ( lastLoggerMessageToCompare != value)   {
+          currentRepeatCounter = 0;
+          lastLoggerMessageToCompare = value;  
+          matchPredefinedStringOnly  = true;
+      }
+      if (lastLoggerMessageToCompare.empty())  
+         matchPredefinedStringOnly  = false;
+   }
+
+}
+//______________________________________________________________________________
+void StarOptionFilter::setRepeatCounterOption(int value)      
+{ 
+   // value  < 0; do not count the messages
+   // value  >= 0  the total number of the messsages before it is filtered out
+   acceptRepeatCounter = value;  
 }
 
+//______________________________________________________________________________
 Filter::FilterDecision StarOptionFilter::decide(
 	const log4cxx::spi::LoggingEventPtr& event) const
 {
-	const String& msg = event->getRenderedMessage();
+   Filter::FilterDecision decision = Filter::NEUTRAL;
+      	const String& msg = event->getRenderedMessage();
 // || stringToMatch.empty())
-	if(msg.empty()) return Filter::NEUTRAL;
-
-	if( msg.find(lastLoggerMessageToCompare) == String::npos )
-	{
-      ((StarOptionFilter*)this)->currentRepeatCounter = 0;
-		((StarOptionFilter*)this)->lastLoggerMessageToCompare = msg;
-      return Filter::NEUTRAL;
-	}
-	else
-	{ // we've got a match
-		if(acceptRepeatCounter && currentRepeatCounter < acceptRepeatCounter)
-		{
-         (((StarOptionFilter*)this)->acceptRepeatCounter)++;
-			return Filter::ACCEPT;
-		}
-		else
-		{
-			return Filter::DENY;
-		}
-	}
+	if( !( msg.empty() && acceptRepeatCounter < 0 ) ) {
+	   if( msg.find(lastLoggerMessageToCompare) == String::npos )
+   	{
+         if (!matchPredefinedStringOnly) {
+           currentRepeatCounter = 0;
+		     lastLoggerMessageToCompare = msg;
+         }
+	   }
+	   else 
+	   { // we've got a match
+		   if(currentRepeatCounter <= acceptRepeatCounter)
+		   {
+            currentRepeatCounter++;
+			   decision = Filter::ACCEPT;
+		   }
+		   else
+	   	{
+		    	decision = Filter::DENY;
+		   }
+	   }
+   }
+//   printf(" ~~~~~~~~~~~~~~~~~~~~~~~~~~  FILETR MAKINGF DECISION %d n = %d  treschold = %d %s %d \n",decision
+//         , currentRepeatCounter, acceptRepeatCounter,(const char *) msg.c_str());
+   return decision;
 }
 

@@ -51,11 +51,12 @@ namespace log4cxx
 		{
 		private:
 			static String ACCEPT_REPEAT_COUNTER;
-//			static String ACCEPT_ON_MATCH_OPTION;
+			static String STRING_TO_COUNT_OPTION;
 
 			int  acceptRepeatCounter;
-         int  currentRepeatCounter;
-			String lastLoggerMessageToCompare;
+         mutable int  currentRepeatCounter;
+			mutable String lastLoggerMessageToCompare;
+         bool  matchPredefinedStringOnly;
 
 		public:
 			typedef spi::Filter BASE_CLASS;
@@ -72,6 +73,8 @@ namespace log4cxx
 			*/
 			virtual void setOption(const String& option,
 				const String& value);
+         
+			void setRepeatCounterOption(int value);
 
 			inline void setAcceptRepeatCounter(int repeat)
 				{ this->acceptRepeatCounter = repeat; }

@@ -14,13 +14,14 @@
 
 #ifndef ClassStLoggerManager
 #define ClassStLoggerManager
+#include "StMessMgr.h"
 
 #ifndef __CINT__
 # include <log4cxx/logger.h>
 # include <vector>
+#  include "StarOptionFilter.h"
 #endif
 
-#include "StMessMgr.h"
 
 //#include "StMessage.h"
 //#include "StMessTypeList.h"
@@ -29,6 +30,7 @@
 class StMessTypeList;
 class StMessageCounter;
 class StMessTypeList;
+//class StarOptionFilter;
 
 #ifndef ClassMessVec
 #define ClassMessVec
@@ -58,6 +60,9 @@ class StLoggerManager : public StMessMgr {
    int   fLineNumbers[10];
    int   fAllowRepeat;        // the total number one and the same message can be printed out
    int   fLastRepeatCounter;
+#ifndef __CINT__
+   log4cxx::varia::StarOptionFilterPtr  fStarOptionFilter;
+#endif
    // int building;
    // int remember;
 
@@ -72,6 +77,11 @@ class StLoggerManager : public StMessMgr {
    StLoggerManager(const StLoggerManager&);
    virtual        void BuildMessage(const char* mess="", const char* type="",
          const char* opt=0,const char *sourceFileName=0, int lineNumber=-1);
+#ifndef __CINT__
+  void SetStarOptionFilter(const log4cxx::varia::StarOptionFilterPtr& filter);
+  const log4cxx::varia::StarOptionFilterPtr& GetStarOptionFilter() const;
+  log4cxx::varia::StarOptionFilterPtr& GetStarOptionFilter();
+#endif
 
 protected:
    virtual void IgnoreRepeats();
@@ -201,6 +211,19 @@ inline int StLoggerManager::LevelIndex(char level)
    assert(thisLevel);
    return thisLevel-StLoggerManager::fgLevels;
 }
+#ifndef __CINT__
+//_____________________________________________________________________________
+inline void StLoggerManager::SetStarOptionFilter(const log4cxx::varia::StarOptionFilterPtr& filter)
+{  fStarOptionFilter = filter;  }
+//_____________________________________________________________________________
+inline const log4cxx::varia::StarOptionFilterPtr&  StLoggerManager::GetStarOptionFilter() const
+{ return fStarOptionFilter;} 
+
+//_____________________________________________________________________________
+inline log4cxx::varia::StarOptionFilterPtr&  StLoggerManager::GetStarOptionFilter()
+{ return fStarOptionFilter;} 
+
+#endif
 #endif
 
-// $Id: StLoggerManager.h,v 1.3 2004/11/03 16:39:32 fine Exp $
+// $Id: StLoggerManager.h,v 1.4 2004/11/13 00:28:16 fine Exp $
