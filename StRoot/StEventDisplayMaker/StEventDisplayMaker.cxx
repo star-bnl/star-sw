@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.17 1999/08/05 02:41:12 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.18 1999/08/07 20:31:22 fine Exp $
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.18  1999/08/07 20:31:22  fine
+// MakeVertex method has been introduced
+//
 // Revision 1.17  1999/08/05 02:41:12  fine
-// fix problem with the hits attributes
+//  fix problem with the hits attributes
 //
 // Revision 1.16  1999/08/05 02:14:09  fine
 //  style attribute for hits has been fixed
@@ -64,6 +67,7 @@
 #include "St_NodeView.h"
 #include "St_NodePosition.h"
 #include "St_PolyLine3D.h"
+#include "St_Points3D.h"
 #include "StHits3DPoints.h"
 #include "StVertices3DPoints.h"
 #include "StHelix3DPoints.h"
@@ -133,6 +137,7 @@ StEventDisplayMaker::~StEventDisplayMaker(){
      m_ListDataSetNames = 0;
   }
 }
+#ifdef PALETTE
 //_____________________________________________________________________________
 static void palette()
 {  
@@ -163,6 +168,7 @@ static void palette()
       printf("palette(): couldn't allocate %d of %d colors\n", failures, MaxColors);
   gStyle->SetPalette(MaxColors, palette);
 }
+#endif
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::Init(){
    // Create geometry 
@@ -170,7 +176,9 @@ Int_t StEventDisplayMaker::Init(){
    // Create a special node to keep "tracks" and "hits"
    CreateTrackNodes();
    // define the custom palette (may affect other pictures)
-//=========   palette();    
+#ifdef PALETTE
+   palette();    
+#endif
    // Call the "standard" Init()
    return StMaker::Init();
 }
@@ -390,7 +398,7 @@ Int_t StEventDisplayMaker::Make()
         m_Table = 0;
   
         Char_t *nextObjectName = StrDup(eventName->String().Data());
-        const Char_t *positions[] = {0,0,0,0,0};
+        Char_t *positions[] = {0,0,0,0,0};
         Int_t type = ParseName(nextObjectName, positions);
         if (!type) { delete [] nextObjectName; continue; }
         const Char_t *foundName = positions[0];
@@ -426,7 +434,7 @@ Int_t StEventDisplayMaker::Make()
 }
 
 //_____________________________________________________________________________
-Int_t StEventDisplayMaker::ParseName(Char_t *inName, const Char_t *positions[])
+Int_t StEventDisplayMaker::ParseName(Char_t *inName, Char_t *positions[])
 { 
   // returns  the number of the tokens found:
   //
@@ -441,7 +449,7 @@ Int_t StEventDisplayMaker::ParseName(Char_t *inName, const Char_t *positions[])
 
   Int_t nParsed = 0;
   if (inName && inName[0]) {
-    Char_t *parsedName = StrDup(inName);
+//    Char_t *parsedName = StrDup(inName);
     Char_t *pos = 0;
 //    const Char_t *positions[] = {0,0,0,0,0};
     const Char_t *errorMessages[] = {  "the open bracket missed"
@@ -458,7 +466,7 @@ Int_t StEventDisplayMaker::ParseName(Char_t *inName, const Char_t *positions[])
     const Char_t delimiters[] = {openBracket,comma,collon,collon,closeBracket };
     pos = positions[nParsed] = inName;
     for (nParsed=1;nParsed <= lenExpr;nParsed++)  {
-       if( pos = strchr(pos+1,delimiters[nParsed]) ) {
+       if( (pos = strchr(pos+1,delimiters[nParsed])) ) {
            positions[nParsed] = pos;
           *pos = 0;
        } else break;
@@ -488,60 +496,76 @@ Int_t StEventDisplayMaker::MakeEvent()
   filter = (StVirtualEventFilter *)m_FilterArray->At(kTpcHit);
   if (!filter || filter->IsOn() ) {
   StTpcHitCollection *hits   = m_Event->tpcHitCollection();
-     hitCounter += MakeHits(hits,filter);
+     hitCounter = MakeHits(hits,filter);
      if (Debug()) printf(" TpcHitCollection: %d \n", hitCounter);
+     total += hitCounter;
   }
 
   filter = (StVirtualEventFilter *)m_FilterArray->At(kFtpcHit);
   if (!filter || filter->IsOn() ) {
      StFtpcHitCollection *hits   = m_Event->ftpcHitCollection();
-     hitCounter += MakeHits(hits,filter);
+     hitCounter = MakeHits(hits,filter);
      if (Debug()) printf(" FtpcHitCollection: %d \n", hitCounter);
+     total += hitCounter;
   }
 
   filter = (StVirtualEventFilter *)m_FilterArray->At(kSvtHit);
   if (!filter || filter->IsOn() ) {
      StSvtHitCollection *hits   = m_Event->svtHitCollection();
-     hitCounter += MakeHits(hits,filter);
+     hitCounter = MakeHits(hits,filter);
      if (Debug()) printf(" SvtHitCollection: %d \n", hitCounter);
+     total += hitCounter;
   }
 
   filter = (StVirtualEventFilter *)m_FilterArray->At(kEmcTowerHit);
   if (!filter || filter->IsOn() ) {
     StEmcTowerHitCollection *hits   = m_Event->emcTowerHitCollection();
-    hitCounter += MakeHits(hits,filter);
+    hitCounter = MakeHits(hits,filter);
     if (Debug()) printf(" EmcTowerHitCollection: %d \n", hitCounter);
+    total += hitCounter;
   }
 
   filter = (StVirtualEventFilter *)m_FilterArray->At(kEmcPreShowerHit);
   if (!filter || filter->IsOn() ) {
     StEmcPreShowerHitCollection *hits   = m_Event->emcPreShowerHitCollection();
-    hitCounter += MakeHits(hits,filter);
+    hitCounter = MakeHits(hits,filter);
     if (Debug()) printf(" EmcPreShowerHitCollection: %d \n", hitCounter);
+    total += hitCounter;
   } 
 
   filter = (StVirtualEventFilter *)m_FilterArray->At(kSmdPhiHit);
   if (!filter || filter->IsOn() ) {
     StSmdPhiHitCollection *hits   = m_Event->smdPhiHitCollection();
-    hitCounter += MakeHits(hits,filter);
+    hitCounter = MakeHits(hits,filter);
     if (Debug()) printf(" SmdPhiHitCollection: %d \n", hitCounter);
+    total += hitCounter;
   }
 
   filter = (StVirtualEventFilter *)m_FilterArray->At(kSmdEtaHit);
   if (!filter || filter->IsOn() ) {
     StSmdEtaHitCollection *hits   = m_Event->smdEtaHitCollection();
-    hitCounter += MakeHits(hits,filter);
+    hitCounter = MakeHits(hits,filter);
     if (Debug()) printf(" SmdEtaHitCollection: %d \n", hitCounter);
+    total += hitCounter;
   }
 
   filter = (StVirtualEventFilter *)m_FilterArray->At(kVertices);
   if (!filter || filter->IsOn() ) {
     StVertexCollection *vertices   = m_Event->vertexCollection();
-    hitCounter +=  MakeVertices(vertices,filter);
+    hitCounter =  MakeVertices(vertices,filter);
     if (Debug()) printf(" VertexCollection: %d \n", hitCounter);
+    total += hitCounter;
   }
 
-  return total+hitCounter;
+  filter = (StVirtualEventFilter *)m_FilterArray->At(kPrimaryVertex);
+  if (!filter || filter->IsOn() ) {
+    StVertex  *vertex   = m_Event->primaryVertex();
+    hitCounter =  MakeVertex(vertex,filter);
+    if (Debug()) printf(" Primary Vertex: %d \n", hitCounter);
+    total += hitCounter;
+  }
+
+  return total;
 }
 //_____________________________________________________________________________
 Color_t StEventDisplayMaker::GetColorAttribute(Int_t adc)
@@ -580,6 +604,42 @@ Int_t StEventDisplayMaker::MakeHits(const StObjArray *eventCollection,StVirtualE
           printf(" no track position %d\n",hitCounter);
        }
        return hitsPoints->Size(); // hitColor;
+    }
+  }
+  return 0;
+}
+
+//_____________________________________________________________________________
+Int_t StEventDisplayMaker::MakeVertex(const StVertex *vertex,StVirtualEventFilter *filter)
+{
+  if (vertex) {
+    Int_t   vertexCounter = 0;
+    Color_t vertexColor = kBlue;
+    Style_t vertexStyle = 3;
+    Width_t vertexSize  = 1;
+
+    // ---------------------------- hits filter ----------------------------- //
+    if (filter) vertexColor =  filter->Filter(vertex,vertexSize,vertexStyle); //
+    // ---------------------------------------------------------------------- //
+    if (vertexColor > 0) {
+       const StThreeVectorF &vertexVector = ((StVertex *)vertex)->position();
+       Float_t x = vertexVector[0];
+       Float_t y = vertexVector[1];
+       Float_t z = vertexVector[2];
+       St_Points3D *vertexPoint =  new St_Points3D(1, &x, &y, &z);
+       m_HitCollector->Add(vertexPoint);    // Collect to remove  
+       St_PolyLineShape *vertexShape   = new St_PolyLineShape(vertexPoint);
+         vertexShape->SetVisibility(1);                vertexShape->SetColorAttribute(vertexColor);
+         vertexShape->SetStyleAttribute(vertexStyle);  vertexShape->SetSizeAttribute(vertexSize);
+       // Create a node to hold it
+       St_Node *thisVertex = new St_Node("vertex",vertex->GetName(),vertexShape);
+         thisVertex->Mark();
+         thisVertex->SetVisibility();
+       St_NodePosition *pp = m_EventsNode->Add(thisVertex); 
+       if (!pp) 
+          printf(" no track position \n");
+       vertexCounter = 1;
+       return vertexCounter;
     }
   }
   return 0;
@@ -766,7 +826,6 @@ void StEventDisplayMaker::PrintFilterStatus()
   Int_t i;
   for (i =0;i<kEndOfEventList;i++) {
       StVirtualEventFilter *filter = (StVirtualEventFilter *)m_FilterArray->At(i);
-      Int_t isOn = filter->IsOn();
       printf(" Filter for %16s",filterNames[i]);
       if (filter) {
           if (filter->IsOn()) printf(" is ON\n");

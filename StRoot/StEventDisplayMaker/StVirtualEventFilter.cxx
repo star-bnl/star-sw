@@ -28,6 +28,12 @@ Int_t StVirtualEventFilter::Filter(const StObjArray *,Width_t &,Style_t &)
 //_____________________________________________________________________________
 Int_t StVirtualEventFilter::Filter(const St_Table *,Int_t index,Width_t &,Style_t &)
 { return GetFlag()? (kGreen+index)%20 : 0 ;}
+//_____________________________________________________________________________
+Int_t StVirtualEventFilter::Filter(const StVertex *,Width_t &,Style_t &)
+{ return GetFlag()? kBlue : 0 ; }
+
+
+
 
 
 
