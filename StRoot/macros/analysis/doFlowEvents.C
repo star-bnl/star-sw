@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.22 2000/09/15 01:22:27 snelling Exp $
+// $Id: doFlowEvents.C,v 1.23 2000/09/15 22:54:44 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -44,6 +44,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.23  2000/09/15 22:54:44  posk
+// Added Pt weighting for event plane calculation.
+//
 // Revision 1.22  2000/09/15 01:22:27  snelling
 // Added the new selection options to the macro
 //
@@ -303,7 +306,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //
 
   // Set the event cuts
-  //StFlowCutEvent::SetCent(1, 1);
+//   StFlowCutEvent::SetCent(1, 1);
 //   StFlowCutEvent::SetMult(0, 0);
 //   StFlowCutEvent::SetVertexX(0., 0.);
 //   StFlowCutEvent::SetVertexY(0., 0.);
@@ -322,6 +325,9 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //StFlowEvent::SetEtaCut(0.05, 1., 0, 0); // harmonic 1, selection 1
   //StFlowEvent::SetEtaCut(0.05, 1., 1, 0); // harmonic 2, selection 1
   //StFlowEvent::SetEtaCut(0.05, 1., 2, 0); // harmonic 3, selection 1
+
+  // Use a Pt weight in the event plane calcualtion
+  //StFlowEvent::SetPtWgt();
 
   // Set the PID windows
 //   StFlowEvent::SetPiPlusCut(-3., 3.);
@@ -450,10 +456,6 @@ void doFlowEvents(const Int_t nevents)
   //Char_t* fileExt="*.event.root";
   
   // LBNL
-  //Char_t* filePath="/data06/posk/";
-  //Char_t* filePath="./pico/";
-  //Char_t* fileExt="*flowpicoevent.root";
-
   //Char_t* filePath="/auto/pdsfdv09/star/dst/P00he/2000/07/"; // July data
   //Char_t* fileExt="*.dst.root";
 
@@ -463,7 +465,7 @@ void doFlowEvents(const Int_t nevents)
   //Char_t* filePath="/auto/pdsfdv08/star/reco/P00hg/2000/08/"; // Aug data
   //Char_t* fileExt="st_physics*dst.root";
 
-  //Char_t* filePath="/auto/pdsfdv08/star/flow/P00hg/flowPicoDST/"; // Aug data
+  //Char_t* filePath="/auto/pdsfdv08/star/flow/P00hg/version1/"; // Aug data
   //Char_t* fileExt="*.flowpicoevent.root";
   //Char_t* fileExt="st_physics_1223002_raw_0005.dst.root.flowpicoevent.root"; // one file
 

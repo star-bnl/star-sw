@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.40 2000/09/12 01:31:00 snelling Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.41 2000/09/15 22:52:53 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.41  2000/09/15 22:52:53  posk
+// Added Pt weighting for event plane calculation.
+//
 // Revision 1.40  2000/09/12 01:31:00  snelling
 // Added pid histograms for e- e+ and dbar
 //
@@ -152,10 +155,6 @@ extern "C" float besi1_(const float&);
 
 ClassImp(StFlowAnalysisMaker)
 
-// const Float_t StFlowAnalysisMaker::etaMin = -1.5;
-// const Float_t StFlowAnalysisMaker::etaMax =  1.5;
-// const Float_t StFlowAnalysisMaker::ptMin  =  0.;
-// const Float_t StFlowAnalysisMaker::ptMax  =  2.;
 const Float_t StFlowAnalysisMaker::qMax   =  3.5;
 enum { n_qBins  = 50 };
 // nPhiBins is in StFlowConstants.h
@@ -227,16 +226,14 @@ Int_t StFlowAnalysisMaker::Make() {
 Int_t StFlowAnalysisMaker::Init() {
   // Book histograms
 
-  float ptMaxPart;
+  float ptMaxPart = 2.;
   if (pFlowSelect->PtMaxPart()) {
     ptMaxPart = pFlowSelect->PtMaxPart();
-  } else {
-    ptMaxPart = 2.;
   }
-  const float etaMin          = -1.5;
-  const float etaMax          =  1.5;
-  const float ptMin           =  0.;
-  const float ptMax           =  2.;
+  const float etaMin          =  -1.5;
+  const float etaMax          =   1.5;
+  const float ptMin           =    0.;
+  const float ptMax           =    2.;
   const float chargeMin       =  -2.5;
   const float chargeMax       =   2.5; 
   const float dcaMin          =    0.;
@@ -290,7 +287,7 @@ Int_t StFlowAnalysisMaker::Init() {
 	 nMaxPtsBins       = 60,
 	 nFitOverMaxBins   = 40,
 	 nOrigMultBins     = 40,
-	 nMultEtaBins      = 100,
+	 nMultEtaBins      = 50,
 	 nTotalMultBins    = 40,
 	 nMultOverOrigBins = 50,
 	 nCorrMultBins     = 40,
@@ -578,91 +575,91 @@ Int_t StFlowAnalysisMaker::Init() {
   mHistCTBversusZDC->SetXTitle("ZDC sum");
   mHistCTBversusZDC->SetYTitle("CTB sum");
 
-  // MeandEdx
-  mHistMeandEdx = new TH2F("Flow_MeandEdx", "Flow_MeandEdx",
+  // MeanDedx
+  mHistMeanDedx = new TH2F("Flow_MeanDedx", "Flow_MeanDedx",
 			   400, -5, 5,
 			   1000, 0, 0.00005);
-  mHistMeandEdx->SetXTitle("momentum/Z (GeV)");
-  mHistMeandEdx->SetYTitle("mean dEdx");
+  mHistMeanDedx->SetXTitle("momentum/Z (GeV)");
+  mHistMeanDedx->SetYTitle("mean dEdx");
 
-  // MeandEdx PiPlus
-  mHistMeandEdxPiPlus = new TH2F("Flow_MeandEdxPiPlus", 
-				 "Flow_MeandEdxPiPlus",
+  // MeanDedx PiPlus
+  mHistMeanDedxPiPlus = new TH2F("Flow_MeanDedxPiPlus", 
+				 "Flow_MeanDedxPiPlus",
 				 400, -5, 5,
 				 1000, 0, 0.00005);
-  mHistMeandEdxPiPlus->SetXTitle("momentum/Z (GeV)");
-  mHistMeandEdxPiPlus->SetYTitle("mean dEdx");
+  mHistMeanDedxPiPlus->SetXTitle("momentum/Z (GeV)");
+  mHistMeanDedxPiPlus->SetYTitle("mean dEdx");
 
-  // MeandEdxPiMinus
-  mHistMeandEdxPiMinus = new TH2F("Flow_MeandEdxPiMinus", 
-				  "Flow_MeandEdxPiMinus",
+  // MeanDedxPiMinus
+  mHistMeanDedxPiMinus = new TH2F("Flow_MeanDedxPiMinus", 
+				  "Flow_MeanDedxPiMinus",
 				  400, -5, 5,
 				  1000, 0, 0.00005);
-  mHistMeandEdxPiMinus->SetXTitle("momentum/Z (GeV)");
-  mHistMeandEdxPiMinus->SetYTitle("mean dEdx");
+  mHistMeanDedxPiMinus->SetXTitle("momentum/Z (GeV)");
+  mHistMeanDedxPiMinus->SetYTitle("mean dEdx");
 
-  // MeandEdxProton
-  mHistMeandEdxProton = new TH2F("Flow_MeandEdxProton", 
-				 "Flow_MeandEdxProton",
+  // MeanDedxProton
+  mHistMeanDedxProton = new TH2F("Flow_MeanDedxProton", 
+				 "Flow_MeanDedxProton",
 				 400, -5, 5,
 				 1000, 0, 0.00005);
-  mHistMeandEdxProton->SetXTitle("momentum/Z (GeV)");
-  mHistMeandEdxProton->SetYTitle("mean dEdx");
+  mHistMeanDedxProton->SetXTitle("momentum/Z (GeV)");
+  mHistMeanDedxProton->SetYTitle("mean dEdx");
 
-  // MeandEdxPbar
-  mHistMeandEdxPbar = new TH2F("Flow_MeandEdxPbar", 
-			       "Flow_MeandEdxPbar",
+  // MeanDedxPbar
+  mHistMeanDedxPbar = new TH2F("Flow_MeanDedxPbar", 
+			       "Flow_MeanDedxPbar",
 			       400, -5, 5,
 			       1000, 0, 0.00005);
-  mHistMeandEdxPbar->SetXTitle("momentum/Z (GeV)");
-  mHistMeandEdxPbar->SetYTitle("mean dEdx");
+  mHistMeanDedxPbar->SetXTitle("momentum/Z (GeV)");
+  mHistMeanDedxPbar->SetYTitle("mean dEdx");
 
-  // MeandEdxKplus
-  mHistMeandEdxKplus = new TH2F("Flow_MeandEdxKplus", 
-				"Flow_MeandEdxKplus",
+  // MeanDedxKplus
+  mHistMeanDedxKplus = new TH2F("Flow_MeanDedxKplus", 
+				"Flow_MeanDedxKplus",
 				400, -5, 5,
 				1000, 0, 0.00005);
-  mHistMeandEdxKplus->SetXTitle("momentum/Z (GeV)");
-  mHistMeandEdxKplus->SetYTitle("mean dEdx");
+  mHistMeanDedxKplus->SetXTitle("momentum/Z (GeV)");
+  mHistMeanDedxKplus->SetYTitle("mean dEdx");
 
-  // MeandEdxKminus
-  mHistMeandEdxKminus = new TH2F("Flow_MeandEdxKminus", "Flow_MeandEdxKminus",
+  // MeanDedxKminus
+  mHistMeanDedxKminus = new TH2F("Flow_MeanDedxKminus", "Flow_MeanDedxKminus",
 				 400, -5, 5,
 				 1000, 0, 0.00005);
-  mHistMeandEdxKminus->SetXTitle("momentum/Z (GeV)");
-  mHistMeandEdxKminus->SetYTitle("mean dEdx");
+  mHistMeanDedxKminus->SetXTitle("momentum/Z (GeV)");
+  mHistMeanDedxKminus->SetYTitle("mean dEdx");
 
-  // MeandEdxDeuteron
-  mHistMeandEdxDeuteron = new TH2F("Flow_MeandEdxDeuteron", 
-				   "Flow_MeandEdxDeuteron",
+  // MeanDedxDeuteron
+  mHistMeanDedxDeuteron = new TH2F("Flow_MeanDedxDeuteron", 
+				   "Flow_MeanDedxDeuteron",
 				   400, -5, 5,
 				   1000, 0, 0.00005);
-  mHistMeandEdxDeuteron->SetXTitle("momentum/Z (GeV)");
-  mHistMeandEdxDeuteron->SetYTitle("mean dEdx");
+  mHistMeanDedxDeuteron->SetXTitle("momentum/Z (GeV)");
+  mHistMeanDedxDeuteron->SetYTitle("mean dEdx");
 
-  // MeandEdxAntiDeuteron
-  mHistMeandEdxAntiDeuteron = new TH2F("Flow_MeandEdxAntiDeuteron", 
-				       "Flow_MeandEdxAntiDeuteron",
+  // MeanDedxAntiDeuteron
+  mHistMeanDedxAntiDeuteron = new TH2F("Flow_MeanDedxAntiDeuteron", 
+				       "Flow_MeanDedxAntiDeuteron",
 				       400, -5, 5,
 				       1000, 0, 0.00005);
-  mHistMeandEdxAntiDeuteron->SetXTitle("momentum/Z (GeV)");
-  mHistMeandEdxAntiDeuteron->SetYTitle("mean dEdx");
+  mHistMeanDedxAntiDeuteron->SetXTitle("momentum/Z (GeV)");
+  mHistMeanDedxAntiDeuteron->SetYTitle("mean dEdx");
 
-  // MeandEdxElectron
-  mHistMeandEdxElectron = new TH2F("Flow_MeandEdxElectron", 
-				   "Flow_MeandEdxElectron",
+  // MeanDedxElectron
+  mHistMeanDedxElectron = new TH2F("Flow_MeanDedxElectron", 
+				   "Flow_MeanDedxElectron",
 				   400, -5, 5,
 				   1000, 0, 0.00005);
-  mHistMeandEdxElectron->SetXTitle("momentum/Z (GeV)");
-  mHistMeandEdxElectron->SetYTitle("mean dEdx");
+  mHistMeanDedxElectron->SetXTitle("momentum/Z (GeV)");
+  mHistMeanDedxElectron->SetYTitle("mean dEdx");
 
-  // MeandEdxPositron
-  mHistMeandEdxPositron = new TH2F("Flow_MeandEdxPositron", 
-				   "Flow_MeandEdxPositron",
+  // MeanDedxPositron
+  mHistMeanDedxPositron = new TH2F("Flow_MeanDedxPositron", 
+				   "Flow_MeanDedxPositron",
 				   400, -5, 5,
 				   1000, 0, 0.00005);
-  mHistMeandEdxPositron->SetXTitle("momentum/Z (GeV)");
-  mHistMeandEdxPositron->SetYTitle("mean dEdx");
+  mHistMeanDedxPositron->SetXTitle("momentum/Z (GeV)");
+  mHistMeanDedxPositron->SetYTitle("mean dEdx");
 
   TString* histTitle;
   for (int i = 0; i < Flow::nSels * Flow::nSubs; i++) {
@@ -900,7 +897,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.40 2000/09/12 01:31:00 snelling Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.41 2000/09/15 22:52:53 posk Exp $");
 
   return StMaker::Init();
 }
@@ -995,7 +992,7 @@ void StFlowAnalysisMaker::FillEventHistograms() {
   mHistVertexXY2D->Fill(vertex.x(), vertex.y());
 
   mHistCTBversusZDC->Fill(pFlowEvent->ZDCe() + pFlowEvent->ZDCe(), 
-						pFlowEvent->CTB());
+			                       pFlowEvent->CTB());
 
   // sub-event Psi_Subs
   for (int i = 0; i < Flow::nSubs * Flow::nSels; i++) {
@@ -1085,16 +1082,16 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
     float totalp = pt/sqrt(1-(tanh(eta)*tanh(eta)));
 
     // For PID multiplicites
-    if (strcmp(pid, "pi+") == 0)      piPlusN++;
-    if (strcmp(pid, "pi-") == 0)      piMinusN++;
-    if (strcmp(pid, "proton") == 0)   protonN++;
-    if (strcmp(pid, "pbar") == 0)     pbarN++;
-    if (strcmp(pid, "k+") == 0)       kPlusN++;
-    if (strcmp(pid, "k-") == 0)       kMinusN++;
-    if (strcmp(pid, "d") == 0)        deuteronN++;
-    if (strcmp(pid, "dbar") == 0)     dbarN++;
-    if (strcmp(pid, "e-") == 0)       electronN++;
-    if (strcmp(pid, "e+") == 0)       positronN++;
+    if (strcmp(pid, "pi+")    == 0)  piPlusN++;
+    if (strcmp(pid, "pi-")    == 0)  piMinusN++;
+    if (strcmp(pid, "proton") == 0)  protonN++;
+    if (strcmp(pid, "pbar")   == 0)  pbarN++;
+    if (strcmp(pid, "k+")     == 0)  kPlusN++;
+    if (strcmp(pid, "k-")     == 0)  kMinusN++;
+    if (strcmp(pid, "d")      == 0)  deuteronN++;
+    if (strcmp(pid, "dbar")   == 0)  dbarN++;
+    if (strcmp(pid, "e-")     == 0)  electronN++;
+    if (strcmp(pid, "e+")     == 0)  positronN++;
 
     // no selections: Charge, Dca, Chi2, FitPts, MaxPts, FitOverMax, PID
     mHistCharge->Fill((float)charge);
@@ -1104,68 +1101,68 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
     mHistMaxPts->Fill((float)maxPts);
     if (maxPts) mHistFitOverMax->Fill((float)fitPts/(float)maxPts);
 
-    mHistMeandEdx->Fill(totalp/charge,pFlowTrack->Dedx());
+    mHistMeanDedx->Fill(totalp/charge,pFlowTrack->Dedx());
 
     if (charge == 1) {
       float piPlus = pFlowTrack->PidPiPlus();
       mHistPidPiPlus->Fill(piPlus);
       if (strcmp(pid, "pi+") == 0) {
-	mHistMeandEdxPiPlus->Fill(totalp/charge,pFlowTrack->Dedx());
+	mHistMeanDedxPiPlus->Fill(totalp/charge,pFlowTrack->Dedx());
 	mHistPidPiPlusSel->Fill(piPlus);
       }
       float kplus  = pFlowTrack->PidKaonPlus();
       mHistPidKplus->Fill(kplus);
       if (strcmp(pid, "k+") == 0) {
-	mHistMeandEdxKplus->Fill(totalp/charge,pFlowTrack->Dedx());
+	mHistMeanDedxKplus->Fill(totalp/charge,pFlowTrack->Dedx());
 	mHistPidKplusSel->Fill(kplus);
       }
       float proton  = pFlowTrack->PidProton();
       mHistPidProton->Fill(proton);
       if (strcmp(pid, "proton") == 0) {
-	mHistMeandEdxProton->Fill(totalp/charge,pFlowTrack->Dedx());
+	mHistMeanDedxProton->Fill(totalp/charge,pFlowTrack->Dedx());
 	mHistPidProtonSel->Fill(proton);
       }
       float deuteron  = pFlowTrack->PidDeuteron();
       mHistPidDeuteron->Fill(deuteron);
       if (strcmp(pid, "d") == 0) {
-	mHistMeandEdxDeuteron->Fill(totalp/charge,pFlowTrack->Dedx());
+	mHistMeanDedxDeuteron->Fill(totalp/charge,pFlowTrack->Dedx());
 	mHistPidDeuteronSel->Fill(deuteron);
       }
       float positron  = pFlowTrack->PidPositron();
       mHistPidPositron->Fill(positron);
       if (strcmp(pid, "e+") == 0) {
-	mHistMeandEdxPositron->Fill(totalp/charge,pFlowTrack->Dedx());
+	mHistMeanDedxPositron->Fill(totalp/charge,pFlowTrack->Dedx());
 	mHistPidPositronSel->Fill(positron);
       }
     } else if (charge == -1) {
       float piMinus = pFlowTrack->PidPiMinus();
       mHistPidPiMinus->Fill(piMinus);
       if (strcmp(pid, "pi-") == 0) {
-	mHistMeandEdxPiMinus->Fill(totalp/charge,pFlowTrack->Dedx());
+	mHistMeanDedxPiMinus->Fill(totalp/charge,pFlowTrack->Dedx());
 	mHistPidPiMinusSel->Fill(piMinus);
       }
       float kminus  = pFlowTrack->PidKaonMinus();
       mHistPidKminus->Fill(kminus);
       if (strcmp(pid, "k-") == 0) {
-	mHistMeandEdxKminus->Fill(totalp/charge,pFlowTrack->Dedx());
+	mHistMeanDedxKminus->Fill(totalp/charge,pFlowTrack->Dedx());
 	mHistPidKminusSel->Fill(kminus);
       }
       float antiproton  = pFlowTrack->PidAntiProton();
       mHistPidAntiProton->Fill(antiproton);
       if (strcmp(pid, "pbar") == 0) {
-	mHistMeandEdxPbar->Fill(totalp/charge,pFlowTrack->Dedx());
+	mHistMeanDedxPbar->Fill(totalp/charge,pFlowTrack->Dedx());
 	mHistPidAntiProtonSel->Fill(antiproton);
       }
       float antideuteron  = pFlowTrack->PidAntiDeuteron();
       mHistPidAntiDeuteron->Fill(antideuteron);
       if (strcmp(pid, "dbar") == 0) {
-	mHistMeandEdxAntiDeuteron->Fill(totalp/charge,pFlowTrack->Dedx());
+	mHistMeanDedxAntiDeuteron->Fill(totalp/charge,pFlowTrack->Dedx());
 	mHistPidAntiDeuteronSel->Fill(antideuteron);
       }
       float electron  = pFlowTrack->PidElectron();
       mHistPidElectron->Fill(electron);
       if (strcmp(pid, "e-") == 0) {
-	mHistMeandEdxElectron->Fill(totalp/charge,pFlowTrack->Dedx());
+	mHistMeanDedxElectron->Fill(totalp/charge,pFlowTrack->Dedx());
 	mHistPidElectronSel->Fill(electron);
       }
     }
@@ -1194,7 +1191,6 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
       for (int j = 0; j < Flow::nHars; j++) {
 	pFlowSelect->SetHarmonic(j);
 	double order  = (double)(j+1);
-// 	float psi_i = mQ[k][j].Phi() / order;
 	float psi_i = mPsi[k][j];
 // 	int i = Flow::nSels*k;
 // 	// for particles with the opposite subevent
@@ -1213,6 +1209,9 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  histFull[k].histFullHar[j].mHistPhiFlat->Fill(phi, phiWgt);
 	  // for no autocorrelations remove, comment out the next 5 lines
 	  if (eta < 0 && (j+1) % 2 == 1) phiWgt *= -1.;
+	  if (pFlowEvent->PtWgt()) {
+	    phiWgt *= pt;
+	  }
 	  Q_i.Set(phiWgt * cos(phi * order), phiWgt * sin(phi * order));
 	  TVector2 mQ_i = mQ[k][j] - Q_i;
 	  psi_i = mQ_i.Phi() / order;

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.21 2000/09/12 01:31:00 snelling Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.22 2000/09/15 22:52:55 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.22  2000/09/15 22:52:55  posk
+// Added Pt weighting for event plane calculation.
+//
 // Revision 1.21  2000/09/12 01:31:00  snelling
 // Added pid histograms for e- e+ and dbar
 //
@@ -116,7 +119,7 @@ public:
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.21 2000/09/12 01:31:00 snelling Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.22 2000/09/15 22:52:55 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -187,17 +190,17 @@ private:
   TH2F*     mHistEtaSymVerZ2D;  //!
   TH1F*     mHistEtaSymVerZ;    //!
   TH2F*     mHistCTBversusZDC;  //!
-  TH2F*     mHistMeandEdx;      //!
-  TH2F*     mHistMeandEdxPiPlus;  //!
-  TH2F*     mHistMeandEdxPiMinus; //!
-  TH2F*     mHistMeandEdxProton;  //!
-  TH2F*     mHistMeandEdxPbar;    //!
-  TH2F*     mHistMeandEdxKplus;   //!
-  TH2F*     mHistMeandEdxKminus;  //!
-  TH2F*     mHistMeandEdxDeuteron;   //!
-  TH2F*     mHistMeandEdxAntiDeuteron;  //!
-  TH2F*     mHistMeandEdxPositron;   //!
-  TH2F*     mHistMeandEdxElectron;  //!
+  TH2F*     mHistMeanDedx;      //!
+  TH2F*     mHistMeanDedxPiPlus;  //!
+  TH2F*     mHistMeanDedxPiMinus; //!
+  TH2F*     mHistMeanDedxProton;  //!
+  TH2F*     mHistMeanDedxPbar;    //!
+  TH2F*     mHistMeanDedxKplus;   //!
+  TH2F*     mHistMeanDedxKminus;  //!
+  TH2F*     mHistMeanDedxDeuteron;   //!
+  TH2F*     mHistMeanDedxAntiDeuteron;  //!
+  TH2F*     mHistMeanDedxPositron;   //!
+  TH2F*     mHistMeanDedxElectron;  //!
 
   
   // for each harmonic, each selection, and each sub-event
@@ -244,10 +247,6 @@ private:
   };
   struct histFulls histFull[Flow::nSels]; //!
 
-  //static const Float_t etaMin;                  // histogram limits
-  //static const Float_t etaMax;
-  //static const Float_t ptMin;
-  //static const Float_t ptMax;
   static const Float_t qMax;
 
   TString      MakerName;
