@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.21 2000/01/12 19:09:33 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.22 2000/01/14 23:14:23 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.22  2000/01/14 23:14:23  lansdell
+// for primtrk, now find residuals correctly
+//
 // Revision 1.21  2000/01/12 19:09:33  lansdell
 // fixed FTPC hits indexing bug
 //
@@ -74,7 +77,6 @@
 #include "TH2.h"
 #include "StEventQAMaker.h"
 #include "StEventTypes.h"
-#include "StParticleTypes.hh"
 
 ClassImp(StEventQAMaker)
 
@@ -470,8 +472,13 @@ void StEventQAMaker::MakeHistPrim() {
 	Float_t chisq1 = primtrk->fitTraits().chi2(1);
         Float_t nfitntot = (Float_t(primtrk->fitTraits().numberOfFitPoints()))/
 	                   (Float_t(primtrk->detectorInfo()->numberOfPoints()));
+	// need to find position on helix closest to first point on track since
+	// the primary vertex is used as the first point on helix for primary
+	// tracks -CL
+	double s = primtrk->geometry()->helix().
+	           pathLength(primtrk->detectorInfo()->firstPoint());
 	StThreeVectorF dif = primtrk->detectorInfo()->firstPoint() -
-	                     primtrk->geometry()->origin();
+	                     primtrk->geometry()->helix().at(s);
         Float_t radf = primtrk->detectorInfo()->firstPoint().perp();
 
 	for (UInt_t k=0; k<primtrk->pidTraits().size(); k++)
