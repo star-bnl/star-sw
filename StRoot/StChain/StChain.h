@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.36 2000/11/27 22:46:39 fisyak Exp $
+// $Id: StChain.h,v 1.37 2001/04/10 21:38:49 perev Exp $
 // $Log: StChain.h,v $
+// Revision 1.37  2001/04/10 21:38:49  perev
+// Maki(int) --> IMake(int)
+//
 // Revision 1.36  2000/11/27 22:46:39  fisyak
 // Introduce kIsCalibrated BIT
 //
@@ -115,6 +118,7 @@ public:
    virtual Int_t      Finish();   // *MENU*
    virtual Int_t      Init();
    virtual Int_t      Make();
+   virtual Int_t      Make(Int_t num){return IMake(num);}
    virtual Int_t      IsChain() const {return 1;}
    virtual Int_t      MakeEvent(); // *MENU*
    virtual Bool_t      GetOption(const TString *Opt) {return Opt ? GetOption(Opt->Data()):kFALSE;}
@@ -123,7 +127,7 @@ public:
    Int_t              GetVersionDate() {return m_VersionDate;}
 
  virtual const char *GetCVS() const 
- {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.36 2000/11/27 22:46:39 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+ {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.37 2001/04/10 21:38:49 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StChain, 0)   //StChain control class
 };
 

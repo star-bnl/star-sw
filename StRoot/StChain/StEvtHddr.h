@@ -20,6 +20,7 @@ public:
   Int_t 	GetOldRunNumber() const {return mOldRunNumber;};
   const Char_t *GetEventType()    const {return (const Char_t*)mEventType;};
   UInt_t 	GetTriggerMask()  const {return mTriggerMask;};
+  UInt_t 	GetInputTriggerMask()  const {return mInputTriggerMask;};
   Float_t       GetCenterOfMassEnergy() const {return mCenterOfMassEnergy;};
   Int_t       	GetAEast()        const {return mAEast;};
   Int_t       	GetZEast() 	  const {return mZEast;};
