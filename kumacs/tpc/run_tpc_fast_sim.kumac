@@ -1,6 +1,7 @@
 * created May 27, 1998 - Kathy Turner
 *                      - this is now kumac that drives tpc fast simulator 
-************************************************************************
+*  editted June 4, 1998 Kathy Turner
+* ***********************************************************************
 ************************************************************************
 
 macro run__
@@ -76,7 +77,10 @@ $STAR/pams/trg/kumac
 
 * tpc geometry init
   exec tpg_init#init
-
+  
+* tpc clustering init for fast simulation!
+  exec tpc_clustering#initialize_fast
+  
 * tpc fast sim init
   exec tpc_fast_sim#initialize 
 

@@ -1,7 +1,8 @@
 * created May 27, 1998 - Kathy Turner
 *                    - this is now kumac that drives tpc fast simulator
 *                      and then does tracking
-************************************************************************
+*  editted June 4, 1998 Kathy Turner
+* ***********************************************************************
 ************************************************************************
 macro run__
           INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
@@ -64,13 +65,6 @@ $STAR/pams/global/kumac,_
 $STAR/pams/mwc/kumac,_
 $STAR/pams/svt/kumac,_
 $STAR/pams/tpc/kumac,_
-$STAR/pams/ctf/kumac,_
-$STAR/pams/emc/kumac,_
-$STAR/pams/ftpc/kumac,_
-$STAR/pams/gen/kumac,_
-$STAR/pams/global/kumac,_
-$STAR/pams/mwc/kumac,_
-$STAR/pams/svt/kumac,_
 $STAR/pams/tpc/kumac,_
 $STAR/pams/trg/kumac
  
@@ -109,14 +103,25 @@ $STAR/pams/trg/kumac
    tdm/table/cell/getvalue 'tsspar[0].bfield'
    cd /dui
    
+   
+* ****************** TPC CLUSTERING INIT **************************
+* tpc cluster init
+  exec tpc_clustering#initialize
+  
+     
 * ****************** TPC TRACKING INIT **************************
 * tpc tracker init
   exec tpc_tracker#initialize
-
-   
+  
+* ****************** TPC EVALUATION INIT **************************
+* tpc evaluation init - doesn't work for slow sim!
+* exec tpc_evaluation#initialize
+  
+        
    
 ******************* TPC FAST SIM PROCESSING ********************
-******************* TPC TRACKER PROCESSING *********************
+* ****************** TPC CLUSTERING *****************************
+* ****************** TPC TRACKER PROCESSING *********************
    
 * read event and then process thru tpc slow sim
   do i=1,[num_events]
@@ -126,12 +131,16 @@ $STAR/pams/trg/kumac
     if STAF_STATUS(1).eq.0 goto ENDOFDATA
 *  slow simulator
     exec tpc_slow_sim#process_event [i] [adcxyzon]
+* clustering
+     exec tpc_clustering#process_event [i] 
 *  tracking
     if [tracker]=tpt then
       exec tpc_tracker#process_event_tpt [i] 
     elseif [tracker]=tte then
       exec tpc_tracker#process_event_tte [i] 
     endif
+* evaluation - doesn't work for slow sim! 
+* exec tpc_evaluation#process_event [i]
 * write table from tpc fast sim to ntuple
     if [i]=1 then
       exec write_table_to_ntuple#init_disk _
