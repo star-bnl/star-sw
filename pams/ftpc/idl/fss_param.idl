@@ -10,8 +10,8 @@
 */
 
    struct fss_param {    
-      short  random_number_gen      ;
-      short adc_threshold           ;/* D=      5   minimum ADC value */
+      long  random_number_gen      ;
+      long adc_threshold           ;/* D=      5   minimum ADC value */
       float chamber_r_min           ;/* D=      8.0  inner radius [cm]    */
       float chamber_r_max           ;/* D=     32.0  outer radius [cm]    */
       float chamber_phi_min         ;/* D=      0.0  min. phi [deg]    */ 
@@ -22,7 +22,7 @@
       float gas_attenuation         ;/* D=       0.0   attenuation [1/cm]    */
       float gas_gas_gain            ;/* D=    2000.0   gas gain         */
       float gas_avg_ion_pot         ;/* D=      26.0   ave ion pot [eV]    */
-      short readout_number_plane    ;/* D=   10        number of readout planes   */
+      long readout_number_plane    ;/* D=   10        number of readout planes   */
       float readout_pad_pitch       ;/* D=   0.20      pad pitch [cm]    */
       float readout_pad_length      ;/* D=   2.0       pad length [cm]    */
       float readout_sigma_prf       ;/* D=   600.0     pad-response-function sigma [um]    */
