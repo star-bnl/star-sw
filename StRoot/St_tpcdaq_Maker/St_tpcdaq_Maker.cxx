@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.51  2000/06/14 17:40:39  ward
+// added db stuff for gains
+//
 // Revision 1.50  2000/06/13 17:42:55  ward
 // asic and noise attached to db, but not yet gains
 //
@@ -159,6 +162,7 @@
 #include "tables/St_type_shortdata_Table.h"
 #include "tables/St_asic_thresholds_Table.h"
 #include "tables/St_noiseElim_Table.h"
+#include "tables/St_tpcGain_Table.h"
 
 ClassImp(St_tpcdaq_Maker)
 
@@ -193,16 +197,14 @@ Int_t St_tpcdaq_Maker::Init() {
 #endif
 #ifdef ASIC_THRESHOLDS
   TDataSet *tpc_calib  = GetDataBase("calibrations/tpc");
-  if (tpc_calib) {
-    St_asic_thresholds *asic = (St_asic_thresholds *) tpc_calib->Find("asic_thresholds");
-    if (asic) { 
-       St_asic_thresholds &kasic = *asic;
-       mThreshLo=kasic[0].thresh_lo;
-       mThreshHi=kasic[0].thresh_hi;
-       mNseqLo=kasic[0].n_seq_lo;
-       mNseqHi=kasic[0].n_seq_hi;
-    }
-  }
+  assert(tpc_calib);
+  St_asic_thresholds *asic = (St_asic_thresholds *) tpc_calib->Find("asic_thresholds");
+  assert(asic);
+  St_asic_thresholds &kasic = *asic;
+  mThreshLo=kasic[0].thresh_lo;
+  mThreshHi=kasic[0].thresh_hi;
+  mNseqLo=kasic[0].n_seq_lo;
+  mNseqHi=kasic[0].n_seq_hi;
 #endif
   junk=log10to8_table[0]; /* to eliminate the warnings from the compiler. */
   
@@ -421,37 +423,25 @@ int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequenc
 }
 #ifdef GAIN_CORRECTION
 #define GAIN_LINE_SIZE 1700
-void St_tpcdaq_Maker::SetGainCorrectionStuff(int sector) {
-  FILE *ff; char *cc,line[GAIN_LINE_SIZE+8]; float min=1e15,max=-1e15;
-  int minRow,minPad,maxRow,maxPad,sec,ii,jj,row,num;
+void St_tpcdaq_Maker::SetGainCorrectionStuff(int sector) { // www
+  register int row,pad;
+
+  TDataSet *tpc_calib  = GetDataBase("calibrations/tpc"); assert(tpc_calib);
+
+  St_tpcGain *gainObj = (St_tpcGain*) tpc_calib->Find("tpcGain"); assert(gainObj);
+
+  assert(gainObj->GetNRows()==24);
+
+  tpcGain_st *gains = gainObj->GetTable(); assert(gains);
+
   assert(sector>=1&&sector<=24);
-  for(ii=44;ii>=0;ii--) { for(jj=181;jj>=0;jj--) fGain[ii][jj]=1.0; }
-  ff=fopen("tpcgains.txt","r"); if(!ff) return;
-  while(fgets(line,GAIN_LINE_SIZE,ff)) {
-    assert(strlen(line)<GAIN_LINE_SIZE-5);
-    if(!strncmp(line,"Sector ",7)) { sec=atoi(line+7); continue; } if(sec!=sector) continue;
-    if(line[0]=='*') continue; if(strstr(line,"$")) continue;
-    if(!strncmp(line,"Row ",4)) {
-      strtok(line," \n"); 
-      cc=strtok(NULL," \n"); assert(cc); row=atoi(cc)-1;
-      cc=strtok(NULL," \n"); assert(cc); num=atoi(cc);
-      cc=strtok(NULL," \n"); assert(!cc);
-      continue;
+
+
+  for(row=0;row<45;row++) {
+    for(pad=0;pad<182;pad++) {
+      fGain[row][pad]=gains[sector-1].Gain[row][pad];
     }
-    assert(row>=0&&row<45);
-    assert(num<=182);
-    cc=strtok(line," \n");
-    for(ii=0;ii<num;ii++) { 
-      assert(cc); fGain[row][ii]=atof(cc); 
-      if(max<fGain[row][ii]) { max=fGain[row][ii]; maxRow=row; maxPad=ii; }
-      if(min>fGain[row][ii]) { min=fGain[row][ii]; minRow=row; minPad=ii; }
-      cc=strtok(NULL," \n"); 
-    }
-    cc=strtok(NULL," \n"); assert(!cc); /* If this assert fails, there is junk in tpcgains.txt. */
   }
-  fclose(ff);
-  PP"I have read gain corr. sector %2d, min=%4.2f (row=%02d pad=%02d), max=%4.2f (row=%02d pad=%02d)\n",
-    sector,min,minRow,minPad,max,maxRow,maxPad);
 }
 #endif
 #ifdef NOISE_ELIM
@@ -460,9 +450,9 @@ void St_tpcdaq_Maker::SetNoiseEliminationStuff() {
 
   for(sector=0;sector<24;sector++) { noiseElim[sector].npad=0; noiseElim[sector].nbin=0; }
 
-  TDataSet *tpc_calib  = GetDataBase("calibrations/tpc"); if(!tpc_calib) return;
+  TDataSet *tpc_calib  = GetDataBase("calibrations/tpc"); assert(tpc_calib);
 
-  St_noiseElim *noiseObj = (St_noiseElim*) tpc_calib->Find("noiseElim"); if(!noiseObj) return;
+  St_noiseElim *noiseObj = (St_noiseElim*) tpc_calib->Find("noiseElim"); assert(noiseObj);
 
   assert(noiseObj->GetNRows()==24);
 
