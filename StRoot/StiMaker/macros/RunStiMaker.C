@@ -165,7 +165,15 @@ void RunStiMaker(Int_t nevents=1,
      }
      iev++; goto EventLoop;
     }
-    
+
+    //Now we can do diagnostics
+    if (draw==false) {
+	cout <<"\n\n***** Processed "<<iev-1<<" events with "<<TestTree->GetEntries()<<" tracks ******\n"<<endl;
+	
+	TestTree->Draw("mcTrackPt");
+	cout <<"\tMean MC pt:\t"<<htemp->GetMean()<<"\tRMS:\t"<<htemp->GetRMS()<<endl;
+
+    }
     return;
 }
 
