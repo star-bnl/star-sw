@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.38 1999/02/02 17:33:10 fine Exp $
+// $Id: bfc.C,v 1.39 1999/02/05 16:31:41 fine Exp $
 // $Log: bfc.C,v $
+// Revision 1.39  1999/02/05 16:31:41  fine
+// StarGeom.C macro has been improved
+//
 // Revision 1.38  1999/02/02 17:33:10  fine
 // makedoc.C creates html directory itself now
 //
@@ -196,7 +199,7 @@ files require a maker to read in the data file.
   //  St_run_summary_Maker  *summary = new St_run_summary_Maker("run_summary","run/dst");
   
   // Create HTML docs of all Maker's involved
-   chain->MakeDoc();
+  //   chain->MakeDoc();
 
 /*------------------------------------- Begin_Html <font color="#800000" size="-1">
 <b>STEP 5:</b> The PrintInfo() member function of chain just prints version

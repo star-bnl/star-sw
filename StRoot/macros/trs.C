@@ -1,5 +1,8 @@
-// $Id: trs.C,v 1.3 1999/01/28 00:11:55 fisyak Exp $
+// $Id: trs.C,v 1.4 1999/02/05 16:31:43 fine Exp $
 // $Log: trs.C,v $
+// Revision 1.4  1999/02/05 16:31:43  fine
+// StarGeom.C macro has been improved
+//
 // Revision 1.3  1999/01/28 00:11:55  fisyak
 // add g2r
 //
@@ -85,7 +88,7 @@ void Load(){
   gSystem->Load("StChain");
   gSystem->Load("xdf2root");
   gSystem->Load("St_Tables");
-  gSystem->Load("libscl");
+  gSystem->Load("StSclRoot");
   gSystem->Load("St_params_Maker");
   gSystem->Load("geometry");
   gSystem->Load("g2r");
