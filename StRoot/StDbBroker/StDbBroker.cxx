@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.18 2000/04/13 20:22:57 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.19 2000/04/14 14:46:41 fine Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.19  2000/04/14 14:46:41  fine
+ * new method for Victor has been introduced
+ *
  * Revision 1.18  2000/04/13 20:22:57  porter
  * - reconnected tableDescriptor that had been broken via St_tableDescriptor.
  * - added unix timestamp as standard
@@ -84,7 +87,6 @@
 #include "TDataType.h"
 
 #include "Api.h"
-#include "tableredef.h"
 #include "StDbBroker.h"
 #include "StDbLib/StDbManager.hh"
 #include "StDbLib/StDbConfigNode.hh"

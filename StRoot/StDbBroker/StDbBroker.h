@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.13 2000/04/13 20:22:57 porter Exp $
+ * $Id: StDbBroker.h,v 1.14 2000/04/14 14:46:41 fine Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.14  2000/04/14 14:46:41  fine
+ * new method for Victor has been introduced
+ *
  * Revision 1.13  2000/04/13 20:22:57  porter
  * - reconnected tableDescriptor that had been broken via St_tableDescriptor.
  * - added unix timestamp as standard
@@ -174,7 +177,8 @@ struct oldDescriptor {
 
     void   SetDictionary(UInt_t nElements, Descriptor *D)
                                      {m_nElements=nElements; mdescriptor = D;}
-
+    void   SetDictionary(Descriptor *D)
+                                     {if (D) { mdescriptor = D;m_nElements=D->NumberOfColumns();}}
     void   SetTableName(const Char_t *table_name)
                                   {if(m_tableName) delete [] m_tableName;
                                    m_tableName=new char[strlen(table_name)+1]; 
