@@ -58,7 +58,7 @@ Table of Contents:
 <a name="#makers"></a>
 <h2> "Loggers" for STAR Makers  </h2>
 
-  With new implementation the STAR framework initiate two common loggers: <b><code>"BFC"</code></b> 
+  With the new implementation, the STAR framework initiates two common loggers: <b><code>"BFC"</code></b> 
   and <b><code>"QA"</code></b> and each STAR StMaker subclass instantiates 
   its own logger. The logger name is the subclass class name.
   This allows to set the logger list of appenders, filters and level of 
@@ -96,7 +96,7 @@ For example, to direct the message to the "error" logger on needs:
 <a name="#use"></a>
 <h2> How to use the manager </h2>
 
-To use the STAR message manager your code mas to contain the STAR message manager 
+To use the STAR message manager your code has to contain the STAR message manager 
 <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/St_base/StMessMgr.h">interface header file</a>:
 
   <b><code>
@@ -153,7 +153,7 @@ environment variable.
 <p>
 <a name="#fileExample"></a>
 For example, <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger/log4j.xml">the file <b><code>"log4j.xml</code></b></a> 
-defines the "Console output" for entire STAR production chain and the <b><code>"dDebug"</code></b> level of the messages.
+defines the "Console output" for entire STAR production chain and the <b><code>"Debug"</code></b> level of the messages.
 
 <p>
 
@@ -285,20 +285,23 @@ with
 <a name="#printCprintf"></a>
 <h3> "C"output subroutines</h3>
 
-If you use the C-language output subroutines like <b><code>"printf"</code></b> or <b><code>"fprintf"</code></b>, then to simplify the transition
-one advises the <a href="http://root.cern.ch/root/htmldoc/TString.html#TString:Form">"Form"</a> ROOT method.
-Add the appropriated  logger macros followed by the former <b><code>printf</code></b> statement followed by <b><code>"endm"</code></b> object and 
-semicolon and replace the name of the C subrotuine (for example printf) with the Form method.
+One advises the <a href="http://root.cern.ch/root/htmldoc/TString.html#TString:Form">"Form"</a> ROOT method 
+simplify the transition the programs those contain the C-language output subroutines like <b><code>"printf"</code></b> or <b><code>"fprintf"</code></b>.
+
+You may add the appropriated  <a href="#macros">logger macros</a> followed by the former <b><code>printf</code></b> statement 
+followed by <b><code>"endm"</code></b> object and 
+semicolon and replace the name of the C subrotuine (for example printf) 
+with the Form method.
 Don't forget to remove the end-of-line symbol ( <b><code>"\n"</code></b>
 ) from the format string.
-
-For example:
+<p>
+For example, to enable "logger", the line
    <b><code>
    <pre>
-  printf(" %d pre and %d post crossing data available\n",numberOfPreXing(),numberOfPostXing());
+   printf(" %d pre and %d post crossing data available\n",numberOfPreXing(),numberOfPostXing());
    </pre>
    </code></b>
-do
+may be replaced with
    <b><code>
    <pre>
   LOG_DEBUG <<
