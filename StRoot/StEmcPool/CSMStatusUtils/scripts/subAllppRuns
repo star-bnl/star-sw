@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# #############################################################################
+# loop over the list of files
+rm shortlists*
+filelist=`cat $1`
+ngflfiles=0;
+for line in $filelist ; do 
+
+  ngflfiles=`expr $ngflfiles + 1`
+  niters=`expr $ngflfiles / 20 + 1`
+  echo "$line" >> shortlists$niters
+done
+#next line just makes the code below pretty - it does not add an iteration!
+  niters=`expr $niters + 1`
+
+  outDir=/star/data05/scratch/relyea/bemc/log
+  queue=star_cas_big                 
+for (( iteration = 1 ; iteration < $niters ; iteration++ )) ; do
+  log=log.$iteration
+  blog=blog.$iteration
+  rm $outDir/$log.gz
+  rm $outDir/$blog
+  bsub -R "linux" -q $queue  -J relyea$run -o $outDir/$blog   << EOF
+    ./scripts/ppBemcSub shortlists$iteration
+EOF
+done
