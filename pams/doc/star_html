@@ -3,125 +3,145 @@
 # Module description
 #
 # Revision 1.1  1998/04/19 21:00:35  fisyak
-# Add cross reference module documentation
+# Add cross reference moIDdule documentation
 #
-echo "<HTML>"
-echo "<HEAD>"
-echo "<TITLE>List of STAR modules and tables</TITLE>"
-echo "</HEAD>"
-echo "<BODY>"
-echo "<H2>List of STAR pams</H2>"
-echo "<hr>"
-echo "<h3>Domains</h3>"
+set caselist = "index module table"
+set all_idl = `find $STAR/pams -name "*.idl"`
+set all_idm = `egrep -l 'interface' $all_idl`
+set all_idt = `egrep -l 'struct '   $all_idl`
+foreach case ($caselist)
+  switch ($case)
+	case index:
+rm index.html; touch index.html
+echo "<HTML>"                                               >> index.html
+echo "<HEAD>"                                               >> index.html
+echo "<TITLE>List of STAR modules and tables</TITLE>"       >> index.html
+echo "</HEAD>"                                              >> index.html
+echo "<BODY>"                                               >> index.html
+echo "<H2>List of STAR pams</H2>"                           >> index.html
+echo "<hr>"                                                 >> index.html
+echo "<h3>Domains</h3>"                                     >> index.html
   set all_dom = `ls ${STAR}/pams | sed -e 's/CVS//g' -e 's/doc//g' -e 's/params//g'`
   foreach dom ($all_dom)
-     echo '<a href="#'$dom'">'$dom'</a> &nbsp;'
+     echo '<a href="#'$dom'">'$dom'</a> &nbsp;'             >> index.html
   end
-echo '<hr>'
+echo '<hr>'                                                 >> index.html
 # list of all modules
  foreach domain ($all_dom)
    set dom_idl = `find $STAR/pams/$domain -name "*.idl"`
    set dom_idm = `egrep -l 'interface' $dom_idl`
    set dom_idt = `egrep -l 'struct '   $dom_idl`
-   echo '<H3>Domain '$domain
+   echo '<H3>Domain '$domain                                >> index.html
    set count = 0
    set DOC = $STAR/pams/$domain/doc
    if (-r $DOC) then
-     set hid = `echo $DOC | sed -e 's/\/afs\/rhic\/star\/packages\//http:\/\/www.rhic.bnl.gov\/afs\/rhic\/star\/doc\/www\/packages_l\//'`
-     echo ' with <a href="'$hid'">documentation</a>'
+     set hid = `echo $DOC | sed -e 's/\/afs\/rhic\/star\/packages\//http:\/\/www.rhic.bnl.gov\/afs\/rhic\/star\/doc\/www\/packages_l\//'`                               >> index.html
+     echo ' with <a href="'$hid'">documentation</a>'        >> index.html
    endif
-   echo '</h3>'
+   echo '</h3>'                                             >> index.html
    set README = $STAR/pams/$domain/README 
    if (-r $README) then
-     echo "<pre>"
-     cat  $README | sed -e '/^$/d'
-     echo '</pre>'
+     echo "<pre>"                                           >> index.html
+     cat  $README | sed -e '/^$/d'                          >> index.html
+     echo '</pre>'                                          >> index.html
    endif
 #list of all tables in domain
-   echo "<h4>Domain's tables</h4>"
+   echo "<h4>Domain's tables</h4>"                          >> index.html
    foreach idl ($dom_idt)
-      set id = `basename $idl .idl`
-      echo '<a href="#'$id'_tab"><strong>'$id'</strong></a>'
+      set idd = `basename ${idl} .idl`
+      echo '<a href="table.html#'$idd'_tab"><strong>'$idd'</strong></a>'>> index.html
    end
    set package = ""
    foreach idlm ($dom_idm) 
-     set dir = `dirname $idlm`
-     if ($package == "") echo "<h4>Domain's packages<h4>"
+     set dir = `dirname ${idlm}`
+     if ($package == "") echo "<h4>Domain's packages<h4>"   >> index.html
      if ($dir != $package) then 
        if (-r $dir/README) then
-         echo '<pre>'
-         cat  $dir/README | sed -e '/^$/d'
-         echo '</pre>'
+         echo '<pre>'                                       >> index.html
+         cat  $dir/README | sed -e '/^$/d'                  >> index.html
+         echo '</pre>'                                      >> index.html
        endif
        if (-r $dir/doc) then
-        set hid = `echo $dir/doc | sed -e 's/\/afs\/rhic\/star\/packages\//http:\/\/www.rhic.bnl.gov\/afs\/rhic\/star\/doc\/www\/packages_l\//'`
-        echo '<a href="'$hid'">Documentation</a> for '
+        set hid = `echo $dir/doc | sed -e 's/\/afs\/rhic\/star\/packages\//http:\/\/www.rhic.bnl.gov\/afs\/rhic\/star\/doc\/www\/packages_l\//'`                        >> index.html
+        echo '<a href="'$hid'">Documentation</a> for '      >> index.html
        endif
-#      echo '<br>'
+#      echo '<br>'                                          >> index.html
 #     else
-#       echo '<br>'
-#       echo 'Package '$dir':'
+#       echo '<br>'                                         >> index.html
+#       echo 'Package '$dir':'                              >> index.html
      endif
      set package = $dir
-     set id = `basename $idlm .idl`
-     echo '<a href="#'$id'_mod"><strong>'$id'</strong></a>&nbsp;'
+     set idd = `basename ${idlm} .idl`
+     echo '<a href="module.html#'$idd'_mod"><strong>'$idd'</strong></a>&nbsp;'>> index.html
    end
  end
-echo "<hr>"
-echo "<H2>List of STAR tables</H2>"
-echo "<hr>"
-echo "<hr>"
-set count = 0
-set domain = ""
-set all_idl = `find $STAR/pams -name "*.idl"`
-set all_idm = `egrep -l 'interface' $all_idl`
-set all_idt = `egrep -l 'struct '   $all_idl`
- foreach idl ($all_idt) 
-   set dom = `echo $idl | gawk -F / '{for (i=1;i<=NF;i++) {if(index($i,"pams")>0) {l=i+1; print $l;break;}}};'`
-   if ($dom != $domain) then
-      set domain = $dom;
-      echo '<H3><a name="'$domain'">Domain '$domain'</a></H3>'
-      echo "<hr>"
-      set count = 0
-   endif
+ echo "<hr>"       >> index.html
+ echo '<hr>'                                               >> index.html
+#echo '<address><a href="mailto:fisyak@sol.star.bnl.gov">Yuri Fisyak</a></address>' >> index.html
+ echo "<\!-- Created:`date` -->"                            >> index.html
+ echo '<\!-- hhmts start -->'                               >> index.html
+ echo '<\!-- hhmts end -->'                                 >> index.html
+ echo '</body>'                                            >> index.html
+ echo '</html>'                                            >> index.html
+	breaksw:
+	case module:
+#========================= module =================
+rm module.html; touch module.html;
 
-   set id = `basename $idl .idl`
-   echo '<a href="#'$id'_tab"><strong>'$id'</strong></a> &nbsp; &nbsp; &nbsp;'
-   set count = `expr $count + 1`;
-#   if ($count >= 5) then
-#       echo "<br>"
-#       set count = 0;
-#   endif
- end
-echo "<H2>List of STAR pams</H2>"
-echo "<hr>"
-echo "<ol>"
+echo "<HTML>"                                               >> module.html
+echo "<HEAD>"                                               >> module.html
+echo "<TITLE>List of STAR modules and tables</TITLE>"       >> module.html
+echo "</HEAD>"                                              >> module.html
+echo "<BODY>"                                               >> module.html
+echo "<H2>List of STAR pams</H2>"       >> module.html
+echo "<hr>"       >> module.html
+echo "<ol>"       >> module.html
  foreach idl ($all_idm) 
-   set id = `basename $idl .idl`
-   set hid = `echo $idl | sed -e 's/\/afs\/rhic\/star\/packages\//http:\/\/www.rhic.bnl.gov\/afs\/rhic\/star\/doc\/www\/packages_l\//'`
-   echo '<li>Module <a name="'$id'_mod"><strong>'$id'</strong></a> defined in <a href="'$hid'">'$idl'</a>'
-echo '<BR>'
-echo '<TABLE CELLPADDING=3 BORDER="1">'
-echo '<TR><TD>Module</TD><TD>Input tables</TD><TD>Output tables</TD></TR>'
-   ./module_html   $idl
-echo '</TABLE>'                                                                                                 
+   set id = `basename ${idl} .idl`
+   set hid = `echo ${idl} | sed -e 's/\/afs\/rhic\/star\/packages\//http:\/\/www.rhic.bnl.gov\/afs\/rhic\/star\/doc\/www\/packages_l\//'`       >> module.html
+   echo '<li><a name="'$id'_mod">Module <a href="'$hid'"><strong>'$id'</strong></a>' >> module.html
+echo '<BR>'       >> module.html
+echo '<TABLE CELLPADDING=3 BORDER="1">'       >> module.html
+echo '<TR><TD>Module</TD><TD>Input tables</TD><TD>Output tables</TD></TR>'       >> module.html
+   ./module_html   ${idl}                     >> module.html
+echo '</TABLE>'                               >> module.html
  end
-echo "</ol>"
-echo "<hr>"
-echo "<H2>List of STAR tables</H2>"
-echo "<hr>"
-echo "<ol>"
+echo "</ol>"       >> module.html
+echo "<hr>"       >> module.html
+#echo '<address><a href="mailto:fisyak@sol.star.bnl.gov">Yuri Fisyak</a></address>' >> module.html
+ echo '<\!-- Created:`date` -->'                            >> module.html
+ echo '<\!-- hhmts start -->'                               >> module.html
+ echo '<\!-- hhmts end -->'                                 >> module.html
+ echo '</body>'                                            >> module.html
+ echo '</html>'                                            >> module.html
+	breaksw
+	case table:
+# ------------- table -----------------------------
+rm table.html; touch table.html;
+echo "<HTML>"                                               >> table.html
+echo "<HEAD>"                                               >> table.html
+echo "<TITLE>List of STAR modules and tables</TITLE>"       >> table.html
+echo "</HEAD>"                                              >> table.html
+echo "<BODY>"                                               >> table.html
+
+echo "<H2>List of STAR tables</H2>"       >> table.html
+echo "<hr>"       >> table.html
+echo "<ol>"       >> table.html
  foreach idl ($all_idt) 
-   set id = `basename $idl .idl`
-   set hid = `echo $idl | sed -e 's/\/afs\/rhic\/star\/packages\//http:\/\/www.rhic.bnl.gov\/afs\/rhic\/star\/doc\/www\/packages_l\//'`
-   echo '<li> Table <a name="'$id'_tab"><strong>'$id'</strong></a> is defined in <a href="'$hid'">'$idl'</a> and used by the following modules:'
+   set id = `basename ${idl} .idl`
+   set hid = `echo ${idl} | sed -e 's/\/afs\/rhic\/star\/packages\//http:\/\/www.rhic.bnl.gov\/afs\/rhic\/star\/doc\/www\/packages_l\//'` 
+   echo '<li> <a name="'$id'_tab"></a>Table <a href="'$hid'"><strong>'$id'</strong></a> is used by the following modules:' >> table.html
    set idlm_idl = `egrep -l ${id}.idl $all_idm`
-   foreach idlm ($idlm_idl)
-     set did = `basename $idlm .idl`
-     echo '<a href="#'$did'_mod">'$did'</a> &nbsp;&nbsp;&nbsp;&nbsp;'
+   foreach idlm (${idlm_idl})
+     set did = `basename ${idlm} .idl`
+     echo '<a href="module.html#'$did'_mod">'$did'</a> &nbsp;&nbsp;&nbsp;&nbsp;'       >> table.html
    end
  end
-echo "</ol>"
-echo "<hr>"
-echo "</BODY>"
-echo "</HTML>"
+echo "</ol>"       >> table.html
+echo "<hr>"       >> table.html
+echo "</BODY>"       >> table.html
+echo "</HTML>"       >> table.html
+	default:
+endsw
+end
+
