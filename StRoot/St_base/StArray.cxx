@@ -1,5 +1,8 @@
-// $Id: StArray.cxx,v 1.17 1999/11/15 23:09:10 perev Exp $
+// $Id: StArray.cxx,v 1.18 1999/11/17 14:22:09 perev Exp $
 // $Log: StArray.cxx,v $
+// Revision 1.18  1999/11/17 14:22:09  perev
+// bug in dtor fix
+//
 // Revision 1.17  1999/11/15 23:09:10  perev
 // Streamer for StrArray and auto remove
 //
@@ -541,12 +544,12 @@ void StStrArray::Streamer(TBuffer &R__b)
       Version_t R__v = R__b.ReadVersion(); if (R__v) { }
       TString name; name.Streamer(R__b);SetName(name);
       name.Streamer(R__b);SetIDName(name);
-      StTObjArray::Streamer(R__b);
+      StObjArray::Streamer(R__b);
    } else {
       R__b.WriteVersion(StStrArray::IsA());
       fName.Streamer(R__b);
       fIDName.Streamer(R__b);
-      StTObjArray::Streamer(R__b);
+      StObjArray::Streamer(R__b);
    }
 
 }
