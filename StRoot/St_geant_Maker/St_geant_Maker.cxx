@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.80 2003/04/30 20:39:19 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.81 2003/05/01 20:48:56 jeromel Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.81  2003/05/01 20:48:56  jeromel
+// This one is ugly ... But needed for root transition again.
+//
 // Revision 1.80  2003/04/30 20:39:19  perev
 // Warnings cleanup. Modified lines marked VP
 //
@@ -1149,7 +1152,13 @@ void St_geant_Maker::RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec,
 
   // Use St_Table::New(...)  when it is available as follows:
   St_Table *table =  St_Table::New(t.Data(),t.Data(),iq,k);
+#ifndef __CINT__
+#if ROOT_VERSION_CODE >= ROOT_VERSION(3,05,04)
   if (table) {fgGeom->Add(table); table->SetBit(TTable::kIsNotOwn);}
+#else
+  if (table) {fgGeom->Add(table); table->SetBit(kIsNotOwn);}
+#endif
+#endif
   else       cout << "Dictionary for table :" << t.Data() 
                   << " has not been defined yet. Skip it" 
                   << endl;
