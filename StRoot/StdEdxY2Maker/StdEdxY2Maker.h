@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.h,v 1.4 2003/09/10 19:47:53 perev Exp $
+// $Id: StdEdxY2Maker.h,v 1.5 2003/10/21 15:18:48 fisyak Exp $
 #ifndef STAR_StdEdxY2Maker
 #define STAR_StdEdxY2Maker
 
@@ -26,7 +26,7 @@ class StGlobalTrack;
 class St_trigDetSums;
 class trigDetSums_st;
 class St_tpcGainMonitor;
- 
+class TMinuit; 
 class StdEdxY2Maker : public StMaker {
  private:
   Bichsel             *m_Bichsel;       //!
@@ -36,9 +36,10 @@ class StdEdxY2Maker : public StMaker {
   St_tpcCorrection    *m_AdcCorrection; //!
   St_tpcCorrection    *m_zCorrection;   //!
   St_tpcCorrection    *m_dXCorrection;  //!
+  St_tpcCorrection    *m_TpcdEdxCor;    //!
   St_tpcCorrection    *m_TpcLengthCorrection;  //!
   St_tpcGas           *m_tpcGas;        //!
-  St_tpcPressure      *m_tpcPressure;   //!
+  St_tpcCorrection    *m_tpcPressure;   //!
   St_TpcSecRowA       *m_TpcSecRowA;    //!
   St_trigDetSums      *m_trigDetSums;   //!
   trigDetSums_st      *m_trig;          //!
@@ -47,8 +48,10 @@ class StdEdxY2Maker : public StMaker {
   StThreeVectorD      *mNormal[24];     //!
   StThreeVectorD      *mRowPosition[24][45][3]; //!
   St_tpcGainMonitor   *m_tpcGainMonitor;//!
-  Bool_t               m_OldCLusterFinder;//!
+  Int_t                m_ClusterFinder; //! old == 0; new != 0
   Int_t                m_Calibration;   //!
+  Int_t                m_DoNotCorrectdEdx; //!
+  TMinuit             *m_Minuit;        //!
  public: 
   StdEdxY2Maker(const char *name="dEdxY2");
   virtual       ~StdEdxY2Maker();
@@ -65,7 +68,7 @@ class StdEdxY2Maker : public StMaker {
   void    PrintdEdx(Int_t iop = 0);
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.4 2003/09/10 19:47:53 perev Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.5 2003/10/21 15:18:48 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
