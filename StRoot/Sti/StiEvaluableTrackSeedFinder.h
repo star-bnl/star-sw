@@ -35,6 +35,12 @@ using std::map;
 #include <string>
 using std::string;
 
+#include <utility>
+using std::pair;
+
+#include "StAssociationMaker/StTrackPairInfo.hh"
+#include "StAssociationMaker/StAssociationMaker.h"
+
 #include "SubjectObserver.h"
 #include "StiSeedFinder.h"
 #include "StiObjectFactoryInterface.h"

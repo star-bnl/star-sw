@@ -8,10 +8,11 @@
 
 #include <iostream>
 #include <string>
-using std::string;
+using namespace std;
+//using std::string;
 
-class StiMaterial{
-    
+class StiMaterial
+{    
 public:
     
     // con/destructor

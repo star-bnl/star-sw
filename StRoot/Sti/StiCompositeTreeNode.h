@@ -139,31 +139,33 @@ public:
     typedef vector<StiCompositeTreeNode *> StiCompositeTreeNodeVector;
 
     ///Provide the iterator into the parent that can be dereferenced to get this node
-    vec_type::iterator whereInParent();
+    vec_type::iterator whereInParent() {
+	return (mparent) ? (mparent->begin()+mkey.index) : mVec.end();
+    }
 
     ///Provide random access iterator to the beginning of the vector of children
-    vec_type::iterator begin();
+    vec_type::iterator begin() {return mVec.begin();}
     
     ///Provide random access iterator to the end of the vector of children.
-    vec_type::iterator end();
+    vec_type::iterator end() {return mVec.end();}
 
     ///Provide const_iterator to the beginning of the vector of children
-    vec_type::const_iterator begin() const;
+    vec_type::const_iterator begin() const {return mVec.begin();}
     
     ///Provied const_iterator to the end of the vector of children.
-    vec_type::const_iterator end() const;
+    vec_type::const_iterator end() const {return mVec.end();}
 
     ///Provide reverse iterator to the beginning of the vector of children.
-    vec_type::reverse_iterator rbegin();
+    vec_type::reverse_iterator rbegin() {return mVec.rbegin();}
     
     ///Provide reverse iterator to the end of the vector of children.
-    vec_type::reverse_iterator rend();
+    vec_type::reverse_iterator rend() {return mVec.rend();}
 
     ///Provide const_reverse_iterator tot he beginning of the vector of children.
-    vec_type::const_reverse_iterator rbegin() const;
+    vec_type::const_reverse_iterator rbegin() const {return mVec.rbegin();}
     
     ///Provide const_reverse_iterator to the end of the vector of children.
-    vec_type::const_reverse_iterator rend() const;
+    vec_type::const_reverse_iterator rend() const {return mVec.rend();}
     
 private:
 
@@ -299,76 +301,78 @@ inline void StiCompositeTreeNode<T>::setParent(StiCompositeTreeNode* val)
     return;
 }
 
-/*! \warning This iterator makes no sense for nodes with no parent.  In 
+// \warning This iterator makes no sense for nodes with no parent.  In
+
+/* \warning This iterator makes no sense for nodes with no parent.  In 
   that case whereInParent() returns end().  Therefore, a safe call to whereInParent() 
   would be as follows: <code> \n
   StiCompositeTreeNode<T>::vec_type::iterator where = node->whereInParent(); \n
   if (where!=node->end()) {\\you're ok \n
   }
   <\code> 
+  template <class T>
+  StiCompositeTreeNode<T>::vec_type::iterator //return type
+  StiCompositeTreeNode<T>::whereInParent()
+  {
+  return (mparent) ? (mparent->begin()+mkey.index) : mVec.end();
+  }
+  
+  template <class T>
+  StiCompositeTreeNode<T>::vec_type::iterator //return type
+  StiCompositeTreeNode<T>::begin()
+  {
+  return mVec.begin();
+  }
+  
+  template <class T>
+  StiCompositeTreeNode<T>::vec_type::iterator //return type
+  StiCompositeTreeNode<T>::end()
+  {
+  return mVec.end();
+  }
+  
+  template <class T>
+  StiCompositeTreeNode<T>::vec_type::const_iterator //return type
+  StiCompositeTreeNode<T>::begin() const
+  {
+  return mVec.begin();
+  }
+
+  template <class T>
+  StiCompositeTreeNode<T>::vec_type::const_iterator //return type
+  StiCompositeTreeNode<T>::end() const
+  {
+  return mVec.end();
+  }
+  
+  template <class T>
+  StiCompositeTreeNode<T>::vec_type::reverse_iterator //return type
+  StiCompositeTreeNode<T>::rbegin()
+  {
+  return mVec.rbegin();
+  }
+
+  template <class T>
+  StiCompositeTreeNode<T>::vec_type::reverse_iterator //return type
+  StiCompositeTreeNode<T>::rend()
+  {
+  return mVec.rend();
+  }
+  
+  template <class T>
+  StiCompositeTreeNode<T>::vec_type::const_reverse_iterator //return type
+  StiCompositeTreeNode<T>::rbegin() const
+  {
+  return mVec.rbegin();
+  }
+  
+  template <class T>
+  StiCompositeTreeNode<T>::vec_type::const_reverse_iterator //return type
+  StiCompositeTreeNode<T>::rend() const
+  {
+  return mVec.rend();
+  }
 */
-template <class T>
-StiCompositeTreeNode<T>::vec_type::iterator //return type
-StiCompositeTreeNode<T>::whereInParent()
-{
-	return (mparent) ? (mparent->begin()+mkey.index) : mVec.end();
-}
-
-template <class T>
-StiCompositeTreeNode<T>::vec_type::iterator //return type
-StiCompositeTreeNode<T>::begin()
-{
-    return mVec.begin();
-}
-
-template <class T>
-StiCompositeTreeNode<T>::vec_type::iterator //return type
-StiCompositeTreeNode<T>::end()
-{
-    return mVec.end();
-}
-
-template <class T>
-StiCompositeTreeNode<T>::vec_type::const_iterator //return type
-StiCompositeTreeNode<T>::begin() const
-{
-    return mVec.begin();
-}
-
-template <class T>
-StiCompositeTreeNode<T>::vec_type::const_iterator //return type
-StiCompositeTreeNode<T>::end() const
-{
-    return mVec.end();
-}
-
-template <class T>
-StiCompositeTreeNode<T>::vec_type::reverse_iterator //return type
-StiCompositeTreeNode<T>::rbegin()
-{
-    return mVec.rbegin();
-}
-
-template <class T>
-StiCompositeTreeNode<T>::vec_type::reverse_iterator //return type
-StiCompositeTreeNode<T>::rend()
-{
-    return mVec.rend();
-}
-
-template <class T>
-StiCompositeTreeNode<T>::vec_type::const_reverse_iterator //return type
-StiCompositeTreeNode<T>::rbegin() const
-{
-    return mVec.rbegin();
-}
-
-template <class T>
-StiCompositeTreeNode<T>::vec_type::const_reverse_iterator //return type
-StiCompositeTreeNode<T>::rend() const
-{
-    return mVec.rend();
-}
 
 //For now, include some typdefs that will make for easy user includes
 #include "StiDetector.h"

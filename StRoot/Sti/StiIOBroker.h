@@ -10,6 +10,10 @@ using std::vector;
 #include <algorithm>
 using std::copy;
 using std::ostream_iterator;
+#include <iostream>
+using std::cout;
+using std::endl;
+using std::ostream;
 
 #include "SubjectObserver.h"
 

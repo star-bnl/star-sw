@@ -6,10 +6,12 @@
 #include <iostream>
 #include <algorithm>
 using std::for_each;
+using std::equal_range;
 
 #include <math.h>
 #include <map>
 #include <utility>
+using std::pair;
 
 //SCL
 #include "StGetConfigValue.hh"
@@ -18,8 +20,8 @@ using std::for_each;
 #include "StMcEventTypes.hh"
 
 //Association
-#include "StAssociationMaker/StTrackPairInfo.hh"
-#include "StAssociationMaker/StAssociationMaker.h"
+//#include "StAssociationMaker/StTrackPairInfo.hh"
+//#include "StAssociationMaker/StAssociationMaker.h"
 
 //Sti
 #include "StiIOBroker.h"
@@ -165,10 +167,25 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
     //mMessenger <<"New Track"<<endl;
     mBestCommon.reset();
     mBestCommon.setLowerBound(mLowerBound);
-    
-    BestCommonHits theBest = for_each(range.first, range.second, mBestCommon );
-    
-    StTrackPairInfo* bestPair = theBest.pair();
+
+    //Temp (MLM) replace with a loop
+    // BestCommonHits theBest = for_each(range.first, range.second, mBestCommon );    
+    // StTrackPairInfo* bestPair = theBest.pair();
+
+    //Start kludge here
+    mcTrackMapType::iterator first = range.first;
+    mcTrackMapType::iterator second = range.second;    
+    mcTrackMapType::iterator end = second++;    
+    StTrackPairInfo* bestPair=0;
+    unsigned int mostCommon=mLowerBound;
+    for (mcTrackMapType::iterator it=first; it!=end; ++it) {	
+	StTrackPairInfo* info = (*it).second;
+	if (info->commonTpcHits()>mostCommon) { //update, remember
+	    mostCommon = info->commonTpcHits();
+	    bestPair = info;
+	}
+    }
+    //End kludge here;
     
     if (!bestPair) {
 	//These return values are now caught before exiting the seedFinder control

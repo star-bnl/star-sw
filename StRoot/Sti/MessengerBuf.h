@@ -8,10 +8,10 @@
 
 #include <strstream.h>
 
-//! #ifdef __CINT__
-//!  class streamsize;
-//!  #endif
-//!
+#ifdef __CINT__
+class streambuf;
+class MessengerBuf;
+#else
 
 class MessengerBuf: public streambuf{
 public:
@@ -42,4 +42,7 @@ protected:
     
 };
 
-#endif
+#endif // on cint
+
+#endif // on MessengerBuf_H
+
