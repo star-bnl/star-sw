@@ -1,10 +1,13 @@
 /***************************************************************************
-* $Id: FPD_Reader.cxx,v 1.2 2003/05/22 20:48:17 perev Exp $
+* $Id: FPD_Reader.cxx,v 1.3 2003/10/02 22:33:35 jeromel Exp $
 * Author: Akio Ogawa
 ***************************************************************************
 * Description:  FPD Event Reader
 ***************************************************************************
 * $Log: FPD_Reader.cxx,v $
+* Revision 1.3  2003/10/02 22:33:35  jeromel
+* Cosmetic change
+*
 * Revision 1.2  2003/05/22 20:48:17  perev
 * method added to remove unprintef chars
 *
@@ -56,7 +59,7 @@ void FPD_Reader::ProcessEvent(const Bank_FPDP * FpdPTR) {
     FpdTdcD = (FPDDATA *) ((unsigned long *)FpdPTR + FpdPTR->TdcPTR.offset);
     //FpdTdcD->print();
     FpdTdcD->swap();
-    cout << "FPD_Reader(FPDTDCD): Got a bank named " << FpdTdcD->bankTypeString() << endl;;
+    cout << "FPD_Reader(FPDTDCD): Got a bank named " << FpdTdcD->bankTypeString() << endl;
     if (FpdTdcD->header.Token!=Token){
       cout << "FPD_Reader: Token mismatch FPDP "<< Token 
 	   << " FPDTDCD " << FpdTdcD->header.Token << endl;
