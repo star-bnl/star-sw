@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.118 1999/09/30 21:34:49 fisyak Exp $
+# $Id: MakeDll.mk,v 1.119 1999/10/01 01:08:47 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.119  1999/10/01 01:08:47  fisyak
+# bug fix in package name
+#
 # Revision 1.118  1999/09/30 21:34:49  fisyak
 # Reduce include Path
 #
@@ -298,7 +301,7 @@ SRC_DIRS  += $(ALL_DIRS)
 endif
 
 # 	Define internal and external includes dirs
-INC_NAMES := include include/$(PKG)
+INC_NAMES := include include/$(PKGNAME)
 INC_DIRS  := $(addprefix $(ROOT_DIR)/,$(INC_NAMES)) $(SRC_DIR)
 ifneq ($(ROOT_DIR),$(STAR))
 INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES)))) $(subst $(ROOT_DIR),$(STAR),$(SRC_DIR))
