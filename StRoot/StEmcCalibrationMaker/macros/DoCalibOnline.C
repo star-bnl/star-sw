@@ -58,6 +58,8 @@ void DoCalibOnline(char* file = "", Int_t nevents = 0)
     
     // create calibraton maker     
     StEmcCalibrationMaker *calib = new StEmcCalibrationMaker(); 
+    StSmdPedMaker *smdPed = new StSmdPedMaker();
+    
 ///////////////////////////////////////////////////////////////
     
 // now configure the options on calibration maker
@@ -76,21 +78,33 @@ void DoCalibOnline(char* file = "", Int_t nevents = 0)
               
 		calib->SetDoUseL3(kTRUE);           
     calib->SetSubPedestal(kTRUE);
+    calib->SetPedInterval(6); //in hours
     calib->SetWaitForPed(kTRUE);        
     calib->SetUseLocalPed(kTRUE);       
-    calib->SetSavePedToDB(kTRUE);       
-    calib->SetSaveCalibToDB(kFALSE);     
     calib->SetGainMode(0);           
 		calib->SetDetNum(0);                        
 		calib->SetZVertexMax(40);       
     calib->SetNEtaBins(5);           
     calib->SetEtaBinSize(4);         
+    
+    // options for SMD pedestal calculator
+    if(smdPed)
+    {
+      smdPed->SetPedInterval(6); //in hours
+      smdPed->SetMinEvents(10000);
+    }
+    // options fto save information on OFFLINE DATABASE
+    
+    calib->SetSavePedToDB(kTRUE);
+    calib->SetSaveCalibToDB(kFALSE);
+    
+    if(smdPed) smdPed->SetSavePedToDB(kTRUE);
 
     // initializing chain
     Int_t initStat = chain->Init(); 
     if (initStat) chain->Fatal(initStat, "during Init()");
     
-    // specific paremeters should be done here
+    // specific paremeters should be done here after chain is initialized
     StEmcPedSpectra    *ped   = NULL;
     StEmcEqualSpectra  *equal = NULL;
     StEmcEqualSpectra  *gain  = NULL;
@@ -118,6 +132,7 @@ void DoCalibOnline(char* file = "", Int_t nevents = 0)
       mip->SetMaxMultiplicity(1000);
       mip->SetMinMomentum(1.2);
     }
+    
 ///////////////////////////////////////////////////////////////
     
     int istat=0,iev=1;
