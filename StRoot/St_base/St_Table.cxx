@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.45 1999/02/22 23:54:37 fine Exp $ 
+// $Id: St_Table.cxx,v 1.46 1999/02/24 17:10:57 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.46  1999/02/24 17:10:57  fine
+// St_Table  New and Purge method have been introdiced, some clean up for St_module as well
+//
 // Revision 1.45  1999/02/22 23:54:37  fine
 // St_Table::New() - method has been prepared but not activated yet
 //
@@ -347,16 +350,28 @@ void St_Table::CopySet(St_Table &array)
 }
 
 //______________________________________________________________________________
-void *St_Table::ReAllocate(Int_t newsize)
+void *St_Table::ReAllocate()
 {
-  if (s_Size && newsize > fN) {
-   void *arr =  realloc(s_Table,*s_Size*newsize);
-   SetfN(newsize);
-   s_Table = (char *)arr;
- }  
- return (void *)s_Table;
+   ReAlloc(GetNRows()+1);
+   return (void *)s_Table;
 }
 
+//______________________________________________________________________________
+void *St_Table::ReAllocate(Int_t newsize)
+{
+  if (newsize > fN) ReAlloc(newsize);
+  return (void *)s_Table;
+}
+
+//______________________________________________________________________________
+void St_Table::ReAlloc(Int_t newsize)
+{
+  if (!TestBit(kIsNotOwn) && s_Size && newsize > 0) {
+    void *arr =  realloc(s_Table,*s_Size*newsize);
+    SetfN(newsize);
+    s_Table = (char *)arr;
+  }
+}
 //______________________________________________________________________________
 Char_t *St_Table::Create()
 {
@@ -498,10 +513,8 @@ void St_Table::ls(Option_t *option)
    DecreaseDirLevel();
 }
 
-#if 0
-
 //______________________________________________________________________________
-static St_Table *St_Table::New(const Char_t *name, const Char_t *type, void *array, UInt_t size)
+St_Table *St_Table::New(const Char_t *name, const Char_t *type, void *array, UInt_t size)
 {
   // This static method creates a new St_Table object if provided 
 
@@ -532,7 +545,6 @@ static St_Table *St_Table::New(const Char_t *name, const Char_t *type, void *arr
   return table; 
 }
 
-#endif
 //______________________________________________________________________________
 Char_t *St_Table::Print(Char_t *strbuf,Int_t lenbuf) const 
 {
@@ -826,7 +838,12 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *, const 
   cout << "---------------------------------------------------------------------------------------" << endl;
   return 0;
  }
-
+//______________________________________________________________________________
+Int_t St_Table::Purge(Option_t *opt)
+{
+  ReAllocate();
+  return St_DataSet::Purge(opt);
+}
 //______________________________________________________________________________
 static void ClosePrimitive(ofstream &out)
 {

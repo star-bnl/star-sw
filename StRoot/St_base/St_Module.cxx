@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Module.cxx,v 1.5 1998/11/25 21:58:33 fisyak Exp $
+// $Id: St_Module.cxx,v 1.6 1999/02/24 17:10:57 fine Exp $
 // $Log: St_Module.cxx,v $
+// Revision 1.6  1999/02/24 17:10:57  fine
+// St_Table  New and Purge method have been introdiced, some clean up for St_module as well
+//
 // Revision 1.5  1998/11/25 21:58:33  fisyak
 // Cleanup
 //
@@ -43,16 +46,16 @@ St_Module::St_Module()
 {  // Default ctor;
 }
 //______________________________________________________________________________
-St_Module::St_Module(char *name,void  *f1,void  *f2,void  *f3,void  *f4
-                            ,void  *f5,void  *f6,void  *f7,void  *f8
-                            ,void  *f9,void *f10,void *f11,void *f12
-                            ,void *f13,void *f14,void *f15,void *f16
-                            ,void *f17,void *f18,void *f19,void *f20
-                            ,void *f21,void *f22,void *f23,void *f24
-                            ,void *f25,void *f26,void *f27,void *f28
-                            ,void *f29,void *f30,void *f31,void *f32
-                            ,void *f33,void *f34,void *f35,void *f36
-                            ,void *f37,void *f38
+St_Module::St_Module(char *, void *,void *,void *,void *
+                            ,void *,void *,void *,void *
+                            ,void *,void *,void *,void *
+                            ,void *,void *,void *,void *
+                            ,void *,void *,void *,void *
+                            ,void *,void *,void *,void *
+                            ,void *,void *,void *,void *
+                            ,void *,void *,void *,void *
+                            ,void *,void *,void *,void *
+                            ,void *,void *
 #if 0
                                                 ,void *f39,void *f40
                             ,void *f41,void *f42,void *f43,void *f44
