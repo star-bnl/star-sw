@@ -9,6 +9,7 @@
 #include "TDataMember.h"
 #include "TDataType.h"
 #include "TMemberInspector.h"
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 //  St_TableSorter  - Is an "observer" class to sort the St_Table objects
@@ -60,9 +61,13 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 
 
+static const St_Table *dummy= 0;
+static const St_Table &dummyTable = *dummy;
+
 ClassImp(St_TableSorter)
 //_____________________________________________________________________________
-  St_TableSorter::St_TableSorter() : m_simpleArray(0),m_ParentTable(*((const St_Table *)0))
+//St_TableSorter::St_TableSorter() : m_simpleArray(0),m_ParentTable(*((const St_Table *)0))
+St_TableSorter::St_TableSorter() : m_simpleArray(0),m_ParentTable(dummyTable)
 {
   // default ctor for RootCint dictionary
   m_LastFound    = -1;
@@ -113,7 +118,7 @@ St_TableSorter::St_TableSorter(const St_Table &table, TString &colName,Int_t fir
   if (numberRows > 0)  m_numberOfRows = TMath::Min(numberRows,m_numberOfRows);
 
   // Allocate index array
-  if (!m_numberOfRows > 0) { MakeZombie(); return; }
+  if (m_numberOfRows <=0 ) { MakeZombie(); return; }
   m_SortIndex = new void*[m_numberOfRows];
 
   // define dimensions if any;
@@ -159,7 +164,7 @@ St_TableSorter::St_TableSorter(const St_Table &table, TString &colName,Int_t fir
 St_TableSorter::St_TableSorter(const Float_t *simpleArray, Int_t arraySize, Int_t firstRow
                                ,Int_t numberRows)
                                :m_simpleArray((const Char_t*)simpleArray)
-                               ,m_ParentTable(*((const St_Table *)0))
+                               ,m_ParentTable(dummyTable)
 {
   //
   // St_TableSorter ctor sort the input "simpleArray" 
@@ -194,7 +199,7 @@ St_TableSorter::St_TableSorter(const Float_t *simpleArray, Int_t arraySize, Int_
 St_TableSorter::St_TableSorter(const Double_t *simpleArray, Int_t arraySize, Int_t firstRow
                                ,Int_t numberRows)
                                :m_simpleArray((const Char_t*)simpleArray)
-                               ,m_ParentTable(*((const St_Table *)0))
+                               ,m_ParentTable(dummyTable)
 {
   //
   // St_TableSorter ctor sort the input "simpleArray" 
@@ -229,7 +234,7 @@ St_TableSorter::St_TableSorter(const Double_t *simpleArray, Int_t arraySize, Int
 St_TableSorter::St_TableSorter(const Long_t *simpleArray, Int_t arraySize, Int_t firstRow
                                ,Int_t numberRows)
                                :m_simpleArray((const Char_t*)simpleArray)
-                               ,m_ParentTable(*((const St_Table *)0))
+                               ,m_ParentTable(dummyTable)
 {
   //
   // St_TableSorter ctor sort the input "simpleArray" 
@@ -419,12 +424,12 @@ Int_t St_TableSorter::BSearch(const Char_t *value)
 }
 
 //_____________________________________________________________________________
-Int_t St_TableSorter::BSearch(TString &value)
+Int_t St_TableSorter::BSearch(TString &value) 
 {
   return BSearch(value.Data());
 }
 //_____________________________________________________________________________
-Int_t St_TableSorter::BSearch(const void *value){
+Int_t St_TableSorter::BSearch(const void *value) {
   Int_t index = -1;
   if (m_searchMethod) {
     void **p = (void **)bsearch( value,  // Object to search for
@@ -484,27 +489,71 @@ int St_TableSorter::CompareChar   (const void *elem1, const void *elem2)
 }
 #endif
 //_____________________________________________________________________________
-Int_t St_TableSorter::CountKey(const void *key, Int_t firstIndx) const
+Int_t St_TableSorter::CountKey(const void *key, Int_t firstIndx, Bool_t bSearch, Int_t *firstRow)
 {
+ //
+ //  CountKey counts the number of rows with the key value equal "key"
+ //
+ //  key      - it is a POINTER to the key value
+ //  fistIndx - the first index within sorted array to star search
+ //              = 0 by default
+ //  bSearch  = kTRUE - binary search (by default) is used otherwise linear one
+ //
+
   Int_t count = 0;
   if (m_searchMethod) {
     Int_t indx = firstIndx;  
     Int_t nRows = GetNRows();
-    while ( indx < nRows && m_searchMethod(key,&m_SortIndex[indx])){indx++;}
-    while ( indx < nRows &&!m_searchMethod(key,&m_SortIndex[indx])){indx++; count++;}
+    if (!bSearch) {
+       while ( indx < nRows && m_searchMethod(key,(const void **)&m_SortIndex[indx])){indx++;}
+       // Remember the first row it been asked:
+       while ( indx < nRows &&!m_searchMethod(key,(const void **)&m_SortIndex[indx])){indx++; count++;}
+       if (firstRow && count) *firstRow = indx-count;
+    } else {
+       indx = FindFirstKey(key);
+#if 0
+//--------
+       Int_t indx = -1;
+       if (BSearch(key)>=0) 
+       {
+         indx = GetLastFound();
+         if (indx >=0) 
+             while (indx > 0 && !m_searchMethod(key,(const void **)&m_SortIndex[indx-1])) indx--;  
+       }
+  return indx;
+
+//--------
+#endif
+       if (indx >=0 ) {  // Key was found let's count it
+         if (firstRow) *firstRow = indx;
+         Int_t sIndx = TMath::Max(indx,firstIndx);
+         // Forward pass
+         while ( sIndx < nRows && !m_searchMethod(key,(const void **)&m_SortIndex[sIndx]))
+               {sIndx++; count++;}
+#if 0
+         // Backward pass
+         sIndx = indx;
+         while ( sIndx > firstIndx &&!m_searchMethod(key,(const void **)&m_SortIndex[sIndx-1]))
+               {sIndx--; count++;}
+#endif
+       }
+    }
   }
   return count;
 }
 
 //_____________________________________________________________________________
-Int_t St_TableSorter::CountKeys() const
+Int_t St_TableSorter::CountKeys()
 {
+ //
+ // Counts the number of different key values 
+ //
   Int_t count = 0;
   if (m_SortIndex && m_SortIndex[0]) {
     void *key = m_SortIndex[0];
     Int_t indx = 0;
     while (indx < GetNRows()){
-      indx += CountKey(key,indx); 
+      indx += CountKey(key,indx,kFALSE); 
       count++; 
       key = m_SortIndex[indx];
     }
@@ -519,13 +568,39 @@ void St_TableSorter::FillIndexArray(){
  
 }
 //_____________________________________________________________________________
+Int_t St_TableSorter::FindFirstKey(const void *key)
+{
+ //
+ // Looks for the first index of the "key" 
+ // within SORTED table AFTER sorting
+ //
+ // Returns: = -1 if the "key" was not found
+ //
+ // Note: This method has no sense for 
+ // ====  the float and double key
+ // 
+ //       To get the index within the original
+ //       unsorted table the GetIndex() method
+ //       may be used like this:
+ //       GetIndex(FindFirstKey(key))
+ //
+  Int_t indx = -1;
+  if (BSearch(key)>=0) 
+  {
+    indx = GetLastFound();
+    if (indx >=0) 
+        while (indx > 0 && !m_searchMethod(key,(const void **)&m_SortIndex[indx-1])) indx--;  
+  }
+  return indx;
+}
+//_____________________________________________________________________________
 const Text_t * St_TableSorter::GetTableName() const { return m_ParentTable.GetName();}
 //_____________________________________________________________________________
 const Text_t * St_TableSorter::GetTableTitle() const { return m_ParentTable.GetTitle();}
 //_____________________________________________________________________________
 const Text_t * St_TableSorter::GetTableType() const { return m_ParentTable.GetType();}
 //_____________________________________________________________________________
-St_Table *St_TableSorter::GetTable() const { return &m_ParentTable;}
+St_Table *St_TableSorter::GetTable() const { return (St_Table *)&m_ParentTable;}
 
 //_____________________________________________________________________________
 void  St_TableSorter::SetSearchMethod()
