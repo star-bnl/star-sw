@@ -1,5 +1,10 @@
-* $Id: sisdgeo1.g,v 1.2 2004/10/26 21:13:22 potekhin Exp $
+* $Id: sisdgeo1.g,v 1.3 2004/10/26 21:15:28 potekhin Exp $
 * $Log: sisdgeo1.g,v $
+* Revision 1.3  2004/10/26 21:15:28  potekhin
+* Changed the print statement to look nicer,
+* and noted that the radius of the mother volume has been
+* changed to conform with the shield of the SVT
+*
 * Revision 1.2  2004/10/26 21:13:22  potekhin
 * Started improving the structure of the code by replacing
 * hardcoded numbers with variables which encapsulate formulas.
@@ -191,7 +196,7 @@ Module  SISDGEO1  is the Silicon Strip Detector
         Component O   A=16     Z=8    W=0.4*4*16./174.
         Mixture   G5   Dens=0.85
 
-      write(*,*) '-more material- Version of the SSD geometry'
+      write(*,*) 'Version sisdgeo1 of the SSD geometry'
       Create and Position SFMO in SVTT
 *******************************************************************************
 *
