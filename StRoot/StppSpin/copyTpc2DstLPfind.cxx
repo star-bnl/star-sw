@@ -1,3 +1,20 @@
+//*-- Author : Jan Balewski
+//  
+// $Id: copyTpc2DstLPfind.cxx,v 1.2 2001/02/28 19:06:11 balewski Exp $
+// $Log: copyTpc2DstLPfind.cxx,v $
+// Revision 1.2  2001/02/28 19:06:11  balewski
+// some reorganizations
+//
+// Revision 1.1.1.1  2001/01/31 14:00:07  balewski
+// First release
+//
+//
+//////////////////////////////////////////////////////////////////////////
+//                                                                      //
+// copy tracks from the TPT table to DST like table
+//                                                                      //
+//////////////////////////////////////////////////////////////////////////
+
 #include <assert.h>
 #include <math.h>
 #include <strings.h>

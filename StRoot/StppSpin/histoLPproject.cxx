@@ -1,3 +1,20 @@
+//*-- Author : Jan Balewski
+//  
+// $Id: histoLPproject.cxx,v 1.2 2001/02/28 19:06:12 balewski Exp $
+// $Log: histoLPproject.cxx,v $
+// Revision 1.2  2001/02/28 19:06:12  balewski
+// some reorganizations
+//
+// Revision 1.1.1.1  2001/01/31 14:00:07  balewski
+// First release
+//
+//
+//////////////////////////////////////////////////////////////////////////
+//                                                                    
+//   histograms initialization for this class
+//                                                                    
+//////////////////////////////////////////////////////////////////////////
+
 #include <math.h>
 #include <stdio.h>
 #include "StppLPprojectMaker.h"
