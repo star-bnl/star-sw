@@ -86,6 +86,8 @@ enddo
 message Start processing [nevents] events
 
 do i=1,[nevents]
+  * Clear previous event
+    tabclear [event]
   * Read in next Event
     message Reading in event [i]
     exec input_g2t_file#read
