@@ -93,8 +93,8 @@ TTreeFormula is just a special case of
 which allows the usage of data members of a particular TTree, and are
 thus tied to a particular TTree.<p>
 
-To see which formulas are provided, it is best to look at the macro itself,
-which is located in:<br>
+To see which formulas are provided, go to the <a href="#formulas">Formulas</a>
+section below, or look at the macro itself, which is located in:<br>
 <tt>$STAR/StRoot/macros/analysis/strangeFormulas.C</tt><br>
 Some examples include:
 <ul>
@@ -104,7 +104,9 @@ Some examples include:
 <li><tt>Xi.rapOmega()</tt>
 </ul>
 As with using the data members of the TTree, these functions begin with
-a component name, such as <tt>Event</tt> or <tt>V0</tt>.<p>
+a component name, such as <tt>Event</tt> or <tt>V0</tt>. The
+<a href="#formulas">Formulas</a> section also describes how to find
+a specific formula for which you might be looking.<p>
 
 
 <hr width=10% align=left>
@@ -272,7 +274,7 @@ known to Root must be told manually about the TTreeFormulas with lines like:
 <li>In using TFormulas, one should be careful to optimize the formulas
 for the number of calls to other formulas. TTreeFormula/TFormula is not
 smart enough to save values to repeat them, and calculates the full thing
-twice, but has a limit of 200 values one can calculate (the limit is
+twice, but has a limit of 100 values one can calculate (the limit is
 actually 50 values for Root 2.24/04 and earlier versions).<p>
 
 For example, "a()+a()+a()" repeats everything necessary to find
@@ -293,6 +295,28 @@ values if they decide to add more complicated formulas using these formulas.
 
 <hr width=10% align=left>
 <a name="formulas"><h2>Available Formulas</h2></a>
+In addition to the listing below, the macro provides two functions
+to help you find a specific formula. The first of these is the
+<tt>findFormulas()</tt> function, which takes up to three strings
+as arguments, and returns all formulas whose names contain the
+strings (case-insensitive):
+<pre>
+  findFormulas("lambda","V0");
+    V0.eLambda()
+    V0.massLambda()
+    V0.massAntiLambda()
+    V0.rapLambda()
+    V0.cTauLambda()
+</pre>
+The second helpful function is <tt>findDefinition()</tt>. This function
+takes the name of a formula and returns its definition:
+<pre>
+  findDefinition("V0.massLambda()");
+    Name       : V0.massLambda()
+    # of Codes : 12
+    Definition : sqrt(sq(V0.ePosProton()+V0.eNegPion())-V0.Ptot2V0())
+</pre>
+Here is an overview of the formulas provided:<p>
 
 <ul>
 <li>Particle Mass Formulas
@@ -336,6 +360,11 @@ V0.dcaNegToPrimVertex()
 V0.cTauLambda()
 V0.cTauK0Short()
 
+-- geometry parameters --
+V0.radtV0()
+V0.radV0()
+V0.phiV0()
+
 -- momentum --
 V0.momPosX()
 V0.momPosY()
@@ -356,6 +385,9 @@ V0.Pt2V0()
 V0.ptV0()
 V0.Ptot2V0()
 V0.ptotV0()
+V0.thetaV0()
+V0.pseudoRapV0()
+V0.psiV0()
 V0.MomPosAlongV0()
 V0.MomNegAlongV0()
 V0.alphaV0()
@@ -427,6 +459,11 @@ Xi.dcaBachelorToPrimVertex()
 Xi.cTauXi()
 Xi.cTauOmega()
 
+-- geometry parameters --
+Xi.radtXi()
+Xi.radXi()
+Xi.phiXi()
+
 -- momentum --
 Xi.momBachelorX()
 Xi.momBachelorY()
@@ -441,6 +478,9 @@ Xi.Pt2Xi()
 Xi.ptXi()
 Xi.Ptot2Xi()
 Xi.ptotXi()
+Xi.thetaXi()
+Xi.pseudoRapXi()
+Xi.psiXi()
 Xi.MomBachelorAlongXi()
 Xi.MomV0AlongXi()
 Xi.alphaXi()
