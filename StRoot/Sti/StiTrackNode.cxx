@@ -6,7 +6,7 @@
 
 ostream& operator<<(ostream& os, const StiDetector& d);
 
-StiDetector * StiTrackNode::getDetector() const
+const StiDetector * StiTrackNode::getDetector() const
 {
     if (hit==0)
 	{

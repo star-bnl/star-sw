@@ -24,7 +24,7 @@ public:
     StiHit * getHit() const      {  return hit;}
     friend ostream& operator<<(ostream& os, const StiTrackNode& n);
     
-    StiDetector *getDetector() const;
+    const StiDetector *getDetector() const;
     void setDetector(const StiDetector *pDetector);
     
     void setDedx(double e) {dedx=e;}
@@ -37,7 +37,7 @@ protected:
     
     double        dedx;
     StiHit      * hit;  
-    StiDetector * detector; // used if not hit for node
+    const StiDetector * detector; // used if not hit for node
 };
 
 #endif
