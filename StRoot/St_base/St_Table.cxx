@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.59 1999/07/02 21:00:31 fine Exp $ 
+// $Id: St_Table.cxx,v 1.60 1999/07/07 16:44:40 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.60  1999/07/07 16:44:40  fine
+// Some print statements clean ups
+//
 // Revision 1.59  1999/07/02 21:00:31  fine
 // Browse method prints empty table now
 //
@@ -736,10 +739,10 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *, const 
    Int_t const width = 8;
    Int_t rowStep = 10; // The maximun values to print per line
    Int_t rowNumber = rownumber;
-   if (row  > GetSize())  { 
+   if (row  > GetSize() || GetSize() == 0)  { 
         PrintHeader();
         cout  << " ======================================================================================" << endl
-              << "   There is NO allocated row for this table"
+              << "   There are " << GetSize() << " allocated rows for this table only"                     << endl
               << " ======================================================================================" << endl;     
         return 0;
    }
@@ -774,7 +777,7 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *, const 
      PrintHeader();
      if  (GetNRows() == 0) {// to Print empty table header 
         cout  << " ======================================================================================" << endl
-              << "   There is NO filled row in this table"
+              << "   There is NO filled row in this table"                                                 << endl
               << " ======================================================================================" << endl;
        return 0; 
      }
