@@ -1,4 +1,6 @@
 //_____________________________________________________________________
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.128 2000/08/06 19:10:15 fisyak Exp $
+//_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
 #include "TObjString.h"
@@ -15,13 +17,12 @@
 #include "StTreeMaker/StTreeMaker.h"
 #include "StIOMaker/StIOMaker.h"
 #include "StMessMgr.h"
-
 //_____________________________________________________________________
-BfcItem BFC[] = {
-  {"Key"         ,"Name","Chain","Opts"                                   ,"Maker","Libs","Comment",kFALSE},
-  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
-  {"TIME STAMPS ","-----------","-----","------------------------------------------------","","","",kFALSE},
-  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+Bfc_st BFC[] = {
+  {"Key"         ,"Name"       ,"Chain"      ,"Opts"                      ,"Maker","Libs","Comment",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"TIME STAMPS ","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"SD97"        ,""  ,"","db"                                ,"","","Turn on 1997 test parameters",kFALSE},
   {"SD98"        ,""  ,"","db"                                ,"","","Turn on 1998 test parameters",kFALSE},
   {"Y1a"         ,""  ,"","db,calib"                            ,"","","Turn on Year 1a parameters",kFALSE},
@@ -35,11 +36,11 @@ BfcItem BFC[] = {
   {"Y1h"         ,""  ,"","db,calib"                            ,"","","Turn on Year 1h parameters",kFALSE},
   {"RY1h"        ,""  ,"","db,calib"                        ,"","","Real data with Year1h geometry",kFALSE},
   {"Y2a"         ,""  ,"","db,calib"                            ,"","","Turn on Year 2a parameters",kFALSE},
-  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
-  {"C H A I N S ","-----------","-----","------------------------------------------------","","","",kFALSE},
-  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"C H A I N S ","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"mdc3"        ,""  ,"","cy1h,GeantOut"                               ,"","","MDC3 default chain",kFALSE},
-  {"doEvents"    ,""  ,"","xin,event,analysis"                                    ,"","","",kFALSE},
+  {"doEvents"    ,""  ,"","xin,event,analysis"                                            ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis,EventQA"                          ,"","","",kFALSE},
   {"Cdefault"    ,""  ,"","tpc,ftpc,rrs,rich,l0,l3,Cdst,Kalman,tags,Tree"    ,"","","Default chain",kFALSE}, 
   {"Cy1a"        ,""  ,"","y1a,Cdefault"                                 ,"","","Turn on chain y1a",kFALSE},
@@ -51,9 +52,9 @@ BfcItem BFC[] = {
   {"Cy2a"        ,""  ,"","y2a,tpc,ftpc,emc,l0,l3,Cdst,tags,Tree,svt"    ,"","","Turn on chain y2a",kFALSE},
   {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,trg,Cdst,Kalman,tags,Tree,evout","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
-  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
-  {"OPTIONS     ","-----------","-----","------------------------------------------------","","","",kFALSE},
-  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"OPTIONS     ","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Kalman"      ,""  ,"","geant"                                                         ,"","","",kFALSE},
   {"Eval"        ,""  ,"","","",""                ,"Turn on evaluation switch for different makers",kFALSE},
   {"Ev03"        ,""  ,"","","",""                                 ,"Turn on alternative V0 method",kFALSE},
@@ -87,9 +88,9 @@ BfcItem BFC[] = {
   {"TrsOut"      ,""  ,"","Tree"                                ,"","","Write Trs output to StTree",kFALSE},
   {"AllEvent"    ,""  ,"","Tree"                               ,"","","Write whole event to StTree",kFALSE},
   {"AllTables"   ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
-  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
-  {"Tables      ","-----------","-----","------------------------------------------------","","","",kFALSE},
-  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"tables"      ,""  ,"",
 "StDbT,ctf_T,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,mwc_T,sim_T,svt_T,tpc_T,trg_T,vpd_T","","","",kFALSE},
   {"StDbT"       ,""  ,"","",""                                ,"libStDb_Tables","Load StDb_Tables",kFALSE},
@@ -107,36 +108,36 @@ BfcItem BFC[] = {
   {"tpc_T"       ,""  ,"","",""                                  ,"libtpc_Tables","Load tpc_Tables",kFALSE},
   {"trg_T"       ,""  ,"","",""                                  ,"libtrg_Tables","Load trg_Tables",kFALSE},
   {"vpd_T"       ,""  ,"","",""                                  ,"libvpd_Tables","Load vpd_Tables",kFALSE},
-  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"vpd"         ,""  ,"","vpd_T",""                                                   ,"St_vpd","",kFALSE},
   {"tls"         ,""  ,"","",""                                                           ,"tls","",kFALSE},
   {"daq"         ,""  ,"","",""                         ,"StDaqLib,StDAQMakerLib","Load StDAQMaker",kFALSE},
   {"SCL"         ,""  ,"","","","StarClassLibrary",                         "Load StarClassLibrary",kFALSE},
-  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
-  {"I/O Makers  ","-----------","-----","------------------------------------------------","","","",kFALSE},
-  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"in"          ,""  ,"","xin"                                               ,"","","Alias to xin",kFALSE},
   {"xin"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
   {"xdf2root"    ,""  ,"",""                                   ,"","xdf2root","Read XDF input file",kFALSE},
-  {"geant","geant","","NoFieldSet,geomT,gen_T,sim_T"
+  {"geant"       ,"geant","","NoFieldSet,geomT,gen_T,sim_T"
                                          ,"St_geant_Maker","geometry,St_g2t,St_geant_Maker","GEANT",kFALSE}, 
-  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
-  {"Db makers   ","-----------","-----","------------------------------------------------","","","",kFALSE},
-  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"db"          ,"db","","StDbT,xdf2root"       ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"dbutil"      ,""  ,"","SCL"                            ,"","StDbUtilities","Load StDbUtilities",kFALSE},
   {"calib"       ,"calib","","xdf2root"          ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
-  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
-  {"Valid Db Versions","------","-----","------------------------------------------------","","","",kFALSE},
-  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"Valid Db    ","Versions   ","-----------","------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"DbVNone"     ,""  ,"","db,calib,ry1h"                   ,"","","19940614/0 Db Version for none",kFALSE},
   {"DbV0614"     ,""  ,"","db,calib,ry1h"                  ,"","","20000614/0 Db Version for p00hd",kFALSE},
   {"DbV0624"     ,""  ,"","db,calib,ry1h"                ,"","","20000624/0 Db Version for p00hd_1",kFALSE},
   {"DbV0713"     ,""  ,"","db,calib,ry1h"                  ,"","","20000713/0 Db Version for p00he",kFALSE},
   {"DbV0727"     ,""  ,"","db,calib,ry1h"                  ,"","","20000727/0 Db Version for p00he",kFALSE},
-  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
-  {"MAKERS      ","-----------","-----","------------------------------------------------","","","",kFALSE},
-  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"magF"        ,"","","NoFieldSet,StDbT,db","StMagFMaker","StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db"                         ,"StTpcDbMaker","StTpcDb","",kFALSE},
@@ -186,7 +187,7 @@ BfcItem BFC[] = {
   {"dst"         ,"dst","globalChain","SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT","St_dst_Maker" 
                                                                 ,"St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Event"       ,"","","globT,SCL"                       ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
-  {"PostEmc"   ,"PostChain","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl"  ,"StMaker","StChain","",kFALSE},
+  {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain","emh"                    ,"StPreEclMaker","StPreEclMaker","",kFALSE},
   {"Epc"         ,"epc","PostChain","PreEcl,Match"                    ,"StEpcMaker","StEpcMaker","",kFALSE},
   {"Rrs"         ,"","","sim_T,Simu"                                  ,"StRrsMaker","StRrsMaker","",kFALSE},
@@ -210,18 +211,17 @@ BfcItem BFC[] = {
   {"EventQA"     ,"EventQA","","Event"                           ,"StEventQAMaker","St_QA_Maker","",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
-  {"Display"     ,"EventDisplay","","SCL,St_geom"   ,"StEventDisplayMaker","StEventDisplayMaker","",kFALSE},
+  {"Display"     ,"","","SCL,St_geom"               ,"StEventDisplayMaker","StEventDisplayMaker","",kFALSE},
   {"Mc"          ,"McChain","","sim_T,globT,McAss,McAna"                    ,"StMaker","StChain","",kFALSE},
   {"McEvent"     ,"","McChain","Event",              "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
   {"McAss"       ,"","McChain","McEvent",              "StAssociationMaker","StAssociationMaker","",kFALSE},
   {"McAna"       ,"","McChain","McEvent",                "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
   {"LAna"        ,"","","in,RY1h,geant,tpcDb","StLaserAnalysisMaker"
                                                       ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},
-  
   {"xout"        ,""  ,"",""                                 ,"","xdf2root","Write dst to XDF file",kFALSE}, 
   {"Tree"        ,""  ,"",""    ,"StTreeMaker","StTreeMaker","Write requested branches into filles",kFALSE}
 };
-Int_t NoChainOptions = sizeof (BFC)/sizeof (BfcItem);
+Int_t NoChainOptions = sizeof (BFC)/sizeof (Bfc_st);
 class StEvent;
 StEvent *Event;
 class StIOMaker; StIOMaker *inpMk=0;     
@@ -238,7 +238,7 @@ ClassImp(StBFChain)
 
 //_____________________________________________________________________________
 StBFChain::StBFChain(const char *name):StChain(name),fXdfOut(0),fSetFiles(0),fInFile(0),fFileOut(0),fXdfFile(0) {
-   fBFC = new BfcItem[NoChainOptions];
+   fBFC = new Bfc_st[NoChainOptions];
    memcpy (fBFC, &BFC, sizeof (BFC));
 }
 //_____________________________________________________________________________
@@ -346,7 +346,7 @@ Int_t StBFChain::Instantiate()
 	  }
 	  if (!mk) status = kStErr;
 	  else {
-	    fBFC[i].Name = (Char_t *) mk->GetName();
+	    strcpy (fBFC[i].Name, (Char_t *) mk->GetName());
 	    if (GetOption("Simu"))    mk->SetFlavor("sim+ofl");
 	    else                      mk->SetFlavor("ofl");
 	  }
@@ -355,7 +355,7 @@ Int_t StBFChain::Instantiate()
 	if (maker == "StIOMaker" && fSetFiles) {
 	  inpMk = new StIOMaker("inputStream","r",fSetFiles);
 	  if (inpMk) {
-	    fBFC[i].Name = (Char_t *) inpMk->GetName();
+	    strcpy (fBFC[i].Name,(Char_t *) inpMk->GetName());
 	    SetInput("StDAQReader",".make/inputStream/.make/inputStream_DAQ/.const/StDAQReader");
 	    SetInput("geant",".make/inputStream/.make/inputStream_XDF/.data/event/geant/Event");
 	  }
@@ -365,7 +365,7 @@ Int_t StBFChain::Instantiate()
 	if (maker == "StTreeMaker" && fFileOut) {
 	  treeMk = new StTreeMaker("tree",fFileOut->Data());
 	  if (treeMk) {
-	    fBFC[i].Name = (Char_t *) treeMk->GetName();
+	    strcpy (fBFC[i].Name,(Char_t *) treeMk->GetName());
 	    treeMk->SetIOMode("w");
 	    SetTreeOptions();
 	    continue;
@@ -384,7 +384,7 @@ Int_t StBFChain::Instantiate()
 	    if (GetOption("paw")) NwPaw  = 200000;
 	    geantMk = new St_geant_Maker("geant",NwGeant,NwPaw,IwType);
 	    if (geantMk) {
-	      fBFC[i].Name = (Char_t *) geantMk->GetName();
+	      strcpy (fBFC[i].Name,(Char_t *) geantMk->GetName());
 	      geantMk->SetActive(kFALSE);
 	      if (GetOption("fzin") || GetOption("gstar")) geantMk->SetActive(kTRUE);
 	      SetGeantOptions();
@@ -399,7 +399,7 @@ Int_t StBFChain::Instantiate()
 	  if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
 	  else  {
 	    mk = New(fBFC[i].Maker);
-	    if (mk) fBFC[i].Name = (Char_t *) mk->GetName();
+	    if (mk) strcpy (fBFC[i].Name,(Char_t *) mk->GetName());
 	  }
 	}
 	if (mk) {
@@ -536,7 +536,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
   if (!Chain || !Chain[0] || !strlen(Chain)) {
     printf ("\tPossible Chain Options are: \n"); 
     for (k=0;k<NoChainOptions;k++)
-      printf (" %2d:[-]%-12s:%-12s:%-6s:%-12s :%s :%s :%s\n"
+      printf (" %3d:[-]%-13s:%-12s:%-12s:%-12s :%s :%s :%s\n"
 	      ,k,fBFC[k].Key,fBFC[k].Name,fBFC[k].Chain,fBFC[k].Opts,fBFC[k].Maker,fBFC[k].Libs,fBFC[k].Comment);
     return; 
   }         
@@ -581,10 +581,13 @@ void StBFChain::SetFlags(const Char_t *Chain)
   if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval"); 
   if (!GetOption("event")) SetOption("-analysis");
   // Print set values
+  St_Bfc *Bfc = new St_Bfc("BFChain",NoChainOptions);
+  AddRunco(Bfc);
   for (k = 1; k<NoChainOptions;k++) {
     if (GetOption(k)) {
       gMessMgr->QAInfo() << "================== " << k << "\t" 
 			 << fBFC[k].Key << "\tis ON \t:" << fBFC[k].Comment << endm;
+      Bfc->AddAt(&BFC[k]);
     }
   }
   //  gSystem->Exit(1);
@@ -804,6 +807,3 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("GeantOut") && geantMk) treeMk->IntoBranch("geantBranch","geant");
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
-//_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.127 2000/08/06 00:25:04 fisyak Exp $
-//_____________________________________________________________________
