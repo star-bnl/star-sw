@@ -1,7 +1,10 @@
 /*
- * $Id: acmain.cc,v 1.3 1998/06/23 21:01:15 perev Exp $
+ * $Id: acmain.cc,v 1.4 1998/06/28 23:31:37 perev Exp $
  *
  * $Log: acmain.cc,v $
+ * Revision 1.4  1998/06/28 23:31:37  perev
+ * STAF size and others
+ *
  * Revision 1.3  1998/06/23 21:01:15  perev
  * cleanup of getarg for linux
  *
@@ -22,6 +25,7 @@
 /*                    m a i n                        */
 /*****************************************************/
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 int        __argc_save=0;	// Pgf77
@@ -58,6 +62,24 @@ int main    (int argc, char *argv[])
   FTN_INITRAP();  fpsetmask(0);
 #endif
   asuMallocInit();
+
+// Request Staf size
+
+for (int i=1; i<=argc; i++) { // Search -S <number>
+  if (argv[i] && (!(strncmp(argv[i],"-S",2)) || !(strncmp(argv[i],"-s",2))) ) { 
+     int n = atoi(argv[i+1]); 
+     void *s = malloc(n*4000000);
+     if (! s) { // Error no space
+       printf (" STAF. No space for %d Mega words\n",n);
+       exit (1);
+     }
+
+     printf ("STAF got space %d Mega words\n",n);
+     free(s);
+     break;
+} }
+
+
   agmain_();
 }
 

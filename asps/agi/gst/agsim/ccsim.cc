@@ -293,7 +293,7 @@ int xdf_open(XdfLun_t **Lun, char *FileName,char *mode)
 {
   XdfLun_t *lun;
  
-  if (*Lun) { printf("xdf_open. Error, lun is non zero %d\n",*lun); return 1;}
+  if (*Lun) { printf("xdf_open. Error, lun is non zero %d\n",*Lun); return 1;}
  
   lun = (XdfLun_t*)malloc(sizeof(XdfLun_t));
  
