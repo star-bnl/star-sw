@@ -1,5 +1,8 @@
-// $Id: St_TableNtuple.cxx,v 1.3 1999/02/18 00:25:52 genevb Exp $
+// $Id: St_TableNtuple.cxx,v 1.4 1999/02/18 15:26:09 genevb Exp $
 // $Log: St_TableNtuple.cxx,v $
+// Revision 1.4  1999/02/18 15:26:09  genevb
+// Updated help, table name defaults to dataset name
+//
 // Revision 1.3  1999/02/18 00:25:52  genevb
 // St_TableNtuple: Histogramming ranges fixed, buffer size increased
 //
@@ -13,7 +16,7 @@
 //                                                                      //
 // St_TableNtuple                                                       //
 //                                                                      //
-// St_TableNtuple is a class to convert STAR Tables into ntuples        //
+// St_TableNtuple is a class to convert STAR Tables into ntuples.       //
 // The class inherits from TTree, so it can be used just as a           //
 // TTree would (Draw(), etc.). Columns are not made for table           //
 // entries which are not basic numerical entities. Table entries        //
@@ -25,27 +28,31 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 // 
-// Basically, this is a TTree with some add-ons. It is very similar to a TNtuple
-// except that it requires using tables to fill it, and entries are not forced
-// to be floats. Here's how to use it...
+// Basically, this is a TTree with some add-ons. It is very similar to a
+// TNtuple, except that it requires using tables to fill it, and entries
+// are not forced to be floats. Here's how to use it...
 // 
 // The constructor must be called with an St_Table-derived table.
-// Here for example, I'll use the St_tpt_track table. You don't
-// have to do the first line if you already have a table:
+// Here for example, I'll use the St_tpt_track table.
 // 
-// St_tpt_track track();
-// St_TableNtuple t1(track);
+//      St_TableNtuple t1(St_tpt_track());
+//
+// ...or, if you already have a table of type St_tpt_track:
+//
+//      St_tpt_track track1();
+//      ...
+//      St_TableNtuple t1(track1);
 // 
-// Now t1 is essentially an ntuple with columns
-// as defined by the table specified. However, columns are not included
+// Now t1 is essentially an ntuple with columns as defined by the table
+// specified (IT IS NOT FILLED!). However, columns are not included
 // for table entries which are not numbers (int, short, long, float, etc
 // are allowed). Table entries which are arrays to begin with are spread out
 // into additional columns with names identical to the original table element
-// name with an index at the end (e.g. array element chisq[3] => chisq0, chisq1,
-// chisq2). Now you are ready to fill the ntuple, and there's two
+// name with an index at the end (e.g. array element chisq[3] => chisq0,
+// chisq1, chisq2). Now you are ready to fill the ntuple, and there's two
 // ways to do it. If you have a specific table, just call:
 // 
-// t1.Fill(track,firstRow,nRows);
+//      t1.Fill(track,firstRow,nRows);
 // 
 // Here, firstRow [default=0] is the first row you'd like to add from the
 // table, and nRows [default=-1] is the number of rows you'd like to add
@@ -54,10 +61,10 @@
 // 
 // If you have a root file with tables for many events, you can call:
 // 
-// t1.AddTFile("filename","datasetname","tablename",firstEvent,nEvents);
-// or
-// TFile f("filename");
-// t1.AddTFile(f,"datasetname","tablename",firstEvent,nEvents);
+//      t1.AddTFile("filename","datasetname","tablename",firstEvent,nEvents);
+// ...or
+//      TFile f("filename");
+//      t1.AddTFile(f,"datasetname","tablename",firstEvent,nEvents);
 // 
 // (AddXDFFile exists for adding tables from XDF files (class St_XDFFile).)
 // 
@@ -66,11 +73,16 @@
 // off and all the events on file will be added (nEvents < 0 goes to
 // end-of-file). An example with the tpt_track table would be:
 // 
-// t1.AddTFile(f,"tpc_data","track");
+//      t1.AddTFile(f,"tpc_data","track");
+// 
+// If the dataset has the same name as the table, which is the case if the
+// table is all that is in the file, then you can leave off the table name:
+// 
+//      t1.AddTFile(f,"track");
 // 
 // Once filled, you can use t1 just like a regular TTree or TNtuple:
 // 
-// t1.Draw("var1:var2","condition1 && condition2");
+//      t1.Draw("var1:var2","condition1 && condition2");
 // etc.
 //
 #include <iostream.h>
@@ -149,6 +161,7 @@ Int_t St_TableNtuple::AddTFile(TFile &f, Char_t *dataset, Char_t *tname, Int_t f
 //               -1 events (default) means read the entire file
 // Number of events actually read is returned
 //
+  if (!(strcmp(tname,"same"))) tname = dataset;
   St_DataSet *set=0;
   Int_t keys = f.GetNkeys();
   if (firstEvent > keys) return 0;
@@ -208,6 +221,7 @@ Int_t St_TableNtuple::AddXDFFile(St_XDFFile &f, Char_t *dataset, Char_t *tname, 
 //               -1 events (default) means read the entire file
 // Number of events actually read is returned
 //
+  if (!(strcmp(tname,"same"))) tname = dataset;
   St_DataSet *event=0;
 
   for (Int_t i=0; i<(firstEvent-1); i++) {
@@ -433,7 +447,7 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
 //_____________________________________________________________________________
 void St_TableNtuple::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_TableNtuple.cxx,v 1.3 1999/02/18 00:25:52 genevb Exp $\n");
+  printf("* $Id: St_TableNtuple.cxx,v 1.4 1999/02/18 15:26:09 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("* Using %d columns from table with:\n",mNvar);
   printf("*   Name: %s\n",GetName());
