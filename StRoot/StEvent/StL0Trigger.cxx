@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL0Trigger.cxx,v 2.9 2003/07/29 19:50:53 ullrich Exp $
+ * $Id: StL0Trigger.cxx,v 2.10 2004/08/03 17:22:16 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.cxx,v $
+ * Revision 2.10  2004/08/03 17:22:16  ullrich
+ * Major update by Akio and Marco.
+ *
  * Revision 2.9  2003/07/29 19:50:53  ullrich
  * Fix for spin bits added.
  *
@@ -44,14 +47,16 @@
  **************************************************************************/
 #include <algorithm>
 #include "StL0Trigger.h"
+#include "StTriggerData.h"
 #include "tables/St_dst_L0_Trigger_Table.h"
 #include "tables/St_dst_TrgDet_Table.h"
+
 #if !defined(ST_NO_NAMESPACES)
 using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StL0Trigger.cxx,v 2.9 2003/07/29 19:50:53 ullrich Exp $";
+static const char rcsid[] = "$Id: StL0Trigger.cxx,v 2.10 2004/08/03 17:22:16 ullrich Exp $";
 
 ClassImp(StL0Trigger)
 
@@ -98,6 +103,27 @@ void StL0Trigger::set(const dst_TrgDet_st* n)
     SetBit(2);
     copy(n->lastDSM+0, n->lastDSM+mMaxLastDsm, mLastDsmArray);
     copy(n->BCdata +0, n->BCdata+mMaxBcData  , mBcDataArray );
+}
+
+void StL0Trigger::set(const StTriggerData* t)
+{
+    // from StTriggerData
+    if(t){  	   
+      SetBit(2);
+      mTriggerWord = t->triggerWord();
+      mTriggerActionWord = t->actionWord();
+      mMwcCtbMultiplicity=0;
+      mMwcCtbDipole=0;
+      mMwcCtbTopology=0;
+      mMwcCtbMoment=0;
+      mDsmInput=t->dsmInput();
+      mDetectorBusy=0;
+      mTriggerToken=t->trgToken();
+      mDsmAddress=t->dsmAddress();
+      mAddBits = t->mAddBits();
+      for(int i=0; i<mMaxLastDsm; i++){mLastDsmArray[i]=t->lastDSM(i);}
+      for(int i=0; i<mMaxBcData;  i++){mBcDataArray[i]=t->bcData(i);}
+    }
 }
 
 StL0Trigger::~StL0Trigger() { /* noop */ }
@@ -272,7 +298,7 @@ StL0Trigger::spinBits(int runNumber) const
 	spin4 = (ldsm0>>11) & 0x1;
 	return spin1+spin2*2+spin3*4+spin4*8;
     }
-    else if (runNumber<5000000){
+    else if (runNumber<6000000){
 	ldsm0 = (mLastDsmArray[7]/16)%256;
 	spin1 = (ldsm0/ 2)%2;
 	spin2 = (ldsm0/ 4)%2;
@@ -291,7 +317,7 @@ StL0Trigger::spinBitYellowUp(int runNumber) const
     if (runNumber<4000000){
 	return (mLastDsmArray[0]>>8) & 0x1;
     }
-    else if (runNumber<5000000){
+    else if (runNumber<6000000){
 	int ldsm0 = (mLastDsmArray[7]/16)%256;
 	return (ldsm0/2)%2;
     }
@@ -306,7 +332,7 @@ StL0Trigger::spinBitYellowDown(int runNumber) const
     if (runNumber<4000000){
 	return (mLastDsmArray[0]>>9) & 0x1;
     }
-    else if (runNumber<5000000){
+    else if (runNumber<6000000){
 	int ldsm0 = (mLastDsmArray[7]/16)%256;
 	return (ldsm0/ 4)%2;
     }
@@ -321,7 +347,7 @@ StL0Trigger::spinBitBlueUp(int runNumber) const
     if (runNumber<4000000){
 	return (mLastDsmArray[0]>>9) & 0x1;
     }
-    else if (runNumber<5000000){
+    else if (runNumber<6000000){
 	int ldsm0 = (mLastDsmArray[7]/16)%256;
 	return (ldsm0/32)%2;
     }
@@ -336,7 +362,7 @@ StL0Trigger::spinBitBlueDown(int runNumber) const
     if (runNumber<4000000){
 	return (mLastDsmArray[0]>>10) & 0x1;
     }
-    else if (runNumber<5000000){
+    else if (runNumber<6000000){
 	int ldsm0 = (mLastDsmArray[7]/16)%256;
 	return (ldsm0/64)%2;
     }
