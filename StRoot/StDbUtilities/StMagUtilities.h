@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.29 2004/12/08 01:26:12 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.30 2005/02/09 23:50:36 jeromel Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,8 +11,8 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
- * Revision 1.29  2004/12/08 01:26:12  jhthomas
- * Add Method kGridLeak
+ * Revision 1.30  2005/02/09 23:50:36  jeromel
+ * Changes by JHT for SpaceCharge / Leak corrections
  *
  * Revision 1.28  2004/10/20 17:53:11  jhthomas
  * Add StGetSpaceChargeMode() function
@@ -102,6 +102,7 @@
 
 enum   EBField  { kUndefined = 0, kConstant = 1, kMapped = 2, kChain = 3 } ;
 enum   Prime    { IsPrimary = 0 , IsGlobal = 1 } ;
+
 // Bit counting starts at 1 for the mode switch (...,3,2,1)
 
 enum   DistortSelect 
@@ -131,6 +132,9 @@ class StTpcDb ;
 class TDataSet ;
 class StDetectorDbSpaceCharge ;
 class StDetectorDbTpcVoltages ;
+class StDetectorDbTpcOmegaTau ;
+class StDetectorDbGridLeak    ;
+
 class TMatrix ;
 
 class StMagUtilities {
@@ -140,9 +144,11 @@ class StMagUtilities {
   
   StTpcDb*  thedb ;  
   TDataSet* thedb2 ;
-  StDetectorDbSpaceCharge* fSpaceCharge ;
+  StDetectorDbSpaceCharge* fSpaceCharge   ;
   StDetectorDbSpaceCharge* fSpaceChargeR2 ;  
-  StDetectorDbTpcVoltages* fTpcVolts ;
+  StDetectorDbTpcVoltages* fTpcVolts      ;
+  StDetectorDbTpcOmegaTau* fOmegaTau      ;
+  StDetectorDbGridLeak*    fGridLeak      ;
 
   virtual void    SetDb( StTpcDb* dbin , TDataSet* dbin2 ) ;
   virtual void    GetMagFactor ()     ;
@@ -151,7 +157,9 @@ class StMagUtilities {
   virtual void    GetSpaceCharge ()   ;
   virtual void    GetSpaceChargeR2 () ;  
   virtual void    GetShortedRing ()   ;  
+  virtual void    GetOmegaTau ()      ;
   virtual Int_t   GetSpaceChargeMode();
+  virtual void    GetGridLeak()       ;
 
   virtual void    CommonStart ( Int_t mode ) ;
   virtual void    ReadField ( ) ;
@@ -187,12 +195,29 @@ class StMagUtilities {
   Float_t  WESTCLOCKERROR ;             // Phi rotation of West end of TPC in milli-radians
   Float_t  IFCRadius ;                  // Radius of the Inner Field Cage
   Float_t  OFCRadius ;                  // Radius of the Outer Field Cage
+  Float_t  GAPRADIUS ;                  // Radius of the gap between the Inner sectors and the Outer sectors
+  Float_t  GAP13_14 ;                   // Width of the gap between the grids at row 13 and row 14 (cm)
   Float_t  StarMagE ;                   // STAR Electric Field (V/cm) Magnitude
   Float_t  IFCShift ;                   // Shift of the IFC towards the West Endcap (cm)
-  Float_t  Const_0, Const_1, Const_2 ;  // OmegaTau parameters
+  Float_t  TensorV1 ;                   // Omega Tau tensor parameter - in the ExB direction
+  Float_t  TensorV2 ;                   // Omega Tau tensor parameter - in the direction perpendicular to ExB and Z axis
+  Float_t  Const_0, Const_1, Const_2  ; // OmegaTau parameters
   Double_t SpaceCharge, SpaceChargeR2 ; // Space Charge parameters (uniform or 1/R**2 in the TPC - arbitrary units)
-  Float_t  Ring ;                       // Location of short on field cage (rings)
-  Float_t  Resistor ;                   // Value of compensating resistor for field cage short (M-Ohm)
+  Double_t InnerGridLeakStrength      ; // Relative strength of the Inner grid leak
+  Double_t InnerGridLeakRadius        ; // Location (in local Y coordinates) of the Inner grid leak 
+  Double_t InnerGridLeakWidth         ; // Half-width of the Inner grid leak.  Must be larger than life for numerical reasons.
+  Double_t MiddlGridLeakStrength      ; // Relative strength of the Middle grid leak
+  Double_t MiddlGridLeakRadius        ; // Location (in local Y coordinates) of the Middle grid leak 
+  Double_t MiddlGridLeakWidth         ; // Half-width of the Middle grid leak.  Must be larger than life for numerical reasons.
+  Double_t OuterGridLeakStrength      ; // Relative strength of the Outer grid leak
+  Double_t OuterGridLeakRadius        ; // Location (in local Y coordinates) of the Outer grid leak 
+  Double_t OuterGridLeakWidth         ; // Half-width of the Outer grid leak.  Must be larger than life for numerical reasons.
+  Int_t    ShortTableRows             ; // Number of rows in the Shorted Ring Table
+  Int_t    Side[10]                   ; // Location of Short   E=0 /   W=1
+  Int_t    Cage[10]                   ; // Location of Short IFC=0 / OFC=1
+  Float_t  Ring[10]                   ; // Location of Short counting out from the CM.  CM==0 
+  Float_t  MissingResistance[10]      ; // Amount of Missing Resistance due to this short (MOhm)
+  Float_t  Resistor[10]               ; // Amount of compensating resistance added for this short
 
   Float_t  Bz[nZ][nR], Br[nZ][nR] ;         
   Float_t  Radius[nR], ZList[nZ] ;         
@@ -238,18 +263,29 @@ class StMagUtilities {
   virtual void    UndoShortedRingDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoTiltDistortion ( const Float_t x[], Float_t Xprime[] ) ;
 
-  virtual void    FixSpaceChargeDistortion ( const Int_t Charge, const Float_t x[3], const Float_t p[3], 
-					const Prime PrimaryOrGlobal, Float_t x_new[3], Float_t p_new[3],
-		      const unsigned int RowMask1 = 0xFFFFFF00 , const unsigned int RowMask2 = 0x1FFFFF,
-			     		                             const Float_t VertexError = 0.0200 ) ;
+  virtual void    FixSpaceChargeDistortion ( const Int_t Charge, const Float_t x[3], const Float_t p[3],
+					     const Prime PrimaryOrGlobal, 
+					     Float_t x_new[3], Float_t p_new[3],
+					     const unsigned int RowMask1 = 0xFFFFFF00 , 
+					     const unsigned int RowMask2 = 0x1FFFFF,
+					     const Float_t VertexError = 0.0200 ) ;
 
-  virtual void    ApplySpaceChargeDistortion ( const Double_t sc, const Int_t Charge, const Float_t x[3], const Float_t p[3], 
-			const Prime PrimaryOrGlobal, Int_t &new_Charge, Float_t x_new[3], Float_t p_new[3],
-		      const unsigned int RowMask1 = 0xFFFFFF00 , const unsigned int RowMask2 = 0x1FFFFF,
-			     		                             const Float_t VertexError = 0.0200 ) ;
+  virtual void    ApplySpaceChargeDistortion ( const Double_t sc, const Int_t Charge, 
+					       const Float_t x[3], const Float_t p[3], 
+					       const Prime PrimaryOrGlobal, Int_t &new_Charge, 
+					       Float_t x_new[3], Float_t p_new[3],
+					       const unsigned int RowMask1 = 0xFFFFFF00 , 
+					       const unsigned int RowMask2 = 0x1FFFFF,
+					       const Float_t VertexError = 0.0200 ) ;
 
-  virtual Int_t   PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Float_t VertexZ, Float_t PseudoRapidity, 
-		   Float_t DCA,  const unsigned int RowMask1, const unsigned int RowMask2, Float_t &pSpace ) ;
+  virtual Int_t   PredictSpaceChargeDistortion (Int_t Charge, 
+						Float_t Pt, 
+						Float_t VertexZ, 
+						Float_t PseudoRapidity, 
+						Float_t DCA,  
+						const unsigned int RowMask1, 
+						const unsigned int RowMask2, 
+						Float_t &pSpace ) ;
 
   virtual void    ManualSpaceCharge(Double_t SpcChg)
           { SpaceCharge   = SpcChg; fSpaceCharge   = 0;}
