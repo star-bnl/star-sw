@@ -17,11 +17,6 @@ install_slm:
 stafGen: $(SRCMDIR)/stafGen.cc
 	$(CXX) -o $@ $^
 #
-PROGS += pamiGen
-#
-pamiGen: $(BASE_DIR)/tools/initGen.csh
-	cp $< $@
-#
 eml_kuvec.o: eml_kuvec.F
 	$(FC) -I$(INCDIR) -c $< -o $@
 #

@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "asuLib.h"	/* Analysis Service Utilities */
+#define EML_MAIN
 #include "emlLib.h"	/* Error Messaging and Logging */
 
 
@@ -21,7 +22,7 @@
 //:<--------------------------------------------------------------------
 int eml_init()
 {
-   EML_MESSAGE(EML: Initializing.);
+   EML_MESSAGE("EML: Initializing.");
 
 /*- Define the EML KUIP commands. -*/
 // eml_def_();
@@ -42,7 +43,7 @@ int eml_init()
 //:<--------------------------------------------------------------------
 int eml_start()
 {
-   EML_MESSAGE(EML: Starting.);
+   EML_MESSAGE("EML: Starting.");
 
    return TRUE;
 }
@@ -55,7 +56,7 @@ int eml_start()
 //:<--------------------------------------------------------------------
 int eml_stop()
 {
-   EML_MESSAGE(EML: Stopping.);
+   EML_MESSAGE("EML: Stopping.");
 
    return TRUE;
 }
