@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.64 2000/08/15 22:17:27 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.65 2000/08/15 23:15:45 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -355,21 +355,27 @@ Int_t StEventDisplayMaker::Make()
          }
 #else
         TDataSet *dshits = GetDataSet("dst/point");
-        if (dshits)   {
+        // if (dshits)   
+        {
            AddName("dst/point(id_track,position[0]:position[1]:charge)");
            if (Debug()) {
               printf(" tphit found !!!\n");  
              ((TTable *)dshits)->Print(0,10);   
            }
         }
-         TDataSet *dstracks = GetDataSet("dst/globtrk");
-         if (dstracks) {
-            AddName("dst/globtrk");
-            if (Debug()) {
-              printf(" globtrk found !!!\n"); 
-             ((TTable *)dstracks)->Print(0,1);
-            }
-         }
+        const char *track2Draw = "dst/primtrk";
+        TDataSet *dstracks = GetDataSet(track2Draw);
+        // if (dstracks) 
+        {
+           AddName(track2Draw);
+           printf(" %s found !!!\n",track2Draw); 
+           if (Debug()) {
+             printf(" %s found !!!\n",track2Draw); 
+            ((TTable *)dstracks)->Print(0,1);
+           }
+        }
+        // printf(" no %s found !!!\n",track2Draw); 
+
 #endif
       }
     }
@@ -938,6 +944,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.65  2000/08/15 23:15:45  fine
+// globtrk has been replaced with primtrk for default views
+//
 // Revision 1.64  2000/08/15 22:17:27  fine
 // New defaults to draw globtrk and point
 //
