@@ -38,7 +38,7 @@ void StHbtExampleQQ(const Int_t nevents, const Char_t **fileList, const Char_t*,
 void StHbtMicroDstMaker(const Int_t nevents=9999,
 			const Char_t *path=venusPath,
 			const Char_t *file=venusFile,
-			const Char_t* outDir="/star/rcf/pwg/hbt/Laue/Test/V3/",		
+			const Char_t* outDir="/star/rcf/pwg/hbt/Laue/Test/V5/",		
 			const Char_t* outFile="dummy",
 			const Char_t* appendix="test.microDst")		
 { 
@@ -114,7 +114,7 @@ cout << "Just instantiated StEventMaker... lets go StHbtMaker!" << endl;
  StStrangeMuDstMaker* v0dst = new StStrangeMuDstMaker("v0dst");
  v0dst->DoV0(); //Set v0MiniDstMaker to find only v0s
  v0dst->SetNoKeep(); 
- v0dst->SetWrite(""); // Set V0muDStMaker output file and Event output file
+ v0dst->SetWrite(); // Set V0muDStMaker output file and Event output file
 // v0dst->SetWrite("StrangemuEventHBTPeriphdst.root","Strangemuv0HBTPeriphdst.root"); // Set V0muDStMaker output file and Event output file
  cout << "Just instantiated StStrangeMuDstMaker... lets go StHbt!" << endl;
 
@@ -164,8 +164,8 @@ cout << "READER SET UP.... " << endl;
  AllTrackCut->SetNHits(5,1000);           // range on number of TPC hits on the track
  AllTrackCut->SetP(0.0,50.0);               // range in P
  AllTrackCut->SetPt(0.0,50.0);              // range in Pt
- AllTrackCut->SetRapidity(-1.5,1.5);       // range in rapidity
- AllTrackCut->SetDCA(0.0,20.);              // range in Distance of Closest Approach to primary vertex
+ AllTrackCut->SetRapidity(-15,15);       // range in rapidity
+ AllTrackCut->SetDCA(0.0,200.);              // range in Distance of Closest Approach to primary vertex
  AllTrackCut->SetCharge(0);                // no cut on charge
  AllTrackCut->SetMass(0.139);              // pion mass
 // ***** set up pion cut *****
@@ -260,11 +260,11 @@ cout << "READER SET UP.... " << endl;
 
 
   //   set up a microDstWriter 
-//  StHbtBinaryReader* allWriter = new StHbtBinaryReader(ioMaker,dirName,"dummy",".microDst");
-//  TheManager->AddEventWriter(allWriter);
-//  allWriter->SetEventCut(EventCut);
-//  allWriter->SetTrackCut(AllTrackCut);
-//  cout << "WRITER SET UP.... " << endl;
+  StHbtBinaryReader* allWriter = new StHbtBinaryReader(ioMaker,dirName,"dummy",".microDst");
+  TheManager->AddEventWriter(allWriter);
+  allWriter->SetEventCut(EventCut);
+  allWriter->SetTrackCut(AllTrackCut);
+  cout << "WRITER SET UP.... " << endl;
 
   //   set up a microDstWriter 
 //   StHbtBinaryReader* pionWriter = new StHbtBinaryReader(ioMaker,dirName,"dummy",".pion.microDst");
@@ -307,12 +307,12 @@ cout << "READER SET UP.... " << endl;
 //  cout << "WRITER SET UP.... " << endl;
     
   //   set up a microDstWriter 
-  StHbtBinaryReader* OmegaWriter = new StHbtBinaryReader(ioMaker,dirName,"dummy",".Omega.microDst");
-  TheManager->AddEventWriter(OmegaWriter);
-  OmegaWriter->SetEventCut(EventCut);
-  OmegaWriter->SetTrackCut(KaonMinusTrackCut);
-  OmegaWriter->SetV0Cut(LambdaCut);
-  cout << "WRITER SET UP.... " << endl;
+//     StHbtBinaryReader* OmegaWriter = new StHbtBinaryReader(ioMaker,dirName,"dummy",".Omega.microDst");
+//   TheManager->AddEventWriter(OmegaWriter);
+//   OmegaWriter->SetEventCut(EventCut);
+//   OmegaWriter->SetTrackCut(KaonMinusTrackCut);
+//   OmegaWriter->SetV0Cut(LambdaCut);
+//   cout << "WRITER SET UP.... " << endl;
  
  //  set up a microDstWriter  with multiple track cuts
 //   StHbtBinaryReader* pionProtonWriter = new StHbtBinaryReader(ioMaker,dirName,"dummy",".pi.prot.microDst");
@@ -339,7 +339,7 @@ cout << "READER SET UP.... " << endl;
    int iret = chain->Make(iev); // This should call the Make() method in ALL makers    
    if (iret) {
      cout << "Bad return code!" << endl;
-     //     break;
+     break;
    }
  } // Event Loop
  chain->Finish(); // This should call the Finish() method in ALL makers
