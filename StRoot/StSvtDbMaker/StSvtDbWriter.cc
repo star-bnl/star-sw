@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbWriter.cc,v 1.1 2001/10/29 18:53:14 munhoz Exp $
+ * $Id: StSvtDbWriter.cc,v 1.2 2001/11/07 16:49:48 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbWriter.cc,v $
+ * Revision 1.2  2001/11/07 16:49:48  caines
+ * Add _st s added by stic for our comfort and convenience
+ *
  * Revision 1.1  2001/10/29 18:53:14  munhoz
  * starting SVT Data base
  *
@@ -26,9 +29,9 @@
 #include "StDbLib/StDbConfigNode.hh"                   //
 #include "StDbLib/StDbTable.h"                         //
 
-#include "../StDb/include/Calibrations/svtDriftVelocity.h"
-#include "../StDb/include/Calibrations/svtPedestals.h"
-#include "../StDb/include/Geometry/svtConfiguration.h"
+#include "svtDriftVelocity.h"
+#include "svtPedestals.h"
+#include "svtConfiguration.h"
 
 #define N_INJECTOR_LINES 4
 
@@ -111,7 +114,7 @@ void  StSvtDbWriter::addDriftVelocity(StSvtHybridCollection* svtColl)
   int* indexHybrid = new int[numberOfHybrids];
   int nHybrids=0;
 
-  svtDriftVelocity *driftVelocity = new svtDriftVelocity[numberOfHybrids];
+  svtDriftVelocity_st *driftVelocity = new svtDriftVelocity_st[numberOfHybrids];
   StSvtHybridDriftVelocity* hybridDriftVeloc;
 
   // Loop over barrels, ladders, wafers and hybrids
@@ -173,7 +176,7 @@ void  StSvtDbWriter::addPedestals(StSvtHybridCollection* svtColl)
   int* indexHybrid = new int[numberOfHybrids];
   int nHybrids=0;
 
-  svtPedestals *pedestals = new svtPedestals[numberOfHybrids];
+  svtPedestals_st *pedestals = new svtPedestals_st[numberOfHybrids];
   StSvtHybridPed* hybridPed;
 
   // Loop over barrels, ladders, wafers and hybrids
@@ -232,7 +235,7 @@ void  StSvtDbWriter::addConfiguration()
      return;
    };
 
-  svtConfiguration config;
+  svtConfiguration_st config;
 
   config.numberOfBarrels = 3;
   config.numberOfLadders = 2;
