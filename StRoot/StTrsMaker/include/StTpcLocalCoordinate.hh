@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: StTpcLocalCoordinate.hh,v 1.1 1998/11/10 17:12:06 fisyak Exp $
+ * $Id: StTpcLocalCoordinate.hh,v 1.2 1998/11/13 21:29:29 lasiuk Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -11,8 +11,11 @@
  **********************************************************************
  *
  * $Log: StTpcLocalCoordinate.hh,v $
- * Revision 1.1  1998/11/10 17:12:06  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1998/11/13 21:29:29  lasiuk
+ * allow setting coordinates individually
+ *
+ * Revision 1.2  1998/11/13 21:29:29  lasiuk
+ * allow setting coordinates individually
  *
  * Revision 1.1  1998/11/10 17:12:06  fisyak
  * Put Brian trs versin into StRoot
@@ -44,11 +47,15 @@ public:
     //StTpcLocalCoordinate(const StTpcLocalCoordinate&);
     //StTpcLocalCoordinate& operator=(const StTpcLocalCoordinate&);
     
+    // access functions provided by StThreeVector
+    const StThreeVector<double>& pos()  const;
+
     // To Modify Coordinates
     StThreeVector<double>& pos();
 
 private:
     StThreeVector<double> mPos;
+};
 
 inline const StThreeVector<double>& StTpcLocalCoordinate::pos() const { return(mPos); }
 inline StThreeVector<double>& StTpcLocalCoordinate::pos() { return(mPos); }
