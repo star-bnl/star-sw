@@ -14,6 +14,7 @@
  * @parm phot_thresh - minimum # photons to produce signal
  * @parm max_photons - conversion factor
  * @parm max_time - timing gate
+ * @parm dist - distance between VPD's
  * @author         Zoran Milosevich
  */
 
@@ -36,7 +37,8 @@
                                        response region of PMT's, here */
        float     phot_thresh;       /* minimum # photons to produce signal*/
        float     max_photons;       /* conversion factor*/ 
-       float     max_time;          /* timing gate */ 
+       float     max_time;          /* timing gate */
+       float     dist;              /* distance between VPD's */ 
    };
 
 /*  Last mod. for vps_par:  Tue Oct 15 19:41:37 1996 */
