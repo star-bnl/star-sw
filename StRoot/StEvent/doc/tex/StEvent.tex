@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 1.16 1999/03/31 19:03:50 ullrich Exp $
+% $Id: StEvent.tex,v 1.17 1999/04/08 15:27:52 ullrich Exp $
 %
 % Author: Thomas Ullrich, March 1999
 %
@@ -21,8 +21,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 1.16  1999/03/31 19:03:50  ullrich
-% Corrected typos in UML appendix
+% Revision 1.17  1999/04/08 15:27:52  ullrich
+% Added description of PID classes
 %
 % Revision 1.18  1999/04/13 23:27:23  genevb
 % Slightly refined vertex code, updated V0, Xi vertex documentation
@@ -155,14 +155,14 @@
 % Revision 2.20  2000/02/24 13:25:12  ullrich
 % Added RICH and EMC to the reference section. Created
 % (empty) section for EMC and RICH in User Guide.
-  {\LARGE $ $Revision: 1.16 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/31 19:03:50 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.17 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/04/08 15:27:52 $ $}  % replaced by cvs with current revision
 %
 % Revision 2.18  2000/02/11 16:23:45  ullrich
 % Add info on order in which primary vertices are stored
   {\LARGE User Guide and Reference Manual}\\[2cm]
-  {\LARGE $ $Revision: 1.16 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/31 19:03:50 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.17 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/04/08 15:27:52 $ $}  % replaced by cvs with current revision
 % Added Helens description of iflag (see StTrack::flag()).
 %
 % Revision 2.16  2000/01/27 18:38:30  ullrich
@@ -306,7 +306,7 @@ are not guaranteed to compile. Their only purpose is to illustrate a
 specific feature and not to provide a fully functional programming
 unit.
 
-  {\LARGE $ $Date: 1999/03/31 19:03:50 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/04/08 15:27:52 $ $}  % replaced by cvs with current revision
      \advance\leftmargin by \labelsep%
 \section{Further documentation}
 \label{sec:furtherdoc}
@@ -957,6 +957,69 @@ void printOneDedx(StDedx *dedx, const char* name)
      cout << "points used = " << dedx->numberOfPointsUsed() << endl;
      cout << "status word = " << dedx->status() << endl;
 }
+\end{verbatim}
+}%footnotesize
+\end{Entry}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Reference: StDedxPid
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{StDedxPid}
+\index{StDedxPid|textbf}
+\index{PID}
+\label{sec:StDedxPid}
+\begin{Entry}
+\item[Summary]
+     The class \name{StDedxPid} serves as an interface for all classes
+     which provide higher level PID of a track derived
+     from dE/dx data.
+
+\item[Synopsis]
+    \verb+#include "StDedxPid.hh"+\\
+    \verb+class StDedxPid;+\\
+    
+\item[Description]
+    This class is an abstract class, i.e., no instances
+    of this class can be created. Its only purpose is to define the
+    interface for derived concrete classes which implement the actual
+    code for PID via dE/dx in a specific detector.  The class
+    \name{StTrackPidTraits} returns pointers to concrete classes only
+    through the StDedxPid interface.\\
+    All member functions of this class are pure virtual functions.
+    \index{StTrackPidTraits}
+    
+\item[Persistence]
+    None
+
+\item[Related Classes]
+    The class \name{StTpcDedxPid} inherits from \name{StDedxPid} and thus
+    provides the exact same interface as defined here.
+    \index{StTpcDedxPid}
+        
+\item[Public Member\\ Functions]
+    \verb+virtual int detectorInfoAvailable() const = 0;+\\
+    Returns true (1) if the data for the corresponding detector
+    is available else false (0).
+    
+    \verb+virtual int meetsStandardPid() const = 0;+\\
+    Returns true (1) if the data for the corresponding detector
+    is available and their quality is sufficient to evaluate PID
+    parameters. Else the functions returns false (0).
+    
+    \verb+virtual double numberOfSigma(double m) const = 0;+\\
+    Returns the number of sigma a tracks dE/dx is away from
+    the expected mean for a track for a particle of this mass.
+    
+    \verb+virtual double meanPidFunction(double m) const = 0;+\\
+    Returns the average dE/dx value \emph{expected} for the referring track
+    under the assumption that the corresponding particle if of mass \name{m}.
+
+    \verb+virtual double sigmaPidFunction(double m) const = 0;+\\
+    Returns the average resolution of dE/dx in the referring detector.  
+
+\item[Examples]
     See sec.~\ref{sec:StTrackPidTraits}
 \begin{Entry}
 \end{Entry}
@@ -1254,7 +1317,7 @@ double sumEmcTowerHits(StEvent *event)
     From here one can navigate to (and access) every quantity stored
     in the DST. Since many other \StEvent\ header files are included
     in \name{StEvent.hh} itself it is often sufficient to include only
-    \name{StEven} is a virtual class.
+    \name{StEvent.hh} in your programming unit.
     \name{StEvent} itself doesn't offer much functionality but rather serves
     as a container for the event data.
     Deleting \name{StEvent} deletes the whole data tree, i.e.~all depending objects
@@ -1712,20 +1775,25 @@ meanPtOfRelatedTracks(StEvent *event, StFtpcHit *hit)
     Vector of SVT hits assigned to the track during
     reconstruction. The returned collection holds the
     hits by pointer. Note, that the collection can be empty.
-    \verb+virtual StDedx* tpcDedx();+\\
-    Returns pointer to an instance of the \name{StDedx} class which holds
+
+    \verb+virtual const StVecPtrFtpcHit& ftpcHits() const;+\\
     Vector of FTPC hits assigned to the track during
     reconstruction. The returned collection holds the
     hits by pointer. Note, that the collection can be empty.
-    \verb+virtual StDedx* svtDedx();+\\
-    Returns pointer to an instance of the \name{StDedx} class which holds
+
+    \verb+virtual const StDedx* tpcDedx() const;+\\
     Returns a constant pointer to an instance of the \name{StDedx} class which holds
     information on the energy loss of the track/particle in the TPC.
     If no dE/dx information is available a null pointer is returned.
-    \verb+virtual StDedx* ftpcDedx();+\\
-    Returns pointer to an instance of the \name{StDedx} class which holds
+
+    \verb+virtual const StDedx* svtDedx() const;+\\
     Returns a constant pointer to an instance of the \name{StDedx} class which holds
     information on the energy loss of the track/particle in the SVT.
+    If no dE/dx information is available a null pointer is returned.
+
+    \verb+virtual const StDedx* ftpcDedx() const;+\\
+    Returns a constant pointer to an instance of the \name{StDedx} class which holds
+    information on the energy loss of the track/particle in the FTPC.
     If no dE/dx information is available a null pointer is returned.
 
     \verb+virtual StTrackPidTraits& pidTraits();+\\
@@ -2653,6 +2721,71 @@ getBusyHits(StEvent *event, int N)
     }
     return theList;
 }
+\end{verbatim}
+}%footnotesize
+\end{Entry}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Reference: StTpcDedxPid
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{StTpcDedxPid}
+\index{StTpcDedxPid|textbf}
+\index{PID}
+\label{sec:StTpcDedxPid}
+\begin{Entry}
+\item[Summary]
+     The class \name{StTpcDedxPid} provides higher level PID information
+     for a given track using the dE/dx data from the TPC.
+     
+\item[Synopsis]
+    \verb+#include "StTpcDedxPid.hh"+\\
+    \verb+class StTpcDedxPid;+\\
+    
+\item[Description]
+    This class is a concrete implementation of the interface as
+    defined in \name{StDedxPid}.  The pointer returned from
+    \verb+StGlobalTrack::pidTraits()->tpcDedxPid()+ is of type
+    \name{StDedxPid} but points to an actual instance of
+    \name{StTpcDedxPid}. All member functions of this class are
+    identical to those in \name{StDedxPid}.  \index{StTrackPidTraits}
+    
+\item[Persistence]
+    None
+
+\item[Related Classes]
+    The class \name{StTpcDedxPid} inherits from the abstract class
+    \name{StDedxPid}. \index{StDedxPid}
+
+\item[Public Constructors]
+    \verb+StTpcDedxPid(const StGlobalTrack& tr);+\\
+    Construct an instance of \name{StTpcDedxPid} for the global
+    track \name{tr}. 
+    
+\item[Public Member\\ Functions]
+    \verb+int detectorInfoAvailable() const;+\\
+    Returns true (1) if the dE/dx data from the TPC is available else
+    false (0).
+    
+    \verb+int meetsStandardPid() const;+\\
+    Returns true (1) if the required TPC data is available their
+    quality is sufficient to evaluate PID parameters. Else the
+    functions returns false (0).
+    
+    \verb+double numberOfSigma(double m) const;+\\
+    Returns the number of sigma a tracks dE/dx is away from the
+    expected mean for a track for a particle of this mass.
+    
+    \verb+double meanPidFunction(double m) const;+\\
+    Returns the average dE/dx value \emph{expected} for the referring
+    track under the assumption that the corresponding particle if of
+    mass \name{m}.  
+
+    \verb+double sigmaPidFunction(double m) const;+\\
+    Returns the average resolution of dE/dx in the TPC.
+    
+\item[Examples]
     See sec.~\ref{sec:StTrackPidTraits}   
 
 \end{Entry}
@@ -2869,11 +3002,6 @@ double largestGap(StGlobalTrack &track)
     \verb+virtual StVertex* stopVertex();+\\
     The stop vertex of the track.
 
-    \verb+virtual StTrackPidTraits& pidTraits();+\\
-    Returns a reference to \name{StTrackPidTraits} which allows
-    to obtain information on the particle identification (PID)
-    of the current track.
-
     \verb+virtual StTrackFitTraits& fitTraits();+\\
     Returns a reference to \name{StTrackFitTraits} which keeps
     information on the covariant matrix, the $\chi^2$ of the
@@ -2933,39 +3061,6 @@ void printMom(StTrack &track)
 }
 \end{verbatim}
 }%footnotesize
-%    Reference: StTrackPidTraits
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{StTrackPidTraits}
-\index{StTrackPidTraits|textbf}
-\index{PID}
-\label{sec:StTrackPidTraits}
-\begin{Entry}
-\item[Summary]
-     The class \name{StTrackPidTraits} holds information on the PID
-     of a track.
-
-\item[Synopsis]
-    \verb+#include "StTrackPidTraits.hh"+\\
-    \verb+class StTrackPidTraits;+\\
-
-\item[Description]
-    This class is currently empty.\\
-    A reference to the pid traits from a track
-    can be obtained through the \name{StTrack::pidTraits()} member
-    function.  \index{StTrack}    
-    
-\item[Persistence]
-    None
-
-\item[Related Classes]
-    None
-
-
-\end{Entry}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
 
 For more examples see \name{StGlobalTrack} (sec.~\ref{sec:StGlobalTrack}).
 \end{Entry}
@@ -3048,7 +3143,7 @@ For more examples see \name{StGlobalTrack} (sec.~\ref{sec:StGlobalTrack}).
     \verb+void setNumberOfFitPoints(short);+\\
     Sets number of points used in the fit.
     
-\item[Examples]
+    \verb+void setNumberOfPossiblePoints(short);+\\
     Sets maximum number of points possible.
     
     \verb+void setQualityBitmap(short);+\\
@@ -3068,6 +3163,81 @@ void printMatrices(StEvent *event)
     for (i=tracks->begin(); i!=tracks->end(); i++)
         if (*i->fitTraits().numberOfFitPoints() == 45)
            cout << *i->fitTraits().covariantMatrix() << endl;
+}
+\end{verbatim}
+}%footnotesize
+
+\end{Entry}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Reference: StTrackPidTraits
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{StTrackPidTraits}
+\index{StTrackPidTraits|textbf}
+\index{PID}
+\label{sec:StTrackPidTraits}
+\begin{Entry}
+\item[Summary]
+     The class \name{StTrackPidTraits} serves as an interface to
+     various classes which provide PID information for global tracks.
+
+\item[Synopsis]
+    \verb+#include "StTrackPidTraits.hh"+\\
+    \verb+class StTrackPidTraits;+\\
+
+\item[Description]
+    This class allows to access all PID information available 
+    for the referring track.
+    A reference to the PID traits from a global track
+    is returned by the \name{StTrack::pidTraits()} member
+    function.  \index{StTrack}    
+    
+\item[Persistence]
+    None
+
+\item[Related Classes]
+    None
+
+\item[Public\\ Constructors]
+    \verb+StTrackPidTraits(const StGlobalTrack&);+\\
+    Creates PID traits for a given global track. This constructor is
+    internally used when a global track is set up so the user does not
+    need to call it explicitly.
+    
+\item[Public Member\\ Functions]
+    \verb+const StDedxPid* tpcDedxPid() const;+\\
+    Returns a constant pointer to an instance of \name{StTpcDedxPid}
+    which provides specific information on the PID as derived from the
+    dE/dx information in the TPC.  Note that the pointer is of type
+    \name{StDedxPid$*$}, i.e., an abstract class which serves as an
+    interface to the concrete implementations.
+    \index{StDedxPid}
+    \index{StTpcDedxPid}
+    
+\item[Examples] \index{pion PID (example)}   
+{\footnotesize
+\begin{verbatim}
+//
+//  Create a vector of pointers to pion
+//  candidates. Here we only use the PID
+//  derived from the dE/dx in the TPC.
+//
+StVecPtrGlobalTrack gimmePions(StEvent *event)
+{
+    double PionMass = 139.56995*MeV;
+    StVecPtrGlobalTrack candidates;
+
+    StTrackCollection *tracks = event->trackCollection();
+    StTrackIterator i;
+    StGlobalTrack   *track;
+    for (i=tracks->begin(); i!=tracks->end(); i++) {
+        track = *i;
+        if (track->pidTraits().tpcDedxPid()->numberOfSigma(PionMass) < 1)
+           candidates.push_back(track);
+    }
+    return candidates;
 }
 \end{verbatim}
 }%footnotesize
@@ -3346,8 +3516,7 @@ unsigned long countGoodV0s(StEvent *event, double limit)
                     event->vertexCollection();
     StVertexIterator iter;
     StV0Vertex *v0p;
-             if (v0p->dcaDaughters() < limit)
-             counter++;
+    StVertex   *vertex;
     for (iter = vertices->begin();
          iter != vertices->end(); iter++) {
          vertex = *iter;
@@ -3521,7 +3690,7 @@ unsigned long countCloseOnes(StEvent *event,
     unsigned long counter = 0;
     TrackCollection *tracks =
                 event->trackCollection();
-        if(dist < limit) counter++
+    StTrackIterator i;
     StGlobalTrack   *track;
     for (i = tracks->begin(); i != tracks->end(); i++) {
         track = *i;
@@ -3817,8 +3986,7 @@ unsigned long countHighPtXis(StEvent *event, double limit)
     StXiVertex *xip;
     StVertex   *vertex;
     for (iter = vertices->begin();
-             if (xiMom.perp() > limit)
-             counter++;
+         iter != vertices->end(); iter++) {
          vertex = *iter;
          if (vertex->type() == Xi) {
              xip = dynamic_cast<StXiVertex*>(vertex);
