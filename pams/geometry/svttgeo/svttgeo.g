@@ -42,10 +42,11 @@ Module  SVTTGEO  is the SVT geometry for STAR
 *             glass thickness changed from 350 to 150 microns to agree with   *
 *              D.L. note                                                      *
 *  Aug 17 PN  C0,Iring is not used anymore, delete their typedef              *
-* 06/08/98 PN truncate variable in structures to 8 letters maximum
-*             otherwise they can not be converted into tables
-* 06/13/98 PN simplify a bit carbon structure code
-*             error fixed in the SFCP cooling pipe 
+* 06/08/98 PN truncate variable in structures to 8 letters maximum            *
+*             otherwise they can not be converted into tables                 *
+* 06/13/98 PN simplify a bit carbon structure code                            *
+*             error fixed in the SFCP cooling pipe                            *
+* 09/26/99, E.Cains: if Nlayer is negaitive, generate one svt ladder there    *
 *******************************************************************************
 
 +cde,AGECOM,GCONST,GCUNIT.
@@ -105,7 +106,7 @@ Module  SVTTGEO  is the SVT geometry for STAR
 *
    Fill SVTG ! Basic SVT dimensions 
       Version   = 1          ! geometry version
-      Nlayer    = 7          ! number of svt layers
+      Nlayer    = 7          ! number of svt layers (was 7)
       RsizeMin  = 5          ! STV innermost radius
       RsizeMax  = 46.107     ! STV outermost radius
       ZsizeMax  = 270        ! SVT+FTPC length
@@ -335,6 +336,14 @@ Block SVTT is the mother of all SVT volumes
          Create   SLYD  " layer mother " 
 	 Position SLYD
       EndDo
+* 
+* The first (test) layer
+*
+      if (svtg_Nlayer<0) then
+         USE SVTL layer=-svtg_Nlayer
+         Create   SLYD  " layer mother " 
+	 Position SLYD
+      endif         
 *
 * The fourth (super) layer made of strip detectors
 *
@@ -368,18 +377,23 @@ EndBlock
 *
 Block SLSD is a single ladder mother (sector of tube) 
       Attribute SLSD    seen=0    colo=1
-      Shape  Division   Iaxis=2   Ndiv=svtl_Nladder,
-      c0=-180.0/svtl_Nladder*mod(ilayer,2)+svtg_Angoff*int((ilayer-1)/2) 
-*      c0=180.0/svtl_Nladder*mod(ilayer-1,2)+svtg_Angoff*int((ilayer-1)/2) 
-
+*>>>
+      if (svtg_Nlayer<0) then
+        Shape  Division   Iaxis=2   Ndiv=1    c0=-90
+      else
+        Shape  Division   Iaxis=2   Ndiv=svtl_Nladder,
+        c0=-180.0/svtl_Nladder*mod(ilayer,2)+svtg_Angoff*int((ilayer-1)/2) 
+      endif
+*>>>
 *
       Create and Position SLDI x=svtl_radius                ORT=YZX
 *
 *     Electronics go on both sides of the ladder
       Create   SELE
-      deg=180/svtl_Nladder
-      rad=(TwoPi/2)/svtl_Nladder
+
 *     Position electronics carrier on left side of ladder (y pos)
+      deg=180.0/svtl_Nladder
+      rad=(TwoPi/2)/svtl_Nladder
       xpos=sin(rad)*selc_ElcaWid/2-cos(rad)*elethk/2
       ypos=cos(rad)*selc_ElcaWid/2+sin(rad)*elethk/2
       do s=-1,1,2
