@@ -61,7 +61,7 @@ CC:  Loop thru all rows in tpc_dedx:
        do i = 1,num_tpc_dedx
          k=1
          found = .false.
-         do while (k.le.num_tpc_trks .and. found.eq..false.)
+         do while (k.le.num_tpc_trks .and. .not.found)
             if (tpc_dedx(i).id_track .eq. tpt_track(k).id) then
 c
 c found the tpc track

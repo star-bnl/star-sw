@@ -1,7 +1,7 @@
       INTEGER kUnknownId,kTpcId,kSvtId,kRichId,kFtpcWestId,kFtpcEastId
       INTEGER kTofPatchId,kCtbId,kSsdId,kBarrelEmcTowerId
       INTEGER kBarrelEmcPreShowerId,kBarrelSmdEtaStripId
-      INTEGER kEndcapEmcTowerId,kEndcapEmcPreShowerId,kSsdId
+      INTEGER kEndcapEmcTowerId,kEndcapEmcPreShowerId
       INTEGER kBarrelSmdPhiStripId,kZdcWestId,kZdcEastId
       INTEGER kEndcapSmdEtaStripId,kEndcapSmdPhiStripId,kMwpcWestId,kMwpcEastId
       INTEGER kTpcSvtId,kTpcSsdId,kTpcSsdsvtId,kSsdSvtId 
