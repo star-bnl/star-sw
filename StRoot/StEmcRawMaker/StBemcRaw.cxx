@@ -1,6 +1,9 @@
 // 
-// $Id: StBemcRaw.cxx,v 1.5 2004/10/21 00:01:42 suaide Exp $
+// $Id: StBemcRaw.cxx,v 1.6 2004/11/02 03:23:09 suaide Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.6  2004/11/02 03:23:09  suaide
+// small changes in order to fix a bug
+//
 // Revision 1.5  2004/10/21 00:01:42  suaide
 // small changes in histogramming and messages for BEMC
 // Complete version for EEMC done by Jan Balewski
@@ -379,7 +382,9 @@ Int_t StBemcRaw::getBemcADCRaw(Int_t det, Int_t softId, StEmcRawData* RAW, Int_t
     Int_t RDO,index;
     Int_t S = mDecoder->GetPsdRDO(softId,RDO,index);
     CRATE = RDO+1;
-    if(S==1 && RAW->header(RDO+BPRSOFFSET) && RDO>=0 && RDO<MAXBPRSCRATES)     
+    //cout <<det<<"  "<<RDO<<" "<<softId<<"   "<<RAW->header(RDO+BPRSOFFSET)<<endl;
+    if(RDO<0 || RDO>=MAXBPRSCRATES) return 0;
+    if(S==1 && RAW->header(RDO+BPRSOFFSET))     
     {
       CAP = RAW->header(RDO+BPRSOFFSET,SMDCAPACITOR);
       return RAW->data(RDO+BPRSOFFSET,index); 

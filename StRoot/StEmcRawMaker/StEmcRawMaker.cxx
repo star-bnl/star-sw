@@ -1,5 +1,5 @@
 // 
-// $Id: StEmcRawMaker.cxx,v 1.4 2004/10/21 00:01:50 suaide Exp $
+// $Id: StEmcRawMaker.cxx,v 1.5 2004/11/02 03:23:09 suaide Exp $
 
 #include <math.h>
 
@@ -228,6 +228,7 @@ Bool_t StEmcRawMaker::makeBemc()
     return kFALSE;
   }    
   mBemcRaw->setDate(GetDate());
+  mBemcRaw->getTables()->loadTables((StMaker*)this);
   return mBemcRaw->make(TheData,mEvent);
 }
 
@@ -273,6 +274,9 @@ void StEmcRawMaker::fillHistograms()
 }
 
 // $Log: StEmcRawMaker.cxx,v $
+// Revision 1.5  2004/11/02 03:23:09  suaide
+// small changes in order to fix a bug
+//
 // Revision 1.4  2004/10/21 00:01:50  suaide
 // small changes in histogramming and messages for BEMC
 // Complete version for EEMC done by Jan Balewski
