@@ -221,12 +221,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	      $main::PATH_SEPARATOR . $env->{FCPATH};
 	$FPPFLAGS = " -DCOMMONS_CONFIG_H -DCERNLIB_LINUX -DCPP_VERS=\"'W'\"";
       } elsif ( $pkg =~ m/^g2t/ || $pkg =~ m/^gstar/ || $pkg =~ m/^geometry/ ) {
-	$FCPATH .=  $main::PATH_SEPARATOR . "#asps/Simulation/starsim/include/atlsim";
-#wait 
-#	$FCPATH  = $INCLUDE;
-#	$FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/starsim/include";
-#	$FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/geant321/include";
-#	$FCPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/include";
+	$FCPATH  = $INCLUDE;
+	$FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/starsim/include";
+	$FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/geant321/include";
+	$FCPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/include";
       } 
     if ( $#idlM > -1 ) {
 	$CPPPATH = $INCLUDE . "/" . $pkg . $main::PATH_SEPARATOR . $CPPPATH;
