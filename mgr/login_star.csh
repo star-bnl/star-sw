@@ -1,5 +1,8 @@
 #!/bin/csh
 #  $Log: login_star.csh,v $
+#  Revision 1.6  1998/02/22 02:07:10  fisyak
+#  Add DATA
+#
 #  Revision 1.5  1998/02/21 00:59:13  fisyak
 #  use dropit only in interactive job
 #
@@ -23,7 +26,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/02/21 00:59:13 $ 
+#             Last modification $Date: 1998/02/22 02:07:10 $ 
 # login_star.csh
 #------------------------------------------------------------------#
 # This script will set up the STAR enviroment.                     #
@@ -50,6 +53,7 @@ source $STAR/mgr/SYS_STAR;
 setenv LIB_STAR  $STAR/lib/${SYS_HOST_STAR}; if ($ECHO) echo   "Setting up LIB_STAR  = $LIB_STAR"
 setenv BIN_STAR  $STAR/bin/${SYS_HOST_STAR}; if ($ECHO) echo   "Setting up BIN_STAR  = $BIN_STAR"
 setenv PAMS_STAR $STAR/pams;                 if ($ECHO) echo   "Setting up PAMS_STAR = $PAMS_STAR"
+setenv DATA      /afs/rhic/star/data;        if ($ECHO) echo   "Setting up DATA      = $DATA"
 setenv CVSROOT   $DIR_STAR/repository;       if ($ECHO) echo   "Setting up CVSROOT   = $CVSROOT"
 if ($?STAR_REF == 0) setenv STAR_REF  /afs/rhic/star/starlib/ref;      
                                              if ($ECHO) echo   "Setting up STAR_REF  = $STAR_REF"
@@ -124,7 +128,7 @@ if ( -e /usr/ccs/bin/ld ) set STAR_PATH = ( $STAR_PATH':'/usr/ccs/bin /usr/ccs/l
 if ( (`echo $PATH | awk '{print index($0,"/afs/rhic/star/packages")}' `) == 0 ) then
         setenv PATH "$STAR_PATH":"$PATH"
 endif
-if ( $?TERM > 0 && -e $STAR/mgr/dropit && -x /bin/nawk ) setenv PATH `$STAR/mgr/dropit` 
+if ( $?TERM > 0 && -e $STAR/mgr/dropit ) setenv PATH `$STAR/mgr/dropit` 
 unset STAR_PATH
 if ( -e $STAR/mgr/init_star.csh) source $STAR/mgr/init_star.csh
 if ($ECHO) echo   "STAR library version "$VERSION_STAR" has been initiated"

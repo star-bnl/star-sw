@@ -1,4 +1,8 @@
+#! /bin/csh -f
 #  $Log: init_star.csh,v $
+#  Revision 1.6  1998/02/22 02:07:10  fisyak
+#  Add DATA
+#
 #  Revision 1.5  1998/02/17 18:06:48  fisyak
 #  Add dropit for PATH
 #
@@ -19,8 +23,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/02/17 18:06:48 $ 
-#! /bin/csh -f
+#             Last modification $Date: 1998/02/22 02:07:10 $ 
 #. default setings
 	setenv CC        gcc
 	setenv CFLAGS   "-fpic -w"
@@ -120,7 +123,7 @@ switch ($SYS_HOST_STAR)
 #                                                  -u
 	setenv F_EXTENDED  -extend_source
 	setenv CC           cc
-	setenv CFLAGS     "-ansi -KPIC -kpicopt -w"
+	setenv CFLAGS     "-KPIC -kpicopt -w"
 #	setenv CFLAGS     "-fpic -fPIC -w"
 	setenv CXX         CC
 	setenv CXXFLAGS   "-32 ${CFLAGS} -xansi -w"
@@ -237,7 +240,7 @@ switch ($SYS_HOST_STAR)
     breaksw
 endsw
 setenv LD_LIBRARY_PATH "$STAR_LD_LIBRARY_PATH":"$LD_LIBRARY_PATH"
-if ( -e $STAR/mgr/dropit ) setenv LD_LIBRARY_PATH `$STAR/mgr/dropit $LD_LIBRARY_PATH ""`
+if (  $?TERM > 0 && -e $STAR/mgr/dropit ) setenv LD_LIBRARY_PATH `$STAR/mgr/dropit -p "$LD_LIBRARY_PATH"`
 unset STAR_LD_LIBRARY_PATH
 
 
