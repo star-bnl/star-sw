@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.hh,v 1.4 1999/07/10 21:31:17 levine Exp $
+ * $Id: EventReader.hh,v 1.5 1999/07/21 21:33:08 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: common definitions for all detectors
@@ -12,9 +12,29 @@
  * 23-Jun-99 MJL add verbose flag and setVerbose() method
  * 25-Jun-99 MJL added TPCV2P0_CPP_SR::getAsicParams(ASIC_params *);
  * 09-Jul-99 MJL added EventReader::findBank()
+ * 20-Jul-99 MJL added EventReader::fprintError()
+ * 20-Jul-99 MJL add alternate getEventReader with name of logfile
+ * 20-Jul-99 MJL add overloaded printEventInfo(FILE *)
  *
  ***************************************************************************
  * $Log: EventReader.hh,v $
+ * Revision 1.5  1999/07/21 21:33:08  levine
+ * changes to include error logging to file.
+ *
+ * There are now 2 constructors for EventReader:
+ *
+ *  EventReader();
+ *  EventReader(const char *logfilename);
+ *
+ * Constructed with no argument, there is no error logging. Supplying a file name
+ * sends all diagnostic output to the named file (N.B. opens in append mode)
+ *
+ * See example in client.cxx for constructing a log file name based on the
+ * datafile name.
+ *
+ * It is strongly advised to use the log file capability. You can grep it for
+ * instances of "ERROR:" to trap anything noteworthy (i.e., corrupted data files).
+ *
  * Revision 1.4  1999/07/10 21:31:17  levine
  * Detectors RICH, EMC, TRG now have their own (defined by each detector) interfaces.
  * Existing user code will not have to change any calls to TPC-like detector
@@ -108,6 +128,19 @@ struct ASIC_Cluster
 };
 
 
+struct Centroids {
+  unsigned short x; // units: 1/64 pad 
+  unsigned short t; // units: 1/64 timebin
+}; 
+
+struct SpacePt {
+  Centroids centroids;
+  unsigned short flags;
+  unsigned short q;
+};
+
+
+
 // The sector reader virtual classes
 class ZeroSuppressedReader
 {
@@ -125,8 +158,15 @@ public:
       // returns 0 if OK.
       // or negative if call fails
 
+// Read the clusters (space points) found in the mezzanine cluster-finder
+  virtual int getSpacePts(int PadRow, int *nSpacePts, SpacePt **SpacePts)=0;
+      // Fills (*SpacePts)[] along with the 
+      // buffers pointed to by (*SpacePts)[]
+      // Set nSpacePts to the # of elements in the (*SpacePts)[] array
+      // returns 0 if OK.
+      // or negative if call fails
+
   virtual int MemUsed()=0;
-  
   virtual ~ZeroSuppressedReader() {};
 };
 
@@ -255,6 +295,7 @@ public:
   virtual ~ConfigReader() {};
 };
 
+
 // Detector Reader Virtual Class
 class DetectorReader
 {
@@ -311,6 +352,7 @@ class EventReader
 {
 public:
   EventReader();
+  EventReader(const char *logfilename);
 
   void InitEventReader(int fd, long offset, int mmap=1);  
                              // takes open file descripter-offset
@@ -330,10 +372,14 @@ public:
   char *getDATAP() { return DATAP; };
   struct EventInfo getEventInfo();
   void printEventInfo();
+  void printEventInfo(FILE *);
+  void fprintError(int err, char *file, int line, char *userstring);
 
   int runno() { return runnum; }
   int errorNo() { return errnum; };
   string errstr() { return string(errstr0); };
+  FILE *logfd; //file handle for log file
+  char err_string[MX_MESSAGE][30];
 
   int MemUsed();              
 
@@ -366,6 +412,7 @@ private:
 // Declaration for the factories
 DetectorReader *getDetectorReader(EventReader *, string);
 EventReader *getEventReader(int fd, long offset, int MMap=1);
+EventReader *getEventReader(int fd, long offset, const char *logfile, int MMap=1);
 EventReader *getEventReader(char *event);
 RICH_Reader *getRichReader(EventReader *er);
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.7 1999/07/10 21:31:17 levine Exp $
+ * $Id: EventReader.cxx,v 1.8 1999/07/21 21:33:09 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -12,9 +12,30 @@
  * 23-Jun-99 MJL turn off all printf, cout when verbose=0
  * 24-Jun-99 MJL navigation now reads DATAP without prior 
  *               knowledge of DATAP length
+ * 20-Jul-99 MJL added EventReader::fprintError()
+ * 20-Jul-99 MJL add alternate constructor for EventReader with name of logfile
+ * 20-Jul-99 MJL add alternate getEventReader with name of logfile
+ * 20-Jul-99 MJL add overloaded printEventInfo(FILE *)
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.8  1999/07/21 21:33:09  levine
+ * changes to include error logging to file.
+ *
+ * There are now 2 constructors for EventReader:
+ *
+ *  EventReader();
+ *  EventReader(const char *logfilename);
+ *
+ * Constructed with no argument, there is no error logging. Supplying a file name
+ * sends all diagnostic output to the named file (N.B. opens in append mode)
+ *
+ * See example in client.cxx for constructing a log file name based on the
+ * datafile name.
+ *
+ * It is strongly advised to use the log file capability. You can grep it for
+ * instances of "ERROR:" to trap anything noteworthy (i.e., corrupted data files).
+ *
  * Revision 1.7  1999/07/10 21:31:17  levine
  * Detectors RICH, EMC, TRG now have their own (defined by each detector) interfaces.
  * Existing user code will not have to change any calls to TPC-like detector
@@ -52,6 +73,20 @@ EventReader *getEventReader(int fd, long offset, int MMap)
   
   return er;
 }
+
+EventReader *getEventReader(int fd, long offset, const char *logfile, int MMap)
+{
+  EventReader *er = new EventReader(logfile);
+  er->InitEventReader(fd, offset, MMap);
+  if(er->errorNo()) 
+  {
+    cout << er->errstr() << endl;
+    delete er;
+    return NULL;
+  }
+  er->printEventInfo(er->logfd);  // print the event information to the log file
+  return er;
+}
   
 EventReader *getEventReader(char *event)
 {
@@ -78,6 +113,25 @@ EventReader::EventReader()
   fd = -1;
   next_event_offset = -1;
   verbose = 0;
+  logfd = NULL; //no error logging
+}
+EventReader::EventReader(const char *logfile) //pass a string with name of logfile 
+{
+  DATAP = NULL;
+  MMAPP = NULL;
+  errnum = 0;
+  runnum = 0;
+  memset(errstr0, '\0', sizeof(errstr0));
+  event_size = 0;
+  fd = -1;
+  next_event_offset = -1;
+  verbose = 0;
+  logfd = fopen(logfile,"a");
+  if (logfd==NULL) {
+    printf("ERR: failed to open log file %s !!!!!!!\n",logfile);
+    exit(-1);
+  }
+  fprintf(logfd,"opening logfile...\n");
 }
 
 // Here lies the event reader code
@@ -86,6 +140,19 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
   long c_offset = offset;
   if (verbose) cout << "Initializing EventReader with a file" << endl;
   
+  //initialize the error strings
+  strcpy(err_string[0],"ERROR: FILE");
+  strcpy(err_string[1],"ERROR: CRC");
+  strcpy(err_string[2],"ERROR: SWAP");
+  strcpy(err_string[3],"ERROR: BANK");
+  strcpy(err_string[4],"ERROR: MEM");
+  strcpy(err_string[5],"ERROR: NOT DATA BANK");
+  strcpy(err_string[6],"ERROR: BAD ARG");
+  strcpy(err_string[7],"ERROR: ENDR ENCOUNTERED");
+  strcpy(err_string[8],"ERROR: BAD HEADER");
+  strcpy(err_string[9],"INFO: MISSING BANK");
+
+
   fd = fdes;
   int DATAPEVENTLENGTH=0;   // hack, the event length is not yet in datap
 
@@ -357,6 +424,31 @@ void EventReader::printEventInfo()
   printf("===========================================\n");
 }
 
+void EventReader::printEventInfo(FILE * fd)
+{
+  char ts[128] ;
+
+  EventInfo ei = getEventInfo();
+  sprintf(ts,"%s",ctime((const long int*)&ei.UnixTime)) ;
+  ts[24] = 0 ;
+  fprintf(fd,"===============  Event # %d  =============\n",ei.EventSeqNo);
+  fprintf(fd,"Ev len (wds) %d\n",ei.EventLength);
+  fprintf(fd,"Creation Time: %s \n",ts);
+  fprintf(fd,"Trigger word 0x%X\t\tTrigger Input word 0x%X\n",ei.TrigWord,ei.TrigInputWord);
+  fprintf(fd,"Detectors present: ");
+  if (ei.TPCPresent) fprintf(fd,"TPC ");
+  if (ei.SVTPresent) fprintf(fd,"SVT ");
+  if (ei.TOFPresent) fprintf(fd,"TOF ");
+  if (ei.EMCPresent) fprintf(fd,"EMC ");
+  if (ei.SMDPresent) fprintf(fd,"SMD ");
+  if (ei.FTPCPresent) fprintf(fd,"FTPC ");
+  if (ei.RICHPresent) fprintf(fd,"RICH ");
+  if (ei.TRGDetectorsPresent) fprintf(fd,"TRG ");
+  if (ei.L3Present) fprintf(fd,"L3 ");
+  fprintf(fd,"\n");
+  fprintf(fd,"===========================================\n");
+}
+
 long EventReader::NextEventOffset()
 {
   return next_event_offset;
@@ -408,4 +500,12 @@ char * EventReader::findBank(char *bankid)
 
   return (char *)pBank;
   
+}
+
+void EventReader::fprintError(int err, char *file, int line, char *userstring)
+{
+  if (logfd==NULL) return; //no file designated
+  if (err<0 || err>MX_MESSAGE) return; //protect against bad error code
+  fprintf(logfd,"%s  %s::%d   %s\n",err_string[err-1],file,line,userstring);
+  fflush(logfd);
 }
