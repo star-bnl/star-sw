@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.31 2000/10/20 21:21:35 lbarnby Exp $
+// $Id: StMatchMaker.cxx,v 1.32 2000/10/23 19:44:13 lbarnby Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.32  2000/10/23 19:44:13  lbarnby
+// Fix units for B
+//
 // Revision 1.31  2000/10/20 21:21:35  lbarnby
 // Set up copying into globtrk table (NO refit) if field-off run
 //
@@ -443,8 +446,8 @@ Int_t StMatchMaker::Init(){
   }
 
   // Set up copying of TPC tracks (no refit) if field off (B very small)
-  gMessMgr->Info() << "B field is " << B*kilogauss << " kilogauss" << endm;
-  if (B < 0.005*kilogauss){
+  gMessMgr->Info() << "B field is " << B/kilogauss << " kilogauss" << endm;
+  if (B/kilogauss < 0.005){
     gMessMgr->Info() <<
       "No field run: no refit, copy tracks into globtrk table" << endm;
     egr_egrpar_st *egr_egrpar = m_egr_egrpar->GetTable();
