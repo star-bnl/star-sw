@@ -92,7 +92,7 @@ Int_t StEmcMixerMaker::addHits()
     Float_t edep1_tot=0;
     Float_t edep2_tot=0;
  
-    for(UInt_t j=1;j<=NMODULES;j++) // loop over all modules
+    if(detector1 && detector2) for(UInt_t j=1;j<=NMODULES;j++) // loop over all modules
     {
       StEmcModule* module1 = detector1->module(j);
       StEmcModule* module2 = detector2->module(j);
