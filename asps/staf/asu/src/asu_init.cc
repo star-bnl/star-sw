@@ -26,6 +26,8 @@ int asu_init()
 {
    EML_MESSAGE(ASU: Initializing.);
 
+   asuMallocInit();			/* initalize asuAlloc */
+
 /*- Setup basic KUIP commands. -*/
 /* asu_kuip_init_();------------- use STAF_CERN_INIT in main instead */
    staf_kuip_init_();
@@ -59,7 +61,7 @@ int asu_stop()
 {
    EML_MESSAGE(ASU: Stopping.);
 
-   asuAllocStats();			/* show allocation stats */
+   asuMallocStats();			/* show allocation stats */
    return TRUE;
 }
 

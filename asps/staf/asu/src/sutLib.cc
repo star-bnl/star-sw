@@ -88,7 +88,7 @@ int sutMatchReg(char *pattern,char* string)
    char *newcursor=NULL;
    char *name=NULL;
 
-   rexp = (char*)ASUALLOC(strlen(pattern) +5);
+   rexp = (char*)MALLOC(strlen(pattern) +5);
    sprintf(rexp,"(%s)$0",pattern);fflush(0);
 
    if( 0 == strcmp(ret0[0],string) ){
@@ -97,8 +97,8 @@ int sutMatchReg(char *pattern,char* string)
    else {
       isMatch=FALSE;
    }
-   ASUFREE(name);
-   ASUFREE(rexp);
+   FREE(name);
+   FREE(rexp);
    return isMatch;
 }
 
@@ -121,11 +121,11 @@ int sutMatchPrefix(char *prefix,char* string)
    if( 0== sutStripWhitespace(&s,string)
    ||  0== sutStripWhitespace(&p,prefix)
    ){
-      ASUFREE(s); ASUFREE(p);
+      FREE(s); FREE(p);
       return FALSE;
    }
    if( string == strstr(s, p) ){
-      ASUFREE(s); ASUFREE(p);
+      FREE(s); FREE(p);
       return TRUE;
    }
 }
@@ -147,7 +147,7 @@ int sutStripWhitespace(char **outstring,char* string)
    char *o=NULL;
    s += (plen = strspn(s,whtspc));
    slen = strcspn(s,whtspc);
-   o = (char*)ASUALLOC(slen +1);
+   o = (char*)MALLOC(slen +1);
    strncpy(o,s,slen);
    *outstring=o;
    return (int)slen;
@@ -167,7 +167,7 @@ char* strntok(const char * str,const char * del,const int n)
    }
    d += strspn(d,del);          /* skip tokens */
    if( strcspn(d,del) > 0 ){
-      w = (char*)ASUCALLOC(1,strcspn(d,del) +1);
+      w = (char*)CALLOC(1,strcspn(d,del) +1);
       strncpy(w,d,strcspn(d,del));
       return (char*)w;
    }
@@ -186,7 +186,7 @@ int strsplit(const char * str,const char * del,char*** a)
 /* if( !(buf = strpbrk(str,del)) )return 0; // NO DELIMITERS FOUND */
 /* will return 1 and entire str array... as strtok */
 
-   buf = (char*)ASUALLOC(strlen(str) +1);
+   buf = (char*)MALLOC(strlen(str) +1);
    strcpy(buf,str);
    
    i = 0;
@@ -194,12 +194,12 @@ int strsplit(const char * str,const char * del,char*** a)
       /* _PRINTF("Token[%d]: >%s<\n", i, token); */
       aa[i++] = token;
    }
-   (*a) = (char**)ASUALLOC(i*sizeof(char**));
+   (*a) = (char**)MALLOC(i*sizeof(char**));
    for(j=0;j<i;j++){
-      (*a)[j] = (char*)ASUALLOC(strlen(aa[j]) +1);
+      (*a)[j] = (char*)MALLOC(strlen(aa[j]) +1);
       strcpy((*a)[j],aa[j]);
    }
-   ASUFREE(buf);
+   FREE(buf);
    return i;
 }
 
@@ -214,7 +214,7 @@ int strbracket(const char *str, const char * od, const char * cd,
    char *optr, *cptr;
    int olen, clen;
 
-   buf = (char*)ASUALLOC(strlen(str) +1);
+   buf = (char*)MALLOC(strlen(str) +1);
    strcpy(buf,str);
    olen = strlen(od);			/*length of opening delimiter*/
    clen = strlen(od);			/*length of closing delimiter*/
@@ -223,7 +223,7 @@ int strbracket(const char *str, const char * od, const char * cd,
    while( (optr=strstr(buf,od)) ){
       buf = optr +1;
       if( (cptr=strstr(buf,cd)) ){
-	 aa[i] = (char*)ASUALLOC((cptr-buf) +1);
+	 aa[i] = (char*)MALLOC((cptr-buf) +1);
 	 strncpy(aa[i],buf,(cptr-buf));
 	 buf = cptr +clen;
 	 i++;
@@ -232,12 +232,12 @@ int strbracket(const char *str, const char * od, const char * cd,
 	 buf = NULL;
       }
    }
-   (*a) = (char**)ASUALLOC(i*sizeof(char**));
+   (*a) = (char**)MALLOC(i*sizeof(char**));
    for(j=0;j<i;j++){
       (*a)[j] = aa[j];
       aa[j] = NULL;
    }
-   ASUFREE(buf);
+   FREE(buf);
    return i;
 }
 
