@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPythia.h,v 1.3 2004/06/25 03:13:01 porter Exp $
+ * $Id: StEStructPythia.h,v 1.4 2004/09/24 01:43:12 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -63,7 +63,7 @@ inline bool StEStructPythia::measureable(int pid){
   bool retVal=false;
 
   if(pid<0)pid*=-1;
-  if(pid!=211)return false;
+//  if(pid!=211)return false;
 
   switch(pid){
 
@@ -139,6 +139,9 @@ inline float* StEStructPythia::globalDCA(float* p, float* v){
 /**********************************************************************
  *
  * $Log: StEStructPythia.h,v $
+ * Revision 1.4  2004/09/24 01:43:12  prindle
+ * Add call to define centrality by multiplicity.
+ *
  * Revision 1.3  2004/06/25 03:13:01  porter
  * added simple trigger selection implemented like BBC-AND plus CTB
  *
