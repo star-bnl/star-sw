@@ -352,6 +352,7 @@ Int_t StiMaker::InitRun(int run)
 	mtracker->setTrackNodeFactory(mktracknodefactory);
 	mtracker->setTrackSeedFinder(mSeedFinder);
 	mtracker->setHitContainer(mhitstore);
+	mtracker->setTrackFilter(mFilter);
 	mtracker->isValid(true);
 	
 	if (StiIOBroker::instance()->useGui()) {
