@@ -1,8 +1,11 @@
 #ifndef MATH_CONSTANTS
 #define MATH_CONSTANTS
 #if 0
-/* $Id: math_constants.h,v 1.3 1999/12/23 23:21:22 fisyak Exp $ */
-/* $Log: math_constants.h,v $
+/* $Id: math_constants.h,v 1.4 2000/01/07 20:15:31 fisyak Exp $ 
+ * $Log: math_constants.h,v $
+ * Revision 1.4  2000/01/07 20:15:31  fisyak
+ * fix linux warnigns
+ *
  * Revision 1.3  1999/12/23 23:21:22  fisyak
  * remove egcs warning
  *
@@ -11,13 +14,13 @@
  *
  * Revision 1.1  1998/02/19 15:56:21  fisyak
  * Math. Phys. constants from H.Ward
- * */
-/* 
-** Most of these were copied from math.h.  The AIX math.h was
-** different than the other three, so I am simply going to have
-** our own version.
-**
-** Underscores here often mean 'divided by'.  E.g., PI_2 means pi/2.
+ *   
+ * 
+ * Most of these were copied from math.h.  The AIX math.h was
+ * different than the other three, so I am simply going to have
+ * our own version.
+ *
+ * Underscores here often mean 'divided by'.  E.g., PI_2 means pi/2.
 */
 #endif
 #define C_DEG_PER_RAD                 57.295779513082320876798155
