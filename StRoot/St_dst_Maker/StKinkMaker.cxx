@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.20 1999/09/24 01:23:36 fisyak Exp $
+// $Id: StKinkMaker.cxx,v 1.21 1999/09/29 18:56:39 wdeng Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.21  1999/09/29 18:56:39  wdeng
+// Accommodated to dst_track and dst_vertex change
+//
 // Revision 1.20  1999/09/24 01:23:36  fisyak
 // Reduced Include Path
 //
@@ -179,7 +182,7 @@ Int_t StKinkMaker::Make(){
   Int_t numOfGlbtrk = globtrk->GetNRows();
   Int_t tkf_limit = numOfGlbtrk/10 + 100;
   
-  St_dst_tkf_vertex *kinkVertex  = (St_dst_tkf_vertex *) matchI("kinkVertex");
+  St_dst_tkf_vertex *kinkVertex  = (St_dst_tkf_vertex *) primaryI("kinkVertex");
   if(!kinkVertex) {
     kinkVertex = new St_dst_tkf_vertex("kinkVertex", tkf_limit);
     AddData(kinkVertex);
@@ -211,8 +214,11 @@ Int_t StKinkMaker::Make(){
 	Int_t    h     = (B*dstTrackPtr->icharge > 0 ? -1 : 1);
 	Float_t phase = dstTrackPtr->psi*degree-h*pi/2;
 	Float_t pt    = (1./dstTrackPtr->invpt)*GeV;
-	Float_t curvature = fabs(c_light*nanosecond/meter*dstTrackPtr->icharge*B/tesla)/(pt/GeV);
-	StThreeVectorD origin(dstTrackPtr->x0, dstTrackPtr->y0, dstTrackPtr->z0);  
+	Float_t curvature = dstTrackPtr->curvature;
+	Float_t x0 = dstTrackPtr->r0 * cos(dstTrackPtr->phi0);
+	Float_t y0 = dstTrackPtr->r0 * sin(dstTrackPtr->phi0);
+	Float_t z0 = dstTrackPtr->z0;
+	StThreeVectorD origin(x0, y0, z0);  
 	
 	tempTrack = new StKinkLocalTrack(dstTrackPtr,
 					 curvature/meter,
@@ -271,8 +277,7 @@ Int_t StKinkMaker::Make(){
  	  if( numOfSolution == 0 ) continue;
 	  if( numOfSolution == 1 ) 
 	    {
-	      Float_t radius2D = sqrt(xCords[0]*xCords[0] +
-				      yCords[0]*yCords[0]);
+	      Float_t radius2D = sqrt(xCords[0]*xCords[0] + yCords[0]*yCords[0]);
 	      if( (radius2D < tkfpar->vertexRMin2D) || 	  
 		  (radius2D > tkfpar->vertexRMax2D) )  continue;
 	      xtarget = xCords[0];	    
@@ -280,10 +285,8 @@ Int_t StKinkMaker::Make(){
 	    }
 	  if ( numOfSolution == 2 )
 	    {
-	      Float_t radiusOne2D = sqrt(xCords[0]*xCords[0] +
-					 yCords[0]*yCords[0]);
-	      Float_t radiusTwo2D = sqrt(xCords[1]*xCords[1] +
-					 yCords[1]*yCords[1]);
+	      Float_t radiusOne2D = sqrt(xCords[0]*xCords[0] + yCords[0]*yCords[0]);
+	      Float_t radiusTwo2D = sqrt(xCords[1]*xCords[1] + yCords[1]*yCords[1]);
 	      if( (radiusOne2D > tkfpar->vertexRMin2D) && 	  
 		  (radiusOne2D < tkfpar->vertexRMax2D) &&
 		  (radiusTwo2D > tkfpar->vertexRMin2D) && 	  
@@ -458,23 +461,25 @@ void StKinkMaker::FillTableRow()
   kinkVtxRow.pd[2] = daughterMoment.z();
 	  
   kinkVtxRow.theta = decayAngle;
-  
-  
-  dstVtxRow.id       = dstVtxIndex + 1;
-  dstVtxRow.det_id   = 100*myTrack1->DetId() + myTrack2->DetId();
+
+  dstVtxRow.vtx_id      = kKinkVtxId;
+  dstVtxRow.n_daughters = 1;    
+  dstVtxRow.id          = dstVtxIndex + 1;
+  FillIflag();
+  dstVtxRow.det_id      = 100*myTrack1->DetId() + myTrack2->DetId();
+  dstVtxRow.id_aux_ent  = kinkVtxIndex + 1;
+ 
   dstVtxRow.x        = mKinkVertex.x();
   dstVtxRow.y        = mKinkVertex.y();
   dstVtxRow.z        = mKinkVertex.z();
-  dstVtxRow.sigma[0] = 0.;
-  dstVtxRow.sigma[1] = 0.;
-  dstVtxRow.sigma[2] = 0.;
-  dstVtxRow.pchi2    = 0.;
-  dstVtxRow.id_aux_ent = kinkVtxIndex + 1;
-  
-  FillIflag();
-
-  dstVtxRow.vtx_id      = kKinkVtxId;
-  dstVtxRow.n_daughters = 1;
+  dstVtxRow.covar[0] = 0.;
+  dstVtxRow.covar[1] = 0.;
+  dstVtxRow.covar[2] = 0.;
+  dstVtxRow.covar[3] = 0.;
+  dstVtxRow.covar[4] = 0.;
+  dstVtxRow.covar[5] = 0.;
+  dstVtxRow.chisq[0]    = 0.;
+  dstVtxRow.chisq[1]    = 0.;
 
 }
 

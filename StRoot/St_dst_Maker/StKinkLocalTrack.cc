@@ -1,5 +1,8 @@
-// $Id: StKinkLocalTrack.cc,v 1.3 1999/07/08 19:09:50 fisyak Exp $
+// $Id: StKinkLocalTrack.cc,v 1.4 1999/09/29 18:56:36 wdeng Exp $
 // $Log: StKinkLocalTrack.cc,v $
+// Revision 1.4  1999/09/29 18:56:36  wdeng
+// Accommodated to dst_track and dst_vertex change
+//
 // Revision 1.3  1999/07/08 19:09:50  fisyak
 // Add tabs, remove St_glb_Maker
 //
@@ -33,14 +36,14 @@ StKinkLocalTrack::StKinkLocalTrack(dst_track_st* trk, Float_t curvature, Float_t
   mNumOfHits = trk->n_fit_point;
   mCharge = trk->icharge;
   mPt = 1./trk->invpt;  
-  mStartPoint[0]=trk->x0;
-  mStartPoint[1]=trk->y0;
-  mStartPoint[2]=trk->z0;
-  mLastPoint[0]=trk->x_last[0];
-  mLastPoint[1]=trk->x_last[1];
-  mLastPoint[2]=trk->x_last[2];
+  mStartPoint[0] = trk->r0 * cos(trk->phi0);
+  mStartPoint[1] = trk->r0 * sin(trk->phi0);
+  mStartPoint[2] = trk->z0;
+  mLastPoint[0] = trk->x_last[0];
+  mLastPoint[1] = trk->x_last[1];
+  mLastPoint[2] = trk->x_last[2];
   mEndRadius2D = sqrt(trk->x_last[0]*trk->x_last[0] + trk->x_last[1]*trk->x_last[1]);
-  mStartRadius2D = sqrt(trk->x0*trk->x0 + trk->y0*trk->y0);
+  mStartRadius2D = trk->r0;
 }
 
 StKinkLocalTrack::~StKinkLocalTrack() {
