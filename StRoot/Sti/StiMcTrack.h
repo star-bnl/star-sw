@@ -42,11 +42,10 @@ class StiMcTrack : public StiTrack
   virtual double  getChi2() const;
   virtual void    setFlag(long v);
   virtual long    getFlag() const;
-  void setStMcTrack(const StMcTrack * track);
+  virtual void    setStMcTrack(const StMcTrack * track);
   const StMcTrack * getStMcTrack(const StMcTrack * track) const;
-	bool extendToVertex(StiHit* vertex);
+  bool extendToVertex(StiHit* vertex);
  protected:
-
   const StMcTrack * mcTrack;
 };
 

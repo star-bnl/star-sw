@@ -54,18 +54,22 @@ using namespace std;
 #include "StThreeVectorD.hh"
 #include "StiVertexFinder.h"
 #include "StiDefaultTrackFilter.h"
+#include "StiMasterDetectorBuilder.h"
 
 ostream& operator<<(ostream&, const StiTrack&);
 void StiKalmanTrackFinder::initialize()
 {
   cout << "StiKalmanTrackFinder::initialize() -I- Started"<<endl;
   _toolkit = StiToolkit::instance();
-  _trackSeedFinder   = _toolkit->getTrackSeedFinder();
   _trackNodeFactory  = _toolkit->getTrackNodeFactory(); 
   _trackFactory      = _toolkit->getTrackFactory();
   _mcTrackFactory    = _toolkit->getMcTrackFactory(); 
   _hitFactory        = _toolkit->getHitFactory(); 
-  _detectorContainer = _toolkit->getDetectorContainer();
+  _detectorContainer = _toolkit->getDetectorContainer(); 
+  _detectorContainer->build(_toolkit->getDetectorBuilder());
+  _detectorContainer->reset();
+  _trackSeedFinder   = _toolkit->getTrackSeedFinder();
+  _trackSeedFinder->initialize();
   _hitLoader         = _toolkit->getHitLoader();
   _hitContainer      = _toolkit->getHitContainer();
   _trackContainer    = _toolkit->getTrackContainer();
@@ -223,9 +227,10 @@ void StiKalmanTrackFinder::findTracks()
 			plus++;
 		      else
 			minus++;
-		      StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
-		      if (t) t->update();
+		      //StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
+		      //if (t) t->update();
 		      _trackContainer->push_back(track);
+		      track->reserveHits();
 		    }
 		}
 	      else
@@ -234,9 +239,10 @@ void StiKalmanTrackFinder::findTracks()
 		    plus++;
 		  else
 		    minus++;
-		  _trackContainer->push_back(track);
-		  StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
-		  if (t) t->update();
+		  _trackContainer->push_back(track);  
+		  track->reserveHits();
+		  //StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
+		  //if (t) t->update();
 		}
 	    }
 	  catch (runtime_error & rte)
@@ -382,8 +388,8 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
   bool debug=false;
   if (fabs(track->getPseudoRapidity())<0.2)
     {
-      // debug=true;
-      //cout << " TRACK:"<<*track<<endl;
+       debug=true;
+      cout << " TRACK:"<<*track<<endl;
     }
   if (!sNode)
     throw logic_error("SKTF::find()\t - ERROR - track last node ==0");
@@ -411,7 +417,7 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
       else
 	_detectorContainer->moveOut();
       tDet = **_detectorContainer;
-      //cout << tDet->getName()<<" ACTIVE:" << tDet->isActive() << endl;
+      if(debug) cout << tDet->getName()<<" ACTIVE:" << tDet->isActive() << endl;
 	  
       leadDet = tDet;
       // tDet==0 implies a severe detector container error - exit
@@ -630,6 +636,7 @@ void StiKalmanTrackFinder::findNextTrackSegment()
   // depracated
 }
 
+/*
 void StiKalmanTrackFinder::update()
 {
   TrackMap::const_iterator iter;
@@ -643,25 +650,25 @@ void StiKalmanTrackFinder::update()
     {
       //_messenger << "StiKalmanTrackFinder::update() -I- Looping on MC tracks."<<endl;
       for (iter=_mcTrackContainer->begin();iter!=_mcTrackContainer->end(); ++iter) 
-				{
-					if (_guiMcTrackFilter)
-						{
-							//_messenger << "StiKalmanTrackFinder::update() -I- Filter OK/";
-							if (_guiMcTrackFilter->filter((*iter).second))
-								{
-									//_messenger <<"Passed"<<endl;
-									t = dynamic_cast<StiDrawableTrack *>((*iter).second);
-									if (t)
-										t->update();
-									else
-										_messenger << "StiKalmanTrackFinder::update() - WARNING - MC dynamic_cast failed." << endl;
-								}
-						}	
-					else
-						_messenger << "StiKalmanTrackFinder::update() -I- Filter NOK"<<endl;
-				}
+	{
+	  if (_guiMcTrackFilter)
+	    {
+	      //_messenger << "StiKalmanTrackFinder::update() -I- Filter OK/";
+	      if (_guiMcTrackFilter->filter((*iter).second))
+		{
+		  //_messenger <<"Passed"<<endl;
+		  t = dynamic_cast<StiDrawableTrack *>((*iter).second);
+		  if (t)
+		    t->update();
+		  else
+		    _messenger << "StiKalmanTrackFinder::update() - WARNING - MC dynamic_cast failed." << endl;
+		}
+	    }	
+	  else
+	    _messenger << "StiKalmanTrackFinder::update() -I- Filter NOK"<<endl;
+	}
     }
-	
+  
   // Reconstructed tracks
   for (iter=_trackContainer->begin();iter!=_trackContainer->end();++iter) 
     {
@@ -677,71 +684,6 @@ void StiKalmanTrackFinder::update()
   StiToolkit::instance()->getDisplayManager()->draw();
   StiToolkit::instance()->getDisplayManager()->update();
   //_messenger << "StiKalmanTrackFinder::update() -I- Done."<<endl;
-}
-
-/*
-void StiKalmanTrackFinder::reloadEvent()
-{
-	clear();
-	loadEvent(_event,_mcEvent);
-}
-
-void StiKalmanTrackFinder::loadEvent(StEvent * event, StMcEvent * mcEvent)
-{
-  if (!event)
-    throw runtime_error("StiKalmanTrackFinder::loadEvent(...) - FATAL - given event==0");
-  _event = event;
-  _mcEvent = mcEvent;
-  if (!_pars->useMcAsRec)
-    {
-      cout << "StiKalmanTrackFinder::loadEvent( ) -I- Loading StEvent Reconstructed Hits"<<endl; 
-      loadHits(event);
-    }
-  else
-    cout << "StiKalmanTrackFinder::loadEvent( ) -I- Not loading StEvent Reconstructed Hits"<<endl; 
-  if (mcEvent)
-    { 
-      StiEvaluableTrackSeedFinder* temp;
-      temp = dynamic_cast<StiEvaluableTrackSeedFinder*>(_trackSeedFinder);
-      if (temp!=0) 
-	temp->setEvent(mcEvent);
-      loadMcTracks(mcEvent);
-    }
-  _trackSeedFinder->reset();
-
-}
-
-void StiKalmanTrackFinder::loadHits(StEvent * event)
-{
-  if(!_hitLoader)
-    throw runtime_error("StiKalmanTrackFinder::loadHits(...) - FATAL - _hitLoader==0");
-  _hitLoader->loadHits(event);
-}
-
-void StiKalmanTrackFinder::loadMcTracks(StMcEvent * mcEvent)
-{
-  cout << "StiKalmanTrackFinder::loadMcTracks() -I- Started"<<endl;
-  _hitLoader->loadMcHits(mcEvent);
-}
-
-
-/*! Find all tracks in the given event
-<p>
-<ol>
-<li>First reset/clear the finder</li>
-<li>Load the hits of the given event, and optionally the tracks of the given McEvent</li>
-<li>Proceed to find all tracks of the given event</li>
-</ol>
-void StiKalmanTrackFinder::findTracks(StEvent * event, StMcEvent * mcEvent)
-{
-  _messenger << "StiKalmanTrackFinder::findTracks(StEvent * event, StMcEvent * mcEvent) -I- Starting"  << endl;
-  // Reset/Clear all data from previous events
-  clear();
-  // Load data from given event and mcEvent
-  loadEvent(event,mcEvent);
-  // Proceed to find all track 
-  findTracks();
-  _messenger << "StiKalmanTrackFinder::findTracks(StEvent*) -I- Done"  << endl;
 }
 */
 

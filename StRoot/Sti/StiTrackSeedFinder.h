@@ -5,15 +5,16 @@
 #define StiTrackSeedFinder_H_INCLUDED
 #include <stdexcept>
 #include <string>
+#include <math.h>
 using std::string;
 
 #include "Sti/Base/EditableParameters.h"
+#include "Sti/StiHit.h"
 class Messenger;
 class StiKalmanTrack;
 class StiHitContainer;
 class StiDetectorContainer;
 class StiDetector;
-class StiHit;
 class EditableParameters;
 template<class Factorized>class Factory;
 class Sti2HitComboFilter;

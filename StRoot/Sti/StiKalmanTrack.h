@@ -240,11 +240,11 @@ class StiKalmanTrack : public StiTrack
    void setFittingDirection(StiDirection direction) { fittingDirection = direction;}
    
    /// Method used to add a hit to this track
-   StiKalmanTrackNode * add(StiHit *h,double alpha, double eta, double curvature, double tanl);
+   virtual StiKalmanTrackNode * add(StiHit *h,double alpha, double eta, double curvature, double tanl);
    
    /// Add a kalman track node to this track as a child to the last node of the track
    /// Return the added node 
-   StiKalmanTrackNode * add(StiKalmanTrackNode * node);
+   virtual StiKalmanTrackNode * add(StiKalmanTrackNode * node);
 
   /// Remove given hit from this track
   void removeHit(StiHit *h);

@@ -100,7 +100,7 @@ inline unsigned int  StiDetectorBuilder::getNRows() const
 ///Returns the number of sectors (or segments) in a the
 ///given row. Sector are expected to be azimuthally
 ///distributed.
-inline unsigned int  StiDetectorBuilder::getNSectors(unsigned int row=0) const
+inline unsigned int  StiDetectorBuilder::getNSectors(unsigned int row) const
 {
   if (row>_nRows)
     {

@@ -91,6 +91,10 @@ public:
       return _alpha;
     }
   
+  double x_g() const;
+  double y_g() const;
+  double z_g() const;
+    
   double getX() const
     {
       return _x;
@@ -448,6 +452,21 @@ inline StThreeVector<double> StiKalmanTrackNode::getPoint() const
 inline StThreeVector<double> StiKalmanTrackNode::getGlobalPoint() const
 {
   return StThreeVector<double>(_cosAlpha*_x-_sinAlpha*_p0, _sinAlpha*_x+_cosAlpha*_p0, _p1);
+}
+
+inline  double StiKalmanTrackNode::x_g() const
+{
+  return _cosAlpha*_x-_sinAlpha*_p0;
+}
+
+inline  double StiKalmanTrackNode::y_g() const
+{
+  return _sinAlpha*_x+_cosAlpha*_p0;
+}
+
+inline  double StiKalmanTrackNode::z_g() const
+{
+  return _p1;
 }
 
 inline double StiKalmanTrackNode::pathlength() const

@@ -74,8 +74,8 @@ Observer::~Observer()
 
 void Observer::changed(Subject* changedSubject)
 {
-  if (changedSubject!=mSubject) 
-    cout <<"Observer::changed(Subject*) - ERROR - changedSubject!=mSubject"<<endl;
-  else 
-    getNewState();
+  //if (changedSubject!=mSubject) 
+  //  cout <<"Observer::changed(Subject*) - ERROR - changedSubject!=mSubject"<<endl;
+  //else 
+  getNewState();
 }

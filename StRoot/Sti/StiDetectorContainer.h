@@ -64,6 +64,8 @@ using std::vector;
 #include <map>
 using std::map;
 
+#include "Sti/Base/Named.h"
+#include "Sti/Base/Described.h"
 #include "Sti/Base/Factory.h"
 #include "StiDetector.h"
 #include "StiCompositeLeafIterator.h"
@@ -76,20 +78,16 @@ class StiMaterial;
 class Messenger;
 class StiDetectorBuilder;
 
-class StiDetectorContainer
+class StiDetectorContainer : public Named, public Described
 {
 public:
+		
+    StiDetectorContainer(const string & name, const string & description);
 
-    ///We inclue this to avoid compiler warnings generated because of the
-    /// singleton design pattern.
-    friend class nobody;
+    ///Private destructor: implementation of singleton pattern.
+    virtual ~StiDetectorContainer();
+		
 
-    ///Access to singleton instance
-    static StiDetectorContainer* instance();
-
-    ///Kill the current instance.  Use this wisely!
-    static void kill();
-    
     ///Builds the detector tree given a pointer to the detector builder
     virtual void build(StiDetectorBuilder * builder);
 
@@ -99,8 +97,6 @@ public:
     ///This performs a full internal reset of interator structure.
     void reset();
     
-    //Navigation
-
     ///Dereference current iterator and return a pointer to current StiDetector.
     StiDetector* operator*() const;
     
@@ -126,11 +122,6 @@ public:
     ///Set iterators to the detector closest to the given position and angle.
     void setToDetector(double position, double angle);
 
-    //Utilities
-
-    ///This is not currently implemented.
-    void print() const;
-    
 private:
 
     bool setPhi(const StiOrderKey& oldOrder);
@@ -159,29 +150,12 @@ private:
     ///An iterator representing the current azimuthal position.
     StiDetectorNodeVector::const_iterator mphi_it;
 
-private:
-
     ///This is an internal function that is used to set the internal iterator
     ///structure
     /// to point to the position (or position closest to) that given by node.
     void setToLeaf(StiDetectorNode* node);
     
-		
-		//private:
- public:
-    //Singleton Management
-		
-    ///Private destructor: implementation of singleton pattern.
-    virtual ~StiDetectorContainer();
-		
-    ///Private destructor: implementation of singleton pattern.
-    StiDetectorContainer();
-		
- private:
-    ///Static pointer to StiDetectorContainer: implementation of singelton
-    ///pattern.
 
-    static StiDetectorContainer* sinstance;
 };
 
 //inlines

@@ -27,19 +27,17 @@ StiLocalTrackSeedFinder::StiLocalTrackSeedFinder(const string& name,
 						 StiDetectorContainer    * detectorContainer)
   : StiTrackSeedFinder(name,trackFactory,hitContainer,detectorContainer)
 {
-  _messenger <<"StiLocalTrackSeedFinder::StiLocalTrackSeedFinder() - INFO - Started"<<endl;
-  initialize();
-  _messenger <<"StiLocalTrackSeedFinder::StiLocalTrackSeedFinder() - INFO - Done"<<endl;
+  _messenger <<"StiLocalTrackSeedFinder::StiLocalTrackSeedFinder() -I- Started/Done"<<endl;
 }
 
 StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder()
 {
-  _messenger <<"StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder()"<<endl;
+  _messenger <<"StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder() -I- Started/Done"<<endl;
 }
 
 void StiLocalTrackSeedFinder::initialize()
 {
-	_messenger << "StiLocalTrackSeedFinder::initialize() -I- Started" << endl;
+  _messenger << "StiLocalTrackSeedFinder::initialize() -I- Started" << endl;
   Factory<EditableParameter> * f = StiToolkit::instance()->getParameterFactory();
   if (!f)
     {
@@ -51,13 +49,13 @@ void StiLocalTrackSeedFinder::initialize()
   add(f->getInstance()->set("SeedLength", "Seed Length",   &mSeedLength,    2,  2, 6, 1, 0));
   add(f->getInstance()->set("extraDeltaY","extra-Delta-Y", &mExtrapDeltaY, 1., 0.5, 10., 0.1, 0));
   add(f->getInstance()->set("extraDeltaZ","extra-Delta-Z", &mExtrapDeltaZ, 2., 0.5, 10., 0.1, 0));
-
+  
   add(f->getInstance()->set("MaxSkipped","Max Layers Skipped",  &mMaxSkipped, 2, 0, 5, 1, 0));
   add(f->getInstance()->set("ExtrapMinLength","Min Length of Extrapolation", &mExtrapMinLength , 4, 1, 10, 1, 0));
   add(f->getInstance()->set("ExtrapMaxLength","Max Length of Extrapolation", &mExtrapMaxLength,  5, 1, 10, 1, 0));
   add(f->getInstance()->set("UseOrigin","Use Origin in Fit", &mUseOrigin, true, 0));
   add(f->getInstance()->set("DoHelixFit","Do Helix Fit",  &mDoHelixFit, true, 0));
-
+  
   StiMasterDetectorBuilder * builder = StiToolkit::instance()->getDetectorBuilder();
   if (!builder)
     throw runtime_error("StiCompositeSeedFinder::build() -F- builder==0 ");

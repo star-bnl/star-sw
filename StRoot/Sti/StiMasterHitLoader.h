@@ -83,7 +83,7 @@ void StiMasterHitLoader<Source1, Source2,Detector>::loadEvent(Source1 *source1, 
   if(!_hitContainer)
     throw runtime_error("StiMasterHitLoader::loadEvent( ) -F- _hitContainer==0");
   _hitContainer->clear();
-  if (source2 && false)
+  if (source2)
     {
       if(!_mcHitContainer)
 	throw runtime_error("StiMasterHitLoader::loadEvent( ) -F- _hitContainer==0");
@@ -93,11 +93,11 @@ void StiMasterHitLoader<Source1, Source2,Detector>::loadEvent(Source1 *source1, 
   for (iter=begin();iter!=end();iter++)
     (*iter)->loadEvent(source1,source2); 
   _hitContainer->sortHits();
-  _hitContainer->update();  
-  if (source2 && false)
+  _hitContainer->reset();//declare all hits as unused...
+  if (source2)
     {
-      _mcHitContainer->sortHits();
-      _mcHitContainer->update();
+      _mcHitContainer->sortHits(); 
+      _mcHitContainer->reset();
     }
 }
 

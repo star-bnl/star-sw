@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.20 2003/03/31 17:18:47 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.21 2003/04/10 12:02:13 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.21  2003/04/10 12:02:13  pruneau
+ * various changes
+ *
  * Revision 2.20  2003/03/31 17:18:47  pruneau
  * various
  *
@@ -952,7 +955,7 @@ bool StiKalmanTrack::find(int direction)
       swap();
       setTrackingDirection(kOutsideIn);
     }
-  reserveHits();
+  //reserveHits();
   setFlag(1);
   return trackExtended||trackExtendedOut;
 }
