@@ -57,12 +57,12 @@
     #--  Prepare the catalog
     # 
     if ( ! -f ${registerDirectory}/../index.html ) then;
-       echo "<HTML><TITLE>${jobTitle} catalog </TITLE> <BODY> <small> <code> <ul>"  >${registerDirectory}/../index.html
+       echo "<HTML><META HTTP-EQUIV=Refresh CONTENT=1200><TITLE>${jobTitle} catalog </TITLE> <BODY> <small> <code> <ul>"  >${registerDirectory}/../index.html
     endif
     echo "<li><a href="$REQUESTID">Job: $REQUESTID `date`</a>" >> ${registerDirectory}/../index.html
     #
     if ( ! -f ${registerDirectory}/index.html ) then;
-       echo "<HTML><TITLE>${jobTitle} $REQUESTID catalog </TITLE> <BODY> <small> <code> <ul>"  >${registerDirectory}/index.html
+       echo "<HTML><META HTTP-EQUIV=Refresh CONTENT=20><TITLE>${jobTitle} $REQUESTID catalog </TITLE> <BODY> <small> <code> <ul>"  >${registerDirectory}/index.html
     endif
     echo "<li><a href="$PROCESSID.html">Process: $PROCESSID `date` </a>" >> ${registerDirectory}/index.html
 
@@ -86,7 +86,7 @@
 # ---
 #   Start the local Web page
 # ---
-    echo "<HTML><TITLE>${jobTitle} $PROCESSID.$REQUESTID has been started </TITLE> <BODY> <small> <code> <pre>"  >${localLogFile}
+    echo "<HTML><META HTTP-EQUIV=Refresh CONTENT=300><TITLE>${jobTitle} $PROCESSID.$REQUESTID has been started </TITLE> <BODY> <small> <code> <pre>"  >${localLogFile}
     cd ${packageDirectoryBin}
 
 #    -------------------------------
@@ -133,14 +133,17 @@
  
     ls -l  $SCRATCH/${ZEBRAINPUT}  >>${localLogFile}
     ls -l  $SCRATCH/${ZEBRAINPUT}
+    
+    #----------- This is for the future ---------------------
     #set nFile=0
     #while ( $nFile < $INPUTFILECOUNT )
     #  eval set filename = '$INPUTFILE'$nFile 
 
-        # put your script here, with filename as input file
+    # ----- put your script here, with filename as input file  ---------
     #   echo $filename 
     #   set nFile++
     # end
+    #---------------------------
 
 
 #    -------------------------------
