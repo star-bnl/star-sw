@@ -1,68 +1,70 @@
+// $Id: StAngleCorrMaker.h,v 1.7 1999/12/28 19:10:02 horsley Exp $
+//
+//
 
 #ifndef StAngleCorrMaker_HH
 #define StAngleCorrMaker_HH
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// StAnalysisMaker
+// StAngleCorrMaker
 //
 // Description: 
-//  Sample maker to access and analyze StEvent
+// 
 //
 // Environment:
 //  Software developed for the STAR Detector at Brookhaven National Laboratory
 //
-// Author List: 
-//  Torre Wenaus, BNL
-//  Craig Ogilvie MIT
+// Author List:
+//  Craig Olgivie, MIT 
+//  Matt Horsley, Yale University
 //
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "StMaker.h"
+#include "StAngleCorrAnalysisManager.h"
+#include "TString.h"
+#include <vector>
+#include "StAngleCorrFunction.h"
 
-
-#include <TOrdCollection.h>
-#include <TFile.h>
 class StEvent;
 class StRun;
-class TH1F;
 
 class StAngleCorrMaker : public StMaker {
 
 private:
-
-  // Maker generates a container of tracks 
-  TOrdCollection* mCollectionOfTracksA;
-  TOrdCollection* mCollectionOfTracksB;
-  TOrdCollection* mCollectionOfHighestPt;
-  int mNumberEventsInPool ;
-  int mTotalEvents ;
-
-  void analyseRealPairs(StEvent&, int);
-  void analyseMixedPairs();
+  Bool_t drawinit;
+  Char_t collectionName[256];
+  StAngleCorrAnalysisManager corrAnalysis; 
+  TString track1,track2;
 
 protected:
-  // maker generates some histograms
-  TFile* mOutput;
-
-  TH1F* mPhiNumeratorPtThresh ;
-  TH1F* mPhiDenominatorPtThresh ;
-  TH1F* mPhiNumeratorPtHigh ; 
-  TH1F* mPhiDenominatorPtHigh ;
-
+  
 public:
 
-  StAngleCorrMaker(const Char_t *name="angle corr", const Char_t *title="angle corr");
+                StAngleCorrMaker(const Char_t *name="angle corr maker");
   virtual ~StAngleCorrMaker();
+  virtual void  Clear(Option_t *option="");
   virtual Int_t Init();
-  virtual Int_t  Make();
-  virtual Int_t  Finish();
-
-  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StAngleCorrMaker.h,v 1.6 1999/08/25 14:19:35 ogilvie Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+                void  AddAnalysis(TString analysisName);
+                void  SetCorrelationFunction(TString analysisName, TString functionName);
+                void  SetMomentumCutsTrack1(TString analysisName, double lowerCut, double upperCut);
+                void  SetMomentumCutsTrack2(TString analysisName, double lowerCut, double upperCut);
+                void  SetPtCutsTrack1(TString analysisName, double lowerCut, double upperCut);
+                void  SetPtCutsTrack2(TString analysisName, double lowerCut, double upperCut);
+                void  SetChargeTrack1(TString analysisName, Int_t charge);
+                void  SetChargeTrack2(TString analysisName, Int_t charge);
+                void  SetRapidityCutsTrack1(TString analysisName, double lowerCut, double upperCut);
+                void  SetRapidityCutsTrack2(TString analysisName, double lowerCut, double upperCut);	  
+                void  SetFastestTrackAnalysis(TString analysisName, int fastAnalysis);
+                void  SetSignalHist(TString analysisName, TH1D* sHist);
+                void  SetBackgroundHist(TString analysisName, TH1D* bHist);
+  virtual Int_t Make();
+  virtual Int_t Finish();
 
   ClassDef(StAngleCorrMaker, 1)
 };
 
 #endif
+

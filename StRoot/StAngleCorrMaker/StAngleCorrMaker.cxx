@@ -1,157 +1,176 @@
+// $Id: StAngleCorrMaker.cxx,v 1.9 1999/12/28 19:10:02 horsley Exp $
+// $Log: StAngleCorrMaker.cxx,v $
+// Revision 1.9  1999/12/28 19:10:02  horsley
+// *** empty log message ***
+//
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StAngleCorrMaker
+// 
+// 1999/06/27 13:56:40
+// Version minimally changed from standard StAnalysisMaker
 //
 // Description: 
-//  Calculates high-pt angular correlations from StEvent
+//  Executes StAngleCorr
 //
 // Environment:
 //  Software developed for the STAR Detector at Brookhaven National Laboratory
 //
-// Author List:
-//  Craig Ogilvie MIT 
-//  Torre Wenaus, BNL
+// Author List: 
+//  Craig Ogilive, MIT
+//  Matt Horsley, Yale University
 //
 // History:
 //
-///////////////////////////////////////////////////////////////////////////////
-#include "StAngleCorrMaker.h"
-#include "StTrackForPool.hh"
+/////////////////////////////////////
 
+// include files included with the standard StAnalysisMaker
 #include "StChain.h"
 #include "StRun.h"
 #include "StEvent.h"
+#include "StGlobalTrack.h"
+#include "StPhysicalHelixD.hh"
+#include "SystemOfUnits.h"
+#include "StThreeVectorD.hh"
+#include "TString.h"
+#include "StAngleCorrFunction.h"
+#include "StTrackCuts.h"
 
-#include <TOrdCollection.h>
-#include <TH1.h>
-#include <TCanvas.h>
-#include <TFile.h>
+// StMakers
+#include "StAngleCorrMaker.h"
+#include "StTrackForPool.h"
+#include "StAngleCorrAnalysis.h"
+#include "StAngleCorrAnalysisManager.h"
 
-#define TRACKSMAX 100000 
+static const char rcsid[] = "$Id: StAngleCorrMaker.cxx,v 1.9 1999/12/28 19:10:02 horsley Exp $";
 
-Int_t StAngleCorrMaker::Init() {
-
-  // set up a TOrdCollection as a pool of tracks
-  // StTrackForPool has momentum and event number information
-
-  mCollectionOfTracksA= new TOrdCollection(TRACKSMAX);
-  mCollectionOfTracksB= new TOrdCollection(TRACKSMAX);
-  mCollectionOfHighestPt= new TOrdCollection(TRACKSMAX);
-  mNumberEventsInPool= 0;
-  mTotalEvents = 0;
-
-  // output file
-  mOutput = new TFile("corr.root","RECREATE");
-
-  // book an histogram for the numerator of the angular correlation
-  int nbin = 60;
-  float lbin =0. ;
-  float ubin = 180.;
-  mPhiNumeratorPtThresh = new TH1F("phiNumerator",
-			       "relative phi in real events",
-			       nbin,lbin,ubin);
-  mPhiNumeratorPtThresh->Sumw2();
-  mPhiDenominatorPtThresh = new TH1F("phiDenominator",
-				 "relative phi in real events",
-			         nbin,lbin,ubin);
-  mPhiDenominatorPtThresh->Sumw2();
-
-  mPhiNumeratorPtHigh = new TH1F("phiNumeratorPtHigh",
-			       "relative phi in real events",
-			       nbin,lbin,ubin);
-  mPhiNumeratorPtHigh->Sumw2();
-  mPhiDenominatorPtHigh = new TH1F("phiDenominatorPtHigh",
-				 "relative phi in real events",
-			         nbin,lbin,ubin);
-  mPhiDenominatorPtHigh->Sumw2();
-  cout << "end of init" << endl;
-  return StMaker::Init();
-}
-
-Int_t StAngleCorrMaker::Make() {
-
-  //#if 0
-  //StEventReaderMaker* evMaker = (StEventReaderMaker*) gStChain->Maker("events");
-  //if (! event()) return kStOK; // If no event, we're done
-  //StEvent& ev = *(evMaker->event());
-  //#endif
-  cout << "in Make" << endl;
+Int_t
+StAngleCorrMaker::Make() 
+{
   StEvent* mEvent;
   mEvent = (StEvent *) GetInputDS("StEvent");
   if (! mEvent) return kStOK; // If no event, we're done
   StEvent& ev = *mEvent;
+  corrAnalysis.ProcessEvent(ev);
+  return kStOK;
+}
 
-  // <<<<<<< StAngleCorrMaker.cxx
-  // int eventNumber = evMaker->GetNumber();
-  // 
-  // following line deleted by someone, reinstate
-  mTotalEvents++;
 
-  int eventNumber = GetNumber();
+StAngleCorrMaker::StAngleCorrMaker(const Char_t *name) : StMaker(name) {drawinit = kFALSE;}
 
-  // process all posssible pairs of primary tracks
-  // fill histograms, and add tracks to pool of tracks
-  //
-  analyseRealPairs(ev,eventNumber);
-  mNumberEventsInPool++;
-  //
-  // check how many tracks in pools
-  //
-  StTrackForPool *trackfrompool;
-  trackfrompool = (StTrackForPool* ) mCollectionOfTracksA->Last();
-  Int_t poolCounterA = mCollectionOfTracksA->IndexOf(trackfrompool);
-  double aveTracksAPerEvent = 
-    float(( poolCounterA + 1)) / float( mNumberEventsInPool);
+StAngleCorrMaker::~StAngleCorrMaker() {}
 
-  trackfrompool = (StTrackForPool* ) mCollectionOfTracksB->Last();
-  Int_t poolCounterB = mCollectionOfTracksB->IndexOf(trackfrompool);
-  double aveTracksBPerEvent = 
-    float(( poolCounterB + 1)) / float( mNumberEventsInPool);
+Int_t
+StAngleCorrMaker::Init()
+{
+  return StMaker::Init();
+}
 
-  //
-  // include in this decision some estimate of average tracks per event
-  //
-  double numPossiblePairs = (float(poolCounterA) - aveTracksAPerEvent)*
-    (float(poolCounterB) - aveTracksBPerEvent);
-  if (numPossiblePairs > 2000000 ) {
-    analyseMixedPairs();
-    mCollectionOfTracksA->Delete();
-    mCollectionOfTracksB->Delete();
-    mNumberEventsInPool = 0;
-    mCollectionOfHighestPt->Delete();
+void
+StAngleCorrMaker::AddAnalysis(TString analysisName)
+{
+  track1 = "track1";
+  track2 = "track2";
+  corrAnalysis.AddAnalysis(analysisName);
+}
+
+void
+StAngleCorrMaker::SetCorrelationFunction(TString analysisName, TString functionName)
+{
+  corrAnalysis.GetAnalysis(analysisName)->SetCorrelationFunction(functionName);
+}
+
+void
+StAngleCorrMaker::SetMomentumCutsTrack1(TString analysisName, double lowerCut, double upperCut)
+{
   
-    trackfrompool = (StTrackForPool* ) mCollectionOfTracksA->Last();
-    poolCounterA = mCollectionOfTracksA->IndexOf(trackfrompool);
-    cout << "empty pool has " << poolCounterA << " tracks" <<endl;     
-  };
+  corrAnalysis.GetAnalysis(analysisName)->GetTrackCuts(track1)->SetMomentumCuts(lowerCut,upperCut);
+}
+
+void
+StAngleCorrMaker::SetMomentumCutsTrack2(TString analysisName, double lowerCut, double upperCut)
+{
+  corrAnalysis.GetAnalysis(analysisName)->GetTrackCuts(track2)->SetMomentumCuts(lowerCut,upperCut);
+}
+
+void
+StAngleCorrMaker::SetPtCutsTrack1(TString analysisName, double lowerCut, double upperCut)
+{
+  corrAnalysis.GetAnalysis(analysisName)->GetTrackCuts(track1)->SetPtCuts(lowerCut,upperCut);
+}
+
+void
+StAngleCorrMaker::SetPtCutsTrack2(TString analysisName, double lowerCut, double upperCut)
+{
+  corrAnalysis.GetAnalysis(analysisName)->GetTrackCuts(track2)->SetPtCuts(lowerCut,upperCut);
+}
+
+
+void
+StAngleCorrMaker::SetChargeTrack1(TString analysisName, Int_t c)
+{
+  corrAnalysis.GetAnalysis(analysisName)->GetTrackCuts(track1)->SetTrackCharge(c);
+}
+
+void
+StAngleCorrMaker::SetChargeTrack2(TString analysisName, Int_t c)
+{
+  corrAnalysis.GetAnalysis(analysisName)->GetTrackCuts(track2)->SetTrackCharge(c);
+}
+
+
+void
+StAngleCorrMaker::SetRapidityCutsTrack1(TString analysisName, double lowerCut, double upperCut)
+{
+  corrAnalysis.GetAnalysis(analysisName)->GetTrackCuts(track1)->SetPseudoRapidityCuts(lowerCut,upperCut);
+}
+
+void
+StAngleCorrMaker::SetRapidityCutsTrack2(TString analysisName, double lowerCut, double upperCut)
+{
+  corrAnalysis.GetAnalysis(analysisName)->GetTrackCuts(track2)->SetPseudoRapidityCuts(lowerCut,upperCut);
+}
+
+
+void 
+StAngleCorrMaker::SetFastestTrackAnalysis(TString analysisName, int fastAnalysis)
+{
+  corrAnalysis.GetAnalysis(analysisName)->SetFastestTrackAnalysis(fastAnalysis);
+}
+
+void 
+StAngleCorrMaker::SetSignalHist(TString analysisName, TH1D* sHist)
+{
+  corrAnalysis.GetAnalysis(analysisName)->SetSignalHist(sHist);
+}
+
+void 
+StAngleCorrMaker::SetBackgroundHist(TString analysisName, TH1D* bHist)
+{
+  corrAnalysis.GetAnalysis(analysisName)->SetBackgroundHist(bHist);
+}
+
+
+void
+StAngleCorrMaker::Clear(Option_t *opt)
+{
+    StMaker::Clear();
+}
+
+Int_t
+StAngleCorrMaker::Finish() 
+{
   return kStOK;
 }
 
 
-StAngleCorrMaker::StAngleCorrMaker(const Char_t *name, const Char_t *title) : StMaker(name, title) {  
-}
-
-StAngleCorrMaker::~StAngleCorrMaker() {
-}
-
-Int_t StAngleCorrMaker::Finish() {
-
-  analyseMixedPairs();
-  //  empty collection 
-  mCollectionOfTracksA->Delete(); 
-  mCollectionOfTracksB->Delete();
-  mNumberEventsInPool = 0; 
-  mCollectionOfHighestPt->Delete();
-  // write out histograms
-  cout << "writing out histograms" << endl;
-  mOutput->Write("MyKey",kSingleKey);
-  mOutput->Close();
-  cout <<   mTotalEvents << "  events analysed" << endl;
-  return kStOK;
-}
 
 ClassImp(StAngleCorrMaker)
+
+
+
+
 
 
 
