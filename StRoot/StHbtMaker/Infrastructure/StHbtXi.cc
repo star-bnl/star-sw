@@ -7,7 +7,7 @@ void StHbtXi::UpdateXi(){
   //Calc. derived members of the xi class
   float MomV0AlongXi, MomBacAlongXi;
 
-   mMomXi  = momV0() + momBac();
+   mMomXi  = momV0() + momBac(); 
    mPtXi   = mMomXi.perp();
    mPtotXi = mMomXi.mag();
    mPtBac  = momBac().perp();
@@ -16,7 +16,7 @@ void StHbtXi::UpdateXi(){
    mEOmega= sqrt(mPtotXi*mPtotXi+M_OMEGA_MINUS*M_OMEGA_MINUS);
    mEBacPion = sqrt(ptotBac()*ptotBac()+M_PION_MINUS*M_PION_MINUS);
    mEBacKaon = sqrt(ptotBac()*ptotBac()+M_KAON_MINUS*M_KAON_MINUS);
-  
+
    MomV0AlongXi  =  momV0()*mMomXi / sqrt(pow(mPtotXi,2));
    MomBacAlongXi =  momBac()*mMomXi / sqrt(pow(mPtotXi,2));
 
@@ -28,7 +28,7 @@ void StHbtXi::UpdateXi(){
    mRapXi = 0.5*log( (eXi()+mMomXi.z()) / (eXi()-mMomXi.z()) );
    mCTauXi = M_XI_MINUS*(mDecayLengthXi) / sqrt( pow((double)mMomXi.mag(),2.) );
    
-   mRapOmega = 0.5*log( (eOmega()+mMomXi.z()) / (eOmega()-mMomXi.z()) );
+   mRapOmega = 0.5*log( (eOmega()+mMomXi.z()) / (eOmega()-mMomXi.z()) );// eO,
    mCTauOmega = M_OMEGA_MINUS*(mDecayLengthXi) / sqrt( pow((double)mMomXi.mag(),2.) );
 }
 // -----------------------------------------------------------------------
@@ -37,7 +37,9 @@ void StHbtXi::UpdateXi(){
 StHbtXi::StHbtXi( StXiMuDst& xiFromMuDst)  : StHbtV0(xiFromMuDst) { // from strangess micro dst structure
   UpdateV0(); // the v0 stuff
 
-  mCharge = xiFromMuDst.charge();                
+
+  mCharge = xiFromMuDst.charge();
+  mDecayLengthXi = xiFromMuDst.decayLengthXi(); // 12/07/2001 Gael
   mDecayVertexXi.setX(xiFromMuDst.decayVertexXiX());
   mDecayVertexXi.setY(xiFromMuDst.decayVertexXiY());
   mDecayVertexXi.setZ(xiFromMuDst.decayVertexXiZ());
@@ -51,9 +53,10 @@ StHbtXi::StHbtXi( StXiMuDst& xiFromMuDst)  : StHbtV0(xiFromMuDst) { // from stra
   mKeyBachelor = xiFromMuDst.keyBachelor();
   mTopologyMapBachelor[0] = xiFromMuDst.topologyMapBachelor().data(1);
   mTopologyMapBachelor[1] = xiFromMuDst.topologyMapBachelor().data(2);
-  
-  mChi2Xi = xiFromMuDst.chi2Xi();
-  mClXi = xiFromMuDst.clXi();
+  mTpcHitsBac = xiFromMuDst.topologyMapBachelor().numberOfHits(kTpcId); // 12/07/2001 Gael
+
+  mChi2Xi = xiFromMuDst.chi2Xi();//nulle
+  mClXi = xiFromMuDst.clXi();//nulle
   mChi2Bachelor = xiFromMuDst.chi2Bachelor();
   mClBachelor = xiFromMuDst.clBachelor();
   
@@ -80,8 +83,8 @@ StHbtXi::StHbtXi(const StHbtTTreeEvent* ev, const StHbtTTreeXi* xi) : StHbtV0(ev
   mTopologyMapBachelor[0] = xi->mTopologyMapBachelor[0];
   mTopologyMapBachelor[1] = xi->mTopologyMapBachelor[1];
   
-  mChi2Xi = xi->mChi2Xi;
-  mClXi = xi->mClXi;
+  mChi2Xi = xi->mChi2Xi;// nulle
+  mClXi = xi->mClXi;// nulle
   mChi2Bachelor = xi->mChi2Bachelor;
   mClBachelor = xi->mClBachelor;
   
