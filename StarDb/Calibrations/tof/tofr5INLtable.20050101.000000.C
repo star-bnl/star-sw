@@ -23,7 +23,7 @@ TDataSet *CreateTable() {
       cout<<"Process board "<<boardid[iboard]<<endl;
       // make file name-----------
       if(boardid[iboard]=="mx38163") boardid[iboard]="mx38162";
-      sprintf(tmpchr,"inltabledat/%s-tdc%s-h%s.inl-1024",boardid[iboard].c_str(),
+      sprintf(tmpchr,"$STAR/StarDb/Calibrations/tof/inltabledat/%s-tdc%s-h%s.inl-1024",boardid[iboard].c_str(),
               filetdcid[itdc].c_str(),filehitid[itdc].c_str());
       if(itdc==3)sprintf(tmpchr,"inltabledat/%s-tdc%s-h%s.inl-256",boardid[iboard].c_str(),
               filetdcid[itdc].c_str(),filehitid[itdc].c_str());
