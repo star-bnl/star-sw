@@ -641,7 +641,7 @@ sub fillDbTable {
     $sql.="LibTag='$mLibT',";
     $sql.="platform='$mplform',";
     $sql.="eventType='$mevtType',";
-    $sql.="fileName='$mfName',";
+    $sql.="fName='$mfName',";
     $sql.="path='$mpath',";
     $sql.="geometry='$mgeom',";
     $sql.="eventGen='$mevtGen',";
@@ -687,7 +687,7 @@ sub fillJSTable {
     $sql.="avg_no_primaryT='$avr_prtracks',";
     $sql.="avg_no_XiVrt='$avr_xivertices',";
     $sql.="avg_no_KinkVrt='$avr_knvertices',";
-    $sql.="node='$node_name',"; 
+    $sql.="nodeID='$node_name',"; 
     $sql.="avail='$mavail'"; 
 
     print "$sql\n" if $debugOn;
