@@ -1,5 +1,8 @@
-// $Id: strange.C,v 1.2 1999/01/19 23:05:14 genevb Exp $
+// $Id: strange.C,v 1.3 1999/01/21 00:53:24 fisyak Exp $
 // $Log: strange.C,v $
+// Revision 1.3  1999/01/21 00:53:24  fisyak
+// Cleanup
+//
 // Revision 1.2  1999/01/19 23:05:14  genevb
 // MakeDoc() removed
 //
@@ -75,6 +78,7 @@ turned on.
   }
   St_ana_Maker        dst("dst","event/data/global/dst");
   St_smdst_Maker      smdst("smdst","event/data/strange/smdst");
+  smdst.MakeDoc();
   smdst.DoHistograms(5);  // Turn on smdst histograms and update every 5 events
 
 /*------------------------------------- Begin_Html <font color="#800000" size="-1">
