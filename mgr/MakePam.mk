@@ -1,4 +1,7 @@
 #  $Log: MakePam.mk,v $
+#  Revision 1.15  1998/04/26 02:49:35  fisyak
+#  Fix fortran dependencies
+#
 #  Revision 1.14  1998/04/20 23:41:09  fisyak
 #  Remove -traditional from gcc
 #
@@ -70,7 +73,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/04/20 23:41:09 $ 
+#           Last modification $Date: 1998/04/26 02:49:35 $ 
 #  #. default setings
 include $(STAR)/mgr/MakeSYS.mk
 ifdef SILENT
@@ -177,8 +180,10 @@ ROOTD   := $(shell cd $(ROOT)/..; $(PWD) )
 LIB_DIR := $(OUT_DIR)/$(STAR_HOST_SYS)
 DOMAIN  := $(notdir $(DOM_DIR))
 OBJ_DIR := $(LIB_DIR)/$(DOMAIN).obj
+OBJ_DIR_:= $(subst .,\., $(subst /,\/,$(OBJ_DIR)))
 DIR_GEN := $(OUT_DIR)/share
 GEN_DIR := $(OUT_DIR)/share/$(DOMAIN).gen
+GEN_DIR_:= $(subst .,\., $(subst /,\/,$(GEN_DIR)))
 DOM_DIRS:= $(filter-out CVS, $(shell cd $(ROOT)/$(PAMS); ls))
 #.
 check_out   := $(shell test -d $(OUT_DIR) || mkdir $(OUT_DIR)) 
@@ -232,7 +237,6 @@ ifneq ($(EMPTY),$(strip $(FILES_IDM) $(FILES_G) $(FILES_CDF)))
         SL_PKG  := $(LIB_DIR)/$(PKG_SL)
 endif                           
 endif                          
-#MKDEPFLAGS:= -traditional -MG -MM -w
 MKDEPFLAGS:= -MG -MM -w
 ifndef NODEPEND                
 FILES_D  :=                          $(addsuffix .d,   $(basename $(FILES_O)))
@@ -268,16 +272,21 @@ ifneq ($(STAR_SYS),hp_ux102)
 CPPFLAGS += -D$(STAR_SYS) $(strip -D$(shell uname)) 
 endif                          
 CPPFLAGS += -I. -I../ -I/usr/include -I$(STAR)/asps/staf/inc \
-             $(addprefix -I, $(SRC_DIR) $(GEN_DIR) $(INC_DIRS)) -I$(CERN_ROOT)/src -I$(CERN_ROOT)/include/cfortran
+             $(addprefix -I, $(SRC_DIR) $(GEN_DIR) $(INC_DIRS)) -I$(CERN_ROOT)/include -I$(CERN_ROOT)/include/cfortran
 ifneq ($(ROOT),$(STAR))        
 CPPFLAGG :=  $(addprefix -I, $(INC_DIRG))
 endif                          
-FFLAGS   += -DCERNLIB_TYPE -I$(CERN_ROOT)/src/geant321 
+FFLAGS   += -DCERNLIB_TYPE
+#                                   -I$(CERN_ROOT)/src/geant321 
 ifndef NODEBUG                 
 FFLAGS   += -g
 CFLAGS   += -g
 CXXFLAGS += -g
 CPPFLAGS += -DDEBUG
+else
+FFLAGS   += -O
+CFLAGS   += -O
+CXXFLAGS += -O
 endif                          
 ifeq ($(EMPTY),$(findstring $(STAR_HOST_SYS),hp_ux102 hp_ux102_aCC))
 ifndef CERN_LIBS               
@@ -344,12 +353,12 @@ clean_obj:
 clean_lib:
 	rm -rf $(SL_PKG) $(LIB_PKG)
 #-----dependencies--------------------------
-ifneq ($(EMPTY), $(strip $(FILES_DM)))
-include $(FILES_DM)
-endif                               # 
 ifneq ($(EMPTY), $(strip $(FILES_D))) 
 include $(FILES_D)
 endif                               #
+ifneq ($(EMPTY), $(strip $(FILES_DM)))
+include $(FILES_DM)
+endif                               # 
 endif                            # end if of FILES_O FILES_SL
 endif       # LEVEL 4
 #--------  idm, idl --------
@@ -378,7 +387,8 @@ $(GEN_DIR)/%.didl $(GEN_DIR)/%_i.cc $(GEN_DIR)/%.h $(GEN_DIR)/%.inc: %.idl
 	cp  $(FIRST_DEP) $(GEN_DIR)/ ; cd $(GEN_DIR);\
         $(STIC) $(STICFLAGS) $(FIRST_DEP); \
         gcc  $(MKDEPFLAGS)  -x c $(STICFLAGS) $(FIRST_DEP) | \
-        sed -e 's/$(STEM)\.idl\.o/$(GEN_DIR)\/$(STEM)\.didl/g' > $(GEN_DIR)/$(STEM).didl; \
+        sed -e 's/$(STEM)\.idl\.o/$(subst .,\., $(subst /,\/, $(GEN_DIR)))\/$(STEM)\.didl/g' \
+        > $(GEN_DIR)/$(STEM).didl; \
         $(STIC) -M  $(STICFLAGS) $(FIRST_DEP) | grep ":" \
         >> $(GEN_DIR)/$(STEM).didl; $(RM) $(STEM).idl
 #       temporarly, until stic is fixed:
@@ -386,16 +396,16 @@ $(GEN_DIR)/%.didl $(GEN_DIR)/%_i.cc $(GEN_DIR)/%.h $(GEN_DIR)/%.inc: %.idl
                 $(GEN_DIR)/$(STEM)_i.cc > temp
 	@mv  -f temp $(GEN_DIR)/$(STEM)_i.cc
 $(OBJ_DIR)/%.d: %.cc 
-	gcc $(MKDEPFLAGS) $(CPPFLAGS) $(FIRST_DEP) | \
-        sed -e 's/$(notdir $(STEM))\.o/$(subst /,\/,$(OBJ_DIR)/$(STEM)\.o) $(subst /,\/,$(ALL_TAGS))/g'\
+	gcc $(MKDEPFLAGS) $(CPPFLAGS) $(FIRST_DEP) | sed -e \
+'s/$(notdir $(STEM))\.o/$(subst .,\.,$(subst /,\/,$(OBJ_DIR)))\/$(STEM)\.o $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
 $(OBJ_DIR)/%.d: %.c
-	gcc $(MKDEPFLAGS) $(CPPFLAGS) $(FIRST_DEP) | \
-        sed -e 's/$(notdir $(STEM))\.o/$(subst /,\/,$(OBJ_DIR)/$(STEM)\.o) $(subst /,\/,$(ALL_TAGS))/g'\
+	gcc $(MKDEPFLAGS) $(CPPFLAGS) $(FIRST_DEP) | sed -e \
+'s/$(notdir $(STEM))\.o/$(subst .,\.,$(subst /,\/,$(OBJ_DIR)))\/$(STEM)\.o $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
 $(OBJ_DIR)/%.d: %.F
-	gcc  $(MKDEPFLAGS)  -x c $(CPPFLAGS) $(FIRST_DEP) | \
-        sed -e 's/$(notdir $(STEM))\.o/$(subst /,\/,$(OBJ_DIR)/$(STEM)\.o) $(subst /,\/,$(ALL_TAGS))/g'\
+	gcc -traditional -x c $(MKDEPFLAGS) $(CPPFLAGS) $(FIRST_DEP) | sed -e \
+'s/$(notdir $(STEM))\.F\.o/$(subst .,\.,$(subst /,\/,$(OBJ_DIR)))\/$(STEM)\.o $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
 $(OBJ_DIR)/%.d: %.cdf
 	cd $(SRC_DIR); \
