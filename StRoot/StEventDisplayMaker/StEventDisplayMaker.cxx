@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.68 2000/08/26 03:14:45 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.69 2000/08/27 16:55:09 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -63,6 +63,7 @@
 #include "TColor.h"
 #include "TStyle.h"
 #include "TTUBS.h"
+#include "TPaveLabel.h"
 
 #include "StEventDisplayMaker.h"
 #include "StChain.h"
@@ -124,6 +125,9 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
   m_TableCollector= new TList;
 
   m_PadBrowserCanvas = 0;
+  mRunNumberLabel    = 0;
+  mEventNumberLabel  = 0;
+  mDateTimeLabel     = 0;
 
   m_ListDataSetNames = 0;
 
@@ -163,7 +167,10 @@ Int_t StEventDisplayMaker::Init(){
    CreateTrackNodes();
      // define the custom palette (may affect other pictures)
 #ifdef PALETTE
-   palette();    
+   palette(); 
+#else
+   gStyle->SetPalette(1);   
+   gROOT->LoadMacro("PadControlPanel.C");
 #endif
    // Call the "standard" Init()
    
@@ -182,9 +189,9 @@ Int_t StEventDisplayMaker::BuildGeometry()
   TDataSetIter volume(m_Hall,0);
 // ---  Create "standard" TPC and SVT views ----
   TVolume *sector = 0;
-//  const Char_t *volueNames[] = {"TPSS","STSI"}; // STLI"};
-  const Char_t *volueNames[] = {"TPSS","STLI","ECAL","CALB"}; // STSI"};
-//  const Char_t *volueNames[] = {"TPSS","STLI","ECAL","CALB","BTOF"}; // STSI"};
+  const Char_t *volueNames[] = {"TPSS","STSI"}; // STLI"};  // tpc + svt
+// emc   const Char_t *volueNames[] = {"TPSS","STLI","ECAL","CALB"}; // STSI"};
+//       const Char_t *volueNames[] = {"TPSS","STLI","ECAL","CALB","BTOF"};
   const Int_t lvolueNames = sizeof(volueNames)/sizeof(Char_t *);
   while ( (sector = ( TVolume *)volume()) ){
     Bool_t found = kFALSE;
@@ -288,10 +295,67 @@ void StEventDisplayMaker::Clear(Option_t *)
 TVirtualPad *StEventDisplayMaker::CreateCanvas()
 {
   if (!GetEventPad()) {
-   // Attention !!! The name of TCanvas MUST unique across all ROOT
-   // objects otherwise those will be destroyed by TCanvas ctor !!!
-     m_PadBrowserCanvas = new TCanvas("STARMonitor","Event Display",10,600,400,400);
+    // Attention !!! The name of TCanvas MUST unique across all ROOT
+    // objects otherwise those will be destroyed by TCanvas ctor !!!
+    m_PadBrowserCanvas = new TCanvas("STARMonitor","Event Display",10,600,400,400);
+    m_PadBrowserCanvas->SetFillColor(kBlack);
+    // Add three TPad's for GetRunNumber/GetEventNumber()/GetDateTime/
+
+#if 0
+     TPad *newpad = new TPad("RunNumber","RunNumber",0.02,0.9,0.2,0.96);
+     newpad->Draw();
+     newpad->cd();
+     mRunNumberLabel = new TPaveLabel(0.01,0.01,0.99,0.99,"RunNumber");
+     mRunNumberLabel->Draw();
+     m_PadBrowserCanvas->cd();
+
+     newpad = new TPad("EventNumber","EventNumber",0.02,0.9,0.2,0.96);
+     newpad->Draw();
+     newpad->cd();
+     mEventNumberLabel = new TPaveLabel(0.01,0.01,0.99,0.99,"EventNumber");
+     mEventNumberLabel->Draw();
+     m_PadBrowserCanvas->cd();
+
+     newpad = new TPad("DateTime","DateTime",0.02,0.9,0.2,0.96);
+     newpad->Draw();
+     newpad->cd();
+     mDateTimeLabel = new TPaveLabel(0.01,0.01,0.99,0.99,"DateTime");
+     mDateTimeLabel->Draw();
+     m_PadBrowserCanvas->cd();
+#endif
   }
+  
+   char buffer[100];
+#if 0
+   sprintf(buffer,"%d",GetRunNumber());
+   mRunNumberLabel->SetLabel(buffer);
+   printf(" GetRunNumber %s ;",buffer);
+
+   sprintf(buffer,"%d",GetEventNumber());
+   printf(" GetEventNumber %s ;",buffer);
+   mEventNumberLabel->SetLabel(buffer);
+ 
+   sprintf(buffer,"%d/%d",GetDate(),GetTime());
+   printf(" DateTIme %s \n;",buffer);
+   mDateTimeLabel->SetLabel(buffer);
+#endif
+   Int_t date  = GetDate();
+   Int_t year  = date/1000;
+   Int_t day   = (date - year*1000);
+   Int_t month = day/100;
+   day         = day  - month*100;
+
+   Int_t time  = GetTime();
+   Int_t hours = time/10000;
+   Int_t sec   = (time - hours*10000);
+   Int_t min   =  sec/100;
+   sec         =  sec  - min*100;
+
+   sprintf(buffer,"Event Display: Run=%d; Event=%d; Date=%d.%02d.%02d/%02d:%02d:%02d",
+     GetRunNumber(),GetEventNumber(),year,month,day,hours,min,sec);
+
+   m_PadBrowserCanvas->SetTitle(buffer);
+
   if (m_ShortView) m_ShortView->Draw();
   m_PadBrowserCanvas->Modified();
   m_PadBrowserCanvas->Update();
@@ -508,10 +572,10 @@ Int_t StEventDisplayMaker::MakeTableTracks(const StTrackChair *points,StVirtualE
   Int_t trackCounter = 0;
   Int_t nRows = 0;
   if (points && (nRows = points->GetNRows()) ) {
-    Color_t trackColor = kRed;
-    Style_t trackStyle = 1;
-    Size_t trackSize  = 1;
     for (i = 0; i < nRows; i++ ){
+      Color_t trackColor = kRed;
+      Style_t trackStyle = 1;
+      Size_t trackSize   = 1;
       filter = (StVirtualEventFilter *)m_FilterArray->At(kTptTrack);
       if (!filter || filter->IsOn() ) {
         // ------------------------------ tracks filter ------------------------------------ //
@@ -560,14 +624,14 @@ Int_t StEventDisplayMaker::MakeTableHits(const TTable *points,StVirtualEventFilt
   if (ttt.GetNRows() ) {
     TTableSorter *track2Line = new TTableSorter (ttt,tr);
     m_TableCollector->Add(track2Line);    // Collect to remove  
-    Color_t hitColor = kGreen;
-    Style_t hitStyle = packed ?   8 : 5;
-    Size_t  hitSize  = packed ? 0.6 : 0.9;
     i = 0;
     Int_t nextKeyIndx = 0;
     Int_t maxTrackCounter = track2Line->CountKeys();
     for (i=0;i<maxTrackCounter;i++) 
     { 
+       Color_t hitColor = kGreen;
+       Style_t hitStyle = packed ?   8 : 5;
+       Size_t  hitSize  = packed ? 0.6 : 0.9;
        // -------------------------- hits filter -------------------------------------- //
        if (filter) hitColor =  filter->Channel(track2Line,nextKeyIndx,hitSize,hitStyle);//
        if (filter->IsOff() ) break;                                                     //
@@ -692,6 +756,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.69  2000/08/27 16:55:09  fine
+// Title with Run event number etc
+//
 // Revision 1.68  2000/08/26 03:14:45  fine
 // New default filter from M.Panebratcev has been introduced
 //
