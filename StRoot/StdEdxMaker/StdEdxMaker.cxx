@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.3 2000/11/26 20:26:37 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.4 2000/11/27 02:26:51 fisyak Exp $
 #include <iostream.h>
 #include "StdEdxMaker.h"
 // ROOT
@@ -117,8 +117,16 @@ Int_t StdEdxMaker::Init(){
     mNormal[sector-1] = new StThreeVectorD(sin(beta), cos(beta), 0.);
   }
   TDataSet *tpc_calib  = GetDataBase("Calibrations/tpc"); assert(tpc_calib);
-  m_tpcTime = (St_TpcTimeGain *) tpc_calib->Find("TpcTimeGain"); assert(m_tpcTime); 
-  m_drift = (St_TpcDriftDistCorr *) tpc_calib->Find("TpcDriftDistCorr"); assert(m_drift); 
+  m_tpcTime = (St_TpcTimeGain *) tpc_calib->Find("TpcTimeGain"); 
+  if (!m_tpcTime) {
+    cout << "TpcTimeGain is missing <=========== switch off time dependent calibration" << endl;
+    //    assert(m_tpcTime); 
+  }
+  m_drift = (St_TpcDriftDistCorr *) tpc_calib->Find("TpcDriftDistCorr"); 
+  if (!m_drift) {
+    cout << "TpcDriftDistCorr is missing <=========== switch off dirft dependent calibration" << endl;
+    //    assert(m_drift); 
+  }
   if (m_Mode > 0) {// calibration mode
     StMaker *tpcdaq = GetMaker("tpc_raw");
     if (!tpcdaq) {
@@ -358,11 +366,13 @@ Int_t StdEdxMaker::Make(){
       Double_t z = pointC->GetZ(ipoint);
       if (sector > 12) z = - z;
 #if 0
-      TpcDriftDistCorr_st *cor = m_drift->GetTable() + SectN - 1;
-      Double_t DriftCorr = TMath::Exp(-(cor->a0+z*(cor->a1 + z*cor->a2)));
-      dE *= DriftCorr;
+      if (m_drift) {
+	TpcDriftDistCorr_st *cor = m_drift->GetTable() + SectN - 1;
+	Double_t DriftCorr = TMath::Exp(-(cor->a0+z*(cor->a1 + z*cor->a2)));
+	dE *= DriftCorr;
+      }
 #endif
-      dE *= (*m_tpcTime)[0].ScaleFactor; // time
+      if (m_tpcTime) dE *= (*m_tpcTime)[0].ScaleFactor; // time
       TrackLength += dx;
       dEdxN[NdEdx] = dE/dx;
       dxN[NdEdx]   = dx;
