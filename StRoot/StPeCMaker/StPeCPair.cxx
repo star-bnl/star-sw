@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.cxx,v 1.5 2001/02/13 17:54:43 yepes Exp $
+// $Id: StPeCPair.cxx,v 1.6 2001/02/21 20:42:12 yepes Exp $
 // $Log: StPeCPair.cxx,v $
+// Revision 1.6  2001/02/21 20:42:12  yepes
+// Add ctb signals to tree
+//
 // Revision 1.5  2001/02/13 17:54:43  yepes
 // still problems on differnt platforms
 //
@@ -142,6 +145,8 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEvent* event  ) {
    Float_t ScalarProduct = p1*p2;
    Float_t Denominator   = p1.mag()*p2.mag();
    pAngle = acos(ScalarProduct/Denominator);
+
+   pXyAngle = acos((p1.x()*p2.x()+p1.y()*p2.y())/p1.perp()/p2.perp());
 //
 //  Calculate Armenteros variables
 //

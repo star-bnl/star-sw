@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.15 2001/02/14 18:34:44 yepes Exp $
+// $Id: StPeCMaker.cxx,v 1.16 2001/02/21 20:42:05 yepes Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.16  2001/02/21 20:42:05  yepes
+// Add ctb signals to tree
+//
 // Revision 1.15  2001/02/14 18:34:44  yepes
 // bug in deleting StEvent and the of of Make
 //
@@ -86,7 +89,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.15 2001/02/14 18:34:44 yepes Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.16 2001/02/21 20:42:05 yepes Exp $";
 
 ClassImp(StPeCMaker)
 
@@ -108,7 +111,6 @@ Int_t StPeCMaker::Init() {
 //
   TString uDstFileName("StPecMaker.uDst.root");    
   StIOMaker* pIOMaker = (StIOMaker*)GetMaker("IO");
-  printf ( "pIOMaker %x \n", pIOMaker ) ;
   if ( pIOMaker) {
      uDstFileName = pIOMaker->GetFile() ;
      char* ccc = "/" ;
@@ -212,6 +214,7 @@ Int_t StPeCMaker::Make() {
    
   pevent->clear();
   geant->clear ( ) ;
+  trigger->clear();
 
   if ( filter ) return flag ;
   return kStOk ;
