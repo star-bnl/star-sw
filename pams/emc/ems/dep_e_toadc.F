@@ -111,7 +111,13 @@ c     +   , ' sub ',sub, ' phi ',phi,' eta ', eta
             adc  = -1
             
          elseif(mode .eq. 1) then ! DE => ADC
-            sf      = samplefraction(%VAL(det),%VAL(eta))
+
+C    PN,7.10.99:     Chto eto za xrenovina ???????????????? 
+C  Please put an extensive explanation in the code if you use
+C  non-standard fortran. It is hard to even guess what should be here
+C           sf      = samplefraction(%VAL(det),%VAL(eta))
+            sf      = samplefraction(det,eta)
+
             const_w = control_toadc(1).c1(det) / cosh(eta)
             radc = hits_ems(ih).energy / cosh(eta)        ! 1./cosh(eta)=sin(theta)
      +           * sf * control_toadc(1).c1(det)
@@ -119,7 +125,9 @@ c     +   , ' sub ',sub, ' phi ',phi,' eta ', eta
             adc  = max(0,adc)
 
          elseif(mode .eq. 2) then ! DE => PHE => ADC
-            sf   = samplefraction(%VAL(det),%VAL(eta)) 
+C    PN,7.10.99:    Chto eto za xrenovina ???????????????? 
+C           sf      = samplefraction(%VAL(det),%VAL(eta))
+            sf      = samplefraction(det,eta)
             const_w = control_toadc(1).c1(det) / cosh(eta)
             amu  = hits_ems(ih).energy / cosh(eta)        ! 1./cosh(eta)=sin(theta)
      +           * sf * control_toadc(1).c2(det)
