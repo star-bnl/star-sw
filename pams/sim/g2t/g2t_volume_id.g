@@ -1,4 +1,4 @@
-* $Id: g2t_volume_id.g,v 1.39 2002/11/27 00:21:06 nevski Exp $
+* $Id: g2t_volume_id.g,v 1.40 2002/11/27 21:50:39 potekhin Exp $
 *  g2t_volume_id.g,v 
 *
 * Revision 1.38  2002/10/16 19:12:44  kopytin
@@ -59,9 +59,10 @@
 * 
       Character*3      Csys
       Integer          NUMBV(15)
-      Integer          i,ibublic,zsubsect,zsublayer
-      Integer          sector_hash(6,2)/ 4, 5, 6, 7, 8, 9, 
-                                        10,11,12, 1, 2, 3/
+      Integer          i,ibublic,zsubsect,zsublayer,eemc_depth
+      Integer          sector_hash(6,2) / 4, 5, 6, 7, 8, 9, 
+                                         10,11,12, 1, 2, 3/
+
       Integer          innout,sector,sub_sector,volume_id
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
       Integer          endcap,zslice,innour,lnumber,wafer,lsub,phi_30d
@@ -383,9 +384,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             shift     = 1
           endif
 
-	  if (emcg_version = 5) then
-* need to look at fillmode:
-
+	  if (emcg_version = 5) then ! need to look at fillmode:
             if (emcg_FillMode <= 2 ) then
                 ibublic = 1
             else
@@ -393,16 +392,19 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                 shift  += 1 
             endif
 
-            section   = numbv(1+shift)
-            phi_30d   = sector_hash(numbv(2+shift),ibublic) 
-            zsubsect  = numbv(3+shift)  ! not used in the readout
-            zsublayer = numbv(4+shift)  ! not used in the readout
-            phi       = numbv(5+shift)  ! 5 fingers
-            eta       = numbv(6+shift)  ! radial division
-            if (6+shift != nv) print *,' G2T_VOL_ID: new chush in ECAL'
-* end version 5
+            section   = numbv(1+shift)                        ! ECVO
+            phi_30d   = sector_hash(numbv(2+shift),ibublic)   ! EMOD
+            zsubsect  = numbv(3+shift)                        ! ESEC (no readout)
+            zsublayer = numbv(4+shift)                        ! EMGT (no readout)
+            phi       = numbv(5+shift)                        ! EPER (5 fingers)
+            eta       = numbv(6+shift)                        ! ETAR (radial division)
 
-	  else
+            if (6+shift != nv) print *,' G2T_VOL_ID: new chush in ECAL'
+
+            eemc_depth = zsubsect + 3*(section-1)
+
+            volume_id = 100000*rileft + 1000*(5*(phi_30d-1)+phi) + 10*eta + eemc_depth
+	  else ! version other than 5
             shift     = 1
             rileft    = numbv(0+shift)
             phi_30d   = numbv(1+shift)
@@ -410,11 +412,11 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             phi       = numbv(3+shift)
             eta       = numbv(5+shift)
             if (5+shift != nv) print *,' G2T_VOL_ID: old chush in ECAL'
+            volume_id = 100000*rileft+1000*(5*(phi_30d-1)+phi)+10*eta+section
           endif
 
-	endif
+	endif ! cd==ESCI
 
-	volume_id = 100000*rileft+1000*(5*(phi_30d-1)+phi)+10*eta+section
 		  
       else If (Csys=='esm') then
 *9* 
