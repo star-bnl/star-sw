@@ -1,11 +1,15 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.40 2004/08/17 20:04:28 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.41 2004/10/01 01:13:51 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.41  2004/10/01 01:13:51  calderon
+ * Added bug fix from Marco:
+ * flag%100 -> flag/100.
+ *
  * Revision 2.40  2004/08/17 20:04:28  perev
  * small leak fixed, delete physicalHelix,originD
  *
@@ -841,7 +845,7 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
   if (totFitPoints<5) {
       int flag = gTrack->flag();
       //keep most sig. digit, set last digit to 2, and flip sign
-      gTrack->setFlag(-(((flag%100)*100)+2)); // -x02 
+      gTrack->setFlag(-(((flag/100)*100)+2)); // -x02 
   }
 
 }
