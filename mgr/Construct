@@ -224,7 +224,7 @@ my $ROOTLIBS    = " -L$ROOTSYS/lib -lRint -lNew -lBase -lCint -lClib -lCont -lFu
    $ROOTLIBS   .= " -lPostscript -lProof -lTree -lUnix -lZip";
 my $ROOTGLIBS   = " -lGpad -lGui -lGX11 -lX3d -lXpm";
 my $ROOTSRC = "/afs/rhic/star/ROOT/" . $ROOT_LEVEL . "/ROOT/src";
-$CPPPATH = $INCLUDE . ":" .  $ROOTSRC . ":" . $CERN_ROOT . "/include:". $STAF . "/inc:/opt/star/include";
+$CPPPATH = $INCLUDE . ":#StRoot:" .  $ROOTSRC . ":" . $CERN_ROOT . "/include:". $STAF . "/inc:/opt/star/include";
 $FCPPPATH ="";
 print "CPPPATH  = \t$CPPPATH\n" unless ($param::quiet);
 Repository ($STAR);
@@ -351,7 +351,6 @@ $env = new cons(
 				   },
 	       );
 my @subdirs = ();
-my @incT = ();
 # make Targets and install includes
 foreach my $dir ("StRoot","pams") {
   if (-d $dir) {
@@ -365,6 +364,44 @@ foreach my $dir ("StRoot","pams") {
 	    $sub_dir =~ /^test$/)  {next;}
 	if ($sub_dir =~  /\./ || $sub_dir =~ /\.\./ || $sub_dir =~ /CVS/ || 
 	    $sub_dir =~ /^html$/ || $sub_dir =~ /^test$/ || $sub_dir =~ /^doc/) {next;}
+	if ($sub_dir =~ /^St_base$/ ||
+	    $sub_dir =~ /^StChain$/ ||
+	    $sub_dir =~ /^StBFChain$/ ||
+	    $sub_dir =~ /^StUtilities$/ ||
+	    $sub_dir =~ /^StAnalysisUtilities$/ ||
+	    $sub_dir =~ /^xdf2root$/ ||
+	    $sub_dir =~ /^StarClassLibrary$/ ||
+	    $sub_dir =~ /^StEvent$/ ||
+	    $sub_dir =~ /^StMcEvent$/ ||
+	    $sub_dir =~ /^StMagF$/ ||
+	    $sub_dir =~ /^StAnalysisUtilities$/ ||
+	    $sub_dir =~ /^StDbLib$/ ||
+	    $sub_dir =~ /^StDbBroker$/){
+	  opendir (DIR, $sub_DIR) or die "Can't open $sub_DIR\n";
+	  my @incs = readdir DIR; 
+	  closedir DIR; #print "incs = @incs\n";
+	  my @incT = ();
+	  foreach my $inc (@incs) {
+	    if ($inc =~ /\.h$/ || $inc =~ /\.hh$/ ||$inc =~ /\.inc$/) { 
+	      push @incT, $sub_DIR ."/" . $inc;# print "+++ add $inc\n";
+	      }
+	  }
+	  if ($#incT > -1) {Install $env $INCLUDE, @incT;}
+	}
+#	else {
+#	  my @incs = find_inc($sub_DIR); #print "in $sub_DIR : @incs\n";
+#	  if ($#incs > -1) {
+#	    foreach my $inc (@incs) {
+#	      next if $inc !~ /\.h$/ && $inc !~ /\.hh$/ && $inc !~ /\.inc$/; 
+#	      (my $ldir = dirname ($inc)) =~ s/^StRoot\///g;
+#	      if ($ldir eq ".") {$ldir = "";}
+#	      else              {$ldir = "/" . $ldir;}
+#		my $local_install = $INCLUDE . $ldir;
+#	      my @lincT = ("#" . $inc); #print "$inc, @lincT\n";	      
+#	      Install $env $local_install, @lincT; #print "Install $env $local_install, @lincT\n";
+#	    }
+#	  }
+#	}
 	opendir (DIR, $sub_DIR) or die "Can't open $sub_DIR\n";
 	my @subsubdirS = readdir DIR;
 	closedir DIR;# print "subsubdirS = @subsubdirS\n";
@@ -379,10 +416,12 @@ foreach my $dir ("StRoot","pams") {
                opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";   
                my @idls = readdir DIR;   
                closedir DIR; #print "idls = @idls\n";   
+	       my @idlT;
                foreach my $idl (@idls) {   
                  if ($idl =~ /\.idl$/ ) {   
                    push @idlT, $subsub_DIR ."/" . $idl; #print "+++ add $idl\n";   
                  }   
+		 if ($#idlT > -1) {Install $env $INCLUDE, @idlT;} 
                }   
                next;   
              }   
@@ -390,51 +429,17 @@ foreach my $dir ("StRoot","pams") {
 	      opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";
 	      my @incs = readdir DIR; 
 	      closedir DIR; #print "subsub_DIR = $subsub_DIR\n";
+	      my @incT = ();
 	      foreach my $inc (@incs) {
 		if ($inc =~ /\.h$/ || $inc =~ /\.hh$/ || $inc =~ /\.hpp$/ || $inc =~ /\.inc$/ ) {
 		  push @incT, $subsub_DIR ."/" . $inc; #print "+++ add $inc\n";
 		}
 	      }
+	      if ($#incT > -1) {Install $env $INCLUDE, @incT;}
 	      next;
 	    }
-	  }
-	  if ($sub_dir =~ /^St_base$/ ||
-	      $sub_dir =~ /^StChain$/ ||
-	      $sub_dir =~ /^StBFChain$/ ||
-	      $sub_dir =~ /^StUtilities$/ ||
-	      $sub_dir =~ /^StAnalysisUtilities$/ ||
-	      $sub_dir =~ /^xdf2root$/ ||
-	      $sub_dir =~ /^StarClassLibrary$/ ||
-	      $sub_dir =~ /^StEvent$/ ||
-	      $sub_dir =~ /^StMcEvent$/ ||
-	      $sub_dir =~ /^StMagF$/ ||
-	      $sub_dir =~ /^StAnalysisUtilities$/ ||
-	      $sub_dir =~ /^StDbLib$/ ||
-	      $sub_dir =~ /^StDbBroker$/){
-	    opendir (DIR, $sub_DIR) or die "Can't open $sub_DIR\n";
-	    my @incs = readdir DIR; 
-	    closedir DIR; #print "incs = @incs\n";
-	    foreach my $inc (@incs) {
-	      if ($inc =~ /\.h$/ || $inc =~ /\.hh$/ ||$inc =~ /\.inc$/) { 
-		push @incT, $sub_DIR ."/" . $inc;# print "+++ add $inc\n";
-	      }
-	    }
-	  }
-	  else {
-	    my @incs = find_inc($sub_DIR); #print "in $sub_DIR : @incs\n";
-	    if ($#incs > -1) {
-	      foreach my $inc (@incs) {
-		next if $inc !~ /\.h$/ && $inc !~ /\.hh$/ && $inc !~ /\.inc$/; 
-		(my $ldir = dirname ($inc)) =~ s/^StRoot\///g;
-		if ($ldir eq ".") {$ldir = "";}
-		else              {$ldir = "/" . $ldir;}
-		my $local_install = $INCLUDE . $ldir;
-		my @lincT = ("#" . $inc); #print "$inc, @lincT\n";	      
-		Install $env $local_install, @lincT; #print "Install $env $local_install, @lincT\n";
-	      }
-	    }
 	    if (($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/) && 
-		 $subsub_dir !~ /^g2t$/) {
+		$subsub_dir !~ /^g2t$/) {
 	      # one more level for gen & sim
 	      if ($SKIP_DIRS && $SKIP_DIRS =~ $sub_dir) {next;}
 	      push @subdirs, $subsub_DIR; #print "================== add $subsub_DIR\n";
@@ -486,8 +491,6 @@ print "BUILD  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ\n" unless ($param::quiet);# 
 Export qw( env INCLUDE LIB BIN EXPORT BUILD OBJ MAIN);
 Default qw (   .  );
 Build  @Targets;
-if ($#incT > -1) {Install $env $INCLUDE, @incT;}
-if ($#idlT > -1) {Install $env $INCLUDE, @idlT;} 
 #________________________________________________________________________________
 # Builder for a C++ module
 package build::command::cxx;
