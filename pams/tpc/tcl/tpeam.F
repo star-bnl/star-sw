@@ -18,7 +18,8 @@ C
      +                        tphith, tphit 
      +,                       mctrlh, mctrl
      +,                       mkineh, mkine
-     +,                       mhits_tpch, mhits_tpc )
+     +,                       mhits_tpch, mhits_tpc 
+     +,                       tssparh, tsspar )
 
       IMPLICIT NONE
 
@@ -57,6 +58,9 @@ C-----------------------------------------------------------------------
 #include "mct_mhits_tpc_pars.inc"
 #include "mct_mhits_tpc_st.inc"
 
+#include "tss_tsspar_pars.inc"
+#include "tss_tsspar_st.inc"
+
 C-----------------------------------------------------------------------
       RECORD/ table_head_st/ tphith
       RECORD/ tphit_row_st/ tphit(*)
@@ -67,6 +71,9 @@ C-----------------------------------------------------------------------
       RECORD/ mkine_row_st/ mkine(*)
       RECORD/ table_head_st/ mhits_tpch
       RECORD/ mhits_tpc_row_st/ mhits_tpc(*)
+
+      RECORD/ table_head_st/ tssparh
+      RECORD/ tsspar_row_st/ tsspar(*)
 
 C-----------------------------------------------------------------------
 c
@@ -81,8 +88,8 @@ c
          common/quest/iquest
          integer iquest(100)
 
-         integer nquota,nvar,icycle,nvar2
-         character*4 chtags(9),chtags2(11)
+         integer nquota,nvar,icycle,nvar2,nvar3
+         character*4 chtags(9),chtags2(11),chtags3(5)
 C-----------------------------------------------------------------------
          logical lstat,first
 
@@ -96,15 +103,20 @@ C-----------------------------------------------------------------------
          parameter (mxhits = 45)
          integer mcptr(4*mxhits),dtptr(mxhits)
          
-         integer nmctrk,nhitrk,itrk
+         integer nmctrk,nhitrk,itrk,nmchit,oldmchit
+         integer nhitrk2,nmchit2
          character*80 outfile
          integer iper,ihisto
+        
+         integer nhitrow(mxhits),wire_hits,kwir
+         real tphit_q(mxhits),mchit_q(mxhits)
 
 C-----------------------------------------------------------------------
-         data nvar/9/,nvar2/11/
+         data nvar/9/,nvar2/11/,nvar3/5/
          data chtags/'itrk','itcl','nrow','x','y','z','prf','zrf','q'/
          data chtags2/'itrk','mcx ','mcy ','mcz ','tpx ','tpy ','tpz '
      +,              'delx','dely','delz','nrow'/
+         data chtags3/'prec','mce','tpe','rde','pre2'/
          data first/.true./,ihisto/0/
 C-----------------------------------------------------------------------
 c
@@ -113,6 +125,7 @@ c
          tpeam = tucod_ok
 
          if(first)then
+            first = .false.
 c
 c           open rz file for ntuple...
 c
@@ -143,6 +156,8 @@ c
      +           chtags)
          call hbookn(300+ihisto,'Compare Info',nvar2,'ntup',11000,
      +              chtags2)
+         call hbookn(400+ihisto,'Track Info',nvar3,'ntup',4000,
+     +              chtags3)
 c        
 c        proceed with evaluation...
 c
@@ -174,16 +189,34 @@ c
 c
          do itrk = 1, mkineh.nok
            nhitrk = 0
+           nhitrk2 = 0
            nmctrk = 0
+           nmchit = 0
+           nmchit2 = 0
+           oldmchit = 0
            call vzero(dtptr,45)
            call vzero(mcptr,180)
+
+           call vzero(tphit_q,45)
+           call vzero(mchit_q,45)
+           call vzero(mcptr,4*mxhits)
+c
+c          build pointers to reconstructed hits on itrk
+c
            do ihit = 1, tphith.nok
               if(tphit(ihit).track.eq.itrk)then
                  nhitrk = nhitrk + 1
+                 if(tphit(ihit).row.ge.40)then
+                    nhitrk2 = nhitrk2 + 1
+                 endif
                  dtptr(tphit(ihit).row) = ihit
+                 tphit_q(nhitrk)=tphit(ihit).q
               endif
            enddo
-           write(6,*)' ',nhitrk,' tphits on itrk = ',itrk
+c          write(6,*)' ',nhitrk,' tphits on itrk = ',itrk
+c
+c          build pointers to mc hits on itrk
+c
            do ihit = 1, mhits_tpch.nok
               if(mhits_tpc(ihit).itrk.eq.itrk)then
                  nmctrk = nmctrk + 1
@@ -196,48 +229,133 @@ c
                  mcptr((irow-1)*4+iwire) = ihit
               endif
            enddo
-           write(6,*)' ',nmctrk,' mchits on itrk = ',itrk
+c          write(6,*)' ',nmctrk,' mchits on itrk = ',itrk
+c
+c          collect comparison statistics for all mc/rec hits on itrk
+c
            do irow = 1, 45
-              vec(11) = real(irow)
-              vec(1) = itrk
-              vec(2) = (mhits_tpc(mcptr((irow-1)*4+1)).x(1)
-     +                +mhits_tpc(mcptr((irow-1)*4+2)).x(1)
-     +                +mhits_tpc(mcptr((irow-1)*4+3)).x(1)
-     +                +mhits_tpc(mcptr((irow-1)*4+4)).x(1))/4.
-              vec(3) = (mhits_tpc(mcptr((irow-1)*4+1)).x(2)
-     +                +mhits_tpc(mcptr((irow-1)*4+2)).x(2)
-     +                +mhits_tpc(mcptr((irow-1)*4+3)).x(2)
-     +                +mhits_tpc(mcptr((irow-1)*4+4)).x(2))/4.
-              vec(4) = (mhits_tpc(mcptr((irow-1)*4+1)).x(3)
-     +                +mhits_tpc(mcptr((irow-1)*4+2)).x(3)
-     +                +mhits_tpc(mcptr((irow-1)*4+3)).x(3)
-     +                +mhits_tpc(mcptr((irow-1)*4+4)).x(3))/4.
-              if(dtptr(irow).ne.0)then
-                 vec(5) = tphit(dtptr(irow)).x
-                 vec(6) = tphit(dtptr(irow)).y
-                 vec(7) = tphit(dtptr(irow)).z
-                 vec(8) = vec(2)-vec(5)
-                 vec(9) = vec(3)-vec(6)
-                 vec(10) = vec(4)-vec(7)
-              else
-                 vec(5) = 0.
-                 vec(6) = 0.
-                 vec(7) = 0.
-                 vec(8) = 0.
-                 vec(9) = 0.
-                 vec(10) = 0.
-              endif
-              call hfn(300+ihisto,vec)
-           enddo
-         enddo
-         call hrout(300+ihisto,icycle,' ')
-c        call hrend('ntup')
-c        close(23)
 
+              if(mcptr((irow-1)*4+1).ne.0 
+     +       .or.mcptr((irow-1)*4+2).ne.0 
+     +       .or.mcptr((irow-1)*4+3).ne.0 
+     +       .or.mcptr((irow-1)*4+4).ne.0 )then
+                 nmchit = nmchit + 1
+                 if(irow.ge.40)then
+                    nmchit2 = nmchit2 + 1
+                 endif
+              endif
+
+              if (nmchit .ne. oldmchit)then
+                 oldmchit = nmchit
+
+                 vec(11) = real(irow)
+                 vec(1) = itrk
+                 vec(2) = 0.
+                 vec(3) = 0.
+                 vec(4) = 0.
+
+                 wire_hits = 0
+                 do kwir=1,4
+                    if(mcptr((irow-1)*4+kwir).ne.0)then
+                       vec(2)=vec(2)
+     +                           +mhits_tpc(mcptr((irow-1)*4+kwir)).x(1)
+                       vec(3)=vec(3)
+     +                           +mhits_tpc(mcptr((irow-1)*4+kwir)).x(2)
+                       vec(4)=vec(4)
+     +                           +mhits_tpc(mcptr((irow-1)*4+kwir)).x(3)
+                       mchit_q(nmchit)=mchit_q(nmchit)
+     +                       +1.e06*mhits_tpc(mcptr((irow-1)*4+kwir)).de
+                       wire_hits = wire_hits + 1
+                    endif
+                 enddo
+                 if(wire_hits.gt.0)then
+                    vec(2)=vec(2)/float(wire_hits)
+                    vec(3)=vec(3)/float(wire_hits)
+                    vec(4)=vec(4)/float(wire_hits)
+                 endif
+c                if(irow .le. pad_plane(1).nrow_in)then
+                 if(irow .le. 13)then
+                    mchit_q(nmchit)=mchit_q(nmchit)*tsspar(1).scale_in
+                 else
+                    mchit_q(nmchit)=mchit_q(nmchit)*tsspar(1).scale_out
+                 endif
+                 
+                 if(dtptr(irow).ne.0)then
+                    vec(5) = tphit(dtptr(irow)).x
+                    vec(6) = tphit(dtptr(irow)).y
+                    vec(7) = tphit(dtptr(irow)).z
+                    vec(8) = vec(2)-vec(5)
+                    vec(9) = vec(3)-vec(6)
+                    vec(10) = vec(4)-vec(7)
+                 else
+                    vec(5) = 0.
+                    vec(6) = 0.
+                    vec(7) = 0.
+                    vec(8) = 0.
+                    vec(9) = 0.
+                    vec(10) = 0.
+                 endif
+                 call hfn(300+ihisto,vec)
+                 
+              endif      ! if(nmchit .ne. oldmchit)
+           enddo      ! do irow = 1, 45
+
+           if(nmchit.gt.0)then
+              vec(1) = float(nhitrk)/float(nmchit)
+           else
+              vec(1) = 0.
+           endif
+           if(nmchit2.gt.0)then
+              vec(5) = float(nhitrk2)/float(nmchit2)
+           else
+              vec(5) = 0.
+           endif
+c
+c          perform truncation try lower 60%
+c
+           do indx = 1, nint(0.6*float(nmchit))
+              vec(2) = vec(2) + mchit_q(indx)
+           enddo
+           vec(2) = vec(2)/float(nint(0.6*float(nmchit)))
+
+           do indx = 1, nint(0.6*float(nhitrk))
+              vec(3) = vec(3) + tphit_q(indx)
+           enddo
+           vec(3) = vec(3)/float(nint(0.6*float(nhitrk)))
+
+c
+c          it really only makes sense to plot dE/E since 
+c          noise is constant wrt the min. ion. peak
+c
+           vec(4) = (vec(2)-vec(3))/vec(2)
+
+           call hfn(400+ihisto,vec)
+         enddo        ! do itrk = 1, mkineh.nok
+
+         call hrout(400+ihisto,icycle,' ')
+         call hrout(300+ihisto,icycle,' ')
+
+c        if( mctrl(1).nevt .eq. mctrl(1).mxevt)then
+c           call hrend('ntup')
+c           close(23)
+c        endif
 c
          return
          end
 
+C----------------------------------------------------------------------
+
+        SUBROUTINE TPE_CLOSE
+
+        Implicit None
+
+C----------------------------------------------------------------------
+
+        call hrend('ntup')
+        close(23)
+
+        return
+        end
 
 
-
+C----------------------------------------------------------------------

@@ -131,6 +131,7 @@ C-----------------------------------------------------------------------
         integer ntim, nseq, jseq
 
         real pad_width, time_bucket, time_bin, tval
+        real rstat
 
         double precision invec(3),outvec(3)
 
@@ -201,11 +202,16 @@ c
 c
 c                warning, these units are in time buckets; later convert to cm...
 c
-                 tphit(tphith.nok).zrf = tph_calc_prf_sigma(ntim, itdc
+                 rstat = tph_calc_prf_sigma(ntim, itdc
      +,                                                           iadc)
-
-                 tphit(tphith.nok).z = tph_calc_prf_pos(ntim, itdc, iadc
+                 if(rstat .ne. 0.)then
+                    tphit(tphith.nok).zrf = rstat
+                 endif
+                 rstat = tph_calc_prf_pos(ntim, itdc, iadc
      +,                                          tphit(tphith.nok).zrf)
+                 if(rstat .ne. 0.)then
+                    tphit(tphith.nok).z = rstat
+                 endif
               endif
 
 c
@@ -221,16 +227,21 @@ c
 c             presumption of three pad hits and Gaussian prf-> 
 c             recalculate position and prf width using parameterisation
 c
-              tphit(tphith.nok).prf = tph_calc_prf_sigma(nseq, ipad
+              rstat = tph_calc_prf_sigma(nseq, ipad
      +,                                                        iadc)
-              tphit(tphith.nok).x = tph_calc_prf_pos(nseq, ipad, iadc
+              if(rstat .ne. 0.)then
+                 tphit(tphith.nok).prf = rstat
+              endif
+              rstat = tph_calc_prf_pos(nseq, ipad, iadc
      +,                                          tphit(tphith.nok).prf)
-
-           elseif(nseq.eq.2)then
+              if(rstat .ne. 0.)then
+                 tphit(tphith.nok).x = rstat
+              endif
+           elseif(nseq.le.2)then
 c
 c             treat two pad hits separately
 c
-              continue
+              goto 999
            endif
 c
 c          finally, transform everything to global coordinates !
@@ -268,6 +279,7 @@ c
 c       finally, should calculate dx, dy, and dz ...
 c       note that sigma_prf IS NOT sigma_x, etc...
 
+ 999       continue   ! error return for two-pad hits!
         enddo
 
 c
@@ -307,7 +319,7 @@ C-----------------------------------------------------------------------
       RECORD/ tpseq_row_st/ tpseq(*)
 
 C-----------------------------------------------------------------------
-        integer lvmax
+        integer lvmax,iucomp
 
         real iadc(*),itdc(*),ipad(*)
         integer id_pad(*), itrk
@@ -326,12 +338,17 @@ C-----------------------------------------------------------------------
         integer kseq,kpix,kseqpix
         integer jpix,iclspix,indx
         integer mtrk,jndx
+
+        integer id
 C-----------------------------------------------------------------------
+        data id/0/
         data seqmask/'3F00'X/,botmask/'FF'X/
 C-----------------------------------------------------------------------
 
         iclspix = 0
         ntrk = 0
+        call vzero(ltrk,maxtrk)
+        call vzero(nocc,maxtrk)
 
         do kseq = jseq, jseq+nseq-1
            jpix = tpseq(kseq).jpix
@@ -342,21 +359,27 @@ c
 c          for MC data!
 c
            ktrk = tpmcpix(jpix).mcid
-           if(ntrk.gt.0)then
-              mtrk = ntrk
-              do jndx = 1, mtrk
-                 if(ltrk(jndx).eq.ktrk)then
-                    nocc(jndx)=nocc(jndx)+1.
-                 else
-                    ntrk = ntrk + 1
-                    ltrk(ntrk) = ktrk
-                    nocc(ntrk) = 1.
-                 endif
-              enddo
-           else
+           if(ntrk.gt.0 .and. ntrk.lt.maxtrk)then
+              mtrk = iucomp(ktrk,ltrk,ntrk)
+              if(mtrk.eq.0 .and. ntrk.lt.maxtrk)then
+                 ntrk = ntrk + 1
+                 ltrk(ntrk) = ktrk
+                 nocc(ntrk) = 1.
+              elseif(mtrk.gt.0 .and. mtrk.le.maxtrk)then
+                 nocc(mtrk) = nocc(mtrk) + 1.
+              else
+                 id = 0
+                 call message('TPHAM-I-GCD, ntrk.gt.maxtrk',1,id)
+                 return
+              endif
+           elseif(ntrk.eq.0)then
               ntrk = ntrk + 1
               ltrk(ntrk) = ktrk
               nocc(ntrk) = 1.
+           else
+              id = 0
+              call message('TPHAM-I-GCD, ntrk.gt.maxtrk',1,id)
+              return
            endif
 
            iadc(iclspix) = real(idatum(1))
@@ -379,16 +402,18 @@ c
 c             for MC data!
 c
               ktrk = tpmcpix(jpix).mcid
-              mtrk = ntrk
-              do jndx = 1, mtrk
-                 if(ltrk(jndx).eq.ktrk)then
-                    nocc(jndx)=nocc(jndx)+1.
-                 else
-                    ntrk = ntrk + 1
-                    ltrk(ntrk) = ktrk
-                    nocc(ntrk) = 1.
-                 endif
-              enddo
+              mtrk = iucomp(ktrk,ltrk,ntrk)
+              if(mtrk.eq.0 .and. ntrk.lt.maxtrk)then
+                 ntrk = ntrk + 1
+                 ltrk(ntrk) = ktrk
+                 nocc(ntrk) = 1.
+              elseif(mtrk.gt.0 .and. mtrk.le.maxtrk)then
+                 nocc(mtrk) = nocc(mtrk) + 1.
+              else
+                 id = 0
+                 call message('TPHAM-I-GCD, ntrk.gt.maxtrk',1,id)
+                 return
+              endif
 
            enddo
         enddo
@@ -442,9 +467,9 @@ C-----------------------------------------------------------------------
         pad = pad/sum
         tdc = tdc/sum
 
-c       tphit(tphith.nok).q = sum
-        max_adc = vmax(iadc,nclspix)
-        tphit(tphith.nok).q = max_adc
+        tphit(tphith.nok).q = sum
+c       max_adc = vmax(iadc,nclspix)
+c       tphit(tphith.nok).q = max_adc
 
         tphit(tphith.nok).x = pad
         tphit(tphith.nok).z = tdc
@@ -550,27 +575,27 @@ C-----------------------------------------------------------------------
            x = iadc(imax)**2
            y = iadc(imax-1)*iadc(imax+1)
            pad_width = 1./log(x/y)
-        elseif(imax+1 .le. nseq)then
+        elseif(imax .eq. 1)then
 c
 c          the peak of the pulse is on the "leftmost" edge of a pad row
 c          should use calculated pad-response width and 2-pad position
 c          estimate
 c
            id = 0
-           call message('TPHAM-I-PRF tpc hit at leftmost pad row edge'
+           call message('TPHAM-I-PRFS imax=1; leftmost'
      +,                 1, id)
-        elseif(imax-1 .ge. 1)then
+        elseif(imax .eq. nseq)then
 c
 c          the peak of the pulse is on the "rightmost" edge of a pad row
 c          should use calculated pad-response width and 2-pad position
 c          estimate
 c
            id = 0
-           call message('TPHAM-I-PRF tpc hit at rightmost pad row edge'
+           call message('TPHAM-I-PRFS imax=nseq; rightmost'
      +,                 1, id)
         else
            id = 0
-           call message('TPHAM-E-PRF error in 3 pad prf calculation'
+           call message('TPHAM-E-PRFS error in 3 pad prf calculation'
      +,                 1, id)
         endif
 
@@ -611,27 +636,27 @@ c          c3 = iadc(imax+1)
 c          p3 = ipad(imax+1)
 
            tph_calc_prf_pos = (p1+p2)/2.-sigma*log(c1/c2)
-        elseif(imax+1 .le. nseq)then
+        elseif(imax .eq. 1)then
 c
 c          the peak of the pulse is on the "leftmost" edge of a pad row
 c          should use calculated pad-response width and 2-pad position
 c          estimate
 c
            id = 0
-           call message('TPHAM-I-PRF tpc hit at leftmost pad row edge'
+           call message('TPHAM-I-PRFP imax=1; leftmost'
      +,                 1, id)
-        elseif(imax-1 .ge. 1)then
+        elseif(imax .eq. nseq)then
 c
 c          the peak of the pulse is on the "rightmost" edge of a pad row
 c          should use calculated pad-response width and 2-pad position
 c          estimate
 c
            id = 0
-           call message('TPHAM-I-PRF tpc hit at rightmost pad row edge'
+           call message('TPHAM-I-PRFP imax=nseq; rightmost'
      +,                 1, id)
         else
            id = 0
-           call message('TPHAM-E-PRF error in 3 pad prf calculation'
+           call message('TPHAM-E-PRFP error in 3 pad prf calculation'
      +,                 1, id)
            return
         endif
