@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.9 2004/12/07 20:03:26 mmiller Exp $
+ * $Id: StJetMaker.cxx,v 1.10 2005/01/27 18:39:03 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -175,11 +175,13 @@ Int_t StJetMaker::Make()
 	    
 	    StProtoJet& pj = (*it);
 	    cout <<"jet "<<ijet<<"\t\t"<<pj.pt()<<"\t"<<pj.phi()<<"\t"<<pj.eta()<<endl;
+	    /*
 	    StProtoJet::FourVecList &trackList = pj.list(); // Get the tracks too.
 	    for(StProtoJet::FourVecList::iterator it2=trackList.begin(); it2!=trackList.end(); ++it2)  {
 		AbstractFourVec* v = (*it2);
-		//cout <<"\t"<<"\t\t"<<v->pt()<<"\t"<<v->phi()<<"\t"<<v->eta()<<endl;
+		cout <<"\t"<<"\t\t"<<v->pt()<<"\t"<<v->phi()<<"\t"<<v->eta()<<endl;
 	    }
+	    */
 	    
 	    /*
 	    //temp check from here.................

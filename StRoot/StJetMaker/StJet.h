@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJet.h,v 1.1 2004/07/08 15:41:03 mmiller Exp $
+// $Id: StJet.h,v 1.2 2005/01/27 18:39:03 mmiller Exp $
 // $Log: StJet.h,v $
+// Revision 1.2  2005/01/27 18:39:03  mmiller
+// Added some extra accessors to StJet object to keep track of Et from TPC, BTOW, ETOW, etc.
+//
 // Revision 1.1  2004/07/08 15:41:03  mmiller
 // First release of StJetMaker.  Mike's commit of full clean of StJetFinder, StJetMaker, and StSpinMaker.  builds and runs in dev.
 //
@@ -66,19 +69,61 @@
 class StJet : public TLorentzVector {
 
 public:  
-    StJet() : TLorentzVector(0,0,0,0), nCell(0), charge(0) {};
+    StJet() : TLorentzVector(0,0,0,0), nCell(0), charge(0)
+    {
+	nTracks = nBtowers = nEtowers = 0;
+	tpcEtSum = btowEtSum = etowEtSum = 0.;
+    }
+
     StJet(double lE, double lpx, double lpy, double lpz, Int_t size, int c)
-	: TLorentzVector(lpx, lpy, lpz, lE), nCell(size), charge(c) {};
+	: TLorentzVector(lpx, lpy, lpz, lE), nCell(size), charge(c)
+    {
+	nTracks = nBtowers = nEtowers = 0;
+	tpcEtSum = btowEtSum = etowEtSum = 0.;
+    }
+    
     virtual ~StJet();
 
     ///The number of 4-vectors contributing to this jet
-    Int_t        nCell;
+    Int_t nCell;
+    
     ///The summed coulomb charge of the tracks in this jet
-    int     charge;
+    int charge;
+
+    ///The number of tracks in this jet
+    int nTracks;
+
+    ///The number of Barrel towers in this jet
+    int nBtowers;
+
+    ///The number of Endcap towers in this jet
+    int nEtowers;
+
+    ///The summed Et from tracks
+    float tpcEtSum;
+
+    ///The summed Et from Barrel towers
+    float btowEtSum;
+
+    ///The summed Et from Endcap towers
+    float etowEtSum;
+
+    ///Et (stored for convenience when drawing TTree)
+    float jetEt;
+
+    ///Pt (stored for convenience when drawing TTree)
+    float jetPt;
+
+    ///Eta (stored for convenience when drawing TTree)
+    float jetEta;
+
+    ///Phi (stored for convenience when drawing TTree)
+    float jetPhi;
+    
     
     Float_t      et() const {return E()*sqrt(1.0-tanh(Eta())*tanh(Eta()));}
     Float_t      ez() const {return E()*fabs(tanh(Eta()));}
-    ClassDef(StJet,3)
+    ClassDef(StJet,4)
 };
 
 #endif

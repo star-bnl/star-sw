@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.5 2004/09/22 15:46:21 mmiller Exp $
+// $Id: StJets.cxx,v 1.6 2005/01/27 18:39:03 mmiller Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.6  2005/01/27 18:39:03  mmiller
+// Added some extra accessors to StJet object to keep track of Et from TPC, BTOW, ETOW, etc.
+//
 // Revision 1.5  2004/09/22 15:46:21  mmiller
 // Added a double check to verify that jet 4p is equal to the vector sum of
 // the particles 4-p.  Removed troublesome access methods to StJets.  See
@@ -132,10 +135,14 @@ void StJets::addProtoJet(StProtoJet& pj)
     int jetIndex = mJets->GetLast()+1;
     
     StProtoJet::FourVecList &trackList = pj.list(); // Get the tracks too.
-    
-    // We need to add up the charged tracks to get charge and nCell
-    int nCell = 0;
-    int charge = 0;
+
+    //Make it here and update info as we go through tracks:
+    StJet tempJet( pj.e(), pj.px(), pj.py(), pj.pz(), 0, 0 );
+    tempJet.jetEt = pj.eT();
+    tempJet.jetPt = tempJet.Pt();
+    tempJet.jetEta = tempJet.Eta();
+    tempJet.jetPhi = tempJet.Phi();
+
     
     for(StProtoJet::FourVecList::iterator it2=trackList.begin(); it2!=trackList.end(); ++it2)  {
 	StMuTrackFourVec *track = dynamic_cast<StMuTrackFourVec*>(*it2);
@@ -149,8 +156,9 @@ void StJets::addProtoJet(StProtoJet& pj)
 	    abort();
 	}
 	else {
-	    //cout <<"here's the track:\t"<<*track<<endl;
 	    
+	    //cout <<"here's the track:\t"<<*track<<endl;
+    
 	    //add to trackToJetIndices
 	    int addAt = mTrackToJetIndices->GetLast()+1;
 	    TrackToJetIndex t2j( jetIndex, muTrackIndex, track->detectorId() );
@@ -159,18 +167,24 @@ void StJets::addProtoJet(StProtoJet& pj)
 
 	    new ( (*mTrackToJetIndices)[addAt]) TrackToJetIndex( t2j );
 
-	    //((TrackToJetIndex*)(*mTrackToJetIndices)[addAt])->setTrackIndex(muTrackIndex);
-	    //((TrackToJetIndex*)(*mTrackToJetIndices)[addAt])->setJetIndex(jetIndex);
+	    //ok, get track/tower properties here:
+	    StDetectorId mDetId = track->detectorId();
+	    if (mDetId==kTpcId) {
+		tempJet.nTracks++;
+		tempJet.tpcEtSum += track->eT();
+	    }
+	    else if (mDetId==kBarrelEmcTowerId) {
+		tempJet.nBtowers++;
+		tempJet.btowEtSum += track->eT();
+	    }
+	    else if (mDetId==kEndcapEmcTowerId) {
+		tempJet.nEtowers++;
+		tempJet.etowEtSum += track->eT();
+	    }
 	}
-	if(track->particle())
-	    if( track->charge() ) {  // If charge != 0, increment the number of cp
-                nCell++;
-	}
-	if(track->particle())
-	    charge += track->particle()->charge();
     }
     //add in the jet container
-    new((*mJets)[jetIndex]) StJet( pj.e(), pj.px(), pj.py(), pj.pz(), nCell, charge );
+    new((*mJets)[jetIndex]) StJet( tempJet );
 }
 
 vector<TrackToJetIndex*> StJets::particles(int jetIndex)

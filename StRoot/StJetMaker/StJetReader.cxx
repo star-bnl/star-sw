@@ -214,6 +214,9 @@ string idString(TrackToJetIndex* t)
     else if (mDetId==kBarrelEmcTowerId) {
 	idstring = "kBarrelEmcTowerId";
     }
+    else if (mDetId==kEndcapEmcTowerId) {
+	idstring = "kEndcapEmcTowerId";
+    }
     else {
 	idstring = "kUnknown";
     }

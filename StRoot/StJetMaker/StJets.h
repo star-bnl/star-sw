@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.h,v 1.6 2004/12/07 20:03:35 mmiller Exp $
+// $Id: StJets.h,v 1.7 2005/01/27 18:39:03 mmiller Exp $
 // $Log: StJets.h,v $
+// Revision 1.7  2005/01/27 18:39:03  mmiller
+// Added some extra accessors to StJet object to keep track of Et from TPC, BTOW, ETOW, etc.
+//
 // Revision 1.6  2004/12/07 20:03:35  mmiller
 // Fixed the tracking of the software-id (tower index) of barrel towers in the jet.
 //
@@ -135,6 +138,9 @@ inline ostream& operator<<(ostream& os, const TrackToJetIndex& t)
     }
     else if (mDetId==kBarrelEmcTowerId) {
 	idstring = "kBarrelEmcTowerId";
+    }
+    else if (mDetId==kEndcapEmcTowerId) {
+	idstring = "kEndcapEmcTowerId";
     }
     else {
 	idstring = "kUnknown";
