@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.76 1999/11/19 21:02:11 didenko Exp $
+// $Id: StMaker.cxx,v 1.77 1999/12/01 22:56:30 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -50,7 +50,7 @@ StMaker::StMaker(const char *name,const char *):St_DataSet(name,".maker"),fActiv
    m_ConstSet = new St_ObjectSet(".const");Add(m_ConstSet);
    m_GarbSet  = new St_ObjectSet(".garb" );Add(m_GarbSet);
    m_Inputs   = new St_ObjectSet(".aliases" );Add(m_Inputs);
-   m_RunCont  = new St_ObjectSet(".runcontrol" );Add(m_RunCont);
+   m_Runco  = new St_ObjectSet(".runco" );Add(m_Runco);
    AddHist(0); m_Histograms = GetHistList();
    gStChain = this; //?????????????????????????????????????????????????????
 ::doPs(GetName(),"constructor");
@@ -126,11 +126,11 @@ St_ObjectSet *StMaker::AddObj(TObject *obj,const char *dir)
   AddObj(h,".hist");
 }    
 //______________________________________________________________________________
- void StMaker::AddRunCont (double par,const char* name,const char* comment)
+ void StMaker::AddRunco (double par,const char* name,const char* comment)
 {
    assert (name && name && comment[0]); 
 
-   St_DataSet *dp = new St_DataSet(name,m_RunCont);
+   St_DataSet *dp = new St_DataSet(name,m_Runco);
    TString ts("  // "); ts += comment;
    char buf[40];
    sprintf(buf,"%f",par);
@@ -934,6 +934,9 @@ Int_t StMaker::FinishRun(int runumber) {return 0;}
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.77  1999/12/01 22:56:30  perev
+// .runco directory & AddRunco method introduced
+//
 // Revision 1.76  1999/11/19 21:02:11  didenko
 // valeri's changes
 //

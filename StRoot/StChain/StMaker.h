@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.37 1999/09/23 21:24:58 perev Exp $
+// $Id: StMaker.h,v 1.38 1999/12/01 22:56:30 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.38  1999/12/01 22:56:30  perev
+// .runco directory & AddRunco method introduced
+//
 // Revision 1.37  1999/09/23 21:24:58  perev
 // recovered debug level init(lost)
 //
@@ -126,7 +129,7 @@ protected:
    St_DataSet     *m_GarbSet;		//!  
    St_DataSet     *m_Inputs;	 	//!list of logInput:ActualInput
    St_DataSet     *m_Ouputs;	 	//!list of logOuput:ActualOuput
-   St_DataSet     *m_RunCont;	 	//!Run Control parameters
+   St_DataSet     *m_Runco;	 	//!Run Control parameters
    TList          *m_Histograms;	//!list of Histograms
    static StMaker *fgStChain;     	//current pointer to StChain
    Int_t	   m_Mode;		// Integer mode of maker
@@ -166,8 +169,8 @@ public:
    virtual void        	AddConst(St_DataSet *data=0){AddData(data,".const");}
    virtual void        	AddHist(TH1 *h,const char *dir=0);
    virtual void        	AddGarb (St_DataSet *data=0){AddData(data,".garb");};
-   virtual void        	AddRunCont (St_DataSet *data=0){AddData(data,".runcontrol");};
-   virtual void        	AddRunCont (double par,const char* name,const char* comment);
+   virtual void        	AddRunco (St_DataSet *data=0){AddData(data,".runco");};
+   virtual void        	AddRunco (double par,const char* name,const char* comment);
    virtual TList       *GetHistList() const {return (TList*)GetDirObj(".hist");};
    virtual TH1         *GetHist(const Char_t *histName) const {TList *l=GetHistList(); return l?(TH1*)l->FindObject(histName):(TH1*)0;};
    virtual StMaker     *cd(){StMaker *ret = fgStChain; fgStChain=this; return ret;};
@@ -245,7 +248,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.37 1999/09/23 21:24:58 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.38 1999/12/01 22:56:30 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   //StChain virtual base class for Makers
 };
