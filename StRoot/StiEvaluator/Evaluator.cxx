@@ -17,31 +17,34 @@ Evaluator::Evaluator(const string & name, const string & description)
 Evaluator:: ~Evaluator()
 {}
 
-void Evaluator::run(const char * inputFile)
-{
-  string file = inputFile;
-  run(file);
-}
 
-void Evaluator::run(const string& inputFile)
+void Evaluator::run(const char* inputFile)
 {
+  StMiniMcEvent * mEvent=0;
+
   TChain * chain = new TChain("StMiniMcTree");
-  chain->Add(inputFile.c_str());
-  chain->SetBranchAddress("StMiniMcEvent",&event);
-  TBranch* btree        = chain->GetBranch("StMiniMcEvent");
+  chain->Add(inputFile);
   int nEvents = (int) chain->GetEntries();
   cout << inputFile << " : " << nEvents << " events" << endl;
+
+  chain->SetBranchAddress("StMiniMcEvent",&mEvent);
+  TBranch* btree        = chain->GetBranch("StMiniMcEvent");
+  
+
   for (int i=0; i<nEvents; ++i) 
     {
+      cout <<"Event: "<<i<<endl;
       btree->GetEntry(i);
       vector<StiEvaluatorHistograms*>::iterator iter;
       for (iter=_histograms.begin();iter!=_histograms.end();++iter)
 	{
-	  (*iter)->fill(event);
+	  (*iter)->fill(mEvent);
 	}
     }
-  delete btree;
-  delete chain;
+
+  chain->Reset();
+  //delete btree;
+  //delete chain;
 }
 
 void Evaluator::save(const char * inputFile)

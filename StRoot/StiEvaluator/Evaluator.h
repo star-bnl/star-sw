@@ -15,7 +15,6 @@ class Evaluator : public Named, public Described, public TObject
   Evaluator(const string & name="Evaluator", const string & description="Evaluator");
   ~Evaluator();
   void run(const char * inputFile);
-  void run(const string & inputFile);
   void save(const char * inputFile);
   void save(const string & targetDirectory);
   void saveHtml(const char * inputFile);
