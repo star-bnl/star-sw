@@ -48,7 +48,8 @@ public:
   virtual Int_t 	SetFile(const Char_t *file);
   virtual Int_t UpdateFile(const Char_t *file);
   virtual const Char_t *GetFile() const {return (const Char_t*)fFile;};
-  virtual Int_t 	SetTFile(TFile *tfile);
+  virtual Int_t SetFile(const Char_t *file,const Char_t *iomode=0);
+  virtual Int_t SetTFile(TFile *tfile);
   virtual TFile        *GetTFile(){return fTFile;};
   virtual void SetUKey(ULong_t ukey){if (ukey!=kUMAX) fUKey=ukey;};
   virtual ULong_t GetUKey()  const {return fUKey;};
@@ -93,6 +94,7 @@ public:
   virtual void  Close(const char *opt=0);
   virtual Int_t Open();
   virtual void Clear(Option_t *opt="");
+  virtual Int_t SetFile(const Char_t *file,const Char_t *iomode=0);
   virtual void SetBaseName(const char* basename);
   virtual const char *GetBaseName() 
           {return (fBaseName.IsNull()) ? 0:(const char*)fBaseName;};
@@ -116,5 +118,24 @@ TObject *fObj;	// Pointer to full tree
   virtual Bool_t IsFolder(){ return fObj ? kTRUE: kFALSE; }
 
 ClassDef(StIOEvent,1)
+};
+
+class StFile : public St_DataSet
+{
+public:
+  StFile(Int_t nbranches=1):St_DataSet("StFile"){};
+ ~StFile(){};
+ 
+  Int_t AddFile(const Char_t *file,const Char_t *branch=0);
+  Int_t AddWild(const Char_t *file);
+  const Char_t *NextFileName();
+  const Char_t *GetBraName(){return GetAttr("branch=");}; 
+  const Char_t *GetFormat() {return GetAttr("format=");};
+  Int_t Check(){return 0;};
+protected:
+  void SetInfo();
+  const Char_t *GetAttr(const char *att); 
+
+  ClassDef(StFile,1)
 };
 #endif
