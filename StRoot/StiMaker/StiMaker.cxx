@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.140  2004/03/26 14:52:43  calderon
+// Print out the magnetic field read from StEvent::eventSummary()
+//
 // Revision 1.139  2004/03/25 22:42:44  andrewar
 // temp mag field fix; cache filed value and reset if it goes to zero. This
 // protects against corrupt event headers...
@@ -395,6 +398,7 @@ Int_t StiMaker::Make()
 
   // Retrieve bfield in Tesla
   double field = event->summary()->magneticField()/10.;
+  cout << "StiMaker::Make() -I- Reading eventSummary()->magneticField() " << field << endl; 
   if (fabs(field)<2.)
     static_cast<StiKalmanTrackFinderParameters&>(_tracker->getParameters()).setField(field);
   else
