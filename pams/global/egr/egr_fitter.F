@@ -966,15 +966,18 @@ CCC  L.Ray - 9/16/98
 
       if(globtrk_h.nok .gt. 0) then
          do i = 1,globtrk_h.nok
-            if(globtrk(i).invpt .ge. -999999. .and. globtrk(i).invpt .le. 999999.) then
+            if(globtrk(i).invpt .ge. -999999. .and. 
+     +         globtrk(i).invpt .le. 999999.) then
                continue 
             else 
-*              write(6,998) i
-998   Format(5X,'BAD Value of globtrk(i=',I7,').invpt detected - set to -999999')
-               globtrk(i).invpt = -999999.
-               globtrk(i).iflag = -999
+C     write(6,998) i
+C 998  Format(5X,'BAD Value of globtrk(i=',I7,').invpt detected - set to -999999')
+      globtrk(i).invpt = -999999.
+CSM preserve the detector id information. Instead of -999 put -x99. Spiros
+CSM        globtrk(i).iflag = -999
+      globtrk(i).iflag = -1.*(abs(globtrk(i).iflag/100)*100+99)
             end if  
-         end do
+        end do
       end if
              
       egr_fitter = STAFCV_OK
