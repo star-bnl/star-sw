@@ -1,5 +1,8 @@
-// $Id: StChargeStepMaker.cxx,v 1.7 2000/08/15 00:25:41 hardtke Exp $
+// $Id: StChargeStepMaker.cxx,v 1.8 2000/08/17 23:28:38 hardtke Exp $
 // $Log: StChargeStepMaker.cxx,v $
+// Revision 1.8  2000/08/17 23:28:38  hardtke
+// read tpcChargeStepCalib parameters for database
+//
 // Revision 1.7  2000/08/15 00:25:41  hardtke
 // require 10 good events before table is written
 //
@@ -38,6 +41,7 @@
 #include "StMessMgr.h"
 #include "tables/St_type_shortdata_Table.h"
 #include "tables/St_tpcDriftVelocity_Table.h"
+#include "tables/St_tpcChargeStepCalib_Table.h"
 #include "tpc/St_xyz_newtab_Module.h"
 #include "TSystem.h"
 #include "TH1.h"
@@ -317,7 +321,7 @@ Int_t StChargeStepMaker::Make() {
 
 void StChargeStepMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StChargeStepMaker.cxx,v 1.7 2000/08/15 00:25:41 hardtke Exp $\n");
+  printf("* $Id: StChargeStepMaker.cxx,v 1.8 2000/08/17 23:28:38 hardtke Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -430,14 +434,17 @@ float StChargeStepMaker::GetAverage(int section){
 }
 
 St_tpcDriftVelocity* StChargeStepMaker::driftTable(){
-  float reference_velocity = 5.3875;
-  float reference_t0       = 1.969;
-  float reference_clock    = 9.3387;
-  float reference_step_west = 348.812;
-  float reference_step_east = 348.816;
+  St_tpcChargeStepCalib* cs = (St_tpcChargeStepCalib*)GetDataBase("Calibrations/tpc/tpcChargeStepCalib");
+  assert(cs);
+  tpcChargeStepCalib_st *mytable = (tpcChargeStepCalib_st*)cs->GetTable();
+  float reference_velocity = mytable->laserVelocityEast;
+  float reference_t0       = theDb->triggerTimeOffset()*1e6;
+  float reference_clock    = theDb->Electronics()->samplingFrequency();
+  float reference_step_west = mytable->chargeStepOuterWest;
+  float reference_step_east = mytable->chargeStepOuterEast;;
   float Lwest = reference_velocity*((reference_step_west/reference_clock)+reference_t0);
   float Least = reference_velocity*((reference_step_east/reference_clock)+reference_t0);
-  cout << "Least, trig offset = " << Least << endl; 
+  cout << "Least, trig offset = " << Least << " " << reference_t0 << endl; 
   float velocityEast = Least/((GetAverage(3)/theDb->Electronics()->samplingFrequency()) + theDb->triggerTimeOffset()*1e6);
   float velocityWest = Lwest/((GetAverage(1)/theDb->Electronics()->samplingFrequency()) + theDb->triggerTimeOffset()*1e6);
   St_tpcDriftVelocity* table = new St_tpcDriftVelocity("tpcDriftVelocity",1);
