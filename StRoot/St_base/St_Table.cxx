@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.15 1998/09/16 22:08:52 fine Exp $ 
+// $Id: St_Table.cxx,v 1.16 1998/09/21 15:43:02 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.16  1998/09/21 15:43:02  fine
+// St_Table::Update bug has been fixed
+//
 // Revision 1.15  1998/09/16 22:08:52  fine
 // St_DataSetIter - big in dtor has been fixed
 // St_Table, St_DataSet - ls method has been improved
@@ -212,7 +215,7 @@ void St_Table::Delete()
 {
   if (s_Table)
   {
-    if (TestBit(kCanDelete)) free(s_Table);
+    if (! TestBit(kCanDelete)) free(s_Table);
     s_Table = 0;
    *s_MaxIndex = 0;
     fN = 0;
@@ -913,7 +916,7 @@ Int_t St_Table::SetfN(Long_t len)
    {
 //     s_TableHeader->nok = fN;
      s_TableHeader->maxlen = fN;
-   }
+   } 
    return fN;
 }
 //_______________________________________________________________________
@@ -930,8 +933,8 @@ void St_Table::Update(St_DataSet *set, UInt_t opt)
     if (strcmp(GetTitle(),set->GetTitle()) == 0 ) 
     {
       St_Table *table =  (St_Table *)set;
-     *s_TableHeader   = *(table->GetHeader());
       Adopt(table->GetSize(),table->GetArray());
+     *s_TableHeader   = *(table->GetHeader());
       // mark that object lost the STAF table and can not delete it anymore
       table->SetBit(kCanDelete);
       // mark we took over of this STAF table
