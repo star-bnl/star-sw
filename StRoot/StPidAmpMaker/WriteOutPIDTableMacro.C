@@ -4,7 +4,7 @@
 
 #include "/afs/rhic/star/replicas/DEV/StRoot/StEventUtilities/BetheBlochFunction.hh"
 
-#include "/afs/rhic/star/replicas/DEV/StRoot/StPidAmpMaker/StPidProbabilityConst.hh"
+#include "/star/data05/scratch/aihong/pidamp_dAu/StRoot/StPidAmpMaker/StPidProbabilityConst.hh"
 
 
 void WriteOutPIDTableMacro( char* myOutputName){
@@ -193,10 +193,10 @@ void WriteOutPIDTableMacro( char* myOutputName){
     
 //----------
      TVectorD* MultiBinEdgeSet = new TVectorD(20);
-     
+     // for dAu
      (*MultiBinEdgeSet)(0) = 1.; //
-     (*MultiBinEdgeSet)(1) =.26;   
-     (*MultiBinEdgeSet)(2) =.10;   //10% central
+     (*MultiBinEdgeSet)(1) =.4;   
+     (*MultiBinEdgeSet)(2) =.2;   //20% central 
 
      MultiBinEdgeSet->Write("MultiBinEdgeSet",TObject::kOverwrite | TObject::kSingleKey);
 //----------
@@ -373,7 +373,8 @@ void WriteOutPIDTableMacro( char* myOutputName){
 
        TF1* EFcnRight = theAmpHist->GetFunction("EFcnRight");
        if (EFcnRight){
-       EFcnRight->SetRange(EFcnRight->GetXmin(), mPEnd);
+	 //       EFcnRight->SetRange(EFcnRight->GetXmin(), mPEnd);
+	 EFcnRight->SetRange(0.15, mPEnd); //extrapolate it to lower pt
        if (     pPosition<=EFcnRight->GetXmax()
 	     && pPosition >EFcnRight->GetXmin() && EFcnRight->GetParameter(1)<0 )
              theAmp = EFcnRight->Eval(pPosition,0.,0.);

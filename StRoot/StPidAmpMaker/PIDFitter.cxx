@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: PIDFitter.cxx,v 1.6 2003/04/30 20:37:56 perev Exp $
+// $Id: PIDFitter.cxx,v 1.7 2003/07/25 15:04:17 aihong Exp $
 //
 // Authors: Aihong Tang
 //
@@ -136,7 +136,7 @@ void PIDFitter::GetSigmaOfSingleTrail(Char_t* fileName4SigmaOfSingleTrail,Char_t
 
     cout<<"sigNSamplePion1Graph fit parameter: "<<f1->GetParameter(0);
     double theSigmaOfSingleTrail= f1->GetParameter(0);    
-//VPunused    double theErrorOfSigmaOfSingleTrail = f1->GetParError(0);
+    double theErrorOfSigmaOfSingleTrail = f1->GetParError(0);
 
     if (mWriteSigmaNSampleGraph) {
         fitResoFile->cd();
@@ -1204,11 +1204,8 @@ Double_t sigmaNSampleFitFcn(Double_t* x, Double_t *par){
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: PIDFitter.cxx,v $
-// Revision 1.6  2003/04/30 20:37:56  perev
-// Warnings cleanup. Modified lines marked VP
-//
-// Revision 1.5  2002/12/20 20:53:40  aihong
-// changes made for P02gd PIDTable
+// Revision 1.7  2003/07/25 15:04:17  aihong
+// change fit range etc.
 //
 // Revision 1.4  2002/12/17 17:05:48  aihong
 // write out sigmaNsample graph
