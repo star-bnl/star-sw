@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.25 2004/04/15 16:28:16 jeromel Exp $
+ * $Id: StEstMaker.cxx,v 1.26 2004/09/16 02:22:12 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.26  2004/09/16 02:22:12  perev
+ * More defence for no geometry
+ *
  * Revision 1.25  2004/04/15 16:28:16  jeromel
  * No functional changes, messages prepended with Class name.
  *
@@ -469,10 +472,15 @@ Int_t StEstMaker::Make() {
   if(!dataSet) {
     gMessMgr->Error("StEstMaker : Failure to get SVT geometry - THINGS HAVE GONE SERIOUSLY WRONG!!!!! \n");
     
-    return kStOK;
+    return kStWarn;
   }
 
   StSvtGeometry* m_geom = (StSvtGeometry*)dataSet->GetObject();
+  if(!m_geom) {
+    gMessMgr->Error("StEstMaker : Failure to get SVT geometry from  StSvtGeometry DataSet   - THINGS HAVE GONE SERIOUSLY WRONG!!!!! \n");
+    return kStWarn;
+  }
+  
   StSvtWaferGeometry* waferGeom;
 
   //VPunused int index;
