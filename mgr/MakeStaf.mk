@@ -105,7 +105,7 @@ ifdef ASPKG
 endif
 #
 ##	Temporary remove of some ASPs
-ifneq (,$(findstring $(STAF_ARCH),i386_linux2 i386_redhat50 i386_redhat51 hp_ux102))
+ifneq (,$(findstring $(STAF_ARCH),i386_linux2 i386_redhat50 i386_redhat60 i386_redhat51 hp_ux102))
   ASPS := $(filter-out tbr,$(ASPS))
 endif
   ASPS := $(filter-out str,$(ASPS))
