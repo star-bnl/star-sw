@@ -175,7 +175,8 @@ elsif (/^sun4x_56_CC5$/) {
   $FC        = "/opt/WS5.0/bin/f77";
 # $CXXFLAGS  = "-KPIC -I/usr/openwin/include -D__SunOS_5_6 -library=iostream,no_Cstd";
   $CXXFLAGS  = "-KPIC -I/usr/openwin/include -D__SunOS_5_6 -library=iostream";
-  $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L/opt/WS5.0/SC5.0/lib -lCstd";#4 -L/usr/ucblib -lucb -L/usr/ccs/lib -lgen";
+  $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L/opt/WS5.0/SC5.0/lib -lCstd -liostream -lCrun";#4 -L/usr/ucblib -lucb -L/usr/ccs/lib -lgen";
+#  $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -lCstd -liostream -lCrun";
   $FLIBS     = "-L/opt/WS5.0/lib -lM77 -lF77 -lsunmath";
   $FFLAGS    = "-KPIC -w";
   $FEXTEND   = "-e";
@@ -323,10 +324,10 @@ my $ROOTSRC = "/afs/rhic/star/ROOT/" . $ROOT_LEVEL . "/ROOT/src";
 $CPPPATH = $INCLUDE . ":#StRoot:" .  $ROOTSRC . ":" . $CERN_ROOT . "/include:/opt/star/include";
 $FCPPPATH ="";
 print "CPPPATH  = \t$CPPPATH\n" unless ($param::quiet);
-my $repository = $STAR; print "repository $repository\n";
+(my $DirPath  = cwd()) =~ s/\/$//g;
+chdir($STAR); my $repository = cwd(); chdir($DirPath); print "repository $repository\n";
 Repository ($repository);# unless $param::noRepository;
 #Repository ($STAR);# unless $param::noRepository;
-(my $DirPath  = cwd()) =~ s/\/$//g;
 my @Repo = Repository_List; 
 print "Build directory: $DirPath;" unless ($param::quiet);
 if (defined($ARG{Salt})) {$Salt = $ARG{Salt} ; print "set Salt = $Salt\n" unless ($param::quiet);}
