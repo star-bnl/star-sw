@@ -92,6 +92,9 @@ Endfill
 
 	create   SUPO
 
+* these bug fixes are temporarily reversed for now to keep the
+* consistency in teh year2003 geometry
+
 * N.B. this variable --pos-- is (erroneously) overwritten
 * in the constructors of the SUPH module. As a result,
 * the position of the support was totally incorrect.
@@ -100,10 +103,13 @@ Endfill
 * restore the correct value of "pos". The resulting geometry
 * looks right. --max--
 
-	pos=(smai_ZMin+smai_ZMax)/2
+*	pos=(smai_ZMin+smai_ZMax)/2
 * another bug fix: the signs of "pos" on the following line were incorrect: --max--
-        position SUPO in CAVE z=-pos             konly='MANY'
-	position SUPO in CAVE z= pos ThetaZ=180 konly='MANY' 
+*        position SUPO in CAVE z=-pos             konly='MANY'
+*        position SUPO in CAVE z= pos ThetaZ=180 konly='MANY' 
+
+        position SUPO in CAVE z=pos             konly='MANY'
+	position SUPO in CAVE z=-pos ThetaZ=180 konly='MANY' 
 *  
 * ----------------------------------------------------------------------------
 Block SUPO is the FTPC support mother volume
