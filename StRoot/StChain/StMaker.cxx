@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.82 1999/12/28 21:23:22 fine Exp $
+// $Id: StMaker.cxx,v 1.83 2000/01/04 17:27:06 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -547,7 +547,7 @@ StMaker     *StMaker::GetParentChain() const
 TDatime  StMaker::GetDateTime() const 
 {
     
-   TDatime td; return td;   
+   TDatime td;    
    StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
    if (!hd) return td;
    return hd->GetDateTime();
@@ -939,6 +939,9 @@ Int_t StMaker::FinishRun(int runumber) {return 0;}
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.83  2000/01/04 17:27:06  perev
+// Use timestamp instead of current one
+//
 // Revision 1.82  1999/12/28 21:23:22  fine
 // StChain::MakeDoc corrections
 //
