@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.44 2003/01/21 01:27:44 jeromel Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.45 2003/01/28 20:21:17 munhoz Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.45  2003/01/28 20:21:17  munhoz
+ * changing from Init() to InitRun()
+ *
  * Revision 1.44  2003/01/21 01:27:44  jeromel
  * hfile->write(0 while NULL caused spurious crash.
  * Took the oportunity to add GetCVS()
@@ -205,7 +208,6 @@ Int_t StSvtSeqAdjMaker::Init(){
   GetSvtRawData();
   
   SetSvtData();
-  GetSvtPedestals();
   
   mInvProd = new StSvtInverseProducts();
   mProbValue = new StSvtProbValues();
@@ -228,9 +230,6 @@ Int_t StSvtSeqAdjMaker::Init(){
       }
     }
   }
-
-  GetBadAnodes();
-
   
   return  StMaker::Init();  
 }
@@ -272,6 +271,10 @@ Int_t StSvtSeqAdjMaker::InitRun( int runnumber)
    //hfile  = new TFile("test.root","RECREATE","Demo ROOT file");
   CreateHist(mTotalNumberOfHybrids);	     
   
+  GetBadAnodes();
+
+  GetSvtPedestals();
+
   return  kStOK;  
 }
 
