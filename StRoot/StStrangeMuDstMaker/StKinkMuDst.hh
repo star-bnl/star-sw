@@ -38,6 +38,8 @@ public:
   Float_t  transverseMassPion() const;
   Float_t  rapidityKaon() const;
   Float_t  rapidityPion() const;
+  UShort_t keyParent() const;          // Track id of parent
+  UShort_t keyDaughter() const;        // Track id of daughter
 
   Float_t  chi2Kink()     const;       // Chi square of Kink
   Float_t  clKink()       const;       // Confidence level of Kink
@@ -84,6 +86,8 @@ public:
   Float_t  mErrDedxDaughter;
   UShort_t mNumDedxParent;
   UShort_t mNumDedxDaughter;
+  UShort_t mKeyParent;
+  UShort_t mKeyDaughter;
 
 private:
   void     findMinDeltaEnergy(StKinkVertex*);
@@ -145,12 +149,17 @@ inline Float_t StKinkMuDst::lenDedxParent()   const
                { return (mNumDedxParent/100); }
 inline Float_t StKinkMuDst::lenDedxDaughter() const
                { return (mNumDedxDaughter/100); }
+inline UShort_t StKinkMuDst::keyParent() const { return mKeyParent; }
+inline UShort_t StKinkMuDst::keyDaughter() const { return mKeyDaughter; }
 #endif
 
 
 /***********************************************************************
- * $Id: StKinkMuDst.hh,v 3.7 2003/06/01 04:25:19 genevb Exp $
+ * $Id: StKinkMuDst.hh,v 3.8 2004/02/03 03:49:27 genevb Exp $
  * $Log: StKinkMuDst.hh,v $
+ * Revision 3.8  2004/02/03 03:49:27  genevb
+ * Added keys (IDs) for Kink parent and daughter
+ *
  * Revision 3.7  2003/06/01 04:25:19  genevb
  * Update ClassDef version for altered inheritance
  *
