@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.14 2002/09/11 21:02:41 laue Exp $
+ * $Id: StMuDstMaker.h,v 1.15 2002/11/08 14:18:59 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -103,7 +103,7 @@ class StMuDstMaker : public StMaker {
   void setCompression(int comp=9);
   /// Returns version tag.
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.14 2002/09/11 21:02:41 laue Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.15 2002/11/08 14:18:59 laue Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -154,6 +154,9 @@ private:
 
   StuProbabilityPidAlgorithm* mProbabilityPidAlgorithm;
 
+  
+  template<class T> 
+  void saveDelete(T* t) { if (t!=0) delete t; t=0;}    
 
   //! protected:
   
@@ -174,7 +177,7 @@ private:
   void clear();
 
   void createArrays();
-  TClonesArray* clonesArray(TClonesArray* p, const char* type, int size, int& counter);
+  TClonesArray* clonesArray(TClonesArray*& p, const char* type, int size, int& counter);
 
   void fill();
   void fillTrees(StEvent* ev, StMuCut* cut=0);
@@ -214,14 +217,14 @@ private:
  
   friend class StMuDst;
 
-  TClonesArray* arrays[__NARRAYS__]; //->
+  TClonesArray* arrays[__NARRAYS__];//->
   TClonesArray* mArrays[__NARRAYS__];//->
 
   TClonesArray* strangeArrays[__NSTRANGEARRAYS__];//->
   TClonesArray* mStrangeArrays[__NSTRANGEARRAYS__];//->
 
   ClassDef(StMuDstMaker, 1)
-};
+}; 
 
 inline StMuDst* StMuDstMaker::muDst() { return mStMuDst;}
 inline TChain* StMuDstMaker::chain() { return mChain; }
@@ -248,11 +251,15 @@ inline void StMuDstMaker::setSplit(int split) { mSplit = split;}
 inline void StMuDstMaker::setCompression(int comp) { mCompression = comp;}
 inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 
+
 #endif
 
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.15  2002/11/08 14:18:59  laue
+ * saveDelete(<T>) added, sets pointer=null after delete
+ *
  * Revision 1.14  2002/09/11 21:02:41  laue
  * added cut on track encoded method for ITTF
  *
