@@ -47,6 +47,13 @@ my @SetG = (
              "auau200/hbt/default/middle/year_1h/hadronic_on",
              "auau200/hbt/default/central/year_1h/hadronic_on",
              "auau200/hbt/default/midcentral/year_1h/hadronic_on",
+             "auau200/starlight/2gamma/halffield/year_1h/hadronic_on",
+             "auau200/starlight/2gamma/none/year_1h/hadronic_on",
+             "auau200/starlight/vmeson/halffield/year_1h/hadronic_on",
+             "auau200/starlight/vmeson/none/year_1h/hadronic_on",
+             "auau200/dtunuc/two_photon/halffield/year_1h/hadronic_on",
+             "auau200/dtunuc/two_photon/none/year_1h/hadronic_on",
+              
 );
 
 my $SetD = "dst/prod5/1999/12";

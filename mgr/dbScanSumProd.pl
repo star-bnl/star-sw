@@ -39,6 +39,13 @@ my @SetS = (
              "auau200/hbt/default/central/year_1h/hadronic_on",
              "auau200/hbt/default/midcentral/year_1h/hadronic_on", 
              "auau200/vni/default/b0_3/year_1h/hadronic_on",
+             "auau200/starlight/2gamma/halffield/year_1h/hadronic_on",
+             "auau200/starlight/2gamma/none/year_1h/hadronic_on",
+             "auau200/starlight/vmeson/halffield/year_1h/hadronic_on",
+             "auau200/starlight/vmeson/none/year_1h/hadronic_on",
+             "auau200/dtunuc/two_photon/halffield/year_1h/hadronic_on",
+             "auau200/dtunuc/two_photon/none/year_1h/hadronic_on",
+             
  );
 
 my $SetD = "daq/2000/02/";
