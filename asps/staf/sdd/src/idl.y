@@ -89,7 +89,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.15 1998/10/11 17:41:14 fisyak Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.16 1998/12/16 18:49:48 ward Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -1076,7 +1076,7 @@ void PamTemplateC(void) {
   /* Q11 */
   FF"#include \"%s.h\"\n\n",StrippedInFileName(0));
   /* Q12 */
-  FF"long %s_(\n",gPam);
+  FF"long type_of_call %s_(\n",gPam);
   for(ii=0;ii<gNProto;ii++) {
     if(!strcmp(gPn[ii],"initialize")) initOrCall=INIT;
     else if(!strcmp(gPn[ii],"call")) initOrCall=CALL;
