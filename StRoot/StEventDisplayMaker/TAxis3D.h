@@ -3,7 +3,7 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/11/99
 #ifndef ROOT_TAxis3D
 #define ROOT_TAxis3D
-// $Id: TAxis3D.h,v 1.4 1999/12/02 02:46:58 fine Exp $ 
+// $Id: TAxis3D.h,v 1.5 1999/12/09 20:42:59 fine Exp $ 
 // ***********************************************************************
 // *  C++ class library to paint axis "arround" TView object
 // * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
@@ -78,8 +78,10 @@ private:
  
 protected:
             TAxis  *fSelected; //!  The selected axis to play with
+            Bool_t  fZoomMode; // Zoom mode for the entire parent TPad
     virtual void    Copy(TObject &hnew);
             void    InitSet();
+            Bool_t  SwitchZoom();
  
 public:
     TAxis3D();
@@ -137,13 +139,20 @@ public:
     virtual void     SetXTitle(Text_t *title) {fAxis[0].SetTitle(title);}
     virtual void     SetYTitle(Text_t *title) {fAxis[1].SetTitle(title);}
     virtual void     SetZTitle(Text_t *title) {fAxis[2].SetTitle(title);}
-    static  void     ToggleRulers(TVirtualPad *pad=0);
+    static  TAxis3D *ToggleRulers(TVirtualPad *pad=0);
+    static  TAxis3D *ToggleZoom(TVirtualPad *pad=0);
     void             UseCurrentStyle();
  
     ClassDef(TAxis3D,1)  //3-D ruler painting class
 };
  
+
+inline Bool_t TAxis3D::SwitchZoom(){Bool_t s = fZoomMode; fZoomMode = !fZoomMode; return s;}
+
 // $Log: TAxis3D.h,v $
+// Revision 1.5  1999/12/09 20:42:59  fine
+// Zoom
+//
 // Revision 1.4  1999/12/02 02:46:58  fine
 // Axis coloring
 //

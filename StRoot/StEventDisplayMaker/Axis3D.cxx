@@ -19,15 +19,17 @@
 // * purpose.  It is provided "as is" without express or implied warranty.
 // ************************************************************************
 //
-// $Id: Axis3D.cxx,v 1.6 1999/12/02 02:46:58 fine Exp $ 
+// $Id: Axis3D.cxx,v 1.7 1999/12/09 20:43:00 fine Exp $ 
 //
 
 #include <iostream.h>
 #include <ctype.h>
 #include <assert.h>
 
+#include "TClass.h"
 #include "TAxis3D.h"
 #include "Hoption.h"
+#include "TCanvas.h"
 #include "TPad.h"
 #include "TGaxis.h"
 #include "TView.h" 
@@ -87,6 +89,7 @@ Hoption_t Hopt;
 //______________________________________________________________________________
 TAxis3D::TAxis3D() : TNamed(TAxis3D::rulerName,"ruler"){
   fSelected = 0;
+  fZoomMode = kFALSE;
   InitSet();
 }
 //______________________________________________________________________________
@@ -94,6 +97,7 @@ TAxis3D::TAxis3D(Option_t *option): TNamed(TAxis3D::rulerName,"ruler")
 {
   fSelected = 0;
   InitSet();
+  fZoomMode = kFALSE;
 }
  
 //______________________________________________________________________________
@@ -129,6 +133,7 @@ Int_t TAxis3D::DistancetoPrimitive(Int_t px, Int_t py)
 //*-*                  ===========================================
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
    Int_t dist = 9999999; 
+   if (fZoomMode) return 0;
    for (int i=0;i<3;i++) {
      Int_t axDist = fAxis[i].DistancetoPrimitive(px,py);
      if (dist > axDist) { dist = axDist; fSelected = &fAxis[i]; }
@@ -147,6 +152,71 @@ void TAxis3D::ExecuteEvent(Int_t event, Int_t px, Int_t py)
 //*-*
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
  if (fSelected) fSelected->ExecuteEvent(event,px,py);
+ //  Execute action corresponding to the mouse event
+
+   static Float_t x0, y0, x1, y1;
+
+   static Int_t pxold, pyold;
+   static Int_t px0, py0;
+   static Int_t linedrawn;
+   Float_t temp;
+#if 0
+   if (!fZoomMode && gPad->GetView()) {
+      gPad->GetView()->ExecuteRotateView(event, px, py);
+      return;
+   }
+#else
+   if (!fZoomMode) return;
+#endif
+
+   // something to zoom ?
+//   fPad->SetCursor(kCross);
+   gPad->SetCursor(kCross);
+   
+   switch (event) {
+
+   case kButton1Down:
+      gVirtualX->SetLineColor(-1);
+      gPad->TAttLine::Modify();  //Change line attributes only if necessary
+      x0 = gPad->AbsPixeltoX(px);
+      y0 = gPad->AbsPixeltoY(py);
+      px0   = px; py0   = py;
+      pxold = px; pyold = py;
+      linedrawn = 0;
+      break;
+
+   case kButton1Motion:
+      if (linedrawn) gVirtualX->DrawBox(px0, py0, pxold, pyold, TVirtualX::kHollow);
+      pxold = px;
+      pyold = py;
+      linedrawn = 1;
+      gVirtualX->DrawBox(px0, py0, pxold, pyold, TVirtualX::kHollow);
+      break;
+
+   case kButton1Up:
+      gPad->GetCanvas()->FeedbackMode(kFALSE);
+      if (px == px0) return;
+      if (py == py0) return;
+      x1 = gPad->AbsPixeltoX(px);
+      y1 = gPad->AbsPixeltoY(py);
+
+      if (x1 < x0) {temp = x0; x0 = x1; x1 = temp;}
+      if (y1 < y0) {temp = y0; y0 = y1; y1 = temp;}
+      gPad->Range(x0,y0,x1,y1);
+#if 0
+      if (fZooms < kMAXZOOMS-1) {
+         fZooms++;
+         fZoomX0[fZooms] = x0;
+         fZoomY0[fZooms] = y0;
+         fZoomX1[fZooms] = x1;
+         fZoomY1[fZooms] = y1;
+      }
+#endif
+      SwitchZoom();
+//      gPad->Modified(kTRUE);
+      break;
+      default: break;
+   }
 }
  
  
@@ -473,45 +543,73 @@ void TAxis3D::SetTitleOffset(Float_t offset, Option_t *axis)
 TAxis3D *TAxis3D::GetPadAxis(TVirtualPad *pad)
 {
  // returns the "pad" Axis3D object pointer if any
+  TObject *o = 0;
   TVirtualPad *thisPad=pad;
   if (!thisPad) thisPad = gPad;
   if (thisPad) {
     // Find axis in the current thisPad 
     TList *l = thisPad->GetListOfPrimitives();
     TObject *o = l->FindObject(TAxis3D::rulerName);
-    return (TAxis3D *)o;
+    if (!(o && o->InheritsFrom(Class()->GetName()))) o = 0;
   }
-  return 0;
+  return (TAxis3D *)o;
 }
+
 //_______________________________________________________________________________________
-void TAxis3D::ToggleRulers(TVirtualPad *pad)
+TAxis3D *TAxis3D::ToggleRulers(TVirtualPad *pad)
 {
   // Turn ON / OFF the "Ruler", TAxis3D object attached
   // to the current pad
+  TAxis3D *ax = 0;
   TVirtualPad *thisPad=pad;
   if (!thisPad) thisPad = gPad;
   if (thisPad) {
-    // Find axis in the current thisPad 
-    TList *l = thisPad->GetListOfPrimitives();
-    TObject *o = l->FindObject(TAxis3D::rulerName);
-    l->Remove(o);
-    if (o)  delete o; 
+    TAxis3D *a =  GetPadAxis(pad);
+    if (a)  delete a; 
     else {
-      TAxis3D *axis = new TAxis3D;
-      axis->SetBit(kCanDelete);
-      axis->Draw();
+      ax = new TAxis3D;
+      ax->SetBit(kCanDelete);
+      ax->Draw();      
     }          
     thisPad->Modified();
     thisPad->Update();
   }
+  return ax;
 }
-
+//_______________________________________________________________________________________
+TAxis3D *TAxis3D::ToggleZoom(TVirtualPad *pad)
+{ 
+  // Turn ON / OFF the "Ruler", TAxis3D object attached
+  // to the current pad
+  TAxis3D *ax = 0;
+  TVirtualPad *thisPad=pad;
+  if (!thisPad) thisPad = gPad;
+  if (thisPad) {
+    // Find axis in the current thisPad 
+    TList *l = thisPad->GetListOfPrimitives();
+    TObject *o = l->FindObject(TAxis3D::rulerName);
+    if (o && o->InheritsFrom(Class()->GetName())) {      
+      if (o != l->Last()) { // make sure the TAxis is the last object of the Pad.
+        l->Remove(o);
+        l->AddLast(o);
+      }
+      ax = (TAxis3D *)o;
+      ax->SwitchZoom();
+      thisPad->Modified();
+      thisPad->Update();
+    }          
+  }
+  return ax;
+}
 //_______________________________________________________________________________________
 //
 //   Axis3D.cxx history
 //_______________________________________________________________________________________
 
 // $Log: Axis3D.cxx,v $
+// Revision 1.7  1999/12/09 20:43:00  fine
+// Zoom
+//
 // Revision 1.6  1999/12/02 02:46:58  fine
 // Axis coloring
 //
