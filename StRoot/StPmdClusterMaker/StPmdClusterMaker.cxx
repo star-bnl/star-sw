@@ -1,6 +1,6 @@
 /*************************************************
  *
- * $Id: StPmdClusterMaker.cxx,v 1.14 2004/11/14 22:56:07 jeromel Exp $
+ * $Id: StPmdClusterMaker.cxx,v 1.15 2004/11/15 23:35:47 subhasis Exp $
  * Author: Subhasis Chattopadhyay
  *************************************************
  *
@@ -9,8 +9,8 @@
  *************************************************
  *
  * $Log: StPmdClusterMaker.cxx,v $
- * Revision 1.14  2004/11/14 22:56:07  jeromel
- * Subhasis changes (BT 489)
+ * Revision 1.15  2004/11/15 23:35:47  subhasis
+ * Refs in centroidCal initialised to solve valgrind error
  *
  * Revision 1.13  2004/09/22 19:24:55  perev
  * Leak fixed + mess with i,j indexes
@@ -150,7 +150,8 @@ Int_t StPmdClusterMaker::Make()
       StPmdDetector * cpv_det = cluster_hit->detector(Int_t(0)); //CPV = 0 in PmdCollection
       StPmdDetector * pmd_det = cluster_hit->detector(Int_t(1)); //PMD = 1 in PmdCollection
      // StPmdClustering *clust1; // added for getting pointer to StPmdClustering
-      Int_t choice=1; // Enter choice
+      Int_t choice=1; // Enter choice (it is put as 1, but variable was kept to adopt differt
+                      // choice of algo.
       if(choice==1){
       if(cpv_det && pmd_det){
 	StPmdClustering *clust1 = new StPmdClustering(pmd_det, cpv_det); //instantiates clustering

@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.21 2004/11/14 22:56:07 jeromel Exp $
+ * $Id: StPmdClustering.cxx,v 1.22 2004/11/15 23:35:28 subhasis Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -17,8 +17,8 @@
  * 'CentroidCal()' has been put in place of 'gaussfit()'.
  **
  * $Log: StPmdClustering.cxx,v $
- * Revision 1.21  2004/11/14 22:56:07  jeromel
- * Subhasis changes (BT 489)
+ * Revision 1.22  2004/11/15 23:35:28  subhasis
+ * Refs in centroidCal initialised to solve valgrind error
  *
  * Revision 1.20  2004/09/22 19:24:55  perev
  * Leak fixed + mess with i,j indexes
@@ -345,11 +345,22 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det0,Int_t incr, Int_t supmo
       d[i1][i2]=d1[i1][i2];
     }
   }
-  
+ //subhasis 15/11/04 added to initialze arrays for centroidCalc refs
+  for(i=0; i<2000; i++){
+  x[i]=0.;
+  y[i]=0.;
+  z[i]=0.;
+  xc[i]=0.;
+  yc[i]=0.;
+  zc[i]=0.;
+}
+/////////////////////////////////
+ 
   for(i=0; i<2000; i++){
     ncl[i]=-1; // ncl[i] --> initialization starts from '-1'
     rcl[i] = 0.; // initialization of rcs and rcl
     rcs[i] = 0.;
+    cells[i] = 0.;
   }
   for(i=0; i<incr; i++)
     {
@@ -513,8 +524,6 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det0,Int_t incr, Int_t supmo
 	 if(censtat==kStOK){
 
 	  icl=icl+ig+1;
-
-
 
           Float_t temp[2000];
           Int_t take_cell[2000];
