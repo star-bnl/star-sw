@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.24 2004/10/29 20:18:18 jeromel Exp $
+ * $Id: StMuDst.h,v 1.25 2004/11/29 15:53:22 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -41,6 +41,7 @@ class StTofData;
 
 class EztEventHeader;
 class EztTrigBlob;
+class EztFpdBlob;
 class EztEmcRawData;
 
 class StPhysicalHelixD;
@@ -223,6 +224,10 @@ public:
   static  EztTrigBlob* eztTrig() 
         { return (EztTrigBlob*)eztArrays[muEztTrig]->UncheckedAt(0); }
 
+  /// returns pointer to eztFpd 
+  static  EztFpdBlob* eztFpd() 
+        { return (EztFpdBlob*)eztArrays[muEztFpd]->UncheckedAt(0); }
+
   /// returns pointer to ETOW 
   static  EztEmcRawData* eztETow() 
         { return (EztEmcRawData*)eztArrays[muEztETow]->UncheckedAt(0); }
@@ -283,6 +288,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.25  2004/11/29 15:53:22  mvl
+ * Additions by Jan for Fpd ezTree
+ *
  * Revision 1.24  2004/10/29 20:18:18  jeromel
  * Proto arg name must not be repeated
  *

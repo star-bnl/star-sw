@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StMuEzTree.cxx,v 1.2 2004/11/10 17:21:57 mvl Exp $
+ * $Id: StMuEzTree.cxx,v 1.3 2004/11/29 15:55:07 mvl Exp $
  *
  * Author: Wei-Ming Zhang             KSU  Aug. 2004
  *
@@ -28,8 +28,7 @@
 #include "EztEventHeader.h"
 #include "EztEmcRawData.h"
 #include "EztTrigBlob.h"
-
-//#include "StMuDebug.h"
+#include "EztFpdBlob.h"
 
 ClassImp(StMuEzTree)
 
@@ -42,7 +41,7 @@ StMuEzTree::~StMuEzTree() {}
 // event header cheked by JB
 //---------------------------------------------------------
 //---------------------------------------------------------
-EztEventHeader* StMuEzTree::getHeader(StEvent* ev){
+EztEventHeader* StMuEzTree::copyHeader(StEvent* ev){
   EztEventHeader* header = new EztEventHeader;
   header->setRunNumber(ev->runId());
   header->setEventNumber(ev->id());
@@ -66,7 +65,7 @@ EztEventHeader* StMuEzTree::getHeader(StEvent* ev){
 // trig  new ok, JB
 //--------------------------------------------------------
 //--------------------------------------------------------
-EztTrigBlob* StMuEzTree::getTrig(StEvent* ev){
+EztTrigBlob* StMuEzTree::copyTrig(StEvent* ev){
   EztTrigBlob * trigBlob = new EztTrigBlob;
   
   StTriggerData* trigData = ev->triggerData();
@@ -74,7 +73,7 @@ EztTrigBlob* StMuEzTree::getTrig(StEvent* ev){
   int rawSize=trigData->getRawSize();
 
   trigBlob->trgd->Set(rawSize, rawData);
-  trigBlob->setTimeStamp(ev->time());
+  trigBlob->setVersion((UChar_t)trigData->version());
   
   //  int year =trigData->year();
   //  printf("JJJ trgSize=%d  token=%d year=%d\n",rawSize ,trigData->token(),year );
@@ -110,3 +109,17 @@ EztEmcRawData* StMuEzTree::copy(StEmcRawData *inp, int ib1, int ib2){
   return raw;
   
 }
+
+
+// FPD is dummy, Akio must fill it right,  JB
+//--------------------------------------------------------
+//--------------------------------------------------------
+EztFpdBlob* StMuEzTree::copyFpd(StEvent* ev){
+  EztFpdBlob * fpdBlob = new EztFpdBlob;
+  unsigned short int dummData[5]={1,3,5,7,9}; // Akio, drop it
+  unsigned short int *rawData= dummData; // Akio, fix it
+  int rawSize=5; // Akio, fix it
+  fpdBlob->smd->Set(rawSize, (short*)rawData);
+  return fpdBlob;
+}
+ 
