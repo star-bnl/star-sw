@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.6 2001/05/24 01:47:42 lansdell Exp $
+// $Id: StHistUtil.cxx,v 2.7 2001/08/27 21:16:03 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.7  2001/08/27 21:16:03  genevb
+// Better filename hanlding
+//
 // Revision 2.6  2001/05/24 01:47:42  lansdell
 // minor bug fixes and updates
 //
@@ -121,7 +124,12 @@ Bool_t StHistUtil::CheckPSFile(const Char_t *histName) {
     m_CurPrefix = newPrefix;
     TString m_CurFileName = m_PsFileName;
     Ssiz_t insertPos = m_CurFileName.Index(".ps");
-    m_CurFileName.Insert(insertPos,possiblePrefixes[m_CurPrefix]);
+    if (insertPos < 0) {          // No .ps suffix in file name
+      m_CurFileName.Append(possiblePrefixes[m_CurPrefix]);
+      m_CurFileName.Append(".ps");
+    } else {
+      m_CurFileName.Insert(insertPos,possiblePrefixes[m_CurPrefix]);
+    }
     if (psf) psf->Close();
     if (!m_PsFileName.IsNull()) psf = new TPostScript(m_CurFileName.Data());
     Ldesc->Clear();
