@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.2 2001/03/06 17:41:33 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.3 2001/08/17 22:10:26 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.3  2001/08/17 22:10:26  posk
+// Now also can do 40 GeV data.
+//
 // Revision 1.2  2001/03/06 17:41:33  posk
 // Put CheckEvent before fill event.
 //
@@ -288,10 +291,10 @@ Bool_t StFlowMaker::FillFromMicroDST(StEbyeEvent* pMicroEvent) {
   pFlowEvent->SetPhiWeight(mPhiWgt);
   pFlowEvent->SetMeanCos(mMeanCos);
   pFlowEvent->SetMeanSin(mMeanSin);
-
+  
   // Check event cuts
   if (!StFlowCutEvent::CheckEvent(pMicroEvent)) { 
-    gMessMgr->Info() << "##### FlowMaker: microevent cut" << endm;
+    //gMessMgr->Info() << "##### FlowMaker: microevent cut" << endm;
     delete pFlowEvent;             // delete this event
     pFlowEvent = NULL;
     return kTRUE;
@@ -303,12 +306,20 @@ Bool_t StFlowMaker::FillFromMicroDST(StEbyeEvent* pMicroEvent) {
   
   // Check Eta Symmetry
   if (!StFlowCutEvent::CheckEtaSymmetry(pMicroEvent)) { 
-    gMessMgr->Info() << "##### FlowMaker: microevent cut" << endm;
+    //gMessMgr->Info() << "##### FlowMaker: microevent cut" << endm;
     delete pFlowEvent;             // delete this event
     pFlowEvent = NULL;
     return kTRUE;
   }
   
+  // Check event cuts again
+  if (!StFlowCutEvent::CheckEvent(pFlowEvent)) { 
+    gMessMgr->Info() << "##### FlowMaker: flowevent cut" << endm;
+    delete pFlowEvent;             // delete this event
+    pFlowEvent = NULL;
+    return kTRUE;
+  }
+
   if (!pFlowEvent->ProbPid()) {
     pFlowEvent->SetPids();
   } else {
@@ -346,8 +357,21 @@ Bool_t StFlowMaker::FillFromMicroVer1(StEbyeEvent* pMicroEvent) {
 					  pMicroEvent->Vy(),
 					  pMicroEvent->Vz()));
   pFlowEvent->SetEVeto(pMicroEvent->Eveto());
-  pFlowEvent->SetCent(pMicroEvent->Centrality());
   pFlowEvent->SetRunID(pMicroEvent->RunID());
+
+  // Set new centrality bins for 40 GeV
+  if (Flow::eBeam == 40) {
+    Float_t ZdcDividers[] = {6000.,12600.,17500.,21500.,24500.};
+    Float_t eVeto = pMicroEvent->Eveto();
+    Float_t cent = 0.;
+    if (eVeto < ZdcDividers[0])      { cent = 1.; }
+    else if (eVeto < ZdcDividers[1]) { cent = 2.; }
+    else if (eVeto < ZdcDividers[2]) { cent = 3.; }
+    else if (eVeto < ZdcDividers[3]) { cent = 4.; }
+    else if (eVeto < ZdcDividers[4]) { cent = 5.; }
+    else                             { cent = 6.; }
+    pFlowEvent->SetCent(cent);
+  } 
   
   // Fill FlowTracks
   int    goodTracks    = 0;
