@@ -120,6 +120,7 @@
 
 * fill_dst_run_summary
    exec create_tables_global#fill_dst_run_summary
+   exec create_tables_global#fill_tof
    exec init_dst#init_rhead
 
 ***************************************************************
