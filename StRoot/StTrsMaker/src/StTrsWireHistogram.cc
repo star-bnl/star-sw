@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.24 2000/08/07 22:44:39 perev Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.25 2001/02/15 21:34:54 perev Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
+ * Revision 1.25  2001/02/15 21:34:54  perev
+ * clear improved
+ *
  * Revision 1.24  2000/08/07 22:44:39  perev
  * srand48 added
  *
@@ -432,14 +435,16 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin,int sector)
 
 void StTrsWireHistogram::clear()
 {
-    for(int ii=mMin; ii<= mMax; ii++) {
-        if(ii<0) continue; // Iwona and Herb, April 20 1999.
-	mSectorWires[ii].clear();
-    }
+//VP    for(int ii=mMin; ii<= mMax; ii++) {
+//VP        if(ii<0) continue; // Iwona and Herb, April 20 1999.
+//VP	mSectorWires[ii].clear();
+//VP    }
+    
+    int sz = mSectorWires.size();
+    mSectorWires.resize(0);
+    mSectorWires.resize(sz);
     mMin = -1;
     mMax = -1;
-   
-    
 
 }
 

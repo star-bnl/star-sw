@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.hh,v 1.8 2000/07/30 02:43:13 long Exp $
+ * $Id: StTrsWireHistogram.hh,v 1.9 2001/02/15 21:34:48 perev Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.hh,v $
+ * Revision 1.9  2001/02/15 21:34:48  perev
+ * clear improved
+ *
  * Revision 1.8  2000/07/30 02:43:13  long
  * add erf function look up table,table builder,etc.
  *
@@ -88,6 +91,7 @@ typedef vector<aTpcWire, allocator<aTpcWire> >                   aTpcWirePlane;
 class StTrsWireHistogram {
 public:
     static StTrsWireHistogram* instance(StTpcGeometry*, StTpcSlowControl*, StTrsDeDx*,StMagneticField*);
+    static void dropit(){delete mInstance;mInstance=0;}
     ~StTrsWireHistogram();
 
     //StTrsWireHistogram(const StTrsWireHistogramy&);

@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.63 2000/08/11 02:24:27 long Exp $
+// $Id: StTrsMaker.cxx,v 1.64 2001/02/15 21:34:45 perev Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.64  2001/02/15 21:34:45  perev
+// clear improved
+//
 // Revision 1.63  2000/08/11 02:24:27  long
 // comment out sampleAnalogSignal();
 //
@@ -266,7 +269,7 @@ using std::min;
 using std::max;
 #endif
 
-
+#include "StMem.h"
 // SCL
 #include "StGlobals.hh"
 #include "Randomize.h"
@@ -349,7 +352,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.63 2000/08/11 02:24:27 long Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.64 2001/02/15 21:34:45 perev Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -554,7 +557,6 @@ Int_t StTrsMaker::Init()
    mWireHistogram->setGasGainOuterSector(mSlowControlDb->outerSectorGasGain());
    mWireHistogram->setDoTimeDelay(false);
    //   mWireHistogram->setRangeOfWiresForChargeDistribution(0);
-
    //
    // An Analog Sector(for calculation)
    mSector = 
@@ -677,6 +679,7 @@ Int_t StTrsMaker::Make(){
     cout << "\n -- Begin TRS Processing -- \n";
     time_t trsMakeBegin = time(0);
     cout << "Started at: " << ctime(&trsMakeBegin);    
+
     int currentSectorProcessed = mFirstSectorToProcess;
 
     cout << "Processing sectors "
@@ -1206,7 +1209,9 @@ Int_t StTrsMaker::Make(){
 //
 void  StTrsMaker::Clear(const char *)
 {
-    if (mAllTheData) mAllTheData->clear(); //This deletes all the StTrsDigitalSectors in the StTrsRawDataEvent
+    if (mAllTheData)   mAllTheData   ->clear(); //This deletes all the StTrsDigitalSectors in the StTrsRawDataEvent
+    if (mWireHistogram)mWireHistogram->clear();
+
     StMaker::Clear();
 }
 Int_t StTrsMaker::Finish()
@@ -1219,21 +1224,21 @@ Int_t StTrsMaker::Finish()
 //     if (mElectronicsDb) delete mElectronicsDb;
 //     if (mGasDb) delete mGasDb;
 
-    if (mWireHistogram) delete mWireHistogram;
+    StTrsWireHistogram::dropit();
     mWireHistogram = 0;
-    if (mSector) delete mSector;
+    if (mSector) 		delete mSector;
     mSector = 0;
-    if (mAllTheData) delete mAllTheData;
+    if (mAllTheData) 		delete mAllTheData;
     mAllTheData = 0;
-    if (mChargeTransporter) delete mChargeTransporter;
+    if (mChargeTransporter) 	delete mChargeTransporter;
     mChargeTransporter = 0;
     if (mAnalogSignalGenerator) delete mAnalogSignalGenerator;
     mAnalogSignalGenerator = 0;
-    if (mDigitalSignalGenerator) delete mDigitalSignalGenerator;
+    if (mDigitalSignalGenerator)delete mDigitalSignalGenerator;
     mDigitalSignalGenerator = 0;    
-    if(mInputStream) delete(mInputStream);
+    if(mInputStream)  		delete(mInputStream);
     mInputStream = 0;
-    if(mOutputStream) delete(mOutputStream);
+    if(mOutputStream) 		delete(mOutputStream);
     mOutputStream = 0;
     return kStOK;
 }
