@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsOstream.cc,v 1.3 1999/10/22 00:00:14 calderon Exp $
+ * $Id: StTrsOstream.cc,v 1.4 1999/11/05 22:18:16 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,15 @@
  ***************************************************************************
  *
  * $Log: StTrsOstream.cc,v $
+ * Revision 1.4  1999/11/05 22:18:16  calderon
+ * Made private copy constructor and operator= in StTrsDigitalSector.
+ * Renamed DigitalSignalGenerators: Fast -> Old, Parameterized -> Fast
+ * and use new "Fast" as default.
+ * Added StTrsDetectorReader and StTrsZeroSuppressedReader for DAQ type
+ * data access.
+ * Removed vestigial for loop in sampleAnalogSignal() method.
+ * Write version of data format in .trs data file.
+ *
  * Revision 1.3  1999/10/22 00:00:14  calderon
  * -added macro to use Erf instead of erf if we have HP and Root together.
  * -constructor with char* for StTrsDedx so solaris doesn't complain
@@ -82,7 +91,7 @@ StTrsOstream::StTrsOstream(string streamName, int numberOfEvents, StTpcGeometry*
     uname(&sysinfo);
     ofs << "# Tpc Response Simulator Data File" << endl;
     ofs << "# Created: " << ctime(&now);
-    ofs << "# System Information ------" << endl;
+    ofs << "# version TrsDatav1.0" << endl;
     ofs << "# Operating System: " << sysinfo.sysname << " " << sysinfo.release << " " << sysinfo.version << endl;
     ofs << "# Number of events " << mEvents << endl;
     ofs << "# Geometry Information ----" << endl;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.5 1999/10/25 18:38:49 calderon Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.6 1999/11/05 22:18:17 calderon Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -10,6 +10,15 @@
  ***************************************************************************
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.6  1999/11/05 22:18:17  calderon
+ * Made private copy constructor and operator= in StTrsDigitalSector.
+ * Renamed DigitalSignalGenerators: Fast -> Old, Parameterized -> Fast
+ * and use new "Fast" as default.
+ * Added StTrsDetectorReader and StTrsZeroSuppressedReader for DAQ type
+ * data access.
+ * Removed vestigial for loop in sampleAnalogSignal() method.
+ * Write version of data format in .trs data file.
+ *
  * Revision 1.5  1999/10/25 18:38:49  calderon
  * changed mPos and pos() to mPosition and position() to
  * be compatible with StEvent/StMcEvent.
@@ -473,21 +482,21 @@ void StTrsParameterizedAnalogSignalGenerator::sampleAnalogSignal()
            
 	    if(!continuousAnalogTimeSequence.size()) continue; 
            
-	    for(mTimeSequenceIterator  = continuousAnalogTimeSequence.begin();
-		mTimeSequenceIterator != continuousAnalogTimeSequence.end();
-		mTimeSequenceIterator ++) {
+// 	    for(mTimeSequenceIterator  = continuousAnalogTimeSequence.begin();
+// 		mTimeSequenceIterator != continuousAnalogTimeSequence.end();
+// 		mTimeSequenceIterator ++) {
                     
-//   		    PR(mTimeSequenceIterator->time());
-//   		    PR(mTimeShiftOfSignalCentroid);
-	      //		    double tmpTime =
-	      //	      mTimeSequenceIterator->time() +mTimeShiftOfSignalCentroid;//shift was already done before the input
-		  	    double tmpTime =
-			      mTimeSequenceIterator->time();//HL,9/8/99
-			    //	    cout<<tmpTime<<" time after shifting offset"<<endl;
-		    mTimeSequenceIterator->setTime(tmpTime);
-//   		PR(mTimeSequenceIterator->time());
-//   		PR(mTimeSequenceIterator->time()/nanosecond);
-	    }
+// //   		    PR(mTimeSequenceIterator->time());
+// //   		    PR(mTimeShiftOfSignalCentroid);
+// 	      //		    double tmpTime =
+// 	      //	      mTimeSequenceIterator->time() +mTimeShiftOfSignalCentroid;//shift was already done before the input
+// 		  	    double tmpTime =
+// 			      mTimeSequenceIterator->time();//HL,9/8/99
+// 			    //	    cout<<tmpTime<<" time after shifting offset"<<endl;
+// 		    mTimeSequenceIterator->setTime(tmpTime);
+// //   		PR(mTimeSequenceIterator->time());
+// //   		PR(mTimeSequenceIterator->time()/nanosecond);
+// 	    }
 //  	    cout << "row/pad " << irow << '/' << ipad << ' ' << continuousAnalogTimeSequence.size() << endl;
 	    
 	    // Calculate the analog signal at the centroid of the time bin
