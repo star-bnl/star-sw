@@ -94,7 +94,7 @@ int StMessage::Print(int nChars) {
       messBuffer << insert << message;                   // ": ",message
     }
     if (nChars<=0) {
-      if (!(option & kMessOptT)) {                       // "No time" option
+      if (option & kMessOptT) {                          // "time" option
         char* temp2 = (ctime(&messTime) + 4);            // First 4 are day
         *(temp2 + 20) = 0;                               // 24th is end-line
         messBuffer << insert2 << temp2 << insert3 ;      // " (",time,")"
@@ -166,7 +166,7 @@ size_t StMessage::GetMemoryUsage() {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.24 2003/10/01 20:06:50 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.25 2004/01/28 00:09:14 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
@@ -181,8 +181,11 @@ int StMessage::InitBuffer() {
 int tmpp = StMessage::InitBuffer();
 
 //_____________________________________________________________________________
-// $Id: StMessage.cxx,v 1.24 2003/10/01 20:06:50 genevb Exp $
+// $Id: StMessage.cxx,v 1.25 2004/01/28 00:09:14 genevb Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.25  2004/01/28 00:09:14  genevb
+// Messages (except Debug) default to no time-date stamp
+//
 // Revision 1.24  2003/10/01 20:06:50  genevb
 // Initialize and test ostrstream buffer sizes (support for gcc before 3.2)
 //

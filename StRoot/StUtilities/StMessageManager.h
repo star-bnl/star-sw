@@ -170,7 +170,7 @@ class StMessageManager : public StMessMgr {
 	 {return FindMessageList(s1,s2,s3,s4,messCollection[3]);}
 
 // Debug Messages:
-   virtual StMessMgr& Debug(const char* mess="", const char* opt="O")
+   virtual StMessMgr& Debug(const char* mess="", const char* opt="OT")
          { return Message(mess, "D", opt);}
    virtual        int PrintDebug() {return PrintList(messCollection[4]); }
    virtual const messVec* GetDebugs() {return (messCollection[4]);}
@@ -182,7 +182,7 @@ class StMessageManager : public StMessMgr {
 	 {return FindMessageList(s1,s2,s3,s4,messCollection[4]);}
 
 // QAInfo Messages:
-   virtual StMessMgr& QAInfo(const char* mess="", const char* opt="OTS")
+   virtual StMessMgr& QAInfo(const char* mess="", const char* opt="OS")
          { return Message(mess, "Q", opt);}
    virtual        int PrintQAInfo() {return PrintList(messCollection[5]); }
    virtual const messVec* GetQAInfos() {return (messCollection[5]);}
@@ -195,9 +195,9 @@ class StMessageManager : public StMessMgr {
 
 // "As is" Messages:
    virtual StMessMgr& out(const char* mess="")
-	 {return Message(mess,"I","OTP-");}
+	 {return Message(mess,"I","OP-");}
    virtual StMessMgr& err(const char* mess="")
-	 {return Message(mess,"E","ETP-");}
+	 {return Message(mess,"E","EP-");}
 
    virtual       void PrintInfo();
 #ifdef __ROOT__
@@ -208,8 +208,11 @@ class StMessageManager : public StMessMgr {
 
 #endif
 
-// $Id: StMessageManager.h,v 1.21 2003/09/25 21:19:22 genevb Exp $
+// $Id: StMessageManager.h,v 1.22 2004/01/28 00:09:14 genevb Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.22  2004/01/28 00:09:14  genevb
+// Messages (except Debug) default to no time-date stamp
+//
 // Revision 1.21  2003/09/25 21:19:22  genevb
 // Some new cout-like functions and friend functions, some doxygen-ization
 //

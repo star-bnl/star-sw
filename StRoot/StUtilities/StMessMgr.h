@@ -100,7 +100,7 @@ class StMessMgr : public ostrstream {
          const char* s3="", const char* s4="") =0;
 
 // Debug Messages:
-   virtual StMessMgr& Debug(const char* mess="", const char* opt="O")= 0;
+   virtual StMessMgr& Debug(const char* mess="", const char* opt="OT")= 0;
    virtual        int PrintDebug() =0;
    virtual const messVec* GetDebugs() =0;
    virtual StMessage* FindDebug(const char* s1, const char* s2="",
@@ -109,7 +109,7 @@ class StMessMgr : public ostrstream {
          const char* s3="", const char* s4="") =0;
 
 // QAInfo Messages:
-   virtual StMessMgr& QAInfo(const char* mess="", const char* opt="OTS") = 0;
+   virtual StMessMgr& QAInfo(const char* mess="", const char* opt="OS") = 0;
    virtual        int PrintQAInfo() =0;
    virtual const messVec* GetQAInfos() =0;
    virtual StMessage* FindQAInfo(const char* s1, const char* s2="",
@@ -136,8 +136,11 @@ R__EXTERN StMessMgr& gMess;
 
 #endif
 
-// $Id: StMessMgr.h,v 1.16 2003/09/25 21:19:22 genevb Exp $
+// $Id: StMessMgr.h,v 1.17 2004/01/28 00:09:14 genevb Exp $
 // $Log: StMessMgr.h,v $
+// Revision 1.17  2004/01/28 00:09:14  genevb
+// Messages (except Debug) default to no time-date stamp
+//
 // Revision 1.16  2003/09/25 21:19:22  genevb
 // Some new cout-like functions and friend functions, some doxygen-ization
 //
