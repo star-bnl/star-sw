@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: StRichOtherAlgorithms.h,v 1.3 2000/02/08 16:29:02 lasiuk Exp $
+ * $Id: StRichOtherAlgorithms.h,v 1.4 2000/03/13 18:03:37 lasiuk Exp $
  *  This file contains two small classes: Randoms encapsulates
  *  random number generation algorithms, such as poisson,
  *  gauss, flat and polia. MyRound rounds doubles to the nearest
@@ -13,8 +13,8 @@
  *  Flat comes from the C++ Standard Library.
  *
  * $Log: StRichOtherAlgorithms.h,v $
- * Revision 1.3  2000/02/08 16:29:02  lasiuk
- * rm use of UNIX random number generators from FLAT gen
+ * Revision 1.4  2000/03/13 18:03:37  lasiuk
+ * nearest integer
  *
  * Revision 1.4  2000/03/13 18:03:37  lasiuk
  * nearest integer
@@ -87,6 +87,12 @@ public:
 
 struct MyRound {
   int operator()(double d) const {
+    return int( ( ceil(d)-d > 0.5 ) ? floor(d) : ceil(d)); 
+  }
+    static RandPoisson    mPoisson;
+    static RandGauss      mGauss;
+    static RandFlat       mFlat;
+};
 
     return static_cast<int>( ( ceil(a)-a > 0.5 ) ? floor(a) : ceil(a)); 
 {
