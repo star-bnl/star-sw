@@ -1,7 +1,10 @@
 
-// $Id: StSpectraMaker.h,v 1.2 1999/11/05 18:58:49 ogilvie Exp $
+// $Id: StSpectraMaker.h,v 1.3 1999/11/22 01:54:58 ogilvie Exp $
 //
 // $Log: StSpectraMaker.h,v $
+// Revision 1.3  1999/11/22 01:54:58  ogilvie
+// generalised analysis containers to beany object that inherits from StSpectraAnalysis
+//
 // Revision 1.2  1999/11/05 18:58:49  ogilvie
 // general tidy up following Mike Lisa's review. List of analyses conntrolled via
 // analysis.dat, rather than hardcoded into StSpectraMaker.cxx
@@ -45,9 +48,9 @@ class StSpectraMaker : public StMaker {
 private:
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
-vector<StTpcDeviantSpectraAnalysis*, allocator<StTpcDeviantSpectraAnalysis*> > mSpectraAnalysisContainer;//!
+vector<StSpectraAnalysis*, allocator<StSpectraAnalysis*> > mSpectraAnalysisContainer;//!
 #else
-vector<StTpcDeviantSpectraAnalysis*> mSpectraAnalysisContainer;//!
+vector<StSpectraAnalysis*> mSpectraAnalysisContainer;//!
 #endif
 TFile* mOutput;
 
@@ -65,7 +68,7 @@ public:
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSpectraMaker.h,v 1.2 1999/11/05 18:58:49 ogilvie Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSpectraMaker.h,v 1.3 1999/11/22 01:54:58 ogilvie Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StSpectraMaker, 1)
 };

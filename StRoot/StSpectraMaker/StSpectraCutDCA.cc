@@ -11,7 +11,7 @@ StSpectraCutDCA::StSpectraCutDCA(double lowLimit, double highLimit){
 StSpectraCutDCA::~StSpectraCutDCA() {
 }
 
-bool StSpectraCutDCA::satisfiesCut(const StGlobalTrack* track, const StEvent* event){
+bool StSpectraCutDCA::satisfiesCut(StGlobalTrack* track, StEvent* event){
   StVertex* primvtx = event->primaryVertex();
 
   float dca = track->helix().distance(primvtx->position());

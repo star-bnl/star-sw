@@ -17,7 +17,7 @@ class StSpectraCutDCA : public StSpectraCut {
 
   ~StSpectraCutDCA();
  
-  bool satisfiesCut(const StGlobalTrack* track, const StEvent* event);
+  bool satisfiesCut(StGlobalTrack* track,StEvent* event);
 
 };
 

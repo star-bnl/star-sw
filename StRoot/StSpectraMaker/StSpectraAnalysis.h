@@ -21,10 +21,9 @@ class StSpectraAnalysis {
   int mNumEvent;
 
  public:
-   StSpectraAnalysis();
-  ~StSpectraAnalysis();
+  virtual ~StSpectraAnalysis();
 
-  void setTitle(string title) ;
+  void setTitle(string title);
   string getTitle();
 
   void setParticle(string particle);
@@ -33,9 +32,9 @@ class StSpectraAnalysis {
   void setEfficiency(StEfficiency effic);
   StEfficiency* getEfficiency();
 
-  void bookHistograms() ;
-  void fillHistograms(StEvent& event);
-  void projectHistograms();
+  virtual void bookHistograms()=0;
+  virtual void fillHistograms(StEvent& event)=0;
+  virtual void projectHistograms()=0;
 };
 
 #endif
