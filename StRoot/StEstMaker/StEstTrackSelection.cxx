@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrackSelection.cxx,v 1.14 2003/10/11 02:51:20 perev Exp $
+ * $Id: StEstTrackSelection.cxx,v 1.15 2003/10/11 03:16:18 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTrackSelection.cxx,v $
+ * Revision 1.15  2003/10/11 03:16:18  perev
+ * Cleanup+bugfix: test for zer pointer, initialization added.
+ *
  * Revision 1.14  2003/10/11 02:51:20  perev
  * Cleanup+bugfix: test for zer pointer, initialization added.
  *
@@ -166,7 +169,7 @@ void StEstTracker::ChooseBestBranch(StEstTrack *tr, int overPass) {
     if (chi<chimin) {
 	chimin = chi;
 	chinr  = i;
-        br_best==br;
+        br_best=br;
     }
     if (tr->GetNBranches()>1 && tr->GetBranch(i)->GetNHits()==0) gMessMgr->Error()<<"StEstMaker::ChooseBestBranch  branch with no hit while track with >1 branch  track= "<<tr->mTPCTrack->mId<<endm;    
   }
