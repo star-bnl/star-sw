@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.40  1999/01/04 16:24:21  fisyak
+#  Add StDisplay
+#
 #  Revision 1.39  1998/12/17 17:21:00  fisyak
 #  Add Akio's insure++
 #
@@ -196,7 +199,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/12/17 17:21:00 $ 
+#           Last modification $Date: 1999/01/04 16:24:21 $ 
 #  default setings
 # Current Working Directory
 #
@@ -368,15 +371,17 @@ StRoot += St_Makers
 endif
 endif
 #          I have subdrs
-.PHONY               :  all $(BASE) $(XDF2ROOT) $(TARGET) $(StRoot) test clean clean_lib clean_share clean_obj
+.PHONY               :  all $(BASE) $(XDF2ROOT) $(TARGET) $(StRoot) StDisplay test clean clean_lib clean_share clean_obj
 #      I_have_subdirs
 all:  $(BASE) $(XDF2ROOT)  $(TARGETS) $(StRoot)
 ifndef NOROOT
-ROOT:      St_base xdf2root St_Makers StChain St_Tables
+ROOT:      St_base xdf2root St_Makers StChain St_Tables StDisplay
 St_base:
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/base     SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/St_base.$(So)
 xdf2root:
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/xdf2root SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/xdf2root.$(So) 
+StDisplay:
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StDisplay SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/StDisplay.$(So) 
 St_Makers: $(Makers)
 StChain:   
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StChain  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/StChain.$(So)
