@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.162 2005/02/05 00:56:20 perev Exp $
+// $Id: StMaker.cxx,v 1.163 2005/03/09 23:42:26 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -741,7 +741,6 @@ Int_t StMaker::Finish()
    }  
 //VP   Printf("=================================================================================\n");
    
-   Clear();
    if (GetParent()==0) TMemStat::Summary();
    return nerr;
 }
@@ -1584,6 +1583,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.163  2005/03/09 23:42:26  perev
+// Clear() removed from Finish()
+//
 // Revision 1.162  2005/02/05 00:56:20  perev
 // More tests for second call Finish()
 //
