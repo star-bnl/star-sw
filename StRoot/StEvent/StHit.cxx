@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.5 2000/07/28 19:49:28 akio Exp $
+ * $Id: StHit.cxx,v 2.6 2000/07/28 23:29:42 calderon Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.6  2000/07/28 23:29:42  calderon
+ * Added handling of Fit Flag: use this flag to tell if the point
+ * is used in the fit.
+ *
  * Revision 2.5  2000/07/28 19:49:28  akio
  * Change in Detector Id for Endcap SMD
  *
@@ -34,16 +38,16 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.5 2000/07/28 19:49:28 akio Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.6 2000/07/28 23:29:42 calderon Exp $";
 
 ClassImp(StHit)
 
 StHit::StHit()
 {
-    mFlag = 0;
-    mCharge = 0;
     mHardwarePosition = 0;
+    mCharge = 0;
     mTrackRefCount = 0;
+    mFlag = mFitFlag = 0;
 }
 
 StHit::StHit(const StThreeVectorF& p,
@@ -52,7 +56,7 @@ StHit::StHit(const StThreeVectorF& p,
     : StMeasuredPoint(p), mHardwarePosition(hp),
       mCharge(q), mTrackRefCount(c), mPositionError(e)
 {
-    mFlag = 0;
+    mFlag = mFitFlag = 0;
 }
 
 StHit::~StHit() { /* noop */ }
@@ -96,6 +100,9 @@ StHit::charge() const { return mCharge; }
 
 UInt_t
 StHit::flag() const { return static_cast<UInt_t>(mFlag); }
+
+Int_t
+StHit::usedInFit() const { return static_cast<Int_t>(mFitFlag); } 
 
 UInt_t
 StHit::trackReferenceCount() const { return static_cast<UInt_t>(mTrackRefCount); }
