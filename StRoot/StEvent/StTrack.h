@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.15 2002/03/14 17:42:15 ullrich Exp $
+ * $Id: StTrack.h,v 2.16 2003/10/30 20:07:32 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.16  2003/10/30 20:07:32  perev
+ * Check of quality added
+ *
  * Revision 2.15  2002/03/14 17:42:15  ullrich
  * Added method to set mNumberOfPossiblePoints.
  *
@@ -128,6 +131,7 @@ public:
     void         setDetectorInfo(StTrackDetectorInfo*);
     void         setNumberOfPossiblePoints(unsigned short);
     void         setNode(StTrackNode*);
+    int          bad() const;
     
 protected:
     UShort_t                mKey;

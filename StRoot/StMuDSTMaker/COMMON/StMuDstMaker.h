@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.24 2003/10/27 23:54:33 perev Exp $
+ * $Id: StMuDstMaker.h,v 1.25 2003/10/30 20:08:13 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -126,7 +126,7 @@ class StMuDstMaker : public StMaker {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.24 2003/10/27 23:54:33 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.25 2003/10/30 20:08:13 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -216,11 +216,11 @@ private:
   void fillTracks(StEvent* ev, StMuCut* cut=0);
   void fillDetectorStates(StEvent* ev);
   void fillL3AlgorithmInfo(StEvent* ev);
-  template <class T> void addType(TClonesArray* tcaFrom, TClonesArray* tcaTo , T *t);
-  template <class T> int addType(TClonesArray* tcaTo , T &t);
-  template <class T, class U> int addType(TClonesArray* tcaTo , U &u, T *t);
+  template <class T, class U> int addType(TClonesArray* tcaTo  , U &u, T *t);
+  template <class T>          int addType(TClonesArray* tcaFrom, TClonesArray* &tcaTo ,T *t);
+  template <class T>          int addType(TClonesArray* tcaTo  , T &t);
   void addTrackNode(const StEvent* ev, const StTrackNode* node, StMuCut* cut, TClonesArray* gTCA=0, TClonesArray* pTCA=0, TClonesArray* oTCA=0, bool l3=false);
-  int addTrack(TClonesArray* tca, const StEvent* event, const StTrack* track, StMuCut* cut, int index2Global, bool l3=false);
+  int  addTrack(TClonesArray* tca, const StEvent* event, const StTrack* track, StMuCut* cut, int index2Global, bool l3=false);
 /*   int addType(TClonesArray* tcaTo , StMuEmcCollection t); */
 
   StRichSpectra* richSpectra(const StTrack* track);
@@ -292,6 +292,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.25  2003/10/30 20:08:13  perev
+ * Check of quality added
+ *
  * Revision 1.24  2003/10/27 23:54:33  perev
  * weird template bug fized and templates simplified
  *

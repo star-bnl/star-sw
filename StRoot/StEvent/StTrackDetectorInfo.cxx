@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.cxx,v 2.7 2001/04/05 04:00:58 ullrich Exp $
+ * $Id: StTrackDetectorInfo.cxx,v 2.8 2003/10/30 20:07:32 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.cxx,v $
+ * Revision 2.8  2003/10/30 20:07:32  perev
+ * Check of quality added
+ *
  * Revision 2.7  2001/04/05 04:00:58  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -39,7 +42,7 @@
 
 ClassImp(StTrackDetectorInfo)
 
-static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.7 2001/04/05 04:00:58 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.8 2003/10/30 20:07:32 perev Exp $";
 
 StTrackDetectorInfo::StTrackDetectorInfo() : mNumberOfPoints(0)
 { /* noop */ }
@@ -163,4 +166,10 @@ StTrackDetectorInfo::removeHit(StHit*& hit)
         int i = hit->trackReferenceCount();
         hit->setTrackReferenceCount(i > 0 ? i-1 : 0);
     }
+}
+int  StTrackDetectorInfo::bad() const
+{
+   if(!mFirstPoint.valid()) return 1;
+   if(!mLastPoint.valid() ) return 2;
+   return 0;
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.18 2003/04/25 23:48:18 calderon Exp $
+ * $Id: StTrack.cxx,v 2.19 2003/10/30 20:07:32 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.19  2003/10/30 20:07:32  perev
+ * Check of quality added
+ *
  * Revision 2.18  2003/04/25 23:48:18  calderon
  * fittingMethod member function was missing case for kITKalmanFitId.
  *
@@ -80,7 +83,7 @@
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.18 2003/04/25 23:48:18 calderon Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.19 2003/10/30 20:07:32 perev Exp $";
 
 StTrack::StTrack()
 {
@@ -351,7 +354,22 @@ StTrack::setNumberOfPossiblePoints(unsigned short val) {mNumberOfPossiblePoints 
 void
 StTrack::setNode(StTrackNode* val) { mNode = val; }
 
+int StTrack::bad() const
+{
+static const double world = 1.e+5;
+ if (mFlag <=0                     )            return 01;
+ if (!::finite(mImpactParameter)   ) 		return 10;
+ if (::fabs(mImpactParameter)>world) 		return 11;
+ if (!::finite(mLength)            )    	return 20;
+ if (::fabs(mLength)         >world) 		return 21;
+ if (mLength <1./world	           )    	return 22;
+ if (mGeometry      && mGeometry->bad()     )	return 30;
+ if (mOuterGeometry && mOuterGeometry->bad())   return 40;
+ const StTrackDetectorInfo *di = mDetectorInfo;
+ if (di             && di->bad()            )   return 50;
+return 0;
 
+}
 void StTrack::Streamer(TBuffer &R__b)
 {
     // Stream an object of class .

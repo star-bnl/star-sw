@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.cc,v 1.17 2003/10/19 20:17:00 perev Exp $
+ * $Id: StHelix.cc,v 1.18 2003/10/30 20:06:46 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1997
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelix.cc,v $
+ * Revision 1.18  2003/10/30 20:06:46  perev
+ * Check of quality added
+ *
  * Revision 1.17  2003/10/19 20:17:00  perev
  * Protection agains overfloat added into pathLength(StThreeVector,StThreeVector)
  *
@@ -570,11 +573,21 @@ StHelix::pathLengths(const StHelix& h) const
     }
 }
 
-bool StHelix::valid() const
+bool StHelix::valid(double WorldSize) const
 {
-    return (fabs(mDipAngle) != M_PI/2 &&
-	    (mH == 1 || mH == -1)      &&
-	    mCurvature >= 0            );
+
+    if (!::finite(mDipAngle    )) 	return 0;
+    if (!::finite(mH           )) 	return 0;
+    if (!::finite(mCurvature   )) 	return 0;
+    if (::fabs(mCurvature) > WorldSize)	return 0;
+
+    if (!mOrigin.valid(WorldSize))      return 0;
+    double qwe = ::fabs(::fabs(mDipAngle)-M_PI/2);
+    if (qwe < 1./WorldSize      ) 	return 0; 
+    if (abs(mH) != 1            )       return 0; 
+    if (mCurvature < 0          )	return 0;
+
+    return 1;
 }
 
 void StHelix::moveOrigin(double s)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorF.cc,v 1.10 2003/04/30 20:39:42 perev Exp $
+ * $Id: StThreeVectorF.cc,v 1.11 2003/10/30 20:06:47 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorF.cc,v $
+ * Revision 1.11  2003/10/30 20:06:47  perev
+ * Check of quality added
+ *
  * Revision 1.10  2003/04/30 20:39:42  perev
  * Warnings cleanup. Modified lines marked VP
  *
@@ -136,6 +139,15 @@ istream&  operator>>(istream& is, StThreeVectorF& v)
     v.setY(y);
     v.setZ(z);
     return is;
+}
+
+int StThreeVectorF::valid(double world) const
+{		
+  for (int i=0;i<3;i++) {
+    if (!::finite((&mX1)[i])      ) return 0; 		
+    if ( ::fabs  ((&mX1)[i])>world) return 0; 		
+  }		
+  return 1;		
 }
 
 #ifdef __ROOT__

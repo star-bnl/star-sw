@@ -1,6 +1,6 @@
 /***************************************************************************
- *
- * $Id: StMuHelix.cxx,v 1.2 2003/10/28 18:57:56 perev Exp $
+ *   
+ * $Id: StMuHelix.cxx,v 1.3 2003/10/30 20:08:13 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -17,43 +17,25 @@ StMuHelix::StMuHelix(StPhysicalHelixD hh, double field) {
 int StMuHelix::bad() const 
 {
    double qwe;
-   qwe = mOrigin.x();
-   if (!::finite(qwe))		return 1;
-   if (fabs(qwe) > 1000) 	return 1;
-
-   qwe = mOrigin.y();
-   if (!::finite(qwe))		return 2;
-   if (fabs(qwe) > 1000) 	return 2;
-   
-   qwe = mOrigin.z();
-   if (!::finite(qwe))		return 3;
-   if (fabs(qwe) > 1000) 	return 3;
-
-   qwe = mP.x();
-   if (!::finite(qwe))		return 4;
-   if (fabs(qwe) > 1000) 	return 4;
-
-   qwe = mP.y();
-   if (!::finite(qwe))		return 5;
-   if (fabs(qwe) > 1000) 	return 5;
-   
-   qwe = mP.z();
-   if (!::finite(qwe))		return 6;
-   if (fabs(qwe) > 1000) 	return 7;
+   if(!mOrigin.valid())		return 10;
+   if(!mP.valid     ()) 	return 20;
 
    qwe = fabs(mP.x())+fabs(mP.y());
-   if (qwe <=1.e-10)   		return 7;
+   if (qwe <=1.e-10)   		return 21;
 
-   if (abs(mQ)  >    10)        return 8;
+   if (abs(mQ)  >    10)        return 30;
 
-   if (!::finite(mB))           return 9;
-   if (fabs(mB) >  1000)        return 9;
+   if (!::finite(mB))           return 40;
+   if (fabs(mB) >  1000)        return 41;
    return 0;
 }
 ClassImp(StMuHelix)
 /***************************************************************************
  *
  * $Log: StMuHelix.cxx,v $
+ * Revision 1.3  2003/10/30 20:08:13  perev
+ * Check of quality added
+ *
  * Revision 1.2  2003/10/28 18:57:56  perev
  * BadData protection added
  *

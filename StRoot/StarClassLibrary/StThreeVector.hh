@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.9 2003/09/02 17:59:35 perev Exp $
+ * $Id: StThreeVector.hh,v 1.10 2003/10/30 20:06:46 perev Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
+ * Revision 1.10  2003/10/30 20:06:46  perev
+ * Check of quality added
+ *
  * Revision 1.9  2003/09/02 17:59:35  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -169,6 +172,7 @@ public:
     StThreeVector<T>& operator+= (const StThreeVector<double>&);
     StThreeVector<T>& operator-= (const StThreeVector<double>&);
 #endif
+    int             valid(double world = 1.e+5) const;
 
 protected:
     T    mX1, mX2, mX3;
@@ -715,6 +719,16 @@ inline StThreeVector<T>
 StThreeVector<T>::pseudoProduct(const StThreeVector<double>& v) const
 {
     return this->pseudoProduct(v.x(),v.y(),v.z());
+}
+template<class T>
+inline int
+StThreeVector<T>::valid(double world) const
+{
+  for (int i=0;i<3;i++) {
+    if (!::finite((&mX1)[i])      ) return 0; 		
+    if ( ::fabs  ((&mX1)[i])>world) return 0; 		
+  }		
+  return 1;		
 }
 #endif  // ST_NO_MEMBER_TEMPLATES
 

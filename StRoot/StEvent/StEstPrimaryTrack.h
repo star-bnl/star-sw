@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEstPrimaryTrack.h,v 2.1 2002/04/19 13:28:34 jeromel Exp $
+ * $Id: StEstPrimaryTrack.h,v 2.2 2003/10/30 20:07:32 perev Exp $
  *
  * Author: Thomas Ullrich, Mar 2002
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEstPrimaryTrack.h,v $
+ * Revision 2.2  2003/10/30 20:07:32  perev
+ * Check of quality added
+ *
  * Revision 2.1  2002/04/19 13:28:34  jeromel
  * New include for SVT 2 tables scheme support. Forgot about it yesterday ...
  *
@@ -38,13 +41,6 @@ protected:
     StObject*   clone() const;
     
 private:
-//  StPrimaryVertex*         	mVertex; 	//$LINK
-#ifdef __CINT__
-    StObjLink  		     	mVertex; 	
-#else
-    StLink<StPrimaryVertex>  	mVertex; 	
-#endif //__CINT__
-    
-    ClassDef(StEstPrimaryTrack,1)
+    ClassDef(StEstPrimaryTrack,2)
 };
 #endif
