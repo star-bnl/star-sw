@@ -16,6 +16,12 @@
 //                                                                      //
 // St_DataSet                                                           //
 //                                                                      //
+// St_DataSet class is to create a special compound object-container:   //
+//                                                                      //
+//    St_DataSet object ::= the named list of St_DataSet objects        //
+//                                                                      //
+//  where the "list" may contain no object                              //
+//                                                                      //
 // St_DataSet class is a base class to implement the directory-like     //
 // data structures and maintain it via St_DataSetIter class iterator    //
 //                                                                      //
