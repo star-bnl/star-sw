@@ -3,6 +3,7 @@
 #pragma link off all functions;
 #ifdef __CINT__
 #pragme link C++ global gFakeTopoPtr;
+#pragma link C++ class DcaService+;
 #pragma link C++ class StDecayMode+;
 #pragma link C++ class StKinkI+;
 #pragma link C++ class StKinkBase+;
