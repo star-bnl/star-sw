@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.17 2002/04/15 13:27:42 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.18 2002/05/14 00:28:21 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -226,7 +226,7 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
 	      a.position().y()*a.position().y());
 
   if( r > 169) barrel = 3;
-  else if( r > 64) barrel = 2;
+  else if( r > 75) barrel = 2;
   else barrel = 1;
 
 
