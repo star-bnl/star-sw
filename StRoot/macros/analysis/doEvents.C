@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.85 2003/09/07 03:49:11 perev Exp $
+// $Id: doEvents.C,v 1.86 2003/10/10 19:39:20 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -53,6 +53,8 @@ class     StChain;
 StChain  *chain=0;
 class     St_db_Maker;
 St_db_Maker *dbMk =0;
+class StFileI;
+StFileI *setFiles =0;
 
 Int_t iEvt=0,istat=0,nEvents=0;
 void doEvents()
@@ -148,7 +150,8 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     // Handling depends on whether file is a ROOT file or XDF file
     //
     chain  = new StChain("StChain");
-    StFileI *setFiles =0;
+    delete setFiles; setFiles =0;
+
     if (fileList) {	//Normal case
       setFiles= new StFile(fileList);
     } else        {	//Grand Challenge
@@ -275,7 +278,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     //
     istat=0,iEvt=1;
     istat = chain->EventLoop(1,nEvents);    
-    delete setFiles; setFiles=0;
+//VP    delete setFiles; setFiles=0;
 
 }
 
@@ -322,6 +325,9 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.86  2003/10/10 19:39:20  perev
+// Remeve delete fileset. problem for debuging. A leak is small
+//
 // Revision 1.85  2003/09/07 03:49:11  perev
 // gcc 3.2 + WarnOff
 //
