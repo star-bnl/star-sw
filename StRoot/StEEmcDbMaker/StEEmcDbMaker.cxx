@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.29 2004/04/28 20:38:10 jwebb Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.30 2004/05/04 16:24:18 balewski Exp $
  
 
 #include <time.h>
@@ -147,7 +147,7 @@ Int_t StEEmcDbMaker::Init(){
   setThreshold(5.0);  // defines threshold for ADCs
   // should be +2 or +3 sigma in the future
 
-  setPreferedFlavor("onlped","eemcPMTped"); // tmp for tests,JB
+  //  setPreferedFlavor("onlped","eemcPMTped"); // tmp for tests,JB
 
   return StMaker::Init();
 }
@@ -209,8 +209,7 @@ void StEEmcDbMaker::clearItemArray(){
   }
 
   memset(byStrip,0,sizeof(byStrip));
-  printf("%s::clear, size of byStrip=%d\n",GetName(),sizeof(byStrip));//tmp
-
+  
   if(mDbFiber) delete [] mDbFiber;
   nFiber=0;
   mDbFiberConfBlob=0;
@@ -840,6 +839,9 @@ void StEEmcDbMaker::setAsciiDatabase( const Char_t *ascii )
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.30  2004/05/04 16:24:18  balewski
+// ready for analysis of 62GeV AuAU production
+//
 // Revision 1.29  2004/04/28 20:38:10  jwebb
 // Added StEEmcDbMaker::setAsciiDatabase().  Currently not working, since
 // tube name missing for some towers, triggereing a "clear" of all EEmcDbItems.
