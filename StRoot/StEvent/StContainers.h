@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.1 1999/10/28 22:06:19 ullrich Exp $
+ * $Id: StContainers.h,v 2.2 2000/01/05 16:02:23 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
- * Revision 2.1  1999/10/28 22:06:19  ullrich
- * Initial Revision
+ * Revision 2.2  2000/01/05 16:02:23  ullrich
+ * SSD hits added to StEvent.
  *
  * Revision 2.5  2000/05/22 21:42:44  ullrich
  * Add RICH related classes.
@@ -25,6 +25,7 @@
  * Revision 2.2  2000/01/05 16:02:23  ullrich
  * SSD hits added to StEvent.
  *
+ * Revision 2.1  1999/10/28 22:06:19  ullrich
  * Initial Revision
  **************************************************************************/
 #ifndef StContainers_hh
@@ -39,6 +40,7 @@ class StRichMCInfo;
 class StEmcRawHit;
 class StEmcCluster;
 class StEmcPoint;
+class StTrack;
 class StTrackNode;
 class StTrackDetectorInfo;
 class StV0Vertex;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.2 1999/11/04 13:30:42 ullrich Exp $
+ * $Id: StEvent.h,v 2.3 2000/01/05 16:02:28 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 2.2  1999/11/04 13:30:42  ullrich
- * Added constructor without summary table
+ * Revision 2.3  2000/01/05 16:02:28  ullrich
+ * SSD hits added to StEvent.
  *
  * Revision 2.9  2000/05/15 18:35:37  ullrich
  * All data member related to collections and containers are now
@@ -39,6 +39,7 @@
  *
  * Revision 2.2  1999/11/04 13:30:42  ullrich
  * Added constructor without summary table
+ *
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Completely Revised for New Version
@@ -75,6 +76,8 @@ public:
     StEvent(const event_header_st&,
             const dst_event_summary_st&,
     const TString&                      type() const;
+    virtual ~StEvent();
+
     
     ULong_t                             bunchCrossingNumber(UInt_t) const;
     
@@ -109,6 +112,7 @@ public:
     StSPtrVecTrackDetectorInfo&         trackDetectorInfo();
     const StSPtrVecTrackDetectorInfo&   trackDetectorInfo() const;
     
+    StSPtrVecTrackNode&                 trackNodes();
 
     UInt_t                              numberOfPrimaryVertices() const;
     const StPrimaryVertex*              primaryVertex(UInt_t = 0) const;
@@ -123,9 +127,12 @@ public:
     void setTime(Long_t);
     void setTriggerMask(ULong_t);
     void setRichPixelCollection(StRichPixelCollection*);
+    TString                      mType;
     Long_t                       mRunId;
     Long_t                       mId;
     Long_t                       mTime;
+    StEventSummary*              mSummary;           
+    
     StTpcHitCollection*          mTpcHits;           
     StFtpcHitCollection*         mFtpcHits;          
     StTpcHitCollection*          mTpcHits;
