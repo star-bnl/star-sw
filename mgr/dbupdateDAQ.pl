@@ -60,7 +60,8 @@ my %monthHash = (
 my %evtTHash = (
                "physics"  => 3,
                "pedestal" => 1,
-               "cluster2" => 2,
+               "cluster2" => 4,
+               "gain"     => 2,
                "notdefined" => 100 
              );
 
@@ -326,7 +327,9 @@ sub walkDHpss {
           next if ( $name =~ /^st_config/);
           next if ( $name =~ /^rcftst/); 
           next if ( $name =~ /^filea/);
-          next if ( $name =~ /^fileb/); 
+          next if ( $name =~ /^fileb/);
+          next if ( $name =~ /^st_pedestal/);
+          next if ( $name =~ /^st_gain/); 
          if (&isDirectory($access)) {
          $fullDir = $dirs->[$ii]."/".$name;
          next if ( $fullDir =~ /test/);
