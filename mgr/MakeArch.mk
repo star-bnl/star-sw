@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.41  1998/11/13 00:19:30  fisyak
+#  Add flags for SCL St_trs_Maker
+#
 #  Revision 1.40  1998/11/07 16:52:27  fisyak
 #  remove OBJY inlcudes to avoid clash with protection
 #
@@ -101,7 +104,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/11/07 16:52:27 $ 
+#             Last modification $Date: 1998/11/13 00:19:30 $ 
 #. default setings
 
 MOTIF := Yess
@@ -272,12 +275,13 @@ ifneq (,$(findstring $(STAF_ARCH),i386_redhat51))
   LINUX :=YESS
   MOTIF :=
   CERN_LEVEL :=pgf98
-  OSFID    := lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON
+  OSFID    := lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES
   STRID    := lnx
   FC       := /usr/pgi/linux86/bin/pgf77
   LD       := $(CXX)
   SO	   := $(CXX)
-  CXXFLAGS := $(DEBUG) -fPIC
+  CXXFLAGS := $(DEBUG) -fPIC -Wall -fno-rtti -fno-exceptions -fno-for-scope
+#                                             -fpipe
   CFLAGS   := $(DEBUG) -fPIC
   CPPFLAGS += f2cFortran
   LDFLAGS  := $(DEBUG) -Wl,-Bstatic
@@ -447,9 +451,9 @@ endif
 ifneq (,$(findstring $(STAF_ARCH),sun4x_55 sun4x_56))
   CPPFLAGS := $(filter-out SunOS,$(CPPFLAGS))
   STDHOME := /afs/rhic/star/packages/ObjectSpace/2.0m
-  STAF_UTILS_INCS += $(STDHOME) $(STDHOME)/ospace/std
+  STAF_UTILS_INCS += $(STDHOME) $(STDHOME)/ospace/std  $(STDHOME)/ospace
 
-  OSFID :=  sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SOLARIS CERNLIB_SUN
+  OSFID :=  sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SOLARIS CERNLIB_SUN ST_NO_MEMBER_TEMPLATES ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_TEMPLATE_DEF_ARGS ST_NO_NAMESPACES
   STRID :=  sun
   CC :=  /opt/SUNWspro/bin/cc
   CXX := /opt/SUNWspro/bin/CC
@@ -460,7 +464,7 @@ ifneq (,$(findstring $(STAF_ARCH),sun4x_55 sun4x_56))
   FFLAGS   :=  $(DEBUG)  -KPIC -w 
   FEXTEND  :=  -e
   CFLAGS   :=  $(DEBUG)  -KPIC 
-  CXXFLAGS :=  $(DEBUG)  -KPIC  
+  CXXFLAGS :=  $(DEBUG)  -KPIC 
   LDFLAGS  :=  $(DEBUG)  -Bstatic 
   EXEFLAGS :=  $(DEBUG)  -z muldefs -Bdynamic -t 
   SOFLAGS  :=  $(DEBUG) -G

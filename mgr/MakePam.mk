@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.61 1998/10/29 23:34:26 fisyak Exp $
+# $Id: MakePam.mk,v 1.62 1998/11/13 00:19:30 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.62  1998/11/13 00:19:30  fisyak
+# Add flags for SCL St_trs_Maker
+#
 # Revision 1.61  1998/10/29 23:34:26  fisyak
 # set ASU_MALLOC_OFF for PAMS
 #
@@ -66,7 +69,7 @@
 ifndef STAF_MAKE_HOME
   STAF_MAKE_HOME := $(STAR)/mgr
 endif
-
+ASU_MALLOC_OFF := YES
 include $(STAF_MAKE_HOME)/MakeEnv.mk
 include $(STAF_MAKE_HOME)/MakeArch.mk
 
@@ -345,7 +348,7 @@ $(GEN_TAB)/.rootrc:
 	@echo '# Path used by dynamic loader to find shared libraries and macros '>>  $(ALL_TAGS)
 	@echo '# Paths are different for Unix and Windows. The example shows the defaults'>>  $(ALL_TAGS)
 	@echo '# for all ROOT applications for either Unix or Windows.'>>  $(ALL_TAGS)
-	@echo 'Unix.*.Root.DynamicPath:    .:$$(ROOTSYS)/lib:.$$(STAR_SYS)/lib:$$(STAR)/lib:$$(STAF_LIB)'>>  $(ALL_TAGS)
+	@echo 'Unix.*.Root.DynamicPath:    .:.$$(STAR_SYS)/lib:$$(STAR)/lib:$$(STAF_LIB)'>>  $(ALL_TAGS)
 	@echo 'Unix.*.Root.MacroPath:      .:./StRoot/macros:$$(STAR)/StRoot/macros:$$(STAR)/StRoot/test:$$(STAR)/.share/tables:$$(ROOTSYS)/macros'>>  $(ALL_TAGS)
 	@echo 'WinNT.*.Root.DynamicPath:   ./;$$(ROOTSYS)/star/bin;//Sol/afs_rhic/star/packages/dev/.intel_wnt/bin;$$(ROOTSYS);$$(ROOTSYS)/bin;$$(PATH)'>>  $(ALL_TAGS)
 	@echo 'WinNT.*.Root.MacroPath:     ./;$$(home)/root/macros;$$(ROOTSYS)/tutorials;$$(ROOTSYS)/star/macros;//Sol/afs_rhic/star/packages/dev/.intel_wnt/bin;$$(ROOTSYS)/macros'>>  $(ALL_TAGS)

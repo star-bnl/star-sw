@@ -75,8 +75,8 @@ INC_DIRS := $(addprefix  $(OUT_DIR)/.share/,$(INC_NAMES))
 INC_DIRS += $(addprefix $(ROOT_DIR)/StRoot/,$(INC_NAMES))
 INC_DIRS += $(addprefix     $(STAR)/.share/,$(INC_NAMES))
 INC_DIRS += $(addprefix     $(STAR)/StRoot/,$(INC_NAMES))
-INCINT := $(INC_DIRS)
-INC_DIRS += $(SRC_DIR) $(GEN_DIR) $(ROOT_DIR)/inc  $(STAR)/inc 
+INCINT := $(INC_DIRS) 
+INC_DIRS += $(SRC_DIR) $(SRC_DIR)/include $(GEN_DIR) $(ROOT_DIR)/inc  $(STAR)/inc  $(STAF_UTILS_INCS)
 #
 INCINT := $(INC_DIRS)
 INC_DIRS += $(OUT_DIR)/.share $(ROOT_DIR)/StRoot $(STAR)/.share $(STAR)/StRoot $(ROOTSYS)/include
@@ -90,7 +90,8 @@ CPPFLAGS += -D__ROOT__
 #	If NO source , NOTHING to do
 #	Skip up to the end
 #
-FILES_SRC := $(wildcard $(addprefix $(SRC_DIR)/, *.c *.cxx))
+FILES_SRC := $(wildcard $(addprefix $(SRC_DIR)/, *.c *.cxx *.cc))
+FILES_SRC += $(wildcard $(addprefix $(SRC_DIR)/src/, *.c *.cxx *.cc))
 ifeq ($(PKGNAME),xdf2root)
   FILES_SRC  += $(wildcard $(STAR)/asps/staf/dsl/src/*.c)
   INPUT_DIRS := $(STAR)/asps/staf/dsl/src
@@ -102,7 +103,7 @@ ifneq (,$(DOIT))
 DEP_DIR := $(SYS_DIR)/dep/$(PKGNAME)
 
 OUPUT_DIRS := $(LIB_DIR) $(OBJ_DIR) $(DEP_DIR) $(BIN_DIR) $(TMP_DIR) $(GEN_DIR) $(SRC_DIR) 
-INPUT_DIRS += $(SRC_DIR) 
+INPUT_DIRS += $(SRC_DIR) $(SRC_DIR)/src
 
 # 	Make dirs before make real work. Othervice VPATH does not see
 #    	non existing directories
@@ -279,6 +280,9 @@ $(OBJ_DIR)/%.o : %.c
 $(OBJ_DIR)/%.o : %.cxx 
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS)  $(INCLUDES)  $(1ST_DEPS) -o $(ALL_TAGS)
 
+$(OBJ_DIR)/%.o : %.cc 
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS)  $(INCLUDES)  $(1ST_DEPS) -o $(ALL_TAGS)
+
 $(FILES_DCINT): $(DEP_DIR)/%Cint.d: %.h 
 	$(RM) $(ALL_TAGS)
 	$(GCC) $(MKDEPFLAGS) $(CPPFLAGS) $(INCLUDES) -x c $(1ST_DEPS) | sed -e \
@@ -292,6 +296,12 @@ $(DEP_DIR)/%.d: %.c
         > $(ALL_TAGS)
 
 $(DEP_DIR)/%.d: %.cxx
+	$(RM) $(ALL_TAGS)
+	$(GCC) $(MKDEPFLAGS) $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
+'s/$(notdir $(STEM))\.o/$(subst .,\.,$(subst /,\/,$(OBJ_DIR)/$(STEM).o)) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
+        > $(ALL_TAGS)
+
+$(DEP_DIR)/%.d: %.cc
 	$(RM) $(ALL_TAGS)
 	$(GCC) $(MKDEPFLAGS) $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
 's/$(notdir $(STEM))\.o/$(subst .,\.,$(subst /,\/,$(OBJ_DIR)/$(STEM).o)) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
