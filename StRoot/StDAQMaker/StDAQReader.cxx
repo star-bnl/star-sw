@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.7 1999/08/19 22:28:40 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.8 1999/09/10 16:35:38 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.8  1999/09/10 16:35:38  fine
+ * The oreder of deleting object has been changed to avoid crash in StDaqLib
+ *
  * Revision 1.7  1999/08/19 22:28:40  perev
  * fix Skip & EventNumber
  *
@@ -204,11 +207,7 @@ StTPCReader::~StTPCReader()
 void StTPCReader::setSector(int sector)
 {
   if (sector == fSector) return;
-  if (sector == -1) {
-   delete fTPCImpReader;
-   fTPCImpReader = ::getDetectorReader(fDAQReader->fEventReader,fDAQReader->fTPCVersion);
-   fSector = -1999;
-  }
+
   delete fZeroSuppressedReader;
   delete fADCRawReader ;
   delete fPedestalReader ;
@@ -216,6 +215,12 @@ void StTPCReader::setSector(int sector)
   delete fGainReader;
   delete fCPPReader;
   delete fBadChannelReader;
+
+  if (sector == -1) {
+   delete fTPCImpReader;
+   fTPCImpReader = ::getDetectorReader(fDAQReader->fEventReader,fDAQReader->fTPCVersion);
+   fSector = -1999;
+  }
 
   fZeroSuppressedReader = 0;
   fADCRawReader 	= 0;
