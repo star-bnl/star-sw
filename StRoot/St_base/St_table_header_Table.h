@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   23/03/00
-// $Id: St_table_header_Table.h,v 1.2 2000/03/27 00:34:04 fine Exp $
+// $Id: St_table_header_Table.h,v 1.3 2000/03/27 02:19:45 fine Exp $
 //
 #ifndef STAF_St_table_header_Table
 #define STAF_St_table_header_Table
@@ -31,7 +31,7 @@ public:
   ClassDef(St_table_header,0) //C++ wrapper for <table_header> 
 };
 
-inline TTable *St_table_header::Object(TTable *&table,const table_head_st *h)
+inline TTable *St_table_header::Object(TTable *&table,const table_head_st *header)
 {
   // return a pointer to the C++ object by table header provided
   assert(header); 
@@ -40,6 +40,9 @@ inline TTable *St_table_header::Object(TTable *&table,const table_head_st *h)
 }
 //______________________________________________________________________________
 // $Log: St_table_header_Table.h,v $
+// Revision 1.3  2000/03/27 02:19:45  fine
+// bug fix
+//
 // Revision 1.2  2000/03/27 00:34:04  fine
 // function ReAllocate and method TTable::Object have been move to St_table_head class
 //
