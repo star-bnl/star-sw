@@ -111,33 +111,24 @@ int EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken, HeadVer 
   for(ic=0;ic<block->GetEntries();ic++) {
     EEfeeDataBlock *b=(EEfeeDataBlock *)block->At(ic);
     assert(ic<dim); // fix it, use DB for crIdSwitch
-    if(ic>=22 ) { 
-      /*  mark BTOW crate as not valid,, one would need
-	  to come up with consistency test for BTOW and  
-	  b->setCrateID(16+BTOWcrateID); to avoid collision with ETOW & ESMD
-	  Jan Balewski, April 2004
-      */
-      b->maskCrate();
-      continue;
-    }
-
     // tmp, should be taken from DB as in StEEmcDataMaker.cxx
     int lenCount=0;
     int errFlag=0;
+    int trigCommand=4; // physics, 9=laser/LED, 8=??
+
     if(ic<6) {// ETOW
       //lenCount=4+5*32; // real .daq content
       lenCount=5*32; //  old ezTree header
-      errFlag=0;
-    } else { // ESMD
+    } else if (ic<22) { // ESMD //tmp
       //lenCount=4+192;// real .daq content
-      lenCount=192;//  old ezTree header
+      lenCount=12*16;//  old ezTree header
       errFlag=0x28;
+    } else { //BTOW
+      lenCount=10*16;//  old ezTree header
     };
-    int trigCommand=4; // physics, 9=laser/LED, 8=??
 
     // this is messy, contact Jan before you change between  ezTree header & .daq header
-      
-    
+          
     UChar_t  sick=0;
     switch (headVersion) {
     case headVer1:  // real .daq content
@@ -154,7 +145,7 @@ int EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken, HeadVer 
       assert(1==2); // make up your mind men!
     }
 
-    //  printf(" ic=%d crID=%d sick=0x%02x\n",ic,b->getCrateID(),sick);
+    // printf(" ic=%d crID=%d sick=0x%02x\n",ic,b->getCrateID(),sick);
 
     // printf("XXX b=%d crID=%d=%d  tok=%d=%d ok=%d\n",ic, b->getCrateID() ,list[ic],b->getToken(), headToken,ok);
     
@@ -163,6 +154,20 @@ int EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken, HeadVer 
   }
   //  printf("nOK=%d\n",nOK);
   return nOK;
+}
+
+//--------------------------------------------------
+//--------------------------------------------------
+//--------------------------------------------------
+
+void EEfeeRawEvent ::  maskBEMC(){  // kill BTOW crates
+
+  // tmp,22  should be taken from DB as in StEEmcDataMaker.cxx
+  for(int ic=22;ic<block->GetEntries();ic++) {
+    EEfeeDataBlock *b=(EEfeeDataBlock *)block->At(ic);
+    b->maskCrate();
+  }
+  
 }
 
 //--------------------------------------------------
@@ -186,6 +191,9 @@ UShort_t  EEfeeRawEvent::getValue(int crateID, int channel) const {
 
 /*
  * $Log: EEfeeRawEvent.cxx,v $
+ * Revision 1.17  2004/07/09 02:38:05  balewski
+ * BTOW data are not masked out any more but headres are checked as for EEMC
+ *
  * Revision 1.16  2004/06/21 19:50:21  balewski
  * mre detailed monitoring of data corruption
  *
