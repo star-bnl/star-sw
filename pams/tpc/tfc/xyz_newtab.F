@@ -1,5 +1,8 @@
-* $Id: xyz_newtab.F,v 1.3 1999/03/24 01:20:53 sakrejda Exp $
+* $Id: xyz_newtab.F,v 1.4 1999/03/27 01:14:54 snelling Exp $
 * $Log: xyz_newtab.F,v $
+* Revision 1.4  1999/03/27 01:14:54  snelling
+* fix placement for inner sector
+*
 * Revision 1.3  1999/03/24 01:20:53  sakrejda
 * tss_pars added to the xyz_newtab call
 *
@@ -339,6 +342,10 @@ c mal 31aug97
 *	      Xlocal(3) = adcxyz(adcxyz_h.nok).bucket * time_bucket
               istatus = tgc_time_to_z(adcxyz(adcxyz_h.nok).bucket,1,1,1,
      +                                Xlocal(3))
+
+              istatus = tgc_drift_velocity(dvel,dummy,dummy)
+              Xlocal(3) = Xlocal(3) - 3.0*tsspar(1).tau*dvel* 1.0e-6
+
 	      istatus = tgc_local_to_global (adcxyz(adcxyz_h.nok).sector,
      +        Xlocal, Xglobal)
 
