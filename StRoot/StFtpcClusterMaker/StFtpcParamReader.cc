@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.cc,v 1.6 2000/11/06 13:42:57 hummler Exp $
+// $Id: StFtpcParamReader.cc,v 1.7 2000/11/14 13:08:26 hummler Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.7  2000/11/14 13:08:26  hummler
+// add charge step calculation, minor cleanup
+//
 // Revision 1.6  2000/11/06 13:42:57  hummler
 // include latest changes in second constructor as well
 //
@@ -74,6 +77,7 @@ StFtpcParamReader::StFtpcParamReader(St_fcl_ampoff *ampoff,
 
   // det table exists only once, just copy
   fcl_det_st *detTable = det->GetTable();
+  mDetTable = detTable; // copy to data member to write parameters back
   mFirstPadrowToSearch = detTable->firstrow  ;
   mLastPadrowToSearch = detTable->lastrow;
   mFirstSectorToSearch = detTable->firstsec;
@@ -225,6 +229,7 @@ StFtpcParamReader::StFtpcParamReader(St_fss_gas *gas,
 
   // det table exists only once, just copy
   fcl_det_st *detTable = det->GetTable();
+  mDetTable = detTable; // copy to data member to write parameters back
   mFirstPadrowToSearch = detTable->firstrow  ;
   mLastPadrowToSearch = detTable->lastrow;
   mFirstSectorToSearch = detTable->firstsec;
@@ -304,6 +309,10 @@ StFtpcParamReader::~StFtpcParamReader()
 	}
     }
 
+  // write back det table entries that have set functions:
+  mDetTable->p_normalized = mNormalizedNowPressure;
+
+  // delete allocated memory
   delete[] mPadtransEField;
   delete[] mPadtransVDrift;
   delete[] mPadtransDeflection;

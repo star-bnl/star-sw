@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.h,v 1.5 2000/08/03 14:39:00 hummler Exp $
+// $Id: StFtpcClusterMaker.h,v 1.6 2000/11/14 13:08:21 hummler Exp $
 // $Log: StFtpcClusterMaker.h,v $
+// Revision 1.6  2000/11/14 13:08:21  hummler
+// add charge step calculation, minor cleanup
+//
 // Revision 1.5  2000/08/03 14:39:00  hummler
 // Create param reader to keep parameter tables away from cluster finder and
 // fast simulator. StFtpcClusterFinder now knows nothing about tables anymore!
@@ -46,7 +49,7 @@ class DetectorReader;
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.5 2000/08/03 14:39:00 hummler Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.6 2000/11/14 13:08:21 hummler Exp $";
    St_fcl_ampoff   *m_ampoff;    //!
    St_fcl_ampslope *m_ampslope;  //!
    St_fcl_timeoff  *m_timeoff;   //!
@@ -65,6 +68,7 @@ class StFtpcClusterMaker : public StMaker {
    TH1F            *m_timebins;    //! timebins 
    TH2F            *m_row_sector;  //! row vs. sector 
    TH2F            *m_npad_nbin;   //! number of pads vs. number of timebins
+   TH2F            *m_csteps;      //! charge step by (6*row)+sector
  public: 
                   StFtpcClusterMaker(const char *name="ftpc_hits");
    virtual       ~StFtpcClusterMaker();
@@ -72,7 +76,7 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.5 2000/08/03 14:39:00 hummler Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.6 2000/11/14 13:08:21 hummler Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker, 1)   //StAF chain virtual base class for Makers
 };
