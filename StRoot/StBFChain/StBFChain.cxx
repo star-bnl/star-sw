@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.367 2003/12/09 23:05:20 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.368 2003/12/12 03:54:39 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1314,7 +1314,10 @@ Int_t StBFChain::Instantiate()
 	    tk->setGuiEnabled(kFALSE);
 	    tk->setMcEnabled(kFALSE);
 	    pars->doStEventInput=kTRUE; // We always want to have this I think?
-	    pars->useSvt=kTRUE; // SVT used in IT but not active. ?? Pre-2001 data, will build only 1 ladder?
+	    pars->doStEventOutput=kTRUE;
+	    pars->baseName="_pars.txt";
+	    pars->useSvt=kTRUE;         // SVT used in IT but not active. ?? 
+	                                // Pre-2001 data, will build only 1 ladder?
 	    if (GetOption("SvtIT")) pars->activeSvt=kTRUE;
 	    if (GetOption("FtpcIT")){
 	      pars->useFtpc=kTRUE;
@@ -1437,10 +1440,12 @@ Int_t StBFChain::Instantiate()
 	    if      (GetOption("Trs"))   tcpdaqMk->SetMode(1); // trs
 	    else if (GetOption("Simu"))  tcpdaqMk->SetMode(2); // daq, no gain
 	    else                         tcpdaqMk->SetMode(0); // daq
+
 	    // DAQ100 or Raw switch options
 	    if ( GetOption("onlcl") )   DMode = DMode | 0x2;  // use the online TPC clusters (DAQ100) info if any
 	    if ( GetOption("onlraw") )  DMode = DMode | 0x1;  // use the TPC raw hit information
 	    tcpdaqMk->SetDAQFlag(DMode);                      // set flag
+
 	    // Correction depending on DAQ100 or not
 	    // bit 0  =   do GAIN_CORRECTION
 	    // bit 1  =   do NOISE_ELIM
@@ -2154,8 +2159,10 @@ void StBFChain::SetTreeOptions()
     treeMk->IntoBranch("dstBranch","dst/.data/dst");
     treeMk->SetBranch("runcoBranch");
   }
-  if (GetOption("Event") && GetOption("EvOut"))
-                             treeMk->IntoBranch("eventBranch","StEvent");
+  if (GetOption("Event") && GetOption("EvOut")){
+    cout << "Will Write StEvent out, treeMk->GetFile() = "  << treeMk->GetFile() << endl;
+    treeMk->IntoBranch("eventBranch","StEvent");
+  }
   if (GetOption("AllEvent")) {
     if (geantMk) {
       treeMk->IntoBranch("geantBranch","geant");
