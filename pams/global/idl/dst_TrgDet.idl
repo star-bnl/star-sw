@@ -26,6 +26,6 @@ struct dst_TrgDet {
   octet          emcHiTower[300];   /* Oct 16 2001                   */
   unsigned long  bunchXing_lo;       /* Jan 10 2002 Jan,Akio,Ullrich  */
   unsigned long  bunchXing_hi;       /* Jan 10 2002 Jan,Akio,Ullrich  */
-  char           BBC[80];            /* Jan 22 2003 Jerome            */
+  unsigned short BBC[80];            /* Jan 22 2003 Jerome            */
 } ;
-/*  Last mod. for dst_TrgDet:   $Date: 2003/01/23 00:02:56 $ */
+/*  Last mod. for dst_TrgDet:   $Date: 2003/01/23 20:53:14 $ */
