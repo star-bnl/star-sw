@@ -10,6 +10,7 @@
 #include "tables/g2t_ftp_hit.h" 
 
 class StMcTrack;
+class StThreeVectorF;
 
 #if !defined(ST_NO_NAMESPACES)
 using namespace std;
@@ -17,7 +18,7 @@ using namespace std;
 
 class StMcFtpcHit : public StMcHit {
 public:
-    StMcFtpcHit(const StThreeVector<float>&,
+    StMcFtpcHit(const StThreeVectorF&,
 	     const float, const float, StMcTrack*);
     StMcFtpcHit(g2t_ftp_hit_st*);
     

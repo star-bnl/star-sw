@@ -1,5 +1,8 @@
-// $Id: StMcEventReadMacro.C,v 1.4 1999/07/23 19:57:26 calderon Exp $
+// $Id: StMcEventReadMacro.C,v 1.5 1999/07/28 20:27:46 calderon Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.5  1999/07/28 20:27:46  calderon
+// Version with SL99f libraries
+//
 // Revision 1.4  1999/07/23 19:57:26  calderon
 // Load StarClassLibrary before loading StMcEvent
 //
@@ -79,10 +82,14 @@ const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/ha
   chain->Init(); // This should call the Init() method in ALL makers
   chain->PrintInfo();
 
-  for (int iev=0;iev<nevents; iev++) {
-    chain->Clear();
-    int iret = chain->Make(); // This should call the Make() method in ALL makers
-    if (iret) break;
+    int istat=0,iev=1;
+    EventLoop: if (iev<=nevents && !istat) {
+	chain->Clear();
+	istat = chain->Make(iev); // This should call the Make() method in ALL makers
+	if (iret) {
+	    cout << "Last Event Processed. Status = " << istat << endl;
+	}
+	iev++; goto EventLoop;
     
     // this next part is just for doing the browser:
     //create browser with name=BName,title=Btitle

@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.3 1999/07/23 14:35:41 calderon Exp $
+// $Id: StAssociator.C,v 1.4 1999/07/28 20:27:45 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.4  1999/07/28 20:27:45  calderon
+// Version with SL99f libraries
+//
 // Revision 1.3  1999/07/23 14:35:41  calderon
 // Updated names of default files and of packages
 //
@@ -38,8 +41,8 @@ const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/ha
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StEvent");
-    gSystem->Load("StEventReaderMaker"); // For use in SL99e
-    //gSystem->Load("StEventMaker"); // For use in SL99f (along with at least 5 other changes)
+    //gSystem->Load("StEventReaderMaker"); // For use in SL99e
+    gSystem->Load("StEventMaker"); // For use in SL99f (along with at least 5 other changes)
     gSystem->Load("StMcEvent");
     gSystem->Load("StMcEventMaker");
     gSystem->Load("StAssociationMaker");
@@ -58,8 +61,8 @@ const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/ha
     ioMaker->SetBranch("dstBranch",0,"r"); //activate Event Branch
 
     // Note, the title "events" is used in the Association Maker, so don't change it.
-    //StEventMaker*       eventReader   = new StEventMaker("events","title");
-    StEventReaderMaker* eventReader   = new StEventReaderMaker("events","title");
+    StEventMaker*       eventReader   = new StEventMaker("events","title");
+    //StEventReaderMaker* eventReader   = new StEventReaderMaker("events","title");
     StMcEventMaker*     mcEventReader = new StMcEventMaker; // Make an instance...
     StAssociationMaker* associator    = new StAssociationMaker;
     StMcAnalysisMaker*  examples      = new StMcAnalysisMaker;
@@ -76,12 +79,15 @@ const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/ha
   
     chain->Init(); // This should call the Init() method in ALL makers
     chain->PrintInfo();
-    
-    for (Int_t iev=0;iev<nevents; iev++) {
-	chain->Clear();
-	int iret = chain->Make(iev); // This should call the Make() method in ALL makers
-	if (iret) break;
 
+    int istat=0,iev=1;
+    EventLoop: if (iev<=nevents && !istat) {
+	chain->Clear();
+	istat = chain->Make(iev); // This should call the Make() method in ALL makers
+	if (iret) {
+	    cout << "Last Event Processed. Status = " << istat << endl;
+	}
+	iev++; goto EventLoop;
     } // Event Loop
 
     TCanvas* myCanvas = examples->mAssociationCanvas;
@@ -103,7 +109,7 @@ const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/ha
     gPad->SetLogy(0);
     examples->coordMcPartner->Draw();
     
-    chain->Finish(); // This should call the Finish() method in ALL makers,
+    //chain->Finish(); // This should call the Finish() method in ALL makers,
                      // comment it out if you want to keep the objects
                      // available at the command line after running
                      // the macro.

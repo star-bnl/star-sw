@@ -19,9 +19,6 @@ using namespace std;
 class StDevice;
 class StTpcHit;
 class StMcTpcHit;
-// #include "StDevice.hh"
-// #include "StEvent/StTpcHit.hh"
-// #include "StMcEvent/StMcTpcHit.hh"
 
 
 class StSubDetector{

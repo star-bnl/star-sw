@@ -1,6 +1,10 @@
 /*************************************************
  *
- * StMcEventMaker.cxx
+ * $Id: StMcEventMaker.cxx,v 1.3 1999/07/28 20:27:42 calderon Exp $
+ * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.3  1999/07/28 20:27:42  calderon
+ * Version with SL99f libraries
+ *
  *
  *************************************************/
 #include <iostream.h>
@@ -12,7 +16,8 @@
 #include "StMcEventMaker.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
-#include "StThreeVector.hh"
+
+#include "StThreeVectorF.hh"
 
 #include "StChain/StChain.h"
 #include "St_DataSet.h"
@@ -99,7 +104,7 @@ void StMcEventMaker::Clear(const char*)
 void StMcEventMaker::PrintInfo() {
     // StMcEventMaker - PrintInfo,
     printf("**************************************************************\n");
-    printf("* $Id: StMcEventMaker.cxx,v 1.2 1999/07/21 19:46:36 calderon Exp $\n");
+    printf("* $Id: StMcEventMaker.cxx,v 1.3 1999/07/28 20:27:42 calderon Exp $\n");
     printf("**************************************************************\n");
 
    
@@ -265,9 +270,9 @@ Int_t StMcEventMaker::Make()
 	  vtemp[vertexTable[0].id - 1].primaryFlag = 1;
 	  mCurrentMcEvent->setPrimaryVertex(v);
 
-	  StThreeVector<float> primVertexPos = v->position();
+	  StThreeVectorF primVertexPos = v->position();
 	 
-	  StThreeVector<float> testVertexPos;
+	  StThreeVectorF testVertexPos;
 	  int nThrownVertices = 0;
 	  for (long ivtx=1; ivtx<NVertices; ivtx++)
 	      {    

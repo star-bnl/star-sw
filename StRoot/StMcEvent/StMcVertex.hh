@@ -6,10 +6,10 @@
 #ifndef StMcVertex_hh
 #define StMcVertex_hh
 #include <string>
-#include "StThreeVector.hh"
 #include "StMcEvent/StMcTrackCollection.hh"
 #include "tables/g2t_vertex.h"  // Need to include a header file for the table!!
 
+class StThreeVectorF;
 class StMcTrack;
 
 class StMcVertex {
@@ -29,7 +29,7 @@ public:
     unsigned int                numberOfDaughters();
     StMcTrack*                  daughter(unsigned int);
     const StMcTrack*            parent();
-    const StThreeVector<float>& position();
+    const StThreeVectorF&       position();
     string                      geantVolume();
     float                       tof();
     int                         geantProcess();
@@ -38,7 +38,7 @@ public:
   
 
     void setParent(StMcTrack* );         
-    void setPosition(const StThreeVector<float>&);       
+    void setPosition(const StThreeVectorF&);       
     void addDaughter(StMcTrack*);
     void setGeantVolume(string);
     void setTof(float);
@@ -47,10 +47,10 @@ public:
 protected:
     
 
-    StMcTrackCollection*   mDaughters;
-    StMcTrack*             mParent;
-    StThreeVector<float>   mPosition;
-    string                 mGeantVolume;
+    StMcTrackCollection* mDaughters;
+    StMcTrack*           mParent;
+    StThreeVectorF       mPosition;
+    string               mGeantVolume;
     float                mTof;
     int                  mGeantProcess;
 };
@@ -68,7 +68,7 @@ inline StMcTrack* StMcVertex::daughter(unsigned int i)
 
 inline const StMcTrack* StMcVertex::parent(){ return mParent; }          
 
-inline const StThreeVector<float>& StMcVertex::position(){ return mPosition; }        
+inline const StThreeVectorF& StMcVertex::position(){ return mPosition; }        
 
 inline string StMcVertex::geantVolume(){ return mGeantVolume; }   
 
