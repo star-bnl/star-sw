@@ -11,7 +11,7 @@ use File::Basename;
 #print "ROOTSYS = $ROOTSYS rootcint = $rootcint\n";
 my $Cint_cxx = shift;
 (my $Cint_h  = $Cint_cxx) =~ s/_Cint\.cxx/_Cint\.h/g;
-my $DirName = dirname($Cint_cxx); print "DirName = $DirName\n";
+my $DirName = dirname($Cint_cxx);# print "DirName = $DirName\n";
 my $LinkDef = $DirName . "/" . "LinkDef.h"; 
 print "Cint Files :", $Cint_cxx, ",", $Cint_h,",",$LinkDef,"\n";
 my $sources  = shift; #print "sources =", $sources,"\n";
