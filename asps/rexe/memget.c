@@ -1,10 +1,10 @@
 #include <stdlib.h>
 /*
- * $Id: memget.c,v 1.1 1998/12/12 00:39:47 fisyak Exp $
+ * $Id: memget.c,v 1.2 1999/01/22 13:55:15 fisyak Exp $
  *
  * $Log: memget.c,v $
- * Revision 1.1  1998/12/12 00:39:47  fisyak
- * Temporal version from gstar
+ * Revision 1.2  1999/01/22 13:55:15  fisyak
+ * clean up
  *
  * Revision 1.4  1998/08/03 17:23:56  didenko
  * correction for NT version by Faine
