@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.125 1999/10/12 14:05:44 fine Exp $
+# $Id: MakePam.mk,v 1.126 1999/10/12 21:56:07 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.126  1999/10/12 21:56:07  fisyak
+# option -H in stic does work anymore, but it is not needed
+#
 # Revision 1.125  1999/10/12 14:05:44  fine
 # assert for St_Table::operator[] fixed
 #
@@ -503,10 +506,10 @@ include $(FILES_D)
 #--------  idm, idl --------
   ifneq (,$(FILES_ALL_TAB))
 $(FILES_TAH) : $(GEN_INC)/%.h : %.idl
-	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -H -q $(STEM).idl; \
+	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -q $(STEM).idl; \
         $(CP) $(STEM).h $(GEN_INC)/$(STEM).h
 $(FILES_TAI) : $(GEN_INC)/%.inc : %.idl
-	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -H -q $(STEM).idl; \
+	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -q $(STEM).idl; \
         $(CP) $(STEM).inc $(GEN_INC)/$(STEM).inc
     ifndef NOROOT
 #------------------------------------------- ---------------------------------
