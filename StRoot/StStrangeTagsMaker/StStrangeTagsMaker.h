@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.h,v 1.7 2003/09/10 19:47:34 perev Exp $
+ * $Id: StStrangeTagsMaker.h,v 1.8 2004/07/26 16:02:33 lbarnby Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.h,v $
+ * Revision 1.8  2004/07/26 16:02:33  lbarnby
+ * Added Xibar, Omega(bar). Introduce max pt tags.
+ *
  * Revision 1.7  2003/09/10 19:47:34  perev
  * ansi corrs
  *
@@ -64,9 +67,10 @@ private:
     Float_t         mMasspi2;
     Float_t         mMasspr2;
     Float_t         mMassla2;
+    Float_t         mMasska2;
     
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StStrangeTagsMaker.h,v 1.7 2003/09/10 19:47:34 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StStrangeTagsMaker.h,v 1.8 2004/07/26 16:02:33 lbarnby Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     ClassDef(StStrangeTagsMaker,0)   // macro for rootcint
 };
