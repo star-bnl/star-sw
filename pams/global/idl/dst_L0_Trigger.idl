@@ -1,0 +1,13 @@
+/* dst_L0_Trigger.idl      */
+/* Table: dst_L0_Trigger   */
+
+ struct dst_L0_Trigger {
+  unsigned short  TriggerActionWd;    /* Trigger Action Word        */
+  unsigned short  TriggerWd;          /* Trigger Word               */
+  long            CPA[32];            /* Coarse Pixel Array         */
+  long            MWC_CTB_mul;        /* MWC/CTB multiplicity       */
+  long            MWC_CTB_dipole;     /* MWC/CTB dipole analysis    */
+  long            MWC_CTB_topology;   /* MWC/CTB spc. topology      */
+  long            MWC_CTB_moment;     /* MWC/CTB moment analysis    */
+ };
+/*  Last mod. for dst_L0_Trigger:   $Date: 1998/06/03 13:51:59 $ */
