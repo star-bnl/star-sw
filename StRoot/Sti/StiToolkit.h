@@ -47,7 +47,7 @@ class 	StiTrackMerger;
 class   StiIOBroker;
 class   StiDisplayManager;
 class   StAssociationMaker;
-class   Parameter;
+class   EditableParameter;
 
 /** 
  * @class StiToolkit
@@ -61,8 +61,8 @@ public:
   virtual Factory<StiMcTrack> * getMcTrackFactory()=0;
   virtual Factory<StiKalmanTrackNode> * getTrackNodeFactory()=0;
   virtual Factory<StiDetector>  * getDetectorFactory()=0;
-  virtual Factory< StiCompositeTreeNode<StiDetector> >  * getDetectorNodeFactory()=0;
-  virtual Factory<Parameter>  * getParameterFactory()=0;
+  virtual Factory<StiCompositeTreeNode<StiDetector> >  * getDetectorNodeFactory()=0;
+  virtual Factory<EditableParameter>  * getParameterFactory()=0;
   virtual Factory< Filter<StiTrack>   >  * getTrackFilterFactory()=0;
   
   // common object containers 

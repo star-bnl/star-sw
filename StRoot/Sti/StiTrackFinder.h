@@ -6,6 +6,7 @@ class StMcEvent;
 class StiHit;
 class StiTrack;
 class StiVertexFinder;
+class EditableParameters;
 template<class Filtered>class Filter;
 
 enum StiFindStep {StepByLayer=1,StepByDetector=2 };
@@ -70,6 +71,7 @@ public:
   /// Get Tracking Mode used for Interactive Tracking
   virtual StiFindStep getTrackingMode() const = 0;
 
+  virtual EditableParameters * getParameters()=0;
 };
 
 

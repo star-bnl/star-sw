@@ -454,7 +454,7 @@ inline void StiKalmanTrackNode::setCurvature(double curvature)
 
 inline  void StiKalmanTrackNode::initialize(StiHit*h,double alpha, double eta, double curvature, double tanl)
 {
-  cout << "StiKalmanTrackNode::initialize(...) -I- Started"<<endl;
+  //cout << "StiKalmanTrackNode::initialize(...) -I- Started"<<endl;
   reset();
   _hit     = h;
   _refX    = h->detector()->getPlacement()->getNormalRadius();
@@ -468,14 +468,13 @@ inline  void StiKalmanTrackNode::initialize(StiHit*h,double alpha, double eta, d
   _p3      = curvature;
   _p4      = tanl;
   _sinCA   = _p3*_x-_p2;
-  cout << "StiKalmanTrackNode::initialize(...) -I- What?"<<endl;
   if (fabs(_sinCA)>1.) 
     {
       cout << "SKTN::initialize() -E- fabs(_sinCA)>1."<<endl;
       throw runtime_error("SKTN::initialize() - ERROR - fabs(_sinCA)>1.");
     }
   _cosCA   = sqrt(1.-_sinCA*_sinCA);
-  cout << "StiKalmanTrackNode::initialize(...) -I- Done"<<endl;
+  //cout << "StiKalmanTrackNode::initialize(...) -I- Done"<<endl;
 };
 
 

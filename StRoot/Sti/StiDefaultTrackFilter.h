@@ -2,7 +2,8 @@
 #define StiDefaultTrackFilter_H_INCLUDED 1
 
 #include "StiTrack.h"
-#include "EditableFilter.h"
+#include "Base/EditableFilter.h"
+#include "Base/Parameter.h"
 
 class StiDefaultTrackFilter : public EditableFilter<StiTrack>
 {

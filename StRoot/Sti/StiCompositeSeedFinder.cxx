@@ -35,19 +35,19 @@ StiCompositeSeedFinder::StiCompositeSeedFinder(const string&             name,
   build();
 }
 
+///Destructor 
+///Nothing to do because the base class takes care of deleting 
+///the vector.
 StiCompositeSeedFinder::~StiCompositeSeedFinder()
 {
-  cout <<"StiCompositeSeedFinder::~StiCompositeSeedFinder() - INFO - Started"<<endl;
-  //Destroy seed finders
-  for (SeedFinderVec::iterator it=_trackSeedFinders.begin(); it!=_trackSeedFinders.end(); ++it) 
-    delete *it;
+  cout <<"StiCompositeSeedFinder::~StiCompositeSeedFinder() -I- Started/Done"<<endl;
 }
 
 bool StiCompositeSeedFinder::hasMore()
 {
   _messenger <<"StiCompositeSeedFinder::hasMore() - INFO - Started"<<endl;
   bool has_more;
-  if (_currentTrackSeedFinder != _trackSeedFinders.end())
+  if (_currentTrackSeedFinder != end())
     has_more = (*_currentTrackSeedFinder)->hasMore();
   else
     has_more = false;
@@ -70,9 +70,9 @@ void StiCompositeSeedFinder::reset()
 {
   _messenger <<"StiCompositeSeedFinder::reset() - INFO - Started"<<endl;
   //reset all!
-  for (SeedFinderVec::iterator it=_trackSeedFinders.begin(); it!=_trackSeedFinders.end(); ++it)
+  for (vector<StiSeedFinder*>::iterator it=begin(); it!=end(); ++it)
     (*it)->reset();
-  _currentTrackSeedFinder=_trackSeedFinders.begin();
+  _currentTrackSeedFinder = begin();
   _messenger <<"StiCompositeSeedFinder::reset() - INFO - Done"<<endl;
 }
 
@@ -92,11 +92,6 @@ void StiCompositeSeedFinder::build()
 						  _hitContainer,
 						  _detectorContainer);
   //Now add detectors to the container
-  //const StiIOBroker* broker = StiToolkit::instance()->getIOBroker();
-  //const vector<unsigned int>& thePadrows = broker->ltsfPadrows();
-  //const vector<unsigned int>& theSectors = broker->ltsfSectors();
-  //char szBuf[100];
-
   // This will put all known rows in the search loop
   StiMasterDetectorBuilder * builder = StiToolkit::instance()->getDetectorBuilder();
   if (!builder)
@@ -114,24 +109,7 @@ void StiCompositeSeedFinder::build()
 	  trackSeedFinder->addLayer(detector);
 	}
     }
-  /*
-  for (vector<unsigned int>::const_iterator padrow=thePadrows.begin(); 
-       padrow!=thePadrows.end(); 
-       ++padrow) 
-    {
-      for (vector<unsigned int>::const_iterator sector=theSectors.begin(); 
-	   sector!=theSectors.end();
-	   ++sector) 
-	{
-	  sprintf(szBuf, "Tpc/Padrow_%d/Sector_%d",static_cast<int>(*padrow), static_cast<int>(*sector));
-	  cout<<szBuf<<endl;
-	  StiDetector* layer = StiToolkit::instance()->getDetectorFinder()->findDetector(szBuf);
-	  if (!layer) 
-	    throw runtime_error("StiCompositeSeedFinder::build() - FATAL - StiDetector *layer==0");
-	  trackSeedFinder->addLayer(layer);
-	}
-	}*/
-  _trackSeedFinders.push_back(trackSeedFinder);
+  add(trackSeedFinder);
   reset();
   _messenger<<"StiCompositeSeedFinder::build() - INFO - Done"<<endl;
 }

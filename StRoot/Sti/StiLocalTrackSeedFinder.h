@@ -20,8 +20,9 @@ using std::vector;
 class StiHitContainer;
 class Sti2HitComboFilter;
 class StiDetector;
+#include "Sti/Base/EditableParameters.h"
 
-class StiLocalTrackSeedFinder : public StiTrackSeedFinder
+class StiLocalTrackSeedFinder : public StiTrackSeedFinder, public EditableParameters
 {
 public:
   StiLocalTrackSeedFinder(const string& name,
@@ -37,7 +38,7 @@ public:
   virtual bool hasMore();
   virtual StiKalmanTrack* next();
   virtual void reset();
-  
+  void initialize();
   virtual void addLayer(StiDetector*);
   virtual void print() const;
   
@@ -65,17 +66,17 @@ protected:
   double mDeltaY;
   double mDeltaZ;
   //define the number of points to connect
-  unsigned int mSeedLength;
+  int mSeedLength;
   //define search window in the next layer when extending a coonection of points
   double mExtrapDeltaY;
   double mExtrapDeltaZ;
   //Count how many hits we've skipped in extrapolation
-  unsigned int mSkipped;
+  int mSkipped;
   //Define the max number we can skip
-  unsigned int mMaxSkipped;
+  int mMaxSkipped;
   //define the Min/Max number of points to extrapolate
-  unsigned int mExtrapMinLength;
-  unsigned int mExtrapMaxLength;
+  int mExtrapMinLength;
+  int mExtrapMaxLength;
   //Use the origin to calculate helix?
   bool mUseOrigin;
   vector<StiHit*> mSeedHitVec;
