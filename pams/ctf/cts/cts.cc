@@ -16,8 +16,8 @@
 //  Function definitions
 //
 #define  rg32_  F77_NAME(rg32,RG32)
-#define  rndm_  F77_NAME(rndm,RNMD)
-extern "C" float type_of_call rg32_() ;
+#define  rndm_  F77_NAME(rndm,RNDM)
+extern "C" float type_of_call rg32_(int) ;
 extern "C" float type_of_call rndm_(int) ;
 
 extern "C" void    MessageOut( const char *msg );
@@ -389,7 +389,7 @@ long cts_detector_response (
 //
       float time = mhit[i_hit].tof + mpara->delay * Length ;
       for ( float tt=0 ; tt <= 0 ; tt = time ) 
-         tt = time + rg32_() * mpara->time_res * sqrt(Length) ;
+         tt = time + rg32_(1) * mpara->time_res * sqrt(Length) ;
 //
 //        Keep real time of fastest particle
 //
@@ -536,7 +536,7 @@ void cts_fill_raw (
 //
 //     Adc 
 //
-      offset = slat[index].offset_adc + rg32_()* slat[index].ods_adc ;
+      offset = slat[index].offset_adc + rg32_(1)* slat[index].ods_adc ;
       raw[i_raw].adc = (int)((float)mslat[i_slat].n_phe * mpara->nphe_to_adc) 
                        + offset ;
       if ( raw[i_raw].adc > mpara->adc_overflow ) 
@@ -545,7 +545,7 @@ void cts_fill_raw (
 //
 //     Tdc
 //
-      offset = slat[index].offset_tdc + rg32_()* (float)slat[index].ods_tdc ;
+      offset = slat[index].offset_tdc + rg32_(1)* (float)slat[index].ods_tdc ;
       raw[i_raw].tdc = mslat[i_slat].time / slat[index].cc_tdc + offset ;
       mslat[i_slat].tdc = raw[i_raw].tdc ;
 //
@@ -568,8 +568,8 @@ void cts_fill_raw (
 
       raw[index].i_phi = slat[index].i_phi ;
       raw[index].i_eta = slat[index].i_eta ;
-      raw[index].adc   = slat[index].offset_adc + rg32_()* slat[index].ods_adc ;
-      raw[index].tdc   = slat[index].offset_tdc + rg32_()* slat[index].ods_tdc ;
+      raw[index].adc   = slat[index].offset_adc + rg32_(1)* slat[index].ods_adc ;
+      raw[index].tdc   = slat[index].offset_tdc + rg32_(1)* slat[index].ods_tdc ;
    }
 //
 //   Set number of slats with raw data
@@ -803,7 +803,7 @@ void cts_physical_noise ( long           i_phi,        long            i_eta,
 //
 //   Store noise info now
 //
-   mslat[i_slat].n_phe += (1.F+rg32_()) * n_phe ;
+   mslat[i_slat].n_phe += (1.F+rg32_(1)) * n_phe ;
 //
 //   Time now
 //
