@@ -1,5 +1,8 @@
-// $Id: tpcdraw.C,v 1.9 1999/11/16 19:28:08 snelling Exp $
+// $Id: tpcdraw.C,v 1.10 1999/11/20 23:45:51 snelling Exp $
 // $Log: tpcdraw.C,v $
+// Revision 1.10  1999/11/20 23:45:51  snelling
+// Used Table member function Draw instead of making TableNtuple
+//
 // Revision 1.9  1999/11/16 19:28:08  snelling
 // Changed kOption to "Option" in chain->GetOption()
 //
@@ -224,12 +227,9 @@ int DrawPixels(Text_t* varexp, Text_t* selection, Text_t* options) {
   else { cout << "Warning: adcxyz table header does not exist " << endl; return kStWarn; }
   if (!ptadcxyz) { cout << "Warning: adcxyz table does not exist " << endl; return kStWarn; }
 
-  St_TableNtuple *adcxyz = new St_TableNtuple(*phtfc);
-  adcxyz.Fill(*phtfc);
-  // define plot options
-  adcxyz.SetMarkerStyle(26);
-  adcxyz.SetMarkerColor(4);
-  adcxyz.Draw(varexp,selection,options);
+  TH1* pPixelHist = phtfc->Draw(varexp,selection,options);
+  pPixelHist->SetMarkerStyle(26);
+  pPixelHist->SetMarkerColor(4);
 
   return kStOK;
 }
@@ -251,12 +251,9 @@ int DrawHits(Text_t* varexp, Text_t* selection, Text_t* options){
   else { cout << "Error: tphit table header does not exist " << endl; return kStWarn; }
   if (!pttphit) { cout << "Error: tphit table does not exist " << endl; return kStWarn; }
 
-  St_TableNtuple *tphit = new St_TableNtuple(*phtcl);
-  tphit.Fill(*phtcl);
-  // define plot options
-  tphit.SetMarkerStyle(20);
-  tphit.SetMarkerColor(2);
-  tphit.Draw(varexp,selection,options);
+  TH1* pHitHist = phtcl->Draw(varexp,selection,options);
+  pHitHist->SetMarkerStyle(20);
+  pHitHist->SetMarkerColor(2);
 
   return kStOK;
 }
@@ -277,12 +274,9 @@ int DrawGeantHits(Text_t* varexp, Text_t* selection, Text_t* options) {
   else { cout << "Warning: g2t tpc hit table header does not exist " << endl; return kStWarn; }
   if (!ptg2t_tpc_hit) { cout << "Warning: g2t tpc hit table does not exist " << endl; return kStWarn; }
 
-  St_TableNtuple *g2t_tpc_hit = new St_TableNtuple(*phg2t);
-  g2t_tpc_hit.Fill(*phg2t);
-  // define plot options
-  g2t_tpc_hit.SetMarkerStyle(24);
-  g2t_tpc_hit.SetMarkerColor(5);
-  g2t_tpc_hit.Draw(varexp,selection,options);
+  TH1* pGeantHist = phg2t->Draw(varexp,selection,options);
+  pGeantHist->SetMarkerStyle(24);
+  pGeantHist->SetMarkerColor(3);
 
   return kStOK;
 }
