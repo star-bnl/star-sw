@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.3 2000/09/15 21:19:10 fisyak Exp $
+// $Id: StHistUtil.cxx,v 2.4 2001/04/25 14:17:16 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.4  2001/04/25 14:17:16  genevb
+// Reduced line width for newer Root
+//
 // Revision 2.3  2000/09/15 21:19:10  fisyak
 // HPUX does not like delete [] newHist
 //
@@ -288,7 +291,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             obj->Draw("box");
           } else {
 	    TH1F* tempHist = (TH1F*) obj;
-	    tempHist->SetLineWidth(5);
+	    tempHist->SetLineWidth(2);
 	    tempHist->Draw();
 	  }
 	  if (gPad) gPad->Update();
