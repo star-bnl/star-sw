@@ -40,8 +40,6 @@
      gSystem->Load("St_svt");
 //     gSystem->Load("global.sl");
 //     gSystem->Load("St_global");
-     gSystem->Load("ftpc.sl");
-     gSystem->Load("St_ftpc");
      gSystem->Load("StChain");
 
      gSystem->Load("St_srs_Maker");
@@ -148,6 +146,7 @@
 
   // Make HTML docs for the "plain" text files those are not in the dictionaries
   cout << " Makeing HTML's for macros" << endl;
+  html.Convert("./SubDetectorView.C","How to create sub-detector view");
   html.Convert("./StarFromWeb.C","Access to ROOT/GEANT geometry database");
   html.Convert("./GetEvent.C","An example of the reading MDC2 dst events");
   html.Convert("./QA_Hist_Draw.C","An example of the plotting postscript file of the MDC2 histograms");
