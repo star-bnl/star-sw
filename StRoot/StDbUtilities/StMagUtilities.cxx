@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.34 2002/09/18 22:50:33 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.35 2003/06/27 18:41:14 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,13 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.35  2003/06/27 18:41:14  jhthomas
+ * Add new function called FixSpaceChargeDistortion( ,,,,, )
+ * It can be used to convert the old (Uniform) space charge corrections to
+ * the new (1/R**2) space charge corrections.  This correction can be
+ * applied to individual track momenta on the microDSTs and it does not
+ * require a re-production of the data to get the 1/R**2 spacecharge corrections.
+ *
  * Revision 1.34  2002/09/18 22:50:33  jhthomas
  * Set default space charge density to zero.  Time dependent values come from DB.
  *
@@ -109,9 +116,16 @@ B field settings and E field settings.  Even reversed fields.
 <p>
 
 An enumerated argument provided at the time of instantiation selects
-a constant field (map=1) or the interpolation grid (map=2).  Or
-the values may be taken from the DataBase by using a time stamp
-and the appropriate style of instantiation (usually done in the chain).
+a constant magnetic field (value=1) or the measured magnetic field (value=2)
+at a field setting that you select manually.  Alternatively, you can use the
+database to determine the magnetic field setting but you must then provide a
+a time stamp and use a different instantiation (this is usually done in the chain).
+
+The enumerations for the manual settings are:
+enum   EBField  { kUndefined = 0, kConstant = 1, kMapped = 2, kChain = 3 } ;
+"kConstant = 1" means you wish to work with a constant, uniform, field.
+"kMapped = 2"   means you want to read values from the measured magnet maps. 
+The other enumerations are undefined and reserved for future expansion.
 
 <p>
 
@@ -164,7 +178,10 @@ To do:  <br>
 */
 
 #include "TFile.h"
+#include "TCanvas.h"
 #include "TMatrixD.h"
+#include "TGraphErrors.h"
+#include "TF1.h"
 #include "StMagUtilities.h"
 #include "StTpcDb/StTpcDb.h"
 #include "tables/St_MagFactor_Table.h"
@@ -297,6 +314,7 @@ void StMagUtilities::CommonStart ( Int_t mode, StTpcDb* dbin, TDataSet* dbin2 )
   if ( fSpaceChargeR2 != 0 )  // Get SpaceCharge so it can be printed, below.
     {
       SpaceChargeR2 = fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ; 
+      SpaceChargeR2 *= 0.525 ; // Temporary until the DB has a new entry to cover this case
     }
   else
     {
@@ -1218,6 +1236,7 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
     {
       fSpaceChargeR2 =  StDetectorDbSpaceCharge::instance();
       SpaceChargeR2  =  fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ;
+      SpaceChargeR2 *= 0.525 ; // Temporary until the DB has a new entry to cover this case
     }
   
   // Subtract to Undo the distortions
@@ -1541,7 +1560,7 @@ void StMagUtilities::Interpolate3DBfield( const Float_t r, const Float_t z, cons
 
   fscale = 0.001*gFactor*gRescale ;               // Scale STAR maps to work in kGauss, cm
 
-  const   Int_t ORDER = 1 ;                      // Linear interpolation = 1, Quadratic = 2   
+  const   Int_t ORDER = 1 ;                       // Linear interpolation = 1, Quadratic = 2   
   static  Int_t ilow, jlow, klow ;
   Float_t save_Br[ORDER+1],   saved_Br[ORDER+1] ;
   Float_t save_Bz[ORDER+1],   saved_Bz[ORDER+1] ;
@@ -1735,11 +1754,182 @@ void StMagUtilities::Search( Int_t N, Float_t Xarray[], Float_t x, Int_t &low )
 }
 
 
+//________________________________________
 
+/// Convert from the old (Uniform) space charge correction to the new (1/R**2) space charge correction. 
 
+void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_t x[3], const Float_t p[3], 
+					   const Prime PrimaryOrGlobal, Float_t x_new[3], Float_t p_new[3],
+		         const unsigned int RowMask1 = 0xFFFFFF00 , const unsigned int RowMask2 = 0x1FFFFF,
+                                                                        const Float_t VertexError = 0.0200 )
+// Applicable to 200 GeV Au+Au data that is on the P02ge (and other) microDSTs.
+// Given the charge and momentum of a particle and a point on the circular path described by the particle , 
+// this function returns the new position of the point (cm) and the new momentum of the particle (GeV).  This 
+// is done by undoing the old space charge corrections and then applying the new space charge corrections.
+// 
+// Input x[3], p[3] and return x_new[3], p_new[3].        x[3] in cm and p[3] in GeV.
+//   
+// The program works by calculating the hits on the TPC rows for
+// the input track, distorts the hits according to the new presciption, and then refits the new hits to find
+// the new track parameters.  If the track is a primary track (PrimaryOrGlobal == 0) then x[3] is assumed to
+// be the vertex and it is included in the refit.  If the track is a global track (PrimaryOrGlobal == 1) then
+// x[3] is assumed to lie somewhere (anywhere) on the track but it is not included in the fit.  For a global
+// track, x[3] must lie on the track because it is used to determine where the track flies (ie. angle phi).
+//
+// PrimaryOrGlobal = 0   for a primary track.
+// PrimaryOrGlobal = 1   for a global track.  You can also use the "Prime" enumeration in the .h file.
+//
+// The code attempts to be as realistic as possible when it does the refit.  Therefore, it asks you for
+// the hit masks from the microDSTs.  These masks tell you which TPC rows were used in the original track fit.
+// For future reference, the masks come in two words.  The first word covers TPC rows 1-24 and the second 
+// word covers rows 25-45.  The first 8 bits of the first word are reserved for the FTPC and therefore
+// 0xFFFFFF00, 0x1FFFFF represent all 45 rows of the TPC.
+//
+// VertexError is quoted in cm (RMS). It is for experts.  If you are working with primary tracks, the vertex
+// is included in the fit.  The true error bar is multiplcity dependent.  (sigma**2 increase linearly with mult).
+// So you can calculate this, external to the function, and then work with a realistic vertex error bar if
+// you wish to do it.  200 microns error is a good average value for central Au-Au events.
 
+{
 
+  x_new[0] = x[0] ; x_new[1] = x[1] ; x_new[2] = x[2] ;          // Default is to do nothing
+  p_new[0] = p[0] ; p_new[1] = p[1] ; p_new[2] = p[2] ;
 
+  // Return default values if passed a whacko input value (i.e. infinite or NaN)
+  if ( finite((double)Charge)*finite(x[0])*finite(x[1])*finite(x[2])*finite(p[0])*finite(p[1])*finite(p[2]) == 0 ) return ;
+
+  const Int_t   INNER = 13 ;               // Number of TPC rows in the inner sectors 
+  const Int_t   ROWS  = 45 ;               // Total number of TPC rows per sector (Inner + Outer)
+  const Float_t IFCRadius  =  47.45 ;      // Radius of the Inner Field Cage
+  const Float_t TestRadius =  77.00 ;      // A random test radius inside the TPC to compare which way the track is going
+
+  Int_t    ChargeB ;
+  Float_t  B[3], Rotation, Direction, xx[3], xxprime[3] ;
+  Double_t Xtrack[ROWS], Ytrack[ROWS], Ztrack[ROWS] ;
+  Double_t Xtrack1[ROWS], Ytrack1[ROWS], Ztrack1[ROWS] ;
+  Double_t R[ROWS], dX[ROWS], dY[ROWS], C0, X0, Y0, R0, Pt, R2, theta, theta0, DeltaTheta ;
+  Double_t Xprime[ROWS+1], Yprime[ROWS+1], eX[ROWS+1], eY[ROWS+1] ;  // Extra index is to accomodate the vertex in the fit for primaries
+ 
+  BField(x,B) ;
+  ChargeB  = Charge * TMath::Sign((int)1,(int)(B[2]*1000)) ;
+  Pt = TMath::Sqrt( p[0]*p[0] + p[1]*p[1] ) ;
+  R0 = TMath::Abs( 1000.0 * Pt / ( 0.299792 * B[2] ) ) ;     // P in GeV, R in cm, B in kGauss
+  X0 = x[0] + ChargeB * p[1] * R0 / Pt ;
+  Y0 = x[1] - ChargeB * p[0] * R0 / Pt ; 
+  Rotation = TMath::Sign( 1.0, (x[0]-X0)*p[1] - (x[1]-Y0)*p[0] ) ; 
+
+  for ( Int_t i = 0 ; i < ROWS ; i++ )
+    {
+      if ( i < INNER )  R[i] = 60.0 + i*4.96666 ;           // Not correct because TPC rows aren't circles ... but we dont' care
+      else              R[i] = 127.195 + (i-INNER)*2.0 ;
+    }
+
+  if (Y0 == 0.0)  Direction = TMath::Sign(1.0,p[1]) ;
+  else
+    {
+      Direction = 1.0 ;
+      R2 = TestRadius * TestRadius ;
+      C0 = ( R2 - R0*R0 + X0*X0 + Y0*Y0 ) ;                                // Intermediate constant
+      Double_t X1 = 0.5 * ( C0*X0 - TMath::Sqrt( TMath::Abs( C0*C0*X0*X0 - (C0*C0 - 4*Y0*Y0*R2) * (X0*X0+Y0*Y0) ) ) ) / (X0*X0 + Y0*Y0) ;
+      Double_t Y1 = ( R2 - R0*R0 - 2*X0*X1 + X0*X0 + Y0*Y0 ) / ( 2 * Y0 ) ;
+      Double_t X2 = 0.5 * ( C0*X0 + TMath::Sqrt( TMath::Abs( C0*C0*X0*X0 - (C0*C0 - 4*Y0*Y0*R2) * (X0*X0+Y0*Y0) ) ) ) / (X0*X0 + Y0*Y0) ;
+      Double_t Y2 = ( R2 - R0*R0 - 2*X0*X2 + X0*X0 + Y0*Y0 ) / ( 2 * Y0 ) ;
+      if ( X2*p[0] +  Y2*p[1]  <  X1*p[0] + Y1*p[1] ) Direction = -1.0 ;   // Test which of two directions the particle goes on the circle
+    }
+  
+  theta0    = TMath::ATan2( (x[1]-Y0) , (x[0]-X0) ) ;  // Assume that x[3] is the vertex if its a primary track
+  Xprime[0] = theta0 ;
+  Yprime[0] = 0.0 ;
+  eX[0] = 0.5 / R0 ;
+  eY[0] = VertexError ;    // In centimeters.  GVB studies suggest average vertex resolution 2x worse than TPC point
+
+  Int_t index = -1 ;
+  unsigned int OneBit = 1 ;
+  for ( Int_t i = 0 ; i < ROWS ; i++ )
+    {
+      if ( ( i < 24 ) && ( ( RowMask1 & OneBit<<(i+8) ) == 0 ) ) continue ;
+      if ( ( i >= 24 ) && ( ( RowMask2 & OneBit<<(i-24) ) == 0 ) ) continue ;
+      index++ ;
+      C0 = ( R[i]*R[i] - R0*R0 + X0*X0 + Y0*Y0 ) ;     // Intermediate constant
+      if (Y0 == 0.0) Xtrack[index]  =  0.5 * C0 / X0 ;
+      else           Xtrack[index]  =  0.5*( C0*X0 + Direction*TMath::Sqrt( TMath::Abs( C0*C0*X0*X0 - (C0*C0-4*Y0*Y0*R[i]*R[i])*(X0*X0+Y0*Y0) )) ) 
+		                     / (X0*X0+Y0*Y0) ;
+      if (Y0 == 0.0) Ytrack[index]  =  Direction * TMath::Sqrt( TMath::Abs( R[i]*R[i] - Xtrack[index]*Xtrack[index] ) ) ;
+      else           Ytrack[index]  =  ( R[i]*R[i] - R0*R0 - 2*X0*Xtrack[index] + X0*X0 + Y0*Y0 ) / ( 2 * Y0 ) ;
+      DeltaTheta  =  TMath::ATan2(x[1]-Y0,x[0]-X0) - TMath::ATan2(Ytrack[index]-Y0,Xtrack[index]-X0) ;
+      while ( DeltaTheta < -1*TMath::Pi() ) DeltaTheta += TMath::TwoPi() ; 
+      while ( DeltaTheta >=   TMath::Pi() ) DeltaTheta -= TMath::TwoPi() ; 
+      Ztrack[index]  =   x[2] - Rotation*DeltaTheta*R0*p[2] / Pt ;
+      xx[0] = Xtrack[index] ; xx[1] = Ytrack[index] ; xx[2] = Ztrack[index] ;
+      UndoSpaceChargeDistortion(xx,xxprime) ;
+      xx[0] = Xtrack[index] - (xxprime[0]-xx[0]) ; xx[1] = Ytrack[index] - (xxprime[1]-xx[1]) ; xx[2] = Ztrack[index] - (xxprime[2]-xx[2]) ;
+      UndoSpaceChargeR2Distortion(xx,xxprime) ;
+      Xtrack1[index] = xxprime[0] ; Ytrack1[index] = xxprime[1] ; Ztrack1[index] = xxprime[2] ;
+      theta = TMath::ATan2( (Ytrack[index]-Y0) , (Xtrack[index]-X0) ) ; // Note (theta-theta0) must stay in range -pi,pi 
+      while ( (theta - theta0) <  -1*TMath::Pi() )   theta = theta + 2*TMath::Pi() ;
+      while ( (theta - theta0) >=    TMath::Pi() )   theta = theta - 2*TMath::Pi() ;
+      dX[index] = Xtrack1[index] - Xtrack[index] ;
+      dY[index] = Ytrack1[index] - Ytrack[index] ;
+      Xprime[index+1] = theta ;          // First location in these arrays used for the vertex if its a primary track
+      Yprime[index+1] = dY[index]*TMath::Sin(theta) + dX[index]*TMath::Cos(theta) ;
+      eX[index+1] = 0.5 / R0 ;
+      eY[index+1] = 0.0100 ;
+    }
+  if ( index == -1 ) return ;
+
+  TGraphErrors gre(index-PrimaryOrGlobal+2,&Xprime[PrimaryOrGlobal],&Yprime[PrimaryOrGlobal],&eX[PrimaryOrGlobal],&eY[PrimaryOrGlobal]) ;
+  TF1 FIT("myFIT", "[0] + [1]*sin(x) + [2]*cos(x)" );
+  FIT.SetParameter( 0, 0. );  
+  FIT.SetParameter( 1, 0. );  
+  FIT.SetParameter( 2, 0. );  
+  gre.Fit("myFIT","NQ") ;
+  /*
+  // Begin debugging plots
+  gre.Fit("myFIT","Q") ;  // Comment out previous gre.fit in order to see the fit on the plots
+  TCanvas* c1 = new TCanvas("A Simple Fit","The Fit", 250, 10, 700, 500) ;
+  c1  -> cd() ;
+  gre.Draw("A*") ;
+  c1  -> Update() ;
+
+  TCanvas* c2  = new TCanvas("The circles are OK","The circles ", 250, 800, 700, 500) ;
+  TGraph* gra  = new TGraph(index+1,Xtrack,Ytrack) ;
+  c2  -> cd() ;
+  gra -> SetMaximum(200) ;
+  gra -> SetMinimum(-200) ;
+  gra -> Draw("A*") ;  // Have to draw twice in order to get the Axis (?)
+  gra -> GetXaxis() -> SetLimits(-200.,200.) ;
+  gra -> Draw("A*") ;
+  c2  -> Update() ;
+  // End debugging plots
+  */
+  Double_t X0_new  =  X0 + FIT.GetParameter( 2 ) ;
+  Double_t Y0_new  =  Y0 + FIT.GetParameter( 1 ) ;
+  Double_t R0_new  =  R0 + FIT.GetParameter( 0 ) ;  
+  Double_t Pt_new  =  TMath::Abs( R0_new * 0.299792 * B[2] / 1000. ) ;     // P in GeV, R in cm, B in kGauss
+
+  if ( TMath::Sqrt( x[0]*x[0]+x[1]*x[1] ) <= IFCRadius ) 
+    {  x_new[0] = x[0] ;  x_new[1] = x[1] ;  x_new[2] = x[2] ; } 
+  else
+    {
+      UndoSpaceChargeDistortion(x,xxprime) ;
+      xx[0] = x[0] - (xxprime[0]-x[0]) ;  xx[1] = x[1] - (xxprime[1]-x[1]) ;  xx[2] = x[2] - (xxprime[2]-x[2]) ;
+      UndoSpaceChargeR2Distortion(xx,x_new) ;
+    }
+
+  Int_t count = 0 ;  p_new[2] = 0.0 ;
+  for ( Int_t i = 0 ; i < index+1 ; i++ )
+    {
+      DeltaTheta  =  (TMath::ATan2(Ytrack1[i]-Y0_new,Xtrack1[i]-X0_new)-TMath::ATan2(x_new[1]-Y0_new,x_new[0]-X0_new)) ;
+      while ( DeltaTheta < -1*TMath::Pi() ) DeltaTheta += TMath::TwoPi() ; 
+      while ( DeltaTheta >=   TMath::Pi() ) DeltaTheta -= TMath::TwoPi() ; 
+      if ( DeltaTheta != 0 )  {  p_new[2] += (Ztrack1[i]-x_new[2]) / DeltaTheta ;   count += 1 ;  }
+    }
+
+  p_new[0]  = Pt_new * ( x_new[1] - Y0_new ) / ( ChargeB * R0_new ) ;   
+  p_new[1]  = Pt_new * ( X0_new - x_new[0] ) / ( ChargeB * R0_new ) ;
+  p_new[2] *= Pt_new / ( Rotation * R0_new * count ) ;
+
+}
 
 
 
