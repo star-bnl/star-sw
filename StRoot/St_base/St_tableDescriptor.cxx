@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   09/08/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.cxx,v 1.15 2000/03/07 23:52:21 fine Exp $
+// $Id: St_tableDescriptor.cxx,v 1.16 2000/03/10 22:37:25 fine Exp $
 #include <stdlib.h> 
 #include "St_tableDescriptor.h"
 #include "St_Table.h"
@@ -68,29 +68,36 @@ TString St_tableDescriptor::CreateLeafList() const
   for (Int_t i=0;i<maxRows;i++){
     if (i) string += ":";
     Int_t nDim = Dimensions(i);
+    
+    UInt_t *indx = 0;
+    Int_t totalSize = 1;
+    Int_t k = 0;
+    
     if (nDim) {
-       UInt_t *indx = IndexArray(i);
-       if (indx) {
-         const Char_t *colName = ColumnName(i);
-         Char_t digBuffer[100];       
-         for (Int_t j=0;j<nDim;j++) {
-	   for (UInt_t l=0;l<indx[j];l++){
-	     if (l) string += ":";
-	     sprintf(digBuffer,"%s_%d",colName, l);
-	     string += digBuffer;
-	     if (l==0) { string += "/"; string += TypeMapTBranch[ColumnType(i)];}
-	   }
+      if ( !(indx = IndexArray(i))){ 
+        string = ""; 
+        Error("CreateLeafList()","Can not create leaflist for arrays");
+        return string;
+      }
+      for (k=0;k< nDim; k++) totalSize *= indx[k];
+    }
+    const Char_t *colName = ColumnName(i);
+    if (totalSize > 1) {
+       for ( k = 0; k < totalSize; k++) {
+         Char_t buf[10];
+         sprintf(buf,"_%d",k);
+         string += colName;
+         string += buf;  
+         if (k==0) {
+           string += "/"; 
+           string += TypeMapTBranch[GetColumnType(i)];
          }
-       }
-       else {
-         string = ""; 
-         Error("CreateLeafList()","Can not create leaflist for arrays");
-         break;
+         if (k != totalSize -1) string += ":";
       }
     } else {
-      string += ColumnName(i);
-      string += "/";
-      string += TypeMapTBranch[ColumnType(i)];
+       string += ColumnName(i);
+       string += "/";
+       string += TypeMapTBranch[ColumnType(i)];
     }
   }
   return string;
@@ -283,6 +290,9 @@ St_Table::EColumnType St_tableDescriptor::ColumnType(const Char_t *columnName) c
 
 //____________________________________________________________________________
 // $Log: St_tableDescriptor.cxx,v $
+// Revision 1.16  2000/03/10 22:37:25  fine
+// CreateLeaf method fixed
+//
 // Revision 1.15  2000/03/07 23:52:21  fine
 // some comments improved
 //
