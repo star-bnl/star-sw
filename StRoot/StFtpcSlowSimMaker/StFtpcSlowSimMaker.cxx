@@ -1,5 +1,9 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.18 2003/07/03 13:25:47 fsimon Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.19 2003/07/04 14:04:51 fsimon Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.19  2003/07/04 14:04:51  fsimon
+// Add rotation of hits from global GEANT coordinates into local FTPC coordinates.
+// This needs an instance of StFtpcTrackingParams
+//
 // Revision 1.18  2003/07/03 13:25:47  fsimon
 // Added database access for cathode offset information.
 //
@@ -82,6 +86,9 @@
 #include "StFtpcClusterMaker/StFtpcParamReader.hh"
 #include "StFtpcClusterMaker/StFtpcDbReader.hh"
 #include "StFtpcClusterMaker/StFtpcGeantReader.hh"
+
+// include for Detector Rotations
+#include "StFtpcTrackMaker/StFtpcTrackingParams.hh" 
 
 #include "StDetectorDbMaker/StDetectorDbFTPCGas.h"
 #include "St_db_Maker/St_db_Maker.h"
@@ -210,8 +217,27 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
   m_ampslope = (St_ftpcAmpSlope *)dblocal_calibrations("ftpcAmpSlope" );
   m_ampoffset = (St_ftpcAmpOffset *)dblocal_calibrations("ftpcAmpOffset");
 
- m_timeoffset = (St_ftpcTimeOffset *)dblocal_calibrations("ftpcTimeOffset");
+  m_timeoffset = (St_ftpcTimeOffset *)dblocal_calibrations("ftpcTimeOffset");
  
+
+  // instance tracking parameters for rotations
+  StFtpcTrackingParams::Instance(kTRUE, 
+				 (St_ftpcCoordTrans *)dblocal_calibrations("ftpcCoordTrans"),
+				 GetDataBase("RunLog"));
+  // get ftpc parameters
+  St_DataSet *ftpcParsDb = GetInputDB("ftpc");
+  assert(ftpcParsDb);
+  St_DataSetIter ftpcPars(ftpcParsDb);
+  
+
+  StFtpcTrackingParams::Instance(0,
+  				 (St_ftpcTrackingPars *)ftpcPars("ftpcTrackingPars"),
+  				 (St_fde_fdepar *)ftpcPars("fdepars/fdepar"),
+  				 (St_ftpcDimensions *)dblocal_geometry("ftpcDimensions"), 
+  				 (St_ftpcPadrowZ *)dblocal_geometry("ftpcPadrowZ"));
+
+
+
   //cout << "Global Dbs read...\n";
  
   //cout << "Getting local Db ..\n";
