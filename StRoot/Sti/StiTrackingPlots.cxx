@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.cxx,v 2.15 2004/11/08 15:32:57 pruneau Exp $
+ * $Id: StiTrackingPlots.cxx,v 2.16 2004/11/10 21:45:11 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.cxx,v $
+ * Revision 2.16  2004/11/10 21:45:11  pruneau
+ * added diagnostic plots
+ *
  * Revision 2.15  2004/11/08 15:32:57  pruneau
  * 3 sets of modifications
  * (1) Changed the StiPlacement class to hold keys to both the radial and angle placement. Propagated the use
@@ -132,9 +135,45 @@ void StiTrackingPlots::initialize()
   _xLastHitVsXLastNode1 = book("xLastHitVsXLastNode1","xLastHitVsXLastNode1",200,0.,200.,200,0.,200.);
   _xLastHitVsXLastNode2 = book("xLastHitVsXLastNode2","xLastHitVsXLastNode2",200,0.,200.,200,0.,200.);
 
-  _chi2 = book("chi2","chi2",100,0.,10.);
-  _chi2VsNpts = book("chi2VsNpts","chi2VsNpts",50,0.,50.,100,0.,10.);
+  _chi2 = book("chi2","chi2",120,-2.,10.);
+  _chi2VsNpts = book("chi2VsNpts","chi2VsNpts",50,0.,50.,120,-2.,10.);
+  _chi2VsDca  = book("chi2VsDca","chi2VsDca",60,-2.,10., 100, 0., 10.);
+  _chi2VsDcaSvt[0]  = book("chi2VsDcaSvt1","chi2VsDca Svt1",60,-2.,10., 100, 0., 10.);
+  _chi2VsDcaSvt[1]  = book("chi2VsDcaSvt2","chi2VsDca Svt2",60,-2.,10., 100, 0., 10.);
+  _chi2VsDcaSvt[2]  = book("chi2VsDcaSvt3","chi2VsDca Svt3",60,-2.,10., 100, 0., 10.);
 
+  // with one, two, three svt points...
+  _etaSvt[0]        = book("etaSvt1",     "Track Eta Svt1",  100,-3.1415927,3.1415927);
+  _phiSvt[0]        = book("phiSvt1",     "Track Phi Svt1",  100,-3.1415927,3.1415927);
+  _ptSvt[0]         = book("ptSvt1",     "pt Svt1",      250,0., 5.);
+  _globalDcaSvt[0]  = book("globalDcaSvt1","Global DCA Svt1", 160, 0,20);	  
+  _nptsVsPtSvt[0]   = book("nptsVsPtSvt1",     "nptsVsPt Svt1",     40, 0., 4., 50, 0., 50.);
+  _nptsVsEtaSvt[0]  = book("nptsVsEtaSvt1",     "nptsVsEta Svt1",     40, -2., 2., 50, 0., 50.);
+  _nptsVsPhiSvt[0]  = book("nptsVsPhiSvt1","nptsVsPhi Svt1",100,-3.1415927,3.1415927, 50, 0., 50.);
+  _chi2Svt[0]       = book("chi2Svt1","chi2 Svt1",120,-2.,10.);
+  _chi2VsNptsSvt[0] = book("chi2VsNptsSvt1","chi2VsNpts Svt1",50,0.,50.,100,0.,10.);
+
+  _etaSvt[1]        = book("etaSvt2",     "Track Eta Svt2",  100,-3.1415927,3.1415927);
+  _phiSvt[1]        = book("phiSvt2",     "Track Phi Svt2",  100,-3.1415927,3.1415927);
+  _ptSvt[1]         = book("ptSvt2",     "pt Svt2",      250,0., 5.);
+  _globalDcaSvt[1]  = book("globalDcaSvt2","Global DCA Svt2", 160, 0,20);	  
+  _nptsVsPtSvt[1]   = book("nptsVsPtSvt2",     "nptsVsPt Svt2",     40, 0., 4., 50, 0., 50.);
+  _nptsVsEtaSvt[1]  = book("nptsVsEtaSvt2",     "nptsVsEta Svt2",     40, -2., 2., 50, 0., 50.);
+  _nptsVsPhiSvt[1]  = book("nptsVsPhiSvt2","nptsVsPhi Svt2",100,-3.1415927,3.1415927, 50, 0., 50.);
+  _chi2Svt[1]       = book("chi2Svt2","chi2 Svt2",120,-2.,10.);
+  _chi2VsNptsSvt[1] = book("chi2VsNptsSvt2","chi2VsNpts Svt2",50,0.,50.,100,0.,10.);
+
+  _etaSvt[2]        = book("etaSvt3",     "Track Eta Svt3",  100,-3.1415927,3.1415927);
+  _phiSvt[2]        = book("phiSvt3",     "Track Phi Svt3",  100,-3.1415927,3.1415927);
+  _ptSvt[2]         = book("ptSvt3",     "pt Svt3",      250,0., 5.);
+  _globalDcaSvt[2]  = book("globalDcaSvt3","Global DCA Svt3", 160, 0,20);	  
+  _nptsVsPtSvt[2]   = book("nptsVsPtSvt3",     "nptsVsPt Svt3",     40, 0., 4., 50, 0., 50.);
+  _nptsVsEtaSvt[2]  = book("nptsVsEtaSvt3",     "nptsVsEta Svt3",     40, -2., 2., 50, 0., 50.);
+  _nptsVsPhiSvt[2]  = book("nptsVsPhiSvt3","nptsVsPhi Svt3",100,-3.1415927,3.1415927, 50, 0., 50.);
+  _chi2Svt[2]       = book("chi2Svt3","chi2 Svt3",120,-2.,10.);
+  _chi2VsNptsSvt[2] = book("chi2VsNptsSvt3","chi2VsNpts Svt3",50,0.,50.,100,0.,10.);
+
+  //3d...
   mGDcavNptsvEtaA = book("mGDcavNptsvEtaA",
 				"Global DCA vs. Npts vs. Eta, All charges",
 				100,0.,20.,6,0.,645.,30,-2.,2.);
@@ -254,6 +293,8 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
       mNptsvPtvEtaA->Fill(mPts,thePt,eta);
       mGDcavEtavPtA->Fill(dca,eta,thePt);
 
+      // svt points driven histos
+   
       if(track->getCharge())
 	{//charge > 0
 	  mGDcavNptsvEtaP->Fill(dca,mPts,eta);
@@ -294,6 +335,23 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 	  else if (fabs(eta)<0.8 && fabs(eta)>0.5 )
 	    _xLastHitVsXLastNode2->Fill(x1,x2);
 	  //cout << " - Filled OK";
+
+	  _chi2VsDca->Fill(kTrack->_vChi2, kTrack->_vDca);
+	  if (svtPoints>0 && svtPoints<4)
+	    {
+	      int iii = svtPoints-1;
+	      _chi2VsDcaSvt[iii]->Fill(kTrack->_vChi2, kTrack->_vDca);
+	      _etaSvt[iii]->Fill(eta);
+	      _phiSvt[iii]->Fill(phi);
+	      _ptSvt[iii]->Fill(thePt);
+	      _globalDcaSvt[iii]->Fill(dca);
+	      _nptsVsPtSvt[iii]->Fill(thePt,nPts);
+	      _nptsVsEtaSvt[iii]->Fill(eta,nPts);
+	      _nptsVsPhiSvt[iii]->Fill(phi,nPts);
+	      _chi2Svt[iii]->Fill(chi2);
+	      _chi2VsNptsSvt[iii]->Fill(nPts,chi2);
+	    }
+	  
 	}
       //else
 	//cout << "StiTrackPlots::fill() -W- kTrack==0"<<endl;

@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.h,v 2.10 2003/11/14 22:31:57 andrewar Exp $
+ * $Id: StiTrackingPlots.h,v 2.11 2004/11/10 21:45:11 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.h,v $
+ * Revision 2.11  2004/11/10 21:45:11  pruneau
+ * added diagnostic plots
+ *
  * Revision 2.10  2003/11/14 22:31:57  andrewar
  * Added isPrimary() cut so only Primary tracks are histogrammed
  * (not a mix of Primary and global).
@@ -132,6 +135,20 @@ class StiTrackingPlots : public HistogramGroup
   TH3D * mNptsvPtvEtaM;
   TH3D * mGDcavEtavPtM;
   //TH3D * mPDcavEtavPtM;
+
+  TH1D* _etaSvt[3]        ;
+  TH1D* _phiSvt[3]        ;
+  TH1D* _ptSvt[3]         ;
+  TH1D* _globalDcaSvt[3]  ;
+  TH2D* _nptsVsPtSvt[3]   ;
+  TH2D* _nptsVsEtaSvt[3]  ;
+  TH2D* _nptsVsPhiSvt[3]  ;
+  TH1D* _chi2Svt[3]       ;
+  TH2D* _chi2VsNptsSvt[3] ;
+
+  TH2D* _chi2VsDca;
+  TH2D* _chi2VsDcaSvt[3];
+
   
 };
 
