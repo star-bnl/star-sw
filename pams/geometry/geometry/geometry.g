@@ -1,11 +1,12 @@
 ***************************************************************************
    subroutine geometry
-*                                                                         *  
-   author  Pavel Nevski
-   Created August 1998
 *                                                                         *
-* Update history:                                                         *
+*  author  Pavel Nevski                                                   *
+*  Created August 1998                                                    *
+*                                                                         *
+*  Update history:                                                        *
 *  08/19/98, PN: tof is not part of year_2a                               *
+*  08/20/98, PJ:                                                          *
 *                                                                         *
 ***************************************************************************
    Implicit   none
@@ -60,26 +61,29 @@ If LL>1
   on HELP       { you may select the following keywords: ;
                   <W>;('---------------:----------------------------- ');
                   <W>;('Configurations : complete,tpc_only,field_only ');
-                  <W>;('               : year_1a(b,c), year_2a        ');
+                  <W>;('               : year_1a,b,c;  year_2a        ');
                   <W>;('Geant Physics  : Hadr_on, Hadr_off, Decay_Only');
                   <W>;('Geometry Detail: mwc_off, pse_off, 4th_off    ');
                   <W>;('Magnetic Field : Field_on/off, field=value    ');
                   <W>;('Auxillary keys : Debug_on/off, Split_on/off   ');
                   <W>;('--------------------------------------------- ');
-                  <W>;('Default: complete STAR with standard physics  ');
+                  <W>;('Default: complete STAR with hadr_on  ');
                   <W>;('--------------------------------------------- ');
                 }  
   on COMPLETE   { Complete STAR geometry;                                     }
-  on YEAR_1A    { STAR initial geometry;      {vpdd,calb,ecal}=off;    Nsi=0; }
-  on YEAR_1B    { TPCs+calo patch, no svt;    {vpdd,ecal}=off; ems=on; Nsi=0; }
-  on YEAR_1C    { TPCs+barrel calo, no svt;   {vpdd,ecal}=off;         Nsi=0; }
-  on YEAR_2A    { STAR second year upgrade;   {vpdd,ecal}=off;       "tof=on;"}
-  on HADR_ON    { default Geant Physics On;                                   }
-  on HADR_OFF   { Geant Physics on, except for hadronic interactions; IHADR=0;}
+  on YEAR_1A    { poor approximation to year1: TPC+CTB+FTPC;      
+                                              {vpdd,calb,ecal}=off;    Nsi=0; }
+  on YEAR_1B    { better year1: TPC+CTB+FTPC+calo patch, no svt; 
+                                                {vpdd,ecal};  ems=on;  Nsi=0; }
+  on YEAR_1C    { not a year1:  TPC+CTB+FTPC+calo;      {vpdd,ecal};   Nsi=0; }
+  on YEAR_2A    { asymptotic STAR;                                   tof=off; }
+  on HADR_ON    { all Geant Physics On;                                       }
+  on HADR_OFF   { all Geant Physics on, except for hadronic interactions; 
+                                                                       IHADR=0}
   on DECAY_ONLY { Some Physics: decays, mult.scat and energy loss;
                   {IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,IDRAY}=0; Iloss=2}
   on TPC_ONLY   { Minimal geometry - only TPC;
-                  {pipe,svtt,ftpc,btof,vpdd,magp,calb,ecal}=off;              }
+                               {pipe,svtt,ftpc,btof,vpdd,magp,calb,ecal}=off; }
   on FIELD_ONLY { No geometry - only magnetic field;
                   {cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal}=off;    }
   on FIELD_OFF  { no magnetic field;                field=0;                  }
@@ -89,8 +93,8 @@ If LL>1
   on MWC_OFF    { Trigger Multy-wire readout off;   mwc=off;                  }
   on PSE_OFF    { No TPC pseudo-padrow generated;   pse=off;                  }
   on 4TH_OFF    { SVT fourth layer off;             Nsi=min(Nsi,6);           }
-  on SPLIT_OFF  { events will not be splitted into subevents; NtrSubEv=0;     }
-  on SPLIT_ON   { events will be splitted into subevents;     NtrSubEv=10000; }
+  on SPLIT_OFF  { events will not be split into subevents;     NtrSubEv=0;    }
+  on SPLIT_ON   { events will be split into subevents;         NtrSubEv=1000; }
   on DEBUG_ON   { verbose mode, some graphics; Idebug=max(Idebug,1); Itest=1; }
   on DEBUG_OFF  { standard debug mode;         {Idebug,Itest}=0;              }
  }
