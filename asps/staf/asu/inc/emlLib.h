@@ -28,12 +28,12 @@ extern CC_P int eml_stop();
 
 #define EML_ERROR(code) {EML_LOG_ERROR(code); return FALSE;}
 #define EML_SUCCESS(code) {EML_LOG_SUCCESS(code); return TRUE;}
-#define EML_MESSAGE(code) {printf( #code "\n");fflush(0);}
+#define EML_MESSAGE(code) {fprintf(stderr, #code "\n");fflush(0);}
 #define EML_LOG_ERROR(code) {EML_TRACE(#code);set_staf_status(STAFCV_BAD);}
 /*DEBUG HACK #define EML_LOG_SUCCESS(code) {EML_TRACE(#code);set_staf_status(STAFCV_OK);} */
 #define EML_LOG_SUCCESS(code) {set_staf_status(STAFCV_OK);}
-#define EML_TRACE(msg) {printf("%s.%d-%s\n",__FILE__,__LINE__,msg);fflush(0);}
-#define EML_PRINTF printf("%s.%d-",__FILE__,__LINE__);fflush(0);printf
+#define EML_TRACE(msg) {fprintf(stderr, "%s.%d-%s\n",__FILE__,__LINE__,msg);fflush(0);}
+#define EML_PRINTF fprintf(stderr, "%s.%d-",__FILE__,__LINE__);fflush(0);printf
 #define EML_DSPERROR(msg) EML_TRACE(#msg);dsPerror("(dsl):")
 
 #endif /*EMLLIB_H*/
