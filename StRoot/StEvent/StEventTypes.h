@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.11 2001/03/14 03:50:42 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.12 2001/04/27 02:37:46 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.12  2001/04/27 02:37:46  ullrich
+ * Added ToF include files.
+ *
  * Revision 2.11  2001/03/14 03:50:42  ullrich
  * Added StPsd.h
  *
@@ -61,6 +64,7 @@
 #include "StEmcSoftwareMonitor.h"
 #include "StEnumerations.h"
 #include "StEvent.h"
+#include "StEventClusteringHints.h"
 #include "StEventInfo.h"
 #include "StEventSummary.h"
 #include "StFtpcHit.h"
@@ -88,8 +92,11 @@
 #include "StRichMCHit.h"
 #include "StRichMCInfo.h"
 #include "StRichMCPixel.h"
-#include "StRichPixel.h"
+#include "StRichPhotonInfo.h"
+#include "StRichPid.h"
+#include "StRichPidTraits.h"
 #include "StRichSoftwareMonitor.h"
+#include "StRichPixel.h"
 #include "StRun.h"
 #include "StRunSummary.h"
 #include "StSoftwareMonitor.h"
@@ -103,6 +110,13 @@
 #include "StSvtBarrelHitCollection.h"
 #include "StSvtSoftwareMonitor.h"
 #include "StSvtWaferHitCollection.h"
+#include "StTofCollection.h"
+#include "StTofHit.h"
+#include "StTofMCHit.h"
+#include "StTofMCSlat.h"
+#include "StTofPidTraits.h"
+#include "StTofSlat.h"
+#include "StTofSoftwareMonitor.h"
 #include "StTpcHit.h"
 #include "StTpcHitCollection.h"
 #include "StTpcPadrowHitCollection.h"
