@@ -1,5 +1,12 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.33 2002/04/29 15:50:10 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.34 2002/06/04 13:39:26 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.34  2002/06/04 13:39:26  oldi
+// After tracking local coordinates are transformed to global coordinates.
+// Points are written to the table again. This causes a loss of symmetry which
+// was used while the tracking was done. Due to the fact that the main vertex
+// is measured in global coordinates, the subsequent momentum fit is done
+// correctly.
+//
 // Revision 1.33  2002/04/29 15:50:10  oldi
 // All tracking parameters moved to StFtpcTrackingParameters.cc/hh.
 // In a future version the actual values should be moved to an .idl file (the
@@ -171,10 +178,6 @@
 
 #include "TH1.h"
 #include "TH2.h"
-#include "TH3.h"
-#include "TProfile.h"
-#include "TCanvas.h"
-#include "TFile.h"
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -399,19 +402,37 @@ Int_t StFtpcTrackMaker::Make()
   }
 
   else {
-    tracker->MainVertexTracking();
+    tracker->TwoCycleTracking();
   }
 
   // for the line above you have these possibilities
   //tracker->MainVertexTracking();
   //tracker->FreeTracking();
+  //tracker->TwoCycleTracking();
   //tracker->NoFieldTracking();
   //tracker->LaserTracking();
 
+  // coordinate transformation due to rotation and shift of TPC with respect to the magnet (= global coordinate system) 
+  if (kTRUE /* future test for simulated events */) {
+    // not a simulated event
+    
+    fcl_fppoint_st *point_st = fcl_fppoint->GetTable();
+    
+    TObjArray *clusters = tracker->GetClusters();
+    StFtpcPoint *point;
+    
+    // loop over all clusters
+    for (Int_t i = 0; i < clusters->GetEntriesFast(); i++) {
+      point = (StFtpcPoint *)clusters->At(i);
+      point->TransformFtpc2Global();
+      point->ToTable(&(point_st[i]));    
+    }
+  }
+
+  // momentum fit, dE/dx calculation, write tracks to tables
   St_fpt_fptrack *fpt_fptrack = new St_fpt_fptrack("fpt_fptrack", tracker->GetNumberOfTracks());
   m_DataSet->Add(fpt_fptrack);
 
-  // momentum fit, dE/dx calculation, write tracks to tables
   if (mag_fld_factor != 0.) {
     // momentum fit possible
     tracker->FitAnddEdxAndWrite(fpt_fptrack, m_fdepar->GetTable(), -primary_vertex_id);
@@ -482,19 +503,18 @@ void StFtpcTrackMaker::MakeHistograms()
   St_fpt_fptrack *trk = 0;
   trk = (St_fpt_fptrack *) ftpc_tracks.Find("fpt_fptrack");
 
-  if (trk) 
-    {
+  if (trk) {
       // Fill histograms for FTPC fpt,fte,fde
       
       fpt_fptrack_st *r = trk->GetTable();
-      for (Int_t i=0; i<trk->GetNRows();i++,r++) 
-	{
-	  m_found->Fill((float)(r->nrec));
-	  m_q->Fill((float)(r->q));
+
+      for (Int_t i=0; i<trk->GetNRows(); i++, r++) {
+	  m_found->Fill((Float_t)(r->nrec));
+	  m_q->Fill((Float_t)(r->q));
 	  m_theta->Fill(r->theta);
-	  m_ndedx->Fill((float)(r->ndedx));
-	  float mom=sqrt(r->p[0] * r->p[0] + r->p[1] * r->p[1] + r->p[2] * r->p[2]);
-	  m_nrec_track->Fill((float)(r->nrec),mom);
+	  m_ndedx->Fill((Float_t)(r->ndedx));
+	  Float_t mom = TMath::Sqrt(r->p[0] * r->p[0] + r->p[1] * r->p[1] + r->p[2] * r->p[2]);
+	  m_nrec_track->Fill((Float_t)(r->nrec), mom);
 	}        
     }
 }
@@ -511,8 +531,8 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
 			 tracker->GetVertexWest()->GetY()-tracker->GetVertex()->GetY());
   m_vertex_west_z->Fill(tracker->GetVertexWest()->GetZ()-tracker->GetVertex()->GetZ());
 
-  for (Int_t t_counter = 0; t_counter < tracker->GetTracks()->GetEntriesFast(); t_counter++) 
-    {
+  for (Int_t t_counter = 0; t_counter < tracker->GetTracks()->GetEntriesFast(); t_counter++) {
+
       StFtpcTrack *tracks = (StFtpcTrack*) tracker->GetTracks()->At(t_counter);
       TObjArray   *fhits  = (TObjArray*) tracks->GetHits();
       
@@ -522,8 +542,8 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
       m_theta->Fill(tracks->GetTheta());
       m_ndedx->Fill(tracks->GetdEdx());
 
-      for (Int_t h_counter = 0; h_counter < fhits->GetEntriesFast(); h_counter++) 
-	{
+      for (Int_t h_counter = 0; h_counter < fhits->GetEntriesFast(); h_counter++) {
+
 	  StFtpcPoint *mhit = (StFtpcPoint *) fhits->At(h_counter);
 
 	  // Residuals
@@ -534,8 +554,8 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
 	    m_phires->Fill(mhit->GetPhiResidual());
 	  }
 
-	  if (mhit->GetPadRow()<=10)
-	    {
+	  if (mhit->GetPadRow()<=10) {
+
 	      m_maxadc_West->Fill(mhit->GetMaxADC());
 	      m_charge_West->Fill(mhit->GetCharge());
 	      m_padvstime_West->Fill(mhit->GetNumberBins(),mhit->GetNumberPads());
@@ -546,8 +566,8 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
 	      }
 	    }
 
-	  else if (mhit->GetPadRow()>=11)
-	    {
+	  else if (mhit->GetPadRow()>=11) {
+
 	      m_maxadc_East->Fill(mhit->GetMaxADC());
 	      m_charge_East->Fill(mhit->GetCharge());
 	      m_padvstime_East->Fill(mhit->GetNumberBins(),mhit->GetNumberPads());
@@ -556,9 +576,9 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
 		m_rres_vs_r_east->Fill(mhit->GetRResidual(), mhit->GetRadius());
 		m_phires_vs_r_east->Fill(mhit->GetPhiResidual(), mhit->GetRadius());
 	      }
-	    }
-	}
-    }
+	  }
+      }
+  }
 }
 
 //_____________________________________________________________________________
@@ -567,7 +587,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.33 2002/04/29 15:50:10 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.34 2002/06/04 13:39:26 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
