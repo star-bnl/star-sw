@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.9 2000/03/01 20:56:15 porter Exp $
+ * $Id: MysqlDb.h,v 1.10 2001/01/22 18:37:50 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,22 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.10  2001/01/22 18:37:50  porter
+ * Update of code needed in next year running. This update has little
+ * effect on the interface (only 1 method has been changed in the interface).
+ * Code also preserves backwards compatibility so that old versions of
+ * StDbLib can read new table structures.
+ *  -Important features:
+ *    a. more efficient low-level table structure (see StDbSql.cc)
+ *    b. more flexible indexing for new systems (see StDbElememtIndex.cc)
+ *    c. environment variable override KEYS for each database
+ *    d. StMessage support & clock-time logging diagnostics
+ *  -Cosmetic features
+ *    e. hid stl behind interfaces (see new *Impl.* files) to again allow rootcint access
+ *    f. removed codes that have been obsolete for awhile (e.g. db factories)
+ *       & renamed some classes for clarity (e.g. tableQuery became StDataBaseI
+ *       and mysqlAccessor became StDbSql)
+ *
  * Revision 1.9  2000/03/01 20:56:15  porter
  * 3 items:
  *    1. activated reConnect for server timeouts
@@ -66,7 +82,7 @@ typedef  int MYSQL_FIELD;
 #include <strstream.h>
 #include <string.h>
 #include "StDbBuffer.h"
-
+#include "StDbLogger.hh"
 
 #define endsql ";"
  
@@ -125,8 +141,6 @@ private:
   MysqlResult* mRes;
   bool mqueryState;
   bool mhasConnected;
-  
-  // temporary until exception handling is enabled
 
   char* mdbhost;
   char* mdbName;
@@ -135,6 +149,13 @@ private:
   int mdbPort;  
 
 public:
+
+  // for logging times
+  bool mlogTime;
+  StDbLogger mqueryLog;
+  StDbLogger msocketLog;
+  StDbLogger mconnectLog;
+
   MysqlDb();
   virtual ~MysqlDb();
   virtual bool Connect(const char *aHost, const char *aUser, 
@@ -157,6 +178,7 @@ public:
   char* CodeStrArray(char** strarr , int aLen);
   virtual int GetLastInsertID(){ return (int)mysql_insert_id(&mData);}
   virtual bool QueryStatus() { return mqueryState; }
+  virtual bool checkForTable(const char* tableName);
   virtual void Close();
   virtual bool IsConnected() { return mhasConnected; }
   virtual bool setDefaultDb(const char* dbName);

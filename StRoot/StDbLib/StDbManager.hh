@@ -1,15 +1,32 @@
 /***************************************************************************
  *
- * $Id: StDbManager.hh,v 1.18 2000/06/02 13:37:37 porter Exp $
+ * $Id: StDbManager.hh,v 1.19 2001/01/22 18:37:55 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
  *
  * Description:  Manages access to Servers and passes Query-by-Table to db
+ *               --> Now a pure virtual interface
  *
  ***************************************************************************
  *
  * $Log: StDbManager.hh,v $
+ * Revision 1.19  2001/01/22 18:37:55  porter
+ * Update of code needed in next year running. This update has little
+ * effect on the interface (only 1 method has been changed in the interface).
+ * Code also preserves backwards compatibility so that old versions of
+ * StDbLib can read new table structures.
+ *  -Important features:
+ *    a. more efficient low-level table structure (see StDbSql.cc)
+ *    b. more flexible indexing for new systems (see StDbElememtIndex.cc)
+ *    c. environment variable override KEYS for each database
+ *    d. StMessage support & clock-time logging diagnostics
+ *  -Cosmetic features
+ *    e. hid stl behind interfaces (see new *Impl.* files) to again allow rootcint access
+ *    f. removed codes that have been obsolete for awhile (e.g. db factories)
+ *       & renamed some classes for clarity (e.g. tableQuery became StDataBaseI
+ *       and mysqlAccessor became StDbSql)
+ *
  * Revision 1.18  2000/06/02 13:37:37  porter
  * built up list of minor changes:
  *  - made buffer more robust for certain null inputs
@@ -89,188 +106,191 @@
 #ifndef STDBMANAGER_HH
 #define STDBMANAGER_HH
 
+// language include files 
+#include <iostream.h>
+#include <time.h>
+
+// real basic definitions
 #include "StDbDefs.hh"
-#include "parseXmlString.hh"
-#include <fstream.h>
-#include "StDbTime.h"
-#include "tableQuery.hh"
+// pure virtual classes
+#include "StDbMessService.hh"
 
-class dbType;
-class dbDomain;
+// other classes
 class StDbServer;
-class StDbTable;
-class StDbConfigNode;
+class StDataBaseI;
+class dbEnvList;
 class StDbNode;
+class StDbConfigNode;
+class StDbTable;
 
-#ifndef __CINT__
-#include <list>
-
-
-#ifdef ST_NO_TEMPLATE_DEF_ARGS
-typedef list<dbType*,allocator<dbType*> > dbTypes;
-typedef list<dbDomain*,allocator<dbDomain*> > dbDomains;
-typedef list<StDbServer*,allocator<StDbServer*> > ServerList;
-typedef list<tableQuery*,allocator<tableQuery*> > QueryObjects;
-#else
-#if !defined(ST_NO_NAMESPACES)
-using std::list;
+#ifdef __ROOT__
+#include "TROOT.h"
 #endif
-typedef list<dbType*> dbTypes;
-typedef list<dbDomain*> dbDomains;
-typedef list<StDbServer*> ServerList;
-typedef list<tableQuery*> QueryObjects;
-#endif
-#endif
-#ifdef __CINT__
-class dbTypes;
-class dbDomains;
-class ServerList;
-class QueryObjects;
-#endif
-
 
 class StDbManager {
 
-private:
-
-  bool misVerbose; // these give 3 levels of verbosity: verbose, normal, quiet.
-  bool misQuiet;   // normal=!misVerbose && !misQuiet
-  dbTypes mTypes;  // enum mapping shortcut
-  dbDomains mDomains; // enum mapping shortcut
-  ServerList mservers;  // servers to handle the Query 
-  QueryObjects mqobjects;
-  parseXmlString mparser; // parses strings in XML
-
-  StDbManager(): misVerbose(false), misQuiet(false), mhasServerList(false), mhasDefaultServer(false), muserName(0), mpWord(0)  { 
-                                                   initTypes(); 
-                                                   initDomains(); 
-                                                };
-
-  // singleton pointer
-  static StDbManager* mInstance;
-
-  bool mhasServerList;
-  bool mhasDefaultServer;
-  StDbTime mcheckTime;  
-  StDbTime mstoreTime;
-  
-  char* muserName;
-  char* mpWord;
-  
 protected:
 
-  // server methods needed internally
-  //  virtual void initServers(const char* refFile = 0);
-  virtual void initTypes();
-  virtual void addDbType(StDbType type, const char* typeName);
-  virtual void initDomains();
-  virtual void deleteServers();
-  virtual void deleteTypes();
-  virtual void deleteDomains();
-  virtual void deleteQueryObjects();
+  bool misVerbose;         //! 3 levels of verbosity: verbose, normal, quiet.
+  bool misQuiet;           //!   where normal=!misVerbose && !misQuiet
+  StDbMessService* Messenger; //! 
+  char* muserName;
+  char* mpWord;
 
-  // These lookup up ServerInfo from XML files
+  bool   misTimeLogged;  //! flag for logging timing
 
-  virtual void  lookUpServers();
-  virtual char* getFileName(const char* envName, const char* subDirName=0);
-  virtual void  findServersXml(ifstream& is);  
-  virtual char* findServerString(ifstream& is);
-  virtual char* getNextName(char*& name);
+  StDbManager();
+  static StDbManager* mInstance;
 
-  char* mstringDup(const char* str); //  strdup(..) is not ANSI
+  char*         mstringDup(const char* str); //!  strdup(..) is not ANSI
 
 public:
 
   // access to this singleton object
-
-  static StDbManager* Instance(){
-    if(!mInstance){
-      mInstance = new StDbManager;
-    }
-   return mInstance;
-  }
-
+  static StDbManager* Instance();
   virtual ~StDbManager();
 
-  // get Container for StDbTables..
-  virtual StDbConfigNode* initConfig(const char* databaseName);
-  virtual StDbConfigNode* initConfig(const char* databaseName, const char* configName, int opt=0);
-  virtual StDbConfigNode* initConfig(StDbType type, StDbDomain domain);
-  virtual StDbConfigNode* initConfig(StDbType type, StDbDomain domain, const char* configName, int opt=0);
-  virtual StDbConfigNode* initConfig(StDbType type, StDbDomain domain, unsigned int requestTime, int opt=0);
-  virtual StDbConfigNode* initConfig(const char* databaseName, unsigned int requestTime, int opt=0);
+  // Act as Factory object for StDbConfigNodess
+  // --> get dbHandle & Container of StDbTables..
+  virtual StDbConfigNode* initConfig(const char* dbName)                  =0;
+  virtual StDbConfigNode* initConfig(const char* dbName, 
+                                     const char* configName, int opt=0)   =0;
+  virtual StDbConfigNode* initConfig(StDbType type, StDbDomain domain)    =0;
+  virtual StDbConfigNode* initConfig(StDbType type, StDbDomain domain, 
+                                     const char* configName, int opt=0)   =0;
+  virtual StDbConfigNode* initConfig(StDbType type, StDbDomain domain, 
+                                     unsigned int requestTime, int opt=0) =0;
+  virtual StDbConfigNode* initConfig(const char* dbName, 
+                                     unsigned int requestTime, int opt=0) =0;
 
-  // message verbosity level
-  virtual bool IsVerbose() const { return misVerbose;};
-  virtual void setVerbose(bool isVerbose){ misVerbose=isVerbose;
-                                           if(isVerbose) misQuiet=false;};
-  virtual bool IsQuiet() const { return misQuiet;};
-  virtual void setQuiet(bool isQuiet){ misQuiet=isQuiet;
-                                       if(isQuiet)misVerbose=false;};
+  virtual char*           getConfigNodeName(StDbType t, StDbDomain d)     =0;
+  virtual char*           getExternalVersion(StDbType t,StDbDomain d)     =0;
+  virtual dbEnvList*      getEnvList(const char* name)                    =0;
 
-  // find servers by various methods
-  virtual StDbServer* findServer(StDbType type, StDbDomain domain);
-  virtual StDbServer* findServer(StDbNode* node);
-  virtual StDbServer* findServer(const char* dbType, const char* dbDomain);
-  virtual StDbServer* findServer(const char* databaseName);
-  virtual StDbServer* findDefaultServer();
+  // act as a Factory object for StDbTables
+  virtual StDbTable*      newDbTable(const char* dbName,const char* tName)=0;
+  virtual StDbTable*      newDbTable(StDbNode* node)                      =0;
 
-  // helper functions to map enumeration to type
-  virtual char*      getDbTypeName(StDbType type);
-  virtual char*      getDbDomainName(StDbDomain domain);
-  virtual StDbType   getDbType(const char* typeName);
-  virtual StDbDomain getDbDomain(const char* domainName);
+  // Retreive DbLib owned database & server poointers by various methods
+  virtual StDataBaseI* findDb(StDbType type, StDbDomain domain)          =0;
+  virtual StDataBaseI* findDb(const char* dbType, const char* dbDomain)  =0;
+  virtual StDataBaseI* findDb(const char* databaseName)                  =0;
+  virtual StDbServer*  findServer(StDbType type, StDbDomain domain)      =0;
+  virtual StDbServer*  findServer(StDbNode* node)                        =0;
+  virtual StDbServer*  findServer(const char* type, const char* domain)  =0;
+  virtual StDbServer*  findServer(const char* databaseName)              =0;
+  virtual StDbServer*  findDefaultServer()                               =0;
+
+  // helper functions using mapped enumeration to dbType & dbDomain
+  virtual char*      getDbTypeName(StDbType type)                        =0;
+  virtual char*      getDbDomainName(StDbDomain domain)                  =0;
+  virtual StDbType   getDbType(const char* typeName)                     =0;
+  virtual StDbDomain getDbDomain(const char* domainName)                 =0;
+  virtual char*      getDbName(const char* typeName, const char* domName)=0;
+  virtual char*      printDbName(StDbType type, StDbDomain domain)       =0;
 
   // time stamp methods
-  virtual void         setRequestTime(unsigned int time);
-  virtual void         setRequestTime(const char* time);
-  virtual unsigned int getUnixCheckTime();
-  virtual char*        getDateCheckTime();
-  virtual void         setStoreTime(unsigned int time);
-  virtual void         setStoreTime(const char* time);
-  virtual unsigned int getUnixStoreTime();
-  virtual char*        getDateStoreTime();
+  virtual void         setRequestTime(unsigned int time)                 =0;
+  virtual void         setRequestTime(const char* time)                  =0;
+  virtual unsigned int getUnixRequestTime()                              =0;
+  virtual char*        getDateRequestTime()                              =0;
+  virtual unsigned int getUnixCheckTime()                                =0;
+  virtual char*        getDateCheckTime()                                =0;
+  virtual void         setStoreTime(unsigned int time)                   =0;
+  virtual void         setStoreTime(const char* time)                    =0;
+  virtual unsigned int getUnixStoreTime()                                =0;
+  virtual char*        getDateStoreTime()                                =0;
 
   // find the dbType & dbDomain for a database=>dbname
-  virtual bool getDataBaseInfo(const char* dbname, char*& type, char*& domain);
- 
-
+  virtual bool getDataBaseInfo(const char* dbname, 
+                               char*& type, char*& domain)               =0;
+  virtual bool getDataBaseInfo(const char* dbname,
+                               StDbType& type, StDbDomain& domain)       =0;
+  
   // fetch & store methods for data
-  virtual bool IsValid(StDbTable* table);
-  virtual bool fetchDbTable(StDbTable* table);
-  virtual bool fetchDbTable(StDbTable* table, char* whereClause);
-  virtual bool fetchAllTables(StDbConfigNode* node);
-  virtual bool storeDbTable(StDbTable* table, bool commitWhenDone=true);
-  virtual bool storeAllTables(StDbConfigNode* node, bool commitWhenDone=true);
-  virtual int  storeConfig(StDbConfigNode* node, int currentID=0, bool commitWhenDone=true);
+  virtual bool IsValid(StDbTable* table)                                 =0;
+  virtual bool fetchDbTable(StDbTable* table)                            =0;
+  virtual bool fetchDbTable(StDbTable* table, char* whereClause)         =0;
+  virtual bool fetchAllTables(StDbConfigNode* node)                      =0;
+  virtual bool storeDbTable(StDbTable* table, bool commitWhenDone=true)  =0;
+  virtual bool storeAllTables(StDbConfigNode* node, 
+                              bool commitWhenDone=true)                  =0;
+  virtual int  storeConfig(StDbConfigNode* node, int currentID, 
+                           int& configID, bool commitWhenDone=true)      =0;
 
   // transaction methods 
-  //  nodes are node entries in the "Nodes" table
-  //  tables are real data entries in a data+dataIndex table
-  virtual bool rollBackAllTables(StDbConfigNode* node); //! for table data
-  virtual bool rollBackAllNodes(StDbConfigNode* node); //!  for node data
-  virtual bool rollBack(StDbNode* node);   //! for node data
-  virtual bool rollBack(StDbTable* table); //! for table data
-  virtual bool commitAllTables(StDbConfigNode* node); //! table commits
-  virtual bool commitAllNodes(StDbConfigNode* node);  //! node  commits 
+  virtual bool rollBackAllTables(StDbConfigNode* node)                   =0;
+  virtual bool rollBackAllNodes(StDbConfigNode* node)                    =0; 
+  virtual bool rollBack(StDbNode* node)                                  =0;   
+  virtual bool rollBack(StDbTable* table)                                =0; 
+  virtual bool commitAllTables(StDbConfigNode* node)                     =0; 
+  virtual bool commitAllNodes(StDbConfigNode* node)                      =0;  
 
-  virtual void closeAllConnections(); 
-  virtual void closeAllConnections(StDbConfigNode* node); 
-  virtual void closeConnection(StDbNode* node);
+  // close connection methods
+  virtual void closeAllConnections()                                     =0; 
+  virtual void closeAllConnections(StDbConfigNode* node)                 =0; 
+  virtual void closeConnection(StDbNode* node)                           =0;
+
+  virtual void printTimeStats()                                          =0;
+
+  // messaging service directions *** These are real functions *** 
+  virtual bool    IsVerbose() const;
+  virtual void    setVerbose(bool isVerbose);
+  virtual bool    IsQuiet() const ;
+  virtual void    setQuiet(bool isQuiet);
+  virtual void    turnOffTimeLogging();
+  virtual void    updateMessLevel();
+  virtual void    setMessenger(StDbMessService* service);
+  virtual StDbMessService* getMessenger();
+  virtual int  printInfo(const char* m1, StDbMessLevel ml, 
+                         int lineNumber=0, const char* className=" ",
+                         const char* methodName=" ") ;
+  virtual int  printInfo(const char* m1,  const char* m2,
+                         StDbMessLevel ml, int lineNumber=0,
+                         const char* className=" ",
+                         const char* methodName=" ");
+  virtual void setMessageStream(ostream& os);
 
   virtual char* userName();
   virtual char* pWord();
   virtual void  setUser(const char* userName, const char* pWord);
 
   // make ROOT-CLI via star-ofl "makefiles"
-  // ClassDef(StDbManager,0)
+#ifdef __ROOT__
+  ClassDef(StDbManager,0)
+#endif
 
 };
 
+inline bool StDbManager::IsVerbose() const { return misVerbose;};
+inline void StDbManager::setVerbose(bool isVerbose){ 
+ misVerbose=isVerbose;
+ if(isVerbose)misQuiet=false;
+ updateMessLevel();   
+};
+inline bool StDbManager::IsQuiet() const { return misQuiet;};
+inline void StDbManager::setQuiet(bool isQuiet){ 
+   misQuiet=isQuiet;
+   if(isQuiet) misVerbose=false;
+   updateMessLevel();
+}
+inline void StDbManager::updateMessLevel(){
+ Messenger->setMessLevel(dbMWarn);
+ if(misQuiet)Messenger->setMessLevel(dbMErr);
+ if(misVerbose)Messenger->setMessLevel(dbMDebug);
+}
+inline void StDbManager::setMessenger(StDbMessService* service){
+  delete Messenger;
+  Messenger=service;
+  updateMessLevel();
+}
+inline StDbMessService* StDbManager::getMessenger(){ return Messenger; }
 inline char* StDbManager::userName() { return muserName; }
-inline char* StDbManager::pWord() { return mpWord; }
+inline char* StDbManager::pWord()    { return mpWord; }
 
 #endif
+
+
 
 
 
