@@ -127,20 +127,15 @@ virtual        ~StObjArray(){};
 
 virtual void 	Browse(TBrowser *b);
 virtual Bool_t  IsFolder();
-virtual void 	Clean(StObject *obj=0);
-virtual void 	Clean(StObjArrayIter *iter);
-virtual void 	Erase(StObject *obj);
-virtual void 	Erase(StObjArrayIter *iter);
-
-virtual void 	push_back(const TObject *obj);
-virtual void 	pop_back();
+virtual void 	pop_back(){RemoveAt(GetLast());};
 virtual UInt_t  size() const;
 virtual void    Resize(Int_t num);
 virtual void    resize(Int_t num);
 virtual Int_t 	capacity() const ;
 virtual TObject* Back() const ;
 virtual TObject* Front() const;
-virtual void 	clear();
+virtual void 	clear(){Clear();}
+virtual StObjArrayIter *Erase(StObjArrayIter *fr=0,StObjArrayIter *to=0,int flag=0);
 virtual Bool_t 	empty() const ;
 virtual TIterator* MakeIterator(Bool_t dir = kIterForward) const;
 virtual TObject** GetCell(Int_t idx) const;
@@ -202,6 +197,8 @@ public:
  virtual void AddAt(TObject* obj, Int_t idx);
  
  virtual void AddAtAndExpand(TObject* obj, Int_t idx);
+
+ virtual void 	clear(){Delete();}
  
 ClassDef(StStrArray,1)
 };
@@ -225,51 +222,61 @@ void random_shuffle(StObjArrayIter &start,StObjArrayIter &end);
 #define StCollectionDef(QWERTY) \
 class St ## QWERTY;\
 class St ## QWERTY ## Iterator;\
+\
 class StPtrVec ## QWERTY : public StRefArray \
 { \
 public: \
 StPtrVec ## QWERTY(Int_t s = TCollection::kInitCapacity);\
 StPtrVec ## QWERTY(const StPtrVec ## QWERTY &from);\
 virtual        ~StPtrVec ## QWERTY ##(){};\
-virtual void push_back(const St ## QWERTY &Obj);\
-virtual void push_back(const St ## QWERTY *Obj);\
-virtual St ## QWERTY ## * back() const ;\
-virtual St ## QWERTY ## * front() const;\
-virtual const St ## QWERTY ## Iterator begin() const ;\
-virtual const St ## QWERTY ## Iterator end()   const ;\
-virtual TIterator* MakeIterator(Bool_t dir = kIterForward) const;\
-virtual void clean(St ## QWERTY *obj=0);\
-virtual void erase(St ## QWERTY *obj=0);\
-virtual void clean(St ## QWERTY ## Iterator *iter);\
-virtual void erase(St ## QWERTY ## Iterator *iter);\
-virtual void clean(St ## QWERTY &obj);\
-virtual void erase(St ## QWERTY &obj);\
-virtual void clean(St ## QWERTY ## Iterator &iter);\
-virtual void erase(St ## QWERTY ## Iterator &iter);\
-virtual St ## QWERTY*& operator[](Int_t i) const;\
+\
+const St ## QWERTY  *&at(Int_t idx) const;\
+      St ## QWERTY  *&at(Int_t idx)\
+      {return (St ## QWERTY  *&)((const StPtrVec ## QWERTY*)this)->at(idx);}\
+\
+const St ## QWERTY  *& front() const { return at(0);}\
+      St ## QWERTY  *& front()       { return at(0);}\
+\
+const St ## QWERTY  *& back() const  { return at(size()-1);}\
+      St ## QWERTY  *& back()        { return at(size()-1);}\
+\
+      void push_back(const St ## QWERTY  *obj){AddLast((TObject*)obj);}\
+\
+const St ## QWERTY ## Iterator begin() const ;\
+const St ## QWERTY ## Iterator end()   const ;\
+      St ## QWERTY ## Iterator erase(StObjArrayIter &it);\
+      St ## QWERTY ## Iterator erase(StObjArrayIter &fst,StObjArrayIter &lst);\
+      St ## QWERTY *& operator[](Int_t i)       {return at(i);}\
+const St ## QWERTY *& operator[](Int_t i) const {return at(i);}\
 ClassDef(StPtrVec ## QWERTY ##,1) \
 };\
+\
+\
 class StSPtrVec ## QWERTY : public StStrArray \
 { \
 public: \
 StSPtrVec ## QWERTY(const Char_t *name=0,Int_t s = TCollection::kInitCapacity);\
 StSPtrVec ## QWERTY(const StSPtrVec ## QWERTY &from);\
-virtual void push_back(const St ## QWERTY &Obj);\
-virtual void push_back(const St ## QWERTY *Obj);\
-virtual St ## QWERTY ## * back() const;\
-virtual St ## QWERTY ## * front() const;\
-virtual const St ## QWERTY ## Iterator begin() const ;\
-virtual const St ## QWERTY ## Iterator end()   const ;\
-virtual TIterator* MakeIterator(Bool_t dir = kIterForward) const;\
-virtual void clean(St ## QWERTY *obj=0);\
-virtual void erase(St ## QWERTY *obj=0);\
-virtual void clean(St ## QWERTY ## Iterator *iter);\
-virtual void erase(St ## QWERTY ## Iterator *iter);\
-virtual void clean(St ## QWERTY &obj);\
-virtual void erase(St ## QWERTY &obj);\
-virtual void clean(St ## QWERTY ## Iterator &iter);\
-virtual void erase(St ## QWERTY ## Iterator &iter);\
-virtual St ## QWERTY*& operator[](Int_t i) const;\
+\
+const St ## QWERTY *&at(Int_t idx) const;\
+      St ## QWERTY *&at(Int_t idx)\
+      {return (St ## QWERTY  *&)((const StSPtrVec ## QWERTY*)this)->at(idx);}\
+\
+const St ## QWERTY  *& front() const { return at(0);}\
+      St ## QWERTY  *& front()       { return at(0);}\
+\
+const St ## QWERTY  *& back() const  { return at(size()-1);}\
+      St ## QWERTY  *& back()        { return at(size()-1);}\
+\
+      void push_back(const St ## QWERTY  *obj){AddLast((TObject*)obj);}\
+\
+const St ## QWERTY ## Iterator begin() const ;\
+const St ## QWERTY ## Iterator end()   const ;\
+      St ## QWERTY ## Iterator erase(StObjArrayIter &it);\
+      St ## QWERTY ## Iterator erase(StObjArrayIter &fst,StObjArrayIter &lst);\
+      St ## QWERTY *& operator[](Int_t i)       {return at(i);}\
+const St ## QWERTY *& operator[](Int_t i) const {return at(i);}\
+\
 ClassDef(StSPtrVec ## QWERTY,1) \
 };\
 class St ## QWERTY ## Iterator : public StObjArrayIter \
@@ -278,7 +285,7 @@ public: \
  \
 St ## QWERTY ## Iterator(const StObjArray* col=0, Bool_t dir = kIterForward);\
  \
-St ## QWERTY ## Iterator(const St ## QWERTY ## Iterator &init);\
+St ## QWERTY ## Iterator(const StObjArrayIter &init):StObjArrayIter(init){};\
 virtual       ~St ## QWERTY ## Iterator(){};  \
 virtual St ## QWERTY *operator*() const;\
 ClassDef(St ## QWERTY ## Iterator,1) \
@@ -294,63 +301,31 @@ typedef St ## QWERTY ## Iterator     StSPtrVec ## QWERTY ## ConstIterator;\
 ClassImp(St ## QWERTY ## Iterator) \
 void 		St       ## QWERTY ## Iterator	::Streamer	(TBuffer& ){} \
 void 		StPtrVec ## QWERTY  		::Streamer	(TBuffer& b){StRefArray::Streamer(b);} \
-TIterator* 	StPtrVec ## QWERTY 		::MakeIterator	(Bool_t dir) const \
-  {return (TIterator*)new St ## QWERTY ## Iterator(this,dir);} \
 \
 ClassImp(StPtrVec ## QWERTY ##) \
 		StPtrVec ## QWERTY::StPtrVec ## QWERTY(Int_t s):StRefArray(s){};\
 		StPtrVec ## QWERTY::StPtrVec ## QWERTY(const StPtrVec ## QWERTY &from):StRefArray(from){};\
-void 		StPtrVec ## QWERTY::push_back(const St ## QWERTY &Obj){StObjArray::push_back((TObject*)&Obj);}  \
-void 		StPtrVec ## QWERTY::push_back(const St ## QWERTY *Obj){StObjArray::push_back((TObject*)Obj);} \
-St ## QWERTY*	StPtrVec ## QWERTY::back() const \
-  {return (St ## QWERTY ## *)Back();};\
-St ## QWERTY* 	StPtrVec ## QWERTY::front() const \
-  {return (St ## QWERTY ## *)Front();};\
 \
 const St ## QWERTY ## Iterator 	StPtrVec ## QWERTY::begin() const { return *((St ## QWERTY ## Iterator*)Begin());}\
 const St ## QWERTY ## Iterator 	StPtrVec ## QWERTY::end()   const { return *((St ## QWERTY ## Iterator*)End());}  \
-void 				StPtrVec ## QWERTY::clean(St ## QWERTY* 		obj ){Clean(obj);  }	  \
-void 				StPtrVec ## QWERTY::erase(St ## QWERTY*			obj ){Clean(obj);  }	  \
-void 				StPtrVec ## QWERTY::clean(St ## QWERTY ## Iterator* 	iter){Clean(iter); }	  \
-void 				StPtrVec ## QWERTY::erase(St ## QWERTY ## Iterator* 	iter){Clean(iter); }	  \
-void 				StPtrVec ## QWERTY::clean(St ## QWERTY&			obj ){Clean(&obj); }	  \
-void 				StPtrVec ## QWERTY::erase(St ## QWERTY&			obj ){Clean(&obj); }	  \
-void 				StPtrVec ## QWERTY::clean(St ## QWERTY ## Iterator&	iter){Clean(&iter);}	  \
-void 				StPtrVec ## QWERTY::erase(St ## QWERTY ## Iterator&	iter){Clean(&iter);}	  \
-St ## QWERTY*& StPtrVec ## QWERTY::operator[](Int_t i) const{return *((St ## QWERTY**)GetCell(i));};\
+const St ## QWERTY*& StPtrVec ## QWERTY::at(Int_t i) const{return *((St ## QWERTY**)GetCell(i));};\
+      St ## QWERTY ## Iterator StPtrVec ## QWERTY::erase(StObjArrayIter &it){return *Erase(&it);}\
+      St ## QWERTY ## Iterator StPtrVec ## QWERTY::erase(StObjArrayIter &fst,StObjArrayIter &lst){return *Erase(&fst,&lst);}\
 \
 ClassImp(StSPtrVec ## QWERTY) \
 	StSPtrVec ## QWERTY::StSPtrVec ## QWERTY(const Char_t *name,Int_t s ):StStrArray(name,s){};\
 	StSPtrVec ## QWERTY::StSPtrVec ## QWERTY(const StSPtrVec ## QWERTY &from):StStrArray(from){};\
-void 		StSPtrVec ## QWERTY::push_back(const St ## QWERTY &Obj){StObjArray::push_back((TObject*)&Obj);} \
-void 		StSPtrVec ## QWERTY::push_back(const St ## QWERTY *Obj){StObjArray::push_back((TObject*)Obj);} \
-St ## QWERTY* 	StSPtrVec ## QWERTY::back() const \
-  {return (St ## QWERTY ## *)Back();};\
-St ## QWERTY* 	StSPtrVec ## QWERTY::front() const \
-  {return (St ## QWERTY ## *)Front();};\
 \
 void 		StSPtrVec ## QWERTY::Streamer    (TBuffer& b){StStrArray::Streamer(b);} \
-TIterator* 	StSPtrVec ## QWERTY::MakeIterator(Bool_t dir) const \
-  {return (TIterator*)new St ## QWERTY ## Iterator(this,dir);} \
 \
-const St ## QWERTY ## Iterator 	StSPtrVec ## QWERTY::begin() const { return *((St ## QWERTY ## Iterator*)Begin());};\
-const St ## QWERTY ## Iterator 	StSPtrVec ## QWERTY::end()   const { return *((St ## QWERTY ## Iterator*)End());};\
-				St ## QWERTY ## Iterator::St ## QWERTY ## Iterator(const StObjArray* col, Bool_t dir ) :  StObjArrayIter(col, dir) \
-  {};\
- \
-				St ## QWERTY ## Iterator::St ## QWERTY ## Iterator(const St ## QWERTY ## Iterator &init) :  StObjArrayIter(0,kIterForward) \
-  { *this=init;};\
- \
+      St ## QWERTY ## Iterator StSPtrVec ## QWERTY::erase(StObjArrayIter &it){return *Erase(&it,0,1);}\
+      St ## QWERTY ## Iterator StSPtrVec ## QWERTY::erase(StObjArrayIter &fst,StObjArrayIter &lst){return *Erase(&fst,&lst,1);}\
+const St ## QWERTY ## Iterator StSPtrVec ## QWERTY::begin() const { return *((St ## QWERTY ## Iterator*)Begin());};\
+const St ## QWERTY ## Iterator StSPtrVec ## QWERTY::end()   const { return *((St ## QWERTY ## Iterator*)End());};\
+      St ## QWERTY ## Iterator::St ## QWERTY ## Iterator(const StObjArray* col, Bool_t dir ) :  StObjArrayIter(col, dir){};\
+\
 St ## QWERTY *St ## QWERTY ## Iterator::operator*() const {return (St ## QWERTY ## *)GetObject();} \
-void StSPtrVec ## QWERTY::clean(St ## QWERTY *obj){Clean(obj);}\
-void StSPtrVec ## QWERTY::erase(St ## QWERTY *obj){Erase(obj);}\
-void StSPtrVec ## QWERTY::clean(St ## QWERTY ## Iterator *iter){Clean(iter);}\
-void StSPtrVec ## QWERTY::erase(St ## QWERTY ## Iterator *iter){Erase(iter);}\
-void StSPtrVec ## QWERTY::clean(St ## QWERTY &obj){Clean(&obj);}\
-void StSPtrVec ## QWERTY::erase(St ## QWERTY &obj){Erase(&obj);}\
-void StSPtrVec ## QWERTY::clean(St ## QWERTY ## Iterator &iter){Clean(&iter);}\
-void StSPtrVec ## QWERTY::erase(St ## QWERTY ## Iterator &iter){Erase(&iter);}\
-St ## QWERTY*& StSPtrVec ## QWERTY::operator[](Int_t i) const{return *((St ## QWERTY**)GetCell(i));};\
+const St ## QWERTY*& StSPtrVec ## QWERTY::at(Int_t i) const{return *((St ## QWERTY**)GetCell(i));};\
 
 #endif /*End not __CINT__*/
 #endif
