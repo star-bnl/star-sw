@@ -79,8 +79,12 @@ void SendMail(void) {
   system("echo $USER > junk.OoEEeFc77 2> /dev/null");
   ff=fopen("junk.OoEEeFc77","r"); if(ff==NULL) return;
   fgets(ln,100,ff); fclose(ff); system("rm junk.OoEEeFc77 2> /dev/null");
-  if(strstr(ln,"ward")) return;
+  /* if(strstr(ln,"ward")) return; */
   system("echo $USER browser `date` > junk.OoEEeFc77 2> /dev/null");
+
+  ff=fopen("junk.OoEEeFc77","a"); if(ff==NULL) return;
+  fprintf(ff,"\n%s\n",gInFile); fclose(ff);
+
   system("cat junk.OoEEeFc77 | mail ward@physics.utexas.edu 2> /dev/null");
   system("rm junk.OoEEeFc77 2> /dev/null");
 }
@@ -119,6 +123,7 @@ Widget Row(Widget parent) {
   return rv;
 }
 void DoOnce2(void) {
+  gCalculateAverages=TRUE;
   SendMail();
   gLast=-1;
   gNGraphicsUp=0;
@@ -186,9 +191,14 @@ void Write(char *mess,int whWin) {
     Complain5(); gWin[whWin]->textOutput[0]='\0'; gBreakRowsLoop=TRUE;
   }
   strcat(gWin[whWin]->textOutput,mess);
+  /*-------------------------------------------------------------
   XmTextSetString(gWin[whWin]->txtWidWrite,gWin[whWin]->textOutput);
+  -------------------------------------------------------------*/
+  XmTextInsert(gWin[whWin]->txtWidWrite,
+      (XmTextPosition)strlen(gWin[whWin]->textOutput),mess);
   XmTextSetInsertionPosition(gWin[whWin]->txtWidWrite,
-      (XmTextPosition)strlen(gWin[whWin]->textOutput));
+      (XmTextPosition)strlen(gWin[whWin]->textOutput)-1);
+  XmUpdateDisplay(gWin[whWin]->txtWidWrite);
 }
 myBool GetTheCuts(char *out,char *tableName) {
  FILE *ff; char *tok,fn[150],line[MAX_CUTS_STRING+5]; myBool fo;
@@ -346,6 +356,15 @@ void SayError0(void) {
  See \"Using this window\" under \"Help\".\n\
  ");
 }
+void BotBigCB(Widget ww,caddr_t cld,caddr_t cad) {
+  ARGS
+  short rr;
+  int whWin; whWin=(int)cld;
+  rr=gWin[whWin]->nRowsWritePart; rr+=4; gWin[whWin]->nRowsWritePart=rr;
+  nn=0;
+  XtSetArg(args[nn],XmNrows,rr); nn++;
+  XtSetValues(gWin[whWin]->txtWidWrite,args,nn);
+}
 void CloseThisWindowCB(Widget w,caddr_t cld,caddr_t cad) {
   int whWin; whWin=(int)cld;
   if(gWin[whWin]->win_type==WIN_TYPE_GRAPHICS) gNGraphicsUp--;
@@ -358,6 +377,9 @@ void RunHistMinMax(size_t row) {
   val=ValueWrapper(gWin[gRunWhWin]->wh_gDs,
       gWin[gRunWhWin]->tlm[gRunWhichHilitedLine],irow,
       gWin[gRunWhWin]->subscript[gRunWhichHilitedLine]);
+  if(gTableValueError) {
+    Say("Table has unsupported data type"); gBreakRowsLoop=TRUE;
+  }
   if(gMin>val) gMin=val; if(gMax<val) gMax=val;
 }
 void RunHistFill(size_t row) {
@@ -365,6 +387,9 @@ void RunHistFill(size_t row) {
   val=ValueWrapper(gWin[gRunWhWin]->wh_gDs,
       gWin[gRunWhWin]->tlm[gRunWhichHilitedLine],irow,
       gWin[gRunWhWin]->subscript[gRunWhichHilitedLine]);
+  if(gTableValueError) {
+    Say("Table has unsupported data type"); gBreakRowsLoop=TRUE;
+  }
   hist=(HIST-1)*(val-gMin)/(gMax-gMin);
   if(hist>=HIST||hist<0) {
     PP"hist=%d, HIST=%d, gMax=%e, gMin=%e\n",hist,HIST,gMax,gMin);
@@ -377,6 +402,9 @@ void RunAverage(size_t row) {
   gRunTotal+=ValueWrapper(gWin[gRunWhWin]->wh_gDs,
       gWin[gRunWhWin]->tlm[gRunWhichHilitedLine],irow,
       gWin[gRunWhWin]->subscript[gRunWhichHilitedLine]);
+  if(gTableValueError) {
+    Say("Table has unsupported data type"); gBreakRowsLoop=TRUE;
+  }
 }
 void RunValue(size_t row) {
   int fo=0,ii,irow=row; float val;
@@ -388,8 +416,10 @@ void RunValue(size_t row) {
   for(ii=0;ii<gWin[gRunWhWin]->nLineClickPart;ii++) { /* user-selected cols */
     if(!gWin[gRunWhWin]->isHilited[ii]) continue; fo++;
     val=ValueWrapper(gWin[gRunWhWin]->wh_gDs,
-        gWin[gRunWhWin]->tlm[ii],irow,
-        gWin[gRunWhWin]->subscript[ii]);
+          gWin[gRunWhWin]->tlm[ii],irow,gWin[gRunWhWin]->subscript[ii]);
+    if(gTableValueError) {
+      Say("Table has unsupported data type"); gBreakRowsLoop=TRUE; break;
+    }
     Format(WIDE-1,tmp,val);
     sprintf(format,"%%%ds",WIDE); sprintf(tt2,format,tmp);
     strcat(buf,tt2);
@@ -505,11 +535,13 @@ void RunTheRows(myBool skipInit,int whWin,void (*fnct)()) {
   size_t row,start,end; char cuts[MAX_CUTS_STRING];
   static char ba[MAXROW_DIV_BY_8];
   if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) Err(109);
-  start=FirstRow(whWin); end=LastRow(whWin);
+  start=FirstRow(whWin); end=LastRow(skipInit,whWin);
   if(start>end) { Complain6(); return; }
   if(!skipInit&&gWin[whWin]->useCuts) {
     if(!GetTheCuts(cuts,gWin[whWin]->tableName)) return;
-    DoCutsWrapper(MAXROW_DIV_BY_8,ba,cuts,gWin[whWin]->wh_gDs);
+    if(!DoCutsWrapper(MAXROW_DIV_BY_8,ba,cuts,gWin[whWin]->wh_gDs)) {
+      Say("We have error 51r.\nCheck your cuts string."); return;
+    }
     strncpy(gCuts,cuts,COL);
     strcpy(gCuts+COL-8," etc...");
   }
@@ -531,6 +563,12 @@ void DumpPsCB(Widget w,caddr_t cld,caddr_t cad) {
   fprintf(ff,"\nshowpage\n");
   fclose(ff);
   Say("Your file is named plot.ps.");
+}
+void DoCB(Widget w,caddr_t cld,caddr_t cad) {
+  gCalculateAverages=TRUE;
+}
+void SkipCB(Widget w,caddr_t cld,caddr_t cad) {
+  gCalculateAverages=FALSE;
 }
 void SigFigCB(Widget w,caddr_t cld,caddr_t cad) { /* pops it up */
   Say("This does not work yet.");
@@ -568,7 +606,7 @@ void HelpUtwCB(Widget w,caddr_t cld,caddr_t cad) {
 void HelpCutsCB(Widget w,caddr_t cld,caddr_t cad) {
   *gPass='\0';
   strcat(gPass,"Cuts are held in file stargl.cuts.\n");
-  strcat(gPass,"A sample four-line cuts file is:\n\n");
+  strcat(gPass,"A sample five-line cuts file is:\n\n");
   strcat(gPass,"# Comment line\n");
   strcat(gPass,"globtrk  id.gt.10.and.id.le.110\n");
   strcat(gPass,"# globtrk  (id.eq.1.or.icharge.eq.1).and.(invpt.gt.7)\n");
@@ -611,9 +649,17 @@ void CreateMenuItems(Widget mbar,int type) {
     MakeMenuItem(NOTUSED,mpane,"Write .ps file of histogram",(XtCP)DumpPsCB);
     FinishThisMenu(mbar,mpane,"WritePostScript ");
   }
-  if(type==WIN_TYPE_TABLE) {
+  if(type==WIN_TYPE_TABLE||type==WIN_TYPE_DATASET) {
     mpane=XmCreatePulldownMenu(mbar,"a2",args,0);
-    MakeMenuItem(NOTUSED,mpane,"Format of numerical output",(XtCP)SigFigCB);
+    if(type==WIN_TYPE_DATASET) {
+      MakeMenuItem(NOTUSED,mpane,"Skip averages (faster)",(XtCP)SkipCB);
+      MakeMenuItem(NOTUSED,mpane,"Calc averages (slower)",(XtCP)DoCB);
+    }
+    if(type==WIN_TYPE_TABLE) {
+      MakeMenuItem(NOTUSED,mpane,"Format of numerical output",(XtCP)SigFigCB);
+      MakeMenuItem(NOTUSED,mpane,"Bottom part bigger (may be iterated)",
+        (XtCP)BotBigCB);
+    }
     FinishThisMenu(mbar,mpane,"Preferences ");
   }
   mpane=XmCreatePulldownMenu(mbar,"a2",args,0);
@@ -824,9 +870,10 @@ size_t FirstRow(int whWin) {
     case 3: rv=gLast+1; break;
     default: Err(114);
   }
+  if(rv<0||rv>=gWin[whWin]->nRow) rv=0;
   return rv;
 }
-size_t LastRow(int whWin) {
+size_t LastRow(myBool skipInit,int whWin) {
   size_t rv; char *scratch,scr[100],*pp;
   if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) Err(115);
   switch(gWin[whWin]->whichRadio) { /* see MakeRowSelectionWidget() */
@@ -839,7 +886,11 @@ size_t LastRow(int whWin) {
     case 3: rv=gLast+10; break;
     default: Err(116);
   }
-  gLast=rv; return rv;
+  if(rv<0||rv>=gWin[whWin]->nRow) rv=gWin[whWin]->nRow-1;
+  if(!skipInit) {
+    gLast=rv; if(gWin[whWin]->whichRadio==2) gLast=0; /* 2 -> cuts */
+  }
+  return rv;
 }
 void MakeText(Widget par) {
   ARGS
@@ -935,7 +986,8 @@ void MakeWindow(int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
       gWin[gNWin]->txtWidClickH=TxtWid(ver,header,0,1,COL);
       gWin[gNWin]->txtWidClick=TxtWid(ver,gWin[gNWin]->textClickPart,1,6,COL);
       gWin[gNWin]->txtWidWriteH=TxtWid(ver,"",0,1,47);
-      gWin[gNWin]->txtWidWrite=TxtWid(ver,gWin[gNWin]->textOutput,2,12,COL);
+      gWin[gNWin]->txtWidWrite=TxtWid(ver,gWin[gNWin]->textOutput,2,RW,COL);
+      gWin[gNWin]->nRowsWritePart=RW; /* num Rows in Write part init */
       break;
     case WIN_TYPE_GRAPHICS:
       gWin[gNWin]->rowSel=ROW_SEL_NOT_USED;
@@ -949,11 +1001,10 @@ void MakeWindow(int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
   if(type==WIN_TYPE_GRAPHICS) Clear();
 }
 void DoXStuff(void) {
+  ARGS
   XEvent event; /* XButtonEvent *bev; */
   Widget j1; caddr_t j2,j3; int zero=0;
-  PP"STAR table browser.\n");
   DoOnce2();
-  PP"Building and opening X-window...\n");
   XtToolkitInitialize();
   gAppCon=XtCreateApplicationContext();
   gDisplay=XtOpenDisplay(gAppCon,NULL,"Dataset Catalog Browser",
@@ -963,8 +1014,9 @@ void DoXStuff(void) {
     PP"I can't open a display.\n");
     PP"Have you set your DISPLAY env var?\n"); exit(2);
   }
+  nn=0;
   gAppShell=XtAppCreateShell("Dataset Catalog Browser",
-      "3hhh",applicationShellWidgetClass,gDisplay,NULL,0);
+      "starbrowser",applicationShellWidgetClass,gDisplay,args,nn);
   MakeWindow(-10,WIN_TYPE_PRIMARY); /* -10 not used */
   XtRealizeWidget(gAppShell);
   for(;;) {
