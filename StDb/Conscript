@@ -3,8 +3,8 @@ Import qw ( env INCLUDE LIB BIN EXPORT BUILD OBJ);
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 my $DirPath = DirPath '.';# print "DirPath = $DirPath\n"; 
 my $Dir = "StDb/include";   print "Build Tables for $Dir\n" unless ($param::quiet);
-my @idlL = find_hfiles($Dir);  print "@idlL\n"; 
-my @Repo = Repository_List; print "Repositories = |@Repo|\n";
+my @idlL = find_hfiles($Dir);  # print "@idlL\n"; 
+my @Repo = Repository_List; # print "Repositories = |@Repo|\n";
 foreach my $Rep (@Repo) {
   my $RepDir = $Rep . "/" . $Dir;# print "RepDir = $RepDir\n";
   my @idlR = find_hfiles($RepDir);
@@ -12,7 +12,7 @@ foreach my $Rep (@Repo) {
     push @idlL, $i; 
   }
 }
-my @idl = sortu (@idlL); print "idl = @idl\n"; 
+my @idl = sortu (@idlL); # print "idl = @idl\n"; 
 my @idlT = ();
 my @sources = (); 
 my $DIR = cwd();# print "DIR = $DIR\n";
@@ -41,7 +41,7 @@ my $cscanner= find scan::cpp($env->{_cwd}, $ROOTCINT_CPP);# print "ROOTCINT_CPP 
 my $ROOTCINT_CPPPATH = $cscanner->iflags;# print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
 
 foreach my $idll (@idlT) { 
-  my $stem     = basename ($idll, ".h"); print "stem = $stem; idll: $idll\n";
+  my $stem     = basename ($idll, ".h"); # print "stem = $stem; idll: $idll\n";
   my $dir      = dirname ($idll); #print "dir = $dir\n"; 
   my $idl      = basename ($idll);
   my $idlh     = $INCLUDE . "/"    . $stem . ".h";
@@ -50,7 +50,7 @@ foreach my $idll (@idlT) {
   my $LinkDef  = $share   . "/"    . $stem . "LinkDef.h";      #print "LinkDef = $LinkDef\n";
   my $idlCintH = $share   . "/St_" . $stem . "_TableCint.h";   #print "idlCintH = $idlCintH\n";
   my $idlCintC = $share   . "/St_" . $stem . "_TableCint.cxx"; #print "idlCintC = $idlCintC\n";
-  (my $IDL = $idll) =~ s/^\#//g; print "IDL = $IDL\n";
+  (my $IDL = $idll) =~ s/^\#//g; # print "IDL = $IDL\n";
   if (-r $IDL) { 
     my @Deps = ($idll);# print "Deps: $Deps[0]\n";
     if ($STAR_SYS !~ /^intel_wnt$/) {
@@ -63,10 +63,10 @@ foreach my $idll (@idlT) {
     push @Deps, $idlh;
     push @Deps, $idlH;
     push @Deps, $LinkDef;
-    push @Deps, $INCLUDE . "/Stypes.h";
-    push @Deps, $INCLUDE . "/St_Table.h";
-    push @Deps, $INCLUDE . "/St_DataSet.h";
-    push @Deps, $INCLUDE . "/tableDescriptor.h";
+#    push @Deps, $INCLUDE . "/Stypes.h";
+#    push @Deps, $INCLUDE . "/St_Table.h";
+#    push @Deps, $INCLUDE . "/St_DataSet.h";
+#    push @Deps, $INCLUDE . "/tableDescriptor.h";
     Depends $env2 [$idlCintH,$idlCintC], $LinkDef;
     if ($STAR_SYS !~ /^intel_wnt$/) {
       my @hh = ($idlH);
