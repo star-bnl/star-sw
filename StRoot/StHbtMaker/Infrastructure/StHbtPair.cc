@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.4 1999/07/12 18:57:05 lisa Exp $
+ * $Id: StHbtPair.cc,v 1.5 1999/07/22 18:49:10 lisa Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.cc,v $
+ * Revision 1.5  1999/07/22 18:49:10  lisa
+ * Implement idea of Fabrice to not create and delete StHbtPair all the time
+ *
  * Revision 1.4  1999/07/12 18:57:05  lisa
  * fixed small bug in fourMomentum method of StHbtPair
  *
@@ -30,6 +33,11 @@
 
 #include "StHbtMaker/Infrastructure/StHbtPair.hh"
 
+StHbtPair::StHbtPair(){
+  mTrack1 = 0;
+  mTrack2 = 0;
+}
+
 StHbtPair::StHbtPair(StHbtParticle* a, StHbtParticle* b)
   : mTrack1(a), mTrack2(b)
 { }
@@ -41,16 +49,6 @@ StHbtPair::~StHbtPair() {/* no-op */}
 
 //StHbtPair& StHbtPair::operator=(const StHbtPair &a)
 
-//_________________
-StHbtParticle* StHbtPair::track1() const
-{
-    return mTrack1;
-}
-//_________________
-StHbtParticle* StHbtPair::track2() const
-{
-    return mTrack2;
-}
 //_________________
 double StHbtPair::qInv() const
 {

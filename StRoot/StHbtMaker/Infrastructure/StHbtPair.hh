@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.hh,v 1.2 1999/07/06 22:33:22 lisa Exp $
+ * $Id: StHbtPair.hh,v 1.3 1999/07/22 18:49:10 lisa Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.hh,v $
+ * Revision 1.3  1999/07/22 18:49:10  lisa
+ * Implement idea of Fabrice to not create and delete StHbtPair all the time
+ *
  * Revision 1.2  1999/07/06 22:33:22  lisa
  * Adjusted all to work in pro and new - dev itself is broken
  *
@@ -41,8 +44,12 @@ public:
   //StHbtPair& operator=(const StHbtPair&);
 
   StHbtLorentzVector fourMomentum() const;
+  // track Gets:
   StHbtParticle* track1() const;
   StHbtParticle* track2() const;
+  // track Sets:
+  void SetTrack1(const StHbtParticle* trkPtr);
+  void SetTrack2(const StHbtParticle* trkPtr);
 
   double qInv() const;
   double kT()   const;
@@ -55,5 +62,11 @@ private:
   StHbtParticle* mTrack2;
 
 };
+
+inline void StHbtPair::SetTrack1(const StHbtParticle* trkPtr){mTrack1=trkPtr;}
+inline void StHbtPair::SetTrack2(const StHbtParticle* trkPtr){mTrack2=trkPtr;}
+
+inline StHbtParticle* StHbtPair::track1() const {return mTrack1;}
+inline StHbtParticle* StHbtPair::track2() const {return mTrack2;}
 
 #endif

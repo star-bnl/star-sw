@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.cxx,v 1.2 1999/07/06 22:33:22 lisa Exp $
+ * $Id: StHbtManager.cxx,v 1.3 1999/07/22 18:49:10 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.cxx,v $
+ * Revision 1.3  1999/07/22 18:49:10  lisa
+ * Implement idea of Fabrice to not create and delete StHbtPair all the time
+ *
  * Revision 1.2  1999/07/06 22:33:22  lisa
  * Adjusted all to work in pro and new - dev itself is broken
  *
@@ -123,6 +126,12 @@ void StHbtManager::ProcessEvent(){
 
       // OK, pico event is built
       // make real pairs...
+
+      // Fabrice points out that we do not need to keep creating/deleting pairs all the time
+      // We only ever need ONE pair, and we can just keep changing internal pointers
+      // this should help speed things up
+      StHbtPair* ThePair = new StHbtPair;
+
       StHbtParticleIterator PartIter1;
       StHbtParticleIterator PartIter2;
       StHbtCorrFctnIterator CorrFctnIter;
@@ -143,16 +152,18 @@ void StHbtManager::ProcessEvent(){
 	  StartInnerLoop = PartIter1;
 	  StartInnerLoop++;
 	}
+	ThePair->SetTrack1(*PartIter1);
 	for (PartIter2 = StartInnerLoop; PartIter2!=EndInnerLoop;PartIter2++){
-	  StHbtPair* pair = new StHbtPair(*PartIter1,*PartIter2);
-	  if (currentAnalysis->PairCut()->Pass(pair)){
+	  ThePair->SetTrack2(*PartIter2);
+	  //	  OBSOLETE StHbtPair* pair = new StHbtPair(*PartIter1,*PartIter2);
+	  if (currentAnalysis->PairCut()->Pass(ThePair)){
 	    for (CorrFctnIter=currentAnalysis->CorrFctnCollection()->begin();
 		 CorrFctnIter!=currentAnalysis->CorrFctnCollection()->end();CorrFctnIter++){
 	      StHbtCorrFctn* CorrFctn = *CorrFctnIter;
-	      CorrFctn->AddRealPair(pair);
+	      CorrFctn->AddRealPair(ThePair);
 	    }
 	  }  // if passed pair cut
-	  delete pair;
+	  // OBSOLETE	  delete pair;
 	}    // loop over second particle
       }      // loop over first particle
       
@@ -181,16 +192,18 @@ void StHbtManager::ProcessEvent(){
 	    EndInnerLoop = storedEvent->SecondParticleCollection()->end();
 	  }
 	  for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
+	    ThePair->SetTrack1(*PartIter1);
 	    for (PartIter2=StartInnerLoop;PartIter2!=EndInnerLoop;PartIter2++){
-	      StHbtPair* pair = new StHbtPair(*PartIter1,*PartIter2);
-	      if (currentAnalysis->PairCut()->Pass(pair)){
+	      // OBSOLETE	      StHbtPair* pair = new StHbtPair(*PartIter1,*PartIter2);
+	      ThePair->SetTrack2(*PartIter2);
+	      if (currentAnalysis->PairCut()->Pass(ThePair)){
 		for (CorrFctnIter=currentAnalysis->CorrFctnCollection()->begin();
 		     CorrFctnIter!=currentAnalysis->CorrFctnCollection()->end();CorrFctnIter++){
 		  StHbtCorrFctn* CorrFctn = *CorrFctnIter;
-		  CorrFctn->AddMixedPair(pair);
+		  CorrFctn->AddMixedPair(ThePair);
 		}
 	      }  // if passed pair cut
-	      delete pair;
+	      // OBSOLETE	      delete pair;
 	    }    // loop over second particle
 	  }      // loop over first particle
 	}        // loop over pico-events stored in Mixing buffer
@@ -200,6 +213,7 @@ void StHbtManager::ProcessEvent(){
 	delete *picoEventIter;
 	currentAnalysis->MixingBuffer()->pop_back();
       }  // if mixing buffer is full
+      delete ThePair;
       currentAnalysis->MixingBuffer()->push_front(picoEvent);  // store the current pico-event in buffer
     }   // if currentEvent is accepted by currentAnalysis
   }     // loop over Analyses
