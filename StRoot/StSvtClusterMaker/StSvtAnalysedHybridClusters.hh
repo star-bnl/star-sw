@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.hh,v 1.6 2001/11/12 22:58:01 caines Exp $
+ * $Id: StSvtAnalysedHybridClusters.hh,v 1.7 2002/01/05 21:46:00 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.hh,v $
+ * Revision 1.7  2002/01/05 21:46:00  caines
+ * Include t0 correction in hit
+ *
  * Revision 1.6  2001/11/12 22:58:01  caines
  * Add functions for filling hits from srs data
  *
@@ -68,7 +71,7 @@ class StSvtAnalysedHybridClusters : public StSvtHybridObject
   virtual ~StSvtAnalysedHybridClusters();
   
   void setMembers(int numOfClu, int index);
-  int setSvtHit(StSvtAnalysis* mSvtAnalysis);
+  int setSvtHit(StSvtAnalysis* mSvtAnalysis, float T0Jitter);
   int setSvtHit(scs_spt_st* mSrsHit);
 
   StSvtHitData* svtHitData();

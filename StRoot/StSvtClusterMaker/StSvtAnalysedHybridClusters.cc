@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.cc,v 1.5 2001/11/21 19:02:43 caines Exp $
+ * $Id: StSvtAnalysedHybridClusters.cc,v 1.6 2002/01/05 21:45:56 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.cc,v $
+ * Revision 1.6  2002/01/05 21:45:56  caines
+ * Include t0 correction in hit
+ *
  * Revision 1.5  2001/11/21 19:02:43  caines
  * Set mNumOfHits properly as for real data I was setting arrays to size 0 then filling
  *
@@ -87,7 +90,8 @@ void StSvtAnalysedHybridClusters::ReSize(){
  mPos = tmp3; 
 }
 
-int StSvtAnalysedHybridClusters::setSvtHit(StSvtAnalysis* mSvtAnalysis)
+int StSvtAnalysedHybridClusters::setSvtHit(StSvtAnalysis* mSvtAnalysis,
+					   float T0Jitter)
 {
 
  StThreeVectorF mGlobalPos;
@@ -105,8 +109,8 @@ int StSvtAnalysedHybridClusters::setSvtHit(StSvtAnalysis* mSvtAnalysis)
     mSvtHit[hit].setHardwarePosition((long)mHardWarePosition<<4);
     mSvtHit[hit].setCharge(mSvtAnalysis->GetCluCharge(hit));
     
-   
-    mPos[hit].setX((float)mSvtAnalysis->GetMeanClusterTimeBin(hit));
+    // Take jitter out of t0 caused by SVT clock being 8 3rds of RHIC clock
+    mPos[hit].setX((float)mSvtAnalysis->GetMeanClusterTimeBin(hit)-T0Jitter);
     mPos[hit].setY((float)mSvtAnalysis->GetMeanClusterAnode(hit));
     mPos[hit].setZ(0.0);
     
