@@ -74,9 +74,9 @@ CC:<--------------------------------------------------------------------
         phi = sphi * (146-iphi) - sphi/2.
       endif
 
-cc      write(6,1) eta_bin,phi_bin, eta,phi,theta
+cc      write(6,101) eta_bin,phi_bin, eta,phi,theta
       return
- 1    format(' Tower ieta ',i3,' iphi ', i3,' eta, phi, theta ', 3f7.4)
+ 101  format(' Tower ieta ',i3,' iphi ', i3,' eta, phi, theta ', 3f7.4)
       end
 
       subroutine turn_to_tower(phit,tht,rt, x,y,z, xt,yt,zt)
