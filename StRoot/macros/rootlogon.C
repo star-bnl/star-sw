@@ -1,5 +1,8 @@
-// $Id: rootlogon.C,v 1.8 1999/07/09 01:22:03 fisyak Exp $
+// $Id: rootlogon.C,v 1.9 1999/07/09 20:55:00 didenko Exp $
 // $Log: rootlogon.C,v $
+// Revision 1.9  1999/07/09 20:55:00  didenko
+// set O0 (VP)
+//
 // Revision 1.8  1999/07/09 01:22:03  fisyak
 // CleanUp, set sequantial processing of Chain flags, flags are not truncated to 3 characters any more
 //
@@ -21,6 +24,8 @@
 //=======================================================================
 
 {
+    gInterpreter->ProcessLine(".O0");
+    G__loadfile("iostream.h");
     TString gPrompt =  gROOT->GetApplication()->Argv(0);
     gPrompt += " [%d] ";
 
@@ -72,7 +77,6 @@
 
 // 	Assign bif size of hashtable for STAR I/O
 TBuffer::SetGlobalWriteParam(2003);
-printf("fgMapSize=%d\n",TBuffer::GetGlobalWriteParam());
 //      Print version
  TString STAR_LEVEL("$STAR_LEVEL");
  TString ROOT_LEVEL("$ROOT_LEVEL");
