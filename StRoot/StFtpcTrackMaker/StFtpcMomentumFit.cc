@@ -1,7 +1,11 @@
 //////////////////////////////////////////////////////////////////
-// $Id: StFtpcMomentumFit.cc,v 1.6 2001/04/02 14:20:07 oldi Exp $
+// $Id: StFtpcMomentumFit.cc,v 1.7 2001/04/04 16:44:28 oldi Exp $
 //
 // $Log: StFtpcMomentumFit.cc,v $
+// Revision 1.7  2001/04/04 16:44:28  oldi
+// Fix of a stupid bug which was introduced by myself two days ago. Linux compiler
+// did not complain but on sun it did.
+//
 // Revision 1.6  2001/04/02 14:20:07  oldi
 // Some minor changes due to Insure++ was reporting problems.
 // These changes do not affect the physical output of StFtpcTrackMaker!
@@ -45,9 +49,9 @@ extern "C" {void gufld(float *, float *);}
 
 StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Vertex, StThreeVector<double> *Hit, int nHits)
 {
-  StThreeVector<double> Point[nHits+1];
-  double xWeight[nHits+1];
-  double yWeight[nHits+1];
+  StThreeVector<double> *Point = new StThreeVector<double>[nHits+1];
+  double *xWeight = new double[nHits+1];
+  double *yWeight = new double[nHits+1];
 
   mYCenter = 0.;
   mXCenter = 0.;
@@ -69,13 +73,17 @@ StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Vertex, StThreeVecto
     }
 
   fitPoints(Point, xWeight, yWeight);
+
+  delete Point;
+  delete xWeight;
+  delete yWeight;
 }
 
 StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Vertex, double xVertexWeight, double yVertexWeight, StThreeVector<double> *Hit, double *xWeightVector, double *yWeightVector, int nHits)
 {
-  StThreeVector<double> Point[nHits+1];
-  double xWeight[nHits+1];
-  double yWeight[nHits+1];
+  StThreeVector<double> *Point = new StThreeVector<double>[nHits+1];
+  double *xWeight = new double[nHits+1];
+  double *yWeight = new double[nHits+1];
 
   mYCenter = 0.;
   mXCenter = 0.;
@@ -95,13 +103,17 @@ StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Vertex, double xVert
     }
 
   fitPoints(Point, xWeight, yWeight);
+
+  delete Point;
+  delete xWeight;
+  delete yWeight;
 }
 
 StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Hit, int nHits)
 {
-  StThreeVector<double> Point[nHits];
-  double xWeight[nHits];
-  double yWeight[nHits];
+  StThreeVector<double> *Point = new StThreeVector<double>[nHits];
+  double *xWeight = new double[nHits];
+  double *yWeight = new double[nHits];
 
   mIterSteps=10;
   mNumHits=nHits;
@@ -120,9 +132,9 @@ StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Hit, int nHits)
 
 StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Hit, double *xWeightVector, double *yWeightVector, int nHits)
 {
-  StThreeVector<double> Point[nHits];
-  double xWeight[nHits];
-  double yWeight[nHits];
+  StThreeVector<double> *Point = new StThreeVector<double>[nHits];
+  double *xWeight = new double[nHits];
+  double *yWeight = new double[nHits];
   // assume hit resolution = 0.01 cm if not otherwise stated
 
   mIterSteps=10;
@@ -137,13 +149,17 @@ StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Hit, double *xWeight
     }
 
   fitPoints(Point, xWeight, yWeight);
+
+  delete Point;
+  delete xWeight;
+  delete yWeight;
 }
 
 StFtpcMomentumFit::StFtpcMomentumFit(double vx, double vy, double vz, double *posx, double *posy, double *posz, int nHits)
 {
-  StThreeVector<double> Point[nHits+1];
-  double xWeight[nHits+1];
-  double yWeight[nHits+1];
+  StThreeVector<double> *Point = new StThreeVector<double>[nHits+1];
+  double *xWeight = new double[nHits+1];
+  double *yWeight = new double[nHits+1];
 
   mIterSteps=10;
   mNumHits=nHits;
@@ -171,9 +187,9 @@ StFtpcMomentumFit::StFtpcMomentumFit(double vx, double vy, double vz, double *po
 
 StFtpcMomentumFit::StFtpcMomentumFit(double vx, double vy, double vz, double xVertexWeight, double yVertexWeight, double *posx, double *posy, double *posz, double *xWeightVector, double *yWeightVector, int nHits)
 {
-  StThreeVector<double> Point[nHits+1];
-  double xWeight[nHits+1];
-  double yWeight[nHits+1];
+  StThreeVector<double> *Point = new StThreeVector<double>[nHits+1];
+  double *xWeight = new double[nHits+1];
+  double *yWeight = new double[nHits+1];
 
   mIterSteps=10;
   mNumHits=nHits;
@@ -194,13 +210,17 @@ StFtpcMomentumFit::StFtpcMomentumFit(double vx, double vy, double vz, double xVe
     }
 
   fitPoints(Point, xWeight, yWeight);
+
+  delete Point;
+  delete xWeight;
+  delete yWeight;
 }
 
 StFtpcMomentumFit::StFtpcMomentumFit(double *posx, double *posy, double *posz, int nHits)
 {
-  StThreeVector<double> Point[nHits+1];
-  double xWeight[nHits+1];
-  double yWeight[nHits+1];
+  StThreeVector<double> *Point = new StThreeVector<double>[nHits];
+  double *xWeight = new double[nHits];
+  double *yWeight = new double[nHits];
 
   mIterSteps=10;
   mNumHits=nHits;
@@ -218,13 +238,17 @@ StFtpcMomentumFit::StFtpcMomentumFit(double *posx, double *posy, double *posz, i
     }
 
   fitPoints(Point, xWeight, yWeight);
+
+  delete Point;
+  delete xWeight;
+  delete yWeight;
 }
 
 StFtpcMomentumFit::StFtpcMomentumFit(double *posx, double *posy, double *posz, double *xWeightVector, double *yWeightVector, int nHits)
 {
-  StThreeVector<double> Point[nHits];
-  double xWeight[nHits];
-  double yWeight[nHits];
+  StThreeVector<double> *Point = new StThreeVector<double>[nHits];
+  double *xWeight = new double[nHits];
+  double *yWeight = new double[nHits];
 
   mIterSteps=10;
   mNumHits=nHits;
@@ -240,11 +264,14 @@ StFtpcMomentumFit::StFtpcMomentumFit(double *posx, double *posy, double *posz, d
     }
 
   fitPoints(Point, xWeight, yWeight);
+
+  delete Point;
+  delete xWeight;
+  delete yWeight;
 }
 
 StFtpcMomentumFit::~StFtpcMomentumFit()
 {
-
 }
 
 void StFtpcMomentumFit::fitPoints(StThreeVector<double> *Hit, double *xWeight, double *yWeight)
