@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVectorD.cc,v 1.5 2000/11/27 17:33:46 ullrich Exp $
+ * $Id: StLorentzVectorD.cc,v 1.6 2003/05/01 19:24:31 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StLorentzVectorD.cc,v $
+ * Revision 1.6  2003/05/01 19:24:31  ullrich
+ * Corrected problem in boost().
+ *
  * Revision 1.5  2000/11/27 17:33:46  ullrich
  * Enclosed streamer in macro __ROOT__.
  *
@@ -48,7 +51,7 @@ StLorentzVectorD::boost(const StLorentzVectorD& pframe) const
 {
     double mass        = abs(pframe);
     StThreeVectorF eta = (-1./mass)*pframe.vect();            // gamma*beta
-    double gamma       = pframe.e()/mass;
+    double gamma       = fabs(pframe.e())/mass;
     StThreeVectorF pl  = ((this->vect()*eta)/(eta*eta))*eta;  // longitudinal momentum
     return StLorentzVectorD(gamma*this->e() - this->vect()*eta,
 			    this->vect() + (gamma-1.)*pl - this->e()*eta);
@@ -59,7 +62,7 @@ StLorentzVectorD::boost(const StLorentzVectorF& pframe) const
 {
     double mass               = abs(pframe);
     StThreeVectorF eta        = (-1./mass)*pframe.vect();            // gamma*beta
-    double gamma              = pframe.e()/mass;
+    double gamma              = fabs(pframe.e())/mass;
     StThreeVectorF pl         = ((this->vect()*eta)/(eta*eta))*eta;  // longitudinal momentum
     return StLorentzVectorD(gamma*this->e() - this->vect()*eta,
 			    this->vect() + (gamma-1.)*pl - this->e()*eta);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVector.hh,v 1.6 1999/10/15 15:56:36 ullrich Exp $
+ * $Id: StLorentzVector.hh,v 1.7 2003/05/01 19:24:31 ullrich Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StLorentzVector.hh,v $
+ * Revision 1.7  2003/05/01 19:24:31  ullrich
+ * Corrected problem in boost().
+ *
  * Revision 1.6  1999/10/15 15:56:36  ullrich
  * Changed output format in operator<<, added operator>>
  *
@@ -410,7 +413,7 @@ StLorentzVector<T>::boost(const StLorentzVector<X>& pframe) const
 {
     T mass               = abs(pframe);
     StThreeVector<T> eta = (-1./mass)*pframe.vect();            // gamma*beta
-    T gamma              = pframe.e()/mass;
+    T gamma              = fabs(pframe.e())/mass;
     StThreeVector<T> pl  = ((this->vect()*eta)/(eta*eta))*eta;  // longitudinal momentum
     return StLorentzVector<T>(gamma*this->e() - this->vect()*eta,
                               this->vect() + (gamma-1.)*pl - this->e()*eta);
@@ -501,7 +504,7 @@ StLorentzVector<T>::boost(const StLorentzVector<float>& pframe) const
 {
     T mass               = abs(pframe);
     StThreeVector<T> eta = (-1./mass)*pframe.vect();            // gamma*beta
-    T gamma              = pframe.e()/mass;
+    T gamma              = fabs(pframe.e())/mass;
     StThreeVector<T> pl  = ((this->vect()*eta)/(eta*eta))*eta;  // longitudinal momentum
     return StLorentzVector<T>(gamma*this->e() - this->vect()*eta,
                               this->vect() + (gamma-1.)*pl - this->e()*eta);
@@ -513,7 +516,7 @@ StLorentzVector<T>::boost(const StLorentzVector<double>& pframe) const
 {
     T mass               = abs(pframe);
     StThreeVector<T> eta = (-1./mass)*pframe.vect();            // gamma*beta
-    T gamma              = pframe.e()/mass;
+    T gamma              = fabs(pframe.e())/mass;
     StThreeVector<T> pl  = ((this->vect()*eta)/(eta*eta))*eta;  // longitudinal momentum
     return StLorentzVector<T>(gamma*this->e() - this->vect()*eta,
                               this->vect() + (gamma-1.)*pl - this->e()*eta);
