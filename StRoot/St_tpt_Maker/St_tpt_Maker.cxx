@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.52 2000/06/23 19:40:27 fisyak Exp $
+// $Id: St_tpt_Maker.cxx,v 1.53 2000/07/26 00:53:37 sakrejda Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.53  2000/07/26 00:53:37  sakrejda
+// Pre-vertex info added to the tpt module
+//
 // Revision 1.52  2000/06/23 19:40:27  fisyak
 // remove access to params
 //
@@ -324,7 +327,7 @@ Int_t St_tpt_Maker::Make(){
 //			TPT
   if (!m_iftteTrack) {
     if (Debug()) cout << " start tpt_run " << endl;
-    Int_t Res_tpt = tpt(m_tpt_pars,tphit,tptrack);
+    Int_t Res_tpt = tpt(m_tpt_pars,tphit,tptrack,clusterVertex);
 //                      ==============================
     
     if (Res_tpt != kSTAFCV_OK) {cout << "Problem with tpt.." << endl;}
