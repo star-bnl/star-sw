@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.54 2001/04/12 15:46:26 balewski Exp $
+// $Id: StPrimaryMaker.cxx,v 1.55 2001/04/17 21:26:41 wdeng Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.55  2001/04/17 21:26:41  wdeng
+// Replug in egr_primfit.
+//
 // Revision 1.54  2001/04/12 15:46:26  balewski
 // *** empty log message ***
 //
@@ -182,9 +185,10 @@
 #include "StMessMgr.h"
 
 #include "global/St_evr_am_Module.h"
-#include "global/St_egr_fitter_Module.h"
 #include "global/St_track_propagator_Module.h"
 #include "global/St_egr_impactcl_Module.h"
+#include "global/St_egr_fitter_Module.h"
+#include "global/St_egr_primfit_Module.h"
 #include "St_db_Maker/St_db_Maker.h"
 
 #define gufld   gufld_
@@ -531,18 +535,16 @@ Int_t StPrimaryMaker::Make(){
       //     ============================================
 
       if(Debug())
-        gMessMgr->Debug() << "Calling EGR_fitter - Second time" << endm;
-      iRes = egr_fitter (tphit,    vertex,       tptrack, tpc_groups,
-			 scs_spt, m_egr2_egrpar, stk_track, svt_groups,
-			 evt_match, primtrk);
-      //	   ======================================================
+        gMessMgr->Debug() << "Calling egr_primfit" << endm;
+      iRes = egr_primfit(vertex, m_egr2_egrpar, globtrk, primtrk);
+      //     ====================================================
       
       if (iRes !=kSTAFCV_OK) iMake = kStWarn;
       if (iRes !=kSTAFCV_OK){
-        gMessMgr->Warning() << "Problem on return from EGR_FITTER" << endm;}
+        gMessMgr->Warning() << "Problem on return from egr_primfit" << endm;}
        
       if(Debug())
-        gMessMgr->Debug() <<" finished calling egr_fitter - second time" << endm;
+        gMessMgr->Debug() <<" finished calling egr_primfit" << endm;
 
       // Fill bit map in prim trk
       
