@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.47 1999/05/09 21:45:12 fisyak Exp $
+// $Id: bfc.C,v 1.48 1999/05/10 19:15:41 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.48  1999/05/10 19:15:41  fisyak
+// Remove bfc_*.C
+//
 // Revision 1.47  1999/05/09 21:45:12  fisyak
 // change default chain
 //
@@ -562,16 +565,14 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gtrack",Char_t *infile=0, 
       if (tptMk) treeMk->IntoBranch("tpc_tracksBranch","tpc_tracks/.data");
       if (ChainFlags[kCTF]) {
 	//  treeMk->SetBranch("trgBranch",FileOut.Data());
-	treeMk->IntoBranch("trgBranch","ctf");
-	treeMk->IntoBranch("trgBranch","mwc");
-	treeMk->IntoBranch("trgBranch","trg");
+	treeMk->IntoBranch("trgBranch","ctf mwc trg");
       }
       if (l3tMk) {
 	//  treeMk->SetBranch("l3TBranch",FileOut.Data());
 	treeMk->IntoBranch("l3TBranch","l3Tracks");
       }
     }      
-    //    treeMk->SetInput(".default","Others");
+    treeMk->SetBranch("histBranch");
   }
   chain->PrintInfo();
   // START the chain (may the force be with you)
