@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.22 2000/07/31 21:59:46 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.23 2000/08/08 17:02:28 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -235,7 +235,7 @@
    $CC        = "/opt/WS5.0/bin/cc";
    $CXX       = "/opt/WS5.0/bin/CC";
    $FC        = "/opt/WS5.0/bin/f77";
-   $CXXFLAGS  = "-KPIC -D__SunOS_5_6 -library=iostream,no_Cstd";
+   $CXXFLAGS  = "-KPIC -D__SunOS_5_6 -library=iostream,no%%Cstd";
    $R_CPPFLAGS  = "-DG__REGEXP1 -DG__UNIX -DG__OSFDLL -DG__SHAREDLIB -DG__ROOT -DG__REDIRECTIO";
    $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
 #   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L/opt/WS5.0/SC5.0/lib -lCstd -liostream -lCrun";
@@ -282,7 +282,7 @@
    $CC        = "cc";
    $CXX       = "CC";
    $FC        = "f77";
-   $CXXFLAGS  = "-KPIC +w -features=no_anachronisms -features=rtti";
+   $CXXFLAGS  = "-KPIC +w -features=no%%anachronisms -features=rtti";
    $R_CPPFLAGS  = "-DG__REGEXP1 -DG__UNIX -DG__OSFDLL -DG__SHAREDLIB -DG__ROOT -DG__REDIRECTIO";
    $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
    $CLIBS     = "-lw -lgen -lsocket -lnsl -lintl";
