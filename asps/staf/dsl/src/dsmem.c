@@ -369,7 +369,7 @@ void *dsTypeCalloc(size_t size)
 void dsTypeFree(void *ptr, size_t size)
 {
 	if (ptr != NULL) {
-		FREE((char *)ptr);
+		FREE(ptr);
 		dsMemCalls++;
 		dsTidSize -= size;
 	}
