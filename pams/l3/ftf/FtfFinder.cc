@@ -2,12 +2,9 @@
 //: FILE:       FtfFinder.cpp
 //: HISTORY:
 //:             28oct1996 version 1.00
-<<<<<<< FtfFinder.cc
 //:             03jun1999 para.fillTracks included. Merging only when tracks filled
 //:             03jun1999 add a function for real time, clock gives cpu time 
-=======
 //:             06may1999 ppy  getTracks returns 1 for error
->>>>>>> 1.6
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
 //: CLASS:       FtfFinder, steers track finding
@@ -69,18 +66,11 @@ double FtfFinder::process (  ) {
 
 //   if ( para.dEdx ) dEdx ( ) ;
 
-<<<<<<< FtfFinder.cc
    cpuTime  = CpuTime ( ) ;
    realTime = RealTime ( ) ;
    if ( para.infoLevel > 0 )
       printf ( "ftf time: cpu %7.3f real %f7.2 \n ", cpuTime, realTime ) ;
    return cpuTime ;
-=======
-   totalTime = time ( ) ;
-// if ( para.infoLevel > 0 )
-//    printf ( "ftf time: %7.3f \n ", totalTime ) ;
-   return totalTime ;
->>>>>>> 1.6
 } 
 //********************************************************************
 //     Calculates deposited Energy
@@ -412,11 +402,7 @@ int FtfFinder::setPointers ( )
       r             = (double)sqrt ( r2 ) ;
       phi           = (double)atan2(thisHit->y,thisHit->x) + para.phiShift ;
       if ( phi < 0 ) phi = phi + twoPi ;
-<<<<<<< FtfFinder.cc
       eta           = (double)seta(r,thisHit->z) ;
-=======
-      eta           = (float)seta(r,(thisHit->z-para.zVertex)) ;
->>>>>>> 1.6
 
       if ( para.szFitFlag ) {
         thisHit->s  = 0.F ;
