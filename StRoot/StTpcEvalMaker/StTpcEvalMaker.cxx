@@ -1,6 +1,9 @@
 //-----------------------------------------------------------------------
-// * $Id: StTpcEvalMaker.cxx,v 1.8 2001/07/10 09:21:47 flierl Exp $
+// * $Id: StTpcEvalMaker.cxx,v 1.9 2001/08/10 12:14:24 flierl Exp $
 // * $Log: StTpcEvalMaker.cxx,v $
+// * Revision 1.9  2001/08/10 12:14:24  flierl
+// * correct call to number of tracks
+// *
 // * Revision 1.8  2001/07/10 09:21:47  flierl
 // * add posibility to cut on vertex z-positions
 // *
@@ -78,7 +81,7 @@ using std::distance;
 #include "StTpcEvalEvent.h"
 #include "StTpcEvalHistograms.h"
 
-static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.8 2001/07/10 09:21:47 flierl Exp $";
+static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.9 2001/08/10 12:14:24 flierl Exp $";
 ClassImp(StTpcEvalMaker)
 
 //-------------------------------------------------
@@ -240,7 +243,7 @@ void StTpcEvalMaker::fillHeader()
     // get some numbers
     globTrks = mStEvent->trackNodes().size();
     geantPrimaries = mStMcEvent->primaryVertex()->daughters().size();
-    recoPrimaries  = mStEvent->primaryVertex()->daughters().size();
+    recoPrimaries  = mStEvent->trackNodes().size(); 
     geantTpcHits   = mStMcEvent->tpcHitCollection()->numberOfHits();
     recoTpcHits    = mStEvent->tpcHitCollection()->numberOfHits();
 
