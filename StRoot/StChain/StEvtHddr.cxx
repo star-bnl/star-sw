@@ -39,6 +39,7 @@ void StEvtHddr::FillTag(EvtHddr_st *tag)
    struct tm *tp;
    tp            = (tm*)gmtime((time_t*)&ut);
    UInt_t year   = tp->tm_year;
+   if (year < 1900) year +=1900;
    UInt_t month  = tp->tm_mon + 1;
    UInt_t day    = tp->tm_mday;
    UInt_t hour   = tp->tm_hour;
