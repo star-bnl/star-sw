@@ -13,18 +13,21 @@
 #define FCF_DOUBLE_PAD		2
 #define FCF_DOUBLE_T		4
 #define FCF_FALLING		8
-#define FCF_TWOPAD		16
+#define FCF_LEFT_EDGE		16
+#define FCF_RIGHT_EDGE		32
+#define FCF_TWOPAD		64
+#define FCF_IGNORE		128
 
 // FCF paramters defaults - DON'T MUCK AROUND!
 #define FCF_PARAM1		2
 #define FCF_MIN_ADC_T		3
 #define FCF_MIN_ADC_PAD		12
 
-#define LEFT_SHIFT 6
-
+#ifdef __ROOT__
 typedef unsigned int u_int;
 typedef unsigned short u_short;
 typedef unsigned char u_char;
+#endif
 
 class fcfClass {
 public:
@@ -61,6 +64,12 @@ public:
 	u_int *cppOff ;	
 	u_int maxClusters ;	// maximum allowed # clusters in this row
 
+	// offset to the pad-to-pad t0 correction (multipled by 64!), V4.10
+	int *t0Corr ;
+
+	// offset to the pad gain table (multipled by 64!), 
+	u_int *gainCorr ;
+
 	// used perhaps...
 	int sb ;	// i.e. sector number, 1..24
 	int rb ;	// receiver board,	1..12
@@ -68,11 +77,14 @@ public:
 
 
 	// THA function!
-	int finder(u_char *adcin, u_short *cppin, u_int *outres, short *t0_corr=NULL) ;
+	int finder(u_char *adcin, u_short *cppin, u_int *outres) ;
 
+	// support
+	inline int saveRes(struct fcfResx *res_p[], int cou, u_int *output) ;
 	void set8to10(u_short *extTable) ;
 
 private:
+	struct fcfResx *resx[2][512] ;
 	
 	u_short *a8to10 ;	// internal copy
 	int noADCconversion ;

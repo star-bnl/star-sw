@@ -3,11 +3,17 @@
 
 /***************************************************************************
  *
- * $Id: StDaqClfMaker.h,v 1.3 2002/03/20 16:41:54 jml Exp $
+ * $Id: StDaqClfMaker.h,v 1.4 2002/08/22 21:31:33 jml Exp $
  *
  *--------------------------------------------------------------------------
  *
  * $Log: StDaqClfMaker.h,v $
+ * Revision 1.4  2002/08/22 21:31:33  jml
+ * Installed new version of fcfClass
+ * This version is frozen for the 2002-2003 run and will be running on the i960s
+ * (assuming no new bugs are found).  Also set best values for several
+ * control flags
+ *
  * Revision 1.3  2002/03/20 16:41:54  jml
  * Added pad by pad t0 corrections controlled by flags
  * 	no flag    -- full pad by pad corrections
@@ -34,6 +40,7 @@ class StTpcHitCollection;
 
 #define MAX_PADS_EVER 256
 #define MAX_TIMEBINS_EVER 512
+#define MAX_CLUSTERS 6000
 
 #ifndef MAX_PADROWS
 #define MAX_PADROWS 45
@@ -87,16 +94,12 @@ class StDaqClfMaker:public StMaker
   unsigned short croat_adc[MAX_PADS_EVER+1][MAX_TIMEBINS_EVER];
   unsigned short croat_cpp[MAX_PADS_EVER+1][64];
   unsigned int croat_adcOff[MAX_PADS_EVER+1];
-  unsigned int croat_cppOff[MAX_PADS_EVER+1];
+  unsigned short croat_cppOff[MAX_PADS_EVER+1];   
+  
+  int t0Corr[MAX_PADS_EVER+1];
+  unsigned int gainCorr[MAX_PADS_EVER+1];
 
-  // control flags
-  Int_t histSector;
-  Int_t histPadrow;
-  Int_t splitRows;          // split rows as they are split on the i960
-
-  Int_t StDaqClfMaker::BuildHistogram(int padrow, 
-				      unsigned short *adc_in, 
-				      unsigned short *adc_out);
+ 
 
   Int_t BuildCPP(int nrows, 
 		 raw_row_st *row, 
@@ -109,7 +112,8 @@ class StDaqClfMaker:public StMaker
   void fillStEvent(tcl_tphit_st *hit);
   void filltphit(tcl_tphit_st *hit);
 
-  void getT0Corrections(short *corr, int sector, int row);
+  void getPbPT0Corrections(int sector, int row);
+  void getGainCorrections(int sector, int row);
 
   // Need my own coordinate transformations, because
   // TPC provided transforms only work on ints.
@@ -125,8 +129,12 @@ class StDaqClfMaker:public StMaker
   double mDt;
   double mDperp;
 
-  int doFullT0Corrections;
-  int doPadT0Corrections;
+  // control flags
+  int splitRows;          // split rows as they are split on the i960
+  int doT0Corrections;    // apply t0 corrections
+  int doGainCorrections;  // apply gains in clf (rather than daqmaker)
+  int doZeroTruncation;   // throw away hist beyond central membrane
+
   int mFill_tphit;
   int mFill_stevent;
   int mCreate_stevent;

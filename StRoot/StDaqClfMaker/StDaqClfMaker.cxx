@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDaqClfMaker.cxx,v 1.4 2002/03/20 16:41:54 jml Exp $
+ * $Id: StDaqClfMaker.cxx,v 1.5 2002/08/22 21:31:33 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,12 @@
  ***************************************************************************
  *
  * $Log: StDaqClfMaker.cxx,v $
+ * Revision 1.5  2002/08/22 21:31:33  jml
+ * Installed new version of fcfClass
+ * This version is frozen for the 2002-2003 run and will be running on the i960s
+ * (assuming no new bugs are found).  Also set best values for several
+ * control flags
+ *
  * Revision 1.4  2002/03/20 16:41:54  jml
  * Added pad by pad t0 corrections controlled by flags
  * 	no flag    -- full pad by pad corrections
@@ -37,6 +43,7 @@
 #include "tables/St_raw_seq_Table.h"
 #include "tables/St_tcl_tphit_Table.h"
 #include "tables/St_type_shortdata_Table.h"
+#include "tables/St_tpcGain_Table.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TFile.h"
@@ -58,6 +65,8 @@
 #include "fcfClass.hh"
 #include "padfinder.h"
 #include "StDbUtilities/StCoordinates.hh"
+#include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
+#include "StDaqLib/TPC/fee_pin.h"
 
 ClassImp(StDaqClfMaker);
 
@@ -98,91 +107,46 @@ StDaqClfMaker::~StDaqClfMaker()
 Int_t StDaqClfMaker::Init()
 {
   PrintInfo();
-  StBFChain *chain = (StBFChain *)GetChain();
 
-  char *x = chain->GetOptionString("prfin");
-  if(x) sscanf(x,"%le",&mPrfin);
-  else mPrfin = .26;
+  //
+  //  Disable the command line options in favor of hardcoded 
+  //  values.   Here is an example of how to make command
+  //  line options though...
+  //
+  //   StBFChain *chain = (StBFChain *)GetChain();
+  //
+  //   char *x = chain->GetOptionString("prfin");
+  //   if(x) sscanf(x,"%le",&mPrfin);
+  //   else mPrfin = .26;
+  //
 
-  x = chain->GetOptionString("trfin");
-  if(x) sscanf(x,"%le",&mTrfin);
-  else mTrfin = .825;
+  mPrfin = .26;         // hardcoded pad response functions
+  mTrfin = .825;
+  mPrfout = .48;
+  mTrfout = .90;
 
-  x = chain->GetOptionString("prfout");
-  if(x) sscanf(x,"%le",&mPrfout);
-  else mPrfout = .48;
+  mDp = .1;             // hardcoded errors
+  mDt = .2;
+  mDperp = .1;
 
-  x = chain->GetOptionString("trfout");
-  if(x) sscanf(x,"%le",&mTrfout);
-  else mTrfout = .90;
+  splitRows = 1;        // split padrows as if real DAQ on i960s
+  doT0Corrections = 1;  // do the t0 corrections
+  doGainCorrections = 0; // done by St_tpcdaq_Maker
+  doZeroTruncation = 1; // 
 
-  x = chain->GetOptionString("clfDp");
-  if(x) sscanf(x,"%le",&mDp);
-  else mDp = .1;
+  mCreate_stevent = 0;  // Use  StEvent for ittf
+  mFill_stevent = 0;
+  mFill_tphit = 1;
 
-  x = chain->GetOptionString("clfDt");
-  if(x) sscanf(x,"%le",&mDt);
-  else mDt = .2;
-
-  x = chain->GetOptionString("clfDperp");
-  if(x) sscanf(x,"%le",&mDperp);
-  else mDperp = .1;
-
-  x = chain->GetOptionString("dhSector");
-  if(x) sscanf(x,"%d",&histSector);
-  else histSector = -1;
-
-  x = chain->GetOptionString("dhPadrow");
-  if(x) sscanf(x,"%d",&histPadrow);
-  else histPadrow = -1;
-
-  x = chain->GetOptionString("splitRows");
-  if(x) sscanf(x,"%d",&splitRows);
-  else  splitRows = 1;
-
-  if(chain->GetOption("avgpadt0"))
-  {
-    doPadT0Corrections = 1;
-    doFullT0Corrections = 0;
-  }
-  else
-  { 
-    doPadT0Corrections = 0;
-    doFullT0Corrections = 1;
-  }
-
-  if(chain->GetOption("nopadt0"))
-  {
-    doPadT0Corrections = 0;
-    doFullT0Corrections = 0;
-  }
-  
-  // Check ittf flag...
-  if(chain->GetOption("ittf"))
-  {
-    gMessMgr->Info() << "Writing to StEvent..." << endm;
-    mFill_tphit = 0;
-    mFill_stevent = 1;
-    mCreate_stevent = 1;
-  }
-  else
-  {
-    gMessMgr->Info() << "Writing to tphit... " << endm;
-    mFill_tphit = 1;
-    mFill_stevent = 0;
-    mCreate_stevent = 0;
-  }
   mStEvent = NULL;
   mT_tphit = NULL;
 
   gMessMgr->Info() << "prfin="<<mPrfin<<" prfout=" << mPrfout << endm;
   gMessMgr->Info() << "trfin="<<mTrfin<<" trfout=" << mTrfout << endm;
-  gMessMgr->Info() << "dpad=" <<mDp<<endm;
-  gMessMgr->Info() << "dperp="<<mDperp<<endm;
-  gMessMgr->Info() << "dt="<<mDt<<endm;
+  // gMessMgr->Info() << "dpad=" <<mDp<<endm;
+  // gMessMgr->Info() << "dperp="<<mDperp<<endm;
+  // gMessMgr->Info() << "dt="<<mDt<<endm;
   gMessMgr->Info() << "splitRows="<<splitRows<<" (Are rows to be split as on i960's)"<<endm;
-  gMessMgr->Info() << "dhSector=" << histSector << endm;  
-  gMessMgr->Info() << "dhPadrow=" << histPadrow << endm;
 
   // Croat initializations
   //
@@ -196,7 +160,14 @@ Int_t StDaqClfMaker::Init()
     croat_cppOff[i] = (unsigned int)(&croat_cpp[i][0]) - (unsigned int)(&croat_cpp[0][0]);
   }
   fcf->adcOff = croat_adcOff;
-  fcf->cppOff = croat_cppOff;
+  fcf->cppOff = (unsigned int *)croat_cppOff;
+  fcf->maxClusters = MAX_CLUSTERS;
+
+  memset(t0Corr, 0, sizeof(t0Corr));
+  for(int i=0;i<MAX_PADS_EVER+1;i++) gainCorr[i] = 64;   // == 1.0 !!
+
+  fcf->t0Corr = t0Corr;
+  fcf->gainCorr = gainCorr;
 
   // Get TPC Parameters
   St_DataSet *tpc = GetDataBase("tpc");
@@ -216,7 +187,7 @@ Int_t StDaqClfMaker::Make()
 {
   PrintInfo();
 
-  // Hack for now...
+  // Hack for now untill ittf is in more complete shape...
   if(mCreate_stevent)
   {
     
@@ -233,11 +204,10 @@ Int_t StDaqClfMaker::Make()
 
   St_DataSet *rawData;
   St_DataSet *sector;
-  u_int croat_out[6000 * 2];                 // maximum number of clusters pad padrow * 2
+  u_int croat_out[MAX_CLUSTERS+2 * 2];                 // maximum number of clusters pad padrow * 2
   int sz;
   clustercount=0;
   
-
   // Coordinate transformer
   if(!gStTpcDb)
   {
@@ -252,10 +222,7 @@ Int_t StDaqClfMaker::Make()
   }
 
   mDriftVelocity = gStTpcDb->DriftVelocity();
-  gMessMgr->Info() << "The drift velocity used = " << mDriftVelocity << endm;
-
-
-  //InitHistograms();
+  // gMessMgr->Info() << "The drift velocity used = " << mDriftVelocity << endm;
 
   rawData = (St_DataSet *)GetInputDS("tpc_raw");
   St_DataSetIter rawIter(rawData);
@@ -324,12 +291,11 @@ Int_t StDaqClfMaker::Make()
     // assignment of pads to different i960's.  This task is accomplished
     // by GetCPPRow()
     for(int r=44;r>=0;r--) {
-      short t0_corrections[MAX_PADS_EVER+1];
-
-      if(doFullT0Corrections)
-	getT0Corrections(t0_corrections,sectorIdx,r+1);
-      else
-	memset(t0_corrections, 0, sizeof(t0_corrections));
+      if(doT0Corrections)
+	getPbPT0Corrections(sectorIdx, r);    // places corrections into fcf->t0Corr[1...lastpad]
+     
+      if(doGainCorrections)
+	getGainCorrections(sectorIdx, r);     // places corrections into fcf->gainCorr[1...lastpad]
 
       unsigned short *adc = ((r<13) ? adc_in : adc_out);
 
@@ -341,20 +307,20 @@ Int_t StDaqClfMaker::Make()
 	if(!cppRow) continue;
 
 	fcf->row = r+1;   // row starts from 1
-	//	fcf->sb = ;
-	//	fcf->rb = ;
-	//	fcf->mz = ;
-
 	fcf->padStart = 1000000;
 	fcf->padStop = 0;
 
 	for(int k=1;k<=MAX_PADS;k++)
 	{
 	  if(cppRowStorage.r[k-1][0].offset == 0xffffffff) continue;
+
 	  if(k<fcf->padStart) fcf->padStart = k;
 	  if(k>fcf->padStop) fcf->padStop = k;
 	}
-	
+
+	// No data on the padrow....	
+	if(fcf->padStart > fcf->padStop) continue;
+
 	memset(&croat_adc[0][0], 0, sizeof(croat_adc));
 	memset(&croat_cpp[0][0], 0xffff, sizeof(croat_cpp));
 
@@ -386,11 +352,10 @@ Int_t StDaqClfMaker::Make()
 				     cppRowStorage.r[pp-1][ss].length -1);
 	  }
 	}
-	
+
 	u_int words = fcf->finder((u_char *)croat_adc, 
 				  (u_short *)croat_cpp, 
-				  (u_int *)croat_out,
-				  t0_corrections);
+				  (u_int *)croat_out);
 
 	//
 	// Add results to tphit table
@@ -431,17 +396,6 @@ Int_t StDaqClfMaker::Make()
 
 	  saveCluster(cl_x,cl_t,cl_f,cl_c,r,sectorIdx);
 	}
-      }
-    }
-
-    // Run afterburner for this sector
-    
-    // Histograms...
-    if((histSector != -1) && (histPadrow != -1))
-    {
-      if(sectorIdx == histSector)
-      {
-	BuildHistogram(histPadrow,adc_in,adc_out);
       }
     }
   }
@@ -508,6 +462,8 @@ Int_t StDaqClfMaker::BuildCPP(int nrows, raw_row_st *row, raw_pad_st *pad, raw_s
 StDaqClfCppRow *StDaqClfMaker::GetCPPRow(int r, int i, StDaqClfCppRow *storage)
 {
   if(splitRows) {   // split row up to 3 times as per i960
+    int found = 0;
+
     memset(storage, 0xff, sizeof(StDaqClfCppRow));
     
     if(padfinder[r][i].mezz == 0) return NULL;   
@@ -518,11 +474,17 @@ StDaqClfCppRow *StDaqClfMaker::GetCPPRow(int r, int i, StDaqClfCppRow *storage)
     {  
       for(int s=0;s<32;s++) 
       {
-	if(cpp[r].r[p][s].start_bin == 0xffff) continue;
-	storage->r[p][s] = cpp[r].r[p][s];
+	if(cpp[r].r[p-1][s].start_bin == 0xffff) continue;
+	storage->r[p-1][s] = cpp[r].r[p-1][s];
+	found = 1;
       }
     }
-    return storage;
+    if(found)
+      return storage;
+    else 
+    {
+      return NULL;
+    }
   }
   else {
     if(i==0) {
@@ -531,52 +493,6 @@ StDaqClfCppRow *StDaqClfMaker::GetCPPRow(int r, int i, StDaqClfCppRow *storage)
     }
   }
   return 0;
-}
-
-Int_t StDaqClfMaker::BuildHistogram(int padrow, 
-				    unsigned short *adc_in, 
-				    unsigned short *adc_out)
-{
-  St_DataSet *d=GetDataSet("StDAQReader");
-  assert(d);
-  StDAQReader *dr=(StDAQReader*)(d->GetObject());
-  assert(dr);
-
-  char tag[100];
-  sprintf(tag,"raw_%d_e%d_s%d_pr%d.hist",
-	  dr->getRunNumber(),
-	  dr->getEventNumber(),
-	  histSector,
-	  histPadrow);
-
-  int r = padrow-1;
-
-  TH2F *hist = new TH2F(tag,tag,184,0,184,512,0,512);
-
-  for(int p=0;p<184;p++) {
-    int seq = 0;
-    while((seq<31) && (cpp[r].r[p][seq].start_bin != 0xffff)) {
-      for(int k=0;k<cpp[r].r[p][seq].length;k++) {
-	int t = cpp[r].r[p][seq].start_bin + k;
-	int pnt = cpp[r].r[p][seq].offset + k;
-	
-	// Deal with inner vs. outer padrows
-	unsigned short *adc = ((r<13) ? adc_in : adc_out);
-	
-	hist->Fill(p+1,t,adc[pnt]);
-      }
-      seq++;
-    }
-  }
-
-  TFile f(tag, "RECREATE");
-
-  hist->Write();
- 
-  f.Close();
-  delete hist;
-
-  return kStOK;
 }
 
 // Copies from StTpcCoordinateTransform,
@@ -608,12 +524,16 @@ double StDaqClfMaker::lzFromTB(double timeBin, int sector, int row, int pad)
 		    gStTpcDb->Dimensions()->zInnerOffset());
 
   double t0zoffset=0.0;
-  if(doPadT0Corrections)   // If we are doing the full correction, this is done...
-  {
-    t0zoffset =
-      gStTpcDb->DriftVelocity()*1e-6*
-      (gStTpcDb->T0(sector)->getT0(row,pad)*tbWidth);
-  }
+
+  //   The padbypad t0 corrections are done inside the cluster finder...
+  //   using the values in fcf->t0Corr
+  //
+  //   if(doPadT0Corrections)  
+  //   {
+  //     t0zoffset =
+  //       gStTpcDb->DriftVelocity()*1e-6*
+  //       (gStTpcDb->T0(sector)->getT0(row,pad)*tbWidth);
+  //   }
 
   double z = 
     gStTpcDb->DriftVelocity()*1e-6*         //cm/s->cm/us
@@ -629,7 +549,7 @@ double StDaqClfMaker::lzFromTB(double timeBin, int sector, int row, int pad)
 // The additional corrections are done in lzFromTb()
 //
 // sector/row count from 1...
-void StDaqClfMaker::getT0Corrections(short *corr, int sector, int row)
+void StDaqClfMaker::getPbPT0Corrections(int sector, int row)
 {
   int npads = gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row);
 
@@ -637,7 +557,7 @@ void StDaqClfMaker::getT0Corrections(short *corr, int sector, int row)
   {
     if(i > npads)
     {
-      corr[i] = 0;
+      t0Corr[i] = 0;
     }
     else
     {
@@ -648,15 +568,58 @@ void StDaqClfMaker::getT0Corrections(short *corr, int sector, int row)
 
       // Units are time buckets...
       double t0zoffset = gStTpcDb->T0(sector)->getT0(row,i);
-
-      if(fabs(t0zoffset) > 1.0) printf("(%d %d %d): t0zoffset = %f\n",sector,row,i,t0zoffset);
-
       int sign = (t0zoffset > 0.0) ? 1 : -1;
       short t0z_s = (short)((fabs(t0zoffset) * 64.0) + .5);
       t0z_s *= sign;
 
-      corr[i] = t0z_s;     
+      t0Corr[i] = t0z_s;     
     }
+  }
+}
+
+void StDaqClfMaker::getGainCorrections(int sector, int row)
+{
+  // copy this routine from St_tpcdaq_Maker()
+  int pad;
+  
+  TDataSet *tpc_calib  = GetDataBase("Calibrations/tpc"); assert(tpc_calib);
+  
+  St_tpcGain *gainObj = (St_tpcGain*) tpc_calib->Find("tpcGain"); assert(gainObj);
+  
+  assert(gainObj->GetNRows()==24);
+  
+  tpcGain_st *gains = gainObj->GetTable(); assert(gains);
+  
+  assert(sector>=1&&sector<=24);
+  
+  static StDetectorDbTpcRDOMasks* mask=0;
+  static int tRDOFromRowAndPad[45][182];
+  if(!mask) {
+    mask = StDetectorDbTpcRDOMasks::instance();
+    assert(mask);
+    for(int tiFee=0;tiFee<182;tiFee++) {
+      for(int tiPin=0;tiPin<32;tiPin++) {
+        if(row_vs_fee[tiFee][tiPin]!=0 && pad_vs_fee[tiFee][tiPin]!=0) {
+          tRDOFromRowAndPad[(row_vs_fee[tiFee][tiPin]-1)]
+	    [(pad_vs_fee[tiFee][tiPin]-1)]=
+	    rdo_vs_fee[tiFee][tiPin];
+        }
+      }
+    }
+  }
+  
+
+  for(pad=0;pad<182;pad++) {
+    float gain;
+
+    if(mask->isOn(sector,tRDOFromRowAndPad[row][pad]))
+      gain = gains[sector-1].Gain[row][pad];
+    else
+      gain = 0.0;
+
+    gain *= 64.0;
+    gain += .5;
+    gainCorr[pad+1] = (int)gain;
   }
 }
 
@@ -668,7 +631,7 @@ void StDaqClfMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, int r, i
   double lx = lxFromPad(r+1,((double)cl_x/64.0));
   double ly = lyFromRow(r+1);
   double lz = lzFromTB(((double)cl_t/64.0), sector, r+1, (cl_x+32)/64);
-  lz -= 3.0 * tsspar->tau * mDriftVelocity * 1.0e-6;
+  lz -= 3.0 * tsspar->tau * mDriftVelocity * 1.0e-6;   // correct for convolution lagtime
 	  
   int cl_xb = cl_x/64;
   int cl_tb = cl_t/64;
@@ -682,7 +645,11 @@ void StDaqClfMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, int r, i
   memset(&hit,0,sizeof(hit));
 
   hit.cluster = clustercount;	  
-  hit.flag = 0;                 // hit.flag = cl_f;
+
+  // Filling in the flag causes very bad tracking performance
+  // for some events.  I don't know why.
+  hit.flag = 0;      // hit.flag = cl_f;
+
   hit.id = clustercount;
   hit.row = (r+1) + sector * 100;
 
@@ -697,6 +664,15 @@ void StDaqClfMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, int r, i
   hit.dy = mDperp;
   hit.z = global.position().z();
   hit.dz = mDt;
+
+  if(doZeroTruncation)
+  {
+    if((hit.z < 0) && (sector <=12))  // sector 1..12 have positive z
+      return;
+    if((hit.z > 0) && (sector > 12))
+      return;
+  }
+    
 
   hit.nseq = 5;
   hit.npads = 5;

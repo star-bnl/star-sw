@@ -14,27 +14,36 @@
 	THIS SHOULD BE MAINTAINED BY TRIGGER!!!!!
 
 	Tonko, 5/8/01, added FPD and moved EMC to 6 and added SMD at old EMCs place
+        John,  8/7/01, replaced RICH with SSD and moved down ETOW, ESMD and PMD into
+                       region 0-13 which is the region of valid LIVE
 */
-#define TRG_TPC_BIT	0
-#define TRG_SVT_BIT	1
+#define TRG_TPC_BIT     0
 
+#define TRG_SVT_BIT     1
 
-#define TRG_BSMD_BIT	2
-#define TRG_SMD_BIT	TRG_BSMD_BIT	// use "BSMD"
+#define TRG_BSMD_BIT    2
+#define TRG_SMD_BIT     TRG_BSMD_BIT   // use "BSMD"
 
-#define TRG_FTPC_BIT	3
-#define TRG_TOF_BIT	4
-#define TRG_RICH_BIT	5
+#define TRG_FTPC_BIT    3
 
-#define TRG_BTOW_BIT	6
-#define TRG_EMC_BIT	TRG_BTOW_BIT	// use "BTOW"
+#define TRG_TOF_BIT     4
 
-#define TRG_FPD_BIT	7
+#define TRG_SSD_BIT     5              // used to be RICH
 
-/* Tonko, 6/11/01 we still need these. Numbers are INVENTED!!! */
-#define TRG_EEMC_BIT	12
-#define TRG_PMD_BIT	13
+#define TRG_BTOW_BIT    6
+#define TRG_EMC_BIT     TRG_BTOW_BIT    // use "BTOW"
 
+#define TRG_FPD_BIT     7
+
+#define TRG_ETOW_BIT    8
+#define TRG_ESMD_BIT    9
+#define TRG_EEC_BIT     TRG_ETOW_BIT    // use "ETOW"
+
+#define TRG_PMD_BIT    10
+
+#define TRG_CTB_BIT    14               // does not have a LIVE bit
+ 
+#define TRG_BBC_BIT    15               // does not have a LIVE bit
 
 
 /* RTS Node Id, Tonko, 11/06/2000
@@ -88,13 +97,17 @@ so we keep it here for source compatibility
 
 #define TPC_SYSTEM	0
 #define TPC_ID		TPC_SYSTEM
+
 #define	SVT_SYSTEM	1
 #define SVT_ID		SVT_SYSTEM
+
 #define TOF_SYSTEM	2
 #define TOF_ID		TOF_SYSTEM
-/* yet another EMC Change, Tonko, 6/11/01 */
+
+/* this is just the barrel EMC! */
 #define EMC_SYSTEM	3
 #define EMC_ID		EMC_SYSTEM
+
 /* let's add the FPD too, Tonko, 1/11/01 */
 #define FPD_SYSTEM	4
 #define FPD_ID		FPD_SYSTEM
@@ -102,27 +115,38 @@ so we keep it here for source compatibility
 #define FTP_SYSTEM	5
 #define FTP_ID		FTP_SYSTEM
 
-#define PMD_SYSTEM	6			
-#define PMD_ID		PMD_SYSTEM
-
+/* extendes the post-April 2002 systems */
+#define EXT_SYSTEM	6
+#define EXT_ID		EXT_SYSTEM
 
 #define RIC_SYSTEM	7
 #define RIC_ID		RIC_SYSTEM
+
 #define TRG_SYSTEM	8
 #define TRG_ID          TRG_SYSTEM
+
 #define L3_SYSTEM	9
 #define L3_ID           L3_SYSTEM
+
 #define SC_SYSTEM	10	/* slow controls */
 #define SC_ID           SC_SYSTEM
 
+/* Reserver for super-future extensions */
+#define EXT2_SYSTEM	11
+#define EXT2_ID		EXT2_SYSTEM
 
-#define EXT_SYSTEM	14	/* will use this when we run out of 4 bit
-				numbers - "Extended System".
-				*/
-#define EXT_ID		EXT_SYSTEM
+#define PMD_SYSTEM	12
+#define PMD_ID		PMD_SYSTEM
+
+#define SSD_SYSTEM	13
+#define SSD_ID		SSD_SYSTEM
+
+/* Endcap */
+#define EEC_SYSTEM	14
+#define EEC_ID		EEC_SYSTEM
 
 
-#define DAQ_SYSTEM	0xF
+#define DAQ_SYSTEM	15
 #define DAQ_ID          DAQ_SYSTEM
 #define RTS_SYSTEM	DAQ_SYSTEM	/* global */
 
@@ -145,24 +169,26 @@ so we keep it here for source compatibility
 #define BB_INSTANCE     2
 #define EVP_INSTANCE    3
 #define GB_INSTANCE     4
+#define BB2_INSTANCE    5
 #define TM_INSTANCE     GB_INSTANCE
 #define EVB_INSTANCE    BB_INSTANCE
-
+#define EVB02_INSTANCE	BB2_INSTANCE
 
 #define TRG_INSTANCE         1
-#define TRG_L1CTL_INSTANCE   2
-#define TRG_L2CTL_INSTANCE   3
-#define TRG_TCDCTL_INSTANCE  4
-#define TRG_RCCCTL_INSTANCE  5
-#define TRG_CTBCTL_INSTANCE  6
-#define TRG_L1DC_INSTANCE    7
-#define TRG_CDBCTL_INSTANCE  8
-#define TRG_EEMCCTL_INSTANCE  9
-#define TRG_DCCCTL_INSTANCE  10
-#define TRG_MWCCTL_INSTANCE  11
-#define TRG_BEMCCTL_INSTANCE 12
-#define TRG_TDI_INSTANCE     13
-#define TRG_SCALER_INSTANCE  14
+#define TRG_L1_INSTANCE      2
+#define TRG_L2_INSTANCE      3
+#define TRG_TCD_INSTANCE     4
+#define TRG_RCC_INSTANCE     5
+#define TRG_CTB_INSTANCE     6
+#define TRG_EMC_INSTANCE     7
+#define TRG_MWC_INSTANCE     8
+#define TRG_BMC_INSTANCE     9
+#define TRG_BME_INSTANCE    10
+#define TRG_BMW_INSTANCE    11 
+#define TRG_SCALER_INSTANCE 12
+#define TRG_BBC_INSTANCE    13
+#define TRG_FPE_INSTANCE    14  
+#define TRG_FPW_INSTANCE    15  
 
 #define L3EVP_INSTANCE      1
 #define L3DISP_INSTANCE     2
@@ -171,15 +197,19 @@ so we keep it here for source compatibility
 /******************** RC/DAQ nodes ****************/
 #define DAQMAN_NODE	((DAQ_SYSTEM<<12) | DAQMAN_INSTANCE) 
 #define BB_NODE		((DAQ_SYSTEM<<12) | BB_INSTANCE) 
+#define BB2_NODE	((DAQ_SYSTEM<<12) | BB2_INSTANCE) 
 #define EVP_NODE	((DAQ_SYSTEM<<12) | EVP_INSTANCE) 
+#define GB_NODE		((DAQ_SYSTEM<<12) | GB_INSTANCE)
+
+/* aliases and shortcuts */
 #define RC_NODE		DAQMAN_NODE 		/* for the time being...*/
 #define LOG_NODE        DAQMAN_NODE
 #define MON_NODE        DAQMAN_NODE
 
-#define GB_NODE		((DAQ_SYSTEM<<12) | 4)
 #define TM_NODE		GB_NODE
 
 #define EVB01_NODE      BB_NODE
+#define EVB02_NODE      BB2_NODE
 #define EVB_NODE	EVB01_NODE
 
 
@@ -192,9 +222,6 @@ so we keep it here for source compatibility
 #define TOF02_NODE	((TOF_SYSTEM<<12) | 2)
 #define TOF_NODE	TOF01_NODE
 
-#define PMD01_NODE	((PMD_SYSTEM<<12) | 1)
-#define PMD02_NODE	((PMD_SYSTEM<<12) | 2)
-#define PMD_NODE	PMD01_NODE
 
 #define FPD01_NODE	((FPD_SYSTEM<<12) | 1)
 #define FPD02_NODE	((FPD_SYSTEM<<12) | 2)
@@ -207,24 +234,41 @@ so we keep it here for source compatibility
 
 #define SVT_NODES(x)	((SVT_SYSTEM<<12) | (x)) 
 
-#define EMC_NODES(x)	((EMC_SYSTEM<<12) | (x))
+/* separated the Endcap (EEC) from the Barrel (EMC), Tonko, 4/4/2002 */
+/* Barrel */
 #define BTOW_INSTANCE	1
 #define BSMD_INSTANCE	2
-#define EEMC_INSTANCE	4
+#define BPRE_INSTANCE	3	/* preshower - doesn't exist yet... */
+
+#define EMC_NODES(x)	((EMC_SYSTEM<<12) | (x))
+
 #define BTOW_NODE	EMC_NODES(BTOW_INSTANCE)
 #define BSMD_NODE	EMC_NODES(BSMD_INSTANCE)
-#define BPRE_NODE	EMC_NODES(3)	// won't exist
+#define BPRE_NODE	EMC_NODES(BPRE_INSTANCE)	
 
-#define ETOW_NODE	EMC_NODES(EEMC_INSTANCE)	// for _all_ Endcap
-#define EEMC_NODE	ETOW_NODE		// Endcap EMC shortcut - use this!
+/* Extended (post April 2002) Detectors */
+#define PMD01_NODE	((EXT_SYSTEM<<12)|(PMD_SYSTEM<<4) | 1)
+#define PMD02_NODE	((EXT_SYSTEM<<12)|(PMD_SYSTEM<<4) | 2)
+#define PMD03_NODE	((EXT_SYSTEM<<12)|(PMD_SYSTEM<<4) | 3)
+#define PMD_NODES(x)	((EXT_SYSTEM<<12)|(PMD_SYSTEM<<4) | (x)) 
+/* the main node is PMD03 */
+#define PMD_NODE	PMD03_NODE
 
-#define ESMD_NODE	EMC_NODES(5)	// won't exist
-#define EPRE_NODE	EMC_NODES(6)	// won't exist
+#define SSD01_NODE	((EXT_SYSTEM<<12)|(SSD_SYSTEM<<4) | 1)
+#define SSD_NODE	SSD01_NODE
 
-/* Tonko, historical - should _not_ use them anymore */
-#define EMC_NODE	BTOW_NODE
-#define EMC01_NODE	BTOW_NODE
-#define SMD_NODE	BSMD_NODE
+/* Endcap */
+#define ETOW_INSTANCE	1
+#define ESMD_INSTANCE	2
+
+#define EEC_NODES(x)	((EXT_SYSTEM<<12)|(EEC_SYSTEM<<4) | (x))
+
+#define ETOW_NODE	EEC_NODES(ETOW_INSTANCE)	// for _all_ Endcap
+#define EEC_NODE	ETOW_NODE			// Endcap EMC shortcut if only one...
+
+#define ESMD_NODE	EEC_NODES(ESMD_INSTANCE)	
+
+
 
 /* Level III */
 #define L3_NODES(x)	((L3_SYSTEM<<12) | (SL3_SUBSYS<<8) | (x)) 
@@ -235,33 +279,96 @@ so we keep it here for source compatibility
 
 /* Trigger */
 #define TRG_NODE        ((TRG_SYSTEM<<12) | TRG_INSTANCE)
-#define L1CTL_NODE      ((TRG_SYSTEM<<12) | TRG_L1CTL_INSTANCE)
-#define L2CTL_NODE      ((TRG_SYSTEM<<12) | TRG_L2CTL_INSTANCE)
-#define TCDCTL_NODE     ((TRG_SYSTEM<<12) | TRG_TCDCTL_INSTANCE)
-#define RCCCTL_NODE     ((TRG_SYSTEM<<12) | TRG_RCCCTL_INSTANCE)
-#define CTBCTL_NODE     ((TRG_SYSTEM<<12) | TRG_CTBCTL_INSTANCE)
-#define L1DC_NODE       ((TRG_SYSTEM<<12) | TRG_L1DC_INSTANCE)
-#define CDBCTL_NODE     ((TRG_SYSTEM<<12) | TRG_CDBCTL_INSTANCE)
+#define L1_NODE         ((TRG_SYSTEM<<12) | TRG_L1_INSTANCE)
+#define L2_NODE         ((TRG_SYSTEM<<12) | TRG_L2_INSTANCE)
+#define TCD_NODE        ((TRG_SYSTEM<<12) | TRG_TCD_INSTANCE)
+#define RCC_NODE        ((TRG_SYSTEM<<12) | TRG_RCC_INSTANCE)
+#define CTB_NODE        ((TRG_SYSTEM<<12) | TRG_CTB_INSTANCE)
 #define L1_NODES(x)     ((TRG_SYSTEM<<12) | (TRG_L1_SUBSYS<<8) | (x))
 #define L2_NODES(x)     ((TRG_SYSTEM<<12) | (TRG_L2_SUBSYS<<8) | (x))
-#define EEMCCTL_NODE     ((TRG_SYSTEM<<12) | TRG_EEMCCTL_INSTANCE)
-#define BEMCCTL_NODE     ((TRG_SYSTEM<<12) | TRG_BEMCCTL_INSTANCE)
-#define DCCCTL_NODE     ((TRG_SYSTEM<<12) | TRG_DCCCTL_INSTANCE)
-#define MWCCTL_NODE	((TRG_SYSTEM<<12) | TRG_MWCCTL_INSTANCE)
-#define TDI_NODE	((TRG_SYSTEM<<12) | TRG_TDI_INSTANCE)
+#define EMC_NODE        ((TRG_SYSTEM<<12) | TRG_EMC_INSTANCE)
+#define MWC_NODE	((TRG_SYSTEM<<12) | TRG_MWC_INSTANCE)
+#define BMC_NODE        ((TRG_SYSTEM<<12) | TRG_BMC_INSTANCE)
+#define BME_NODE        ((TRG_SYSTEM<<12) | TRG_BME_INSTANCE)
+#define BMW_NODE        ((TRG_SYSTEM<<12) | TRG_BMW_INSTANCE)
 #define TRG_SCALER_NODE ((TRG_SYSTEM<<12) | TRG_SCALER_INSTANCE)
+#define BBC_NODE        ((TRG_SYSTEM<<12) | TRG_BBC_INSTANCE)
+#define FPE_NODE        ((TRG_SYSTEM<<12) | TRG_FPE_INSTANCE)
+#define FPW_NODE        ((TRG_SYSTEM<<12) | TRG_FPW_INSTANCE)
 
+#define L201_NODE L2_NODES(1)
 
 /* Slow Controls */
 #define SC_NODE         ((SC_SYSTEM<<12) | 1)
 
 /*
   Inverse's...
+
+  MODIFIED FOR POST-APRIL02 EXT. DETECTORS! Tonko
 */
-#define GET_NODE(sys,subsys,inst)  ((sys<<12) | (subsys<<8) | (inst))
-#define GET_INSTANCE(x)  ((x) & 0xff)
-#define GET_SUBSYSTEM(x) (((x) >> 8) & 0x3)
-#define GET_SYSTEM(x)    (((x) >> 12) & 0xf)
+extern inline int GET_NODE(int sys, int subsys, int inst)
+{
+	int node ;
+
+	if((sys <= 10) || (sys==15)) {	// pre-Apr2002
+		node = ((sys<<12) | (subsys<<8) | (inst)) ;
+	}
+	else {
+	  //	node = 0x6000 | (inst);    
+	  node = 0x6000 | (sys<<4) | (inst);   // need sys -- 18APR02, jml
+	}
+
+	return node ;
+} ;
+
+extern inline int GET_SYSTEM(unsigned short node)
+{
+	int ret ;
+
+	if((node & 0xF000) != (EXT_SYSTEM<<12)) {
+		ret = ((node)>>12) & 0xF ;
+	}
+	else {
+		ret = ((node)&0x03F0) >> 4 ;
+	}
+
+	return ret ;
+}
+
+extern inline int GET_INSTANCE(unsigned short node)
+{
+	int ret ;
+
+	if((node & 0xF000) != (EXT_SYSTEM << 12)) {
+		ret = (node) & 0xFF ;
+	}
+	else {
+		ret = (node) &  0xF ;
+	}
+
+	return ret ;
+}
+
+extern inline int GET_SUBSYSTEM(unsigned short node)
+{
+	int ret ;
+
+	if((node & 0xF000) != (EXT_SYSTEM<<12)) {
+		ret = (((node) >> 8) & 0x3) ;
+	}
+	else {
+		ret = 0 ;
+	}
+
+	return ret ;
+
+}
+	
+#define GET_NODE_PRE_APR2002(sys,subsys,inst)  ((sys<<12) | (subsys<<8) | (inst))
+#define GET_SYSTEM_PRE_APR2002(x)    (((x) >> 12) & 0xf)
+#define GET_INSTANCE_PRE_APR2002(x)  ((x) & 0xff)
+#define GET_SUBSYSTEM_PRE_APR2002(x) (((x) >> 8) & 0x3)
+
 #define GET_ROUTE(x)     (((x) >> 10) & 0x3)
 
 #endif /* _RTS_SYSTEMS_H_ */
