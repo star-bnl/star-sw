@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: EztEmcRawData.h,v 1.4 2005/01/11 21:33:40 mvl Exp $
+ * $Id: EztEmcRawData.h,v 1.5 2005/03/10 16:59:54 mvl Exp $
  *
  * Author: Alex Suaide, Mar 2004, JB
  ***************************************************************************
@@ -61,6 +61,17 @@ public:
   UShort_t  getCrateID(int ib)  const { return  getCrateID(header(ib)); }
 
   //........ corruption tests ......
+  // scans whole block
+  bool doHeadCorruptionTest(int token,int  lenCount, int firstCrId, int errFlag=0) ;
+
+  bool doTowerHeadCorruptionTest(int token) { 
+    //before 2004 another params are needed
+    return  doHeadCorruptionTest(token,0xa4,1); }
+
+  bool doMapmtHeadCorruptionTest(int token) { 
+    //before 2005 another params are needed
+    return  doHeadCorruptionTest(token,0xc4,64); }
+
   bool purgeCrateOFF(int ib);// discards header & data for one crate
   void tagHeadValid(int ib, int token, int crId, int len, int trigComm, int errFlag, int dbg=0); // test one header & fill saninty
 
@@ -87,6 +98,9 @@ public:
 /**************************************************************************
  *
  * $Log: EztEmcRawData.h,v $
+ * Revision 1.5  2005/03/10 16:59:54  mvl
+ * New routine for corruption checking by Jan Balewski
+ *
  * Revision 1.4  2005/01/11 21:33:40  mvl
  * Minor mod to hearder checking (do not delete data for certain error states ) By Jan Balewski.
  *

@@ -1,5 +1,5 @@
 /***********************************************************************
- * $Id: EztEmcRawData.cxx,v 1.4 2005/01/11 21:33:40 mvl Exp $
+ * $Id: EztEmcRawData.cxx,v 1.5 2005/03/10 16:59:54 mvl Exp $
  * Author: Alex Suaide, Mar 2004, JB
  ************************************************************************/
 
@@ -121,10 +121,34 @@ EztEmcRawData::tagHeadValid( int ib, int token, int crId, int len, int trigComm,
   // return ret;
 } 
 
+//----------------------------------------------------
+bool
+EztEmcRawData::doHeadCorruptionTest(int token, int lenCount, int firstCrId,  int errFlag){
+  // general corruption test of all types
+  // RETURN : true =any corruption, false=no corruption
+  int trigComm=0x4; // physics, 9=laser/LED, 8=??
+
+  int nCrIn=0;
+  int nCrOK=0;
+  int icr;
+  for(icr=0;icr<getNBlocks();icr++) {
+    if(isCrateVoid(icr)) continue;
+    if(purgeCrateOFF(icr)) continue;
+    nCrIn++;
+    int crID=icr+firstCrId;
+    //........... hader..........
+    tagHeadValid(icr,token, crID,lenCount,trigComm,errFlag);
+    if(getCorruption(icr)) continue;
+    nCrOK++; // count number of valid crates
+  }
+
+  return nCrOK!=nCrIn;
+}
+
 
 //----------------------------------------------------
 bool
-EztEmcRawData:: isCrateOFF( const UShort_t* hd) {
+EztEmcRawData::isCrateOFF( const UShort_t* hd) {
   bool a=(hd[0]& 0xFFF)==0xFFF; // Gerard's prescription
   bool b=(hd[1]& 0xFFF)==0xFFF;
   return a && b;
@@ -196,6 +220,9 @@ void EztEmcRawData::print(const UShort_t* hd, const UShort_t* d, int nd) {
 /***************************************************************************
  *
  * $Log: EztEmcRawData.cxx,v $
+ * Revision 1.5  2005/03/10 16:59:54  mvl
+ * New routine for corruption checking by Jan Balewski
+ *
  * Revision 1.4  2005/01/11 21:33:40  mvl
  * Minor mod to hearder checking (do not delete data for certain error states ) By Jan Balewski.
  *
