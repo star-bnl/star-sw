@@ -1,12 +1,12 @@
-/*    StructSlatGeom.idl
+/*    tofSlatGeom.idl
 *
-*  Table: StructSlatGeom
+*  Table: tofSlatGeom
 *
 *       description: //   geometry table per tof slat
 */ 
 
 
-struct StructSlatGeom { 
+struct tofSlatGeom { 
 
    long  ieta;   /*   */
    float  z;   /*   */
