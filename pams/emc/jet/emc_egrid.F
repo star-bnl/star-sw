@@ -161,7 +161,6 @@ C*- get tracks from DST_TRACK table
       do ihit = 1, dst_track_h.nok       ! Loop over input tracks
          trk_qual=(dst_track(ihit).chisq(1)+
      +             dst_track(ihit).chisq(2))/2.0
-     +            /float(dst_track(ihit).ndegf)
          if(trk_qual.le.trk_qual_cut)then
             trkchar = float(dst_track(ihit).icharge)
             pt      = 1.0/dst_track(ihit).invpt
