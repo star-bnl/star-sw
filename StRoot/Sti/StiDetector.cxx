@@ -32,11 +32,11 @@ void StiDetector::copy(StiDetector &detector){
   setName(detector.getName());
 }
  
-ostream& operator<<(ostream& os, const StiDetector& d){
-
+ostream& operator<<(ostream& os, const StiDetector& d)
+{
     os << d.getName()
-       <<"\tR:"<<d.getPlacement()->getCenterRadius()<<"cm\tA:"
-       <<d.getPlacement()->getCenterRefAngle()<< " radians";
+       <<"\tR:"<<d.getPlacement()->getNormalRadius()<<"cm\tA:"
+       <<d.getPlacement()->getNormalRefAngle()<< " radians";
     return os;
     
 } // operator<<
