@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.9 2000/04/27 01:39:15 pavlinov Exp $
+ * $Id: StEmcGeom.h,v 1.10 2000/05/18 17:07:30 pavlinov Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.10  2000/05/18 17:07:30  pavlinov
+ * Fixed error for methods getXYZ(...)
+ *
  * Revision 1.9  2000/04/27 01:39:15  pavlinov
  * Cleanup for SUN
  *
@@ -288,8 +291,8 @@ inline void StEmcGeom::getXYZ(const Int_t m, const Int_t e, const Int_t s,
   if(m<=60) z = mZlocal[e-1];
   else      z =-mZlocal[e-1];
   getPhi(m,s,phi);
-  x = mRadius*sin(phi); 
-  y = mRadius*cos(phi);
+  x = mRadius*cos(phi); 
+  y = mRadius*sin(phi);
 }
 // _____________________________________________________________________
 inline Int_t StEmcGeom::getXYZ(const Int_t rid, Float_t &x,Float_t &y,Float_t &z)
