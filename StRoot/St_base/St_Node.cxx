@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.7 1999/01/23 18:40:53 fisyak Exp $
+// $Id: St_Node.cxx,v 1.8 1999/01/25 14:22:46 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.8  1999/01/25 14:22:46  fine
+// St_Node Identity matrix improvement
+//
 // Revision 1.7  1999/01/23 18:40:53  fisyak
 // Cleanup for SL98l
 //
@@ -66,7 +69,7 @@ static Int_t gGeomLevel = 0;
 St_Node *gNode;
 #endif 
 R__EXTERN  Size3D gSize3D;
- 
+static TRotMatrix *gIdentity = 0; 
 ClassImp(St_Node)
  
 //______________________________________________________________________________
@@ -227,8 +230,8 @@ TNode *St_Node::CreateTNode(const St_NodePosition *position)
     while (pos = (St_NodePosition *) next()){
       St_Node *node = pos->GetNode();
       if (node) {
-          TNode *nextNode = node->CreateTNode(pos);
           newNode->cd();
+          TNode *nextNode = node->CreateTNode(pos);
       }
     }
   }
@@ -284,11 +287,14 @@ St_NodePosition *St_Node::Add(St_Node *node, Double_t x, Double_t y, Double_t z,
 //*-*
  if (!node) return 0;
  TRotMatrix *rotation = matrix;
- if(rotation) {
-     rotation =gGeometry->GetRotMatrix("Identity");
-     if (!rotation) 
-        rotation  = new TRotMatrix("Identity","Identity matrix",90,0,90,90,0,0);
+ if(!rotation) {
+    if (!gIdentity) {
+       gIdentity = gGeometry->GetRotMatrix("Identity");
+       if (!gIdentity) 
+          gIdentity  =  new TRotMatrix("Identity","Identity matrix",90,0,90,90,0,0);
    }
+   rotation = gIdentity;
+ }
  St_NodePosition *position = new St_NodePosition(node,x,y,z,rotation);
  return Add(node,position);
 }
@@ -302,13 +308,14 @@ St_NodePosition *St_Node::Add(St_Node *node, Double_t x, Double_t y, Double_t z,
 //*-*    matrixname  is the name of the rotation matrix
 //*-*
  if (!node) return 0;
- TRotMatrix *rotation = 0;
+ TRotMatrix *rotation = gIdentity;
  if (strlen(matrixname)) rotation = gGeometry->GetRotMatrix(matrixname);
- else {
-   rotation = gGeometry->GetRotMatrix("Identity");
-   if (!rotation) 
-      rotation  = new TRotMatrix("Identity","Identity matrix",90,0,90,90,0,0);
- } 
+ else if (!gIdentity) {
+    gIdentity = gGeometry->GetRotMatrix("Identity");
+    if (!gIdentity) 
+          gIdentity  =  new TRotMatrix("Identity","Identity matrix",90,0,90,90,0,0);
+    rotation = gIdentity;
+ }
  St_NodePosition *position = new St_NodePosition(node,x,y,z,rotation);
  return Add(node,position);
 }
