@@ -1,5 +1,8 @@
-* $Id: tte.F,v 1.23 1999/02/27 21:14:07 sakrejda Exp $
+* $Id: tte.F,v 1.24 1999/02/27 22:29:17 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.24  1999/02/27 22:29:17  sakrejda
+* changes suggested by Victor implemented
+*
 * Revision 1.23  1999/02/27 21:14:07  sakrejda
 * some reconstructed hits are not in the index table, now they are skipped....
 *
@@ -352,9 +355,9 @@ c     let's count dropped mc hits
            evmc(evmc_h.nok).pzvr =  0.0
            evmc(evmc_h.nok).dedxr = 0.0
            evmc(evmc_h.nok).qfact = 0.0
-           if(hit_h.maxlen.gt.hit_size) then
+           if(hit_h.nok.gt.hit_size) then
 		write(m132(1),*) 'TTE-I5 hit_size not big enough'
-                write(m132(2),*) hit_h.maxlen,hit_size
+                write(m132(2),*) hit_h.nok,hit_size
                 call Message (m132, 2, idI5 )
                 tte = STAFCV_BAD
                 return
@@ -452,11 +455,12 @@ c          so now it's time to calculate dedx for this track
            endif
 
 c          go through all the points on the long_list list
-           if(track_h.maxlen.gt.track_size) then
+           if(track_h.nok.gt.track_size) then
                write(m132(1),*) 'TTE-I7 track_size not big enough', 
-     >         track_size, track_h.maxlen 
+     >         track_size, track_h.nok 
                call Message (m132, 1, idI7 )
-               track_h.maxlen=track_size
+               tte=STAFCV_BAD
+               return
            endif
 *
 c
@@ -625,8 +629,8 @@ c     translation table, clean up and zero the list_index_rec first
 C     Sort the hit array according to the track number
       
       iret = tls_Index_Sort_i(hit_h.nok,hit(1).track,
-     >       hit(2).track,loc_hit,
-     >       hit_h.maxlen)
+     >       hit(2).track,loc_hit,hit_size)
+
         
 c     go through all the hits sorted by the track number and relate them
 c     to the mc tracks
@@ -645,8 +649,9 @@ c        double-check, whether this is a good track, loop only through good trac
          if(track_num.gt.0) then 
            track_num_local=track_num
 c          loop through all the points until this track is done
-           eval_h.nok=eval_h.nok+1
-           if(eval_h.nok.le.eval_h.maxlen) then
+
+           if(eval_h.nok.lt.eval_h.maxlen) then
+             eval_h.nok=eval_h.nok+1
              eval(eval_h.nok).rtrk=track_num
 c            fill the evaluation table with the info about this track:
              eval(eval_h.nok).nfit=track(list_tracks(track_num)).nfit
