@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.h,v 1.12 2004/07/01 13:38:23 fisyak Exp $
+// $Id: StdEdxY2Maker.h,v 1.13 2004/07/21 14:13:56 fisyak Exp $
 #ifndef STAR_StdEdxY2Maker
 #define STAR_StdEdxY2Maker
 
@@ -54,18 +54,18 @@ class StdEdxY2Maker : public StMaker {
   void    SpaceCharge(Int_t iok = 0, StEvent * pEvent=0, StGlobalCoordinate *global=0, dEdx_t *CdEdx=0);
   void    XyzCheck(StGlobalCoordinate *global=0, Int_t iokCheck=0);
   void    QAPlots(StGlobalTrack* gTrack = 0);
-  void    BadHit(const StThreeVectorF &xyz);
+  void    BadHit(Int_t iFlag, const StThreeVectorF &xyz);
   void    DoFitZ(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ);
   void    PrintdEdx(Int_t iop = 0);
+  static  Bichsel             *m_Bichsel;       //!
   static  void Landau(Double_t x, Double_t *val);
   static  void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.12 2004/07/01 13:38:23 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.13 2004/07/21 14:13:56 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
  private:
-  Bichsel             *m_Bichsel;       //!
   TMinuit             *m_Minuit;        //!
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
   Int_t                m_Mask; //!
