@@ -330,11 +330,11 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
     //  {"TPEA","one endcap placed in TPC","HALL_1/CAVE_1/TPCE_1/TPEA_1-2/*","",""},
     //  {"TPCM","the Central Membrane placed in TPC","HALL_1/CAVE_1/TPCE_1/TPCM_1","",""},
     //  {"TOFC","outer field cage - fill it with insulating gas already","HALL_1/CAVE_1/TPCE_1/TOFC_1/*","",""},
-    {"TIFC","the Inner Field Cage placed in TPC","HALL_1/CAVE_1/TPCE_1/TIFC_1","",""},
+    {"TIFC","Inner Field Cage","HALL_1/CAVE_1/TPCE_1/TIFC_1","",""},
     //  {"TPGV","the Gas Volume placed in TPC","HALL_1/CAVE_1/TPCE_1/TPGV_1-2/*","",""},
     //  {"TPSS","a division of gas volume corresponding to a supersectors","HALL_1/CAVE_1/TPCE_1/TPGV_1-2/TPSS_1-12/*","",""},
-    {"TPAD","(inner) real padrow with dimensions defined at positioning time","HALL_1/CAVE_1/TPCE_1/TPGV_%d/TPSS_%d/TPAD_%d","tpc",""},// <+++
-    {"TPA1","(outer) real padrow with dimensions defined at positioning time","HALL_1/CAVE_1/TPCE_1/TPGV_%d/TPSS_%d/TPA1_%d","tpc",""}
+    {"TPAD","inner pad row","HALL_1/CAVE_1/TPCE_1/TPGV_%d/TPSS_%d/TPAD_%d","tpc",""},// <+++
+    {"TPA1","outer pad row","HALL_1/CAVE_1/TPCE_1/TPGV_%d/TPSS_%d/TPA1_%d","tpc",""}
   };
   _padPlane = gStTpcDb->PadPlaneGeometry();
   if (!_padPlane) 
@@ -415,18 +415,21 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
   p->setLayerAngle(sector*dPhi);
   p->setNormalRep(sector*dPhi, radius, 0.);
   p->setRegion(StiPlacement::kMidRapidity);
-  StiDetector *fcVolume = _detectorFactory->getInstance();
-  fcVolume->setName(TpcVolumes[kTIFC].path);
-  fcVolume->setIsOn(true);
-  fcVolume->setIsActive(new StiNeverActiveFunctor);
-  fcVolume->setIsContinuousMedium(false);
-  fcVolume->setIsDiscreteScatterer(true);
-  fcVolume->setShape(FCShape);
-  fcVolume->setPlacement(p);
-  fcVolume->setGas(_gas);
-  fcVolume->setMaterial(_fcMaterial);
-  fcVolume->setElossCalculator(fcElossCalculator);
-  add(row,sector,fcVolume);
+  StiDetector *fcDet = _detectorFactory->getInstance();
+  TString nameP(TpcVolumes[kTIFC].path);
+  nameP.ReplaceAll("HALL_1/CAVE_1/","");
+  nameP.Resize(30); nameP.Strip();
+  fcDet->setName(nameP.Data());
+  fcDet->setIsOn(true);
+  fcDet->setIsActive(new StiNeverActiveFunctor);
+  fcDet->setIsContinuousMedium(false);
+  fcDet->setIsDiscreteScatterer(true);
+  fcDet->setShape(FCShape);
+  fcDet->setPlacement(p);
+  fcDet->setGas(_gas);
+  fcDet->setMaterial(_fcMaterial);
+  fcDet->setElossCalculator(fcElossCalculator);
+  add(row,sector,fcDet);
   StDetectorDbTpcRDOMasks *s_pRdoMasks = StDetectorDbTpcRDOMasks::instance();
   StiPlanarShape *pShape;
   //Active TPC padrows 
@@ -503,7 +506,8 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
       pPlacement->setCenterRep(phic, rn, phi2); 
       
       pPlacement->setLayerRadius(fRadius);
-      pPlacement->setLayerAngle(phiForTpcSector(sector));
+      //      pPlacement->setLayerAngle(phiForTpcSector(sector));
+      pPlacement->setLayerAngle(phic);
       
       pPlacement->setRegion(StiPlacement::kMidRapidity);
       name = Form("Tpc/Padrow_%d/Sector_%d", row, sector);
