@@ -2,6 +2,9 @@
 // $Id EfficiencyAnalysis.cxx $
 //
 // $Log: EfficiencyAnalysis.cxx,v $
+// Revision 1.9  2004/05/03 23:41:08  perev
+// Possible non init WarnOff
+//
 // Revision 1.8  2003/11/20 22:58:10  calderon
 // Move inline functions to header file.
 // Initialize minimcevent pointer to zero in constructor of StiEvaluator.  Otherwise
@@ -1150,8 +1153,8 @@ int EfficiencyAnalysis::fillHistograms(StMiniMcEvent* minimcevent) {
 	float curvPr    = minimcpair->curvPr();
 	float curvGl    = minimcpair->curvGl();
 
-	float tanGl_err, curvGl_err, ptPr_err = -999;
-	float tanPr_err, curvPr_err, ptGl_err = -999;
+	float tanGl_err=-999, curvGl_err=-999, ptPr_err = -999;
+	float tanPr_err=-999, curvPr_err=-999, ptGl_err = -999;
 	
 	float B = 0.49795819;
 	float c = 0.299792458;

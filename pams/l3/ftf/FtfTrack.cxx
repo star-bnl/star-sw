@@ -581,7 +581,7 @@ int FtfTrack::followHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ){
 //
    double lszChi2 = 0 ;
    double lchi2 ;
-   double slocal, deta, dphi ;
+   double slocal=999999, deta, dphi ;
    double dx, dy, dxy, dsz, temp ;
 //
 //           Check delta eta 

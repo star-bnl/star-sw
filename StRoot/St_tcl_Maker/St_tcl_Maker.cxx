@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.71 2004/01/14 22:29:35 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.72 2004/05/03 23:34:32 perev Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.72  2004/05/03 23:34:32  perev
+// Possible non init WarnOff
+//
 // Revision 1.71  2004/01/14 22:29:35  fisyak
 // Add IdTruth
 //
@@ -401,7 +404,7 @@ Int_t St_tcl_Maker::Make() {
     if (geant) {
       St_DataSetIter geantI(geant);
       St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geantI("g2t_tpc_hit");
-      int max_hit;
+      int max_hit=0;
       if (g2t_tpc_hit) { 
 	max_hit = g2t_tpc_hit->GetNRows();
       }
@@ -483,7 +486,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.71 2004/01/14 22:29:35 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.72 2004/05/03 23:34:32 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();

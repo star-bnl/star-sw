@@ -537,7 +537,7 @@ void cpe_get_mkine (  long itof ) {
 **: RETURNS:    STAF condition value
 **:>------------------------------------------------------------------*/
 
-   long i, j, k, id, idet, pid, ipid ;
+   long i, j, k, id, idet, pid, ipid =-999999;
 
    for ( i=0 ; i <= TRACK_LEN ; i++ )
       for ( j=0 ; j < 3 ; j++ )

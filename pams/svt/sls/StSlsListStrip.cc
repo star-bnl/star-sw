@@ -152,7 +152,7 @@ StSlsListStrip* StSlsListStrip::addListStrip(StSlsListStrip *list)
   int size2 = list->getSize();
   if (!size2) return this;
   
-  StSlsStrip *st1;
+  StSlsStrip *st1=0;
   StSlsStrip *st2 = list->first();
   int i = 0;
   for (i=0 ; i < size2 ; i++)

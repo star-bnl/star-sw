@@ -48,7 +48,7 @@ void FtfHit::printLinks ( int point_level )
    if ( fmod((double)point_level,10) > 1 ) 
       printf ( "pointers:vol,row,tr,mtr,mirror (%4d,%4d,%4d,%4d)\n ",
 		    vhit, rhit, thit, mhit ) ; 
-   int tid ;
+   int tid =-999999;
 //   if ( track != 0 ) tid = track->id ;
 //   else tid = -1 ;
    if ( fmod((double)point_level,10) > 2 )

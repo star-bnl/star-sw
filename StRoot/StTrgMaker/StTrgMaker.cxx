@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrgMaker.cxx,v 1.9 2003/09/02 17:59:14 perev Exp $
+ * $Id: StTrgMaker.cxx,v 1.10 2004/05/03 23:30:28 perev Exp $
  *
  * Author: Herbert Ward April 2001
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StTrgMaker.cxx,v $
+ * Revision 1.10  2004/05/03 23:30:28  perev
+ * Possible non init WarnOff
+ *
  * Revision 1.9  2003/09/02 17:59:14  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -45,6 +48,7 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include "StTrgMaker.h"
 #include "StEventTypes.h"
 #include "TNtuple.h"
@@ -256,12 +260,13 @@ void StTrgMaker::Location2Sector(double tanl,double xAtMwc,
   else if( -45<=ang && ang<= -15) { *sect= 4; mid= -30; }
   else assert(0);
 
-  rad=::sqrt(xAtMwc*xAtMwc+yAtMwc*yAtMwc);
+  rad=::sqrt(xAtMwc*xAtMwc+yAtMwc*yAtMwc); rmid = 0.;
   if(rad >=  53.000 && rad <  85.000 ) { *subsect=1; rmid=( 53.000+ 85.000)/2.0; }
   if(rad >=  85.000 && rad < 117.000 ) { *subsect=2; rmid=( 85.000+117.000)/2.0; }
   if(rad >= 125.395 && rad < 157.395 ) { *subsect=3; rmid=(125.395+157.395)/2.0; }
   if(rad >= 157.395 && rad < 189.395 ) { *subsect=4; rmid=(157.395+189.395)/2.0; }
-
+  assert(rmid>0);
+  
   if(*subsect>0&&*sect>0) {
 
     angleDiff=ang-mid;
@@ -328,8 +333,8 @@ void StTrgMaker::DoOneTrackCtb(FILE *oo,long q,double curvature,double phi0,
   double intersectionInner1X,intersectionInner1Y,intersectionInner2X,intersectionInner2Y;
   double intersectionOuter1X,intersectionOuter1Y,intersectionOuter2X,intersectionOuter2Y;
   double xUnitVector,yUnitVector,xstart,ystart,dotProduct1,dotProduct2;
-  double innerIntersectionX,innerIntersectionY;
-  double outerIntersectionX,outerIntersectionY;
+  double innerIntersectionX=0,innerIntersectionY=0;
+  double outerIntersectionX=0,outerIntersectionY=0;
 
   /* Calculate the radius and center (x,y) of the circle. */
   radius=1/curvature; CalcCenterOfCircleDefinedByTrack(q,radius,psi,r0,phi0,&xcenter,&ycenter);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.cc,v 1.21 2004/01/27 02:49:48 perev Exp $
+ * $Id: StHelix.cc,v 1.22 2004/05/03 23:35:31 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1997
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelix.cc,v $
+ * Revision 1.22  2004/05/03 23:35:31  perev
+ * Possible non init WarnOff
+ *
  * Revision 1.21  2004/01/27 02:49:48  perev
  * Big value appropriate for float
  *
@@ -543,7 +546,7 @@ StHelix::pathLengths(const StHelix& h) const
 	double dmin              = h.distance(at(s));
 	double range             = max(2*dmin, MinRange);
 	double ds                = range/10;
-	double slast, ss, d;
+	double slast=-999999, ss, d;
 	s1 = s - range/2.;
 	s2 = s + range/2.;
 	

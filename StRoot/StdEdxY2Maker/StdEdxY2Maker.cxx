@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.26 2004/04/14 15:57:30 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.27 2004/05/03 23:36:28 perev Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -860,7 +860,7 @@ Int_t StdEdxY2Maker::Make(){
 	  static_cast<StPrimaryTrack*>(node->track(primary));
 	StTptTrack   *tTrack =
 	  static_cast<StTptTrack    *>(node->track(tpt));
-	StTrack *track;
+	StTrack *track=0;
 	// clean old PiD traits
 	for (int l = 0; l < 3; l++) {
 	  if (l == 0) track = gTrack;
@@ -1626,7 +1626,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 void StdEdxY2Maker::PrintdEdx(Int_t iop) {
   const Char_t *Names[3] = {"CdEdx","FdEdx","dEdxS"};
   if (iop < 0 || iop > 2) return;
-  dEdx_t *dEdx;
+  dEdx_t *dEdx=0;
   Double_t I = 0, avrz = 0;
   Int_t N70 = NdEdx - (int) (0.3*NdEdx + 0.5); 
   Int_t N60 = NdEdx - (int) (0.4*NdEdx + 0.5);

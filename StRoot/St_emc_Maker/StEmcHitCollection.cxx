@@ -1,5 +1,8 @@
-// $Id: StEmcHitCollection.cxx,v 1.8 2003/09/02 17:59:28 perev Exp $
+// $Id: StEmcHitCollection.cxx,v 1.9 2004/05/03 23:32:39 perev Exp $
 // $Log: StEmcHitCollection.cxx,v $
+// Revision 1.9  2004/05/03 23:32:39  perev
+// Possible non init WarnOff
+//
 // Revision 1.8  2003/09/02 17:59:28  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -258,7 +261,7 @@ void StEmcHitCollection::printHits(Int_t n, Int_t start){
   if(start>=mNHit) start=mNHit-1;
   if(start+n>=mNHit) n=mNHit-start;
 
-  int mold;
+  int mold=-999999;
   for(i=start; i<start+n; i++){
     id = (Int_t) mId[i]; getBin(id, m, e, s);
     if(i == start) mold=m;

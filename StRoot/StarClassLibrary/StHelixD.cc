@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixD.cc,v 1.18 2004/01/27 02:50:28 perev Exp $
+ * $Id: StHelixD.cc,v 1.19 2004/05/03 23:35:31 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StHelixD.cc,v $
+ * Revision 1.19  2004/05/03 23:35:31  perev
+ * Possible non init WarnOff
+ *
  * Revision 1.18  2004/01/27 02:50:28  perev
  * Big value appropriate for float
  *
@@ -526,7 +529,7 @@ StHelixD::pathLengths(const StHelixD& h) const
 	s1                       = s - range/2.;
 	s2                       = s + range/2.;
 	double ds                = range/10;
-	double slast, ss, d;
+	double slast=999999, ss, d;
 	
 	while (ds > MinStepSize) {
 	    for (ss=s1; ss<s2+ds; ss+=ds) {

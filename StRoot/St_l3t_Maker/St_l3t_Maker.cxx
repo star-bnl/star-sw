@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.45 2003/09/02 17:59:30 perev Exp $
+// $Id: St_l3t_Maker.cxx,v 1.46 2004/05/03 23:33:22 perev Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -289,7 +289,7 @@ Int_t St_l3t_Maker::MakeOnLine(){
     //
     int maxHits = 500000 ;
     int nHits = 0 ;
-    int token ;
+    int token = -999999;
     St_tcl_tphit *hitS = new St_tcl_tphit("l3Hit",maxHits); 
     m_DataSet->Add(hitS);
     tcl_tphit_st*  hit  = (tcl_tphit_st  *)hitS->GetTable();

@@ -223,7 +223,7 @@ int RdoFinder::InGap(float *p){
 int RdoFinder::GetOutOfGap(float *p,int *last_cross){
   int found = 0;
   int   local_last=*last_cross;
-  float x_temp,y_temp,x_orig=p[0],y_orig=p[1];
+  float x_temp=-999999,y_temp=-999999,x_orig=p[0],y_orig=p[1];
   
   if(GotoNextCross(p,&local_last,Sector(p[0],p[1],10)-1)){
     found=local_last;x_temp=p[0];y_temp=p[1];
