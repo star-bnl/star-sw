@@ -1,5 +1,8 @@
-// $Id: StHistMaker.cxx,v 2.1 2001/05/16 20:57:03 lansdell Exp $
+// $Id: StHistMaker.cxx,v 2.2 2002/09/06 02:51:34 genevb Exp $
 // $Log: StHistMaker.cxx,v $
+// Revision 2.2  2002/09/06 02:51:34  genevb
+// Remove limit on maximum number of histograms that can be copied
+//
 // Revision 2.1  2001/05/16 20:57:03  lansdell
 // new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
 //
@@ -57,7 +60,7 @@ Int_t StHistMaker::Make(){
 
   cout << " StHistMaker::Make  " << endl;
   cout << "This is the array " << mHArray << endl;
-  for (int i=0; i<1024; i++) {
+  for (int i=0; i<mHArraySize; i++) {
     AddHist(mHArray[i]);
   }
 
