@@ -364,7 +364,7 @@ ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
           cd [run]
           dio/stream/getevent inev
     (insvt)
-         exec init_svg#svg_am
+         exec init_svg#init
          exec create_tables_svt#srs
 	 exec init_srs#init
 	 exec create_tables_svt#sgr
@@ -375,7 +375,7 @@ ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
          exec create_tables_global#svm
          exec init_svm#init
       (svg) 	  
-           exec init_svg#svg_am
+           exec init_svg#init
       (tpg) 
            exec tpg_init#init
            exec tpg_init#tpg_main
