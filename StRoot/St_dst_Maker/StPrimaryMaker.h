@@ -5,8 +5,11 @@
 //                                                                      //
 // StPrimaryMaker virtual base class for Maker                          //
 //                                                                      //
-// $Id: StPrimaryMaker.h,v 1.13 2001/11/28 23:51:45 balewski Exp $
+// $Id: StPrimaryMaker.h,v 1.14 2001/11/29 00:19:08 balewski Exp $
 // $Log: StPrimaryMaker.h,v $
+// Revision 1.14  2001/11/29 00:19:08  balewski
+// *** empty log message ***
+//
 // Revision 1.13  2001/11/28 23:51:45  balewski
 // *** empty log message ***
 //
@@ -106,10 +109,10 @@ class StPrimaryMaker : public StMaker {
   virtual void  UnFixVertex();
   Int_t GetFixedSize() { return m_fixedArrayX.GetSize(); }
   Int_t GetMatchedSize() { return m_fixedArrayE.GetSize(); }
-  void ppLMVuse(int *parI, float *parF);
+  void ppLMVuse1(int *parI, float *parF);
   void ppLMVuse(float z); // obsolete JB
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.13 2001/11/28 23:51:45 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.14 2001/11/29 00:19:08 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StPrimaryMaker, 0)   //StAF chain virtual base class for Makers
     };
