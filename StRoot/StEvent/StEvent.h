@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.15 2000/12/08 03:53:41 ullrich Exp $
+ * $Id: StEvent.h,v 2.16 2001/03/09 05:24:01 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.16  2001/03/09 05:24:01  ullrich
+ * Added new method statistics().
+ *
  * Revision 2.15  2000/12/08 03:53:41  ullrich
  * Prepared hooks for ToF.
  *
@@ -157,7 +160,8 @@ public:
     StSPtrVecKinkVertex&                kinkVertices();
     const StSPtrVecKinkVertex&          kinkVertices() const;
 
-    StSPtrVecObject&                    content();  // for IO purposes only
+    StSPtrVecObject&                    content();       // for IO purposes only
+    void                                statistics();    // *MENU*
 
     void setType(const Char_t*);
     void setRunId(Long_t);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.18 2000/12/08 03:53:40 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.19 2001/03/09 05:23:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.19  2001/03/09 05:23:53  ullrich
+ * Added new method statistics().
+ *
  * Revision 2.18  2000/12/08 03:53:40  ullrich
  * Prepared hooks for ToF.
  *
@@ -99,8 +102,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.18 2000/12/08 03:53:40 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.18 2000/12/08 03:53:40 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.19 2001/03/09 05:23:53 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.19 2001/03/09 05:23:53 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -700,4 +703,44 @@ void StEvent::Browse(TBrowser* b)
 {
     StAutoBrowse::Browse(this,b);
     TDataSet::Browse(b);
+}
+
+void StEvent::statistics()
+{
+    cout << "Statistics and information for event " << id() << endl;
+    cout << "\tthis:                      " << static_cast<void*>(this) << endl;
+//  cout << "\tcvsTag:                    " << cvsTag() << endl;
+    cout << "\ttype:                      " << type() << endl;
+    cout << "\tid:                        " << id() << endl;
+    cout << "\trunId:                     " << runId() << endl;
+    cout << "\ttime:                      " << time() << endl;
+    cout << "\ttriggerMask:               " << triggerMask() << endl;
+    cout << "\tbunchCrossingNumber(0):    " << bunchCrossingNumber(0) << endl;
+    cout << "\tbunchCrossingNumber(1):    " << bunchCrossingNumber(1) << endl;
+    cout << "\tStEventSummary:              " << static_cast<void*>(summary());
+    cout << "\tStSoftwareMonitor:           " << static_cast<void*>(softwareMonitor());
+    cout << "\tStTpcHitCollection:          " << static_cast<void*>(tpcHitCollection());
+    cout << "\tStFtpcHitCollection:         " << static_cast<void*>(ftpcHitCollection());
+    cout << "\tStSvtHitCollection:          " << static_cast<void*>(svtHitCollection());
+    cout << "\tStSsdHitCollection:          " << static_cast<void*>(ssdHitCollection());
+    cout << "\tStEmcCollection:             " << static_cast<void*>(emcCollection());
+    cout << "\tStRichCollection:            " << static_cast<void*>(richCollection());
+    cout << "\tStTofCollection:             " << static_cast<void*>(tofCollection());
+    cout << "\tStL0Trigger:                 " << static_cast<void*>(l0Trigger());
+    cout << "\tStL3Trigger:                 " << static_cast<void*>(l3Trigger());
+    cout << "\tStTriggerDetectorCollection: " << static_cast<void*>(triggerDetectorCollection());
+    cout << "\tStPrimaryVertex:             " << static_cast<void*>(primaryVertex(0));
+    cout << "\tnumberOfPrimaryVertices:     " << numberOfPrimaryVertices() << endl;
+    cout << "\t# of TPC hits:               " << (tpcHitCollection() ? tpcHitCollection()->numberOfHits() : 0) << endl;
+    cout << "\t# of FTPC hits:              " << (ftpcHitCollection() ? ftpcHitCollection()->numberOfHits() : 0) << endl;
+    cout << "\t# of SVT hits:               " << (svtHitCollection() ? svtHitCollection()->numberOfHits() : 0) << endl;
+    cout << "\t# of SSD hits:               " << (ssdHitCollection() ? ssdHitCollection()->numberOfHits() : 0) << endl;
+    cout << "\t# of track nodes:            " << trackNodes().size() << endl;
+    cout << "\t# of primary tracks:         " << (primaryVertex(0) ? primaryVertex(0)->numberOfDaughters() : 0) << endl;
+    cout << "\t# of V0s:                    " << v0Vertices().size() << endl;
+    cout << "\t# of Xis:                    " << xiVertices().size() << endl;
+    cout << "\t# of Kinks:                  " << kinkVertices().size() << endl;
+    cout << "\t# of hits in EMC:            " << (emcCollection() ? emcCollection()->barrelPoints().size() : 0) << endl;
+    cout << "\t# of hits in EEMC:           " << (emcCollection() ? emcCollection()->endcapPoints().size() : 0) << endl;
+    cout << "\t# of hits in RICH:           " << (richCollection() ? richCollection()->getRichHits().size() : 0) << endl;
 }
