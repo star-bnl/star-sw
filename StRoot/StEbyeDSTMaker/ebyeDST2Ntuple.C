@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: ebyeDST2Ntuple.C,v 1.5 2000/09/15 22:41:17 jgreid Exp $
+ * $Id: ebyeDST2Ntuple.C,v 1.6 2000/11/01 22:51:06 jgreid Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *
@@ -17,6 +17,9 @@
  **********************************************************************
  *
  * $Log: ebyeDST2Ntuple.C,v $
+ * Revision 1.6  2000/11/01 22:51:06  jgreid
+ * fixed repeat file-loading bug
+ *
  * Revision 1.5  2000/09/15 22:41:17  jgreid
  * made file array even larger
  *
@@ -72,40 +75,32 @@ void ebyeDST2Ntuple(char *dirname) {
   //  the traget analysis directory, finds all of the .ebe.root
   //  files in that directory and adds them to the analysis chain
 
-  //Char_t dirname[]="~/newdst";
-
-  void* dir=gSystem->OpenDirectory(gSystem->ExpandPathName(dirname));
-  int nruns=0;
-  Char_t *file_name;
+  Int_t nfiles = 0;
+  Char_t *file;
   Char_t path_file[100];
-  TString Tname;
-  // must be big enough to handle dir listing!!!
-  Char_t file_list[1000][256];
+  //Char_t dirname[]="~/pwg/dst/aug/";
+  Char_t file_list[5000][128];
 
-  do {
-    file_name = gSystem->GetDirEntry(dir);
-      Tname=file_name;
-      while (!Tname.Contains(".root") && file_name){
-        file_name = gSystem->GetDirEntry(dir);
-        Tname=file_name;
-        //printf("%s\n",Tname.Data());
-      }
+  void *dirhandle = gSystem->OpenDirectory(gSystem->ExpandPathName(dirname));
+  while (file = gSystem->GetDirEntry(dirhandle)) {
+    if (strstr(file,".ebe.root") != 0) {
+      strcpy(path_file,dirname);
+      strcat(path_file,file);
+      sprintf(&file_list[nfiles],"%s",path_file);
+      printf("file %d: %s\n",nfiles,path_file);
+      nfiles++;
+    }
+  }
 
-      if (file_name && Tname.Contains(".ebe.")) {
-        strcpy(path_file,dirname);
-        strcat(path_file,"/");
-        strcat(path_file,file_name);
-        chain.Add(path_file);
-        sprintf(&file_list[nruns],"%s/%s",dirname,file_name);
-        printf("file %d: %s\n",nruns,file_list[nruns]);
-        nruns++;
-      }
-      
-  } while (file_name);
-
-  if (nruns == 0) {
+  if (nfiles == 0) {
     printf("No *.ebe.root files found in specified directory\n");
     break;
+  }
+
+  printf("Hold on a sec, adding %i files to chain...\n",nfiles);
+  for (int q = 0; q < nfiles; q++) {
+    chain.Add(file_list[q]);
+    printf(".");
   }
 
   //
