@@ -12,13 +12,13 @@ use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
 
-# $Id: cons,v 1.45 2000/06/27 21:07:23 fisyak Exp $
+# $Id: cons,v 1.46 2000/06/29 22:48:11 fisyak Exp $
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 $ver_num = 2.0;
 $ver_rev = ".1";
 $version = sprintf "This is Cons %2.1f%s " .
-	    '($Id: cons,v 1.45 2000/06/27 21:07:23 fisyak Exp $)'. "\n",
+	    '($Id: cons,v 1.46 2000/06/29 22:48:11 fisyak Exp $)'. "\n",
 	    $ver_num, $ver_rev;
 
 # Cons: A Software Construction Tool.
@@ -476,7 +476,7 @@ sub Override {
 package main;
 # Check script inclusion regexps
 my $pwd = cwd();# print "Pwd = $pwd\n"; 
-(my $Rpwd = $pwd) =~ s/\/(pams|StRoot|asps|ROOT\/root|root|StDb).*//;# print "Root pwd = $Rpwd\n";
+(my $Rpwd = $pwd) =~ s/\/(pams|StRoot|asps|ROOT\/root|StDb)\/.*//;# print "Root pwd = $Rpwd\n";
 if ($1) {
   chdir($Rpwd) if $Rpwd;
   (my $Lpwd = $pwd) =~ s/$Rpwd\///;#print "Local pwd = $Lpwd\n";
