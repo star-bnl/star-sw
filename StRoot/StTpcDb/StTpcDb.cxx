@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.26 2000/08/09 14:54:54 hardtke Exp $
+ * $Id: StTpcDb.cxx,v 1.27 2000/08/10 18:41:34 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.27  2000/08/10 18:41:34  hardtke
+ * only look for L0_trigger table once per event -- improves timing
+ *
  * Revision 1.26  2000/08/09 14:54:54  hardtke
  * Add Clear option, set trigger table pointer to 0 after each event
  *
@@ -108,6 +111,7 @@ StTpcDb::StTpcDb(St_DataSet* input) {
    gMessMgr->Message("StTpcDb::Error Creating StTpcDb: Need to specify input Da   taSet","E");
  }
  gMessMgr->SetLimit("StRTpcPadPlane::Invalid Pad number",20);
+ dvelcounter = 0;
  gStTpcDb = this;
 }
 
@@ -118,11 +122,13 @@ StTpcDb::StTpcDb(StMaker* maker) {
  mk = maker;
  if (maker) GetDataBase(maker);
  gMessMgr->SetLimit("StRTpcPadPlane::Invalid Pad number",20);
+ dvelcounter=0;
  gStTpcDb = this;
 }
 
 void StTpcDb::Clear(){
   trigtype = 0;
+  dvelcounter = 0;
   return;
 }
 
@@ -342,8 +348,8 @@ float StTpcDb::DriftVelocity(){
 
 //-----------------------------------------------------------------------------
 float StTpcDb::triggerTimeOffset(){
-  if (!trigtype) trigtype = (St_dst_L0_Trigger*)mk->GetChain()->GetDataSet("L0_Trigger");
-  
+  if (!trigtype&&dvelcounter==0) trigtype = (St_dst_L0_Trigger*)mk->GetChain()->GetDataSet("L0_Trigger");
+  dvelcounter++;
   if(!toff){              // get triggerTimeOffset
    const int dbIndex = kConditions;
    if (trg[dbIndex]){
