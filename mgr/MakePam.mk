@@ -217,7 +217,8 @@ endif
 ifneq ($(strip $(FILES_SL) $(FILES_OG) $(FILES_init)),)   
 $(SL_PKG): $(FILES_SL) $(FILES_OG) $(FILES_init) $(LIB_PKG)
 	$(SO) $(SOFLAGS) $(FILES_SL) $(FILES_OG)  $(FILES_init)  -o $(SL_NEW) \
-        $(LIBRARIES)  
+        $(LIBRARIES)
+	$(RM) $(SL_PKG)
 	$(LN) $(SL_NEW) $(SL_PKG)
 	@echo "           Shared library " $(SL_PKG) " has been created"   
 #--------- module --------- 
