@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.1 1999/10/04 15:43:00 long Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.2 1999/10/06 16:50:44 long Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.2  1999/10/06 16:50:44  long
+ * in the calculation of sigma_x,iter->position().z()----->mGeomDb->frischGrid()-iter->position().z()
+ *
  * Revision 1.1  1999/10/04 15:43:00  long
  * TrsParameterizedAnalogSignalGenerator using tss algorithm
  *
@@ -275,15 +278,20 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 		    double xCentroidOfPad = xyCoord.pos().x();
 		    double yCentroidOfPad = xyCoord.pos().y();
                     double delx           = xCentroidOfPad-iter->position().x();
-		    double sigma_x        = sigmaT*sqrt(iter->position().z());
+		    double sigma_x        = sigmaT*sqrt(mGeomDb->frischGrid()-iter->position().z());
                      sigma_x=sqrt(sqr(sigma_x )+sqr( mPadRespondFunctionSigma)); 
+		     
+
+                     
+
 		    double localXDirectionCoupling  =
 		      (padWidth/sigma_x)*exp(-0.5*delx*delx/sigma_x/sigma_x)/M_SQRT2/2.0*M_2_PI;
                       
-
+		  
+		   
                     double dely           = fabs(yCentroidOfPad-iter->position().y()); 
 		    double constant       =sigma_x*M_SQRT2 ;
-				     
+		     		     
 
 		    double localYDirectionCoupling =
 		      0.5/rowNormalization*((mChargeFraction[0]-mChargeFraction[1])*(erf_fast((dely+yb1)/constant)-
