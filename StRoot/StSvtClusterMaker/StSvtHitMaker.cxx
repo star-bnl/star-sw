@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.33 2004/07/07 18:09:24 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.34 2004/07/29 01:36:59 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.34  2004/07/29 01:36:59  caines
+ * Changes for using the drift curves
+ *
  * Revision 1.33  2004/07/07 18:09:24  caines
  * Save out fraction drfi5 velocity scaler to StEvent
  *
@@ -196,6 +199,9 @@ Int_t StSvtHitMaker::Init()
   // drift velocity
   if( GetSvtDriftVelocity() != kStOK) return kStWarn;
 
+  // drift curves from Robert
+  if( GetSvtDriftCurve() != kStOK) return kStWarn;
+
   m_x_vs_y = new TH2F("si_x_vs_y","X vs Y of Si space points",
 		      300,-30,30,300,-30,30);
 
@@ -279,6 +285,9 @@ Int_t StSvtHitMaker::InitRun(int runumber)
   // drift velocity
   if( GetSvtDriftVelocity() != kStOK) return kStWarn;
 
+  // drift curves from Robert
+  if( GetSvtDriftCurve() != kStOK) return kStWarn;
+
   // t0
   if( GetSvtT0() != kStOK) return kStWarn;
 
@@ -348,6 +357,28 @@ Int_t StSvtHitMaker::GetSvtDriftVelocity()
 
 }
 //___________________________________________________________________________
+Int_t StSvtHitMaker::GetSvtDriftCurve()
+{
+  m_driftCurve = 0;
+  St_DataSet* dataSet;
+  dataSet = GetDataSet("StSvtDriftCurve");
+  // gMessMgr->Info() << "dataset: " << dataSet << endm;
+  if(!dataSet) {
+    gMessMgr->Error("Failure to get SVT drift curve  - THINGS HAVE GONE SERIOUSLY WRONG!!!!! \n");
+    
+    return kStOK;
+  }
+
+  m_driftCurve = (StSvtHybridCollection*)dataSet->GetObject();
+  
+  //gMessMgr->Info() << "GETSVTDRIFTCURVE: m_driftCurve is: " << m_driftCurve << endm;
+
+  if(!m_driftCurve) gMessMgr->Error("NULL pointer  - THINGS HAVE GONE SERIOUSLY WRONG!!!!! \n");
+
+  return kStOK;
+
+}
+//___________________________________________________________________________
 Int_t StSvtHitMaker::GetSvtT0()
 {
  
@@ -412,7 +443,9 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
   
   StSvtCoordinateTransform SvtGeomTrans;
   //SvtGeomTrans.setParamPointers(&srs_par[0], &geom[0], &shape[0], mSvtData->getSvtConfig());
-  if(m_geom)  SvtGeomTrans.setParamPointers(m_geom, mSvtData->getSvtConfig(), m_driftVeloc, m_t0);
+  //   if(m_geom)  SvtGeomTrans.setParamPointers(m_geom, mSvtData->getSvtConfig(), m_driftVeloc, m_t0);
+ 
+  if(m_geom)  SvtGeomTrans.setParamPointers(m_geom, mSvtData->getSvtConfig(), m_driftVeloc, m_driftCurve, m_t0);
   StSvtLocalCoordinate localCoord(0,0,0);
   StSvtWaferCoordinate waferCoord(0,0,0,0,0,0);
   StGlobalCoordinate globalCoord(0,0,0); 

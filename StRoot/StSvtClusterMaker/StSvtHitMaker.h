@@ -1,5 +1,8 @@
-// $Id: StSvtHitMaker.h,v 1.18 2004/07/07 18:09:24 caines Exp $
+// $Id: StSvtHitMaker.h,v 1.19 2004/07/29 01:36:59 caines Exp $
 // $Log: StSvtHitMaker.h,v $
+// Revision 1.19  2004/07/29 01:36:59  caines
+// Changes for using the drift curves
+//
 // Revision 1.18  2004/07/07 18:09:24  caines
 // Save out fraction drfi5 velocity scaler to StEvent
 //
@@ -97,6 +100,7 @@ class StSvtHitMaker : public StMaker
   Int_t GetSvtClusterData();
   Int_t GetSvtGeometry();
   Int_t GetSvtDriftVelocity();
+  Int_t GetSvtDriftCurve();
   Int_t GetSvtT0();
   void TransformIntoSpacePoint();
   void SaveIntoTable(int numOfCluster, int index);
@@ -107,7 +111,7 @@ class StSvtHitMaker : public StMaker
   double LaserTemperatureCorrection();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.18 2004/07/07 18:09:24 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.19 2004/07/29 01:36:59 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  protected:
@@ -119,6 +123,7 @@ class StSvtHitMaker : public StMaker
   StSvtHybridCollection *mSvtCluColl; //!
   StSvtHybridCollection *mSvtGeantHitColl; //!
   StSvtHybridCollection *m_driftVeloc; //!
+  StSvtHybridCollection *m_driftCurve; //!
   StSvtT0 *m_t0; //!
 
   StSvtAnalysedHybridClusters  *mSvtBigHit;  //!
