@@ -62,8 +62,8 @@ macro svm
     tdm/newtable globtrk dst_track 100000
   endif
   
-  cd [dst]
-   maxrowcount globtrk
+  cd [data]/global/tracks
+   maxrowcount [dst]/globtrk
    tdm/newtable ev0track ev0_track  staf_result(1)
 
   cd /dui
