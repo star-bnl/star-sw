@@ -163,10 +163,12 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap=1)
   if (!datap.test_CRC()) ERROR(ERR_CRC);
   if (datap.swap() < 0) ERROR(ERR_SWAP);
 
+  if(datap.EventLength < DATAPEVENTLENGTH) 
+    datap.EventLength = DATAPEVENTLENGTH;  // hack
+
   next_event_offset = c_offset + datap.EventLength * 4;
 //   printf("%s::%d  c_offset=0x%x datap.EventLength * 4  0x%x\n",__FILE__,__LINE__,c_offset,datap.EventLength * 4);
 
-  if(!datap.EventLength) datap.EventLength = DATAPEVENTLENGTH;  // hack
   //  printf("======= Event number: %d ============\n",datap.EventNumber);
   // check that the file contains the entire event
   struct stat statbuf;
