@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.57 2004/04/06 18:36:51 oldi Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.58 2004/05/19 09:53:38 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.58  2004/05/19 09:53:38  jcs
+// print out number of clusters found for both Ftpcsy
+//
 // Revision 1.57  2004/04/06 18:36:51  oldi
 // New data mebers for pad and time position and pad and time sigma filled.
 //
@@ -802,8 +805,10 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 	} // end of: for(iSec...)
     } // end of: for(iRow...)
 
+  if (iftpc == 0 ) gMessMgr->Message("", "I", "OS") << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " <<  mPoint->GetEntriesFast() << " hits in Ftpc West." << endm;
+  if (iftpc == 1 ) gMessMgr->Message("", "I", "OS") << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " <<  mPoint->GetEntriesFast() << " hits in Ftpc East." << endm;
+  
 }  // end of: for(iftpc
-  gMessMgr->Message("", "I", "OS") << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " <<  mPoint->GetEntriesFast() << " hits." << endm;
   
 #ifdef DEBUGFILE
   fclose(fin);
