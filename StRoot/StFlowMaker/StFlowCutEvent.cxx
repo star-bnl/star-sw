@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.37 2005/02/08 22:13:08 psoren Exp $
+// $Id: StFlowCutEvent.cxx,v 1.38 2005/02/11 23:22:10 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
@@ -227,27 +227,26 @@ Bool_t StFlowCutEvent::CheckEvent(StFlowPicoEvent* pPicoEvent) {
   //This is obsolete!!!! There is no trigger word after year 4
   // Trigger
   UInt_t triggerWord = pPicoEvent->L0TriggerWord();
-  Float_t trigger;
 
   if (pPicoEvent->CenterOfMassEnergy() > 60. && pPicoEvent->CenterOfMassEnergy() < 65. ) { // 62 GeV
     if (!( (triggerWord == 35004 || triggerWord == 35007) ||
 	  ((triggerWord == 35001 || triggerWord == 35009) && pPicoEvent->CTB() > 15) )) {
-      trigger = 10.; // no clue
+      mTriggersFound = 10; // no clue
     } else {
-      trigger = 1.; // minbias
+      mTriggersFound = 1; // minbias
     }
   } 
 
   else {
     switch (triggerWord) {
-    case 4096:  trigger = 1.;  break; // minbias
-    case 4352:  trigger = 2.;  break; // central
-    case 61952: trigger = 3.;  break; // laser
-    default:    trigger = 10.; break; // no clue
+    case 4096:  mTriggersFound = 1;  break; // minbias
+    case 4352:  mTriggersFound = 2;  break; // central
+    case 61952: mTriggersFound = 3;  break; // laser
+    default:    mTriggersFound = 10; break; // no clue
     }    
   }
 
-  if (mTriggerCut && trigger != mTriggerCut) {
+  if (mTriggerCut && mTriggersFound != mTriggerCut) {
     mTriggerCutN++;
     return kFALSE;
   }
@@ -633,16 +632,6 @@ Bool_t StFlowCutEvent::CheckEtaSymmetry(StMuEvent* pMuEvent) {
 
 //-----------------------------------------------------------------------
 
-UInt_t StFlowCutEvent::TriggersFound() {
-  return mTriggersFound;
-}
-//-----------------------------------------------------------------------
-
-UInt_t StFlowCutEvent::GetFlowTriggerBitMap() {
-  return flowTriggerBitMap;
-}
-//-----------------------------------------------------------------------
-
 void StFlowCutEvent::PrintCutList() {
   // Prints the list of cuts
 
@@ -680,6 +669,9 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.38  2005/02/11 23:22:10  posk
+// Made TriggersFound() work for pico files.
+//
 // Revision 1.37  2005/02/08 22:13:08  psoren
 // initialized flowTriggerBitMap=0 for each event
 //

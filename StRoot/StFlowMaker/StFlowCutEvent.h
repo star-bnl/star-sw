@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.h,v 1.12 2005/02/08 20:57:36 psoren Exp $
+// $Id: StFlowCutEvent.h,v 1.13 2005/02/11 23:22:12 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -107,11 +107,20 @@ inline void StFlowCutEvent::SetEtaSymFtpc(Float_t lo, Float_t hi) {
 inline void StFlowCutEvent::SetTrigger(const UInt_t value) {
   mTriggerCut = value; }
 
+inline UInt_t StFlowCutEvent::TriggersFound() { 
+  return mTriggersFound; }
+
+inline UInt_t StFlowCutEvent::GetFlowTriggerBitMap() {
+  return flowTriggerBitMap; }
+
 #endif
 
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.h,v $
+// Revision 1.13  2005/02/11 23:22:12  posk
+// Made TriggersFound() work for pico files.
+//
 // Revision 1.12  2005/02/08 20:57:36  psoren
 // trigger and centrality selections were updated for all runs after run 4 to be compatible with trigger collections. Added TriggersFound() and GetFlowTriggerBitMap() functions.
 //
