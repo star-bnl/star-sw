@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.h,v 1.4 2003/11/24 23:36:36 laue Exp $
+ * $Id: StMuDstFilterMaker.h,v 1.5 2004/04/29 03:35:57 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstFilterMaker_hh
@@ -35,13 +35,13 @@ class StMuDstFilterMaker : public StMaker {
     int Make();   ///< Filters the muDst and writes the filtered version
     int Finish(); ///< Writes and closes the output file
     virtual const char *GetCVS() const {
-	static const char cvs[]="Tag $Name:  $ $Id: StMuDstFilterMaker.h,v 1.4 2003/11/24 23:36:36 laue Exp $ built "__DATE__" "__TIME__ ; 
+	static const char cvs[]="Tag $Name:  $ $Id: StMuDstFilterMaker.h,v 1.5 2004/04/29 03:35:57 perev Exp $ built "__DATE__" "__TIME__ ; 
 	return cvs;
     }
   
     void setOutputFileName(const char* name) { mFileName = string(name); }
     void setMuDstMaker( StMuDstMaker* maker) { mMuDstMaker = maker; }
- private:
+ protected:
     /// specialize this function to apply filters to the individual branches
     template<class T> bool filter(T* t) { return false;}
     /// If this function returns false, the whole event is discarded
@@ -80,6 +80,9 @@ class StMuDstFilterMaker : public StMaker {
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.h,v $
+ * Revision 1.5  2004/04/29 03:35:57  perev
+ * private ==> protected
+ *
  * Revision 1.4  2003/11/24 23:36:36  laue
  * commented the StMuEmcCollection out
  *
