@@ -2,7 +2,7 @@
 #ifndef EEfeeDataBlock_h
 #define EEfeeDataBlock_h
 /*********************************************************************
- * $Id: EEfeeDataBlock.h,v 1.2 2003/11/20 16:01:46 balewski Exp $
+ * $Id: EEfeeDataBlock.h,v 1.3 2003/11/24 05:40:55 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw FEE Data Block
@@ -49,6 +49,7 @@ public:
   UChar_t   getCrateID()  const { return  head[CRATE] & 0x00FF ; }
   int       getNData(int thres) const;
   void      maskCrate() {head[CRATE]=0xFFFF;}
+  int       isValid();
 
   ClassDef(EEfeeDataBlock,1) // Endcap Emc event
 };
@@ -56,6 +57,9 @@ public:
 
 /*
  * $Log: EEfeeDataBlock.h,v $
+ * Revision 1.3  2003/11/24 05:40:55  balewski
+ * new stuff for miniDaq
+ *
  * Revision 1.2  2003/11/20 16:01:46  balewski
  * towars run 4
  *
