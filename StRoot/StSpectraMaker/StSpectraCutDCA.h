@@ -6,13 +6,11 @@
 class StSpectraCutDCA : public StSpectraCut {
 
  private:
- double mLowLimit;
- double mHighLimit;
 
  protected:
 
  public:
-  StSpectraCutDCA();
+
   StSpectraCutDCA(double lowLimit, double highLimit);
 
   ~StSpectraCutDCA();

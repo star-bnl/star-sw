@@ -17,6 +17,11 @@ class StSpectraCut {
 
  protected:
 
+  double mLowLimit;
+  double mHighLimit;
+
+  StSpectraCut(double lowLimit, double highLimit);
+
  public:
 
   virtual  ~StSpectraCut() {};

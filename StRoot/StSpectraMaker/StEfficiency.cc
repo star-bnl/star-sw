@@ -71,8 +71,8 @@ StEfficiency::StEfficiency(char* efficFile) {
     if (&mEfficHistogram != 0 ){
       efficHistogramFound = true; 
       cout << "found" << endl;
-      mAbscissa = kTransverseMass;
-      mOrdinate = kRapidity;
+      mOrdinate = kTransverseMass;
+      mAbscissa = kRapidity;
     } else {
       cout << "not found" << endl; 
     // set failure mode of constructor
