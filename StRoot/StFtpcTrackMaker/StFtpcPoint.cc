@@ -1,5 +1,8 @@
-// $Id: StFtpcPoint.cc,v 1.4 2000/07/18 21:22:16 oldi Exp $
+// $Id: StFtpcPoint.cc,v 1.5 2000/08/01 12:23:15 hummler Exp $
 // $Log: StFtpcPoint.cc,v $
+// Revision 1.5  2000/08/01 12:23:15  hummler
+// add writing to table functionality
+//
 // Revision 1.4  2000/07/18 21:22:16  oldi
 // Changes due to be able to find laser tracks.
 // Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
@@ -152,6 +155,27 @@ StFtpcPoint::~StFtpcPoint()
   // Does nothing except destruct.
 }
 
+
+Int_t StFtpcPoint::ToTable(fcl_fppoint_st *point_st)
+{
+  point_st->row=GetPadRow();
+  point_st->sector=GetSector();
+  point_st->n_pads=GetNumberPads();
+  point_st->n_bins=GetNumberBins();
+  point_st->max_adc=GetMaxADC();
+  point_st->charge=GetCharge();
+  point_st->flags=GetFlags();
+  point_st->x=GetX();
+  point_st->y=GetY();
+  point_st->z=GetZ();
+  point_st->x_err=GetXerr();
+  point_st->y_err=GetYerr();
+  point_st->z_err=GetZerr();
+  point_st->s_phi=GetSigmaPhi();
+  point_st->s_r=GetSigmaR();
+
+  return 1;
+}
 
 Int_t StFtpcPoint::Write()
 {
