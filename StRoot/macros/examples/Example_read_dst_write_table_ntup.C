@@ -1,13 +1,13 @@
-// $Id: Example_read_dst_write_ntup.C,v 1.1 2000/01/20 22:50:40 kathy Exp $
-// $Log: Example_read_dst_write_ntup.C,v $
-// Revision 1.1  2000/01/20 22:50:40  kathy
-// put in new macro to show how to write a table from a dst.root file to an ntuple and save to an output disk file
+// $Id: Example_read_dst_write_table_ntup.C,v 1.1 2000/01/21 18:20:45 kathy Exp $
+// $Log: Example_read_dst_write_table_ntup.C,v $
+// Revision 1.1  2000/01/21 18:20:45  kathy
+// now have macro that writes a table-based ntuple and another that reads the ntuple back in and draws from it
 //
 //
 //=======================================================================
 // owner: Kathy Turner
 // what it does:
-//    - Reads an .dst.root or .dst.xdf file, 
+//    - Reads an .dst.root produced from bfc
 //    - finds a table (dst/globtrk) 
 //    - fills an ntuple with this table. 
 //    - Draws some plots from the ntuple.  
@@ -15,17 +15,16 @@
 //=======================================================================
 
 
-void Example_read_dst_write_ntup(
+void Example_read_dst_write_table_ntup(
   Int_t nevents=3, 
   const Char_t *MainFile=
      "/afs/rhic/star/data/samples/gstar.dst.root",
-  const Char_t *NtupFile="test_ntup.root")
+  const Char_t *NtupFile="globtrk_ntup.root")
 {
  
   cout << " nevents to process = " << nevents << endl;
   cout << " Input file       = " << MainFile << endl;
   cout << " Output ntup file = " << NtupFile << endl;
-
 
     gSystem->Load("St_base");
     gSystem->Load("StChain");
@@ -77,9 +76,11 @@ void Example_read_dst_write_ntup(
 // if pointer is zero, go back to top and read in next event
 // last event is really end-run record, so it doesn't have the
 // data on it. After this record is passed, the while loop ends
+
   if (!glob)  continue;
 
 // Create ntuple & file in first event!
+// Ntuple gets named "globtrk" here!
 // Must have variable list setup already in order to define an ntuple
 // We don't have this done until after we get to the table in the
 //  first event - so am defining the ntuple below.
@@ -93,23 +94,23 @@ void Example_read_dst_write_ntup(
       ntupfile = new TFile(NtupFile,"RECREATE","My Ntuple");
       myNtuple = new St_TableNtuple((St_Table&)*glob);
     }
+
    
 // fill ntuple
     myNtuple->Fill((St_Table&)*glob);
 }
 
+ cout << " ==> finished loop, now write ntuple to output file" << endl;
+// write ntuple in memory to the Tfile:
+ myNtuple->Write();
+
+// draw some things from ntuple which is in memory
  gStyle->SetOptStat(111111);
-
  myNtuple->Draw("n_point");
-
-// draw 2D hist with conditions
  myNtuple->Draw("r0:z0","n_point<50 && n_fit_point<40");
+ myNtuple->Draw("x_first0:x_first1","n_point<50 && n_fit_point<40");
 
-// below Draw doesn't work... don't know why
-// myNtuple->Draw("x_first[0]:x_first[1]","n_point<50 && n_fit_point<40");
-
- cout << " ==> finished loop, now close output file" << endl;
-
+ cout << " ==> close output file" << endl;
 // close ntuple in TFile
  ntupfile->Close();
 
