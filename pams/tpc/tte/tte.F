@@ -1,5 +1,8 @@
-* $Id: tte.F,v 1.24 1999/02/27 22:29:17 sakrejda Exp $
+* $Id: tte.F,v 1.25 1999/02/27 22:43:03 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.25  1999/02/27 22:43:03  sakrejda
+* some more checks for rec hit without a mc partner
+*
 * Revision 1.24  1999/02/27 22:29:17  sakrejda
 * changes suggested by Victor implemented
 *
@@ -649,7 +652,6 @@ c        double-check, whether this is a good track, loop only through good trac
          if(track_num.gt.0) then 
            track_num_local=track_num
 c          loop through all the points until this track is done
-
            if(eval_h.nok.lt.eval_h.maxlen) then
              eval_h.nok=eval_h.nok+1
              eval(eval_h.nok).rtrk=track_num
@@ -659,7 +661,9 @@ c            fill the evaluation table with the info about this track:
              eval(eval_h.nok).inhit=track(list_tracks(track_num)).hitid
 c            find a mc hit associated with this reconstructed hit
 c            and get it's momentum information.
-             id_mc=tindex(list_index_rec(eval(eval_h.nok).inhit)).key1
+             id_mc = 0
+             if (list_index_rec(eval(eval_h.nok).inhit).gt.0)
+     >       id_mc=tindex(list_index_rec(eval(eval_h.nok).inhit)).key1
              if(id_mc.gt.0) then
                ip_mc=list_g2t_hits(id_mc)
                eval(eval_h.nok).pxg=g2t_hit(ip_mc).p(1)
