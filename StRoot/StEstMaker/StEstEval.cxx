@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstEval.cxx,v 1.3 2001/01/31 16:43:08 lmartin Exp $
+ * $Id: StEstEval.cxx,v 1.4 2001/03/02 16:05:05 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstEval.cxx,v $
+ * Revision 1.4  2001/03/02 16:05:05  lmartin
+ * Save the numbers of ideal, good and bad tracks.
+ *
  * Revision 1.3  2001/01/31 16:43:08  lmartin
  * mParams[]->debug replaced by mDebug
  *
@@ -437,7 +440,14 @@ void StEstTracker::Eval(int onoffmatrix, int nminhit) {
   cout<<"             Real purity (%)     : \t"<<(real_good*100)/(lmgood_tot*1.+lmbad_tot*1.)<<"\t"<<(real_good_pri*100)/(lmgood_pri_tot*1.+lmbad_pri_tot*1.)<<"\t"<<(real_good_sec*100)/(lmgood_sec_tot*1.+lmbad_sec_tot*1.)<<endl;
   cout<<"------------------------------------------------------------------------------------------"<<endl;
 
-
+  if (mSuperPass==mNSuperPass-1) {
+    mNIdealPrim=real_ideal_pri;
+    mNIdealSeco=real_ideal_sec;
+    mNGoodPrim=real_good_pri;
+    mNGoodSeco=real_good_sec;
+    mNBadPrim=lmbad_pri_tot+good_found_twice_pri;
+    mNBadSeco=lmbad_sec_tot+good_found_twice_sec;
+  }
 
   i=0;
   bd=0;
