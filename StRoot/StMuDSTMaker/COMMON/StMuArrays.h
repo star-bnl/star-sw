@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.11 2004/10/19 01:43:05 mvl Exp $
+ * $Id: StMuArrays.h,v 1.12 2004/10/28 00:11:33 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -29,13 +29,17 @@ enum pmdTypes {muPmdHit=0, muCpvHit, muPmdCluster, muCpvCluster};
 /// @enum Tofr enumeration
 enum tofTypes {muTofHit=0, muTofData};
 
+/// @enum eztTypes enumeration to to index the eztArrays (IUCF-ezTree)
+enum eztTypes {muEztHead=0, muEztTrig, muEztETow, muEztESmd};
+
 enum NARRAYS {
 __NARRAYS__        =9,	///< size of the 'regular stuff' arrays, i.e. number of TClonesArrays  
 __NSTRANGEARRAYS__ =12,	///< size of the strangeness arrays, i.e. number of TClonesArrays  
 __NEMCARRAYS__     =7 ,	///< size of the emc arrays, i.e. number of TClonesArrays  
 __NPMDARRAYS__     =4 ,	///< size of the pmd arrays, i.e. number of TClonesArrays  
 __NTOFARRAYS__     =2 ,  ///< size of the tof arrays >
-__NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__
+__NEZTARRAYS__     =4 ,  ///< size of the ez arrays >
+__NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NEZTARRAYS__
 };
 class StMuArrays {
  public:
@@ -46,6 +50,7 @@ class StMuArrays {
     static const char**      emcArrayNames;//[__NEMCARRAYS__    ]
     static const char**      pmdArrayNames;//[__NPMDARRAYS__    ]
     static const char**      tofArrayNames;//[__NTOFARRAYS__    ]
+    static const char**      eztArrayNames;//[__NEZARRAYS__    ]
 
 ///< names of the classes, the TClonesArrays are arrays of this type
     static const char*   arrayTypes          [__NALLARRAYS__    ];
@@ -53,6 +58,7 @@ class StMuArrays {
     static const char**  emcArrayTypes;//    [__NEMCARRAYS__    ]
     static const char**  pmdArrayTypes;//    [__NPMDARRAYS__    ]
     static const char**  tofArrayTypes;//    [__NTOFARRAYS__    ]
+    static const char**  eztArrayTypes;//    [__NEZARRAYS__    ]
 
 ///< maximum sizes of the TClonesArrays
     static int           arraySizes    [__NALLARRAYS__    ];
@@ -60,6 +66,7 @@ class StMuArrays {
     static int*       emcArraySizes;// [__NEMCARRAYS__    ]
     static int*       pmdArraySizes;// [__NPMDARRAYS__    ]
     static int*       tofArraySizes;// [__NTOFARRAYS__    ]
+    static int*       eztArraySizes;// [__NEZARRAYS__    ]
 
 ///< number of entries in current event, currently not used
     static int        arrayCounters    [__NALLARRAYS__    ];
@@ -67,6 +74,7 @@ class StMuArrays {
     static int*    emcArrayCounters;// [__NEMCARRAYS__    ]
     static int*    pmdArrayCounters;// [__NPMDARRAYS__    ]
     static int*    tofArrayCounters;// [__NTOFARRAYS__    ]
+    static int*    eztArrayCounters;// [__NEZARRAYS__    ]
 };
 
 #endif
@@ -74,6 +82,10 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.12  2004/10/28 00:11:33  mvl
+ * Added stuff to support ezTree mode of MuDstMaker.
+ * This is a special mode for fast-online processing of fast-detector data.
+ *
  * Revision 1.11  2004/10/19 01:43:05  mvl
  * Changes for splitting Emc and Pmd collections
  *

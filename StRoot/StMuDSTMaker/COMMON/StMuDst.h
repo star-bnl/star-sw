@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.22 2004/10/21 02:56:35 mvl Exp $
+ * $Id: StMuDst.h,v 1.23 2004/10/28 00:11:33 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -39,6 +39,10 @@ class StEmcCollection;
 class StMuTofHit;
 class StTofData;
 
+class EztEventHeader;
+class EztTrigBlob;
+class EztEmcRawData;
+
 class StPhysicalHelixD;
 
 #include "TObject.h"
@@ -67,7 +71,7 @@ public:
   /// set the pointers to the TClonesArrays
   void set(StMuDstMaker* maker);
   /// set the pointers to the TClonesArrays
-  void set(TClonesArray**, TClonesArray**, TClonesArray** emc=0, TClonesArray** pmd=0, TClonesArray** tof=0, TClonesArray *emc_arr=0, StMuEmcCollection *emc=0, TClonesArray *pmd_arr=0, StMuPmdCollection *pmd=0);
+  void set(TClonesArray**, TClonesArray**, TClonesArray** emc=0, TClonesArray** pmd=0, TClonesArray** tof=0, TClonesArray *emc_arr=0, StMuEmcCollection *emc=0, TClonesArray *pmd_arr=0, StMuPmdCollection *pmd=0, TClonesArray** ezt=0);
   /// set pointer to current StEmcCollection
   static void setEmcCollection(StEmcCollection *emc_coll) { mEmcCollection=emc_coll; }
   
@@ -105,6 +109,8 @@ public:
   static StMuPmdCollection *mMuPmdCollection;
   /// pointer to EmcCollecion (for Emc clusterfinding etc)
   static StEmcCollection *mEmcCollection;
+  /// array of TClonesArrays for the stuff inherited from the EZT (ezTree)
+  static TClonesArray** eztArrays;
 
 public:
   /// returns pointer to the n-th TClonesArray 
@@ -117,6 +123,8 @@ public:
   static TClonesArray* pmdArray(int type) { return pmdArrays[type]; }
   /// returns pointer to the n-th TClonesArray from the tof arrays
   static TClonesArray* tofArray(int type) { return tofArrays[type]; }
+  /// returns pointer to the n-th TClonesArray from the ezt arrays
+  static TClonesArray* eztArray(int type) { return eztArrays[type]; }
 
   /// returns pointer to the primary tracks list
   static TClonesArray* primaryTracks() { return arrays[muPrimary]; }
@@ -205,6 +213,20 @@ public:
   /// returns pointer to the i-th tofData
   static StTofData* tofData(int i) { return (StTofData*)tofArrays[muTofData]->UncheckedAt(i); }
 
+  /// returns pointer to eztHeader 
+  static  EztEventHeader* eztHeader() { return (EztEventHeader*)eztArrays[muEztHead]->UncheckedAt(0); }
+
+  /// returns pointer to eztTrig 
+  static  EztTrigBlob* eztTrig() 
+        { return (EztTrigBlob*)eztArrays[muEztTrig]->UncheckedAt(0); }
+
+  /// returns pointer to ETOW 
+  static  EztEmcRawData* eztETow() 
+        { return (EztEmcRawData*)eztArrays[muEztETow]->UncheckedAt(0); }
+  /// returns pointer to eztESmd +pre/post
+  static  EztEmcRawData* eztESmd() 
+        { return (EztEmcRawData*)eztArrays[muEztESmd]->UncheckedAt(0); }
+
   static unsigned int numberOfPrimaryTracks()  { return arrays[muPrimary]->GetEntries(); }
   static unsigned int numberOfGlobalTracks()   { return arrays[muGlobal]->GetEntries(); }
   static unsigned int numberOfOtherTracks()    { return arrays[muOther]->GetEntries(); }
@@ -250,7 +272,7 @@ public:
   static unsigned int GetNTofHit()          { return numberOfTofHit(); }
   static unsigned int GetNTofData()         { return numberOfTofData(); }
 
-  ClassDef(StMuDst,2)
+  ClassDef(StMuDst,0)
 };
 
 #endif
@@ -258,6 +280,10 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.23  2004/10/28 00:11:33  mvl
+ * Added stuff to support ezTree mode of MuDstMaker.
+ * This is a special mode for fast-online processing of fast-detector data.
+ *
  * Revision 1.22  2004/10/21 02:56:35  mvl
  * Added pointer to StEmcColleciton for Emc clustering etc.
  * Also made some technical changes for backward compatibility mode with

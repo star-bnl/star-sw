@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.cxx,v 1.12 2004/10/19 01:43:05 mvl Exp $
+ * $Id: StMuArrays.cxx,v 1.13 2004/10/28 00:11:32 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -25,13 +25,15 @@ const char* StMuArrays::arrayNames [__NALLARRAYS__    ] = {"MuEvent",
 /*pmdArrayNames    [__NPMDARRAYS__    ]*/                  "PmdHit","CpvHit",
 							   "PmdCluster",
 							   "CpvCluster",
-/*tofArrayNames    [__NTOFARRAYS__    ]*/                  "TofHit","TofData"};
+/*tofArrayNames    [__NTOFARRAYS__    ]*/                  "TofHit","TofData",
+/*eztArrayNames    [__NEZTARRAYS__    ]*/                  "EztHead","EztTrig",
+							   "EztETow","EztESmd"};
 
 const char** StMuArrays::strangeArrayNames = StMuArrays::arrayNames    +__NARRAYS__;
 const char** StMuArrays::emcArrayNames = StMuArrays::strangeArrayNames +__NSTRANGEARRAYS__;
 const char** StMuArrays::pmdArrayNames = StMuArrays::emcArrayNames     +__NEMCARRAYS__;
 const char** StMuArrays::tofArrayNames = StMuArrays::pmdArrayNames     +__NPMDARRAYS__;
-
+const char** StMuArrays::eztArrayNames = StMuArrays::tofArrayNames     +__NTOFARRAYS__;
 
 //		ARRAY TYPES
 //============================================================================================
@@ -46,12 +48,13 @@ const char* StMuArrays::arrayTypes [__NALLARRAYS__    ] = {"StMuEvent",
 /*emcArrayTypes   [__NEMCARRAYS__     ]*/                  "StMuEmcTowerData","StMuEmcHit",
 							   "StMuEmcHit","StMuEmcHit","StMuEmcHit","StMuEmcHit","StMuEmcHit",
 /*pmdArrayTypes   [__NPMDARRAYS__     ]*/                  "StMuPmdHit","StMuPmdHit","StMuPmdCluster","StMuPmdCluster",
-/*tofArrayTypes   [__NTOFARRAYS__     ]*/                  "StMuTofHit","StTofData"};
+/*tofArrayTypes   [__NTOFARRAYS__     ]*/                  "StMuTofHit","StTofData",
+/*eztArrayTypes   [__NEZTARRAYS__     ]*/                  "EztEventHeader","EztTrigBlob","EztEmcRawData","EztEmcRawData"};
 const char** StMuArrays::strangeArrayTypes = StMuArrays::arrayTypes    +__NARRAYS__;
 const char** StMuArrays::emcArrayTypes = StMuArrays::strangeArrayTypes +__NSTRANGEARRAYS__;
 const char** StMuArrays::pmdArrayTypes = StMuArrays::emcArrayTypes     +__NEMCARRAYS__;
 const char** StMuArrays::tofArrayTypes = StMuArrays::pmdArrayTypes     +__NPMDARRAYS__;
-
+const char** StMuArrays::eztArrayTypes = StMuArrays::tofArrayTypes     +__NTOFARRAYS__;
 
 //		ARRAY SIZES
 //============================================================================================
@@ -62,11 +65,13 @@ int   StMuArrays::arraySizes       [__NALLARRAYS__    ] = {1,1000,1000,1000,1000
 /*strangeArraySizes[__NSTRANGEARRAYS__]*/                  1,1,1000,100,100,1000,100,100,1000,100,100,200,
 /*emcArraySizes    [__NEMCARRAYS__    ]*/                  1,1000,1000,1000,1000,1000,1000,
 /*pmdArraySizes    [__NPMDARRAYS__    ]*/                  1000,1000,1000,1000,
-/*tofArraySizes    [__NTOFARRAYS__    ]*/                  100, 200};
+/*tofArraySizes    [__NTOFARRAYS__    ]*/                  100, 200,
+/*eztArraySizes    [__NEZTARRAYS__    ]*/                  1, 1, 1, 1};
 int* StMuArrays::strangeArraySizes = StMuArrays::arraySizes    +__NARRAYS__;
 int* StMuArrays::emcArraySizes = StMuArrays::strangeArraySizes +__NSTRANGEARRAYS__;
 int* StMuArrays::pmdArraySizes = StMuArrays::emcArraySizes     +__NEMCARRAYS__;
 int* StMuArrays::tofArraySizes = StMuArrays::pmdArraySizes     +__NPMDARRAYS__;
+int* StMuArrays::eztArraySizes = StMuArrays::tofArraySizes     +__NTOFARRAYS__;
 
 
 //		ARRAY COUNTERS
@@ -75,7 +80,8 @@ int   StMuArrays::arrayCounters       [__NALLARRAYS__ ] = {0,0,0,0,0,0,0,0,0,
 /*strangeArrayCounters[__NSTRANGEARRAYS__]*/               0,0,0,0,0,0,0,0,0,0,0,0,
 /*emcArrayCounters    [__NEMCARRAYS__    ]*/               0,0,0,0,0,0,0,
 /*pmdArrayCounters    [__NPMDARRAYS__    ]*/               0,0,0,0,
-/*tofArrayCounters    [__NTOFARRAYS__    ]*/               0, 0};
+/*tofArrayCounters    [__NTOFARRAYS__    ]*/               0, 0,
+/*eztArrayCounters    [__NEZTARRAYS__    ]*/               0, 0, 0, 0};
 
 StMuArrays test;
 
@@ -83,6 +89,7 @@ int* StMuArrays::strangeArrayCounters = StMuArrays::arrayCounters    +__NARRAYS_
 int* StMuArrays::emcArrayCounters = StMuArrays::strangeArrayCounters +__NSTRANGEARRAYS__;
 int* StMuArrays::pmdArrayCounters = StMuArrays::emcArrayCounters     +__NEMCARRAYS__;
 int* StMuArrays::tofArrayCounters = StMuArrays::pmdArrayCounters     +__NPMDARRAYS__;
+int* StMuArrays::eztArrayCounters = StMuArrays::tofArrayCounters     +__NTOFARRAYS__;
 
 StMuArrays::StMuArrays()
 {
@@ -104,6 +111,10 @@ StMuArrays::StMuArrays()
 /***************************************************************************
  *
  * $Log: StMuArrays.cxx,v $
+ * Revision 1.13  2004/10/28 00:11:32  mvl
+ * Added stuff to support ezTree mode of MuDstMaker.
+ * This is a special mode for fast-online processing of fast-detector data.
+ *
  * Revision 1.12  2004/10/19 01:43:05  mvl
  * Changes for splitting Emc and Pmd collections
  *
