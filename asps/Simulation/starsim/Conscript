@@ -36,11 +36,11 @@ $CPPPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{INCDIR};
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/src/pawlib/paw/ntuple";
 $CPPFLAGS  = "-DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
-if ($STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^i386/) {
+if ($STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^i386/ or $STAR_HOST_SYS =~ /^sl/) {
   $FPPFLAGS .= " -DCERNLIB_LINUX";
   $CPPFLAGS .= " -DCERNLIB_LINUX";
 }
-if ($STAR_SYS =~ /^rh8/ or $STAR_SYS =~ /^rh9/) {
+if ($STAR_SYS =~ /^rh8/ or $STAR_SYS =~ /^rh9/ or $STAR_HOST_SYS =~ /^sl/) {
   $FPPFLAGS .= " -DCERNLIB_MYSQL";
   $CPPFLAGS .= " -DCERNLIB_MYSQL";
   $CPPFLAGS  = " -Df2cFortran -DCERNLIB_QMGLIBC";
