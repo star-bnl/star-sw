@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.20  1999/04/08 16:40:51  ward
+// Reduced table memory, will reduce more later.
+//
 // Revision 1.19  1999/04/07 21:42:33  ward
 // Version tag, Desi and Lucy.
 //
@@ -139,12 +142,12 @@ void St_tpcdaq_Maker::MkTables(int isect,St_DataSet *sector,
 
   *raw_pad_in=(St_raw_pad*) sect("raw_pad_in");
   if (!(*raw_pad_in)) {
-    *raw_pad_in=new St_raw_pad("raw_pad_in",4000); sect.Add(*raw_pad_in);
+    *raw_pad_in=new St_raw_pad("raw_pad_in",1750); sect.Add(*raw_pad_in);
   }
 
   *raw_pad_out=(St_raw_pad*) sect("raw_pad_out");
   if (!(*raw_pad_out)) {
-    *raw_pad_out=new St_raw_pad("raw_pad_out",4000); sect.Add(*raw_pad_out);
+    *raw_pad_out=new St_raw_pad("raw_pad_out",3940); sect.Add(*raw_pad_out);
   }
 
   *raw_seq_in=(St_raw_seq*) sect("raw_seq_in");
@@ -159,13 +162,13 @@ void St_tpcdaq_Maker::MkTables(int isect,St_DataSet *sector,
 
   *pixel_data_in=(St_type_shortdata*) sect("pixel_data_in");
   if (!(*pixel_data_in)) {
-    *pixel_data_in=new St_type_shortdata("pixel_data_in",900000); // BBB Iwona
+    *pixel_data_in=new St_type_shortdata("pixel_data_in",400000); // BBB Iwona
     sect.Add(*pixel_data_in);
   }
 
   *pixel_data_out=(St_type_shortdata*) sect("pixel_data_out");
   if (!(*pixel_data_out)) {
-    *pixel_data_out=new St_type_shortdata("pixel_data_out",900000);
+    *pixel_data_out=new St_type_shortdata("pixel_data_out",400000);
     sect.Add(*pixel_data_out);
   }
 }
@@ -385,7 +388,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.19 1999/04/07 21:42:33 ward Exp $ \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.20 1999/04/08 16:40:51 ward Exp $ \n");
   printf("**************************************************************\n");
   if(Debug()) StMaker::PrintInfo();
 }
