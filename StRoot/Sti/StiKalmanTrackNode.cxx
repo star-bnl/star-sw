@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.64 2005/02/19 20:23:37 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.65 2005/02/25 17:05:41 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.65  2005/02/25 17:05:41  perev
+ * Scaling for errors added
+ *
  * Revision 2.64  2005/02/19 20:23:37  perev
  * Cleanup
  *
@@ -299,16 +302,20 @@ static int myCount=0;
   _Kount = ++myCount;
 }
 //______________________________________________________________________________
-void StiKalmanTrackNode::resetError()
+void StiKalmanTrackNode::resetError(double fak)
 { 
 static const double DY=0.3,DZ=0.3,DEta=0.03,DRho=0.01,DTan=0.05;
 
-  memset(&_c00,0,15*sizeof(_c00));
-  _c00=DY*DY;
-  _c11=DZ*DZ;
-  _c22=DEta*DEta;
-  _c33=DRho*DRho;
-  _c44=DTan*DTan;
+  if (!fak) {
+    memset(&_c00,0,15*sizeof(_c00));
+    _c00=DY*DY;
+    _c11=DZ*DZ;
+    _c22=DEta*DEta;
+    _c33=DRho*DRho;
+    _c44=DTan*DTan;
+  } else {
+    for (int i=0;i<15;i++) (&_c00)[i] *=fak;
+  }  
 }
 //_____________________________________________________________
 /// Set the Kalman state of this node to be identical 
