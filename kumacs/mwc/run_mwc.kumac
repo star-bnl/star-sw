@@ -4,6 +4,7 @@
 * 7/31/98 P. Yepes  - editted to make it standard
 * 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk 
 * 10/14/98 K. Turner - put in read_default_params
+* 11/16/98 K. Turner - update to dev version of kumacs
 * ***********************************************************************
 ************************************************************************
 
@@ -77,12 +78,10 @@
 *  Setup for mwc
 * ****************************************************************  
 
-* load geometry
-  exec mwg_init
-    
-  exec mws_init
-  
   exec create_tables_mwc#init
+  exec mwg_init#init
+  exec mwg_init#mwg
+  exec mws_init#init
   
 ***************************************************************
 *  Run mwc
@@ -97,10 +96,10 @@
 * read input file
     exec input_g2t_file#read
     if STAF_STATUS(1).eq.0 goto ENDOFDATA
-* do simulation
-    exec mws_run
+* do simulation 
+    exec mws_run#mws_run
 * fill pixel tables
-    exec mwu_run   
+    exec mwu_run#mwu_run
 * write table to ntuple
     exec write_table_to_ntuple#write_event_disk [nid] [data]/[table]
   enddo
