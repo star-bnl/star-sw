@@ -54,7 +54,7 @@ public:
 
    void addTracks ( short sector, int nTracks, type1_track* track1 ) ;
    void addTracks ( short sector, int nTracks, type2_track* track2 ) ;
-   void addTracks ( short sector, int nTracks, type3_track* track3 ) ;
+   void addTracks ( int nTracks, type3_track* track3 ) ;
 
    int  readEvent  ( int maxLength, char* buffer ) ;
    int  readSector ( int maxLength, char* buffer ) ;

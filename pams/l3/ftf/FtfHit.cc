@@ -61,7 +61,7 @@ void FtfHit::printLinks ( int point_level )
 //    This function assigns this hit and all its 
 //    mirror hits to a given track
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void FtfHit::setStatus ( FtfTrack* this_track, FtfPara *para ) {
+void FtfHit::setStatus ( FtfTrack* this_track ) {
 //
 //   Set the flag for this hit
 //

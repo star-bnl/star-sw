@@ -29,7 +29,7 @@ public:
    void    deleteCandidate       ( ) ;
    void    fill                  ( ) ;
    void    fillPrimary           ( double &xc, double &yc, double &rc ) ;
-   void    fillSecondary         ( double &xc, double &yc, double &rc) ;
+   void    fillSecondary         ( double &xc, double &yc ) ;
    int     follow                ( VOLUME *volume, int way, int rowToStop ) ;
    int     followHitSelection    ( FtfHit *baseHit, FtfHit *candidateHit ) ;
    int     mergePrimary          ( AREA   *trackArea ) ;

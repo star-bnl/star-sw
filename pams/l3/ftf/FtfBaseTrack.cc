@@ -376,17 +376,17 @@ int FtfBaseTrack::fitLine ( )
       dx   = firstHit->x - lastHit->x ;
       dy   = firstHit->y - lastHit->y ;
    }
-   double dpsi = 0.5F * sqrt ( dx*dx + dy*dy ) / radius ;
+   double localPsi = 0.5F * sqrt ( dx*dx + dy*dy ) / radius ;
    double total_s ;
-   if ( fabs(dpsi) < 1. ) {
-      total_s = 2.0F * radius * asin ( dpsi ) ;
+   if ( fabs(localPsi) < 1. ) {
+      total_s = 2.0F * radius * asin ( localPsi ) ;
    } 
    else { 
       total_s = 2.0F * radius * M_PI ;
    } 
 
 //
-   FtfBaseHit *previousHit ;
+   FtfBaseHit *previousHit = 0  ;
 	
    for ( startLoop() ; done() ; nextHit() ) {
         

@@ -2,14 +2,14 @@
 #define _SECTOR_H
 
 
-// Sector Broker defines
+/* Sector Broker defines */
 #define SB_RB_NUM	12
 
-// Receiver board defines
+/* Receiver board defines */
 #define RB_MZ_NUM		3
 #define RB_FIBER_HDR_LEN	64
 
-// Mezzanine defines 
+/* Mezzanine defines */ 
 #define MZ_ASIC_NUM	6
 #define MZ_BUFFER_NUM	12
 
@@ -18,24 +18,24 @@
 #define MZ_TPC_PADS_PER_ASIC	64
 #define MZ_TPC_TIMEBINS		512
 #define MZ_TPC_CPP_PER_PAD	32
-#define MZ_TPC_MAX_PADS_PER_MEZ	(MZ_TPC_PADS_PER_ASIC*MZ_ASIC_NUM)	// calculated by Mike...
+#define MZ_TPC_MAX_PADS_PER_MEZ	(MZ_TPC_PADS_PER_ASIC*MZ_ASIC_NUM)	/* calculated by Mike... */
 
 #define MZ_SVT_PADS_PER_ASIC	256
 #define MZ_SVT_TIMEBINS		128
 #define MZ_SVT_CPP_PER_PAD	8
-#define MZ_SVT_MAX_PADS_PER_MEZ	(MZ_SVT_PADS_PER_ASIC*MZ_ASIC_NUM)	// not really verified
+#define MZ_SVT_MAX_PADS_PER_MEZ	(MZ_SVT_PADS_PER_ASIC*MZ_ASIC_NUM)	/* not really verified */
 
-// generic constants
-#define MZ_MAX_PADS_PER_ASIC	256	// SVT case
-#define MZ_MAX_TIMEBINS		512	// TPC
-#define MZ_MAX_CPP_PER_PAD	32	// TPC
-#define MZ_MAX_PADS		(256*MZ_ASIC_NUM)	// SVT
-#define MZ_MAX_CHANNELS		(512*64*MZ_ASIC_NUM)	// all
-#define MZ_MAX_CPPS		(8*256*MZ_ASIC_NUM)		// all
-#define MZ_MAX_ROWS		6	// TPC, SVT
+/* generic constants */
+#define MZ_MAX_PADS_PER_ASIC	256	/* SVT case */
+#define MZ_MAX_TIMEBINS		512	/* TPC      */
+#define MZ_MAX_CPP_PER_PAD	32	/* TPC      */
+#define MZ_MAX_PADS		(256*MZ_ASIC_NUM)	/* SVT */
+#define MZ_MAX_CHANNELS		(512*64*MZ_ASIC_NUM)	/* all */
+#define MZ_MAX_CPPS		(8*256*MZ_ASIC_NUM)		/* all */
+#define MZ_MAX_ROWS		6	/* TPC, SVT */
 
-// this shouldn't really be here...
-// misc.
+/* this shouldn't really be here... */
+/* misc. */
 #define DMA_SL3_TYPE	(1 << 28)
 #define DMA_FMT_TYPE	(2 << 28)
 
