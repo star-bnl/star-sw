@@ -284,7 +284,7 @@ StiDetectorContainer::buildDetectors(StiObjectFactoryInterface<StiDetectorNode>*
     mregion = (*where);
     reset();
 
-    print();
+    //print();
     
     return;
 }
