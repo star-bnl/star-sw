@@ -19,7 +19,16 @@ StiPixelDetectorBuilder::StiPixelDetectorBuilder(bool active, const string & inp
 	//once you actually want to do tracking, the results depend strongly on the numbers below.
 	//here I plug in 4micron resolution in both local x and y coordinates
 	//I also put no dependence on either crossing angle or dip angle of track
-	_calculator.set(0.00004, 0., 0., 0.00004, 0., 0.);
+
+  _trackingParameters.setName("PixelTrackingParameters");
+  _calculator.setName("PixelHitErrors");
+  //_calculator = new StiDefaultHitErrorCalculator();
+  _calculator.set(0.00006, 0., 0., 0.00006, 0., 0.);
+  //StiTrackingParameters * trackingPars = getTrackingParameters();
+  _trackingParameters.setMaxChi2ForSelection(10000.);
+  _trackingParameters.setMinSearchWindow(0.0002);
+  _trackingParameters.setMaxSearchWindow(20.0);
+  _trackingParameters.setSearchWindowScaling(100000.);
 }
 
 StiPixelDetectorBuilder::~StiPixelDetectorBuilder()
@@ -32,54 +41,59 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker&source)
   cout << "StiPixelDetectorBuilder::buildDetectors() -I- Started" << endl;
   double pixRadius = 5.0; //cm
   unsigned int nRows=1;
-	setNRows(nRows);
-	for(unsigned int row = 0; row<nRows; ++row)
-		setNSectors(row,12);
-	cout << "StiPixelDetectorBuilder::buildMaterials() -I- Started" << endl; 
+	setNRows(2);
+	setNSectors(0,6);
+	setNSectors(1,18);
+
 	//_gas is the gas that the pixel detector lives in
 	_gas            = add(new StiMaterial("PixelAir",     0.49919,  1., 0.001205, 30420.*0.001205, 5.) );
 	//_fcMaterial is the (average) material that makes up the detector elements.  Here I use ~silicon
 	_fcMaterial     = add(new StiMaterial("PixelSi", 14.,      28.0855,   2.33,     21.82,           5.) );
-	cout << "StiPixelDetectorBuilder::buildMaterials() -I- Done" << endl;
-  cout << "StiPixelDetectorBuilder::buildShapes() -I- Started" << endl;
-  //this is assuming that we have the same beampipe (at r=4cm).
-  //To change, edit StRoot/Sti/Star/StiStarDetectorBuilder.cxx
-  //change for KS from IFC to Pixel
-  StiCylindricalShape *shape = new StiCylindricalShape;
-  shape->setName("Pixel/sector");
-  shape->setThickness(0.1); //radial thickness in cm 
-  shape->setHalfDepth( 16./2. ); 
-  
-  //the angle swept out.  So, for 12 segments, = pi/6
-  shape->setOpeningAngle( M_PI/6. );
-  shape->setOuterRadius(pixRadius + shape->getThickness()/2.); //we'll put it at 5cm
-  add(shape);
-  cout << "StiPixelDetectorBuilder::buildShapes() -I- Done" << endl;
-  StiPlacement *p;
-  for (unsigned int row=0; row<nRows; ++row) 
+  StiPlanarShape *pShape;
+  for (unsigned int row=0; row<nRows; row++) 
 		{
-			for(unsigned int sector = 0; sector<12; ++sector)	
-				{
-					StiDetector *detector = _detectorFactory->getInstance();
-					p = new StiPlacement; //see StRoot/Sti/StiPlacement.h
-					p->setZcenter(0.);
-					p->setLayerRadius(pixRadius);
-					p->setRegion(StiPlacement::kMidRapidity);
-					p->setNormalRep(phiForSector(sector), pixRadius, 0.);
-					sprintf(name, "Pixel/Layer1/Sector_%d", sector);
-					detector->setName(name);
-					detector->setIsOn(true);
-					detector->setIsActive(new StiPixelIsActiveFunctor); 
-					detector->setIsContinuousMedium(false);
-					detector->setIsDiscreteScatterer(true);
-					detector->setShape(shape);
-					detector->setPlacement(p);
-					detector->setGas(_gas);
-					detector->setMaterial(_fcMaterial);
-					detector->setHitErrorCalculator(&_calculator);
-					add(row, sector, detector); 
-				}
+    pShape = new StiPlanarShape;
+    if (!pShape) throw runtime_error("StiPixelDetectorBuilder::buildDetectors() - FATAL - pShape==0||ifcShape==0");
+    sprintf(name, "Pixel/Layer_%d", row);
+    pShape->setName(name);
+    pShape->setThickness(0.0020); //cm 
+    pShape->setHalfDepth( 16./2. );
+    pShape->setHalfWidth(1.0);
+    for(unsigned int sector = 0; sector<24; sector++)	
+			{      
+				StiPlacement *pPlacement = new StiPlacement;
+				pPlacement->setZcenter(0.);
+				double phi = phiForPixelSector(sector) + psiForPixelSector(sector);
+				double r = radiusForPixelSector(sector) * cos(psiForPixelSector(sector));
+				double dY = radiusForPixelSector(sector)*sin(psiForPixelSector(sector));
+				cout << " sector:"<<sector<<endl
+						 << "    phi:"<<phi*180/3.1415<<endl
+						 << "      r:"<<r<<endl
+						 << " radius:"<<radiusForPixelSector(sector)<<endl
+						 << "     dY:"<<dY<<endl;
+				pPlacement->setNormalRep(phi, r, dY); 
+				pPlacement->setLayerRadius(r);
+				pPlacement->setRegion(StiPlacement::kMidRapidity);
+				sprintf(name, "Pixel/Layer_%d/Ladder_%d", row, sector);
+				StiDetector *pDetector = _detectorFactory->getInstance();
+				pDetector->setName(name);
+				pDetector->setIsOn(true);
+				pDetector->setIsActive(new StiPixelIsActiveFunctor);
+				pDetector->setIsContinuousMedium(true);
+				pDetector->setIsDiscreteScatterer(false);
+				pDetector->setMaterial(_gas);
+				pDetector->setGas(_gas);
+				pDetector->setShape(pShape);
+				pDetector->setPlacement(pPlacement);
+				
+				pDetector->setHitErrorCalculator(&_calculator);
+				if (sector<18)
+					add(1,sector,pDetector);
+				else
+					add(0,(sector-18),pDetector);
+			}
 		}
+
   cout << "StiPixelDetectorBuilder::buildDetectors() -I- Done" << endl;
 }
 
