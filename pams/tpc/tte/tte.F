@@ -1,5 +1,8 @@
-* $Id: tte.F,v 1.22 1999/02/23 19:07:34 sakrejda Exp $
+* $Id: tte.F,v 1.23 1999/02/27 21:14:07 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.23  1999/02/27 21:14:07  sakrejda
+* some reconstructed hits are not in the index table, now they are skipped....
+*
 * Revision 1.22  1999/02/23 19:07:34  sakrejda
 * changes in a qsort requested by Victor, put in
 *
@@ -730,28 +733,30 @@ c          to do it take a real hit id
            ip=hit(loc_hit(j)).id
 c          look up its position in the index table and take
 c          the mc hit id from this location
-           id_mc=tindex(list_index_rec(ip)).key1
-           if(id_mc.gt.0) then
-c            find a pointer for this id
-             ip_mc=list_g2t_hits(id_mc)
-c            find a parent track for this point
-             mc_track=g2t_hit(ip_mc).track_p
-c            let's see how many different tracks got mixed up in this one...
-             iloc=0
-             do ii=1,mc_track_on_rec_track_nok
-                if(mc_track_on_rec_track(1,ii).eq.mc_track) iloc=ii
-             end do
-             if(iloc.eq.0) then
-               if(mc_track_on_rec_track_nok.lt.maxtrack)then
-                 mc_track_on_rec_track_nok=mc_track_on_rec_track_nok+1
-                 mc_track_on_rec_track(1,mc_track_on_rec_track_nok)=
-     >           mc_track
-                 mc_track_on_rec_track(2,mc_track_on_rec_track_nok)=0
-                 iloc=mc_track_on_rec_track_nok
+           if(list_index_rec(ip).gt.0) then
+             id_mc=tindex(list_index_rec(ip)).key1
+             if(id_mc.gt.0) then
+c              find a pointer for this id
+               ip_mc=list_g2t_hits(id_mc)
+c              find a parent track for this point
+               mc_track=g2t_hit(ip_mc).track_p
+c              let's see how many different tracks got mixed up in this one...
+               iloc=0
+               do ii=1,mc_track_on_rec_track_nok
+                  if(mc_track_on_rec_track(1,ii).eq.mc_track) iloc=ii
+               end do
+               if(iloc.eq.0) then
+                 if(mc_track_on_rec_track_nok.lt.maxtrack)then
+                   mc_track_on_rec_track_nok=mc_track_on_rec_track_nok+1
+                   mc_track_on_rec_track(1,mc_track_on_rec_track_nok)=
+     >             mc_track
+                   mc_track_on_rec_track(2,mc_track_on_rec_track_nok)=0
+                   iloc=mc_track_on_rec_track_nok
+                 endif
                endif
+               mc_track_on_rec_track(2,iloc)=
+     >         mc_track_on_rec_track(2,iloc)+1
              endif
-             mc_track_on_rec_track(2,iloc)=
-     >       mc_track_on_rec_track(2,iloc)+1
            endif
            j=j+1
            if(j.le.hit_h.nok) then
