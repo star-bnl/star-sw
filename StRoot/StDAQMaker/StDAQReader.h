@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.3 1999/08/01 00:10:57 perev Exp $
+ * $Id: StDAQReader.h,v 1.4 1999/08/01 00:14:50 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,12 +10,14 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.4  1999/08/01 00:14:50  perev
+ * leak removed author added
+ *
  * Revision 1.3  1999/08/01 00:10:57  perev
  * leak removed author added
  *
  *
  **************************************************************************/
-#include "StDAQMaker/StDAQReader.h
 #ifndef _StDAQReader_
 #define _StDAQReader_
 
