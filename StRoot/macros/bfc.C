@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.12 1998/09/18 14:35:33 fisyak Exp $
+// $Id: bfc.C,v 1.13 1998/09/23 20:23:23 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.13  1998/09/23 20:23:23  fisyak
+// Prerelease SL98h
+//
 // Revision 1.12  1998/09/18 14:35:33  fisyak
 // Fix makers
 //
@@ -67,10 +70,10 @@
 //gSystem.Exec("rm *.log");
 //  Char_t *filename = "/afs/rhic/star/data/samples/auau_central_hijing.xdf";
 //  Char_t *filename = "/disk1/star/auau200/year1a/central/hijing/set0001/regular/gst/auau_ce_b0-2_1001_1050.xdf";
-  Char_t *filename = "/disk1/star/auau200/year2a/central/hijing/set0001/regular/gst/auau_ce_b0-2_0051_0100.xdf";
+  Char_t *filename ="/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/g2t/psc079_01_46evts.xdf";
   St_XDFFile *xdf_in   = new St_XDFFile(filename,"r");
   St_XDFFile *xdf_out  = new St_XDFFile("auau_central_hijing.xdf","w");
-  TFile      *root_out=  new TFile("auau_central_hijing.root","RECREATE");
+  //  TFile      *root_out=  new TFile("auau_central_hijing.root","RECREATE");
 //TFile      *root_tree= new TFile("auau_central_hijing.tree.root","RECREATE");
 // Create the main chain object
   StChain chain("StChain");
@@ -86,7 +89,7 @@
   St_tcl_Maker tcl_Maker("tcl_Maker","event/data/tpc/hits");
   St_stk_Maker stk_Maker("stk_Maker","event/data/svt/tracks");
   St_tpt_Maker tpt_Maker("tpt_Maker","event/data/tpc/tracks");
-  //  St_dst_Maker dst_Maker("dst_Maker","event/data/global");
+  St_dst_Maker dst_Maker("dst_Maker","event/data/global");
 // Set parameters
 //  tss_Maker.adcxyzon();
   chain.PrintInfo();
@@ -94,31 +97,35 @@
   chain.Init();
 //  chain.MakeTree("StChainTree","Title");
 // Prepare TCanvas to show some histograms created by makers
-  //  xdf_out->NextEventPut(chain.GetRun()); // xdf output
+  xdf_out->NextEventPut(chain.GetRun()); // xdf output
+  gBenchmark->Start("root i/o");
   //  root_out->cd();
   //  chain.GetRun()->Write();// root output
+  gBenchmark->Stop("root i/o");
   gBenchmark->Start("bfc");
-  for (Int_t i=0;i<1;i++){
+  for (Int_t i=0;i<5;i++){
     chain.Make(i);
     St_DataSetIter local(chain.DataSet());
     local.Cd(chain.GetName());
     St_DataSet *evnt = local("event");
-    //    xdf_out->NextEventPut(evnt); // xdf output
+    xdf_out->NextEventPut(evnt); // xdf output
+    gBenchmark->Start("root i/o");
     //    root_out->cd();
     //    evnt->Write();// root output
+    gBenchmark->Stop("root i/o");
     //    root_tree->cd();
     //    printf ("Fill Tree\n");
     //    chain.FillTree();
-  //  histCanvas->Modified();
-  //  histCanvas->Update();
-  //  chain.Clear();
+    //  histCanvas->Modified();
+    //  histCanvas->Update();
+    chain.Clear();
   }
-  //  chain.Finish();
+  chain.Finish();
   gBenchmark->Stop("bfc");
-  gBenchmark->Print("bfc");
-  // delete xdf_in;
-  // delete xdf_out;;
-  // root_out->Close();   
-  // delete root_out;
-  TBrowser b;
+  gBenchmark->Summary("bfc");
+  delete xdf_in;
+  delete xdf_out;;
+  //  root_out->Close();   
+  //  delete root_out;
+  //  TBrowser b;
 }

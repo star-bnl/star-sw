@@ -22,7 +22,7 @@
        if (gSystem.Load(buffer))  printf(" Loading DLL \"%s\" failed \n",buffer);
     }
     
-    }
+   }
    else {
      gSystem->Load("St_base.so");
      gSystem->Load("xdf2root.so");
@@ -39,6 +39,19 @@
      gSystem->Load("ftpc.sl");
      gSystem->Load("St_ftpc.so");
      gSystem->Load("StChain.so");
+
+   //  gSystem->Load("St_srs_Maker.so");
+   //  gSystem->Load("St_tpt_Maker.so");
+   //  gSystem->Load("St_xdfin_Maker.so");
+   //  gSystem->Load("St_evg_Maker.so");
+   //  gSystem->Load("St_tcl_Maker.so");
+   //  gSystem->Load("St_tss_Maker.so");
+  //   gSystem->Load("St_ebye_Maker.so");
+  //   gSystem->Load("St_laser_Maker.so");
+  //   gSystem->Load("St_run_Maker.so");
+  //   gSystem->Load("St_tpctest_Maker.so");
+
+     gSystem->Load("St_calib_Maker.so");
    }
    
    
@@ -74,9 +87,9 @@
                        ,"St_srs_Maker","St_tpt_Maker","St_xdfin_Maker"
                        ,"St_evg_Maker","St_tcl_Maker","St_tss_Maker"
                        ,"St_ebye_Maker","St_laser_Maker","St_run_Maker"
-                       ,"St_tpctest_Maker"
+                       ,"St_tpctest_Maker","St_calib_Maker"
                         };
-  Int_t nclass = 20;
+  Int_t nclass = 21;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("//sol/afs_rhic/star/packages/dev/inc/table_header.h");

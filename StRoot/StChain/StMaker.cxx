@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.8 1998/09/22 01:39:07 fine Exp $
+// $Id: StMaker.cxx,v 1.9 1998/09/23 20:22:52 fisyak Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.9  1998/09/23 20:22:52  fisyak
+// Prerelease SL98h
+//
 // Revision 1.8  1998/09/22 01:39:07  fine
 // Some make up
 //
@@ -31,8 +34,7 @@
 ClassImp(StMaker)
 
 //_____________________________________________________________________________
-  StMaker::StMaker():
-m_DataSet(0)
+StMaker::StMaker(): m_DataSet(0)
 {
    m_BranchName = "";
    m_Save       = 0;
@@ -40,20 +42,17 @@ m_DataSet(0)
    m_Fruits     = 0;
    m_Clones     = 0;
    m_IsClonable = kTRUE;
-   m_DataSet    = 0;
 }
 
 //_____________________________________________________________________________
 StMaker::StMaker(const char *name, const char *title)
-       :TNamed(name,title),
-m_DataSet(0)
+       :TNamed(name,title), m_DataSet(0)
 {
    m_BranchName = "";
    m_Save       = 0;
    m_Histograms = new TList();
    m_Clones     = 0;
    m_IsClonable = kTRUE;
-   m_DataSet    = 0;
    gStChain->Makers()->Add(this);  
 }
 
@@ -240,7 +239,8 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir)
                    html.MakeClass(classes[i]);
 
   // Create the doc for this class
-  html.MakeClass(ClassName());
+  const Char_t *c = ClassName();  // This tric has to be done since a bug within ROOT
+  html.MakeClass((Char_t *)c);
 }
 //_____________________________________________________________________________
 void StMaker::PrintInfo()

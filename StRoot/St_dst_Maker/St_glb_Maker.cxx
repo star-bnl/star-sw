@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.4 1998/09/15 20:55:20 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.5 1998/09/23 20:22:54 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.5  1998/09/23 20:22:54  fisyak
+// Prerelease SL98h
+//
 // Revision 1.4  1998/09/15 20:55:20  fisyak
 // Split St_DataSet -> St_DataSet + St_DataSetIter
 //
@@ -49,7 +52,16 @@
 ClassImp(St_dst_Maker)
 
 //_____________________________________________________________________________
-St_dst_Maker::St_dst_Maker(){
+St_dst_Maker::St_dst_Maker():
+m_svm_ctrl(0),
+m_evr_privert(0),
+m_evr_evrpar(0),
+m_ev0par(0),
+m_magf(0),
+m_egr_egrpar(0),
+m_run_header(0),
+m_particle_dst_param(0)
+{
    drawinit=kFALSE;
    m_scenario  = 8;
    m_svtchicut = 0;
@@ -60,7 +72,16 @@ St_dst_Maker::St_dst_Maker(){
 
 }
 //_____________________________________________________________________________
-St_dst_Maker::St_dst_Maker(const char *name, const char *title):StMaker(name,title){
+St_dst_Maker::St_dst_Maker(const char *name, const char *title):StMaker(name,title),
+m_svm_ctrl(0),
+m_evr_privert(0),
+m_evr_evrpar(0),
+m_ev0par(0),
+m_magf(0),
+m_egr_egrpar(0),
+m_run_header(0),
+m_particle_dst_param(0)
+{
    drawinit=kFALSE;
    m_scenario  = 8;
    m_svtchicut = 0;
@@ -255,10 +276,13 @@ Int_t St_dst_Maker::Make(){
                                                               dst.Add(monitor_soft);
   cout << " run_dst: Calling dst_monitor_soft_filler" << endl;
   St_tcl_tpcluster  *tpcluster = (St_tcl_tpcluster *) data("tpc/tpcluster");
+  if (! tpcluster) {tpcluster = new St_tcl_tpcluster("tpcluster",1); data.Add(tpcluster,"tpc");}
   // What is [data]/svt/hits/scs_cluster ?
   St_scs_cluster *scs_cluster = new St_scs_cluster("scs_cluster",1); data.Add(scs_cluster,"svt/hits");
+  St_DataSet *ctf = data("ctf");
+  if (!ctf) data.Mkdir("ctf");
   St_ctu_cor *ctb_cor = (St_ctu_cor *) data("ctf/ctb_cor"); 
-
+  if (! ctb_cor) {ctb_cor = new St_ctu_cor("ctb_cor",1); data.Add(ctb_cor,"ctf");}
   Int_t Res_dst_monitor =  dst_monitor_soft_filler(tpcluster,
                             scs_cluster,
                             tphit,scs_spt,tptrack,stk_track,evt_match,
@@ -293,7 +317,7 @@ Int_t St_dst_Maker::Make(){
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.4 1998/09/15 20:55:20 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.5 1998/09/23 20:22:54 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

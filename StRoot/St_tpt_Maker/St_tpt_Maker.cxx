@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.7 1998/09/19 00:15:44 fisyak Exp $
+// $Id: St_tpt_Maker.cxx,v 1.8 1998/09/23 20:23:16 fisyak Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.8  1998/09/23 20:23:16  fisyak
+// Prerelease SL98h
+//
 // Revision 1.7  1998/09/19 00:15:44  fisyak
 // move iostrem into <>
 //
@@ -35,12 +38,28 @@
 ClassImp(St_tpt_Maker)
 
 //_____________________________________________________________________________
-St_tpt_Maker::St_tpt_Maker(){
+St_tpt_Maker::St_tpt_Maker():
+m_tpg_pad_plane(0),
+m_type(0),
+m_tpt_pars(0),
+m_tpt_spars(0),
+m_tte_control(0),
+m_tdeparm(0),
+m_tpipar(0)
+{
    drawinit=kFALSE;
    m_iftte =kFALSE;
 }
 //_____________________________________________________________________________
-St_tpt_Maker::St_tpt_Maker(const char *name, const char *title):StMaker(name,title){
+St_tpt_Maker::St_tpt_Maker(const char *name, const char *title):StMaker(name,title),
+m_tpg_pad_plane(0),
+m_type(0),
+m_tpt_pars(0),
+m_tpt_spars(0),
+m_tte_control(0),
+m_tdeparm(0),
+m_tpipar(0)
+{
    drawinit=kFALSE;
    m_iftte =kFALSE;
 }
@@ -155,7 +174,7 @@ Int_t St_tpt_Maker::Make(){
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.7 1998/09/19 00:15:44 fisyak Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.8 1998/09/23 20:23:16 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
