@@ -1,7 +1,10 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: histoLPfind.cxx,v 1.5 2001/04/27 20:50:45 balewski Exp $
+// $Id: histoLPfind.cxx,v 1.6 2001/06/07 17:02:53 balewski Exp $
 // $Log: histoLPfind.cxx,v $
+// Revision 1.6  2001/06/07 17:02:53  balewski
+// *** empty log message ***
+//
 // Revision 1.5  2001/04/27 20:50:45  balewski
 // *** empty log message ***
 //
@@ -47,6 +50,16 @@ void StppLPfindMaker::init_histo()
   hv[5]=new TH1F("R nTPT","No. of all TPT tracks",100,0.,1000.);
   hv[6]=new TH1F("R eff","Counts Input,rec events",10,-0.5,9.5);
   hv[7] =(TH1F*)new TH2F("hvt","No. TCL hits/K vs. No. PrimTrack, AC",50,0.,50.,50,0.,10.);
+
+  hv[8]=new TH1F("ph0","dst Tra vs. #phi(deg), all pT",72,0.,360.);
+  hv[9]=(TH1F *)new TH2F("ph2","dst Tra #eta vs. #phi(deg), all pT",36,0.,360.,10,-2.5,2.5);
+
+  hv[10]=new TH1F("cl0","TCL clust vs. #phi(deg)",72,0.,360.);
+  hv[11]=(TH1F *)new TH2F("cl2","TCL clust  Z vs. #phi(deg)",36,0.,360.,20,-250.,250);
+
+  hv[12]=new TH1F("Lph0","rLP vs. #phi(deg), all pT",72,0.,360.);
+  hv[13]=(TH1F *)new TH2F("Lph2","rLP #eta vs. #phi(deg), all pT",36,0.,360.,10,-2.5,2.5);
+
 
   printf("init histo .. done\n");
 
