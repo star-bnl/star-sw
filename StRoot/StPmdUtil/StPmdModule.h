@@ -4,7 +4,7 @@
  */
 /*****************************************************
  *                                                
- * $Id: StPmdModule.h,v 1.1 2002/08/27 12:24:15 subhasis Exp $                             
+ * $Id: StPmdModule.h,v 1.2 2003/05/12 12:07:13 subhasis Exp $                             
  *                                                
  * Author: Subhasis Chattopadhyay                  
  *****************************************************
@@ -14,8 +14,8 @@
  *                           
  ******************************************************
  * $Log: StPmdModule.h,v $
- * Revision 1.1  2002/08/27 12:24:15  subhasis
- * first version
+ * Revision 1.2  2003/05/12 12:07:13  subhasis
+ * Mapping added
  *
  *                                                
  *******************************************************/
@@ -26,7 +26,9 @@
 #include "StPmdHit.h"
 
 class StPmdModule : public StObject {
+
 public:
+
   StPmdModule();           //! A constructor
   ~StPmdModule();          //! A destructor
     unsigned int numberOfHits() const;

@@ -4,7 +4,7 @@
  */
 /*********************************************************
  *
- * $Id: StPmdClusterCollection.h,v 1.1 2002/08/27 12:19:30 subhasis Exp $
+ * $Id: StPmdClusterCollection.h,v 1.2 2003/05/12 12:07:12 subhasis Exp $
  *
  * Author:  Subhasis Chattopadhaya
  **********************************************************
@@ -12,8 +12,8 @@
  * Description: Base class for PMD cluster collection
  *
  * $Log: StPmdClusterCollection.h,v $
- * Revision 1.1  2002/08/27 12:19:30  subhasis
- * First version
+ * Revision 1.2  2003/05/12 12:07:12  subhasis
+ * Mapping added
  *
  *
  *********************************************************/
@@ -37,8 +37,8 @@ private:
 protected:   
 public: 
 
-                  StPmdClusterCollection();  
-  virtual         ~StPmdClusterCollection();
+  StPmdClusterCollection();  //!constructor
+  virtual      ~StPmdClusterCollection(); //! destructor
 
   Int_t           Nclusters() const;    //! no. of clusters
   TObjArray*      Clusters();

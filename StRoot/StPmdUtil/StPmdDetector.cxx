@@ -1,6 +1,6 @@
 /*******************************************************
  *
- * $Id: StPmdDetector.cxx,v 1.1 2002/08/27 12:20:38 subhasis Exp $
+ * $Id: StPmdDetector.cxx,v 1.2 2003/05/12 12:07:13 subhasis Exp $
  *
  * Author:  Subhasis Chattopadhyay, July 2002
  *******************************************************
@@ -9,8 +9,8 @@
  *
  *********************************************************
  * $Log: StPmdDetector.cxx,v $
- * Revision 1.1  2002/08/27 12:20:38  subhasis
- * First version
+ * Revision 1.2  2003/05/12 12:07:13  subhasis
+ * Mapping added
  *
  *********************************************************/
 #include "StPmdDetector.h"

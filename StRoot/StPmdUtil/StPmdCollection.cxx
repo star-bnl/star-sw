@@ -1,6 +1,6 @@
  /**********************************************
  *
- * $Id: StPmdCollection.cxx,v 1.1 2002/08/27 12:13:36 subhasis Exp $
+ * $Id: StPmdCollection.cxx,v 1.2 2003/05/12 12:07:13 subhasis Exp $
  *
  * Author: Subhasis Chattopadhyay, July 2002.
  ***********************************************
@@ -9,8 +9,8 @@
  *
  ***********************************************
  * $Log: StPmdCollection.cxx,v $
- * Revision 1.1  2002/08/27 12:13:36  subhasis
- * First version
+ * Revision 1.2  2003/05/12 12:07:13  subhasis
+ * Mapping added
  *
  ***********************************************/
 #include "StPmdCollection.h"

@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPmdCluster.cxx,v 1.1 2002/08/27 12:21:35 subhasis Exp $
+ * $Id: StPmdCluster.cxx,v 1.2 2003/05/12 12:07:12 subhasis Exp $
  *
  * Author:  Subhasis Chattopadhyay
  ************************************************************
@@ -10,8 +10,8 @@
  ************************************************************
  *
  * $Log: StPmdCluster.cxx,v $
- * Revision 1.1  2002/08/27 12:21:35  subhasis
- * First version
+ * Revision 1.2  2003/05/12 12:07:12  subhasis
+ * Mapping added
  *
  ************************************************************/
 #include "StPmdCluster.h"
@@ -57,4 +57,11 @@ StPmdCluster::Browse(TBrowser *b)
   cout << (*this) << endl;
   StObject::Browse(b);
 }
+
+void StPmdCluster::addHitCollection(StPmdHit* hits)
+{
+      mHitCollection.Add(hits);
+ }
+
+
 
