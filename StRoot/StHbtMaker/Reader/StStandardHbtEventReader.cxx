@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.37 2003/01/31 20:22:57 magestro Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.38 2003/05/07 20:05:26 magestro Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.38  2003/05/07 20:05:26  magestro
+ * Removed StFlowTagMaker.h include
+ *
  * Revision 1.37  2003/01/31 20:22:57  magestro
  * Small changes to eliminate compiler warnings
  *
@@ -190,7 +193,6 @@
 
 #include "StEventMaker/StEventMaker.h"
 
-#include "StFlowTagMaker/StFlowTagMaker.h"
 #include "tables/St_FlowTag_Table.h"
 #include "StFlowMaker/StFlowMaker.h"
 #include "StFlowMaker/StFlowEvent.h"
