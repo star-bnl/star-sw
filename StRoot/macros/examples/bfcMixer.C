@@ -7,7 +7,7 @@
 //
 //
 //
-// $Id: bfcMixer.C,v 1.9 2001/01/25 18:06:29 pfachini Exp $
+// $Id: bfcMixer.C,v 1.10 2001/01/29 15:40:17 didenko Exp $
 //////////////////////////////////////////////////////////////////////////
 
 TBrowser *b = 0;
@@ -97,7 +97,7 @@ void bfcMixer(const Int_t Nevents=2,
   //chain3->SetFlags("P00h NoInput -xin GeantOut -QA -EventQA debug");
   //chain3->SetFlags("P00h NoInput l3 -in -xin -tags AllEvent");
   //chain3->SetFlags("P00h NoInput DbV0713 -y1h -in -xin -tags AllEvent");
-  chain3->SetFlags("NoInput ry1h in tpc_daq tpc global dst Kalman Tree GeantOut AllEvent");   
+  chain3->SetFlags("NoInput ry1h in tpc_daq tpc ExB global dst Kalman Tree GeantOut AllEvent");   
   //ry1h,in,tpc_daq,tpc,rich,trg,Cdst,Kalman,tags,Tree,evout
   TString OutputFileName(gSystem->BaseName(file2));
   OutputFileName.ReplaceAll("*","");
