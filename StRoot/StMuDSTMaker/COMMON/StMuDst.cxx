@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.2 2002/03/14 04:12:55 laue Exp $
+ * $Id: StMuDst.cxx,v 1.3 2002/03/20 16:04:11 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -71,6 +71,8 @@ void StMuDst:: fixTrackIndices() {
   /// global and primary tracks share the same id, so we can fix the 
   /// index2Global up in case they got out of order (e.g. by removing 
   /// a track from the TClonesArrayx
+
+  if ( !(arrays[muGlobal]&&arrays[muPrimary]) ) return;
   DEBUGMESSAGE1("");
   StTimer timer;
   timer.start();
@@ -79,7 +81,10 @@ void StMuDst:: fixTrackIndices() {
   int *globalIndex = new int[StMuArrays::arraySizes[muGlobal]];
   for (int i=0; i<StMuArrays::arraySizes[muGlobal]; i++) globalIndex[i]=-1;   // there must be an better way
   int nGlobals = arrays[muGlobal]->GetEntries();
-  for (int i=0; i<nGlobals; i++) globalIndex[ globalTracks(i)->id() ] = i;
+  for (int i=0; i<nGlobals; i++) {
+    globalIndex[ globalTracks(i)->id() ] = i;
+    globalTracks(i)->setIndex2Global(i);
+  }
   /// set the indices for the primary tracks
   DEBUGVALUE2(arrays[muPrimary]->GetEntries());
   int nPrimaries = arrays[muPrimary]->GetEntries();
@@ -90,6 +95,18 @@ void StMuDst:: fixTrackIndices() {
   DEBUGVALUE2(timer.elapsedTime());
 }
 
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -160,12 +177,25 @@ StEvent* StMuDst::createStEvent() {
   return ev;
 }
 
+#include "StarClassLibrary/SystemOfUnits.h"
+#include "StarClassLibrary/PhysicalConstants.h"
+StTrackGeometry* StMuDst::trackGeometry(int q, StPhysicalHelixD* h) {
+  static StPhysicalHelixD nullHelix;
+  StHelixModel* model=0; 
+  if  (nullHelix!=*h) 
+    model = new StHelixModel(q, h->phase()+h->h()*pi/2, h->curvature(), h->dipAngle(), h->origin(), 
+			     h->momentumAt(0,event()->runInfo().magneticField()*kilogauss), h->h());
+  return model;
+}
 
 StTrack* StMuDst::createStTrack(StMuTrack* track) {
   StTrack* t;
   if (track->type() == primary) t = new StPrimaryTrack();
   if (track->type() == global) t = new StGlobalTrack();
   t->setFlag( track->flag() );
+
+  t->setGeometry( trackGeometry( track->charge(), &track->helix()) );
+  t->setOuterGeometry( trackGeometry( track->charge(), &track->outerHelix()) );
 
   return t;
 }
@@ -176,6 +206,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.3  2002/03/20 16:04:11  laue
+ * minor changes, mostly added access functions
+ *
  * Revision 1.2  2002/03/14 04:12:55  laue
  * bug fix: StMuL3EventSummary.cxx
  * update: StMuDst.h StMuDst.cxx

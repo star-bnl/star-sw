@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuHelix.h,v 1.1 2002/03/08 17:04:18 laue Exp $
+ * $Id: StMuHelix.h,v 1.2 2002/03/20 16:04:11 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -19,10 +19,10 @@ class StMuHelix : public TObject {
  public:
   StMuHelix() { /* no-op */ }
   StMuHelix(StPhysicalHelixD hh, double field);
-  StThreeVectorF p();
-  StThreeVectorF origin();
-  short q();
-  float b();
+  StThreeVectorF p() const;
+  StThreeVectorF origin() const;
+  short q() const;
+  float b() const;
  private:
   StThreeVectorF mP;
   StThreeVectorF mOrigin;
@@ -32,16 +32,19 @@ class StMuHelix : public TObject {
 };
 
 
-inline StThreeVectorF StMuHelix::p() { return mP; }
-inline StThreeVectorF StMuHelix::origin() { return mOrigin; }
-inline short StMuHelix::q() { return mQ; }
-inline float StMuHelix::b() { return mB; }
+inline StThreeVectorF StMuHelix::p() const { return mP; }
+inline StThreeVectorF StMuHelix::origin() const { return mOrigin; }
+inline short StMuHelix::q() const { return mQ; }
+inline float StMuHelix::b() const { return mB; }
 
 #endif
 
 /***************************************************************************
  *
  * $Log: StMuHelix.h,v $
+ * Revision 1.2  2002/03/20 16:04:11  laue
+ * minor changes, mostly added access functions
+ *
  * Revision 1.1  2002/03/08 17:04:18  laue
  * initial revision
  *

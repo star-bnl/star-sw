@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuL3Filter.h,v 1.1 2002/03/08 17:04:18 laue Exp $
+ * $Id: StMuL3Filter.h,v 1.2 2002/03/20 16:04:12 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -11,14 +11,20 @@
 #include "TObject.h"
 #include "StMuCut.h"
 
-
+class BetheBloch;
+  
 class StMuL3Filter : public StMuCut, public TObject{
- private:
-  virtual bool accept( const StEvent*);
-  virtual bool accept( const StTrack*);
-  virtual bool accept( const StV0Vertex*);
-  virtual bool accept( const StXiVertex*);
-  virtual bool accept( const StKinkVertex*);
+ public: 
+  StMuL3Filter();
+  ~StMuL3Filter();
+ private: 
+  BetheBloch* mBB;
+
+  bool accept( const StEvent*);
+  bool accept( const StTrack*);
+  bool accept( const StV0Vertex*);
+  bool accept( const StXiVertex*);
+  bool accept( const StKinkVertex*);
 
   ClassDef(StMuL3Filter,1)
 };
@@ -28,6 +34,9 @@ class StMuL3Filter : public StMuCut, public TObject{
 /***************************************************************************
  *
  * $Log: StMuL3Filter.h,v $
+ * Revision 1.2  2002/03/20 16:04:12  laue
+ * minor changes, mostly added access functions
+ *
  * Revision 1.1  2002/03/08 17:04:18  laue
  * initial revision
  *
