@@ -1,5 +1,12 @@
-// $Id: StFtpcTrack.hh,v 1.15 2002/11/06 13:46:04 oldi Exp $
+// $Id: StFtpcTrack.hh,v 1.16 2002/11/28 09:39:30 oldi Exp $
 // $Log: StFtpcTrack.hh,v $
+// Revision 1.16  2002/11/28 09:39:30  oldi
+// Problem in momentum fit eliminated. Negative vertex Id is not used anymore.
+// It was used do decide for global or primary fit.
+// Code was prepared to fill momentum values at outermost points on tracks.
+// This feature is not used up to now.
+// Code cleanups.
+//
 // Revision 1.15  2002/11/06 13:46:04  oldi
 // Global/primary fit handling simplified.
 // Code clean ups.
@@ -140,7 +147,9 @@ private:
   
   // data from momentum fit
   TVector3   mP;              // ThreeVector of track momentum
-  TVector3   mV;              // ThreeVector of vertex used in fit
+  TVector3   mV;              // ThreeVector of vertex used in fit (= first point on track)
+  // This has to go in as soon as r0out, phi0out, z0out in the dst_track table are needed.  
+  // TVector3   mL;              // ThreeVector of last point on track)  
      Int_t   mQ;              // charge measured in fit 
   Double_t   mChiSq[2];       // Chi2 of momentum fit
   Double_t   mTheta;          // theta value of momentum fit
@@ -169,7 +178,9 @@ public:
   Double_t   CalcAlpha0();                                                        // calculation of the angle of xt with respect to the x axis
       void   CalcAndSetAlpha0() { this->SetAlpha0(this->CalcAlpha0()); }          // calculates and sets the angle of xt with respect to the x axis
       void   CalcResiduals();                                                     // calulates the residuals for each point on track
-     Int_t   WriteTrack(fpt_fptrack_st *trackTableEntry, StFtpcVertex *vertex);   // writes track to table
+     Int_t   WriteTrack(fpt_fptrack_st *trackTableEntry, 
+			StFtpcVertex *vertex,
+			Bool_t primary_fit);                                      // writes track to table
 
   // momentum fit
   void MomentumFit(StFtpcVertex *vertex = 0);
@@ -214,6 +225,9 @@ public:
   Int_t       GetSector() const;
 
   TVector3    GetVertex()           const { return mV;                               }
+  TVector3    GetFirstPointOnTrack()const { return mV;                               }
+  // This has to go in as soon as r0out, phi0out, z0out in the dst_track table are needed.
+  // TVector3    GetLastPointOnTrack() const { return mL;                               }
   Int_t       GetCharge()           const { return mQ;                               }
   Double_t const  *GetChiSq()       const { return mChiSq;                           }
   Double_t    GetTheta()            const { return mTheta;                           }
