@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.59 2005/03/31 17:25:57 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.59 2005/03/31 17:25:57 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.60 2005/03/31 18:14:00 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.60 2005/03/31 18:14:00 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.60  2005/03/31 18:14:00  perev
+ * getMaxPointCount() fixed(thank to Jan)
+ *
  * Revision 2.59  2005/03/31 17:25:57  perev
  * getMaxPointCount() fixed(thank to Jan)
  *
@@ -457,7 +460,7 @@ int StiKalmanTrack::getMaxPointCount(int detectorId) const
   int k=0;
 
   for (it=begin();it!=end();it++,k++){
-    const StiKalmanTrackNode *node = (*it);
+    const StiKalmanTrackNode *node = &(*it);
     if (!node->isValid()) 					continue;
     const StiDetector *detector = node->getDetector();
     if (!detector)						continue;
