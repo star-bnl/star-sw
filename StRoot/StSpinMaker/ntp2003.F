@@ -6,7 +6,7 @@
       character*3 cEWNSTB
       character*40 hname
       COMMON /PAWC/ hmem(2000000)
-      include 'StSpinMaker/ntp2003.inc'
+#include "ntp2003.inc"
       CALL HLIMIT(1980000)         
 
       call hropen(1,'NTP',filename,'N',2048,ISTAT)
@@ -44,7 +44,7 @@
       integer   iin(100),iout(100)
       real      rin(100),rout(100)
       integer i, run
-      include "StSpinMaker/ntp2003.inc"
+#include "ntp2003.inc"
 
       run=iin(1)
       call hfnt(111)
