@@ -1,8 +1,11 @@
 //
-// $Id: StPreEclMaker.h,v 1.8 2001/04/17 23:51:57 pavlinov Exp $
+// $Id: StPreEclMaker.h,v 1.9 2001/04/20 22:23:51 pavlinov Exp $
 //
 //
 // $Log: StPreEclMaker.h,v $
+// Revision 1.9  2001/04/20 22:23:51  pavlinov
+// Clean up
+//
 // Revision 1.8  2001/04/17 23:51:57  pavlinov
 // Clean up before MDC4
 //
@@ -60,7 +63,9 @@
 #include <TH2.h>
 #include "St_emc_Maker/StEmcHitCollection.h"
 #include "StEmcPreClusterCollection.h"
-#include "emc_def.h"
+#include "StEmcUtil/emcInternalDef.h"
+
+class St_emcClusterParam;
 
 class StPreEclMaker : public StMaker {
 private:
@@ -77,6 +82,8 @@ protected:
   TH1F          *m_EnergyCl[MAXDET];//!
   TH1F          *m_EtaInCl[MAXDET]; //!
   TH1F          *m_PhiInCl[MAXDET]; //!
+
+  St_emcClusterParam* mParam;       //!
 public: 
                 StPreEclMaker(const char *name="ecl", const char *title="event/data/emc/hits");
   virtual       ~StPreEclMaker();
@@ -85,7 +92,8 @@ public:
   virtual void  PrintInfo();
           void  SetClusterConditions(char*,Int_t,Float_t,Float_t,Float_t);
           void  SetClusterConditions(char*,Int_t,Float_t,Float_t,Float_t,Bool_t);
-          
+  St_emcClusterParam* getParam() {return mParam;} 
+        
   ClassDef(StPreEclMaker, 1)// Electromagnetic PreClusters maker
 };
 

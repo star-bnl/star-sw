@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.h,v $
+// Revision 1.8  2001/04/20 22:23:40  pavlinov
+// Clean up
+//
 // Revision 1.7  2001/04/17 23:51:43  pavlinov
 // Clean up before MDC4
 //
@@ -52,17 +55,15 @@
 #ifndef STAR_StEmcPreClusterCollection
 #define STAR_StEmcPreClusterCollection
 
-#include "TObjArray.h"
-#include "TArrayI.h"
-#include "TArrayF.h"
-#include "TMatrix.h"
-#include "St_DataSet.h"
-#include "St_DataSetIter.h"
-#include "St_TableSorter.h"
+#include <TObjArray.h>
+#include <TArrayI.h>
+#include <TArrayF.h>
+#include <TMatrix.h>
+#include <TDataSet.h>
 #include "StEmcPreCluster.h"
 #include "StEvent/StEmcDetector.h"
 
-class StEmcPreClusterCollection : public St_DataSet {
+class StEmcPreClusterCollection : public TDataSet {
 private:
   Int_t           mDetector;
   Float_t         mEnergySeed;
@@ -74,6 +75,7 @@ private:
   Bool_t          kIsOk;
   Bool_t          kCheckClustersOk;
   Bool_t          kStEvOk;
+  Int_t           mLoop;
  
 protected:   
 public: 
@@ -119,7 +121,7 @@ public:
   virtual  void   printClusters(Int_t n=5, Int_t start=5, Int_t m=0);
   virtual  void   printClustersAll();
   virtual  void   printClusterFromModule(Int_t m=0);  // *MENU* 
-           void   printConf();
+           void   printConf();                        // *MENU* 
   
   
   ClassDef(StEmcPreClusterCollection,2)// Base class for electromagnetic calorimeter cluster collection 
