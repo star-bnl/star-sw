@@ -59,7 +59,7 @@
    TOP=$STAR _
    domain='geometry sim/gstar sim/g2t' _
    chain='rgst rg2t' _
-   gstar_settings='complete 4th_off hadr_on'
+   gstar_settings='complete 4th_off hadr_on' _
    num_events=1 _
    debugger=on _
    intype=file _
