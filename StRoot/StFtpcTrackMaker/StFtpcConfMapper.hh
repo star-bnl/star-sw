@@ -1,5 +1,11 @@
-// $Id: StFtpcConfMapper.hh,v 1.8 2001/01/25 15:21:45 oldi Exp $
+// $Id: StFtpcConfMapper.hh,v 1.9 2001/07/12 08:29:09 oldi Exp $
 // $Log: StFtpcConfMapper.hh,v $
+// Revision 1.9  2001/07/12 08:29:09  oldi
+// New constructor introduced to be able to use only cluster which were
+// found to be good in a previous run.
+// New function NoFieldTracking() introduced.
+// Tracking parameters for LaserTracking() changed.
+//
 // Revision 1.8  2001/01/25 15:21:45  oldi
 // Review of the complete code.
 // Fix of several bugs which caused memory leaks:
@@ -167,6 +173,12 @@ public:
 			     Bool_t bench = (Bool_t)false,
 			     Int_t phi_segments = 100, 
 			     Int_t eta_segments = 200);  // constructor
+            StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint,
+			     MIntArray *good_hits,
+			     Double_t vertexPos[3] = NULL,
+			     Bool_t bench = (Bool_t)false,
+			     Int_t phi_segments = 100, 
+			     Int_t eta_segments = 200);  // constructor to fill evaluated hits
             StFtpcConfMapper(TObjArray *hits, 
 			     StFtpcVertex *vertex = NULL, 
 			     Bool_t bench = (Bool_t)false, 
@@ -259,7 +271,8 @@ StFtpcConfMapPoint *GetNextNeighbor(StFtpcConfMapPoint *start_hit, Double_t *coe
   void FreeTracking();       // tracking without vertex constraint 
   void NonVertexTracking();  // same as FreeTracking()
   void TwoCycleTracking();   // tracking: 1st cylce: with vertex constraint, 2nd cycle: without vertex constraint
-  void LaserTracking();      // tracks straight tracks (settings optimized)
+  void LaserTracking();      // tracks straight tracks (settings optimized for laser data)
+  void NoFieldTracking();    // tracks straight tracks originating from main vertex
 
   // Information
   void  SettingInfo();  // displays settings
