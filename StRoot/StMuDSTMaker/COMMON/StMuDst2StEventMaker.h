@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst2StEventMaker.h,v 1.3 2003/09/07 03:49:03 perev Exp $
+ * $Id: StMuDst2StEventMaker.h,v 1.4 2003/09/12 21:32:17 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDst2StEventMaker_hh
@@ -25,9 +25,9 @@ class StMuDst2StEventMaker : public StMaker {
     
     void Clear(const char*);  
     int Make();   ///< create a StEvent from the muDst and put it into the .data tree structure. Also time stamp gets written and set in StEvtHddr for database usage
-    StEvent* event() { return  mStEvent; } ///< retunr pointer to StEvent, 0 if not created 
+    StEvent* event() { return  mStEvent; } ///< return pointer to StEvent, 0 if not created 
     virtual const char *GetCVS() const {
-	static const char cvs[]="Tag $Name:  $ $Id: StMuDst2StEventMaker.h,v 1.3 2003/09/07 03:49:03 perev Exp $ built "__DATE__" "__TIME__ ; 
+	static const char cvs[]="Tag $Name:  $ $Id: StMuDst2StEventMaker.h,v 1.4 2003/09/12 21:32:17 jeromel Exp $ built "__DATE__" "__TIME__ ; 
 	return cvs;
     }
   
@@ -48,6 +48,9 @@ class StMuDst2StEventMaker : public StMaker {
 /***************************************************************************
  *
  * $Log: StMuDst2StEventMaker.h,v $
+ * Revision 1.4  2003/09/12 21:32:17  jeromel
+ * No changes (misspelled)
+ *
  * Revision 1.3  2003/09/07 03:49:03  perev
  * gcc 3.2 + WarnOff
  *
