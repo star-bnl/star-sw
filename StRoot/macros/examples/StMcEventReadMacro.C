@@ -1,5 +1,8 @@
-// $Id: StMcEventReadMacro.C,v 1.16 2000/06/22 23:54:30 calderon Exp $
+// $Id: StMcEventReadMacro.C,v 1.17 2001/04/09 17:47:15 calderon Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.17  2001/04/09 17:47:15  calderon
+// load StEmcUtil instead of St_emc_Maker
+//
 // Revision 1.16  2000/06/22 23:54:30  calderon
 // add gSystemLoad->("libglobal_Tables"); because it is needed for year2a
 //
@@ -87,7 +90,8 @@ const char *MainFile=
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
     
-    gSystem->Load("St_emc_Maker");
+//     gSystem->Load("St_emc_Maker");
+     gSystem->Load("StEmcUtil");
     
     gSystem->Load("StMcEvent");
     gSystem->Load("StMcEventMaker");
@@ -114,6 +118,7 @@ const char *MainFile=
     mcEventReader->doUseFtpc = true;
     mcEventReader->doUseRich = true;
     mcEventReader->doUseBemc = true;
+    mcEventReader->doUseBsmd = true;
     //mcEventReader->SetDebug();
     // now execute the chain member functions
     
