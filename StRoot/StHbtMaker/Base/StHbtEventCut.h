@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEventCut.h,v 1.2 1999/12/03 22:24:34 lisa Exp $
+ * $Id: StHbtEventCut.h,v 1.3 2000/01/07 23:21:16 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,10 @@
  ***************************************************************************
  *
  * $Log: StHbtEventCut.h,v $
+ * Revision 1.3  2000/01/07 23:21:16  laue
+ * 0.) all 'ClassDef(...)' put inside #ifdef __ROOT__  #endif
+ * 1.) unnecessary includes of 'StMaker.h' deleted
+ *
  * Revision 1.2  1999/12/03 22:24:34  lisa
  * (1) make Cuts and CorrFctns point back to parent Analysis (as well as other way). (2) Accommodate new PidTraits mechanism
  *
@@ -59,8 +63,9 @@ public:
   //  virtual string Report() =0;    // user-written method to return string describing cuts
   virtual StHbtString Report() =0;    // user-written method to return string describing cuts
 
+#ifdef __ROOT__
   ClassDef(StHbtEventCut, 0)
-
+#endif
   // the following allows "back-pointing" from the CorrFctn to the "parent" Analysis
   friend class StHbtAnalysis;
   StHbtAnalysis* HbtAnalysis(){return myAnalysis;};

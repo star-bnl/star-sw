@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticleCut.h,v 1.2 1999/12/03 22:24:34 lisa Exp $
+ * $Id: StHbtParticleCut.h,v 1.3 2000/01/07 23:21:17 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StHbtParticleCut.h,v $
+ * Revision 1.3  2000/01/07 23:21:17  laue
+ * 0.) all 'ClassDef(...)' put inside #ifdef __ROOT__  #endif
+ * 1.) unnecessary includes of 'StMaker.h' deleted
+ *
  * Revision 1.2  1999/12/03 22:24:34  lisa
  * (1) make Cuts and CorrFctns point back to parent Analysis (as well as other way). (2) Accommodate new PidTraits mechanism
  *
@@ -77,7 +81,9 @@ protected:
   //  StHbtParticleType mType;            // tells whether cut is on Tracks or V0's
   StHbtAnalysis* myAnalysis;
 
+#ifdef __ROOT__
   ClassDef(StHbtParticleCut, 0)
+#endif
 };
 
 #endif
