@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.72 1999/08/25 02:45:47 fine Exp $ 
+// $Id: St_Table.cxx,v 1.73 1999/08/26 04:35:46 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.73  1999/08/26 04:35:46  fine
+// St_Table::Draw() works somehow for Sun but still fail for Linux
+//
 // Revision 1.72  1999/08/25 02:45:47  fine
 // StTable::Draw works under Sun and crashes under Linux
 //
@@ -504,8 +507,8 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
       }
    }
 //--------------------------------------------------
-    printf(" Draw %s %s\n", varexp00, selection);
-    printf(" col counter = %d \n",colIndex);
+    printf(" Draw %s for %s\n", varexp00, selection);
+    printf(" col counter = %d \n",colIndex+1);
     Char_t *exprFileName = MakeExpression(expressions,colIndex+1);
     if (!exprFileName) return;
 
@@ -537,17 +540,14 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
          delete oldh1; oldh1 = 0;
       }
    }
-   printf("1. This is Ok\n");
 //*-*- Create a default canvas if none exists
    if (!gPad && !opt.Contains("goff") && dimension > 0) {
       if (!gROOT->GetMakeDefCanvas()) return;
       (gROOT->GetMakeDefCanvas())();
    }
-   printf("2. This is Ok \dimension = %d\n", dimension);
-
-   Int_t         fNbins[4];        //Number of bins per dimension
-   Float_t       fVmin[4];         //Minima of varexp columns
-   Float_t       fVmax[4];         //Maxima of varexp columns
+   Int_t         fNbins[4] = {100,100,100,100};     //Number of bins per dimension
+   Float_t       fVmin[4]  = {0,0,0,0};             //Minima of varexp columns
+   Float_t       fVmax[4]  = {20,20,20,20};         //Maxima of varexp columns
 
 //*-*- 1-D distribution
    if (dimension == 1) {
@@ -590,7 +590,6 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
       }
 
       EntryLoop(exprFileName,action, h1, nentries, firstentry, option);
-      printf(" hist = %s\n", h1->GetName());
  
 //      if (!fDraw && !opt.Contains("goff")) h1->Draw(option);
         if (!opt.Contains("goff")) h1->Draw(option);
@@ -726,20 +725,22 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
     break;
   default:
     fprintf(stderr,"Error: loading file %s\n",exprFileName);
+    G__unloadfile((Char_t *)exprFileName);
     return kFALSE; // can not load file
   }
 
   // Float_t  Selection(Float_t *results[], void *address[])
+  const Char_t *funcName = "SelectionQWERTY";  
+  const Char_t *argtypes = "Float_t *,void **";
   long offset;
   G__ClassInfo globals;
-  const Char_t *funcName = "Selection";  
-  const Char_t *argtypes = "Float_t **,void **";
   G__MethodInfo func = globals.GetMethod(funcName,argtypes,&offset);
 
   // Compile bytecode
   struct G__bytecodefunc *pbc = func.GetBytecode();
   if(!pbc) {
     fprintf(stderr,"Error: Bytecode compilation %s\n",funcName);
+    G__unloadfile((Char_t *)exprFileName);
     return kFALSE; // can not get bytecode
   }
 
@@ -749,35 +750,34 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
   callfunc.SetBytecode(pbc);
   St_tableDescriptor  *tabsDsc   = GetRowDescriptors();
   tableDescriptor_st  *descTable = tabsDsc->GetTable();
-  Float_t *results[5];
-  Char_t **addressArray = (Char_t **)new ULong_t(tabsDsc->GetNRows());
+  Float_t  results[]    = {1990,1991,1992,1993,1994};
+  Char_t **addressArray = (Char_t **)new ULong_t[tabsDsc->GetNRows()];
   Char_t *thisTable     = (Char_t *)GetArray();
-  for (i=0; i < tabsDsc->GetNRows(); i++,descTable++ ) {
-     addressArray[i] = thisTable + descTable->m_Offset;
-     printf(" Ox%x ",addressArray[i]);
-  }
-  printf("\n");
  
-  callfunc.SetArg((long)(&results));  // give 'Float_t *results[5]' as 1st argument
-  callfunc.SetArg((long)(&addressArray));  // give 'void    *addressArray[]' as 2nd argument
- 
+  callfunc.SetArg((long)(&results[0]));   // give 'Float_t *results[5]' as 1st argument
+  callfunc.SetArg((long)(addressArray));  // give 'void    *addressArray[]' as 2nd argument
+  
   // Call bytecode in loop
-  printf(" NRows = %d \n", GetNRows());
-  for(i=0;i<GetNRows();i++) {
-    callfunc.Exec(0);
-    // Fill this histograms;
-    if (*results[0]) {
-       ((TH1*)obj)->Fill(*results[1],*results[0]);
-//       ((TH1*)obj)->Fill(*results[1],*results[2],*results[0]);
+  printf("first = %d; n =  %d  NRows = %d \n", firstentry, nentries, GetNRows());
+  if (firstentry < GetNRows() ) {
+    Int_t lastEntry = TMath::Min(UInt_t(firstentry+nentries),UInt_t(GetNRows()));
+    for (i=0; i < tabsDsc->GetNRows(); i++,descTable++ ) 
+       addressArray[i] = thisTable + descTable->m_Offset + GetRowSize()*firstentry;
+    for(i=firstentry;i<lastEntry;i++) {
+      callfunc.Exec(0);
+      // Fill this histograms;
+      if (results[1]) {
+         ((TH1*)obj)->Fill(Axis_t(results[0]),Stat_t(results[1]));
+//       ((TH1*)obj)->Fill(results[1],results[2],results[0]);
+      }
+      // preparing next loop
+      for (int j=0; j < tabsDsc->GetNRows(); j++ ) 
+         addressArray[j] += GetRowSize();   
     }
-    // preparing next loop
-    for (i=0; i < tabsDsc->GetNRows(); i++ ) 
-       addressArray[i] += GetRowSize();   
   }
 
-  printf(" 1. unloading %s  \n", exprFileName);
   G__unloadfile((Char_t *)exprFileName);
-  printf(" 2. unloading %s  \n", exprFileName);
+  delete [] addressArray;
   return kTRUE;
 }
 
@@ -1710,29 +1710,33 @@ Char_t *St_Table::MakeExpression(const Char_t *expressions[],Int_t nExpressions)
    const tableDescriptor_st *descTable  = dsc->GetTable();
    Int_t size = dsc->GetNRows();
    // Create function
-   str << "float  Selection(float *"<<resID<<"[], void *address[])"   << endl;
+   str << "void SelectionQWERTY(float *"<<resID<<", void **address)"   << endl;
    str << "{"                                                        << endl;
-//   str << "  void *nextAddress[] = address;"                       << endl;
-   str << " printf(\" Selection " << GetName() <<" \\n\");" << endl; 
-    str << "void *topr = 0;" << endl;
+//print   str << " printf(\" Selection  : " << GetName() <<":  %x %f \\n\","<<resID<<",*"<<resID<<");" << endl; 
+   str << "void *topr = 0;" << endl;
    int i = 0;
    for (i=0; i < dsc->GetNRows(); i++,descTable++ ) {
     // First check whether we do need this column
-    const Char_t *type = typeNames[descTable->m_Type];
-     str << "topr = (address+" << i << ");" << endl;
-     str << "printf(\" " << descTable->m_ColumnName << " Ox%x  Ox%x \\n\",topr, *topr);" << endl;
-     if (descTable->m_Dimensions) 
-        str << type  << " *&" << descTable->m_ColumnName << " = *((" << type << "**)topr);" << endl;
-     else
-        str << type  << " &" << descTable->m_ColumnName << " = *((" << type << "*)topr);" << endl;
+     const Char_t *type = typeNames[descTable->m_Type];
+     str << "topr = address[" << i << "];" << endl;
+//print     str << "printf(\" " << descTable->m_ColumnName << " Ox%x \\n\",topr);" << endl;
+     if (descTable->m_Dimensions) {
+        str << type  << " *" << descTable->m_ColumnName << " = (" << type << "*)topr;" << endl;
+//print        str << "printf(\" " << descTable->m_ColumnName << ":: 0x%x  %f \\n\"," << descTable->m_ColumnName << ","
+//print                            << descTable->m_ColumnName << "[0]);" << endl;
+     }
+     else 
+        str << type  << " &" << descTable->m_ColumnName << " = *((" << type << "*)topr);" << endl;     
    }
    // Create expressions
-   for (i=0; i < nExpressions; i++ ) {
-     str << "*"<<resID<<"["<<i<<"]=float(" << expressions[i] << ");"  << endl;
-     if (i == 0 ) 
-         str  << "if (*"<<resID<<"[0] == 0) return 0;" << endl;
+   for (i=nExpressions-1; i >= 0; i-- ) {
+//print       str << " printf(\" Expression %f \\n\",float(" << expressions[i] << "));" << endl; 
+       str << " "<<resID<<"["<<i<<"]=(float)(" << expressions[i] << ");"  << endl;
+//print       str << " printf(\" result  %f %x \\n\","<<resID<<"["<<i<<"],&"<<resID<<"["<<i<<"]);" << endl; 
+//      if (i == nExpressions-1 && i !=0 ) 
+//          str  << "  if ("<<resID<<"["<<i<<"] == 0){ return; }" << endl;
    };
-   str << "return *"<<resID<<"[0];}" << endl;
+   str << "}" << endl;
    str.close();
    // Create byte code and check syntax
    if (str.good()) return fileName;
