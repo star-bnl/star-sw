@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.hh,v 1.6 1999/02/21 20:32:48 genevb Exp $
+ * $Id: StV0Vertex.hh,v 1.7 1999/03/23 21:47:48 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.hh,v $
- * Revision 1.6  1999/02/21 20:32:48  genevb
- * Improve StV0Vertex code
+ * Revision 1.7  1999/03/23 21:47:48  ullrich
+ * Member function made virtual
  *
  * Revision 1.6  1999/02/21 20:32:48  genevb
  * Improve StV0Vertex code
@@ -49,15 +49,15 @@ public:
     // StV0Vertex(const StV0Vertex&);        use default
     // const StV0Vertex & operator=(const StV0Vertex&);
 
-    float dcaDaughterToPrimaryVertex(StTrackSign sign) const;
-    float dcaDaughters() const;
-    float dcaParentToPrimaryVertex() const;
-    const StThreeVector<float>& momentumOfDaughter(StTrackSign sign) const;
+    virtual float dcaDaughterToPrimaryVertex(StTrackSign sign) const;
+    virtual float dcaDaughters() const;
+    virtual float dcaParentToPrimaryVertex() const;
+    virtual const StThreeVector<float>& momentumOfDaughter(StTrackSign sign) const;
 
-    void setDcaDaughterToPrimaryVertex(StTrackSign sign, float);
-    void setMomentumOfDaughter(StTrackSign sign, const StThreeVector<float>&);
-    void setDcaDaughters(float);
-    void setDcaParentToPrimaryVertex(float);
+    virtual void setDcaDaughterToPrimaryVertex(StTrackSign sign, float);
+    virtual void setMomentumOfDaughter(StTrackSign sign, const StThreeVector<float>&);
+    virtual void setDcaDaughters(float);
+    virtual void setDcaParentToPrimaryVertex(float);
     
     void setType(StVertexType);     // overwrite from base class          
 

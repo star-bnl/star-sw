@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.hh,v 1.6 1999/03/04 18:17:00 ullrich Exp $
+ * $Id: StEvent.hh,v 1.7 1999/03/23 21:47:43 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.hh,v $
- * Revision 1.6  1999/03/04 18:17:00  ullrich
- * Namespace std not used if ST_NO_NAMESPACES defined
+ * Revision 1.7  1999/03/23 21:47:43  ullrich
+ * Member function made virtual
  *
  * Revision 1.6  1999/03/04 18:17:00  ullrich
  * Namespace std not used if ST_NO_NAMESPACES defined
@@ -71,51 +71,51 @@ public:
     int operator!=(const StEvent &right) const;
 
     void init(StRun* run=NULL);
-    const string&                type() const;
-    pair<long, long>             id() const;
-    time_t                       time() const;
-    unsigned long                runNumber() const;              
-    unsigned long                triggerMask() const;
-    unsigned long                bunchCrossingNumber() const;
-    double                       luminosity() const;
-    StRun*                       run();
-    StVertex*                    primaryVertex();
-    StDstEventSummary*              summary();
-    StTrackCollection*           trackCollection();
-    StTpcHitCollection*          tpcHitCollection();
-    StSvtHitCollection*          svtHitCollection();
-    StFtpcHitCollection*         ftpcHitCollection();
-    StEmcTowerHitCollection*     emcTowerHitCollection();
-    StEmcPreShowerHitCollection* emcPreShowerHitCollection();
-    StSmdPhiHitCollection*       smdPhiHitCollection();
-    StSmdEtaHitCollection*       smdEtaHitCollection();
-    StVertexCollection*          vertexCollection();
-    StTriggerDetectorCollection* triggerDetectorCollection();
-    StL0Trigger*                 l0Trigger();                        
-    float                        beamPolarization(StBeamDirection, StBeamPolarizationAxis);
+    virtual const string&                type() const;
+    virtual pair<long, long>             id() const;
+    virtual time_t                       time() const;
+    virtual unsigned long                runNumber() const;              
+    virtual unsigned long                triggerMask() const;
+    virtual unsigned long                bunchCrossingNumber() const;
+    virtual double                       luminosity() const;
+    virtual StRun*                       run();
+    virtual StVertex*                    primaryVertex();
+    virtual StDstEventSummary*           summary();
+    virtual StTrackCollection*           trackCollection();
+    virtual StTpcHitCollection*          tpcHitCollection();
+    virtual StSvtHitCollection*          svtHitCollection();
+    virtual StFtpcHitCollection*         ftpcHitCollection();
+    virtual StEmcTowerHitCollection*     emcTowerHitCollection();
+    virtual StEmcPreShowerHitCollection* emcPreShowerHitCollection();
+    virtual StSmdPhiHitCollection*       smdPhiHitCollection();
+    virtual StSmdEtaHitCollection*       smdEtaHitCollection();
+    virtual StVertexCollection*          vertexCollection();
+    virtual StTriggerDetectorCollection* triggerDetectorCollection();
+    virtual StL0Trigger*                 l0Trigger();                        
+    virtual float                        beamPolarization(StBeamDirection, StBeamPolarizationAxis);
 
-    void setType(const char*);
-    void setId(const pair<long, long>&);
-    void setTime(time_t);
-    void setRunNumber(unsigned long);                
-    void setTriggerMask(unsigned long);              
-    void setBunchCrossingNumber(unsigned long);      
-    void setLuminosity(double);               
-    void setRun(StRun*);                            
-    void setPrimaryVertex(StVertex*);                  
-    void setSummary(StDstEventSummary*);                        
-    void setTrackCollection(StTrackCollection*);                
-    void setTpcHitCollection(StTpcHitCollection*);               
-    void setSvtHitCollection(StSvtHitCollection*);               
-    void setFtpcHitCollection(StFtpcHitCollection*);              
-    void setEmcTowerHitCollection(StEmcTowerHitCollection*);              
-    void setEmcPreShowerHitCollection(StEmcPreShowerHitCollection*);              
-    void setSmdPhiHitCollection(StSmdPhiHitCollection*);              
-    void setSmdEtaHitCollection(StSmdEtaHitCollection*);              
-    void setVertexCollection(StVertexCollection*);               
-    void setTriggerDetectorCollection(StTriggerDetectorCollection*);      
-    void setL0Trigger(StL0Trigger*);                      
-    void setBeamPolarization(StBeamDirection, StBeamPolarizationAxis, float);                   
+    virtual void setType(const char*);
+    virtual void setId(const pair<long, long>&);
+    virtual void setTime(time_t);
+    virtual void setRunNumber(unsigned long);                
+    virtual void setTriggerMask(unsigned long);              
+    virtual void setBunchCrossingNumber(unsigned long);      
+    virtual void setLuminosity(double);               
+    virtual void setRun(StRun*);                            
+    virtual void setPrimaryVertex(StVertex*);                  
+    virtual void setSummary(StDstEventSummary*);                        
+    virtual void setTrackCollection(StTrackCollection*);                
+    virtual void setTpcHitCollection(StTpcHitCollection*);               
+    virtual void setSvtHitCollection(StSvtHitCollection*);               
+    virtual void setFtpcHitCollection(StFtpcHitCollection*);              
+    virtual void setEmcTowerHitCollection(StEmcTowerHitCollection*);              
+    virtual void setEmcPreShowerHitCollection(StEmcPreShowerHitCollection*);              
+    virtual void setSmdPhiHitCollection(StSmdPhiHitCollection*);              
+    virtual void setSmdEtaHitCollection(StSmdEtaHitCollection*);              
+    virtual void setVertexCollection(StVertexCollection*);               
+    virtual void setTriggerDetectorCollection(StTriggerDetectorCollection*);      
+    virtual void setL0Trigger(StL0Trigger*);                      
+    virtual void setBeamPolarization(StBeamDirection, StBeamPolarizationAxis, float);                   
 
 protected:
     string                       mType;

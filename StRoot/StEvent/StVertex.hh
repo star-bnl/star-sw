@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.hh,v 1.5 1999/02/17 11:04:52 ullrich Exp $
+ * $Id: StVertex.hh,v 1.6 1999/03/23 21:47:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -15,8 +15,8 @@
  ***************************************************************************
  *
  * $Log: StVertex.hh,v $
- * Revision 1.5  1999/02/17 11:04:52  ullrich
- * Added numberOfDaughters() and daughter(i) methods.
+ * Revision 1.6  1999/03/23 21:47:45  ullrich
+ * Member function made virtual
  *
  * Revision 1.5  1999/02/17 11:04:52  ullrich
  * Added numberOfDaughters() and daughter(i) methods.
@@ -49,24 +49,24 @@ public:
     int operator==(const StVertex&) const;
     int operator!=(const StVertex&) const;
 
-    StVertexType                type();
-    StVecPtrGlobalTrack&        daughters();
-    unsigned int                numberOfDaughters();
-    StGlobalTrack*              daughter(unsigned int);
-    const StGlobalTrack*        parent();
-    const StThreeVector<float>& position();
-    const StThreeVector<float>& positionError();
-    unsigned long               qualityBitmask();
-    float                       chiSquared();         
-    long                        index() {return mIndex;};
+    virtual StVertexType                type();
+    virtual StVecPtrGlobalTrack&        daughters();
+    virtual unsigned int                numberOfDaughters();
+    virtual StGlobalTrack*              daughter(unsigned int);
+    virtual const StGlobalTrack*        parent();
+    virtual const StThreeVector<float>& position();
+    virtual const StThreeVector<float>& positionError();
+    virtual unsigned long               qualityBitmask();
+    virtual float                       chiSquared();         
+    virtual long                        index() {return mIndex;};
 
     virtual void setType(StVertexType);           
-    void setParent(StGlobalTrack* );         
-    void setPosition(const StThreeVector<float>&);       
-    void setPositionError(const StThreeVector<float>&);  
-    void setQualityBitmask(unsigned long); 
-    void setChiSquared(float);     
-    void setIndex(long ii) {mIndex = ii;};
+    virtual void setParent(StGlobalTrack* );         
+    virtual void setPosition(const StThreeVector<float>&);       
+    virtual void setPositionError(const StThreeVector<float>&);  
+    virtual void setQualityBitmask(unsigned long); 
+    virtual void setChiSquared(float);     
+    virtual void setIndex(long ii) {mIndex = ii;};
 
 protected:
     unsigned long          mIndex;
