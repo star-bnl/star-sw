@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.133 2003/10/07 00:22:30 perev Exp $
+// $Id: StMaker.cxx,v 1.134 2003/11/05 19:56:32 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -40,6 +40,7 @@
 
 #include "StMem.h"
 #include "TMemStat.h"
+#include "StMkDeb.h"
 
 StMaker *StMaker::fgStChain = 0;
 StMaker *StMaker::fgFailedMaker = 0;
@@ -79,6 +80,9 @@ StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker")
    fMemStatMake  = 0;
    fMemStatClear = 0;
    memset(fTallyMaker,0,(kStFatal+1)*sizeof(Int_t));
+   StMkDeb::Register(this);
+   
+   
 }
 
 //_____________________________________________________________________________
@@ -617,6 +621,7 @@ Int_t StMaker::Make()
      }
 // 		Call Maker
      maker->StartMaker();
+     StMkDeb::SetCurrent(maker);
      ret = maker->Make();
      assert((ret%10)>=0 && (ret%10)<=kStFatal);     
      maker->EndMaker(ret);
@@ -1158,6 +1163,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.134  2003/11/05 19:56:32  perev
+// Simple debugging class added
+//
 // Revision 1.133  2003/10/07 00:22:30  perev
 // PrintInfo simplified
 //
