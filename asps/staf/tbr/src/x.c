@@ -693,7 +693,7 @@ void SayError0(int codePos) {
 void 
 WrBotCB(Widget ww,caddr_t cld,caddr_t cad) 
 {
-  FILE *ff; XmString scratch;
+  FILE *ff; char *scratch;
   int whWin; whWin=(int)cld;
   ff=fopen("browDump.txt","w"); if(ff==NULL) {
     Sss("I can't write on browDump.txt."); return;
@@ -1294,7 +1294,7 @@ void ResetTheTriangles(int wds) {
   else if(wds==-15) { for(ii=0;ii<gNDs;ii++) ExpandExceptCase(ii); }
   else if(wds==-20) { for(ii=0;ii<gNDs;ii++) ContractCase(ii); }
   else dsu_Err(123);
-  gWin[0]->textClickPart=MALLOC((size_t)TEXT_SIZE_PART_2);
+  gWin[0]->textClickPart=malloc((size_t)TEXT_SIZE_PART_2);
   if(!gWin[0]->textClickPart) dsu_Err(777);
   PrimaryList(junk,0,&nLines,gWin[0]->tlm,MAX_LINES_CLICK_PART,
               gWin[0]->textClickPart,TEXT_SIZE_PART_2);
@@ -1526,7 +1526,7 @@ void MakeWindow(int nolipw,int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
   mbar=XmCreateMenuBar(mw,"mbar",args,0); XtManageChild(mbar);
   if(type==WIN_TYPE_TABLE) TableName(wh_gDs,name); else strcpy(name,"BadType");
   CreateMenuItems(name,mbar,type);
-  gWin[gNWin]=MALLOC(sizeof(WINDOW_INFO)); if(gWin[gNWin]==0) dsu_Err(100);
+  gWin[gNWin]=malloc(sizeof(WINDOW_INFO)); if(gWin[gNWin]==0) dsu_Err(100);
   for(ii=MAX_LINES_CLICK_PART-1;ii>=0;ii--) gWin[gNWin]->isHilited[ii]=FALSE;
   gWin[gNWin]->win_type=type; ver=Column(mw);
   gWin[gNWin]->width=COL;
@@ -1537,7 +1537,7 @@ void MakeWindow(int nolipw,int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
       dsu_Err(552); /* June 28 1995 */
       gWin[gNWin]->rowSel=ROW_SEL_NOT_USED;
       SetToPrimaryInfo(gWin[gNWin]->textTop,TEXT_SIZE_PART_1);
-      gWin[gNWin]->textClickPart=MALLOC((size_t)TEXT_SIZE_PART_2);
+      gWin[gNWin]->textClickPart=malloc((size_t)TEXT_SIZE_PART_2);
       if(!gWin[gNWin]->textClickPart) dsu_Err(708);
       DatasetList(&nLines,gWin[gNWin]->tlm,MAX_LINES_CLICK_PART,
               gWin[gNWin]->textClickPart,TEXT_SIZE_PART_2);
@@ -1550,7 +1550,7 @@ void MakeWindow(int nolipw,int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
       if(wh_gDs!=0) dsu_Err(554); /*6-28-95*/
       gWin[gNWin]->rowSel=ROW_SEL_NOT_USED;
       SetToDatasetInfo(wh_gDs,gWin[gNWin]->textTop,TEXT_SIZE_PART_1); /*BBB*/
-      gWin[gNWin]->textClickPart=MALLOC((size_t)TEXT_SIZE_PART_2);
+      gWin[gNWin]->textClickPart=malloc((size_t)TEXT_SIZE_PART_2);
       if(!gWin[gNWin]->textClickPart) dsu_Err(717);
       PrimaryList(header,wh_gDs,&nLines,gWin[gNWin]->tlm,MAX_LINES_CLICK_PART,
               gWin[gNWin]->textClickPart,TEXT_SIZE_PART_2);
@@ -1565,7 +1565,7 @@ void MakeWindow(int nolipw,int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
       SetToTableInfo(name,&nRow,wh_gDs,gWin[gNWin]->textTop,TEXT_SIZE_PART_1);
       gWin[gNWin]->nRow=nRow; strncpy(gWin[gNWin]->tableName,name,NAME);
       gWin[gNWin]->tableName[NAME-1]='\0';
-      for(mm=0;mm<2;mm++) { /* pass 1 MALLOC, pass 2 use MALLOC'd memory */
+      for(mm=0;mm<2;mm++) { /* pass 1 malloc, pass 2 use malloc'd memory */
         if(mm==0) reportSpaceNeeded=7; else reportSpaceNeeded=0;
         ColumnList(
             reportSpaceNeeded,&nbytes,
@@ -1574,11 +1574,11 @@ void MakeWindow(int nolipw,int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
             gWin[gNWin]->textClickPart,nbytes,
             gWin[gNWin]->subscript);
         if(mm==0) {
-          gWin[gNWin]->textClickPart=MALLOC((size_t)nbytes);
+          gWin[gNWin]->textClickPart=malloc((size_t)nbytes);
           if(!gWin[gNWin]->textClickPart) dsu_Err(188);
         }
       }
-      gWin[gNWin]->textOutput=MALLOC(TEXT_SIZE_PART_3);
+      gWin[gNWin]->textOutput=malloc(TEXT_SIZE_PART_3);
       if(gWin[gNWin]->textOutput==NULL) {
         PP"Table browser:  no more dynamic memory.\n"); dsu_Err(118);
       }
