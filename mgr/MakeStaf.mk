@@ -112,6 +112,7 @@ endif
 ifneq (,$(findstring $(STAF_ARCH),i386_linux2 i386_redhat50 hp_ux102))
   ASPS := $(filter-out tbr,$(ASPS))
 endif
+  ASPS := $(filter-out str,$(ASPS))
 
 ASPSLIB := $(filter-out sdd pam c4t tst,$(ASPS))
 ASPSLIB := $(addsuffix _LIB,$(ASPSLIB))

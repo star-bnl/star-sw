@@ -1,9 +1,6 @@
 #  $Log: MakeArch.mk,v $
-#  Revision 1.9  1998/07/08 12:57:50  fisyak
-#  replace /usr/pgi => (PGI)
-#
-#  Revision 1.8  1998/07/07 21:55:32  fisyak
-#  HPUX fixes
+#  Revision 1.10  1998/07/09 16:39:31  perev
+#  BAKup for .so
 #
 #  Revision 1.10  1998/05/19 16:36:38  perev
 #  Makefiles
@@ -26,10 +23,11 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/07/08 12:57:50 $ 
+#             Last modification $Date: 1998/07/09 16:39:31 $ 
 #. default setings
 
 RM := rm -f
+MV := mv -f
 RMDIR := rm -rf
 CP := cp
 LN := ln -s
@@ -68,6 +66,7 @@ FLIBS    :=
 
 CPPFLAGS := $(UNAMES) $(STAF_ARCH) $(TULL_ARCH)
 OSFID    :=
+STRID    :=
 YACC     := yacc
 YACCLIB  := -ly
 LEX      := lex
@@ -100,6 +99,7 @@ ifneq (,$(findstring $(STAF_ARCH),intel_wnt))
   SLASH := \\
   MKDIR :=mkdir
   OSFID   := VISUAL_CPLUSPLUS CERNLIB_WINNT CERNLIB_MSSTDCALL
+  STRID   := wnt
   CXX     := cl
   CC      := cl
   LD      := $(CXX)
@@ -121,6 +121,7 @@ ifneq (,$(findstring $(STAF_ARCH),rs_aix31 rs_aix32 rs_aix41))
 #  ====================
 
   OSFID :=aix AIX CERNLIB_IBMRT CERNLIB_UNIX CERNLIB_QMIBM
+  STRID :=aix
   ifdef GCC.
     CXXFLAGS := $(DEBUG)  -fsigned-char -w  
     CFLAGS  := $(DEBUG)  -fsigned-char -w 
@@ -151,6 +152,7 @@ ifneq (,$(findstring $(STAF_ARCH),i386_linux2 i386_redhat50))
   MOTIF :=
   CERN_LEVEL :=pgf98
   OSFID    := lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX
+  STRID    := lnx
   FC       := pgf77
   LD       := $(CXX)
   SO	   := $(CXX)
@@ -161,8 +163,8 @@ ifneq (,$(findstring $(STAF_ARCH),i386_linux2 i386_redhat50))
   EXEFLAGS := -Wl,-Bdynamic  
   SOFLAGS  := -shared  
 ##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lg++ -lpgc -lm -ldl -rdynamic
-  CLIBS    := -L$(PGI)/linux86/lib -L/usr/X11R6/lib -L/usr/lib -lXt -lXpm -lX11 -lcrypt -lg++ -lpgc -lm -ldl  -rdynamic
-  FLIBS    := -L$(PGI)/linux86/lib -lpgftnrtl 
+  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -L/usr/lib -lXt -lXpm -lX11 -lcrypt -lg++ -lpgc -lm -ldl  -rdynamic
+  FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
   FFLAGS   := -DPGI  $(DEBUG)
   FEXTEND  := -Mextend
   YACC     := bison -y
@@ -175,6 +177,7 @@ ifneq (,$(findstring $(STAF_ARCH),alpha_osf1 alpha_osf32c alpha_dux40))
 #    case "alpha":
 #  ====================
   OSFID := osf ALPHA alpha CERNLIB_QMVAOS CERNLIB_DECS CERNLIB_UNIX
+  STRID := osf
   ifdef GCC.
     CXXFLAGS := -w  -D__osf__ -D__alpha 
     CFLAGS  := -w  -D__osf__ -D__alpha 
@@ -206,6 +209,7 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
 #  ====================
   HPUX := Yess
   OSFID := HPUX CERNLIB_HPUX CERNLIB_UNIX
+  STRID := hpu
   ifdef GCC
     CXXFLAGS  := $(DEBUG) -fPIC  -I/usr/include/X11R5 -Dextname -D_HPUX_SOURCE 
     CFLAGS    := $(DEBUG) -fPIC  -I/usr/include/X11R5 -Dextname -D_HPUX_SOURCE
@@ -221,10 +225,10 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
     CC      := cc
     LD      := $(CXX)
     SO      := $(CXX)
-    CXXFLAGS  := $(DEBUG) -z +Z -w -Dextname  -D_HPUX_SOURCE
-    CFLAGS   := $(DEBUG) -Ae -z +Z -Dextname  -D_HPUX_SOURCE
+    CXXFLAGS  := $(DEBUG) -z +Z  -Dextname  
+    CFLAGS   := $(DEBUG) -Ae -z +Z -Dextname  
     LDFLAGS   := $(DEBUG)  -z -Wl,+s -Wl,-E 
-    SOFLAGS   := $(DEBUG)  -b -z -Wl,+vnocompatwarnings 
+    SOFLAGS   := $(DEBUG)  -b -z  
     CLIBS   :=   -lXm -lXt -lX11 -lm -lPW -ldld
 
   else
@@ -250,7 +254,8 @@ endif
 
 ifneq (,$(findstring $(STAF_ARCH),sgi_52 sgi_53))
 #  ====================
-  OSFID := sgi SGI irix IRIX CERNLIB_SGI CERNLIB_UNIX
+  OSF SGI irix IRIX CERNLIB_SGI CERNLIB_UNIX
+  STRID := sgi
   FFLAGS    :=  -Nn20000 -static -trapuv  
   FEXTEND   :=  -extend_source
   CC        :=    cc
@@ -270,6 +275,7 @@ endif
 ifneq (,$(findstring $(STAF_ARCH),sgi_64 ))
 
   OSFID :=  irix64 sgi64 SGI64 IRIX64 CERNLIB_QMIRIX64 CERNLIB_SGI CERNLIB_UNIX
+  STRID := sgi
   FFLAGS    :=  -n32  -static -trapuv 
   FEXTEND   :=  -extend_source
   CC        :=    cc
@@ -290,6 +296,7 @@ ifneq (,$(findstring $(STAF_ARCH),sun4x_55 sun4x_56))
 
   CPPFLAGS := $(filter-out SunOS,$(CPPFLAGS))
   OSFID :=  sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SUN
+  STRID :=  sun
   CC :=  /opt/SUNWspro/bin/cc
   CXX := /opt/SUNWspro/bin/CC
   LD  := $(CXX)
@@ -311,6 +318,7 @@ endif
 ifneq (,$(findstring $(STAF_ARCH),sunx86_55))
   CPPFLAGS := $(filter-out SunOS,$(CPPFLAGS))
   OSFID :=  sun SUN SOLARIS SOLARISPC CERNLIB_UNIX CERNLIB_SUN CERNLIB_FQNEEDCV 
+  STRID :=  sun
   CC       :=  /opt/SUNWspro/bin/cc
   CXX      := /opt/SUNWspro/bin/CC
   SO       := $(CXX)
