@@ -17,7 +17,7 @@
 void cts_get_ctb_indexes ( long volume, long &i_phi, long &i_eta ) ;
 
 
-CtbResponse::CtbResponse(StPrimaryMaker *head, int *ipar, float *fpar) {
+CtbResponse::CtbResponse(StVertexMaker *head, int *ipar, float *fpar) {
   // INPUT flag = 0 - assume all 240 slats fired
   //              1 - use DAQ data
   //              2 - use M-C hits

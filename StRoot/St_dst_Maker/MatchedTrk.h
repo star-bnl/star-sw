@@ -30,10 +30,16 @@ struct Jtrk {
   dst_track_st *glb_track_pointer;
 };
 
+struct CanTrk{
+  double  x0,y0,z0;
+  dst_track_st *glb_track_pointer;
+};
+
 class MatchedTrk {
  public:
-  MatchedTrk(StPrimaryMaker*, int*, float*, CtbResponse*,St_dst_track * );
+  MatchedTrk(StVertexMaker*, int*, float*, CtbResponse*,St_dst_track * );
   vector <Jtrk> tracks[MxTimeSlot];
+  vector <CanTrk> primCan;
   void * GVER[MxTimeSlot];
   int getTrigBXing(){ return (int)(30./bXingTimeSep -firstBXing);}
   int getPileupBXing();

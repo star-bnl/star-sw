@@ -1,5 +1,8 @@
-// $Id: lmv.cc,v 1.14 2000/07/22 18:02:12 balewski Exp $
+// $Id: lmv.cc,v 1.15 2002/02/18 19:48:20 genevb Exp $
 // $Log: lmv.cc,v $
+// Revision 1.15  2002/02/18 19:48:20  genevb
+// Separation of primary vertex and track finding, other minor changes
+//
 // Revision 1.14  2000/07/22 18:02:12  balewski
 // more NaN fixes
 //
@@ -102,7 +105,7 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 //#include "StMagF/StMagF.h"
 
 
-//static const char rcsid[] = "$Id: lmv.cc,v 1.14 2000/07/22 18:02:12 balewski Exp $";
+//static const char rcsid[] = "$Id: lmv.cc,v 1.15 2002/02/18 19:48:20 genevb Exp $";
 
 static double  MinTrackLen= 1.;
 
@@ -519,7 +522,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
   chi2pdof = chi2/(helices.size()-1);
 
   Int_t nrows = vertex->GetNRows();
-  long IVertex = nrows+1; //By definition
+  long IVertex = 66;// //By definition
 
   // Mark the vertex tracks in the global_trk table
   for (long ll=0; ll<Ntrk; ll++){
