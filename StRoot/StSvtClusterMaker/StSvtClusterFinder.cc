@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtClusterFinder.cc,v 1.1 2000/07/06 03:50:33 caines Exp $
+ * $Id: StSvtClusterFinder.cc,v 1.2 2000/07/13 14:50:49 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterFinder.cc,v $
+ * Revision 1.2  2000/07/13 14:50:49  caines
+ * Improvements on not saving single pixels
+ *
  * Revision 1.1  2000/07/06 03:50:33  caines
  * First version of cluster finder and fitter
  *
@@ -142,28 +145,29 @@ void StSvtClusterFinder::getClusterMembers(int& mAnode, int &mSeq)
      else if((mem == members - 1) && newMem==0)
        { 
 	 //cout<< memCount <<' '<<"members found in cluster"<<' '<<cluIndex - 1<<endl;
-	 if( memCount > 1){
-	   mNumOfCluMem[cluIndex-1] = memCount;
-	 }	   
-	 else{
+
+	 mNumOfCluMem[cluIndex-1] = memCount;
+
+
+	 if( memCount == 1 && mSeqLength==4){
 	   cluIndex--;
 	 }
-
-	for(int j = 0; j < 500; j++)
-          {
-           mContainer1[j] = 0;
-           mContainer2[j] = 0;
-	  }
-
-        mSeq = -1;
-        mAnode = breakAn;
-        status = hybdata->getListSequences(mAnode,mSequence,sequence);
-        
-        }
+	 
+	 for(int j = 0; j < 500; j++)
+	   {
+	     mContainer1[j] = 0;
+	     mContainer2[j] = 0;
+	   }
+	 
+	 mSeq = -1;
+	 mAnode = breakAn;
+	 status = hybdata->getListSequences(mAnode,mSequence,sequence);
+	 
+       }
      }
-
+   
   }
-    
+
 //______________________________________________________________________________
 
 int StSvtClusterFinder::getSeqOnRight(int mAnode, int mSeqStart, int mSeqEnd, int& memCount,int& newmem)

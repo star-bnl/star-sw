@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.cc,v 1.1 2000/07/06 03:50:32 caines Exp $
+ * $Id: StSvtAnalysis.cc,v 1.2 2000/07/13 14:50:49 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysis.cc,v $
+ * Revision 1.2  2000/07/13 14:50:49  caines
+ * Improvements on not saving single pixels
+ *
  * Revision 1.1  2000/07/06 03:50:32  caines
  * First version of cluster finder and fitter
  *
@@ -114,13 +117,11 @@ void StSvtAnalysis::FirstAndLastAnodes()
      }
   }
 
-
 void StSvtAnalysis::CluFirstTimeBin()
   {
    int status , Seq, SeqStart = 0, seqStart = 0;
    int listAn = 0, mseq = 0, mem;
 
- 
 
    for(int clu = 0; clu < numOfClusters; clu++)
      {
@@ -224,6 +225,27 @@ void StSvtAnalysis::CluLastTimeBin()
 	
  }   
 
+int StSvtAnalysis::GetNumberOfPixels(int clu)
+{ 
+  int Seq, NumPixels=0;
+  int listAn = 0, mseq;
+  
+  
+  tempMemberInfo[clu] = mHybridCluster->getCluMemInfo(clu);
+  numOfMembers = mHybridCluster->getNumberOfMembers(clu);
+  
+  for(int j = 0; j< numOfMembers ; j++)
+    {
+      listAn = tempMemberInfo[clu][j].listAnode;
+      mseq = tempMemberInfo[clu][j].seq;
+      mHybridData->getListSequences(listAn,Seq,mSvtSequence);
+      
+      
+      NumPixels  += mSvtSequence[mseq].length;
+    }
+  return NumPixels;
+}  
+
 void StSvtAnalysis::MomentAnalysis(int PedOffset)
 {
   int listAn , actualAn, numAnodes;
@@ -237,8 +259,8 @@ void StSvtAnalysis::MomentAnalysis(int PedOffset)
   numAnodes = mHybridData->getAnodeList(anolist);
 	
 	  
- for(int clu = 0; clu < numOfClusters; clu++)
-   {
+  for(int clu = 0; clu < numOfClusters; clu++){
+   
     tempMemberInfo[clu] = mHybridCluster->getCluMemInfo(clu);
     numOfMembers = mHybridCluster->getNumberOfMembers(clu);
 	      
