@@ -345,6 +345,7 @@ my $msJobId = "n\/a";
 my $mjobSt = "n\/a";
 my $mNev  = 0;
 my $mCPU = 0;
+my $mRealT = 0;
 my $mmemSz = 0;
 my $mNoTrk = 0;
 my $mNoVert = 0;
@@ -370,6 +371,7 @@ foreach my $jobnm (@jobSum_set){
      $mjobSt = "n\/a";
      $mNev  = 0;
      $mCPU = 0;
+     $mRealT = 0; 
      $mmemSz = 0;
      $mNoTrk = 0;
      $mNoVert = 0;
@@ -675,6 +677,7 @@ sub updateJSTable {
     $sql.="CPU_per_evt_sec='$mCPU',";
     $sql.="avg_no_tracks='$mNoTrk',";
     $sql.="avg_no_vertex='$mNoVert',";
+    $sql.="RealTime_per_evt='$mRealT',";
     $sql.="nodeID='$mnodeId'";
     $sql.=" WHERE sumFileName = '$msumFile' AND sumFileDir = '$msumDir' AND prodSeries = '$mproSr'";
     print "$sql\n" if $debugOn;
@@ -977,13 +980,14 @@ my @output = `more $jb_sum`;
               @word_sum = split (" ", $sum_line);
                 $mmemSz = $word_sum[5];
             }
-## get CPU per event
+## get CPU and REAL Time per event
              next if ($sum_line =~ /Command string/);
             if($sum_line =~ /Total: bfc/ ) {             
            @word_sum = split (" ", $sum_line);
 #          print "CPU = ", $sum_line, "\n";   
             if($word_sum[8] =~ /Cpu/) { 
               $mCPU  = $word_sum[11];  
+              $mRealT = $word_sum[6];  
            }
           }
 ## get everage number of tracks in the event
