@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.21 2003/02/27 22:53:12 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.22 2003/05/06 20:19:40 mora Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.22  2003/05/06 20:19:40  mora
+// Add a new constructor only with FTPC dimensions and geometry for ITTF
+//
 // Revision 1.21  2003/02/27 22:53:12  jcs
 // make default temperature values from database available to the FTPC slow simulator (needed for embedding)
 //
@@ -500,6 +503,48 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
     gMessMgr->Message( " No data in table class St_ftpcDriftField","E");
   }
 
+//   cout << "StFtpcDbReader constructed" << endl;  
+}
+///////////////////////////////////////////////////////////////////////////////////////
+// for Sti/StFtpcDetectorBuilder
+StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
+                               St_ftpcPadrowZ       *zrow         )
+{
+
+  //  just copy dimensions table start to pointer
+  ftpcDimensions_st* dimensionsTable = (ftpcDimensions_st*)dimensions->GetTable();
+  if(dimensionsTable){
+    mNumberOfPadrows = dimensionsTable->totalNumberOfPadrows;
+    mNumberOfPadrowsPerSide = dimensionsTable->numberOfPadrowsPerSide;
+    mFirstPadrowToSearch    = dimensionsTable->firstPadrowToSearch;
+    mLastPadrowToSearch     = dimensionsTable->lastPadrowToSearch;
+    mNumberOfSectors        = dimensionsTable->numberOfSectorsPerPadrow;
+    mFirstSectorToSearch    = dimensionsTable->firstSectorToSearch;
+    mLastSectorToSearch     = dimensionsTable->lastSectorToSearch;
+    mPhiOrigin                  = dimensionsTable->phiOrigin;
+    mPhiPerSector               = dimensionsTable->phiPerSector;
+    mNumberOfPads           = dimensionsTable->numberOfPadsPerSector;
+    mPadLength              = dimensionsTable->padLength;
+    mPadPitch               = dimensionsTable->padPitch;
+    mRadiansPerPad          = dimensionsTable->radiansPerPad;
+    mRadiansPerBoundary     = dimensionsTable->radiansPerGap;
+    mNumberOfTimebins       = dimensionsTable->numberOfTimebinsPerSector;
+    mMicrosecondsPerTimebin = dimensionsTable->sizeOfTimebin;
+    mSensitiveVolumeInnerRadius = dimensionsTable->innerRadiusSensitiveVolume;
+    mSensitiveVolumeOuterRadius = dimensionsTable->outerRadiusSensitiveVolume;
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcDimensions","E");
+  }
+
+  //  just copy zrow table start to pointer
+  ftpcPadrowZ_st* padrowzTable = (ftpcPadrowZ_st*)zrow->GetTable();
+  if(padrowzTable){
+   mPadrowZPosition = (Float_t *)padrowzTable->z;
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcPadrowZ","E");
+  }
+
+ 
 //   cout << "StFtpcDbReader constructed" << endl;  
 }
 
