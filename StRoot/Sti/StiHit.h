@@ -153,6 +153,7 @@ public:
     double getValue(int key) const;
     double getPseudoRapidity() const;
     friend ostream& operator<<(ostream& os, const StiHit& h);
+    void Break(int i);
 private:
     float mrefangle;
     float mposition;
@@ -171,16 +172,10 @@ private:
     const StiDetector* mdetector;
     const StMeasuredPoint * msthit;
     float _energy;
+public:
+    int mCount;
 };
 
-inline void StiHit::reset()
-{
-  mrefangle = mposition = 0;
-  mx = my = mz = msxx = msyy = mszz = msxy = msxz = msyz = _xg = _yg = _zg = _energy= 0.;
-  mTimesUsed=0;
-  mdetector = 0;
-  msthit = 0;
-}
 
 inline void StiHit::scaleError(float scale)
 {

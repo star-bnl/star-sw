@@ -50,6 +50,8 @@ public:
   double mcs2(double relRadThickness, double beta2, double p2);
   /// Resets the node to a "null" un-used state
   void reset();
+  /// Resets errors for refit
+  void resetError();
   /// Initialize this node with the given hit information
   void initialize(StiHit*h,double alpha, double eta, double curvature, double tanl);
   
@@ -85,7 +87,7 @@ public:
   
   double getRefPosition() const {return _refX;}
   
-  double getRefAngle() const {return _refAngle;}
+  double getLayerAngle() const {return _layerAngle;}
   
   double x_g() const;
   double y_g() const;
@@ -205,7 +207,7 @@ public:
   double _sinAlpha;
   /// local X-coordinate of this track (reference plane)
   double _refX;
-  double _refAngle;
+  double _layerAngle;
   double _x;   
   /// local Y-coordinate of this track (reference plane)           
   double _p0; 
@@ -514,7 +516,7 @@ inline  void StiKalmanTrackNode::initialize(StiHit*h,double alpha, double XcRho,
   _hit     = h;
   //_refX    = h->detector()->getPlacement()->getNormalRadius();
   _refX    = h->detector()->getPlacement()->getLayerRadius();
-  _refAngle= h->detector()->getPlacement()->getLayerAngle();
+  _layerAngle= h->detector()->getPlacement()->getLayerAngle();
   _x       = h->x();
   _alpha   = alpha;
   _cosAlpha = cos(alpha);
@@ -545,7 +547,7 @@ inline const StiKalmanTrackNode& StiKalmanTrackNode::operator=(const StiKalmanTr
   _sinCA = n._sinCA;
   _cosCA = n._cosCA;
   _refX = n._refX;
-  _refAngle = n._refAngle;
+  _layerAngle = n._layerAngle;
   _x    = n._x;   
   _p0   = n._p0; 
   _p1   = n._p1;

@@ -12,27 +12,17 @@
 #define PrP(A)    cout << "\t" << (#A) << " = \t" << ( A )
 #define PrPP(A,B) cout << "=== StiHit::" << (#A); PrP((B)); cout << endl;
 #endif
+static int gCount=1946;
+static int myCase = -1;
+void StiHit::Break(int i) 
+{ printf("StiHit::Break(%d)\n",i);}
+
+
 StiHit::StiHit()
-:  mrefangle(0),
-   mposition(0),
-   mx(0),
-   my(0),
-   mz(0), 
-   msxx(0),
-   msyy(0),
-   mszz(0),
-   msxy(0),
-   msxz(0),
-   msyz(0),
-   _xg(0),
-   _yg(0),
-   _zg(0),
-   mTimesUsed(0),
-   mdetector(0),
-   msthit(0),
-   _energy(0)
 {
-  reset();
+   reset();
+   mCount = gCount++;if (mCount == myCase) Break(1);
+   reset();
 }
 
 
@@ -48,14 +38,15 @@ StiHit::StiHit(const StiHit & h)
    msxy(h.msxy),
    msxz(h.msxz),
    msyz(h.msyz),
-   _xg(0),
-   _yg(0),
-   _zg(0),
+   _xg(h._xg),
+   _yg(h._yg),
+   _zg(h._zg),
    mTimesUsed(h.mTimesUsed),
    mdetector(h.mdetector),
    msthit(h.msthit),
    _energy(h._energy)
 {
+   mCount = gCount++;if (mCount == myCase) Break(2);
 }
 
 const StiHit& StiHit::operator=(const StiHit & h)
@@ -177,6 +168,14 @@ double StiHit::getPseudoRapidity() const
   else
     return 1.e10;
 }
+void StiHit::StiHit::reset()
+{
+  mrefangle = mposition = 0;
+  mx = my = mz = msxx = msyy = mszz = msxy = msxz = msyz = _xg = _yg = _zg = _energy= 0.;
+  mTimesUsed=0;
+  mdetector = 0;
+  msthit = 0;
+}
 
 
 void StiHit::setGlobal(const StiDetector * detector,
@@ -212,6 +211,16 @@ void StiHit::setGlobal(const StiDetector * detector,
   mTimesUsed = 0;
   mdetector = detector;  msthit = stHit;
   _energy = energy;
+  if (!stHit   ) return;
+  assert( fabs(stHit->position().x()-_xg)< 1.e-6
+       && fabs(stHit->position().y()-_yg)< 1.e-6
+       && fabs(stHit->position().z()-_zg)< 1.e-6);
+  if (!detector) return;
+  double pos = detector->getPlacement()->getNormalRadius();
+  double dif = mx-pos;
+  if (fabs(dif)<1.) return;
+  printf("**** StiHit.%s too far: x=%f pos=%g dif=%g ****\n"
+        ,detector->getName().c_str(),mx,pos,dif);
 }
 
 
@@ -250,6 +259,17 @@ void StiHit::setGlobal(const StiDetector * detector,
   msthit = stHit;
   _energy = energy;  
   _zg = z;
+  if (!stHit) return;
+  assert( fabs(stHit->position().x()-_xg)< 1.e-6
+       && fabs(stHit->position().y()-_yg)< 1.e-6
+       && fabs(stHit->position().z()-_zg)< 1.e-6);
+
+  if (!detector) return;
+  double pos = detector->getPlacement()->getNormalRadius();
+  double dif = mx-pos;
+  if (fabs(dif)<1.) return;
+  printf("**** StiHit.%s too far: x=%f pos=%g dif=%g ****\n"
+        ,detector->getName().c_str(),mx,pos,dif);
 }
 
  void StiHit::setTimesUsed(unsigned int val)
@@ -279,4 +299,8 @@ void StiHit::set(float position,  float angle, float y, float z)
   mdetector = 0;
   msthit = 0;
   _energy = 0;
+//   add crazy values
+  _xg = 100000.;
+  _yg = 100000.;
+  _zg = 100000.;
 }

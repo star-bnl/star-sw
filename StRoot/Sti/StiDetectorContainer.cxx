@@ -389,8 +389,12 @@ bool RPhiLessThan::operator()(const StiDetector* lhs, const StiDetector* rhs)
     return false;
   else if (lhsp->getLayerRadius()>rhsp->getLayerRadius())
     return true;
-  else
-    return (lhsp->getLayerAngle()<rhsp->getLayerAngle());
+//VP  else
+//VP    return (lhsp->getLayerAngle()<rhsp->getLayerAngle());
+  double la = lhsp->getLayerAngle();
+  double ra = rhsp->getLayerAngle();
+  if ((la<0) != (ra<0))  { if (la<0) la+=2*M_PI;if (ra<0) ra+=2*M_PI;}
+  return (la<ra);
 }
 
 

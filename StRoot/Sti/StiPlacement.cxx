@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdio.h>
 #include "StiPlacement.h"
 
 StiPlacement::StiPlacement(){
@@ -32,7 +33,17 @@ void StiPlacement::setCenterRep(float refAngle_, float radius_,
   while(normalRefAngle >=  M_PI){ normalRefAngle -= 2.*M_PI; }
   normalRadius = centerRadius*cos(centerOrientation);
   normalYoffset = centerRadius*sin(centerOrientation);
-
+  if (!radius_) return;
+  double trig[4];
+  trig[0] = cos(normalRefAngle);
+  trig[1] = sin(normalRefAngle);
+  trig[2] = cos(centerRefAngle);
+  trig[3] = sin(centerRefAngle);
+  double dif = fabs(trig[0]-trig[2])+fabs(trig[1]-trig[3]);
+  if (dif >1e-3) {
+    printf("**** centerRefAngle=%g normalAngle=%g diff=%g ****\n"
+          ,centerRefAngle,normalRefAngle,dif);
+  }
 }// setCenterRep()
 
 void StiPlacement::setNormalRep(float refAngle_, float radius_, 
@@ -52,7 +63,29 @@ void StiPlacement::setNormalRep(float refAngle_, float radius_,
   while(centerRefAngle <  -M_PI){ centerRefAngle += 2.*M_PI; }
   while(centerRefAngle >=  M_PI){ centerRefAngle -= 2.*M_PI; }
 
+  double trig[4];
+  trig[0] = cos(normalRefAngle);
+  trig[1] = sin(normalRefAngle);
+  trig[2] = cos(centerRefAngle);
+  trig[3] = sin(centerRefAngle);
+  double dif = fabs(trig[0]-trig[2])+fabs(trig[1]-trig[3]);
+  if (dif >1e-3) {
+    printf("**** centerRefAngle=%g normalAngle=%g diff=%g ****\n"
+          ,centerRefAngle,normalRefAngle,dif);
+  }
+  
+  
+  
 //  cout << "normal(" << normalRefAngle << ", " << normalRadius
 //       << ", " << normalXoffset << ") == center(" << centerRefAngle
 //       << ", " << centerRadius << ", " << centerOrientation << ")" << endl;
 }// setNormalRep()
+
+void StiPlacement::setLayerAngle(float layerAngle) 
+{
+  _layerAngle = layerAngle;
+  if (_layerAngle< -M_PI)  _layerAngle+=2*M_PI;	
+  if (_layerAngle>  M_PI)  _layerAngle-=2*M_PI;	
+}
+	
+	

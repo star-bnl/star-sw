@@ -99,11 +99,12 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	{
 	  if ((*source).getChildCount()<=0) break;
 	  targetNode= static_cast<StiKalmanTrackNode*>((*source).getFirstChild());
+	  targetNode->setChi2(1e52);
 	  targetDet = targetNode->getDetector();
 	  targetHit = targetNode->getHit();
 	  //begin refit at first hit
 	  if (!targetHit && !started)	goto ENDLB;
-	  started = true;
+	  if (!started) {started = true; targetNode->resetError();}
 	  // evolve state from that of source using dets source to target
 	  if (targetDet)
 	    status = targetNode->propagate(&(*source),targetDet,fitDirection);	// hit
@@ -134,11 +135,12 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	{
 	  targetNode= static_cast<StiKalmanTrackNode*>((*source).getParent());
 	  if (!targetNode) break;
+	  targetNode->setChi2(1e51);
 	  targetDet = targetNode->getDetector();
 	  targetHit = targetNode->getHit();
 	  //begin refit at first hit
 	  if (!targetHit && !started) 	goto ENDLF;
-	  started = true;
+	  if (!started) {started = true; targetNode->resetError();}
 	  //cout << "  ==== " << *source << endl;
 	  // evolve state from that of source using dets source to target
 	  if (targetDet)

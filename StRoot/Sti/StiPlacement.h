@@ -46,24 +46,24 @@ public:
     StiPlacement();
 
     // accessors
-    float getNormalRefAngle() const { return normalRefAngle; }
-    float getNormalRadius() const { return normalRadius; }
-    float getNormalYoffset() const { return normalYoffset; }
-    float getCenterRefAngle() const { return centerRefAngle; }
-    float getCenterRadius() const { return centerRadius; }
-    float getCenterOrientation() const { return centerOrientation; }
-    float getLayerRadius() const { return layerRadius; }
-    float getLayerAngle() const { return _layerAngle; }
-    float getZcenter() const { return zCenter; }
-    StiRegion getRegion() const {return mRegion;}
+    float getNormalRefAngle()	const { return normalRefAngle;   }
+    float getNormalRadius() 	const { return normalRadius;     }
+    float getNormalYoffset() 	const { return normalYoffset;    }
+    float getCenterRefAngle() 	const { return centerRefAngle;   }
+    float getCenterRadius() 	const { return centerRadius;     }
+    float getCenterOrientation()const { return centerOrientation;}
+    float getLayerRadius() 	const { return layerRadius;      }
+    float getLayerAngle() 	const { return _layerAngle;      }
+    float getZcenter() 		const { return zCenter;          }
+    StiRegion getRegion() 	const { return mRegion;          }
 
     // mutators
     void setNormalRep(float refAngle_, float radius_, float xOffset_);
     void setCenterRep(float refAngle_, float radius_, float orientation_);
     void setLayerRadius(float radius_){ if(radius_>=0) layerRadius = radius_; }
-    void setLayerAngle(float angle){ _layerAngle = angle;}
-    void setZcenter(float val){ zCenter = val; }
-    void setRegion(StiRegion r) {mRegion = r;}
+    void setLayerAngle(float angle);
+    void setZcenter(float val)        { zCenter = val; }
+    void setRegion(StiRegion r)       { mRegion = r;}
 
 protected:
 
