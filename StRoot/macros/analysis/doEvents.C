@@ -1,22 +1,13 @@
-// $Id: doEvents.C,v 1.20 1999/06/24 20:06:36 genevb Exp $
+// $Id: doEvents.C,v 1.21 1999/06/27 22:45:33 fisyak Exp $
 // $Log: doEvents.C,v $
-// Revision 1.20  1999/06/24 20:06:36  genevb
-// Include StUtilities library
-//
-// Revision 1.19  1999/06/10 15:39:03  fisyak
-// Add mag.field
-//
-// Revision 1.18  1999/05/24 19:02:03  kathy
+// Revision 1.21  1999/06/27 22:45:33  fisyak
 // Merge StRootEvent and StEvent
 //
-// Revision 1.17  1999/05/23 21:54:07  perev
-// restore old default in doEvent
+// Revision 1.21  1999/06/27 22:45:33  fisyak
+// Merge StRootEvent and StEvent
 //
-// Revision 1.16  1999/05/23 03:20:20  perev
-// SetMaxEvent(2) removed
-//
-// Revision 1.15  1999/05/22 19:39:09  perev
-// Big changes for all fmts(xdf,mdc2,root)
+// Revision 1.2  1999/05/24 19:02:03  kathy
+// put owner back into do*Events.C so it's standardized with all other macros
 //
 // Revision 1.1  1999/05/22 19:38:12  perev
 // temporary macro for RootEvents
@@ -59,7 +50,7 @@
 //
 // Revision 1.1  1999/02/11 15:44:28  wenaus
 // macro to read DSTs into StEvent and analyze
-// owner: Torre Wenaus
+//
 // what it does: 
 // what it does: reads .dst.root or .xdf files and then runs StEventMaker
 //          to fill StEvent and StAnalysisMaker to show example of analysis
@@ -124,24 +115,8 @@ const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 // example ROOT file invocation:
 // .x doEvents.C(9999,"/disk00001/star/auau200/hijing/b0_3/jet05/year_1b/hadronic_on/tfs/","*.root")
 
-void doEventsQQ(const Int_t nevents, const Char_t **fileList);
-
-
-void doEvents(const Int_t nevents=999,
               const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
-              const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf")
-{
-  const char *fileListQQ[]={0,0};
-  if (path[0]=='-') {
-    fileListQQ[0]=file;
-  } else {
-    fileListQQ[0] = gSystem->ConcatFileName(path,file);
-  }
-  doEventsQQ(nevents,fileListQQ);
-}
-
-              const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
-void doEventsQQ(const Int_t nevents,
+void doEventsQQ(const Int_t nevents=999,
               const Char_t **fileList)
     cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
     cout << "       doEvents.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
@@ -149,14 +124,14 @@ void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
 
 
 
-  gSystem->Load("StUtilities");
 
   // Dynamically link needed shared libs
-  gSystem->Load("StMagF");
+  gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
   gSystem->Load("StUtilities");
-  gSystem->Load("StEventReaderMaker");
+  gSystem->Load("StIOMaker");
+  gSystem->Load("StEvent");
 //  gSystem->Load("StEventReaderMaker");
 //  gSystem->Load("St_geom_Maker");
 //  gSystem->Load("StEventDisplayMaker");
@@ -170,11 +145,13 @@ void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
   
   // St_geom)Maker is to supply the GEANT/GEOM dataset, that will be provided by
   IOMk->SetDebug();
+  IOMk->SetMaxEvent(2);
   //  St_geom_Maker *geom = new St_geom_Maker; // this maker open its own TFile !!!
 // 		Maker to read events from file or database into StEvent
-  StEventReaderMaker readerMaker("events","title");
+
+  StEventMaker readerMaker("events","title");
 // 		Sample analysis maker
- 		StAnalysisMaker analysisMaker("analysis");
+  StAnalysisMaker analysisMaker("analysis");
 //  Event Display Maker
   //  StEventDisplayMaker *disp  = new StEventDisplayMaker;
 Int_t iInit = chain->Init();
@@ -204,6 +181,18 @@ EventLoop: if (i <= nevents && !istat) {
   if (nevents > 1) {
     if (!b) b = new TBrowser;
       //       gROOT->LoadMacro("PadControlPanel.C");
+    b = new TBrowser;
+void doEvents(const Int_t nevents=999,
+              const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
+              const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf")
+  }
+    }
+	if (!b) {
+	    b = new TBrowser;
+  const char *fileListQQ[]={0,0};
+  if (path[0]=='-') {
+    fileListQQ[0]=file;
+  doEventsQQ(nevents,fileListQQ);
     fileListQQ[0] = gSystem->ConcatFileName(path,file);
 }
 

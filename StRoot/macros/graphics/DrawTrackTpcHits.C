@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   25/05/99  (E-mail: fine@bnl.gov)
-// $Id: DrawTrackTpcHits.C,v 1.2 1999/06/24 16:49:00 fine Exp $
+// $Id: DrawTrackTpcHits.C,v 1.3 1999/06/27 22:45:34 fisyak Exp $
 // $Log: DrawTrackTpcHits.C,v $
+// Revision 1.3  1999/06/27 22:45:34  fisyak
+// Merge StRootEvent and StEvent
+//
 // Revision 1.2  1999/06/24 16:49:00  fine
 // StTrack.length method replaced the 120.0 cm constant
 //
@@ -13,8 +16,8 @@
 //  reading STAR GEANT geometry database
 //_______________________________________
     TCanvas *m_TreeD = new TCanvas("STAF","Events",10,600,200,200);
-//    TFile f("/star/u2a/fine/WWW/STAR");
-    TWebFile f("http://www.star.bnl.gov/~fine/star.root");
+    TFile f("/star/u2a/fine/WWW/star.root");
+    //    TWebFile f("http://www.star.bnl.gov/~fine/star.root");
     // read STAR geometry database remotely
     TGeometry *star = f.Get("STAR");
     if (!star) {
@@ -40,7 +43,7 @@
       StGlobalTrack *globTrack = 0;
       Int_t trackCounter = 0;
       while (globTrack = (StGlobalTrack *)next() && trackCounter < 50) {
-         next();
+         printf ("Track %d\n",trackCounter);
          StVecPtrTpcHit *hits = globTrack->tpcHits();
          StHits3DPoints *hitPoints     = new StHits3DPoints(hits);
          StHelix3DPoints *helixPoints  = new StHelix3DPoints(globTrack,globTrack->length(),30);

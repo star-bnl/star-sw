@@ -3,15 +3,15 @@
  **************************************************************************/
 #ifndef StTrackForPool_hh
 #define StTrackForPool_hh
-#include "StThreeVector.hh"
+#include "StThreeVectorD.hh"
 #include <TObject.h> 
 
 class StTrackForPool : public TObject {
 public:
- StThreeVector<double> mMomentum;
+ StThreeVectorD mMomentum;
  long mEventNumber;
 
- void setTrackForPool(StThreeVector<double> momentum, long event); 
+ void setTrackForPool(StThreeVectorD momentum, long event); 
  
 protected:
 private:

@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.3 1999/05/01 00:57:02 fisyak Exp $
+// $Id: StPeCMaker.cxx,v 1.4 1999/06/27 22:45:29 fisyak Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.4  1999/06/27 22:45:29  fisyak
+// Merge StRootEvent and StEvent
+//
 // Revision 1.3  1999/05/01 00:57:02  fisyak
 // Change Clear function to defualt
 //
@@ -30,19 +33,18 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "StPeCMaker.h"
-#include "StRoot/StEventReaderMaker/StEventReaderMaker.h"
 #include "StChain/StChain.h"
-#include "StEvent/StRun.hh"
-#include "StEvent/StEvent.hh"
-#include "StEvent/StL0Trigger.hh"
-#include "StEvent/StGlobalTrack.hh"
+#include "StRun.h"
+#include "StEvent.h"
+#include "StL0Trigger.h"
+#include "StGlobalTrack.h"
 #include "TH1.h"
 #include "SystemOfUnits.h"
 #include "/afs/rhic/star/packages/SL99b/pams/global/inc/phys_constants.h"
 #include <vector>
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.3 1999/05/01 00:57:02 fisyak Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.4 1999/06/27 22:45:29 fisyak Exp $";
 
 double minv(double m1, double px1, double py1, double pz1, double m2, double px2, double py2, double pz2);
 void tagFiller(StEvent& event, HighPtTag_st& hptTag);
@@ -52,10 +54,14 @@ double rmax=2.0;
 double Zmax=2.0;
 
 Int_t StPeCMaker::Make() {
+#if 0
   StEventReaderMaker* evMaker = (StEventReaderMaker*) gStChain->Maker("events");
-  if (! evMaker->event()) return kStOK; // If no event, we're done
+  if (! event()) return kStOK; // If no event, we're done
   StEvent& ev = *(evMaker->event());
-  StRun& run = *(evMaker->run());
+#endif
+  StEvent* mEvent = (StEvent *) GetInputDS("StEvent");
+  if (!mEvent) return kStOK; // If no event, we're done
+  StEvent& ev = *mEvent;
 
   cout<<endl<<endl<<"This is StPeCMaker (JN 990305)"<<endl;
   // OK, we've got the event. Pass it and process it.
@@ -78,13 +84,17 @@ Int_t StPeCMaker::Make() {
 
 void StPeCMaker::FindVertex(StEvent& event) {
 
-  VecLong vertex[10];
+#ifdef ST_NO_TEMPLATE_DEF_ARGS
+vector<long, allocator<long> > vertex[10];
+#else
+vector<long> vertex[10];
+#endif
   StTrackCollection *tracks = event.trackCollection();
   StTrackIterator iter;
   StGlobalTrack *track;
   StGlobalTrack pectrk[16];
   StGlobalTrack vtxtrk[16];
-  StThreeVector<double> pectrkorg[16];
+  StThreeVectorD pectrkorg[16];
 
   double bfield=0.5*tesla;
 
@@ -114,11 +124,11 @@ void StPeCMaker::FindVertex(StEvent& event) {
     int nhits = track->tpcHits().size();
     // Scan Z-axis from -50 to +50 cm and determine min distance
     double rmin=100.0;
-    StThreeVector<double> temppoint;
+    StThreeVectorD temppoint;
     for( int i=0; i<2001; i++){
       double zv = -50.0 + 0.05*i;
-      StThreeVector<double> testpoint;
-      testpoint = StThreeVector<double>(0,0,zv);
+      StThreeVectorD testpoint;
+      testpoint = StThreeVectorD(0,0,zv);
       double s3 = track->helix().pathLength(testpoint);
       double xv = track->helix().x(s3);
       double yv = track->helix().y(s3);
@@ -294,7 +304,7 @@ Int_t StPeCMaker::Init() {
 
 void StPeCMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StPeCMaker.cxx,v 1.3 1999/05/01 00:57:02 fisyak Exp $\n");
+  printf("* $Id: StPeCMaker.cxx,v 1.4 1999/06/27 22:45:29 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }

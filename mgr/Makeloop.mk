@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.80  1999/06/27 22:44:03  fisyak
+#  Merge StRootEvent and StEvent
+#
 #  Revision 1.79  1999/06/24 18:00:20  fisyak
 #  Take out StDaqLib for sun
 #
@@ -316,7 +319,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/06/24 18:00:20 $ 
+#           Last modification $Date: 1999/06/27 22:44:03 $ 
 #  default setings
 # Current Working Directory
 #
@@ -365,12 +368,8 @@ ifndef SUBDIRS
   SUBDIRS := $(filter-out global, $(SUBDIRS)) $(filter global, $(SUBDIRS))
   SUBDIRS := $(filter util, $(SUBDIRS)) $(filter-out util, $(SUBDIRS)) 
   SUBDIRS := $(filter-out StDisplay, $(SUBDIRS))
-  SUBDIRS := $(filter-out StREvent StrEvent, $(SUBDIRS))
-  SUBDIRS := $(filter-out St_mev_Maker, $(SUBDIRS))
-  SUBDIRS := $(filter-out St_hbt_Maker, $(SUBDIRS))
 #  SUBDIRS := $(filter-out StRootEvent, $(SUBDIRS))
   SUBDIRS := $(filter-out St_emc_Maker, $(SUBDIRS))
-  SUBDIRS := $(filter-out StEbyEScaMaker,$(SUBDIRS))
 #                         St_evg_Maker St_ebye_Maker St_fpt_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out vpd par crs egz fri g2x mev, $(SUBDIRS))
 ifndef OBJY_HOME
@@ -379,16 +378,9 @@ endif
 ifneq (wenuas,$(USER))
   SUBDIRS := $(filter-out StObjectivity StOdbEvent StObjyLoaderMaker objy, $(SUBDIRS)) 
 endif
-   SUBDIRS := $(filter-out StPeCMaker, $(SUBDIRS))
-#  ifneq (,$(findstring $(STAR_SYS),hp_ux102 ))
-#    SUBDIRS := $(filter-out StTrsMaker, $(SUBDIRS))
-#    SUBDIRS := $(filter-out StEvent, $(SUBDIRS)) 
-#  endif
-#    SUBDIRS := $(filter-out StEventReaderMaker, $(SUBDIRS)) 
- SUBDIRS := $(filter-out StEventReaderMaker, $(SUBDIRS)) 
  ifneq (,$(findstring $(STAR_SYS),sun4x_56 hp_ux102))
-    SUBDIRS := $(filter-out StDaqLib StNoiseMaker StPadDisplayMaker StDisplayMaker StEventReaderMaker, $(SUBDIRS))
-#    SUBDIRS := $(filter-out StFtpcV0Maker, $(SUBDIRS))
+    SUBDIRS := $(filter-out StDaqLib StNoiseMaker StPadDisplayMaker StDisplayMaker, $(SUBDIRS))
+    SUBDIRS := $(filter-out StPeCMaker St_hbt_Maker, $(SUBDIRS))
  endif
   ifdef PKG
     SUBDIRS:=

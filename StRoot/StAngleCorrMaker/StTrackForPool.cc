@@ -1,7 +1,7 @@
 #include "StTrackForPool.hh"
 
 
-void StTrackForPool::setTrackForPool(StThreeVector<double> momentum, long event) {
+void StTrackForPool::setTrackForPool(StThreeVectorD momentum, long event) {
 
     // need to make a copy of this global track, store the pointer
  

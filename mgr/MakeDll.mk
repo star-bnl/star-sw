@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.91 1999/06/24 22:25:38 fisyak Exp $
+# $Id: MakeDll.mk,v 1.92 1999/06/27 22:44:02 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.92  1999/06/27 22:44:02  fisyak
+# Merge StRootEvent and StEvent
+#
 # Revision 1.91  1999/06/24 22:25:38  fisyak
 # Add StUtilities in include path
 #
@@ -202,7 +205,7 @@ endif
 #	Includes
 
 # 	Define internal and external includes dirs
-INC_NAMES := $(addprefix StRoot/,St_base StChain StUtilities xdf2root StarClassLibrary StRootEvent) \
+INC_NAMES := $(addprefix StRoot/,St_base StChain StUtilities xdf2root StarClassLibrary StEvent) \
               StRoot .share .share/tables .share/$(PKG) pams inc 
 #                            StarClassLibrary/include
 INC_DIRS  := $(wildcard $(GEN_DIR) $(SRC_DIR) $(SRC_DIR)/include)

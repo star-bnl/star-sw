@@ -1,5 +1,8 @@
-// $Id: bfcread.C,v 1.15 1999/06/22 18:09:02 kathy Exp $
+// $Id: bfcread.C,v 1.16 1999/06/27 22:45:34 fisyak Exp $
 // $Log: bfcread.C,v $
+// Revision 1.16  1999/06/27 22:45:34  fisyak
+// Merge StRootEvent and StEvent
+//
 // Revision 1.15  1999/06/22 18:09:02  kathy
 // change default input file
 //
@@ -46,12 +49,7 @@ class St_DataSet;
 St_DataSet *Event;
 StChain *chain;
 TBrowser *brow=0;
-
-void bfcread(Int_t nevents=1, const char
-*MainFile="/disk00000/star/test/dev/tfs_Linux/Thu/year_2a/psc0208_01_40evts.dst.root")
-
-{
-//
+void Load(){
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
@@ -59,8 +57,14 @@ void bfcread(Int_t nevents=1, const char
 //    gSystem->Load("St_QA_Maker");
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StRootEvent");
-
     cout << "  .. bfcread.C, have loaded libraries " << endl;
+}
+void bfcread(Int_t nevents=1, const char
+*MainFile="/disk00000/star/test/dev/tfs_Linux/Thu/year_2a/psc0208_01_40evts.dst.root")
+
+{
+//
+  if (gClassTable->GetID("StChain") < 0) Load();
 
 //  Setup top part of chain
     chain = new StChain("bfc");

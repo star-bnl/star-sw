@@ -18,13 +18,13 @@
 #include "PhysicalConstants.h"
 #include "StAngleDiff.hh"
 
-#include "StEvent/StGlobalTrack.hh"
-#include "StThreeVector.hh"
+#include "StGlobalTrack.h"
+#include "StThreeVectorD.hh"
 #include <stdio.h>
 #include <math.h>
 
-double StAngleDiff::phiDiff(StThreeVector<double> m1, 
-			    StThreeVector<double> m2) {
+double StAngleDiff::phiDiff(StThreeVectorD m1, 
+			    StThreeVectorD m2) {
   // calculates difference in phi angles between two tracks
   // 0 < phidiff < pi
 
@@ -41,8 +41,8 @@ double StAngleDiff::phiDiff(StThreeVector<double> m1,
   return phidiff ;
 };
 
- double StAngleDiff::alphaDiff(StThreeVector<double> m1, 
-			       StThreeVector<double> m2) {
+ double StAngleDiff::alphaDiff(StThreeVectorD m1, 
+			       StThreeVectorD m2) {
   // calculates  angle between the momenta of two tracks
   // 0 < alphadiff < 2pi
 
@@ -53,8 +53,8 @@ double StAngleDiff::phiDiff(StThreeVector<double> m1,
   return alphadiff;
 };
 
-double  StAngleDiff::weightPhiDiff(StThreeVector<double> m1, 
-			       StThreeVector<double> m2) {
+double  StAngleDiff::weightPhiDiff(StThreeVectorD m1, 
+			       StThreeVectorD m2) {
   // placeholder for two-track acceptance function
 
   double weight = 1;
