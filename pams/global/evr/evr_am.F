@@ -132,7 +132,7 @@ C=== decide which tracks to use===
               p = 1/globtrk(i).invpt
               tanla = globtrk(i).tanl
               r0 = sqrt(globtrk(i).x0**2+globtrk(i).y0**2)
-              phi = atan2(globtrk(i).x0,globtrk(i).y0)
+              phi = atan2(globtrk(i).x0,globtrk(i).y0)*57.29
               z = globtrk(i).z0
            endif
            if (p.ge.evrpar(1).ptmin) then
