@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.2 1998/02/17 18:11:04 love Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.3 1998/03/17 16:57:18 sakrejda Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.3  1998/03/17 16:57:18  sakrejda
+* temporary protection from NaN - RB is preparing a better one
+*
 * Revision 1.2  1998/02/17 18:11:04  love
 * Repaired z position calculation
 *
@@ -329,11 +332,14 @@ c ??? If pad_proj *is* 0, rvec is peculiar...but I left existing *logic*
               rvec(indx) = tdc_x_adc(indx)
            end if
         enddo
+        if(ipad_range.lt.3) then
+        phi(1)=-1.0
+        else
 	call lfitw(identity_vector(ipad_lo), rvec(ipad_lo),
      +             d_rvec(ipad_lo), ipad_range, 0,
      +             slope, b, badness)
         phi(1) = slope
-
+        endif
 
 c track: - who contributed the most pixels (MC data)
 c this following is only useful for MC data-- turn it off with 
