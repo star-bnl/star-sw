@@ -1,5 +1,8 @@
-// $Id: readStrangeMuDst.C,v 1.3 2000/04/05 14:09:23 genevb Exp $
+// $Id: readStrangeMuDst.C,v 1.4 2000/04/12 16:16:55 genevb Exp $
 // $Log: readStrangeMuDst.C,v $
+// Revision 1.4  2000/04/12 16:16:55  genevb
+// Remove unnecessary library loads
+//
 // Revision 1.3  2000/04/05 14:09:23  genevb
 // Changed member functions again
 //
@@ -21,10 +24,8 @@ TStopwatch clock;
 
 void load() {
   gSystem->Load("St_base");
-  gSystem->Load("St_Tables");
   gSystem->Load("StChain");
   gSystem->Load("StUtilities");
-  gSystem->Load("StAnalysisUtilities");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StEvent");
   gSystem->Load("StStrangeMuDstMaker");

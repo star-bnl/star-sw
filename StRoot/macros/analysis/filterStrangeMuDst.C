@@ -1,5 +1,8 @@
-// $Id: filterStrangeMuDst.C,v 1.1 2000/04/05 20:27:58 genevb Exp $
+// $Id: filterStrangeMuDst.C,v 1.2 2000/04/12 16:16:55 genevb Exp $
 // $Log: filterStrangeMuDst.C,v $
+// Revision 1.2  2000/04/12 16:16:55  genevb
+// Remove unnecessary library loads
+//
 // Revision 1.1  2000/04/05 20:27:58  genevb
 // Introduction of macro to filter strangeness micro DSTs
 //
@@ -23,10 +26,8 @@ TStopwatch clock;
 
 void load() {
   gSystem->Load("St_base");
-  gSystem->Load("St_Tables");
   gSystem->Load("StChain");
   gSystem->Load("StUtilities");
-  gSystem->Load("StAnalysisUtilities");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StEvent");
   gSystem->Load("StStrangeMuDstMaker");
