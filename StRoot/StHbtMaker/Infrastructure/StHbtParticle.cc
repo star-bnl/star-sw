@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.11 2000/07/19 17:18:48 laue Exp $
+ * $Id: StHbtParticle.cc,v 1.12 2000/07/23 13:52:56 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
+ * Revision 1.12  2000/07/23 13:52:56  laue
+ * NominalExitPoint set to (-9999.,-9999.-9999.) if helix.at()
+ * returns nan (not a number).
+ *
  * Revision 1.11  2000/07/19 17:18:48  laue
  * Calculation of Entrance and Exit point added in StHbtParticle constructor
  *
@@ -58,7 +62,7 @@
 
 #include "StHbtMaker/Infrastructure/StHbtParticle.hh"
 #include "math_constants.h"
-
+#include "cmath"
 //_____________________
 StHbtParticle::StHbtParticle() : mTrack(0), mV0(0) {
   /* no-op for default */
@@ -192,5 +196,18 @@ void StHbtParticle::CalculateNominalTpcExitAndEntrancePoints(){
 //    }
 
   mNominalTpcEntrancePoint = hel.at(sideLength);
+
+
+  // This is the secure way !  
+//   if (isnan(mNominalTpcEntrancePoint.x()) || 
+//       isnan(mNominalTpcEntrancePoint.x()) || 
+//       isnan(mNominalTpcEntrancePoint.x()) ) mNominalTpcEntrancePoint = StHbtThreeVector(-9999.,-9999.,-9999); 
+//   if (isnan(mNominalTpcExitPoint.x()) || 
+//       isnan(mNominalTpcExitPoint.x()) || 
+//       isnan(mNominalTpcExitPoint.x()) ) mNominalTpcExitPoint = StHbtThreeVector(-9999.,-9999.,-9999); 
+
+  // This is faster  
+  if (isnan(mNominalTpcExitPoint.x())) mNominalTpcExitPoint = StHbtThreeVector(-9999.,-9999.,-9999); 
+
 }
 //_____________________
