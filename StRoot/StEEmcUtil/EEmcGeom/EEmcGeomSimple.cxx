@@ -1,7 +1,7 @@
-// $Id: EEmcGeomSimple.cxx,v 1.2 2003/01/16 23:04:05 zolnie Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.3 2003/01/18 02:35:53 zolnie Exp $
 // $Log: EEmcGeomSimple.cxx,v $
-// Revision 1.2  2003/01/16 23:04:05  zolnie
-// added more functionality
+// Revision 1.3  2003/01/18 02:35:53  zolnie
+// further modifications
 //
 // Revision 1.1  2003/01/16 19:33:50  zolnie
 // added a simple Geom class to conver a track hit -> tower hit
@@ -22,8 +22,6 @@
 // ######################################################################
 //         *** WARNING NOT TESTED FOR mClock==1 (clock-wise) ***
 // ######################################################################
-
-
 
 
 ClassImp(EEmcGeomSimple)
@@ -65,8 +63,8 @@ EEmcGeomSimple::InitDefaults()
 
   mZ1     =  270.190*centimeter;
   mZ2     =  306.158*centimeter;
-  mPhi0   =  75.0*degree;  //  
-  mClock  = -1;            // +1 clockwise
+  mPhi0   =  75.0*degree;       
+  mClock  =  CounterClockwise;  
 
 }
 
@@ -80,38 +78,40 @@ EEmcGeomSimple::getHit(const StThreeVectorD& r,  StEmcRawHit &hit)
 {
   const double dPhiSec  = 2.0*M_PI/mNumSec;
   
-  double  z   = r.z();
-  double  eta = r.pseudoRapidity();
-  double  phi = r.phi() - mPhi0;
+  // some shorcuts
+  double  rZ    = r.z();
+  double  rEta  = r.pseudoRapidity();
+  double  rPhi  = r.phi() - mPhi0;
 
   // check if inside 
-  if(z  <mZ1              || mZ2<z          ) return kEEmcGeomZRangeErr;
-  if(eta<mEtaBin[mNumEta] || mEtaBin[0]<eta ) return kEEmcGeomEtaRangeErr;
+  if(rZ  <mZ1              || mZ2<rZ          ) return 0; 
+  if(rEta<mEtaBin[mNumEta] || mEtaBin[0]<rEta ) return 0; 
 
   
-  int teta = 0;
-  for(teta=1;teta<=mNumEta;teta++) if(mEtaBin[teta]<eta) break;
-  --teta; // step back
+  int eta = 0;
+  for(eta=0;eta<=mNumEta;eta++) if(mEtaBin[eta]<rEta) break;
+  --eta; // step back
 
   // ------------------------------------------------------------------------
-  // this code is a wonder code
-  // nobody know how it works
-  //
-  // get the sector number
-  int  k  = (mClock>0) ? (int) floor(phi/dPhiSec) : (int) ceil(phi/dPhiSec); 
+  // this code is a wonder code  - I do not know how it works ;) /paz/
+  // get the sector number - 1
+  int  k  = isClockwise() ? (int) floor(rPhi/dPhiSec) : (int) ceil(rPhi/dPhiSec); 
   // adjust to 0..(mNumSec-1)
-  int tsec    = (mNumSec + mClock*k)%mNumSec;
+  int sec    = (mNumSec + mClock*k) % mNumSec; 
   // get the subsector
-  int tsubsec = (int) ( ((k*dPhiSec - phi)/dPhiSec*mNumSSec) ) % mNumSSec ;
+  int subsec = (int) ( ((k*dPhiSec - rPhi)/dPhiSec*mNumSSec) ) % mNumSSec ;
   // ------------------------------------------------------------------------
 
-  hit.setId(kEndcapEmcTowerId,tsec,teta,tsubsec);
+  hit.setId(kEndcapEmcTowerId,sec,eta,subsec);
 
   return 1;
 
 }
 
-
+// 
+// a wrapper for the above when a StTrack and z is given 
+// (implicitely assumed that the center of the world is at z==0
+//
 int   
 EEmcGeomSimple::getHit(const StTrack& track , double z, StEmcRawHit &hit)
 {
