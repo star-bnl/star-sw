@@ -23,22 +23,24 @@ C
 C 
 	IMPLICIT NONE
 	CHARACTER*(*) strin,strout
-	INTEGER*4 lout
+	INTEGER*4 lout,lin
 	INTEGER*4 i,let
-	INTEGER*4 index,len
-	CHARACTER*26 alower,aupper
-	DATA alower /'abcdefghijklmnopqrstuvwxyz'/
-	DATA aupper/'ABCDEFGHIJKLMNOPQRSTUVWXYZ'/
+	INTEGER*4 len
+c	CHARACTER*26 alower,aupper
+c	DATA alower /'abcdefghijklmnopqrstuvwxyz'/
+c	DATA aupper/'ABCDEFGHIJKLMNOPQRSTUVWXYZ'/
+	integer alower,zlower,uldif
+	data alower,zlower/97,122/
+	data uldif/-32/
 !	[specification_statement]...
 	 
 	strout = strin
 	lout = len( strout )
-	DO i = 1, lout
-	    let = index(alower,strout(i:i))
-	    DO WHILE (let .gt. 0)
-		IF (let .gt. 0) strout(i:i) = aupper(let:let)
-		let = index(alower,strout(i:i))
-	    END DO
+	lin = len( strin )
+	DO i = 1, min(lin,lout)
+	   let = ichar(strin(i:i))
+	   if(let.ge.alower .and. let .le.zlower) let=let+uldif
+	   strout(i:i) = char(let)
 	END DO
 !	[executable_statement]...
 	RETURN
