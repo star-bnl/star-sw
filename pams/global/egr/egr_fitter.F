@@ -154,7 +154,7 @@ C  Abort if the TPC is needed but there are no TPC tracks
             call message('EGR_REFITTER-W: None or too many TPC 
      +           track - aborted.',1,imsgw)
             egr_fitter=STAFCV_BAD
-            return
+           return
          endif
          
          do i=1,tptrack_h.nok ! Reset number of hits counter
@@ -263,7 +263,7 @@ c     mark spts as used if not using primary vertex
      +                       globtrk(globtrk_h.nok).n_fit_point-1+1000
                      endif
                      if(svt_spt(gtrk(itpct).ipnt(ient)).id_wafer 
-     +                    .gt.6000) then
+     +                    .gt.7000) then
                         globtrk(globtrk_h.nok).n_point = 
      +                       globtrk(globtrk_h.nok).n_point-1000+10000
                         if( gtrk(itpct).pos(ient) .gt. 0) then
@@ -326,7 +326,7 @@ c     mark spts as used if not using primary vertex
      +                       globtrk(globtrk_h.nok).n_fit_point-1+1000
                      endif
                      if(svt_spt(gtrk(itpct).ipnt(ient)).id_wafer 
-     +                    .gt.6000) then
+     +                    .gt.7000) then
                         globtrk(globtrk_h.nok).n_point = 
      +                       globtrk(globtrk_h.nok).n_point-1000+10000
                         if( gtrk(itpct).pos(ient) .gt. 0) then
@@ -559,7 +559,7 @@ C     Adjust for ssd later
      +                       svt_track(itrk).id) then
                            ient = svt_group(ishit).id2
 
-                           if( svt_spt(ient).id_wafer .gt. 6000 ) then
+                           if( svt_spt(ient).id_wafer .gt. 7000 ) then
                               globtrk(iglob).det_id = kSsdSvtIdentifier
                               globtrk(iglob).n_point =
      +                         globtrk(iglob).n_point-1000+10000
@@ -718,7 +718,7 @@ CSM                    globtrk(iglob).id_start_vertex = 0
                                    endif
                                 enddo
                              endif
-                             if( svt_spt(ient).id_wafer .gt. 6000) then
+                             if( svt_spt(ient).id_wafer .gt. 7000) then
                                 globtrk(globtrk_h.nok).n_point = 
      +                               globtrk(globtrk_h.nok).n_point-1000+10000
                                 if( gtrk(igtrk).pos(ishit) .gt. 0) then
