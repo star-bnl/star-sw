@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.22 1999/07/19 18:20:24 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.23 1999/08/12 16:54:02 ogilvie Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.23  1999/08/12 16:54:02  ogilvie
+// added tpc_dedx table to dst_dedx_filler
+//
 // Revision 1.22  1999/07/19 18:20:24  fisyak
 // Add globtrk2 to dst
 //
@@ -67,7 +70,7 @@
 #include "St_dst_summary_param_Table.h"
 #include "St_dst_run_summary_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.22 1999/07/19 18:20:24 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.23 1999/08/12 16:54:02 ogilvie Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -247,12 +250,15 @@ Int_t  St_dst_Maker::Filler(){
   }
   // dst_dedx_filler
   St_dst_dedx       *dst_dedx    = 0;
+  St_dst_dedx   *tpc_dedx = 0;
   St_DataSet    *tpctracks = GetInputDS("tpc_tracks");
   St_tpt_track  *tptrack   = 0;
   if (tpctracks) {
     St_DataSetIter tpc_tracks(tpctracks); 
     tptrack   = (St_tpt_track  *) tpc_tracks("tptrack");
+    tpc_dedx   = (St_dst_dedx  *) tpc_tracks("tpc_dedx");
   }
+
  // 			Case running est tpc -> Si space point tracking
   St_DataSet     *svtracks = GetInputDS("svt_tracks");
   St_stk_track   *stk_track = 0;
@@ -265,8 +271,8 @@ Int_t  St_dst_Maker::Filler(){
 
   if(Debug()) gMessMgr->Debug() << " run_dst: Calling dst_dedx_filler" << endm;
   dst_dedx = new St_dst_dedx("dst_dedx",20000); dstI.Add(dst_dedx);
-    
-  iRes = dst_dedx_filler(tptrack,stk_track,dst_dedx);
+ 
+  iRes = dst_dedx_filler(tptrack,stk_track,tpc_dedx,dst_dedx);
     //     ===========================================
   if (iRes !=kSTAFCV_OK) {
     iMake = kStWarn;
