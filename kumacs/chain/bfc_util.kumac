@@ -18,6 +18,7 @@
 *                      kumacs/util/setup_defaults and load_libraries
 * 1Aug98  K. Turner - tid now separated out of tpt
 * 3Aug98  K. Turner - use new detp geometry command instead of bfc_gstar_setup
+* 7Aug98  K. Turner - removed unneeded user/input under evgin in bfc_process 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -130,10 +131,10 @@ macro bfc_init _
             exec init_ems;  
             exec init_jet;     |  EMC geometry &  pam initialization 
     (fzout)  user/output o [output_fzd_file]
-    (evout) if output_file="" then
+    (evout) if output_xdf_file="" then
               message "empty output file"
             else
-	      exec write_table_to_file#init evout [output_file]
+	      exec write_table_to_file#init evout [output_xdf_file]
               if (STAF_STATUS(1).ne. STAFCV_OK) then
                 message "Cannot open output file"
                 goto eof
@@ -164,9 +165,9 @@ EOF:
    message ' !!! bfc_util ==> chain processing for  ' [mod]
    CASE [mod] in 
     (oldin) nextl 1
-    (evgin) cd [event]; getev hij_in
-            user/input u [evgen]/particle.staf
-    (g2tin) exec input_g2t_file#read
+    (evgin) cd [event]; 
+            getev hij_in
+     (g2tin) exec input_g2t_file#read
             if (staf_status(1).ne.STAFCV_OK) goto EOF
      (gtxin) nextl 1
      (evin) exec read_table_from_file#read inev
@@ -225,7 +226,7 @@ EOF:
     (ev0_e)    exec run_ev0#ev0_eval2  
       (erj)    exec run_jet_egrid
                exec run_jet_erj
-    (evout)    if [output_file]="" then
+    (evout)    if [output_xdf_file]="" then
                  message "Empty output file"
                else
 		 exec write_table_to_file#write evout [event]
