@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.30 2002/03/12 02:33:34 posk Exp $
+//  $Id: StFlowMaker.h,v 1.31 2002/06/07 22:18:42 kirill Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -28,6 +28,7 @@ class StParticleDefinition;
 class StFlowEvent;
 class StFlowPicoTrack;
 class StFlowPicoEvent;
+class StMuEvent;
 class StFlowSelection;
 class StIOMaker;
 class StFileI;
@@ -35,6 +36,8 @@ class TChain;
 class StHbtEvent; // Randy added these 2
 class StHbtTrack;
 class StThreeVectorF;
+class StPhysicalHelixD;
+class TClonesArray;
 
 class StFlowMaker : public StMaker {
 
@@ -52,13 +55,17 @@ public:
   StFlowEvent*  FlowEventPointer() const;
   void          PicoEventWrite(Bool_t flag=kFALSE);
   void          PicoEventRead(Bool_t flag=kFALSE);
+  void          MuEventRead(Bool_t flag=kFALSE);
   void          SetPicoEventDir(const Char_t* name="./");
   void          SetPicoEventFileName(StFileI* fileList);
+  void          SetMuEventDir(const Char_t* name="./");
+  void          SetMuEventFileName(StFileI* fileList);
+
   void          FillFlowEvent(StHbtEvent* hbtEvent); //rcwells added this
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.30 2002/03/12 02:33:34 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.31 2002/06/07 22:18:42 kirill Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -76,14 +83,18 @@ private:
   TString          mEventFileNameOld;         //! IO Maker Old file name
   Char_t           mPicoEventDir[64];         // Pico-DST directory name
   StFileI*         pPicoFileList;             //! Pico File List
+  Char_t           mMuEventDir[64];           // Mu-DST directory name
+  StFileI*         pMuFileList;               //! Mu-DST File List
   Bool_t           mPicoEventWrite;           // switch for pico-DST
   Bool_t           mPicoEventRead;            // switch for pico-DST
+  Bool_t           mMuEventRead;              // switch for common Mu-DST
   UInt_t           mPicoEventCounter;         // number of Bytes in pico event
   Bool_t           mOnePhiWgt;                // use old phi weights
   Int_t            mRunID;                    // last run ID
   Int_t            ReadPhiWgtFile();          // get the weight file
   Int_t            InitPicoEventWrite();      // open pico-DST
   Int_t            InitPicoEventRead();       // open pico-DST
+  Int_t            InitMuEventRead();         // open Mu-DST
   Int_t            InitEventRead();           // open StEvent
   void             FillFlowEvent();           // fill the flow event
   void             FillPicoEvent();           // fill pico-DST
@@ -94,6 +105,8 @@ private:
   Bool_t           FillFromPicoVersion3DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromPicoVersion5DST(StFlowPicoEvent* pPicoEvent);
+  Bool_t           FillFromMuDST();
+  Bool_t           FillFromMuVersion0DST();
   void             CloseEventRead();          // close StEvent
   void             PrintSubeventMults();      // for testing
   StFlowSelection* pFlowSelect;               //! selection object
@@ -104,8 +117,18 @@ private:
   TTree*           pFlowTree;                 // pointer to pico-DST Tree
   TFile*           pPicoDST;                  //! pointer to pico-DST File
   TChain*          pPicoChain;                //! pointer to chain of pico files
+  TTree*           pMuFlowTree;               // pointer to mu-DST Tree
+  TFile*           pMuDST;                    //! pointer to mu-DST File
+  TChain*          pMuChain;                  //! pointer to chain of mu-DST files
+  StMuEvent*       pMuEvent;                  //! pointer to Mu-DST Event
+  TClonesArray*    pMuEvents;                 //! pointer to Mu-DST Event array
+  TClonesArray*    pMuTracks;                 //! Mu-DST Primary Tracks
+  TClonesArray*    pMuGlobalTracks;           //! Mu-DST Global Tracks
+
   Float_t          CalcDcaSigned(const StThreeVectorF pos, 
 				 const StTrack* track);
+  Float_t          CalcDcaSigned(const StThreeVectorF vertex, 
+				 const StPhysicalHelixD helix); 
 
   ClassDef(StFlowMaker, 1)                    // macro for rootcint
 };
@@ -120,11 +143,20 @@ inline void StFlowMaker::PicoEventRead(Bool_t flag) {
   mPicoEventRead=flag;
   if (flag) mPicoEventWrite=kFALSE; }
 
+inline void StFlowMaker::MuEventRead(Bool_t flag) {
+  mMuEventRead=flag;}
+
 inline void StFlowMaker::SetPicoEventDir(const Char_t* name) {
   strncpy(mPicoEventDir, name, 63); mPicoEventDir[63] = '\0'; }
 
 inline void StFlowMaker::SetPicoEventFileName(StFileI* fileList) {
   pPicoFileList = fileList; }
+
+inline void StFlowMaker::SetMuEventDir(const Char_t* name) {
+  strncpy(mMuEventDir, name, 63); mMuEventDir[63] = '\0'; }
+
+inline void StFlowMaker::SetMuEventFileName(StFileI* fileList) {
+  pMuFileList = fileList; }
 
 inline StFlowSelection* StFlowMaker::FlowSelection() {
 	return pFlowSelect; }
@@ -134,6 +166,9 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.31  2002/06/07 22:18:42  kirill
+//  Introduced MuDst reader
+//
 //  Revision 1.30  2002/03/12 02:33:34  posk
 //  Now makes pico files in SL02c.
 //
