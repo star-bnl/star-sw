@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.33 2003/09/02 17:59:20 perev Exp $
+// $Id: StMessageManager.cxx,v 1.34 2003/09/22 01:30:41 perev Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.34  2003/09/22 01:30:41  perev
+// some cleanup
+//
 // Revision 1.33  2003/09/02 17:59:20  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -125,8 +128,8 @@
 StMessMgr* gMessMgr = 0;
 StMessage* gMessage=0;
 StMessage* endm=0;
-ostream& operator<<(ostream& os, StMessage*) {
-  gMessMgr->Print();
+StMessMgr& operator<<(StMessMgr& os, StMessage*) {
+  os.Print();
   return os;
 }
 static const char defaultMessType = 'I';
@@ -355,15 +358,18 @@ void type_of_call StMessAddType_(const char* type, const char* text,
 ClassImp(StMessageManager)
 #endif
 //_____________________________________________________________________________
-StMessageManager::StMessageManager() : StMessMgr(),
-curType(new char[2]),
-building(0) {
+StMessageManager::StMessageManager() : StMessMgr()
+{
 //
 // Constructor - only called once when the library is loaded to
 // instantiate the global message manager.
 //
-  curType[0] = 0;
-  curType[1] = 0;
+  messTypeList=0;     
+  messCounter =0;
+  curType     = new char[  2];  curType[0] = 0; curType[1] = 0;
+  curOpt      = new char[120];  curOpt [0] = 0; 
+  building    =0;
+  remember    =0;
   gMessMgr = (StMessMgr*) this;
   messTypeList = StMessTypeList::Instance();
   messCounter = StMessageCounter::Instance();
@@ -412,6 +418,7 @@ StMessMgr& StMessageManager::Message(const char* mess, const char* type,
 // Message declarator - creates a new message if mess is not empty,
 // otherwise, prepares for << input.
 //
+  if (!opt) opt = "";
   size_t messSize = strlen(mess);
   if (messSize) {
 #ifdef LINUX
@@ -439,7 +446,7 @@ StMessMgr& StMessageManager::Message(const char* mess, const char* type,
   } else {
     building = 1;
     *curType = *type;
-    curOpt = const_cast<char*> (opt);
+    strcpy(curOpt,opt);
     seekp(0);
   }
   return *((StMessMgr*) this);
@@ -450,6 +457,7 @@ void StMessageManager::BuildMessage(const char* mess, const char* type,
 //
 // Instantiate an StMessage and place on the lists of known messages
 //
+  if (!opt) opt = "";
   if (!(*type)) {
     static char dash = '-';                   // if no type supplied,
     const char* cptr = strchr(mess,dash);     // search for type within message
@@ -460,13 +468,13 @@ void StMessageManager::BuildMessage(const char* mess, const char* type,
   } else {
     if (!building) *curType = *type;
   }
-  if (!opt) {
+  if (opt[0]) {
     if ((*type == 'E') || (*type == 'W'))     // Error and Warning messages
-      curOpt = eOpt;                          // default to stderr,
+      strcpy(curOpt,eOpt);                    // default to stderr,
     else                                      // otherwise
-      curOpt = oOpt;                          // default to stdout
+      strcpy(curOpt,oOpt);                    // default to stdout
   } else
-    if (!building) curOpt = const_cast<char*> (opt);
+    if (!building) strcpy(curOpt,opt);
   int typeN = messTypeList->FindTypeNum(curType);
   if (!typeN) {
     *curType = defaultMessType;               // default type is Info
@@ -708,7 +716,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.33 2003/09/02 17:59:20 perev Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.34 2003/09/22 01:30:41 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

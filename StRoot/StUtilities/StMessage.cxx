@@ -1,5 +1,8 @@
-// $Id: StMessage.cxx,v 1.21 2003/09/02 17:59:20 perev Exp $
+// $Id: StMessage.cxx,v 1.22 2003/09/22 01:30:41 perev Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.22  2003/09/22 01:30:41  perev
+// some cleanup
+//
 // Revision 1.21  2003/09/02 17:59:20  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -97,7 +100,8 @@ StMessage::StMessage(const char *mess, const char *ty, const char* opt) {
   time(&messTime);
   *type = *ty;
   type[1] = 0;
-  size_t len = strlen(opt);
+  if (!opt) opt="";
+  int len = strlen(opt);
   option = new char[(len+1)];
   option[len] = 0;
   while (len--)
@@ -107,7 +111,13 @@ StMessage::StMessage(const char *mess, const char *ty, const char* opt) {
   len = strlen(mess);
   while (mess[--len] == space) {}     // remove trailing spaces
   message = new char[(++len + 1)];
-  strncpy(message,mess,len);
+  for (int i=0;i<len;i++) {
+    message[i]=mess[i];
+    if (mess[i]=='\n') 		continue;
+    if (mess[i]=='\t') 		continue;
+    if (!iscntrl(mess[i]))	continue;
+    assert(0);
+  }
   message[len]=0;
   Print(0);
 }
@@ -190,7 +200,7 @@ size_t StMessage::GetMemoryUsage() {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.21 2003/09/02 17:59:20 perev Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.22 2003/09/22 01:30:41 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
