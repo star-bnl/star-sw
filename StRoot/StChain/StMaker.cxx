@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.72 1999/09/23 21:24:57 perev Exp $
+// $Id: StMaker.cxx,v 1.73 1999/09/24 14:51:51 fisyak Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.73  1999/09/24 14:51:51  fisyak
+// Add implementation for InitRun/FinishRun
+//
 // Revision 1.72  1999/09/23 21:24:57  perev
 // recovered debug level init(lost)
 //
@@ -1092,3 +1095,7 @@ void StMaker::SetDEBUG(Int_t l)
    StMaker *maker;
    while ((maker = (StMaker*)nextMaker())) maker->SetDEBUG(l);
 }
+//_____________________________________________________________________________
+Int_t StMaker::InitRun(int runumber) {}
+//_____________________________________________________________________________
+Int_t StMaker::FinishRun(int runumber) {}
