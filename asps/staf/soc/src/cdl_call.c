@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#ifndef ALPHA_OSF
+#ifndef __alpha
 int 
 cdl_calli_ (name,n,p)
  int (*(*name)) ();
@@ -184,8 +184,8 @@ cdl_calld_ (name,n,p)
      }
   return 0;  /* added by hjw to keep compiler quiet */
 }
-#endif /* not ALPHA_OSF */
-#ifdef ALPHA_OSF
+#endif /* not __alpha */
+#ifdef __alpha
 
 #define cdl_calli
 #undef  cdl_calli

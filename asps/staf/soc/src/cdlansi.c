@@ -52,7 +52,7 @@ cdl_init()
     strcpy(cdl_def.CC,  "");
 #endif
 
-#ifdef ALPHA_OSF
+#if defined(__alpha)
     strcpy(cdl_def.f77, "f77 -c");
     strcpy(cdl_def.cc,  "cc -c");
     strcpy(cdl_def.CC,  "");
@@ -82,7 +82,7 @@ cdl_init()
   }
 #endif
 
-#if defined(SUN) || defined(SGI) || defined(ALPHA_OSF)
+#if defined(SUN) || defined(SGI) || defined(__alpha)
     {
     char       lib_name[82];
     FilesPtr   f;
@@ -299,7 +299,7 @@ cdl_script(char *fexec, char *path, char *name, char *fext)
     fprintf(st, "ld -shared -o %s.sl %s.o\n", name, name);
 
 #endif
-#if defined(ALPHA_OSF)
+#if defined(__alpha)
 
     fprintf(st, 
     "ld -shared -o %s.sl %s.o -lUfor -lfor -lFutil -lm -lots -lc\n",
@@ -558,7 +558,7 @@ void *cdl_get_func_lib(char *func_name, FilesPtr *fp)
 #ifdef SUN
 /*VP*   int *addr;*/
 #endif
-#ifdef ALPHA_OSF
+#if defined(__alpha)
    int jumpad_();
    unsigned long ptr = (unsigned long)jumpad_;
 #endif
@@ -574,7 +574,7 @@ void *cdl_get_func_lib(char *func_name, FilesPtr *fp)
 #else
      addr =  dlsym((*fp)->file_handle, func_name);
      if (addr !=  NULL) {
-#ifdef ALPHA_OSF
+#if defined(__alpha)
          addr = (unsigned long) addr - ptr;
 #endif
          return (void *) addr;
