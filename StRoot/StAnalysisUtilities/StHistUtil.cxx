@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.5 2000/01/28 17:53:41 lansdell Exp $
+// $Id: StHistUtil.cxx,v 1.6 2000/01/31 14:59:13 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.6  2000/01/31 14:59:13  kathy
+// add default print list for ftpc
+//
 // Revision 1.5  2000/01/28 17:53:41  lansdell
 // split overlay method into Overlay1D and Overlay2D
 //
@@ -1181,8 +1184,58 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 // FTPC Table QA list.........................................................
   if (strcmp(dirName,"QA")==0 && strcmp(analType,"Ftpc")==0) {
    Char_t* sdefList3[] = {
-    "TabQaGtrkNPntFE",
-    "TabQaGtrkNPntFW"
+  "TabQaGtrkNPntFE",
+  "TabQaGtrkNPntFW",
+  "TabQaGtrkNPntMaxFE",
+  "TabQaGtrkNPntMaxFW",
+  "TabQaGtrkNPntFitFE",
+  "TabQaGtrkNPntFitFW",
+  "TabQaGtrkRnfFE",
+  "TabQaGtrkRnfFW",
+  "TabQaGtrkRnmFE",
+  "TabQaGtrkRnmFW",
+  "TabQaGtrkChrgFE",
+  "TabQaGtrkChrgFW",
+  "TabQaGtrkXfFE",
+  "TabQaGtrkXfFW",
+  "TabQaGtrkYfFE",
+  "TabQaGtrkYfFW",
+  "TabQaGtrkZfFE",
+  "TabQaGtrkZfFW",
+  "TabQaGtrkRFE",
+  "TabQaGtrkRFW",
+  "TabQaGtrkLengthFE",
+  "TabQaGtrkLengthFW",
+  "TabQaGtrkPsiFE",
+  "TabQaGtrkPsiFW",
+  "TabQaGtrkEtaFE",
+  "TabQaGtrkEtaFW",
+  "TabQaGtrkPtFE",
+  "TabQaGtrkPtFW",
+  "TabQaGtrkPFE",
+  "TabQaGtrkPFW",
+  "TabQaGtrkChisq0FE",
+  "TabQaGtrkChisq0FW",
+  "TabQaGtrkChisq1FE",
+  "TabQaGtrkChisq1FW",
+  "TabQaGtrkPtVsEtaFE",
+  "TabQaGtrkPtVsEtaFW",
+  "TabQaGtrkXfYfFE",
+  "TabQaGtrkXfYfFW",
+  "TabQaGtrkLengthVEtaFE",
+  "TabQaGtrkLengthVEtaFW",
+  "TabQaGtrkNPntLengthFE",
+  "TabQaGtrkNPntLengthFW",
+  "TabQaGtrkFitPntLengthFE",
+  "TabQaGtrkFitPntLengthFW",
+  "TabQaDedxNdedxFE",
+  "TabQaDedxDedx0FE",
+  "TabQaDedxDedx1FE",
+  "TabQaDedxNdedxFW",
+  "TabQaDedxDedx0FW",
+  "TabQaDedxDedx1FW",  
+  "TabQaPointFtpcE",
+  "TabQaPointFtpcW"
    };
   sdefList = sdefList3;
   lengofList = sizeof(sdefList3)/4;  
