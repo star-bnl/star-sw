@@ -7,7 +7,7 @@
 ************************************************************************
 
  macro run__
-          TOP=$STAR _
+          TOP=/star/u2d/akio/staf _
           domain='emc' _
           INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
           input_g2t_file=muons_central_2.xdf _
@@ -48,6 +48,8 @@
    
    exec setup#setup
    
+   alias/create STAFCV_OK  1
+   alias/create STAFCV_BAD 0   
    macro/global/import *
      
    exec load_libraries#run [domain]
