@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.7 2002/03/23 22:28:56 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.8 2002/11/15 22:18:01 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -747,12 +747,14 @@ void StFlowAnalysisMaker::FillEventHistograms() {
         float psiSubCorr = mPsiSub[Flow::nSels*k][j] - 
           mPsiSub[Flow::nSels*k+1][j];
       if((order == 2) && pFlowEvent->SinOnly()) {
-        histFull[k].mHistCos->Fill(order,(float)(sin(order * mPsiSub[Flow::nSels*k][j])*sin(order * 			  			   mPsiSub[Flow::nSels*k+1][j])));
-         } else {
-         histFull[k].mHistCos->Fill(order, (float)cos(order * psiSubCorr));
-       }
-	if (psiSubCorr < 0.) psiSubCorr += twopi / order;
-	histFull[k].histFullHar[j].mHistPsiSubCorr->Fill(psiSubCorr);
+        histFull[k].mHistCos->Fill(order, (float)(sin(order * 
+	  mPsiSub[Flow::nSels*k][j]) *
+	  sin(order * mPsiSub[Flow::nSels*k+1][j])));
+      } else {
+	histFull[k].mHistCos->Fill(order, (float)cos(order * psiSubCorr));
+      }
+      if (psiSubCorr < 0.) psiSubCorr += twopi / order;
+      histFull[k].histFullHar[j].mHistPsiSubCorr->Fill(psiSubCorr);
       }
       if (j < Flow::nHars - 1) { // subevents of different harmonics
 	int j1, j2;
@@ -1340,6 +1342,9 @@ Int_t StFlowAnalysisMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.8  2002/11/15 22:18:01  posk
+// updates.
+//
 // Revision 1.7  2002/03/23 22:28:56  posk
 // More 40 GeV compatability.
 //
