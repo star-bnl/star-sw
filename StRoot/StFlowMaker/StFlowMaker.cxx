@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.78 2003/01/10 16:42:17 oldi Exp $
+// $Id: StFlowMaker.cxx,v 1.79 2003/01/13 20:03:16 aihong Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -221,7 +221,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.78 2003/01/10 16:42:17 oldi Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.79 2003/01/13 20:03:16 aihong Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -1816,9 +1816,19 @@ Int_t StFlowMaker::InitMuEventRead() {
   
   for (Int_t ilist = 0;  ilist < pMuFileList->GetNBundles(); ilist++) {
     pMuFileList->GetNextBundle();
+
+    //**************  this block is to remove files with # evts < 5
+    // if there is only one event in a file, the job will crash
+    TChain* pTempChain = new TChain("MuDst");
+    pTempChain->Add(pMuFileList->GetFileName(0));
+    if (((Int_t)pTempChain->GetEntries()) > 5 ) 
+    pMuChain->Add(pMuFileList->GetFileName(0));
+    if (pTempChain) {delete pTempChain; pTempChain=0;}
+    //**************  end of the block   
+
     if (Debug()) gMessMgr->Info() << " doFlowEvents -  input fileList = " 
 				  << pMuFileList->GetFileName(0) << endm;
-    pMuChain->Add(pMuFileList->GetFileName(0));
+
       
     pMuChain->SetBranchAddress("MuEvent", &pMuEvents);
     pMuChain->SetBranchAddress("PrimaryTracks", &pMuTracks);
@@ -1881,6 +1891,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.79  2003/01/13 20:03:16  aihong
+// let it exclude MuDst files with events less than 5
+//
 // Revision 1.78  2003/01/10 16:42:17  oldi
 // Several changes to comply with FTPC tracks:
 // - Switch to include/exclude FTPC tracks introduced.
