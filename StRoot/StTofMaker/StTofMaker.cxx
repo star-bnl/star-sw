@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.cxx,v 1.5 2001/10/05 21:08:40 geurts Exp $
+ * $Id: StTofMaker.cxx,v 1.6 2001/10/07 19:01:46 geurts Exp $
  *
  * Author: W.J. Llope / Wei-Ming Zhang / Frank Geurts
  *
@@ -26,6 +26,9 @@
  ***************************************************************************
  *
  * $Log: StTofMaker.cxx,v $
+ * Revision 1.6  2001/10/07 19:01:46  geurts
+ * change default operation mode to DAQ-reader
+ *
  * Revision 1.5  2001/10/05 21:08:40  geurts
  * clean-up histograms and private root file
  *
@@ -128,9 +131,7 @@ Int_t StTofMaker::Make(){
 
 // check if slatCollection not already available, get data if not
     if(!mDataCollectionPresent) {
-      if (m_Mode ==0)              // default setting 
-        cout << "StTofMaker No special action required for DataCollection"<<endl;
-      else if(m_Mode == 1) {       // Daq-reader
+      if (m_Mode ==0) {             // default DAQ-reader setting 
         cout << "StTofMaker Will get real data from TOFpDAQ Reader ... " << endl;
         mTheTofData = GetDataSet("StDAQReader");
         if (!mTheTofData) {
@@ -170,45 +171,48 @@ Int_t StTofMaker::Make(){
 //       cout << i << ", " << slatid << ", " << rawAdc << ", " << rawTdc 
 //                                   << ", " << rawTc  << ", " << rawSc  << endl;
 //#endif
-       StTofData *rawTofData = new StTofData(slatid,rawAdc,rawTdc,rawTc,rawSc);
-       mDataCollection->push_back(rawTofData);      // local collection
-     	 if(i<41) {
-    	   if (rawAdc>  50) nadchit++; 
-           if (rawTdc<1600) ntdchit++; 
-         }
-     	 if(i>41) {
-           if (rawTdc>1500) iStrobe++; 
-         }
-       }    
+	  StTofData *rawTofData = new StTofData(slatid,rawAdc,rawTdc,rawTc,rawSc);
+	  mDataCollection->push_back(rawTofData);      // local collection
+	  if(i<41) {
+	    if (rawAdc>  50) nadchit++; 
+	    if (rawTdc<1600) ntdchit++; 
+	  }
+	  if(i>41) {
+	    if (rawTdc>1500) iStrobe++; 
+	  }
+	}    
 //--- end loop over data words...
 //
 //--- 
-      if (iStrobe>4) {
-       cout << "StTofMaker ...This is a Strobe Event... " << iStrobe << endl;
-       tofTag = -1;     	// set tag to show this was a strobe event   
+	if (iStrobe>4) {
+	  cout << "StTofMaker ...This is a Strobe Event... " << iStrobe << endl;
+	  tofTag = -1;     	// set tag to show this was a strobe event   
 #ifdef TOFP_HISTOS
-       nadchits->Fill(-1.);
-       ntdchits->Fill(-1.);
+	  nadchits->Fill(-1.);
+	  ntdchits->Fill(-1.);
 #endif
-       } else {
-       cout << "StTofMaker ...Saw Roughly " << nadchit << " ADC Hits and " 
-                                            << ntdchit << " TDC Hits in TRAY..." << endl;
-       tofTag = nadchit;	// set tag to show this was physics event (tofTag>=0)
+	} else {
+	  cout << "StTofMaker ...Saw Roughly " << nadchit << " ADC Hits and " 
+	       << ntdchit << " TDC Hits in TRAY..." << endl;
+	  tofTag = nadchit;	// set tag to show this was physics event (tofTag>=0)
 #ifdef TOFP_HISTOS
-       nadchits->Fill(nadchit);
-       ntdchits->Fill(ntdchit);
+	  nadchits->Fill(nadchit);
+	  ntdchits->Fill(ntdchit);
 #endif
-      }
+	}
 //---- 
 //
-    } else {
-       cout << "WRONG SetMode (" << m_Mode << ")! "
-            << "... should be either 0 (no action) or 1(DAQ)" << endl;
-       return iMake;
-    }
+      }
+      else if(m_Mode == 1)        // no action
+        cout << "StTofMaker No special action required for DataCollection"<<endl;
+      else {
+	cout << "WRONG SetMode (" << m_Mode << ")! "
+	     << "... should be either 0 (DAQ reader) or 1(no action, SIM)" << endl;
+	return iMake;
+      }
 //--- end m_mode check....
 
-  }  
+    }  
 //--- end section if !mDataCollectionPresent
 
     cout << "StTofMaker tofTag = " << tofTag << endl;
