@@ -38,6 +38,9 @@ public:
   virtual float PadPitchAtRow(int row)       const = 0;
   virtual float RowPitchAtRow(int row)       const = 0;
 
+  virtual int indexForRowPad(int row, int pad)  const = 0;
+
+
 ClassDef(StTpcPadPlaneI,0)
 
 };
