@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.143 2004/04/08 21:32:41 perev Exp $
+// $Id: StMaker.cxx,v 1.144 2004/04/09 01:59:00 jeromel Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -438,7 +438,11 @@ void StMaker::Clear(Option_t *option)
       StMkDeb::SetCurrent(curr);
    }
    TCollection::EmptyGarbageCollection();
-   ::doPs(maker->GetName(),"Clear");
+   if (maker) doPs(maker->GetName(),"Clear");
+   // Maker=StChain or whatever is called "Eread" would
+   // reach this with a NULL pointer when executed from a macro
+   // such as doEvent(). Same reason for the patch below ...
+   //else       printf("StMaker::Clear :: cannot call method doPs on NULL pointer [%s]\n",GetName()) ;
    return;
 
 }
@@ -1228,6 +1232,9 @@ AGAIN: switch (fState) {
 }
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.144  2004/04/09 01:59:00  jeromel
+// Bug fix.
+//
 // Revision 1.143  2004/04/08 21:32:41  perev
 // MemStat improving
 //
