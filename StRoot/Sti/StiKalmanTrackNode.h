@@ -180,7 +180,8 @@ public:
   static double nice(double angle);
   /// Return center of helix circle in global coordinates
   StThreeVector<double> getHelixCenter() const;
-  void setError(double yErr,double zErr);
+  void setHitErrors(double yErr,double zErr);
+  void setHitErrors();
   static void   setParameters(StiKalmanTrackFinderParameters *parameters);
   friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
 
@@ -259,7 +260,7 @@ public:
   static bool   useCalculatedHitError;
 //  debug variables
   static int    fDerivTestOn;   
-  static double fDerivTest[5][5];   
+  static double fDerivTest[kNPars][kNPars];   
   static int   _debug;
   static TString comment;
 public:
@@ -341,7 +342,7 @@ inline double StiKalmanTrackNode::crossAngle() const
   return asin(_sinCA);
 }
 
-inline void StiKalmanTrackNode::setError(double ey,double ez)
+inline void StiKalmanTrackNode::setHitErrors(double ey,double ez)
 {
   eyy = ey; ezz = ez;
 }
@@ -360,7 +361,7 @@ inline double StiKalmanTrackNode::getPt() const
   if (curvature<1e-12) 
     return 0.003e12*fabs(pars->field);
   else
-    return 0.003*fabs(pars->field/curvature);
+    return 0.00299792458*fabs(pars->field/curvature);
 }
 
 /*! Calculate/return the track momentum
