@@ -333,8 +333,8 @@ Int_t StEmcCalibrationMaker::Make()
     gMessMgr->Info("StEmcCalibrationMaker::Make() - saving tables");
     SaveTables();
     gMessMgr->Info("StEmcCalibrationMaker::Make() - starting again");
-    Init();
-    //return kStFATAL;
+    //Init();
+    return kStFATAL;
   }
     
   clock.Stop();
