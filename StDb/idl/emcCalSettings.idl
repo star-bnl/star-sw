@@ -1,12 +1,12 @@
-/*    bemcCalSettings.idl
+/*    emcCalSettings.idl
 *
-*  Table: bemcCalSettings
+*  Table: emcCalSettings
 *
 *       description: //:  Table which contains the calibration settings
 */ 
 
 
-struct bemcCalSettings { 
+struct emcCalSettings { 
 
    long  DataType;   /*   data type (0=simulation, 1=real)  */
    long  UseL3Tracks;   /*   1 = use L3 tracks, 0 = use normal recontructed tracks  */

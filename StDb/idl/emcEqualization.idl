@@ -1,12 +1,12 @@
-/*    bemcEqualization.idl
+/*    emcEqualization.idl
 *
-*  Table: bemcEqualization
+*  Table: emcEqualization
 *
 *       description: //:  Table which contains equalization information
 */ 
 
 
-struct bemcEqualization { 
+struct emcEqualization { 
 
    long  EqStatus;   /*   equalization status (0=failed, 1=ok)  */
    long  EqRef;   /*   tower or wire used as reference for equalization  */
