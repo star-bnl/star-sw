@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.41 2002/01/18 01:51:57 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.42 2002/02/07 21:00:48 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -235,7 +235,10 @@
             $FC    = "pgf77";
             $FLIBS = "-L" . $PGI . "/linux86/lib -lpgftnrtl -lpgc";
 	    if( -e "$OPTSTAR/lib/libpgf77S.so"){
-		$FLIBS .= " -L" . $OPTSTAR . "/lib -lpgf77S -lpgf77A";
+		$FLIBS .= " -L" . $OPTSTAR . "/lib -lpgf77S";
+		if( -e "$OPTSTAR/lib/libpgf77A.a"){
+		    $FLIBS .= " -lpgf77A";
+		}
 	    }
             $FFLAGS  = "-DPGI";
             $FEXTEND = "-Mextend";
