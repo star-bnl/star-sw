@@ -56,8 +56,10 @@ void StiKalmanTrackFinder::initialize()
 					  Parameter::Integer,StiTrack::kPointCount) );
   trackFilter->add( new EditableParameter("nPtsMax", "Maximum nPts", 60., 60., 0., 100.,1., 
 					  Parameter::Integer,StiTrack::kPointCount) );
+  trackFilter->add(new EditableParameter("lengthUsed","Use Length", 1., 1., 0.,1.,1.,Parameter::Boolean, StiTrack::kTrackLength));
+  trackFilter->add(new EditableParameter("lengthMin", "Min Length", 0., 0., -300.,   300.,2,Parameter::Double, StiTrack::kTrackLength));
+  trackFilter->add(new EditableParameter("lengthMax", "Max Length", 300.,  300., -300.,   300.,2,Parameter::Double, StiTrack::kTrackLength));
   _trackFilter = trackFilter;
-
   _toolkit->setFinderTrackFilter(trackFilter);
   cout << "StiKalmanTrackFinder::initialize() -I- Done"<<endl;
 }
