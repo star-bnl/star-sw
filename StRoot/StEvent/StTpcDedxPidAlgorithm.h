@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.h,v 2.7 2002/02/22 22:56:52 jeromel Exp $
+ * $Id: StTpcDedxPidAlgorithm.h,v 2.8 2002/03/26 23:09:17 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.h,v $
+ * Revision 2.8  2002/03/26 23:09:17  ullrich
+ * Added destructor.
+ *
  * Revision 2.7  2002/02/22 22:56:52  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -52,6 +55,7 @@ class StDedxPidTraits;
 class StTpcDedxPidAlgorithm : public StPidAlgorithm {
 public:
     StTpcDedxPidAlgorithm(StDedxMethod = kTruncatedMeanId);
+    ~StTpcDedxPidAlgorithm();
     
     StParticleDefinition*  operator() (const StTrack&, const StSPtrVecTrackPidTraits&);
 
