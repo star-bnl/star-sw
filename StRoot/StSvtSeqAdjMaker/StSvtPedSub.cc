@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtPedSub.cc,v 1.4 2000/08/21 12:57:30 caines Exp $
+ * $Id: StSvtPedSub.cc,v 1.5 2000/08/28 22:12:39 caines Exp $
  *
  * Author: Helen Caines
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtPedSub.cc,v $
+ * Revision 1.5  2000/08/28 22:12:39  caines
+ * Error accessing timebucket in Ped. subtraction
+ *
  * Revision 1.4  2000/08/21 12:57:30  caines
  * Now opens and reads in ped using CalibMaker
  *
@@ -64,12 +67,12 @@ int StSvtPedSub::SubtractPed( StSvtHybridData* fData, int Index, int PedOffset)
     
     status = fData->getSequences(anodeID,nSeq,Seq);
     for (iseq=0;iseq<nSeq;iseq++) {	  	  
-      for (time=Seq[iseq].startTimeBin; time<Seq[iseq].startTimeBin+Seq[iseq].length; time++) {
+      for (time=0; time<Seq[iseq].length; time++) {
 	
 	// Actually subtract the pedestal per pixel. PedOffset  
 	//allows undershoot to be seen 
 		newAdc= (int)Seq[iseq].firstAdc[time]-
-		  (int) mPed->getPixelContent(anodeID,time)
+		  (int) mPed->getPixelContent(anodeID,Seq[iseq].startTimeBin+time)
 		  +PedOffset;
 	//Check adc hasn't gone -ve
 	if( newAdc < 0) newAdc=0;
