@@ -128,14 +128,22 @@ int main(int argc, char **argv)
 "%s"						/* ami_load_proto() */
 "extern CC_P void unknown(); \n"
 "extern CC_P int stafArgs(int argc, char **argv); \n"
-"extern CC_P void %s; \n"			/* cern_init_call() */
+"#ifdef TNT \n"
+"extern CC_P void staf_paw_init_();  \n"
+"#else \n"
+"extern CC_P void staf_kuip_init_();  \n"
+"#endif \n"
 "extern CC_P void staf_banner(FILE* stream); \n"
 " \n"
 "/*================== MAIN ========*/ \n"
 "int main(int argc, char** argv) \n"
 "{ \n"
 "   stafArgs(argc,argv); \n"
-"   %s; \n"					/* cern_init_call() */
+"#ifdef TNT \n"
+"   staf_paw_init_();  \n"
+"#else \n"
+"   staf_kuip_init_();  \n"
+"#endif \n"
 " \n"
 "/*------------------ START -------*/ \n"
 "%s"						/* asp_starts() */
@@ -163,8 +171,6 @@ int main(int argc, char **argv)
 	,asp_includes()
 	,pam_includes()
 	,ami_load_proto()
-	,cern_init_call()
-	,cern_init_call()
 	,asp_starts()
 	,asp_stops()
 	,ami_load_func()

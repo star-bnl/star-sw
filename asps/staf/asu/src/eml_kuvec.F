@@ -64,14 +64,14 @@ c     STAF_STATUS_COUNT = STAF_STATUS_COUNT + 1
 c     IF(STAF_STATUS_COUNT.GT.STAF_KUVEC_HISTORY)THEN
 c        STAF_STATUS_COUNT = 1
 c     ENDIF
-c     STAF_STATUS(STAF_STATUS_COUNT) = STATUS
+c     STAF_STATUS_VECTOR(STAF_STATUS_COUNT) = STATUS
 
 C- FIFO buffer approach. --
       STAF_STATUS_COUNT = MIN(STAF_STATUS_COUNT + 1,STAF_KUVEC_HISTORY)
       DO I=STAF_STATUS_COUNT-1,1,-1
-	 STAF_STATUS(I+1) = STAF_STATUS(I)
+	 STAF_STATUS_VECTOR(I+1) = STAF_STATUS_VECTOR(I)
       ENDDO
-      STAF_STATUS(1) = STATUS
+      STAF_STATUS_VECTOR(1) = STATUS
 
       RETURN
       END
@@ -89,7 +89,8 @@ c:<---------------------------------------------------------------------
 
       INTEGER*4 N
 
-      GET_STAF_STATUS = STAF_STATUS(MAX(1,MIN(N,STAF_STATUS_COUNT)))
+      GET_STAF_STATUS = 
+     + STAF_STATUS_VECTOR(MAX(1,MIN(N,STAF_STATUS_COUNT)))
 
       RETURN
       END
@@ -112,10 +113,10 @@ c:<---------------------------------------------------------------------
 C- FIFO buffer approach. --
       STAF_RESULT_COUNT = MIN(STAF_RESULT_COUNT + 1,STAF_KUVEC_HISTORY)
       DO I=STAF_RESULT_COUNT-1,1,-1
-         STAF_RESULT(I+1) = STAF_RESULT(I)
+         STAF_RESULT_VECTOR(I+1) = STAF_RESULT_VECTOR(I)
       ENDDO
 
-      STAF_RESULT(1) = RESULT
+      STAF_RESULT_VECTOR(1) = RESULT
 
       RETURN
       END
@@ -133,7 +134,8 @@ c:<---------------------------------------------------------------------
 
       INTEGER*4 N
 
-      GET_STAF_RESULT = STAF_RESULT(MAX(1,MIN(N,STAF_RESULT_COUNT)))
+      GET_STAF_RESULT
+     += STAF_RESULT_VECTOR(MAX(1,MIN(N,STAF_RESULT_COUNT)))
 
       RETURN
       END
