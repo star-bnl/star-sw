@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.51 2001/02/28 18:25:42 caines Exp $
+// $Id: StPrimaryMaker.cxx,v 1.52 2001/04/09 19:27:44 fisyak Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.52  2001/04/09 19:27:44  fisyak
+// modification for new evr
+//
 // Revision 1.51  2001/02/28 18:25:42  caines
 // Update bit map for SVT
 //
@@ -247,6 +250,7 @@ Int_t StPrimaryMaker::Init(){
     evr_evrpar_st row;
     //
     memset(&row,0,sizeof(row));
+    if (m_Mode == 2) row.fitoption = 2; // For Y2K real data set evrpar.fitoption = 2
     row.vcut	 =          3; // distance below where track is marked as default primary ;
     row.cut2	 =          2; // select tracks for 2nd vertex fit ;
     row.cut3	 =        0.5; // select tracks for 3rd vertex fit ;
