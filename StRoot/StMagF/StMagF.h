@@ -5,7 +5,7 @@
 #include "TVector.h"
 
 #ifndef __CINT__
-#include "fortranc.h"
+#include "StarCallf77.h"
 #define agufld_ F77_NAME(agufld,AGUFLD)
 extern "C" {
 R__EXTERN  void type_of_call agufld_(Float_t *x, Float_t *b);
