@@ -18,19 +18,20 @@
 /// the next highest code.  Also increment g_nMessageTypes
 /// and add the address of the default stream to g_apMessageOstreams.
 static const unsigned int kHitMessage   = 1;
-static const unsigned int kTrackMessage = 2; 
+static const unsigned int kTrackMessage = 2;
 static const unsigned int kNodeMessage  = 4;
 static const unsigned int kDetectorMessage = 8;
 static const unsigned int kGeometryMessage = 16;
+static const unsigned int kSeedFinderMessage = 32;
 
 /// Number of message types
-static const int g_nMessageTypes = 5;
+static const int g_nMessageTypes = 6;
 /// Output streams corresponding to the message types
 static ostream *g_apMessageOstreams[g_nMessageTypes] = 
-{ &cout, &cout, &cout, &cout, &cout};
+{ &cout, &cout, &cout, &cout, &cout, &cout};
 /// Human readable names for message types
 static const char *g_apMessageNames[g_nMessageTypes] =
-{"Hit", "Track", "Node", "Detector", "Geometry"};
+{"Hit", "Track", "Node", "Detector", "Geometry", "SeedFinder"};
 
 /// Typedefs for containers
 typedef map<unsigned int, Messenger*> messengerMap;

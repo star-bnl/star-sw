@@ -24,6 +24,7 @@ using std::vector;
 class StiHitContainer;
 class Sti2HitComboFilter;
 class StiDetector;
+class ostream;
 
 class StiLocalTrackSeedFinder : public StiTrackSeedFinder
 {
@@ -38,15 +39,17 @@ public:
     virtual void reset();
 
     virtual void addLayer(StiDetector*);
+    virtual void print() const;
 
 protected:
-    bool increment();
+    void increment();
+    void initHitVec();
     
 protected:
     typedef vector<StiDetector*> DetVec;
     typedef vector<StiHit*> HitVec;
 
-    virtual StiKalmanTrack* makeTrack(const StiHit*);
+    virtual StiKalmanTrack* makeTrack(StiHit*);
     
     DetVec mDetVec;
     DetVec::iterator mCurrentDet;
@@ -59,6 +62,8 @@ private:
     StiLocalTrackSeedFinder();
     StiLocalTrackSeedFinder(const StiLocalTrackSeedFinder&);
     StiLocalTrackSeedFinder operator=(const StiLocalTrackSeedFinder&);
+
+    
 };
 
 //Non-members

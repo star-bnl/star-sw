@@ -15,6 +15,8 @@
 
 //Sti
 #include "StiHit.h"
+#include "StiPlacement.h"
+#include "StiDetector.h"
 #include "StiHitContainer.h"
 
 using std::sort;
@@ -158,6 +160,13 @@ const hitvector& StiHitContainer::hits(double refangle, double position)
 {
     mkey.refangle = refangle;
     mkey.position = position; 
+    return mmap[mkey];
+}
+
+hitvector& StiHitContainer::hits(const StiDetector* layer)
+{
+    mkey.refangle = layer->getPlacement()->getCenterRefAngle();
+    mkey.position = layer->getPlacement()->getCenterRadius();
     return mmap[mkey];
 }
 

@@ -100,7 +100,7 @@ protected:
     svg_config_st  svgConfig;
     svg_geom_st  *aSvgGeom;
     svg_shape_st *aSvgShape;
-
+    
     StTpcCoordinateTransform* tpcTransform;
 
     padrow_radius_map mpadrowradiusmap;
