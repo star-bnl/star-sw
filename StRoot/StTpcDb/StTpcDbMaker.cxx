@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.15 2000/05/31 19:50:16 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.16 2000/07/06 21:37:34 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.16  2000/07/06 21:37:34  hardtke
+ * speed up tpc_pad_to_x function
+ *
  * Revision 1.15  2000/05/31 19:50:16  hardtke
  * speed up tpc_time_to_z and tpc_z_to_time by factor of 5
  *
@@ -71,12 +74,12 @@ int type_of_call tpc_row_to_y_(float *row,float *y) {
   return 1;
 }
 int type_of_call tpc_pad_to_x_(float *pad,float *row, float* x) {
-  StTpcPadCoordinate raw(12,(int)*row,(int)floor(*pad),1); //sector 12, row row, pad pad, bucket 1
-  StTpcLocalSectorCoordinate localSector;
-  StTpcCoordinateTransform transform(gStTpcDb);
-  transform(raw,localSector);
-  float offset = fmod(*pad,floor(*pad));
-  *x = localSector.position().x() - offset*gStTpcDb->PadPlaneGeometry()->PadPitchAtRow((int)*row);
+  int irow = (int)(*row+0.5);
+  float pitch = gStTpcDb->PadPlaneGeometry()->PadPitchAtRow(irow);
+  float pad_int = floor(*pad+0.5);
+  float pad_half = gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(irow)/2.0;
+  float pad_diff = *pad - pad_int;
+  *x = -(pad_int-pad_half-0.5+pad_diff)*pitch;
   return 1;
 }
 int type_of_call tpc_x_to_pad_(float *row,float *x, float* pad) {
