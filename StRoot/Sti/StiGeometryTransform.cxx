@@ -513,3 +513,11 @@ StThreeVectorD StiGeometryTransform::operator() (const StThreeVectorD& globalPos
     return g2dEulerRotation(globalPosition, refAngle);
 }
 
+pair<double, double> StiGeometryTransform::angleAndPosition(
+    const StTpcHit *pHit) const{
+
+  double dRefAngle = phiForSector( pHit->sector(), 12 );
+  double dPosition = mpadrowradiusmap[pHit->padrow() + 100]; // 1-indexed
+
+  return pair<double, double>(dRefAngle, dPosition);
+} // angleAndPosition
