@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.159 2004/03/30 03:20:02 calderon Exp $
+// $Id: bfc.C,v 1.160 2004/04/07 19:00:56 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -47,11 +47,17 @@ StTpcT0Maker *t0mk = 0;
 void Load(){
   if (gClassTable->GetID("TTable") < 0) gSystem->Load("libTable");
   gSystem->Load("StarRoot");
+  TMemStat::PrintMem("load StarRoot");
   gSystem->Load("St_base");
+  TMemStat::PrintMem("load St_base");
   gSystem->Load("StChain");
+  TMemStat::PrintMem("load StChain");
   gSystem->Load("StUtilities");
+  TMemStat::PrintMem("load StUtilities");
   gSystem->Load("StBFChain");
+  TMemStat::PrintMem("load StBFChain");
   gSystem->Load("StChallenger");
+  TMemStat::PrintMem("load StChallenger");
 }
 //_____________________________________________________________________
 void bfc(const Int_t First,
@@ -93,7 +99,10 @@ void bfc(const Int_t First,
 #if 0
   // Insert your maker before "tpc_hits"
   Char_t *myMaker = "St_TLA_Maker";
-  if (gClassTable->GetID(myMaker) < 0) gSystem->Load(myMaker);
+  if (gClassTable->GetID(myMaker) < 0) {
+	  gSystem->Load(myMaker);
+          TString ts("load "; ts+=myMaker; TMemStat::PrintMem(ts.Data());
+  }
   StMaker *myMk = chain->GetMaker(myMaker);
   if (myMk) delete myMk;
   myMk = chain->New(myMaker,"before");
