@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsAnalogSignalGenerator.hh,v 1.1 1998/11/10 17:12:08 fisyak Exp $
+ * $Id: StTrsAnalogSignalGenerator.hh,v 1.2 1999/01/18 10:20:23 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsAnalogSignalGenerator.hh,v $
- * Revision 1.1  1998/11/10 17:12:08  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/18 10:20:23  lasiuk
+ * add tau
  *
  * Revision 1.3  1999/01/18 21:00:52  lasiuk
  * add fractionSampled(); reorder initialization
@@ -92,6 +92,7 @@ protected:
     vector<StTrsAnalogSignal> mDiscreteAnalogTimeSequence;    
     vector<StTrsAnalogSignal>::iterator mTimeSequenceIterator;
 #else
+    vector<StTrsAnalogSignal, allocator<StTrsAnalogSignal> > mDiscreteAnalogTimeSequence;    
     vector<StTrsAnalogSignal, allocator<StTrsAnalogSignal> >::iterator mTimeSequenceIterator;
 #endif
     // db parameters

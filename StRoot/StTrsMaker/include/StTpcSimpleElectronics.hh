@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcSimpleElectronics.hh,v 1.1 1998/11/10 17:12:07 fisyak Exp $
+ * $Id: StTpcSimpleElectronics.hh,v 1.2 1999/01/18 10:21:57 lasiuk Exp $
  *
  * Author: brian Nov 3, 1998
  *
@@ -11,8 +11,8 @@
  **********************************************************************
  *
  * $Log: StTpcSimpleElectronics.hh,v $
- * Revision 1.1  1998/11/10 17:12:07  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/18 10:21:57  lasiuk
+ * add tau
  *
  * Revision 1.3  1999/02/24 19:33:17  lasiuk
  * add tzero offset parameter
@@ -41,6 +41,7 @@ public:
     static StTpcElectronics* instance();
     static StTpcElectronics* instance(const char*);
 
+        // Analog Electronics
     double    nominalGain()                    const;
     double    channelGain(StTpcPadCoordinate&) const;
     double    samplingFrequency()              const;
@@ -62,17 +63,19 @@ private:
     StTpcSimpleElectronics();
     StTpcSimpleElectronics(const char*);
     
+private:
     static StTpcElectronics* mInstance;
     double mNominalGain;
     double mSamplingFrequency;
     double mTZero;
     double mShapingTime;
-double inline StTpcSimpleElectronics::nominalGain() const {return mNominalGain;}
-double inline StTpcSimpleElectronics::samplingFrequency() const {return mSamplingFrequency;}
-double inline StTpcSimpleElectronics::shapingTime() const {return mShapingTime;}
-double inline StTpcSimpleElectronics::adcConversion() const {return mAdcConversion;}
-double inline StTpcSimpleElectronics::adcConversionCharge() const {return mAdcConversionCharge;}
-int inline StTpcSimpleElectronics::averagePedestal() const {return mAveragePedestal;}
+    double mTau;
+    
+    double mAdcConversion;
+    double mAdcConversionCharge;
+    int mAveragePedestal;
+};
+inline double StTpcSimpleElectronics::samplingFrequency() const {return mSamplingFrequency;}
 inline double StTpcSimpleElectronics::shapingTime() const {return mShapingTime;}
 inline double StTpcSimpleElectronics::tZero() const {return mTZero;}
 inline double StTpcSimpleElectronics::tau() const {return mTau;}

@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcSimpleElectronics.cc,v 1.1 1998/11/10 17:12:22 fisyak Exp $
+ * $Id: StTpcSimpleElectronics.cc,v 1.2 1999/01/18 10:22:08 lasiuk Exp $
  *
  * Author: brian Nov 3, 1998
  *
@@ -11,8 +11,8 @@
  *****************************************************************
  *
  * $Log: StTpcSimpleElectronics.cc,v $
- * Revision 1.1  1998/11/10 17:12:22  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/18 10:22:08  lasiuk
+ * add tau
  *
  * Revision 1.4  1999/02/24 19:33:29  lasiuk
  * add tzero offset parameter
@@ -44,6 +44,7 @@
 StTpcElectronics* StTpcSimpleElectronics::mInstance = 0; // static data member
 
 StTpcSimpleElectronics::StTpcSimpleElectronics() { /* nopt */ }
+
 StTpcSimpleElectronics::StTpcSimpleElectronics(const char* file)
     StGetConfigValue(file,"nominalGain",mNominalGain);
     StGetConfigValue(file,"samplingFrequency",mSamplingFrequency);
@@ -54,7 +55,8 @@ StTpcSimpleElectronics::StTpcSimpleElectronics(const char* file)
     StGetConfigValue(file,"shapingTime",mShapingTime);
     StGetConfigValue(file,"tau",mTau);
 
-    mShapingTime         *=   nanosecond;
+#ifndef ST_NO_NAMESPACES
+    using namespace units;
 #endif
 
     mTau                 += nanosecond;
@@ -121,6 +123,7 @@ int StTpcSimpleElectronics::pedestal(StTpcPadCoordinate& coord) const
 
 void StTpcSimpleElectronics::print(ostream& os) const
 {
+#ifndef ST_NO_NAMESPACES
     using namespace units;
 #endif
     os << "Simple Electronics Data Base Parameters"                         << endl;
