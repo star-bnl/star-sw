@@ -1,9 +1,0 @@
-
-
-*	msg.ex1  --  msg example #1
-
-*	Application-specified values:
-*	<Subroutine Name>     CHARACTER*(*)
-
-	Here's the simplest message call (eg, for an error);  "-1" means no fast-reference ID:
-	CALL Message( '<Subroutine Name>-E1  This is a pedagogical error message', 1, -1 )
