@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.34 2001/07/19 00:05:28 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.35 2001/09/12 23:49:22 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.35  2001/09/12 23:49:22  ullrich
+ * Removed code to build StRun and StRunSummary.
+ *
  * Revision 2.34  2001/07/19 00:05:28  ullrich
  * New StL0Trigger needs additional table in constructor.
  *
@@ -155,7 +158,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.34 2001/07/19 00:05:28 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.35 2001/09/12 23:49:22 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -164,14 +167,12 @@ StEventMaker::StEventMaker(const char *name, const char *title) : StMaker(name)
     if(title) SetTitle(title);
     mEventManager = new StRootEventManager();
     mEventManager->setMaker(this);
-    mCurrentRun = 0;
     mCurrentEvent = 0;
     doLoadTpcHits     = kTRUE;
     doLoadFtpcHits    = kTRUE;
     doLoadSvtHits     = kTRUE;
     doLoadSsdHits     = kTRUE;
     doLoadTptTracks   = kFALSE;
-    doPrintRunInfo    = kFALSE;
     doPrintEventInfo  = kFALSE;
     doPrintMemoryInfo = kTRUE;
     doPrintCpuInfo    = kTRUE;
@@ -196,9 +197,6 @@ StEventMaker::eventManager() {return mEventManager;};
 StEvent*
 StEventMaker::event() { return mCurrentEvent;};
 
-StRun*
-StEventMaker::run() {return mCurrentRun;};
-
 void
 StEventMaker::setEventManager(StEventManager* mgr)
 {
@@ -217,7 +215,6 @@ StEventMaker::Make()
     //
     // In this method we actually do not create anything but call
     // other methods which do that for us:
-    // makeRun()      creates StRun and all its dependent classes
     // makeEvent()    creates StEvent and all its dependent classes
     //
     // Since this Maker should also work without any 'dst' dataset
@@ -234,14 +231,10 @@ StEventMaker::Make()
     //
     //  The current event is deleted automatically before every
     //  new event. It is added by using AddData().
-    //  The current run is kept until a new one is created. It
-    //  is stored in the .runcontrol area using AddRunCont().
-    //  We do not need to delete any one of them ourself.
+    //  We do not need to delete it ourself.
     //
     //  If no DST dataset is available we cannot setup StEvent
     //  properly. Nevertheless we will create an empty instance.
-    //  Note that in this case also no instance of StRun can
-    //  get instantiated.
     //
     int status = mEventManager->openEvent("dst");
     if (status == oocError) {
@@ -250,18 +243,6 @@ StEventMaker::Make()
     }
     else
 	mCreateEmptyInstance = kFALSE;
-
-    //
-    //  Setup run header and summary (StRun/StRunSummary)
-    //  and get new run constants.
-    //
-    if (!mCreateEmptyInstance && isNewRun()) {
-        status = makeRun();
-        if (status == kStOK)
-            AddRunCont(mCurrentRun);
-        else
-            gMessMgr->Warning() << "StEventMaker::Make(): no StRun object created." << endm;
-    }
     
     //
     //  Setup the event (StEvent and all subclasses)
@@ -278,7 +259,6 @@ StEventMaker::Make()
     //  Print out some timing, memory usage and StEvent
     //  info if requested
     //
-    if (doPrintRunInfo)   printRunInfo();
     if (doPrintEventInfo) printEventInfo();
     if (doPrintMemoryInfo) {
         StMemoryInfo::instance()->snapshot();
@@ -291,56 +271,6 @@ StEventMaker::Make()
     }
 
     return status;
-}
-
-Bool_t
-StEventMaker::isNewRun()
-{
-    //
-    //  Checks if we reached a new run by comparing the run header table
-    //  with the parameters of the current StRun instance.
-    //
-    if (!mCurrentRun) return kTRUE;
-
-    long nrows;
-    run_header_st* dstRunHeader = mEventManager->returnTable_run_header(nrows);
-    if (dstRunHeader) {
-        if (dstRunHeader->bfc_run_id == mCurrentRun->bfcId() &&
-            dstRunHeader->exp_run_id == mCurrentRun->id())
-            return kFALSE;
-        else
-            return kTRUE;
-    }
-    else
-        return kFALSE;   // nothing we can do anyhow
-}
-
-Int_t
-StEventMaker::makeRun()
-{
-    //
-    //  To setup the StRun/StRunSummary object properly we have to pass
-    //  the run_header_st and dst_run_summary_st tables to StRun.
-    //  StRunSummary is automatically setup through StRun.
-    //  If run_header_st doesn't exist we stop, if dst_run_summary_st
-    //  doesn't exist we continue since StRun can handle this case.
-    //
-    long nrows;
-    
-    run_header_st* dstRunHeader = mEventManager->returnTable_run_header(nrows);
-    if (!dstRunHeader) {
-        mCurrentRun = 0;
-        return kStWarn;
-    }
-
-    dst_run_summary_st* dstRunSummary = mEventManager->returnTable_dst_run_summary(nrows);
-
-    if (dstRunSummary)
-        mCurrentRun = new StRun(*dstRunHeader, *dstRunSummary);
-    else
-        mCurrentRun = new StRun(*dstRunHeader);
-
-    return kStOK;
 }
 
 StEvent*
@@ -922,28 +852,6 @@ StEventMaker::makeEvent()
     }
     
     return kStOK;
-}
-
-void
-StEventMaker::printRunInfo()
-{
-    cout << "*********************************************************" << endl;
-    cout << "*                  StRun Information                    *" << endl;
-    cout << "*********************************************************" << endl;
-
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StRun at " << (void*) mCurrentRun                          << endl;
-    cout << "---------------------------------------------------------" << endl;
-    if (mCurrentRun)
-        mCurrentRun->Dump();
-    
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StRunSummary at "
-         << (mCurrentRun ? (void*) (mCurrentRun->summary()) : 0)        << endl;
-    cout << "---------------------------------------------------------" << endl;
-    if (mCurrentRun && mCurrentRun->summary()) mCurrentRun->summary()->Dump();
-
-    cout << endl;
 }
 
 void
