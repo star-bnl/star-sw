@@ -1,5 +1,10 @@
-// $Id: StLaserEventMaker.cxx,v 1.33 2004/03/19 23:13:46 pfachini Exp $
+// $Id: StLaserEventMaker.cxx,v 1.34 2005/02/03 16:17:28 jecc Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.34  2005/02/03 16:17:28  jecc
+// Correct for laser travel time from first to last mirror.
+// Select narrow range around laser z peak position to determine <z>.
+// Fix very old typo in histos names! Problematic only if reading laserhist.root file.
+//
 // Revision 1.33  2004/03/19 23:13:46  pfachini
 // Defining event(0) in the constructor.
 //
@@ -184,10 +189,10 @@ Int_t StLaserEventMaker::InitRun(int RunId){
   //  Create histograms
   cout << "Making Histograms" << endl;
   fzLaser = new TH1F("fzLaser","fzLaser",100,-200,200);
-  fzlWestHigh = new TH1F("fzlEastHigh","fzlEastHigh",100,165,190);
-  fzlWestLow = new TH1F("fzlEastLow","fzlEastLow",100,15,40);
-  fzlEastHigh = new TH1F("fzlWestHigh","fzlWestHigh",100,-190,-165);
-  fzlEastLow = new TH1F("fzlWestLow","fzlWestLow",100,-40,-15);
+  fzlWestHigh = new TH1F("fzlWestHigh","fzlWestHigh",100,165,190);
+  fzlWestLow = new TH1F("fzlWestLow","fzlWestLow",100,15,40);
+  fzlEastHigh = new TH1F("fzlEastHigh","fzlEastHigh",100,-190,-165);
+  fzlEastLow = new TH1F("fzlEastLow","fzlEastLow",100,-40,-15);
   numberTracks = new TH1F("numberTracks","numberTracks",100,5,2005);
   numberEvents = new TH1F("numberEvents","numberEvents",2,0,2);
   driftVelocityRec = new TH1F("driftVelocityRec","driftVelocityRec",100,5000000,6000000);
@@ -772,6 +777,11 @@ Int_t StLaserEventMaker::Finish() {
       if (nTracks() >= minValidTracks/2.) {
 	velocityWest = 147.164*driftVelocityReco/fabs(fzlAverageWestHigh()-fzlAverageWestLow());
 	velocityEast = velocityWest;
+	//Now correcting for laser velocity 
+	//v=d/t = d/(d_u/v_u - d/v_l) = v_o*(1/(1-v_o/v_l))
+	//d=d_real; d_u=d_used; v_u=v_used; v_l=v_laser; v_o=d*v_u/d_u
+	velocityEast = velocityEast*(1./(1.-velocityEast/29979245800.));
+	velocityWest = velocityWest*(1./(1.-velocityWest/29979245800.));
 	//Now correcting for the clock...
 	velocityEast = velocityEast*clock/clockNominal;
 	velocityWest = velocityWest*clock/clockNominal;
@@ -792,6 +802,11 @@ Int_t StLaserEventMaker::Finish() {
 	if (nTracks() >= minValidTracks/2.) {
 	  velocityEast = 147.199*driftVelocityReco/fabs(fzlAverageEastHigh()-fzlAverageEastLow());
 	  velocityWest = velocityEast;
+	  //Now correcting for laser velocity 
+	  //v=d/t = d/(d_u/v_u - d/v_l) = v_o*(1/(1-v_o/v_l))
+	  //d=d_real; d_u=d_used; v_u=v_used; v_l=v_laser; v_o=d*v_u/d_u
+	  velocityEast = velocityEast*(1./(1.-velocityEast/29979245800.));
+	  velocityWest = velocityWest*(1./(1.-velocityWest/29979245800.));
 	  //Now correcting for the clock...
 	  velocityEast = velocityEast*clock/clockNominal;
 	  velocityWest = velocityWest*clock/clockNominal;
@@ -810,6 +825,11 @@ Int_t StLaserEventMaker::Finish() {
 	if (nTracks() >= minValidTracks) {
 	  velocityEast = 147.199*driftVelocityReco/fabs(fzlAverageEastHigh()-fzlAverageEastLow());
 	  velocityWest = 147.164*driftVelocityReco/fabs(fzlAverageWestHigh()-fzlAverageWestLow());
+	  //Now correcting for laser velocity 
+	  //v=d/t = d/(d_u/v_u - d/v_l) = v_o*(1/(1-v_o/v_l))
+	  //d=d_real; d_u=d_used; v_u=v_used; v_l=v_laser; v_o=d*v_u/d_u
+	  velocityEast = velocityEast*(1./(1.-velocityEast/29979245800.));
+	  velocityWest = velocityWest*(1./(1.-velocityWest/29979245800.));
 	  //Now correcting for the clock...
 	  velocityEast = velocityEast*clock/clockNominal;
 	  velocityWest = velocityWest*clock/clockNominal;
@@ -839,7 +859,7 @@ Int_t StLaserEventMaker::Finish() {
 /// Print CVS commit information
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.33 2004/03/19 23:13:46 pfachini Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.34 2005/02/03 16:17:28 jecc Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -884,10 +904,46 @@ void StLaserEventMaker::WriteHistFile(){
 }
 
 
-double StLaserEventMaker::fzlAverageEastHigh(){double mean = fzlEastHigh->GetMean();return mean;};
-double StLaserEventMaker::fzlAverageEastLow(){double mean = fzlEastLow->GetMean();return mean;};
-double StLaserEventMaker::fzlAverageWestHigh(){double mean = fzlWestHigh->GetMean();return mean;};
-double StLaserEventMaker::fzlAverageWestLow(){double mean = fzlWestLow->GetMean();return mean;};
+double StLaserEventMaker::fzlAverageEastHigh(){
+  int nBins = fzlEastHigh->GetNbinsX();
+  int binMax = fzlEastHigh->GetMaximumBin();
+  int minBin = TMath::Max(1,binMax-20);
+  int maxBin = TMath::Min(nBins,binMax+20);
+  fzlEastHigh->GetXaxis()->SetRange(minBin,maxBin);
+  double mean = fzlEastHigh->GetMean();
+  fzlEastHigh->GetXaxis()->SetRange(1,nBins);
+  return mean;
+};
+double StLaserEventMaker::fzlAverageEastLow(){
+  int nBins = fzlEastLow->GetNbinsX();
+  int binMax = fzlEastLow->GetMaximumBin();
+  int minBin = TMath::Max(1,binMax-20);
+  int maxBin = TMath::Min(nBins,binMax+20);
+  fzlEastLow->GetXaxis()->SetRange(minBin,maxBin);
+  double mean = fzlEastLow->GetMean();
+  fzlEastLow->GetXaxis()->SetRange(1,nBins);
+  return mean;
+};
+double StLaserEventMaker::fzlAverageWestHigh(){
+  int nBins = fzlWestHigh->GetNbinsX();
+  int binMax = fzlWestHigh->GetMaximumBin();
+  int minBin = TMath::Max(1,binMax-20);
+  int maxBin = TMath::Min(nBins,binMax+20);
+  fzlWestHigh->GetXaxis()->SetRange(minBin,maxBin);
+  double mean = fzlWestHigh->GetMean();
+  fzlWestHigh->GetXaxis()->SetRange(1,nBins);
+  return mean;
+};
+double StLaserEventMaker::fzlAverageWestLow(){
+  int nBins = fzlWestLow->GetNbinsX();
+  int binMax = fzlWestLow->GetMaximumBin();
+  int minBin = TMath::Max(1,binMax-20);
+  int maxBin = TMath::Min(nBins,binMax+20);
+  fzlWestLow->GetXaxis()->SetRange(minBin,maxBin);
+  double mean = fzlWestLow->GetMean();
+  fzlWestLow->GetXaxis()->SetRange(1,nBins);
+  return mean;
+}
 double StLaserEventMaker::nTracks(){double mean = numberTracks->GetMean();return mean;};
 double StLaserEventMaker::fzlIntegralEastHigh(){double integral = fzlEastHigh->Integral();return integral;};
 double StLaserEventMaker::fzlIntegralEastLow(){double integral = fzlEastLow->Integral();return integral;};
