@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.25 2000/08/31 22:32:37 laue Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.26 2000/10/17 17:25:23 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.26  2000/10/17 17:25:23  laue
+ * Added the dE/dx information for v0s
+ *
  * Revision 1.25  2000/08/31 22:32:37  laue
  * Readers updated for new StHbtEvent version 3.
  *
@@ -208,8 +211,16 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   // get StEvent //
   /////////////////
   StEvent* rEvent = 0;
-  StEventMaker* tempMaker = (StEventMaker*) mTheEventMaker;
-  rEvent = tempMaker->event();
+
+  if (mTheEventMaker) {  // an event maker was specified in the macro
+    StEventMaker* tempMaker = (StEventMaker*) mTheEventMaker;
+    rEvent = tempMaker->event();
+  }
+  else { // no event maker was specified, we assume that an event.root file was read 
+    cout << " read from event.root file " << endl;
+    rEvent = (StEvent *) GetInputDS("StEvent");
+    cout << " read from event.root file " << endl;
+  }
   if (!rEvent){
     cout << " StStandardHbtEventReader::ReturnHbtEvent() - No StEvent!!! " << endl;
     return 0;
@@ -299,6 +310,8 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   hbtEvent->SetUncorrectedNumberOfPositivePrimaries(0);
   hbtEvent->SetUncorrectedNumberOfNegativePrimaries(uncorrectedNumberOfNegativePrimaries(*rEvent));
   hbtEvent->SetEventNumber(mTheTagReader->tag("mEventNumber"));    
+
+  // reaction plane from tags 
   StHbtThreeVector a( mTheTagReader->tag("qxa",1), mTheTagReader->tag("qya",1),0);
   StHbtThreeVector b( mTheTagReader->tag("qxb",1), mTheTagReader->tag("qyb",1),0);
   float reactionPlane = (a+b).phi();
@@ -561,6 +574,9 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     hbtV0->SetptotPos(v0FromMuDst->ptotPos());
     hbtV0->SetptNeg(v0FromMuDst->ptNeg());
     hbtV0->SetptotNeg(v0FromMuDst->ptotNeg());
+    hbtV0->SetdedxPos(v0FromMuDst->dedxPos());
+    hbtV0->SetdedxNeg(v0FromMuDst->dedxNeg());
+
     
     // By now, all track-wise information has been extracted and stored in hbtTrack
     // see if it passes any front-loaded event cut
