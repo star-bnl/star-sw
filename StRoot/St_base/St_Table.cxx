@@ -1,5 +1,5 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
-// $Id: St_Table.cxx,v 1.86 1999/10/22 22:53:17 fine Exp $ 
+// $Id: St_Table.cxx,v 1.87 1999/10/28 00:32:54 fine Exp $ 
 // 
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
@@ -131,6 +131,7 @@ St_tableDescriptor *St_Table::GetTableDescriptors() const {
     return new St_tableDescriptor(this);
 }
 
+#if 0
 //______________________________________________________________________________
 const void *St_Table::At(Int_t i) const
 {
@@ -138,7 +139,7 @@ const void *St_Table::At(Int_t i) const
       i = 0;
    return (const void *)(s_Table+i*(*s_Size));
 }
-
+#endif 
 //______________________________________________________________________________
 TH1  *St_Table::Draw(TCut varexp, TCut selection, Option_t *option, Int_t nentries, Int_t firstentry)
 {
@@ -2643,6 +2644,9 @@ St_Table::EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {
 
 
 // $Log: St_Table.cxx,v $
+// Revision 1.87  1999/10/28 00:32:54  fine
+// method At() has been removed
+//
 // Revision 1.86  1999/10/22 22:53:17  fine
 // TGaxis include added
 //
