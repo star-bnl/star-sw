@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.h,v 1.6 1999/01/02 19:08:22 fisyak Exp $
+// $Id: St_stk_Maker.h,v 1.7 1999/02/16 21:17:54 caines Exp $
 // $Log: St_stk_Maker.h,v $
+// Revision 1.7  1999/02/16 21:17:54  caines
+// Added QA histograms
+//
 // Revision 1.6  1999/01/02 19:08:22  fisyak
 // Add ctf
 //
@@ -43,11 +46,13 @@ class St_stk_filler;
 class St_svg_config;
 class St_svg_geom;
 class St_spr_sprpar;
+class TH1F;
+class TH2F;
 
 class St_stk_Maker : public StMaker {
  private:
                Bool_t drawinit;
-// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.6 1999/01/02 19:08:22 fisyak Exp $";
+// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.7 1999/02/16 21:17:54 caines Exp $";
                Int_t  m_mode;      // mode 1 = primaries;
 	                           // mode 2 = secondaries;
 	                           // mode 3 = primaries to secondaries 
@@ -92,7 +97,14 @@ class St_stk_Maker : public StMaker {
                St_svg_config     *m_config; //!
                St_svg_geom       *m_geom;//!
                St_spr_sprpar     *m_sprpar; //!
+	       void   MakeHistograms(); // Tracking histograms
  protected:
+	       TH1F *m_q_pt; //!number of hits assigned to a reconstructed track
+	       TH1F *m_frac_used;   //!Frac. of hits used
+               TH1F *m_azimuth;       //!azimuthal angle
+               TH1F *m_tan_dip;       //!tangent of the dip angle
+	       TH2F *m_dedx;       //! dedx plot
+	       TH2F *m_gededx;  //! geant dedx plot
  public: 
                   St_stk_Maker(const char *name="svt_tracks", const char *title="event/data/svt/tracks");
    virtual       ~St_stk_Maker();
@@ -126,3 +138,9 @@ class St_stk_Maker : public StMaker {
 };
 
 #endif
+
+
+
+
+
+
