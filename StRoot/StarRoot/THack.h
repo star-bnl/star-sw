@@ -16,7 +16,7 @@ class THack
 public:
 static void DeleteClonesArray(TClonesArray *clone);
 static void ClearClonesArray(TClonesArray *clone);
-static void PadRefresh(TPad *pad,int flag);
+static void PadRefresh(TPad *pad,int flag=0);
 static void HistRelease(TDirectory *dir);
 };
 #endif //ROOT_THack
