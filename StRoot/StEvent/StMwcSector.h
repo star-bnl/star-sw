@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMwcSector.h,v 1.4 1999/04/28 22:27:34 fisyak Exp $
+ * $Id: StMwcSector.h,v 1.5 1999/04/30 13:16:28 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StMwcSector.h,v $
- * Revision 1.4  1999/04/28 22:27:34  fisyak
- * New version with pointer instead referencies
+ * Revision 1.5  1999/04/30 13:16:28  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.5  1999/04/30 13:16:28  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.4  1999/04/28 22:27:34  fisyak
  * New version with pointer instead referencies
@@ -20,8 +23,9 @@
  * version with constructors for table-based loading
  *
  **************************************************************************/
+#ifndef StMwcSector_hh
 #define StMwcSector_hh
-class StMwcSector : public TObject {
+
 #include "StObject.h"
 #include "StArray.h"
 class StMwcSector : public StObject {

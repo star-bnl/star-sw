@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPid.cxx,v 1.1 1999/04/28 22:27:36 fisyak Exp $
+ * $Id: StTpcDedxPid.cxx,v 1.2 1999/04/30 13:16:29 fisyak Exp $
  *
  * Author: Craig Ogilvie, April 1999
  ***************************************************************************
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPid.cxx,v $
- * Revision 1.1  1999/04/28 22:27:36  fisyak
- * New version with pointer instead referencies
+ * Revision 1.2  1999/04/30 13:16:29  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.2  1999/04/30 13:16:29  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.1  1999/04/28 22:27:36  fisyak
  * New version with pointer instead referencies
@@ -27,7 +30,7 @@
 Double_t StTpcDedxPid::mTpcDedxOffset = -3.75785 ;
 Double_t StTpcDedxPid::mTpcDedxRise = 29.706 ;
 Double_t StTpcDedxPid::mTpcDedxTcut = 1.50536 ;
-StTpcDedxPid::StTpcDedxPid(const StGlobalTrack* t) : StDedxPid(t) { /* noop */ }
+
 ClassImp(StTpcDedxPid)
 
 StTpcDedxPid::StTpcDedxPid(StGlobalTrack* t) : StDedxPid(t) { /* noop */ }

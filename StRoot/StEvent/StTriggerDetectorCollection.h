@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.h,v 1.4 1999/04/28 22:27:39 fisyak Exp $
+ * $Id: StTriggerDetectorCollection.h,v 1.5 1999/04/30 13:16:30 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTriggerDetectorCollection.h,v $
- * Revision 1.4  1999/04/28 22:27:39  fisyak
- * New version with pointer instead referencies
+ * Revision 1.5  1999/04/30 13:16:30  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.5  1999/04/30 13:16:30  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.4  1999/04/28 22:27:39  fisyak
  * New version with pointer instead referencies
@@ -19,7 +22,7 @@
  * Revision 1.2  1999/01/15 22:54:14  wenaus
  * version with constructors for table-based loading
  *
-#include "TObject.h"
+ **************************************************************************/
 #ifndef StTriggerDetectorCollection_hh
 #define StTriggerDetectorCollection_hh
 #include "StObject.h"
@@ -31,7 +34,7 @@
 #include "StCtbCounter.h"
 #include "StCtbCounter.h"
 #include "StMwcSector.h"
-class StTriggerDetectorCollection : public TObject {
+#include "StVpdCounter.h"
 #include "StZdcSegment.h"
 
 class StTriggerDetectorCollection : public StObject {

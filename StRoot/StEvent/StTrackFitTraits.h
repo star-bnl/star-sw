@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 1.4 1999/04/28 22:27:37 fisyak Exp $
+ * $Id: StTrackFitTraits.h,v 1.5 1999/04/30 13:16:29 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
- * Revision 1.4  1999/04/28 22:27:37  fisyak
- * New version with pointer instead referencies
+ * Revision 1.5  1999/04/30 13:16:29  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.5  1999/04/30 13:16:29  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.4  1999/04/28 22:27:37  fisyak
  * New version with pointer instead referencies
@@ -25,11 +28,11 @@
  * Revision 1.2  1999/01/15 22:54:07  wenaus
  * version with constructors for table-based loading
  *
-#include "TObject.h"
+ * Revision 2.1  1999/10/28 22:27:35  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
 #include "tables/dst_track.h"
  * Revision 2.0  1999/10/12 18:43:02  ullrich
-class StTrackFitTraits : public TObject {
+ *
 #include "dst_track.h"
 #include "StObject.h"
 #include "StEnumerations.h"

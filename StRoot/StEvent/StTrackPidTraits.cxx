@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackPidTraits.cxx,v 1.1 1999/04/28 22:27:37 fisyak Exp $
+ * $Id: StTrackPidTraits.cxx,v 1.2 1999/04/30 13:16:30 fisyak Exp $
  *
  * Author: Thomas Ullrich, April 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrackPidTraits.cxx,v $
- * Revision 1.1  1999/04/28 22:27:37  fisyak
- * New version with pointer instead referencies
+ * Revision 1.2  1999/04/30 13:16:30  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.2  1999/04/30 13:16:30  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.1  1999/04/28 22:27:37  fisyak
  * New version with pointer instead referencies
@@ -23,7 +26,7 @@
  *
 #include "StGlobalTrack.h"
 #include "StTpcDedxPid.h"
-StTrackPidTraits::StTrackPidTraits(const StGlobalTrack* track)
+ * Revision 2.2  1999/11/15 18:48:25  ullrich
 #include "tables/dst_dedx.h"
  *
 StTrackPidTraits::StTrackPidTraits(StGlobalTrack* track)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRun.cxx,v 1.4 1999/04/28 22:27:34 fisyak Exp $
+ * $Id: StRun.cxx,v 1.5 1999/04/30 13:16:28 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StRun.cxx,v $
- * Revision 1.4  1999/04/28 22:27:34  fisyak
- * New version with pointer instead referencies
+ * Revision 1.5  1999/04/30 13:16:28  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.5  1999/04/30 13:16:28  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.4  1999/04/28 22:27:34  fisyak
  * New version with pointer instead referencies
@@ -31,11 +34,12 @@
  * Revision 1.2  1999/01/15 22:53:49  wenaus
  * version with constructors for table-based loading
  *
-static const Char_t rcsid[] = "$Id: StRun.cxx,v 1.4 1999/04/28 22:27:34 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StRun.cxx,v 1.5 1999/04/30 13:16:28 fisyak Exp $";
  **************************************************************************/
 #include "tables/run_header.h"
-static const Char_t rcsid[] = "$Id: StRun.cxx,v 1.4 1999/04/28 22:27:34 fisyak Exp $";
-StRun::StRun()
+static const Char_t rcsid[] = "$Id: StRun.cxx,v 1.5 1999/04/30 13:16:28 fisyak Exp $";
+
+St_DataSet("Run")
   StRun::StRun():
 St_DataSet("Run"),
 mCVSTag("$Name:  $")
@@ -48,7 +52,8 @@ ClassImp(StRun)
     mTriggerMask = 0;
     mCenterOfMassEnergy = 0;
     mEastA = 0;
-StRun::StRun(dst_run_header_st& runHdr, dst_run_summary_st& runSum)
+    mEastZ = 0;
+St_DataSet("Run")
 StRun::StRun(dst_run_header_st& runHdr, dst_run_summary_st& runSum):
 St_DataSet("Run"),
 mCVSTag("$Name:  $")

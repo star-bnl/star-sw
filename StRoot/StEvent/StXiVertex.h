@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.h,v 1.2 1999/04/28 22:27:41 fisyak Exp $
+ * $Id: StXiVertex.h,v 1.3 1999/04/30 13:16:31 fisyak Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  *
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.h,v $
- * Revision 1.2  1999/04/28 22:27:41  fisyak
- * New version with pointer instead referencies
+ * Revision 1.3  1999/04/30 13:16:31  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.3  1999/04/30 13:16:31  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.2  1999/04/28 22:27:41  fisyak
  * New version with pointer instead referencies
@@ -42,7 +45,7 @@
  * Add new StXiVertex
  *
  *
-#include "TObject.h"
+ * Revision 2.1  1999/10/28 22:28:18  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
 #include "StObject.h"

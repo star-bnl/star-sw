@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVpdCounter.h,v 1.4 1999/04/28 22:27:40 fisyak Exp $
+ * $Id: StVpdCounter.h,v 1.5 1999/04/30 13:16:31 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StVpdCounter.h,v $
- * Revision 1.4  1999/04/28 22:27:40  fisyak
- * New version with pointer instead referencies
+ * Revision 1.5  1999/04/30 13:16:31  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.5  1999/04/30 13:16:31  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.4  1999/04/28 22:27:40  fisyak
  * New version with pointer instead referencies
@@ -20,8 +23,9 @@
  * version with constructors for table-based loading
  *
  **************************************************************************/
+#ifndef StVpdCounter_hh
 #define StVpdCounter_hh
-class StVpdCounter : public TObject {
+
 #include "StObject.h"
 #include "StArray.h"
 class StVpdCounter : public StObject {

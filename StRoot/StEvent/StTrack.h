@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.h,v 1.4 1999/04/28 22:27:37 fisyak Exp $
+ * $Id: StTrack.h,v 1.5 1999/04/30 13:16:29 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
- * Revision 1.4  1999/04/28 22:27:37  fisyak
- * New version with pointer instead referencies
+ * Revision 1.5  1999/04/30 13:16:29  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.5  1999/04/30 13:16:29  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.4  1999/04/28 22:27:37  fisyak
  * New version with pointer instead referencies
@@ -40,13 +43,13 @@
  * Revision 1.2  1999/01/15 22:54:02  wenaus
  * version with constructors for table-based loading
  *
-#include "TObject.h"
+ * Revision 2.6  1999/11/29 17:32:45  ullrich
  * Added non-const method pidTraits().
 #define StTrack_hh 
 #include "tables/dst_track.h"
 #include "StPhysicalHelixD.hh"
  *
-class StTrack : public TObject {
+#include "dst_track.h"
  * Revision 2.2  1999/11/01 12:45:06  ullrich
  *
  * Revision 2.0  1999/10/12 18:42:56  ullrich

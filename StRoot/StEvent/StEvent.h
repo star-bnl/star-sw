@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 1.4 1999/04/28 22:27:32 fisyak Exp $
+ * $Id: StEvent.h,v 1.5 1999/04/30 13:16:28 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 1.4  1999/04/28 22:27:32  fisyak
- * New version with pointer instead referencies
+ * Revision 1.5  1999/04/30 13:16:28  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.5  1999/04/30 13:16:28  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.4  1999/04/28 22:27:32  fisyak
  * New version with pointer instead referencies
@@ -84,7 +87,7 @@ class StVecPtrSmdPhiHit;
 class StVecPtrSvtHit;
 class StVecPtrTpcHit;
 class StVecPtrVertex;
-#include "TObject.h"
+class StVecPtrVpdCounter;
 class StVecPtrZdcSegment;
  * Those methods which returns references were modified to create
  * an empty collection in case the pointer is null.
@@ -118,13 +121,16 @@ class StVecPtrZdcSegment;
 
 struct pairL
 using namespace std;
-    long first;
-    long second;
-    pairL(long, long);
+    Long_t first;
+    Long_t second;
+    pairL(Long_t, Long_t);
     pairL();
+  //ClassDef(pairL,1)
   Long_t first;
+inline pairL::pairL(Long_t a, Long_t b) : first(a), second(b) {}
+inline pairL::pairL() : first(0), second(0) {}
   Long_t second;
-class StEvent : public TObject {
+  pairL(Long_t a=0, Long_t b=0): first(a), second(b) {};
 };
  *
  * Revision 2.2  1999/11/04 13:30:42  ullrich
@@ -134,6 +140,7 @@ class StEvent : public TObject {
  **************************************************************************/
 #include "StTrackDetectorInfo.h"
     Int_t operator==(const StEvent &right) const;
+    Int_t operator!=(const StEvent &right) const;
     virtual const TString&   type() const;
     virtual pairL            id() const;
     virtual Long_t           time()        const {return GetTime();};
@@ -149,7 +156,7 @@ class StEvent : public TObject {
     virtual StRun*                       run();
     virtual StVertex*                    primaryVertex();
     virtual StDstEventSummary*           summary();
-    virtual StGlobalTrackCollection*           trackCollection();
+    virtual StGlobalTrackCollection*     trackCollection();
     virtual StTpcHitCollection*          tpcHitCollection();
     virtual StSvtHitCollection*          svtHitCollection();
     virtual StFtpcHitCollection*         ftpcHitCollection();
@@ -160,7 +167,8 @@ class StEvent : public TObject {
     virtual StVertexCollection*          vertexCollection();
     virtual StTriggerDetectorCollection* triggerDetectorCollection();
     virtual StL0Trigger*                 l0Trigger();                        
-    virtual Float_t                        beamPolarization(StBeamDirection, StBeamPolarizationAxis);
+    virtual Float_t                      beamPolarization(StBeamDirection, 
+							  StBeamPolarizationAxis);
 
     virtual void setType(const Char_t*);
     virtual void setId(const pairL&);
@@ -189,7 +197,7 @@ class StEvent : public TObject {
     virtual void setTriggerDetectorCollection(StTriggerDetectorCollection*);      
     virtual void setL0Trigger(StL0Trigger*);                      
     virtual void setBeamPolarization(StBeamDirection, StBeamPolarizationAxis, Float_t); // *MENU*
-    pairL                        mId;                      
+    pairL                        mId;       //!                      
     
     
     pairL                        mId;        //!
@@ -209,8 +217,8 @@ class StEvent : public TObject {
     StEmcTowerHitCollection*     mEmcTowerHits;
     StEmcPreShowerHitCollection* mEmcPreShowerHits;
     StTriggerDetectorCollection* mTriggerDetectors;
-    Float_t                        mBeamPolarizationEast[3];
-    Float_t                        mBeamPolarizationWest[3];
+    StGlobalTrackCollection*     mTracks;
+    StVertexCollection*          mVertices;
     StL0Trigger*                 mL0Trigger;                
     Float_t                      mBeamPolarizationEast[3];
     Float_t                      mBeamPolarizationWest[3];

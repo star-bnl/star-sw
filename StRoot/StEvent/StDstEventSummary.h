@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDstEventSummary.h,v 1.4 1999/04/28 22:27:30 fisyak Exp $
+ * $Id: StDstEventSummary.h,v 1.5 1999/04/30 13:16:27 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDstEventSummary.h,v $
- * Revision 1.4  1999/04/28 22:27:30  fisyak
- * New version with pointer instead referencies
+ * Revision 1.5  1999/04/30 13:16:27  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.5  1999/04/30 13:16:27  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.4  1999/04/28 22:27:30  fisyak
  * New version with pointer instead referencies
@@ -20,10 +23,10 @@
  * version with constructors for table-based loading
  *
  **************************************************************************/
-#include "TObject.h"
+#ifndef StDstEventSummary_hh
 #define StDstEventSummary_hh
 
-class StDstEventSummary : public TObject {
+#include "StObject.h"
 #include "StTHDefs.h"
 
 class StDstEventSummary : public StObject {

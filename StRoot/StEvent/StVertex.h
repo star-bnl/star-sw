@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.h,v 1.4 1999/04/28 22:27:39 fisyak Exp $
+ * $Id: StVertex.h,v 1.5 1999/04/30 13:16:31 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -15,8 +15,11 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
- * Revision 1.4  1999/04/28 22:27:39  fisyak
- * New version with pointer instead referencies
+ * Revision 1.5  1999/04/30 13:16:31  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.6  1999/06/24 17:33:01  fisyak
+ * Replace Collection by value to Collection by pointer for TBrowser
  *
  * Revision 1.5  1999/04/30 13:16:31  fisyak
  * add StArray for StRootEvent
@@ -45,7 +48,7 @@
  * Revision 2.4  2000/02/10 18:49:08  ullrich
  * Fixed typo introduced at last check-in.
  *
-class StVertex : public TObject {
+ * Revision 2.2  2000/01/11 19:22:14  ullrich
     StVecPtrGlobalTrack   *mDaughters;
     StGlobalTrack         *mParent;
     StThreeVectorF         mPosition;

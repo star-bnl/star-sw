@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRunSummary.cxx,v 1.4 1999/04/28 22:27:34 fisyak Exp $
+ * $Id: StRunSummary.cxx,v 1.5 1999/04/30 13:16:29 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StRunSummary.cxx,v $
- * Revision 1.4  1999/04/28 22:27:34  fisyak
- * New version with pointer instead referencies
+ * Revision 1.5  1999/04/30 13:16:29  fisyak
+ * add StArray for StRootEvent
+ *
+ * Revision 1.5  1999/04/30 13:16:29  fisyak
+ * add StArray for StRootEvent
  *
  * Revision 1.4  1999/04/28 22:27:34  fisyak
  * New version with pointer instead referencies
@@ -22,11 +25,12 @@
  * Revision 1.2  1999/01/15 22:53:51  wenaus
  * version with constructors for table-based loading
  *
-static const Char_t rcsid[] = "$Id: StRunSummary.cxx,v 1.4 1999/04/28 22:27:34 fisyak Exp $";
+ * Revision 2.2  1999/12/21 15:09:06  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
  * Revision 2.1  1999/10/28 22:26:30  ullrich
-static const Char_t rcsid[] = "$Id: StRunSummary.cxx,v 1.4 1999/04/28 22:27:34 fisyak Exp $";
-StRunSummary::StRunSummary()
+static const Char_t rcsid[] = "$Id: StRunSummary.cxx,v 1.5 1999/04/30 13:16:29 fisyak Exp $";
+#include "tables/dst_run_summary.h"
+ * Revision 2.0  1999/10/12 18:42:36  ullrich
  * Completely Revised for New Version
   StRunSummary::StRunSummary():
 St_DataSet("RunSummary")
@@ -35,7 +39,8 @@ St_DataSet("RunSummary")
     mNumberOfProcessedEvents = 0;  
     mStartTime = 0;                
     mStopTime = 0;                 
-StRunSummary::StRunSummary(dst_run_summary_st* runSum)
+    mCpuSeconds = 0;               
+}
 
 StRunSummary::StRunSummary(dst_run_summary_st* runSum):
 St_DataSet("RunSummary")
