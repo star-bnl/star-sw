@@ -42,24 +42,127 @@
 *
       If    (Csys=='svt') then
 *1*                                          Ken Wilson
+** Helen altered SVT volume IDs so agrees with hardware defs.
         If  (Cd=='SVTD') then
            lnumber    = numbv(1)
            ladder     = numbv(2)
            wafer      = numbv(3)
-           If (lnumber.le.2) then
-             wafer    = 5-wafer
+        
+           If ( ladder .eq. 0 .and. wafer .eq. 0) then
+* This is the year 1 ladder
+                wafer = lnumber
+                ladder = 12
+                lnumber = 4
+
+                                                                               * Set First barrel ids            
+           else If (lnumber.le.2) then
+*             wafer    = 5-wafer 
+             If (lnumber .eq. 1) then
+               If( ladder .eq. 1) then
+                   ladder = 2
+               else If(ladder .eq.2) then 
+                  ladder= 8
+               else If(ladder .eq.3) then
+                  ladder= 6
+               else If(ladder .eq.4) then
+                  ladder = 4
+               endif
+             else
+               If( ladder .eq. 1) then
+                   ladder = 1
+               else If(ladder .eq.2) then 
+                  ladder= 7
+               else If(ladder .eq.3) then
+                  ladder= 5
+               else If(ladder .eq.4) then
+                  ladder = 3
+               endif
+             endif 
+* Set 2nd barrel ids
            else If (lnumber.le.4) then
-             wafer    = 7-wafer     
+*             wafer    = 7-wafer   
+             If (lnumber .eq. 4) then
+               If( ladder .eq.1) then 
+                  ladder= 2
+               else If(ladder .eq.2) then 
+                  ladder= 12
+               else If(ladder .eq.3) then
+                  ladder= 10
+               else If(ladder .eq.4) then
+                  ladder= 8
+               else If(ladder .eq.5) then
+                  ladder= 6
+               else If(ladder .eq.6) then 
+                  ladder= 4
+               endif
+             else
+               If( ladder .eq.1) then 
+                  ladder= 3
+               else If(ladder .eq.2) then 
+                  ladder= 1
+               else If(ladder .eq.3) then
+                  ladder= 11
+               else If(ladder .eq.4) then
+                  ladder= 9
+               else If(ladder .eq.5) then
+                  ladder= 7
+               else If(ladder .eq.6) then 
+                  ladder= 5
+               endif
+
+
+             endif
+
+* Set 3rd barrel ids
+
            else If (lnumber.le.6) then
-             wafer    = 8-wafer     
+*             wafer    = 8-wafer
+             If (lnumber .eq. 6)  then
+               If( ladder .eq.1) then 
+                   ladder= 3
+               else If(ladder .eq.2) then 
+                   ladder= 1
+               else If(ladder .eq.3) then
+                   ladder= 15
+               else If(ladder .eq.4) then
+                   ladder= 13
+               else If(ladder .eq.5) then 
+                   ladder= 11
+               else If(ladder .eq.6) then
+                    ladder= 9
+               else If(ladder .eq.7) then
+                    ladder= 7
+               else If(ladder .eq.8) then
+                    ladder= 5
+               endif
+             else
+               If( ladder .eq.1) then 
+                  ladder= 4
+               else If(ladder .eq.2) then 
+                  ladder= 2
+               else If(ladder .eq.3) then
+                  ladder= 16
+               else If(ladder .eq.4) then
+                  ladder= 14
+               else If(ladder .eq.5) then
+                  ladder= 12
+               else If(ladder .eq.6) then 
+                  ladder= 10
+               else If(ladder .eq.7) then
+                  ladder= 8
+               else If(ladder .eq.8) then
+                  ladder= 6
+               endif
+             endif 
            else
              print *,' G2T warning: layer number ',lnumber,
-     *               '     in svt hits not found' 
+     >               '     in svt hits not found' 
            endif
            volume_id  = 1000*lnumber+100*wafer+ladder
         else If (Cd=='SFSD') then
            volume_id =  7000+100*numbv(2)+numbv(1)
         endif
+
 
       else If (Csys=='tpc') then
 *2*                                        Peter M. Jacobs
