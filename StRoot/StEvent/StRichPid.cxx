@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPid.cxx,v 2.1 2000/09/28 10:53:56 ullrich Exp $
+ * $Id: StRichPid.cxx,v 2.2 2000/11/01 16:45:43 lasiuk Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StRichPid.cxx,v $
- * Revision 2.1  2000/09/28 10:53:56  ullrich
- * Initial Revision.
+ * Revision 2.2  2000/11/01 16:45:43  lasiuk
+ * Keep the pointers to the hits that are associated with the track
+ * in order to use the bit flag information.  These are kept
+ * in an StPtrVec (does not own the hits)  The PDG encoded number
+ * is kept as a data member now
  *
  * Revision 2.3  2000/11/21 19:47:33  lasiuk
  * add the d information for each hit
@@ -24,16 +27,18 @@
  * is kept as a data member now
  *
  * Revision 2.1  2000/09/28 10:53:56  ullrich
-    : mParticleType(0),
+ * Initial Revision.
  *
  ***************************************************************************/
 #include "StRichPid.h"
 
-static const char rcsid[] = "$Id: StRichPid.cxx,v 2.1 2000/09/28 10:53:56 ullrich Exp $";
+static const char rcsid[] = "$Id: StRichPid.cxx,v 2.2 2000/11/01 16:45:43 lasiuk Exp $";
 
-    : mParticleType(type), mMipResidual(resid), mTotalAzimuth(totAzim), mTotalArea(totArea),
+ClassImp(StRichPid)
 
 StRichPid::StRichPid()
+    : mParticleNumber(0),
+      mTotalAzimuth(0), mTotalArea(0), mTotalHits(0), mTotalDensity(0),
       mTruncatedAzimuth(0), mTruncatedArea(0), mTruncatedHits(0), mTruncatedDensity(0) {/* noop */}
 
 StRichPid::StRichPid(StParticleDefinition* type, StThreeVectorD resid, Float_t totAzim,
@@ -44,9 +49,14 @@ StRichPid::StRichPid(StParticleDefinition* type, StThreeVectorD resid, Float_t t
       mTruncatedHits(trunHits) {
 
     mParticleNumber = type->pdgEncoding();
+    
+    if (mTotalArea>0) {mTotalDensity=mTotalHits/mTotalArea;}
+    else mTotalDensity=0;
+    
+    if (mTruncatedArea>0) {mTruncatedDensity=mTruncatedHits/mTruncatedArea;}
     else mTruncatedDensity=0;
 }
-    return ( mParticleType     == pid.getRingType() &&
+
 StRichPid::~StRichPid() {/* noop */}
 
 void StRichPid::setRingType(StParticleDefinition* t)   {
@@ -57,10 +67,6 @@ void StRichPid::setRingType(StParticleDefinition* t)   {
 Int_t
 StRichPid::operator==(const StRichPid& pid) const {
     return ( mParticleNumber   == pid.getParticleNumber() &&
-
-
-
-
 	     mMipResidual      == pid.getMipResidual() &&
 	     mTotalAzimuth     == pid.getTotalAzimuth() &&
 	     mTotalArea        == pid.getTotalArea() &&
