@@ -55,12 +55,11 @@ long type_of_call reformat_new_
 )
 {
   /* define local variables */
-    int     rdoID, secID,ij;
+    int    ij;
     long  iptr, sptr, dptr;
     long  npad;
-    int    row,current_sect,isect,ir,irow,err;
+    int    row,current_sect,err;
     int    sector, RDO,datatype;
-    long min_buck,max_buck;
     long irepeatrow;
 
     /* Check all headers first */
@@ -126,7 +125,7 @@ long type_of_call reformat_new_
 	            /* Check the structure pointer integrity */
 	            if (sptr > structtbl_h->nok)
 	            printf(" Error: reformat_new: initial structure pointer out of range!\n" 
-                            " sptr, structtbl_h->nok = %d, %d\n", sptr, structtbl_h->nok); 
+                            " sptr, structtbl_h->nok = %d, %d\n", (int)sptr, (int)structtbl_h->nok); 
 
    	            if(row<=13){
 	            /* for the inner sector */

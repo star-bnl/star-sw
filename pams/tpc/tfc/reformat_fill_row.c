@@ -28,10 +28,10 @@ long  reformat_fill_row
     TABLE_HEAD_ST  *pixel_data_io_h, TYPE_SHORTDATA_ST    *pixel_data_io 
 )
 {
-    int    i, j,ij,ji;
-    long   iptr,iptrow,irow;
+    int    i, j;
+    long   iptrow,irow;
     long   ipad;
-    int    nseq, nseq0, nseq1, nbuck0, bucket;
+    int    nseq0, nseq1, nbuck0, bucket;
     int    ibucket;
     long    first_pad_row,first_seq_row,first_pixel_row,first_pixel_pad;
     long   npixel_this_row,npixel_this_pad;

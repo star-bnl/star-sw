@@ -361,7 +361,7 @@ long type_of_call reformat_
 
     if (fmtpar[0].printf >= 1)
 	printf (" <I> reformat: Total IndexTBL entries for this event: %d\n", 
-		indextbl_h->nok);
+		(int)indextbl_h->nok);
 
     if (indextbl_h->nok >= 1){
 	sptr   = indextbl[0].struct_row;
@@ -437,7 +437,7 @@ long type_of_call reformat_
 	printf(" <I> reformat: Event_Type - Extracting Online Gains...\n");
     } else {
 	printf(" <E> reformat: Event_Type - Unknown (%d)\n",
-	       fmtpar[0].event_type);
+	       (int)fmtpar[0].event_type);
 	return STAFCV_BAD;
     }
 
@@ -524,7 +524,7 @@ long type_of_call reformat_
 		   "               dptr   = %d\n"
 		   "               sector = %d\n"
 		   "               RDO    = %d\n",
-		   sptr, dptr, sector, RDO);
+		   (int)sptr, (int)dptr, (int)sector, (int)RDO);
 
 	/* check the sector/RDO integrity */
 	if (RDO < 1 || RDO > 6){
@@ -541,35 +541,35 @@ long type_of_call reformat_
 	if (sptr > structtbl_h->nok){
 	    printf(" <E> reformat: initial structure pointer out of range!\n"
 		   "     sptr, structtbl_h->nok = %d, %d\n", 
-		   sptr, structtbl_h->nok);
+		   (int)sptr, (int)structtbl_h->nok);
 	    continue;
 	}
 	
 	/* Check the data pointer integrity, if this is not a counter entry */
-	if (indextbl[iptr].data_type != 128)
+	if (indextbl[iptr].data_type != 128){
 	    if (fmtpar[0].event_type == -3){
 		if (dptr > gain_bad_h->nok){
 		    printf(" <E> reformat: initial gain data pointer out of "
 			   "range!\n"
 			   "     dptr, gain_bad_h->nok  = %d, %d\n",
-			   dptr, gain_bad_h->nok);
+			   (int)dptr, (int)gain_bad_h->nok);
 		    continue;
 		}
 	    } else {
-		if (adc_8bit)
-		    adcdata_nok = bytedata_h->nok;
-		else
-		    adcdata_nok = shortdata_h->nok;
+	        if (adc_8bit){
+		    adcdata_nok = bytedata_h->nok;}
+		else{
+		  adcdata_nok = shortdata_h->nok;}
 
 		if (dptr > adcdata_nok){
 		    printf(" <E> reformat: initial adc data pointer out of "
 			   "range!\n"
 			   "     dptr, adcdata_nok  = %d, %d\n",
-			   dptr, adcdata_nok);
+			   (int)dptr, (int)adcdata_nok);
 		    continue;
 		}
 	    }
-
+	}
 	/* Obtain an ID for this sector/RDO pair */
 	rdoID  = get_ID (1, sector, RDO, mapIndex, mapSector, mapRDO);
 	if (rdoID < 0) return STAFCV_BAD;
@@ -600,7 +600,7 @@ long type_of_call reformat_
 	    nPad  = structtbl[sptr++].info;
 
 	    if (fmtpar[0].printf >= 2)
-		printf(" <I> reformat: row, nPad = %d, %d\n", row, nPad);
+		printf(" <I> reformat: row, nPad = %d, %d\n", (int)row, (int)nPad);
 
 	    break;
 
@@ -623,7 +623,7 @@ long type_of_call reformat_
 	    nPad  = structtbl[sptr++].info;
 
 	    if (fmtpar[0].printf >= 2)
-		printf(" <I> reformat: group, nPad = %d, %d\n", group, nPad);
+		printf(" <I> reformat: group, nPad = %d, %d\n", (int)group, (int)nPad);
 
 	    break;
 
@@ -645,7 +645,7 @@ long type_of_call reformat_
 	    nPad  = structtbl[sptr++].info;
 
 	    if (fmtpar[0].printf >= 2)
-		printf(" <I> reformat: row, nPad = %d, %d\n", row, nPad);
+		printf(" <I> reformat: row, nPad = %d, %d\n", (int)row, (int)nPad);
 
 	    break;
 
@@ -667,7 +667,7 @@ long type_of_call reformat_
 	    nPad  = structtbl[sptr++].info;
 
 	    if (fmtpar[0].printf >= 2)
-		printf(" <I> reformat: group, nPad = %d, %d\n", group, nPad);
+		printf(" <I> reformat: group, nPad = %d, %d\n", (int)group, (int)nPad);
 
 	    break;
 
@@ -685,7 +685,7 @@ long type_of_call reformat_
 	    row   = indextbl[iptr].rgm;
 	    nPad  = structtbl[sptr++].info;
 	    if (fmtpar[0].printf >= 2)
-		printf(" <I> reformat: row, nPad = %d, %d\n", row, nPad);
+		printf(" <I> reformat: row, nPad = %d, %d\n", (int)row, (int)nPad);
 
 	    /* Process these pads */
 	    for (i=0; i<nPad; i++){
@@ -740,7 +740,7 @@ long type_of_call reformat_
 	    group = indextbl[iptr].rgm;
 	    nPad  = structtbl[sptr++].info;
 	    if (fmtpar[0].printf >= 2)
-		printf(" <I> reformat: group, nPad = %d, %d\n", group, nPad);
+		printf(" <I> reformat: group, nPad = %d, %d\n", (int)group, (int)nPad);
 
 	    /* Process these pads */
 	    for (i=0; i<nPad; i++){
@@ -876,7 +876,7 @@ long type_of_call reformat_
 	    }
 
 	    if (fmtpar[0].printf >= 1)
-		printf(" <I> reformat: Event number is: %d\n", dptr);
+		printf(" <I> reformat: Event number is: %d\n", (int)dptr);
 
 	    continue; /* don't go down to data processing */
 
@@ -1044,7 +1044,7 @@ long type_of_call reformat_
 			    datum=1023;
 
 			if (fmtpar[0].printf >= 2)
-			    printf(" <I> reformat: final datum = %d\n", datum);
+			    printf(" <I> reformat: final datum = %d\n", (int)datum);
 
 			/* find pedestal info */
 			if (fmtpar[0].times_rms > 0) {
@@ -1227,7 +1227,7 @@ long type_of_call reformat_
 			    datum=1023;
 
 			if (fmtpar[0].printf >= 2)
-			    printf(" <I> reformat: final datum = %d\n", datum);
+			    printf(" <I> reformat: final datum = %d\n", (int)datum);
 
 			/* Add this pixel to the pixel table (maybe) */
 			if (datum >= threshold){
@@ -1352,7 +1352,7 @@ long type_of_call reformat_
 		    else {
 			printf(" <E> reformat: "
 			       "Unknown processing mode: event_type = %d\n",
-			       fmtpar[0].event_type);
+			       (int)fmtpar[0].event_type);
 			return STAFCV_BAD;
 		    }
 

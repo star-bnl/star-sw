@@ -31,9 +31,8 @@ long  reformat_fill_repeat_row
 {
   /* define local variables */
     int    i, j,ij,ji,ik, ijrow;
-    long   iptr;
     long   ipad;
-    int    nseq, nseq0, nseq1, nbuck0, bucket;
+    int    nseq0, nseq1, nbuck0, bucket;
     int    ibucket;
     long    first_pad_row,first_seq_row,first_pixel_row;
     long   first_pixel_pad,first_pixel_seq;
