@@ -180,7 +180,7 @@ c      "test_both" is used to check both inner and outer
 c         extrapolations in x and y for primary vertex tracks
         test_both = .false.
         if(merge(i).xclose(1).lt.mins(7).and.merge(i).yclose(1).lt.mins(7).and.
-     >    (abs(merge(i).z(1)).lt.mins(8).or.abs(merge(i).z(2).lt.mins(8)))) then
+     >    (abs(merge(i).z(1)).lt.mins(8).or.abs(merge(i).z(2)).lt.mins(8))) then
                    test_both=.true.
         endif
 
