@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.9 2003/02/19 03:16:05 calderon Exp $
+ * $Id: StMcEvent.cc,v 2.10 2003/03/18 22:37:39 calderon Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.10  2003/03/18 22:37:39  calderon
+ * Added member mSubProcessId which is used for Pythia events.
+ * Only is set from constructor from g2t_event table.
+ *
  * Revision 2.9  2003/02/19 03:16:05  calderon
  * Introduction of Ctb Hit Class and Ctb Hit Collection class, modified
  * StMcTrack, and StMcEvent accordingly.  Clearing of hits in StMcSvtWaferHitCollection.
@@ -68,8 +72,8 @@
 
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.9 2003/02/19 03:16:05 calderon Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.9 2003/02/19 03:16:05 calderon Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.10 2003/03/18 22:37:39 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.10 2003/03/18 22:37:39 calderon Exp $";
 
 void StMcEvent::initToZero()
 {
@@ -105,6 +109,7 @@ StMcEvent::StMcEvent()
      mZEast(0),
      mNEast(0),
      mPrimaryTracks(0),
+     mSubProcessId(0),
      mImpactParameter(0),
      mPhiReactionPlane(0),
      mTriggerTimeOffset(0)
@@ -122,6 +127,7 @@ StMcEvent::StMcEvent(g2t_event_st* evTable)
      mZEast(evTable->n_part_prot_east),
      mNEast(evTable->n_part_neut_east),
      mPrimaryTracks(evTable->n_track_prim),
+     mSubProcessId(evTable->subprocess_id),
      mImpactParameter(evTable->b_impact),
      mPhiReactionPlane(evTable->phi_impact),
      mTriggerTimeOffset(evTable->time_offset)
