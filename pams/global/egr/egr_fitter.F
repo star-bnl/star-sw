@@ -354,7 +354,7 @@ C----->>>>  new calculation of .length   S.Margetis
                   globtrk(igtrk).length=glength
 C---<<<<<<<
                   globtrk(igtrk).impact = 0.                  
-                  globtrk(igtrk).id_start_vertex = 0
+CSM                  globtrk(igtrk).id_start_vertex = 0
                   globtrk(igtrk).curvature = tptrack(itpct).curvature
                   globtrk(igtrk).method = 0
                   globtrk(igtrk).map(1) = 0

@@ -261,14 +261,14 @@ C---  <<<<<<<
       globtrk(iglob).method = 0
       globtrk(iglob).map(1) = 0
       globtrk(iglob).map(2) = 0
-      globtrk(iglob).id_start_vertex = 0
+CSM      globtrk(iglob).id_start_vertex = 0
 
       EGR_LOAD_GLOBTRK = 0
       return
       end
       
 C======================================================================
-C-- A acurate estimation of track length which is using as a 'seed' the
+C-- An acurate estimation of track length which is using as a 'seed' the
 C   current calculation, i.e. the cord length in x-y plane
 C   Author: S. Margetis  7/1/99
 c----------------------------------------------------------------------
