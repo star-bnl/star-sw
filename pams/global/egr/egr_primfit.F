@@ -50,7 +50,7 @@ C<----------------------------------------------------------------------
       REAL    bfield(3)
       REAL    mainv(3)
       REAL    pveci(5),pvecis(5),rver1,bchis
-      REAL    Prob_cern
+      REAL    prob
       REAL    covar(6,6) ! covariance matrix of fit - 6th entry is alen
       REAL    r0,r1,charge,psi1,psi1b,alen
       REAL    CONSB
@@ -216,7 +216,7 @@ C -- the covariance matrix is evaluated at proximity
               primtrk(index).chisq(1) = globtrk(i).chisq(1)*ndef + bchis
 
 C -- NOTE - globtrk(i).chisq(2) is the probability that globtrk is primary
-              primtrk(index).chisq(2) = Prob_cern(primtrk(index).chisq(1),ndef+2) 
+              primtrk(index).chisq(2) = prob(primtrk(index).chisq(1),ndef+2) 
               globtrk(i).chisq(2) = primtrk(index).chisq(2) 
               primtrk(index).chisq(1) = primtrk(index).chisq(1)/(ndef+2)
               primtrk(index).impact = globtrk(i).impact ! use original impact

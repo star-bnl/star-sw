@@ -70,7 +70,7 @@ C---------------
       real      xn13d(2), xn23d(2)
       real      bimp(3),bimps,bchisp,bchisn
       real      xyzver(3)
-      REAL      Prob_cern,chitot
+      REAL      prob,chitot
       REAL      rci,rcj,p1,p2
 
       logical v0_verfit
@@ -492,7 +492,7 @@ CCC                       vertex(vertex_h.nok).z=xpp(3)
      +                           + trak(j).chisq*trak(j).ndef
                        vertex(vertex_h.nok).chisq(1) = chitot/ndegf
                        vertex(vertex_h.nok).chisq(2) = 
-     +                 Prob_cern(verchisq + trak(i).chisq*trak(i).ndef
+     +                 prob(verchisq + trak(i).chisq*trak(i).ndef
      +                           + trak(j).chisq*trak(j).ndef,ndegf)
 
 

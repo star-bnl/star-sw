@@ -45,7 +45,7 @@ C<----------------------------------------------------------------------
 
       REAL    xc(2),xlocal(3),bfield(3)
       REAL    mainv(3)
-      REAL    Prob_cern
+      REAL    prob
 
       CHARACTER*132 m132
 
