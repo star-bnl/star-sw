@@ -1,4 +1,4 @@
-//StiDrawableDetector.cxx
+//StiRootDrawableDetector.cxx
 //M.L. Miller (Yale Software)
 //04/01
 
@@ -12,36 +12,36 @@
 
 //Sti
 #include "StiDisplayManager.h"
-#include "StiDrawableDetector.h"
+#include "StiRootDrawableDetector.h"
 
 void gStiEulerMatrixForRoot(double phi, double* xx); //rotation about z-axis by angle phi
 
-StiDrawableDetector::StiDrawableDetector()
+StiRootDrawableDetector::StiRootDrawableDetector()
 {
 }
 
-StiDrawableDetector::~StiDrawableDetector()
+StiRootDrawableDetector::~StiRootDrawableDetector()
 {
 }
 
-void StiDrawableDetector::draw()
-{
-    return;
-}
-
-void StiDrawableDetector::update()
+void StiRootDrawableDetector::draw()
 {
     return;
 }
 
-const char* StiDrawableDetector::name() const
+void StiRootDrawableDetector::update()
+{
+    return;
+}
+
+const char* StiRootDrawableDetector::name() const
 {
     return StiDetector::getName();
 }
 
-void StiDrawableDetector::makeShape()
+void StiRootDrawableDetector::makeShape()
 {
-    //cout <<"StiDrawableDetector::makeShape()"<<endl;
+    //cout <<"StiRootDrawableDetector::makeShape()"<<endl;
 
     //Make Shape
     
@@ -73,9 +73,9 @@ void StiDrawableDetector::makeShape()
     return;
 }
 
-void StiDrawableDetector::build(const char* buildfile)
+void StiRootDrawableDetector::build(const char* buildfile)
 {
-    //cout <<"StiDrawableDetector::build()"<<endl;
+    //cout <<"StiRootDrawableDetector::build()"<<endl;
     StiDetector::build(buildfile);
     makeShape();
     StiDisplayManager::instance()->addDrawable(this);
