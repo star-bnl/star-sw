@@ -263,10 +263,11 @@ Int_t StTreeMaker::Save()
   saveName = gSystem->BaseName(regPath);
   saveName.Replace(0,0,"save.");
   savePath = gSystem->ConcatFileName(saveDir,saveName);
-  brSave->SetFile((const char*)savePath);
-  fTree->WriteEvent((ULong_t)(-2));	
   brSave->Close();
-  fTree->Clear(); 
+  brSave->SetFile((const char*)savePath);
+  brSave->WriteEvent((ULong_t)(-2));	
+  brSave->Close();
+  brSave->Clear(); 
   brSave->SetFile((const char*)regPath); 
   delete [] savePath;
   brSave->Open();  
