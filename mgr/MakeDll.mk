@@ -1,7 +1,7 @@
-# $Id: MakeDll.mk,v 1.78 1999/04/28 00:46:06 fisyak Exp $
+# $Id: MakeDll.mk,v 1.79 1999/04/28 00:49:17 fisyak Exp $
 # $Log: MakeDll.mk,v $
-# Revision 1.78  1999/04/28 00:46:06  fisyak
-# Fix feature with QWERTY for St_base
+# Revision 1.79  1999/04/28 00:49:17  fisyak
+# Once  more QWERTY
 #
 # Revision 1.77  1999/04/26 22:40:15  fisyak
 # remove -lpgc for new pfg77, Victor has updated libpgf77S.so
@@ -303,8 +303,7 @@ endef
 
 ifdef FILES_ORD
   ifneq (,$(strip $(FILES_H)))
-    NAMES_ORD  := $(filter-out StVecPtr, $(shell $(AWK)))
-ifdef NEVER
+    NAMES_ORD  := $(filter-out \#\# QWERTY, $(shell $(AWK)))
     NAMES_DD   := $(shell $(AWK2))
     NAMES_DD   := $(strip $(filter-out %StArray.h, $(NAMES_DD)))
     ifneq (,$(NAMES_DD))
@@ -315,7 +314,6 @@ ifdef NEVER
       FILES_COL := $(shell grep -l StCollectionDef  $(FILES_H))
       FILES_GCO := $(notdir $(FILES_COL))
     endif
-endif
   endif
   LinkDef        :=$(wildcard $(SRC_DIR)/$(PKG)LinkDef.h $(SRC_DIR)/$(PKG)LinkDef.hh)
   ifneq (,$(LinkDef))
