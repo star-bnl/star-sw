@@ -126,7 +126,7 @@ extern __inline volatile void mstore(struct fcfResx *r, u_int av, u_int pad, u_i
 #endif	// UNIX
 
 
-int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
+int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres, short *t0_corr)
 {
 	int i, j, pad ;
 
@@ -430,7 +430,24 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 			else {
 				rn = new_res + new_res_cou ;
 			}
-					
+	
+			av = (av << LEFT_SHIFT);
+			mean = (mean << LEFT_SHIFT);
+
+#ifdef FCF_10BIT_ADC
+			if(t0_corr)
+			{
+			  // t0_corr is signed...need to avoid a mess of unsigned + (negsigned) = ????
+			  unsigned short corr = (t0_corr[pad] > 0) ? t0_corr[pad] : -t0_corr[pad];
+			  if(t0_corr[pad] > 0)
+			    av += corr;
+			  else
+			    av -= corr;
+
+			  mean += t0_corr[pad];
+			}
+#endif			
+			
 			mstore(rn,av,charge*pad,charge,flags|FCF_ONEPAD,mean) ;
 			rn->p1 = rn->p2 = pad ;
 			rn->t1 = f_start ;
@@ -468,8 +485,8 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 			int merged = 0 ;
 
 			int old_mean = rr->mean ;
-			int old_mean_m = old_mean - param1 ;
-			int old_mean_p = old_mean + param1 ;
+			int old_mean_m = old_mean - (param1<<LEFT_SHIFT) ;
+			int old_mean_p = old_mean + (param1<<LEFT_SHIFT) ;
 
 			start = new_start ;
 		
@@ -615,7 +632,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 				//printf("STORED (%d)\n",*cl_found_pointer) ;
 
 
-				tmp1 = (rr->pad << 6) / cha ;
+				tmp1 = (rr->pad << LEFT_SHIFT) / cha ;
 
 				c = (struct fmt21_c *) outres++ ;			
 				f = (struct fmt21_f *) outres++ ;
@@ -623,13 +640,13 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 				f->f = fla ;
 				f->c = cha ;
 
-				tmp2 = (rr->t << 6) / cha ;
+				tmp2 = (rr->t) / cha ;
 
 				c->x = tmp1 ;
 				c->t = tmp2 ;
 
-				tmp1 >>= 6 ;
-				tmp2 >>= 6 ;
+				tmp1 >>= LEFT_SHIFT ;
+				tmp2 >>= LEFT_SHIFT ;
 
 
 
@@ -699,7 +716,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 		//printf("STORED (%d)\n",*cl_found_pointer) ;
 
 
-		tmp1 = (rr->pad << 6) / cha ;
+		tmp1 = (rr->pad << LEFT_SHIFT) / cha ;
 
 		c = (struct fmt21_c *) outres++ ;			
 		f = (struct fmt21_f *) outres++ ;
@@ -707,13 +724,13 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 		f->f = fla ;
 		f->c = cha ;
 
-		tmp2 = (rr->t << 6) / cha ;
+		tmp2 = (rr->t) / cha ;
 
 		c->x = tmp1 ;
 		c->t = tmp2 ;
 
-		tmp1 >>= 6 ;
-		tmp2 >>= 6 ;
+		tmp1 >>= LEFT_SHIFT ;
+		tmp2 >>= LEFT_SHIFT ;
 
 
 

@@ -20,6 +20,7 @@
 #define FCF_MIN_ADC_T		3
 #define FCF_MIN_ADC_PAD		12
 
+#define LEFT_SHIFT 6
 
 typedef unsigned int u_int;
 typedef unsigned short u_short;
@@ -67,7 +68,7 @@ public:
 
 
 	// THA function!
-	int finder(u_char *adcin, u_short *cppin, u_int *outres) ;
+	int finder(u_char *adcin, u_short *cppin, u_int *outres, short *t0_corr=NULL) ;
 
 	void set8to10(u_short *extTable) ;
 
