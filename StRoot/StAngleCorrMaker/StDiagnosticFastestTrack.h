@@ -27,6 +27,10 @@ public:
                    StDiagnosticFastestTrack();
                   ~StDiagnosticFastestTrack();
   void        Fill(StTrackForPool* t);
+//VP
+  virtual  void        Fill(StEvent& ev){StDiagnosticTool::Fill(ev);}
+  virtual  void        Fill(StTrackForPool* t1, StTrackForPool* t2){StDiagnosticTool::Fill(t1,t2);}
+  
   void        Write();
   TString GetName();
 private:
