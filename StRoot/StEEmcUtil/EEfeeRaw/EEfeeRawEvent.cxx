@@ -4,6 +4,7 @@
 #include "EEfeeDataBlock.h"
 #include "EEfeeRawEvent.h"
 
+#include "EEfeeRawEvent.h"
 ClassImp(EEfeeRawEvent)
 
 
@@ -72,11 +73,13 @@ void EEfeeRawEvent ::addFeeDataBlock(EEfeeDataBlock* b){
   //  bl1->print();
 }
 
+
 //--------------------------------------------------
 //--------------------------------------------------
 //--------------------------------------------------
 
 void EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken) {
+
   /* check for:
      - token in every data block
      - crateID vs. positon in event
@@ -108,8 +111,8 @@ void EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken) {
     //pr-intf("vvv %d %d \n",i,crateID);
   }
   
-  
 }
+
 //--------------------------------------------------
 //--------------------------------------------------
 //--------------------------------------------------
@@ -128,8 +131,12 @@ UShort_t  EEfeeRawEvent::getValue(int crateID, int channel) const {
   return 0xffff; 
 }
 
+
 /*
  * $Log: EEfeeRawEvent.cxx,v $
+ * Revision 1.11  2003/12/10 04:43:19  balewski
+ * first QA
+ *
  * Revision 1.10  2003/12/04 18:29:25  balewski
  * I forgot
  *
