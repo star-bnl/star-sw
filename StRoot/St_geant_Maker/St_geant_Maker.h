@@ -1,10 +1,22 @@
-// $Id: St_geant_Maker.h,v 1.2 1998/10/31 00:26:17 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.3 1999/01/03 20:56:36 fisyak Exp $
 // $Log: St_geant_Maker.h,v $
-// Revision 1.2  1998/10/31 00:26:17  fisyak
+// Revision 1.3  1999/01/03 20:56:36  fisyak
+// Remove St_geom_Maker
+//
+// Revision 1.4  1998/12/25 21:02:14  nevski
+// Add Set/Get method
+//
+// Revision 1.3  1998/12/16 20:56:24  fisyak
+// Add gstar to ROOT
+//
+// Revision 1.2  1998/12/04 19:36:48  fisyak
+// Add Pavel/Ruben gstar interface
+//
+// Revision 1.1  1998/10/31 00:28:31  fisyak
 // Makers take care about branches
 //
-// Revision 1.1  1998/10/12 14:34:18  fisyak
-// new geant Maker
+// Revision 1.6  1998/10/06 18:00:31  perev
+// cleanup
 //
 // Revision 1.5  1998/08/26 12:15:13  fisyak
 // Remove asu & dsl libraries
@@ -28,26 +40,40 @@
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
+class TNode;
+
 #endif
-//class St_stk_stkpar;
+
 class St_geant_Maker : public StMaker {
  private:
-   Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_geant_Maker.h,v 1.2 1998/10/31 00:26:17 fisyak Exp $";
-// Int_t          m_mode;        // mode 1 = primaries;
-// St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
+  Bool_t drawinit;
+  static Bool_t Init_done;   // Flag to initialize GEANT/ZEBRA
+  Int_t  nwgeant;     // No. of words in GCBANK common block
+  Int_t  nwpaw;       // No. of words in PAWC  common block
+  Int_t  iwtype;      // HIGZ interface (=0 no HIGZ)
+  TNode*   fNode;
  
  protected:
  public: 
-                  St_geant_Maker(const char *name="geant", const char *title="event/geant/Event");
+                  St_geant_Maker(const char *name="geant", const char *title="run/geant/Run");
    virtual       ~St_geant_Maker();
-   virtual void   Clear(Option_t *option="");
-   virtual Int_t   Finish();
-   virtual Int_t   Init();
+   virtual Int_t  Finish(){SafeDelete(m_DataSet); return kStOK;}
+   virtual Int_t  Init();
+   virtual void   Clear(Option_t *option){}; // No clearance for parameters
+   virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU 
+   virtual void   Draw();  
    virtual Int_t  Make();
    virtual void   PrintInfo();
-// virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
+   virtual void   LoadGeometry (Char_t *option = "detp geometry field_only");  // *MENU
+   virtual void   SetNwGEANT (Int_t n=100000) {nwgeant = n;} // *MENU
+   virtual void   SetNwPAW   (Int_t n=     0) {nwpaw   = n;} // *MENU
+   virtual void   SetIwtype  (Int_t n=     0) {iwtype  = n;} // *MENU
+
+   virtual void   Work();
+   TNode* GetNode() { return fNode; }
+
    ClassDef(St_geant_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
 #endif
+
