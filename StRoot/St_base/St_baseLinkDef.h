@@ -20,6 +20,7 @@
 #pragma link C++ class StObjArray-!;
 #pragma link C++ class StRefArray-!;
 #pragma link C++ class StStrArray-!;
+#pragma link C++ class StMem-!;
 
 
 

@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.10 2000/06/19 01:28:26 perev Exp $
+// $Id: StObject.cxx,v 1.11 2000/07/30 01:40:12 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.11  2000/07/30 01:40:12  perev
+// StMem class added
+//
 // Revision 1.10  2000/06/19 01:28:26  perev
 // STL StEvent
 //
@@ -43,20 +46,25 @@ ClassImp(StObject)
 //_____________________________________________________________________________
 StObject::~StObject()
 {
-#if 0
-  Int_t colIdx,objIdx; UInt_t u;
-  u = GetUniqueID();
-  if (!u) return;
-  StRegistry::Ident(u,colIdx,objIdx);
-  if (!colIdx) return;
-  StStrArray *ar = StRegistry::GetColl(colIdx);
-  if (!ar) return;
-  int n = ar->GetSize();
-  if (objIdx>=n)			return;
-  if (ar->At(objIdx) != (TObject*)this) return;
-  ar->RemoveAt(objIdx);
-#endif
+  SetBit(kInvalidObject);
 }
+//_____________________________________________________________________________
+Int_t StObject::IsArr() const
+{
+  if (!TestBit(kStARR))	return 0;
+  if (!TestBit(kStRRR))	return 1;
+  return 2;
+}
+//_____________________________________________________________________________
+void  StObject::SetArr(Int_t a) 
+{
+  if (!a) 	return;
+  SetBit(kStARR);
+  if (a==1) 	return;
+  SetBit(kStRRR);
+}
+
+
 //_____________________________________________________________________________
 void StObject::Browse(TBrowser *tb)
 {
