@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.26 2002/02/10 21:10:44 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.27 2002/02/26 13:17:56 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.27  2002/02/26 13:17:56  jcs
+// get cluster unfolding parameters from ftpcClusterPars
+//
 // Revision 1.26  2002/02/10 21:10:44  jcs
 // allow for individual west/east Ftpc temperature/pressure corrections
 //
@@ -99,10 +102,18 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
 					 TObjArray *pointarray)
 {
 //   cout << "StFtpcClusterFinder constructed" << endl;  
-mReader = reader;
-mParam = paramReader; 
-mDb    = dbReader;
-mPoint = pointarray;
+  mReader = reader;
+  mParam = paramReader; 
+  mDb    = dbReader;
+  mPoint = pointarray;
+
+  MAXSEQPEAKS = mParam->maxNumSeqPeaks();
+  MAXPEAKS = mParam->maxNumPeaks();
+  MAXLOOPS = mParam->maxLoops();
+  MAXFASTLOOPS = mParam->maxFastLoops();
+  UNFOLDLIMIT = mParam->unfoldLimit();
+  UNFOLDFAILEDLIMIT = mParam->unfoldFailedLimit();
+
 //clfradius=new TH1F("clfradius","radius",140,0,35);
 }
 
