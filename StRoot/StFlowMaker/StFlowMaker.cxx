@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.31 2000/07/12 17:54:37 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.32 2000/07/14 23:49:03 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.32  2000/07/14 23:49:03  snelling
+// Changed to ConstIterator for new StEvent and removed comparison int uint
+//
 // Revision 1.31  2000/07/12 17:54:37  posk
 // Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
 // Apply cuts when reading picoevent file.
@@ -232,7 +235,7 @@ Int_t StFlowMaker::Init() {
   if (mFlowEventRead)  kRETURN += InitFlowEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.31 2000/07/12 17:54:37 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.32 2000/07/14 23:49:03 snelling Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -344,7 +347,7 @@ void StFlowMaker::FillFlowEvent() {
   // loop over tracks in StEvent
   int goodTracks = 0;
   const StSPtrVecPrimaryTrack& tracks = pEvent->primaryVertex(0)->daughters();
-  StSPtrVecPrimaryTrackIterator itr;
+  StSPtrVecPrimaryTrackConstIterator itr;
   StTpcDedxPidAlgorithm tpcDedxAlgo;
   Float_t nSigma;
 
