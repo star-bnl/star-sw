@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.27  1998/09/16 21:52:13  fisyak
+#  Add dependencies for StRoot
+#
 #  Revision 1.26  1998/09/10 23:32:47  perev
 #  add ASU_MALLOC_ON
 #
@@ -59,7 +62,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/09/10 23:32:47 $ 
+#             Last modification $Date: 1998/09/16 21:52:13 $ 
 #. default setings
 
 RM := rm -f
@@ -109,6 +112,7 @@ CPPFLAGS := $(UNAMES) $(STAF_ARCH) $(TULL_ARCH) QUIET_ASP
 ifndef ASU_MALLOC_OFF
   CPPFLAGS += ASU_MALLOC_ON
 endif
+MKDEPFLAGS:= -MG -MM -w -nostdinc
 
 OSFID    :=
 STRID    :=

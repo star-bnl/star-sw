@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.50 1998/09/15 22:15:28 fisyak Exp $
+# $Id: MakePam.mk,v 1.51 1998/09/16 21:52:13 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.51  1998/09/16 21:52:13  fisyak
+# Add dependencies for StRoot
+#
 # Revision 1.50  1998/09/15 22:15:28  fisyak
 # Fix root/noroot options
 #
@@ -164,7 +167,6 @@ FILES_ALL_TAB := $(FILES_SYT) $(FILES_TAH) $(FILES_TAI) $(FILES_TAB) $(FILES_THH
 endif    
 endif
 FILES_O  := $(strip $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(NAMES_F) $(NAMES_C))))
-MKDEPFLAGS:= -MG -MM -w -nostdinc
 ifndef NODEPEND                
 FILES_D  := $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_O)))))
 FILES_DM := $(addprefix $(GEN_DIR)/, $(addsuffix .didl, $(NAMES_IDM)))                         
@@ -403,26 +405,26 @@ $(GEN_DIR)/%.didl $(GEN_DIR)/%_i.cc $(GEN_DIR)/%.h $(GEN_DIR)/%.inc: %.idl
 	$(RM)  $(GEN_DIR)/$(STEM)_i.cc
 	cp  $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);\
         $(STIC) -q $(STICFLAGS) $(1ST_DEPS); \
-        gcc  $(MKDEPFLAGS)  -x c $(STICFLAGS) $(1ST_DEPS) | \
+        $(GCC)  $(MKDEPFLAGS)  -x c $(STICFLAGS) $(1ST_DEPS) | \
         sed -e 's/$(STEM)\.idl\.o/$(subst .,\., $(subst /,\/, $(GEN_DIR)))\/$(STEM)\.didl/g' \
         > $(GEN_DIR)/$(STEM).didl; \
         $(STIC) -q $(STICFLAGS) $(1ST_DEPS) >>  $(GEN_DIR)/$(STEM).didl;
 #        cp $(STEM)_i.cc $(STEM).h $(STEM).inc $(GEN_DIR); $(RM) *.*; 
 endif #IDM
 $(DEP_DIR)/%.d:%.cc 
-	gcc $(MKDEPFLAGS) $(CPPFLAGS) $(1ST_DEPS) | sed -e \
+	$(GCC) $(MKDEPFLAGS) $(CPPFLAGS) $(1ST_DEPS) | sed -e \
 's/$(notdir $(STEM))\.o/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).o))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
 $(DEP_DIR)/%.d:%.c
-	gcc $(MKDEPFLAGS) $(CPPFLAGS) $(1ST_DEPS) | sed -e \
+	$(GCC) $(MKDEPFLAGS) $(CPPFLAGS) $(1ST_DEPS) | sed -e \
 's/$(notdir $(STEM))\.o/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).o))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
 $(DEP_DIR)/%.d:%.F
-	gcc -traditional -x c $(MKDEPFLAGS) $(CPPFLAGS) $(1ST_DEPS) | sed -e \
+	$(GCC) -traditional -x c $(MKDEPFLAGS) $(CPPFLAGS) $(1ST_DEPS) | sed -e \
 's/$(notdir $(STEM))\.F\.o/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).o))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
 $(DEP_DIR)/%.d:%.g
-	gcc -traditional -x c $(MKDEPFLAGS) $(CPPFLAGS) $(1ST_DEPS) | sed -e \
+	$(GCC) -traditional -x c $(MKDEPFLAGS) $(CPPFLAGS) $(1ST_DEPS) | sed -e \
 's/$(notdir $(STEM))\.g\.o/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).o))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
 $(DEP_DIR)/%.d:%.cdf

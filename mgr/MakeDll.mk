@@ -93,16 +93,13 @@ ifneq (,$(DOIT))
 DEP_DIR := $(SYS_DIR)/dep/$(PKGNAME)
 
 OUPUT_DIRS := $(LIB_DIR) $(OBJ_DIR) $(DEP_DIR) $(BIN_DIR) $(TMP_DIR) $(GEN_DIR) $(SRC_DIR) 
-INPUT_DIRS += $(SRC_DIR) $(SRM_DIR) 
+INPUT_DIRS += $(SRC_DIR) 
 
 # 	Make dirs before make real work. Othervice VPATH does not see
 #    	non existing directories
 MAKEDIRS := $(shell mkdir -p $(OUPUT_DIRS))
 
-VPATH =  $(INPUT_DIRS) $(OUPUT_DIRS) 
-
-FILES_D := $(FILES_SRC) $(FILES_SRM) 
-FILES_D := $(addsuffix .d, $(addprefix $(DEP_DIR)/,$(basename $(notdir $(FILES_D)))))
+VPATH =  $(INPUT_DIRS) $(OUPUT_DIRS)
 
 FILES_SYM  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_Module.cxx )))
 FILES_SYT  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_Table.cxx )))
@@ -171,7 +168,7 @@ endef
 FILES_O := $(FILES_SRC) $(FILES_CINT_SYM) $(FILES_CINT_SYT) $(FILES_CINT_TAB) $(FILES_CINT_MOD) $(FILES_ORD) $(FILES_CINT_ORD)
 FILES_O := $(addprefix $(OBJ_DIR)/,$(addsuffix .o, $(notdir $(basename $(FILES_O)))))
 FILES_O := $(sort $(FILES_O))
-
+FILES_D := $(addsuffix .d, $(addprefix $(DEP_DIR)/,$(basename $(notdir $(FILES_O)))))
 ifeq (,$(FILES_O))
 all: 
 	@echo Nothing to do for $(PKG)
@@ -235,6 +232,10 @@ $(FILES_CINT_MOD) : $(GEN_DIR)/St_%_ModuleCint.cxx : $(GEN_DIR)/St_%_Module.h $(
 	cd $(GEN_DIR);\
         rootcint -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCLUDES) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF));
 #  $(INCLUDES)
+#_________________dependencies_____________________________
+ifneq (, $(strip $(FILES_D))) 
+include $(FILES_D)
+endif                               #
 
 Libraries : $(MY_SO) 
 
@@ -264,14 +265,13 @@ $(OBJ_DIR)/%.o : %.cxx
 
 $(DEP_DIR)/%.d: %.c 
 	$(RM) $(ALL_TAGS)
-	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES) $(INCL)  $(ALL_DEPS) > $(ALL_TAGS)
+	$(GCC) $(MKDEPFLAGS) $(CPPFLAGS) $(INCLUDES) $(INCL)  $(ALL_DEPS) > $(ALL_TAGS)
 
 $(DEP_DIR)/%.d: %.cxx
 	$(RM) $(ALL_TAGS)
-	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES) $(INCL)  $(ALL_DEPS) > $(ALL_TAGS)
+	$(GCC) $(MKDEPFLAGS) $(CPPFLAGS) $(INCLUDES) $(INCL)  $(ALL_DEPS) > $(ALL_TAGS)
 
 
-####%.d:  %.cdf
 endif
 DeleteDirs :
 	$(RMDIR)  $(TMP_DIR)
