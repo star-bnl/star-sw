@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.181 2001/03/22 22:15:31 didenko Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.182 2001/03/28 23:42:24 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -122,7 +122,8 @@ Bfc_st BFC[] = {
   {"ExB"         ,""  ,"","",""                       ,"","Activate ExB correction in St_tpt_Maker",kFALSE},
   {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
   {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
-  {"AllOn"     ,""  ,"","",""                        ,"","Activate both East and West parts of tpc",kFALSE},
+  {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
+  {"ReadAll"     ,""  ,"","",""                                 ,"","Activate all branches to read",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -219,7 +220,7 @@ Bfc_st BFC[] = {
   {"scf"      ,"","svtChain",""                ,"St_scf_Maker","St_tpc,St_svt,StSsdClusterMaker","",kFALSE},
   {"scm"      ,"","svtChain",""                ,"St_scm_Maker","St_tpc,St_svt,StSsdClusterMaker","",kFALSE},
   {"sce"      ,"","svtChain",""                   ,"St_sce_Maker","St_tpc,St_svt,StSsdEvalMaker","",kFALSE},
-  {"Est"      ,"","svtChain",""                                ,"StEstMaker","St_svt,StEstMaker","",kFALSE},
+  {"Est"      ,"","svtChain","globT"                 ,"StEstMaker","St_global,St_svt,StEstMaker","",kFALSE},
   {"Ftpc"        ,"ftpcChain"  ,"","ftpcT,fcl,fpt,Fglobal,Fprimary"         ,"StMaker","StChain","",kFALSE},
   {"fss"    ,"ftpc_raw","ftpcChain","SCL,Simu",        "StFtpcSlowSimMaker","StFtpcSlowSimMaker","",kFALSE},
   {"Fcl"    ,"ftpc_hits","ftpcChain","SCL"
@@ -433,6 +434,7 @@ Int_t StBFChain::Instantiate()
 	    strcpy (fBFC[i].Name,(Char_t *) inpMk->GetName());
 	    SetInput("StDAQReader",".make/inputStream/.make/inputStream_DAQ/.const/StDAQReader");
 	    SetInput("geant",".make/inputStream/.make/inputStream_XDF/.data/event/geant/Event");
+	    if (GetOption("ReadAll")) inpMk->SetBranch("*",0,"r");	//activate all branches
 	  }
 	  else status = kStErr;
 	  continue;
@@ -910,10 +912,12 @@ void StBFChain::SetDbOptions(){
   else {if (GetOption("Y1d"))  db->SetDateTime("year_1d");
   else {if (GetOption("Y1e"))  db->SetDateTime("year_1e");
   else {if (GetOption("Y1h"))  db->SetDateTime("year_1h");
+  else {if (GetOption("Y2000"))  db->SetDateTime("year_1h");
   else {if (GetOption("Y2a"))  db->SetDateTime("year_2a");
   else {if (GetOption("Y2b"))  db->SetDateTime("year_2b"); 
   else {if (GetOption("Simu")) db->SetDateTime("year_2b");
-  }}}}}}}}}}}}}
+  else {if (GetOption("Y2001"))  db->SetDateTime("year_2b");
+  }}}}}}}}}}}}}}}
 	gMessMgr->QAInfo() << db->GetName() 
 			   << " Maker set time = " 
 			   << db->GetDateTime().GetDate() << "." 
