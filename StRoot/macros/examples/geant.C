@@ -1,5 +1,8 @@
-// $Id: geant.C,v 1.5 1999/02/05 16:31:42 fine Exp $
+// $Id: geant.C,v 1.6 1999/02/19 23:43:36 fisyak Exp $
 // $Log: geant.C,v $
+// Revision 1.6  1999/02/19 23:43:36  fisyak
+// add parameters
+//
 // Revision 1.5  1999/02/05 16:31:42  fine
 // StarGeom.C macro has been improved
 //
@@ -30,7 +33,7 @@ void Load(){
   gSystem->Load("St_geant_Maker");
   gSystem->Load("St_TLA_Maker");
 }
-void geant()
+void geant(const Int_t Nevents=1,const Char_t *fzfile ="/disk1/star/test/psc0049_08_40evts.fzd")
 {
   // Dynamically link some shared libs
   if (gClassTable->GetID("StChain") < 0) Load();
@@ -41,19 +44,16 @@ void geant()
   if (! geant) geant = new St_geant_Maker("geant","event/geant/Event");
   geant->SetNwGEANT(20 000 000);
   //  geant->SetNwPAW(1000000);
-  geant->SetIwtype(1);
+  //  geant->SetIwtype(1);
   geant->SetIwtype(0);
-  geant->LoadGeometry("");
-  //  geant->Do("gfile pz /disk1/star/kathy/auau_ce_b0-2_4041_4060.fzd;");
-  //  geant->Do("zone 1 2;");
-  //  geant->Do("next;");
-  //geant->Do("dcut cave x 0.1 10 10 0.03 0.03;");
+  TString cmd("gfile p ");
+  cmd += fzfile;
+  geant->Do(cmd.Data());
   chain->PrintInfo();
-// Init the mai chain and all its makers
+// Init the main chain and all its makers
   int iInit = chain->Init();
   if (iInit) chain->Fatal(iInit,"on init");
   Int_t i=0;
-  Int_t Nevents = 0;
   for (Int_t i =1; i <= Nevents; i++)
   {
     if (chain->Make(i)) break;
@@ -66,4 +66,5 @@ void geant()
   if (Nevents > 1) {
     chain->Finish();
   }
+  else {b = new TBrowser("GEANT",chain);}
 }
