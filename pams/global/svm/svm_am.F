@@ -282,9 +282,9 @@ ccc
       dimension dirtpc(3,TRKS_MAX),eangtp(TRKS_MAX)
       dimension ichk(TRKS_MAX),jchk(TRKS_MAX)
       dimension ang(3),td(3),cosphi(3),zint(3),tmcs(3),
-     1 chisq(TRKS_MAX,5),jtpc(TRKS_MAX,5),ntpc(TRKS_MAX),
+     1 chisq(5,TRKS_MAX),jtpc(5,TRKS_MAX),ntpc(TRKS_MAX),
      2 iflag(TRKS_MAX),jflag(TRKS_MAX),nsvt(TRKS_MAX),
-     3 isvt(TRKS_MAX,5),jtpc1(TRKS_MAX),isvt1(TRKS_MAX),
+     3 isvt(5,TRKS_MAX),jtpc1(TRKS_MAX),isvt1(TRKS_MAX),
      4 iskip(TRKS_MAX),jskip(TRKS_MAX),pin(6),isvt2(TRKS_MAX),
      5 pout(7),pcov(6,6),ptmp(6),dirvec(3),partal(3,6),
      6 poserr(3),nbad(2),nmat(2),nunasg(2),
@@ -867,13 +867,13 @@ ccc
       if(ktr.gt.5) then
       call fcmin(chitmp,jtmp,chi5,j5,ktr,NO_TKS_MAX)
       do 901 k = 1,5
-      chisq(i,k) = chi5(k)
-901   jtpc(i,k) = j5(k)
+      chisq(k,i) = chi5(k)
+901   jtpc(k,i) = j5(k)
       ktr = 5
       else if(ktr.gt.0) then
       do 902 k = 1,ktr
-      chisq(i,k) = chitmp(k)
-902   jtpc(i,k) = jtmp(k)
+      chisq(k,i) = chitmp(k)
+902   jtpc(k,i) = jtmp(k)
       end if
       ntpc(i) = ktr
 91    continue
@@ -908,7 +908,7 @@ ccc   tracks to have no tpc matching candidates.
       do 95 i = 1,ksvt
       if(ntpc(i).eq.0) go to 95
       do 96 ktr = 1,ntpc(i)
-      jflag(jtpc(i,ktr)) = 1
+      jflag(jtpc(ktr,i)) = 1
 96    continue
 95    continue
 ccc
@@ -920,9 +920,9 @@ ccc
       do 111 i = 1,ksvt
       if(ntpc(i).eq.0) go to 111
       do 112 k = 1,ntpc(i)
-      if(j.eq.jtpc(i,k)) then
+      if(j.eq.jtpc(k,i)) then
       nsvt(j) = nsvt(j) + 1
-      chitmp(nsvt(j)) = chisq(i,k)
+      chitmp(nsvt(j)) = chisq(k,i)
       jtmp(nsvt(j)) = i
        end if
 112   continue
@@ -932,10 +932,10 @@ ccc
       call fcmin(chitmp,jtmp,chi5,j5,ktr,NO_TKS_MAX)
       nsvt(j) = 5
       do 1119 k = 1,5
-1119  isvt(j,k) = j5(k)
+1119  isvt(k,j) = j5(k)
       else if(nsvt(j).gt.0) then
       do 1118 k = 1,nsvt(j)
-1118  isvt(j,k) = jtmp(k)
+1118  isvt(k,j) = jtmp(k)
       end if
 110   continue
       write(6,406)
@@ -952,7 +952,7 @@ ccc   Find largest chi-square
       do 120 i = 1,ksvt
       if(ntpc(i).eq.0) go to 120
       do 1207 k = 1,ntpc(i)
-      if(chisq(i,k).gt.chimax) chimax = chisq(i,k)
+      if(chisq(k,i).gt.chimax) chimax = chisq(k,i)
 1207  continue
 120   continue
       if(chimax.lt.3.00) chimax = 3.00
@@ -960,8 +960,8 @@ ccc   Find largest chi-square
       if(ntpc(i).eq.0) go to 121
       chimin = chimax
       do 122 k = 1,ntpc(i)
-      if(chisq(i,k).lt.chimin) jtpc1(i) = jtpc(i,k)
-      if(chisq(i,k).lt.chimin) chimin = chisq(i,k)
+      if(chisq(k,i).lt.chimin) jtpc1(i) = jtpc(k,i)
+      if(chisq(k,i).lt.chimin) chimin = chisq(k,i)
 122   continue
       chisav(i) = chimin
 121   continue
@@ -972,12 +972,12 @@ ccc
       if(nsvt(j).eq.0) go to 123
       chimin = chimax
       do 124 k = 1,nsvt(j)
-      if(ntpc(isvt(j,k)).eq.0) go to 124
-      do 125 ktr = 1,ntpc(isvt(j,k))
-125   if(j.eq.jtpc(isvt(j,k),ktr)) ktrset = ktr
-      if(chisq(isvt(j,k),ktrset).lt.chimin) isvt1(j) = isvt(j,k)
-      if(chisq(isvt(j,k),ktrset).lt.chimin) chimin = chisq(isvt(j,k),
-     1   ktrset)
+      if(ntpc(isvt(k,j)).eq.0) go to 124
+      do 125 ktr = 1,ntpc(isvt(k,j))
+125   if(j.eq.jtpc(ktr,isvt(k,j))) ktrset = ktr
+      if(chisq(ktrset,isvt(k,j)).lt.chimin) isvt1(j) = isvt(k,j)
+      if(chisq(ktrset,isvt(k,j)).lt.chimin) chimin = chisq(ktrset,
+     1   isvt(k,j))
 124   continue
 123   continue
 
@@ -987,13 +987,13 @@ ccc
       if(nsvt(j).le.1) go to 1123
       chimin = chimax
       do 1124 k = 1,nsvt(j)
-      if(ntpc(isvt(j,k)).eq.0) go to 1124
-      if(isvt(j,k) .eq. isvt1(j)) go to 1124
-      do 1125 ktr = 1,ntpc(isvt(j,k))
-1125  if(j.eq.jtpc(isvt(j,k),ktr)) ktrset = ktr
-      if(chisq(isvt(j,k),ktrset).lt.chimin) isvt2(j) = isvt(j,k)
-      if(chisq(isvt(j,k),ktrset).lt.chimin) chimin = chisq(isvt(j,k),
-     1   ktrset)
+      if(ntpc(isvt(k,j)).eq.0) go to 1124
+      if(isvt(k,j) .eq. isvt1(j)) go to 1124
+      do 1125 ktr = 1,ntpc(isvt(k,j))
+1125  if(j.eq.jtpc(ktr,isvt(k,j))) ktrset = ktr
+      if(chisq(ktrset,isvt(k,j)).lt.chimin) isvt2(j) = isvt(k,j)
+      if(chisq(ktrset,isvt(k,j)).lt.chimin) chimin = chisq(ktrset,
+     1   isvt(k,j))
 1124  continue
       if(isvt2(j) .gt. 0) chisav_2(j) = chimin
 1123  continue
@@ -1086,13 +1086,13 @@ ccc
       if(ktr.gt.5) then
       call fcmin(chitmp,jtmp,chi5,j5,ktr,NO_TKS_MAX)
       do 303 k = 1,5
-      chisq(i,k) = chi5(k)
-303   jtpc(i,k) = j5(k)
+      chisq(k,i) = chi5(k)
+303   jtpc(k,i) = j5(k)
       ktr = 5
       else if(ktr.gt.0) then
       do 304 k = 1,ktr
-      chisq(i,k) = chitmp(k)
-304   jtpc(i,k) = jtmp(k)
+      chisq(k,i) = chitmp(k)
+304   jtpc(k,i) = jtmp(k)
       end if
       ntpc(i) = ktr
 301   continue
@@ -1104,8 +1104,8 @@ ccc
       chimin = 1000000.
       if(ntpc(i).eq.0) go to 305
       do 306 k = 1,ntpc(i)
-      if(chisq(i,k).lt.chimin) jtpc1(i) = jtpc(i,k)
-      if(chisq(i,k).lt.chimin) chimin   = chisq(i,k)
+      if(chisq(k,i).lt.chimin) jtpc1(i) = jtpc(k,i)
+      if(chisq(k,i).lt.chimin) chimin   = chisq(k,i)
 306   continue
       chisav(i) = chimin
       isvt1(jtpc1(i)) = i
