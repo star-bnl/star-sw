@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_full_tables.C,v 1.5 1999/07/26 20:54:15 kathy Exp $
+// $Id: QA_bfcread_dst_full_tables.C,v 1.6 1999/07/30 17:05:49 kathy Exp $
 // $Log: QA_bfcread_dst_full_tables.C,v $
+// Revision 1.6  1999/07/30 17:05:49  kathy
+// changed to use goto in loop instead of for loop because of CINT problems
+//
 // Revision 1.5  1999/07/26 20:54:15  kathy
 // changed output text to QAInfo: so that the QA sripts can tag on it; also cleaned up a bit and set to newer default input file
 //
@@ -37,7 +40,7 @@ class St_DataSet;
 St_DataSet *Event;
 
 
-void QA_bfcread_dst_full_tables(Int_t nevents=10, 
+void QA_bfcread_dst_full_tables(Int_t nevents=20, 
  const char *MainFile=
  "/disk00000/star/test/dev/tfs_Linux/Wed/year_2a/psc0208_01_40evts.dst.root",
  const char *fname="qa_full_tables.txt")
@@ -74,212 +77,169 @@ void QA_bfcread_dst_full_tables(Int_t nevents=10,
   St_DataSet *obj=0;
   Int_t tabcntr=0;
 
-   Int_t evcntr=0;
-   Int_t dstcntr=0;
+  Int_t evcntr=0;
+  Int_t dstcntr=0;
+  Int_t mkcntr=0;
 
-   Int_t cnt_event_header=0;
-   Int_t cnt_event_summary=0;
-   Int_t cnt_globtrk=0;
-   Int_t cnt_globtrk_aux=0;
-   Int_t cnt_vertex=0;
-   Int_t cnt_point=0;
-   Int_t cnt_globtrk2=0;
-   Int_t cnt_primtrk=0;
-   Int_t cnt_primtrk_aux=0;
-   Int_t cnt_dst_v0_vertex=0;
-   Int_t cnt_dst_xi_vertex=0;
-   Int_t cnt_dst_dedx=0;
-   Int_t cnt_particle=0;
-   Int_t cnt_TrgDet=0;
-   Int_t cnt_monitor_soft=0;
-   Int_t cnt_g2t_rch_hit=0;
-   Int_t cnt_kinkVertex=0;
-   Int_t cnt_ev0_eval=0;
+  Int_t cnt_event_header=0;
+  Int_t cnt_event_summary=0;
+  Int_t cnt_globtrk=0;
+  Int_t cnt_globtrk_aux=0;
+  Int_t cnt_vertex=0;
+  Int_t cnt_point=0;
+  Int_t cnt_globtrk2=0;
+  Int_t cnt_primtrk=0;
+  Int_t cnt_primtrk_aux=0;
+  Int_t cnt_dst_v0_vertex=0;
+  Int_t cnt_dst_xi_vertex=0;
+  Int_t cnt_dst_dedx=0;
+  Int_t cnt_particle=0;
+  Int_t cnt_TrgDet=0;
+  Int_t cnt_monitor_soft=0;
+  Int_t cnt_g2t_rch_hit=0;
+  Int_t cnt_kinkVertex=0;
+  Int_t cnt_ev0_eval=0;
 
 
 // Loop over events
-  for (int iev=0;iev<nevents; iev++)
-    {
-      chain->Clear();
-      int iret = chain->Make();
-      if (iret) break;
-
-      evcntr++;
-      ds=chain->GetDataSet("dst");
-      St_DataSetIter tabiter(ds);
-
-      tabcntr=0;
-
-      if (ds) {
-
-      dstcntr++;
+  int iret=0,iev=0;
+//for (iev=0;iev<nevents; iev++) {     // for loop code
+ EventLoop: if (iev<nevents && !iret) {      // goto loop code
+   chain->Clear();
+   iret = chain->Make();
+   iev++;                                   // goto loop code
+   cout << "   ...iret = " << iret << endl;
+   //if (iret != 0) break;                  // for loop code
+   if (!iret) {                             // goto loop code
+     evcntr++;
+     ds=chain->GetDataSet("dst");
+     St_DataSetIter tabiter(ds);
+    
+     tabcntr=0;
+     if (ds) {
+       dstcntr++;
 
        while (obj = tabiter.Next()) {
 //.. count all tables that exist:
-        if (obj->InheritsFrom("St_Table")) {
-          tabcntr++;
-
-          tabl = (St_Table *)tabiter.Find(obj->GetName());
-
-          if (tabl) {
-            if (strcmp(obj->GetName(),"event_header")==0) 
+         if (obj->InheritsFrom("St_Table")) {
+           tabcntr++;
+           tabl = (St_Table *)tabiter.Find(obj->GetName());
+         
+           if (tabl) {
+             if (strcmp(obj->GetName(),"event_header")==0) 
                cnt_event_header++;
-            if (strcmp(obj->GetName(),"event_summary")==0) 
+             if (strcmp(obj->GetName(),"event_summary")==0) 
                cnt_event_summary++;
-            if (strcmp(obj->GetName(),"globtrk")==0) 
+             if (strcmp(obj->GetName(),"globtrk")==0) 
                cnt_globtrk++;
-            if (strcmp(obj->GetName(),"globtrk_aux")==0) 
+             if (strcmp(obj->GetName(),"globtrk_aux")==0) 
                cnt_globtrk_aux++;
-            if (strcmp(obj->GetName(),"vertex")==0) 
+             if (strcmp(obj->GetName(),"vertex")==0) 
                cnt_vertex++;
-            if (strcmp(obj->GetName(),"point")==0) 
+             if (strcmp(obj->GetName(),"point")==0) 
                cnt_point++;
-            if (strcmp(obj->GetName(),"globtrk2")==0) 
+             if (strcmp(obj->GetName(),"globtrk2")==0) 
                cnt_globtrk2++;
-            if (strcmp(obj->GetName(),"primtrk")==0) 
+             if (strcmp(obj->GetName(),"primtrk")==0) 
                cnt_primtrk++;
-            if (strcmp(obj->GetName(),"primtrk_aux")==0) 
+             if (strcmp(obj->GetName(),"primtrk_aux")==0) 
                cnt_primtrk_aux++;
-            if (strcmp(obj->GetName(),"dst_v0_vertex")==0) 
+             if (strcmp(obj->GetName(),"dst_v0_vertex")==0) 
                cnt_dst_v0_vertex++;
-            if (strcmp(obj->GetName(),"dst_xi_vertex")==0) 
+             if (strcmp(obj->GetName(),"dst_xi_vertex")==0) 
                cnt_dst_xi_vertex++;
-            if (strcmp(obj->GetName(),"dst_dedx")==0) 
+             if (strcmp(obj->GetName(),"dst_dedx")==0) 
                cnt_dst_dedx++;
-            if (strcmp(obj->GetName(),"particle")==0) 
+             if (strcmp(obj->GetName(),"particle")==0) 
                cnt_particle++;
-            if (strcmp(obj->GetName(),"TrgDet")==0) 
+             if (strcmp(obj->GetName(),"TrgDet")==0) 
                cnt_TrgDet++;
-            if (strcmp(obj->GetName(),"monitor_soft")==0) 
+             if (strcmp(obj->GetName(),"monitor_soft")==0) 
                cnt_monitor_soft++;
-            if (strcmp(obj->GetName(),"g2t_rch_hit")==0) 
+             if (strcmp(obj->GetName(),"g2t_rch_hit")==0) 
                cnt_g2t_rch_hit++;
-            if (strcmp(obj->GetName(),"kinkVertex")==0) 
+             if (strcmp(obj->GetName(),"kinkVertex")==0) 
                cnt_kinkVertex++;
-            if (strcmp(obj->GetName(),"ev0_eval")==0) 
+             if (strcmp(obj->GetName(),"ev0_eval")==0) 
                cnt_ev0_eval++;
-
-          }
-        }
+           }
+         }
        }
-      }
-    }
+     }
+   }
+   goto EventLoop;                        // goto loop code
+ }
 
+  cout << "iret = " << iret << endl;
+  fout << "iret = " << iret << endl;
 
-      cout  << "QAInfo: # times Make called = " << evcntr << endl;
-      fout  << "QAInfo: # times Make called = " << evcntr << endl;
+  cout  << "QAInfo: # times Make called = " << iev << endl;
+  fout  << "QAInfo: # times Make called = " << iev << endl;
 
-      cout  << "QAInfo: # times found dst = " << dstcntr << endl << endl;
-      fout  << "QAInfo: # times found dst = " << dstcntr << endl << endl;
+  cout  << "# events found = " << evcntr << endl;
+  fout  << "# events found = " << evcntr << endl;
 
-      cout << "QAInfo: total # event_header tables = " << 
-         cnt_event_header << endl;
-      fout << "QAInfo: total # event_header tables = " << 
-         cnt_event_header << endl;
+  cout  << "QAInfo: # times found dst = " << dstcntr << endl << endl;
+  fout  << "QAInfo: # times found dst = " << dstcntr << endl << endl;
 
-      cout << "QAInfo: total # event_summary tables = " << 
-         cnt_event_summary << endl;
-      fout << "QAInfo: total # event_summary tables = " << 
-         cnt_event_summary << endl;
+  cout << "QAInfo: total # event_header tables = " << cnt_event_header << endl;
+  fout << "QAInfo: total # event_header tables = " << cnt_event_header << endl;
+ 
+  cout << "QAInfo: total # event_summary tables = "<<cnt_event_summary << endl;
+  fout << "QAInfo: total # event_summary tables = "<<cnt_event_summary << endl;
 
-      cout << "QAInfo: total # globtrk tables = " << 
-         cnt_globtrk << endl;
-      fout << "QAInfo: total # globtrk tables = " << 
-         cnt_globtrk << endl;
+  cout << "QAInfo: total # globtrk tables = " << cnt_globtrk << endl;
+  fout << "QAInfo: total # globtrk tables = " << cnt_globtrk << endl;
 
-      cout << "QAInfo: total # globtrk_aux tables = " << 
-         cnt_globtrk_aux << endl;
-      fout << "QAInfo: total # globtrk_aux tables = " << 
-         cnt_globtrk_aux << endl;
+  cout << "QAInfo: total # globtrk_aux tables = " << cnt_globtrk_aux << endl;
+  fout << "QAInfo: total # globtrk_aux tables = " << cnt_globtrk_aux << endl;
 
-      cout << "QAInfo: total # vertex tables = " << 
-         cnt_vertex << endl;
-      fout << "QAInfo: total # vertex tables = " << 
-         cnt_vertex << endl;
+  cout << "QAInfo: total # vertex tables = " << cnt_vertex << endl;
+  fout << "QAInfo: total # vertex tables = " << cnt_vertex << endl;
 
-      cout << "QAInfo: total # point tables = " << 
-         cnt_point << endl;
-      fout << "QAInfo: total # point tables = " << 
-         cnt_point << endl;
+  cout << "QAInfo: total # point tables = " << cnt_point << endl;
+  fout << "QAInfo: total # point tables = " << cnt_point << endl;
 
-      cout << "QAInfo: total # globtrk2 tables = " << 
-         cnt_globtrk2 << endl;
-      fout << "QAInfo: total # globtrk2 tables = " << 
-	 cnt_globtrk2 << endl;
+  cout << "QAInfo: total # globtrk2 tables = " << cnt_globtrk2 << endl;
+  fout << "QAInfo: total # globtrk2 tables = " << cnt_globtrk2 << endl;
 
+  cout << "QAInfo: total # primtrk tables = " << cnt_primtrk << endl;
+  fout << "QAInfo: total # primtrk tables = " << cnt_primtrk << endl;
 
-      cout << "QAInfo: total # primtrk tables = " << 
-         cnt_primtrk << endl;
-      fout << "QAInfo: total # primtrk tables = " << 
-	 cnt_primtrk << endl;
+  cout << "QAInfo: total # primtrk_aux tables = " << cnt_primtrk_aux << endl;
+  fout << "QAInfo: total # primtrk_aux tables = " << cnt_primtrk_aux << endl;
 
+  cout << "QAInfo: total # dst_v0_vertex tables = "<<cnt_dst_v0_vertex << endl;
+  fout << "QAInfo: total # dst_v0_vertex tables = "<<cnt_dst_v0_vertex << endl;
 
-      cout << "QAInfo: total # primtrk_aux tables = " << 
-         cnt_primtrk_aux << endl;
-      fout << "QAInfo: total # primtrk_aux tables = " << 
-	 cnt_primtrk_aux << endl;
+  cout << "QAInfo: total # ev0_eval tables = " << cnt_ev0_eval << endl;
+  fout << "QAInfo: total # ev0_eval tables = " << cnt_ev0_eval << endl;
 
+  cout << "QAInfo: total # dst_xi_vertex tables = "<<cnt_dst_xi_vertex << endl;
+  fout << "QAInfo: total # dst_xi_vertex tables = "<<cnt_dst_xi_vertex << endl;
 
-      cout << "QAInfo: total # dst_v0_vertex tables = " << 
-         cnt_dst_v0_vertex << endl;
-      fout << "QAInfo: total # dst_v0_vertex tables = " << 
-	 cnt_dst_v0_vertex << endl;
+  cout << "QAInfo: total # kinkVertex tables = " << cnt_kinkVertex << endl;
+  fout << "QAInfo: total # kinkVertex tables = " << cnt_kinkVertex << endl;
 
+  cout << "QAInfo: total # dst_dedx tables = " << cnt_dst_dedx << endl;
+  fout << "QAInfo: total # dst_dedx tables = " << cnt_dst_dedx << endl;
 
-      cout << "QAInfo: total # ev0_eval tables = " << 
-         cnt_ev0_eval << endl;
-      fout << "QAInfo: total # ev0_eval tables = " << 
-	 cnt_ev0_eval << endl;
+  cout << "QAInfo: total # particle tables = " << cnt_particle << endl;
+  fout << "QAInfo: total # particle tables = " << cnt_particle << endl;
 
-      cout << "QAInfo: total # dst_xi_vertex tables = " << 
-         cnt_dst_xi_vertex << endl;
-      fout << "QAInfo: total # dst_xi_vertex tables = " << 
-	 cnt_dst_xi_vertex << endl;
+  cout << "QAInfo: total # TrgDet tables = " << cnt_TrgDet << endl;
+  fout << "QAInfo: total # TrgDet tables = " << cnt_TrgDet << endl;
 
-      cout << "QAInfo: total # kinkVertex tables = " << 
-         cnt_kinkVertex << endl;
-      fout << "QAInfo: total # kinkVertex tables = " << 
-	 cnt_kinkVertex << endl;
+  cout << "QAInfo: total # monitor_soft tables = " << cnt_monitor_soft << endl;
+  fout << "QAInfo: total # monitor_soft tables = " << cnt_monitor_soft << endl;
 
-
-      cout << "QAInfo: total # dst_dedx tables = " << 
-         cnt_dst_dedx << endl;
-      fout << "QAInfo: total # dst_dedx tables = " << 
-	 cnt_dst_dedx << endl;
-
-
-      cout << "QAInfo: total # particle tables = " << 
-         cnt_particle << endl;
-      fout << "QAInfo: total # particle tables = " << 
-	 cnt_particle << endl;
-
-
-      cout << "QAInfo: total # TrgDet tables = " << 
-         cnt_TrgDet << endl;
-      fout << "QAInfo: total # TrgDet tables = " << 
-	 cnt_TrgDet << endl;
-
-
-      cout << "QAInfo: total # monitor_soft tables = " << 
-         cnt_monitor_soft << endl;
-      fout  << "QAInfo: total # monitor_soft tables = " << 
-	 cnt_monitor_soft << endl;
-
-
-      cout  << "QAInfo: total # g2t_rch_hit tables = " << 
-         cnt_g2t_rch_hit << endl;
-      fout  << "QAInfo: total # g2t_rch_hit tables = " << 
-	 cnt_g2t_rch_hit << endl;
+  cout  << "QAInfo: total # g2t_rch_hit tables = " << cnt_g2t_rch_hit << endl;
+  fout  << "QAInfo: total # g2t_rch_hit tables = " << cnt_g2t_rch_hit << endl;
 
 
 // ------------------------------------------------------------
 
-      fout.close();
-      chain->Finish();    
+  fout.close();
+  chain->Finish();    
      
 }
-
-
-
-
-
