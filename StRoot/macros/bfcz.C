@@ -1,4 +1,4 @@
-// $Id: bfcz.C,v 1.4 1999/02/19 22:24:54 fisyak Exp $
+// $Id: bfcz.C,v 1.5 1999/02/19 22:27:23 fisyak Exp $
 //#define gtrack
 #define trs
 #define emc
@@ -161,25 +161,6 @@ bfcz(const Int_t Nevents=1,const Char_t *fzfile ="/disk1/star/test/muons.fz")
   Int_t i=0;
   for (Int_t i =1; i <= Nevents; i++){
     if (chain->Make(i)) break;
-#if 0
-    St_DataSet *dst = chain->DataSet("dst");
-    if (dst) {
-      if (root_out){
-	gBenchmark->Start("root i/o");
-	root_out->cd();
-	chain->FillClone();
-	//	dst->SetWrite();// root output
-	gBenchmark->Stop("root i/o");
-      }
-#endif
-    }
-    //    root_tree->cd();
-    //    printf ("Fill Tree\n");
-    //    chain->FillTree();
-    //  histCanvas->Modified();
-    //  histCanvas->Update();
-
-
     if (i != Nevents) chain->Clear();
     printf ("===========================================\n");
     printf ("=========================================== Done with Event no. %d\n",i);
