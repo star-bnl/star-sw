@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.28 2000/07/03 19:34:06 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.29 2000/07/21 17:47:55 yepes Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -217,6 +217,15 @@ Int_t St_l3t_Maker::MakeOnLine(){
 //
    tracker.setup ( 30000, 3000 ) ;
    tracker.para.infoLevel = 10 ;
+   tracker.para.hitChi2Cut   = 50 ;
+   tracker.para.trackChi2Cut = 20 ;
+   tracker.para.goodHitChi2  = 5 ;
+   tracker.para.dphi=0.1;
+   tracker.para.deta=0.1;
+   tracker.para.distanceMerge = 5 ;
+   tracker.xyError = 0.1 ;
+   tracker.zError  = 0.2  ;
+//
    for ( int ie = 0 ; ie < gl3.nEvents ; ie++ ) gl3.event[ie].bField = 0.5 ;
    tracker.reset();
 //
