@@ -8,7 +8,9 @@
 	float	tdrift[4];  /* parameters of a P3-fit of drift-time */
 	float	sig_rad[4]; /* parameters of a P3-fit of sigma(rad) */
 	float	sig_azi[4]; /* parameters of a P3-fit of sigma(azi) */
+	float	err_rad[4]; /* parameters of a P3-fit of rad error */
+	float	err_azi[4]; /* parameters of a P3-fit of azi error */
    };
 
-/*  Last mod. for ffs_gaspar:   $Date: 1998/01/19 02:25:13 $  */
+/*  Last mod. for ffs_gaspar:   $Date: 2000/02/07 13:05:52 $  */
 
