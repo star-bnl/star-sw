@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.14 2003/11/13 16:24:59 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.15 2003/11/14 17:33:19 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.15  2003/11/14 17:33:19  caines
+ * DOnt read from pedmaker for now
+ *
  * Revision 1.14  2003/11/13 16:24:59  caines
  * Further improvements to get simulator looking like reality
  *
@@ -289,8 +292,8 @@ Int_t StSvtSimulationMaker::InitRun(int runumber)
 { //when the run changes
   if(Debug()) gMessMgr->Info() <<"StSvtSimulationMaker::InitRun()"<<endm;
  
-  ((StSvtPedMaker*) GetMaker("StSvtPedMaker"))->ReadFromFile("data/ped/pedestal_4065001.root");
-  ((StSvtPedMaker*) GetMaker("StSvtPedMaker"))->ReadRMSFromFile("data/ped/rms2_pedestal_4065001.root");
+  //((StSvtPedMaker*) GetMaker("StSvtPedMaker"))->ReadFromFile("data/ped/pedestal_4065001.root");
+  // ((StSvtPedMaker*) GetMaker("StSvtPedMaker"))->ReadRMSFromFile("data/ped/rms2_pedestal_4065001.root");
   
   //read from tabase
   getConfig();
