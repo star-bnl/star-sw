@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.cxx,v 2.4 1999/11/11 10:19:52 ullrich Exp $
+ * $Id: StTpcHit.cxx,v 2.5 1999/12/01 15:56:28 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.cxx,v $
- * Revision 2.4  1999/11/11 10:19:52  ullrich
- * Inlined sector() and padrow().
+ * Revision 2.5  1999/12/01 15:56:28  ullrich
+ * Renamed xxxInCluster() methods to xxxInHit()
  *
  * Revision 2.5  1999/12/01 15:56:28  ullrich
  * Renamed xxxInCluster() methods to xxxInHit()
@@ -36,7 +36,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.4 1999/11/11 10:19:52 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.5 1999/12/01 15:56:28 ullrich Exp $";
 
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 
@@ -97,13 +97,13 @@ StTpcHit::StTpcHit(const dst_point_st& pt)
 StTpcHit::~StTpcHit() {/* noop */}
 
 StObject*
-StTpcHit::padsInCluster() const
+StTpcHit::clone() { return new StTpcHit(*this); }
 
 ULong_t
 StTpcHit::padsInHit() const
 {
     return bits(15, 7);   // bits 15-21
-StTpcHit::pixelsInCluster() const
+}
 
 ULong_t
 StTpcHit::pixelsInHit() const

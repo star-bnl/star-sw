@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.3 1999/11/11 10:19:55 ullrich Exp $
+ * $Id: StTpcHit.h,v 2.4 1999/12/01 15:56:31 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
- * Revision 2.3  1999/11/11 10:19:55  ullrich
- * Inlined sector() and padrow().
+ * Revision 2.4  1999/12/01 15:56:31  ullrich
+ * Renamed xxxInCluster() methods to xxxInHit()
  *
  * Revision 2.4  1999/12/01 15:56:31  ullrich
  * Renamed xxxInCluster() methods to xxxInHit()
@@ -49,8 +49,8 @@ public:
 
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
-    ULong_t   padsInCluster() const;
-    ULong_t   pixelsInCluster() const;
+
+    ULong_t   sector() const;          // 0-23
     ULong_t   padrow() const;          // 0-44
     ULong_t   padsInHit() const;
     ULong_t   pixelsInHit() const;
