@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.cxx,v 1.11 2002/02/22 14:30:51 dunlop Exp $
+ * $Id: StRichSpectraMaker.cxx,v 1.12 2002/02/22 18:18:13 dunlop Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StRichSpectraMaker.cxx,v $
+ * Revision 1.12  2002/02/22 18:18:13  dunlop
+ * condom to allow for 0 photons passing mean calculation without NAN.
+ *
  * Revision 1.11  2002/02/22 14:30:51  dunlop
  * Fixed bug in filling of StEvent StRichSpectra.
  * Loosened cuts to match StRichPIDMaker.
@@ -734,7 +737,7 @@ Int_t StRichSpectraMaker::Make() {
 			      mass2, lineIntegralRatio, totalPath,
 			      mTracer->trackAngle()/degree, iflag, dEdx,
 			      mD[0], mD[1], mD[2],
-			      mNpd[0], mNpd[1], mNpd[2]);
+			      int(mNpd[0]), int(mNpd[1]), int(mNpd[2]));
 	//
 	// default Production
 	//
@@ -756,7 +759,7 @@ Int_t StRichSpectraMaker::Make() {
 void StRichSpectraMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRichSpectraMaker.cxx,v 1.11 2002/02/22 14:30:51 dunlop Exp $\n");
+    printf("* $Id: StRichSpectraMaker.cxx,v 1.12 2002/02/22 18:18:13 dunlop Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -1158,7 +1161,11 @@ void StRichSpectraMaker::doIdentification(StTrack* track) {
 // 		    thePhotonInfo.push_back(photonInfo[ll]);
    		}
  	    }
-	    meanD /= numberOfCts;
+	    if (numberOfCts>0) {
+		
+		meanD /= numberOfCts;
+	    }
+	    
 	    mD[kk] = meanD;
 	    mNpd[kk] = numberOfCts;
 // 	    PR(meanD);
