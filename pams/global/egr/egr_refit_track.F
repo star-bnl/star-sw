@@ -132,6 +132,7 @@ C     at start mark all the points that belong to a track as good
       ntry   = 1
       enough=.false.
 
+
 CC:   Load primary vertex position coordinates:
 
       prim_vrtx_x = 0.0
@@ -204,32 +205,34 @@ C     load the working arrays for the fitting subroutines
 C     omit points that were marked as outliers
 
                if(good_hit(i)) then
-                  ncir = ncir+1
                   ient = gtrk(igtrk).ipnt(i)
-                  xcir(ncir) = tphit(ient).x
-                  ycir(ncir) = tphit(ient).y
-                  zcir(ncir) = tphit(ient).z
-                  wcir(ncir) = 1.0/(tphit(ient).dx**2+
-     +                 tphit(ient).dy**2)
-
+                  if( ient .ne. 0) then
+                     ncir = ncir+1
+                     xcir(ncir) = tphit(ient).x
+                     ycir(ncir) = tphit(ient).y
+                     zcir(ncir) = tphit(ient).z
+                     wcir(ncir) = 1.0/(tphit(ient).dx**2+
+     +                    tphit(ient).dy**2)
+                     
 C     calculate correction to the error, coming from the crossing angle
-                  iret = egr_cross_fact(tphit(ient).row,xcir(ncir),
-     +                 ycir(ncir),xold,yold,cf,theta)
-                  
-                  if(ient1 .eq. 0) then
-                     ient1 = 1
-                  else if(ient1 .eq. 1) then
-                     ient1 = 2
-                     wcir(ncir-1) = wcir(ncir-1)/cf
+                     iret = egr_cross_fact(tphit(ient).row,xcir(ncir),
+     +                    ycir(ncir),xold,yold,cf,theta)
+                     
+                     if(ient1 .eq. 0) then
+                        ient1 = 1
+                     else if(ient1 .eq. 1) then
+                        ient1 = 2
+                        wcir(ncir-1) = wcir(ncir-1)/cf
+                     endif
+                     xold = xcir(ncir)
+                     yold = ycir(ncir)
+                     wcir(ncir) = wcir(ncir)/cf
+                     wlin(ncir) = 1.0/tphit(ient).dz**2
+                     
+                     pnt(ncir)  = i ! pointer that identifies outliers
                   endif
-                  xold = xcir(ncir)
-                  yold = ycir(ncir)
-                  wcir(ncir) = wcir(ncir)/cf
-                  wlin(ncir) = 1.0/tphit(ient).dz**2
-                  
-                  pnt(ncir)  = i ! pointer that identifies outliers
                endif
-            enddo   ! i
+            enddo               ! i
          
          endif    ! itpct
          gtrk(igtrk).nfit = ncir
@@ -252,6 +255,7 @@ C     try the first full half of the circle
                ncir = j-1
             endif
             gtrk(igtrk).nfit = ncir
+
 C     
 C     Check whether enough hits survived
             if(ncir.le.egrpar(1).minfit) then
@@ -304,6 +308,7 @@ C     could not identify the outlier
             endif
          endif
       enddo
+
 C     
 C     clean up list of hits and remove outliers
       if(.not.enough) then

@@ -119,7 +119,8 @@ C Adjust for ssd later
          firsthit = gtrk(igtrk).pos(gtrk(igtrk).nhit)
          i = gtrk(igtrk).nhit
          det = gtrk(igtrk).det(i)        
-         do while (firsthit .lt. 0 .or. det .gt. 1)
+         do while (firsthit .lt. 0 .or. det .gt. 1 .or.
+     +        gtrk(igtrk).ipnt(i) .eq. 0)
             i = i-1
             firsthit = gtrk(igtrk).pos(i)
             det = gtrk(igtrk).det(i)
@@ -139,7 +140,8 @@ C Adjust for ssd later
          firsthit = gtrk(igtrk).pos(gtrk(igtrk).nhit)
          i = gtrk(igtrk).nhit
          det = gtrk(igtrk).det(i)
-         do while (firsthit .lt. 0 .or. det .gt. 2)
+         do while (firsthit .lt. 0 .or. det .gt. 2 .or.
+     +        gtrk(igtrk).ipnt(i) .eq. 0)
             i = i-1
             firsthit = gtrk(igtrk).pos(i)
             det = gtrk(igtrk).det(i)
@@ -147,7 +149,8 @@ C Adjust for ssd later
          
          firsthit = gtrk(igtrk).ipnt(i)
          if( det .eq. 2) then
-            do while (det .eq. 2 .or. gtrk(igtrk).pos(i) .lt. 0)
+            do while (det .eq. 2 .or. gtrk(igtrk).pos(i) .lt. 0 .or.
+     +           gtrk(igtrk).ipnt(i) .eq. 0)
                i = i-1
                firsthit = gtrk(igtrk).ipnt(i)
                det = gtrk(igtrk).det(i)
@@ -177,7 +180,8 @@ C     Now find last point on track and calculate track length.
       if (firsthit .gt. 0) then
          if (itpct.ne.0) then
             i = 1
-            do while (gtrk(igtrk).pos(i) .lt. 0)
+            do while (gtrk(igtrk).pos(i) .lt. 0 .or. 
+     +           gtrk(igtrk).ipnt(i) .eq.0)
                i=i+1
             enddo
             lasthit = gtrk(igtrk).ipnt(i)
@@ -198,7 +202,8 @@ C---  <<<<<<<
             
          else
             i = gtrk(igtrk).nhit
-            do while( gtrk(igtrk).pos(i) .lt. 0) 
+            do while( gtrk(igtrk).pos(i) .lt. 0 .or.
+     +           gtrk(igtrk).ipnt(i) .eq. 0 ) 
                i = i-1
                lasthit = gtrk(igtrk).pos(i)
                det = gtrk(igtrk).det(i)

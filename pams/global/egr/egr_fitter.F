@@ -170,37 +170,39 @@ C**
             tptrack(i).id_globtrk = -1*tptrack(i).id_globtrk
             
          end do
-         do ithit=1,tpc_group_h.nok        ! Loop over number of hits
-            if( tpc_group(ithit).ident .eq. 0) then
-               itrk = tpc_group(ithit).id1/1000
-*     VP*        if (itrk.ge.1.and.itrk.le.mxtrack) then
-               if (itrk.ge.1.and.itrk.le.tptrack_h.nok) then !!!*VP*
-                  ient = tpc_group(ithit).id1 - itrk*1000
-                  if (ient.ge.1.and.ient.le.mxpnt_tpc) then
-                     if ( gtrk(itrk).nhit .lt. mxpnt_tpc) then !!*VP*
+         do ithit=1,tpc_group_h.nok ! Loop over number of hits
+            itrk = tpc_group(ithit).id1/1000
+            if (itrk.ge.1.and.itrk.le.tptrack_h.nok) then !!!*VP*
+               gtrk(itrk).nhit = gtrk(itrk).nhit + 1
+               gtrk(itrk).ntpc = gtrk(itrk).ntpc + 1
+               ient = tpc_group(ithit).id1 - itrk*1000
+               if (ient.ge.1.and.ient.le.mxpnt_tpc) then  
+                  if ( gtrk(itrk).nhit .lt. mxpnt_tpc) then !!*VP*
+                     gtrk(itrk).pos(ient) = ient
+                     gtrk(itrk).det(ient) = 1
+                     if( tpc_group(ithit).ident .eq. 0) then     
                         gtrk(itrk).ipnt(ient) = tpc_group(ithit).id2
-                        gtrk(itrk).pos(ient) = ient
-                        gtrk(itrk).det(ient) = 1
-                        gtrk(itrk).nhit = gtrk(itrk).nhit + 1
-                        gtrk(itrk).ntpc = gtrk(itrk).ntpc + 1
-                     endif
-                  else
-                     if( ient .eq. mxpnt_tpc+1) then 
-                        write (errmsg,'(A45,I5)')
-     +                       ' EGR_REFITTER-W: Too many hits on track', itrk
-                        call message(errmsg,1,imsg2)
+                     else
+                        gtrk(itrk).ipnt(ient) = 0
                      endif
                   endif
+                  
                else
-*     VP*           if (itrk.gt.mxtrack) then
-                  if (itrk.gt.tptrack_h.nok) then !!*VP*
-                     write (errmsg,'(A45,I8)')
-     +                    ' EGR_REFITTER-W: track id out of range',
-     +                    tpc_group(ithit).id1
-                     call message(errmsg,1,imsg3)
+                  if( ient .eq. mxpnt_tpc+1) then 
+                     write (errmsg,'(A45,I5)')
+     +                    ' EGR_REFITTER-W: Too many hits on track', itrk
+                     call message(errmsg,1,imsg2)
                   endif
                endif
-            endif               ! Should hit be used in fit
+            else
+*     VP*           if (itrk.gt.mxtrack) then
+               if (itrk.gt.tptrack_h.nok) then !!*VP*
+                  write (errmsg,'(A45,I8)')
+     +                 ' EGR_REFITTER-W: track id out of range',
+     +                 tpc_group(ithit).id1
+                  call message(errmsg,1,imsg3)
+               endif
+            endif
          enddo                  ! Loop over ithit
       endif                     ! usetpc.gt.0
          
