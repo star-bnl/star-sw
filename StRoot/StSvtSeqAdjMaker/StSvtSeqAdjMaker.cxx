@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.7 2000/08/21 12:57:31 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.8 2000/08/24 04:23:50 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  **************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.8  2000/08/24 04:23:50  caines
+ * Improved histograms
+ *
  * Revision 1.7  2000/08/21 12:57:31  caines
  * Now opens and reads in ped using CalibMaker
  *
@@ -283,12 +286,19 @@ Int_t StSvtSeqAdjMaker::CreateHist(Int_t tNuOfHyb)
 {
    // Create Histograms
 
-   mInvProdSeqAdj = new TH1D*[tNuOfHyb];
+   mInvProdSeqAdj= new TH1D*[tNuOfHyb];
+   mInvProdSeqAdj= new TH1D*[tNuOfHyb];
+   mRawAdc = new TH1F*[tNuOfHyb];
+   mAdcAfter = new TH1F*[tNuOfHyb];
  
-  char invProdTitle_fcut[25];
-  char  Index[3];
-  char* prodTitle_fcut;
-  
+   char invProdTitle_cut[25];
+   char RawTitle[25];
+   char AdcAfterTitle[25];
+   char  Index[3];
+   char* prodTitle_cut;
+   char* RawTitle_cut;
+   char* AdcAf_cut;
+
   for (int barrel = 1;barrel <= mSvtToBeAdjEvent->getNumberOfBarrels();barrel++) {
     for (int ladder = 1;ladder <= mSvtToBeAdjEvent->getNumberOfLadders(barrel);ladder++) {
       for (int wafer = 1;wafer <= mSvtToBeAdjEvent->getNumberOfWafers(barrel);wafer++) {
@@ -297,10 +307,17 @@ Int_t StSvtSeqAdjMaker::CreateHist(Int_t tNuOfHyb)
             int index = mSvtToBeAdjEvent->getHybridIndex(barrel,ladder,wafer,hybrid);
             if(index < 0) continue;
             
-            sprintf(invProdTitle_fcut,"InvProdSeqAdj"); 
+            sprintf(invProdTitle_cut,"InvProdSeqAdj"); 
+            sprintf(RawTitle,"RawAdcIn");
+ 	    sprintf(AdcAfterTitle,"AdcAfterCuts");
             sprintf(Index,"%d", index);
-            prodTitle_fcut = strcat(invProdTitle_fcut,Index);
-	    mInvProdSeqAdj[index] = new TH1D(prodTitle_fcut,"freqOfInvProd vs log10 of InvProd",100,0.,30.);
+            prodTitle_cut = strcat(invProdTitle_cut,Index);
+            RawTitle_cut = strcat(RawTitle,Index);
+	    AdcAf_cut = strcat(AdcAfterTitle,Index);	    
+
+	    mInvProdSeqAdj[index] = new TH1D(prodTitle_cut,"freqOfInvProd vs log10 of InvProd After Seq Adusting",100,0.,30.);
+	    mRawAdc[index] = new TH1F(RawTitle_cut,"freq Of Adc Values Before Seq Adjusting",150,-50.,100.);
+	    mAdcAfter[index] = new TH1F(AdcAf_cut,"freq Of Adc Values After Seq Adjusting",150,-50.,100.);
 	}
       }
     }
@@ -367,7 +384,7 @@ Int_t StSvtSeqAdjMaker::Make()
 						       seq);
 		  continue;
 		}
-		
+		MakeHistogramsAdc(index,Anode,1);
 	      }
 	      //Perform Asic like zero suppression
 	      AdjustSequences1(Anode);
@@ -375,9 +392,11 @@ Int_t StSvtSeqAdjMaker::Make()
 	      //Perform E896 type zero-suppresion (look for non-noise like signals
 	      if(m_inv_prod_lo){
 		mInvProd->FindInvProducts(mPedOffSet,Anode);
+		MakeHistogramsProb(index,Anode);
 		AdjustSequences2(Anode);
-		MakeHistograms(index,Anode);
+
 	      }
+	      MakeHistogramsAdc(index,Anode,2);
 	    }
 	  
 	  mHybridToBeAdjData->SetAnodeList();
@@ -537,7 +556,7 @@ Int_t StSvtSeqAdjMaker::AdjustSequences2(int Anode){
 
 
 //______________________________________________________________________________
-void StSvtSeqAdjMaker::MakeHistograms(int index,int Anode){
+void StSvtSeqAdjMaker::MakeHistogramsProb(int index,int Anode){
   
   int mSequence;
   int stTimeBin,len,status;
@@ -559,6 +578,36 @@ void StSvtSeqAdjMaker::MakeHistograms(int index,int Anode){
 	{
 	  tempBuffer = mInvProd->GetBuffer(stTimeBin + j);
 	  mInvProdSeqAdj[index]->Fill(tempBuffer);
+	}
+    }
+  
+  //cout<<"******* making histogram finished *******"<<endl; 
+}
+
+
+//_____________________________________________________________________________
+void StSvtSeqAdjMaker::MakeHistogramsAdc(int index,int Anode,int Count){
+  
+  int mSequence;
+  int len,status;
+  unsigned char* adc;
+
+  StSequence* svtSequence;
+  
+  mHybridToBeAdjData = (StSvtHybridData *)mSvtToBeAdjEvent->at(index);
+  if( !mHybridToBeAdjData) return;
+  
+  
+  status = mHybridToBeAdjData->getListSequences(Anode,mSequence,svtSequence);
+  
+  for(int mSeq = 0; mSeq < mSequence; mSeq++) 
+    { 
+      adc = svtSequence[mSeq].firstAdc;
+      len = svtSequence[mSeq].length;
+      for(int j = 0 ; j < len; j++)
+	{
+	  if( Count ==1) mRawAdc[index]->Fill((int)adc[j]-mPedOffSet);
+	  else  mAdcAfter[index]->Fill((int)adc[j]-mPedOffSet);
 	}
     }
   
