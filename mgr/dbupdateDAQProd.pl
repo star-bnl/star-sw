@@ -27,7 +27,7 @@ my @DISKR = (
 #              "/star/rcf/disk00001/star/reco",
 #              "/star/rcf/data09/reco",
 #              "/star/rcf/data10/reco",
-              "/star/rcf/data05/reco",
+#              "/star/rcf/data05/reco",
 #              "/star/rcf/data08/reco",
 #              "/star/rcf/data07/reco",
 ); 
@@ -198,7 +198,7 @@ my $ndbOnFiles = 0;
  }
  
  print "\nFinding daq DST files in HPSS\n";
- my $ftpRDaq = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>200)
+ my $ftpRDaq = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>400)
    or die "HPSS access failed";
  $ftpRDaq->login("starreco","MockData") or die "HPSS access failed";
 
