@@ -77,7 +77,7 @@ while (<>) {
 
 }
  open (OUT,">> $outfile") or die "Can't open $outfile";
-  print OUT "JobInfo: ", $jbStat,"  %  ",$nodeID,"  %  ",$job_file,  "\n"; 
+  print OUT "JobInfo: ","  %  " $jbStat,"  %  ",$nodeID,"  %  ",$job_file,  "\n"; 
 
   close (OUT);
 
