@@ -3,66 +3,33 @@
 * ----------------------------------------------------------------
 * this is the initialization kumac for the sca event by event package
 * ----------------------------------------------------------------
-* 8/4/98 - K. Turner - editted to make standard
+* 8/4/98 - K. Turner - edited to make standard
+* 8/7/98 - LDC - added switches
  
 * ***************************************************************
-macro init
+macro init prior_switch=0 ensemble_switch=0 analysis_switch=1
   
   macro/global/import *
-  message ' Initializing sca tables'
-  
+  message 'initialize sca tables and switches '  
   cd [params]
   
   dio/newfilestream      SCAPARAM  $STAR/params/ebye/scaconst.xdf r 
   dio/stream/getevent    SCAPARAM
   dio/stream/close       SCAPARAM
   
+* set switches
+  cd [params]/ebye
+  if [prior_switch]=1 then 
+    tdm/table/cell/putvalue 'sca_switch[0].makePrior' 1
+  endif
+  if [ensemble_switch]=1 then 
+    tdm/table/cell/putvalue 'sca_switch[0].makeEnsembleAve' 1
+  endif
+  if [analysis_switch]=1 then 
+    tdm/table/cell/putvalue 'sca_switch[0].doAnalysis' 1
+  endif
+
   cd /dui
-  
-return
-
-* ******************************************************
-
-* ***************************************************************
-macro prior
-  
-  cd [params]/ebye
-  tdm/table/cell/putvalue 'sca_switch[0].useDeltaD'      0
-  tdm/table/cell/putvalue 'sca_switch[0].useDimension'   0
-  tdm/table/cell/putvalue 'sca_switch[0].useEntropy'     0
-  tdm/table/cell/putvalue 'sca_switch[0].makePrior'      1
-  tdm/table/cell/putvalue 'sca_switch[0].doAnalysis'     0
-  cd /dui 
-  
-return
-
-* ******************************************************
-
-* ***************************************************************
-macro ensemble
-  
-  cd [params]/ebye
-  tdm/table/cell/putvalue 'sca_switch[0].useDeltaD'      0
-  tdm/table/cell/putvalue 'sca_switch[0].useDimension'   0
-  tdm/table/cell/putvalue 'sca_switch[0].useEntropy'     0
-  tdm/table/cell/putvalue 'sca_switch[0].makePrior'      1
-  tdm/table/cell/putvalue 'sca_switch[0].doAnalysis'     0
-  cd /dui 
-  
-return
-
-* ******************************************************
-
-* ***************************************************************
-macro deltad
-  
-  cd [params]/ebye
-  tdm/table/cell/putvalue 'sca_switch[0].useDeltaD'      0
-  tdm/table/cell/putvalue 'sca_switch[0].useDimension'   0
-  tdm/table/cell/putvalue 'sca_switch[0].useEntropy'     0
-  tdm/table/cell/putvalue 'sca_switch[0].makePrior'      1
-  tdm/table/cell/putvalue 'sca_switch[0].doAnalysis'     0
-  cd /dui 
   
 return
 
