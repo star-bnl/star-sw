@@ -2,7 +2,7 @@
 %
 % StMcEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StMcEvent.tex,v 2.6 2003/04/16 18:12:35 calderon Exp $
+% $Id: StMcEvent.tex,v 2.7 2003/05/15 18:29:04 calderon Exp $
 %
 % Authors:Michael A. Lisa
 %         Thomas S. Ullrich
@@ -23,6 +23,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StMcEvent.tex,v $
+% Revision 2.7  2003/05/15 18:29:04  calderon
+% Added data members from modified g2t_event table:
+% Event Generator Final State Tracks, N Binary Collisions,
+% N Wounded Nucleons East and West, N Jets.
+%
 % Revision 2.6  2003/04/16 18:12:35  calderon
 % Documentation on subprocess id.
 %
@@ -1279,6 +1284,11 @@ PositionOfHits(StMcTrack *track)
     Number of neutrons of particle coming from the ``East'', read from g2t\_event.
     \index{nEast}
 
+    \verb+unsigned long eventGeneratorFinalStateTracks() const;+\\
+    As the name implies, this has the number of final stated tracks coming
+    from the event generator, read from g2t\_event.
+    \index{event generator final state tracks}
+
     \verb+unsigned long numberOfPrimaryTracks() const;+\\
     Number of primary tracks read from g2t\_event.  Note that this is
     not coming from {\tt primaryVertex()->daughters().size()} so one
@@ -1289,11 +1299,12 @@ PositionOfHits(StMcTrack *track)
     \index{primary tracks}
 
     \verb+unsigned long subProcessId() const;+\\
-    This is used for simulated Pythia pp events, where the
+    This is used for simulated Pythia pp events, where
     one can study a given reaction, e.g. gg->QQbar = 82, and
     gg->J/Psi+g = 86. Refer to the Pythia manual for the
     subprocess ids.  Read from g2t\_event.
-    \index{impact parameter}
+    \index{subprocess ID}
+    \index{Pythia}
 
     \verb+float impactParameter() const;+\\
     Impact parameter of collision, read from g2t\_event.
@@ -1306,6 +1317,22 @@ PositionOfHits(StMcTrack *track)
     \verb+float triggerTimeOffset() const;+\\
     Trigger time offset, read from g2t\_event.
     \index{trigger time offset}
+
+    \verb+unsigned long nBinary() const;+\\
+    Returns the number of binary collisions.  Read from g2t\_event.
+    \index{binary collisions}
+
+    \verb+unsigned long nWoundedEast() const;+\\
+    \verb+unsigned long nWoundedWest() const;+\\
+    Return the number of binary of wounded nucleons from each collision
+    direction.  Read from g2t\_event.
+    \index{wounded nucleons}
+
+    \verb+unsigned long nJets() const;+\\
+    Number of jets in the event.  Read from g2t\_event.
+    \index{jets}
+
+
 
     \verb+StMcVertex* primaryVertex();+\\
     Returns a pointer to primary vertex. The same object is stored

@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.8 2003/03/18 22:37:43 calderon Exp $
+ * $Id: StMcEvent.hh,v 2.9 2003/05/15 18:28:47 calderon Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.9  2003/05/15 18:28:47  calderon
+ * Added data members from modified g2t_event table:
+ * Event Generator Final State Tracks, N Binary Collisions,
+ * N Wounded Nucleons East and West, N Jets.
+ *
  * Revision 2.8  2003/03/18 22:37:43  calderon
  * Added member mSubProcessId which is used for Pythia events.
  * Only is set from constructor from g2t_event table.
@@ -92,12 +97,16 @@ public:
     unsigned long                nWest() const;
     unsigned long                zEast() const;
     unsigned long                nEast() const;
+    unsigned long                eventGeneratorFinalStateTracks() const;
     unsigned long                numberOfPrimaryTracks() const;
-    unsigned long                subProcessId() const;
+    unsigned long                subProcessId() const;  
     float                        impactParameter() const;
     float                        phiReactionPlane() const;
     float                        triggerTimeOffset() const;
-    
+    unsigned long                nBinary() const;
+    unsigned long                nWoundedEast() const;
+    unsigned long                nWoundedWest() const;
+    unsigned long                nJets() const;
     
     
     StMcVertex*                    primaryVertex();
@@ -137,10 +146,15 @@ public:
     void setNWest(unsigned long);
     void setZEast(unsigned long);
     void setNEast(unsigned long);
+    void setEventGeneratorFinalStateTracks(unsigned long);
     void setNumberOfPrimaryTracks(unsigned long);
     void setImpactParameter(float);
     void setPhiReactionPlane(float);
     void setTriggerTimeOffset(float);
+    void setNBinary(unsigned long);
+    void setNWoundedEast(unsigned long);
+    void setNWoundedWest(unsigned long);
+    void setNJets(unsigned long);
     void setPrimaryVertex(StMcVertex*);  
     void setTpcHitCollection(StMcTpcHitCollection*);               
     void setSvtHitCollection(StMcSvtHitCollection*);               
@@ -162,11 +176,16 @@ protected:
     unsigned long                  mNWest;
     unsigned long                  mZEast;
     unsigned long                  mNEast;
+    unsigned long                  mEvGenFSTracks; // Number of final state event generator tracks
     unsigned long                  mPrimaryTracks;
     unsigned long                  mSubProcessId; // Pythia subprocess Id
     float                          mImpactParameter;
     float                          mPhiReactionPlane;
-    float                          mTriggerTimeOffset;
+    float                          mTriggerTimeOffset; // time offset wrt trigger event
+    unsigned long                  mNBinary;           // Number of Binary Collisions
+    unsigned long                  mNWoundedEast;      // Number of Wounded Nucleons East
+    unsigned long                  mNWoundedWest;      // Number of Wounded Nucleons West
+    unsigned long                  mNJets;             // Number of Jets
     StMcVertex*                    mPrimaryVertex;
     StSPtrVecMcVertex              mVertices;
     StSPtrVecMcTrack               mTracks;
@@ -206,6 +225,8 @@ inline unsigned long StMcEvent::zEast() const { return mZEast;}
 
 inline unsigned long StMcEvent::nEast() const { return mNEast;}
 
+inline unsigned long StMcEvent::eventGeneratorFinalStateTracks() const { return mEvGenFSTracks;}
+
 inline unsigned long StMcEvent::numberOfPrimaryTracks() const { return mPrimaryTracks;}
 
 inline unsigned long StMcEvent::subProcessId() const { return mSubProcessId;}
@@ -215,6 +236,14 @@ inline float StMcEvent::impactParameter() const { return mImpactParameter; }
 inline float StMcEvent::phiReactionPlane() const { return mPhiReactionPlane; }
 
 inline float StMcEvent::triggerTimeOffset() const { return mTriggerTimeOffset;}
+
+inline unsigned long StMcEvent::nBinary() const { return mNBinary;}
+				
+inline unsigned long StMcEvent::nWoundedEast() const { return mNWoundedEast;}
+				
+inline unsigned long StMcEvent::nWoundedWest() const { return mNWoundedWest;}
+				
+inline unsigned long StMcEvent::nJets() const { return mNJets;}
 
 inline StMcVertex* StMcEvent::primaryVertex() { return mPrimaryVertex;}
 
