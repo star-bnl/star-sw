@@ -1,0 +1,17 @@
+/*   rl0_ctrl.idl
+*   Table: rl0_ctrl
+*        description: Controls the level 0 emulation          
+*/
+   struct rl0_ctrl {               /* Rl0_ctrl_row_st */ 
+       short       ctb_pixel_out;  /* Number of pixels output for CTB */
+       short       det_set;        /* Detector Set ID number */
+       short       mwc_pixel_out;  /* Number of pixels output for MWC */
+       short       nthres;         /* Multiplicity threshold */
+       short       segment[2];     /* Determines how segments are summed in RL */
+       float       evc_cut;        /* VC energy cut */
+       float       fpga_gain[9];   /* Gain for FPGA trees */
+       float       z_cut;          /* Maximum allowed dz */
+   }; 
+
+/*  Last mod. for rl0_ctrl: $Date: 1998/02/05 21:29:46 $*/
+
