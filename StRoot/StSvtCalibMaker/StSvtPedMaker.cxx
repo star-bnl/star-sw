@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtPedMaker.cxx,v 1.6 2003/12/01 00:19:43 caines Exp $
+ * $Id: StSvtPedMaker.cxx,v 1.7 2003/12/01 00:53:10 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtPedMaker.cxx,v $
+ * Revision 1.7  2003/12/01 00:53:10  caines
+ * Dont follow zero pointer if raw data not there
+ *
  * Revision 1.6  2003/12/01 00:19:43  caines
  * Version of pedestal maker to go with EMbedding
  *
@@ -151,7 +154,7 @@ Int_t StSvtPedMaker::SetSvtData()
 
   dataSet = GetDataSet("StSvtRawData");
   //assert(dataSet);
-  fSvtData = (StSvtData*)(dataSet->GetObject());
+  if( dataSet) fSvtData = (StSvtData*)(dataSet->GetObject());
   //assert(fSvtData);
 
   return kStOK;
@@ -707,7 +710,7 @@ Int_t StSvtPedMaker::Finish()
 void StSvtPedMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtPedMaker.cxx,v 1.6 2003/12/01 00:19:43 caines Exp $\n");
+  printf("* $Id: StSvtPedMaker.cxx,v 1.7 2003/12/01 00:53:10 caines Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
