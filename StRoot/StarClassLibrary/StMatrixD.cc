@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrixD.cc,v 1.6 2001/12/07 00:48:06 fine Exp $
+ * $Id: StMatrixD.cc,v 1.7 2003/09/28 01:54:33 jeromel Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StMatrixD.cc,v $
+ * Revision 1.7  2003/09/28 01:54:33  jeromel
+ * Possible delete of non-initialized mElement (minor)
+ *
  * Revision 1.6  2001/12/07 00:48:06  fine
  * assert include placed
  *
@@ -112,7 +115,7 @@ StMatrixD& StMatrixD::operator=(const StMatrixD& m1)
 	return *this;
     }
     else {
-	delete [] mElement;
+	if (mElement) delete [] mElement;
 	mSize    = m1.numRow()*m1.numCol();
 	mElement = new double[mSize];
 
@@ -134,7 +137,7 @@ StMatrixD& StMatrixD::operator=(const StMatrixF& m1)
 	return *this;
     }
     else {
-	delete [] mElement;
+	if (mElement) delete [] mElement;
 	mSize    = m1.numRow()*m1.numCol();
 	mElement = new double[mSize];
 
@@ -152,7 +155,7 @@ StMatrixD& StMatrixD::operator=(const StMatrixF& m1)
 
 // Destructor
 StMatrixD::~StMatrixD() {
-    delete [] mElement;
+  if (mElement) delete [] mElement;
 }
 
 //
@@ -440,7 +443,7 @@ void StMatrixD::invert(size_t &ierr) {
     static unsigned int *ir = new unsigned int [max_array+1];
     
     if (mCol > max_array) {
-	delete [] ir;
+        delete [] ir;
 	max_array = mRow;
 	ir = new unsigned int [max_array+1];
     }
