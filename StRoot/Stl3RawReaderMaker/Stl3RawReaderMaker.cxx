@@ -1,5 +1,5 @@
 //*-- Author : Dominik Flierl
-// 
+//             Christof Struck
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -8,12 +8,18 @@
 // TTree Structure which can then be used as a l3 Mini DST              //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
+//
+//  $Id
+//
+//  $Log
+//
 
 #include "Stl3RawReaderMaker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StDAQMaker/StDAQReader.h"
 #include "StEventTypes.h"
+#include "StEnumerations.h"
 #include "TTree.h"
 #include "Stl3MiniEvent.h"
 #include "Rtypes.h"
@@ -24,37 +30,72 @@
 #include "St_l3_Coordinate_Transformer.h"
 #include "St_l3_Coordinates.h"
 
+
+#define gufld   gufld_
+extern "C" {void gufld(Float_t *, Float_t *);}
+
+
 ClassImp(Stl3RawReaderMaker)
 
 //_____________________________________________________________________________
 Stl3RawReaderMaker::Stl3RawReaderMaker(const char *name):StMaker(name){
  //  l3RawReader constructor
 }
+
 //_____________________________________________________________________________
 Stl3RawReaderMaker::~Stl3RawReaderMaker(){
 }
+
+
 //_____________________________________________________________________________
 Int_t Stl3RawReaderMaker::Init(){
   //  Init - is a first method the top level StChain calls to initialize all its makers
 
   // Make Connection to raw data
-  DAQReaderSet = GetDataSet("StDAQReader") ; 
+  DAQReaderSet = GetDataSet("StDAQReader");
  
   // set switches
-  WriteMiniEvent = 0 ;
-  WriteStEvent   = 1 ;
+  mWriteMiniEvent = kFALSE;
+  mWriteStEvent   = kTRUE;
+  mCalculateVertex = 0; // =1 or =2 for vertex finding routines
+  mL3On = kFALSE;
+
+  SetDebug(1);
+
+  mMaxNumberOfGl3Nodes = 10;
+  mMaxNumberOfAlgorithms = 20;
+
+  // allocate memory
+  //mGlobalCounter = new GlobalCounter[mMaxNumberOfGl3Nodes];
+  //mAlgorithmCounter = new AlgorithmCounter[mMaxNumberOfGl3Nodes][mMaxNumberOfAlgorithms];
+
+  mNumberOfGl3Nodes = 3;
+  mNumberOfAlgorithms = 0;
+
+  // reset counter
+  for (int i=0; i<mMaxNumberOfGl3Nodes; i++) {
+        mGlobalCounter[i].nProcessed = 0;
+	mGlobalCounter[i].nReconstructed = 0;
+	for (int j=0; j<mMaxNumberOfAlgorithms; j++) {
+	      mAlgorithmCounter[i][j].algId = 0;
+	      mAlgorithmCounter[i][j].nProcessed = 0;
+	      mAlgorithmCounter[i][j].nAccept = 0;
+	      mAlgorithmCounter[i][j].nBuild = 0;
+	}
+  }
 
   // create TTree and Branch
-  if (WriteMiniEvent == 1)
-    {    
-      mGlobalTrackTree = new TTree("L3GTracks","L3Globaltracks") ;
-      mL3Event = new Stl3MiniEvent() ;
-      mGlobalTrackTree->Branch("L3Event","Stl3MiniEvent",&mL3Event,128000,1);
-    }
+  if (mWriteMiniEvent) {
+        mGlobalTrackTree = new TTree("L3GTracks","L3Globaltracks") ;
+	mL3Event = new Stl3MiniEvent() ;
+	mGlobalTrackTree->Branch("L3Event","Stl3MiniEvent",&mL3Event,128000,1);
+  }
 
   // return
   return StMaker::Init();
 }
+
+
 //_____________________________________________________________________________
 Int_t Stl3RawReaderMaker::Make()
 {
@@ -67,51 +108,72 @@ Int_t Stl3RawReaderMaker::Make()
     
     // get the l3 daqreader
     StDAQReader *daqReader = (StDAQReader*)(DAQReaderSet->GetObject()) ;
-    if (daqReader) 
-	{ 
-	    ml3reader = daqReader->getL3Reader() ;
-	    Int_t sec = 1 ;
-	    if ( ml3reader && ml3reader->getGlobalTrackReader() )  
-	      { cout << ml3reader->getGlobalTrackReader()->getNumberOfTracks() << " global tracks found.\n" ; } ;
-	    if ( ml3reader && ml3reader->getSl3ClusterReader(sec) )  
-	      { cout << ml3reader->getSl3ClusterReader(sec)->getNumberOfClusters() << " sl3 clusters found in sec " << sec <<" .\n" ; } ;
-	    if ( ml3reader && ml3reader->getSl3TrackReader(sec) )  
-	      { cout << ml3reader->getSl3TrackReader(sec)->getNumberOfTracks() << " sl3 tracks found in sec " << sec <<" .\n" ; } ;
-	    if ( ml3reader && ml3reader->getI960ClusterReader(sec) )
-	      { cout << ml3reader->getI960ClusterReader(sec)->getNumberOfClusters() << " i960 clusters found in sec " << sec <<" .\n" ; } ;
-	}
-    else 
-	{
-	    cout << "no l3 daq reader found.\n" ;
-	    return kStWarn ;
-	} 
+    if (daqReader) { 
+          ml3reader = daqReader->getL3Reader();
 
+	  if (ml3reader) {
 
-    // fill tree
-    if ( WriteMiniEvent == 1 )
-      {
-	if ( fillTree() != 0 )
-	  {
-	    cout << "problems filling l3 tree.\n" ;
-	    return kStWarn ;
-	  }
-      }
+	        // set flag L3 ON
+	        mL3On = kTRUE;
 
-    // fill StEvent
-    if ( WriteStEvent == 1 )
-      {
-	if ( fillStEvent() != 0 )
-	  {
-	    cout << "problems filling l3 into StEvent.\n" ;
-	    return kStWarn ;
-	  }
-      }
-    
-    // delete ml3reader ;
+		// debug output
+	        if (m_DebugLevel) {
+		      int sec = 23;
+		      if (ml3reader->getGlobalTrackReader())
+			    cout << ml3reader->getGlobalTrackReader()->getNumberOfTracks()
+				 << " global tracks found.\n";
+		      if (ml3reader->getSl3ClusterReader(sec))
+			    cout << ml3reader->getSl3ClusterReader(sec)->getNumberOfClusters() 
+				 << " sl3 clusters found in sec " << sec <<" .\n";
+		      if (ml3reader->getSl3TrackReader(sec))
+			    cout << ml3reader->getSl3TrackReader(sec)->getNumberOfTracks()
+				 << " sl3 tracks found in sec " << sec <<" .\n";
+		      if (ml3reader->getI960ClusterReader(sec))
+			    cout << ml3reader->getI960ClusterReader(sec)->getNumberOfClusters()
+				 << " i960 clusters found in sec " << sec <<" .\n";
+		}
+
+		// fill StEvent
+		if (mWriteStEvent) {
+		      if (fillStEvent() != 0) {
+			    cout << "ERROR: problems filling l3 into StEvent." << endl;
+			    return kStErr;
+		      }
+		}
+
+		// fill tree
+		if (mWriteMiniEvent) {
+		      if ( fillTree() != 0 ) {
+			    cout << "problems filling l3 tree.\n" ;
+			    return kStWarn ;
+		      }
+		}
+
+	  } // if (ml3reader)
+
+	  else {
+	        // if L3 is on for this run
+	        // crash chain
+	        if (mL3On) {
+		  cout << "ERROR: L3 is ON, but no l3 data found in this event." << endl;
+		      return kStErr;
+		}
+		// if L3 is off so far
+		// it may be switched off for this run
+		// so don't crash the chain
+		else {
+		      cout << "WARNING: no l3 data found." << endl;
+		      return kStWarn;
+		}
+	  } 
+
+    } // if (daqReader)
 
     // go home
     return kStOk;
 }
+
+
 //_____________________________________________________________________________
 Int_t Stl3RawReaderMaker::fillTree()
 {
@@ -141,6 +203,8 @@ Int_t Stl3RawReaderMaker::fillTree()
   // all right go home
   return 0 ;  
 }
+
+
 //_____________________________________________________________________________
 Int_t Stl3RawReaderMaker::fillMiniEventWithL3GlobalTracks()
 {
@@ -177,6 +241,8 @@ Int_t Stl3RawReaderMaker::fillMiniEventWithL3GlobalTracks()
   //ok
   return 0;
 }
+
+
 //_____________________________________________________________________________
 Int_t Stl3RawReaderMaker::fillMiniEventWithi960Clusters()
 {
@@ -189,7 +255,7 @@ Int_t Stl3RawReaderMaker::fillMiniEventWithi960Clusters()
   for(Int_t sec=1 ;sec <=24 ; sec +=2 )
     {
       // get clusters for this sector 
-      l3_cluster* i960cluster = ml3reader->getI960ClusterReader(sec)->getClusterList() ;    
+      L3_Cluster* i960cluster = ml3reader->getI960ClusterReader(sec)->getClusterList() ;    
       
       // loop over clusters and fill them into TClonesArray
       Int_t a = ml3reader->getI960ClusterReader(sec)->getNumberOfClusters(); 
@@ -211,23 +277,158 @@ Int_t Stl3RawReaderMaker::fillMiniEventWithi960Clusters()
   cout << hitArrayIndex << " i960 clusters found.\n" ;
   return 0;
 }
+
+
 //_____________________________________________________________________________
 Int_t Stl3RawReaderMaker::fillStEvent() 
 {
+
   // get StEvent if not return
-  StEvent* myStEvent = (StEvent *) GetInputDS("StEvent") ;
-  if (!myStEvent) { cout << "No StEvent\n" ; return 1 ; } ;
+  mStEvent = (StEvent *) GetInputDS("StEvent");
+  if (!mStEvent) {
+        cout << "No StEvent" << endl;
+	return 1;
+  }
   
-  // create Stl3Trigger and connect it
+  // create StL3Trigger and connect it
   myStL3Trigger = new StL3Trigger() ;
-  if (!myStL3Trigger) { cout <<"No Stl3Trigger.\n" ; return 1 ; } ;
-  myStEvent->setL3Trigger(myStL3Trigger) ;
+  if (!myStL3Trigger) {
+        cout << "No Stl3Trigger." << endl;
+	return 1;
+  }
+  mStEvent->setL3Trigger(myStL3Trigger);
+
+  // create StL3EventSummary
+  StL3EventSummary* myEventSummary = new StL3EventSummary(ml3reader->getL3_SUMD());
+  if (!myEventSummary) {
+        cout << "No Stl3EventSummary." << endl;
+	return 1;
+  }
+  // connect StL3EventSummary to StL3Trigger
+  myStL3Trigger->setL3EventSummary(myEventSummary);
+
+
+  // get Gl3AlgorithmReader
+  Gl3AlgorithmReader* gl3Reader = ml3reader->getGl3AlgorithmReader();
+  if (!gl3Reader) {
+        cout << "ERROR: L3 is ON, but L3 summary data is missing!" << endl;
+	return 1;
+  }
+
+  // check data
+  // L3_summary.on==0 indicates that the event crashed in
+  // L3 online and raw data contains for us no valid information
+  if (ml3reader->getL3_Summary()->on == 0) {
+        cout << "Warning: L3 crashed online on this event, no usefull information."
+	     << endl;
+	myEventSummary->setCounters(-1, -1);
+	return 0;
+  }
+
+
+  // gl3 node which built this event
+  int gl3Id = ml3reader->getGl3Id();
+
+  // number of algorithms
+  mNumberOfAlgorithms = gl3Reader->getNumberofAlgorithms();
+  
+  // check number of algorithms and gl3 node id
+  if (mNumberOfAlgorithms >= mMaxNumberOfAlgorithms) {
+        cout << "ERROR: number of algorithms exceeds limit: found "
+	     << mNumberOfAlgorithms << ", limit " << mMaxNumberOfAlgorithms
+	     << endl;
+	return 1;
+  }
+  if (gl3Id<=0 || gl3Id>= mMaxNumberOfGl3Nodes) {
+        cout << "ERROR: gl3 id exceeds limit: found "
+	     << gl3Id << ", limit " << mMaxNumberOfGl3Nodes
+	     << endl;
+	return 1;
+  }
+
+  //--------------------------
+  // now do the bookkeeping
+  //--------------------------
+
+  // first: global counter
+  mGlobalCounter[gl3Id-1].nProcessed     = gl3Reader->getNumberOfProcessedEvents();
+  mGlobalCounter[gl3Id-1].nReconstructed = gl3Reader->getNumberOfReconstructedEvents();
+  // second: algorithm counter
+  Algorithm_Data* algData = gl3Reader->getAlgorithmData();
+  for (int i=0; i<mNumberOfAlgorithms; i++) {
+        mAlgorithmCounter[gl3Id-1][i].algId      = algData[i].algId;
+	mAlgorithmCounter[gl3Id-1][i].nProcessed = algData[i].nProcessed;
+	mAlgorithmCounter[gl3Id-1][i].nAccept    = algData[i].nAccept;
+	mAlgorithmCounter[gl3Id-1][i].nBuild     = algData[i].nBuild;
+  }
+
+  // get total counters
+  GlobalCounter totalCounter;
+  AlgorithmCounter totalAlgCounter[mNumberOfAlgorithms];
+
+  totalCounter.nProcessed     = 0;
+  totalCounter.nReconstructed = 0;
+  for (int i=0; i<mNumberOfAlgorithms; i++) {
+        totalAlgCounter[i].algId      = 0;
+	totalAlgCounter[i].nProcessed = 0;
+	totalAlgCounter[i].nAccept    = 0;
+	totalAlgCounter[i].nBuild     = 0;
+  }
+  
+  for (int i=0; i<mNumberOfGl3Nodes; i++) {
+        // if one gl3 node wasn't seen so far,
+        // the counters are still undefined
+        if (mGlobalCounter[i].nProcessed==0) {
+	      totalCounter.nProcessed     = -1;
+	      totalCounter.nReconstructed = -1;
+	      for (int j=0; j<mNumberOfAlgorithms; j++) {
+		    totalAlgCounter[j].algId      = mAlgorithmCounter[i][j].algId;
+		    totalAlgCounter[j].nProcessed = -1;
+		    totalAlgCounter[j].nAccept    = -1;
+		    totalAlgCounter[j].nBuild     = -1;
+	      }
+	      break;
+	}
+	// summ-up the counters of all gl3 nodes
+	totalCounter.nProcessed     += mGlobalCounter[i].nProcessed;
+	totalCounter.nReconstructed += mGlobalCounter[i].nReconstructed;
+	for (int k=0; k<mNumberOfAlgorithms; k++) {
+	      totalAlgCounter[k].algId       = mAlgorithmCounter[i][k].algId;
+	      totalAlgCounter[k].nProcessed += mAlgorithmCounter[i][k].nProcessed;
+	      totalAlgCounter[k].nAccept    += mAlgorithmCounter[i][k].nAccept;
+	      totalAlgCounter[k].nBuild     += mAlgorithmCounter[i][k].nBuild;
+	}
+  }
+
+  //--------------------------
+  // fill StL3EventSummary
+  //--------------------------
+
+  // fill counters and number of tracks
+  myEventSummary->setCounters(totalCounter.nProcessed, totalCounter.nReconstructed);
+  myEventSummary->setNumberOfTracks(ml3reader->getL3_Summary()->nTracks);
+
+  //--------------------------
+  // fill StL3AlgorithmInfo
+  //--------------------------
+  for (int i=0; i<mNumberOfAlgorithms; i++) {
+        StL3AlgorithmInfo* myL3AlgorithmInfo = new StL3AlgorithmInfo(&algData[i]);
+	if (!myL3AlgorithmInfo) {
+	      cout << "No StL3AlgorithmInfo." << endl;
+	      return 1;
+	}
+	myL3AlgorithmInfo->setCounters(totalAlgCounter[i].nProcessed,
+				       totalAlgCounter[i].nAccept,
+				       totalAlgCounter[i].nBuild);
+	myEventSummary->addAlgorithm(myL3AlgorithmInfo);
+  }
+
 
   // call filling routines
   // global tracks
-  if (  ml3reader->getGlobalTrackReader()->getTrackList() )
-    { if ( fillStEventWithL3GlobalTracks() !=0 ) return 1; 
-    } ;
+  if (ml3reader->getGlobalTrackReader()) {
+        if (fillStEventWithL3GlobalTracks()!=0) return 1; 
+  }
 
   // i960 hits
   //if (  ml3reader->getI960ClusterReader(1) )
@@ -235,88 +436,109 @@ Int_t Stl3RawReaderMaker::fillStEvent()
   
 
   // calculate vertex offline and fill into StEvent
-  if (  ml3reader->getGlobalTrackReader()->getTrackList() )
-      { 
-	  StPrimaryVertex* mVertex1 = new StPrimaryVertex() ;
-	  if ( findVertexMethod1(*mVertex1) !=0 ) 
-	      {
-		  delete mVertex1 ;
-		  return 1 ; 
-	      }
-	  else
-	      {
-		  myStL3Trigger-> addPrimaryVertex(mVertex1) ;
-		  cout << "mVertex straight lines :  " << mVertex1->position().x() << "\t" ;
-		  cout << mVertex1->position().y() << "\t" << mVertex1->position().z() << endl ;
-	      }
+//   if (  ml3reader->getGlobalTrackReader()->getTrackList() )
+//       { 
+// 	  StPrimaryVertex* mVertex1 = new StPrimaryVertex() ;
+// 	  if ( findVertexMethod1(*mVertex1) !=0 ) 
+// 	      {
+// 		  delete mVertex1 ;
+// 		  return 1 ; 
+// 	      }
+// 	  else
+// 	      {
+// 		  myStL3Trigger-> addPrimaryVertex(mVertex1) ;
+// 		  cout << "mVertex straight lines :  " << mVertex1->position().x() << "\t" ;
+// 		  cout << mVertex1->position().y() << "\t" << mVertex1->position().z() << endl ;
+// 	      }
 
 
-	  StPrimaryVertex* mVertex2 = new StPrimaryVertex() ;
-	  if ( findVertexMethod2(*mVertex2) !=0 ) 
-	      {
-		  delete mVertex2 ;
-		  return 1 ; 
-	      }
-	  else
-	      {
-		  myStL3Trigger-> addPrimaryVertex(mVertex2) ;
-		  cout << "mVertex helixes :  " << mVertex2->position().x() << "\t" ;
-		  cout << mVertex2->position().y() << "\t" << mVertex2->position().z() << endl ;
-	      }
-    } ;
+// 	  StPrimaryVertex* mVertex2 = new StPrimaryVertex() ;
+// 	  if ( findVertexMethod2(*mVertex2) !=0 ) 
+// 	      {
+// 		  delete mVertex2 ;
+// 		  return 1 ; 
+// 	      }
+// 	  else
+// 	      {
+// 		  myStL3Trigger-> addPrimaryVertex(mVertex2) ;
+// 		  cout << "mVertex helixes :  " << mVertex2->position().x() << "\t" ;
+// 		  cout << mVertex2->position().y() << "\t" << mVertex2->position().z() << endl ;
+// 	      }
+//     } ;
 
 
   // all right go home
   return 0 ;  
 }
+
+
 //_____________________________________________________________________________
 Int_t Stl3RawReaderMaker::fillStEventWithL3GlobalTracks() 
 { 
-  // get Track Nod
-  StSPtrVecTrackNode& myTrackNodevec = myStL3Trigger->trackNodes() ;
+  // get track nodes
+  StSPtrVecTrackNode& myTrackNodeVector = myStL3Trigger->trackNodes();
+  StSPtrVecTrackDetectorInfo& myTrackDetectorInfoVector = myStL3Trigger->trackDetectorInfo();
   
-  // get L3 raw tracks
-  globalTrack* globalL3Tracks = ml3reader->getGlobalTrackReader()->getTrackList() ;
-      
   // loop over rawdata tracks and fill them into StEvent
-  Int_t numberOfTracks = ml3reader->getGlobalTrackReader()->getNumberOfTracks() ;
-  cout << "Try to fill " << numberOfTracks << " tracks into StEvent.\n" ; 
-  for(Int_t trackindex = 0 ; trackindex < numberOfTracks ;  trackindex++)
-    {
-      // StTrackDetectorInfo
-      StTrackDetectorInfo* detecInfo = new StTrackDetectorInfo() ;
-      detecInfo->setNumberOfPoints(globalL3Tracks[trackindex].nHits) ;
+  int numberOfTracks = ml3reader->getGlobalTrackReader()->getNumberOfTracks();
+  cout << "Try to fill " << numberOfTracks << " tracks into StEvent." << endl;
+
+  // get L3 raw tracks
+  globalTrack* globalL3Tracks = ml3reader->getGlobalTrackReader()->getTrackList();
+
+  // get magnetic field
+  Float_t xval[3] = {0.,0.,0.};
+  Float_t bval[3];
+  gufld(xval,bval);
+  int signOfField = bval[2] < 0 ? -1 : 1;
+
+  for (int trackindex=0; trackindex<numberOfTracks; trackindex++) {
+        StTrackDetectorInfo* detectorInfo = new StTrackDetectorInfo();
+	detectorInfo->setNumberOfPoints(globalL3Tracks[trackindex].nHits);
+	myTrackDetectorInfoVector.push_back(detectorInfo);
 		
-      // StTrackGeometry
-      StThreeVectorF* origin = new  StThreeVectorF( globalL3Tracks[trackindex].r0 * TMath::Cos(globalL3Tracks[trackindex].phi0),
+	// StTrackGeometry
+	StThreeVectorF* origin = new StThreeVectorF(globalL3Tracks[trackindex].r0 * TMath::Cos(globalL3Tracks[trackindex].phi0),
 						    globalL3Tracks[trackindex].r0 * TMath::Sin(globalL3Tracks[trackindex].phi0),
-						    globalL3Tracks[trackindex].z0 ) ;
-      StThreeVectorF* momentum = new StThreeVectorF( globalL3Tracks[trackindex].pt * TMath::Cos(globalL3Tracks[trackindex].psi),
-						     globalL3Tracks[trackindex].pt * TMath::Sin(globalL3Tracks[trackindex].psi),
-						     globalL3Tracks[trackindex].pt * globalL3Tracks[trackindex].tanl ) ;
-      StHelixModel* helixModel = new StHelixModel( globalL3Tracks[trackindex].q,
-						   globalL3Tracks[trackindex].psi,
-						   0.0,
-						   globalL3Tracks[trackindex].tanl, 
-						   *origin, 
-						   *momentum ) ;		
+						    globalL3Tracks[trackindex].z0);
+	StThreeVectorF* momentum = new StThreeVectorF(globalL3Tracks[trackindex].pt * TMath::Cos(globalL3Tracks[trackindex].psi),
+						      globalL3Tracks[trackindex].pt * TMath::Sin(globalL3Tracks[trackindex].psi),
+						      globalL3Tracks[trackindex].pt * globalL3Tracks[trackindex].tanl );
+	StHelixModel* helixModel = new StHelixModel( globalL3Tracks[trackindex].q,
+						     globalL3Tracks[trackindex].psi,
+						     0.0,
+						     globalL3Tracks[trackindex].tanl, 
+						     *origin, 
+						     *momentum, -1 );		
       // StGlobalTrack
-      StGlobalTrack* globalTrack = new StGlobalTrack() ;
+      StGlobalTrack* globalTrack = new StGlobalTrack();
       globalTrack->setFlag(globalL3Tracks[trackindex].flag) ;
       globalTrack->setLength(globalL3Tracks[trackindex].length) ;
-      globalTrack->setDetectorInfo(detecInfo) ;
+      globalTrack->setDetectorInfo(detectorInfo) ;
       globalTrack->setGeometry(helixModel) ;
+      short h = globalTrack->geometry()->charge()*signOfField > 0 ? -1 : 1;   //  h = -sign(q*B)
+      globalTrack->geometry()->setHelicity(h);
+      double curv = fabs(0.29979 * bval[2] / globalL3Tracks[trackindex].pt);
+      globalTrack->geometry()->setCurvature(curv);
+      // add dE/dx information
+      if (globalL3Tracks[trackindex].dedx > 0) {
+	    StDedxPidTraits* myStDedxPidTraits =  new StDedxPidTraits(kTpcId, kTruncatedMeanId,
+								      globalL3Tracks[trackindex].ndedx,
+								      globalL3Tracks[trackindex].dedx*1e6, 0);
+	    globalTrack->addPidTraits(myStDedxPidTraits);
+      }
 
       // StTrackNode
-      StTrackNode* trackNode = new StTrackNode() ;
-      trackNode->addTrack(globalTrack) ;
-      myTrackNodevec.push_back(trackNode) ;
+      StTrackNode* trackNode = new StTrackNode();
+      trackNode->addTrack(globalTrack);
+      myTrackNodeVector.push_back(trackNode);
 
-      if ( !detecInfo || !origin || !momentum || !helixModel || !globalTrack || !trackNode )  { return 1;} ;  
     }
   // ok
   return 0 ;
 }
+
+
 //_____________________________________________________________________________
 Int_t Stl3RawReaderMaker::fillStEventWithi960Hits() 
 {   
@@ -337,7 +559,7 @@ Int_t Stl3RawReaderMaker::fillStEventWithi960Hits()
       if ( ml3reader->getI960ClusterReader(secindex)->getClusterList() )
 	{
 	  cout << "Found some i960 clusters in sector:" << secindex <<endl ;
-	  l3_cluster* myl3cluster = ml3reader->getI960ClusterReader(secindex)->getClusterList() ;
+	  L3_Cluster* myl3cluster = ml3reader->getI960ClusterReader(secindex)->getClusterList() ;
 	  Int_t numOfClusters = ml3reader->getI960ClusterReader(secindex)->getNumberOfClusters() ;
 	  
 	  for (Int_t clindex=0 ;  clindex < numOfClusters ; clindex++)
@@ -399,6 +621,8 @@ Int_t Stl3RawReaderMaker::fillStEventWithi960Hits()
  // ok
   return 0 ;
 }
+
+
 //_____________________________________________________________________________
 Int_t Stl3RawReaderMaker::findVertexMethod1(StPrimaryVertex& mvertex)
 {
@@ -466,6 +690,8 @@ Int_t Stl3RawReaderMaker::findVertexMethod1(StPrimaryVertex& mvertex)
     // ok go home
     return 0;
 }
+
+
 //________________________________________________________________________
 Int_t Stl3RawReaderMaker::findVertexMethod2(StPrimaryVertex& mvertex)
 {

@@ -16,24 +16,58 @@
 
 // some foreward declaration since includes don't work
 // in these cases 
-class globalTrack ;
-class StL3Trigger ;
-class StPrimaryVertex ;
+class globalTrack;
+class StEvent;
+class StL3Trigger;
+class StPrimaryVertex;
+
+
+// ol' fashioned structs for counter bookkeeping
+struct AlgorithmCounter {
+      unsigned int  algId;
+      int  nProcessed;
+      int  nAccept;
+      int  nBuild;
+};
+
+struct GlobalCounter {
+      int  nProcessed;
+      int  nReconstructed;
+};
+
 
 class Stl3RawReaderMaker : public StMaker {
  
  private:
     // General stuff
-    TDataSet* DAQReaderSet ; //!
-    StL3Reader*  ml3reader ;  //!
+    TDataSet*          DAQReaderSet ; //!
+    StL3Reader*        ml3reader ;  //!
+
     // Mini Event
-    Stl3MiniEvent*  mL3Event ;  //!
-    TTree* mGlobalTrackTree ;  //!
+    Stl3MiniEvent*     mL3Event ;  //!
+    TTree*             mGlobalTrackTree ;  //!
+
     // StEvent
-    StL3Trigger* myStL3Trigger ; //!
+    StEvent*           mStEvent; //!
+    StL3Trigger*       myStL3Trigger ; //!
+
     // switches
-    Int_t WriteMiniEvent ; //!
-    Int_t WriteStEvent ; //!
+    Bool_t             mWriteMiniEvent ; //!
+    Bool_t             mWriteStEvent ; //!
+    Int_t              mCalculateVertex ; //!
+    Bool_t             mL3On;
+
+    // counter
+    GlobalCounter      mGlobalCounter[10];
+    AlgorithmCounter   mAlgorithmCounter[10][20];
+
+    Int_t              mNumberOfGl3Nodes;
+    Int_t              mNumberOfAlgorithms;
+
+    // limits
+    Int_t              mMaxNumberOfGl3Nodes;
+    Int_t              mMaxNumberOfAlgorithms;
+
 
  protected:
  public: 
@@ -61,7 +95,7 @@ class Stl3RawReaderMaker : public StMaker {
    TTree* GetGlobalTrackTree() {return mGlobalTrackTree;} ;
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: Stl3RawReaderMaker.h,v 1.2 2000/09/13 14:57:26 flierl Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: Stl3RawReaderMaker.h,v 1.3 2001/08/20 22:29:20 struck Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(Stl3RawReaderMaker, 1)   //StAF chain virtual base class for Makers
 };
