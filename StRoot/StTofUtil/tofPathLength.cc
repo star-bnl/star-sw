@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: tofPathLength.cc,v 1.4 2003/09/02 17:59:10 perev Exp $
+ * $Id: tofPathLength.cc,v 1.5 2004/03/17 01:49:56 dongx Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: tofPathLength.cc,v $
+ * Revision 1.5  2004/03/17 01:49:56  dongx
+ * add tofPathLength(StThreeVectorD*, StThreeVectorF*, double)
+ *
  * Revision 1.4  2003/09/02 17:59:10  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -31,6 +34,19 @@
 // ----------------------------------------------------------------------------------------------
 double tofPathLength(const StThreeVectorD*  beginPoint, const StThreeVectorD* endPoint, const double curvature){
   // used in StTofGeometry::tofHelixToArray
+  double x,y,z;
+  x = (double)beginPoint->x();
+  y = (double)beginPoint->y();
+  z = (double)beginPoint->z();
+  StThreeVector<double> bp (x,y,z);
+  x = (double)endPoint->x();
+  y = (double)endPoint->y();
+  z = (double)endPoint->z();
+  StThreeVector<double> ep(x,y,z);
+  return tofPathLength(&bp,&ep,curvature);
+}
+
+double tofPathLength(const StThreeVectorD*  beginPoint, const StThreeVectorF* endPoint, const double curvature){
   double x,y,z;
   x = (double)beginPoint->x();
   y = (double)beginPoint->y();

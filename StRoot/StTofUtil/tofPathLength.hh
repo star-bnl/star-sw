@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: tofPathLength.hh,v 1.1 2003/08/06 23:42:56 geurts Exp $ tofPathLength.cc,v 1.2 2003/07/11 05:08:49 geurts Exp $
+ * $Id: tofPathLength.hh,v 1.2 2004/03/17 01:49:56 dongx Exp $ tofPathLength.cc,v 1.2 2003/07/11 05:08:49 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: tofPathLength.hh,v $
+ * Revision 1.2  2004/03/17 01:49:56  dongx
+ * add tofPathLength(StThreeVectorD*, StThreeVectorF*, double)
+ *
  * Revision 1.1  2003/08/06 23:42:56  geurts
  * function definitions in seperate header file
  *
@@ -24,6 +27,7 @@ class StThreeVectorF;
 
 double tofPathLength(const StThreeVector<double>*, const StThreeVector<double>*, const double);
 double tofPathLength(const StThreeVectorD*, const StThreeVectorD*, const double);
+double tofPathLength(const StThreeVectorD*, const StThreeVectorF*, const double);
 double tofPathLength(const StThreeVectorF*, const StThreeVectorD*, const double);
 double tofPathLength(const StThreeVectorF*, const StThreeVectorF*, const double);
 #endif
