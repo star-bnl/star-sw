@@ -1,8 +1,8 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.4 1998/12/27 03:16:51 fine Exp $
+// $Id: St_Node.cxx,v 1.5 1998/12/27 04:16:44 fine Exp $
 // $Log: St_Node.cxx,v $
-// Revision 1.4  1998/12/27 03:16:51  fine
-// Flag WIN32 has been introduced for St_Node / St_NodePosition agaist of crashes
+// Revision 1.5  1998/12/27 04:16:44  fine
+// *** empty log message ***
 //
 // Revision 1.3  1998/12/27 02:33:16  fine
 // St_Node, St_NodePosition - first working versions have been introduced *see macros/STAR_shapes.C for an example)
@@ -160,7 +160,73 @@ St_Node::St_Node(const Text_t *name, const Text_t *title, TShape *shape, Option_
    if(!shape) {Printf("Illegal referenced shape"); return;} 
 
 }
- 
+//______________________________________________________________________________
+St_Node::St_Node(TNode &rootNode)
+{
+  // Convert the ROOT TNode object into STAR St_Node
+
+  SetName(rootNode.GetName());
+  SetTitle(rootNode.GetTitle());
+  fVisibility = rootNode.GetVisibility();
+  fOption     = rootNode.GetOption();
+  fShape      = rootNode.GetShape();
+
+  SetLineColor(rootNode.GetLineColor());
+  SetLineStyle(rootNode.GetLineStyle());
+  SetLineWidth(rootNode.GetLineWidth());
+  SetFillColor(rootNode.GetFillColor());
+  SetFillStyle(rootNode.GetFillStyle());
+
+  TList *nodes = rootNode.GetListOfNodes();
+  if (nodes) {
+    TIter next(nodes);
+    TNode *node = 0;
+    while (node = (TNode *) next()){
+      St_Node *nextNode = new St_Node(*node);
+      Add(nextNode,node->GetX(),node->GetY(),node->GetZ(),node->GetMatrix());
+    }
+  }
+}
+
+//______________________________________________________________________________
+TNode *St_Node::CreateTNode(const St_NodePosition *position)
+{
+  // Convert the  STAR St_Node into ROOT TNode object
+
+  Double_t x=0; 
+  Double_t y=0;
+  Double_t z=0;
+  TRotMatrix* matrix = 0;
+  if (position) {
+     x=position->GetX(); 
+     y=position->GetY();
+     z=position->GetZ();
+     matrix = position->GetMatrix();
+  }
+  TNode *newNode  = new TNode(GetName(),GetTitle(),GetShape(),x,y,z,matrix,GetOption());
+  newNode->SetVisibility(GetVisibility());
+
+  newNode->SetLineColor(GetLineColor());
+  newNode->SetLineStyle(GetLineStyle());
+  newNode->SetLineWidth(GetLineWidth());
+  newNode->SetFillColor(GetFillColor());
+  newNode->SetFillStyle(GetFillStyle());
+
+  TList *positions = GetListOfPositions();
+  if (positions) {
+    newNode->cd();
+    TIter next(positions);
+    St_NodePosition *pos = 0;
+    while (pos = (St_NodePosition *) next()){
+      St_Node *node = pos->GetNode();
+      if (node) 
+          TNode *nextNode = node->CreateTNode(pos);
+    }
+  }
+  newNode->ImportShapeAttributes();
+  return newNode;
+}
+
 //______________________________________________________________________________
 St_Node::~St_Node()
 {
