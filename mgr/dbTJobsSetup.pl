@@ -20,7 +20,7 @@ $dbname="TestJobs";
 
 # Tables
 $FilesCatalogT = "FilesCatalog";
-$JobTStatusT = "JobTStatus";
+$JobStatusT = "JobStatus";
 
 ######################
 sub StDbTJobsConnect {
