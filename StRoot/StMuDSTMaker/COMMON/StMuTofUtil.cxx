@@ -25,7 +25,6 @@ void StMuTofUtil::fillMuTofHit(StMuTofHitCollection* muTofHit, StTofCollection* 
   if(!tofcol || !tofcol->dataPresent()) return;
   if(!muTofHit) return;
 
-  StMuTofHit* tofMuHit = new StMuTofHit(); 
 
   if( ( tofcol->cellsPresent() || tofcol->slatsPresent() ) &&
       tofcol->hitsPresent() ) {
@@ -34,6 +33,7 @@ void StMuTofUtil::fillMuTofHit(StMuTofHitCollection* muTofHit, StTofCollection* 
     StSPtrVecTofSlat &tofSlat = tofcol->tofSlats();
     
     for(size_t i=0; i < tofHits.size(); i++) {
+      StMuTofHit* tofMuHit = new StMuTofHit(); 
       tofMuHit->setIconf(1);
       tofMuHit->setTrayIndex(tofHits[i]->trayIndex());
       tofMuHit->setModuleIndex(tofHits[i]->moduleIndex());
