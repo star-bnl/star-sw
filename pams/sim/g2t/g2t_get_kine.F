@@ -9,6 +9,7 @@ CC: HISTORY:
 CC:  YF, 12/08/97 - first version
 CC:  PN, 12/31/97 - second version
 CC:  PN, 05/05/98 - first release version
+CC:  PN, 06/24/99 - compress vertex numbering
 CC:>-----+---------+---------+---------+---------+---------+---------+---------+
       FUNCTION  G2T_GET_KINE (  p_vert_h,             p_vert ,
      >                          p_track_h,            p_track )
@@ -19,10 +20,12 @@ CC:>-----+---------+---------+---------+---------+---------+---------+---------+
      >          Nd, Id, NBytPW, LabelV, LabelT, IHEAD(1000)
       Parameter (Lbuf=200,NBytPW=4)
       INTEGER   NBUF, NtBeam, NtTarg, Ipart, eg_label, Parent, NwHead,
-     >          Iv0, Ip0, Mecat, Meca, Ivol, N_parent, numed
-      REAL      VMOD, Pvert(4), Vert(3), Ubuf(Lbuf), Par(50),
-     >          Amass, Tlife, Charge, Tofg, Pt, tet, Eta, rap
+     >          Iv0, Ip0, Mecat, Meca, Ivol, N_parent, numed, Jv, Kv 
+      REAL      VMOD, VDIST, Pvert(4), Vert(3), Ubuf(Lbuf), Par(50),
+     >          Amass, Tlife, Charge, Tofg, Pt, tet, Eta, rap, 
+     >          P(4),V(3),am,time,Vcut/0.0010/
       CHARACTER NAPART*24,Cvol*4,Cshap*4
+      Integer   NUM(100000),ISTAT,IDPDG,MOTH(2),IDAU(2)
 
 #include       "g2t_get_kine.inc"
 #include       "geant321/gcnum.inc"
@@ -46,17 +49,30 @@ C: Sanity check of header for table 'p_vert' & 'p_track'
       p_track_h.nok = 0
       p_vert_h.nok  = 0
       LabelV        = 0
-      Do Iv = 1,NVERTX
+      Iv            = 0
+      Do Kv = 1,NVERTX
 
-        Call VZERO  (p_vert(iv),LenV)
-        Call GFVERT (Iv, Vert, NtBeam, NtTarg, TOFG, UBUF, NBUF)
+        Call VZERO  (p_vert(Kv),LenV)
+        Call GFVERT (Kv, Vert, NtBeam, NtTarg, TOFG, UBUF, NBUF)
         If (Nbuf.gt.Lbuf) go to 901
 *       
         If (Ntbeam.le.0) then ! this is an event generator vertex
+
+* 24.06.99: filter-out close vertices
+          Do Jv = 1,Iv
+            IF ( p_vert(jv).eg_label.ne.0       .and. 
+     >           VDIST(p_vert(jv).ge_x,Vert,3).le.Vcut) then
+               num(kv) = Jv
+               goto 77
+            endif
+          enddo  
+
           LabelV   = LabelV+1
           eg_Label = LabelV
           n_parent = 0
           Parent   = 0
+          meca     = 0 
+          Numed    = 0 
           Cvol     = '_eg_'
         else                  ! this is a Geant produced vertex
           eg_label = 0
@@ -77,6 +93,9 @@ C: Sanity check of header for table 'p_vert' & 'p_track'
      *                           ' refers a non-existing volume',ivol 
         endif
 *
+        Iv=Iv+1
+        Num(kv)=Iv
+*
         p_vert(iv).Id           = Iv             ! primary key 
         p_vert(iv).event_p      = Ihead(2)       ! pointer to event
         p_vert(iv).eg_label     = eg_label       ! generator label (0 if GEANT)
@@ -96,7 +115,7 @@ c       p_vert(iv).daughter_p - filled by tracks ! first daughter in linked list
         p_vert(iv).next_itrmd_p = 0              ! next intermedate vertex 
         p_vert(iv).next_prim_v_p= 0              ! next primary vertex
         p_vert_h.nok            = iv
-      EndDo
+ 77   EndDo
 *
 *     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *
@@ -106,13 +125,14 @@ c       p_vert(iv).daughter_p - filled by tracks ! first daughter in linked list
       DO IT = 1,NTRACK
 
         Call VZERO  (p_track(it),LenT)
-        Call GFKINE (It, Vert, Pvert, Ipart,Iv, UBUF, NBUF)
+        Call GFKINE (It, Vert, Pvert, Ipart,Kv, UBUF, NBUF)
         If (Nbuf.gt.Lbuf) go to 901
 *
-        IF (Iv.ne.Iv0) THEN
-          Call GFVERT (Iv, Vert, NtBeam, NtTarg, TOFG, UBUF, NBUF)
+        IF (Kv.ne.Iv0) THEN
+          Call GFVERT (Kv, Vert, NtBeam, NtTarg, TOFG, UBUF, NBUF)
           If (Nbuf.gt.Lbuf) go to 901
-          Iv0 = Iv
+          Iv0 = Kv
+          Iv  = Num(kv)
         END IF
 *        
         If (Ipart.ne.Ip0) then
@@ -134,7 +154,13 @@ c       p_vert(iv).daughter_p - filled by tracks ! first daughter in linked list
 *
         if (NtBeam .le. 0) then ! this is an event generator particle        
 *                                 stable arithmetics requires Pt>0 only
-          LabelT  = LabelT + 1 
+ 61       LabelT  = LabelT + 1 
+          call AgNZGETP(1,1,LabelT,ISTAT,IDPDG,P,AM,MOTH,TIME,IDAU,V)
+          if (ISTAT.gt.1) go to 61
+          D       = VDIST(Pvert,P,3)
+          if (D.gt.0) print *,' g2t_warning - particle and kine differ'
+          if (D.gt.0) print *,'   Ikine=',It,',   Eg=',LabelT
+*          
           Pt      = VMOD (Pvert,2)
           Eta     = Pvert(3)
           Rap     = Pvert(3)
@@ -149,6 +175,8 @@ c       p_vert(iv).daughter_p - filled by tracks ! first daughter in linked list
           p_track(it).pt         = Pt
           p_track(it).eta        = eta
           p_track(it).rapidity   = rap
+*>
+          p_vert(iv).eg_label    = LabelT      ! generator label (0 if GEANT)
 *
         else                ! Ntbeam positive - this is a secondary particle
 *                           ! NtTarg coding explained above
@@ -166,6 +194,7 @@ c       p_vert(iv).daughter_p - filled by tracks ! first daughter in linked list
 *
         nd = p_vert(iv).n_daughter
         Id = p_vert(iv).daughter_p 
+
         p_vert(iv).n_daughter      = nd+1  ! Number of daughter tracks
         p_vert(iv).daughter_p      = it    ! first(last) daughter in linked list
         p_track(it).next_vtx_trk_p = Id    ! Next daughter track of start vertex
