@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.1 2001/02/23 00:50:59 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.2 2001/03/16 22:39:23 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -11,8 +11,8 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
-// Revision 1.1  2001/02/23 00:50:59  posk
-// NA49 version of STAR software.
+// Revision 1.2  2001/03/16 22:39:23  posk
+// Removed pt weighting for odd harmonics.
 //
 // Revision 1.17  2000/10/12 22:46:35  snelling
 //
@@ -58,7 +58,7 @@ Float_t  StFlowEvent::mPtCuts[2][Flow::nHars][Flow::nSels] =  {{{0.,0.},
 								{1.,1.},
 								{1.,1.}}};
 
-Float_t  StFlowEvent::mMeanSinCosCuts[2] = {-0.1,0.1};
+Float_t  StFlowEvent::mMeanSinCosCuts[2] = {-0.2,0.2};
 
 Bool_t  StFlowEvent::mPtWgt     = kFALSE;
 Bool_t  StFlowEvent::mYWgt      = kFALSE;
@@ -157,7 +157,7 @@ TVector2 StFlowEvent::Q(StFlowSelection* pFlowSelect) {
       float y   = pFlowTrack->Y();
       double phiWgt = PhiWeight(phi, selN, harN);
       if (y < Flow::yCM && oddHar) phiWgt *= -1.;
-      if (mPtWgt) phiWgt *= pt;
+      if (mPtWgt && !oddHar) phiWgt *= pt;
       if (mYWgt && oddHar) phiWgt *= fabs(y - Flow::yCM);
       double meanCos = MeanCos(y, pt, harN);
       double meanSin = MeanSin(y, pt, harN);
@@ -207,10 +207,14 @@ void StFlowEvent::SetSelections() {
     StFlowTrack* pFlowTrack = *itr;
     Float_t pt  = pFlowTrack->Pt();
     Float_t rapidity = pFlowTrack->Y();
+    Char_t pid[10];
+    strcpy(pid, pFlowTrack->Pid());
     for (int selN = 0; selN < Flow::nSels; selN++) {
       for (int harN = 0; harN < Flow::nHars; harN++) {
-	Float_t meanSin = MeanSin(rapidity, pt, harN);
-	Float_t meanCos = MeanCos(rapidity, pt, harN);
+
+	// No protons for odd harmonics
+// 	bool oddHar  = (harN + 1) % 2;
+// 	if (oddHar && strcmp(pid, "proton") == 0) continue;
 
 	// Pt
 	if (mPtCuts[1][harN][selN] > mPtCuts[0][harN][selN] && 
@@ -223,6 +227,8 @@ void StFlowEvent::SetSelections() {
 	     rapidity >= mYCuts[1][harN][selN])) continue;
 	
 	// MeanSinCos
+	Float_t meanSin = MeanSin(rapidity, pt, harN);
+	Float_t meanCos = MeanCos(rapidity, pt, harN);
 	if (mMeanSinCosCuts[1] > mMeanSinCosCuts[0] && 
 	    (meanSin < mMeanSinCosCuts[0] ||
 	     meanSin >= mMeanSinCosCuts[1] ||
