@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: ManyPairCuts.cxx,v 1.1 2000/07/31 01:19:24 lisa Exp $
+ * $Id: ManyPairCuts.cxx,v 1.2 2003/02/02 21:43:58 magestro Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: ManyPairCuts.cxx,v $
+ * Revision 1.2  2003/02/02 21:43:58  magestro
+ * Small change to remove compiler warning
+ *
  * Revision 1.1  2000/07/31 01:19:24  lisa
  * add PairCut which contains collection of PairCuts - also 3D bertsch-pratt CorrFctn
  *
@@ -52,9 +55,9 @@ bool ManyPairCuts::Pass(const StHbtPair* pair){
 StHbtString ManyPairCuts::Report(){
   string Stemp = "ManyPairCuts Report\n";
   char Ctemp[100];
-  sprintf(Ctemp,"Number of pairs which passed:\t%ld  Number which failed:\t%ld\n",mNPairsPassed,mNPairsFailed);
+  sprintf(Ctemp,"Number of pairs which passed:\t%li  Number which failed:\t%li\n",mNPairsPassed,mNPairsFailed);
   Stemp += Ctemp;
-  sprintf(Ctemp,"Here are the reports from the\t%ld PairCuts in the collection\n",mPairCutCollection.size());
+  sprintf(Ctemp,"Here are the reports from the\t%i PairCuts in the collection\n",mPairCutCollection.size());
   Stemp += Ctemp;
 
   for (StHbtPairCutIterator iter=mPairCutCollection.begin();iter!=mPairCutCollection.end();iter++){
