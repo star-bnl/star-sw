@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.60 1998/10/20 01:42:00 fisyak Exp $
+# $Id: MakePam.mk,v 1.61 1998/10/29 23:34:26 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.61  1998/10/29 23:34:26  fisyak
+# set ASU_MALLOC_OFF for PAMS
+#
 # Revision 1.60  1998/10/20 01:42:00  fisyak
 # debug only for db
 #
@@ -74,7 +77,7 @@ endif
 ifndef INP_DIR
   INP_DIR := $(CWD)
 endif
-ifeq (,$(strip $(filter /%,$(INP_DIR))))
+ifeq (,$(strip $(filter /% [a-Z]:/%,$(INP_DIR))))
   override INP_DIR := $(CWD)/$(INP_DIR)
 endif
 
@@ -148,6 +151,7 @@ VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_DIR) $(GEN_TAB) $(OBJ_DIR) $(IDL_DIRS)
 STIC       := $(STAR_BIN)/stic
 GEANT3     := $(STAR_BIN)/geant3
 STICFLAGS =  $(addprefix -I,  $(STAR)/inc $(SRC_DIR) $(IDL_DIRS))
+CXXFLAGS   += -DASU_MALLOC_OFF
 ifneq ($(STAR_SYS),hp_ux102)   
 CPPFLAGS += -D$(STAR_SYS) $(strip -D$(shell uname)) 
 endif                          
@@ -550,7 +554,8 @@ test_mk:
 	@echo "CXX      =" $(CXX)"	; CXXFLAGS 	="	$(CXXFLAGS)
 	@echo "CPP      =" $(CPP)"	; CPPFLAGS 	="	$(CPPFLAGS)
 	@echo "FC       =" $(FC)"	; FFLAGS 	="	$(FFLAGS)
-	@echo FEXTEND= $(FEXTEND)
+	@echo "CFLAGS   =" $(CFLAGS)
+	@echo "FEXTEND  =" $(FEXTEND)
 	@echo "SO       =" $(SO)"	; SOFLAGS	="	$(SOFLAGS)
 	@echo "FLIBS  =" $(FLIBS)" ; CLIBS	="	$(CLIBS)
 	@echo "LDS      =" $(LDS)"     ; LDS_FLAGS   	="     $(LDS_FLAGS)
