@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofCell.cxx,v 2.2 2003/08/05 17:12:32 ullrich Exp $
+ * $Id: StTofCell.cxx,v 2.3 2003/08/28 23:24:17 jeromel Exp $
  *
  * Author: F. Geurts, May 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofCell.cxx,v $
+ * Revision 2.3  2003/08/28 23:24:17  jeromel
+ * Modif in class
+ *
  * Revision 2.2  2003/08/05 17:12:32  ullrich
  * Added position() methods and member.
  *
@@ -21,7 +24,7 @@
 #include "StTrack.h"
 #include "StThreeVectorD.hh"
 
-static const char rcsid[] = "$Id: StTofCell.cxx,v 2.2 2003/08/05 17:12:32 ullrich Exp $";
+static const char rcsid[] = "$Id: StTofCell.cxx,v 2.3 2003/08/28 23:24:17 jeromel Exp $";
 
 ClassImp(StTofCell)
 
@@ -29,8 +32,8 @@ StTofCell::StTofCell()
   : mTrayIndex(0), mModuleIndex(0), mCellIndex(0), mAdc(0), mTdc(0), mAssociatedTrack(0)
 { /* noop */ }
 
-StTofCell::StTofCell(int trayId, int moduleId, int cellId, int rawAdc, int rawTdc, StTrack* track, int flag, StThreeVectorD& pos)
-  : mTrayIndex(trayId), mModuleIndex(moduleId), mCellIndex(cellId), mAdc(rawAdc), mTdc(rawTdc), mAssociatedTrack(track), mMatchFlag(flag), mPosition(pos)
+StTofCell::StTofCell(int trayId, int moduleId, int cellId, int rawAdc, int rawTdc, StTrack* track, float zhit, int flag, StThreeVectorD& pos)
+  : mTrayIndex(trayId), mModuleIndex(moduleId), mCellIndex(cellId), mAdc(rawAdc), mTdc(rawTdc), mAssociatedTrack(track), mZhit(zhit), mMatchFlag(flag), mPosition(pos)
 { /* noop */ }
 
 StTofCell::~StTofCell() { /* noop */ }
@@ -59,6 +62,7 @@ StTofCell::operator==(const StTofCell& p) const
     return (p.mTrayIndex == mTrayIndex && p.mModuleIndex == mModuleIndex &&
 	    p.mCellIndex == mCellIndex && p.mAdc  == mAdc && p.mTdc  == mTdc &&
 	    p.mAssociatedTrack == mAssociatedTrack &&
+	    p.mZhit == mZhit &&
             p.mMatchFlag == mMatchFlag);
 }
 

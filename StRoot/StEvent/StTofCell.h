@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofCell.h,v 2.2 2003/08/05 17:12:32 ullrich Exp $
+ * $Id: StTofCell.h,v 2.3 2003/08/28 23:24:17 jeromel Exp $
  *
  * Author: F. Geurts, May 2003
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofCell.h,v $
+ * Revision 2.3  2003/08/28 23:24:17  jeromel
+ * Modif in class
+ *
  * Revision 2.2  2003/08/05 17:12:32  ullrich
  * Added position() methods and member.
  *
@@ -32,7 +35,7 @@ class StTrack;
 class StTofCell : public StObject {
 public:
     StTofCell();
-    StTofCell(int, int, int, int, int, StTrack*, int, StThreeVectorD&);
+    StTofCell(int, int, int, int, int, StTrack*, float, int, StThreeVectorD&);
     ~StTofCell();
     
     int operator==(const StTofCell&) const;
@@ -45,6 +48,7 @@ public:
     int                   tdc() const;
     StTrack*              associatedTrack();
     const StTrack*        associatedTrack() const;
+    float                 zHit() const;
     int                   matchFlag() const;
     const StThreeVectorD& position() const;
     
@@ -54,6 +58,7 @@ public:
     void      setAdc(int);
     void      setTdc(int);
     void      setAssociatedTrack(StTrack*);
+    void      setZHit(float);
     void      setMatchFlag(int);
     void      setPosition(const StThreeVectorD&);
 
@@ -64,6 +69,7 @@ protected:
     Int_t    mAdc;
     Int_t    mTdc;
     StTrack* mAssociatedTrack;   //$LINK
+    Float_t  mZhit;
     Int_t    mMatchFlag;
     StThreeVectorD mPosition;
 
@@ -100,6 +106,9 @@ StTofCell::setTdc(int rawTdc)
 {
     mTdc = rawTdc;
 }
+
+inline void
+StTofCell::setZHit(float zhit) {mZhit = zhit;}
 
 inline void
 StTofCell::setMatchFlag(int flag)
