@@ -1,7 +1,10 @@
 *
-* $Id: ggclos.F,v 1.2 1998/04/16 16:59:33 fisyak Exp $
+* $Id: ggclos.F,v 1.3 1998/12/28 15:51:18 nevski Exp $
 *
 * $Log: ggclos.F,v $
+* Revision 1.3  1998/12/28 15:51:18  nevski
+* swap clow<->chigh
+*
 * Revision 1.2  1998/04/16 16:59:33  fisyak
 * 2nd pass with gstar
 *
@@ -333,7 +336,12 @@ C.    ------------------------------------------------------------------
                if(sg.le.0.0)chigh=360.-chigh
               endif
               if(chigh.lt.clow)then
+* correction:
+                chightf = clow
+                clow = chigh
+                chigh = chightf
                 iq(jphi2+in)=1
+*
               endif
             elseif(iaxis.eq.6.and.myphif.eq.0)then
              if((chigh-chmoth).gt..01.or.(clmoth-clow).gt..01)then
