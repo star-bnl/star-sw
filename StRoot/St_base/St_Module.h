@@ -1,8 +1,11 @@
 //*-- Author : Valeri Fine (Faine); E-mail: fine@bnl.gov, fine@mail.cern.ch
 //*CMZ : 23/03/98
 // Copyright (C) FineSoft, Valery Fine at Brookhaven National Laboratory (fine@bnl.gov)
-// $Id: St_Module.h,v 1.6 1999/07/28 15:36:33 fisyak Exp $
+// $Id: St_Module.h,v 1.7 1999/12/07 22:26:27 fine Exp $
 // $Log: St_Module.h,v $
+// Revision 1.7  1999/12/07 22:26:27  fine
+// Clean up to remove the compilation warnings
+//
 // Revision 1.6  1999/07/28 15:36:33  fisyak
 // Resolve clash with TSystem for ELogLevel
 //
@@ -77,6 +80,7 @@ typedef enum {kNoWarning     // No message
              ,kIgnore
              } EModuleLogLevel;
 private:
+
 	EModuleTypes   st_Type;          // kCtype, kCPlusplustype, kFortran
         char          *st_Name;          // Name of the module for the dynamic loading
         Int_t          fN;               // The length of the array

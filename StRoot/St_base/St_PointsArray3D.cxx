@@ -185,13 +185,13 @@ Int_t St_PointsArray3D::DistancetoPrimitive(Int_t px, Int_t py)
    Int_t puymax = gPad->YtoAbsPixel(gPad->GetUymax());
  
 //*-*- return if point is not in the user area
-   if (px < puxmin - inaxis) return dist;
-   if (py > puymin + inaxis) return dist;
-   if (px > puxmax + inaxis) return dist;
-   if (py < puymax - inaxis) return dist;
+   if (px < puxmin - inaxis) return Int_t (dist);
+   if (py > puymin + inaxis) return Int_t (dist);
+   if (px > puxmax + inaxis) return Int_t (dist);
+   if (py < puymax - inaxis) return Int_t (dist);
  
    TView *view = gPad->GetView();
-   if (!view) return dist;
+   if (!view) return Int_t(dist);
    Int_t i;
    Float_t dpoint;
    Float_t xndc[3];
@@ -237,7 +237,6 @@ void St_PointsArray3D::Print(Option_t *option)
 //______________________________________________________________________________
 Int_t St_PointsArray3D::SetLastPosition(Int_t idx)
 {
-  Int_t lastPoint = GetLastPosition();
   fLastPoint = TMath::Min(idx,GetN()-1);
   return idx;
 }
