@@ -79,9 +79,8 @@ Module  BTOFGEO is the Geometry of Barrel Trigger / Time Of Flight system
 *
       real      support_arm_width,  support_arm_Xpos,  support_arm_Ypos,
                 support_aile_width, support_aile_Ypos, 
-                xpos, ypos, zpos, totlen, zpbass, zpfee,
-                sublen, subcen
-      integer   i, is, choice, tof,iwid
+                xpos, ypos, zpos, totlen, sublen, subcen
+      integer   is, choice, tof, iwid
 *
 * -------------------------------------------------------------------------
 *
