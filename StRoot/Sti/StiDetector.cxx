@@ -15,7 +15,7 @@
 #include "StiDetector.h"
 #include "StiMapUtilities.h"
 
-StiDetector::StiDetector() : gas(0), material(0), shape(0), placement(0)
+StiDetector::StiDetector() : gas(0), material(0), shape(0), placement(0), mNode(0)
 {
 }
 

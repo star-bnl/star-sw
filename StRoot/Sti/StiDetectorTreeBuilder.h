@@ -89,7 +89,7 @@ private:
     void addToTree(StiDetector*);
 
     ///Decide where to hang the detector object on the tree.
-    data_node* hangWhere(data_node* parent, StiOrderKey_t order, 
+    data_node* hangWhere(data_node* parent, const StiOrderKey& order,
                          string& keystring);
 
     ///Store a pointer to the root of the tree.

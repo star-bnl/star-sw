@@ -73,6 +73,12 @@ public:
 public:
     //Safe forward Access to leaves
 
+    ///Return an iterator marking the beginning of the leaf vector
+    tnode_vec::iterator begin();
+    
+    ///Return an iterator marking the end of the leaf vector
+    tnode_vec::iterator end();
+    
     ///Return a const_iterator marking the beginning of the leaf vector.
     tnode_vec::const_iterator const_begin() const;
 
@@ -181,6 +187,36 @@ template <class T>
 inline unsigned int StiCompositeLeafIterator<T>::getLeafCount() const 
 {
     return mleaves.size();
+}
+
+
+/*! We provide safe forward access to the vector of leaves.  This is a
+  real STL iterator (std::vector::const_iterator) and can be used
+  accordingly.  It <b>can</b> be used to modify the container
+  of leaves that the iterator points into. <p>
+  begin() marks a valid iterator, and it points to the first entry
+  in the leaf vector.
+ */
+template <class T>
+inline StiCompositeLeafIterator<T>::tnode_vec::iterator //return type
+StiCompositeLeafIterator<T>::begin()
+{
+    return mleaves.begin();
+}
+
+
+/*! We provide safe forward access to the vector of leaves.  This is a
+  real STL iterator (std::vector::const_iterator) and can be used
+  accordingly.  It <b>can</b> be used to modify the container
+  of leaves that the iterator points into. <p>
+  const_begin() marks a valid iterator, and it points to the first entry
+  in the leaf vector.
+ */
+template <class T>
+inline StiCompositeLeafIterator<T>::tnode_vec::iterator //return type
+StiCompositeLeafIterator<T>::end()
+{
+    return mleaves.end();
 }
 
 /*! We provide safe forward access to the vector of leaves.  This is a

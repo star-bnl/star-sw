@@ -14,6 +14,10 @@ class StiMaterial;
 class StiShape;
 class StiPlacement;
 
+//This is a little convoluted, but we need it:
+class StiDetector;
+template <class T> class StiCompositeTreeNode;
+
 class StiDetector {
     
 public:
@@ -55,6 +59,11 @@ public:
 
     virtual void copy(StiDetector &detector);
     
+    //This is a bit of a hack, but we leave ourselves a reverse connection between
+    // a detector and the tree node that it's stored on.
+    void setTreeNode(StiCompositeTreeNode<StiDetector>* val) {mNode=val;}
+    StiCompositeTreeNode<StiDetector>* getTreeNode() const {return mNode;}
+    
 protected:
     
     // logical switches
@@ -73,6 +82,8 @@ protected:
     StiPlacement *placement;
 
     string name;
+
+    StiCompositeTreeNode<StiDetector>* mNode;
 
 };
 

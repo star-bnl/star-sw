@@ -27,7 +27,7 @@
   ability to store daughters in a sorted order, which is especially useful for
   efficient traversal through the tree.  One could manually sort the tree by
   the data
-  stored, or one can use the StiOrderKey_t typedef.  Currently this typedef is
+  stored, or one can use the StiOrderKey typedef.  Currently this typedef is
   set to
   a double, and one can eager cache the sort-key to avoid calls into the data
   structure.  Because StiCompositeTreeNode provides random-access iterators
@@ -72,10 +72,18 @@ using std::ostream;
 using std::endl;
 
 /*! This is used to eager-cache information for sorting and/or traversal of
-  the tree.  However, it <b>is not</b> a priori necessary for efficient
-  traversal of the tree.
+  the tree.
 */
-typedef double StiOrderKey_t;
+struct StiOrderKey
+{
+    StiOrderKey() 
+	: key(0.), index(0) {};
+    StiOrderKey(double k, unsigned int i) 
+	: key(k), index(i) {};
+    
+    double key;
+    unsigned int index;
+};
 
 template <class T>
 class StiCompositeTreeNode
@@ -94,7 +102,7 @@ public:
     void setName(const string&);
 
     ///Set the order-key for the node
-    void setOrderKey(const StiOrderKey_t&);
+    void setOrderKey(const StiOrderKey&);
 
     ///Set the data to be hung on the node.
     void setData(T*);
@@ -111,7 +119,7 @@ public:
     StiCompositeTreeNode* getParent() const;
 
     ///Return a reference to the the orderkey of this node.
-    const StiOrderKey_t& getOrderKey() const;
+    const StiOrderKey& getOrderKey() const;
 
     ///Return a (non-const!) pointer to the data hung on this node.
     T* getData() const;
@@ -129,6 +137,9 @@ public:
     
     ///For internal convenience
     typedef vector<StiCompositeTreeNode *> StiCompositeTreeNodeVector;
+
+    ///Provide the iterator into the parent that can be dereferenced to get this node
+    vec_type::iterator whereInParent();
 
     ///Provide random access iterator to the beginning of the vector of children
     vec_type::iterator begin();
@@ -170,7 +181,7 @@ private:
     T* mdata;
 
     ///The order key association with this node
-    StiOrderKey_t mkey;
+    StiOrderKey mkey;
 
     ///The name of the node.
     string mname;
@@ -183,8 +194,10 @@ private:
 */
 template <class T>
 StiCompositeTreeNode<T>::StiCompositeTreeNode()
-    : mparent(0), mdata(0), mkey(0) 
+    : mparent(0), mdata(0)
 {
+    mkey.key=0.;
+    mkey.index=0;
 }
 
 template <class T>
@@ -199,7 +212,7 @@ inline void StiCompositeTreeNode<T>::setName(const string& val)
 }
 
 template <class T>
-inline void StiCompositeTreeNode<T>::setOrderKey(const StiOrderKey_t& val)
+inline void StiCompositeTreeNode<T>::setOrderKey(const StiOrderKey& val)
 {
     mkey=val;
 }
@@ -233,7 +246,7 @@ StiCompositeTreeNode<T>::getParent() const
 }
 
 template <class T>
-inline const StiOrderKey_t& StiCompositeTreeNode<T>::getOrderKey() const 
+inline const StiOrderKey& StiCompositeTreeNode<T>::getOrderKey() const 
 {
     return mkey;
 }
@@ -284,6 +297,21 @@ inline void StiCompositeTreeNode<T>::setParent(StiCompositeTreeNode* val)
     }
     mparent=val;
     return;
+}
+
+/*! \warning This iterator makes no sense for nodes with no parent.  In 
+  that case whereInParent() returns end().  Therefore, a safe call to whereInParent() 
+  would be as follows: <code> \n
+  StiCompositeTreeNode<T>::vec_type::iterator where = node->whereInParent(); \n
+  if (where!=node->end()) {\\you're ok \n
+  }
+  <\code> 
+*/
+template <class T>
+StiCompositeTreeNode<T>::vec_type::iterator //return type
+StiCompositeTreeNode<T>::whereInParent()
+{
+	return (mparent) ? (mparent->begin()+mkey.index) : mVec.end();
 }
 
 template <class T>
@@ -352,8 +380,12 @@ typedef StiCompositeTreeNode<data_t> data_node;
 class data_node;
 #endif
   
-typedef vector<data_node*> data_node_vec; 
+typedef vector<data_node*> data_node_vec;
 
-//typedef StiObjectFactory<data_node> data_node_factory;
+//non-members
+inline ostream& operator<<(ostream& os, const StiOrderKey& theKey)
+{
+	return os<<"key: "<<theKey.key<<" index: "<<theKey.index;
+}
 
 #endif
