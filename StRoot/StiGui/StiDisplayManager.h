@@ -15,8 +15,9 @@ using std::string;
 
 class TCanvas;
 class TShape;
-class TNode;
+class TVolume;
 class StiDrawable;
+class TPolyMarker3D;
 
 class StiDisplayManager
 {
@@ -50,6 +51,8 @@ public:
 
     //Utility
     void print() const;
+
+protected:
     
 private:
 
@@ -66,7 +69,8 @@ private:
     
     TCanvas* mcanvas;
     TShape* mzone;
-    TNode* mnode;
+    TVolume* mnode;
+    TPolyMarker3D* poly;
 
 };
 
