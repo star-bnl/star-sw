@@ -115,7 +115,9 @@ void StRefArray::Streamer(TBuffer &R__b)
 
       for (Int_t i = 0; nobjects; i++) {
          TObject *to = at(i);
-         if (to && !to->IsZombie()) {R__b.WriteObject(to,1); nobjects--;}
+	 //         if (to && !to->IsZombie()) {R__b.WriteObject(to,1); nobjects--;}
+	 if (to && !to->IsZombie()) {R__b.WriteObject((const TObject *)to); nobjects--;}
+
       }
    }
 }
