@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.12 1999/12/12 17:17:24 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.13 1999/12/12 23:09:47 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.13  1999/12/12 23:09:47  kathy
+// add pt vs eta in ftpc histogram as per Janet
+//
 // Revision 1.12  1999/12/12 17:17:24  kathy
 // fixed limits on ftpc  histograms
 //
@@ -199,6 +202,8 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_glb_impactT=0; 
 
   m_pT_eta_recT = 0;
+  m_pT_eta_recFE = 0;
+  m_pT_eta_recFW = 0;
   m_globtrk_xf_yfT = 0;
   m_globtrk_xf_yfFE = 0;
   m_globtrk_xf_yfFW = 0;
@@ -624,6 +629,11 @@ void StQABookHist::BookHistGlob(){
   m_chisq1FW     = QAH1F("QaGtrkChisq1FW",  "globtrk: chisq1 - z, ftpc west", 50, 0.,500.);
 
 // 2D - ftpc
+
+   m_pT_eta_recFE = 
+      QAH2F("QaGtrkPtVsEtaFE","globtrk: log pT vs eta, ftpcE",20,-5.,0.,40,1.,4.);
+   m_pT_eta_recFW = 
+      QAH2F("QaGtrkPtVsEtaFW","globtrk: log pT vs eta, ftpcW",20,0.,5.,40,1.,4.);
 
   m_globtrk_xf_yfFE = QAH2F("QaGtrkXfYfFE","globtrk: Y vs X of first hit on trk, ftpcE", 40,-40.,40.,40,-40.,40.);
     m_globtrk_xf_yfFE->SetXTitle("x first");
