@@ -1,5 +1,8 @@
-* $Id: index_sort.F,v 1.4 1998/08/17 14:39:22 fisyak Exp $
+* $Id: index_sort.F,v 1.5 1998/09/21 19:30:46 perev Exp $
 * $Log: index_sort.F,v $
+* Revision 1.5  1998/09/21 19:30:46  perev
+* Simple tests added
+*
 * Revision 1.4  1998/08/17 14:39:22  fisyak
 * clean up
 *
@@ -83,8 +86,14 @@ C
       INTEGER A(*),X
       INTEGER        W, R, LT(40), RT(40), IND(N)
 *--------------------------------------------------------------------------
+      if (N.LE.1) return
+      do I=1,N-1
+        if (A(IND(I)) .gt. A(IND(I+1))) GO TO 1
+      enddo
+      return 
+      
 
-      LEVEL = 1
+  1   LEVEL = 1
       LT(1) = 1
       RT(1) = N
   100 L = LT(LEVEL)
