@@ -52,6 +52,7 @@ C
 C
 C
 C Converted to STAF HLC 4/12/96
+C Modified to accept the SSD hits without using them Lilian MARTIN 09/06/98
 C iNTERNAL VARIABLES:
       integer MAXHITS
       parameter (MAXHITS=30000)
@@ -163,18 +164,27 @@ C Calculate phi, zs arrays on first pass.
           do i = 1,svt_hits_h.nok
              r2 = svt_hits(i).x(1)**2 + svt_hits(i).x(2)**2
              Layer(i) = ((svt_hits(i).id_wafer/1000)+1)/2
-             if( Layer(i) .gt. 4 .or. Layer(i) .lt. 1) then
-               write(6,*) ' Hit',i,'recorded as on layer',Layer(i)
-
-            endif
-             rs       = 10.0 / sqrt(r2)
-             zs(i)    = rs * (svt_hits(i).x(3) - z0) + z0
-             phi(i)   = 180. +
-     +            atan2d( svt_hits(i).x(2), svt_hits(i).x(1))
-             Merge(i) = 0
-             Used(i)  = .FALSE.
-             if( Layer(i) .eq. 4) then
-                Used(i) = .TRUE.
+             if( Layer(i) .gt. 3 .or. Layer(i) .lt. 1) then
+                if (Layer(i).eq.4.and.sqrt(r2).gt.22 
+     +               .and.sqrt(r2).lt.24.) then 
+c     the wrong hit can be due to the SSD
+c     in this case the hits are locally tagged as used.
+                   rs       = 10.0 / sqrt(r2)
+                   zs(i)    = rs * (svt_hits(i).x(3) - z0) + z0
+                   phi(i)   = 180. +
+     +                  atan2d( svt_hits(i).x(2), svt_hits(i).x(1))
+                   Merge(i) = 0
+                   Used(i)= .TRUE.
+                else
+                   write(6,*) ' Hit',i,'recorded as on layer',Layer(i)
+                endif
+             else
+                rs       = 10.0 / sqrt(r2)
+                zs(i)    = rs * (svt_hits(i).x(3) - z0) + z0
+                phi(i)   = 180. +
+     +               atan2d( svt_hits(i).x(2), svt_hits(i).x(1))
+                Merge(i) = 0
+                Used(i)  = .FALSE.
              endif
           enddo
 C Now we try merging close hits together.
@@ -262,7 +272,7 @@ C       do i = 1,groups_h.nok
 C          ih = groups(i).id2
 C          ih = ind_SVT(ih)
 C          if( Used(ih) .ne. .TRUE.) then
-C             write(6,*) '*****************Huston we have a  problem!!!!!!!!!'
+C             write(6,*) '*****************Houston we have a  problem!!!!!!!!!'
 C          endif
 C          Used(ih) = .TRUE.
 C       enddo
