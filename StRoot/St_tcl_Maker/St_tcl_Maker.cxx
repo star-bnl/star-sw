@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.3 1998/08/07 19:34:55 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.4 1998/08/10 02:34:34 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.4  1998/08/10 02:34:34  fisyak
+// Add St_laser_Maker
+//
 // Revision 1.3  1998/08/07 19:34:55  fisyak
 // Add St_run_Maker
 //
@@ -14,7 +17,7 @@
 // St_tcl_Maker class for Makers                                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#include "iostream.h"
+#include <iostream.h>
 #include <stdlib.h>
 #include "St_tcl_Maker.h"
 #include "StChain.h"
@@ -103,7 +106,9 @@ Int_t St_tcl_Maker::Make(){
      St_tcl_tp_seq  *tpseq = (St_tcl_tp_seq *) tpc_data("tpseq");
      if (!tpseq) {tpseq = new St_tcl_tp_seq("tpseq",2000000); tpc_data.Add(tpseq);}
      St_DataSet   *sector;
-     St_DataSet *raw_data_tpc =  gStChain->Maker("tss_Maker")->DataSet();
+//   St_DataSet *raw_data_tpc =  gStChain->Maker("tss_Maker")->DataSet();
+     St_DataSetIter raw_data(gStChain->GetRawData());
+     St_DataSet *raw_data_tpc = raw_data("tpc"); 
      if (raw_data_tpc){// Row data exits -> make clustering
        St_DataSetIter next(raw_data_tpc);
        St_raw_sec_m  *raw_sec_m = (St_raw_sec_m *) next("raw_sec_m");
@@ -150,7 +155,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.3 1998/08/07 19:34:55 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.4 1998/08/10 02:34:34 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
