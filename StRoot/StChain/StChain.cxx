@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.16 1998/10/06 18:00:26 perev Exp $
+// $Id: StChain.cxx,v 1.17 1998/10/07 18:43:57 perev Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.17  1998/10/07 18:43:57  perev
+// Add Spy classes for Farm Monitor
+//
 // Revision 1.16  1998/10/06 18:00:26  perev
 // cleanup
 //
@@ -474,7 +477,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.16 1998/10/06 18:00:26 perev Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.17 1998/10/07 18:43:57 perev Exp $    \n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");
@@ -630,7 +633,12 @@ void StChain::EndMaker(StMaker *mk,Int_t iret)
   gBenchmark->Stop (mk->GetName());
 
 }
-
+void StChain::Fatal(int Ierr, const char *com)
+{
+   printf("StChain::Fatal: Error %d %s\n",Ierr,com);
+   fflush(stdout);
+   exit(Ierr);
+}
 //_____________________________________________________________________________
 void StChain::SortDown(Int_t n1, Float_t *a, Int_t *index, Bool_t down)
 {
