@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.39  1999/09/27 19:22:58  ward
+// Ignore CVS comments in the noise file.
+//
 // Revision 1.38  1999/09/27 16:24:58  ward
 // Handle CVS comments in gains file.
 //
@@ -397,6 +400,7 @@ void St_tpcdaq_Maker::SetNoiseEliminationStuff(tpcdaq_noiseElim *noiseElim) {
   if(!ff) return;
   sector=0;
   while(fgets(line,196,ff)) {
+    if(line[0]=='*') continue; if(strstr(line,"$")) continue;
     if(!strncmp(line,"sector ",7)) {
       if((ee=strstr(line,"time bins"))) { for(zz=0;zz<9;zz++) ee[zz]=' '; }
       cc=strtok(line," ,\n"); cc=strtok(NULL," \n"); if(cc) sector=atoi(cc); else sector=0;
