@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.13 2001/10/19 23:31:34 caines Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.14 2001/12/13 03:08:17 caines Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.14  2001/12/13 03:08:17  caines
+// Can now subtract common mode noise via black anodes 239 and 2
+//
 // Revision 1.13  2001/10/19 23:31:34  caines
 // Correct problem that if anodes were missing didnt do average common mode noise calc
 //
@@ -55,6 +58,7 @@
 #include <fstream.h>
 
 class TH1D;
+class TH2F;
  
 class StSequence;
 class StSvtData;
@@ -84,7 +88,8 @@ class StSvtSeqAdjMaker : public StMaker
   Int_t GetPedOffset(){return mPedOffSet;};
   void CommonModeNoiseCalc(int iAnode);
   void CommonModeNoiseSub(int iAnode);
-  void SubtractFirstAnode(int iAnode, int mNAnodes);
+  void SubtractFirstAnode(int iAnode);
+  Int_t FindBlackAnodes(); // Find Black anodes on each hybrid
   Int_t AdjustSequences1( int iAnode, int Anode); // Find sequences  based on ASICS
   Int_t AdjustSequences2(int iAnode, int Anode); //adjust sequences base on LowInvProd
 
@@ -121,6 +126,7 @@ class StSvtSeqAdjMaker : public StMaker
   TH1F** mAdcAfter;  //!
   TH1F* mCommonModePitch; //!
   TH1F* mCommonModeCount; //!
+  TH2F** mTimeAn; //!
   int mNumOfSeq;
   int m_n_seq_lo;
   int m_n_seq_hi;
@@ -133,6 +139,7 @@ class StSvtSeqAdjMaker : public StMaker
   int mCommonModeNoise[128];
   int mCommonModeNoiseAn[128];
   int mNAnodes;
+  int doCommon;
   float adcCommon[128];
 
  private:
