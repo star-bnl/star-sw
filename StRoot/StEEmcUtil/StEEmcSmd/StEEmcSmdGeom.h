@@ -1,7 +1,7 @@
 
 /*******************************************************************
  *
- * $Id: StEEmcSmdGeom.h,v 1.2 2003/04/04 15:33:31 wzhang Exp $
+ * $Id: StEEmcSmdGeom.h,v 1.3 2003/06/11 18:58:15 wzhang Exp $
  *
  * Author: Wei-Ming Zhang
  *****************************************************************
@@ -18,6 +18,9 @@
  *****************************************************************
  *
  * $Log: StEEmcSmdGeom.h,v $
+ * Revision 1.3  2003/06/11 18:58:15  wzhang
+ * added geometry methods for StiEEmc
+ *
  * Revision 1.2  2003/04/04 15:33:31  wzhang
  * included EEmcGeomDefs.h & improved codes
  *
@@ -42,6 +45,7 @@ class StMaker;
 struct StructEEmcSmdParam {
   float zPlane[kEEmcNumSmdPlanes];
   float rOffset[kEEmcNumSmdPlanes];
+  float stripWidth;
 };
 
 struct StructEEmcStripId{
@@ -123,8 +127,16 @@ class StEEmcSmdGeom{
   bool EEmcMatchStrips(const StructEEmcStripId stripId1, 
 	  	       const StructEEmcStripId stripId2, Int_t nTolerance);
 
+  // return delta_phi of a sector including empty sector 
+  float EEmcSmdDelPhi(const Int_t planeId, const Int_t sectorId);
+
+  // return center phi of a sector including empty sector 
+  float EEmcSmdCenterPhi(const Int_t planeId, const Int_t sectorId);
+
 // print out memebers 
   void printGeom(ostream& os = cout) const;
+  void printSectorPhis(const Int_t planeId, const Int_t sectorId, 
+		                                    ostream& os = cout);
   void printModule(const StructEEmcSmdModule Module, ostream& os = cout) const;
   void printStrip(const StructEEmcStrip Strip, ostream& os = cout) const;
   void printStripId(const StructEEmcStripId StripId, ostream& os = cout) const;

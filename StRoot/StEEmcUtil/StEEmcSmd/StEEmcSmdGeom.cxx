@@ -1,7 +1,7 @@
 
 /*******************************************************************
  *
- * $Id: StEEmcSmdGeom.cxx,v 1.2 2003/04/04 15:33:32 wzhang Exp $
+ * $Id: StEEmcSmdGeom.cxx,v 1.3 2003/06/11 18:58:19 wzhang Exp $
  *
  * Author: Wei-Ming Zhang 
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StEEmcSmdGeom.cxx,v $
+ * Revision 1.3  2003/06/11 18:58:19  wzhang
+ * added geometry methods for StiEEmc
+ *
  * Revision 1.2  2003/04/04 15:33:32  wzhang
  * included EEmcGeomDefs.h & improved codes
  *
@@ -137,6 +140,8 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
     vPhiRotation[iMod-1]=( 45.0 - iMod*delPhi)*degree; 
   }
   
+  mEEmcSmdParam.stripWidth = 0.5;
+
   for (int iPlane = 1; iPlane <= kEEmcNumSmdPlanes; iPlane++) {
     float globalX1, globalY1, globalX2, globalY2;
     float x0Corr, y1Corr, y2Corr, lengthCorr; 
@@ -439,6 +444,105 @@ void StEEmcSmdGeom::initGeomFromFile(const Char_t* InputFile){
     }
     return match;
 }
+
+// return delta_phi of a sector including empty sector 
+float StEEmcSmdGeom::EEmcSmdDelPhi(const Int_t planeId, const Int_t sectorId) 
+{
+     float delPhi, phiMin, phiMax;
+     int layerId, antiClockLayerId, clockLayerId;
+     int antiClockSectorId, clockSectorId;
+
+     layerId = kEEmcSmdMapUV[planeId - 1][sectorId - 1];
+     if(layerId == 1) {
+           phiMin = EEmcUModule(sectorId).phiMin;
+           phiMax = EEmcUModule(sectorId).phiMax;
+     }
+     else if(layerId == 2) { 
+           phiMin = EEmcVModule(sectorId).phiMin;
+           phiMax = EEmcVModule(sectorId).phiMax;
+     }
+     else {  // emtry sector
+// find phiMax in anticlockwise adjacent sector 
+	  if(sectorId != 1) antiClockSectorId = sectorId - 1;
+	  else antiClockSectorId = 12; 
+	  antiClockLayerId = kEEmcSmdMapUV[planeId - 1][antiClockSectorId - 1];
+	  if(antiClockLayerId == 1) 
+                phiMax = EEmcUModule(antiClockSectorId).phiMin;
+	  else if(antiClockLayerId == 2)  
+                phiMax = EEmcVModule(antiClockSectorId).phiMin;
+// find phiMin in clockwise adjacent sector 
+	  if(sectorId != 12) clockSectorId = sectorId + 1;
+	  else clockSectorId = 1; 
+	  clockLayerId = kEEmcSmdMapUV[planeId - 1][clockSectorId - 1];
+	  if(clockLayerId == 1) phiMin=EEmcUModule(clockSectorId).phiMax;
+	  else if(clockLayerId == 2)  phiMin=EEmcVModule(clockSectorId).phiMax;
+     }
+
+     delPhi = phiMax - phiMin;
+     if(sectorId  == kEEmcSmdModuleIdPhiCrossPi) delPhi = 2*pi + delPhi; 
+
+     return delPhi;
+}
+
+// return center phi of a sector including empty sector 
+float StEEmcSmdGeom::EEmcSmdCenterPhi(const Int_t planeId, const Int_t sectorId)
+{
+     float centerPhi, phiMin, phiMax;
+     int layerId, antiClockLayerId, clockLayerId;
+     int antiClockSectorId, clockSectorId;
+
+     layerId = kEEmcSmdMapUV[planeId - 1][sectorId - 1];
+     if(layerId == 1) {
+           phiMin = EEmcUModule(sectorId).phiMin;
+           phiMax = EEmcUModule(sectorId).phiMax;
+     }
+     else if(layerId == 2) { 
+           phiMin = EEmcVModule(sectorId).phiMin;
+           phiMax = EEmcVModule(sectorId).phiMax;
+     }
+     else {  // emtry sector
+// find phiMax in anticlockwise adjacent sector 
+	  if(sectorId != 1) antiClockSectorId = sectorId - 1;
+	  else antiClockSectorId = 12; 
+	  antiClockLayerId = kEEmcSmdMapUV[planeId - 1][antiClockSectorId - 1];
+	  if(antiClockLayerId == 1) 
+                phiMax = EEmcUModule(antiClockSectorId).phiMin;
+	  else if(antiClockLayerId == 2)  
+                phiMax = EEmcVModule(antiClockSectorId).phiMin;
+// find phiMin in clockwise adjacent sector 
+	  if(sectorId != 12) clockSectorId = sectorId + 1;
+	  else clockSectorId = 1; 
+	  clockLayerId = kEEmcSmdMapUV[planeId - 1][clockSectorId - 1];
+	  if(clockLayerId == 1) phiMin=EEmcUModule(clockSectorId).phiMax;
+	  else if(clockLayerId == 2)  phiMin=EEmcVModule(clockSectorId).phiMax;
+     }
+
+     centerPhi = 0.5*(phiMax + phiMin);
+     if(sectorId  == kEEmcSmdModuleIdPhiCrossPi) {
+	     if(centerPhi <= 0) centerPhi= M_PI + centerPhi; 
+	     else centerPhi = M_PI - centerPhi; 
+     }
+
+     return centerPhi;
+}
+
+// print delPhi and centerPhi used in ITTF
+void StEEmcSmdGeom::printSectorPhis(const Int_t planeId, const Int_t sectorId,
+                                                              ostream& os ) {
+  int layerId;
+  layerId = kEEmcSmdMapUV[planeId-1][sectorId-1];
+
+  os << "------StEEmcSmdGeom::printPhis()------" << endl;
+  os << " planeId = " << planeId << " sectorId = " << sectorId << endl;
+  if(layerId != 0) 
+    os << " " <<  kEEmcSmdLayerChar[layerId -1] << " Module" << endl; 
+  else  
+    os << " Empty" << endl; 
+  os << " delPhi = " << EEmcSmdDelPhi(planeId, sectorId)/degree <<
+        " " << "centerPhi = " << EEmcSmdCenterPhi(planeId, sectorId)/degree 
+     << endl;
+}
+
 /// print global geometry parameters
 void StEEmcSmdGeom::printGeom(ostream& os) const {
   os << "------StEEmcSmdGeom::printGeom()------" << endl;
@@ -450,6 +554,8 @@ void StEEmcSmdGeom::printGeom(ostream& os) const {
      << " " << mEEmcSmdParam.rOffset[0]
      << " " << mEEmcSmdParam.rOffset[1]
      << " " << mEEmcSmdParam.rOffset[2] << endl;
+  os << " " << "stripWidth    = "
+     << " " << mEEmcSmdParam.stripWidth << endl;
   os << "---------------------------------------" << endl;
 }
 
