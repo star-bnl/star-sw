@@ -1,11 +1,15 @@
 /******************************************************************
- *  $Id: StRichPadPlane.cxx,v 1.4 2000/04/26 18:58:03 lasiuk Exp $
+ *  $Id: StRichPadPlane.cxx,v 1.5 2000/05/17 22:27:39 lasiuk Exp $
  *
  * Description:
  *   StRichPadPlane is a special container specialized to store 
  *   RICH Raw Data. 
  ********************************************************************
  *  $Log: StRichPadPlane.cxx,v $
+ *  Revision 1.5  2000/05/17 22:27:39  lasiuk
+ *  use charge()
+ *  use mHitID in comparator for StRichID
+ *
  *  Revision 1.4  2000/04/26 18:58:03  lasiuk
  *  change list to vector for mc info storage.
  *  allow change of allocation methodology
@@ -29,7 +33,7 @@
 ostream& operator<<(ostream& os, const StRichID& id)
 {
     return (os << "id.mHitID: " << id.mHitID << " GID: " << id.mG_ID << " track: " << id.mTrackp
-	       << " q: " << id.mAmount << " type: " << static_cast<int>(id.mSignalType));
+	       << " q: " << id.mCharge << " type: " << static_cast<int>(id.mSignalType));
 }
 
 StRichPadPlane::StRichPadPlane() { /*nopt*/ }
@@ -38,7 +42,6 @@ StRichPadPlane::StRichPadPlane(size_t rows, size_t cols)
 {
     //cout << "StRichPadPlane::StRichPadPlane() " << endl;
 
-    unsigned int ii, jj;
 //  PR(rows);
 //  PR(cols);
 
@@ -61,6 +64,7 @@ StRichPadPlane::StRichPadPlane(size_t rows, size_t cols)
 	 }
      }
 #else
+     unsigned int ii, jj;
      cout << "NOT NORMAL_ALLOCATION" << endl;
 
      aDetectorRow aRow;
