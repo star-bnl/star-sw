@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimulator.cc,v 1.16 2003/10/07 12:43:07 jcs Exp $
+// $Id: StFtpcSlowSimulator.cc,v 1.17 2003/10/21 19:14:46 jcs Exp $
 // $Log: StFtpcSlowSimulator.cc,v $
+// Revision 1.17  2003/10/21 19:14:46  jcs
+// use geantPlane function in debug printout
+//
 // Revision 1.16  2003/10/07 12:43:07  jcs
 // use StFtpcGeantReader member function to extract FTPC plane number from GEANT volumeID
 //
@@ -309,7 +312,7 @@ int StFtpcSlowSimulator::simulate()
                 << " de = " << de << endl;
            cout << " dip_angle = " << dip_ang
                 << " cross_angle = " << cross_ang
-                << " row_id = " << mGeant->geantVolume(i)
+                << " row_id = " << mGeant->geantPlane(mGeant->geantVolume(i))-1
                 << " track_id = " << mGeant->track(i)+1
                 << " ge_pid = " << mGeant->trackPid(i)
                 << endl;
