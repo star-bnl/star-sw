@@ -1,6 +1,10 @@
-// $Id: StFtpcParamReader.hh,v 1.3 2000/10/31 09:52:19 hummler Exp $
+// $Id: StFtpcParamReader.hh,v 1.4 2000/11/03 13:23:13 hummler Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.4  2000/11/03 13:23:13  hummler
+// add set functions to change the drift map values
+// (to be used in the new drift map maker)
+//
 // Revision 1.3  2000/10/31 09:52:19  hummler
 // add parameters for slow simulator
 //
@@ -38,6 +42,10 @@ class StFtpcParamReader : public TObject
 {
   
 protected:
+  //STAF table pointers stored for writing back in destructor
+  //set to NULL if not set in constructor
+  fcl_padtrans_st *mPadtransTable;
+
   //ClusterFinder parameters (also used by other classes)
   Float_t *mAmplitudeOffset;
   Float_t *mAmplitudeSlope;
@@ -162,8 +170,14 @@ public:
   Float_t fssGasDiffusionY(Int_t i);
   Float_t fssGasDiffusionZ(Int_t i);
   Float_t fssGasLorentzAngle(Int_t i);
+  // parameter set functions
+  Int_t setPadtransEField(Int_t i, Float_t newvalue); 
+  Int_t setPadtransVDrift(Int_t i, Int_t padrow, Float_t  newvalue); 
+  Int_t setPadtransDeflection(Int_t i, Int_t padrow, Float_t  newvalue); 
+  Int_t setPadtransdVDriftdP(Int_t i, Int_t padrow, Float_t  newvalue); 
+  Int_t setPadtransdDeflectiondP(Int_t i, Int_t padrow, Float_t  newvalue); 
 
-
+  // inline get functions
   Int_t numberOfCalibrationValues() {return mNumberOfCalibrationValues;}
   Int_t numberOfPadtransBins() {return mNumberOfPadtransBins;}
   Int_t numberOfPadrowsPerSide() {return mNumberOfPadrowsPerSide;}
