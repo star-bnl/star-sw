@@ -209,7 +209,9 @@ int dsTasProject(DS_DATASET_T *pDataset, char *name,
 * Not recommended for applications
 *
 */
-#if defined(DS_ADVANCED) || defined(DS_PRIVATE)
+/* Making these decls public since tbr uses them 
+   #if defined(DS_ADVANCED) || defined(DS_PRIVATE) */
+#if 1
 /*****************************************************************************
 *
 * ds_list_t - structure for list of tables or datasets
