@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.44 2000/04/03 23:46:49 perev Exp $
+// $Id: StMaker.h,v 1.45 2000/04/13 02:53:35 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.45  2000/04/13 02:53:35  perev
+// StMaker::GetValidity added
+//
 // Revision 1.44  2000/04/03 23:46:49  perev
 // Increased error check
 //
@@ -131,6 +134,7 @@ class TList;
 class TBrowser;
 class TChain;
 class TTree;
+class TTable;
 
 class StMaker : public TDataSet{
 public:
@@ -197,7 +201,6 @@ public:
 //		STAR methods
    virtual Int_t  	GetNumber() const ;
    virtual void   	SetNumber(Int_t number) ;
-   virtual TDataSet*  UpdateDB(TDataSet* ds){if (ds){};return 0;};
    static  StMaker     *GetChain(){return fgStChain;}
    static  StMaker     *GetFailedMaker(){return fgFailedMaker;}
    virtual StMaker     *GetParentChain() const;
@@ -222,6 +225,8 @@ public:
    virtual TDataSet  *GetDataBase(const char* logInput);
    virtual TDataSet  *GetInputDB (const char* logInput)
                           {return GetDataBase(logInput);};
+   virtual Int_t   GetValidity(const TTable *tb, TDatime *val) const;
+   virtual TDataSet*  UpdateDB(TDataSet* ds){if (ds){};return 0;};
 
 
    virtual Int_t 	GetDebug() const {return m_DebugLevel;}
@@ -268,7 +273,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.44 2000/04/03 23:46:49 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.45 2000/04/13 02:53:35 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   // base class to define  one step of the recontsruction chain
 };
