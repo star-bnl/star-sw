@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.9 2000/04/23 01:00:45 perev Exp $
+// $Id: StObject.cxx,v 1.10 2000/06/19 01:28:26 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.10  2000/06/19 01:28:26  perev
+// STL StEvent
+//
 // Revision 1.9  2000/04/23 01:00:45  perev
 // StEvent monolitic I/O
 //
@@ -40,6 +43,7 @@ ClassImp(StObject)
 //_____________________________________________________________________________
 StObject::~StObject()
 {
+#if 0
   Int_t colIdx,objIdx; UInt_t u;
   u = GetUniqueID();
   if (!u) return;
@@ -51,6 +55,7 @@ StObject::~StObject()
   if (objIdx>=n)			return;
   if (ar->At(objIdx) != (TObject*)this) return;
   ar->RemoveAt(objIdx);
+#endif
 }
 //_____________________________________________________________________________
 void StObject::Browse(TBrowser *tb)
