@@ -4,6 +4,7 @@
 // To execute an item, click with the left mouse button.
 // To see the HELP of a button, click on the right mouse button.
    gROOT->Reset();
+   gROOT->SetStyle("Default");
    TControlBar *bar = new TControlBar("vertical", "Control Panel"); 
    bar->AddButton("Load STAR libraries",".x Load.C", "Load the share libraries with STAR base classes defintions");
    bar->AddButton("Print view port size",   ".x Get3DSize.C", "Print the total size of all 3D axice");
