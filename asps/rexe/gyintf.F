@@ -9,6 +9,17 @@ CDECK  ID>, GYINTF.
 *                                                                      *
 ************************************************************************
       dimension IVAL(2,2),RVAL(2,2),DVAL(2,2),JVAL(2,2)
+* externals from /cern/pro/src/pawlib/paw/code/pawcs.F
+      EXTERNAL VZERO,UCOPY,RANNOR,LENOCC,CLTOU,CUTOL
+      EXTERNAL RANMAR,RNORML,RANLUX,RNORMX
+      EXTERNAL TIMED
+      EXTERNAL SBIT0,SBIT1,SBYT,JBIT,JBYT,UCTOH,UHTOC,PROB,FREQ
+      EXTERNAL DENLAN,DSTLAN,DIFLAN,XM1LAN,XM2LAN,RANLAN
+      EXTERNAL RNDM,RDMIN,RDMOUT,SORTZV
+      EXTERNAL CHISIN,VDOT,VADD,VSCALE,CROSS
+      EXTERNAL VMOD,VDIST,VDOTN2,VSUB,VUNIT
+      EXTERNAL BESJ0,BESJ1,BESY0,BESY1,BESI0,BESI1,BESK0,BESK1
+      EXTERNAL EBESI0,EBESI1,EBESK0,EBESK1,DCAUCH
       double precision DVAL
       complex CCA,CCB      
 *               "$EXP  "  Narg = 2 : 2
@@ -267,3 +278,96 @@ c      RVAL(1,0) = SECNDS (RVAL(1,1))
 
  999  return
       END
+*-- Author :    Pavel Nevski
+******************************************************************
+*                                                                *
+                Function    R N D M (x)
+*                                                                *
+******************************************************************
+      logical first/.true./
+*
+        if (first) 
+     &  print *,' *******  RNDM substituted by GRNDM  *******'
+        first=.false.
+        call GRNDM(r,1)
+        rndm=r
+      return
+      entry IRNDM
+        if (first) 
+     &  print *,' *******  RNDM substituted by GRNDM  *******'
+        first=.false.
+        call GRNDM(i,1)
+        irndm=i
+        return
+      END
+*
+      subroutine NORRAN (a)
+      real    a,b/99999/
+      logical first/.true./
+       if (first) 
+     &  print *,' *******  NORRAN substituted by RANNOR  *******'
+       if (b .eq. 99999) then 
+         call rannor(a,b)
+         first=.false. 
+       else 
+         a=b
+         b=99999 
+       endif
+      end
+*
+      function  RANF (a)
+      real      RANF,a,b
+      logical   first/.true./
+       if (first) 
+     &  print *,' *******  RANF substituted by GRNDM  *******'
+       first=.false.
+       Call GRNDM(b,1)
+       RANF=b
+      end
+*
+      function  RN32(a)
+      real      RN32,a,b
+      logical   first/.true./
+       if (first) 
+     &  print *,' *******  RN32 substituted by GRNDM  *******'
+       first=.false.
+       Call GRNDM(b,1)
+       RN32=b
+      end
+*
+      function  RG32(d)
+      real      RG32,d,a,b/99999/
+      logical   first/.true./
+       if (first) 
+     &  print *,' *******  RG32 substituted by RANNOR  *******'
+       if (b .eq. 99999) then
+         call rannor(a,b)
+         first=.false. 
+        else 
+          a=b
+          b=99999 
+       endif
+       RG32=a
+      end
+*
+      Subroutine RDMIN
+      entry      RDMOUT
+        print 
+     &  *,' RNDM substituted by GRNDM, set seed using G/CONT/RNDM'
+      end
+*
+      Subroutine RN32IN
+      entry      RN32OT
+        print 
+     &  *,' RN32 substituted by GRNDM, set seed using G/CONT/RNDM'
+      end
+*
+      Subroutine RG32IN
+      entry      RG32OT
+        print 
+     &  *,' RG32 substituted by RANNOR, set seed using G/CONT/RNDM'
+      end
+*
+ 
+ 
+ 
