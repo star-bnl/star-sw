@@ -1,5 +1,8 @@
-* $Id: tpi_pid.F,v 1.4 1998/11/12 16:13:59 ogilvie Exp $
+* $Id: tpi_pid.F,v 1.5 1998/11/17 15:29:48 ogilvie Exp $
 * $Log: tpi_pid.F,v $
+* Revision 1.5  1998/11/17 15:29:48  ogilvie
+* corrected foreign key pointing to global tracks
+*
 * Revision 1.4  1998/11/12 16:13:59  ogilvie
 * resolution of dedx updated from mdc1 info
 *
@@ -35,7 +38,7 @@ C-----------------------------------------------------------------------
 C
 C-----------------------------------------------------------------------
 
-      INTEGER  i,j,igl,ii
+      INTEGER  i,j,igl,ii,igl_use
       REAL     pt,pz,p,invpt,tanl,dedx1,dedx2,vert
       INTEGER  nrec
 
@@ -57,7 +60,7 @@ C-----------------------------------------------------------------------
   
 
 
-      LOGICAL  no_dedx,primary
+      LOGICAL  no_dedx,primary,found
 C-----------------------------------------------------------------------
 
 
@@ -170,25 +173,53 @@ C***********************************************************************
       do j=1, dedx_h.nok    ! Loop over dst dedx valuse
 
          if (dedx(j).det_id.eq.1) then ! tpc 
+c          if (dedx(j).det_id.eq.2) then ! svt 
            igl= dedx(j).id_track
+c
+c find the global track with this index, note that igl is not
+c necessarily the igl'th record, because it may have been sorted
+c
+            found=.false.
+c
+c check for simplest possibility to save time first
+c
+            if (gl(igl).id.eq.igl) then
+               found=.true.
+               igl_use = igl
+            else
+               igl_use = 1
+            endif
+            do while (.not.found.and.igl_use.le.gl_h.nok)
+               if (gl(igl_use).id.eq.igl) then
+                 found=.true.
+               else
+                 igl_use = igl_use+1
+               endif
+            enddo
+            if (found.eq..false.) then
+              write (6,20)
+ 20           format(2x,'global track indedx by dst_dedx.id_track not found')
+              tpi_pid = STAFCV_BAD
+              return
+             endif         
 c
 c id_hypo_pid only becomes non-zero if a partition is looked at the
 c PID for that track
 c
-           if (gl(igl).id_hypo_pid.eq.0) then
+           if (gl(igl_use).id_hypo_pid.eq.0) then
 		use_this_id = current_id
-                gl(igl).id_hypo_pid = use_this_id
+                gl(igl_use).id_hypo_pid = use_this_id
                 current_id = current_id + 1
            else
-                write (6,*) gl(igl).id_hypo_pid
-		use_this_id = gl(igl).id_hypo_pid
+                write (6,*) gl(igl_use).id_hypo_pid
+		use_this_id = gl(igl_use).id_hypo_pid
 	   endif
 c
 C     Extract momentum values of the track
 c
-           icharge = gl(igl).icharge
-           invpt = gl(igl).invpt
-           tanl = gl(igl).tanl
+           icharge = gl(igl_use).icharge
+           invpt = gl(igl_use).invpt
+           tanl = gl(igl_use).tanl
            if (invpt.gt.0.0) then
              pt = 1.0/invpt
            else
@@ -200,12 +231,12 @@ c
 c rough cut on primary
 c
            primary=.true.
-           vert=sqrt(gl(igl).x_first(1)**2+gl(igl).x_first(2)**2)
+           vert=sqrt(gl(igl_use).x_first(1)**2+gl(igl_use).x_first(2)**2)
 
             if (vert.gt.20) then
                primary=.false.
             endif        
-            if (abs(gl(igl).x_first(3)).gt.20) then
+            if (abs(gl(igl_use).x_first(3)).gt.20) then
                primary=.false.
             endif
            
@@ -290,10 +321,11 @@ c
            
              hypo(n).nsigma = nsigma(nid)
              hypo(n).method = method
+             hypo(n).method = nrec
              if (.not.primary) then
               hypo(n).weight = 0.
              else
-              hypo(n).weight = 0.
+              hypo(n).weight = p
              endif
              hypo(n).det    = 1
 c
