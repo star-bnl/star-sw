@@ -1,6 +1,11 @@
-* $Id: svttgeo3.g,v 1.3 2004/02/05 20:51:41 potekhin Exp $
+* $Id: svttgeo3.g,v 1.4 2004/09/11 01:17:34 potekhin Exp $
 *
 * $Log: svttgeo3.g,v $
+* Revision 1.4  2004/09/11 01:17:34  potekhin
+* Added a parameter to specify the innermost layer index,
+* thus providing the possibility to selectively remove inner layers.
+* Work motivated by the pixel group request.
+*
 * Revision 1.3  2004/02/05 20:51:41  potekhin
 * Assign the 150 um value to the radial position offset
 * of the wafer, as was decided earlier (and done in version 1
@@ -107,7 +112,7 @@ Module  SVTTGEO3  is the SVT geometry for STAR: corrected and without SSD
                        SCBM,SCBL,SFED,SPLS,SOUM,SOUR
 *
       structure SVTG { Version,   Nlayer,    RsizeMin,  RsizeMax,
-		       ZsizeMax,  Angoff, SupportVer,   ifMany}
+		       ZsizeMax,  Angoff, SupportVer,   ifMany, Nmin}
 *     
       structure SWCA { Version,   Length,
                        WaferWid,  WaferLen,  WaferThk,  RohaThk,
@@ -192,6 +197,7 @@ Module  SVTTGEO3  is the SVT geometry for STAR: corrected and without SSD
       Angoff    = 0          ! angular offset x1 for slayer 2 x2 for slayer 3
       SupportVer= 1          ! versioning of the shield
       ifMany    = 0          ! whether we use the geant MANY option
+      Nmin      = 1          ! the index of the innermost layer
 *
    Fill SWCA ! Wafer Carrier
       Version   = 1          ! geometry version
@@ -600,7 +606,7 @@ Block SVTT is the mother of all SVT volumes
 *
 * The SVT layers 
       radmax=svtg_rSizeMax
-      Do ilayer = 1, min(6,nint(svtg_Nlayer))
+      Do ilayer = svtg_Nmin, min(6,nint(svtg_Nlayer))
          if (ilayer<6) then
             USE SVTL layer=ilayer+1
             radmax=svtl_radius
