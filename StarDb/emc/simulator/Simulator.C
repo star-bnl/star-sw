@@ -19,8 +19,8 @@ memset(&row,0,tableSet->GetRowSize());
     row.npheMip	 =         63; // number of PHE for MIP at zero angle         ;
     row.typeOfPmt	 =          1; // ;
     row.pedDistribution  = 0;   //  must be 0 for embedding 
-    row.pedMean          = 10.; // for 2001 year
-    row.pedRMS           = 2.;
+    row.pedMean          = 40.; // for 2002 year
+    row.pedRMS           = 1.5;
 tableSet->AddAt(&row,0);
 memset(&row,0,tableSet->GetRowSize());
     row.mode	 =          3; // 0->no conversion; 1->simple conversion; 2-> precise simulation ;
