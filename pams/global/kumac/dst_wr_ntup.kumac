@@ -1,0 +1,12 @@
+ macro init
+   macro/global/import *
+ return
+* ************************************************************
+  macro run
+   macro/global/import *
+ return
+* ************************************************************
+  macro finish
+   macro/global/import *
+ return
+* ************************************************************
