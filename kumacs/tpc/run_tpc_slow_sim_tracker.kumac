@@ -11,6 +11,7 @@
 * 7/8/98 - I. Sakrejda - put in cluster matching evaluator & track evaluator
 * 7/9/98 - K. Turner - put in tfc_run#run_newtab - can now set adcxyzon=1
 * 7/11/98 - K. Turner - change default data file to new version
+* 7/13/98 - K. Turner - put in global macros
 * ***********************************************************************
 ************************************************************************
  macro run__
@@ -49,18 +50,47 @@
   message ' *** Ntuple ID # -->            ' [nid]
   message ' *** Table to write to ntup --> ' [table]
   message ' *** Fill adcxyz table for diag.? 0,1 = no,yes --> ' [adcxyzon]
- 
-* ----------- General setup stuff ------------------------*
-  macro/global/create TOP              [TOP]
+  
+***********************************************************
+* General Setup
+***********************************************************
+  
+ macro/global/create TOP              [TOP]
+
     
 * setup default directories to search for kumacs in
 * setup default table directory structure in STAF
 * load libraries [domain]
     
- exec $STAR/kumacs/chain/bfc_util#bfc_start [domain]
-     
- macro/global/import *  
-   
+   exec $STAR/kumacs/chain/bfc_util#bfc_defaults [domain]
+   exec setup#setup
+   macro/global/import *  
+      
+   if $vexist(make_done)=0 then
+   message "Load domains:" [domain]
+   test = [domain]
+   nw = $words([test])
+   do i = 1, [nw]
+     mod = $word([test],[i],1)
+     n = $words([mod],'/') 
+     module = $word([mod],[n],[n],'/')
+     test_done = [module]_done
+     if ($vexist([test_done])=0) then
+       vec/cre [test_done]
+         message ' doing make ' [mod]
+         make [mod]
+       if $iquest(1)<>0 then
+            message "<bfc> Shared libraries have not been loaded : ABend"
+       endif
+     endif
+     if $iquest(1)<>0 then
+       message "<bfc> Shared libraries have not been loaded : ABend"
+     endif
+   enddo
+   vec/cre make_done
+ endif
+ 
+ 
 * **************************************************************
 * --------- Setup and run tpc slow simulator & tracker pams -------------*
    
