@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtConfig.cc,v 1.1 2000/11/30 20:38:50 caines Exp $
+ * $Id: StSvtConfig.cc,v 1.2 2001/02/18 00:10:28 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtConfig.cc,v $
+ * Revision 1.2  2001/02/18 00:10:28  caines
+ * Improve and use StSvtConifg
+ *
  * Revision 1.1  2000/11/30 20:38:50  caines
  * Svt configuration files
  *
@@ -52,7 +55,58 @@ void StSvtConfig::setConfiguration()
 
 void StSvtConfig::setConfiguration(const char* config)
 {
+
   mConfig = TString(config);
+  if ( !strncmp(config, "ASCII", strlen("ASCII")) ) {
+ 
+    mNumberOfBarrels = 1;
+    mNumberOfLadders[0] = 1;
+    mNumberOfLadders[1] = 0;
+    mNumberOfLadders[2] = 0;
+    mNumberOfWafers[0] = 1;
+    mNumberOfWafers[1] = 0;
+    mNumberOfWafers[2] = 0;
+    mNumberOfHybrids = 2;
+  }
+  else if( !strncmp(config, "SYST", strlen("SYST")) ){
+
+    mNumberOfBarrels = 3;
+    mNumberOfLadders[0] = 8;
+    mNumberOfLadders[1] = 12;
+    mNumberOfLadders[2] = 16;
+    mNumberOfWafers[0] = 4;
+    mNumberOfWafers[1] = 6;
+    mNumberOfWafers[2] = 7;
+    mNumberOfHybrids = 2;
+    mTotalNumberOfHybrids = 18; // SYSTEM TEST  
+  }
+  else if( !strncmp(config, "Y1L", strlen("Y1L")) ){
+
+    mNumberOfBarrels=3;
+    mNumberOfLadders[0] = 0;
+    mNumberOfLadders[1] = 0;
+    mNumberOfLadders[2] = 2;
+    mNumberOfWafers[0] = 0;
+    mNumberOfWafers[1] = 0;
+    mNumberOfWafers[2] = 7;
+    mNumberOfHybrids = 2;    
+    mTotalNumberOfHybrids = 14; // YEAR 1 LADDER  
+  }
+  else if( !strncmp(config, "FULL", strlen("FULL")) ){
+
+    mNumberOfBarrels=3;
+    mNumberOfLadders[0] = 8;
+    mNumberOfLadders[1]= 12;
+    mNumberOfLadders[2] = 16;
+    mNumberOfWafers[0] = 4;
+    mNumberOfWafers[1] =6;
+    mNumberOfWafers[2] = 7;
+    mNumberOfHybrids=2;
+    mTotalNumberOfHybrids = 432; // FULL SVT 
+  }
+ else
+    gMessMgr->Message("Configuration of SVT not defined! It must be SYST, Y1L or FULL","E");
+   
 }
 
 const char* StSvtConfig::getConfiguration()

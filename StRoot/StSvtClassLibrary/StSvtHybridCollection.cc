@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridCollection.cc,v 1.5 2000/11/30 20:39:12 caines Exp $
+ * $Id: StSvtHybridCollection.cc,v 1.6 2001/02/18 00:10:28 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridCollection.cc,v $
+ * Revision 1.6  2001/02/18 00:10:28  caines
+ * Improve and use StSvtConifg
+ *
  * Revision 1.5  2000/11/30 20:39:12  caines
  * Changed to allow us of database
  *
@@ -74,52 +77,7 @@ void StSvtHybridCollection::setConfiguration(const char* config)
 
   mConfig = TString(config);
   mSvtConfig = new StSvtConfig();
-
-  if ( !strncmp(config, "ASCII", strlen("ASCII")) ) {
-    mSvtConfig->setNumberOfBarrels(1);
-    mSvtConfig->setNumberOfLadders(1,1);
-    mSvtConfig->setNumberOfWafers(1,1);
-    mSvtConfig->setNumberOfHybrids(2);
-    mSvtConfig->setTotalNumberOfHybrids(2);    
-  }
-  
-  else if ( !strncmp(config, "SYST", strlen("SYST")) ) {
-    mSvtConfig->setNumberOfBarrels(3);
-    mSvtConfig->setNumberOfLadders(1,8);
-    mSvtConfig->setNumberOfLadders(2,12);
-    mSvtConfig->setNumberOfLadders(3,16);
-    mSvtConfig->setNumberOfWafers(1,4);
-    mSvtConfig->setNumberOfWafers(2,6);
-    mSvtConfig->setNumberOfWafers(3,7);
-    mSvtConfig->setNumberOfHybrids(2);
-    mSvtConfig->setTotalNumberOfHybrids(18);
-  }
-
-  else if ( !strncmp(config, "Y1L", strlen("Y1L")) ) {
-    mSvtConfig->setNumberOfBarrels(3);
-    mSvtConfig->setNumberOfLadders(1,0);
-    mSvtConfig->setNumberOfLadders(2,0);
-    mSvtConfig->setNumberOfLadders(3,2);
-    mSvtConfig->setNumberOfWafers(1,0);
-    mSvtConfig->setNumberOfWafers(2,0);
-    mSvtConfig->setNumberOfWafers(3,7);
-    mSvtConfig->setNumberOfHybrids(2);
-    mSvtConfig->setTotalNumberOfHybrids(14);
-  }
-
-  else if ( !strncmp(config, "FULL", strlen("FULL")) ) {
-    mSvtConfig->setNumberOfBarrels(3);
-    mSvtConfig->setNumberOfLadders(1,8);
-    mSvtConfig->setNumberOfLadders(2,12);
-    mSvtConfig->setNumberOfLadders(3,16);
-    mSvtConfig->setNumberOfWafers(1,4);
-    mSvtConfig->setNumberOfWafers(2,6);
-    mSvtConfig->setNumberOfWafers(3,7);
-    mSvtConfig->setNumberOfHybrids(2);
-    mSvtConfig->setTotalNumberOfHybrids(432);
-  }
-  else
-    gMessMgr->Message("Configuration of SVT not defined! It must be SYST, Y1L or FULL","E");
+  mSvtConfig->setConfiguration(config);
 
   resize(mSvtConfig->getTotalNumberOfHybrids());
   clear();
@@ -154,8 +112,8 @@ int StSvtHybridCollection::getHybridIndex(int barrelID, int ladderID, int waferI
   mNumberOfBarrels = mSvtConfig->getNumberOfBarrels();
 
   for (int i = 0;i < mNumberOfBarrels;i++) {
-    mNumberOfLadders[i] = mSvtConfig->getNumberOfLadders(i);
-    mNumberOfWafers[i] = mSvtConfig->getNumberOfWafers(i);
+    mNumberOfLadders[i] = mSvtConfig->getNumberOfLadders(i+1);
+    mNumberOfWafers[i] = mSvtConfig->getNumberOfWafers(i+1);
   }
   mNumberOfHybrids = mSvtConfig->getNumberOfHybrids();
 
