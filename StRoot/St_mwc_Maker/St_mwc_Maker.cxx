@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.cxx,v 1.20 2000/12/11 10:33:35 vlmrz Exp $
+// $Id: St_mwc_Maker.cxx,v 1.21 2000/12/12 04:51:00 vlmrz Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.21  2000/12/12 04:51:00  vlmrz
+// *** empty log message ***
+//
 // Revision 1.20  2000/12/11 10:33:35  vlmrz
 // *** empty log message ***
 //
@@ -113,18 +116,11 @@ St_mwc_Maker::~St_mwc_Maker(){
 }
 //______________________________________________________________________________
 St_mwc_Maker::Finish(){
-  /*
-m_outfile = new TFile("mwc_signal.root","recreate");
-m_outfile->cd();
-m_signal->Write();
-m_outfile->Close();
-  */
 }
 //_____________________________________________________________________________
 Int_t St_mwc_Maker::Init(){
 
 // Read Parameter tables
-   cout<<"Hello, this is St_mwc_Maker Init"<<endl;
 
    St_DataSetIter params(GetDataBase("mwc/mwcpars"));
    m_geom = (St_mwc_geo  *) params("geom");
@@ -149,14 +145,25 @@ Int_t St_mwc_Maker::Init(){
      Float_t rad2 = radius->lastInnerSectorAnodeWire();
      Float_t rad3 = radius->firstOuterSectorAnodeWire();
      Float_t rad4 = radius->lastOuterSectorAnodeWire();
-     geotable->r1max = rad2;
-     geotable->r1min = rad1;
-     geotable->r2min = rad3;
-     geotable->r2max = rad4;
+     geotable->r1max = rad2+.2;
+     geotable->r1min = rad1-.2;
+     geotable->r2min = rad3-.2;
+     geotable->r2max = rad4+.2;
    }
    m_geom->AddAt(geotable,0);
    
-
+   m_pars = new St_mwc_pars("pars",1);
+   mwc_pars_st *parst = m_pars->GetTable();
+   parst->ogain = 1315; 
+   parst->igain = 2503;
+   parst->vgain = 2.75E-13;
+   parst->drift1 = 0.04969;
+   parst->drift2 = 0.025;
+   parst->tr = 140;       
+   parst->mip_deds = 1.7E-06;
+   parst->threshold = .1;
+   parst->delay = 109*6;   
+   m_pars->AddAt(parst,0);
 
   
 // Create Histograms
@@ -185,20 +192,8 @@ Int_t St_mwc_Maker::Make(){
 //   the cor table is not implemented
 //     St_mwc_cor    *cor    = new St_mwc_cor("cor",384);
 
-   St_mwc_pars *pars = new St_mwc_pars("pars",1);
-   mwc_pars_st *parst = pars->GetTable();
-   parst->ogain = 1315; 
-   parst->igain = 2503;
-   parst->vgain = 2.75E-13;
-   parst->drift1 = 0.04969;
-   parst->drift2 = 0.025;
-   parst->tr = 140;       
-   parst->mip_deds = 1.7E-06;
-   parst->threshold = .1;
-   parst->delay = 109*6;   
-   pars->AddAt(parst,0);
 
-   m_DataSet->Add(pars);
+
    m_DataSet->Add(mevent);
    m_DataSet->Add(sector);
    m_DataSet->Add(raw);
@@ -215,7 +210,6 @@ Int_t St_mwc_Maker::Make(){
    if (!mevent)      {printf("mevent does not exist\n")     ;return kStWarn;}
    if (!sector)      {printf("sector does not exist\n")     ;return kStWarn;}
    if (!raw)         {printf("raw does not exist\n")        ;return kStWarn;}
-   printf("Hello This is the St_mwc_Maker\n");
 
 
    Int_t mwc_result = mws(
@@ -225,7 +219,7 @@ Int_t St_mwc_Maker::Make(){
                           mevent,
                           sector,
                           raw,
-                          pars);
+                          m_pars);
    if (mwc_result != kSTAFCV_OK)
    {
       printf("**** Problems with mwc ****\n");
@@ -240,10 +234,10 @@ Int_t St_mwc_Maker::Make(){
  
        if ( (rw+ii)->count ){
          nhts = nhts + (rw+ii)->count;
-	 printf("raw sector: %2d count %3d phi %2d eta %d nhit %2d tot_hit "
+	 /*	 printf("raw sector: %2d count %3d phi %2d eta %d nhit %2d tot_hit "
 		"%3d de %f\n",(rw+ii)->sector,(rw+ii)->count,
 		(sec+ii-jj*96)->iphi,(sec+ii-jj*96)->ieta,(sec+ii-jj*96)->nhit,
-		(sec+ii-jj*96)->tot_hit,(sec+ii-jj*96)->de);
+		(sec+ii-jj*96)->tot_hit,(sec+ii-jj*96)->de);*/
        }	 
      }
    for (int zz = 0;zz<nhts;zz++) m_Hits->Fill(jj);
