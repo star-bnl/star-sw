@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.2 2004/07/08 18:26:09 dongx Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.3 2004/07/15 18:11:22 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,6 +13,10 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.3  2004/07/15 18:11:22  dongx
+ * -introduce two new tables in dbase: tofAdcRange & tofResolution
+ *  -continue update on writing StTofPidTraits
+ *
  * Revision 1.2  2004/07/08 18:26:09  dongx
  * filling StTofPidTraits added (not completed, null nsigmaXXX now)
  *
@@ -48,6 +52,8 @@
 #include "tables/St_tofTzero_Table.h"
 #include "tables/St_tofTACorr_Table.h"
 #include "tables/St_tofCorrection_Table.h"
+#include "tables/St_tofAdcRange_Table.h"
+#include "tables/St_tofResolution_Table.h"
 
 #include "StTofUtil/tofPathLength.hh"
 #include "StTofUtil/StTofDataCollection.h"
@@ -115,6 +121,21 @@ void StTofCalibMaker::resetPars()
   }
 
   mValidCalibPar = kFALSE;
+
+  /// ADC range, resolution of each channel;
+  for(int i=0;i<mNTOFr;i++) {
+    mTofrADCMin[i] = 0.;
+    mTofrADCMax[i] = 1024.;
+    mTofrRes[i] = 999.;
+  }
+  for(int i=0;i<mNTOFp;i++) {
+    mTofpADCMin[i] = 0.;
+    mTofpADCMax[i] = 1024.;
+    mTofpRes[i] = 999.;
+  }
+  for(int i=0;i<mNPVPD;i++) {
+    mPVPDRes[i] = 999.;
+  }
 }
 
 //____________________________________________________________________________
@@ -184,6 +205,8 @@ Int_t StTofCalibMaker::initParameters()
   for(Int_t i=0;i<nRows;i++) {
     int daqId = t0[0].daqChannel[i];
     int tdcChan = t0[0].tdcChan[i];
+    // check the daqId
+    if(daqId<0) continue;
     if(tdcChan<42) {
       mTofpT0[daqId] =  (Double_t)(t0[0].Tzero[i]);
       if(Debug()) {
@@ -207,6 +230,8 @@ Int_t StTofCalibMaker::initParameters()
   for(Int_t i=0;i<mNMax;i++) {
     int daqId = tofta[0].daqChannel[i];
     int tdcChan = tofta[0].tdcChan[i];
+    // check the daqId
+    if(daqId<0) continue;
     for(int j=0;j<mNPar;j++) {
       int ijdaq = daqId*mNPar+j;
       int ij = i*mNPar+j;
@@ -266,7 +291,81 @@ Int_t StTofCalibMaker::initParameters()
       } 
     }
   }
+
+  // ADC range parameters ( specially for TOFp in Run IV )
+  St_tofAdcRange *tofAdc = static_cast<St_tofAdcRange*>(mDbDataSet->Find("tofAdcRange"));
+  if(!tofAdc) {
+    gMessMgr->Warning("unable to find ADC range parameters, use default values!","OS");
+  }
+  tofAdcRange_st *tofadc = static_cast<tofAdcRange_st*>(tofAdc->GetArray());
+  for(Int_t i=0;i<mNMax;i++) {
+    int daqId = tofadc[0].daqChannel[i];
+    int adcChan = tofadc[0].adcChan[i];
+    if(daqId<0) continue;
+    if(adcChan<42) {
+      if(daqId>=mNTOFp) {
+	gMessMgr->Warning("More than expected TOFp channels read in","OS");
+      } else {
+	mTofpADCMin[daqId] = tofadc[0].adcMin[i];
+	mTofpADCMax[daqId] = tofadc[0].adcMax[i];
+	if(Debug()) {
+	  gMessMgr->Info("","OS") << " -TOFp- daqId=" << daqId << " adcChan=" << adcChan << " min=" << mTofpADCMin[daqId] << " max=" << mTofpADCMax[daqId] << endm;
+	}
+      }
+    }
+    if(adcChan>=60) {
+      if(daqId>=mNTOFr) {
+	gMessMgr->Warning("More than expected TOFr channels read in","OS");
+      } else {
+	mTofrADCMin[daqId] = tofadc[0].adcMin[i];
+	mTofrADCMax[daqId] = tofadc[0].adcMax[i];
+	if(Debug()) {
+	  gMessMgr->Info("","OS") << " -TOFr- daqId=" << daqId << " adcChan=" << adcChan << " min=" << mTofrADCMin[daqId] << " max=" << mTofrADCMax[daqId] << endm;
+	}
+      }
+    }
+  }
   
+  // res parameters ( specially for TOFp in Run IV )
+  St_tofResolution *tofRes = static_cast<St_tofResolution*>(mDbDataSet->Find("tofResolution"));
+  if(!tofRes) {
+    gMessMgr->Warning("unable to find resolution parameters, nSimgaTof UNAVAILABLE!","OS");
+  }
+  tofResolution_st *tofres = static_cast<tofResolution_st*>(tofRes->GetArray());
+  for(Int_t i=0;i<mNMax;i++) {
+    int daqId = tofres[0].daqChannel[i];
+    int tdcChan = tofres[0].tdcChan[i];
+    if(daqId<0) continue;
+    if(tdcChan<42) {
+      if(daqId>=mNTOFp) {
+	gMessMgr->Warning("More than expected TOFp channels read in","OS");
+      } else {
+	mTofpRes[daqId] = tofres[0].resolution[i];
+	if(Debug()) {
+	  gMessMgr->Info("","OS") << " -TOFp- daqId=" << daqId << " tdcChan=" << tdcChan << " resolution=" << mTofpRes[daqId] << endm;
+	}
+      }
+    } else if(tdcChan<48) {
+      if(daqId>=mNPVPD) {
+	gMessMgr->Warning("More than expected PVPD channels read in","OS");
+      } else {
+	mPVPDRes[daqId] = tofres[0].resolution[i];
+	if(Debug()) {
+	  gMessMgr->Info("","OS") << " -PVPD- daqId=" << daqId << " tdcChan=" << tdcChan << " resolution=" << mPVPDRes[daqId] << endm;
+	}
+      }
+    } else {
+      if(daqId>=mNTOFr) {
+	gMessMgr->Warning("More than expected TOFr channels read in","OS");
+      } else {
+	mTofrRes[daqId] = tofres[0].resolution[i];
+	if(Debug()) {
+	  gMessMgr->Info("","OS") << " -TOFr- daqId=" << daqId << " tdcChan=" << tdcChan << " resolution=" << mTofrRes[daqId] << endm;
+	}
+      }
+    }
+  }
+
   return kStOK;
 }
 
@@ -370,7 +469,11 @@ Int_t StTofCalibMaker::Make()
       (mOuterGeometry)?thisTrack->outerGeometry():thisTrack->geometry();
     Double_t L = tofPathLength(&vtx, &aCell->position(), theTrackGeometry->helix().curvature());
     aHit->setPathLength((Float_t)L);
-    
+
+    if(adc<mTofrADCMin[daqId]||adc>=mTofrADCMax[daqId]) {
+      delete aHit;
+      continue;
+    }
     if(mValidCalibPar&&mValidStartTime) {
       Double_t tofcorr = tofrAllCorr(tof, T0, adc, zhit, daqId);
       aHit->setTimeOfFlight((Float_t)tofcorr);
@@ -428,6 +531,10 @@ Int_t StTofCalibMaker::Make()
     Double_t L = tofPathLength(&vtx, &aSlat->position(), theTrackGeometry->helix().curvature());
     aHit->setPathLength((Float_t)L);
     
+    if(adc<mTofpADCMin[daqId]||adc>=mTofpADCMax[daqId]) {
+      delete aHit;
+      continue;
+    }
     if(mValidCalibPar&&mValidStartTime) {
       Double_t tofcorr = tofpAllCorr(tof, T0, adc, zhit, daqId);
       aHit->setTimeOfFlight((Float_t)tofcorr);
@@ -476,6 +583,28 @@ Int_t StTofCalibMaker::Make()
       if(!aTrack) continue;
       if(aTrack->key()!=trkId) continue;
       StTofPidTraits* pidTof = new StTofPidTraits(tofHitVec[j]->trayIndex(), tofHitVec[j]->moduleIndex(), tofHitVec[j]->cellIndex(), tofHitVec[j]->timeOfFlight(), tofHitVec[j]->pathLength(), tofHitVec[j]->beta());
+      float sigmae = 999.;
+      float sigmapi = 999.;
+      float sigmak = 999.;
+      float sigmap = 999.;
+      float res = 999.;
+      if(tofHitVec[j]->trayIndex()==0&&tofHitVec[j]->moduleIndex()==0) { // tofp
+	res = mTofpRes[tofHitVec[j]->daqIndex()];
+      } else { // tofr
+	res = mTofrRes[tofHitVec[j]->daqIndex()];
+      }
+      
+      if(res!=0.) {
+	sigmae = (tofHitVec[j]->timeOfFlight()-tofHitVec[j]->tofExpectedAsElectron())/res;
+	sigmapi = (tofHitVec[j]->timeOfFlight()-tofHitVec[j]->tofExpectedAsPion())/res;
+	sigmak = (tofHitVec[j]->timeOfFlight()-tofHitVec[j]->tofExpectedAsKaon())/res;
+	sigmap = (tofHitVec[j]->timeOfFlight()-tofHitVec[j]->tofExpectedAsProton())/res;
+      }
+      pidTof->setSigmaElectron(sigmae);
+      pidTof->setSigmaPion(sigmapi);
+      pidTof->setSigmaKaon(sigmak);
+      pidTof->setSigmaProton(sigmap);
+      
       theTrack->addPidTraits(pidTof);
     }
   }
