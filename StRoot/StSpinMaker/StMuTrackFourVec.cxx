@@ -32,3 +32,14 @@ StMuTrackFourVec::StMuTrackFourVec(StMuTrack* t, Int_t i) : mTrack(t), index(i)
     mVec = StLorentzVectorF( mom.massHypothesis(StPionPlus::instance()->mass() ) , mom);
 }
 
+StMuTrackFourVec::StMuTrackFourVec() : mTrack(NULL), index(0)
+{
+  
+}
+
+void StMuTrackFourVec::Init(StMuTrack *track, StLorentzVectorF P, Int_t i)
+{
+  //index = i;
+  mVec = P;
+  mTrack = track;
+}
