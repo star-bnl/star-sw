@@ -1,26 +1,5 @@
 #include "StDetectorDbBeamInfo.h"
-#include "tables/St_spaceChargeCor_Table.h"
-
-struct beamInfo_st{ 
-
-   unsigned int  runNumber;   /*   */
-   int  entryTag;   /*   0=startrun, 1=endrun, 2=runave, 3=std  */
-   char  blueSpecies[32];   /*   species  */
-  unsigned int blueMassNumber;
-   float  blueEnergy;   /*   energy  */
-   float  blueIntensity;   /*   Ions  */
-   float  blueLifeTime;   /*   Ions per minute  */
-   float  blueBunchIntensity;   /*   bunch intensity  */
-   char  yellowSpecies[32];   /*   species  */
-  unsigned int yellowMassNumber;
-   float  yellowEnergy;   /*   energy  */
-   float  yellowIntensity;   /*   Ions  */
-   float  yellowLifeTime;   /*   Ions per minute  */
-   float  yellowBunchIntensity;   /*   bunch intensity  */
-   float  blueFillNumber;   /*   */
-   float  yellowFillNumber;   /*   */
-
- };  
+#include "tables/St_beamInfo_Table.h"
 
 /*!
 
