@@ -1,5 +1,5 @@
 // Hey Emacs this is -*-c++-*-
-// $Id: EEmcTower.cxx,v 1.4 2004/05/06 16:02:50 zolnie Exp $
+// $Id: EEmcTower.cxx,v 1.5 2004/05/07 22:02:57 zolnie Exp $
 
 /**
  * \class  EEmcTower
@@ -11,8 +11,8 @@
  *
  * \author Piotr A. Zolnierczuk
  *
- * $Date: 2004/05/06 16:02:50 $ 
- * $Revision: 1.4 $
+ * $Date: 2004/05/07 22:02:57 $ 
+ * $Revision: 1.5 $
  *
  * \section towerremarks Remarks
  * \bug  implicitly assumed that labels are no longer than 16 characters
@@ -44,11 +44,9 @@ EEmcTower::EEmcTower(const char *label , float adc, float ene)
  mEta  = -1;
  mADC  = 0.0;
  mEdep = 0.0;
- mLabel= "";
  if( ! ParseLabel(label) ) return;
  mADC  = adc;
  mEdep = ene;
- WriteLabel();
 };
 //                                
 
@@ -74,21 +72,21 @@ EEmcTower::ParseLabel(const char *label)
 }
 
 //=============================================================================
-bool 
-EEmcTower::WriteLabel()
+const char* 
+EEmcTower::TowerLabel() const 
 {
-  if(mLabel) delete mLabel;
-  mLabel = new char[kMaxLabelLen];
-  int r = sprintf(mLabel,"%02dT%1c%02d",SecLabel(),SubSecLabel(),EtaLabel());
-  return (r==3);
+  static char labelBuffer[kMaxLabelLen];
+  sprintf(labelBuffer,"%02dT%1c%02d",SecLabel(),SubSecLabel(),EtaLabel());
+  return labelBuffer;
 }
+
 
 //=============================================================================
 ostream& 
 EEmcTower::Out(ostream &out ) const
 {
   out << "<EEmcTower";
-  out << " TOWER=\"" << mLabel << "\"";
+  out << " TOWER=\"" << TowerLabel() << "\"";
   out << " ADC=\""   << mADC   << "\"";
   out << " EDEP=\""  << mEdep  << "\"";
   out << " />\n";

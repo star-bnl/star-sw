@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.22 2004/05/06 16:02:49 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.23 2004/05/07 22:02:56 zolnie Exp $
 // doxygen info here
 /** 
  * \class  EEmcTTMMaker
@@ -10,8 +10,8 @@
  * of towers with associated tracks (list of EEmcTTMatch objects)
  *
  * \author Piotr A. Zolnierczuk
- * $Date: 2004/05/06 16:02:49 $
- * $Revision: 1.22 $
+ * $Date: 2004/05/07 22:02:56 $
+ * $Revision: 1.23 $
  *
  * \section ttmakerremarks Remarks
  *
@@ -35,8 +35,6 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1F.h"
-
-
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -69,8 +67,6 @@
 #include "EEmcTTMatch.h"
 #include "EEmcTTMMaker.h"
 
-
-#define DEBUG        0
 
 #if !defined(ST_NO_NAMESPACES)
 using std::map;
@@ -140,7 +136,12 @@ EEmcTTMMaker::EEmcTTMMaker(
   mTrackList = new TList;
   mTowerList = new TList;
   mMatchList = new TList;
-
+  //
+  mTowerList->SetOwner();
+  mMatchList->SetOwner();
+  
+  //
+  mTreeOut   = false;
   //
   ResetStats();
 
@@ -169,7 +170,7 @@ EEmcTTMMaker::Init() {
   mFile = new TFile(mFileName, "RECREATE");   if(!mFile) return kStErr;
   mTree = new TTree("ttm","MuDST tracks");    if(!mTree) return kStErr;
   //
-  mTree->Branch("matches","TList",&mMatchList,32768,99);
+  mTree->Branch("matches","TList",&mMatchList,32768,0);
   
   // control histos
   mFile->mkdir("histos");
@@ -200,10 +201,9 @@ EEmcTTMMaker::Make(){
 
   mNEvents++;
   //
+  mTrackList->Clear(); 
+  mTowerList->Clear(); 
   mMatchList->Clear();
-  // 
-  mTrackList->Clear() ; // we do  not own this 
-  mTowerList->Delete(); // we own that :) the beauty of C++
 
   //
   StMuDst    *muDst  = mMuDstMaker->muDst();   // get pointer to _the_ _data_
@@ -307,8 +307,11 @@ EEmcTTMMaker::Make(){
     goodTowerHits++;
     //
     EEmcTower   *eemcHit   = new EEmcTower(sec,sub,eta,adcped,edep);
+
     EEmcTTMatch *eemcMatch = new EEmcTTMatch();
+
     mTowerList->Add(eemcHit);
+
     eemcMatch->Add(eemcHit);
 
     TIter nextTrack(mTrackList);
@@ -337,9 +340,12 @@ EEmcTTMMaker::Make(){
       eemcMatch->Add(track);
       ntrack++;       
     }
-    if( eemcMatch->Matches() > 0 ) mMatchList->Add(eemcMatch); 
+    if( eemcMatch->Matches() > 0 ) 
+      mMatchList->Add(eemcMatch); 
+    else 
+      delete eemcMatch; // stop leaking 
   }
-  mTree->Fill();
+  if(mTreeOut) mTree->Fill();
   mNMatched += ntrack;
   return kStOK;
 }
@@ -352,7 +358,7 @@ EEmcTTMMaker::Clear(Option_t *option ) {
   //if(opt.Contains("A")) { doSth() }  elseif (opt.Contains("B")) { doSthElse() };
   //mMatchList->Clear();
   //mTrackList->Clear() ; // we do  not own this 
-  //mTowerList->Delete(); // we own that :) the beauty of C++
+  //mTowerList->Clear(); // we own that :) the beauty of C++
   StMaker::Clear();
 }
 
@@ -360,7 +366,7 @@ EEmcTTMMaker::Clear(Option_t *option ) {
 /// finish the job, write TTree 
 Int_t 
 EEmcTTMMaker::Finish () {
-  if(mTree) mFile->Write();
+  if(mTreeOut && mTree!=NULL) mFile->Write();
   return kStOK;
 }
 
@@ -420,19 +426,24 @@ EEmcTTMMaker::Summary(ostream &out ) const
   out.precision(2);
 
   out << " <CutsSummary>\n";
+  cout.precision(2);
+  
+  out << "     max CTB sum allowed                         " << mMaxCTBsum      << "\n\n";
+  //
+  out << "     min hits/track  required                    " << mMinTrackHits   << "\n"; 
+  out << "     min track length required                   " << mMinTrackLength << "\n";
+  out << "     min track transverse momentum required      " << mMinTrackPt     << "\n";
+  out << "     min track pseudorapidity at origin required " << mMinTrackEta    << "\n";
+  out << "     max track pseudorapidity at origin required " << mMaxTrackEta    << "\n\n";
+  //
   out << "     tracks are matched at the following depths:\n";
   map<double,TString>::const_iterator zpos; 
   int k=0;
-  cout.precision(2);
   for(zpos=mZ.begin(); zpos!=mZ.end() ; ++zpos) 
     out << "      " << ++k << ". z=" << zpos->first << "   \"" << zpos->second << "\"\n";
-  
-  out << "     min. hits/track  required         " << mMinTrackHits   << "\n"; 
-  out << "     min. track length required        " << mMinTrackLength << "\n";
-  out << "     min. transverse momentum required " << mMinTrackPt     << "\n";
-
-  out << "     max. track to tower center dist.  " << mPhiFac << " x tower half-width (phi)\n";
-  out << "     max. track to tower center dist.  " << mEtaFac << " x tower half-width (eta)\n";
+  //
+  out << "     max track to tower center dist.  " << mPhiFac << " x tower half-width (phi)\n";
+  out << "     max track to tower center dist.  " << mEtaFac << " x tower half-width (eta)\n";
   out << " </CutsSummary>\n";
 
   if(mNEvents>0) { 
@@ -460,6 +471,9 @@ ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm)  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.23  2004/05/07 22:02:56  zolnie
+// fixed a nasty memory leak in EEmcTTMMaker
+//
 // Revision 1.22  2004/05/06 16:02:49  zolnie
 // more docs
 //

@@ -1,4 +1,4 @@
-// $Id: EEmcTTMatch.cxx,v 1.5 2004/05/06 16:02:50 zolnie Exp $
+// $Id: EEmcTTMatch.cxx,v 1.6 2004/05/07 22:02:56 zolnie Exp $
 /**
  *                                                                     
  * \class  EEmcTTMatch
@@ -10,8 +10,8 @@
  * 
  * \author Piotr A. Zolnierczuk
  * 
- * $Date: 2004/05/06 16:02:50 $ 
- * $Revision: 1.5 $
+ * $Date: 2004/05/07 22:02:56 $ 
+ * $Revision: 1.6 $
  *
  *
  * \section eemcttmachexample Example 
@@ -27,7 +27,7 @@
 
  */                                                                      
 
-
+#include <iostream>
 #include <ostream>
 
 #include "TList.h"
@@ -45,34 +45,45 @@ using std::ostream;
 
 ClassImp(EEmcTTMatch);
 
-
+//_____________________________________________________________________________
+//! 
 EEmcTTMatch::EEmcTTMatch()
 {
-	mTower  = NULL;
-	mTracks = new TList();
-	mNTracks= 0;
+  mTower  = NULL;
+  mTracks = new TList();
+  mNTracks= 0;
 }
 
+//_____________________________________________________________________________
+//! 
 EEmcTTMatch::~EEmcTTMatch()
-{
-	delete mTracks;
+{ 
+  if(mTracks) {
+    mTracks->Clear();
+    delete mTracks; 
+  }
 }
 
+//_____________________________________________________________________________
+//! 
 void
 EEmcTTMatch::Clear(Option_t *opt)
 {
-	mTower = NULL;
-	mTracks->Clear();
-	mNTracks=0;
+  mTower = NULL;
+  mTracks->Clear();
+  mNTracks=0;
 }
 
-
+//_____________________________________________________________________________
+//! 
 void 
 EEmcTTMatch::Add(EEmcTower *t) 
 { 
   mTower = t; 
 }
 
+//_____________________________________________________________________________
+//! 
 void 
 EEmcTTMatch::Add(StMuTrack *t) 
 {
@@ -83,10 +94,6 @@ EEmcTTMatch::Add(StMuTrack *t)
 
 //_____________________________________________________________________________
 //! given track and position z return TVector3 with a 
-/// \param track a const pointer to current track
-/// \param z     a z (along the beam) position where 
-/// \param r     a TVector (returned)
-/// \return boolean indicating if track crosses a plane
 Bool_t
 EEmcTTMatch::ExtrapolateToZ(const StMuTrack *track, const double   z, TVector3 &r)
 {
@@ -103,7 +110,8 @@ EEmcTTMatch::ExtrapolateToZ(const StMuTrack *track, const double   z, TVector3 &
 }
 
 
-
+//_____________________________________________________________________________
+//! 
 ostream& 
 EEmcTTMatch::Out(ostream &out ) const
 {

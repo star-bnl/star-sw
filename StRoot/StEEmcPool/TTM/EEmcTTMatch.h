@@ -1,5 +1,5 @@
 // Hey Emacs this is -*-c++-*-
-// $Id: EEmcTTMatch.h,v 1.2 2004/05/05 21:37:38 zolnie Exp $
+// $Id: EEmcTTMatch.h,v 1.3 2004/05/07 22:02:57 zolnie Exp $
 #ifndef STAR_EEmcTTMatch
 #define STAR_EEmcTTMatch
 
@@ -24,7 +24,8 @@ public:
   /// the constructor
   EEmcTTMatch();
   /// the destructor
-  virtual ~EEmcTTMatch(); 
+  ~EEmcTTMatch();
+
 
   /// clears list of matches
   void    Clear(Option_t *opt);
@@ -52,15 +53,15 @@ public:
 
 private:
   /// tower data
-  EEmcTower *mTower;   //->
+  EEmcTower *mTower;   //
   /// list of matched tracks
-  TList     *mTracks;  //->
+  TList     *mTracks;  //
   /// number of matched tracks (do not trust root)
   Int_t      mNTracks; //! 
 
 public:
 
-  ClassDef(EEmcTTMatch, 1)   // 
+  ClassDef(EEmcTTMatch, 2)   // 
 
 };
 
