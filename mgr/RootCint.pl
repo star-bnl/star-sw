@@ -12,74 +12,131 @@ my $Cint_cxx = shift;
 my $DirName = dirname($Cint_cxx); print "DirName = $DirName\n";
 my $LinkDef = $DirName . "/" . "LinkDef.h"; 
 print "Cint Files :", $Cint_cxx, ",", $Cint_h,",",$LinkDef,"\n";
-my $sources  = shift;
-#print "sources =", $sources,"\n";
+my $sources  = shift; #print "sources =", $sources,"\n";
 my $CPPFLAGS = shift; #print "CPPFLAGS = ", $CPPFLAGS, "\n";
-my @list_of_h_files = (); # List of h-files with ClassDef.
-my @list_of_classes = (); # List of classes with ClassDef.
-my @LINKDEF = (); # List of h-files with LinkDefs
+my %class_hfile = (); # class h-file map
+my %class_written = (); 
+my @classes = 0; # list of classes
+
+# count no. of classes i LinkDef's
+my $ListOfWrittenClasses = ":"; 
+my $ListOfDefinedClasses = "";
+open (Out, ">$LinkDef") or die "Can't open $LinkDef";
+for my $def  (split / /,$sources) {#  print "SRC:", $def, "\n";
+  if ($def =~ /LinkDef/ && !($def =~/^$LinkDef$/) ) {
+    open (In, $def) or die "Can't open $def";
+    while ($line = <In>) {
+      print Out $line; print $line; 
+      if ($line =~ / class / && $line  =~ /\#pragma/) {
+	my @words = split /([ \(,\)\;\-\!])/, $line;
+	my $class = $words[8];
+	if ($class) {
+	  push @classes, $class;
+	  $class_written{$class} = "YES"; #print "class: $class, written: $class_written{$class}\n";
+	}
+      }
+    }
+  }
+}
+close (Out);
 for my $h  (split / /,$sources) {#  print "SRC:", $h, "\n";
-  if ($h =~ /LinkDef/) {push @LINKDEF, $h;}# print "======================== Found LinkDef in $h\n";next;} 
+  if ($h =~ /LinkDef/) {next;}
   open (In,$h) or die "Can't open $h";
-  my $h_ok = 0;
+  my $coll = 0;
   my $dummy;
-  my $ClassName;
+  my $class;
   while ($line = <In>) {
     if ($line =~/ClassDef/) {
-      if ($line =~ /\#\#/) {next;} # ClassDefs in macro
-#      print $line;
-      if (!$h_ok) {$h_ok++; push @list_of_h_files, basename($h);}
-      my @words = split /([\(,\)])/, $line;
-      my $ClassName = $words[2];
-#      print "ClassName = ",$ClassName,"\n";
-      if ($ClassName) { push  @list_of_classes, $ClassName;}
+      if ($line =~ /\#\#/) {next;} # ClassDefs in macro definition
+      my @words = split /([\(,\-\!\)])/, $line;
+      my $class = $words[2];#      print "=================class = ",$class,"\n";
+      if ($class) {
+	push @classes, $class;
+	$class_hfile{$class} = $h; #print "class: $class, written: $class_written{$class}, h: $class_hfile{$class}\n"; 
+      }
     }
     else {
-      if ($line =~ /CollectionDef/) {
-	print $line;
+      if ($line =~ /CollectionDef/ && !$line =~ /\#define/) {
+	$coll++;# print $line;
       }
       else {next;}
     }
   }
   close (In);
-}
-my $ListOfWrittenClasses = ""; 
-if ($#list_of_classes > -1) {
-  open (Out, ">$LinkDef") or die "Can't open $LinkDef";
-  if ($#LINKDEF > -1) {
-    for my $def (@LINKDEF) {
-      open (In, $def) or die "Can't open $def";
-      while ($line = <In>) {
-	print Out $line; #print $line; 
-	if ($line =~ / class / && $line  =~ /\#pragma/) {
-	  my @words = split /([ \(,\)\;\-\!])/, $line;
-	  my $i = 0;
-#	  for my $word (@words) {print "word[",$i,"]=",$word,"\n"; $i++;}
-	  $ListOfWrittenClasses .= ":" . $words[8]; #print "ListOfWrittenClasses = ",$ListOfWrittenClasses,"\n";
+  if ($coll) {# Collection Definition 
+    my $macro = `echo \$STAR/StRoot/St_base/StArray.h`;
+    my $tmp = "temp.h";
+    open (INPUT, $h) or die "Can't open $h\n";
+    open (OUTPUT, ">$tmp") or die "Can't open $tmp\n";
+    while ($line = <INPUT>) {
+      if ($line =~ /StCollectionDef/) {
+	my @Class = split /([\(\)])/, $line;
+	my $class = $Class[2];
+	if ($class) {
+	  open(DEF, $macro) || die "Can't open Macros $macro \n";
+	  my $def = 0;
+	  while ($line = <DEF>) {
+	    if ($line =~ /\#define/ && $line =~ /StCollectionDef/) {
+	      $def = 1; next;
+	    }
+	    if ($def && $line =~ /\#define/) {last;}
+	    if (! $def) { next; }
+	    $line =~ s/\\//g;
+	    $line =~ s/QWERTY/$class/g;
+	    $line =~ s/ \#\# //g;
+	    $line =~ s/\#\# //g;
+	    $line =~ s/ \#\#//g;
+	    print OUTPUT $line;
+	  }
 	}
       }
     }
-    print Out "#ifdef __CINT__\n";                  #print  "#ifdef __CINT__\n";
-  }  
-  else {
-    print Out "#ifdef __CINT__\n";                  #print  "#ifdef __CINT__\n";
-    print Out "#pragma link off all globals;\n";    #print  "#pragma link off all globals;\n";
-    print Out "#pragma link off all classes;\n";    #print  "#pragma link off all classes;\n";
-    print Out "#pragma link off all functions;\n";  #print  "#pragma link off all functions;\n";
+    close (OUTPUT);
+    my $flag = `mv $tmp $h;`; print "mv $tmp $h;";
   }
-  for $ClassName (@list_of_classes) {#    print "ClassName = $ClassName\n";
-    if (!grep (/\:$ClassName/, $ListOfWrittenClasses)) {
-      print Out "#pragma link C++ class $ClassName;\n"; #print  "#pragma link C++ class $ClassName;\n";
+}
+my $opened = "";
+for my $class (@classes) {
+  if ($class) {
+    if (!$class_written{$class}) {
+      if (!$opened) {
+	open (Out,">>$LinkDef")  or die "Can't open $LinkDef";
+	print Out "#ifdef __CINT__\n";                  print  "#ifdef __CINT__\n";
+	print Out "#pragma link off all globals;\n";    print  "#pragma link off all globals;\n";
+	print Out "#pragma link off all classes;\n";    print  "#pragma link off all classes;\n";
+	print Out "#pragma link off all functions;\n";  print  "#pragma link off all functions;\n";
+	$opened = "YES";
+      }
+      print Out "#pragma link C++ class $class;\n"; print  "#pragma link C++ class $class;\n";
+      $class_written{$class} = "YES";
     }
   }
-  print Out "#endif\n";                           #print  "#endif\n";
-  close (Out);
 }
-my $files = join ' ', @list_of_h_files;
-$files .= " " . "LinkDef.h"; print "files = ",$files,"\n";
-my $local_cint = basename($Cint_cxx);
-my $cmd  = "cd $DirName; rootcint -f $local_cint -c $CPPFLAGS $files";
-print "cmd = ",$cmd,"\n";
-my $flag = `$cmd`;
+if ($opened) {
+  print Out "#endif\n";                           print  "#endif\n";
+  close (Out);
+  $opened = "";
+}
+my $h_files = "";
+for my $class (@classes) {
+  next if ! $class;
+  my $h = $class_hfile{$class};#  print "Class: $class h: $h written: $class_written{$class} \n";
+  if (!$h) {my $hfile = $DirName . "/" . $class . ".h"; #print "hfile = $hfile\n";
+	    if (-f $hfile ) {$h = $hfile;} 
+	  }
+  if (!$h) {next;}
+  my $hh = basename($h); #print "hh = $hh\n";
+  if (!grep(/$hh/,$h_files)) {$h_files .= " " . $hh;}
+}
+if ($h_files) {
+  $h_files .= " " . "LinkDef.h";# print "files = ",$files,"\n";
+  my $local_cint = basename($Cint_cxx);#  print "files = $#files\n";
+  my $cmd  = "cd $DirName; rootcint -f $local_cint -c -DROOT_CINT $CPPFLAGS $h_files";
+  print "cmd = ",$cmd,"\n";
+  my $flag = `$cmd`;
+}
+else {
+    my $flag = `touch $Cint_cxx $Cint_h $LinkDef`;
+}
 exit(0);
 # last line

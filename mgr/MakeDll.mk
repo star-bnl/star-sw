@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.99 1999/07/28 14:16:23 fisyak Exp $
+# $Id: MakeDll.mk,v 1.100 1999/08/06 15:06:28 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.100  1999/08/06 15:06:28  fisyak
+# Clean up for new release
+#
 # Revision 1.99  1999/07/28 14:16:23  fisyak
 # Simplify for St_base, take out geant3.def
 #
@@ -302,8 +305,6 @@ VPATH =  $(INPUT_DIRS) $(OUTPUT_DIRS)
 
 FILES_TAB  := $(wildcard $(SRC_DIR)/St_*_Table.cxx)
 FILES_MOD  := $(wildcard $(SRC_DIR)/St_*_Module.cxx)
-FILES_DAT  := $(wildcard $(SRC_DIR)/St_DataSet.cxx)
-FILES_XDF  := $(wildcard $(SRC_DIR)/St_XDFFile.cxx)
 ifneq (tables,$(PKGNAME))
 #FILES_HH   := $(wildcard $(SRC_DIR)/*.h $(SRC_DIR)/*.hh $(SRC_DIR)/*.h $(SRC_DIR)/*.hh)
 FILES_HH   := $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.h) $(wildcard $(dir)/*.hh))
