@@ -32,7 +32,7 @@
        if (Ier!=0)  goto :e:
     }
     else if C=='X'                       " xdf format "
-    {  J=Csaddr('xdf_open')
+    {  J=Csaddr('XDF_OPEN')
        If ( J==0 )  goto :e:
        call CsJCAL(J,2,file)
     }
@@ -44,7 +44,7 @@
     {  Table=File(1:idot-1)
     } 
     else if C=='M'                       "mickey-mouse"
-    {  Iadr=CSADDR('gstar_micky');  If (Iadr!=0) Call CSJCAL(Iadr,0,0,0)
+    {  Iadr=CSADDR('GSTAR_MICKY');  If (Iadr!=0) Call CSJCAL(Iadr,0,0,0)
     } 
     CCOMMAND(N:N)=C
     return
@@ -71,9 +71,9 @@
      C=CCOMMAND(i:i); Igate=i
      if     C=='E' { Call AGZREAD('P',ier);  call gstar_ReadEGZ(Igate)     }
      elseif C=='X' { IrbDIV=IxDIV;           LKARP2=LkEvnt
-                     J=CsADDR('xdf_read'); If (J!=0) call CsJCAL(J,1,Igate)}
+                     J=CsADDR('XDF_READ'); If (J!=0) call CsJCAL(J,1,Igate)}
      elseif C=='T' {                         call gstar_ReadTXT(Igate)     }
-     elseif C=='M' { J=CsADDR ('mickine'); IF (J!=0) Call CsJCAL(J,1,Igate)}
+     elseif C=='M' { J=CsADDR ('MICKINE'); IF (J!=0) Call CsJCAL(J,1,Igate)}
      elseif C=='S' { J=AMI_CALL ('gstar_readtab'//o,1,%L(Table)//o)        }
 
      If Igate<=0   { Ier=1; return }
@@ -369,9 +369,9 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
    endif
 *
    Iadr = 0
-   call GsHEAD (len_egrn-2, egrn_generator, iadr)
-   call GsHEAD (len_egev-2, egev_N_event,   iadr)
-   call GsHEAD (len_uevn-2, uevn_author,    iadr)
+   call GsHEAD (len_egrn-2, Bank_egrn(3), iadr)
+   call GsHEAD (len_egev-2, Bank_egev(3), iadr)
+   call GsHEAD (len_uevn-2, Bank_uevn(3), iadr)
    print *,' HepeHeader: geant header set with length =',iadr
 *
    end

@@ -24,7 +24,7 @@ Created August,14 1997
           np    = 5                    ! number of particle types
           code  = {8,  9,  11, 12, 14} ! list of particle codes
           mult  = {3., 3., 2., 2., 1.} ! particle multiplicities
-          slope = {5., 5., 4., 4.,3.3} ! PT spectra slopes (1/GeV)
+          slope = {5., 5., 4., 4.,3.3} ! PT spectra slopes (c/GeV)
           dy    = {2., 2., 2., 2., 2.} ! width of rapidity Gaussian
        endfill
        first = .false.
@@ -33,9 +33,9 @@ Created August,14 1997
     Use   MIKY
           warm = ' a negative multiplicity means no fluctuations'
     s=0;  do i=1,miky_np { s+=miky_slope(i); }
-          warn = '  Input data contain spectrum slopes [1/GeV]  '
+          warn = '  Input data contain spectrum slopes [c/GeV]  '
     if (s<miky_np) then
-          warn = '   Input data contain inverse slopes  [GeV]   '
+          warn = '   Input data contain inverse slopes [GeV/c]  '
           do i=1,miky_np { if(miky_slope(i)>0) miky_slope(i)=1./miky_slope(i);}
     endif
 *
@@ -44,7 +44,7 @@ Created August,14 1997
     <w> warm,warn;
     (' === mickey-mouse events will be generated with parameters ==='/,
      5x,' (',a,') '/ 5x,' (',a,') '/,
-     5x,' geant_code   multiplicity  inv_pt_slope(c/GeV)  rapidity_width ')
+     5x,' geant_code   multiplicity  inv_pt_slope(GeV/c)  rapidity_width ')
     do i=1,miky_np
        <w> miky_code(i),miky_mult(i),1./miky_slope(i),miky_dy(i)
            (F15.0,3F15.3)
@@ -82,7 +82,6 @@ Created August,14 1997
 *                                 generate
        prin2 mult,%L(Cname); (2x,'*** generating ',i5,1x,a,'''s')
        do I=1,Mult
-       prin3; (' *** generating an event with mickey-mouse generator ***')
           call RANNOR(a,b)
           pt      = Gamma2(0.)/miky_SLOPE(Ip)
           y       = miky_DY(Ip)*a
@@ -90,6 +89,7 @@ Created August,14 1997
           pLab(1) = pt*cos(phi)
           pLab(2) = pt*sin(phi)
           pLab(3) = sqrt(Amass**2+pt**2)*sinh(y)
+          prin4 Ipart,Plab; (' *** next particle ',i3,4F9.3)
           CALL AGSKINE(Plab,Ipart,Ivert,Ub,0,Itr)
        enddo
     enddo
