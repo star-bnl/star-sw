@@ -1,8 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.hh,v 1.1 1999/11/05 00:06:42 posk Exp $
+// $Id: StFlowCutEvent.hh,v 1.1 1999/11/11 23:08:49 posk Exp $
 //
-// Author: Art Poskanzer, LBNL, Oct 1999
+// Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
 // Description:  Class for applying flow event cuts
 //               If lo >= hi no cut is applied
@@ -13,24 +13,29 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.hh,v $
+// Revision 1.1  1999/11/11 23:08:49  posk
+// Rearrangement of files.
+//
 // Revision 1.1  1999/11/05 00:06:42  posk
 // First versions of Flow cut classes.
 //
 //
 ////////////////////////////////////////////////////////////////////////////
+
 #ifndef _StFlowCutEvent_INCLUDED_
 #define _StFlowCutEvent_INCLUDED_
-
 #include <iostream.h>
 #include <stdlib.h>
-#include "StFlowAnalysisMaker.h"
+#include "Rtypes.h"
+class StEvent;
+//#include "StFlowMaker.hh"
 
 class StFlowCutEvent {
 
  public:
 
                StFlowCutEvent();
-               ~StFlowCutEvent();
+  virtual      ~StFlowCutEvent();
   static void  SetMult(Int_t lo, Int_t hi);
   static void  SetVertexX(Float_t lo, Float_t hi);
   static void  SetVertexY(Float_t lo, Float_t hi);
@@ -55,7 +60,7 @@ class StFlowCutEvent {
   static UInt_t  mVertexZCut;            // number of not accepted events
   static Float_t mVertexZCuts[2];        // range of Z vertex position
 
-  ClassDef(StFlowCutEvent,1)             // macro for rootcint
+  //ClassDef(StFlowCutEvent,1)             // macro for rootcint
 }; 
 
 inline void StFlowCutEvent::SetMult(Int_t lo, Int_t hi) {

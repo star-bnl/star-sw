@@ -1,37 +1,49 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.1 1999/11/05 00:06:41 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.1 1999/11/11 23:08:47 posk Exp $
 //
-// Author: Art Poskanzer, LBNL, Oct 1999
+// Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
 // Description:  Class for applying event cuts
 //
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.1  1999/11/11 23:08:47  posk
+// Rearrangement of files.
+//
 // Revision 1.1  1999/11/05 00:06:41  posk
 // First versions of Flow cut classes.
 //
 //
 ////////////////////////////////////////////////////////////////////////////
+
 #include <iostream.h>
 #include <stdlib.h>
 #include "StFlowCutEvent.hh"
-#include "StFlowAnalysisMaker.h"
 #include "StEvent.h"
+//#include "StFlowMaker.hh"
+//#include "StEvent.h"
+//#include "StVertex.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "StThreeVectorF.hh"
-
 #define PR(x) cout << (#x) << " = " << (x) << endl;
-ClassImp(StFlowCutEvent)
+
+//ClassImp(StFlowCutEvent)
+
+//-----------------------------------------------------------------------
 
 StFlowCutEvent::StFlowCutEvent() {
   // To apply event cuts
 }
 
+//-----------------------------------------------------------------------
+
 StFlowCutEvent::~StFlowCutEvent() {
 }
+
+//-----------------------------------------------------------------------
 
 Int_t    StFlowCutEvent::mMultCuts[2]    = {10, 10000};
 Float_t  StFlowCutEvent::mVertexXCuts[2] = {-1., 1.};
@@ -44,6 +56,8 @@ UInt_t   StFlowCutEvent::mVertexXCut     = 0;
 UInt_t   StFlowCutEvent::mVertexYCut     = 0;
 UInt_t   StFlowCutEvent::mVertexZCut     = 0;
 
+
+//-----------------------------------------------------------------------
 
 Int_t StFlowCutEvent::CheckEvent(StEvent* mEvent) {
   // Returns kTRUE if the event survives all the cuts
@@ -86,6 +100,8 @@ Int_t StFlowCutEvent::CheckEvent(StEvent* mEvent) {
   mGoodEventN++;
   return kTRUE;
 }
+
+//-----------------------------------------------------------------------
 
 void StFlowCutEvent::PrintCutList() {
   // Prints the list of cuts

@@ -1,76 +1,93 @@
-/***************************************************************************
- *
- * $Id: StFlowTagMaker.cxx,v 1.3 1999/08/09 21:43:05 snelling Exp $
- *
- * Author: Raimond Snellings, LBNL, Jun 1999
- * Description:  Maker to fill the Flow EbyE Tag
- *
- ***************************************************************************
- *
- * $Log: StFlowTagMaker.cxx,v $
- * Revision 1.3  1999/08/09 21:43:05  snelling
- * removed parameters from cxx file
- *
- * Revision 1.2  1999/07/26 23:39:34  snelling
- * added histograms for FlowTag QA
- *
- * FlowTagMaker: fills FlowTags defined by EbE workgroup
- *
- *  
- **************************************************************************/
-#define onlyforStFlowTagMaker
-#include "StFlowTagMaker.h"
+//////////////////////////////////////////////////////////////////////
+//
+// $Id: StFlowTagMaker.cxx,v 1.4 1999/11/11 23:12:59 posk Exp $
+//
+// Author: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
+// Description:  Maker to fill the Flow EbyE Tag database
+//
+//////////////////////////////////////////////////////////////////////
+//
+// $Log: StFlowTagMaker.cxx,v $
+// Revision 1.4  1999/11/11 23:12:59  posk
+// Rearrangement of files.
+//
+// Revision 1.3  1999/08/09 21:43:05  snelling
+// removed parameters from cxx file
+//
+// Revision 1.2  1999/07/26 23:39:34  snelling
+// added histograms for FlowTag QA
+//
+// FlowTagMaker: fills FlowTags defined by EbE workgroup
+//
+//  
+//////////////////////////////////////////////////////////////////////
+
+#include <iostream.h>
+#include <stdlib.h>
+#include <math.h>
+#include "StFlowTagMaker.hh"
+//#include "StMaker.h"
+#include "../StFlowMaker/StFlowMaker.hh"
+#include "../StFlowMaker/StFlowEvent.hh"
+//#include "../StFlowMaker/StFlowTrackCollection.hh"
+//#include "../StFlowMaker/StFlowCutEvent.hh"
+#include "../StFlowMaker/StFlowCutTrack.hh"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
-#include "StThreeVector.hh"
-#include "StLorentzVector.hh"
-
+//#include "StThreeVector.hh"
+//#include "StLorentzVector.hh"
+#include "TH1.h"
+#include "TH2.h"
+#include "TProfile.h"
+#define PR(x) cout << (#x) << " = " << (x) << endl;
 
 ClassImp(StFlowTagMaker)
 
+//-------------------------------------------------------------
 
-StFlowTagMaker::StFlowTagMaker(const Char_t *name) 
-  : StMaker(name)
+StFlowTagMaker::StFlowTagMaker(const Char_t* name) : StFlowMaker(name)
 {
-  mFlowTag = 0;
-  mEvent = 0;
 }
+
+//-------------------------------------------------------------
 
 StFlowTagMaker::~StFlowTagMaker() 
 {
-  delete mFlowTag; //clean up
+  //delete mFlowTag; //clean up
 }
+
+//-------------------------------------------------------------
 
 Int_t StFlowTagMaker::Make() 
 {
-
-  // Create a new tag
-  mFlowTag = new FlowTag_st;
-
-  // Get a pointer to the DST
-  mEvent = (StEvent *) GetInputDS("StEvent");
-  if (!mEvent) return kStOK; // If no event, we're done
-  
+  StFlowMaker* flowMaker = (StFlowMaker*)GetMaker("Flow");
+  mFlowTag = flowMaker->TagPointer();
+  mFlowEvent = flowMaker->FlowEventPointer();
   // fill the Flow Tag 
-  fillFlowTag();
+  if (mFlowEvent && mFlowTag) {
+    fillFlowTag();    // fill the tag database
+  } else {
+    return kStOK;     // no StFlowEvent or no Tag pointer
+  }
 
   // fill histograms from Flow Tag
   makeHistograms();
 
   // print pointer to flowtag 
-  cout << "pointer to flow tag: " << tag() << endl;
-
-  // print debug info
-  printTag();
+  cout << "TagMaker TagPointer: " << TagPointer() << endl;
 
   return kStOK;
 }
 
+//-------------------------------------------------------------
+
 void StFlowTagMaker::PrintInfo() 
 {
-  cout << "$Id: StFlowTagMaker.cxx,v 1.3 1999/08/09 21:43:05 snelling Exp $" << endl;
-  if (Debug()) StMaker::PrintInfo();
+  cout << "$Id: StFlowTagMaker.cxx,v 1.4 1999/11/11 23:12:59 posk Exp $" << endl;
+  //if (Debug()) StMaker::PrintInfo();
 }
+
+//-------------------------------------------------------------
 
 void StFlowTagMaker::printTag(ostream& os) 
 {
@@ -85,29 +102,32 @@ void StFlowTagMaker::printTag(ostream& os)
   }
 }
 
-FlowTag_st* StFlowTagMaker::tag()
-{
-  return mFlowTag;
+//-------------------------------------------------------------
+
+Int_t StFlowTagMaker::Finish() {
+  StFlowCutTrack::PrintCutList();
+  return kStOK;
 }
+
+//-------------------------------------------------------------
 
 Int_t StFlowTagMaker::Init()
 {
 
-  const float PhiMin = -pi;
-  const float PhiMax = pi; 
-  const float EtaMin = -6.;
-  const float EtaMax = 6.;
-  const float PtMin = 0.;
-  const float PtMax = 4.;
-
-  const float PsiMin = 0.;
-  const float PsiMax = twopi; 
-  const float SumPtMin = 0.;
-  const float SumPtMax = 4.;
-  const float MultMin = 0.;
-  const float MultMax = 10000.;
-  const float qMin = 0.;
-  const float qMax = 2.;
+  const Float_t PhiMin   = -pi;
+  const Float_t PhiMax   =  pi; 
+  const Float_t EtaMin   = -6.;
+  const Float_t EtaMax   =  6.;
+  const Float_t PtMin    =  0.;
+  const Float_t PtMax    =  4.;
+  const Float_t PsiMin   =  0.;
+  const Float_t PsiMax   =  twopi; 
+  const Float_t SumPtMin =  0.;
+  const Float_t SumPtMax =  4.;
+  const Float_t MultMin  =  0.;
+  const Float_t MultMax  =  10000.;
+  const Float_t qMin     =  0.;
+  const Float_t qMax     =  2.;
 
   for (int i = 0; i < nSubEvents; i++) {
     TString *mHistTitle;
@@ -198,9 +218,10 @@ Int_t StFlowTagMaker::Init()
   return kStOK;
 }
 
+//-------------------------------------------------------------
+
 Int_t StFlowTagMaker::makeHistograms()
 {
-
   for (int j = 0; j < nHarmonics; j++) {
 
     histSubEvents[0].histHarmonics[j].mHistFlowTagSumPt->
@@ -229,11 +250,11 @@ Int_t StFlowTagMaker::makeHistograms()
 	   / sqrt((float)mFlowTag->nd[j]));
 
     // calculate the resolution (sqrt of hist still has to be implemented also *sqrt 2)
-    float EventPlaneAngle1 = atan2(mFlowTag->qya[j], mFlowTag->qxa[j]) / (float)(j+1);
+    Float_t EventPlaneAngle1 = atan2(mFlowTag->qya[j], mFlowTag->qxa[j]) / (float)(j+1);
     if (EventPlaneAngle1 < 0.) {
       EventPlaneAngle1 += twopi / (float)(j+1);
     }
-    float EventPlaneAngle2 = atan2(mFlowTag->qyb[j], mFlowTag->qxb[j]) / (float)(j+1);
+    Float_t EventPlaneAngle2 = atan2(mFlowTag->qyb[j], mFlowTag->qxb[j]) / (float)(j+1);
     if (EventPlaneAngle2 < 0.) {
       EventPlaneAngle2 += twopi / (float)(j+1);
     }
@@ -242,11 +263,11 @@ Int_t StFlowTagMaker::makeHistograms()
     histSubEvents[1].mHistResolution->
       Fill((float)(j+1), (float) cos((float)(j+1) * (EventPlaneAngle2 - EventPlaneAngle1)));
     
-    float EventPlaneAngle3 = atan2(mFlowTag->qyc[j], mFlowTag->qxc[j]) / (float)(j+1);
+    Float_t EventPlaneAngle3 = atan2(mFlowTag->qyc[j], mFlowTag->qxc[j]) / (float)(j+1);
     if (EventPlaneAngle3 < 0.) {
       EventPlaneAngle3 += twopi / (float)(j+1);
     }
-    float EventPlaneAngle4 = atan2(mFlowTag->qyd[j], mFlowTag->qxd[j]) / (float)(j+1);
+    Float_t EventPlaneAngle4 = atan2(mFlowTag->qyd[j], mFlowTag->qxd[j]) / (float)(j+1);
     if (EventPlaneAngle4 < 0.) {
       EventPlaneAngle4 += twopi / (float)(j+1);
     }
@@ -260,51 +281,19 @@ Int_t StFlowTagMaker::makeHistograms()
   return kStOK;
 }
 
+//-------------------------------------------------------------
+
 void StFlowTagMaker::fillFlowTag() 
-{
-
-  const double bField             = 0.5*tesla;
-  
+{  
   // Initialize Iterator, loop variables
-  StTrackCollection* tracks          = mEvent->trackCollection();
-  StTrackIterator    itr;
-
-  // i,j should be defined inside every loop however compiler does not like that
-  long       i,j;
-
-  // fill FlowTag with cuts 
-  for (i = 0; i < 3; i++) {
-    for (j = 0; j < 2; j++) {
-      mFlowTag->qVector[i][j] = trackquality[i][j];
-    }
-  }
-
-  // track loop
-  long initialMultiplicity = tracks->size();
-  float *mPhiAngle = new float[initialMultiplicity];
-  float *mPseudoRapidity = new float[initialMultiplicity];
-  float *mPt = new float[initialMultiplicity];
-  
-  long TrackCount = 0;
-  for (itr = tracks->begin(), i=0; itr != tracks->end(); itr++) {
-    StGlobalTrack* gtrk = *itr;
-    StTrackFitTraits& fitTraits = gtrk->fitTraits();
-    int nFitPoints = fitTraits.numberOfFitPoints();
-    if ((double) nFitPoints > trackquality[0][0]) {
-      StThreeVectorD p = gtrk->helix().momentum(bField); 
-      mPhiAngle[i] = p.phi();
-      mPseudoRapidity[i] = p.pseudoRapidity();
-      mPt[i] = p.perp(); 
-      TrackCount++;
-      i++;
-    }
-  }
-
-  //  cout << "after loop over tracks TrackCount = " << TrackCount << endl;
+  StFlowTrackCollection* tracks = mFlowEvent->TrackCollection();
+  StFlowTrackIterator    itr;
+  Int_t TrackCount = tracks->size();
 
   // Make random subevents routine looks translated from Fortran so 1..n
-  float *mRandomVector = new float[TrackCount + 1];
+  Float_t *mRandomVector = new Float_t[TrackCount + 1];
   long  *mIndexVector = new long[TrackCount + 1];
+  int i;
   // Fill array with random numbers
   for (i = 0; i <= TrackCount ; i++) 
     {mRandomVector[i] = rand()/(float)RAND_MAX;}
@@ -314,51 +303,55 @@ void StFlowTagMaker::fillFlowTag()
 
   // Make subevent arrays
   long TrackCountSub1 = (long) ceil(TrackCount/2.);
-  float *mPhiAngleSub1 = new float[TrackCountSub1];
-  float *mPseudoRapiditySub1 = new float[TrackCountSub1];
-  float *mPtSub1 = new float[TrackCountSub1];
+  Float_t *mPhiAngleSub1 = new Float_t[TrackCountSub1];
+  Float_t *mPseudoRapiditySub1 = new Float_t[TrackCountSub1];
+
+  Float_t *mPtSub1 = new Float_t[TrackCountSub1];
   long TrackCountSub2 = (long) floor(TrackCount/2.);
-  float *mPhiAngleSub2 = new float[TrackCountSub2];
-  float *mPseudoRapiditySub2 = new float[TrackCountSub2];
-  float *mPtSub2 = new float[TrackCountSub2];
+  Float_t *mPhiAngleSub2 = new Float_t[TrackCountSub2];
+  Float_t *mPseudoRapiditySub2 = new Float_t[TrackCountSub2];
+  Float_t *mPtSub2 = new Float_t[TrackCountSub2];
 
-  long Sub1Counter =0;
-  long Sub2Counter =0;
-  double SumPtSub1 =0.;
-  double SumPtSub2 =0.;
+  long Sub1Counter   =0;
+  long Sub2Counter   =0;
+  Double_t SumPtSub1 =0.;
+  Double_t SumPtSub2 =0.;
 
-  for (i = 0; i < TrackCount ; i++) {
+  // Fill the ararys and histograms without track selection
+  for (itr = tracks->begin(), i=0; itr != tracks->end(); itr++, i++) {
+    StFlowTrack* mTrack = *itr;
     if (mIndexVector[i + 1] <= TrackCountSub1) {
-      mPhiAngleSub1[Sub1Counter] = mPhiAngle[i];
+      mPhiAngleSub1[Sub1Counter] = mTrack->Phi();
       histSubEvents[0].mHistPhi->Fill(mPhiAngleSub1[Sub1Counter]);
-      mPseudoRapiditySub1[Sub1Counter] = mPseudoRapidity[i];
+      mPseudoRapiditySub1[Sub1Counter] = mTrack->Eta();
       histSubEvents[0].mHistPseudoRapidity->Fill(mPseudoRapiditySub1[Sub1Counter]);
-      mPtSub1[Sub1Counter] = mPt[i];
+      mPtSub1[Sub1Counter] = mTrack->Pt();
       histSubEvents[0].mHistPt->Fill(mPtSub1[Sub1Counter]);
-      SumPtSub1 += mPt[i];
+      SumPtSub1 += mTrack->Pt();
       Sub1Counter++;
     }
     else {
-      mPhiAngleSub2[Sub2Counter] = mPhiAngle[i];
+      mPhiAngleSub2[Sub2Counter] = mTrack->Phi();
       histSubEvents[1].mHistPhi->Fill(mPhiAngleSub2[Sub2Counter]);
-      mPseudoRapiditySub2[Sub2Counter] = mPseudoRapidity[i];
+      mPseudoRapiditySub2[Sub2Counter] = mTrack->Eta();
       histSubEvents[1].mHistPseudoRapidity->Fill(mPseudoRapiditySub2[Sub2Counter]);
-      mPtSub2[Sub2Counter] = mPt[i];
+      mPtSub2[Sub2Counter] = mTrack->Pt();
       histSubEvents[1].mHistPt->Fill(mPtSub2[Sub2Counter]);
-      SumPtSub2 += mPt[i];
+      SumPtSub2 += mTrack->Pt();
       Sub2Counter++;
     }
   }
 
-  //  cout << "TrackCountSub1, Sub1Counter, TrackCountSub2, Sub2Counter" << endl;
-  //  cout << TrackCountSub1 << " " << Sub1Counter << " " 
-  //       << TrackCountSub2 << " " << Sub2Counter << endl; 
+//   cout << "TrackCountSub1, Sub1Counter, TrackCountSub2, Sub2Counter" << endl;
+//   cout << TrackCountSub1 << " " << Sub1Counter << " " 
+//        << TrackCountSub2 << " " << Sub2Counter << endl; 
 
 
   for (i = 0; i < 5 ; i++) {
-    double Qx, Qy, EventPlaneAngle;
-    // calculate plane and q vectors first subevent
-    eventPlane(TrackCountSub1, mPseudoRapiditySub1, mPhiAngleSub1, mPtSub1, 
+    Double_t Qx, Qy, EventPlaneAngle;
+
+    // calculate plane and Q vectors first subevent
+    eventPlane(TrackCountSub1, mPseudoRapiditySub1, mPhiAngleSub1, 
 	       &Qx, &Qy, &EventPlaneAngle, i+1, 0);
     histSubEvents[0].histHarmonics[i].mHistPsi->Fill(EventPlaneAngle);
     // fill tags
@@ -366,27 +359,30 @@ void StFlowTagMaker::fillFlowTag()
     mFlowTag->qya[i] = Qy;
     mFlowTag->na[i] = TrackCountSub1;
     mFlowTag->spta[i] = SumPtSub1;
-    // calculate plane and q vectors second subevent
-    eventPlane(TrackCountSub2, mPseudoRapiditySub2, mPhiAngleSub2, mPtSub2, 
-	       &Qx, &Qy, &EventPlaneAngle, i+1, 0);
+
+    // calculate plane and Q vectors second subevent
+    eventPlane(TrackCountSub2, mPseudoRapiditySub2, mPhiAngleSub2, 
+	       &Qx, &Qy, &EventPlaneAngle, i+1, 1);
     histSubEvents[1].histHarmonics[i].mHistPsi->Fill(EventPlaneAngle);
     // fill tags
     mFlowTag->qxb[i] = Qx;
     mFlowTag->qyb[i] = Qy;
     mFlowTag->nb[i] = TrackCountSub2;
     mFlowTag->sptb[i] = SumPtSub2;
-    // calculate plane and q vectors first subevent with additional weights
-    eventPlane(TrackCountSub1, mPseudoRapiditySub1, mPhiAngleSub1, mPtSub1, 
-	       &Qx, &Qy, &EventPlaneAngle, i+1, 1);
+
+    // calculate plane and Q vectors first subevent
+    eventPlane(TrackCountSub1, mPseudoRapiditySub1, mPhiAngleSub1, 
+	       &Qx, &Qy, &EventPlaneAngle, i+1, 2);
     histSubEvents[2].histHarmonics[i].mHistPsi->Fill(EventPlaneAngle);
     // fill tags
     mFlowTag->qxc[i] = Qx;
     mFlowTag->qyc[i] = Qy;
     mFlowTag->nc[i] = TrackCountSub1;
     mFlowTag->sptc[i] = SumPtSub1;
-    // calculate plane and q vectors second subevent with additional weights
-    eventPlane(TrackCountSub2, mPseudoRapiditySub2, mPhiAngleSub2, mPtSub2, 
-	       &Qx, &Qy, &EventPlaneAngle, i+1, 1);
+
+    // calculate plane and Q vectors second subevent
+    eventPlane(TrackCountSub2, mPseudoRapiditySub2, mPhiAngleSub2, 
+	       &Qx, &Qy, &EventPlaneAngle, i+1, 3);
     histSubEvents[3].histHarmonics[i].mHistPsi->Fill(EventPlaneAngle);
     // fill tags
     mFlowTag->qxd[i] = Qx;
@@ -395,9 +391,6 @@ void StFlowTagMaker::fillFlowTag()
     mFlowTag->sptd[i] = SumPtSub2;
   }
 
-  delete [] mPhiAngle;
-  delete [] mPseudoRapidity;
-  delete [] mPt;
   delete [] mRandomVector;
   delete [] mIndexVector;
   delete [] mPhiAngleSub1;
@@ -409,17 +402,17 @@ void StFlowTagMaker::fillFlowTag()
 
 }
 
+//-------------------------------------------------------------
 
-Int_t StFlowTagMaker::eventPlane(long Multiplicity, float *mPseudoRapidity, 
-				 float *mPhiAngle, float *mPt, double *mQx, 
-				 double *mQy, double *mEventPlaneAngle, 
-				 int OrderParameter, int PhiYWeigt)
+Int_t StFlowTagMaker::eventPlane(long Multiplicity, Float_t *mPseudoRapidity, 
+  Float_t *mPhiAngle, Double_t *mQx, Double_t *mQy, Double_t *mEventPlaneAngle, 
+  Int_t OrderParameter, Int_t eventN)
 {
+  Int_t harN = OrderParameter - 1;
   // will go to header file
-  const int MinimumMultiplicity = 1;
-  const int MinimumOrder = 1;
-
-  const int MaximumOrder = nHarmonics;
+  const Int_t MinimumMultiplicity = 1;
+  const Int_t MinimumOrder = 1;
+  const Int_t MaximumOrder = nHarmonics;
   //initialize return variables
   *mQx = 0.;
   *mQy = 0.;
@@ -439,32 +432,21 @@ Int_t StFlowTagMaker::eventPlane(long Multiplicity, float *mPseudoRapidity,
   }
 
   for (long i=0; i < Multiplicity; i++) {
-    float weight = 1.;
-    if (PhiYWeigt) {
-      phiRapidityWeight(mPhiAngle[i], mPseudoRapidity[i], mPt[i], &weight);
-    }
+    Double_t phiWgt = PhiWeight(mPhiAngle[i], eventN, harN);
     if (mPseudoRapidity[i] < 0 && OrderParameter % 2 == 1) {
-      weight *= -1.;
+      phiWgt *= -1.;
     }
-    *mQx += weight * cos(mPhiAngle[i] * OrderParameter);
-    *mQy += weight * sin(mPhiAngle[i] * OrderParameter);
+    *mQx += phiWgt * cos(mPhiAngle[i] * OrderParameter);
+    *mQy += phiWgt * sin(mPhiAngle[i] * OrderParameter);
   }
-  
-  *mEventPlaneAngle = atan2(*mQy,*mQx) / (float) OrderParameter;
+    *mEventPlaneAngle = atan2(*mQy,*mQx) / (float)OrderParameter;
   if (*mEventPlaneAngle < 0.) {
-    *mEventPlaneAngle += twopi / (float) OrderParameter;
+    *mEventPlaneAngle += twopi / (float)OrderParameter;
   }
   return kStOK;
 }
 
-Int_t StFlowTagMaker::phiRapidityWeight(float PhiAngle, float PseudoRapidity, 
-					float Pt, float *weight)
-{
-  
-  *weight = 1.;
-  
-  return kStOK;
-}
+//-------------------------------------------------------------
 
 void StFlowTagMaker::swap(long &a,long &b)
 {
