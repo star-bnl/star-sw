@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.162 2004/09/10 21:59:04 perev Exp $
+// $Id: bfc.C,v 1.163 2004/09/16 02:28:43 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -20,7 +20,6 @@
 #include "StEventMaker/StEventMaker.h"
 #include "StAssociationMaker/StMcParameterDB.h"
 #include "St_dst_Maker/StV0Maker.h"
-#include "xdf2root/St_XDFFile.h" 
 #include "StPass0CalibMaker/StTpcT0Maker.h" 
 void Usage();
 void Load();
@@ -30,7 +29,6 @@ class StBFChain;
 class StEvent;
 class St_geant_Maker;
 class StIOMaker;
-class St_XDFFile;
 class StEventDisplayMaker; 
 class StEventMaker; 
 class StTpcT0Maker;
@@ -38,10 +36,9 @@ class StTpcT0Maker;
 TBrowser *b = 0;
 StBFChain  *chain=0; 
 StMaker    *treeMk=0;
-StEvent *Event;
+StEvent *Event=0;
 St_geant_Maker *geant = 0;
 StEventDisplayMaker *dsMk = 0;
-StEventMaker *evMk = 0;
 StTpcT0Maker *t0mk = 0;
 //_____________________________________________________________________
 void Load(){
@@ -70,8 +67,6 @@ void bfc(const Int_t First,
   // All symbols are significant (regardless of case)
   // "-" sign before requiest means that this option is disallowed
   // Chain = "gstar" run GEANT on flight with 10 muons in range |eta| < 1 amd pT = 1GeV/c (default)
-  // Chain = "" || "xdf" run STANDARD chain using xd-files as an input
-  // Chain = "minidaq" read miniDAQ xdf file and process 
   // Dynamically link some shared libs
   if (gClassTable->GetID("StBFChain") < 0) Load();
   if (chain) delete chain;
@@ -180,66 +175,24 @@ void bfc(const Int_t First,
   
   // Init the chain and all its makers
   Int_t iTotal = 0, iBad = 0;
-  St_XDFFile *xdf_out = 0;
   Int_t iMake = 0, i = First;
 
+  chain->SetAttr(".Privilege",0,"*"                ); 	//All  makers are NOT priviliged
   chain->SetAttr(".Privilege",1,"StIOInterFace::*" ); 	//All IO makers are priviliged
   chain->SetAttr(".Privilege",1,"St_geant_Maker::*"); 	//It is also IO maker
 
-  if (Last >= 0) {
-    Int_t iInit = chain->Init();
-    if (iInit >=  kStEOF) {
-      chain->Fatal(iInit,"on init");
-      goto END;
-    }
-    StEvtHddr *hd = (StEvtHddr*)chain->GetDataSet("EvtHddr");
-    if (hd) hd->SetRunNumber(-2); // to be sure that InitRun calls at least once
+  if (Last < 0) return;
+  Int_t iInit = chain->Init();
+  if (iInit >=  kStEOF) {chain->Fatal(iInit,"on init"); return;}
+    
+  StEvtHddr *hd = (StEvtHddr*)chain->GetDataSet("EvtHddr");
+  if (hd) hd->SetRunNumber(-2); // to be sure that InitRun calls at least once
     // skip if any
-    if (First > 1) {
-      if (chain->GetOption("fzin")) {
-	geant = (St_geant_Maker *) chain->GetMaker("geant");
-	if (geant) {
-	  if (geant->IsActive()) geant->Skip(First-1);
-	}
-      }
-      else {
-	StIOMaker *inpMk      = (StIOMaker *)      chain->GetMaker("inputStream");
-	if (inpMk) {printf ("Skip %i Events\n",First-1);inpMk->Skip(First-1);}
-      }
-    }
-  }
-  xdf_out = chain->GetXdfOut();
-  if (chain->GetOption("Event")) evMk  = (StEventMaker   *) chain->GetMaker("StEventMaker");  
+  chain->Skip(First-1);
   treeMk = chain->GetMaker("outputStream");
- EventLoop: if (i <= Last && iMake != kStEOF && iMake != kStFatal) {
-   TBenchmark evnt;
-   evnt.Start("QAInfo:");
-   chain->Clear();
-   iMake = chain->Make(i);
-   if (iMake <kStEOF) {
-     if (xdf_out){
-       St_DataSet *dstSet = chain->GetInputDS("dst");
-       if (dstSet) xdf_out->NextEventPut(dstSet); // xdf output
-     }
-     iTotal++;
-     if (treeMk && iMake == kStErr) {
-       treeMk->IMake(i); 
-       iBad++;
-     }
-     //    gSystem->Exec("ps ux");
-     evnt.Stop("QAInfo:");
-     //  evnt.Show("QAInfo:");
-     printf ("QAInfo: Done with Event [no. %d/run %d/evt. %d/Date.Time %d.%d/sta %d] Real Time = %10.2f seconds Cpu Time =  %10.2f seconds \n",
-	     i,chain->GetRunNumber(),chain->GetEventNumber(),chain->GetDate(), chain->GetTime(),
-	     iMake,evnt.GetRealTime("QAInfo:"),evnt.GetCpuTime("QAInfo:"));
-   }
-   i++; goto EventLoop;
- }
- END:
-  fflush(stdout);
+  chain->EventLoop(First,Last,treeMk);
   printf ("QAInfo:Run completed ");
   gSystem->Exec("date");
-  if (evMk) Event = (StEvent *) chain->GetInputDS("StEvent");
   {
     TDatime t;
     printf ("\nQAInfo:Run is finished at Date/Time %i/%i; Total events processed :%i and not completed: %i\n",
@@ -300,9 +253,7 @@ void Usage() {
   printf (" root4star 'bfc.C(2,40,\"Cy1b fzin -l3t\")'//the as above but remove L3T from chain\n");
   printf (" root4star 'bfc.C(40,\"Cy2a fzin\",\"/star/rcf/disk0/star/test/venus412/b0_3/year_2a/psc0208_01_40evts.fz\")'\n");
   printf (" root4star 'bfc.C(40,\"Cy2a fzin\")'\t// the same as  above\n");
-  printf (" root4star 'bfc.C(5,10,\"Cy1b in xout\",\"/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf\")'\n");
   printf ("                                    \t// skipping the 4 events and processing the remaining 6 events\n");
-  printf (" root4star 'bfc.C(1,\"off in tpc FieldOff sd97 eval\",\"Mini_Daq.xdf\")'\t// the same as Chain=\"minidaq\"\n");
   printf (" root4star 'bfc.C(1,\"gstar Cy1a tfs allevent\")' \t// run gstar and write all event into file branches\n");
   printf (" root4star 'bfc.C(1,\"off in Cy1a l3t\",\"gtrack.tpc_hits.root\")'\t// run l3t only with prepaired file\n");
   printf (" root4star 'bfc.C(1,\"tdaq display\",\"/star/rcf/disk1/star/daq/990727.3002.01.daq\")' \n");
