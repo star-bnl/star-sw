@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.47 2003/07/18 17:15:40 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.48 2003/07/31 19:01:14 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.48  2003/07/31 19:01:14  caines
+ * Make changes so the slow simulator can run
+ *
  * Revision 1.47  2003/07/18 17:15:40  caines
  * Fix Pedoffset to be 20 not 10 change variables to int from floats to avoid casting problems, fix that when pedestal goes negative we dont
  *
@@ -268,18 +271,28 @@ Int_t StSvtSeqAdjMaker::InitRun( int runnumber)
 
   StIOMaker* mIOMaker = (StIOMaker*)GetMaker("inputStream");
   cout << "************************" << mIOMaker << endl;
-  ioMakerFileName = string(mIOMaker->GetFile()); 
-  FileName = buildFileName( DirName+"/", baseName(ioMakerFileName),".SvtGainCal.root"); 
-  
-  // cout << "Heres my name: " << FileName << endl;
+  if (mIOMaker){
+    ioMakerFileName = string(mIOMaker->GetFile()); 
+    FileName = buildFileName( DirName+"/", baseName(ioMakerFileName),".SvtGainCal.root"); 
+    // cout << "Heres my name: " << FileName << endl;
+  }else
+    {
+      FileName=buildFileName( DirName+"/", "SeqAdj-Run"+GetRunNumber(),".SvtGainCal.root"); 
+    }
+  hfile  = new TFile(FileName.c_str(),"RECREATE","Demo ROOT file");
+  CreateHist(mTotalNumberOfHybrids);
 
-   hfile  = new TFile(FileName.c_str(),"RECREATE","Demo ROOT file");
-   //hfile  = new TFile("test.root","RECREATE","Demo ROOT file");
-  CreateHist(mTotalNumberOfHybrids);	     
-  
   GetBadAnodes();
 
   GetSvtPedestals();
+
+  gMessMgr->Info()<< " StSvtSeqAdjMaker-info:"<<endm;
+  gMessMgr->Info() << "     PedOffSet = "<<mPedOffSet<<endm;
+  gMessMgr->Info() << "    thresh_lo = "<<m_thresh_lo <<endm;
+  gMessMgr->Info() << "     thresh_hi = "<<m_thresh_hi <<endm;
+  gMessMgr->Info() << "     n_seq_lo  = "<<m_n_seq_lo <<endm;
+  gMessMgr->Info() << "     n_seq_hi  = "<< m_n_seq_hi <<endm;
+  gMessMgr->Info() << "    inv_prod_lo  = "<<m_inv_prod_lo <<endm;
 
   return  kStOK;  
 }
