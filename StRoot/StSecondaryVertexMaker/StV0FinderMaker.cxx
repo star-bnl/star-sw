@@ -353,8 +353,11 @@ Int_t StV0FinderMaker::Prepare() {
       if (!trks)
         {StThreeVectorD p1 = triGeom->momentum();
         StThreeVectorD p2 = heli[trks].momentum(Bfield);
-        if (p2.x() != 0) Bfield *= p1.x()/(p2.x()+1.e+5);
-        else Bfield *= p1.y()/(p2.y()+1.e+5);
+
+        if      (fabs(p2.x()) > 1.e-20) Bfield *= p1.x()/p2.x();
+        else if (fabs(p2.y()) > 1.e-20) Bfield *= p1.y()/p2.y();
+	else continue;
+
         if (triGeom->charge()*triGeom->helicity() > 0) Bfield = -fabs(Bfield);
                else Bfield = fabs(Bfield);
         }
@@ -845,8 +848,11 @@ void StV0FinderMaker::ExpandVectors(unsigned short size) {
   trkID.resize(newsize);
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.29 2005/02/09 21:10:01 perev Exp $
+// $Id: StV0FinderMaker.cxx,v 1.30 2005/02/10 02:51:09 jeromel Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.30  2005/02/10 02:51:09  jeromel
+// Correct Zero field protection (broke V0/kink)
+//
 // Revision 1.29  2005/02/09 21:10:01  perev
 // test for zero field fixed
 //
