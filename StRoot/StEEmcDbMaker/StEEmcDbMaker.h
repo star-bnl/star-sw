@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.10 2003/08/27 03:26:46 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.11 2003/09/02 19:02:49 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -45,10 +45,18 @@ class eemcDbPMTstat_st;
 
 class  StEEmcDbIndexItem1;
 
+class DbFlavor {
+ public:
+  static const int mx=100;
+  char flavor[mx];
+  char nameMask[mx];
+  DbFlavor(){flavor[0]=0; nameMask[0]=0;}
+};
+
 
 class StEEmcDbMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.10 2003/08/27 03:26:46 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.11 2003/09/02 19:02:49 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -64,7 +72,7 @@ class StEEmcDbMaker : public StMaker {
   eemcDbPMTcal_st   **mDbPMTcal ; //!
   eemcDbPMTped_st   **mDbPMTped ; //!
   eemcDbPMTstat_st  **mDbPMTstat ; //!
-
+  
   // local fast look-up tables
   StEEmcDbIndexItem1   *mDbItem1; //!  assess via logical name (sec/sub/eta)
   StEEmcDbIndexItem1   ***mLookup; //! access via crate/chan
@@ -76,7 +84,7 @@ class StEEmcDbMaker : public StMaker {
   float KsigOverPed; // defines threshold
   int nFound;
   TString dbName; //name of the DB used 
-  TString flavor[2]; // holds flavor & tableMask
+  DbFlavor dbFlavor; // used if flavor is requested
 
   //  template <class St_T, class T_st> T_st * getTable(TDataSet *eedb, int secID, TString tabName);
 
@@ -110,7 +118,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.10 2003/08/27 03:26:46 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.11 2003/09/02 19:02:49 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -121,6 +129,9 @@ class StEEmcDbMaker : public StMaker {
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.11  2003/09/02 19:02:49  balewski
+// fix for TMemeStat
+//
 // Revision 1.10  2003/08/27 03:26:46  balewski
 // flavor option added:  myMk1->setPreferedFlavor("set-b","eemcPMTcal");
 //

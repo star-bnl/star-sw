@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.16 2003/08/27 03:26:45 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.17 2003/09/02 19:02:49 balewski Exp $
  
 #include <TDatime.h>
 #include <time.h>
@@ -50,9 +50,7 @@ StEEmcDbMaker::StEEmcDbMaker(const char *name):StMaker(name){
     memset(mLookup[i],0,sizeof(StEEmcDbIndexItem1 *)*mxAdcChan);// clear all pointers
   }
   setDBname("Calibrations/eemc");
-  flavor[0]="";
-  flavor[1]="";
- 
+  
 }
 
 
@@ -125,10 +123,10 @@ void StEEmcDbMaker::setThreshold(float x){
 
 //------------------
 //------------------
-void StEEmcDbMaker::setPreferedFlavor(const char *flav, const char *mask){
-  flavor[0]=flav;
-  flavor[1]=mask;
-  printf("SET %s::preferFlavor(flav='%s', mask='%s')\n",GetName(),flavor[0].Data(),flavor[1].Data());
+void StEEmcDbMaker::setPreferedFlavor(const char *flavor, const char *nameMask){
+  strncpy(dbFlavor.flavor,flavor,DbFlavor::mx);
+  strncpy(dbFlavor.nameMask,nameMask,DbFlavor::mx);
+  printf("SET %s::preferFlavor(flav='%s', mask='%s')\n",GetName(),dbFlavor.flavor,dbFlavor.nameMask);
 }
 
 
@@ -221,7 +219,7 @@ StEEmcDbMaker::get(int crate, int channel){
 Int_t  StEEmcDbMaker::InitRun  (int runumber){
   printf("\n\nInitRun :::::: %s\n\n\n",GetName());
 
-  printf("%s::use(flav='%s', mask='%s')\n",GetName(),flavor[0].Data(),flavor[1].Data());
+  printf("%s::use(flav='%s', mask='%s')\n",GetName(),dbFlavor.flavor,dbFlavor.nameMask);
 
 
   mReloadDb();
@@ -298,10 +296,11 @@ void  StEEmcDbMaker::mReloadDb  (){
   TString mask="";
   for(ifl=0;ifl<2;ifl++) { // loop over flavors
     if(ifl==1) {
-      if( flavor[0].IsNull()) continue; // drop flavor change
-      printf("\n %s-->ifl=%d try flavor='%s' for mask='%s'\n",GetName(),ifl,flavor[0].Data(),flavor[1].Data());
-      SetFlavor(flavor[0].Data(),flavor[1].Data());
-      mask=flavor[1];
+      if( dbFlavor.flavor[0]==0) continue; // drop flavor change
+      printf("\n %s-->ifl=%d try flavor='%s' for mask='%s'\n",GetName(),ifl,dbFlavor.flavor,dbFlavor.nameMask);
+      
+      SetFlavor(dbFlavor.flavor,dbFlavor.nameMask);
+      mask=dbFlavor.nameMask;
     }
     
     TDataSet *eedb=GetDataBase(dbName );
@@ -579,13 +578,9 @@ template <class St_T, class T_st>  void StEEmcDbMaker
     return ;
   }
 
-  mCleanDbNames(tab->name, EEMCDbMaxAdcName);
   *outTab= new T_st (*tab); // copy the whole s-struct to allow flavor change
-  
+  mCleanDbNames((*outTab)->name, EEMCDbMaxAdcName);
   printf("'%s'\n",tab->comment);
-
-  // copy the whole table to allow multiple flavors to be mixed
-
 
   nFound++;
   return ;
@@ -593,6 +588,9 @@ template <class St_T, class T_st>  void StEEmcDbMaker
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.17  2003/09/02 19:02:49  balewski
+// fix for TMemeStat
+//
 // Revision 1.16  2003/08/27 03:26:45  balewski
 // flavor option added:  myMk1->setPreferedFlavor("set-b","eemcPMTcal");
 //
