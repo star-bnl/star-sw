@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.h,v 2.7 2001/04/05 04:00:43 ullrich Exp $
+ * $Id: StSvtHit.h,v 2.8 2001/08/07 20:50:53 caines Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.h,v $
+ * Revision 2.8  2001/08/07 20:50:53  caines
+ * Implement better packing of hardware and charge values
+ *
  * Revision 2.7  2001/04/05 04:00:43  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -60,33 +63,32 @@ public:
     unsigned int ladder() const;     // ladder=[1-8]
     unsigned int wafer() const;      // wafer=[1-7]
     unsigned int barrel() const;     // barrel=[1-3]
-    unsigned int hybrid() const;
+    unsigned int hybrid() const;     // hybrid=[1-2]
+    unsigned int index() const;  // hybrid index
+    float anode() const;  // anode of hit in 1/4 slices
+    float timebucket() const; // timebucket of hit in 1/4 slices
+    float peakADC() const; // Peak ADC value of hit
 
 protected:
     static StMemoryPool mPool;  //!
     StObject* clone() const;
+    float mPeak; 
+ private:
+    enum {mNBarrel=3};
     ClassDef(StSvtHit,1)
+
 };
 
 inline unsigned int
-StSvtHit::layer() const
+StSvtHit::index() const
 {
-    // bits 4-31: 1000*layer + 100*wafer + ladder (Helen, Sep 99)
-    return (mHardwarePosition>>4)/1000;
+    // bits 4-13: Hybrid index
+    return ((mHardwarePosition>>4)%(1L<<9));
 }
 
-inline unsigned int
-StSvtHit::ladder() const
+inline float
+StSvtHit::peakADC() const
 {
-    // bits 4-31: 1000*layer + 100*wafer + ladder (Helen, Sep 99)
-    return (mHardwarePosition>>4)%100;
+  return mPeak;
 }
-
-inline unsigned int
-StSvtHit::wafer() const
-{
-    // bits 4-31: 1000*layer + 100*wafer + ladder (Helen, Sep 99)
-    return ((mHardwarePosition>>4)%1000)/100;
-}
-
 #endif
