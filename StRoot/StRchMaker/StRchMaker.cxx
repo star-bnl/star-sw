@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 1.19 2000/05/31 19:26:15 dunlop Exp $
+ * $Id: StRchMaker.cxx,v 1.20 2000/06/01 21:10:40 dunlop Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
- * Revision 1.19  2000/05/31 19:26:15  dunlop
- * Filling non-ctor entries in persistent hits + support for this
+ * Revision 1.20  2000/06/01 21:10:40  dunlop
+ * filled cluster piece not in ctor
+ *
+ * Revision 1.20  2000/06/01 21:10:40  dunlop
+ * filled cluster piece not in ctor
  *
  * Revision 1.19  2000/05/31 19:26:15  dunlop
  * Filling non-ctor entries in persistent hits + support for this
@@ -616,6 +619,8 @@ void StRchMaker::fillStEvent()
 	    StRichCluster* thePersistentCluster = new StRichCluster(theClusters[ii]->numberOfPads(),
 								    theClusters[ii]->numberOfLocalMax(),
 								    theClusters[ii]->firstPad(),
+								    theClusters[ii]->amplitudeSum(),
+								    theClusters[ii]->amplitude2Sum(),
 								    theClusters[ii]->rms2());
 	    thePersistentCluster->setMinimumAmplitudeOfLocalMax(theClusters[ii]->minimumAmplitudeOfLocalMax());
 	    
@@ -707,10 +712,10 @@ void StRchMaker::fillStEvent()
     
 }
 //-----------------------------------------------------------------
-  printf("* $Id: StRchMaker.cxx,v 1.19 2000/05/31 19:26:15 dunlop Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.20 2000/06/01 21:10:40 dunlop Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
-    printf("* $Id: StRchMaker.cxx,v 1.19 2000/05/31 19:26:15 dunlop Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 1.20 2000/06/01 21:10:40 dunlop Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
