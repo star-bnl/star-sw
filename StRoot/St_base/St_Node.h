@@ -1,8 +1,8 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_Node.h,v 1.3 1998/12/27 02:33:16 fine Exp $
+// $Id: St_Node.h,v 1.4 1998/12/27 04:16:44 fine Exp $
 // $Log: St_Node.h,v $
-// Revision 1.3  1998/12/27 02:33:16  fine
-// St_Node, St_NodePosition - first working versions have been introduced *see macros/STAR_shapes.C for an example)
+// Revision 1.4  1998/12/27 04:16:44  fine
+// *** empty log message ***
 //
 // Revision 1.2  1998/12/26 21:40:40  fisyak
 // Add Id and Log
@@ -21,6 +21,8 @@
 #define ROOT_St_Node
 
 #include "St_ObjectSet.h" 
+
+#include <TNode.h>
 
 #ifndef ROOT_TShape
 //*KEEP,TShape.
@@ -57,10 +59,12 @@ class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill {
         St_Node();
         St_Node(const Text_t *name, const Text_t *title, const Text_t *shapename, Option_t *option="");
         St_Node(const Text_t *name, const Text_t *title, TShape *shape, Option_t *option="");
+        St_Node(TNode &node);
         virtual ~St_Node();
         virtual St_NodePosition *Add(St_Node *node, Double_t x=0, Double_t y=0, Double_t z=0, TRotMatrix *matrix=0, Option_t *option="");
         virtual St_NodePosition *Add(St_Node *node, Double_t x, Double_t y, Double_t z,  const Text_t *matrixname, Option_t *option="");
         virtual void        Browse(TBrowser *b);
+        virtual TNode      *CreateTNode(const St_NodePosition *position=0);
         virtual void        DeletePosition(St_NodePosition *position);
         virtual Int_t       DistancetoPrimitive(Int_t px, Int_t py);
         virtual void        Draw(Option_t *option=""); // *MENU*
