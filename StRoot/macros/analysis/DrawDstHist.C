@@ -35,7 +35,7 @@ void Load()
 //   *fileName="/disk1/star/test/hijing135/jetq_on/b0_3/year_1b/tfs_dst/set0016_01_51evts.dst.root",
 
 void DrawDstHist(
-     Int_t nevproc=2,
+     Int_t nevproc=100,
      const Char_t *firstHist="*",
      const Char_t *lastHist="*",
      const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0064_07_40evts.root",
@@ -124,18 +124,21 @@ void DrawDstHist(
 // now setup the rest of the Makers in the chain 
     St_QA_Maker *QA   = new St_QA_Maker;
 
-// the following methods are already set to default values in St_QA_Maker constructor:
-    QA->SetHistsNamesDraw(firstHist,lastHist);
-    QA->SetDraw(kTRUE);
-    QA->SetPostScriptFile(psFile);
-    QA->SetZones();
-    QA->SetPaperSize();
+
 //    input->MakeDoc(); 
   }
 
 // Now actually execute the init & make methods in the Makers 
   chain->Init();
   chain->PrintInfo();
+
+// method to print out list of histograms - can do this anytime after they're booked
+   Int_t NoHist=0;
+   NoHist = QA->ListHists();
+   cout << " No. of Hist we have == " << NoHist << endl;
+
+
+// now looping over all events in input file
   int i=0;
   int iloop=0;
   iloop = input->GetMaxEvent();
@@ -151,28 +154,32 @@ void DrawDstHist(
   cout <<  " !!! passed chain->Make !!!" << endl ;
 
 
-// Now tell which histograms we want plotted with LogY scale
-// Set default list:
-  const Char_t *defList[] = {"QaGlobtrkPt", "QaGlobtrkNPoint", "QaGlobtrkNPointFit"};
+// the following methods are already set to default values in St_QA_Maker::Init - now write over them
+    QA->SetDraw(kTRUE);
+    QA->SetHistsNamesDraw(firstHist,lastHist);
+    QA->SetPostScriptFile(psFile);
+    QA->SetZones();
+    QA->SetPaperSize();
+
+// Now add to the list of which histograms we want plotted with LogY scale
+  const Char_t *LList[] = {"QaVertexX",
+                           "QaVertexY",
+                           "QaVertexZ"};
   Int_t lengOfList = 0;
-  Int_t lengOfList = sizeof(defList)/4;
-  Int_t i = 0;
-// Now put it in list for QA method:
+    lengOfList = sizeof(LList)/4;
+  Int_t ilg = 0;
   Int_t numLog = 0;
-  for (i=0;i<lengOfList;i++) {
-     numLog = QA->AddToLogYList(defList[i]);
-     cout <<  " !!! adding histogram " << defList[i] << " to LogY list "  << endl ;
+  for (ilg=0;ilg<lengOfList;ilg++) {
+    cout <<  " !!! adding histogram " << LList[ilg] << " to LogY list "  << endl ;
+    numLog = QA->AddToLogYList(LList[ilg]);
   }
   cout <<" Number hist to plot with log scale = " << numLog << endl;
+
 
 // Finish method in St_QA_Maker is where the actual DrawHist is done
   chain->Finish();
   cout <<  " !!! passed chain->Finish" << endl ;
 
-// method to print out list of histograms - can do this anytime after they're booked
-   Int_t NoHist=0;
-   NoHist = QA->ListHists();
-   cout << " No. of Hist we have == " << NoHist << endl;
 
   if (QABrowser) delete QABrowser;
 //  QABrowser = new TBrowser;
@@ -181,6 +188,15 @@ void DrawDstHist(
   delete [] exPsFile;
 //  cout <<  " !!! This is last line of macro" << endl ;
 }
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.27 1999/05/07 20:20:53 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.28 1999/05/10 17:16:16 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.28  1999/05/10 17:16:16  kathy
+// added new member function SetDefaultLogYList and implemented and tested
+//
 // Revision 1.27  1999/05/07 20:20:53  kathy
 // now set logy on when hist name is in loglist
 //
@@ -325,19 +328,13 @@ ClassImp(St_QA_Maker)
   
   // for method MakeHistXi
 
-//  Now construct inline functions: 
-  SetDraw(kFALSE);
-  SetHistsNamesDraw();
-  SetZones();
-  SetPaperSize();
-  SetPostScriptFile(); // no PostScript file "by default"
 }
 //_____________________________________________________________________________
 St_QA_Maker::~St_QA_Maker(){
   SafeDelete(m_QACanvas);
   if (m_ListOfLog) {
     m_ListOfLog->Delete();
-    delete m_ListOfLog;
+    SafeDelete(m_ListOfLog);
   }
 }
 //_____________________________________________________________________________
@@ -432,7 +429,8 @@ Int_t St_QA_Maker::ListHists()
   cout << " **** Now in St_QA_Maker::ListHists **** " << endl;
 
   TObject *obj = 0;
-  TList *dirList = gDirectory->GetList();
+//  TList *dirList = gDirectory->GetList();
+  TList *dirList = Histograms();
   
 // Create an iterator
   TIter nextObj(dirList);
@@ -471,26 +469,57 @@ Int_t St_QA_Maker::AddToLogYList(const Char_t *HistName){
 // create TObjString on heap
    TObjString *HistNameObj = new TObjString(HistName);
 
+// - check if it's already on the list
+// - check if it's really a histogram
+
 // now can use method of TList
     m_ListOfLog->Add(HistNameObj);
- 
+  
 // return using a method of TList (inherits GetSize from TCollection)
  return m_ListOfLog->GetSize();
 }
 
+
+//_____________________________________________________________________________
+// Method SetDefaultLogYList
+//    - create default list of histograms we want plotted in LogY scale
+
+void St_QA_Maker::SetDefaultLogYList(){  
+  cout << " **** Now in St_QA_Maker::SetDefaultLogYList  **** " << endl;
+
+  const Char_t *sdefList[] = {"QaGlobtrkPt", 
+                              "QaGlobtrkNPoint", 
+                              "QaGlobtrkNPointFit",
+                              "QaGlobtrkChisq0P",
+                              "QaGlobtrkChisq1P",
+                              "QaDstDedxNdedx",
+                              "QaDstDedxDedx0", 
+                              "QaDstDedxDedx1",
+                              "QaPrimtrkPt",
+                              "QaParticlePt"};
+
+  Int_t lengofList = 0;
+  lengofList = sizeof(sdefList)/4;
+  Int_t ilg = 0;
+  Int_t numLog = 0;
+  for (ilg=0;ilg<lengofList;ilg++) {
+     numLog = AddToLogYList(sdefList[ilg]);
+     cout <<  " !!! adding histogram " << sdefList[ilg] << " to LogY list "  << endl ;
+  }
+
+}
+
 //_____________________________________________________________________________
 Int_t St_QA_Maker::Finish() {
-  if (drawinit) DrawHists();
+  if (drawinit)  DrawHists();
+
   return StMaker::Finish();
 }
 //_____________________________________________________________________________
 Int_t St_QA_Maker::Init(){
   
-  // Create tables
-  // Create Histograms 
   
-  //book histograms --------------
-  
+//book histograms --------------
   BookHistEvSum();
   BookHistGlob();
   BookHistDE();
@@ -504,6 +533,15 @@ Int_t St_QA_Maker::Init(){
   BookHistEmsHitsBemc();
   BookHistEmsHitsBsmd();
   BookHistXi();
+
+//  Set default values for all methods:
+  SetDraw(kFALSE);
+  SetHistsNamesDraw();
+  SetZones();
+  SetPaperSize();
+  SetPostScriptFile(); 
+  SetDefaultLogYList();
+
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -522,10 +560,8 @@ Int_t St_QA_Maker::Make(){
   MakeHistDE(dst);
   // histograms from table primtrk
   MakeHistPrim(dst);
-  
   // histograms from table particle
-  MakeHistGen(dst);
-  
+  MakeHistGen(dst);  
   // histograms from table dst_v0_vertex
   MakeHistV0(dst);
   // histograms from table primtrk & dst_dedx
@@ -1160,7 +1196,7 @@ void St_QA_Maker::MakeHistEmsHitsBsmd(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.27 1999/05/07 20:20:53 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.28 1999/05/10 17:16:16 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();

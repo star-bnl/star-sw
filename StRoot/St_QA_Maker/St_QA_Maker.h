@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.16 1999/05/07 17:18:30 kathy Exp $
+//! $Id: St_QA_Maker.h,v 1.17 1999/05/10 17:16:18 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.17  1999/05/10 17:16:18  kathy
+//! added new member function SetDefaultLogYList and implemented and tested
+//!
 //! Revision 1.16  1999/05/07 17:18:30  kathy
 //! new method AddToLogYList implemented and tested on solaris
 //!
@@ -104,7 +107,7 @@ class TCanvas;
 class St_QA_Maker : public StMaker {
  private:
   Bool_t drawinit;
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.16 1999/05/07 17:18:30 kathy Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.17 1999/05/10 17:16:18 kathy Exp $";
   //! Histograms booking constants
   static const Int_t nxpT;
   static const Int_t nyeta;
@@ -311,7 +314,7 @@ class St_QA_Maker : public StMaker {
   
   
   // for method MakeHistXi
-  
+ 
   
   
   //------------------------------------------------------------------------
@@ -324,7 +327,6 @@ class St_QA_Maker : public StMaker {
   virtual Int_t  Init();
   virtual Int_t  Finish();
   virtual Int_t  Make();
-  virtual Int_t  AddToLogYList(const Char_t *HistName="");
   virtual void   MakeHistEvSum(St_DataSet *dst);
   virtual void   MakeHistGlob(St_DataSet *dst);
   virtual void   MakeHistDE(St_DataSet *dst);
@@ -359,7 +361,8 @@ class St_QA_Maker : public StMaker {
 // SetPaperSize -->  A4 is 20,26  US letter is 20,24
   virtual void   SetPaperSize(Int_t width=20, Int_t height=24);
   virtual void   SetPostScriptFile(const Char_t *psFileName="");
-
+  virtual void   SetDefaultLogYList();
+  virtual Int_t  AddToLogYList(const Char_t *HistName="");
   
 // the following is a ROOT macro  that is needed in all ROOT code
   ClassDef(St_QA_Maker, 1)   //StAF chain virtual base class for Makers
