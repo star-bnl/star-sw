@@ -1,0 +1,26 @@
+/*---------------------------------------------------------------------------
+ *  dst_tof_evt.idl           
+ *
+ *  original: bill llope, for mdc2, feb-11-99
+ *
+ *  Comments:   Each row in this table corresponds to a given event,
+ *              and the entries are counters and QA information ofr diagnostics
+ *
+ *---------------------------------------------------------------------------
+ */
+ struct dst_tof_evt {
+  long  icall;      /*   */
+  long  n_tpttrk;   /*   */
+  long  n_ttetrk;   /*   */
+  long  n_g2ttrk;   /*   */
+  long  n_ctfhit;   /*   */
+  long  n_exttrk;   /*   */
+  long  n_toftrk;   /*   */
+  long  ntrks;      /*   */
+  long  ntrks_hit;  /*   */
+  long  ntrks_ext;  /*   */
+  long  ntrks_mat;  /*   */
+  float prtrkmat;   /*   */
+  float prhitmat;   /*   */
+ } ;
+
