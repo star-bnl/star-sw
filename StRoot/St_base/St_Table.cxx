@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.41 1999/02/04 15:38:45 fine Exp $ 
+// $Id: St_Table.cxx,v 1.42 1999/02/15 14:20:33 fisyak Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.42  1999/02/15 14:20:33  fisyak
+// remove staf stuff
+//
 // Revision 1.41  1999/02/04 15:38:45  fine
-// St_Table::SavePrimitive - some extra protections have been introduced. Thanks Victor Perevoztchikov
+//  St_Table::SavePrimitive - some extra protections have been introduced. Thanks Victor Perevoztchikov
 //
 // Revision 1.40  1999/02/03 23:19:15  fine
 // St_Table:: protection for SavePrimitive has been introduced
@@ -170,9 +173,9 @@ static void AsString(void *buf, const char *name, Int_t width=0)
    else if (!strcmp("long", name))
       cout <<  setw(width) <<  *(long *)buf;
    else if (!strcmp("unsigned short", name))
-      cout <<  setw(width) <<   *(unsigned short *)buf;
+      cout <<  setw(width) <<  hex << *(unsigned short *)buf;
    else if (!strcmp("short", name))
-      cout <<  setw(width) <<  *(short *)buf;
+      cout <<  setw(width) <<  hex << *(short *)buf;
    else if (!strcmp("unsigned char", name))
       cout <<  setw(width) <<  *(unsigned char *)buf;
    else if (!strcmp("char", name))
