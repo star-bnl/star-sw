@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// $Id: TpcHitUtilities.cxx,v 1.3 2001/04/25 18:14:12 perev Exp $
+// $Id: TpcHitUtilities.cxx,v 1.4 2002/02/01 23:15:27 genevb Exp $
 //
 // Author: M.L. Miller, Yale
 //
@@ -10,6 +10,9 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: TpcHitUtilities.cxx,v $
+// Revision 1.4  2002/02/01 23:15:27  genevb
+// Include float.h
+//
 // Revision 1.3  2001/04/25 18:14:12  perev
 // HPcorrs
 //
@@ -18,6 +21,7 @@
 //
 //
 ///////////////////////////////////////////////////////////////////////////
+#include "float.h"
 #include "TpcMapUtilities.h"
 #include "TpcHitUtilities.h"
 #include "StEventTypes.h" // StEvent
