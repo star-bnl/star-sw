@@ -1,5 +1,8 @@
-// $Id: StMinidaqMaker.cxx,v 1.4 1999/03/15 00:36:45 perev Exp $
+// $Id: StMinidaqMaker.cxx,v 1.5 1999/03/17 02:02:31 fisyak Exp $
 // $Log: StMinidaqMaker.cxx,v $
+// Revision 1.5  1999/03/17 02:02:31  fisyak
+// New scheme
+//
 // Revision 1.4  1999/03/15 00:36:45  perev
 // For new Maker schema
 //
@@ -76,8 +79,10 @@ Int_t StMinidaqMaker::Init() {
   //Tell me I am here
   cout<<"Init miniDAQ maker"<<endl;
   // access to tsspar
-   St_DataSetIter       local(GetDataBase("params"));
-   St_DataSet *tsspars = local("tpc/tsspars");
+  St_DataSet *tpc = GetDataBase("params/tpc");
+  assert(tpc);
+  St_DataSetIter       local(tpc);
+   St_DataSet *tsspars = local("tsspars");
    if (tsspars){
        St_DataSetIter partable(tsspars);
        m_tsspar = (St_tss_tsspar *) partable("tsspar");
@@ -96,13 +101,10 @@ Int_t StMinidaqMaker::Init() {
 // geometry parameters
    //   St_DataSetIter atpc = local(GetDataBase("params/tpc"));
    //  St_DataSet *tpc(atpc);
-   St_DataSet *tpc=local("tpc"); 
-   if(!tpc) tpc=local.Mkdir("tpc");
-   St_DataSet *tpgpar = local("tpc/tpgpar");
+   St_DataSet *tpgpar = local("tpgpar");
    if (tpgpar){
-       St_DataSetIter partable(tpgpar);
-       m_tpg_pad_plane = (St_tpg_pad_plane *) partable("tpg_pad_plane");
-       m_tpg_detector  = (St_tpg_detector  *) partable("tpg_detector");
+       m_tpg_pad_plane = (St_tpg_pad_plane *) tpgpar->Find("tpg_pad_plane");
+       m_tpg_detector  = (St_tpg_detector  *) tpgpar->Find("tpg_detector");
        if (!(m_tpg_pad_plane && m_tpg_detector)) {
          cout << "TPC geometry parameter tables are incomplete."<< endl;
          SafeDelete(tpgpar);
@@ -110,19 +112,19 @@ Int_t StMinidaqMaker::Init() {
     // set the clock for the TPC system tests
        tpg_detector_st *tpg_detector = m_tpg_detector->GetTable();
        tpg_detector->clock_frequency = m_clock_frequency;
-       m_tpg_pad       = (St_tpg_pad       *) partable("tpg_pad");
+       m_tpg_pad       = (St_tpg_pad       *) tpgpar->Find("tpg_pad");
        if (!m_tpg_pad) {
-         m_tpg_pad       = new St_tpg_pad("tpg_pad",1); partable.Add(m_tpg_pad);
+         m_tpg_pad       = new St_tpg_pad("tpg_pad",1); AddConst(m_tpg_pad);
        }
        Int_t res = tpg_main(m_tpg_pad_plane,m_tpg_detector,m_tpg_pad); 
        if(res!=kSTAFCV_OK) Warning("Make","tpg_main==%d",res);
 
    }
    // add the params/tpc/tfcpars/tfc_sector_index table
-//   St_DataSet *tfspars = local("tpc/tfcpars");
+//   St_DataSet *tfspars = local("tfcpars");
    if (!m_tfc_sector_index) {
-         St_DataSetIter  loc(GetDataBase("params"));
-         loc.Cd("tpc/tfcpars");
+         St_DataSetIter  loc(tpc);
+         loc.Cd("tfcpars");
          m_tfc_sector_index = (St_tcl_sector_index *) loc("tfc_sector_index");
          if (!m_tfc_sector_index) {
            m_tfc_sector_index = new St_tcl_sector_index("tfc_sector_index",1);
@@ -150,9 +152,8 @@ Int_t StMinidaqMaker::Init() {
    //
      cout<<"just before the loop"<<endl;
 
-     St_DataSet     *gg = GetDataBase("params");
-     St_DataSetIter param(gg);
-     St_DataSet     *begin_run = param("tpc/BEGIN_RUN");
+     St_DataSet     *begin_run = GetDataSet("BEGIN_RUN");
+     assert (begin_run);
      St_DataSetIter gaintables(begin_run);
      
 
@@ -236,15 +237,13 @@ Int_t StMinidaqMaker::Init() {
 Int_t StMinidaqMaker::Make(){
 //  PrintInfo();
   cout<<"begin to make StMinidaqMaker"<<endl;
-  if (m_DataSet->GetList())  {//if DataSet is empty fill it
-     cout<<"begin to transfer tables in StMinidaqMaker"<<endl;
-    TransferData(); //transfer data from TPC_DATA dataset to event/raw_data/tpc/
-     cout<<"begin to fill the histrograms in StMinidaqMaker"<<endl;
-     MakeHistograms(); //run module adcxyz, and fill histograms
-     cout<<"end of StMinidaqMaker"<<endl;
-  }
+  cout<<"begin to transfer tables in StMinidaqMaker"<<endl;
+  TransferData(); //transfer data from TPC_DATA dataset to event/raw_data/tpc/
+  cout<<"begin to fill the histrograms in StMinidaqMaker"<<endl;
+  MakeHistograms(); //run module adcxyz, and fill histograms
+  cout<<"end of StMinidaqMaker"<<endl;
   cout<<" I am at the end of  the minidaq maker NOW"<<endl;
- return kStOK;
+  return kStOK;
 }
 //_____________________________________________________________________________
 void StMinidaqMaker::TransferData(){
@@ -325,7 +324,8 @@ void StMinidaqMaker::TransferData(){
     next.Reset();
     // goto the TPC_DATA directory
     //   St_DataSetIter mdaqdata(GetDataSet("event/raw_data/tpc/TPC_DATA"));
-     St_DataSet     *tpcmin =next.Find("TPC_DATA");
+     St_DataSet     *tpcmin =GetDataSet("TPC_DATA");
+     assert (tpcmin);
      St_DataSetIter mdaqdata(tpcmin);
 
     //loop over all the sectors to run reformat_new module
@@ -417,8 +417,7 @@ void StMinidaqMaker::MakeHistograms(){
      if (m_adcxyzon) {//Create  pixels table
 // tss Debug tables control
        if (!m_tfc_sector_index) {
-         St_DataSetIter  loc(GetDataBase("params"));
-         loc.Cd("tpc/tfcpars");
+         St_DataSetIter  loc(GetDataBase("params/tpc/tfspars"));
          m_tfc_sector_index = (St_tcl_sector_index *) loc("tfc_sector_index");
          if (!m_tfc_sector_index) {
            m_tfc_sector_index = new St_tcl_sector_index("tfc_sector_index",1);
@@ -496,7 +495,7 @@ void StMinidaqMaker::MakeHistograms(){
 //_____________________________________________________________________________
 void StMinidaqMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StMinidaqMaker.cxx,v 1.4 1999/03/15 00:36:45 perev Exp $\n");
+  printf("* $Id: StMinidaqMaker.cxx,v 1.5 1999/03/17 02:02:31 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
