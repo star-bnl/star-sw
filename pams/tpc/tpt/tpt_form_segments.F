@@ -1,5 +1,8 @@
-* $Id: tpt_form_segments.F,v 1.7 1999/05/05 21:52:13 sakrejda Exp $
+* $Id: tpt_form_segments.F,v 1.8 1999/09/14 00:55:47 liq Exp $
 * $Log: tpt_form_segments.F,v $
+* Revision 1.8  1999/09/14 00:55:47  liq
+* use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
+*
 * Revision 1.7  1999/05/05 21:52:13  sakrejda
 * local arrays converted to dynamic ones (with malloc)
 *
@@ -62,7 +65,7 @@ C
 #include "tpt_track.inc"
 #include "tcl_tphit.inc"
 
-#include "tpt_pointers.inc"
+#include "tpt_track_pointers.inc"
 #include "tpt_mxdim.inc"
 #include "tpt_root.inc"
 C______________________________________________________________________
@@ -74,11 +77,11 @@ C______________________________________________________________________
       RECORD /table_head_st/    hit_h
       RECORD /tcl_tphit_st/     hit(*)
 
-      RECORD /track_pointers/   trk(*)
+      RECORD /tpt_track_pointers_st/   trk(*)
 C______________________________________________________________________
 C
 C     Local variables
-      RECORD /track_pointers/ saved_trk
+      RECORD /tpt_track_pointers_st/ saved_trk
       RECORD /track_root/     root(mxroot)
       INTEGER next_hit(*)
       INTEGER slice_loc(mxsector,mxrow,mxslic)

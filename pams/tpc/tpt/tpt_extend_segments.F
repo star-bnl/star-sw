@@ -1,5 +1,8 @@
-* $Id: tpt_extend_segments.F,v 1.5 1999/07/19 19:15:54 genevb Exp $
+* $Id: tpt_extend_segments.F,v 1.6 1999/09/14 00:55:45 liq Exp $
 * $Log: tpt_extend_segments.F,v $
+* Revision 1.6  1999/09/14 00:55:45  liq
+* use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
+*
 * Revision 1.5  1999/07/19 19:15:54  genevb
 * Use StMessMgr
 *
@@ -57,7 +60,7 @@ C
 #include "tpt_pars.inc"
 #include "tpt_track.inc"
 #include "tcl_tphit.inc"
-#include "tpt_pointers.inc"
+#include "tpt_track_pointers.inc"
 #include "tpt_mxdim.inc"
 
 C______________________________________________________________________
@@ -67,7 +70,7 @@ C______________________________________________________________________
       RECORD /tpt_track_st/     track(*)
       RECORD /table_head_st/    hit_h
       RECORD /tcl_tphit_st/     hit(*)
-      RECORD /track_pointers/   trk(*)
+      RECORD /tpt_track_pointers_st/   trk(*)
 C_____________________________________________________________________
 C
 C     Local variables

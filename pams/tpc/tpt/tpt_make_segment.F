@@ -1,5 +1,8 @@
-* $Id: tpt_make_segment.F,v 1.7 1999/08/12 12:43:28 sakrejda Exp $
+* $Id: tpt_make_segment.F,v 1.8 1999/09/14 00:55:49 liq Exp $
 * $Log: tpt_make_segment.F,v $
+* Revision 1.8  1999/09/14 00:55:49  liq
+* use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
+*
 * Revision 1.7  1999/08/12 12:43:28  sakrejda
 * typo in a variable identifying sector was fixed, the variable name was changed so they differ by more than 1 letter
 *
@@ -54,7 +57,7 @@ C
 
 #include "tpt_pars.inc"
 #include "tcl_tphit.inc"
-#include "tpt_pointers.inc"
+#include "tpt_track_pointers.inc"
 #include "tpt_mxdim.inc"
 
 C______________________________________________________________________
@@ -64,7 +67,7 @@ C______________________________________________________________________
       RECORD /table_head_st/    hit_h
       RECORD /tcl_tphit_st/     hit(*)
 
-      RECORD /track_pointers/   trk(*)
+      RECORD /tpt_track_pointers_st/   trk(*)
 C_____________________________________________________________________
 C
 C     Local variables

@@ -1,5 +1,8 @@
-* $Id: tpt_make_segment_uv.F,v 1.9 1999/05/05 21:52:17 sakrejda Exp $
+* $Id: tpt_make_segment_uv.F,v 1.10 1999/09/14 00:55:50 liq Exp $
 * $Log: tpt_make_segment_uv.F,v $
+* Revision 1.10  1999/09/14 00:55:50  liq
+* use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
+*
 * Revision 1.9  1999/05/05 21:52:17  sakrejda
 * local arrays converted to dynamic ones (with malloc)
 *
@@ -62,7 +65,7 @@ C
 #include "tcl_tphit.inc"
 #include "tpt_pars.inc"
 #include "tpt_mxdim.inc"
-#include "tpt_pointers.inc"
+#include "tpt_track_pointers.inc"
 
 C______________________________________________________________________
 
@@ -72,7 +75,7 @@ C______________________________________________________________________
       RECORD /table_head_st/    hit_h
       RECORD /tcl_tphit_st/     hit(*)
 
-      RECORD /track_pointers/   trk(*)
+      RECORD /tpt_track_pointers_st/   trk(*)
 C______________________________________________________________________
 C
 C     Local variables
