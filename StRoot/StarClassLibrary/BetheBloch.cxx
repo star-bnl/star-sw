@@ -23,6 +23,7 @@
 // 1/beta^2 region and the values from the table.
 
 #include <vector>
+#include "TMath.h"
 #include "BetheBloch.h"
 
 #ifndef ST_NO_NAMESPACES
@@ -502,7 +503,60 @@ double BetheBloch::operator() (double betagamma) {
 
     return 1.055*unnormalized;
 }
+double BetheBloch::operator() (double betagamma, double length, int k) {
+  return BetheBloch::Sirrf(betagamma,length,k);
+}
+//________________________________________________________________________________
+Double_t BetheBloch::Sirrf(Double_t poverm, Double_t Length, Int_t k) {
+  //        returns value of relative ionisation normalised to value
+  //        at p/m=4 poverm    p/m (=beta gamma)             (input)
+  Double_t dsri[40] = { 
+    1.640, 1.410, 1.200, 1.070, 1.025,
+    1.000, 1.000, 1.010, 1.030, 1.055,
+    1.085, 1.115, 1.145, 1.175, 1.210,
+    1.245, 1.275, 1.310, 1.340, 1.370,
+    1.395, 1.420, 1.440, 1.460, 1.480,
+    1.495, 1.510, 1.520, 1.530, 1.540,
+    1.545, 1.550, 1.555, 1.560, 1.560,
+    1.560, 1.560, 1.560, 1.560, 1.560};
+  Double_t par[5] = {1.43267267735747716, 6.53488e-02, -2.27416e-02, 3.40098e-03, 4.89398e-04 };
+  Double_t sirrf;
+  Double_t pt = 10.*TMath::Log10 (poverm);
+  if (pt <  0.) pt =  0.;
+  if (pt > 38.) pt = 38.; // if p/m above 10000 treat as saturated
+  Int_t ipt = (int) pt;
+  Double_t dpt = pt - ipt;
+  Double_t Lpoverm = TMath::Log(poverm);
+  sirrf = par[0]*(dsri[ipt] + (dsri[ipt+1] - dsri[ipt])*dpt);
+  sirrf *= TMath::Exp(par[4]*Lpoverm);
+  if (poverm < 1.) {
+    Double_t beta2inv = 1. + 1./(poverm*poverm);
+    Double_t Lbeta2inv = TMath::Log(beta2inv);
+    sirrf *= beta2inv/2;
+    sirrf *= TMath::Exp(Lbeta2inv*(par[1]+Lbeta2inv*(par[2])) + Lpoverm*par[3]);
+  } 
+  if (k == 0) { // track lengthe correction
+    Double_t COEFF[7] = {-0.29414629E+00,-0.65181924E-15,-0.19702754E-09,
+			 0.20519117E-01,-0.28383705E-03, 0.59486243E-12,
+			 0.25575770E-07};
+    Int_t IBASFT[7]   = {0, 7, 5, 1, 2, 6, 4};
+    Double_t X = Length;
+    if (X <  15.) X = 15.;
+    if (X > 140.) X = 140.;
+    Double_t xx[8];
+    Double_t FPARAM=0.;
+    xx[0] = 1.; 
+    xx[1] = X;
+    for (int J=2; J<8;J++) {
+      double j = J;
+      xx[J] = (2*j-1)/j*xx[J-1]*X-(j-1)/j*xx[J-2];
+    }
+    for (int i=0; i<7; i++) {
+      int k = IBASFT[i];
+      FPARAM += COEFF[i]*xx[k];
+    }
+    sirrf *= TMath::Exp(FPARAM);
+  }
+  return sirrf;
+}
     
-// Double_t BetheBloch::operator() (Double_t betagamma){
-//     return (Double_t) operator()((double) betagamma);
-// }
