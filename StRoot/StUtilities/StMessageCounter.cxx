@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.cxx,v 1.9 1999/07/01 01:24:46 genevb Exp $
+// $Id: StMessageCounter.cxx,v 1.10 1999/07/15 05:15:06 genevb Exp $
 // $Log: StMessageCounter.cxx,v $
+// Revision 1.10  1999/07/15 05:15:06  genevb
+// Fixed an odd bug with seekp(0) on an empty stream buffer
+//
 // Revision 1.9  1999/07/01 01:24:46  genevb
 // Fixed FORTRAN character string bug on linux, removed a memory leak from Summary()
 //
@@ -42,7 +45,7 @@
 StMessageCounter* StMessageCounter::mInstance = 0;
 
 //_____________________________________________________________________________
-StMessageCounter::StMessageCounter() : ostrstream(new char[4096],4096),
+StMessageCounter::StMessageCounter() : ostrstream(new char[4096],4096,ios::out),
 limitMessage(" - COUNT LIMIT REACHED!\n") {
   messTypeList = StMessTypeList::Instance();
   yesLimits = 0;
