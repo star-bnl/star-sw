@@ -1,5 +1,5 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
-// $Id: St_Table.cxx,v 1.99 2000/03/05 04:11:47 fine Exp $ 
+// $Id: St_Table.cxx,v 1.100 2000/03/06 02:03:16 fine Exp $ 
 // 
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
@@ -2485,10 +2485,27 @@ Int_t St_Table::SetfN(Long_t len)
 #undef StreamElelement
 #endif
 
-#define StreamElementIn(type)  case St_TableElementDescriptor::_NAME2_(k,type):            \
- if (nextCol->m_Offset != UInt_t(-1)) {                         \
-   if (nextCol->m_Dimensions)                                   \
-     R__b.ReadStaticArray((_NAME2_(type,_t) *)(row+nextCol->m_Offset));                    \
+#define StreamElementIn(type)  case St_TableElementDescriptor::_NAME2_(k,type):   \
+ if (evolutionOn) {                                  \
+     if (nextCol->m_Dimensions)  {                   \
+       if (nextCol->m_Offset != UInt_t(-1))          \
+           R__b.ReadStaticArray((_NAME2_(type,_t) *)(row+nextCol->m_Offset));     \
+       else {                                        \
+           _NAME2_(type,_t) *readPtrV = 0;           \
+           R__b.ReadArray(readPtrV);                 \
+           delete [] readPtrV;                       \
+           readPtrV = 0;                             \
+       }                                             \
+     }                                               \
+     else  {                                         \
+       _NAME2_(type,_t) skipBuffer;                  \
+       _NAME2_(type,_t) *readPtr =  (_NAME2_(type,_t) *)(row+nextCol->m_Offset);  \
+       if (nextCol->m_Offset == UInt_t(-1)) readPtr = &skipBuffer;                \
+       R__b >> *readPtr;                             \
+     }                                               \
+ } else {                                            \
+   if (nextCol->m_Dimensions)                        \
+     R__b.ReadStaticArray((_NAME2_(type,_t) *)(row+nextCol->m_Offset));           \
    else                                                         \
      R__b >> *(_NAME2_(type,_t) *)(row+nextCol->m_Offset);      \
  }                                                              \
@@ -2605,15 +2622,13 @@ void St_Table::Streamer(TBuffer &R__b)
             ioDescriptor =  new St_tableDescriptor();
             ioDescriptor->Streamer(R__b);
             // compare two descriptors
-//            if (currentDescriptor->Compare(ioDescriptor)) {
             if (ioDescriptor->UpdateOffsets(currentDescriptor)) {
               // Remember the real descriptor
               TString dType = "Broken:";
               dType += GetType();
               ioDescriptor->SetName(dType.Data());
               Add(ioDescriptor);
-              evolutionOn = kTRUE;
- 
+              evolutionOn = kTRUE; 
             }
             else {
               delete ioDescriptor;
@@ -2732,6 +2747,9 @@ St_Table::EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {
 
 
 // $Log: St_Table.cxx,v $
+// Revision 1.100  2000/03/06 02:03:16  fine
+// Schema evolution: skiping the lost field introduced
+//
 // Revision 1.99  2000/03/05 04:11:47  fine
 // Automatic schema evolution for St_Table has been activated
 //
