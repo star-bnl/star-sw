@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.hh,v 1.18 2002/03/21 18:49:31 laue Exp $
+ * $Id: StHbtEvent.hh,v 1.19 2002/11/19 23:27:25 renault Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,10 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.hh,v $
+ * Revision 1.19  2002/11/19 23:27:25  renault
+ * New event constructor to find V0 daughters informations(helix for average
+ * separation calculation)
+ *
  * Revision 1.18  2002/03/21 18:49:31  laue
  * updated for new MuDst reader
  *
@@ -105,6 +109,7 @@ public:
 #ifdef __ROOT__
   StHbtEvent(const StHbtTTreeEvent* ); 
   StHbtEvent(const StMuDst*, int trackType );
+  StHbtEvent(const StMuDst*, int trackType, bool readV0Daughters);
 #endif
   StHbtEvent(const StHbtEvent&, StHbtTrackCut* =0, StHbtV0Cut* =0,  StHbtXiCut* =0, StHbtKinkCut* =0); // copy constructor with track and v0 cuts
   ~StHbtEvent();
