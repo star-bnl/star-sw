@@ -85,7 +85,7 @@ do {
 	    $i++;
 	    $line .= $lines[$i];
 	}
-	push(@items,split(/\"\s*,/,$line));
+	push(@items,split(/\"\s*,/,$line)); # not that the STR_OBSOLETE lines will not show up
 
 	$flag = 1;
 	for($j=0 ; $j <= $#items ; $j++){
