@@ -24,6 +24,13 @@ C---------------
       
 
 *-----executable statements--------------------------------------------
+
+      ev0_eval_h.nok = ev0out_h.nok
+      IF( svt_track_h.nok .eq. 0 .and. tte_eval_h.nok .eq. 0) then
+         ev0_eval2 = stafcv_bad
+         write(6,*) 'No evaluation tables qutiing'
+         return
+      endif
 *
 * Sort tptrack and svttrack by id_globtrk
 
@@ -32,7 +39,7 @@ C---------------
       ok = tls_quick_sort_i(svt_track_h.nok, svt_track(1).id_globtrk,
      +     svt_track(2).id_globtrk, svt_track)
 
-      ev0_eval_h.nok = ev0out_h.nok
+
 
       do i=1,tpt_track_h.nok
          if( tpt_track(i).id_globtrk .ne. 0) then
@@ -112,7 +119,7 @@ C---------------
         elseif( done1 .eq. 10) then
            iv1 = g2t_track(iv1s).start_vertex_p
            ev0_eval(i).itrue  = -2
-        else
+        elseif( done1 .eq. 11) then
            if( iv1s .eq. iv1t) then
               iv1 = g2t_track(iv1t).start_vertex_p
               ev0_eval(i).itrue = -3
@@ -128,7 +135,7 @@ C---------------
         elseif( done2 .eq. 10) then
            iv2 = g2t_track(iv2s).start_vertex_p
            ev0_eval(i).itrue  = ev0_eval(i).itrue -20
-        else
+        elseif( done2 .eq. 11) then
            if( iv2s .eq. iv2t) then
               iv2 = g2t_track(iv2t).start_vertex_p
               ev0_eval(i).itrue = ev0_eval(i).itrue -30
@@ -137,32 +144,34 @@ C---------------
               ev0_eval(i).itrue = ev0_eval(i).itrue -40
            endif
         endif
-              
-        IF( (iv1.eq.iv2).and.(g2t_vertex(iv1).parent_p) .ne. 0 ) THEN
-         ev0_eval(i).itrue= -1*ev0_eval(i).itrue
-         ev0_eval(i).id_parent = g2t_track(g2t_vertex(iv1).parent_p).id
-         ev0_eval(i).vid = g2t_vertex(iv1).id
-         ev0_eval(i).x_true=g2t_vertex(iv1).ge_x(1)
-         ev0_eval(i).y_true=g2t_vertex(iv1).ge_x(2)
-         ev0_eval(i).z_true=g2t_vertex(iv1).ge_x(3)
-         ev0_eval(i).rapidity_true = 
-     +        g2t_track(g2t_vertex(iv1).parent_p).rapidity
-        ev0_eval(i).pid_true = 
-     +        g2t_track(g2t_vertex(iv1).parent_p).ge_pid
+
+        if( iv1 .gt. 0 .and. iv2 .gt. 0) then
+           IF( (iv1.eq.iv2).and.(g2t_vertex(iv1).parent_p) .ne. 0 ) THEN
+              ev0_eval(i).itrue= -1*ev0_eval(i).itrue
+              ev0_eval(i).id_parent = g2t_track(g2t_vertex(iv1).parent_p).id
+              ev0_eval(i).vid = g2t_vertex(iv1).id
+              ev0_eval(i).x_true=g2t_vertex(iv1).ge_x(1)
+              ev0_eval(i).y_true=g2t_vertex(iv1).ge_x(2)
+              ev0_eval(i).z_true=g2t_vertex(iv1).ge_x(3)
+              ev0_eval(i).rapidity_true = 
+     +             g2t_track(g2t_vertex(iv1).parent_p).rapidity
+              ev0_eval(i).pid_true = 
+     +             g2t_track(g2t_vertex(iv1).parent_p).ge_pid
+           endif
         else
-      
-         ev0_eval(i).id_parent = 0 
-         ev0_eval(i).vid = 0
-         ev0_eval(i).x_true= 0
-         ev0_eval(i).y_true= 0
-         ev0_eval(i).z_true= 0
-         ev0_eval(i).rapidity_true = 0
-         ev0_eval(i).pid_true = 0
-         iv1 = 0
-         endif
-
+           
+           ev0_eval(i).id_parent = 0 
+           ev0_eval(i).vid = 0
+           ev0_eval(i).x_true= 0
+           ev0_eval(i).y_true= 0
+           ev0_eval(i).z_true= 0
+           ev0_eval(i).rapidity_true = 0
+           ev0_eval(i).pid_true = 0
+           iv1 = 0
+        endif
+        
         ev0_eval(i).id = ev0out(i).id
-
+        
         if (iv1t .gt. 0) then
            ev0_eval(i).pid_neg_true = g2t_track(iv1t).ge_pid
            ev0_eval(i).id_neg = g2t_track(iv1t).id
