@@ -330,10 +330,10 @@ C     &        (iladder-1)*config(1).n_wafer(ilayer) + iwafer1
          do iwafer1= 1, geom_h.nok
             if( geom(iwafer1).id .eq. kwafer) then
                iwafer2 = iwafer1
-               iwafer1 = geom_h.nok+1
+               goto 112
             endif
          enddo
-
+ 112     continue
          if (iwafer2 .eq. 0 ) then
 
            call StError( ' fatal mis-match')

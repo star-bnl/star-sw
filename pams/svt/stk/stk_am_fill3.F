@@ -68,9 +68,9 @@ C     ===================
       integer    extra(7), ispts(0:7), i_spt, j_spt(0:7), iwafer(0:7)
       integer    jwafer(0:7),n_groups
       integer    iwafer1, iwafer2, n, kwafer
-      integer    iladder, iladder1, iladder2
+      integer    iladder
       integer    layer, layerp, layerpp, k
-      logical    layers(7), loop(7), done(7), first
+      logical    layers(7), loop(7), done(7)
 
       integer    waferkey(570,7,0:570), waferkeyn(7,0:570)
       integer    sptkey(200,570), sptkeyn(570)
@@ -81,7 +81,6 @@ C     ===================
       integer    ilayer0, ilayer1, ilayer2, ilayer
       integer    flag, id
       integer    ilist
-      save       first
       character*132 myString
       real       cosd
  
@@ -307,10 +306,11 @@ C     &        (iladder-1)*config(1).n_wafer(ilayer) + iwafer1
             do iwafer1= 1, geom_h.nok
                if( geom(iwafer1).id .eq. kwafer) then
                   iwafer2 = iwafer1
-                  iwafer1 = geom_h.nok+1
+                  goto 112
                endif
             enddo
          endif
+ 112     continue
          if (iwafer2 .eq. 0 ) then
             if (kwafer.gt.7000.and.kwafer.lt.9000
      &           .and.config(1).n_layer.eq.7) then
