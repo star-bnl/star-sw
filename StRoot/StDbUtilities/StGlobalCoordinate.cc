@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * $Id: StGlobalCoordinate.cc,v 1.1 1999/11/19 19:01:07 calderon Exp $
+ * $Id: StGlobalCoordinate.cc,v 1.2 2000/02/02 23:01:38 calderon Exp $
  *
  * Author:  brian May 20, 1998
  *
@@ -12,6 +12,10 @@
  ***************************************************************************
  *
  * $Log: StGlobalCoordinate.cc,v $
+ * Revision 1.2  2000/02/02 23:01:38  calderon
+ * Changes for CC5
+ * Tests withs StTpcDb still going.
+ *
  * Revision 1.1  1999/11/19 19:01:07  calderon
  * First version of files for StDbUtilities.
  * Note: this package uses StTpcDb.
@@ -40,18 +44,15 @@
  *************************************************************************/
 #include "StGlobalCoordinate.hh"
 
-static const char rcsid[] = "$Id: StGlobalCoordinate.cc,v 1.1 1999/11/19 19:01:07 calderon Exp $";
+static const char rcsid[] = "$Id: StGlobalCoordinate.cc,v 1.2 2000/02/02 23:01:38 calderon Exp $";
 
-#ifdef PERSISTENT
-ClassImp(StGlobalCoordinate)
-#endif
     
 StGlobalCoordinate::StGlobalCoordinate() {/**/}
 
-StGlobalCoordinate::StGlobalCoordinate(const float x, const float y, const float z)
+StGlobalCoordinate::StGlobalCoordinate(const double x, const double y, const double z)
     : mPosition(x,y,z) { /**/ }
 
-StGlobalCoordinate::StGlobalCoordinate(const StThreeVectorF& x)
+StGlobalCoordinate::StGlobalCoordinate(const StThreeVector<double>& x)
     : mPosition(x) {/**/}
 
 StGlobalCoordinate::~StGlobalCoordinate() {/**/}
@@ -69,10 +70,8 @@ StGlobalCoordinate::operator!=(const StGlobalCoordinate& p) const
 }
 
 void
-StGlobalCoordinate::setPosition(const StThreeVectorF& val) { mPosition = val; }
+StGlobalCoordinate::setPosition(const StThreeVector<double>& val) { mPosition = val; }
     
-const StThreeVectorF& StGlobalCoordinate::position() const {return mPosition;}
-
 // Non-member functions
 ostream& operator<<(ostream& os, const StGlobalCoordinate& a)
 {

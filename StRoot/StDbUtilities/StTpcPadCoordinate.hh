@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcPadCoordinate.hh,v 1.1 1999/11/19 19:01:09 calderon Exp $
+ * $Id: StTpcPadCoordinate.hh,v 1.2 2000/02/02 23:01:39 calderon Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -11,6 +11,10 @@
  ************************************************************************
  *
  * $Log: StTpcPadCoordinate.hh,v $
+ * Revision 1.2  2000/02/02 23:01:39  calderon
+ * Changes for CC5
+ * Tests withs StTpcDb still going.
+ *
  * Revision 1.1  1999/11/19 19:01:09  calderon
  * First version of files for StDbUtilities.
  * Note: this package uses StTpcDb.
@@ -35,14 +39,7 @@
 #define ST_TPC_PAD_COORDINATE_HH
 #include <iostream.h>
 
-#ifdef PERSISTENT
-#include "StObject.h"
-#endif
-
 class StTpcPadCoordinate
-#ifdef PERSISTENT
-    : public StObject
-#endif
 {
 public:
     StTpcPadCoordinate();
@@ -71,9 +68,6 @@ protected:
     int mPad;
     int mTimeBucket;
 
-#ifdef PERSISTENT
-    ClassDef(StTpcPadCoordinate,1)
-#endif
 };
 
 const inline int StTpcPadCoordinate::sector()     const {return(mSector);}
