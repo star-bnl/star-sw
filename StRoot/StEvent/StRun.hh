@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRun.hh,v 1.5 1999/03/04 15:56:59 wenaus Exp $
+ * $Id: StRun.hh,v 1.6 1999/03/04 18:17:10 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StRun.hh,v $
- * Revision 1.5  1999/03/04 15:56:59  wenaus
- * add std namespace for Sun CC5 compatibility
+ * Revision 1.6  1999/03/04 18:17:10  ullrich
+ * Namespace std not used if ST_NO_NAMESPACES defined
  *
  * Revision 1.6  1999/03/04 18:17:10  ullrich
  * Namespace std not used if ST_NO_NAMESPACES defined
@@ -31,12 +31,15 @@
  * Revision 1.2  1999/01/15 22:53:50  wenaus
  * version with constructors for table-based loading
  *
-using namespace std;
+ **************************************************************************/
 #ifndef StRun_hh
 #define StRun_hh
 
 #include "StEvent/StRunSummary.hh"
 #include "StEvent/StEnumerations.hh"
+#include "tables/dst_run_header.h"
+#include "tables/dst_run_summary.h"
+#include <string>
 #if !defined(ST_NO_NAMESPACES)
 using namespace std;
 #endif

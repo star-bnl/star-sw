@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.hh,v 1.5 1999/03/04 15:56:56 wenaus Exp $
+ * $Id: StEvent.hh,v 1.6 1999/03/04 18:17:00 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.hh,v $
- * Revision 1.5  1999/03/04 15:56:56  wenaus
- * add std namespace for Sun CC5 compatibility
+ * Revision 1.6  1999/03/04 18:17:00  ullrich
+ * Namespace std not used if ST_NO_NAMESPACES defined
  *
  * Revision 1.6  1999/03/04 18:17:00  ullrich
  * Namespace std not used if ST_NO_NAMESPACES defined
@@ -32,7 +32,7 @@
  * Revision 1.2  1999/01/15 22:53:40  wenaus
  * version with constructors for table-based loading
  *
-using namespace std;
+ **************************************************************************/
 #ifndef StEvent_hh
 #define StEvent_hh
 
@@ -53,6 +53,10 @@ using namespace std;
 #include "StEvent/StSmdEtaHitCollection.hh"
 #include "StEvent/StL0Trigger.hh"
 #include "StEvent/StTriggerDetectorCollection.hh"
+#include "StEvent/StEnumerations.hh"
+#include "tables/dst_event_header.h"
+#include "tables/dst_event_summary.h"
+
 #if !defined(ST_NO_NAMESPACES)
 using namespace std;
 #endif

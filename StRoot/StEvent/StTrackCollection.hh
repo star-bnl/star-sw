@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackCollection.hh,v 1.4 1999/03/04 15:57:05 wenaus Exp $
+ * $Id: StTrackCollection.hh,v 1.5 1999/03/04 18:17:29 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackCollection.hh,v $
- * Revision 1.4  1999/03/04 15:57:05  wenaus
- * add std namespace for Sun CC5 compatibility
+ * Revision 1.5  1999/03/04 18:17:29  ullrich
+ * Namespace std not used if ST_NO_NAMESPACES defined
  *
  * Revision 1.4  1999/03/04 15:57:05  wenaus
  * add std namespace for Sun CC5 compatibility
@@ -25,8 +25,11 @@
  **************************************************************************/
 #ifndef StTrackCollection_hh
 #define StTrackCollection_hh
-using namespace std;
+
 #include <vector>
+#if !defined(ST_NO_NAMESPACES)
+using namespace std;
+#endif
 class StGlobalTrack;
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.hh,v 1.4 1999/03/04 15:57:04 wenaus Exp $
+ * $Id: StTpcHit.hh,v 1.5 1999/03/04 18:17:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.hh,v $
- * Revision 1.4  1999/03/04 15:57:04  wenaus
- * add std namespace for Sun CC5 compatibility
+ * Revision 1.5  1999/03/04 18:17:25  ullrich
+ * Namespace std not used if ST_NO_NAMESPACES defined
  *
  * Revision 1.5  1999/03/04 18:17:25  ullrich
  * Namespace std not used if ST_NO_NAMESPACES defined
@@ -25,11 +25,14 @@
  * Revision 1.2  1999/01/15 22:53:59  wenaus
  * version with constructors for table-based loading
  *
-using namespace std;
+ **************************************************************************/
 #ifndef StTpcHit_hh
 #define StTpcHit_hh
 
 #include <vector>
+#include "StEvent/StHit.hh"
+#include "StEvent/StGlobalTrack.hh"
+#include "StEvent/StTrackCollection.hh"
 #if !defined(ST_NO_NAMESPACES)
 using namespace std;
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVecPtrTpcHit.hh,v 1.3 1999/03/04 15:57:10 wenaus Exp $
+ * $Id: StVecPtrTpcHit.hh,v 1.4 1999/03/04 18:17:43 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVecPtrTpcHit.hh,v $
- * Revision 1.3  1999/03/04 15:57:10  wenaus
- * add std namespace for Sun CC5 compatibility
+ * Revision 1.4  1999/03/04 18:17:43  ullrich
+ * Namespace std not used if ST_NO_NAMESPACES defined
  *
  * Revision 1.3  1999/03/04 15:57:10  wenaus
  * add std namespace for Sun CC5 compatibility
@@ -22,8 +22,10 @@
  **************************************************************************/
 #ifndef StVecPtrTpcHit_hh
 #define StVecPtrTpcHit_hh
-using namespace std;
 #include <vector>
+#if !defined(ST_NO_NAMESPACES)
+using namespace std;
+#endif
 class StTpcHit;
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS

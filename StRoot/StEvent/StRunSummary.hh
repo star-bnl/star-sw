@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRunSummary.hh,v 1.4 1999/03/04 15:57:00 wenaus Exp $
+ * $Id: StRunSummary.hh,v 1.5 1999/03/04 18:17:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StRunSummary.hh,v $
- * Revision 1.4  1999/03/04 15:57:00  wenaus
- * add std namespace for Sun CC5 compatibility
+ * Revision 1.5  1999/03/04 18:17:12  ullrich
+ * Namespace std not used if ST_NO_NAMESPACES defined
  *
  * Revision 1.4  1999/03/04 15:57:00  wenaus
  * add std namespace for Sun CC5 compatibility
@@ -28,11 +28,14 @@
  **************************************************************************/
 #ifndef StRunSummary_hh
 #define StRunSummary_hh
-using namespace std;
+
 #include <string>
 #include <time.h>
 #include "StEvent/StTHDefs.hh"
 #include "tables/dst_run_summary.h"
+#if !defined(ST_NO_NAMESPACES)
+using namespace std;
+#endif
 
 class StRunSummary {
 public:
