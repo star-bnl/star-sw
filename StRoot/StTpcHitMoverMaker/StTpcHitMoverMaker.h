@@ -34,8 +34,11 @@ class StTpcHitMover : public StMaker {
   void setOutputMode(Int_t mode);
   inline Int_t getOutputMode() const {return mOutputMode;}
 
+  void setExB(StMagUtilities* ExB) {mExB = ExB;}
+  inline StMagUtilities* getExB() const {return mExB;}
+
   virtual const Char_t *GetCVS() const { 
-    static const char cvs[]="Tag $Name:  $ $Id: StTpcHitMoverMaker.h,v 1.4 2004/01/29 23:16:40 jeromel Exp $ built "__DATE__" "__TIME__; 
+    static const char cvs[]="Tag $Name:  $ $Id: StTpcHitMoverMaker.h,v 1.5 2004/06/26 22:30:43 genevb Exp $ built "__DATE__" "__TIME__; 
     return cvs; 
   }
  protected:
