@@ -104,10 +104,12 @@ Int_t StPrimaryMaker::Make(){
   St_DataSetIter matchI(match);         
   
   St_dst_track   *globtrk = (St_dst_track *) matchI("globtrk");
+  St_dst_track   *EstGlobal = 0;
+  EstGlobal = (St_dst_track *) matchI("EstGlobal");
   if (! globtrk) {globtrk = new St_dst_track("globtrk",1); AddGarb(globtrk);}
 
   St_dst_track   *primtrk = 0;   
-
+  St_dst_track   *EstPrimary =0;
   St_DataSet    *tpctracks = GetInputDS("tpc_tracks");
   St_tpt_track  *tptrack   = 0;
   if (tpctracks) {
@@ -211,6 +213,7 @@ Int_t StPrimaryMaker::Make(){
 	
 	glob->impact = globHelix.distance(primVertex);
       }
+  
     
     if(Debug()) gMessMgr->Debug(" finished calling track-propagator");
     
@@ -239,7 +242,8 @@ Int_t StPrimaryMaker::Make(){
       if(Debug())
         gMessMgr->Debug(" finished calling egr_primfit");
 
-      // Fill bit map in prim trk
+
+     // Fill bit map in prim trk
       
 
       tcl_tphit_st  *spc   = tphit->GetTable();
@@ -283,36 +287,125 @@ Int_t StPrimaryMaker::Make(){
 	}
       }
       
-      scs_spt_st *s_spc = scs_spt->GetTable();
-      sgr_groups_st *sgroup = svt_groups->GetTable();
       
-      for( i=0; i<svt_groups->GetNRows(); i++, sgroup++){
+      // If EstGlobal exists create EstPrimary
+      if( EstGlobal){
 	
-	if( sgroup->id1 != 0 && sgroup->ident >= 0){
-	  spt_id = sgroup->id2-1;
-	  row = s_spc[spt_id].id_wafer/1000;
-	   if(  s_spc[spt_id].id_globtrk-1 < 0){
-	    cout << spt_id << " " << s_spc[spt_id].id_globtrk<< " " << endl;
-	    return kStErr;
+	dst_track_st *glob  = EstGlobal->GetTable();
+	for( Int_t no_rows=0; no_rows<EstGlobal->GetNRows(); no_rows++, glob++)
+	  {
+	    Float_t dip   = atan(glob->tanl);
+	    Int_t    h    = ((bval[2] * glob->icharge) > 0 ? -1 : 1);
+	    Float_t phase = glob->psi*degree-h*pi/2;
+	    Float_t curvature = glob->curvature;
+	    Float_t x0 = glob->r0 * cos(glob->phi0 * degree);
+	    Float_t y0 = glob->r0 * sin(glob->phi0 * degree);
+	    Float_t z0 = glob->z0;
+	    StThreeVectorD origin(x0, y0, z0);  
+	    StHelixD globHelix(curvature, dip, phase, origin, h);
+	    
+	    glob->impact = globHelix.distance(primVertex);
 	  }
-	  if( row>7)row=7;
-	  track[s_spc[spt_id].id_globtrk-1].map[0] |= (1UL<<row);
+	
+	EstPrimary = new St_dst_track("EstPrimary", NGlbTrk);
+	AddData(EstPrimary);
+	
+	
+	//calculate impact parameter Confidence Level
+	if(Debug())
+	  gMessMgr->Debug("Calling EGR_impactcl");
+	
+	iRes = egr_impactcl (vertex,m_egr2_egrpar,EstGlobal);
+	//     ============================================
+	
+	if(Debug())
+	  gMessMgr->Debug("Calling egr_primfit");
+	iRes = egr_primfit(vertex, m_egr2_egrpar, EstGlobal, EstPrimary);
+	//     ====================================================
+	
+	if (iRes !=kSTAFCV_OK) iMake = kStWarn;
+	if (iRes !=kSTAFCV_OK){
+	  gMessMgr->Warning("Problem on return from egr_primfit");}
+	
+	if(Debug())
+	  gMessMgr->Debug(" finished calling egr_primfit");
+	
+	
+	// Fill bit map in EstPrimary
+	
+	
+	spc   = tphit->GetTable();
+	tgroup = tpc_groups->GetTable();
+	track  = EstPrimary->GetTable();
+	
+	int spt_id = 0;
+	int row = 0,i;
+	bool isset;
+	
+	//First set all bits in map to zero before doing bitwise ops
+	for(i=0;i<EstPrimary->GetNRows();i++){
+	  track[i].map[0] = 0UL;
+	  track[i].map[1] = 0UL;
+	}
+	
+	for( i=0; i<tpc_groups->GetNRows(); i++, tgroup++){
+	  if( tgroup->id1 != 0 && tgroup->ident >= 0){
+	  spt_id = tgroup->id2-1;
+	  if( spt_id <0) {
+	    cout << spt_id << endl;
+            return kStErr;
+	  }
+          else{
+	    row = spc[spt_id].row/100;
+	    row = spc[spt_id].row - row*100;
+	    if( spc[spt_id].id_globtrk-1 < 0){
+	      cout << tgroup->ident << " " << tgroup->id1 << " " << tgroup->id2 << " " << spc[spt_id].id << " " << endl;
+              return kStErr;
+	    }
+	    if( row < 25){
+	      isset = track[spc[spt_id].id_globtrk-1].map[0] & 1UL<<(row+7);
+	      track[spc[spt_id].id_globtrk-1].map[0] |= 1UL<<(row+7);
+	    }
+	    else{
+	      isset = track[spc[spt_id].id_globtrk-1].map[1] & 1UL<<(row-25);
+	      track[spc[spt_id].id_globtrk-1].map[1] |= 1UL<<(row-25);
+	    }
+	    if (isset) track[spc[spt_id].id_globtrk-1].map[1] |= 1UL<<30; 
+	  }
+	  }
+	}
+	
+	
+	scs_spt_st *s_spc = scs_spt->GetTable();
+	sgr_groups_st *sgroup = svt_groups->GetTable();
+	
+	for( i=0; i<svt_groups->GetNRows(); i++, sgroup++){
+	  
+	  if( sgroup->id1 != 0 && sgroup->ident >= 0){
+	    spt_id = sgroup->id2-1;
+	    row = s_spc[spt_id].id_wafer/1000;
+	    if(  s_spc[spt_id].id_globtrk-1 < 0){
+	      cout << spt_id << " " << s_spc[spt_id].id_globtrk<< " " << endl;
+	      return kStErr;
+	    }
+	    if( row>7)row=7;
+	    track[s_spc[spt_id].id_globtrk-1].map[0] |= (1UL<<row);
+	    
+	  }
 	  
 	}
-    
-      }
-
-
+	
+      } // End of if EstGlobal
     }
   } else {
     gMessMgr->Debug(" No Primary vertex ");
     return kStWarn;
   }
-
+  
   // copy id_start_vertex from globtrk to primtrk for all rows
   // copy n_max_point from globtrk to primtrk for all rows
   // calculate impact parameter variable
-
+  
   //  Int_t keep_vrtx_id;
   dst_vertex_st *myvrtx = vertex->GetTable();
   if( myvrtx->vtx_id != kEventVtxId || myvrtx->iflag != 1){
@@ -353,7 +446,43 @@ Int_t StPrimaryMaker::Make(){
 	  Float_t primLength = primHelix.pathLength(lastPoint);
 	  primtrkPtr->length = (primLength>0) ? primLength : (-primLength);
         }
-    } 
+
+
+      if( EstPrimary){
+	globtrkPtr = EstGlobal->GetTable();
+	primtrkPtr = EstPrimary->GetTable();  
+	for( Int_t i=0; i<EstPrimary->GetNRows(); i++, globtrkPtr++, primtrkPtr++) 
+	  {
+	    globtrkPtr->id_start_vertex = 0;
+	    primtrkPtr->id_start_vertex = globtrkPtr->id_start_vertex;
+	    if( globtrkPtr->impact < 3.){
+	      primtrkPtr->id_start_vertex =10;
+	      }
+	    //          if(primtrkPtr->id_start_vertex != 0)
+	    //  keep_vrtx_id=primtrkPtr->id_start_vertex;
+	    primtrkPtr->n_max_point = globtrkPtr->n_max_point;
+	    primtrkPtr->map[0] |= (1UL<<0);
+	    
+	    Float_t dip   = atan(primtrkPtr->tanl);
+	    Int_t    h    = ((bval[2] * primtrkPtr->icharge) > 0 ? -1 : 1);
+	    Float_t phase = primtrkPtr->psi*degree-h*pi/2;
+	    Float_t curvature = primtrkPtr->curvature;
+	    Float_t x0 = primtrkPtr->r0 * cos(primtrkPtr->phi0 * degree);
+	    Float_t y0 = primtrkPtr->r0 * sin(primtrkPtr->phi0 * degree);
+	    Float_t z0 = primtrkPtr->z0;
+	    StThreeVectorD origin(x0, y0, z0);  
+	    StHelixD primHelix(curvature, dip, phase, origin, h);
+	    
+	    primtrkPtr->impact = primHelix.distance(primVertex);
+	    
+	    StThreeVectorD lastPoint(primtrkPtr->x_last[0], 
+				     primtrkPtr->x_last[1],primtrkPtr->x_last[2]);
+	    Float_t primLength = primHelix.pathLength(lastPoint);
+	    primtrkPtr->length = (primLength>0) ? primLength : (-primLength);
+	  }
+      } // Fill EstPrimary info if it exists
+
+    }
   
   Int_t nrows = primtrk->GetNRows();
   dst_track_st *squeezePtr = primtrk->GetTable();
@@ -367,11 +496,28 @@ Int_t StPrimaryMaker::Make(){
   nrows = n2rows;
   primtrk->SetNRows(nrows);  
   printf("%s end, nPrimTR=%d\n",GetName(),nrows);
-  return iMake;
-}
+  
+  
+  // if( EstPrimary){
+    
+//     nrows = EstPrimary->GetNRows();
+//     dst_track_st *squeezePtr = EstPrimary->GetTable();
+//     n2rows = 0;
+//     for (Int_t irow=0;irow<nrows;irow++){
+//       if(squeezePtr[irow].id_start_vertex == 0) continue;
+//       squeezePtr[n2rows++]= squeezePtr[irow];    
+//     }
+//     EstPrimary->SetNRows(n2rows);  
+//   }
+  
+ return iMake;
+  }
 //_____________________________________________________________________________
-// $Id: StPrimaryMaker.cxx,v 1.74 2002/02/22 01:42:54 caines Exp $
+// $Id: StPrimaryMaker.cxx,v 1.75 2002/04/17 23:56:43 jeromel Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.75  2002/04/17 23:56:43  jeromel
+// Changes by Helen for the SVT in egr implementation.
+//
 // Revision 1.74  2002/02/22 01:42:54  caines
 // Correct track-hit correlations for SVT
 //

@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.70 2002/04/06 03:09:23 jeromel Exp $
+// $Id: St_dst_Maker.cxx,v 1.71 2002/04/17 23:56:43 jeromel Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.71  2002/04/17 23:56:43  jeromel
+// Changes by Helen for the SVT in egr implementation.
+//
 // Revision 1.70  2002/04/06 03:09:23  jeromel
 // Valeri found one biggy buggy causing crashes (pointer <-> array range)
 //
@@ -217,7 +220,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.70 2002/04/06 03:09:23 jeromel Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.71 2002/04/17 23:56:43 jeromel Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -233,9 +236,9 @@ St_dst_Maker::~St_dst_Maker(){
 //_____________________________________________________________________________
 Int_t St_dst_Maker::Init(){
   static const char *todst[] = {
-    "match:",  "globtrk","CpyTrk", 
+    "match:",  "globtrk","CpyTrk","EstGlobal",
     "fglobal:", "point","dst_dedx",
-    "primary:","globtrk2", "primtrk", "vertex",
+    "primary:","globtrk2", "primtrk", "vertex", "EstPrimary", 
     "v0:",     "dst_v0_vertex","ev0_eval",
     "xi:",     "dst_xi_vertex",
     "kink:",   "kinkVertex",

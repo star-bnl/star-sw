@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + egr )                                     //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.39 2002/02/19 16:00:27 wdeng Exp $
+// $Id: StMatchMaker.cxx,v 1.40 2002/04/17 23:58:05 jeromel Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.40  2002/04/17 23:58:05  jeromel
+// Changes by Helen for the SVT in egr implementation.
+//
 // Revision 1.39  2002/02/19 16:00:27  wdeng
 // Number of maximum point calculation from Ian.
 //
@@ -260,6 +263,7 @@ Int_t StMatchMaker::Make(){
   
   int iMake = kStOK;
   int iRes = 0, i;
+ 
   const Float_t deltaZCut = 1; //(cm) Cut used in track length calc.
 
   // Get Field
@@ -376,20 +380,23 @@ Int_t StMatchMaker::Make(){
    }
    
    tpc_groups->SetNRows(count);
-
+   egr_egrpar_st *egr_egrpar = m_egr_egrpar->GetTable();
+   int usetpc = egr_egrpar->usetpc;
+   int usesvt = egr_egrpar->usesvt;
+   int useglobal = egr_egrpar->useglobal;
    //First call egr and make a copy of the tpc and svt tracks for evaluation
    //purposes - see exactly what the trackers do before re-fitting touches them
    
-   if(Debug()){
+    if(Debug()){
      //
 
      //Change params so just a copy is made of the tracks
-     egr_egrpar_st *egr_egrpar = m_egr_egrpar->GetTable();
-     int usetpc = egr_egrpar->usetpc;
+     
+     usetpc = egr_egrpar->usetpc;
      egr_egrpar->usetpc = 1;
-     int usesvt = egr_egrpar->usesvt;
+     usesvt = egr_egrpar->usesvt;
      egr_egrpar->usesvt = 1;
-     int useglobal = egr_egrpar->useglobal;
+     useglobal = egr_egrpar->useglobal;
      egr_egrpar->useglobal  = 0;
 
      // Allocate some space for the tracks
@@ -416,20 +423,39 @@ Int_t StMatchMaker::Make(){
    }
    
 
-  //  Now call egr for real
+    St_stk_track* dummy_track=0;
+    St_sgr_groups* dummy_groups=0;
 
-  iRes = egr_fitter (tphit,    vertex,      tptrack , tpc_groups,
-		     scs_spt,m_egr_egrpar,stk_track, svt_groups,
-		     evt_match,globtrk);
-  //	 ======================================================
-  
-  if (iRes !=kSTAFCV_OK) iMake = kStWarn;
-  if (iRes !=kSTAFCV_OK) {
-    gMessMgr->Warning() << "Problem on return from EGR_FITTER" << endm;}
-  if(Debug()) gMessMgr->Debug() << " finished calling egr_fitter" << endm;
+    //Change params so just fit using TPC hits even if SVT there
+    usetpc = egr_egrpar->usetpc;
+    egr_egrpar->usetpc = 4;
+    usesvt = egr_egrpar->usesvt;
+    egr_egrpar->usesvt = 0;
+    useglobal = egr_egrpar->useglobal;
+    egr_egrpar->useglobal  = 4;
+    // Make sure it doesnt use the SVT information by not sending it in
+    // need to keep the useglobal flag on though so that the indexing
+    // works and id=1 for TPC only track is the same track as for TPC+SVT
+    // track
+    dummy_groups = new St_sgr_groups("dummy_groups",1);
+    AddGarb(dummy_groups);
+    
+    dummy_track = new St_stk_track("dummy_track",1);
+    AddGarb(dummy_track);
+    
+    iRes = egr_fitter (tphit,    vertex,      tptrack , tpc_groups,
+		       scs_spt,m_egr_egrpar, dummy_track, dummy_groups,
+		       evt_match, globtrk);
+    //	 ======================================================
+     
+     if (iRes !=kSTAFCV_OK) iMake = kStWarn;
+     if (iRes !=kSTAFCV_OK) {
+       gMessMgr->Warning() << "Problem on return from EGR_FITTER" << endm;}
+     gMessMgr->Debug() << " finished calling egr_fitter" << endm;
 
-  RdoFinder* rdoFinder = RdoFinder::Instance();
-  rdoFinder->setMagneticField( b[2] );
+     
+     RdoFinder* rdoFinder = RdoFinder::Instance();
+     rdoFinder->setMagneticField( b[2] );
   
   // globtrk length calculation  
   dst_track_st *globtrkPtr1  = globtrk->GetTable();
@@ -506,27 +532,129 @@ Int_t StMatchMaker::Make(){
   }
 
 
-  scs_spt_st *s_spc = scs_spt->GetTable();
-  sgr_groups_st *sgroup = svt_groups->GetTable();
-    
-  for( i=0; i<svt_groups->GetNRows(); i++, sgroup++){
+   if( stk_track->GetNRows() >0){
 
-    if( sgroup->id1 != 0){
-      spt_id = sgroup->id2-1;
-      row = s_spc[spt_id].id_wafer/1000;
-      if(  s_spc[spt_id].id_globtrk-1 < 0){
-	cout << spt_id << " " << s_spc[spt_id].id_globtrk<< " " << endl;
-	assert(0);
-      }
-      if( row>7)row=7;
-      track[s_spc[spt_id].id_globtrk-1].map[0] |= (1UL<<row);
-      
-    }
-    
-  }
-  
+  // Set pointers back as they were
 
-  return iMake;
+     egr_egrpar->usetpc = usetpc;
+     egr_egrpar->usesvt = usesvt;
+     egr_egrpar->useglobal  = useglobal; 
+
+       // Allocate new space for SVT+TPC track refit
+       
+       int Nrows = tptrack->GetNRows()+ stk_track->GetNRows();
+       St_dst_track     *EstGlobal     = new St_dst_track("EstGlobal",Nrows);  
+       AddData(EstGlobal);
+       
+       
+       //  Now call egr for real
+       
+       iRes = egr_fitter (tphit,    vertex,      tptrack , tpc_groups,
+			  scs_spt,m_egr_egrpar,stk_track, svt_groups,
+			  evt_match,EstGlobal);
+       //	 ======================================================
+       
+       if (iRes !=kSTAFCV_OK) iMake = kStWarn;
+       if (iRes !=kSTAFCV_OK) {
+	 gMessMgr->Warning() << "Problem on return from EGR_FITTER" << endm;}
+       if(Debug()) gMessMgr->Debug() << " finished calling egr_fitter" << endm;
+       
+         // EstGlobal length calculation  
+       globtrkPtr1  = EstGlobal->GetTable();
+       for( Int_t no_rows=0; no_rows<EstGlobal->GetNRows(); no_rows++,
+	      globtrkPtr1++)
+	 {
+	   int possiblePoints = rdoFinder->PossiblePoints(globtrkPtr1);
+	   globtrkPtr1->n_max_point = possiblePoints;
+	   
+	   //Convenient place to also zero globtrk bitmap
+	   globtrkPtr1->map[0]= 0UL; globtrkPtr1->map[1]= 0UL;
+	   if( globtrkPtr1->iflag<0 ) { globtrkPtr1->length = 0; continue; }
+	   Float_t dip   = atan(globtrkPtr1->tanl);
+	   Int_t    h    = (b[2]*globtrkPtr1->icharge > 0 ? -1 : 1);
+	   Float_t phase = globtrkPtr1->psi*degree-h*pi/2;
+	   Float_t curvature = globtrkPtr1->curvature;
+	   Float_t x0 = globtrkPtr1->r0 * cos(globtrkPtr1->phi0 * degree);
+	   Float_t y0 = globtrkPtr1->r0 * sin(globtrkPtr1->phi0 * degree);
+	   Float_t z0 = globtrkPtr1->z0;
+	   StThreeVectorD origin(x0, y0, z0);  
+	   StHelixD globHelix(curvature, dip, phase, origin, h);
+	   
+	   Float_t globLength;
+	   //default is larger than cut, beware curvature=0 (straight) tracks
+	   Float_t deltaZ = 2*deltaZCut;
+	   if (curvature > 1E-20) deltaZ= (2*M_PI*globtrkPtr1->tanl)/curvature;
+	   deltaZ = (deltaZ >= 0) ? deltaZ : (-deltaZ); 
+	   //If case where dist. moved in z after 1 period is less than cut (1 cm) 
+	   //use alternative pathLength method (prevents large false lengths)     
+	   if (deltaZ >= deltaZCut) {
+	     StThreeVectorD lastPoint(globtrkPtr1->x_last[0], 
+				      globtrkPtr1->x_last[1],globtrkPtr1->x_last[2]);
+	     globLength = globHelix.pathLength(lastPoint); 
+	   }
+	   
+	   else {
+	     globLength = 
+	       globHelix.pathLength(globtrkPtr1->x_last[0],globtrkPtr1->x_last[1]);
+	   }
+	   globtrkPtr1->length = (globLength>0) ? globLength : (-globLength);  
+	 }
+       
+       // Fill bit map in EstGlobal
+       
+       spc   = tphit->GetTable();
+       tgroup = tpc_groups->GetTable();
+       track  = EstGlobal->GetTable();
+       
+       int spt_id = 0;
+       int row = 0;
+       bool isset;
+       
+       for( i=0; i<tpc_groups->GetNRows(); i++, tgroup++){
+	 
+	 if( tgroup->id1 != 0 && tgroup->ident > -5){
+	   spt_id = tgroup->id2-1;
+	   row = spc[spt_id].row/100;
+	   row = spc[spt_id].row - row*100;
+	   
+	   if(  spc[spt_id].id_globtrk-1 < 0){
+	     cout << spt_id << " " << spc[spt_id].id_globtrk<< " " << endl;
+	     assert(0);
+	   }
+	   
+	   if( row < 25){
+	     isset = track[spc[spt_id].id_globtrk-1].map[0] & 1UL<<(row+7);
+	     track[spc[spt_id].id_globtrk-1].map[0] |= 1UL<<(row+7);
+	   }
+	   else{
+	     isset = track[spc[spt_id].id_globtrk-1].map[1] & 1UL<<(row-25);
+	     track[spc[spt_id].id_globtrk-1].map[1] |= 1UL<<(row-25);
+	   }
+	   if (isset) track[spc[spt_id].id_globtrk-1].map[1] |= 1UL<<30; 
+	 }
+       }
+       
+       scs_spt_st *s_spc = scs_spt->GetTable();
+       sgr_groups_st *sgroup = svt_groups->GetTable();
+       
+       for( i=0; i<svt_groups->GetNRows(); i++, sgroup++){
+	 
+	 if( sgroup->id1 != 0){
+	   spt_id = sgroup->id2-1;
+	   row = s_spc[spt_id].id_wafer/1000;
+	   if(  s_spc[spt_id].id_globtrk-1 < 0){
+	     cout << spt_id << " " << s_spc[spt_id].id_globtrk<< " " << endl;
+	     assert(0);
+	   }
+	   if( row>7)row=7;
+	   track[s_spc[spt_id].id_globtrk-1].map[0] |= (1UL<<row);
+	   
+	 }
+	 
+       }
+   } // End of if stk_track loop   
+   
+   return iMake;
 }
 
 //_____________________________________________________________________________
