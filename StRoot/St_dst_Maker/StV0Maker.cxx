@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.35 2002/02/21 05:07:32 genevb Exp $
+// $Id: StV0Maker.cxx,v 1.36 2002/09/13 17:51:04 genevb Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.36  2002/09/13 17:51:04  genevb
+// Better handling of full or corrupt tables
+//
 // Revision 1.35  2002/02/21 05:07:32  genevb
 // Had not fully implemented previous changed - now fixed
 //
@@ -254,6 +257,17 @@ Int_t StV0Maker::Make(){
         iRes = kSTAFCV_ERR;
       }
     }
+
+    // 12-Sep-2002 GVB
+    // Patch for a bug in ev0 where number of rows is advanced
+    // before the check for an already full table. Result was a
+    // blank entry in dst_v0_vertex and vertex tables at the end.
+    if (dst_v0_vertex->GetNRows() == v0_limit) {
+      gMessMgr->Warning("StV0Maker::Make(): V0 table is full!");
+      dst_v0_vertex->SetNRows(dst_v0_vertex->GetNRows()-1);
+      vertex->SetNRows(vertex->GetNRows()-1);
+    }
+
     //       =========================================================
     
     if (iRes !=kSTAFCV_OK) {
@@ -385,8 +399,13 @@ void StV0Maker::ChopVertex(Long_t idVert){
   // Want to delete this vertex
   // Take last vertex and move it here
   Int_t ivert = (Int_t) idVert - 1;
-  Int_t lastVert = vertex->GetNRows();
-  if ((--lastVert)!=ivert) {
+  Int_t lastVert = vertex->GetNRows() - 1;
+  if ((ivert < 0) || (ivert > lastVert)) {
+    gMessMgr->Error() << "StV0Maker::ChopVertex(): index out of range.\n"
+      << "     Possible table corruption! Not chopping vertex." << endm;
+    return;
+  }
+  if (ivert != lastVert) {
     dst_vertex_st* vertrow = vertex->GetTable(ivert);
     dst_vertex_st* vertrowL = vertex->GetTable(lastVert);
     Long_t idVertL = vertrowL->id;
