@@ -92,7 +92,7 @@ void  StCtbUtility::collectCTBhitsMC(St_DataSet *gds){// M-C CTB
 
   //assert(ctb_hit);
   if (! ctb_hit){
-    gMessMgr->Warning() << "StppLMVVertexFinder::collectCTBhitsMC: no CTB hits" << endm;
+    gMessMgr->Warning() << "StCtbUtility::collectCTBhitsMC: no CTB hits" << endm;
     return ;
   }
 
@@ -129,12 +129,12 @@ void  StCtbUtility::collectCTBhitsMC(St_DataSet *gds){// M-C CTB
 //==========================================================
 void  StCtbUtility::collectCTBhitsData(StTriggerData *trgD){
   // returns true if one or more valid CTB hits are found.  
-  gMessMgr->Info() << "StppLMVVertexFinder::fit() scans real CTB hits" << endm;
+  gMessMgr->Info() << "StCtbUtility scans real CTB hits" << endm;
 
   // access CTB from Akio's Maker
   
   if(!trgD){
-    gMessMgr->Warning() << "StppLMVVertexFinder::fit() no trigData in real data" << endm;
+    gMessMgr->Warning() << "StCtbUtility scans: no trigData in real data" << endm;
     return ;
   }
 
@@ -154,7 +154,7 @@ void  StCtbUtility::collectCTBhitsData(StTriggerData *trgD){
 
   StTriggerDetectorCollection* trigCol = event->triggerDetectorCollection();
   if(!trigCol){
-    gMessMgr->Warning() << "StppLMVVertexFinder::fit() no trigCol in Data" << endm;
+    gMessMgr->Warning() << "StCtbUtility scans: no trigCol in Data" << endm;
     return ;
   }
 

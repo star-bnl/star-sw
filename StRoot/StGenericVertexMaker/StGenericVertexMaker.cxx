@@ -25,7 +25,10 @@
 #include "StMinuitVertexFinder.h"
 #include "StppLMVVertexFinder.h"
 
-//#include "StiPPVertex/StPPVertexFinder.h"
+//#define PPVertex
+#ifdef PPVertex
+#include "StiPPVertex/StPPVertexFinder.h"
+#endif
 
 #include "StTreeMaker/StTreeMaker.h"
 
@@ -57,6 +60,9 @@ StGenericVertexMaker::StGenericVertexMaker(const char *name):StMaker(name)
 //_____________________________________________________________________________
 StGenericVertexMaker::~StGenericVertexMaker()
 {
+
+  if(theFinder) delete theFinder;
+
 }
 
 /*!
@@ -94,8 +100,11 @@ Int_t StGenericVertexMaker::Init()
   } else if ( m_Mode & 0x4){
     theFinder= new StppLMVVertexFinder();
     theFinder->SetMode(1);                 // this mode is an internal to ppLMV option switch
- // } else if ( m_Mode & 0x8){
- //   theFinder= new StPPVertexFinder();
+#ifdef PPVertex
+  } else if ( m_Mode & 0x8){ // Jan's testing area
+    gMessMgr->Info() << "StGenericVertexMaker::Init: uses PPVertex finder"<<  endm;
+    theFinder= new StPPVertexFinder();
+#endif
   } else {
     // Later, this would NEVER make multiple possible vertex
     // finder unlike for option 0x1 .
@@ -114,7 +123,7 @@ Int_t StGenericVertexMaker::Init()
 
 //_____________________________________________________________________________
 void StGenericVertexMaker::Clear(const char*){
- // theFinder->Clear();
+  theFinder->Clear();
 }
 
 
@@ -166,10 +175,8 @@ Int_t StGenericVertexMaker::Finish()
    mEvalNtuple->Write();
    out.Close();
   }
-
-  //LSB TODO check whether this is correct usage
-  if(theFinder) delete theFinder;
   
+  theFinder->Finish();  
   return  kStOK;
 }
 
