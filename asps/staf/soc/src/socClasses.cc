@@ -6,6 +6,7 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
+#define FILE_VERSION "$Id: socClasses.cc,v 1.10 1997/01/22 01:22:58 tull Exp $"
 
 //:----------------------------------------------- INCLUDES           --
 #include <stream.h>
@@ -113,13 +114,6 @@ SOC_PTR_T socObject::  ptr () {
 }
 
 //----------------------------------
-char * socObject::  soRef () {
-   char *c = (char*)ASUALLOC(strlen(mySOR->show())+1);
-   strcpy(c,mySOR->show());
-   return c;
-}
-
-//----------------------------------
 void socObject:: lock (unsigned char lock) {
    if(lock){
       myLock = 1;
@@ -133,17 +127,16 @@ unsigned char socObject::  lock () {
    return (myLock>0);
 }
 
-//:----------------------------------------------- PUB FUNCTIONS      --
-STAFCV_T socObject:: attach () {
-   myLock++;
-   EML_SUCCESS(STAFCV_OK);
+//----------------------------------
+char * socObject:: listing () {
+   char *c = NULL; 
+   c = (char*)ASUALLOC(79);
+   sprintf(c,"| %5d | %-15s | %-15s | %-33s"
+   		, idRef(), name(), type(), "---");
+   return c;
 }
 
-//----------------------------------
-STAFCV_T socObject:: release () {
-   if(myLock>0)myLock--;
-   EML_SUCCESS(STAFCV_OK);
-}
+//:----------------------------------------------- PUB FUNCTIONS      --
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
 // **NONE**
@@ -183,10 +176,34 @@ long socFactory :: maxCount () {
 
 //:----------------------------------------------- PUB FUNCTIONS      --
 char * socFactory :: list () {
-   for( int i=0;i<maxCount();i++ ){
-      printf("%d (%d)\n",i,entry(i));
+   char *c=NULL;
+   c = (char*)ASUALLOC(80*(4+maxCount()));
+   char *l=NULL;	// individual line
+   socObject *o;	// object
+   char *cc;
+   sprintf(c,
+		"+-------+-----------------+-----------------"
+		"+----------------------------------\n"
+		"| IDREF | OBJECT NAME     | CLASS TYPE      "
+		"| OBJECT DESCRIPTION               \n"
+		"+-------+-----------------+-----------------"
+		"+----------------------------------\n"
+   );
+   int lc=3;		// line count
+   for( int i=0;i<count();i++ ){
+      if( (NULL != (o = soc->getObject(entryID(i)))) ){
+	 l = o->listing();
+	 cc = c + (80*lc++);
+	 sprintf(cc,"%-79s\n",l);
+	 ASUFREE(l);
+      }
    }
-   return "";	// TEMPORARY HACK
+   cc = c + (80*lc++);
+   sprintf(cc,
+		"+-------+-----------------+-----------------"
+		"+----------------------------------\n"
+   );
+   return c;
 }
 
 //----------------------------------
@@ -220,7 +237,7 @@ STAFCV_T socFactory :: unaddEntry (IDREF_T idRef) {
 }
 
 //----------------------------------
-IDREF_T socFactory :: entry (long n) {
+IDREF_T socFactory :: entryID (long n) {
    if(n<myCount && idRefs[n]>=0){
       return idRefs[n];
    }
@@ -260,7 +277,7 @@ socCatalog:: ~socCatalog() {
 
 //:----------------------------------------------- ATTRIBUTES         --
 char * socCatalog:: version() {
-	char * myVersion="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/soc/src/Attic/socClasses.cc,v 1.9 1997/01/21 20:35:24 tull Exp $";
+	char * myVersion=FILE_VERSION;
 	char *c=(char*)ASUALLOC(strlen(myVersion) +1);
 	strcpy(c,myVersion);
 	return c;
@@ -350,39 +367,19 @@ printf("MAJOR ERROR REPORT!!! (%d,%d)\n",i,id=myObjs[i]->idRef());
 //- OVER-RIDE socFactory:: list()
 char * socCatalog :: list () {
 
-// char *c, *cc;
-// c = (char*)ASUALLOC(70*(count()+5));	// Best guess
+   char *c = socFactory::list();
 
-   printf("\n"
-"+---------------------------------------------------------------------"
-   "\n"
-"|************** SOC - Service & Object Catalog listing ***************"
-   "\n"
-"+-------+-----------------+-----------------+-------------------------"
-   "\n"
-"| IDREF | NAME            | TYPE            | POINTER                 "
-    "\n"
-"+-------+-----------------+-----------------+-------------------------"
-    "\n");
-   char *n,*t;
-   for( int i=0;i<count();i++ ){
-      if( myObjs[i] ){
-	 printf("| %5d | %-15s | %-15s | %p \n"
-	 		,i,n=(myObjs[i])->name(),t=(myObjs[i])->type()
-			,myObjs[i]);
-	 delete[] n; delete[] t;
-      } else {
-/*- Do not printout any info about deleted objects. -**
-  	 printf("| %5d | %-15s | %-15s | - \n"
-	 		,i,"**DELETED**","**DELETED**");
--*/
-      }
-   }
-   printf(
-"+-------+-----------------+-----------------+-------------------------"
-   "\n\n");
+   char *cc = (char*)ASUALLOC(strlen(c) +1 +160);
 
-   return ""; // TEMPORARY HACK
+   sprintf(cc, 
+		"+-------------------------------------------"
+		"-----------------------------------\n"
+		"|******************* "
+		"SOC - Service & Object Catalog listing"
+		" *******************\n"
+		"%s",c);
+   ASUFREE(c);
+   return cc;
 }
 
 //----------------------------------

@@ -343,7 +343,9 @@ void kam_soc_list_()
 
 STAFCV_T soc_list()
 {
-   printf("%s",soc->list() );
+   char *c;
+   printf("%s",c = soc->list() );
+   ASUFREE(c);
    EML_SUCCESS(STAFCV_OK);
 }
 
