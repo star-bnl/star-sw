@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.327 2003/04/09 21:13:44 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.328 2003/04/15 22:22:37 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -147,9 +147,12 @@ Bfc_st BFC1[] = {
   {"B2003"       ,""  ,"","ry2003,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                        ,"Base chain for 2003 (tpc)",kFALSE},
   {"dau2003"     ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
-                  ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc",kFALSE},
-  {"pp2003"      , "" ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
-                  ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc",kFALSE},
+                 ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc)",kFALSE},
+  {"dau2003a"    ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
+           ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
+
+  {"pp2003"      , "" ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
+           ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
 
 
 
@@ -308,6 +311,7 @@ Bfc_st BFC1[] = {
   {"ctf"         ,"ctf","l0Chain","ctf_T,db"               ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE},
   {"mwc"         ,"mwc","l0Chain","mwc_T,db,tpcDB"         ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE},
   {"trg"         ,"trg","l0Chain","trg_T,globT,db"         ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
+  {"trgd"        ,"trgd","l0Chain",""                 ,"StTriggerDataMaker","StTriggerDataMaker","",kFALSE},
   {"ppMCTrig"    ,"ppMC_trig1","l0Chain",""
                          ,"StppTrigMaker","StppSpin","Add emulation of pp Trigger based on CTB+MWC",kFALSE},
 
@@ -620,9 +624,12 @@ Bfc_st BFC2[] = {
   {"B2003"       ,""  ,"","ry2003,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                        ,"Base chain for 2003 (tpc)",kFALSE},
   {"dau2003"     ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
-                  ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc",kFALSE},
-  {"pp2003"      , "" ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
-                  ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc",kFALSE},
+                 ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc)",kFALSE},
+  {"dau2003a"    ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
+           ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
+
+  {"pp2003"      , "" ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
+           ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
 
 
   // Other chains/Calibration
@@ -781,6 +788,7 @@ Bfc_st BFC2[] = {
   {"ctf"         ,"ctf","l0Chain","ctf_T,db"               ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE},
   {"mwc"         ,"mwc","l0Chain","mwc_T,db,tpcDB"         ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE},
   {"trg"         ,"trg","l0Chain","trg_T,globT,db"         ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
+  {"trgd"        ,"trgd","l0Chain",""                 ,"StTriggerDataMaker","StTriggerDataMaker","",kFALSE},
   {"ppMCTrig"    ,"ppMC_trig1","l0Chain",""
                          ,"StppTrigMaker","StppSpin","Add emulation of pp Trigger based on CTB+MWC",kFALSE},
 
