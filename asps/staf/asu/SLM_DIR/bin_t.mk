@@ -37,11 +37,16 @@ bin_show:
 	@echo " LOAD_LIBS = " $(LOAD_LIBS)
 #
 progs:
+ifneq ($(PROGS),$(EMPTY))
 	cd $(BINDIR); \
 	$(MAKE) PROGS=a.out -f ../Makefile $(PROGS)
+endif
+#
 objs:
+ifneq ($(OBJS),$(EMPTY))
 	cd $(BINDIR); \
 	$(MAKE) -f ../Makefile $(OBJS)
+endif
 #
 vpath %.a $(subst $(SPACE),:,$(strip $(LIBDIRS)))
 #

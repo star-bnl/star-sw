@@ -46,15 +46,21 @@ libs:
 	$(MAKE) -f ../Makefile $(LIBS)
 #
 alib:
+ifneq ($(ALIB),$(EMPTY))
 	cd $(LIBDIR); \
 	$(MAKE) -f ../Makefile $(ALIB)
+endif
 #
 solib:
+ifneq ($(SOLIB),$(EMPTY))
 	cd $(SOLIBDIR); \
 	$(MAKE) -f ../Makefile $(SOLIB)
+endif
 #
 objs:
+ifneq ($(OBJS),$(EMPTY))
 	cd $(LIBDIR); $(MAKE) $(OBJS)
+endif
 #
 $(ALIB): $(OBJS)
 	$(AR) $(ARFLAGS) $@ $?

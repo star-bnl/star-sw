@@ -92,11 +92,11 @@ $(BASE_DIR)/$(BASE_NAME).config: $(BASE_DIR)/Makefile.control
 	@echo "export CDFDIR :=" $(CDFDIR)			>> $@
 	@echo "export DOCDIR :=" $(DOCDIR)			>> $@
 	@echo "export IDLDIR :=" $(IDLDIR)			>> $@
-	@echo "export IDLDIRS +=" $(IDLDIRS)			>> $@
+	@echo "export IDLDIRS :=" $(IDLDIRS)			>> $@
 	@echo "export INCDIR :=" $(INCDIR)			>> $@
-	@echo "export INCDIRS +=" $(INCDIRS)			>> $@
+	@echo "export INCDIRS :=" $(INCDIRS)			>> $@
 	@echo "export LIBDIR :=" $(LIBDIR)			>> $@
-	@echo "export LIBDIRS +=" $(LIBDIRS)			>> $@
+	@echo "export LIBDIRS :=" $(LIBDIRS)			>> $@
 	@echo "export SOLIBDIR :=" $(SOLIBDIR)			>> $@
 	@echo "export SRCDIR :=" $(SRCDIR)			>> $@
 	@echo "export SRCMDIR :=" $(SRCMDIR)			>> $@

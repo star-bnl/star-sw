@@ -25,6 +25,7 @@ idl_show:
 	@echo " ** idl.mk                   ** "
 	@echo " ****************************** "
 	@echo "      IDL = " $(IDL)
+	@echo "  IDLDIRS = " $(IDLDIRS)
 	@echo " IDLFLAGS = " $(IDLFLAGS)
 	@echo " IDLFILES = " $(IDLFILES)
 	@echo " GENFILES = " $(GENFILES)
@@ -33,8 +34,10 @@ idl_show:
 %.d: %.idl
 	$(IDL) -O $(IDLFLAGS) $< > $@
 #
+#HACK - not in CVS 25jun96
+#
 $(GENTYPES): %.idl
-	-$(IDL) $(IDLFLAGS) $^
+	-$(IDL) $(IDLDIRS:%=-I%) $^
 #
 endif #IDL_T_MK
 #
