@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.61 1999/08/02 00:53:14 fine Exp $ 
+// $Id: St_Table.cxx,v 1.62 1999/08/11 00:42:33 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.62  1999/08/11 00:42:33  fine
+// new I/O via St_baseDescriptor table has been implemented
+//
 // Revision 1.61  1999/08/02 00:53:14  fine
 // St_Table::New - protection against of zero pointers was removed by VP demand
 //
@@ -174,6 +177,7 @@
 #include "TDataType.h"
 #include "St_Table.h"
 #include "St_TableElementDescriptor.h"
+#include "St_tableDescriptor.h"
 #include "StBufferAbc.h"
 
 //______________________________________________________________________________
@@ -247,10 +251,16 @@ static void AsString(void *buf, const char *name, Int_t width=0)
 
 ClassImp(St_Table)
  
-
+#if 1
+//______________________________________________________________________________
+St_tableDescriptor *St_Table::GetTableDescriptors() const {
+    return new St_tableDescriptor(this);
+}
+#else
 //______________________________________________________________________________
 TList *St_Table::GetTableDescriptors() {
   // Create a new list of the columns descriptors
+
    TClass *classPtr = GetRowClass();
    if (classPtr == 0)         return 0;
    if (!classPtr->GetListOfRealData()) classPtr->BuildRealData();
@@ -269,7 +279,14 @@ TList *St_Table::GetTableDescriptors() {
   }
   return dscList;
 }
-
+#endif
+//______________________________________________________________________________
+const void *St_Table::At(Int_t i) const
+{
+   if (!BoundsOk("St_Table::At", i))
+      i = 0;
+   return (const void *)(s_Table+i*(*s_Size));
+}
 //______________________________________________________________________________
 Int_t St_Table::MakeWrapClass(Text_t *name)
 {
@@ -742,14 +759,14 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *, const 
    Int_t const width = 8;
    Int_t rowStep = 10; // The maximun values to print per line
    Int_t rowNumber = rownumber;
-   if (row  > GetSize() || GetSize() == 0)  { 
+   if (row  > Int_t(GetSize()) || GetSize() == UInt_t(0))  { 
         PrintHeader();
         cout  << " ======================================================================================" << endl
               << "   There are " << GetSize() << " allocated rows for this table only"                     << endl
               << " ======================================================================================" << endl;     
         return 0;
    }
-   if (rowNumber > GetSize()-row) rowNumber = GetSize()-row;
+   if (rowNumber > Int_t(GetSize()-row)) rowNumber = GetSize()-row;
    if (!rowNumber) return 0;
    rowStep = TMath::Min(rowStep,rowNumber);
 
@@ -1619,38 +1636,43 @@ Int_t St_Table::SetfN(Long_t len)
 #undef StreamElelement
 #endif
 
-#define StreamElementIn(type)  case St_TableElementDescriptor::_NAME2_(k,type):          \
- if (nextCol->GetDimensions())                                   \
-   R__b.ReadStaticArray((_NAME2_(type,_t) *)(row+nextCol->GetOffset()));    \
- else                                                            \
-   R__b >> *(_NAME2_(type,_t) *)(row+nextCol->GetOffset());      \
+#define StreamElementIn(type)  case St_TableElementDescriptor::_NAME2_(k,type):            \
+ if (nextCol->m_Dimensions)                                   \
+   R__b.ReadStaticArray((_NAME2_(type,_t) *)(row+nextCol->m_Offset));                      \
+ else                                                         \
+   R__b >> *(_NAME2_(type,_t) *)(row+nextCol->m_Offset);      \
  break
 
-#define StreamElementOut(type) case St_TableElementDescriptor::_NAME2_(k,type):          \
- if (nextCol->GetDimensions())                                   \
-    R__b.WriteArray((_NAME2_(type,_t) *)(row+nextCol->GetOffset()), nextCol->GetSize()/sizeof(_NAME2_(type,_t))); \
- else                                                            \
-    R__b << *(_NAME2_(type,_t) *)(row+nextCol->GetOffset());     \
+#define StreamElementOut(type) case St_TableElementDescriptor::_NAME2_(k,type):            \
+ if (nextCol->m_Dimensions)                                   \
+    R__b.WriteArray((_NAME2_(type,_t) *)(row+nextCol->m_Offset), nextCol->m_Size/sizeof(_NAME2_(type,_t))); \
+ else                                                         \
+    R__b << *(_NAME2_(type,_t) *)(row+nextCol->m_Offset);     \
  break
 
 #define StreamNMElementIn(type)  case St_TableElementDescriptor::_NAME2_(k,type):           \
- if (nextCol->GetDimensions())                                   \
-   R__b.ReadStaticArray((_NAME2_(type,_t) *)(row+nextCol->GetOffset()),nextCol->GetName()); \
- else                                                            \
-   R__b.ReadScalar(*(_NAME2_(type,_t) *)(row+nextCol->GetOffset()),nextCol->GetName());      \
+ if (nextCol->m_Dimensions)                                   \
+   R__b.ReadStaticArray((_NAME2_(type,_t) *)(row+nextCol->m_Offset),nextCol->m_ColumnName); \
+ else                                                         \
+   R__b.ReadScalar(*(_NAME2_(type,_t) *)(row+nextCol->m_Offset),nextCol->m_ColumnName);     \
  break
 
-#define StreamNMElementOut(type) case St_TableElementDescriptor::_NAME2_(k,type):          \
- if (nextCol->GetDimensions())                                   \
-    R__b.WriteArray((_NAME2_(type,_t) *)(row+nextCol->GetOffset()), nextCol->GetSize()/sizeof(_NAME2_(type,_t)),nextCol->GetName()); \
- else                                                            \
-    R__b.WriteScalar(*(_NAME2_(type,_t) *)(row+nextCol->GetOffset()),nextCol->GetName());     \
+#define StreamNMElementOut(type) case St_TableElementDescriptor::_NAME2_(k,type):           \
+ if (nextCol->m_Dimensions)                                   \
+    R__b.WriteArray((_NAME2_(type,_t) *)(row+nextCol->m_Offset), nextCol->m_Size/sizeof(_NAME2_(type,_t)),nextCol->m_ColumnName); \
+ else                                                         \
+    R__b.WriteScalar(*(_NAME2_(type,_t) *)(row+nextCol->m_Offset),nextCol->m_ColumnName);   \
  break
 //______________________________________________________________________________
 Int_t St_Table::StreamerHeader(StBufferAbc &b){ return 0;}
 
 //______________________________________________________________________________
-TList *St_Table::GetRowDescriptors() { return 0;}
+#if 0
+TList 
+#else
+St_tableDescriptor 
+#endif
+       *St_Table::GetRowDescriptors() const { return 0;}
 //______________________________________________________________________________
 Int_t St_Table::Streamer(StBufferAbc &R__b)
 {
@@ -1662,12 +1684,12 @@ Int_t St_Table::Streamer(StBufferAbc &R__b)
       if (*s_MaxIndex <= 0) return -1; 
       char *row= s_Table;
       for (Int_t indx=0;indx<*s_MaxIndex;indx++) {
-        TIter nextColDescriptor(GetRowDescriptors());
-        St_TableElementDescriptor *nextCol = 0;
-        while ( ( nextCol = (St_TableElementDescriptor *)nextColDescriptor() ) )
+        tableDescriptor_st *nextCol = GetRowDescriptors()->GetTable();
+        Int_t maxColumns = GetNumberOfColumns();
+        for (Int_t colCounter=0; colCounter < maxColumns; colCounter++) 
         {
           // Stream one table row supplied
-          switch(nextCol->GetType()) {
+          switch(nextCol->m_Type) {
            StreamNMElementIn(Float);
            StreamNMElementIn(Int);
            StreamNMElementIn(Long);
@@ -1680,6 +1702,7 @@ Int_t St_Table::Streamer(StBufferAbc &R__b)
           default:
             break;
         };
+        nextCol++;
       }
       row += GetRowSize();
      }
@@ -1688,12 +1711,12 @@ Int_t St_Table::Streamer(StBufferAbc &R__b)
       if (*s_MaxIndex <= 0) return -1; 
       char *row= s_Table;
       for (Int_t indx=0;indx<*s_MaxIndex;indx++) {
-        TIter nextColDescriptor(GetRowDescriptors());
-        St_TableElementDescriptor *nextCol = 0;
-        while ( ( nextCol = (St_TableElementDescriptor *)nextColDescriptor() ) )
+        tableDescriptor_st *nextCol = GetRowDescriptors()->GetTable();
+        Int_t maxColumns = GetNumberOfColumns();
+        for (Int_t colCounter=0; colCounter < maxColumns; colCounter++) 
         {
           // Stream one table row supplied
-          switch(nextCol->GetType()) {
+          switch(nextCol->m_Type) {
            StreamNMElementOut(Float);
            StreamNMElementOut(Int);
            StreamNMElementOut(Long);
@@ -1706,6 +1729,7 @@ Int_t St_Table::Streamer(StBufferAbc &R__b)
           default:
             break;
         };
+        nextCol++;
       }
       row += GetRowSize();
      }
@@ -1723,12 +1747,12 @@ void St_Table::Streamer(TBuffer &R__b)
       if (*s_MaxIndex <= 0) return; 
       char *row= s_Table;
       for (Int_t indx=0;indx<*s_MaxIndex;indx++) {
-        TIter nextColDescriptor(GetRowDescriptors());
-        St_TableElementDescriptor *nextCol = 0;
-        while ( ( nextCol = (St_TableElementDescriptor *)nextColDescriptor() ) )
+        tableDescriptor_st *nextCol = GetRowDescriptors()->GetTable();
+        Int_t maxColumns = GetNumberOfColumns();
+        for (Int_t colCounter=0; colCounter < maxColumns; colCounter++) 
         {
           // Stream one table row supplied
-          switch(nextCol->GetType()) {
+          switch(nextCol->m_Type) {
            StreamElementIn(Float);
            StreamElementIn(Int);
            StreamElementIn(Long);
@@ -1741,6 +1765,7 @@ void St_Table::Streamer(TBuffer &R__b)
           default:
             break;
         };
+        nextCol++;
       }
       row += GetRowSize();
      }
@@ -1750,12 +1775,12 @@ void St_Table::Streamer(TBuffer &R__b)
       if (*s_MaxIndex <= 0) return; 
       char *row= s_Table;
       for (Int_t indx=0;indx<*s_MaxIndex;indx++) {
-        TIter nextColDescriptor(GetRowDescriptors());
-        St_TableElementDescriptor *nextCol = 0;
-        while ( ( nextCol = (St_TableElementDescriptor *)nextColDescriptor() ) )
+        tableDescriptor_st *nextCol = GetRowDescriptors()->GetTable();
+        Int_t maxColumns = GetNumberOfColumns();
+        for (Int_t colCounter=0; colCounter < maxColumns; colCounter++) 
         {
           // Stream one table row supplied
-          switch(nextCol->GetType()) {
+          switch(nextCol->m_Type) {
            StreamElementOut(Float);
            StreamElementOut(Int);
            StreamElementOut(Long);
@@ -1768,6 +1793,7 @@ void St_Table::Streamer(TBuffer &R__b)
           default:
             break;
         };
+        nextCol++;
       }
       row += GetRowSize();
      }
@@ -1804,4 +1830,25 @@ void St_Table::Update(St_DataSet *set, UInt_t opt)
   }
   St_DataSet::Update(set,opt);
 }
+
+ //  ----   Table descriptor service   ------
+const Char_t *St_Table::GetColumnName(Int_t columnIndex) const {return GetRowDescriptors()->GetColumnName(columnIndex); }
+UInt_t      *St_Table::GetIndexArray(Int_t columnIndex)  const {return GetRowDescriptors()->GetIndexArray(columnIndex); }
+UInt_t       St_Table::GetNumberOfColumns()              const {return GetRowDescriptors()->GetNumberOfColumns();       }
+
+UInt_t       St_Table::GetOffset(Int_t columnIndex)      const {return GetRowDescriptors()->GetOffset(columnIndex); }
+Int_t        St_Table::GetOffset(const Char_t *columnName) const {return GetRowDescriptors()->GetOffset(columnName); }
+
+UInt_t       St_Table::GetSize(Int_t columnIndex)        const {return GetRowDescriptors()->GetSize(columnIndex); }
+Int_t        St_Table::GetSize(const Char_t *columnName) const {return GetRowDescriptors()->GetSize(columnName); }
+
+UInt_t       St_Table::GetTypeSize(Int_t columnIndex)    const {return GetRowDescriptors()->GetTypeSize(columnIndex); }
+Int_t        St_Table::GetTypeSize(const Char_t *columnName) const {return GetRowDescriptors()->GetTypeSize(columnName); }
+
+UInt_t       St_Table::GetDimensions(Int_t columnIndex)  const {return GetRowDescriptors()->GetDimensions(columnIndex); }
+Int_t        St_Table::GetDimensions(const Char_t *columnName) const {return GetRowDescriptors()->GetDimensions(columnName); }
+
+EColumnType  St_Table::GetColumnType(Int_t columnIndex)  const {return GetRowDescriptors()->GetColumnType(columnIndex); }
+EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {return GetRowDescriptors()->GetColumnType(columnName); }
+
 
