@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.20 2000/01/13 16:55:11 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.21 2000/01/18 16:38:05 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.21  2000/01/18 16:38:05  kathy
+// add loading of StUtilities and StAnalysisUtilities so that StHistUtil class can now be picked up from StAnalysisUtilities library
+//
 // Revision 1.20  2000/01/13 16:55:11  kathy
 // updating bfcread_dst*.C macros to use the new methods in StHistUtil which allow printing from a list; also make sure all libraries needed are loaded in the ones running St_QA_Maker; also update documentation
 //
@@ -134,6 +137,7 @@ void bfcread_dst_QAhist(
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
   gSystem->Load("StUtilities");
+  gSystem->Load("StAnalysisUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("St_QA_Maker");
@@ -141,7 +145,6 @@ void bfcread_dst_QAhist(
   gSystem->Load("St_tpc");
   gSystem->Load("St_svt");
   gSystem->Load("St_global");
-
 
 //  Setup top part of chain
   chain = new StChain("bfc");

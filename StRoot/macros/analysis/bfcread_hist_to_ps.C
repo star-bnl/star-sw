@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.16 2000/01/13 17:18:04 kathy Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.17 2000/01/18 16:38:05 kathy Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.17  2000/01/18 16:38:05  kathy
+// add loading of StUtilities and StAnalysisUtilities so that StHistUtil class can now be picked up from StAnalysisUtilities library
+//
 // Revision 1.16  2000/01/13 17:18:04  kathy
 // updated bfcread_hist* macros so that they can now use the new *PrintList methods from StHistUtil to only print a subset (given a list of names) of histograms from the given Maker Directory; also updated documentation
 //
@@ -119,7 +122,8 @@ void bfcread_hist_to_ps(
     gSystem->Load("St_Tables");
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
-    gSystem->Load("St_QA_Maker");
+    gSystem->Load("StUtilities");
+    gSystem->Load("StAnalysisUtilities");
 
 
 // setup chain with IOMaker - can read in .dst.root, .dst.xdf files
@@ -141,8 +145,6 @@ void bfcread_hist_to_ps(
    HU->SetPntrToMaker((StMaker *)IOMk);
 
 // ONLY use StIOMaker in chain 
-//   - not St_QA_Maker
-//   - I'm just using methods from St_QA_Maker...
 // --- now execute chain member functions - 1 event (histograms) only
   IOMk->Init();
   IOMk->Clear();
