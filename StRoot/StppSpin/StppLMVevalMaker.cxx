@@ -1,6 +1,9 @@
 // *-- Author : Jan Balewski 
-// $Id: StppLMVevalMaker.cxx,v 1.5 2001/04/24 21:58:26 balewski Exp $
+// $Id: StppLMVevalMaker.cxx,v 1.6 2001/04/26 18:53:34 balewski Exp $
 // $Log: StppLMVevalMaker.cxx,v $
+// Revision 1.6  2001/04/26 18:53:34  balewski
+// *** empty log message ***
+//
 // Revision 1.5  2001/04/24 21:58:26  balewski
 // *** empty log message ***
 //
@@ -81,10 +84,10 @@ Int_t StppLMVevalMaker::Init(){
 
   he[3]=new TH1F("dz","error of any vertex",100,-5.,5.);
 
-  he[4] =(TH1F*)new TH2F("2dz","dz vs. NchG",50,-0.5,49.5,50,-3.,3.);
-  he[5] =(TH1F*)new TH2F("2dr","dRxy vs. NchG",50,-0.5,49.5,50,.0,6.);
+  he[4] =(TH1F*)new TH2F("2dzvn","dz vs. NchG",50,-0.5,49.5,50,-3.,3.);
+  he[5] =(TH1F*)new TH2F("2drvn","dRxy vs. NchG",50,-0.5,49.5,50,.0,6.);
 
-  he[6] =(TH1F*)new TH2F("2dz","dz vs. zG",50,-0.5,49.5,50,-25.,35.);
+  he[6] =(TH1F*)new TH2F("2dzvz","dz vs. zG",50,-25.,25.,50, -3.,3.);
 
   // h1 = new TH1F("trg_out","Trigger decision",10, -1.5, 8.5);
   //h1->SetXTitle(" trigger ") ;
