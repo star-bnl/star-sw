@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPairCut.h,v 1.6 2000/04/03 16:21:19 laue Exp $
+ * $Id: StHbtPairCut.h,v 1.7 2000/05/11 21:16:40 willson Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,10 @@
  ***************************************************************************
  *
  * $Log: StHbtPairCut.h,v $
+ * Revision 1.7  2000/05/11 21:16:40  willson
+ * myAnalysis pointer changed to type StHbtBaseAnalysis - moved
+ * some methods into StHbtBaseAnalysis class
+ *
  * Revision 1.6  2000/04/03 16:21:19  laue
  * some include files changed
  *
@@ -82,12 +86,11 @@ public:
   ClassDef(StHbtPairCut, 0)
 #endif
   // the following allows "back-pointing" from the CorrFctn to the "parent" Analysis
-  friend class StHbtAnalysis;
-  friend class StHbtLikeSignAnalysis;
-  StHbtAnalysis* HbtAnalysis(){return myAnalysis;};
+  friend class StHbtBaseAnalysis;
+  StHbtBaseAnalysis* HbtAnalysis(){return myAnalysis;};
 
 protected:
-  StHbtAnalysis* myAnalysis;
+  StHbtBaseAnalysis* myAnalysis;
 
 };
 
