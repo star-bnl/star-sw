@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcDetector.cxx,v 2.1 2000/02/23 17:34:08 ullrich Exp $
+ * $Id: StEmcDetector.cxx,v 2.2 2000/05/22 19:21:53 akio Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StEmcDetector.cxx,v $
- * Revision 2.1  2000/02/23 17:34:08  ullrich
- * Initial Revision
+ * Revision 2.2  2000/05/22 19:21:53  akio
+ * Bug fix, add delta into EMcPoint, wider bits for Eta in RawHit
+ *
+ * Revision 2.2  2000/05/22 19:21:53  akio
+ * Bug fix, add delta into EMcPoint, wider bits for Eta in RawHit
  *
  * Revision 2.1  2000/02/23 17:34:08  ullrich
  * Initial Revision
@@ -19,10 +22,10 @@
  **************************************************************************/
 #include "StEmcDetector.h"
 #include "StEmcRawHit.h"
-static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.1 2000/02/23 17:34:08 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.2 2000/05/22 19:21:53 akio Exp $";
 #include "StEmcClusterCollection.h"
 
-static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.1 2000/02/23 17:34:08 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.2 2000/05/22 19:21:53 akio Exp $";
 
 ClassImp(StEmcDetector)
 
@@ -42,12 +45,11 @@ StEmcDetector::StEmcDetector(StDetectorId id, UInt_t n)
 }
 
 Bool_t
-	UInt_t m = hit->module();
-	if (m < mNumberOfModules){
-	    mModules[m].hits().push_back(hit);
-	    return kTRUE;
-	}
-	else return kFALSE;
+StEmcDetector::addHit(StEmcRawHit* hit)
+{
+    if (hit){
+      UInt_t m = hit->module();
+      if (m > 0 && m <= mNumberOfModules){
 	mModules[m-1].hits().push_back(hit);
     else return kFALSE;
       }
@@ -71,8 +73,8 @@ StEmcDetector::numberOfHits() const
     return sum;
 }
 
-    if (i < mNumberOfModules)
-        return &(mModules[i]);
+StEmcModule*
+StEmcDetector::module(UInt_t i)
 {
     if (i > 0 && i <= mNumberOfModules)
         return &(mModules[i-1]);
@@ -80,8 +82,8 @@ StEmcDetector::numberOfHits() const
         return 0;
 }
 
-    if (i < mNumberOfModules)
-        return &(mModules[i]);
+const StEmcModule*
+StEmcDetector::module(UInt_t i) const
 {
     if (i > 0 && i <= mNumberOfModules)
         return &(mModules[i-1]);

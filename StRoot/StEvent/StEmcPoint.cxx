@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcPoint.cxx,v 2.1 2000/03/23 22:24:07 akio Exp $
+ * $Id: StEmcPoint.cxx,v 2.2 2000/05/22 19:21:53 akio Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcPoint.cxx,v $
+ * Revision 2.2  2000/05/22 19:21:53  akio
+ * Bug fix, add delta into EMcPoint, wider bits for Eta in RawHit
+ *
  * Revision 2.1  2000/03/23 22:24:07  akio
  * Initial version of Emc Point, and Inclusion of track pointers
  *
@@ -18,7 +21,7 @@
 #include "StEmcPoint.h"
 #include <iostream.h>
 
-static const char rcsid[] = "$Id: StEmcPoint.cxx,v 2.1 2000/03/23 22:24:07 akio Exp $";
+static const char rcsid[] = "$Id: StEmcPoint.cxx,v 2.2 2000/05/22 19:21:53 akio Exp $";
 
 ClassImp(StEmcPoint)
 
@@ -90,6 +93,15 @@ StEmcPoint::setSizeAtDetector(const StDetectorId id, const Float_t s){
   int i = getDetId(id);
   if(i>=0) mSizeAtDetector[i]=s;
 }
+
+Float_t StEmcPoint::deltaEta() const{return mDelta[0];}
+Float_t StEmcPoint::deltaPhi() const{return mDelta[1];}
+Float_t StEmcPoint::deltaU()   const{return mDelta[0];}
+Float_t StEmcPoint::deltaV()   const{return mDelta[1];}
+void StEmcPoint::setDeltaEta(const Float_t d){mDelta[0]=d;}
+void StEmcPoint::setDeltaPhi(const Float_t d){mDelta[1]=d;}
+void StEmcPoint::setDeltaU(const Float_t d){mDelta[0]=d;}
+void StEmcPoint::setDeltaV(const Float_t d){mDelta[1]=d;}
 
 StPtrVecEmcCluster& 
 StEmcPoint::cluster(const StDetectorId id){

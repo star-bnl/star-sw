@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcRawHit.cxx,v 2.1 2000/02/23 17:34:12 ullrich Exp $
+ * $Id: StEmcRawHit.cxx,v 2.2 2000/05/22 19:21:54 akio Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,13 +10,16 @@
  ***************************************************************************
  *
  * $Log: StEmcRawHit.cxx,v $
+ * Revision 2.2  2000/05/22 19:21:54  akio
+ * Bug fix, add delta into EMcPoint, wider bits for Eta in RawHit
+ *
  * Revision 2.1  2000/02/23 17:34:12  ullrich
  * Initial Revision
  *
  **************************************************************************/
 #include "StEmcRawHit.h"
 
-static const char rcsid[] = "$Id: StEmcRawHit.cxx,v 2.1 2000/02/23 17:34:12 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcRawHit.cxx,v 2.2 2000/05/22 19:21:54 akio Exp $";
 
 ClassImp(StEmcRawHit)
 
@@ -52,8 +55,8 @@ StEmcRawHit::bits(UInt_t bit, UInt_t nbits) const
 void
 StEmcRawHit::setId(StDetectorId d, UInt_t m, UInt_t e, UInt_t s)
 {
-    mId  = UInt_t(d - kBarrelEmcTowerId) << 19;
-    mId += m << 12;
+    mId  = UInt_t(d - kBarrelEmcTowerId) << 20;
+    mId += m << 13;
     mId += e << 4;
     mId += s;
 }
@@ -61,17 +64,27 @@ StEmcRawHit::setId(StDetectorId d, UInt_t m, UInt_t e, UInt_t s)
 StDetectorId
 StEmcRawHit::detector() const
 { 
-    return static_cast<StDetectorId>(bits(19, 4)+kBarrelEmcTowerId); // bits 19-23
+    return static_cast<StDetectorId>(bits(20, 4)+kBarrelEmcTowerId); // bits 20-24
 }
 
 UInt_t
-StEmcRawHit::module() const {return bits(12, 7);}   // bits 12-18
+StEmcRawHit::module() const {return bits(13, 7);}   // bits 13-19
 
 UInt_t
-StEmcRawHit::eta() const {return bits( 4, 8);}   // bits 4-11
+StEmcRawHit::eta() const {return bits( 4, 9);}  // bits 4-12
 
-UInt_t
-StEmcRawHit::sub() const {return bits( 0, 4);}   // bits 0-3
+Int_t
+StEmcRawHit::sub() const {
+  Int_t sub;
+  switch(detector()){
+  case kBarrelSmdEtaStripId:                         // irrelevant case return negative
+  case kEndcapSmdEtaStripId: case kEndcapSmdPhiStripId: 
+    sub = -1; break;
+  default:
+    sub = bits(0, 4);                         // bits 0-3
+  }   
+  return sub;
+}
 
 UInt_t
 StEmcRawHit::adc() const {return mAdc;}   
@@ -87,4 +100,9 @@ StEmcRawHit::setEnergy(const Float_t energy) {mEnergy=energy;}
 
 StObject*
 StEmcRawHit::clone() { return new StEmcRawHit(*this); }
+
+
+
+
+
 
