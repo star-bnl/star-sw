@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.20 2000/06/07 15:06:08 jml Exp $
+ * $Id: EventReader.cxx,v 1.21 2000/06/08 12:44:37 jml Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -22,6 +22,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.21  2000/06/08 12:44:37  jml
+ * Added <assert.h> to fix compile error in offline
+ *
  * Revision 1.20  2000/06/07 15:06:08  jml
  * Changed exit() calls to assert(0) to aid in debugging
  *
@@ -105,7 +108,7 @@
 #include <sys/uio.h>
 #include <unistd.h>
 #include "EventReader.hh"
-
+#include <assert.h>
 
 EventReader *getEventReader(int fd, long offset, int MMap)
 {
