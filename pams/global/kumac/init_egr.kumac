@@ -2,8 +2,20 @@ MACRO init
    
 macro/global/import *
 
-*cd [params]/global/egrpars
-*cd /dui
+cd [params]/global/egrpars
+
+tdm/table/cell/putvalue 'egr_egrpar[0].scenario' 8
+tdm/table/cell/putvalue 'egr_egrpar[0].mxtry'    10
+tdm/table/cell/putvalue 'egr_egrpar[0].minfit'    2
+tdm/table/cell/putvalue 'egr_egrpar[0].prob'    2  2
+tdm/table/cell/putvalue 'egr_egrpar[0].debug'  1 0 0 0 0 0 0 0 0
+tdm/table/cell/putvalue 'egr_egrpar[0].svtchicut' 0
+tdm/table/cell/putvalue 'egr_egrpar[0].usetpc' 1
+tdm/table/cell/putvalue 'egr_egrpar[0].usesvt' 1
+tdm/table/cell/putvalue 'egr_egrpar[0].usevert' 0
+tdm/table/cell/putvalue 'egr_egrpar[0].useglobal' 2
+
+cd /dui
 
 return
 

@@ -122,6 +122,28 @@ endif
 
 message ' run_dst: finished calling dst_point_unpack'
  return
-* **************************************************
+
+***************************************************
+
+macro particle_dst_filler
+
+  macro/global/import *
+
+   message 'Calling particle_dst_filler'
+
+  ami/mod/call particle_dst_filler _
+               [params]/global/particle_dst_param _
+               [evgen]/particle _ 
+               [dst]/dst_track
+
+  if (staf_status(1) .ne. stafcv_ok) then
+        message 'Problem on return from particle_dst_filler'
+  endif
+
+  message 'Finished calling particle_dst_filler'
+
+RETURN
+ 
+****************************************************************
 
 

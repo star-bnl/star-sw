@@ -44,7 +44,24 @@ RETURN
 * ***************************************************************
 
 
+macro particle_dst_filler
 
+ macro/global/import *
+
+cd [params]/global
+
+tdm/table/cell/putvalue 'particle_dst_param[0].switch_neutrals' 0
+tdm/table/cell/putvalue 'particle_dst_param[0].pt_min'         0.001
+tdm/table/cell/putvalue 'particle_dst_param[0].pt_max'         1000.
+tdm/table/cell/putvalue 'particle_dst_param[0].eta_min'        -2.0
+tdm/table/cell/putvalue 'particle_dst_param[0].eta_max'         2.0
+tdm/table/cell/putvalue 'particle_dst_param[0].phi_min'         0.0
+tdm/table/cell/putvalue 'particle_dst_param[0].phi_max'       360.0
+
+ cd /dui
+ return
+
+* ***************************************************************
 
 
 
