@@ -51,12 +51,12 @@ memset(&row,0,tableSet->GetRowSize());
     row.adjustedAirPressureEast   =    1013.25; // temperature adjusted air pressure for FTPC East 
     row.minPressure               =     990.;   // minimum barometric pressure (in hPa);
     row.maxPressure               =    1040.;   // maximum barometric pressure (in hPa);
-    row.gasTemperatureWest        =      25.8;  // temperature of gas FTPC East ;
-                                                // initially set to default 
-    row.gasTemperatureEast        =      25.1;  // temperature of gas FTPC East ;
-                                                // initially set to default 
-    row.minGasTemperature         =      23.0;  // maximum gas temperature (in centigrade);
-    row.maxGasTemperature         =      30.0;  // maximum gas temperature (in centigrade);
+    row.gasTemperatureWest        =       0.0;  // temperature of gas FTPC East ;
+                                                // initialzed to ftpcGas->defaultTemperatureWest  
+    row.gasTemperatureEast        =       0.0;  // temperature of gas FTPC East ;
+                                                // initialzed to ftpcGas->defaultTemperatureEast
+    row.minGasTemperature         =      20.0;  // maximum gas temperature (in centigrade);
+    row.maxGasTemperature         =      35.0;  // maximum gas temperature (in centigrade);
     
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
