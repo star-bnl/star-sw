@@ -6,16 +6,30 @@ Double_t St_tpcCorrectionC::CalcCorrection(Int_t i,Double_t x) {
   tpcCorrection_st *cor =  ((St_tpcCorrection *) Table())->GetTable() + i;
   if (cor) {
     Int_t N = TMath::Abs(cor->npar);
-    Double_t X = x;
-    if (cor->npar  < 0) X = TMath::Exp(x);
-    if (N > 0) {
-      if (cor->min < cor->max) {
-	if (X < cor->min) X = cor->min;
-	if (X > cor->max) X = cor->max;
-      }
+    if (! cor->type) {
+      Double_t X = x;
+      if (cor->npar  < 0) X = TMath::Exp(x);
       if (N > 0) {
-	Sum = cor->a[N-1];
-	for (int n = N-2; n>=0; n--) Sum = X*Sum + cor->a[n];
+	if (cor->min < cor->max) {
+	  if (X < cor->min) X = cor->min;
+	  if (X > cor->max) X = cor->max;
+	}
+	if (N > 0) {
+	  Sum = cor->a[N-1];
+	  for (int n = N-2; n>=0; n--) Sum = X*Sum + cor->a[n];
+	}
+      }
+    } else {
+      if (cor->type == 10) {// ADC correction offset + poly for ADC
+	Double_t X = TMath::Log(x);
+	if (N > 0) {
+	  Sum = cor->a[N-1];
+	  for (int n = N-2; n>=0; n--) Sum = X*Sum + cor->a[n];
+	}
+	Double_t Y = TMath::Log(1. + cor->OffSet/x);
+	Sum += Y;
+	Sum  = TMath::Exp(Sum);
+	Sum *= x;
       }
     }
   }
