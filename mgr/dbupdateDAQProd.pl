@@ -15,6 +15,7 @@ use Net::FTP;
 
 require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
 require "/afs/rhic/star/packages/DEV00/mgr/dbOnLineSetup.pl";
+#require "dbOnLineSetup.pl";
 
 my $debugOn=0;
 
@@ -34,8 +35,8 @@ my @SetD = (
 );
 
 my @SetS = (
-             "daq/2000/06",
-             "daq/2000/07",
+             "2000/06",
+             "2000/07",
 );
 
 my $recoDir = ("daq");
@@ -221,9 +222,9 @@ print "Total daq reco files: $nDiskFiles\n";
 
 &StDbProdConnect();
 
-for ($ll = 0; $ll<scalar(@SetS); $ll++) {
+for ($ll = 0; $ll < scalar(@SetS); $ll++) {
 
- $sql="SELECT fName, Nevents FROM $FileCatalogT WHERE path like '%SetS[$ll]%' AND fName like '%daq' AND Nevents = 0";
+ $sql="SELECT fName, Nevents FROM $FileCatalogT WHERE path like '%$SetS[$ll]' AND fName like '%daq' AND Nevents = 0 ";
 
   $cursor =$dbh->prepare($sql)
    || die "Cannot prepare statement: $DBI::errstr\n";
