@@ -32,7 +32,7 @@
 using namespace std;
 
 //Sti
-#include "StiKTNVertIterator.h"
+#include "StiKTNIterator.h"
 #include "StiIOBroker.h"
 #include "StiHit.h"
 #include "StiDetector.h"
@@ -673,7 +673,7 @@ void StiKalmanTrackFinder::reserveHits(StiKalmanTrackNode * node)
     // (when there is a hit) is set to "used".
     
     //trackMes <<"SKTF::reserveHits(StiKalmanTrackNode * node) - Beginning"<<endl;
-    StiKTNVertIterator it(node);
+    StiKTNForwardIterator it(node);
     for_each( it, it.end(), SetHitUsed() );
 }
 
