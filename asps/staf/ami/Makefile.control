@@ -5,15 +5,19 @@
 ######################################################################
 #
 # Specify ASPs and PAMs upon which this package depends.
-ASPS := ami dio dui
-PAMS := pam
+ASPS := ami dio dui tdm spx soc
+#ASPS := tbr ami dio dui tdm spx soc
+#PAMS := pam
 #
 # Specify special user libraries against which to link.
 #USER_LIBS := -ldsu -ldsl -lasu
 #
 # Choose flags controlling make.
 DEBUG := TRUE
-#SHARE := TRUE
+IRIX := IRIX
+ifneq ($(IRIX),$(shell uname))
+SHARE := FALSE
+endif
 #MOTIF := TRUE
 #
 # Specify which CERN libraries against which to link.

@@ -38,6 +38,9 @@ public:
    virtual char * listing();
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- OVERRIDE VIRTUALS
+   virtual unsigned char implementsInterface (const char * iface);
+
    virtual STAFCV_T call (TABLE_SEQ_T& tbl);
 
    virtual STAFCV_T init ();
@@ -48,12 +51,19 @@ public:
    virtual AMI_IO_MODE_T tableMode (long ntbl);
 
 protected:
-//:----------------------------------------------- PRIV VARIABLES     --
+//:----------------------------------------------- PROT VARIABLES     --
    long myRank;		// storage of PAM function rank (# of tables)
    char ** myTblSpecs;	// storage of table spec.s
    FNC_PTR_T myPamFtn;	// storage of PAM function pointer
 
+//:----------------------------------------------- PROT FUNCTIONS     --
+// **NONE**
+
+private:
+//:----------------------------------------------- PRIV VARIABLES     --
+// **NONE**
 //:----------------------------------------------- PRIV FUNCTIONS     --
+// **NONE**
 
 };
 
@@ -69,7 +79,10 @@ public:
 //:**NONE**
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- OVERRIDE VIRTUALS
+   virtual unsigned char implementsInterface (const char * iface);
    virtual char * list ();
+
    virtual STAFCV_T callInvoker (const char * name
 		, const STRING_SEQ_T& tables);
 
