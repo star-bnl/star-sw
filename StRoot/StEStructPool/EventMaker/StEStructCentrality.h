@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCentrality.h,v 1.3 2004/06/09 22:39:09 prindle Exp $
+ * $Id: StEStructCentrality.h,v 1.4 2004/06/25 03:13:41 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -23,13 +23,16 @@ class StEStructCentrality {
   int  mnumpts, mnumptcents;
 
   static StEStructCentrality* mInstance;
-  StEStructCentrality(): mcentralities(0), mnumCentralities(0) {};
+  StEStructCentrality(): mcentralities(0), mnumCentralities(0), mpts(0), mptcents(0),mnumpts(0), mnumptcents(0) {};
 
  public:
 
   static StEStructCentrality* Instance();
 
   virtual ~StEStructCentrality();
+
+  double minCentrality(int id);
+  double maxCentrality(int id);
 
   int centrality( double impact );
   int ptIndex(const double pt);
@@ -46,15 +49,29 @@ class StEStructCentrality {
   double ptLimit( const int ptIndex );
   double ptCentralityLimit( const int ptCent );
 
-
   ClassDef(StEStructCentrality,1)
 };
+
+
+
+inline double StEStructCentrality::minCentrality(int id){
+  if(mcentralities && id>=0 && id<mnumCentralities ) return mcentralities[id];
+  return -1;
+}
+
+inline double StEStructCentrality::maxCentrality(int id){
+  if(mcentralities && id>=0 && id<(mnumCentralities-1) ) return mcentralities[id+1]-1;
+  return -1;
+}
 
 #endif
 
 /***********************************************************************
  *
  * $Log: StEStructCentrality.h,v $
+ * Revision 1.4  2004/06/25 03:13:41  porter
+ * updated centrality methods and put a test in StEStructEvent.cxx
+ *
  * Revision 1.3  2004/06/09 22:39:09  prindle
  * Expanded centrality class.
  * Call to set centrality from event reader.
