@@ -1,5 +1,10 @@
-* $Id: pixlgeo.g,v 1.9 2004/01/29 19:58:12 potekhin Exp $
+* $Id: pixlgeo.g,v 1.10 2004/04/21 22:45:57 potekhin Exp $
 * $Log: pixlgeo.g,v $
+* Revision 1.10  2004/04/21 22:45:57  potekhin
+* Killed the extraneous line with angular offset of 90
+* for the first ladder, which was a typo and the actual
+* angle should be slightly different,  89.28
+*
 * Revision 1.9  2004/01/29 19:58:12  potekhin
 * Corrected a typo in the ladder mother volume
 * material -- it's not silicon but air
@@ -83,7 +88,6 @@ Module PIXLGEO is the geometry of the STAR pixel detector
       aOffset    =  89.28      ! Angular offset
 *
       pOffset    =  0.0        ! Position offset (shift)
-      aOffset    =  90.0       ! Angular offset
    EndFill
 
    Fill PIXG                   ! Pixel detector data
