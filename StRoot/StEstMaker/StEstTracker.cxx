@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.cxx,v 1.10 2001/07/15 20:31:31 caines Exp $ 
+ * $Id: StEstTracker.cxx,v 1.11 2002/01/31 21:10:00 caines Exp $ 
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.cxx,v $
+ * Revision 1.11  2002/01/31 21:10:00  caines
+ * Open est cuts up
+ *
  * Revision 1.10  2001/07/15 20:31:31  caines
  * Fixes from Insure++ debugging
  *
@@ -112,12 +115,13 @@ Int_t StEstTracker::DoTracking() {
   for(mSuperPass=0; mSuperPass<mNSuperPass; mSuperPass++) {
     if (mSuperPass>0) {
       for (mPass=0;mPass<mNPass;mPass++) {
-	mParams[mPass]->geomcutl[2] = 0.5;
-	mParams[mPass]->geomcutl[1] = 0.2;
-	mParams[mPass]->geomcutl[0] = 0.2;
-	mParams[mPass]->geomcutw[2] = 0.5;
-	mParams[mPass]->geomcutw[1] = 0.2;
-	mParams[mPass]->geomcutw[0] = 0.2;
+	cout<< " Setting params here" << endl;
+	mParams[mPass]->geomcutl[2] = 5.;
+	mParams[mPass]->geomcutl[1] = 5.;
+	mParams[mPass]->geomcutl[0] = 5.;
+	mParams[mPass]->geomcutw[2] = 5.;
+	mParams[mPass]->geomcutw[1] = 5.;
+	mParams[mPass]->geomcutw[0] = 5.;
       }
     }
     FlagTPCTracksSP(mSuperPass);
