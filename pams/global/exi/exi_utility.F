@@ -591,7 +591,8 @@ C---------------------------------------------------------------------
       call circle_param(track,xc,r)
       call exi_project_track(xc,r,vertex,xn)
       call update_track_param(xc,r,xn,track,trk)
-      r_min=sqrt( xn(1)**2+xn(2)**2+trk(3)**2 )
+      r_min=sqrt( (xn(1)-vertex(1))**2+(xn(2)-vertex(2))**2+
+     +     (trk(3)-vertex(3))**2 )
 
  999  RETURN
       END
