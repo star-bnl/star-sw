@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.21 2004/02/12 17:39:15 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.22 2004/03/15 23:32:14 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.22  2004/03/15 23:32:14  genevb
+// Add primary vertex check for event classes to QA Shift set
+//
 // Revision 2.21  2004/02/12 17:39:15  genevb
 // Separate MinBias histos
 //
@@ -244,6 +247,7 @@
   "StELMQaPointBarrelS",
   "StELMQaPointPlaneF",
   "StELMQaRichTot",
+  "StELMQaNullPrimVtx",
   "StELMQaGtrkZfTS",
   "StELMQaGtrkPhifTS",
   "StELMQaGtrkZfT",
@@ -389,6 +393,7 @@
   "StEMMQaPointBarrelS",
   "StEMMQaPointPlaneF",
   "StEMMQaRichTot",
+  "StEMMQaNullPrimVtx",
   "StEMMQaGtrkZfTS",
   "StEMMQaGtrkPhifTS",
   "StEMMQaGtrkZfT",
@@ -534,6 +539,7 @@
   "StEHMQaPointBarrelS",
   "StEHMQaPointPlaneF",
   "StEHMQaRichTot",
+  "StEHMQaNullPrimVtx",
   "StEHMQaGtrkZfTS",
   "StEHMQaGtrkPhifTS",
   "StEHMQaGtrkZfT",
@@ -679,6 +685,7 @@
   "StECLQaPointBarrelS",
   "StECLQaPointPlaneF",
   "StECLQaRichTot",
+  "StECLQaNullPrimVtx",
   "StECLQaGtrkZfTS",
   "StECLQaGtrkPhifTS",
   "StECLQaGtrkZfT",
@@ -824,6 +831,7 @@
   "StEHTQaPointBarrelS",
   "StEHTQaPointPlaneF",
   "StEHTQaRichTot",
+  "StEHTQaNullPrimVtx",
   "StEHTQaGtrkZfTS",
   "StEHTQaGtrkPhifTS",
   "StEHTQaGtrkZfT",
@@ -969,6 +977,7 @@
   "StEMBQaPointBarrelS",
   "StEMBQaPointPlaneF",
   "StEMBQaRichTot",
+  "StEMBQaNullPrimVtx",
   "StEMBQaGtrkZfTS",
   "StEMBQaGtrkPhifTS",
   "StEMBQaGtrkZfT",
