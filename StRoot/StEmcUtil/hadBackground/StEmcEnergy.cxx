@@ -23,8 +23,8 @@
 #include "SystemOfUnits.h"
 #include "StarClassLibrary/StParticleTable.hh"
 #include "StarClassLibrary/StParticleDefinition.hh"
-#include "StEmcGeom.h"
-#include "StEmcPosition.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEmcUtil/projection/StEmcPosition.h"
 #include <math.h>
 #include <TFile.h>
 
