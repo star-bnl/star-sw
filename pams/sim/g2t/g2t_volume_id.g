@@ -20,6 +20,7 @@
       COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
       structure  TPCG  {version}
       Structure  BTOG  {version, choice }
+      Structure  CALG  {version, Nmodule(2) }
       logical          first/.true./
 *c - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 *
@@ -28,6 +29,7 @@
           call RBPUSHD
           USE  /DETM/TPCE/TPCG
           USE  /DETM/BTOF/BTOG
+          USE  /DETM/CALB/CALG
           call RBPOPD
           print *,' g2t_volume_id: TPC version =',tpcg_version
           print *,'              : TOF version =',btog_version,
@@ -122,46 +124,52 @@
 *6*                                barrel calorimeter - K.Shester
         if (numbv(3)>0) then
           rileft=numbv(1)
-          eta=idigi(1)+1
-          If (rileft==1) then
-            phi=60-numbv(2)+1
-            phi_sub=idigi(2)
-            If (phi_sub==0) phi_sub=2 
+	  phi   =numbv(2)
+	  superl=numbv(3)
+	else
+	  if(CALG_Nmodule(1)==0) then
+            rileft=2
           else
-            phi=60+numbv(2)
-            phi_sub=idigi(2)+1
-          endif     
-          superl=numbv(3)
-        else
-          rileft=0
-          eta=idigi(1)+1
-          phi=60+numbv(1)
-          phi_sub=idigi(2)+1
+            rileft=1
+	  endif
+          phi   =numbv(1)
           superl=numbv(2)
+	endif
+        eta=idigi(1)+1
+        phi_sub=idigi(2)
+        If (rileft==1) then
+          phi=60-phi+1
+          If (phi_sub==0) phi_sub=2
+        else
+          phi=60+phi
+          phi_sub=phi_sub+1
         endif
         volume_id=10000000*rileft+100000*eta+100*phi+
      +                            10*phi_sub+superl
 
       else If (Csys=='smd') then
 *7*
-         if (numbv(3)>0) then
-	  rileft=numbv(1) 
-          eta=idigi(2)+1
-          If (rileft==1) then
-            phi=60-numbv(2)+1
-          else
-            phi=60+numbv(2)
-          endif     
-          forw_back=numbv(3)
-          strip=idigi(3)+1
-	else
-	  rileft=0 
-          eta=idigi(1)+1
-          phi=60+numbv(1)
-          forw_back=numbv(2)
-          strip=idigi(2)+1
-	endif
+	 if (numbv(3)>0) then
+           rileft   =numbv(1)
+	   phi      =numbv(2)
+	   forw_back=numbv(3)
+	 else
+           if(CALG_Nmodule(1)==0) then
+             rileft=2
+           else
+             rileft=1
+           endif
+           phi      =numbv(1)
+           forw_back=numbv(2)
+        endif
+	eta=idigi(2)+1
+        strip=idigi(3)+1
         If (forw_back==4) forw_back=3
+        If (rileft==1) then
+          phi=60-phi+1
+        else
+          phi=60+phi
+        endif     
         volume_id=100000000*rileft+1000000*eta+1000*phi+
      +                             100*forw_back+strip
 
