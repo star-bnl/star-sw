@@ -1,5 +1,8 @@
-// $Id: QAhlist_logx.h,v 2.1 2001/05/23 00:17:58 lansdell Exp $
+// $Id: QAhlist_logx.h,v 2.2 2001/05/25 16:31:20 lansdell Exp $
 // $Log: QAhlist_logx.h,v $
+// Revision 2.2  2001/05/25 16:31:20  lansdell
+// more updates to qa shift histograms
+//
 // Revision 2.1  2001/05/23 00:17:58  lansdell
 // introduction of file
 //
@@ -13,4 +16,5 @@
  "QaGtrkRT",
  "QaGtrkRTS",
  "QaPtrkRT",
- "QaPtrkRTS"
+ "QaPtrkRTS",
+ "QaDedxBBTTS"

@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.h,v 2.3 2001/05/23 00:14:52 lansdell Exp $
+// $Id: StEventQAMaker.h,v 2.4 2001/05/25 16:31:21 lansdell Exp $
 // $Log: StEventQAMaker.h,v $
+// Revision 2.4  2001/05/25 16:31:21  lansdell
+// more updates to qa shift histograms
+//
 // Revision 2.3  2001/05/23 00:14:52  lansdell
 // more changes for qa_shift histograms
 //
@@ -24,7 +27,6 @@
 #define STAR_StEventQAMaker
 
 #include "StQAMakerBase.h"
-#include "StarClassLibrary/BetheBloch.h"
 
 class StEvent;
 class HitHistograms;
@@ -36,7 +38,6 @@ class StEventQAMaker : public StQAMakerBase {
  
   StEvent *event;          //! pointer to current event
   HitHistograms *mHitHist; //!
-  BetheBloch betheBloch;   //! Bethe-Bloch lookup table
   Int_t n_prim_good;       //!
   Int_t n_glob_good;       //!
  
@@ -65,7 +66,7 @@ class StEventQAMaker : public StQAMakerBase {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.3 2001/05/23 00:14:52 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.4 2001/05/25 16:31:21 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEventQAMaker,0)   //StAF chain virtual base class for Makers
     };
