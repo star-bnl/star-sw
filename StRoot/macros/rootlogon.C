@@ -1,5 +1,8 @@
-// $Id: rootlogon.C,v 1.13 1999/08/11 13:30:31 fisyak Exp $
+// $Id: rootlogon.C,v 1.14 1999/09/20 23:03:04 fisyak Exp $
 // $Log: rootlogon.C,v $
+// Revision 1.14  1999/09/20 23:03:04  fisyak
+// Set default O0
+//
 // Revision 1.13  1999/08/11 13:30:31  fisyak
 // Add root4star usage statistics
 //
@@ -38,7 +41,8 @@
 {
 #pragma optimize 0
   //    gInterpreter->ProcessLine(".O0");
-    G__loadfile("iostream.h");
+    gROOT->ProcessLine(".O0"); 
+  //    G__loadfile("iostream.h");
     TString gPrompt =  gSystem->BaseName(gROOT->GetApplication()->Argv(0));
     gPrompt += " [%d] ";
 
