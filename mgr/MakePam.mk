@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.88 1999/03/04 00:18:26 fisyak Exp $
+# $Id: MakePam.mk,v 1.89 1999/03/06 20:13:30 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.89  1999/03/06 20:13:30  fisyak
+# fix cleanup
+#
 # Revision 1.88  1999/03/04 00:18:26  fisyak
 # Add svt library for global
 #
@@ -338,7 +341,7 @@ ifneq (,$(strip $(FILES_O) $(FILES_OG)))
 LIB_PKG := $(LIB_DIR)/lib$(DOMAIN).$(A)
 ifndef LIBRARIES
   LIBRARIES := $(LIB_PKG)	               
-ifneq ($(STAR_PATH),$(OUT_DIR))   
+ifneq ($(STAR_PATH),$(OUT_DIR))
   ifneq ($(LIB_PKG),)
     LIBRARIES += $(wildcard  $(STAR_LIB)/lib$(PKG).$(A))
   endif                           
@@ -618,7 +621,7 @@ else #/* NT */
 endif #/* NT */
 clean_lib:
 ifndef NT
-	rm -rf $(SL_PKG) $(LIB_PKG)
+	rm -rf $(DEP_DIR) $(OBJ_DIR) $(wildcard $(LIB_PKG) $(SL_PKG))
 else #/* NT */
 	for %i in ($(subst /,\\,$(subst \,/,$(SL_PKG) $(LIB_PKG)))) if exist %i\\. $(RMDIR)  %i
 endif #/* NT */
