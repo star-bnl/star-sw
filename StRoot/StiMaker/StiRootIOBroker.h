@@ -69,6 +69,18 @@ public:
 
     virtual void setLTSFSeedLength(unsigned int);
     virtual unsigned int ltsfSeedLength() const;
+
+    virtual void setLTSFExtrapZWindow(double);
+    virtual double ltsfExtrapZWindow() const;
+    
+    virtual void setLTSFExtrapYWindow(double);
+    virtual double ltsfExtrapYWindow() const;
+    
+    virtual void setLTSFExtrapMaxSkipped(unsigned int);
+    virtual unsigned int ltsfExtrapMaxSkipped() const;
+
+    virtual void setLTSFExtrapLength(unsigned int);
+    virtual unsigned int ltsfExtrapLength() const;
     
     virtual void setLTSFUseVertex(bool);
     virtual bool ltsfUseVertex() const;
@@ -145,6 +157,10 @@ protected:
     double mLTSFZWindow;
     double mLTSFYWindow;
     unsigned int mLTSFSeedLength;
+    double mLTSFExtrapZWindow;
+    double mLTSFExtrapYWindow;
+    unsigned int mLTSFExtrapMaxSkipped;
+    unsigned int mLTSFExtrapLength;
     bool mLTSFUseVertex;
     bool mLTSFDoHelixFit;
 
@@ -313,6 +329,50 @@ inline void StiRootIOBroker::setLTSFSeedLength(unsigned int val)
 inline unsigned int StiRootIOBroker::ltsfSeedLength() const
 {
     return mLTSFSeedLength;
+}
+
+inline void StiRootIOBroker::setLTSFExtrapZWindow(double val)
+{
+    mLTSFExtrapZWindow=val;
+    notify();
+}
+
+inline double StiRootIOBroker::ltsfExtrapZWindow() const
+{
+    return mLTSFExtrapZWindow;
+}
+
+inline void StiRootIOBroker::setLTSFExtrapYWindow(double val)
+{
+    mLTSFExtrapYWindow = val;
+    notify();
+}
+
+inline double StiRootIOBroker::ltsfExtrapYWindow() const
+{
+    return mLTSFExtrapYWindow;
+}
+
+inline void StiRootIOBroker::setLTSFExtrapMaxSkipped(unsigned int val)
+{
+    mLTSFExtrapMaxSkipped = val;
+    notify();
+}
+
+inline unsigned int StiRootIOBroker::ltsfExtrapMaxSkipped() const
+{
+    return mLTSFExtrapMaxSkipped;
+}
+
+inline void StiRootIOBroker::setLTSFExtrapLength(unsigned int val)
+{
+    mLTSFExtrapLength=val;
+    notify();
+}
+
+inline unsigned int StiRootIOBroker::ltsfExtrapLength() const
+{
+    return mLTSFExtrapLength;
 }
 
 inline void StiRootIOBroker::setLTSFUseVertex(bool val)
