@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.12 2000/06/25 23:51:03 fisyak Exp $
+// $Id: St_trg_Maker.cxx,v 1.13 2000/07/13 18:48:23 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.13  2000/07/13 18:48:23  ward
+// Fixed ZDC indices according to email from Javier.
+//
 // Revision 1.12  2000/06/25 23:51:03  fisyak
 // Replace assert by return of kStErr
 //
@@ -288,9 +291,9 @@ void St_trg_Maker::ZdcDaq(St_dst_TrgDet *dst1) {
     tt->adcZDC[i]=GraceSlick->TrgSum.DSM.ZDC[i];
     tt->tdcZDC[i]=0;
   }
-  tt->adcZDCEast=GraceSlick->TrgSum.DSM.ZDC[3];
-  tt->adcZDCWest=GraceSlick->TrgSum.DSM.ZDC[7];
-  tt->adcZDCsum=GraceSlick->TrgSum.DSM.ZDC[3]+GraceSlick->TrgSum.DSM.ZDC[7];
+  tt->adcZDCEast=GraceSlick->TrgSum.DSM.ZDC[4];
+  tt->adcZDCWest=GraceSlick->TrgSum.DSM.ZDC[0];
+  tt->adcZDCsum=GraceSlick->TrgSum.DSM.ZDC[4]+GraceSlick->TrgSum.DSM.ZDC[0];
 }
 void St_trg_Maker::VpdSim(St_dst_TrgDet *dst1) {
   int i;
