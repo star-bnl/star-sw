@@ -29,9 +29,10 @@ using std::string;
 #include "StiCodedDetectorBuilder.h"
 
 StiCodedDetectorBuilder::StiCodedDetectorBuilder(){
-  init();
-  m_messenger << 
-      "################################StiCodedDetectorBuilder()" << endl;
+    cout <<"StiCodedDetectorBuilder::StiCodedDetectorBuilder()"<<endl;
+    init();
+    m_messenger << 
+	"################################StiCodedDetectorBuilder()" << endl;
 }
 
 StiCodedDetectorBuilder::~StiCodedDetectorBuilder(){
@@ -40,13 +41,20 @@ StiCodedDetectorBuilder::~StiCodedDetectorBuilder(){
 }
 
 void StiCodedDetectorBuilder::init(){
-
-  buildMaterials();
-  buildShapes();
-  buildDetectors();
-
-  mDetectorIterator = mDetectorMap.begin();
-
+    
+    cout <<"StiCodedDetectorBuilder::init()"<<endl;
+    cout <<"Build Materiasl"<<endl;
+    buildMaterials();
+    cout <<"Done building materials"<<endl;
+    cout <<"Build Shapes"<<endl;
+    buildShapes();
+    cout <<"Done Building shapes"<<endl;
+    cout <<"Build Detector"<<endl;
+    buildDetectors();
+    cout <<"Done Building Detectors"<<endl;
+    
+    mDetectorIterator = mDetectorMap.begin();
+  
 } // init()
 
 
@@ -78,18 +86,26 @@ void StiCodedDetectorBuilder::buildMaterials(){
 void StiCodedDetectorBuilder::buildShapes()
 {
     m_messenger <<"StiCodedDetectorBuilder::buildShapes()"<<endl;
-  char szName[100];
-
-  //---------------------------------------------------------------------------
-  // tpc
-  //---------------------------------------------------------------------------
-  StTpcPadPlaneI *pPadPlane = gStTpcDb->PadPlaneGeometry();
-  StTpcDimensionsI *pDimensions = gStTpcDb->Dimensions();
-
-  int nPadrows = pPadPlane->numberOfRows();
-  int nInnerPadrows = pPadPlane->numberOfInnerRows();
-  for(int iPadrow = 1; iPadrow<=nPadrows; iPadrow++){
-    StiPlanarShape *pShape = new StiPlanarShape;
+    cout <<"StiCodedDetectorBuilder::buildShapes()"<<endl;
+    char szName[100];
+    
+    //---------------------------------------------------------------------------
+    // tpc
+    //---------------------------------------------------------------------------
+    cout <<"Build Tpc Shapes"<<endl;
+    if (!gStTpcDb) {
+	cout <<"StiCodedDetectorBuilder::buildShapes().  ERROR:\t"
+	     <<"null gStTpcDb.  Abort"<<endl;
+	return;
+    }
+    
+    StTpcPadPlaneI *pPadPlane = gStTpcDb->PadPlaneGeometry();
+    StTpcDimensionsI *pDimensions = gStTpcDb->Dimensions();
+	
+    int nPadrows = pPadPlane->numberOfRows();
+    int nInnerPadrows = pPadPlane->numberOfInnerRows();
+    for(int iPadrow = 1; iPadrow<=nPadrows; iPadrow++){
+	StiPlanarShape *pShape = new StiPlanarShape;
     
     if(iPadrow<nInnerPadrows){
       pShape->setThickness(pPadPlane->innerSectorPadLength());
@@ -107,11 +123,12 @@ void StiCodedDetectorBuilder::buildShapes()
     mShapeMap.insert( shapeMapValType(key, pShape) );
 
   } // for iPadrow
+    cout <<"Done Building Tpc Shapes"<<endl;
   
   //---------------------------------------------------------------------------
   // svt
   //---------------------------------------------------------------------------
-  
+    cout <<"Build Svt Shapes"<<endl;
   // get the configuration & geometry tables
   StiGeometryTransform *pGeometryTransform = StiGeometryTransform::instance();
   StSvtConfig *pSvtConfig = pGeometryTransform->getSvtConfig();
@@ -147,7 +164,7 @@ void StiCodedDetectorBuilder::buildShapes()
     mShapeMap.insert( shapeMapValType(key2, pShape) );
 
   } // for iLayer
-  
+  cout <<"Done Building Svt Shapes"<<endl;
   //---------------------------------------------------------------------------
   // ifc
   //---------------------------------------------------------------------------
@@ -156,6 +173,7 @@ void StiCodedDetectorBuilder::buildShapes()
   // in xy and runs the whole length of the IFC.  This makes for easy
   // (we hope) transition from padrow 1.
 
+  cout <<"Build IFC Shapes"<<endl;
   StiCylindricalShape *pShape = new StiCylindricalShape;
 
   pShape->setThickness(1.27); 
@@ -166,6 +184,7 @@ void StiCodedDetectorBuilder::buildShapes()
   NameMapKey key("Ifc/Nomex");
   mShapeMap.insert( shapeMapValType(key, pShape) );
 
+  cout <<"Done building IFC Shapes"<<endl;
 } // buildShapes()
 
 void StiCodedDetectorBuilder::buildDetectors(){

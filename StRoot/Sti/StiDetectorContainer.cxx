@@ -256,7 +256,10 @@ StiDetectorContainer::buildDetectors(StiObjectFactoryInterface<StiDetectorNode>*
 				     StiObjectFactoryInterface<StiDetector>*
 				     detfactory)
 {
+    cout <<"StiDetectorContainer::buildDetectors"<<endl;
+    cout <<"Make builder"<<endl;
     StiDetectorTreeBuilder mybuilder;
+    cout <<"Use builder"<<endl;
     mroot = mybuilder.build(nodefactory, detfactory);
 
     //Set region to midrapidity, hard-coded for now, update later to allow for other regions
@@ -276,6 +279,7 @@ StiDetectorContainer::buildDetectors(StiObjectFactoryInterface<StiDetectorNode>*
     reset();
 
     //print();
+    cout <<"Done"<<endl;
     
     return;
 }

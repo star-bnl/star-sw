@@ -85,7 +85,8 @@ StiMaker::StiMaker(const Char_t *name) : StMaker(name),
 					 mtracker(0),
 					 //Members
 					 mevent(0), mMcEvent(0), mMcEventMaker(0),
-					 mAssociationMaker(0)
+					 mAssociationMaker(0),
+					 mBuilt(false)
 {
     cout <<"StiMaker::StiMaker()"<<endl;
     sinstance = this;
@@ -161,26 +162,29 @@ StiMaker::~StiMaker()
 
 void StiMaker::Clear(const char*)
 {
-    //Clear HitContainer
-    mhitstore->clear();
-
-    //Reset DetectorContainer
-    StiDetectorContainer::instance()->reset();
-    
-    //Reset HitFactory
-    mhitfactory->reset();
-
-    //Reset EvaluableTrackFactory
-    mtrackfactory->reset();
-    mktracknodefactory->reset();
-
-    if (StiIOBroker::instance()->useGui()) {
-	//Reset DisplayManager
-	mdisplay->reset();
+    if (mBuilt) {
+	
+	//Clear HitContainer
+	mhitstore->clear();
+	
+	//Reset DetectorContainer
+	StiDetectorContainer::instance()->reset();
+	
+	//Reset HitFactory
+	mhitfactory->reset();
+	
+	//Reset EvaluableTrackFactory
+	mtrackfactory->reset();
+	mktracknodefactory->reset();
+	
+	if (StiIOBroker::instance()->useGui()) {
+	    //Reset DisplayManager
+	    mdisplay->reset();
+	}
+	
+	//Clear the track store
+	mtrackstore->clear();
     }
-
-    //Clear the track store
-    mtrackstore->clear();
     
     StMaker::Clear();
 }
@@ -192,105 +196,114 @@ Int_t StiMaker::Finish()
 
 Int_t StiMaker::Init()
 {
-    Messenger::init();
-    Messenger::setRoutingMask(0);
-    //Messenger::instance()->setRoutingMask(0); //turn off all streams
-    //Messenger::instance()->setRoutingBits(MessageType::kHitMessage);
+    return kStOk;
+}
 
-    //The IOBroker
-    StiIOBroker* stiIO = StiIOBroker::instance();
-    cout <<"\n\n ------------------- StiIOBroker ----------------------- \n\n"<<*stiIO<<endl;
+Int_t StiMaker::InitRun(int run)
+{
+    if (!mBuilt) {
+	
+	mBuilt=true;
 
-    //The Display
-    if (StiIOBroker::instance()->useGui()) {
-	mdisplay = StiDisplayManager::instance();
-	//Must come before anything that you want to be drawn
-	mdisplay->cd();
-    }
+	Messenger::init();
+	Messenger::setRoutingMask(0);
+	//Messenger::instance()->setRoutingMask(0); //turn off all streams
+	//Messenger::instance()->setRoutingBits(MessageType::kHitMessage);
 
-    if (stiIO->simulated()==true) {
-	StiEventAssociator::instance(mAssociationMaker);
-    }
+	//The IOBroker
+	StiIOBroker* stiIO = StiIOBroker::instance();
+	cout <<"\n\n ------------------- StiIOBroker ----------------------- \n\n"<<*stiIO<<endl;
+
+	//The Display
+	if (StiIOBroker::instance()->useGui()) {
+	    mdisplay = StiDisplayManager::instance();
+	    //Must come before anything that you want to be drawn
+	    mdisplay->cd();
+	}
+
+	if (stiIO->simulated()==true) {
+	    StiEventAssociator::instance(mAssociationMaker);
+	}
     
-    //The hit container
-    if (StiIOBroker::instance()->useGui()) {
-	mhitstore = new StiRootDrawableHitContainer();
-    }
-    else {
-	mhitstore = new StiHitContainer();
-    }
-
-    //The track store
-    mtrackstore = StiTrackContainer::instance();
-
-    //The track merger
-    mTrackMerger = new StiLocalTrackMerger(mtrackstore);
-
-    //The Hit Factory
-    mhitfactory = new StiHitFactory("HitFactory");
-    mhitfactory->setIncrementalSize(50000); //Allocate in chunks of 50k hits
-    mhitfactory->setMaxIncrementCount(10);
-    //So, we can have 10 allocations at 50k a pop -> 500k hits max.
-
-    //The Track node factory
-    mktracknodefactory =
-	new StiKalmanTrackNodeFactory("StiKalmanTrackNodeFactory");
-    mktracknodefactory->setIncrementalSize(10000);
-    mktracknodefactory->setMaxIncrementCount(200);
-    //So, we can have 100 allocations at 10000 a pop ->1M nodes max
-    
-    StiKalmanTrack::setKalmanTrackNodeFactory( mktracknodefactory );    
-
-    //The StiDetector factory
-    if (StiIOBroker::instance()->useGui()==true) {
-	mdetectorfactory = new StiRDDetectorFactory("RDDetectorFactory");
-    }
-    else {
-	mdetectorfactory = new StiDetectorFactory("DetectorFactory");
-    }
-    mdetectorfactory->setIncrementalSize(1000);
-    mdetectorfactory->setMaxIncrementCount(10);
-    mdetectorfactory->reset();
-
-    //The DetectorNodeFactory
-    mdatanodefactory = new StiDetectorNodeFactory("DetectorNodeFactory");
-    mdatanodefactory->setIncrementalSize(1000);
-    mdatanodefactory->setMaxIncrementCount(10);
-    mdatanodefactory->reset();
-    
-    //The Detector Tree
-    mdetector = StiDetectorContainer::instance();
-    mdetector->buildDetectors(mdatanodefactory, mdetectorfactory);
-    mdetector->reset();
-      
-    //The Hit Filler
-    mhitfiller = new StiHitFiller();
-    mhitfiller->addDetector(kTpcId);
-    mhitfiller->addDetector(kSvtId);
-    cout <<"Hits used from detectors:\t"<<*mhitfiller<<endl;
-
-    //The seed finder (must be built after detector-tree)
-    if (StiIOBroker::instance()->seedFinderType()==StiIOBroker::kEvaluable) {
-	//Make an evaluable track factory
-	if (StiIOBroker::instance()->useGui()==true) {
-	    mtrackfactory = new StiRDEvaluableTrackFactory("StiRDEvaluableTrackFactory",50);
-	    mtrackfactory->setIncrementalSize(1000);
-	    mtrackfactory->setMaxIncrementCount(200);
+	//The hit container
+	if (StiIOBroker::instance()->useGui()) {
+	    mhitstore = new StiRootDrawableHitContainer();
 	}
 	else {
-	    mtrackfactory = new StiEvaluableTrackFactory("StiEvaluableTrackFactory");
-	    mtrackfactory->setIncrementalSize(1000);
-	    mtrackfactory->setMaxIncrementCount(200);
+	    mhitstore = new StiHitContainer();
 	}
-	    
-	cout <<"StiMaker::init(). Set tracker seed finder to StiIOBroker::kEvaluable"<<endl;
-	StiEvaluableTrackSeedFinder* temp =
-	    new StiEvaluableTrackSeedFinder(mAssociationMaker, mhitstore);
-	temp->setFactory(mtrackfactory);
-	mSeedFinder=temp;
-    }
+
+	//The track store
+	mtrackstore = StiTrackContainer::instance();
+
+	//The track merger
+	mTrackMerger = new StiLocalTrackMerger(mtrackstore);
+
+	//The Hit Factory
+	mhitfactory = new StiHitFactory("HitFactory");
+	mhitfactory->setIncrementalSize(50000); //Allocate in chunks of 50k hits
+	mhitfactory->setMaxIncrementCount(10);
+	//So, we can have 10 allocations at 50k a pop -> 500k hits max.
+
+	//The Track node factory
+	mktracknodefactory =
+	    new StiKalmanTrackNodeFactory("StiKalmanTrackNodeFactory");
+	mktracknodefactory->setIncrementalSize(10000);
+	mktracknodefactory->setMaxIncrementCount(200);
+	//So, we can have 100 allocations at 10000 a pop ->1M nodes max
     
-    else if (StiIOBroker::instance()->seedFinderType()==StiIOBroker::kComposite) {
+	StiKalmanTrack::setKalmanTrackNodeFactory( mktracknodefactory );    
+
+	//The StiDetector factory
+	if (StiIOBroker::instance()->useGui()==true) {
+	    mdetectorfactory = new StiRDDetectorFactory("RDDetectorFactory");
+	}
+	else {
+	    mdetectorfactory = new StiDetectorFactory("DetectorFactory");
+	}
+	mdetectorfactory->setIncrementalSize(1000);
+	mdetectorfactory->setMaxIncrementCount(10);
+	mdetectorfactory->reset();
+
+	//The DetectorNodeFactory
+	mdatanodefactory = new StiDetectorNodeFactory("DetectorNodeFactory");
+	mdatanodefactory->setIncrementalSize(1000);
+	mdatanodefactory->setMaxIncrementCount(10);
+	mdatanodefactory->reset();
+    
+	//The Detector Tree
+	mdetector = StiDetectorContainer::instance();
+	mdetector->buildDetectors(mdatanodefactory, mdetectorfactory);
+	mdetector->reset();
+      
+	//The Hit Filler
+	mhitfiller = new StiHitFiller();
+	mhitfiller->addDetector(kTpcId);
+	mhitfiller->addDetector(kSvtId);
+	cout <<"Hits used from detectors:\t"<<*mhitfiller<<endl;
+
+	//The seed finder (must be built after detector-tree)
+	if (StiIOBroker::instance()->seedFinderType()==StiIOBroker::kEvaluable) {
+	    //Make an evaluable track factory
+	    if (StiIOBroker::instance()->useGui()==true) {
+		mtrackfactory = new StiRDEvaluableTrackFactory("StiRDEvaluableTrackFactory",50);
+		mtrackfactory->setIncrementalSize(1000);
+		mtrackfactory->setMaxIncrementCount(200);
+	    }
+	    else {
+		mtrackfactory = new StiEvaluableTrackFactory("StiEvaluableTrackFactory");
+		mtrackfactory->setIncrementalSize(1000);
+		mtrackfactory->setMaxIncrementCount(200);
+	    }
+	    
+	    cout <<"StiMaker::init(). Set tracker seed finder to StiIOBroker::kEvaluable"<<endl;
+	    StiEvaluableTrackSeedFinder* temp =
+		new StiEvaluableTrackSeedFinder(mAssociationMaker, mhitstore);
+	    temp->setFactory(mtrackfactory);
+	    mSeedFinder=temp;
+	}
+    
+	else if (StiIOBroker::instance()->seedFinderType()==StiIOBroker::kComposite) {
 	//Make a kalman track factory
 	if (StiIOBroker::instance()->useGui()==true) {
 	    mtrackfactory = new StiRDKalmanTrackFactory("StiRDKalmanTrackFactory",50);
@@ -329,7 +342,8 @@ Int_t StiMaker::Init()
     //The Evaluator
     //First call to instance must specify then output file name
     StiEvaluator::instance(mEvalFileName);
-    
+
+    }
     return StMaker::Init();
 }
 
