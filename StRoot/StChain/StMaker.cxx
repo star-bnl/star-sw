@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.115 2001/05/31 02:40:29 perev Exp $
+// $Id: StMaker.cxx,v 1.116 2001/06/01 02:47:31 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -26,6 +26,7 @@
 #include "TTable.h"
 
 #include "StMem.h"
+#include "TMemStat.h"
 
 StMaker *StMaker::fgStChain = 0;
 StMaker *StMaker::fgFailedMaker = 0;
@@ -57,6 +58,8 @@ StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker"),fActive(
    AddHist(0); m_Histograms = GetHistList();
    ::doPs(GetName(),"constructor");
    m_Timer.Stop();
+   fMemStatMake  = 0;
+   fMemStatClear = 0;
 }
 
 //_____________________________________________________________________________
@@ -70,6 +73,8 @@ void StMaker::AddMaker(StMaker *mk)
 StMaker::~StMaker()
 {
 if (fgStChain == this) fgStChain = 0;
+delete fMemStatMake;	fMemStatMake  = 0;
+delete fMemStatClear;	fMemStatClear = 0;
 }
 //______________________________________________________________________________
 void StMaker::SetNumber(Int_t number)
@@ -235,7 +240,7 @@ TString StMaker::GetAlias(const char* log,const char* dir) const
   return act;
 }
 //______________________________________________________________________________
-TDataSet *StMaker::GetDataSet(const char* logInput,
+TDataSet *StMaker::FindDataSet(const char* logInput,
                                 const StMaker *uppMk,
                                 const StMaker *dowMk) const
 {
@@ -304,7 +309,7 @@ DOWN: if (!(dir = Find(".make"))) goto UP;
   while ((mk = (StMaker*)nextMk()))
   {
     if (mk==dowMk) continue;
-    dataset = mk->GetDataSet(actInput,this,0);
+    dataset = mk->FindDataSet(actInput,this,0);
     if (dataset) goto FOUND;
   }
 
@@ -312,7 +317,7 @@ DOWN: if (!(dir = Find(".make"))) goto UP;
 UP: if (uppMk) return 0;
 
   parent = GetMaker(this); if (!parent) goto NOTFOUND;
-  dataset = parent->GetDataSet(actInput,0,this);
+  dataset = parent->FindDataSet(actInput,0,this);
   if (dataset) goto FOUND;
 
 //		Not FOUND
@@ -363,19 +368,11 @@ void StMaker::Clear(Option_t *option)
    TIter next(GetMakeList(),kIterBackward);
    StMaker *maker;
    while ((maker = (StMaker*)next())) {
-      if (maker->GetDebug()>1) {
-        printf("\n*** %s(%s)::Clear() called, mem = ", maker->ClassName(),maker->GetName());
-        StMem::Print(0);
-        printf("\n");
-      }  
       maker->StartTimer();
+      if (maker->fMemStatClear) maker->fMemStatClear->Start();
       maker->Clear(option);
+      if (maker->fMemStatClear) maker->fMemStatClear->Stop();
       maker->StopTimer();
-      if (maker->GetDebug()>1) {
-        printf("\n*** %s(%s)::Clear() ended,  mem = ", maker->ClassName(),maker->GetName());
-        StMem::Print(0);
-        printf("\n");
-      }  
    }
    return;
 
@@ -400,7 +397,14 @@ Int_t StMaker::Init()
 
       maker->StartTimer();
       if (GetDebug()) printf("\n*** Call %s::Init() ***\n\n",maker->ClassName());
+      TString ts1(maker->ClassName()); ts1+="("; ts1+=maker->GetName(); ts1+=")::";
+      TString ts2 = ts1; ts2+="Make ";
+      maker->fMemStatMake  = new TMemStat(ts2);
+      ts2 = ts1; ts2+="Clear";
+      maker->fMemStatClear = new TMemStat(ts2);
+
       if ( maker->Init()) {
+
 	printf("   Maker %s failed in Init\n", maker->GetName());
 	return kStErr;
       }
@@ -431,12 +435,8 @@ void StMaker::StartMaker()
     m_DataSet = Find(".data");
     if (!m_DataSet) {m_DataSet = new TObjectSet(".data"); Add(m_DataSet);}
   }
-  if (GetDebug()>1) {
-    printf("\n*** %s(%s)::Make() called, mem = ", ClassName(),GetName());
-    StMem::Print(0);
-    printf("\n");
-  }
-
+  fMemStatMake->Start();
+  
 
   StartTimer();}
 //_____________________________________________________________________________
@@ -447,11 +447,7 @@ void StMaker::EndMaker(int ierr)
   if (m_GarbSet) m_GarbSet->Delete();
   ::doPs(GetName(),"EndMaker");
   
-  if (GetDebug()>1) {
-    printf("\n*** %s(%s)::Make() ended. mem =", ClassName(),GetName());
-    StMem::Print(0);
-    printf("\n");
-  }
+  fMemStatMake->Stop();
   StopTimer();
 }
 
@@ -500,6 +496,7 @@ Int_t StMaker::Finish()
    }
    
    Clear();
+   TMemStat::Summary();
    return nerr;
 }
 
@@ -1056,6 +1053,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.116  2001/06/01 02:47:31  perev
+// Memory consumption measurement added
+//
 // Revision 1.115  2001/05/31 02:40:29  perev
 // const(ing)
 //
