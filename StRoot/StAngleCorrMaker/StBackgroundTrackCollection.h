@@ -15,8 +15,11 @@ public:
     int             Size();
     void            Clear();
 
- vector<StTrackForPoolCollection> vec;
-
+#ifdef ST_NO_TEMPLATE_DEF_ARGS
+    vector<StTrackForPoolCollection, allocator<StTrackForPoolCollection> > vec;
+#else
+    vector<StTrackForPoolCollection> vec;
+#endif 
  private:
     
 };

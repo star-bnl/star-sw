@@ -3,6 +3,10 @@
 
 #include "StTrackForPool.h"
 #include <vector>
+#if !defined(ST_NO_NAMESPACES)
+using std::string;
+using std::vector;
+#endif
 
 class  StTrackForPoolCollection {
 public:
@@ -13,7 +17,11 @@ public:
     int             Size();
     void            Clear();
 
- vector<StTrackForPool*> vec;
+#ifdef ST_NO_TEMPLATE_DEF_ARGS
+    vector< StTrackForPool*, allocator<StTrackForPool*> > vec;
+#else
+    vector<StTrackForPool*> vec;
+#endif 
 
  private:
     

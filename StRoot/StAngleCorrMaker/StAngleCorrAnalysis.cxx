@@ -1,5 +1,4 @@
 #include "StAngleCorrAnalysis.h"
-#include <vector>
 #include "StTrackForPool.h"
 #include "StThreeVectorD.hh"
 #include "StPhysicalHelixD.hh"
@@ -33,14 +32,18 @@
 
 #include "StEventTypes.h"
 
+#ifndef ST_NO_NAMESPACES
+using namespace units;
+#endif
+
 
 StAngleCorrAnalysis::~StAngleCorrAnalysis()
 {
-  if (signal != NULL)                        delete signal;
-  if (background != NULL)              delete background;
+  if (signal != NULL)               delete signal;
+  if (background != NULL)           delete background;
   if (correlationFunction != NULL)  delete correlationFunction;
-  if (track1Cuts != NULL)                delete track1Cuts;
-  if (track2Cuts != NULL)                delete track2Cuts;
+  if (track1Cuts != NULL)           delete track1Cuts;
+  if (track2Cuts != NULL)           delete track2Cuts;
 }
 
 StAngleCorrAnalysis::StAngleCorrAnalysis(TString analysisName) 
@@ -57,7 +60,6 @@ StAngleCorrAnalysis::StAngleCorrAnalysis(TString analysisName)
 
   fastestTrackAnalysis=OFF;
   diagnostics=OFF;
-
  
   mNumberOfEventsInPool=0;
   mNumberOfTracks1InPool=0;
@@ -67,7 +69,6 @@ StAngleCorrAnalysis::StAngleCorrAnalysis(TString analysisName)
   mNumberOfBackgroundTracks2=0;
   minimumNumberOfBackgroundEvents=10;
   minimumNumberOfBackgroundPairs=1000;
-
  
   DiagnoseEventCuts  = "DiagnoseEventCuts";
   DiagnoseTrack1     = "DiagnoseTrack1";
@@ -158,6 +159,7 @@ int
 StAngleCorrAnalysis::IdenticalTrackCheck(StTrackForPool* t1, StTrackForPool* t2)
 {
   // here i just want to check if the two tracks are not the same track!
+  // need to change later
   Double_t px1,py1,pz1,px2,py2,pz2;
   t1->GetMomentum(px1,py1,pz1);
   t2->GetMomentum(px2,py2,pz2);
@@ -205,6 +207,7 @@ StAngleCorrAnalysis::SetEventCuts(StEventCuts* evCuts)
 {
   eventCuts = evCuts;
 }
+
 
 void
 StAngleCorrAnalysis::SetTrackForPool(StTrack* track, StTrackForPool* trackForPool)
@@ -350,7 +353,7 @@ StAngleCorrAnalysis::AnalyseBackgroundPairs()
   TRandom *ran = new TRandom();
   ran->SetSeed(t1);  
 
- // reduce total number of pairs by 100 to avoid any superstatistical correlations
+  // reduce total number of pairs by 100 to avoid any superstatistical correlations
   UInt_t mNumberOfBackgroundPairs=mNumberOfBackgroundTracks1*mNumberOfBackgroundTracks2/100;
   
  
