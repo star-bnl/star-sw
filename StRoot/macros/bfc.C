@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.152 2001/06/01 03:05:26 perev Exp $
+// $Id: bfc.C,v 1.153 2002/01/26 23:48:08 jeromel Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -21,7 +21,7 @@
 #include "StAssociationMaker/StMcParameterDB.h"
 #include "St_dst_Maker/StV0Maker.h"
 #include "xdf2root/St_XDFFile.h" 
-#include "StTpcT0Maker/StTpcT0Maker.h" 
+#include "StPass0CalibMaker/StTpcT0Maker.h" 
 void Usage();
 void Load();
 #else 
