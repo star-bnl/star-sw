@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.cxx,v 1.7 1999/05/05 18:37:21 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.8 1999/05/21 21:15:59 yepes Exp $
 // $Log: St_l3t_Maker.cxx,v $
+// Revision 1.8  1999/05/21 21:15:59  yepes
+// Fixint problem with no Hits
+//
 // Revision 1.7  1999/05/05 18:37:21  yepes
 // *** empty log message ***
 //
@@ -188,6 +191,7 @@ Int_t St_l3t_Maker::Make(){
     *l3hit = *tphit ;
 //
     maxNofTracks = nHits / 20 ;
+    if ( maxNofTracks < 1 ) maxNofTracks = 1 ;
     St_tpt_track   *track = new St_tpt_track("l3Track",maxNofTracks); m_DataSet->Add(track);
     St_sl3Monitor  *mon   = new St_sl3Monitor("sl3Monitor",1000); m_DataSet->Add(mon);
 
@@ -222,7 +226,7 @@ void St_l3t_Maker::MakeHistograms() {
 //_____________________________________________________________________________
 void St_l3t_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_l3t_Maker.cxx,v 1.7 1999/05/05 18:37:21 yepes Exp $\n");
+  printf("* $Id: St_l3t_Maker.cxx,v 1.8 1999/05/21 21:15:59 yepes Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
