@@ -1,5 +1,8 @@
-// $Id: StKinkController.cxx,v 3.5 2002/04/30 16:02:47 genevb Exp $
+// $Id: StKinkController.cxx,v 3.6 2002/06/13 16:06:01 genevb Exp $
 // $Log: StKinkController.cxx,v $
+// Revision 3.6  2002/06/13 16:06:01  genevb
+// Additional security against zombies in StEvent vectors
+//
 // Revision 3.5  2002/04/30 16:02:47  genevb
 // Common muDst, improved MC code, better kinks, StrangeCuts now a branch
 //
@@ -72,10 +75,13 @@ Int_t StKinkController::MakeCreateDst(StEvent& event) {
   entries = kinkVertices.size();
   Int_t asize = dataArray->GetSize();
   if (entries > asize) dataArray->Expand(entries+increment);
+  Int_t j=0;
   for (Int_t i=0; i<entries; i++) {
     StKinkVertex* kinkVertex = kinkVertices[i];
-    new((*dataArray)[i]) StKinkMuDst(kinkVertex);
+    if (kinkVertex)
+      new((*dataArray)[j++]) StKinkMuDst(kinkVertex);
   }
+  entries = j;
   PrintNumCand("found",entries);
   nEntries += entries;
 

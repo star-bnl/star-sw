@@ -1,5 +1,8 @@
-// $Id: StV0Controller.cxx,v 3.8 2002/05/29 19:09:51 genevb Exp $
+// $Id: StV0Controller.cxx,v 3.9 2002/06/13 16:06:01 genevb Exp $
 // $Log: StV0Controller.cxx,v $
+// Revision 3.9  2002/06/13 16:06:01  genevb
+// Additional security against zombies in StEvent vectors
+//
 // Revision 3.8  2002/05/29 19:09:51  genevb
 // Removed some mistakes left in last time
 //
@@ -99,7 +102,7 @@ Int_t StV0Controller::MakeCreateDst(StEvent& event) {
   Int_t j=0;
   for (Int_t i=0; i<entries; i++) {
     StV0Vertex* v0Vertex = v0Vertices[i];
-    if (v0Vertex->dcaParentToPrimaryVertex() >= 0)
+    if ((v0Vertex) && (v0Vertex->dcaParentToPrimaryVertex() >= 0))
       new((*dataArray)[j++]) StV0MuDst(v0Vertex,ev);
   }
   entries = j;

@@ -1,5 +1,8 @@
-// $Id: StXiController.cxx,v 3.5 2002/04/30 16:02:48 genevb Exp $
+// $Id: StXiController.cxx,v 3.6 2002/06/13 16:06:01 genevb Exp $
 // $Log: StXiController.cxx,v $
+// Revision 3.6  2002/06/13 16:06:01  genevb
+// Additional security against zombies in StEvent vectors
+//
 // Revision 3.5  2002/04/30 16:02:48  genevb
 // Common muDst, improved MC code, better kinks, StrangeCuts now a branch
 //
@@ -88,13 +91,17 @@ Int_t StXiController::MakeCreateDst(StEvent& event) {
   Int_t asize = dataArray->GetSize();
   if (entries > asize) dataArray->Expand(entries+increment);
   StStrangeEvMuDst* ev = masterMaker->GetEvent();
+  Int_t j=0;
   for (Int_t i=0; i<entries; i++) {
     StXiVertex* xiVertex = xiVertices[i];
-    StV0Vertex* v0Vertex = xiVertex->v0Vertex();
-    if (v0Vertex) {
-      new((*dataArray)[i]) StXiMuDst(xiVertex,v0Vertex,ev);
-    } else nBad++;
+    if (xiVertex) {
+      StV0Vertex* v0Vertex = xiVertex->v0Vertex();
+      if (v0Vertex) {
+        new((*dataArray)[j++]) StXiMuDst(xiVertex,v0Vertex,ev);
+      } else nBad++;
+    }
   }
+  entries = j;
   PrintNumCand("found",entries);
   if (nBad) gMessMgr->Warning() << "StXiController: " << nBad
                                 << "with missing V0 vertices" << endm;
