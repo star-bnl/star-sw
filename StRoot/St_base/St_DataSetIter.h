@@ -58,7 +58,9 @@ public:
   virtual Int_t          Df() const {return 0;} // report number of free "table" blocks. 
 
   virtual St_DataSet    *Find(const Char_t *path, St_DataSet *rootset=0,Bool_t mkdir=kFALSE);
+  virtual St_DataSet    *FindByPath(const Char_t *path, St_DataSet *rootset=0,Bool_t mkdir=kFALSE);
   virtual St_DataSet    *FindObject(const Char_t *name,const Char_t *path="",Option_t *opt="");
+  virtual St_DataSet    *FindByName(const Char_t *name,const Char_t *path="",Option_t *opt="");
   virtual St_DataSet    *FindObject(St_DataSet *set,const Char_t *path,Option_t *opt="");
   virtual Int_t          Flag(UInt_t flag=kMark,EBitOpt reset=kSet){return Flag((St_DataSet *)0,flag,reset);}
   virtual Int_t          Flag(const Char_t *path,UInt_t flag=kMark,EBitOpt reset=kSet);

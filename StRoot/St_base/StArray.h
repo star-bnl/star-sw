@@ -3,10 +3,12 @@
 #pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
+#pragma link C++ class StObjArrayIter-;
+#pragma link C++ class StObjArray-;
+#pragma link C++ class StRefArray-;
+#pragma link C++ class StStrArray-;
+#pragma link C++ function testqwe();
 #endif
-
-//*CMZ :          13/08/98  18.27.27  by  Valery Fine(fine@bnl.gov)
-//*-- Author :    Valery Fine(fine@mail.cern.ch)   13/08/98 
 
 #ifndef _StRegistry_
 #define _StRegistry_
@@ -36,80 +38,108 @@ class StRegistry
     static TObjArray *fReg;				// pointer to container of containers
  public:
  StRegistry(){};
- static Int_t SetColl (TSeqCollection *coll); 		// Register new container
- static Int_t GetColl (const char *name); 		// get index of container
+ static void Clear(){if (fReg) fReg->Clear();};
+ static Int_t SetColl (TObjArray *coll); 		// Register new container
+ static Int_t GetColl (const char *name); 	 	// get index of container
  static const char    *GetCollName (Int_t idx );	// get name of cont by index
- static TSeqCollection   *GetColl (Int_t idx );		// get name of cont by index
- static void  List();					// print list of registered conts    
+ static TObjArray     *GetColl (Int_t idx );		// get name of cont by index
+ static void  List() ;					// print list of registered conts    
  static ULong_t Ident(ULong_t colidx,ULong_t objidx){return colidx<<24 |objidx;};
  static void    Ident(ULong_t ident,ULong_t &colidx,ULong_t &objidx)
   {colidx = ident<<24;  objidx = ident & 0x00ffffff;};
+ static Int_t GetNColl(){return (fReg) ? fReg->GetLast()+1:0;};				// Number of collections
 };
+class StObjArrayIter;
  
+class StObjArray : public TObjArray
+{
+public:
+StObjArray(Int_t s = TCollection::kInitCapacity):TObjArray(s,0){};
+virtual        ~StObjArray(){printf("~StObjArray %p\n",this);};
+virtual void 	push_back(TObject *obj) {AddLast(obj);};
+virtual void 	pop_back() {RemoveAt(GetLast());};
+virtual Int_t   size() const {return GetLast()+1;};
+virtual void    Resize(Int_t num);
+virtual void    resize(Int_t num){Resize(num);};
+virtual Int_t 	capacity() const {return Capacity();}
+virtual TObject* back() const {return Last();};
+virtual TObject* front() const {return First();};
+virtual void 	clear(){Clear();};
+virtual Bool_t 	empty() const {return GetLast()<LowerBound();};
+virtual TObject* at(Int_t idx){return At(idx);};
+virtual void    SetLast(Int_t last);
+virtual const StObjArrayIter begin() const;
+virtual const StObjArrayIter Begin() const;
+virtual const StObjArrayIter end() const;
+virtual const StObjArrayIter End() const;
 
-class StStrArray : public TObjArray {
+
+ClassDef(StObjArray,1)
+};
+
+class StObjArrayIter : public TObjArrayIter
+{
+public:
+StObjArrayIter(const TObjArray* col=0, Bool_t dir = kIterForward) :  TObjArrayIter(col, dir)
+{ printf("StObjArrayIter=%p\n",this);};
+StObjArrayIter(const StObjArrayIter &init) :  TObjArrayIter(0,kIterForward)
+{ *this=init; printf("StObjArrayIter2=%p %p\n",this,&init);};
+
+virtual       ~StObjArrayIter(){printf("~StObjArrayIter %p\n",this);}; 
+virtual void   SetCursor(Int_t kursor);
+virtual Int_t  GetCursor() const;
+virtual void   SetDirection(Bool_t dir = kIterForward);
+virtual Bool_t GetDirection() const;
+virtual void   SetCollection(TObjArray *coll);
+virtual TObject* operator*();
+virtual StObjArrayIter &operator++();
+virtual StObjArrayIter &operator--();
+virtual void operator=(const StObjArrayIter &iter);
+virtual Bool_t operator==(const StObjArrayIter &iter);
+
+
+ClassDef(StObjArrayIter,1)
+};
+
+class StStrArray : public StObjArray {
 protected:
  TString fName;
- UInt_t fIdx;
+ ULong_t fIdx;
+
  void Book(TObject* obj,int idx)
  { obj->SetUniqueID(StRegistry::Ident(fIdx,idx));};
 public:
- StStrArray(const char *name=0)
- { if (!name) return; fName=name; fIdx=StRegistry::SetColl(this);};
+ StStrArray(const char *name=0);
 
- const Char_t *GetName() const {return fName;};
+ virtual const Char_t *GetName() const {return fName;};
+ virtual void          SetName(const char* name);
 
  virtual void AddFirst(TObject* obj)
- { TObjArray::AddFirst(obj); Book(obj,LowerBound());}
+ { TObjArray::AddFirst(obj); Book(obj,0);}
 
  virtual void AddLast(TObject* obj)
  { TObjArray::AddLast(obj); Book(obj,GetLast());}
 
- virtual void Add(TObject* obj){AddLast(obj);}
-
+ virtual void AddAt(TObject* obj, Int_t idx)
+ { TObjArray::AddAt(obj,idx); Book(obj,idx);};
+ 
+ virtual void AddAtAndExpand(TObject* obj, Int_t idx)
+ { TObjArray::AddAtAndExpand(obj,idx); Book(obj,idx);};
+ 
+ClassDef(StStrArray,1)
 };
 
-class StArray {
-public:
-int fUnit;	// Size of element in bytes
-int fNEnt;       // Size of allocated array in elements
-int fLast;      // index of Last filled element
-char *fArray;   // array
 
-public:
-
-StArray(int iSize=4, int nEnt=10)
-{ fUnit = iSize; fArray=0; fNEnt=0; fLast=0; Expand(nEnt);};
-virtual void 		Expand(int n);
-virtual void 		AddAt(void *w,Int_t idx, int size);
-virtual void 		AddAt(Int_t w,   Int_t idx){AddAt(&w,idx,sizeof(Int_t   ));};
-virtual void 		AddAt(ULong_t w, Int_t idx){AddAt(&w,idx,sizeof(ULong_t ));};
-virtual void 		AddAt(Float_t w, Int_t idx){AddAt(&w,idx,sizeof(Float_t ));};
-virtual void 		AddAt(Double_t w,Int_t idx){AddAt(&w,idx,sizeof(Double_t));};
-virtual void   	       *AtV(int idx) const {return (idx>=fNEnt || idx <0)? 0: fArray+idx*fUnit;};
-virtual Int_t   	AtI(int idx) const {void *v; return (v = AtV(idx))? *(Int_t*   )v:0;};
-virtual Float_t 	AtF(int idx) const {void *v; return (v = AtV(idx))? *(Float_t* )v:0;};
-virtual Double_t 	AtD(int idx) const {void *v; return (v = AtV(idx))? *(Double_t*)v:0;};
-virtual Int_t		GetLast(){return fLast;};
-};
-
-class StRefArray : public StArray,public TObjArray
+class StRefArray : public StObjArray
 {
-protected:
-TSeqCollection *fCurrColl;
-Int_t fCurrIdent;
 public:
-StRefArray():StArray(sizeof(void*),5)
-{fCurrColl=0;fCurrIdent=0; TObjArray::Expand(0);}
-virtual void AddAt(TObject *obj,Int_t idx);
-virtual void Add(TObject *obj){AddLast(obj);};
-virtual void AddLast(TObject *obj){AddAt(obj,StArray::fLast+1);};
-virtual void AddFirst(TObject *obj){AddAt(obj,0);};
+StRefArray(Int_t s = TCollection::kInitCapacity)
+:StObjArray(s){};
 
-virtual TObject *At(Int_t idx) const;
-virtual TObject *Last() const {return At(StArray::fLast);};
-virtual TObject *First() const {return At(0);};
-virtual void Clear(Option_t* option){StArray::Expand(0);};
+ClassDef(StRefArray,1)
 };
+
+void testqwe();
+
 #endif
 
