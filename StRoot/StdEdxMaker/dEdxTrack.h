@@ -13,17 +13,16 @@ class Point : public TObject {
   Int_t    row;
   Int_t    pad;
   Int_t    Fee;
-  Double_t dE;
-  Double_t dEU; // before correction
   Double_t dx;
+  Double_t dE;
   Double_t dEdx; 
-  Double_t dEdxU; 
-  Double_t dEdxP; // after pulser correction only
-  Double_t dEdxL; // log of dEdx
-  Double_t dEdxLU; // log of dEdx
+  Double_t dEdxL;  // log of dEdx
   Double_t dEdxN; // normolized to BB
-  Double_t dEdxNP; // normolized to BB
   Double_t dETot; 
+  Double_t dEU;
+  Double_t dEdxU; 
+  Double_t dEdxLU;  // log of dEdx
+  Double_t dEdxNU; // normolized to BB
   Double_t xyz[3];
   Double_t Prob; 
   Double_t SigmaFee;
