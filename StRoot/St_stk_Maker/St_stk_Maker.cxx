@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.11 1999/02/25 20:29:48 caines Exp $
+// $Id: St_stk_Maker.cxx,v 1.12 1999/03/13 00:26:48 perev Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.12  1999/03/13 00:26:48  perev
+// New maker schema
+//
 // Revision 1.11  1999/02/25 20:29:48  caines
 // Changed Histo names
 //
@@ -62,8 +65,8 @@
 ClassImp(St_stk_Maker)
   
 //_____________________________________________________________________________
-  St_stk_Maker::St_stk_Maker(const char *name, const char *title):
-    StMaker(name,title),
+  St_stk_Maker::St_stk_Maker(const char *name):
+    StMaker(name),
     m_stk_stkpar(0),
     m_pix_info(0),
     m_stk_vtx(0),
@@ -79,7 +82,6 @@ ClassImp(St_stk_Maker)
     m_dedx(0),
     m_gededx(0)
 {
-  drawinit=kFALSE;
   m_mode = 2;
   m_method = 2;
   m_fill = 1;
@@ -105,7 +107,7 @@ St_stk_Maker::~St_stk_Maker(){
 //_____________________________________________________________________________
 Int_t St_stk_Maker::Init(){
   // Create tables
-  St_DataSetIter       local(gStChain->DataSet("params"));
+  St_DataSetIter       local(GetDataBase("params"));
   m_stk_stkpar = (St_stk_stkpar *) local("svt/stkpars/stk_stkpar");
   stk_stkpar_st *stk_stkpar = m_stk_stkpar->GetTable();
   stk_stkpar->mode = m_mode;
@@ -141,177 +143,167 @@ Int_t St_stk_Maker::Init(){
   m_pix_info       = (St_sgr_pixmap *)     local("svt/sgrpars/pix_info");
   
   m_sprpar         = (St_spr_sprpar *)     local("svt/sprpars/sprpar");
+
   // Create Histograms
-  m_q_pt = new TH1F("StkChargeOverPt","Charge/pt of reconstructed svt tracks",100,-20.,20.);
-  m_frac_used   = new TH1F("StkHitsUsed","Fraction of hits used on svt tracks",100,0.,1.2);
-  m_azimuth       = new TH1F("StkAzimuth","Azimuthal distribution of svt tracks",60,0.,360.0);
-  m_tan_dip       = new TH1F("StkTanDip","Distribution of the svt dip angle",100,-1.5,1.5);
-  m_dedx          = new TH2F("StkDedx","svt de/dx distribution",100,0.,2.0,100,0.,0.01);
+  m_q_pt      = new TH1F("StkChargeOverPt","Charge/pt of reconstructed svt tracks",100,-20.,20.);
+  m_frac_used = new TH1F("StkHitsUsed"    ,"Fraction of hits used on svt tracks"  ,100,0.,1.2);
+  m_azimuth   = new TH1F("StkAzimuth"     ,"Azimuthal distribution of svt tracks" ,60,0.,360.0);
+  m_tan_dip   = new TH1F("StkTanDip"      ,"Distribution of the svt dip angle"    ,100,-1.5,1.5);
+  m_dedx      = new TH2F("StkDedx"        ,"svt de/dx distribution"               ,100,0.,2.0,100,0.,0.01);
 
   return StMaker::Init();
 }
 //_____________________________________________________________________________
-Int_t St_stk_Maker::Make(){
-  //  PrintInfo();
+Int_t St_stk_Maker::Make()
+{
+
   const Int_t maxNofTracks = 50000;
-  if (!m_DataSet->GetList()){  // event/data/svt/tracks
-    St_DataSetIter geant(gStChain->DataSet("geant"));
-    St_g2t_track   *g2t_track    = (St_g2t_track  *) geant("g2t_track");
-    St_g2t_event   *g2t_event    = (St_g2t_event  *) geant("g2t_event");
-    St_g2t_vertex  *g2t_vertex   = (St_g2t_vertex *) geant("g2t_vertex");
-    St_g2t_svt_hit *g2t_svt_hit  = (St_g2t_svt_hit *)geant("g2t_svt_hit");
-    if (g2t_track && g2t_event && g2t_vertex && g2t_svt_hit) {
-      St_sgr_groups *candidate_groups = new St_sgr_groups("candidate_groups",maxNofTracks);
-      m_DataSet->Add(candidate_groups);
-      St_sgr_groups *groups      = new St_sgr_groups("groups",4*maxNofTracks);
-      m_DataSet->Add(groups);
-      St_sgr_groups *mcgroups    = new St_sgr_groups("mcgroups",maxNofTracks);  
-      m_DataSet->Add(mcgroups);
-      St_stk_track  *stk_track   = new St_stk_track("stk_track",maxNofTracks);
-      m_DataSet->Add(stk_track);
-      St_stk_kine   *stk_kine    = new St_stk_kine("stk_kine",maxNofTracks/5);
-      m_DataSet->Add(stk_kine);
-      St_stk_track  *stk_mctrack = new St_stk_track("stk_mctrack",maxNofTracks/5);
-      m_DataSet->Add(stk_mctrack);
-      St_stk_kine   *stk_mckine  = new St_stk_kine("stk_mckine",maxNofTracks/5);
-      m_DataSet->Add(stk_mckine);
-      //
-      //
-      St_DataSetIter data(gStChain->DataSet("svt_hits"));
-      St_scs_spt    *scs_spt      = (St_scs_spt *) data("scs_spt");
-      // exec run_stk  
-#if 0
-      St_DataSet    *geom = gStChain->DataSet("geom");
-      St_DataSetIter run(geom);
-      St_g2t_gepart *g2t_gepart  = (St_g2t_gepart *) run("g2t_gepart");
-      if (!g2t_gepart){
-	g2t_gepart   = new St_g2t_gepart("g2t_gepart",1);
-	run.Add(g2t_gepart);
-      }
-      if (m_ifstk){
-	Int_t Res_stk = stk_am(m_stk_stkpar,
-			       g2t_track,g2t_event,g2t_vertex,
-			       scs_spt,
-			       m_stk_vtx,m_stk_vtx_direct,
-			       groups,stk_track,stk_kine,mcgroups,
-			       stk_mctrack,stk_mckine,
-			       m_stk_filler,m_config,m_geom);
-	//eval_stk
-      St_ste_teval  *ste_teval   = new St_ste_teval("ste_teval",maxNofTracks/5); 
-      m_DataSet->Add(ste_teval);
-      St_ste_teff   *ste_teff    = new St_ste_teff("ste_teff",1);
-      m_DataSet->Add(ste_teff);
-	Int_t res_ste = ste_am(g2t_gepart,g2t_svt_hit,g2t_track,g2t_event,g2t_vertex,
-			       scs_spt,
-			       m_stk_vtx,
-			       groups,stk_track,stk_kine,mcgroups,
-			       stk_mctrack,stk_mckine,
-			       ste_teval,ste_teff);
-      }
-      else			      //sgr 
-#endif
-	{
-	Int_t Res_stk_init = stk_am_init(m_stk_stkpar,
-					 groups,stk_track,stk_kine,mcgroups,
-					 stk_mctrack,stk_mckine);
-	if (Res_stk_init !=  kSTAFCV_OK) {
-	  cout << "Problem on return from STK_AM_INIT" << endl;
-	}
-	Int_t Res_sgr = sgr_am(m_stk_vtx,m_geom,
-			       scs_spt,groups,
-			       m_pix_info,candidate_groups,stk_track);
-	if (Res_sgr !=  kSTAFCV_OK) {cout << " Problem on return from SGR" << endl;}
 
-	stk_stkpar_st *stk_stkpar = m_stk_stkpar->GetTable();
-        stk_stkpar->direct = 1;
-        Int_t Res_stk =  stk_am(m_stk_stkpar,
-				g2t_track,g2t_event,g2t_vertex,
-				scs_spt,
-				m_stk_vtx,m_stk_vtx_direct,
-				groups,stk_track,stk_kine,mcgroups,
-				stk_mctrack,stk_mckine,
-				m_stk_filler,m_config,m_geom );
-	if (Res_stk !=  kSTAFCV_OK) {cout << " Problem on return from STK_AM" << endl;}
-#if 0
-	cout << "Calling STE_AM..." << endl;
-	
-	Int_t Res_ste = ste_am(g2t_gepart,g2t_svt_hit,
-			       g2t_track,g2t_event,g2t_vertex,
-			       scs_spt,m_stk_vtx,
-			       groups,stk_track,stk_kine,mcgroups,
-			       stk_mctrack,stk_mckine,
-			       ste_teval,ste_teff);
-	
-	if (Res_ste != kSTAFCV_OK) {cout << "Problem on return from STE_AM" << endl;}
-#endif
-		Int_t Res_spr_svt = spr_svt(m_sprpar, stk_kine,
-				    m_geom, scs_spt,
-				    groups, stk_track);
-	if (Res_spr_svt != kSTAFCV_OK) {cout << "Problem on return from SPR_SVT"<< endl;}
+  St_DataSetIter geant(GetDataSet("geant"));
+  St_g2t_track   *g2t_track    = (St_g2t_track  *) geant("g2t_track");
+  St_g2t_event   *g2t_event    = (St_g2t_event  *) geant("g2t_event");
+  St_g2t_vertex  *g2t_vertex   = (St_g2t_vertex *) geant("g2t_vertex");
+  St_g2t_svt_hit *g2t_svt_hit  = (St_g2t_svt_hit *)geant("g2t_svt_hit");
+  if (g2t_track && g2t_event && g2t_vertex && g2t_svt_hit) {
+    St_sgr_groups *candidate_groups = new St_sgr_groups("candidate_groups",maxNofTracks);
+    m_DataSet->Add(candidate_groups);
+    St_sgr_groups *groups      = new St_sgr_groups("groups",4*maxNofTracks);
+    m_DataSet->Add(groups);
+    St_sgr_groups *mcgroups    = new St_sgr_groups("mcgroups",maxNofTracks);  
+    m_DataSet->Add(mcgroups);
+    St_stk_track  *stk_track   = new St_stk_track("stk_track",maxNofTracks);
+    m_DataSet->Add(stk_track);
+    St_stk_kine   *stk_kine    = new St_stk_kine("stk_kine",maxNofTracks/5);
+    m_DataSet->Add(stk_kine);
+    St_stk_track  *stk_mctrack = new St_stk_track("stk_mctrack",maxNofTracks/5);
+    m_DataSet->Add(stk_mctrack);
+    St_stk_kine   *stk_mckine  = new St_stk_kine("stk_mckine",maxNofTracks/5);
+    m_DataSet->Add(stk_mckine);
+    //
+    St_scs_spt    *scs_spt      = (St_scs_spt *)GetDataSet("svt_hits/scs_spt");
 
+// 			exec run_stk  
+#if 0
+    St_DataSet    *geom = GetDataSet("geom");
+    St_DataSetIter run(geom);
+    St_g2t_gepart *g2t_gepart  = (St_g2t_gepart *) run("g2t_gepart");
+    if (!g2t_gepart){
+      g2t_gepart   = new St_g2t_gepart("g2t_gepart",1);
+      run.Add(g2t_gepart);
+    }
+    if (m_ifstk){
+      Int_t Res_stk = stk_am(m_stk_stkpar,
+			     g2t_track,g2t_event,g2t_vertex,
+			     scs_spt,
+			     m_stk_vtx,m_stk_vtx_direct,
+			     groups,stk_track,stk_kine,mcgroups,
+			     stk_mctrack,stk_mckine,
+			     m_stk_filler,m_config,m_geom);
+      //eval_stk
+    St_ste_teval  *ste_teval   = new St_ste_teval("ste_teval",maxNofTracks/5); 
+    m_DataSet->Add(ste_teval);
+    St_ste_teff   *ste_teff    = new St_ste_teff("ste_teff",1);
+    m_DataSet->Add(ste_teff);
+      Int_t res_ste = ste_am(g2t_gepart,g2t_svt_hit,g2t_track,g2t_event,g2t_vertex,
+			     scs_spt,
+			     m_stk_vtx,
+			     groups,stk_track,stk_kine,mcgroups,
+			     stk_mctrack,stk_mckine,
+			     ste_teval,ste_teff);
+    }
+    else			      //sgr 
+#endif
+      {
+      Int_t Res_stk_init = stk_am_init(m_stk_stkpar,
+				       groups,stk_track,stk_kine,mcgroups,
+				       stk_mctrack,stk_mckine);
+      if (Res_stk_init !=  kSTAFCV_OK) {
+	cout << "Problem on return from STK_AM_INIT" << endl;
       }
-    }	  
-  } 
+      Int_t Res_sgr = sgr_am(m_stk_vtx,m_geom,
+			     scs_spt,groups,
+			     m_pix_info,candidate_groups,stk_track);
+      if (Res_sgr !=  kSTAFCV_OK) {cout << " Problem on return from SGR" << endl;}
+
+      stk_stkpar_st *stk_stkpar = m_stk_stkpar->GetTable();
+      stk_stkpar->direct = 1;
+      Int_t Res_stk =  stk_am(m_stk_stkpar,
+			      g2t_track,g2t_event,g2t_vertex,
+			      scs_spt,
+			      m_stk_vtx,m_stk_vtx_direct,
+			      groups,stk_track,stk_kine,mcgroups,
+			      stk_mctrack,stk_mckine,
+			      m_stk_filler,m_config,m_geom );
+      if (Res_stk !=  kSTAFCV_OK) {cout << " Problem on return from STK_AM" << endl;}
+#if 0
+      cout << "Calling STE_AM..." << endl;
+
+      Int_t Res_ste = ste_am(g2t_gepart,g2t_svt_hit,
+			     g2t_track,g2t_event,g2t_vertex,
+			     scs_spt,m_stk_vtx,
+			     groups,stk_track,stk_kine,mcgroups,
+			     stk_mctrack,stk_mckine,
+			     ste_teval,ste_teff);
+
+      if (Res_ste != kSTAFCV_OK) {cout << "Problem on return from STE_AM" << endl;}
+#endif
+	      Int_t Res_spr_svt = spr_svt(m_sprpar, stk_kine,
+				  m_geom, scs_spt,
+				  groups, stk_track);
+      if (Res_spr_svt != kSTAFCV_OK) {cout << "Problem on return from SPR_SVT"<< endl;}
+
+    }
+  }	  
   MakeHistograms(); //tracking histograms
   return kStOK;
 }
 // --------------------------------------------------------------------------
 void St_stk_Maker::MakeHistograms() {
-  // Create an iterator
+
+// 		Create an iterator
   St_DataSetIter svt_tracks(m_DataSet);
-  // Create iterator for space points
+// 		Create iterator for space points
 
-  St_DataSetIter data(gStChain->DataSet("svt_hits"));
+  St_DataSetIter data(GetDataSet("svt_hits"));
 
 
-  //Get the table:
+//		Get the table:
   St_stk_track *spr = 0;
   St_sgr_groups *gpr = 0;
   St_scs_spt *spc = 0;
   
-  spr               = (St_stk_track *) svt_tracks.Find("stk_track");  
-  gpr               = (St_sgr_groups *) svt_tracks.Find("groups");  
-  spc               = (St_scs_spt *) data.Find("scs_spt");
+  spr  = (St_stk_track  *) svt_tracks.Find("stk_track");  
+  gpr  = (St_sgr_groups *) svt_tracks.Find("groups");  
+  spc  = (St_scs_spt    *) data.Find("scs_spt");
 
-  cout << "Filling SVT track histograms" << endl;
+  if(Debug()) cout << "Filling SVT track histograms" << endl;
 
-  if (gpr && spc) {
+  if (gpr && spc) 
     m_frac_used->Fill((float)gpr->GetNRows()/(float)spc->GetNRows());
-  }
+  
   if (spr) {
     stk_track_st *r = spr->GetTable();
-    
     for(Int_t i=0; i<spr->GetNRows();i++,r++){
-      Int_t flag    = r->flag;
-      
-      
-      if(flag>0) {
-	m_q_pt->Fill(r->invpt);
-	m_azimuth->Fill(r->psi);
-	m_tan_dip->Fill(r->tanl); 
-	
-	// Fill dedx
+      Int_t flag = r->flag;
+      if(!flag>0) 	continue;
+      m_q_pt->Fill(r->invpt);
+      m_azimuth->Fill(r->psi);
+      m_tan_dip->Fill(r->tanl); 
 
-	Float_t pt = 1./r->invpt;
-	Float_t pz = r->tanl/r->invpt;
-	Float_t p = TMath::Sqrt(pt*pt+pz*pz);
-	
-	m_dedx->Fill(p,r->dedx[0]);
+      // Fill dedx
+      Float_t pt = 1./r->invpt;
+      Float_t pz = r->tanl/r->invpt;
+      Float_t p = TMath::Sqrt(pt*pt+pz*pz);
 
-      }         
+      m_dedx->Fill(p,r->dedx[0]);
     }
-
   }
-
 }
-
-
 //_____________________________________________________________________________
 void St_stk_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_stk_Maker.cxx,v 1.11 1999/02/25 20:29:48 caines Exp $\n");
-  //  printf("* %s    *\n",m_VersionCVS);
+  printf("* $Id: St_stk_Maker.cxx,v 1.12 1999/03/13 00:26:48 perev Exp $\n");
   printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
+  if (Debug()) StMaker::PrintInfo();
 }
 
