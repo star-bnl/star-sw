@@ -9,18 +9,18 @@
     cd [data]/emc/hits
     
     tdm/newtable ems_hits_bemc ems_hits       9600
-    tdm/newtable ems_hits_bsmd ems_hits      18000
+    tdm/newtable ems_hits_bsmd ems_hits      36000
     tdm/newtable ems_hits_eemc ems_hits      10000
     tdm/newtable ems_hits_esmd ems_hits      20000
     
     tdm/newtable emc_hits_bemc      emc_hits      4800 
     tdm/newtable emc_hits_bprs      emc_hits      4800 
-    tdm/newtable emc_hits_bsmde     emc_hits	  5000
-    tdm/newtable emc_hits_bsmdp     emc_hits	  5000
+    tdm/newtable emc_hits_bsmde     emc_hits	 18000
+    tdm/newtable emc_hits_bsmdp     emc_hits	 18000
     tdm/newtable emc_hits_eemc      emc_hits      1440 
     tdm/newtable emc_hits_eprs      emc_hits      1440 
-    tdm/newtable emc_hits_esmde     emc_hits	  5000
-    tdm/newtable emc_hits_esmdp     emc_hits	  5000
+    tdm/newtable emc_hits_esmde     emc_hits	 20000
+    tdm/newtable emc_hits_esmdp     emc_hits	 20000
     
     cd /dui
     
@@ -33,6 +33,33 @@
              
 * create tables for output
     
+ return
+
+
+* ************************************************************
+ macro dstemc
+   
+  macro/global/import *
+             
+    cd [dst]
+
+* create tables for output
+    tdm/newtable bemc_dst_hits 	         emc_dst_hits         4805 
+    tdm/newtable bprs_dst_hits           emc_dst_hits         4805 
+    tdm/newtable bsmde_dst_hits          emc_dst_hits	      5005
+    tdm/newtable bsmdp_dst_hits          emc_dst_hits	      5005
+    tdm/newtable eemc_dst_hits           emc_dst_hits         1445 
+    tdm/newtable eprs_dst_hits           emc_dst_hits         1445 
+    tdm/newtable esmde_dst_hits          emc_dst_hits	      5005
+    tdm/newtable esmdp_dst_hits          emc_dst_hits	      5005
+    tdm/newtable bemc_dst_hits_index     emc_dst_hits_index   4805 
+    tdm/newtable bprs_dst_hits_index     emc_dst_hits_index   4805 
+    tdm/newtable bsmde_dst_hits_index    emc_dst_hits_index   5005
+    tdm/newtable bsmdp_dst_hits_index    emc_dst_hits_index   5005
+    tdm/newtable eemc_dst_hits_index     emc_dst_hits_index   1445 
+    tdm/newtable eprs_dst_hits_index     emc_dst_hits_index   1445 
+    tdm/newtable esmde_dst_hits_index    emc_dst_hits_index   5005
+    tdm/newtable esmdp_dst_hits_index    emc_dst_hits_index   5005        	
  return
 
 
@@ -55,3 +82,6 @@
   return
 
 * *************************************************************
+
+
+

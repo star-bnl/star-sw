@@ -21,7 +21,7 @@ routines for sharing structures in VxWorks or other multi-threaded OS
 SEM_ID errSemID = NULL;
 SEM_ID tidSemID = NULL;
 #endif
-static int errSemVal = 0, nErrTake = 0;
+static int errSemVal = 0, nErrTake = 0, nTidTake = 0, tidSemVal = 0;
 /******************************************************************************
 *
 * dsErrSemGive - unlock error structures
@@ -78,5 +78,52 @@ int dsSemInit(void)
 		return FALSE;
 	}
 #endif
+	return TRUE;
+}
+/******************************************************************************
+*
+* dsSemStats - print lock statsistics
+*
+* RETURNS: TRUE
+*/
+int dsSemStats(void)
+{
+	printf("semStats: errSemVal %d, tidSemVal %d, nErrTake %d, nTidTake %d\n",
+		errSemVal, tidSemVal, nErrTake, nTidTake);
+	return TRUE;
+}
+/******************************************************************************
+*
+* dsTypeSemGive - unlock structures
+*
+* RETURNS: TRUE if success else FALSE
+*/
+int dsTypeSemGive(void)
+{
+#ifdef VXWORKS
+	if (semGive(tidSemID)) {
+#else
+	if (--tidSemVal){
+#endif
+		DS_ERROR(DS_E_SEM_GIVE_ERROR);
+	}
+	return TRUE;
+}
+/******************************************************************************
+*
+* dsTypeSemTake - lock type structures
+*
+* RETURNS: TRUE if success else FALSE
+*/
+int dsTypeSemTake(void)
+{
+	nTidTake++;
+#ifdef VXWORKS
+	if (semTake(tidSemID, WAIT_FOREVER)) {
+#else
+	if (tidSemVal++){
+#endif
+		DS_ERROR(DS_E_SEM_TAKE_ERROR);
+	}
 	return TRUE;
 }

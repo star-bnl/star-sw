@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.30  1998/11/25 21:51:08  fisyak
+#  remove tcc trg and l3 from directories list for hp_ux102
+#
 #  Revision 1.29  1998/11/15 21:12:58  fisyak
 #  fix shared libraries versioning for St_Root
 #
@@ -166,7 +169,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/11/15 21:12:58 $ 
+#           Last modification $Date: 1998/11/25 21:51:08 $ 
 #  default setings
 # Current Working Directory
 #
@@ -254,10 +257,12 @@ ifneq (,$(findstring gen, $(SUBDIRS)))
 endif
 #. take out trg for sgi
 ifneq (,$(findstring $(STAR_SYS),sgi_64 ))
-        SUBDIRS := $(filter-out trg, $(SUBDIRS))
+#        SUBDIRS := $(filter-out trg, $(SUBDIRS))
 endif
-ifneq (,$(findstring $(STAR_SYS),hp_ux102))
-        SUBDIRS := $(filter-out l3, $(SUBDIRS))
+ifneq (,$(findstring $(STAR_SYS),hp_ux102 ))
+         SUBDIRS := $(filter-out tcc, $(SUBDIRS))
+         SUBDIRS := $(filter-out trg, $(SUBDIRS))
+         SUBDIRS := $(filter-out l3, $(SUBDIRS))
 endif
 endif
 ifeq ($(LEVEL), $(TWO))  #default is domain

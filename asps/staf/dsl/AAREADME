@@ -1,10 +1,14 @@
-AAREADME - 11nov98 - CETull@lbl.gov
+AAREADME
 
-(cd lib; make)
-	...will make the DSL libraries.
+B. Moskowitz, BNL   April 29, 1996
 
-make -f star.mk
-	...will prepare the DSL package for installStaf.csh
+An important message concerning the dsl package
+-----------------------------------------------
 
-For programming documentation see doc/dsl.html
+The dsl package must use its own Makefiles, and not the standard 
+slm Makefiles.  This is because dsl needs to work under VxWorks 
+as well as under Unix.
 
+To build the library, use the command "make", not "make lib".
+
+The top Makefile now uses STAR_SYS_LEVEL for "make install".
