@@ -1,4 +1,6 @@
-// $Id: bfcz.C,v 1.10 1999/03/17 03:00:06 fisyak Exp $
+// $Id: bfcz.C,v 1.11 1999/04/01 23:39:46 fisyak Exp $
+#define GTRACK
+#define GEANT
 //#define TRS
 //#define TSS
 #define FTPC
@@ -6,8 +8,9 @@
 #define SVT
 //#define EMC
 #define CTF
-//$define StMagF
-#define GEANT
+#ifndef GTRACK
+//#define StMagF
+#endif
 //#define XDF
 TBrowser *b = 0;
 class StChain;
@@ -84,6 +87,9 @@ void bfcz (const Int_t Nevents=1000000,
      const Char_t *fzfile ="/disk1/star/test/psc0049_08_40evts.fzd",
      TString* FileOut=0)
 {                              
+  // Dynamically link some shared libs
+  if (gClassTable->GetID("StChain") < 0) Load();
+#ifndef GTRACK
   //set I/O for crs
   TString InFile = "$input_file";
   gSystem->ExpandPathName(InFile);
@@ -97,16 +103,17 @@ void bfcz (const Int_t Nevents=1000000,
     if (NoEvents > Nevents) {NoEvents = Nevents;}  
     printf("Input file name = %s with No.Events to process = %i \n",InFile.Data(),NoEvents);
   }
-  // Dynamically link some shared libs
-  if (gClassTable->GetID("StChain") < 0) Load();
   if (!FileOut){
     FileOut = new TString(gSystem->BaseName(InFile.Data()));
     FileOut->ReplaceAll(".fzd",".root");
     FileOut->ReplaceAll(".fz",".root");
     FileOut->Strip();
   }
+#else
+  if (!FileOut) FileOut = new TString("gtrack.root");
+  Int_t NoEvents = Nevents;
+#endif
   printf("File for chain %s\n",FileOut.Data());
-  TFile       *root_out  =  new TFile(FileOut->Data(),"RECREATE");
 #ifdef XDF
   St_XDFFile  *xdf_out = 0;
   TString *XdfFile = new TString(FileOut->Data());
@@ -132,8 +139,20 @@ void bfcz (const Int_t Nevents=1000000,
 
   geant = new St_geant_Maker("geant");
   geant->SetNwGEANT(10 000 000);
+#ifdef GTRACK
+  geant->SetIwtype(1);
   geant->SetDebug();
+  geant->LoadGeometry("detp geometry YEAR_1B");
+  geant->Do("subevent 0;");
+  geant->Do("gkine 25 6 1. 1. -1. 1. 0 6.28  -1. 1.;");
+  geant->Do("mode g2tm prin 1;");
+  //  geant->Do("next;");
+  //  geant->Do("dcut cave z 1 10 10 0.03 0.03;");
+  geant->Do("debug on;");
+  geant->Do("swit 2 3;");
+#else
   geant->SetInputFile(InFile.Data());
+#endif
   chain->SetInput("geom","geant:geom");
 #ifdef FSS
 //		fss
@@ -199,9 +218,9 @@ GLOBAL:
   St_dst_Maker *dstMk = new St_dst_Maker("dst");
   dstMk->SetDebug();
   St_QA_Maker          *qa         = new St_QA_Maker;  
-  goto CHAIN;
+//  goto CHAIN;
 //		Tree
-  StTreeMaker *treeMk = new StTreeMaker("tree",InFile.Data());
+  StTreeMaker *treeMk = new StTreeMaker("tree",FileOut.Data());
   treeMk->SetIOMode("w");
   treeMk->SetDebug();
   treeMk->SetInput("dst","dst");

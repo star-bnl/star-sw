@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.11 1999/03/10 14:28:17 fisyak Exp $
+// $Id: doEvents.C,v 1.12 1999/04/01 23:39:47 fisyak Exp $
 // $Log: doEvents.C,v $
-// Revision 1.11  1999/03/10 14:28:17  fisyak
-// Clean up for SL99c
+// Revision 1.12  1999/04/01 23:39:47  fisyak
+// Cleanup old macros
+//
+// Revision 1.12  1999/04/01 23:39:47  fisyak
+// Cleanup old macros
 //
 // Revision 1.11  1999/03/10 14:28:17  fisyak
 // Clean up for SL99c
@@ -120,7 +123,7 @@ void doEvents(const Int_t nevents=999,
 
   gSystem->Load("xdf2root");
   // Dynamically link needed shared libs
-  gSystem->Load("St_emc_Maker");
+  //  gSystem->Load("St_emc_Maker");
   gSystem->Load("St_io_Maker");
   St_io_Maker *rootIn=0;
   gSystem->Load("St_Tables");
