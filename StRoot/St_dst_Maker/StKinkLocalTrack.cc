@@ -1,5 +1,8 @@
-// $Id: StKinkLocalTrack.cc,v 1.6 1999/11/10 21:03:29 wdeng Exp $
+// $Id: StKinkLocalTrack.cc,v 1.7 1999/12/07 21:47:31 wdeng Exp $
 // $Log: StKinkLocalTrack.cc,v $
+// Revision 1.7  1999/12/07 21:47:31  wdeng
+// Made change to please the compiler
+//
 // Revision 1.6  1999/11/10 21:03:29  wdeng
 // Use SystemOfUnits.h
 //
@@ -61,7 +64,7 @@ Int_t StKinkLocalTrack::Compare(TObject *obj)
 {
   if( mStartRadius2D == ((StKinkLocalTrack*)obj)->mStartRadius2D ) return 0;
   if( mStartRadius2D <  ((StKinkLocalTrack*)obj)->mStartRadius2D ) return -1;
-  if( mStartRadius2D >  ((StKinkLocalTrack*)obj)->mStartRadius2D ) return 1;
+  return 1;
 }
 
 Bool_t StKinkLocalTrack::IsEqual(TObject *obj)
