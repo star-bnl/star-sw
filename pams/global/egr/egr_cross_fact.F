@@ -29,6 +29,7 @@ C_______________________________________________________________________
       INTEGER idet
       REAL    xnew,ynew,xold,yold,cf,theta
       REAL    vlocal(3),vglobal(3)
+      real    atand
       integer tgc_global_to_local_p,isect,iret
 C______________________________________________________________________
  
