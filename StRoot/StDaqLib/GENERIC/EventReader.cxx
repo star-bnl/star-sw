@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.36 2002/01/17 18:29:54 jeromel Exp $
+ * $Id: EventReader.cxx,v 1.37 2002/10/10 22:13:58 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.37  2002/10/10 22:13:58  ward
+ * Silence error msg about missing banks in WhereAreThePointers.
+ *
  * Revision 1.36  2002/01/17 18:29:54  jeromel
  * After I looked at the code, corrections from Akio (pass2).
  *
@@ -810,7 +813,7 @@ void EventReader::WhereAreThePointers(int *beg,int *end,char *xx) {
   if(!strcmp(xx,    "FPDP")) { *beg=0; *end=0; } // This is for chekcing data corruptions. Skip for now
   (*beg)--; (*end)--;
   if((*beg)<0||(*end)<0) {
-    printf("Please add code to WhereAreThePointers for '%s'.\n",xx);
+    // printf("Please add code to WhereAreThePointers for '%s'.\n",xx); Commented Oct 10 2002.
     *beg=0; *end=0; return;
   }
   if(*beg>=*end) assert(0);
