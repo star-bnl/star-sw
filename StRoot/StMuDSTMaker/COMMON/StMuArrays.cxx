@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.cxx,v 1.11 2004/05/04 00:10:28 perev Exp $
+ * $Id: StMuArrays.cxx,v 1.12 2004/10/19 01:43:05 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -18,8 +18,13 @@ const char* StMuArrays::arrayNames [__NALLARRAYS__    ] = {"MuEvent",
 							   "Xi","McXi","XiAssoc",
 							   "Kink","McKink","KinkAssoc",
 							   "StrangeCuts",
-/*emcArrayNames    [__NEMCARRAYS__    ]*/                  "EmcCollection",
-/*pmdArrayNames    [__NPMDARRAYS__    ]*/                  "PmdCollection",
+/*emcArrayNames    [__NEMCARRAYS__    ]*/                  "EmcTow",
+                                                           "EmcPrs","EmcSmde",
+                                                           "EmcSmdp",
+                                                           "EEmcPrs","EEmcSmdu","EEmcSmdv",
+/*pmdArrayNames    [__NPMDARRAYS__    ]*/                  "PmdHit","CpvHit",
+							   "PmdCluster",
+							   "CpvCluster",
 /*tofArrayNames    [__NTOFARRAYS__    ]*/                  "TofHit","TofData"};
 
 const char** StMuArrays::strangeArrayNames = StMuArrays::arrayNames    +__NARRAYS__;
@@ -38,8 +43,9 @@ const char* StMuArrays::arrayTypes [__NALLARRAYS__    ] = {"StMuEvent",
 							   "StXiMuDst","StXiMc","StStrangeAssoc",
 							   "StKinkMuDst","StKinkMc","StStrangeAssoc",
 							   "TCut",
-/*emcArrayTypes   [__NEMCARRAYS__     ]*/                  "StMuEmcCollection",
-/*pmdArrayTypes   [__NPMDARRAYS__     ]*/                  "StMuPmdCollection",
+/*emcArrayTypes   [__NEMCARRAYS__     ]*/                  "StMuEmcTowerData","StMuEmcHit",
+							   "StMuEmcHit","StMuEmcHit","StMuEmcHit","StMuEmcHit","StMuEmcHit",
+/*pmdArrayTypes   [__NPMDARRAYS__     ]*/                  "StMuPmdHit","StMuPmdHit","StMuPmdCluster","StMuPmdCluster",
 /*tofArrayTypes   [__NTOFARRAYS__     ]*/                  "StMuTofHit","StTofData"};
 const char** StMuArrays::strangeArrayTypes = StMuArrays::arrayTypes    +__NARRAYS__;
 const char** StMuArrays::emcArrayTypes = StMuArrays::strangeArrayTypes +__NSTRANGEARRAYS__;
@@ -49,10 +55,13 @@ const char** StMuArrays::tofArrayTypes = StMuArrays::pmdArrayTypes     +__NPMDAR
 
 //		ARRAY SIZES
 //============================================================================================
-int   StMuArrays::arraySizes       [__NALLARRAYS__    ] = {1,50000,50000,50000,50000,100,100,100,100,
-/*strangeArraySizes[__NSTRANGEARRAYS__]*/                  1,1,50000,100,100,50000,100,100,50000,100,100,200,
-/*emcArraySizes    [__NEMCARRAYS__    ]*/                  1,
-/*pmdArraySizes    [__NPMDARRAYS__    ]*/                  1,
+// These are intial sizes. Automatically resized if too small.
+// Choosing too large initial values gives a performance penalty when reading 
+// only selected MuDst branches 
+int   StMuArrays::arraySizes       [__NALLARRAYS__    ] = {1,1000,1000,1000,1000,100,100,100,100,
+/*strangeArraySizes[__NSTRANGEARRAYS__]*/                  1,1,1000,100,100,1000,100,100,1000,100,100,200,
+/*emcArraySizes    [__NEMCARRAYS__    ]*/                  1,1000,1000,1000,1000,1000,1000,
+/*pmdArraySizes    [__NPMDARRAYS__    ]*/                  1000,1000,1000,1000,
 /*tofArraySizes    [__NTOFARRAYS__    ]*/                  100, 200};
 int* StMuArrays::strangeArraySizes = StMuArrays::arraySizes    +__NARRAYS__;
 int* StMuArrays::emcArraySizes = StMuArrays::strangeArraySizes +__NSTRANGEARRAYS__;
@@ -64,8 +73,8 @@ int* StMuArrays::tofArraySizes = StMuArrays::pmdArraySizes     +__NPMDARRAYS__;
 //============================================================================================
 int   StMuArrays::arrayCounters       [__NALLARRAYS__ ] = {0,0,0,0,0,0,0,0,0,
 /*strangeArrayCounters[__NSTRANGEARRAYS__]*/               0,0,0,0,0,0,0,0,0,0,0,0,
-/*emcArrayCounters    [__NEMCARRAYS__    ]*/               0,
-/*pmdArrayCounters    [__NPMDARRAYS__    ]*/               0,
+/*emcArrayCounters    [__NEMCARRAYS__    ]*/               0,0,0,0,0,0,0,
+/*pmdArrayCounters    [__NPMDARRAYS__    ]*/               0,0,0,0,
 /*tofArrayCounters    [__NTOFARRAYS__    ]*/               0, 0};
 
 StMuArrays test;
@@ -95,6 +104,9 @@ StMuArrays::StMuArrays()
 /***************************************************************************
  *
  * $Log: StMuArrays.cxx,v $
+ * Revision 1.12  2004/10/19 01:43:05  mvl
+ * Changes for splitting Emc and Pmd collections
+ *
  * Revision 1.11  2004/05/04 00:10:28  perev
  * Cleanup
  *
