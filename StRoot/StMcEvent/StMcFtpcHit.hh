@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.hh,v 2.3 1999/12/15 20:05:48 calderon Exp $
+ * $Id: StMcFtpcHit.hh,v 2.4 2000/01/18 20:52:31 calderon Exp $
  * $Log: StMcFtpcHit.hh,v $
+ * Revision 2.4  2000/01/18 20:52:31  calderon
+ * Works with CC5
+ *
  * Revision 2.3  1999/12/15 20:05:48  calderon
  * corrected the comment on the numbering of the plane
  *
@@ -35,7 +38,6 @@ class StThreeVectorF;
 class g2t_ftp_hit_st;
 
 #if !defined(ST_NO_NAMESPACES)
-using namespace std;
 #endif
 
 class StMcFtpcHit : public StMcHit {

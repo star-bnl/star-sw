@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.2 1999/12/03 00:51:52 calderon Exp $
+ * $Id: StMcEvent.hh,v 2.3 2000/01/18 20:52:31 calderon Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.3  2000/01/18 20:52:31  calderon
+ * Works with CC5
+ *
  * Revision 2.2  1999/12/03 00:51:52  calderon
  * Tested with new StMcEventMaker.  Added messages for
  * diagnostics.
@@ -28,11 +31,6 @@
 #define StMcEvent_hh
 
 #include <iostream.h>
-
-
-#if !defined(ST_NO_NAMESPACES)
-using namespace std;
-#endif
 
 #include "StMcTpcHitCollection.hh"
 #include "StMcFtpcHitCollection.hh"

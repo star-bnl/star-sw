@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.3 1999/12/14 07:04:49 calderon Exp $
+ * $Id: StMcEvent.cc,v 2.4 2000/01/18 20:52:31 calderon Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.4  2000/01/18 20:52:31  calderon
+ * Works with CC5
+ *
  * Revision 2.3  1999/12/14 07:04:49  calderon
  * Numbering scheme as per SVT request.
  *
@@ -34,11 +37,10 @@
 #include "StMcSvtHit.hh"
 #include "tables/St_g2t_event_Table.h"
 
-#include <string>
-#include <utility>
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.3 1999/12/14 07:04:49 calderon Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.3 1999/12/14 07:04:49 calderon Exp $";
+
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.4 2000/01/18 20:52:31 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.4 2000/01/18 20:52:31 calderon Exp $";
 
 void StMcEvent::initToZero()
 {
@@ -57,7 +59,8 @@ void StMcEvent::initToZero()
 }
 
 StMcEvent::StMcEvent()
-{   cout << "Inside StMcEvent Constructor" << endl;
+{
+    cout << "Inside StMcEvent Constructor" << endl;
     initToZero();
 }
 

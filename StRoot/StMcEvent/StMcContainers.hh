@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcContainers.hh,v 2.2 1999/12/14 07:04:49 calderon Exp $
+ * $Id: StMcContainers.hh,v 2.3 2000/01/18 20:52:31 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcContainers.hh,v $
+ * Revision 2.3  2000/01/18 20:52:31  calderon
+ * Works with CC5
+ *
  * Revision 2.2  1999/12/14 07:04:49  calderon
  * Numbering scheme as per SVT request.
  *
@@ -24,6 +27,11 @@
 #define StMcContainers_hh
 
 #include <vector>
+
+#ifndef ST_NO_NAMESPACES
+using std::vector;
+#endif
+
 
 class StMcHit;
 class StMcVertex;
