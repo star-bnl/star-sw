@@ -31,7 +31,9 @@
 // some includes
 
 #include <stdlib.h>
+#ifdef LEDA
 #include "_memory.hpp"
+#endif
 
 // class declaration
 
@@ -62,7 +64,9 @@ public:
                a1_xy = a2_xy = a1_sz = a2_sz = 0.0F;
       strack = (float) 0.0;
    };
+#ifdef LEDA
    LEDA_MEMORY(TTrackFit);
+#endif
 };
 
 #endif

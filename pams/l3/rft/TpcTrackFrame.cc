@@ -220,10 +220,14 @@ void TpcTrackFrame::ProcessEvent()
 // free event memory and clean up
 void TpcTrackFrame::Done()
 {
+#ifdef LEDA
 //  Error << ">> Cleaning environment" << endl;
 // kill all the memory at once, but leave the first memory block allocated for further use
   std_memory_mgr.kill_but_first();
+#endif
+//
 // and get a new freepoint list
+//
   fFreePoints = new THitList();
 // create free point lists for sectorwise calculation
   for(int count = 0; count < 24; count++)
@@ -302,7 +306,7 @@ int TpcTrackFrame::FillResultTable
   
   int counter = 0;
   forall(track, *fTracks) {
-     tracks[counter].flag     = 0;
+     tracks[counter].flag     = 1;
      tracks[counter].hitid    = 0;
      tracks[counter].id       = counter + 1 ;
      tracks[counter].dedx[0]  = 0.0;
@@ -323,13 +327,15 @@ int TpcTrackFrame::FillResultTable
 //     and assign them to this track
 //
      int id ; 
+     int nHits = 1 ;
      forall(tHit, *(track->GetHits())) {
         id = tHit->GetId() ;
         if ( id < 0 || id > hit_h->nok - 1 ) {
            printf ( "TpcTrackFrame: \n Error assigning hits to tracks " ) ; 
            continue ;
         }
-        hit[id].track = counter + 1 ;
+        hit[id].track = 1000 * (counter + 1) + nHits ;
+        nHits++ ;
      }
 //
 //    Increase counter and check bounds
