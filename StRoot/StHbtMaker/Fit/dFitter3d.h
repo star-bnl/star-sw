@@ -25,7 +25,7 @@ class dFitter3d : public TObject
 	////
 	// constructors
 	////
-	dFitter3d( TMinuit* gMinuit, TH3D* numerator, TH3D* denominator, TString opt, TString opt ) ;
+	dFitter3d( TMinuit* gMinuit, TH3D* numerator, TH3D* denominator, TString opt, TString opt2 ) ;
         ~dFitter3d() ;
     
 	////
