@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StppuDstMaker.h,v 1.2 2002/02/11 20:30:48 akio Exp $
+ * $Id: StppuDstMaker.h,v 1.3 2002/06/24 13:22:59 akio Exp $
  * $Log: StppuDstMaker.h,v $
+ * Revision 1.3  2002/06/24 13:22:59  akio
+ * numerous bug fix & updates
+ *
  * Revision 1.2  2002/02/11 20:30:48  akio
  * Many updates, including very first version of jet finder.
  *
@@ -33,17 +36,20 @@ class StBbcTriggerDetector;
 class StFpdCollection;
 class StEmcClusterCollection;
 class StEmcPoint;
+class StMuDst;
 
 class StppuDstMaker : public StMaker {
 public:
   StppuDstMaker(const Char_t *name="StppuDst");
-  Int_t Init();
+  Int_t Init(const Char_t* filename="spinDst.root");
   Int_t Make();
-  Int_t Finish();
-  
+  Int_t Finish(); 
+  void setMuDst(StMuDst* p) {mudst=p;};
+
 protected:
     
 private:
+  StMuDst*        mudst;        //!
   size_t          mGoodCounter; //!
   size_t          mBadCounter;  //!
   TFile           *m_outfile;   //!

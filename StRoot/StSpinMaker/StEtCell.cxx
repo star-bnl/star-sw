@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StEtCell.cxx,v 1.1 2002/02/11 20:30:47 akio Exp $
+// $Id: StEtCell.cxx,v 1.2 2002/06/24 13:22:58 akio Exp $
 // $Log: StEtCell.cxx,v $
+// Revision 1.2  2002/06/24 13:22:58  akio
+// numerous bug fix & updates
+//
 // Revision 1.1  2002/02/11 20:30:47  akio
 // Many updates, including very first version of jet finder.
 //
@@ -17,8 +20,8 @@
 ClassImp(StEtCell);
 
 void  StEtCell::print() const{
-  printf("Key %6d    Eta %6.3f(%6.3f : %6.3f)    Phi %6.3f(%6.3f : %6.3f)  Entry %6d   Et %6.3f \n",
-	 key,eta(),etaMin,etaMax,phi(),phiMin,phiMax,nEntry,et);
+  printf("Key=%6d  Et=%6.3f Eta=%6.3f(%6.3f : %6.3f) Phi=%6.3f(%6.3f : %6.3f) Entry=%6d JetId=%3d\n",
+	 key,et,eta(),etaMin,etaMax,phi(),phiMin,phiMax,nEntry,jetId);
 }
 
 Int_t StEtCell::Compare(const TObject* obj) const{
@@ -43,7 +46,7 @@ float  StEtCell::distancePhi(const StEtCell* othercell) const{
 float  StEtCell::distance(const StEtCell* othercell) const{
   float deta = distanceEta(othercell);
   float dphi = distancePhi(othercell);
-  return sqrt(deta*deta+dphi+dphi);
+  return sqrt(deta*deta + dphi*dphi);
 }
 
 int StEtCell::check(int key,float e1,float e2,float p1,float p2) const{
@@ -54,5 +57,3 @@ int StEtCell::check(int key,float e1,float e2,float p1,float p2) const{
   if(p2!=phiMax) return 6;
   return 0;
 }
-
-

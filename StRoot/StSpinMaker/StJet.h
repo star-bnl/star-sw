@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJet.h,v 1.1 2002/02/11 20:30:48 akio Exp $
+// $Id: StJet.h,v 1.2 2002/06/24 13:22:59 akio Exp $
 // $Log: StJet.h,v $
+// Revision 1.2  2002/06/24 13:22:59  akio
+// numerous bug fix & updates
+//
 // Revision 1.1  2002/02/11 20:30:48  akio
 // Many updates, including very first version of jet finder.
 //
@@ -39,6 +42,7 @@ public:
   Float_t      eta;  
   Int_t        nCell;
 
+  Float_t      ez() const {return et*sinh(eta);}
   ClassDef(StJet,2)
 };
 
