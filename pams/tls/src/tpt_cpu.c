@@ -23,14 +23,21 @@
 #include <sys/resource.h>
 int getrusage();
 
-#endif /* sun4 ****************************************************************/
+#endif /* sun4 **************************************************************/
 
-#ifdef sun4os5 /* Solaris definition ******************************************/
+#ifdef sun4os5 /* Solaris definition ****************************************/
 
 #include <sys/types.h>
 #include <sys/times.h>
 #include <sys/param.h>
-#endif /* sun4os5 ************************************************************/
+#endif /* sun4os5 ***********************************************************/
+
+#ifdef sun4os5pc /* Solaris on pentium definition ***************************/
+
+#include <sys/types.h>
+#include <sys/times.h>
+#include <sys/param.h>
+#endif /* sun4os5pc  ***************************************************/
 
 #ifdef VAX /* VAX definitions ************************************************/
 
