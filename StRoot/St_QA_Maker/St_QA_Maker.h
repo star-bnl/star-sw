@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.23 1999/07/07 16:58:34 kathy Exp $
+//! $Id: St_QA_Maker.h,v 1.24 1999/07/09 13:14:19 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.24  1999/07/09 13:14:19  kathy
+//! now have put in new primtrk histograms to match the globtrk ones
+//!
 //! Revision 1.23  1999/07/07 16:58:34  kathy
 //! put log scales on some histograms
 //!
@@ -124,7 +127,7 @@ class TCanvas;
 class St_QA_Maker : public StMaker {
  private:
   Bool_t drawinit;
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.23 1999/07/07 16:58:34 kathy Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.24 1999/07/09 13:14:19 kathy Exp $";
   //! Histograms booking constants
   static const Int_t nxpT;
   static const Int_t nyeta;
@@ -269,24 +272,52 @@ class St_QA_Maker : public StMaker {
   TH1F     *m_dedx0;         //! dE/dx [0]
   TH1F     *m_dedx1;         //! dE/dx [1] 
   
-  // for method MakeHistPrim - from table primtrk
-  TH1F     *m_prim_pT;          //! pT  recostructed
-  TH1F     *m_prim_eta;         //! eta recostructed
-  TH2F     *m_prim_pT_eta_rec;  //! pT versus eta Spectra for reconstructed
-  TH1F     *m_prim_tlength;     //! dst track length
-  TH1F     *m_prim_chi2xd;      //! x chisq/degf
-  TH1F     *m_prim_chi2yd;      //! y chisq/degf
-  TH1F     *m_prim_point;       //! # points on track
-  TH1F     *m_prim_fit_point;   //! # fitted points
-  TH1F     *m_prim_psi;         //! psi angle_ 
-  TH1F     *m_prim_det_id;        //!
-  TH2F     *m_prim_mom_trklength; //!
-  TH2F     *m_prim_npoint_length; //!
-  TH2F     *m_prim_fpoint_length; //!
-  TH2F     *m_prim_chisq0_mom;    //!
-  TH2F     *m_prim_chisq1_mom;    //!
-  
-  
+
+// for method MakeHistGlob - from table primtrk
+  TH1F     *m_primtrk_tot;   //! # tracks in table
+  TH1F     *m_primtrk_good;  //! # tracks in table with iflag>0 
+  TH1F     *m_primtrk_iflag; //! iflag value
+  TH1F     *m_pdet_id;        //! detector id of track
+  TH1F     *m_ppoint;         //! number of points on the track
+  TH1F     *m_pmax_point;     //! number of max possible track points
+  TH1F     *m_pfit_point;     //! number of track points used for fitting
+  TH1F     *m_prim_charge;    //! particle charge in units of |e|
+  TH1F     *m_prim_x0;        //! x-coord. at start of helix
+  TH1F     *m_prim_y0;        //! y-coord. at start of helix
+  TH1F     *m_prim_z0;        //! z-coord. at start of helix
+  TH1F     *m_prim_xf;        //! x-coord. of first tpc hit
+  TH1F     *m_prim_yf;        //! y-coord. of first tpc hit
+  TH1F     *m_prim_zf;        //! z-coord. of first tpc hit
+  TH1F     *m_ppsi;           //! psi reconstructed
+  TH1F     *m_ptanl;          //! tan(dip) =pz/pt at start
+  TH1F     *m_prim_theta;     //! theta - calculated
+  TH1F     *m_peta;           //! eta reconstructed
+  TH1F     *m_pmom;           //! momentum reconstructed
+  TH1F     *m_ppT;            //! pT  reconstructed
+  TH1F     *m_pchisq0;        //! chi square [0]
+  TH1F     *m_pchisq1;        //! chi square [1]
+  TH1F     *m_plength;        //! length of track
+  TH1F     *m_prim_impact;    //! impact parameter from primary vertex
+  TH1F     *m_prim_ndf;       //! no. deg. of freedom for track fit.
+
+  TH2F     *m_ppT_eta_rec;    //! pT versus eta Spectra for reconstructed
+  TH2F     *m_ptanl_z0;       //! tanl(dip angle) vs z coord at start of helix
+  TH2F     *m_pmom_trklength; //! mom vs. trk length
+  TH2F     *m_peta_trklength; //! trk length vs. eta
+  TH2F     *m_pnpoint_length; //! num points vs length
+  TH2F     *m_pfpoint_length; //! num fit points vs length
+  TH2F     *m_pchisq0_mom;    //! chisq0 vs momentum
+  TH2F     *m_pchisq1_mom;    //! chisq1 vs momentum
+  TH2F     *m_pchisq0_eta;    //! chisq0 vs eta
+  TH2F     *m_pchisq1_eta;    //! chisq1 vs eta
+  TH2F     *m_pchisq0_dip;    //! chisq0 vs dip angle
+  TH2F     *m_pchisq1_dip;    //! chisq1 vs dip angle
+  TH2F     *m_pchisq0_z0;    //! chisq0 vs z0 - helix start point
+  TH2F     *m_pchisq1_z0;    //! chisq1 vs z0 - helix start point
+  TH2F     *m_pnfptonpt_mom;  //! mom vs ratio of n fit pnts over n pnts
+  TH2F     *m_pnfptonpt_eta;  //! eta vs ratio of n fit pnts over n pnts
+
+
   // for method MakeHistGen - from table particle
   TH2F     *m_H_pT_eta_gen;  //! pT versus eta Spectra for generated
   TH1F     *m_H_pT_gen;  //! pT Spectra for generated
