@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.462 2005/02/04 16:14:20 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.463 2005/02/04 18:07:33 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -366,6 +366,7 @@ Bfc_st BFC1[] = { // standard chains
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
   {"l3Util"      ,""  ,"","",""                                         ,"Stl3Util","Load Stl3Util",kFALSE},
   {"PmdUtil"     ,""  ,"","","",                                       "StPmdUtil","Load StPmdUtil",kFALSE},
+  {"QUtils"      ,""  ,"","PmdUtil,EmcUtil","",                      "","Load QA Libs dependencies",kFALSE},
   {"MuDSTDeps"   ,""  ,"","StEvent","",                              "StEventUtilities,StStrangeMuDstMaker",
                                                               "Load MuDST misc. dependencies (all)",kFALSE},
   {"MuDST"       ,""  ,"","MuDSTDeps,EmcUtil,TofUtil,PmdUtil","",
@@ -630,8 +631,8 @@ Bfc_st BFC1[] = { // standard chains
 
 
 
-  {"QA"          ,"QA","","globT,SCL,global"  ,"St_QA_Maker","St_QA_Maker","Filling Y1/Y2 Qa histo",kFALSE},
-  {"EventQA"     ,"EventQA","","Event"     ,"StEventQAMaker","St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
+  {"QA"     ,"QA","","QUtils,globT,SCL,global","St_QA_Maker","St_QA_Maker","Filling Y1/Y2 Qa histo",kFALSE},
+  {"EventQA","EventQA","","QUtils,Event","StEventQAMaker"   ,"St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display"     ,"","","TbUtil,St_geom",
@@ -1013,6 +1014,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
   {"l3Util"      ,""  ,"","",""                                         ,"Stl3Util","Load Stl3Util",kFALSE},
   {"PmdUtil"     ,""  ,"","","",                                       "StPmdUtil","Load StPmdUtil",kFALSE},
+  {"QUtils"      ,""  ,"","PmdUtil,EmcUtil","",                      "","Load QA Libs dependencies",kFALSE},
   {"MuDSTDeps"   ,""  ,"","StEvent","",                              "StEventUtilities,StStrangeMuDstMaker",
                                                               "Load MuDST misc. dependencies (all)",kFALSE},
   {"MuDST"       ,""  ,"","MuDSTDeps,EmcUtil,TofUtil,PmdUtil","",
@@ -1298,8 +1300,8 @@ Bfc_st BFC2[] = { // ITTF Chains
 
 
   // Reminder: You are within the ITTF chain definitions
-  {"QA"          ,"QA","","globT,SCL,global"  ,"St_QA_Maker","St_QA_Maker","Filling Y1/Y2 Qa histo",kFALSE},
-  {"EventQA"     ,"EventQA","","Event"     ,"StEventQAMaker","St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
+  {"QA"     ,"QA","","QUtils,globT,SCL,global","St_QA_Maker","St_QA_Maker","Filling Y1/Y2 Qa histo",kFALSE},
+  {"EventQA","EventQA","","QUtils,Event"   ,"StEventQAMaker","St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display"     ,"","","TbUtil,St_geom",
