@@ -1,5 +1,8 @@
-* $Id: pixlgeo1.g,v 1.3 2004/07/15 16:28:40 potekhin Exp $
+* $Id: pixlgeo1.g,v 1.4 2005/01/06 01:59:40 potekhin Exp $
 * $Log: pixlgeo1.g,v $
+* Revision 1.4  2005/01/06 01:59:40  potekhin
+* Added an important comment, corrected a typo in another
+*
 * Revision 1.3  2004/07/15 16:28:40  potekhin
 * Changes the outer radius of the mother volume to a more
 * reasonable value
@@ -117,7 +120,10 @@ Block PSEC is a group of ladders
 * in space, along the lines of x=r*cos(...), y=r*sin(...)
 * have to correct and convert to radians:
 
-         anglePos = angle*raddeg               !  +angleCorr  see above cpmment
+         anglePos = angle*raddeg               !  +angleCorr  see above comment
+
+* In case we do go with the pOffset, don't forget to correct the radius,
+* to keep the surfaces at the nominal DCA to the beam
 
          Create and Position PLMO x=PIXG_r*cos(anglePos) y=PIXG_r*sin(anglePos) _
          z=0.0 AlphaZ=-PIXG_aOffset+angle
