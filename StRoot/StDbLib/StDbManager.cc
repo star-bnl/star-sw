@@ -183,8 +183,8 @@ StDbManager::lookUpServers(){
   //cout << "looking up Servers " << endl;
 
 char* xmlfile1 = getFileName("HOME");
-char* xmlfile2 = getFileName("STAR","/StDb/Servers");
-char* xmlfile3 = getFileName("STDB_SERVERS");
+char* xmlfile2 = getFileName("STDB_SERVERS");
+char* xmlfile3 = getFileName("STAR","/StDb/servers");
 
 if(xmlfile1){
  ifstream is1(xmlfile1);
