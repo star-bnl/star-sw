@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: EztEmcRawData.h,v 1.2 2004/11/29 18:36:59 mvl Exp $
+ * $Id: EztEmcRawData.h,v 1.3 2005/01/08 20:06:42 mvl Exp $
  *
  * Author: Alex Suaide, Mar 2004, JB
  ***************************************************************************
@@ -17,8 +17,11 @@
 
 class EztEmcRawData : public TObject {
 public:
-  enum {MAXEMCDATABANK=60}; // 48 would be enough for EEMC
+  enum { MAXEMCDATABANK=60}; // 48 would be enough for EEMC
   enum { WRDCNT=0,ERRFLG=1,TOKEN=2,CRATE=3}; // header words
+  enum { bitCrateID=1<<0, bitToken=1<<1, bitLenCount=1<<2, bitTrigComm=1<<3,
+	 bitErrFlag=1<<4, bitN256=1<<5, bitGhost=1<<6, bitCrateOff=1<<7, 
+	 bitStall=1<<8, bitVoid=1<<15};
 
   EztEmcRawData();
   EztEmcRawData(const EztEmcRawData&);
@@ -36,22 +39,34 @@ public:
   void          setHeader(int, unsigned short*);
   void          setData(int, unsigned short*);
   
-  const UChar_t getCorruption(int ib) const { return  mCorrupt[ib];}
-  void          setCorruption(int ib, UChar_t x) {mCorrupt[ib]=x;}
+  const UShort_t getCorruption(int ib) const { return  mCorrupt[ib];}
+  void          setCorruption(int ib, UShort_t x) {mCorrupt[ib]=x;}
+  bool          isVoid(int ib) { return mCorrupt[ib] & bitVoid; }
 
-  static UShort_t  getErrFlag(const UShort_t* hd)  { return  hd[ERRFLG] & 0x0FFF; }
-  static UShort_t  getLenCount(const UShort_t* hd) { return  hd[WRDCNT] & 0x0FFF; }
-  static UShort_t  getToken(const UShort_t* hd)    { return  hd[TOKEN] & 0x0FFF; }
-  static UChar_t   getTrigComm(const UShort_t* hd) { return (hd[CRATE] / 0x0100) &0x000F ; }
-  static UChar_t   getCrateID(const UShort_t* hd)  { return  hd[CRATE] & 0x00FF ; }
+  static UShort_t  getErrFlag(const UShort_t* hd)  { 
+    return  hd[ERRFLG] & 0x0FFF; }
+  static UShort_t  getLenCount(const UShort_t* hd) { 
+    return  hd[WRDCNT] & 0x0FFF; }
+  static UShort_t  getToken(const UShort_t* hd)    { 
+    return  hd[TOKEN] & 0x0FFF; }
+  static UShort_t   getTrigComm(const UShort_t* hd) { 
+    return (hd[CRATE] / 0x0100) &0x000F ; }
+  static UShort_t   getCrateID(const UShort_t* hd)  { 
+    return  hd[CRATE] & 0x00FF ; }
 
   UShort_t  getErrFlag(int ib)  const { return  getErrFlag(header(ib)); }
   UShort_t  getLenCount(int ib) const { return  getLenCount(header(ib)); }
   UShort_t  getToken(int ib)    const { return  getToken(header(ib)); }
-  UChar_t   getTrigComm(int ib) const { return  getTrigComm(header(ib)); }
-  UChar_t   getCrateID(int ib)  const { return  getCrateID(header(ib)); }
-  UChar_t   isHeadValid(int ib, int token, int crId, int len, int trigComm, int errFlag, int dbg=0); // test one header & fill saninty
-  static UChar_t   isHeadValid(const UShort_t* hd, int token, int crId, int len, int trigComm, int errFlag, int dbg=0);
+  UShort_t  getTrigComm(int ib) const { return  getTrigComm(header(ib)); }
+  UShort_t  getCrateID(int ib)  const { return  getCrateID(header(ib)); }
+
+  //........ corruption tests ......
+  bool purgeCrateOFF(int ib);// discards header & data for one crate
+  void tagHeadValid(int ib, int token, int crId, int len, int trigComm, int errFlag, int dbg=0); // test one header & fill saninty
+
+  //..... working horse(s) 
+  static bool  isCrateOFF( const UShort_t* hd);
+  static UShort_t  isHeadValid(const UShort_t* hd, int token, int crId, int len, int trigComm, int errFlag, int dbg=0);
 
   void print(int ib, int flag); // one block
   void print(int flag=0); // all nonzero blocks
@@ -60,18 +75,21 @@ public:
  protected:
   TArrayS       mHeader[MAXEMCDATABANK];
   TArrayS       mData[MAXEMCDATABANK];
-  UChar_t       mCorrupt[MAXEMCDATABANK];// encodes all corruptions, filled in fly
+  UShort_t      mCorrupt[MAXEMCDATABANK];// encodes all corruptions, filled in fly
   
  private:
   void          deleteBank(int);
   
-  ClassDef(EztEmcRawData,1)
+  ClassDef(EztEmcRawData,2)
 };
 #endif
 
 /**************************************************************************
  *
  * $Log: EztEmcRawData.h,v $
+ * Revision 1.3  2005/01/08 20:06:42  mvl
+ * Code added by Jan Balewski (for corruption checking?)
+ *
  * Revision 1.2  2004/11/29 18:36:59  mvl
  * New code for header checks and some printing (by Jan Balewski)
  *

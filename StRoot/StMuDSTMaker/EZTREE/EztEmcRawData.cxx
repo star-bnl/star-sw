@@ -1,5 +1,5 @@
 /***********************************************************************
- * $Id: EztEmcRawData.cxx,v 1.2 2004/11/29 18:36:59 mvl Exp $
+ * $Id: EztEmcRawData.cxx,v 1.3 2005/01/08 20:06:42 mvl Exp $
  * Author: Alex Suaide, Mar 2004, JB
  ************************************************************************/
 
@@ -13,7 +13,7 @@ EztEmcRawData::EztEmcRawData()
     for(int i=0;i<MAXEMCDATABANK;i++) {
 	mHeader[i].Set(0);
 	mData[i].Set(0);
-	setCorruption(i,0xff); // all bad is default
+	setCorruption(i,0xffff); // all bad is default
     }
 }
 
@@ -102,25 +102,44 @@ EztEmcRawData::sizeData(int bank) const
     return mData[bank].GetSize();
 }
 
-
 //----------------------------------------------------
-UChar_t 
-EztEmcRawData::isHeadValid( int ib, int token, int crId, int len, int trigComm, int errFlag, int dbg) 
-{
-  UChar_t ret= isHeadValid(header(ib), token, crId,  len, trigComm,  errFlag, dbg);
-  setCorruption(ib,ret);
-  return ret;
+bool
+EztEmcRawData::purgeCrateOFF(int ib){
+  bool isOFF=isCrateOFF(header(ib));
+  if(isOFF) { // crate was OFF based on the header
+    setCorruption(ib,bitCrateOff);
+    deleteBank(ib);
+  }
+  return isOFF;
 } 
 
 //----------------------------------------------------
-UChar_t  EztEmcRawData::isHeadValid(const UShort_t* hd, int token, int crId, int len, int trigComm, int errFlag, int dbg) {// just test one header    {
-   // encode failure all test as subsequent bits
-  UChar_t ret=0;
-  ret|=(getCrateID(hd)!=crId)<<0;
-  ret|=(getToken(hd)!=token)<<1;
-  ret|=(getLenCount(hd)!=len)<<2;
-  ret|=(getTrigComm(hd)!=trigComm)<<3;
-  ret|=(getErrFlag(hd)!=errFlag)<<4;
+void 
+EztEmcRawData::tagHeadValid( int ib, int token, int crId, int len, int trigComm, int errFlag, int dbg)  {
+  UShort_t ret= isHeadValid(header(ib), token, crId,  len, trigComm,  errFlag, dbg);
+  setCorruption(ib,ret);
+  // return ret;
+} 
+
+
+//----------------------------------------------------
+bool
+EztEmcRawData:: isCrateOFF( const UShort_t* hd) {
+  bool a=(hd[0]& 0xFFF)==0xFFF; // Gerard's prescription
+  bool b=(hd[1]& 0xFFF)==0xFFF;
+  return a && b;
+}
+
+//----------------------------------------------------
+UShort_t  
+EztEmcRawData::isHeadValid(const UShort_t* hd, int token, int crId, int len, int trigComm, int errFlag, int dbg) {// just test one header  
+  // encode failure of all test as subsequent bits
+  UShort_t ret=0;
+  if (getCrateID(hd)!=crId) ret |=bitCrateID;
+  if (getToken(hd)!=token)  ret |=bitToken;
+  if (getLenCount(hd)!=len) ret |=bitLenCount;
+  if (getTrigComm(hd)!=trigComm) ret |=bitTrigComm;
+  if (getErrFlag(hd)!=errFlag)   ret |=bitErrFlag;
   if (dbg) {
     print(hd);
     printf("getCrateID()/0x is=%x %x=required\n",getCrateID(hd),crId);
@@ -138,7 +157,7 @@ UChar_t  EztEmcRawData::isHeadValid(const UShort_t* hd, int token, int crId, int
 void
 EztEmcRawData::print(int ib, int flag) 
 {
-  printf("EztEmcRawData block=%d corruption=0x%02x\n",ib,getCorruption(ib));
+  printf("EztEmcRawData block=%d corruption=0x%04x\n",ib,getCorruption(ib));
 
   if(flag<=0) {   print(header(ib)); return; }
 
@@ -177,6 +196,9 @@ void EztEmcRawData::print(const UShort_t* hd, const UShort_t* d, int nd) {
 /***************************************************************************
  *
  * $Log: EztEmcRawData.cxx,v $
+ * Revision 1.3  2005/01/08 20:06:42  mvl
+ * Code added by Jan Balewski (for corruption checking?)
+ *
  * Revision 1.2  2004/11/29 18:36:59  mvl
  * New code for header checks and some printing (by Jan Balewski)
  *
