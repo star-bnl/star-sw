@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.hh,v 1.4 1999/06/16 14:26:51 fisyak Exp $
+ * $Id: StTrsWireHistogram.hh,v 1.5 1999/07/09 03:46:49 lasiuk Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,9 +11,13 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.hh,v $
- * Revision 1.4  1999/06/16 14:26:51  fisyak
- * Add flags for egcs on Solaris
+ * Revision 1.5  1999/07/09 03:46:49  lasiuk
+ * add switch for singleElectron multiplication, gaussian random
+ * number generator
  *
+ * Revision 1.5  1999/07/09 03:46:49  lasiuk
+ * add switch for singleElectron multiplication, gaussian random
+ * number generator
  *
  * Revision 1.4  1999/06/16 14:26:51  fisyak
  * Add flags for egcs on Solaris
@@ -99,8 +103,10 @@ public:
     //void putWire(vector<StTrsWireBinEntry>&);
 
     // Gas Gain
+    void   setDoGasGain(bool)            ;
     void   setGasGainInnerSector(double) ;
-
+    void   setGasGainOuterSector(double) ;
+    void   setDoGasGainFluctuations(bool);
     void   setDoSingleElectronMultiplication(bool);
     double avalanche(int)                ;
     double gaussianMultiplication(int)   ;
@@ -124,6 +130,7 @@ private:
     int             mNumberOfOuterSectorAnodeWires; // from dataBase
     int             mTotalNumberOfAnodeWires;
 
+    // Gas Gain
     bool            mDoGasGain;
     bool            mDoGasGainFluctuations;
     bool            mGasGainCalculationDone;
@@ -137,13 +144,15 @@ private:
     StTpcGeometry*    mGeomDb;
     StTpcSlowControl* mSCDb;
     
-    static HepJamesRandom   mEngine;
+    aTpcWirePlane      mSectorWires;
+
     static StTrsWireHistogram* mInstance;
 
     static HepJamesRandom  mEngine;
     static RandGauss       mGaussianDistribution;
     static RandExponential mExponentialDistribution;
 };
+int inline StTrsWireHistogram::min() const {return mMin;}
 int inline StTrsWireHistogram::max() const {return mMax;}
 void inline StTrsWireHistogram::setDoGasGain(bool gg) {mDoGasGain = gg;}
 void inline StTrsWireHistogram::setDoTimeDelay(bool t) {mDoTimeDelay = t;}
