@@ -50,7 +50,7 @@ c     WRITE(*,*) VECTORS_SPEC
 	  ENDIF
       ENDDO
       WRITE(*,*) '###  checked ',T1_H.NOK,' rows'
-      DO I=1,T1_H.NOK
+      DO I=1,T2_H.NOK
       DO J=1,3
 	  IF( (T2(I).BSHORTS(J) .NE. I+J-2)
      +    .OR.(T2(I).BUSHORTS(J) .NE. I+J-2)
