@@ -16,6 +16,7 @@ class StiRootSimpleTrackFilter : public StiTrackFilter, public EditableParameter
 		   double max,
 		   double increment,
 		   int    type);*/
+  virtual bool accept(StiTrack * t) const;
   virtual void initialize();
   virtual void setDefaults();
 
@@ -36,7 +37,10 @@ public:
   
  protected:
   ///Return a pointer to a new StiRootSimpleTrackFilter object on the heap.
-  virtual void * makeNewObject() const;
+  virtual void * makeNewObject() const
+    {
+      return new StiRootSimpleTrackFilter();
+    }
   
  private:
   StiRootSimpleTrackFilterFactory(); //Not implemented
