@@ -1,5 +1,8 @@
-* * $Id: bfc.kumac,v 1.60 1998/09/23 17:38:07 kathy Exp $
+* * $Id: bfc.kumac,v 1.61 1998/09/23 19:25:06 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.61  1998/09/23 19:25:06  kathy
+* new example list in bfc and new examples
+*
 * Revision 1.60  1998/09/23 17:38:07  kathy
 * fix event counters; fix output messages; Pavels fix for rg2t; remove first from input list and change all call examples for this; revise dictionary in bfc to make current
 *
@@ -226,9 +229,9 @@
 * editted 9/21/98 K. Turner - add inputs and global macros for ebye stuff
 *                           - remove !!! for user kumacs
 * editted 9/23/98 K. Turner - fixing messages and event counters
-*                           - nev_total = total # events read in, including skipped events
-*                           - nev_proc = total # events processed (not incl. skipped)
-* - nev_pass = total # events passed the processing
+*                               nev_total = total # events read in, including skipped events
+*                               nev_proc = total # events processed (not incl. skipped)
+*                               nev_pass = total # events passed the processing
 * 
 * ******************************************************************************
 * -- DICTIONARY OF INPUTS TO BFC.KUMAC --
@@ -341,43 +344,38 @@
 * -- EXAMPLE CHAINS --
 * Use the kumacs listed below as examples - they are in $STAR/kumacs/chain
 * 
-* 1. call_bfc_gstar_g2t.kumac
+* 1. call_bfc_g2tin_to_dst.kumac
+*   - read in g2t file
+*   - do tpc,svt simulations
+*   - do tpc & svt reconstruction
+*   - do global reconstruction
+*   - dst packages
+*   - write output file
+*
+* 2. call_bfc_gstar_g2t.kumac
 *   - read in event generator file (e.g. from hijing)
 *   - run gstar
 *   - run g2t
 * 
-* 2. call_bfc_read_dst.kumac 
+* 3. call_bfc_read_dst.kumac 
 *   - read in dst file
 *
-* 3. call_bfc_read_dst_ebye.kumac 
+* 4. call_bfc_read_dst_ebye.kumac 
 *   - read in dst file
 *   - run ebye post-dst analysis
 *
-* 4. call_bfc_read_dst_user.kumac 
+* 5. call_bfc_read_dst_user.kumac 
 *   - read in dst file
 *   - run user post-dst analysis
 *   - write out ntuple and full event file
 *
-* 5. call_bfc_readfz_g2t_sim.kumac
+* 6. call_bfc_readfz_ftpc.kumac
 *   - read in fz file
 *   - run g2t
-*   - run tpc (tss) & svt (srs) simulation
+*   - run ftpc simulation
 *   - write out xdf file containing full directories
-* 
-* 6. call_bfc_readfz_g2t_tfs_srs_emc.kumac
-*   - read in fz file
-*   - run g2t
-*   - run tpc & svt & emc simulation
 *
-* 7. call_bfc_readfz_to_dst_year2.kumac
-*   - read in fz file with year2 simulations
-*   - run g2t
-*   - run tpc & svt & emc simulation
-*   - tpc, svt reconstruction
-*   - global reconstruction
-*   - dst packages
-*
-* 8. call_bfc_readfz_to_dst_year1.kumac
+* 7. call_bfc_readfz_to_dst_year1.kumac
 *   - read in fz file with year1 simulations
 *   - run g2t
 *   - run tpc & emc simulation
@@ -385,7 +383,25 @@
 *   - global reconstruction
 *   - dst packages
 *
-* 9. call_bfc_reco.kumac                  
+* 8. call_bfc_readfz_to_dst_year2.kumac
+*   - read in fz file with year2 simulations
+*   - run g2t
+*   - run tpc & svt & emc simulation
+*   - tpc, svt reconstruction
+*   - global reconstruction
+*   - dst packages
+*
+* 9. call_bfc_readfz_to_sim_tfs_year1.kumac
+*   - read in fz file with year1 simulations
+*   - run g2t
+*   - run tpc & svt & emc simulation
+*
+* 10. call_bfc_readfz_to_sim_tfs_year2.kumac
+*   - read in fz file with year2 simulations
+*   - run g2t
+*   - run tpc & svt & emc simulation
+*
+* 11. call_bfc_reco.kumac                  
 *  - read in simulated data file (thru tss & srs)
 *  - run tpc & svt clustering
 *  - run tpc & svt tracking
@@ -393,17 +409,6 @@
 *  - run dst packages
 *  - write xdf file containing full directories
 * 
-* 10. call_bfc_reco_global.kumac           
-*  - read in data file that has simulation and tracking on it (thru tpt & sgr)
-*  - run global packages
-*  - run dst packages
-*  - write output file containing full directories
-* 
-* 11. call_bfc_reco_trk.kumac              
-*  - read in simulated data file (thru tss & srs)
-*  - run tpc & svt clustering
-*  - run tpc & svt tracking
-*  - write xdf file containing full directories
 * 
 * 12. call_bfc_reco_trk_ftpc.kumac              
 *  - read in simulated data file (thru tss & srs)
@@ -436,21 +441,8 @@
 *   - run tpc tracking
 *   - write xdf file containing full directories
 * 
-* 17.  call_bfc_tpc_svt_sim_global.kumac 
-*   - read in g2t file
-*   - run svt & tpc fast sim 
-*   - run svt & tpc tracking
-*   - run global packages
-*   - write xdf file containing full directories
 * 
-* 18.  call_bfc_tpc_svt_sim_global_dst.kumac 
-*   - read in g2t file
-*   - run svt & tpc fast sim 
-*   - run svt & tpc tracking
-*   - run global packages
-*   - write xdf file containing full directories
-* 
-* 19. call_bfc_txt_gstar_g2t.kumac
+* 17. call_bfc_txt_gstar_g2t.kumac
 *   - read in text file
 *   - run gstar
 *   - run g2t

@@ -16,5 +16,5 @@
    skip=0 _
    no_events=1 _
    input_data_file=$AFS_RHIC/star/data/samples/auau_central_hijing.xdf _
-   output_file=bfc_sim_global_dst_out _
-   log=bfc_sim_global_dst.log
+   output_file=auau_central_hijing_out _
+   log=bfc_g2tin_to_dst.log
