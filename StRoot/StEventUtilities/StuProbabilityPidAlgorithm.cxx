@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.29 2003/04/30 20:37:12 perev Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.30 2003/05/02 21:32:08 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.30  2003/05/02 21:32:08  aihong
+ * destroy myBandBGFcn in destructor
+ *
  * Revision 1.29  2003/04/30 20:37:12  perev
  * Warnings cleanup. Modified lines marked VP
  *
@@ -164,6 +167,7 @@ StuProbabilityPidAlgorithm::StuProbabilityPidAlgorithm():
 //-------------------------------
 StuProbabilityPidAlgorithm::~StuProbabilityPidAlgorithm(){
   /* no op */
+  delete myBandBGFcn;
 }
 //-------------------------------
 void StuProbabilityPidAlgorithm::setDedxMethod(StDedxMethod method){
