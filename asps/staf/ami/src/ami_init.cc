@@ -28,7 +28,9 @@ extern CC_P int ami_load(amiBroker* broker); //automatically generated
 //:<--------------------------------------------------------------------
 int ami_init()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("AMI:Initializing. ");
+#endif
 
 /*- Define the AMI KUIP commands. -*/
    ami_def_();
@@ -44,7 +46,9 @@ int ami_init()
 //:<--------------------------------------------------------------------
 int ami_start()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("AMI:Starting. ");
+#endif
 
 /*- Create the AMI Broker. -*/
    ami = new amiBroker("ami");
@@ -61,7 +65,9 @@ int ami_start()
 //:<--------------------------------------------------------------------
 int ami_stop()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("AMI:Stopping. ");
+#endif
 
 /*- Delete the AMI Broker.
    delete ami;
