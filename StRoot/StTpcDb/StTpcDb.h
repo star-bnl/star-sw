@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.11 1999/12/16 22:00:53 hardtke Exp $
+ * $Id: StTpcDb.h,v 1.12 2000/01/11 15:49:52 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.12  2000/01/11 15:49:52  hardtke
+ * get Electronics table from Calibrations database, Fix error messages
+ *
  * Revision 1.11  1999/12/16 22:00:53  hardtke
  * add CVS tags
  *
@@ -50,7 +53,7 @@ class St_Table;
 
 class StTpcDb {
  private:
- enum { kCalibrarion,kGeometry,kConditions } ;
+ enum { kCalibration,kGeometry,kConditions } ;
  StMaker* mk;
  StTpcPadPlaneI*       PadPlane;      //!
  StTpcWirePlaneI*      WirePlane;     //!
