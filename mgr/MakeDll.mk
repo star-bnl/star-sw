@@ -55,8 +55,16 @@ endif
 SYS_DIR := $(OUT_DIR)/.$(STAR_SYS)
 LIB_DIR := $(SYS_DIR)/lib
 OBJ_DIR := $(SYS_DIR)/obj/$(PKGNAME)
+DEP_DIR := $(SYS_DIR)/dep/$(PKGNAME)
 TMP_DIR := $(SYS_DIR)/tmp
 SRC_DIR := $(INP_DIR)
+#.
+    check_out   := $(shell test -d $(OUT_DIR) || mkdir -p $(OUT_DIR)) 
+    check_sys   := $(shell test -d $(SYS_DIR) || mkdir -p $(SYS_DIR)) 
+    check_lib   := $(shell test -d $(LIB_DIR) || mkdir -p $(LIB_DIR))
+    check_obj   := $(shell test -d $(OBJ_DIR) || mkdir -p $(OBJ_DIR))
+    check_dep   := $(shell test -d $(DEP_DIR) || mkdir -p $(DEP_DIR))
+
 #	Includes
 #####INCLUDES := $(addprefix -I,$(wildcard $(UPP_INP_DIR)/*/inc))
 
@@ -256,10 +264,10 @@ $(DEP_DIR)/%.d: %.cxx
 ####%.d:  %.cdf
 endif
 DeleteDirs :
-	rm -r $(TMP_DIR)
+	$(RMDIR)  $(TMP_DIR)
 
 clean :
-	-rm -r $(OUPUT_DIRS)
+	-$(RMDIR)  $(OUPUT_DIRS)
 
 
 endif # end of DoIt
