@@ -18,7 +18,7 @@ class StiTrackToObjMap: public TrackToObjMap
 	     StiHitToHitMap*, 
 	     StiHitToTrackMap*);
   void clear();
-  void analyze(Filter<StiTrack> * filter, StiHit * vertex);
+  void analyze(Filter<StiTrack> * filter, StiHit * vertex=0);
 };
 
 #endif
