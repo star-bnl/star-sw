@@ -1,5 +1,8 @@
-// $Id: rootlogon.C,v 1.16 1999/11/11 00:25:53 fisyak Exp $
+// $Id: rootlogon.C,v 1.17 1999/11/15 23:46:42 fisyak Exp $
 // $Log: rootlogon.C,v $
+// Revision 1.17  1999/11/15 23:46:42  fisyak
+// Separate time stamps and chains
+//
 // Revision 1.16  1999/11/11 00:25:53  fisyak
 // replace cout by printf
 //
@@ -51,7 +54,6 @@
   //    G__loadfile("iostream.h");
     TString gPrompt =  gSystem->BaseName(gROOT->GetApplication()->Argv(0));
     gPrompt += " [%d] ";
-
    ((TRint*)gROOT->GetApplication())->SetPrompt( gPrompt.Data()); // Redefine prompt
 
    printf("\nWelcome to the ROOT tutorials\n\n");
@@ -110,6 +112,7 @@ TBuffer::SetGlobalWriteParam(2003);
  gSystem->ExpandPathName(ROOT_LEVEL);
  printf("QAInfo:You are using STAR_LEVEL : %s and ROOT_LEVEL : %s \n",  STAR_LEVEL.Data(),ROOT_LEVEL.Data());
   gSystem->Exec("echo $USER from $HOST in STAR_LEVEL=$STAR_LEVEL / STAR_VERSION=$STAR_VERSION  `date` >>  $GROUP_DIR/statistics/root4star${STAR_VERSION}");
+  gSystem->SetIncludePath("-I./include -I./StRoot -I$STAR/include -I$STAR/StRoot -I$STAF/inc -I$CERN_ROOT/include -I$ROOTSYS/src");
 
 }
  

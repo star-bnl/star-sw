@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.118 1999/11/11 01:46:37 fisyak Exp $
+// $Id: bfc.C,v 1.119 1999/11/15 23:46:41 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
@@ -13,6 +13,7 @@ StEvent *Event;
 class St_geant_Maker;
 class StIOMaker;
 class St_XDFFile;
+class StEventDisplayMaker; StEventDisplayMaker *dsMk = 0;
 class StEventMaker; StEventMaker *evMk = 0;
 //_____________________________________________________________________
 void Load(){
@@ -27,7 +28,7 @@ void Load(){
 //_____________________________________________________________________
 void bfc(const Int_t First,
 	 const Int_t Last,
-	 const Char_t *Chain="gstar y2a tfs",Char_t *infile=0, Char_t *outfile=0)
+	 const Char_t *Chain="gstar Cy2a tfs",Char_t *infile=0, Char_t *outfile=0)
 { // Chain variable define the chain configuration 
   // All symbols are significant (regardless of case)
   // "-" sign before requiest means that this option is disallowed
@@ -42,6 +43,7 @@ void bfc(const Int_t First,
   chain->Set_IO_Files(infile,outfile);
   chain->Load();
   chain->Instantiate();
+  if (chain->GetOption("DISPLAY")) dsMk = (StEventDisplayMaker *) chain->GetMaker("EventDisplay");
 #if 0
   // Insert your maker before "tpc_hits"
   Char_t *myMaker = "St_TLA_Maker";
@@ -131,7 +133,7 @@ void bfc(const Int_t First,
 }
 //_____________________________________________________________________
 void bfc (const Int_t Last, 
-	  const Char_t *Chain="gstar y2a tfs",Char_t *infile=0, Char_t *outfile=0)
+	  const Char_t *Chain="gstar Cy2a tfs",Char_t *infile=0, Char_t *outfile=0)
 {
   bfc(1,Last,Chain,infile,outfile);
 }
@@ -169,19 +171,19 @@ void Usage() {
   printf (" root4star  bfc.C                   \t// Create this message\n");
   printf (" root4star 'bfc.C(1)'               \t// Run one event with default Chain=\"gstar tfs\"\n");
   printf (" root4star 'bfc.C(1,1)'             \t// the same\n");
-  printf (" root4star 'bfc.C(2,40,\"y1b fzin\")'\t// run for configuration year_1b, \n");
+  printf (" root4star 'bfc.C(2,40,\"Cy1b fzin\")'\t// run for configuration year_1b, \n");
   printf ("                                    \t// reading /star/rcf/disk1/star/test/psc0050_01_40evts.fzd\n");
   printf ("                                    \t// skipping the 1-st event and processing the remaining 39 events\n");
-  printf (" root4star 'bfc.C(40,\"y1b fzin\",\"/star/rcf/disk1/star/test/psc0050_01_40evts.fzd\")'\n");
-  printf (" root4star 'bfc.C(40,\"y1b fzin\")'\t// the same as  above\n");
-  printf (" root4star 'bfc.C(2,40,\"y1b fzin -l3t\")'//the as above but remove L3T from chain\n");
-  printf (" root4star 'bfc.C(40,\"y2a fzin\",\"/star/rcf/disk0/star/test/venus412/b0_3/year_2a/psc0208_01_40evts.fz\")'\n");
-  printf (" root4star 'bfc.C(40,\"y2a fzin\")'\t// the same as  above\n");
-  printf (" root4star 'bfc.C(5,10,\"y1b in xout\",\"/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf\")'\n");
+  printf (" root4star 'bfc.C(40,\"Cy1b fzin\",\"/star/rcf/disk1/star/test/psc0050_01_40evts.fzd\")'\n");
+  printf (" root4star 'bfc.C(40,\"Cy1b fzin\")'\t// the same as  above\n");
+  printf (" root4star 'bfc.C(2,40,\"Cy1b fzin -l3t\")'//the as above but remove L3T from chain\n");
+  printf (" root4star 'bfc.C(40,\"Cy2a fzin\",\"/star/rcf/disk0/star/test/venus412/b0_3/year_2a/psc0208_01_40evts.fz\")'\n");
+  printf (" root4star 'bfc.C(40,\"Cy2a fzin\")'\t// the same as  above\n");
+  printf (" root4star 'bfc.C(5,10,\"Cy1b in xout\",\"/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf\")'\n");
   printf ("                                    \t// skipping the 4 events and processing the remaining 6 events\n");
   printf (" root4star 'bfc.C(1,\"off in tpc FieldOff sd97 eval\",\"Mini_Daq.xdf\")'\t// the same as Chain=\"minidaq\"\n");
-  printf (" root4star 'bfc.C(1,\"gstar y1a tfs allevent\")' \t// run gstar and write all event into file branches\n");
-  printf (" root4star 'bfc.C(1,\"off in y1a l3t\",\"gtrack.tpc_hits.root\")'\t// run l3t only with prepaired file\n");
+  printf (" root4star 'bfc.C(1,\"gstar Cy1a tfs allevent\")' \t// run gstar and write all event into file branches\n");
+  printf (" root4star 'bfc.C(1,\"off in Cy1a l3t\",\"gtrack.tpc_hits.root\")'\t// run l3t only with prepaired file\n");
   printf (" root4star 'bfc.C(1,\"tdaq display\",\"/star/rcf/disk1/star/daq/990727.3002.01.daq\")' \n");
   printf (" \t//Cosmics (56) events with full magnetic field, TPC only \n");
   printf (" root4star 'bfc.C(1,\"tdaq FieldOn\",\"/star/rcf/disk1/star/daq/990624.306.daq\")' \n");

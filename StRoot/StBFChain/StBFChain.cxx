@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.31 1999/11/13 02:33:37 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.32 1999/11/15 23:46:22 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.32  1999/11/15 23:46:22  fisyak
+// Separate time stamps and chains
+//
 // Revision 1.31  1999/11/13 02:33:37  fisyak
 // Add dependence of ems from geant, eliminate geant Cint macros
 //
@@ -153,23 +156,29 @@ struct BfcItem {
 };
 BfcItem BFC[] = {
   {"Key"         ,"Name","Chain","Opts"                                   ,"Maker","Libs","Comment",kFALSE},
-  {"doEvents",""  ,"","xin,event,analysis,FiledOn",""                                        ,"","",kFALSE},
-  {"Kalman"  ,""  ,"","geant",""                                                             ,"","",kFALSE},
-  {"SD97"  ,""  ,"","db,tpc,global,dst,qa,event,analysis,tree","","","Turn on 1997 test parameters",kFALSE},
-  {"SD98"  ,""  ,"","db,tpc,global,dst,qa,event,analysis,tree","","","Turn on 1998 test parameters",kFALSE},
-  {"Y1a"    ,""  ,"","db,tpc,global,dst,qa,event,analysis,tree,ftpc,l0,l3t","","","Turn on Year 1a",kFALSE},
-  {"Y1b"    ,""  ,"","db,tpc,global,dst,qa,event,analysis,tree,ftpc,l0,l3t,ems,emc,rich","",""
-                                                                                         ,"Year 1b",kFALSE},
-  {"Y1c"    ,""  ,"","db,tpc,global,dst,qa,event,analysis,tree,ftpc,l0,l3t","","","Turn on Year 1c",kFALSE},
-  {"ES99","","","db,tpc,global,dst,qa,event,analysis,tree","",""
-                                                   ,"Turn on 1999 engineering run simulation param",kFALSE},
-  {"ER99","","","db,tpc,global,dst,qa,event,analysis,tree","",""
-                                                   ,"Turn on 1999 engineering run real data params",kFALSE},
-  {"Y1d"         ,""  ,"","db,tpc,global,dst,qa,event,analysis,tree",""       ,"","Turn on Year 1d",kFALSE},
-  {"Y1e"         ,""  ,"","db,tpc,global,dst,qa,event,analysis,tree","",""       ,"Turn on Year 1e",kFALSE},
-  {"Y2a"         ,""  ,"","db,tpc,global,dst,qa,event,analysis,tree,svt,ftpc,l0,l3t,ems,emc,rich","","",
-                                                                                  "Turn on Year 2a",kFALSE},
+  // time stamps
+  {"SD97"        ,""  ,"","db"                                ,"","","Turn on 1997 test parameters",kFALSE},
+  {"SD98"        ,""  ,"","db"                                ,"","","Turn on 1998 test parameters",kFALSE},
+  {"Y1a"         ,""  ,"","db"                                  ,"","","Turn on Year 1a parameters",kFALSE},
+  {"Y1b"         ,""  ,"","db"                                          ,"","","Year 1b parameters",kFALSE},
+  {"Y1c"         ,""  ,"","db"                                  ,"","","Turn on Year 1c parameters",kFALSE},
+  {"ES99"        ,""  ,"","db"          ,"","","Turn on 1999 engineering run simulation parameters",kFALSE},
+  {"ER99"        ,""  ,"","db"           ,"","","Turn on 1999 engineering run real data parameters",kFALSE},
+  {"Y1d"         ,""  ,"","db"                                  ,"","","Turn on Year 1d parameters",kFALSE},
+  {"Y1e"         ,""  ,"","db"                                  ,"","","Turn on Year 1e parameters",kFALSE},
+  {"Y2a"         ,""  ,"","db"                                  ,"","","Turn on Year 2a parameters",kFALSE},
+  // chains
+  {"doEvents","" ,""  ,"xin,event,analysis,FiledOn"                                       ,"","","",kFALSE},
+  {"Kalman"      ,""  ,"","geant"                                                         ,"","","",kFALSE},
+  {"dst"         ,""  ,"","global,dst,qa,event,analysis"                                  ,"","","",kFALSE},
+  {"Cy1a"        ,""  ,"","y1a,tpc,ftpc,l0,l3t,dst,tree"                 ,"","","Turn on chain y1a",kFALSE},
+  {"Cy1b"        ,""  ,"","y1b,ftpc,l0,l3t,ems,emc,rich,dst,tree"        ,"","","Turn on chain y1b",kFALSE},
+  {"Cy1c"        ,""  ,"","y1c,tpc,ftpc,l0,l3t,dst,tree"                 ,"","","Turn on chain y1c",kFALSE},
+  {"Cy1d"        ,""  ,"","y1d,tpc,global,dst,qa,event,analysis,tree"    ,"","","Turn on chain y1d",kFALSE},
+  {"cy1e"        ,""  ,"","y1e,tpc,dst,tree"                             ,"","","Turn on chain y1e",kFALSE},
+  {"Cy2a"        ,"","","y2a,tpc,svt,ftpc,l0,l3t,ems,emc,rich,dst,tree ,","","","Turn on chain y2a",kFALSE},
   {"Eval"        ,""  ,"","","",""                ,"Turn on evaluation switch for different makers",kFALSE},
+  //Options
   {"off"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
   {"db"          ,""  ,"","tables"               ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"calib"       ,""  ,"","tables"               ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
@@ -185,6 +194,7 @@ BfcItem BFC[] = {
   {"FieldOff"    ,""  ,"","-FieldOn,-HalfField,-ReverseField","StMagFC","StMagF" ,"No Field option",kFALSE},
   {"HalfField"   ,""  ,"","-FieldOn,-FieldOff,-ReverseField","StMagFC","StMagF","Half Field option",kFALSE},
   {"ReverseField",""  ,"","-FieldOn,-FieldOff,-HalfField","StMagFC","StMagF","Reverse Field option",kFALSE},
+  // Makers
   {"NoEvent"     ,""  ,"","-event,-analysis"      ,"","","Switch Off StEvent and StAnalysis Makers",kFALSE},
   {"geant","geant","","tables","St_geant_Maker","geometry,St_g2r,St_geant_Maker","initailize geant",kFALSE}, 
   {"tpc"         ,"tpc","","tables,tls,db,-tss,-trs,tcl,tpt"                ,"StMaker","StChain","",kFALSE},
@@ -195,6 +205,8 @@ BfcItem BFC[] = {
   {"tfs"         ,""  ,"","tpc,-trs,-tss","",""     ,"use tfs       (no St_[tss_ and no Trs]Maker)",kFALSE},
   {"tcl"         ,"tpc_hits","tpc","tables,tls"            ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
   {"tpt"         ,"tpc_tracks","tpc","tables,tls"          ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
+  {"laser"       ,"tpc_tracks","tpc","tdaq,tpc,-tpt"
+                                           ,"StLaserEventMaker","StLaserEvent,StLaserEventMaker","",kFALSE},  
   {"svt"         ,"svt"     ,""     ,"tables,srs,stk"                       ,"StMaker","StChain","",kFALSE},
   {"srs"         ,"svt_hits","svt","tls"                   ,"St_srs_Maker","St_svt,St_srs_Maker","",kFALSE},
   {"stk"         ,"svt_tracks","svt","tls"                 ,"St_stk_Maker","St_svt,St_stk_Maker","",kFALSE},
@@ -204,7 +216,7 @@ BfcItem BFC[] = {
   {"fpt"         ,"ftpc_tracks","ftpc","SCL"              ,"St_fpt_Maker","St_ftpc,St_fpt_Maker","",kFALSE},
   {"emc"         ,"emc","","geant,tables,ems,emh"                           ,"StMaker","StChain","",kFALSE},
   {"ems"         ,"emc_raw","emc","geant,tables"           ,"St_ems_Maker","St_emc,St_ems_Maker","",kFALSE},
-  {"emh"         ,"emc_hits","emc","geant,table"           ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
+  {"emh"         ,"emc_hits","emc","geant,tables"          ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
   {"l0"          ,"l0","","tables,ctf,mwc,trg"                              ,"StMaker","StChain","",kFALSE}, 
   {"ctf"         ,"ctf","l0","tables"                      ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE}, 
   {"mwc"         ,"mwc","l0","tables"                      ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE}, 
@@ -233,7 +245,6 @@ BfcItem BFC[] = {
   {"xout"        ,""  ,"",""                                 ,"","xdf2root","Write dst to XDF file",kFALSE}, 
   {"Tree"        ,""  ,"",""                                        ,"StTreeMaker","StTreeMaker","",kFALSE}
 };
-
 Int_t NoChainOptions = sizeof (BFC)/sizeof (BfcItem);
 StFile  *setFiles= 0;
 TString *InFile = 0;
@@ -359,12 +370,13 @@ Int_t StBFChain::Instantiate()
 	if (Key == "geant") {
 	  geant = new St_geant_Maker("geant");
 	  if (geant) {
-	    SetGeantOptions();
 	    BFC[i].Name = (Char_t *) geant->GetName();
-	  }
-	  if (!GetOption("fzin") && !GetOption("gstar")) {
-	    geant->SetNwGEANT(5000000);
-	    geant->SetActive(kFALSE);
+	    if (!GetOption("fzin") && !GetOption("gstar")) {
+	      geant->SetNwGEANT(5000000);
+	      geant->SetActive(kFALSE);
+	    }
+	    else     geant->SetNwGEANT(10000000);
+	    SetGeantOptions();
 	  }
 	  continue;
 	}
@@ -607,10 +619,9 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
 //_____________________________________________________________________
 void StBFChain::SetGeantOptions(){
   if (geant) {
-    geant->SetNwGEANT(10000000);
     SetInput("geant",".make/geant/.data");
     if (GetOption("Higz"))  geant->SetIwtype(1);
-    if (GetOption("gstar")) {
+    if (!GetOption("fzin")) {
       if (GetOption("SD97") || GetOption("SD98") || GetOption("Y1a") || 
 	  GetOption("ES99") || GetOption("ER99")) geant->LoadGeometry("detp geometry YEAR_1A"); 
       else {
@@ -629,26 +640,26 @@ void StBFChain::SetGeantOptions(){
 	  }
 	}
       }
-      geant->Do("subevent 0;");
-      // gkine #particles partid ptrange yrange phirange vertexrange 
-      geant->Do("gkine 10 6 1. 1. -1. 1. 0 6.28  0. 0.;");
-      geant->Do("mode g2tm prin 1;");
-      //  geant->Do("next;");
-      //  geant->Do("dcut cave z 1 10 10 0.03 0.03;");
-      if (GetOption("Debug")) geant->Do("debug on;");
-      geant->Do("swit 2 3;");
-      // geant->LoadGeometry("detp geometry GetOption("FieldOn") field_off");
+      if (GetOption("gstar")) {
+	geant->Do("subevent 0;");
+	// gkine #particles partid ptrange yrange phirange vertexrange 
+	geant->Do("gkine 10 6 1. 1. -1. 1. 0 6.28  0. 0.;");
+	geant->Do("mode g2tm prin 1;");
+	//  geant->Do("next;");
+	//  geant->Do("dcut cave z 1 10 10 0.03 0.03;");
+	if (GetOption("Debug")) geant->Do("debug on;");
+	geant->Do("swit 2 3;");
+      }
     }
     else {
-      if (GetOption("fzin")) {
-	if (geant->SetInputFile(InFile->Data()) > kStOK) {
-	  printf ("File %s cannot be opened. Exit! \n",InFile->Data());
-	  gSystem->Exit(1);
-	}
+      if (geant->SetInputFile(InFile->Data()) > kStOK) {
+	printf ("File %s cannot be opened. Exit! \n",InFile->Data());
+	gSystem->Exit(1);
       }
     }
   }
-}//_____________________________________________________________________
+}
+//_____________________________________________________________________
 void StBFChain::SetDbOptions(){
         if (GetOption("SD97")) dbMk->SetDateTime("sd97");
   else {if (GetOption("SD98")) dbMk->SetDateTime("sd98");
