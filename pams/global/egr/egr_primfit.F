@@ -172,7 +172,7 @@ C     SM modifying this to comply to iflag scheme we have
               endif
 C     
               primtrk(index).method = globtrk(i).method
-              call sbyt(primtrk(index).method,kKalmanFitId,1,4)
+              call sbyt(kKalmanFitId,primtrk(index).method,1,4)
               ndegf = ndef+2   ! two extra df for fit
               primtrk(index).id=globtrk(i).id
               primtrk(index).n_max_point=globtrk(i).n_max_point + 1
