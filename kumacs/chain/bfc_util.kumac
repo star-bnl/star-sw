@@ -306,7 +306,8 @@ macro bfc_init _
 	    exec create_tables_ftpc#fss_tables
 	    exec init_fss#init
       (fcl) 
-	    exec create_tables_ftpc#fcl_tables
+            exec create_tables_ftpc#fcl_tables
+            exec init_fcl#read_cal
 	    exec init_fcl#init
     (fpt_f)
 	    exec create_tables_ftpc#fpt_tables
