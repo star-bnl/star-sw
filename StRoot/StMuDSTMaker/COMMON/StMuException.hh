@@ -4,25 +4,21 @@
 #include <string>
 #include "Stiostream.h"
 #include <typeinfo>
+#include "StMuDebug.h"
 
 #ifndef ST_NO_NAMESPACES
 using namespace std;
 #endif
 
-#if ! defined(__PRETTY_FUNCTION__) 
-# define PF (__FILE__)
-#else
-# define PF (__PRETTY_FUNCTION__)
-#endif
-
-
 
 
 enum StMuExceptionTypes {kUnknown=0, kNullPointer, kBadFlag, kBadValue, kEOF};
 /** 
-    @class StMuException
+    \class StMuException
+
     Just a small helper class (and a few macros) to easily create a set of exceptions.
-    Using the "THROW(...)" macro the exception's datamember mIn will hold the name of the scope that was throwing the exception.
+    Using the "THROW(...)" macro the exception's datamember mIn will hold the name of 
+    the scope that was throwing the exception.
 */
 
 class StMuException {
@@ -39,7 +35,7 @@ public:
 };
 
 
-#define THROW(key,text) StMuException##key(text,__PRETTY_FUNCTION__)
+#define THROW(key,text) StMuException##key(text,__PRETTYF_)
 #define EXE(x) class StMuException##x : public StMuException { public: StMuException##x (const char* m="", const char* in="???") : StMuException(k##x, m, in) { /* no-op */ } };
 		       
 

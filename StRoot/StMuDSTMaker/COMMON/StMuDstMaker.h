@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.26 2003/11/09 01:02:59 perev Exp $
+ * $Id: StMuDstMaker.h,v 1.27 2004/02/17 04:56:36 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -62,12 +62,14 @@ class TChain;
 class TClonesArray;
 
 /**
-   @class StMuDstMaker
+   \class StMuDstMaker
+
    Class to create and read STAR's common micro dst (StMuDst)
    
-   This class is a true maker in the STAR sense. It inherits from "StMaker" and implements the functions "int Init()", "void Clear()",
-   int Make()", and "int Finish()" in order to run as part of an "StChain". Please refer to the STAR Computing Web pages in case you do not 
-   know what "StMaker" and "StChain" mean.
+   This class is a true maker in the STAR sense. It inherits from "StMaker" and implements 
+   the functions "int Init()", "void Clear()", int Make()", and "int Finish()" in order to 
+   run as part of an "StChain". Please refer to the STAR Computing Web pages in case you do 
+   not know what "StMaker" and "StChain" mean.
    
 */
 class StMuDstMaker : public StMaker {
@@ -126,7 +128,7 @@ class StMuDstMaker : public StMaker {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.26 2003/11/09 01:02:59 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.27 2004/02/17 04:56:36 jeromel Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -292,6 +294,12 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.27  2004/02/17 04:56:36  jeromel
+ * Extended help, added crs support, restored __GNUC__ for PRETTY_FUNCTION(checked once
+ * more and yes, it is ONLY defined in GCC and so is __FUCTION__),  use of a consistent
+ * internal __PRETTYF__, return NULL if no case selected (+message) and protected against
+ * NULL mChain.
+ *
  * Revision 1.26  2003/11/09 01:02:59  perev
  * more sofisticated clear() to fix leaks
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.cxx,v 1.3 2003/09/11 05:49:20 perev Exp $
+ * $Id: StMuIOMaker.cxx,v 1.4 2004/02/17 04:56:36 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -135,7 +135,7 @@ TClonesArray* StMuIOMaker::clonesArray(TClonesArray*& p, const char* type, int s
     p = new TClonesArray(type, size);
     counter=0;
   }
-  if (!p) throw StMuExceptionNullPointer("could not create TClonesArray",PF);
+  if (!p) throw StMuExceptionNullPointer("could not create TClonesArray",__PRETTYF__);
   return p;
 }
 //-----------------------------------------------------------------------
@@ -337,6 +337,12 @@ void  StMuIOMaker::SetFile(const char *fileName)    {
 /***************************************************************************
  *
  * $Log: StMuIOMaker.cxx,v $
+ * Revision 1.4  2004/02/17 04:56:36  jeromel
+ * Extended help, added crs support, restored __GNUC__ for PRETTY_FUNCTION(checked once
+ * more and yes, it is ONLY defined in GCC and so is __FUCTION__),  use of a consistent
+ * internal __PRETTYF__, return NULL if no case selected (+message) and protected against
+ * NULL mChain.
+ *
  * Revision 1.3  2003/09/11 05:49:20  perev
  * ansi corrs
  *

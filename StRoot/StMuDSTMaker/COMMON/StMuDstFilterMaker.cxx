@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.cxx,v 1.4 2003/11/24 23:36:36 laue Exp $
+ * $Id: StMuDstFilterMaker.cxx,v 1.5 2004/02/17 04:56:36 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDstFilterMaker.h"
@@ -33,9 +33,9 @@ StMuDstFilterMaker::StMuDstFilterMaker(const char* name) : StMaker(name), mMuDst
  * Create output file and the TClonesArrays needed
  */
 int StMuDstFilterMaker::Init() {
-  if (!mMuDstMaker) throw StMuExceptionNullPointer("pointer to the StMuDstMaker not set",PF);
+  if (!mMuDstMaker) throw StMuExceptionNullPointer("pointer to the StMuDstMaker not set",__PRETTYF__);
   mFile = new TFile(mFileName.c_str(),"RECREATE","StMuDst");
-  if (!mFile) throw StMuExceptionNullPointer("no file openend",PF);
+  if (!mFile) throw StMuExceptionNullPointer("no file openend",__PRETTYF__);
   mFile->SetCompressionLevel(__COMPRESSION__);
   
   // Create the TClonesArrays
@@ -46,7 +46,7 @@ int StMuDstFilterMaker::Init() {
   
   TBranch* branch;
   mTTree = new TTree("MuDst", "StMuDst",__SPLIT__);
-  if (!mTTree) throw StMuExceptionNullPointer("can not create tree",PF);
+  if (!mTTree) throw StMuExceptionNullPointer("can not create tree",__PRETTYF__);
   mTTree->SetAutoSave(__AUTOSAVE__);  // autosave when 1 Mbyte written
   //  muDst stuff
   DEBUGMESSAGE2("arrays");
@@ -214,6 +214,12 @@ ClassImp(StMuDstFilterMaker)
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.cxx,v $
+ * Revision 1.5  2004/02/17 04:56:36  jeromel
+ * Extended help, added crs support, restored __GNUC__ for PRETTY_FUNCTION(checked once
+ * more and yes, it is ONLY defined in GCC and so is __FUCTION__),  use of a consistent
+ * internal __PRETTYF__, return NULL if no case selected (+message) and protected against
+ * NULL mChain.
+ *
  * Revision 1.4  2003/11/24 23:36:36  laue
  * commented the StMuEmcCollection out
  *
