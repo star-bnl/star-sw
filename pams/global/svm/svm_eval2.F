@@ -145,7 +145,7 @@ C
 
 
       integer     i, index, j, tpcmat, mctpc, svtmat, mcsvt, nmax, row
-      integer     nmax2, k
+      integer     nmax2, k, pi
 
       parameter (pi=3.141592654)
       parameter (nmax = 10000)
@@ -164,7 +164,7 @@ C
       integer     nstrk_good_un     ,   nttrk_good_un
       integer     count
       integer     nttrk_goodp       ,   nttrk_goodp_cor
-      real tan_ang, ang, theta, pi
+      real tan_ang, ang, theta 
       real tanl, sinl, costh, th, mass, pz, e
  
 CC   Message Formats:
