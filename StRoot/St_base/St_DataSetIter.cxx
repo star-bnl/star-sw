@@ -569,7 +569,7 @@ St_DataSet *St_DataSetIter::Shunt(St_DataSet *set, St_DataSet *dataset)
  //  returns  the pointer to set is success or ZERO poiner                    //
  //  =======                                                                  //
  //                                                                           //
- //  Note: If this St_DataSetIter is empty (i.e. Pwd() returns 0), the "set"  //
+ //  Note: If this St_DataSetIter is empty (i.e. Cwd() returns 0), the "set"  //
  //        becomes the "root" dataset of this iterator                        //                                                                         //
  ///////////////////////////////////////////////////////////////////////////////
  
