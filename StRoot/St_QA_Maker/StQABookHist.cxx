@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.36 2003/01/24 15:24:48 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.37 2003/02/15 21:59:08 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.37  2003/02/15 21:59:08  genevb
+// dedx lable
+//
 // Revision 2.36  2003/01/24 15:24:48  genevb
 // Further dAu changes
 //
@@ -1616,7 +1619,7 @@ void StQABookHist::BookHistPID(){
   m_p_dedx_rec = QAH::H2F("QaPidGlobtrkDstdedxPVsDedx","PID: globtrk-dst_dedx,  p vs dedx (reconstructed)",
 			  cnp,cminp,cmaxp,cndedx,cmindedx,cmaxdedx);
   m_p_dedx_rec->SetXTitle("p (GeV)");
-  m_p_dedx_rec->SetYTitle("dedx");
+  m_p_dedx_rec->SetYTitle("dedx (keV/cm)");
   
 }
 //_____________________________________________________________________________
