@@ -44,6 +44,7 @@ class 	StiSeedFinder;
 class 	StiTrackFinder;
 class 	StiTrackFitter;
 class 	StiTrackMerger;
+class   StiVertexFinder;
 class   StiIOBroker;
 class   StiDisplayManager;
 class   StAssociationMaker;
@@ -78,6 +79,7 @@ public:
   virtual StiTrackFinder       * getTrackFinder()=0;
   virtual StiTrackFitter       * getTrackFitter()=0;
   virtual StiTrackMerger       * getTrackMerger()=0;
+	virtual StiVertexFinder      * getVertexFinder()=0;
   virtual StiDisplayManager    * getDisplayManager()=0;
   virtual StiIOBroker * getIOBroker()=0;
   virtual StAssociationMaker * getAssociationMaker()=0;
