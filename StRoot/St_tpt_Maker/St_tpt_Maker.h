@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.h,v 1.7 1999/02/25 20:55:33 love Exp $
+// $Id: St_tpt_Maker.h,v 1.8 1999/03/01 18:24:08 sakrejda Exp $
 // $Log: St_tpt_Maker.h,v $
+// Revision 1.8  1999/03/01 18:24:08  sakrejda
+// evaluation and residuals calculation made switchable
+//
 // Revision 1.7  1999/02/25 20:55:33  love
 // ntuple named final added
 //
@@ -45,10 +48,11 @@ class TNtuple;
 class St_tpt_Maker : public StMaker {
  private:
                Bool_t drawinit;
-	       Bool_t m_iftte;
-	       Bool_t m_mkfinal;  //control flag for final ntuple production
-	       Bool_t m_mkadcxyz; //control flag for final ntuple production
-//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.7 1999/02/25 20:55:33 love Exp $";
+	       Bool_t m_iftteTrack;
+	       Bool_t m_mkfinal;   //control flag for final ntuple production
+	       Bool_t m_tteEvalOn; //switch for the evaluation
+	       Bool_t m_tptResOn;  //switch for the residuals calculation
+//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.8 1999/03/01 18:24:08 sakrejda Exp $";
                St_tpg_pad_plane *m_tpg_pad_plane; //! Constants that describe TPC pad plane
                St_tcl_tpc_index_type *m_type;   //!  Table of many-to-many index 
 	                                        // correlations for tpc evaluations
@@ -69,12 +73,18 @@ class St_tpt_Maker : public StMaker {
  public: 
                   St_tpt_Maker(const char *name="tpc_tracks", const char *title="event/data/tpc/tracks");
    virtual       ~St_tpt_Maker();
+   virtual void   tteEval(Bool_t flag=kFALSE){m_tteEvalOn=flag;}
+   virtual void   tteEvalOn() {tteEval(kTRUE);}                       // *MENU*
+   virtual void   tteEvalOff(){tteEval();}                            // *MENU
+   virtual void   tptRes(Bool_t flag=kFALSE){m_tptResOn=flag;}
+   virtual void   tptResOn() {tptRes(kTRUE);}                       // *MENU*
+   virtual void   tptResOff(){tptRes();}                            // *MENU
+
    virtual Int_t Init();
    virtual Int_t  Make();
    virtual void   PrintInfo();
-   virtual void   Set_tte(Bool_t m=kFALSE){m_iftte = m;}
+   virtual void   Set_tte(Bool_t m=kFALSE){m_iftteTrack = m;}
    virtual void   Set_final(Bool_t m=kFALSE){m_mkfinal = m;}
-   virtual void   Set_adcxyz(Bool_t m=kFALSE){m_mkadcxyz = m;}
    ClassDef(St_tpt_Maker, 1)   //StAF chain virtual base class for Makers
 };
 

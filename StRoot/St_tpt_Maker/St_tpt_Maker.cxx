@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.20 1999/02/26 20:03:59 didenko Exp $
+// $Id: St_tpt_Maker.cxx,v 1.21 1999/03/01 18:24:07 sakrejda Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.21  1999/03/01 18:24:07  sakrejda
+// evaluation and residuals calculation made switchable
+//
 // Revision 1.20  1999/02/26 20:03:59  didenko
 // fixed stupid mistake
 //
@@ -91,9 +94,10 @@ ClassImp(St_tpt_Maker)
     m_tpipar(0)
 {
   drawinit=kFALSE;
-  m_iftte =kFALSE;
+  m_iftteTrack =kFALSE;
+  m_tteEvalOn=kTRUE;
+  m_tptResOn=kFALSE;
   m_mkfinal=kFALSE;
-  m_mkadcxyz=kFALSE;
 }
 //_____________________________________________________________________________
 St_tpt_Maker::~St_tpt_Maker(){
@@ -177,24 +181,17 @@ Int_t St_tpt_Maker::Make(){
       if (!index) {index = new St_tcl_tpc_index("index",10*maxNofTracks); next.Add(index);}
       
       St_tpt_track  *tptrack = new St_tpt_track("tptrack",maxNofTracks); m_DataSet->Add(tptrack);
-      //tte_e
-      St_tte_mctrk  *mctrk   = new St_tte_mctrk("mctrk",maxNofTracks);   m_DataSet->Add(mctrk);
-      St_tte_eval *evaltrk   = new St_tte_eval("evaltrk",maxNofTracks);  m_DataSet->Add(evaltrk);
-      St_tpt_res      *restpt= new St_tpt_res("restpt",10*maxNofTracks);    m_DataSet->Add(restpt);
+
       St_DataSetIter geant(gStChain->DataSet("geant"));
       St_g2t_track   *g2t_track    = (St_g2t_track  *) geant("g2t_track");
       St_g2t_tpc_hit *g2t_tpc_hit  = (St_g2t_tpc_hit *)geant("g2t_tpc_hit");
       //tpt
-      if (!m_iftte) {
+      if (!m_iftteTrack) {
 	cout << " start tpt_run " << endl;
         Int_t Res_tpt = tpt(m_tpt_pars,tphit,tptrack);
         if (Res_tpt != kSTAFCV_OK) {cout << "Problem with tpt.." << endl;}
 	cout << " finish tpt_run " << endl;
-	
-	cout << "start run_tpt_residuals" << endl;
-	Int_t Res_tpt_res = tpt_residuals(tphit,tptrack,restpt);
-	if (Res_tpt_res != kSTAFCV_OK) {cout << "Problem with tpt_residuals...." << endl;}
-	cout << "finish run_tpt_residuals" << endl;
+
       }
       else {//tte_track
 	if (g2t_tpc_hit && g2t_track) {
@@ -204,14 +201,34 @@ Int_t St_tpt_Maker::Make(){
 	  cout << " finish run_tte_track " << endl; 
 	}
       }
+
+      //Calculate residuals
+      if(m_tptResOn){	
+      //set up table for residuals
+        St_tpt_res      *restpt= new St_tpt_res("restpt",10*maxNofTracks);
+        m_DataSet->Add(restpt);
+	cout << "start run_tpt_residuals" << endl;
+	Int_t Res_tpt_res = tpt_residuals(tphit,tptrack,restpt);
+	if (Res_tpt_res != kSTAFCV_OK) {cout << "Problem with tpt_residuals...." << endl;}
+	cout << "finish run_tpt_residuals" << endl;
+      }
+      //End of residuals calculations
+
+
       //tid
       cout << " start tid_run " << endl;
       Int_t Res_tde = tde_new(m_tdeparm,tphit,tptrack,m_tpg_pad_plane);
       if (Res_tde != kSTAFCV_OK) {cout << " Problem with tde_new.. " << endl;}
       cout << " finish tid_run " << endl;
       //tte
-      if (g2t_tpc_hit && g2t_track) {
+      if (g2t_tpc_hit && g2t_track && m_tteEvalOn) {
 	cout << " start run_tte " << endl;
+      //if tte on, create evaluation tables
+        St_tte_mctrk  *mctrk   = new St_tte_mctrk("mctrk",maxNofTracks);
+        m_DataSet->Add(mctrk);
+        St_tte_eval *evaltrk   = new St_tte_eval("evaltrk",maxNofTracks);
+        m_DataSet->Add(evaltrk);
+
 	Int_t Res_tte = tte(tptrack,tphit,
 			    g2t_tpc_hit,g2t_track,
 			    index,m_type,evaltrk,mctrk,m_tte_control);
@@ -311,7 +328,7 @@ Int_t St_tpt_Maker::Make(){
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.20 1999/02/26 20:03:59 didenko Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.21 1999/03/01 18:24:07 sakrejda Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
