@@ -11,9 +11,9 @@
 
   //  Create the makers to be called by the current chain
   const char *mainDB =  "MySQL:StarDb";
-  const char *userDB = "StarDb";
+  const char *userDB = "$STAR/StarDb";
   StChain *chain =  new StChain();
-  St_db_Maker *dbMk = new St_db_Maker("db",mainDB);
+  St_db_Maker *dbMk = new St_db_Maker("db",mainDB,userDB);
   StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
   dbMk->SetDebug();
   tpcDbMk->SetDebug();
