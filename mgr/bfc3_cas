@@ -1,6 +1,9 @@
 #!/usr/local/bin/perl
-# $Id: bfc3_cas,v 1.6 2001/05/02 18:55:05 didenko Exp $
+# $Id: bfc3_cas,v 1.7 2001/05/03 00:32:05 didenko Exp $
 # $Log: bfc3_cas,v $
+# Revision 1.7  2001/05/03 00:32:05  didenko
+# *** empty log message ***
+#
 # Revision 1.6  2001/05/02 18:55:05  didenko
 # change disk number
 #
@@ -150,7 +153,7 @@ $nSeq = $prt[1];
 $evts = $prt[2];
 ($Nevts,$dummy) = split /e/, $evts;
 $NofEvents = 100;
-my $N3 = $Nevts * abs($nSeq - 1);
+my $N3 = $Nevts * abs($nSeq - 257) + 1;
 my $N1 = $N3 + 1;
 my $N2 = $Nevts * $nSeq + 1;
 
