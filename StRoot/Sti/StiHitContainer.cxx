@@ -7,6 +7,7 @@
 #include <math.h>
 #include <algorithm>
 #include "Sti/Base/Messenger.h"
+#include "Sti/Base/Filter.h"
 #include "StiKalmanTrackNode.h"
 #include "StiHit.h"
 #include "StiPlacement.h"
@@ -20,24 +21,25 @@ using std::stable_partition;
 ostream& operator<<(ostream& os, const StiHit& hit);
 ostream& operator<<(ostream&, const HitMapKey&);
 
-StiHitContainer::StiHitContainer(const string & name, const string & description)
+StiHitContainer::StiHitContainer(const string & name, 
+				 const string & description,
+				 Factory<StiHit> *hitFactory)
   : Named(name),
     Described(description),
-    mMessenger(*(Messenger::instance(MessageType::kHitMessage)))
+    _hitFactory(hitFactory)
 {
   cout <<"StiHitContainer::StiHitContainer() -I- Started with name:"<<name<<endl;
-  mminpoint = new StiHit();
-  mmaxpoint = new StiHit();
-  //mMessenger <<"\tLeaving StiHitContainer() -I- Done"<<endl;
+  //_minPoint = new StiHit();
+  //_maxPoint = new StiHit();
 }
 
 StiHitContainer::~StiHitContainer()
 {
   cout <<"StiHitContainer::~StiHitContainer()"<<endl;
-  delete mminpoint;
-  mminpoint=0;
-  delete mmaxpoint;
-  mmaxpoint=0;
+  //delete _minPoint;
+  //_minPoint=0;
+  //delete _maxPoint;
+  //_maxPoint=0;
 }
 
 /*! Null implementation.  We provide this virtual function for the situation
@@ -46,8 +48,8 @@ StiHitContainer::~StiHitContainer()
   call to update() will propogate to the most derived class, allowing that
   class to perform necessary tasks (e.g., append hits to display).
  */
-void StiHitContainer::update()
-{}
+//void StiHitContainer::update()
+//{}
 
 /*! The time complexity of push_back has two components:\n
   1) The correct hit-vector must be retrieved (or inserted if it doesn't
@@ -61,27 +63,24 @@ void StiHitContainer::update()
   container.  Thus, once all hits have been added to the container, then one
   must call sortHits().
  */
-void StiHitContainer::push_back(StiHit* hit)
+void StiHitContainer::add(StiHit* hit)
 {
   const StiDetector* det = hit->detector();
   if (!det) 
-    throw runtime_error("StiHitContainer::push_back() -E- Given hit has no associated detector");
-  //This is a coupling that I would like to get rid of, not in the spirit of the hit container!
-  mkey.refangle = det->getPlacement()->getCenterRefAngle();
-  mkey.position = det->getPlacement()->getCenterRadius();
-  //mkey.refangle = hit->refangle();
-  //mkey.position = hit->position();
-  mmap[mkey].theHitVec.push_back(hit);
+    throw runtime_error("StiHitContainer::add() -E- Given hit has no associated detector");
+  _key.refangle = det->getPlacement()->getCenterRefAngle();
+  _key.position = det->getPlacement()->getCenterRadius();
+  _map[_key].theHitVec.push_back(hit);
   return;
 }
 
 void StiHitContainer::reset()
 {
    HitMapToVectorAndEndType::iterator it;
-   HitVectorType::iterator iter;
-   for (it=mmap.begin(); it!=mmap.end(); it++) 
+   vector<StiHit*>::iterator iter;
+   for (it=_map.begin(); it!=_map.end(); it++) 
      {
-       HitVectorType &hits = (*it).second.theHitVec;
+       vector<StiHit*> &hits = (*it).second.theHitVec;
        for (iter=hits.begin();iter!=hits.end();iter++)
 	 {
 	   (*iter)->setTimesUsed(0);
@@ -96,13 +95,14 @@ void StiHitContainer::reset()
  */
 void StiHitContainer::clear()
 {
+  cout<<"StiHitContainer::clear() -I- Started"<<endl;
     HitMapToVectorAndEndType::iterator it;
-    for (it=mmap.begin(); it!=mmap.end(); it++) {
+    for (it=_map.begin(); it!=_map.end(); it++) {
 	(*it).second.theHitVec.clear();
 	(*it).second.theEffectiveEnd = (*it).second.theHitVec.end();
     }
-    mvertexvec.clear();
-    return;
+    //mvertexvec.clear();
+    cout<<"StiHitContainer::clear() -I- Done"<<endl;
 }
 
 /*! The time complexity of size is of O(logN) where N is the number of
@@ -113,83 +113,39 @@ unsigned int StiHitContainer::size() const
 {
     unsigned int thesize = 0;
     HitMapToVectorAndEndType::const_iterator it;
-    for (it=mmap.begin(); it!=mmap.end(); it++) {
+    for (it=_map.begin(); it!=_map.end(); it++) {
 	thesize+=(*it).second.theHitVec.size();
     }
     return thesize;
 }
 
-/*! The values of refangle and position are used to fill an existing
-  HitMapToVectorAndEndTypeKey object.  This object is used to key the retrieval of a vector
-  of hits associated with the specified position.  For more on the
-  definition of refangle and position, please see StiHit documentation.\n
-  A call to hits(double,double) corresponds to the retrieval of an object
-  from an STL map based on a key.  Such a retrieval is guarunteed to be of
-  O(logN) time complexity, where N is the number of keys in the map.  For
-  our practices, N is roughly equal to (TPC) 12*45 + (SVT layer 1) 2*4 +
-  (SVT layer 2) 2*6 + (SVT layer 3) 2*8 + (SSD) 20.
- */
-const HitVectorType& StiHitContainer::hits(double refangle, double position)
+
+vector<StiHit*>::iterator StiHitContainer::hitsBegin(const StiDetector* layer)
 {
-    mkey.refangle = refangle;
-    mkey.position = position; 
-    return mmap[mkey].theHitVec;
+    _key.refangle = layer->getPlacement()->getCenterRefAngle();
+    _key.position = layer->getPlacement()->getCenterRadius();
+    return _map[_key].theHitVec.begin();
 }
 
-HitVectorType& StiHitContainer::hits(const StiDetector* layer)
+vector<StiHit*>::iterator StiHitContainer::hitsEnd(const StiDetector* layer)
 {
-    mkey.refangle = layer->getPlacement()->getCenterRefAngle();
-    mkey.position = layer->getPlacement()->getCenterRadius();
-    return mmap[mkey].theHitVec;
-}
-
-HitVectorType::iterator StiHitContainer::hitsBegin(const StiDetector* layer)
-{
-    mkey.refangle = layer->getPlacement()->getCenterRefAngle();
-    mkey.position = layer->getPlacement()->getCenterRadius();
-    return mmap[mkey].theHitVec.begin();
-}
-
-HitVectorType::iterator StiHitContainer::hitsEnd(const StiDetector* layer)
-{
-    mkey.refangle = layer->getPlacement()->getCenterRefAngle();
-    mkey.position = layer->getPlacement()->getCenterRadius();
-    //if (mmap[mkey].theHitVec.end() != mmap[mkey].theEffectiveEnd) {
+    _key.refangle = layer->getPlacement()->getCenterRefAngle();
+    _key.position = layer->getPlacement()->getCenterRadius();
+    //if (_map[_key].theHitVec.end() != _map[_key].theEffectiveEnd) {
     //cout <<"StiHitContainer::hitsEnd(const StiDetector*). ERROR:\t"
     //     <<"theEffectiveEnd != theHitVec.end()"<<endl
-    //     <<"mkey:\t"<<mkey.refangle<<" "<<mkey.position<<endl;
+    //     <<"_key:\t"<<_key.refangle<<" "<<_key.position<<endl;
     //}
-    //return mmap[mkey].theHitVec.end();
+    //return _map[_key].theHitVec.end();
 
-    return mmap[mkey].theEffectiveEnd;
-}
-
-/*! This form of setRefPoint packs the information passed as arguments into
-  a member StiHit object, and passes this to the method setRefPoint(StiHit*).
- */
-void StiHitContainer::setRefPoint(double position, double refAngle,
-				  double y, double z, bool fetchAll)
-{
-  mMessenger <<"\nStiHitContainer::setRefPoint(double, double, double, double)"<<endl
-	     <<"\tposition: "<<position<<"\trefAngle: "<<refAngle<<"\t"
-	     <<"y: "<<y<<"\tz: "<<z<<endl;
-  mUtilityHit.set(position,refAngle,y,z);
-  setRefPoint(&mUtilityHit,fetchAll);
-}
-
-void StiHitContainer::setRefPoint(StiKalmanTrackNode & node, bool fetchAll)
-{
-  mdeltad = node.getWindowY();
-  mdeltaz = node.getWindowZ();
-  mUtilityHit.set(node.getRefPosition(),
-		  node.getRefAngle(),
-		  node.getY(),
-		  node.getZ());
-  setRefPoint(&mUtilityHit,fetchAll);
+    return _map[_key].theEffectiveEnd;
 }
 
 
-/*! The sub-volume is identified by the following algorithm:\n
+/*! Get hits specified by the filter condition implied by the given position 
+    and search radius.
+
+  The sub-volume is identified by the following algorithm:\n
   1) Identify the detector plane of intereset via the position and refAngle
   of the StiHit pointer passed. \n
   2) Find those hits that satisfy abs(hit->z-z_i)<deltaZ.  This is
@@ -198,11 +154,7 @@ void StiHitContainer::setRefPoint(StiKalmanTrackNode & node, bool fetchAll)
   3) Find thos hits that satisfy abs(hit->y-y_i)<deltaD.  This can only be
   accomplished via a linear search over those hits satisfying condition
   
-  Once setRefPoint() has been called, one use the iterator like interfaces
-  hasMore(), getHit() and getCurrentHit() to access the hits that satisfied
-  the search criterion.\n
-
-  The time complexity of setRefPoint has several components: \n
+  The time complexity of getHits has several components: \n
   1) The correct hit-vector must be retrieved from the map.  This is of
   O(logN) where N is the number of keys in the map (see documentation of
   hits() for an estimate of the size of N).\n
@@ -215,57 +167,36 @@ void StiHitContainer::setRefPoint(StiKalmanTrackNode & node, bool fetchAll)
   order (search in y, then z instead of z, then y).  See the source code for
   the necessary conversion actions.
  */
-void StiHitContainer::setRefPoint(StiHit* ref, bool fetchAll)
+vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bool fetchAll)
 {
-    mcandidatevec.clear();
-    
-    mkey.refangle = ref->refangle();
-    mkey.position = ref->position();
-    //mminpoint->setY( ref->y() -mdeltad );
-    //mmaxpoint->setY( ref->y() +mdeltad );
-    //cp//mminpoint->setZ( ref->z() -mdeltaz );
-    //cp//mmaxpoint->setZ( ref->z() +mdeltaz );
-    mminpoint->set(ref->position(),ref->refangle(),ref->y(),ref->z()-mdeltaz );
-    mmaxpoint->set(ref->position(),ref->refangle(),ref->y(),ref->z()+mdeltaz );
-    HitVectorType& tempvec = mmap[mkey].theHitVec;
-    HitVectorType::iterator& tempend = mmap[mkey].theEffectiveEnd;
-    //Search first by distance along z
-    mstart = lower_bound(tempvec.begin(), tempend, mminpoint, StizHitLessThan());
-    
-    if (mstart!=tempend) {
-	mstop = upper_bound(tempvec.begin(), tempend, mmaxpoint, StizHitLessThan());
+  _selectedHits.clear();
+  _key.refangle = ref.refangle();
+  _key.position = ref.position();
+  _minPoint.set(ref.position(),ref.refangle(),ref.y(),ref.z()-dZ );
+  _maxPoint.set(ref.position(),ref.refangle(),ref.y(),ref.z()+dZ );
+  vector<StiHit*>& tempvec = _map[_key].theHitVec;
+  vector<StiHit*>::iterator& tempend = _map[_key].theEffectiveEnd;
+  //Search first by distance along z
+  _start = lower_bound(tempvec.begin(), tempend, &_minPoint, StizHitLessThan());
+  if (_start!=tempend) 
+    _stop = upper_bound(tempvec.begin(), tempend, &_maxPoint, StizHitLessThan());
+  else 
+    {
+      _start = tempend;
+      _stop  = _start;
     }
-    
-    else {
-	//mMessenger <<"mstart==tempend\tAbort"<<endl;
-	mstart = tempend;
-	mstop = mstart;
-        mcurrent = mcandidatevec.end();
-	return;
-    }
-
-    if (mstart==mstop) {
-	mstart=tempend;
-	mstop = mstart;
-	mcurrent = mcandidatevec.end();
-	return;
-    }
-    
-    //Now search over distance along d
-    for (HitVectorType::iterator cit=mstart; cit!=mstop; cit++) 
-      {
-	if (fabs( (*cit)->y() - ref->y() ) < mdeltad)
+  //Now search over distance along d
+  StiHit * hit;
+  for (vector<StiHit*>::iterator cit=_start; cit!=_stop; cit++) 
+    {
+      hit = *cit;
+      if (fabs( hit->y() - ref.y() ) < dY)
 	{
-	  StiHit * hit = *cit;
 	  if (fetchAll || (hit->timesUsed()==0 && hit->detector()->isActive()) )
-	    {
-	      mcandidatevec.push_back(hit);
-	    }
+	    _selectedHits.push_back(hit);
 	}
-      }
-    mcurrent = mcandidatevec.begin();
-    
-    return;
+    }
+  return _selectedHits;
 }
 
 /*! This function calls the STL sort algorithm for each hit-vector in the
@@ -285,9 +216,9 @@ void StiHitContainer::setRefPoint(StiHit* ref, bool fetchAll)
 void StiHitContainer::sortHits()
 {
   HitMapToVectorAndEndType::iterator it;
-  for (it=mmap.begin(); it!=mmap.end(); ++it) 
+  for (it=_map.begin(); it!=_map.end(); ++it) 
     {
-      HitVectorType& tempvec = (*it).second.theHitVec;
+      vector<StiHit*>& tempvec = (*it).second.theHitVec;
       sort(tempvec.begin(), tempvec.end(), StizHitLessThan());
       (*it).second.theEffectiveEnd =(*it).second.theHitVec.end();
     }
@@ -296,25 +227,18 @@ void StiHitContainer::sortHits()
 
 void StiHitContainer::partitionUsedHits()
 {
-    for (HitMapToVectorAndEndType::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
-	HitVectorType& tempvec = (*it).second.theHitVec;
-	
-	mMessenger <<"-- Hits before partition --"<<endl;
-	mMessenger <<(*it).second.theHitVec<<endl;
-	
-	HitVectorType::iterator where =
-	    stable_partition(tempvec.begin(), tempvec.end(), StiHitIsUsed() );
-	(*it).second.theEffectiveEnd = where;
-	
-	mMessenger <<"-- Hits after partition --"<<endl;
-	mMessenger <<(*it).second.theHitVec<<endl;
-
+    for (HitMapToVectorAndEndType::iterator it=_map.begin(); it!=_map.end(); ++it)
+      {
+      vector<StiHit*>& tempvec = (*it).second.theHitVec;
+      vector<StiHit*>::iterator where =
+        stable_partition(tempvec.begin(), tempvec.end(), StiHitIsUsed() );
+      (*it).second.theEffectiveEnd = where;
     }
 }
 
-ostream& operator<<(ostream& os, const HitVectorType& vec)
+ostream& operator<<(ostream& os, const vector<StiHit*>& vec)
 {
-    for (HitVectorType::const_iterator vit=vec.begin(); vit!=vec.end(); vit++) {
+    for (vector<StiHit*>::const_iterator vit=vec.begin(); vit!=vec.end(); vit++) {
 	os<<*(*vit)<<endl;
     }
     return os;
@@ -322,7 +246,7 @@ ostream& operator<<(ostream& os, const HitVectorType& vec)
 
 ostream& operator<<(ostream& os, const StiHitContainer& store)
 {
-    for (HitMapToVectorAndEndType::const_iterator it=store.mmap.begin(); it!=store.mmap.end(); it++) {
+    for (HitMapToVectorAndEndType::const_iterator it=store._map.begin(); it!=store._map.end(); it++) {
 	os <<endl;
 	os <<(*it).second.theHitVec;
     }
@@ -330,19 +254,61 @@ ostream& operator<<(ostream& os, const StiHitContainer& store)
 }
 
 
-HitVectorType StiHitContainer::getAllHits()
+/// Get hits selected by the given filter. If no filter is given (i.e. filter==0)
+//  then return all hits.
+vector<StiHit*> & StiHitContainer::getHits()
 {
-  HitVectorType allHits;
-  for(HitMapToVectorAndEndType::const_iterator iter= mmap.begin(); iter !=mmap.end(); iter++)
-    {
-      const HitVectorType & t_hits = (*iter).second.theHitVec;
-      for (vector<StiHit*>::const_iterator it=t_hits.begin();
-	   it!=t_hits.end();
-	   ++it)
-	{
-	  allHits.push_back(*it);
-	}
-    }  return allHits;
+  _selectedHits.clear();
+  for(HitMapToVectorAndEndType::const_iterator iter= _map.begin(); iter !=_map.end(); iter++)
+   {
+      const vector<StiHit*> & t_hits = (*iter).second.theHitVec;
+      for (vector<StiHit*>::const_iterator it=t_hits.begin();it!=t_hits.end();++it)
+        _selectedHits.push_back(*it);
+   }  
+  return _selectedHits;
 }
 
+/// Get hits selected by the given filter. If no filter is given (i.e. filter==0)
+//  then return all hits.
+vector<StiHit*> & StiHitContainer::getHits(Filter<StiHit> & filter)
+{
+  //cout << "StiHitContainer::getHits(Filter<StiHit> * filter) -I- Started"<<endl;
+  _selectedHits.clear();
+  StiHit * hit;
+  for(HitMapToVectorAndEndType::const_iterator iter= _map.begin(); iter !=_map.end(); iter++)
+    {
+    const vector<StiHit*> & t_hits = (*iter).second.theHitVec;
+    for (vector<StiHit*>::const_iterator it=t_hits.begin();
+         it!=t_hits.end();
+         ++it)
+      {
+      hit = *it;
+      if (filter.accept(hit)) _selectedHits.push_back(hit);
+      }
+    }
+  return _selectedHits;
+}
+
+
+StiHit * StiHitContainer::getNearestHit(StiHit& ref, double dY, double dZ, bool fetchAll)
+{ 
+  StiHit* hit = 0;
+  StiHit* closestHit = 0;
+  double dMax = DBL_MAX;
+  double dy, dz, d;
+  vector<StiHit*> & hits = getHits(ref,dY,dZ,fetchAll);
+  for (vector<StiHit*>::iterator iter=hits.begin();iter!=hits.end();++iter)
+    {
+      hit = *iter;
+      dy  = hit->y() - ref.y();
+      dz  = hit->z() - ref.z();
+      d   = dy*dy + dz*dz;
+      if ( d<dMax)
+        {
+        closestHit = hit;
+        dMax       = d;
+        }
+    }
+  return closestHit;
+}
 
