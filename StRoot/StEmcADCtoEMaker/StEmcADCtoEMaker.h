@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.41 2004/04/05 18:56:15 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.42 2004/04/05 20:06:46 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.42  2004/04/05 20:06:46  suaide
+// added feature to print maps
+//
 // Revision 1.41  2004/04/05 18:56:15  suaide
 // raw data structure is filled in StEvent
 //
@@ -232,8 +235,9 @@ class StEmcADCtoEMaker : public StMaker
   void                      setSMDRmsCut(Float_t a = 1.5,Float_t b = 1.5); ///< Turns on SMD hit cut based on pedestal RMS and set the thresholds for eta and phi planes
   void                      setSMDPhiIdMinus1Bug(Bool_t a = kFALSE) { mSMDPidMinus1Bug = a;} ///< Turns on the correction for the SMD-phi id-1 Pedestal bug if using old Pedestal tables for the y2003 d+Au and p+p runs
   void                      saveAllStEvent(Bool_t a) { mSaveAllStEvent = a;} ///< Set to kTRUE if all hits are to be saved on StEvent
+  void                      printMap(Int_t,char*); ///< print map for an EMC detector
   
-  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.41 2004/04/05 18:56:15 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.42 2004/04/05 20:06:46 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcADCtoEMaker, 2)  
 };

@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.66 2004/04/05 18:56:15 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.67 2004/04/05 20:06:46 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.67  2004/04/05 20:06:46  suaide
+// added feature to print maps
+//
 // Revision 1.66  2004/04/05 18:56:15  suaide
 // raw data structure is filled in StEvent
 //
@@ -253,6 +256,7 @@ program
 Int_t StEmcADCtoEMaker::Init()
 {     
   mData = new StBemcData(); 
+  mDecoder = new StEmcDecoder();
   for (Int_t i=0; i<MAXDETBARREL; i++) 
 	{
 		mGeo[i]=StEmcGeom::getEmcGeom(detname[i].Data());
@@ -1374,5 +1378,16 @@ void StEmcADCtoEMaker::setSMDRmsCut(Float_t a, Float_t b)
     mControlADCtoE->CutOffType[2]=1;
     mControlADCtoE->CutOff[3]=b;
     mControlADCtoE->CutOffType[3]=1;
+}
+void StEmcADCtoEMaker::printMap(Int_t detector,char*file)
+{
+    if(!mDecoder) return;
+    ofstream f(file);
+    if(detector==1) mDecoder->PrintTowerMap(&f);
+    if(detector==2) mDecoder->PrintPsdMap(&f);
+    if(detector==3) mDecoder->PrintSmdMap(&f);
+    if(detector==4) mDecoder->PrintSmdMap(&f);
+    f.close();
+    return;
 }
 
