@@ -1,5 +1,8 @@
-// $Id: geant.C,v 1.2 1999/01/08 21:39:54 fisyak Exp $
+// $Id: geant.C,v 1.3 1999/01/23 18:38:51 fisyak Exp $
 // $Log: geant.C,v $
+// Revision 1.3  1999/01/23 18:38:51  fisyak
+// Cleanup for SL98l
+//
 // Revision 1.2  1999/01/08 21:39:54  fisyak
 // Add Gene Van Buren bfc description
 //
@@ -40,8 +43,9 @@ void geant()
   geant->SetNwGEANT(20 000 000);
   //  geant->SetNwPAW(1000000);
   geant->SetIwtype(1);
-  //  geant->LoadGeometry("");
-  geant->Do("gfile pz /disk1/star/kathy/auau_ce_b0-2_4041_4060.fzd;");
+  geant->SetIwtype(0);
+  geant->LoadGeometry("");
+  //  geant->Do("gfile pz /disk1/star/kathy/auau_ce_b0-2_4041_4060.fzd;");
   //  geant->Do("zone 1 2;");
   //  geant->Do("next;");
   geant->Do("dcut cave x 0.1 10 10 0.03 0.03;");

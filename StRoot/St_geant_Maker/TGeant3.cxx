@@ -9,13 +9,31 @@
 #endif /* Geant3Dummy */
  
 #include "TGeant3.h" 
+EXTERN common_gcbank *cbank;
+EXTERN common_quest  *cquest; 
+EXTERN common_gclink *clink; 
+EXTERN common_gccuts *ccuts; 
+EXTERN common_gcflag *cflag; 
+EXTERN common_gckine *ckine; 
+EXTERN common_gcking *cking; 
+EXTERN common_gcmate *cmate; 
+EXTERN common_gctmed *ctmed; 
+EXTERN common_gctrak *ctrak; 
+EXTERN common_gctpol *ctpol; 
+EXTERN common_gcvolu *cvolu; 
+EXTERN common_gcnum  *cnum; 
+EXTERN common_gcsets *csets; 
+//--------------Declarations for ZEBRA--------------------- 
+EXTERN Int_t *z_iq, *z_lq; 
+EXTERN Float_t *z_q; 
+#if 0
 common_gcbank *cbank;
 common_quest  *cquest; 
 common_gclink *clink; 
 common_gccuts *ccuts; 
 common_gcflag *cflag; 
 common_gckine *ckine; 
-common_gcking *cking; 
+common_gcking *cking;
 common_gcmate *cmate; 
 common_gctmed *ctmed; 
 common_gctrak *ctrak; 
@@ -25,7 +43,7 @@ common_gcnum  *cnum;
 common_gcsets *csets; 
 Int_t *z_iq, *z_lq; 
 Float_t *z_q; 
- 
+#endif 
 //--------------------------------------------------------- 
  
 TGeant3 *geant = 0; 

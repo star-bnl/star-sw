@@ -265,7 +265,11 @@ Bool_t    St_DataSet::IsEmpty() const
 //______________________________________________________________________________
 Bool_t St_DataSet::IsThisDir(const Char_t *dirname) const 
 {
-  return !strcmp(GetName(),dirname); 
+  
+  Bool_t res = kFALSE;
+  if (strcmp(GetName(),dirname)==0 ) res = kTRUE;
+//   Warning("IsThisDir(const Char_t *dirname) const"," %s %s %d ",GetName(),dirname,res);
+  return res; 
 }
 #if 0
 //______________________________________________________________________________

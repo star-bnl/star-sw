@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.cc,v 1.3 1999/01/23 05:04:09 lasiuk Exp $
+ * $Id: StTrsDeDx.cc,v 1.4 1999/01/23 18:47:23 fisyak Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,8 +13,11 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.cc,v $
- * Revision 1.3  1999/01/23 05:04:09  lasiuk
- * provide a default constructor
+ * Revision 1.4  1999/01/23 18:47:23  fisyak
+ * Cleanup for SL98l
+ *
+ * Revision 1.4  1999/01/23 18:47:23  fisyak
+ * Cleanup for SL98l
  *
  * Revision 1.3  1999/01/23 05:04:09  lasiuk
  * provide a default constructor
@@ -80,6 +83,7 @@ StTrsDeDx::StTrsDeDx()
 {
   mGas = "Ar";
   mPadLength = 1.95*centimeter;
+#ifndef __sun
   doInitialization();
     : mPadLength(pad),  mGas(gas)
 
@@ -97,6 +101,7 @@ StTrsDeDx::StTrsDeDx()
 	cerr << "Must use either: \"Ne\", \"Ar\", or \"P10\"." << endl;
 	cerr << "Exitting..." << endl;
 	exit(1);
+#endif
 #endif
     }
     doInitialization();
@@ -131,7 +136,7 @@ void StTrsDeDx::doInitialization()
 	mSigmaLongitudinal = 300*micrometer/sqrt(centimeter);
 	
 	mDensity  = 0.00166*gram/centimeter3;
-    if((mGas == "P10") || (gas == "p10")) {
+	mZa       =  .45;
     }
 
     if((mGas == "P10") || (mGas == "p10")) {

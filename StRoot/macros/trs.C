@@ -1,5 +1,8 @@
-// $Id: trs.C,v 1.1 1998/11/12 22:27:10 fisyak Exp $
+// $Id: trs.C,v 1.2 1999/01/23 18:38:53 fisyak Exp $
 // $Log: trs.C,v $
+// Revision 1.2  1999/01/23 18:38:53  fisyak
+// Cleanup for SL98l
+//
 // Revision 1.1  1998/11/12 22:27:10  fisyak
 // Add trs.C
 //
@@ -69,41 +72,56 @@
 // Revision 1.2  1998/07/20 15:08:19  fisyak
 // Add tcl and tpt
 //
-void trs(const Char_t *fileinp= "/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/g2t/psc091_03_34evts.xdf",const Int_t Nevents=1)
-{
+TBrowser *b = 0;
+class StChain;
+StChain  *chain=0;
+void Load(){
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("xdf2root");
   gSystem->Load("St_Tables");
   gSystem->Load("libscl");
-  gSystem->Load("St_geant_Maker");
+  gSystem->Load("St_params_Maker");
+  //  gSystem->Load("geometry");
+  //  gSystem->Load("St_geant_Maker");
+  gSystem->Load("St_TLA_Maker");
   gSystem->Load("St_xdfin_Maker");
-  gSystem->Load("St_trs_Maker");
+  gSystem->Load("StTrsMaker");
+}
+void trs(
+const Int_t Nevents=1,
+const Char_t *fileinp= "/afs/rhic/star/data/samples/hijet-g2t.xdf")
+{
+  if (gClassTable->GetID("StChain") < 0) Load();
   St_XDFFile   *xdf_in   = 0;
   if (fileinp)  xdf_in   = new St_XDFFile(fileinp,"r");
-  StChainSpy chain("trs");
+  chain = new StChain("trs");
+  St_params_Maker  *params = new St_params_Maker("params","params");
+  St_TLA_Maker       *geom = new St_TLA_Maker("geom","run/geant/Run");
+  //  St_geant_Maker   *geant = new St_geant_Maker("geant","event/geant/Event");
+  //  geant->LoadGeometry("detp geometry field_only");
   if (xdf_in) {
-    St_xdfin_Maker xdfin("xdfin");
-    chain.SetInputXDFile(xdf_in);
+    St_xdfin_Maker *xdf = new St_xdfin_Maker("xdfin");
+    chain->SetInputXDFile(xdf_in);
   }
-  St_geant_Maker    geant("geant","event/geant/Event");
-  St_trs_Maker    tpc_raw("tpc_raw","event/raw_data/tpc");
-  chain.PrintInfo();
+  St_TLA_Maker   *geant = new St_TLA_Maker("geant","event/geant/Event");
+  StTrsMaker    *tpc_raw = new StTrsMaker("tpc_raw","event/raw_data/tpc");
+  //  chain->PrintInfo();
 // Init the mai chain and all its makers
-  int iInit = chain.Init();
-  if (iInit) chain.Fatal(iInit,"on init");
+  int iInit = chain->Init();
+  if (iInit) chain->Fatal(iInit,"on init");
   gBenchmark->Start("trs");
   Int_t i=0;
   for (Int_t i =1; i <= Nevents; i++){
-    if (chain.Make(i)) break;
-    St_DataSet *dst = chain.DataSet("dst");
-    if (i != Nevents) chain.Clear();
+    if (chain->Make(i)) break;
+    St_DataSet *dst = chain->DataSet("dst");
+    if (i != Nevents) chain->Clear();
     printf ("===========================================\n");
     printf ("=========================================== Done with Event no. %d\n",i);
     printf ("===========================================\n");
   }
   if (Nevents > 1) {
-    chain.Finish();
+    chain->Finish();
     delete xdf_in;
     if (xdf_out){
       delete xdf_out;;
@@ -111,7 +129,5 @@ void trs(const Char_t *fileinp= "/disk1/star/auau200/hijing135/default/b0_3/year
     }
     gBenchmark->Print("trs");
   }
-#if 0
-  else TBrowser b;
-#endif
+  else b = new TBrowser;
 }

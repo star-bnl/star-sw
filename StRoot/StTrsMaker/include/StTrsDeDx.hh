@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.hh,v 1.2 1999/01/23 05:04:18 lasiuk Exp $
+ * $Id: StTrsDeDx.hh,v 1.3 1999/01/23 18:47:22 fisyak Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,8 +13,11 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.hh,v $
- * Revision 1.2  1999/01/23 05:04:18  lasiuk
- * provide a default constructor
+ * Revision 1.3  1999/01/23 18:47:22  fisyak
+ * Cleanup for SL98l
+ *
+ * Revision 1.3  1999/01/23 18:47:22  fisyak
+ * Cleanup for SL98l
  *
  * Revision 1.2  1999/01/23 05:04:18  lasiuk
  * provide a default constructor
@@ -53,7 +56,9 @@
  * Initial Revision
  *
  ******************************************************************/
+#ifndef __sun
 #ifndef ST_TRS_DEDX_HH
+#endif
 #define ST_TRS_DEDX_HH
 
 #include <string>
@@ -73,7 +78,9 @@ public:
 	secondaries,
 	total,
     StTrsDeDx(); // should be made private!! Do not use!!
+#ifndef __sun
 	numberOfElectrons};
+#endif
     
 public:
     StTrsDeDx(const string&, double = 1.95*centimeter);
@@ -104,7 +111,11 @@ public:
 
 protected:
     StTrsDeDx(); // should be made private!! Do not use!!
+#ifndef __sun
     void doInitialization();
+#else
+    char*  mGas;
+#endif
 
 protected:
     string mGas;          // Label
