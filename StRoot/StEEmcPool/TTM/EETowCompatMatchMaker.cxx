@@ -1,5 +1,5 @@
 // *-- Author : Piotr A. Zolnierczuk
-// $Id: EETowCompatMatchMaker.cxx,v 1.1.1.1 2003/12/18 18:00:54 zolnie Exp $
+// $Id: EETowCompatMatchMaker.cxx,v 1.2 2003/12/19 17:32:44 zolnie Exp $
 
 #include "TFile.h"
 #include "TTree.h"
@@ -9,6 +9,8 @@
 #include "EETowCompatMatchMaker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
+
+#include "StIOMaker/StIOMaker.h"
 
 
 
@@ -50,7 +52,7 @@ EETowCompatMatchMaker::EETowCompatMatchMaker(const char* self            , // th
 
   //if( (mMuDstMaker = (StMuDstMaker *)GetMaker(muDstMakerName)) == NULL )  
   if( mMuDstMaker == NULL )  
-      Fatal("EETowCompatMatchMaker","invalid StMuDstMaker");
+    Fatal("EETowCompatMatchMaker","invalid StMuDstMaker");
   
   // get the EEMC database
   //if( (mEEmcDb = (StEEmcDbMaker*)GetMaker(eemcDbMaker)) == NULL ) 
@@ -202,7 +204,6 @@ EETowCompatMatchMaker::Make(){
     hTrackDCAY ->Fill(dca.y());
     hTrackDCAZ ->Fill(dca.z());
 
-
     if ( ! accept(track) ) continue;
     goodTracks.Add(track);
 
@@ -255,7 +256,6 @@ EETowCompatMatchMaker::Finish () {
 
 
   if(mFile)  { 
-    mFile->Write();
 
     hTrackNHits->Write();
     hTrackLen->Write();
@@ -265,6 +265,8 @@ EETowCompatMatchMaker::Finish () {
     hTrackDCAX->Write();
     hTrackDCAY->Write();
     hTrackDCAZ->Write();
+
+    mFile->Write();
    
   }
   return kStOK;
@@ -310,6 +312,9 @@ EETowCompatMatchMaker::accept(StMuEmcCollection *emc, Int_t i, EEmcTowerHit *tow
 
 
 // $Log: EETowCompatMatchMaker.cxx,v $
+// Revision 1.2  2003/12/19 17:32:44  zolnie
+// ver pre-alpha
+//
 // Revision 1.1.1.1  2003/12/18 18:00:54  zolnie
 // Imported sources
 //
