@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.1 2000/03/02 23:49:11 posk Exp $
+// $Id: doFlowEvents.C,v 1.2 2000/03/07 17:51:23 snelling Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -36,6 +36,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.2  2000/03/07 17:51:23  snelling
+// Added switch for Nano DST
+//
 // Revision 1.1  2000/03/02 23:49:11  posk
 // Version of doEvents.C for flow analysis which can set cut parameters.
 //
@@ -111,6 +114,9 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
     StFlowMaker *flowMaker = new StFlowMaker("Flow");
     StFlowTagMaker *flowTagMaker = new StFlowTagMaker("FlowTag");
     StFlowAnalysisMaker *flowAnalysisMaker = new StFlowAnalysisMaker("FlowAnalysis");
+
+//     flowMaker->NanoFlowEventOff();
+//     flowMaker->NanoFlowEventOn();
 //     flowMaker->SetDebug();
 //     flowTagMaker->SetDebug();
 //     flowAnalysisMaker->SetDebug();
