@@ -342,9 +342,10 @@ sub parse_log($) {
 
    print '-' x 80, "\n"; 
 
-   
+   if($jrun eq "Run not completed" & $Err_messg ne "none") {
+     $jrun = $Err_messg ;
+   }
    print("Job status:  ", $jrun, " \n");
-   print("Error message:  ", $Err_messg, " \n");
 
    print '=' x 80, "\n";
    print(">>>>>>>>>> Maker's tag <<<<<<<<<<\n");
