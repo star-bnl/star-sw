@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.21 2004/03/18 17:09:11 calderon Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.22 2004/08/12 14:06:19 pruneau Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.22  2004/08/12 14:06:19  pruneau
+ * doubled StiKalmanTrackNode factory allocation
+ *
  * Revision 2.21  2004/03/18 17:09:11  calderon
  * Change the StiXXXVertexFinder from StiDummy to StiStar for Y2004 chain,
  * as per Lee's example.
@@ -256,7 +259,7 @@ Factory<StiKalmanTrackNode>* StiDefaultToolkit::getTrackNodeFactory()
 {
   if (_trackNodeFactory)
     return _trackNodeFactory;
-  _trackNodeFactory = new VectorizedFactory<StiKalmanTrackNode,StiKalmanTrackNode>("StiKalmanTrackNodeFactory",20000,20000,50);
+  _trackNodeFactory = new VectorizedFactory<StiKalmanTrackNode,StiKalmanTrackNode>("StiKalmanTrackNodeFactory",40000,40000,50);
   StiKalmanTrack::setKalmanTrackNodeFactory(_trackNodeFactory);
   return _trackNodeFactory;	
 }
