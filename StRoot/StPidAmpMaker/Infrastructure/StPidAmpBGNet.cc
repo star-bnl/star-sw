@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpBGNet.cc,v 1.2 2000/03/22 14:07:59 aihong Exp $
+ * $Id: StPidAmpBGNet.cc,v 1.3 2000/04/09 15:40:58 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpBGNet.cc,v $
+ * Revision 1.3  2000/04/09 15:40:58  aihong
+ * change sliceWidth4Window[1] to 0.03 for mBGNet
+ *
  * Revision 1.2  2000/03/22 14:07:59  aihong
  * reduce unnecessary bound checking for faster run
  *
@@ -472,7 +475,7 @@ void StPidAmpBGNet::fillSliceWidth(){
 
   if (mParticleType.id()==-999){
     sliceWidth4Window[0]=SliceWidth;
-    sliceWidth4Window[1]=0.01;
+    sliceWidth4Window[1]=0.03;
     sliceWidth4Window[2]=1.2;
     sliceWidth4Window[3]=2.0;
   }
