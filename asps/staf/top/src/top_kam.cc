@@ -24,32 +24,42 @@
 
 
 /*-------------------------------------------------------------------*/
-void kam_top_count_(){kam_top_count();}
-int kam_top_count()
+void kam_top_count_()
 {
    long npars = ku_npar(); /* no. of KUIP param.s */
 
+        STAFCV_T status = top_count();
+}
+STAFCV_T top_count()
+{
    printf("TOP:\tObject count = %d \n",top->count());
    EML_SUCCESS(STAFCV_OK);
 }
 
 /*-------------------------------------------------------------------*/
-void kam_top_list_(){kam_top_list();}
-int kam_top_list()
+void kam_top_list_()
 {
    long npars = ku_npar(); /* no. of KUIP param.s */
 
+        STAFCV_T status = top_list();
+}
+STAFCV_T top_list()
+{
    printf("%s",top->list() );
    EML_SUCCESS(STAFCV_OK);
 }
 
 /*-------------------------------------------------------------------*/
-void kam_top_newproject_(){kam_top_newproject();}
-int kam_top_newproject() {
+void kam_top_newproject_()
+{
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of project agent */
    char *select = ku_gets(); /* selection specification */
 
+        STAFCV_T status = top_newproject(agent, select);
+}
+STAFCV_T top_newproject(char* agent, char* select)
+{
    if( !top->newProject(agent, select) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
@@ -57,13 +67,17 @@ int kam_top_newproject() {
 }
  
 /*-------------------------------------------------------------------*/
-void kam_top_newjoin_(){kam_top_newjoin();}
-int kam_top_newjoin() {
+void kam_top_newjoin_()
+{
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of join agent */
    char *select = ku_gets(); /* selection specification */
    char *where = ku_gets(); /* where clause */
 
+        STAFCV_T status = top_newjoin(agent, select, where);
+}
+STAFCV_T top_newjoin(char* agent, char* select, char* where)
+{
    if( !top->newJoin(agent, select, where) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
@@ -71,30 +85,40 @@ int kam_top_newjoin() {
 }
  
 /*-------------------------------------------------------------------*/
-void kam_top_newfilter_(){kam_top_newfilter();}
-int kam_top_newfilter() {
+void kam_top_newfilter_()
+{
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of mask agent */
    char *cfunc = ku_gets(); /* cut function */
+        STAFCV_T status = top_newfilter();
+}
+STAFCV_T top_newfilter() {
 EML_ERROR(NOT_YET_IMPLEMENTED);
 }
  
 /*-------------------------------------------------------------------*/
-void kam_top_newsort_(){kam_top_newsort();}
-int kam_top_newsort() {
+void kam_top_newsort_()
+{
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of sort agent */
    char *sfunc = ku_gets(); /* sort function */
+        STAFCV_T status = top_newsort();
+}
+STAFCV_T top_newsort() {
 EML_ERROR(NOT_YET_IMPLEMENTED);
 }
  
 /*-------------------------------------------------------------------*/
-void kam_topproject_selectspec_(){kam_topproject_selectspec();}
-int kam_topproject_selectspec() {
+void kam_topproject_selectspec_()
+{
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of project agent */
    char *select = ku_gets(); /* selection specification */
 
+        STAFCV_T status = topproject_selectspec(agent, select);
+}
+STAFCV_T topproject_selectspec(char* agent, char* select)
+{
    topProject* proj=NULL;
    if( !top->findProject(agent, proj) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
@@ -114,14 +138,20 @@ int kam_topproject_selectspec() {
 }
  
 /*-------------------------------------------------------------------*/
-void kam_topproject_project_(){kam_topproject_project();}
-int kam_topproject_project() {
+void kam_topproject_project_()
+{
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of project agent */
    char *table1 = ku_gets(); /* first input table */
    char *table2 = ku_gets(); /* output table */
    char *select = ku_gets(); /* selection specification */
 
+        STAFCV_T status = topproject_project(agent, table1, table2
+		, select);
+}
+STAFCV_T topproject_project(char* agent, char* table1, char* table2
+	, char* select)
+{
 //- Find Mandatory Input Objects
    topProject* proj=NULL;
    if( !top->findProject(agent, proj) ){
@@ -152,11 +182,15 @@ int kam_topproject_project() {
 }
  
 /*-------------------------------------------------------------------*/
-void kam_topproject_reset_(){kam_topproject_reset();}
-int kam_topproject_reset() {
+void kam_topproject_reset_()
+{
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of project agent */
 
+        STAFCV_T status = topproject_reset(agent);
+}
+STAFCV_T topproject_reset(char* agent)
+{
 //- Find Mandatory Input Objects
    topProject* proj=NULL;
    if( !top->findProject(agent, proj) ){
@@ -169,12 +203,16 @@ int kam_topproject_reset() {
 }
  
 /*-------------------------------------------------------------------*/
-void kam_topjoin_selectspec_(){kam_topjoin_selectspec();}
-int kam_topjoin_selectspec() {
+void kam_topjoin_selectspec_()
+{
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of join agent */
    char *select = ku_gets(); /* selection specification */
 
+        STAFCV_T status = topjoin_selectspec(agent, select);
+}
+STAFCV_T topjoin_selectspec(char* agent, char* select)
+{
    topJoin* join=NULL;
    if( !top->findJoin(agent, join) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
@@ -194,12 +232,16 @@ int kam_topjoin_selectspec() {
 }
  
 /*-------------------------------------------------------------------*/
-void kam_topjoin_whereclause_(){kam_topjoin_whereclause();}
-int kam_topjoin_whereclause() {
+void kam_topjoin_whereclause_()
+{
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of join agent */
    char *where = ku_gets(); /* where clause */
 
+        STAFCV_T status = topjoin_whereclause(agent, where);
+}
+STAFCV_T topjoin_whereclause(char* agent, char* where)
+{
    topJoin* join=NULL;
    if( !top->findJoin(agent, join) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
@@ -219,8 +261,8 @@ int kam_topjoin_whereclause() {
 }
  
 /*-------------------------------------------------------------------*/
-void kam_topjoin_join_(){kam_topjoin_join();}
-int kam_topjoin_join() {
+void kam_topjoin_join_()
+{
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of join agent */
    char *table1 = ku_gets(); /* first input table */
@@ -229,6 +271,12 @@ int kam_topjoin_join() {
    char *select = ku_gets(); /* selection specification */
    char *where = ku_gets(); /* where clause */
 
+        STAFCV_T status = topjoin_join(agent, table1, table2, table3
+		, select, where);
+}
+STAFCV_T topjoin_join(char* agent, char* table1, char* table2
+	, char* table3, char* select, char* where)
+{
 //- Find Mandatory Input Objects
    topJoin* join=NULL;
    if( !top->findJoin(agent, join) ){
@@ -271,11 +319,15 @@ int kam_topjoin_join() {
 }
  
 /*-------------------------------------------------------------------*/
-void kam_topjoin_reset_(){kam_topjoin_reset();}
-int kam_topjoin_reset() {
+void kam_topjoin_reset_()
+{
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of join agent */
 
+        STAFCV_T status = topjoin_reset(agent);
+}
+STAFCV_T topjoin_reset(char* agent)
+{
 //- Find Mandatory Input Objects
    topJoin* join=NULL;
    if( !top->findJoin(agent, join) ){

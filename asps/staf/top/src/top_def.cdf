@@ -161,14 +161,14 @@ Create and register a new topSort agent.
 
 ************************************************************************
 ************************************************************************
-** TOP/PROJECT
->MENU PROJECTOR
+** TOP/PROJECT_AGENT
+>MENU PROJECT_AGENT
 >GUIDANCE
 topProject commands.
 .
 
 ** ---------------------------------------------------------------------
-** TOP/PROJECT/SELECTSPEC AGENT [ SELECT ]
+** TOP/PROJECT_AGENT/SELECTSPEC AGENT [ SELECT ]
 >COMMAND SELECTSPEC
 >PARAMETERS
 AGENT 'Name of Project agent.' C
@@ -182,7 +182,7 @@ See HELP TOP for syntax of SELECT.
 >ACTION KAM_TOPPROJECT_SELECTSPEC
 
 ** ---------------------------------------------------------------------
-** TOP/PROJECT/PROJECT AGENT TABLE1 TABLE2 [ SELECT ]
+** TOP/PROJECT_AGENT/PROJECT AGENT TABLE1 TABLE2 [ SELECT ]
 >COMMAND PROJECT
 >PARAMETERS
 AGENT 'Name of Project agent.' C
@@ -198,7 +198,7 @@ See HELP TOP for syntax of SELECT.
 >ACTION KAM_TOPPROJECT_PROJECT
 
 ** ---------------------------------------------------------------------
-** TOP/PROJECT/RESET AGENT
+** TOP/PROJECT_AGENT/RESET AGENT
 >COMMAND RESET
 >PARAMETERS
 AGENT 'Name of Project agent.' C
@@ -209,14 +209,14 @@ Reset a topProject agent.
 
 ************************************************************************
 ************************************************************************
-** TOP/JOIN
->MENU \JOINER
+** TOP/JOIN_AGENT
+>MENU \JOIN_AGENT
 >GUIDANCE
 topJoin agent commands.
 .
 
 ** ---------------------------------------------------------------------
-** TOP/JOIN/SELECTSPEC AGENT [ SELECT ]
+** TOP/JOIN_AGENT/SELECTSPEC AGENT [ SELECT ]
 >COMMAND SELECTSPEC
 >PARAMETERS
 AGENT 'Name of Join agent.' C
@@ -230,7 +230,7 @@ See HELP TOP for syntax of SELECT.
 >ACTION KAM_TOPJOIN_SELECTSPEC
 
 ** ---------------------------------------------------------------------
-** TOP/JOIN/WHERECLAUSE AGENT [ WHERE ]
+** TOP/JOIN_AGENT/WHERECLAUSE AGENT [ WHERE ]
 >COMMAND WHERECLAUSE
 >PARAMETERS
 AGENT 'Name of Join agent.' C
@@ -244,7 +244,7 @@ See HELP TOP for syntax of WHERE.
 >ACTION KAM_TOPJOIN_WHERECLAUSE
 
 ** ---------------------------------------------------------------------
-** TOP/JOIN/JOIN AGENT TABLE1 TABLE2 TABLE3 [ SELECT WHERE ]
+** TOP/JOIN_AGENT/JOIN AGENT TABLE1 TABLE2 TABLE3 [ SELECT WHERE ]
 >COMMAND JOIN
 >PARAMETERS
 AGENT 'Name of Join agent.' C
@@ -263,7 +263,7 @@ See HELP TOP for syntax of WHERE.
 >ACTION KAM_TOPJOIN_JOIN
 
 ** ---------------------------------------------------------------------
-** TOP/JOIN/RESET AGENT
+** TOP/JOIN_AGENT/RESET AGENT
 >COMMAND RESET
 >PARAMETERS
 AGENT 'Name of Join agent.' C
