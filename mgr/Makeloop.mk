@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.60  1999/02/25 22:24:40  fisyak
+#  Add ROOTCINTD flag
+#
 #  Revision 1.59  1999/02/23 01:07:12  fisyak
 #  Cleanup for SL99a
 #
@@ -256,7 +259,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/02/23 01:07:12 $ 
+#           Last modification $Date: 1999/02/25 22:24:40 $ 
 #  default setings
 # Current Working Directory
 #
@@ -310,8 +313,9 @@ ifndef SUBDIRS
   SUBDIRS := $(filter-out St_mev_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out St_hbt_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out StRootEvent, $(SUBDIRS))
+#  SUBDIRS := $(filter-out StAnalysisMaker, $(SUBDIRS))
+  SUBDIRS := $(filter-out StEbyeScaTagsMaker, $(SUBDIRS))
 #  SUBDIRS := $(filter-out StTrsMaker, $(SUBDIRS))
-  SUBDIRS := $(filter-out StObjyLoaderMaker, $(SUBDIRS))
   SUBDIRS := $(filter-out vpd par crs egz fri g2x mev, $(SUBDIRS))
 #  ifndef OBJY_HOME
     SUBDIRS := $(filter-out objy, $(SUBDIRS))

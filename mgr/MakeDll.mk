@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.65 1999/02/16 15:37:34 fisyak Exp $
+# $Id: MakeDll.mk,v 1.66 1999/02/25 22:24:39 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.66  1999/02/25 22:24:39  fisyak
+# Add ROOTCINTD flag
+#
 # Revision 1.65  1999/02/16 15:37:34  fisyak
 # Clean up HP stuff
 #
@@ -137,7 +140,7 @@ endif
 #	Includes
 
 # 	Define internal and external includes dirs
-INC_NAMES := $(addprefix StRoot/,St_base StChain xdf2root StSclRoot) \
+INC_NAMES := $(addprefix StRoot/,St_base StChain xdf2root StarClassLibrary) \
               StRoot .share .share/tables .share/$(PKG) pams inc 
 #                            StarClassLibrary/include
 INC_DIRS  := $(wildcard $(SRC_DIR) $(SRC_DIR)/include)
@@ -165,7 +168,7 @@ ifdef NT
  INCLUDES :=
  INCINT   :=
 endif
-
+INCINT   += $(ROOTCINTD)
 
 CPPFLAGS += -D__ROOT__ 
 ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
@@ -508,7 +511,7 @@ include $(STAR_MAKE_HOME)/MakeDep.mk
 endif
 DeleteDirs :
 ifndef NT
-	$(RMDIR)  $(TMP_DIR)
+#	rm -rf  $(TMP_DIR)
 else #/* NT */
 	if exist $(subst /,\\,$(subst \,/,$(TMP_DIR)/.)) $(RMDIR) $(subst /,\\,$(subst \,/,$(TMP_DIR)))
 endif #/* NT */
