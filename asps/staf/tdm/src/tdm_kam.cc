@@ -494,9 +494,10 @@ int kam_tdmtable_cell_putvalue()
    TDM_CELLDATA_T cellData;
    cellData._d = tcode;
    cellData.data.v = ASUALLOC(sizeof(double));
+   char *v;
    switch( tcode ){
       case DS_TYPE_CHAR:
-	 char *v = (char*)ASUALLOC(strlen(value) +1);
+	 v = (char*)ASUALLOC(strlen(value) +1);
 	 strcpy(v,value);
          cellData.data.c = (char*)v;
 	 break;
