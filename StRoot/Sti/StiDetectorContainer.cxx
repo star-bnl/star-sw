@@ -8,11 +8,14 @@
 #include <sys/stat.h>
 #include <string>
 
+//StiGui
+#include "StiGui/StiDrawableDetector.h"
+
+//Sti
 #include "StiMapUtilities.h"
 #include "StiDetPolygon.h"
 #include "StiDetector.h"
 #include "StiMaterial.h"
-#include "StiDrawableDetector.h"
 #include "StiDetectorContainer.h"
 
 
