@@ -1,8 +1,11 @@
 #! /opt/star/bin/perl
 #
-# $Id: dbrunhpss.pl,v 1.4 2000/01/26 15:58:25 wenaus Exp $
+# $Id: dbrunhpss.pl,v 1.5 2000/02/22 20:12:52 wenaus Exp $
 #
 # $Log: dbrunhpss.pl,v $
+# Revision 1.5  2000/02/22 20:12:52  wenaus
+# Lengthen ftp timeout
+#
 # Revision 1.4  2000/01/26 15:58:25  wenaus
 # rhic.bnl.gov -> rcf.bnl.gov
 #
@@ -59,7 +62,7 @@ if ( $pass eq '' ) {
     exit;
 }
 my $ftpDaqHome = "/home/starsink/raw/daq";
-my $ftpDaq = Net::FTP->new($hpssHost, Port => 2121, Timeout=>10)
+my $ftpDaq = Net::FTP->new($hpssHost, Port => 2121, Timeout=>60)
     or die "$hpssHost connect failed";
 $ftpDaq->login("starsink",$pass) or die "Login failed";
 my $nDaqFiles = 0;
