@@ -29,7 +29,9 @@ levFactory *lev;
 //:<--------------------------------------------------------------------
 int lev_init()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("LEV:Initializing. ");
+#endif
 
 /*- Define the LEV KUIP commands. -*/
    lev_def_();
@@ -45,9 +47,13 @@ int lev_init()
 //:<--------------------------------------------------------------------
 int lev_start()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("LEV:Starting. "); fflush(0);
+#endif
    lev = new levFactory("lev");
+#ifndef QUIET_ASP
    EML_MESSAGE("LEV:Updating. "); fflush(0);
+#endif
    lev->levUpdate();
    // What's this for?   tdmTable *versions=lev->versions();
    // What's this for?   tdmTable *environment=lev->environment();
@@ -62,7 +68,9 @@ int lev_start()
 //:<--------------------------------------------------------------------
 int lev_stop()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("LEV:Stopping. ");
+#endif
 
    return TRUE;
 }
