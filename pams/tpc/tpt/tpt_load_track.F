@@ -1,5 +1,9 @@
-* $Id: tpt_load_track.F,v 1.7 1999/08/25 21:06:26 sakrejda Exp $
+* $Id: tpt_load_track.F,v 1.8 1999/09/06 02:18:17 sakrejda Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.8  1999/09/06 02:18:17  sakrejda
+* Calculation of the inverse transverse momentum protected against
+* z component of the field being 0.
+*
 * Revision 1.7  1999/08/25 21:06:26  sakrejda
 * calcualtion of possible number of points deactivated
 *
@@ -87,9 +91,14 @@ C     curvature
       track(ipt).curvature = 1.0/abs(trk(ipt).p(2))    
 C     inverse of the pt
       call gufld(xlocal,bfield)
-      track(ipt).invp =  1.0/(abs(trk(ipt).p(2))*bfield(3)*C_D_CURVATURE)
-      track(ipt).cov(1) = abs(trk(ipt).dpar(6))/
+      if(bfield(3).eq.0.0)then
+        track(ipt).invp = 0.0
+        track(ipt).cov(1) = 0.0
+      else
+        track(ipt).invp =  1.0/(abs(trk(ipt).p(2))*bfield(3)*C_D_CURVATURE)
+        track(ipt).cov(1) = abs(trk(ipt).dpar(6))/
      >                    ((trk(ipt).p(2)**2*bfield(3)*C_D_CURVATURE)**2)
+      endif
 C
 C     coordinates of the point where track parameters are given
       x0 = abs(trk(ipt).p(2))*cos(trk(ipt).p(5))+trk(ipt).p(3)
