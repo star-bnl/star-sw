@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerId.h,v 2.2 2003/02/18 21:34:46 jeromel Exp $
+ * $Id: StTriggerId.h,v 2.3 2003/02/18 22:19:58 jeromel Exp $
  *
  * Author: Thomas Ullrich, January 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerId.h,v $
+ * Revision 2.3  2003/02/18 22:19:58  jeromel
+ * Skip mIdx
+ *
  * Revision 2.2  2003/02/18 21:34:46  jeromel
  * Changed vector to arrays
  *
@@ -50,7 +53,7 @@ private:
     unsigned int index(unsigned int) const;
     
 private:
-    UInt_t       mIdx;
+    UInt_t       mIdx;    //!
     UInt_t       mMask;
     UInt_t       mId[TRIGGER_ID_DIM];
     UInt_t	 mVersion[TRIGGER_ID_DIM];
