@@ -1,5 +1,10 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.6 2001/04/20 12:52:09 jcs Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.7 2001/04/24 07:17:12 oldi Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.7  2001/04/24 07:17:12  oldi
+// Renaming of some variables (slice->sslice, gnch->ggnch, glow->gglow,
+// ghigh->gghigh,  gdelta->ggdelta) to avoid compiler warnings (and bad coding
+// style).
+//
 // Revision 1.6  2001/04/20 12:52:09  jcs
 // change if/else statements for calculating polar coordinates to avoid
 // problem with optimizer
@@ -349,9 +354,9 @@ int StFtpcSlowSimReadout::WhichSlice(const float time)
     return itim;
 }
 
-float StFtpcSlowSimReadout::TimeOfSlice(const int slice)
+float StFtpcSlowSimReadout::TimeOfSlice(const int sslice)
 {
-    return (slice+0.5)*1000*mDb->microsecondsPerTimebin();         // time in nsec
+    return (sslice+0.5)*1000*mDb->microsecondsPerTimebin();         // time in nsec
 }
 
 void StFtpcSlowSimReadout::Print() const 
@@ -374,8 +379,8 @@ void StFtpcSlowSimReadout::Print() const
 }
 
 
-void StFtpcSlowSimReadout::polya(const int gnch, const float glow, 
-                    const float ghigh, const float gdelta)
+void StFtpcSlowSimReadout::polya(const int ggnch, const float gglow, 
+                    const float gghigh, const float ggdelta)
 {
 // generate probability distribution from
 // Polya function for gain fluctuation
@@ -392,14 +397,14 @@ void StFtpcSlowSimReadout::polya(const int gnch, const float glow,
     float p;
     pcum[0] = 0.0;
     int i;
-    for (i=1; i<gnch; ++i) {
-        x       = m_polya*(i*gdelta+glow);
+    for (i=1; i<ggnch; ++i) {
+        x       = m_polya*(i*ggdelta+gglow);
         p       = c_polya*pow(x,(m_polya-1.0))*exp(-x);
         pcum[i] = pcum[i-1] + p ;
     }
 
-    for (i=0; i<gnch; ++i) {
-        pcum[i] /= pcum[gnch-1];             // renormalize it
+    for (i=0; i<ggnch; ++i) {
+        pcum[i] /= pcum[ggnch-1];             // renormalize it
         //cout << "i=" << i << " pcum=" << pcum[i] << endl;
     }
 }
