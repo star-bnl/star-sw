@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.47 2000/05/08 15:38:28 lbarnby Exp $
+// $Id: St_dst_Maker.cxx,v 1.48 2000/05/12 20:01:12 lbarnby Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.48  2000/05/12 20:01:12  lbarnby
+// StRoot/St_dst_Maker
+//
 // Revision 1.47  2000/05/08 15:38:28  lbarnby
 // Added l3Dedx table to dst
 //
@@ -144,7 +147,7 @@
 #include "tables/St_dst_mon_soft_l3_Table.h"
 #include "tables/St_dst_mon_soft_rich_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.47 2000/05/08 15:38:28 lbarnby Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.48 2000/05/12 20:01:12 lbarnby Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -487,6 +490,8 @@ Int_t  St_dst_Maker::Filler(){
   if (summary_param && run_header) {
     if(Debug()) gMessMgr->Debug() << " run_dst: Calling fill_dst_event_summary" << endm;
     
+    if(!globtrk) {globtrk = new St_dst_track("globtrk",1);AddGarb(globtrk);}
+
     iRes = fill_dst_event_summary(summary_param, run_header, event_header,
                                   globtrk,vertex,event_summary);
     //     ================================================================
