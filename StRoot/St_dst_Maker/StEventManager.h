@@ -1,6 +1,9 @@
-// $Id: StEventManager.h,v 1.1 1999/05/01 01:49:14 fisyak Exp $
+// $Id: StEventManager.h,v 1.2 1999/05/03 01:39:21 fisyak Exp $
 //
 // $Log: StEventManager.h,v $
+// Revision 1.2  1999/05/03 01:39:21  fisyak
+// Remove tables from DST, add access to different makers
+//
 // Revision 1.1  1999/05/01 01:49:14  fisyak
 // Add StRootEvent fill
 //
@@ -55,6 +58,7 @@
 // suppress 'bool' definition in ObjectSpace stuff
 //#define OS_OMIT_BOOL        Needed only if Star.hh is included
 //#include "StUtil/Star.hh"   Not needed at present
+#include "StMaker.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 #include "tables/dst_run_header.h"
@@ -99,7 +103,6 @@ typedef int ooStatus;
 #define oocSuccess		((ooStatus) 1)
 #define oocError		((ooStatus) 0)
 
-class StMaker;
 
 class StEventManager{
 
