@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNodeImpl.cc,v 1.3 2001/10/26 16:35:28 porter Exp $
+ * $Id: StDbConfigNodeImpl.cc,v 1.4 2003/01/10 04:19:20 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNodeImpl.cc,v $
+ * Revision 1.4  2003/01/10 04:19:20  porter
+ * added feature of getting timestamp list (but no data) for a table.
+ * fixed 2 features sometimes used in online in query-by-whereclause.
+ * removed a stray 'cout' in a routine that is rarely accessed
+ *
  * Revision 1.3  2001/10/26 16:35:28  porter
  * improved directory search
  *
@@ -263,7 +268,6 @@ StDbConfigNodeImpl::removeTable(StDbTable* table){
   TableList::iterator itr;
   StDbTable* myTable=0;
 
-  do {
     for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
         myTable=*itr;
         if(myTable && compareTables(myTable,table)){
@@ -271,7 +275,6 @@ StDbConfigNodeImpl::removeTable(StDbTable* table){
         }
         myTable=0;
     }
-  } while (mTables.begin() != mTables.end());
 }
 
 ////////////////////////////////////////////////////////////////

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.hh,v 1.5 2002/01/30 15:40:48 porter Exp $
+ * $Id: StDbSql.hh,v 1.6 2003/01/10 04:19:20 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbSql.hh,v $
+ * Revision 1.6  2003/01/10 04:19:20  porter
+ * added feature of getting timestamp list (but no data) for a table.
+ * fixed 2 features sometimes used in online in query-by-whereclause.
+ * removed a stray 'cout' in a routine that is rarely accessed
+ *
  * Revision 1.5  2002/01/30 15:40:48  porter
  * changed limits on flavor tag & made defaults retrieving more readable
  *
@@ -95,11 +100,15 @@ protected:
   bool  readTableInfo(StDbTable* table);
   bool  checkValue(const char* colName, const char* colValue);
   bool  checkForNull(const char* src);
+
+  // use local 'mretString' for building and tracking common query entities
   char* insertNodeString(StDbNode* node);
   char* getFlavorQuery(const char* flavor);
   char* getProdTimeQuery(unsigned int prodTime);
   char* getElementList(int* elements, int num);
   char* getColumnList(StDbTable* table,char* tableName, char* funcName=0);
+  char* getEmptyString();
+
   bool  hasInstance(StDbTable* table);
   void  checkTableCatalog();
   char* checkTablePrepForQuery(StDbTable* table, bool checkIndexed=false);
@@ -135,7 +144,7 @@ public:
   virtual int   QueryDb(StDbNode* node);
   virtual int   QueryDb(StDbTable* table, unsigned int reqTime);
   virtual int   QueryDb(StDbTable* table, const char* whereClause);
-  virtual unsigned int* QueryDbTimes(StDbTable* table, const char* whereClause);
+  virtual unsigned int* QueryDbTimes(StDbTable* table, const char* whereClause,int opt=0);
   virtual int   QueryDbFunction(StDbTable* table, const char* whereClause, char* funcName);
   virtual int   QueryDescriptor(StDbTable* table);
   virtual int   WriteDb(StDbTable* table, unsigned int storeTime);

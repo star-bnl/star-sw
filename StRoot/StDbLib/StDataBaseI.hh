@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDataBaseI.hh,v 1.2 2001/10/26 20:59:46 porter Exp $
+ * $Id: StDataBaseI.hh,v 1.3 2003/01/10 04:19:19 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDataBaseI.hh,v $
+ * Revision 1.3  2003/01/10 04:19:19  porter
+ * added feature of getting timestamp list (but no data) for a table.
+ * fixed 2 features sometimes used in online in query-by-whereclause.
+ * removed a stray 'cout' in a routine that is rarely accessed
+ *
  * Revision 1.2  2001/10/26 20:59:46  porter
  * fixed new endtime flag from previous checkin. made StDataBaseI available
  * at root-cli.
@@ -106,7 +111,7 @@ public:
   virtual int  QueryDb(StDbTable* table, unsigned int reqTime)            = 0;
   virtual int  QueryDb(StDbTable* table, const char* whereClause)         = 0;
   virtual unsigned int* QueryDbTimes(StDbTable* table, 
-                                     const char* whereClause)             = 0;
+                                     const char* whereClause, int opt=0)  = 0;
   virtual int  QueryDbFunction(StDbTable* table, 
                               const char* whereClause, char* funcName)    = 0;
   virtual int  QueryDescriptor(StDbTable* table)                          = 0;

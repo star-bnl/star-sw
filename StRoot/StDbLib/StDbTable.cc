@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.31 2002/01/30 15:40:48 porter Exp $
+ * $Id: StDbTable.cc,v 1.32 2003/01/10 04:19:20 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.32  2003/01/10 04:19:20  porter
+ * added feature of getting timestamp list (but no data) for a table.
+ * fixed 2 features sometimes used in online in query-by-whereclause.
+ * removed a stray 'cout' in a routine that is rarely accessed
+ *
  * Revision 1.31  2002/01/30 15:40:48  porter
  * changed limits on flavor tag & made defaults retrieving more readable
  *
@@ -137,6 +142,11 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.32  2003/01/10 04:19:20  porter
+ * added feature of getting timestamp list (but no data) for a table.
+ * fixed 2 features sometimes used in online in query-by-whereclause.
+ * removed a stray 'cout' in a routine that is rarely accessed
+ *
  * Revision 1.31  2002/01/30 15:40:48  porter
  * changed limits on flavor tag & made defaults retrieving more readable
  *
@@ -624,25 +634,32 @@ StDbTable::addNRows(int numRows){
   if(mdata)delete [] mdata;
   mdata=newData;
 
-  int * newElements=new int[newRows];
+  resizeElementID(newRows);
+};
+
+//////////////////////////////////////////////////////////////////////
+void 
+StDbTable::resizeElementID(int numRows){
+
+  int * newElements=new int[numRows];
   if(melementID) {
     memcpy(newElements,melementID,mrows*sizeof(int));
     delete [] melementID;
   }
   melementID=newElements;
-  mrows = newRows;
+  mrows = numRows;
 
 };
 
 //////////////////////////////////////////////////////////////////////
 void
-StDbTable::addNElements(int* elements, int numRows){
+StDbTable::addNElements(int* elements, int newRows){
 
 
   if(!melementID) return;
 
   int i,j,k;
-  k=mrows-numRows;
+  k=mrows-newRows;
   if(k<0)return;
   j=0;
   for(i=k;i<mrows;i++){

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.h,v 1.19 2002/01/30 15:40:48 porter Exp $
+ * $Id: StDbTable.h,v 1.20 2003/01/10 04:19:21 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: StDbTable.h,v $
+ * Revision 1.20  2003/01/10 04:19:21  porter
+ * added feature of getting timestamp list (but no data) for a table.
+ * fixed 2 features sometimes used in online in query-by-whereclause.
+ * removed a stray 'cout' in a routine that is rarely accessed
+ *
  * Revision 1.19  2002/01/30 15:40:48  porter
  * changed limits on flavor tag & made defaults retrieving more readable
  *
@@ -273,9 +278,12 @@ public:
   // memory management for query by where clause
   virtual int         getRowLimit() const;
   virtual void        setRowLimit(int nrows);
-  virtual void        addNRows(int nrows);
-  virtual void        addNElements(int* elements, int nrows);
+  virtual void        addNRows(int newRows);
+
+  ////--> addNElements must be called after either addNRows or resizeElementID
+  virtual void        addNElements(int* elements, int newRows); 
   virtual void        resizeNumRows(int nrows);
+  virtual void        resizeElementID(int numRows);
 
   // methods for reading & writing to Db & to file
   virtual void StreamAccessor(typeAcceptor* accept, bool isReading);
