@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.5 1999/11/18 19:40:49 ullrich Exp $
+% $Id: StEvent.tex,v 2.6 1999/11/22 20:58:43 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -143,8 +143,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.5 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/18 19:40:49 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.6 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/11/22 20:58:43 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -168,8 +168,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.5 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/18 19:40:49 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.6 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/11/22 20:58:43 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -177,8 +177,8 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.5 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/18 19:40:49 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.6 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/11/22 20:58:43 $ $}  % replaced by cvs with current revision
 \index{header files}
 \index{StEventTypes.h file}
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
@@ -202,7 +202,7 @@ To summarize: All you need when using StEvent is to include
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.5 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.6 $ $}  \\[5mm] % replaced by cvs with current revision
 \index{enumerations}
 \index{constants}
 \index{StDetectorId.h file}
@@ -306,6 +306,7 @@ code more readable. All enumerations used in \StEvent\ are defined in
 \texttt{StEnumerations.h}.  For users convenience some non-\StEvent\
 header files as \texttt{StDetectorId.h}, \texttt{StVertexId.h} and
 \subsubsection{Numbering Scheme}
+enum StTrackType            {global, primary, secondary};
 All numbering follows \emph{strictly} the C/C++ convention. This
 includes not only indices as usual but also for example sector
 numbers, row numbers and wafer numbers. If you follow this rule things
@@ -808,7 +809,7 @@ It does \emph{not} contain all data on the experimental run but only on the even
 of the run which were handled in a single batch job. This are usually around 50 events,an experimental run can contain thousands of events. 
 It runs the chain on either a single file or all files under a
 specified root directory (see doEvents.C for details). Example
-        \includegraphics[width=0.5\textwidth]{run.eps}
+invocations are:
 
 Processes 10 events from the specified XDF file.\\
 \hspace{1cm}\verb+.x doEvents.C(10,"-","/some_directory/some_dst_file.xdf");+\\
@@ -883,7 +884,7 @@ This is depicted in Fig.~\ref{fig:umlEvent} which shows only a very small
 fraction of the class design around \texttt{StEvent}.
 not to describe every class and every method in detail but to explain
 the idea behind it and illustrate a few things in simple examples.  If
-        \includegraphics[width=0.8\textwidth]{event.eps}
+you need more details have a look at the reference section and if you
 want to know \emph{everything} about \StEvent\ you have to visit the
 source code directly.
 
@@ -930,8 +931,289 @@ trigger mask, the bunch crossing number and more. For a complete reference see
 section \ref{sec:StEvent}.
     cout << "run type:              " << run->type() << endl;
     cout << "center of mass energy: " << run->centerOfMassEnergy() << endl;
+    if (run->summary()) {
+        cout << "# of events:            "
+             << run->summary()->numberOfEvents() << endl;
+        cout << "# of processed events:  "
+the physics of the event but tells you a lot about how the
+reconstruction programs performs. These are mostly quantities which
+cannot be derived from other objects in \StEvent\ and would be lost
+otherwise.  In a sense they \emph{monitor} the reconstruction details.
+That's where
+the name software monitor comes from.\\
+\begin{figure}[htb]
+allow a better integration of \StEvent\ into the ROOT framework. Since
+this is of no big importance for the understanding of the data model
+as a whole we refer to section \ref{sec:StEventMaker} and
+\ref{sec:StBrowsableEvent} for more details.
+
+             << run->summary()->averageLuminosity() << endl;
+             << run->summary()->meanPt() << endl;
+reconstruction has one. This is not really a detector but still a
+large fraction of our software deals with combining all the detectors
+in order to create global tracks and find the primary vertices.
+This example also illustrates how useful it is to name the methods
+properly. This code actually could have been written simpler using the
+This is depicted in Fig.~\ref{fig:umlMonitors} where all classes and
+their relations are shown.  You get the actual instance of
+StSoftwareMonitor from StEvent and then you can select which
+component, i.e.~which monitor object you want by invoking the proper
+method. The methods are named after the component they return:
+\texttt{tpc()} returns a pointer to the \texttt{StTpcSoftwareMonitor},
+\texttt{svt()} to the \texttt{StSvtSoftwareMonitor} -- well, you get
+the idea. As usual you should check for \texttt{NULL} pointers. If a
+detector was not reconstructed in the reconstruction chain it's likely
+that you will not find the corresponding monitor.
+
+\subsection{Event Header}
+They have no relation with any other class. ALl the do is to hold
+data. Because of this the have no member access functions but all data
+member are public. In order to make things easier for people moving
+from table-based analysis to \StEvent-based analysis we kept the table
+names.  With other words the software monitor classes match their
+table counterparts 1:1.  The names are not always descriptive but the
+author got tired of inventing new names.  You'll find more details on
+what is what in the reference section of this manual.
+you
+can reach every single bit and byte there is on the DST.\\
+Obviously, this makes the \texttt{StEvent} class is a bit more complex
+than \texttt{StRun}. However, one thing is very similar: the summary.
+This is depicted in Fig.~\ref{fig:umlEvent} which shows only a very
+small fraction of the class design around \texttt{StEvent}.
+\begin{figure}[htb]
+    \begin{center}
+        \includegraphics{event.eps}
+        \caption{Class diagrams for \texttt{StEvent} and
+            \texttt{StEventSummary}.}
+    if (!tpcMon) return;       // no monitor 
+    \end{center}
+\end{figure}
+The class \texttt{StEventSummary} contains lots of information
+gathered during the reconstruction of the event like: the total number
+of tracks, the number of positive or negative tracks, the number of
+vertices of certain types, and several \emph{quasi}-histograms which
+hold for example transverse momenta distributions and other important
+quantities. The same warning as for \texttt{StRun} applies here.
+Check the pointer to the event summary before you use it. It could be
+\texttt{NULL}.
+ 
+As already mentioned \texttt{StEvent} opens the door to all the info
+there is on the DST.  In order to get there you have to navigate
+through the tree. Only few objects, mostly container and collections,
 can be reached directly from the \texttt{StEvent} objects.  Here's a
+Here we are actually talking about two different things. The 
+trigger and the trigger detectors. The trigger is put together from data 
+recorded by a bunch of trigger detectors combined in some logic. So far STAR deals
+with 3 levels of trigger numbered 0 -- 3.  Currently the only one
+implemented is level-0 (L0). Others will follow.  All trigger classes
+inherit from a common base class \texttt{StTrigger}. As mentioned
+above, at the moment there is  only one derived class \texttt{StL0Trigger}
+as depicted in Fig.~\ref{fig:umlTrigger}.
+\item Primary vertices (mostly only one)
+\item List of all V0 vertex candidates
+\item List of all Xi vertex candidates
+\item List of all kink vertex candidates
+\item Level-0 trigger
+\end{enumerate}
+And remember, an object you get \emph{by pointer} is not guaranteed to
+exist, an object you get \emph{by reference} always exist.
+The class contains everything there is available about the actual trigger:
+trigger word, trigger action word, multiplicities, and more. The trigger
+is directly contained in the \texttt{StEvent} class. In order to get a pointer
+to the L0 trigger use: \texttt{StEvent::l0Trigger()}. Even if we repeat
+us here: it is a pointer and therefore can be \texttt{NULL}. At the moment
+all simulations have no trigger data. You were warned.
+\index{software monitors}
+The trigger detectors are those detectors which data is used in
+the trigger (which doesn't mean that the data isn't useful for other
+things as well). There's a couple of them: the Central Trigger Barrel
+(CTB), the Zero Degree Calorimeter (ADC), the Vertex Position Detector
+(VPD), and the Multiwire Proportional Chamber (MWC). This means we need
+a collection to hold them together and indeed this is what
+\texttt{StTriggerDetectorCollection}
+is all about. The trigger detector design is shown in Fig.~\ref{fig:umlTrigger}.
+The collection holds all classes which describe the different trigger detectors:
+\texttt{StMwcTriggerDetector}, \texttt{StCtbTriggerDetector}, \texttt{StZdcTriggerDetector}, and
+\texttt{StVpdTriggerDetector} (not shown). 
+These trigger detectors store the actual ADC and TDC values including some
+calculated quantities. Check in the reference section for more details.
+The collection is a member of \texttt{StEvent}. To get a pointer to the
+collection use: \texttt{StEvent::triggerDetectorCollection()}. From there you get the
+specific trigger detectors through a set of methods.
+The methods are named after the component they return by \texttt{reference}:
+\texttt{ctb()} returns a reference to the \texttt{StCtbTriggerDetector},
+\texttt{mwc()} to the \texttt{StMwcTriggerDetector}, and so on.
+Since they are returned by reference you can be sure the objects exist. No checks
+necessary. Note that ``exist'' is not a synonym for ``makes sense''. The reason
+for this is that the DST contains the data for all trigger detectors in one big
+table. If it available the collection (StTriggerDetectorCollection) is created
+else \texttt{StEvent::triggerDetectorCollection()} will return \texttt{NULL}.
+Once created the data in the table is used to setup the instances of the
+various trigger detectors. If a specific detector wasn't used its data is set 0
+(so the author hopes) but the data is still there. 
+\texttt{StTpcSoftwareMonitor}, \texttt{svt()} to the
+\texttt{StSvtSoftwareMonitor} -- well, you get the idea. As usual you
+should check for \texttt{NULL} pointers. If a detector was not
+reconstructed in the reconstruction chain it's likely that you will
+not find the corresponding monitor.
+
+The specific software monitor classes are pretty simple flat classes.
+They have no relation with any other class. All they do is to hold
+data. Because of this, they have no member access functions and all
+data members are public. In order to make things easier for people
+moving from table-based analysis to \StEvent-based analysis we kept
+even the table names.  With other words the software monitor classes
+match their table counterparts 1:1.  The names are not always
+descriptive but the author got tired of inventing new names.  You'll
+find more details on what is what in the reference section of this
+             << ctb.time(i) << endl; 
+
+Here a simple example on how to use the software monitors:
+\begin{verbatim}
+void printTpcClusterInfo(ostream& os = cout, StEvent* event)
+{
+    StTpcSofwareMonitor *tpcMon = 0;
+
+    if (event && event->softwareMonitor())
+        tpcMon = event->softwareMonitor()->tpc();
+    else 
+
+    if (!tpcMon) return;       // no monitor
+
+Again, we are using the \texttt{PR()} macro from \texttt{StGlobals.hh} to save
+some typing. The names of the method say all there is to say.
+        os << "Inner sector " << i << " has "
            << tpcMon->n_clus_tpc_in[i] << " cluster" << endl;
+\index{tracks} This is probably the most complex part of the design.
+Before we go into the details we give a brief introduction to what a
+track is and explain the differences between \emph{global} and
+\emph{primary} tracks. We then introduce the track \emph{node}, which
+plays a very central role in the \StEvent\ track model.  The different
+blocks of information which make a track such as the track geometry
+and the various traits are explained later together with a short
+introduction to filters which, as you will learn, allow to apply
+predefined algorithm to select and filter information out of the data.
+
+The \textbf{trigger} is put together from data recorded by a bunch of
+\index{primary tracks} \index{global tracks} The STAR tracker, known
+as \texttt{tpt}, performs the tracking in the main STAR tracking
+detector the TPC. It finds a set of hits, which tpt assume to belong
+to one track and applies fits in order to determine the track
+parameters. Once this is done the track is passed along the chain.
+Points from other detectors might be added. At the end this track is
+then usually fitted with a more sophisticated fitting method and from
+there on is called a \textbf{global} track (class
+        \caption{Class diagrams for the trigger detector collection and
+            the \texttt{StTrigger} hierarchy.}
+    cout << "  counter  |     mips    |     time   \n";
+    cout << "--------------------------------------\n";
+simulations have no trigger data. You were warned.
+this, since by using all global tracks we can deduce the primary
+vertex (or vertices) with pretty good accuracy. A track which comes
+from the primary vertex (and most do) can be re-fitted using the new
+primary vertex. This increase dramatically the accuracy in which STAR
+can measure particles, both in terms of direction and momentum. If a
+global track points back close enough to the primary vertex and the
+re-fitting works out well (whatever that means) then this track, or
+better the refitted track, becomes a \textbf{primary} track (class
+\texttt{StPrimaryTrack}). A primary track only makes sense if it
+refers to a primary vertex.  If a primary track is found the global
+track which was used to create it makes almost no sense any more and
+could be dropped, \texttt{if} you trust the procedure. However, things
+aren't as perfect and a primary track very well could have been
+misidentified.  For that reason STAR keeps currently all global
+holds all classes which describe the different trigger detectors:
+\texttt{StMwcTriggerDetector}, \texttt{StCtbTriggerDetector},
+\texttt{StZdcTriggerDetector}, and \texttt{StVpdTriggerDetector} (not
+shown).  These trigger detectors store the actual ADC and TDC values
+a fraction of the global tracks if th primary track is superior. \\
+If a primary track fit succeeds the new track parameters and related
+get a pointer to the collection use:
+the number of hits might change, since the newly re-fitted track might
+exclude old hits and/or add new hits.  \StEvent\ is able to cope with
+named after the component they return by reference: \texttt{ctb()}
+returns a reference to the \texttt{StCtbTriggerDetector},
+\texttt{mwc()} to the \texttt{StMwcTriggerDetector}, and so on.  Since
+So far so good. But what is with the tracks which fail the fit.
+checks necessary. Note that ``exist'' is not a synonym for ``makes
+sense''. The reason for this is that the DST contains the data for all
+trigger detectors in one big table. If it available the collection
+(StTriggerDetectorCollection) is created else
+\texttt{StEvent::triggerDetectorCollection()} will return
+\texttt{NULL}.  Once created the data in the table is used to setup
+the instances of the various trigger detectors. If a specific detector
+wasn't used its data is set 0 (so the author hopes) but the data is
+still there.
+
+Here's an example which dumps the CTB data in form of a table:
+\begin{verbatim}
+void dumpCtb(StEvent* event)
+{
+not know a priori or at least cannot be determined unabmigiously. In
+
+    StCtbTriggerDetector &ctb = event->triggerDetectorCollection()->ctb();
+possibly also the set of hits used.  In a sense these are tracks
+created from the same \texttt{seed}. How we keep track of all these
+different flavours is explained in the next section.
+
+    for (int i=0; i<ctb.numberOfTrays(); i++) 
+        for (int j=0; j<ctb.numberOfSlats(); j++) 
+            cout << setw(5) << i <<   " | "
+used to re-fit the primary tracks.
+                 << setw(10) << ctb.mips(i, j, 0) << " | "
+                 << ctb.time(i, j, 0) << endl;
+\index{track node}
+As we have seen in the previous section there are two kinds of tracks
+from which each of them might be possibly fitted in different models
+such creating a whole bunch of tracks which all come originally from
+the same \texttt{seed} formed early in the reconstruction chain. Only
+one of them can be right (at least for a specific analysis) and if we
+count tracks we can only count all of them as one. May students spent
+by far too much time hunting
+the problem of double-counting.\\
+\end{verbatim}
+Again, we are using the \texttt{PR()} macro from \texttt{StGlobals.hh}
+to save some typing. The names of the methods speak for themself.
+        \caption{Schematic view of the track node collection and its relation to
+            the detector info collection and the list of daughter
+            tracks of the primary vertex.}
+
+This is probably the most complex part of the design.  Before we get
+into too much detail we give a brief introduction on what a track is
+We have to have a way to tell that all these flavours belong together
+even if the have different fit parameters or event a slightly
+different set of hits. This is were the track \textbf{node} comes into
+the game (class \texttt{StTrackNode}).
+various traits are explained later together with a short introduction
+to filters, which, as you will learn, allow to apply predefined
+Every track knows about the node it belongs and thus one can navigate
+from one track in the node to the other.  Each node contains at 1--n
+tracks. This is depicted in Fig.~\ref{fig:nodes}.
+
+The array shown in the middle of the picture shows the list of nodes
+as held by the StEvent class itself. Every element (depicted as a box)
+The STAR tracker, known as \texttt{tpt}, performs the tracking in the
+main STAR tracking detector the TPC. It finds a set of hits, which
+between: max(N$_{primary}$, N$_{global}$) and N$_{primary}$ + N$_{global}$.
+It is a good measure for the multiplicity in the event. 
+passed along the chain.  Points from other detectors might be added.
+At the end this track is then fitted with a more sophisticated fitting
+primary vertex can be found easily secondary vertices are more tricky
+to detect (at least in a Heavy-Ion collision) and can hardly be
+identified unambiguously. If one could do so, one could repeat the
+\subsubsection{Track Geometry and Fit Traits}
+
+\subsubsection{PID Traits}
+
+To summarize: STAR has two kinds of tracks global tracks which can
+come from wherever they want and primary tracks which always point
+back to the primary vertex. The position of the primary vertex was
+        \caption{}
+\label{sec:node}
+\index{track node}
+
+\vfill
+
        // Assume it's a pion
 cout << tpcDedx.traits()->mean() << endl;
      << theHits.size() << " hits" << endl;
@@ -1405,18 +1687,30 @@ definition in the header file.
     
     \verb+void setNumberOfTracks(Long_t);+\\
     \verb+void setNumberOfGoodTracks(Long_t);+\\
+
     \verb+void setNumberOfGoodPrimaryTracks(Long_t);+\\
     \verb+void setNumberOfNegativeTracks(Long_t);+\\
     \verb+void setNumberOfExoticTracks(Long_t);+\\
     \verb+void setNumberOfVertices(Long_t);+\\
+    \verb+void setNumberOfVerticesForType(StVertexId, Long_t);+\\
 \item[Related Classes]
+   Instance of \texttt{StFtpcPlaneHitCollection} are stored in the \texttt{StFtpcHitCollection}.
+   The class holds a list of objects of type \texttt{StFtpcSectorHitCollection}.
+    \verb+void setMeanEta(Float_t);+\\
     \verb+void setRmsEta(Float_t);+\\
     \verb+void setPrimaryVertexPosition(const StThreeVectorF&);+\\
+    \verb+void setMagneticField(Double_t);+\\
+\end{Entry}
 \clearpage
 
+
+\subsection{StEventTypes}
 \index{StEventTypes|textbf}
-    \verb+StFtpcSectorHitCollection* sector(UInt_t);+\\
-    \verb+const StFtpcSectorHitCollection* sector(UInt_t) const;+\\
+\label{sec:StEventTypes}
+\begin{Entry}
+\item[Summary] Header files which contains all type definition used in
+    \StEvent.
+    Returns the \texttt{i}'th sector, where \texttt{i = 0--(numberOfSectors()-1).}
 \item[Description] Since all \StEvent\ classes contain only the
     minimum amount of declaration it could become very tedious to find
     the right set of header files in your application.  This header
@@ -1685,6 +1979,7 @@ definition in the header file.
     Returns flag providing info on if this hit was actually used in one
     of the various track fits.
     
+    \verb+UInt_t trackReferenceCount() const;+\\
     Returns the number of tracks associated with that hit.
     
     \verb+StDetectorId detector() const;+\\
