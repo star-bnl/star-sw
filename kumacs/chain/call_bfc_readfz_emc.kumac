@@ -2,7 +2,7 @@
 * Run BFC in following manner:
 * - read in fz file
 * - run g2t
-* - run tpc (tss) & svt (srs) & emc (ems) simulation
+* - run  emc (ems) simulation
 * - write out xdf file
 *  
 * 
@@ -12,11 +12,11 @@
    tpc_sector_first=1 _
    tpc_sector_last=24 _
    gstar_settings=' field_only' _
-   domain=' geometry g2t tpc emc ctf svt global ' _
-   chain=' fzin rg2t tpg svg tfs srs ems tpt tid tte_e sgr drhd dehd svm egr evr ev0 ddedx dpnt desum dmsft drsum dout ' _
+   domain=' geometry g2t  emc  ' _
+   chain=' fzin rg2t  ems  evout ' _
    skip=0 _
    no_events=1 _
  input_data_file=/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/Gstardata/psc079_01_46evts.fza _
-   output_file=psc079_01_46evts_year2 _
-   log=bfc_readfz_to_dst_year2.log
+   output_file=psc079_01_46evts_year2_emc _
+   log=bfc_readfz_emc.log
 
