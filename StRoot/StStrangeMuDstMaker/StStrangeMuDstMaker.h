@@ -159,7 +159,7 @@ class StStrangeMuDstMaker : public StMaker {
   virtual void  Clear(Option_t *option="");
   virtual Int_t Finish();
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StStrangeMuDstMaker.h,v 3.16 2003/10/20 00:21:47 genevb Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StStrangeMuDstMaker.h,v 3.17 2004/07/12 21:45:35 genevb Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   //@}
@@ -289,10 +289,10 @@ inline StStrangeMuDst* StStrangeMuDstMaker::GetDatum(Int_t i, Bool_t MC,
               else return (StStrangeMuDst*) GetEventI(MC); }
 inline StStrangeEvMuDst* StStrangeMuDstMaker::GetEvent()
             { return (evClonesArray ?
-            (StStrangeEvMuDst*) (*evClonesArray)[0] : 0); }
+            (StStrangeEvMuDst*) evClonesArray->At(0) : 0); }
 inline StStrangeEvMuDst* StStrangeMuDstMaker::GetMcEvent()
             { return (evMcArray ?
-            (StStrangeEvMuDst*) (*evMcArray)[0] : 0); }
+            (StStrangeEvMuDst*) evMcArray->At(0) : 0); }
 inline StStrangeEvMuDst* StStrangeMuDstMaker::GetEventI(Bool_t MC)
             { return (MC ? GetMcEvent() : GetEvent()); }
 inline StV0I* StStrangeMuDstMaker::GetV0I(Int_t i, Bool_t MC)
@@ -342,8 +342,11 @@ inline Int_t StStrangeMuDstMaker::MatchName(const char* name) const
 
 //____________________________________________________________________
 //
-// $Id: StStrangeMuDstMaker.h,v 3.16 2003/10/20 00:21:47 genevb Exp $
+// $Id: StStrangeMuDstMaker.h,v 3.17 2004/07/12 21:45:35 genevb Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 3.17  2004/07/12 21:45:35  genevb
+// Handle missing Event branch info condition
+//
 // Revision 3.16  2003/10/20 00:21:47  genevb
 // Fix a typo for Assoc introduced in vers. 3.13
 //

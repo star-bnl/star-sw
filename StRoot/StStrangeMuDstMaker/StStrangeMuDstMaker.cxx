@@ -251,8 +251,8 @@ Int_t StStrangeMuDstMaker::MakeReadDst() {
     SkipChainFile(curTree);
   }
 
-  if (((skippingFile) && (curTree == chain->GetNtrees())) ||
-      (tree->GetEvent(readEventNumber) <= 0)) return kStErr; // Read the event
+  if (skippingFile && curTree == chain->GetNtrees()) return kStErr; 
+  if (tree->GetEvent(readEventNumber) <= 0) return kStErr; // Read the event
 
   TFile* thisFile = chain->GetFile();
   if (thisFile != lastFile) {
@@ -261,11 +261,15 @@ Int_t StStrangeMuDstMaker::MakeReadDst() {
     lastFile = thisFile;
   }
 
-  // Overcome a bug where event wasn't meant to be recorded into 
-  // a muDst, but was anyhow (with the previous event's info)
-  thisRun = GetEvent()->run();
-  thisEvent = GetEvent()->event();
-  if ((thisRun == lastRun) && (thisEvent == lastEvent)) {
+  // Overcome a bug where event wasn't meant to be recorded into a muDst,
+  // but was anyhow (with the previous event's info, or none at all)
+  Bool_t badEvent = kTRUE;
+  if (GetEvent()) { 
+    thisRun = GetEvent()->run();
+    thisEvent = GetEvent()->event();
+    badEvent = (thisRun == lastRun) && (thisEvent == lastEvent);
+  }
+  if (badEvent) {
     if (makerEventNumber < 0 ) {
       // User is calling Make() (not asking for a specific event).
       // Automatically skip to next event.
@@ -651,8 +655,11 @@ char* StStrangeMuDstMaker::GetFile() const {
 }       
 
 //_____________________________________________________________________________
-// $Id: StStrangeMuDstMaker.cxx,v 3.29 2003/12/07 00:49:40 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.30 2004/07/12 21:45:34 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.30  2004/07/12 21:45:34  genevb
+// Handle missing Event branch info condition
+//
 // Revision 3.29  2003/12/07 00:49:40  genevb
 // Include events with no primary vertex
 //
