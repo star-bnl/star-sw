@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.3 2001/03/15 20:56:11 pavlinov Exp $
+ * $Id: StEmcGeom.h,v 1.4 2001/03/15 23:47:20 pavlinov Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.4  2001/03/15 23:47:20  pavlinov
+ * Fixed error on SUN compiler
+ *
  * Revision 1.3  2001/03/15 20:56:11  pavlinov
  * Jose's scheme is default
  *
@@ -142,7 +145,7 @@ public:
   Int_t    checkSub(const Int_t );
   Int_t    checkId(const Int_t );
 
-  Int_t    getBin(const Float_t phi, const Float_t eta, Int_t &m,Int_t &e,Int_t &e);
+  Int_t    getBin(const Float_t phi, const Float_t eta, Int_t &m,Int_t &e,Int_t &s);
   Int_t    getBin(const Int_t rid, Int_t &m, Int_t &e, Int_t &s);
   Int_t    getId(const Int_t m,const Int_t e,const Int_t s,Int_t &rid);
 
