@@ -200,36 +200,19 @@ void St_PolyLine3D::DrawPolyLine(Int_t n, Float_t *p, Option_t *option)
 //______________________________________________________________________________
 Color_t St_PolyLine3D::GetColorAttribute() const
 {
-  typedef Color_t (St_PolyLine3D::*badDef)() const;
-  typedef Color_t (St_PolyLine3D::*rightDef)();
-  rightDef lineDef = GetLineColor;
-  badDef mkit = (badDef) lineDef;
-//  Color_t (St_PolyLine3D::*mkit)() const = (Color_t (St_PolyLine3D::*)() const)GetLineColor;
-  return (this->*mkit)();
-// return 0;
+  return ((St_PolyLine3D *)this)->GetLineColor();
 //  return fAttributes ? fAttributes->GetLineColor():0;
 }
 //______________________________________________________________________________
 Width_t St_PolyLine3D::GetSizeAttribute()  const
 {
-  typedef Width_t (St_PolyLine3D::*badDef)() const;
-  typedef Width_t (St_PolyLine3D::*rightDef)();
-  rightDef lineDef = GetLineWidth;
-  badDef mkit = (badDef) lineDef;
-
-//  Width_t (St_PolyLine3D::*mkit)() const = (Width_t(St_PolyLine3D::*)() const)GetLineWidth;
-  return (this->*mkit)();
+  return ((St_PolyLine3D *)this)->GetLineWidth();
 //   return  fAttributes ? fAttributes->GetLineWidth():0;
 }
 //______________________________________________________________________________
 Style_t St_PolyLine3D::GetStyleAttribute()  const
 {
-  typedef Style_t (St_PolyLine3D::*badDef)() const;
-  typedef Style_t (St_PolyLine3D::*rightDef)();
-  rightDef lineDef = GetLineStyle;
-  badDef mkit = (badDef) lineDef;
-//  Style_t (St_PolyLine3D::*mkit)() const = (Style_t(St_PolyLine3D::*)() const)GetLineStyle;
-  return (this->*mkit)();
+  return ((St_PolyLine3D *)this)->GetLineStyle();
 //   return  fAttributes ? fAttributes->GetLineStyle():0;
 }
 //______________________________________________________________________________
@@ -246,13 +229,10 @@ void St_PolyLine3D::Paint(Option_t *option)
     if (!fPoints) return;
     //*-* Check whether there is some 3D view class for this TPad
     TPadView3D *view3D = gPad->GetView3D();
-#ifdef WIN32
     if (view3D) {
         view3D->SetLineAttr(GetColorAttribute(), GetSizeAttribute());
         view3D->PaintPoints3D((const TPoints3DABC *)this, "L");
     }
-
-#endif
  
     //*-* Check if option is 'x3d'.      NOTE: This is a simple checking
     //                                         but since there is no other
