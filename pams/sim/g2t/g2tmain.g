@@ -215,15 +215,13 @@ created   22 april 98
 
       enddo
 *
-      print *, ' **** calling g2t_get_event ****'
       i = AMI_CALL ('g2t_get_event'//o,1,'g2t_event'//o)
-      prin0 i; (' g2tmain: get_event done with i=',i6)
+      prin5 i; (' g2tmain: get_event done with i=',i6)
 *
       if (ld>0) i = DUI_CDIR('..'//o)
       IQUEST(1)   = IEOTRI
       IQUEST(100) = NTRACK
       G2T_MAIN = i
-      print *,' === gt2 main done ==='
       END
 
 
