@@ -72,7 +72,7 @@ SRC_DIR := $(INP_DIR)
 #	Includes
 #####INCLUDES := $(addprefix -I,$(wildcard $(UPP_INP_DIR)/*/inc))
 
-INCLUDES := -I$(SRC_DIR) -I$(OUT_DIR)/StRoot/base -I$(STAR)/StRoot/base -I$(STAR)/asps/staf/inc -I$(ROOTSYS)/include -I$(OUT_DIR)/.share/tables -I$(STAR)/.share/tables -I$(OUT_DIR)/.share  -I$(STAR)/.share
+INCLUDES := -I$(SRC_DIR) -I$(OUT_DIR)/StRoot/base -I$(STAR)/StRoot/base -I$(STAR)/StRoot/xdf2root -I$(STAR)/asps/staf/inc -I$(ROOTSYS)/include -I$(OUT_DIR)/.share/tables -I$(STAR)/.share/tables -I$(OUT_DIR)/.share  -I$(STAR)/.share
 INCL     :=  -I$(GEN_DIR) $(addprefix -I, $(INC_DIRS))
 
 
@@ -107,7 +107,7 @@ FILES_DAT  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_DataSet.cxx )))
 FILES_XDF  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_XDFFile.cxx )))
 FILES_ALL  := $(strip $(wildcard $(SRC_DIR)/St*.cxx ))
 FILES_CINT := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_*Cint.cxx)))
-FILES_ST   := $(strip $(FILES_CINT) $(FILES_SYM) $(FILES_SYT) $(FILES_TAB) $(FILES_MOD) $(FILES_DAT) $(FILES_XDF))
+FILES_ST   := $(strip $(FILES_CINT) $(FILES_SYM) $(FILES_SYT) $(FILES_TAB) $(FILES_MOD) $(FILES_DAT))
 FILES_ALL  := $(filter-out $(FILES_ST),  $(FILES_ALL))
 FILES_ORD  := $(FILES_ALL)
 ifdef FILES_SYM
@@ -199,7 +199,7 @@ $(FILES_CINT_SYM) : $(GEN_DIR)/St_%Cint.cxx : $(wildcard $(SRC_DIR)/St_*.h)
 $(FILES_CINT_SYM) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h
 	$(COMMON_LINKDEF)
 	@echo "#pragma link C++ class St_DataSet;"       >> $(LINKDEF);
-	@echo "#pragma link C++ class St_XDFFile;"       >> $(LINKDEF);
+#	@echo "#pragma link C++ class St_XDFFile;"       >> $(LINKDEF);
 	@echo "#pragma link C++ enum EModuleTypes;"      >> $(LINKDEF);
 	@echo "#pragma link C++ class St_DataSetIter;"   >> $(LINKDEF);
 	@echo "#endif"					 >> $(LINKDEF);
