@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.5 2002/03/27 00:50:11 laue Exp $
+ * $Id: StMuDst.cxx,v 1.6 2002/05/20 18:57:18 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -18,9 +18,12 @@
 #include "TClonesArray.h"
 #include "TTree.h"
 
+#include "StStrangeMuDstMaker/StV0MuDst.hh"
+#include "StStrangeMuDstMaker/StXiMuDst.hh"
+#include "StStrangeMuDstMaker/StKinkMuDst.hh"
 
 TClonesArray* StMuDst::arrays[__NARRAYS__] = {0,0,0,0,0,0,0,0,0};
-TClonesArray* StMuDst::strangeArrays[__NSTRANGEARRAYS__] = {0,0,0,0,0,0,0,0,0,0,0};
+TClonesArray* StMuDst::strangeArrays[__NSTRANGEARRAYS__] = {0,0,0,0,0,0,0,0,0,0,0,0};
 
 
 StMuDst::StMuDst() {
@@ -51,6 +54,13 @@ void StMuDst::set(StMuDstMaker* maker) {
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
     strangeArrays[i] = maker->mStrangeArrays[i];
   }
+
+  StStrangeEvMuDst* ev = strangeEvent();
+  cout << ev <<endl;
+  int nV0s = v0s()->GetEntries(); for (int i=0;i<nV0s; i++) v0s(i)->SetEvent(ev);
+  int nXis = xis()->GetEntries(); for (int i=0;i<nXis; i++) xis(i)->SetEvent(ev);
+  //  int nKinks = kinks()->GetEntries(); for (int i=0;i<nKinks; i++) kinks(i)->SetEvent(ev);
+
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -206,6 +216,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.6  2002/05/20 18:57:18  laue
+ * update for Christof
+ *
  * Revision 1.5  2002/03/27 00:50:11  laue
  * bux fix from earlier check in
  *
