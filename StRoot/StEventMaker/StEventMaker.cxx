@@ -44,7 +44,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.65 2004/02/11 02:20:27 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.66 2004/02/14 19:25:27 perev Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -893,17 +893,28 @@ StEventMaker::makeEvent()
           nfailed++;continue;}
 
         id = dstV0Vertices[i].id_vertex - 1;
+        int ifail = 2;
         if (id < static_cast<unsigned long>(nVertices)
         &&  dstVertices[id].iflag > 0) {
             StV0Vertex *v0 = new StV0Vertex(dstVertices[id], dstV0Vertices[i]);
             id = dstV0Vertices[i].idneg;
-            if (id < vecGlobalTracks.size()) v0->addDaughter(vecGlobalTracks[id]);
+            if (id < vecGlobalTracks.size() && vecGlobalTracks[id] ) {
+              v0->addDaughter(vecGlobalTracks[id]);
+              ifail--;
+            }
             id = dstV0Vertices[i].idpos;
-            if (id < vecGlobalTracks.size()) v0->addDaughter(vecGlobalTracks[id]);
-            v0Vertices.push_back(v0);
+            if (id < vecGlobalTracks.size() && vecGlobalTracks[id] ) {
+              v0->addDaughter(vecGlobalTracks[id]);
+              ifail--;
+            }
+            if (ifail) {
+              gMessMgr->Warning() << "StEventMaker::makeEvent(): V0 has <2 daughters. Delete it" << endm;
+              delete v0;
+            } else {
+              v0Vertices.push_back(v0);
+            }
         }
-        else
-            nfailed++;
+        if (ifail) nfailed++;
     }
     if (nfailed)
         gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
@@ -921,17 +932,25 @@ StEventMaker::makeEvent()
 	  if (Debug()) Warning("makeEvent","Xi vertex rejected by %d",bad);
           nfailed++;continue;}
         id    = dstXiVertices[i].id_xi - 1;
+        int ifail = 1;
         if (dstVertices[id].iflag > 0
         && (id < static_cast<unsigned long>(nVertices))) {
             StXiVertex *xi = new StXiVertex(dstVertices[id], dstXiVertices[i]);
             id = dstXiVertices[i].id_v0 - 1;
             if (id < v0Vertices.size()) xi->setV0Vertex(v0Vertices[id]);
             id  = dstXiVertices[i].id_b;       // no -1 here
-            if (id < vecGlobalTracks.size()) xi->addDaughter(vecGlobalTracks[id]);
-            xiVertices.push_back(xi);
+            if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
+              xi->addDaughter(vecGlobalTracks[id]);
+              ifail--;
+            }
+            if (ifail) {
+              gMessMgr->Warning() << "StEventMaker::makeEvent(): Xi has <1 daughters. Delete it" << endm;
+              delete xi;
+            } else {
+              xiVertices.push_back(xi);
+            }
         }
-        else
-            nfailed++;
+        if (ifail) nfailed++;
     }
     if (nfailed)
         gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
@@ -949,18 +968,25 @@ StEventMaker::makeEvent()
 	  if (Debug()) Warning("makeEvent","tkf vertex rejected by %d",bad);
           nfailed++;continue;}
 
+        int ifail=3;
         id = dstKinkVertices[i].id_vertex - 1;
         if (dstVertices[id].iflag > 0
         && (id < static_cast<unsigned long>(nVertices))) {
             StKinkVertex *kink = new StKinkVertex(dstVertices[id], dstKinkVertices[i]);
             id = dstKinkVertices[i].idd;
-            if (id < vecGlobalTracks.size()) kink->addDaughter(vecGlobalTracks[id]);
+            if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
+              ifail-=1; kink->addDaughter(vecGlobalTracks[id]);}
+
             id = dstKinkVertices[i].idp;
-            if (id < vecGlobalTracks.size()) kink->setParent(vecGlobalTracks[id]);
-            kinkVertices.push_back(kink);
+            if (id < vecGlobalTracks.size()) {
+              ifail-=2; kink->setParent(vecGlobalTracks[id]);}
+            if (ifail&1) {
+               gMessMgr->Warning() << "StEventMaker::makeEvent(): Kink has no daughter. Delete it" << endm;}
+            if (ifail&2) {
+               gMessMgr->Warning() << "StEventMaker::makeEvent(): Kink has no parent.   Delete it" << endm;}
+            if (ifail) {delete kink;} else {kinkVertices.push_back(kink);}
         }
-        else
-            nfailed++;
+        if (ifail) nfailed++;
     }
     if (nfailed)
         gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
@@ -1623,8 +1649,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.65 2004/02/11 02:20:27 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.66 2004/02/14 19:25:27 perev Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.66  2004/02/14 19:25:27  perev
+ * More strong check for secondaries objects
+ *
  * Revision 2.65  2004/02/11 02:20:27  ullrich
  * Load StTriggerDetectorCollection using StTriggerData for runs
  * in 2003 and later. For 2001 and 2002 stick to TrgDet table.
