@@ -1,5 +1,8 @@
-// $Id: St_l3Clufi_Maker.h,v 1.5 2000/04/12 18:39:21 flierl Exp $
+// $Id: St_l3Clufi_Maker.h,v 1.6 2001/04/26 18:28:55 flierl Exp $
 // $Log: St_l3Clufi_Maker.h,v $
+// Revision 1.6  2001/04/26 18:28:55  flierl
+// add two member functions
+//
 // Revision 1.5  2000/04/12 18:39:21  flierl
 // check whether enough memory is allocated for the clusters ( for the tables and the buffers )
 //
@@ -68,7 +71,7 @@
 //class St_stk_stkpar;
 class St_l3Clufi_Maker : public StMaker {
  private:
-    // static Char_t  m_VersionCVS = "$Id: St_l3Clufi_Maker.h,v 1.5 2000/04/12 18:39:21 flierl Exp $";
+    // static Char_t  m_VersionCVS = "$Id: St_l3Clufi_Maker.h,v 1.6 2001/04/26 18:28:55 flierl Exp $";
      
     //
     // l3 clusterfinding variables
@@ -84,6 +87,7 @@ class St_l3Clufi_Maker : public StMaker {
     hitarray_st* hit_bank_this_st; //!
     St_hitarray*   St_hit_bank[12];//!
     hitarray_st* hit_bank_array[12];//!
+    Int_t clbanklengths[12];//!
 
     // histos
     TH1F* x_dis;
@@ -92,6 +96,9 @@ class St_l3Clufi_Maker : public StMaker {
     TH1F* charge_dis;
     TH1D* i960_time;
     
+    // debugging
+    Int_t l3ClufiDebug ;
+
     // some constants
     Int_t Buffer_size ; // define max buffer_size
 
@@ -102,15 +109,17 @@ class St_l3Clufi_Maker : public StMaker {
     //
     Int_t Fill_pixel_of_inner_rows();
     Int_t Fill_pixel_of_outer_rows();
-   
+    Int_t WriteClustersIntoFile() ;
+    Int_t WriteClustersIntoTables() ;
 
                   St_l3Clufi_Maker(const char *name="l3Clufi");
    virtual       ~St_l3Clufi_Maker();
    virtual Int_t Init();
    virtual Int_t  Make();
+   
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_l3Clufi_Maker.h,v 1.5 2000/04/12 18:39:21 flierl Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_l3Clufi_Maker.h,v 1.6 2001/04/26 18:28:55 flierl Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_l3Clufi_Maker, 1)   //StAF chain virtual base class for Makers
 };
