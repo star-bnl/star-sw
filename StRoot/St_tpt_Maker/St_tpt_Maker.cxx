@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.28 1999/04/23 19:03:30 sakrejda Exp $
+// $Id: St_tpt_Maker.cxx,v 1.29 1999/05/05 18:45:40 liq Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.29  1999/05/05 18:45:40  liq
+// include valuation plots of reconstraction
+//
 // Revision 1.28  1999/04/23 19:03:30  sakrejda
 // One more scope problem, type definition removed from the if scope
 //
@@ -96,8 +99,11 @@
 #include "tpc/St_tde_new_Module.h"
 #include "tpc/St_tte_Module.h"
 #include "TH1.h"
+#include "TH2.h"
+#include "TH3.h"
 #include "TNtuple.h"
 #include "St_type_index_Table.h"
+#include "tpc/St_tfs_g2t_Module.h"  
 ClassImp(St_tpt_Maker)
   
   //_____________________________________________________________________________
@@ -169,8 +175,132 @@ Int_t St_tpt_Maker::Init(){
      "evno:alpha:lambda:row:x:y:z:track:cluster:q:xave:sigma:zrf:prf:nfit:invp:psi:phi0:r0:tanl:z0:chisqxy:chisqz:nseq");
  // xave and sigma are not filled anymore because they came from aux table (RAI)
 
+// if m_tteEvalOn=kTrue, then initialize the histograms of the efficiency and momentum resolution
+  if(m_tteEvalOn){VertexEffResolutionInit();}
   return StMaker::Init();
 }
+//_____________________________________________________________________________
+void St_tpt_Maker::VertexEffResolutionInit() {
+  //create histograms and ntuple for VertexEffResolution
+
+cout<<"begin to run St_tpt_Maker::VertexEffResolutionInit"<<endl;
+
+m_vertex_x=new TH1F("m_vertex_x", "primary vertex X",50,-0.05, 0.05);
+//m_vertex_x->SetXTitle("primary vertex X");
+
+m_vertex_y=new TH1F("m_vertex_y", "primary vertex Y",50,-0.05, 0.05);
+m_vertex_y->SetXTitle("primary vertex Y");
+
+m_vertex_z=new TH1F("m_vertex_z", "primary vertex Z",100,-50., 50.);
+m_vertex_z->SetXTitle("primary vertex Z");
+
+m_vertex_xy=new TH1F("m_vertex_xy", "primary vertex Rxy",30,0., 0.03);
+m_vertex_xy->SetXTitle("primary vertex XY");
+
+m_vertexX_vertexY=new TH2F("m_vertexX_vertexY", "primary vertex X vs. Y",50,-0.05, 0.05,50,-0.05, 0.05);
+m_vertexX_vertexY->SetXTitle("primary vertex X"); m_vertexX_vertexY->SetYTitle("primary vertex Y");
+
+m_vertexX_vertexZ=new TH2F("m_vertexX_vertexZ", "primary vertex X vs. Z",50,-0.05, 0.05,100,-50., 50.);
+m_vertexX_vertexZ->SetXTitle("primary vertex X"); m_vertexX_vertexZ->SetYTitle("primary vertex Z");
+
+m_average_ptr=new TH1F("m_average_ptr","average rec. pt",100,0.,1.0);
+m_average_ptr->SetXTitle("average rec. pt");
+
+ m_average_ptg=new TH1F("m_average_ptg","average mc. pt",100,0.,1.0);
+m_average_ptg->SetXTitle("average mc. pt");
+
+ m_average_rapidity=new TH1F("m_average_rapidity","average rec. pseudo_rapidity",100,-1.,1.0);
+m_average_rapidity->SetXTitle("average rec. pseudo_rapidity");
+
+ m_average_chisqxy=new TH1F("m_average_chisqxy","average rec. chisq xy",100,0.,100.0);
+m_average_chisqxy->SetXTitle("average rec. chisq xy");
+
+ m_average_chisqz=new TH1F("m_average_chisqz","average rec. chisq z",150,0.,150.0);
+m_average_chisqz->SetXTitle("average rec. chisqz");
+
+ m_vertexXY_eff=new TH2F("m_vertexXY_eff","vertex XY vs. efficiency", 30,0.,0.03,100, 0.,1.5);
+m_vertexXY_eff->SetXTitle("vertex XY"); m_vertexXY_eff->SetYTitle("average rec. efficiency"); 
+m_vertexXY_eff->SetMarkerStyle(21); m_vertexXY_eff->SetMarkerSize(0.7);
+
+ m_vertexZ_eff=new TH2F("m_vertexZ_eff","vertex Z vs. efficiency", 100,-50.,50.,100,  0.,1.5);
+m_vertexZ_eff->SetXTitle("vertex Z"); m_vertexZ_eff->SetYTitle("average rec. efficiency"); 
+m_vertexZ_eff->SetMarkerStyle(21); m_vertexZ_eff->SetMarkerSize(0.7);
+
+m_chisqxy=new TH1F("m_chisqxy","chisq on xy plan",100,0.,5.);
+m_chisqxy->SetXTitle("rec. chisq xy");
+
+m_chisqz=new TH1F("m_chisqz","chisq on z plan",100,0.,5.);
+m_chisqz->SetXTitle("rec. chisq z");
+
+m_vertexXY_average_ptr=new TH2F("m_vertexXY_average_ptr","vertex XY vs. average Ptr", 30,0.,0.03,50,0.,1.0);
+m_vertexXY_average_ptg=new TH2F("m_vertexXY_average_ptg","vertex XY vs. average Ptg", 30,0.,0.03,50,0.,1.0);
+m_vertexXY_average_rapidity=new TH2F("m_vertexXY_average_rapidity","vertex XY vs. average rapidity", 30,0.,0.03,20,-1.,1.);
+m_vertexXY_average_chisqxy=new TH2F("m_vertexXY_average_chisqxy","vertex XY vs. average chisqxy", 30,0.,0.03,100,0.,5.);
+m_vertexXY_average_chisqz=new TH2F("m_vertexXY_average_chisqz","vertex XY vs. average chisqz", 30,0.,0.03,30,0.,10.);
+ m_vertexXY_average_ptr->SetMarkerStyle(21); m_vertexXY_average_ptr->SetMarkerSize(0.7);
+ m_vertexXY_average_ptr->SetXTitle("vertex XY"); m_vertexXY_average_ptr->SetYTitle("average rec. pt"); 
+ m_vertexXY_average_ptg->SetMarkerStyle(21); m_vertexXY_average_ptg->SetMarkerSize(0.7);
+ m_vertexXY_average_ptg->SetXTitle("vertex XY"); m_vertexXY_average_ptg->SetYTitle("average mc. pt"); 
+ m_vertexXY_average_rapidity->SetMarkerStyle(21); m_vertexXY_average_rapidity->SetMarkerSize(0.7);
+ m_vertexXY_average_rapidity->SetXTitle("vertex XY"); m_vertexXY_average_rapidity->SetYTitle("average  rapidity "); 
+ m_vertexXY_average_chisqxy->SetMarkerStyle(21); m_vertexXY_average_chisqxy->SetMarkerSize(0.7);
+ m_vertexXY_average_chisqxy->SetXTitle("vertex XY"); m_vertexXY_average_chisqxy->SetYTitle("average  chisqxy"); 
+ m_vertexXY_average_chisqz->SetMarkerStyle(21); m_vertexXY_average_chisqz->SetMarkerSize(0.7);
+ m_vertexXY_average_chisqz->SetXTitle("vertex XY"); m_vertexXY_average_chisqz->SetYTitle("average  chisqz"); 
+
+m_vertexZ_average_ptr=new TH2F("m_vertexZ_average_ptr","vertex Z vs. average Ptr", 100,-50.,50.,50,0.,1.);
+m_vertexZ_average_ptg=new TH2F("m_vertexZ_average_ptg","vertex Z vs. average Ptg", 100,-50.,50.,50,0.,1.);
+m_vertexZ_average_rapidity=new TH2F("m_vertexZ_average_rapidity","vertex Z vs. average rapidity", 100,-50.,50.,20,-1.,1.);
+m_vertexZ_average_chisqxy=new TH2F("m_vertexZ_average_chisqxy","vertex Z vs. average chisqxy", 100,-50.,50.,100,0.,5.);
+m_vertexZ_average_chisqz=new TH2F("m_vertexZ_average_chisqz","vertex Z vs. average chisqz", 100,-50.,50.,50,0.,10.);
+ m_vertexZ_average_ptr->SetMarkerStyle(21); m_vertexZ_average_ptr->SetMarkerSize(0.7);
+ m_vertexZ_average_ptr->SetXTitle("vertex Z"); m_vertexZ_average_ptr->SetYTitle("average rec. pt");
+ m_vertexZ_average_ptg->SetMarkerStyle(21); m_vertexZ_average_ptg->SetMarkerSize(0.7);
+ m_vertexZ_average_ptg->SetXTitle("vertex Z"); m_vertexZ_average_ptg->SetYTitle("average mc. pt");
+ m_vertexZ_average_rapidity->SetMarkerStyle(21); m_vertexZ_average_rapidity->SetMarkerSize(0.7);
+ m_vertexZ_average_rapidity->SetXTitle("vertex Z"); m_vertexZ_average_rapidity->SetYTitle("average  rapidity "); 
+ m_vertexZ_average_chisqxy->SetMarkerStyle(21); m_vertexZ_average_chisqxy->SetMarkerSize(0.7);
+ m_vertexZ_average_chisqxy->SetXTitle("vertex Z"); m_vertexZ_average_chisqxy->SetYTitle("average  chisqxy"); 
+ m_vertexZ_average_chisqz->SetMarkerStyle(21); m_vertexZ_average_chisqz->SetMarkerSize(0.7);
+ m_vertexZ_average_chisqz->SetXTitle("vertex Z"); m_vertexZ_average_chisqz->SetYTitle("average  chisqz"); 
+
+m_rapidity_total1=new TH1F("m_rapidity_total1", "rapidity with vid=1,nfst>5", 30,-3.,3.);
+m_rapidity_total2=new TH1F("m_rapidity_total2", "rapidity with vid=1,nfst>5,nrec>0", 30,-3.,3.);
+m_eff_total=new TH1F("m_eff_total", "eff=rapidity_total2/rapidity_total1", 30,-3.,3.);
+
+m_averge_eff=new TH1F("m_averge_eff","effificency per event",50,0.2,1.2);
+
+m_ptg_rapidity=new TH2F("m_ptg_rapidity","Ptg vs. pseudo_rapidity ", 30,0.,3.,30,-3.,3.);
+ m_ptg_rapidity->SetMarkerStyle(21); m_ptg_rapidity->SetMarkerSize(0.7);
+ m_ptg_rapidity->SetXTitle("ptg"); m_ptg_rapidity->SetYTitle("pseudo_rapidity");
+
+m_ptg_rapidity_1=new TH2F("m_ptg_rapidity_1","Ptg vs. pseudo_rapidity (nrec1>=0)", 30,0.,3.,30,-3.,3.);
+m_ptg_rapidity_2=new TH2F("m_ptg_rapidity_2","Ptg vs. pseudo_rapidity (nrec1>0)", 30,0.,3.,30,-3.,3.);
+//m_ptg_rapidity_1=new TH2F("m_ptg_rapidity_1","Ptg vs. pseudo_rapidity ", 30,0.,3.,30,-3.,3.);
+//m_ptg_rapidity_2=new TH2F("m_ptg_rapidity_2","Ptg vs. pseudo_rapidity ", 30,0.,3.,30,-3.,3.);
+
+m_ptg_rapidity_dpt=new TH3F("m_ptg_rapidity_dpt","Ptg vs. pseudo_rapidity vs. abs(ptr-ptg)/ptg", 30,0.,3.,30,-3.,3.,20,-0.0001,0.0099);
+ m_ptg_rapidity_dpt->SetMarkerStyle(21); m_ptg_rapidity_dpt->SetMarkerSize(0.7);
+ m_ptg_rapidity_dpt->SetXTitle("ptg"); m_ptg_rapidity_dpt->SetYTitle("pseudo_rapidity");m_ptg_rapidity_dpt->SetZTitle("momentum resolution");
+
+// for momentum resolution
+m_dpt=new TH1F("m_dpt", "abs(ptr-ptg)/ptg", 20, 0.,0.01);
+m_dpt_ptg=new TH2F("m_dpt_ptg", "abs(ptr-ptg)/ptg vs. ptg", 50,0.,5.,20, -0.0001,0.0999);
+
+m_dp=new TH1F("m_dp", "abs(pr-pg)/pg", 20, 0.,0.01);
+m_dp_pg=new TH2F("m_dp_pg", "abs(pr-pg)/pg vs. pg", 20,0.,2.,20, -0.0001,0.0099);
+
+m_dp_pg_pion=new TH2F("m_dp_pg_pion", "abs(pr-pg)/pg vs. pg for pion", 20,0.,2.,20, -0.0001,0.0099);
+m_dp_pg_proton=new TH2F("m_dp_pg_proton", "abs(pr-pg)/pg vs. pg for pion", 20,0.,2.,20, -0.0001,0.0099);
+m_dp_pg_kaon=new TH2F("m_dp_pg_kaon", "abs(pr-pg)/pg vs. pg for pion", 20,0.,2.,20, -0.0001,0.0099);
+
+//init ntuple
+m_vertex_final = new TNtuple("m_vertex_final","vertex information", "vx:vy:vz:aptr:aptg:eff:ay:achisqxy:achisqz");
+
+mevent=0;
+
+}
+
 //_____________________________________________________________________________
 Int_t St_tpt_Maker::Make(){
   
@@ -261,21 +391,24 @@ Int_t St_tpt_Maker::Make(){
   }
 
   MakeHistograms(); // tracking histograms
+// if m_tteEvalOn=kTrue, then  calculate  the efficiency and momentum resolution
+  if(m_tteEvalOn){VertexEffResolutionMakeHistograms();}
   return kStOK;
 }
 //_____________________________________________________________________________
   void St_tpt_Maker::MakeHistograms() {
    // go get event number from the event data
    Int_t evno = 0;
+
    if (m_mkfinal) {
 
      St_DataSet *raw = GetInputDS("TPC_DATA");
   if (raw) {
     St_DataSetIter nex(raw);
     St_type_index *I1 = (St_type_index *) nex("IT1");
-     type_index_st *ii = 0;
+    type_index_st *ii = 0;
     if(I1) ii = I1->GetTable();
-    if(ii) evno = ii->data_row;
+    if(ii)evno = ii->data_row;
      }
   }
 
@@ -349,10 +482,233 @@ Int_t St_tpt_Maker::Make(){
   }// end of if on m_mkfinal flag.
 }  // end of MakeHistograms member.
 //_____________________________________________________________________________
+void St_tpt_Maker::VertexEffResolutionMakeHistograms() {
+
+ cout<<"begin to run St_tpt_Maker::VertexEffResolutionMakeHistogram"<<endl; 
+
+  // Create an iterator
+  St_DataSetIter ap(m_DataSet);
+//get tpc_tracks/mctrk table
+  //St_DataSet *ypp(chain->DataSet("tpc_tracks"));
+  //St_DataSetIter ap(ypp) ;
+ 
+St_tte_mctrk *af=(St_tte_mctrk  *) ap("mctrk");
+tte_mctrk_st *wr=af->GetTable();
+
+mevent++;
+cout<<"Event number is "<<mevent<<endl; 
+
+ //get tpc_tracks/evaltrk table
+St_tte_eval *aeval=(St_tte_eval  *) ap("evaltrk");
+tte_eval_st *weval=aeval->GetTable();
+
+//get g2t_vertex table, and get the position of vertex, fill histograms
+Float_t vertex[3];
+Float_t eg_vertex[3];
+
+St_DataSet *yyp = GetInputDS("geant");
+ if (yyp) {
+      St_DataSetIter ayp(yyp) ;
+      St_g2t_vertex *ayf=(St_g2t_vertex *) ayp("g2t_vertex");
+      g2t_vertex_st *wyr=ayf->GetTable();
+      //wr->eg_label=1 stand for the primary vertex
+      for(Int_t ij=0;ij<3;ij++)vertex[ij]=wyr->ge_x[ij];
+      for(Int_t ji=0;ji<3;ji++)eg_vertex[ji]=wyr->eg_x[ji];
+}
+
+ cout<<"event gen. vertex="<<eg_vertex[0]<<eg_vertex[1]<<eg_vertex[2]<<endl;
+ cout<<"geant vertex="<<vertex[0]<<vertex[1]<<vertex[2]<<endl;
+
+m_vertex_x->Fill(vertex[0]);
+m_vertex_y->Fill(vertex[1]);
+m_vertex_z->Fill(vertex[2]);
+
+m_vertexX_vertexY->Fill(vertex[0],vertex[1]);
+m_vertexX_vertexZ->Fill(vertex[0],vertex[2]);
+
+Float_t vertex_xy=sqrt(vertex[0]*vertex[0]+vertex[1]*vertex[1]);
+//Float_t vertex_xyz=sqrt(vertex_xy*vertex_xy+vertex[2]*vertex[2]);
+
+m_vertex_xy->Fill(vertex_xy);
+
+ cout<<"run1 StVertexEffMaker::MakeHistogram"<<endl; 
+//before loop, initialize 
+ //m_rapidity1->Reset();
+//m_rapidity2->Reset();
+ //m_eff1->Reset();
+TH1F *m_rapidity1=new TH1F("m_rapidity1", "rapidity with vid=1,nfst>5", 30,-3.,3.);
+TH1F *m_rapidity2=new TH1F("m_rapidity2", "rapidity with vid=1,nfst>5,nrec>0", 30,-3.,3.);
+TH1F *m_eff1=new TH1F("m_eff1", "eff=rapidity2/rapidity1", 30,-3.,3.);
+
+
+Float_t  total_ptr=0.0;
+Float_t  total_ptg=0.0;
+Float_t  total_rapidity=0.0;
+Float_t  total_chisqxy=0.0;
+Float_t  total_chisqz=0.0;
+
+Int_t nmctrk=0;
+// loop over mctrk table, and get the rapidity of this events, and efficiency
+for(Int_t i=0;i<af->GetNRows();i++,wr++){
+         Int_t pid=wr->pid;
+         Float_t ptr=wr->ptr;
+         Float_t ptg=wr->ptg;
+         Float_t pzg=wr->pzg;
+         Float_t pzr=wr->pzr;
+         Float_t pg=sqrt(ptg*ptg+pzg*pzg); 
+         Float_t pr=sqrt(ptr*ptr+pzr*pzr); 
+ 
+         Float_t dp=abs(pr-pg);
+         Float_t dpt=abs(ptr-ptg);
+
+         Int_t vid=wr->vid;
+         Int_t nfst=wr->nfst;
+         Int_t nrec1=wr->nrec1;
+
+   if(vid==1&&nfst>5&&(pg-pzg)!=0.0){
+       Float_t rapidity=-0.5*log((pg+pzg)/(pg-pzg));
+       m_rapidity1->Fill(rapidity);
+       m_rapidity_total1->Fill(rapidity);
+       m_ptg_rapidity_1->Fill(ptg,rapidity);
+       if(nrec1>0){
+         m_rapidity2->Fill(rapidity);
+         m_rapidity_total2->Fill(rapidity);
+         m_ptg_rapidity_2->Fill(ptg,rapidity);
+         m_ptg_rapidity_dpt->Fill(ptg,rapidity,dpt);
+         total_ptr+=ptr;
+         total_ptg+=ptg;
+         total_rapidity+=rapidity;
+         nmctrk++;
+       } //nrec1>0
+   } //end if vid==1&&nfst>5&&(pr-pzg)!=0.0
+
+    //get abs(ptg-ptr)/ptg momentum resolution
+   if(vid==1&&nfst>5&&nrec1>0&&ptg>0.0){
+             dpt/=ptg;
+             dp/=pg;       
+             m_dpt->Fill(dpt);
+             m_dpt_ptg->Fill(ptg,dpt);
+             m_dp->Fill(dp);
+             m_dp_pg->Fill(pg,dp);
+             if(pid==8||pid==9)m_dp_pg_pion->Fill(pg,dp);  //for pion
+             if(pid==14)m_dp_pg_proton->Fill(pg,dp);   // for proton
+             if(pid==11||pid==12)m_dp_pg_kaon->Fill(pg,dp); //for kaon
+   } //end for momentum resolution
+}  //end loop for i
+
+//loop over evaltrk table, get chisq[2]
+Int_t nevaltrk=0;
+for( Int_t ji=0;ji<aeval->GetNRows();ji++,weval++){
+   Float_t chisqxy=weval->chisq[0];
+   Float_t chisqz=weval->chisq[1];
+   Int_t nfit=weval->nfit;
+   
+   if(ji==0)cout<<"chisqxy="<<chisqxy<<endl;
+   if(ji==0)cout<<"chisqz="<<chisqz<<endl;
+   if(nfit!=3)chisqxy/=(nfit-3.0);
+   if(nfit!=2)chisqz/=(nfit-2.0);
+   m_chisqxy->Fill(chisqxy);
+   m_chisqz->Fill(chisqz);
+   total_chisqxy+=chisqxy;
+   total_chisqz+=chisqz;
+   nevaltrk++;
+}  //end loop for ji
+
+//fit the slices of m_dpt_ptg, get RMS, for momentum resolution, plot m_dpt_ptg_2
+//m_dpt_ptg->FitSlicesY();m_dpt_ptg_2->SetMaximum(0.2);m_dpt_ptg_2->SetMinimum(0.0);
+//m_dp_pg->FitSlicesY();m_dp_pg_2->SetMaximum(0.2);m_dp_pg_2->SetMinimum(0.0);
+//m_dp_pg_pion->FitSlicesY();m_dp_pg_pion_2->SetMaximum(0.2);m_dp_pg_pion_2->SetMinimum(0.0);
+//m_dp_pg_kaon->FitSlicesY();m_dp_pg_kaon_2->SetMaximum(0.2);m_dp_pg_pion_2->SetMinimum(0.0);
+//m_dp_pg_proton->FitSlicesY();m_dp_pg_proton_2->SetMaximum(0.2);m_dp_pg_proton_2->SetMinimum(0.0);
+
+//get efficiency
+m_eff1->Divide(m_rapidity2,m_rapidity1,1.0,1.0); 
+Float_t effm=m_eff1->GetBinContent(10);
+ cout<<"GetBinContent eff="<<effm<<endl; 
+
+
+//fit efficiency per event
+      Double_t par[1];
+      TF1 *pol_0= new TF1("pol_0","pol0",-1.0,1.0);
+       m_eff1->Fit("pol_0","N","",-1.0,1.0); //fit and non_plot
+       pol_0->GetParameters(&par[0]);
+
+      Float_t efficiency=par[0];
+      cout<<"For each event:Fit eff0="<<par[0]<<endl; 
+       m_averge_eff->Fill(efficiency);
+
+//get average pt,rapidity,chisqxy,chisqz
+cout<<"No. of tracks selected in mctrk="<<nmctrk<<endl;
+cout<<"No. of tracks in evaltrk="<<nevaltrk<<endl;
+
+Float_t average_ptr=total_ptr/nmctrk;
+Float_t average_ptg=total_ptg/nmctrk;
+ cout<<"total_ptr="<<total_ptr<<"average_ptr="<<average_ptr<<endl;
+ cout<<"total_ptg="<<total_ptg<<"average_ptg="<<average_ptg<<endl;
+Float_t average_rapidity=total_rapidity/nmctrk;
+ cout<<"total_rapidity="<<total_rapidity<<"  average_rapidity="<<average_rapidity<<endl;
+Float_t average_chisqxy=total_chisqxy/nevaltrk;
+ cout<<"total_chisqxy="<<total_chisqxy<<"  average_chisqxy="<<average_chisqxy<<endl;
+Float_t average_chisqz=total_chisqz/nevaltrk;
+ cout<<"total_chisqz="<<total_chisqz<<"  average_chisqz="<<average_chisqz<<endl;
+
+//fill histograms
+m_average_ptr->Fill(average_ptr);
+m_average_ptg->Fill(average_ptg);
+m_average_rapidity->Fill(average_rapidity);
+m_average_chisqxy->Fill(average_chisqxy);
+m_average_chisqz->Fill(average_chisqz);
+
+m_vertexXY_average_ptr->Fill(vertex_xy,average_ptr);
+m_vertexXY_average_ptg->Fill(vertex_xy,average_ptg);
+m_vertexXY_average_rapidity->Fill(vertex_xy,average_rapidity);
+m_vertexXY_average_chisqxy->Fill(vertex_xy,average_chisqxy);
+m_vertexXY_average_chisqz->Fill(vertex_xy,average_chisqz);
+
+m_vertexZ_average_ptr->Fill(vertex[2],average_ptr);
+m_vertexZ_average_ptg->Fill(vertex[2],average_ptg);
+m_vertexZ_average_rapidity->Fill(vertex[2],average_rapidity);
+m_vertexZ_average_chisqxy->Fill(vertex[2],average_chisqxy);
+m_vertexZ_average_chisqz->Fill(vertex[2],average_chisqz);
+
+m_vertexXY_eff->Fill(vertex_xy,efficiency);
+m_vertexZ_eff->Fill(vertex[2],efficiency);
+
+delete m_rapidity1;
+delete m_rapidity2;
+delete m_eff1;
+
+ cout<<"at the end of the VertexEffResolutionMakeHistogram"<<endl;
+}
+//_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.28 1999/04/23 19:03:30 sakrejda Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.29 1999/05/05 18:45:40 liq Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
+}
+//_____________________________________________________________________________
+Int_t St_tpt_Maker::Finish(){
+// if m_tteEvalOn=kTrue, then  calculate  the efficiency and momentum resolution
+  if(m_tteEvalOn){VertexEffResolutionFinish();}
+  return kStOK;
+}
+//_____________________________________________________________________________
+void St_tpt_Maker::VertexEffResolutionFinish(){
+cout<<"begin to run StVertexEffMaker::Finish"<<endl; 
+m_eff_total->Divide(m_rapidity_total2,m_rapidity_total1,1.0,1.0); 
+//fit efficiency per event
+Double_t par[1];
+TF1 *pol_0= new TF1("pol_0","pol0",-1.0,1.0);
+m_eff_total->Fit("pol_0","N","",-1.0,1.0); //fit and non_plot
+pol_0->GetParameters(&par[0]);
+
+Float_t efficiency=par[0];
+cout<<"For all events:Fit eff="<<efficiency<<endl; 
+
+//divide to get efficiency
+m_ptg_rapidity->Divide(m_ptg_rapidity_2,m_ptg_rapidity_1,1.0,1.0); 
+
+//WriteOutHistogram();
 }
 
