@@ -196,7 +196,7 @@ my $ROOTLIBS    = " -L$ROOTSYS/lib -lRint -lNew -lBase -lCint -lClib -lCont -lFu
    $ROOTLIBS   .= " -lPostscript -lProof -lTree -lUnix -lZip";
 my $ROOTGLIBS   = " -lGpad -lGui -lGX11 -lX3d";
 my $ROOTSRC = "/afs/rhic/star/ROOT/" . $ROOT_LEVEL . "/ROOT/src";
-$CPPPATH = $INCLUDE . ":#StRoot:#pams:" . $INCLUDE . "/tables:#.share:#.share/tables:" $CERN_ROOT "/include:" . $ROOTSRC . ":" . $STAF . "/inc:/opt/star/include";
+$CPPPATH = $INCLUDE . ":#StRoot:#pams:" . $INCLUDE . "/tables:#.share:#.share/tables:" . $CERN_ROOT . "/include:" . $ROOTSRC . ":" . $STAF . "/inc:/opt/star/include";
 $FCPPPATH ="";
 #                                                   -I" . $CERN_ROOT . "/include/geant321/geant321";
 print "CPPPATH  = \t$CPPPATH\n";
