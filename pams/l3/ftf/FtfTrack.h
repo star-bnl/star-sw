@@ -16,24 +16,24 @@ class FtfTrack : public FtfBaseTrack {
 public:
    friend class FtfFinder ;
 
-   void    Add                     ( FtfHit   *this_hit, int way ) ;
-   void    Add                     ( FtfTrack *this_track ) ;
-   int     Build_Track             ( FtfHit *first_hit, VOLUME *volume ) ;
-   void    dEdx                    ( ) ;
-   void    Delete_Candidate        ( ) ;
-   void    Fill                    ( ) ;
-   void    Fill_Primary            ( double &xc, double &yc, double &rc ) ;
-   void    Fill_Secondary          ( double &xc, double &yc, double &rc) ;
-   int     Follow                  ( VOLUME *volume, int way, int row_to_stop ) ;
-   int     Follow_Hit_Selection    ( FtfHit *base_hit, FtfHit *candidate_hit ) ;
-   int     Merge_Primary           ( AREA   *track_area ) ;
-   void    Reset                   ( ) ;
-   FtfHit  *Seek_Next_Hit          ( VOLUME  *volume, 
-                                     FtfHit *base_hit,
-			             int     n_r_step,
-                                     int     which_function ) ;
-   int     Segment                 ( VOLUME *volume, int way ) ;
-   int     Segment_Hit_Selection   ( FtfHit *base_hit, FtfHit *candidate_hit ) ;
+   void    add                   ( FtfHit   *thisHit, int way ) ;
+   void    add                   ( FtfTrack *thisTrack ) ;
+   int     buildTrack            ( FtfHit *firstHit, VOLUME *volume ) ;
+   void    dEdx                  ( ) ;
+   void    deleteCandidate       ( ) ;
+   void    fill                  ( ) ;
+   void    fillPrimary           ( double &xc, double &yc, double &rc ) ;
+   void    fillSecondary         ( double &xc, double &yc, double &rc) ;
+   int     follow                ( VOLUME *volume, int way, int rowToStop ) ;
+   int     followHitSelection    ( FtfHit *baseHit, FtfHit *candidateHit ) ;
+   int     mergePrimary          ( AREA   *trackArea ) ;
+   void    reset                 ( ) ;
+   FtfHit  *seekNextHit          ( VOLUME  *volume, 
+                                   FtfHit *baseHit,
+			           int     nradiusSteps,
+                                   int     whichFunction ) ;
+   int     segment               ( VOLUME *volume, int way ) ;
+   int     segmentHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ) ;
    FtfTrack *nxatrk  ;      
         
 #ifdef DEBUG
@@ -47,31 +47,28 @@ public:
    void Debug_in_Volume            ( FtfHit *base_hit, FtfHit *current_hit ) ;
    void Debug_New                  ( ) ;
 #endif
-
 		
-   float  last_xy_angle ;    // Angle in the xy plane of line connecting to last hits        
-   FtfHit* ref_hit ; // Hit use as reference for secondary tracks
+   float   lastXyAngle ;    // Angle in the xy plane of line connecting to last hits        
+   FtfHit* refHit ; // Hit use as reference for secondary tracks
 		
-
    typedef double vfit ;
 
-   vfit    s11_xy  ;       // Fit Parameters
-   vfit    s12_xy  ;
-   vfit    s22_xy  ;
-   vfit    g1_xy   ;
-   vfit    g2_xy   ;       
-   vfit    s11_sz  ;
-   vfit    s12_sz  ;
-   vfit    s22_sz  ;
-   vfit    g1_sz   ;
-   vfit    g2_sz   ; 
+   vfit    s11Xy  ;       // Fit Parameters
+   vfit    s12Xy  ;
+   vfit    s22Xy  ;
+   vfit    g1Xy   ;
+   vfit    g2Xy   ;       
+   vfit    s11Sz  ;
+   vfit    s12Sz  ;
+   vfit    s22Sz  ;
+   vfit    g1Sz   ;
+   vfit    g2Sz   ; 
 
-   vfit    dd_xy, a1_xy, a2_xy ;    /*fit par in xy */
-   vfit    dd_sz, a1_sz, a2_sz ;    /*fit par in sz */
-   float   strack ;
+   vfit    ddXy, a1Xy, a2Xy ;    /*fit par in xy */
+   vfit    ddSz, a1Sz, a2Sz ;    /*fit par in sz */
+   float   trackLength ;
 private:
-   inline virtual   void next_hit (){ current_hit = current_hit->nxthit ; } ;
-
+   inline virtual   void nextHit (){ currentHit = currentHit->nextTrackHit ; } ;
 	   
    } ;
 #endif

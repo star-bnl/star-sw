@@ -14,29 +14,28 @@
 //
 void ROW::print()
 {
-    for ( FtfHit *hit=first_hit ;
+    for ( FtfHit *hit=firstHit ;
             hit != 0 ;
-            hit = hit->nxrhit ) {
+            hit = hit->nextRowHit ) {
 
          printf( "\n Hit nr = %i\n Ir = %i",
-                        hit->id, hit->i_r) ;
-         printf( "\n Next should be %i", hit->nxrhit ) ;
+                        hit->id, hit->row) ;
+         printf( "\n Next should be %i", hit->nextRowHit ) ;
     }
     return ;
 }
-
 //
 //    Print volume now
 //
 void VOLUME::print(  )
 { 
     
-    for ( FtfHit *hit = first_hit ;
-       hit != 0 ;  hit = hit->nxvhit ) {
+    for ( FtfHit *hit = firstHit ;
+       hit != 0 ;  hit = hit->nextVolumeHit ) {
 
        printf( "\n Hit nr = %i\n Ir = %i\n Iphi = %i\n Ieta=%i" ,
-               hit->id, hit->i_r, hit->i_phi, hit->i_eta) ;
-       printf( "\n Next should be %i", hit->nxvhit ) ;
+               hit->id, hit->row, hit->phiIndex, hit->etaIndex ) ;
+       printf( "\n Next should be %i", hit->nextVolumeHit ) ;
    }
    return ;
 }

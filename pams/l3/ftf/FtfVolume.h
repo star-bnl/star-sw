@@ -5,9 +5,9 @@
  */
 class VOLUME {
    public:
-        void print ( ) ;
-        FtfHit *first_hit       ;   /* first hit in this volume */
-        FtfHit *last_hit       ;   /* Id of last hit in this volume */
+       void print ( ) ;
+       FtfHit *firstHit       ;   /* first hit in this volume */
+       FtfHit *lastHit       ;   /* Id of last hit in this volume */
 } ;
 /*
  * To organize rows
@@ -15,8 +15,8 @@ class VOLUME {
 class ROW  {
    public:
         void print ( ) ;
-        FtfHit *first_hit;   /* first hit in this row       */
-        FtfHit *last_hit;   /* last  hit in this row       */
+        FtfHit *firstHit;   /* first hit in this row       */
+        FtfHit *lastHit;   /* last  hit in this row       */
 } ;
 /*
  *    For track merging
@@ -24,8 +24,8 @@ class ROW  {
 class FtfTrack ;
 class AREA{
    public:
-        FtfTrack *fst_track;   /* first track in track area   */
-        FtfTrack *lst_track;   /* last  track in track area   */
+        FtfTrack *firstTrack;   /* first track in track area   */
+        FtfTrack *lastTrack;   /* last  track in track area   */
 } ;
 #endif
 
