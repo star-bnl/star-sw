@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.h,v 1.15 1999/02/18 16:43:12 caines Exp $
+// $Id: St_glb_Maker.h,v 1.16 1999/02/22 21:27:20 kathy Exp $
 // $Log: St_glb_Maker.h,v $
+// Revision 1.16  1999/02/22 21:27:20  kathy
+// moved hist from St_glb_Maker to St_QA_Maker and had to rename some etc
+//
 // Revision 1.15  1999/02/18 16:43:12  caines
 // Added in est the 4th layer tracking
 //
@@ -62,12 +65,6 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-#ifndef ROOT_TH1
-#include "TH1.h"
-#endif
-#ifndef ROOT_TH2
-#include "TH2.h"
-#endif
 
 class St_svm_ctrl;
 class St_est_ctrl;
@@ -86,7 +83,7 @@ class St_glb_Maker : public StMaker {
 
  private:
   Bool_t drawinit;
-  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.15 1999/02/18 16:43:12 caines Exp $";
+  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.16 1999/02/22 21:27:20 kathy Exp $";
   // egr
   Int_t         m_scenario;   
   //#1: Real TPC Stand-Alone Tracking: Use this when running the TPC only.  
@@ -146,26 +143,9 @@ class St_glb_Maker : public StMaker {
   St_particle_dst_param *m_particle_dst_param; //!
   St_est_ctrl    *m_est_ctrl; //!
   
-  // Histograms
-  static const Int_t nxpT;
-  static const Int_t nyeta;
-  static const Float_t xminpT;
-  static const Float_t xmaxpT;
-  static const Float_t ymineta;
-  static const Float_t ymaxeta;
-  void              Histograms();// Histograms for global
 
  protected:
-  TH2F     *m_pT_eta_rec;  //! pT versus eta Spectra for reconstructed
-  TH2F     *m_pT_eta_gen;  //! pT versus eta Spectra for generated
-  TH1F     *m_pT;          //! pT  recostructed
-  TH1F     *m_eta;         //! eta recostructed
-  TH1F     *m_tlength;     //! dst track length
-  TH1F     *m_chi2xd;      //! x chisq/degf
-  TH1F     *m_chi2yd;      //! y chisq/degf
-  TH1F     *m_ev0_lama_hist;//! Lambda mass
-  TH1F     *m_ev0_k0ma_hist;//! K0 mass
-  TH2F     *m_p_dedx_rec;   //! dedx vs p
+
   
  public: 
   St_glb_Maker(const char *name="global", const char *title="event/data/global");

@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.h,v 1.1 1999/02/08 19:28:33 didenko Exp $
+// $Id: St_QA_Maker.h,v 1.2 1999/02/22 21:27:18 kathy Exp $
 // $Log: St_QA_Maker.h,v $
+// Revision 1.2  1999/02/22 21:27:18  kathy
+// moved hist from St_glb_Maker to St_QA_Maker and had to rename some etc
+//
 // Revision 1.1  1999/02/08 19:28:33  didenko
 // fixed directory level
 //
@@ -51,7 +54,7 @@
 class St_QA_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.1 1999/02/08 19:28:33 didenko Exp $";
+// static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.2 1999/02/22 21:27:18 kathy Exp $";
    // Histograms
    static const Int_t nxpT;
    static const Int_t nyeta;
@@ -104,6 +107,25 @@ class St_QA_Maker : public StMaker {
    TH1F     *m_prim_vrtx2;    // primary vrtx z position
    TH1F     *m_vrtx_chisq;    // primary vrtx chisq
 
+   // for MakeHistGen
+   TH2F     *m_H_pT_eta_gen;  //! pT versus eta Spectra for generated
+
+   // for MakeHistPrim
+   TH2F     *m_prim_pT_eta_rec;  //! pT versus eta Spectra for reconstructed
+   TH1F     *m_prim_pT;          //! pT  recostructed
+   TH1F     *m_prim_eta;         //! eta recostructed
+   TH1F     *m_prim_tlength;     //! dst track length
+   TH1F     *m_prim_chi2xd;      //! x chisq/degf
+   TH1F     *m_prim_chi2yd;      //! y chisq/degf
+
+   // for MakeHistV0
+   TH1F     *m_ev0_lama_hist;//! Lambda mass
+   TH1F     *m_ev0_k0ma_hist;//! K0 mass
+
+   // for MakeHistPID
+   TH2F     *m_p_dedx_rec;   //! dedx vs p
+
+//------
 
  public: 
                   St_QA_Maker(const char *name="QA", const char *title="evet/QA");
@@ -112,8 +134,13 @@ class St_QA_Maker : public StMaker {
    virtual Int_t  Make();
    virtual void   MakeEvSum();
    virtual void   MakeV0();
+   virtual void   MakeGlob();
    virtual void   MakeDE();
    virtual void   MakeGen();
+   virtual void   MakeHistPrim();
+   virtual void   MakeHistGen();
+   virtual void   MakeHistV0();
+   virtual void   MakeHistPID();
    virtual void   PrintInfo();
    ClassDef(St_QA_Maker, 1)   //StAF chain virtual base class for Makers
 };
