@@ -125,7 +125,7 @@ C-----------------------------------------------------------------------
         integer jtpcl, nclspix
 
         integer mxrow
-        parameter (mxrow = 48)
+        parameter (mxrow = 45)
         integer id_pad(mxrow)
 
         integer ntim, nseq, jseq
@@ -569,7 +569,9 @@ C-----------------------------------------------------------------------
         real sigma
 C-----------------------------------------------------------------------
         integer imax
-        real    p1,p2,p3,wa,y0,x1,x2,y,pad
+        real    p1,p2,p3
+        real    c1,c2,c3
+        real    pad
         integer id
 C-----------------------------------------------------------------------
 
@@ -577,27 +579,15 @@ C-----------------------------------------------------------------------
         imax = lvmax(iadc,nseq)
 
         if(imax.ge.2)then
-           p1 = iadc(imax-1)
-           p2 = iadc(imax)
-           p3 = iadc(imax+1)
-c          wa = (p3-p1)/(p1+p2+p3)
-           y0 = ipad(imax)
-           x1 = p1/p2
-           x2 = p2/p3
-           y = p1+p3/(p2**2)
-           if(x1.gt.0. .and. y.gt.0. .and. y.ne.1.)then
-              x1 = log(x1)/log(y) - 0.5
-              x2 = log(x2)/log(y) + 0.5
-              pad = (x1 + x2)*0.5
-c             A = p2/exp(-pad**2/sigma)
-              pad = pad + y0
-              tph_calc_prf_pos = pad
-           else
-              id = 0
-              call message('TPHAM-E-PRF error in 3 pad prf calculation'
-     +,                    1, id)
-              return
-           endif
+           c1 = iadc(imax-1)
+           c2 = iadc(imax)
+c          c3 = iadc(imax+1)
+
+           p1 = ipad(imax-1)
+           p2 = ipad(imax)
+c          p3 = ipad(imax+1)
+
+           tph_calc_prf_pos = (p1+p2)/2.-sigma*log(c1/c2)
         else
            id = 0
            call message('TPHAM-E-PRF error in 3 pad prf calculation'

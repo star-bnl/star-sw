@@ -74,12 +74,12 @@ c
          common/quest/iquest
          integer iquest(100)
 
-         integer nquota,nvar,icycle,nvarp
-         character*4 chtags(8)
+         integer nquota,nvar,icycle,nvar2
+         character*4 chtags(8),chtags2(11)
 C-----------------------------------------------------------------------
          logical lstat,first
 
-         real vec(8)
+         real vec(11)
 
          integer istat
          integer indx, ihit
@@ -87,13 +87,15 @@ C-----------------------------------------------------------------------
 
          integer mxhits
          parameter (mxhits = 45)
-         integer mcptr(mxhits),dtptr(mxhits)
+         integer mcptr(4*mxhits),dtptr(mxhits)
          
          integer nmctrk,nhitrk,itrk
 
 C-----------------------------------------------------------------------
-         data nvar/8/
+         data nvar/8/,nvar2/11/
          data chtags/'itrk','itcl','nrow','x','y','z','prf','zrf'/
+         data chtags2/'itrk','mcx ','mcy ','mcz ','tpx ','tpy ','tpz '
+     +,              'delx','dely','delz','nrow'/
          data first/.true./
 C-----------------------------------------------------------------------
 c
@@ -115,6 +117,8 @@ c
             endif
             call hbookn(102,'Hit Info',nvar,'ntup',8000,
      +              chtags)
+            call hbookn(103,'Compare Info',nvar2,'ntup',11000,
+     +              chtags2)
          endif
 c        
 c        proceed with evaluation...
@@ -136,22 +140,26 @@ c
 c->      close ntuple file...
 c
          call hrout(102,icycle,' ')
-         call hrend('ntup')
-         close(23)
+c        call hrend('ntup')
+c        close(23)
 c
 c        the following works only for sparse events!
+c        more efficient and flexible would sort primary 
+c        keys on itrk, etc...
+c
 c
          do itrk = 1, mkineh.nok
            nhitrk = 0
            nmctrk = 0
            call vzero(dtptr,45)
-           call vzero(mcptr,45)
+           call vzero(mcptr,180)
            do ihit = 1, tphith.nok
               if(tphit(ihit).track.eq.itrk)then
                  nhitrk = nhitrk + 1
                  dtptr(tphit(ihit).row) = ihit
               endif
            enddo
+           write(6,*)' ',nhitrk,' tphits on itrk = ',itrk
            do ihit = 1, mhits_tpch.nok
               if(mhits_tpc(ihit).itrk.eq.itrk)then
                  nmctrk = nmctrk + 1
@@ -161,11 +169,46 @@ c
                  isect = (numbv-10000*iwire)/100
                  irow = (numbv-10000*iwire-100*isect)
 
-                 mcptr(irow) = ihit
+                 mcptr((irow-1)*4+iwire) = ihit
               endif
            enddo
-
+           write(6,*)' ',nmctrk,' mchits on itrk = ',itrk
+           do irow = 1, 45
+              vec(11) = real(irow)
+              vec(1) = itrk
+              vec(2) = (mhits_tpc(mcptr((irow-1)*4+1)).x(1)
+     +                +mhits_tpc(mcptr((irow-1)*4+2)).x(1)
+     +                +mhits_tpc(mcptr((irow-1)*4+3)).x(1)
+     +                +mhits_tpc(mcptr((irow-1)*4+4)).x(1))/4.
+              vec(3) = (mhits_tpc(mcptr((irow-1)*4+1)).x(2)
+     +                +mhits_tpc(mcptr((irow-1)*4+2)).x(2)
+     +                +mhits_tpc(mcptr((irow-1)*4+3)).x(2)
+     +                +mhits_tpc(mcptr((irow-1)*4+4)).x(2))/4.
+              vec(4) = (mhits_tpc(mcptr((irow-1)*4+1)).x(3)
+     +                +mhits_tpc(mcptr((irow-1)*4+2)).x(3)
+     +                +mhits_tpc(mcptr((irow-1)*4+3)).x(3)
+     +                +mhits_tpc(mcptr((irow-1)*4+4)).x(3))/4.
+              if(dtptr(irow).ne.0)then
+                 vec(5) = tphit(dtptr(irow)).x
+                 vec(6) = tphit(dtptr(irow)).y
+                 vec(7) = tphit(dtptr(irow)).z
+                 vec(8) = vec(2)-vec(5)
+                 vec(9) = vec(3)-vec(6)
+                 vec(10) = vec(4)-vec(7)
+              else
+                 vec(5) = 0.
+                 vec(6) = 0.
+                 vec(7) = 0.
+                 vec(8) = 0.
+                 vec(9) = 0.
+                 vec(10) = 0.
+              endif
+              call hfn(103,vec)
+           enddo
          enddo
+         call hrout(103,icycle,' ')
+         call hrend('ntup')
+         close(23)
 
 c
          return
