@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   29/06/99  (E-mail: fine@bnl.gov)
-// $Id: St_geom_Maker.cxx,v 1.4 1999/07/02 20:01:21 fine Exp $
+// $Id: St_geom_Maker.cxx,v 1.5 1999/07/02 20:04:11 fine Exp $
 // $Log: St_geom_Maker.cxx,v $
+// Revision 1.5  1999/07/02 20:04:11  fine
+// Init() can not be called from StDataSet since the last os const
+//
 // Revision 1.4  1999/07/02 20:01:21  fine
 // The name of the maker is the geom file name
 //
@@ -80,8 +83,10 @@ St_DataSet  *St_geom_Maker::GetDataSet (const char* logInput,const StMaker *uppM
 {
   St_DataSet *ds = StMaker::GetDataSet(logInput,uppMk,dowMk);
   if (!ds && strcmp(logInput,"HALL")==0) { 
+#if 0
      Init();
      ds = m_ConstSet->FindByName("HALL");
+#endif
   }
   return ds;
 }
@@ -123,7 +128,7 @@ Int_t St_geom_Maker::Make(){
 //_____________________________________________________________________________
 void St_geom_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geom_Maker.cxx,v 1.4 1999/07/02 20:01:21 fine Exp $\n");
+  printf("* $Id: St_geom_Maker.cxx,v 1.5 1999/07/02 20:04:11 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
