@@ -60,7 +60,7 @@ void tpt_cpu_( i, seconds, delta_seconds )
 int	*i;
 float	*seconds, *delta_seconds;
 {
-	struct tms now;
+	static struct tms now;
 	static struct tms start;
 	static int first = 1;
 	static float cpu_last;
