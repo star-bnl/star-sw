@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.12 2000/01/31 17:11:18 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.13 2000/02/14 23:36:36 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.13  2000/02/14 23:36:36  porter
+ * fixed unsigned int <-> int comparison & timestamp string
+ *
  * Revision 1.12  2000/01/31 17:11:18  porter
  * fix break caused by the interaction design between
  * 'StRoot/St_base/tableDescriptor.h' & 'StDbBroker::Descriptor'
@@ -164,14 +167,14 @@ StDbBroker::GetTableDescriptor(){
 StDbBuffer buff;
 StDbTableDescriptor* descriptor = new StDbTableDescriptor();
 
- for(int i=0;i<m_nElements;i++){
+ for(int i=0;i<(int)m_nElements;i++){
 
    buff.WriteScalar(m_descriptor[i].m_ColumnName,"name");
 
    // array designation & lengths 
    char lengthString[100];
    ostrstream os(lengthString,100);
-   for(int k=0; k<m_descriptor[i].m_Dimensions-1;k++) os<<m_descriptor[i].m_IndexArray[k]<<",";
+   for(int k=0; k<(int)m_descriptor[i].m_Dimensions-1;k++) os<<m_descriptor[i].m_IndexArray[k]<<",";
    os<<m_descriptor[i].m_IndexArray[m_descriptor[i].m_Dimensions-1]<<ends;
    buff.WriteScalar(lengthString,"length");
 
@@ -291,19 +294,24 @@ void * StDbBroker::Use(int tabID, int parID)
   StDbTable* node=0;
   if(anode && !anode->IsNode())node=(StDbTable*)anode;
   if(node && mgr->fetchDbTable(node)){
+    char* thisTime;
     m_nRows= node->GetNRows();
     pData  = node->GetTableCpy(); // gives the "malloc'd version"
 
-    char* tmp1 = node->getBeginDateTime();
-    char* tmp2 = new char[strlen(tmp1)+1];
+    thisTime = node->getBeginDateTime();
+    char* tmp1 = new char[strlen(thisTime)+1];
+    char* tmp2 = new char[strlen(thisTime)+1];
+    strcpy(tmp1,thisTime);
     strcpy(tmp2,tmp1);  tmp1[8]='\0'; tmp2+=8;
 
     m_BeginDate = (UInt_t)atoi(tmp1);
     m_BeginTime = (UInt_t)atoi(tmp2);
     delete [] tmp1; tmp2-=8; delete [] tmp2;
 
-    tmp1 = node->getEndDateTime();
-    tmp2 = new char[strlen(tmp1)+1];
+    thisTime = node->getBeginDateTime();
+    tmp1 = new char[strlen(thisTime)+1];
+    tmp2 = new char[strlen(thisTime)+1];
+    strcpy(tmp1,thisTime);
     strcpy(tmp2,tmp1); tmp1[8]='\0';tmp2+=8;
 
     m_EndDate = (UInt_t)atoi(tmp1);
