@@ -1,12 +1,12 @@
 /***************************************************************
- * $Id: StRichDrawableTMip.cxx,v 2.1 2000/09/29 17:36:58 gans Exp $
+ * $Id: StRichDrawableTMip.cxx,v 2.2 2000/11/01 16:54:24 lasiuk Exp $
  *
  * Description:
  *
  ***************************************************************
  * $Log: StRichDrawableTMip.cxx,v $
- * Revision 2.1  2000/09/29 17:36:58  gans
- * Modified addHit(), StThreeVector<double> -> StThreeVectorF,other minor stuff
+ * Revision 2.2  2000/11/01 16:54:24  lasiuk
+ * simplify default arguments in c'tor
  *
  * Revision 2.1  2000/09/29 17:36:58  gans
  * Modified addHit(), StThreeVector<double> -> StThreeVectorF,other minor stuff
@@ -25,26 +25,27 @@
 #include <iostream.h>
 #include <fstream.h>
 #ifdef __ROOT__
-#include "StRichDrawableTMip.h"
-#include "StRichPIDMaker/StRichTrack.h"
-#include "StRichDrawableTTrack.h"
+
+#include "SystemOfUnits.h"
 #include "StParticleDefinition.hh"
 #include "StParticleTypes.hh"
-#include "StRichPIDMaker/StRichMCTrack.h"
+
+#include "StRichDrawableTMip.h"
+#include "StRichDrawableTTrack.h"
+
 #include "StMcEventTypes.hh"
-#include "SystemOfUnits.h"
+
+#include "StRichPIDMaker/StRichTrack.h"
+#include "StRichPIDMaker/StRichMCTrack.h"
 
 ClassImp(StRichDrawableTMip)
 
 StRichDrawableTMip::StRichDrawableTMip() {/*nopt*/}
 
-StRichDrawableTMip::StRichDrawableTMip(StRichDrawableTTrack * drawableTrackP) : TMarker(){
-
-    mTLineMIPPointer   = 0;
-    mTMarkerMIPPointer = 0;
-    geantTrackP = 0;
-    mMomText    = 0;
-    mTrackPointer  = drawableTrackP;
+StRichDrawableTMip::StRichDrawableTMip(StRichDrawableTTrack * drawableTrackP)
+    : TMarker(),   mTLineMIPPointer(0), mTMarkerMIPPointer(0), geantTrackP(0),
+      mMomText(0), mTrackPointer(drawableTrackP)
+{
     double Degrees = 180.0/M_PI;
     
     StRichTrack * trackP = drawableTrackP->getTrack();
@@ -60,7 +61,6 @@ StRichDrawableTMip::StRichDrawableTMip(StRichDrawableTTrack * drawableTrackP) : 
 	sprintf(tempChar,"%.3f",trackP->getMomentum().mag());
 	mMomText = new TText(this->GetX()+.35,this->GetY()+.15,tempChar);
 	mMomText->SetTextSize(.018);
-	mMomText->Draw();
 	
 	mXImpactRadiator = trackP->getImpactPoint().x();
 	mYImpactRadiator = trackP->getImpactPoint().y();
@@ -111,16 +111,21 @@ StRichDrawableTMip::StRichDrawableTMip(StRichDrawableTTrack * drawableTrackP) : 
 	mGeantPhi             = geantTrackP->getGeantPhiAtRadiator()*Degrees;
 	
 	if( geantTrackP->getStMcTrack() && geantTrackP->getStMcTrack()->stopVertex() ){
-	    mGeantStopVertexProcess   = geantTrackP->getStMcTrack()->stopVertex()->geantProcess();
-	    mGeantStopVertexNumDaught = geantTrackP->getStMcTrack()->stopVertex()->numberOfDaughters();
-	    mGeantXStopVertex         = geantTrackP->getStMcTrack()->stopVertex()->position().x();
-	    mGeantYStopVertex         = geantTrackP->getStMcTrack()->stopVertex()->position().y();	
+	    mGeantStopVertexProcess   =
+		geantTrackP->getStMcTrack()->stopVertex()->geantProcess();
+	    mGeantStopVertexNumDaught =
+		geantTrackP->getStMcTrack()->stopVertex()->numberOfDaughters();
+	    mGeantXStopVertex         =
+		geantTrackP->getStMcTrack()->stopVertex()->position().x();
+	    mGeantYStopVertex         =
+		geantTrackP->getStMcTrack()->stopVertex()->position().y();	
 	}
 	
 	mGeantCommonTpcHits    = geantTrackP->getCommonTpcHits();
 	mGeantNumberOfPartners = geantTrackP->getNumberOfPartners();
 	mGeantHitsInRadiator   = geantTrackP->getNumberOfGeantHitsInRadiator();
 	mGeantHitsInGap        = geantTrackP->getNumberOfGeantHitsInGap();
+
 	if(geantTrackP->getStMcTrack()){
 	  mGeantTrackID = geantTrackP->getStMcTrack()->geantId();
 	}
@@ -142,9 +147,18 @@ StRichDrawableTMip::~StRichDrawableTMip() {
     delete mMomText;
 }
 
+void StRichDrawableTMip::draw() {
+    //
+    // Draw the text of the momentum and the marker (diamond)
+    //
+    mMomText->Draw();
+    this->Draw();
+}
+
 StRichDrawableTTrack* StRichDrawableTMip::getDrawableTTrack() { return mTrackPointer;}
 
 void StRichDrawableTMip::clearRings(){
+
     for(int i = 0; i < mTrackPointer->numberOfRings();i++)
 	mTrackPointer->getRing(i)->clear();
 }
