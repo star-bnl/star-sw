@@ -1,7 +1,10 @@
 /***********************************************************************
  *
- * $Id: StDecayMode.hh,v 3.1 2001/05/04 20:15:13 genevb Exp $
+ * $Id: StDecayMode.hh,v 3.2 2002/04/30 16:02:47 genevb Exp $
  * $Log: StDecayMode.hh,v $
+ * Revision 3.2  2002/04/30 16:02:47  genevb
+ * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+ *
  * Revision 3.1  2001/05/04 20:15:13  genevb
  * Common interfaces and reorganization of components, add MC event info
  *
@@ -55,7 +58,23 @@ enum decayModeType {
   kOmega2CascadePiZero          =23,
   kAntiOmega2AntiLambdaKPlus    =24,
   kAntiOmega2AntiCascadePiPlus  =25,
-  kAntiOmega2AntiCascadePiZero  =26
+  kAntiOmega2AntiCascadePiZero  =26,
+  kKLong2PiPlusPiZeroPiMinus    =27,
+  kKLong2PiPlusMuNu             =28,
+  kKLong2PiMinusMuNu            =29,
+  kKLong2PiMinusENu             =30,
+  kKLong2PiPlusENu              =31,
+  kKLong2PiPlusPiMinus          =32,
+  kPiPlus2MuNu                  =33,
+  kPiPlus2MuNuGamma             =34,
+  kPiPlus2ENu                   =35,
+  kPiMinus2MuNu                 =36,
+  kPiMinus2MuNuGamma            =37,
+  kPiMinus2ENu                  =38,
+  kMuPlus2ENuNu                 =39,
+  kMuPlus2ENuNuGamma            =40,
+  kMuMinus2ENuNu                =41,
+  kMuMinus2ENuNuGamma           =42
 };
 
 
@@ -69,7 +88,12 @@ public:
   Int_t Process(StMcVertex* mcVertex);
   Int_t KPlusProcess(Int_t ID); 
   Int_t KMinusProcess(Int_t ID);  
+  Int_t KLongProcess(Int_t ID, Int_t ID2);
   Int_t KShortProcess(Int_t ID);
+  Int_t PiPlusProcess(Int_t ID);
+  Int_t PiMinusProcess(Int_t ID);
+  Int_t MuPlusProcess(Int_t ID);
+  Int_t MuMinusProcess(Int_t ID);
   Int_t LambdaProcess(Int_t ID);
   Int_t AntiLambdaProcess(Int_t ID); 
   Int_t XiProcess(Int_t ID); 

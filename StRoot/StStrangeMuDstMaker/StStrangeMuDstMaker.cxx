@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 3.14 2001/11/05 23:41:06 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.15 2002/04/30 16:02:48 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.15  2002/04/30 16:02:48  genevb
+// Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+//
 // Revision 3.14  2001/11/05 23:41:06  genevb
 // Add more dEdx, B field info, careful of changes to TTree unrolling
 //
@@ -112,6 +115,7 @@ StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
   tree = 0;
   evClonesArray = 0;
   evMcArray = 0;
+  cutsArray = 0;
   dstMaker = 0;
   cuts = new StStrangeCuts();
   SetNumber(-2);
@@ -149,6 +153,7 @@ StStrangeMuDstMaker::~StStrangeMuDstMaker() {
     delete evClonesArray; evClonesArray = 0;
     if (evMcArray) { delete evMcArray; evMcArray = 0; }
   }
+  delete cutsArray; cutsArray = 0;
   delete cuts; cuts = 0;
 }
 //_____________________________________________________________________________
@@ -164,6 +169,7 @@ Int_t StStrangeMuDstMaker::Init() {
     evClonesArray = new TClonesArray("StStrangeEvMuDst",1);
     if (doMc) evMcArray = new TClonesArray("StStrangeEvMuDst",1);
   }
+  cutsArray = new TClonesArray("TCut",0);
   StStrangeControllerBase::currentMaker = this;
   {EachDoT(cont[i] = StStrangeControllerBase::Instantiate(i));}
 
@@ -191,15 +197,34 @@ Int_t StStrangeMuDstMaker::Init() {
 void StStrangeMuDstMaker::InitReadDst() {
   
   tree = (TTree*) muDst->Get("StrangeMuDst");
+  if (!tree) tree = (TTree*) muDst->Get("MuDst");
   if (!tree) {
-    gMessMgr->Error() << "StStrangeMuDstMaker: no StrangeMuDst tree"
+    gMessMgr->Error() << "StStrangeMuDstMaker: no StrangeMuDst or MuDst tree"
                       << " in file " << file[evT] << endm;
     return;
   }
+
+  tree->SetBranchStatus("*",0);
+  tree->SetBranchStatus("Event",1);
   tree->SetBranchAddress("Event",&evClonesArray);
-  if (doMc) tree->SetBranchAddress("McEvent",&evMcArray);
+  if (doMc) {
+    tree->SetBranchStatus("McEvent",1);
+    tree->SetBranchAddress("McEvent",&evMcArray);
+  }
   EachController(InitReadDst());
-  cuts->Append((TOrdCollection*) muDst->Get("StrangeCuts"));
+
+  if (tree->GetBranch("StrangeCuts")) {
+    tree->SetBranchStatus("StrangeCuts",1);
+    tree->SetBranchAddress("StrangeCuts",&cutsArray);
+  } else {
+    TOrdCollection* ordCuts = (TOrdCollection*) muDst->Get("StrangeCuts");
+    if (ordCuts) {
+      cuts->Reset(ordCuts);
+    } else {
+      gMessMgr->Warning("StStrangeMuDstMaker: no StrangeCuts");
+      cuts->UnknownCuts();
+    }
+  }
 }
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::InitCreateDst() {
@@ -208,15 +233,17 @@ void StStrangeMuDstMaker::InitCreateDst() {
   tree->SetDirectory(muDst);
   EachController(InitCreateDst());
 
+  Int_t split = 0;
+  TBranch* branch = tree->Branch("StrangeCuts",&cutsArray,bsize[evT],split);
+  branch->SetFile(file[evT]);
   if (!dstMaker) {
-    Int_t split=10;
-    TBranch* branch = tree->Branch("Event",&evClonesArray,bsize[evT],split);
+    split = 10;
+    branch = tree->Branch("Event",&evClonesArray,bsize[evT],split);
     branch->SetFile(file[evT]);
     if (doMc) {
       branch = tree->Branch("McEvent",&evMcArray,bsize[evT],split);
       branch->SetFile(file[evT]);
     }
-    cuts->Assure();
   }
 }
 //_____________________________________________________________________________
@@ -232,7 +259,6 @@ void StStrangeMuDstMaker::InitCreateSubDst() {
     branch->SetFile(file[evT]);
   }
   EachController(InitCreateSubDst());
-  cuts->Append(dstMaker->Cuts().GetCollection());
 }
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::Make() {
@@ -268,7 +294,7 @@ Int_t StStrangeMuDstMaker::MakeReadDst() {
     event_number -= evNumber;
   }
   Int_t tree_size = (Int_t) tree->GetEntries();
-  if (event_number >= tree_size) {
+  while (event_number >= tree_size) {
     if (files[evT]) {                                  // If reading from
       SetStFiles();                                    // multiple files, then
       if (!file[evT]) return kStErr;                   // get the next file
@@ -277,13 +303,16 @@ Int_t StStrangeMuDstMaker::MakeReadDst() {
       InitReadDst();                                   // and subtract total
       evNumber += tree_size;                           // events from old file
       event_number -= tree_size;                       // from current event #.
+      tree_size = (Int_t) tree->GetEntries();
     } else {
       return kStErr;
     }
   }
-  if (! tree->GetEvent(event_number)) return kStErr;   // Read the event
+  if ((tree->GetEvent(event_number)) <= 0) return kStErr;   // Read the event
   EachController(MakeReadDst());
-  
+ 
+  if (cutsArray->GetEntriesFast()) cuts->Reset(cutsArray);
+
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -293,13 +322,15 @@ Int_t StStrangeMuDstMaker::MakeCreateDst() {
 
   // Get the cut parameters and fill StrangeCuts on the first event
   if (firstEvent) {
-    Int_t iSize = cuts->GetCollection()->GetSize();
+    Int_t iSize = cuts->GetSize();
     cuts->Fill(strTypeNames[v0T], GetDataSet("ev0par2"));
     cuts->Fill(strTypeNames[xiT], GetDataSet("exipar"));
     cuts->Fill(strTypeNames[kinkT], GetDataSet("tkf_tkfpar"));
-    Int_t fSize = cuts->GetCollection()->GetSize();
-    if (!(fSize-iSize))
+    Int_t fSize = cuts->GetSize();
+    if (!(fSize-iSize)) {
       gMessMgr->Warning("StStrangeMuDstMaker: no cut parameters found.");
+      cuts->UnknownCuts();
+    }
     firstEvent = kFALSE;
   }  
 
@@ -320,6 +351,7 @@ Int_t StStrangeMuDstMaker::MakeCreateDst() {
   if (doMc) MakeCreateMcDst();
 
   CheckFile();
+  cuts->UpdateArray(cutsArray);
   tree->Fill();
 
   return kStOK;
@@ -348,35 +380,70 @@ Int_t StStrangeMuDstMaker::MakeCreateMcDst() {
   for (StMcVertexIterator mcVertexIt = mcVertices.begin();
                           mcVertexIt != mcVertices.end(); mcVertexIt++) {
     const StMcTrack* parent = (*mcVertexIt)->parent();
-    if (parent) {
-      if (doT[xiT]) { // looking for Xis
-        if ((parent->geantId()==23)||(parent->geantId()==24)||
-            (parent->geantId()==31)||(parent->geantId()==32))
-	  cont[xiT]->MakeCreateMcDst(*mcVertexIt);
-      } else if (doT[v0T]) { // looking for V0s
-        if ((parent->geantId()==16)||(parent->geantId()==18)||
-            (parent->geantId()==26)) 
-	  cont[v0T]->MakeCreateMcDst(*mcVertexIt);
-      }
-      if (doT[kinkT]) { // looking for Kinks
-	if ((parent->geantId()==11)||(parent->geantId()==12))
-	  cont[kinkT]->MakeCreateMcDst(*mcVertexIt);
-      }
+    if (parent) switch (parent->geantId()) {
+
+      // Xi vertex candidates
+      case (23) : // Xi-
+      case (31) : // AntiXi+
+      case (24) : // Omega-
+      case (32) : // AntiOmega+
+        if (doT[xiT]) cont[xiT]->MakeCreateMcDst(*mcVertexIt);
+        break;
+
+      // V0 vertex candidates
+      case (10) : // Kaon0Long
+      case (16) : // Kaon0Short
+      case (18) : // Lambda
+      case (26) : // AntiLambda
+        // Do all V0's here only if not doing Xi's
+        if (doT[v0T] && !(doT[xiT])) cont[v0T]->MakeCreateMcDst(*mcVertexIt);
+        break;
+
+      // Kink vertex candidates
+      case ( 5) : // Muon+
+      case ( 6) : // Muon-
+      case ( 8) : // Pion+
+      case ( 9) : // Pion-
+      case (11) : // Kaon+
+      case (12) : // Kaon-
+        if (doT[kinkT]) {
+          // No need to keep decays not within the TPC
+          // (must change if looking for kinks inside inner TPC radius)
+          float rad = (*mcVertexIt)->position().perp();
+          if ((rad < 195.) && (rad > 65.))
+            cont[kinkT]->MakeCreateMcDst(*mcVertexIt);
+        }
+        break;
+
+      default   : {}
     }
   }//end of loop over MC  vertices
 
+  // If doing Xi's, all Xi V0 daughters are done concurrently with their Xi.
   // Do all non-Xi V0's at the end...
   if (doT[xiT] && doT[v0T]) {
     for (StMcVertexIterator mcVertexIt = mcVertices.begin();
                           mcVertexIt != mcVertices.end(); mcVertexIt++) {
+      Bool_t notFromXi = kTRUE;
       const StMcTrack* parent = (*mcVertexIt)->parent();
-      if ((parent) && ((parent->geantId()==16)||(parent->geantId()==18)||
-            (parent->geantId()==26))) {
-        const StMcTrack* parent2 = parent->parent();
-        // Check for cascade parentage
-        if (!((parent2) && ((parent2->geantId()==23)||(parent2->geantId()==24)||
-            (parent2->geantId()==31)||(parent2->geantId()==32))))
-	  cont[v0T]->MakeCreateMcDst(*mcVertexIt);
+      if (parent) switch (parent->geantId()) {
+        case (18) : // Lambda
+        case (26) : // AntiLambda
+          { // Check for cascade parentage
+            const StMcTrack* parent2 = parent->parent();
+            if (parent2) switch (parent2->geantId()) {
+              case (23) : // Xi-
+              case (31) : // AntiXi+
+              case (24) : // Omega-
+              case (32) : // AntiOmega+
+                notFromXi = kFALSE;
+              default   : {}
+            }
+          }
+        case (10) : // Kaon0Long
+        case (16) : // Kaon0Short
+	  if (notFromXi) cont[v0T]->MakeCreateMcDst(*mcVertexIt);
+        default   : {}
       }
     }
   }//end of loop over MC  vertices
@@ -391,6 +458,8 @@ Int_t StStrangeMuDstMaker::MakeCreateSubDst() {
 
   EachController(MakeCreateSubDst());
   CheckFile();
+  cuts->Reset(dstMaker->Cuts());
+  cuts->UpdateArray(cutsArray);
   tree->Fill();
 
   return kStOK;
@@ -422,6 +491,7 @@ void StStrangeMuDstMaker::ClearForReal(Option_t *option) {
       if (evClonesArray) evClonesArray->Clear();      // Not if making a subDST
       if (evMcArray) evMcArray->Clear();              // Not if making a subDST
     }
+    cutsArray->Clear();
 
     EachController(Clear());
     if (rw == StrangeNoKeep) tree->Reset();
@@ -508,6 +578,7 @@ Int_t StStrangeMuDstMaker::OpenFile() {
   //if (rw == StrangeWrite) muDst->SetFormat(1);   // Necessary to read MuDst in plain root
   gMessMgr->Info() << "StStrangeMuDstMaker: Opened event file for " << inout
                    << ":\n  " << file[evT] << endm;     
+  cuts->ForceUpdateArray();
   return kStOk;
 }
 //_____________________________________________________________________________
@@ -516,7 +587,8 @@ Int_t StStrangeMuDstMaker::CloseFile() {
     if (rw == StrangeWrite) {
       muDst->Write();
       muDst->cd();
-      cuts->Store();
+      // No longer necessary to store cuts as they are now a branch
+      // cuts->Store();
     }
     muDst->Close();
     tree = 0;

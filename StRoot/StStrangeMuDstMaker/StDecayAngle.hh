@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StDecayAngle.hh,v 3.4 2002/02/10 15:29:09 genevb Exp $
+ * $Id: StDecayAngle.hh,v 3.5 2002/04/30 16:02:47 genevb Exp $
  *
  * Author: Gene Van Buren, BNL, 26-Nov-2001
  *
@@ -14,6 +14,9 @@
  ***********************************************************************
  *
  * $Log: StDecayAngle.hh,v $
+ * Revision 3.5  2002/04/30 16:02:47  genevb
+ * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+ *
  * Revision 3.4  2002/02/10 15:29:09  genevb
  * Additional functions for momenta of decay daughters in CM frame
  *
@@ -41,7 +44,7 @@ static TLorentzVector StDecayAngleParent;
 static TLorentzVector StDecayAngleDaughter;
 static TLorentzVector StDecayAngleParentCopy;    // Use T (not M) to store
 static TLorentzVector StDecayAngleDaughterCopy;  //   value of m in Copy
-static Bool_t StDecayAngleShifted(UNSHIFTED); // Is daughter shifted?
+static Bool_t StDecayAngleShifted = UNSHIFTED; // Is daughter shifted?
 
 class StDecayAngle {
  public:

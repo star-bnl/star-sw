@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkMuDst.hh,v 3.4 2001/11/05 23:41:06 genevb Exp $
+ * $Id: StKinkMuDst.hh,v 3.5 2002/04/30 16:02:47 genevb Exp $
  *
  * Author: Wensheng Deng, Kent State University, 29-Mar-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StKinkMuDst.hh,v $
+ * Revision 3.5  2002/04/30 16:02:47  genevb
+ * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+ *
  * Revision 3.4  2001/11/05 23:41:06  genevb
  * Add more dEdx, B field info, careful of changes to TTree unrolling
  *
@@ -58,6 +61,7 @@ public:
   Float_t  mindE() const;
   Float_t  decayAngle() const;
   Float_t  parentMomentum() const;
+  Float_t  parentPrimMomentum() const;
   Int_t    parentCharge() const;
   Float_t  daughterMomentum() const;
   Int_t    daughterCharge() const;
@@ -91,6 +95,7 @@ public:
   Float_t  mMinDeltaEnergy;
   Float_t  mDecayAngle;
   Float_t  mParentMomentum;
+  Float_t  mParentPrimMomentum;
   Int_t    mParentCharge;
   Float_t  mDaughterMomentum;
   Int_t    mDaughterCharge;
@@ -121,7 +126,7 @@ private:
   void     findTransverseMassPion();
   void     findRapidityKaon();
   void     findRapidityPion();
-  ClassDef(StKinkMuDst,5)
+  ClassDef(StKinkMuDst,6)
 };
 
 inline Float_t StKinkMuDst::dcaParentDaughter() const
@@ -138,6 +143,8 @@ inline Float_t StKinkMuDst::mindE() const { return mMinDeltaEnergy; }
 inline Float_t StKinkMuDst::decayAngle() const { return mDecayAngle; }
 inline Float_t StKinkMuDst::parentMomentum() const
                { return mParentMomentum; }
+inline Float_t StKinkMuDst::parentPrimMomentum() const
+               { return mParentPrimMomentum; }
 inline Int_t   StKinkMuDst::parentCharge() const
                { return mParentCharge; }
 inline Float_t StKinkMuDst::daughterMomentum() const
