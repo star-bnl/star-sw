@@ -1,5 +1,8 @@
-* $Id: tpt_merge_segments.F,v 1.5 1998/06/01 06:41:01 sakrejda Exp $
+* $Id: tpt_merge_segments.F,v 1.6 1998/07/07 14:27:26 sakrejda Exp $
 * $Log: tpt_merge_segments.F,v $
+* Revision 1.6  1998/07/07 14:27:26  sakrejda
+* tracks, hits, id defined as integers
+*
 * Revision 1.5  1998/06/01 06:41:01  sakrejda
 * merging improved so it does not create ghost tracks
 *
@@ -56,16 +59,18 @@ C______________________________________________________________________
 C_________________________________________________________________
       INTEGER ltot,tls_Quick_Sort_r,iret
       INTEGER i,j,k,l,lxj,lxi,next,c,m,n,ipass
-      REAL id,radd,long,tracks,hits,dis,min(5),cuta,cutb
+      REAL    radd,long
+      INTEGER tracks,hits,id
+      REAL    dis,min(5),cuta,cutb
       INTEGER firsti,lasti,firstj,lastj
       INTEGER hipnt,lowpnt,isort,ipoint,itrack,ips,isect
       INTEGER rfifj,rfilj,rlifj,rlilj,rowdiff
       INTEGER rfi,rli,rfj,rlj,mpnt,ncount
-      REAL xfi,yfi,zfi,xli,yli,zli
-      REAL xfj,yfj,zfj,xlj,ylj,zlj
-      REAL dfifj,dfilj,dlifj,dlilj,mindist,mindist2
-      REAL radi,radj
-      REAL varb,varc,meanrad,qij
+      REAL    xfi,yfi,zfi,xli,yli,zli
+      REAL    xfj,yfj,zfj,xlj,ylj,zlj
+      REAL    dfifj,dfilj,dlifj,dlilj,mindist,mindist2
+      REAL    radi,radj
+      REAL    varb,varc,meanrad,qij
 C______________________________________________________________________
 
 c Order the good tracks according to their helix radius.
