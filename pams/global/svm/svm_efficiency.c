@@ -33,7 +33,7 @@ long type_of_call svm_efficiency_(
 */
 #define tp_max 10000
 
-  long i,idsvt,idtpc;
+  long i;
   long tptrack[tp_max];
 
 /*  Set up array linking tptrack -> tptrack_mc */
