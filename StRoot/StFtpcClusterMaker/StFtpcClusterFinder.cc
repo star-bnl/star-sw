@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.38 2002/08/02 13:03:55 oldi Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.39 2002/11/06 13:43:59 oldi Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.39  2002/11/06 13:43:59  oldi
+// Flag for clusters not to be used for tracking introduced.
+//
 // Revision 1.38  2002/08/02 13:03:55  oldi
 // Wrong pad ordering was corrected in previous version already
 // (see code changes there).
@@ -1272,6 +1275,14 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	      fRadError = sqrt(fRadError * fRadError
 			       + sqr(mParam->timeCutoffClusterError()));
 	    }
+	  
+	  if (Peak->Rad > mDb->sensitiveVolumeOuterRadius() &&
+	      Peak->Rad < mDb->sensitiveVolumeInnerRadius()
+	      /* please add additional criteria here*/) {
+	    // don't use this point for tracking
+	    
+	    thispoint->SetFlags(thispoint->GetFlags() | 128);
+	  }
 
 	  /* transform errors to actual hit position */ 
 	  PadtransBin=(int) ((Peak->TimePosition+0.5)*PadtransPerTimebin);
@@ -1734,6 +1745,14 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 		  fRadError = sqrt(fRadError * fRadError
 				   + sqr(mParam->timeCutoffClusterError()));
 		}
+
+	      if (Peak[iPeakIndex].Rad > mDb->sensitiveVolumeOuterRadius() && 
+		  Peak[iPeakIndex].Rad < mDb->sensitiveVolumeInnerRadius()
+		  /* please add additional criteria here*/) {
+		// don't use this point for tracking
+		
+		thispoint->SetFlags(thispoint->GetFlags() | 128);
+	      }
 	      
 	      /* transform errors to actual hit position */ 
 	      PadtransBin=(int) ((Peak->TimePosition+0.5)*PadtransPerTimebin);
