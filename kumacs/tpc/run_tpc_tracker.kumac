@@ -97,7 +97,10 @@ $STAR/pams/trg/kumac
   exec tpc_evaluation#initialize
   
   
-  
+* ***********  OPEN OUTPUT NTUPLE FILE *************
+    exec write_table_to_ntuple#init_disk [funit] [nfile] 
+    
+    
 ******************* TPC TRACKER PROCESSING *********************
 
 * read event and then process thru tpc fast sim
@@ -113,13 +116,7 @@ $STAR/pams/trg/kumac
    exec tpc_tracker#process_event_tte [i] 
  endif
  exec tpc_evaluation#process_event [i]
-* write table from tpc fast sim to ntuple
- if [i].eq.1 then
-   exec write_table_to_ntuple#init_disk _
-      [funit] [nfile] [nid] [table]
- else  
-   exec write_table_to_ntuple#write_event_disk [nid] [table]
- endif
+ exec write_table_to_ntuple#write_event_disk [nid] [table]
  enddo
 
 

@@ -117,7 +117,9 @@ $STAR/pams/trg/kumac
 * tpc evaluation init - doesn't work for slow sim!
 * exec tpc_evaluation#initialize
   
-        
+  
+   exec write_table_to_ntuple#init_disk [funit] [nfile]   
+
    
 ******************* TPC FAST SIM PROCESSING ********************
 * ****************** TPC CLUSTERING *****************************
@@ -141,13 +143,7 @@ $STAR/pams/trg/kumac
     endif
 * evaluation - doesn't work for slow sim! 
 * exec tpc_evaluation#process_event [i]
-* write table from tpc fast sim to ntuple
-    if [i]=1 then
-      exec write_table_to_ntuple#init_disk _
-       [funit] [nfile] [nid] [table]  
-    else
-      exec write_table_to_ntuple#write_event_disk [nid] [table]
-    endif
+    exec write_table_to_ntuple#write_event_disk [nid] [table]
   enddo
   
   
