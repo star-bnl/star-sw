@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.16 2003/05/07 03:06:32 pruneau Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.17 2003/09/21 02:19:28 perev Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.17  2003/09/21 02:19:28  perev
+ * several initializations to 0 added
+ *
  * Revision 2.16  2003/05/07 03:06:32  pruneau
  * *** empty log message ***
  *
@@ -106,8 +109,11 @@ StiDefaultToolkit::StiDefaultToolkit()
   _trackFactory(0),
   _mcTrackFactory(0),
   _detectorFactory(0),
+  _detectorNodeFactory(0),
   _trackNodeFactory(0),
+  _detectorBuilder(),
   _detectorContainer(0),
+  _detectorGroups(0),
   _hitContainer(0),
   _mcHitContainer(0),
   _trackContainer(0),
@@ -119,7 +125,12 @@ StiDefaultToolkit::StiDefaultToolkit()
   _trackMerger(0),
   _vertexFinder(0),
   _hitLoader(0),
-  _associationMaker(0)
+  _associationMaker(0),
+  _stiMaker(0),
+  _residualCalculator(0),
+  _loaderHitFilter(0),
+  _loaderTrackFilter(0),
+  _finderTrackFilter(0)
 {
   cout<<"StiDefaultToolkit::StiDefaultToolkit() -I- Started"<<endl;
   Messenger::init(0);
