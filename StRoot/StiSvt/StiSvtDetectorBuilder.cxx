@@ -66,38 +66,11 @@
     6     13       5     6
     6     15       5     7
  */
-StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active)
-  : StiDetectorBuilder("Svt",active)
-{}
-
-void StiSvtDetectorBuilder::load(const char * baseName)
+StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active, const string & inputFile)
+  : StiDetectorBuilder("Svt",active,inputFile)
 {
-  StiTrackingParameters & trackingPars = getTrackingParameters();
-  string fName= _name + baseName;
-  ifstream inF(fName.c_str());
-  if (inF)
-    {
-      cout <<"New tracking parameters set from file:"<<fName<<endl;
-      trackingPars.setPar(inF);
-      double intrY, driftY, dipY, intrZ,driftZ,dipZ;
-      inF>>intrY;
-      inF>>driftY;
-      inF>>dipY;
-      inF>>intrZ;
-      inF>>driftZ;
-      inF>>dipZ;
-      _calc.set(intrY,driftY,dipY,intrZ,driftZ,dipZ);
-    }
-  else
-    {
-      cout <<"Tracking Parameters and hit errors set from default. "<<endl;
-      trackingPars.setMaxChi2ForSelection(5.);
-      trackingPars.setMinSearchWindow(1.);
-      trackingPars.setMaxSearchWindow(4.);
-      trackingPars.setSearchWindowScaling(10.);
-      _calc.set(.0009,0.004,0.04,.0009,0.0032,0.09); 
-    }
-  cout <<trackingPars<<endl;
+  _trackingParameters.setName("SvtTrackingParameters");
+  _calc.setName("SvtHitErrors");
 }
 
 StiSvtDetectorBuilder::~StiSvtDetectorBuilder()
@@ -108,20 +81,7 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
   char name[50];  
 	int nRows;
   cout << "StiSvtDetectorBuilder::buildDetectors() -I- Started" << endl;
-
-	// Load Tracker Parameters 
-	TDataSet * ds = source.GetDataSet("calibrations/tracker");
-	if (ds)
-		{
-			cout << "StiSvtDetectorBuilder::buildDetectors() -I- Loading SVT Tracking parameters from STAR DB" << endl;
-			StiTrackingParameters & trackingPars = getTrackingParameters();
-			trackingPars.load(ds);
-			St_HitError * t = dynamic_cast<St_HitError*>(ds->Find("SvtHitError"));
-			HitError_st * h = t->GetTable();
-			_calc = *h;
-		}
-	else
-		cout <<  "StiSvtDetectorBuilder::buildingDetectors() -W- Using DEFAULT SVT tracking parameters" << endl;
+	load(_inputFile, source);
 
 	St_DataSet *dataSet = NULL;
   dataSet = source.GetDataSet("StSvtConfig");
@@ -269,4 +229,34 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 					add(pHybrid2);
 				} // for ladder
     } // for layer
+}
+
+void StiSvtDetectorBuilder::loadFS(ifstream& iFile)
+{
+	cout << "StiSvtDetectorBuilder::loadFS(ifstream& iFile) -I- Started" << endl;
+	_trackingParameters.loadFS(iFile);
+	_calc.loadFS(iFile);
+	cout << "StiSvtDetectorBuilder::loadFS(ifstream& iFile) -I- Started" << endl;
+}
+
+void StiSvtDetectorBuilder::loadDS(TDataSet& ds)
+{
+	cout << "StiSvtDetectorBuilder::loadDS(TDataSet* ds) -I- Started" << endl;
+	_trackingParameters.loadDS(ds);
+	_calc.loadDS(ds);
+	cout << "StiSvtDetectorBuilder::loadDS(TDataSet* ds) -I- Done" << endl;
+}
+
+
+void StiSvtDetectorBuilder::setDefaults()
+{
+  cout << "StiSvtDetectorBuilder::setDefaults() -I- Started" << endl;
+  _trackingParameters.setMaxChi2ForSelection(5.);
+  _trackingParameters.setMinSearchWindow(1.);
+  _trackingParameters.setMaxSearchWindow(4.);
+  _trackingParameters.setSearchWindowScaling(10.);
+  _calc.set(.0009,0.004,0.04,.0009,0.0032,0.09); 
+  cout << _trackingParameters << endl;
+  cout << _calc<<endl;
+  cout << "StiSvtDetectorBuilder::setDefaults() -I- Done" << endl;
 }

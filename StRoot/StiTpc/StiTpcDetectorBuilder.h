@@ -10,7 +10,7 @@ class StiTpcDetectorBuilder : public StiDetectorBuilder
 {
 
 public:
-    StiTpcDetectorBuilder(bool active);
+    StiTpcDetectorBuilder(bool active, const string & inputFile);
     virtual ~StiTpcDetectorBuilder(); 	
     virtual void buildDetectors(StMaker&s);
     /// returns the azimuthal angle [-pi, pi) for tpc sector [1-24]
@@ -18,6 +18,9 @@ public:
 		double phiForSector(unsigned int iSector,     unsigned int nSectors) const;
 		double phiForWestSector(unsigned int iSector, unsigned int nSectors) const;
 		double phiForEastSector(unsigned int iSector, unsigned int nSectors) const;
+		virtual void loadDS(TDataSet&ds);
+		virtual void loadFS(ifstream &);	
+		virtual void setDefaults();
  protected:
     int rdoForPadrow(int iPadrow);
     StiMaterial * _gas;

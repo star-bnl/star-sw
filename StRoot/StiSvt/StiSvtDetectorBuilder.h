@@ -9,10 +9,14 @@
 class StiSvtDetectorBuilder : public StiDetectorBuilder
 {
  public:
-	StiSvtDetectorBuilder(bool active);
+	StiSvtDetectorBuilder(bool active, const string & inputFile);
 	virtual ~StiSvtDetectorBuilder(); 
-	virtual void load(const char * baseName);
-	virtual void buildDetectors(StMaker& source);
+	virtual void loadDS(TDataSet&);
+  virtual void loadFS(ifstream& inFile);
+
+	virtual void buildDetectors(StMaker& source);	
+	virtual void setDefaults();
+
  protected:
 	StiMaterial    * _gasMat;
 	StiMaterial    * _siMat;

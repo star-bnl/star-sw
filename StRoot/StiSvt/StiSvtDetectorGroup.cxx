@@ -7,10 +7,10 @@
 #include "Sti/StiElossCalculator.h"
 #include <stdexcept>
 
-StiSvtDetectorGroup::StiSvtDetectorGroup(bool active)
+StiSvtDetectorGroup::StiSvtDetectorGroup(bool active, const string & inputFile)
   : StiDetectorGroup<StEvent,StMcEvent>("SVT",
 					active?new StiSvtHitLoader():0,
-					new StiSvtDetectorBuilder(active),0,0)
+					new StiSvtDetectorBuilder(active,inputFile),0,0)
 {}
 
 StiSvtDetectorGroup::~StiSvtDetectorGroup()

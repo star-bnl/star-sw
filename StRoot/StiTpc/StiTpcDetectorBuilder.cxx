@@ -21,50 +21,14 @@
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "tables/St_HitError_Table.h"
 
-StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active)
-  : StiDetectorBuilder("Tpc",active)
-{}
-
-/*
-void StiTpcDetectorBuilder::load(char* baseName)
+StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active, const string & inputFile)
+  : StiDetectorBuilder("Tpc",active,inputFile)
 {
-  StiTrackingParameters & trackingPars = getTrackingParameters();
-  string fName= _name + baseName;
-  cout <<"StiTpcDetectorBuilder::load( ) -I- Reading Parameters from file "<<fName<<endl;
-  ifstream inF(fName.c_str());
-  if (inF)
-    {
-      cout <<"New tracking parameters set from file:"<<fName<<endl;
-      trackingPars.setPar(inF);
-      double intrY, driftY, dipY, intrZ,driftZ,dipZ;
-      inF>>intrY;
-      inF>>driftY;
-      inF>>dipY;
-      inF>>intrZ;
-      inF>>driftZ;
-      inF>>dipZ;
-      _innerCalc.set(intrY,driftY,dipY,intrZ,driftZ,dipZ);
-       inF>>intrY;
-      inF>>driftY;
-      inF>>dipY;
-      inF>>intrZ;
-      inF>>driftZ;
-      inF>>dipZ;
-      _outerCalc.set(intrY,driftY,dipY,intrZ,driftZ,dipZ);
-    }
-  else
-    {
-      cout <<"Tracking Parameters set from defaults."<<endl;
-      trackingPars.setMaxChi2ForSelection(10.);
-      trackingPars.setMinSearchWindow(1.6);
-      trackingPars.setMaxSearchWindow(7.);
-      trackingPars.setSearchWindowScaling(15.);
-      _innerCalc.set(.066, 1.2e-04, 0.0004, 0.066, 4.4e-4, 2.8e-02);
-      _outerCalc.set(.02, 4.e-3, 0.04, 0.02, 3.2e-3, 9.e-2);
-    }
-	cout <<trackingPars<<endl;
+  _trackingParameters.setName("TpcTrackingParameters");
+  _innerCalc.setName("InnerTpcHitErrors");
+  _outerCalc.setName("OuterTpcHitErrors");
 }
-*/
+
 
 
 StiTpcDetectorBuilder::~StiTpcDetectorBuilder()
@@ -84,21 +48,7 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
   char name[50];
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Started" << endl;
   unsigned int row;
-
-	TDataSet * ds = source.GetDataSet("calibration/tracker");
-	if (ds)
-		{
-			cout << "StiTpcDetectorBuilder::buildDetectors(StMaker&source) -I- Loading TPC tracking parameters from tracking database" << endl;
-			StiTrackingParameters & trackingPars = getTrackingParameters();
-			trackingPars.load(ds);
-	
-			St_HitError * t = dynamic_cast<St_HitError*>(ds->Find("TpcHitError"));
-			HitError_st * h = t->GetTable();
-			_innerCalc = h[0];
-			_outerCalc = h[1];
-		}
-	else
-		cout << "StiTpcDetectorBuilder::buildDetectors(StMaker&source) -W- Default TPC tracking parameters will be used" << endl;
+	load(_inputFile,source);
 
   if (!gStTpcDb) 
 		throw runtime_error("StiTpcDetectorBuilder::buildDetectors() -E- gStTpcDb==0");
@@ -254,3 +204,37 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Done" << endl;
 }
 
+
+
+void StiTpcDetectorBuilder::loadDS(TDataSet &ds)
+{
+	cout << "StiTpcDetectorBuilder::load(TDataSet * ds) -I- Loading TPC tracking parameters from tracking database" << endl;
+	getTrackingParameters().loadDS(ds);
+	_innerCalc.loadDS(ds);
+	_outerCalc.loadDS(ds);
+	cout << "StiTpcDetectorBuilder::load(TDataSet * ds) -I- Loading TPC tracking parameters from tracking database" << endl;
+}
+
+void StiTpcDetectorBuilder::loadFS(ifstream & inputFileStream)
+{
+	cout <<"StiTpcDetectorBuilder::load(ifstream &) -I- Loading TPC tracking parameters from file" << endl;
+	getTrackingParameters().loadFS(inputFileStream);
+	_innerCalc.loadFS(inputFileStream);
+	_outerCalc.loadFS(inputFileStream);
+	cout <<"StiTpcDetectorBuilder::load(ifstream &) -I- Done loading TPC tracking parameters from file" << endl;
+}
+
+void StiTpcDetectorBuilder::setDefaults()
+{
+  cout <<"StiTpcDetectorBuilder::setDefaults() -I- Tracking Parameters set from class default values."<<endl;
+  _trackingParameters.setMaxChi2ForSelection(10.);
+  _trackingParameters.setMinSearchWindow(1.6);
+  _trackingParameters.setMaxSearchWindow(7.);
+  _trackingParameters.setSearchWindowScaling(15.);
+  _innerCalc.set(.066, 1.2e-04, 0.0004, 0.066, 4.4e-4, 2.8e-02);
+  _outerCalc.set(.02, 4.e-3, 0.04, 0.02, 3.2e-3, 9.e-2);
+  cout << _trackingParameters << endl;
+  cout << _innerCalc << endl;
+  cout << _outerCalc << endl;
+  cout <<"StiTpcDetectorBuilder::setDefaults() -I- Tracking Parameters set from class default values."<<endl;
+}
