@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.217 2001/07/26 22:04:38 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.218 2001/08/01 00:54:27 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -123,7 +123,7 @@ Bfc_st BFC[] = {
   {"MakeDoc"     ,""  ,"",""                   ,"","","Make HTML documentation for the given Chain",kFALSE},
   {"Debug"       ,""  ,"",""                                            ,"","","Set debug flag = 1",kFALSE},
   {"Debug2"      ,""  ,"",""                                            ,"","","Set debug flag = 2",kFALSE},
-  {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},  
+  {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},
   {"big"         ,""  ,"",""                                         ,"","","Set NwGEANT =20Mwords",kFALSE},
   {"bigbig"      ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
   {"InTree"      ,""  ,"","in",""                                     ,"","bfcTree Input Tree name",kFALSE},
@@ -523,7 +523,11 @@ Int_t StBFChain::Instantiate()
 	  if (maker == "St_dst_Maker") SetInput("dst",".make/dst/.data/dst");
 	  if (maker == "St_dst_Maker" && GetOption("HitsBranch")) mk->SetMode(2); 
 	  if (maker == "StMatchMaker" && !GetOption("Kalman")) mk->SetMode(-1);
-	  if (maker == "St_tpt_Maker" && GetOption("ExB")) mk->SetMode(1); // Al Saulys request
+	  if (maker == "St_tpt_Maker" && GetOption("ExB")){
+	    int mask=1;                                  // Al Saulys request
+	    if( GetOption("RY2001") ) mask = mask & 2 ;  // Jim Thomas request
+	    mk->SetMode(mask); 
+	  }
 	  if (maker == "St_tcl_Maker") {
 	    St_tcl_Maker *tclMk = (St_tcl_Maker *) mk;
 	    if (GetOption("EastOff")) tclMk->EastOff(); 
