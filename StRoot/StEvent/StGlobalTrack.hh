@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.hh,v 1.4 1999/02/12 02:01:18 wenaus Exp $
+ * $Id: StGlobalTrack.hh,v 1.5 1999/02/15 16:17:03 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.hh,v $
- * Revision 1.4  1999/02/12 02:01:18  wenaus
- * New track constructor to load helix params independently of table
+ * Revision 1.5  1999/02/15 16:17:03  wenaus
+ * fix double& -> double referencing bug
+ *
+ * Revision 1.9  1999/03/04 18:17:04  ullrich
+ * Namespace std not used if ST_NO_NAMESPACES defined
  *
  * Revision 1.8  1999/03/04 15:56:58  wenaus
  * add std namespace for Sun CC5 compatibility
@@ -43,9 +46,9 @@ using namespace std;
 #define StGlobalTrack_hh
 
 #include <vector>
-                  double& curvature,
-                  double& dip,
-                  double& phase,
+#include "StEvent/StDedx.hh"
+#include "StEvent/StTrack.hh"
+#include "StEvent/StVecPtrSvtHit.hh"
 #include "StEvent/StTrackPidTraits.hh"
 #include "tables/dst_track.h"
 
