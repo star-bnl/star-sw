@@ -19,6 +19,7 @@
 #include "Sti/StiIsActiveFunctor.h"
 #include "Sti/StiNeverActiveFunctor.h"
 #include "StiSvt/StiSvtIsActiveFunctor.h"
+#include "Sti/StiElossCalculator.h"
 #include <stdio.h>
 #include "tables/St_HitError_Table.h"
 
@@ -104,10 +105,13 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 
   cout << "StiSvtDetectorBuilder::buildDetectors() -I- Define Svt Materials" << endl;
   _gasMat    = add(new StiMaterial("Air",     0.49919,  1.,       0.001205, 30420.*0.001205, 5.) );
-  _siMat     = add(new StiMaterial("Si",     14.,      28.0855,   2.33,     21.82,           5.) );
-  _hybridMat = add(new StiMaterial("Hybrid", 14.,      28.0855,   2.33,     21.82,           5.) );
+  _siMat     = add(new StiMaterial("Si",     14.,      28.0855,   2.33,     21.82,           14.*12.*1e-9) );
+  _hybridMat = add(new StiMaterial("Hybrid", 14.,      28.0855,   2.33,     21.82,           14.*12.*1e-9) );
   cout << "StiSvtDetectorBuilder::buildDetectors() -I- Define Svt Shapes" << endl;
-	int nLayers = nRows;
+
+  double ionization = _siMat->getIonization();
+  StiElossCalculator * siElossCalculator = new StiElossCalculator(_siMat->getZOverA(), ionization*ionization);
+  int nLayers = nRows;
   for(int layer = 0; layer<nLayers; layer++)
     {
       int nWafers = _config->getNumberOfWafers(1+layer/2);
@@ -194,6 +198,7 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 	  pLadder->setHitErrorCalculator(&_calc);
 	  pLadder->setKey(1,layer);
 	  pLadder->setKey(2,ladder);
+	  pLadder->setElossCalculator(siElossCalculator);
 
 	  add(layer,ladder,pLadder);
 	  
@@ -217,6 +222,7 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 	  pHybrid1->setMaterial(_hybridMat);
 	  pHybrid1->setShape(_hybridShape[layer]);
 	  pHybrid1->setPlacement(pPlacement);
+	  pHybrid1->setElossCalculator(siElossCalculator);
 	  add(pHybrid1);
 	  // hybrid 2
 	  pPlacement = new StiPlacement;
@@ -230,6 +236,7 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 	  pHybrid2->copy(*pHybrid1);
 	  pHybrid2->setName(name);
 	  pHybrid2->setPlacement(pPlacement);
+	  pHybrid2->setElossCalculator(siElossCalculator);
 	  add(pHybrid2);
 	} // for ladder
     } // for layer

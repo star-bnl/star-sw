@@ -9,6 +9,7 @@
 #include "Sti/StiIsActiveFunctor.h"
 #include "Sti/StiNeverActiveFunctor.h"
 #include "Sti/Star/StiStarDetectorBuilder.h"
+#include "Sti/StiElossCalculator.h"
 
 StiStarDetectorBuilder::StiStarDetectorBuilder(bool active, const string & inputFile)
   : StiDetectorBuilder("StarBuilder",active,inputFile)
@@ -27,8 +28,16 @@ void StiStarDetectorBuilder::buildDetectors(StMaker&s)
   float thickness = 0.076;
   float dPhi=M_PI/6.;
   float depth = 200.; // was 20...
-  _pipeMaterial = add(new StiMaterial("Be", 4.,9.012, 1.848, 65.19, 3.) );  
+  _pipeMaterial = add(new StiMaterial("Be", 4.,9.010, 1.848, 65.19, 4.*12.) );  
   _vacuumMaterial = add(new StiMaterial("Vaccum",0., 1., 0., 1e30, 0.)  );
+
+  //Instantiate energy loss detector for beam pipe material  
+  //
+  // Material is berylium
+  //
+  double ionization = _pipeMaterial->getIonization();
+  StiElossCalculator * pipeElossCalculator = new StiElossCalculator(_pipeMaterial->getZOverA(), ionization*ionization);
+
   _beamPipeShape = new StiCylindricalShape;
   _beamPipeShape->setName("Star/pipe");
   _beamPipeShape->setThickness(thickness); // checked
@@ -56,6 +65,7 @@ void StiStarDetectorBuilder::buildDetectors(StMaker&s)
       pipeVolume->setPlacement(p);
       pipeVolume->setGas(_vacuumMaterial);
       pipeVolume->setMaterial(_pipeMaterial);
+      pipeVolume->setElossCalculator(pipeElossCalculator);
       add(0,sector,pipeVolume);
     }
  cout << "StiStarDetectorBuilder::buildDetectors() -I- Done" << endl;

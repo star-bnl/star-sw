@@ -20,6 +20,7 @@
 #include "Sti/StiHitErrorCalculator.h"
 #include "StiTpcDetectorBuilder.h" 
 #include "StiTpcIsActiveFunctor.h"
+#include "Sti/StiElossCalculator.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDbUtilities/StCoordinates.hh" 
 #include "StTpcDb/StTpcDb.h"
@@ -80,8 +81,16 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
   StMatrixD  unit(3,3,1);
   StThreeVectorD RowPosition;
 
-  _gas        = add(new StiMaterial("P10",   16.4,  36.2741, 0.00156,  12820.*0.00156, 15.48) ); 
-  _fcMaterial = add(new StiMaterial("Nomex",  6.24, 12.40,   0.064,       39.984,  1.)        );
+  _gas        = add(new StiMaterial("P10",   16.4,  36.2741, 0.00156,  12820.*0.00156, 15.8*18.*1e-9) ); 
+  _fcMaterial = add(new StiMaterial("Nomex",  6.24, 12.40,   0.064,       39.984,      6.24*12.*1e-9) );
+
+  
+  const static double I2Ar = (15.8*18) * (15.8*18) * 1e-18; // GeV**2
+  // Instantiate eloss calculator for tpc gas and for field cage
+  double ionization = _gas->getIonization();
+  StiElossCalculator * gasElossCalculator = new StiElossCalculator(_gas->getZOverA(),ionization*ionization);
+  ionization = _fcMaterial->getIonization();
+  StiElossCalculator * fcElossCalculator = new StiElossCalculator(_fcMaterial->getZOverA(), ionization*ionization);
 
 
   // Inner field cage
@@ -131,6 +140,7 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
       ifcVolume->setPlacement(p);
       ifcVolume->setGas(_gas);
       ifcVolume->setMaterial(_fcMaterial);
+      ifcVolume->setElossCalculator(fcElossCalculator);
       //add(ifcVolume);
       add(45,sector,ifcVolume);
 
@@ -156,6 +166,7 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
       ofcVolume->setPlacement(p);
       ofcVolume->setGas(_gas);
       ofcVolume->setMaterial(_fcMaterial);
+      ofcVolume->setElossCalculator(fcElossCalculator);
       // remove it for now...
       //add(ofcVolume);  
       add(46,sector,ofcVolume);
@@ -266,6 +277,7 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
 	    pDetector->setHitErrorCalculator(&_innerCalc);
 	  else
 	    pDetector->setHitErrorCalculator(&_outerCalc);
+	  pDetector->setElossCalculator(gasElossCalculator);
 	  add(row,sector,pDetector);
 	}// for sector
     }// for row

@@ -9,6 +9,7 @@
 #include "Sti/StiToolkit.h"
 #include "Sti/StiIsActiveFunctor.h"
 #include "Sti/StiNeverActiveFunctor.h"
+#include "Sti/StiElossCalculator.h"
 #include "StiPixelDetectorBuilder.h" 
 #include "StiPixelIsActiveFunctor.h"
 
@@ -47,7 +48,14 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker&source)
   //_gas is the gas that the pixel detector lives in
   _gas            = add(new StiMaterial("PixelAir",     0.49919,  1., 0.001205, 30420.*0.001205, 5.) );
   //_fcMaterial is the (average) material that makes up the detector elements.  Here I use ~silicon
-  _fcMaterial     = add(new StiMaterial("PixelSi", 14.,      28.0855,   2.33,     21.82,           5.) );
+  StiMaterial * material = add(new StiMaterial("PixelSi", 14.,  28.0855,   2.33,     21.82,   14.*12.*1e-9) );
+
+
+  //Instantiate energy loss detector for si material  
+  //const static double I2Ar = (15.8*18) * (15.8*18) * 1e-18; // GeV**2
+  double ionization = material->getIonization();
+  StiElossCalculator * siElossCalculator = new StiElossCalculator(material->getZOverA(), ionization*ionization);
+  
   StiPlanarShape *pShape;
   for (unsigned int row=0; row<nRows; row++) 
     {
@@ -80,11 +88,12 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker&source)
 	  pDetector->setIsActive(new StiPixelIsActiveFunctor);
 	  pDetector->setIsContinuousMedium(true);
 	  pDetector->setIsDiscreteScatterer(false);
-	  pDetector->setMaterial(_gas);
+	  pDetector->setMaterial(material);
 	  pDetector->setGas(_gas);
 	  pDetector->setShape(pShape);
 	  pDetector->setPlacement(pPlacement);
 	  pDetector->setHitErrorCalculator(&_calculator);
+	  pDetector->setElossCalculator(siElossCalculator);
 	  if (sector<18)
 	    add(1,sector,pDetector);
 	  else
