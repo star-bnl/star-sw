@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.10 1999/02/16 21:17:54 caines Exp $
+// $Id: St_stk_Maker.cxx,v 1.11 1999/02/25 20:29:48 caines Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.11  1999/02/25 20:29:48  caines
+// Changed Histo names
+//
 // Revision 1.10  1999/02/16 21:17:54  caines
 // Added QA histograms
 //
@@ -139,12 +142,11 @@ Int_t St_stk_Maker::Init(){
   
   m_sprpar         = (St_spr_sprpar *)     local("svt/sprpars/sprpar");
   // Create Histograms
-  m_q_pt = new TH1F("svt_charge_over_pt","Charge/pt of reconstructed svt tracks",100,-20.,20.);
-  m_frac_used   = new TH1F("svt_hits_used","Fraction of hits used on svt tracks",100,0.,1.2);
-  m_azimuth       = new TH1F("svt_azimuth","Azimuthal distribution of svt tracks",60,0.,360.0);
-  m_tan_dip       = new TH1F("svt_tan_dip","Distribution of the svt dip angle",100,-1.5,1.5);
-  m_dedx          = new TH2F("svt_dedx","svt de/dx distribution",100,0.,2.0,100,0.,0.01);
-  m_gededx          = new TH2F("svt_gededx","svt ge de/dx distribution",100,0.,2.0,100,0.,0.01);
+  m_q_pt = new TH1F("StkChargeOverPt","Charge/pt of reconstructed svt tracks",100,-20.,20.);
+  m_frac_used   = new TH1F("StkHitsUsed","Fraction of hits used on svt tracks",100,0.,1.2);
+  m_azimuth       = new TH1F("StkAzimuth","Azimuthal distribution of svt tracks",60,0.,360.0);
+  m_tan_dip       = new TH1F("StkTanDip","Distribution of the svt dip angle",100,-1.5,1.5);
+  m_dedx          = new TH2F("StkDedx","svt de/dx distribution",100,0.,2.0,100,0.,0.01);
 
   return StMaker::Init();
 }
@@ -301,35 +303,13 @@ void St_stk_Maker::MakeHistograms() {
 
   }
 
-
-  // Fill the geant dedx hist
-
-  St_DataSetIter gedata(gStChain->DataSet("geant"));
-
-  //Get the table:
-  St_g2t_svt_hit *g2tspc = 0;
- 
-  g2tspc              = (St_g2t_svt_hit *) gedata.Find("g2t_svt_hit");
-
-  if( g2tspc){
-    g2t_svt_hit_st *gmc = g2tspc->GetTable();
-    
-    for( Int_t i=0; i<g2tspc->GetNRows(); i++,gmc++){
-      
-      Float_t p = TMath::Sqrt(gmc->p[0]*gmc->p[0]+gmc->p[1]*gmc->p[1]+
-			      gmc->p[2]*gmc->p[2]);
-      Float_t chr = gmc->de/(float)gmc->ds;
-      
-      m_gededx->Fill(p,chr);
-    }
-  }
 }
 
 
 //_____________________________________________________________________________
 void St_stk_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_stk_Maker.cxx,v 1.10 1999/02/16 21:17:54 caines Exp $\n");
+  printf("* $Id: St_stk_Maker.cxx,v 1.11 1999/02/25 20:29:48 caines Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
