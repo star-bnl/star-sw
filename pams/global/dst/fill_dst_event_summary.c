@@ -91,7 +91,7 @@ long  type_of_call fill_dst_event_summary_ (
   float   pt, mt, eta, rms_eta=0 ,phi, theta;
   float   mean_pt=0, mean_pt2=0, mean_eta=0, t_average=0;
   
-  enum { PRIMVTX=0, K0=1, LAMBDA=2,  ALAMBDA=3, PILEUP=4};
+  enum { PRIMVTX=1, K0=2, LAMBDA=3,  ALAMBDA=4, PILEUP=5};
   
   /* ===========================  Begin Executable Code  =============== */
 
@@ -206,10 +206,14 @@ long  type_of_call fill_dst_event_summary_ (
   for (itrk=0; itrk < dst_track_h->nok; itrk++) {/* begin global track loop */
     /* Calculate track multiplicities  */
     if ( dst_track[itrk].icharge > 0 )
-      glb_trk_plus++;
+      glb_trk_plus++;     /*  charge = 1             */
     if ( dst_track[itrk].icharge < 0 )
-      glb_trk_minus++;
-    /*  Calculate kinematic varialbles */
+      glb_trk_minus++;    /*  charge = -1            */
+    if ( dst_track[itrk].iflag > 0 )
+      glb_trk_good++;     /*  good tracks            */
+    else
+      continue;
+    /*  Calculate kinematic varialbles for good tracks only */
     theta = piov2 - atan(dst_track[itrk].tanl);
     eta   = -log(tan(theta/2.));
     pt    = 1./dst_track[itrk].invpt;
@@ -286,12 +290,10 @@ long  type_of_call fill_dst_event_summary_ (
   /*  Fill track multiplicities  */
   dst_eventsummary->glb_trk_tot   = dst_track_h->nok;
   dst_eventsummary->glb_trk_good  = glb_trk_good;
-  dst_eventsummary->glb_trk_prim  = glb_trk_prim;
   dst_eventsummary->glb_trk_plus  = glb_trk_plus;
   dst_eventsummary->glb_trk_minus = glb_trk_minus ;
   
   /* Fill mean eta, pt, pt^2 and rms_eta */
-  glb_trk_good = dst_track_h->nok;
   dst_eventsummary->mean_pt  = mean_pt/(float)glb_trk_good;
   dst_eventsummary->mean_pt2 = mean_pt2/(float)glb_trk_good;
   dst_eventsummary->mean_eta = mean_eta/(float)glb_trk_good;
@@ -307,7 +309,7 @@ long  type_of_call fill_dst_event_summary_ (
   /* Count v0 candidates */
   for (ivtx=0;  ivtx<dst_vertex_h->nok; ivtx++)  { /* begin vertex loop */
     vtx_id = dst_vertex[ivtx].vtx_id;  /*  get vertex type */
-    if (vtx_id)
+    if (vtx_id > 1)
       dst_eventsummary->n_vert_V0++;   /* count total number of V0s  */
     switch (vtx_id) {
     case PRIMVTX:
@@ -316,6 +318,7 @@ long  type_of_call fill_dst_event_summary_ (
       dst_eventsummary->prim_vrtx[1]    = dst_vertex[ivtx].y;
       dst_eventsummary->prim_vrtx[2]    = dst_vertex[ivtx].z;
       dst_eventsummary->prim_vrtx_chisq = dst_vertex[ivtx].pchi2;
+      dst_eventsummary->glb_trk_prim    = dst_vertex[ivtx].n_daughters;
       break;
       /* Count v0 candidates */
     case K0:
