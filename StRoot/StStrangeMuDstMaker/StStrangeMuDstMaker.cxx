@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 3.5 2000/09/28 20:16:05 jones Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.6 2000/10/27 21:55:31 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.6  2000/10/27 21:55:31  genevb
+// Allow use of event.root files
+//
 // Revision 3.5  2000/09/28 20:16:05  jones
 // Added doT0JitterAbort() optio; added fix to CheckFile in case of no file
 //
@@ -58,7 +61,6 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "StTree.h"
-#include "StEventMaker/StEventMaker.h"
 #include "StEvent/StEvent.h"
 #include "StMcEventMaker/StMcEventMaker.h"
 #include "StEvent.h"
@@ -260,8 +262,7 @@ Int_t StStrangeMuDstMaker::MakeCreateDst() {
   }  
 
   // Get event
-  StEventMaker* evMaker = (StEventMaker *) GetMaker("events");
-  StEvent* event = evMaker->event();
+  StEvent* event = (StEvent*) GetInputDS("StEvent");
   if (!event) return kStOK; 
   if (doT0JitterAbort && t0JitterAbort(event)) {
     gMessMgr->Warning("StStrangeMuDstMaker: T0 jitter; skipping event.");
