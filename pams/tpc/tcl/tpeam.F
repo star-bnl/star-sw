@@ -378,7 +378,7 @@ c         call hcdir('//NTUP',' ')
 c ntuple 200 as defined has no more information than the hits table...
 *         call hbookn(200+ihisto,'Hit Info',nvar,'NTUP',8000,
 *     +           chtags)
-         call hbookn(300+ihisto,'Compare Info',nvar2,'NTUP',22000,
+         call hbookn(300+ihisto,'Compare Info',nvar2,'NTUP',27000,
      +              chtags2)
          call hbookn(400+ihisto,'Track Info',nvar3,'NTUP',4000,
      +              chtags3)
@@ -389,13 +389,13 @@ c ntuple 200 as defined has no more information than the hits table...
          call hbookn(650+ihisto,'LOCAL MC Hit Info',nvar6,'NTUP',4000,
      +              chtags6)
          call hbook2(1100+ihisto,'MC Neighbor Distance -Inner',
-     +              40,0.0,20.0,40,0.0,20.0,-1.0)
+     +              40,0.0,5.0,40,0.0,5.0,-1.0)
          call hbook2(1200+ihisto,'MC Neighbor Distance -Outer',
-     +              40,0.0,20.0,40,0.0,20.0,-1.0)
+     +              40,0.0,5.0,40,0.0,5.0,-1.0)
          call hbook2(2100+ihisto,'Rec Neighbor Distance -Inner',
-     +              40,0.0,20.0,40,0.0,20.0,-1.0)
+     +              40,0.0,5.0,40,0.0,5.0,-1.0)
          call hbook2(2200+ihisto,'Rec Neighbor Distance -Outer',
-     +              40,0.0,20.0,40,0.0,20.0,-1.0)
+     +              40,0.0,5.0,40,0.0,5.0,-1.0)
 c
 c ok now we try the above suggestion....
 c
@@ -431,6 +431,10 @@ c but still store it in overall pointer list
             idummy = int(tphit(ihit_recon).row)
             idummy = (idummy/100-1)*45+mod(idummy,100)
             rec_ptr_list(idummy,0) = rec_ptr_list(idummy,0) + 1
+            if (rec_ptr_list(idummy,0).gt.max_nhits_in_row) then
+               write(6,*)'TPE-overflow of rec_ptr_list0',idummy
+               rec_ptr_list(idummy,0) = max_nhits_in_row
+            endif
             rec_ptr_list(idummy,rec_ptr_list(idummy,0))=ihit_recon
          enddo
  19      ihit_recon=ihit_recon-1
