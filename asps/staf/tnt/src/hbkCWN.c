@@ -44,12 +44,20 @@ hbkCWNscalarBlock(long id, char *blockName, int *dataPtr, char *chform) {
 STAFCV_T 
 hbkCWNcharBlock(long id, char *blockName, char *dataPtr, char *chform) {
   /* This is a hardwired C/Fortran linkage. */
+#ifndef WIN32
   hbnamc_(&id, blockName, dataPtr, chform, strlen(blockName), 4,
 	  strlen(chform));
+#else
+ /*  hbnamc_(&id, blockName, dataPtr, chform, strlen(blockName), 4,
+ 	  strlen(chform));
+  */
+  HBNAMC(id, blockName, dataPtr, chform);
+
+#endif
   /* The follow code looks like it ought to work, but it doesn't - see
      comments above.  
      
-     HBNAMC(id, blockName, dataPtr, chform); */
+      */
 }    
 
 /*--------------------------------------------------------------------*/

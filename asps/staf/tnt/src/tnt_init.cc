@@ -10,6 +10,10 @@
 
 #include "tntLib.h"
 #include "tntHBOOK.h"
+#include "fortranc.h"   /* The definition of the Fortran/C interface */
+
+#define tnt_def_ F77_NAME(tnt_def,TNT_DEF)
+extern "C" void type_of_call tnt_def_();
 
 tntFactory *tnt;
 

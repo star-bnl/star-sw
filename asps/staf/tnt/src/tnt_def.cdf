@@ -14,7 +14,7 @@
 >GUIDANCE
 Table_to_NTuple commands.
 .
- #(@)$Id: tnt_def.cdf,v 1.6 1998/03/11 21:40:37 ward Exp $
+ #(@)$Id: tnt_def.cdf,v 1.7 1998/03/16 02:13:16 fisyak Exp $
  #Edited by Bill Love 23-25 Feb 98
 .
 TNT is an Analysis Service Package (ASP) for the Standard Analysis
@@ -83,7 +83,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TNT_COUNT
+>ACTION kam_tnt_count_%C
 **
 ** ---------------------------------------------------------------------
 ** TNT/LIST
@@ -153,7 +153,7 @@ SEE ALSO:
 .
 Ntuple/list 
 .
->ACTION KAM_TNT_LIST
+>ACTION kam_tnt_list_%C
 **
 ** ---------------------------------------------------------------------
 ** TNT/NEWCWNTUPLE HID TABLE
@@ -207,7 +207,7 @@ SEE ALSO:
 .
    TNT/CWNTUPLE
 .
->ACTION KAM_TNT_NEWCWNTUPLE
+>ACTION kam_tnt_newcwntuple_%C
 **
 ************************************************************************
 ** TNT/CWNTUPLE
@@ -266,7 +266,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TNTCWNTUPLE_HID
+>ACTION kam_tntcwntuple_hid_%C
 **
 ** ---------------------------------------------------------------------
 ** TNT/CWNTUPLE/TITLE HID
@@ -314,7 +314,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TNTCWNTUPLE_TITLE
+>ACTION kam_tntcwntuple_title_%C
 **
 ** ---------------------------------------------------------------------
 ** TNT/CWNTUPLE/ENTRYCOUNT HID
@@ -362,7 +362,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TNTCWNTUPLE_ENTRYCOUNT
+>ACTION kam_tntcwntuple_entrycount_%C
 **
 ** ---------------------------------------------------------------------
 ** TNT/CWNTUPLE/COLUMNCOUNT HID
@@ -410,7 +410,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TNTCWNTUPLE_COLUMNCOUNT
+>ACTION kam_tntcwntuple_columncount_%C
 **
 ** ---------------------------------------------------------------------
 ** TNT/CWNTUPLE/APPEND HID TABLE
@@ -460,7 +460,7 @@ BUGS:
 .
 SEE ALSO: 
 .
->ACTION KAM_TNTCWNTUPLE_APPEND
+>ACTION kam_tntcwntuple_append_%C
 **
 ** ---------------------------------------------------------------------
 ** TNT/CWNTUPLE/IMPORT HID TABLE
@@ -515,5 +515,5 @@ BUGS:
 SEE ALSO:
  TNT/NEWCWNTUPLE, TNT/CWNTUPLE/APPEND
 .
->ACTION KAM_TNTCWNTUPLE_IMPORT
+>ACTION kam_tntcwntuple_import_%C
 **
