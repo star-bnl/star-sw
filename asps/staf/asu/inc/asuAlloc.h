@@ -10,10 +10,10 @@
 void * operator new(size_t sz,const char *file,int line);
 void * operator new(size_t sz);
 
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__ACC)
 void * operator new[](size_t sz,const char *file,int line);
 void * operator new[](size_t sz);
-#endif /**__GNUC__**/
+#endif /**__GNUC__ or __ACC**/
 
 #define new new(__FILE__,__LINE__)
 #endif /**__cplusplus**/

@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.22  1998/08/28 14:56:57  fisyak
+#  Fix for hp
+#
 #  Revision 1.21  1998/08/22 01:26:00  perev
 #  QUIET_ASP to MakeArch
 #
@@ -44,7 +47,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/08/22 01:26:00 $ 
+#             Last modification $Date: 1998/08/28 14:56:57 $ 
 #. default setings
 
 RM := rm -f
@@ -249,6 +252,7 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
   endif
 
   ifndef noACC.
+  OSFID += __ACC
     CXX     := aCC
     CC      := cc
     LD      := $(CXX)
