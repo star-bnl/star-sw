@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.43 1999/05/06 03:21:24 fisyak Exp $
+// $Id: bfc.C,v 1.44 1999/05/06 12:39:39 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.44  1999/05/06 12:39:39  fisyak
+// Generic version of bfc
+//
 // Revision 1.43  1999/05/06 03:21:24  fisyak
 // synchronize FTPC and TPC slow/fast
 //
@@ -34,22 +37,32 @@
 // Macro for running chain with different inputs                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
+#ifndef __CINT__
+#include "TBrowser.h"
+#include "TString.h"
+#include "TSystem.h"
+#endif
 TBrowser *b = 0;
 class StChain;        
 StChain  *chain=0;
 class St_xdfin_Maker; St_xdfin_Maker *xdfMk=0;     
 class St_XDFFile;     St_XDFFile     *xdf_out = 0; 
-class St_geant_Maker; St_geant_Maker *geant = 0;   
-class StMagF;         StMagF *field = 0;           
-class St_fss_Maker;   St_fss_Maker *fssMk = 0;     
-class St_tcl_Maker;   St_tcl_Maker *tclMk = 0;     
-class St_tpt_Maker;   St_tpt_Maker *tptMk = 0;
-class St_ems_Maker;   St_ems_Maker  *emsMk = 0;    
-class St_l3t_Maker;   St_l3t_Maker  *l3tMk = 0;    
-class St_glb_Maker;   St_glb_Maker *glbMk = 0;     
-class St_dst_Maker;   St_dst_Maker *dstMk = 0;     
-class StEventMaker;   StEventMaker *evMk  = 0;
-class StTreeMaker;    StTreeMaker  *treeMk = 0;
+class St_geant_Maker; St_geant_Maker *geant   = 0;   
+class St_db_Maker;    St_db_Maker    *dbMk    = 0; St_db_Maker    *dbMktpc = 0;
+class StMagF;         StMagF         *field   = 0;           
+class St_fss_Maker;   St_fss_Maker   *fssMk   = 0;     
+class St_tcl_Maker;   St_tcl_Maker   *tclMk   = 0;     
+class St_tpt_Maker;   St_tpt_Maker   *tptMk   = 0;
+class St_ems_Maker;   St_ems_Maker   *emsMk   = 0;    
+class St_l3t_Maker;   St_l3t_Maker   *l3tMk   = 0;    
+class St_glb_Maker;   St_glb_Maker   *glbMk   = 0;     
+class St_dst_Maker;   St_dst_Maker   *dstMk   = 0;     
+class StEventMaker;   StEventMaker   *evMk    = 0;
+class StTreeMaker;    StTreeMaker    *treeMk  = 0;
+TString *FileOut= 0;
+TString *XdfFile = 0;
+Int_t NoEvents = 0;
+TString *InFile = 0;
 //_____________________________________________________________________
 Bool_t XDFIN   = kTRUE;
 Bool_t XDFOUT  = kFALSE;
@@ -73,6 +86,82 @@ Bool_t GLOBAL  = kFALSE;
 Bool_t DST     = kFALSE;
 Bool_t ANALYSIS= kFALSE;
 Bool_t TREE    = kTRUE;
+//_____________________________________________________________________
+void SetFlags(const Char_t *Chain="gtrack"){// parse Chain request
+  if (strlen(Chain)) {
+    printf ("============= Chain: %s  =================\n",Chain);
+    if (strstr(Chain,"min") || strstr(Chain,"MIN")) {// MINIDAQ
+      XDFIN   = kTRUE;
+      MINIDAQ = kTRUE;
+      TPC     = kTRUE;
+      CTEST   = kTRUE;
+      GTRACK  = kFALSE;
+      GEANT   = kFALSE;
+      FZIN    = kFALSE;
+      TSS     = kFALSE;
+      TRS     = kFALSE;
+    }
+    else {
+      FZIN   = kTRUE;
+      GEANT  = kTRUE;
+      GTRACK = kFALSE;
+      if (strstr(Chain,"GTR") || strstr(Chain,"gtr")) GTRACK = kTRUE;
+      TPC     = kTRUE;
+      TSS     = kFALSE;
+      TRS     = kTRUE;
+      FSS     = kFALSE;
+      if (strstr(Chain,"-tss") || strstr(Chain,"-TSS")) TSS = kFALSE;
+      else {if (strstr(Chain,"tss") || strstr(Chain,"TSS")) {TSS = kTRUE; FSS = kTRUE;}}
+
+      if (strstr(Chain,"-trs") || strstr(Chain,"-TRS")) TRS = kFALSE;
+      else {if (strstr(Chain,"trs") || strstr(Chain,"TRS")) {TRS = kTRUE; FSS = kTRUE;}}
+
+      if (strstr(Chain,"tfs") || strstr(Chain,"TFS")) {TRS = kFALSE; TSS = kFALSE;}
+
+      FTPC    = kTRUE;
+      if (strstr(Chain,"-ftp") || strstr(Chain,"-FTP")) {FTPC = kFALSE; FSS = kFALSE;}
+      EMC     = kTRUE;
+      if (strstr(Chain,"-emc") || strstr(Chain,"-EMC")) EMC = kFALSE; 
+      CTF     = kTRUE;
+      if (strstr(Chain,"-ctf") || strstr(Chain,"-CTF")) CTF = kFALSE; 
+      //      L3      = kTRUE;
+      RICH    = kTRUE;
+      if (strstr(Chain,"-rich") || strstr(Chain,"-RICH")) RICH = kFALSE; 
+      SVT     = kTRUE;
+      if (strstr(Chain,"-svt") || strstr(Chain,"-SVT")) SVT = kFALSE; 
+      GLOBAL  = kTRUE;
+      if (strstr(Chain,"-glo") || strstr(Chain,"-GLO")) GLOBAL = kFALSE; 
+      ANALYSIS= kTRUE;
+      if (strstr(Chain,"-ana") || strstr(Chain,"-ANA")) ANALYSIS = kFALSE; 
+    }
+    TREE    = kTRUE;
+    if (strstr(Chain,"-tree") || strstr(Chain,"-TREE")) TREE = kFALSE;
+  }
+  if (GTRACK || FZIN) XDFIN = kFALSE;
+  if (MINIDAQ)        STMAGF = kTRUE;
+  if (XDFIN   ) printf ("===================== XDFIN    is ON \n");
+  if (XDFOUT  ) printf ("===================== XDFOUT   is ON \n");
+  if (GTRACK  ) printf ("===================== GTRACK   is ON \n");
+  if (MINIDAQ ) printf ("===================== MINIDAQ  is ON \n");
+  if (FZIN    ) printf ("===================== FZIN     is ON \n");
+  if (GEANT   ) printf ("===================== GEANT    is ON \n");
+  if (CTEST   ) printf ("===================== CTEST    is ON \n");
+  if (STMAGF  ) printf ("===================== STMAGF   is ON \n");
+  if (FTPC    ) printf ("===================== FTPC     is ON \n");
+  if (FSS     ) printf ("===================== FSS      is ON \n");
+  if (TPC     ) printf ("===================== TPC      is ON \n");
+  if (TSS     ) printf ("===================== TSS      is ON \n");
+  if (TRS     ) printf ("===================== TRS      is ON \n");
+  if (EMC     ) printf ("===================== EMC      is ON \n");
+  if (CTF     ) printf ("===================== CTF      is ON \n");
+  if (L3      ) printf ("===================== L3       is ON \n");
+  if (RICH    ) printf ("===================== RICH     is ON \n");
+  if (SVT     ) printf ("===================== SVT      is ON \n");
+  if (GLOBAL  ) printf ("===================== GLOBAL   is ON \n");
+  if (DST     ) printf ("===================== DST      is ON \n");
+  if (ANALYSIS) printf ("===================== ANALYSIS is ON \n");
+  if (TREE    ) printf ("===================== TREE     is ON \n");
+}
 //_____________________________________________________________________
 void Load(){
   gSystem->Load("St_base");
@@ -143,66 +232,7 @@ void Load(){
   if (TREE) gSystem->Load("StTreeMaker");
 }
 //_____________________________________________________________________
-void bfc (const Int_t Nevents=1, const Char_t *Chain="gtrack",Char_t *infile=0, Char_t *outfile=0)
-{// Chain = "gtrack"
-  Int_t NoEvents = Nevents;
-  // parse Chain request
-  if (strlen(Chain)) {
-    printf ("============= Chain: %s  =================\n",Chain);
-    if (strstr(Chain,"min") || strstr(Chain,"MIN")) {// MINIDAQ
-      XDFIN   = kTRUE;
-      MINIDAQ = kTRUE;
-      TPC     = kTRUE;
-      CTEST   = kTRUE;
-      GTRACK  = kFALSE;
-      GEANT   = kFALSE;
-      FZIN    = kFALSE;
-      TSS     = kFALSE;
-      TRS     = kFALSE;
-    }
-    else {
-      FZIN   = kTRUE;
-      GEANT  = kTRUE;
-      GTRACK = kFALSE;
-      if (strstr(Chain,"GTR") || strstr(Chain,"gtr")) GTRACK = kTRUE;
-      TPC     = kTRUE;
-      TSS     = kFALSE;
-      TRS     = kTRUE;
-      FSS     = kFALSE;
-      if (strstr(Chain,"-tss") || strstr(Chain,"-TSS")) TSS = kFALSE;
-      else {if (strstr(Chain,"tss") || strstr(Chain,"TSS")) {TSS = kTRUE; FSS = kTRUE;}}
-      if (strstr(Chain,"-trs") || strstr(Chain,"-TRS")) TRS = kFALSE;
-      else {if (strstr(Chain,"trs") || strstr(Chain,"TRS")) TRS = kTRUE; FSS = kTRUE;}}
-      if (strstr(Chain,"tfs") || strstr(Chain,"TFS")) {TRS = kFALSE; TSS = kFALSE;}
-      FTPC    = kTRUE;
-      EMC     = kTRUE;
-      CTF     = kTRUE;
-      //      L3      = kTRUE;
-      RICH    = kTRUE;
-      SVT     = kTRUE;
-      GLOBAL  = kTRUE;
-      ANALYSIS= kTRUE;
-    }
-    TREE    = kTRUE;
-    if (strstr(Chain,"-tree") || strstr(Chain,"-TREE")) TREE = kFALSE;
-  }
-  if (GTRACK || FZIN) XDFIN = kFALSE;
-  if (MINIDAQ)        STMAGF = kTRUE;
-  // define input file
-  if (!infile) {
-    if (MINIDAQ) infile ="/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf"; // laser data
-    else {
-      if (FZIN)  infile ="/disk1/star/test/psc0049_08_40evts.fzd";                     // zebra file
-      else 
-	if (!GTRACK) infile ="/afs/rhic/star/data/samples/hijet-g2t.xdf";	       // g2t xdf file
-    }
-    TString InFile(infile);
-    //      Check the input file
-    if (gSystem->AccessPathName(InFile.Data())) {// file does not exist
-      printf(" *** NO FILE: %s, exit!\n", InFile.Data());
-      gSystem->Exit(1); 
-    }
-  }
+void SetOutputFile(const Char_t *infile=0, const Char_t *outfile=0 ){
   if (GTRACK) {
     if (!outfile) FileOut = new TString("gtrack.root");
     else          FileOut = new TString(outfile);
@@ -211,21 +241,18 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gtrack",Char_t *infile=0, 
   }
   else {
     if (FZIN) {// zebra file, set I/O for crs using "input_file" varaible if any
-      TString InFile = "$input_file";
-      gSystem->ExpandPathName(InFile);
-      Int_t NoEvents = Nevents;
-      if (!strcmp("$input_file",InFile.Data())) {
-	InFile = infile; 
+      InFile = new TString("$input_file");
+      gSystem->ExpandPathName(*InFile);
+      if (!strcmp("$input_file",InFile->Data())) {
+	delete InFile;
+	InFile =  new TString(infile); 
       }
-      else {
-	Int_t NoEvents = atoi(strrchr(InFile.Data(),'_')+1);
-	if (NoEvents <=0) {NoEvents = Nevents;}  
-	if (NoEvents > Nevents) {NoEvents = Nevents;}  
-      }
+      Int_t NN = atoi(strrchr(gSystem->BaseName(InFile->Data()),'_')+1);
+      if (NN > 0 && NN <= NoEvents) NoEvents = NN;  
     }
     if (outfile) FileOut = new TString(outfile);
     else {
-      FileOut = new TString(gSystem->BaseName(InFile.Data()));
+      FileOut = new TString(gSystem->BaseName(InFile->Data()));
       FileOut->ReplaceAll(".fzd",".root");
       FileOut->ReplaceAll(".fz",".root");
       FileOut->ReplaceAll(".xdf",".root");
@@ -233,23 +260,45 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gtrack",Char_t *infile=0, 
     }
     printf("==============================================\n");
     printf("Input file name = %s with No. of Events to process = %i\n"
-	   ,InFile.Data(),NoEvents);
+	   ,InFile->Data(),NoEvents);
     printf("Output root file name %s\n", FileOut.Data());
     printf("==============================================\n");
   }
-  // Dynamically link some shared libs
-  if (gClassTable->GetID("StChain") < 0) Load();
   
   if (XDFOUT && FileOut) {
-    TString *XdfFile = new TString(FileOut->Data());
+    XdfFile = new TString(FileOut->Data());
     XdfFile->ReplaceAll(".root","_dst.xdf");
     xdf_out = new St_XDFFile(XdfFile->Data(),"wb"); 
     printf ("Open output xdf file  = %s \n ++++++++++++++++++++++\n",XdfFile->Data());
   }
+}
+//_____________________________________________________________________
+void bfc (const Int_t Nevents=1, const Char_t *Chain="gtrack",Char_t *infile=0, Char_t *outfile=0)
+{// Chain = "gtrack"
+  NoEvents = Nevents;
+  SetFlags(Chain);
+  // define input file
+  if (!infile) {
+    if (MINIDAQ) infile ="/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf"; // laser data
+    else {
+      if (FZIN)  infile ="/disk1/star/test/psc0049_08_40evts.fzd";                     // zebra file
+      else 
+	if (!GTRACK) infile ="/afs/rhic/star/data/samples/hijet-g2t.xdf";	       // g2t xdf file
+    }
+    InFile = new TString(infile);
+    //      Check the input file
+    if (gSystem->AccessPathName(InFile->Data())) {// file does not exist
+      printf(" *** NO FILE: %s, exit!\n", InFile->Data());
+      gSystem->Exit(1); 
+    }
+  }
+  SetOutputFile(infile,outfile);
   // Create the main chain object
+  // Dynamically link some shared libs
+  if (gClassTable->GetID("StChain") < 0) Load();
   chain = new StChain("bfc");
   chain->SetDebug();
-  //  Create the makers to be called by the current chain
+//  Create the makers to be called by the current chain
   if (CTEST){// TPC test Data Base
     cout<<"creating DB for TPC test"<<endl;
     const char *tpcDB = "/afs/rhic/star/tpc/ctest/StDb/params";
@@ -260,12 +309,11 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gtrack",Char_t *infile=0, 
     const char *mainDB = "$STAR/StDb/params";
     dbMk = new St_db_Maker("db",mainDB);
     dbMk->SetDebug();
-    St_db_Maker *dbMktpc = 0;
     const char *calibDB = "$STAR_ROOT/calib";
     St_db_Maker *calibMk = new St_db_Maker("calib",calibDB);
     calibMk->SetDebug();  
   }
-  if (XDFIN) xdfMk = new St_xdfin_Maker("xdfin",InFile.Data());
+  if (XDFIN) xdfMk = new St_xdfin_Maker("xdfin",InFile->Data());
   if (MINIDAQ) {// defined for MINIDAQ
     chain->SetInput("BEGIN_RUN",".make/xdfin/.const/BEGIN_RUN");
     chain->SetInput("TPC_DATA",".make/xdfin/.data/TPC_DATA");
@@ -288,7 +336,7 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gtrack",Char_t *infile=0, 
       geant->Do("swit 2 3;");
       // geant->LoadGeometry("detp geometry field_only field_off");
     }
-    else  geant->SetInputFile(InFile.Data());
+    else  geant->SetInputFile(InFile->Data());
   }
   if (STMAGF) field   = new StMagFC("field","STAR no field",0.00002);
   //  S I M U L A T I O N  or D A Q
@@ -404,7 +452,7 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gtrack",Char_t *infile=0, 
     treeMk->SetIOMode("w");
     treeMk->SetDebug();
     if (geant) {
-      treeMk->IntoBranch("geantBranch","geant/.data");
+      treeMk->IntoBranch("geantBranch","geant");
       //  treeMk->SetBranch("geantBranch",FileOut.Data());
       //    treeMk->IntoBranch("geantBranch","geant/.data/particle");
       //    treeMk->IntoBranch("geantBranch","geant/.data/g2t_rch_hit");
@@ -444,7 +492,7 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gtrack",Char_t *infile=0, 
     
     if (evMk){
       //  treeMk->SetBranch("EventBranch",FileOut.Data());
-      treeMk->IntoBranch("EventBranch","StEventMaker/.data/Event");
+      treeMk->IntoBranch("EventBranch","StEvent");
     }
     // treeMk->SetInput(".default","Others");
     // START the chain (may the force be with you)
@@ -473,5 +521,3 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gtrack",Char_t *infile=0, 
   }
   //  else {b = new TBrowser("BFC chain",chain);}
 }
-
-
