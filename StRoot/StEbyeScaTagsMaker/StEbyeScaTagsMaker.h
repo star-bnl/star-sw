@@ -44,7 +44,6 @@ public:
   virtual void Clear(Option_t *option="");
   virtual Int_t Init();
   virtual Int_t  Make();
-  virtual void   PrintInfo();
   virtual Int_t  Finish();
 
   // Tag accessor
@@ -52,6 +51,9 @@ public:
 
   // output Tag info to screen
   void printTag(ostream& = cout);
+
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeScaTagsMaker.h,v 1.3 1999/07/15 13:57:00 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEbyeScaTagsMaker, 1)
 };

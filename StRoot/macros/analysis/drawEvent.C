@@ -1,6 +1,9 @@
 //*-- Author :  Valeri Fine (fine@bnl.gov)
-// $Id: drawEvent.C,v 1.3 1999/07/14 01:47:15 fine Exp $
+// $Id: drawEvent.C,v 1.4 1999/07/15 13:58:39 perev Exp $
 // $Log: drawEvent.C,v $
+// Revision 1.4  1999/07/15 13:58:39  perev
+// cleanup
+//
 // Revision 1.3  1999/07/14 01:47:15  fine
 // New macros derived from doEvent to show StEventDisplayMaker
 //
@@ -121,7 +124,7 @@ void doEventsQQ(const Int_t nevents=999,
   if (iInit) chain->Fatal(iInit,"on init");
   chain->PrintInfo();
   disp->SetTrackFilterFlag(1);
-  disp->SetHitFilterFlag(0);
+  disp->SetHitFilterFlag(1);
 
   // Event loop
   int istat;
@@ -148,7 +151,7 @@ void doEventsQQ(const Int_t nevents=999,
      gROOT->LoadMacro("PadControlPanel.C");
   }
 }
-void drawEvent(const Int_t nevents=1,
+void drawEvent(const Int_t nevents=2,
               const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
               const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf")
 {

@@ -278,13 +278,6 @@ void    St_db_Maker::SetMainDir(const Char_t *db)
 void    St_db_Maker::SetUserDir(const Char_t *db)
 {m_UserDir = db; gSystem->ExpandPathName(m_UserDir);}
 //_____________________________________________________________________________
-void St_db_Maker::PrintInfo(){
-  printf("***************************************************************\n");
-  printf("* $Id: St_db_Maker.cxx,v 1.8 1999/07/08 19:12:22 fisyak Exp $\n");
-  printf("***************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}
-//_____________________________________________________________________________
 TDatime St_db_Maker::GetDateTime()
 { 
   if (!fIsDBTime) return StMaker::GetDateTime();

@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.35 1999/06/02 01:28:22 sakrejda Exp $
+// $Id: St_tpt_Maker.cxx,v 1.36 1999/07/15 13:58:27 perev Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.36  1999/07/15 13:58:27  perev
+// cleanup
+//
 // Revision 1.35  1999/06/02 01:28:22  sakrejda
 // comment before tte_track corrected (was about residuals instead of tte_track)
 //
@@ -620,12 +623,6 @@ void St_tpt_Maker::VertexEffResolutionMakeHistograms() {
   cout<<"at the end of the VertexEffResolutionMakeHistogram"<<endl;
 }
 //_____________________________________________________________________________
-void St_tpt_Maker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.35 1999/06/02 01:28:22 sakrejda Exp $\n");
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}
 //_____________________________________________________________________________
 Int_t St_tpt_Maker::Finish(){
   // if m_tteEvalOn=kTrue, then  calculate  the efficiency and momentum resolution

@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.4 1999/07/11 19:32:42 druss Exp $
+// $Id: St_trg_Maker.cxx,v 1.5 1999/07/15 13:58:32 perev Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.5  1999/07/15 13:58:32  perev
+// cleanup
+//
 // Revision 1.4  1999/07/11 19:32:42  druss
 // Change DST table from dst_TriggerDetectors to dst_TrgDet.
 // The classname can only be 19 letters long.
@@ -80,10 +83,3 @@ Int_t St_trg_Maker::Make(){
   return kStOK;
 }
 //_____________________________________________________________________________
-void St_trg_Maker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: St_trg_Maker.cxx,v 1.4 1999/07/11 19:32:42 druss Exp $\n");
-//  printf("* %s    *\n",m_VersionCVS);
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}

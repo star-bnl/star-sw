@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.39 1999/07/02 15:25:11 ward Exp $
+// $Id: St_tcl_Maker.cxx,v 1.40 1999/07/15 13:58:24 perev Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.40  1999/07/15 13:58:24  perev
+// cleanup
+//
 // Revision 1.39  1999/07/02 15:25:11  ward
 // Add -1 so 1-512 -> 0-511.
 //
@@ -145,6 +148,7 @@ ClassImp(St_tcl_Maker)
   
 //_____________________________________________________________________________
   St_tcl_Maker::St_tcl_Maker(const char *name):
+    StMaker(name),
     m_tclPixTransOn(kFALSE),
     m_tclEvalOn(kFALSE),
     m_tclMorphOn(kFALSE),
@@ -155,8 +159,8 @@ ClassImp(St_tcl_Maker)
     m_tclpar(0),
     m_type(0),
     m_tfs_fspar(0),
-    m_tfs_fsctrl(0),
-    StMaker(name){
+    m_tfs_fsctrl(0)
+{
 }
 //_____________________________________________________________________________
 St_tcl_Maker::~St_tcl_Maker(){
@@ -694,12 +698,6 @@ Int_t St_tcl_Maker::Make(){
   return kStOK;
 }
 //_____________________________________________________________________________
-void St_tcl_Maker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.39 1999/07/02 15:25:11 ward Exp $\n");
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}
 
 //----------------------------------------------------------------------
 

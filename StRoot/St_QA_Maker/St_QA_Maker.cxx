@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.44 1999/07/14 23:22:58 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.45 1999/07/15 13:57:37 perev Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.45  1999/07/15 13:57:37  perev
+// cleanup
+//
 // Revision 1.44  1999/07/14 23:22:58  kathy
 // a lot of changes to hist limits and fixes to titles and added a few new hist
 //
@@ -1582,13 +1585,4 @@ void St_QA_Maker::MakeHistXi(St_DataSet *dst){
   if (Debug()) cout << " *** in St_QA_Maker - filling dst_xi_vertex histograms " << endl;
 }
 
-//_____________________________________________________________________________
 
-
-void St_QA_Maker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.44 1999/07/14 23:22:58 kathy Exp $\n");
-  //  printf("* %s    *\n",m_VersionCVS);
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}

@@ -56,6 +56,10 @@ void StDAQMaker::Close(Option_t *)
   delete fDAQReader; 	fDAQReader	=0;
 }
 //_____________________________________________________________________________
+Int_t StDAQMaker::Skip(int nskip){
+  return fDAQReader->skipEvent(nskip);
+}
+//_____________________________________________________________________________
 Int_t StDAQMaker::Make(){
 
   int iret = fDAQReader->readEvent();  
@@ -87,12 +91,4 @@ Int_t StDAQMaker::Make(){
     }
   }
   return 0;
-}
-//_____________________________________________________________________________
-//_____________________________________________________________________________
-void StDAQMaker::Skip(Int_t Nskip){
-  for (Int_t i =0; i < Nskip; i++){
-    if (GetDebug()) printf("StDAQMaker skip record %i\n",i); 
-    Make();
-  }
 }

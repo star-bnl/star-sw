@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.4 1999/07/08 19:09:51 fisyak Exp $
+// $Id: StMatchMaker.cxx,v 1.5 1999/07/15 13:57:52 perev Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.5  1999/07/15 13:57:52  perev
+// cleanup
+//
 // Revision 1.4  1999/07/08 19:09:51  fisyak
 // Add tabs, remove St_glb_Maker
 //
@@ -245,12 +248,4 @@ Int_t StMatchMaker::Make(){
 }
 
 //_____________________________________________________________________________
-void StMatchMaker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: StMatchMaker.cxx,v 1.4 1999/07/08 19:09:51 fisyak Exp $\n");
-  //  printf("* %s    *\n",m_VersionCVS);
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-  
-}
 

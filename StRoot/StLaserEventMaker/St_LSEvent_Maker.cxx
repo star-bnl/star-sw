@@ -1,7 +1,10 @@
-// $Id: St_LSEvent_Maker.cxx,v 1.2 1999/05/10 13:41:30 love Exp $
+// $Id: St_LSEvent_Maker.cxx,v 1.3 1999/07/15 13:57:35 perev Exp $
 // $Log: St_LSEvent_Maker.cxx,v $
+// Revision 1.3  1999/07/15 13:57:35  perev
+// cleanup
+//
 // Revision 1.2  1999/05/10 13:41:30  love
-// Two passes to try to get event number from IT tables, Clean up code
+//   Two passes to try to get event number from IT tables, Clean up code
 //  to erase previous event data.
 //
 // Revision 1.1.1.1  1999/04/27 14:29:31  love
@@ -191,10 +194,4 @@ Int_t St_LSEvent_Maker::Make(){
    }  //end of if(m_mksts)
 }  // end of MakeHistograms member.
 //_____________________________________________________________________________
-void St_LSEvent_Maker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: St_LSEvent_Maker.cxx,v 1.2 1999/05/10 13:41:30 love Exp $\n");
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.h,v 1.3 1999/03/20 22:00:19 perev Exp $
+ * $Id: StRchMaker.h,v 1.4 1999/07/15 13:57:23 perev Exp $
  *
  * Author: Dan Lyons
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.h,v $
+ * Revision 1.4  1999/07/15 13:57:23  perev
+ * cleanup
+ *
  * Revision 1.3  1999/03/20 22:00:19  perev
  * new maker schema
  *
@@ -43,7 +46,9 @@ class StRichReaderInterface;
     virtual       ~StRchMaker();
     virtual Int_t  Init();
     virtual Int_t  Make();
-    virtual void   PrintInfo();
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 1.4 1999/07/15 13:57:23 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
 	m_Mode = mode;
 };
 

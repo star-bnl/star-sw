@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.h,v 1.4 1999/03/12 15:27:33 perev Exp $
+// $Id: St_l3t_Maker.h,v 1.5 1999/07/15 13:58:16 perev Exp $
 // $Log: St_l3t_Maker.h,v $
+// Revision 1.5  1999/07/15 13:58:16  perev
+// cleanup
+//
 // Revision 1.4  1999/03/12 15:27:33  perev
 // New maker schema
 //
@@ -55,7 +58,9 @@ class St_l3t_Maker : public StMaker {
    virtual       ~St_l3t_Maker();
    virtual Int_t Init();
    virtual Int_t  Make();
-   virtual void   PrintInfo();
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: St_l3t_Maker.h,v 1.5 1999/07/15 13:58:16 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
    ClassDef(St_l3t_Maker, 1)   //StAF chain virtual base class for Makers
 };
 

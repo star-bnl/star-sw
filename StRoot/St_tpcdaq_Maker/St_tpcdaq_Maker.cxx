@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.28  1999/07/15 13:58:25  perev
+// cleanup
+//
 // Revision 1.27  1999/06/22 19:21:43  ward
 // Fix crash found by Lidia.
 //
@@ -478,12 +481,4 @@ Int_t St_tpcdaq_Maker::Make() {
   }
   printf("Got through St_tpcdaq_Maker OK.\n");
   return kStOK;
-}
-void St_tpcdaq_Maker::PrintInfo() {
-  printf("**************************************************************\n");
-  printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
-  printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.27 1999/06/22 19:21:43 ward Exp $ \n");
-  printf("**************************************************************\n");
-  if(Debug()) StMaker::PrintInfo();
 }

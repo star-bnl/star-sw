@@ -1,5 +1,8 @@
-// $Id: StEventMaker.h,v 1.4 1999/07/12 15:08:35 fisyak Exp $
+// $Id: StEventMaker.h,v 1.5 1999/07/15 13:57:07 perev Exp $
 // $Log: StEventMaker.h,v $
+// Revision 1.5  1999/07/15 13:57:07  perev
+// cleanup
+//
 // Revision 1.4  1999/07/12 15:08:35  fisyak
 // Add  type_of_call F77_NAME
 //
@@ -80,7 +83,6 @@ class dst_TrgDet_st;
    virtual       ~StEventMaker();
    virtual Int_t  Init();
    virtual Int_t  Make();
-   virtual void   PrintInfo();
    virtual void   setEventManager(StEventManager* mgr); 
    virtual StEventManager* eventManager(){return theEventManager;};
    virtual StEvent* event() { return currentEvent;}; 
@@ -105,8 +107,8 @@ class dst_TrgDet_st;
   dst_TrgDet_st 	        *defTriggerDetectors;	//!
   Bool_t doLoad;					//!
    
-  virtual const char *GetCVS()
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventMaker.h,v 1.4 1999/07/12 15:08:35 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventMaker.h,v 1.5 1999/07/15 13:57:07 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventMaker, 1)   //StAF chain virtual base class for Makers
     Int_t  makeEvent();

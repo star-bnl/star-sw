@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.37 1999/07/09 03:45:50 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.38 1999/07/15 13:57:30 perev Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.38  1999/07/15 13:57:30  perev
+// cleanup
+//
 // Revision 1.37  1999/07/09 03:45:50  lasiuk
 // set switch for the wireHistogram to determine the use
 // of a Gaussian or exponential gas gain based on a collection
@@ -202,7 +205,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.37 1999/07/09 03:45:50 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.38 1999/07/15 13:57:30 perev Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -820,9 +823,3 @@ Int_t StTrsMaker::Finish()
     return kStOK;
 }
 
-void StTrsMaker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.37 1999/07/09 03:45:50 lasiuk Exp $\n");
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}

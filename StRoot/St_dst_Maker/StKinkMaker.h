@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.h,v 1.7 1999/07/12 23:04:16 fisyak Exp $
+// $Id: StKinkMaker.h,v 1.8 1999/07/15 13:57:52 perev Exp $
 // $Log: StKinkMaker.h,v $
+// Revision 1.8  1999/07/15 13:57:52  perev
+// cleanup
+//
 // Revision 1.7  1999/07/12 23:04:16  fisyak
 // Remove glob2
 //
@@ -52,7 +55,7 @@ using namespace std;
 class StKinkMaker : public StMaker {
  private:
   Bool_t m_kinkEvalOn;   //switch for the evaluation
-  // static Char_t  m_VersionCVS = "$Id: StKinkMaker.h,v 1.7 1999/07/12 23:04:16 fisyak Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StKinkMaker.h,v 1.8 1999/07/15 13:57:52 perev Exp $";
   St_tkf_tkfpar    *m_tkfpar;          //!
   StKinkLocalTrack *mKinkLocalTrack;   //!
  protected:
@@ -67,12 +70,11 @@ class StKinkMaker : public StMaker {
   virtual  ~StKinkMaker(); 
   virtual  Int_t  Init();
   virtual  Int_t  Make();
-  virtual  void   PrintInfo();
   virtual  void   kinkEval(Bool_t flag=kTRUE){m_kinkEvalOn=flag;} // *MENU*
   virtual  void   kinkEvalOn() {kinkEval();} 
   virtual  void   kinkEvalOff(){kinkEval(kFALSE);}      
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.7 1999/07/12 23:04:16 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.8 1999/07/15 13:57:52 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StKinkMaker, 1)   //StAF chain virtual base class for Makers
 };
     

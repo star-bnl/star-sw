@@ -33,7 +33,9 @@ class St_srs_Maker : public StMaker {
    virtual       ~St_srs_Maker();
    virtual Int_t  Init();
    virtual Int_t  Make();
-   virtual void   PrintInfo();
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: St_srs_Maker.h,v 1.6 1999/07/15 13:58:20 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
    ClassDef(St_srs_Maker, 1)   //StAF chain virtual base class for Makers
 };
 

@@ -1,5 +1,8 @@
-// $Id: St_emc_Maker.cxx,v 1.8 1999/07/02 03:01:56 pavlinov Exp $
+// $Id: St_emc_Maker.cxx,v 1.9 1999/07/15 13:58:01 perev Exp $
 // $Log: St_emc_Maker.cxx,v $
+// Revision 1.9  1999/07/15 13:58:01  perev
+// cleanup
+//
 // Revision 1.8  1999/07/02 03:01:56  pavlinov
 // Little corrections for Linux
 //
@@ -149,10 +152,4 @@ void St_emc_Maker::MakeHistograms(){
   }
 }
 //_____________________________________________________________________________
-void St_emc_Maker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: St_emc_Maker.cxx,v 1.8 1999/07/02 03:01:56 pavlinov Exp $\n");
-  printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
-}
 //_____________________________________________________________________________

@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.h,v 1.11 1999/03/17 19:23:51 sakrejda Exp $
+// $Id: St_tcl_Maker.h,v 1.12 1999/07/15 13:58:24 perev Exp $
 // $Log: St_tcl_Maker.h,v $
+// Revision 1.12  1999/07/15 13:58:24  perev
+// cleanup
+//
 // Revision 1.11  1999/03/17 19:23:51  sakrejda
 // unpacking of raw data into adcxyz table with an on/off switch added
 //
@@ -179,8 +182,10 @@ protected:
 
    virtual Int_t  Init();
    virtual Int_t  Make();
-   virtual void   PrintInfo();
    virtual void   MakeHistograms();// Histograms for tpc clustering
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.12 1999/07/15 13:58:24 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
    ClassDef(St_tcl_Maker, 1)       //StAF chain virtual base class for Makers
 };
 

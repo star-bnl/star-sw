@@ -52,8 +52,10 @@ public:
   virtual void Clear(Option_t *option="");
   virtual Int_t Init();
   virtual Int_t  Make();
-  virtual void   PrintInfo();
   virtual Int_t  Finish();
+
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StAngleCorrMaker.h,v 1.5 1999/07/15 13:56:43 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StAngleCorrMaker, 1)
 };

@@ -1,5 +1,8 @@
-// $Id: StSmdstMaker.h,v 1.1 1999/04/14 15:10:36 genevb Exp $
+// $Id: StSmdstMaker.h,v 1.2 1999/07/15 13:57:25 perev Exp $
 // $Log: StSmdstMaker.h,v $
+// Revision 1.2  1999/07/15 13:57:25  perev
+// cleanup
+//
 // Revision 1.1  1999/04/14 15:10:36  genevb
 // Add StSmdstMaker source files
 //
@@ -76,7 +79,9 @@ class StSmdstMaker : public StMaker {
    virtual Int_t  Finish();            // Finalize analysis
    virtual Int_t  Init();              // Initialize analysis
    virtual Int_t  Make();              // Run analysis
-   virtual void   PrintInfo();         // Print class information
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StSmdstMaker.h,v 1.2 1999/07/15 13:57:25 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
    ClassDef(StSmdstMaker, 1)   //StAF chain virtual base class for Makers
 };
 

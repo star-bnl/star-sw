@@ -1,5 +1,8 @@
-// $Id: St_tptsts_Maker.cxx,v 1.1.1.1 1999/05/10 13:24:15 love Exp $
+// $Id: St_tptsts_Maker.cxx,v 1.2 1999/07/15 13:58:30 perev Exp $
 // $Log: St_tptsts_Maker.cxx,v $
+// Revision 1.2  1999/07/15 13:58:30  perev
+// cleanup
+//
 // Revision 1.1.1.1  1999/05/10 13:24:15  love
 // Straight track Maker
 //
@@ -161,10 +164,4 @@ Int_t St_tptsts_Maker::Make(){
    }  //end of if(m_mksts)
 }  // end of MakeHistograms member.
 //_____________________________________________________________________________
-void St_tptsts_Maker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: St_tptsts_Maker.cxx,v 1.1.1.1 1999/05/10 13:24:15 love Exp $\n");
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}
 

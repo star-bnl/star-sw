@@ -1,5 +1,8 @@
-// $Id: StSmdstMaker.cxx,v 1.10 1999/07/08 23:03:58 genevb Exp $
+// $Id: StSmdstMaker.cxx,v 1.11 1999/07/15 13:57:24 perev Exp $
 // $Log: StSmdstMaker.cxx,v $
+// Revision 1.11  1999/07/15 13:57:24  perev
+// cleanup
+//
 // Revision 1.10  1999/07/08 23:03:58  genevb
 // Now using StMessMgr, a couple small changes
 //
@@ -502,14 +505,3 @@ Int_t StSmdstMaker::Finish() {
   return StMaker::Finish();
 }
 //_____________________________________________________________________________
-void StSmdstMaker::PrintInfo() {
-//
-// PrintInfo() prints information about the class to standard output.
-//
-  printf("**************************************************************\n");
-  printf("* $Id: StSmdstMaker.cxx,v 1.10 1999/07/08 23:03:58 genevb Exp $\n");
-//  printf("* %s    *\n",m_VersionCVS);
-  if (draw_histos) printf("* Strangeness Histograms are active\n");
-  printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
-}

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.cxx,v 1.9 1999/06/27 22:45:31 fisyak Exp $
+ * $Id: StStrangeTagsMaker.cxx,v 1.10 1999/07/15 13:57:28 perev Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.cxx,v $
+ * Revision 1.10  1999/07/15 13:57:28  perev
+ * cleanup
+ *
  * Revision 1.9  1999/06/27 22:45:31  fisyak
  * Merge StRootEvent and StEvent
  *
@@ -83,11 +86,6 @@ Int_t StStrangeTagsMaker::Make()
     return kStOK;
 }
 
-void StStrangeTagsMaker::PrintInfo()
-{
-    cout << "$Id: StStrangeTagsMaker.cxx,v 1.9 1999/06/27 22:45:31 fisyak Exp $" << endl;
-    if (Debug()) StMaker::PrintInfo();
-}
 
 StrangeTag_st* StStrangeTagsMaker::tag()
 {

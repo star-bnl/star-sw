@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.h,v 1.2 1999/03/14 00:25:40 perev Exp $
+// $Id: St_trg_Maker.h,v 1.3 1999/07/15 13:58:32 perev Exp $
 // $Log: St_trg_Maker.h,v $
+// Revision 1.3  1999/07/15 13:58:32  perev
+// cleanup
+//
 // Revision 1.2  1999/03/14 00:25:40  perev
 // New makers
 //
@@ -39,7 +42,7 @@
 class St_trg_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_trg_Maker.h,v 1.2 1999/03/14 00:25:40 perev Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_trg_Maker.h,v 1.3 1999/07/15 13:58:32 perev Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
  
@@ -49,8 +52,10 @@ class St_trg_Maker : public StMaker {
    virtual       ~St_trg_Maker();
    virtual Int_t Init();
    virtual Int_t  Make();
-   virtual void   PrintInfo();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.3 1999/07/15 13:58:32 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
    ClassDef(St_trg_Maker, 1)   //StAF chain virtual base class for Makers
 };
 

@@ -17,7 +17,7 @@ class St_tcl_sector_index;
 
 class StMinidaqMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StMinidaqMaker.h,v 1.8 1999/06/18 21:35:06 perev Exp $";
+// static Char_t  m_VersionCVS = "$Id: StMinidaqMaker.h,v 1.9 1999/07/15 13:57:15 perev Exp $";
 // St_stk_stkpar *m_stk_stkpar;  	//! pointer to stk parameters
    Int_t m_init;			//! init counter
    St_type_structtbl *m_tpc_gain;   	//! pointer to the gain table
@@ -37,9 +37,11 @@ protected:
    virtual Int_t Init();
    virtual Int_t  Finish();
    virtual Int_t  Make();
-   virtual void   PrintInfo();
    virtual void   Set_first_sector(Int_t m=1){m_first_sector = m;} // *MENU*
    virtual void   Set_last_sector(Int_t m=24){m_last_sector = m;}  // *MENU*
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StMinidaqMaker.h,v 1.9 1999/07/15 13:57:15 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
    ClassDef(StMinidaqMaker, 1)   	// StAF chain virtual base class for Makers
 };
 

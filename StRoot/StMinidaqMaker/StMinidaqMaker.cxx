@@ -1,5 +1,8 @@
-// $Id: StMinidaqMaker.cxx,v 1.15 1999/06/18 21:35:06 perev Exp $
+// $Id: StMinidaqMaker.cxx,v 1.16 1999/07/15 13:57:14 perev Exp $
 // $Log: StMinidaqMaker.cxx,v $
+// Revision 1.16  1999/07/15 13:57:14  perev
+// cleanup
+//
 // Revision 1.15  1999/06/18 21:35:06  perev
 // Fix BEGIN_RUN. Add Init in Make
 //
@@ -429,13 +432,6 @@ void StMinidaqMaker::TransferData(){
 }
 
 //_____________________________________________________________________________
-void StMinidaqMaker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: StMinidaqMaker.cxx,v 1.15 1999/06/18 21:35:06 perev Exp $\n");
-  //  printf("* %s    *\n",m_VersionCVS);
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}
 
 //_____________________________________________________________________________
 Int_t StMinidaqMaker::Finish()

@@ -2,8 +2,11 @@
 //                                                                      //
 // StXiMaker class                                                    //
 //                                                                      //
-// $Id: StXiMaker.cxx,v 1.5 1999/07/12 23:04:17 fisyak Exp $
+// $Id: StXiMaker.cxx,v 1.6 1999/07/15 13:57:54 perev Exp $
 // $Log: StXiMaker.cxx,v $
+// Revision 1.6  1999/07/15 13:57:54  perev
+// cleanup
+//
 // Revision 1.5  1999/07/12 23:04:17  fisyak
 // Remove glob2
 //
@@ -137,12 +140,4 @@ Int_t StXiMaker::Make(){
 }
 
 //_____________________________________________________________________________
-void StXiMaker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: StXiMaker.cxx,v 1.5 1999/07/12 23:04:17 fisyak Exp $\n");
-  //  printf("* %s    *\n",m_VersionCVS);
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-
-}
 

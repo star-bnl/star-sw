@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.cxx,v 1.12 1999/03/11 03:55:06 perev Exp $
+// $Id: St_ctf_Maker.cxx,v 1.13 1999/07/15 13:57:48 perev Exp $
 // $Log: St_ctf_Maker.cxx,v $
+// Revision 1.13  1999/07/15 13:57:48  perev
+// cleanup
+//
 // Revision 1.12  1999/03/11 03:55:06  perev
 // new schema
 //
@@ -206,11 +209,4 @@ Int_t St_ctf_Maker::Make(){
   
 }
 //_____________________________________________________________________________
-void St_ctf_Maker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: St_ctf_Maker.cxx,v 1.12 1999/03/11 03:55:06 perev Exp $\n");
-//  printf("* %s    *\n",m_VersionCVS);
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}
 

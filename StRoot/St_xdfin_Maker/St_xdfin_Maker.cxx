@@ -115,11 +115,13 @@ Int_t St_xdfin_Maker::Make(){
 }
 //_____________________________________________________________________________
 //_____________________________________________________________________________
-void St_xdfin_Maker::Skip(Int_t Nskip){
+Int_t St_xdfin_Maker::Skip(Int_t Nskip){
   St_DataSet *set;
   for (Int_t i =1; i<= Nskip; i++){
     if (GetDebug()) printf("St_xdfin_Maker skip record %i\n",i); 
     set = fXdfin.ReadEvent();
+    if (!set) return kStEOF;
     SafeDelete (set);
   }
+  return 0;
 }

@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.cxx,v 1.8 1999/05/21 21:15:59 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.9 1999/07/15 13:58:14 perev Exp $
 // $Log: St_l3t_Maker.cxx,v $
+// Revision 1.9  1999/07/15 13:58:14  perev
+// cleanup
+//
 // Revision 1.8  1999/05/21 21:15:59  yepes
 // Fixint problem with no Hits
 //
@@ -224,11 +227,4 @@ void St_l3t_Maker::MakeHistograms() {
 }
 
 //_____________________________________________________________________________
-void St_l3t_Maker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: St_l3t_Maker.cxx,v 1.8 1999/05/21 21:15:59 yepes Exp $\n");
-  //  printf("* %s    *\n",m_VersionCVS);
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}
 

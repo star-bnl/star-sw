@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_TLA_Maker.cxx,v 1.11 1999/07/10 22:59:16 fine Exp $
+// $Id: St_TLA_Maker.cxx,v 1.12 1999/07/15 13:57:44 perev Exp $
 // $Log: St_TLA_Maker.cxx,v $
+// Revision 1.12  1999/07/15 13:57:44  perev
+// cleanup
+//
 // Revision 1.11  1999/07/10 22:59:16  fine
 // Some comments have been introduced to show html docs
 //
@@ -67,20 +70,5 @@ Int_t St_TLA_Maker::Make(){
  //  PrintInfo();
 
  return kStOK;
-}
-//_____________________________________________________________________________
-void St_TLA_Maker::PrintInfo(){
- //
- //  PrintInfo - prints some general information about this class
- //
- //  The first comment lines after the opening bracket
- //  ({) of a member function are considered as a member function description 
- //  see: begin_html <A HREF="http://root.cern.ch/root/Documentation.html"> ROOT HTML documentation </A> end_html   //
-
-  printf("**************************************************************\n");
-  printf("* $Id: St_TLA_Maker.cxx,v 1.11 1999/07/10 22:59:16 fine Exp $\n");
-//  printf("* %s    *\n",m_VersionCVS);
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
 }
 

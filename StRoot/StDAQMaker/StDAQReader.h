@@ -51,6 +51,7 @@ public:
   virtual int open(const char *file);
   virtual int close();
   virtual int readEvent();
+  virtual int skipEvent(int nskip);
   virtual int getRunNumber() const;
   virtual int getEventNumber() const;
   virtual unsigned int getUnixTime() const;
@@ -67,7 +68,7 @@ public:
   virtual int TRGDetectorsPresent() const;
   virtual int L3Present()   const;
 
-  virtual void setTPCVersion(const char* vers = "TPCV2P0") {strcpy(fTPCVersion,vers);} 
+  virtual void setTPCVersion(const char* vers = "TPCV2P0"); 
   StTPCReader *getTPCReader(); 
   virtual void printEventInfo();
 

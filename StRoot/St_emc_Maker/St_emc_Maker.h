@@ -1,5 +1,8 @@
-// $Id: St_emc_Maker.h,v 1.6 1999/07/02 03:01:56 pavlinov Exp $
+// $Id: St_emc_Maker.h,v 1.7 1999/07/15 13:58:02 perev Exp $
 // $Log: St_emc_Maker.h,v $
+// Revision 1.7  1999/07/15 13:58:02  perev
+// cleanup
+//
 // Revision 1.6  1999/07/02 03:01:56  pavlinov
 // Little corrections for Linux
 //
@@ -50,8 +53,10 @@ public:
   virtual Int_t Init();
   virtual Int_t Make();
   virtual void Set_mode (Int_t m = 0){m_mode = m;}; // *MENU*  
-  virtual void PrintInfo();
   St_DataSet     *getEmcCalib()   {return mEmcCalib;};
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: St_emc_Maker.h,v 1.7 1999/07/15 13:58:02 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
   ClassDef(St_emc_Maker, 1)   //Macro
 };
 

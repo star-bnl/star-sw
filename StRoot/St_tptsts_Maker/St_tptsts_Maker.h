@@ -1,5 +1,8 @@
-// $Id: St_tptsts_Maker.h,v 1.1.1.1 1999/05/10 13:24:15 love Exp $
+// $Id: St_tptsts_Maker.h,v 1.2 1999/07/15 13:58:30 perev Exp $
 // $Log: St_tptsts_Maker.h,v $
+// Revision 1.2  1999/07/15 13:58:30  perev
+// cleanup
+//
 // Revision 1.1.1.1  1999/05/10 13:24:15  love
 // Straight track Maker
 //
@@ -43,8 +46,10 @@ public:
 
   virtual Int_t  Init();
   virtual Int_t  Make();
-  virtual void   PrintInfo();
   virtual void   Set_stks(Bool_t m=kTRUE){m_mkstks = m;}
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tptsts_Maker.h,v 1.2 1999/07/15 13:58:30 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
 ClassDef(St_tptsts_Maker, 1)   //StAF chain virtual base class for Makers
 };
 

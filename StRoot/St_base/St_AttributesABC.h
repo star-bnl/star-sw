@@ -23,9 +23,19 @@ public:
         St_AttributesABC(){;}
         virtual ~St_AttributesABC(){;}
 
+        virtual Int_t     CreateAttribute() =0;
         virtual Int_t     GetAttributeI(const Char_t *attribName) const =0;
         virtual Float_t   GetAttributeF(const Char_t *attribName) const =0;
         virtual Double_t  GetAttributeD(const Char_t *attribName) const =0;
+
+        virtual Int_t     GetAttributeByName(Int_t    &attrib,const Char_t *attribName) const =0;
+        virtual Float_t   GetAttributeByName(Float_t  &attrib,const Char_t *attribName) const =0;
+        virtual Double_t  GetAttributeByName(Double_t &attrib,const Char_t *attribName) const =0;
+
+        virtual Int_t     GetAttributeByIndex(Int_t    &attrib,Int_t *attribIndex) const =0;
+        virtual Float_t   GetAttributeByIndex(Float_t  &attrib,Int_t *attribIndex) const =0;
+        virtual Double_t  GetAttributeByIndex(Double_t &attrib,Int_t *attribIndex) const =0;
+
         virtual Color_t   GetColorAttribute() const=0;
         virtual Width_t   GetSizeAttribute()  const=0;
         virtual Style_t   GetStyleAttribute() const=0;
@@ -38,8 +48,7 @@ public:
         virtual Int_t     GetNumberOfAttributes() const  =0;
         virtual Int_t     SetNumberOfAttributes(Int_t n) =0;
 
-        ClassDef(St_AttributesABC,0)  //A 3-D Points
-
+        ClassDef(St_AttributesABC,0)
 };
 
 #endif

@@ -14,7 +14,7 @@
 class StFtpcV0Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcV0Maker.h,v 1.2 1999/04/13 12:43:04 mheffner Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcV0Maker.h,v 1.3 1999/07/15 13:57:09 perev Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
  
@@ -30,8 +30,10 @@ class StFtpcV0Maker : public StMaker {
    virtual       ~StFtpcV0Maker();
    virtual Int_t Init();
    virtual Int_t  Make();
-   virtual void   PrintInfo();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcV0Maker.h,v 1.3 1999/07/15 13:57:09 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
    ClassDef(StFtpcV0Maker, 1)   //StAF chain virtual base class for Makers
 };
 

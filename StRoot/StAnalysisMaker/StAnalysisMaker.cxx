@@ -1,5 +1,8 @@
-// $Id: StAnalysisMaker.cxx,v 1.8 1999/06/25 19:20:40 fisyak Exp $
+// $Id: StAnalysisMaker.cxx,v 1.9 1999/07/15 13:56:40 perev Exp $
 // $Log: StAnalysisMaker.cxx,v $
+// Revision 1.9  1999/07/15 13:56:40  perev
+// cleanup
+//
 // Revision 1.8  1999/06/25 19:20:40  fisyak
 // Merge StRootEvent and StEvent
 //
@@ -49,7 +52,7 @@
 #include "StRun.h"
 #include "StEvent.h"
 
-static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.8 1999/06/25 19:20:40 fisyak Exp $";
+static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.9 1999/07/15 13:56:40 perev Exp $";
 #include "StMessMgr.h"
 void summarizeEvent(StEvent& event);
 //  specific analysis tasks.
@@ -87,12 +90,6 @@ Int_t StAnalysisMaker::Init() {
 Int_t
 StAnalysisMaker::Init()
 {
-void StAnalysisMaker::PrintInfo() {
-  printf("**************************************************************\n");
-  printf("* $Id: StAnalysisMaker.cxx,v 1.8 1999/06/25 19:20:40 fisyak Exp $\n");
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}
 
 void StAnalysisMaker::Clear(Option_t *opt) {
   delete theTag; theTag = 0;

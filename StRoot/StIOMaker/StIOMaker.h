@@ -60,10 +60,8 @@ StIOInterFace *Load();
 
 Int_t  fCase    ;		//! case 1=root,2=xdf,3=mdc2,4=daq
 
-
-
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIOMaker.h,v 1.2 1999/07/13 02:19:36 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIOMaker.h,v 1.3 1999/07/15 13:57:12 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StIOMaker, 1)   //StAR chain virtual base class for Makers
 };
