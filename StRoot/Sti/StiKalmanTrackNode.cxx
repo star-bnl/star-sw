@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.29 2003/08/02 08:23:10 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.30 2003/08/13 21:04:21 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.30  2003/08/13 21:04:21  pruneau
+ * transfered relevant tracking pars to detector builders
+ *
  * Revision 2.29  2003/08/02 08:23:10  pruneau
  * best performance so far
  *
@@ -82,6 +85,7 @@ using namespace std;
 #include "StiCylindricalShape.h"
 #include "StiKalmanTrackNode.h"
 #include "StiElossCalculator.h"
+#include "StiTrackingParameters.h"
 #include "StiKalmanTrackFinderParameters.h"
 #include "StiHitErrorCalculator.h"
 #include "Sti/StiElossCalculator.h"
@@ -1089,48 +1093,40 @@ ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
 
 double StiKalmanTrackNode::getWindowY()
 {	  
-  const StiHitErrorCalculator * calc = getDetector()->getHitErrorCalculator();
-  if (!calc)
-    {
-      cout << "SKTN::getWindowY() -E- Detector:"<<getDetector()->getName()<<" has no calculator"<<endl;
-      throw runtime_error("SKTN::getWindowY() -E- calc==0");
-    }
+  const StiDetector * detector = getDetector();
+  const StiTrackingParameters * parameters = detector->getTrackingParameters();
+  double searchWindowScale = parameters->getSearchWindowScale();
+  double minSearchWindow   = parameters->getMinSearchWindow();
+  double maxSearchWindow   = parameters->getMaxSearchWindow();
+
+  const StiHitErrorCalculator * calc = detector->getHitErrorCalculator();
+  if (!calc)throw runtime_error("SKTN::getWindowY() -E- calc==0");
   calc->calculateError(this);
-  double window = pars->searchWindowScale*sqrt(_c00+eyy);
-  /*  double sqrtC00 = sqrt(_c00);
-  double sqrtEyy = sqrt(eyy);
-  double eta = 180*getDipAngle()/3.1415;
-  if (fabs(eta)<10.) cout << "getWindowY() _refX: "<< _refX
-			  <<" eta:"<< eta
-			  << " sqrt(_c00):"<<sqrtC00
-			  <<" ey:"<<sqrtEyy
-			  << " window:"<<window;*/
-  if (window<pars->minSearchWindow)
-    window = pars->minSearchWindow;
-  else if (window>pars->maxSearchWindow)
-    window = pars->maxSearchWindow;
-  //if (fabs(eta)<10.)cout <<" win corr:"<<window<<endl;
+  double window = searchWindowScale*sqrt(_c00+eyy);
+  if (window<minSearchWindow)
+    window = minSearchWindow;
+  else if (window>maxSearchWindow)
+    window = maxSearchWindow;
   return window;
 }
 
 //_____________________________________________________________________________
-double StiKalmanTrackNode::getWindowZ() const
+double StiKalmanTrackNode::getWindowZ()
 {	 
-  double window = pars->searchWindowScale*sqrt(_c11+ezz);  
-  /*
-  double sqrtC11 = sqrt(_c11);
-  double sqrtEzz = sqrt(ezz);
-  double eta = 180*getDipAngle()/3.1415;
-  if (fabs(eta)<10.) cout << "getWindowZ() _refX: "<< _refX
-			  <<" eta:"<< eta
-			  << " sqrt(_c11):"<<sqrtC11
-			  <<" ez:"<<sqrtEzz
-			  <<" window:"<<window;*/
-  if (window<pars->minSearchWindow)
-    window = pars->minSearchWindow;
-  else if (window>pars->maxSearchWindow)
-    window = pars->maxSearchWindow;
-  //if (fabs(eta)<10.)cout <<" win corr:"<<window<<endl;
+  const StiDetector * detector = getDetector();
+  const StiTrackingParameters * parameters = detector->getTrackingParameters();
+  double searchWindowScale = parameters->getSearchWindowScale();
+  double minSearchWindow   = parameters->getMinSearchWindow();
+  double maxSearchWindow   = parameters->getMaxSearchWindow();
+
+  const StiHitErrorCalculator * calc = detector->getHitErrorCalculator();
+  if (!calc)throw runtime_error("SKTN::getWindowY() -E- calc==0");
+  calc->calculateError(this);
+  double window = searchWindowScale*sqrt(_c11+ezz); 
+  if (window<minSearchWindow)
+    window = minSearchWindow;
+  else if (window>maxSearchWindow)
+    window = maxSearchWindow;
   return window;
 }
 
