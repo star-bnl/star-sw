@@ -2,7 +2,7 @@
 
 /*****************************************************************************
  *
- * $Id: EEmcSmdGeom.cxx,v 1.3 2004/02/06 22:33:08 jwebb Exp $
+ * $Id: EEmcSmdGeom.cxx,v 1.4 2004/06/03 23:01:06 jwebb Exp $
  *
  * Author: Wei-Ming Zhang
  * 
@@ -27,6 +27,9 @@
  *****************************************************************************
  *
  * $Log: EEmcSmdGeom.cxx,v $
+ * Revision 1.4  2004/06/03 23:01:06  jwebb
+ * Fixed memory leak reported by Bob.  Fixed another memory leak.
+ *
  * Revision 1.3  2004/02/06 22:33:08  jwebb
  * Moved statement to fix warning.
  *
@@ -187,6 +190,7 @@ void EEmcSmdGeom::buildSmdGeom(){
 	    stripStructId.UVId = iUV+1;
 	    stripStructId.stripId = iStrip + 1;
 	    stripStructId.planeId = iPlane + 1;
+
 	    StructEEmcStrip*    stripPtr = new StructEEmcStrip;
 	    stripPtr->stripStructId = stripStructId; 
 
@@ -376,9 +380,10 @@ StructEEmcStrip* EEmcSmdGeom::getStripPtr(const Int_t iStrip,
 
 // get DCA strip pointer from a point  
 StructEEmcStrip* EEmcSmdGeom::getDcaStripPtr(const Int_t iPlane, 
-               const Int_t iSec, const TVector3& point, Float_t* dca) {
-    StructEEmcStrip* stripPtr;
-    stripPtr = new StructEEmcStrip;
+               const Int_t iSec, const TVector3& point, Float_t* dca) 
+{
+  //    StructEEmcStrip* stripPtr;
+  //    stripPtr = new StructEEmcStrip;
     int iStrip = -1;
     //$$$    int iUV;
     float x1,y1,x2,y2,mu,d;
@@ -413,13 +418,14 @@ StructEEmcStrip* EEmcSmdGeom::getDcaStripPtr(const Int_t iPlane,
       }
     }
     if(iStrip >=0) {
-      stripPtr = getStripPtr(iStrip,iUV,iSec);
-      return stripPtr;
+      //stripPtr = getStripPtr(iStrip,iUV,iSec);
+      //return stripPtr;
+      return getStripPtr(iStrip,iUV,iSec);
     }
     else {
-      *stripPtr = initStrip();
-      std::cout << "NO dca strip found in plane (sector empty or not in)" 
-                                                                 << std::endl;
+      StructEEmcStrip *stripPtr = new StructEEmcStrip;
+      (*stripPtr) = initStrip();
+      std::cout << "NO dca strip found in plane (sector empty or not in)"                                                                  << std::endl;
       return stripPtr;
     }
 }
@@ -428,8 +434,7 @@ StructEEmcStrip* EEmcSmdGeom::getDcaStripPtr(const Int_t iPlane,
 StructEEmcStrip* EEmcSmdGeom::getDcaStripPtr(const Int_t iPlane, 
 		         const TVector3& point, Float_t* dca) {
     StructEEmcStrip* stripPtr;
-    stripPtr = new StructEEmcStrip;
-
+    //$$$  stripPtr = new StructEEmcStrip; //-- Not needed, JCW 03/06/04
     int iSec = getEEmcISec(iPlane, point);
     stripPtr = getDcaStripPtr(iPlane, iSec, point, dca); 
     return stripPtr;
