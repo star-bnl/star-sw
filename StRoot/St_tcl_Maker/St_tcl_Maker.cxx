@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.35 1999/03/29 23:11:41 snelling Exp $
+// $Id: St_tcl_Maker.cxx,v 1.36 1999/04/07 23:31:49 snelling Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.36  1999/04/07 23:31:49  snelling
+// calculate size for adcxyz table and create it with that size
+//
 // Revision 1.35  1999/03/29 23:11:41  snelling
 // auxiliary hit table eliminated
 //
@@ -117,6 +120,7 @@
 #include <stdlib.h>
 #include "St_tcl_Maker.h"
 #include "StChain.h"
+#include "St_DataSet.h"
 #include "St_DataSetIter.h"
 #include "St_XDFFile.h"
 #include "tpc/St_tpg_main_Module.h"
@@ -484,24 +488,66 @@ Int_t St_tcl_Maker::Make(){
 
   St_DataSetIter local(m_DataSet);
 
+  if (Debug()) printf("Start of TCL Maker");
+
   St_tcl_tphit     *tphit     = new St_tcl_tphit("tphit",max_hit);         local.Add(tphit);
   St_tcl_tpcluster *tpcluster = new St_tcl_tpcluster("tpcluster",max_hit); local.Add(tpcluster);
   St_tcc_morphology *morph    = 0;
   if(m_tclMorphOn) {
-                        morph = new St_tcc_morphology("morph",max_hit); 	   local.Add(morph);
+                        morph = new St_tcc_morphology("morph",max_hit);    local.Add(morph);
   }
   St_tcl_tp_seq    *tpseq     = new St_tcl_tp_seq("tpseq",5*max_hit);      local.Add(tpseq);
   St_DataSet       *sector;
   St_DataSet       *raw_data_tpc = GetInputDS("tpc_raw");
   Int_t sector_tot = 0;
-
-  if (raw_data_tpc){// Row data exits -> make clustering
+  
+  if (raw_data_tpc) {// Row data exits -> make clustering
     St_DataSetIter next(raw_data_tpc);
     St_raw_sec_m  *raw_sec_m = (St_raw_sec_m *) next("raw_sec_m");
     //Create the adcxyz table
     St_tfc_adcxyz *adcxyz = (St_tfc_adcxyz *) next("adcxyz");
-    if (!adcxyz && m_tclPixTransOn)  // tfc_adcxyz Table
-      {adcxyz = new St_tfc_adcxyz("adcxyz",900000);  next.Add(adcxyz);}
+
+    if (!adcxyz && m_tclPixTransOn) {  // tfc_adcxyz Table
+      Int_t isumpix = 0;
+      Int_t isumseq = 0;
+
+      while ((sector=next())) {// loop over sectors
+	Char_t *name= 0;
+	if ((name = strstr(sector->GetName(),"Sector"))) {
+	  // look for the sector number
+	  name  = strchr(name,'_')+1; Int_t indx = atoi(name);
+	  if (Debug()) printf(" Sector = %d \n", indx);
+	  St_DataSetIter sect(sector);
+	  St_type_shortdata  *pixel_data_in  = (St_type_shortdata *) sect("pixel_data_in");
+	  St_type_shortdata  *pixel_data_out = (St_type_shortdata *) sect("pixel_data_out");
+	  Int_t ipin = pixel_data_in->GetNRows();
+	  Int_t ipout = pixel_data_out->GetNRows();
+	  isumpix += ipin + ipout;
+	  if (Debug()) cout << "Total number of pixels, " << isumpix << endl;
+	  St_raw_seq  *raw_seq_in  = (St_raw_seq *) sect("raw_seq_in");
+	  St_raw_seq  *raw_seq_out = (St_raw_seq *) sect("raw_seq_out");
+	  Int_t nseqin = raw_seq_in->GetNRows();
+	  Int_t nseqout = raw_seq_out->GetNRows();
+	  raw_seq_st *praw_seq_in = raw_seq_in->GetTable();
+	  raw_seq_st *praw_seq_out = raw_seq_out->GetTable();
+	  for (Int_t l=0; l < nseqin; l++, praw_seq_in++ )
+	    {
+	      isumseq += praw_seq_in->i + 1;
+	    }
+	  for (l=0; l < nseqout; l++, praw_seq_out++ )
+	    {
+	      isumseq += praw_seq_out->i + 1;
+	    }
+	  if (Debug()) cout << "Total number of seq pixels, " << isumseq << endl;
+	}
+      }
+
+      if (Debug()) cout << "making adcxyz table with " << isumpix << " entries" << endl;
+      next.Reset();
+      adcxyz = new St_tfc_adcxyz("adcxyz",isumpix);  next.Add(adcxyz);
+      adcxyz->SetNRows(0);
+    }
+
     while ((sector=next())) {// loop over sectors
       Char_t *name= 0;
       if ((name = strstr(sector->GetName(),"Sector"))) {
@@ -520,22 +566,22 @@ Int_t St_tcl_Maker::Make(){
 	St_raw_seq         *raw_seq_out    = (St_raw_seq *) sect("raw_seq_out");
 	St_type_shortdata  *pixel_data_in  = (St_type_shortdata *) sect("pixel_data_in");
 	St_type_shortdata  *pixel_data_out = (St_type_shortdata *) sect("pixel_data_out");
-
+	
 	if (m_tclPixTransOn){
-	// call the pixel translation
-        if(Debug()) printf("Starting %20s for sector %2d.\n","xyz_newtab",indx);
-
-        Int_t res =  xyz_newtab(m_tpg_detector,
-                            m_tcl_sector_index,raw_sec_m,
-                            raw_row_in,raw_pad_in,raw_seq_in,pixel_data_in,
-                            raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out,
-                            adcxyz,m_tsspar);
-        if (res!=kSTAFCV_OK) Warning("Make","xyz_newtab == %d",res);
+	  // call the pixel translation
+	  if(Debug()) printf("Starting %20s for sector %2d.\n","xyz_newtab",indx);
+	  
+	  Int_t res =  xyz_newtab(m_tpg_detector,
+				  m_tcl_sector_index,raw_sec_m,
+				  raw_row_in,raw_pad_in,raw_seq_in,pixel_data_in,
+				  raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out,
+				  adcxyz,m_tsspar);
+	  if (res!=kSTAFCV_OK) Warning("Make","xyz_newtab == %d",res);
 	}
-
-// 			TCL
+	
+	// 			TCL
         if(Debug()) printf("Starting %20s for sector %2d.\n","tcl",indx);
-
+	
 	Int_t tcl_res = tcl(m_tpg_pad_plane, m_tcl_sector_index, raw_sec_m,
                             raw_row_in, raw_pad_in, raw_seq_in, pixel_data_in,
                             raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out,
@@ -627,7 +673,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.35 1999/03/29 23:11:41 snelling Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.36 1999/04/07 23:31:49 snelling Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
