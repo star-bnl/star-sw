@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.47 1999/02/28 20:21:43 fine Exp $ 
+// $Id: St_Table.cxx,v 1.48 1999/03/04 01:26:03 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.48  1999/03/04 01:26:03  fine
+// minor change in the comments
+//
 // Revision 1.47  1999/02/28 20:21:43  fine
 // operator = reallocates the target table to fit used rows only, not allocated as before
 //
@@ -300,7 +303,7 @@ St_Table::St_Table(const St_Table &table)
 St_Table &St_Table::operator=(const St_Table &rhs)
 {
    // St_Table assingment operator.
-   // This operator REALLOCATE this table to fit the number of 
+   // This operator REALLOCATEs this table to fit the number of 
    // the USED rows of the source table if any
 
   if (strcmp(GetType(),rhs.GetType()) == 0) {
