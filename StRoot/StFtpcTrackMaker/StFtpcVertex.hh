@@ -1,5 +1,9 @@
-// $Id: StFtpcVertex.hh,v 1.10 2002/06/04 13:43:54 oldi Exp $
+// $Id: StFtpcVertex.hh,v 1.11 2002/11/06 13:48:06 oldi Exp $
 // $Log: StFtpcVertex.hh,v $
+// Revision 1.11  2002/11/06 13:48:06  oldi
+// IFlag and Id added as data members.
+// New functionality introduced (to clean up StFtpcTrackMaker.cxx).
+//
 // Revision 1.10  2002/06/04 13:43:54  oldi
 // Minor change: 'west' -> 'hemisphere' (just a naming convention)
 //
@@ -67,6 +71,7 @@
 #ifndef STAR_StFtpcVertex
 #define STAR_StFtpcVertex
 
+#include <iostream.h>
 #include "TObject.h"
 #include "TObjArray.h"
 #include "TH1.h"
@@ -74,7 +79,6 @@
 #include "TVector3.h"
 #include "St_DataSet.h"
 #include "tables/St_dst_vertex_Table.h"
-
 
 class fcl_fppoint_st;
 
@@ -84,6 +88,8 @@ private:
 
   TVector3 mCoord;  // coordinates of vertex
   TVector3 mError;  // errors on coordinates
+     Int_t mIFlag;  // flag to indicate vertex state
+     Int_t mId;     // vertex identification number
 
 public:
 
@@ -93,10 +99,12 @@ public:
   StFtpcVertex(St_DataSet *const geant);                                             // constructor from geant
   StFtpcVertex(dst_vertex_st *vertex);                                               // constructor from dst vertex
   StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemisphere);          // constructor form track array
-  StFtpcVertex(Double_t pos[6]);                                                     // constructor from array of doubles
-  StFtpcVertex(Double_t pos[3], Double_t err[3]);                                    // constructor from arrays of doubles (with errors)
+  StFtpcVertex(Double_t pos[6], Int_t iFlag = 0, Int_t id = 0);                      // constructor from array of doubles
+  StFtpcVertex(Double_t pos[3], Double_t err[3],
+	       Int_t iFlag = 0, Int_t id = 0);                                       // constructor from arrays of doubles (with errors)
   StFtpcVertex(Double_t x,     Double_t y,     Double_t z, 
-	       Double_t x_err, Double_t y_err, Double_t z_err);                      // constructor from doubles with errors
+	       Double_t x_err, Double_t y_err, Double_t z_err,
+	       Int_t iFlag = 0, Int_t id = 0);                                       // constructor from doubles with errors
   StFtpcVertex(const StFtpcVertex &vertex);                                          // Copy constructor
   virtual  ~StFtpcVertex();                                                          // destructor
 
@@ -104,13 +112,16 @@ public:
   Double_t GetX()       const { return mCoord.X(); }
   Double_t GetY()       const { return mCoord.Y(); }
   Double_t GetZ()       const { return mCoord.Z(); }
+  Double_t GetAbsZ()    const { return TMath::Abs(mCoord.Z()); }
   Double_t GetXerr()    const { return mError.X(); }
   Double_t GetYerr()    const { return mError.Y(); }
   Double_t GetZerr()    const { return mError.Z(); }
   Double_t GetRadius2() const { return TMath::Sqrt(GetX()*GetX() + GetY()*GetY()); }
   Double_t GetRadius3() const { return mCoord.Mag(); }
-  TVector3 GetCoord()   const { return mCoord;}
-  TVector3 GetError()   const { return mError;}
+  TVector3 GetCoord()   const { return mCoord; }
+  TVector3 GetError()   const { return mError; }
+     Int_t GetIFlag()   const { return mIFlag; }
+     Int_t GetId()      const { return mId;    }
 
   // setter
   void SetX(Double_t f)    { mCoord.SetX(f); }
@@ -119,11 +130,22 @@ public:
   void SetXerr(Double_t f) { mError.SetX(f); }
   void SetYerr(Double_t f) { mError.SetY(f); }
   void SetZerr(Double_t f) { mError.SetZ(f); }
+  void SetIFlag(Int_t f)   { mIFlag = f;     }
+  void SetId(Int_t f)      { mId = f;        }
   
+    void CheckXerr()  { if (isnan(mError.x())) mError.SetX(0.); }
+    void CheckYerr()  { if (isnan(mError.y())) mError.SetY(0.); }
+    void CheckZerr()  { if (isnan(mError.z())) mError.SetZ(0.); }
+    void CheckErr()   { CheckXerr(); CheckYerr(); CheckZerr();  }
+  Bool_t CoordIsNan() { return (Bool_t)(isnan(GetX()) || isnan(GetY()) || isnan(GetZ())); }
+   Int_t CheckVertex();
+
   StFtpcVertex& operator=(const StFtpcVertex &vertex);    // Assignment operator
 
   ClassDef(StFtpcVertex, 1)   //Ftpc vertex class
 };
+
+ostream& operator<< (ostream& s, const StFtpcVertex &vertex);  // cout
 
 #endif
   
