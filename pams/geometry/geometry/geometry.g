@@ -1,5 +1,18 @@
-* $Id: geometry.g,v 1.74 2003/11/14 22:56:19 potekhin Exp $
+* $Id: geometry.g,v 1.75 2003/11/20 02:58:10 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.75  2003/11/20 02:58:10  potekhin
+* Changed the correction number scheme, such that it
+* allows for a new layout of the SVT to be implemented --
+* the one without the nested SSD. This is achieved by
+* calling the new code, svttgeo3.
+*
+* Changed the SSD config number in y2004 to "2": 10 ladders,
+* the "1" being one ladder installed previosuly and "3"
+* being the complete 20 ladder config.
+*
+* Made smallchanges in the barrel config flag for y2004,
+* improved comments and cleaned out unused variables.
+*
 * Revision 1.74  2003/11/14 22:56:19  potekhin
 * We are about to redo a sim run with y2003x,
 * and it seems that me might put in some of the
@@ -269,8 +282,7 @@
    Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,kgeom,nmod(2),nonf(3),
               ecal_config, ecal_fill,
               Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf,
-              fieldbug,argonbug,
-              CorrNum, PhmdVersion, SisdVersion
+              CorrNum, PhmdVersion, SisdConfig
 
 * CorrNum allows us to control incremental bug fixes in a more
 * organized manner
@@ -307,7 +319,7 @@ replace[;ON#{#;] with [
 
 * No Photon multiplicity detector or Silicin strip by default, hence init the version:
    PhmdVersion = 0
-   SisdVersion = 0
+   SisdConfig = 0
 
 * Set only flags for the main configuration (everthing on, except for tof),
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
@@ -320,9 +332,9 @@ replace[;ON#{#;] with [
 * whereas some newer stuff is considered optional:
    {bbcm,fpdm,phmd,pixl,sisd} = off;
 
-   {mwc,pse}=on          " MultiWire Chambers, pseudopadrows"   
-   {ems,rich,alpipe}=off " TimeOfFlight, EM calorimeter Sector"
-   btofconfig = 1        " ctb only
+   {mwc,pse}=on          " MultiWire Chambers, pseudopadrows              "
+   {ems,rich,alpipe}=off " TimeOfFlight, EM calorimeter Sector            "
+   btofconfig = 1        " ctb only                                       "
    Nsi=7; Wfr=0;  Wdm=0; " SVT+SSD, wafer number and width as in code     "
    svtw=on               " water+water manifold in svt, off for Y2000 only"
    mwx=2                 " for Year_1? mwx=1 limites x in mwc hits (<Y2K) "
@@ -331,10 +343,8 @@ replace[;ON#{#;] with [
    Rp=2                  " real RICH position and spectra inst.of nominal "
    nonf={1,2,2}          " ecal on right side, FPD parts on left side     "
    ecal_config=0         " Ecal: east, west or both                       "
-   ecal_fill=3           " lets say its full wheel by default             "
-   mf=2                  " default field - simetrical, as fitted by Bill  "
-   ArgonBug=0            " in the future tsettting bug to 1 should introduce "
-   Fieldbug=0            " old bugs in these places "
+   ecal_fill=3           " full wheel by default                          "
+   mf=2                  " default field - symmetrical, as fitted by Bill "
    Commands=' ';
 
    do kgeom=1,8
@@ -342,7 +352,8 @@ replace[;ON#{#;] with [
    enddo;
 
 * -------------------- select USERS configuration ------------------------
-* On a non-empty DETP GEOM every keyword makes an action and is erased.
+* On a non-empty DETP GEOM every keyword results in an action and is erased.
+*
 * Actions consist here of selecting the appropriate parameteres and flags.
 * This flags are used in the next section to create subsystems and 
 * to communicate DETP commands with parameters to them.
@@ -353,8 +364,7 @@ If LL>1
 * convert input line into a string of upprecase characters
   CALL UHTOC(PAR(2),4,Commands,LL*4-4);  Call CLTOU(Commands);
 
-  * set geant processes and cuts only if any detp geometry was issued:
-   
+* set geant processes and cuts only if any detp geometry was issued:
   {CUTGAM,CUTELE,CUTNEU,CUTHAD,CUTMUO,BCUTE,BCUTM,DCUTE,DCUTM,PPCUTM} =.001;
   {IDCAY,IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,ILOSS,IDRAY,IMULS} = 1;
   {IRAYL,ISTRA} = 0; 
@@ -445,13 +455,13 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
                   "geometry correction "
-                     CorrNum = 3;
+                     CorrNum = 4;
                   "Photon Multiplicity Detector Version "
                      phmd=on;
                      PhmdVersion = 1;
                   "Silicon Strip Detector Version "
                      sisd=on;
-                     SisdVersion = 1;
+                     SisdConfig = 1;
 * careful! Achtung!
                    pipe=off;   " provisional"
                    pixl=on;    " put the pixel detector in"
@@ -654,7 +664,7 @@ If LL>1
                      btofconfig=5;
                   "calb" 
                      ems=on
-                     nmod={60,0}; shift={75,0}; " 60 sectors plus 3/4 to be done" 
+                     nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
                   "ecal"
                      ecal_config=1   " one ecal patch, west "
                      ecal_fill=3     " all sectors filled "
@@ -665,13 +675,13 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
                   "geometry correction "
-                     CorrNum = 2;
+                     CorrNum = 3;
                   "Photon Multiplicity Detector Version "
                      phmd=on;
                      PhmdVersion = 1;
                   "Silicon Strip Detector Version "
                      sisd=on;
-                     SisdVersion = 1;
+                     SisdConfig = 2;
                 }
 
   on HADR_ON    { all Geant Physics On;                                       }
@@ -771,23 +781,29 @@ If LL>1
    endif
 
 ******************************************************************
-* Take care of the correction level
-* and call the appropriate constructor:
+* Take care of the correction level and call the appropriate constructor:
 
-           if (svtt) then
-              if(CorrNum==0) then
-                 call svttgeo
-              elseif(CorrNum==1) then 
-                 call svttgeo1
-              elseif(CorrNum==2) then
-                 call svttgeo2
-              elseif(CorrNum==3) then
-* switch to a larger inner shield, AND smaller beampipe support
-                 call AgDETP add ('svtg.SupportVer=',2 ,1)
-                 call svttgeo2
-              endif
-           endif
-            
+  if(svtt) then
+    if    (CorrNum==0) then
+       call svttgeo
+    elseif(CorrNum==1) then 
+       call svttgeo1
+    elseif(CorrNum==2) then
+       call svttgeo2
+    elseif(CorrNum==3) then
+       call svttgeo3
+    elseif(CorrNum==4) then ! switch to a larger inner shield, AND smaller beampipe support
+       call AgDETP add ('svtg.SupportVer=',2 ,1)
+       call svttgeo2
+    endif
+  endif
+
+* Set the proper configuration of the Silicon Strip Detector
+  if(sisd) then
+       call AgDETP new ('SISD')
+       call AgDETP add ('ssdp.Config=',SisdConfig ,1)
+       call sisdgeo
+  endif
 
 
 * - MWC or pseudo padrows needed ? DETP TPCE TPCG(1).MWCread=0 TPRS(1).super=1
@@ -805,20 +821,20 @@ If LL>1
      If (.not.pse)  call AgDETP add ('tprs(1).super='  , 1, 1) 
    endif 
 
-   if(CorrNum==3) then
+* Back in July 2003 Yuri has discovered the discrepancy
+* in the gas density. The patch for this is activated here:
+   if(CorrNum>=3) then
      call AgDETP add ('tpcg.gasCorr=',2 ,1)
    endif
 
    if (tpce) Call tpcegeo
 
    if (ftpc) then
-* FTPC proper
-	Call ftpcgeo
-* Take care of the correction level:
-	if(CorrNum==0) then ! Default, buggy version
-           Call supogeo
-	else                ! New, corrected version
-           Call supogeo1
+	Call ftpcgeo     ! and look at the support pieces:
+	if(CorrNum==0) then
+           Call supogeo  ! Default, buggy version
+	else            
+           Call supogeo1 ! New, corrected version
 	endif
    endif
 
