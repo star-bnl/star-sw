@@ -155,7 +155,6 @@ C     iterations exceeded
 C
 CCC      do while (ntry.le.egrpar(1).mxtry.and..not.enough)
          ncir = 0            ! counts number of points used in the fit
-         cf = -1.0
 
 C     load the fitting arrays for the primary vertex
 
@@ -197,7 +196,7 @@ CCC                  wlin(ncir) = 1.0/(0.01*0.01)
 C Load the fitting arrays with the TPC points
 
          if (itpct.ne.0) then
-
+            cf = -1.0
             do i=gtrk(igtrk).ntpc,1,-1
 
 C     load the working arrays for the fitting subroutines
