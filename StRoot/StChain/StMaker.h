@@ -166,6 +166,8 @@ public:
    virtual void       	SetOutputAll(TDataSet *ds,Int_t level=1);
    virtual void   	SetMode(Int_t mode=0)   {m_Mode=mode;}   // *MENU*
    virtual void         SetNotify(const char *about,StMaker *mk);
+   virtual Int_t        GetMode() { return m_Mode;}
+   virtual Int_t        GetDebug(){ return m_DebugLevel;}
 
    virtual void         NotifyEm(const char *about,const void *ptr);
 
@@ -186,7 +188,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.61 2003/07/01 16:59:16 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.62 2003/07/09 19:54:44 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -215,8 +217,11 @@ private:
 #endif
 
 
-// $Id: StMaker.h,v 1.61 2003/07/01 16:59:16 perev Exp $
+// $Id: StMaker.h,v 1.62 2003/07/09 19:54:44 jeromel Exp $
 // $Log: StMaker.h,v $
+// Revision 1.62  2003/07/09 19:54:44  jeromel
+// Added some Get methods
+//
 // Revision 1.61  2003/07/01 16:59:16  perev
 // error codes for Maker added
 //
