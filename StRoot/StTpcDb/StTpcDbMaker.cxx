@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.27 2002/02/05 22:21:08 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.28 2002/02/12 22:50:35 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.28  2002/02/12 22:50:35  hardtke
+ * separate geometrical tpc rotation from field twist
+ *
  * Revision 1.27  2002/02/05 22:21:08  hardtke
  * Move Init code to InitRun
  *
@@ -409,6 +412,10 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
    else if (gFactor<-0.2) {
      gMessMgr->Info() << "StTpcDbMaker::Half Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
      SetFlavor("HalfMagFNegative","tpcGlobalPosition");
+   }
+   else if (gFactor<0.2) {
+     gMessMgr->Info() << "StTpcDbMaker::Zero Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
+     SetFlavor("ZeroMagF","tpcGlobalPosition");
    }
    else if (gFactor<0.8) {
      gMessMgr->Info() << "StTpcDbMaker::Half Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;

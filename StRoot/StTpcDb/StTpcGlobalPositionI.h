@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcGlobalPositionI.h,v 1.1 2001/05/21 23:26:08 hardtke Exp $
+ * $Id: StTpcGlobalPositionI.h,v 1.2 2002/02/12 22:50:36 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -29,6 +29,10 @@ public:
   virtual double TpcRotationAroundGlobalAxisX()  const = 0;
   virtual double TpcRotationAroundGlobalAxisY()  const = 0;
   virtual double TpcRotationAroundGlobalAxisZ()  const = 0;
+
+  virtual double TpcEFieldRotationX()   const = 0;  // These are used
+  virtual double TpcEFieldRotationY()   const = 0;  // for ExB twist correction
+  virtual double TpcEFieldRotationZ()   const = 0;
 
 
 
