@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   26/03/99  (E-mail: fine@bnl.gov)
-// $Id: SubDetectorView.C,v 1.2 1999/04/08 21:12:24 fine Exp $
+// $Id: SubDetectorView.C,v 1.3 1999/05/20 19:57:08 fine Exp $
 // $Log: SubDetectorView.C,v $
+// Revision 1.3  1999/05/20 19:57:08  fine
+// some clean up and protections
+//
 // Revision 1.2  1999/04/08 21:12:24  fine
 // SubDetectorView macro has been introduced
 //
@@ -39,29 +42,43 @@
   listOfNode->Remove(hall);
   listOfNode->Remove(hall);
   St_DataSetIter volume(hall);
-
+  St_Node *nextNode = 0;
   // Mark the pieces of the whole detector to create sub-structure
  
   volume("HALL")->Mark();
   volume("HALL")->Mark()->SetVisibility(1);;
   volume.Cd("HALL/CAVE");
 
-   volume("SVTT/SCON")->Mark();
-  ((St_Node*)volume("SVTT/SCON"))->SetVisibility(1);
+  nextNode = (St_Node *)volume("SVTT/SCON");
+  if (nextNode) {
+     nextNode->Mark();
+     nextNode->SetVisibility(1);
+   }
 
-   volume("SVTT/SCON/STAC")->Mark();
-  ((St_Node*)volume("SVTT/SCON/STAC"))->SetVisibility(1);
+   nextNode = (St_Node *)volume("SVTT/SCON/STAC");
+   if (nextNode) {
+     nextNode->Mark();
+     nextNode->SetVisibility(1);
+   }
 
 
-   volume("SVTT/SCON/SHLA/SHMA/SHWA")->Mark();
-  ((St_Node*)volume("SVTT/SCON/SHLA/SHMA/SHWA"))->SetVisibility(1);
+   nextNode = (St_Node *)volume("SVTT/SCON/SHLA/SHMA/SHWA");
+   if (nextNode) {
+     nextNode->Mark();
+     nextNode->SetVisibility(1);
+   }
 
-   volume("SVTT/SCON/SHLB/SHMB/SHWA")->Mark();
-  ((St_Node*)volume("SVTT/SCON/SHLA/SHMA/SHWA"))->SetVisibility(1);
+   nextNode = (St_Node *)volume("SVTT/SCON/SHLB/SHMB/SHWA");
+   if (nextNode) {
+     nextNode->Mark();
+     nextNode->SetVisibility(1);
+   }
 
-   volume("MAGP/COIL/MCSE")->Mark();
-  ((St_Node*)volume("MAGP/COIL/MCSE"))->SetVisibility(1);
-
+   nextNode = (St_Node *)volume("MAGP/COIL/MCSE");
+   if (nextNode) {
+     nextNode->Mark();
+     nextNode->SetVisibility(1);
+   }
   // Mark the whole structure excluding one node
   
   St_DataSetIter bmtc(volume("BTOF/BTOH/BSEC/BTRA/BXTR/BMTC"));
