@@ -169,7 +169,7 @@ St_DataSet *St_db_Maker::UpdateDB(St_DataSet* ds)
 //_____________________________________________________________________________
 EDataSetPass St_db_Maker::UpdateDB(St_DataSet* ds,void *user )
 {
-  St_DataSet *set,*newdat,*bak,*ps;
+  St_DataSet *set,*newdat,*ps;
   St_ValiSet *val;
   const char *filename;
   TDatime timeMin,timeMax;
@@ -189,30 +189,57 @@ EDataSetPass St_db_Maker::UpdateDB(St_DataSet* ds,void *user )
     if (val->fDat) delete val->fDat; val->fDat=0;
 
 //	Start loop
-  bak = 0;  timeMin.Set(950101,0);
+#if 0
+  left = 0;  timeMin.Set(950101,0);
   TListIter next(list);
   while ((set = (St_DataSet*)next())) {
     filename = set->GetName();
     timeMax = St_db_Maker::Time(filename);
     if (uevent < timeMax.Get()) break;
-    bak = set; timeMin=timeMax;
+    left = set; timeMin=timeMax;
   }   
 
 
   if (!set) timeMax.Set(kMaxTime,0);
   val->fTimeMin=timeMin;
   val->fTimeMax=timeMax;
-  if (!bak) return kContinue;
+  if (!left) return kContinue;
 
-  TString dbfile = bak->GetTitle()+5;
+  TString dbfile = left->GetTitle()+5;
+#endif // 0
+
+  val->fTimeMin.Set(950101,0);
+  val->fTimeMax.Set(kMaxTime,0);
+  UInt_t utmp,ucur,udifleft=(UInt_t)(-1),udifrite=(UInt_t)(-1); 
+  St_DataSet *left=0,*rite=0; 
+  TListIter next(list);
+  while ((set = (St_DataSet*)next())) {
+    filename = set->GetName();
+    ucur = St_db_Maker::Time(filename).Get();
+    if (uevent < ucur) 
+    { utmp = ucur - uevent;
+      if (utmp <= udifrite) { udifrite=utmp; rite=set;}
+    }else{
+      utmp = uevent - ucur;
+      if (utmp <= udifleft) { udifleft=utmp; left=set;}
+    }
+  }// end while
+
+
+  if (left) val->fTimeMin = St_db_Maker::Time(left->GetName());
+  if (rite) val->fTimeMax = St_db_Maker::Time(rite->GetName());
+  if (!left) return kContinue;
+
+  TString dbfile = left->GetTitle()+5;
+
 
   ps = ds->GetParent();
   dbfile += strchr(strstr(ps->Path(),"/.data/")+7,'/');
-  dbfile += "/"; dbfile += bak->GetName();
+  dbfile += "/"; dbfile += left->GetName();
   gSystem->ExpandPathName(dbfile);
   newdat = 0;
   TString command; 
-  switch (mk->Kind(bak->GetName())) {
+  switch (mk->Kind(left->GetName())) {
   
     case 1: // .xdf file
     newdat = St_XDFFile::GetXdFile(dbfile);assert (newdat);
