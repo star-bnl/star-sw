@@ -1,5 +1,8 @@
-// $Id: StEventMaker.cxx,v 1.3 1999/05/10 13:09:46 fisyak Exp $
+// $Id: StEventMaker.cxx,v 1.4 1999/05/10 16:53:12 fisyak Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.4  1999/05/10 16:53:12  fisyak
+// Rename reader
+//
 // Revision 1.3  1999/05/10 13:09:46  fisyak
 // Fix for HP
 //
@@ -80,7 +83,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
-// StEventReaderMaker
+// StEventMaker
 //
 // Description: 
 //
@@ -93,8 +96,11 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-// $Id: StEventMaker.cxx,v 1.3 1999/05/10 13:09:46 fisyak Exp $
+// $Id: StEventMaker.cxx,v 1.4 1999/05/10 16:53:12 fisyak Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.4  1999/05/10 16:53:12  fisyak
+// Rename reader
+//
 // Revision 1.3  1999/05/10 13:09:46  fisyak
 // Fix for HP
 //
@@ -179,7 +185,7 @@
 #include "StV0Vertex.h"
 #include "StXiVertex.h"
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.3 1999/05/10 13:09:46 fisyak Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.4 1999/05/10 16:53:12 fisyak Exp $";
 #include "StEventManager.h"
 StEventManager MakerEventManager;
  * Revision 2.23  2000/05/22 21:53:41  ullrich
@@ -235,13 +241,13 @@ Int_t StEventMaker::Make(){
   theEventManager->ResetDstIter(global);
   status = theEventManager->readRunHeader(dstRunHeader);
   if (status) {
-    cout << "StEventReaderMaker: Run header: ID " << dstRunHeader.run_id << endl;
+    cout << "StEventMaker: Run header: ID " << dstRunHeader.run_id << endl;
     /* run summary not used
        dst_run_summary_st dummy_sum;
        dst_run_summary_st& dstRunSummary = dummy_sum;
        status = theEventManager->readRunSummary(dstRunSummary);
        if (status) {
-       cout << "StEventReaderMaker: Run summary found" << endl;
+       cout << "StEventMaker: Run summary found" << endl;
        // Create transient run header
        currentRun = new StRun(dstRunHeader, dstRunSummary);
        } else {
@@ -261,7 +267,7 @@ Int_t StEventMaker::Make(){
     return kStOK;
   }
   
-  cout << "StEventReaderMaker: Reading Event" << endl;
+  cout << "StEventMaker: Reading Event" << endl;
   theEventManager->readHeader(dstEventHeader);
   status = theEventManager->readTable(dstEventSummary);
   // Create transient event header
@@ -274,11 +280,11 @@ Int_t StEventMaker::Make(){
   
   status = theEventManager->readTable(dstMonitorHard);
   if (status) {
-    cout << "StEventReaderMaker: Found dstMonitorHard" << endl;
+    cout << "StEventMaker: Found dstMonitorHard" << endl;
   }
   status = theEventManager->readTable(dstMonitorSoft);
   if (status) {
-    cout << "StEventReaderMaker: Found dstMonitorSoft" << endl;
+    cout << "StEventMaker: Found dstMonitorSoft" << endl;
   }
   
   // Read and load trigger detector data
@@ -288,7 +294,7 @@ Int_t StEventMaker::Make(){
     theEventManager->ResetDstIter(trg);
     status = theEventManager->readTable(dstTriggerDetectors);
     if (status) {
-      cout << "StEventReaderMaker: Loading triggerDetectors" << endl;
+      cout << "StEventMaker: Loading triggerDetectors" << endl;
       StTriggerDetectorCollection *trgDets =
 	currentEvent->triggerDetectorCollection();
       // Load CTB data
@@ -380,9 +386,9 @@ Int_t StEventMaker::Make(){
     // Second, deal with xi's
     dst_xi_vertex_st* dstXiVertex = theEventManager->returnTable_dst_xi_vertex(nXiVertex);
     if (nXiVertex > nVertex)
-      cout << "StEventReaderMaker: Warning - more Xi's than vertices" << endl;
+      cout << "StEventMaker: Warning - more Xi's than vertices" << endl;
     if (dstXiVertex) {
-      cout << "StEventReaderMaker: " << nXiVertex << " dst_xi_vertex" << endl;
+      cout << "StEventMaker: " << nXiVertex << " dst_xi_vertex" << endl;
       // Add Xi vertices to vertex collection
       if (doLoad) {
 	StVertex* vtx = NULL;
@@ -402,9 +408,9 @@ Int_t StEventMaker::Make(){
     // Third, deal with v0's
     dst_v0_vertex_st* dstV0Vertex = theEventManager->returnTable_dst_v0_vertex(nV0Vertex);
     if (nV0Vertex > nVertex)
-      cout << "StEventReaderMaker: Warning - more V0's than vertices" << endl;
+      cout << "StEventMaker: Warning - more V0's than vertices" << endl;
     if (dstV0Vertex) {
-      cout << "StEventReaderMaker: " << nV0Vertex << " dst_v0_vertex" << endl;
+      cout << "StEventMaker: " << nV0Vertex << " dst_v0_vertex" << endl;
       // Add V0 vertices to vertex collection
       if (doLoad) {
 	StVertex* vtx = NULL;
@@ -431,7 +437,7 @@ Int_t StEventMaker::Make(){
     
     // Last for the vertices, add any un-accounted-for vertices (primary)
     if (dstVertex) {
-      cout << "StEventReaderMaker: " << nVertex << " dst_vertex" << endl;
+      cout << "StEventMaker: " << nVertex << " dst_vertex" << endl;
       // Build vertex collection
       if (doLoad) {
 	StVertex* vtx = NULL;
@@ -451,7 +457,7 @@ Int_t StEventMaker::Make(){
     
     dst_track_st* dstTrack = theEventManager->returnTable_dst_track(nTrack);
     if (dstTrack) {
-      cout << "StEventReaderMaker: " << nTrack << " dst_track" << endl;
+      cout << "StEventMaker: " << nTrack << " dst_track" << endl;
       if (doLoad) {
 	StGlobalTrack* trk = NULL;
 	for (i=0; i<nTrack; i++, dstTrack++) {
@@ -494,7 +500,7 @@ Int_t StEventMaker::Make(){
 	    if ( idStartVertex > 0 && idStartVertex <= vtxPtr.size() ) {
 	      startVertex = vtxPtr[vertexMatchIndex[--idStartVertex]];
 	    } else {
-	      cout << "StEventReaderMaker: WARNING: idStartVertex " << idStartVertex <<
+	      cout << "StEventMaker: WARNING: idStartVertex " << idStartVertex <<
 		" either null or larger than vertex list " << vtxPtr.size() << endl;
 	    }
 	  }
@@ -504,7 +510,7 @@ Int_t StEventMaker::Make(){
 	    if ( idStopVertex > 0 && idStopVertex <= vtxPtr.size() ) {
 	      stopVertex  = vtxPtr[vertexMatchIndex[--idStopVertex]];
 	    } else {
-	      cout << "StEventReaderMaker: WARNING: idStopVertex " << idStopVertex <<
+	      cout << "StEventMaker: WARNING: idStopVertex " << idStopVertex <<
 		" either null or larger than vertex list " << vtxPtr.size() << endl;
 	    }
 	  }
@@ -523,7 +529,7 @@ Int_t StEventMaker::Make(){
     
     dst_track_aux_st* dstTrackAux = theEventManager->returnTable_dst_track_aux(nTrackAux);
     if (dstTrackAux) {
-      cout << "StEventReaderMaker: " << nTrackAux << " dst_track_aux" << endl;
+      cout << "StEventMaker: " << nTrackAux << " dst_track_aux" << endl;
       // Add auxiliary info to tracks
       if (doLoad) {
 	StGlobalTrack* theTrack;
@@ -580,7 +586,7 @@ Int_t StEventMaker::Make(){
 	    theTrack->fitTraits().covariantMatrix()(4,5) = 
 	      dstTrackAux[i].covar_off_diag[9];
 	  } else {
-	    cout << "StEventReaderMaker: ERROR: Track find failed for ID " << itrk << endl;
+	    cout << "StEventMaker: ERROR: Track find failed for ID " << itrk << endl;
 	  }
 	}
       }
@@ -588,7 +594,7 @@ Int_t StEventMaker::Make(){
     
     dst_dedx_st* dstDedx = theEventManager->returnTable_dst_dedx(nDedx);
     if (dstDedx) {
-      cout << "StEventReaderMaker: " << nDedx << " dst_dedx" << endl;
+      cout << "StEventMaker: " << nDedx << " dst_dedx" << endl;
       // Add dedx info to tracks
       if (doLoad) {
 	StDedx* dedx = NULL;
@@ -613,13 +619,13 @@ Int_t StEventMaker::Make(){
 	    } else if (idet == detid_svt) {
 	      theTrack->setSvtDedx(dedx);
 	    } else {
-	      cout << "StEventReaderMaker: ERROR: Dedx: Det ID " << idet << 
+	      cout << "StEventMaker: ERROR: Dedx: Det ID " << idet << 
 		" not recognized" << endl;
 	      delete dedx;
 	      dedx=0;
 	    }
 	  } else {
-	    cout << "StEventReaderMaker: ERROR: Track find failed for ID " << itrk << endl;
+	    cout << "StEventMaker: ERROR: Track find failed for ID " << itrk << endl;
 	  }
 	}
       }
@@ -633,7 +639,7 @@ Int_t StEventMaker::Make(){
     
     dst_tof_trk_st* dstTofTrk = theEventManager->returnTable_dst_tof_trk(nTofTrk);
     if (dstTofTrk) {
-      cout << "StEventReaderMaker: " << nTofTrk << " dst_tof_trk" << endl;
+      cout << "StEventMaker: " << nTofTrk << " dst_tof_trk" << endl;
       if (doLoad) {
       }
     }    
@@ -641,7 +647,7 @@ Int_t StEventMaker::Make(){
     dst_point_st* dstPoint = theEventManager->returnTable_dst_point(nPoint);
     dst_point_st* thePoint = NULL;  
     if (dstPoint) {
-      cout << "StEventReaderMaker: " << nPoint << " dst_point" << endl;
+      cout << "StEventMaker: " << nPoint << " dst_point" << endl;
       if (doLoad) {
 	StTpcHit* tpcHit = NULL;
 	StFtpcHit* ftpcHit = NULL;
@@ -653,7 +659,7 @@ Int_t StEventMaker::Make(){
 	  StTrackCollection* theTrackCollection = currentEvent->trackCollection();
 	  StGlobalTrack* theTrack = (*theTrackCollection)[itrk];
 	  if (! theTrack) {
-	    cout << "StEventReaderMaker: ERROR: Track find failed for ID " << itrk << endl;
+	    cout << "StEventMaker: ERROR: Track find failed for ID " << itrk << endl;
 	  } else {
 	    // Handle point depending on what detector it comes from
 	    idet = thePoint->hw_position%16;
@@ -673,7 +679,7 @@ Int_t StEventMaker::Make(){
 	      theTrack->addFtpcHit(ftpcHit);
 	    }
 	    else {
-	      cout << "StEventReaderMaker: ERROR: Detector ID " << idet << " not known" << endl;
+	      cout << "StEventMaker: ERROR: Detector ID " << idet << " not known" << endl;
 	    }
 	  }
 	}
@@ -692,7 +698,7 @@ void StEventMaker::setEventManager(StEventManager* mgr)
 //_____________________________________________________________________________
 void StEventMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StEventMaker.cxx,v 1.3 1999/05/10 13:09:46 fisyak Exp $\n");
+  printf("* $Id: StEventMaker.cxx,v 1.4 1999/05/10 16:53:12 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
