@@ -43,6 +43,7 @@ public:
   Int_t        Make();
   void            PrintInfo();
   void            SetTagWriter(const StHbtTagWriter* tagWriter);
+  void            SetShowTags(const int i=1);
   StHbtTagWriter* TagWriter() const;
   Int_t        Finish();
   HbtTag_st*  TagPointer() const;           // returns pointer to the tag table
@@ -51,6 +52,7 @@ private:
 
   void         PrintTag(ostream& = cout);  // output Tag info to screen
 
+  int mShowTags;
   St_HbtTag*  mSt_HbtTag; //! the StHbtTag table header
   HbtTag_st*  mHbtTag;    //! the StHbtTag table structure to fill
   StHbtTagWriter* mTagWriter;
@@ -64,5 +66,6 @@ private:
 //inline void StHbtTagMaker::SetTagWriter(const StHbtTagWriter* tagWriter) {mTagWriter = tagWriter;}
 inline StHbtTagWriter* StHbtTagMaker::TagWriter() const {return mTagWriter;}
 inline HbtTag_st* StHbtTagMaker::TagPointer() const { return mHbtTag; }
+inline void StHbtTagMaker::SetShowTags(const int i) { mShowTags=i; }
 
 #endif
