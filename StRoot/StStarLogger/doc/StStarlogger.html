@@ -1,20 +1,20 @@
 <html>
 <title>STAR logger</title>
 <body>
-<pre>
+<b><pre>
 
      ***************************************************************
      ***************************************************************
-     **** STAR logger:  The STAR offline logger-based message manager ****
+     ****                    STAR logger:                       ****  
+     ****     The STAR offline logger-based message manager     ****
      ***************************************************************
      ***************************************************************
+</pre></b>
 STAR logger is a the logger-based implementation of <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr">
 STAR message manager interface</a>
 
-
+<p>
 Table of Contents:
-
-Section I. Basic usage: creating a message
 <ul>
 <li><a href="#logger">Intergration log4j package for STAR framework</a>
 <li><a href="#makers">Logger for STAR Makers</a>
@@ -24,13 +24,17 @@ Section I. Basic usage: creating a message
 <li><a href="#print">"Print statement" transition</a>
 </ul>
 <a name="#logger"></a>
-<h1> Intergration log4j package for STAR framework</h1>
+<h2> Intergration log4j package for STAR framework</h2>
 
 
-  Integration of the log4j packages and STAR offline framework 
+  Integration of the <a href="http://logging.apache.org">log4j</a> packages and STAR offline framework 
   was straightforward due to an already existing OO  
   <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr">design</a> 
-  for processing message streams.  
+  for processing message streams. For the STAR C++ production code  the 
+  <a href="http://logging.apache.org/log4cxx">C++ version</a> of the logger, 
+  so-called <a href="http://logging.apache.org/log4cxx">log4cxx</a> 
+  was chosen.
+  
 <p>
   Most (if not all) components of the STAR production 
   framework send their log messages to the abstract STAR messenger. 
@@ -47,10 +51,11 @@ Section I. Basic usage: creating a message
   STAR production system, enabling the new scheme did not 
   require modifying any existing piece of the STAR code. 
   It was sufficient to dynamically load the new implementation 
-  and provide an external XML configuration file for the logger as needed. 
+  and provide an external XML <a href="#conf">configuration file</a> 
+  for the logger as needed. 
 
 <a name="#makers"></a>
-<h1> Logger for STAR Makers  </h1>
+<h2> Logger for STAR Makers  </h2>
 
   With new implementation each STAR StMaker subclass instantiate 
   its own logger. The logger name is the subclass class name.
@@ -64,7 +69,7 @@ Section I. Basic usage: creating a message
   logger  matches the logger of the current active StMaker instance.
 
 <a name="#macros"></a>
-<h1> New macros </h1>
+<h2> New macros </h2>
 
 The base STAR message manager abstract interface was improved to provide better performance.
 It is recommended now istaed of direct ise of the Messager global pointer apply the CPP macros
@@ -86,42 +91,65 @@ For example, to direct the message to the "error" logger on needs:
 </pre>  </code> </b>
 
 <a name="#use"></a>
-<h1> How to use New macros </h1>
+<h2> How to use the manager </h2>
 
 By default STAR "roto4star" framework works with the old STAR message manager implementation.
 
 <p>
   Ti turn the new one one should load the extra shared library.
   The ROOT macros <code>LoadLogger.C</code> does just that.
-  This means to instantiate the new logger it is enough to call "LoadLogger.C" before invoking your ROTO macro. 
+  This means to instantiate the new logger it is enough to call "LoadLogger.C" before invoking your ROOT macro. 
   <p>
    For example to get BFC.C works with the new logger schema one needs to start the "root4star" session and call TWO macros:
    <b><code>
    <pre>
-     root4star
-     .x LoadLogger.C
-     .x Bfc.C(1, . . . )
+     &gt;root4star
+     root4star[0] .x LoadLogger.C
+     root4star[0] .x Bfc.C(1, . . . )
    </pre>
    </code></b>
  <p>
-    As soon as the new logger is loaded the output files, format and level of 
+   As soon as the new logger is loaded the output files, format and level of 
    the verbosity may be defined by the extrenal Logger configuration file.
-   It recommenend to avoid using any method of the STAR message m,anager describing with 
+   It recommenend to avoid using any method of the STAR message manager describing with 
    <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr"> document</a> and use <a href"#macros">the macros</a>
    mentioned above only. This is to make the ocde free of the run-time and compilation 
-   time parameters this can be defined via the logger configuration file.
+   time parameters this can be defined via the <a href="#conf">logger configuration</a> file.
  <p>
    
    In other words the author of the code should not apply the "Adanced methods" described by   
    <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr"> "Section II"</a> 
    from the use code as soon as this can be done outside of the code at run-time.
  <p>
-   It is enough to define the desirable messages and its level. All other features can be ordered with the configuration 
+   It is enough to define the desirable messages and its level. 
+   All other features can be ordered with the configuration 
    file at run-time without any needs to change and re-compile the code.
  <a name="#conf"></a>
-<h1>How to configure</h1>
+<h2>How to configure</h2>
+"Jakarta log4j" is a community-supported project that includes the log4cxx,
+ log4c, and log4perl packages (thereby supporting multiple computing languages) 
+ 
+ The output media and format and level are confured by providing the set of the different parameters
+ via the external configuration file 
+ (of course we do provide the reasonable default. If one is happy with that no extra file is required).
+ For all STAR StMaker subclass at once or /and for each separate subclass
+ one may define the desirable output by combining 4 different logger components:
+ 
+<ul>
+<li>	<a href="http://logging.apache.org/log4cxx/manual/Introduction.html#LoggersAppendersAndLayouts">loggers</a>
+<li>	<a href="http://logging.apache.org/log4cxx/manual/Introduction.html#AppendersAndLayouts">appenders</a>
+<li>	<a href="http://logging.apache.org/log4cxx/manual/Introduction.html#AppendersAndLayouts">layouts</a>
+<li>	<a href="http://logging.apache.org/log4cxx/manual/classlog4cxx_1_1spi_1_1Filter.html">filters</a>
+</ul>
+
+These four types are necessary to empower the developers with the capabilities 
+to log messages according to message type and level, to control at runtime 
+how these messages are formatted, and lastly to decide where they are reported. 
+
+The C++ version fo teh package provide the readey-to-eat components to choose from:
+See: <a href="http://logging.apache.org/log4cxx/">http://logging.apache.org/log4cxx</a>
 <a name="#print"></a>
-<h1> "Print statement" transition</h1>
+<h2> "Print statement" transition</h2>
 
 </body>
 </html>
