@@ -1,16 +1,16 @@
 /**********************************************************
- * $Id: StRichMaterialsDb.cxx,v 1.1 2000/04/03 19:36:07 horsley Exp $
+ * $Id: StRichMaterialsDb.cxx,v 1.2 2000/05/19 19:06:10 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMaterialsDb.cxx,v $
- *  Revision 1.1  2000/04/03 19:36:07  horsley
- *  initial revision
+ *  Revision 1.2  2000/05/19 19:06:10  horsley
+ *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
  *
- *  
+ *  Revision 1.2  2000/05/19 19:06:10  horsley
+ *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
  *
- **********************************************************/
  *  Revision 1.1  2000/04/03 19:36:07  horsley
  *  initial revision
   **********************************************************/
@@ -29,10 +29,13 @@ StRichMaterialsDb::StRichMaterialsDb() {
   my_fill();
 }
 
-  mLongestWaveLength = 220.0*nanometer;
-  mShortestWaveLength = 169.0*nanometer;
+  mLongestWaveLength  = 220.0*nanometer; // --> inner ring
+  mShortestWaveLength = 169.0*nanometer; // --> outer ring
+  mMeanWaveLength     = 177.4*nanometer; // --> mode frequency  
   mConversion = 5.1;
   
+  mMeanRadiatorDepth = 0.5;  // normalized to unit pathlength in radiator
+    = ((mLongestWavelength/nanometer-mShortestWavelength/nanometer)/(numberOfEntries-1));
 
   
   mMeanRadiatorDepth = 0.5; // normalized to unit pathlength in radiator
@@ -124,6 +127,27 @@ StRichMaterialsDb* StRichMaterialsDb::getDb() {
   return p2Db;
 }
 
+void StRichMaterialsDb::print(ostream& os) const {
+  // os << "**************** StRichMaterialsDb::print() ****************" << endl;
+double StRichMaterialsDb::meanWaveLength() {
+  return mMeanWaveLength;
+
+double StRichMaterialsDb::meanWavelength() {
+  return mMeanWavelength;
+double StRichMaterialsDb::longestWaveLength() {
+  return mLongestWaveLength;
+
+double StRichMaterialsDb::longestWavelength() {
+  return mLongestWavelength;
+double StRichMaterialsDb::shortestWaveLength() {
+  return mShortestWaveLength;
+
+double StRichMaterialsDb::shortestWavelength() {
+  return mShortestWavelength;
+}
+
+double StRichMaterialsDb::meanRadiatorDepth() {
+  return mMeanRadiatorDepth;
        << mOuterWave/nanometer << "nm " << endl; 
 }
 

@@ -1,15 +1,15 @@
 /**********************************************************
- * $Id: StRichArea.cxx,v 1.1 2000/04/03 19:36:07 horsley Exp $
+ * $Id: StRichArea.cxx,v 1.2 2000/05/19 19:06:10 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichArea.cxx,v $
+ *  Revision 1.2  2000/05/19 19:06:10  horsley
+ *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
+ *
  *  Revision 1.1  2000/04/03 19:36:07  horsley
  *  initial revision
- *
- *  
- *
  **********************************************************/
 
 #include "StRichArea.h"
@@ -20,149 +20,165 @@
 #include "SystemOfUnits.h"
 
 #ifndef ST_NO_NAMESPACES
-using std::vector;
 using namespace units;
 #endif
 
 StRichArea::StRichArea(StRichRingPoint* irp, 
-		              StRichRingPoint* orp) {
+		       StRichRingPoint* orp) {
   mInnerRing      = irp;
   mOuterRing      = orp;  
-  mNumberOfSteps  = 1000.0;
+  
+  mNumberOfSteps  = 3600.0;
 
   mPositiveDirection =  1.0;
   mNegativeDirection = -1.0;
-  mSmallAngleStep    = 0.000174532925;  // ---> 0.01 degrees
+  mSmallAngleStep    = 0.0000174532925;  // ---> 0.01 degrees
   
   mSmallDistance  = 0.01*centimeter; 
-  mCorrectForGap  = true;  // ---> here we are concerned with the gap correction
+  mCorrectForGap  = false;  // ---> here we are concerned with the gap correction
 
   myGeometryDb = StRichGeometryDb::getDb();
 
+  mTotalAngleOnPadPlane = 0;
 }
+
 
 StRichArea::~StRichArea() { /* nopt */ }
 
 
-double 
-StRichArea::getTotalArea() {
+double
+StRichArea::calculateArea(double psiCut) {
+  
+  mTotalAngleOnPadPlane = 0.0;
+  mTotalArea      = 0.0;
+  mAreaSegment    = 0.0;
+  mStartAngle     = M_PI;
+  mStopAngle      = getStoppingAngle(psiCut);  
+  // mAngleIncrement = (mStartAngle-mStopAngle)/(mNumberOfSteps/2.0);
+  mAngleIncrement = M_PI/(mNumberOfSteps/2.0);
+  int stopHere = (int) (mStopAngle/mAngleIncrement);
+
+
+  // -----------  pi ---> 0 degs  ---------------------- // 
+  double angle = mStartAngle;
+  if (!getRingPoints(angle,mInXYA,mOutXYA,mPositiveDirection)) {
+    cout << "StRichNewArea::calculateArea  a --> starting point returns false. abort!" << endl;
+    abort();
+  }
+  
+  
+  for (int i=0;i<(mNumberOfSteps/2.0 - stopHere);i++) {
+    mAreaSegment = 0.0;
+    
+    if (getRingPoints(angle,mInXYB,mOutXYB,mPositiveDirection)) {      
+      getAreaSegment(mInXYA,mOutXYA,mInXYB,mOutXYB,mAreaSegment);
+      mTotalArea += mAreaSegment;
+      if (mAreaSegment>0) {mTotalAngleOnPadPlane++;}
+    }
+    
+    swapPoints(mInXYA,mOutXYA,mInXYB,mOutXYB);
+    
+  }
+  
+  // ---------   -pi ---> 0 degs  -------------------- //
+  angle = -mStartAngle;
+  if (!getRingPoints(angle,mInXYA,mOutXYA,mNegativeDirection)) {
+    cout << "StRichNewArea::calculateArea  b --> starting point returns false. abort!" << endl;
+    abort();
+  }
+
+  for (int i=0;i<(mNumberOfSteps/2.0 - stopHere);i++) {
+    mAreaSegment = 0.0;
+
+    if (getRingPoints(angle,mInXYB,mOutXYB,mNegativeDirection)) {
+      getAreaSegment(mInXYA,mOutXYA,mInXYB,mOutXYB,mAreaSegment);
+      mTotalArea += mAreaSegment; 
+      if (mAreaSegment>0) {mTotalAngleOnPadPlane++;}
+    }
+
+    swapPoints(mInXYA,mOutXYA,mInXYB,mOutXYB);
+  }
+  
+  
+  mTotalAngleOnPadPlane = mTotalAngleOnPadPlane*mAngleIncrement;
   return mTotalArea;
 }
 
 
-double 
-StRichArea::getPadPlaneArea() {
-  return mPadPlaneArea;
-}
 
+double
+StRichArea::getStoppingAngle(double cutAngle) {
 
-void
-StRichArea::calculateArea(double psiCut) {
-  int i=0;
+  StThreeVector<double> in;
+  double stopAngle = 0.0;
 
-  double startPsi = M_PI;
-  double stopInnerPsi,stopOuterPsi;
-  
-  getStoppingAngles(stopInnerPsi,stopOuterPsi,psiCut);
-  mInnerAngleIncrement = (startPsi-stopInnerPsi)/mNumberOfSteps;
-  mOuterAngleIncrement = (startPsi-stopOuterPsi)/mNumberOfSteps;
-  
-  mTotalArea    = 0.0;
-  mPadPlaneArea = 0.0;
-  // -----------  pi ---> 0 degs  ---------------------- //
-  double innerPsi = startPsi;
-  double outerPsi = startPsi; 
-  mStatus = getRingPoints(innerPsi,outerPsi,mInXYA,mOutXYA,mPositiveDirection);
-  for (i=0;i<mNumberOfSteps;i++) {
-  
-    if (getRingPoints(innerPsi,outerPsi,mInXYB,mOutXYB,mPositiveDirection)) {
-      getAreaSegment(mInXYA,mOutXYA,mInXYB,mOutXYB,mTotalArea,mPadPlaneArea);
-    
-    }
-
-    swapPoints(mInXYA,mOutXYA,mInXYB,mOutXYB);
-  }
-  
-  // ---------   -pi ---> 0 degs  -------------------- //
-  innerPsi = -startPsi;
-  outerPsi = -startPsi;
-  mStatus  = getRingPoints(innerPsi,outerPsi,mInXYA,mOutXYA,mNegativeDirection);
-  for ( i=0;i<mNumberOfSteps;i++) {
-  
-    if (getRingPoints(innerPsi,outerPsi,mInXYB,mOutXYB,mNegativeDirection)) {
-      getAreaSegment(mInXYA,mOutXYA,mInXYB,mOutXYB,mTotalArea,mPadPlaneArea);
-    }
-    
-    swapPoints(mInXYA,mOutXYA,mInXYB,mOutXYB);
-
-  }
-  
-}
-
-
-void 
-StRichArea::getStoppingAngles(double& ipsi, 
-			               double& opsi, 
-			               double psiCut) {
-  StThreeVector<double> in,out;
-  bool iStatus = false;
-  bool oStatus = false;
-
-  ipsi = 0.0;
+  bool iStatus = mInnerRing->getPoint(stopAngle,in); 
   while (!iStatus) {
-    iStatus = mInnerRing->getPoint(ipsi,in);
-    if (!iStatus) ipsi = ipsi + mSmallAngleStep; 
+    stopAngle += mSmallAngleStep;
+    iStatus = mInnerRing->getPoint(stopAngle,in); 
   }
-
-  opsi = 0.0;
-  while (!oStatus) {
-    oStatus = mOuterRing->getPoint(opsi,out);
-    if (!oStatus) opsi = opsi + mSmallAngleStep; 
-  }
-
-  if (ipsi<psiCut) {ipsi = psiCut;}
-  if (opsi<psiCut) {opsi = psiCut;}
   
-    
-  return;
+  if (stopAngle<cutAngle) {
+    return cutAngle;}
+  
+  return stopAngle;
 }
+
+
+
+double 
+StRichArea::getTotalAngleOnPadPlane() {
+  return mTotalAngleOnPadPlane;
+}
+
+
 
 bool
-StRichArea::getRingPoints(double& iPsi, double& oPsi, 
-			           StThreeVector<double>& ixy, 
-			           StThreeVector<double>& oxy, 
-			           int direction) {
- bool mInStatus,mOutStatus;
+StRichArea::getRingPoints(double& angle, 
+			              StThreeVector<double>& ixy, 
+			              StThreeVector<double>& oxy, 
+			              int direction) {
   
- mInStatus  = mInnerRing->getPoint(iPsi,ixy);
- mOutStatus = mOuterRing->getPoint(oPsi,oxy);
- 
- iPsi       = iPsi - direction*mInnerAngleIncrement;  
- oPsi       = oPsi - direction*mOuterAngleIncrement;
- 
- if (!mInStatus || !mOutStatus) return false;
- return true;
+  StThreeVector<double> tempInner(0,0,0);
+  StThreeVector<double> tempOuter(0,0,0);
+  
+  bool mInStatus  = mInnerRing->getPoint(angle,tempInner);
+  bool mOutStatus = mOuterRing->getPoint(angle,tempOuter);
+  
+  angle -= ((double) direction)*mAngleIncrement;  
+  
+  if (mInStatus)  {ixy = tempInner;}
+  if (mOutStatus) {oxy = tempOuter;}
+
+  if (mInStatus) return true;
+  
+  return false;
 }
 
 
+
 void
-StRichArea::swapPoints(StThreeVector<double>& ixya ,StThreeVector<double>& oxya,
-		              StThreeVector<double>& ixyb, StThreeVector<double>& oxyb) {
+StRichArea::swapPoints(StThreeVector<double>& ixya,
+			          StThreeVector<double>& oxya,
+		                  StThreeVector<double>& ixyb, 
+			          StThreeVector<double>& oxyb) {
       
-  // dont really have to swap the points, its 
+  // don't really have to swap the points, its 
   // enough to just set a = b
   ixya = ixyb;
   oxya = oxyb;
 }
 
+
+
 void
 StRichArea::getAreaSegment(StThreeVector<double>& ixya,
-			            StThreeVector<double>& oxya,
-			            StThreeVector<double>& ixyb, 
-			            StThreeVector<double>& oxyb,
-			            double& totArea, 
-                                    double& padArea) {
-  
+			                StThreeVector<double>& oxya,
+			                StThreeVector<double>& ixyb, 
+			                StThreeVector<double>& oxyb, 
+			                double& padAreaSeg) {
+
+  padAreaSeg = 0;
   if (outOfBoundsCorrection(ixya,oxya) && outOfBoundsCorrection(ixyb,oxyb) ) {
     
     // calculate total area segment here
@@ -172,7 +188,11 @@ StRichArea::getAreaSegment(StThreeVector<double>& ixya,
     term2 = (oxya.x()*oxyb.y() - oxyb.x()*oxya.y());
     term3 = (oxyb.x()*ixyb.y() - ixyb.x()*oxyb.y());
     term4 = (ixyb.x()*ixya.y() - ixya.x()*ixyb.y());
-    totArea += 0.5*fabs(term1 + term2 + term3 + term4); 
+       
+    if (!mCorrectForGap) {
+      padAreaSeg =  0.5*fabs(term1 + term2 + term3 + term4); 
+      return;
+    }
     
 
     // calculate area segment that 
@@ -199,8 +219,8 @@ StRichArea::getAreaSegment(StThreeVector<double>& ixya,
       term3b = (oxyb.x()*oEdgeb.y()   - oEdgeb.x()*oxyb.y());
       term4b = (oEdgeb.x()*oEdgea.y() - oEdgea.x()*oEdgeb.y());
       
-      padArea += 0.5*fabs(term1a + term2a + term3a + term4a) +
-	         0.5*fabs(term1b + term2b + term3b + term4b);
+      padAreaSeg = 0.5*fabs(term1a + term2a + term3a + term4a) +
+	           0.5*fabs(term1b + term2b + term3b + term4b);
       areaSegmentDone = true;
     }
     
@@ -217,7 +237,7 @@ StRichArea::getAreaSegment(StThreeVector<double>& ixya,
       term2c = (oxya.x()*oxyb.y() - oxyb.x()*oxya.y());
       term3c = (oxyb.x()*ixyb.y() - ixyb.x()*oxyb.y());
       term4c = (ixyb.x()*ixya.y() - ixya.x()*ixyb.y());
-      padArea += 0.5*fabs(term1c + term2c + term3c + term4c); 
+      padAreaSeg = 0.5*fabs(term1c + term2c + term3c + term4c); 
       areaSegmentDone = true;
 
     }    
@@ -234,7 +254,7 @@ StRichArea::getAreaSegment(StThreeVector<double>& ixya,
 
     // here no gap correction is necesary
     if (!areaSegmentDone) {
-      padArea += 0.5*fabs(term1 + term2 + term3 + term4); 
+      padAreaSeg = 0.5*fabs(term1 + term2 + term3 + term4); 
     }
     
   }
@@ -244,9 +264,9 @@ StRichArea::getAreaSegment(StThreeVector<double>& ixya,
 
 bool 
 StRichArea::fullGapCorrectionNecessary(StThreeVector<double>& ixy,   
-				                    StThreeVector<double>& oxy,
-				                    StThreeVector<double>& itemp, 
-				                    StThreeVector<double>& otemp) {
+				       StThreeVector<double>& oxy,
+				       StThreeVector<double>& itemp, 
+				       StThreeVector<double>& otemp) {
   
 
   if ( !mCorrectForGap )   return false;
@@ -268,18 +288,32 @@ StRichArea::fullGapCorrectionNecessary(StThreeVector<double>& ixy,
 			       100.0*mSmallDistance*centimeter);
   tempo = oxy;
   tempi = ixy;
-  
+
+  int tooManyCounts = 10000;  
+  int safetyCheck=0;
   while (temp.mag()>mSmallDistance) {
+    
+    safetyCheck++;
+    if (safetyCheck>tooManyCounts) {
+      cout << "StRichArea::fullGapCorrectionNecessary  ---> abort!" << endl;
+      cout << "Problem in outer ring gap correction. " << endl;      
+      abort();}
+    
     temp = tempi-tempo;
     double v = 0.5*temp.mag();
     tempa.setX(tempo.x() + v*cos(phi));
     tempa.setY(tempo.y() + v*sin(phi));
     if (quadCheck(oxy,tempa)) {tempo = tempa;} 
-    else                     {tempi = tempa;}
+    else                      {tempi = tempa;}
   }
+  
   otemp = tempa;
   
-
+  if (!sanityCheck(ixy,otemp,oxy) ) {
+    cout << "StRichArea::fullGapCorrectionNecessary() ---> abort()!" << endl;
+    cout << "Problem in outer ring gap correction, sanity check." << endl;
+    abort();}
+ 
   // here we get the point closest to the inner point
   phi = atan2(oxy.y()-ixy.y(),oxy.x()-ixy.x());
   
@@ -291,8 +325,16 @@ StRichArea::fullGapCorrectionNecessary(StThreeVector<double>& ixy,
 
   tempo = oxy;
   tempi = ixy;
- 
+  
+  safetyCheck=0;
   while (temp.mag()>mSmallDistance) {
+
+    safetyCheck++;
+    if (safetyCheck>tooManyCounts) {
+      cout << "StRichArea::fullGapCorrectionNecessary  ---> abort!" << endl;
+      cout << "Problem in inner ring gap correction. " << endl;      
+      abort();}
+    
     temp = tempi - tempo;
     double v = 0.5*temp.mag();
     tempa.setX(tempi.x() + v*cos(phi));
@@ -300,13 +342,19 @@ StRichArea::fullGapCorrectionNecessary(StThreeVector<double>& ixy,
     if (quadCheck(ixy,tempa)) {tempi = tempa;} 
     else                     {tempo = tempa;}
   }
+
   itemp = tempa;
+ 
+  if (!sanityCheck(ixy,itemp,oxy) ) {
+    cout << "StRichArea::fullGapCorrectionNecessary() ---> abort()!" << endl;
+    cout << "Problem in inner ring gap correction, sanity check." << endl;
+    abort();}
   
   return true;
 }
 
 bool StRichArea::partialGapCorrectionNecessary(StThreeVector<double>& ixy,   
-				                              StThreeVector<double>& oxy) {
+					       StThreeVector<double>& oxy) {
   // if neither point in gap, no correction necessary
   if ( !gapCheck(ixy) && !gapCheck(oxy) ) {
     return false;
@@ -319,9 +367,10 @@ bool StRichArea::partialGapCorrectionNecessary(StThreeVector<double>& ixy,
   }
     
     
-
+  int tooManyCounts = 10000;
   StThreeVector<double> tempo,tempi,tempa,temp;
   double phi;
+
   // inner ring point falls in gap, outer ok
   if (gapCheck(ixy)) {
     phi = atan2(ixy.y()-oxy.y(),ixy.x()-oxy.x());    
@@ -340,8 +389,21 @@ bool StRichArea::partialGapCorrectionNecessary(StThreeVector<double>& ixy,
       tempa.setY(tempo.y() + v*sin(phi));
       if (quadCheck(oxy,tempa)) {tempo = tempa;} 
       else                     {tempi = tempa;}
-      if (counter>10000) break;
+      
+      if (counter>tooManyCounts) {
+	cout << "StRichArea::partialGapCorrectionNecessary  ---> abort!" << endl;
+	cout << "Problem in inner ring gap correction. " << endl;
+	abort();
+      }
+
     }
+        
+    if (!sanityCheck(ixy,tempa,oxy) ) {
+      cout << "StRichArea::partialGapCorrectionNecessary() ---> abort()!" << endl;
+      cout << "Problem in inner ring gap correction, sanity check" << endl;
+      abort();
+    }
+
     ixy = tempa;
     
     return true;
@@ -367,9 +429,21 @@ bool StRichArea::partialGapCorrectionNecessary(StThreeVector<double>& ixy,
       tempa.setY(tempo.y() + v*sin(phi));
       if (quadCheck(ixy,tempa)) {tempi = tempa;} 
       else                     {tempo = tempa;}
-      if (counter>10000) break;
-    
+      
+      if (counter>tooManyCounts) {
+	cout << "StRichArea::partialGapCorrectionNecessary  ---> abort!" << endl;
+	cout << "Problem in outer ring gap correction. " << endl;
+	abort();
+      }
+      
     }
+    
+    if (!sanityCheck(ixy,tempa,oxy) ) {
+      cout << "StRichArea::partialGapCorrectionNecessary() ---> abort()!" << endl;
+      cout << "Problem in outer ring gap correction, sanity check" << endl;
+      abort();
+    }
+
     oxy = tempa;
     
     return true;
@@ -393,7 +467,7 @@ bool StRichArea::gapCheck(StThreeVector<double>& xy) {
 
 
 bool StRichArea::quadCheck(StThreeVector<double>& ixy,
-			           StThreeVector<double>& oxy) {
+			               StThreeVector<double>& oxy) {
  
   double gapWidth = myGeometryDb->quadrantGapInX()/2.0;
   
@@ -417,9 +491,7 @@ bool StRichArea::quadCheck(StThreeVector<double>& ixy,
 
 
 bool 
-StRichArea::inBounds(StThreeVector<double> xy) {
-  
-  
+StRichArea::inBounds(StThreeVector<double>& xy) {
   
   if ( (xy.x() > -myGeometryDb->radiatorDimension().x() && 
 	xy.x() <  myGeometryDb->radiatorDimension().x() ) && 
@@ -434,29 +506,53 @@ StRichArea::inBounds(StThreeVector<double> xy) {
 
 
 bool 
-StRichArea::outOfBoundsCorrection(StThreeVector<double>& ixy, StThreeVector<double>& oxy) {
+StRichArea::outOfBoundsCorrection(StThreeVector<double>& ixy, 
+				                 StThreeVector<double>& oxy) {
  
   if (inBounds(oxy) && inBounds(ixy)) {
     return true;
   }
-  
+
+  int tooManyCounts=10000;
+
   if (inBounds(oxy)) {
-      double phi = atan2(ixy.y()-oxy.y(),ixy.x()-oxy.y());    
+      double phi = atan2(ixy.y()-oxy.y(),ixy.x()-oxy.x());    
       StThreeVector<double> tempo,tempi,tempa;
+
       StThreeVector<double> temp(100.0*mSmallDistance,
 				   100.0*mSmallDistance,
 				   100.0*mSmallDistance);
       tempo = oxy;
       tempi = ixy;
+      
+      int safetyCheck=0;
       while (temp.mag()>mSmallDistance) {
+
+	safetyCheck++;
+	if (safetyCheck > tooManyCounts) {
+	  cout << "StRichArea::outOfBoundsCorrection  ---> abort!" << endl;
+	  cout << "Problem in inner ring out-of-bounds correction. " << endl;
+	  abort();	  
+	}
+
 	temp = tempi-tempo;
 	double v = 0.5*temp.mag();
+	
 	tempa.setX(tempo.x() + v*cos(phi));
 	tempa.setY(tempo.y() + v*sin(phi));
-	if (inBounds(tempa))  {tempi = tempa;} 
-	if (!inBounds(tempa)) {tempo = tempa;}
+
+	if (inBounds(tempa))  {tempo = tempa;} 
+	if (!inBounds(tempa)) {tempi = tempa;}
       }
+     
+      if (!sanityCheck(ixy,tempa,oxy) ) {
+	cout << "StRichArea::outOfBoundsCorrection  ---> abort!" << endl;
+	cout << "Problem in inner ring sanity check. " << endl;
+	abort();	  
+      } 
+
       ixy = tempa;
+
       return true;
   }
   
@@ -469,19 +565,68 @@ StRichArea::outOfBoundsCorrection(StThreeVector<double>& ixy, StThreeVector<doub
 				   100.0*mSmallDistance);
     tempo = oxy;
     tempi = ixy;
+
+    int safetyCheck=0;
     while (temp.mag()>mSmallDistance)  {
+
+      safetyCheck++;
+      if (safetyCheck > tooManyCounts) {
+	cout << "StRichArea::outOfBoundsCorrection  ---> abort!" << endl;
+	cout << "Problem in outer ring out-of-bounds correction. " << endl;
+	abort();	  
+	}
+      
+      
       temp = tempi - tempo;
       double v = 0.5*temp.mag();
+     
       tempa.setX(tempi.x() + v*cos(phi));
       tempa.setY(tempi.y() + v*sin(phi));
       if (inBounds(tempa))  {tempi = tempa;} 
       if (!inBounds(tempa)) {tempo = tempa;}
     }
+    
+    if (!sanityCheck(ixy,tempa,oxy) ) {
+      cout << "StRichArea::outOfBoundsCorrection  ---> abort!" << endl;
+      cout << "Problem in outer ring sanity check. " << endl;
+      abort();	  
+    }
+    
     oxy = tempa;
     return true;
   }
   
   // if the points are not on the pad plane return false
   return false;
-  
 }
+
+
+bool StRichArea::sanityCheck(StThreeVector<double>& ixy, 
+			                  StThreeVector<double>& mxy, 
+			                  StThreeVector<double>& oxy ) {
+
+  // simple check to see if the middle point falls within
+  // the bounds of the inner, outer points
+  
+  // x check
+  bool xok=false;
+  if ( (ixy.x() >= mxy.x() && oxy.x() <= mxy.x() )  ||
+        (ixy.x() <= mxy.x() && oxy.x() >= mxy.x() ) ) {
+    xok = true;
+  }
+
+  // y check
+  bool yok = false;
+  if ( (ixy.y() >= mxy.y() && oxy.y() <= mxy.y() )  ||
+        (ixy.y() <= mxy.y() && oxy.y() >= mxy.y() ) ) {
+    yok = true;
+  }
+  
+  if (xok && yok) return true;
+  return false;
+}
+
+
+
+
+

@@ -1,15 +1,15 @@
 /**********************************************************
- * $Id: StRichMinimization.cxx,v 1.1 2000/04/03 19:36:08 horsley Exp $
+ * $Id: StRichMinimization.cxx,v 1.2 2000/05/19 19:06:10 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMinimization.cxx,v $
- *  Revision 1.1  2000/04/03 19:36:08  horsley
- *  initial revision
+ *  Revision 1.2  2000/05/19 19:06:10  horsley
+ *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
  *
- *  
- *
+ *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
+ *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
  *
  *  Revision 1.3  2000/05/22 15:14:44  horsley
  *  modified StRichRings, StRichTDrawableRings to comply with sun compiler
@@ -29,7 +29,7 @@
 #include <iostream.h>
 #include <fstream.h>
 #include <iomanip.h>
-  mTolerance = 0.005;
+#include <math.h>
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -47,13 +47,14 @@ StThreeVectorF StRichMinimization::rotatedMin(StThreeVectorF& point) {
 
   StRichTrack* t =  ringPoint->getTrack();
   StThreeVector<double> tempPoint = point - t->getImpactPoint();
+  mMeanPathInRadiator = 0.0;
   StThreeVector<double> rotatedPoint(mTrackCosPhi*tempPoint.x() + 
-				       mTrackSinPhi*tempPoint.y(),
+				     mTrackSinPhi*tempPoint.y(),
 				     
-				      -mTrackSinPhi*tempPoint.x() + 
-				       mTrackCosPhi*tempPoint.y(),
+				    -mTrackSinPhi*tempPoint.x() + 
+				     mTrackCosPhi*tempPoint.y(),
 				     
-				       0.0);  
+				     0.0);  
   StThreeVectorF tempPoint = point - t->getImpactPoint();
 
 
@@ -62,8 +63,7 @@ StThreeVectorF StRichMinimization::rotatedMin(StThreeVectorF& point) {
 
   else {
     minDistance = brent(0.0,-M_PI/2.0,-M_PI,&returnPsi);}
-  
-  if (returnPsi<0) returnPsi = 2.0*M_PI + returnPsi;  
+    
   status = ringPoint->getPoint(returnPsi,returnThisPoint);
   return returnThisPoint;
  //

@@ -1,72 +1,60 @@
 /**********************************************************
- * $Id: StRichTrackFilter.h,v 1.1 2000/04/03 19:36:09 horsley Exp $
+ * $Id: StRichTrackFilter.h,v 1.2 2000/05/19 19:06:11 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrackFilter.h,v $
+ *  Revision 1.2  2000/05/19 19:06:11  horsley
+ *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
+ *
  *  Revision 1.1  2000/04/03 19:36:09  horsley
  *  initial revision
- *
- *  
- *
  **********************************************************/
 
 #ifndef STRICHTRACKFILTER_H
 #define STRICHTRACKFILTER_H
 
-
-#include "StTrack.h"
-#include "StRichTrackFilter.h"
-
-#include "StRrsMaker/StRichGeometryDb.h"
-#include "StRichMaterialsDb.h"
-
-#include "StPhysicalHelixD.hh"
-#include "StPhysicalHelix.hh"
-
-#include "StThreeVectorD.hh"
 #include "StThreeVector.hh"
-#include "SystemOfUnits.h"
 
-// used in track coordinate transformations
-#include "StRrsMaker/StRichMomentumTransform.h"
-#include "StRrsMaker/StGlobalCoordinate.h"
-#include "StRrsMaker/StRichRawCoordinate.h"
-#include "StRrsMaker/StRichLocalCoordinate.h"
-#include "StRrsMaker/StRichCoordinateTransform.h"
-
+class StRichTrack;
+class StRichGeometryDb;
 
 class StRichTrackFilter {
+
 public:
+
   StRichTrackFilter();
-  StRichTrackFilter(StTrack* tpcTrack, double magField);
-  StRichTrackFilter(StPhysicalHelixD& tpcHelix, double magField);
-  
   ~StRichTrackFilter();
-
-  StThreeVector<double>& getLocalMomentumAtRadiator();
-  StThreeVector<double>& getLocalImpactPointAtRadiator();  
-  StThreeVector<double>& getLocalImpactPointAtPadPlane();
-
-  bool onPadPlane();
-  bool onRadiator();
-  bool momentumIsAbove(double limit);
-  bool incidentAngleCheck();
-
+  bool trackAcceptable();
+  void setTrack(StRichTrack* );
+  void setMomentum(double);
+  void setImpactParameter(double);
+  void setNTPCPoints(int);
+  void setChi2(double);
+  
 protected:
-  void setLocalMomentumAtRadiator(StThreeVector<double>& mom);
-  void setLocalImpactPointAtPadPlane(StThreeVector<double>& pt);
-  void setLocalImpactPointAtRadiator(StThreeVector<double>& pt);
 
 private:
-  StThreeVector<double> mLocalImpactPointAtRadiator;
-  StThreeVector<double> mLocalImpactPointAtPadPlane;
-  StThreeVector<double> mLocalMomentumAtRadiator;
-  StThreeVector<double> mLocalMomentumAtPadPlane;
-  bool mOnPadPlane;
-  bool mOnRadiator;
-  bool mIncidentAngleCheck;
+
+  StRichTrack* mStRichTrack;
+  
+  StRichGeometryDb* myGeometryDb;
+  
+  double  mAngleOfIncidence;
+  int     mNumberOfTPCHits;  
+  double  mChiSqr;
+  double  mImpactParameter;
+  double  mMinNTPCHits;
+  
+  StThreeVector<double>  mMomentum;
+  StThreeVector<double>  mMIP;
+  
+  double mChi2Cut;
+  double mNTPCPoints;
+  double mImpactPar;
+  double mMomCut;
+  double mFlag;
 
 };
 
