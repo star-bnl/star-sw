@@ -7,9 +7,9 @@ StString& StString::operator<<(long long I)
 {
   char cbuf[200];
   if (!fPrec) {
-     sprintf(cbuf,"%ld",I);
+     sprintf(cbuf,"%ld",(long)I);
   } else {
-     sprintf(cbuf,"%.*ld",fPrec,I);
+     sprintf(cbuf,"%.*ld",fPrec,(long)I);
   }
   fPrec = 0;
   (*this) += cbuf;
@@ -29,12 +29,13 @@ StString& StString::operator<<(unsigned long long I)
 {
   char cbuf[100];
   if (!fPrec) {
-     sprintf(cbuf,"%lu",I);
+     sprintf(cbuf,"%lu",(unsigned long)I);
   } else {
-     sprintf(cbuf,"%.*lu",fPrec,I);
+     sprintf(cbuf,"%.*lu",fPrec,(unsigned long)I);
   }
   fPrec = 0;
   (*this) += cbuf;
+  return (*this);
 }      
 //______________________________________________________________________________
 StString& StString::operator<<(unsigned long I)
