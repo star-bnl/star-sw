@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.5 2001/05/23 00:14:27 lansdell Exp $
+// $Id: StHistUtil.cxx,v 2.6 2001/05/24 01:47:42 lansdell Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.6  2001/05/24 01:47:42  lansdell
+// minor bug fixes and updates
+//
 // Revision 2.5  2001/05/23 00:14:27  lansdell
 // added some logx code
 //
@@ -42,6 +45,7 @@
 #include "TPaveText.h"
 #include "TLegend.h"
 #include "TDatime.h"
+#include "TLine.h"
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -292,6 +296,19 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
           // actually draw,print
           if ((chkdim == 2) && (!obj->InheritsFrom("StMultiH1F"))) {
             obj->Draw("box");
+	    if (!strcmp(obj->GetName(),"StEQaGtrkGoodF") ||
+		!strcmp(obj->GetName(),"StEQaPtrkGoodF") ||
+		!strcmp(obj->GetName(),"StELMQaGtrkGoodF") ||
+		!strcmp(obj->GetName(),"StELMQaPtrkGoodF") ||
+		!strcmp(obj->GetName(),"StEMMQaGtrkGoodF") ||
+		!strcmp(obj->GetName(),"StEMMQaPtrkGoodF") ||
+		!strcmp(obj->GetName(),"StEHMQaGtrkGoodF") ||
+		!strcmp(obj->GetName(),"StEHMQaPtrkGoodF")) {
+	      TLine diagonal;
+	      diagonal.SetLineColor(46);
+	      diagonal.SetLineWidth(2);
+	      diagonal.DrawLineNDC(0.1,0.1,0.9,0.9);
+	    }
           } else {
 	    TH1F* tempHist = (TH1F*) obj;
 	    tempHist->SetLineWidth(2);
@@ -941,9 +958,9 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
   Int_t ilg = 0;
   for (ilg=0;ilg<lengofList;ilg++) {
     TString listString;
-    if ((sdefList[ilg] != "QaInnerSectorDeDx") &&
-	(sdefList[ilg] != "QaOuterSectorDeDx") &&
-	(sdefList[ilg] != "QaDedxAllSectors")) {
+    if (strcmp(sdefList[ilg],"QaInnerSectorDeDx") &&
+	strcmp(sdefList[ilg],"QaOuterSectorDeDx") &&
+	strcmp(sdefList[ilg],"QaDedxAllSectors")) {
       for (Int_t k=0; k<numOfPosPrefixes; k++) {
         ((listString = type) += possiblePrefixes[k]) += sdefList[ilg];
         numLog = AddToLogYList(listString.Data());
