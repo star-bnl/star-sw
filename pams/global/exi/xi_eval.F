@@ -1,7 +1,7 @@
 C
-      INTEGER FUNCTION V0_EVAL(nok,idd,trak,
-     +                         ev0par_h,ev0par,
-     +                         ev0out_h,ev0out,
+      INTEGER FUNCTION XI_EVAL(nok,idd,trak,
+     +                         exipar_h,exipar,
+     +                         exiout_h,exiout,
      +                         mkine_h,  mkine,
      +                         mvert_h,  mvert)
 
@@ -16,19 +16,19 @@ C   Status		: Tested with svt_hits
 C----------------------------------------------------------------------
 #include "/star/starlib/star/dev/sys/inc/tas_structures.inc"
 #include "/star/starlib/star/dev/sys/inc/tas_user_codes.inc"
-#include "ev0_ev0par_pars.inc"
-#include "ev0_ev0par_st.inc"
-#include "ev0_ev0out_pars.inc"
-#include "ev0_ev0out_st.inc"
+#include "exi_exipar_pars.inc"
+#include "exi_exipar_st.inc"
+#include "exi_exiout_pars.inc"
+#include "exi_exiout_st.inc"
 #include "mct_mvert_pars.inc"
 #include "mct_mvert_st.inc"
 #include "mct_mkine_pars.inc"
 #include "mct_mkine_st.inc"
 C----------------------------------------------------------------------
-      RECORD/ table_head_st/ ev0par_h
-      RECORD/ ev0par_row_st/ ev0par(*)
-      RECORD/ table_head_st/ ev0out_h
-      RECORD/ ev0out_row_st/ ev0out(*)
+      RECORD/ table_head_st/ exipar_h
+      RECORD/ exipar_row_st/ exipar(*)
+      RECORD/ table_head_st/ exiout_h
+      RECORD/ exiout_row_st/ exiout(*)
       RECORD/ table_head_st/ mvert_h
       RECORD/ mvert_row_st/ mvert(*)
       RECORD/ table_head_st/ mkine_h
@@ -70,24 +70,24 @@ C---------------
       degrad = pi/180.
       raddeg = 180./pi      
 *
-* loop over all found V0
+* loop over all found Xi
 *
-      DO 10 i=1,ev0out_h.nok
+      DO 10 i=1,exiout_h.nok
 *
 * check if daughter particles came from a secondary vertex
 *
-        iv1=mkine(ev0out(i).idneg).ivor
-        iv2=mkine(ev0out(i).idpos).ivor
+        iv1=mkine(exiout(i).idba).ivor
+        iv2=mkine(exiout(i).idv0).ivor
         IF( (iv1.eq.iv2).and.(iv1.ne.1).and.(iv2.ne.1) ) THEN
-         ev0out(i).itrue=1
-         ev0out(i).x_true(1)=mvert(iv1).x(1)
-         ev0out(i).x_true(2)=mvert(iv1).x(2)
-         ev0out(i).x_true(3)=mvert(iv1).x(3)
-         ev0out(i).p_true(1)=mkine(mvert(iv1).orgtrk).p(1)
-         ev0out(i).p_true(2)=mkine(mvert(iv1).orgtrk).p(2)
-         ev0out(i).p_true(3)=mkine(mvert(iv1).orgtrk).p(3)
+         exiout(i).itrue=1
+         exiout(i).x_true(1)=mvert(iv1).x(1)
+         exiout(i).x_true(2)=mvert(iv1).x(2)
+         exiout(i).x_true(3)=mvert(iv1).x(3)
+         exiout(i).p_true(1)=mkine(mvert(iv1).orgtrk).p(1)
+         exiout(i).p_true(2)=mkine(mvert(iv1).orgtrk).p(2)
+         exiout(i).p_true(3)=mkine(mvert(iv1).orgtrk).p(3)
         ELSE
-         ev0out(i).itrue=0
+         exiout(i).itrue=0
         ENDIF
 
  10   CONTINUE
