@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.h,v 1.1 1999/02/12 00:12:33 lyons Exp $
+ * $Id: StRchMaker.h,v 1.2 1999/02/12 17:29:02 fisyak Exp $
  *
  * Author: Dan Lyons
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.h,v $
+ * Revision 1.2  1999/02/12 17:29:02  fisyak
+ * Make it compiled
+ *
  * Revision 1.1  1999/02/12 00:12:33  lyons
  * Trail version... untested
  *
@@ -40,7 +43,6 @@ class StRichReaderInterface;
     virtual Int_t  Make();
     virtual void   PrintInfo();
 	m_Mode = mode;
-	; // extra harmless semicolon for emacs tab key purposes
 };
 
 #endif // ST_RCH_MAKER_HH
