@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.59 2005/02/07 18:33:42 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.60 2005/02/16 17:47:16 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.60  2005/02/16 17:47:16  perev
+ * assert in nudge 1==>5
+ *
  * Revision 2.59  2005/02/07 18:33:42  fisyak
  * Add VMC dead material
  *
@@ -267,6 +270,8 @@ void StiKalmanTrackNode::Break(int kase)
    3   => 8 - test locate
  */
 int StiKalmanTrackNode::_debug = 0;
+
+//______________________________________________________________________________
 void StiKalmanTrackNode::reset()
 { 
 static const double DY=0.3,DZ=0.3,DEta=0.03,DRho=0.01,DTan=0.05;
@@ -290,7 +295,7 @@ static const double DY=0.3,DZ=0.3,DEta=0.03,DRho=0.01,DTan=0.05;
 /// to that of the given node.
 /// This method is useful to initial the state of a node
 /// while propagating a track.
-//_____________________________________________________________
+//______________________________________________________________________________
 void StiKalmanTrackNode::setState(const StiKalmanTrackNode * n)
 {
   _alpha    = n->_alpha;
@@ -352,6 +357,7 @@ void StiKalmanTrackNode::setAsCopyOf(const StiKalmanTrackNode * n)
    double& dEdx  : energy loss info
    double& chi2) : chi2 of the track at this node
 */
+//______________________________________________________________________________
 void StiKalmanTrackNode::get(double& alpha,
 			     double& xRef,
 			     double  x[5], 
@@ -394,6 +400,7 @@ void StiKalmanTrackNode::get(double& alpha,
   <li>Bypasses error calculation if error array "e" is a null pointer.</li>
   </ol>
 */
+//______________________________________________________________________________
 void StiKalmanTrackNode::getMomentum(double p[3], double e[6]) const
 {	
 //	keep in mind that _p2 == -_sinCA
@@ -429,11 +436,13 @@ void StiKalmanTrackNode::getMomentum(double p[3], double e[6]) const
   }}}}    
 }
 
+//______________________________________________________________________________
 double StiKalmanTrackNode::getField()  const
 {
   return pars->field;
 }
 
+//______________________________________________________________________________
 double StiKalmanTrackNode::getPhase() const
 {
   //! This function translates between ITTF helix parameters and
@@ -442,6 +451,7 @@ double StiKalmanTrackNode::getPhase() const
   return getPsi()-getHelicity()*M_PI/2;
 
 }
+//______________________________________________________________________________
 double StiKalmanTrackNode::getPsi() const
 {
   return getGlobalMomentum().phi();
@@ -461,6 +471,7 @@ double StiKalmanTrackNode::getPsi() const
 /// e[4] = py-pz
 /// e[5] = pz-pz
 
+//______________________________________________________________________________
 void StiKalmanTrackNode::getGlobalMomentum(double p[3], double e[6]) const
 {	
   // first get p & e in the local ref frame
@@ -523,6 +534,7 @@ void StiKalmanTrackNode::getGlobalMomentum(double p[3], double e[6]) const
  </OL>
  <p>Currently, propagate can handle kPlanar and kCylindrical geometries only. An exception is thrown if other geometry shape are used.
 */
+//______________________________________________________________________________
 int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode, 
 				  const StiDetector * tDet,int dir)
 {
@@ -538,8 +550,10 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   int shapeCode = sh->getShapeCode();
   _refX = place->getLayerRadius();
   _refAngle = place->getLayerAngle();
+  double endVal;
+  switch (shapeCode) {
 
-  if(shapeCode==kPlanar)
+  case kPlanar: endVal = place->getNormalRadius();
     { //flat volume
       double tAlpha = nice(place->getNormalRefAngle());
       double dAlpha = tAlpha - _alpha;
@@ -547,12 +561,14 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
       if (fabs(dAlpha)>0.5e-2)
 	if (rotate(dAlpha)) return -10;
     }
-  //planarShape = 0;
-  //cylinderShape = 0;
-
-
+    							break;
+    
+  case kCylindrical: endVal = place->getNormalRadius(); break;
+  case kDisk:        endVal = place->getZcenter(); 	break;
+  default: assert(0);
+  }
   //if (false&&_refX<20.) cout << "Node:refX<4.5 pNode:"<< *pNode;
-  position = propagate(place->getNormalRadius(),sh->getShapeCode(),dir); 
+  position = propagate(endVal,sh->getShapeCode(),dir); 
   if (position<0) 
     {
       //if (shapeCode==kCylindrical) cout << "cylinder returns:"<<position<<endl;
@@ -585,6 +601,7 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   return position;
 }
 
+//______________________________________________________________________________
 /*! Propagate the track encapsulated by pNode to the given vertex. Use this node
 	to represent the track parameters at the vertex.
   <p>
@@ -607,7 +624,7 @@ bool StiKalmanTrackNode::propagate(const StiKalmanTrackNode *parentNode, StiHit 
   return true;
 }
 
-
+//______________________________________________________________________________
 ///Propagate track from the given node to the beam line with x==0.
 ///Set the hit and detector pointers to null to manifest this is an extrapolation
 bool StiKalmanTrackNode::propagateToBeam(const StiKalmanTrackNode *parentNode,int dir)
@@ -620,6 +637,7 @@ bool StiKalmanTrackNode::propagateToBeam(const StiKalmanTrackNode *parentNode,in
   return true;
 }
 
+//______________________________________________________________________________
 ///Extrapolate the track defined by the given node to the given radius.
 ///Return a negative value if the operation is impossible.
 int StiKalmanTrackNode::propagateToRadius(StiKalmanTrackNode *pNode, double radius,int dir)
@@ -634,6 +652,7 @@ int StiKalmanTrackNode::propagateToRadius(StiKalmanTrackNode *pNode, double radi
 }
 
 
+//______________________________________________________________________________
 /*! Work method used to perform the tranport of "this" node from 
   its current "_x" position to the given position "xk". 
   Returns -1 if the propagation cannot be carried out, i.e.
@@ -666,37 +685,37 @@ int  StiKalmanTrackNode::propagate(double xk, int option,int dir)
       R = 1/_p3;
       x0 = _p2/_p3+x1; 			/*VP*/
       r0sq= x0*x0+y0*y0;
-      if (r0sq==0.) return -1;
+      if (r0sq==0.) 				return -1;
       a = 0.5*(r0sq+L*L-R*R);
-      if (a==0.) return -1;
+      if (a==0.) 				return -1;
       b = L*L/(a*a);
       sq = b*r0sq-1;
-      if (sq<0) return -2;
+      if (sq<0) 				return -2;
       sq = ::sqrt(sq);				
       x_p = a*(x0+y0*sq)/r0sq;
       x_m = a*(x0-y0*sq)/r0sq;
       x2 = ( x_p>x_m) ? x_p : x_m;
-      if (x2<=0) return -3;
+      if (x2<=0) 				return -3;
       break;
-    case kDisk: 
-      if (_p3==0) throw runtime_error("SKTN::propagateDisk() - _p3==0");
-      L = xk;
-      y0 = _p0+cosCA1/_p3;
-      R = 1/_p3;
-      x0 = _p2/_p3+x1; 			/*VP*/
-      r0sq= x0*x0+y0*y0;
-      if (r0sq==0.) return -1;
-      a = 0.5*(r0sq+L*L-R*R);
-      if (a==0.) return -1;
-      b = L*L/(a*a);
-      sq = b*r0sq-1;
-      if (sq<0) return -2;
-      sq = ::sqrt(sq);				
-      x_p = a*(x0+y0*sq)/r0sq;
-      x_m = a*(x0-y0*sq)/r0sq;
-      x2 = ( x_p>x_m) ? x_p : x_m;
-      if (x2<=0) return -3;
 
+    case kDisk: {
+      if (fabs(_p4)<1e-12) 			return -1;
+      L = (xk-_p1)/_p4;
+      double ang = L*_p3; 
+      double sangR,cang1R;
+      if ( fabs(ang)>0.02) {
+        double sang = sin(ang);
+        double cang = cos(ang);
+        if (_cosCA*cang - _sinCA*sang <=0) 	return -2;
+        sangR  = sang/_p3;
+        cang1R = (cang-1.)/_p3;
+      } else {
+        sangR  =  L*(1.-ang*ang/6);
+        cang1R = -L*ang/2*(1.-ang*ang/12);
+      }
+      x2 = _x +	_cosCA*sangR + _sinCA*cang1R;}
+      break;
+    default: assert(0);
     }
   dx=x2-x1;  
   double test = (dir)? dx:-dx;  
@@ -747,10 +766,11 @@ int  StiKalmanTrackNode::propagate(double xk, int option,int dir)
   return 0;
 }
 
+//______________________________________________________________________________
 int StiKalmanTrackNode::nudge()
 {
   double deltaX = _hit->x()-_x;
-  assert(fabs(deltaX) < 1.);
+  assert(fabs(deltaX) < 3.);
   double deltaS = _p3*(deltaX);
   double dp0= deltaX*sinCA2/cosCA2;
   sinCA2 +=deltaS;
@@ -778,6 +798,7 @@ int StiKalmanTrackNode::nudge()
 
 
 
+//______________________________________________________________________________
 /// Propagate the track error matrix
 /// \note This method must be called ONLY after a call to the propagate method.
 void StiKalmanTrackNode::propagateError()
@@ -908,6 +929,7 @@ void StiKalmanTrackNode::propagateError()
       }*/
 }
 
+//______________________________________________________________________________
 /*! Calculate the effect of MCS on the track error matrix.
   <p>
   The track is assumed to propagate from (x0,y0,z0) to (x1,y1,z1). The calculation
@@ -933,6 +955,7 @@ double StiKalmanTrackNode::pathLToNode(const StiKalmanTrackNode * const oNode)
   return length(delta, R);
 }
 
+//______________________________________________________________________________
 inline double StiKalmanTrackNode::length(const StThreeVector<double>& delta, double curv)
 {
   
@@ -944,6 +967,7 @@ inline double StiKalmanTrackNode::length(const StThreeVector<double>& delta, dou
   return sqrt(lxy*lxy+delta.z()*delta.z());
 }
 
+//______________________________________________________________________________
 StThreeVector<double> StiKalmanTrackNode::getPointAt(double xk) const
 {
   assert(0);
@@ -961,6 +985,7 @@ StThreeVector<double> StiKalmanTrackNode::getPointAt(double xk) const
   return StThreeVector<double>(_cosAlpha*x2-_sinAlpha*yy, _sinAlpha*x2+_cosAlpha*yy, _p1+dx*_p4*sumSin/sinCA1plusCA2);
 }
 
+//______________________________________________________________________________
 /*! Calculate the increment of chi2 caused by the addition of this node to the track.
   <p>
   Uses the track extrapolation to "_x", and hit position to evaluate and return the 
@@ -1020,6 +1045,7 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   }
   return cc;
 }
+//______________________________________________________________________________
 /*! Calculate the effect of MCS on the track error matrix.
   <p>
   The track is assumed to propagate from (x0,y0,z0) to (x1,y1,z1). The calculation
@@ -1155,6 +1181,7 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
     }
 }
 
+//______________________________________________________________________________
 /*! Update the track parameters using this node.
   <p>
   This method uses the hit contained by node to update the track 
@@ -1378,6 +1405,7 @@ static int nCall=0; nCall++;
   return 0;
 }
 
+//______________________________________________________________________________
 /*! Rotate this node track representation azymuthally by given angle.
   <p>
   This method rotates by an angle alpha the track representation 
@@ -1524,6 +1552,7 @@ ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
   return os;
 }
 
+//______________________________________________________________________________
 double StiKalmanTrackNode::getWindowY()
 {	  
   const StiDetector * detector = getDetector();
@@ -1568,6 +1597,7 @@ double StiKalmanTrackNode::getWindowZ()
   return window;
 }
 
+//______________________________________________________________________________
 StThreeVector<double> StiKalmanTrackNode::getHelixCenter() const
 {
   if (_p3==0) throw logic_error("StiKalmanTrackNode::getHelixCenter() -F- _p3==0 ");
@@ -1577,12 +1607,14 @@ StThreeVector<double> StiKalmanTrackNode::getHelixCenter() const
   return (StThreeVector<double>(_cosAlpha*xx0-_sinAlpha*yy0,_sinAlpha*xx0+_cosAlpha*yy0,zz0));
 }
 
+//______________________________________________________________________________
 void StiKalmanTrackNode::setParameters(StiKalmanTrackFinderParameters *parameters)
 {
   pars = parameters;
 }
 
 
+//______________________________________________________________________________
 int StiKalmanTrackNode::locate(StiPlacement*place,StiShape*sh)
 {
   int position;
