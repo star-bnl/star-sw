@@ -1,5 +1,8 @@
-// $Id: StSvtHitMaker.h,v 1.14 2003/09/10 19:47:35 perev Exp $
+// $Id: StSvtHitMaker.h,v 1.15 2004/01/27 02:34:55 perev Exp $
 // $Log: StSvtHitMaker.h,v $
+// Revision 1.15  2004/01/27 02:34:55  perev
+// LeakOff
+//
 // Revision 1.14  2003/09/10 19:47:35  perev
 // ansi corrs
 //
@@ -91,7 +94,7 @@ class StSvtHitMaker : public StMaker
   void SetFileNames(char* name1="/dev/null", char* name2="/dev/null");
   Int_t Eval();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.14 2003/09/10 19:47:35 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.15 2004/01/27 02:34:55 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  protected:
@@ -110,6 +113,7 @@ class StSvtHitMaker : public StMaker
   StSvtGeantHits *mSvtGeantHit;  //!
   
   TH2F     *m_x_vs_y;  //! x vs y of Si points
+  int        mNwaf_no;  //! size of following array
   TH2F     **m_waf_no;  //! ladder no vs z of Si hit
 
   TNtuple *m_ClusTuple;                       //!

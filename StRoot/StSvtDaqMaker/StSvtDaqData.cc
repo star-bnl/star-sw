@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqData.cc,v 1.8 2003/09/02 17:59:08 perev Exp $
+ * $Id: StSvtDaqData.cc,v 1.9 2004/01/27 02:36:02 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqData.cc,v $
+ * Revision 1.9  2004/01/27 02:36:02  perev
+ * LeakOff
+ *
  * Revision 1.8  2003/09/02 17:59:08  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -115,11 +118,11 @@ int StSvtDaqData::setData(StSVTReader* reader, char* option)
 	    }
 	  }
 
-	  mData = (StSvtHybridDaqData*)at(index);
+	  StSvtHybridDaqData* mData = (StSvtHybridDaqData*)at(index);
 
 	  if (mData) {
 	    delete mData;
-	    //put_at(NULL, getHybridIndex(barrel,ladder,wafer,hybrid));
+	    put_at(0,index);
 	  }
 
 	  //if (mData)

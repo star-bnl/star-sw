@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: St_SvtDb_Reader.cc,v 1.5 2003/04/14 15:51:53 munhoz Exp $
+ * $Id: St_SvtDb_Reader.cc,v 1.6 2004/01/27 02:37:54 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: St_SvtDb_Reader.cc,v $
+ * Revision 1.6  2004/01/27 02:37:54  perev
+ * LeakOff
+ *
  * Revision 1.5  2003/04/14 15:51:53  munhoz
  * reading t0 from DB
  *
@@ -57,11 +60,18 @@ svtElectronics_st *electronic = NULL;
 
 //_____________________________________________________________________________
 St_SvtDb_Reader::St_SvtDb_Reader()
-{}
+{
+  mSvtDriftVeloc=0;
+  mSvtConfig = 0;
+  memset(svtDb,0,sizeof(svtDb));
+}
 
 //_____________________________________________________________________________
 St_SvtDb_Reader::~St_SvtDb_Reader()
-{}
+{
+  delete mSvtDriftVeloc;
+  delete mSvtConfig;
+}
 
 //_____________________________________________________________________________
 void St_SvtDb_Reader::setDataBase(St_DataSet* input, dbSvtType type)
@@ -130,12 +140,11 @@ StSvtConfig* St_SvtDb_Reader::getConfiguration()
 StSvtHybridCollection* St_SvtDb_Reader::getDriftVelocity()
 {
   cout << "St_SvtDb_Reader::getDriftVelocity" << endl;
+  assert(!mSvtDriftVeloc);
+  mSvtDriftVeloc = new StSvtHybridCollection(mSvtConfig);
+  getDriftVelocityAverage(mSvtDriftVeloc);
 
-  StSvtHybridCollection* svtDriftVeloc = new StSvtHybridCollection(mSvtConfig);
-
-  getDriftVelocityAverage(svtDriftVeloc);
-
-  return svtDriftVeloc;
+  return mSvtDriftVeloc;
 }
 
 //_____________________________________________________________________________
