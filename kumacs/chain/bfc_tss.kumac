@@ -30,7 +30,7 @@
 *  editted 6/12/98 Kathy Turner - put in tpc slow sim - had to add new inputs
 *                               to macro (adcxyzon,tpc_sector_first,_last)
 * ******************************************************************************
-* TOP        top level directory 
+* 
 * domain     list of domains to load [domain='tpc svt global]
 * chain       list of modules to run **** IN ORDER ****  
 *   [chain='g2t svg tpg srs tss tcl sgr tpt svm egr  ev0 evout']
@@ -55,28 +55,17 @@
 * 
 * 
 MACRO bfc _
-   TOP=$STAR  _
+   TOP=$STAR _
    adcxyzon=0 _
    tpc_sector_first=1 _
    tpc_sector_last=24 _
-   domain='tpc svt global' _
-   chain='gethij gst svg tpg srs tss'_ 
+   domain='tpc svt' _
+   chain='g2t svg tpg srs tss evout'_ 
    first=401 _
-   no_events=200 _
-   no_in_bunch=200 _
-   nsplit=20 _
-   prefix_in=/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2 _
-   prefix_out=/star/mds/data/SD98/auau200/bfc/central/hijing/set0001/regular/tss/auau_ce_b0-2 
+   no_events=1 _
+   input_file=$AFS_RHIC/star/data/samples/event_0000050.xdf _
+   output_file=tss_out.xdf
 
-ff    = $format([no_in_bunch]*int([first]/[no_in_bunch])+1,i5)
-f     = [ff]
-l     = [f]+[no_in_bunch]-1
-last  = [f]+[no_in_bunch]-1
-
-input_file = [prefix_in]_[f]_[l].xdf
-if [no_in_bunch]>[nsplit] then | split mode
-  output_file = ""
-endif
  macro/global/create input_file       [input_file]              'Input file name'
  macro/global/create output_file      [output_file]             'Output file name'
  macro/global/create adcxyzon         [adcxyzon]                'flag'
@@ -108,25 +97,12 @@ message ' *** Output file name              --> ' [output_file]
  *  MAIN EVENT LOOP 
  *****************************************
  message $cptime
- do iev=[first],[last],[nsplit]
-   iev1=[iev]
-   iev2=[iev]+[nsplit]-1
-   if [iev2]>[last] then
-     iev2 = [last
-   endif
-   i1 = $format([iev1],i4.4)
-   i2 = $format([iev2],i4.4)
-   output_file = [prefix_out]_[i1]_[i2].xdf
-   exec [TOP]/kumacs/chain/bfc_util#bfc_init chain=evout  
-   do ievent=[iev1],[iev2]
+ do ievent=1, [no_events]
 * clean tables
      tabclear [event]
      exec [TOP]/kumacs/chain/bfc_util#bfc_process [chain]
      if $iquest(1)<>0 goto EOF
      if (STAF_STATUS(1).ne. STAFCV_OK) goto EOF
-     exec [TOP]/kumacs/chain/bfc_util#bfc_process chain=evout
-   enddo
-   exec [TOP]/kumacs/chain/bfc_util#bfc_finish chain=evout
 *   wait
  enddo
 EOF:
