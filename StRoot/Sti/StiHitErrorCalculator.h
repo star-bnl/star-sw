@@ -33,6 +33,9 @@ class StiDefaultHitErrorCalculator: public StiHitErrorCalculator
    inline void set(double intrinsicZ, double driftZ,
 		   double crossZ, double intrinsicX,
 		   double driftX, double crossX);
+   inline void set(ifstream& iFle);
+
+   inline void report();
 
  private:
    void  SetSource(int);           
