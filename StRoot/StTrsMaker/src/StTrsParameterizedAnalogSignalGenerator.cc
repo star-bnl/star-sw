@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.23 2001/03/13 22:08:56 long Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.24 2001/11/21 01:57:29 long Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -9,7 +9,14 @@
  * normalization factors
  ***************************************************************************
  *
+ *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.24  2001/11/21 01:57:29  long
+ * adding log message for 3/2001 long;
+ * delete empty command line
+ * double InOuterFactor=1.0075,normalFactor=1.4 ;;--->
+ * double InOuterFactor=1.0075,normalFactor=1.4 ;
+ *
  * Revision 1.23  2001/03/13 22:08:56  long
  * *** empty log message ***
  *
