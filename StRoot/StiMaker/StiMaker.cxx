@@ -66,9 +66,6 @@ ClassImp(StiMaker)
 StiMaker::StiMaker(const Char_t *name) : StMaker(name),
 					 //names
 					 mEvalFileName("empty"),
-					 //flags
-					 mSimulation(false), mUseGui(true),
-					 mDoTrackFit(true), mSeedFinderType(kUndefined),
 					 //Containers
 					 mhitstore(0), mdetector(0), mtrackstore(0),
 					 //Factories
@@ -117,7 +114,7 @@ StiMaker::~StiMaker()
     delete mhitfiller;
     mhitfiller = 0;
 
-    if (mUseGui) {
+    if (StiIOBroker::instance()->useGui()) {
 	StiDisplayManager::kill();
 	mdisplay = 0;
     }
@@ -170,7 +167,7 @@ void StiMaker::Clear(const char*)
     mtrackfactory->reset();
     mktracknodefactory->reset();
 
-    if (mUseGui) {
+    if (StiIOBroker::instance()->useGui()) {
 	//Reset DisplayManager
 	mdisplay->reset();
     }
@@ -197,7 +194,7 @@ Int_t StiMaker::Init()
     cout <<"\n\n ------------------- StiIOBroker ----------------------- \n\n"<<*stiIO<<endl;
 
     //The Display
-    if (mUseGui) {
+    if (StiIOBroker::instance()->useGui()) {
 	mdisplay = StiDisplayManager::instance();
 	//Must come before anything that you want to be drawn
 	mdisplay->cd();
@@ -207,7 +204,7 @@ Int_t StiMaker::Init()
     mtrackstore = StiTrackContainer::instance();
 
     //The hit container
-    mhitstore = StiHitContainer::instance(mUseGui);
+    mhitstore = StiHitContainer::instance(StiIOBroker::instance()->useGui());
 
     //The Hit Factory
     mhitfactory = new StiHitFactory("HitFactory");
@@ -216,7 +213,7 @@ Int_t StiMaker::Init()
     //So, we can have 10 allocations at 50k a pop -> 500k hits max.
 
     //The Evalualbe Track Factory
-    if (mUseGui==true) {
+    if (StiIOBroker::instance()->useGui()==true) {
 	mtrackfactory =
 	    new StiRDEvaluableTrackFactory("StiRDEvaluableTrackFactory",50);
     }
@@ -237,7 +234,7 @@ Int_t StiMaker::Init()
     
 
     //The StiDetector factory
-    if (mUseGui==true) {
+    if (StiIOBroker::instance()->useGui()==true) {
 	mdetectorfactory = new StiRDDetectorFactory("RDDetectorFactory");
     }
     else {
@@ -265,8 +262,8 @@ Int_t StiMaker::Init()
     cout <<"Hits used from detectors:\t"<<*mhitfiller<<endl;
 
     //The seed finder (must be built after detector-tree)
-    if (mSeedFinderType==kEvaluable) {
-	cout <<"StiMaker::init(). Set tracker seed finder to kEvaluable"<<endl;
+    if (StiIOBroker::instance()->seedFinderType()==StiIOBroker::kEvaluable) {
+	cout <<"StiMaker::init(). Set tracker seed finder to StiIOBroker::kEvaluable"<<endl;
 	StiEvaluableTrackSeedFinder* temp =
 	    new StiEvaluableTrackSeedFinder(mAssociationMaker);
 	temp->setFactory(mtrackfactory);
@@ -274,16 +271,16 @@ Int_t StiMaker::Init()
 	temp->build();
 	mSeedFinder=temp;
     }
-    else if (mSeedFinderType==kComposite) {
-	cout <<"StiMaker::init(). Set tracker seed finder to kComposite"<<endl;
+    else if (StiIOBroker::instance()->seedFinderType()==StiIOBroker::kComposite) {
+	cout <<"StiMaker::init(). Set tracker seed finder to StiIOBroker::kComposite"<<endl;
 	StiCompositeSeedFinder* temp = new StiCompositeSeedFinder();
 	temp->setFactory(mtrackfactory);
 	temp->setBuildPath("StRoot/StiMaker/RunTimeParameters/CompositeSeedFinderBuild.txt");
 	temp->build();
 	mSeedFinder=temp;	
     }
-    else if (mSeedFinderType==kUndefined) { //not initialized
-	cout <<"StiMaker::init(). ERROR:\t SeedFinderType==kUndefined"<<endl;
+    else if (StiIOBroker::instance()->seedFinderType()==StiIOBroker::kUndefined) { //not initialized
+	cout <<"StiMaker::init(). ERROR:\t SeedFinderType==StiIOBroker::kUndefined"<<endl;
     }
     else { //catch all
 	cout <<"StiMaker::init(). ERROR:\t unkown SeedFinderType"<<endl;
@@ -295,7 +292,7 @@ Int_t StiMaker::Init()
     mtracker->setTrackSeedFinder(mSeedFinder);
     mtracker->isValid(true);
 
-    if (mUseGui) {
+    if (StiIOBroker::instance()->useGui()) {
 	mdisplay->setSkeletonView();
 	mdisplay->draw();
 	mdisplay->update();
@@ -315,17 +312,17 @@ Int_t StiMaker::Make()
     
     StEvent* rEvent = 0;
     rEvent = (StEvent*) GetInputDS("StEvent");
-    if (mSimulation && !mMcEventMaker) {
+    if (StiIOBroker::instance()->simulated() && !mMcEventMaker) {
 	cout <<"StiMaker::Make(). ERROR!\tmMcEventMaker==0"<<endl;
 	return 0;
     }
     
     StMcEvent* mc = 0;
-    if (mSimulation) {
+    if (StiIOBroker::instance()->simulated()) {
 	mc = mMcEventMaker->currentMcEvent();
     }
     
-    if (mSimulation==true && mc==0) {
+    if (StiIOBroker::instance()->simulated()==true && mc==0) {
 	cout <<"StiMaker::Make(). ERROR!\tMcEvent==0"<<endl;
 	return 0;
     }
@@ -353,20 +350,23 @@ Int_t StiMaker::Make()
 
 	//Pass mc event if simulated
 	StiEvaluableTrackSeedFinder* temp = dynamic_cast<StiEvaluableTrackSeedFinder*>(mSeedFinder);
-	if (mSimulation && temp!=0) {
+	if (StiIOBroker::instance()->simulated() && temp!=0) {
 	    temp->setEvent(mc);
 	}
 
 	//Now we can loop, if we're not using the gui
-	if (mUseGui==false) {
+	if (StiIOBroker::instance()->useGui()==false) {
+	    // cout <<"StiMaker::Maker().  FinishEvent"<<endl;
 	    finishEvent();
+	    // cout <<"\tStiMaker::Maker().  FinishEvent. done"<<endl;
 	}
-
     }
 
-    if (mUseGui==true) {
+    if (StiIOBroker::instance()->useGui()==true) {
+	// cout <<"StiMaker::Make.  Draw/update"<<endl;
 	mdisplay->draw();
 	mdisplay->update();
+	// cout <<"\tStiMaker::Make.  Draw/update. done"<<endl;
     }
 
     return kStOK;
@@ -381,16 +381,18 @@ void StiMaker::printStatistics() const
 
 void StiMaker::finishEvent()
 {
+    cout <<"StiMaker::finishEvent()"<<endl;
     while (mtracker->hasMore()) {
 	finishTrack();
     }
     StiEvaluator::instance()->evaluateForEvent(mtrackstore);
+    cout <<"\tStiMaker::finishEvent(). done"<<endl;
 }
 
 void StiMaker::finishTrack()
 {
     //Add call to next tracker action here
-    if (mDoTrackFit==true) {
+    if (StiIOBroker::instance()->doTrackFit()==true) {
 	mtracker->doTrackFit();
     }
     else {
@@ -411,19 +413,3 @@ void StiMaker::defineNextTrackStep(StiFindStep val)
     mtracker->setStepMode(val);
 }
 
-void StiMaker::setSeedFinderType(SeedFinderType val)
-{
-    if (val==kComposite) {
-	mSeedFinderType=kComposite;
-	cout <<"StiMaker::setSeedFinderType(). type==kComposite"<<endl;
-    }
-    else if (val==kEvaluable) {
-	mSeedFinderType=kEvaluable;
-	cout <<"StiMaker::setSeedFinderType(). type==kEvaluable"<<endl;
-    }
-    else {
-	cout <<"StiMaker::setSeedFinderType(). ERROR:\t"
-	     <<"Unkown SeedFinderType: "<<static_cast<int>(val)<<endl;
-	mSeedFinderType=kUndefined;
-    }
-}
