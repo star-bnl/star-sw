@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.46 1999/03/04 01:19:21 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.47 1999/03/04 03:01:27 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.47  1999/03/04 03:01:27  fisyak
+// fix typo
+//
 // Revision 1.46  1999/03/04 01:19:21  fisyak
 // Put release tag to run_summary table
 //
@@ -382,7 +385,7 @@ Int_t St_glb_Maker::Init(){
   
   dst_summary_param.n_phi_bins=  8;
 
-  m_dst_summary_param->AddAt(&dst_summary_param,1);
+  m_dst_summary_param->AddAt(&dst_summary_param,0);
 
   return StMaker::Init();
 }
@@ -781,7 +784,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.46 1999/03/04 01:19:21 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.47 1999/03/04 03:01:27 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
