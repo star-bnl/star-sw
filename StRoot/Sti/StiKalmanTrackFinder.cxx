@@ -392,7 +392,7 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 		{ 
 		  // not reaching this detector layer - stop track
 		  if (debug() > 2) cout << "TRACK DOES NOT REACH CURRENT volume"<<endl;
-		  if (debug()) cout << StiKalmanTrackNode::Comment() << endl;
+		  if (debug() > 1) cout << StiKalmanTrackNode::Comment() << endl;
 		  continue; // will try the next available volume on this layer
 		}
 	      else 
