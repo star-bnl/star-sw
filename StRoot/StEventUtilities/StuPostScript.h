@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuPostScript.h,v 1.1 2002/04/23 03:15:28 ullrich Exp $
+ * $Id: StuPostScript.h,v 1.2 2002/04/23 17:17:10 ullrich Exp $
  *
  * Author: Thomas Ullrich, April 2002
  ***************************************************************************
@@ -34,17 +34,18 @@
  *
  * Options (case sensitive):                                          
  * b     Black background, white frame.                               
- *       Otherwise the frame is dran in black and the                 
+ *       Otherwise the frame is drawn in black and the                 
  *       background is white.                                         
  * p     Draw beampipe.                                               
  * c     Use many colors for tracks (colored according to pt).        
- *       red pt>1, green 0.5<pt<1, blue<0.5                           
+ *       red pt>1 GeV/c, green 0.5<pt<1  GeV/c, blue<0.5  GeV/c
  * C     Use many colors for tracks (colored according to pt).        
  *       Blue lowest, red highest.                                    
- * f     Track drawn with fewer points (factor 4 less).               
- *       Helix becomes slightly more chiseled                         
- *       and files are considerable smaller.                          
- *       Still good for small scale eps.                              
+ * f     Track drawn with fewer points (factor 4 less).
+ *       Helices are approximated by a line to many points.
+ *       With fewer points the helices become slightly more
+ *       chiseled but files get considerable smaller.                          
+ *       Still sufficient for most cases.                              
  * t     Add text (event, run number, trigger etc.) to the plot.      
  * a     Plot all global tracks.                                      
  *       Without this option short tracks                             
@@ -60,6 +61,9 @@
  ***************************************************************************
  *
  * $Log: StuPostScript.h,v $
+ * Revision 1.2  2002/04/23 17:17:10  ullrich
+ * More description.
+ *
  * Revision 1.1  2002/04/23 03:15:28  ullrich
  * Initial Revision.
  *
