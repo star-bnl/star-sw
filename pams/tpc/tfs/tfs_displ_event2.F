@@ -1,5 +1,8 @@
-* $Id: tfs_displ_event2.F,v 1.4 1999/10/11 16:53:09 sakrejda Exp $
+* $Id: tfs_displ_event2.F,v 1.5 2000/02/22 20:06:26 hardtke Exp $
 * $Log: tfs_displ_event2.F,v $
+* Revision 1.5  2000/02/22 20:06:26  hardtke
+* replace tgc functions with tpc functions
+*
 * Revision 1.4  1999/10/11 16:53:09  sakrejda
 * Obsolete parameters removed and the old code to do the pileup
 * deleted (not Akio's , akio's is still in!). It did not work anyway.
@@ -79,15 +82,15 @@ C Local variables
       real dz
 
       real drivel, dummy, xlength 
-      integer iret, tgc_drift_velocity, tgc_drift_volume_length
+      integer iret, tpc_drift_velocity, tpc_drift_volume_length
       character*132 m132
 
 C=========================== Begin Executable Code =======================
 c
 c     get the drift velocity
-      iret = tgc_drift_velocity(drivel,dummy,dummy)
+      iret = tpc_drift_velocity(drivel)
 c     get the drift length
-      iret = tgc_drift_volume_length(xlength,dummy,dummy)
+      iret = tpc_drift_volume_length(xlength)
 
 C     now do the displacement
       do i = 1, par(1).nsect

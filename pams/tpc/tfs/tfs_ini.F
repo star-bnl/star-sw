@@ -1,5 +1,8 @@
-* $Id: tfs_ini.F,v 1.6 1999/10/11 16:53:13 sakrejda Exp $
+* $Id: tfs_ini.F,v 1.7 2000/02/22 20:06:27 hardtke Exp $
 * $Log: tfs_ini.F,v $
+* Revision 1.7  2000/02/22 20:06:27  hardtke
+* replace tgc functions with tpc functions
+*
 * Revision 1.6  1999/10/11 16:53:13  sakrejda
 * Obsolete parameters removed and the old code to do the pileup
 * deleted (not Akio's , akio's is still in!). It did not work anyway.
@@ -93,10 +96,10 @@ C     ASCALE - is the linear scale factor in-between
       REAL  CLUS_PER_CM_AR, CLUS_PER_CM_CH4, F_AR, F_CH4, PRESSURE
 
       INTEGER  n0
-      INTEGER tgc_drift_velocity
+      INTEGER tpc_drift_velocity
       INTEGER iret
       REAL    dummy
-      INTEGER tgc_drift_volume_length
+      INTEGER tpc_drift_volume_length
       REAL    xlength
 
 CDH test variables:
@@ -126,10 +129,11 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
          RETURN
       endif
 c     get drift velocity
-      iret = tgc_drift_velocity(drivel, dummy, dummy)
+      iret = tpc_drift_velocity(drivel)
 
 c     get the TPC length
-      iret = tgc_drift_volume_length(xlength,dummy,dummy)
+      iret = tpc_drift_volume_length(xlength)
+
       
 C     pad response function (prf)
       

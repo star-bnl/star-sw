@@ -1,5 +1,8 @@
-* $Id: tfs_tpchit_merge.F,v 1.14 1999/11/23 00:45:35 sakrejda Exp $
+* $Id: tfs_tpchit_merge.F,v 1.15 2000/02/22 20:06:27 hardtke Exp $
 * $Log: tfs_tpchit_merge.F,v $
+* Revision 1.15  2000/02/22 20:06:27  hardtke
+* replace tgc functions with tpc functions
+*
 * Revision 1.14  1999/11/23 00:45:35  sakrejda
 * Hits that had de<0 or were merged with hits with de<0 flagged with flagset
 * to 5. tfs does not handle them correctly. They are mostly edge hits
@@ -127,7 +130,7 @@ C Local variables
       REAL RMIN, RMAX, ZMIN, ZMAX, RMINK, RMINL
       REAL XOUTK(3),XOUTL(3),XGLOB(3)
 
-      integer  tgc_global_to_local, tgc_local_to_global
+      integer  tpc_global_to_local, tpc_local_to_global
       integer  iret,irowl,i_rows(100),ii_rows, hit_id, counter
       integer  tls_Quick_Sort_r, tls_Quick_Sort_i,tls_Search_i
 
@@ -286,17 +289,19 @@ C     rotate into local sector coord system
                xglob(1) = tphit(k).x
                xglob(2) = tphit(k).y
                xglob(3) = tphit(k).z
-               iret  = tgc_global_to_local(IsectorDummy,xglob,xoutk)
+               iret  = tpc_global_to_local(IsectorDummy,xglob,xoutk)
                xglob(1) = tphit(l).x
                xglob(2) = tphit(l).y
                xglob(3) = tphit(l).z
-               iret  = tgc_global_to_local(IsectorDummy,xglob,xoutl)
+               iret  = tpc_global_to_local(IsectorDummy,xglob,xoutl)
 
 C     In the new tgc routines, local Z coordinate is measured relative to
 C     pad-plane and is alway positive. So Z-direction hit merging needs to be 
 C     done in local sector coordinate system. Therefore hit merging in all
 C     three directions are now done in local sector coordinate system.
 C     -- Apr 15, 1996  Dhammika W. --
+C     -- Feb. 17, 2000 Hardtke -- replace tgc with tpc functions, but 
+c                                 convention is the same
 
 C     check overlap in the z-direction
                if ( zlap .ge. zsizk ) then
@@ -373,7 +378,7 @@ C     add the amplitudes and quadrature the errors
                xoutl(2) = (xoutl(2) + xoutk(2))/2.
                xoutl(3) = (zmax + zmin) / 2.
                IsectorDummy=i
-               iret  = tgc_local_to_global(IsectorDummy,xoutl,xglob) 
+               iret  = tpc_local_to_global(IsectorDummy,xoutl,xglob) 
                tphit(l).x = xglob(1)
                tphit(l).y = xglob(2)
                tphit(l).z = xglob(3)
