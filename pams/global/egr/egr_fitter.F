@@ -302,7 +302,7 @@ C  Abort if the TPC is needed but there are no TPC tracks
       endif
 
       do i=1,svt_track_h.nok
-         if( svt_track(i).id .lt. mxtrack) then
+         if( svt_track(i).id .le. mxtrack) then
             svt(svt_track(i).id) = i
          endif
       enddo
@@ -398,7 +398,7 @@ C     Now find first point on track
 C     Now find last point on track and calculate track length.
                   
                   if (tptrack(itpct).id.gt.0.and.
-     +                 tptrack(itpct).id.lt.mxtrack) then
+     +                 tptrack(itpct).id.le.mxtrack) then
                      lasthit = gtrk(tptrack(itpct).id).ipnt(1)
                   else
                      write (errmsg,'(A60)')
@@ -565,7 +565,7 @@ C     Now find first point on track
 C     Now find last point on track and calculate track length.
 
                if (tptrack(tpc(itpct)).id.gt.0.and.
-     +              tptrack(tpc(itpct)).id.lt.mxtrack) then
+     +              tptrack(tpc(itpct)).id.le.mxtrack) then
                   lasthit = gtrk(tptrack(tpc(itpct)).id).ipnt(1)
                else
                   write (errmsg,'(A60)')
@@ -710,7 +710,7 @@ C     +           tptrack(itrk).nrec .gt. 10 )    then
                   globtrk(iglob).chisq(2) = tptrack(itrk).chisq(2)
 C     Now find first point on track.
                   if (tptrack(itrk).id.gt.0.and.
-     +                 tptrack(itrk).id.lt.mxtrack) then
+     +                 tptrack(itrk).id.le.mxtrack) then
                      ifirst = gtrk(tptrack(itrk).id).ntpc
                      ifirst = 
      +              gtrk(tptrack(itrk).id).ipnt(ifirst)
@@ -725,7 +725,7 @@ C     Now find first point on track.
 
 C     Now find last point on track and calculate track length.
                   if (tptrack(itrk).id.gt.0.and.
-     +                 tptrack(itrk).id.lt.mxtrack) then
+     +                 tptrack(itrk).id.le.mxtrack) then
                      lasthit = gtrk(tptrack(itrk).id).ipnt(1)
                   else
                      write (errmsg,'(A60)')
