@@ -1,7 +1,7 @@
 
 /*******************************************************************
  *
- * $Id: StEEmcSmdGeom.h,v 1.3 2003/06/11 18:58:15 wzhang Exp $
+ * $Id: StEEmcSmdGeom.h,v 1.4 2003/08/22 15:14:03 wzhang Exp $
  *
  * Author: Wei-Ming Zhang
  *****************************************************************
@@ -18,6 +18,9 @@
  *****************************************************************
  *
  * $Log: StEEmcSmdGeom.h,v $
+ * Revision 1.4  2003/08/22 15:14:03  wzhang
+ * Added ClassDef and method stripEnd
+ *
  * Revision 1.3  2003/06/11 18:58:15  wzhang
  * added geometry methods for StiEEmc
  *
@@ -31,6 +34,7 @@
  *******************************************************************/
 #ifndef STEEMCSMDGEOM_H
 #define STEEMCSMDGEOM_H
+#include "TObject.h"
 #include "StThreeVectorD.hh"
 #include "StThreeVectorF.hh"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
@@ -39,8 +43,6 @@
 #ifndef ST_NO_NAMESPACES
 using std::vector;
 #endif
-
-class StMaker;
 
 struct StructEEmcSmdParam {
   float zPlane[kEEmcNumSmdPlanes];
@@ -82,14 +84,18 @@ struct StructEEmcSmdModule {
   EEmcStripPtrVec stripPtrVec;  
 };
 
-class StEEmcSmdGeom{
+class StEEmcSmdGeom : public TObject {
+ public:  
+  StEEmcSmdGeom();
+  virtual ~StEEmcSmdGeom(); 
+
  private:
   StructEEmcSmdParam     mEEmcSmdParam;      //! general geometry variables
   StructEEmcSmdModule    mEEmcUModule[kEEmcNumSectors];   //! 12 U modules. 
   StructEEmcSmdModule    mEEmcVModule[kEEmcNumSectors];   //! 12 V modules. 
   bool                   mIsSectorIn[kEEmcNumSectors];    //! sector status. 
 
-  void initGeomFromFile(const Char_t* = "/star/u/wzhang/myafs/anlsmd/strip_geometry.txt");
+  void initGeomFromFile(const Char_t* = "/star/u/wzhang/smd/strip_geometry.txt");
   static StEEmcSmdGeom* sInstance;
 
  public:
@@ -120,8 +126,14 @@ class StEEmcSmdGeom{
   // return module Id of a point 
   Int_t EEmcModuleId(const Int_t planeId, const StThreeVectorD& point) const;
   
+  // return a strip from Ids   
+  StructEEmcStrip EEmcStrip(const Int_t layerId, const Int_t mId, const Int_t etaId);
+
   // return a DCA strip from a global point (float *dca carries a sign)  
   StructEEmcStrip EEmcStrip(const Int_t planeId, const StThreeVectorD& point, Float_t* dca);
+
+  // return coordinates of ends of a strip   
+  StThreeVectorD  stripEnd(const StructEEmcStrip strip, const Int_t endId);
 
   // match two strips 
   bool EEmcMatchStrips(const StructEEmcStripId stripId1, 
@@ -140,11 +152,10 @@ class StEEmcSmdGeom{
   void printModule(const StructEEmcSmdModule Module, ostream& os = cout) const;
   void printStrip(const StructEEmcStrip Strip, ostream& os = cout) const;
   void printStripId(const StructEEmcStripId StripId, ostream& os = cout) const;
-  
+
 //protected
  protected:  
-  StEEmcSmdGeom();
-  virtual ~StEEmcSmdGeom(); 
+  ClassDef(StEEmcSmdGeom,1)  // STAR Endcap Electromagnetic Calorimeter SMD Geometry Class
 };
 
 inline bool StEEmcSmdGeom::IsSectorIn(Int_t sId)
