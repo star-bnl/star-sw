@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.h,v 1.5 2004/11/30 19:01:38 mmiller Exp $
+// $Id: StJets.h,v 1.6 2004/12/07 20:03:35 mmiller Exp $
 // $Log: StJets.h,v $
+// Revision 1.6  2004/12/07 20:03:35  mmiller
+// Fixed the tracking of the software-id (tower index) of barrel towers in the jet.
+//
 // Revision 1.5  2004/11/30 19:01:38  mmiller
 // Back compatibility for pre P04k bemc corrupt events
 //
@@ -106,7 +109,9 @@ public:
     
     void setJetIndex(int n) {mJetIndex=n;}
     int jetIndex() const {return mJetIndex;}
-    
+
+    ///Note, trackIndex is the index of the track in the primaryTracks array, if detectorId==kTpcId.
+    ///If detectorId==kBemcTowerId, it is the tower index (actually software id)
     void setTrackIndex(int n) {mTrackIndex=n;}
     int trackIndex() const {return mTrackIndex;}
 

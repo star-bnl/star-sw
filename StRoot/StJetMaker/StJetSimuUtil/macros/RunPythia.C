@@ -9,8 +9,8 @@ int total=0;
 void RunPythia(
 	       int nevents = 100,
 	       const char *dir ="",
-	       const char *fname= "/star/data19/reco/pp200/pythia6_203/default/pt15/y2004x/gheisha_on/trs_ii/pds1214_68_5000evts.geant.root",
-	       const char *file ="/star/data19/reco/pp200/pythia6_203/default/pt15/y2004x/gheisha_on/trs_ii/pds1214_68_5000evts.MuDst.root",
+	       const char* file ="/star/data18/reco/pp200/pythia6_203/default/pt15/y2004x/gheisha_on/trs_ij/pds1214_69_5000evts.MuDst.root",
+	       const char *fname="/star/data18/reco/pp200/pythia6_203/default/pt15/y2004x/gheisha_on/trs_ij/pds1214_69_5000evts.geant.root",
 	       const char *filter = "",
 	       const char* outfile = "Simu.jet.root",
 	       const char *soutfile="Simu_out.root"
@@ -28,6 +28,7 @@ void RunPythia(
     gSystem->Load("StMcEvent");
     gSystem->Load("StMcEventMaker");
     gSystem->Load("StDaqLib");
+    gSystem->Load("StEmcRawMaker");
     gSystem->Load("StEmcADCtoEMaker");
     gSystem->Load("StEpcMaker");
     gSystem->Load("StDbLib");
@@ -58,9 +59,24 @@ void RunPythia(
     StMuDebug::setLevel(1); 
     StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,dir,file,filter,10,"MuDst");
 
-    /*
-      emc stuff here....
-    */
+    //Database
+    St_db_Maker *dbMk =new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","StarDb");
+    dbMk->SetDateTime(20031120,0);
+    dbMk->SetFlavor("sim","bemcPed");
+    dbMk->SetFlavor("sim","bemcStatus");
+    dbMk->SetFlavor("sim","bemcCalib");
+    dbMk->SetFlavor("sim","bemcGain");
+    dbMk->SetFlavor("sim","eemcPMTcal");
+    dbMk->SetFlavor("sim","eemcPIXcal");
+
+    //EmcAdc2EMaker
+    StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
+
+    //Instantiate the StEmcTpcFourPMaker
+    StEmcTpcFourPMaker* emcFourPMaker = new StEmcTpcFourPMaker("EmcTpcFourPMaker", muDstMaker, 30, 30, .3, .3, .003, adc);
+    emcFourPMaker->setUseType(StEmcTpcFourPMaker::Hits);//if don't have this line then default is 0 (which is hits)
+    emcFourPMaker->setMaxPoints(150);
+    emcFourPMaker->setMinPointThreshold(.3);
 
     //Instantiate Trigger maker for simulation
     StJetSimuTrigMaker *trig=new StJetSimuTrigMaker("SimuTrig");
@@ -75,7 +91,7 @@ void RunPythia(
     stree->setPrintOption(0);
 
     //Pythia4pMaker
-    StPythiaFourPMaker* pythiaFourPMaker = new StPythiaFourPMaker("StPythiaFourPMaker",weight, mcEventMaker);
+    //StPythiaFourPMaker* pythiaFourPMaker = new StPythiaFourPMaker("StPythiaFourPMaker",weight, mcEventMaker);
 
     //Instantiate the JetMaker
     StJetMaker* emcJetMaker = new StJetMaker("emcJetMaker", muDstMaker, outfile);
@@ -104,13 +120,17 @@ void RunPythia(
     cpars->setRequireStableMidpoints(true);
     cpars->setDoSplitMerge(true);
     cpars->setDebug(false);
-    emcJetMaker->addAnalyzer(anapars, cpars, pythiaFourPMaker, "MkPythiaConeJetsPt02R07");
  
     //Setup the kt=finder (See StJetFinder/StKtCluFinder.h -> class StKtCluPars)
     StKtCluPars* ktpars = new StKtCluPars();
     ktpars->setR(1.0);
     ktpars->setDebug(false);
-    emcJetMaker->addAnalyzer(anapars, ktpars, pythiaFourPMaker, "MkPythiaKtJet");
+
+    //Creat jet finders
+    //emcJetMaker->addAnalyzer(anapars, cpars, pythiaFourPMaker, "PythiaConeJetsPt02R07");  //cone + pythia
+    //emcJetMaker->addAnalyzer(anapars, ktpars, pythiaFourPMaker, "PythiaKtJet"); //kt + pythia
+    emcJetMaker->addAnalyzer(anapars, cpars, emcFourPMaker, "RecoConeJetsPt02R07"); //cone + reco
+    emcJetMaker->addAnalyzer(anapars, ktpars, emcFourPMaker, "RecoKtJet"); //kt + Reco
 
     
     chain->Init();
