@@ -3,7 +3,7 @@
       
    macro/global/import *
 
-     cd [params]/emc
+     cd [params]/emc/jet
   
      tdm/newtable       emc_jetpar emc_jetpar 1
      tdm/table/rowcount emc_jetpar 1

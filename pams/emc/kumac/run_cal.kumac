@@ -1,0 +1,26 @@
+*** Put variations of pedestal and slope
+macro energy_to_adc
+macro/global/import *
+
+  ami/module/call energy_to_adc _
+    [params]/emc/ems/ems_control _
+    [params]/emc/cal/ems_cal_control _
+    [params]/emc/cal/org_ped_bemc _
+    [params]/emc/cal/org_slp_bemc _
+    [data]/emc/hits/adc_bemc
+  
+return
+ 
+*** Energy to ADC conversion  
+macro adc_to_energy
+macro/global/import *
+
+  ami/module/call adc_to_energy _
+    [calib]/emc/bemc/pedestal/current/ped_bemc _
+    [calib]/emc/bemc/gain/current/slp_bemc _
+    [data]/emc/hits/adc_bemc
+  
+return
+ 
+
+

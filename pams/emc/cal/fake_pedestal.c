@@ -32,11 +32,11 @@ long type_of_call fake_pedestal_(
     long iseed=999; 
 
     if(fake_ped_h->maxlen <= 0 ) {
-      puts("maxlen is less equal zero\n");
+      puts("maxlen is less equal zero");
       return STAFCV_BAD;
     }
     if(fake_ped_h->nok+1 > fake_ped_h->maxlen){
-      puts("nok is more than maxlen\n");
+      puts("nok is more than maxlen");
       return STAFCV_BAD;
     }
     n = fake_ped_h->nok;
@@ -53,26 +53,24 @@ long type_of_call fake_pedestal_(
       fake_ped[n].neta = ems_control[nok_c].bemc_eta_nbin;
       break;
     default: 
-      puts("emc_cal_control.det is invalid. Specify the detector\n");
+      puts("emc_cal_control.det is invalid. Specify the detector.");
       return STAFCV_BAD;
     }
     if(fake_ped[n].neta < 1 || fake_ped[n].nphi < 1){
-      puts("neta or ephi is less than 1, need inputs in ems_control\n");
+      puts("neta or ephi is less than 1, need inputs in ems_control.");
       return STAFCV_BAD;
     }
-    fake_ped[n].flag = -1; /* flag=-1 fake data */
+    fake_ped[n].flag = -1;              /* flag=-1 fake data */
     fake_ped[n].det  = ems_cal_control[nok_cc].det; 
     for( i = 0; i < fake_ped[n].nphi ; i++ ){
       for( j = 0; j < fake_ped[n].neta ; j++ ){
-	fake_ped[n].pedA[i][j]=(short)ems_cal_control[nok_cc].ped_channel
-                              +(short)( ems_cal_control[nok_cc].ped_var
-                              *(ran0(&iseed) - 0.5) );
-	fake_ped[n].pedB[i][j]=(short)ems_cal_control[nok_cc].ped_channel
-                              +(short)(ems_cal_control[nok_cc].ped_var
-                              *(ran0(&iseed) - 0.5) );
+	fake_ped[n].ped[i][j]=(short)ems_cal_control[nok_cc].ped_channel
+                             +(short)( ems_cal_control[nok_cc].ped_var
+                             *(ran0(&iseed) - 0.5) );
       }
     } 
     ems_cal_control[nok_cc].iseed=iseed;
     fake_ped_h->nok++;
     return STAFCV_OK;
 }
+

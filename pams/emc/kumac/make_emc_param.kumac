@@ -1,0 +1,89 @@
+ macro make_param TOP=$STAR domain='emc'
+   shell rm ./params/emc/ems_param.xdf ./params/emc/jet_param.xdf ./params/emc/cal_param.xdf 
+   macro/global/create TOP [TOP]
+   macro/global/create gstar_settings [gstar_settings]
+   exec $STAR/kumacs/util/setup_defaults
+   exec setup#setup
+   alias/create STAFCV_OK  1
+   alias/create STAFCV_BAD 0   
+   macro/global/import *
+   exec load_libraries#run [domain]
+   
+   cd [params]/emc
+   mkdir ems
+   mkdir cal
+   mkdir jet
+   cd /dui
+   
+   exec init_ems.kumac
+   exec init_cal.kumac  
+   exec init_jet.kumac  
+   exec fake_pedestal
+   exec fake_adcslope
+   
+   dio/newfilestream out1 ./params/emc/ems_param.xdf w
+   dio/stream/putevent out1 [params]/emc/ems
+   dio/stream/close out1
+   dio/newfilestream out2 ./params/emc/jet_param.xdf w
+   dio/stream/putevent out2 [params]/emc/jet
+   dio/stream/close out2
+   dio/newfilestream out3 ./params/emc/cal_param.xdf w
+   dio/stream/putevent out3 [params]/emc/cal
+   dio/stream/close out3
+      
+return   
+
+*** Make fake pedestal calibration constants   
+macro fake_pedestal 
+macro/global/import *
+cd [params]/emc/cal
+ 
+tdm/table/cell/putvalue 'ems_cal_control[0].det'                1
+tdm/table/cell/putvalue 'ems_cal_control[0].ped_channel'        0
+tdm/table/cell/putvalue 'ems_cal_control[0].ped_var'            0
+tdm/newtable org_ped_bemc emc_pedestal 1
+ami/module/call fake_pedestal [params]/emc/ems/ems_control ems_cal_control org_ped_bemc 
+
+tdm/table/cell/putvalue 'ems_cal_control[0].det'                4
+tdm/table/cell/putvalue 'ems_cal_control[0].ped_channel'        30
+tdm/table/cell/putvalue 'ems_cal_control[0].ped_var'            20
+tdm/newtable org_ped_eemc emc_pedestal 1
+ami/module/call fake_pedestal [params]/emc/ems/ems_control ems_cal_control org_ped_eemc 
+
+tdm/table/cell/putvalue 'ems_cal_control[0].det'                2
+tdm/table/cell/putvalue 'ems_cal_control[0].ped_channel'        20
+tdm/table/cell/putvalue 'ems_cal_control[0].ped_var'            10
+tdm/newtable org_ped_bprs emc_pedestal 1
+ami/module/call fake_pedestal [params]/emc/ems/ems_control ems_cal_control org_ped_bprs 
+ 
+cd /dui
+return
+
+*** Make fake adc slope calibration constants   
+macro fake_adcslope 
+macro/global/import *
+cd [params]/emc/cal
+
+tdm/table/cell/putvalue 'ems_cal_control[0].det'	        1
+tdm/table/cell/putvalue 'ems_cal_control[0].slope_fun'          1
+tdm/table/cell/putvalue 'ems_cal_control[0].slope_ave'          1.0
+tdm/table/cell/putvalue 'ems_cal_control[0].slope_var'         0.1
+tdm/newtable org_slp_bemc emc_adcslope 1
+ami/module/call fake_adcslope [params]/emc/ems/ems_control ems_cal_control org_slp_bemc
+
+tdm/table/cell/putvalue 'ems_cal_control[0].det'	        4
+tdm/table/cell/putvalue 'ems_cal_control[0].slope_fun'          1
+tdm/table/cell/putvalue 'ems_cal_control[0].slope_ave'          1.0
+tdm/table/cell/putvalue 'ems_cal_control[0].slope_var'        0.11
+tdm/newtable org_slp_eemc emc_adcslope 1
+ami/module/call fake_adcslope [params]/emc/ems/ems_control ems_cal_control org_slp_eemc
+
+tdm/table/cell/putvalue 'ems_cal_control[0].det'	        2
+tdm/table/cell/putvalue 'ems_cal_control[0].slope_fun'          1
+tdm/table/cell/putvalue 'ems_cal_control[0].slope_ave'          1.0
+tdm/table/cell/putvalue 'ems_cal_control[0].slope_var'          0.2
+tdm/newtable org_slp_bprs emc_adcslope 1
+ami/module/call fake_adcslope [params]/emc/ems/ems_control ems_cal_control org_slp_bprs
+cd /dui
+return
+

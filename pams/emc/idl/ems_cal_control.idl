@@ -8,13 +8,9 @@
      long   ped_channel;   /* mean pedestal for fake_pedestal */
      long   ped_var;       /* ch to ch pedestal variation for fake_pedestal */
      long   slope_fun;     /* slope function # for fake_adcslope */
-     float  adc_rangeA;    /* A adc range for fake_adcslope */
-     float  adc_rangeB;    /* B adc range for fake_adcslope */
+     float  slope_ave;     /* average slope for fake_adcslope */
      float  slope_var;     /* slope variation for fake_adcslope */
-     long   bemc_adckink;  /* ADC A to B changing point */
-     long   eemc_adckink;  /* ADC A to B changing point */
      float  ped_width;     /* pedestal width for energy_to_adc */
-     long   force_B;       /* != 0 force to use ADC B */
      long   toy_sim_mode;  /* =0 pedestal, =1 gaussian */
      float  noise_level;   /* noise level for toy_simulator mode=0 */
      float  noise_width;   /* noise width for toy_simulator mode=0 */

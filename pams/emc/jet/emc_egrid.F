@@ -352,17 +352,17 @@ c         call find_pos_emc(ems_control,2,pbin,1,phi,eta)
 c         write(*,*) 'find_pos/e/phi; ', pbin, phi 
 c      enddo
 c      do i=1,220
-c        eta=float(i)/float(det)*4.4-2.2
+c        eta=float(i)/220.0*4.4-2.2
 c         call find_bin_emc(ems_control,0.0,eta,det,pbin,ebin)
 c         write(*,*) 'find_bin/eta; ', det,eta, ebin
 c      enddo
 c      do i=1,240
-c         phi=float(i)/float(det)*PI2
+c         phi=float(i)/240.0*PI2
 c         call find_bin_emc(ems_control,phi,0.0,det,pbin,ebin)
 c         write(*,*) 'find_bin/b/phi; ', phi, pbin
 c      enddo
 c      do i=1,240
-c         phi=float(i)/float(det)*PI2
+c         phi=float(i)/240.0*PI2
 c         call find_bin_emc(ems_control,phi,1.1,det,pbin,ebin)
 c         write(*,*) 'find_bin/e/phi; ', phi, pbin
 c      enddo

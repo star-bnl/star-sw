@@ -1,0 +1,65 @@
+*** Make calbration tables for emc
+*** For the moment, pedestal is zero and slope is a given number
+*** We need to build calibration system 
+ 
+ macro ped TOP=$STAR domain='emc'
+   macro/global/create TOP [TOP]
+   macro/global/create gstar_settings [gstar_settings]
+   exec $STAR/kumacs/util/setup_defaults
+   exec setup#setup
+   alias/create STAFCV_OK  1
+   alias/create STAFCV_BAD 0   
+   macro/global/import *
+   exec load_libraries#run [domain]
+   
+   exec init_ems.kumac
+   exec init_cal.kumac  
+   
+   cd [params]/emc/cal
+   tdm/table/cell/putvalue 'ems_cal_control[0].det'                1
+   tdm/table/cell/putvalue 'ems_cal_control[0].ped_channel'        0
+   tdm/table/cell/putvalue 'ems_cal_control[0].ped_var'            0
+   mkdir [calib]/emc/bemc
+   mkdir [calib]/emc/bemc/pedestal
+   mkdir [calib]/emc/bemc/pedestal/current
+   cd [calib]/emc/bemc/pedestal/current
+   tdm/newtable ped_bemc emc_pedestal 1
+   tdm/table/rowcount ped_bemc 0
+   ami/module/call fake_pedestal [params]/emc/ems/ems_control _
+                   [params]/emc/cal/ems_cal_control ped_bemc 
+   dio/newfilestream out ./calib/emc/bemc/pedestal/ped_bemc.19801231.2000000 w
+   dio/stream/putevent out .
+   dio/stream/close out
+return   
+ 
+macro slp TOP=$STAR domain='emc'
+   macro/global/create TOP [TOP]
+   macro/global/create gstar_settings [gstar_settings]
+   exec $STAR/kumacs/util/setup_defaults
+   exec setup#setup
+   alias/create STAFCV_OK  1
+   alias/create STAFCV_BAD 0   
+   macro/global/import *
+   exec load_libraries#run [domain]
+   
+   exec init_ems.kumac
+   exec init_cal.kumac  
+   
+   cd [params]/emc/cal
+   tdm/table/cell/putvalue 'ems_cal_control[0].det'                1
+   tdm/table/cell/putvalue 'ems_cal_control[0].slope_fun'          1
+   tdm/table/cell/putvalue 'ems_cal_control[0].slope_ave'          1218.56
+   tdm/table/cell/putvalue 'ems_cal_control[0].slope_var'          0.0
+
+   mkdir [calib]/emc/bemc
+   mkdir [calib]/emc/bemc/gain
+   mkdir [calib]/emc/bemc/gain/current
+   cd [calib]/emc/bemc/gain/current
+   tdm/newtable slp_bemc emc_adcslope 1
+   tdm/table/rowcount slp_bemc 0
+   ami/module/call fake_adcslope [params]/emc/ems/ems_control _
+                   [params]/emc/cal/ems_cal_control slp_bemc
+   dio/newfilestream out ./calib/emc/bemc/gain/slp_bemc.19801231.2000000 w
+   dio/stream/putevent out .
+   dio/stream/close out
+return   

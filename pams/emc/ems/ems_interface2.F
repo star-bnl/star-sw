@@ -43,7 +43,7 @@ c---- Tags
       integer tesmd(2,60,200,100)
 
 c---- start executable statements...
-      write(*,*) 'EMS_INTERFACE2:starting...'
+c      write(*,*) 'EMS_INTERFACE2:starting...'
       EMS_INTERFACE2 = STAFCV_BAD
 
 c----
@@ -60,30 +60,40 @@ c----
             call find_parent_b(ems_control_h, ems_control,
      +           g2t_vertex_h,g2t_vertex,g2t_track_h,g2t_track,itrk,ipartrk)
             iparpid  = g2t_track(itrk).ge_pid
-            if(tbemc(eta,phi,dep).eq.0) then
-               nout=nout+1
-               if(ems_hits_bemc_h.maxlen.le.nout) then
-                  write(*,*) 'EMS INTERFACE2: Short of space in EMS_HITS_BEMC'
-                  RETURN
+            do j=1,2
+               if(j.eq.2) then
+                  if(dep.eq.1) then 
+                     dep=2      !if it's pre-shower, add dE to the whole tower too
+                  else
+                     goto 100
+                  endif
                endif
-               i=nout
-               tbemc(eta,phi,dep)=nout
-               ems_hits_bemc(i).eta_bin  = eta
-               ems_hits_bemc(i).phi_bin  = phi
-               ems_hits_bemc(i).tower_dep= dep
-               ems_hits_bemc(i).e_sum    = de
-               if(g2t_track(ipartrk).charge.eq.0) then
-                  ems_hits_bemc(i).e_neut=de
+               if(tbemc(eta,phi,dep).eq.0) then
+                  nout=nout+1
+                  if(ems_hits_bemc_h.maxlen.le.nout) then
+                     write(*,*) 'EMS INTERFACE2: Short of space in EMS_HITS_BEMC'
+                     RETURN
+                  endif
+                  i=nout
+                  tbemc(eta,phi,dep)=nout
+                  ems_hits_bemc(i).eta_bin  = eta
+                  ems_hits_bemc(i).phi_bin  = phi
+                  ems_hits_bemc(i).tower_dep= dep
+                  ems_hits_bemc(i).e_sum    = de
+                  if(g2t_track(ipartrk).charge.eq.0) then
+                     ems_hits_bemc(i).e_neut=de
+                  else
+                     ems_hits_bemc(i).e_neut=0.0
+                  endif
                else
-                  ems_hits_bemc(i).e_neut=0.0
+                  i=tbemc(eta,phi,dep)
+                  ems_hits_bemc(i).e_sum=ems_hits_bemc(i).e_sum+de
+                  if(g2t_track(ipartrk).charge.eq.0) then
+                     ems_hits_bemc(i).e_neut=ems_hits_bemc(i).e_neut+de
+                  endif
                endif
-            else
-               i=tbemc(eta,phi,dep)
-               ems_hits_bemc(i).e_sum=ems_hits_bemc(i).e_sum+de
-               if(g2t_track(ipartrk).charge.eq.0) then
-                  ems_hits_bemc(i).e_neut=ems_hits_bemc(i).e_neut+de
-               endif
-            endif
+            enddo
+ 100        continue
          enddo
          ems_hits_bemc_h.nok=nout
       endif
