@@ -220,7 +220,7 @@ void StTreeMaker::UpdateTree(Int_t flag)
         continue;}
         
     br = (StBranch*)fTree->Find(updName);
-    if (!br && fIOMode!="r" && fIOMode!="0") br = new StBranch(updName,fTree);
+    if (!br && fIOMode!="r" && fIOMode!="0") br = new StBranch(updName,fTree,"w");
       
     if (!br) 				continue;
     if (!updMode.IsNull() || !updFile.IsNull()) br->SetFile(updFile,updMode);  
