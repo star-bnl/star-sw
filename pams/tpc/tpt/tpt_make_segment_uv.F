@@ -1,5 +1,8 @@
-* $Id: tpt_make_segment_uv.F,v 1.14 2000/04/28 03:10:19 sakrejda Exp $
+* $Id: tpt_make_segment_uv.F,v 1.15 2000/05/01 04:11:42 sakrejda Exp $
 * $Log: tpt_make_segment_uv.F,v $
+* Revision 1.15  2000/05/01 04:11:42  sakrejda
+* Debug write removed.
+*
 * Revision 1.14  2000/04/28 03:10:19  sakrejda
 * Added freing of hits from a track that did not survive the fitting.
 *
@@ -318,7 +321,6 @@ C         succesfull search - fit a track
           tte_skip=0
           iret =
      >    tpt_fit_track(ntrk,trk,hit_h,hit,tpar_h,tpar,tte_skip,ipass)
-          if(ntrk.eq.148) write(6,*)"track ",ntrk, trk(ntrk).flag," case 1"
           if(iret.eq.STAFCV_OK) then
              tpt_make_segment_uv = STAFCV_OK
           else
@@ -326,7 +328,6 @@ C         succesfull search - fit a track
                 hit(trk(ntrk).ipnt(i)).track=0
              enddo
              tpt_make_segment_uv = STAFCV_BAD
-             if(ntrk.eq.148) write(6,*)"track ",ntrk, trk(ntrk).flag," case 2"
           endif
       else
           tpt_make_segment_uv = STAFCV_BAD
