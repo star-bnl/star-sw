@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.cxx,v 1.16 2003/09/02 17:59:05 perev Exp $
+ * $Id: StStrangeTagsMaker.cxx,v 1.17 2003/10/07 03:10:27 perev Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.cxx,v $
+ * Revision 1.17  2003/10/07 03:10:27  perev
+ * Leak of struct on mTagTable fixed
+ *
  * Revision 1.16  2003/09/02 17:59:05  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -102,6 +105,7 @@ Int_t StStrangeTagsMaker::Make()
     St_StrangeTag *StrangeTag = new St_StrangeTag("StrangeTag",1);
     AddData(StrangeTag);
     StrangeTag->AddAt(mTagTable,0);
+    delete mTagTable; mTagTable=0;
     return kStOK;
 }
 
