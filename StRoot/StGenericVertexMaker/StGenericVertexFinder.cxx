@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.5 2004/07/30 22:59:00 calderon Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.6 2004/12/13 20:39:58 fisyak Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -12,9 +12,10 @@
 #include "StMaker.h"
 
 
-StGenericVertexFinder::StGenericVertexFinder() {
-    mDumMaker = new StMaker();
-}
+StGenericVertexFinder::StGenericVertexFinder() : 
+  mUseITTF(false), mFlagBase(0), mBeamHelix(0), mVertexConstrain(false), mWeight(0),
+  mRequireCTB(false),  mExternalSeedPresent(false), mStatus(0), mMode(0), 
+  mMinNumberOfFitPointsOnTrack(0) {}
 
 /*!
   Adds the vertex to StEvent (currently as a primary)
@@ -73,6 +74,9 @@ void StGenericVertexFinder::setFlagBase()
 
 
 // $Log: StGenericVertexFinder.cxx,v $
+// Revision 1.6  2004/12/13 20:39:58  fisyak
+// Add initaition of StGenericVertexFinder variables, replace mDumMaker by StMaker::GetChain() method
+//
 // Revision 1.5  2004/07/30 22:59:00  calderon
 // Setting the primary vertex flag to 1 for the moment, as per
 // dst_vertex.idl.  This was causing the FTPC code to reject the
