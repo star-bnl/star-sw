@@ -971,8 +971,8 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
   StiKalmanTrackNode * tNode=0;
   bool trackExtended = false;
 
-  if (true)
-    return true;
+//   if (true)      //commented out for testing, MC & AAR 
+//     return true;
   sNode = lastNode;
   tNode = trackNodeFactory->getObject();
   if (tNode==0) 
