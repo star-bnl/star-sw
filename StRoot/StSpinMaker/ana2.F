@@ -443,7 +443,8 @@ c   *      write(*,*) float(i),float(adc(i+120)),smygain(i),float(adc(i+120))*sm
 *
 *      zvert=smdz0+(timdif+atdf)*btdf ! find z_vertex from BBC times
 *      zvert = 790.0
-      zvert = smdz0 + zvertex
+       zvert = 750.0
+*      zvert = smdz0 + zvertex
 *
       p1f(4)=f1*esum
       p1f(1)=f1*esum*(smyscl*savpar2(2,j1)-smdh0)/zvert

@@ -29,7 +29,8 @@
       real smxsum,smysum
       real nttim
       real tpczv, lcppt, lcpeta, lcpphi
-      integer token, trgwd, bunch, nprim, bunch48
+      integer token, trgwd, bunch, bunch48, nprim
+      integer bbcadc, bbctdc
       common/st11dat/
      $     n4evt,                                         ! 1x I*4
      $     npkpar,                                        ! 1x I*4
@@ -47,8 +48,9 @@
      $     smxsum,smysum,                                 ! 2x R*4
      $     nttim(7),                                      ! 7x R*4
      $     tpczv,                                         ! 1x R*4
-     $     token,bunch,trgwd,                             ! 2x I*4
-     $     nprim,lcppt,lcpeta,lcpphi                      ! 2x I*4
+     $     token,bunch,bunch48,trgwd,                     ! 2x I*4
+     $     nprim,lcppt,lcpeta,lcpphi,                     ! 2x I*4
+     $     bbcadc(32),bbctdc(32)                          
 *                                                          -------
 *                                                   total 121x R*4
       integer runnum
