@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0_Reader.hh,v 1.1 2000/01/18 18:01:20 levine Exp $
+ * $Id: FTPV1P0_Reader.hh,v 1.2 2001/06/19 20:51:22 jeromel Exp $
  * Author: Jeff Landgraf, M.J. LeVine, J.Klay, H.Huemmler
  ***************************************************************************
  * Description: common definitions for FTPC
@@ -9,6 +9,9 @@
  *
  ***************************************************************************
  * $Log: FTPV1P0_Reader.hh,v $
+ * Revision 1.2  2001/06/19 20:51:22  jeromel
+ * Commited for Janet S.
+ *
  * Revision 1.1  2000/01/18 18:01:20  levine
  * Hummler's implementaiton of FTPC reader. Note that method
  *
@@ -90,6 +93,7 @@ protected:
   classname(Bank_FTPRBP) *getBankFTPRBP(int sector, classname(Bank_FTPCHAP) *pBank_FTPCHAP);
   classname(Bank_FTPAZIP) *getBankFTPAZIP(int sector, classname(Bank_FTPRBP) *pBank_FTPRBP);
   classname(Bank_FTPMZP) *getBankFTPMZP(int sector, classname(Bank_FTPAZIP) *pBank_FTPAZIP);
+  classname(Bank_FTPMZP) *getBankFTPMZP(int sector, classname(Bank_FTPRBP) *pBank_FTPRBP);
   classname(Bank_FTPMZP) *getBankFTPMZP(int sector);
 
   // Sector Reader Buffers

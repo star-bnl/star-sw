@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0_ADCR_SR.cxx,v 1.1 2000/01/18 18:01:19 levine Exp $
+ * $Id: FTPV1P0_ADCR_SR.cxx,v 1.2 2001/06/19 20:51:21 jeromel Exp $
  * Author: Jeff Landgraf, J.Klay, H.Huemmler
  ***************************************************************************
  * Description: FTP (v1.0) raw ADC reader 
@@ -9,6 +9,9 @@
  *
  ***************************************************************************
  * $Log: FTPV1P0_ADCR_SR.cxx,v $
+ * Revision 1.2  2001/06/19 20:51:21  jeromel
+ * Commited for Janet S.
+ *
  * Revision 1.1  2000/01/18 18:01:19  levine
  * Hummler's implementaiton of FTPC reader. Note that method
  *
@@ -32,7 +35,7 @@
 
 FTPV1P0_ADCR_SR::FTPV1P0_ADCR_SR(int s, FTPV1P0_Reader *det)
 {
-//  cout << "Constructing FTPV1P0_ADCR_SR" << endl;
+  //  cout << "Constructing FTPV1P0_ADCR_SR for sector "<<s << endl;
   sector = s;
   detector = det;
 
@@ -108,7 +111,8 @@ FTPV1P0_PEDR_SR::FTPV1P0_PEDR_SR(int s, FTPV1P0_Reader *det)
   detector = det;
 
   // NULLS in banks array
-  memset((char *)bank, 0, sizeof(bank));
+//  memset((char *)bank, 0, sizeof(bank));
+  bank = 0;
   numEvents = 0;
 }
 
@@ -187,7 +191,8 @@ FTPV1P0_PRMS_SR::FTPV1P0_PRMS_SR(int s, FTPV1P0_Reader *det)
   detector = det;
 
   // NULLS in banks array
-  memset((char *)bank, 0, sizeof(bank));
+//  memset((char *)bank, 0, sizeof(bank));
+  bank = 0;
   numEvents = 0;
 
 }

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0.cxx,v 1.2 2000/08/18 15:38:58 ward Exp $
+ * $Id: FTPV1P0.cxx,v 1.3 2001/06/19 20:51:21 jeromel Exp $
  * Author: M.J. LeVine, J.Klay, H.Huemmler
  ***************************************************************************
  * Description:  FTPV1P0 implementation
@@ -10,6 +10,9 @@
  * JLK 11-Jul-2000 Added new geometry files to correctly navigate banks
  ***************************************************************************
  * $Log: FTPV1P0.cxx,v $
+ * Revision 1.3  2001/06/19 20:51:21  jeromel
+ * Commited for Janet S.
+ *
  * Revision 1.2  2000/08/18 15:38:58  ward
  * New FTPC stuff from JKlay and Hummler.
  *
@@ -41,17 +44,14 @@ FTPV1P0_PADK_SR::FTPV1P0_PADK_SR(int s, FTPV1P0_Reader *det)
 
 int FTPV1P0_PADK_SR::initialize()
 {
-  //cout << "Initializing PADK sector: " << sector << endl;
 
   // zero out lookup array  
   memset((char *)packed_address, 0, sizeof(packed_address));
 
-  // cout << "Sizeof() = " << sizeof(packed_address) << endl;
 
   FTPPADK_entry ent;
 
   classname(Bank_FTPPADK) *raw_bank = detector->getBankFTPPADK(sector);
-//  cout << "RAW_BANK " << raw_bank << endl;
   if(!raw_bank)
   {
 //    printf("No PADK DATA, sector %d\n",sector);
@@ -68,6 +68,8 @@ int FTPV1P0_PADK_SR::initialize()
 		  
          ent.offset = i;
 		
+         // convert to correct FTPC software padrow
+         padrow = ((int)(padrow-1)/6)%2+1;
          place(padrow, pad, &ent);
       }
        
@@ -102,22 +104,18 @@ void FTPV1P0_PADK_SR::unpack(FTPPADK_entry *entry, short paddress)
 
 ZeroSuppressedReader *FTPV1P0_Reader::getZeroSuppressedReader(int sector)
 {
-//   cout << "getFTPV1P0_ZS_SR" << endl;
   
   FTPV1P0_ZS_SR *zs = new FTPV1P0_ZS_SR(sector, this);
-//   cout << "created zs" << endl;
   if(!zs->initialize())
   {
     delete zs;
     zs = NULL;
   }
-//   cout << "initialized zs" << endl;
   return (ZeroSuppressedReader *)zs;
 }
 
 ADCRawReader *FTPV1P0_Reader::getADCRawReader(int sector)
 {
-//  cout << "getFTPV1P0_ADCR_SR" << endl;
   FTPV1P0_ADCR_SR *adc = new FTPV1P0_ADCR_SR(sector, this);
   if(!adc->initialize())
   {
@@ -129,7 +127,6 @@ ADCRawReader *FTPV1P0_Reader::getADCRawReader(int sector)
 
 PedestalReader *FTPV1P0_Reader::getPedestalReader(int sector)
 {
-  //  cout << "getFTPV1P0_PEDR_SR" << endl;
   FTPV1P0_PEDR_SR *ped = new FTPV1P0_PEDR_SR(sector, this);
   if(!ped->initialize())
   {
@@ -142,7 +139,6 @@ PedestalReader *FTPV1P0_Reader::getPedestalReader(int sector)
 
 PedestalRMSReader *FTPV1P0_Reader::getPedestalRMSReader(int sector)
 {
-  //  cout << "getFTPV1P0_PRMS_SR" << endl;
   FTPV1P0_PRMS_SR *rms = new FTPV1P0_PRMS_SR(sector, this);
   if(!rms->initialize())
   {
@@ -155,13 +151,11 @@ PedestalRMSReader *FTPV1P0_Reader::getPedestalRMSReader(int sector)
 
 GainReader *FTPV1P0_Reader::getGainReader(int sector)
 {
-  cout << "getFTPV1P0_G_SR" << endl;
   return NULL;
 }
 
 CPPReader *FTPV1P0_Reader::getCPPReader(int sector)
 {
-  //  cout << "getFTPV1P0_CPP_SR" << endl;
   FTPV1P0_CPP_SR *cpp = new FTPV1P0_CPP_SR(sector, this);
   if(!cpp->initialize())
   {
@@ -174,19 +168,16 @@ CPPReader *FTPV1P0_Reader::getCPPReader(int sector)
 
 BadChannelReader *FTPV1P0_Reader::getBadChannelReader(int sector)
 {
-  cout << "getFTPV1P0_BC_SR" << endl;
   return NULL;
 }
 
 ConfigReader *FTPV1P0_Reader::getConfigReader(int sector)
 {
-  cout << "getFTPV1P0_CR_SR" << endl;
   return NULL;
 }
 
 FTPV1P0_PADK_SR *FTPV1P0_Reader::getPADKReader(int sector)
 {
-//  cout << "GetPADKReader" << endl;
   
   FTPV1P0_PADK_SR *p;
   p = padk[sector];
@@ -222,7 +213,6 @@ FTPV1P0_Reader::FTPV1P0_Reader(EventReader *er, classname(Bank_FTPP) *pftp)
 
 FTPV1P0_Reader::~FTPV1P0_Reader()
 {
-  //  cout << "FTPV1P0 destructor" << endl;
   
   // Delete Sector Readers buffers (The actual readers are deleted by client)
   
@@ -275,6 +265,8 @@ classname(Bank_FTPCHAP) *FTPV1P0_Reader::getBankFTPCHAP(int sector)
   if(ptr->swap() < 0) { pERROR(ERR_SWAP); return NULL; }
   ptr->header.CRC = 0;
  
+//  ptr->print();
+ 
   return ptr;
 }
 
@@ -315,6 +307,7 @@ classname(Bank_FTPRBP) *FTPV1P0_Reader::getBankFTPRBP(int sector,
   if(ptr->swap() < 0) { pERROR(ERR_SWAP); return NULL; }
   ptr->header.CRC = 0;
 
+//  ptr->print();
   return ptr;
 }
 
@@ -351,12 +344,13 @@ classname(Bank_FTPAZIP) *FTPV1P0_Reader::getBankFTPAZIP(int sector,
   if(ptr->swap() < 0) { pERROR(ERR_SWAP); return NULL; }
   ptr->header.CRC = 0;
  
+//  ptr->print();
   return ptr;
 }
 
 classname(Bank_FTPMZP) *FTPV1P0_Reader::getBankFTPMZP(int sector, 
-//	classname(Bank_FTPRBP) *azip)
-							classname(Bank_FTPAZIP) *azip)
+	classname(Bank_FTPRBP) *azip)
+//							classname(Bank_FTPAZIP) *azip)
 {
 
   if ((sector <= 0) || (sector > 60))
@@ -376,8 +370,10 @@ classname(Bank_FTPMZP) *FTPV1P0_Reader::getBankFTPMZP(int sector,
 
 //  cout << "getBankFTPMZP Mezz Offset: " << azip->Mz[mz].offset << endl;
 //  cout << "getBankFTPMZP Mezz Length: " << azip->Mz[mz].length << endl;
-  if ((!azip->Mz[mz].offset) || (!azip->Mz[mz].length))
-//  if ((!azip->Sector[mz].offset) || (!azip->Sector[mz].length))
+//  if ((!azip->Mz[mz].offset) || (!azip->Mz[mz].length))
+//  cout << "getBankFTPMZP Mezz Offset: " << azip->Sector[mz].offset << endl;
+//  cout << "getBankFTPMZP Mezz Length: " << azip->Sector[mz].length << endl;
+  if ((!azip->Sector[mz].offset) || (!azip->Sector[mz].length))
   { 
     pERROR(ERR_BANK); 
     return NULL; 
@@ -385,15 +381,15 @@ classname(Bank_FTPMZP) *FTPV1P0_Reader::getBankFTPMZP(int sector,
 
   classname(Bank_FTPMZP) *ptr = (classname(Bank_FTPMZP) *)
                      (((INT32 *)azip) +
-//		      azip->Sector[mz].offset);
-		      azip->Mz[mz].offset);
+  		      azip->Sector[mz].offset);
+//      azip->Mz[mz].offset);
 
   if(!ptr->test_CRC()) { pERROR(ERR_CRC); return NULL; }
   if(ptr->swap() < 0) { pERROR(ERR_SWAP); return NULL; }
   ptr->header.CRC = 0;
 
-//    printf("getBankFTPMZP Mezz: %d\n",mz);
-//    ptr->print();
+//  printf("getBankFTPMZP Mezz: %d\n",mz);
+//  ptr->print();
 
   return ptr;
 }
@@ -415,9 +411,8 @@ classname(Bank_FTPMZP) *FTPV1P0_Reader::getBankFTPMZP(int sector)
   classname(Bank_FTPAZIP) *azip = getBankFTPAZIP(sector, rbp);
   if(!azip) return NULL;
 
-  classname(Bank_FTPMZP) *mzp = getBankFTPMZP(sector,azip);
-//  classname(Bank_FTPMZP) *mzp = getBankFTPMZP(sector,rbp);
-//  cout << "inside getBankMZP " << mzp << endl;
+//classname(Bank_FTPMZP) *mzp = getBankFTPMZP(sector,azip);
+  classname(Bank_FTPMZP) *mzp = getBankFTPMZP(sector,rbp);
   if(!mzp) 
   {
     return NULL;
@@ -504,9 +499,7 @@ classname(Bank_FTPPADK) *FTPV1P0_Reader::getBankFTPPADK(int sector)
   errnum = 0;
   errstr0[0] = '\0';
 
-//  cout << "getBankFTPPADK\n";
   classname(Bank_FTPMZP) *mzp = getBankFTPMZP(sector);
-//  cout << "MZP " << mzp << endl;
   if(!mzp) return NULL;
 
 //   printf(" sector: %d\n",sector);
@@ -559,7 +552,6 @@ classname(Bank_FTPADCR) *FTPV1P0_Reader::getBankFTPADCR(int sector)
   errnum = 0;
   errstr0[0] = '\0';
 
-//  cout << "getBankFTPADCR\n";
   classname(Bank_FTPMZP) *mzp = getBankFTPMZP(sector);
   if(!mzp) return NULL;
 
