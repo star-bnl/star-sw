@@ -88,23 +88,23 @@ C
       END
 C
 C
-      REAL FUNCTION DERBSJ(M,X,IER)
+C      REAL FUNCTION DERBSJ(M,X,IER)
 C
-      IF(M.GE.0) GO TO 1000
-      DERBSJ=0.
-      IER=1
-      RETURN
+C      IF(M.GE.0) GO TO 1000
+C      DERBSJ=0.
+C      IER=1
+C      RETURN
 C
-1000  CONTINUE
-      IF(M.GT.0) GO TO 2000
-      DERBSJ=-1.*BESJN(1,X)
-      RETURN
+C1000  CONTINUE
+C      IF(M.GT.0) GO TO 2000
+C      DERBSJ=-1.*BESJN(1,X)
+C      RETURN
 C
-2000  CONTINUE
-      M1=M-1
-      M2=M+1
-      DERBSJ=.5*(BESJN(M1,X)-BESJN(M2,X))
-      RETURN
+C2000  CONTINUE
+C      M1=M-1
+C      M2=M+1
+C      DERBSJ=.5*(BESJN(M1,X)-BESJN(M2,X))
+C      RETURN
 C
-      END
+C      END
 C

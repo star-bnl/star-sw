@@ -10,7 +10,7 @@ Module     MFLDGEO  is the actual GUFLD routine for GSTAR
                        int nrp, int nzp, rm, zm , BBZ(nzp,nrp),BBR(nzp,nrp) }
       Complex          Brz,BBTOT
       Integer          Iprin,iz,ir
-      real             r,z,B0/5.0/ 
+      real             Real,Imag,r,z,B0/5.0/ 
       Common /brcontr/ Iprin
 * --------------------------------------------------------------------------
 *
@@ -170,7 +170,7 @@ end
                { int nr, int nzc, int nzs, rmax, zmax,
                  bzcorn, zterm(20), rterm(20), bn(20) }
       real     FITz, FITr, c,r,z, rh,zet, rho,zeta, rho1,zeta1
-      real     besjn,besi,derbsj,derbsi, pi/3.141592653/
+      real     besj0,besj1,besi,derbsi, pi/3.141592653/
       integer  i,j,ier
 *
       rho     = pi*r/bfit_rmax
@@ -185,8 +185,8 @@ end
 
       do  I   = 1,bfit_nr
         c=bfit_rterm(I)/cosh(bfit_bn(i)*zeta1)
-        FITz += c*BESJN (0,bfit_bn(i)*rho)*cosh(bfit_bn(i)*zeta)
-        FITr += c*DERBSJ(0,bfit_bn(i)*rho)*sinh(bfit_bn(i)*zeta)
+        FITz += c*BESJ0(  bfit_bn(i)*rho)*cosh(bfit_bn(i)*zeta)
+        FITr -= c*BESJ1(  bfit_bn(i)*rho)*sinh(bfit_bn(i)*zeta)
       enddo
 *
       do  I   = 1,bfit_nzc
@@ -225,7 +225,7 @@ end
             call   UCOPY (bank_BDAT,bank_BDOT,len_BDAT)
             nz+=1; USE /detm/mfld/BFLD/BDAT(nz) Stat=ier 
             prin3  z,nz,bdot_zi,bdat_zi,ier; 
-            (' z,nz,z1-z2 =',f10.1,i5,2f10.1,' ier=',ier)
+            (' z,nz,z1-z2 =',f10.1,i5,2f10.1,' ier=',i5)
          }
          CALL  RBPOPD;  if ier!=0
          { prin0 z,bdat_zi; (' bexter: Z not found ',2F10.1)
@@ -284,7 +284,7 @@ end
       function   BBR(z,r)
       implicit   none
       complex    BBTOT
-      real       BBR,BBZ,BRR,BZZ,z,r,x(3),B(3)
+      real       IMAG,REAL,BBR,BBZ,BRR,BZZ,z,r,x(3),B(3)
       BBR = Imag(BBTOT(z,r))
       return
       entry      BBZ(z,r)
