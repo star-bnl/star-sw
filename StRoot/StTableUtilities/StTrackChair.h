@@ -1,10 +1,6 @@
 #ifndef STAR_StTrackChair
 #define STAR_StTrackChair
-#ifdef __CC5__
-#include <TChair.h>
-#else
 #include "TChair.h"
-#endif
 class StHelixD;
 
 class StTrackChair : public TChair {
