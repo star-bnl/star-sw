@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.4 1999/02/19 17:35:47 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.5 1999/02/19 17:37:42 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.5  1999/02/19 17:37:42  fisyak
+// Add RICH hits to dst
+//
 // Revision 1.4  1999/02/19 17:35:47  fisyak
 // Add RICH hits to dst
 //
@@ -79,7 +82,7 @@ Int_t St_dst_Maker::Make(){
       St_DataSetIter geantI(geant);
       St_particle *particle = (St_particle *) geantI["particle"];
       if (particle) m_DataSet->Add(particle);
-      St_g2t_rch_hit *g2t_rch_hit = (St_g2t_rch_hit *) geant("g2t_rch_hit");
+      St_g2t_rch_hit *g2t_rch_hit = (St_g2t_rch_hit *) geantI("g2t_rch_hit");
       if (g2t_rch_hit) m_DataSet->Add(g2t_rch_hit);
     }
     St_DataSet *global = gStChain->DataSet("global");
@@ -132,7 +135,7 @@ Int_t St_dst_Maker::Make(){
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_dst_Maker.cxx,v 1.4 1999/02/19 17:35:47 fisyak Exp $\n");
+  printf("* $Id: St_dst_Maker.cxx,v 1.5 1999/02/19 17:37:42 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
