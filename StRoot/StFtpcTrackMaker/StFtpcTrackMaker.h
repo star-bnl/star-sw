@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.h,v 1.6 2002/04/05 16:51:07 oldi Exp $
+// $Id: StFtpcTrackMaker.h,v 1.7 2002/10/03 10:34:04 oldi Exp $
 // $Log: StFtpcTrackMaker.h,v $
+// Revision 1.7  2002/10/03 10:34:04  oldi
+// Usage of gufld removed.
+// Magnetic field is read by StMagUtilities, now.
+//
 // Revision 1.6  2002/04/05 16:51:07  oldi
 // Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
 // Each Track inherits from StHelix, now.
@@ -80,10 +84,12 @@ class StFtpcTrackMaker : public StMaker {
  public: 
                   StFtpcTrackMaker(const char *name="ftpc_tracks"); // constructor
    virtual       ~StFtpcTrackMaker();                               // destructor
+   virtual Int_t  InitRun(Int_t run);                               // Initialisation per run
    virtual Int_t  Init();                                           // Initialisation 
    virtual Int_t  Make();                                           // actual program
+           Int_t  Finish();                                         // final cleanup
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.6 2002/04/05 16:51:07 oldi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.7 2002/10/03 10:34:04 oldi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    virtual void   PrintInfo();                                      // prints information
            void   MakeHistograms();                                 // makes histograms
 	   void   MakeHistograms(StFtpcTracker *tracker);           // makes histograms

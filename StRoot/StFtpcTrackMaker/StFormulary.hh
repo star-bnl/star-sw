@@ -1,5 +1,9 @@
-// $Id: StFormulary.hh,v 1.3 2002/04/09 16:10:11 oldi Exp $
+// $Id: StFormulary.hh,v 1.4 2002/10/03 10:33:57 oldi Exp $
 // $Log: StFormulary.hh,v $
+// Revision 1.4  2002/10/03 10:33:57  oldi
+// Usage of gufld removed.
+// Magnetic field is read by StMagUtilities, now.
+//
 // Revision 1.3  2002/04/09 16:10:11  oldi
 // Method to get the magentic field factor moved to StFormulary. It works for
 // simulation as well, now.
@@ -43,8 +47,6 @@ class StFormulary
         static void  Sum(const Double_t *p1, const Double_t *p2, Double_t *P, Int_t n = 3);       // sum of two vectors
         static void  Diff(const Double_t *p1, const Double_t *p2, Double_t *P, Int_t n = 3);      // difference of two vectors
     static Double_t  Abs(const Double_t *p, Int_t dim = 3);                                       // length of a vector
-
-    static Double_t  GetMagneticFieldFactor();                                                    // returns magnetic field factor
 
     ClassDef(StFormulary,0)  // Mathematical formulary
 };    
