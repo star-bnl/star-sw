@@ -1,7 +1,7 @@
-      FUNCTION  G2T_CTB (g2t_track_h,   g2t_track , 
+      FUNCTION  G2T_TOF (g2t_track_h,   g2t_track , 
      >                   g2t_ctf_hit_h, g2t_ctf_hit ) 
       IMPLICIT  NONE
-#include "g2t_ctb.inc"
+#include "g2t_tof.inc"
 *    - - - - - - - - - 
       Integer         Lnmax
       Parameter       (Lnmax=50)
@@ -13,19 +13,19 @@
      >                Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
       Equivalence     (QQ(1),IQQ(1),id)
 *    - - - - - - - - -
-      INTEGER   G2T_CTB,G2R_GET_HIT,ISLFLAG,Iprin/0/,Idigi,i
+      INTEGER   G2T_TOF,G2R_GET_HIT,Iprin/0/,Idigi,i
       logical   Local/.true./
 *
-      G2T_CTB=STAFCV_OK
+      G2T_TOF=STAFCV_OK
       if (g2t_ctf_hit_h.maxlen.le.0) return
 *
-      call G2R_GET_SYS ('BTOF','BXSA',Iprin,Idigi)
+      call G2R_GET_SYS ('BTOF','BCSB',Iprin,Idigi)
       if (Iprin.lt.0) return
       Local  = Idigi.ge.2
 *
       i=0
       g2t_ctf_hit_h.nok = 0
-      Do While (G2R_GET_HIT('ctb') .eq. 0)
+      Do While (G2R_GET_HIT('tof') .eq. 0)
          i=i+1
          g2t_ctf_hit_h.nok            = i
          g2t_ctf_hit(i).id            = i
@@ -53,9 +53,9 @@
 *
 *                  add to track linked list 
 *
-         g2t_ctf_hit(i).next_tr_hit_p = g2t_track(trac).hit_ctb_p
-         g2t_track(trac).hit_ctb_p    = i
-         g2t_track(trac).n_ctb_hit    = g2t_track(trac).n_ctb_hit + 1
+*         g2t_ctf_hit(i).next_tr_hit_p = g2t_track(trac).hit_ctf_p
+*         g2t_track(trac).hit_ctf_p    = i
+*         g2t_track(trac).n_ctf_hit    = g2t_track(trac).n_ctf _hit + 1
 
       enddo    
 
