@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.338 2003/05/20 18:58:24 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.339 2003/05/20 19:02:16 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -276,6 +276,7 @@ Bfc_st BFC1[] = {
   {"StEvent"     ,""  ,"","globT,SCL,TRGDef",""                           ,"StEvent","Load StEvent",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T",""                                  ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
+  {"l3Util"      ,""  ,"","",""                                         ,"Stl3Util","Load Stl3Util",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -447,8 +448,8 @@ Bfc_st BFC1[] = {
   {"tofsim"      ,"","","TofUtil","StTofSimMaker","StEvent,StTofMaker,StTofSimMaker","TOF Simulator",kFALSE},
 
   {"l3"          ,"l3Chain","","l3cl,l3t"                                   ,"StMaker","StChain","",kFALSE},
-  {"l3cl"        ,"","l3Chain","l3_T"               ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
-  {"l3t"         ,"","l3Chain","l3_T"                       ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
+  {"l3cl"        ,"","l3Chain","l3_T,l3util"        ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
+  {"l3t"         ,"","l3Chain","l3_T,l3util"                ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
   {"l3onl"       ,"","",""                            ,"Stl3RawReaderMaker","Stl3RawReaderMaker","",kFALSE},
   {"l3count"     ,"","",""                              ,"Stl3CounterMaker","Stl3RawReaderMaker","",kFALSE},
 
@@ -760,6 +761,7 @@ Bfc_st BFC2[] = {
   {"StEvent"     ,""  ,"","globT,SCL,TRGDef",""                           ,"StEvent","Load StEvent",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T",""                                  ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
+  {"l3Util"      ,""  ,"","",""                                         ,"Stl3Util","Load Stl3Util",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -933,8 +935,8 @@ Bfc_st BFC2[] = {
   {"tofsim"      ,"","","TofUtil","StTofSimMaker","StEvent,StTofMaker,StTofSimMaker","TOF Simulator",kFALSE},
 
   {"l3"          ,"l3Chain","","l3cl,l3t"                                   ,"StMaker","StChain","",kFALSE},
-  {"l3cl"        ,"","l3Chain","l3_T"               ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
-  {"l3t"         ,"","l3Chain","l3_T"                       ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
+  {"l3cl"        ,"","l3Chain","l3_T,l3util"        ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
+  {"l3t"         ,"","l3Chain","l3_T,l3util"                ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
   {"l3onl"       ,"","",""                            ,"Stl3RawReaderMaker","Stl3RawReaderMaker","",kFALSE},
   {"l3count"     ,"","",""                              ,"Stl3CounterMaker","Stl3RawReaderMaker","",kFALSE},
 
