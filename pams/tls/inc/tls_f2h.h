@@ -9,6 +9,11 @@ fortran filename   : /star/starlib/star/dev/sys/tls/src/scv_state.F
 #define scv_state_ELEMS_3          ZTRINGV_NUM(1)
 #define scv_state_ELEMLEN_3        ZTRINGV_NUM(0)
 */
+#define tls_index_sort_i_ F77_NAME(tls_index_sort_i,TLS_INDEX_SORT_I)
+#define tls_search_index_i_ F77_NAME(tls_search_index_i,TLS_SEARCH_INDEX_I)
+int type_of_call tls_index_sort_i_(int *nrows, int *el1, int *el2, int *index, int *ind_size);
+int type_of_call tls_search_index_i_(int *nrows, int *el1, int *el2, int *key, int *j_table_off,
+				     int *k_rows,int *index, int *j_index_off);
 
  PROTOCCALLSFFUN2(LOGICAL,SCV_STATE,scv_state,INT,STRING)
 #define SCV_STATE(A2,A3)  CCALLSFFUN2(SCV_STATE,scv_state,INT,STRING,A2,A3)
