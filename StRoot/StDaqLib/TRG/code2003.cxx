@@ -3,6 +3,7 @@
 
 #define PREPOST 11 // This is also defined in TRG_Reader.cxx.
 
+#include <assert.h>
 #include "trgStructures2003.h"
 #include "TRG_Reader.hh"
 
