@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichPadMonitor.cxx,v 2.3 2000/08/13 01:26:49 gans Exp $
+ * $Id: StRichPadMonitor.cxx,v 2.4 2000/09/29 17:36:58 gans Exp $
  * Description:
  *  A Pad Monitor for the STAR-RICH.
  *  Runs only in ROOT
@@ -7,11 +7,8 @@
  *****************************************************************
  *
  * $Log: StRichPadMonitor.cxx,v $
- * Revision 2.3  2000/08/13 01:26:49  gans
- * Added directory changing for pidMaker->printCanvas("directory/")
- *
- * Revision 2.2  2000/08/11 20:20:43  gans
- * Added use of StRichDrawableTControl
+ * Revision 2.4  2000/09/29 17:36:58  gans
+ * Modified addHit(), StThreeVector<double> -> StThreeVectorF,other minor stuff
  *
  * Revision 2.4  2000/09/29 17:36:58  gans
  * Modified addHit(), StThreeVector<double> -> StThreeVectorF,other minor stuff
@@ -46,7 +43,6 @@
 
 #include "StGlobals.hh"
 
-#include "TButton.h"
 #include "TLine.h"
 #include "TFile.h"
 #include "TNtuple.h"
@@ -73,7 +69,7 @@
 #include "StRichPIDMaker/StRichTrack.h"
 
 #include "StRichPadMonitorText.h"
-#include "StRichDrawableTControl.h"
+#include "TText.h"
 #include "StTrackGeometry.h"
 #include "StTrackFitTraits.h"
 
@@ -84,9 +80,7 @@ StRichPadMonitor* StRichPadMonitor::getInstance(StRichGeometryDb* geo)
     if(!mInstance)
 	mInstance = new StRichPadMonitor(geo);
     
-StRichPadMonitor::StRichPadMonitor(StRichGeometryDb* geoDb)
-    : mGeometryDb(geoDb)
-{
+    return mInstance;
 }
 
 StRichPadMonitor::StRichPadMonitor(StRichGeometryDb* geoDb) : mGeometryDb(geoDb) {
@@ -154,10 +148,9 @@ StRichPadMonitor::StRichPadMonitor(StRichGeometryDb* geoDb) : mGeometryDb(geoDb)
 
 //     cout << "yco (41.82) " << yco << endl;
 //     cout << "yci (1.5)   " << yci << endl;
-    // StRichDrawableTControls
-    static StRichDrawableTControl zoomIn(1.5,43,9,48,eZoomIn,this);
-    static StRichDrawableTControl zoomOut(10,43,18,48,eZoomOut,this);
-       
+//     cout << "xco (65.5)  " << xco << endl;
+//     cout << "xci (1.5)   " << xci << endl;
+
     TLine aLine;
     aLine.SetLineWidth(2);
 
@@ -254,14 +247,13 @@ StRichPadMonitor::~StRichPadMonitor()
 
     delete mZVertex;
     delete mNumTracks;
-void StRichPadMonitor::clearAll()
-{
-    this->clearPads();
-    this->clearG2T();
-    this->clearHits();
-    this->clearTracks();
-        
-  }
+    cout << "out ~StRichPadMonitor" << endl;
+}
+
+void StRichPadMonitor::clearAll() {
+  this->clearPads();
+  this->clearG2T();
+  this->clearHits();
   this->clearTracks();
 }
 
@@ -286,8 +278,7 @@ void StRichPadMonitor::clearG2T()
 	(mG2TSegments[ii])->Delete();	    
     }
     mG2TSegments.Clear();
-void StRichPadMonitor::clearHits()
-{
+    mG2TSegments.Expand(0);
 }
 
 void StRichPadMonitor::clearHits() {
@@ -402,6 +393,8 @@ void StRichPadMonitor::drawHit(StRichSimpleHit* hit)
     thit->SetMarkerColor(1);
     thit->Draw();
     mHits.Add(thit);
+#endif
+}
 
 
 
@@ -513,7 +506,7 @@ void StRichPadMonitor::doResiduals(double zVertex,long numPrim[],int runId,int e
 	    tempArray[5] = closestMIP->GetX();
 	    tempArray[6] = closestMIP->GetY();
 	    
-	    StThreeVector<double> tempMom = curRichTrack->getMomentumAtPadPlane();
+	    StRichDrawableTTrack * curTTrack = closestMIP->getDrawableTTrack();
 	    StRichTrack * curRichTrack = curTTrack->getTrack();
 	    
 	    StThreeVectorF tempMom = curRichTrack->getMomentumAtPadPlane();
@@ -560,9 +553,7 @@ void StRichPadMonitor::doResiduals(double zVertex,long numPrim[],int runId,int e
 	primaryNtuple->Write("primaryNtuple",TObject::kOverwrite); }
     else{
 	residNtuple->Write();
-    delete residFile;
-    
-    
+	primaryNtuple->Write();}
     
     residFile->Close();
     delete residFile;    
@@ -609,48 +600,43 @@ Color_t StRichPadMonitor::GetColorAttribute(double amp)
 //     Color_t ret = (50+(static_cast<int>(log(tmpAmp)*7.21)) );
 //     if(ret <= 50)
 // 	ret +=1;
-void StRichPadMonitor::addTrack(StRichTrack* track)
-{
-
-    mVectorTracks.push_back(new StRichDrawableTTrack(track)); 
-    
+//     return ret;
+}
 
 void StRichPadMonitor::addTrack(StRichTrack* track) {
-StRichDrawableTTrack* StRichPadMonitor::getTrack(StRichTrack* track)
-{
+  mVectorTracks.push_back(new StRichDrawableTTrack(track)); 
+}
+
+StRichDrawableTTrack* StRichPadMonitor::getTrack(StRichTrack* track) {
+  
+  for(unsigned int i = 0; i < mVectorTracks.size() ; i++) {
     if(mVectorTracks[i]->getTrack() == track)
-    for(unsigned int i = 0; i < mVectorTracks.size() ; i++)
-	{
-	    if(mVectorTracks[i]->getTrack() == track)
-		return mVectorTracks[i];
-	}
-    return 0;
+      return mVectorTracks[i];
   }
 
-void StRichPadMonitor::drawRings()
-{
-    for(unsigned int j = 0; j < mVectorTracks.size();j++) {
-	for(int i = 0;i < mVectorTracks[j]->numberOfRings();i++) {
-	    // this if is a cludge. Rings Should never have been made if under
-	    // .5 GeV, but somehow are. limit now at 1 Gev/c
-	    if(mVectorTracks[j]->getTrack()->getMomentum().mag() >= 1 )
-		mVectorTracks[j]->getRing(i)->draw();
-	}
-	mVectorTracks[j]->getProjectedMIP()->Draw();
+  return 0;
+}
+
+
+void StRichPadMonitor::drawRings() {
+  for(unsigned int j = 0; j < mVectorTracks.size();j++) {
+    for(int i = 0;i < mVectorTracks[j]->numberOfRings();i++) {
+      
+      // this if is a cludge. Rings Should never have been made if under
       // .5 GeV, but somehow are. limit now at 1 Gev/c
-    mVectorTracks[j]->getProjectedMIP()->Draw();
-  }
-  }  
-void StRichPadMonitor::clearTracks()
-{
-
-    for(unsigned int j=0; j < mVectorTracks.size();j++) {
-	delete mVectorTracks[j];
+      if( mVectorTracks[j]->getTrack()->getMomentum().mag() >= 0.5 ) 
+	mVectorTracks[j]->getRing(i)->draw();
     }
-	
-    mVectorTracks.clear();
-    mVectorTracks.resize(0);
-    
+    mVectorTracks[j]->getProjectedMIP()->Draw();
+  }  
+}
+
+
+void StRichPadMonitor::clearTracks() {
+ 
+  for(unsigned int j=0; j < mVectorTracks.size();j++) {
+    delete mVectorTracks[j];
+  }
   
   mVectorTracks.clear();
   mVectorTracks.resize(0);
@@ -763,26 +749,31 @@ void StRichPadMonitor::drawFileName(char * fileName) {
     mFileName->SetTextSize(.019495); // Found this works
     mFileName->SetTextAlign(31);
     mFileName->Draw();
-void StRichPadMonitor::printCanvas(char * directory,char * filename,int eventNum){ 
+}
 
 
-
+void StRichPadMonitor::printCanvas(char* directory, char * filename, int eventNum){ 
     
-
     char tempChar[300];
     char* newFile = new char[100];
-
     int i = 0;
     while(filename[i] != '\0')
-	i--;
-    if(filename[i] == '/')
 	i++;
-      j++;
-    sprintf(tempChar,"%s%s_%d.ps",directory,&filename[i],eventNum);
-    newFile[j]='\0';
-    sprintf(tempChar,"%s_%s%d.ps",directory,newFile,eventNum);
+    while( (i != 0) && (filename[i] != '/'))
+	i--;
+    if(filename[i] == '/') 
+	i++;
 
-TCanvas * StRichPadMonitor::getRichCanvas(){ return mRichCanvas;}
+    int j=0;
+    int ii=i;
+    while(j != 99) {
+      if (filename[ii]=='r') break;
+      newFile[j] = filename[ii++];
+      j++;
+    }
+    newFile[j]='\0';
+
+    sprintf(tempChar,"%s_%s%d.ps",directory,newFile,eventNum);
     mRichCanvas->Print(tempChar);
     delete newFile;
 }

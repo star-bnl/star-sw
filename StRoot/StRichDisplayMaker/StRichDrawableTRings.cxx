@@ -1,12 +1,15 @@
 /**********************************************************
- * $Id: StRichDrawableTRings.cxx,v 2.0 2000/08/09 16:28:03 gans Exp $
+ * $Id: StRichDrawableTRings.cxx,v 2.1 2000/09/29 17:36:58 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichDrawableTRings.cxx,v $
- *  Revision 2.0  2000/08/09 16:28:03  gans
- *  Created New Maker for all drawable objects.
+ *  Revision 2.1  2000/09/29 17:36:58  gans
+ *  Modified addHit(), StThreeVector<double> -> StThreeVectorF,other minor stuff
+ *
+ *  Revision 2.1  2000/09/29 17:36:58  gans
+ *  Modified addHit(), StThreeVector<double> -> StThreeVectorF,other minor stuff
  *
  *  Revision 2.0  2000/08/09 16:28:03  gans
  *  Created New Maker for all drawable objects.
@@ -27,8 +30,10 @@
 #include "StRichDrawableTRings.h"
 #include "StRichPIDMaker/StRichRings.h"
 #include "TPolyLine.h"
-#include "StThreeVector.hh"
+#include "StRichPIDMaker/StRichTrack.h"
 
+#include "StThreeVectorD.hh"
+#include "StThreeVectorF.hh"
 #include "TRandom.h"
 #include "StRichHit.h"
 
@@ -58,8 +63,8 @@ StRichDrawableTRings::StRichDrawableTRings(StRichRings& ring) {
     } 
     
   const Int_t maxInnerSize = 3600;    // each ring <= 3600 line segments 
-  vector<StThreeVector<double> > in  = ring.getInnerPoints(maxInnerSize);
-  vector<StThreeVector<double> > out = ring.getOuterPoints(maxOuterSize);
+  const Int_t maxOuterSize = 3600;
+
   // Copy into temp vector (should make a vector<pair<double>>)
   vector<StThreeVectorF > in  = ring.getInnerPoints(maxInnerSize);
   vector<StThreeVectorF > out = ring.getOuterPoints(maxOuterSize);
@@ -140,8 +145,7 @@ StRichDrawableTRings::~StRichDrawableTRings() {
     delete mOuterRing;
 
    for (unsigned int i=0;i<mHits.size();i++) {
-   mHits.resize(0);
-   
+       delete mHits[i];
    }
    mHits.clear();
    mHits.resize(0);   
@@ -198,24 +202,32 @@ void StRichDrawableTRings::clear() {
     mOuterRing = new TPolyLine(*tempOuter);
     
     tempInner->Clear();
+    tempOuter->Clear();
     delete tempInner;
-}
     delete tempOuter;
 }
 
 
 StRichTrack* StRichDrawableTRings::getTrack() {
+  return mTrack;
 }
 
 
 StParticleDefinition* StRichDrawableTRings::getParticle() {
-void StRichDrawableTRings::addHit(double x,double y){
-    StRichDrawableTHit * tempHit = new StRichDrawableTHit(x,y,4); // 4 == Circle
-    tempHit->SetMarkerColor(mInnerRing->GetLineColor());  // Make Same Color as Ring
-    tempHit->SetMarkerSize(2+ rand->Rndm());              // Size == 2+ (num between 0 and 1)
-    mHits.push_back(tempHit);                             // add hit to list
+  return mParticle;
+}
+
+
+void StRichDrawableTRings::addHit(StRichHit* hit){
+  float x,y;
+  if (hit) {
+    x = hit->local().x();
+    y = hit->local().y();
+  }
+  
+  StRichDrawableTHit * tempHit = new StRichDrawableTHit(x,y,4); // 4 == Circle
   tempHit->SetMarkerColor(mInnerRing->GetLineColor());  // Make Same Color as Ring
-    
+  tempHit->SetMarkerSize(2+ rand->Rndm());              // Size == 2+ (num between 0 and 1)
   mHits.push_back(tempHit);                             // add hit to list
 }
 
