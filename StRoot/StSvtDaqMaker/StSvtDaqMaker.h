@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.h,v 1.3 2000/11/30 20:44:33 caines Exp $
+ * $Id: StSvtDaqMaker.h,v 1.4 2001/07/11 23:29:47 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.h,v $
- * Revision 1.3  2000/11/30 20:44:33  caines
- * Use database
+ * Revision 1.4  2001/07/11 23:29:47  munhoz
+ * adding capability for zero suppressed and pedestal reading
  *
  * Revision 1.2  2000/08/04 21:03:51  perev
  * Leaks + Clear() cleanup
@@ -30,6 +30,7 @@
 #endif
 
 class StSvtHybridDaqData;
+class StSvtDaqPed;
 class StSvtDaqData;
 class StDAQReader;
 class StSVTReader;
@@ -41,11 +42,15 @@ class StSvtDaqMaker : public StMaker {
   char             *fConfig;   //!           
   char             *fDataType; //!
            
-  StSvtHybridDaqData  *fData;     //!
-  StSvtDaqData        *fSvtData;  //!
+  StSvtHybridDaqData     *fData;     //!
+  StSvtDaqData           *fSvtData;  //!
+  StSvtDaqPed            *fSvtPed;   //!
+  StSvtDaqPed            *fSvtRMSPed;   //!
 
   TObjectSet     *fSvtSet;    //! pointer to StSvtEvent DataSet
   TObjectSet     *fHybridSet; //! pointer to StSvtEvent DataSet
+  TObjectSet     *fPedSet;    //! 
+  TObjectSet     *fRMSPedSet;    //! 
 
   StDAQReader *daqReader;   //!
   StSVTReader *svtReader;   //!
@@ -56,14 +61,20 @@ class StSvtDaqMaker : public StMaker {
   StSvtDaqMaker(const char *name="SvtDaq", char* config="Y1L", char* data="RAW");
   virtual       ~StSvtDaqMaker();
   void   SetConfiguration(char* config){fConfig = config;}
+  void   SetDataType(char* data){fDataType = data;}
   Int_t  SetSvtData();
+  Int_t  SetSvtPed();
+  Int_t  SetSvtRMSPed();
   Int_t  SetHybridData();
   Int_t  GetSvtData();
+  Int_t  GetSvtPed();
+  Int_t  GetSvtRMSPed();
   Int_t  GetHybridData(int barrel, int ladder, int wafer, int hybrid);
   Int_t  GetUnixTime();
   void   PrintInfo();
   void   PrintEventInfo();
   Int_t  Reset();
+  void   UpdateReader();
   virtual Int_t  Init();
   virtual Int_t  Make();
   virtual void   Clear(const char *opt);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqData.hh,v 1.2 2000/11/30 20:44:33 caines Exp $
+ * $Id: StSvtDaqData.hh,v 1.3 2001/07/11 23:29:47 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqData.hh,v $
- * Revision 1.2  2000/11/30 20:44:33  caines
- * Use database
+ * Revision 1.3  2001/07/11 23:29:47  munhoz
+ * adding capability for zero suppressed and pedestal reading
  *
  * Revision 1.1  2000/06/13 20:42:05  caines
  * StRoot/StSvtDaqMaker

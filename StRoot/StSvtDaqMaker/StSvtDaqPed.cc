@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqData.cc,v 1.4 2001/07/11 23:29:47 munhoz Exp $
+ * $Id: StSvtDaqPed.cc,v 1.1 2001/07/11 23:29:48 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -9,15 +9,10 @@
  *
  ***************************************************************************
  *
- * $Log: StSvtDaqData.cc,v $
- * Revision 1.4  2001/07/11 23:29:47  munhoz
+ * $Log: StSvtDaqPed.cc,v $
+ * Revision 1.1  2001/07/11 23:29:48  munhoz
  * adding capability for zero suppressed and pedestal reading
  *
- * Revision 1.2  2000/07/03 02:07:55  perev
- * StEvent: vector<TObject*>
- *
- * Revision 1.1  2000/06/13 20:42:05  caines
- * StRoot/StSvtDaqMaker
  *
  **************************************************************************/
 ////////////////////////////////////////////////////////////////////////////
@@ -28,46 +23,43 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include <iostream.h>
-#include "StSvtHybridDaqData.hh"
-#include "StSvtDaqData.hh"
+#include "StSvtHybridDaqPed.hh"
+#include "StSvtDaqPed.hh"
+#include "StDAQMaker/StSVTReader.h"
 
-ClassImp(StSvtDaqData)
+ClassImp(StSvtDaqPed)
 
-StSvtDaqData::StSvtDaqData() : 
-  StSvtData()
+StSvtDaqPed::StSvtDaqPed() : 
+  StSvtHybridCollection()
 {}
 
-StSvtDaqData::StSvtDaqData(const char* config, StSVTReader* reader, char* option, int run, int event, int trigger) : 
-  StSvtData(config, run, event, trigger)
+StSvtDaqPed::StSvtDaqPed(const char* config, StSVTReader* reader, int run) : 
+  StSvtHybridCollection(config)
 {
   // The Same as StSvtHybridCollection, with two additional parameters: 
   //    event number and trigger type
 
   mRunNumber = run;
-  mEventNumber = event;
-  mTriggerWord = trigger;
 
   if (reader)
-    setData(reader,option);
+    setPed(reader);
 }
 
-StSvtDaqData::StSvtDaqData(StSvtConfig* config, StSVTReader* reader, char* option, int run, int event, int trigger) : 
-  StSvtData(config, run, event, trigger)
+StSvtDaqPed::StSvtDaqPed(StSvtConfig* config, StSVTReader* reader, int run) : 
+  StSvtHybridCollection(config)
 {
   // The Same as StSvtHybridCollection, with two additional parameters: 
   //    event number and trigger type
 
   mRunNumber = run;
-  mEventNumber = event;
-  mTriggerWord = trigger;
 
   if (reader)
-    setData(reader,option);
+    setPed(reader);
 }
 
-int StSvtDaqData::setData(StSVTReader* reader, char* option)
+int StSvtDaqPed::setPed(StSVTReader* reader, const char* type)
 {
-  int status;
+  int status=-1;
 
   for (int barrel = 1;barrel <= getNumberOfBarrels();barrel++) {
     for (int ladder = 1;ladder <= getNumberOfLadders(barrel);ladder++) {
@@ -75,43 +67,47 @@ int StSvtDaqData::setData(StSVTReader* reader, char* option)
 	for (int hybrid = 1;hybrid <= getNumberOfHybrids();hybrid++) {
 
 	  if (getHybridIndex(barrel,ladder,wafer,hybrid) < 0) continue;
-	  
+	      
 	  //printf("StSvtDaqMaker::barrel = %d, ladder = %d, wafer = %d, hybrid = %d\n",barrel,ladder,wafer,hybrid);
 
 	  // have to swap the hybrids in collection due to hardware swapping for Y1
 	  if ( !strncmp(getConfiguration(), "Y1L", strlen("Y1L")) ) {
 	    if (hybrid == 1)
-	      mData = (StSvtHybridDaqData*)at(getHybridIndex(barrel, ladder, wafer, 2));
+	      mPed = (StSvtHybridDaqPed*)at(getHybridIndex(barrel, ladder, wafer, 2));
 	    else if (hybrid == 2)
-	      mData = (StSvtHybridDaqData*)at(getHybridIndex(barrel, ladder, wafer, 1));
+	      mPed = (StSvtHybridDaqPed*)at(getHybridIndex(barrel, ladder, wafer, 1));
 	  }
 	  else
-	    mData = (StSvtHybridDaqData*)at(getHybridIndex(barrel, ladder, wafer, hybrid));
+	    mPed = (StSvtHybridDaqPed*)at(getHybridIndex(barrel, ladder, wafer, hybrid));
 
-	  if (mData) {
-	    delete mData;
-	    //put_at(NULL, getHybridIndex(barrel,ladder,wafer,hybrid));
-	  }
+	  //if (mPed)
+	  //  delete mPed;
 
-	  //if (mData)
-	  //  mData->reset();
-	  //else
-	  mData = new StSvtHybridDaqData(barrel, ladder, wafer, hybrid);
+	  //cout << "mPed = " << mPed << endl;
+ 
+	  //if (mPed) {
+	  //  delete mPed;
+	  //  put_at(NULL, getHybridIndex(barrel,ladder,wafer,hybrid));
+	  //}
 
-	  status = ((StSvtHybridDaqData*)mData)->setHybridData(reader, option);
+	  if (!mPed)
+	    mPed = new StSvtHybridDaqPed(barrel, ladder, wafer, hybrid);
 
-	  if (status >= 0) {
+	  if ( !strncmp(type, "PED", strlen("PED")) )
+	    status = mPed->setHybridPed(reader);
+	  else if ( !strncmp(type, "RMS", strlen("RMS")) )
+	    status = mPed->setHybridRMSPed(reader);
 
-	    // have to swap the hybrids in collection due to hardware swapping for Y1
-	    if ( !strncmp(getConfiguration(), "Y1L", strlen("Y1L")) ) {
-	      if (hybrid == 1 || hybrid == 2 )
-		put_at(mData, getHybridIndex(barrel,ladder,wafer,3-hybrid));	  
-	    }
-	    else
-	      put_at(mData, getHybridIndex(barrel,ladder,wafer,hybrid));	  
+	  if (status < 0)
+	    mPed->reset();
+
+	  // have to swap the hybrids in collection due to hardware swapping for Y1
+	  if ( !strncmp(getConfiguration(), "Y1L", strlen("Y1L")) ) {
+	    if (hybrid == 1 || hybrid == 2 )
+	      put_at(mPed, getHybridIndex(barrel,ladder,wafer,3-hybrid));	  
 	  }
 	  else
-	    delete mData;
+	    put_at(mPed, getHybridIndex(barrel,ladder,wafer,hybrid));
 	}
       }
     }
