@@ -1,0 +1,11 @@
+StFlowAnalysisMaker
+
+Reads the tags
+Calculates event plane angle of full event
+Calculates magnitude of Q for full event
+Removes autocorrelation of a particle with 
+	respect to the event plane 
+	(Reason for storing x and y components)
+Calculates the event plane resolution from 
+	the correlation of sub-event event planes 
+	(Reason for storing values for sub-events)
