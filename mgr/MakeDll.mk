@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.60 1999/02/08 02:29:19 fisyak Exp $
+# $Id: MakeDll.mk,v 1.61 1999/02/09 19:14:49 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.61  1999/02/09 19:14:49  fisyak
+# Add objy
+#
 # Revision 1.60  1999/02/08 02:29:19  fisyak
 # New Makefile scheme
 #
@@ -125,9 +128,9 @@ endif
 INC_NAMES := $(addprefix StRoot/,St_base StChain xdf2root StSclRoot) StRoot .share .share/tables pams inc 
 #                            StarClassLibrary/include
 INC_DIRS  := $(wildcard $(SRC_DIR) $(SRC_DIR)/include)
-INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) 
+INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) $(ROOT_DIR) 
 ifneq ($(ROOT_DIR),$(STAR))
-INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES))))
+INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES)))) $(STAR)
 endif
 INC_DIRS  +=  $(STAF_UTILS_INCS) $(CERN_ROOT)/include $(ROOTSYS)/src
 
