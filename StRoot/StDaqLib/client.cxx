@@ -92,14 +92,14 @@ int main(int argc, char *argv[])
 	    for (int padnum = 0; padnum<count; padnum++) {
 	      int pad = padlist[row-1][padnum];
 	      printf("pad %d:\n",pad);
-	      int ret = zsr->getSequences(row, pad, &nSeq[pad], &Seq[pad]);
+	      int ret = zsr->getSequences(row, pad, &nSeq[pad-1], &Seq[pad-1]);
 	      unsigned short ADC;
-	      for (int i=0; i<nSeq[pad]; i++){
-		int start = Seq[pad][i].startTimeBin;
-		int len = Seq[pad][i].Length;
+	      for (int i=0; i<nSeq[pad-1]; i++){
+		int start = Seq[pad-1][i].startTimeBin;
+		int len = Seq[pad-1][i].Length;
 		printf("\tsequence timebin [%d..%d]\n\t",start,start+len-1);
 		fflush(stdout);
-		unsigned char *p = Seq[pad][i].FirstAdc;
+		unsigned char *p = Seq[pad-1][i].FirstAdc;
 		for (int j=0; j<len; j++) {
 		  ADC = lookup[*(p++)];
 		  printf("%d ",ADC);
