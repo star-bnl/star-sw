@@ -1,6 +1,6 @@
 /********************************************************
  *
- * $Id: StPmdDBUtil.cxx,v 1.5 2004/03/23 08:50:23 subhasis Exp $
+ * $Id: StPmdDBUtil.cxx,v 1.6 2004/06/28 20:49:26 perev Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -11,12 +11,15 @@
  *
  *********************************************************
  * $Log: StPmdDBUtil.cxx,v $
+ * Revision 1.6  2004/06/28 20:49:26  perev
+ * obsolete stream replaced
+ *
  * Revision 1.5  2004/03/23 08:50:23  subhasis
  * biardDetail put by had
  *
  *
  **********************************************************/
-#include <iostream.h> 
+#include "Stiostream.h"
 #include <strings.h>
 #include <stdlib.h>
 #include <TROOT.h>
