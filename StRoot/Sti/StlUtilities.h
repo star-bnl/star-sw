@@ -144,7 +144,7 @@ inline T gFindClosestOrderKey(T begin, T end, double findThis)
 template <class T>
 struct SameData
 {
-    T* thedata;
+    const T* thedata;
     bool operator()(const StiCompositeTreeNode<T>* rhs) {
 	return (thedata == rhs->getData());
     }

@@ -95,7 +95,7 @@ void StiDetectorContainer::setToDetector(double radius, double angle)
   found that is equal to <b>layer</b>, then an error message is streamed to
   the screen and reset() is called.
 */
-void StiDetectorContainer::setToDetector(StiDetector* layer)
+void StiDetectorContainer::setToDetector(const StiDetector* layer)
 {
     SameData<data_t> mySameData;
     mySameData.thedata = layer;
