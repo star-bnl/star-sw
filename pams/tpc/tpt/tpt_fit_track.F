@@ -1,5 +1,8 @@
-* $Id: tpt_fit_track.F,v 1.10 2000/03/24 06:36:28 sakrejda Exp $
+* $Id: tpt_fit_track.F,v 1.11 2000/03/29 03:40:22 sakrejda Exp $
 * $Log: tpt_fit_track.F,v $
+* Revision 1.11  2000/03/29 03:40:22  sakrejda
+* Make sure that ncir is not too large
+*
 * Revision 1.10  2000/03/24 06:36:28  sakrejda
 * Reload pointers to tracks only if necessary
 *
@@ -83,6 +86,10 @@ C#include "tpt_pointers.inc"
 
 C
 C     at the beginning mark all the points that belong to a track as good
+      if(trk(ipt).nhit.gt.mxpnt) then
+C         truncate track if too long
+          trk(ipt).nhit=mxpnt
+      endif
       do i=1,trk(ipt).nhit
 	 good_hit(i) = .true.
       end do
@@ -105,6 +112,7 @@ C        omitt points that were marked as outliers
          if(good_hit(i)) then
 	   ncir = ncir+1
            ient = trk(ipt).ipnt(i)
+C           write(6,*)"mxpnt",mxpnt,ncir,ient,ipt,i
 	   xcir(ncir) = hit(ient).x
 	   ycir(ncir) = hit(ient).y
 	   zcir(ncir) = hit(ient).z
