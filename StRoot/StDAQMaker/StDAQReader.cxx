@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.3 1999/08/01 00:09:07 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.4 1999/08/01 00:14:49 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.4  1999/08/01 00:14:49  perev
+ * leak removed author added
+ *
  * Revision 1.3  1999/08/01 00:09:07  perev
  * leak removed author added
  *
@@ -25,6 +28,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include "Stypes.h"
 //
 
 
@@ -93,7 +97,13 @@ int StDAQReader::readEvent()
 //_____________________________________________________________________________
 int StDAQReader::skipEvent(int nskip)
 {
-  for (int isk=0; isk<nskip; isk++) {if (readEvent()) return 1;} 
+  for (int isk=0; isk<nskip; isk++) 
+  {
+    delete fEventReader;
+    if (fOffset == -1) return kStEOF;
+    fEventReader = new EventReader();
+    fEventReader->InitEventReader(fFd, fOffset, 0);
+  }
   return 0;
 }
 
