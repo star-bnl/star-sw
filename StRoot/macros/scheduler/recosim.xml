@@ -80,14 +80,14 @@
 # ---
 #   Start the local Web page
 # ---
-    echo "<HTML><TITLE>${jobTitle} $PROCESSID.$REQUESTID has been started </TITLE> <BODY> <small> <code> <pre>"  >${localLogFile}
+    echo "<HTML><META HTTP-EQUIV="Refresh" CONTENT=600><TITLE>${jobTitle} $PROCESSID.$REQUESTID has been started </TITLE> <BODY> <small> <code> <pre>"  >${localLogFile}
     cd ${packageDirectoryBin}
 
 #    -------------------------------
 #    Set the proper version of STAR software release
 #    -------------------------------
 
-    source /star/u/starreco/.cshrc
+    source ~didenko/.cshrc
     source /afs/rhic.bnl.gov/rhstar/group/.stardev
     stardev
     setenv StarEndMakerShell
@@ -109,8 +109,8 @@
 #    Bring the remote file in 
 #    -------------------------------
 
-     set JOBFILEBASENAME=`basename ${INPUTFILE0}`
-     set ZEBRAINPUT=${JOBFILEBASENAME}
+     set JOBFILEBASENAME=`basename ${INPUTFILE0} fzd`
+     set ZEBRAINPUT=${JOBFILEBASENAME}fzd
      if ("${BNL}" == "1") then;
        ln -s  ${INPUTFILE0}  $SCRATCH/${ZEBRAINPUT}
      else
@@ -131,31 +131,31 @@
 #    -------------------------------
 #   start "root4star" from the bin directory
 #    -------------------------------
-    echo root4star -b -l -q \'bfc.C\(${nSimulatedEvents},\"trs,srs,fss,y2004,tpc,l0,svt,Cdst,Kalman,tags,Tree,bbcsim,tofsim,evout,est,-xi,-v0,xi2,XiSvt,svtdEdx,emcY2,eefs,GeantOut,big,-dstout,CMuDst,fzin\",\"${ZEBRAINPUT}\"\)\'  >>${localLogFile}
-    root4star -b -l -q \'bfc.C\(${nSimulatedEvents},\"trs,srs,fss,y2004,tpc,l0,svt,Cdst,Kalman,tags,Tree,bbcsim,tofsim,evout,est,-xi,-v0,xi2,XiSvt,svtdEdx,emcY2,eefs,GeantOut,big,-dstout,CMuDst,fzin\",\"${ZEBRAINPUT}\"\)\' 
+    echo root4star -b -l -q bfc.C\(${nSimulatedEvents},\"trs,srs,fss,y2004,tpc,l0,svt,Cdst,Kalman,tags,Tree,bbcsim,tofsim,evout,est,-xi,-v0,xi2,XiSvt,svtdEdx,emcY2,eefs,GeantOut,big,-dstout,CMuDst,fzin\",\"${ZEBRAINPUT}\"\)  >>${localLogFile}
+    root4star -b -l -q bfc.C\(${nSimulatedEvents},\"trs,srs,fss,y2004,tpc,l0,svt,Cdst,Kalman,tags,Tree,bbcsim,tofsim,evout,est,-xi,-v0,xi2,XiSvt,svtdEdx,emcY2,eefs,GeantOut,big,-dstout,CMuDst,fzin\",\"${ZEBRAINPUT}\"\)
     # --- check output
     #  we should see 4 files with non-zero length
     if (! -s ${JOBFILEBASENAME}.tags.root) then;
-      echo "root4star ERROR. The output file ${JOBFILEBASENAME}.tags.root was not created. Abort \!\!\! "
-      echo "<b>root4star ERROR. The output file ${JOBFILEBASENAME}.tags.root was not created. Abort \!\!\! </b>"     >>${localLogFile}
+      echo "root4star ERROR. The output file ${JOBFILEBASENAME}tags.root was not created. Abort \!\!\! "
+      echo "<b>root4star ERROR. The output file ${JOBFILEBASENAME}tags.root was not created. Abort \!\!\! </b>"     >>${localLogFile}
       exit $status
     endif
 
     if (! -s ${JOBFILEBASENAME}.hist.root) then;
-      echo "root4star ERROR. The output file ${JOBFILEBASENAME}.hist.root was not created. Abort \!\!\! "
-      echo "<b>root4star ERROR. The output file ${JOBFILEBASENAME}.hist.root was not created. Abort \!\!\! </b>"      >>${localLogFile}
+      echo "root4star ERROR. The output file ${JOBFILEBASENAME}hist.root was not created. Abort \!\!\! "
+      echo "<b>root4star ERROR. The output file ${JOBFILEBASENAME}hist.root was not created. Abort \!\!\! </b>"      >>${localLogFile}
       exit $status
     endif
 
     if (! -s ${JOBFILEBASENAME}.geant.root) then;
-      echo "root4star ERROR. The output file \"${JOBFILEBASENAME}.geant.root\" was not created. Abort \!\!\! "
-      echo "<b>root4star ERROR. The output file \"${JOBFILEBASENAME}.geant.root\" was not created. Abort \!\!\! </b>"  >>${localLogFile}
+      echo "root4star ERROR. The output file \"${JOBFILEBASENAME}geant.root\" was not created. Abort \!\!\! "
+      echo "<b>root4star ERROR. The output file \"${JOBFILEBASENAME}geant.root\" was not created. Abort \!\!\! </b>"  >>${localLogFile}
       exit $status
     endif
 
     if (! -s ${JOBFILEBASENAME}.event.root) then;
-      echo "root4star ERROR. The output file \"${JOBFILEBASENAME}.event.root\" was not created. Abort \!\!\! "
-      echo "<b>root4star ERROR. The output file \"${JOBFILEBASENAME}.event.root\" was not created. Abort \!\!\! </b>"  >>${localLogFile}
+      echo "root4star ERROR. The output file \"${JOBFILEBASENAME}event.root\" was not created. Abort \!\!\! "
+      echo "<b>root4star ERROR. The output file \"${JOBFILEBASENAME}event.root\" was not created. Abort \!\!\! </b>"  >>${localLogFile}
       exit $status
     endif
 
