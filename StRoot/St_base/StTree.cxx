@@ -102,6 +102,7 @@ TObject *StIO::Read(TFile *file, const Char_t *name, ULong_t  ukey)
   TObject   *retn  = 0;
   event = (StIOEvent*)Read(file,(const char*)MakeKey(name,ukey));
   if (!event) 		return 0;
+  if (event == (StIOEvent*)(-1)) return (TObject*)(-1);
   retn = event->fObj; 
   assert( !retn || retn==(TObject*)(-1) || event->GetUniqueID()==ukey);
   delete event;
