@@ -1,5 +1,5 @@
 MACRO run_srs ievent=1 stnd_al=no nevent=1
-
+macro/global/import *
 ievent=[1]
 stnd_al=[2]
 nevent=[3]
@@ -7,9 +7,6 @@ nevent=[3]
 
 * initializations
 
-if ( [ievent]=1) then
-  exec create_tables_svt#srs
-  exec init_srs
   if ( [stnd_al]=yes ) then
    exec init_svg
     message 'Input name of .dsl file'
@@ -20,7 +17,6 @@ if ( [ievent]=1) then
   * first get event gets Run info
     dio/stream/getevent data
   endif
-endif
 
 *-------------------------------------------------
 
@@ -34,15 +30,15 @@ do i=1,[nevent]
    message 'Calling SRS...'
 
    ami/mod/call srs_am _
-	/dui/data/svt/hits/srs_result _
-        /dui/geant/Event/g2t_svt_hit _
-        /dui/data/svt/hits/scs_spt _
-        /dui/constants/svt/geometry/geom _
-        /dui/constants/svt/geometry/config _
-        /dui/constants/svt/geometry/shape _
-        /dui/constants/svt/params/srs_srspar _
-        /dui/constants/svt/params/srs_direct _
-        /dui/constants/svt/geometry/srs_activea 
+        [data]/svt/hits/srs_result _
+        [geant]/Event/g2t_svt_hit _
+        [data]/svt/hits/scs_spt _
+        [geometry]/svt/geom _
+        [geometry]/svt/config _
+        [geometry]/svt/shape _
+        [params]/svt/srs_srspar _
+        [params]/svt/srs_direct _
+        [geometry]/svt/srs_activea 
    
 enddo
 
