@@ -9,6 +9,8 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+#include "TH2.h"
+
 class St_svg_config;
 class St_svg_shape;
 class St_svg_geom;
@@ -26,6 +28,7 @@ class St_srs_Maker : public StMaker {
                St_srs_srspar  *m_srs_srspar; //!
                St_srs_direct  *m_srs_direct; //!
  protected:
+	       TH2F     *m_x_vs_y;  //! x vs y of Si points
  public: 
                   St_srs_Maker(const char *name="svt_hits", const char *title="event/data/svt/hits");
    virtual       ~St_srs_Maker();
@@ -36,3 +39,5 @@ class St_srs_Maker : public StMaker {
 };
 
 #endif
+
+
