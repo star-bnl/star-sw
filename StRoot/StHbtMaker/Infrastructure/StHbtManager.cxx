@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.cxx,v 1.15 2000/02/18 21:32:24 laue Exp $
+ * $Id: StHbtManager.cxx,v 1.16 2000/02/26 19:04:52 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,14 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.cxx,v $
+ * Revision 1.16  2000/02/26 19:04:52  laue
+ * Some unnecessary includes removed.
+ * StThreeVectorD replace by StHbtThreeVector.
+ * StHbtCoulomb modified to compile without Root (ClassDef embraced into
+ *   #ifdef __ROOT__  ..... #endif)
+ * StHbtParticle now returns references (FourMomentum(),Helix(),
+ *   DecayVertexPosiion())
+ *
  * Revision 1.15  2000/02/18 21:32:24  laue
  * franksTrackCut changed. If mCharge is set to '0' there will be no cut
  * on charge. This is important for front-loaded cuts.
@@ -141,7 +149,7 @@ int StHbtManager::Init(){
   // EventWriters
   StHbtEventWriterIterator EventWriterIter;
   for (EventWriterIter=mEventWriterCollection->begin();EventWriterIter!=mEventWriterCollection->end();EventWriterIter++){
-    cout << "*EventWriterIter " << *EventWriterIter << endl;
+    //cout << "*EventWriterIter " << *EventWriterIter << endl;
     // The message (StHbtString) passed into Init will be at the file header.
     // for that reason take the readerReport, add my own report and pass as message 
     StHbtString writerMessage = readerMessage;

@@ -1,10 +1,7 @@
-
-
 #ifndef StHbtCoulomb_HH
 #define StHbtCoulomb_HH
 
 #include <stdio.h>
-#include "StChain/StMaker.h"
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtPair.hh"
 #include "StHbtMaker/Infrastructure/StHbtParticle.hh"
@@ -49,7 +46,9 @@ private:
   double mCoulomb[1000];                         // interpolated Coulomb correction table
   int mNLines;                                   // Number of Eta's in lookup-table
 
+#ifdef __ROOT__
   ClassDef(StHbtCoulomb, 1)
+#endif
 };
 
 

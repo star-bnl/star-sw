@@ -9,13 +9,13 @@
 typedef unsigned int colSizeType;
 
 StHbtIOBinary::StHbtIOBinary(const char* fileName, const char* readWrite) {
-  cout << " StHbtIOBinary(const char* fileName, const char* readWrite " << endl;
+  //cout << " StHbtIOBinary(const char* fileName, const char* readWrite " << endl;
   byteCounterTotal=0;
   byteCounterEvent=0;
   if (((*readWrite)=='w')|| ((*readWrite)=='W')){  // this object will be a writer
     mOStream = new ofstream;
     mOStream->open(fileName);
-    if (!(*mOStream)){
+    if (!mOStream){
       cout << "StHbtIOBinary::Init() - Cannot open output file! " << endl;
       exit(-1);
     }
@@ -24,7 +24,7 @@ StHbtIOBinary::StHbtIOBinary(const char* fileName, const char* readWrite) {
   else {
     mIStream = new ifstream;
     mIStream->open(fileName); 
-    if (!(*mIStream)){
+    if (!mIStream){
       cout << "StHbtIOBinary::Init() - Cannot open input file! " << endl;
       exit(-1);
     }
@@ -34,10 +34,15 @@ StHbtIOBinary::StHbtIOBinary(const char* fileName, const char* readWrite) {
 }
 
 StHbtIOBinary::~StHbtIOBinary() {
-    if (*mOStream)
-      mOStream->close();
-    if (*mIStream)
-      mIStream->close();
+  cout << " StHbtIOBinary::~StHbtIOBinary() " << endl;
+  if (mOStream) {
+    mOStream->close();
+    delete mOStream;
+  }  
+  if (mIStream) {
+    mIStream->close();
+    delete mIStream;
+  }
 }
 
 int StHbtIOBinary::bytesWritten() { return byteCounterTotal; }
