@@ -145,6 +145,21 @@ public:
 
     virtual void setLTMDeltaR(double);
     virtual double ltmDeltaR() const;
+
+    // Track Filter (filter)
+    
+    virtual void setFilterPtMin(double);
+    virtual double filterPtMin() const;
+
+    virtual void setFilterPtMax(double);
+    virtual double filterPtMax() const;
+
+    virtual void setFilterEtaMin(double);
+    virtual double filterEtaMin() const;
+    
+    virtual void setFilterEtaMax(double);
+    virtual double filterEtaMax() const;
+
     
 protected:
     friend class StiIOBroker;
@@ -193,6 +208,12 @@ protected:
 
     //LocalTrackMerger
     double mLTMDeltaR;
+
+    //Filter
+    double mPtMin;
+    double mPtMax;
+    double mEtaMin;
+    double mEtaMax;
     
 private:
     ClassDef(StiRootIOBroker, 1)
@@ -568,5 +589,48 @@ inline double StiRootIOBroker::ltmDeltaR() const
 {
     return mLTMDeltaR;
 }
+
+inline void StiRootIOBroker::setFilterPtMin(double v) {
+    mPtMin=v;
+    notify();
+}
+
+inline double StiRootIOBroker::filterPtMin() const
+{
+    return mPtMin;
+}
+
+inline void StiRootIOBroker::setFilterPtMax(double v)
+{
+    mPtMax=v;
+    notify();
+}
+
+inline double StiRootIOBroker::filterPtMax() const
+{
+    return mPtMax;
+}
+
+inline void StiRootIOBroker::setFilterEtaMin(double v)
+{
+    mEtaMin=v;
+    notify();
+}
+
+inline double StiRootIOBroker::filterEtaMin() const
+{
+    return mEtaMin;
+}
     
+inline void StiRootIOBroker::setFilterEtaMax(double v)
+{
+    mEtaMax = v;
+    notify();
+}
+
+inline double StiRootIOBroker::filterEtaMax() const
+{
+    return mEtaMax;
+}
+
 #endif
