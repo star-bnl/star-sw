@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.cxx,v 1.2 1999/11/30 14:34:34 love Exp $
+// $Id: StLaserEventMaker.cxx,v 1.3 1999/12/08 18:22:59 love Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.3  1999/12/08 18:22:59  love
+// fix code to remove Linux compiler warning - Bill Love
+//
 // Revision 1.2  1999/11/30 14:34:34  love
 // Corrections to make CC5 compile.  DOCA routine added.
 //
@@ -82,7 +85,7 @@ Int_t StLaserEventMaker::Init(){
   ((StBFChain* )GetChain())->GetTFile()->cd();
   m_laser = new TTree("laser","Tpc laser track tree");
   Int_t bufsize= 64000;
-  TBranch *br = m_laser->Branch("event", "StLaserEvent",&event, bufsize, 1);
+  m_laser->Branch("event", "StLaserEvent",&event, bufsize, 1);
 
   return StMaker::Init();
 }
