@@ -468,9 +468,9 @@ C---<<<<<<<
      +                 evt_match_h,evt_match,cov)
                   
               iret = egr_load_globtrk(globtrk_h,globtrk,
-     +                 ,tptrack(itpct).id,gtrk,
-     +                 tphit_h,tphit,svt_spt_h,svt_spt,cov,itpct
-     +                 ,isvtt,ipriv,bfield(3))
+     +                 tptrack(itpct).id,gtrk,
+     +                 tphit_h,tphit,svt_spt_h,svt_spt,cov,itpct,
+     +                 isvtt,ipriv,bfield(3))
                endif
                tptrack(itpct).id_globtrk = globtrk_h.nok
                svt_track(svt(isvtt)).id_globtrk = globtrk_h.nok  
@@ -502,7 +502,7 @@ c     mark spts as used
      +              egrpar_h,egrpar,evt_match_h,evt_match,cov)
                
                iret = egr_load_globtrk(globtrk_h,globtrk,
-     +              ,igtrk,gtrk,tphit_h,tphit,svt_spt_h,
+     +              igtrk,gtrk,tphit_h,tphit,svt_spt_h,
      +              svt_spt,cov,itpct,isvtt,ipriv,bfield(3))
                
 c     mark spts as used
