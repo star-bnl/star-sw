@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.h,v 1.1 2000/06/13 20:42:05 caines Exp $
+ * $Id: StSvtDaqMaker.h,v 1.2 2000/08/04 21:03:51 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.h,v $
+ * Revision 1.2  2000/08/04 21:03:51  perev
+ * Leaks + Clear() cleanup
+ *
  * Revision 1.1  2000/06/13 20:42:05  caines
  * StRoot/StSvtDaqMaker
  *
@@ -59,7 +62,7 @@ class StSvtDaqMaker : public StMaker {
   Int_t  Reset();
   virtual Int_t  Init();
   virtual Int_t  Make();
-  virtual Int_t  Clear();
+  virtual void   Clear(const char *opt);
   virtual Int_t  Finish();
   ClassDef(StSvtDaqMaker, 1)   //StAF chain virtual base class for Makers
 };

@@ -1,5 +1,8 @@
-// $Id: StTpcBadChanMaker.h,v 1.2 1999/10/11 08:04:09 fretiere Exp $
+// $Id: StTpcBadChanMaker.h,v 1.3 2000/08/04 21:03:53 perev Exp $
 // $Log: StTpcBadChanMaker.h,v $
+// Revision 1.3  2000/08/04 21:03:53  perev
+// Leaks + Clear() cleanup
+//
 // Revision 1.2  1999/10/11 08:04:09  fretiere
 // Fix bugg + add README, LOG and ID
 //
@@ -31,7 +34,6 @@ public:
   virtual Int_t  Init();
   virtual Int_t  Make();
   virtual Int_t  Finish();
-  virtual Int_t  Clear();
   virtual void   PrintInfo();
  ClassDef(StTpcBadChanMaker, 1)   //StAF chain virtual base class for Makers
 };

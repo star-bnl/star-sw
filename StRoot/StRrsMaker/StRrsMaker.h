@@ -1,5 +1,5 @@
 /**********************************************************
- * $Id: StRrsMaker.h,v 1.11 2000/04/14 22:37:22 lasiuk Exp $
+ * $Id: StRrsMaker.h,v 1.12 2000/08/04 21:03:49 perev Exp $
  *
  * Description:
  *  StRrsMaker is the main module
@@ -15,6 +15,9 @@
  *  memory.
  ***********************************************************
  *  $Log: StRrsMaker.h,v $
+ *  Revision 1.12  2000/08/04 21:03:49  perev
+ *  Leaks + Clear() cleanup
+ *
  *  Revision 1.11  2000/04/14 22:37:22  lasiuk
  *  Recommit code
  *
@@ -116,7 +119,6 @@ public:
     Int_t Init(int histograms);
     Int_t Make();
     Int_t Finish();
-    Int_t Clear();
     
 public:
     void useLocalCoordinate(int);
@@ -185,7 +187,7 @@ private:
     int       mAddElectricNoise;
     
     virtual const char *GetCVS() const
-    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.11 2000/04/14 22:37:22 lasiuk Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.12 2000/08/04 21:03:49 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     ClassDef(StRrsMaker, 1)            // StAF chain
 };

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.9 2000/06/30 14:48:32 posk Exp $
+// $Id: StFlowEvent.h,v 1.10 2000/08/04 21:03:45 perev Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.10  2000/08/04 21:03:45  perev
+// Leaks + Clear() cleanup
+//
 // Revision 1.9  2000/06/30 14:48:32  posk
 // Using MessageMgr, changed Eta Symmetry cut.
 //
@@ -113,7 +116,9 @@ public:
   void SetOrigMult(const UInt_t&);
   void SetCentrality(const UInt_t&);
   void SetVertexPos(const StThreeVectorF&);
+#ifndef __CINT__		
   void SetPhiWeight(const Flow::PhiWgt_t &pPhiWgt);
+#endif
   static void SetEtaCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
   static void SetPtCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
   static void SetPiPlusCut(Float_t lo, Float_t hi);

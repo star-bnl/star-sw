@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.141 2000/07/12 22:49:41 fisyak Exp $
+// $Id: bfc.C,v 1.142 2000/08/04 21:04:05 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -145,7 +145,9 @@ void bfc(const Int_t First,
     // skip if any
     St_geant_Maker *geant = (St_geant_Maker *) chain->GetMaker("geant");
     if (chain->GetOption("Event")) evMk  = (StEventMaker   *) chain->GetMaker("StEventMaker");  
-    if (geant && First > 1 && geant->IsActive()) geant->Skip(First-1);
+    if (geant) {
+      if (First > 1 && geant->IsActive()) geant->Skip(First-1);
+    }
     else {
       StIOMaker *inpMk      = (StIOMaker *)      chain->GetMaker("inputStream");
       if (inpMk && First > 1) {printf ("Skip %i Events\n",First-1);inpMk->Skip(First-1);}

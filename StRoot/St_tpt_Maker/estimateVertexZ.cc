@@ -1,5 +1,8 @@
-// $Id: estimateVertexZ.cc,v 1.3 2000/06/20 21:30:19 wdeng Exp $
+// $Id: estimateVertexZ.cc,v 1.4 2000/08/04 21:04:02 perev Exp $
 // $Log: estimateVertexZ.cc,v $
+// Revision 1.4  2000/08/04 21:04:02  perev
+// Leaks + Clear() cleanup
+//
 // Revision 1.3  2000/06/20 21:30:19  wdeng
 // Memory seal.
 //
@@ -17,7 +20,7 @@
 #include "TTable.h"
 #include "TTableSorter.h"
 #include "TTableIter.h"
-
+#include "TMath.h"
 #include "tables/St_tcl_tphit_Table.h"
 
 void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ, Float_t& relativeHeight) 
@@ -67,7 +70,7 @@ void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ, Float_t& relativeHei
 	    
 	    Float_t innerR = sqrt( innerX * innerX + innerY * innerY );
 	    Float_t deltaR = innerR - outerR;
-	    if( fabs(deltaR) < 0.000001 ) continue;
+	    if(TMath::Abs(deltaR) < 0.000001 ) continue;
 	    
 	    Float_t z0 = (innerR*outerZ - outerR*innerZ)/ deltaR;
 	    //  if( fabs(z0)>200 ) continue;

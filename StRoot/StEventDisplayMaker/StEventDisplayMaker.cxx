@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.62 2000/07/21 15:50:19 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.63 2000/08/04 21:03:43 perev Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -722,7 +722,7 @@ Int_t StEventDisplayMaker::MakeTableTracks(const StTrackChair *points,StVirtualE
       filter = (StVirtualEventFilter *)m_FilterArray->At(kTptTrack);
       if (!filter || filter->IsOn() ) {
         // ------------------------------ tracks filter ------------------------------------ //
-        if (filter) trackColor =  filter->Channel(points->GetTable(),i,trackSize,trackStyle);//
+        if (filter) trackColor =  filter->Channel(points->Table(),i,trackSize,trackStyle);//
         // ----------------------------------------------------------------------------------//
         if (trackColor > 0) {
            StHelixD *helix  = points->MakeHelix(i);
@@ -919,6 +919,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.63  2000/08/04 21:03:43  perev
+// Leaks + Clear() cleanup
+//
 // Revision 1.62  2000/07/21 15:50:19  fine
 // Bug fix: needs some correction in ROOT/star as well
 //

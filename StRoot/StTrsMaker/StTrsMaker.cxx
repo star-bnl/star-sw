@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.60 2000/08/04 03:33:45 long Exp $
+// $Id: StTrsMaker.cxx,v 1.61 2000/08/04 21:03:57 perev Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.61  2000/08/04 21:03:57  perev
+// Leaks + Clear() cleanup
+//
 // Revision 1.60  2000/08/04 03:33:45  long
 // mMiniSegmentLength(3.*millimeter)--->mMiniSegmentLength(4.*millimeter)
 //
@@ -340,7 +343,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.60 2000/08/04 03:33:45 long Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.61 2000/08/04 21:03:57 perev Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -689,7 +692,6 @@ Int_t StTrsMaker::Make(){
     //cout << "Make ofstream" << endl;
     //ofstream ofs("/star/u2b/lasiuk/geantdebug.txt", ios::out);
     //ofstream raw("/star/u2b/lasiuk/event.txt",ios::out);
-    if (!m_DataSet->GetList())  {//if DataSet is empty fill it
     //
     // Read the GEANT info
     // these structures/classes are defined in:
@@ -988,7 +990,7 @@ Int_t StTrsMaker::Make(){
 	// Otherwise, do the digitization...
 	
 #ifdef HISTOGRAM
-	float* wireValues = new float[3];
+	float wireValues[3];
 	// Loop over Wire Histogram
 	for(int jj=mWireHistogram->minWire(); jj<=mWireHistogram->maxWire(); jj++) {
 	    aTpcWire currentWire = mWireHistogram->getWire(jj);
@@ -1002,7 +1004,6 @@ Int_t StTrsMaker::Make(){
 		mWireNtuple->Fill(wireValues);
 	    }
 	}
-	delete [] wireValues;
 	mWireNtuple->Write();
 #endif
 	PR(currentSectorProcessed);
@@ -1020,7 +1021,7 @@ Int_t StTrsMaker::Make(){
 #ifdef HISTOGRAM
 	tpcTimeBins continuousAnalogTimeSequence;
 	timeBinIterator timeSeqIter;
-	float* cAnalogValues = new float[4];
+	float cAnalogValues[4];
 	// Loop over Continuous Analog Sector
 	for(int jrow=1; jrow<=mGeometryDb->numberOfRows(); jrow++) {
 	    for (int jpad=1; jpad<=mGeometryDb->numberOfPadsAtRow(jrow); jpad++){
@@ -1037,7 +1038,6 @@ Int_t StTrsMaker::Make(){
 		}
 	    }
 	}
-	delete [] cAnalogValues;
 	mContinuousAnalogNtuple->Write();
 #endif
 
@@ -1051,7 +1051,7 @@ Int_t StTrsMaker::Make(){
 #ifdef HISTOGRAM
 	tpcTimeBins discreteAnalogTimeSequence;
 	timeBinIterator timeBinIter;
-	float* dAnalogValues = new float[4];
+	float dAnalogValues[4];
 	// Loop over Discrete Analog Sector
 	for(int drow=1; drow<=mGeometryDb->numberOfRows(); drow++) {
 	    for (int dpad=1; dpad<=mGeometryDb->numberOfPadsAtRow(drow); dpad++){
@@ -1068,7 +1068,6 @@ Int_t StTrsMaker::Make(){
 		}
 	    }
 	}
-	delete [] dAnalogValues;
 	mDiscreteAnalogNtuple->Write();
 #endif
 	
@@ -1113,7 +1112,6 @@ Int_t StTrsMaker::Make(){
         
 	//
     } // loop over all segments: for(int i...
-  } // mDataSet
   } // normal processing of TRS
   if(mWriteToFile) mOutputStream->writeTrsEvent((mAllTheData));
   
@@ -1136,7 +1134,7 @@ Int_t StTrsMaker::Make(){
       // otherwise, let's decode it
       unsigned char* padList;
 #ifdef HISTOGRAM
-      float* digitalValues = new float[4];
+      float digitalValues[4];
       for (int irow=1; irow<=mGeometryDb->numberOfRows();irow++) {
 	  int numberOfPads = zsr->getPadList(irow, &padList);
 	  // If there are no pads, go to the next row...
@@ -1180,7 +1178,6 @@ Int_t StTrsMaker::Make(){
 	  // 	    dynamic_cast<StTrsZeroSuppressedReader*>(zsr);
 	  //  	    zsr->clear();
       } // Loop over rows!
-      delete [] digitalValues;
       mDigitalNtuple->Write();
 #endif
   } // Loop over sectors
@@ -1200,10 +1197,10 @@ Int_t StTrsMaker::Make(){
 // *****************************************************************
 // Make sure the memory is deallocated!
 //
-Int_t StTrsMaker::Clear()
+void  StTrsMaker::Clear(const char *)
 {
-    mAllTheData->clear(); //This deletes all the StTrsDigitalSectors in the StTrsRawDataEvent
-    return kStOk;
+    if (mAllTheData) mAllTheData->clear(); //This deletes all the StTrsDigitalSectors in the StTrsRawDataEvent
+    StMaker::Clear();
 }
 Int_t StTrsMaker::Finish()
 {

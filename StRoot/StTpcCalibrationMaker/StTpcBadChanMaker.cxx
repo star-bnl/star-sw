@@ -1,5 +1,8 @@
-// $Id: StTpcBadChanMaker.cxx,v 1.5 1999/10/11 08:04:08 fretiere Exp $
+// $Id: StTpcBadChanMaker.cxx,v 1.6 2000/08/04 21:03:53 perev Exp $
 // $Log: StTpcBadChanMaker.cxx,v $
+// Revision 1.6  2000/08/04 21:03:53  perev
+// Leaks + Clear() cleanup
+//
 // Revision 1.5  1999/10/11 08:04:08  fretiere
 // Fix bugg + add README, LOG and ID
 //
@@ -110,7 +113,7 @@ Int_t StTpcBadChanMaker::Make(){
 //_____________________________________________________________________________
 void StTpcBadChanMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTpcBadChanMaker.cxx,v 1.5 1999/10/11 08:04:08 fretiere Exp $\n");
+  printf("* $Id: StTpcBadChanMaker.cxx,v 1.6 2000/08/04 21:03:53 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -177,10 +180,6 @@ Int_t StTpcBadChanMaker::Finish(){
   tHFile->Close();
   tBadFile->close();
   return kStOK;
-}
-//_____________________________________________________________________________
-Int_t StTpcBadChanMaker::Clear(){
-   return kStOK;
 }
 
 
