@@ -4,8 +4,6 @@
 #include "StiDetector.h"
 #include "StiTrackNode.h"
 
-Messenger *StiTrackNode::s_pMessenger = NULL;
-
 ostream& operator<<(ostream& os, const StiDetector& d);
 
 const StiDetector * StiTrackNode::getDetector() const
@@ -34,19 +32,15 @@ const StiDetector * StiTrackNode::getDetector() const
     return( hit==0 ? detector : hit->detector() );
 }
 
-void StiTrackNode::setDetector(const StiDetector *pDetector){
-    //if(hit==0){ 
-    detector = pDetector; 
-    if (detector!=0) {
-	
-	*(Messenger::instance(MessageType::kNodeMessage)) << "StiTrackNode::setDetector() - Detector set to :" << *detector << endl;
-	
-    }
-    else {
-	
-	*(Messenger::instance(MessageType::kNodeMessage)) << "StiTrackNode::setDetector() - Fatal Error - Detector improperly set to '0'" << endl;
-
-    }
+void StiTrackNode::setDetector(const StiDetector *pDetector)
+{
+	detector = pDetector; 
+	if (detector!=0) 
+		*(Messenger::instance(MessageType::kNodeMessage)) 
+			<< "StiTrackNode::setDetector() - Detector set to :" << *detector << endl;
+	else 
+		*(Messenger::instance(MessageType::kNodeMessage)) 
+			<< "StiTrackNode::setDetector() - Fatal Error - Detector improperly set to '0'" << endl;
 }
 
 
@@ -56,21 +50,6 @@ void StiTrackNode::reset()
     StiDefaultMutableTreeNode::reset();
     hit      = 0;
     detector = 0;
-}
-
-
-//_____________________________________________________________________________
-void StiTrackNode::set(int depth, StiHit * h)
-{
-	//StiDefaultMutableTreeNode::set(depth);
-	hit = h;
-}
-
-//_____________________________________________________________________________
-void StiTrackNode::setAsCopyOf(const StiTrackNode * node)
-{
-    StiDefaultMutableTreeNode::setAsCopyOf(node);
-    hit = node->hit;
 }
 
 //_____________________________________________________________________________

@@ -317,77 +317,194 @@ StiKalmanTrackNode * StiKalmanTrack::findHit(StiHit * h)
   return 0;
 }
 
+/*! Remove all hits from this track.
+	<p>
+	Remove all references to hits from this track be setting the firstNode and lastNode 
+	pointers to "0".
+	<h3>Note</h3>
+	<ol>
+	<li>No need to destroy any object since the memory for the nodes and hits is owned 
+	by the factory that supply these.</li>
+	</ol>
+*/
 void StiKalmanTrack::removeAllHits()
 {
     firstNode = 0;
 		lastNode  = 0;
 }
 
+/*! Initialization of this kalman track from external parameters.
+	<p>
+	This track object is initialized on the basis of parameters determined externally. The
+parameters consist of the track curvature, the tangent of pitch angle, the origin of 
+the helix, and a vector of hits already associated with the track.
+
+<h3>Arguments:</h3>
+<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" WIDTH="100%">
+  <TR> <TD WIDTH="10%">curvature</TD> <TD WIDTH="90%">1/radius of the tack.</TD>  </TR>
+  <TR> <TD WIDTH="10%">tanl</TD>      <TD WIDTH="90%">tan(pitch angle)</TD> </TR>
+  <TR> <TD WIDTH="10%">origin</TD>    <TD WIDTH="90%">origin of the track in global coordinates.</TD> </TR>
+  <TR> <TD WIDTH="10%">v</TD>         <TD WIDTH="90%">vector of hits associated with this track.</TD> </TR>
+</TABLE>
+<h3>Internal Track Representation: </h3>
+
+<TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0" WIDTH="80%">
+  <TR>
+    <TD WIDTH="10%">x</TD>
+    <TD WIDTH="10%">fX</TD>
+    <TD WIDTH="80%">independent variable</TD>
+  </TR>
+  <TR>
+    <TD WIDTH="10%">state[0]</TD>
+    <TD WIDTH="10%">fP0</TD>
+    <TD WIDTH="80%">y; ordinate at &quot;x&quot;</TD>
+  </TR>
+  <TR>
+    <TD WIDTH="10%">state[1]</TD>
+    <TD WIDTH="10%">fP1</TD>
+    <TD WIDTH="80%">z; position along beam axis at &quot;x&quot;</TD>
+  </TR>
+  <TR>
+    <TD WIDTH="10%">state[2]</TD>
+    <TD WIDTH="10%">fP2</TD>
+    <TD WIDTH="80%">eta=C*x0; C == curvature, x0==position of helix center.</TD>
+  </TR>
+  <TR>
+    <TD WIDTH="10%">state[3]</TD>
+    <TD WIDTH="10%">fP3</TD>
+    <TD WIDTH="80%">C (local) curvature of the track</TD>
+  </TR>
+  <TR>
+    <TD WIDTH="10%">state[4]</TD>
+    <TD WIDTH="10%">fP4</TD>
+    <TD WIDTH="80%">tan(l)</TD>
+  </TR>
+  <TR>
+    <TD WIDTH="10%">error[0]</TD>
+    <TD WIDTH="10%">fC00</TD>
+    <TD WIDTH="80%">Error Matrix - Symmetric e.g. fC20=fC02</TD>
+  </TR>
+  <TR>
+    <TD WIDTH="10%">error[1]</TD>
+    <TD WIDTH="10%">fC10</TD>
+    <TD WIDTH="80%"></TD>
+  </TR>
+  <TR>
+    <TD WIDTH="10%">error[2]</TD>
+    <TD WIDTH="10%">fC11</TD>
+    <TD WIDTH="80%"></TD>
+  </TR>
+  <TR>
+    <TD WIDTH="10%">error[3]</TD>
+    <TD WIDTH="10%">fC20</TD>
+    <TD WIDTH="80%"></TD>
+  </TR>
+  <TR>
+    <TD WIDTH="10%">error[4]</TD>
+    <TD WIDTH="10%">fC21</TD>
+    <TD WIDTH="80%"></TD>
+  </TR>
+  <TR>
+    <TD WIDTH="10%">error[5]</TD>
+    <TD WIDTH="10%">fC22</TD>
+    <TD WIDTH="80%"></TD>
+  </TR>
+  <TR>
+    <TD WIDTH="10%">error[6]</TD>
+    <TD WIDTH="10%">fC30</TD>
+    <TD WIDTH="80%"></TD>
+  </TR>
+  <TR>
+    <TD WIDTH="10%">error[7]</TD>
+    <TD WIDTH="10%">fC31</TD>
+    <TD WIDTH="80%"></TD>
+  </TR>
+  <TR>
+    <TD WIDTH="10%">error[8]</TD>
+    <TD WIDTH="10%">fC32</TD>
+    <TD WIDTH="80%"></TD>
+  </TR>
+  <TR>
+    <TD WIDTH="10%">error[9]</TD>
+    <TD WIDTH="10%">fC33</TD>
+    <TD WIDTH="80%"></TD>
+  </TR>
+  <TR>
+    <TD WIDTH="10%">error[10]</TD>
+    <TD WIDTH="10%">fC40</TD>
+    <TD WIDTH="80%"></TD>
+  </TR>
+  <TR>
+    <TD WIDTH="10%">error[11]</TD>
+    <TD WIDTH="10%">fC41</TD>
+    <TD WIDTH="80%"></TD>
+  </TR>
+  <TR>
+    <TD WIDTH="10%">error[12]</TD>
+    <TD WIDTH="10%">fC42</TD>
+    <TD WIDTH="80%"></TD>
+  </TR>
+  <TR>
+    <TD WIDTH="10%">error[13]</TD>
+    <TD WIDTH="10%">fC43</TD>
+    <TD WIDTH="80%"></TD>
+  </TR>
+  <TR>
+    <TD WIDTH="10%">error[14]</TD>
+    <TD WIDTH="10%">fC44</TD>
+    <TD WIDTH="80%"></TD>
+  </TR>
+</TABLE>
+
+
+<h3>Algorithm:</h3>
+<ol>
+<li>Verify that a valid node factory exists.</li>
+<LI>Use local arrays state and error to add and set all nodes of this track.</LI>
+<LI>Use the same curvature, and tanl for all nodes as supplied in argument list.</li>
+<li>Use Unit matrix for error matrix.</li>
+<li>Loop over all hits of the input hit vector and create a track node for each.</LI>
+<li>Paramters of the track node are set according to the y,z of the hits added.</LI>
+<li>Hits given are transformed in the local coordinates of their detector.
+</ol>
+<h3>Notes:</h3>
+<OL>
+<LI>Throws a logic_error exception if no track node factory is available.</li>
+<LI>Throws a logic_error exception if the factory
+  is not a castable to a factory of StiKalmanTrackNode.</li>
+<li>Throws a logic error exception if hits do not have a valid pointer to a detector object.</li>
+</OL>
+*/
 void StiKalmanTrack::initialize(double curvature,
 				double tanl,
 				const StThreeVectorD& origin,
 				const hitvector & v)
 {
-    // Input parameters_________________________________________
-    // origin    : origin of the track in global coordinates
-    // curvature : 1/Radius of the track
-    // tanl      : tan(pitch angle)
-    // v         : vector of hits to be added to this track
-    //
-    // Generated parameters_____________________________________
-    // state[0] = y  ordinate
-    // state[1] = z  position along beam axis
-    // state[2] = eta=C*x0
-    // state[3] = C  (local) curvature of the track
-    // state[4] = tan(l) 
-    // e[0] = fC00;
-    // e[1] = fC10;e[2] = fC11;
-    // e[3] = fC20;e[4] = fC21;e[5] = fC22;
-    // e[6] = fC30;e[7] = fC31;e[8] = fC32;
-    // e[9] = fC33;e[10]= fC40;e[11]= fC41;e[12]= fC42;e[13]= fC43;e[14]= fC44;
-    
-    //cout <<"StiKalmanTrack::initialize()"<<endl;
     if (!trackNodeFactory) 
-			{
-				cout <<"StiKalmanTrack::initialize()\tERROR:\t";
-				cout <<"trackNodeFactory==0.  Abort"<<endl;
-				return;
-			}
-
+			throw logic_error("StiKalmanTrack::initialize()\tERROR:\tNo Kalman Track Node Factory-Abort");
     StiObjectFactoryInterface<StiKalmanTrackNode>* fac = trackNodeFactory;
     if (!fac) 
-	{
-	    cout <<"StiKalmanTrack::initialize(). ERROR:\t";
-	    cout <<"factory cast failed.  Seg-fault"<<endl;
-	}
-    
+			throw logic_error("StiKalmanTrack::initialize(). ERROR:\tFactory cast failed-Abort");
     //StThreeVectorD stiOrigin;
     double alpha,alphaP,eta;  
     hitvector::const_iterator it;
     double state[5];  
     double error[15];
-    
-    //cout <<"\tSet state[3], state[4]"<<endl;
     // These are constant for all hits
     state[3]=curvature;
     state[4]=tanl;
-    //cout <<"\tSet Errors"<<endl;
     // For the time being set a diagonal error matrx
     error[0] = 1.;  
     error[1] = 0.; error[2] = 1.;  
     error[3] = 0.; error[4] = 0.; error[5] = 1.;  
     error[6] = 0.; error[7] = 0.; error[8] = 0.;  error[9]  = 1.;  
     error[10]= 0.; error[11] = 0.;error[12] = 0.; error[13] = 0.;  error[14] = 1.;
-    
     // do the transfer here
     StiKalmanTrackNode * node  = 0;
     StiKalmanTrackNode * pNode = 0;
-    int i =0;
     eta = 0.;
-    //cout <<"\tAdd Hits"<<endl;
     for (it=v.begin(); it!=v.end(); ++it)
       {
-				//cout <<"===========Adding Hit: "<<(*(*it))<<endl;
 				StiDetector* layer = (*it)->detector();
 				if (!layer) 
 					throw logic_error("StiKalmanTrack::initialize() ERROR:\t Hit has null detector.");
@@ -409,16 +526,13 @@ void StiKalmanTrack::initialize(double curvature,
 				state[0] = (*it)->y(); 
 				state[1] = (*it)->z(); 
 				state[2] = eta;
-				node->set(i, (*it), alpha, (*it)->x(), state,error, 0., 0.);
+				node->set((*it), alpha, (*it)->x(), state,error, 0., 0.);
 				if (pNode==0) 
 					firstNode = node;
 				else
-					{
 						pNode->add(node);
-					}
 				pNode = node;
 				lastNode = node;
-				i++;
       }
 }
 
@@ -589,7 +703,7 @@ double  StiKalmanTrack::getChi2() const
 			else
 				return firstNode->fChi2;
 		}
-	else
+	else // insideOut
 		{
 			if (trackingDirection==kOutsideIn)
 				return firstNode->fChi2;
@@ -797,12 +911,9 @@ double StiKalmanTrack::getTrackLength() const
 }
 	/*
 		StiKTNBidirectionalIterator it;
-		cout << "Outer:" << (*first) << endl;
 		x1=(*first).fX; y1=(*first).fP0; z1=(*first).fP1; 
 		e1=(*first).fP2; a1=(*first).fAlpha; c1=(*first).fP3; t1=(*first).fP4;
 		cos1=c1*x1-e1;
-		cout << "Inner:" << (*last) << endl;
-		cout << "(x1,y1)="<<x1<<"\t"<<y1<<endl;
 		x2=(*last).fX; y2=(*last).fP0; z2=(*last).fP1; 
 		e2=(*last).fP2; a2=(*last).fAlpha; c2=(*last).fP3; t2=(*last).fP4;
 		if (a2!=a1)
@@ -810,7 +921,6 @@ double StiKalmanTrack::getTrackLength() const
 		if (a1<0) a1+=2*M_PI;
 		if (a2<0) a2+=2*M_PI;
 		da=a1-a2; cda=cos(da); sda=sin(da);
-		cout << " rotby:" << da*180/3.1415<<endl;
 		x0=e2/c2; //center of circle
 		d=c2*x2-e2;
 		y0=y2+sqrt(1-d*d)/c2;
@@ -1054,19 +1164,20 @@ void StiKalmanTrack::swap()
 ///return hits;
 vector<StHit*> StiKalmanTrack::stHits() const
 {
-    StiKalmanTrackNode* leaf = getLastNode();
-    StiKTNForwardIterator it(leaf);
-    StiKTNForwardIterator end = it.end();
-
-    vector<StHit*> hits;
-    
-    while (it!=end) {
-	const StiKalmanTrackNode& node = *it;
-	StiHit* hit = node.getHit();
-	if (hit) {
-	    hits.push_back( const_cast<StHit*>( hit->stHit() ) );
+	StiKalmanTrackNode* leaf = getLastNode();
+	StiKTNForwardIterator it(leaf);
+	StiKTNForwardIterator end = it.end();
+	vector<StHit*> hits;
+	while (it!=end) {
+		const StiKalmanTrackNode& node = *it;
+		StiHit* hit = node.getHit();
+		if (hit) {
+			StHit * stHit = const_cast<StHit*>( hit->stHit() );
+			if (stHit)
+				hits.push_back(stHit);
+		}
+		++it;
 	}
-	++it;
-    }
-    return hits;
+	return hits;
 }
+
