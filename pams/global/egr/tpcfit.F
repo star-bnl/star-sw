@@ -43,10 +43,10 @@ C* covar - covariance matrix
 
       DOUBLE PRECISION    xcir(mxpnt),ycir(mxpnt),zcir(mxpnt)
       DOUBLE PRECISION    xerr(mxpnt),yerr(mxpnt),zerr(mxpnt),pnt(mxpnt)
-      DOUBLE PRECISION    chisquare, param(5)
+      DOUBLE PRECISION    chisquare, param(*)
       DOUBLE PRECISION    covar(5,5)
 
-      REAL xfirst,yfirst,zfirst,xlast,ylast,zlast
+      REAL xfirst,yfirst,zfirst,xlast,ylast,zlast,rfirst,xpar,ypar
       REAL x,y,z,xer,yer,zer,phi,psi,lambda,psii,psif,psir,parmass
       REAL tanl,cosl,q
       REAL r,x0,y0,dpsi,twopi
@@ -115,21 +115,59 @@ C parameters at beginning of track
       x = xfirst
       y = yfirst
       z = zfirst
+      rfirst = sqrt(x**2+y**2) 
       q = sign(1.0,param(5)) ! charge
-      trkgen(1) = sqrt(x**2+y**2) ! R
+
       phi = param(1)
-      trkgen(2) = phi*trkgen(1) ! phi*R
-      trkgen(3) = param(2) ! z
+      xpar = param(6)*cos(param(1)) ! x of parameters
+      ypar = param(6)*sin(param(1)) ! y of parameters
+
       tanl = param(4)
-      trkgen(4) = tanl ! tanl
-      trkgen(5) = param(3) ! psi
-      trkgen(6) = param(5) ! q/pt
 
       psi = param(3)+sign(1.0,param(5))*C_PI_2 !mangled psi
       r = 1.0/(C_D_CURVATURE*bfield(3)*abs(param(5)))
 
-      x0 = x - r*cos(psi)
-      y0 = y - r*sin(psi)
+      x0 = xpar - r*cos(psi)
+      y0 = ypar - r*sin(psi)
+
+      trkgen(1) = rfirst
+      trkgen(2) = phi*trkgen(1) ! phi*R
+      trkgen(3) = param(2) ! z
+      trkgen(4) = tanl ! tanl
+      trkgen(5) = param(3) ! psi
+      trkgen(6) = param(5) ! q/pt
+
+C extrapolate parameters to first point if necessary
+      if(abs(rfirst-param(6)).gt.0.1)then
+        phi = atan2(y,x)
+C convert to 0-2pi
+        phi = amod(phi,twopi)
+        if(phi.lt.0)phi=phi+C_2PI
+        psif = atan2(y-y0,x-x0)
+        psii = atan2(ypar-y0,xpar-x0)
+        dpsi = psif-psii
+C -- put dpsi in 0-2pi range
+        dpsi = amod(dpsi,real(C_2PI))
+        psir = psi+dpsi - sign(1.0,param(5))*C_PI_2
+C convert to 0-2pi
+        psir = amod(psir,twopi)
+        if(psir.lt.0)psir=psir+C_2PI
+
+        trkgen(2) = phi*trkgen(1) ! phi*R
+        trkgen(5) = psir
+
+C -- check for rotation direction
+        if(q*bfield(3).lt.0)then
+          if(dpsi.lt.0)then
+            dpsi = (C_2PI+dpsi)
+          endif
+        else
+          if(dpsi.gt.0)then
+            dpsi = -(C_2PI-dpsi)
+          endif
+        endif
+        trkgen(3) = param(2)-dpsi*r*sign(1.0,param(5))*tanl ! z
+      endif ! if(abs(rfirst-param(6)).gt.0.1)
 
 C parameters at end of track
       x = xlast
@@ -166,7 +204,7 @@ C -- check for rotation direction
         endif
       endif
 
-      trkref(3) = param(2)-dpsi*r*sign(1.0,param(5))*tanl ! z
+      trkref(3) = trkgen(3)-dpsi*r*sign(1.0,param(5))*tanl ! z
 
       CALL TPCTRK(NEVT,NTRK,TRKGEN,TRKREF,NTPCUSED,TPC,TPCCH2,TRKTPC,IRET)
 C DEBUG
@@ -182,7 +220,8 @@ C convert to 0-2pi
         if(psi.lt.0)psi=psi+C_2PI
         param(3)=psi ! psi
         param(4)=trktpc(4) ! tanl
-        param(5)=trktpc(6) ! q/pt 
+        param(5)=trktpc(6) ! q/pt
+        param(6)=trktpc(1) ! r0 where parameters are evaluated 
         chisquare = trktpc(22)/trktpc(23) ! chisq/degf
         npfit = (ifix(trktpc(23))+5)/2 ! (ndegf+5)/2
         do ih =1,ntpcused ! tag the removed hits
@@ -223,6 +262,8 @@ c fill in covar here
         covar(5,4) = covar(4,5)
 
       ENDIF
+
+ 900  CONTINUE
 
       FITTER = IRET
       IF(IRET.NE.0)FITTER = -IRET
@@ -779,7 +820,8 @@ CCC      pathl = abs(dpsi*rad/cosl)
 *-- fraction of radiation length for P10
       XLTRUE = SQRT(DXSQ+DYSQ+DZSQ)/11600.
 *-- put in the material for inner field cage
-      if((rl.gt.50.0).and.(r.lt.50.0))XLTRUE = XLTRUE + 0.006
+      if((rl.gt.50.0).and.(r.lt.50.0))XLTRUE = XLTRUE + 0.006/COSL
+CCC      if((rl.gt.50.0).and.(r.lt.50.0))XLTRUE = XLTRUE + 0.006
 CCC      XLTRUE = pathl/11600.
 
       IF (XLTRUE.GT.1E-8) THEN
@@ -794,7 +836,8 @@ CCC      XLTRUE = pathl/11600.
 
       C(6)  = 0.3333*(DXSQ+DYSQ)*thplsq ! z term
 CCC      C(10) = thplsq ! atan(tanl) term
-      C(10) = thplsq/cosl**2 ! tanl term
+CCC      C(10) = thplsq/cosl**2 ! tanl term
+      C(10) = thplsq/cosl**4 ! tanl term
       C(13) = thplsq ! psi term
 *-- track radius
 CCC      tanl = tan(C_PI_2-p(3))

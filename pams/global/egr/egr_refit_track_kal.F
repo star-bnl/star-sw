@@ -92,7 +92,7 @@ C     Local variables
       LOGICAL good_hit(mxpnt)
       DOUBLE PRECISION    xcir(mxpnt),ycir(mxpnt),zcir(mxpnt)
       DOUBLE PRECISION    xerr(mxpnt),yerr(mxpnt),zerr(mxpnt),pnt(mxpnt)
-      DOUBLE PRECISION    chisquare, param(5)
+      DOUBLE PRECISION    chisquare, param(*)
 
       REAL    as,bs,cf,xold,yold,theta
       DOUBLE PRECISION    covar(5,5)
@@ -234,11 +234,11 @@ C        write(6,*) param(1), param(2), param(3), param(4), param(5)
 
 
 
-         do i=1,5
+         do i=1,6
             gtrk(igtrk).p(i) = param(i)
          enddo
 
-         gtrk(igtrk).p(6) = sqrt(xcir(1)**2+ycir(1)**2)
+CCC         gtrk(igtrk).p(6) = sqrt(xcir(1)**2+ycir(1)**2)
          gtrk(igtrk).p(7) = chisquare
          gtrk(igtrk).nfit = npfit
 CCC         gtrk(igtrk).nfit = ncir
