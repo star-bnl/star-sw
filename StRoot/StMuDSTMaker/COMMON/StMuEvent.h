@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.11 2004/12/02 00:19:52 mvl Exp $
+ * $Id: StMuEvent.h,v 1.12 2005/03/17 21:55:00 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -116,6 +116,7 @@ class StMuEvent : public TObject {
   StThreeVectorF mPrimaryVertexError;
   friend class StMuDst;
   friend class StMuDstMaker;
+  friend class StMuMomentumShiftMaker;
   friend class StMuL3EventSummary;
   ClassDef(StMuEvent,6)
 };
@@ -166,6 +167,9 @@ inline StThreeVectorF StMuEvent::primaryVertexErrors() { return mPrimaryVertexEr
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.12  2005/03/17 21:55:00  mvl
+ * Added StMuMomentumShiftMaker for applying a magnetic field scaling to the reconstructed MuDst. This class accesses StMuTrack, StMuEvent and StMuHelix and some Strangeness MuDst data members as 'friend'
+ *
  * Revision 1.11  2004/12/02 00:19:52  mvl
  * Added error on primary vertex
  *

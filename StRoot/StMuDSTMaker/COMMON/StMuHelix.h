@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuHelix.h,v 1.5 2004/05/02 04:10:14 perev Exp $
+ * $Id: StMuHelix.h,v 1.6 2005/03/17 21:55:00 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -34,6 +34,8 @@ class StMuHelix : public TObject {
   StThreeVectorF mOrigin;
   short mQ;
   float mB;
+
+  friend class StMuMomentumShiftMaker;
   ClassDef(StMuHelix,1)
 };
 
@@ -48,6 +50,9 @@ inline float StMuHelix::b() const { return mB; }
 /***************************************************************************
  *
  * $Log: StMuHelix.h,v $
+ * Revision 1.6  2005/03/17 21:55:00  mvl
+ * Added StMuMomentumShiftMaker for applying a magnetic field scaling to the reconstructed MuDst. This class accesses StMuTrack, StMuEvent and StMuHelix and some Strangeness MuDst data members as 'friend'
+ *
  * Revision 1.5  2004/05/02 04:10:14  perev
  * private => protected
  *

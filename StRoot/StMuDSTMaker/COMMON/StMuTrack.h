@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.12 2004/10/22 23:44:16 mvl Exp $
+ * $Id: StMuTrack.h,v 1.13 2005/03/17 21:55:00 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -141,6 +141,7 @@ protected:
   static double mProbabilityPidCentrality; ///< Centrality for Aihong's pid prob calculations. Will set when new StMuEvent is made from StEvent
 
   friend class StMuDst;
+  friend class StMuMomentumShiftMaker;
   ClassDef(StMuTrack,5)
 };
 
@@ -191,6 +192,9 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.13  2005/03/17 21:55:00  mvl
+ * Added StMuMomentumShiftMaker for applying a magnetic field scaling to the reconstructed MuDst. This class accesses StMuTrack, StMuEvent and StMuHelix and some Strangeness MuDst data members as 'friend'
+ *
  * Revision 1.12  2004/10/22 23:44:16  mvl
  * Fixed StMuDst::fixTrackIndices()
  *
