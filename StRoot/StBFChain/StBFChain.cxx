@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.419 2004/06/10 01:18:57 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.420 2004/06/24 02:47:55 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -740,9 +740,11 @@ Bfc_st BFC2[] = {
 
   {"Idst"        ,""  ,"",
    "l0,dst,event,dEdxY2,genvtx,Kink2,xi2,svtdEdx,SvtIT,CMuDst,analysis,compend,EventQA"   ,"","","",kFALSE},
-  {"B2003I"      ,"","","ry2003,tpc_daq,tpcI,fcf,Physics,Idst,beamLine,tags,Tree,evout"
+  {"B2003I"      ,"","","ry2003,in,tpc_daq,tpcI,fcf,Physics,Idst,beamLine,tags,Tree,evout"
                                                                   ,"","","Base chain for 2003 ITTF",kFALSE},
   {"dau2003i"    ,""  ,"","B2003I,Corr2,ppOpt,l3onl,tofDat,eemcD,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
+                                        ,"Production chain for winter 2003 data dau2003a with ITTF",kFALSE},
+  {"pp2003i"     ,""  ,"","B2003I,Corr2,ppOpt,-PreVtx,l3onl,tofDat,eemcD,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
                                         ,"Production chain for winter 2003 data dau2003a with ITTF",kFALSE},
 
   // Year 4 chains (2003/2004) *** CHAINS WILL BE RESHAPED AS RUN PROGRESS ***
