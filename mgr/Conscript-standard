@@ -7,9 +7,14 @@ $build =~ s/\\/\//g;# print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
 (my $Dir = $ObjDir) =~ s/$build\///g; #print "Dir = $Dir\n";
 $ObjDir = "#" . $ObjDir; #print "ObjDir = $ObjDir\n";
 (my $obj_dir = $ObjDir) =~ s/^\#//g;# print "obj_dir = $obj_dir\n";
+#my @St_base  = ("#lib/St_DataSet.h","#include/St_DataSetIter.h","#include/StMaker.h","#include/SystemOfUnits.");
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 my @Repo = Repository_List; #print "Repositories = |@Repo|\n";
 my $pkg  = basename($Dir);# print "Run cons in $Dir for $PKG\n";
+#my @St_base  = ("#include/St_DataSet.h","#include/St_DataSetIter.h","#include/StMaker.h","#include/SystemOfUnits.");
+#my @base = ("St_base","StarClassLibrary","StChain");
+#my @St_base = ();
+#foreach my $i (@base) {next if "$i" eq "$pkg"; push @St_base, $LIB . "/" . $i . "." .  $env->{SUFSOLIB};}
 my $PKG = $pkg;
 my @idlML    = find_idlM($Dir);   #  $i = 0; for my $s (@idlM) {print "i=",$i++," idlM = ",$s,"\n";}
 my @srcL     = find_sources($Dir);#  my $i=0; for my $s (@src) {print "i=",$i++," src = ",$s,"\n";}
@@ -121,23 +126,23 @@ else {
     for $idl (@idlM) {
       my $stem = basename($idl,".idl"); #print "idl = $idl  stem = $stem\n";
       my $idm  = $stem . ".idl";
-#      my $idM  = "#" . $DIR . "/" . $Dir . "/" . $idl; print "idM = $idM\n";
+      my $idMM = $DIR . "/" . $Dir . "/" . $idl;# print "idMM = $idMM\n";
       my $idM  = "#" . $Dir . "/" . $idl;# print "idM = $idM\n";
       my @idlS = ($idM);
       my $modh = $INCLUDE . "/"   . $stem . ".h";
       my $modi = $INCLUDE . "/"   . $stem . ".inc";
       my $modH = $include . "/"   . "St_" . $stem . "_Module.h"; 
       my $modC = $share . "/"   . "St_" . $stem . "_Module.cxx";# print "mod = $mod\n";
-#      if (-r $idM) {
-#	open (IN, "<$idM") or die  "Can't open $idM";
-#	while ($line = <IN>) {
-#	  if ($line !~ "include") {next;}
-#	  if ($line =~ "PAM")     {next;}
-#	  my @words = split '"', $line; my $idt = $INCLUDE . "/" . $words[1]; #print "idt = $idt\n";
-#	  push @idlS, $idt; 
-#	}
-#	close (IN);
-#      }
+      if (-r $idMM) {
+	open (IN, "<$idMM") or die  "Can't open $idMM";
+	while ($line = <IN>) {
+	  if ($line !~ "include") {next;}
+	  if ($line =~ "PAM")     {next;}
+	  my @words = split '"', $line; my $idt = $INCLUDE . "/" . $words[1]; #print "idt = $idt\n";
+	  push @idlS, $idt; 
+	}
+	close (IN);
+      }
 	if ($STAR_SYS !~ /^intel_wnt$/) {
 	  Command $env2 [$modh], @idlS,  qq(stic.pl %> -r $STIC_CPPPATH -q %1);  
 	  Command $env2 [$modi], @idlS,  qq(stic.pl %> -r $STIC_CPPPATH -q %1);  
@@ -155,6 +160,7 @@ else {
 if ($#Defs > -1) {
   my @CintFiles = 
   ($share . "/"  . $PKG . "_Cint.cxx", $share . "/"  . $PKG . "_Cint.h", $share . "/"  . "LinkDef.h"); 
+#  Depends $env2, [@CintFiles], [@St_base];
   Command $env2 [@CintFiles], @Defs,  qq(RootCint.pl "%>" "%<" "$ROOTCINT_CPPPATH" );
 #  my $linkdef = pop @CintFiles;# print "ObjDir and Cints: $ObjDir => @CintFiles\n";
   Install $env2 $ObjDir, @CintFiles;
