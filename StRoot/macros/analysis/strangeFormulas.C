@@ -1,5 +1,8 @@
-// $Id: strangeFormulas.C,v 3.3 2000/08/28 16:24:33 genevb Exp $
+// $Id: strangeFormulas.C,v 3.4 2001/05/04 21:17:57 genevb Exp $
 // $Log: strangeFormulas.C,v $
+// Revision 3.4  2001/05/04 21:17:57  genevb
+// Catch ROOT definition of TTreeFormula class, add McEvent branch
+//
 // Revision 3.3  2000/08/28 16:24:33  genevb
 // Introduce findFormula(), handle executing on second tree
 //
@@ -155,6 +158,10 @@ TTree* strangeFormulas(const char* fname) {
 
 TTree* strangeFormulas(TFile* fptr) {
   if (!fptr) return 0;
+  if (!(gROOT->GetClass("TTreeFormula"))) {
+    gSystem->Load("libProof");
+    gSystem->Load("libTreePlayer");
+  }
   strangeTree = (TTree*) fptr->Get("StrangeMuDst");
   strangeFormulas(strangeTree);
   return strangeTree;
@@ -206,6 +213,21 @@ Int_t strangeFormulas(TTree* tree) {
   formulate("Event.primaryVertexY()", "Event.mPrimaryVertexY");
   formulate("Event.primaryVertexZ()", "Event.mPrimaryVertexZ");
   
+  // McEvent
+  if (tree->GetBranch("McEvent")) {
+    printf("Loading MC event formulas...\n");
+
+    formulate("McEvent.run()", "McEvent.mRun");
+    formulate("McEvent.event()", "McEvent.mEvent");
+    formulate("McEvent.globalTracks()", "McEvent.mGlobalTracks");
+    formulate("McEvent.primaryTracks()", "McEvent.mPrimaryTracks");
+    formulate("McEvent.primaryVertexX()", "McEvent.mPrimaryVertexX");
+    formulate("McEvent.primaryVertexY()", "McEvent.mPrimaryVertexY");
+    formulate("McEvent.primaryVertexZ()", "McEvent.mPrimaryVertexZ");
+
+  }  // End of McEvent
+
+
   // V0
   if (tree->GetBranch("V0")) {
     printf("Loading V0 formulas...\n");
@@ -427,37 +449,41 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("V0.dedxNeg()", "V0.mDedxNeg");
     formulate("V0.numDedxNeg()", "V0.mNumDedxNeg");
 
-
-    // V0Mc
-    if (tree->GetBranch("V0Mc")) {
-      printf("Loading V0Mc formulas...\n");
-
-      // The following formulas use 1 value:
-      formulate("V0Mc.decayMode()", "V0Mc.mDecayMode");
-      formulate("V0Mc.positiveCommonTpcHits()", "V0Mc.mPositiveCommonTpcHits");
-      formulate("V0Mc.positiveSimTpcHits()", "V0Mc.mPositiveSimTpcHits");
-      formulate("V0Mc.negativeCommonTpcHits()", "V0Mc.mNegativeCommonTpcHits");
-      formulate("V0Mc.negativeSimTpcHits()", "V0Mc.mNegativeSimTpcHits");
-      formulate("V0Mc.geantIdParent()", "V0Mc.mParentGeantId");
-      formulate("V0Mc.geantIdPositive()", "V0Mc.mPositiveGeantId");
-      formulate("V0Mc.geantIdNegative()", "V0Mc.mNegativeGeantId");
-      formulate("V0Mc.parentMomentumX()", "V0Mc.mParentMomentumX");
-      formulate("V0Mc.parentMomentumY()", "V0Mc.mParentMomentumY");
-      formulate("V0Mc.parentMomentumZ()", "V0Mc.mParentMomentumZ");
-      formulate("V0Mc.positiveMomentumX()", "V0Mc.mPositiveMomentumX");
-      formulate("V0Mc.positiveMomentumY()", "V0Mc.mPositiveMomentumY");
-      formulate("V0Mc.positiveMomentumZ()", "V0Mc.mPositiveMomentumZ");
-      formulate("V0Mc.negativeMomentumX()", "V0Mc.mNegativeMomentumX");
-      formulate("V0Mc.negativeMomentumY()", "V0Mc.mNegativeMomentumY");
-      formulate("V0Mc.negativeMomentumZ()", "V0Mc.mNegativeMomentumZ");
-      formulate("V0Mc.positionX()", "V0Mc.mPositionX");
-      formulate("V0Mc.positionY()", "V0Mc.mPositionY");
-      formulate("V0Mc.positionZ()", "V0Mc.mPositionZ");
-
-    }  // End of V0Mc
-
   }  // End of V0
+
+  // V0Mc
+  if (tree->GetBranch("V0Mc")) {
+    printf("Loading V0Mc formulas...\n");
+
+    // The following formula uses 6 values:
+    formulate("V0Mc.decayLengthV0()",
+      "sqrt(sq(V0Mc.mPositionX-McEvent.mPrimaryVertexX)+sq(V0Mc.mPositionY-McEvent.mPrimaryVertexY)+sq(V0Mc.mPositionZ-McEvent.mPrimaryVertexZ))");
+
+    // The following formulas use 1 value:
+    formulate("V0Mc.decayMode()", "V0Mc.mDecayMode");
+    formulate("V0Mc.positiveCommonTpcHits()", "V0Mc.mPositiveCommonTpcHits");
+    formulate("V0Mc.positiveSimTpcHits()", "V0Mc.mPositiveSimTpcHits");
+    formulate("V0Mc.negativeCommonTpcHits()", "V0Mc.mNegativeCommonTpcHits");
+    formulate("V0Mc.negativeSimTpcHits()", "V0Mc.mNegativeSimTpcHits");
+    formulate("V0Mc.geantIdParent()", "V0Mc.mParentGeantId");
+    formulate("V0Mc.geantIdPositive()", "V0Mc.mPositiveGeantId");
+    formulate("V0Mc.geantIdNegative()", "V0Mc.mNegativeGeantId");
+    formulate("V0Mc.parentMomentumX()", "V0Mc.mParentMomentumX");
+    formulate("V0Mc.parentMomentumY()", "V0Mc.mParentMomentumY");
+    formulate("V0Mc.parentMomentumZ()", "V0Mc.mParentMomentumZ");
+    formulate("V0Mc.positiveMomentumX()", "V0Mc.mPositiveMomentumX");
+    formulate("V0Mc.positiveMomentumY()", "V0Mc.mPositiveMomentumY");
+    formulate("V0Mc.positiveMomentumZ()", "V0Mc.mPositiveMomentumZ");
+    formulate("V0Mc.negativeMomentumX()", "V0Mc.mNegativeMomentumX");
+    formulate("V0Mc.negativeMomentumY()", "V0Mc.mNegativeMomentumY");
+    formulate("V0Mc.negativeMomentumZ()", "V0Mc.mNegativeMomentumZ");
+    formulate("V0Mc.positionX()", "V0Mc.mPositionX");
+    formulate("V0Mc.positionY()", "V0Mc.mPositionY");
+    formulate("V0Mc.positionZ()", "V0Mc.mPositionZ");
+
+  }  // End of V0Mc
   
+
   // Xi
   if (tree->GetBranch("Xi")) {
     printf("Loading Xi formulas...\n");
@@ -777,58 +803,62 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("Xi.dedxBachelor()", "Xi.mDedxBachelor");
     formulate("Xi.numDedxBachelor()", "Xi.mNumDedxBachelor");
 
-
-    // XiMc
-    if (tree->GetBranch("XiMc")) {
-      printf("Loading XiMc formulas...\n");
-
-      // The following formulas use 1 value:
-      formulate("XiMc.decayMode()", "XiMc.mDecayMode");
-      formulate("XiMc.commonTpcHits()", "XiMc.mCommonTpcHits");
-      formulate("XiMc.simTpcHits()", "XiMc.mSimTpcHits");
-      formulate("XiMc.geantIdParent()", "XiMc.mParentGeantId");
-      formulate("XiMc.geantIdDaughter()", "XiMc.mDaughterGeantId");
-      formulate("XiMc.parentMomentumX()", "XiMc.mParentMomentumX");
-      formulate("XiMc.parentMomentumY()", "XiMc.mParentMomentumY");
-      formulate("XiMc.parentMomentumZ()", "XiMc.mParentMomentumZ");
-      formulate("XiMc.daughterMomentumX()", "XiMc.mDaughterMomentumX");
-      formulate("XiMc.daughterMomentumY()", "XiMc.mDaughterMomentumY");
-      formulate("XiMc.daughterMomentumZ()", "XiMc.mDaughterMomentumZ");
-      formulate("XiMc.positionX()", "XiMc.mPositionX");
-      formulate("XiMc.positionY()", "XiMc.mPositionY");
-      formulate("XiMc.positionZ()", "XiMc.mPositionZ");
-
-    }  // End of XiMc
-
   }  // End of Xi
+
+  // XiMc
+  if (tree->GetBranch("XiMc")) {
+    printf("Loading XiMc formulas...\n");
+
+    // The following formulas use 6 values:
+    formulate("XiMc.decayLengthXi()",
+      "sqrt(sq(XiMc.mPositionX-McEvent.mPrimaryVertexX)+sq(XiMc.mPositionY-McEvent.mPrimaryVertexY)+sq(XiMc.mPositionZ-McEvent.mPrimaryVertexZ))");
+
+    // The following formulas use 1 value:
+    formulate("XiMc.decayMode()", "XiMc.mDecayMode");
+    formulate("XiMc.commonTpcHits()", "XiMc.mCommonTpcHits");
+    formulate("XiMc.simTpcHits()", "XiMc.mSimTpcHits");
+    formulate("XiMc.geantIdParent()", "XiMc.mParentGeantId");
+    formulate("XiMc.geantIdDaughter()", "XiMc.mDaughterGeantId");
+    formulate("XiMc.parentMomentumX()", "XiMc.mParentMomentumX");
+    formulate("XiMc.parentMomentumY()", "XiMc.mParentMomentumY");
+    formulate("XiMc.parentMomentumZ()", "XiMc.mParentMomentumZ");
+    formulate("XiMc.daughterMomentumX()", "XiMc.mDaughterMomentumX");
+    formulate("XiMc.daughterMomentumY()", "XiMc.mDaughterMomentumY");
+    formulate("XiMc.daughterMomentumZ()", "XiMc.mDaughterMomentumZ");
+    formulate("XiMc.positionX()", "XiMc.mPositionX");
+    formulate("XiMc.positionY()", "XiMc.mPositionY");
+    formulate("XiMc.positionZ()", "XiMc.mPositionZ");
+
+  }  // End of XiMc
+
 
   // Kink
   if (tree->GetBranch("Kink")) {
     printf("Loading Kink formulas...\n");
 
-    // KinkMc
-    if (tree->GetBranch("KinkMc")) {
-      printf("Loading KinkMc formulas...\n");
-
-      // The following formulas use 1 value:
-      formulate("KinkMc.decayMode()", "KinkMc.mDecayMode");
-      formulate("KinkMc.commonTpcHits()", "KinkMc.mCommonTpcHits");
-      formulate("KinkMc.simTpcHits()", "KinkMc.mSimTpcHits");
-      formulate("KinkMc.geantIdParent()", "KinkMc.mParentGeantId");
-      formulate("KinkMc.geantIdDaughter()", "KinkMc.mDaughterGeantId");
-      formulate("KinkMc.parentMomentumX()", "KinkMc.mParentMomentumX");
-      formulate("KinkMc.parentMomentumY()", "KinkMc.mParentMomentumY");
-      formulate("KinkMc.parentMomentumZ()", "KinkMc.mParentMomentumZ");
-      formulate("KinkMc.daughterMomentumX()", "KinkMc.mDaughterMomentumX");
-      formulate("KinkMc.daughterMomentumY()", "KinkMc.mDaughterMomentumY");
-      formulate("KinkMc.daughterMomentumZ()", "KinkMc.mDaughterMomentumZ");
-      formulate("KinkMc.positionX()", "KinkMc.mPositionX");
-      formulate("KinkMc.positionY()", "KinkMc.mPositionY");
-      formulate("KinkMc.positionZ()", "KinkMc.mPositionZ");
-
-    }  // End of KinkMc
-
   }  // End of Kink
+
+  // KinkMc
+  if (tree->GetBranch("KinkMc")) {
+    printf("Loading KinkMc formulas...\n");
+
+    // The following formulas use 1 value:
+    formulate("KinkMc.decayMode()", "KinkMc.mDecayMode");
+    formulate("KinkMc.commonTpcHits()", "KinkMc.mCommonTpcHits");
+    formulate("KinkMc.simTpcHits()", "KinkMc.mSimTpcHits");
+    formulate("KinkMc.geantIdParent()", "KinkMc.mParentGeantId");
+    formulate("KinkMc.geantIdDaughter()", "KinkMc.mDaughterGeantId");
+    formulate("KinkMc.parentMomentumX()", "KinkMc.mParentMomentumX");
+    formulate("KinkMc.parentMomentumY()", "KinkMc.mParentMomentumY");
+    formulate("KinkMc.parentMomentumZ()", "KinkMc.mParentMomentumZ");
+    formulate("KinkMc.daughterMomentumX()", "KinkMc.mDaughterMomentumX");
+    formulate("KinkMc.daughterMomentumY()", "KinkMc.mDaughterMomentumY");
+    formulate("KinkMc.daughterMomentumZ()", "KinkMc.mDaughterMomentumZ");
+    formulate("KinkMc.positionX()", "KinkMc.mPositionX");
+    formulate("KinkMc.positionY()", "KinkMc.mPositionY");
+    formulate("KinkMc.positionZ()", "KinkMc.mPositionZ");
+
+  }  // End of KinkMc
   
   Int_t finalFormulas = ListofFuncs->GetSize();
   return (finalFormulas-initialFormulas);
