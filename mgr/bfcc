@@ -1,6 +1,9 @@
 #!/usr/local/bin/perl
-# $Id: bfcc,v 1.1 2000/08/09 16:06:10 fisyak Exp $
+# $Id: bfcc,v 1.2 2000/08/31 22:23:47 didenko Exp $
 # $Log: bfcc,v $
+# Revision 1.2  2000/08/31 22:23:47  didenko
+# change to T0Maker
+#
 # Revision 1.1  2000/08/09 16:06:10  fisyak
 # Chain with precalibration
 #
@@ -117,8 +120,11 @@ if ($input_file =~ /evts/){
   ($ev, $dumm) = split /e/, $evts;
   if ($ev > 0 && $ev < 100000000) {$NofEvents = $ev;}
 }
-symlink "/star/data09/reco/StarDb", "StarDb";
-my $cmd = " root4star -q -b 'bfc.C(300,\"in ChargeStep\",\"" . $input_file . "\")\'";
+my $inFile = $input_file;
+  $inFile =~ s/daq/log/g;
+
+symlink "/star/data03/reco/StarDb", "StarDb";
+my $cmd = " root4star -q -b 'bfc.C(" . $NofEvents . ",\"in TpcT0\",\"" . $input_file . "\")\' >& /star/data03/reco/StarDb/log/" . $inFile;
 system 'echo "Start calibration job execution at" `date` " on " `hostname`'; 
 print "$cmd\n";
 system $cmd;
@@ -132,7 +138,7 @@ exit 0;
 #______________________________________________________
 sub convert($) {
   my $new_name = @_[0];
-  $new_name =~ s'/home/starreco/reco'/star/rcf/data09/reco'g;
+  $new_name =~ s'/home/starreco/reco'/star/rcf/data03/reco'g;
   return $new_name;
 }
 #END
