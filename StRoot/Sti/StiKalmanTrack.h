@@ -28,6 +28,8 @@
 #include <stdexcept>
 using namespace std;
 
+#include "StDetectorId.h"
+
 //Sti
 #include "StiObjectFactoryInterface.h"
 #include "StiKalmanTrackNode.h"
@@ -288,7 +290,8 @@ class StiKalmanTrack : public StiTrack
     ///return hits;
 	 //virtual vector<StHit*> stHits() const;
 	 virtual vector<StMeasuredPoint*> stHits() const;
-  
+	 virtual vector<StiKalmanTrackNode*> getNodes(StDetectorId det) const;
+	 
   // Function to reverse the node geometry of a track
   void swap();
 
