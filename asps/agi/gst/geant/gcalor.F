@@ -1,7 +1,11 @@
 *
-* $Id: gcalor.F,v 1.6 2001/11/26 00:44:22 fisyak Exp $
+* $Id: gcalor.F,v 1.7 2001/11/26 01:19:45 jeromel Exp $
 *
 * $Log: gcalor.F,v $
+* Revision 1.7  2001/11/26 01:19:45  jeromel
+* Was looking in the wrong place and not carefully enough
+* at the messages ... Thanks.
+*
 * Revision 1.6  2001/11/26 00:44:22  fisyak
 * Move dummy gcalor version from agsim.g to gcalor.F
 *
@@ -383,11 +387,6 @@ CZ      DESTEP = DESTEP + ERMED * 1.E-3
       print *,' No GCALOR available in this version'
       end
 #endif
-C#if !defined(CERNLIB_GCALOR)
-C      SUBROUTINE GCALOR
-C      print *,' No GCALOR available in this version'
-C      RETURN
-C      END
-C#endif
+
 
 
