@@ -1,5 +1,8 @@
-* $Id: mountain_finder.F,v 1.1 1998/01/27 00:49:09 fisyak Exp $
+* $Id: mountain_finder.F,v 1.2 1998/03/17 16:57:17 sakrejda Exp $
 * $Log: mountain_finder.F,v $
+* Revision 1.2  1998/03/17 16:57:17  sakrejda
+* temporary protection from NaN - RB is preparing a better one
+*
 * Revision 1.1  1998/01/27 00:49:09  fisyak
 * Split sources
 *
@@ -97,6 +100,10 @@ c
         RECORD      /TABLE_HEAD_ST/                tclpar_h
         RECORD      /TCL_TCLPAR_ST/               tclpar(*)
 
+        integer ii                    ! INDEX FOR THE EMERGENCY LOOP
+*********
+*********
+*********
         integer iadc(*)               ! ADC's for cluster pixels
         integer ipad(*)               ! Pads for cluster pixels
         integer ipad_lo, ipad_hi      ! Pad number extent for cluster
@@ -662,6 +669,26 @@ c
 c Fit the peak:
  99      continue
          if (nclspix_temp.gt.0) then
+*********
+*********
+*********	This is a VERY TEMPORARY PATCH
+*********
+*********
+            ipad_hi_temp=-1
+            ipad_lo_temp=1000
+            itdc_hi_temp=-1
+            itdc_lo_temp=1000
+            do ii=1,nclspix_temp
+               if(itdc_temp(ii).gt.itdc_hi_temp) itdc_hi_temp=itdc_temp(ii)
+               if(itdc_temp(ii).lt.itdc_lo_temp) itdc_lo_temp=itdc_temp(ii)
+               if(ipad_temp(ii).gt.ipad_hi_temp) ipad_hi_temp=ipad_temp(ii)
+               if(ipad_temp(ii).lt.ipad_lo_temp) ipad_lo_temp=ipad_temp(ii)
+            end do
+*********
+*********
+*********      End of the very temporary fix
+*********
+*********
             call tph_fit_isolated_cluster(tclpar, nclspix_temp,
      +           ipad_temp,itdc_temp,iadc_temp,itrk_temp,
      +           white_noise, filtered_noise, qq(i),
