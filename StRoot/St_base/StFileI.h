@@ -1,9 +1,37 @@
 #ifndef ROOT_StFileI
 #define ROOT_StFileI
- 
-
 
 #include "TNamed.h"
+
+ 
+const UInt_t kUMAX = (UInt_t)(-1);
+
+class StUKey
+{
+public:
+  StUKey(const char *name=0,UInt_t *uk=0,int nk=1);
+  StUKey(const char *name,UInt_t uk);
+  StUKey(UInt_t uRun,UInt_t uEvent=0);
+ ~StUKey(){}
+  StUKey &operator=( const StUKey &from);
+  StUKey &operator=( UInt_t from);
+  StUKey &operator=( Int_t from){return *this=(UInt_t)from; return *this;}
+  StUKey &operator=( const char *from);
+  void    Update(const StUKey &from);
+  void    SetName(const char *name){fName=name;} 
+  const char *GetName() const {return fName;} 
+  TString GetKey() const; 
+  void    SetKey(const char *key);
+  void    SetUrr(const UInt_t *key,int nk);
+  UInt_t  GetSum() const;
+  Int_t   EOK()    const { return fUrr[0]==kUMAX;}
+  Int_t   IsNull() const { return !fUrr[0];}
+  
+private:
+  TString fName;
+  Int_t fNUrr;
+  UInt_t fUrr[9];
+};
 
 
 class StFileI : public TNamed
@@ -30,6 +58,7 @@ public:
   virtual Int_t GetNextBundle()=0;
   virtual Int_t GetNextEvent(UInt_t *NextEventNumber)
                 {*NextEventNumber=0;return 0;}
+  virtual StUKey GetNextEvent();
 protected:
  Int_t fDebug;
  

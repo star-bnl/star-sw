@@ -131,10 +131,10 @@ Int_t StIOMaker::MakeRead(){
 
   if (!fCurrMk) Open();
   if (!fCurrMk) return kStEOF;
- int res = fFileSet->GetNextEvent(uRunEvent);
-  if (res)	return kStEOF;
+  StUKey uk  = fFileSet->GetNextEvent();
+  if (uk.EOK())	return kStEOF;
 
-  return fCurrMk->MakeRead(uRunEvent);
+  return fCurrMk->MakeRead(uk);
 }    
 //_____________________________________________________________________________
 Int_t StIOMaker::MakeWrite()
