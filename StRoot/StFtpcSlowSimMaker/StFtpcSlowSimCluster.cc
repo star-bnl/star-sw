@@ -1,5 +1,9 @@
-// $Id: StFtpcSlowSimCluster.cc,v 1.7 2003/02/14 16:56:56 fsimon Exp $
+// $Id: StFtpcSlowSimCluster.cc,v 1.8 2003/07/03 13:28:59 fsimon Exp $
 // $Log: StFtpcSlowSimCluster.cc,v $
+// Revision 1.8  2003/07/03 13:28:59  fsimon
+// Functionality for cathode offset simulation: Additional parameters for
+// StFtpcSlowSimField::GetVelocityZ
+//
 // Revision 1.7  2003/02/14 16:56:56  fsimon
 // Add functionality that allows for different temperature corrections
 // in west and east, important for embedding. StFtpcSlowSimField now
@@ -88,7 +92,7 @@ void StFtpcSlowSimCluster::DriftDiffuse(StFtpcSlowSimField *field)
 
       // deflection angle
       float lorentz, inverseVelocity;
-      field->GetVelocityZ(inverseRadius, padrow, &inverseVelocity, &lorentz);
+      field->GetVelocityZ(inverseRadius, padrow, currentPhi, &inverseVelocity, &lorentz);
       currentPhi += deltaRadiusRelative * lorentz;
 
       // accumulative drift time
