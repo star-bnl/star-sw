@@ -8,7 +8,7 @@
 #include <math.h>
 
 
-long tte_hit_match_(
+long type_of_call tte_hit_match_(
   TABLE_HEAD_ST        *g2t_hit_h,    G2T_TPC_HIT_ST          *g2t_hit ,
   TABLE_HEAD_ST      *tpc_index_h,    TCL_TPC_INDEX_ST        *tpc_index ,
   TABLE_HEAD_ST *tpc_index_type_h,    TCL_TPC_INDEX_TYPE_ST   *tpc_index_type ,

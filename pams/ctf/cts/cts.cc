@@ -70,7 +70,7 @@ float const Pi    = acos(-1.) ;
 float const Todeg = 180. / Pi ;
 #define min(a,b)    ( ( (a) < (b) ) ? (a) : (b) )
 //
-extern "C" long cts_(
+extern "C" long type_of_call cts_(
   TABLE_HEAD_ST           *mhit_h,    G2T_CTF_HIT_ST             *mhit ,
   TABLE_HEAD_ST          *track_h,      G2T_TRACK_ST            *track ,
   TABLE_HEAD_ST            *geo_h,        CTG_GEO_ST              *geo ,
