@@ -17,19 +17,21 @@
 // History: 
 //
 ///////////////////////////////////////////////////////////////////////////////
-
-
-#include <TH1.h>
-#include <TCanvas.h>
-#include <TFile.h>
 #include "StTrackForPool.h"
 #include "StEvent.h"
 #include <vector>
-#include "TString.h"
 #include "StAngleCorrFunction.h"
-#include "StTrackCuts.h"
 #include "StDiagnosticTool.h"
 
+// cut classes
+#include "StTrackCuts.h"
+#include "StEventCuts.h"
+
+// ROOT classes
+#include <TH1.h>
+#include <TCanvas.h>
+#include <TFile.h>
+#include "TString.h"
 
 class StAngleCorrAnalysis {
 private:
@@ -38,8 +40,10 @@ private:
 
   StAngleCorrFunction*  correlationFunction;
 
-  StTrackCuts*   track1Cuts;
-  StTrackCuts*   track2Cuts;
+  // cuts
+  StTrackCuts*  track1Cuts;
+  StTrackCuts*  track2Cuts;
+  StEventCuts*  eventCuts;
 
   Double_t  trackMom,fastestMom;
 
@@ -73,34 +77,44 @@ private:
   int    fastestTrackAnalysis,ON,OFF;
   Double_t fractionToConsider;
 
-  int    EventWithinCuts(StEvent& ev);
-  int    TracksWithinCuts(StTrackForPool* t1, StTrackForPool* t2);
-  int    Track1WithinCuts(StTrackForPool* t1);
-  int    Track2WithinCuts(StTrackForPool* t2);
   void   RelativeAngle(StTrackForPool* t1, StTrackForPool* t2, TH1D* hist); 
-  void   SetTrackForPool(StGlobalTrack* track, StTrackForPool* trackForPool);
-  void   SetTrackCuts(StTrackCuts* t1Cuts, StTrackCuts* t2Cuts);
-  StDiagnosticTool* Diagnose(TString diagName); 
+  void   SetTrackForPool(StGlobalTrack* track, StTrackForPool* trackForPool); 
 
-
+  // diagnostics
+  StDiagnosticTool* Diagnose(TString diagName);
+  
+  // cuts
+  int     EventWithinCuts(StEvent& ev);
+  int     TracksWithinCuts(StTrackForPool* t1, StTrackForPool* t2);
+  int     Track1WithinCuts(StTrackForPool* t1);
+  int     Track2WithinCuts(StTrackForPool* t2);
+  
 public:
-       StAngleCorrAnalysis();
-      StAngleCorrAnalysis(TString analysisName);
-     ~StAngleCorrAnalysis();
-    TString GetName();
-    void       SetCorrelationFunction(TString functionName);
-    void       SetSignalHist(TH1D* sHist);
-    void       SetBackgroundHist(TH1D* bHist);
-    void       SetTrackForPool(StGlobalTrack& globalTrack, StTrackForPool* trackForPool);
-    void       ProcessEvent(StEvent& ev);
-    void       AnalyseRealPairs();
-    void       AnalyseBackgroundPairs();
-    void       SetFastestTrackAnalysis(int fastAnalysis);
-    void       SetDiagnosticsON();
-    void       SetNBackgroundEvents(int number);
-    void       SetNBackgroundPairs(int number, Double_t fraction);
-    StTrackCuts*     GetTrackCuts(TString whichTrack);
-    void       WriteDiagnostic();
+                            StAngleCorrAnalysis();
+                            StAngleCorrAnalysis(TString analysisName);
+                            ~StAngleCorrAnalysis();
+  TString              GetName();
+  void                   SetCorrelationFunction(TString functionName);
+  void                   SetSignalHist(TH1D* sHist);
+  void                   SetBackgroundHist(TH1D* bHist);
+  void                   SetTrackForPool(StGlobalTrack& globalTrack, StTrackForPool* trackForPool);
+  void                   ProcessEvent(StEvent& ev);
+  void                   AnalyseRealPairs();
+  void                   AnalyseBackgroundPairs();
+  void                   SetFastestTrackAnalysis(int fastAnalysis);
+  void                   SetNBackgroundEvents(int number);
+  void                   SetNBackgroundPairs(int number, Double_t fraction);
+
+  // diagnostics
+  void                   SetDiagnosticsON();
+  void                   WriteDiagnostic();
+  
+  // cuts
+  StTrackCuts*    GetTrackCuts(TString whichTrack);
+  StEventCuts*    GetEventCuts();
+  void                   SetTrackCuts(StTrackCuts* t1Cuts, StTrackCuts* t2Cuts);
+  void                   SetEventCuts(StEventCuts* evCuts);
+
 
 };
 
