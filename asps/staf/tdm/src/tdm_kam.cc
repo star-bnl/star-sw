@@ -460,14 +460,29 @@ kam_tdmtable_name_()
 *:* TDM/TABLE/PRINT TNAME [ NROWS IFIRST ]
 *:<---------------------------------------------------------------------
 */
+#define COLLISTSIZE 1000
 void 
 kam_tdmtable_dump_()
 {
+   int nn = ku_npar()-4;         /* If user uses carets to separate col names,
+                                 ** nn=1, if spaces, nn is # of cols. */
    char* name = ku_gets();	 /* table name */
    long nrows = ku_geti();	 /* number of rows to dump */
    long ifirst = ku_geti();	 /* first row number to dump */
    char* outputfile = ku_gets(); /* name of output file */
-   char* colList = ku_gets();	 /* list of columns */
+   char* oneElement,colList[COLLISTSIZE+1];
+   int ii;
+   colList[0]=0;
+   for(ii=0;ii<nn;ii++) {
+     oneElement=ku_gets();
+     if(strlen(colList)+strlen(oneElement)+4>COLLISTSIZE) {
+       printf("Column list truncated.\n"); break;
+     }
+     strcat(colList,oneElement); strcat(colList,"^");
+   }
+
+   /* tdmtable_dump expects the col list to be delimited with ^s */
+   for(ii=0;colList[ii];ii++) { if(colList[ii]==' ') colList[ii]='^'; }
 
    tdmtable_dump(name, nrows, ifirst, outputfile, colList);
 }

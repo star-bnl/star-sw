@@ -428,7 +428,8 @@ STAFCV_T tdmTable::dumpRows(long ifirst,long nrows,char *out,char *colList) {
     fclose(ff); 
     if(pass==1) { if(strcmp(out,"screen")) fclose(gg); }
   }
-  printf("Have written %s,  vi %s\n",out,out);
+  if(strcmp(out,"screen")) printf("Have written %s:  vi %s   emacs %s\n",
+    out,out,out);
   EML_SUCCESS(STAFCV_OK);
 }
 STAFCV_T tdmTable:: printRows (long ifirst, long nrows) {
