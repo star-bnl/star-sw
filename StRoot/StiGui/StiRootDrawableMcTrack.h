@@ -14,7 +14,7 @@ class StiRootDrawableMcTrack : public StiMcTrack, public StiRootDrawableTrack
 public:
     StiRootDrawableMcTrack();
     virtual ~StiRootDrawableMcTrack();
-    virtual void setStMcTrack(const StMcTrack * mcTrack);
+    //virtual void setStMcTrack(const StMcTrack * mcTrack);
     virtual void reset(); 
     virtual void draw();
 };

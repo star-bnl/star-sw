@@ -539,7 +539,7 @@ void 	EventDisplay::createPolicies()
   //cout << "EventDisplay::createPolicies() -I- Started" << endl;
   _defaultHitDrawingPolicy = new DefaultDrawingPolicy("DefaultHitDrawingPolicy","Default Hit Draw Policy",1,1,0.2);
   _defaultTrackDrawingPolicy = new DefaultDrawingPolicy("DefaultTrackDrawingPolicy","Default Track Draw Policy",2,1,1.);
-  _defaultMcTrackDrawingPolicy =  new DefaultDrawingPolicy("DefaultMcTrackDrawingPolicy","Default McTrack Draw Policy",4,2,1.);
+  _defaultMcTrackDrawingPolicy =  new DefaultDrawingPolicy("DefaultMcTrackDrawingPolicy","Default McTrack Draw Policy",4,1,1.);
   _hitDrawingPolicy = _defaultHitDrawingPolicy;
   _trackDrawingPolicy = _defaultTrackDrawingPolicy;
   _mcTrackDrawingPolicy = _defaultMcTrackDrawingPolicy;
