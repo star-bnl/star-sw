@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtMaker.h,v 1.2 1999/07/15 13:57:11 perev Exp $
+ * $Id: StHbtMaker.h,v 1.3 1999/07/26 16:21:25 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StHbtMaker.h,v $
+ * Revision 1.3  1999/07/26 16:21:25  lisa
+ * always convert string to char when output - needed on solaris
+ *
  * Revision 1.2  1999/07/15 13:57:11  perev
  * cleanup
  *
@@ -41,9 +44,9 @@ class StHbtMaker : public StMaker {
   StHbtMaker(const char* name = "StHbt", const char* title = "StHbtTit");
   virtual ~StHbtMaker();
   virtual void  Clear(const char* opt="");
-  virtual Int_t Init();
+  virtual Int_t Init();//!
   virtual Int_t Make();
-  virtual Int_t Finish();
+  virtual Int_t Finish();//!
 
   StMaker* currentChain;
   //  StHbtManager* HbtManager();//! tells cint to skip that
@@ -51,7 +54,7 @@ class StHbtMaker : public StMaker {
 
   
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHbtMaker.h,v 1.2 1999/07/15 13:57:11 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHbtMaker.h,v 1.3 1999/07/26 16:21:25 lisa Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHbtMaker, 1)
 

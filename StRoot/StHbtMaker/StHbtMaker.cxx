@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtMaker.cxx,v 1.3 1999/07/15 13:57:10 perev Exp $
+ * $Id: StHbtMaker.cxx,v 1.4 1999/07/26 16:21:25 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtMaker.cxx,v $
+ * Revision 1.4  1999/07/26 16:21:25  lisa
+ * always convert string to char when output - needed on solaris
+ *
  * Revision 1.3  1999/07/15 13:57:10  perev
  * cleanup
  *
@@ -61,14 +64,16 @@ Int_t StHbtMaker::Init()
 {
 
   cout << "StHbtMaker::Init() - requesting a Report " << endl;
-  cout << mHbtManager->Report() << endl;
+  StHbtString tempString = mHbtManager->Report();
+  cout << "Got the report, now let me try to put it to screen" << endl;
+  cout << tempString.c_str() << endl; //!
 
   return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t StHbtMaker::Finish()
 {
-  cout << mHbtManager->Report() << endl;
+  cout << mHbtManager->Report().c_str() << endl; //!
   mHbtManager->Finish();
   return StMaker::Finish();
 }

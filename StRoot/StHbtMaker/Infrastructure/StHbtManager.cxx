@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.cxx,v 1.3 1999/07/22 18:49:10 lisa Exp $
+ * $Id: StHbtManager.cxx,v 1.4 1999/07/26 16:21:26 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.cxx,v $
+ * Revision 1.4  1999/07/26 16:21:26  lisa
+ * always convert string to char when output - needed on solaris
+ *
  * Revision 1.3  1999/07/22 18:49:10  lisa
  * Implement idea of Fabrice to not create and delete StHbtPair all the time
  *
@@ -69,7 +72,7 @@ StHbtString StHbtManager::Report(){
   stemp = ctemp;
   StHbtAnalysisIterator AnalysisIter;
   StHbtAnalysis* currentAnalysis;
-  cout << stemp;
+  cout << stemp.c_str();
   for (AnalysisIter=mAnalysisCollection->begin();AnalysisIter!=mAnalysisCollection->end();AnalysisIter++){
     cout << "StHbtManager - asking for Analysis Report" << endl;
     currentAnalysis = *AnalysisIter;
