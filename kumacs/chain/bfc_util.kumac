@@ -649,7 +649,7 @@ return
    (dchkt)    
                exec dst_chk_tabl#event_header
                exec dst_chk_tabl#dst_tables
-               exec dst_chk_tabl#event_summary    
+*              exec dst_chk_tabl#event_summary    
     (dwntp)    exec dst_wr_ntup#run
      (user)     exec run_user
      (ntup)     exec write_table_to_ntuple#write_event_disk [nid] [ntable]
