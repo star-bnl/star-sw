@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.9 1999/12/03 19:40:42 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.10 1999/12/14 07:05:32 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.10  1999/12/14 07:05:32  calderon
+ * Use numbering scheme
+ *
  * Revision 1.9  1999/12/03 19:40:42  calderon
  * volume_id for SVT hits can be up to ~8700.
  *
@@ -62,9 +65,6 @@
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
 
-#include "StTpcDb/StTpcDb.h"
-#include "StDbUtilities/StCoordinates.hh"
-
 #include "StMcEventTypes.hh"
 
 #ifndef ST_NO_NAMESPACES
@@ -76,7 +76,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.9 1999/12/03 19:40:42 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.10 1999/12/14 07:05:32 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -426,46 +426,6 @@ Int_t StMcEventMaker::Make()
 	// TPC Hits
 	//
 	
-	//
-	// Check DB
-	//
-	if (!gStTpcDb) {
-	    cerr << "*** No pointer to StTpcDb, can't instantiate Coordinate Transforms ***" << endl;
-	    
-	}
-
-	int dbOk=1;
-	if(!gStTpcDb->PadPlaneGeometry()) {
-	    cerr << " No PadPlaneGeometry Db!" << endl;
-	    PR(gStTpcDb->PadPlaneGeometry());
-	    dbOk=0;
-	}
-	if(!gStTpcDb->WirePlaneGeometry()) {
-	    cerr << " No WirePlaneGeometry Db!" << endl;
-	    PR(gStTpcDb->WirePlaneGeometry());
-	    dbOk=0;
-	}
-	if(!gStTpcDb->Electronics()) {
-	    cerr << " No Electronics Db!" << endl;
-	    PR(gStTpcDb->Electronics());
-	    dbOk=0;
-	}
-	if(!gStTpcDb->SlowControlSim()) {
-	    cerr << " No SlowControlSim Db!" << endl;
-	    PR(gStTpcDb->SlowControlSim());
-	    cout << " Using TPC volume Id to get sector & padrow. " << endl;
-	}
-		
-	if (!dbOk)  {
-	    cerr << "*** Incomplete Database, Transformations will fail.  ***" << endl;
-	    return kStFatal;
-	}
-		
-	StTpcCoordinateTransform transformer(gStTpcDb); // Instantiate coord. transform with StTpcDb.
-	StTpcPadCoordinate padCoord(1, 1, 1, 0);
-	StTpcLocalSectorCoordinate localCoord(0,0,0,1);
-	
-
 	long NHits = g2t_tpc_hitTablePointer->GetNRows();
 	long iTrkId = 0;
 	long nBadVolId = 0;
@@ -479,26 +439,6 @@ Int_t StMcEventMaker::Make()
 	    }
 	    
 	    th = new StMcTpcHit(&tpcHitTable[ihit]);
-
-	    // Get the local and pad coordinates.
-	    transformer(static_cast<StGlobalCoordinate>(*th),localCoord);
-	    
-	    if (gStTpcDb->SlowControlSim()) transformer(localCoord,padCoord);
-	    else { // Use Volume ID, but won't have pad or timebucket
-		padCoord.setSector((tpcHitTable[ihit].volume_id%10000)/100);
-		padCoord.setRow(tpcHitTable[ihit].volume_id%100);
-	    }
-
-	    th->setLocalCoordinate(localCoord);
-	    th->setPadCoordinate(padCoord);
-
-	    // Check
-// 	    cout << "Sector " << endl;
-// 	    cout << "From volume " << (tpcHitTable[ihit].volume_id%10000)/100 << endl;
-// 	    cout << "From transf " << th->sector()+1 << endl;
-// 	    cout << "Padrow " << endl;
-// 	    cout << "From volume " << tpcHitTable[ihit].volume_id%100 << endl;
-// 	    cout << "From transf " << th->padrow()+1 << endl;
 	    
 	    mCurrentMcEvent->tpcHitCollection()->addHit(th); // adds hit th to collection
 	    
@@ -515,8 +455,9 @@ Int_t StMcEventMaker::Make()
 	if (nBadVolId) gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
 					   << " TPC hits, wrong Volume Id." << endm;
 	
-	
+	//
 	// SVT Hits
+	//
 	if (g2t_svt_hitTablePointer) {
 	    NHits = g2t_svt_hitTablePointer->GetNRows();
 	    iTrkId = 0;
@@ -715,9 +656,9 @@ StMcEventMaker::printEventInfo()
 	nhits = svtColl->numberOfHits();
 	cout << "# of hits in collection = " << nhits << endl;
 	gotOneHit = kFALSE;
-	for (k=0; !gotOneHit && k<svtColl->numberOfLayers(); k++)
-	    for (j=0; !gotOneHit && j<svtColl->layer(k)->numberOfLadders(); j++)
-		for (i=0; !gotOneHit && i<svtColl->layer(k)->ladder(j)->numberOfWafers(); i++)
+	for (k=1; !gotOneHit && k<=svtColl->numberOfLayers(); k++)
+	    for (j=1; !gotOneHit && j<=svtColl->layer(k)->numberOfLadders(); j++)
+		for (i=1; !gotOneHit && i<=svtColl->layer(k)->ladder(j)->numberOfWafers(); i++)
 		    if (svtColl->layer(k)->ladder(j)->wafer(i)->hits().size()) {
 			cout << "Svt Hit" << endl;
 			cout << *(svtColl->layer(k)->ladder(j)->wafer(i)->hits()[0]);
