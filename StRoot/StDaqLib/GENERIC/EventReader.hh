@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.hh,v 1.16 2002/10/13 20:43:37 ward Exp $
+ * $Id: EventReader.hh,v 1.17 2002/12/09 18:54:23 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: common definitions for all detectors
@@ -21,6 +21,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.hh,v $
+ * Revision 1.17  2002/12/09 18:54:23  ward
+ * EMC stuff from Subhassis.
+ *
  * Revision 1.16  2002/10/13 20:43:37  ward
  * Support for decoding DAQ100 data and writing it into a table.
  *
@@ -133,9 +136,9 @@ struct EventInfo // return from EventReader::getEventInfo()
   unsigned char SVTPresent;
   unsigned char TOFPresent;
   unsigned char EMCPresent;
+  unsigned char PMDPresent;
   unsigned char FPDPresent;
   unsigned char FTPCPresent;
-  unsigned char PMDPresent;
   unsigned char RICHPresent;
   unsigned char TRGDetectorsPresent;
   unsigned char L3Present;

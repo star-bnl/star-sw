@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.11 2002/01/17 17:29:26 jeromel Exp $
+ * $Id: DetectorReader.cxx,v 1.12 2002/12/09 18:54:23 ward Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -12,7 +12,11 @@
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
+ * Revision 1.12  2002/12/09 18:54:23  ward
+ * EMC stuff from Subhassis.
+ *
  * Revision 1.11  2002/01/17 17:29:26  jeromel
+ *
  * Files:  CVS: DetectorReader.cxx EventReader.cxx EventReader.hh CVS: RecHeaderFormats.hh CVS: ----------------------------------------------------------------------
  * Modifications for FPD support
  *
@@ -65,6 +69,7 @@
 #include "SVT/SVTV1P0_Reader.hh"
 #include "SSD/SSD_Reader.hh"
 #include "EMC/EMC_Reader.hh"
+#include "PMD/PMD_Reader.hh"
 #include "RICH/RICH_Reader.hh"
 #include "FTPC/FTPV1P0_Reader.hh"
 #include "L3/L3_Reader.hh"
@@ -159,6 +164,20 @@ EMC_Reader *getEMCReader(EventReader *er)
 					__FILE__,__LINE__) ;
     pEMCP->header.CRC = 0;
     return new EMC_Reader(er,pEMCP);
+  }
+  return FALSE;
+}
+PMD_Reader *getPMDReader(EventReader *er)
+{
+  Bank_PMDP *pPMDP;
+  pPMDP = (Bank_PMDP *)er->findBank("PMDP");
+  if (pPMDP)  {
+    if (!pPMDP->test_CRC())  printf("CRC error in PMDP: %s %d\n",
+					__FILE__,__LINE__) ;
+    if (pPMDP->swap() < 0)   printf("swap error in PMDP: %s %d\n",
+					__FILE__,__LINE__) ;
+    pPMDP->header.CRC = 0;
+    return new PMD_Reader(er,pPMDP);
   }
   return FALSE;
 }

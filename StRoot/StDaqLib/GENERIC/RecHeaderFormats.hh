@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RecHeaderFormats.hh,v 1.7 2002/01/17 18:29:55 jeromel Exp $
+ * $Id: RecHeaderFormats.hh,v 1.8 2002/12/09 18:54:23 ward Exp $
  * Author: M.W. Schulz, Jeff Landgraf, M.J. LeVine
  ***************************************************************************
  * Description: Bank header formats common to all detectors in STAR:
@@ -11,6 +11,9 @@
  *
  ***************************************************************************
  * $Log: RecHeaderFormats.hh,v $
+ * Revision 1.8  2002/12/09 18:54:23  ward
+ * EMC stuff from Subhassis.
+ *
  * Revision 1.7  2002/01/17 18:29:55  jeromel
  * After I looked at the code, corrections from Akio (pass2).
  *
@@ -143,9 +146,10 @@ struct Bank_DATAP : public Bank
   Pointer SVT;
   Pointer TOF;
   Pointer EMC;
+//  Pointer PMD;
+  Pointer EXT_ID;   // DET_ID "EXT_ID" points to DATAPX if it exists! ( Addedd by Susanta for PMD 6th Nov, 2002 )
   Pointer FPD;
   Pointer FTPC;
-  Pointer PMD;
   Pointer RICH;
   Pointer TRG;
   Pointer L3;
@@ -154,6 +158,12 @@ struct Bank_DATAP : public Bank
 
 // some unavoidable detector-specific definitions:
 //
+
+// Next Struct Bank_DATAPX is added by Susanta for PMD on 6th Nov, 2002.
+struct Bank_DATAPX : public Bank
+{
+	Pointer EXT_DET[22]; // EXT_DET[2] = PMD 
+};
 struct ASIC_params 
   // these params used to emulate ASIC behavior in the reader
 {
