@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.cxx,v 1.12 2002/02/27 01:37:20 munhoz Exp $
+ * $Id: StSvtDaqMaker.cxx,v 1.13 2004/01/30 00:14:42 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.cxx,v $
+ * Revision 1.13  2004/01/30 00:14:42  munhoz
+ * few corrections to pedestal reading and adding getDaqReader method
+ *
  * Revision 1.12  2002/02/27 01:37:20  munhoz
  * move GetDataSet(StDAQReader) from Init() to Make()
  *
@@ -146,7 +149,7 @@ Int_t StSvtDaqMaker::SetSvtPed()
     
     if (!fSvtPed) {
       if (dataSet2)
-	fSvtPed = new StSvtDaqPed((StSvtConfig*)(dataSet->GetObject()));
+	fSvtPed = new StSvtDaqPed((StSvtConfig*)(dataSet2->GetObject()));
       else
 	fSvtPed = new StSvtDaqPed(fConfig);
       fPedSet->SetObject((TObject*)fSvtPed);
@@ -176,7 +179,7 @@ Int_t StSvtDaqMaker::SetSvtRMSPed()
     
     if (!fSvtRMSPed) {
       if (dataSet2)
-	fSvtRMSPed = new StSvtDaqPed((StSvtConfig*)(dataSet->GetObject()));
+	fSvtRMSPed = new StSvtDaqPed((StSvtConfig*)(dataSet2->GetObject()));
       else
 	fSvtRMSPed = new StSvtDaqPed(fConfig);
       fRMSPedSet->SetObject((TObject*)fSvtRMSPed);
@@ -206,15 +209,19 @@ Int_t StSvtDaqMaker::Make()
 {
    if (Debug()) gMessMgr->Debug() << "StSvtDaqMaker::Make" << endm;
 
+   GetDaqReader();
+   
+   return GetSvtData();
+}
+
+//_____________________________________________________________________________
+Int_t StSvtDaqMaker::GetDaqReader()
+{
   St_DataSet *dataSet;
   dataSet = GetDataSet("StDAQReader");
   assert(dataSet);
   daqReader = (StDAQReader*)(dataSet->GetObject());
   assert(daqReader);
-
-  GetSvtData();
-
-  return kStOK;
 }
 
 //_____________________________________________________________________________
@@ -366,7 +373,7 @@ Int_t StSvtDaqMaker::Finish()
 void StSvtDaqMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtDaqMaker.cxx,v 1.12 2002/02/27 01:37:20 munhoz Exp $\n");
+  printf("* $Id: StSvtDaqMaker.cxx,v 1.13 2004/01/30 00:14:42 munhoz Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.h,v 1.9 2003/09/10 19:47:35 perev Exp $
+ * $Id: StSvtDaqMaker.h,v 1.10 2004/01/30 00:14:42 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.h,v $
+ * Revision 1.10  2004/01/30 00:14:42  munhoz
+ * few corrections to pedestal reading and adding getDaqReader method
+ *
  * Revision 1.9  2003/09/10 19:47:35  perev
  * ansi corrs
  *
@@ -81,6 +84,7 @@ class StSvtDaqMaker : public StMaker {
   Int_t  SetSvtPed();
   Int_t  SetSvtRMSPed();
   Int_t  SetHybridData();
+  Int_t  GetDaqReader();
   Int_t  GetSvtData();
   Int_t  GetSvtPed();
   Int_t  GetSvtRMSPed();
@@ -100,7 +104,7 @@ class StSvtDaqMaker : public StMaker {
   virtual Int_t  Finish();
 
  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDaqMaker.h,v 1.9 2003/09/10 19:47:35 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDaqMaker.h,v 1.10 2004/01/30 00:14:42 munhoz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StSvtDaqMaker,0)   //StAF chain virtual base class for Makers
 };
