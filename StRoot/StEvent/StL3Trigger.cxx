@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL3Trigger.cxx,v 2.2 2001/04/05 04:00:51 ullrich Exp $
+ * $Id: StL3Trigger.cxx,v 2.3 2001/08/02 01:27:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StL3Trigger.cxx,v $
+ * Revision 2.3  2001/08/02 01:27:45  ullrich
+ * Added event summary and algorithms.
+ *
  * Revision 2.2  2001/04/05 04:00:51  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -20,20 +23,29 @@
 #include "StL3Trigger.h"
 #include "StTpcHitCollection.h"
 #include "StPrimaryVertex.h"
+#include "StL3EventSummary.h"
 
-static const char rcsid[] = "$Id: StL3Trigger.cxx,v 2.2 2001/04/05 04:00:51 ullrich Exp $";
+static const char rcsid[] = "$Id: StL3Trigger.cxx,v 2.3 2001/08/02 01:27:45 ullrich Exp $";
 
 ClassImp(StL3Trigger)
 
 StL3Trigger::StL3Trigger()
 {
     mL3TpcHits = 0;
+    mL3EventSummary = 0;
 }
   
 StL3Trigger::~StL3Trigger()
 {
     delete mL3TpcHits; mL3TpcHits = 0;
+    delete mL3EventSummary; mL3EventSummary = 0;
 }
+
+StL3EventSummary*
+StL3Trigger::l3EventSummary() { return mL3EventSummary; }
+
+const StL3EventSummary*
+StL3Trigger::l3EventSummary() const { return mL3EventSummary; }
 
 StTpcHitCollection*
 StL3Trigger::tpcHitCollection() { return mL3TpcHits; }
@@ -81,6 +93,13 @@ StL3Trigger::setTpcHitCollection(StTpcHitCollection* val)
     mL3TpcHits = val;
 }
 
+
+void
+StL3Trigger::setL3EventSummary(StL3EventSummary* evsum)
+{
+    if (mL3EventSummary) delete mL3EventSummary;
+    mL3EventSummary = evsum;
+}
 
 
 void
