@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.cxx,v 1.2 1999/01/02 19:08:14 fisyak Exp $
+// $Id: St_ctf_Maker.cxx,v 1.3 1999/01/21 00:52:31 fisyak Exp $
 // $Log: St_ctf_Maker.cxx,v $
+// Revision 1.3  1999/01/21 00:52:31  fisyak
+// Cleanup
+//
 // Revision 1.2  1999/01/02 19:08:14  fisyak
 // Add ctf
 //
@@ -55,16 +58,18 @@ St_ctf_Maker::~St_ctf_Maker(){
 }
 //_____________________________________________________________________________
 Int_t St_ctf_Maker::Init(){
-// Create tables
-   St_DataSetIter       local(gStChain->DataSet("params"));
-   m_ctb          = (St_ctg_geo      *) local("ctf/ctg/ctb");
-   m_ctb_slat_phi = (St_ctg_slat_phi *) local("ctf/ctg/ctb_slat_phi");
-   m_ctb_slat_eta = (St_ctg_slat_eta *) local("ctf/ctg/ctb_slat_eta");
-   m_ctb_slat     = (St_ctg_slat     *) local("ctf/ctg/ctb_slat");
-   m_cts          = (St_cts_mpara    *) local("ctf/cts/cts");
-   Int_t Res_ctg  =  ctg (m_ctb,m_ctb_slat_phi,m_ctb_slat_eta,m_ctb_slat);
-// Create Histograms    
-   return StMaker::Init();
+  // Create tables
+  St_DataSetIter       params(gStChain->DataSet("params"));
+  m_ctb          = (St_ctg_geo      *) params("ctf/ctg/ctb");
+  m_ctb_slat_phi = (St_ctg_slat_phi *) params("ctf/ctg/ctb_slat_phi");
+  m_ctb_slat_eta = (St_ctg_slat_eta *) params("ctf/ctg/ctb_slat_eta");
+  m_ctb_slat     = (St_ctg_slat     *) params("ctf/ctg/ctb_slat");
+  Int_t Res_ctg  =  ctg (m_ctb,m_ctb_slat_phi,m_ctb_slat_eta,m_ctb_slat);
+  // Special treatment for double names
+  //  m_cts          = (St_cts_mpara    *) params("ctf/cts")->GetList()->FindObject("cts");
+  m_cts          = (St_cts_mpara    *) params("ctf/cts/cts");
+  // Create Histograms    
+  return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t St_ctf_Maker::Make(){
@@ -90,7 +95,7 @@ Int_t St_ctf_Maker::Make(){
 //_____________________________________________________________________________
 void St_ctf_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_ctf_Maker.cxx,v 1.2 1999/01/02 19:08:14 fisyak Exp $\n");
+  printf("* $Id: St_ctf_Maker.cxx,v 1.3 1999/01/21 00:52:31 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
