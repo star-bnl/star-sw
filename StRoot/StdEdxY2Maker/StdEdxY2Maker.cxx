@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.19 2003/11/25 04:24:31 perev Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.20 2003/12/29 18:15:05 fisyak Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -883,6 +883,7 @@ Int_t StdEdxY2Maker::Make(){
 	  const StThreeVectorD  &gMidPos = *mRowPosition[sector-1][row-1][0];
 	  // check that helix prediction is consistent with measurement
 	  Double_t s = gTrack->geometry()->helix().pathLength(gMidPos, normal);
+	  if (s > 1.e4) continue;
 	  StThreeVectorD xyzOnPlane = gTrack->geometry()->helix().at(s);
 	  StGlobalCoordinate globalOnPlane(xyzOnPlane.x(),xyzOnPlane.y(),xyzOnPlane.z());
 	  StTpcPadCoordinate PadOnPlane;      transform(globalOnPlane,PadOnPlane);
@@ -937,7 +938,9 @@ Int_t StdEdxY2Maker::Make(){
 	  const StThreeVectorD  &gTopPos = *mRowPosition[sector-1][row-1][1];
 	  const StThreeVectorD  &gBotPos = *mRowPosition[sector-1][row-1][2];
 	  double s_out = gTrack->geometry()->helix().pathLength(gTopPos, normal);
+	  if (s_out > 1.e4) continue;
 	  double s_in  = gTrack->geometry()->helix().pathLength(gBotPos, normal);
+	  if (s_in > 1.e4) continue;
 	  Double_t dx = TMath::Abs(s_out-s_in);
 #ifdef PadSelection
 	  if (dx < 0.5 || dx > 25.) continue;
