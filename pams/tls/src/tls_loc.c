@@ -7,7 +7,7 @@
  *
  *      the integer*4 return is the address of object...
  */
-#include "fortranc.h"
+#include "StarCallf77.h"
 #define tls_loc_ F77_NAME(tls_loc,TLS_LOC)
 int type_of_call tls_loc_( object )
 int    object;

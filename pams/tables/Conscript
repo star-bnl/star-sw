@@ -37,8 +37,8 @@ foreach my $idl (@idl) {#  print "$idl\n";
 }# print "idlT = @idlT\n";
 Install $env $INCLUDE, @idlT; #print "Install $env $INCLUDE, @idlT\n";
 #___________________________________
-my $ROOTCINT_CPP = $INCLUDE . ":" . $INCLUDE . "/tables:" . $share;
-   $ROOTCINT_CPP.= ":" . $env->{ENV}->{STAF} . "/inc:" . $env->{ENV}->{ROOTSRC};
+my $ROOTCINT_CPP = $INCLUDE . ":" . $INCLUDE . "/tables:" . $share . ":" . $env->{ENV}->{ROOTSRC};
+#   $ROOTCINT_CPP.= ":" . $env->{ENV}->{STAF} . "/inc:" 
 my $CXXFLAGS = $env->{CXXFLAGS};
 if ($STAR_SYS =~ /^sun4x_5/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
    $env2 = $env->clone(
