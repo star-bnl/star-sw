@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.376 2004/01/28 00:06:35 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.377 2004/01/28 02:49:11 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -31,6 +31,7 @@
 #include "StSecondaryVertexMaker/StXiFinderMaker.h"
 #include "StHitFilterMaker/StHitFilterMaker.h"
 #include "StTpcHitMoverMaker/StTpcHitMoverMaker.h"
+#include "St_tpt_Maker/St_tpt_Maker.h"
 
 //_____________________________________________________________________
 Bfc_st BFC1[] = {
@@ -1433,7 +1434,7 @@ Int_t StBFChain::Instantiate()
 	    // Bill stuff - Empty place-holder
 	  }
 	  //if (maker == "St_tpt_Maker" && GetOption("ExB")){
-	  if (maker == "StTpcHitMover" && GetOption("ExB")){
+	  if ( (maker == "StTpcHitMover" || maker == "St_tpt_Maker") && GetOption("ExB")){
 	    // bit 0 is ExB ON or OFF
 	    // The next 3 bits are reserved for yearly changes.
 	    // Backward compatibility preserved.
@@ -1471,10 +1472,10 @@ Int_t StBFChain::Instantiate()
 	    (void) printf("StBFChain:: ExB The option passed will be %d 0x%X\n",mask,mask);
 	    mk->SetMode(mask);
 	  }
-	  //if (maker == "St_tpt_Maker" && GetOption("AlignSectors")){
-	  //St_tpt_Maker *tptMk = (St_tpt_Maker*)mk;
-	  //tptMk->AlignHits(kTRUE);
-	  //}
+	  if (maker == "St_tpt_Maker" && GetOption("AlignSectors")){
+	    St_tpt_Maker *tptMk = (St_tpt_Maker*)mk;
+	    tptMk->AlignHits(kTRUE);
+	  }
 	  if (maker == "StTpcHitMover" && GetOption("AlignSectors")){
 	    StTpcHitMover *hitMk = (StTpcHitMover *) mk;
             hitMk->AlignHits(kTRUE);
