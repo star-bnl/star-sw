@@ -180,6 +180,7 @@
 *                    - add sdst2 chain
 * 11/25/98 K. Turner - change ev0d chain to use ev0_dst code & kumacs
 *                      instead of just kumacs
+*                    - add tcc code to "tcl" chain
 * 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
@@ -364,7 +365,9 @@ ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
          exec tfc_init#init
       (tcl)
          exec create_tables_tpc#tcl_slow
-	 exec tcl_init#init
+         exec create_tables_tpc#tcc
+	 exec tcl_init#init_tcl
+	 exec tcl_init#init_tcc
       (tpt)
 	 exec create_tables_tpc#tpt
 	 exec tpt_init#init
@@ -692,7 +695,8 @@ return
       (tfc)    exec tfc_run#run_newtab [tpc_sector_first] [tpc_sector_last]
       (tfc_r)  exec tfc_run#run_reformat_newtab
       (tcl)    
-	       exec tcl_run#run_tcl [tpc_sector_first] [tpc_sector_last] 
+               exec tcl_run#run_tcl [tpc_sector_first] [tpc_sector_last] 
+               exec tcl_run#run_tcc [tpc_sector_first] [tpc_sector_last] 
                exec tcl_run#run_tph [tpc_sector_first] [tpc_sector_last]
                if (staf_status(1) .ne. stafcv_ok) then 
                  message ' problem with tpc_clustering_process_event'
