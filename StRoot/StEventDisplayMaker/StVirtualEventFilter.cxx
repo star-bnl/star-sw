@@ -15,9 +15,14 @@ Int_t StVirtualEventFilter::GetFlag(){ return m_ActiveFlag;}
 
 //_____________________________________________________________________________
 Int_t StVirtualEventFilter::Filter(StGlobalTrack *,Width_t &,Style_t &)
-{return GetFlag();}
+{
+   static Int_t colorTrack = kRed;
+   colorTrack++;
+   if (colorTrack > 20) colorTrack = kRed;
+   return GetFlag() ? colorTrack : 0 ;
+}
 //_____________________________________________________________________________
-Int_t StVirtualEventFilter::Filter(const StObjArray *hitCollection,Width_t &,Style_t &s)
-{return GetFlag();}
+Int_t StVirtualEventFilter::Filter(const StObjArray *,Width_t &,Style_t &)
+{return GetFlag()? kYellow : 0 ;}
 
 

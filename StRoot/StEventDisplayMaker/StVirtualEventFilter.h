@@ -24,7 +24,7 @@ class StVirtualEventFilter : public TObject {
  protected:
     Int_t m_ActiveFlag;  // Flag whether this filter is on/off 
  public:
-    StVirtualEventFilter(Int_t flag=1):m_ActiveFlag(flag){;}
+    StVirtualEventFilter(Int_t flag=0):m_ActiveFlag(flag){;}
     virtual ~StVirtualEventFilter(){;}
     Int_t IsOn() { return GetFlag();}
     Int_t IsOff(){ return !GetFlag();}

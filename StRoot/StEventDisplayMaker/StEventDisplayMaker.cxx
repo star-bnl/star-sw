@@ -35,8 +35,9 @@
 #include <TH2.h>
 #include <TMath.h>
 
-StVirtualEventFilter hitsOffFilter(0);
-StVirtualEventFilter hitsOnFilter(1);
+// StVirtualEventFilter hitsOffFilter(0);
+// StVirtualEventFilter hitsOnFilter(1);
+StVirtualEventFilter StEventDisplayMaker::m_DefaultFilters[StEventDisplayMaker::kEndOfEventList];
 
 //_____________________________________________________________________________
 //
@@ -61,10 +62,12 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
 
   m_FilterArray   = new TObjArray(kEndOfEventList);
   Int_t i; 
-  for (i =0;i<kEndOfEventList;i++) m_FilterArray->AddAt(&hitsOffFilter,i);
-
-  m_FilterArray->AddAt(0,kGlobalTracks);
-  m_FilterArray->AddAt(0,kTrack);
+  for (i =0;i<kEndOfEventList;i++) {
+   m_FilterArray->AddAt(&m_DefaultFilters[i],i);
+//    m_FilterArray->AddAt(&hitsOffFilter,i);
+  }
+  ((StVirtualEventFilter *)m_FilterArray->At(kGlobalTracks))->TurnOn();
+  ((StVirtualEventFilter *)m_FilterArray->At(kTrack))->TurnOn();
 
   gROOT->GetListOfBrowsables()->Add(this,GetName());
 }
@@ -192,6 +195,7 @@ void StEventDisplayMaker::ClearEvents()
     if (m_PadBrowserCanvas) 
         m_PadBrowserCanvas->Clear();
     delete m_EventsView;
+    m_EventsView = 0;
     St_Node *node = 0;
     St_DataSetIter nextNode(m_EventsNode);
     while ( (node = (St_Node *)nextNode() )) {
@@ -226,7 +230,7 @@ Int_t StEventDisplayMaker::CreateTrackNodes()
   return 0;
 }
 //______________________________________________________________________________
-void StEventDisplayMaker::Clear(Option_t *option)
+void StEventDisplayMaker::Clear(Option_t *)
 {
   ClearEvents();
 //  StMaker::Clear();
@@ -307,58 +311,67 @@ Int_t StEventDisplayMaker::Make()
   m_Event  = (StEvent *) GetDataSet("StEvent");
   if (!m_Event) return kStErr;
 
+  Int_t total      = 0;
+  Int_t hitCounter = 0;
   if (m_ShortView){
-     Int_t total = MakeGlobalTracks();
 
+     total = MakeGlobalTracks();
      StVirtualEventFilter *filter = 0;
      filter = (StVirtualEventFilter *)m_FilterArray->At(kTpcHit);
      if (!filter || filter->IsOn() ) {
         StTpcHitCollection *hits   = m_Event->tpcHitCollection();
-        total += MakeHits(hits,filter);
+        hitCounter += MakeHits(hits,filter);
+        printf(" TpcHitCollection: %d \n", hitCounter);
      }
 
      filter = (StVirtualEventFilter *)m_FilterArray->At(kFtpcHit);
      if (!filter || filter->IsOn() ) {
         StFtpcHitCollection *hits   = m_Event->ftpcHitCollection();
-        total += MakeHits(hits,filter);
+        hitCounter += MakeHits(hits,filter);
+        printf(" FtpcHitCollection: %d \n", hitCounter);
      }
 
      filter = (StVirtualEventFilter *)m_FilterArray->At(kSvtHit);
      if (!filter || filter->IsOn() ) {
         StSvtHitCollection *hits   = m_Event->svtHitCollection();
-        total += MakeHits(hits,filter);
+        hitCounter += MakeHits(hits,filter);
+        printf(" SvtHitCollection: %d \n", hitCounter);
      }
 
      filter = (StVirtualEventFilter *)m_FilterArray->At(kEmcTowerHit);
      if (!filter || filter->IsOn() ) {
         StEmcTowerHitCollection *hits   = m_Event->emcTowerHitCollection();
-        total += MakeHits(hits,filter);
+        hitCounter += MakeHits(hits,filter);
+        printf(" EmcTowerHitCollection: %d \n", hitCounter);
      }
 
      filter = (StVirtualEventFilter *)m_FilterArray->At(kEmcPreShowerHit);
      if (!filter || filter->IsOn() ) {
         StEmcPreShowerHitCollection *hits   = m_Event->emcPreShowerHitCollection();
-        total += MakeHits(hits,filter);
-     }
+        hitCounter += MakeHits(hits,filter);
+        printf(" EmcPreShowerHitCollection: %d \n", hitCounter);
+     } 
 
      filter = (StVirtualEventFilter *)m_FilterArray->At(kSmdPhiHit);
      if (!filter || filter->IsOn() ) {
         StSmdPhiHitCollection *hits   = m_Event->smdPhiHitCollection();
-        total += MakeHits(hits,filter);
+        hitCounter += MakeHits(hits,filter);
+        printf(" SmdPhiHitCollection: %d \n", hitCounter);
      }
 
      filter = (StVirtualEventFilter *)m_FilterArray->At(kSmdEtaHit);
      if (!filter || filter->IsOn() ) {
         StSmdEtaHitCollection *hits   = m_Event->smdEtaHitCollection();
-        total += MakeHits(hits,filter);
+        hitCounter += MakeHits(hits,filter);
+        printf(" SmdEtaHitCollection: %d \n", hitCounter);
      }
 
-     if (total) {
+     if (total+hitCounter ) {
         m_EventsView = new St_NodeView(*m_EventsNode);
         m_ShortView->Add(m_EventsView);
      }
    }
-  printf(" updating view \n");
+  printf(" updating view of %d global tracks and %d hits\n",total, hitCounter);
   m_PadBrowserCanvas->Update();
   return kStOK;
 }
@@ -447,7 +460,9 @@ Int_t StEventDisplayMaker::SetFlag(Int_t flag, EDisplayEvents filterIndex)
 {
  // Set the new filter flag and return the previous one
   StVirtualEventFilter *f = (StVirtualEventFilter *)m_FilterArray->At(filterIndex);
-  return f ? f->Turn(flag): 0;
+  Int_t res = f ? f->Turn(flag): 0;
+  if (Debug()) PrintFilterStatus();
+  return res;
 }
 //_____________________________________________________________________________
 StVirtualEventFilter *StEventDisplayMaker::SetFilter(StVirtualEventFilter *filter, EDisplayEvents filterIndex)
@@ -460,16 +475,47 @@ StVirtualEventFilter *StEventDisplayMaker::SetFilter(StVirtualEventFilter *filte
      filter->Turn(f->GetFlag());
    m_FilterArray->AddAt(filter,filterIndex);
   }
+  if (Debug()) PrintFilterStatus();
   return f;
+}
+ 
+//_____________________________________________________________________________
+void StEventDisplayMaker::PrintFilterStatus()
+{
+  const Char_t *filterNames[] = {
+                                  "Primary Vertex"
+                                 , "Tpc Hit"
+                                 , "Svt Hit"
+                                 , "Ftpc Hit"
+                                 , "EmcTower Hit"
+                                 , "EmcPreShower Hit"
+                                 , "SmdPhi Hit"
+                                 , "SmdEta Hit"
+                                 , "Global Tracks"
+                                 ,  "Track"
+                                 ,  "Track Tpc Hits"
+                                 ,  "Track Svt Hits"
+                                 ,  "Track Ftpc Hits" 
+                                } ;
+   
+  Int_t i;
+  for (i =0;i<kEndOfEventList;i++) {
+      StVirtualEventFilter *filter = (StVirtualEventFilter *)m_FilterArray->At(i);
+      Int_t isOn = filter->IsOn();
+      printf(" Filter for %16s%",filterNames[i]);
+      if (filter) {
+          if (filter->IsOn()) printf(" is ON\n");
+          else printf(" is       OFF\n");
+      }
+      else printf(" doesn't exist\n");
+  }
 }
 
 #define DISPLAY_FILTER_DEFINITION(filterName)                                  \
-//_____________________________________________________________________________\
-Int_t  StEventDisplayMaker::__NAME3__(Set,filterName,Flag)(Int_t flag)         \
-{ return SetFlag(flag,__NAME2__(k,filterName)); }                              \
-//_____________________________________________________________________________\
-StVirtualEventFilter *StEventDisplayMaker::__NAME2__(Set,filterName)(StVirtualEventFilter *filter) \
-{ return SetFilter(filter,__NAME2__(k,filterName)); }
+Int_t  StEventDisplayMaker::_NAME3_(Set,filterName,Flag)(Int_t flag)         \
+{ return SetFlag(flag,_NAME2_(k,filterName)); }                              \
+StVirtualEventFilter *StEventDisplayMaker::_NAME2_(Set,filterName)(StVirtualEventFilter *filter) \
+{ return SetFilter(filter,_NAME2_(k,filterName)); }
 
 DISPLAY_FILTER_DEFINITION(PrimaryVertex)
 
@@ -482,7 +528,6 @@ DISPLAY_FILTER_DEFINITION(EmcTowerHit)
 DISPLAY_FILTER_DEFINITION(EmcPreShowerHit)
 DISPLAY_FILTER_DEFINITION(SmdPhiHit)
 DISPLAY_FILTER_DEFINITION(SmdEtaHit)
-DISPLAY_FILTER_DEFINITION(PrimaryVertex)
 
 // -- StGlobalTrack filters --
 
