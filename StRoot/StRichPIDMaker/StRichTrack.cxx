@@ -1,10 +1,15 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.18 2001/01/30 22:13:10 horsley Exp $
+ * $Id: StRichTrack.cxx,v 2.19 2001/02/01 17:55:30 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
+ *  Revision 2.19  2001/02/01 17:55:30  horsley
+ *  set energy loss in CTB at 20 MeV (default)
+ *  ifdef'd out the TrackEntryClass
+ *  StRichTrack::fastEnough() has materialsDB input for wavelenght's
+ *
  *  Revision 2.18  2001/01/30 22:13:10  horsley
  *  trajectory correction now default, added trajectory correction comments for log file
  *
@@ -478,38 +483,40 @@ void StRichTrack::init()
     mRefit = 0;
 }
 
+
 bool StRichTrack::setEnergyLoss() {
   
-  //bool energyLossCorrection = true;
+  bool energyLossCorrection = true;
 
-    //
-    // Approximation
-    // energy loss of a 2 GeV/c proton traveling thru the CTB
-    // at normal incidence  ~ 20 MeV
-    //
-
-  //double protonEnergyLoss = 20.0*MeV;
-
-  double protonEnergyLoss = 0.0*MeV;
-
-    //
-    // constant energy loss temporary, in future adjust for angle, mass, etc...
-    //
-    mEnergyLoss = protonEnergyLoss;
-
-    cout << "StRichTrack::setEnergyLoss()\n";
-    cout << "\tCorrection = " << protonEnergyLoss/GeV << " GeV/c" << endl;
-    cout << "\told mom = " << mMomentum.mag()/GeV << " GeV/c" << endl;
-
-    //
-    // Same units (Save an operation...do not convert to GeV)
-    //
-    mMomentum.setMag(mMomentum.mag() - mEnergyLoss);
-
-    cout << "\tnew mom after correction = " << this->getMomentum().mag()/GeV << " GeV/c" << endl;
-
-    return true;
+  //
+  // Approximation
+  // energy loss of a 2 GeV/c proton traveling thru the CTB
+  // at normal incidence  ~ 20 MeV
+  //
+  
+  double protonEnergyLoss = 20.0*MeV;
+  
+  //double protonEnergyLoss = 0.0*MeV;
+  
+  //
+  // constant energy loss temporary, in future adjust for angle, mass, etc...
+  //
+  mEnergyLoss = protonEnergyLoss;
+  
+  cout << "StRichTrack::setEnergyLoss()\n";
+  cout << "\tCorrection = " << protonEnergyLoss/GeV << " GeV/c" << endl;
+  cout << "\told mom = " << mMomentum.mag()/GeV << " GeV/c" << endl;
+  
+  //
+  // Same units (Save an operation...do not convert to GeV)
+  //
+  mMomentum.setMag(mMomentum.mag() - mEnergyLoss);
+  
+  cout << "\tnew mom after correction = " << this->getMomentum().mag()/GeV << " GeV/c" << endl;
+  
+  return true;
 }
+
 
 double StRichTrack::getEnergyLoss() const {
   return mEnergyLoss;
@@ -699,11 +706,7 @@ bool StRichTrack::correctTrajectory() {
 				     localPadPlane.position().z());
 	
 	    StThreeVectorF tempResidual = tempLocal - tempMip;
-	
-// 	if (tempResidual.perp() < correctedResidual.perp() && 
-// 	    fabs(tempResidual.x()) < 1.1*fabs(tempResidual.y()) &&
-// 	    fabs(tempResidual.x()) > 0.9*fabs(tempResidual.y())) {
-	
+		
 	    if ( tempResidual.perp() < correctedResidual.perp() ) {
 		correctedMomentum     = tempMomentum;
 		correctedResidual     = tempResidual;
@@ -746,12 +749,13 @@ bool StRichTrack::correctTrajectory() {
 					       tempRichLocalMom.z());  
 	  //StThreeVectorF normalVector(0,0,-1);
       
-	  //this->setProjectedMIP(correctedProjectedMIP);
+	 
 	  cout << "TrajectoryCorrection:  original impact point (cm) = " 
 	       << this->getImpactPoint() << endl;
-	  cout << "                                    new  impact point (cm) = " 
+	  cout << "                       new  impact point (cm) = " 
 	       << impact << endl;
 
+	  this->setProjectedMIP(correctedProjectedMIP);
 	  this->setImpactPoint(impact);
 	  //this->setMomentum(tempRichLocalMomentum);
       }
@@ -889,9 +893,14 @@ int StRichTrack::fastEnough(StParticleDefinition* particle) {
     double p = mMomentum.mag()*GeV;
     double m = particle->mass()*GeV;
     
-    double indexOfRefraction1 = myMaterialsDb->indexOfRefractionOfC6F14At(219.999*nanometer);
-    double indexOfRefraction2 = myMaterialsDb->indexOfRefractionOfC6F14At(169.0*nanometer);
+    double indexOfRefraction1 = 
+      myMaterialsDb->indexOfRefractionOfC6F14At(myMaterialsDb->innerWavelength());
+    double indexOfRefraction2 = 
+      myMaterialsDb->indexOfRefractionOfC6F14At(myMaterialsDb->outerWavelength());
            
+    //cout << "inner = " << indexOfRefraction1 << endl;
+    //cout << "outer = " << indexOfRefraction2 << endl;
+
     if ( p/sqrt(p*p + m*m) > (1./indexOfRefraction1) && 
 	 p/sqrt(p*p + m*m) > (1./indexOfRefraction2)) { 
 	return 1;
