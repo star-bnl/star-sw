@@ -2,12 +2,16 @@
 #include <math.h>
 #include "TError.h"
 #include "THelixTrack.h"
+#include <complex>
+typedef std::complex<double > Complex;
+const Complex Im(0,1);
 const double Zero = 1.e-5;
 
 
 ClassImp(THelixTrack)
 //_____________________________________________________________________________
-THelixTrack::THelixTrack(const double *xyz,const double *dir,double rho,const double *hxyz)
+THelixTrack::THelixTrack(const double *xyz,const double *dir,double rho
+		        ,const double *hxyz,double drho)
 {
 //	Made from GEANT3 ghelix by V.Perevoztchikov
 //
@@ -31,7 +35,7 @@ THelixTrack::THelixTrack(const double *xyz,const double *dir,double rho,const do
 //    *                                                                *
 //    ******************************************************************
 //
-  Set(xyz,dir,rho,hxyz);
+  Set(xyz,dir,rho,hxyz,drho);
 }
 //_____________________________________________________________________________
 THelixTrack::THelixTrack(const THelixTrack &from)
@@ -189,7 +193,8 @@ double THelixTrack::Fit(const double *pnts,int npnts, int rowsize)
   return ::sqrt(resmax);
 }
 //_____________________________________________________________________________
-void THelixTrack::Set(const double *xyz,const double *dir,double rho,const double *hxyz)
+void THelixTrack::Set(const double *xyz,const double *dir,double rho
+		     ,const double *hxyz,double drho)
 {
   fX[0] = xyz[0]; fX[1] = xyz[1]; fX[2] = xyz[2];
   fP[0] = dir[0]; fP[1] = dir[1]; fP[2] = dir[2];
@@ -199,13 +204,13 @@ void THelixTrack::Set(const double *xyz,const double *dir,double rho,const doubl
     if (!fH[0] && !fH[1]) fKind=1;
   } else {
     fH[0] = 0.;     fH[1] =0.;      fH[2] = 1.; fKind=1;}
-  fRho = rho;
+  fRho = rho; fDRho=drho;
   Build();
 }
 //_____________________________________________________________________________
-void THelixTrack::Set(double rho)
+void THelixTrack::Set(double rho,double drho)
 {
-   fRho = rho; fMax = 1./(fabs(fRho*fCosL)+1.e-10);
+   fRho = rho; fDRho=drho; fMax = 1./(fabs(fRho*fCosL)+1.e-10);
 }
 //_____________________________________________________________________________
 void THelixTrack::Backward()
@@ -214,7 +219,7 @@ void THelixTrack::Backward()
   double x[3],d[3],h[3],rho;
   for (int i=0;i<3;i++) { x[i]=fX[i]; d[i]=-fP[i];h[i]=fH[i];}
   rho = -fRho;
-  Set(x,d,rho,h); 
+  Set(x,d,rho,h,fDRho); 
 }
 
 //_____________________________________________________________________________
@@ -552,6 +557,16 @@ void THelixTrack::Print(Option_t *) const
   
 }
 //_____________________________________________________________________________
+void THelixTrack::Tailor(void *vrr, int narr)
+{
+  Complex *arr = (Complex*)vrr;
+  arr[0] = -Im/fRho;
+  arr[1] = 0.;
+  for (int j=1;j<narr-1;j++) {
+    arr[j+1] = -Im*(fRho*arr[j]+fDRho*arr[j-1])/(j+1.);
+  }
+}
+//_____________________________________________________________________________
 int THelixTrack::SqEqu(double *cba, double *sol)
 {
 //	
@@ -598,4 +613,38 @@ int THelixTrack::SqEqu(double *cba, double *sol)
   nsol   = 2; sol[1] = (-bdis/a);
   if (sol[0] > sol[1]) { swap = sol[0]; sol[0] = sol[1]; sol[1] = swap;}
   return nsol;
+}
+//_____________________________________________________________________________
+double THelixTrack::Steb(double step, double *xyz, double *dir,double *rho) const
+{
+
+  double ztep = step*fCosL;
+  Complex CX(fX[0]  ,fX[1]  ),CXn;
+  Complex CP(fPxy[0],fPxy[1]),CPn;
+  Complex ImTet(0,fRho * ztep );
+  Complex ImRho(0,fRho);
+  if (fabs(ImTet.imag()) > 0.01)	{
+//    Complex Cf1 = std::exp(ImTet)-1.;
+    Complex hlf = std::exp(0.5*ImTet);
+    Complex Cf1 = 2.*Im*hlf*hlf.imag();
+    CPn = CP + CP*Cf1;
+    CXn = CX + CP*Cf1/(ImRho);
+  } else { 
+    Complex COne = (1.+ImTet*(0.5 +ImTet*(1./6+ImTet*(1./24+ImTet/120.))));
+    Complex Cf1 = ImTet*COne;
+    CPn = CP + CP*Cf1; 
+    CXn = CX + CP*ztep*COne;
+  }
+  if (xyz) {
+    xyz[0] = CXn.real();
+    xyz[1] = CXn.imag();
+    xyz[2] = fX[2]+fP[2]*step;
+  } 
+  if (dir) {
+    dir[0] = CPn.real()*fCosL;
+    dir[1] = CPn.imag()*fCosL;
+    dir[2] = fP[2];
+  }
+
+  return step;
 }
