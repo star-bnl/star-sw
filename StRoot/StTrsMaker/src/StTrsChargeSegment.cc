@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.7 1999/02/18 21:18:33 lasiuk Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.8 1999/02/28 20:15:17 lasiuk Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,8 +12,8 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
- * Revision 1.7  1999/02/18 21:18:33  lasiuk
- * rotate() mods to StTpcCoordinateTranform
+ * Revision 1.8  1999/02/28 20:15:17  lasiuk
+ * splitting test/add muon to pid
  *
  * Revision 1.8  1999/02/28 20:15:17  lasiuk
  * splitting test/add muon to pid
@@ -35,32 +35,6 @@
  *
  * Revision 1.2  1999/01/15 10:59:11  lasiuk
  * remove g2t pointer
- * Revision 1.1  1998/11/10 17:12:23  fisyak
- * Put Brian trs versin into StRoot
- *
- * Revision 1.7  1998/11/08 17:04:44  lasiuk
- * use built in types,
- * namespace macro
- * vector allocators
- *
- * Revision 1.6  1998/11/01 13:55:15  lasiuk
- * coordinate transform rename
- *
- * Revision 1.5  1998/10/22 00:24:20  lasiuk
- * Oct 22
- *
- * Revision 1.4  1998/06/30 23:08:56  lasiuk
- * g2t stored by pointer
- *
- * Revision 1.3  1998/06/04 23:23:37  lasiuk
- * remove transportToWire()
- *
- * Revision 1.2  1998/05/21 21:27:58  lasiuk
- * Initial revision
- *
- * Revision 1.1.1.1  1998/05/19 22:33:44  lasiuk
- * Initial Revision
- *
  * add pid member; add systemofunits; mv access fcts to .hh
 
 #include "StPhysicalHelix.hh"
@@ -127,9 +101,12 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 			       list<StTrsMiniChargeSegment,allocator<StTrsMiniChargeSegment> >* listOfMiniSegments)
 #endif
 {
-    // Number of electrons in complete segment
+#endif
+
+
     //
     // Calculate the number of electrons in complete segment
+    
 
 //     PR(mDE/eV);
 //     PR(gasDb->W());
@@ -167,14 +144,17 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 	// Must get from pid structures
 	double particleMass;
 	switch (mPid) {
-	case 1:
+	case 1:    // pion
 	    particleMass = .1395*GeV;
 	    break;
-	case 2:
+	case 2:    // kaon
 	    particleMass = .493*GeV;
 	    break;
-	case 3:
+	case 3:    // proton
 	    particleMass = .939*GeV;
+	    break;
+	case 4:    // muon
+	    particleMass = .106*GeV;
 	    break;
 	default:  // a pion is default
 	    particleMass = .1395*GeV;
@@ -182,8 +162,9 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 	}
 	
 	double betaGamma = abs(mMomentum)/particleMass;
-//     PR(mMomentum);
-//     PR(betaGamma);
+// 	PR(particleMass/GeV);
+		   charge);
+// 	PR(betaGamma);
 
 	// number of segments to split given by command line argument (default 1):
 	//  should be related to mNumberOfElectrons
@@ -214,7 +195,7 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 	    
 	    // 	PR(ionization[StTrsDeDx::primaries]);
 	    // 	PR(ionization[StTrsDeDx::secondaries]);
-	    // 	PR(ionization[StTrsDeDx::total]);
+	    //  PR(ionization[StTrsDeDx::total]);
 	    
 	    if(!ionization[StTrsDeDx::total]) continue;
 	    
@@ -226,9 +207,9 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 		numberOfElectronsOnMiniSegment = ionization[StTrsDeDx::total];
 	    if(!theIonization[ii]) {
 		newPosition += deltaS;
-// 	PR(numberOfElectronsOnMiniSegment);
-// 	PR(newPosition);
-// 	PR(track.at(newPosition));
+// 	    PR(numberOfElectronsOnMiniSegment);
+// 	    PR(newPosition);
+// 	    PR(track.at(newPosition));
 	
  	    //PR(newPosition);
 						numberOfElectronsOnMiniSegment,
@@ -238,7 +219,7 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 	    ionizationLeft -= numberOfElectronsOnMiniSegment;
 // 	PR(ionizationLeft);
 
-	    if(!ionizationLeft) break;
+	    if(ionizationLeft<1) break;
 						deltaS);
 	    listOfMiniSegments->push_back(aMiniSegment);
 
@@ -248,21 +229,25 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 	// last subsegment -- assign remaining ionizaiton
 	// GEANT energy is conserved by this (exactly!)
 	//
-//     PR(newPosition);
-//     PR(track.at(newPosition));
-	if(ionizationLeft) {
+	if(ionizationLeft>1) {
 	    StTrsMiniChargeSegment aNewMiniSegment(track.at(newPosition),
 						   ionizationLeft,
 						   deltaS);
 	    listOfMiniSegments->push_back(aNewMiniSegment);
+// 	    PR(newPosition);
+// 	    PR(track.at(newPosition));
+// 	    PR(ionizationLeft);
 	}
     } // if (subsegments > 1)  ---> allows us to skip the helix construction
-    else {
+    else if(subSegments == 1) {
 	StTrsMiniChargeSegment aSingleMiniSegment(mPosition,
 						  mNumberOfElectrons,
 						  mDs);
 	listOfMiniSegments->push_back(aSingleMiniSegment);
+						   mNumberOfElectrons,
+						   mDs);
     }
+// 	PR(mPosition);
 // 	PR(mNumberOfElectrons);
      }
 
