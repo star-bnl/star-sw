@@ -9,10 +9,15 @@
  *  tofCollection->tofData() and will store the matches in
  *  tofCollection->tofSlats().
  *
- * $Id: StTofpMatchMaker.h,v 1.3 2003/09/13 19:15:52 geurts Exp $
+ * $Id: StTofpMatchMaker.h,v 1.4 2003/09/15 22:38:11 geurts Exp $
  */    
 /*  -------------------------------------------------------------------------
  * $Log: StTofpMatchMaker.h,v $
+ * Revision 1.4  2003/09/15 22:38:11  geurts
+ * dBase updates:
+ *  - removed initLocalDb option
+ *  - introduced dBase parameters for strobe event definitions
+ *
  * Revision 1.3  2003/09/13 19:15:52  geurts
  * Changed passing of StSPtrVecTofData for strobeEvent (see bugtracker ticket #172)
  *
@@ -59,7 +64,6 @@ public:
   Int_t  Make();
   Int_t  Finish();
 
-  void initLocalDb(Bool_t localDb=kTRUE);
   void createHistograms(Bool_t histos=kTRUE);
   void setOuterTrackGeometry();
   void setStandardTrackGeometry();
@@ -88,12 +92,15 @@ protected:
 
 private:
   Bool_t strobeEvent(StSPtrVecTofData&);// check pVPD data for strobe event
+  Int_t mStrobeTdcMin[NPVPD]; //! lower strobe event range
+  Int_t mStrobeTdcMax[NPVPD]; //! upper strobe event range
+
   void bookHistograms();
   void writeHistogramsToFile();
   StTofGeometry *mTofGeom; //! pointer to the TOF geometry utility class
 
   Bool_t mHisto; //! create, fill and write out histograms
-  Bool_t mInitLocalDb; //! initialize from local (true) dbase or STAR dbase (false)
+  //Bool_t mInitLocalDb; //! initialize from local (true) dbase or STAR dbase (false)
   Bool_t mYear2; //! STAR year2: TOFp+pVPD
   Bool_t mYear3; //! STAR year3: TOFp+pVPD+TOFr
   Bool_t mOuterTrackGeometry; //! use outer track geometry (true) for extrapolation
@@ -165,12 +172,11 @@ private:
   TH2D *hTofpMatchNoHit[NTOFP]; //!
 
   virtual const char *GetCVS() const 
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofpMatchMaker.h,v 1.3 2003/09/13 19:15:52 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofpMatchMaker.h,v 1.4 2003/09/15 22:38:11 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StTofpMatchMaker,0)
 };
 
-inline void StTofpMatchMaker::initLocalDb(Bool_t localDb){mInitLocalDb = localDb;}
 inline void StTofpMatchMaker::setValidAdcRange(Int_t min, Int_t max){mMinValidAdc=min; mMaxValidAdc=max;}
 inline void StTofpMatchMaker::setValidTdcRange(Int_t min, Int_t max){mMinValidTdc=min; mMaxValidTdc=max;}
 inline void StTofpMatchMaker::setOuterTrackGeometry(){mOuterTrackGeometry=true;}

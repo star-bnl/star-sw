@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofpMatchMaker.cxx,v 1.3 2003/09/13 19:15:52 geurts Exp $
+ * $Id: StTofpMatchMaker.cxx,v 1.4 2003/09/15 22:38:10 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTofpMatchMaker.cxx,v $
+ * Revision 1.4  2003/09/15 22:38:10  geurts
+ * dBase updates:
+ *  - removed initLocalDb option
+ *  - introduced dBase parameters for strobe event definitions
+ *
  * Revision 1.3  2003/09/13 19:15:52  geurts
  * Changed passing of StSPtrVecTofData for strobeEvent (see bugtracker ticket #172)
  *
@@ -33,6 +38,7 @@
 #include "StPhysicalHelixD.hh"
 #include "StTofUtil/StTofGeometry.h"
 #include "StTofUtil/StTofSlatCollection.h"
+#include "tables/St_pvpdStrobeDef_Table.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TFile.h"
@@ -62,7 +68,6 @@ StTofpMatchMaker::StTofpMatchMaker(const Char_t *name): StMaker(name){
   setMaxDCA(9999.);
 
   createHistograms(kTRUE);
-  initLocalDb(kFALSE);
   doPrintMemoryInfo = kFALSE;
   doPrintCpuInfo    = kFALSE;
 }
@@ -82,8 +87,6 @@ Int_t StTofpMatchMaker::Init(){
   gMessMgr->Info("","OST") << "Maximum DCA: " << mMaxDCA << endm;
   if (!mOuterTrackGeometry)
     gMessMgr->Warning("Warning: using standard trackgeometry()","OST");
-  if (mInitLocalDb)
-    gMessMgr->Warning("Warning: initializing from local dbase","OST");
 
 
   if (mHisto){
@@ -102,10 +105,33 @@ Int_t StTofpMatchMaker::Init(){
 Int_t StTofpMatchMaker::InitRun(int runnumber){
   gMessMgr->Info("StTofpMatchMaker -- reinitializing TofGeometry (InitRun)","OS" );
   mTofGeom = new StTofGeometry();
-  if (mInitLocalDb)
-    mTofGeom->init();
-  else
-    mTofGeom->init(this);
+  mTofGeom->init(this);
+
+  gMessMgr->Info("                 -- retrieving run parameters","OS");
+  TDataSet *mDbDataSet = GetDataBase("Calibrations/tof");
+  if (!mDbDataSet){
+    gMessMgr->Error("unable to get TOF run parameters","OS");
+    assert(mDbDataSet);
+  }
+  St_pvpdStrobeDef* pvpdStrobeDef = static_cast<St_pvpdStrobeDef*>(mDbDataSet->Find("pvpdStrobeDef"));
+  if (!pvpdStrobeDef){
+    gMessMgr->Error("unable to find TOF run param table","OS");
+    assert(pvpdStrobeDef);
+  }
+  pvpdStrobeDef_st *strobeDef = static_cast<pvpdStrobeDef_st*>(pvpdStrobeDef->GetArray());
+  int numRows = pvpdStrobeDef->GetNRows();
+  if (NPVPD != numRows) gMessMgr->Warning("#tubes inconsistency in dbase");
+  for (int i=0;i<NPVPD;i++){
+    int ii = strobeDef[i].id - 1;
+    mStrobeTdcMin[ii] = strobeDef[i].strobeTdcMin;
+    mStrobeTdcMax[ii] = strobeDef[i].strobeTdcMax;
+    if (Debug())
+      cout << "tube " << strobeDef[i].id << "  min:"<< strobeDef[i].strobeTdcMin
+	   <<" max:"<< strobeDef[i].strobeTdcMax<< endl;
+  }
+
+
+
   return kStOK;
 }
 
@@ -270,7 +296,7 @@ Int_t StTofpMatchMaker::Make(){
     } // existing global track
   } // loop over nodes
 
-  gMessMgr->Info("","OST") << "B:  #matched/#avail/#total tracknodes: " 
+  gMessMgr->Info("","OST") << "B: #matched/#avail/#total tracknodes: " 
 			   <<allSlatsHitVec.size() << "/" <<nAllTracks 
 			   << "/" << nodes.size() << endm;
   // end of Sect.B
@@ -992,27 +1018,12 @@ void StTofpMatchMaker::writeHistogramsToFile(){
 /// determine pVPD event type (strobe or beam)
 bool StTofpMatchMaker::strobeEvent(StSPtrVecTofData& tofData){
   // determine strobe event from pVPD TDC data
-  int strobeTdcMin(0), strobeTdcMax(0);
-
-  // this should move into the dbase:
-  if (mYear2){
-    strobeTdcMin = 1600;
-    strobeTdcMax = 1650;
-  }
-  else if (mYear3){
-    strobeTdcMin =  980;
-    strobeTdcMax = 1020;
-  }
-  else {
-    gMessMgr->Error("No strobe settings available for this data set ... aborting","OET");
-    assert(strobeTdcMin);
-    assert(strobeTdcMax);
-  }
   
   int nStrobedPvpdTdcs=0;
-  for(int i=42;i<48;i++)
-    if((tofData[i]->tdc()>strobeTdcMin) &&(tofData[i]->tdc()<strobeTdcMax))
-  	nStrobedPvpdTdcs++;
+  for(int i=0;i<NPVPD;i++)
+    if((tofData[42+i]->tdc()>mStrobeTdcMin[i]) &&
+       (tofData[42+i]->tdc()<mStrobeTdcMax[i]))
+      nStrobedPvpdTdcs++;
   
   if (nStrobedPvpdTdcs==NPVPD) return true;
 
