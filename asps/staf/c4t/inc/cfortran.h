@@ -1,6 +1,9 @@
 /* cfortran.h */ /* 2.8 */            /* anonymous ftp: zebra.desy.de */
 /* Burkhard Burow, burow@vxdesy.cern.ch, University of Toronto, 1993. */
 
+/* G.Folger, 940602 add !defined(__alpha) on line 707
+ * G.Folger, 941296 Solaris != sun, it no longer has FLOAT.. in <math.h>
+ */
 #ifndef __CFORTRAN_LOADED
 #define __CFORTRAN_LOADED
 
@@ -703,7 +706,7 @@ do{VVCF(T1,A1,B1) VVCF(T2,A2,B2) VVCF(T3,A3,B3) VVCF(T4,A4,B4) VVCF(T5,A5,B5)  \
    WCF(TB,AB,B) WCF(TC,AC,C) WCF(TD,AD,D) WCF(TE,AE,E)             }while(FALSE)
 
 /* Apollo 6.7, CRAY, Sun, VAX/Ultrix vcc/cc and HP can't hack more than 31 arg's */
-#if !(defined(VAXUltrix)&&!defined(__GNUC__)) && !defined(__CF__APOLLO67) && !defined(sun) && !defined(__hpux) && !defined(_CRAY)
+#if !(defined(VAXUltrix)&&!defined(__GNUC__)) && !defined(__CF__APOLLO67) && !defined(sun) && !defined(__hpux) && !defined(_CRAY) && !defined(__alpha)
 #define CCALLSFSUB15(UN,LN,T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB,TC,TD,TE,TF,A1,A2,A3,A4,A5,A6,A7,A8,A9,AA,AB,AC,AD,AE,AF)\
         CCALLSFSUB20(UN,LN,T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB,TC,TD,TE,TF,CF_0,CF_0,CF_0,CF_0,CF_0,A1,A2,A3,A4,A5,A6,A7,A8,A9,AA,AB,AC,AD,AE,AF,0,0,0,0,0)
 #define CCALLSFSUB16(UN,LN,T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB,TC,TD,TE,TF,TG,A1,A2,A3,A4,A5,A6,A7,A8,A9,AA,AB,AC,AD,AE,AF,AG)\
@@ -929,7 +932,7 @@ do{VVCF(T1,A1,B1) VVCF(T2,A2,B2) VVCF(T3,A3,B3) VVCF(T4,A4,B4) VVCF(T5,A5,B5)  \
 /* Sun and VOID break U into U and PU. */
 #define PUBYTE(      A) INTEGER_BYTE     A
 #define PUDOUBLE(    A) DOUBLE_PRECISION A
-#ifndef sunFortran
+#ifndef FLOATFUNCTIONTYPE
 #define PUFLOAT(     A) float   A
 #else
 #define PUFLOAT(     A) FLOATFUNCTIONTYPE   A
@@ -943,7 +946,7 @@ do{VVCF(T1,A1,B1) VVCF(T2,A2,B2) VVCF(T3,A3,B3) VVCF(T4,A4,B4) VVCF(T5,A5,B5)  \
 
 #define EBYTE          INTEGER_BYTE     A0;
 #define EDOUBLE        DOUBLE_PRECISION A0;
-#ifndef sunFortran
+#ifndef FLOATFUNCTIONTYPE
 #define EFLOAT         float  A0;
 #else
 #define EFLOAT         float AA0;   FLOATFUNCTIONTYPE A0;
@@ -1247,7 +1250,7 @@ do{VVCF(T1,A1,B1) VVCF(T2,A2,B2) VVCF(T3,A3,B3) VVCF(T4,A4,B4) VVCF(T5,A5,B5)  \
 
 #define XBYTE          return A0;
 #define XDOUBLE        return A0;
-#ifndef sunFortran
+#ifndef ASSIGNFLOAT
 #define XFLOAT         return A0;
 #else
 #define XFLOAT         ASSIGNFLOAT(AA0,A0); return AA0;
@@ -1338,8 +1341,6 @@ static _INT(2,U,F,CFFUN(UN),0)() {E##F  _INT(3,GZ,F,UN,LN)); X##F}
 #define PROTOCCALLSFFUN9( T0,UN,LN,T1,T2,T3,T4,T5,T6,T7,T8,T9)                 \
         PROTOCCALLSFFUN10(T0,UN,LN,T1,T2,T3,T4,T5,T6,T7,T8,T9,CF_0)
 
-/* HP/UX 9.01 cc requires the blank between '_INT(3,G,T0,UN,LN) CCCF(T1,1,0)' */
-
 #ifndef __CF__KnR
 #define PROTOCCALLSFFUN10(T0,UN,LN,T1,T2,T3,T4,T5,T6,T7,T8,T9,TA)              \
 PU##T0(CFC_(UN,LN))(CF_NULL_PROTO);                                          \
@@ -1352,7 +1353,7 @@ static _INT(2,U,T0,CFFUN(UN),0)(UCF(T1,1,0) UCF(T2,2,1) UCF(T3,3,1) UCF(T4,4,1) 
  CCF(T1,1) CCF(T2,2) CCF(T3,3) CCF(T4,4) CCF(T5,5)                             \
  CCF(T6,6) CCF(T7,7) CCF(T8,8) CCF(T9,9) CCF(TA,A)                             \
  _INT(3,G,T0,UN,LN) CCCF(T1,1,0) CCCF(T2,2,1) CCCF(T3,3,1) CCCF(T4,4,1) CCCF(T5,5,1)\
-                    CCCF(T6,6,1) CCCF(T7,7,1) CCCF(T8,8,1) CCCF(T9,9,1) CCCF(TA,A,1)\
+                   CCCF(T6,6,1) CCCF(T7,7,1) CCCF(T8,8,1) CCCF(T9,9,1) CCCF(TA,A,1)\
                JCF(T1,1) JCF(T2,2) JCF(T3,3) JCF(T4,4) JCF(T5,5)               \
                JCF(T6,6) JCF(T7,7) JCF(T8,8) JCF(T9,9) JCF(TA,A));             \
  WCF(T1,A1,1) WCF(T2,A2,2) WCF(T3,A3,3) WCF(T4,A4,4) WCF(T5,A5,5)              \
@@ -1372,8 +1373,9 @@ static _INT(2,U,T0,CFFUN(UN),0)(UUCF(T1,1,0) UUCF(T2,2,1) UUCF(T3,3,1) UUCF(T4,4
  VCF(T6,6) VCF(T7,7) VCF(T8,8) VCF(T9,9) VCF(TA,A) E##T0                     \
  CCF(T1,1) CCF(T2,2) CCF(T3,3) CCF(T4,4) CCF(T5,5)                             \
  CCF(T6,6) CCF(T7,7) CCF(T8,8) CCF(T9,9) CCF(TA,A)                             \
- _INT(3,G,T0,UN,LN) CCCF(T1,1,0) CCCF(T2,2,1) CCCF(T3,3,1) CCCF(T4,4,1) CCCF(T5,5,1)\
-                    CCCF(T6,6,1) CCCF(T7,7,1) CCCF(T8,8,1) CCCF(T9,9,1) CCCF(TA,A,1)\
+ _INT(3,G,T0,UN,LN) CCCF(T1,1,0) CCCF(T2,2,1) CCCF(T3,3,1) CCCF(T4,4,1)        \
+		   CCCF(T5,5,1)                                                \
+                   CCCF(T6,6,1) CCCF(T7,7,1) CCCF(T8,8,1) CCCF(T9,9,1) CCCF(TA,A,1)\
                JCF(T1,1) JCF(T2,2) JCF(T3,3) JCF(T4,4) JCF(T5,5)               \
                JCF(T6,6) JCF(T7,7) JCF(T8,8) JCF(T9,9) JCF(TA,A) );            \
  WCF(T1,A1,1) WCF(T2,A2,2) WCF(T3,A3,3) WCF(T4,A4,4) WCF(T5,A5,5)              \
@@ -1574,7 +1576,7 @@ static _INT(2,U,T0,CFFUN(UN),0)(UUCF(T1,1,0) UUCF(T2,2,1) UUCF(T3,3,1) UUCF(T4,4
 #endif
 #endif
 #else
-#ifndef sunFortran
+#ifndef FLOATFUNCTIONTYPE
 #define FZFLOAT(  UN,LN) float fcallsc(UN,LN)(
 #else
 #define FZFLOAT(  UN,LN) FLOATFUNCTIONTYPE fcallsc(UN,LN)(
@@ -1645,7 +1647,7 @@ arguments to work correctly. Note that R.. frees and hence may corrupt the
 string. */
 #define IBYTE          return A0;
 #define IDOUBLE        return A0;
-#ifndef sunFortran
+#ifndef RETURNFLOAT
 #define IFLOAT         return A0;
 #else
 #define IFLOAT         RETURNFLOAT(A0);
@@ -1703,8 +1705,8 @@ string. */
 FZ##T0(UN,LN)) {_INT(2,UU,T0,A0,0); _INT(0,L,T0,0,0) CN(); _INT(0,K,T0,0,0) I##T0}
 
 #define FCALLSCFUN10(T0,CN,UN,LN,T1,T2,T3,T4,T5,T6,T7,T8,T9,TA)                \
-F##T0(UN,LN) NCF(T1,1,0) NCF(T2,2,1) NCF(T3,3,1) NCF(T4,4,1) NCF(T5,5,1)     \
-               NCF(T6,6,1) NCF(T7,7,1) NCF(T8,8,1) NCF(T9,9,1) NCF(TA,A,1)     \
+F##T0(UN,LN)NCF(T1,1,0) NCF(T2,2,1) NCF(T3,3,1) NCF(T4,4,1) NCF(T5,5,1)      \
+              NCF(T6,6,1) NCF(T7,7,1) NCF(T8,8,1) NCF(T9,9,1) NCF(TA,A,1)      \
                         DCF(T1,1) DCF(T2,2) DCF(T3,3) DCF(T4,4) DCF(T5,5)      \
                         DCF(T6,6) DCF(T7,7) DCF(T8,8) DCF(T9,9) DCF(TA,A) )    \
  {QCF(T1,1) QCF(T2,2) QCF(T3,3) QCF(T4,4) QCF(T5,5)                            \
@@ -1718,8 +1720,8 @@ F##T0(UN,LN) NCF(T1,1,0) NCF(T2,2,1) NCF(T3,3,1) NCF(T4,4,1) NCF(T5,5,1)     \
 {_INT(2,UU,T0,A0,0); _INT(0,L,T0,0,0) CN(); _INT(0,K,T0,0,0) I##T0}
 
 #define FCALLSCFUN10(T0,CN,UN,LN,T1,T2,T3,T4,T5,T6,T7,T8,T9,TA)                \
-F##T0(UN,LN) NNCF(T1,1,0) NNCF(T2,2,1) NNCF(T3,3,1) NNCF(T4,4,1) NNCF(T5,5,1)\
-               NNCF(T6,6,1) NNCF(T7,7,1) NNCF(T8,8,1) NNCF(T9,9,1) NNCF(TA,A,1)\
+F##T0(UN,LN)NNCF(T1,1,0) NNCF(T2,2,1) NNCF(T3,3,1) NNCF(T4,4,1) NNCF(T5,5,1) \
+              NNCF(T6,6,1) NNCF(T7,7,1) NNCF(T8,8,1) NNCF(T9,9,1) NNCF(TA,A,1) \
    DDCF(T1,1) DDCF(T2,2) DDCF(T3,3) DDCF(T4,4) DDCF(T5,5)                      \
    DDCF(T6,6) DDCF(T7,7) DDCF(T8,8) DDCF(T9,9) DDCF(TA,A) )  _INT(0,FF,T0,0,0) \
  NNNCF(T1,1,0) NNNCF(T2,2,1) NNNCF(T3,3,1) NNNCF(T4,4,1) NNNCF(T5,5,1)         \
