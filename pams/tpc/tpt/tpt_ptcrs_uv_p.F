@@ -1,5 +1,8 @@
-* $Id: tpt_ptcrs_uv_p.F,v 1.4 1998/03/31 17:00:56 sakrejda Exp $
+* $Id: tpt_ptcrs_uv_p.F,v 1.5 1999/10/26 18:18:30 liq Exp $
 * $Log: tpt_ptcrs_uv_p.F,v $
+* Revision 1.5  1999/10/26 18:18:30  liq
+* change r defination from (x-x0)**2+(y-y0)**2 to (x**2-x0**2)+(y**2-y0**2), fixed the bug
+*
 * Revision 1.4  1998/03/31 17:00:56  sakrejda
 * sector boundry crossing calculation corrected-was using old sector naming convention
 *
@@ -15,7 +18,7 @@ C
 C DESCRIPTION:
 C Routine finds solutions for a set of 2 equations. A TPC row is 
 C parametrized by as*x+bs*y+cs=0, a track is parametrized by -(y-y0)/r
-C =at*(x-x0)/r+bt where r=(x-x0)**2+(y-y0)**2.
+C =at*(x-x0)/r+bt where r=(x**2-x0**2)+(y**2-y0**2).
 C
 C INPUT PARAMETERS:
 C  as - slope parameter for the row
@@ -38,11 +41,11 @@ C<---------------------------------------------------------------------
       REAL a,b,c,delta
 C______________________________________________________________________
       if(abs(as).gt.abs(bs)) then
-        a=(bt+bt*bs**2/as**2)
-        b=(-at*bs/as+2.0*bt*bs/as*(cs/as+x0)-2.0*bt*y0+1.0)
-        c=(-at*(cs/as+x0)+bt*(cs/as+x0)**2+bt*y0**2-y0)
-        delta=b**2-4.0*a*c
-        if(delta.ge.0) then
+       a=(bt+bt*bs**2/as**2)
+       b=(1.0-at*bs/as+2.0*bt*cs*bs/as**2)
+       c=(-y0-at*cs/as-at*x0+bt*cs**2/as**2-y0**2*bt-x0**2*bt)
+       delta=b**2-4.0*a*c
+       if(delta.ge.0) then
           yp1(1)=(-b-sqrt(delta))*0.5/a
           yp1(2)=(-b+sqrt(delta))*0.5/a
           xp1(1)=-(cs+yp1(1)*bs)/as
@@ -53,10 +56,8 @@ C______________________________________________________________________
         endif
       else
         a=(bt+bt*as**2/bs**2)
-        b=(at-2.0*bt*x0+2.0*bt*as/bs*(cs/bs+y0)-as/bs)
-c There was a bug in the following line. I had (1.0/bs-y0) instead of
-c (1.0/bs-y0)**2 (ims)
-        c=(-at*x0+bt*x0**2+bt*(cs/bs+y0)**2-cs/bs-y0)
+        b=(-as/bs+at+2.0*bt*cs*as/bs**2)
+        c=(-cs/bs-y0-at*x0+bt*cs**2/bs**2-bt*x0**2-bt*y0**2)
         delta=b**2-4.0*a*c
         if(delta.ge.0) then
           xp1(1)=(-b-sqrt(delta))*0.5/a
@@ -69,3 +70,8 @@ c (1.0/bs-y0)**2 (ims)
         endif
       endif
       end
+
+
+
+
+
