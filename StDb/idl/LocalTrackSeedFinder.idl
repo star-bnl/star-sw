@@ -1,0 +1,22 @@
+/*    LocalTrackSeedFinder.idl
+*
+*  Table: LocalTrackSeedFinder
+*
+*       description:
+*/ 
+	
+
+struct LocalTrackSeedFinder { 
+
+  double DeltaY;            /* Delta-Y */           
+  double DeltaZ;	    /* Delta-Z */           
+  long   SeedLength;	    /* Seed Length */       
+  double ExtrapDeltaY;	    /* extra-Delta-Y */     
+  double ExtrapDeltaZ;	    /* extra-Delta-Z */     
+  long   MaxSkipped;        /* Max Layers Skipped */         
+  long   ExtrapMinLength;   /* Min Length of Extrapolation */
+  long   ExtrapMaxLength;   /* Max Length of Extrapolation */
+  long   UseOrigin;	    /* Use Origin in Fit */          
+  long   DoHelixFit;        /* Do Helix Fit  true-> fit, false-> calculate */
+  
+ };  
