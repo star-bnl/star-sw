@@ -40,9 +40,25 @@ void loadLibrairies(bool doProfile)
   cout <<"Run.C::loadLibrairies() - INFO - Done"<<endl;
 }
 
-void Run(int firstEvent=0,
-	 int nEvents=1,
-	 //const char * filePrefix = "st_physics_",
+void RunMany(int first=0, int count=100)
+{
+  Run(first, count,
+      "rcf", 
+      "/data/r23b/star/hijingAuau/200GeV/b0_20/standard/2001/Unknown/",
+      "rcf0183_02_300evts.geant.root");
+}
+ 
+void RunGui()
+{
+   Run(0,1, 
+      "rcf", 
+      "/data/r23b/star/hijingAuau/200GeV/b0_20/standard/2001/Unknown/",
+      "rcf0183_02_300evts.geant.root",
+       true);
+ 
+}
+void Run(int firstEvent,
+	 int nEvents,
 	 const char * filePrefix = "rcf",
 	 //const char * path= "/star/data13/reco/ppMinBias/FullField/P02gf/2002/019/",
 	 //const char * path ="/star/data22/ITTF/EvalData/Event/ppMinBias/",
@@ -51,8 +67,7 @@ void Run(int firstEvent=0,
 	 //const char * path= "/data/r20b/ittf/auau200/hijing/b0_20/standard/year2001/",
 	 const char * path= "/data/r23b/star/hijingAuau/200GeV/b0_20/standard/2001/Unknown/",
 	 const char * file="rcf0183_02_300evts.geant.root",
-	 
-	 bool useGui=true,
+	 bool useGui=false,
 	 bool useMcAsRec=false,
 	 bool doPlots=true,
 	 bool doSimulation=true,
