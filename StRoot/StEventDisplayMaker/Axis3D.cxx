@@ -2,7 +2,7 @@
 //Z,+DECK,Axis3D,T=C++..
 //*CMZ :          28/11/99  01.06.19  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   27/11/99
-// $Id: Axis3D.cxx,v 1.1 1999/11/29 19:49:56 fine Exp $ 
+// $Id: Axis3D.cxx,v 1.2 1999/11/29 19:57:59 fine Exp $ 
 #include <iostream.h>
 #include <ctype.h>
 
@@ -196,7 +196,8 @@ void TAxis3D::PaintLegoAxis(TGaxis *axis, Float_t ang)
        axis->SetTitle(fAxis[i].GetTitle());
        axis->SetTitleOffset(fAxis[i].GetTitleOffset());
        axis->SetTitleSize(fAxis[i].GetTitleSize());
-       axis->SetBit(TGaxis::kCenterTitle, fAxis[i].TestBit(TGaxis::kCenterTitle));
+       enum { kCenterTitle = BIT(12) }; // to be remove with the last version of ROOT
+       axis->SetBit(kCenterTitle, fAxis[i].TestBit(kCenterTitle));
 
        //*-*-    Initialize the number of divisions. If the
        //*-*-    number of divisions is negative, option 'N' is required.
@@ -382,6 +383,9 @@ void TAxis3D::SetTitleOffset(Float_t offset, Option_t *axis)
 }
 
 // $Log: Axis3D.cxx,v $
+// Revision 1.2  1999/11/29 19:57:59  fine
+// Missing ROOT constant kCenterTitle hard coded. Should be removed later
+//
 // Revision 1.1  1999/11/29 19:49:56  fine
 // ROOT class: TAxis3D. To be moved to ROOT later
 //
