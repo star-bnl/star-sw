@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.16 2001/12/21 04:54:45 porter Exp $
+ * $Id: StDbBuffer.cc,v 1.17 2002/11/13 15:24:09 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.17  2002/11/13 15:24:09  porter
+ * updated strstream formatting
+ *
  * Revision 1.16  2001/12/21 04:54:45  porter
  * sped up table definition for emc and changed some ostrstream usage for
  * insure tests
@@ -314,7 +317,7 @@ genwritemem(long long);
 genwritemem(float);
 genwritemem(double);
 
-#define castcasest(typelist,casttype) case typelist: {casttype tVal; MemSwapCpy((char*)&tVal,(char*)aVal,mycsize[typelist],mycswapl[typelist],Client);ostrstream sStream;sStream << tVal<<ends;char *tStr=new char[strlen(sStream.str())+1];strcpy(tStr,sStream.str());s[0]=tStr; sStream.freeze(0); };break
+#define castcasest(typelist,casttype) case typelist: {casttype tVal; MemSwapCpy((char*)&tVal,(char*)aVal,mycsize[typelist],mycswapl[typelist],Client);ostrstream sStream;sStream.precision(10); sStream << tVal<<ends;char *tStr=new char[strlen(sStream.str())+1];strcpy(tStr,sStream.str());s[0]=tStr; sStream.freeze(0); };break
 
 bool StDbBuffer::WriteMem( char **s,void* aVal, myctype type) {
   bool tRetVal=true;
