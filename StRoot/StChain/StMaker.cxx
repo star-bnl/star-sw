@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.74 1999/09/24 16:32:40 fisyak Exp $
+// $Id: StMaker.cxx,v 1.75 1999/10/19 03:23:55 fine Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.75  1999/10/19 03:23:55  fine
+// Some new comments
+//
 // Revision 1.74  1999/09/24 16:32:40  fisyak
 // add return for Init/Finish Run
 //
@@ -760,9 +763,15 @@ static void MakeAssociatedClassList(const TObject *obj, const Char_t *classDir=0
  //
  // classDir - the name of the directory to search in
  //
- // Search C++ class declaraion looping over all *.h 
- // with the classDir directory of provided otherwise
- // within  this class source directory
+ // Search C++ class declarations like:
+ //
+ //   class <className> : 
+ //   class <className> { 
+ //   class <className> ;
+ //
+ // looping over all *.h within the "classDir" directory 
+ // if provided
+ // otherwise within "this" class source directory
  //
 
   if (!obj) return;
