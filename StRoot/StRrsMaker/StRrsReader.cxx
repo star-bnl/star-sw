@@ -1,9 +1,9 @@
 //*************************************************************
-// $Id: StRrsReader.cxx,v 1.4 2000/03/12 23:50:10 lasiuk Exp $
+// $Id: StRrsReader.cxx,v 1.5 2000/04/05 16:08:27 lasiuk Exp $
 //
 // $Log: StRrsReader.cxx,v $
-// Revision 1.4  2000/03/12 23:50:10  lasiuk
-// order of arguments
+// Revision 1.5  2000/04/05 16:08:27  lasiuk
+// row/col order
 //
 // Revision 1.4  2000/03/12 23:50:10  lasiuk
 // order of arguments
@@ -40,25 +40,9 @@ unsigned short StRrsReader::GetADCFromCoord(int col, int row)
 //typedef list<StRichID> anIDList;
 //int G_ID
 //double amount
-anIDList StRrsReader::GetMCDetectorInfo(int row, int col)
+anIDList StRrsReader::GetMCDetectorInfo(int col, int row)
 {
-    anIDList myList;
-    anIDList::iterator iter;
-    for (iter  = (*mData)[row][col].IDs.begin();
-	 iter != (*mData)[row][col].IDs.end();
-	 ++iter ) {
-	//g_id.id  = (*k).G_ID;
-// 	double charge;
-// 	if ( (*mData)[row][col].signal )
-// 	    charge = (*iter).mAmount / (*mData)[row][col].signal;
-// 	else
-// 	    charge = 1;
-
-	  StRichID anID((*iter).mG_ID, (*iter).mTrackp, (*iter).mAmount);
-	  myList.push_back(anID);
-	}   
-
-    return myList;
+    return ( (*mData)[row][col].IDs );
 }
 
 unsigned short StRrsReader::GetADCFromCramChannel(int cramBlock, int channelNum)
