@@ -1,5 +1,8 @@
-* $Id: quick_sort_r.F,v 1.4 1998/09/19 13:00:01 fisyak Exp $
+* $Id: quick_sort_r.F,v 1.5 1998/09/20 00:52:34 fisyak Exp $
 * $Log: quick_sort_r.F,v $
+* Revision 1.5  1998/09/20 00:52:34  fisyak
+* Remoe back
+*
 * Revision 1.4  1998/09/19 13:00:01  fisyak
 * add tls_uswop
 *
@@ -88,14 +91,11 @@ C
       GO TO 230
 C
   231 IF (I.GT.J)               GO TO 232
-      call tls_USWOP(A(1,I),A(1,J),NROW)
-#if 0
       DO JJ = 1,NROW
         W   = A(JJ,I)
         A(JJ,I) = A(JJ,J)
         A(JJ,J) = W
       ENDDO
-#endif
       I = I+1
       J = J-1
       IF (I.LE.J)               GO TO 220
