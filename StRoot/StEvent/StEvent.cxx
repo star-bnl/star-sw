@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.11 2000/05/15 18:35:38 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.12 2000/05/22 21:47:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,11 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 2.11  2000/05/15 18:35:38  ullrich
- * All data member related to collections and containers are now
- * kept by pointer. The interface (public methods) stays the same.
- * Those methods which returns references were modified to create
- * an empty collection in case the pointer is null.
+ * Revision 2.12  2000/05/22 21:47:12  ullrich
+ * Added RICH collection and related methods.
  *
  * Revision 2.15  2000/09/06 22:34:12  ullrich
  * Changed mBunchCrossingNumber from scalar to array to hold all 64 bits.
@@ -65,7 +62,7 @@
  *
  * Revision 2.0  1999/10/12 18:41:53  ullrich
  *
-#include "StRichPixelCollection.h"
+ **************************************************************************/
 #include <typeinfo>
 #include <algorithm>
 #include "StEvent.h"
@@ -81,8 +78,8 @@
 #include "StTriggerDetectorCollection.h"
 #include "StPrimaryVertex.h"
 #include "StL0Trigger.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.11 2000/05/15 18:35:38 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.11 2000/05/15 18:35:38 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.12 2000/05/22 21:47:12 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.12 2000/05/22 21:47:12 ullrich Exp $";
 #include "tables/St_dst_event_summary_Table.h"
 #include "tables/St_dst_summary_param_Table.h"
 #include "StAutoBrowse.h"
@@ -98,7 +95,7 @@ using std::swap;
     mSoftwareMonitor = 0;
     mTpcHits = 0;
     mFtpcHits = 0;
-    mRichPixels = 0;
+    mSvtHits = 0;
     mSsdHits = 0;
     mEmcCollection = 0;
     mRichCollection = 0;
@@ -111,7 +108,7 @@ using std::swap;
     mV0Vertices = 0;
     mXiVertices = 0;
     mKinkVertices = 0;
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.11 2000/05/15 18:35:38 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.12 2000/05/22 21:47:12 ullrich Exp $";
 void
 StEvent::initToZero()
 
@@ -151,7 +148,7 @@ StEvent::StEvent(const event_header_st& evtHdr,
     delete mSummary;           mSummary = 0;
     delete mSoftwareMonitor;   mSoftwareMonitor = 0;
     delete mTpcHits;           mTpcHits = 0;
-    delete mRichPixels;        mRichPixels = 0;
+    delete mFtpcHits;          mFtpcHits = 0;
     delete mSvtHits;           mSvtHits = 0;
     delete mSsdHits;           mSsdHits = 0;
     delete mRichCollection;    mRichCollection = 0;
@@ -226,11 +223,11 @@ StEvent::ssdHitCollection() const { return mSsdHits; }
     return hits;
 StEvent::emcCollection() { return mEmcCollection; }
     _lookup(hits, mContent);
-StRichPixelCollection*
-StEvent::richPixelCollection() { return mRichPixels; }
+    return hits;
+StEvent::emcCollection() const { return mEmcCollection; }
     _lookup(emc, mContent);
-const StRichPixelCollection*
-StEvent::richPixelCollection() const { return mRichPixels; }
+    return emc;
+StEvent::richCollection() { return mRichCollection; }
     _lookup(emc, mContent);
     return emc;
 StEvent::richCollection() const { return mRichCollection; }
@@ -416,10 +413,10 @@ StEvent::setBunchCrossingNumber(ULong_t val) { mBunchCrossingNumber = val; }
     mContent[mSsdHits] = val;
     if (mEmcCollection) delete mEmcCollection;
     mEmcCollection = val;
-StEvent::setRichPixelCollection(StRichPixelCollection* val)
+    _lookupAndSet(val, mContent);
 }
-    if (mRichPixels) delete mRichPixels;
-    mRichPixels = val;
+
+
     if (mContent[mEmcCollection]) delete mContent[mEmcCollection];
     if (mRichCollection) delete mRichCollection;
     mRichCollection = val;

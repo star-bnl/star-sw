@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.9 2000/05/15 18:35:37 ullrich Exp $
+ * $Id: StEvent.h,v 2.10 2000/05/22 21:47:15 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,11 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 2.9  2000/05/15 18:35:37  ullrich
- * All data member related to collections and containers are now
- * kept by pointer. The interface (public methods) stays the same.
- * Those methods which returns references were modified to create
- * an empty collection in case the pointer is null.
+ * Revision 2.10  2000/05/22 21:47:15  ullrich
+ * Added RICH collection and related methods.
  *
  * Revision 2.12  2000/06/19 01:32:15  perev
  *  Thomas StEvent branches added
@@ -68,7 +65,7 @@
 
 class event_header_st;
 class dst_event_summary_st;
-class StRichPixelCollection;
+class dst_summary_param_st;
 class StEventInfo;
 class StEventSummary;
 class StSoftwareMonitor;
@@ -111,8 +108,8 @@ public:
     const StSoftwareMonitor*            softwareMonitor() const;
     
     StTpcHitCollection*                 tpcHitCollection();
-    StRichPixelCollection*              richPixelCollection();
-    const StRichPixelCollection*        richPixelCollection() const;
+    const StTpcHitCollection*           tpcHitCollection() const;
+    StFtpcHitCollection*                ftpcHitCollection();
     const StFtpcHitCollection*          ftpcHitCollection() const;
     StSvtHitCollection*                 svtHitCollection();
     const StSvtHitCollection*           svtHitCollection() const;
@@ -150,7 +147,7 @@ public:
     void setBunchCrossingNumber(ULong_t);
     void setTime(Long_t);
     void setTriggerMask(ULong_t);
-    void setRichPixelCollection(StRichPixelCollection*);
+    void setBunchCrossingNumber(ULong_t, UInt_t);
     void setInfo(StEventInfo*);
     void setSummary(StEventSummary*);
     void setSoftwareMonitor(StSoftwareMonitor*);
@@ -171,7 +168,7 @@ public:
     StSoftwareMonitor*                   mSoftwareMonitor;
                                          
     StTpcHitCollection*                  mTpcHits;
-    StRichPixelCollection*               mRichPixels;
+    StFtpcHitCollection*                 mFtpcHits;
     StSvtHitCollection*                  mSvtHits;
     StSsdHitCollection*                  mSsdHits;
     StRichCollection*                    mRichCollection;
