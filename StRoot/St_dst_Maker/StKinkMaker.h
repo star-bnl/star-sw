@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.h,v 1.5 1999/07/08 19:09:51 fisyak Exp $
+// $Id: StKinkMaker.h,v 1.6 1999/07/12 19:03:13 wdeng Exp $
 // $Log: StKinkMaker.h,v $
+// Revision 1.6  1999/07/12 19:03:13  wdeng
+// move #define statements to StKinkMaker.cxx
+//
 // Revision 1.5  1999/07/08 19:09:51  fisyak
 // Add tabs, remove St_glb_Maker
 //
@@ -17,18 +20,6 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-
-#define kaonMass 0.493677
-#define pionMass 0.139569
-#define muonMass 0.105658
-#define pi0Mass  0.134976
-
-#define kaonToMuonQ 0.236
-#define kaonToPionQ 0.205
-#define pionToMuonQ 0.030
-
-#define radToDeg        57.2957795131
-#define degToRad        0.0174532925199                 
 
 #include "StKinkLocalTrack.hh"
 #include "StPhysicalHelixD.hh"
@@ -58,7 +49,7 @@ using namespace std;
 class StKinkMaker : public StMaker {
  private:
   Bool_t m_kinkEvalOn;   //switch for the evaluation
-  // static Char_t  m_VersionCVS = "$Id: StKinkMaker.h,v 1.5 1999/07/08 19:09:51 fisyak Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StKinkMaker.h,v 1.6 1999/07/12 19:03:13 wdeng Exp $";
   St_tkf_tkfpar    *m_tkfpar;          //!
   StKinkLocalTrack *mKinkLocalTrack;   //!
  protected:
@@ -77,6 +68,9 @@ class StKinkMaker : public StMaker {
   virtual  void   kinkEval(Bool_t flag=kTRUE){m_kinkEvalOn=flag;} // *MENU*
   virtual  void   kinkEvalOn() {kinkEval();} 
   virtual  void   kinkEvalOff(){kinkEval(kFALSE);}      
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.6 1999/07/12 19:03:13 wdeng Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
   ClassDef(StKinkMaker, 1)   //StAF chain virtual base class for Makers
 };
     
