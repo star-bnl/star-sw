@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrix.hh,v 1.14 2003/09/02 17:59:35 perev Exp $
+ * $Id: StMatrix.hh,v 1.15 2004/01/14 22:37:27 fisyak Exp $
  *
  * Author: Original code from CLHEP by Mike Smyth
  *         Modified April 17, 1998 Brian Lasiuk (templated version)
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StMatrix.hh,v $
+ * Revision 1.15  2004/01/14 22:37:27  fisyak
+ * unsigned int => size_t to make alpha happy
+ *
  * Revision 1.14  2003/09/02 17:59:35  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -982,12 +985,12 @@ void StMatrix<DataType>::invert(size_t &ierr) {
 #endif
     }
     static unsigned int max_array = 20;
-    static unsigned int *ir = new unsigned int [max_array+1];
+    static size_t *ir = new size_t [max_array+1];
     
     if (mCol > max_array) {
 	delete [] ir;
 	max_array = mRow;
-	ir = new unsigned int [max_array+1];
+	ir = new size_t [max_array+1];
     }
     DataType t1, t2, t3;
     DataType det, temp, s;
@@ -1081,7 +1084,7 @@ void StMatrix<DataType>::invert(size_t &ierr) {
 template<class DataType>
 DataType StMatrix<DataType>::determinant() const {
     static unsigned int max_array = 20;
-    static unsigned int *ir = new unsigned int [max_array+1];
+    static size_t *ir = new size_t [max_array+1];
     if(mCol != mRow) {
 #ifndef ST_NO_EXCEPTIONS
 		throw out_of_range("StMatrix<DataType>::determinant(): not a NxN matrix");
@@ -1092,7 +1095,7 @@ DataType StMatrix<DataType>::determinant() const {
     if (mCol > max_array) {
 	delete [] ir;
 	max_array = mRow;
-	ir = new unsigned int [max_array+1];
+	ir = new size_t [max_array+1];
     }
     DataType det;
     StMatrix<DataType> mt(*this);

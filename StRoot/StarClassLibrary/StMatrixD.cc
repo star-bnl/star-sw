@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrixD.cc,v 1.8 2003/10/07 02:52:20 perev Exp $
+ * $Id: StMatrixD.cc,v 1.9 2004/01/14 22:37:27 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StMatrixD.cc,v $
+ * Revision 1.9  2004/01/14 22:37:27  fisyak
+ * unsigned int => size_t to make alpha happy
+ *
  * Revision 1.8  2003/10/07 02:52:20  perev
  * Cleanup for Insure, no bugs
  *
@@ -428,12 +431,12 @@ void StMatrixD::invert(size_t &ierr) {
 	cerr << "StMatrixD::invert(): not a NxN matrix" << endl;
     }
     static unsigned int max_array = 20;
-    static unsigned int *ir = new unsigned int [max_array+1];
+    static size_t *ir = new size_t [max_array+1];
     
     if (mCol > max_array) {
         delete [] ir;
 	max_array = mRow;
-	ir = new unsigned int [max_array+1];
+	ir = new size_t [max_array+1];
     }
     double t1, t2, t3;
     double det, temp, s;
@@ -526,14 +529,14 @@ void StMatrixD::invert(size_t &ierr) {
 
 double StMatrixD::determinant() const {
     static unsigned int max_array = 20;
-    static unsigned int *ir = new unsigned int [max_array+1];
+    static size_t *ir = new size_t [max_array+1];
     if(mCol != mRow) {
 		cerr << "StMatrixD::determinant(): not a NxN matrix" << endl;
     }
     if (mCol > max_array) {
 	delete [] ir;
 	max_array = mRow;
-	ir = new unsigned int [max_array+1];
+	ir = new size_t [max_array+1];
     }
     double det;
     StMatrixD mt(*this);

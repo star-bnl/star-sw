@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.21 2001/05/23 00:09:55 hardtke Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.22 2004/01/14 22:39:08 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.22  2004/01/14 22:39:08  fisyak
+ * unsigned int => size_t to make alpha happy
+ *
  * Revision 1.21  2001/05/23 00:09:55  hardtke
  * Add error message if rotation matrix inversion fails
  *
@@ -185,7 +188,7 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
     gTpcDbPtr    = globalDbPointer;
     if (gTpcDbPtr->PadPlaneGeometry() &&
 	gTpcDbPtr->Electronics() &&
-	gTpcDbPtr->SlowControlSim() &&
+	gTpcDbPtr->SlowControlSim() && 
         gTpcDbPtr->GlobalPosition()) { 
 	mTimeBinWidth = 1./gTpcDbPtr->Electronics()->samplingFrequency();
 	//
@@ -232,7 +235,7 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
         mGlobalToTpcRotation(3,1) = cos(psi)*sin(theta)*cos(phi)+sin(psi)*sin(phi);
         mGlobalToTpcRotation(3,2) = cos(psi)*sin(theta)*sin(phi)-sin(psi)*cos(phi);
         mGlobalToTpcRotation(3,3) = cos(theta)*cos(psi);
-        unsigned int ierr;
+        size_t ierr;
         mTpcToGlobalRotation = mGlobalToTpcRotation.inverse(ierr);
   	if (ierr!=0){ 
             cerr << "StTpcCoordinateTransform::Cant invert rotation matrix" << endl;
@@ -248,7 +251,7 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
 	cerr << "StTpcDb IS INCOMPLETE! Cannot contstruct Coordinate transformation." << endl;
 	assert(gTpcDbPtr->PadPlaneGeometry());
 	assert(gTpcDbPtr->Electronics());
-	assert(gTpcDbPtr->SlowControlSim());
+	assert(gTpcDbPtr->SlowControlSim()); 
         assert(gTpcDbPtr->GlobalPosition());
     }
 }
