@@ -190,16 +190,18 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
     dst_track[dst_track_h->nok].ndegf   = 0;              
     dst_track[dst_track_h->nok].id_global_pid         = 0; 
     dst_track[dst_track_h->nok].id_hypo_pid           = 0;
+/*  COMMENT OUT FOR MDC2   */
 /* CURRENTLY treating ALL ftpc tracks as if they are primary tracks */
-    if (ivtx_prim >= 0 ) {
-       dst_track[dst_track_h->nok].id_start_vertex       = 
-                    dst_vertex[ivtx_prim].id;
+/*    if (ivtx_prim >= 0 ) {                               MDC2 */
+/*       dst_track[dst_track_h->nok].id_start_vertex       =   MDC2 */
+/*                    dst_vertex[ivtx_prim].id;            MDC2 */
 /* Increase number of charged daughter tracks for primary vertex */
-       dst_vertex[ivtx_prim].n_daughters = dst_vertex[ivtx_prim].n_daughters++;  
-    }
-    else {
+/*       dst_vertex[ivtx_prim].n_daughters = dst_vertex[ivtx_prim].n_daughters++;                                                          MDC2 */
+/*    }                                                    MDC2 */
+/*    else {                                               MDC2 */
         dst_track[dst_track_h->nok].id_start_vertex  = 0;
-    }
+/*    }                                                    MDC2 */
+/*  COMMENT OUT FOR MDC2                                   MDC2 */
     dst_track[dst_track_h->nok].id_stop_vertex        = 0;
     dst_track[dst_track_h->nok].id_emc                = 0;
     dst_track[dst_track_h->nok].id_smd                = 0;
