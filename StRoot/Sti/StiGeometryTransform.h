@@ -39,7 +39,7 @@ public:
     static StiGeometryTransform* instance();
     static void kill();
 
-    /// phi in [0,2pi] for tpc sector in [1,24]
+    /// phi in [-pi,pi] for tpc sector in [1,24]
     double phiForTpcSector(int sector) const{
       return phiForSector(sector, 12);
     }
@@ -69,11 +69,11 @@ public:
     svg_shape_st  *getSvgShape() const{ return aSvgShape; }
 
     // generic transforms
-    /// phi in [0,2pi] for tpc sector in [1, nSectors]
+    /// phi in [-pi,pi] for tpc sector in [1, nSectors]
     double phiForWestSector(int iSector, int nSectors) const;
-    /// phi in [0,2pi] for tpc sector in [nSectors + 1, 2*nSectors]
+    /// phi in [-pi,pi] for tpc sector in [nSectors + 1, 2*nSectors]
     double phiForEastSector(int iSector, int nSectors) const;
-    /// phi in [0,2pi] for tpc sector in [1, 2*nSectors]
+    /// phi in [-pi,pi] for tpc sector in [1, 2*nSectors]
     double phiForSector(int iSector, int nSectors) const;
     /// sector in [1, nSectors] for phi
     int westSectorForPhi(double phi, int nSectors) const;

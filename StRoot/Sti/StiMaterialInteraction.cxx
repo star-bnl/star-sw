@@ -20,7 +20,8 @@
 // can't initialize this to the actual messenger until after
 // Messenger::init() is called in StiMaker, certainly not at dll load time.
 Messenger *StiMaterialInteraction::s_pMessenger = NULL;
-StiExtrapolationType StiMaterialInteraction::s_extrapolationType = kHelixExtrapolation;
+StiExtrapolationType StiMaterialInteraction::s_extrapolationType = kLinearExtrapolation;
+//StiExtrapolationType StiMaterialInteraction::s_extrapolationType = kHelixExtrapolation;
 
 void StiMaterialInteraction::nameForIntersection(
     StiIntersection &intersection, string &name){
@@ -80,6 +81,8 @@ StiIntersection StiMaterialInteraction::findPlanarIntersection(
   bool bExtrapolated = false;
   switch(s_extrapolationType){
     case kHelixExtrapolation:
+//    case kLinearExtrapolation:
+//    default:
         bExtrapolated = extrapolateHelixToPlane(
             pNode, pDetector, &intersection,
             dNodeHalfThickness, dGapThickness, dDetectorHalfThickness);
@@ -298,11 +301,11 @@ bool StiMaterialInteraction::extrapolateHelixToPlane(
   normal.rotateZ(pPlacement->getNormalRefAngle());
 
   // get point on plane in global
-  StThreeVector<double> point(pPlacement->getNormalRadius(), 0.);
+  StThreeVector<double> point(pPlacement->getNormalRadius(), 0., 0.);
   point.rotateZ(pPlacement->getNormalRefAngle());
 
   // get the path length between node center & detector center
-  dGapThickness = abs(helix.pathLength(point, normal)); // tracking outside->in
+  dGapThickness = helix.pathLength(point, normal); //tracking outside->in
   if(dGapThickness == DBL_MAX){ 
     return false; 
   }
@@ -340,18 +343,19 @@ bool StiMaterialInteraction::extrapolateHelixToCylinder(
   StiPlacement *pPlacement = pDetector->getPlacement();
   pair<double, double> pathLengths = helix.pathLength(
       pPlacement->getNormalRadius());
-  StThreeVector<double> intersection = helix.at(pathLengths.first);
+  dGapThickness = (fabs(pathLengths.first) > fabs(pathLengths.second)) ? 
+      pathLengths.second : pathLengths.first;
+  StThreeVector<double> intersection = helix.at(dGapThickness);
   
   // For the node & detector pathlengths, we still use a line approximation.
   StThreeVector<double> momentum = helix.momentumAt(
-      pathLengths.first, StiKalmanTrackNode::getFieldConstant());
+      dGapThickness, StiKalmanTrackNode::getFieldConstant());
   StThreeVector<double> node(pNode->fX, pNode->fP0, pNode->fP1);
   dDetectorHalfThickness = 0.5*findThickness(pDetector, pIntersection, 
                                              &momentum);
   dNodeHalfThickness = 0.5*findThickness(pNode->getDetector(), &node,
                                          &momentum);
-  dGapThickness = pathLengths.first - dDetectorHalfThickness - 
-      dNodeHalfThickness;
+  dGapThickness -= (dDetectorHalfThickness + dNodeHalfThickness);
 
   return true;
 

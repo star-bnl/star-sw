@@ -76,19 +76,28 @@ public:
   void add(StiKalmanTrackNode * newChild);
 	void setTargetDet(const StiDetector * targetDet);
 	const StiDetector * getTargetDet();
+        
+        /// rotation angle of local coordinates wrt global coordinates
+        double fAlpha;
+        /// local X-coordinate of this track (reference plane)
+        double fX;   
+        /// local Y-coordinate of this track (reference plane)           
+        double fP0; 
+        /// local Z-coordinate of this track (reference plane)
+        double fP1;
+        /// (signed curvature)*(local X-coordinate of helix axis)
+        double fP2;
+        /// signed curvature [sign = sign(-qB)]
+        double fP3;  
+        /// tangent of the track momentum dip angle
+        double fP4;
 
-  double fAlpha;          // rotation angle
-  double fX;              // X-coordinate of this track (reference plane)
-  double fP0;             // Y-coordinate of a track
-  double fP1;             // Z-coordinate of a track
-  double fP2;             // C*x0
-  double fP3;             // track curvature==C [sign=sign(-qB)]
-  double fP4;             // tangent of the track momentum dip angle
-  double fC00;                         // covariance
-  double fC10, fC11;                   // matrix
-  double fC20, fC21, fC22;             // of the
-  double fC30, fC31, fC32, fC33;       // track
-  double fC40, fC41, fC42, fC43, fC44; // parameters
+        /// covariance matrix of the track parameters
+  double fC00;                       
+  double fC10, fC11;                 
+  double fC20, fC21, fC22;           
+  double fC30, fC31, fC32, fC33;     
+  double fC40, fC41, fC42, fC43, fC44;
   double fChi2;
   float  fdEdx;           // dE/dx 
 	float  pathLength;
