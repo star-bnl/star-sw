@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.14 2001/12/01 15:39:19 ullrich Exp $
+ * $Id: StContainers.cxx,v 2.15 2002/12/20 22:34:42 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.15  2002/12/20 22:34:42  ullrich
+ * Added containers for PMD hits and clusters.
+ *
  * Revision 2.14  2001/12/01 15:39:19  ullrich
  * Added macros for StDetectorState.
  *
@@ -82,6 +85,8 @@
 #include "StXiVertex.h"
 #include "StKinkVertex.h"
 #include "StL3AlgorithmInfo.h"
+#include "StPhmdHit.h"
+#include "StPhmdCluster.h"
 
 StCollectionImp(Object)
 StCollectionImp(CalibrationVertex)
@@ -114,3 +119,5 @@ StCollectionImp(V0Vertex)
 StCollectionImp(XiVertex)
 StCollectionImp(KinkVertex)
 StCollectionImp(L3AlgorithmInfo)
+StCollectionImp(PhmdHit)
+StCollectionImp(PhmdCluster)
