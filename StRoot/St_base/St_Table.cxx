@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.70 1999/08/20 13:22:24 fine Exp $ 
+// $Id: St_Table.cxx,v 1.71 1999/08/21 00:40:54 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.71  1999/08/21 00:40:54  fine
+// GetExpressionFileName function has been introduced
+//
 // Revision 1.70  1999/08/20 13:22:24  fine
 // new method St_Table::Draw
 //
@@ -692,6 +695,7 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
       EntryLoop(exprFileName,action,elist,nentries, firstentry, option);
 //      SetEstimate(oldEstimate);
    }
+   if (exprFileName) delete [] exprFileName;
    if (hkeep) delete [] varexp;
 }
  
@@ -757,7 +761,7 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
        addressArray[i] += GetRowSize();   
   }
 
-  G__unloadfile(exprFileName);
+  G__unloadfile((Char_t *)exprFileName);
   return kTRUE;
 }
 
@@ -1648,6 +1652,22 @@ int St_Table::PointerToPointer(G__DataMemberInfo &m)
    if (strstr(m.Type()->Name(), "**")) return 1;
    return 0;
 }
+//______________________________________________________________________________
+static Char_t *GetExpressionFileName()
+{ 
+  // Create a name of the file in the temporary directory if any
+  const Char_t *tempDirs =  gSystem->Getenv("TEMP");
+  if (!tempDirs)  tempDirs =  gSystem->Getenv("TMP");
+  if (!tempDirs) tempDirs = "/tmp";
+  if (gSystem->AccessPathName(tempDirs)) tempDirs = ".";
+  if (gSystem->AccessPathName(tempDirs)) return 0;
+  Char_t buffer[16];
+  sprintf(buffer,".C.%d.tmp",gSystem->GetPid());
+  TString fileName = "Selection.";
+  fileName += buffer;
+  return  gSystem->ConcatFileName(tempDirs,fileName.Data());
+}
+
 //______________________________________________________________________________
 Char_t *St_Table::MakeExpression(const Char_t *expressions[],Int_t nExpressions)
 {
