@@ -1,5 +1,8 @@
-// $Id: StMinidaqMaker.cxx,v 1.7 1999/03/30 15:58:10 love Exp $
+// $Id: StMinidaqMaker.cxx,v 1.8 1999/03/31 20:29:40 liq Exp $
 // $Log: StMinidaqMaker.cxx,v $
+// Revision 1.8  1999/03/31 20:29:40  liq
+// take off call module xyz_newtab
+//
 // Revision 1.7  1999/03/30 15:58:10  love
 // Set Drift velocity and trigger time for a laser run
 //
@@ -58,7 +61,6 @@
 #include "tpc/St_tfc_load_native_gains_Module.h"
 #include "tpc/St_init_raw_table_Module.h"
 #include "tpc/St_reformat_new_Module.h"
-#include "tpc/St_xyz_newtab_Module.h"
    const Int_t StMinidaqMaker::no_of_sectors = 24;
 
 ClassImp(StMinidaqMaker)
@@ -237,24 +239,15 @@ Int_t StMinidaqMaker::Init() {
    }
    //tell where we are
   cout<<"finish init of StMinidaqMaker"<<endl;
-// Create Histograms    
-   m_pxl_in   = new TH2F("pxl_in","Log10(No. of pixels (in)) versus sector no.",24,0.,24.,70,-1.,6.);
-   m_pxl_out = new TH2F("pxl_out","Log10(No. of pixels (out)) versus sector no.",24,0.,24.,70,-1.,6.);
-   m_pixelxy = 0;
-   m_adcxyz  = 0;
-   m_pixelxy=0;
+  // create the histograms
    return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t StMinidaqMaker::Make(){
 //  PrintInfo();
   cout<<"begin to make StMinidaqMaker"<<endl;
-  cout<<"begin to transfer tables in StMinidaqMaker"<<endl;
   TransferData(); //transfer data from TPC_DATA dataset to event/raw_data/tpc/
-  cout<<"begin to fill the histrograms in StMinidaqMaker"<<endl;
-  MakeHistograms(); //run module adcxyz, and fill histograms
   cout<<"end of StMinidaqMaker"<<endl;
-  cout<<" I am at the end of  the minidaq maker NOW"<<endl;
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -409,105 +402,9 @@ void StMinidaqMaker::TransferData(){
 }
 
 //_____________________________________________________________________________
-
-void StMinidaqMaker::MakeHistograms(){
-
-   St_DataSet   *sector;
-   Char_t *name = 0;
-   Int_t indx = 0;
-   Int_t nrows = 0;
-   Float_t in = 0;
-   Float_t out = 0;
-   Float_t sect_no = 0;
-   m_adcxyzon=1;
-
-//  Histograms for TPC slow simulator 
-   St_tfc_adcxyz *adcxyz = 0;
-   St_raw_sec_m  *raw_sec_m = 0;
-   if (m_DataSet) {
-     St_DataSetIter next(m_DataSet);
-     if (m_adcxyzon) {//Create  pixels table
-// tss Debug tables control
-       if (!m_tfc_sector_index) {
-         St_DataSetIter  loc(GetDataBase("params/tpc/tfspars"));
-         m_tfc_sector_index = (St_tcl_sector_index *) loc("tfc_sector_index");
-         if (!m_tfc_sector_index) {
-           m_tfc_sector_index = new St_tcl_sector_index("tfc_sector_index",1);
-           loc.Add(m_tfc_sector_index);
-         }
-      }
-
-      if (!m_adcxyz) // Create 3D histogram 
-         m_adcxyz  = new TH3C("adcxy","x y z of Pixels",100,-200.,200.,100,-200.,200.,90,-225.,225.);
-      else m_adcxyz->Reset();
-
-      if (!m_pixelxy) // Create 2D histogram 
-         m_pixelxy  = new TH2F("pixelxy","x y of Pixels",100,-200.,200.,100,-200.,200.);
-      else m_pixelxy->Reset();
-  
-
-      adcxyz = (St_tfc_adcxyz *) next("adcxyz");
-      if (!adcxyz) { // tfc_adcxyz Table
-         adcxyz = new St_tfc_adcxyz("adcxyz",900000); 
-         next.Add(adcxyz);
-      }
-      raw_sec_m = (St_raw_sec_m *) next("raw_sec_m");
-     } // if (m_adcxyzon) 
-
-     while ((sector=next())){// Iterate over sectors
-       if ((name = strstr(sector->GetName(),"Sector"))) {
-         St_DataSetIter sect(sector); 
-       // look for the sector number
-         name  = strchr(name,'_')+1;
-         indx = atoi(name);
-         St_type_shortdata  *pixel_data_in  = (St_type_shortdata *) sect("pixel_data_in");
-         St_type_shortdata  *pixel_data_out = (St_type_shortdata *) sect("pixel_data_out");
-         sect_no = indx;
-         nrows = 0;
-         in = -1.;
-         if (pixel_data_in) nrows = pixel_data_in->GetNRows();
-         if (nrows > 0)     in = TMath::Log10(nrows);
-         nrows = 0;
-         out = -1.;
-         if (pixel_data_out) nrows = pixel_data_out->GetNRows();
-         if (nrows > 0)      out   = TMath::Log10(nrows);
-         if(in>0)m_pxl_in->Fill(sect_no,   in);
-         if(out>0)m_pxl_out->Fill(sect_no, out);
-         if (m_adcxyzon) {//Create  pixels table
-           tcl_sector_index_st *tfc_sector_index = m_tfc_sector_index->GetTable();
-           tfc_sector_index->CurrentSector = indx;
-           St_raw_row  *raw_row_in = (St_raw_row *) sect("raw_row_in");
-           St_raw_pad  *raw_pad_in = (St_raw_pad *) sect("raw_pad_in");
-           St_raw_pad  *raw_pad_out = (St_raw_pad *) sect("raw_pad_out");
-           St_raw_row  *raw_row_out = (St_raw_row *) sect("raw_row_out");
-           St_raw_seq  *raw_seq_in = (St_raw_seq *) sect("raw_seq_in");
-           St_raw_seq  *raw_seq_out = (St_raw_seq *) sect("raw_seq_out");
-           
-           Int_t res =  xyz_newtab(m_tpg_detector,
-                                   m_tfc_sector_index,raw_sec_m,
-                                   raw_row_in,raw_pad_in,raw_seq_in,pixel_data_in,
-                                   raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out,
-                                   adcxyz, m_tsspar);
-           if(res!=kSTAFCV_OK) Warning("Make","xyz_newtab==%d",res);
-	 }
-       }
-     }
-     if (m_adcxyzon && m_adcxyz && adcxyz) {
-       Int_t no_pixels = adcxyz->GetNRows();
-       tfc_adcxyz_st *pixel = adcxyz->GetTable();
-       for (Int_t i=1;i<=no_pixels;i++,pixel++){
-         m_adcxyz->Fill(pixel->x,pixel->y,pixel->z); 
-         m_pixelxy->Fill(pixel->x,pixel->y);
-       }
-     }
-   }
-}
-
-
-//_____________________________________________________________________________
 void StMinidaqMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StMinidaqMaker.cxx,v 1.7 1999/03/30 15:58:10 love Exp $\n");
+  printf("* $Id: StMinidaqMaker.cxx,v 1.8 1999/03/31 20:29:40 liq Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
