@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.cc,v 1.25 2003/09/16 15:27:01 jcs Exp $
+// $Id: StFtpcConfMapper.cc,v 1.26 2003/10/02 15:07:34 jcs Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.26  2003/10/02 15:07:34  jcs
+// initialize mNumMainVertexTracks
+//
 // Revision 1.25  2003/09/16 15:27:01  jcs
 // removed inline as it would leave a few undefined reference
 //
@@ -207,6 +210,7 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, StFtpcVertex *ve
 
   CalcEtaMinMax();
 
+  mMainVertexTracks = 0;
   mMergedTracks = 0;
   mMergedTracklets = 0;
   mMergedSplits = 0;
@@ -272,6 +276,7 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, MIntArray *good_
 
   CalcEtaMinMax();
 
+  mMainVertexTracks = 0;
   mMergedTracks = 0;
   mMergedTracklets = 0;
   mMergedSplits = 0;
@@ -1280,6 +1285,7 @@ void StFtpcConfMapper::MergeSplitTracks(StFtpcTrack *t1, StFtpcTrack *t2)
   if (mVertexConstraint) mMainVertexTracks++;
   if (t1->ComesFromMainVertex()) mMainVertexTracks--;
   if (t2->ComesFromMainVertex()) mMainVertexTracks--;
+
 
   mTrack->Remove(t1);
   mTrack->Remove(t2);
