@@ -9,7 +9,7 @@ use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.16 1999/10/09 23:33:15 fisyak Exp $
+# $Id: cons,v 1.17 1999/10/17 19:11:43 fine Exp $
 $cons_history =
   q(
     Modification History:
@@ -44,7 +44,7 @@ $cons_history =
 $ver_num = 1.6;
 $ver_rev = "b1";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.16 1999/10/09 23:33:15 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.17 1999/10/17 19:11:43 fine Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -2219,6 +2219,7 @@ sub iflags {
 # print "==========\tDebug:","In scan::cpp-iflags- parameters = ", @_, "\n";
     my($self) = @_;
     my($iflags);
+    my($rflags);
     my($dpath);
     # Recognize /I style include directive on Win32
     # <schwarze@isa.de> 1998-05-13
@@ -2236,11 +2237,11 @@ sub iflags {
 	    }
 	    my($dir);
 	    foreach $dir (@param::rpath) {
-		$iflags .= $flagprefix . $dir->path . $suffix;
+		$rflags .= $flagprefix . $dir->path . $suffix;
 	    }
 	}
     }
-    $iflags
+    $iflags . $rflags
 }
 
 # Directory and file handling. Files/dirs are represented by objects.
