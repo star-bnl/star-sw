@@ -319,23 +319,31 @@ StiTrackSeedFinder   * StiDefaultToolkit::getTrackSeedFinder()
     }
   else 
     {
-      cout << "instantiating StiCompositeTrackSeedFinder" << endl;
-			StiCompositeSeedFinder * compositeTrackSeedFinder;
-			compositeTrackSeedFinder = new StiCompositeSeedFinder("CompositeTrackSeedFinder",
-																														getTrackFactory(),
-																														getHitContainer(), 
-																														getDetectorContainer());  
-			StiTrackSeedFinder * trackSeedFinder;																																					
+			//StiCompositeSeedFinder * compositeTrackSeedFinder;
+			//compositeTrackSeedFinder = new StiCompositeSeedFinder("CompositeTrackSeedFinder",
+			//																											getTrackFactory(),
+			//																											getHitContainer(), 
+			//																											getDetectorContainer());  
+			//StiTrackSeedFinder * trackSeedFinder;																																					
 			if (_guiEnabled)
-				trackSeedFinder = new StiRDLocalTrackSeedFinder("RDLocalTrackSeedFinder",
-																												_trackFactory, 
-																												_hitContainer, 
-																												_detectorContainer);
-			else 
-				trackSeedFinder = new StiLocalTrackSeedFinder("LocalTrackSeedFinder",_trackFactory, _hitContainer, _detectorContainer);
-			compositeTrackSeedFinder->Vectorized<StiTrackSeedFinder>::add(trackSeedFinder);
-			compositeTrackSeedFinder->reset();
-			_trackSeedFinder = compositeTrackSeedFinder;
+				{
+					cout << "instantiating StiRDLocalTrackSeedFinder" << endl;
+					_trackSeedFinder = new StiRDLocalTrackSeedFinder("RDLocalTrackSeedFinder",
+																													 getTrackFactory(),
+																													 getHitContainer(), 
+																													 getDetectorContainer());  
+				}
+			else
+				{
+					cout << "instantiating StiLocalTrackSeedFinder" << endl;
+					_trackSeedFinder = new StiLocalTrackSeedFinder("LocalTrackSeedFinder",
+																												 getTrackFactory(),
+																												 getHitContainer(), 
+																												 getDetectorContainer());  
+					//compositeTrackSeedFinder->Vectorized<StiTrackSeedFinder>::add(trackSeedFinder);
+					//compositeTrackSeedFinder->reset();
+					//_trackSeedFinder = compositeTrackSeedFinder;
+				}
     }
   return _trackSeedFinder;
 }

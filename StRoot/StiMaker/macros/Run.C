@@ -11,16 +11,18 @@ void help()
 
 void loadLibrairies(bool doProfile)
 {	
-  char * list[]={"St_base","StChain","StUtilities","StBFChain", "St_Tables","libgen_Tables",
-		  "libsim_Tables","libglobal_Tables","geometry","St_g2t","St_geant_Maker",
-		  "StIOMaker","StTreeMaker","StarClassLibrary",
-		  "St_db_Maker","StDbLib","StDbBroker","StSvtDbMaker","StDbUtilities",
-		  "StTpcDb","StEvent","StEventMaker","StEmcUtil", 
-		  "StMcEvent","StMcEventMaker","StAssociationMaker","StDaqLib","StDAQMaker",
-		  "StDetectorDbMaker",
-		  "StSvtClassLibrary","StSvtDaqMaker","StSvtSimulationMaker","StSvtCalibMaker",
-		  "StSvtSeqAdjMaker","StSvtClusterMaker","Sti","StiGui",
-		  "StiEvaluator","libGui","StiMaker","StiTpc","StiSvt","StiEmc","StMiniMcEvent","StMiniMcMaker","last"};
+	//  char * list[]={"St_base","StChain","StUtilities","StBFChain", "St_Tables","libgen_Tables",
+	// "libsim_Tables","libglobal_Tables","geometry","St_g2t","St_geant_Maker",
+  char * list[]={"St_base","StChain","StUtilities", "St_Tables", "StarClassLibrary",
+								 "libsim_Tables","libglobal_Tables","geometry","St_g2t","St_geant_Maker",
+								 "StIOMaker","StTreeMaker",
+								 "St_db_Maker","StDbLib","StDbBroker","StSvtDbMaker","StDbUtilities",
+								 "StTpcDb","StEvent","StEventMaker","StEmcUtil", 
+								 "StMcEvent","StMcEventMaker","StAssociationMaker","StDaqLib","StDAQMaker",
+								 "StDetectorDbMaker",
+								 "StSvtClassLibrary","StSvtDaqMaker","StSvtSimulationMaker","StSvtCalibMaker",
+								 "StSvtSeqAdjMaker","StSvtClusterMaker","Sti","StiGui",
+								 "StiEvaluator","libGui","StiMaker","StiTpc","StiSvt","StiEmc","StMiniMcEvent","StMiniMcMaker","last"};
 
   int i=0;  
   cout <<"Run.C::loadLibrairies() - INFO - Started"<<endl;
@@ -99,6 +101,13 @@ void Run(Int_t firstEvent,
   pars->doDst=doDst;
   pars->doStEventOutput=doStEventOutput;
   pars->doStEventInput=doStEventInput;  
+  miniChain->run(firstEvent,nEvents,filePrefix,fileList);
+}
+
+
+
+// keep this here for convenience for a short while... CP
+
 	/*
   StiRootIOBroker * stiIoBroker = miniChain->getIOBroker();
   stiIoBroker->setTPHFMinPadrow(1);
@@ -142,9 +151,3 @@ void Run(Int_t firstEvent,
     stiIoBroker->addLTSFPadrow(padrow);
   stiIoBroker->setSimulated(doSimulation);
 	*/
-
-  miniChain->run(firstEvent,nEvents,filePrefix,fileList);
-  
-}
-
-
