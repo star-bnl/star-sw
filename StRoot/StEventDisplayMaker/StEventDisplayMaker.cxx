@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.77 2001/09/17 00:06:11 perev Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.78 2001/09/17 21:31:53 jeromel Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -705,7 +705,8 @@ enum {kTRK=1,kHIT=2,kUSE=4,kUNU=8};
   Style_t defSty=0; Size_t defSiz = 0; Color_t defCol= 0;
   TObjArray *shaps =0;
 
-SWIT:  switch (kase) {
+ SWIT:  
+  switch (kase) {
 
     case kHIT|kUNU:;
     case kHIT|kUSE:;
@@ -753,12 +754,12 @@ SWIT:  switch (kase) {
   for (int i = 0; i < ntrk; i++ ){
     rndCol = (((rndCol-kRed)+1)%7)+kRed;
     StPoints3DABC *pnt = (StPoints3DABC*)shaps->At(i);
-//		Filtration
+    //		Filtration
     StFilterABC *filt=0;
     nextFilter.Reset();
     while ((filt=(StFilterABC*)nextFilter())) {if (!filt->Accept(pnt)) break;}
     if (filt) continue;
-//
+    //
     int P = pnt->Size()==1;
     const char *L = (P) ? "P":"L";
 
@@ -776,7 +777,7 @@ SWIT:  switch (kase) {
     tracksShape->SetLineStyle(sty);
     tracksShape->SetSizeAttribute(siz);
 
-// 		Create a node to hold it
+    // 		Create a node to hold it
     TVolume *thisTrack = new TVolume(pnt->GetName(),pnt->GetTitle(),tracksShape);
     thisTrack->Mark();   thisTrack->SetVisibility();
     trackCounter++;
@@ -1032,6 +1033,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.78  2001/09/17 21:31:53  jeromel
+// Compiler Kaboum on syntax (label vs switch()). Slightly modified and now works.
+//
 // Revision 1.77  2001/09/17 00:06:11  perev
 // Two column
 //
