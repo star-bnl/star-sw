@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.4 2000/05/15 14:28:12 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.5 2000/06/07 11:16:29 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.5  2000/06/07 11:16:29  oldi
+// Changed 0 pointers to NULL pointers.
+// Function HandleSplitTracks() called.
+//
 // Revision 1.4  2000/05/15 14:28:12  oldi
 // problem of preVertex solved: if no main vertex is found (z = NaN) StFtpcTrackMaker stops with kStWarn,
 // refitting procedure completed and included in StFtpcTrackMaker (commented),
@@ -19,7 +23,7 @@
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 15.05.2000
+//----------Last Modified: 07.06.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include <iostream.h>
@@ -88,7 +92,7 @@ Int_t StFtpcTrackMaker::Init()
   m_q            = new TH1F("fpt_q"         ,"FTPC track charge"                       ,3,-2.,2.);
   m_theta        = new TH1F("fpt_theta"     ,"FTPC theta"                              ,100,-5.0,5.0);
   m_ndedx        = new TH1F("fde_ndedx"     ,"Number of points used in FTPC dE/dx calculation" ,10,1.,11.);
-  m_found         = new TH1F("fpt_nrec"      ,"FTPC: number of points found per track"  ,10,1.,11.);
+  m_found        = new TH1F("fpt_nrec"      ,"FTPC: number of points found per track"  ,10,1.,11.);
   m_track        = new TH1F("fpt_track"     ,"FTPC: number of tracks found"            ,100,1.,5000.);    
   m_nrec_track   = new TH2F("fpt_hits_mom" ,"FTPC: points found per track vs. momentum",10,1.,11.,100,1.,20.);
  
@@ -103,7 +107,7 @@ Int_t StFtpcTrackMaker::Make()
 
   fpt_fptpar_st *fpt_fptpar = m_fptpar->GetTable();
   St_DataSet *ftpc_data = GetDataSet("ftpc_hits");
-  St_fpt_fptrack *fpt_fptrack = 0;
+  St_fpt_fptrack *fpt_fptrack = NULL;
   
   if (!ftpc_data) {
     return kStWarn;
@@ -196,7 +200,7 @@ Int_t StFtpcTrackMaker::Make()
   
   cout << fpt_fptpar->primary_vertex[0] << ", " << fpt_fptpar->primary_vertex[1] << ", " << fpt_fptpar->primary_vertex[2] << "." << endl;
   
-  Double_t vertexPos[3] = {fpt_fptpar->primary_vertex[0], fpt_fptpar->primary_vertex[1], fpt_fptpar->primary_vertex[2]}; 
+  Double_t vertexPos[3] = {fpt_fptpar->primary_vertex[0], fpt_fptpar->primary_vertex[1], fpt_fptpar->primary_vertex[2]};
   StFtpcConfMapper *tracker = new StFtpcConfMapper(fcl_fppoint, vertexPos, Debug());
   
   // settings
@@ -211,11 +215,14 @@ Int_t StFtpcTrackMaker::Make()
   
   // without vertex constraint
   tracker->SetTrackletCuts(0.007, false);
-  tracker->SetTrackCuts(0.007, 0.03, 30., false);
+  tracker->SetTrackCuts(0.007, 0.03, 70., false);
   
   // tracking 
   tracker->MainVertexTracking();
-  
+
+  // Merging of split tracks.
+  tracker->HandleSplitTracks(0.11, 0.5, 0.5);
+
   if (Debug()) {
     tracker->SettingInfo();
     tracker->CutInfo();
@@ -237,7 +244,7 @@ Int_t StFtpcTrackMaker::Make()
   if(Debug()) {
     cout << "finish fde: " << Res_fde << endl;
   }
- 
+
   /*
     // Track Display
     
@@ -250,7 +257,7 @@ Int_t StFtpcTrackMaker::Make()
     display->ShowTracks();
     delete display;
   */
-  
+
   /*
     // Track Evaluator
     
@@ -309,8 +316,9 @@ void StFtpcTrackMaker::MakeHistograms()
   St_DataSetIter ftpc_tracks(m_DataSet);
 
   //Get the table
-  St_fpt_fptrack *trk = 0;
-  trk               = (St_fpt_fptrack *) ftpc_tracks.Find("fpt_fptrack");
+  St_fpt_fptrack *trk = NULL;
+  trk = (St_fpt_fptrack *) ftpc_tracks.Find("fpt_fptrack");
+
   if (trk) {
    // Fill histograms for FTPC fpt,fte,fde
 
@@ -333,7 +341,7 @@ void StFtpcTrackMaker::PrintInfo()
   // prints some information
 
   cout << "******************************************************************" << endl;
-  cout << "* $Id: StFtpcTrackMaker.cxx,v 1.4 2000/05/15 14:28:12 oldi Exp $ *" << endl;
+  cout << "* $Id: StFtpcTrackMaker.cxx,v 1.5 2000/06/07 11:16:29 oldi Exp $ *" << endl;
   cout << "******************************************************************" << endl;
   
   if (Debug()) {
