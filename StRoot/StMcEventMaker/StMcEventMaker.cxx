@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.20 2000/04/17 23:01:56 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.21 2000/04/18 00:56:39 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.21  2000/04/18 00:56:39  calderon
+ * Add pdgId to tracks that appear in both tables
+ *
  * Revision 1.20  2000/04/17 23:01:56  calderon
  * proper casting to remove a comparison warning
  *
@@ -121,7 +124,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.20 2000/04/17 23:01:56 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.21 2000/04/18 00:56:39 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -527,6 +530,7 @@ Int_t StMcEventMaker::Make()
 		    // need to keep the information of its parentage.
 		    nParticlesInBothTables++;
 		    t->setParent(ttempParticle[iEventGeneratorLabel]->parent());
+		    t->setPdgId(ttempParticle[iEventGeneratorLabel]->pdgId());
 		    StMcTrackIterator trkToErase = find (mCurrentMcEvent->tracks().begin(),
 							 mCurrentMcEvent->tracks().end(),
 							 ttempParticle[iEventGeneratorLabel]);
