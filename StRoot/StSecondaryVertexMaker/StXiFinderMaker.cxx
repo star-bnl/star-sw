@@ -28,15 +28,6 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 
 
 
-enum ITTFusage{
-  kUseTPT = 0 ,
-  kUseITTF = 1,
-  kUseBOTH = 2
-};
-
-
-
-
 StSPtrVecXiVertex* vecXi=0;
 
 ClassImp(StXiFinderMaker)
@@ -91,6 +82,48 @@ Int_t StXiFinderMaker::Init()
      return kStErr;
      }
  ///AddRunCont(exipar);
+ 
+ if (useLanguage != kLanguageUseSpecial)
+    {int a,b,c;
+     a=1&(useLanguage>>2);
+     b=1&(useLanguage>>1);
+     c=1&useLanguage;
+     useV0Language=2*(~(a^c))+(a|c);
+     useXiLanguage=4*(b&(~(a^c)))+2*(a&b&(~c))+(a|c);
+     }
+ switch (useLanguage)
+    {case kLanguageUseOldRun : gMessMgr->Info()<<"StXiFinderMaker : Fortran run."<<endm;
+                               break;
+     case kLanguageUseRun : gMessMgr->Info()<<"StXiFinderMaker : C++ run."<<endm;
+                            break;
+     case kLanguageUseTestV0Finder : gMessMgr->Info()<<"StXiFinderMaker : Test V0Finder."<<endm;
+                                     break;
+     case kLanguageUseTestXiFinder : gMessMgr->Info()<<"StXiFinderMaker : Test XiFinder."<<endm;
+                                     break;
+     case kLanguageUseTestBothFinders : gMessMgr->Info()<<"StXiFinderMaker : Test V0Finder and XiFinder."<<endm;
+                                        break;
+     default : ;
+     }
+ switch (useV0Language)
+    {case 1 : if ((useXiLanguage!=1) && (useXiLanguage!=2) && (useXiLanguage!=3))
+                 {gMessMgr->Info()<<"StXiFinderMaker : BE CAREFUL : impossible combination asked."<<endm;
+                  gMessMgr->Info()<<"StXiFinderMaker :    Set it to testXiFinder."<<endm;
+                  useXiLanguage=kXiLanguageUseFortranAndCppOnFortranV0;
+                  }
+              break;
+     case 2 : if (useXiLanguage!=4)
+                 {gMessMgr->Info()<<"StXiFinderMaker : BE CAREFUL : impossible combination asked."<<endm;
+                  gMessMgr->Info()<<"StXiFinderMaker :    Set it to normalRun."<<endm;
+                  useXiLanguage=kXiLanguageUseCppOnCppV0;
+                  }
+              break;
+     default : ;
+     }
+ if (1&useV0Language) gMessMgr->Info()<<"StXiFinderMaker :    Will store Fortran V0s."<<endm;
+ if (2&useV0Language) gMessMgr->Info()<<"StXiFinderMaker :    Will store C++ V0s."<<endm;
+ if (1&useXiLanguage) gMessMgr->Info()<<"StXiFinderMaker :    Will store Fortran Xis."<<endm;
+ if (2&useXiLanguage) gMessMgr->Info()<<"StXiFinderMaker :    Will store C++ Xis made with Fortran V0s."<<endm;
+ if (4&useXiLanguage) gMessMgr->Info()<<"StXiFinderMaker :    Will store C++ Xis made with C++ V0s."<<endm;
 
  return StMaker::Init();
  }
@@ -116,22 +149,39 @@ Int_t StXiFinderMaker::Make() {
   if (iRes != kStOk) return iRes;
 
   StSPtrVecXiVertex& xiVertices = event->xiVertices();
+  /*if (dontZapV0s && !dontZapXis)
+     {// Erase existing Xis
+      // Already done if erasing V0s
+      StSPtrVecXiVertex xiVertices2;
+      xiVertices = xiVertices2;
+      }
+     else if (dontZapXis && !dontZapV0s)
+     {gMessMgr->Warning() << "StXiFinderMaker: must not zap V0s if not zapping Xis\n"
+      << "      Automatically switching to keep V0s." << endm;
+      DontZapV0s();
+      }*/
+  if (!(1&useXiLanguage) && !((4&useXiLanguage) && (!(1&useV0Language))))
+     {// Erase existing Xis
+      StSPtrVecXiVertex xiVertices2;
+      xiVertices = xiVertices2;
+      }
   vecXi = &xiVertices;
 
   // Call the V0-finding, which will in turn call
   // the UseV0() member function for each V0 found
-  if (useExistingV0s) {
-    StSPtrVecV0Vertex& v0Vertices = event->v0Vertices();
-    unsigned int nV0s = v0Vertices.size();
-    det_id_v0 = 1; // for lack of any further information
-    for (unsigned int i=0; i<nV0s; i++) {
-      v0Vertex = v0Vertices[i];
-      if (v0Vertex) UseV0();
-    }
-  } else {
-    iRes = StV0FinderMaker::Make();
-    if (iRes != kStOk) return iRes;
-  }
+  if (2&useXiLanguage)
+     {StSPtrVecV0Vertex& v0Vertices = event->v0Vertices();
+     unsigned int nV0s = v0Vertices.size();
+     det_id_v0 = 1; // for lack of any further information
+     for (unsigned int i=0; i<nV0s; i++)
+        {v0Vertex = v0Vertices[i];
+         if (v0Vertex) UseV0();
+         }
+     }
+  if ((4&useXiLanguage) || (2&useV0Language))
+    {iRes = StV0FinderMaker::Make();
+     if (iRes != kStOk) return iRes;
+     }
 
   gMessMgr->Info() << "StXiFinderMaker: Found " << xiVertices.size() <<
                       " Xi candidates" << endm;
@@ -152,6 +202,14 @@ Int_t StXiFinderMaker::Make() {
 
 //_____________________________________________________________________________
 Bool_t StXiFinderMaker::UseV0() {
+
+  Bool_t usedV0 = kFALSE;
+
+  if ((!(2&useXiLanguage)) && (!(4&useXiLanguage))) return usedV0;
+  if (useXiLanguage<6)
+     {if ((2&useXiLanguage) && (v0Vertex->chiSquared()<0)) return usedV0;
+      if ((4&useXiLanguage) && (v0Vertex->chiSquared()>=0)) return usedV0;
+      }
 
   /// Variables:
   StPhysicalHelixD /**trkHelix,*/tmpHelix;
@@ -188,6 +246,10 @@ Bool_t StXiFinderMaker::UseV0() {
   int h_tmp;
   StThreeVectorD origin_tmp;
   
+  //Rotating
+  double epsDipAngle, cstPsi;
+  StThreeVectorF epsOrigin, epsMomentum, cstOrigin;
+  
 
   StSPtrVecXiVertex& xiVertices = *vecXi;
   
@@ -207,7 +269,6 @@ Bool_t StXiFinderMaker::UseV0() {
   bfield.setY(gufldB[1]*tesla);
   bfield.setZ(gufldB[2]*tesla);
 
-  Bool_t usedV0 = kFALSE;
   charge=0;
 
   int negKey, posKey;
@@ -221,7 +282,33 @@ Bool_t StXiFinderMaker::UseV0() {
   pV0=v0Vertex->momentum();
   impact = xV0-xPvx;
   if (impact.mag2() < (parsXi->rv_v0*parsXi->rv_v0)) return usedV0;
-
+  
+  epsDipAngle=1.;
+  epsOrigin.setX(1.);
+  epsOrigin.setY(1.);
+  epsOrigin.setZ(1.);
+  epsMomentum.setX(1.);
+  epsMomentum.setY(1.);
+  epsMomentum.setZ(1.);
+  cstPsi=0.;
+  cstOrigin.setX(0.);
+  cstOrigin.setY(0.);
+  cstOrigin.setZ(0.);
+  if (1&useRotating)
+     {epsOrigin.setX(-1.);
+      epsOrigin.setY(-1.);
+      epsMomentum.setX(-1.);
+      epsMomentum.setY(-1.);
+      cstPsi=C_PI;
+      cstOrigin.setX(2*xPvx.x());
+      cstOrigin.setY(2*xPvx.y());
+      }
+  if (2&useRotating)
+     {epsDipAngle=-1.;
+      epsOrigin.setZ(-1.);
+      epsMomentum.setZ(-1.);
+      cstOrigin.setZ(2*xPvx.z());
+      }
 
   // Calculates Lambda invariant mass and decides if Lam or antiLam.
   const StThreeVectorF& posVec3 = v0Vertex->momentumOfDaughter(positive);
@@ -259,24 +346,25 @@ Bool_t StXiFinderMaker::UseV0() {
       else
      {return usedV0;
       }
+  charge=-(useLikesign-1)*charge;
 
   StHelixModel* bachGeom = new StHelixModel;
-  if (bachGeom == NULL) {printf("CAUTION : pointer bachGeom is null.\n");return usedV0;}
+  if (bachGeom == NULL) {gMessMgr->Info()<<"StXiFinderMaker : CAUTION : pointer bachGeom is null."<<endm; return usedV0;}
   StHelixModel* bachGeom2 = new StHelixModel;
-  if (bachGeom2 == NULL) {printf("CAUTION : pointer bachGeom2 is null.\n");return usedV0;}
+  if (bachGeom2 == NULL) {gMessMgr->Info()<<"StXiFinderMaker : CAUTION : pointer bachGeom2 is null."<<endm; return usedV0;}
   
   // Loop over tracks (bachelors) to find Xis
   for (k=0; k<trks; k++)
      {bachGeom->setCharge(trk[k]->geometry()->charge());
       bachGeom->setHelicity(trk[k]->geometry()->helicity());
       bachGeom->setCurvature(trk[k]->geometry()->curvature());
-      bachGeom->setPsi(trk[k]->geometry()->psi());
-      bachGeom->setDipAngle(trk[k]->geometry()->dipAngle());
-      bachGeom->setOrigin(trk[k]->geometry()->origin());
-      bachGeom->setMomentum(trk[k]->geometry()->momentum());
+      bachGeom->setPsi(trk[k]->geometry()->psi()+cstPsi);
+      bachGeom->setDipAngle(epsDipAngle*trk[k]->geometry()->dipAngle());
+      bachGeom->setOrigin(cstOrigin+epsOrigin.pseudoProduct(trk[k]->geometry()->origin()));
+      bachGeom->setMomentum(epsMomentum.pseudoProduct(trk[k]->geometry()->momentum()));
       if (charge*bachGeom->charge() > 0)
          {//Check that ITTF and TPT tracks/V0's are not combined together.
-          if (UsingITTFTracks() == kUseBOTH)
+          if (GetTrackerUsage() == kTrackerUseBOTH)
              {if ((v0Vertex->dcaDaughters() <= 0) && (trk[k]->fittingMethod() != ITTFflag)) continue;
               if ((v0Vertex->dcaDaughters() >= 0) && (trk[k]->fittingMethod() == ITTFflag)) continue;
               }
@@ -306,7 +394,7 @@ Bool_t StXiFinderMaker::UseV0() {
           bachGeom2->setOrigin(bachGeom->origin());
           bachGeom2->setMomentum(bachGeom->momentum());
           if ((bachGeom->origin().x()==0) && (bachGeom->origin().y()==0) && (bachGeom->origin().z()==0))
-             {printf("CAUTION : bachelor candidate has all parameters = 0.\n");
+             {gMessMgr->Info()<<"StXiFinderMaker : CAUTION : bachelor candidate has all parameters = 0."<<endm;
               continue;
               }
           
@@ -592,6 +680,7 @@ Bool_t StXiFinderMaker::UseV0() {
                               xiVertex->setDcaDaughters(dca);
                               xiVertex->setDcaParentToPrimaryVertex(bxi);
                               xiVertex->setV0Vertex(v0Vertex);
+                              xiVertex->setChiSquared(-1.);
                               xiVertices.push_back(xiVertex);
                               usedV0 = kTRUE;
                               } //End if (bxi and iflag check)
@@ -619,8 +708,11 @@ Bool_t StXiFinderMaker::UseV0() {
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.6 2003/05/07 10:51:42 faivre Exp $
+// $Id: StXiFinderMaker.cxx,v 1.7 2003/05/14 19:15:36 faivre Exp $
 // $Log: StXiFinderMaker.cxx,v $
+// Revision 1.7  2003/05/14 19:15:36  faivre
+// Fancy choices Fortran/C++ V0's and Xi's. Xi rotating and like-sign.
+//
 // Revision 1.6  2003/05/07 10:51:42  faivre
 // Use brand new StHelixModel::setMomentum to solve memory leaks.
 //
