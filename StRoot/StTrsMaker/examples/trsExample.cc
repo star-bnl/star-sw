@@ -1,5 +1,5 @@
 //*******************************************************/
-// $Id: trsExample.cc,v 1.2 1999/01/18 20:59:06 lasiuk Exp $
+// $Id: trsExample.cc,v 1.3 1999/01/22 23:36:47 lasiuk Exp $
 //
 // Author: brian, October, 1998
 //
@@ -10,6 +10,9 @@
 #define DIAGNOSTICS
 //
 // $Log: trsExample.cc,v $
+// Revision 1.3  1999/01/22 23:36:47  lasiuk
+// macro TRUE
+//
 // Revision 1.2  1999/01/18 20:59:06  lasiuk
 // function selection
 //
@@ -71,7 +74,7 @@ int main (int argc,char* argv[])
     switch (c) {
     case 'b':
         if (argc < ++opt +1)
-            usage = TRUE;
+            usage = true;
         breakNumber = atoi(argv[opt++]);
         break;
     default:
