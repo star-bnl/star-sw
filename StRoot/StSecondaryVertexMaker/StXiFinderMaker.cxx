@@ -390,7 +390,7 @@ Bool_t StXiFinderMaker::UseV0() {
           ///"heli" and "trk" : cf StRoot/St_dst_Maker/StV0FinderMaker.cxx (STAT).
           
           //Determine detector id of pair for parsXi
-          det_id_xi=TMath::Max((int)det_id_v0,(int)detId[k]);
+          det_id_xi=TMath::Max(det_id_v0,detId[k]);
           //Xi cut parameters
           parsXi=exipar->GetTable(det_id_xi-1);
           
@@ -736,8 +736,11 @@ Bool_t StXiFinderMaker::UseV0() {
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.13 2003/09/17 12:00:23 faivre Exp $
+// $Id: StXiFinderMaker.cxx,v 1.14 2003/11/08 18:26:00 faivre Exp $
 // $Log: StXiFinderMaker.cxx,v $
+// Revision 1.14  2003/11/08 18:26:00  faivre
+// Bfield + consistency int/short
+//
 // Revision 1.13  2003/09/17 12:00:23  faivre
 // RH8 : initialize everything in constructor.
 //

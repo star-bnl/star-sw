@@ -131,7 +131,7 @@ class StV0FinderMaker : public StMaker {
 
   virtual void   GetPars();
   virtual Int_t  Init();
-  virtual Int_t  InitRun(int RunNumber);
+  //virtual Int_t  InitRun(int RunNumber);
   virtual Int_t  Make();
   virtual void   Clear(Option_t *option="") { prepared = kFALSE; }
   virtual void   UseExistingV0s(Bool_t opt=kTRUE) { useExistingV0s = opt; }
@@ -154,7 +154,7 @@ class StV0FinderMaker : public StMaker {
   virtual void   Trim();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StV0FinderMaker.h,v 1.4 2003/08/22 17:47:14 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StV0FinderMaker.h,v 1.5 2003/11/08 18:25:48 faivre Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
   virtual Int_t Prepare();
@@ -186,7 +186,7 @@ class StV0FinderMaker : public StMaker {
   unsigned short* ntrk;            //!
   unsigned short* ptrk;            //!
   short* hits;                     //!
-  short* detId;                    //!
+  int* detId;                    //!
   double* pt;                      //!
   double* ptot;                    //!
   unsigned short *trkID;           //!
@@ -200,8 +200,11 @@ class StV0FinderMaker : public StMaker {
 #endif
 
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.h,v 1.4 2003/08/22 17:47:14 caines Exp $
+// $Id: StV0FinderMaker.h,v 1.5 2003/11/08 18:25:48 faivre Exp $
 // $Log: StV0FinderMaker.h,v $
+// Revision 1.5  2003/11/08 18:25:48  faivre
+// Bfield + consistency int/short
+//
 // Revision 1.4  2003/08/22 17:47:14  caines
 // Get sign AND magnitude of mag field correctly for Xi and V0 finder
 //
