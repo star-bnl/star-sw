@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.110 1999/09/12 23:16:40 fisyak Exp $
+// $Id: bfc.C,v 1.111 1999/09/17 21:29:31 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
@@ -21,7 +21,7 @@ void Load(){
   gSystem->Load("StBFChain");}
 //_____________________________________________________________________
 void bfc(const Int_t First,
-	 const Int_t Last=1,
+	 const Int_t Last,
 	 const Char_t *Chain="gstar tfs",Char_t *infile=0, Char_t *outfile=0)
 { // Chain variable define the chain configuration 
   // All symbols are significant (regardless of case)
