@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.39 1999/07/13 02:19:33 perev Exp $
+// $Id: StChain.cxx,v 1.40 1999/07/14 15:26:18 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.40  1999/07/14 15:26:18  fine
+// Context menu MakeEvent method has been introduced
+//
 // Revision 1.39  1999/07/13 02:19:33  perev
 // GetCVS,StEvtHddr,etc...
 //
@@ -107,7 +110,7 @@
 #include "StChain.h"
 #include "StEvtHddr.h"
 
-StChain *fgStChain;
+StChain *fgStChain=0;
 
 ClassImp(StChain)
 
@@ -129,5 +132,13 @@ StChain::~StChain()
 void StChain::Streamer(TBuffer &)
 { Error("Streamer"," attempt to write %s\n ",GetName());
   assert(0);
+}
+
+//_____________________________________________________________________________
+Int_t StChain::MakeEvent() 
+{
+  // Make next event from the TBrowser TContextMenu
+  Clear();
+  return Make(GetNumber()+1);
 }
 
