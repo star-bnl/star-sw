@@ -1,7 +1,7 @@
 #ifndef EEstarTrig_h
 #define EEstarTrig_h
 /*********************************************************************
- * $Id: EEstarTrig.h,v 1.8 2004/06/21 19:50:21 balewski Exp $
+ * $Id: EEstarTrig.h,v 1.9 2004/09/07 20:32:01 balewski Exp $
  *********************************************************************
  * container for STAR trigger data
  */
@@ -34,17 +34,8 @@ class EEstarTrig : public TObject {
   u_short  npre,npost; // used in a trivial way for now
   u_short  VTX[8];  // level-2 inputs for BBC and ZDC
   u_short  EMC[8];  // level-2 inputs, results of separate BEMC and EEMC DSMs 
-  
-   
+     
   u_char spinBits() const { return (lastDSM[7]>>4) & 0xff; }
-  u_char bitYellFill()  const { return ( spinBits()>>0) & 0x1; }
-  u_char bitYellUp()    const { return ( spinBits()>>1) & 0x1; }
-  u_char bitYellDown()  const { return ( spinBits()>>2) & 0x1; }
-  u_char bitYellUnpol() const { return ( spinBits()>>3) & 0x1; }
-  u_char bitBlueFill()  const { return ( spinBits()>>4) & 0x1; }
-  u_char bitBlueUp()    const { return ( spinBits()>>5) & 0x1; }
-  u_char bitBlueDown()  const { return ( spinBits()>>6) & 0x1; }
-  u_char bitBlueUnpol() const { return ( spinBits()>>7) & 0x1;}
   u_short bbcTimeDiff() const { return VTX[3] & 0x1ff; }
   int isTrigID(int id);
   int get48bXing() const;
@@ -59,6 +50,9 @@ class EEstarTrig : public TObject {
 
 /*************************************************************
  * $Log: EEstarTrig.h,v $
+ * Revision 1.9  2004/09/07 20:32:01  balewski
+ * more methods, remove questionable spin bits interpetation
+ *
  * Revision 1.8  2004/06/21 19:50:21  balewski
  * mre detailed monitoring of data corruption
  *
@@ -87,3 +81,13 @@ class EEstarTrig : public TObject {
  *********************************************************************/
 
 
+#if 0 // probably all is wrong, JB
+  u_char bitYellFill()  const { return ( spinBits()>>0) & 0x1; }
+  u_char bitYellUp()    const { return ( spinBits()>>1) & 0x1; }
+  u_char bitYellDown()  const { return ( spinBits()>>2) & 0x1; }
+  u_char bitYellUnpol() const { return ( spinBits()>>3) & 0x1; }
+  u_char bitBlueFill()  const { return ( spinBits()>>4) & 0x1; }
+  u_char bitBlueUp()    const { return ( spinBits()>>5) & 0x1; }
+  u_char bitBlueDown()  const { return ( spinBits()>>6) & 0x1; }
+  u_char bitBlueUnpol() const { return ( spinBits()>>7) & 0x1;}
+#endif

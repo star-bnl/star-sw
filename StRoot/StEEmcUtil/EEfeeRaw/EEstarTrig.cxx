@@ -77,8 +77,8 @@ void EEstarTrig :: print(int k, FILE *fd) const{
   fprintf(fd,"\n");
 
   fprintf(fd," bbcTimeDiff=%d spinBits=x%2.2x lastDSM[7]=x%4.4x\n",bbcTimeDiff(), spinBits(),lastDSM[7]);
-  fprintf(fd," Yell fill=%d   Up=%d  Down=%d  UnPol=%d \n",bitYellFill() ,bitYellUp(),bitYellDown(), bitYellUnpol());  
-  fprintf(fd," Blue fill=%d   Up=%d  Down=%d  UnPol=%d \n",bitBlueFill() ,bitBlueUp(),bitBlueDown(), bitBlueUnpol());  
+  //  fprintf(fd," Yell fill=%d   Up=%d  Down=%d  UnPol=%d \n",bitYellFill() ,bitYellUp(),bitYellDown(), bitYellUnpol());  
+  // fprintf(fd," Blue fill=%d   Up=%d  Down=%d  UnPol=%d \n",bitBlueFill() ,bitBlueUp(),bitBlueDown(), bitBlueUnpol());  
   if(k<=1) return;
 
 
