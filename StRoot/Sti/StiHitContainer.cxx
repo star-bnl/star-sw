@@ -252,12 +252,17 @@ void StiHitContainer::setRefPoint(StiHit* ref)
     }
     
     //Now search over distance along d
-    for (HitVectorType::iterator cit=mstart; cit!=mstop; cit++) {
+    for (HitVectorType::iterator cit=mstart; cit!=mstop; cit++) 
+      {
 	if (fabs( (*cit)->y() - ref->y() ) < mdeltad)
-	    if ( (*cit)->timesUsed()==0) { //hack, MLM (9/27/02)  should be up to the user
-		mcandidatevec.push_back((*cit));
+	{
+	  StiHit * hit = *cit;
+	  if (hit->timesUsed()==0 && hit->detector()->isActive())
+	    {
+	      mcandidatevec.push_back(hit);
 	    }
-    }
+	}
+      }
     mcurrent = mcandidatevec.begin();
     
     return;
