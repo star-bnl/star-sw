@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.64 1999/06/16 12:43:29 fisyak Exp $
+// $Id: bfc.C,v 1.65 1999/06/17 19:53:58 didenko Exp $
 // $Log: bfc.C,v $
+// Revision 1.65  1999/06/17 19:53:58  didenko
+// switch off CTF
+//
 // Revision 1.64  1999/06/16 12:43:29  fisyak
 // Add OFF option to switch off default chain
 //
@@ -204,6 +207,7 @@ void SetDefaultChain(){// default for standard chain
 	ChainFlags[k] = kTRUE;
       }
     }
+    ChainFlags[kCTF] = kFALSE;
     DefaultSet = kTRUE;
   } 
 }
