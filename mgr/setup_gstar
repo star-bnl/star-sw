@@ -7,4 +7,5 @@ rm -f dzdoc.bank; ln -s  $STAR_BIN/dzdoc.bank         .
 rm -f *.sl;       ln -s  $STAR_PAMS/geometry/star/*.g . 
                   ln -s  $STAR_PAMS/sim/gstar/*.g     .
                   ln -s  $STAR_PAMS/sim/gstar/*.c     .
+                  ln -s  $STAR_PAMS/sim/inc/*.h       .
 make detm
