@@ -18,9 +18,6 @@ static inline Int_t IntOMode(char ciomode)
 char *c=(char *)strchr(RWU,tolower(ciomode));
 return (c) ? (c-RWU)&3 : 0;
 }
-//              Local functions
-static TString GetBranchByFile(const Char_t *file);
-static int AreSimilar(const Char_t *fileA, const Char_t *fileB);
 
 extern "C" {
    int rfio_open(const char *filepath, int flags, int mode);
@@ -197,6 +194,9 @@ TString StIO::RFIOName(const char *name)
 TFile *StIO::Open(const char *name, Option_t *option,const char *title,Int_t compress)
 {
   TString file = RFIOName(name);
+  if(strcmp("READ",option)==0 && !IfExi(name)) return 0;
+  if(strcmp("read",option)==0 && !IfExi(name)) return 0;
+  if(strcmp("Read",option)==0 && !IfExi(name)) return 0;
   TFile *tf = TFile::Open(file,option,title,compress);
   if (!tf  || !tf->IsZombie()) return tf;
   delete tf;
@@ -272,16 +272,14 @@ TString outFile = file; gSystem->ExpandPathName(outFile);
         dir[0] = gSystem->DirName (outFile);
         bas[0] = gSystem->BaseName(outFile);
 
-if (strncmp(".none",GetFile(),4)==0) {//FileName was corrupted by old bug
-  TString ts("/.nowhere/");     ts += bas[0];
-  ts.ReplaceAll(".root","");    ts.Replace(ts.Last('.')+1,999,"");
-  ts += GetName();              ts.ReplaceAll("Branch","");
-  ts +=".root";                 SetFile(ts);
+if (strncmp(".none ",GetFile(),6)==0) {//FileName was corrupted by old bug
+  
+  TString ts(GetFile()); ts.Remove(0,6); SetFile(ts);
 }
 
   dir[1]  = gSystem->DirName (GetFile());
   bas[1]  = gSystem->BaseName(GetFile());
-  SetIOMode("0");
+//VP  SetIOMode("0");
   if (bas[0] == bas[1] || bas[0].Contains(nam)) SetIOMode("r");
   else                                  	bas[0]=bas[1];
   for (int d=1; d>=0; d--) {
@@ -293,6 +291,7 @@ if (strncmp(".none",GetFile(),4)==0) {//FileName was corrupted by old bug
         delete [] newFile;
         return 0;
   } } }
+  fIOMode = -abs(fIOMode);
   return 0;
 }
 //_______________________________________________________________________________
@@ -301,7 +300,7 @@ Int_t StBranch::SetTFile(TFile *tfile)
   if (!tfile)           return 0;
   if (fTFile==tfile)    return 0;
   fHandle=0;
-  if (fTFile) Close();
+  if (fTFile) Close();  
   fTFile=0;
   SetFile(tfile->GetName());
   Open();
@@ -335,12 +334,19 @@ void StBranch::Close(const char *)
 //_______________________________________________________________________________
 const char *StBranch::GetFile()
 {
-  if (fFile.IsNull()) { // Construct file name
+  TString dir(fFile);
+  int kase=0;
+  if (!fFile.IsNull()) kase = 2;
+  if (kase && fFile[fFile.Length()-1]=='/') kase = 1;
+
+  if (kase<2) { // Construct file name
     fFile=GetName(); fFile.ReplaceAll("Branch",""); fFile+=".root";
     StTree *tree = (StTree*)GetParent();
     if (tree) { // include base name
       const char* base = tree->GetBaseName();
-      if (base) {fFile.Insert(0,"."); fFile.Insert(0,base);}}}
+      if (base) {fFile.Insert(0,"."); fFile.Insert(0,base);}}
+    if (kase==1) fFile.Insert(0,dir); 
+  }
 
    return (const char*)fFile;
 }
@@ -472,13 +478,6 @@ void StBranch::OpenTFile()
   fTFile = tf;
   if (!fTFile) {
     fTFile = StIO::Open(GetFile(),TFOPT[fIOMode],GetName());
-//    if (fTFile && fIOMode==2 ) {//HACK VP
-//
-//      static const char *bra[] = {".geant.root",".dst.root",".hist.root",".runco.root",0};
-//      int i;
-//      for (i=0;bra[i];i++) {if(strstr(fTFile->GetName(),bra[i])) break;}    
-//    if (!bra[i]) fTFile->SetFormat(3);
-//    }
 
   }
   if (!fTFile) {
@@ -528,30 +527,16 @@ void StTree::SetIOMode(Option_t *iomode)
 //_______________________________________________________________________________
 Int_t StTree::SetFile(const Char_t *file,const Char_t *mode,int insist)
 {
-  TDataSetIter next(this);StBranch *br;
-  if (insist) {while ((br=(StBranch*)next())) br->SetFile(file,mode); return 0;}
+  if (mode && *mode) SetIOMode(mode); 
+  if (!file || !*file) 	return 0;
 
-  TString br1Name = ::GetBranchByFile(file);
-  TString br2Name;
-  if (!br1Name.IsNull()) br2Name = br1Name + "Branch";
-
-  const char *brName,*curFile,*oldFile=0;
-
-  while ((br=(StBranch*)next())) { //loop over branches
-    curFile = br->GetFile();
-    brName = br->GetName();
-    if (br1Name == brName)              oldFile = curFile;
-    if (br2Name == brName)              oldFile = curFile;
-    if (AreSimilar(file,curFile))       oldFile = curFile;
-    if (oldFile) break;
+  if (fIOMode&1)  {	//ReadMode
+    UpdateFile(file);
+    
   }
-  if (!oldFile || !oldFile[0]) oldFile = " ";
-
-  while ((br=(StBranch*)next())) { //loop over branches
-    if(strcmp(brName,br->GetName()) && strcmp(oldFile,br->GetFile())) continue;
-    br->SetFile(file,mode);
-    printf("<%s(%s/%s)::SetFile> file %s is replaced by %s\n",
-           ClassName(),GetName(),br->GetName(),oldFile,file);
+  if (fIOMode&2)  {	//WriteMode
+  
+    SetBaseName(file);
   }
   return 0;
 }
@@ -698,46 +683,25 @@ StTree *StTree::GetTree(TFile *file, const char *treeName)
 }
 
 //_______________________________________________________________________________
-void StTree::SetBaseName(const char *baseName)
+void StTree::SetBaseName(const char *baseName,const char *dirname)
 {
+  const char *sla,*dot;
   fBaseName = baseName;
-  const char *dot = strrchr(baseName,'.');
+  sla = strrchr(fBaseName.Data(),'/');
+  if (sla) fBaseName.Remove(0,sla-fBaseName.Data()+1);
+  dot = strrchr(fBaseName.Data(),'.');
   if (!dot) return;
-  const char *sla = strrchr(baseName,'/');
-  if (sla && dot<sla) return;
-  fBaseName.Remove(dot-baseName);
+  fBaseName.Remove(dot-fBaseName.Data());
+  dot = strrchr(fBaseName.Data(),'.');
+  if (!dot) return;
+  fBaseName.Remove(dot-fBaseName.Data());
+  if (dirname && *dirname) {
+    TString ts(dirname); 
+    if (ts[ts.Length()-1]!='/') ts += "/";
+    ts += fBaseName;
+    fBaseName = ts;
+  }
 }
-
-//_______________________________________________________________________________
-static TString GetBranchByFile(const Char_t *file)
-{
-  int dot;
-  TString ts = file;
-  gSystem->BaseName(ts);
-  dot = ts.Last('.'); if (dot<0) return ts.Replace(0,999,"");
-  ts.Replace(dot,999,"");
-  dot = ts.Last('.');
-  if (dot<0) dot = ts.Last('_');
-  if (dot<0) return ts.Replace(0,999,"");
-  return ts.Replace(0,dot+1,"");
-}
-
-//_______________________________________________________________________________
-static int AreSimilar(const Char_t *fileA, const Char_t *fileB)
-{
-  TString A(fileA); gSystem->BaseName(A); A.Replace(0,3,"");
-  TString B(fileB); gSystem->BaseName(B); B.Replace(0,3,"");
-
-  int i,n;
-  n = A.Length();
-  for(i=0;i<n;i++) { if (isdigit(A[i])) A.Replace(i,1," ");}
-  A.ReplaceAll(" ","");
-  n = B.Length();
-  for(i=0;i<n;i++) { if (isdigit(B[i])) B.Replace(i,1," ");}
-  B.ReplaceAll(" ","");
-  return A==B;
-}
-
 
 //_____________________________________________________________________________
 ClassImp(StFile)

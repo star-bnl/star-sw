@@ -97,7 +97,7 @@ public:
   virtual Int_t Open();
   virtual void Clear(Option_t *opt="");
   virtual Int_t SetFile(const Char_t *file,const Char_t *iomode=0,int insist=0);
-  virtual void SetBaseName(const char* basename);
+  virtual void SetBaseName(const char* basename,const char* dirname=0);
   virtual const char *GetBaseName() 
           {return (fBaseName.IsNull()) ? 0:(const char*)fBaseName;};
   static StTree *GetTree(TFile *file, const char *treeName);
