@@ -1,0 +1,45 @@
+MACRO run_tpt i=1 TPC_HOME=$STAR/pams/tpc/kumac
+
+if ( [i] .eq. 1) then
+ 
+ exec [TPC_HOME]/tpt_init
+ cd /dui/data/tpc
+endif
+
+
+MESSAGE 'Calling TPT...'
+ami/mod/call tpt /dui/constants/tpc/params/tptpars/tpt_pars _
+	     /dui/constants/tpc/geometry/tpgpar/tpg_pad_plane _
+	     /dui/data/tpc/hits/tphit _
+	     /dui/data/tpc/tracks/tptrack
+if ( staf_status(1) .ne. STAFCV_OK) then
+	message 'Problem with tpt..'
+	goto END
+endif
+
+message ' Calling TTE...'
+
+ami/mod/call tte /dui/data/tpc/tracks/tptrack _
+                 /dui/data/tpc/hits/tphit _
+                /dui/geant/Event/g2t_tpc_hit _
+                /dui/geant/Event/g2t_track _
+                /dui/data/tpc/hits/index _
+                /dui/constants/tpc/params/type _
+                /dui/data/tpc/tracks/tpt_eval _
+                /dui/data/tpc/tracks/mctrk _
+                /dui/data/tpc/tracks/res _
+                /dui/constants/tpc/params/tte_control
+v/print staf_status(1)
+if ( staf_status(1) .ne. STAFCV_OK) then
+        message 'Problem with tte..'
+endif
+
+END:
+
+return
+
+
+
+
+
+

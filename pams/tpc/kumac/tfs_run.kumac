@@ -1,0 +1,44 @@
+Macro run_tfs i=1 TPC_HOME=$STAR/pams/tpc/kumac
+i=[1]
+TPC_HOME = [2]
+
+if [i] = 1 then
+  exec [TPC_HOME]/tfs_init [TPC_HOME]
+endif
+
+* this bit should be in the event loop
+* clean up just in case....
+
+cd /dui/data/tpc/hits
+
+  tdm/table/rowcount tpcluster 0
+  tdm/table/rowcount tpseq 0
+  tdm/table/rowcount tphit 0
+  tdm/table/maxrowcount tphit 300000
+
+message ' Running tfs_g2t...'
+ami/mod/call tfs_g2t _
+		/dui/geant/Event/g2t_tpc_hit _
+		/dui/geant/Event/g2t_track _
+		/dui/constants/tpc/params/tfspar/tfs_fspar _ 
+  		/dui/constants/tpc/params/tfspar/tfs_bmpar _
+		/dui/constants/tpc/params/tfspar/tfs_fsctrl _
+		/dui/data/tpc/hits/index _
+	        /dui/constants/tpc/params/type _
+		/dui/data/tpc/hits/tphit
+
+if ( staf_status(1) .ne. STAFCV_OK) then
+	message 'Problem running tfs_g2t...'
+	goto RTRN
+endif
+
+message ' Running tfs_filt...'
+ami/mod/call tfs_filt /dui/data/tpc/hits/tphit
+
+if ( staf_status(1) .ne. STAFCV_OK) then
+	message 'Problem running tfs_filt...'
+endif
+
+RTRN:
+
+RETURN
