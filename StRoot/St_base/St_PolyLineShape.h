@@ -3,8 +3,13 @@
 
 #include <TShape.h>
 
-class TPolyLine3D;
-class TPolyMarker3D;
+//#define MyInputPoints TPolyLine3D
+//#define MyInputPoints St_PolyLine3D
+
+class St_PolyLine3D;
+// class TPolyMarker3D;
+// typedef St_PolyLine3D  MyInputPoints;
+
 class TVirtualPad;
 
 enum EShapeTypes { kNULL=0, kSphere, kBrik};
@@ -14,8 +19,8 @@ class St_PolyLineShape : public TShape  {
    EShapeTypes   m_ShapeType;   // shape of the segment connections
    TShape       *m_Shape;       // shape for draw each segment of the polylins
    TShape       *m_Connection;  // shep to represent the each "end" of the polyline
-//   TPolyLine3D  *m_Points;        // PolyLine itself
-   TPolyMarker3D *m_Points;        // PolyLine itself
+//   MyInputPoints  *m_Points;        // PolyLine itself
+   St_PolyLine3D *m_Points;        // PolyLine itself
    Float_t       m_WidthFactor; // factor to calculate the the tube diameters 
    Bool_t        m_HasDrawn;    // flag to avoid multiply plots
    Bool_t        m_Smooth;      // Make smooth connections
@@ -28,9 +33,9 @@ protected:
 public:
    St_PolyLineShape();
 #ifdef LINES
-   St_PolyLineShape(TPolyLine3D   *points,Option_t* option="");
+   St_PolyLineShape(MyInputPoints   *points,Option_t* option="");
 #else
-   St_PolyLineShape(TPolyMarker3D *points,Option_t* option="");
+   St_PolyLineShape(St_PolyLine3D *points,Option_t* option="");
 #endif
    virtual ~St_PolyLineShape();
    static  void Axis(TVirtualPad *p=0, Float_t width=0.5);
@@ -38,8 +43,8 @@ public:
    virtual void         Draw(Option_t *opt="");
    virtual void         ExecuteEvent(Int_t event, Int_t px, Int_t py);
    virtual TShape      *GetConnection(){ return m_Connection;}
-//   virtual TPolyLine3D *GetLine(){ return m_Points;}
-   virtual TPolyMarker3D *GetMarker(){ return m_Points;}
+//   virtual MyInputPoints *GetLine(){ return m_Points;}
+   virtual St_PolyLine3D *GetMarker(){ return m_Points;}
    virtual TShape      *GetShape(){ return m_Shape;}
    virtual Bool_t       GetSmooth(){ return m_Smooth;}
    virtual Float_t      GetWidthFactor(){ return m_WidthFactor;}

@@ -29,7 +29,7 @@
 ClassImp(St_PolyLine3D)
  
 //______________________________________________________________________________
-// PolyLine3D is a 3-dimensional polyline. It has 4 different constructors.
+// PolyLine3D is a 3-dimensional polyline. It has 5 different constructors.
 //
 //   First one, without any parameters St_PolyLine3D(), we call 'default
 // constructor' and it's used in a case that just an initialisation is
@@ -76,6 +76,8 @@ St_PolyLine3D::St_PolyLine3D(Int_t n, Option_t *option): St_Points3D(n,option)
 //*-*        ======================================================
 //*-*  If n < 0 the default size (2 points) is set
 //*-*
+//*-*  'normal constructor' with, usually, one parameter
+//*-*   n (number of points), and it just allocates a space for the points.
 }
  
 //______________________________________________________________________________
@@ -85,12 +87,19 @@ St_PolyLine3D::St_PolyLine3D(Int_t n, Float_t *p, Option_t *option):St_Points3D(
 //*-*                      ===============================
 //*-*  If n < 0 the default size (2 points) is set
 //*-*
+//*-*  one allocates a space for the points, and also makes
+//*-*  initialisation from the given array.
 }
  
 //______________________________________________________________________________
 St_PolyLine3D::St_PolyLine3D(Int_t n, Float_t *x, Float_t *y, Float_t *z, Option_t *option)
 :St_Points3D(n<2?2:n,x,y,z,option)
 {
+//*-*-*-*-*-*-*-*-*-*-*-*-*3-D PolyLine normal constructor*-*-*-*-*-*-*-*-*-*-*-*
+//*-*                      ===============================
+//*-*  almost, similar to the constructor above, except
+//*-*  initialisation is provided with three independent arrays 
+//*-*  (array of x coordinates, y coordinates and z coordinates).
 }
  
 //______________________________________________________________________________
@@ -100,24 +109,20 @@ St_PolyLine3D::~St_PolyLine3D()
 //*-*                      ===============================
 }
  
- 
 //______________________________________________________________________________
 St_PolyLine3D::St_PolyLine3D(const St_PolyLine3D &polyline)
 {
    ((St_PolyLine3D&)polyline).Copy(*this);
-}
- 
- 
+} 
 //______________________________________________________________________________
 void St_PolyLine3D::Copy(TObject &obj)
 {
 //*-*-*-*-*-*-*-*-*-*-*-*-*Copy this polyline to polyline*-*-*-*-*-*-*-*-*-*-*-*
 //*-*                      ==============================
    St_Points3D::Copy(obj);
-//==   TAttLine::Copy(((St_PolyLine3D&)obj));
+   TAttLine::Copy(((St_PolyLine3D&)obj));
 }
- 
- 
+  
 //______________________________________________________________________________
 Int_t St_PolyLine3D::DistancetoPrimitive(Int_t px, Int_t py)
 {
@@ -160,7 +165,13 @@ Int_t St_PolyLine3D::DistancetoPrimitive(Int_t px, Int_t py)
       view->WCtoNDC(&xyz[3], xndc);
       x2 = xndc[0];
       y2 = xndc[1];
-      dsegment = DistancetoLine(px,py,x1,y1,x2,y2);
+      dsegment =  St_Points3DABC::DistancetoLine(px,py,
+                                  gPad->XtoAbsPixel(x1),
+                                  gPad->XtoAbsPixel(y1),
+                                  gPad->XtoAbsPixel(x2),
+                                  gPad->XtoAbsPixel(y2),
+                                  GetSizeAttribute()
+                                 );
       if (dsegment < dist) dist = dsegment;
    }
    return dist;
@@ -170,10 +181,8 @@ Int_t St_PolyLine3D::DistancetoPrimitive(Int_t px, Int_t py)
 void St_PolyLine3D::Draw(Option_t *option)
 {
 //*-*-*-*-*-*-*-*Draw this 3-D polyline with its current attributes*-*-*-*-*-*-*
-//*-*            ==================================================
- 
+//*-*            ================================================== 
    AppendPad(option);
- 
 }
  
 //______________________________________________________________________________
@@ -183,27 +192,44 @@ void St_PolyLine3D::DrawPolyLine(Int_t n, Float_t *p, Option_t *option)
 //*-*              ============================================
  
    St_PolyLine3D *newpolyline = new St_PolyLine3D(Size(),p,GetOption());
-//   TAttLine::Copy(*newpolyline);
+   TAttLine::Copy(*newpolyline);
    newpolyline->SetBit(kCanDelete);
-   newpolyline->AppendPad(option);
+   newpolyline->AppendPad(option); 
 }
  
 //______________________________________________________________________________
 Color_t St_PolyLine3D::GetColorAttribute() const
 {
- return 0;
+  typedef Color_t (St_PolyLine3D::*badDef)() const;
+  typedef Color_t (St_PolyLine3D::*rightDef)();
+  rightDef lineDef = GetLineColor;
+  badDef mkit = (badDef) lineDef;
+//  Color_t (St_PolyLine3D::*mkit)() const = (Color_t (St_PolyLine3D::*)() const)GetLineColor;
+  return (this->*mkit)();
+// return 0;
 //  return fAttributes ? fAttributes->GetLineColor():0;
 }
 //______________________________________________________________________________
 Width_t St_PolyLine3D::GetSizeAttribute()  const
 {
- return 0;
+  typedef Width_t (St_PolyLine3D::*badDef)() const;
+  typedef Width_t (St_PolyLine3D::*rightDef)();
+  rightDef lineDef = GetLineWidth;
+  badDef mkit = (badDef) lineDef;
+
+//  Width_t (St_PolyLine3D::*mkit)() const = (Width_t(St_PolyLine3D::*)() const)GetLineWidth;
+  return (this->*mkit)();
 //   return  fAttributes ? fAttributes->GetLineWidth():0;
 }
 //______________________________________________________________________________
 Style_t St_PolyLine3D::GetStyleAttribute()  const
 {
- return 0;
+  typedef Style_t (St_PolyLine3D::*badDef)() const;
+  typedef Style_t (St_PolyLine3D::*rightDef)();
+  rightDef lineDef = GetLineStyle;
+  badDef mkit = (badDef) lineDef;
+//  Style_t (St_PolyLine3D::*mkit)() const = (Style_t(St_PolyLine3D::*)() const)GetLineStyle;
+  return (this->*mkit)();
 //   return  fAttributes ? fAttributes->GetLineStyle():0;
 }
 //______________________________________________________________________________
@@ -240,7 +266,8 @@ void St_PolyLine3D::Paint(Option_t *option)
         St_Points3D x3dPoints(size);
         buff->points    = fPoints->GetXYZ(x3dPoints.GetP(),0,size);
  
-        Int_t c = (((fAttributes?fAttributes->GetColorAttribute():0) % 8) - 1) * 4;     // Basic colors: 0, 1, ... 8
+//        Int_t c = (((fAttributes?fAttributes->GetColorAttribute():0) % 8) - 1) * 4;     // Basic colors: 0, 1, ... 8
+        Int_t c = ((GetColorAttribute() % 8) - 1) * 4;     // Basic colors: 0, 1, ... 8
         if (c < 0) c = 0;
  
     //*-* Allocate memory for segments *-*
@@ -276,7 +303,7 @@ void  St_PolyLine3D::PaintPoints(Int_t n, Float_t *, Option_t *)
 //*-*              ===========================================
    if (n < 2) return;
  
- //  TAttLine::Modify();  //Change line attributes only if necessary
+   TAttLine::Modify();  //Change line attributes only if necessary
  
 //*-*- Loop on each individual line
  
@@ -329,7 +356,7 @@ Color_t St_PolyLine3D::SetColorAttribute(Color_t color)
   //          previous value of the color
   //
   Color_t c = GetColorAttribute();
- // SetLineColor(color);
+  SetLineColor(color);
   return c;
 }
 //______________________________________________________________________________
@@ -340,10 +367,15 @@ Width_t St_PolyLine3D::SetSizeAttribute(Width_t  size)
   //          previous value of the cline width
   //
   Width_t s = 0;
+#if 1
+  s = GetSizeAttribute();
+  SetLineWidth(size);
+#else
   if (fAttributes) {
     s = fAttributes->GetSizeAttribute();
  //   fAttributes->SetLineWidth(size);
   }
+#endif
   return s;
 }
 //______________________________________________________________________________
@@ -354,10 +386,16 @@ Style_t St_PolyLine3D::SetStyleAttribute(Style_t style)
   //          previous value of the line style
   //
   Style_t s = 0;
+#if 1
+   s = GetStyleAttribute();
+   SetLineStyle(style);
+#else
+  Style_t s = 0;
   if (fAttributes) {
     s = fAttributes->GetStyleAttribute();
  //   fAttributes->SetLineStyle(style);
   }
+#endif
   return s;
 }
  

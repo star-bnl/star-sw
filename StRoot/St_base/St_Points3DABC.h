@@ -21,7 +21,7 @@ public:
         St_Points3DABC(){;}
         virtual ~St_Points3DABC(){;}
 
-        static  Int_t     DistancetoLine(Int_t px, Int_t py, Float_t xp1, Float_t yp1, Float_t xp2, Float_t yp2 );
+        static  Int_t     DistancetoLine(Int_t px, Int_t py, Float_t x1, Float_t y1, Float_t x2, Float_t y2, Int_t lineWidth = 1 );
 
         virtual Int_t     Add(Float_t x, Float_t y, Float_t z);
         virtual Int_t     AddLast(Float_t x, Float_t y, Float_t z);

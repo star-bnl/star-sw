@@ -20,7 +20,7 @@ Int_t St_Points3DABC::Add(Float_t x, Float_t y, Float_t z)    { return AddLast(x
 //______________________________________________________________________________
 Int_t St_Points3DABC::AddLast(Float_t x, Float_t y, Float_t z){ return SetNextPoint(x,y,z); }
 //______________________________________________________________________________
-Int_t St_Points3DABC::DistancetoLine(Int_t px, Int_t py, Float_t xp1, Float_t yp1, Float_t xp2, Float_t yp2 )
+Int_t St_Points3DABC::DistancetoLine(Int_t px, Int_t py, Float_t x1, Float_t y1, Float_t x2, Float_t y2, Int_t lineWidth )
 {
 //*-*-*-*-*-*-*-*-*-*-*Compute distance from point px,py to a line*-*-*-*-*-*
 //*-*                  ===========================================
@@ -48,14 +48,14 @@ Int_t St_Points3DABC::DistancetoLine(Int_t px, Int_t py, Float_t xp1, Float_t yp
 //*-*  D = B - V  = B -(c-u)**2
 //*-*     ==> u = (A -B +C)/2c
 //*-*
+//*-*   Float_t x1    = gPad->XtoAbsPixel(xp1);
+//*-*   Float_t y1    = gPad->YtoAbsPixel(yp1);
+//*-*   Float_t x2    = gPad->XtoAbsPixel(xp2);
+//*-*   Float_t y2    = gPad->YtoAbsPixel(yp2);
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
    Float_t xl, xt, yl, yt;
    Float_t x     = px;
    Float_t y     = py;
-   Float_t x1    = gPad->XtoAbsPixel(xp1);
-   Float_t y1    = gPad->YtoAbsPixel(yp1);
-   Float_t x2    = gPad->XtoAbsPixel(xp2);
-   Float_t y2    = gPad->YtoAbsPixel(yp2);
    if (x1 < x2) {xl = x1; xt = x2;}
    else         {xl = x2; xt = x1;}
    if (y1 < y2) {yl = y1; yt = y2;}
@@ -77,8 +77,7 @@ Int_t St_Points3DABC::DistancetoLine(Int_t px, Int_t py, Float_t xp1, Float_t yp
    Float_t D     = TMath::Abs(A - u*u);
    if (D < 0)   return 9999;
  
-//   return Int_t(TMath::Sqrt(D) - 0.5*float(fLineWidth));
-   return Int_t(TMath::Sqrt(D));
+   return Int_t(TMath::Sqrt(D) - 0.5*float(lineWidth));
 }
  
 //______________________________________________________________________________

@@ -69,6 +69,10 @@ St_Points3D::St_Points3D(St_Points3DABC *points) : fPoints(points)
 //*-*                      ================================
   DoOwner(kFALSE);
   fPoints = points; 
+  if (!fPoints) {
+    fPoints = new St_PointsArray3D;
+    DoOwner();
+  }
 }
  
  
