@@ -8,6 +8,8 @@
 //                                                                      //
 // St_io_Maker class for Makers                                         //
 //                                                                      //
+//  Submit any problem with this code via begin_html <A HREF="http://www.rhic.bnl.gov/STAR/html/comp_l/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html
+//
 //////////////////////////////////////////////////////////////////////////
 
 #include <iostream.h>
@@ -470,7 +472,7 @@ TTree *St_io_Maker::MakeTree(const char* name, const char*title)
 //_____________________________________________________________________________
 void St_io_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_io_Maker.cxx,v 1.15 1999/03/08 17:21:28 fine Exp $\n");
+  printf("* $Id: St_io_Maker.cxx,v 1.16 1999/03/10 15:03:03 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
