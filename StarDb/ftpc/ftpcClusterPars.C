@@ -1,6 +1,6 @@
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
-// Top/ftpcClusterPars Allocated rows: 1  Used rows: 1  Row size: 120 bytes
+// Top/ftpcClusterPars Allocated rows: 1  Used rows: 1  Row size: 108 bytes
 //  Table: ftpcClusterPars_st[0]--> ftpcClusterPars_st[0]
 // ====================================================================
 // ------  Test whether this table share library was loaded ------
@@ -20,7 +20,6 @@ memset(&row,0,tableSet->GetRowSize());
     row.timeDiffusionErrors[1]	  =      1e-05;
     row.timeDiffusionErrors[2]	  =          0;
     row.lorentzAngleFactor        =          1; // multiplicative lorentz angle correction;
-    row.dvdpCalcOffset	          =       20.0; // offset for dv/dp-calculation (in Torr) ;
     row.padBadFitError	          =      0.095; // additional error for bad-fit clusters;
     row.timeBadFitError	          =      0.033; // additional error for bad-fit clusters;
     row.padUnfoldError	          =      0.019; // additional error for unfolded clusters;
@@ -36,8 +35,6 @@ memset(&row,0,tableSet->GetRowSize());
     row.threePadWeightedError	  =     0.0152; // additional error 3-pad-cluster, w.mean ;
     row.threePadGaussError	  =    0.00057; // additional error 3-pad-cluster, gaussfit ;
     row.zDirectionError	          =       0.01; // parameter for error in z-direction ;
-    row.directionOfMagnetField	  =          1; // direction of magnetic field (+/- 1) ;
-    row.baseTemperature	          =       20.0; // base temperature for calculations ;
     row.normalizedNowPressure	  =    1013.25; // normalized air pressure (in hPa) ;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
