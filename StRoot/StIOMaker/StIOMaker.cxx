@@ -84,27 +84,22 @@ Int_t StIOMaker::Open()
   fNumEvent = 0;
   if (!fFileSet) return kStEOF;
 
-  int nBr = fFileSet->GetNBranches();
-
-  for (int iBr=0; iBr<nBr; iBr++) { //branch loop
   
-    fNextFile = fFileSet->NextFileName();
-    if (!fNextFile) return kStEOF;
-    TString fmt = fFileSet->GetFormat();
-    TString bra = fFileSet->GetBraName();
+  fNextFile = fFileSet->NextFileName();
+  if (!fNextFile) return kStEOF;
+  TString fmt = fFileSet->GetFormat();
+  TString bra = fFileSet->GetBraName();
 
-    const char *cc = strstr(IOFMTS,(const char*)fmt);
-    if (!cc) return kStErr;
-    fCase = (cc-IOFMTS)/5+1; 
+  const char *cc = strstr(IOFMTS,(const char*)fmt);
+  if (!cc) return kStErr;
+  fCase = (cc-IOFMTS)/5+1; 
 
-    if (!fFmtMk[fCase-1]) fFmtMk[fCase-1] = Load();
-    fCurrMk = fFmtMk[fCase-1];
+  if (!fFmtMk[fCase-1]) fFmtMk[fCase-1] = Load();
+  fCurrMk = fFmtMk[fCase-1];
 
-    if (!fCurrMk) return kStErr;
-    fCurrMk->SetBranch(bra,fNextFile,0);
-    fCurrMk->SetFile(fNextFile);
-  
-  }//end branch loop
+  if (!fCurrMk) return kStErr;
+  fCurrMk->SetBranch(bra,fNextFile,0);
+  fCurrMk->SetFile(fNextFile);
   
   return fCurrMk->Open();
 }
