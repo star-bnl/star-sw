@@ -168,7 +168,7 @@ long tdmTable::  columnCount () {
 
    if(!dsTableColumnCount(&ccount,pDSthis)) {
       dsPerror("DSL_ERROR");
-      return -1;
+      return -1; /*-TDM_E_BAD_COLUMNCOUNT-*/
    }
    return (long)ccount;
 }
@@ -199,7 +199,7 @@ long tdmTable::  maxRowCount () {
    size_t count;
    if( !dsTableMaxRowCount(&count, pDSthis) ){
       dsPerror("DSL_ERROR");
-      return -1;
+      return -1; /*-TDM_E_BAD_MAXROWCOUNT-*/
    }
    return (long)count;
 }
@@ -216,7 +216,7 @@ long tdmTable::  rowCount () {
    size_t count;
    if( !dsTableRowCount(&count, pDSthis) ){
       dsPerror("DSL_ERROR");
-      return -1;
+      return -1; /*-TDM_E_BAD_ROWCOUNT-*/
    }
    return (long)count;
 }
@@ -227,7 +227,7 @@ long tdmTable::  rowSize () {
 
    if(!dsTableRowSize(&rsize,pDSthis)) {
       dsPerror("DSL_ERROR");
-      return -1;
+      return -1; /*-TDM_E_BAD_ROWSIZE-*/
    }
    return (long)rsize;
 }
@@ -350,7 +350,7 @@ long tdmTable:: columnNumber (const char * name) {
    size_t cnum;
    if( !dsFindColumn(&cnum, pDSthis, (char*)name) ){
       dsPerror("DSL_ERROR");
-      return -1;
+      return -1; /*-TDM_E_COLUMN_NOTFOUND-*/
    }
    return (long)cnum;
 }
@@ -392,7 +392,7 @@ char * tdmTable:: columnTypeName (long ncol) {
 long tdmTable:: columnSize (long ncol) {
    size_t c;
    if( !dsColumnSize(&c,pDSthis,ncol) ){
-      return -1;
+      return -1; /*-TDM_E_BAD_COLUMNSIZE-*/
    }
    return c;
 }
@@ -401,7 +401,7 @@ long tdmTable:: columnSize (long ncol) {
 long tdmTable:: columnRank (long ncol) {
    size_t c;
    if( !dsColumnDimCount(&c,pDSthis,ncol) ){
-      return -1;
+      return -1; /*-TDM_E_BAD_COLUMNRANK-*/
    }
    return c;
 }
@@ -412,7 +412,7 @@ long tdmTable:: columnShape (long ncol, long ndim) {
    if( !dsColumnDimensions(c,pDSthis,ncol)
    ||  !( ndim < columnRank(ncol) )
    ){
-      return -1;
+      return -1; /*-TDM_E_BAD_COLUMNSHAPE-*/
    }
    return c[ndim];
 }
@@ -421,7 +421,7 @@ long tdmTable:: columnShape (long ncol, long ndim) {
 long tdmTable:: columnElcount (long ncol) {
    size_t c;
    if( !dsColumnElcount(&c,pDSthis,ncol) ){
-      return -1;
+      return -1; /*-TDM_E_BAD_COLUMNELCOUNT-*/
    }
    return c;
 }
@@ -611,7 +611,7 @@ long tdmDataset::  entryCount () {
    size_t count;
    if( !dsDatasetEntryCount(&count, pDSthis) ){
       dsPerror("DSL_ERROR");
-      return -1;
+      return -1; /*-TDM_E_BAD_ENTRYCOUNT-*/
    }
    return count;
 }
@@ -621,7 +621,7 @@ long tdmDataset::  maxEntryCount () {
    size_t count;
    if( !dsDatasetMaxEntryCount(&count, pDSthis) ){
       dsPerror("DSL_ERROR");
-      return -1;
+      return -1; /*-TDM_E_BAD_MAXENTRYCOUNT-*/
    }
    return count;
 }
@@ -803,7 +803,7 @@ char * tdmFactory:: list () {
     "\n"
 "+-------+------------------------------+------------+-----------------"
     "\n");
-   for( int i=0;i<myCount;i++ ){
+   for( int i=0;i<count();i++ ){
       if( soc->getObject(entry(i),obj) ){
          if( 0 == strcmp("tdmTable",t=obj->type()) ){
 	    n=obj->name();
@@ -888,10 +888,10 @@ STAFCV_T tdmFactory:: createDataset (const char * name
    }
    static tdmDataset* p;
    p = new tdmDataset(name,pDS);
-   if( !soc->idObject(name,"tdmDataset",id) ){
+   if( !findDataset(name,dataset) ){
       EML_ERROR(OBJECT_NOT_FOUND);
    }
-   addEntry(id);
+   addEntry(dataset->idRef());
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -904,10 +904,10 @@ STAFCV_T tdmFactory:: createTable (const char * name
    }
    static tdmTable* p;
    p = new tdmTable(name,pDS);
-   if( !soc->idObject(name,"tdmTable",id) ){
+   if( !findTable(name,table) ){
       EML_ERROR(OBJECT_NOT_FOUND);
    }
-   addEntry(id);
+   addEntry(table->idRef());
    table = p;
    EML_SUCCESS(STAFCV_OK);
 }
