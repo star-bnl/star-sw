@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.37 1998/12/02 20:01:50 fisyak Exp $
+# $Id: MakeDll.mk,v 1.38 1998/12/03 23:39:55 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.38  1998/12/03 23:39:55  fisyak
+# Add geant to StRoot
+#
 # Revision 1.37  1998/12/02 20:01:50  fisyak
 # More NT
 #
@@ -144,14 +147,16 @@ ifdef NT
 endif
 
 
-CPPFLAGS += -D__ROOT__
+CPPFLAGS += -D__ROOT__ -I$(STAF_SYS_INCS) \
+             $(addprefix -I, $(SRC_DIR) $(GEN_TAB) $(GEN_DIR) $(INC_DIRS)) \
+            -I$(CERN_ROOT)/include
 
 #
 #	If NO source , NOTHING to do
 #	Skip up to the end
 #
-FILES_SRC := $(wildcard $(addprefix $(SRC_DIR)/, *.c *.cxx *.cc))
-FILES_SRC += $(wildcard $(addprefix $(SRC_DIR)/src/, *.c *.cxx *.cc))
+FILES_SRC := $(wildcard $(addprefix $(SRC_DIR)/, *.c *.cxx *.cc *.f *.F *.g))
+FILES_SRC += $(wildcard $(addprefix $(SRC_DIR)/src/, *.c *.cxx *.cc *.f *.F *.g))
 ifdef NT
 FILES_SRC := $(filter-out %_init.cc %_i.cc, $(FILES_SRC)) 
 endif
@@ -453,7 +458,24 @@ ifdef NT
 else
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS)  $(INCLUDES) $(CXXINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS)
 endif
-
+$(FILES_OG): $(OBJ_DIR)/%.$(O):%.g $(GEN_DIR)/geant3.def
+	$(CP)$(1ST_DEPS) $(GEN_DIR); cd $(GEN_DIR); $(GEANT3) $(1ST_DEPS) -o  $(GEN_DIR)/$(STEM).F
+	$(FOR72) $(subst /,\\,$(subst \,/,$(CPPFLAGS) $(FFLAGS) -c $(GEN_DIR)/$(STEM).F  $(FOUT)$(ALL_TAGS)))
+$(FILES_OBJ) $(FILES_ORJ) $(FILES_OTJ): $(OBJ_DIR)/%.$(O): %.cxx
+	$(CXX) $(CXXFLAGS) $(CXXOPT) $(subst \,/, $(CPPFLAGS) -c $(CXXINP)$(1ST_DEPS) $(COUT)$(OBJ_DIR)/$(STEM).$(O) -Fd$(OBJ_DIR)/$(DOMAIN)
+ifndef NT
+$(GEN_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def
+	test -h $(GEN_DIR)/geant3.def || $(RM)  $(GEN_DIR)/geant3.def
+	test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(GEN_DIR)/geant3.def 
+$(OBJ_DIR)/%.o:%.g $(GEN_DIR)/geant3.def
+	cp $(1ST_DEPS) $(GEN_DIR); cd $(GEN_DIR); $(GEANT3) $(1ST_DEPS) -o  $(GEN_DIR)/$(STEM).F
+	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(GEN_DIR)/$(STEM).F  -o  $(ALL_TAGS)
+$(OBJ_DIR)/%.o: %.F
+	$(FC)  $(CPPFLAGS) $(FFLAGS) $(FEXTEND)   -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
+	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).o; $(RM) $(OBJ_DIR)/$(STEM).o
+endif #/* NT */
+$(OBJ_DIR)/%.o: %.cdf
+	$(KUIPC) $(KUIPC_FLAGS) $(1ST_DEPS) $(GEN_DIR)/$(STEM).c
 $(FILES_DCINT): $(DEP_DIR)/%Cint.d: %.h 
 ifdef NT
 	@echo $(FILES_DCINT) $<
@@ -480,6 +502,22 @@ $(DEP_DIR)/%.d: %.cc
 	$(MAKEDEPEND) $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
 's/$(notdir $(STEM))\.o/$(subst .,\.,$(subst /,\/,$(OBJ_DIR)/$(STEM).o)) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
+$(DEP_DIR)/%.d:%.F
+	$(MAKEDEPEND) -traditional -x c $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
+'s/$(notdir $(STEM))\.F\.$(O)/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).$(O)))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
+        > $(ALL_TAGS)
+$(DEP_DIR)/%.d:%.f
+	$(MAKEDEPEND) -traditional -x c $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
+'s/$(notdir $(STEM))\.F\.$(O)/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).$(O)))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
+        > $(ALL_TAGS)
+$(DEP_DIR)/%.d:%.g
+	$(MAKEDEPEND) -traditional -x c $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
+'s/$(notdir $(STEM))\.g\.$(O)/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).$(O)))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
+        > $(ALL_TAGS)
+$(DEP_DIR)/%.d:%.cdf
+	cd $(SRC_DIR); \
+        echo "$(notdir $(STEM)).c $(ALL_TAGS): $(ALL_DEPS)" > $(ALL_TAGS) ;
+        echo "$(STEM).$(O): $(STEM).c" >> $(ALL_TAGS)
 endif
 DeleteDirs :
 ifndef NT
