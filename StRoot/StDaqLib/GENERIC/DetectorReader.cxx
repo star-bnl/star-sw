@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.8 2000/06/30 21:51:15 perev Exp $
+ * $Id: DetectorReader.cxx,v 1.9 2001/06/19 21:07:54 jeromel Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -12,6 +12,9 @@
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
+ * Revision 1.9  2001/06/19 21:07:54  jeromel
+ * Activate getFTPCReader (Janet S.)
+ *
  * Revision 1.8  2000/06/30 21:51:15  perev
  * L3 stuff added
  *
@@ -113,12 +116,12 @@ DetectorReader *getDetectorReader(EventReader *er, string det)
   return dr;
 }
 
-// DetectorReader *getFTPCReader(EventReader *er)
-// {
-//   string det="FTPC";
-//   DetectorReader *detReader=getDetectorReader(er,det);
-//   return detReader;
-// }
+DetectorReader *getFTPCReader(EventReader *er)
+{
+  string det="FTPC";
+  DetectorReader *detReader=getDetectorReader(er,det);
+  return detReader;
+}
 
 RICH_Reader *getRICHReader(EventReader *er)
 {
