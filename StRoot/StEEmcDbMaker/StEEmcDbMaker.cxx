@@ -1,7 +1,10 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.12 2003/08/02 01:02:17 perev Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.13 2003/08/22 20:52:20 balewski Exp $
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.13  2003/08/22 20:52:20  balewski
+// access to stat-table
+//
 // Revision 1.12  2003/08/02 01:02:17  perev
 // change %d to %p int printf
 //
@@ -73,6 +76,7 @@
 #include "tables/St_eemcDbPMTconf_Table.h"
 #include "tables/St_eemcDbPMTcal_Table.h"
 #include "tables/St_eemcDbPMTped_Table.h"
+#include "tables/St_eemcDbPMTstat_Table.h"
 #include "cstructs/eemcConstDB.hh"
 
 
@@ -97,6 +101,7 @@ StEEmcDbMaker::StEEmcDbMaker(const char *name):StMaker(name){
   for(i=0;i<mxAdcCrate;i++)
     mLookup[i]=new StEEmcDbIndexItem1 * [mxAdcChan];
 
+  setDBname("Calibrations/eemc");
 }
 
 
@@ -116,6 +121,7 @@ StEEmcDbMaker::~StEEmcDbMaker(){
     delete [] mDbPMTconf;
     delete [] mDbPMTcal;
     delete [] mDbPMTped;
+    delete [] mDbPMTstat;
     delete [] mDbsectorID;
   }
 }
@@ -187,6 +193,7 @@ void StEEmcDbMaker::setSectors(int sec1,int sec2){
   mDbPMTconf=(eemcDbPMTconf_st **) new void *[mNSector];
   mDbPMTcal= (eemcDbPMTcal_st  **) new void *[mNSector];
   mDbPMTped= (eemcDbPMTped_st  **) new void *[mNSector];
+  mDbPMTstat=(eemcDbPMTstat_st **) new void *[mNSector];
   mDbsectorID=  new int [mNSector];
   
   printf("\n\n%s::Use sectors from %d to %d\n",GetName(),mfirstSecID,mlastSecID);
@@ -247,6 +254,7 @@ void  StEEmcDbMaker::mReloadDb  (){
     mDbPMTconf[i]=0;
     mDbPMTcal [i]=0;
     mDbPMTped [i]=0;
+    mDbPMTstat[i]=0;
     mDbsectorID[i]=-1;
   }
   
@@ -264,10 +272,10 @@ void  StEEmcDbMaker::mReloadDb  (){
   assert(mydb);
    
   if(myTimeStampDay==0) { // use oryginal timestamp of event   
+
 #if 0
     StEvent *stEvent= (StEvent *) GetInputDS("StEvent"); 
-    assert(stEvent); 
-    
+    assert(stEvent);     
     printf("StEvent time=%d, ID=%d, runID=%d\n",(int)stEvent->time(),(int)stEvent->id(),(int)stEvent->runId());
 #endif
     
@@ -285,14 +293,14 @@ void  StEEmcDbMaker::mReloadDb  (){
   // mydb->SetDateTime(20021201,0); // set ~day & ~hour by hand
 
 
-  printf("JB: access DB info, first time, use timeStamp=\n  ");
+  printf("JB: access DB=\"%s\"  first time, use timeStamp=\n  ",dbName.Data());
   TDatime aa;
   aa=mydb->GetDateTime();
   aa.Print();
   
-  TDataSet *eedb=GetDataBase("Calibrations/eemc");
+  TDataSet *eedb=GetDataBase(dbName );
   if(eedb==0) {
-    printf(" \n\n%s::InitRun()  Could not find Calibrations/eemc\n\n",GetName());
+    printf(" \n\n%s::InitRun()  Could not find %s\n\n",GetName(),dbName.Data());
     return ;
     // down-stream makers should check for presence of dataset
   }
@@ -365,10 +373,26 @@ void  StEEmcDbMaker::mReloadDb  (){
     }
 
 
+    sprintf(name,"%s/eemcPMTstat",secTx); //.................
+    printf("request=%s==>",name);
+    St_eemcDbPMTstat *ds5= (St_eemcDbPMTstat *)eedb->Find(name);
+    if(ds5) {
+      assert(ds5->GetNRows()==1);  // DB TABLE HAS ONLY ONE ROW
+      mDbPMTstat[is]=(eemcDbPMTstat_st *) ds5->GetArray();
+      assert(mDbPMTstat[is]); // db error
+      printf("\n  comm='%s'\n",mDbPMTstat[is]->comment);
+      mCleanDbNames(mDbPMTstat[is]->name, EEMCDbMaxAdcName);
+      nFound++;
+    } else {
+      printf("Not Found in DB : %s , continue \n",name);
+    }
+
+
   } // end of loop over sectors
 
+ 
   printf("%s::InitRun()  Found %d EEMC related tables for the present time stamp\n",GetName(),nFound);
-  if(nFound<=0) printf("WARN : no relevant records were in db, makes no sense to use this maker for any work, JB\n");
+
 }
  
 //__________________________________________________
@@ -394,6 +418,10 @@ void  StEEmcDbMaker::mOptimizeDb(){
 
   int i, j;
   printf("\noptimizeDb :::::: %s\n\n",GetName());
+  if(nFound<=0) {
+    printf("\n\nWARN : no relevant records were in db, makes no sense to use %s maker for any work, JB\n\n",GetName());
+    return;
+  }
 
 
   // primary information: crate,chan <--> element name

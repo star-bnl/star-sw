@@ -10,7 +10,7 @@
 
 
 void StEEmcDbIndexItem1::print() const{
-  printf("DbIndexItem: %s crate=%d chan=%3d sec=%d sub=%c eta=%d gain=%.3f hv=%6.1f ped=%.2f ADC thr=%.2f\n",name,crate,chan,sec,sub,eta,gain,hv,ped,thr);
+  printf("DbIndexItem: %s crate=%d chan=%3d sec=%d sub=%c eta=%d gain=%.3f hv=%6.1f ped=%.2f ADC thr=%.2f stat=0x%4x fail=0x%4x\n",name,crate,chan,sec,sub,eta,gain,hv,ped,thr,stat,fail);
 }
 
 void StEEmcDbIndexItem1::clear() {
@@ -22,6 +22,7 @@ void StEEmcDbIndexItem1::clear() {
   sub='Z';
   eta=-5;  
   thr=-6;
+  stat=fail=0;
 }
 
 void StEEmcDbIndexItem1::setName(char *text) {

@@ -17,6 +17,8 @@ class StEEmcDbIndexItem1 {
   float ped,thr; // in ADC channals
   int sec,eta;
   char sub;
+  unsigned short stat; // bits, see eemcConstDB.hh for definitions
+  unsigned short fail; // bits, see eemcConstDB.hh for definitions
 
   StEEmcDbIndexItem1();
   void clear();
