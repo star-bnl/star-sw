@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrgMaker.h,v 1.1 2001/04/23 20:00:27 ward Exp $
+ * $Id: StTrgMaker.h,v 1.2 2001/07/27 17:40:18 ward Exp $
  *
  * Author: Herbert Ward
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrgMaker.h,v $
+ * Revision 1.2  2001/07/27 17:40:18  ward
+ * Handles reversed B field, also has code for chking triggerWord.
+ *
  * Revision 1.1  2001/04/23 20:00:27  ward
  * Outputs info for CTB calib: slat ADCs and TPC track extensions.
  *
@@ -92,6 +95,7 @@ private:
     //  Methods (== member functions)
     //  Remember: these are just examples!
     //
+    double mMagneticField;
     bool accept(StEvent*);            // this method serves as an event filter
     bool accept(StTrack*);            // and this is used to select tracks
     void DoOneTrack(FILE *oo,long q,double curvature,double phi0,

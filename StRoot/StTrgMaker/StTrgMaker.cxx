@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrgMaker.cxx,v 1.3 2001/07/22 23:00:27 ward Exp $
+ * $Id: StTrgMaker.cxx,v 1.4 2001/07/27 17:40:18 ward Exp $
  *
  * Author: Herbert Ward April 2001
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StTrgMaker.cxx,v $
+ * Revision 1.4  2001/07/27 17:40:18  ward
+ * Handles reversed B field, also has code for chking triggerWord.
+ *
  * Revision 1.3  2001/07/22 23:00:27  ward
  * Added diagnostics to output file.  Also doc improvements.
  *
@@ -86,12 +89,24 @@ Int_t StTrgMaker::Make() {
     return kStOK;
   }
 
+  StEventSummary *summary = event->summary();  // This should be in StTrgMaker::Init().  It wastes time 
+  assert(summary);                             // every event.  But no
+  mMagneticField = summary->magneticField();   // big deal.
+
   StTriggerDetectorCollection *theTriggers = event->triggerDetectorCollection();
   if (!theTriggers) {
     fprintf(out,"# Event %3d: triggerDetectorCollection is missing\n",mEventCounter);
     fclose(out);
     return kStOK;
   }
+  StL0Trigger *l0Trigger = event->l0Trigger();
+  if(!l0Trigger) {
+    fprintf(out,"# Event %3d: l0Trigger is missing\n",mEventCounter);
+    fclose(out);
+    return kStOK;
+  }
+  fprintf(out,"# Event %3d, triggerWord = 0x%04x\n",mEventCounter,l0Trigger->triggerWord());
+
   StCtbTriggerDetector &theCtb = theTriggers->ctb();
 
   fprintf(out,"e %d\n",mEventCounter);
@@ -187,7 +202,8 @@ void StTrgMaker::CalcCenterOfCircleDefinedByTrack(int q,double radius,double psi
   double angleOffset,xstart,ystart;
   xstart=r0*cos(RPD*phi0);
   ystart=r0*sin(RPD*phi0);
-  if(q>=0) angleOffset=-90; else angleOffset=90;
+  if(mMagneticField>0) { if(q>=0) angleOffset=-90; else angleOffset= 90; }
+  else                 { if(q>=0) angleOffset= 90; else angleOffset=-90; }
   *xcenter=xstart+radius*cos(RPD*(psi+angleOffset));
   *ycenter=ystart+radius*sin(RPD*(psi+angleOffset));
 }
@@ -281,7 +297,7 @@ void StTrgMaker::DoOneTrack(FILE *oo,long q,double curvature,double phi0,
     angle+=atan2(outerIntersectionY-ycenter,outerIntersectionX-xcenter)-atan2(ystart-ycenter,xstart-xcenter);
     count++;
   }
-  // bbb restore this, or sth better.   if(fabs(tanl)>0.8) { FakeInfo(oo,101); return; } // 0.8
+  // The 180 below does this. if(fabs(tanl)>0.8) { FakeInfo(oo,101); return; }
   if(count<1) { FakeInfo(oo,124); return; } /* The track does not intersect the CTB because of low pt. */
   angle/=count; zintersection=z0+tanl*radius*fabs(angle);
   if(fabs(zintersection)>180.0) { FakeInfo(oo,107); return; }
