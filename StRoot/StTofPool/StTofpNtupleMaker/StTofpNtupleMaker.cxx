@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofpNtupleMaker.cxx,v 1.4 2004/04/09 19:26:25 dongx Exp $
+ * $Id: StTofpNtupleMaker.cxx,v 1.5 2004/04/10 04:36:25 dongx Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofpNtupleMaker.cxx,v $
+ * Revision 1.5  2004/04/10 04:36:25  dongx
+ * additional update for AdcLoRes in ntuple
+ *
  * Revision 1.4  2004/04/09 19:26:25  dongx
  * Add some missing updates for year4, add AdcLoRes in ntuple
  *
@@ -385,7 +388,8 @@ void StTofpNtupleMaker::bookNtuples(){
   // pVPD timing
   string varList = "run:evt:trgwrd:magfield:zvtx:zvtxchi2:ctbsum"
                    ":zdceast:zdcwest:refmult:nprimary:tofpsum" 
-                   ":ntofp:te1:te2:te3:tw1:tw2:tw3:ae1:ae2:ae3:aw1:aw2:aw3";
+                   ":ntofp:te1:te2:te3:tw1:tw2:tw3:ael1:ael2:ael3"
+                   ":awl1:awl1:awl3:ae1:ae2:ae3:aw1:aw2:aw3";
   mPvpdTuple = new TNtuple("pvpd","tofp timing",varList.c_str());
 
   // TOFp calibration ntuple
