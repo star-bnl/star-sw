@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.h,v 2.2 2000/09/29 19:04:43 lasiuk Exp $
+ * $Id: StRichClusterAndHitFinder.h,v 2.3 2000/11/07 14:12:47 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,14 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.h,v $
- * Revision 2.2  2000/09/29 19:04:43  lasiuk
- * hit calculation factorized to allow
- * deconvolution.  A flag was added to denote
- * this process (eDeconvolution).
- * MC info restored in classifyHit() member
- * cut parameters (for decon) added in initializeCutParameters()
- * startAmplitude set to 0.  This keeps track of the local
- * max of the hit now.
+ * Revision 2.3  2000/11/07 14:12:47  lasiuk
+ * init() information and
+ * quadrant threshold cuts default is 200 ADC counts
  *
  * Revision 2.2  2000/09/29 19:04:43  lasiuk
  * hit calculation factorized to allow
@@ -101,6 +96,8 @@ public:
     StRichClusterAndHitFinder(unsigned int x, unsigned int y);
     ~StRichClusterAndHitFinder();
 
+    void init();
+    
     //StRichClusterAndHitFinder(const StRichClusterAndHitFinder&){/* use default*/}
     //StRichClusterAndHitFinder operator=(const StRichClusterAndHitFinder&){/* use default*/}
 
@@ -117,7 +114,7 @@ public:
 #endif
     void loadPixels(vector<StRichSinglePixel>&);
     void loadPixels(vector<StRichSinglePixel*>&);
-    //
+    
     void addSinglePixel(StRichSinglePixel*);
     void setBorderFlags();
     
@@ -127,6 +124,11 @@ public:
     
     bool isSet(StRichSinglePixelFlag f)      const;
 
+    //
+    // Gain parameters
+    void setQuadrantThreshold(int,int,int,int);
+    void printQuadrantThreshold(ostream& os=cout)   const;
+    
     //Main control!  calls functions below!
     bool makeTheClustersAndFilter(); 
     bool simpleHitsFromClusters();
@@ -182,7 +184,8 @@ private:
     
 private:
     StRichGeometryDb*            mGeometryDb;
-
+    StRichCoordinateTransform*   mTransform;
+    
     // Dimensions X x Y
     int mX;
     int mY;
@@ -196,6 +199,9 @@ private:
     int mMaxClusterWidth;
     float mMaxAspectRatio; // length/width
     float mMinChargeFraction;  // fraction of charge central pad possess
+
+    double mQuadrantThresholdCharge[5][2];
+    int    mGainVoltage;
     
     // tmp storage for comparison to cuts
     int mNumberOfSaturatedPads;

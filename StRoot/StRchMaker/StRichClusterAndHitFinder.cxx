@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.cxx,v 2.4 2000/11/01 16:51:10 lasiuk Exp $
+ * $Id: StRichClusterAndHitFinder.cxx,v 2.5 2000/11/07 14:12:44 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,8 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.cxx,v $
- * Revision 2.4  2000/11/01 16:51:10  lasiuk
- * print the number of pads in dumpHitInfo()
+ * Revision 2.5  2000/11/07 14:12:44  lasiuk
+ * init() information and
+ * quadrant threshold cuts default is 200 ADC counts
  *
  * Revision 2.5  2000/11/07 14:12:44  lasiuk
  * init() information and
@@ -96,7 +97,8 @@ using std::back_inserter;
 
 //#include "StDaqLib/GENERIC/EventReader.hh"
 //#include "StDaqLib/RICH/RICH_Reader.hh"
-    mGeometryDb = StRichGeometryDb::getDb(); // Singleton
+
+
 StRichClusterAndHitFinder::StRichClusterAndHitFinder()
 {
     this->init();
@@ -112,16 +114,54 @@ StRichClusterAndHitFinder::StRichClusterAndHitFinder()
     mThePixels.resize(mX,mY);
 
     this->initializeCutParameters();
-    mGeometryDb = StRichGeometryDb::getDb(); // Singleton
+}
 
 StRichClusterAndHitFinder::StRichClusterAndHitFinder(unsigned int x, unsigned int y)
-    cout << "\tERROR! SHOULD NEVER BE CALLED" << endl;
+{
+    this->init();
     
     cout << "StRichClusterAndHitFinder::StRichClusterAndHitFinder(int,int)";
     cout << "\tSHOULD NEVER BE CALLED" << endl;
     cout << "\tARE YOU SURE YOU MEAN TO DO THIS?" << endl;
     mX = x;
     mY = y;
+    mThePixels.resize(mX,mY);
+    this->initializeCutParameters();
+
+}
+
+void StRichClusterAndHitFinder::init()
+{
+    //
+    // Must be called from any c'tor to initialize
+    // the Geometry and Transformation Classes
+    // which are both Singletons
+    //
+    
+    mGeometryDb = StRichGeometryDb::getDb();
+
+    mTransform  = StRichCoordinateTransform::getTransform(mGeometryDb);
+
+    //
+    // Set the array which determines the Threshold for
+    // calling a hit either a "photon" or "Mip"
+    // Default setting is 2100 V
+    //
+    // do not use the index 0 for quadrant
+    // index definitions:  [quad][decon]
+    //
+    
+    mQuadrantThresholdCharge[0][0] = 0;
+    mQuadrantThresholdCharge[0][1] = 0;
+    mQuadrantThresholdCharge[1][0] = 200;
+    mQuadrantThresholdCharge[1][1] = 200;
+    mQuadrantThresholdCharge[2][0] = 200;
+    mQuadrantThresholdCharge[2][1] = 200;
+    mQuadrantThresholdCharge[3][0] = 200;
+    mQuadrantThresholdCharge[3][1] = 200;
+    mQuadrantThresholdCharge[4][0] = 200;
+    mQuadrantThresholdCharge[4][1] = 200;
+    mGainVoltage = 2100;
 
     this->printQuadrantThreshold();
 }
@@ -161,7 +201,6 @@ void StRichClusterAndHitFinder::clearAndDestroyAll()
 }
 
 StRichClusterAndHitFinder::~StRichClusterAndHitFinder()
-
 {
     //this->clearAndDestroyAll();
 }
@@ -239,6 +278,67 @@ void StRichClusterAndHitFinder::setBorderFlags()
 	   tmpRow == 48  ||
 	   tmpRow == 95    ) {
 	    //cout << "setPixels()=>Border " << *mThePixels[ii] << endl;
+	    mThePixels[ii]->setBit(eBorder);
+	}
+    }
+}
+
+void StRichClusterAndHitFinder::setQuadrantThreshold(int quad,
+						     int decon,
+						     int value,
+						     int voltage)
+{
+    if(quad==0 || quad>4) {
+	cout << "StRichClusterAndHitFinder::setQuadrantThreshold()" << endl;
+	cout << "\tERROR: You are trying to set parameters for a non-existent sector" << endl;
+	cout << "\tAbort()" << endl;
+	abort();
+    }
+    
+    if(voltage>2200) {
+	cout << "StRichClusterAndHitFinder::setQuadrantThreshold()" << endl;
+	cout << "\tERROR: You are trying to set a bad voltage" << endl;
+	cout << "\tAbort()" << endl;
+	abort();
+    }
+    
+    if(decon<0 || decon>1) {
+	cout << "StRichClusterAndHitFinder::setQuadrantThreshold()" << endl;
+	cout << "\tERROR: You are trying to an invalid deconvolution value" << endl;
+	cout << "\tAbort()" << endl;
+	abort();
+    }
+
+    if(value<0 || value>1023) {
+	cout << "StRichClusterAndHitFinder::setQuadrantThreshold()" << endl;
+	cout << "\tERROR: You are trying to an invalid ADC Threshold" << endl;
+	cout << "\tAbort()" << endl;
+	abort();
+    }
+    
+    mQuadrantThresholdCharge[quad][decon] = value;
+    mGainVoltage = voltage;
+}
+
+void StRichClusterAndHitFinder::printQuadrantThreshold(ostream& os) const {
+
+    os << "===================================================" << endl;
+    os << "StRichClusterAndHitFinder::printQuadrantThreshold()" << endl;
+    os << " Isolated     Hit Threshold" << endl;
+    os << " Deconvoluted Hit Threshold" << endl;
+    os << "---------------------------------------------------" << endl;
+    os << " Quadrant 2:             Quadrant 1:             " << endl;
+    os << "\t"     << mQuadrantThresholdCharge[2][0]
+       << "\t\t\t" << mQuadrantThresholdCharge[1][0] << endl;
+    os << "\t"     << mQuadrantThresholdCharge[2][1]
+       << "\t\t\t" << mQuadrantThresholdCharge[1][1] << endl;
+    os << endl;
+    os << " Quadrant 3:             Quadrant 4:             " << endl;
+    os << "\t"     << mQuadrantThresholdCharge[3][0]
+       << "\t\t\t" << mQuadrantThresholdCharge[4][0] << endl;
+    os << "\t"     << mQuadrantThresholdCharge[3][1]
+       << "\t\t\t" << mQuadrantThresholdCharge[4][1] << endl;
+    os << "---------------------------------------------------" << endl;
     os << " Settings for " << mGainVoltage << " V" << endl;
     os << "---------------------------------------------------" << endl;
 }
@@ -923,15 +1023,14 @@ bool StRichClusterAndHitFinder::useTheMovingMatrix(StRichSinglePixel* pix, int c
     return status;
 }
 
-    StRichCoordinateTransform* myTransform =
-	StRichCoordinateTransform::getTransform(mGeometryDb);
+void StRichClusterAndHitFinder::calculateHitsInLocalCoordinates()
 {
 //     cout << "StRichClusterAndHitFinder::calculateHitsInLocalCoordinates()" << endl;
     // Loop over hits:
 
     StRichLocalCoordinate local;
     
-	(*myTransform)(raw,local);
+//     PR(mTheHits.size());
     for(size_t ii =0; ii<mTheHits.size(); ii++) {
 	StRichRawCoordinate raw(mTheHits[ii]->internal().x(),
 				mTheHits[ii]->internal().y());
@@ -944,15 +1043,13 @@ bool StRichClusterAndHitFinder::useTheMovingMatrix(StRichSinglePixel* pix, int c
     }
 }
 
-    StRichCoordinateTransform* myTransform =
-	StRichCoordinateTransform::getTransform(mGeometryDb);
 void StRichClusterAndHitFinder::calculateHitsInGlobalCoordinates()
 {
 //     cout << "StRichClusterAndHitFinder::calculateHitsInLocalCoordinates()" << endl;
     // Loop over hits:
     StGlobalCoordinate global;
     
-	(*myTransform)(raw,global);
+//     PR(mTheHits.size());
     for(size_t ii =0; ii<mTheHits.size(); ii++) {
 	StRichRawCoordinate raw(mTheHits[ii]->internal().x(),
 				mTheHits[ii]->internal().y());
@@ -1157,6 +1254,9 @@ size_t StRichClusterAndHitFinder::findTheLocalMaximaInCluster(StRichSimpleCluste
     
     return numberOfCentralMax;
 }
+
+bool StRichClusterAndHitFinder::fillHitInformation(StRichHitInformation& info)
+{
 //      cout << "StRichClusterAndHitFinder::fillHitStructure()" << endl;
     //
     // Remember the internal coordinate is in pad/row fractions
@@ -1165,7 +1265,34 @@ size_t StRichClusterAndHitFinder::findTheLocalMaximaInCluster(StRichSimpleCluste
     mTheHits.back()->sigma() = info.positionError();
     
     mTheHits.back()->setCharge(info.charge());
-//      cout << *mTheHits.back() << endl;
+    mTheHits.back()->setClusterNumber(info.clusterNumber());
+    mTheHits.back()->setMaxAmplitude(info.maxAdc());
+    mTheHits.back()->setNumberOfPads(info.numberOfPads());
+//     mTheHits.back()->setRms();
+
+    //
+    // classification of the hit based on amplitude
+    // -- in sector #
+    // -- deconvoluted
+
+    int quadrantNumber =
+	(*mTransform).whichQuadrant(StRichRawCoordinate(info.position().x(),
+							info.position().y()));
+
+    if(!mTheHits.back()->isSet(eDeconvoluted)) { // Isolated clusters
+	if(info.charge() < mQuadrantThresholdCharge[quadrantNumber][0]) {
+	    mTheHits.back()->setBit(ePhotoElectron);
+	}
+	else {
+	    mTheHits.back()->setBit(eMip);
+	}
+    }
+    else {// Deconvoluted Cluster
+	if(info.charge() < mQuadrantThresholdCharge[quadrantNumber][1]) {
+	    mTheHits.back()->setBit(ePhotoElectron);
+	}
+	else {
+	    mTheHits.back()->setBit(eMip);
 	}
     }
     
