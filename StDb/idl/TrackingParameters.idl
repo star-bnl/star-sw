@@ -1,0 +1,14 @@
+/*    TrackingParameters.idl
+*
+*  Table: TrackingParameters
+*
+*       description:
+*/ 
+	
+
+struct TrackingParameters { 
+	double MinSearch; /*  Minimum Search Window */
+	double MaxSearch; /*  Maximum Search Window */
+	double Scaling;   /*  Search Window Scaling */
+	double MaxChi2;   /*  Max Chi2 */
+ };  
