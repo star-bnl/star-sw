@@ -107,6 +107,10 @@ C     - Also fill new entry in tphit table, nseq=nseq of contributing cluster
 C     -	now using consistent convention of sector=1..24, row=1..45 for all
 C       tables from tpseq,tpcluster on
 C
+C    21 Apr 1995
+C     -	uncertainty in position along pad row for hits fit w/ 3-point gaussian
+C	now caculated in a non-ad-hoc fashion, depends on signal:noise
+C
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
@@ -196,7 +200,7 @@ C-----------------------------------------------------------------------
 
         integer ntim, nseq, jseq
 
-        real pad_width, time_bucket, time_bin, tval
+        real pad_width, time_bucket, time_bin, tval, rms_noise
         real rstat
 	real rad,dx_prime
 
@@ -231,10 +235,8 @@ c->         constants...
 c
             time_bucket = detector(1).drift_length/tsspar(1).ntime
             time_bin = time_bucket/tsspar(1).v_drift
-
-
-c	    write(6,*)'input icheck'
-c	    read(5,*)ichek			! mal -** temp
+	    rms_noise = sqrt((tsspar(1).white_rms)**2 +
+     +		(tsspar(1).sca_rms)**2)/tsspar(1).scale
 
         endif
 
@@ -274,7 +276,8 @@ c              tphit(tphith.nok).row = 100*((isec+1)/2)+krow	! mal 19jan95
               tphit(tphith.nok).track = itrk   ! for now this is MC info
 
 	      call tph_fit_cluster(nseq, nclspix, npix_pad,
-     +				   ipad, itdc, iadc, tphith, tphit)
+     +				   ipad, itdc, iadc, tphith, tphit,
+     +				   rms_noise)
 
            else
 c
@@ -341,27 +344,17 @@ c	also, calculate "orientation" of hit in terms of spatial quantities
      +				  	tphit(tphith.nok).phi *
      +					time_bucket / pad_width )
 
-c
-c       finally, should calculate dx, dy, and dz ...
-c       note that sigma_prf IS NOT sigma_x, etc...
-c
-c Dhamika's code is complaining about dx=dy=dz=0.0  Here I put in
-c  what amounts to a first estimate of the spatial uncertainties...
-c  mal 3mar95
-c
-	if (tphit(tphith.nok).q.ne.0.0) then
-	  tphit(tphith.nok).dz = tphit(tphith.nok).zrf/
-     +		sqrt(tphit(tphith.nok).q)
+c must also rotate dx,dy into global coordinates...
+	tphit(tphith.nok).dz = time_bucket*tphit(tphith.nok).dz
+	dx_prime = pad_width*tphit(tphith.nok).dx
 c for explanation of what follows, see bottom of notebook p59
-	  dx_prime = abs(tphit(tphith.nok).prf)/
-     +		sqrt(tphit(tphith.nok).q)
-	  rad = sqrt((tphit(tphith.nok).x)**2+
+	rad = sqrt((tphit(tphith.nok).x)**2+
      +		(tphit(tphith.nok).y)**2)
-	  tphit(tphith.nok).dx = dx_prime *
+	tphit(tphith.nok).dx = dx_prime *
      +		abs(tphit(tphith.nok).y)/rad
-	  tphit(tphith.nok).dy = dx_prime *
+	tphit(tphith.nok).dy = dx_prime *
      +		abs(tphit(tphith.nok).x)/rad
-	endif
+
 
  999       continue
         enddo
@@ -589,7 +582,7 @@ c	write(13,*)'ntrk,iclspix for this cluster.....',ntrk,iclspix	! mal -** temp
 C-----------------------------------------------------------------------
 	Subroutine tph_fit_cluster(nseq, nclspix, npix_pad,
      +				ipad, itdc, iadc, 
-     +				tphith, tphit)
+     +				tphith, tphit,rms_noise)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -602,6 +595,7 @@ C     npix_pad: number of pixels in each sequence in cluster
 C     ipad:	for each pixel, what is pad #
 C     itdc:	for each pixel, what is bucket #
 C     iadc:	for each pixel, what is adc value
+C     rms_noise: rms noise on adc values
 C
 C   Output arguments : 
 C
@@ -650,12 +644,12 @@ C-----------------------------------------------------------------------
 	real ipad(*),itdc(*),iadc(*)
 	integer npix_pad(*)
 
-	real centroid,sigma,uncertainty,sum
+	real centroid,sigma,uncertainty,sum,rms_noise,dt0
 C-----------------------------------------------------------------------
 	integer lvmax
 	integer iseq,iptr_lo,iptr_hi
 	integer itim,ipix
-	real padsum(50),padnum(50),padtime(50),padwidth(50)
+	real padsum(50),padnum(50),padtime(50),padwidth(50),d_padsum(50)
 	real tseq(100),aseq(100)	! for passing to pulse-fitting routine
 	real t0,tau
 	real hitsum
@@ -666,7 +660,7 @@ C-----------------------------------------------------------------------
 	real dylin(50),slope,intercept
 	real dslope,dintercept
 	real padtime_arr(50),padwidth_arr(50)
-	real padsum_arr(50),padnum_arr(50)
+	real padsum_arr(50),padnum_arr(50),d_padsum_arr(50)
 C-----------------------------------------------------------------------
 
 c loop over sequences to (1) make projection in pad direction 	(padnum,padsum)
@@ -689,6 +683,7 @@ c (here it is assumed that each sequence is on a different pad)
 	    tseq(itim) = itdc(ipix)
 	    aseq(itim) = iadc(ipix)
 	  enddo
+	  d_padsum(iseq) = sqrt(padsum(iseq))*rms_noise
 	  iptr_lo = iptr_hi + 1
 	  hitsum = hitsum + padsum(iseq)
 	  if (npix_pad(iseq).ge.3) then		! little time info if <3 bkts
@@ -700,6 +695,7 @@ c (here it is assumed that each sequence is on a different pad)
 	      padtime_arr(ngood_times)  = padtime(iseq)
 	      padwidth_arr(ngood_times) = padwidth(iseq)
 	      padsum_arr(ngood_times)   = padsum(iseq)
+	      d_padsum_arr(ngood_times) = d_padsum(iseq)
 	      padnum_arr(ngood_times)   = padnum(iseq)
 	      dylin(ngood_times)	= 1.0/sqrt(padsum(iseq)) ! ad hoc
 	    endif
@@ -714,36 +710,40 @@ c calculate hit position along pad row: fit to gaussian.  If that does not
 c   work, do a weighted mean
 c
 	sigma = -1.0
-	if (nseq.ge.3) call tph_3point_gauss(padnum, padsum, nseq,
-     +					     centroid, sigma)
+	if (nseq.ge.3) call tph_3point_gauss(padnum, padsum, d_padsum, nseq,
+     +					     centroid, sigma, uncertainty)
 	if (sigma.le.0.0) then
-	  call tph_weighted_mean(padnum, padsum, nseq,
-     +				 centroid, sigma)
+	  call tph_weighted_mean(padnum, padsum, d_padsum, nseq,
+     +				 centroid, sigma, uncertainty)
 	  sigma = -sigma		! use sign to flag different algorithm
 	endif
 
 	tphit(tphith.nok).x = centroid
 	tphit(tphith.nok).prf = sigma
+	tphit(tphith.nok).dx = uncertainty
 
 c Calculate hit position along time direction from sequences with well-defined
 c  t0's
 
 	if (ngood_times.ge.1) then
-	  call tph_weighted_mean(padtime_arr, padsum_arr, ngood_times,
-     +				 t0, mom2)
-	  call tph_weighted_mean(padwidth_arr, padsum_arr, ngood_times,
-     +				 tau, mom2)
+	  call tph_weighted_mean(padtime_arr, padsum_arr, d_padsum_arr, ngood_times,
+     +				 t0, mom2,dt0)
+	  call tph_weighted_mean(padwidth_arr, padsum_arr, d_padsum_arr, ngood_times,
+     +				 tau, mom2,uncertainty)
 	else
-	  id = 0
+	  id = 5
 	  call message('TPH_FIT_CLUSTER no good time peaks-taking max',
      +			1, id)
 	  imax = lvmax(iadc,nclspix)
 	  t0 = itdc(imax)
 	  tau = 0.0
+	  dt0 = 0.0
 	endif
 
 	tphit(tphith.nok).z   = t0
+	tphit(tphith.nok).dz  = dt0
 	tphit(tphith.nok).zrf = tau
+
 
 c now linear fit to padtime vs padnum:
 	if (ngood_times.gt.1) then	
@@ -816,11 +816,12 @@ C-----------------------------------------------------------------------
 	real sum
 C-----------------------------------------------------------------------
 
-
+	real dummy_errs(50),uncertainty
+	data dummy_errs/50*1/
 
 ***** I am bypassing all the fancy stuff below for a simple weighted mean **
 
-	call tph_weighted_mean(tseq,aseq,itim,t0,tau)
+	call tph_weighted_mean(tseq,aseq,dummy_errs,itim,t0,tau,uncertainty)
 	return
 
 ************************************************************8
@@ -926,8 +927,8 @@ c calculate "width" tau
 
 
 C-----------------------------------------------------------------------
-	Subroutine tph_3point_gauss(x, y, npts,
-     +				centroid, sigma)
+	Subroutine tph_3point_gauss(x, y, dy, npts,
+     +				centroid, sigma, uncertainty)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -935,6 +936,7 @@ C-----------------------------------------------------------------------
 C   Input arguments  (One to a line with definition after ! ) 
 C
 C     y		- y(x) distribution to fit to gaussian
+C     dy	- uncertainties on y(x)
 C     x		- x coordinate for each point
 C     npts	- number of samples in distribution
 C
@@ -942,6 +944,7 @@ C   Output arguments :
 C
 C     centroid 	- Gaussian centroid from 3-point fit to y(x)
 C     sigma	- Gaussian width from 3-point fit to y(x)
+C     uncertainty - uncertainty in centroid
 C
 C  Returns:
 C       Contained in the output arguments...
@@ -964,9 +967,9 @@ C	it has a peak on one edge), a negative sigma is returned and no
 C	centroid is calculated
 C
 C-----------------------------------------------------------------------
-	real y(*),x(*)
+	real y(*),x(*),dy(*)
 	integer npts
-	real centroid,sigma
+	real centroid,sigma,uncertainty,x0
 C-----------------------------------------------------------------------
 	integer lvmax
 	integer ipt,imax,istart,id
@@ -982,12 +985,14 @@ C-----------------------------------------------------------------------
      +			1,id)
 c	  istart=1
 	  sigma = -1.0
+	  return
 	else
 	  id = 0
 	  call message('TPH_3POINT_GAUSS peak at last point',
      +			1,id)
 c	  istart=npts-2
 	  sigma = -1.0
+	  return
 	endif
 
 	y1 = y(istart)
@@ -999,11 +1004,17 @@ c	  istart=npts-2
 	  id = 0
 	  call message('TPH_3POINT_GAUSS unexpected delta .ne. 1',
      +			1,id)
+	  return
 	endif
 
 	r213 = log(y2*y2/(y1*y3))
-	centroid = x(istart+1) + (delta/2.0) * log(y3/y1)/r213
+	x0 = (delta/2.0) * log(y3/y1)/r213
+	centroid = x(istart+1) + x0
 	sigma = delta/sqrt(r213)
+
+	uncertainty = sqrt( (dy(istart)*(delta/2.0-x0)/y(istart))**2 +
+     +			    (dy(istart+1)*(2.0*x0)/y(istart+1))**2 +
+     +			    (dy(istart+2)*(delta/2.0+x0)/y(istart+2))**2)/r213
 
 	return
 	end
@@ -1080,8 +1091,8 @@ C-----------------------------------------------------------------------
 
 
 C-----------------------------------------------------------------------
-	Subroutine tph_weighted_mean(x, y, npts,
-     +				     mom1, mom2)
+	Subroutine tph_weighted_mean(x, y, dy, npts,
+     +				     mom1, mom2, uncertainty)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -1090,11 +1101,13 @@ C   Input arguments  (One to a line with definition after ! )
 C
 C     x		- x coordinate of each point
 C     y		- y(x) distribution
+C     dy	- uncertainty in y(x)
 C     npts	- number of samples in distribution
 C
 C   Output arguments : 
 C
 C     mom1	- first moment of y(x) distribution (mean x)
+C     uncertainty - uncertainty of mean
 C     mom2	- second moment of y(x) distribution (rms)
 C
 C  Returns:
@@ -1114,9 +1127,9 @@ C   Error conditions :
 C   ================
 C
 C-----------------------------------------------------------------------
-	real x(*),y(*)
+	real x(*),y(*),dy(*)
 	integer npts
-	real mom1,mom2
+	real mom1,mom2,uncertainty
 C-----------------------------------------------------------------------
 	real ysum
 	integer ipt
@@ -1133,6 +1146,12 @@ C-----------------------------------------------------------------------
 	mom1 = mom1 / ysum
 	mom2 = mom2 / ysum
 	mom2 = sqrt(mom2 - mom1*mom1)
+
+	uncertainty = 0.0
+	do ipt=1,npts
+	  uncertainty = uncertainty+((x(ipt)-mom1)*dy(ipt)/ysum)**2
+	enddo
+	uncertainty = sqrt(uncertainty)
 	return
 	end
 
