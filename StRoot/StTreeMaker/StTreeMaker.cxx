@@ -87,10 +87,11 @@ Int_t StTreeMaker::Open(const char*)
       St_DataSet *fst = fTree->Find(firstBr);            
       if (!fst) {//not found, add "Branch" to name
         firstBr+="Branch";
-        fst = fTree->Find(firstBr); assert(fst);}
-      fst->Shunt(0); fTree->AddFirst(fst);
-      printf("<%s(%s)::Init> Branch %s is MAIN in tree\n",ClassName(),GetName(),fst->GetName());
-
+        fst = fTree->Find(firstBr);}
+      if (fst) {
+        fst->Shunt(0); fTree->AddFirst(fst);
+        printf("<%s(%s)::Init> Branch %s is MAIN in tree\n",ClassName(),GetName(),fst->GetName());
+      }
     }
 
 //   
