@@ -16,59 +16,90 @@ macro ftpc_fast_sim_chain_
        nskip=0_
        nevents=1
 
+*
+DEFAULT = _
+./kumacs/util,_
+./kumacs/chain,_
+./pams/emc/kumac,_
+./pams/global/kumac,_
+./pams/svt/kumac,_
+./pams/tpc/kumac,_
+./pams/ftpc/kumac,-
+$STAR/kumacs/util,_
+$STAR/kumacs/chain,_
+$STAR/kumacs/tpc,_
+$STAR/pams/ctf/kumac,_
+$STAR/pams/emc/kumac,_
+$STAR/pams/ftpc/kumac,_
+$STAR/pams/gen/kumac,_
+$STAR/pams/global/kumac,_
+$STAR/pams/mwc/kumac,_
+$STAR/pams/svt/kumac,_
+$STAR/pams/tpc/kumac,_
+$STAR/pams/trg/kumac
+ 
+  
+  
+ def [DEFAULT]
+ message 'Define default kumac search path as' def
+ 
+* generic inits
+  exec setup_dir
 
-* global macros
-
-exec $STAR/kumacs/util/setup_global_macros
-/macro/global/import KUMACS_UTIL
-/macro/global/import PAMS_FTPC_KUMAC
+  
+* create tables
+  exec create_tables_ftpc#ffs_tables
+  exec create_tables_ftpc#fpt_tables
+  exec create_tables_ftpc#fte_tables
+  
 
 * Create and initialize input tables
 
-exec [PAMS_FTPC_KUMAC]ffs_init
-exec [PAMS_FTPC_KUMAC]fpt_init
-exec [PAMS_FTPC_KUMAC]fte_init
+  exec ffs_init
+  exec fpt_init
+  exec fte_init
 
 * Initialize input data stream
 
-exec [KUMACS_UTIL]input_g2t_file#init [input_g2t_file]
+  exec input_g2t_file#init [input_g2t_file]
 
 * Initialize output data stream
-
-DIO/NEWFILESTREAM ftpc_fast_out [output_file] W
-message Initialize output data stream [output_file]
+  exec write_table_to_file#init ftpc_fast_out [output_file]
+  message Initialize output data stream [output_file]
 
 * Skip events
 
 do i=1,[nskip]
-message Skipping event [i]
-exec [KUMACS_UTIL]input_g2t_file#read
+  message Skipping event [i]
+  exec input_g2t_file#read
 enddo
-message Skipped [nskip] events
+  message Skipped [nskip] events
 
 *  Event loop
 
 message Start processing [nevents] events
 
 do i=1,[nevents]
-* Read in next Event
-message Reading in event [i]
-exec [KUMACS_UTIL]input_g2t_file#read
-* Process next Event
-exec [PAMS_FTPC_KUMAC]ffs_run
-exec [PAMS_FTPC_KUMAC]fpt_fast_sim_run
-exec [PAMS_FTPC_KUMAC]fte_fast_sim_run
-* Output Event
-cd /dui/data/ftpc
-dio/stream/putevent ftpc_fast_out tracks
-cd
+  * Read in next Event
+    message Reading in event [i]
+    exec input_g2t_file#read
+  * Process next Event
+    exec ffs_run
+    exec fpt_run#run_fast_sim
+    exec fte_run#run_fast_sim
+  * Output Event
+    exec write_table_to_file#write ftpc_fast_out /dui/data/ftpc/tracks
 enddo
 
 * Close input data stream
-dio/stream/close G2Tfile
+ exec input_g2t_file#close 
+ 
+
 
 * Close output data stream
-dio/stream/close ftpc_fast_out
+ exec write_table_to_file#close ftpc_fast_out
+ 
+
 
 message Finished processing [nevents] events
 
