@@ -5,6 +5,7 @@
 #endif /* WIN32 */
 
 #include "asuAlloc.h"
+#define HERB980611
 
 extern char *id2name(char *base, long id);
 extern char *shortname(char *longname, size_t length);
@@ -19,8 +20,16 @@ char *id2name(char *base, long id)
       return name;
    }
    else {
+#ifdef HERB980611
+      size_t herb980611;
+      herb980611=strlen(base) + 1 + 1 + log10((double)id);
+                                         /* DEAR COLLABORATOR:  PLEASE DO    */
+      name = (char*)malloc(herb980611);  /* NOT CHANGE malloc to MALLOC  UN- */
+                                         /* LESS YOU HAVE TO.  HERBERT WARD. */
+#else
       name = (char*)MALLOC(strlen(base) +1
                 +(int)(1 +log10((double)id)));	/*INS++:BAD_DECL*/
+#endif
       sprintf(name,"%s%ld",base,id);
       return name;
    }
