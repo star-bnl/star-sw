@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.20 2000/03/15 23:28:52 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.21 2000/03/21 00:22:01 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.21  2000/03/21 00:22:01  posk
+// Added GetCVS and some print commands.
+//
 // Revision 1.20  2000/03/15 23:28:52  posk
 // Added StFlowSelection.
 //
@@ -125,6 +128,10 @@ Int_t StFlowMaker::Make() {
   if (StFlowCutEvent::CheckEvent(pEvent)) {
     FillFlowEvent();
     if (mNanoFlowEventOn) FillFlowNanoEvent();
+  } else {
+    Long_t eventID = pEvent->id();
+    cout << "##### FlowMaker: event " << eventID << " cut" << endl;
+
   }
 
   return kStOK;
@@ -133,7 +140,7 @@ Int_t StFlowMaker::Make() {
 //-----------------------------------------------------------------------
 
 void StFlowMaker::PrintInfo() {
-  cout << "$Id: StFlowMaker.cxx,v 1.20 2000/03/15 23:28:52 posk Exp $" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.21 2000/03/21 00:22:01 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 
 }
@@ -154,6 +161,8 @@ Int_t StFlowMaker::Init() {
 
 Int_t StFlowMaker::Finish() {
   // Print the cut lists
+  cout << "#######################################################" << endl;
+  cout << "##### FlowMaker: Cut Print Lists" << endl;
   StFlowCutEvent::PrintCutList();
   StFlowCutTrack::PrintCutList();
   pFlowEvent->PrintSelectionList();
