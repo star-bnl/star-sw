@@ -7,6 +7,11 @@
 #ifndef _FCF_CLASS_HH_
 #define _FCF_CLASS_HH_
 
+
+// steering - watch it!
+//#define FCF_DEBUG_OUTPUT
+//#define FCF_ANNOTATE_CLUSTERS
+
 // flag definitions - NEVER CHANGE
 #define FCF_ONEPAD		1
 #define FCF_DOUBLE_PAD		2
@@ -31,20 +36,55 @@
 
 
 #if defined(__unix) || defined(__ROOT__)
-	typedef unsigned int u_int;
-	typedef unsigned short u_short;
-	typedef unsigned char u_char;  
+
+typedef unsigned int u_int;
+typedef unsigned short u_short;
+typedef unsigned char u_char;  
+
+#define FCF_SIM_ON
+
+#else
+
+#ifdef FCF_ANNOTATE_CLUSTERS
+#undef FCF_ANNOTATE_CLUSTERS
+#endif
+
+#ifdef FCF_DEBUG_OUTPUT
+#undef FCF_DEBUG_OUTPUT
+#endif
+
+#ifdef FCF_SIM_ON
+#undef FCF_SIM_ON
+#endif
+
 #endif
 
 
+// used if the FCF_ANNOTATE_CLUSTERS is set...
+struct fcfPixAnnotate {
+	u_short adc ;	// the 10 bit ADC value of the charge
+	u_short cl_id ;	// the FCF cluster ID (local to the row)
+	u_short id_simtrk ;	// the Simulated track ID (local to the event)
+	u_short res ;		// reserved...
+} ;
 
 
-
+// used for simulated tracks...
 struct FcfSimOutput {   // this is just the payload definition.
   short id_simtrk;
   short id_quality;
-  int reserved;
+  short cl_id ;		// local cluster id
+  short reserved;	// reserved
 };
+
+
+#ifdef FCF_ANNOTATE_CLUSTERS
+extern struct fcfPixAnnotate fcfPixA[24][45][182][512] ;	// a biiiig one!
+#endif
+
+#ifdef FCF_DEBUG_OUTPUT
+//extern FILE *fcf_annotate_f ;
+#endif
 
 class fcfClass {
 public:
@@ -54,9 +94,9 @@ public:
 	// the following are set by the constructor depending on the detector parameter
 	// They may be changed explicitly for tests & debug thus they are "public"
 
-	int detector ;	// i.e. TPC_ID, SVT_ID
+	int detector ;		// i.e. TPC_ID, SVT_ID; set in constructor
 	u_int maxTimebin ;	// 511 TPC, 127 SVT
-	u_int maxCPP ;	// 8 SVT, 31 TPC
+	u_int maxCPP ;		// 8 SVT, 31 TPC
 
 	// the following MUST BE SET once!
 	u_int svtPedestal ;	// when using SVT pedestal offet...
@@ -65,8 +105,9 @@ public:
 	u_int chargeMin ;
 
 
-	u_int deconTime  ;
-	u_int deconPad  ;
+	u_int deconTime  ;	// unused...
+	u_int deconPad  ;	// unused...
+
 	u_int doCuts  ;
 
 	int param1  ;
@@ -74,9 +115,9 @@ public:
 	int minAdcPad  ;
 
 	// the following changes from call to call (row to row...)
-	int row ;
-	int padStart ;
-	int padStop ;	// absolute start/stop pads
+	int row ;	// from 1..45
+	int padStart ;	// Absolute starting pad i.e. 1..182
+	int padStop ;	// Absolute last pad 
 	int padMax ;	// maximum pad for this row
 
 	u_int *adcOff ;	// offsets for the current row only!
@@ -96,8 +137,8 @@ public:
 
 	// used perhaps...
 	int sb ;	// i.e. sector number, 1..24
-	int rb ;	// receiver board,	1..12
-	int mz ;	// mezzanine, 1..3
+	int rb ;	// receiver board,	1..12 or 1..6 for Offline
+	int mz ;	// mezzanine, 1..3 (0 for Offline)
 
 
 	// THA function!
@@ -130,6 +171,7 @@ struct fcfHit {
 	u_short p1,p2,t1,t2 ;
         short id_simtrk;
         short id_quality;
+	short cl_id ;
 } ;
 
 
