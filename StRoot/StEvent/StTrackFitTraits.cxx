@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.12 2004/08/10 14:20:21 calderon Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.13 2004/08/12 17:22:31 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
+ * Revision 2.13  2004/08/12 17:22:31  fisyak
+ * Switch to automatic streamer for version >4 to account new no. of fit points definition
+ *
  * Revision 2.12  2004/08/10 14:20:21  calderon
  * Putting the streamers back in.  They should not be needed, but
  * apparently removing them causes more problems.  Yuri tested that
@@ -65,7 +68,7 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.12 2004/08/10 14:20:21 calderon Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.13 2004/08/12 17:22:31 fisyak Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {
@@ -242,9 +245,13 @@ void StTrackFitTraits::Streamer(TBuffer &R__b)
 {
 //        Stream an object of class StTrackFitTraits.
 
-  Version_t R__v = 0;
   if (R__b.IsReading()) {
-    R__v = R__b.ReadVersion();
+    UInt_t R__s, R__c;
+    Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+    if (R__v > 4) {
+       Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
+       return;
+    }
     StObject::Streamer(R__b);
 
     R__b >> (unsigned short&)mPidHypothesis;
@@ -257,11 +264,6 @@ void StTrackFitTraits::Streamer(TBuffer &R__b)
     mCovariantMatrix.Streamer(R__b);
 
   } else {
-    R__b.WriteVersion(Class());
-    StObject::Streamer(R__b);
-    R__b << (unsigned short )mPidHypothesis;
-    R__b << (unsigned short )mNumberOfFitPoints;
-    R__b.WriteFastArray(mChi2, 2);
-    mCovariantMatrix.Streamer(R__b);
+    Class()->WriteBuffer(R__b,this);
   }
 }

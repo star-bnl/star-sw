@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 2.9 2004/08/05 22:24:32 ullrich Exp $
+ * $Id: StTrackFitTraits.h,v 2.10 2004/08/12 17:22:31 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -31,6 +31,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
+ * Revision 2.10  2004/08/12 17:22:31  fisyak
+ * Switch to automatic streamer for version >4 to account new no. of fit points definition
+ *
  * Revision 2.9  2004/08/05 22:24:32  ullrich
  * Changes to the handling of numberOfPoints() to allow ITTF more flexibility.
  *
@@ -102,6 +105,6 @@ protected:
     Float_t  mChi2[2];
     TArrayF  mCovariantMatrix;
     
-    ClassDef(StTrackFitTraits,4) 
+    ClassDef(StTrackFitTraits,5) 
 };
 #endif
