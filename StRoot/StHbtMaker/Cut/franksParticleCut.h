@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: franksParticleCut.h,v 1.1 1999/09/05 02:58:11 lisa Exp $
+ * $Id: franksParticleCut.h,v 1.2 1999/09/17 22:38:01 lisa Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: franksParticleCut.h,v $
+ * Revision 1.2  1999/09/17 22:38:01  lisa
+ * first full integration of V0s into StHbt framework
+ *
  * Revision 1.1  1999/09/05 02:58:11  lisa
  * add ASCII microDST reader/writer AND franksParticle cuts
  *
@@ -29,11 +32,11 @@
 #include "StMaker.h"
 #endif
 
-#include "StHbtMaker/Base/StHbtParticleCut.hh"
+#include "StHbtMaker/Base/StHbtTrackCut.hh"
 //#include "StHbtMaker/Base/StHbtHistoStyle.hh"
 //#include "StHbtMaker/Infrastructure/StHbtParticleCutMoniHandler.h" 
 
-class franksParticleCut : public StHbtParticleCut
+class franksParticleCut : public StHbtTrackCut
 //, public StHbtParticleCutMoniHandler 
 {
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.9 1999/09/16 18:48:01 lisa Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.10 1999/09/17 22:38:03 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.10  1999/09/17 22:38:03  lisa
+ * first full integration of V0s into StHbt framework
+ *
  * Revision 1.9  1999/09/16 18:48:01  lisa
  * replace placeholder HbtV0Track stuff with Helens StHbtV0 classes
  *
@@ -84,15 +87,19 @@ ClassImp(StStandardHbtEventReader)
 
 //__________________
 StStandardHbtEventReader::StStandardHbtEventReader(){
+  mTheEventMaker=0;
+  mTheV0Maker=0;
   mEventCut=0;
-  mParticleCut=0;
+  mTrackCut=0;
+  mV0Cut=0;
   mReaderStatus = 0;  // "good"
   mV0=0;
 }
 //__________________
 StStandardHbtEventReader::~StStandardHbtEventReader(){
   if (mEventCut) delete mEventCut;
-  if (mParticleCut) delete mParticleCut;
+  if (mTrackCut) delete mTrackCut;
+  if (mV0Cut) delete mV0Cut;
 }
 //__________________
 StHbtString StStandardHbtEventReader::Report(){
@@ -104,9 +111,17 @@ StHbtString StStandardHbtEventReader::Report(){
   else {
     temp += "NONE";
   }
-  temp += "\n---> ParticleCuts in Reader: ";
-  if (mParticleCut) {
-    temp += mParticleCut->Report();
+  temp += "\n---> TrackCuts in Reader:\n ";
+  if (mTrackCut) {
+    temp += mTrackCut->Report();
+  }
+  else {
+    temp += "NONE";
+  }
+  temp += "\n";
+  temp += "\n---> V0Cuts in Reader:\n ";
+  if (mV0Cut) {
+    temp += mV0Cut->Report();
   }
   else {
     temp += "NONE";
@@ -232,8 +247,8 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
 
     // By now, all track-wise information has been extracted and stored in hbtTrack
     // see if it passes any front-loaded event cut
-    if (mParticleCut){
-      if (!(mParticleCut->Pass(hbtTrack))){                  // track failed - delete it and skip the push_back
+    if (mTrackCut){
+      if (!(mTrackCut->Pass(hbtTrack))){                  // track failed - delete it and skip the push_back
 	delete hbtTrack;
 	continue;
       }
@@ -300,8 +315,18 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
         hbtV0->SetptNeg(v0FromMiniDst->ptNeg());
         hbtV0->SetptotNeg(v0FromMiniDst->ptotNeg());
 
+	// By now, all track-wise information has been extracted and stored in hbtTrack
+	// see if it passes any front-loaded event cut
+	if (mV0Cut){
+	  if (!(mV0Cut->Pass(hbtV0))){                  // track failed - delete it and skip the push_back
+	    delete hbtV0;
+	    continue;
+	  }
+	}
+
+
 	hbtEvent->V0Collection()->push_back(hbtV0);
-        }
+	} // end of loop over strangeness groups v0's
 	//Store total number of v0s in v0minidst so can start from there next time
         cout << "**** n_v0 = " << n_v0 << "**mV0"   << n_v0-mV0 << endl;        //  "       "
 	mV0 =n_v0;
