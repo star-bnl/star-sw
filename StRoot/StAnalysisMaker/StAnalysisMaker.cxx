@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StAnalysisMaker.cxx,v 1.15 1999/11/04 21:02:27 ullrich Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.0 1999/11/04 16:10:03 ullrich Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,10 +14,7 @@
  ***************************************************************************
  *
  * $Log: StAnalysisMaker.cxx,v $
- * Revision 1.15  1999/11/04 21:02:27  ullrich
- * Revision for new StEvent
- *
- * Revision 1.15  1999/11/04 21:02:27  ullrich
+ * Revision 2.0  1999/11/04 16:10:03  ullrich
  * Revision for new StEvent
  *
  **************************************************************************/
@@ -26,7 +23,7 @@
 #include "StEventTypes.h"
 #include "StMessMgr.h"
 
-static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.15 1999/11/04 21:02:27 ullrich Exp $";
+static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 2.0 1999/11/04 16:10:03 ullrich Exp $";
 
 //
 //  Proptotypes of little functions which perform
