@@ -65,7 +65,8 @@ ClassImp(St_TableSorter)
   St_TableSorter::St_TableSorter() : m_simpleArray(0),m_ParentTable(*((const St_Table *)0))
 {
   // default ctor for RootCint dictionary
-  m_SortIndex  = 0;
+  m_LastFound    = -1;
+  m_SortIndex    = 0;
   m_searchMethod = 0;
   m_numberOfRows = 0;
   m_colType = kNAN;
@@ -86,6 +87,7 @@ St_TableSorter::St_TableSorter(const St_Table &table, TString &colName,Int_t fir
   //                   = 0 means sort all rows from the "firstRow" by the end of table
   //
 
+  m_LastFound    = -1;
   m_numberOfRows = 0;
   m_colType      = kNAN;
   m_simpleArray  = 0;
@@ -162,11 +164,13 @@ St_TableSorter::St_TableSorter(const Float_t *simpleArray, Int_t arraySize, Int_
   //
   // St_TableSorter ctor sort the input "simpleArray" 
   //
-  //    - arraySize  - the sie of the full array
+  //    - arraySize  - the size of the full array
   //    - firstRow   - the first table row to sort from (=0 by default)
   //    - numberRows - the number of the table rows to sort (=0 by default)
   //                   = 0 means sort all rows from the "firstRow" by the end of table
   //
+
+  m_LastFound    = -1;
 
   SetSimpleArray(arraySize,firstRow,numberRows);
   if (!m_simpleArray) { MakeZombie(); return; }
@@ -201,6 +205,8 @@ St_TableSorter::St_TableSorter(const Double_t *simpleArray, Int_t arraySize, Int
   //                   = 0 means sort all rows from the "firstRow" by the end of table
   //
 
+  m_LastFound    = -1;
+
   SetSimpleArray(arraySize,firstRow,numberRows);
   if (!m_simpleArray)  {MakeZombie(); return; }
 
@@ -233,6 +239,8 @@ St_TableSorter::St_TableSorter(const Long_t *simpleArray, Int_t arraySize, Int_t
   //    - numberRows - the number of the table rows to sort (=0 by default)
   //                   = 0 means sort all rows from the "firstRow" by the end of table
   //
+
+  m_LastFound    = -1;
 
   SetSimpleArray(arraySize,firstRow,numberRows);
   if (!simpleArray) { MakeZombie(); return; }
@@ -317,18 +325,19 @@ St_TableSorter::~St_TableSorter()
            break;                                     \
       };                                              \
 }                                                     \
-Int_t St_TableSorter::SelectSearch(valuetype value) {\
+Int_t St_TableSorter::SelectSearch(valuetype value) {               \
    valuetype **array = (valuetype **)m_SortIndex;                   \
    Int_t nabove, nbelow, middle;                                    \
    nabove = m_numberOfRows+1;                                       \
    nbelow = 0;                                                      \
    while(nabove-nbelow > 1) {                                       \
       middle = (nabove+nbelow)/2;                                   \
-      if (value == *array[middle-1]) return middle-1;               \
+      if (value == *array[middle-1]) { nbelow = middle; break; }    \
       if (value  < *array[middle-1]) nabove = middle;               \
       else                           nbelow = middle;               \
    }                                                                \
    nbelow--;                                                        \
+   m_LastFound    = nbelow;                                         \
    if (nbelow < 0) return nbelow;                                   \
    return GetIndex(nbelow);                                         \
 }
@@ -419,17 +428,21 @@ Int_t St_TableSorter::BSearch(const void *value){
   Int_t index = -1;
   if (m_searchMethod) {
     void **p = (void **)bsearch( value,  // Object to search for
-                   m_SortIndex,     // Pointer to base of search data
-                   m_numberOfRows,  // Number of elements
-                   sizeof(void *),  // Width of elements
+                   m_SortIndex,          // Pointer to base of search data
+                   m_numberOfRows,       // Number of elements
+                   sizeof(void *),       // Width of elements
                    CALLQSORT(m_searchMethod));
+    m_LastFound = -1;
     if (p) {
        const Char_t *res = (const Char_t *)(*p);
-       // calculate index:
-      if (!m_simpleArray) 
-         index =  m_firstRow + (res - (((const Char_t *)m_ParentTable.At(m_firstRow)) + m_colOffset))/m_ParentTable.GetRowSize();
-      else
-        index = ULong_t(res) - ULong_t(m_simpleArray)/m_colSize;
+       m_LastFound = ((Char_t *)p - (Char_t *)m_SortIndex)/sizeof(void *);
+        // calculate index:
+       if (!m_simpleArray) 
+          index =  m_firstRow + 
+                   (res - (((const Char_t *)m_ParentTable.At(m_firstRow))+ m_colOffset))
+                  /m_ParentTable.GetRowSize();
+       else
+         index = ULong_t(res) - ULong_t(m_simpleArray)/m_colSize;
     }
   }
   return index;  
@@ -571,12 +584,12 @@ void  St_TableSorter::SortArray(){
                 CALLQSORT(compare));           
 }
   
-//_____________________________________________________________________________
+//____________________________________________________________________________
 void St_TableSorter::LearnTable()
 {
 //
-// LearnTable() allows the St_TableSorter to learn the structure of the
-// tables used to fill the ntuple.
+//  LearnTable() allows the St_TableSorter to learn the structure of the
+//  tables used to fill the ntuple.
 //  table     - the name of the table
 //  buildTree - if kTRUE, then add TBranches to the TTree for each table
 //              column (default=kFALSE)

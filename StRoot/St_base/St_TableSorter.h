@@ -1,10 +1,10 @@
 //*-- Author :    Valery Fine   26/01/99  (E-mail: fine@bnl.gov)
-// 
-//   
+// $Id: St_TableSorter.h,v 1.14 1999/05/14 00:30:38 fine Exp $
+// $Log: St_TableSorter.h,v $
+// Revision 1.14  1999/05/14 00:30:38  fine
+// GetLastFound method has been introduced
+//  
 
-//*-- Author :    Valery Fine   26/01/99  (E-mail: fine@bnl.gov)
-// 
-// 
 #ifndef STAR_St_TableSorter
 #define STAR_St_TableSorter
 
@@ -50,8 +50,9 @@ class St_TableSorter : public TNamed {
     enum EColumnType {kNAN, kFloat, kInt, kLong, kShort, kDouble, kUInt
                            ,kULong, kUShort, kUChar, kChar };
     void    **m_SortIndex;    // Array of pointers to columns of the sorted table
+    Int_t     m_LastFound;    // The index ofmthe last found index within m_SortIndex
     Int_t     m_firstRow;     // first row of the table to be sorted
-    Int_t     m_numberOfRows; // number of rows of ttable to be sorted
+    Int_t     m_numberOfRows; // number of rows of the table to be sorted
     TString   m_colName;      //
     Int_t     m_colOffset;    //
     Int_t     m_colSize;      // The size of the selected column in bytes
@@ -63,7 +64,7 @@ class St_TableSorter : public TNamed {
 #else
     //    const St_Table *m_ParentTable;  //!- the back pointer to the sorted table
 #endif
-    SEARCHMETHOD  m_searchMethod;   // Function selected to serach values
+    SEARCHMETHOD  m_searchMethod;   // Function selected to search values
     EColumnType   m_colType;        // data type of the selected column
 
     static int CompareFloat_t     (const void **, const void **);
@@ -134,8 +135,9 @@ class St_TableSorter : public TNamed {
     Int_t BinarySearch(UChar_t  value );
     Int_t BinarySearch(Char_t   value );
  
-    virtual       Int_t   GetIndex(UInt_t index) const;
     virtual const Text_t *GetColumnName() const { return m_colName.Data();}
+    virtual       Int_t   GetIndex(UInt_t index) const;
+    virtual       Int_t   GetLastFound()  const { return m_LastFound; }
     virtual const Text_t *GetTableName()  const;
     virtual const Text_t *GetTableTitle() const;
     virtual const Text_t *GetTableType()  const;
