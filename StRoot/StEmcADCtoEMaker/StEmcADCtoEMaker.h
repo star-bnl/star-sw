@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.20 2002/09/19 21:32:23 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.21 2002/12/02 21:20:14 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.21  2002/12/02 21:20:14  suaide
+// modifications for new DB scheme
+//
 // Revision 1.20  2002/09/19 21:32:23  suaide
 // Modifications to use a new internal data format
 //
@@ -54,17 +57,6 @@
 
 This class gets EMC raw ADC's and convert them to calibrated energy.<br><br>
 
-The main variables that should be set are:<br>
-  - kCalib[det] - Set to kTRUE if you want to calibrate an EMC subdetector.
-  - isDaqFile - Set to kTRUE if you are reading a DAQ dataset.
-  - subtractPedestal - Set to kTRUE if pedestal should be subtracted.
-  - saveOnlyCalibHits - Set to kTRUE if you want to save only calibrated hits. Otherwise, all hits with ADC>0 are saved.
-
-The defaults values are:<br>
-  - kCalib[det] = {kTRUE, kFALSE, kTRUE, kTRUE}
-  - isDaqFile = kTRUE
-  - subtractPedestal = kTRUE
-  - saveOnlyCalibHits = kFALSE
 */
 
 #ifndef STAR_StEmcADCtoEMaker
@@ -74,11 +66,15 @@ The defaults values are:<br>
 #include "StMaker.h"
 #endif
 
-#include "tables/St_emcCalibration_Table.h"
-#include "tables/St_emcPedestal_Table.h"
-#include "tables/St_smdPedestal_Table.h"
-#include "tables/St_emcRunning_Table.h"
-#include "tables/St_smdRunning_Table.h"
+#include "tables/St_emcCalib_Table.h"
+#include "tables/St_smdCalib_Table.h"
+#include "tables/St_emcPed_Table.h"
+#include "tables/St_smdPed_Table.h"
+#include "tables/St_emcStatus_Table.h"
+#include "tables/St_smdStatus_Table.h"
+#include "tables/St_emcGain_Table.h"
+#include "tables/St_smdGain_Table.h"
+
 #include "tables/St_controlADCtoE_Table.h"
 
 #include "StEmcUtil/emcInternalDef.h"

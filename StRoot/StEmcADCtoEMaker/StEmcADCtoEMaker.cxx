@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.33 2002/09/30 14:03:00 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.34 2002/12/02 21:20:12 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.34  2002/12/02 21:20:12  suaide
+// modifications for new DB scheme
+//
 // Revision 1.33  2002/09/30 14:03:00  suaide
 // small bugs fixed
 //
@@ -58,13 +61,10 @@
 // Add README
 //
 #include "StEmcADCtoEMaker.h"
-//#include "StChain.h"
-//#include "St_DataSetIter.h"
 #include "StEventTypes.h"
 #include "StEvent.h"
 #include <iostream.h>
 #include <math.h>
-#include "StMessMgr.h"
 #include "StEmcUtil/emcDetectorName.h"
 #include "StEmcUtil/StEmcGeom.h"
 #include "TStopwatch.h"
@@ -77,6 +77,8 @@
 
 #define STATUS_OK 1
 #define MAXDET 4
+#define CAP1 124
+#define CAP2 125
 
 ClassImp(StEmcADCtoEMaker)
 
@@ -88,10 +90,10 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
 {
   mControlADCtoE = new controlADCtoE_st();
 
-  Int_t calib[]   = {1, 0, 1, 1, 0, 0, 0, 0};
-  Int_t pedSub[]  = {1, 0, 1, 1, 0, 0, 0, 0};
-  Float_t energyCut[]  = {-1000, -1000, .15, .15, -1000, -1000, -1000, -1000};
-  Int_t onlyCal[] = {0, 0, 0, 0, 0, 0, 0, 0};
+  Int_t   calib[]      = {1, 0, 1, 1, 0, 0, 0, 0};
+  Int_t   pedSub[]     = {1, 0, 1, 1, 0, 0, 0, 0};
+  Float_t energyCut[]  = {-1, -1, 0.1, 0.1, -1, -1, -1, -1};
+  Int_t   onlyCal[]    = {0, 0, 0, 0, 0, 0, 0, 0};
   
   for(Int_t i=0; i<MAXDET; i++)
   {
@@ -99,11 +101,6 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
     mControlADCtoE->Calibration[i]=calib[i];
     mControlADCtoE->EnergyCutOff[i]=energyCut[i];
     mControlADCtoE->OnlyCalibrated[i]=onlyCal[i];
-    cout <<"det = "<<detname[i].Data()
-         <<"  DeductPedestal = "<<mControlADCtoE->DeductPedestal[i]
-         <<"  Calibration = "<<mControlADCtoE->Calibration[i]
-         <<"  EnergyCutOff = "<<mControlADCtoE->EnergyCutOff[i]
-         <<"  OnlyCalibrated = "<<mControlADCtoE->OnlyCalibrated[i]<<endl;
   } 
 
 }
@@ -120,18 +117,15 @@ Init function. Initializes the histograms and all other variables used by the
 program
 */
 Int_t StEmcADCtoEMaker::Init()
-{   
-  
-  gMessMgr->SetLimit("StEmcADCtoEMaker",1000);
-  
+{     
   //Making QA histgrams
   const Int_t   nx[] = {40,40,300,20,12,12,12,12};
   const Float_t xl[] = {-1.0,-1.0,-1.0,-1.0, 0.5 , 0.5, 0.5, 0.5};
   const Float_t xu[] = { 1.0, 1.0, 1.0, 1.0, 12.5,12.5,12.5,12.5};
   const Int_t   ny[] = {120, 120, 60, 900, 60, 60, 60, 60};
  
-  mNhit = new TH2F("EmcNHitsVsDet" ,"Number of hit(log) with energy > 0 .vs. Detector #",500,0.0,15.0,8,0.5,8.5);
-  mEtot = new TH2F("EmcEtotVsDet" ,"Total energy(log) .vs. Detector #",500,-4.0,15.0,8,0.5,8.5);
+  mNhit = new TH2F("EmcNHitsVsDet" ,"Number of hit with energy > 0 .vs. Detector #",1000,0.0,18000,8,0.5,8.5);
+  mEtot = new TH2F("EmcEtotVsDet" ,"Total energy(log10) .vs. Detector #",500,-4.0,15.0,8,0.5,8.5);
  
   //tower spectra for gain monitoring  
   mTower=new TH2F("TowerSpectra","Tower Spectra up to ADC = 500",4800,0.5,4800.5,500,0,500);
@@ -148,14 +142,22 @@ Int_t StEmcADCtoEMaker::Init()
     TString title_h= detname[i] + " Hits distribution with energy > 0";
     TString title_e= detname[i] + " Energy distribution";
     TString title_a= detname[i] + " ADC distribution";
-    TString title_a1= detname[i] +" ADC distribution (log)";
+    TString title_a1= detname[i] +" ADC distribution (log10)";
     Float_t rpi = M_PI + 0.00001; 
     mHits[i]   = new TH2F(name_h,title_h,nx[i],xl[i],xu[i],ny[i],-rpi, rpi);
     mEnergyHist[i] = new TH2F(name_e,title_e,nx[i],xl[i],xu[i],ny[i],-rpi, rpi);
     mAdc[i]    = new TH2F(name_a,title_a,nx[i],xl[i],xu[i],ny[i],-rpi, rpi);
     mAdc1d[i]  = new TH1F(name_a1,title_a1,1000,0,8);   
   }
-  for (Int_t i=0; i<MAXDET; i++) mGeo[i]=StEmcGeom::getEmcGeom(detname[i].Data());
+  for (Int_t i=0; i<MAXDET; i++) 
+	{
+		mGeo[i]=StEmcGeom::getEmcGeom(detname[i].Data());
+    cout <<"det = "<<detname[i].Data()
+         <<"  DeductPedestal = "<<mControlADCtoE->DeductPedestal[i]
+         <<"  Calibration = "<<mControlADCtoE->Calibration[i]
+         <<"  EnergyCutOff = "<<mControlADCtoE->EnergyCutOff[i]
+         <<"  OnlyCalibrated = "<<mControlADCtoE->OnlyCalibrated[i]<<endl;
+  }
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -186,7 +188,6 @@ Int_t StEmcADCtoEMaker::Make()
   TStopwatch clock;
   clock.Start();
   cout <<"\n\nStEmcADCtoEMaker::Make()******************************************************************\n";
-  
   zeroAll(); 
 	
 	mData = new StBemcData(); 
@@ -230,24 +231,25 @@ array mStatus[det][index].
 Bool_t StEmcADCtoEMaker::getStatus(Int_t det)
 {
 	mDb=NULL;
-	mDb=GetInputDB("Calibrations/emc/status");
-  if(!mDb) {gMessMgr->Warning("StEmcADCtoEMaker::Make() - Can not get new status tables.... "); return kFALSE;}
+	TString DbName = "Calibrations/emc/y3"+detname[det];
+  mDb=GetDataBase(DbName.Data());
+  if(!mDb) {cout <<"StEmcADCtoEMaker::Make() - Can not get new status tables.... \n"; return kFALSE;}
   
 	cout <<"Getting status table for detector "<<detname[det].Data()<<endl;
-  TString TableName=detname[det]+"Running";
+  TString TableName=detname[det]+"Status";
 	
-	Int_t NGOOD = 0;
+	Int_t NGOOD = 0; 
   
   if(det==0)
 	{
-		St_emcRunning* run = NULL;
-		if(mDb) run = (St_emcRunning*)mDb->Find(TableName.Data());
+		St_emcStatus* run = NULL;
+		if(mDb) run = (St_emcStatus*)mDb->Find(TableName.Data());
 		if(run)
 		{
-			emcRunning_st* runst=run->GetTable();
+			emcStatus_st* runst=run->GetTable();
 			for(Int_t i=1;i<=4800;i++) 
 			{
-				mData->TowerStatus[i-1] = runst[0].IsRunning[i-1];
+				mData->TowerStatus[i-1] = runst[0].Status[i-1];
 				if(mData->TowerStatus[i-1]==STATUS_OK) NGOOD++;
 			}
 		} 
@@ -255,16 +257,16 @@ Bool_t StEmcADCtoEMaker::getStatus(Int_t det)
   
 	if(det==2 || det==3)
   {
-    St_smdRunning* run = NULL;
-    if(mDb) run = (St_smdRunning*)mDb->Find(TableName.Data());
+    St_smdStatus* run = NULL;
+    if(mDb) run = (St_smdStatus*)mDb->Find(TableName.Data());
     if(run)
     {
-      smdRunning_st* runst=run->GetTable(); 
+      smdStatus_st* runst=run->GetTable(); 
       for(Int_t i=1;i<=18000;i++)
       {
-        if(det==2) mData->SmdeStatus[i-1]=runst[0].IsRunning[i-1];
-				if(det==3) mData->SmdpStatus[i-1]=runst[0].IsRunning[i-1];
-				if(runst[0].IsRunning[i-1]==STATUS_OK) NGOOD++;
+        if(det==2) mData->SmdeStatus[i-1]=runst[0].Status[i-1];
+				if(det==3) mData->SmdpStatus[i-1]=runst[0].Status[i-1];
+				if(runst[0].Status[i-1]==STATUS_OK) NGOOD++;
       }
     }
   }
@@ -448,37 +450,57 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 	if(!Valid) return kFALSE;
 	
 	mDb=NULL;
-  TString DbName="Calibrations/emc/"+detname[det];      
+	TString DbName = "Calibrations/emc/y3"+detname[det];
   mDb=GetInputDB(DbName.Data());
   if(!mDb) return kFALSE;
-  	
-	//calibration tables ////////////////////////////////////////////////////
-	TString TableName=detname[det]+"Calibration";
-	emcCalibration_st* cal_st = NULL;
-	St_emcCalibration* cal=(St_emcCalibration*)mDb->Find(TableName.Data());
-  if(cal) cal_st=cal->GetTable();
-	if(!cal_st) return kFALSE;
-  
-	//pedestal tables ////////////////////////////////////////////////////
-	emcPedestal_st *emcpedst=NULL;
-  smdPedestal_st *smdpedst=NULL;
-	if(mControlADCtoE->DeductPedestal[det]==1)
+  	  
+	//getting tables ////////////////////////////////////////////////////
+	emcCalib_st* emccalibst = NULL;
+	smdCalib_st* smdcalibst = NULL;
+	emcGain_st* emcgainst = NULL;
+	smdGain_st* smdgainst = NULL;
+	emcPed_st *emcpedst=NULL;
+  smdPed_st *smdpedst=NULL;
+	TString TableName;
+	if(det<2)//bemc and bprs
 	{
-		TString TableName=detname[det]+"Pedestal";
-  	if(det<2) //bemc and bprs
-  	{
-    	St_emcPedestal* ped=(St_emcPedestal*)mDb->Find(TableName.Data());
+		TableName = detname[det]+"Calib";
+		St_emcCalib* a = (St_emcCalib*) mDb->Find(TableName.Data());
+		if(a) emccalibst = a->GetTable();
+		if(!emccalibst) return kFALSE;
+		
+		TableName = detname[det]+"Gain";
+		St_emcGain* b = (St_emcGain*) mDb->Find(TableName.Data());
+		if(b) emcgainst = b->GetTable();
+		
+		if(mControlADCtoE->DeductPedestal[det]==1)
+		{
+			TableName = detname[det]+"Ped";
+			St_emcPed* ped=(St_emcPed*)mDb->Find(TableName.Data());
     	if(ped) emcpedst=ped->GetTable();
     	if(!emcpedst) return kFALSE;
-  	}
-  	else // SMD
-  	{
-      St_smdPedestal* ped=(St_smdPedestal*)mDb->Find(TableName.Data());
-    	if(ped) smdpedst=ped->GetTable();
-    	if(!smdpedst) return kFALSE;  
-  	}
+		}
 	}
+	else// SMD
+	{
+		TableName = detname[det]+"Calib";
+		St_smdCalib* a = (St_smdCalib*) mDb->Find(TableName.Data());
+		if(a) smdcalibst = a->GetTable();
+		if(!smdcalibst) return kFALSE;
 		
+		TableName = detname[det]+"Gain";
+		St_smdGain* b = (St_smdGain*) mDb->Find(TableName.Data());
+		if(b) smdgainst = b->GetTable();
+		
+		if(mControlADCtoE->DeductPedestal[det]==1)
+		{
+			TableName = detname[det]+"Ped";
+			St_smdPed* ped=(St_smdPed*)mDb->Find(TableName.Data());
+    	if(ped) smdpedst=ped->GetTable();
+    	if(!smdpedst) return kFALSE;
+		}
+	}
+			
 	//loop over all channels ///////////////////////////////////////////////
 	Int_t MAX = 18000;
 	if(det<2) MAX = 4800;
@@ -494,14 +516,17 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 		if(det==3) { ADC = (Float_t)mData->SmdpADC[id-1];  status = mData->SmdpStatus[id-1];  }
 		if(mControlADCtoE->DeductPedestal[det]==1)
 		{
-      if(det<2) PED = (Float_t)emcpedst[id-1].AdcPedestal;
+      if(det<2) PED = ((Float_t)emcpedst[0].AdcPedestal[id-1])/100.;
 			else
 			{
       	Int_t RDO,index,m,e,s;
 				mGeo[det]->getBin(id,m,e,s);
       	mDecoder->GetSmdRDO(det+1,m,e,s,RDO,index);
       	Int_t capacitor=mData->TimeBin[RDO];
-				if(capacitor>=0 && capacitor<128) PED = (Float_t)smdpedst[id-1].AdcPedestal[RDO];
+				Int_t cap = 0;
+				if(capacitor == CAP1) cap = 1;
+				if(capacitor == CAP2) cap = 2;
+				PED = ((Float_t)smdpedst[0].AdcPedestal[id-1][cap])/100.;
 		  }
 		}
     if(status==STATUS_OK)
@@ -509,11 +534,22 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 			Float_t ADCSUB=ADC-PED;
 			Float_t EN=0;
 			Float_t ADCPOWER=1;
+			//calibrating ..............
       for(Int_t i=0;i<5;i++) 
       {
-        EN+=cal_st[id-1].AdcToE[i]*ADCPOWER; 
-        ADCPOWER*=ADCSUB;
+        Float_t c = 0;
+				if(det<2) c = emccalibst[0].AdcToE[id-1][i];
+				else      c = smdcalibst[0].AdcToE[id-1][i];
+				EN+=c*ADCPOWER; 
+        ADCPOWER*=fabs(ADCSUB);
       }
+      if(ADCSUB<0) EN*=-1;
+			//correcting gain ..........
+			Float_t gain = 1;
+			if(det<2 && emcgainst) gain = emcgainst[0].Gain[id-1];
+			if(det>2 && smdgainst) gain = smdgainst[0].Gain[id-1];
+			EN*=gain;
+			
 			if(det==0) mData->TowerEnergy[id-1] = EN;
 			if(det==2) mData->SmdeEnergy[id-1] = EN;     
 			if(det==3) mData->SmdpEnergy[id-1] = EN;     
@@ -545,7 +581,7 @@ Bool_t StEmcADCtoEMaker::fillHistograms()
 			if(det==0) status = mData->TowerStatus[i];
 			if(det==2) status = mData->SmdeStatus[i];
 			if(det==3) status = mData->SmdpStatus[i];
-			if(status==1)
+			if(status==STATUS_OK)
 			{
 				Float_t ADC = 0;
 				Float_t E = 0;
@@ -562,17 +598,10 @@ Bool_t StEmcADCtoEMaker::fillHistograms()
 				mEnergyHist[det]->Fill(eta,phi,E);
 			}
 		}
-		if(nHits>0)    mNhit->Fill(log((Float_t)nHits),(Float_t)det+1);
-		if(totalE>0)   mEtot->Fill(log(totalE),(Float_t)det+1);
-		if(totalADC>0) mAdc1d[det]->Fill(log(totalADC));
+		if(nHits>0)    mNhit->Fill((Float_t)nHits,(Float_t)det+1);
+		if(totalE>0)   mEtot->Fill(log10(totalE),(Float_t)det+1);
+		if(totalADC>0) mAdc1d[det]->Fill(log10(totalADC));
   	if(det==2) for(Int_t RDO=0;RDO<8;RDO++) mSmdTimeBinHist->Fill(RDO,mData->TimeBin[RDO]);
-		if(nHits>0)
-		{
-			cout <<"Statistics for detector "<<detname[det].Data()<<endl;
-			cout <<"Total Energy = "<<totalE<<endl;
-			cout <<"Number of Hits = "<<nHits<<endl;
-			cout <<"total ADC = "<<totalADC<<endl;
-		}
 	}
   return kTRUE;
 }
