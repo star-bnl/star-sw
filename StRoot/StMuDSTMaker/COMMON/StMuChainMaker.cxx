@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.10 2002/11/27 20:37:02 laue Exp $
+ * $Id: StMuChainMaker.cxx,v 1.11 2002/12/19 19:44:25 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -10,6 +10,7 @@
 #include "StMuDebug.h"
 #include "StMuChainMaker.h"
 #include "StMuDbReader.h"
+#include "StMuTimer.h"
 
 #include "StMaker.h"
 #include "StChain.h"
@@ -45,7 +46,6 @@ StMuChainMaker::StMuChainMaker(const char* name) : mTreeName(name) {
  */
 StMuChainMaker::~StMuChainMaker() {
   DEBUGMESSAGE2("");
-  int n=0;
   //  delete []mSubFilters;
 }
 //-----------------------------------------------------------------------
@@ -120,10 +120,15 @@ TChain* StMuChainMaker::make(string dir, string file, string filter, int maxFile
   DEBUGMESSAGE1("");
   subFilter(filter);
 
-  for (int i=0; i<1e6; i++) double ii=pow(2,i);
+  //  for (int i=0; i<1e6; i++) double ii=pow(2,i);
 
   if (file!="") {
-    if (file.find(".lis")!=string::npos) fromList(file, maxFiles);
+    if (file.find(".lis")!=string::npos) {
+      if (file.find(".list")!=string::npos) 
+	fromFileCatalog(file, maxFiles);
+      else
+	fromList(file, maxFiles);
+    }
     if (file.find(".files")!=string::npos) fromList(file, maxFiles);
     if (file.find(".MuDst.root")!=string::npos) fromFile(file, maxFiles);
   }
@@ -156,7 +161,7 @@ void StMuChainMaker::subFilter(string filter) {
 void StMuChainMaker::add(string file) {
   DEBUGMESSAGE3("");
   /// if no entries in db, just add file
-  DEBUGVALUE1(file.c_str());
+  DEBUGVALUE2(file.c_str());
 
   int entries = 0;
 
@@ -207,6 +212,73 @@ void StMuChainMaker::fromDir(string dir, int maxFiles) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+#include "TSQLServer.h"
+#include "TSQLResult.h"
+#include "TSQLRow.h"
+void StMuChainMaker::fromFileCatalog(string list, int maxFiles) { ///< no yet implemented
+  DEBUGMESSAGE2("");
+  TSQLServer* server = TSQLServer::Connect("mysql://duvall.star.bnl.gov:3306/FileCatalog","","");
+  if ( !server ) DEBUGMESSAGE("could not connect to server");
+
+  /// get machine name 
+  string machine(gSystem->Getenv("HOST"));
+  if (machine.find(".rcf.bnl.gov")==string::npos) machine += ".rcf.bnl.gov";
+
+  /// read list of files
+  string files("(filename='dummy')");
+  ifstream in(list.c_str());
+  if (!in) {
+    DEBUGMESSAGE("can not open file");
+    DEBUGVALUE(list);
+    return;
+  }
+  char line[512];
+  while ( in.getline(line,511) ) {
+    string full(line);
+    int split = full.rfind("/");
+    string name = full.substr(split+1);
+    string path = full.substr(0,split);
+    cout << path << " " << name << endl;
+    if (path.find("/star/data/")==0) // if it's a local disk, then add the machine name to the query
+      files += " || (filePath='" + path + "'&&fileName='" + name +"')";
+    else
+      files += " || (filePath='" + path + "'&&fileName='" + name + "'&&nodeName='" + machine + "')";
+  }
+  in.close();
+	  
+  cout << files << endl;
+
+  // now query the database
+  StMuTimer timer;
+  timer.stop();
+  timer.reset();
+  string query = "SELECT filePath,fileName,numEntries FROM FileData LEFT JOIN FileLocations USING (fileDataId) WHERE " + files;
+  TSQLResult* result = server->Query(query.c_str());
+  timer.stop();
+  
+  DEBUGVALUE(timer.elapsedTime());
+  DEBUGVALUE(result->GetRowCount());
+  
+  // now fill chain with query results
+  TSQLRow* row;
+  string file;
+  int entries;
+  while ( (row=result->Next()) ) {
+    file = row->GetField(0); 
+    file += +"/";
+    file += row->GetField(1);
+    entries = atoi(row->GetField(2));
+    mChain->Add( file.c_str(), entries );
+    mFileCounter++;
+  }
+
+  server->Close();
+  delete server;
+  DEBUGVALUE2(mFileCounter);
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 void StMuChainMaker::fromList(string list, int maxFiles) {
   DEBUGMESSAGE2("");
   ifstream* inputStream = new ifstream;
@@ -251,6 +323,9 @@ bool StMuChainMaker::pass(string file, string* filters) {
 /***************************************************************************
  *
  * $Log: StMuChainMaker.cxx,v $
+ * Revision 1.11  2002/12/19 19:44:25  laue
+ * update to read number of events from database, for files ending with .list
+ *
  * Revision 1.10  2002/11/27 20:37:02  laue
  * output removed
  *
