@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.29 2004/03/18 04:02:56 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.30 2004/05/05 21:27:54 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.30  2004/05/05 21:27:54  caines
+ * Fix bug that causes default drift vel. to be used instead of value from database...
+ *
  * Revision 1.29  2004/03/18 04:02:56  caines
  * Remove from global scope variables used in debug mode as they shouldnt be there and caused erratic behaviour
  *
@@ -337,7 +340,7 @@ Int_t StSvtHitMaker::GetSvtDriftVelocity()
 //___________________________________________________________________________
 Int_t StSvtHitMaker::GetSvtT0()
 {
-  m_driftVeloc = 0;
+ 
   St_DataSet* dataSet;
   dataSet = GetDataSet("StSvtT0");
   if(!dataSet) {
