@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "dsxdr.h"
+/*#include "dstype.h"*/
    static FILE         *f=NULL; /* input file      */
    static XDR           x;      /* XDR stream      */
    static DS_DATASET_T *d=NULL; /* "root" dataset  */
@@ -33,31 +34,56 @@
    unsigned int        *pp;
    size_t               nn;
 
-#define GET(P,T,O,F) (dsFindEntry(&P,d,T)                && \
-                      dsTableDataAddress((char**)(&O),P) && \
-                      dsTableRowCount(&F,P))
+#define GET(P,T,O,F)  (dsFindEntry(&P,d,T)                && \
+                       dsTableDataAddress((char**)(&O),P) && \
+                       dsTableRowCount(&F,P))
+#define GETT(P,S,O,F) (dsFindTab(&P,d,S)                  && \
+                       dsTableDataAddress((char**)(&O),P) && \
+                       dsTableRowCount(&F,P))
+typedef struct cparticle_st {
+      long  isthep;   /* status code of the entry */
+      long  idhep;    /* particle identity, accordingly to the PDG standard*/
+      long  jmohep[2];/* pointer(s) to position where the mother(s) stored */
+      long  jdahep[2];/* pointers to position of the first/last daughter   */
+      double phep[5]; /* p4 and mass (GeV) */
+      double vhep[4]; /* production vertex (mm) and time (mm/c) */
+} CPARTICLE_ST;
 /*----------------------------------------------------------------------------*/
 void gstar_readxdf_()     { printf("  Gstar xdf format readout activated \n"); }
 /*----------------------------------------------------------------------------*/
+void xdf_skip_(igate)
+int  *igate;
+{  
+   if ( !xdr_dataset(&x,&d) )  
+      { dsPerror("xdf_read: end of file "); *igate=-1; return; }
+}
+/*----------------------------------------------------------------------------*/
 void xdf_read_(igate)
 int  *igate;
-{  int    i,nv,nt,iv,jv,id; 
+{  int    i,j,nv,nt,iv,jv,id,iz=0; 
+   long   lll; float fff; double ddd;
    float  z[4] = {0,0,0,0}; 
-   extern int gcflag_,gcbank_; 
+   extern int gcflag_,gcbank_;
+   CPARTICLE_ST   cparticle;
+
    jv=-(*igate); nt=0; nv=0;
 
    if ( !xdr_dataset(&x,&d) )  
       { dsPerror("xdf_read: end of file "); *igate=-1; return; }
-   /* if (particle) free(particle); */
+      if (particle) free(particle); 
 
-   if ( GET(p,"particle",particle,pok) )
-      { if (gcflag_) printf("  xdf_read: HEPEVNT table Npart=%d \n",pok);
+/* if ( GET(p,"particle",particle,pok) ) */
+   if ( GETT(p,PARTICLE_SPEC,particle,pok) )
+      { 
+        if (gcflag_) printf("  xdf_read: HEPEVNT table Npart=%d \n",pok);
         if (pok) 
         { int num[3]={1,1,1};  int L=15*pok;  int Link;
+        /* copy first - AGSVERT/AGSKINE may cause garbage collection */
           rebank_("/EVNT/GENE/GENT*",num,&L,&Link,z,16);
           ucopy_ (particle, &gcbank_+29+Link+1, &L);
 	                  *(&gcbank_+29+Link-5) = -pok;  
         }
+
         for (i=0; i<pok; i++)
         { if (particle[i].isthep==1)
           { apdg2gea_(&particle[i].idhep, &id );
