@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.21 2001/01/22 18:38:00 porter Exp $
+ * $Id: StDbTable.cc,v 1.22 2001/02/08 23:23:56 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.22  2001/02/08 23:23:56  porter
+ * fixed initialization of schemaID in table & fixed some warnings when
+ * compiled with NODEBUG
+ *
  * Revision 1.21  2001/01/22 18:38:00  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -102,6 +106,10 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.22  2001/02/08 23:23:56  porter
+ * fixed initialization of schemaID in table & fixed some warnings when
+ * compiled with NODEBUG
+ *
  * Revision 1.21  2001/01/22 18:38:00  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -261,6 +269,7 @@ void StDbTable::init() {
  mrowNumber         = 0;
  mprodTime          = StDbDefaults::Instance()->getProdTime();
  setDefaultFlavor();
+ mschemaID = 0;
 
 }
 

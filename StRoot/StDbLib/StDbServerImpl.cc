@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbServerImpl.cc,v 1.1 2001/01/22 18:37:59 porter Exp $
+ * $Id: StDbServerImpl.cc,v 1.2 2001/02/08 23:23:56 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbServerImpl.cc,v $
+ * Revision 1.2  2001/02/08 23:23:56  porter
+ * fixed initialization of schemaID in table & fixed some warnings when
+ * compiled with NODEBUG
+ *
  * Revision 1.1  2001/01/22 18:37:59  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -33,11 +37,11 @@
 
 ////////////////////////////////////////////////////////////////
 
-StDbServerImpl::StDbServerImpl(): StDbServer(){}
+StDbServerImpl::StDbServerImpl(): StDbServer(), mcurrentDb(0){}
 
-StDbServerImpl::StDbServerImpl(const char* name, const char* host, const char* sock, int port): StDbServer(name,host,sock,port){};
+StDbServerImpl::StDbServerImpl(const char* name, const char* host, const char* sock, int port): StDbServer(name,host,sock,port), mcurrentDb(0) {};
 
-StDbServerImpl::StDbServerImpl(StDbServerImpl& server) :  StDbServer(server){}
+StDbServerImpl::StDbServerImpl(StDbServerImpl& server) :  StDbServer(server), mcurrentDb(0){}
 
 StDbServerImpl::~StDbServerImpl() { deleteDataBases(); }
 

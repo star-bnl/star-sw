@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.2 2001/01/23 14:38:16 porter Exp $
+ * $Id: StDbSql.cc,v 1.3 2001/02/08 23:23:56 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.3  2001/02/08 23:23:56  porter
+ * fixed initialization of schemaID in table & fixed some warnings when
+ * compiled with NODEBUG
+ *
  * Revision 1.2  2001/01/23 14:38:16  porter
  * fixed bug in parsing flavor string where string contains a list of flavors.
  *
@@ -319,6 +323,7 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
   delete [] idMap;
   delete [] dataIDList;
   delete [] dataTable;
+  delete [] timeValues;
 
   Db.Release();  
   return retVal;

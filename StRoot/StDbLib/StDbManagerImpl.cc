@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.1 2001/01/22 18:37:55 porter Exp $
+ * $Id: StDbManagerImpl.cc,v 1.2 2001/02/08 23:23:56 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.2  2001/02/08 23:23:56  porter
+ * fixed initialization of schemaID in table & fixed some warnings when
+ * compiled with NODEBUG
+ *
  * Revision 1.1  2001/01/22 18:37:55  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -443,7 +447,7 @@ StDbManagerImpl::findServersXml(ifstream& is){
   delete [] servName; 
   delete [] hostName; 
   delete [] uSocket; 
-  delete [] portNumber;
+  if(portNumber)delete [] portNumber;
   mservers.push_back(server);
   server->setTimeLogging(misTimeLogged);
 
@@ -703,7 +707,7 @@ char* name=0;
 StDbType
 StDbManagerImpl::getDbType(const char* typeName){
 #define __METHOD__ "getDbType(typeName)"
-  StDbType retType;
+  StDbType retType=dbStDb;
   bool found=false;
   for(dbTypes::iterator itr=mTypes.begin();
       itr != mTypes.end(); ++itr){
@@ -728,7 +732,7 @@ StDbDomain
 StDbManagerImpl::getDbDomain(const char* domainName){
 #define __METHOD__ "getDbDomain(domainName)"
 
-  StDbDomain retType;
+  StDbDomain retType=dbDomainUnknown;
   bool found=false;
   for(dbDomains::iterator itr=mDomains.begin();
       itr != mDomains.end(); ++itr){
