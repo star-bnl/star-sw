@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.42 2001/01/31 17:12:05 fisyak Exp $
+// $Id: St_db_Maker.cxx,v 1.43 2001/02/18 20:09:58 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.43  2001/02/18 20:09:58  perev
+// Distinction between UNIX FS objects and MySql added
+//
 // Revision 1.42  2001/01/31 17:12:05  fisyak
 // Introduce year-2b for STAR 2001
 //
@@ -97,6 +100,8 @@ static const int   times[]=  {
        0,        0,        0,        0,        0,
        0,   120000,    80000,        0,        0,
        0,        0,        0,        0};
+
+enum eDBMAKER {kUNIXOBJ = 0x2000};
 
 /////////////////////////////////////////////////////////////////////////
 //                                          
@@ -426,8 +431,7 @@ EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
   par->Remove(val->fDat);
 
   int kase = 0;
-  //  if (mk->fDBBroker && val->fDat && par->GetUniqueID()) {	// Try to load from MySQL
-  if (mk->fDBBroker && val->fDat) { // Try to load from MySQL
+  if (mk->fDBBroker && val->fDat && par->GetUniqueID() < kUNIXOBJ) {	// Try to load from MySQL
     int ierr = mk->UpdateTable(par->GetUniqueID(),(TTable*)val->fDat, valsSQL );
     if (!ierr) kase = 1;
   }
@@ -514,7 +518,8 @@ TDataSet *St_db_Maker::LoadTable(TDataSet* left)
   dbfile += "/"; dbfile += left->GetName();
   gSystem->ExpandPathName(dbfile);
   
-  switch (Kind(left->GetName())) {
+  int kind = Kind(left->GetName());
+  switch (kind) {
   
     case 1: // .xdf file
     newdat = St_XDFFile::GetXdFile(dbfile);assert (newdat);
@@ -551,6 +556,7 @@ TDataSet *St_db_Maker::LoadTable(TDataSet* left)
     
     default: assert(0);
   }
+  if (newdat) newdat->SetUniqueID(kUNIXOBJ+kind);
 
   return newdat;
 }
