@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.71 1999/03/21 20:41:00 fisyak Exp $
+# $Id: MakeDll.mk,v 1.72 1999/04/02 22:59:01 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.72  1999/04/02 22:59:01  fisyak
+# filter-out St_laser_Maker St_run_summary_Maker St_tpctest_Maker
+#
 # Revision 1.71  1999/03/21 20:41:00  fisyak
 # Cleanup for SL99d
 #
@@ -525,7 +528,9 @@ $(OBJ_DIR)/%.$(O):%.g $(GEN_DIR)/geant3.def
 	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(GEN_DIR)/$(STEM).F  -o  $(ALL_TAGS)
 $(OBJ_DIR)/%.$(O): %.F
 	$(FC)  $(CPPFLAGS)  $(INCLUDES) $(FFLAGS) $(FEXTEND)   -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).$(O)
+ifdef $(LIB_PKG)
 	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).$(O); $(RM) $(OBJ_DIR)/$(STEM).$(O)
+endif
 endif #/* NT */
 $(OBJ_DIR)/%.$(O): %.cdf
 	$(KUIPC) $(KUIPC_FLAGS) $(1ST_DEPS) $(GEN_DIR)/$(STEM).c
