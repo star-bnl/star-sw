@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.77 1999/07/09 01:22:03 fisyak Exp $
+// $Id: bfc.C,v 1.78 1999/07/09 02:18:43 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -208,6 +208,12 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
 	SetOption(kTPC);
 	SetOption(kFPC);
 	SetOption(kCTF);
+	SetOption(kGLOBAL);
+	SetOption(kDST);
+	SetOption(kSQA);
+	SetOption(kEVENT);
+	SetOption(kANALYS);
+	SetOption(kAllEvent);
 	break;
       case  kY2a:
 	SetOption(kDefault);
@@ -280,7 +286,7 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
   }
   for (k = kFIRST; k<kLAST;k++) {
     if (ChainFlags[k]) {
-      printf ("================== %2d \t%s \tis ON \t:%s \n",k,ChainOptions[k],ChainComments[k]);
+      printf ("================== %2d \t%s      \tis ON \t:%s \n",k,ChainOptions[k],ChainComments[k]);
     }
   }
   //  gSystem->Exit(1);
@@ -457,6 +463,7 @@ void bfc (const Int_t First,
   St_db_Maker *calibMk = new St_db_Maker("calib",calibDB);
   calibMk->SetDebug();  
   if (ChainFlags[kXINDF]) {
+    xdfMk->SetDebug();
     xdfMk = new St_xdfin_Maker("xdfin",InFile->Data());
     chain->SetInput("geant",".make/xdfin/.data/event/geant/Event");
   }
@@ -499,7 +506,10 @@ void bfc (const Int_t First,
       geant->Do("swit 2 3;");
       // geant->LoadGeometry("detp geometry ChainFlags[kField_On] field_off");
     }
-    if (ChainFlags[kFZIN]) geant->SetInputFile(InFile->Data());
+    if (ChainFlags[kFZIN]) {
+      geant->SetInputFile(InFile->Data());
+      if (First > 0) geant->Skip(First-1);
+    }
   }
   if (ChainFlags[kNo_Field]) field   = new StMagFC("field","STAR no field",0.00002);
   if (ChainFlags[kNo_Field]) field   = new StMagFC("field","STAR no field",0.00002);
@@ -696,8 +706,10 @@ void bfc (const Int_t First,
     xdf_out = new St_XDFFile(XdfFile->Data(),"wb"); 
     printf ("Open output xdf file  = %s \n ++++++++++++++++++++++\n",XdfFile->Data());
   }
+  // skip if any
+  if (xdfMk && First > 1) xdfMk->Skip(First-1);
   Int_t iMake = 0;
-  for (Int_t i =First; i <= NoEvents; i++){
+  for (Int_t i = First; i <= NoEvents; i++){
     chain->Clear();
     iMake = chain->Make(i);
     if (iMake <kStEOF && xdf_out){
