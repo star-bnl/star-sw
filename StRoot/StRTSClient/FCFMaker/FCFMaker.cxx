@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.25 2004/08/05 20:08:05 jml Exp $
+ * $Id: FCFMaker.cxx,v 1.26 2004/09/02 21:37:13 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.26  2004/09/02 21:37:13  jml
+ * Reduced memory footprint
+ *
  * Revision 1.25  2004/08/05 20:08:05  jml
  * added support for StEvent
  *
@@ -237,18 +240,15 @@ static class fcfAfterburner fcf_after;
 // Three contributions...
 
 // [sector][padrow][result_buffer]
-static u_int croat_out[24][45][(FCF_MAX_CLUSTERS + 2) * 2];
-static u_int croat_simu_out[24][45][(FCF_MAX_CLUSTERS+2)* 2];
-
+//static u_int croat_out[45][(FCF_MAX_CLUSTERS + 2) * 2];
+//static u_int croat_simu_out[45][(FCF_MAX_CLUSTERS+2)* 2];
 // [sector][rb][mz][result_buffer]
-static u_int daq_file_out[24][6][3][(FCF_MAX_CLUSTERS + 2) * 2 * 6];
+//static u_int daq_file_out[6][3][(FCF_MAX_CLUSTERS + 2) * 2 * 6];
+//static j_uintptr simu_resptr[45][3];
+//static j_uintptr croat_resptr[45][3];
+//static j_uintptr daq_file_resptr[45][3];
 
 
-// points to the raw data contributing...
-
-static j_uintptr simu_resptr[24][45][3];
-static j_uintptr croat_resptr[24][45][3];
-static j_uintptr daq_file_resptr[24][45][3];
 
 StRTSClientFCFMaker::StRTSClientFCFMaker(const char *name):StMaker(name)
 {
@@ -256,6 +256,8 @@ StRTSClientFCFMaker::StRTSClientFCFMaker(const char *name):StMaker(name)
   fcf = NULL;
   mCTransform = NULL;
 
+  gainCorr = NULL;
+  t0Corr = NULL;
 
   ignoreFileClusters = false;
   ignoreRawData = false;
@@ -284,6 +286,10 @@ StRTSClientFCFMaker::StRTSClientFCFMaker(const char *name):StMaker(name)
 
 StRTSClientFCFMaker::~StRTSClientFCFMaker() 
 {
+  // Useless, as we are about to exit anyhow, but why not be picky?
+  if(gainCorr) free(gainCorr);
+  if(t0Corr) free(t0Corr);
+
   gMessMgr->Debug() << "Destructor for StRTSClientFCFMaker()" << endm;
   if(fcf != NULL)
   {
@@ -372,17 +378,9 @@ Int_t StRTSClientFCFMaker::Init()
   fcf->cppOff = (short unsigned int *)croat_cppOff;
   fcf->maxClusters = FCF_MAX_CLUSTERS;
 
-  memset(t0Corr, 0, sizeof(t0Corr));
-
 #ifdef FCF_DEBUG_OUTPUT
   ff = fopen("fcf.dta","w") ;
 #endif
-
-  for(int i=0;i<24;i++) {
-    for(int j=0;j<45;j++) {
-      for(int k=0;k<FCF_MAX_PADS_EVER+1;k++) gainCorr[i][j][k] = 64;   // == 1.0 !!
-    }
-  }
 
   // Tonko: added startFlags
   memset(startFlags,0,sizeof(startFlags)) ;
@@ -408,6 +406,9 @@ Int_t StRTSClientFCFMaker::Init()
 
 Int_t StRTSClientFCFMaker::InitRun(int run)
 {
+  int t1,t2;
+  t1 = time(NULL);
+
   fprintf(stderr,"StRTSClientFCFMaker::InitRun called with run %u...\n",run) ;
   
   Event_counter = 0 ;	// clear the count of events
@@ -419,25 +420,134 @@ Int_t StRTSClientFCFMaker::InitRun(int run)
   if(daqReader == NULL) {
     printf("FCFMaker::InitRun No daqReader available...\n");
   }
-
-  for(int i=0;i<24;i++) {
-    for(int j=0;j<45;j++) {
-      getCorrections(i+1,j);   // sector from 1, row from 0
-    }
-  }
-
+ 
+  t2 = time(NULL);
+  printf("<FCFMaker>: Done with InitRun: %d secs\n",t2-t1);
   return kStOK ;
 }
 
 Int_t StRTSClientFCFMaker::Make()
 {
+  hasSim = 0;
+  int t1,t2;
+  t1 = time(NULL);
+
+  //St_DataSet *geant = (St_DataSet *)GetInputDS("geant");
+  StMaker *mk = StMaker::GetChain();
+  StMaker *geant = mk->Maker("geant");  
+  if(geant) {
+    St_g2t_tpc_hit *hit = (St_g2t_tpc_hit *) geant->DataSet("g2t_tpc_hit");
+    if (hit) {
+      hasSim = 1;
+    }
+  }
+ 
+  if(hasSim) 
+    printf("<FCFMaker:Make> event has simulation information\n");
+  else
+    printf("<FCFMaker:Make> no simulation information\n");
+
+  t2 = time(NULL);
+  //printf("<FCFMaker:Make>: Tested for geant (%d): %d secs\n",hasSim, t2-t1);
+
+  int anyRawData = anyRawDataInFile();
+  t2 = time(NULL);
+  //printf("<FCFMaker:Make>: Tested for raw (%d): %d secs\n",anyRawData, t2-t1);
+
+  if(anyRawData && !ignoreRawData) {  
+    // Set up gain/t0 corrections and t0, if neccessary
+
+    if(!t0Corr || !gainCorr) {    // not if already done!
+      if(t0Corr || gainCorr) {
+	printf("<FCFMaker:Make>: Thats funny: we have one set of corrections but not the other? t0=0x%x, gain=0x%x\n",(u_int)t0Corr, (u_int)gainCorr);
+      }
+
+      t0Corr = (t0_corr_t *)malloc(sizeof(t0_corr_t));
+      if(!t0Corr) {
+	printf("<FCFMaker:Make>: Not enough memory for t0 corrections!\n");
+	assert(false);
+      }
+      
+      gainCorr = (gain_corr_t *)malloc(sizeof(gain_corr_t));
+      if(!gainCorr) {
+	printf("<FCFMaker:Make>: Not enough memory for gain corrections!\n");
+	assert(false);
+      }
+      
+      // This is ugly, but getCorrections sets uncorrected values
+      // if the flags are turned off 
+      for(int i=0;i<24;i++) {
+	for(int j=0;j<45;j++) {
+	  getCorrections(i+1, j);
+	}
+      }
+
+      t2 = time(NULL);
+      printf("<FCFMaker>: Got T0/gain corrections: %d secs\n",t2-t1);
+    }
+  }
+
+  int anyClusters = anyClustersInFile();
+  t2 = time(NULL);
+  // printf("<FCFMaker:Make>: Tested for clusters (%d): %d secs\n",anyClusters, t2-t1);  
 
 
+  int doFile = anyClusters && !ignoreFileClusters;
+  int doCroat = anyRawData && !ignoreRawData;
+
+  // All the control flags are in place, now allocate the memory we need
+  //
+
+  croat_out_t *croat_out = NULL;
+  resptr_t *croat_resptr = NULL;
+  daq_out_t *daq_file_out = NULL;
+  resptr_t *daq_file_resptr = NULL;
+  croat_out_t *simu_out = NULL;
+  resptr_t *simu_resptr = NULL;
+
+  if(doCroat) {
+    croat_out = (croat_out_t *)malloc(sizeof(croat_out_t));
+    if(!croat_out) {
+      printf("Not enough memory for croat_out (%d bytes)",sizeof(croat_out_t));
+      assert(false);
+    }
+    croat_resptr = (resptr_t *)malloc(sizeof(resptr_t));
+    if(!croat_resptr) {
+      printf("Not enough memory for croat_resptr (%d bytes)",sizeof(resptr_t));
+      assert(false);
+    }
+  }
+
+  if(doFile) {
+    daq_file_out = (daq_out_t *)malloc(sizeof(daq_out_t));
+    if(!daq_file_out) {
+      printf("Not enough memory for daq_file_out (%d bytes)",sizeof(daq_out_t));
+      assert(false);
+    }
+    daq_file_resptr = (resptr_t *)malloc(sizeof(resptr_t));
+    if(!daq_file_resptr) {
+      printf("Not enough memory for daq_file_resptr (%d bytes)",sizeof(resptr_t));
+      assert(false);
+    }  
+  }
+
+  if(hasSim) {
+    simu_out = (croat_out_t *)malloc(sizeof(croat_out_t));
+    if(!simu_out) {
+      printf("Not enough memory for croat_resptr (%d bytes)",sizeof(croat_out_t));
+      assert(false);
+    }
+    simu_resptr = (resptr_t *)malloc(sizeof(resptr_t));
+    if(!simu_resptr) {
+      printf("Not enough memory for simu_resptr (%d bytes)",sizeof(resptr_t));
+      assert(false);
+    }
+  }
+  
   Event_counter++ ;	// got one more event...
   clustercount = 0 ;	// initialize clustercount...
 
   PrintInfo();
-
 
   int do_annot = 0 ;
 #ifdef FCF_ANNOTATE_CLUSTERS
@@ -494,130 +604,127 @@ Int_t StRTSClientFCFMaker::Make()
 
 
   // Get the clusters
-  // 
-  // These fill the following results:
-  //
-  //     croat_out[][][]     croat_resptr[][][]
-  //     daq_file_out[][][]  daq_file_resptr[][][]
-  //
+  int n_daq_file_cl=0;
+  int n_croat_cl=0;
+  int n_daq_file_cl_sector=0;
+  int n_croat_cl_sector=0;
 
-  int n_daq_file_cl = -1;
-  int n_croat_cl = -1;
-  if(!ignoreFileClusters)
-  {
-    //printf("FCFMaker: reading daq file clusters\n");
-    n_daq_file_cl = build_daq_file_clusters();
-    printf("<FCFMaker::Make> done reading daq file clusters (%d found)\n",n_daq_file_cl);
-  }
-  if(!ignoreRawData)
-  {
-    //printf("FCFMaker: calculating clusters from raw data\n");
-    n_croat_cl = build_croat_clusters();
-    printf("<FCFMaker::Make> done calculating clusters from raw data (%d found)\n",n_croat_cl);
-  }
-
-  int n_burned_daq_file_cl=-1;
-  int n_burned_croat_cl=-1;
-  int use_daq_file_clusters;
-
-  if(n_daq_file_cl != -1)
-    use_daq_file_clusters=1;
-  else
-    use_daq_file_clusters=0;
-
+  int n_burned_daq_file_cl=0;
+  int n_burned_croat_cl=0;
+  int n_burned_daq_file_cl_sector=0;
+  int n_burned_croat_cl_sector=0;
+  
   int mismatch_tot=0;
-  for(int s=0;s<24;s++)
-  {
-    int mismatch_sector=0;
-    int n_burned_croat_cl_sector=0;
-    int n_burned_daq_file_cl_sector=0;
+  int mismatch_sector=0;
 
+
+  for(int sector = 0;sector < 24; sector++) {
+    n_daq_file_cl_sector = 0;
+    n_croat_cl_sector = 0;
+    n_burned_daq_file_cl_sector = 0;
+    n_burned_croat_cl_sector = 0;
+
+    if(doFile) {
+      t2 = time(NULL);
+      //  printf("FCFMaker: reading daq file clusters for sector %d (%d secs)\n",sector+1, t2-t1);
+
+      n_daq_file_cl_sector = build_daq_file_clusters(sector, daq_file_out, daq_file_resptr);
+      n_daq_file_cl += n_daq_file_cl_sector;
+
+      t2 = time(NULL);
+      // printf("<FCFMaker::Make> done reading daq file clusters for sector %d (%d found) (%d secs)\n",sector+1, n_daq_file_cl_sector,t2-t1);
+    }
+
+    if(doCroat) {
+      t2 = time(NULL);
+      // printf("FCFMaker: calculating clusters from raw data for sector %d (%d secs)\n",sector+1, t2-t1);
+
+      n_croat_cl_sector = build_croat_clusters(sector, croat_out, croat_resptr, simu_out, simu_resptr);
+      n_croat_cl += n_croat_cl_sector;
+
+      t2 = time(NULL);
+      // printf("<FCFMaker::Make> done calculating clusters from raw data sector %d (%d found) (%d secs)\n",sector+1, n_croat_cl_sector, t2-t1);
+    }
+
+    
     for(int pr=0;pr<45;pr++)
     {
       fcfHit h;
+      
+      // Compare....
+      if((n_croat_cl_sector > 0) &&
+	 (n_daq_file_cl_sector > 0)) {
 
-      // First compare...
-     
-      if((n_croat_cl > 0) &&
-	 (n_daq_file_cl > 0)) {
 	if(hasSim) {
 	  printf("FCFMaker: have simulated data as well as daq file clusters. disabling comparison between calculated and file clusters\n");
 	}
 	else {
-	  int e = fcf_after.compare(daq_file_resptr[s][pr],
-				    croat_resptr[s][pr]);
+	  int e = fcf_after.compare(daq_file_resptr->v[pr],
+				    croat_resptr->v[pr]);
 	  
 	  mismatch_sector += e;
 	  mismatch_tot += e;
-	  
-	  // 	if(e != 0) {
-	  //  	  printf("FCFMaker: %d mismatches between daq_file & calculated clusters (s=%d, pr=%d)\n",e,s,pr);
-	  //  	}
 	}
       }
       
-      // Do daq file cluster after burner
-      if(n_daq_file_cl > 0) {
-	if(n_burned_daq_file_cl == -1) 
-	  n_burned_daq_file_cl=0;
+      // Burn and save file clusters...
+      if(n_daq_file_cl_sector > 0) {
 
-	fcf_after.burn(daq_file_resptr[s][pr], NULL);
+	fcf_after.burn(daq_file_resptr->v[pr], NULL);
 
 	while(fcf_after.next(&h)) {
 	  n_burned_daq_file_cl++;
 	  n_burned_daq_file_cl_sector++;
 
-	  if(use_daq_file_clusters) {
-	    saveCluster(h.pad,h.tm,h.f,h.c,h.p1,h.p2,h.t1,h.t2,pr,s+1,-1,0,0);
+	  if(doFile) {
+	    saveCluster(h.pad,h.tm,h.f,h.c,h.p1,h.p2,h.t1,h.t2,pr,sector+1,-1,0,0);
 	  }
 	}
       }
 
-      // Do croat cluster after burner if have croat clusters...
-      if(n_croat_cl > 0) {
-	if(n_burned_croat_cl == -1) 
-	  n_burned_croat_cl = 0;
+      // Burn and save croat clusters...
+      if(n_croat_cl_sector > 0) {
 
-	fcf_after.burn(croat_resptr[s][pr], simu_resptr[s][pr]);
+	fcf_after.burn(croat_resptr->v[pr], (simu_resptr) ? simu_resptr->v[pr]: NULL);
 		
 	while(fcf_after.next(&h)) {
 	  n_burned_croat_cl++;
 	  n_burned_croat_cl_sector++;
-
-	  if(!use_daq_file_clusters) {
-	    saveCluster(h.pad,h.tm,h.f,h.c,h.p1,h.p2,h.t1,h.t2,pr,s+1,h.cl_id,h.id_simtrk, h.id_quality);
+	  
+	  if(!doFile) {
+	    saveCluster(h.pad,h.tm,h.f,h.c,h.p1,h.p2,h.t1,h.t2,pr,sector+1,h.cl_id,h.id_simtrk, h.id_quality);
 	  }
 	}
       }
     }
+
+    t2 = time(NULL);
+    //printf("<FCFMaker>: Done with compare and burn for sector %d (%d secs)\n",sector+1,t2-t1);
     
     // If no compare this is not satisfied...
     if(mismatch_sector != 0) {
-      printf("<FCFMaker::Make> There were mismatches between file & calculated clusters (sector=%02d mismatches=%6d nfile=%6d nraw=%6d)\n",s+1,mismatch_sector,n_burned_daq_file_cl_sector,n_burned_croat_cl_sector);
+      printf("<FCFMaker::Make> There were mismatches between file & calculated clusters (sector=%02d mismatches=%6d nfile=%6d nraw=%6d)\n",sector+1,mismatch_sector,n_burned_daq_file_cl_sector,n_burned_croat_cl_sector);
     }
   }
-
-  if(n_burned_daq_file_cl > 0) {
+  
+  if(doFile) {
     printf("<FCFMaker::Make> Merged %d of %d file clusters\n",n_daq_file_cl-n_burned_daq_file_cl,n_daq_file_cl);
   }
-
-  if(n_burned_croat_cl > 0) {
+  
+  if(doCroat) {
     printf("<FCFMaker::Make> Merged %d of %d calculated clusters\n",n_croat_cl-n_burned_croat_cl,n_croat_cl);
   }
 
   // Poor mans comparison....
-  if((n_burned_croat_cl == -1) && 
-     (n_burned_daq_file_cl == -1)) 
+  if(!doFile && !doCroat) 
   {
-    printf("<FCFMaker::Make> No data available\n");
+    printf("<FCFMaker::Make> No clusters available\n");
   }
-  else if((n_burned_croat_cl >= 0) &&
-	  (n_burned_daq_file_cl == -1)) 
+  else if(doCroat && !doFile)
   {
     printf("<FCFMaker::Make> Only raw data available.  No daq file clusters\n");
   }
-  else if((n_burned_croat_cl == -1) &&
-	  (n_burned_daq_file_cl >= 0)) 
+  else if(doFile && !doCroat) 
   {
     printf("<FCFMaker::Make> Only daq file clusters available.  No raw data\n");
   }
@@ -655,6 +762,17 @@ Int_t StRTSClientFCFMaker::Make()
     mStEvent->setTpcHitCollection(mTpcHitColl);
     mTpcHitColl = NULL;    // I don't control the pointer anymore...
   }
+
+  if(croat_out) free(croat_out);
+  if(daq_file_out) free(daq_file_out);
+  if(croat_resptr) free(croat_resptr);
+  if(daq_file_resptr) free(daq_file_resptr);
+
+  if(simu_out) free(simu_out);
+  if(simu_resptr) free(simu_resptr);
+
+  t2 = time(NULL);
+  printf("<FCFMaker::Make> Done with make (%d secs)\n",t2-t1);
 
   return kStOK;
 }
@@ -893,7 +1011,7 @@ void StRTSClientFCFMaker::getCorrections(int sector, int row)
 
     
     // gainCorr starts from 1!
-    gainCorr[sector-1][row][pad+1] = (int)(gain*64.0 + 0.5);
+    gainCorr->v[sector-1][row][pad+1] = (int)(gain*64.0 + 0.5);
 
     // Tonko: added T0 correction here...
     // NOTE: it seems that getT0 wants row,pad to start from 1 whereas the previous Gain
@@ -904,8 +1022,8 @@ void StRTSClientFCFMaker::getCorrections(int sector, int row)
     else t0 = 0.0 ;
 
     // t0Corr starts from 1!
-    t0Corr[sector-1][row][pad+1] = (short)(gain*fabs(t0)*64.0 + 0.5) ;	// this is convoluted with the gain!
-    if(t0 < 0.0) t0Corr[sector-1][row][pad+1] *= -1 ;
+    t0Corr->v[sector-1][row][pad+1] = (short)(gain*fabs(t0)*64.0 + 0.5) ;	// this is convoluted with the gain!
+    if(t0 < 0.0) t0Corr->v[sector-1][row][pad+1] *= -1 ;
 
 #ifdef FCF_DEBUG_OUTPUT
 //     fprintf(ff, "Gains: %d %d %d %1.3f %1.3f\n",
@@ -1156,13 +1274,15 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
   u_int charge_on_row = 0 ;	// I added this for misc. debugging and cross checks, Tonko.
 
   for(int i=0;i<3;i++) result_mz_ptr[i] = NULL;
-  for(int i=0;i<3;i++) simu_mz_ptr[i] = NULL;
 
+  if(hasSim) {
+    for(int i=0;i<3;i++) simu_mz_ptr[i] = NULL;
+  }
 
   //printf("s=%d r=%d\n",sector,row);
   // does both Gain & T0 corrections (depending on flags)
-  fcf->t0Corr = t0Corr[sector-1][row];
-  fcf->gainCorr = gainCorr[sector-1][row];
+  fcf->t0Corr = t0Corr->v[sector-1][row];
+  fcf->gainCorr = gainCorr->v[sector-1][row];
 
   fcf->sb = sector ;	// sector starts from 1 
 
@@ -1177,7 +1297,7 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
   *rows_count = 0 ;	// row count 0 as default...
 	
   res_ptr++ ;	   // advance space...
-  simu_res_ptr++;  // keep parallel with res_ptr...
+  if(hasSim) simu_res_ptr++;  // keep parallel with res_ptr...
 
   int i ;
   for(i=0;i<3;i++) {
@@ -1337,7 +1457,9 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
 
       (*rows_count)++ ;
       res_ptr += 2+2*nclusters ;	// advance pointer
-      simu_res_ptr += 2+2*nclusters;
+      
+      if(hasSim)
+	simu_res_ptr += 2+2*nclusters;
     }
   }
 
@@ -1356,180 +1478,173 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
   return total_clusters;
 }
 
-
-int StRTSClientFCFMaker::build_daq_file_clusters()
+int StRTSClientFCFMaker::anyClustersInFile()
 {
-  //printf("FCFMaker: build_daq_file_clusters\n");
-  memset(daq_file_resptr, 0, sizeof(daq_file_resptr));
-  memset(daq_file_out, 0, sizeof(daq_file_out));
-
-  int hasClusters=0;
-  int nClusters=0;
-
-  if(!daqReader) 
-  {
-    printf("FCFMaker: No daq reader\n");
-    return -1;
+  for(u_int hs=0;hs<24;hs += 2) {
+    for(u_int rb=0;rb<12;rb++) {
+      for(u_int mz=0;mz<3;mz++) {
+	u_int len;
+	if(getMZCLD(hs,rb,mz,&len)) return 1;
+      }
+    }
   }
+    
+  return 0;
+}
 
+u_int *StRTSClientFCFMaker::getMZCLD(u_int hsector, u_int rb, u_int mz, u_int *len)
+{
+  if(!daqReader) {
+    printf("FCFMaker: No daq reader\n");
+    return NULL;
+  }
+  
   tpcReader = daqReader->getTPCReader();
   if(!tpcReader) {
     printf("FCFMaker: No tpc reader\n");
-    return -1;
+    return NULL;
   }
-
+  
   u_int *tpcp = (u_int *)tpcReader->ptrTPCP;
-
-  if(memcmp("TPCP", (char *)tpcp, 4) != 0) 
-  {
+  
+  if(memcmp("TPCP", (char *)tpcp, 4) != 0) {
     printf("FCFMaker: Bad tpcp bank (%s)\n",(char *)tpcp);
-    return -1;
+    return NULL;
+  }
+  
+  int swap_tpcp = checkSwap(tpcp[5]);
+  int off = swap32(swap_tpcp, tpcp[10+2*hsector]);
+  *len = swap32(swap_tpcp, tpcp[10+2*hsector+1]);
+
+  if(*len == 0) return NULL;
+  
+  u_int *tpcsecp = tpcp + off;
+  if(memcmp("TPCSECP", (char *)tpcsecp, 7) != 0)  {
+    printf("FCFMaker: Bad tpcsecp bank (%s)\n",(char *)tpcsecp);
+    return NULL;
   }
 
-  //  printf("FCFMaker: Got tpcp\n");
+  int swap_tpcsecp = checkSwap(tpcsecp[5]);   
+  off = swap32(swap_tpcsecp, tpcsecp[8]);  // SECLP bank offset
+  int format = swap32(swap_tpcsecp, tpcsecp[6]);
 
-//   for(int i=0;i<34;i++) {
-//     printf("FCFMaker: tpcp[%d] = 0x%x\n",i,tpcp[i]);
-//   }
+  //printf("FCFMaker: --- off=%d format=%d\n",off,format);
 
-  int ncl_sector[24];
-  memset(ncl_sector, 0, sizeof(ncl_sector));
+  if(off==0) return NULL;
+  if(format < 2) return NULL;
   
-  for(u_int sec=0;sec<24;sec += 2) 
-  {
-    int swap_tpcp = checkSwap(tpcp[5]);
-    int off = swap32(swap_tpcp, tpcp[10+2*sec]);
-    int len = swap32(swap_tpcp, tpcp[10+2*sec+1]);
-
-    //  printf("FCFMaker: sec=%d off=%d len=%d\n",sec,off,len);
-
-    if(len == 0) continue;
-
-    u_int *tpcsecp = tpcp + off;
-    if(memcmp("TPCSECP", (char *)tpcsecp, 7) != 0) 
-    {
-      printf("FCFMaker: Bad tpcsecp bank (%s)\n",(char *)tpcsecp);
-      return -1;
-    }
-    int swap_tpcsecp = checkSwap(tpcsecp[5]);   
-    off = swap32(swap_tpcsecp, tpcsecp[8]);  // SECLP bank offset
-    int format = swap32(swap_tpcsecp, tpcsecp[6]);
-
-    //printf("FCFMaker: --- off=%d format=%d\n",off,format);
-
-    if(off==0) continue;
-    if(format < 2) continue;
-  
-    u_int *tpcseclp = tpcsecp + off;
-    if(memcmp("TPCSECLP", (char *)tpcseclp, 8) != 0)
-    {
-      printf("FCFMaker: Bad tpcseclp bank (%s)\n",(char *)tpcseclp);
-      return -1;
-    }
-    u_int swap_tpcseclp = checkSwap(tpcseclp[5]);
-    if((sec+1) != swap32(swap_tpcseclp, tpcseclp[3])) 
-    {
-      printf("FCFMaker: Bad tpcseclp sector %d vs %d\n",
-	     swap32(swap_tpcseclp, tpcseclp[3]),
-	     sec);
-
-    }
-
-    //printf("FCFMaker: Good tpcseclp, sector %d\n",sec+1);
+  u_int *tpcseclp = tpcsecp + off;
+  if(memcmp("TPCSECLP", (char *)tpcseclp, 8) != 0) {
+    printf("FCFMaker: Bad tpcseclp bank (%s)\n",(char *)tpcseclp);
+    return NULL;
+  }
+  u_int swap_tpcseclp = checkSwap(tpcseclp[5]);
+  if((hsector+1) != swap32(swap_tpcseclp, tpcseclp[3])) {
+    printf("FCFMaker: Bad tpcseclp sector %d vs %d\n",
+	   swap32(swap_tpcseclp, tpcseclp[3]),
+	   hsector+1);
+    return NULL;
+  }
     
-    int sadd;
-    for(int rb=0;rb<12;rb++) {
-      sadd = 0;    // rb 6..11 are from next sector
-      if(rb >= 6) sadd = 1;
+  off = swap32(swap_tpcseclp, tpcseclp[10+2*rb]);
+  *len = swap32(swap_tpcseclp, tpcseclp[10+2*rb+1]);
+  if(*len == 0) return NULL;
+    
+  u_int *tpcrbclp = tpcseclp + off;
+  if(memcmp("TPCRBCLP", tpcrbclp, 8) != 0) {
+    printf("FCFMaker: Bad TPCRBCLP bank (%s)", (char *)tpcrbclp);
+    return NULL;
+  }
+  int swap_tpcrbclp = checkSwap(tpcrbclp[5]);
+    
+  off = swap32(swap_tpcrbclp, tpcrbclp[10+2*mz]);
+  *len = swap32(swap_tpcrbclp, tpcrbclp[10+2*mz+1]);
+  if(*len==0) return NULL;
+  
+  u_int *tpcmzcld = tpcrbclp + off;
+  if(memcmp("TPCMZCLD", tpcmzcld, 8) != 0) {
+    printf("FCFMaker: Bad TPCMZCLD bank (%s)", (char *)tpcmzcld);
+    return NULL;
+  }
 
-      off = swap32(swap_tpcseclp, tpcseclp[10+2*rb]);
-      len = swap32(swap_tpcseclp, tpcseclp[10+2*rb+1]);
-      if(len == 0) continue;
+  return tpcmzcld;
+}
 
-      u_int *tpcrbclp = tpcseclp + off;
-      if(memcmp("TPCRBCLP", tpcrbclp, 8) != 0) {
-	printf("FCFMaker: Bad TPCRBCLP bank (%s)", (char *)tpcrbclp);
-	return -1;
-      }
-      int swap_tpcrbclp = checkSwap(tpcrbclp[5]);
+int StRTSClientFCFMaker::build_daq_file_clusters(u_int sector,daq_out_t *daq_file_out, resptr_t *daq_file_resptr)
+{
+  //printf("FCFMaker: build_daq_file_clusters\n");
+
+  // printf("0x%x 0x%x\n", (uint)daq_file_out, (uint)daq_file_resptr);
+
+  memset(daq_file_resptr, 0, sizeof(resptr_t));
+  memset(daq_file_out, 0, sizeof(daq_out_t));
+
+  u_int hsector = (sector / 2) * 2;
+  u_int sadd = sector % 2;
+  u_int len;
+  
+  int nClusters=0;
+  
+  for(u_int rb = sadd*6; rb < sadd*6 + 6; rb++) {
+    for(u_int mz = 0;mz<3;mz++) {
+
+      u_int *tpcmzcld = getMZCLD(hsector, rb, mz, &len);
+
+      if(!tpcmzcld) continue;
+
+      // This bank contains up to 6 contributions to be placed into
+      // daq_file_out[][][] and daq_file_resptr[][][]
+      int swap_tpcmzcld = checkSwap(tpcmzcld[5]);
       
-      for(int mz=0;mz<3;mz++) {
-	off = swap32(swap_tpcrbclp, tpcrbclp[10+2*mz]);
-	len = swap32(swap_tpcrbclp, tpcrbclp[10+2*mz+1]);
-	if(len==0) continue;
+      u_int *p = daq_file_out->v[rb%6][mz];
 
-	u_int *tpcmzcld = tpcrbclp + off;
-	if(memcmp("TPCMZCLD", tpcmzcld, 8) != 0)
-	{
-	  printf("FCFMaker: Bad TPCMZCLD bank (%s)", (char *)tpcmzcld);
+      // Only copy payload....
+      memcpy(p, &tpcmzcld[10], len*4 - 40);
+      
+      int n_padrows = swap32(swap_tpcmzcld, p[0]); 
+      
+      u_int *curr = &p[1];
+      for(int i=0;i<n_padrows;i++) {
+	u_int r = rb % 6;
+	
+	u_int pr = swap32(swap_tpcmzcld, *curr);
+	if(pr > 45) {
+	  printf("FCFMaker: Bad padrow %d\n",pr);
+	}
+	
+	u_int ncl = swap32(swap_tpcmzcld, *(curr+1));
+	nClusters += ncl;
+	
+	//printf("FCFMaker: \t\s=%d r=%d pr=%d -- %d clusters (tot=%d)\n",s,r,pr,ncl,nClusters);
+
+	if(pr > 45) {
+	  printf("FCFMaker: Bad padrow s=%d, rb=%d, mz=%d pr=%d\n",
+		 sector+1,r,mz,pr);
 	  return -1;
 	}
 
-	//printf("\tGood TPCMZCLD s=%d rb=%d mz=%d\n", sec+sadd, rb%6, mz);
-
-	// We are finally here!!!
-	// This bank contains up to 6 contributions to be placed into
-	// daq_file_out[][][] and daq_file_resptr[][][]
-	int swap_tpcmzcld = checkSwap(tpcmzcld[5]);
-
-	u_int *p = daq_file_out[sec+sadd][rb%6][mz];
-
-	// Only copy payload....
-	memcpy(p, &tpcmzcld[10], len*4 - 40);
-
-	int n_padrows = swap32(swap_tpcmzcld, p[0]); 
-	
-	u_int *curr = &p[1];
-	for(int i=0;i<n_padrows;i++) {
-	  u_int s = sec+sadd;
-	  u_int r = rb % 6;
-
-	  u_int pr = swap32(swap_tpcmzcld, *curr);
-	  if(pr > 45) {
-	    printf("FCFMaker: Bad padrow %d\n",pr);
-	  }
-
-	  u_int ncl = swap32(swap_tpcmzcld, *(curr+1));
-	  ncl_sector[s] += ncl;
-	  nClusters += ncl;
-
-	  //printf("FCFMaker: \t\s=%d r=%d pr=%d -- %d clusters (tot=%d)\n",s,r,pr,ncl,nClusters);
-
-	  hasClusters = 1;
-
-	  if(pr > 45) 
-	  {
-	    printf("FCFMaker: Bad padrow s=%d, rb=%d, mz=%d pr=%d\n",
-		   s+1,r,mz,pr);
-	    return -1;
-	  }
-
-	  // Add pointer to daq_file_resptr[]
-	  j_uintptr *resptr = daq_file_resptr[s][pr-1];
-	  int j;
-	  for(j=0;j<3;j++) {
-	    if(resptr[j] == NULL) break;
-	  }
-	  if(j >= 3) {
-	    printf("FCFMaker: All three resptr already filled! s=%d, rb=%d mz=%d pr=%d\n",
-		   s+1,r,mz,pr);
-	    return -1;
-	  }
-
-	  resptr[j] = curr;
-
-	  curr += ncl*2+2;
+	// Add pointer to daq_file_resptr[]
+	j_uintptr *resptr = daq_file_resptr->v[pr-1];
+	int j;
+	for(j=0;j<3;j++) {
+	  if(resptr[j] == NULL) break;
 	}
+	if(j >= 3) {
+	  printf("FCFMaker: All three resptr already filled! s=%d, rb=%d mz=%d pr=%d\n",
+		 sector+1,r,mz,pr);
+	  return -1;
+	}
+	
+	resptr[j] = curr;
+
+	curr += ncl*2+2;
       }
     }
   }
 
-//   for(int s=0;s<24;s++) {
-//     printf("FCFMaker: sec=%d clusters=%d read from daq file\n",s+1,ncl_sector[s]);
-//   }
-
-  if(hasClusters == 0)
-    return -1;
+  //   for(int s=0;s<24;s++) {
+  //     printf("FCFMaker: sec=%d clusters=%d read from daq file\n",s+1,ncl_sector[s]);
+  //   }
   
   return nClusters;
 }
@@ -1543,32 +1658,67 @@ u_int StRTSClientFCFMaker::swap32(bool test, u_int x)
 {
   if(!test) return x;
   else
-  { 
-    char *hh,temp[4];
-    hh=(char*)(&x);
-    temp[0]=hh[3]; temp[1]=hh[2]; temp[2]=hh[1]; temp[3]=hh[0];
-    return *((unsigned int*)temp);
-  }
+    { 
+      char *hh,temp[4];
+      hh=(char*)(&x);
+      temp[0]=hh[3]; temp[1]=hh[2]; temp[2]=hh[1]; temp[3]=hh[0];
+      return *((unsigned int*)temp);
+    }
 }
 
-int StRTSClientFCFMaker::build_croat_clusters()
+int StRTSClientFCFMaker::anyRawDataInFile()
+{  St_DataSet *data = (St_DataSet *)GetInputDS("tpc_raw");
+  if(!data) return 0;
+
+  St_DataSetIter rawIter(data);
+
+  // Loop over all sectors  
+  for(int sectorIdx=1;sectorIdx<=24;sectorIdx++) {
+    char sectorName[100];
+    sprintf(sectorName, "Sector_%d", sectorIdx);
+    
+    //printf("Checking for %s\n", sectorName);
+
+    rawIter.Reset();
+    St_DataSet *sector = (St_DataSet *)rawIter.Find(sectorName);
+    if(!sector) continue;
+
+    //  printf("Got %s\n",sectorName);
+
+    // Get the padrow tables...
+    St_DataSetIter sectorIter(sector);
+    St_type_shortdata *Tadc_in, *Tadc_out;
+    Tadc_in = (St_type_shortdata *)sectorIter.Find("pixel_data_in");
+    Tadc_out = (St_type_shortdata *)sectorIter.Find("pixel_data_out");
+
+    //printf("%ld %ld\n",Tadc_in->GetNRows(), Tadc_out->GetNRows());
+    if(Tadc_in->GetNRows() || Tadc_out->GetNRows())
+      return 1;
+  }
+ 
+  return 0;
+}
+    
+int StRTSClientFCFMaker::build_croat_clusters(u_int s, 
+					      croat_out_t *croat_out, 
+					      resptr_t *croat_resptr,
+					      croat_out_t *simu_out,
+					      resptr_t *simu_resptr)
 {
+  memset(croat_out, 0, sizeof(croat_out_t));
+  memset(croat_resptr, 0, sizeof(resptr_t));
+
+  if(hasSim) {
+    memset(simu_out, 0, sizeof(croat_out_t));
+    memset(simu_resptr, 0, sizeof(resptr_t));
+  }
+
   int nclusters=0;
   int haveAnyRaw=0;
   int haveRaw=0;
 
   St_DataSet *rawData;
   St_DataSet *sector;
-  St_DataSet *geant;
-
-  geant = (St_DataSet *)GetInputDS("geant");
-  if(geant) {
-    hasSim = 1;
-    printf("<FCFMaker> event has simulation information\n");
-  }
-  else {
-    hasSim = 0;
-  }
 
   int sz;
   
@@ -1578,137 +1728,145 @@ int StRTSClientFCFMaker::build_croat_clusters()
   St_DataSetIter rawIter(rawData);
 
   // Loop over all sectors  
-  int sectorIdx;
-  for(sectorIdx=1;sectorIdx<=24;sectorIdx++) {
-    haveRaw = 0;
+  int sectorIdx = s+1;
+  haveRaw = 0;
 
-    St_raw_row *Trow_in, *Trow_out;
-    St_raw_pad *Tpad_in, *Tpad_out;
-    St_raw_seq *Tseq_in, *Tseq_out;
-    St_type_shortdata *Tadc_in, *Tadc_out;
-    St_type_shortdata *Ttrk_in, *Ttrk_out;
+  St_raw_row *Trow_in, *Trow_out;
+  St_raw_pad *Tpad_in, *Tpad_out;
+  St_raw_seq *Tseq_in, *Tseq_out;
+  St_type_shortdata *Tadc_in, *Tadc_out;
+  St_type_shortdata *Ttrk_in, *Ttrk_out;
+  
+  // c arrays for this sector
+  raw_row_st *row_in, *row_out;
+  raw_pad_st *pad_in, *pad_out;
+  raw_seq_st *seq_in, *seq_out;
+  unsigned short *adc_in, *adc_out;
+  unsigned short *trk_in=NULL;
+  unsigned short *trk_out=NULL;
+  
+  // look for the sector in the raw data...
+  rawIter.Reset();
+  while((sector = rawIter()) != NULL) {
+    char sectorName[100];
+    sprintf(sectorName, "Sector_%d", sectorIdx);
+    
+    if(strcmp(sector->GetName(), sectorName) != 0) continue;
 
-    // c arrays for this sector
-    raw_row_st *row_in, *row_out;
-    raw_pad_st *pad_in, *pad_out;
-    raw_seq_st *seq_in, *seq_out;
-    unsigned short *adc_in, *adc_out;
-    unsigned short *trk_in=NULL;
-    unsigned short *trk_out=NULL;
+    //printf("Got sector:  %s\n",sector->GetName());
 
-    // look for the sector in the raw data...
-    rawIter.Reset();
-    while((sector = rawIter()) != NULL) {
-      char sectorName[100];
-      sprintf(sectorName, "Sector_%d", sectorIdx);
+    // Get the table structures...
+    St_DataSetIter sectorIter(sector);
+    
+    Trow_in = (St_raw_row *)sectorIter.Find("raw_row_in");
+    Trow_out = (St_raw_row *)sectorIter.Find("raw_row_out");
+    Tpad_in = (St_raw_pad *)sectorIter.Find("raw_pad_in");
+    Tpad_out = (St_raw_pad *)sectorIter.Find("raw_pad_out");
+    Tseq_in = (St_raw_seq *)sectorIter.Find("raw_seq_in");
+    Tseq_out = (St_raw_seq *)sectorIter.Find("raw_seq_out");
+    Tadc_in = (St_type_shortdata *)sectorIter.Find("pixel_data_in");
+    Tadc_out = (St_type_shortdata *)sectorIter.Find("pixel_data_out");
+    Ttrk_in = (St_type_shortdata *)sectorIter.Find("pixel_indx_in");
+    Ttrk_out = (St_type_shortdata *)sectorIter.Find("pixel_indx_out");
 
-      if(strcmp(sector->GetName(), sectorName) != 0) continue;
-
-      // Get the table structures...
-      St_DataSetIter sectorIter(sector);
-
-      Trow_in = (St_raw_row *)sectorIter.Find("raw_row_in");
-      Trow_out = (St_raw_row *)sectorIter.Find("raw_row_out");
-      Tpad_in = (St_raw_pad *)sectorIter.Find("raw_pad_in");
-      Tpad_out = (St_raw_pad *)sectorIter.Find("raw_pad_out");
-      Tseq_in = (St_raw_seq *)sectorIter.Find("raw_seq_in");
-      Tseq_out = (St_raw_seq *)sectorIter.Find("raw_seq_out");
-      Tadc_in = (St_type_shortdata *)sectorIter.Find("pixel_data_in");
-      Tadc_out = (St_type_shortdata *)sectorIter.Find("pixel_data_out");
-      Ttrk_in = (St_type_shortdata *)sectorIter.Find("pixel_indx_in");
-      Ttrk_out = (St_type_shortdata *)sectorIter.Find("pixel_indx_out");
-
-      // Get the c arrays for this sector
-      row_in = Trow_in->GetTable();
-      row_out = Trow_out->GetTable();
-      pad_in = Tpad_in->GetTable();
-      pad_out = Tpad_out->GetTable();
-      seq_in = Tseq_in->GetTable();
-      seq_out = Tseq_out->GetTable();
-      adc_in = (unsigned short *)Tadc_in->GetTable();
-      adc_out = (unsigned short *)Tadc_out->GetTable();
-
-      if(hasSim) {
-	trk_in = (unsigned short *)Ttrk_in->GetTable();
-	trk_out = (unsigned short *)Ttrk_out->GetTable();
-
-	//printf("<FCFMaker> Simulation table at 0x%x and 0x%x\n",(u_int)trk_in, (u_int)trk_out);
-      }
-      else {
-	trk_in = NULL;
-	trk_out = NULL;
+    // Get the c arrays for this sector
+    row_in = Trow_in->GetTable();
+    row_out = Trow_out->GetTable();
+    pad_in = Tpad_in->GetTable();
+    pad_out = Tpad_out->GetTable();
+    seq_in = Tseq_in->GetTable();
+    seq_out = Tseq_out->GetTable();
+    adc_in = (unsigned short *)Tadc_in->GetTable();
+    adc_out = (unsigned short *)Tadc_out->GetTable();
+    
+    if(hasSim) {
+      if(!Ttrk_in || !Ttrk_out) {
+	printf("<FCFMaker> didn't find pixel_indx tables, but simulation are on\n");
       }
 
-      haveRaw = 1;
-      haveAnyRaw = 1;
+      trk_in = (unsigned short *)Ttrk_in->GetTable();
+      trk_out = (unsigned short *)Ttrk_out->GetTable();
+      
+      //printf("<FCFMaker> Simulation table at 0x%x and 0x%x\n",(u_int)trk_in, (u_int)trk_out);
     }
+    else {
+      if(Ttrk_in || Ttrk_out) {
+	printf("<FCFMaker> found pixel_indx tables, but simulations are off\n");
+      }
+      trk_in = NULL;
+      trk_out = NULL;
+    }
+    
+    haveRaw = 1;
+    haveAnyRaw = 1;
+  }    
 
-    //printf("Sector %d, raw=%d\n", sectorIdx, haveRaw);
+  //printf("Sector %d, raw=%d\n", sectorIdx, haveRaw);
+  
+  // Setup pointers for entire sector
+  if(haveRaw) {
+    
+    memset(&cpp[0],0xff,sizeof(cpp));
+    sz = 0;	
+    int sz2;	
+    
+    sz2 = BuildCPP(Trow_in->GetNRows(), row_in, pad_in, seq_in, sectorIdx);
+    if(sz2 == -1) printf("<StRTSClientFCFMaker::build_croat_clusters> No data for sector %d, inner\n", sectorIdx);
+    else sz += sz2;
+    
+    sz2 = BuildCPP(Trow_out->GetNRows(), row_out, pad_out, seq_out, sectorIdx);
+    if(sz2 == -1) printf("<StRTSClientFCFMaker::build_croat_clusters> No data for sector %d, outer\n", sectorIdx);
+    else sz += sz2;
+  }
 
-    // Setup pointers for entire sector
+  // Run Clusterfinder...for this sector
+  for(int r=44;r>=0;r--) {
+    // skip row 13!
+    if(r==12) continue ;
+    
+    j_uintptr *raw_resptr = croat_resptr->v[r];
+    j_uintptr *sim_resptr = (hasSim) ? simu_resptr->v[r] : NULL;
+    
     if(haveRaw) {
 
-      memset(&cpp[0],0xff,sizeof(cpp));
-      sz = 0;	
-      int sz2;	
+      nclusters +=
+	runClusterFinder(raw_resptr, 
+			 croat_out->v[r], 
+			 sectorIdx,
+			 r,
+			 &cpp[r],
+			 ((r<13) ? adc_in : adc_out),
+			 ((r<13) ? trk_in : trk_out),
+			 (hasSim) ? simu_out->v[r] : NULL,
+			 sim_resptr);
 
-      sz2 = BuildCPP(Trow_in->GetNRows(), row_in, pad_in, seq_in, sectorIdx);
-      if(sz2 == -1) printf("<StRTSClientFCFMaker::build_croat_clusters> No data for sector %d, inner\n", sectorIdx);
-      else sz += sz2;
-
-      sz2 = BuildCPP(Trow_out->GetNRows(), row_out, pad_out, seq_out, sectorIdx);
-      if(sz2 == -1) printf("<StRTSClientFCFMaker::build_croat_clusters> No data for sector %d, outer\n", sectorIdx);
-      else sz += sz2;
-    }
-
-    // Run Clusterfinder...for this sector
-    for(int r=44;r>=0;r--) {
-      // skip row 13!
-      if(r==12) continue ;
-      
-      j_uintptr *raw_resptr = croat_resptr[sectorIdx-1][r];
-      j_uintptr *sim_resptr = simu_resptr[sectorIdx-1][r];
-
-      if(haveRaw) {
-
-	nclusters +=
-	  runClusterFinder(raw_resptr, 
-			   croat_out[sectorIdx-1][r], 
-			   sectorIdx,
-			   r,
-			   &cpp[r],
-			   ((r<13) ? adc_in : adc_out),
-			   ((r<13) ? trk_in : trk_out),
-			   croat_simu_out[sectorIdx-1][r],
-			   sim_resptr);
-
-
-	// 	printf("(raw)------>        0x%x 0x%x 0x%x (0x%x)\n",
-	// 	       (u_int)raw_resptr[0],
-	// 	       (u_int)raw_resptr[1],
-	// 	       (u_int)raw_resptr[2],
-	// 	       (u_int)croat_out);
-	// save pixels
+	
+      // 	printf("(raw)------>        0x%x 0x%x 0x%x (0x%x)\n",
+      // 	       (u_int)raw_resptr[0],
+      // 	       (u_int)raw_resptr[1],
+      // 	       (u_int)raw_resptr[2],
+      // 	       (u_int)croat_out);
+      // save pixels
 #if defined(FCF_ANNOTATE_CLUSTERS) && defined(__ROOT__)
-	St_fcfPixel *fcfPixA = new St_fcfPixel(Form("fcfPixA%i_%i",sectorIdx,r+1),1000);
-	fcfPixATop->Add(fcfPixA);
-	fcfPixel_st pix;
-	for(int i=1;i<=182;i++) {
-	  for(int j=0;j<512;j++) {
-	    if(pixStruct[i][j].adc) {
-	      pix.pad = i;
-	      pix.tbin = j;
-	      pix.adc  = pixStruct[i][j].adc;
-	      pix.cl_id = pixStruct[i][j].cl_id;
-	      pix.id_simtrk = pixStruct[i][j].id_simtrk;
-	      fcfPixA->AddAt(&pix);
-	    }
+      St_fcfPixel *fcfPixA = new St_fcfPixel(Form("fcfPixA%i_%i",sectorIdx,r+1),1000);
+      fcfPixATop->Add(fcfPixA);
+      fcfPixel_st pix;
+      for(int i=1;i<=182;i++) {
+	for(int j=0;j<512;j++) {
+	  if(pixStruct[i][j].adc) {
+	    pix.pad = i;
+	    pix.tbin = j;
+	    pix.adc  = pixStruct[i][j].adc;
+	    pix.cl_id = pixStruct[i][j].cl_id;
+	    pix.id_simtrk = pixStruct[i][j].id_simtrk;
+	    fcfPixA->AddAt(&pix);
 	  }
 	}
-#endif
       }
+#endif
     }
   }
+
 
   // -1 if no raw data.
   // 0 if raw data but no clusters
