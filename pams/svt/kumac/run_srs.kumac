@@ -1,33 +1,6 @@
-MACRO run_srs ievent=1 stnd_al=no nevent=1
-macro/global/import *
-ievent=[1]
-stnd_al=[2]
-nevent=[3]
-
-
-* initializations
-
-  if ( [stnd_al]=yes ) then
-   exec init_svg
-    message 'Input name of .dsl file'
-    read file
-    message 'Opening input file...'
-    dio/newfile data [file] r
-    message 'Reading input file...'
-  * first get event gets Run info
-    dio/stream/getevent data
-  endif
-
-*-------------------------------------------------
-
-* Event Loop
-do i=1,[nevent]
-
-   if ( [stnd_al]=yes) then
-	dio/stream/getevent data
-   endif
-
-   message 'Calling SRS...'
+MACRO run_srs 
+   
+   macro/global/import *
 
    ami/mod/call srs_am _
         [data]/svt/hits/srs_result _
@@ -40,6 +13,4 @@ do i=1,[nevent]
         [params]/svt/srs_direct _
         [geometry]/svt/srs_activea 
    
-enddo
-
 RETURN
