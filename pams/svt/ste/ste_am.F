@@ -50,7 +50,7 @@ C                 (mc)groups tables for spt-tracks identification
 c
 C     ARGUMENTS:
 #include "ste_am.inc"
-
+      integer malloc
 C     Local Declarations: 
 c     -------------------
       integer ictrack, idtrack, j_spt(10), mctrk
@@ -96,15 +96,18 @@ c     keys
       parameter (ndtrackmax=100000)
       integer sptkey(nsptmax)
       integer g2t_trackkey(nkinemax)
+      pointer (p_g2t_trackkey,g2t_trackkey)
       integer dtrackkey(ndtrackmax)
+      pointer (p_dtrackkey,dtrackkey)
       integer loc_g2thit(nkinemax)
+      pointer (p_loc_g2thit,loc_g2thit)
 
       integer   tls_Index_Sort_i, tls_Search_Near_i      
 c  integer indexed sort, integer search near nominated row
 
  
 c     error/message
-      
+            
       character msg*132
       logical   first
       data      first/.true./
@@ -178,6 +181,11 @@ c2345678901234567890123456789012345678901234567890123456789012
  1032 format(1x,'ste_am_mm-e : ',
      &     'mctrk,ndtrackmax:',2i10)
 
+C     Create arrays
+      p_g2t_trackkey = malloc(nkinemax*4)
+      p_dtrackkey    = malloc(ndtrackmax*4)
+      p_loc_g2thit   = malloc(nkinemax*4)
+      
 C     EXECUTABLE CODE:
 C     ================
       ste_am = stafcv_ok
@@ -190,52 +198,52 @@ C     ================
          ste_am = stafcv_bad
          write(msg,1001)
          call StError(msg)
-         return
+         goto 999
       else if (spt_h.nok.le.0) then ! no spt
          ste_am = stafcv_bad
          write(msg,1002)
          call StError(msg)
-         return
+         goto 999
       else if (vtx_h.nok.le.0) then ! no vtx
          ste_am = stafcv_bad
          write(msg,1003)
          call StError(msg)
-         return
+         goto 999
       else if (mctrack_h.nok.le.0) then ! no mctrack
 c         ste_am = stafcv_bad
          write(msg,1005)
          call StError(msg)
-c         return
+c         goto 999
       else if (mckine_h.nok.le.0) then ! no kine
 c         ste_am = stafcv_bad
          write(msg,1006)
          call StError(msg)
-c         return
+c         goto 999
 c      else if (track_h.nok.le.0) then ! no mctrack
 c         ste_am = stafcv_bad
 c         write(msg,1008)
 c         call StError(msg)
-c         return
+c         goto 999
       else if (kine_h.nok.le.0) then ! no kine
 c         ste_am = stafcv_bad
          write(msg,1009)
          call StError(msg)
-c         return
+c         goto 999
       else if (g2t_track_h.nok.le.0) then ! no g2t_track
          ste_am = stafcv_bad
          write(msg,1010)
          call StError(msg)
-         return
+         goto 999
       else if (g2t_vertex_h.nok.le.0) then ! no vert
          ste_am = stafcv_bad
          write(msg,1011)
          call StError(msg)
-         return
+         goto 999
       else if (g2t_gepart_h.nok.le.0) then ! no g2t_gepart
          ste_am = stafcv_bad
          write(msg,1011)
          call StError(msg)
-         return
+         goto 999
       end if
       
       gspt = tls_Index_Sort_i(g2t_svt_hit_h.nok,g2t_svt_hit(1).id,
@@ -971,7 +979,7 @@ c     total space points accounting
             write(msg,1029) ispt
             call StError(msg)
             ste_am = stafcv_bad
-            return
+            goto 999
          else
             teff(1).nspt(layer) =  teff(1).nspt(layer) + 1   ! count number spt/layer
             if (spt(ispt).flag .eq. 0) then
@@ -989,5 +997,11 @@ c     update the teval table header
 
       WRITE(*,*) 'STE_AM: Stopping ######################################'
       STE_AM=STAFCV_OK
+ 999  continue
+C     Delete arrays
+      call free(p_g2t_trackkey)
+      call free(p_dtrackkey   )
+      call free(p_loc_g2thit  )
+
       RETURN
       END
