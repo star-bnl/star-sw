@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.28 2001/10/19 09:41:22 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.29 2001/10/29 12:53:23 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.29  2001/10/29 12:53:23  jcs
+// select FTPC drift maps according to flavor of magnetic field
+//
 // Revision 1.28  2001/10/19 09:41:22  jcs
 // tZero now in data base in ftpcElectronics
 //
@@ -116,6 +119,11 @@
 #include "TH2.h"
 #include "TObjArray.h"
 
+#ifndef gufld
+#define gufld gufld_
+extern "C" void gufld(float *, float *);
+#endif
+
 #include "tables/St_fcl_fppoint_Table.h"
 #include "tables/St_fcl_ftpcsqndx_Table.h"
 #include "tables/St_fcl_ftpcadc_Table.h"
@@ -150,6 +158,56 @@ StMaker(name),
 }
 //_____________________________________________________________________________
 StFtpcClusterMaker::~StFtpcClusterMaker(){
+}
+//_____________________________________________________________________________
+Int_t StFtpcClusterMaker::InitRun(int runnumber){
+  Float_t x[3] = {0,0,0};
+  Float_t b[3];
+
+  gufld(x,b);
+  Double_t gFactor = b[2]/4.980;
+  
+  gMessMgr->Info() << "StFtpcClusterMaker::InitRun: gFactor is "<<gFactor<<endm;
+  
+  // Load the correct FTPC drift maps depending on magnetic field
+
+  // Full Field Positive ?
+  if ( gFactor > 0.8 ) {
+     SetFlavor("ffp10kv","ftpcVDrift");
+     SetFlavor("ffp10kv","ftpcdVDriftdP");
+     SetFlavor("ffp10kv","ftpcDeflection");
+     SetFlavor("ffp10kv","ftpcdDeflectiondP");
+     gMessMgr->Info() << "StFtpcClusterMaker::InitRun: flavor set to ffp10kv"<<endm;
+  }
+  else if ( gFactor > 0.2 ) {
+     SetFlavor("hfp10kv","ftpcVDrift");
+     SetFlavor("hfp10kv","ftpcdVDriftdP");
+     SetFlavor("hfp10kv","ftpcDeflection");
+     SetFlavor("hfp10kv","ftpcdDeflectiondP");
+     gMessMgr->Info() << "StFtpcClusterMaker::InitRun: flavor set to hfp10kv"<<endm;
+  }
+  else if ( gFactor > -0.2 ) {
+     SetFlavor("zf10kv","ftpcVDrift");
+     SetFlavor("zf10kv","ftpcdVDriftdP");
+     SetFlavor("zf10kv","ftpcDeflection");
+     SetFlavor("zf10kv","ftpcdDeflectiondP");
+     gMessMgr->Info() << "StFtpcClusterMaker::InitRun: flavor set to zf10kv"<<endm;
+  }
+  else if ( gFactor > -0.8 ) {
+     SetFlavor("hfn10kv","ftpcVDrift");
+     SetFlavor("hfn10kv","ftpcdVDriftdP");
+     SetFlavor("hfn10kv","ftpcDeflection");
+     SetFlavor("hfn10kv","ftpcdDeflectiondP");
+     gMessMgr->Info() << "StFtpcClusterMaker::InitRun: flavor set to hfn10kv"<<endm;
+  }
+  else {
+     SetFlavor("ffn10kv","ftpcVDrift");
+     SetFlavor("ffn10kv","ftpcdVDriftdP");
+     SetFlavor("ffn10kv","ftpcDeflection");
+     SetFlavor("ffn10kv","ftpcdDeflectiondP");
+     gMessMgr->Info() << "StFtpcClusterMaker::InitRun: flavor set to ffn10kv"<<endm;
+  }     
+  return 0;
 }
 //_____________________________________________________________________________
 Int_t StFtpcClusterMaker::Init(){

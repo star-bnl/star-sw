@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.8 2001/10/19 09:42:34 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.9 2001/10/29 12:56:55 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.9  2001/10/29 12:56:55  jcs
+// select FTPC drift maps according to flavor of magnetic field
+//
 // Revision 1.8  2001/10/19 09:42:34  jcs
 // tZero now in data base in ftpcElectronics
 //
@@ -46,6 +49,11 @@
 #include "TH1.h"
 #include "TH2.h"
 
+#ifndef gufld
+#define gufld gufld_
+extern "C" void gufld(float *, float *);
+#endif
+
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_ftp_hit_Table.h"
 #include "tables/St_fcl_ftpcndx_Table.h" 
@@ -59,7 +67,6 @@ StFtpcSlowSimMaker::StFtpcSlowSimMaker(const char *name):
 StMaker(name),
 m_slowsimpars(0),
 m_dimensions(0),
-m_padrow_z(0),
 m_efield(0),
 m_vdrift(0),
 m_deflection(0),
@@ -72,6 +79,50 @@ m_electronics(0)
 }
 //_____________________________________________________________________________
 StFtpcSlowSimMaker::~StFtpcSlowSimMaker(){
+}
+//_____________________________________________________________________________
+Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
+  Float_t x[3] = {0,0,0};
+  Float_t b[3];
+  gufld(x,b);
+  Double_t gFactor = b[2]/4.980;
+
+  gMessMgr->Info() << "StFtpcSlowSimMaker::InitRun: gFactor is "<<gFactor<<endm;
+
+  // Load the correct FTPC drift maps depending on magnetic field
+
+  // Full Field Positive ?
+  if ( gFactor > 0.8 ) {
+     SetFlavor("ffp10kv","ftpcVDrift");
+     SetFlavor("ffp10kv","ftpcdVDriftdP");
+     SetFlavor("ffp10kv","ftpcDeflection");
+     SetFlavor("ffp10kv","ftpcdDeflectiondP");
+  }
+  else if ( gFactor > 0.2 ) {
+     SetFlavor("hfp10kv","ftpcVDrift");
+     SetFlavor("hfp10kv","ftpcdVDriftdP");
+     SetFlavor("hfp10kv","ftpcDeflection");
+     SetFlavor("hfp10kv","ftpcdDeflectiondP");
+  }
+  else if ( gFactor > -0.2 ) {
+     SetFlavor("zf10kv","ftpcVDrift");
+     SetFlavor("zf10kv","ftpcdVDriftdP");
+     SetFlavor("zf10kv","ftpcDeflection");
+     SetFlavor("zf10kv","ftpcdDeflectiondP");
+  }
+  else if ( gFactor > -0.8 ) {
+     SetFlavor("hfn10kv","ftpcVDrift");
+     SetFlavor("hfn10kv","ftpcdVDriftdP");
+     SetFlavor("hfn10kv","ftpcDeflection");
+     SetFlavor("hfn10kv","ftpcdDeflectiondP");
+  }
+  else {
+     SetFlavor("ffn10kv","ftpcVDrift");
+     SetFlavor("ffn10kv","ftpcdVDriftdP");
+     SetFlavor("ffn10kv","ftpcDeflection");
+     SetFlavor("ffn10kv","ftpcdDeflectiondP");
+  }    
+  return 0;
 }
 //_____________________________________________________________________________
 Int_t StFtpcSlowSimMaker::Init(){
@@ -92,7 +143,6 @@ Int_t StFtpcSlowSimMaker::Init(){
   St_DataSetIter       dblocal_geometry(ftpc_geometry_db);
 
   m_dimensions = (St_ftpcDimensions *)dblocal_geometry("ftpcDimensions");
-  m_padrow_z   = (St_ftpcPadrowZ  *)dblocal_geometry("ftpcPadrowZ" );
 
   St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
   if ( !ftpc_calibrations_db ){
@@ -152,7 +202,6 @@ Int_t StFtpcSlowSimMaker::Make(){
  
     //create FTPC database reader
     StFtpcDbReader *dbReader = new StFtpcDbReader(m_dimensions,
-                                                  m_padrow_z,
                                                   m_efield,
                                                   m_vdrift,
                                                   m_deflection,
