@@ -693,6 +693,12 @@ Int_t TGeant3::Glvolu(const Int_t Nlev, Int_t *Lnam, Int_t *Lnum)
    glvolu(&Nlev, Lnam, Lnum, &Ierr);
    return Ierr; 
 } 
+//___________________________________________ 
+Float_t* TGeant3::Gufld(Float_t *x, Float_t *bf)
+{ 
+   gufld(x,bf);
+   return bf; 
+} 
 #endif /* Geant3Dummy */
  
  

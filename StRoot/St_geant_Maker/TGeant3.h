@@ -127,6 +127,7 @@ public:
    virtual  Int_t Gsvolu(const char *name, const char *shape, Int_t nmed,  
                          Float_t *upar, Int_t np); 
    virtual  Int_t Glvolu(const Int_t Nlev, Int_t *Lnam, Int_t *Lnum);  
+   virtual  Float_t* Gufld(Float_t *x, Float_t *bf);  
    ClassDef(TGeant3,1)  //C++ interface to Geant basic routines 
 }; 
  
@@ -474,6 +475,7 @@ EXTERN Float_t *z_q;
 # define gprotm  gprotm_ 
 # define gsvolu  gsvolu_ 
 # define glvolu  glvolu_ 
+# define gufld   gufld_
 # define gprint  gprint_ 
 # define dzshow  dzshow_ 
 # define agmain  agmain_ 
@@ -551,6 +553,7 @@ EXTERN Float_t *z_q;
 # define gprotm  GPROTM 
 # define gsvolu  GSVOLU 
 # define glvolu  GLVOLU 
+# define gufld   GUFLD
 # define gprint  GPRINT 
 # define dzshow  DZSHOW 
 # define agmain  AGMAIN
@@ -631,6 +634,7 @@ extern "C" void type_of_call gsposp(DEFCHARD, Int_t &, DEFCHARD, Float_t &, Floa
 				    Float_t *, Int_t & DEFCHARL DEFCHARL DEFCHARL); 
 extern "C" void type_of_call gsvolu(DEFCHARD, DEFCHARD, Int_t &, Float_t *, Int_t &, Int_t & DEFCHARL DEFCHARL); 
 extern "C" void type_of_call glvolu(Int_t *, Int_t *, Int_t *, Int_t *);
+extern "C" void type_of_call gufld(Float_t *, Float_t *);
 extern "C" void type_of_call gprint(DEFCHARD,const int& DEFCHARL); 
 extern "C" void type_of_call dzshow(DEFCHARD,const int&,const int&,DEFCHARD,const int&, const int&, const int&, const int& DEFCHARL DEFCHARL);
 extern "C" void type_of_call agmain(Int_t*,Int_t*,Int_t*);
