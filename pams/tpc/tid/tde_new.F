@@ -1,5 +1,8 @@
-* $Id: tde_new.F,v 1.5 1998/08/05 21:58:30 fisyak Exp $
+* $Id: tde_new.F,v 1.6 1998/10/10 00:53:18 sakrejda Exp $
 * $Log: tde_new.F,v $
+* Revision 1.6  1998/10/10 00:53:18  sakrejda
+* take care of tracks with decreasing radius, do not discard them
+*
 * Revision 1.5  1998/08/05 21:58:30  fisyak
 * Correct parameters in hdelet for NT (VF)
 *
@@ -283,12 +286,17 @@ c
                     dedx(nde).charge=hit(loc_hit(l)).q
                     dedx(nde).adedx=dedx(nde).charge/ds
                   endif
+c               else if((xc-hit(loc_hit(l)).x)**2+
+c     >            (yc-hit(loc_hit(l)).y)**2
+c     >            .gt.radius**2) then
+c  include the flag cuts for the merged tracks. Because after merged, some hits from other recid can't 
+c  fit this circle parameter, so cause the track.flag=-1 or -999  liqun 10/08/98
                else if((xc-hit(loc_hit(l)).x)**2+
      >            (yc-hit(loc_hit(l)).y)**2
-     >            .gt.radius**2) then
+     >            .gt.radius**2.and.track(j).flag.ne.100) then
                   hit(loc_hit(l)).dq=-1.0
                   track(j).flag=-1
-               else
+               else if(track(j).flag.ne.100) then
                   hit(loc_hit(l)).dq=-999.0
                   track(j).flag=-999
                endif
