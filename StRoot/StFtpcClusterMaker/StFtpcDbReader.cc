@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.5 2001/07/11 21:18:02 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.6 2001/07/12 10:26:34 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.6  2001/07/12 10:26:34  jcs
+// temporarily set mMicrosecondsPerTimeBin and mTZero in code instead of in MySQLDB
+//
 // Revision 1.5  2001/07/11 21:18:02  jcs
 // changes for new FTPC database structures
 //
@@ -53,7 +56,8 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
     mRadiansPerPad              = dimensionsTable->radiansPerPad;
     mRadiansPerBoundary         = dimensionsTable->radiansPerGap;
     mNumberOfTimebins           = dimensionsTable->numberOfTimebinsPerSector;
-    mMicrosecondsPerTimebin     = dimensionsTable->sizeOfTimebin;
+//    mMicrosecondsPerTimebin     = dimensionsTable->sizeOfTimebin;
+    mMicrosecondsPerTimebin     = 0.21316;
     mSensitiveVolumeInnerRadius = dimensionsTable->innerRadiusSensitiveVolume;
     mSensitiveVolumeOuterRadius = dimensionsTable->outerRadiusSensitiveVolume;
   } else {
@@ -176,7 +180,8 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
     mRadiansPerPad          = dimensionsTable->radiansPerPad;
     mRadiansPerBoundary     = dimensionsTable->radiansPerGap;
     mNumberOfTimebins       = dimensionsTable->numberOfTimebinsPerSector;
-    mMicrosecondsPerTimebin = dimensionsTable->sizeOfTimebin;
+//    mMicrosecondsPerTimebin = dimensionsTable->sizeOfTimebin;
+    mMicrosecondsPerTimebin     = 0.21316;
     mSensitiveVolumeInnerRadius = dimensionsTable->innerRadiusSensitiveVolume;
     mSensitiveVolumeOuterRadius = dimensionsTable->outerRadiusSensitiveVolume;
   } else {
