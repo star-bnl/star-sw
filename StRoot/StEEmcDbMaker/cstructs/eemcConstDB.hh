@@ -39,15 +39,32 @@
 //3200  =EEMCDbMaxQAbatch * EEMCDbMaxName
 
 
-// status bits (short int) 
-#define EEMCSTAT_NOSIG  0x0000
-#define EEMCSTAT_STKBT  0x0001
-#define EEMCSTAT_HOTHT  0x0002
-#define EEMCSTAT_HOTJP  0x0004
+/*
+Use idividual bits of 'stat' to exclude individual
+channels from a particular analysis, but let other 
+analysis make a different choice.
+*/
 
-// falure bits (short int)
-#define EEMCFAIL_GARBG  0x1000
-#define EEMCFAIL_HVOFF  0x0001
-#define EEMCFAIL_NOFIB  0x0002
+// status bits (short int)
+#define EEMCSTAT_ONLPED   0x0001 // only pedestal
+#define EEMCSTAT_STKBT    0x0002 // sticky lower bits
+#define EEMCSTAT_HOTHT    0x0004 // hot for HT trigger
+#define EEMCSTAT_HOTJP    0x0008 // hot for JP trigger
+#define EEMCSTAT_OUTPI0   0x0010 // hot in pi0 analysis
 
-#endif
+//The remaing 11 bits of 'stat' are free.
+
+/* The 'fail' 16-bits are meant as general abort of a given 
+channel. If any bit is set in
+'fail' all analysis should exclude this channel.
+*/
+
+// failure bits (short int)
+#define EEMCFAIL_GARBG  0x0001  // exclude from any anal
+#define EEMCFAIL_HVOFF  0x0002  // HV was off
+#define EEMCFAIL_NOFIB  0x0004  // signal fiber is broken
+
+
+#endif 
+ 
+ 
