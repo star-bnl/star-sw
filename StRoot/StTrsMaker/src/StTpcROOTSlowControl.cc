@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcROOTSlowControl.cc,v 1.1 1999/03/23 03:39:23 lasiuk Exp $
+ * $Id: StTpcROOTSlowControl.cc,v 1.2 1999/04/07 00:45:43 lasiuk Exp $
  *
  * Author: brian, against his will 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcROOTSlowControl.cc,v $
+ * Revision 1.2  1999/04/07 00:45:43  lasiuk
+ * addition of gas gain
+ *
  * Revision 1.1  1999/03/23 03:39:23  lasiuk
  * Initial Revsion
  *
@@ -23,30 +26,29 @@ StTpcROOTSlowControl::StTpcROOTSlowControl() { /* nopt */}
 
 StTpcROOTSlowControl::StTpcROOTSlowControl(slowcontrolDataSet* dS)
 {
-    mDriftVelocity       = dS->driftVelocity;
-    mDriftVoltage        = dS->driftVoltage;
-    mISAnodeVoltage      = dS->innerSectorAnodeVoltage;
-    mISGatingGridVoltage = dS->innerSectorGatingGridV;
-    mOSAnodeVoltage      = dS->outerSectorAnodeVoltage;
-    mOSGatingGridVoltage = dS->outerSectorGatingGridV;
-    mHallPressure        = dS->hallPressure;
-    mHallTemperature     = dS->hallTemperature;
-		     
 #ifndef ST_NO_NAMESPACES
     using namespace units;
 #endif
 
-    // Make sure of unit integrity:
-    mDriftVelocity       *= (centimeter/(second*1.e-6));
-    mDriftVoltage        *= volt;
-    mISAnodeVoltage      *= volt;
-    mISGatingGridVoltage *= volt;
-    mOSAnodeVoltage      *= volt;
-    mOSGatingGridVoltage *= volt;
+    mDriftVelocity       = dS->driftVelocity *= (centimeter/(second*1.e-6));
+    mDriftVoltage        = dS->driftVoltage  *= volt;
+    mISAnodeVoltage      = dS->innerSectorAnodeVoltage *= volt;
+    mISGatingGridVoltage = dS->innerSectorGatingGridV  *= volt;
+    mOSAnodeVoltage      = dS->outerSectorAnodeVoltage *= volt;
+    mOSGatingGridVoltage = dS->outerSectorGatingGridV  *= volt;
 
-    //mHallTemperature /= kelvin;
-    mHallPressure        *= atmosphere;
+    mISGasGain           = dS->innerSectorGasGain;
+    mISGasGainVzero      = dS->innerSectorGasGainVzero *= volt;
+    mISGasGainb          = dS->innerSectorGasGainb     /= volt;
     
+    mOSGasGain           = dS->outerSectorGasGain;
+    mOSGasGainVzero      = dS->outerSectorGasGainVzero *= volt;
+    mOSGasGainb          = dS->outerSectorGasGainb     /= volt;
+    
+    mHallPressure        = dS->hallPressure            *= atmosphere;
+    mHallTemperature     = dS->hallTemperature;
+
+
 }
 
 StTpcSlowControl* StTpcROOTSlowControl::instance()
@@ -92,9 +94,15 @@ void StTpcROOTSlowControl::print(ostream& os) const
     os << "InnerSector:" << endl;
     os << "Anode Voltage:       " << innerSectorAnodeVoltage()/volt      << " V" << endl;
     os << "Gating Grid Voltage: " << innerSectorGatingGridVoltage()/volt << " V" << endl;
+    os << "Gas Gain:           "    << innerSectorGasGain()               <<  endl;
+    os << "Gas Gain Vzero:       "  << innerSectorGasGainVzero()/volt      << " V"  << endl;
+    os << "Gas Gainb:              "    << innerSectorGasGainb()*volt           << " /V"  << endl;
     os << "OuterSector:" << endl;
     os << "Anode Voltage:       " << outerSectorAnodeVoltage()/volt      << " V" << endl;
     os << "Gating Grid Voltage: " << outerSectorGatingGridVoltage()/volt << " V" << endl;
+    os << "Gas Gain:            "    << outerSectorGasGain()               <<  endl;
+    os << "Gas Gain Vzero:       "  << outerSectorGasGainVzero()/volt      << " V"  << endl;
+    os << "Gas Gainb:             "    << outerSectorGasGainb()*volt           << " /V"  << endl;
     os << endl;
 }
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcSimpleSlowControl.cc,v 1.1 1998/11/10 17:12:22 fisyak Exp $
+ * $Id: StTpcSimpleSlowControl.cc,v 1.2 1999/04/07 00:45:42 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcSimpleSlowControl.cc,v $
+ * Revision 1.2  1999/04/07 00:45:42  lasiuk
+ * addition of gas gain
+ *
  * Revision 1.1  1998/11/10 17:12:22  fisyak
  * Put Brian trs versin into StRoot
  *
@@ -46,7 +49,13 @@ StTpcSimpleSlowControl::StTpcSimpleSlowControl(const char* fname)
     StGetConfigValue(fname,"outerSectorGatingGridV",mOSGatingGridVoltage);
     StGetConfigValue(fname,"hallPressure",mHallPressure);
     StGetConfigValue(fname,"hallTemperature",mHallTemperature);
-		     
+
+    StGetConfigValue(fname,"innerSectorGasGain",mISGasGain);
+    StGetConfigValue(fname,"innerSectorGasGainVzero",mISGasGainVzero);
+    StGetConfigValue(fname,"innerSectorGasGainb",mISGasGainb);
+    StGetConfigValue(fname,"outerSectorGasGain",mOSGasGain);
+    StGetConfigValue(fname,"outerSectorGasGainVzero",mOSGasGainVzero);
+    StGetConfigValue(fname,"outerSectorGasGainb",mOSGasGainb);
 #ifndef ST_NO_NAMESPACES
     using namespace units;
 #endif
@@ -59,6 +68,11 @@ StTpcSimpleSlowControl::StTpcSimpleSlowControl(const char* fname)
     mOSAnodeVoltage      *= volt;
     mOSGatingGridVoltage *= volt;
 
+    mISGasGainVzero      *= volt;
+    mISGasGainb          /= volt;
+    mOSGasGainVzero      *= volt;
+    mOSGasGainb          /= volt;
+    
     //mHallTemperature /= kelvin;
     mHallPressure        *= atmosphere;
     
@@ -107,8 +121,16 @@ void StTpcSimpleSlowControl::print(ostream& os) const
     os << "InnerSector:" << endl;
     os << "Anode Voltage:       " << innerSectorAnodeVoltage()/volt      << " V" << endl;
     os << "Gating Grid Voltage: " << innerSectorGatingGridVoltage()/volt << " V" << endl;
+    os << "Gas Gain:            "    << innerSectorGasGain()               << endl;
+    os << "Gas Gain Vzero:       "  << innerSectorGasGainVzero()/volt      << " V"  << endl;
+    os << "Gas Gainb:              "    << innerSectorGasGainb()*volt           << " /V"  << endl;
+    
     os << "OuterSector:" << endl;
     os << "Anode Voltage:       " << outerSectorAnodeVoltage()/volt      << " V" << endl;
     os << "Gating Grid Voltage: " << outerSectorGatingGridVoltage()/volt << " V" << endl;
+    os << "Gas Gain:            "    << outerSectorGasGain()                      << endl;
+    os << "Gas Gain Vzero:       "  << outerSectorGasGainVzero()/volt      << " V"  << endl;
+    os << "Gas Gainb:              "    << outerSectorGasGainb()*volt           << " /V"  << endl;
+
     os << endl;
 }
