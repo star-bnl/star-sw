@@ -173,6 +173,10 @@ void StHbtTTreeEvent::fillEventInfo(const StHbtEvent* event){
   mZdcAdc[0] = event->mZdcAdc[0];
   mZdcAdc[1] = event->mZdcAdc[1];
   mMagneticField = event->mMagneticField;
+  mTriggerWord = event->mTriggerWord;
+  mTriggerActionWord = event->mTriggerActionWord;
+  //for ( int i=0; i<4; i++) mL3TriggerAlgorithm[i] = event->mL3TriggerAlgorithm[i];
+  mL3TriggerAlgorithm = event->mL3TriggerAlgorithm[0];
 
   if (mDebug) cout << "StHbtTTreeEvent::fillEventInfo(StEvent* event) - leaving" << endl;
 } 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTTreeEvent.h,v 1.4 2001/09/05 20:41:42 laue Exp $
+ * $Id: StHbtTTreeEvent.h,v 1.5 2001/12/07 00:36:16 laue Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************
@@ -8,8 +8,9 @@
  ***************************************************************************
  *
  * $Log: StHbtTTreeEvent.h,v $
- * Revision 1.4  2001/09/05 20:41:42  laue
- * Updates of the hbtMuDstTree microDSTs
+ * Revision 1.5  2001/12/07 00:36:16  laue
+ * Ouuuups, forgot to check this ones in.
+ * L3 trigger algorithm added
  *
  * Revision 1.1  2001/06/21 19:15:47  laue
  * Modified fiels:
@@ -72,8 +73,8 @@ private:
   UShort_t mEventNumber;           //
   UShort_t mRunNumber;             //
   
-  UShort_t mTriggerWord;
-  UShort_t mTriggerActionWord;
+  UInt_t mTriggerWord;
+  UInt_t mTriggerActionWord;
 
   UShort_t mTpcNhits;              // number of TPC hits
   UShort_t mNumberOfTracks;        // total number of TPC tracks
@@ -110,6 +111,8 @@ private:
   Short_t mTrackType;  //! do not write this to disk
 
   Float_t mReactionPlanePtWgt[2];              
+  //UInt_t mL3TriggerAlgorithm[4];
+  UInt_t mL3TriggerAlgorithm;
 
   friend class StHbtEvent;
   friend class StHbtTrack;
@@ -117,7 +120,7 @@ private:
   friend class StHbtXi;
   friend class StHbtKink;
 
-  ClassDef(StHbtTTreeEvent,4)
+  ClassDef(StHbtTTreeEvent,5)
 };
 
 
