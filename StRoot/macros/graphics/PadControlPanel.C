@@ -2,8 +2,11 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.C,v 1.7 1999/06/10 19:44:16 fine Exp $
+// $Id: PadControlPanel.C,v 1.8 1999/06/11 01:27:37 fine Exp $
 // $Log: PadControlPanel.C,v $
+// Revision 1.8  1999/06/11 01:27:37  fine
+// TIter fixed
+//
 // Revision 1.7  1999/06/10 19:44:16  fine
 // AdjustScale button jas been introduced
 //
@@ -259,16 +262,17 @@ void MakeFourView(TVirtualPad *pad=0)
     Int_t system = view->GetSystem();
     TCanvas *c = new TCanvas(" 4 views", thisPad->GetTitle(),600,600);
     c->Divide(2,2);
-    TIter next(thisPrimitives);
+    TIter *next=  new TIter(thisPrimitives);
     for (int i =1; i <= 4; i++) {
       c->cd(i);
       TList *newPrimitives = gPad->GetListOfPrimitives();
       TObject *obj = 0;
-      while (obj = next()) newPrimitives->Add(obj);
+      while (obj = next->Next()) newPrimitives->Add(obj);
       TView *newView = new TView(system);
       newView->SetRange(min,max);
       next.Reset();
    }
+   delete next;
    // set separate view;
    // Fron view
     Int_t j = 1;
