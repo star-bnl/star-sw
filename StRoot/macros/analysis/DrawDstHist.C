@@ -16,7 +16,8 @@ void Load()
 
 void DrawDstHist(
      const Char_t *firstHistName="*",const Char_t *lastHistName="*",
-     const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0067_02_40evts.root",
+//     const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0067_02_40evts.root",
+     const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss",
      const Char_t *psFile="QA_hist.ps")
 { 
     cout << endl   
@@ -48,7 +49,28 @@ void DrawDstHist(
   if (!chain) {
     chain = new StChain("bfc");
     St_io_Maker *in    = new St_io_Maker("Input","all");
-    in->AddFile(exFileName);
+    Int_t  nFile = 0;
+    if ((flags & 2)) {
+
+//*-*  Add a files or files to the list of dst ones 
+
+      St_FileSet dstDirs(exFileName);
+      St_DataSetIter nextDataSet(&dstDirs,0);
+      St_DataSet *set = 0;      
+      while ( (set = nextDataSet()) ) {           
+        if (strcmp(set->GetTitle(),"file") || !(strstr(set->GetName(),"evts.root"))) continue;
+        TString p = set->Path();
+        Char_t *rootfilename = gSystem->ConcatFileName(exFileName,p.Data());
+        cout << "Including file " << rootfilename << " into list of the files " << endl;
+        in->AddFile(rootfilename);
+        nFile++;
+      } 
+    } else {
+      in->AddFile(exFileName);
+      nFile++;
+    }
+    cout << "Total: " << nFile << " files will be analysed" << endl ;
+
     in->SetMaxEvent(4);
     St_QA_Maker *QA   = new St_QA_Maker("QA","event/geant/Event");
     QA->SetHistsNames(firstHistName,lastHistName);
