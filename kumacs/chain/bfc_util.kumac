@@ -5,6 +5,7 @@
 * 9Jul98 K. Turner - changed to use new tpc cluster and track eval for slow sim
 * 9Jul98 K. Turner - changed to use tfc_run#run_newtab - can set adcxyzon=1
 * 10Jul98 K. Turner - changed to use new version of global pam kumacs
+* 11Jul98 K. Turner - changed to used tfc for adcxyz table
 * 
 *************************************************************
 *                     BFC_UTIL.KUMAC
@@ -86,12 +87,11 @@ macro bfc_init _
              exec [TOP]/kumacs/chain/bfc_util#bfc_start domain=geometry
            endif
     (fzd)  user/output o [output_fzd_file]
-    (g2t)   cd [geant];
-            dio/newfilestream G2Tfile [input_file] r | open file & read header 
-            getev G2Tfile         | get Run
+    (g2t)  
+           exec input_g2t_file#init [input_file]
             if (STAF_STATUS(1).ne. STAFCV_OK) then
               message 'problem opening input file '
-            goto EOF 
+              goto EOF 
             endif
     (evout) if output_file="" then
               message "empty output file"
@@ -108,17 +108,17 @@ macro bfc_init _
       (svg) exec init_svg         | SVT initialization - geometry
       (tpg) exec tpg_init#init    | TPC geometry initialization
       (sss) exec svt_slow_sim#initialize | SVT initialization - slow simulation
-      (srs) exec init_srs	| SVT initialization - fast simulation
+      (srs) 
+            exec create_tables_svt#srs
+            exec init_srs		| SVT initialization - fast simulation
       (tfs) 
             exec create_tables_tpc#tcl_fast
             exec tcl_init#init
             exec tfs_init#init
       (tss) 
 	    exec create_tables_tpc#tss [tpc_sector_first] [tpc_sector_last]
-            if [adcxyzon].eq.1 then
-                exec create_tables_tpc#tfc
-            endif
             exec tss_init#init [tpc_sector_first] [tpc_sector_last]
+      (tfc) exec create_tables_tpc#tfc
       (tcl)
             exec create_tables_tpc#tcl_slow
             exec tcl_init#init
@@ -133,8 +133,16 @@ macro bfc_init _
     (tte_e)
             exec create_tables_tpc#tte
             exec tte_init#init
-      (stk) exec svt_tracker#initialize
-      (sgr) exec svt_tracker#initialize
+      (stk)
+	    exec create_tables_svt#sgr
+            exec create_tables_svt#stk
+            exec init_stk
+            exec init_sgr
+      (sgr) 
+	    exec create_tables_svt#sgr
+            exec create_tables_svt#stk
+            exec init_stk
+            exec init_sgr
       (svm) 
             exec create_tables_global#svm
             exec init_svm
@@ -176,7 +184,7 @@ EOF:
                user/input u evgen/particle.staf
       (gst)    trig 1; cd [geant]; for/call g2t; cd /dui; 
       (g2t)    
-               dio/stream/getevent G2Tfile [geant];
+               exec input_g2t_file#read
                if (staf_status(1).ne.STAFCV_OK) goto EOF
       (svg)    nextl 1
       (tpg)    nextl 1
@@ -189,12 +197,10 @@ EOF:
 	       endif
       (tss)    
                exec tss_run#run [tpc_sector_first] [tpc_sector_last]
-               if [adcxyzon].eq.1 then
-                 exec tfc_run#run_newtab [tpc_sector_first] [tpc_sector_last]
-               endif
                if (staf_status(1) .ne. stafcv_ok) then 
                  message ' problem with tpc_slow_sim_process_event'
                endif
+      (tfc)    exec tfc_run#run_newtab [tpc_sector_first] [tpc_sector_last]
       (tcl)    
 	       exec tcl_run#run_tcl [tpc_sector_first] [tpc_sector_last] 
                exec tcl_run#run_tph [tpc_sector_first] [tpc_sector_last]
@@ -269,10 +275,7 @@ macro bfc_finish _
 	       soc/deleteoid [oid] 
       (gst)   ge/rz/cd //PAWC; 
 	       hi/list;		| show histograms
-      (g2t)  dio/stream/close G2Tfile; 
-             soc/object/oid G2Tfile; 
-             oid = staf_result(1); 
-             soc/deleteoid [oid]
+      (g2t)  exec input_g2t_file#close
       (evout) dio/stream/close evout;   
               soc/object/oid evout; 
               oid = staf_result(1); 
