@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.31 2001/05/09 21:25:59 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.32 2001/07/16 17:18:42 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.32  2001/07/16 17:18:42  calderon
+ * Modification in the access of the L3 event at the beginning of loop.
+ *
  * Revision 1.31  2001/05/09 21:25:59  calderon
  * Added debug messages to see where do we exceed the size of the candidate vector
  *
@@ -622,11 +625,20 @@ Int_t StAssociationMaker::Make()
 	rcFtpcHitColl = rEvent->ftpcHitCollection();
     }
     else {
-	rL3Event = (StL3Trigger*) GetInputDS("StL3Trigger");
+      rEvent = (StEvent*) GetInputDS("StEvent");
+      if (rEvent){ rL3Event = rEvent->l3Trigger(); } ;
 
-	rcTpcHitColl = rL3Event->tpcHitCollection();   
-	rcSvtHitColl = 0;   
-	rcFtpcHitColl = 0;
+      if (rL3Event)
+        {
+            rcTpcHitColl = rL3Event->tpcHitCollection();
+        }
+      else
+        {
+          return kStWarn ;
+        }
+
+        rcSvtHitColl = 0;
+        rcFtpcHitColl = 0;
 	
     }
 
