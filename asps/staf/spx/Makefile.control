@@ -1,0 +1,11 @@
+# spx/Makefile.control
+#
+ASPS := spx soc
+#PAMS :=
+#
+USER_LIBS := -lasu
+#
+DEBUG := TRUE
+#SHARE := TRUE
+MOTIF := FALSE
+#
