@@ -1,7 +1,7 @@
-// $Id: St_geant_Maker.cxx,v 1.19 1999/02/20 18:49:24 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.20 1999/02/20 20:23:45 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
-// Revision 1.19  1999/02/20 18:49:24  fisyak
-// Add event/run information
+// Revision 1.20  1999/02/20 20:23:45  fisyak
+// Fix Aeast
 //
 // Revision 1.18  1999/02/19 14:41:00  fisyak
 // Set kIsNotOwn Bit for geometry tables
@@ -243,7 +243,7 @@ Int_t St_geant_Maker::Make(){
 	gStChain->SetMode(p->phep[2]);
 	gStChain->SetCenterOfMassEnergy(p->phep[3]);
 	Int_t west = p->phep[4];
-	Int_t east = (1000*p->phep[4]-1000*west)/1000;
+	Int_t east = (1000.*p->phep[4]-1000.*((float )west));
 	gStChain->SetAwest(west);
 	gStChain->SetAeast(east);
 	gStChain->SetRun(p->vhep[0]);
@@ -363,7 +363,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.19 1999/02/20 18:49:24 fisyak Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.20 1999/02/20 20:23:45 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
