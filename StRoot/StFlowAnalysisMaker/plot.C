@@ -1,14 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.22 2000/07/12 17:49:39 posk Exp $
+// $Id: plot.C,v 1.23 2000/08/01 21:51:20 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
 //               If selN = 0 plot all selections and harmonics.
 //               First time type .x plot.C() to see the menu.
 //               Run Number appended to "ana" is entered in the bottom, left box.
-//               File Number is prepended to flow.hist.root.
-//               Default hist file is just flow.hist.root .
+//               Hist file is anaXX.root where XX is the number.
+//               Default hist file is flow.hist.root .
 //               After the first execution, just type plot(N) .
 //               A negative N plots all pages starting with page N.
 //
@@ -17,6 +17,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.23  2000/08/01 21:51:20  posk
+// Added doubly integrated v.
+//
 // Revision 1.22  2000/07/12 17:49:39  posk
 // Changed EtaSym plots.
 //
@@ -114,8 +117,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   			     "Flow_PidProton",
   			     "Flow_PidMult",
   			     "Flow_Cent",
-   			     "Flow_Bin_Eta",
-   			     "Flow_Bin_Pt",
+   			     //"Flow_Bin_Eta",
+   			     //"Flow_Bin_Pt",
                              "Flow_CosPhiLab",
 			     "Flow_Phi_Sel",
 			     "Flow_Phi_Weight_Sel",
@@ -138,7 +141,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_vEta_Sel",
 			     "Flow_vPt_Sel"};
   const int nNames = sizeof(baseName) / sizeof(char*);
-  const int nSingles = 28 + 1;
+  const int nSingles = 26 + 1;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -159,10 +162,14 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
   // input the file number (default opens flow.hist.root)
   if (strstr(fileNumber, "x")!=0) {
-    cout << "     file number? [none] " << flush;
+    cout << "     anaXX.root file number? [flow.hist.root] " << flush;
     fgets(fileNumber, sizeof(fileNumber), stdin);
-    fileNumber[strlen(fileNumber)-1] = '\0';             // remove CR
-    sprintf(fileName, "%sflow.hist.root", fileNumber);   // prepend
+    if (strlen(fileNumber) == 1) {
+      sprintf(fileName, "flow.hist.root");
+    } else {
+      fileNumber[strlen(fileNumber)-1] = '\0';             // remove CR
+      sprintf(fileName, "ana%s.root", fileNumber);         // insert
+    }
     cout << " file name = " << fileName << endl;
     histFile = new TFile(fileName);
   }
@@ -568,6 +575,3 @@ void plotAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
   }
   cout << "  plotAll Done" << endl;
 }
-
-#endif
-

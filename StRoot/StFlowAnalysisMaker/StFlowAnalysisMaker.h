@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.17 2000/07/03 02:07:49 perev Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.18 2000/08/01 21:51:20 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.18  2000/08/01 21:51:20  posk
+// Added doubly integrated v.
+//
 // Revision 1.17  2000/07/03 02:07:49  perev
 // StEvent: vector<TObject*>
 //
@@ -104,7 +107,7 @@ public:
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.17 2000/07/03 02:07:49 perev Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.18 2000/08/01 21:51:20 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -195,6 +198,8 @@ private:
   struct histFulls {
     TProfile* mHistCos;
     TH1F*     mHistRes;
+    TProfile* mHist_vObs;
+    TH1D*     mHist_v;
     struct histFullHars histFullHar[Flow::nHars];
   };
   struct histFulls histFull[Flow::nSels]; //!
