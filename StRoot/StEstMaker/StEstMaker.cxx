@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.12 2001/07/15 20:31:30 caines Exp $
+ * $Id: StEstMaker.cxx,v 1.13 2002/01/31 21:10:00 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.13  2002/01/31 21:10:00  caines
+ * Open est cuts up
+ *
  * Revision 1.12  2001/07/15 20:31:30  caines
  * Fixes from Insure++ debugging
  *
@@ -222,14 +225,6 @@ Int_t StEstMaker::Init(){
     mParams[i]->maxsvthits=8;    
     mParams[i]->maxbranches=100;     
 
-    mParams[i]->lrad[0][0] = 6.125;
-    mParams[i]->lrad[0][1] = 7.185;
-    mParams[i]->lrad[1][0] = 10.185;
-    mParams[i]->lrad[1][1] = 11.075;
-    mParams[i]->lrad[2][0] = 13.995;
-    mParams[i]->lrad[2][1] = 14.935;
-    mParams[i]->lrad[3][0] = 23;
-    mParams[i]->lrad[3][1] = 23;
   }	
     
   mParams[4]->ptmin = 0.1;
@@ -255,39 +250,39 @@ Int_t StEstMaker::Init(){
   mParams[4]->geomcutw[3] = 1.0;
 
   mParams[0]->geomcutl[2] = 5.0;
-  mParams[0]->geomcutl[1] = 0.2;
-  mParams[0]->geomcutl[0] = 0.1;
+  mParams[0]->geomcutl[1] = 5.;
+  mParams[0]->geomcutl[0] = 5.;
   mParams[0]->geomcutw[2] = 5.0;
-  mParams[0]->geomcutw[1] = 0.2;
-  mParams[0]->geomcutw[0] = 0.1;
+  mParams[0]->geomcutw[1] = 5.;
+  mParams[0]->geomcutw[0] = 5.;
 
   mParams[1]->geomcutl[2] = 5.0;
-  mParams[1]->geomcutl[1] = 0.2;
-  mParams[1]->geomcutl[0] = 0.1;
+  mParams[1]->geomcutl[1] = 5.;
+  mParams[1]->geomcutl[0] = 5.;
   mParams[1]->geomcutw[2] = 5.0;
-  mParams[1]->geomcutw[1] = 0.2;
-  mParams[1]->geomcutw[0] = 0.1;
+  mParams[1]->geomcutw[1] = 5.;
+  mParams[1]->geomcutw[0] = 5.;
   
   mParams[2]->geomcutl[2] = 5.0;
-  mParams[2]->geomcutl[1] = 0.2;
-  mParams[2]->geomcutl[0] = 0.1;
+  mParams[2]->geomcutl[1] = 5.;
+  mParams[2]->geomcutl[0] = 5.;
   mParams[2]->geomcutw[2] = 5.0;
-  mParams[2]->geomcutw[1] = 0.2;
-  mParams[2]->geomcutw[0] = 0.1;
+  mParams[2]->geomcutw[1] = 5.;
+  mParams[2]->geomcutw[0] = 5.;
   
   mParams[3]->geomcutl[2] = 7.0;
-  mParams[3]->geomcutl[1] = 0.2;
-  mParams[3]->geomcutl[0] = 0.15;
+  mParams[3]->geomcutl[1] = 5.;
+  mParams[3]->geomcutl[0] = 5.;
   mParams[3]->geomcutw[2] = 7.0;
-  mParams[3]->geomcutw[1] = 0.2;
-  mParams[3]->geomcutw[0] = 0.15;
+  mParams[3]->geomcutw[1] = 5.;
+  mParams[3]->geomcutw[0] = 5.;
   
   mParams[4]->geomcutl[2] = 7.0;
-  mParams[4]->geomcutl[1] = 0.2;
-  mParams[4]->geomcutl[0] = 0.15;
+  mParams[4]->geomcutl[1] = 5.;
+  mParams[4]->geomcutl[0] = 5.;
   mParams[4]->geomcutw[2] = 7.0;
-  mParams[4]->geomcutw[1] = 0.2;
-  mParams[4]->geomcutw[0] = 0.15;
+  mParams[4]->geomcutw[1] = 5.;
+  mParams[4]->geomcutw[0] = 5.;
 
 
   // superpass settings
@@ -425,6 +420,27 @@ Int_t StEstMaker::Make() {
   
   if(!Stsvggeom)  Stsvggeom = (St_svg_geom *)local("svgpars/geom");
   if (!Stsvggeom) return kStWarn;
+
+  svg_geom_st* geom = Stsvggeom->GetTable();
+  
+  for (int i=0;i<mNPass;i++){
+    mParams[i]->lrad[0][0] = sqrt(geom[0].x[0]*geom[0].x[0]+
+				  geom[0].x[1]*geom[0].x[1]);
+    mParams[i]->lrad[0][1] =sqrt(geom[16].x[0]*geom[16].x[0]+
+				  geom[16].x[1]*geom[16].x[1]);
+    mParams[i]->lrad[1][0] = sqrt(geom[68].x[0]*geom[68].x[0]+
+				  geom[68].x[1]*geom[68].x[1]);
+    mParams[i]->lrad[1][1] = sqrt(geom[38].x[0]*geom[38].x[0]+
+				  geom[38].x[1]*geom[38].x[1]);
+    mParams[i]->lrad[2][0] = sqrt(geom[111].x[0]*geom[111].x[0]+
+				  geom[111].x[1]*geom[111].x[1]);
+    mParams[i]->lrad[2][1] = sqrt(geom[167].x[0]*geom[167].x[0]+
+				  geom[167].x[1]*geom[167].x[1]);
+    mParams[i]->lrad[3][0] = sqrt(geom[232].x[0]*geom[232].x[0]+
+				  geom[232].x[1]*geom[232].x[1]);
+    mParams[i]->lrad[3][1] = sqrt(geom[232].x[0]*geom[232].x[0]+
+				  geom[232].x[1]*geom[232].x[1]);
+  }
 
   St_svg_shape*   Stsvgshape =0;
   Stsvgshape = (St_svg_shape *)local("svgpars/shape");
