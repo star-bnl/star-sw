@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.h,v 1.9 1999/10/15 01:57:37 lisa Exp $
+ * $Id: StStandardHbtEventReader.h,v 1.10 1999/11/24 22:01:41 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.h,v $
+ * Revision 1.10  1999/11/24 22:01:41  laue
+ * reader adopted to the new StEvent 2.x
+ *
  * Revision 1.9  1999/10/15 01:57:37  lisa
  * Important enhancement of StHbtMaker - implement Franks CutMonitors
  * ----------------------------------------------------------
@@ -79,10 +82,23 @@
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 #include "StHbtMaker/Base/StHbtV0Cut.h"
 
+class StPionPlus;
+class StKaonPlus;
+class StProton;
+class StTpcDedxPidAlgorithm;
+class StParticleDefinition;
+
 class TOrdCollection;
 class StStandardHbtEventReader : public StHbtEventReader{
 
 private:
+  // needed for the new StEvent 2.x  pid functions
+  StPionPlus* mPion;  //!
+  StKaonPlus* mKaon;  //!
+  StProton* mProton;  //!
+  StTpcDedxPidAlgorithm* mPidAlgorithm; //!
+  StParticleDefinition* mBestGuess; //!
+
   StMaker* mTheEventMaker;      //! this is the chain where the StEventReaderMaker is
   StV0MiniDstMaker* mTheV0Maker; //! this is the chain where the StV0MiniDstMaker is
   StHbtEventCut* mEventCut;     //!
