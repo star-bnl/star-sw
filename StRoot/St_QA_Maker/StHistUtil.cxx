@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.23 1999/12/29 17:52:30 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.24 2000/01/12 16:49:04 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.24  2000/01/12 16:49:04  kathy
+// add new methods so that one can set a list which will be used to print,draw a subset of the histograms corresponding to a given maker; new methods are SetDefaultPrintList,AddToPrintList,RemoveFromPrintList,ExaminePrintList; can't test it yet because seems can't find directory of histograms in DEV anymore and there are conflicts in NEW; updates to DrawHist method to use this new list are not done yet
+//
 // Revision 1.23  1999/12/29 17:52:30  kathy
 // changes to hist limits and list of logY scales
 //
@@ -103,6 +106,7 @@ ClassImp(StHistUtil)
 StHistUtil::StHistUtil(){
 
   m_ListOfLog = 0;
+  m_ListOfPrint = 0;
   m_HistCanvas = 0;
 
 
@@ -116,6 +120,10 @@ StHistUtil::~StHistUtil(){
   if (m_ListOfLog) {
     m_ListOfLog->Delete();
     SafeDelete(m_ListOfLog);
+  }
+  if (m_ListOfPrint) {
+    m_ListOfPrint->Delete();
+    SafeDelete(m_ListOfPrint);
   }
 }
 //_____________________________________________________________________________
@@ -445,6 +453,38 @@ Int_t StHistUtil::ExamineLogYList()
   return LogYCount;
 }
 
+
+//_____________________________________________________________________________
+
+
+Int_t StHistUtil::ExaminePrintList() 
+{  
+// Method ExaminePrintList
+// List of all histograms that will be drawn,printed
+
+  cout << " **** Now in StHistUtil::ExaminePrintList **** " << endl;
+
+// m_ListOfPrint -  is a list of hist to print,draw
+
+// construct a TObject
+  TObject *obj = 0;
+
+// construct a TIter ==>  () is an overloaded operator in TIter
+  TIter nextObj(m_ListOfPrint);
+  Int_t PrintCount = 0;
+
+// use = here instead of ==, because we are setting obj equal to nextObj and then seeing if it's T or F
+  while ((obj = nextObj())) {
+
+    cout << " StHistUtil::ExaminePrintList has hist " <<  obj->GetName() << endl;
+    PrintCount++;
+
+  }
+
+  cout << " Now in StHistUtil::ExaminePrintList, No. Hist. to Print,Draw = " << PrintCount <<endl;
+  return PrintCount;
+}
+
 //_____________________________________________________________________________
 
 
@@ -480,6 +520,39 @@ Int_t StHistUtil::AddToLogYList(const Char_t *HistName){
 //_____________________________________________________________________________
 
 
+Int_t StHistUtil::AddToPrintList(const Char_t *HistName){  
+
+// Method AddToPrintList
+//   making list of all histograms that we want drawn,printed
+
+//  cout << " **** Now in StHistUtil::AddToPrintList  **** " << endl;
+
+// Since I'm creating a new list, must delete it in the destructor!!
+//make a new TList on heap(persistant); have already defined m_ListOfPrint in header file
+   if (!m_ListOfPrint) m_ListOfPrint = new TList;
+
+// the add method for TList requires a TObject input  (also can use TObjString)
+// create TObjString on heap
+   TObjString *HistNameObj = new TObjString(HistName);
+
+// - check if it's already on the list - use FindObject method of TList
+    TObject *lobj = 0;
+    lobj = m_ListOfPrint->FindObject(HistName);
+
+// now can use Add method of TList
+    if (!lobj) {
+       m_ListOfPrint->Add(HistNameObj);
+       cout << " StHistUtil::AddToPrintList: " << HistName  <<endl;
+    }
+    else  cout << " StHistUtil::AddToPrintList: " << HistName << " already in list - not added" <<endl;
+ 
+// return using a method of TList (inherits GetSize from TCollection)
+ return m_ListOfPrint->GetSize();
+
+}
+
+//_____________________________________________________________________________
+
 Int_t StHistUtil::RemoveFromLogYList(const Char_t *HistName){  
 // Method RemoveFromLogYList
 //   remove hist from  list  that we want drawn with LogY scale
@@ -503,6 +576,34 @@ Int_t StHistUtil::RemoveFromLogYList(const Char_t *HistName){
   } 
 // return using a method of TList (inherits GetSize from TCollection)
  return m_ListOfLog->GetSize();
+}
+
+
+//_____________________________________________________________________________
+
+Int_t StHistUtil::RemoveFromPrintList(const Char_t *HistName){  
+// Method RemoveFromPrintList
+//   remove hist from  list  that we want drawn,printed
+
+//  cout << " **** Now in StHistUtil::RemoveFromPrintList  **** " << endl;
+
+// check if list exists:
+  if (m_ListOfPrint) {
+    
+// the remove method for TList requires a TObject input  
+// - check if it's  on the list - use FindObject method of TList
+    TObject *lobj = 0;
+    lobj = m_ListOfPrint->FindObject(HistName);
+// now can use Remove method of TList
+    if (lobj) {
+      m_ListOfPrint->Remove(lobj);
+      cout << " RemovePrintList: " << HistName << " has been removed from list" <<endl;
+    }
+    else  cout << " RemovePrintList: " << HistName << " not on list - not removing" <<endl;
+
+  } 
+// return using a method of TList (inherits GetSize from TCollection)
+ return m_ListOfPrint->GetSize();
 }
 
 
@@ -769,6 +870,86 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
     for (ilg=0;ilg<lengofList;ilg++) {
      numLog = AddToLogYList(sdefList[ilg]);
      cout <<  " !!! adding histogram " << sdefList[ilg] << " to LogY list "  << endl ;
+    }
+  }
+
+}
+
+//_____________________________________________________________________________
+// Method SetDefaultPrintList
+//    - create default list of histograms we want drawn,printed
+
+void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
+{  
+
+  cout << " **** Now in StHistUtil::SetDefaultPrintList  **** " << endl;
+
+  Char_t **sdefList=0;
+  Int_t lengofList = 0;
+
+// Cosmic Data Table QA list .............................................
+  if (strcmp(dirName,"QA")==0 && strcmp(analType,"Cosmic")==0) {
+   Char_t* sdefList1[] = {
+ "TabQaEvsumTrkTot",
+ "TabQaEvsumPlusMinusTrk",
+ "TabQaEvsumMeanPt",
+ "TabQaGtrkGood",
+ "TabQaGtrkNPntT",
+ "TabQAGtrkNPntMaxT",
+ "TabQAGtrkNPntFitT",
+ "TabQAGtrkRnmT",
+ "TabQAGtrkChrgT",
+ "TabQAGtrkR0T",
+ "TabQAGtrkPhi0T",
+ "TabQAGtrkZ0T",
+ "TabQAGtrkCurvT",
+ "TabQAGtrkXfT",
+ "TabQAGtrkXf0",
+ "TabQAGtrkYfT",
+ "TabQAGtrkYf0",
+ "TabQAGtrkZfT",
+ "TabQAGtrkZf0",
+ "TabQAGtrkRT",
+ "TabQAGtrkLengthT",
+ "TabQAGtrkPsiT",
+ "TabQAGtrkTanlT",
+ "TabQAGtrkThetaT",
+ "TabQAGtrkPtT",
+ "TabQAGtrkPT",
+ "TabQAGtrkChisq0T",
+ "TabQAGtrkChisq1T",
+ "TabQAGtrkXfYfT",
+ "TabQAGtrkTanlzf",
+ "TabQAGtrkPVsTrkLength",
+ "TabQAGtrkNPntLengthT",
+ "TabQAGtrkChi0MomT",
+ "TabQAGtrkChi1MomT",
+ "TabQAGtrkChi0TanlT",
+ "TabQAGtrkChi1TanlT",
+ "TabQAGtrkChi0zfT",
+ "TabQAGtrkChi1zfT",
+ "TabQAGtrkPsiPhiT"
+   };
+  sdefList = sdefList1;
+  lengofList = sizeof(sdefList1)/4;  
+  }
+
+// Full Table QA list.........................................................
+  if (strcmp(dirName,"QA")==0 && strcmp(analType,"FullTable")==0) {
+   Char_t* sdefList2[] = {
+ "TabQaVtxX",
+   };
+  sdefList = sdefList2;
+  lengofList = sizeof(sdefList2)/4;  
+  }
+
+
+  if (lengofList) {
+    Int_t ilg = 0;
+    Int_t numLog = 0;
+    for (ilg=0;ilg<lengofList;ilg++) {
+     numLog = AddToPrintList(sdefList[ilg]);
+     cout <<  " !!! adding histogram " << sdefList[ilg] << " to print list "  << endl ;
     }
   }
 
