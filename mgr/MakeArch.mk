@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.26  1998/09/10 23:32:47  perev
+#  add ASU_MALLOC_ON
+#
 #  Revision 1.25  1998/09/09 07:42:47  fisyak
 #  For HP optimization is -O
 #
@@ -56,7 +59,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/09/09 07:42:47 $ 
+#             Last modification $Date: 1998/09/10 23:32:47 $ 
 #. default setings
 
 RM := rm -f
@@ -102,7 +105,11 @@ Cxx   :=cc
 CLIBS    :=
 FLIBS    :=
 
-CPPFLAGS := $(UNAMES) $(STAF_ARCH) $(TULL_ARCH) QUIET_ASP
+CPPFLAGS := $(UNAMES) $(STAF_ARCH) $(TULL_ARCH) QUIET_ASP 
+ifndef ASU_MALLOC_OFF
+  CPPFLAGS += ASU_MALLOC_ON
+endif
+
 OSFID    :=
 STRID    :=
 YACC     := yacc
