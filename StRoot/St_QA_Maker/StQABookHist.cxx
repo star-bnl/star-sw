@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.48 2000/07/31 19:29:48 lansdell Exp $ 
+// $Id: StQABookHist.cxx,v 1.49 2000/08/11 13:28:43 lansdell Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.49  2000/08/11 13:28:43  lansdell
+// changed axis limits for FTPC chisq histograms
+//
 // Revision 1.48  2000/07/31 19:29:48  lansdell
 // primary vertex check histogram now contains entries for events with or without a primary vertex (with = 1, without = -1)
 //
@@ -1048,10 +1051,10 @@ void StQABookHist::BookHistGlob(){
   m_pTFW         = QAH1F("QaGtrkPtFW",      "globtrk: pT, ftpc west",50,0.,5.);
   m_momFE        = QAH1F("QaGtrkPFE",       "globtrk: momentum, ftpc east ",50,0.,5.);
   m_momFW        = QAH1F("QaGtrkPFW",       "globtrk: momentum, ftpc west ",50,0.,5.);
-  m_chisq0FE     = QAH1F("QaGtrkChisq0FE",  "globtrk: chisq0, ftpc east", 50, 0.,5000.);
-  m_chisq0FW     = QAH1F("QaGtrkChisq0FW",  "globtrk: chisq0, ftpc west", 50, 0.,5000.);
-  m_chisq1FE     = QAH1F("QaGtrkChisq1FE",  "globtrk: chisq1, ftpc east", 50, 0.,500.);
-  m_chisq1FW     = QAH1F("QaGtrkChisq1FW",  "globtrk: chisq1, ftpc west", 50, 0.,500.);
+  m_chisq0FE     = QAH1F("QaGtrkChisq0FE",  "globtrk: chisq0, ftpc east", 50, 0.,5.);
+  m_chisq0FW     = QAH1F("QaGtrkChisq0FW",  "globtrk: chisq0, ftpc west", 50, 0.,5.);
+  m_chisq1FE     = QAH1F("QaGtrkChisq1FE",  "globtrk: chisq1, ftpc east", 50, 0.,5.);
+  m_chisq1FW     = QAH1F("QaGtrkChisq1FW",  "globtrk: chisq1, ftpc west", 50, 0.,5.);
 
 // 2D - ftpc
 
