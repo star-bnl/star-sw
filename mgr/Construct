@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.131 2003/07/09 19:43:54 jeromel Exp $
+# $Id: Construct,v 1.132 2003/08/29 20:51:22 jeromel Exp $
 use Env;
 use lib $ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -218,6 +218,10 @@ my @subdirs = ();
 my  @items;
 if ( defined($SKIP_DIRS) ){ @items = split(" ",$SKIP_DIRS);}
 
+#
+# Search for directories (one level down) and make
+# list of targets
+#
 foreach my $dir( "pams", "StRoot" ,"StPiD" ) {
     next if !-d $dir;
     opendir( DIR, $dir ) or die "Can't open $dir\n";
@@ -295,6 +299,7 @@ foreach my $dir( "pams", "StRoot" ,"StPiD" ) {
                     next;
                 }
 
+		#print "---> looking for $sub_DIR $subsub_dir\n";
                 if ( $subsub_dir =~ /^inc$/ || $subsub_dir =~ /^idl$/ ) {
                     opendir( DIR, $subsub_DIR )
                       or die "Can't open $sub_DIR\n";
