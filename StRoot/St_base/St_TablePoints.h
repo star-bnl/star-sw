@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   14/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_TablePoints.h,v 1.2 1999/11/04 18:03:10 fine Exp $
+// $Id: St_TablePoints.h,v 1.3 1999/11/16 16:29:57 fine Exp $
 // $Log: St_TablePoints.h,v $
+// Revision 1.3  1999/11/16 16:29:57  fine
+// TObject::GetObjectInfo() implemented
+//
 // Revision 1.2  1999/11/04 18:03:10  fine
 // new ctor for tablepoints introduced to make EventDiplay happy
 //
@@ -30,6 +33,7 @@ class St_TablePoints : public TPoints3DABC
     St_TablePoints(St_TableSorter *sorter,const void *key,Option_t *opt="");
     St_TablePoints(St_TableSorter *sorter, Int_t keyIndex,Option_t *opt="");
    ~St_TablePoints(){}
+    virtual Int_t     DistancetoPrimitive(Int_t px, Int_t py);
     virtual Int_t     GetLastPosition()const;
     virtual Float_t   GetX(Int_t idx)  const = 0;
     virtual Float_t   GetY(Int_t idx)  const = 0;

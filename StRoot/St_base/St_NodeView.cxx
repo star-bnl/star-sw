@@ -559,6 +559,23 @@ void St_NodeView::GetLocalRange(Float_t *min, Float_t *max)
 }
 
 //______________________________________________________________________________
+Text_t *St_NodeView::GetObjectInfo(Int_t px, Int_t py)
+{
+   if (!gPad) return "";
+   static char info[512];   
+   Axis_t x[3];
+   ((TPad *)gPad)->AbsPixeltoXY(px,py,x[0],x[1]);
+   TView *view =gPad->GetView();
+   if (view) view->NDCtoWC(x, x);  
+   TShape *shape = GetShape();
+   if (shape) 
+     sprintf(info,"%6.2f/%6.2f: %s/%s, shape=%s/%s",x[0],x[1],GetName(),GetTitle(),shape->GetName(),shape->ClassName());
+   else
+     sprintf(info,"%6.2f/%6.2f: %s/%s",x[0],x[1],GetName(),GetTitle());
+   return info;
+}
+
+//______________________________________________________________________________
 St_NodePosition  *St_NodeView::Local2Master(const Char_t *localName, const Char_t *masterName)
 {
   St_NodeView *masterNode = this;

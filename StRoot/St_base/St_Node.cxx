@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.31 1999/11/15 23:22:16 fine Exp $
+// $Id: St_Node.cxx,v 1.32 1999/11/16 16:29:56 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.32  1999/11/16 16:29:56  fine
+// TObject::GetObjectInfo() implemented
+//
 // Revision 1.31  1999/11/15 23:22:16  fine
 // refs to GEANT Wen site has been added
 //
@@ -621,15 +624,20 @@ TRotMatrix *St_Node::GetIdentity()
  return gIdentity;
 }
 //______________________________________________________________________________
-Text_t *St_Node::GetObjectInfo(Int_t, Int_t)
+Text_t *St_Node::GetObjectInfo(Int_t px, Int_t py)
 {
    if (!gPad) return "";
    static char info[512];
    sprintf(info,"%s/%s",GetName(),GetTitle());
+   Axis_t x[3];
+   ((TPad *)gPad)->AbsPixeltoXY(px,py,x[0],x[1]);
+   TView *view =gPad->GetView();
+   if (view) view->NDCtoWC(x, x);  
+
    TIter nextShape(fListOfShapes);
    TShape *shape = 0;
    while( (shape = (TShape *)nextShape()) ) 
-      sprintf(&info[strlen(info)]," shape=%s/%s",shape->GetName(),shape->ClassName());
+      sprintf(&info[strlen(info)]," %6.2f/%6.2f: shape=%s/%s",x[0],x[1],shape->GetName(),shape->ClassName());
    
    return info;
 }
