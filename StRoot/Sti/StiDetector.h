@@ -77,6 +77,6 @@ protected:
 };
 
 //Non-members--------------------------
-//ostream& operator<<(ostream&, const StiDetector&);
+ostream& operator<<(ostream& os, const StiDetector& d);
 
 #endif
