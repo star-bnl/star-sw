@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorD.cc,v 1.5 2000/09/30 17:14:27 perev Exp $
+ * $Id: StThreeVectorD.cc,v 1.6 2000/10/26 21:13:59 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorD.cc,v $
- * Revision 1.5  2000/09/30 17:14:27  perev
- * Streame added to ThreeVector
+ * Revision 1.6  2000/10/26 21:13:59  perev
+ * assert.h include added
+ *
+ * Revision 1.6  2000/10/26 21:13:59  perev
+ * assert.h include added
  *
  * Revision 1.5  2000/09/30 17:14:27  perev
  * Streame added to ThreeVector
@@ -33,7 +36,7 @@
  * Revision 1.1  1999/01/23 00:29:23  ullrich
  * Initial Revision
  *
-
+ **************************************************************************/
 #include "StThreeVectorF.hh"
 #include "StThreeVectorD.hh"
 #include <assert.h>
