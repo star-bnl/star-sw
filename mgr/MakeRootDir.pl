@@ -45,6 +45,8 @@ my $root = "rootdeb";
 my $lib  = "lib";
 my $bin  = "bin";
 
+my $COMPAT=0; # weill remove soon
+
 
 # Loop over 2 possibilities
 for ( my $iter=0; $iter < 2; $iter++ ) {
@@ -62,22 +64,23 @@ for ( my $iter=0; $iter < 2; $iter++ ) {
    print "Creating directory structure for .$SYS/$root\n";
    system("cd .$SYS/$root && $LNDIR $PWD/root ");
 
-
-   # Second task, fix up a bunch of required soft-links for
-   # backward infrastructure compatible layout (AFS only).
-   if( ! -l "$lib")   { symlink("$ANFS/$root/lib","$lib" );}
-   if( ! -l "$bin")   { symlink("$ANFS/$root/bin","$bin" );}
-   if( $iter == 0){
-       if( ! -l "etc")      { symlink("$ANFS/$root/etc","etc"  );}
-       if( ! -l "cint")     { symlink("$ANFS/$root/cint","cint");}
-       if( ! -l "icons")    { symlink("$ANFS/$root/icons","icons");}
-       if( ! -l "include")  { symlink("$ANFS/$root/include","include");}
-       if( ! -l "tutorials"){ symlink("$ANFS/$root/tutorials","tutorials");}
-       if( ! -l "fonts")    { symlink("$ANFS/$root/fonts","fonts");}
-       if( ! -l "test")     { symlink("$ANFS/$root/test","test");}
+   if ($COMPAT){
+       # Second task, fix up a bunch of required soft-links for
+       # backward infrastructure compatible layout (AFS only).
+       if( ! -l "$lib")   { symlink("$ANFS/$root/lib","$lib" );}
+       if( ! -l "$bin")   { symlink("$ANFS/$root/bin","$bin" );}
+       if( $iter == 0){
+	   if( ! -l "etc")      { symlink("$ANFS/$root/etc","etc"  );}
+	   if( ! -l "cint")     { symlink("$ANFS/$root/cint","cint");}
+	   if( ! -l "icons")    { symlink("$ANFS/$root/icons","icons");}
+	   if( ! -l "include")  { symlink("$ANFS/$root/include","include");}
+	   if( ! -l "tutorials"){ symlink("$ANFS/$root/tutorials","tutorials");}
+	   if( ! -l "fonts")    { symlink("$ANFS/$root/fonts","fonts");}
+	   if( ! -l "test")     { symlink("$ANFS/$root/test","test");}
+       }
+       # Backward support for old scripts
+       if( ! -l "$lib/libStar.so")   { symlink("libTable.so","$lib/libStar.so" );}
    }
-   # Backward support for old scripts
-   if( ! -l "$lib/libStar.so")   { symlink("libTable.so","$lib/libStar.so" );}
 
 
    if( ! $FLINK ){
@@ -88,8 +91,14 @@ for ( my $iter=0; $iter < 2; $iter++ ) {
 
 
    # Beware of sysname change under linux. Fix those out.
-   if( ! -l ".i386_linux22"){ symlink(".i386_redhat61",".i386_linux22");}
-   if( ! -l ".i386_linux24"){ symlink(".i386_redhat72",".i386_linux24");}
+   # order is oldfile= expected value for $STAR_HOST_SYS
+   # 6.1 support
+   #if( ! -l ".i386_linux22"){ symlink(".i386_redhat61",".i386_linux22");}
+   # 7.x support
+   if( ! -l ".i386_redhat72"){ symlink(".i386_linux24",".i386_redhat72");}
+   if( ! -l ".rh73_gcc296"){   symlink(".i386_linux24",".rh73_gcc296");}
+   # 8.0 support. Starting here, the sysname changed
+   if( ! -l ".i386_redhat80"){ symlink(".rh80_gcc32",".i386_redhat80");}
 
 
    # Little extra message for guidance
