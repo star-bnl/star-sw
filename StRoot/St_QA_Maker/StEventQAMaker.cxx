@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.15 2001/05/25 17:46:59 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 2.16 2001/07/31 23:21:42 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.16  2001/07/31 23:21:42  lansdell
+// added last point, hit-helix histos
+//
 // Revision 2.15  2001/05/25 17:46:59  lansdell
 // commented out unnecessary emccol cout statement
 //
@@ -226,15 +229,26 @@ void StEventQAMaker::MakeHistGlob() {
       Float_t nfitnmax = (Float_t(fTraits.numberOfFitPoints())) /
                          (Float_t(globtrk->numberOfPossiblePoints()));
       const StThreeVectorF& firstPoint = detInfo->firstPoint();
+      const StThreeVectorF& lastPoint = detInfo->lastPoint();
       const StThreeVectorF& origin = geom->origin();
-      StThreeVectorF dif = firstPoint - origin;
+      // get the helix position closest to the first point on track
+      double sFirst = geom->helix().pathLength(firstPoint);
+      // get the helix position closest to the last point on track
+      double sLast = geom->helix().pathLength(lastPoint);
+
+      StThreeVectorF dif = firstPoint - geom->helix().at(sFirst);
+      StThreeVectorF difl = lastPoint - geom->helix().at(sLast);
       Float_t xcenter = geom->helix().xcenter();
       Float_t ycenter = geom->helix().ycenter();
       Float_t rcircle = 1./geom->helix().curvature();
       Float_t centerOfCircleToFP = sqrt(pow(xcenter-firstPoint.x(),2) +
 					pow(ycenter-firstPoint.y(),2));
+      Float_t centerOfCircleToLP = sqrt(pow(xcenter-lastPoint.x(),2) +
+					pow(ycenter-lastPoint.y(),2));
       Float_t azimdif = dif.perp();
       if (rcircle<centerOfCircleToFP) azimdif *= -1.;
+      Float_t azimdifl = difl.perp();
+      if (rcircle<centerOfCircleToLP) azimdifl *= -1.;
       Float_t radf = firstPoint.perp();
 
       Float_t logImpact = TMath::Log10(globtrk->impactParameter());
@@ -321,6 +335,8 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_glb_zf0->Fill(dif.z());
 	hists->m_glb_rzf0->Fill(azimdif,0.);
         hists->m_glb_rzf0->Fill(dif.z(),1.);
+	hists->m_glb_rzl0->Fill(azimdifl,0.);
+        hists->m_glb_rzl0->Fill(difl.z(),1.);
         hists->m_glb_impactT->Fill(logImpact);
         hists->m_glb_impactrT->Fill(globtrk->impactParameter());
         hists->m_glb_impactTTS->Fill(logImpact,1.);
@@ -448,6 +464,8 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_glb_zf0TS->Fill(dif.z());
 	hists->m_glb_rzf0TS->Fill(azimdif,0.);
         hists->m_glb_rzf0TS->Fill(dif.z(),1.);
+	hists->m_glb_rzl0TS->Fill(azimdifl,0.);
+        hists->m_glb_rzl0TS->Fill(difl.z(),1.);
         hists->m_glb_impactTS->Fill(logImpact);
         hists->m_glb_impactrTS->Fill(globtrk->impactParameter());
         hists->m_glb_impactTTS->Fill(logImpact,0.);
@@ -791,23 +809,31 @@ void StEventQAMaker::MakeHistPrim() {
 	Float_t logCurvature = TMath::Log10(geom->curvature());
 
         const StThreeVectorF& firstPoint = detInfo->firstPoint();
-        const StThreeVectorF& origin = geom->origin();
+	const StThreeVectorF& lastPoint = detInfo->lastPoint();
+	const StThreeVectorF& origin = geom->origin();
 
 	// need to find position on helix closest to first point on track since
 	// the primary vertex is used as the first point on helix for primary
 	// tracks -CPL
-	double s = geom->helix().
-	           pathLength(firstPoint);
-	StThreeVectorF dif = firstPoint -
-	                     geom->helix().at(s);
-        Float_t radf = firstPoint.perp();
+	double sFirst = geom->helix().pathLength(firstPoint);
+	// get the helix position closest to the last point on track
+	double sLast = geom->helix().pathLength(lastPoint);
+
+	StThreeVectorF dif = firstPoint - geom->helix().at(sFirst);
+	StThreeVectorF difl = lastPoint - geom->helix().at(sLast);
 	Float_t xcenter = geom->helix().xcenter();
 	Float_t ycenter = geom->helix().ycenter();
 	Float_t rcircle = 1./geom->helix().curvature();
 	Float_t centerOfCircleToFP = sqrt(pow(xcenter-firstPoint.x(),2) +
 					  pow(ycenter-firstPoint.y(),2));
+	Float_t centerOfCircleToLP = sqrt(pow(xcenter-lastPoint.x(),2) +
+					  pow(ycenter-lastPoint.y(),2));
 	Float_t azimdif = dif.perp();
 	if (rcircle<centerOfCircleToFP) azimdif *= -1.;
+	Float_t azimdifl = difl.perp();
+	if (rcircle<centerOfCircleToLP) azimdifl *= -1.;
+
+        Float_t radf = firstPoint.perp();
 
 	// check if the track has hits in a detector -CPL
 	if (map.hasHitInDetector(kUnknownId)) hists->m_pdet_id->Fill(kUnknownId);
@@ -852,6 +878,8 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_prim_zf0->Fill(dif.z());
 	  hists->m_prim_rzf0->Fill(azimdif,0.);
 	  hists->m_prim_rzf0->Fill(dif.z(),1.);
+	  hists->m_prim_rzl0->Fill(azimdifl,0.);
+	  hists->m_prim_rzl0->Fill(difl.z(),1.);
 	  hists->m_prim_impactT->Fill(logImpact);
 	  hists->m_prim_impactrT->Fill(primtrk->impactParameter());
 	  hists->m_prim_impactTTS->Fill(logImpact,1.);
@@ -960,6 +988,8 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_prim_zf0TS->Fill(dif.z());
 	  hists->m_prim_rzf0TS->Fill(azimdif,0.);
 	  hists->m_prim_rzf0TS->Fill(dif.z(),1.);
+	  hists->m_prim_rzl0TS->Fill(azimdifl,0.);
+	  hists->m_prim_rzl0TS->Fill(difl.z(),1.);
 	  hists->m_prim_impactTS->Fill(logImpact);
 	  hists->m_prim_impactrTS->Fill(primtrk->impactParameter());
 	  hists->m_prim_impactTTS->Fill(logImpact,0.);
