@@ -2,7 +2,7 @@
 ************************************************************************
 macro tpc_slow_sim__
           INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
-          input_g2t_file=/event_0000050.xdf_
+          input_g2t_file=event_0000050.xdf_
           num_events=1_
           tpc_sector_first=18_
           tpc_sector_last=18_
