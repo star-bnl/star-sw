@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.89 2000/04/07 15:41:42 perev Exp $
+// $Id: StMaker.cxx,v 1.90 2000/04/13 02:53:35 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -320,9 +320,18 @@ TDataSet *StMaker::GetDataBase(const char* logInput)
   TDataSet *ds;
   StMaker *mk;
   ds = GetInputDS(logInput);
-  if (!ds) return 0;
-  mk = GetMaker(ds); if (!mk) return 0;
+  if (!ds) 				return 0;
+  mk = GetMaker(ds); if (!mk) 		return 0;
+  if (!mk->InheritsFrom("St_db_Maker"))	return 0;
   return mk->UpdateDB(ds);
+}
+//______________________________________________________________________________
+Int_t   StMaker::GetValidity(const TTable *tb, TDatime *val) const
+{
+   StMaker *mk = GetMaker(tb);
+   if (!mk) 					return 10;
+   if (!mk->InheritsFrom("St_db_Maker"))	return 11;
+   return mk->GetValidity(tb,val);
 }
 //_____________________________________________________________________________
 void StMaker::Clear(Option_t *option)
@@ -954,6 +963,9 @@ Int_t StMaker::FinishRun(int runumber) {return 0;}
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.90  2000/04/13 02:53:35  perev
+// StMaker::GetValidity added
+//
 // Revision 1.89  2000/04/07 15:41:42  perev
 // Printout error codes improved
 //
