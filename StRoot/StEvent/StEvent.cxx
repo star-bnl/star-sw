@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 1.6 1999/05/03 01:36:18 fisyak Exp $
+ * $Id: StEvent.cxx,v 1.7 1999/05/04 20:59:23 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 1.6  1999/05/03 01:36:18  fisyak
- * Add Print
+ * Revision 1.7  1999/05/04 20:59:23  fisyak
+ * move CVS Tag to StRun
+ *
+ * Revision 1.7  1999/05/04 20:59:23  fisyak
+ * move CVS Tag to StRun
  *
  * Revision 1.6  1999/05/03 01:36:18  fisyak
  * Add Print
@@ -70,16 +73,16 @@
 #include "TString.h"
 #include "TBrowser.h"
 using namespace std;
-static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.6 1999/05/03 01:36:18 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.7 1999/05/04 20:59:23 fisyak Exp $";
  extern "C" {int isprint(int);}
 StEvent::StEvent():St_DataSet("Event")
-static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.6 1999/05/03 01:36:18 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.7 1999/05/04 20:59:23 fisyak Exp $";
  * Changes due to the addition of the EMC to StEvent
 StEvent::StEvent():St_DataSet("StEvent")
  * add rich pixel info/containers
     init();
 St_DataSet("Event")
-static const char rcsid[] = "$Id: StEvent.cxx,v 1.6 1999/05/03 01:36:18 fisyak Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 1.7 1999/05/04 20:59:23 fisyak Exp $";
 StEvent::StEvent(StRun* run, dst_event_header_st& hdr, dst_event_summary_st& sum):
 St_DataSet("StEvent")
 #include "StEmcCollection.h"
@@ -128,7 +131,6 @@ StEvent::operator=(const StEvent&) { return *this;} // private
     mType = "Unknown";
     //    mRun = run;
     mRunNumber = 0;           
-    mCvsTag = "Unknown";
     mTriggerMask = 0;         
     mBunchCrossingNumber = 0; 
     mTime.Set();
