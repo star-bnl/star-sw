@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.h,v 2.4 2001/05/25 16:31:21 lansdell Exp $
+// $Id: StEventQAMaker.h,v 2.5 2002/02/05 22:27:30 jeromel Exp $
 // $Log: StEventQAMaker.h,v $
+// Revision 2.5  2002/02/05 22:27:30  jeromel
+// Modifications from David H. Int() -> InitRun().
+//
 // Revision 2.4  2001/05/25 16:31:21  lansdell
 // more updates to qa shift histograms
 //
@@ -48,6 +51,7 @@ class StEventQAMaker : public StQAMakerBase {
   StEventQAMaker(const char *name="EventQA", const char *title="StEvent/QA");
   virtual       ~StEventQAMaker() {}
   virtual Int_t  Init();
+  virtual Int_t  InitRun(int runnumber);
   virtual Int_t  Finish();
   virtual Int_t  Make();
   
@@ -66,7 +70,7 @@ class StEventQAMaker : public StQAMakerBase {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.4 2001/05/25 16:31:21 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.5 2002/02/05 22:27:30 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEventQAMaker,0)   //StAF chain virtual base class for Makers
     };
