@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.84 2004/05/31 20:09:22 oldi Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.85 2004/08/18 00:18:59 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -119,9 +119,9 @@ Int_t StFlowAnalysisMaker::Init() {
   const float maxPtsMinTpc    =  -0.5;
   const float maxPtsMaxTpc    =  60.5; 
   const float fitPtsMinFtpc   =  -0.5;
-  const float fitPtsMaxFtpc   =  13.5; 
+  const float fitPtsMaxFtpc   =  12.5; 
   const float maxPtsMinFtpc   =  -0.5;
-  const float maxPtsMaxFtpc   =  13.5; 
+  const float maxPtsMaxFtpc   =  12.5; 
   const float fitOverMaxMin   =    0.;
   const float fitOverMaxMax   =   1.2; 
   const float origMultMin     =    0.;
@@ -163,9 +163,9 @@ Int_t StFlowAnalysisMaker::Init() {
 	 nDcaBins          = 60,
 	 nChi2Bins         = 50,
 	 nFitPtsBinsTpc    = 61,
-	 nFitPtsBinsFtpc   = 14,
+	 nFitPtsBinsFtpc   = 13,
 	 nMaxPtsBinsTpc    = 61,
-	 nMaxPtsBinsFtpc   = 14,
+	 nMaxPtsBinsFtpc   = 13,
 	 nFitOverMaxBins   = 40,
 	 nOrigMultBins     = 60,
 	 nMultEtaBins      = 50,
@@ -266,13 +266,13 @@ Int_t StFlowAnalysisMaker::Init() {
   // Tpc
   mHistFitOverMaxTpc = new TH1F("Flow_FitOverMax_Tpc", "Flow_FitOverMax_Tpc",
       nFitOverMaxBins, fitOverMaxMin, fitOverMaxMax);
-  mHistFitOverMaxTpc->SetXTitle("(Fit Points - 1) / Max Points");
+  mHistFitOverMaxTpc->SetXTitle("Fit Points / Max Points");
   mHistFitOverMaxTpc->SetYTitle("Counts");
     
   // Ftpc
   mHistFitOverMaxFtpc = new TH1F("Flow_FitOverMax_Ftpc", "Flow_FitOverMax_Ftpc",
       nFitOverMaxBins, fitOverMaxMin, fitOverMaxMax);
-  mHistFitOverMaxFtpc->SetXTitle("(Fit Points - 1) / Max Points");
+  mHistFitOverMaxFtpc->SetXTitle("Fit Points / Max Points");
   mHistFitOverMaxFtpc->SetYTitle("Counts");
     
 
@@ -1161,7 +1161,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.84 2004/05/31 20:09:22 oldi Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.85 2004/08/18 00:18:59 oldi Exp $");
 
   return StMaker::Init();
 }
@@ -1411,7 +1411,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
       mHistChi2Ftpc     ->Fill(chi2);
       mHistFitPtsFtpc   ->Fill((float)fitPts);
       mHistMaxPtsFtpc   ->Fill((float)maxPts);
-      if (maxPts) mHistFitOverMaxFtpc->Fill((float)(fitPts-1)/(float)maxPts);
+      if (maxPts) mHistFitOverMaxFtpc->Fill((float)fitPts/(float)maxPts);
     }
     
     else { // Tpc track or otherwise!!!
@@ -1432,7 +1432,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
       mHistChi2Tpc     ->Fill(chi2);
       mHistFitPtsTpc   ->Fill((float)fitPts);
       mHistMaxPtsTpc   ->Fill((float)maxPts);
-      if (maxPts) mHistFitOverMaxTpc->Fill((float)(fitPts-1)/(float)maxPts);
+      if (maxPts) mHistFitOverMaxTpc->Fill((float)fitPts/(float)maxPts);
       
       if (charge == 1) {
 	hPlusN++;
@@ -2306,6 +2306,31 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.85  2004/08/18 00:18:59  oldi
+// Several changes were necessary to comply with latest changes of MuDsts and StEvent:
+//
+// nHits, nFitPoints, nMaxPoints
+// -----------------------------
+// From now on
+//  - the fit points used in StFlowMaker are the fit points within the TPC xor FTPC (vertex excluded).
+//  - the max. possible points used in StFlowMAker are the max. possible points within the TPC xor FTPC (vertex excluded).
+//  - the number of points (nHits; not used for analyses so far) are the total number of points on a track, i. e.
+//    TPC + SVT + SSD + FTPCeast + FTPCwest [reading from HBT event gives a warning, but it seems like nobody uses it anyhow].
+// - The fit/max plot (used to be (fit-1)/max) was updated accordingly.
+// - The default cuts for fit points were changed (only for the FTPC, since TPC doesn't set default cuts).
+// - All these changes are backward compatible, as long as you change your cuts for the fit points by 1 (the vertex used to
+//   be included and is not included anymore). In other words, your results won't depend on old or new MuDst, StEvent,
+//   PicoDsts as long as you use the new flow software (together with the latest MuDst and StEvent software version).
+// - For backward compatibility reasons the number of fit points which is written out to the flowpicoevent.root file
+//   includes the vertex. It is subtracted internally while reading back the pico files. This is completely hidden from the
+//   user.
+//
+// zFirstPoint
+// -----------
+// The positions of the first point of tracks which have points in the TPC can lie outside of the TPC (the tracks can start in
+// the SVT or SSD now). In this case, the first point of the track is obtained by extrapolating the track helix to the inner
+// radius of the TPC.
+//
 // Revision 1.84  2004/05/31 20:09:22  oldi
 // PicoDst format changed (Version 7) to hold ZDC SMD information.
 // Trigger cut modified to comply with TriggerCollections.

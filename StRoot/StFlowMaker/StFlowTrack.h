@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.26 2003/09/02 17:58:13 perev Exp $
+// $Id: StFlowTrack.h,v 1.27 2004/08/18 00:19:21 oldi Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //         FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -55,9 +55,9 @@ public:
   Float_t       DcaSigned()   const;
   Float_t       DcaGlobal()   const;
   Float_t       Chi2()        const;
-  Int_t         FitPts()      const;
-  Int_t         MaxPts()      const;
-  Int_t         Nhits()       const;
+  Int_t         FitPts()      const;  // contains fit points in TPC xor FTPC only (SVT and/or SSD hits subtracted)
+  Int_t         MaxPts()      const;  // contains possible hits in TPC xor FTPC only (SVT and/or SSD hits subtracted)
+  Int_t         Nhits()       const;  // contains ALL hits on the track (TPC + SVT + SSD + FTPC east + FTPC west)
   Int_t         NdedxPts()    const;
   Float_t       TrackLength() const;
   Int_t Select(Int_t harmonic, Int_t selection, Int_t subevent= -1) const;
@@ -140,9 +140,9 @@ private:
   Float_t mDcaSigned;
   Float_t mDcaGlobal;
   Float_t mChi2;
-  Int_t   mFitPts;
-  Int_t   mMaxPts;
-  Int_t   mNhits;
+  Int_t   mFitPts; // contains fit points in TPC xor FTPC only (SVT and/or SSD hits subtracted)
+  Int_t   mMaxPts; // contains possible hits in TPC xor FTPC only (SVT and/or SSD hits subtracted)
+  Int_t   mNhits;  // contains ALL hits on the track (TPC + SVT + SSD + FTPC east + FTPC west)
   Int_t   mNdedxPts;
   Float_t mTrackLength;
   Int_t   mSelection;
@@ -348,6 +348,31 @@ inline void StFlowTrack::SetTopologyMap(StTrackTopologyMap map) { mTopology = ma
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.27  2004/08/18 00:19:21  oldi
+// Several changes were necessary to comply with latest changes of MuDsts and StEvent:
+//
+// nHits, nFitPoints, nMaxPoints
+// -----------------------------
+// From now on
+//  - the fit points used in StFlowMaker are the fit points within the TPC xor FTPC (vertex excluded).
+//  - the max. possible points used in StFlowMAker are the max. possible points within the TPC xor FTPC (vertex excluded).
+//  - the number of points (nHits; not used for analyses so far) are the total number of points on a track, i. e.
+//    TPC + SVT + SSD + FTPCeast + FTPCwest [reading from HBT event gives a warning, but it seems like nobody uses it anyhow].
+// - The fit/max plot (used to be (fit-1)/max) was updated accordingly.
+// - The default cuts for fit points were changed (only for the FTPC, since TPC doesn't set default cuts).
+// - All these changes are backward compatible, as long as you change your cuts for the fit points by 1 (the vertex used to
+//   be included and is not included anymore). In other words, your results won't depend on old or new MuDst, StEvent,
+//   PicoDsts as long as you use the new flow software (together with the latest MuDst and StEvent software version).
+// - For backward compatibility reasons the number of fit points which is written out to the flowpicoevent.root file
+//   includes the vertex. It is subtracted internally while reading back the pico files. This is completely hidden from the
+//   user.
+//
+// zFirstPoint
+// -----------
+// The positions of the first point of tracks which have points in the TPC can lie outside of the TPC (the tracks can start in
+// the SVT or SSD now). In this case, the first point of the track is obtained by extrapolating the track helix to the inner
+// radius of the TPC.
+//
 // Revision 1.26  2003/09/02 17:58:13  perev
 // gcc 3.2 updates + WarnOff
 //

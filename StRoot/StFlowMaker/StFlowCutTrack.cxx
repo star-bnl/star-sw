@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.40 2003/09/02 17:58:11 perev Exp $
+// $Id: StFlowCutTrack.cxx,v 1.41 2004/08/18 00:19:17 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -38,7 +38,7 @@ Float_t StFlowCutTrack::mEtaTpcCuts[2]        = {-1.3, 1.3};
 Int_t   StFlowCutTrack::mChgTpcCuts[2]        = {0, 0};
 
 Bool_t  StFlowCutTrack::mFtpcTrackCut         = kFALSE;
-Int_t   StFlowCutTrack::mFitPtsFtpcCuts[2]    = {6, 12};     // FitPts include the vertex (i.e. the range is from 6 to 11 for 5 to 10 FTPC points). Everything < 6 and >= 12 is cut.
+Int_t   StFlowCutTrack::mFitPtsFtpcCuts[2]    = {5, 11};     // FitPts DO NOT include the vertex ANYMORE (i.e. the range is from 5 to 10 FTPC points). Everything < 5 and >= 11 is cut.
 Float_t StFlowCutTrack::mChiSqFtpcCuts[2]     = {0., 0.};
 Float_t StFlowCutTrack::mDcaFtpcCuts[2]       = {0., 0.};
 Float_t StFlowCutTrack::mDcaGlobalFtpcCuts[2] = {0., 2.};
@@ -101,10 +101,14 @@ Int_t StFlowCutTrack::CheckTrack(StTrack* pTrack) {
   float dcaGlobal = pTrack->node()->track(global)->impactParameter();  
   float pt = p.perp();
   float chiSq = (float)(pTrack->fitTraits().chi2());
-  Int_t nFitPoints = pTrack->fitTraits().numberOfFitPoints();
-  Int_t nMaxPoints = pTrack->numberOfPossiblePoints();
-  float fitOverMax = (nMaxPoints) ? (float)(nFitPoints-1)/(float)nMaxPoints : 0.0;
   StTrackTopologyMap map = pTrack->topologyMap();
+  Int_t nFitPoints = pTrack->fitTraits().numberOfFitPoints() -
+    pTrack->fitTraits().numberOfFitPoints(kSvtId) -
+    pTrack->fitTraits().numberOfFitPoints(kSsdId) - 1; // remove additional vertex point
+  Int_t nMaxPoints = pTrack->numberOfPossiblePoints() - 
+    pTrack->numberOfPossiblePoints(kSvtId) - 
+    pTrack->numberOfPossiblePoints(kSsdId) - 1; // remove additional vertex point
+  float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;
 
   if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) { 
     // Tpc track, or no topologyMap
@@ -276,9 +280,9 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
   float dcaGlobal = pPicoTrack->DcaGlobal();
   float pt = pPicoTrack->Pt();
   float chiSq = pPicoTrack->Chi2();
-  Int_t nFitPoints = pPicoTrack->FitPts();
+  Int_t nFitPoints = pPicoTrack->FitPts() - 1; // remove additional vertex point
   Int_t nMaxPoints = pPicoTrack->MaxPts();
-  float fitOverMax = (nMaxPoints) ? (float)(nFitPoints-1)/(float)nMaxPoints : 0.0;
+  float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;
   StTrackTopologyMap map(pPicoTrack->TopologyMap0(), pPicoTrack->TopologyMap1());
 
   if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) {
@@ -451,10 +455,14 @@ Int_t StFlowCutTrack::CheckTrack(StMuTrack* pMuTrack) {
   float dcaGlobal = pMuTrack->dcaGlobal().mag();
   float pt = pMuTrack->pt();
   float chiSq = pMuTrack->chi2xy(); 
-  Int_t nFitPoints = pMuTrack->nHitsFit();
-  Int_t nMaxPoints = pMuTrack->nHitsPoss();
-  float fitOverMax = (nMaxPoints) ? (float)(nFitPoints-1)/(float)nMaxPoints : 0.0;
   StTrackTopologyMap map(pMuTrack->topologyMap());
+  Int_t nFitPoints = pMuTrack->nHitsFit() -
+    pMuTrack->nHitsFit(kSvtId) -
+    pMuTrack->nHitsFit(kSsdId) - 1; // remove additional vertex point
+  Int_t nMaxPoints = pMuTrack->nHitsPoss() -
+    pMuTrack->nHitsPoss(kSvtId) -
+    pMuTrack->nHitsPoss(kSsdId) - 1; // remove additional vertex point
+  float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;
 
   if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) { 
     // Tpc track, or no topologyMap
@@ -702,6 +710,31 @@ void StFlowCutTrack::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.41  2004/08/18 00:19:17  oldi
+// Several changes were necessary to comply with latest changes of MuDsts and StEvent:
+//
+// nHits, nFitPoints, nMaxPoints
+// -----------------------------
+// From now on
+//  - the fit points used in StFlowMaker are the fit points within the TPC xor FTPC (vertex excluded).
+//  - the max. possible points used in StFlowMAker are the max. possible points within the TPC xor FTPC (vertex excluded).
+//  - the number of points (nHits; not used for analyses so far) are the total number of points on a track, i. e.
+//    TPC + SVT + SSD + FTPCeast + FTPCwest [reading from HBT event gives a warning, but it seems like nobody uses it anyhow].
+// - The fit/max plot (used to be (fit-1)/max) was updated accordingly.
+// - The default cuts for fit points were changed (only for the FTPC, since TPC doesn't set default cuts).
+// - All these changes are backward compatible, as long as you change your cuts for the fit points by 1 (the vertex used to
+//   be included and is not included anymore). In other words, your results won't depend on old or new MuDst, StEvent,
+//   PicoDsts as long as you use the new flow software (together with the latest MuDst and StEvent software version).
+// - For backward compatibility reasons the number of fit points which is written out to the flowpicoevent.root file
+//   includes the vertex. It is subtracted internally while reading back the pico files. This is completely hidden from the
+//   user.
+//
+// zFirstPoint
+// -----------
+// The positions of the first point of tracks which have points in the TPC can lie outside of the TPC (the tracks can start in
+// the SVT or SSD now). In this case, the first point of the track is obtained by extrapolating the track helix to the inner
+// radius of the TPC.
+//
 // Revision 1.40  2003/09/02 17:58:11  perev
 // gcc 3.2 updates + WarnOff
 //

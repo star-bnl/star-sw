@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.21 2004/02/03 22:36:37 posk Exp $
+// $Id: StFlowSelection.cxx,v 1.22 2004/08/18 00:19:21 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -115,7 +115,7 @@ Bool_t StFlowSelection::SelectPart(StFlowTrack* pFlowTrack) {
 
   // Fit Points over Max Points
   int maxPts = pFlowTrack->MaxPts();
-  float fitOverMaxPts = (float)(fitPts-1) / (float)maxPts;
+  float fitOverMaxPts = (float)fitPts/(float)maxPts;
   if (mFitOverMaxPtsPart[1] > mFitOverMaxPtsPart[0] && 
       (fitOverMaxPts < mFitOverMaxPtsPart[0] || 
        fitOverMaxPts >= mFitOverMaxPtsPart[1])) return kFALSE;
@@ -174,6 +174,31 @@ void StFlowSelection::PrintList() const {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
+// Revision 1.22  2004/08/18 00:19:21  oldi
+// Several changes were necessary to comply with latest changes of MuDsts and StEvent:
+//
+// nHits, nFitPoints, nMaxPoints
+// -----------------------------
+// From now on
+//  - the fit points used in StFlowMaker are the fit points within the TPC xor FTPC (vertex excluded).
+//  - the max. possible points used in StFlowMAker are the max. possible points within the TPC xor FTPC (vertex excluded).
+//  - the number of points (nHits; not used for analyses so far) are the total number of points on a track, i. e.
+//    TPC + SVT + SSD + FTPCeast + FTPCwest [reading from HBT event gives a warning, but it seems like nobody uses it anyhow].
+// - The fit/max plot (used to be (fit-1)/max) was updated accordingly.
+// - The default cuts for fit points were changed (only for the FTPC, since TPC doesn't set default cuts).
+// - All these changes are backward compatible, as long as you change your cuts for the fit points by 1 (the vertex used to
+//   be included and is not included anymore). In other words, your results won't depend on old or new MuDst, StEvent,
+//   PicoDsts as long as you use the new flow software (together with the latest MuDst and StEvent software version).
+// - For backward compatibility reasons the number of fit points which is written out to the flowpicoevent.root file
+//   includes the vertex. It is subtracted internally while reading back the pico files. This is completely hidden from the
+//   user.
+//
+// zFirstPoint
+// -----------
+// The positions of the first point of tracks which have points in the TPC can lie outside of the TPC (the tracks can start in
+// the SVT or SSD now). In this case, the first point of the track is obtained by extrapolating the track helix to the inner
+// radius of the TPC.
+//
 // Revision 1.21  2004/02/03 22:36:37  posk
 // Initialzed mPtBinsPart.
 //
