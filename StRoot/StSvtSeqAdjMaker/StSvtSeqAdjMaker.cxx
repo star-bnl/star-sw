@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.43 2002/09/26 20:46:06 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.44 2003/01/21 01:27:44 jeromel Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,11 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.44  2003/01/21 01:27:44  jeromel
+ * hfile->write(0 while NULL caused spurious crash.
+ * Took the oportunity to add GetCVS()
+ * Some maniaco-compulsive //! alignement fixes ...
+ *
  * Revision 1.43  2002/09/26 20:46:06  caines
  * Make sure initRun works when no svt data present and correct code to allow for the ordering init and initrun are called in
  *
@@ -1124,9 +1129,11 @@ Int_t StSvtSeqAdjMaker::Finish(){
   
   if (Debug()) gMessMgr->Debug() << "In StSvtSeqAdjMaker::Finish() "
 				 << GetName() << endm; 
- 
-  hfile->Write();
-  hfile->Close();
+
+  if ( hfile ){
+    hfile->Write();
+    hfile->Close();
+  }
   
   return kStOK;
 }
