@@ -447,16 +447,18 @@ ABEND:
             vec/input staf_status(1) STAFCV_OK
      (rg2t) cd [geantE]
           for/call g2t
-* try this
+* try this - error check
           if ($iquest(100) <1 .or. $iquest(100) > 100000) goto ABEND 
-          cd /dui
-          tdm/table/rowcount event/geant/Event/g2t_vertex
-          no_vert=$format(staf_result(1),i10)
-          tdm/table/rowcount event/geant/Event/g2t_track
-          no_track=$format(staf_result(1),i10)
-          string = '---<bfc>---rg2t: Event  No.vertices ='//[no_vert]//' No.Tracks = '//[no_track]
-          fmessage $quote([string])    [log_file]
-          message $quote([string])
+            cd /dui
+            tdm/table/rowcount event/geant/Event/g2t_vertex
+            no_vert=$format(staf_result(1),i10)
+            tdm/table/rowcount event/geant/Event/g2t_track
+            no_track=$format(staf_result(1),i10)
+            string = '---<bfc>---rg2t: Event '//[nev_proc]//' No.vertices ='//[no_vert]//' No.Tracks = '//[no_track]
+            fmessage $quote([string])    [log_file]
+            message $quote([string])
+* copy event generator table to dst directory
+          cp event/geant/Event/hepe_gent [dst]
       (svg)    nextl 1
       (tpg)    nextl 1
       (sss)    exec run_sss
@@ -507,17 +509,17 @@ ABEND:
                  message ' problem with tpc_tracker_tpt'
                endif
     (tte_e)    exec tte_run#run_tte
-      (ffs) exec ffs_run#run 
-      (fss) exec fss_run#run
-      (fcl) exec fcl_run#run
-    (fpt_f) exec fpt_run#run_fast_sim
-    (fte_f) exec fte_run#run_fast_sim
-    (fpt_s) exec fpt_run#run_slow_sim
-    (fte_s) exec fte_run#run_slow_sim
-      (svm)    exec run_svm#run_svm 	     |  TPC to SVT Matching 
+      (ffs)    exec ffs_run#run 
+      (fss)    exec fss_run#run
+      (fcl)    exec fcl_run#run
+    (fpt_f)    exec fpt_run#run_fast_sim
+    (fte_f)    exec fte_run#run_fast_sim
+    (fpt_s)    exec fpt_run#run_slow_sim
+    (fte_s)    exec fte_run#run_slow_sim
+      (svm)    exec run_svm#run_svm
       (evr)    exec run_evr#run
-      (egr)    exec run_egr#egr	|  Event Global Refit
-      (ev0)    exec run_ev0#ev0_am           |  V0 Finder 
+      (egr)    exec run_egr#egr	
+      (ev0)    exec run_ev0#ev0_am 
     (ev0_e)    exec run_ev0#ev0_eval2  
       (ctf)    exec cts_run
                exec ctu_run 
@@ -550,13 +552,11 @@ ABEND:
                  message "Empty output file"
                else
 		 exec write_table_to_file#write outfile [event]
-*                 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
               endif
     (dout)    if [output_dst_file]="" then
                  message "Empty dst output file"
                else
 		 exec write_table_to_file#write dstout [dst]
-*                 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT	
                endif
     (esout)    if [output_xdf_file]="" then
                  message "Empty output file"
@@ -571,6 +571,7 @@ ABEND:
 
 
    if (STAF_STATUS(1).ne. STAFCV_OK) goto ABEND
+
    sigma v[mod] = v[mod] + abs($cptime)
    sigma t[mod] = t[mod] + v[mod]
    string = '---<bfc>---'//[mod]//': Event  '//$format([nev_proc],i6)//$format(v[mod],f12.5)//$format(t[mod],f12.5)
@@ -579,8 +580,9 @@ ABEND:
    vec/inp v[mod] 0.0
    
   enddo
-  asu/malloc/stats 
 
+
+ asu/malloc/stats 
 
  ABEND:
  NEXT_EVENT:
@@ -647,24 +649,26 @@ macro bfc_finish _
     ENDCASE
 
     sigma totime = totime + t[mod]
-    if [nevents]>0 then
-      sigma cpupev = t[mod]/[nevents]
+    if [nev_proc]>0 then
+      sigma cpupev = t[mod]/[nev_proc]
       string = '---<bfc>---'//[mod]//': CPU/event = '//$format(cpupev,f12.5)
      fmessage $quote([string])    [log_file]
       message $quote([string]) 
     endif
 
    if (STAF_STATUS(1).ne. STAFCV_OK) goto ABEND
+
   enddo
 
 
-  string = '---<bfc>--- total CPU to process  '//$format([nevents],i6)//' events = '//$format(totime,f12.5)
- fmessage $quote([string])    [log_file]
+  string = '---<bfc>--- total CPU to process  '//$format([nev_proc],i6)//' events = '//$format(totime,f12.5)
+  fmessage $quote([string])    [log_file]
   message $quote([string]) 
-  if [nevents]>0 then
-      sigma cpupev = totime/[nevents]
+
+  if [nev_proc]>0 then
+      sigma cpupev = totime/[nev_proc]
       string = '---<bfc>--- total CPU/event = '//$format(cpupev,f12.5)
-     fmessage $quote([string])    [log_file]
+      fmessage $quote([string])    [log_file]
       message $quote([string]) 
   endif
 
@@ -738,7 +742,6 @@ return
  enddo
   
 return
-
 
 
 **********************************************************************
