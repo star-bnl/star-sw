@@ -6,6 +6,7 @@ class StChain;
 StChain *chain=0;
 
 void RunStiMaker(Int_t nevents=1,
+		 bool simulated = true,
 		 bool run=true,
 		 //const char* MainFile="/star/data13/reco/dev/2001/08/*2235009*.event.root")
 		 //const char* MainFile="/afs/rhic/star/users/mmiller/code/ITF/geant/pion_10_neg.event.root")
@@ -44,21 +45,33 @@ void RunStiMaker(Int_t nevents=1,
     
     cout <<"Loading StEvent"<<endl;
     gSystem->Load("StEvent");
-    
+
     cout <<"Loading StEventMaker"<<endl;
     gSystem->Load("StEventMaker");
+
+    cout <<"Loading StEmcUtil"<<endl;
+    gSystem->Load("StEmcUtil");
+    
+    cout <<"Loading StMcEvent"<<endl;
+    gSystem->Load("StMcEvent");
+
+    cout <<"Loading StMcEventMaker"<<endl;
+    gSystem->Load("StMcEventMaker");
+
+    cout <<"Loading AssociationMaker"<<endl;
+    gSystem->Load("StAssociationMaker");
     
     cout <<"Loading Sti"<<endl;
     gSystem->Load("Sti");
-    //gSystem->Load(".i386_redhat61/LIB/Sti.so");
+    //gSystem->Load(".i386_redhat61/LIB/Sti.so"); //For optimized
 
     cout <<"Loading StiGui"<<endl;
     gSystem->Load("StiGui");
-    //gSystem->Load(".i386_redhat61/LIB/StiGui");
+    //gSystem->Load(".i386_redhat61/LIB/StiGui"); //For optimized
 
     cout <<"Loading StiMaker"<<endl;
     gSystem->Load("StiMaker");
-    //gSystem->Load(".i386_redhat61/LIB/StiMaker");
+    //gSystem->Load(".i386_redhat61/LIB/StiMaker"); //For optimized
     
     // create a new instance of the chain
     
@@ -75,16 +88,28 @@ void RunStiMaker(Int_t nevents=1,
     ioMaker->SetBranch("dstBranch",0,"r");    //activate Event Branch
     ioMaker->SetBranch("runcoBranch",0,"r");  //activate runco Branch
 
+    //Calibration Maker (StarDB,not a real Database!)
     const char* calibDB = "MySQL:StarDb";
     const char* paramsDB = "$STAR/StarDb";
     St_db_Maker* calibMk = new St_db_Maker("StarDb",calibDB,paramsDB);
     calibMk->SetDateTime("year_1h");
     calibMk->SetDebug();
-    
+
+    //Read Tpc Database access
     StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
-    
+
+    //StEventMaker
     StEventMaker*       eventReader   = new StEventMaker("events","title");
     eventReader->doPrintEventInfo = 0;
+
+    //StMcEventMaker
+    StMcEventMaker* mcEventReader = new StMcEventMaker();    
+
+    StAssociationMaker* assocMaker = 0;
+    if (simulated) {
+	//Association
+	assocMaker = new StAssociationMaker();
+    }
     
     //StiMaker
     StiMaker* anaMk = StiMaker::instance();
@@ -94,6 +119,10 @@ void RunStiMaker(Int_t nevents=1,
     enum StTrackType {global, primary, tpt, secondary};
     //anaMk->setDrawableStTrackType(primary);
     anaMk->setDrawableStTrackType(global);
+    anaMk->setMcEventMaker(mcEventReader);
+    if (simulated) {
+	anaMk->setAssociationMaker(assocMaker);
+    }
 
     // now execute the chain member functions    
     chain->PrintInfo();
