@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.30 1999/11/13 00:26:13 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.31 1999/11/13 02:33:37 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.31  1999/11/13 02:33:37  fisyak
+// Add dependence of ems from geant, eliminate geant Cint macros
+//
 // Revision 1.30  1999/11/13 00:26:13  fisyak
 // Add UserDb option for Cint files
 //
@@ -151,6 +154,7 @@ struct BfcItem {
 BfcItem BFC[] = {
   {"Key"         ,"Name","Chain","Opts"                                   ,"Maker","Libs","Comment",kFALSE},
   {"doEvents",""  ,"","xin,event,analysis,FiledOn",""                                        ,"","",kFALSE},
+  {"Kalman"  ,""  ,"","geant",""                                                             ,"","",kFALSE},
   {"SD97"  ,""  ,"","db,tpc,global,dst,qa,event,analysis,tree","","","Turn on 1997 test parameters",kFALSE},
   {"SD98"  ,""  ,"","db,tpc,global,dst,qa,event,analysis,tree","","","Turn on 1998 test parameters",kFALSE},
   {"Y1a"    ,""  ,"","db,tpc,global,dst,qa,event,analysis,tree,ftpc,l0,l3t","","","Turn on Year 1a",kFALSE},
@@ -166,14 +170,14 @@ BfcItem BFC[] = {
   {"Y2a"         ,""  ,"","db,tpc,global,dst,qa,event,analysis,tree,svt,ftpc,l0,l3t,ems,emc,rich","","",
                                                                                   "Turn on Year 2a",kFALSE},
   {"Eval"        ,""  ,"","","",""                ,"Turn on evaluation switch for different makers",kFALSE},
-  {"OFF"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
+  {"off"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
   {"db"          ,""  ,"","tables"               ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"calib"       ,""  ,"","tables"               ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
-  {"XIN"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
-  {"GSTAR"       ,"" ,"","tables,geant","","","gstar for 10 muon track with pT = 10 GeV in |eta|<1",kFALSE}, 
-  {"TDAQ"        ,""  ,"","er99,xin,tpc_daq"                                              ,"","","",kFALSE},  
-  {"FZIN"        ,""  ,"","geant","" ,""                                      ,"read GSTAR fz-file",kFALSE},
-  {"UTIL"        ,""  ,"","","","StAnalysisUtilities",                   "Load StAnalysisUtilities",kFALSE},
+  {"xin"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
+  {"gstar"       ,"" ,"","tables,geant","","","gstar for 10 muon track with pT = 10 GeV in |eta|<1",kFALSE}, 
+  {"tdaq"        ,""  ,"","er99,xin,tpc_daq"                                              ,"","","",kFALSE},  
+  {"fzin"        ,""  ,"","geant","" ,""                                      ,"read gstar fz-file",kFALSE},
+  {"util"        ,""  ,"","","","StAnalysisUtilities",                   "Load StAnalysisUtilities",kFALSE},
   {"tables"      ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
   {"tls"         ,""  ,"","",""                                                        ,"libtls","",kFALSE},
   {"SCL"         ,""  ,"","","","StarClassLibrary",                         "Load StarClassLibrary",kFALSE},
@@ -182,51 +186,52 @@ BfcItem BFC[] = {
   {"HalfField"   ,""  ,"","-FieldOn,-FieldOff,-ReverseField","StMagFC","StMagF","Half Field option",kFALSE},
   {"ReverseField",""  ,"","-FieldOn,-FieldOff,-HalfField","StMagFC","StMagF","Reverse Field option",kFALSE},
   {"NoEvent"     ,""  ,"","-event,-analysis"      ,"","","Switch Off StEvent and StAnalysis Makers",kFALSE},
-  {"GEANT","geant","","tables","St_geant_Maker","geometry,St_g2r,St_geant_Maker","initailize GEANT",kFALSE}, 
-  {"TPC"         ,"tpc","","tables,tls,db,-tss,-trs,tcl,tpt"                ,"StMaker","StChain","",kFALSE},
-  {"TSS"         ,"tpc_raw","tpc","tls,-trs"               ,"St_tss_Maker","St_tpc,St_tss_Maker","",kFALSE},  
-  {"TRS"         ,"","tpc","scl,-tss,tpc_daq"                         ,"StTrsMaker","StTrsMaker","",kFALSE},
-  {"MINIDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE}, 
+  {"geant","geant","","tables","St_geant_Maker","geometry,St_g2r,St_geant_Maker","initailize geant",kFALSE}, 
+  {"tpc"         ,"tpc","","tables,tls,db,-tss,-trs,tcl,tpt"                ,"StMaker","StChain","",kFALSE},
+  {"tss"         ,"tpc_raw","tpc","tls,-trs"               ,"St_tss_Maker","St_tpc,St_tss_Maker","",kFALSE},  
+  {"Trs"         ,"","tpc","scl,-tss,tpc_daq"                         ,"StTrsMaker","StTrsMaker","",kFALSE},
+  {"miniDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE}, 
   {"tpc_daq"     ,"tpc_raw","tpc",""                        ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
-  {"TFS"         ,""  ,"","tpc,-trs,-tss","",""     ,"use TFS       (no St_[tss_ and no Trs]Maker)",kFALSE},
-  {"TCL"         ,"tpc_hits","tpc","tables,tls"            ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
-  {"TPT"         ,"tpc_tracks","tpc","tables,tls"          ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
-  {"SVT"         ,"svt"     ,""     ,"tables,srs,stk"                       ,"StMaker","StChain","",kFALSE},
-  {"SRS"         ,"svt_hits","svt","tls"                   ,"St_srs_Maker","St_svt,St_srs_Maker","",kFALSE},
-  {"STK"         ,"svt_tracks","svt","tls"                 ,"St_stk_Maker","St_svt,St_stk_Maker","",kFALSE},
-  {"FTPC"        ,"ftpc"  ,"","tables,-fss,fcl,fpt"                         ,"StMaker","StChain","",kFALSE},
-  {"FSS"         ,"ftpc_raw","ftpc","SCL"                 ,"St_fss_Maker","St_ftpc,St_fss_Maker","",kFALSE},
-  {"FCL"         ,"ftpc_hits","ftpc","SCL"    ,"StFtpcClusterMaker","St_ftpc,StFtpcClusterMaker","",kFALSE},
-  {"FPT"         ,"ftpc_tracks","ftpc","SCL"              ,"St_fpt_Maker","St_ftpc,St_fpt_Maker","",kFALSE},
-  {"EMC"         ,"emc","","tables,ems,emh"                                 ,"StMaker","StChain","",kFALSE},
-  {"EMS"         ,"emc_raw","emc","tables"                 ,"St_ems_Maker","St_emc,St_ems_Maker","",kFALSE},
-  {"EMH"         ,"emc_hits","emc","tables"                ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
-  {"L0"          ,"l0","","tables,ctf,mwc,trg"                              ,"StMaker","StChain","",kFALSE}, 
-  {"CTF"         ,"ctf","l0","tables"                      ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE}, 
-  {"MWC"         ,"mwc","l0","tables"                      ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE}, 
-  {"TRG"         ,"trg","l0","tables"                      ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
-  {"L3T"         ,"l3Tracks","","tables"                    ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
-  {"RICH"        ,"rch","","tables"                                   ,"StRchMaker","StRchMaker","",kFALSE},
-  {"GLOBAL"      ,"global","","tables,match,primary,v0,xi,kink,dst"         ,"StMaker","StChain","",kFALSE},
-  {"MATCH"     ,"match","global","SCL,tables,tls","StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"MATCH"     ,"match","global","SCL,tables,tls","StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"PRIMARY","primary","global","SCL,tables,tls","StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"tfs"         ,""  ,"","tpc,-trs,-tss","",""     ,"use tfs       (no St_[tss_ and no Trs]Maker)",kFALSE},
+  {"tcl"         ,"tpc_hits","tpc","tables,tls"            ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
+  {"tpt"         ,"tpc_tracks","tpc","tables,tls"          ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
+  {"svt"         ,"svt"     ,""     ,"tables,srs,stk"                       ,"StMaker","StChain","",kFALSE},
+  {"srs"         ,"svt_hits","svt","tls"                   ,"St_srs_Maker","St_svt,St_srs_Maker","",kFALSE},
+  {"stk"         ,"svt_tracks","svt","tls"                 ,"St_stk_Maker","St_svt,St_stk_Maker","",kFALSE},
+  {"Ftpc"        ,"ftpc"  ,"","tables,-fss,fcl,fpt"                         ,"StMaker","StChain","",kFALSE},
+  {"fss"         ,"ftpc_raw","ftpc","SCL"                 ,"St_fss_Maker","St_ftpc,St_fss_Maker","",kFALSE},
+  {"Fcl"         ,"ftpc_hits","ftpc","SCL"    ,"StFtpcClusterMaker","St_ftpc,StFtpcClusterMaker","",kFALSE},
+  {"fpt"         ,"ftpc_tracks","ftpc","SCL"              ,"St_fpt_Maker","St_ftpc,St_fpt_Maker","",kFALSE},
+  {"emc"         ,"emc","","geant,tables,ems,emh"                           ,"StMaker","StChain","",kFALSE},
+  {"ems"         ,"emc_raw","emc","geant,tables"           ,"St_ems_Maker","St_emc,St_ems_Maker","",kFALSE},
+  {"emh"         ,"emc_hits","emc","geant,table"           ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
+  {"l0"          ,"l0","","tables,ctf,mwc,trg"                              ,"StMaker","StChain","",kFALSE}, 
+  {"ctf"         ,"ctf","l0","tables"                      ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE}, 
+  {"mwc"         ,"mwc","l0","tables"                      ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE}, 
+  {"trg"         ,"trg","l0","tables"                      ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
+  {"l3t"         ,"l3Tracks","","tables"                    ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
+  {"rich"        ,"rch","","tables"                                   ,"StRchMaker","StRchMaker","",kFALSE},
+  {"global"      ,"global","","tables,Match,primary,v0,xi,kink,dst"         ,"StMaker","StChain","",kFALSE},
+  {"Match"       ,"match","global","SCL,tables,tls","StMatchMaker"
+                                                                ,"St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"Primary"     ,"primary","global","SCL,tables,tls"
+                                               ,"StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"V0"          ,"v0","global","SCL,tables,tls"    ,"StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"XI"          ,"xi","global","SCL,tables,tls"    ,"StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"KINK"        ,"kink","global","SCL,tables,tls","StKinkMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"DST"         ,"dst","global","SCL,tables,tls","St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"EVENT"       ,"StEventMaker","","tables,SCL","StEventMaker","St_Tables,StEvent,StEventMaker","",kFALSE},
-  {"ANALYSIS"    ,"analysis","","SCL"               ,"StAnalysisMaker","StEvent,StAnalysisMaker","",kFALSE},
+  {"Xi"          ,"xi","global","SCL,tables,tls"    ,"StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"Kink"        ,"kink","global","SCL,tables,tls","StKinkMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"dst"         ,"dst","global","SCL,tables,tls","St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"Event"       ,"StEventMaker","","tables,SCL","StEventMaker","St_Tables,StEvent,StEventMaker","",kFALSE},
+  {"analysis"    ,"analysis","","SCL"               ,"StAnalysisMaker","StEvent,StAnalysisMaker","",kFALSE},
   {"QA"          ,"QA","","tables,SCL"                    ,"St_QA_Maker","St_Tables,St_QA_Maker","",kFALSE},
   {"QAC"         ,"CosmicsQA","tables",""         ,"StQACosmicMaker","St_Tables,StQACosmicMaker","",kFALSE},
   {"AllEvent"    ,""  ,"",""                                   ,"","","Write whole event to StTree",kFALSE},
   {"St_geom"     ,"","",""       ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
-  {"DISPLAY"    ,"EventDisplay","","St_geom"        ,"StEventDisplayMaker","StEventDisplayMaker","",kFALSE},
+  {"Display"    ,"EventDisplay","","St_geom"        ,"StEventDisplayMaker","StEventDisplayMaker","",kFALSE},
   {"MakeDoc"     ,""  ,"",""                   ,"","","Make HTML documentation for the given Chain",kFALSE},
-  {"DEBUG"       ,""  ,"",""                                                ,"","","Set debug flag",kFALSE},
-  {"HIGZ"        ,""  ,"",""                                               ,"","","Pop HIGZ window",kFALSE},  
-  {"XOUT"        ,""  ,"",""                                 ,"","xdf2root","Write dst to XDF file",kFALSE}, 
-  {"TREE"        ,""  ,"",""                                        ,"StTreeMaker","StTreeMaker","",kFALSE}
+  {"Debug"       ,""  ,"",""                                                ,"","","Set debug flag",kFALSE},
+  {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},  
+  {"xout"        ,""  ,"",""                                 ,"","xdf2root","Write dst to XDF file",kFALSE}, 
+  {"Tree"        ,""  ,"",""                                        ,"StTreeMaker","StTreeMaker","",kFALSE}
 };
 
 Int_t NoChainOptions = sizeof (BFC)/sizeof (BfcItem);
@@ -341,11 +346,11 @@ Int_t StBFChain::Instantiate()
 	  if (treeMk) {
 	    BFC[i].Name = (Char_t *) treeMk->GetName();
 	    treeMk->SetIOMode("w");
-	    if (GetOption("DST"))      treeMk->IntoBranch("dstBranch","dst");
+	    if (GetOption("dst"))      treeMk->IntoBranch("dstBranch","dst");
 	    else {
-	      if (GetOption("GLOBAL")) treeMk->IntoBranch("globalBranch","global/.data");
+	      if (GetOption("global")) treeMk->IntoBranch("globalBranch","global/.data");
 	    }
-	    if (GetOption("EVENT"))    treeMk->IntoBranch("eventBranch","StEvent");
+	    if (GetOption("Event"))    treeMk->IntoBranch("eventBranch","StEvent");
 	    if (GetOption("AllEvent")) SetTreeOptions();
 	    treeMk->SetBranch("histBranch");
 	    continue;
@@ -357,6 +362,10 @@ Int_t StBFChain::Instantiate()
 	    SetGeantOptions();
 	    BFC[i].Name = (Char_t *) geant->GetName();
 	  }
+	  if (!GetOption("fzin") && !GetOption("gstar")) {
+	    geant->SetNwGEANT(5000000);
+	    geant->SetActive(kFALSE);
+	  }
 	  continue;
 	}
 	StMaker *mk = 0;
@@ -367,7 +376,7 @@ Int_t StBFChain::Instantiate()
 	}
 	if (mk && maker == "St_dst_Maker") SetInput("dst",".make/dst/.data/dst");
 	if (mk && maker == "St_tpcdaq_Maker") {
-	  if (GetOption("TRS")) mk->SetMode(1); // trs
+	  if (GetOption("Trs")) mk->SetMode(1); // trs
 	  else                  mk->SetMode(0); // daq
 	}
 	if (saveMk) saveMk->cd();
@@ -378,9 +387,9 @@ Int_t StBFChain::Instantiate()
   //  PrintQAInfo();
   PrintInfo();
   // START the chain (may the force be with you)
-  // Create HTML docs of all Maker's inv#ifdef GetOption("TRG")
+  // Create HTML docs of all Maker's inv#ifdef GetOption("trg")
   if (GetOption("MakeDoc")) MakeDoc();
-  if (GetOption("DEBUG")) SetDEBUG();
+  if (GetOption("Debug")) SetDEBUG();
   return kStOk;
 }
 Int_t StBFChain::Finish()
@@ -443,7 +452,7 @@ Int_t StBFChain::kOpt (const TString *tag) const {
   printf ("Option %s has been not recognized\n", Tag.Data());
   return 0;
 }//_____________________________________________________________________
-void StBFChain::SetOption(const Int_t k) {// set all OFF
+void StBFChain::SetOption(const Int_t k) {// set all off
   if (k > 0 && !BFC[k].Flag) {
     //    printf ("SetOption: %s %i",BFC[k].Key,k);
     BFC[k].Flag = kTRUE;
@@ -495,21 +504,21 @@ void StBFChain::SetFlags(const Char_t *Chain, Bool_t Force)
     if (kgo != 0) SetOption(kgo);
   }
   // Check flags consistency   
-  if (!GetOption("FZIN") && !GetOption("GEANT") &&
-      !GetOption("XIN") && !GetOption("GSTAR") &&!GetOption("TDAQ")) {
-    SetOption("FZIN");
-    SetOption("GEANT");
+  if (!GetOption("fzin") && !GetOption("geant") &&
+      !GetOption("xin") && !GetOption("gstar") &&!GetOption("tdaq")) {
+    SetOption("fzin");
+    SetOption("geant");
   }
-  if (!GetOption("GEANT") && !GetOption("FieldOff") && 
+  if (!GetOption("geant") && !GetOption("FieldOff") && 
       !GetOption("HalfField") && !GetOption("FieldOn")) { 
     SetOption("FieldOn"); 
   }
-  if (!GetOption("GLOBAL") && 
-      (GetOption("MATCH") || GetOption("PRIMARY") || GetOption("V0") ||
-       GetOption("XI")    || GetOption("KINK"))) SetOption("GLOBAL");
+  if (!GetOption("global") && 
+      (GetOption("Match") || GetOption("Primary") || GetOption("V0") ||
+       GetOption("Xi")    || GetOption("Kink"))) SetOption("global");
   if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval"); 
-  //  SetOption("-EMC");
-  //  SetOption("-KINK");
+  //  SetOption("-emc");
+  //  SetOption("-Kink");
   // Print set values
   for (k = 1; k<NoChainOptions;k++) {
     if (GetOption(k)) {
@@ -524,19 +533,19 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
   // define input file
   Char_t *Infile  = (Char_t *) infile;
   if (!Infile) {
-    if (GetOption("MINIDAQ")) {
+    if (GetOption("miniDAQ")) {
       Infile ="/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf"; // laser data
       //Infile ="/scratch/sakrejda/tpc_s01w_981021_21h_cos_t7_f3.xdf"; // laser data
-      printf ("Use default input file %s for %s \n",Infile,"MINIDAQ");
+      printf ("Use default input file %s for %s \n",Infile,"miniDAQ");
     }
     else {
-      if (GetOption("FZIN")) {
+      if (GetOption("fzin")) {
 	if (GetOption("Y1b")) Infile = "/disk0/star/test/venus412/b0_3/year_1b/psc0050_01_40evts.fzd";
 	else {
 	  if (GetOption("Y2a"))  Infile = "/disk0/star/test/venus412/b0_3/year_2a/psc0208_01_40evts.fzd";
 	  else                  Infile ="/disk1/star/test/psc0049_08_40evts.fzd";
 	}
-	printf ("Use default input file %s for %s \n",Infile,"FZIN");
+	printf ("Use default input file %s for %s \n",Infile,"fzin");
       }
       else {
 	if (GetOption("doEvents")){
@@ -544,9 +553,9 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
 	  printf ("Use default input file %s for %s \n",Infile,"doEvent");
 	}
 	else { 
-	  if (!GetOption("GSTAR")) {
+	  if (!GetOption("gstar")) {
 	    Infile ="/afs/rhic/star/data/samples/hijet-g2t.xdf";	       // g2t xdf file
-	    printf ("Use default input file %s for %s \n",Infile,"XIN");
+	    printf ("Use default input file %s for %s \n",Infile,"xin");
 	  }
 	}
       }
@@ -554,7 +563,7 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
   }
   if (Infile) {
     InFile = new TString(Infile);
-    if (Infile && !GetOption("FZIN")) {
+    if (Infile && !GetOption("fzin")) {
       setFiles= new StFile();
       InFile = new TString(Infile);
       TString *Files[80];
@@ -573,7 +582,7 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
   if (InFile) gMessMgr->QAInfo() << "Input file name = " << InFile->Data() << endm;
   if (outfile)               FileOut = new TString(outfile);
   else {
-    if (GetOption("GSTAR"))  FileOut = new TString("gtrack");
+    if (GetOption("gstar"))  FileOut = new TString("gtrack");
     else {
       if (InFile) {
 	FileOut = new TString(gSystem->BaseName(InFile->Data()));
@@ -588,7 +597,7 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
     }
   }
   if (FileOut)  gMessMgr->QAInfo() << "Output root file name " <<  FileOut->Data() << endm;
-  if (GetOption("XOUT") && FileOut) {
+  if (GetOption("xout") && FileOut) {
     XdfFile = new TString(FileOut->Data());
     XdfFile->Append(".dst.xdf");
     gMessMgr->QAInfo() << "Open output xdf file  = " << XdfFile->Data() <<  "++++++++++++++++++++++" << endm;
@@ -600,8 +609,8 @@ void StBFChain::SetGeantOptions(){
   if (geant) {
     geant->SetNwGEANT(10000000);
     SetInput("geant",".make/geant/.data");
-    if (GetOption("HIGZ"))  geant->SetIwtype(1);
-    if (GetOption("GSTAR")) {
+    if (GetOption("Higz"))  geant->SetIwtype(1);
+    if (GetOption("gstar")) {
       if (GetOption("SD97") || GetOption("SD98") || GetOption("Y1a") || 
 	  GetOption("ES99") || GetOption("ER99")) geant->LoadGeometry("detp geometry YEAR_1A"); 
       else {
@@ -626,12 +635,12 @@ void StBFChain::SetGeantOptions(){
       geant->Do("mode g2tm prin 1;");
       //  geant->Do("next;");
       //  geant->Do("dcut cave z 1 10 10 0.03 0.03;");
-      if (GetOption("DEBUG")) geant->Do("debug on;");
+      if (GetOption("Debug")) geant->Do("debug on;");
       geant->Do("swit 2 3;");
       // geant->LoadGeometry("detp geometry GetOption("FieldOn") field_off");
     }
     else {
-      if (GetOption("FZIN")) {
+      if (GetOption("fzin")) {
 	if (geant->SetInputFile(InFile->Data()) > kStOK) {
 	  printf ("File %s cannot be opened. Exit! \n",InFile->Data());
 	  gSystem->Exit(1);
@@ -662,12 +671,12 @@ void StBFChain::SetTreeOptions(){
     treeMk->IntoBranch("geantBranch","geant/.data/particle");
     treeMk->IntoBranch("geantBranch","geant/.data/g2t_rch_hit");
   }
-  if (GetOption("FSS"))    treeMk->IntoBranch("ftpc_rawBranch","ftpc_raw/.data");
-  if (GetOption("EMS"))    treeMk->IntoBranch("emc_rawBranch","emc_raw/.data");
-  if (GetOption("TSS") || GetOption("TRS"))
+  if (GetOption("fss"))    treeMk->IntoBranch("ftpc_rawBranch","ftpc_raw/.data");
+  if (GetOption("ems"))    treeMk->IntoBranch("emc_rawBranch","emc_raw/.data");
+  if (GetOption("tss") || GetOption("Trs"))
     treeMk->IntoBranch("tpc_rawBranch","tpc_raw/.data");
-  if (GetOption("TCL"))    treeMk->IntoBranch("tpc_hitsBranch","tpc_hits/.data");
-  if (GetOption("TPT"))    treeMk->IntoBranch("tpc_tracksBranch","tpc_tracks/.data");
-  if (GetOption("TRG"))    treeMk->IntoBranch("trgBranch","ctf mwc trg");
-  if (GetOption("L3T"))    treeMk->IntoBranch("l3tBranch","l3Tracks");
+  if (GetOption("tcl"))    treeMk->IntoBranch("tpc_hitsBranch","tpc_hits/.data");
+  if (GetOption("tpt"))    treeMk->IntoBranch("tpc_tracksBranch","tpc_tracks/.data");
+  if (GetOption("trg"))    treeMk->IntoBranch("trgBranch","ctf mwc trg");
+  if (GetOption("l3t"))    treeMk->IntoBranch("l3tBranch","l3Tracks");
 }
