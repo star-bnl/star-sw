@@ -1,6 +1,9 @@
-// $Id: StSsdWafer.hh,v 1.4 2005/03/18 14:01:32 lmartin Exp $
+// $Id: StSsdWafer.hh,v 1.5 2005/03/18 14:59:32 lmartin Exp $
 //
 // $Log: StSsdWafer.hh,v $
+// Revision 1.5  2005/03/18 14:59:32  lmartin
+// setPedestalSigmaStrip method added, setSigmaStrip removed
+//
 // Revision 1.4  2005/03/18 14:01:32  lmartin
 // Remove first include accidentaly added
 //
@@ -65,7 +68,7 @@ class StSsdWafer
   void              addPackage(StSsdPackage *ptr);            //!< Attaches the ptr package on that wafer
   void              addPoint(StSsdPoint *ptr);                //!< Attaches the ptr point on that wafer
 
-  void              setSigmaStrip(int iStrip, int iSide, int iSigma, StSsdDynamicControl *dynamicControl);
+  void              setPedestalSigmaStrip(int iStrip, int iSide, int iPedestal, int iSigma, StSsdDynamicControl *dynamicControl);
 
   void              sortStrip();
   void              sortCluster();

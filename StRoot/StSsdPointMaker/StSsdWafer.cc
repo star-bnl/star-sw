@@ -1,6 +1,9 @@
-// $Id: StSsdWafer.cc,v 1.9 2005/03/18 14:01:32 lmartin Exp $
+// $Id: StSsdWafer.cc,v 1.10 2005/03/18 14:59:32 lmartin Exp $
 //
 // $Log: StSsdWafer.cc,v $
+// Revision 1.10  2005/03/18 14:59:32  lmartin
+// setPedestalSigmaStrip method added, setSigmaStrip removed
+//
 // Revision 1.9  2005/03/18 14:01:32  lmartin
 // Remove first include accidentaly added
 //
@@ -198,12 +201,12 @@ A new point is added to the wafer by calling the PointList method.
 void StSsdWafer::addPoint(StSsdPoint *ptr)
 {  mPoint->addNewPoint(ptr); }
 
-void StSsdWafer::setSigmaStrip(int iStrip, int iSide, int iSigma, StSsdDynamicControl *dynamicControl)
+void StSsdWafer::setPedestalSigmaStrip(int iStrip, int iSide, int iPedestal, int iSigma, StSsdDynamicControl *dynamicControl)
 {
   if (iSide)
-    { mStripN->setSigma(iStrip, iSigma, dynamicControl); }
+    { mStripN->setPedestalSigma(iStrip, iPedestal, iSigma, dynamicControl); }
   else
-    { mStripP->setSigma(iStrip, iSigma, dynamicControl); }
+    { mStripP->setPedestalSigma(iStrip, iPedestal, iSigma, dynamicControl); }
 }
 
 /*!
