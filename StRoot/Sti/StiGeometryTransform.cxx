@@ -39,6 +39,7 @@
 #include "StiHitContainer.h"
 #include "StiKalmanTrack.h"
 #include "StiGeometryTransform.h"
+#include "StiHelixFitter.h"
 #include "StiDetectorFinder.h"
 
 StiGeometryTransform* StiGeometryTransform::sinstance = 0;
@@ -513,19 +514,6 @@ void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
 	*/
 }
 
-//Go from global->Sti, expect refAngle positive
-/*
-  StThreeVector<double> StiGeometryTransform::operator() (const StThreeVector<double>& globalPosition, double refAngle)
-  {
-  return g2dEulerRotation(globalPosition, refAngle);
-  }
-  
-  StThreeVectorD StiGeometryTransform::operator() (const StThreeVectorD& globalPosition, double refAngle)
-  {
-  return g2dEulerRotation(globalPosition, refAngle);
-  }
-*/
-
 double StiGeometryTransform::positionForTpcPadrow(int padrow) const{
 
   padrow_radius_map::const_iterator where = mpadrowradiusmap.find(padrow+100);
@@ -594,6 +582,7 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
 	    }
 	}
     }
+
     
     //cout <<"Filled Hits: "<<endl;
     //for (hitvector::const_iterator it=hitvec.begin(); it!=hitvec.end(); ++it) {
@@ -606,19 +595,28 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
     //Get the (x-y) center of the circle and z0 in global coordinates, that's what StiKalmanTrack needs:
     //note, StHelix origin is the first point on the track, not the center of the circle!
     StThreeVectorD stiGlobalOrigin( sthelix.xcenter(), sthelix.ycenter(), sthelix.origin().z());
+    
     double curvature = sthelix.curvature();
     if (sthelix.h()<0) 
 	curvature=-curvature;
     cout <<"StiGeometryTransform:  curvature: "<<curvature<<endl;
+    
     double tanLambda = tan(sthelix.dipAngle());
     //cout <<"tanLambda: "<<tanLambda<<endl;
+
+    //Test transform:
+    //bool worked = StiHelixFitter::instance()->refit(hitvec);
+    //cout <<*(StiHelixFitter::instance())<<endl;
+    cout <<"\t"<<stiGlobalOrigin<<" curvature: "<<curvature<<" tanLambda: "<<tanLambda<<endl;
+    
     sti->initialize(curvature, tanLambda, stiGlobalOrigin, hitvec);
+
     //Test track!
     //cout <<"Test the track:"<<endl;
     //for (double xLocal=hitvec.back()->x(); xLocal<=hitvec.front()->x(); xLocal+=10.) {
     //for (double xLocal=0.; xLocal<=190.; xLocal+=10.) 
     //	{
-    //for (double xLocal=hitvec.front()->x(); xLocal<=hitvec.back()->x(); xLocal+=10.) {
+    //for (doublee xLocal=hitvec.front()->x(); xLocal<=hitvec.back()->x(); xLocal+=10.) {
     //		StThreeVector<double> pos = sti->getGlobalPointNear(xLocal);
     //cout <<"\tx: "<<xLocal<<"\tpos: "<<pos<<endl;
     //	}

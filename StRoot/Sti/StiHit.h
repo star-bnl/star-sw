@@ -104,7 +104,7 @@ public:
     ///track.
     bool   isUsed() const;
 
-    ///Return a const reference to a StThreeVectorF that denots the position
+    ///Return a const reference to a StThreeVectorF that denotes the position
     ///of the hit in global STAR coordinates.
     const StThreeVectorF& globalPosition() const;
 

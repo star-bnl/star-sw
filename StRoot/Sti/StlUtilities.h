@@ -132,4 +132,13 @@ struct SameData
     }
 };
 
+//Stream a pointer
+template <class T>
+struct PtrStreamer
+{
+    void operator()(const T* val) {
+	cout <<*val<<endl;
+    }
+};
+
 #endif

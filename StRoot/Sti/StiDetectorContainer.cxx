@@ -155,6 +155,36 @@ void StiDetectorContainer::moveIn()
 	}
 	return;
     }
+    /*
+      double oldOrder = (*mphi_it)->getOrderKey();
+      bool go=true;
+      while (mradial_it!=mregion->begin() && go) {
+      cout <<"Entered move in loop"<<endl;
+      --mradial_it;
+      if ( (*(*mradial_it)->begin())->getData()->isActive()==1 ) {
+      //That means that the first phi entry in the next layer is active
+      go=false;
+      }
+      }
+      
+      cout <<"Past move in loop"<<endl;
+      
+      //When loop breaks, check to see if we failed just nowhere else to go
+      if (mradial_it==mregion->begin() &&
+      (*(*mradial_it)->begin())->getData()->isActive()==0 ) {
+      cout <<"StiDetecotrContainer::moveIn()\tNowhere to go"<<endl;
+      return;
+      }
+      
+      mphi_it = gFindClosestOrderKey((*mradial_it)->begin(),
+      (*mradial_it)->end(), oldOrder);
+      if (mphi_it == (*mradial_it)->end()) {
+      cout <<"StiDetectorContainer::moveIn()\tError:\t";
+      cout <<"Find Phi failed"<<endl;
+      mphi_it = (*mradial_it)->begin();
+      }
+    */
+    return;
 }
 
 /*! A call to moveOut() may not always alter the StiDetector to which the

@@ -147,10 +147,12 @@ StiKalmanTrack* StiTrackSeedFinder::makeTrack(const tvector& vec) const
     cout <<"StiTrackSeedFinder::makeTrack()"<<endl;
     //Construct Track fromt these points
     StiKalmanTrack* track = 0;
-    if (vec.size()<3) {
-	cout <<"StiTrackSeedFinder::makeTrack()\tError:\tvec.size()<3  Abort"<<endl;
-	return track;
-    }
+    /*
+      if (vec.size()<3) {
+      cout <<"StiTrackSeedFinder::makeTrack()\tError:\tvec.size()<3  Abort"<<endl;
+      return track;
+      }
+    */
     mdrawablehits->clear();
 
     //This is an ugly loop ,but it is chosen for efficiency to avoid multiple loops over the points
