@@ -45,7 +45,7 @@ void StiRootDrawableLine::setMarkerSize(double val)
 
 void StiRootDrawableLine::setLineWidth(double val)
 {
-    mline->SetLineStyle(val);
+    mline->SetLineStyle(static_cast<short>(val));
 }
 
 void StiRootDrawableLine::setLineStyle(unsigned int val)
