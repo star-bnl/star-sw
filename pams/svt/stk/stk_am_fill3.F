@@ -65,12 +65,8 @@ C     ===================
 
       real       x(3,0:7), v(3,6,0:7), vm(7,0:7), cth, cthij(7,0:7)
 
-%L
-%T2       
       integer    extra(7), ispts(0:7), i_spt, j_spt(0:7), iwafer(0:7)
       integer    jwafer(0:7),n_groups
-%N
-%T0
       integer    iwafer1, iwafer2, n, kwafer
       integer    iladder, iladder1, iladder2
       integer    layer, layerp, layerpp, k
