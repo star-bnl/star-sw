@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TMemStat.cxx,v 1.3 2002/01/21 22:01:17 perev Exp $
+ * $Id: TMemStat.cxx,v 1.4 2002/01/23 00:19:36 jeromel Exp $
  *
  ***************************************************************************
  *
@@ -155,5 +155,5 @@ void TMemStat::PrintMem(const char *tit)
 void TMemStat::Streamer(TBuffer&)
 {Assert(0);}
 //______________________________________________________________________________
-void TMemStat::ShowMembers(TMemberInspector& insp, char* parent){}
+// void TMemStat::ShowMembers(TMemberInspector& insp, char* parent){}
              
