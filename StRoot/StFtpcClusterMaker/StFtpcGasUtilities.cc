@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 //
-//   $Id: StFtpcGasUtilities.cc,v 1.12 2004/09/15 10:27:59 jcs Exp $
+//   $Id: StFtpcGasUtilities.cc,v 1.13 2004/09/17 08:55:40 jcs Exp $
 //
 //   StFtpcGasUtilities
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////
 //
 //   $Log: StFtpcGasUtilities.cc,v $
+//   Revision 1.13  2004/09/17 08:55:40  jcs
+//   add corrections for processing 2004 pp data
+//
 //   Revision 1.12  2004/09/15 10:27:59  jcs
 //   correct error in averageTemperatureEast comment and output statement (body3,4,5 are used NOT 1,3,4)
 //
@@ -180,10 +183,10 @@ Int_t StFtpcGasUtilities::averageTemperatureEast(Int_t dbDate, Int_t runNumber) 
    Int_t numberBodyTemperaturesEast = 0;
    Float_t averageBodyTemperatureEast = 0.0;
      
-   // Year2004: from runs after run 5027147 on 2004-01-27 to the end of run on  2004-05-15, only Body3, Body4 and Body5 temperature readings are useable for FTPC East
+   // Year2004: from runs after run 5027147 on 2004-01-27 to run 5093053, the last run of the AuAu 62GeV run on  2004-04-02, only Body3, Body4 and Body5 temperature readings are useable for FTPC East
    // The averageBodyTemperatureEast must be adjusted since only 3 instead of 6 temperature readings are used
-   if ( runNumber > 5027147 && runNumber < 5136001 ) {
-      cout<<"ruNumber = "<<runNumber<<" > 5027147 && <= 5136001: only Body3, Body4 and Body5 are useable for FTPC East. The averageBodyTemperatureEast is adjusted by  "<<mDb->adjustAverageEast()<<endl;
+   if ( runNumber > 5027147 && runNumber <= 5093053 ) {
+      cout<<"ruNumber = "<<runNumber<<" > 5027147 && <= 5093053: only Body3, Body4 and Body5 are useable for FTPC East. The averageBodyTemperatureEast is adjusted by  "<<mDb->adjustAverageEast()<<endl;
       if (mGas->getBody3East() >= mDb->minGasTemperature() && mGas->getBody3East() <= mDb->maxGasTemperature() ) {
          averageBodyTemperatureEast = averageBodyTemperatureEast + mGas->getBody3East();	 
 	 numberBodyTemperaturesEast++;
@@ -223,9 +226,9 @@ Int_t StFtpcGasUtilities::averageTemperatureEast(Int_t dbDate, Int_t runNumber) 
 		 numberBodyTemperaturesEast++;
 	         cout<<mGas->getBody4East()<<" (body4East) ";
       }		 
-      // from 2003-10-31 -> 2004-01-24 there are 2 additional body temperature sensors
-      if ( dbDate >= 20031031 && dbDate <= 20040124) {
-         cout<<"(dbDate = "<<dbDate<<" >= 20031031 && <= 20040124 activate additional body temperature sensors) ";
+      // from 2003-10-31 -> 2004-01-24 and from 2004-04-04 there are 2 additional body temperature sensors
+      if ( dbDate >= 20031031 && dbDate <= 20040124 || dbDate >= 20040404 ) {
+         cout<<"(dbDate = "<<dbDate<<" >= 20031031 && <= 20040124 ||  >= 20040404 activate additional body temperature sensors) ";
          if (mGas->getBody5East() >= mDb->minGasTemperature() && mGas->getBody5East() <= mDb->maxGasTemperature() ) {
             averageBodyTemperatureEast = averageBodyTemperatureEast + mGas->getBody5East();	 
 	    numberBodyTemperaturesEast++;
