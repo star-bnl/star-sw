@@ -1,7 +1,10 @@
 //*-- Author : James Dunlop
 // 
-// $Id: StHitFilterMaker.cxx,v 1.1 2003/02/07 02:16:15 jeromel Exp $
+// $Id: StHitFilterMaker.cxx,v 1.2 2003/07/30 15:27:00 caines Exp $
 // $Log: StHitFilterMaker.cxx,v $
+// Revision 1.2  2003/07/30 15:27:00  caines
+// Set options so you delete TPC and SVT hit if Zert >30. If ZVert<30cm save all good svt hits and TPC hits on tracks
+//
 // Revision 1.1  2003/02/07 02:16:15  jeromel
 // First version of a generlized HitFilter/removal maker. Expeditious review
 // done.
@@ -28,7 +31,7 @@ ClassImp(StHitFilterMaker)
 
 //_____________________________________________________________________________
 /// StHitFilterMaker constructor
-StHitFilterMaker::StHitFilterMaker(const char *name, Double_t ptl, Double_t pth, Double_t eta):StMaker(name),mPtLowerCut(ptl),mPtUpperCut(pth),mAbsEtaCut(eta){
+StHitFilterMaker::StHitFilterMaker(const char *name, Double_t ptl, Double_t pth, Double_t eta, Double_t zvert):StMaker(name),mPtLowerCut(ptl),mPtUpperCut(pth),mAbsEtaCut(eta), mAbsZVertCut(zvert){
   //  This has defaults for the cuts in the include file
 }
 
@@ -41,11 +44,12 @@ StHitFilterMaker::~StHitFilterMaker(){
 Int_t StHitFilterMaker::Init(){
 
   // Output the cuts
-  gMessMgr->Info() << "StHitFilterMaker::Make():  keeping tracks between      " << 
+  gMessMgr->Info() << "StHitFilterMaker::Init():  keeping tracks between      " << 
     mPtLowerCut << " and " << mPtUpperCut << "GeV/c (negative = no cut)" << endm;
-  gMessMgr->Info() << "StHitFilterMaker::Make():  keeping tracks with |eta| < " << 
+  gMessMgr->Info() << "StHitFilterMaker::Init():  keeping tracks with |eta| < " << 
     mAbsEtaCut << endm;
-  
+   gMessMgr->Info() << "StHitFilterMaker::Init():  keeping tracks with |ZVert| < " << 
+    mAbsZVertCut << endm;
   return StMaker::Init();
 }
 
@@ -69,45 +73,54 @@ Int_t StHitFilterMaker::Make(){
 
 	return kStOK;
     }
-    // Fill up the ones to keep
+    // Fill up the ones to keep if ZVert in range
     vector<StTrackNode*> keptTrackNodes;
-    StSPtrVecTrackNode& nodes = event->trackNodes();
-    for (StSPtrVecTrackNodeIterator nodeIter = nodes.begin();
-	 nodeIter != nodes.end(); ++nodeIter) {
+    if( accept(event)){
+      StSPtrVecTrackNode& nodes = event->trackNodes();
+      for (StSPtrVecTrackNodeIterator nodeIter = nodes.begin();
+	   nodeIter != nodes.end(); ++nodeIter) {
 	bool isAcceptedTrack = false;
-	    
+	
 	for (UInt_t ientry=0;
 	     ientry < (*nodeIter)->entries(); ++ientry) {
-	    StTrack *track = (*nodeIter)->track(ientry);
-	    
-	// Check that it's got tpc hits
-	
-	    if (!(track->topologyMap().hasHitInDetector(kTpcId))) {
-		continue;
-	    }
-
-	    if (accept(track)) {
-		isAcceptedTrack = true;
-		break;
-	    }
+	  StTrack *track = (*nodeIter)->track(ientry);
+	  
+	  // Check that it's got tpc hits
+	  
+	  if (!(track->topologyMap().hasHitInDetector(kTpcId))) {
+	    continue;
+	  }
+	  
+	  if (accept(track)) {
+	    isAcceptedTrack = true;
+	    break;
+	  }
 	}
 	if (isAcceptedTrack) {
-	    keptTrackNodes.push_back(*nodeIter);
+	  keptTrackNodes.push_back(*nodeIter);
 	}
-    }
-    // Sort it and keep unique
-    sort(keptTrackNodes.begin(),keptTrackNodes.end());
-    vector<StTrackNode*>::iterator uniquePos = 
+      }
+      // Sort it and keep unique
+      sort(keptTrackNodes.begin(),keptTrackNodes.end());
+      vector<StTrackNode*>::iterator uniquePos = 
 	unique(keptTrackNodes.begin(),keptTrackNodes.end());
-    keptTrackNodes.erase(uniquePos,keptTrackNodes.end());
+      keptTrackNodes.erase(uniquePos,keptTrackNodes.end());
+    }
     
-
     gMessMgr->Info() << "StHitFilterMaker::Make(): keeping TPC hits on " <<
-	keptTrackNodes.size() << "track nodes " << endm;
+      keptTrackNodes.size() << "track nodes " << endm;
     
     this->removeTpcHitsNotOnTracks(event,keptTrackNodes);
+    this->removeBadSvtHits(event);
     
     return kStOK;
+}
+
+bool StHitFilterMaker::accept(StEvent *event) {
+
+  if( !(event->primaryVertex()))  return false;
+  if( fabs(event->primaryVertex()->position().z()) > mAbsZVertCut) return false;
+  return true;
 }
 
 bool StHitFilterMaker::accept(StTrack *track) {
@@ -125,6 +138,12 @@ bool StHitFilterMaker::accept(StTrack *track) {
     
     return true;
 }
+
+bool StHitFilterMaker::accept(StHit *hit) {
+  if( hit->flag() > 3) return false;
+  return true;
+}
+
 
 /*!
   This is a pretty simple cut and paste + extension from StEventScavenger
@@ -196,7 +215,41 @@ bool StHitFilterMaker::removeTpcHitsNotOnTracks(StEvent *event,
     return false;
 }
 
+/*!
+  This is a pretty simple cut and paste + extension from StEventScavenger
+  Only difference is that it searches the vector of keptTrackNodes
+  for good nodes, rather than relying on zombies.
+*/	
+bool StHitFilterMaker::removeBadSvtHits(StEvent *event) 
+{
+  Int_t removedHits = 0;
+  
+  if (event && event->svtHitCollection()) {
+    // first remove all hits with flag > 3
+    StSvtHitCollection *theHits = event->svtHitCollection();
+    for (unsigned int l=0; l<theHits->numberOfBarrels(); l++) {
+      for (unsigned int m=0; m<theHits->barrel(l)->numberOfLadders(); m++) {
+	for (unsigned int n=0; n<theHits->barrel(l)->ladder(m)->numberOfWafers(); n++) {
+	  for (unsigned int h=0; h<theHits->barrel(l)->ladder(m)->wafer(n)->hits().size(); h++) {   
+	    if (! (accept(theHits->barrel(l)->ladder(m)->wafer(n)->hits()[h])) ||
+		!accept(event)) {
+	      if (! (theHits->barrel(l)->ladder(m)->wafer(n)->hits()[h]->isZombie())) {
+		theHits->barrel(l)->ladder(m)->wafer(n)->hits()[h]->makeZombie();
+		++removedHits;
+	      }
+	    }
+	  }
+	}
+      }
+    }
 
+    gMessMgr->Info() << "StHitFilterMaker::removeBadSvtHits.  Removed " <<
+      removedHits << " bad SVT hits" << endm;
+  return true;
+  }
+  else
+    return false;
+}
 
 
 
