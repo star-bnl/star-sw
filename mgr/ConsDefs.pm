@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.74 2004/07/29 17:44:57 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.75 2004/09/17 20:31:21 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -121,7 +121,7 @@
     if ( !$ROOT_LEVEL ) { print "ROOT_LEVEL has to be defined\n"; exit 1;}
     if ( !$ROOTSYS )    { print "ROOT_SYS   has to be defined\n"; exit 1;}
     $ROOTCINT      = $ROOTSYS . "/bin/rootcint";
-    my $RLIBMAP    = "";#$ROOTSYS . "/bin/rlibmap";
+     my $RLIBMAP    = "";#$ROOTSYS . "/bin/rlibmap";
  if ($RLIBMAP and ! -e $RLIBMAP ) {$RLIBMAP = "";}
     $CINTSYSDIR    = $ROOTSYS . "/cint";
     $LIBS          = "";
@@ -204,7 +204,7 @@
        $kernl = "kernlib";
    }
    
-   $CERNLIBS .= " " . `$cernl pawlib packlib graflib/X11 packlib mathlib kernlib`;
+   $CERNLIBS .= " " . `cernlib pawlib packlib graflib/X11 packlib mathlib kernlib`;
    $CERNLIBS =~ s/packlib\./$packl\./g;
    $CERNLIBS =~ s/kernlib\./$kernl\./g;
    $CERNLIBS =~ s/$strip//g if ($strip ne "");
@@ -215,7 +215,7 @@
     #  ============================================================
     # Platform support should be concentrated here
     #  ============================================================
- if ($STAR_HOST_SYS =~ /^rh/ and $STAR_HOST_SYS =~ /_icc/) {
+ if ($STAR_HOST_SYS =~ /^rh/ and $STAR_HOST_SYS =~ /_icc/ or $STAR_HOST_SYS =~ /^sl/ and $STAR_HOST_SYS =~ /_icc/) {
 	$PLATFORM      = "linux";
 	$ARCH          = "linuxicc";
 	$PGI           = "";
@@ -257,7 +257,7 @@
 	$SO            = $CXX;
 	$SOFLAGS       = "-shared -u*";
 
- } elsif ($STAR_HOST_SYS =~ /^i386_/ || $STAR_HOST_SYS =~ /^rh/) {
+ } elsif ($STAR_HOST_SYS =~ /^i386_/ || $STAR_HOST_SYS =~ /^rh/ || $STAR_HOST_SYS =~ /^sl/) {
         #
         # Case linux
         #
@@ -450,7 +450,7 @@
  script::find_lib($mysqllibdir . " /usr/lib/mysql ".
 		  $OPTSTAR . "/lib " .  $OPTSTAR . "/lib/mysql ",
 		  "libmysqlclient");
- if ($STAR_HOST_SYS =~ /^rh/) { 
+ if ($STAR_HOST_SYS =~ /^rh/ or $STAR_HOST_SYS =~ /^sl/) { 
    $MYSQLLIB .= " -L/usr/lib";
    if (-r "/usr/lib/libmystrings.a") {$MYSQLLIB .= " -lmystrings";}
    if (-r "/usr/lib/libssl.a"      ) {$MYSQLLIB .= " -lssl";}
