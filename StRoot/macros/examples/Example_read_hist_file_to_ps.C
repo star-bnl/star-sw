@@ -1,5 +1,8 @@
-// $Id: Example_read_hist_file_to_ps.C,v 1.3 1999/06/03 23:34:50 kathy Exp $
+// $Id: Example_read_hist_file_to_ps.C,v 1.4 1999/10/07 14:13:10 kathy Exp $
 // $Log: Example_read_hist_file_to_ps.C,v $
+// Revision 1.4  1999/10/07 14:13:10  kathy
+// changes to Example macros to make them work in dev - mostly changes were correcting input file name
+//
 // Revision 1.3  1999/06/03 23:34:50  kathy
 // got macros working with current files
 //
@@ -21,12 +24,13 @@
 //  *-*     113 eps
 //  *-*
 //
+void Example_read_hist_file_to_ps(const char* filein="Kathy_hist.root")
 {
   // open root file
   //TFile file1("/diskA/star/kathy/output/psc0049_08_40evts_3EV.root"); 
   //TFile file1("/disk00000/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/set0029_01_49evts.root");
 
-TFile file1("Kathy_hist.root");
+TFile file1(filein);
   // list contents
 file1.ls();
   // create canvas

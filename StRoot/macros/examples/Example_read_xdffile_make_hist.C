@@ -1,5 +1,8 @@
-// $Id: Example_read_xdffile_make_hist.C,v 1.4 1999/07/29 19:57:14 kathy Exp $
+// $Id: Example_read_xdffile_make_hist.C,v 1.5 1999/10/07 14:13:11 kathy Exp $
 // $Log: Example_read_xdffile_make_hist.C,v $
+// Revision 1.5  1999/10/07 14:13:11  kathy
+// changes to Example macros to make them work in dev - mostly changes were correcting input file name
+//
 // Revision 1.4  1999/07/29 19:57:14  kathy
 // get working for current version
 //
@@ -26,7 +29,7 @@ void Example_read_xdffile_make_hist()
  // create instance of St_XDFFile called f1
  // use method OpenXDF of St_XDFFile with instance f1 to open input file
  St_XDFFile f1;
- f1.OpenXDF("/disk00000/star/test/new/tfs_Solaris/year_2a/psc0208_01_40evts_dst.xdf");
+ f1.OpenXDF("/disk00000/star/test/new/tfs_Solaris/year_2a/psc0208_01_40evts.dst.xdf");
 //rcf013_05_49evts_h_dst.xdf");
  // create a pointer to an St_DataSet called record
  St_DataSet *record;

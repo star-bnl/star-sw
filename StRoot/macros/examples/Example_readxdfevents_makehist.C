@@ -1,5 +1,8 @@
-// $Id: Example_readxdfevents_makehist.C,v 1.4 1999/07/29 19:57:14 kathy Exp $ 
+// $Id: Example_readxdfevents_makehist.C,v 1.5 1999/10/07 14:13:11 kathy Exp $ 
 // $Log: Example_readxdfevents_makehist.C,v $
+// Revision 1.5  1999/10/07 14:13:11  kathy
+// changes to Example macros to make them work in dev - mostly changes were correcting input file name
+//
 // Revision 1.4  1999/07/29 19:57:14  kathy
 // get working for current version
 //
@@ -23,7 +26,7 @@
 
 
 void Example_readxdfevents_makehist(const Char_t *InputXdfFile=
-"/disk00000/star/test/new/tfs_Solaris/year_2a/psc0208_01_40evts_dst.xdf")
+"/disk00000/star/test/new/tfs_Solaris/year_2a/psc0208_01_40evts.dst.xdf")
 {
  
  gSystem.Load("St_base");
