@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.hh,v 1.11 1999/04/08 14:58:34 ullrich Exp $
+ * $Id: StGlobalTrack.hh,v 1.12 1999/06/07 14:53:05 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,9 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.hh,v $
- * Revision 1.11  1999/04/08 14:58:34  ullrich
- * Moved PID traits from StTrack to StGlobalTrack.
+ * Revision 1.12  1999/06/07 14:53:05  ullrich
+ * Added separate method to set and access number of hits in case the hit
+ * collections aren't filled, ie no hits are stored on the DST.
  *
  * Revision 1.11  1999/04/08 14:58:34  ullrich
  * Moved PID traits from StTrack to StGlobalTrack.
@@ -87,9 +88,23 @@ public:
     virtual const StDedx*             ftpcDedx() const;
     virtual const StTrackPidTraits&   pidTraits() const;
 
+    virtual int  numberOfTpcHits() const;
+    virtual int  numberOfSvtHits() const;
+    virtual int  numberOfFtpcHits() const;
+    
     virtual void setTpcDedx(StDedx*);      
     virtual void setFtpcDedx(StDedx*);     
     virtual void setSvtDedx(StDedx*);
+
+    //
+    //  These 3 set-functions only make sense if no hits are 
+    //  available (e.g. they are not stored on the DST).
+    //  Else the number of hits is simply determined by the size
+    //  of the hit collections.
+    //
+    virtual void  setNumberOfTpcHits(unsigned char);
+    virtual void  setNumberOfSvtHits(unsigned char);
+    virtual void  setNumberOfFtpcHits(unsigned char);
 
     //
     // The following methods also manage the ref counting,
@@ -111,6 +126,9 @@ protected:
     StDedx*          mFtpcDedx;
     StDedx*          mSvtDedx;       
     StTrackPidTraits mPidTraits;
+    unsigned char    mNumberOfTpcHits;
+    unsigned char    mNumberOfSvtHits;
+    unsigned char    mNumberOfFtpcHits;
 };
 
 inline const StVecPtrTpcHit& StGlobalTrack::tpcHits() const { return mTpcHits; }
