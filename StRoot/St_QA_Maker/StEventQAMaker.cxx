@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.18 2000/01/11 00:10:08 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.19 2000/01/11 23:50:51 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.19  2000/01/11 23:50:51  lansdell
+// now filling FTPC hits histograms
+//
 // Revision 1.18  2000/01/11 00:10:08  lansdell
 // totalled hits from detectors; made code for xdif, ydif, zdif, radf more readable (search for dif and radf)
 //
@@ -65,6 +68,7 @@
 #include "TH2.h"
 #include "StEventQAMaker.h"
 #include "StEventTypes.h"
+#include "StParticleTypes.hh"
 
 ClassImp(StEventQAMaker)
 
@@ -518,6 +522,10 @@ void StEventQAMaker::MakeHistPrim() {
 
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistGen() {
+
+  //  StEvent does not have data corresponding to the DST particle table
+  //  so this method is not used in StEventQAMaker.  However, this
+  //  information can be found from StMcEvent.
 /*
   if (Debug()) cout << " *** in StEventQAMaker - filling particle histograms " << endl;
 
@@ -537,9 +545,10 @@ void StEventQAMaker::MakeHistGen() {
     //  in the STAR detector. Here we restrict us to/
     //  the most common species.
 
-    // for some reason, name() isn't found when compiling -CL
-    if (part->name() == "e-" || "mu-" || "pi+" || "kaon+" || "proton") {
-      nchgpart++;	    
+    if (part == StElectron::instance() || part == StMuonMinus::instance() ||
+	part == StPionPlus::instance() || part == StKaonPlus::instance() ||
+	part == StProton::instance()) {
+      nchgpart++;
       Double_t pT = theTrack->geometry()->momentum().perp();
       Float_t eta = theTrack->geometry()->momentum().pseudoRapidity();
 
@@ -555,16 +564,6 @@ void StEventQAMaker::MakeHistGen() {
   m_H_ncpart->Fill(nchgpart);
 */
 }
-/*
-	if (p->isthep == 1) {            // select good status only
-
-	    m_H_vtxx->Fill(p->vhep[0]);
-	    m_H_vtxy->Fill(p->vhep[1]);
-	    m_H_vtxz->Fill(p->vhep[2]);
-    m_H_npart->Fill(totpart);
-    m_H_ncpart->Fill(nchgpart);
-  }
-*/
 
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistV0() {
@@ -642,7 +641,6 @@ void StEventQAMaker::MakeHistPID() {
 
       if (primtrk->flag()>0) {
 */
-
 /* ===== Old DST table-based code... -CL
 
   // spectra-PID diagnostic histograms
@@ -804,7 +802,9 @@ void StEventQAMaker::MakeHistPoint() {
   StFtpcHitCollection *ftpcHits = event->ftpcHitCollection();
   StSsdHitCollection *ssdHits = event->ssdHitCollection();
 
-  UInt_t totalHits = 0;
+  ULong_t totalHits = 0;
+  ULong_t ftpcHitsE = 0;
+  ULong_t ftpcHitsW = 0;
 
   if (tpcHits) {
     m_pnt_tpc->Fill(tpcHits->numberOfHits());
@@ -815,9 +815,15 @@ void StEventQAMaker::MakeHistPoint() {
     totalHits += svtHits->numberOfHits();
   }
   if (ftpcHits) {
-    //m_pnt_ftpcE->Fill(ftpcHits-> );
-    //m_pnt_ftpcW->Fill(ftpcHits-> );
-    //totalHits += ftpcHits-> ;
+    // it's better to do this with det_id, but need to code -CL
+    for (UInt_t i=0; i<10; i++)
+      ftpcHitsW += ftpcHits->plane(i)->numberOfHits();
+    for (UInt_t i=10; i<20; i++)
+      ftpcHitsE += ftpcHits->plane(i)->numberOfHits();
+
+    m_pnt_ftpcW->Fill(ftpcHitsW);
+    m_pnt_ftpcE->Fill(ftpcHitsE);
+    totalHits += ftpcHitsW + ftpcHitsE;
   }
   if (ssdHits) {
     m_pnt_ssd->Fill(ssdHits->numberOfHits());
