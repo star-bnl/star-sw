@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.23 2003/01/30 18:37:55 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.24 2003/04/16 17:48:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.24  2003/04/16 17:48:53  ullrich
+ * Added StTriggerData.
+ *
  * Revision 2.23  2003/01/30 18:37:55  ullrich
  * Added Phmd and TriggerId stuff.
  *
@@ -181,6 +184,7 @@
 #include "StTrackPidTraits.h"
 #include "StTrackTopologyMap.h"
 #include "StTrigger.h"
+#include "StTriggerData.h"
 #include "StTriggerDetectorCollection.h"
 #include "StTriggerIdCollection.h"
 #include "StTriggerId.h"
