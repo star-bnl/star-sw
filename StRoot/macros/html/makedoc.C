@@ -1,5 +1,8 @@
-// $Id: makedoc.C,v 1.32 1999/05/23 21:36:40 fine Exp $
+// $Id: makedoc.C,v 1.33 1999/06/01 01:46:41 fine Exp $
 // $Log: makedoc.C,v $
+// Revision 1.33  1999/06/01 01:46:41  fine
+// New classes have been added StTrack, StHit, StHelixD StObjArray
+//
 // Revision 1.32  1999/05/23 21:36:40  fine
 // New class have been introduce for html
 //
@@ -118,17 +121,19 @@
   // Create the list of the classes defined with the loaded DLL's to be documented
 
   Char_t *classes[] = { "St_TableSorter","St_TableNtuple"
-                       ,"St_XDFFile",  "St_Module",   "St_Table"
-                       ,"St_DataSet", "St_DataSetIter","St_FileSet"
-                       ,"StParticleView","St_ObjectSet","St_Node","St_NodePosition"
-                       ,"StMaker",     "StChain",       "St_NodeView"
-                       ,"table_head_st","St_NodeViewIter", "St_PolyLineShape"
-                       , "St_Points3D","St_PolyLine3D","St_PointsArray3D"
+                       ,"St_XDFFile",    "St_Module",       "St_Table"
+                       ,"St_DataSet",    "St_DataSetIter", "St_FileSet"
+                       ,"StParticleView","St_ObjectSet",    "St_Node",     "St_NodePosition"
+                       ,"StMaker",       "StChain",         "St_NodeView"
+                       ,"table_head_st", "St_NodeViewIter", "St_PolyLineShape"
+                       ,"St_Points3D",   "St_PolyLine3D",   "St_PointsArray3D"
                        ,"St_AttributesABC", "St_Table3Points","St_TablePoints"
-                       ,"St_io_Maker","StHelix3DPoints","StHits3DPoints"
-                       ,"St_srs_Maker","St_xdfin_Maker"
+                       ,"St_io_Maker",   "StHelix3DPoints", "StHits3DPoints"
+                       ,"StObjArray",    "StHit",            "StHelixD"
+                       ,"StTrack"
+                       ,"St_srs_Maker",  "St_xdfin_Maker"
                       };
-  Int_t nclass = 27;
+  Int_t nclass = 31;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("//sol/afs_rhic/star/packages/dev/inc/table_header.h");
@@ -145,9 +150,7 @@
 
   // Make class descriptions
   Int_t i=0;
-
-  for (i=0;i<nclass;i++) 
-                   html.MakeClass(classes[i]);
+  for (i=0;i<nclass;i++)  html.MakeClass(classes[i]);
 
   TString giffile = STAR;
   giffile += "/StRoot/html/src/gif";
