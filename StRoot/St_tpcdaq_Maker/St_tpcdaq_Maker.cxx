@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.13  1999/04/05 16:57:19  ward
+// Updated version tag (Spock).
+//
 // Revision 1.12  1999/04/05 16:51:11  ward
 // Now expects time bins 0-511 from Trs, and not 1-512.
 //
@@ -348,7 +351,7 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
 Int_t St_tpcdaq_Maker::Make() {
   int ii,errorCode;
   mErr=0;
-  printf("I am Captain James T. Kirk. St_tpcdaq_Maker::Make().\n");
+  printf("I am Doctor Spock. St_tpcdaq_Maker::Make().\n");
   errorCode=GetEventAndDecoder();
   printf("GetEventAndDecoder() = %d\n",errorCode);
   if(errorCode) {
@@ -369,7 +372,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.12 1999/04/05 16:51:11 ward Exp $ \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.13 1999/04/05 16:57:19 ward Exp $ \n");
   printf("**************************************************************\n");
   if(Debug()) StMaker::PrintInfo();
 }
