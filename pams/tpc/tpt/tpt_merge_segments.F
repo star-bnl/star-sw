@@ -1,5 +1,8 @@
-* $Id: tpt_merge_segments.F,v 1.13 2000/03/05 01:32:05 sakrejda Exp $
+* $Id: tpt_merge_segments.F,v 1.14 2000/03/06 04:19:24 sakrejda Exp $
 * $Log: tpt_merge_segments.F,v $
+* Revision 1.14  2000/03/06 04:19:24  sakrejda
+* Fixed bug in track indexing in the merge part.
+*
 * Revision 1.13  2000/03/05 01:32:05  sakrejda
 * New version of spiral merging
 *
@@ -94,10 +97,10 @@ C______________________________________________________________________
       RECORD /local_hits/       rhits(1000)
 C_________________________________________________________________
       INTEGER ltot,tls_Quick_Sort_r,iret
-      INTEGER i,j,k,ipass
+      INTEGER i,j,k,ipass, lxi, lxj
 
       REAL    min(5),cuta,cutb
-      INTEGER integer tpt_fit_track, tpt_load_track
+      INTEGER tpt_fit_track, tpt_load_track
       REAL    radi,radj
       REAL    varb,varc
 
@@ -141,7 +144,7 @@ C      if(event.eq.4) return
                merge(ltot).yclose(1)=merge(ltot).yclose(2)
                merge(ltot).yclose(2)=temp
             endif
-C            write(17,*)merge(ltot).rad,merge(ltot).xclose(1),merge(ltot).xclose(2),
+C            write(17,*) i,merge(ltot).rad,merge(ltot).xclose(1),merge(ltot).xclose(2),
 C     >                 merge(ltot).yclose(1),merge(ltot).yclose(2)
          endif
       enddo
@@ -152,7 +155,7 @@ C      go to 999
 c Minimum difference values for merging tracks 
 c (min(1)=rr,min(2)=average of acent & bcent, min(3)=ltan, min(4)=phi0):
 c Adjust these parameters to change the merging criteria.
-      min(1)=0.00003  ! radius ratio
+      min(1)=0.0001! radius ratio
       min(2)=0.05  ! approach average
       min(3)=0.02  ! tanl
       min(4)=0.5   ! phi0 (deactivated)
@@ -170,50 +173,54 @@ c radd is the larger of the radii being compared.
          if(radi.gt.1500.0) then
             enough = abs(radi-radj)/radj.gt.min(1)*radi
          else
-            enough = abs(radi-radj)/radj.gt.0.05
+            enough = abs(radi-radj)/radj.gt.0.1
          endif
          lxj=merge(j).lpnt
+C         write(17,*)"trying to merge", lxi, lxj
          if(.not.enough.and.trk(lxj).flag.gt.0) then
+C            write(17,*)"trying to merge", lxi, lxj
 c           Now compare the average of the differences of the 
 c           x and y for the closest apptoach to the origin.
             cuta = abs(merge(i).xclose(1)-merge(j).xclose(1))/merge(i).rad
             cutb = abs(merge(i).xclose(1)-merge(j).xclose(1))/merge(i).rad
             if (cuta.lt.min(2).and.cutb.lt.min(2)) then
+C                write(17,*)"trying to merge", lxi, lxj
 c               Now compare their dip angles.
                 varc=abs(abs(trk(lxi).p(7))-abs(trk(lxj).p(7)))
                 if (abs(varc).lt.min(3)) then
-C                   write(17,*)"merged",i,j
+C                   write(17,*)"merged",lxi,lxj
 C                  flag the j=th track as "admerged"
-                   trk(j).flag=-77
-                   track(j).flag=-77
+                   trk(lxj).flag=-77
+                   track(lxj).flag=-77
 C                  store hits from both tracks in a local struct
-                   do k=1,trk(i).nhit
-                      rhits(k).lhit=trk(i).ipnt(k)
-                      rhits(k).ltrack=i
+                   do k=1,trk(lxi).nhit
+                      rhits(k).lhit=trk(lxi).ipnt(k)
+                      rhits(k).ltrack=lxi
                       rhits(k).x=hit(rhits(k).lhit).x
                       rhits(k).y=hit(rhits(k).lhit).y
                       rhits(k).z=hit(rhits(k).lhit).z
 c                      write(6,*)hit(rhits(k).lhit).x,hit(rhits(k).lhit).y,hit(rhits(k).lhit).z,hit(rhits(k).lhit).track
                    end do
-                   do k=1,trk(j).nhit
-                      rhits(k+trk(i).nhit).lhit=trk(j).ipnt(k)
-                      rhits(k+trk(i).nhit).ltrack=j
-                      rhits(k+trk(i).nhit).x=hit(rhits(k+trk(i).nhit).lhit).x
-                      rhits(k+trk(i).nhit).y=hit(rhits(k+trk(i).nhit).lhit).y
-                      rhits(k+trk(i).nhit).z=hit(rhits(k+trk(i).nhit).lhit).z
+                   do k=1,trk(lxj).nhit
+                      rhits(k+trk(lxi).nhit).lhit=trk(lxj).ipnt(k)
+                      rhits(k+trk(lxi).nhit).ltrack=lxj
+                      rhits(k+trk(lxi).nhit).x=hit(rhits(k+trk(lxi).nhit).lhit).x
+                      rhits(k+trk(lxi).nhit).y=hit(rhits(k+trk(lxi).nhit).lhit).y
+                      rhits(k+trk(lxi).nhit).z=hit(rhits(k+trk(lxi).nhit).lhit).z
                    end do
-                   trk(i).nhit=trk(i).nhit+trk(j).nhit
+                   trk(lxi).nhit=trk(lxi).nhit+trk(lxj).nhit
 C                  sort hits in z
-                   iret=tls_Quick_Sort_r(trk(i).nhit, rhits(1).z, rhits(2).z, rhits)
-C                  re-load trk(i)
-                   do  k=1,trk(i).nhit
-                      trk(i).ipnt(k)=rhits(k).lhit
-                      hit(rhits(k).lhit).track=1000*i+k
+                   iret=tls_Quick_Sort_r(trk(lxi).nhit, rhits(1).z, rhits(2).z, rhits)
+C                  re-load trk(lxi)
+                   do  k=1,trk(lxi).nhit
+                      trk(lxi).ipnt(k)=rhits(k).lhit
+                      hit(rhits(k).lhit).track=1000*lxi+k
                    end do
 c                  refit track
 c                call the fitting and loading
-                 iret = tpt_fit_track(i,trk,hit_h,hit,tpar_h,tpar,dummy,ipass)
-                 iret = tpt_load_track(i,track_h,track,trk,hit_h,hit)
+                 iret = tpt_fit_track(lxi,trk,hit_h,hit,tpar_h,tpar,dummy,ipass)
+                 iret = tpt_load_track(lxi,track_h,track,trk,hit_h,hit)
+C                 write(17,*)track(lxi).flag, track(lxi).id, track(lxi).nrec
               endif   ! p(7) or tanl
             endif   ! cuta,b
          endif! track that passes the radius criterion already merged 
