@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.36 1999/07/07 16:58:32 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.37 1999/07/07 21:23:16 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.37  1999/07/07 21:23:16  kathy
+// fixed log scales
+//
 // Revision 1.36  1999/07/07 16:58:32  kathy
 // put log scales on some histograms
 //
@@ -375,7 +378,7 @@ Int_t St_QA_Maker::DrawHists()
   const Int_t numPads = m_PadColumns*m_PadRows;  
 // SetPaperSize wants width & height in cm: A4 is 20,26 & US is 20,24
   gStyle->SetPaperSize(m_PaperWidth,m_PaperHeight); 
-  gStyle->SetOptStat(111111);
+  //  gStyle->SetOptStat(111111);
 //
 
 //setup canvas
@@ -661,8 +664,6 @@ void St_QA_Maker::SetDefaultLogYList(){
   cout << " **** Now in St_QA_Maker::SetDefaultLogYList  **** " << endl;
 
   const Char_t *sdefList[] = {
- "QaGlobtrkTot",
- "QaGlobtrkGood",
  "QaGlobtrkFlag",
  "QaGlobtrkNPnt",
  "QaGlobtrkNPntMax",
@@ -683,8 +684,6 @@ void St_QA_Maker::SetDefaultLogYList(){
  "QaGlobtrkLength",
  "QaGlobtrkImpact",
  "QaGlobtrkNdof",
- "QaGlobtrkPtVsEta", 
- "QaGlobtrkPVsTrkLength",
  "QaDstDedxNdedx",
  "QaDstDedxDedx0", 
  "QaDstDedxDedx1",
@@ -801,9 +800,9 @@ void St_QA_Maker::BookHistGlob(){
 
 // 1D
   m_globtrk_tot   = new TH1F("QaGlobtrkTot",  "globtrk: tot # tracks",40,4000.,8000.);
-  m_globtrk_good  = new TH1F("QaGlobtrkGood", "globtrk: tot # good tracks",40,4000.,8000);
-  
   m_globtrk_iflag = new TH1F("QaGlobtrkFlag", "globtrk: iflag ",10,-1000.,1000.);
+
+  m_globtrk_good  = new TH1F("QaGlobtrkGood", "globtrk: tot # good tracks",40,4000.,8000);  
   m_det_id     = new TH1F("QaGlobtrkDetId",   "globtrk: Detector ID for tracks",11,-0.5,10.5);
   m_point      = new TH1F("QaGlobtrkNPnt",    "globtrk: N points on track", 50, 0.,50.);
   m_max_point  = new TH1F("QaGlobtrkNPntMax", "globtrk: N max points on track", 50, 0.,50.);
@@ -820,9 +819,9 @@ void St_QA_Maker::BookHistGlob(){
   m_glb_theta  = new TH1F("QaGlobtrkTheta",   "globtrk: theta distribution",20,0.,4.);
   m_eta        = new TH1F("QaGlobtrkEta",     "globtrk: eta distribution",60,-3.0,3.0);
   m_pT         = new TH1F("QaGlobtrkPt",      "globtrk: pT distribution",50,0.,5.);
-  m_mom        = new TH1F("QaGlobtrkP",      "globtrk: momentum distribution",50,0.,5.);
-  m_chisq0     = new TH1F("QaGlobtrkChisq0C", "globtrk: chisq[0]", nchisq, 0.,10.);
-  m_chisq1     = new TH1F("QaGlobtrkChisq1C", "globtrk: chisq[1]", nchisq, 0.,10.);
+  m_mom        = new TH1F("QaGlobtrkP",       "globtrk: momentum distribution",50,0.,5.);
+  m_chisq0     = new TH1F("QaGlobtrkChisq0C", "globtrk: chisq[0]", 100, 0.,15.);
+  m_chisq1     = new TH1F("QaGlobtrkChisq1C", "globtrk: chisq[1]", 100, 0.,15.);
   m_length     = new TH1F("QaGlobtrkLength",  "globtrk: track length", 50,0.,200.);
   m_glb_impact = new TH1F("QaGlobtrkImpact",  "globtrk: impact param from prim vtx ", 50,0.,500.);
   m_glb_ndf    = new TH1F("QaGlobtrkNdof",    "globtrk: num deg of freedom", 100,-10.,90.);
@@ -834,7 +833,7 @@ void St_QA_Maker::BookHistGlob(){
     m_pT_eta_rec->SetYTitle("pT (GeV)");
 
 
-  m_tanl_z0 = new TH2F("QaGlobtrkTanlz0","globtrk: tanl(dip) versus z0", 20,-200.,200.,20,-5.,5.);
+  m_tanl_z0 = new TH2F("QaGlobtrkTanlz0","globtrk: tanl(dip) versus z0", 20,-3.,3.,20,-50.,50.);
     m_tanl_z0->SetXTitle("z0");
     m_tanl_z0->SetYTitle("tanl");
 
@@ -860,11 +859,11 @@ void St_QA_Maker::BookHistGlob(){
     m_fpoint_length->SetXTitle("length");
     m_fpoint_length->SetYTitle("Npoints");
 
-  m_chisq0_mom = new TH2F("QaGlobtrkChi0Mom","globtrk: Chisq0 vs mom",20,0.,5.,20,0.,10.);
+  m_chisq0_mom = new TH2F("QaGlobtrkChi0Mom","globtrk: Chisq0 vs mom",20,0.,2.,50,0.,15.);
     m_chisq0_mom->SetXTitle("mom");
     m_chisq0_mom->SetYTitle("chisq0");
 
-  m_chisq1_mom = new TH2F("QaGlobtrkChi1Mom","globtrk: Chisq1 vs mom",20,0.,5.,20,0.,10.);
+  m_chisq1_mom = new TH2F("QaGlobtrkChi1Mom","globtrk: Chisq1 vs mom",20,0.,2.,50,0.,15.);
     m_chisq1_mom->SetXTitle("mom");
     m_chisq1_mom->SetYTitle("chisq1");
 
@@ -1363,7 +1362,7 @@ void St_QA_Maker::MakeHistXi(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.36 1999/07/07 16:58:32 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.37 1999/07/07 21:23:16 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
