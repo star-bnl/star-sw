@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.101 2000/09/20 13:13:23 fisyak Exp $
+# $Id: Construct,v 1.102 2000/09/28 00:35:31 fisyak Exp $
 use Env;
 #use lib qw($STAR . "/mgr"); # Modify perl include path
 use lib $STAR . "/mgr"; # Modify perl include path
@@ -56,7 +56,7 @@ else {
 }
 $LIBPATH = $LIB;
 if ($STAR_HOST_SYS !~ /^intel_wnt/) {
-  $CERNLIBS .= " " . `cernlib geant321 pawlib graflib/X11 packlib mathlib kernlib `;
+  $CERNLIBS .= " " . `cernlib geant321 pawlib packlib graflib/X11 packlib mathlib kernlib `;
   chop ($CERNLIBS);
   $Libraries = $CERNLIBS ." ";
   $Libraries .=  " ". $FLIBS . " " . $CLIBS . " ";
