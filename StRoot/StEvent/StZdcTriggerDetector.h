@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcTriggerDetector.h,v 2.4 2001/04/05 04:00:47 ullrich Exp $
+ * $Id: StZdcTriggerDetector.h,v 2.5 2001/07/12 22:58:33 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StZdcTriggerDetector.h,v $
+ * Revision 2.5  2001/07/12 22:58:33  ullrich
+ * Added variable to store the vertex_z from timing info.
+ *
  * Revision 2.4  2001/04/05 04:00:47  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -43,11 +46,13 @@ public:
     unsigned int  numberOfZdcWords() const;
     float         adc(unsigned int) const;
     float         tdc(unsigned int) const;
+    float         vertexZ() const;
 
     void setAdc(unsigned int, float);
     void setTdc(unsigned int, float);
     void setAdcSum(StBeamDirection, float);
     void setAdcSum(float);
+    void setVertexZ(float);
 
     unsigned int   numberOfZdcCounters() const;  // usage depreciated, to be removed soon
     
@@ -57,6 +62,7 @@ protected:
     Float_t  mTdc[mMaxZdcWords];
     Float_t  mSumAdc[2];
     Float_t  mSum;
+    Float_t  mVertexZ;
     
     ClassDef(StZdcTriggerDetector,1)
 };

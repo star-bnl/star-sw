@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcTriggerDetector.cxx,v 2.5 2001/04/05 04:00:59 ullrich Exp $
+ * $Id: StZdcTriggerDetector.cxx,v 2.6 2001/07/12 22:58:33 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StZdcTriggerDetector.cxx,v $
+ * Revision 2.6  2001/07/12 22:58:33  ullrich
+ * Added variable to store the vertex_z from timing info.
+ *
  * Revision 2.5  2001/04/05 04:00:59  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -34,7 +37,7 @@ using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.5 2001/04/05 04:00:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.6 2001/07/12 22:58:33 ullrich Exp $";
 
 ClassImp(StZdcTriggerDetector)
 
@@ -44,6 +47,7 @@ StZdcTriggerDetector::StZdcTriggerDetector()
     fill_n(mTdc, static_cast<int>(mMaxZdcWords), 0);
     fill_n(mSumAdc, 2, 0);
     mSum = 0;
+    mVertexZ = 0;
 }
 
 StZdcTriggerDetector::StZdcTriggerDetector(const dst_TrgDet_st& t)
@@ -53,6 +57,7 @@ StZdcTriggerDetector::StZdcTriggerDetector(const dst_TrgDet_st& t)
     mSumAdc[east] = t.adcZDCEast;
     mSumAdc[west] = t.adcZDCWest;
     mSum          = t.adcZDCsum;
+    mVertexZ = 0;
 }
 
 StZdcTriggerDetector::~StZdcTriggerDetector() {/* noop */}
@@ -90,6 +95,9 @@ StZdcTriggerDetector::adcSum(StBeamDirection dir) const
 float
 StZdcTriggerDetector::adcSum() const {return mSum;}
 
+float
+StZdcTriggerDetector::vertexZ() const {return mVertexZ;}
+
 void
 StZdcTriggerDetector::setAdc(unsigned int i, float val)
 {
@@ -114,4 +122,10 @@ void
 StZdcTriggerDetector::setAdcSum(float val)
 {
     mSum = val;
+}
+
+void
+StZdcTriggerDetector::setVertexZ(float val)
+{
+    mVertexZ = val;
 }
