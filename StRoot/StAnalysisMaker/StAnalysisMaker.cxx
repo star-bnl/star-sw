@@ -17,7 +17,7 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.cxx,v 2.5 2003/02/27 15:25:36 jeromel Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.6 2003/03/20 00:29:19 jeromel Exp $
  *
  */
 
@@ -133,9 +133,12 @@ StAnalysisMaker::Finish()
     //
     //  Write Ntuple/histos to file and close it.
     //  
-    mFile->Write();  
-    mFile->Close();
+    if( mFile){
+      mFile->Write();  
+      mFile->Close();
+    }
     
+
     return kStOK;
 }
 
@@ -311,6 +314,9 @@ bool StAnalysisMaker::accept(StTrack* track)
 
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.6  2003/03/20 00:29:19  jeromel
+ * Calling Wite() on 0x0 pointer
+ *
  * Revision 2.5  2003/02/27 15:25:36  jeromel
  * Missing check on triggerIdCollection() now added
  *
