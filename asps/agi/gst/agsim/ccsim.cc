@@ -1,4 +1,4 @@
-/*CMZ :          17/08/98  16.59.37  by  Pavel Nevski*/
+/*CMZ :          23/08/98  16.19.48  by  Pavel Nevski*/
 /*-- Author :    Pavel Nevski   28/11/97*/
 /*****************************************************/
 /*               S T A F   i n t e r f a c e         */
@@ -28,7 +28,7 @@ extern "C" void ami_module_register_ ()    {}
 #include "tntLib.h"
 #include "topLib.h"
 #include "dstype.h"
- 
+extern int gcflag_;
  
 #define staf_start_          F77_NAME(staf_start,STAF_START)
 #define staf_stop_           F77_NAME(staf_stop,STAF_STOP)
@@ -84,7 +84,7 @@ extern "C" void type_of_call staf_start_ ()
    ami_init(); ami_start();
    top_init(); top_start();
    tnt_init(); tnt_start();
-//   staf_banner(stdout);
+   if(gcflag_) staf_banner(stdout);
 }
  
 extern "C" void type_of_call staf_stop_ ()
@@ -247,13 +247,15 @@ extern "C" int type_of_call tdm_clear_all_  (char* path, int lp)
    for (;ds;)
    {
      if (ds->tid)
-     { ds->elcount=0; printf(" clearing table %20s \n",ds->name); break; }
+     { ds->elcount=0; if(gcflag_>1) printf(" clearing table %20s \n",ds->name);
+       break;
+     }
      du=0;
      for (j=mm[l]+1; j< ds->elcount; j++)
      {
        if (!(dt=ds->p.link[j])) continue;
        if (!(dt->tid)) { mm[l]=j; du=dt; break; }
-       dt->elcount=0;  printf(" clearing table %20s \n",dt->name);
+       dt->elcount=0; if(gcflag_>1) printf(" clearing table %20s \n",dt->name);
      }
      /* new dataset found  - and selected */
      if (du)  { /* going  up  the tree */  l+=1; ds=du; mm[l]=-1; dd[l]=ds; }
@@ -329,7 +331,7 @@ extern "C" void type_of_call ami_module_register_ (char* name, int n)
  
    sname[n]='\0';
    specs._length = specs._maximum = 0;
-   specs._buffer = new char*[0];
+   specs._buffer = 0;
  
    ami->deleteInvoker(sname);
    ami->newInvoker(sname,0,address,specs);
