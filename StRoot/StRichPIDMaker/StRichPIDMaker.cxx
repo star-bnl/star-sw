@@ -1,12 +1,15 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.9 2000/10/19 15:41:57 horsley Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.10 2000/10/26 20:29:55 lasiuk Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
- * Revision 2.9  2000/10/19 15:41:57  horsley
- * added set format option to TFile, file->SetFormat(1);
+ * Revision 2.10  2000/10/26 20:29:55  lasiuk
+ * move filename of ntuple into ifdef'd region
+ *
+ * Revision 2.21  2000/11/27 17:19:40  lasiuk
+ * fill the constant area in teh PID structure
  *
  * Revision 2.20  2000/11/26 15:08:56  lasiuk
  * move the setting of all flags to the pidtraits
@@ -140,10 +143,10 @@ using std::max;
 //#include "StarCallf77.h"
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.9 2000/10/19 15:41:57 horsley Exp $";
+    return true;
 
 	track->geometry() && 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.9 2000/10/19 15:41:57 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.10 2000/10/26 20:29:55 lasiuk Exp $";
 	(fabs(track->geometry()->momentum().pseudoRapidity()) < mEtaCut) &&
 Int_t StRichPIDMaker::Make() { 
   
@@ -1990,10 +1993,11 @@ Int_t StRichPIDMaker::Init() {
   mDefaultLongWave  = 200.0e-7;
  
   if (mDefaultShortWave != mShortWave && mDefaultLongWave != mLongWave) {
+    mMaterialDb->setWavelengthRange(mDefaultShortWave,mDefaultLongWave);
+  }
 
 
 #ifdef  myRICH_WITH_NTUPLE
-#ifdef  myRICH_WITH_NTUPLE 
   char finalname[200];
   sprintf(finalname,"%s.root",mySaveDirectory);
 
