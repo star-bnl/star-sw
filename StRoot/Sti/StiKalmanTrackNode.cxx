@@ -237,9 +237,9 @@ void StiKalmanTrackNode::getMomentum(double p[3], double e[6]) const
   ////sinPhi = fabs(fP3)*fX-fP2;
   double ss = sinPhi*sinPhi;
   if (ss>1.)
-		{
-			throw runtime_error("StiKalmanTrackNode::getMomentum() - ERROR - sinPhi*sinPhi>1.");
-		}
+    {
+      throw runtime_error("StiKalmanTrackNode::getMomentum() - ERROR - sinPhi*sinPhi>1.");
+    }
   p[0] = pt*sqrt(1-ss);
   p[1] = pt*sinPhi;
   p[2] = pt*fP4;

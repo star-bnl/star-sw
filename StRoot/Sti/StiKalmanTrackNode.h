@@ -2,7 +2,9 @@
 #define StiKalmanTrackNode_H 1
 #include <iostream.h>
 #include <stdlib.h>
-#include "Exception.h"
+#include <stdexcept>
+#include <math.h>
+///////#include "Exception.h"
 #include "StiTrackNode.h"
 #include "StThreeVector.hh"
 #include "StiKalmanTrackFinderParameters.h"
@@ -49,11 +51,19 @@ public:
 	     double cc[15], 
 	     double& dEdx,
 	     double& chi2);
+
+    /// Get the charge (sign) of the track at this node
+    double getCharge() const;
     
+    StThreeVector<double> getMomentum() const;
+    StThreeVector<double> getGlobalMomentum() const;
+
     /// Calculates and returns the momentum and error of the track at this node. The momentum is 
     /// in the local reference frame of this node.
     void getMomentum(double p[3], double e[6]=0) const;
     /// Calculates and returns the tangent of the track pitch angle at this node.
+    double getCurvature() const;
+    double getDipAngle() const;
     double getTanL() const;
     /// Calculates and returns the momentum of the track at this node.
     double getP() const;
@@ -185,6 +195,44 @@ public:
     static double gasDensity,matDensity,gasRL,matRL;
     static bool   useCalculatedHitError;
 };
+
+inline double StiKalmanTrackNode::getCurvature() const
+{
+  return fP3;
+}
+
+inline double StiKalmanTrackNode::getDipAngle() const
+{
+  return atan(fP4);
+}
+
+inline StThreeVector<double> StiKalmanTrackNode::getMomentum() const
+{
+  double pt, sinPhi;
+  pt = getPt();
+  sinPhi = fP3*fX-fP2;
+  double ss = sinPhi*sinPhi;
+  if (ss>1.)
+    {
+      throw runtime_error("StiKalmanTrackNode::getMomentum() - ERROR - sinPhi*sinPhi>1.");
+    }  
+  return StThreeVector<double>(pt*sqrt(1-ss),pt*sinPhi,pt*fP4);
+}
+
+inline StThreeVector<double> StiKalmanTrackNode::getGlobalMomentum() const
+{
+  StThreeVector<double> p = getMomentum();
+  p.rotateZ(fAlpha);
+  return StThreeVector<double>(p);
+}
+
+
+inline double StiKalmanTrackNode::getCharge() const
+{
+  return (pars->field*fP3 > 0) ? -1. : 1.;
+}
+
+
 
 inline double StiKalmanTrackNode::getTanL() const
 {

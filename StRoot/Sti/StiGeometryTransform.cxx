@@ -7,6 +7,7 @@
 //SCL
 #include "StThreeVector.hh"
 #include "StPhysicalHelix.hh"
+#include "StHelix.hh"
 #include "StMatrixF.hh"
 #include "SystemOfUnits.h"
 
@@ -275,31 +276,26 @@ void StiGeometryTransform::operator() (const StSsdHit* ssdhit, StiHit* stihit){
 void StiGeometryTransform::operator() (const StiHit* stihit, StSsdHit* ssdhit){
 }
 
-void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
-                                       StPhysicalHelix *pHelix){
-#ifndef ST_NO_NAMESPACES
-using namespace units;
-#endif
+void StiGeometryTransform::operator() (const StiKalmanTrackNode *pNode,
+                                       StHelix *pHelix)
+{
+  // calculate the helix origin in global coords
+  StThreeVector<double> origin(pNode->fX, pNode->fP0,pNode->fP1);
+  origin.rotateZ(pNode->fAlpha);
+  const StThreeVector<double> p=pNode->getGlobalMomentum();
+  double h, phase;
+  h = (pNode->getCharge()*StiKalmanTrackNode::getFieldConstant() <= 0) ? 1 : -1;
+  phase = (p.y()==0&&p.x()==0) ? phase =(1-2.*h)*M_PI/4. : atan2(p.y(),p.x())-h*M_PI/2.;
+  *pHelix = StHelix(pNode->getCurvature(),
+		    pNode->getDipAngle(),
+		    phase,
+		    origin,
+		    h);
 
-  // thanks to StPhysicalHelix constructor, this is easy.
-
-  // first, calculate the helix origin in global coords
-  StThreeVector<double> origin(pTrackNode->fX, pTrackNode->fP0,
-                               pTrackNode->fP1);
-  origin.rotateZ(pTrackNode->fAlpha);
-  
-  // now get momentum at that point
-  double adMomentum[3];
-  pTrackNode->getMomentum(adMomentum);
-  StThreeVector<double> momentum(adMomentum[0], adMomentum[1], adMomentum[2]);
-  momentum.rotateZ(pTrackNode->fAlpha);
-  
-  // magnetic field and charge
-  double dField = StiKalmanTrackNode::getFieldConstant();
-  double dCharge = (dField*pTrackNode->fP3 > 0) ? -1. : 1.;
-
-  *pHelix = StPhysicalHelix(momentum*GeV, origin*GeV, 
-                            dField*tesla, dCharge*eplus);
+  //*pHelix = StPhysicalHelix(pNode->getGlobalMomentum(), 
+  //			    origin, 
+  //                          StiKalmanTrackNode::getFieldConstant(), 
+  //		    pNode->getCharge());
 }
 
 void StiGeometryTransform::operator() (StiHitContainer* hc, const StGlobalTrack* st, StiKalmanTrack* sti,
