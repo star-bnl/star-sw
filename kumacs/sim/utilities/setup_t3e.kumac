@@ -1,8 +1,0 @@
-*
-* T3E-specific setup
-*
-* pmj 14/4/98
-
-mess This is a CRAY T3E
-
-macro/global/create PLATFORM T3E

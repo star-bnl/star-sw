@@ -1,6 +1,0 @@
-#include "PAM.idl"
-#include "tcl_tphit.idl"
-
-interface tfs_filt :amiModule {
-          STAFCV_T call(   inout  tcl_tphit tphit);
-};
