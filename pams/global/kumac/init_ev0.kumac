@@ -82,6 +82,37 @@ return
 
 * **************************************************
 
+*** project (ev0out) ev0_aux to dst_v0_vertex
+* first create the table
+ 
+ macro ev0_dst
+   macro/global/import *
+     
+newproject ev0agent '{_
+id, _
+id_vertex, _
+idneg, _
+idpos, _
+dcan, _
+dcap, _
+dcapn, _
+dcav0, _
+neg_px, _
+neg_py, _
+neg_pz, _
+pos_px, _
+pos_py, _
+pos_pz}' _
+'{ev0out.id dst_v0_vertex.id}'
+
+ return
+ 
+* **************************************************************
+
+
+
+
+
 
 
 
