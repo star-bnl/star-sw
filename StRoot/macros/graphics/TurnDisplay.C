@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   02/12/99
-// $Id: TurnDisplay.C,v 1.2 1999/12/02 19:56:22 fine Exp $
+// $Id: TurnDisplay.C,v 1.3 1999/12/06 04:46:56 fine Exp $
   StEventDisplayMaker *dsMaker = 0;
   StVirtualEventFilter *trackFilter;
 //___________________________________________________________________
@@ -19,7 +19,7 @@ void TurnDisplay(const Char_t *filterName="StTrackFilter") {
     if (dsMaker) {
        if (filterName && filterName[0]) {
            gSystem->Load(filterName);  // Load the user-defined filter
-           TClass *filterClass = GetClass(filterName);
+           TClass *filterClass = gROOT->GetClass(filterName);
            if (filterClass) {
              trackFilter = (StVirtualEventFilter *)filterClass->New();
 
@@ -32,6 +32,11 @@ void TurnDisplay(const Char_t *filterName="StTrackFilter") {
        }
 
        // define "Event" geometry (the objects to be drawn out)
+       //  This is under construction !!!!
+     //___________________________________________________________________
+     //
+     //                  User defined area follow:
+     //___________________________________________________________________
 
        // "Reference tables" have no (x,y,z) information and can not be drawn
        // They should be sorted by the foreign key provided in brackets to be effecient
@@ -52,13 +57,19 @@ void TurnDisplay(const Char_t *filterName="StTrackFilter") {
 
        dsMaker->AddName("tptrack");                // the table has no column with (x,y,z) coordinates,
                                                    // a special method has to be invoked to draw this table 
-
+     //___________________________________________________________________
+     //
+     //               End of the user defined area follow:
+     //___________________________________________________________________
        if (trackFilter) trackFilter->TurnOn(); 
        dsMaker->SetDebug();
     }
   }
 //__________________________________________________________________________
 // $Log: TurnDisplay.C,v $
+// Revision 1.3  1999/12/06 04:46:56  fine
+// Bug fixes
+//
 // Revision 1.2  1999/12/02 19:56:22  fine
 // Clean up
 //

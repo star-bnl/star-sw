@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   02/12/99  
-// $Id: SetObjectFilter.C,v 1.2 1999/12/02 20:03:31 fine Exp $
+// $Id: SetObjectFilter.C,v 1.3 1999/12/06 04:46:56 fine Exp $
 //___________________________________________________________________
 void SetObjectFilter()
 {
@@ -20,14 +20,14 @@ void SetObjectFilter()
 
    //________________________________________________
    //
-   // You should adjust the type of fulter below
+   // You should adjust the type of filter below
    //________________________________________________
    //
-      StVirtualFilter *localFilter = (StVirtualFilter *)trackFilter;
+      StVirtualEventFilter *localFilter = (StVirtualFilter *)trackFilter;
    //________________________________________________
    Int_t tr_p[]={39250,39344};
    Int_t ltr_p = sizeof(tr_p)/sizeof(int);
-//   localFilter->SetTrack_P(tr_p,ltr_p);
+   localFilter->SetTrack_P(tr_p,ltr_p);
 
    Int_t id_globtrk[]={3975,2485};
    Int_t lid_globtrk = sizeof(id_globtrk)/sizeof(int);
@@ -47,6 +47,9 @@ void SetObjectFilter()
 }
 
 // $Log: SetObjectFilter.C,v $
+// Revision 1.3  1999/12/06 04:46:56  fine
+// Bug fixes
+//
 // Revision 1.2  1999/12/02 20:03:31  fine
 // Clean up
 //
