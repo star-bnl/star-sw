@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.h,v 1.2 1999/07/06 22:33:22 lisa Exp $
+ * $Id: StHbtAnalysis.h,v 1.3 1999/10/04 15:38:56 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.h,v $
+ * Revision 1.3  1999/10/04 15:38:56  lisa
+ * include Franks new accessor methods StHbtAnalysis::CorrFctn and StHbtManager::Analysis as well as McEvent example macro
+ *
  * Revision 1.2  1999/07/06 22:33:22  lisa
  * Adjusted all to work in pro and new - dev itself is broken
  *
@@ -66,6 +69,7 @@ public:
   bool MixingBufferFull();
 
   StHbtCorrFctnCollection* CorrFctnCollection();
+  StHbtCorrFctn* CorrFctn(int n);    // Access to CFs within the collection
 
   void AddCorrFctn(StHbtCorrFctn*);
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.h,v 1.6 1999/09/24 01:23:12 fisyak Exp $
+ * $Id: StHbtManager.h,v 1.7 1999/10/04 15:38:58 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.h,v $
+ * Revision 1.7  1999/10/04 15:38:58  lisa
+ * include Franks new accessor methods StHbtAnalysis::CorrFctn and StHbtManager::Analysis as well as McEvent example macro
+ *
  * Revision 1.6  1999/09/24 01:23:12  fisyak
  * Reduced Include Path
  *
@@ -57,6 +60,8 @@ public:
 
   // Gets and Sets...
   StHbtAnalysisCollection* AnalysisCollection();
+  StHbtAnalysis* Analysis(int n);  // Access to Analysis within Collection
+
   StHbtEventReader* EventReader();
   void SetEventReader(StHbtEventReader*);
   void SetEventWriter(StHbtEventReader*);

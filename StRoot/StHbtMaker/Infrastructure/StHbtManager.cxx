@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.cxx,v 1.10 1999/09/17 22:38:02 lisa Exp $
+ * $Id: StHbtManager.cxx,v 1.11 1999/10/04 15:38:57 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.cxx,v $
+ * Revision 1.11  1999/10/04 15:38:57  lisa
+ * include Franks new accessor methods StHbtAnalysis::CorrFctn and StHbtManager::Analysis as well as McEvent example macro
+ *
  * Revision 1.10  1999/09/17 22:38:02  lisa
  * first full integration of V0s into StHbt framework
  *
@@ -168,6 +171,16 @@ StHbtString StHbtManager::Report(){
   return returnThis;
 }
 //____________________________
+StHbtAnalysis* StHbtManager::Analysis( int n ){  // return pointer to n-th analysis
+  if ( n<0 || n > mAnalysisCollection->size() )
+    return NULL;
+  StHbtAnalysisIterator iter = mAnalysisCollection->begin();
+  for (int i=0; i<n ;i++){
+    iter++;
+  }
+  return *iter;
+}
+ //____________________________
 int StHbtManager::ProcessEvent(){
 
   cout << "StHbtManager::ProcessEvent" << endl;
