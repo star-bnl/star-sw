@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.h,v 1.10 1999/05/05 18:45:42 liq Exp $
+// $Id: St_tpt_Maker.h,v 1.11 1999/06/02 01:29:14 sakrejda Exp $
 // $Log: St_tpt_Maker.h,v $
+// Revision 1.11  1999/06/02 01:29:14  sakrejda
+// functions to switch on/off tte_track added
+//
 // Revision 1.10  1999/05/05 18:45:42  liq
 // include valuation plots of reconstraction
 //
@@ -61,7 +64,7 @@ private:
   Bool_t m_mkfinal;   	//control flag for final ntuple production
   Bool_t m_tteEvalOn; 	//switch for the evaluation
   Bool_t m_tptResOn;  	//switch for the residuals calculation
-//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.10 1999/05/05 18:45:42 liq Exp $";
+//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.11 1999/06/02 01:29:14 sakrejda Exp $";
   St_tpg_pad_plane      *m_tpg_pad_plane;	//! Constants that describe TPC pad plane
   St_tcl_tpc_index_type *m_type;   		//! Table of many-to-many index 
 	                                        //! correlations for tpc evaluations
@@ -158,12 +161,14 @@ public:
   virtual void   tptRes(Bool_t flag=kFALSE){m_tptResOn=flag;}
   virtual void   tptResOn() {tptRes(kTRUE);}                         // *MENU*
   virtual void   tptResOff(){tptRes();}                              // *MENU
+  virtual void   tteTrack(Bool_t flag=kFALSE){m_iftteTrack=flag;}
+  virtual void   tteTrackOn() {tteTrack(kTRUE);}                     // *MENU*
+  virtual void   tteTrackOff(){tteTrack();}                          // *MENU
 
   virtual Int_t  Init();
   virtual Int_t  Make();
   virtual Int_t  Finish();
   virtual void   PrintInfo();
-  virtual void   Set_tte(Bool_t m=kFALSE){m_iftteTrack = m;}
   virtual void   Set_final(Bool_t m=kFALSE){m_mkfinal = m;}
  ClassDef(St_tpt_Maker, 1)   //StAF chain virtual base class for Makers
 };
