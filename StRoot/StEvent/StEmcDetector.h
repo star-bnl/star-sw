@@ -4,9 +4,9 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcDetector.h,v 2.6 2004/07/20 17:07:49 perev Exp $
+ * $Id: StEmcDetector.h,v 2.7 2004/10/14 20:00:18 ullrich Exp $
  *
- * Author: Akio Ogawa, Jan 2000
+ * Author: Akio Ogawa, Jan 2000`
  ***************************************************************************
  *
  * Description:
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcDetector.h,v $
+ * Revision 2.7  2004/10/14 20:00:18  ullrich
+ * Added member and methods to deal with crate status flags.
+ *
  * Revision 2.6  2004/07/20 17:07:49  perev
  * Pavlinov corrs for TBrowser
  *
@@ -55,29 +58,35 @@ public:
     
     bool          addHit(StEmcRawHit*);
     unsigned int  numberOfHits() const;
-    void    printNumberOfHits() const; // *MENU*
-    double  getEnergy(const int pri=0) const; // *MENU*
+    void          printNumberOfHits() const; // *MENU*
+    double        getEnergy(const int pri=0) const; // *MENU*
     
     StEmcModule*       module(unsigned int);
     const StEmcModule* module(unsigned int) const;
     
     StEmcClusterCollection*         cluster();
     const StEmcClusterCollection*   cluster() const;
+    
+    StEmcCrateStatus crateStatus(int) const;
 
     void setCluster(StEmcClusterCollection*);
-    void setModule(StEmcModule*,int);
-  // 17-sep-03  
+    void setModule(StEmcModule*, int);
+    void setCrateStatus(int, StEmcCrateStatus);
+
     virtual bool  IsFolder() const;    
     virtual void  Browse(TBrowser *b);
-    void Zero();
+
+protected:
+    void clear();
     
 private:
+    enum { mMaxNumberOfCrates = 30 };
     StDetectorId            mDetectorId;
-    UInt_t                  mNumberOfModules;
-    
+    UInt_t                  mNumberOfModules;    
     StEmcModule             *mModules[120];
     StEmcClusterCollection  *mClusters;
+    StEmcCrateStatus        mCrateStatusFlag[mMaxNumberOfCrates];
     
-    ClassDef(StEmcDetector,1)
+    ClassDef(StEmcDetector,2)
 };
 #endif
