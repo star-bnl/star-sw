@@ -154,9 +154,44 @@ void StiDetectorContainer::moveIn()
 	mMessenger <<"StiDetecotrContainer::moveIn()\tNowhere to go"<<endl;
 	return;
     }
-    else {
-	double oldOrder = (*mphi_it)->getOrderKey();
+
+    //remember where we started:
+    double oldOrder = (*mphi_it)->getOrderKey();
+    data_node_vec::const_iterator oldRadialIt = mradial_it;
+    data_node_vec::const_iterator oldPhiIt = mphi_it;
+    
+    //Only select layers that are active
+    bool go=true;
+    
+    while (mradial_it>mregion->begin() && go) {
 	--mradial_it;
+	
+	//look for active layer by first detector
+	StiDetector* temp = (*(*mradial_it)->begin())->getData();
+	if (!temp) {
+	    mMessenger <<"StiDetectorContainer::moveIn()\tError:\t";
+	    mMessenger <<"No detector on first phi-node"<<endl;
+	    return;
+	}
+	//break the loop if "isOn"
+	if (temp->isOn()) {
+	    mMessenger <<"StiDetectorContainer::moveIn().  Layer "
+		       <<temp->getName()<<" is on.  Stop here"<<endl;
+	    go=false;
+	}
+	else {
+	    mMessenger <<"StiDetectorContainer::moveIn().  Layer "
+		       <<temp->getName()<<" is off.  Continue"<<endl;
+	}
+    }
+	
+    //see if we failed:
+    if (go) {
+	mMessenger <<"StiDetectorContainer::moveIn().  No active layer found."<<endl;
+	mradial_it = oldRadialIt;
+	mphi_it = oldPhiIt;
+    }
+    else {
 	mphi_it = gFindClosestOrderKey((*mradial_it)->begin(),
 				       (*mradial_it)->end(), oldOrder);
 	if (mphi_it == (*mradial_it)->end()) {
@@ -166,35 +201,7 @@ void StiDetectorContainer::moveIn()
 	}
 	return;
     }
-    /*
-      double oldOrder = (*mphi_it)->getOrderKey();
-      bool go=true;
-      while (mradial_it!=mregion->begin() && go) {
-      mMessenger <<"Entered move in loop"<<endl;
-      --mradial_it;
-      if ( (*(*mradial_it)->begin())->getData()->isActive()==1 ) {
-      //That means that the first phi entry in the next layer is active
-      go=false;
-      }
-      }
-      
-      mMessenger <<"Past move in loop"<<endl;
-      
-      //When loop breaks, check to see if we failed just nowhere else to go
-      if (mradial_it==mregion->begin() &&
-      (*(*mradial_it)->begin())->getData()->isActive()==0 ) {
-      mMessenger <<"StiDetecotrContainer::moveIn()\tNowhere to go"<<endl;
-      return;
-      }
-      
-      mphi_it = gFindClosestOrderKey((*mradial_it)->begin(),
-      (*mradial_it)->end(), oldOrder);
-      if (mphi_it == (*mradial_it)->end()) {
-      mMessenger <<"StiDetectorContainer::moveIn()\tError:\t";
-      mMessenger <<"Find Phi failed"<<endl;
-      mphi_it = (*mradial_it)->begin();
-      }
-    */
+
     return;
 }
 
@@ -213,15 +220,53 @@ void StiDetectorContainer::moveIn()
  */
 void StiDetectorContainer::moveOut()
 {
-    ++mradial_it;
-    if (mradial_it == mregion->end()) {
+    //remember where we started:
+    double oldOrder = (*mphi_it)->getOrderKey();
+    data_node_vec::const_iterator oldRadialIt = mradial_it;
+    data_node_vec::const_iterator oldPhiIt = mphi_it;
+    
+    //if there's nowher to go, get out before doing work!
+    mMessenger <<"StiDetectorContainer::moveOut()"<<endl;
+    if ( (++mradial_it<mregion->end())==false) {
 	mMessenger <<"StiDetectorContainer::moveOut(). ERROR:\t";
 	mMessenger <<"Nowhere to go"<<endl;
 	--mradial_it;
 	return;
     }
+    
+    bool go=true;
+    
+    while ( (mradial_it<mregion->end())==true && go) {
+
+	mMessenger <<"StiDetectorContainer::moveOut(). \t"
+		   <<"entered radial search loop";
+    
+	//look for active layer by first detector
+	StiDetector* temp = (*(*mradial_it)->begin())->getData();
+	if (!temp) {
+	    mMessenger <<"StiDetectorContainer::moveIn()\tError:\t";
+	    mMessenger <<"No detector on first phi-node"<<endl;
+	    return;
+	}
+	//break the loop if "isOn"
+	if (temp->isOn()) {
+	    mMessenger <<"StiDetectorContainer::moveOut().  Layer "
+		       <<temp->getName()<<" is on.  Stop here"<<endl;
+	    go=false;
+	}
+	else {
+	    mMessenger <<"StiDetectorContainer::moveOut().  Layer "
+		       <<temp->getName()<<" is off.  Continue"<<endl;
+	    ++mradial_it;
+	}
+    }
+    
+    //see if we failed:
+    if (go) {
+	mradial_it = oldRadialIt;
+	mphi_it = oldPhiIt;
+    }
     else {
-	double oldOrder = (*mphi_it)->getOrderKey();
 	mphi_it = gFindClosestOrderKey((*mradial_it)->begin(),
 				       (*mradial_it)->end(), oldOrder);
 	if (mphi_it == (*mradial_it)->end()) {
@@ -231,6 +276,8 @@ void StiDetectorContainer::moveOut()
 	}
 	return;
     }
+    
+    return;
 }
 
 /*! Plus phi is defined as clockwise if viewing sectors 1-12 from the membrane,
@@ -294,9 +341,7 @@ void StiDetectorContainer::print() const
     mMessenger <<"\nStiDetectorContainer::print()  Det"<<endl;
     mMessenger <<"--- Leaves ----"<<endl;
 
-    StreamNodeData<StiDetector> myStreamer;
-    for_each(mLeafIt->const_begin(), mLeafIt->const_end(),
-	     myStreamer);
+    for_each(mLeafIt->const_begin(), mLeafIt->const_end(), StreamNodeName<StiDetector>() );
 }
 
 //We assume that the node is a leaf in phi

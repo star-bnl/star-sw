@@ -6,6 +6,10 @@
 #define StlUtilities_HH
 
 #include <iostream>
+
+#include <string>
+using std::string;
+
 #include "StiCompositeTreeNode.h"
 #include "StiDetector.h"
 
@@ -17,6 +21,20 @@ struct StreamNodeName
     void operator()(const StiCompositeTreeNode<T>* node) {
 	cout <<node->getName()<<endl;
     }
+};
+
+template <class T>
+class SameNodeName
+{
+public:
+    SameNodeName(const string& name) : mname(name) {};
+    bool operator()(const StiCompositeTreeNode<T>* rhs) {
+	return mname == rhs->getName();
+    }
+    
+private:
+    SameNodeName(); //Not implemented
+    string mname;
 };
 
 template <class T>

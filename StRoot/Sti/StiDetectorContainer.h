@@ -97,10 +97,13 @@ public:
 				StiObjectFactoryInterface<StiDetector>*
 				detfactory);
 
+    //gets
+    const data_node* root() const;
+    
     //Action
     
     ///This performs a full internal reset of interator structure.
-    void reset(); 
+    void reset();
     
     //Navigation
 
@@ -178,5 +181,12 @@ private:
     ///pattern.
     static StiDetectorContainer* sinstance;
 };
+
+//inlines
+
+inline const data_node* StiDetectorContainer::root() const
+{
+    return mroot;
+}
 
 #endif
