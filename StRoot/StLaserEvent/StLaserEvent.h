@@ -1,6 +1,9 @@
-//$Id: StLaserEvent.h,v 1.2 1999/12/01 15:22:38 love Exp $
+//$Id: StLaserEvent.h,v 1.3 2000/02/01 16:06:30 love Exp $
 // Header file for TPC Laser event - Bill Love
 //$Log: StLaserEvent.h,v $
+//Revision 1.3  2000/02/01 16:06:30  love
+//Added track invp and nfit to Hit object
+//
 //Revision 1.2  1999/12/01 15:22:38  love
 //Bringing up to date with new StLaserEventMaker.  Sorry 'bout that.
 //
@@ -93,6 +96,11 @@ public:
                         Float_t zl, Float_t psi,
                         Float_t dx, Float_t dz,Float_t alpha,
                         Float_t lambda,Float_t prf,Float_t zrf);
+   void          AddHit(Float_t q,Float_t x,Float_t y,Float_t z, 
+                        Int_t row, Int_t track, Int_t flag, Int_t sector,
+                        Float_t zl, Float_t psi, Float_t invp, Int_t nfit,
+                        Float_t dx, Float_t dz,Float_t alpha,
+                        Float_t lambda, Float_t prf, Float_t zrf);
    void          AddPixel(Int_t row,Int_t pad,Int_t time,Int_t adc,
                          Float_t x,Float_t y,Float_t z);
 
@@ -118,10 +126,10 @@ class Hit : public TObject {
       Float_t fdx;     Float_t fdz;
       Float_t fq;      Float_t falpha;  Float_t flambda;
       Float_t fprf;    Float_t fzrf;
-      Float_t ftkzl;    Float_t ftkpsi;
+      Float_t ftkzl;    Float_t ftkpsi; Float_t ftkinvp;
 
       Int_t   ftrack;  Int_t   frow;    Int_t   fflag;
-      Int_t ftksector;
+      Int_t ftksector; Int_t ftknfit;
 
 public:
    Hit() { }
@@ -130,6 +138,11 @@ public:
    Hit(Float_t q,Float_t x,Float_t y,Float_t z, Int_t row, Int_t track,
   Int_t flag, Int_t tksector, Float_t tkzl, Float_t tkpsi, Float_t dx,
   Float_t dz,Float_t alpha, Float_t lambda, Float_t prf,Float_t zrf);
+  
+  Hit(Float_t q,Float_t x,Float_t y,Float_t z, Int_t row, Int_t track,
+  Int_t flag, Int_t tksector, Float_t tkzl, Float_t tkpsi, Float_t ftkinvp,
+  Int_t tknfit, Float_t dx, Float_t dz,Float_t alpha, Float_t lambda,
+  Float_t prf,Float_t zrf);
    virtual ~Hit() { }      
    ClassDef(Hit,1)  //A TPC TPhit object
 };
