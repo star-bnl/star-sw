@@ -38,4 +38,16 @@
 //#define EEMCDbMaxQAbatchName     3200
 //3200  =EEMCDbMaxQAbatch * EEMCDbMaxName
 
+
+// status bits (short int) 
+#define EEMCSTAT_NOSIG  0x0000
+#define EEMCSTAT_STKBT  0x0001
+#define EEMCSTAT_HOTHT  0x0002
+#define EEMCSTAT_HOTJP  0x0004
+
+// falure bits (short int)
+#define EEMCFAIL_GARBG  0x1000
+#define EEMCFAIL_HVOFF  0x0001
+#define EEMCFAIL_NOFIB  0x0002
+
 #endif
