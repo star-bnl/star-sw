@@ -1,5 +1,8 @@
-// $Id: DrawDstHist.C,v 1.24 1999/06/03 23:34:49 kathy Exp $
+// $Id: DrawDstHist.C,v 1.25 1999/06/11 20:07:35 kathy Exp $
 // $Log: DrawDstHist.C,v $
+// Revision 1.25  1999/06/11 20:07:35  kathy
+// changed default output file name
+//
 // Revision 1.24  1999/06/03 23:34:49  kathy
 // got macros working with current files
 //
@@ -81,7 +84,7 @@ void DrawDstHist(const Int_t nevents=1,
               const Char_t *file="/disk00000/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/set0029_08_49evts.root",
               const Char_t *firstHist="*",
               const Char_t *lastHist="*",   
-              const Char_t *psFile="QA_hist.ps")
+              const Char_t *psFile="QA_hist_DrawDstHist.ps")
 {
   const char *fileListQQ[]={0,0};
   if (path[0]=='-') {

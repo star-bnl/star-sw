@@ -1,5 +1,8 @@
-// $Id: DrawDstHistNew.C,v 1.1 1999/05/21 20:58:50 kathy Exp $
+// $Id: DrawDstHistNew.C,v 1.2 1999/06/11 20:07:39 kathy Exp $
 // $Log: DrawDstHistNew.C,v $
+// Revision 1.2  1999/06/11 20:07:39  kathy
+// changed default output file name
+//
 // Revision 1.1  1999/05/21 20:58:50  kathy
 // new macro DrawDstHistNew.C - reads 99e DST root files, runs St_QA_Maker, draws histograms and sends to ps file
 //
@@ -41,7 +44,7 @@ TBrowser *brow=0;
 
 void DrawDstHistNew(Int_t nevents=1, 
              const char *MainFile="/disk00000/star/test/new/tfs_Solaris/year_2a/psc0210_01_40evts.dst.root",
-             const Char_t *psFile="QA_hist.ps")
+             const Char_t *psFile="QA_hist_DrawDstHistNew.ps")
 {
 //
   cout << "DrawDstHistNew.C, input file name       " << MainFile << endl;
@@ -95,7 +98,7 @@ void DrawDstHistNew(Int_t nevents=1,
 //    QA->SetHistsNamesDraw(firstHist,lastHist);
     QA->SetPostScriptFile(psFile);
     QA->SetZones();
-    QA->SetPaperSize()
+    QA->SetPaperSize();
 
     Int_t numLog = 0;
     numLog = QA->ExamineLogYList();
