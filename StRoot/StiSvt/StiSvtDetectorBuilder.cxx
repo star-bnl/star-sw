@@ -66,15 +66,10 @@
     6     15       5     7
  */
 StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active)
-  : StiDetectorBuilder("Svt",active)
+  : StiDetectorBuilder("SvtBuilder",active)
 {
   _calc = new StiDefaultHitErrorCalculator();
-  _calc->set(0.25,0.,0.,0.25,0.,0.);  
-  StiTrackingParameters * trackingPars = getTrackingParameters();
-  trackingPars->setMaxChi2ForSelection(5.);
-  trackingPars->setMinSearchWindow(1.);
-  trackingPars->setMaxSearchWindow(2.);
-  trackingPars->setSearchWindowScaling(4.);
+  _calc->set(0.25,0.,0.,0.25,0.,0.);
 }
 
 StiSvtDetectorBuilder::~StiSvtDetectorBuilder()
