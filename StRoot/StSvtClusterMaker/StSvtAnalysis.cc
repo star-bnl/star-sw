@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.cc,v 1.4 2000/08/21 13:06:57 caines Exp $
+ * $Id: StSvtAnalysis.cc,v 1.5 2000/08/24 04:27:56 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -81,6 +81,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysis.cc,v $
+ * Revision 1.5  2000/08/24 04:27:56  caines
+ * Fixed casting warnings so compiles without errors on linux
+ *
  * Revision 1.4  2000/08/21 13:06:57  caines
  * Much improved hit finding and fitting
  *
@@ -117,11 +120,11 @@ StSvtAnalysis::StSvtAnalysis(int TotalNumberOfHybrids)
 
   tempMemberInfo           = new StSvtClusterMemberInfo*[500];	 
 
-  mCluCharge               = new int[500];     //ideally should make these static so they are on the 
   mCluFlag                 = new int[500];     //heap not the stack to increase speed.
   mCluPeakAdc              = new int[500];     //note new is very slow to I do this here and only
   mCluNumPixels            = new int[500];     //recall if more than 500 clusters/hybrid. Very unlikely
   mCluNumAnodes            = new int[500];     //number of anodes>1 ADC
+  mCluCharge               = new double[500];     //ideally should make these static so they are on the 
   mMeanClusterTimeBin      = new double[500];  //Mean Time
   mMeanClusterAnode        = new double[500];  //Mean Anode
   mSecondMomClusterTimeBin = new double[500];  //2nd momemnt Time
@@ -401,7 +404,6 @@ void StSvtAnalysis::MomentAnalysis()
  int mseq, Seq, stTimeBin, len;
  int sumAdc;
  double fDriftMom1, fAnodeMom1, fDriftMom2, fAnodeMom2, fMom0, Neff;
- int* anolist;
  unsigned char* adc;
  int ADC, hit_id;
  double X_err=72., Y_err=75.;                          //default bin size/sqrt(12)
@@ -418,7 +420,6 @@ void StSvtAnalysis::MomentAnalysis()
                                                        //Array. If there is no info value is 0.	 
  if (numOfClusters>500)                                //Then we have to allocate more memory.
  {
-   mCluCharge               = new int[numOfClusters];  //shouldn't call these each time. Make static and
    mCluFlag                 = new int[numOfClusters];  //then just refill. Will speed up a lot.
    mCluPeakAdc              = new int[numOfClusters];
    mCluNumPixels            = new int[numOfClusters];
@@ -426,6 +427,7 @@ void StSvtAnalysis::MomentAnalysis()
    mHybridNum               = new int[numOfClusters];
    mCluID                   = new int[numOfClusters];
    mCluDeconvID             = new int[numOfClusters];
+   mCluCharge               = new double[numOfClusters];  //shouldn't call these each time. Make static and
    mMeanClusterTimeBin      = new double[numOfClusters];
    mMeanClusterAnode        = new double[numOfClusters];
    mSecondMomClusterTimeBin = new double[numOfClusters];
@@ -460,7 +462,7 @@ void StSvtAnalysis::MomentAnalysis()
      mseq     =  tempMemberInfo[clu][mem].seq;
      actualAn =  tempMemberInfo[clu][mem].actualAnode; //actual anode
 		  
-     int status = mHybridData->getListSequences(listAn,Seq,mSvtSequence);
+     mHybridData->getListSequences(listAn,Seq,mSvtSequence);
      stTimeBin = mSvtSequence[mseq].startTimeBin; 
      len = mSvtSequence[mseq].length;
      adc = mSvtSequence[mseq].firstAdc;
@@ -535,7 +537,7 @@ void StSvtAnalysis::MomentAnalysis()
 
    if (sumAdc>3)  //fianlize the moment calculation and also estiame the cov's. 
    {
-     fMom0 = sumAdc;
+     fMom0 = (double)sumAdc;
      fDriftMom1 = (double)fDriftMom1/sumAdc;
      fAnodeMom1 = (double)fAnodeMom1/sumAdc;
      fDriftMom2 = sqrt((double)fDriftMom2/sumAdc - fDriftMom1*fDriftMom1); /*note no N/N-1*/
@@ -718,6 +720,7 @@ int StSvtAnalysis::Deconvolve_Cluster(int iRows, int iCols, int clu)
     if (iRetu==0) return 0;
   }
 
+  return 1;
   // cout<<"Exit Deconvolve Cluster"<<endl;
 
 }
@@ -769,7 +772,7 @@ POINT* StSvtAnalysis::Find_Peaks (int iRows, int iCols, int *iNumPeaks)
 	  Peaks[*iNumPeaks].y = y;
 	  Peaks[*iNumPeaks].val = Array[i].val;
           Peaks[*iNumPeaks].error = Array[i].error;
-	  if (valley=IsValidPeak (iRows, iCols, Peaks, *iNumPeaks)) //Is it a nicely seperated hit (based on peak/valley)
+	  if ((valley=IsValidPeak (iRows, iCols, Peaks, *iNumPeaks))) //Is it a nicely seperated hit (based on peak/valley)
           {
             Peaks[*iNumPeaks].error = valley;                //the error on the deconv. hits is proportional to how clean they
             *iNumPeaks += 1;                                 //are or how well seperated they are.
@@ -796,7 +799,7 @@ RETURN VALUE: the amplitude difference
 ------------------------------------------------------------------*/
 int Compare_Point ( const void *a, const void *b)
 {
-  return static_cast<const POINT*>(b)->val - static_cast<const POINT*>(a)->val;
+  return (int)(static_cast<const POINT*>(b)->val - static_cast<const POINT*>(a)->val);
 }
 
 /*------------------------------------------------------------------
@@ -817,12 +820,12 @@ float StSvtAnalysis::IsValidPeak(int iRows, int iCols, POINT *Peaks, int iNumPea
   int Px = Peaks[iNumPeaks].x, Py = Peaks[iNumPeaks].y, i;
   float pval;
   float  val=0, peak=1, valley=0;
-  float PEAK_TO_VALLEY = 2;
+  //float PEAK_TO_VALLEY = 2;
 
   for (i = 0; i < iNumPeaks; i++)
   {
     int    dx, dy;
-    float  fSlope, fRatio;
+    float  fSlope;
 
     dx = Peaks[i].x - Px;
     dy = Peaks[i].y - Py;
@@ -840,7 +843,7 @@ float StSvtAnalysis::IsValidPeak(int iRows, int iCols, POINT *Peaks, int iNumPea
     while (dx!=0 || dy!=0)
     {
       if (dx!=0) 
-        dy = dx / fSlope;
+        dy = (int)(dx /fSlope);
       else
       {
         if (dy>0) dy--; if (dy<0) dy++;
@@ -890,7 +893,7 @@ int StSvtAnalysis::Fit_Peaks(int iRows, int iCols, int iNumPeaks, POINT *Peaks, 
 //Fitthe deconv. clusters. Add them to the end of the cluster table
 {
   int     i, j, k, iSum;
-  double  iX, iY;
+  int  iX, iY;
   double  fX, fY;
   int     iSum1;
   float   CovX, CovY;
@@ -946,15 +949,15 @@ int StSvtAnalysis::Fit_Peaks(int iRows, int iCols, int iNumPeaks, POINT *Peaks, 
     mCluDeconvID[m_clu]             = clu;                   //points to hit which was deconvoluted
     mMeanClusterAnode[m_clu]        = fX + iFirstAnode+0.5;  /*so goes from 0-239  CHECK THIS!!!!!!!!*/
     mMeanClusterTimeBin[m_clu]      = fY + iFirstTime+0.5;   /*so goes from 0-127*/
-    mCluPeakAdc[m_clu]              = Peaks[i].val;          //peakADC
+    mCluPeakAdc[m_clu]              = (int)Peaks[i].val;          //peakADC
     mCluCharge[m_clu]               = iSum;                  //should not be used in de/dx
     mCluFlag[m_clu]                 = 2;                     //says deconvoluted hit
     mSecondMomClusterTimeBin[m_clu] = MomX;                  //Not really accuratly determined
     mSecondMomClusterAnode[m_clu]   = MomY;                  //Not really accuratly determined
     mCluXCov[m_clu]                 = sqrt(2.)*CovX*Peaks[i].error; //errors based on origional error scaled by peak/valley
     mCluYCov[m_clu]                 = sqrt(2.)*CovY*Peaks[i].error;
-    mCluNumPixels[m_clu]            = 9999.;   //so dont mess up signal/noise calculation.
-    mCluNumAnodes[m_clu]            = 9999.;   //ill defined for deconvolution
+    mCluNumPixels[m_clu]            = 9999;   //so dont mess up signal/noise calculation.
+    mCluNumAnodes[m_clu]            = 9999;   //ill defined for deconvolution
    
     //cout<<"In Deconvolute: x:" << mMeanClusterAnode[m_clu] << " y: " << mMeanClusterTimeBin[m_clu] 
     //    << " Peak: " << mCluPeakAdc[m_clu] << endl;
@@ -1132,9 +1135,9 @@ RETURN VALUE: 0
 int StSvtAnalysis::Fill_Pixel_Array(int clu)
 //Fill a 2D array with the cluster in question to be deconvoluted.
 {
-  int listAn, mseq, actualAn, stTimeBin, len, ADC, Seq;
+  int listAn, mseq, actualAn, stTimeBin, len, Seq;
   unsigned char* adc;
-  int iBins, iRow, iCol;
+  int iRow, iCol;
   int val;
 
   m_col_p = 0; m_row_p = 0; m_adc_p = 0;
@@ -1150,7 +1153,7 @@ int StSvtAnalysis::Fill_Pixel_Array(int clu)
     mseq     =  tempMemberInfo[clu][mem].seq;
     actualAn =  tempMemberInfo[clu][mem].actualAnode; //actual anode
 		  
-    int status = mHybridData->getListSequences(listAn,Seq,mSvtSequence);
+    mHybridData->getListSequences(listAn,Seq,mSvtSequence);
     stTimeBin  = mSvtSequence[mseq].startTimeBin; 
     adc        = mSvtSequence[mseq].firstAdc;
 
@@ -1161,7 +1164,7 @@ int StSvtAnalysis::Fill_Pixel_Array(int clu)
     //cout << "Clu=" << clu<< " Irow=" << iRow << " Actual An=" << actualAn << " iCol=" << iCol <<  " stTimeBucket=" << stTimeBin << " and finally len=" << len << endl;
      
     for (int j=0; j<len; j++) {
-      if (iRow<0 || iCol+j<0 || iRow>239 || iCol+j>127) {
+      if (iRow<1 || iCol+j<1 || iRow>240 || iCol+j>128) {
 	cout<<"Problem in Fill Pixel Array. iRow: " << iRow << " iCol: " << iCol+j<<endl;
         continue;
       }
@@ -1193,7 +1196,7 @@ int StSvtAnalysis::FillRawAdc()
 
   for(int an = 0; an < numAnodes; an++) {
     actualAn = anodeList[an];
-    int status = mHybridRawData->getListSequences(an,numOfSeq,svtSequence);
+    mHybridRawData->getListSequences(an,numOfSeq,svtSequence);
     for(int seq = 0; seq < numOfSeq; seq++) {
       seqStart =  svtSequence[seq].startTimeBin;
       seqLength = svtSequence[seq].length;
@@ -1279,10 +1282,6 @@ int StSvtAnalysis::GetLastTimeBin(int clu)
 return mCluLastTimeBin[clu];
 }
 
-int StSvtAnalysis::GetCluCharge(int clu)
-{
-return mCluCharge[clu];
-}
 
 int StSvtAnalysis::GetCluFlag(int clu)
 {
@@ -1292,6 +1291,12 @@ int StSvtAnalysis::GetCluFlag(int clu)
   else{
     return mCluFlag[clu];
   }
+}
+
+
+double StSvtAnalysis::GetCluCharge(int clu)
+{
+return mCluCharge[clu];
 }
 
 double StSvtAnalysis::GetMeanClusterAnode(int clu)
