@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.20 2000/03/06 18:08:56 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.21 2000/03/28 02:57:32 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.21  2000/03/28 02:57:32  calderon
+ * Add additional check for V0 vertices: Make sure they also have a parent.
+ *
  * Revision 1.20  2000/03/06 18:08:56  calderon
  * Hit comparisons are used for both sorting the hits in the
  * StMcEvent containers and for ordering the hits in the multimaps,
@@ -1231,7 +1234,8 @@ Int_t StAssociationMaker::Make()
 		mcDaughter2 = (*trkIter2).second->partnerMcTrack();
 		if (mcDaughter1->startVertex() == mcDaughter2->startVertex() &&
 		    mcDaughter1->startVertex() != primary &&
-		    mcDaughter1->startVertex() != 0) {
+		    mcDaughter1->startVertex() != 0 &&
+		    mcDaughter1->startVertex()->parent() != 0) {
 		    // Got a V0 candidate
 		    mRcV0Map->insert(rcV0MapValType (rcV0, mcDaughter1->startVertex()));
 		    mMcV0Map->insert(mcV0MapValType (mcDaughter1->startVertex(), rcV0));
