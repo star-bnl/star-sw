@@ -1,5 +1,8 @@
-// $Id: rootlogoff.C,v 1.11 2004/11/14 17:03:56 fisyak Exp $
+// $Id: rootlogoff.C,v 1.12 2005/02/05 01:21:37 perev Exp $
 // $Log: rootlogoff.C,v $
+// Revision 1.12  2005/02/05 01:21:37  perev
+// STARNODELETE env added
+//
 // Revision 1.11  2004/11/14 17:03:56  fisyak
 // delete chain in .DEV version only
 //
@@ -47,8 +50,9 @@ if (TClassTable::GetDict("StMaker"))
     
 
     rootlogoff::mk->Finish();
-    if (TString(gSystem->Getenv("STAR_VERSION")) == ".DEV") delete rootlogoff::mk;
-    else                            printf ("*** Chain not deleted***\n");
+    if (TString(gSystem->Getenv("STAR_VERSION")) == ".DEV"
+	&& !gSystem->Getenv("STARNODELETE")) delete rootlogoff::mk;
+    else  printf ("*** Chain not deleted***\n");
   }
 }
 printf("\nThis is the end of ROOT -- Goodbye\n\n");
