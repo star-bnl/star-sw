@@ -1,6 +1,6 @@
 /*************************************************
  *
- * $Id: StPmdClusterMaker.cxx,v 1.7 2004/06/24 13:46:52 subhasis Exp $
+ * $Id: StPmdClusterMaker.cxx,v 1.8 2004/06/29 17:31:23 perev Exp $
  * Author: Subhasis Chattopadhyay
  *************************************************
  *
@@ -9,6 +9,9 @@
  *************************************************
  *
  * $Log: StPmdClusterMaker.cxx,v $
+ * Revision 1.8  2004/06/29 17:31:23  perev
+ * Zeroing in ctr added and tests for null pointers
+ *
  * Revision 1.7  2004/06/24 13:46:52  subhasis
  * several changes in clustering code
  *
@@ -124,10 +127,10 @@ Int_t StPmdClusterMaker::Make()
     {
       StPmdDetector * cpv_det = cluster_hit->detector(Int_t(0)); //CPV = 0 in PmdCollection
       StPmdDetector * pmd_det = cluster_hit->detector(Int_t(1)); //PMD = 1 in PmdCollection
-      StPmdClustering *clust1; // added for getting pointer to StPmdClustering
+      StPmdClustering *clust1=0; // added for getting pointer to StPmdClustering
       Int_t choice=1; // Enter choice
       if(choice==1){
-	//      StPmdClustering *clust1 = new StPmdClustering(pmd_det, cpv_det);
+//        clust1 = new StPmdClustering(pmd_det, cpv_det);
 	if(clust1)
 	  {
 	    for(Int_t d=0;d<2;d++)  // Loop over detectors
@@ -174,66 +177,69 @@ void StPmdClusterMaker::FillHistograms(StPmdDetector* pmd_det, StPmdDetector* cp
   StPmdClusterCollection* clusters = (StPmdClusterCollection*)pmd_det->cluster();
   StPmdClusterCollection* cpvclusters = (StPmdClusterCollection*)cpv_det->cluster();
   
-  Int_t nclust = clusters->Nclusters();   //! no of Pmd clusters
+  Int_t nclust     = (clusters   )? clusters->Nclusters()   :0;   //! no of Pmd clusters
   
-  Int_t nclust_cpv = cpvclusters->Nclusters(); //! no of Cpv clusters
+  Int_t nclust_cpv = (cpvclusters)? cpvclusters->Nclusters():0; //! no of Cpv clusters
   
   //! First Fill PMD
-  TIter next(clusters->Clusters());
-  
-  StPmdCluster *spmcl1;
-  for(Int_t i=0; i<nclust ; i++)
-    {
-      spmcl1 = (StPmdCluster*)next();
-      Float_t eta=spmcl1->CluEta(); 
-      Float_t phi=spmcl1->CluPhi();
-      Float_t edep=spmcl1->CluEdep();
-      Float_t sigmaL=spmcl1->CluSigmaL();
-      Float_t sigmaS=spmcl1->CluSigmaS();
-      Int_t mod=spmcl1->Module();
-      Float_t ncell=spmcl1->NumofMems();
-      Float_t xclu = spmcl1->CluX();
-      Float_t yclu = spmcl1->CluY();
+  if ( nclust ) {
+    TIter next(clusters->Clusters());
 
-      mSmPmdCluster->Fill(Float_t(mod));
-      mEdepPmdCluster->Fill(edep);    // In keV
-      mSigmaLPmdCluster->Fill(sigmaL);
-      mSigmaSPmdCluster->Fill(sigmaS);
-      mNcellPmdCluster->Fill(ncell);
-      mEtaPmdCluster->Fill(eta);
-      mPhiPmdCluster->Fill(phi);
-      mXYPmdCluster->Fill(xclu,yclu);
-    }
+    StPmdCluster *spmcl1;
+    for(Int_t i=0; i<nclust ; i++)
+      {
+	spmcl1 = (StPmdCluster*)next();
+	Float_t eta=spmcl1->CluEta(); 
+	Float_t phi=spmcl1->CluPhi();
+	Float_t edep=spmcl1->CluEdep();
+	Float_t sigmaL=spmcl1->CluSigmaL();
+	Float_t sigmaS=spmcl1->CluSigmaS();
+	Int_t mod=spmcl1->Module();
+	Float_t ncell=spmcl1->NumofMems();
+	Float_t xclu = spmcl1->CluX();
+	Float_t yclu = spmcl1->CluY();
+
+	mSmPmdCluster->Fill(Float_t(mod));
+	mEdepPmdCluster->Fill(edep);    // In keV
+	mSigmaLPmdCluster->Fill(sigmaL);
+	mSigmaSPmdCluster->Fill(sigmaS);
+	mNcellPmdCluster->Fill(ncell);
+	mEtaPmdCluster->Fill(eta);
+	mPhiPmdCluster->Fill(phi);
+	mXYPmdCluster->Fill(xclu,yclu);
+      }
+  }
   mHitVscluster->Fill(tothitpmd,Float_t(nclust));
   mPmdCluster->Fill(nclust);
   mCpvCluster->Fill(nclust_cpv);  
   //! NOW for Fill CPV
-  TIter nextcpv(cpvclusters->Clusters());
-  StPmdCluster *spmcl2;
-  for(Int_t i=0; i<nclust_cpv ; i++)
-    {
-      spmcl2 = (StPmdCluster*)nextcpv();
-      Float_t eta=spmcl2->CluEta();
-      Float_t phi=spmcl2->CluPhi();
-      Float_t edep=spmcl2->CluEdep();
-      Int_t mod=spmcl2->Module();
-      Float_t sigmaL=spmcl2->CluSigmaL();
-      Float_t sigmaS=spmcl2->CluSigmaS();
-      Float_t ncell1=spmcl2->NumofMems();
-      Float_t xclu = spmcl2->CluX();
-      Float_t yclu = spmcl2->CluY();
-      
-      
-      mSmCpvCluster->Fill(Float_t(mod));
-      mEdepCpvCluster->Fill(edep); //In keV
-      mSigmaLCpvCluster->Fill(sigmaL);
-      mSigmaSCpvCluster->Fill(sigmaS);
-      mNcellCpvCluster->Fill(ncell1);
-      mEtaCpvCluster->Fill(eta);
-      mPhiCpvCluster->Fill(phi);
-      mXYCpvCluster->Fill(xclu,yclu);
-    }
-  
+  if (nclust_cpv) {
+    TIter nextcpv(cpvclusters->Clusters());
+    StPmdCluster *spmcl2;
+    for(Int_t i=0; i<nclust_cpv ; i++)
+      {
+	spmcl2 = (StPmdCluster*)nextcpv();
+	Float_t eta=spmcl2->CluEta();
+	Float_t phi=spmcl2->CluPhi();
+	Float_t edep=spmcl2->CluEdep();
+	Int_t mod=spmcl2->Module();
+	Float_t sigmaL=spmcl2->CluSigmaL();
+	Float_t sigmaS=spmcl2->CluSigmaS();
+	Float_t ncell1=spmcl2->NumofMems();
+	Float_t xclu = spmcl2->CluX();
+	Float_t yclu = spmcl2->CluY();
+
+
+	mSmCpvCluster->Fill(Float_t(mod));
+	mEdepCpvCluster->Fill(edep); //In keV
+	mSigmaLCpvCluster->Fill(sigmaL);
+	mSigmaSCpvCluster->Fill(sigmaS);
+	mNcellCpvCluster->Fill(ncell1);
+	mEtaCpvCluster->Fill(eta);
+	mPhiCpvCluster->Fill(phi);
+	mXYCpvCluster->Fill(xclu,yclu);
+      }
+   }
 }
 
 Int_t StPmdClusterMaker::Finish()
@@ -271,11 +277,11 @@ void StPmdClusterMaker::FillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_d
       StPmdClusterCollection* clusters = (StPmdClusterCollection*)pmd_det->cluster();
       StPmdClusterCollection* cpvclusters = (StPmdClusterCollection*)cpv_det->cluster();
       
-      Int_t nclust = clusters->Nclusters();   //! no of Pmd clusters
-      Int_t nclust_cpv = cpvclusters->Nclusters(); //! no of Cpv clusters
+      Int_t nclust     = (clusters   )?clusters->Nclusters()   :0;   //! no of Pmd clusters
+      Int_t nclust_cpv = (cpvclusters)?cpvclusters->Nclusters():0; //! no of Cpv clusters
       
       //! First Fill PMD
-      if(evtdet0)
+      if(evtdet0 && clusters)
 	{
 	  evtdet0->setCluster(cluscollpmd);
 	  TIter next(clusters->Clusters());
@@ -309,7 +315,7 @@ void StPmdClusterMaker::FillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_d
 	    }       
 	} 
       //! NOW for Fill CPV
-      if(evtdet1)
+      if(evtdet1 && cpvclusters)
 	{
 	  evtdet1->setCluster(cluscollcpv);
 	  TIter nextcpv(cpvclusters->Clusters());
