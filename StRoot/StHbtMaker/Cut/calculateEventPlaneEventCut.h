@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: calculateEventPlaneEventCut.h,v 1.1 2001/07/20 20:03:50 rcwells Exp $
+ * $Id: calculateEventPlaneEventCut.h,v 1.2 2003/01/28 17:16:55 magestro Exp $
  *
  * Author: Randall Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: calculateEventPlaneEventCut.h,v $
+ * Revision 1.2  2003/01/28 17:16:55  magestro
+ * Removed inheritance from StMaker, caused compilation warnings
+ *
  * Revision 1.1  2001/07/20 20:03:50  rcwells
  * Added pT weighting and moved event angle cal. to event cut
  *
@@ -26,8 +29,6 @@
 //#endif
 
 #include "StMaker.h"
-#include "StChain.h"
-#include "St_DataSetIter.h"
 
 #include "StHbtMaker/Base/StHbtEventCut.h"
 class StFlowMaker;
@@ -35,7 +36,7 @@ class StFlowEvent;
 class StFlowAnalysisMaker;
 class StFlowSelection;
 
-class calculateEventPlaneEventCut : public StMaker, public StHbtEventCut {
+class calculateEventPlaneEventCut : public StHbtEventCut {
 
 public:
 
@@ -72,14 +73,16 @@ private:   //
 inline int  calculateEventPlaneEventCut::NEventsPassed() {return mNEventsPassed;}
 inline int  calculateEventPlaneEventCut::NEventsFailed() {return mNEventsFailed;}
 inline void calculateEventPlaneEventCut::SetFlowMaker(char* title){
-  mFlowMaker = (StFlowMaker*)GetMaker(title);
+  StMaker tempMaker;
+  mFlowMaker = (StFlowMaker*)tempMaker.GetMaker(title);
   if (!mFlowMaker) {
     cout << "No StFlowMaker found!" << endl;
     assert(0);
   }
 }
 inline void calculateEventPlaneEventCut::SetFlowAnalysisMaker(char* title) {
-  mFlowAnalysisMaker = (StFlowAnalysisMaker*)GetMaker(title);
+  StMaker tempMaker;
+  mFlowAnalysisMaker = (StFlowAnalysisMaker*)tempMaker.GetMaker(title);
   if (!mFlowAnalysisMaker) {
     cout << "No StFlowAnalysisMaker found!" << endl;
     assert(0);
