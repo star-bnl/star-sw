@@ -1,4 +1,4 @@
-#define PPDATA
+#define AUAUDATA
 
 #ifndef __STESTRUCTSIGMAS__H
 #define __STESTRUCTSIGMAS__H
