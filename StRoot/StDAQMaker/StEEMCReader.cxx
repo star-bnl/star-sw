@@ -23,11 +23,10 @@
 typedef EventInfo DAQEventInfo;
   
 StEEMCReader::StEEMCReader(StDAQReader *daqr) {
-  fEEMCImpReader=0;
+   fEEMCImpReader=0;
    fDAQReader = daqr;
   delete fEEMCImpReader;
   fEEMCImpReader = ::getEEMCReader(daqr->getEventReader());
-
 }
 
 
@@ -39,36 +38,6 @@ int StEEMCReader::close() {
   return 1;
 }
 
-int StEEMCReader::getEemcData2004(int crate,int channel) {
-  static int warn=0;
-  if(fEEMCImpReader) return fEEMCImpReader->getEemc2004(crate,channel);
-  if(!warn) {
-    printf("StEEMCReader::getTowerAdc  WARNING:   no EEMC data in this event.\n");
-    warn=1;
-  }
-  return -1;
-}
-int StEEMCReader::getTowerAdc(int crate,int channel) {
-  static int warn=0;
-  if(fEEMCImpReader) return fEEMCImpReader->getEemcTowerAdc(crate,channel);
-  if(!warn) {
-    printf("StEEMCReader::getTowerAdc  WARNING:   no EEMC data in this event.\n");
-    warn=1;
-  }
-  return -1;
-}
-
-
-int StEEMCReader::getEEmcData(int crate,int channel, int mapping) {
-  static int warn=0;
-  if(fEEMCImpReader) return fEEMCImpReader->getEemc(crate,channel,mapping);
-  if(!warn) {
-    printf("StEEMCReader::getTowerAdc  WARNING:   no EEMC data in this event.\n");
-    warn=1;
-  }
-  return -1;
-}
-
 
 int StEEMCReader::Update() {
   delete fEEMCImpReader;
@@ -77,3 +46,27 @@ int StEEMCReader::Update() {
  cout<<" EEMC Updated**"<<endl;
  return 1;
 }
+
+
+u_short *StEEMCReader::getEemcHeadBlock(int fiber,char type) {
+  if(fEEMCImpReader) return fEEMCImpReader->getEemcHeadBlock(fiber,type);
+  return 0;
+} 
+
+
+u_short *StEEMCReader::getEemcDataBlock(int fiber,char type) {
+  if(fEEMCImpReader) return fEEMCImpReader->getEemcDataBlock(fiber,type);
+  return 0;
+} 
+
+
+u_short StEEMCReader::getEemcHead(int fiber,int channel,char type) {
+  if(fEEMCImpReader) return fEEMCImpReader->getEemcHead(fiber,channel,type);
+  return 0;
+}
+
+u_short StEEMCReader::getEemcData(int fiber,int channel,char type) {
+  if(fEEMCImpReader) return fEEMCImpReader->getEemcData(fiber,channel,type);
+  return 0;
+}
+

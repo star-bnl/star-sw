@@ -44,21 +44,24 @@ struct Bank_EEMCRBP: public Bank
 
 class EEMC_Reader 
 {
-      void              ProcessEvent(const Bank_EEMCP *EmcPTR);///<Process EEMC (tower+SMD) event
+  void              ProcessEvent(const Bank_EEMCP *EmcPTR);///<Process EEMC (tower+SMD) event
+  
+public:
+  
+  EEMC_Reader(EventReader *er, Bank_EEMCP *pEEMCP);///<EEMC_Reader constructor
+  ~EEMC_Reader() {}; ///<EEMC_Reader destructor
 
-  public:
-                        enum  FeeMapping { kFY2003=0, kFY2004 , kBEYOND }; // some sanity added (Piotr A Zolnierczuk)   
-                        EEMC_Reader(EventReader *er, Bank_EEMCP *pEEMCP);///<EEMC_Reader constructor
-                        ~EEMC_Reader() {}; ///<EEMC_Reader destructor
-			int getEemcTowerAdc(int crate,int channel);
-			int getEemc2004(int crate,int channel);
-                        int getEemc(int crate, int channel, int mapping);
-                         
-  protected:
+  u_short *getEemcHeadBlock(int fiber,char type); 
+  u_short *getEemcDataBlock(int fiber,char type); 
+  
+  u_short getEemcHead(int fiber,int channel,char type);
+  u_short getEemcData(int fiber,int channel,char type);
 
-      // copy of EventReader pointer
-      EventReader       *ercpy;
-      Bank_EEMCP         *pBankEEMCP;
+protected:
+  
+  // copy of EventReader pointer
+  EventReader       *ercpy;
+  Bank_EEMCP         *pBankEEMCP;
 };
 
 EEMC_Reader *getEEMCReader(EventReader *er);

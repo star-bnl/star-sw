@@ -1,69 +1,87 @@
 #include "EEMC_Reader.hh"
 #include "../EVP/emcReader.h" // Has prototypes for emcReader and getEemcTower.
 #include <assert.h>
-#define MAX_ADC 0xFFF
 
-// modified by Piotr A Zolnierczuk
-int EEMC_Reader::getEemc2004(int crate,int channel) { // To resolve confusion about "channel", see
-                                                      // comments in getEemcTowerAdc.
-  //int index;
-  if(crate>=1&&crate<=6) { // Tower portion of EEMC.
-    //index = (crate-1) + 6 * channel ;
-    //return ::getEemcTower(index); // emc.etow[index]
-    return emc.etow[crate-1][channel]; 
-  } else if(crate>=84&&crate<=99) { // MAPMT portion of EEMC.
-    //index = crate - 82 + 30 * channel ;
-    //return ::getEemcMapmt(index); // emc.esmd[index]
-    return emc.esmd[crate-82][channel]; 
-  } else {
-    return 0;
-  }
-  
-}
-int EEMC_Reader::getEemcTowerAdc(int crate,int channelJan) {
-  //int index,channelGerard;
-  int channelGerard;
 
-  // Jan and Gerard use the word "channel" in different senses, hence
-  // the two int's with names beginning with "channel".
+u_short *EEMC_Reader::getEemcHeadBlock(int fiber, char type) {
 
-  assert(crate>=0&&crate<=5); // There are only six crates, and their numbering begins at 0.
-  assert(channelJan>=0&&channelJan<=159); // Only 160 "channels" per crate.
-
-  /**/ if(crate==3) channelGerard=0;
-  else if(crate==4) channelGerard=1;
-  else if(crate==5) channelGerard=3;
-  else return 0;
-
-  //index=channelGerard+30*channelJan;
-  // printf("BBB index = %4d\n",index);
-  //return ::getEemcTower(index);
-  return emc.etow[channelGerard][channelJan];
-  
-}
-
-// added by Piotr A Zolnierczuk
-int EEMC_Reader::getEemc(int crate,int chan, int mapping) {
-  // a lousy crate <-> fee data index mapping 
-  if(mapping<0) mapping=kFY2004;
-  switch(mapping) {
-  case kFY2003:
-    switch(crate) {
-    case  3: return emc.etow[0][chan]; break;
-    case  4: return emc.etow[1][chan]; break;
-    case  5: return emc.etow[3][chan]; break; // redundant breaks
-    default: break;
-    }
+  switch(type) {
+  case 'T': // tower crates
+    assert(fiber>=0 && fiber <ETOW_MAXFEE);
+    return emc.etow_pre[fiber];
     break;
-  case kFY2004:
-    if( 1<=crate && crate<= 6) return emc.etow[crate- 1][chan];
-    if(84<=crate && crate<=99) return emc.esmd[crate-82][chan];
+  case 'S': // smd/pre/post  crates
+    assert(fiber>=0 && fiber <=ESMD_MAXFEE);
+    return emc.esmd_pre[fiber];
     break;
-  case kBEYOND: break; // not yet there
-  default:      break;
+  default:
+    assert(2==3);
   }
-  return -1;
+
 }
+
+
+u_short *EEMC_Reader::getEemcDataBlock(int fiber, char type) {
+
+  switch(type) {
+  case 'T': // tower crates
+    assert(fiber>=0 && fiber <ETOW_MAXFEE);
+    return emc.etow[fiber];
+    break;
+  case 'S': // smd/pre/post  crates
+    assert(fiber>=0 && fiber <=ESMD_MAXFEE);
+    return emc.esmd[fiber];
+    break;
+  default:
+    assert(2==3);
+  }
+
+}
+
+
+
+
+u_short EEMC_Reader::getEemcHead(int fiber,int channel, char type) {
+  u_short val=0;
+  switch(type) {
+  case 'T': // tower crates
+    assert(channel>=0 && channel <ETOW_PRESIZE);
+    assert(fiber>=0 && fiber <ETOW_MAXFEE);
+    val=emc.etow_pre[fiber][channel];
+    break;
+  case 'S': // smd/pre/post  crates
+    assert(channel>=0 && channel <ESMD_PRESIZE);
+    assert(fiber>=0 && fiber <=ESMD_MAXFEE);
+    val=emc.esmd_pre[fiber][channel];
+    break;
+  default:
+    assert(2==3);
+  }
+  return val;
+
+}
+
+
+u_short EEMC_Reader::getEemcData(int fiber,int channel, char type) {
+  u_short val=0;
+  switch(type) {
+  case 'T': // tower crates
+    assert(channel>=0 && channel <ETOW_DATSIZE);
+    assert(fiber>=0 && fiber <ETOW_MAXFEE);
+    val=emc.etow[fiber][channel];
+    break;
+  case 'S': // smd/pre/post  crates
+    assert(channel>=0 && channel <ESMD_DATSIZE);
+    assert(fiber>=0 && fiber <=ESMD_MAXFEE);
+    val=emc.esmd[fiber][channel];
+    break;
+  default:
+    assert(2==3);
+  }
+  return val;
+
+}
+
   
 
 EEMC_Reader::EEMC_Reader(EventReader *er, Bank_EEMCP *pEEMCP) 
@@ -84,4 +102,6 @@ EEMC_Reader::EEMC_Reader(EventReader *er, Bank_EEMCP *pEEMCP)
   ////////////////////////////////////////////////////////////////////////////////
  
   pBankEEMCP->header.CRC = 0;
+
 }
+
