@@ -1,0 +1,12 @@
+Commands.txt	- All STAF KUIP commands - tab delimited
+TAS_Usage.txt	- All TAS KUIP commands - "<TAS> USAGE TAS"
+Unique.txt	- All STAF KUIP commands - sorted by last menu level
+Usage.txt	- All STAF KUIP commands - "<STAF> USAGE *"
+ami.man.txt	- KUIP man pages for AMI.
+asu.man.txt	- KUIP man pages for ASU.
+dio.man.txt	- KUIP man pages for DIO.
+dui.man.txt	- KUIP man pages for DUI.
+soc.man.txt	- KUIP man pages for SOC.
+spx.man.txt	- KUIP man pages for SPX.
+tbr.man.txt	- KUIP man pages for TBR.
+tdm.man.txt	- KUIP man pages for TDM.
