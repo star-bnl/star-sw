@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFpdTriggerDetector.cxx,v 2.4 2004/10/05 16:10:33 ullrich Exp $
+ * $Id: StFpdTriggerDetector.cxx,v 2.5 2004/11/30 19:18:14 ullrich Exp $
  *
  * Author: Akio Ogawa, Jul 2004
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFpdTriggerDetector.cxx,v $
+ * Revision 2.5  2004/11/30 19:18:14  ullrich
+ * Fixed 2 bugs causing out of range errors reported in insure++ (Akio).
+ *
  * Revision 2.4  2004/10/05 16:10:33  ullrich
  * Corrected uninitialized for-loop variable.
  *
@@ -29,7 +32,7 @@
 #include "tables/St_dst_TrgDet_Table.h"
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StFpdTriggerDetector.cxx,v 2.4 2004/10/05 16:10:33 ullrich Exp $";
+static const char rcsid[] = "$Id: StFpdTriggerDetector.cxx,v 2.5 2004/11/30 19:18:14 ullrich Exp $";
 
 ClassImp(StFpdTriggerDetector)
 
@@ -51,7 +54,9 @@ StFpdTriggerDetector::StFpdTriggerDetector(const StTriggerData& t)
     for(int ew=0; ew<2; ew++) {
 	for(unsigned int nstbps=0; nstbps<mMaxModule; nstbps++) {
 	    for(unsigned int tower=0; tower<mMaxTower[nstbps]; tower++) 
-		mAdc[ew][nstbps][tower]=t.fpd((StBeamDirection)ew,nstbps,tower);
+		mAdc[ew][nstbps][tower]=t.fpd((StBeamDirection)ew,nstbps,tower+1);
+	}
+	for(unsigned int nstbps=0; nstbps<mMaxBoard; nstbps++) {
 	    for(int bd=0; bd<mMaxBoard; bd++) 
 		mLayer1[ew][nstbps][bd]=t.fpdLayer1DSM((StBeamDirection)ew,nstbps,bd);
 	    mLayer2[ew][nstbps]=t.fpdLayer2DSM((StBeamDirection)ew,nstbps);
