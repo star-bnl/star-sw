@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.23 2003/02/05 22:10:00 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.24 2003/02/06 18:41:44 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -226,6 +226,7 @@ void StMuDstMaker::del(TClonesArray* t, int& counter){
   if (t) { 
     if (t->UncheckedAt(0)) {
       ((StMuEmcCollection*)t->UncheckedAt(0))->DeleteThis();
+      t->Clear();
     }
     counter=0;
   }
@@ -870,6 +871,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.24  2003/02/06 18:41:44  laue
+ * second try to kill memory leak
+ *
  * Revision 1.23  2003/02/05 22:10:00  laue
  * delete emc collection after being copied (when creating mudst)
  *
