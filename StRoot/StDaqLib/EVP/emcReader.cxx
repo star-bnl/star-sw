@@ -156,7 +156,11 @@ int emcReader(char *m)
 			return -1 ;
 		}
 
-		if(emcp->bh.byte_order != DAQ_RAW_FORMAT_ORDER) swapemcp = 1;
+
+		assert(emcp->bh.byte_order==0x04030201 || emcp->bh.byte_order==0x01020304); // If this
+			// assert fails, the data is _VERY_ corrupted.  BIG PROBLEM.
+
+		if(emcp->bh.byte_order != DAQ_RAW_FORMAT_ORDER) swapemcp = 1; else swapemcp = 0;
 
 		token = qswap32(swapemcp, emcp->bh.token) ;
 
