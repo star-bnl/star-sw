@@ -291,6 +291,7 @@ Int_t StBFChain::Instantiate()
 	  if (GetOption("HalfField"))    {Scale = 0.5;     FieldName = "STAR Normal field";}
 	  if (GetOption("ReverseField")) {Scale = - Scale; FieldName += " Reverse";}
 	  new StMagFC("field",FieldName.Data(),Scale);
+	  kMagF = kTRUE;
 	  continue;
 	}
 	if (maker == "St_db_Maker"){
@@ -385,12 +386,8 @@ Int_t StBFChain::Instantiate()
 	    geantMk = new St_geant_Maker("geant",NwGeant,NwPaw,IwType);
 	    if (geantMk) {
 	      fBFC[i].Name = (Char_t *) geantMk->GetName();
-	      if (!GetOption("fzin") && !GetOption("gstar")) {
-		geantMk->SetActive(kFALSE);
-	      }
-	      else {
-		kMagF = kTRUE;
-	      }
+	      geantMk->SetActive(kFALSE);
+	      if (GetOption("fzin") || GetOption("gstar")) geantMk->SetActive(kTRUE);
 	      SetGeantOptions();
 	    }
 	  }
@@ -568,7 +565,8 @@ void StBFChain::SetFlags(const Char_t *Chain)
     }
   }
   if (!GetOption("FieldOn") && !GetOption("FieldOff") && 
-      !GetOption("HalfField") && !GetOption("ReverseField") && !kMagF)   SetOption("magF"); 
+      !GetOption("HalfField") && !GetOption("ReverseField") &&    
+      !GetOption("fzin") &&  !GetOption("gstar")) SetOption("magF"); 
   if (!GetOption("global") && 
       (GetOption("Match") || GetOption("Primary") || GetOption("V0") ||
        GetOption("Xi")    || GetOption("Kink"))) SetOption("global");
@@ -779,8 +777,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.103 2000/06/18 00:17:47 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.104 2000/06/20 19:06:06 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.104  2000/06/20 19:06:06  fisyak
+// Fix clash between geant and data in MagF
+//
 // Revision 1.103  2000/06/18 00:17:47  fisyak
 // fix clash in mag field between geant and daq
 //
