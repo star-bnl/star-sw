@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.6 2002/05/20 18:57:18 laue Exp $
+ * $Id: StMuDst.cxx,v 1.7 2002/06/18 19:21:00 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -56,7 +56,6 @@ void StMuDst::set(StMuDstMaker* maker) {
   }
 
   StStrangeEvMuDst* ev = strangeEvent();
-  cout << ev <<endl;
   int nV0s = v0s()->GetEntries(); for (int i=0;i<nV0s; i++) v0s(i)->SetEvent(ev);
   int nXis = xis()->GetEntries(); for (int i=0;i<nXis; i++) xis(i)->SetEvent(ev);
   //  int nKinks = kinks()->GetEntries(); for (int i=0;i<nKinks; i++) kinks(i)->SetEvent(ev);
@@ -216,6 +215,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.7  2002/06/18 19:21:00  laue
+ * cout statement taken out
+ *
  * Revision 1.6  2002/05/20 18:57:18  laue
  * update for Christof
  *
