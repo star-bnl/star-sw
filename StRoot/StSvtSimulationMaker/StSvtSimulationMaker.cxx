@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.3 2001/02/18 00:10:42 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.4 2001/03/15 15:12:09 bekele Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.4  2001/03/15 15:12:09  bekele
+ * added a method to fill the whole SVT hybrid with background
+ *
  * Revision 1.3  2001/02/18 00:10:42  caines
  * Improve and use StSvtConfig
  *
@@ -72,7 +75,7 @@ StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
   mTimeBinSize = 0.04;  //micro sec
   mAnodeSize =  0.25;  //mm
   mBackGSigma = 2.1;
-  mBackGrOption = "doBackGr";
+  mBackGrOption = "doHitBackGr";
 }
 
 //____________________________________________________________________________
@@ -155,11 +158,10 @@ Int_t StSvtSimulationMaker::Init()
 
   }
 
-  setSvtRawData();
-  setTables();
-
   mCoordTransform =  new StSvtCoordinateTransform();
   
+  setTables();
+
   mTimeBinSize = 1.E6/mSvtSrsPar->fsca;  // Micro Secs
   mAnodeSize = mSvtSrsPar->pitch*10;  // mm
   mDriftVelocity = 1.E-5*mSvtSrsPar->vd;  // mm/MicroSec (?)
@@ -183,10 +185,22 @@ Int_t StSvtSimulationMaker::Init()
   mSvtSimulation->setParam(mTimeBinSize , mAnodeSize);
 
   mSvtSimPixelColl = new StSvtHybridCollection(mConfig);
-
-  mSvtSimulation->setParam(mTimeBinSize , mAnodeSize);
-
+  setSvtRawData();
   setEval();
+  
+ /*
+  if(doEmbbeding){
+    setSvtPixelData();
+    setSvtRawData();
+   } 
+  else{
+    mSvtSimPixelColl = new StSvtHybridCollection(mConfig.Data());
+    setSvtRawData();
+  }
+ */
+
+  if(!strncmp(mBackGrOption,"doHybBackGr",strlen("doHybBackGr")))
+    createBackGrData(mBackGSigma); 
 
   //CreateHistograms();
 
@@ -194,7 +208,23 @@ Int_t StSvtSimulationMaker::Init()
 }
 
 //____________________________________________________________________________
+Int_t  StSvtSimulationMaker::setSvtPixelData()
+{
 
+  mSimPixelSet = new St_ObjectSet("StSvtSimPixels");
+  AddData(mSimPixelSet);  
+  SetOutput(mSimPixelSet); //Declare for output
+
+  mSvtSimPixelColl = new StSvtHybridCollection(mConfig);
+  //cout<<" mSvtSimPixelColl = "<<mSvtSimPixelColl<<endl;
+  mSimPixelSet->SetObject((TObject*)mSvtSimPixelColl);
+  assert(mSvtSimPixelColl);
+
+ return kStOK;
+
+}
+
+//____________________________________________________________________________
 Int_t  StSvtSimulationMaker::setSvtRawData()
 {
   mSimDataSet = new St_ObjectSet("StSvtRawData");
@@ -301,6 +331,55 @@ Int_t StSvtSimulationMaker::CreateHistograms()
 }
 
 //____________________________________________________________________________
+Int_t StSvtSimulationMaker::createBackGrData(double backgsigma)
+{
+   for(int Barrel = 1;Barrel <= mSvtSimPixelColl->getNumberOfBarrels();Barrel++) {
+    
+    for (int Ladder = 1;Ladder <= mSvtSimPixelColl->getNumberOfLadders(Barrel);Ladder++) {
+      
+      for (int Wafer = 1;Wafer <= mSvtSimPixelColl->getNumberOfWafers(Barrel);Wafer++) {
+	
+	for( int Hybrid = 1;Hybrid <= mSvtSimPixelColl->getNumberOfHybrids();Hybrid++){
+
+            int index = mSvtSimPixelColl->getHybridIndex(Barrel,Ladder,Wafer,Hybrid);
+
+	    //cout << "Barrel = " << Barrel << ", Ladder = " << Ladder << ", Wafer = " << Wafer << ", Hybrid = " << Hybrid << endl;
+            //cout<<"index = "<<index<<endl;
+
+            if( index < 0) continue; 
+
+            for(int an = 0; an < 240; an++)
+             for(int tim = 0; tim < 128; tim++)
+	       {
+		 //cout<<"an = "<<an<<" "<<"time = "<<tim<<endl;
+		 //cout<<mSvtSimulation->makeGausDev(backgsigma)<<endl;
+
+                double back,rem;
+                 back = mSvtSimulation->makeGausDev(backgsigma);
+                 mAdcArray[an*128 + tim] = back;
+ 		 
+               }
+
+          mSvtSimDataPixels  = (StSvtHybridPixels*)mSvtSimPixelColl->at(index);
+
+          if(!mSvtSimDataPixels )
+            mSvtSimDataPixels  = new StSvtHybridPixels(Barrel, Ladder, Wafer, Hybrid, 128*240, mAdcArray);
+            
+            mSvtSimPixelColl->at(index) = mSvtSimDataPixels ;
+          //(*mSvtSimPixelColl)[index] = mSvtSimDataPixels ;
+
+	    //cout << "mSvtSimDataPixels = " << mSvtSimDataPixels << endl;
+
+	}
+      }
+    }
+  } 
+
+   return kStOK; 
+
+}
+//____________________________________________________________________________
+
 Int_t StSvtSimulationMaker::Make()
 {
   if(Debug()) gMessMgr->Debug() <<"In StSvtSimulationMaker::Make()"<<endm;

@@ -1,5 +1,8 @@
-// $Id: StSvtSimulationMaker.h,v 1.3 2001/02/18 00:10:42 caines Exp $
+// $Id: StSvtSimulationMaker.h,v 1.4 2001/03/15 15:12:09 bekele Exp $
 // $Log: StSvtSimulationMaker.h,v $
+// Revision 1.4  2001/03/15 15:12:09  bekele
+// added a method to fill the whole SVT hybrid with background
+//
 // Revision 1.3  2001/02/18 00:10:42  caines
 // Improve and use StSvtConfig
 //
@@ -62,10 +65,11 @@ class StSvtSimulationMaker : public StMaker
   Int_t setConfig(const char* config);
   Int_t setConfig(StSvtConfig* config);
   Int_t setEval();
+  Int_t setSvtPixelData();
   Int_t setSvtRawData(); 
   Int_t setTables();
   Int_t setHybrid();
-
+  Int_t createBackGrData(double backgsigma);
   void  calcAngles(svg_geom_st *geom_st,int hardWarePosition);
   void  fillBuffer(double mAnHit, double mTimeHit, int hybIndex);
   Int_t doOneHit(StSvtHybridPixels* mSvtSimDataPixels);
@@ -100,6 +104,7 @@ class StSvtSimulationMaker : public StMaker
 
   St_ObjectSet                 *mGeantHitSet;        //!
   St_ObjectSet                 *mSimDataSet;         //!
+   St_ObjectSet                 *mSimPixelSet;       //!
 
   St_g2t_svt_hit               *mG2tSvtHit;       //!
   svg_shape_st                 *mSvtShape;        //!
@@ -116,6 +121,7 @@ class StSvtSimulationMaker : public StMaker
   Int_t mFineDiv;      // mFineDiv = 0 to use finer scales for signal width outputs 
   Int_t mSigOption;
   Int_t mOneHit;
+  Float_t mAdcArray[128*240];
 
   double mAnode;
   double mTime;    
@@ -135,7 +141,7 @@ class StSvtSimulationMaker : public StMaker
   TH2D** geant_hit;            //!
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.3 2001/02/18 00:10:42 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.4 2001/03/15 15:12:09 bekele Exp $ built "__DATE__" "__TIME__; return cvs;}
 
   ClassDef(StSvtSimulationMaker,1)
 
