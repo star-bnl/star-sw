@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.32 2001/11/21 01:53:42 long Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.35 2002/04/26 06:05:26 long Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -13,6 +13,15 @@
  *
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.35  2002/04/26 06:05:26  long
+ * add triton and correct charge for he3
+ *
+ * Revision 1.34  2002/04/25 21:40:23  long
+ * add he3,he4,deuteron
+ *
+ * Revision 1.33  2002/04/25 21:37:03  long
+ * *** empty log message ***
+ *
  * Revision 1.32  2001/11/21 01:53:42  long
  * adding log message for 3/2001 long;
  *
@@ -149,7 +158,7 @@ using std::random_shuffle;
 
 // Need a CERNLIB routine for tssSplit
 extern "C"  float dislan_(float *);
-
+ 
 HepJamesRandom  StTrsChargeSegment::mEngine;
 RandFlat        StTrsChargeSegment::mFlatDistribution(mEngine);
 
@@ -244,6 +253,23 @@ void StTrsChargeSegment::whichGEANTParticle(double& particleMass, int& charge)
 	particleMass = .93827231*GeV;
 	charge = -1;
 	break;
+    case 45:  // deuteron
+        particleMass = 1.876*GeV; 
+        charge = 1;
+        break;
+    case 46:  // triton
+        particleMass = 2.809*GeV;
+        charge = 1;
+        break;
+    case 47:  // alpha
+        particleMass = 3.727*GeV;
+        charge = 2;
+        break; 
+    case 49:  // He3
+        particleMass = 2.809*GeV;
+        charge = 2;
+        break;
+
     default: // Probably uncharged, but DO NOT BREAK IT!
 	//cout << "Mass is Undefined (" << mPid << ")" << endl;
 	particleMass = 0*GeV;

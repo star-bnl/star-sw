@@ -1,6 +1,9 @@
-// $Id: StFtpcMagboltz2.cc,v 1.1 2000/12/20 08:44:02 jcs Exp $
+// $Id: StFtpcMagboltz2.cc,v 1.2 2002/03/05 16:59:15 jcs Exp $
 //
 // $Log: StFtpcMagboltz2.cc,v $
+// Revision 1.2  2002/03/05 16:59:15  jcs
+// force double to long for HepRandom
+//
 // Revision 1.1  2000/12/20 08:44:02  jcs
 // Replace pam/ftpc/fmg with maker
 //
@@ -1735,7 +1738,7 @@ int StFtpcMagboltz2::montea_()
     sumzsq = 0.;
     setp_1.small = 1e-20;
     outpt_1.tmax1 = 0.;
-    rdum = setp_1.rstart;
+    rdum = (long)setp_1.rstart;
     HepRandom quasiRandom(rdum);
 
     e1 = setp_1.estart;
@@ -2105,7 +2108,7 @@ int StFtpcMagboltz2::monteb_()
     setp_1.small = 1e-20;
     outpt_1.tmax1 = 0.;
     ef100 = setp_1.efield * 100.;
-    rdum = setp_1.rstart;
+    rdum = (long)setp_1.rstart;
     HepRandom quasiRandom(rdum);
 
     e1 = setp_1.estart;
@@ -2528,7 +2531,7 @@ int StFtpcMagboltz2::montec_()
   efx100 = setp_1.efield * 100. * cos(rtheta);
   f1 = setp_1.efield * cnsts1_1.const2 * cos(rtheta);
   bfld_1.eovb *= sin(rtheta);
-  rdum = setp_1.rstart;
+  rdum = (long)setp_1.rstart;
   HepRandom quasiRandom(rdum);
   
   e1 = setp_1.estart;
@@ -2902,7 +2905,7 @@ int StFtpcMagboltz2::elimit_(int *ielow)
 	}
     }
     setp_1.small = 1e-20;
-    rdum = setp_1.rstart;
+    rdum = (long)setp_1.rstart;
     HepRandom quasiRandom(rdum);
 
     e1 = setp_1.estart;
@@ -3122,7 +3125,7 @@ int StFtpcMagboltz2::elimitb_(int *ielow)
     }
     setp_1.small = 1e-20;
     ef100 = setp_1.efield * 100.;
-    rdum = setp_1.rstart;
+    rdum = (long)setp_1.rstart;
     HepRandom quasiRandom(rdum);
 
     e1 = setp_1.estart;
@@ -3360,7 +3363,7 @@ int StFtpcMagboltz2::elimitc_(int *ielow)
     efx100 = setp_1.efield * 100. * cos(rtheta);
     f1 = setp_1.efield * cnsts1_1.const2 * cos(rtheta);
     eovb1 = bfld_1.eovb * sin(rtheta);
-    rdum = setp_1.rstart;
+    rdum = (long)setp_1.rstart;
     HepRandom quasiRandom(rdum);
 
     e1 = setp_1.estart;

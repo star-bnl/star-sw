@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackEvaluator.cc,v 1.12 2001/07/12 08:34:27 oldi Exp $
+// $Id: StFtpcTrackEvaluator.cc,v 1.13 2002/03/05 16:53:10 jcs Exp $
 // $Log: StFtpcTrackEvaluator.cc,v $
+// Revision 1.13  2002/03/05 16:53:10  jcs
+// force data type definitions to avoid compiler warnings (this is a correct
+// but inelegant fix which must be changed)
+//
 // Revision 1.12  2001/07/12 08:34:27  oldi
 // Many new things were developed eg. histograms for time consumption and
 // momentum resolution.
@@ -1666,7 +1670,7 @@ void StFtpcTrackEvaluator::FillGCutHistos()
 	}
 
 	else {
-	  mGTrackAngAll->Fill((Float_t)t.StFtpcConfMapper::TrackletAngle(track, (Float_t)h_counter+1));
+	  mGTrackAngAll->Fill((Float_t)t.StFtpcConfMapper::TrackletAngle(track, h_counter+1));
 	  mGTrackAng->Fill((Float_t)t.StFtpcConfMapper::TrackletAngle(track, h_counter+1), (Float_t)h_counter+1);
 
 	  t.StraightLineFit(track, coeff, h_counter-1);

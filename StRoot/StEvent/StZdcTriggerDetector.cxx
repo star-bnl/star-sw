@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcTriggerDetector.cxx,v 2.7 2001/09/14 19:11:11 ullrich Exp $
+ * $Id: StZdcTriggerDetector.cxx,v 2.8 2002/03/05 17:11:52 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StZdcTriggerDetector.cxx,v $
+ * Revision 2.8  2002/03/05 17:11:52  ullrich
+ * Corrected bug in constructor. Wrong table entry was used.
+ *
  * Revision 2.7  2001/09/14 19:11:11  ullrich
  * Load corrected vertex-Z from trigger table.
  *
@@ -40,7 +43,7 @@ using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.7 2001/09/14 19:11:11 ullrich Exp $";
+static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.8 2002/03/05 17:11:52 ullrich Exp $";
 
 ClassImp(StZdcTriggerDetector)
 
@@ -60,7 +63,7 @@ StZdcTriggerDetector::StZdcTriggerDetector(const dst_TrgDet_st& t)
     mSumAdc[east] = t.adcZDCEast;
     mSumAdc[west] = t.adcZDCWest;
     mSum          = t.adcZDCsum;
-    mVertexZ      = t.vertexZ;
+    mVertexZ      = t.ZDCvertexZ;
 }
 
 StZdcTriggerDetector::~StZdcTriggerDetector() {/* noop */}

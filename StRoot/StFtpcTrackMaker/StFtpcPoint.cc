@@ -1,5 +1,9 @@
-// $Id: StFtpcPoint.cc,v 1.7 2002/01/29 11:07:59 oldi Exp $
+// $Id: StFtpcPoint.cc,v 1.8 2002/03/05 16:53:10 jcs Exp $
 // $Log: StFtpcPoint.cc,v $
+// Revision 1.8  2002/03/05 16:53:10  jcs
+// force data type definitions to avoid compiler warnings (this is a correct
+// but inelegant fix which must be changed)
+//
 // Revision 1.7  2002/01/29 11:07:59  oldi
 // Write() renamed to WriteCluster() resp. WriteTrack() to avoid compiler warnings.
 // As a result the functions TObject::Write() are available again (directly).
@@ -200,7 +204,7 @@ StFtpcPoint::StFtpcPoint(Double_t *x, Int_t row)
 
   SetSigmaPhi(0.);
   SetSigmaR(0.);
-  SetFlags(0.);
+  SetFlags(0);
 
   return;
 }

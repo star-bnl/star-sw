@@ -1,6 +1,10 @@
-// $Id: StFtpcFastSimu.cc,v 1.23 2001/04/23 20:30:41 oldi Exp $
+// $Id: StFtpcFastSimu.cc,v 1.24 2002/03/05 16:51:35 jcs Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.24  2002/03/05 16:51:35  jcs
+// force data type definitions to avoid compiler warnings (this is a correct
+// but inelegant fix which must be changed)
+//
 // Revision 1.23  2001/04/23 20:30:41  oldi
 // Output sent to StMessMgr now.
 //
@@ -380,7 +384,7 @@ int StFtpcFastSimu::ffs_hit_rd()
 	
 	//de/dx
 	mPoint[ih].SetMaxADC(int( mParam->adcConversionFactor() * mGeant->energyLoss(ih) ));
-	mPoint[ih].SetCharge(mParam->clusterChargeConversionFactor()*mPoint[ih].GetMaxADC());
+	mPoint[ih].SetCharge((int)(mParam->clusterChargeConversionFactor()*mPoint[ih].GetMaxADC()));
 	// for de/dx simulations, introduce de/dx smearing + adjust factors! hh
 	mPoint[ih].SetNumberPads(mParam->numberOfPadsDedxSmearing());
 	mPoint[ih].SetNumberBins(mParam->numberOfBinsDedxSmearing());

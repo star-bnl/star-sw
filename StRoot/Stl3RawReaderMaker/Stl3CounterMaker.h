@@ -1,7 +1,12 @@
 //
-//  $Id: Stl3CounterMaker.h,v 1.2 2002/02/20 22:09:49 struck Exp $
+//  $Id: Stl3CounterMaker.h,v 1.3 2002/03/07 22:03:41 struck Exp $
 //
 //  $Log: Stl3CounterMaker.h,v $
+//  Revision 1.3  2002/03/07 22:03:41  struck
+//  major update: using new NotifyMe() to get input filename, allows to run on
+//  more than one input file in a chain, two output tables separated into two files
+//  and put into dedicated dir StarDb/RunLog_l3
+//
 //  Revision 1.2  2002/02/20 22:09:49  struck
 //  added some debugging info
 //
@@ -73,7 +78,7 @@ class Stl3CounterMaker : public StMaker {
     // General stuff
     TDataSet*          DAQReaderSet; //!
     StL3Reader*        ml3reader;  //!
-    TString*           mDaqFileName; //!
+    TString            mDaqFileName; //!
     TString*           mDbTableFileName; //!
     int                mDaqFileSequenceNumber; //!
     int                mRunNumber; //!
@@ -101,11 +106,14 @@ class Stl3CounterMaker : public StMaker {
    virtual       ~Stl3CounterMaker();
    virtual Int_t Init();
    virtual Int_t Make();
+   virtual void  NotifyMe(const char *about, const void *info);
    virtual Int_t GetCounters();
+   virtual Int_t WriteTable();
+   virtual Int_t InitTable();
    virtual Int_t Finish();
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: Stl3CounterMaker.h,v 1.2 2002/02/20 22:09:49 struck Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: Stl3CounterMaker.h,v 1.3 2002/03/07 22:03:41 struck Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(Stl3CounterMaker, 1)   //StAF chain virtual base class for Makers
 };

@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.281 2002/03/01 22:21:30 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.283 2002/03/08 00:15:50 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -132,7 +132,7 @@ Bfc_st BFC[] = {
   // Other chains/Calibration
   {"LaserCal",""  ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","","", 
                                                                           "Laser Calibration Chain",kFALSE},
-  {"L3Counter","" ,"","db,detDb,tpc_daq,l3count","","",                "L3 Counter extraction pass",kFALSE},
+  {"L3Counter","" ,"","db,detDb,xin,l3count","","",                    "L3 Counter extraction pass",kFALSE},
   {"VtxSeedCal","","",
    "pp2001 -l3onl -rich -rch -RichPiD -tofDat -v0 -xi -kink FindVtxSeed NoEvent -tree -tags -QA -EventQA",
                                                                      "","","Pass0 Vertex evaluator",kFALSE},
@@ -243,7 +243,7 @@ Bfc_st BFC[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"db"          ,"db"   ,"","StDbT,xdf2root"    ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"svtDb"       ,"svtDb","","SvtCL,db" ,                          "StSvtDbMaker","StSvtDbMaker","",kFALSE},
-  {"dbutil"      ,""     ,"","SCL,svtDb"                   ,"","StDbUtilities","Load StDbUtilities",kFALSE},
+  {"dbutil"      ,""     ,"","SCL"            ,"","StSvtDbMaker,StDbUtilities","Load StDbUtilities",kFALSE},
   {"calib"       ,"calib","","xdf2root"          ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"detDb"       ,""     ,"",""   ,"StDetectorDbMaker","StDetectorDbMaker","Load StDetectorDbMaker",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
