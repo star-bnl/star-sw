@@ -94,8 +94,11 @@ topsort_agent_column(char* agent)
 }
 
 STAFCV_T 
-topproject_agent_selectspec(char* agent)
+topproject_agent_selectspec(char* agent, char *select)
 {
+  // Just to hush pedantic compilers
+  static void *ps = &select;
+
   topProject* proj=NULL;
   if( !top->findProject(agent, proj) ){
     EML_CONTEXT("ERROR: Are you sure you defined '%s'?\n",agent);
@@ -159,8 +162,11 @@ topproject_agent_reset(char* agent)
 }
  
 STAFCV_T 
-topjoin_agent_selectspec(char* agent)
+topjoin_agent_selectspec(char* agent, char *select)
 {
+  // Just to hush pedantic compilers
+  static void *ps = &select;
+
   topJoin* join=NULL;
   if( !top->findJoin(agent, join) ){
     EML_CONTEXT("ERROR: Are you sure you defined '%s'?\n",agent);
@@ -174,8 +180,11 @@ topjoin_agent_selectspec(char* agent)
 }
  
 STAFCV_T 
-topjoin_agent_whereclause(char* agent)
+topjoin_agent_whereclause(char* agent, char* where)
 {
+  // Just to hush pedantic compilers
+  static void *pw = &where;
+
   topJoin* join=NULL;
   if( !top->findJoin(agent, join) ){
     EML_CONTEXT("ERROR: Are you sure you defined '%s'?\n",agent);
