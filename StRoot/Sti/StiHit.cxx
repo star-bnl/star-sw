@@ -7,5 +7,8 @@
 
 ostream& operator<<(ostream& os, const StiHit& hit)
 {
-    return os <<hit.refangle()<<"\t"<<hit.position()<<"\t"<<hit.x()<<"\t"<<hit.y()<<"\t"<<hit.z();
+    return os <<hit.refangle()<<"\t"<<hit.position()<<"\t"
+	      <<hit.x()<<"\t"<<hit.y()<<"\t"<<hit.z()
+	      <<hit.sxx()<<"\t"<<hit.syy()<<"\t"<<hit.szz()<<"\t"
+	      <<hit.sxy()<<"\t"<<hit.sxz()<<"\t"<<hit.syz();
 }
