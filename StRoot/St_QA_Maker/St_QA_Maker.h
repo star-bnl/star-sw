@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.7 1999/03/03 23:34:30 kathy Exp $
+//! $Id: St_QA_Maker.h,v 1.8 1999/03/05 21:19:38 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.8  1999/03/05 21:19:38  kathy
+//! added new histograms
+//!
 //! Revision 1.7  1999/03/03 23:34:30  kathy
 //! fixes to histograms
 //!
@@ -69,7 +72,7 @@
 class St_QA_Maker : public StMaker {
  private:
    Bool_t drawinit;
-//! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.7 1999/03/03 23:34:30 kathy Exp $";
+//! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.8 1999/03/05 21:19:38 kathy Exp $";
    //! Histograms booking constants
    static const Int_t nxpT;
    static const Int_t nyeta;
@@ -196,7 +199,11 @@ class St_QA_Maker : public StMaker {
    TH2F     *m_H_pT_eta_gen;  //! pT versus eta Spectra for generated
    TH1F     *m_H_pT_gen;  //! pT Spectra for generated
    TH1F     *m_H_eta_gen;  //! eta Spectra for generated
-
+   TH1F     *m_H_vtxx;     //! production vertex (mm)
+   TH1F     *m_H_vtxy;     //! production vertex (mm)
+   TH1F     *m_H_vtxz;     //! production vertex (mm)
+   TH1F     *m_H_npart;    //! total num particles generated
+   TH1F     *m_H_ncpart;   //! number of charged e,mu,proton,kaon,pion
 
 // for MakeHistV0 - from table dst_v0_vertex
    TH1F     *m_ev0_lama_hist;//! Lambda mass
@@ -213,6 +220,46 @@ class St_QA_Maker : public StMaker {
    TH1F     *m_v_y;     //!  STAR reference 
    TH1F     *m_v_z;     //!   system
    TH1F     *m_v_pchi2; //! P(chi^2,ndf) of vertex fit
+
+// for method MakeHistTofEvt
+    TH1F *m_te_ntpttrk;   //!no. of tpc tracks in event  
+    TH1F *m_te_nttetrk;   //!no. of tte tracks associated with tpt tracks
+    TH1F *m_te_ng2ttrk;   //!no. of g2t tracks associated with tpt/tte tracks
+    TH1F *m_te_nctfhit;   //!no. hits in g2t_tof_hit
+    TH1F *m_te_nexttrk;   //!no. decent tracks extrapolated
+    TH1F *m_te_ntoftrk;   //!no. of these that are kept
+    TH1F *m_te_ntrks;     //!no. decent tracks in the event
+    TH1F *m_te_ntrks_hit; //!no. of these with ctf hit via pointers
+    TH1F *m_te_ntrks_kee; //!no. of decent tracks extrapolated
+    TH1F *m_te_ntrks_tra; //!no. of these extrapolated to TOFp tray
+    TH1F *m_te_ntrks_mat; //!no. of these extrapolated to struck TOFp slat
+
+// for method MakeHistTofTrk
+    TH1F *m_tt_strk;   //! measured total length from target to hit
+    TH1F *m_tt_phitrk; //! phi of extrapolation of track to tof
+    TH1F *m_tt_stof;   //! geant's total length from target to hit 
+    TH1F *m_tt_phitof; //! phi of hit in tof from geant 
+    TH1F *m_tt_tof;    //! actual time of flight
+    TH1F *m_tt_adc;    //! ADC value for this slat
+
+// for method MakeHistEmsHitsBemc
+    TH1F *m_ehbe_hits1; //! bemc # hits detector 1
+    TH1F *m_ehbe_tnrg1; //! bemc tot energy detector 1
+    TH1F *m_ehbe_hits2; //! bemc # hits detector 2
+    TH1F *m_ehbe_tnrg2; //! bemc tot energy detector 2
+    TH1F *m_ehbe_nrg1;  //! bemc energy per hit, detector 1
+    TH1F *m_ehbe_nrg2;  //! bemc energy per hit, detector 2
+
+// for method MakeHistEmsHitsBsmd
+    TH1F *m_ehbs_hits3; //! bemc # hits detector 3
+    TH1F *m_ehbs_tnrg3; //! bemc tot energy detector 3
+    TH1F *m_ehbs_hits4; //! bemc # hits detector 4
+    TH1F *m_ehbs_tnrg4; //! bemc tot energy detector 4 
+    TH1F *m_ehbs_nrg3;  //! bemc energy per hit, detector 3
+    TH1F *m_ehbs_nrg4;  //! bemc energy per hit, detector 4
+
+// for method MakeHistXi
+
 
 
 //------------------------------------------------------------------------
@@ -238,6 +285,16 @@ class St_QA_Maker : public StMaker {
    virtual void   BookHistV0();
    virtual void   BookHistPID();
    virtual void   BookHistVertex();
+   virtual void   BookHistTofEvt();
+   virtual void   BookHistTofTrk();
+   virtual void   BookHistEmsHitsBemc();
+   virtual void   BookHistEmsHitsBsmd();
+   virtual void   BookHistXi();
+   virtual void   MakeHistTofEvt();
+   virtual void   MakeHistTofTrk();
+   virtual void   MakeHistEmsHitsBemc();
+   virtual void   MakeHistEmsHitsBsmd();
+   virtual void   MakeHistXi();
    virtual void   PrintInfo();
    ClassDef(St_QA_Maker, 1)   //StAF chain virtual base class for Makers
 };
