@@ -61,7 +61,8 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
   if (!_dimensions)
     throw runtime_error("StiTpcDetectorBuilder::buildDetectors() -E- _dimensions==0");
   
-  unsigned int nRows = _padPlane->numberOfRows()+2;
+  // change to +1 instead of +2 to remove the ofc.
+  unsigned int nRows = _padPlane->numberOfRows()+1;
   setNRows(nRows);
   for(unsigned int row = 0; row<nRows;row++)
     {
@@ -79,7 +80,11 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
   ifcShape->setHalfDepth( _dimensions->tpcTotalLength()/2. );
   ifcShape->setOpeningAngle( M_PI/6. );
   ifcShape->setOuterRadius(_dimensions->ifcRadius() + ifcShape->getThickness()/2.);
+  if (!ifcShape)
+    throw runtime_error("StiTpcDetectorBuilder::buildDetectors() - FATAL - ifcShape==0");
+  float fIfcRadius = _dimensions->ifcRadius();   
 
+  /*
   //Outer  field cage
   StiCylindricalShape *ofcShape = new StiCylindricalShape;
   ofcShape->setName("tpc/ofc");
@@ -87,10 +92,10 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
   ofcShape->setHalfDepth( _dimensions->tpcTotalLength()/2. );
   ofcShape->setOpeningAngle( M_PI/6. );
   ofcShape->setOuterRadius(_dimensions->ofcRadius() + ofcShape->getThickness()/2.);
-  if (!ifcShape || !ofcShape)
-    throw runtime_error("StiTpcDetectorBuilder::buildDetectors() - FATAL - ifcShape==0||ofcShape==0");
-  float fIfcRadius = _dimensions->ifcRadius();   
+  if (!ofcShape)
+    throw runtime_error("StiTpcDetectorBuilder::buildDetectors() - FATAL - ofcShape==0");
   float fOfcRadius = _dimensions->ofcRadius();   
+  */
 
   StiPlacement *p;
   //for(unsigned int sector = 0; sector<getNSectors(); sector++) 
@@ -117,6 +122,7 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
       //add(ifcVolume);
       add(45,sector,ifcVolume);
 
+      /*
       // outer field cage
       p = new StiPlacement;
       p->setZcenter(0.);
@@ -139,6 +145,7 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
       // remove it for now...
       //add(ofcVolume);  
       add(46,sector,ofcVolume);
+      */
   } 
 
   StDetectorDbTpcRDOMasks *s_pRdoMasks = StDetectorDbTpcRDOMasks::instance();
