@@ -296,7 +296,7 @@ Int_t StBFChain::Instantiate()
 		if (!calibMk) status = kStErr;
 		else {
 		  fBFC[i].Name = (Char_t *) calibMk->GetName();
-		  if (GetOption("Simu")) calibMk->SetFlavor("sim");
+		  if (GetOption("Simu")) calibMk->SetFlavor("sim+ofl");
 		  else                   calibMk->SetFlavor("ofl");
 		}
 	      }
@@ -317,7 +317,7 @@ Int_t StBFChain::Instantiate()
 		if (!dbMk) status = kStErr;
 		else {
 		  fBFC[i].Name = (Char_t *) dbMk->GetName();
-		  if (GetOption("Simu")) dbMk->SetFlavor("sim");
+		  if (GetOption("Simu")) dbMk->SetFlavor("sim+ofl");
 		  else                   dbMk->SetFlavor("ofl");
 		  SetDbOptions();
 		}
@@ -329,7 +329,7 @@ Int_t StBFChain::Instantiate()
 		  StarDbMk     = new St_db_Maker("StarDb","MySQL:StarDb");
 		  if (!StarDbMk) status = kStErr;
 		  else {
-		    if (GetOption("Simu")) StarDbMk->SetFlavor("sim");
+		    if (GetOption("Simu")) StarDbMk->SetFlavor("sim+ofl");
 		    else                   StarDbMk->SetFlavor("ofl");
 		  }
 		}
@@ -337,7 +337,7 @@ Int_t StBFChain::Instantiate()
 		  RunLogMk = new St_db_Maker("RunConditions","MySQL:RunLog");
 		  if (!RunLogMk) status = kStErr;
 		  else {
-		    if (GetOption("Simu")) RunLogMk->SetFlavor("sim");
+		    if (GetOption("Simu")) RunLogMk->SetFlavor("sim+ofl");
 		    else                   RunLogMk->SetFlavor("ofl");
 		  }
 		}
@@ -757,8 +757,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.97 2000/06/10 23:13:45 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.98 2000/06/11 21:41:33 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.98  2000/06/11 21:41:33  fisyak
+// replace sim -> sim+ofl
+//
 // Revision 1.97  2000/06/10 23:13:45  fisyak
 // Add flavour for Db
 //
