@@ -17,4 +17,8 @@
        float     phi_impact;       /* Azimuth of reaction plane */
        float     time_offset;      /* time offset in seconds wrt trigger event */
        long      subprocess_id;    /* Pythia subprocess Id */
+       long      n_binary;         /* binary collisions */
+       long      n_wounded_east;   /* wounded in the east nucleus */
+       long      n_wounded_west;   /* wounded in the west nucleus */
+       long      njets;            /* number of jets */
    } ;
