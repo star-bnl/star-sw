@@ -9,7 +9,7 @@ source $GROUP_DIR/group_env.csh
 #printenv
 echo "start time: `date`" 
 set no    = 100      # -n NoOfEvents
-set chain = \"lana\" # -c Chain
+set chain = \"p00h,-kalman,FieldOff\" # -c Chain
 set input = 0        # -i Input
 set output = 0       # -o Output
 set tfile = 0        # -t TFile
