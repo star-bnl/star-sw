@@ -427,6 +427,7 @@ ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
     (dmhrd) 
     (desum) exec create_tables_global#fill_dst_event_summary
     (drsum) exec create_tables_global#fill_dst_run_summary
+            exec init_dst#init_rsum
      (dehd) exec create_tables_global#fill_dst_event_header
             exec init_dst#init_ehead
      (drhd) exec create_tables_global#fill_dst_run_header
