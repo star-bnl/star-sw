@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: countPrimaryPions.cc,v 2.1 1999/12/30 01:54:57 ogilvie Exp $
+ * $Id: countPrimaryPions.cc,v 2.2 2000/01/25 03:11:58 ogilvie Exp $
  *
  * Author: Craig Ogilvie, MIT, Dec 199
  ***************************************************************************
@@ -15,14 +15,24 @@
 #include "StParticleTable.hh"
 #include "StTpcDedxPidAlgorithm.h"
 
-static const char rcsid[] = "$Id: countPrimaryPions.cc,v 2.1 1999/12/30 01:54:57 ogilvie Exp $";
+static const char rcsid[] = "$Id: countPrimaryPions.cc,v 2.2 2000/01/25 03:11:58 ogilvie Exp $";
 
 long countPrimaryPions(StEvent& event)
 {
     long counter = 0;
     StParticleDefinition* particle;  
     particle =  StParticleTable::instance()->findParticle("pi+") ;
+
+    // return if no primary vertex
+    if (event.primaryVertex()==0) {
+       return counter;
+    }
     const StSPtrVecPrimaryTrack& tracks = event.primaryVertex()->daughters();
+    // return if no primary tracks
+    if (tracks.size() < 0) {
+      return counter;
+    }
+
     // collection of primary tracks
     StPrimaryTrackIterator iter;
     StPrimaryTrack *track;
