@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.17 2000/08/26 21:39:51 snelling Exp $
+// $Id: doFlowEvents.C,v 1.18 2000/08/28 16:15:50 snelling Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -44,6 +44,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.18  2000/08/28 16:15:50  snelling
+// Added Pt and Eta cuts to macro
+//
 // Revision 1.17  2000/08/26 21:39:51  snelling
 // Modified IO for multiple pico events
 //
@@ -181,7 +184,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //  flowSelect->SetNumber(1);
   //  flowSelect->SetCentrality(4);
   //  flowSelect->SetPid("pi"); // pi+, pi-, pi, or proton
-  //  flowSelect->SetPidPart("proton"); // pi+, pi-, pi, k+, k-, pbar or proton
+  //  flowSelect->SetPidPart("pi"); // pi+, pi-, pi, k+, k-, pbar or proton
 
   sprintf(makerName, "Flow%s", flowSelect->Number());
 
@@ -256,15 +259,15 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //
   // Set write flages and file names
   //
-  flowMaker->PicoEventWrite(kTRUE);
-  flowMaker->SetPicoEventFileName("flowpicoevent.root"); 
+  //  flowMaker->PicoEventWrite(kTRUE);
+  //  flowMaker->SetPicoEventFileName("flowpicoevent.root"); 
   //  flowMaker->FlowEventWrite(kTRUE);
   //  flowMaker->FlowEventRead(kTRUE);
   
   // Set Debug status
-  flowMaker->SetDebug();
-  //flowTagMaker->SetDebug();
-  //flowAnalysisMaker->SetDebug();
+  //  flowMaker->SetDebug();
+  //  flowTagMaker->SetDebug();
+  //  flowAnalysisMaker->SetDebug();
 
   //
   // Initialize chain
@@ -291,7 +294,9 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   StFlowCutTrack::SetFitOverMaxPts(0., 0.);
   StFlowCutTrack::SetChiSq(0., 0.);
   StFlowCutTrack::SetDca(0., 0.);
-  
+  StFlowCutTrack::SetPt(0., 0.);
+  StFlowCutTrack::SetEta(0., 0.);
+
   // Set the event plane selections
   //StFlowEvent::SetEtaCut(0.5, 1., 0, 0); // harmonic 1, selection 1
   
