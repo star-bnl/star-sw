@@ -15,6 +15,9 @@ class StrangeMuDstPlayer {
   void DoT0Abort(Bool_t val = kTRUE);
   void DoTopMapFix(Bool_t val = kTRUE);
   void DoReadDST(Bool_t val = kTRUE);
+  void DoV0(Bool_t val = kTRUE);
+  void DoXi(Bool_t val = kTRUE);
+  void DoKink(Bool_t val = kTRUE);
   void SetEvPrimTracks(unsigned int);
   void SetEvPrimVertexZ(Float_t);
   void SetV0DecayLength(Float_t);
@@ -34,6 +37,9 @@ class StrangeMuDstPlayer {
   Bool_t doT0Abort;
   Bool_t doTopMapFix;
   Bool_t doReadDST;
+  Bool_t doV0;
+  Bool_t doXi;
+  Bool_t doKink;
   const char* outputFile;
   unsigned int evPrimTracks;
   float evPrimVertexZ;
@@ -87,5 +93,11 @@ inline void StrangeMuDstPlayer::DoTopMapFix(Bool_t val)
             { doTopMapFix = val; }
 inline void StrangeMuDstPlayer::DoReadDST(Bool_t val)
             { doReadDST = val; }
+inline void StrangeMuDstPlayer::DoV0(Bool_t val)
+            { doV0 = val; }
+inline void StrangeMuDstPlayer::DoXi(Bool_t val)
+            { doXi = val; }
+inline void StrangeMuDstPlayer::DoKink(Bool_t val)
+            { doKink = val; }
 #endif
 
