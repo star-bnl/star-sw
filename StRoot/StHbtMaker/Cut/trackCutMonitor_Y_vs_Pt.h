@@ -17,7 +17,7 @@ public:
 			 int nbins2 ,double min2, double max2);
   virtual ~trackCutMonitor_Y_vs_Pt();
 
-  virtual void Fill(const StHbtTrack* track);
+  void Fill(const StHbtTrack* track);
   StHbt2DHisto* Histo() {return mHisto;}
 
 #ifdef __ROOT__ 

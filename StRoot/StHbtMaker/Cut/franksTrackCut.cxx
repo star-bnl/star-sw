@@ -20,6 +20,8 @@
   ClassImp(franksTrackCut)
 #endif
 
+  //#define STHBTDEBUG
+
 franksTrackCut::franksTrackCut(){
   mNTracksPassed = mNTracksFailed = 0;
   mNSigmaElectron[0] = -1e9;  mNSigmaElectron[1] = +1e9;
@@ -30,6 +32,8 @@ franksTrackCut::franksTrackCut(){
   mNSigmaAntiPion[0]     = 0.;  mNSigmaAntiPion[1]     = 0.;
   mNSigmaAntiKaon[0]     = 0.;  mNSigmaAntiKaon[1]     = 0.;
   mNSigmaAntiProton[0]   = 0.;  mNSigmaAntiProton[1]   = 0.;
+  mEta[0]      = -1e9;   mEta[1]      = +1e9; 
+  mRapidity[0] = -1e9;   mRapidity[1] = +1e9; 
   mPt[0] = -1e9;  mPt[1] = +1e9;
   mPx[0] = -1e9;  mPx[1] = +1e9;
   mPy[0] = -1e9;  mPy[1] = +1e9;
@@ -64,6 +68,8 @@ franksTrackCut::franksTrackCut(franksTrackCut& c) : StHbtTrackCut(c) {
   mPz[0] = c.mPz[0]; mPz[1] = c.mPz[1];
   mRapidity[0] = c.mRapidity[0];
   mRapidity[1] = c.mRapidity[1];
+  mEta[0] = c.mEta[0];
+  mEta[1] = c.mEta[1];
   mDCA[0] = c.mDCA[0];
   mDCA[1] = c.mDCA[1];
   mNTracksPassed=0;
@@ -102,24 +108,22 @@ bool franksTrackCut::Pass(const StHbtTrack* track){
    bool goodPID = (
 		   (track->NSigmaElectron() >= mNSigmaElectron[0]) &&
 		   (track->NSigmaElectron() <= mNSigmaElectron[1]) &&
-		   (track->NSigmaPion()  >= mNSigmaPion[0]) &&
+		   (track->NSigmaPion()   >= mNSigmaPion[0]) &&
 		   (track->NSigmaPion()   <= mNSigmaPion[1]) &&
 		   (track->NSigmaKaon()   >= mNSigmaKaon[0]) &&
 		   (track->NSigmaKaon()   <= mNSigmaKaon[1]) &&
 		   (track->NSigmaProton() >= mNSigmaProton[0]) &&
 		   (track->NSigmaProton() <= mNSigmaProton[1]) &&
-		   !( (track->NSigmaElectron() >= mNSigmaAntiElectron[0]) &&
-		      (track->NSigmaElectron() <= mNSigmaAntiElectron[1]) ) &&
-		   !( (track->NSigmaPion()  >= mNSigmaAntiPion[0]) &&
-		      (track->NSigmaPion()   <= mNSigmaAntiPion[1]) ) &&
-		   !( (track->NSigmaKaon()   >= mNSigmaAntiKaon[0]) &&
-		      (track->NSigmaKaon()   <= mNSigmaAntiKaon[1]) ) &&
-		   !( (track->NSigmaProton() >= mNSigmaAntiProton[0]) &&
-		      (track->NSigmaProton() <= mNSigmaAntiProton[1]) ) &&
+		   !( (track->NSigmaElectron() > mNSigmaAntiElectron[0]) &&
+		      (track->NSigmaElectron() < mNSigmaAntiElectron[1]) ) &&
+		   !( (track->NSigmaPion()  > mNSigmaAntiPion[0]) &&
+		      (track->NSigmaPion()   < mNSigmaAntiPion[1]) ) &&
+		   !( (track->NSigmaKaon()   > mNSigmaAntiKaon[0]) &&
+		      (track->NSigmaKaon()   < mNSigmaAntiKaon[1]) ) &&
+		   !( (track->NSigmaProton() > mNSigmaAntiProton[0]) &&
+		      (track->NSigmaProton() < mNSigmaAntiProton[1]) ) &&
 		   (track->Charge() == mCharge || mCharge==0 )
 		   );
-
-
 
 #ifdef STHBTDEBUG
    cout  << mNSigmaElectron[0] << " << " << track->NSigmaElectron() << " << " << mNSigmaElectron[1] << " ";
@@ -141,6 +145,8 @@ bool franksTrackCut::Pass(const StHbtTrack* track){
       (track->P().y() <= mPy[1]) &&
       (track->P().z() >= mPz[0]) &&
       (track->P().z() <= mPz[1]) &&
+      (track->P().pseudoRapidity() >= mEta[0]) &&
+      (track->P().pseudoRapidity() <= mEta[1]) &&
       (TRapidity      >= mRapidity[0]) &&
       (TRapidity      <= mRapidity[1])
 );
@@ -179,6 +185,8 @@ StHbtString franksTrackCut::Report(){
   sprintf(Ctemp,"\nParticle pT:\t%E - %E",mPt[0],mPt[1]);
   Stemp+=Ctemp;
   sprintf(Ctemp,"\nParticle rapidity:\t%E - %E",mRapidity[0],mRapidity[1]);
+  Stemp+=Ctemp;
+  sprintf(Ctemp,"\nParticle mEta:\t%E - %E",mEta[0],mEta[1]);
   Stemp+=Ctemp;
   sprintf(Ctemp,"\nParticle DCA:\t%E - %E",mDCA[0],mDCA[1]);
   Stemp+=Ctemp;
