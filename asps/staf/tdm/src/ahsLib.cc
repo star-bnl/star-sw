@@ -231,7 +231,7 @@ int ahs_spec2shape(const char *spec, SHAPE_T& shape)
 	 shape.indexes[i] = atoi(buffs[i]);
       }
       else {
-	 shape.indexes[i] = -11301957;
+	 shape.indexes[i] = -11301957; /*-AHS_E_NO_INDEX-*/
 	 isGood = FALSE;
       }
    }

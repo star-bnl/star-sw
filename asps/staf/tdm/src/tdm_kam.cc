@@ -147,20 +147,23 @@ int kam_tdm_type_list()
    long tid = ku_geti();	/* table type id */
 
    char *name=NULL;
+   char n[64]={0};
 
    if( tid < 0 ){
       for(int i=1;;i++){
 	 if( !tdm->getTypeName(i,name) ){
 	    break;
 	 }
-	 printf("TDM:\tType name = (%s) \n",name);
+	 strncpy(n,name,strlen(name)); strtok(n," ");
+	 printf("TDM:\tType name = (%s) \n",n);	//ame);
       }
    }
    else {
       if( !tdm->getTypeName(tid,name) ){
 	 EML_ERROR(KAM_METHOD_FAILURE);
       }
-      printf("TDM:\tType name = (%s) \n",name);
+      strncpy(n,name,strlen(name)); strtok(n," ");
+      printf("TDM:\tType name = (%s) \n",n);	//ame);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -268,10 +271,14 @@ int kam_tdmdataset_entrycount()
 
    tdmDataset* dataset;		/* tdmDataset object */
 
+   long result=0;
+
    if( !tdm->findDataset(name, dataset) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   printf("TDMDATASET:\tEntry Count = %d \n",dataset->entryCount());
+   printf("TDMDATASET:\tEntry Count = %d \n"
+		,result=dataset->entryCount());
+   set_staf_result((float)result);
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -311,12 +318,14 @@ int kam_tdmdataset_maxentrycount()
    char* name = ku_gets();	/* dataset name */
 
    tdmDataset* dataset;		/* tdmDataset object */
+   long result=0;
 
    if( !tdm->findDataset(name, dataset) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    printf("TDMDATASET:\tMax Entry Count = %d \n"
-		,dataset->maxEntryCount());
+		,result=dataset->maxEntryCount());
+   set_staf_result((float)result);
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -436,12 +445,12 @@ int kam_tdmtable_cell_getvalue()
          result = *(cellData.data.d);
 	 break;
       case DS_TYPE_STRUCT:
-	 result = 11301957;
+	 result = 11301957; /*-TDM_E_UNIMPLEMENTED_TYPE-*/
 	 set_staf_result(result);
 	 EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
 	 break;
       default:
-	 result = -11301957;
+	 result = -11301957; /*-TDM_E_UNKNOWN_TYPE-*/
 	 set_staf_result(result);
 	 printf(" code = %d \n",cellData._d);
 	 printf(" codes = %d %d %d %d %d %d %d %d %d\n"
@@ -568,11 +577,14 @@ int kam_tdmtable_colcount()
    char* name = ku_gets();	/* table name */
 
    tdmTable* table;		/* tdmTable object */
+   long result=0;
 
    if( !tdm->findTable(name, table) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
-   printf("TDMTABLE:\tColumn Count = %d \n",table->columnCount());
+   printf("TDMTABLE:\tColumn Count = %d \n"
+		,result=table->columnCount());
+   set_staf_result((float)result);
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -673,14 +685,19 @@ int kam_tdmtable_maxrowcount()
    long maxrowcount = ku_geti();/* number of rows allocated */
 
    tdmTable* table;		/* tdmTable object */
+   long result=0;
 
    if( !tdm->findTable(name, table) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
-   if( maxrowcount > 0 ){
+   if( maxrowcount >= 0 ){				/* SET */
       table->maxRowCount(maxrowcount);
    }
-   printf("TDMTABLE:\tMax Row Count = %d \n",table->maxRowCount());
+   else {						/* GET */
+      printf("TDMTABLE:\tMax Row Count = %d \n"
+      		,result=table->maxRowCount());
+      set_staf_result((float)result);
+   }
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -751,14 +768,18 @@ int kam_tdmtable_rowcount()
    long rowcount = ku_geti();	/* number of rows filled */
 
    tdmTable* table;		/* tdmTable object */
+   long result=0;
 
    if( !tdm->findTable(name, table) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
-   if( rowcount > 0 ){
+   if( rowcount >= 0 ){					/* SET */
       table->rowCount(rowcount);
    }
-   printf("TDMTABLE:\tRow Count = %d \n",table->rowCount());
+   else {						/* GET */
+      printf("TDMTABLE:\tRow Count = %d \n",result=table->rowCount());
+      set_staf_result((float)result);
+   }
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -778,11 +799,14 @@ int kam_tdmtable_rowsize()
    char* name = ku_gets();	/* table name */
 
    tdmTable* table;		/* tdmTable object */
+   long result=0;
 
    if( !tdm->findTable(name, table) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
-   printf("TDMTABLE:\tRow Size = %d bytes \n",table->rowSize());
+   printf("TDMTABLE:\tRow Size = %d bytes \n"
+		,result=table->rowSize());
+   set_staf_result((float)result);
    EML_SUCCESS(STAFCV_OK);
 }
 
