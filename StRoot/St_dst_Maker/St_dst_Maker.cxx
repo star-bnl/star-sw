@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.57 2000/11/25 23:21:55 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.58 2000/11/29 14:15:14 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.58  2000/11/29 14:15:14  fisyak
+// Remove St_dst_dedx_filler_Module, Thanks Janet
+//
 // Revision 1.57  2000/11/25 23:21:55  fisyak
 // Add dEdx maker to production chain
 //
@@ -161,7 +164,6 @@
 
 #include "StMessMgr.h"
 
-#include "global/St_dst_dedx_filler_Module.h"
 #include "global/St_dst_monitor_soft_filler_Module.h"
 
 #include "global/St_particle_dst_filler_Module.h"
@@ -173,9 +175,10 @@
 #include "tables/St_dst_mon_soft_emc_Table.h"
 #include "tables/St_dst_mon_soft_l3_Table.h"
 #include "tables/St_dst_mon_soft_rich_Table.h"
+#include "tables/St_dst_dedx_Table.h"
 #include "tables/St_sgr_groups_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.57 2000/11/25 23:21:55 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.58 2000/11/29 14:15:14 fisyak Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -408,6 +411,7 @@ Int_t  St_dst_Maker::Filler(){
     else {
        point->ReAllocate(point->GetNRows() + no_of_points);
     }
+    if (GetMaker("tpc_raw")) point->SetBit(kIsCalibrated); // mark that tpc_raw made calibration
     iRes = dst_point_filler(tphit, scs_spt, point);
   //	   ========================================
     if (iRes !=kSTAFCV_OK) {
