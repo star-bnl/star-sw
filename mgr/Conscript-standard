@@ -137,14 +137,17 @@ if ( $pkg =~ /^StHbtMaker$/ ) {
     print "CPPPATH = $CPPPATH\n" if $param::debug;
 }
 
-# This block can be used for ANY make having a 2 level
-# directory structure + auto-globbing
+# This block can be used for ANY maker having a 2 level
+# directory structure using auto-globbing
 if ( $pkg =~ /^StMuDSTMaker$/ ||
-     $pkg =~ /^StRichPool$/ ) {
+     $pkg =~ /^StRichPool$/   ||
+     $pkg =~ /^Sti/           ) {
     $CPPPATH = "#" . $Dir;
 
     foreach my $subdir ( glob("$Dir/*") ){
-	if( -d $subdir && $subdir ne "$Dir/CVS"){
+	if( -d $subdir && $subdir ne "$Dir/CVS"
+	               && $subdir ne "$Dir/macros" 
+	               && $subdir ne "$Dir/doc" ){
 	    #print "Inserting $subdir\n";
 	    $CPPPATH  .= $main::PATH_SEPARATOR . "#"  . $subdir;
 	}
