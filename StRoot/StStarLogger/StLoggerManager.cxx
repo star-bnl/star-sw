@@ -353,7 +353,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.4 2004/05/11 23:48:19 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.5 2004/09/16 00:13:05 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -653,14 +653,17 @@ _NO_IMPLEMENTATION_;   return 5;
 //   return messTypeList->ListTypes();                           
 }
    
-   // Instantiate the (singleton) class upon loading
-//
-static StMessMgr* temp=StLoggerManager::Instance();
+  // Instantiate the (singleton) class upon loading
+  //
+// static StMessMgr* temp=StLoggerManager::Instance();
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.4 2004/05/11 23:48:19 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.5 2004/09/16 00:13:05 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.5  2004/09/16 00:13:05  fine
+// remove the implict StStarLogger object. We should give log4cxx a chance to complete the intialization
+//
 // Revision 1.4  2004/05/11 23:48:19  fine
 // update the default logger pattern
 //
