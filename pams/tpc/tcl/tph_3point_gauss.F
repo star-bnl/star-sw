@@ -1,23 +1,15 @@
-* $Id: tph_3point_gauss.F,v 1.5 2000/01/20 23:15:33 snelling Exp $
+* $Id: tph_3point_gauss.F,v 1.6 2000/02/03 00:05:13 snelling Exp $
 * $Log: tph_3point_gauss.F,v $
+* Revision 1.6  2000/02/03 00:05:13  snelling
+* Changed warning reporting, improved switching between 3point Gaussian fit
+* and weighted mean.
+*
 * Revision 1.5  2000/01/20 23:15:33  snelling
 * Made 3point gaussian default
 *
-* Revision 1.4  1999/10/07 03:21:37  snelling
-* changes related to StMessage
-*
-* Revision 1.3  1999/10/05 00:47:07  snelling
-* the tdc range saga continues
-*
-* Revision 1.2  1999/07/17 00:32:06  genevb
-* Use StMessMgr
-*
-* Revision 1.1  1998/01/27 00:49:15  fisyak
-* Split sources
-*
 	integer function tph_3point_gauss(x, y, dy, ipad_lo, ipad_hi,
-     +				npads, centroid, sigma, uncertainty)
-C-----------------------------------------------------------------------
+     &    npads, centroid, sigma, uncertainty)
+c-----------------------------------------------------------------------
 
       IMPLICIT NONE
 
@@ -84,11 +76,10 @@ c
 	real x0                       ! Hit centroid in offset coordinates
 	real x(*)                     ! X positions
 	real y(*)                     ! Amplitudes at x
-C-----------------------------------------------------------------------
+c-----------------------------------------------------------------------
 c local variables:
 c
 	integer imax                  ! Pad with largest signal
-	integer istart                ! First pad
 	integer npts                  ! Number of pads involved in hit
 
 	real delta
@@ -98,86 +89,98 @@ c
 c message call related variables
         character*132 m132
 
-C-----------------------------------------------------------------------
+c-----------------------------------------------------------------------
 c functions:
 c
 	integer lvmax
-C-----------------------------------------------------------------------
+c-----------------------------------------------------------------------
+c       debug information
+	logical debug 
+	data    debug /.false./
 
+c       only use three pad hits or more
         npts = ipad_hi - ipad_lo + 1
-        if (npts.lt.3) then
+        if (npts .lt. 3) then
            tph_3point_gauss = -1
            return
         else
            tph_3point_gauss = 1
         endif
-c
-c Find pad with largest signal:
+
+c       Find pad with largest signal:
 	imax = lvmax(y(ipad_lo),npts) + ipad_lo - 1
-        if (imax.eq.1) then             ! maximum at first point
-           if (y(2).le.y(3)) then
-              tph_3point_gauss = -1
-	      write(m132,*) 'TPH_3POINT_GAUSS bad shape'
-              call StWarning(m132)
-              return
-           endif
-           istart = 1
-	else if (imax.eq.npads) then ! maximum at last point
-           if (y(npads-1).le.y(npads-2)) then
-              tph_3point_gauss = -1
-	      write(m132,*) 'TPH_3POINT_GAUSS bad shape'
-              call StWarning(m132)
-              return
-           endif
-           istart = npads - 2
-        else                            ! normal - max not at edge
-           istart = imax - 1
+
+c       Check if maximum is not on an edge pad
+        if ((imax .eq. 1) .or. (imax .eq. npads)) then	
+	   if(debug) then
+	      write(m132,*) 'TPH_3POINT_GAUSS maximum at sector edge'
+	      call StWarning(m132)
+	   endif
+	   tph_3point_gauss = -1
+	   return 
 	endif
 
-	y1 = y(istart)
-	y2 = y(istart+1)
-	y3 = y(istart+2)
-
-        if (y1*y3.lt.1.0e-10) then ! zero occupancy - no can do
-           tph_3point_gauss = -1
-           return
-        endif
-
-C RRB: Slightly recode to avoid direct comparison of floating pt. numbers
-	delta = x(istart+1) - x(istart)
-	if (ABS(delta-1.).gt.1.E-7) then
-	   write(m132,*) 'TPH_3POINT_GAUSS unexpected delta .ne. 1'
-	   call StWarning(m132)
+c       Check if maximum is not the first or last pad in the hit
+	if ((imax .eq. ipad_lo) .or. (imax .eq. ipad_hi)) then
+	   if(debug) then
+	      write(m132,*) 'TPH_3POINT_GAUSS maximum at last or first pad'
+	      call StWarning(m132)
+	   endif
 	   tph_3point_gauss = -1
 	   return
 	endif
 
-	r213 = log(y2*y2/(y1*y3))
-        if (r213.le.0.0) then
-           tph_3point_gauss = -1
-	   write(m132,*) 'TPH_3POINT_GAUSS bad shape - r213'
-	   call StWarning(m132)
-           return
+c       fill the three points to fit
+	y1 = y(imax - 1)
+	y2 = y(imax)
+	y3 = y(imax + 1)
 
-********************** let's try to take it out....**********************
-C
-C From Monte Carlo, if the fitted Gaussian is wider than about 83%
-C of the pad pitch in X, the weighted mean algorithm is more accurate;
-C we return a diagnostic to force its use.  [ 1/sqrt(1.452)=0.83 ].
-C	elseif (r213.le.1.452) then
-C           id = 0
-C           tph_3point_gauss = -2
-C           return
+c       Check if ADC values are not zero
+        if (y1*y3 .lt. 1.0e-10) then 
+	   if(debug) then
+	      write(m132,*) 'TPH_3POINT_GAUSS partly zero ADC hit'
+	      call StWarning(m132)
+	   endif
+           tph_3point_gauss = -1
+           return
         endif
 
-	x0 = (delta/2.0) * log(y3/y1)/r213
-	centroid = x(istart+1) + x0
-	sigma = delta/sqrt(r213)
+c       Check cluster shape
+	r213 = log((y2*y2)/(y1*y3))
 
-	uncertainty = sqrt( (dy(istart)*(delta/2.0-x0)/y(istart))**2 +
-     +			    (dy(istart+1)*(2.0*x0)/y(istart+1))**2 +
-     +			    (dy(istart+2)*(delta/2.0+x0)/y(istart+2))**2
-     +				)/r213
+        if (r213 .le. 0.0) then
+	   if(debug) then
+	      write(m132,*) 'TPH_3POINT_GAUSS bad shape - r213'
+	      call StWarning(m132)
+	   endif
+           tph_3point_gauss = -1
+           return
+	endif
+
+c       From Monte Carlo, if the fitted Gaussian is wider than about 83%
+c       of the pad pitch in X, the weighted mean algorithm is more accurate;
+c       we return a diagnostic to force its use.  [ 1/sqrt(1.452)=0.83 ].
+	if (r213 .le. 1.452) then
+	   if(debug) then
+	      write(m132,*) 'TPH_3POINT_GAUSS to broad Gaussian'
+	      call StWarning(m132)
+	   endif
+           tph_3point_gauss = -2
+           return
+        endif
+
+c       RRB: Slightly recode to avoid direct comparison of f
+c       loating point numbers
+	delta = x(imax) - x(imax - 1)
+
+	x0 = (delta/2.0) * log(y3/y1) / r213
+	centroid = x(imax) + x0
+	sigma = delta / sqrt(r213)
+
+	uncertainty = sqrt( (dy(imax - 1) * (delta/2.0-x0)/y(imax - 1))**2 +
+     &			    (dy(imax)*(2.0*x0)/y(imax))**2 +
+     &			    (dy(imax + 1)*(delta/2.0+x0)/y(imax + 1))**2
+     &				) / r213
 
 	return
 	end
