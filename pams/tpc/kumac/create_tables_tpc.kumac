@@ -36,9 +36,9 @@ macro/global/import *
       tdm/newtable pixel_data_in  type_shortdata 900000
       tdm/newtable raw_row_out    raw_row 32
       tdm/newtable raw_pad_out    raw_pad 4000 
-      tdm/newtable raw_seq_out    raw_seq 50000
+      tdm/newtable raw_seq_out    raw_seq 100000
       tdm/newtable pixel_data_out type_shortdata 900000
-      cd ..
+      cd [raw_data]/tpc
     enddo  
   
   cd [calib]/tpc
@@ -51,7 +51,9 @@ macro/global/import *
   cd /dui
 
  return
-
+ 
+* ********************************************************
+ 
 macro tfc_r
 macro/global/import *
    
@@ -65,7 +67,7 @@ macro/global/import *
       tdm/newtable gain_data_in    type_floatdata 1750
       tdm/newtable gain_row_out    raw_row 32
       tdm/newtable gain_data_out   type_floatdata 3942
-      cd ..
+      cd [calib]/tpc
     enddo  
   
   cd /dui
@@ -84,7 +86,7 @@ macro/global/import *
       tdm/newtable raw_pad_out    raw_pad 4000 
       tdm/newtable raw_seq_out    raw_seq 50000
       tdm/newtable pixel_data_out type_shortdata 900000
-      cd ..
+      cd [raw_data]/tpc
     enddo  
   
   cd /dui
@@ -119,10 +121,10 @@ macro/global/import *
 
   cd [data]/tpc/hits
   
-    tdm/newtable tphit     tcl_tphit     200000
-    tdm/newtable tphitau   tcl_tphit_aux 200000
-    tdm/newtable index     tcl_tpc_index 200000
-    tdm/newtable tpcluster tcl_tpcluster 200000
+    tdm/newtable tphit     tcl_tphit     500000
+    tdm/newtable tphitau   tcl_tphit_aux 500000
+    tdm/newtable index     tcl_tpc_index 500000
+    tdm/newtable tpcluster tcl_tpcluster 400000
     tdm/newtable tpseq     tcl_tp_seq    2000000
     
 * Need for slow simulator stuff:
