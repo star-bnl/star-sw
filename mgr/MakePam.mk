@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.117 1999/09/12 01:47:27 fisyak Exp $
+# $Id: MakePam.mk,v 1.118 1999/09/13 22:19:49 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.118  1999/09/13 22:19:49  fisyak
+# Add inlclude and include/tables in CPP path
+#
 # Revision 1.117  1999/09/12 01:47:27  fisyak
 # merge cons and makel tables h-files into include/tables
 #
@@ -264,7 +267,7 @@ SUBDIR2 := $(filter-out $(SUBDIR1), $(subst $(STAR)/pams/,, $(wildcard $(STAR)/p
 INC_DIRS:= $(addprefix $(OUT_DIR)/pams/, $(SUBDIR1)) $(addprefix $(STAR)/pams/, $(SUBDIR2)) 
 INC_DIRS+= $(STAF_UTILS_INCS)
 INC_NAMES := $(addprefix StRoot/,St_base StChain StUtilities xdf2root StarClassLibrary StEvent) \
-              StRoot .share .share/tables .share/$(PKG) pams inc StDb/include
+              StRoot .share include include/tables .share/$(PKG) pams inc StDb/include
 #                            StarClassLibrary/include
 INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES))))
 ifneq ($(ROOT_DIR),$(STAR))
