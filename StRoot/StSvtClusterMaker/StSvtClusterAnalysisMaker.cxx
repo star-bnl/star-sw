@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.2 2000/07/13 14:50:49 caines Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.3 2000/07/16 22:32:54 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.3  2000/07/16 22:32:54  caines
+ * Fills spacepoint table correctly
+ *
  * Revision 1.2  2000/07/13 14:50:49  caines
  * Improvements on not saving single pixels
  *
@@ -196,7 +199,7 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
           mSvtAnalysis->CluFirstTimeBin();
           mSvtAnalysis->CluLastTimeBin();
           mSvtAnalysis->MomentAnalysis(mSvtEvent->getPedOffset());
-          //mSvtAnalysis->Report(index);
+          mSvtAnalysis->Report(index);
 
           SaveIntoTable(numOfClust,barrel, ladder, wafer, hybrid);
 	  if( index != 11 && index !=10){
@@ -338,7 +341,7 @@ void StSvtClusterAnalysisMaker::MakeHistograms(){
       spt->de[1]=0;
       myHybridObject = (StSvtHybridObject *)
 	mSvtCluster->getObject(barrel, ladder, wafer,  hybrid);
-      spt->id_wafer=myHybridObject->getLayerID()*1000+100*
+      spt->id_wafer=mHybridData->getLayerID()*1000+100*
 	wafer+ladder;
  
       for( int j=0; j<3; j++){
