@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.h,v 2.5 2004/06/29 22:37:35 ullrich Exp $
+ * $Id: StTriggerData2003.h,v 2.6 2004/07/20 18:02:26 jeromel Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.h,v $
+ * Revision 2.6  2004/07/20 18:02:26  jeromel
+ * Updates from Akio to fix CTB issues.
+ *
  * Revision 2.5  2004/06/29 22:37:35  ullrich
  * Added missing access function for ZDC. Currently same as 2004.
  *
@@ -69,7 +72,9 @@ public:
     unsigned short tcuBits() const;
     
     // CTB
+    unsigned short ctbRaw(int address, int prepost=0) const;
     unsigned short ctb(int pmt, int prepost=0) const;
+    unsigned short ctbTraySlat(int tray, int slat, int prepost=0) const;
     
     // MWC
     unsigned short mwc(int pmt, int prepost=0) const;

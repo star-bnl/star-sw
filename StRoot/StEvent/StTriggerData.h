@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.6 2004/02/11 01:39:51 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.7 2004/07/20 18:02:26 jeromel Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.7  2004/07/20 18:02:26  jeromel
+ * Updates from Akio to fix CTB issues.
+ *
  * Revision 2.6  2004/02/11 01:39:51  ullrich
  * Use enumeration StBeamDirector for east/west. Add member for ZDC vertex.
  *
@@ -28,7 +31,12 @@
  * Revision 2.1  2003/04/16 17:47:41  ullrich
  * Initial Revision.
  *
+ **************************************************************************
+ *
+ * prepost argument should go between -5 and 5, and 0 is triggered crossing
+ *
  **************************************************************************/
+
 #ifndef StTriggerData_hh
 #define StTriggerData_hh
 
@@ -76,7 +84,9 @@ public:
     virtual unsigned short fpdLayer2DSM(int channel) const;
 
     // CTB
+    virtual unsigned short ctbRaw(int address, int prepost=0) const;
     virtual unsigned short ctb(int pmt, int prepost=0) const;
+    virtual unsigned short ctbTraySlat(int tray, int slat, int prepost=0) const;
 
     // MWC
     virtual unsigned short mwc(int sector, int prepost=0) const;
@@ -152,7 +162,9 @@ inline unsigned short StTriggerData::ctbLayer1DSM(int channel) const {return 0;}
 inline unsigned short StTriggerData::ctbLayer2DSM(int channel) const {return 0;}
 inline unsigned short StTriggerData::emcLayer2DSM(int channel) const {return 0;}
 inline unsigned short StTriggerData::fpdLayer2DSM(int channel) const {return 0;}
+inline unsigned short StTriggerData::ctbRaw(int address, int prepost) const {return 0;}
 inline unsigned short StTriggerData::ctb(int pmt, int prepost) const {return 0;}
+inline unsigned short StTriggerData::ctbTraySlat(int tray, int slat, int prepost) const {return 0;}
 inline unsigned short StTriggerData::mwc(int sector, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcAtChannel(int channel, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcAtAddress(int address, int prepost) const {return 0;}

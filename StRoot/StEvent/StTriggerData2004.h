@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2004.h,v 2.3 2004/02/11 01:39:52 ullrich Exp $
+ * $Id: StTriggerData2004.h,v 2.4 2004/07/20 18:02:26 jeromel Exp $
  *
  * Author: Akio Ogawa, Feb 2004
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2004.h,v $
+ * Revision 2.4  2004/07/20 18:02:26  jeromel
+ * Updates from Akio to fix CTB issues.
+ *
  * Revision 2.3  2004/02/11 01:39:52  ullrich
  * Use enumeration StBeamDirector for east/west. Add member for ZDC vertex.
  *
@@ -64,8 +67,10 @@ public:
     unsigned short tcuBits() const;
     
     // CTB
+    unsigned short ctbRaw(int address, int prepost=0) const;
     unsigned short ctb(int pmt, int prepost=0) const;
-    
+    unsigned short ctbTraySlat(int tray, int slat, int prepost=0) const;    
+
     // MWC
     unsigned short mwc(int pmt, int prepost=0) const;
             
