@@ -7,7 +7,7 @@ export AIX_MK += DONE
 # C PreProcessor
 #export CPP := gcc -E -x c
 export CPP := /usr/ccs/lib/cpp
-export CPPFLAGS += $(IDIRS:%=-I%)
+export CPPFLAGS += $(INCDIRS:%=-I%)
 export CPPFLAGS += -D$(shell uname) -D$(STAR_ARCH)
 export CPPFLAGS += -Dextname
 ifeq ($(DEBUG),$(TRUE))

@@ -111,6 +111,8 @@ $(BASE_DIR)/$(BASE_NAME).config: $(BASE_DIR)/Makefile.control
 	@echo ""						>> $@
 	@echo "export USER_LIBS :=" $(USER_LIBS)		>> $@
 	@echo ""						>> $@
+	@echo "export CERNLIBS :=" $(CERNLIBS)		        >> $@
+	@echo ""						>> $@
 	@echo "export INSTALL_BIN_FILES :=" $(INSTALL_BIN_FILES)>> $@
 	@echo ""						>> $@
 #

@@ -65,7 +65,8 @@ tst_%: tst_%.o $(LOAD_LIBS) $(USER_LIBS) $(CERN_LIBS)
 	$(FOR_LIBS)
 	chmod +x $@
 #
-$(PROGS): $(PAM_LIBS) $(ASP_LIBS) $(USER_LIBS) $(CERN_LIBS)
+#$(PROGS): $(PAM_LIBS) $(ASP_LIBS) $(USER_LIBS) $(CERN_LIBS)
+$(PROGS): $(PAM_LIBS) $(ASP_LIBS) $(USER_LIBS)
 	@echo "*** Building program:" $@ "***"
 	rm -f $@
 	$(LD) -o $@ \

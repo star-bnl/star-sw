@@ -7,7 +7,7 @@ export HPUX_MK += DONE
 # C PreProcessor
 #export CPP := gcc -E -x c
 export CPPFLAGS += -Dextname
-export CPPFLAGS += $(IDIRS:%=-I%)
+export CPPFLAGS += $(INCDIRS:%=-I%)
 export CPPFLAGS += -D$(shell uname | sed -e 's/-//g') -D$(STAR_ARCH)
 ifeq ($(DEBUG),$(TRUE))
 export CPPFLAGS += -DDEBUG
