@@ -1,4 +1,4 @@
-// $Id: bfcread_geantBranch.C,v 1.5 2000/04/12 16:13:41 kathy Exp $
+// $Id: bfcread_geantBranch.C,v 1.6 2000/04/13 18:33:01 kathy Exp $
 // $Log $
 
 //======================================================================
@@ -62,7 +62,8 @@ void bfcread_geantBranch(
   St_Table   *tabl=0;
   St_DataSet *obj=0;
 
-  Int_t tottabcntr=0;
+
+  Float_t tottabcntr=0;
 // Event loop
   int istat=0,i=0;
 
@@ -70,7 +71,8 @@ EventLoop: if (i < nevents && !istat) {
 
     chain->Clear();
     istat = chain->Make(i);
-    cout << "     istat value returned from chain Make = " << istat << endl;
+    
+//    cout << "     istat value returned from chain Make = " << istat << endl;
 
 
 // Now look at the data in the event:

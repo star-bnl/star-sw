@@ -1,4 +1,4 @@
-// $Id: bfcread_tagsBranch.C,v 1.6 2000/03/23 19:54:36 kathy Exp $
+// $Id: bfcread_tagsBranch.C,v 1.7 2000/04/13 18:33:02 kathy Exp $
 // $Log $
 
 //======================================================================
@@ -64,9 +64,9 @@ void bfcread_tagsBranch(
 //Loop over entries (events written to the tags.root file)
 //test that all events can be read in & print out values for printEvent
 
-  Int_t countEvents=0;
-  Int_t countTables=0;
-  Int_t countTagsTot[4]={0,0,0,0};
+  Float_t countEvents=0;
+  Float_t countTables=0;
+  Float_t countTagsTot[4]={0,0,0,0};
 
   Float_t AsumScaCPM=0;
   Float_t AsumScaCPS=0;
