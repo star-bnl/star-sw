@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.hh,v 1.2 1999/01/15 22:54:16 wenaus Exp $
+ * $Id: StV0Vertex.hh,v 1.3 1999/01/27 13:04:50 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,9 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.hh,v $
- * Revision 1.2  1999/01/15 22:54:16  wenaus
- * version with constructors for table-based loading
+ * Revision 1.3  1999/01/27 13:04:50  ullrich
+ * Renamed data member and access functions: xxxToV0 into xxxToPrimaryVertex.
+ * This is the right meaning according to P. Jones.
  *
  * table load intfc change; include ref change
  *
@@ -33,32 +34,34 @@
 #include <float.h>
 
 class StV0Vertex : public StVertex {
-    
-    float dcaDaughterToV0 (unsigned int i) const;
+    StV0Vertex(dst_v0_vertex_st*);
+    StV0Vertex();
     ~StV0Vertex();
-    float dcaParentToV0() const;
+    StV0Vertex(dst_v0_vertex_st*,dst_vertex_st*);
     float dcaDaughterToPrimaryVertex(unsigned int i) const;
-    void setDcaDaughtersToV0(unsigned int, float);
+    // const StV0Vertex & operator=(const StV0Vertex&);
 
-    void setDcaParentToV0(float);
+    float dcaDaughters() const;
     void setDcaDaughtersToPrimaryVertex(unsigned int, float);
+
+    void setDcaDaughterToPrimaryVertex(StTrackSign sign, float);
     void setMomentumOfDaughter(StTrackSign sign, const StThreeVector<float>&);
-    float mDcaDaughtersToV0[2];
+    void setDcaDaughters(float);
     void setDcaParentToPrimaryVertex(float);
-    float mDcaParentToV0;
+    
     float mDcaDaughtersToPrimaryVertex[2];
     float mDcaDaughters;
-inline float StV0Vertex::dcaDaughterToV0 (unsigned int i) const
+    float mDcaParentToPrimaryVertex;
     StThreeVector<float> mMomentumOfDaughters[2];
     float                mDcaDaughters;
-	return mDcaDaughtersToV0[i];
+inline float StV0Vertex::dcaDaughterToPrimaryVertex (unsigned int i) const
 };
     if (i < 2)
 	return mDcaDaughtersToPrimaryVertex[i];
     else
 	return FLT_MAX;
 StV0Vertex::momentumOfDaughter(StTrackSign sign) const
-inline float StV0Vertex::dcaParentToV0() const { return mDcaParentToV0; }
+{
     return mMomentumOfDaughters[sign];
 }
 
