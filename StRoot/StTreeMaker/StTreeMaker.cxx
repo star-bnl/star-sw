@@ -432,9 +432,10 @@ void StTreeMaker::FillHistBranch(StBranch *histBr)
 
     St_ObjectSet *os = new St_ObjectSet(ts);
     ts = ((StMaker*)ds)->GetCVS();
-    if (ts.Contains("StMaker.h")) {// GetCVS not overloaded
+    if (ts.Contains("StMaker.h") 
+    && ds->IsA() != StMaker::Class()) {// GetCVS not overloaded
        ds->Warning("StMaker::Init","GetCVS is not overloaded");
-       printf("  Please add into file %s the following line: \n",ds->DeclFileName());
+       printf("  Please add into file %s the following line: \n",ds->IsA()->GetDeclFileName());
        printf("  virtual const char *GetCVS()\n");
        printf("  {static const char cvs[]=\"Tag %sName:$ %sId:$ built \"__DATE__\" \"__TIME__ ; return cvs;}\n\n","$","$");  
      }
