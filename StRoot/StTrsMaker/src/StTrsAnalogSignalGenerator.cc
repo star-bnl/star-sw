@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsAnalogSignalGenerator.cc,v 1.5 1999/04/27 15:05:40 lasiuk Exp $
+ * $Id: StTrsAnalogSignalGenerator.cc,v 1.6 1999/10/04 15:28:31 long Exp $
  *
  * Author: brian Nov 3, 1998 
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StTrsAnalogSignalGenerator.cc,v $
+ * Revision 1.6  1999/10/04 15:28:31  long
+ * change on the value of mTimeShiftOfSignalCentroid
+ *
+ * Revision 1.6  1999/10/01  17:15:00  Hui Long
+ * mTimeShiftOfSignalCentroid(See Note in the code..
+ *
  * Revision 1.5  1999/04/27 15:05:40  lasiuk
  * itime shift in ns
  *
@@ -48,8 +54,8 @@ RandGauss       StTrsAnalogSignalGenerator::mGaussDistribution(mEngine);
 
 StTrsAnalogSignalGenerator::StTrsAnalogSignalGenerator(StTpcGeometry* geo, StTpcSlowControl* sc, StTpcElectronics* el, StTrsSector* sec)
     : mGeomDb(geo), mSCDb(sc), mElectronicsDb(el), mSector(sec),
-      mDeltaRow(0),
-      mDeltaPad(0),
+      mDeltaRow(1),
+      mDeltaPad(6),
       mSignalThreshold(0.*volt),
       mSuppressEmptyTimeBins(true)
 {
@@ -69,7 +75,8 @@ StTrsAnalogSignalGenerator::StTrsAnalogSignalGenerator(StTpcGeometry* geo, StTpc
     mNoiseRMS = 0.;
     //
     // Time  Shift
-    mTimeShiftOfSignalCentroid = 3.*mTau;
+   //  mTimeShiftOfSignalCentroid = 3.* mTau;
+    mTimeShiftOfSignalCentroid =mElectronicsDb->tZero();//HL,8/31/99
     PR(mTimeShiftOfSignalCentroid/nanosecond);
 }
 
