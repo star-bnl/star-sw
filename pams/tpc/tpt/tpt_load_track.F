@@ -1,5 +1,9 @@
-* $Id: tpt_load_track.F,v 1.10 1999/09/14 00:55:48 liq Exp $
+* $Id: tpt_load_track.F,v 1.11 1999/09/30 00:22:06 sakrejda Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.11  1999/09/30 00:22:06  sakrejda
+* twopi and radtodeg were replaced by C_2PI and C_DEG_PER_RAD
+* (Thanks Spiros for pointing it out....)
+*
 * Revision 1.10  1999/09/14 00:55:48  liq
 * use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
 *
@@ -63,7 +67,7 @@ C___________________________________________________________________
       INTEGER ipt
       REAL    x0, y0, sgn, sign
       REAL   dx0,dy0
-      real   twopi,radtodeg
+      real   radtodeg
       real   xlocal(3),bfield(3)
       data   xlocal /3*0./
 
@@ -79,8 +83,6 @@ C     REAL     xlocal(3), bfield(3)                  !ALREADY EXISTS
 
 C___________________________________________________________________
 
-      twopi=8.0*atan(1.0)
-      radtodeg=45.0/atan(1.0)
       track(ipt).flag= trk(ipt).flag   ! good momentum fit
 C
 C     number of points to fit
@@ -120,8 +122,8 @@ C
 C     azimuthal angle for this point
       track(ipt).phi0 = atan2(y0,x0)
       if(track(ipt).phi0.lt.0) track(ipt).phi0=
-     >track(ipt).phi0+twopi
-      track(ipt).phi0 = track(ipt).phi0*radtodeg  ! convert to degrees
+     >track(ipt).phi0+C_2PI
+      track(ipt).phi0 = track(ipt).phi0*C_DEG_PER_RAD ! convert to degrees
 **cc      if (track(ipt).phi0.gt.180.0) track(ipt).phi0 = 
 **cc     +     track(ipt).phi0 - 360.0
       track(ipt).cov(3)  = ((y0*dx0/(x0*x0))**2 + (dy0/x0)**2) /
@@ -143,10 +145,10 @@ C
 C
 C     azimuthal angle for the momentum at the first point
       sgn = sign(1.0,trk(ipt).p(2))
-      track(ipt).psi = trk(ipt).p(5)-sgn*0.25*twopi
+      track(ipt).psi = trk(ipt).p(5)-sgn*0.25*C_2PI
       if(track(ipt).psi.lt.0) track(ipt).psi=track(ipt).psi+
-     >                        twopi
-      track(ipt).psi = track(ipt).psi*radtodeg  ! convert to degrees
+     >                        C_2PI
+      track(ipt).psi = track(ipt).psi*C_DEG_PER_RAD ! convert to degrees
 **cc      if (track(ipt).psi.gt.180.0) track(ipt).psi = 
 **cc     +     track(ipt).psi - 360.0
 C
