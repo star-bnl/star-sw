@@ -8,9 +8,9 @@ echo $ASP $ARCH
 set LIB = .$ARCH/lib
 if ( -d $LIB) then
   echo rm -f $LIB/lib$ASP.a
-  rm -f $LIB/*$ASP.a
-  echo rm -f $LIB/lib$ASP.s?
-  rm -f $LIB/*$ASP.s?
+  rm -f $LIB/lib$ASP.a
+  echo rm -f $LIB/lib$ASP.s?.????
+  rm -f $LIB/lib$ASP.s?.????
 endif
 
 set OBJ = .$ARCH/obj/$ASP
@@ -22,7 +22,7 @@ endif
 set DEP = .$ARCH/dep/$ASP
 if ( -e $DEP ) then
   echo rm -rf $DEP/*.d
-  rm -rf $OBJ/*.d
+  rm -rf $DEP/*.d
 endif
 
 set SRG = srg/$ASP
