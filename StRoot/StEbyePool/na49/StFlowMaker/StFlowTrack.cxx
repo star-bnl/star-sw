@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.cxx,v 1.1 2001/02/23 00:51:46 posk Exp $
+// $Id: StFlowTrack.cxx,v 1.2 2001/05/14 23:04:45 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -12,8 +12,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.cxx,v $
-// Revision 1.1  2001/02/23 00:51:46  posk
-// NA49 version of STAR software.
+// Revision 1.2  2001/05/14 23:04:45  posk
+// Can select PID for event plane particles. Protons not used for 1st har.
+// event plane.
 //
 // Revision 1.4  2000/09/05 16:11:39  snelling
 //

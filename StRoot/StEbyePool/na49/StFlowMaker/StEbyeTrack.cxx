@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeTrack.cxx,v 1.1 2001/02/23 00:50:07 posk Exp $
+ * $Id: StEbyeTrack.cxx,v 1.2 2001/05/14 23:04:04 posk Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  +         Art Poskanzer, LBNL, Nov. 2000
@@ -13,8 +13,9 @@
  **********************************************************************
  *
  * $Log: StEbyeTrack.cxx,v $
- * Revision 1.1  2001/02/23 00:50:07  posk
- * NA49 version of STAR software.
+ * Revision 1.2  2001/05/14 23:04:04  posk
+ * Can select PID for event plane particles. Protons not used for 1st har.
+ * event plane.
  *
  * Revision 1.1.1.1  2000/11/22 19:45:09  jcs
  * Imported sources for MICRODST
