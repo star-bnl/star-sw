@@ -1,5 +1,8 @@
-* * $Id: bfc.kumac,v 1.61 1998/09/23 19:25:06 kathy Exp $
+* * $Id: bfc.kumac,v 1.62 1998/09/23 19:33:10 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.62  1998/09/23 19:33:10  kathy
+* put line continuations in where missing
+*
 * Revision 1.61  1998/09/23 19:25:06  kathy
 * new example list in bfc and new examples
 *
@@ -459,19 +462,19 @@
  
 MACRO bfc _
    TOP=$STAR _
-   calib_dir=$STAR_CALIB/ebye_
+   calib_dir=$STAR_CALIB/ebye _
    tpc_sector_first=1 _
    tpc_sector_last=24 _
    ebye_prior_switch=0 _
    ebye_ensemble_switch=0 _
    ebye_analysis_switch=1 _
    gstar_settings=' field_only' _
-   domain=' geometry g2t tpc ctf svt global ' _
-   chain=' fzin rg2t tpg svg tfs srs tpt tid tte_e sgr drhd dehd svm evr egr ev0 ddedx dpnt desum dmsft drsum dout ' _
-   skip=2 _
+   domain=' geometry g2t tpc emc ctf svt global ' _
+   chain=' fzin rg2t tpg svg tfs srs ems tpt tid tte_e sgr drhd dehd svm evr egr ev0 ddedx dpnt desum dmsft drsum dout ' _
+   skip=0 _
    no_events=1 _
-   input_data_file=/disk1/star/auau200/hijing135/default/b0_3/year1a/hadronic_off/Gstardata/set100/set100_01_45evts.fz _
-   output_file=set100_01_45evts _
+ input_data_file=/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/Gstardata/psc079_01_46evts.fza _
+   output_file=psc079_01_46evts_year2.xdf _
    log=bfc.log _
    nunit=21 _
    nfile=globtrk.ntup _
