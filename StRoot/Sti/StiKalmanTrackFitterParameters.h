@@ -11,12 +11,13 @@ public:
   StiKalmanTrackFitterParameters(const string & name, const string & description);
   StiKalmanTrackFitterParameters(const StiKalmanTrackFitterParameters & pars);
 	const StiKalmanTrackFitterParameters & operator=(const StiKalmanTrackFitterParameters & p);
-  const StiKalmanTrackFitterParameters & operator=(const KalmanTrackFitterParameters_st & p);
   virtual ~StiKalmanTrackFitterParameters();
   void setMaxChi2(double maxChi2);
   double getMaxChi2() const;
   void initialize(); 
-	void load(TDataSet*);
+	virtual void loadDS(TDataSet&ds);
+	virtual void loadFS(ifstream& inFile); 
+	friend ostream& operator<<(ostream& os, const StiKalmanTrackFitterParameters& par);
  protected:
   double _maxChi2; 
 };
