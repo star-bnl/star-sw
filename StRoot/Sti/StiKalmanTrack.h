@@ -226,6 +226,8 @@ public:
    /// Accessor method returns the last node associated with the track.
    // Assumes the track has been pruned.
    StiKalmanTrackNode * getLastNode()   const { return lastNode; };
+
+   void  setLastNode(StiKalmanTrackNode *n) { lastNode = n; };
    
    /// Returns the direction (kInsideOut, kOutsideIn) used in the reconstruction of this track.
    StiDirection getTrackingDirection() const { return  trackingDirection;};
