@@ -10,7 +10,7 @@ c:>------------------------------------------------------------------
       INTEGER*4 FUNCTION EMC_EGRID(
      1     ems_hits_bemc_h,     ems_hits_bemc ,
      2     ems_hits_eemc_h,     ems_hits_eemc ,
-     3       egr_globtrk_h,       egr_globtrk ,
+     3         dst_track_h,         dst_track ,
      4       ems_control_h,       ems_control ,
      5        emc_energy_h,        emc_energy )
 c:>------------------------------------------------------------------
@@ -26,7 +26,7 @@ C     neutrals) in e_n table. This module then projects the tracks
 C     back to the primary vertex, claculates the Energy, eta, and phi
 C     for the tracks and loads a table with the charged energy at the
 C     vertex.
-C:ARGUMENTS:    ems_hits_bemc ems_hits_eemc egr_globtrk ems_control
+C:ARGUMENTS:    ems_hits_bemc ems_hits_eemc dst_track ems_control
 C:ARGUMENTS:    emc_energy
 C:RETURN VALUE: STAFCV_OK on successful completion
 c:>------------------------------------------------------------------
@@ -131,27 +131,27 @@ c*- and for Endcap
       endif
 
 C*- get the tracks from GLOBTRK table
-      write(*,*)'EMC_EGRID -- No. tracks in =',egr_globtrk_h.nok
-      do ihit = 1, egr_globtrk_h.nok       ! Loop over input tracks
-         trk_qual=egr_globtrk(ihit).chisq/float(egr_globtrk(ihit).ndegf)
+      write(*,*)'EMC_EGRID -- No. tracks in =',dst_track_h.nok
+      do ihit = 1, dst_track_h.nok       ! Loop over input tracks
+         trk_qual=(dst_track(ihit).chisq(1)+
+     +             dst_track(ihit).chisq(2))/2.0
+     +            /float(dst_track(ihit).ndegf)
          if(trk_qual.le.trk_qual_cut)then
-            trkchar = float(egr_globtrk(ihit).icharge)
-            pt      = 1.0/egr_globtrk(ihit).invpt
-            pz      = pt*egr_globtrk(ihit).tanl
+            trkchar = float(dst_track(ihit).icharge)
+            pt      = 1.0/dst_track(ihit).invpt
+            pz      = pt*dst_track(ihit).tanl
             p_tot   = sqrt(pt**2 + pz**2)
             crad    = pt/abs(trkchar*0.0003*b_field)
-            x_strt  = egr_globtrk(ihit).r0
-     1              * cos(egr_globtrk(ihit).phi0*deg_to_rad)
-            y_strt  = egr_globtrk(ihit).r0
-     1              * sin(egr_globtrk(ihit).phi0*deg_to_rad)
-            cap_phi0= egr_globtrk(ihit).psi*deg_to_rad+trkchar*0.5*pi
+            x_strt  = dst_track(ihit).x0
+            y_strt  = dst_track(ihit).y0
+            cap_phi0= dst_track(ihit).psi*deg_to_rad+trkchar*0.5*pi
             xc      = x_strt - crad*cos(cap_phi0)
             yc      = y_strt - crad*sin(cap_phi0)
             p_input(1) = xc
             p_input(2) = yc
-            p_input(3) = egr_globtrk(ihit).z0
+            p_input(3) = dst_track(ihit).z0
             p_input(4) = crad
-            p_input(5) = egr_globtrk(ihit).tanl 
+            p_input(5) = dst_track(ihit).tanl 
             p_input(6) = cap_phi0
             z_int = 10000.
 c*-Flag for track which go through
@@ -220,14 +220,16 @@ c*-Fill tables
             
 C*-Project Track back to the primary Vertex. Calculate Energy
 C*-of charged tracks and load energy into eta-phi grid at Vertex
-            trak(1)  = egr_globtrk(ihit).r0 ! r0
-            trak(2)  = egr_globtrk(ihit).r0
-     1               * egr_globtrk(ihit).phi0*deg_to_rad !r0*phi0
-            trak(3)  = egr_globtrk(ihit).z0 !z0
-            trak(4)  = egr_globtrk(ihit).psi*deg_to_rad !psi
-            trak(5)  = egr_globtrk(ihit).tanl !tanl
-            trak(6)  = FLOAT(egr_globtrk(ihit).icharge)
-     +               * (0.2997*5.)*egr_globtrk(ihit).invpt/1000.        !q/R
+            trak(1)  = sqrt(dst_track(ihit).x0**2
+     +                     +dst_track(ihit).y0**2)    !r0
+            trak(2)  = trak(1)
+     +               *ATAN2(dst_track(ihit).x0,dst_track(ihit).y0)
+     +               *deg_to_rad                      !r0*phi0
+            trak(3)  = dst_track(ihit).z0 !z0
+            trak(4)  = dst_track(ihit).psi*deg_to_rad !psi
+            trak(5)  = dst_track(ihit).tanl !tanl
+            trak(6)  = FLOAT(dst_track(ihit).icharge)
+     +               * (0.2997*5.)*dst_track(ihit).invpt/1000.        !q/R
 
 C*-At present assume that primary vertex is at X = Y = Z = 0
 C*- Shall we use vertex position? If yes, how do we treat 

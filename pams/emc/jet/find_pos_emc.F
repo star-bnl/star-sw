@@ -14,6 +14,12 @@ c*-
       parameter (offset=1.3089969) !phi_bin=1(or 120) 
       parameter (sign=-1)          !anti-clockwise
 
+      if(ieta.eq.0) then
+         write(*,*) '***find_pos_emc: eta out of range: ',det,ieta
+         phi=0.0
+         eta=0.0
+         return
+      endif      
       aeta=abs(ieta)
       rl=ieta/aeta
 
