@@ -93,7 +93,7 @@ Int_t StStrangeMuDstMaker::Init() {
   firstEvent = kTRUE;
   if (Debug()) gMessMgr->Debug() << "In StStrangeMuDstMaker::Init() ... "
                                << GetName() << endm; 
-  if ((GetMode() == StrangeWrite) && (OpenFile() == kStErr)) return kStErr;
+  if ((GetMode() == StrangeWrite) && (OpenFile() == kStErr)) return kStEOF;
   if (!dstMaker) {
     evClonesArray = new TClonesArray("StStrangeEvMuDst",1);
     if (doMc) evMcArray = new TClonesArray("StStrangeEvMuDst",1);
@@ -231,7 +231,7 @@ Int_t StStrangeMuDstMaker::Make() {
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::MakeReadDst() {
 
-  if (!((tree) && (muDst))) return kStErr;
+  if (!((tree) && (muDst))) return kStEOF;
   Int_t makerEventNumber = GetNumber();
   if (makerEventNumber == -2) {    // If event numbers aren't supplied,
     readEventNumber = 0;           // start at 0 and increment ourselves.
@@ -252,8 +252,8 @@ Int_t StStrangeMuDstMaker::MakeReadDst() {
     SkipChainFile(curTree);
   }
 
-  if (skippingFile && curTree == chain->GetNtrees()) return kStErr; 
-  if (tree->GetEvent(readEventNumber) <= 0) return kStErr; // Read the event
+  if (skippingFile && curTree == chain->GetNtrees()) return kStEOF; 
+  if (tree->GetEvent(readEventNumber) <= 0) return kStEOF; // Read the event
 
   TFile* thisFile = chain->GetFile();
   if (thisFile != lastFile) {
@@ -656,8 +656,11 @@ char* StStrangeMuDstMaker::GetFile() const {
 }       
 
 //_____________________________________________________________________________
-// $Id: StStrangeMuDstMaker.cxx,v 3.31 2004/08/19 19:55:52 perev Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.32 2004/10/13 16:41:19 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.32  2004/10/13 16:41:19  genevb
+// Use kStEOF returns to terminate chain
+//
 // Revision 3.31  2004/08/19 19:55:52  perev
 // Replace Delete to THack:ClearClone
 //
