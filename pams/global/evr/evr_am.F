@@ -65,7 +65,7 @@ CC:>----------------------------------------------------------------------
       COMMON 	/FITVERT/ vtrv
       REAL 	XV,YV,ZV
       COMMON 	/VERTEX/ XV,YV,ZV
-      INTEGER   ntrk
+      INTEGER   ntrk,index
       LOGICAL   match_flag
       REAL	dr
       REAL      x0(maxtr),y0(maxtr),z0(maxtr)
@@ -131,8 +131,8 @@ C=== decide which tracks to use===
              icharge = globtrk(i).icharge
               p = 1/globtrk(i).invpt
               tanla = globtrk(i).tanl
-              r0 = globtrk(i).r0
-              phi = globtrk(i).phi0
+              r0 = sqrt(globtrk(i).x0**2+globtrk(i).y0**2)
+              phi = atan2(globtrk(i).x0,globtrk(i).y0)
               z = globtrk(i).z0
            endif
            if (p.ge.evrpar(1).ptmin) then
@@ -219,23 +219,38 @@ C=== decide which tracks to use===
 C
 C save results
 C
+        index=privert_h.nok + 1
         if (evrpar(1).use.eq.0) then
-           privert(1).use = ' TPC'
+           privert(index).det_id = 1
+           privert(index).  = 0.0150
+           privert(index).  = 0.0150
+           privert(index).  = 0.0200
         elseif (evrpar(1).use.eq.1) then
-           privert(1).use = ' SVT'
+           privert(index).det_id = 2
+           privert(index).  = 0.0050
+           privert(index).  = 0.0050
+           privert(index).  = 0.0050
         elseif (evrpar(1).use.eq.2) then
-           privert(1).use = 'GLOB'
+           privert(index).det_id = 3
+           privert(index).  = 0.0150
+           privert(index).  = 0.0150
+           privert(index).  = 0.0200
         endif
-        privert(1).match = evrpar(1).match
-        privert(1).ptmin = evrpar(1).ptmin
-        privert(1).id = 1
-        privert(1).ndegf = 2*k
-        privert(1).ntch = k
-        privert(1).x = xv
-        privert(1).y = yv
-        privert(1).z = zv
+CC        privert(index).match = evrpar(1).match
+CC        privert(index).ptmin = evrpar(1).ptmin
+        privert(index).id = 1
+cc        privert(index).ndegf = 2*k
+cc        privert(index).ntch = k
+        privert(index).x = xv
+        privert(index).y = yv
+        privert(index).z = zv
+        privert(index).iflag  = 1     ! found
+        privert(index).vtx_id  = 1    ! primary
+        privert(index).n_daughters  = 0
+        privert(index).pchi2  = 0
+        privert(index).id_aux_ent  = 0
 
-        privert_h.nok = 1
+        privert_h.nok = index
 
         evr_am = STAFCV_OK
 
