@@ -319,7 +319,8 @@ E can be used.
 been generated. In this case the second parameter is the initial
 event number.
 Other parameters are use as a filter to select particles fed into
-simulations.
+simulations. When used as filter, GKINE command should preceed
+file openning.
  
 >Action AGXUSER
 *-----------------------------------------------------------------------------
