@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.17 2001/08/03 18:45:05 fine Exp $
+// $Id: StdEdxMaker.cxx,v 1.18 2001/08/07 18:42:53 fisyak Exp $
 #include <iostream.h>
 #include "StdEdxMaker.h"
 // ROOT
@@ -638,6 +638,7 @@ Int_t StdEdxMaker::Make(){
     iprim = -1;
     if (globTrk->iflag < 0) continue;
     Int_t Id = globTrk->id;
+    SafeDelete(helix);
     if (primtrkS && kprim < NP) {
       for (; kprim < NP; kprim++) {
 	jprim = primtrkS->GetIndex(kprim); assert(jprim >=0);
@@ -703,7 +704,7 @@ Int_t StdEdxMaker::Make(){
       if (sector != PadOnPlane.sector() || 
 	  row != PadOnPlane.row() ||
 	  TMath::Abs(dEdxP[ipoint].pad-PadOnPlane.pad()) > 5) {
-	if (iprim >= 0  && Debug() > 1) {
+	if (Debug() > 1) {
 	  gMessMgr->Warning() << "StdEdxMaker::	Helix Pediction " 
 			      << "Sector = " 
 			      << PadOnPlane.sector() << "/" 
@@ -740,7 +741,7 @@ Int_t StdEdxMaker::Make(){
       Double_t RMS = 1;
       dEP = dE;
       CdEdx[NdEdx].SigmaFee = 1;
-      if (!m_Simulation) {
+      if (!m_Simulation && GetDate() < 20010000) {
 	Double_t dEpad = dEdxP[ipoint].dEIpad;
 	RMS = VolChargeRMS[lsc][0] + dEpad*(VolChargeRMS[lsc][1] + dEpad*VolChargeRMS[lsc][2]);
 	gc = VolChargePars[lsc][0] + dEpad*(VolChargePars[lsc][1] + dEpad*VolChargePars[lsc][2]);
@@ -989,9 +990,9 @@ Int_t StdEdxMaker::Make(){
 	Time->Fill(date,fitZ - TMath::Log(Pred[2]));
 	FitPull->Fill(TrackLength,(fitZ - TMath::Log(Pred[2]))/fitdZ);
       }
-     SafeDelete(helix);
     }
   }
+  SafeDelete(helix);
   SafeDelete(pointS);
   SafeDelete(primtrkS);
   SafeDelete(globtrkS);
