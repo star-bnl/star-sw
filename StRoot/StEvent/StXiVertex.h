@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.h,v 2.4 2001/04/05 04:00:47 ullrich Exp $
+ * $Id: StXiVertex.h,v 2.5 2001/05/30 17:45:55 perev Exp $
  *
  * Author: Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.h,v $
+ * Revision 2.5  2001/05/30 17:45:55  perev
+ * StEvent branching
+ *
  * Revision 2.4  2001/04/05 04:00:47  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -69,14 +72,24 @@ public:
     void removeDaughter(StTrack*);
 
 protected:
-    StTrack*               mDaughter;                   //$LINK
+//  StTrack*               mDaughter;                   //$LINK
+#ifdef __CINT__
+    StObjLink              mDaughter;                   
+#else
+    StLink<StTrack>        mDaughter;                   
+#endif //__CINT__
     Float_t                mDcaBachelorToPrimaryVertex;
     StThreeVectorF         mMomentumOfBachelor;
     Float_t                mDcaDaughters;
     Float_t                mDcaParentToPrimaryVertex;
-    StV0Vertex*            mV0Vertex;                   //$LINK
+//  StV0Vertex*            mV0Vertex;                   //$LINK
+#ifdef __CINT__
+    StObjLink              mV0Vertex;                   
+#else
+    StLink<StV0Vertex>     mV0Vertex;                   
+#endif //__CINT__
 
     StObject* clone() const;
-    ClassDef(StXiVertex,1)
+    ClassDef(StXiVertex,2)
 };
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.11 2001/04/05 04:00:45 ullrich Exp $
+ * $Id: StTrack.h,v 2.12 2001/05/30 17:45:55 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.12  2001/05/30 17:45:55  perev
+ * StEvent branching
+ *
  * Revision 2.11  2001/04/05 04:00:45  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -111,18 +114,26 @@ public:
 protected:
     UShort_t                mKey;
     Short_t                 mFlag;
-    UChar_t                 mEncodedMethod;
+    UShort_t                mEncodedMethod;
+    UShort_t                mNumberOfPossiblePoints;
     Float_t                 mImpactParameter;
     Float_t                 mLength;
-    UShort_t                mNumberOfPossiblePoints;
     StTrackTopologyMap      mTopologyMap;
     StTrackFitTraits        mFitTraits;
     StTrackGeometry         *mGeometry;
-    StTrackDetectorInfo     *mDetectorInfo;         //$LINK
-    StTrackNode             *mNode;                 //$LINK
+//  StTrackDetectorInfo         *mDetectorInfo;         //$LINK
+//  StTrackNode                 *mNode;                 //$LINK
+#ifdef __CINT__
+    StObjLink                    mDetectorInfo;         
+    StObjLink      		 mNode;                 	
+#else
+    StLink<StTrackDetectorInfo>  mDetectorInfo;         
+    StLink<StTrackNode>          mNode;                 	
+#endif //__CINT__
+
     StSPtrVecTrackPidTraits mPidTraitsVec;
 
     virtual StObject*       clone() const = 0;
-    ClassDef(StTrack,1)
+    ClassDef(StTrack,2)
 };
 #endif

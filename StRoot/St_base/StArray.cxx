@@ -3,6 +3,29 @@
 #include "StArray.h"
 #include "TDatime.h"
 #include "TBrowser.h"
+//______________________________________________________________________________
+ClassImp(StObjLink)
+//______________________________________________________________________________
+void StObjLink::Browse(TBrowser* b) {b->Add(fLink);}
+//______________________________________________________________________________
+void StObjLink::Streamer(TBuffer &R__b)
+{
+
+   if (R__b.IsReading()) {
+     fLink = 0;
+     UInt_t ubj;
+     R__b >> ubj ;
+     if (!ubj) 	return;
+     StProxyUrr *urr = new StProxyUrr(&fLink);
+     urr->push_back(ubj);
+     StXRefManager::fgManager->AddColl(urr);
+
+   } else {
+
+     if (!fLink) R__b << UInt_t(0);
+     else        fLink->Ztreamer(R__b);
+   }
+}
 
 //______________________________________________________________________________
 
@@ -37,7 +60,7 @@ void StObjArray::Streamer(TBuffer &b)
       for (Int_t i = 0; i < nobjects; i++) {
          b >> obj;  push_back(obj);}
    } else {
-      b.WriteVersion(IsA());
+      b.WriteVersion(Class());
       nobjects = getEntries();
       b << nobjects;
 
@@ -65,7 +88,7 @@ void StObjArray::Browse(TBrowser *b)
    Int_t counter = 0;
    Int_t totalSize = size();
    for (int i=0; i<totalSize && ++counter <  maxBrowsable ; i++) {
-       obj = at(i); if (!obj) continue;
+       obj = at(i); if (!obj || ((UInt_t)obj)&1) continue;
        TString browseName(obj->GetName());
        if (browseName.IsNull()) browseName = obj->ClassName();
        char buffer[100];
@@ -105,31 +128,40 @@ void StRefArray::Streamer(TBuffer &R__b)
       clear();
       R__b >> nobjects;
       if (!nobjects) return;
-      TObject *obj;
-      for (Int_t i = 0; i < nobjects; i++) {
+      if (v <=2 || nobjects>0) {	//OLD non split format
+        TObject *obj;
+        for (Int_t i = 0; i < nobjects; i++) {
          R__b >> obj;  push_back(obj);}
+      } else {		//SPLIT format 
+        UInt_t ubj;
+        nobjects = -nobjects;
+        StProxyUrr *urr = new StProxyUrr(this);
+        for (Int_t i = 0; i < nobjects; i++) {
+         R__b >> ubj ; urr->push_back(ubj);
+        }
+        StXRefManager::fgManager->AddColl(urr);
+      }
+
    } else {
-      R__b.WriteVersion(IsA());
-      nobjects = getEntries();
-      R__b << nobjects;
-
+      R__b.WriteVersion(Class());
+      int nobjs = nobjects = getEntries();
+      if (StObject::fgTally) nobjs=-nobjs;
+      R__b << nobjs;
+      if (!nobjects) 	return;
+      TObject *to;
       for (Int_t i = 0; nobjects; i++) {
-         TObject *to = at(i);
-	 //         if (to && !to->IsZombie()) {R__b.WriteObject(to,1); nobjects--;}
-	 if (to && !to->IsZombie()) {R__b.WriteObject((const TObject *)to); nobjects--;}
-
+        to = at(i);
+        if (!to) 		continue;
+        if (to->IsZombie())	continue; 
+        nobjects--;
+        if (nobjs<0)  {((StObject*)to)->Ztreamer(R__b);}             
+        else          { R__b << to;                    }
       }
    }
 }
 
 //______________________________________________________________________________
 ClassImp(StStrArray)
-//______________________________________________________________________________
-StStrArray::StStrArray(const Char_t *name,Int_t sz):StObjArray(sz)
-{ 
-//NONMONO  StRegistry::SetColl(this);
-  if (name) SetName(name); 
-}
 //______________________________________________________________________________
 StStrArray::StStrArray(Int_t sz):StObjArray(sz){}
 //______________________________________________________________________________
@@ -138,8 +170,6 @@ StStrArray::StStrArray(Int_t sz):StObjArray(sz){}
   int n,i; TObject *sto;
   
   clear();
-  SetName(a.GetName());
-  SetIDName(0);
   n = a.size();
   for (i=0; i<n; i++)
   {
@@ -167,25 +197,8 @@ StStrArray::StStrArray(const StStrArray &from){ *this = from;}
 StStrArray::~StStrArray()
 {
   clear(); 
-//NONMONO StRegistry::RemColl(this);
 }
 
-//______________________________________________________________________________
-const Char_t *StStrArray::GetIDName() const 
-{
-  return GetTitle();
-}
- 
-//______________________________________________________________________________
-void StStrArray::SetIDName(const Char_t *idname)
-{
-}
-//______________________________________________________________________________
-void StStrArray::SetName(const char *name)
-{ fName = name;}
-//______________________________________________________________________________
-const char *StStrArray::GetName() const
-{ return fName;}
 //______________________________________________________________________________
 void StStrArray::Streamer(TBuffer &R__b)
 {
@@ -193,18 +206,20 @@ void StStrArray::Streamer(TBuffer &R__b)
    if (R__b.IsReading()) {
       Version_t R__v = R__b.ReadVersion(); if (R__v) { }
       StObjArray::Streamer(R__b);
+      if (R__v >=3) 
+         StXRefManager::fgManager->AddColl(this);
    } else {
-      R__b.WriteVersion(StStrArray::IsA());
-      SetIDName(0);
+      R__b.WriteVersion(Class());
       StObjArray::Streamer(R__b);
+         StXRefManager::fgManager->AddColl(this);//temporaryVP
    }
 
 }
 //______________________________________________________________________________
-void StStrArray::makeZombie() 
+void StStrArray::makeZombie(int flg) 
 {
-   StObject::makeZombie();
+   StObject::makeZombie(flg);
    int n = size();
    for (int i=0;i<n;i++)
-   {  StObject *o = (StObject*)at(i); if (o) o->makeZombie();}
+   {  StObject *o = (StObject*)at(i); if (o) o->makeZombie(flg);}
 }

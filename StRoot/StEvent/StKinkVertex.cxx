@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StKinkVertex.cxx,v 2.6 2001/04/05 04:00:51 ullrich Exp $
+ * $Id: StKinkVertex.cxx,v 2.7 2001/05/30 17:45:54 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StKinkVertex.cxx,v $
+ * Revision 2.7  2001/05/30 17:45:54  perev
+ * StEvent branching
+ *
  * Revision 2.6  2001/04/05 04:00:51  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -30,6 +33,7 @@
  *
  **************************************************************************/
 #include <algorithm>
+#include "TClass.h"
 #include "StKinkVertex.h"
 #include "StParticleTable.hh"
 #include "StTrack.h"
@@ -41,7 +45,7 @@ using std::copy;
 
 ClassImp(StKinkVertex)
 
-static const char rcsid[] = "$Id: StKinkVertex.cxx,v 2.6 2001/04/05 04:00:51 ullrich Exp $";
+static const char rcsid[] = "$Id: StKinkVertex.cxx,v 2.7 2001/05/30 17:45:54 perev Exp $";
 
 StKinkVertex::StKinkVertex()
 {
@@ -90,13 +94,13 @@ StKinkVertex::numberOfDaughters() const { return mDaughter ? 1 : 0; }
 StTrack*
 StKinkVertex::daughter(unsigned int i)
 {
-    return i==0 ? mDaughter : 0;
+    return i==0 ? (StTrack*)mDaughter : 0;
 }
 
 const StTrack*
 StKinkVertex::daughter(unsigned int i) const
 {
-    return i==0 ? mDaughter : 0;
+    return i==0 ? (const StTrack*)mDaughter : 0;
 }
 
 StPtrVecTrack
@@ -217,3 +221,39 @@ StKinkVertex::removeDaughter(StTrack* val)
 {
     if (mDaughter == val) mDaughter = 0;
 }
+
+void StKinkVertex::Streamer(TBuffer &R__b)
+{
+    // Stream an object of class StKinkVertex.
+
+    if (R__b.IsReading()) {
+       UInt_t R__s, R__c;
+       Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+       if (R__v > 1) {
+          Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
+          return;
+       }
+       //====process old versions before automatic schema evolution
+       StVertex::Streamer(R__b);
+//     R__b >> mDaughter;
+       R__b >> (StTrack*&)mDaughter;
+
+       R__b >> mParentGeantId;
+       R__b >> mDaughterGeantId;
+       R__b >> mDcaParentDaughter;
+       R__b >> mDcaDaughterPrimaryVertex;
+       R__b >> mDcaParentPrimaryVertex;
+       R__b >> mHitDistanceParentDaughter;
+       R__b >> mHitDistanceParentVertex;
+       R__b.ReadStaticArray(mDeltaEnergy);
+       R__b >> mDecayAngle;
+       R__b >> mDecayAngleCM;
+       mParentMomentum.Streamer(R__b);
+       mDaughterMomentum.Streamer(R__b);
+       R__b.CheckByteCount(R__s, R__c, Class());
+       //====end of old versions
+      
+    } else {
+       Class()->WriteBuffer(R__b,this);
+    }
+} 

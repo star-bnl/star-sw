@@ -367,7 +367,7 @@ Int_t StBranch::WriteEvent(const StUKey &ukey)
   fNEvents++;
 
   TList *savList = new TList;
-  SetParAll(0,savList);
+  SetParAll(0,this,savList);
   if (IsOption("const"))        {//Write constant branch (event independent)
     StUKey uk(fUKey); uk = (UInt_t)(-2);
     iret = StIO::Write(fTFile,uk,   fList);
@@ -404,7 +404,7 @@ Int_t StBranch::GetEvent(Int_t mode)
   if (obj == (TObject*)(-1))    return kStErr;
   fList = (TList*)obj;
 
-  SetParAll(this,0);
+  SetParAll(this,this,0);
 
   return 0;
 }
@@ -436,26 +436,30 @@ Int_t StBranch::NextEvent (StUKey &ukey)
   return iret;
 }
 //_______________________________________________________________________________
-void StBranch::SetParAll(TDataSet *par,TList *savList)
+void StBranch::SetParAll(TDataSet *parNew,TDataSet *parOld,TList *savList)
 {
-  TDataSetIter next(this);
+  TDataSetIter next(parOld);
   TDataSet *son,*p;
   while ((son=next())) {
     p = son->GetParent();
-    if (savList) {assert(p);savList->Add(p);}
-    son->SetParent(par);
+    son->SetParent(parNew);
+    if (savList) {
+       assert(p);
+       savList->AddFirst(son); savList->AddFirst(p); 
+       SetParAll(son,son,savList);
+    }
   }// end while
 }
 //_______________________________________________________________________________
 void StBranch::SetParAll(TList *savList)
 {
   assert(savList);
-  TDataSetIter next(this);
-  TDataSet *son,*p;
-  while ((son=next())) {
-    p = (TDataSet*)savList->First(); assert(p);
-    son->SetParent(p);
-    savList->Remove(p);
+  TDataSet *son,*par;
+  while ((par=(TDataSet*)savList->First())) {
+    savList->Remove(par);
+    son = (TDataSet*)savList->First(); assert(son);
+    savList->Remove(son);
+    son->SetParent(par);
   }// end while
 }
 //_______________________________________________________________________________

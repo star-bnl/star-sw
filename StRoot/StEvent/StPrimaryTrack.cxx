@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryTrack.cxx,v 2.5 2001/03/24 03:34:52 perev Exp $
+ * $Id: StPrimaryTrack.cxx,v 2.6 2001/05/30 17:45:54 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryTrack.cxx,v $
+ * Revision 2.6  2001/05/30 17:45:54  perev
+ * StEvent branching
+ *
  * Revision 2.5  2001/03/24 03:34:52  perev
  * clone() -> clone() const
  *
@@ -27,13 +30,14 @@
  * Initial Revision
  *
  **************************************************************************/
+#include "TClass.h"
 #include "StPrimaryTrack.h"
 #include "tables/St_dst_track_Table.h"
 #include "StPrimaryVertex.h"
 
 ClassImp(StPrimaryTrack)
 
-static const char rcsid[] = "$Id: StPrimaryTrack.cxx,v 2.5 2001/03/24 03:34:52 perev Exp $";
+static const char rcsid[] = "$Id: StPrimaryTrack.cxx,v 2.6 2001/05/30 17:45:54 perev Exp $";
 
 StPrimaryTrack::StPrimaryTrack() : mVertex(0) {/* noop */}
 
@@ -73,3 +77,28 @@ StPrimaryTrack::setVertex(StVertex* val)
     StPrimaryVertex *p = dynamic_cast<StPrimaryVertex*>(val);
     if (p) mVertex = p;
 }
+
+void StPrimaryTrack::Streamer(TBuffer &R__b)
+{
+    // Stream an object of class .
+
+    if (R__b.IsReading()) {
+       UInt_t R__s, R__c;
+       Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+       if (R__v > 1) {
+          Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
+          return;
+       }
+       //====process old versions before automatic schema evolution
+       StTrack::Streamer(R__b);
+      
+//     R__b >> mVertex;
+       R__b >> (StPrimaryVertex*&)mVertex;
+
+       R__b.CheckByteCount(R__s, R__c, Class());
+       //====end of old versions
+      
+    } else {
+       Class()->WriteBuffer(R__b,this);
+    }
+} 

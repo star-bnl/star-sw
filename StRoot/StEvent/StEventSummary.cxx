@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventSummary.cxx,v 2.9 2001/05/17 22:56:33 ullrich Exp $
+ * $Id: StEventSummary.cxx,v 2.10 2001/05/30 17:45:54 perev Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventSummary.cxx,v $
+ * Revision 2.10  2001/05/30 17:45:54  perev
+ * StEvent branching
+ *
  * Revision 2.9  2001/05/17 22:56:33  ullrich
  * Removed all usage of dst_summary_param.
  *
@@ -48,7 +51,7 @@ using units::tesla;
 using units::degree;
 #endif
 
-static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.9 2001/05/17 22:56:33 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.10 2001/05/30 17:45:54 perev Exp $";
 
 ClassImp(StEventSummary)
 
@@ -318,7 +321,7 @@ float
 StEventSummary::upperEdgePhiBin(unsigned int i) const
 {
     if (i < mPhiBinsSize) {
-       if (i == mPhiBinsSize-1)
+       if ((int)i == mPhiBinsSize-1)
            return const_cast<TArrayF&>(mPhiBins)[0];
        else
            return const_cast<TArrayF&>(mPhiBins)[i+1];

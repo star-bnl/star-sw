@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.13 2001/04/05 04:00:57 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.14 2001/05/30 17:45:54 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.14  2001/05/30 17:45:54  perev
+ * StEvent branching
+ *
  * Revision 2.13  2001/04/05 04:00:57  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -53,6 +56,7 @@
  * Completely Revised for New Version
  *
  **************************************************************************/
+#include "TClass.h"
 #include "StTrack.h"
 #include "tables/St_dst_track_Table.h"
 #include "StParticleDefinition.hh"
@@ -64,7 +68,7 @@
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.13 2001/04/05 04:00:57 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.14 2001/05/30 17:45:54 perev Exp $";
 
 StTrack::StTrack()
 {
@@ -300,3 +304,51 @@ StTrack::setDetectorInfo(StTrackDetectorInfo* val) { mDetectorInfo = val; }
 
 void
 StTrack::setNode(StTrackNode* val) { mNode = val; }
+
+
+void StTrack::Streamer(TBuffer &R__b)
+{
+    // Stream an object of class .
+
+    if (R__b.IsReading()) {
+       UInt_t R__s, R__c;
+       Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+       if (R__v > 1) {
+          Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
+          return;
+       }
+       //====process old versions before automatic schema evolution
+       StObject::Streamer(R__b);
+       R__b >> mKey;
+       R__b >> mFlag;
+
+//     R__b >> mEncodedMethod;
+       UChar_t oldEncodedMethod;
+       R__b >> oldEncodedMethod;
+       mEncodedMethod=oldEncodedMethod;
+
+       R__b >> mImpactParameter;
+       R__b >> mLength;
+       R__b >> mNumberOfPossiblePoints;
+       mTopologyMap.Streamer(R__b);
+       mFitTraits.Streamer(R__b);
+       R__b >> mGeometry;
+
+//     R__b >> mDetectorInfo;
+       R__b >> (StTrackDetectorInfo*&)mDetectorInfo;
+
+//     R__b >> mNode;
+       R__b >> (StTrackNode*&)mNode;
+
+
+       mPidTraitsVec.Streamer(R__b);
+
+       R__b.CheckByteCount(R__s, R__c, Class());
+       //====end of old versions
+      
+    } else {
+       Class()->WriteBuffer(R__b,this);
+    }
+} 
+
+
