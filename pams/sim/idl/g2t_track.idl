@@ -17,6 +17,7 @@ struct g2t_track {          /* G2t_track */
        long      hit_pgc_p;  /* Id of first pgc hit on track linked list */
        long      hit_pmd_p;  /* Id of first psc hit on track linked list */
        long      hit_smd_p;  /* pointer to first SHM linked list hit */
+       long      hit_ssd_p;  /* Id of first ssd hit on track linked list */
        long      hit_svt_p;  /* Id of first svt hit on track linked list */
        long      hit_pix_p;  /* Id of first pix hit on track linked list */
        long      hit_tof_p;  /* Id of first tof hit on track linked list */
@@ -35,6 +36,7 @@ struct g2t_track {          /* G2t_track */
        long      n_pgc_hit;  /* Nhits in pgc  ???  */
        long      n_pmd_hit;  /* Nhits in pmd (PMD) */
        long      n_smd_hit;  /* number of hits in shower max */
+       long      n_ssd_hit;  /* Nhits in ssd */
        long      n_svt_hit;  /* Nhits in svt */
        long      n_pix_hit;  /* Nhits in pix */
        long      n_tof_hit;  /* Nhits in tof */
