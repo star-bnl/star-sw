@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.10 1999/09/18 00:36:46 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.11 1999/09/18 00:56:33 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.11  1999/09/18 00:56:33  fisyak
+// remove .root
+//
 // Revision 1.10  1999/09/18 00:36:46  fisyak
 // remove .root extension
 //
@@ -588,7 +591,7 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
     }
   }
   if (GetOption(kGSTAR)) {
-    if (!Outfile) FileOut = new TString("gtrack.root");
+    if (!Outfile) FileOut = new TString("gtrack");
     else          FileOut = new TString(Outfile);
     printf ("QAInfo:Output root file name %s\n", FileOut->Data());
     printf ("==============================================\n");
