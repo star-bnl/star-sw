@@ -1,7 +1,10 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.21 2003/01/23 03:49:59 jeromel Exp $
+// $Id: StPreEclMaker.cxx,v 1.22 2003/04/30 16:12:22 alexst Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.22  2003/04/30 16:12:22  alexst
+// Clear vector of existing barrel clusters in StEvent. This accounts for the case when one needs to redo clusters with different parameters.
+//
 // Revision 1.21  2003/01/23 03:49:59  jeromel
 // Include changed
 //
@@ -229,8 +232,25 @@ Int_t StPreEclMaker::Make()
     return kStErr;
   }
   else{
-    cout << "***** StEvent pointer Ok\n";
     ecmpreecl = currevent->emcCollection();
+
+    // when this maker is running there aren't supposed to be
+    // any BEMC clusters in StEvent. Clean up first.
+    StEmcDetector* emcDetector;
+    StEmcClusterCollection* emcClusterCollection;
+    if(ecmpreecl)
+      for(unsigned int i = 0; i<4; i++)
+	{
+	  emcDetector = ecmpreecl->detector(StDetectorId(kBarrelEmcTowerId + i));
+	  if(!emcDetector)
+	    continue;
+	  emcClusterCollection = emcDetector->cluster();
+	  if(!emcClusterCollection)
+	    continue;
+	  StSPtrVecEmcCluster& emcClusters = emcClusterCollection->clusters();
+	  if(emcClusters.size())
+	    emcClusters.clear();
+	}
 
     if(ecmpreecl == 0){
     // Try to get from simulator(s) ==============================================
@@ -479,7 +499,7 @@ StPreEclMaker::SetClusterConditions(char *cdet,Int_t sizeMax,
 void 
 StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.21 2003/01/23 03:49:59 jeromel Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.22 2003/04/30 16:12:22 alexst Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
