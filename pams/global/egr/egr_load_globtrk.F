@@ -24,6 +24,7 @@ C     Fills the global track array for different situations
 C<--------------------------------------------------------------------
       IMPLICIT NONE
 #include "PAM.inc"
+#include "StDetectorId.inc"
 #include "dst_track.inc"
 #include "dst_track_aux.inc"
 #include "tcl_tphit.inc"
@@ -87,8 +88,10 @@ c---<<<<<<<<<<<<<<<<<<<<<<<<
       globtrk(iglob).covar_diag(3) = covar(3,3)
       globtrk(iglob).covar_diag(4) = 0
       globtrk(iglob).covar_diag(5) = 0
-      globtrk(iglob).chisq(1) = gtrk(igtrk).p(8)
-      globtrk(iglob).chisq(2) = gtrk(igtrk).p(9)
+      globtrk(iglob).chisq(1) = gtrk(igtrk).p(8)/
+     +     real(2*globtrk(iglob).n_fit_point-3)
+      globtrk(iglob).chisq(2) = gtrk(igtrk).p(9)/
+     +     real(2*globtrk(iglob).n_fit_point-2)
       globtrk(iglob).length=9999.9
       if( isvtt .eq. 0) then
          firsthit = gtrk(igtrk).ipnt(gtrk(igtrk).ntpc)
@@ -146,7 +149,7 @@ C---  <<<<<<<
          endif
       endif
       if( itpct .ne. 0 .and. isvtt .ne. 0) then
-         globtrk(iglob).det_id = 3
+         globtrk(iglob).det_id = kTpcSsdSvtIdentifier
          if( ipriv .eq. 0) then
             globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
      +           flag)))*500.+gtrk(igtrk).flag 
@@ -155,7 +158,7 @@ C---  <<<<<<<
      +           flag)))*600.+gtrk(igtrk).flag 
          endif
       elseif( isvtt .eq. 0) then
-         globtrk(iglob).det_id = 1
+         globtrk(iglob).det_id = kTpcId
          if( ipriv .eq. 0) then
             globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
      +           flag)))*100.+gtrk(igtrk).flag 
@@ -164,7 +167,7 @@ C---  <<<<<<<
      +           flag)))*300.+gtrk(igtrk).flag 
          endif
       elseif( itpct .eq. 0) then
-         globtrk(iglob).det_id = 2
+         globtrk(iglob).det_id = kSsdSvtId
          if( ipriv .eq. 0) then
             globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
      +           flag)))*200.+gtrk(igtrk).flag 
