@@ -455,15 +455,21 @@ C     Now find first point on track.
                         ifirst = 
      +                       gtrk(tptrack(itrk).id).ipnt(lasthit)
                     enddo
-                    if( ifirst .eq. 0) ifirst = 1
                   else
                      write (errmsg,'(A60)')
      +                    'EGR_REFITTER-W: lasthit track id error'
                      call message(errmsg,1,imsg4)
                   endif
-                  globtrk(iglob).x_first(1) = tphit(ifirst).x
-                  globtrk(iglob).x_first(2) = tphit(ifirst).y
-                  globtrk(iglob).x_first(3) = tphit(ifirst).z
+                  if( ifirst .ne. 0) then
+                     globtrk(iglob).x_first(1) = tphit(ifirst).x
+                     globtrk(iglob).x_first(2) = tphit(ifirst).y
+                     globtrk(iglob).x_first(3) = tphit(ifirst).z
+                  else
+                     globtrk(iglob).x_first(1) = -999.
+                     globtrk(iglob).x_first(2) = -999.
+                     globtrk(iglob).x_first(3) = -999.
+                  endif
+                     
 
 
 C     Now find last point on track 
@@ -471,22 +477,27 @@ C     Now find last point on track
      +                 tptrack(itrk).id.le.mxtrack) then
                      lasthit = gtrk(tptrack(itrk).id).ipnt(1)
                      ifirst = 1
-                     do while( lasthit .eq.0 .and.
+                     do while( lasthit .eq. 0 .and.
      +                    ifirst .le.  gtrk(tptrack(itrk).id).ntpc)
                         ifirst = ifirst+1
                         lasthit = gtrk(tptrack(itrk).id).ipnt(ifirst)
                      enddo
-                     if( lasthit .gt. gtrk(tptrack(itrk).id).ntpc) then
-                        lasthit = gtrk(tptrack(itrk).id).ntpc
-                     endif
+                     
                  else
                      write (errmsg,'(A60)')
      +                    'EGR_REFITTER-W: lasthit track id error'
                      call message(errmsg,1,imsg4)
                   endif
-                  globtrk(iglob).x_last(1) = tphit(lasthit).x
-                  globtrk(iglob).x_last(2) = tphit(lasthit).y
-                  globtrk(iglob).x_last(3) = tphit(lasthit).z
+                  if( lasthit .ne. 0) then
+                     globtrk(iglob).x_last(1) = tphit(lasthit).x
+                     globtrk(iglob).x_last(2) = tphit(lasthit).y
+                     globtrk(iglob).x_last(3) = tphit(lasthit).z
+                  else
+                     globtrk(iglob).x_last(1) = -999.
+                     globtrk(iglob).x_last(2) = -999.
+                     globtrk(iglob).x_last(3) = -999.
+                  endif
+                     
 
                   globtrk(iglob).length = tptrack(itrk).length
 CSM               
