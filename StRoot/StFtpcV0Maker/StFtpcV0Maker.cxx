@@ -1,6 +1,9 @@
-// $Id: StFtpcV0Maker.cxx,v 1.12 2000/11/16 12:48:33 jcs Exp $
+// $Id: StFtpcV0Maker.cxx,v 1.13 2000/11/29 08:32:48 jcs Exp $
 //
 // $Log: StFtpcV0Maker.cxx,v $
+// Revision 1.13  2000/11/29 08:32:48  jcs
+// remove obsolete include
+//
 // Revision 1.12  2000/11/16 12:48:33  jcs
 // Save FTPC vzero inforamtion in correct banks
 // Use correct FTPC track class
@@ -46,7 +49,6 @@
 // Star Module and Table stuff
 #include "tables/St_dst_vertex_Table.h"
 #include "tables/St_dst_v0_vertex_Table.h"
-#include "tables/St_fv0_vertex_Table.h"
 #include "tables/St_fpt_fptrack_Table.h"
 
 #include "StFtpcV0Maker.h"
