@@ -2,7 +2,10 @@
 *   Table: evr_evrpar
 */
  struct evr_evrpar {
-       float     vcut;       /* distance below where track is marked as default primary */
+       long      fitoption;  /* Fit option to reproject helices each iter.*/
+       long      covariance; /* Option to include track cov matrix in errors*/
+       float     vcut;       /* distance below where track is marked as default 
+primary */
        float     cut2;       /* select tracks for 2nd vertex fit */
        float     cut3;       /* select tracks for 3rd vertex fit */
        float     cutxy;      /* select tracks for vertex fitting */
@@ -10,6 +13,6 @@
        float     ptmin;      /* minimum pt of individual tracks */
    } ;
 
-/*  Last mod. for evrpar: $Date: 1998/12/10 17:16:07 $ */
+/*  Last mod. for evrpar: $Date: 1999/09/29 16:11:28 $ */
 
 

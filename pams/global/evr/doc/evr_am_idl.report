@@ -17,5 +17,5 @@ interface evr_am : amiModule {
                 , inout    dst_vertex      privert
         );
 };
-/* Last mod. for evr_am: $Date: 1999/09/29 16:11:25 $  */
+/* Last mod. for evr_am: $Date: 1999/09/29 16:11:28 $  */
 
