@@ -140,7 +140,12 @@ public:
     //Use helix extrapolation (defaults to line)
     virtual void setKTFUseHelixExtrapolation(bool) = 0;
     virtual bool ktfUseHelixExtrapolation() const = 0;
-   
+
+    // LocalTrackMerger (ltm)
+
+    virtual void setLTMDeltaR(double) = 0;
+    virtual double ltmDeltaR() const = 0;
+    
 protected:
     
     //singleton management
@@ -188,7 +193,9 @@ inline ostream& operator<<(ostream& os, const StiIOBroker& b)
        <<"ktfMassHypothesis():\t"<<b.ktfMassHypothesis()<<endl
        <<"ktfMinContiguousHitCount():\t"<<b.ktfMinContiguousHitCount()<<endl
        <<"ktfMaxNullCount():\t"<<b.ktfMaxNullCount()<<endl
-       <<"ktfMaxContiguousNullCount():\t"<<b.ktfMaxContiguousNullCount()<<endl;
+       <<"ktfMaxContiguousNullCount():\t"<<b.ktfMaxContiguousNullCount()<<endl
+       <<"ltmDeltaR():\t"<<b.ltmDeltaR()<<endl;
+    
 
     return os;
 }

@@ -137,6 +137,11 @@ public:
     virtual void setKTFUseHelixExtrapolation(bool);
     virtual bool ktfUseHelixExtrapolation() const;
 
+    // LocalTrackMerger (ltm)
+
+    virtual void setLTMDeltaR(double);
+    virtual double ltmDeltaR() const;
+    
 protected:
     friend class StiIOBroker;
     
@@ -180,6 +185,9 @@ protected:
     double mKTFMinSearchRadius;
     double mKTFMaxSearchRadius;
     bool mKTFUseHelixExtrapolation;
+
+    //LocalTrackMerger
+    double mLTMDeltaR;
     
 private:
     ClassDef(StiRootIOBroker, 1)
@@ -534,4 +542,15 @@ inline bool StiRootIOBroker::ktfUseHelixExtrapolation() const
     return mKTFUseHelixExtrapolation;
 }
 
+inline void StiRootIOBroker::setLTMDeltaR(double val)
+{
+    mLTMDeltaR = val;
+    notify();
+}
+
+inline double StiRootIOBroker::ltmDeltaR() const
+{
+    return mLTMDeltaR;
+}
+    
 #endif

@@ -58,13 +58,15 @@ void StiEventAssociator::associate(StMcEvent* mc)
     
     mMcEvent = mc;
     clear();
-
+    
     //loopOnFoundTracks
     cout <<"\tLooping on found tracks"<<endl;
-    for (stitrackvec::iterator it=mTrackStore->begin(); it!=mTrackStore->end(); ++it) {
-	StiKalmanTrack* track = dynamic_cast<StiKalmanTrack*>(*it);
+    for (KalmanTrackMap::iterator it=mTrackStore->begin(); it!=mTrackStore->end(); ++it) {
+	StiKalmanTrack* track = dynamic_cast<StiKalmanTrack*>( (*it).second );
 	if (track) {
 	    fillForFoundTrack(track);
+	    //cout <<"curvature: "<<track->getLastNode()->fP3
+	    // <<" tanLambda: "<<track->getLastNode()->fP4<<endl;
 	}
     }
     
