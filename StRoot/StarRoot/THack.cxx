@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: THack.cxx,v 1.2 2004/01/27 02:53:32 perev Exp $
+ * $Id: THack.cxx,v 1.3 2004/04/07 17:19:20 perev Exp $
  *
  ***************************************************************************
  *
@@ -15,6 +15,11 @@
 
 #include "THack.h"
 #include "TClonesArray.h"
+#include "TDirectory.h"
+#include "TPad.h"
+#include "TList.h"
+#include "TSystem.h"
+#include "TH1.h"
 
 class myClonesArray :public TClonesArray
 {
@@ -80,10 +85,37 @@ void THack::ClearClonesArray(TClonesArray *clone)
    clone->Clear();
 }
 
+//______________________________________________________________________________
+void THack::PadRefresh(TPad *pad,int flag)
+{
+//  Refresh all TPads in TCanvas recursively
 
+  if (!pad) return;
+  pad->Modified();
+  pad->Update();
+  TList *tl = pad->GetListOfPrimitives();
+  if (!tl) return;
+  TListIter next(tl);
+  TObject *to;
+  while ((to=next())) {
+    if (to->InheritsFrom(TPad::Class())) PadRefresh((TPad*)to,1);}
+  if (flag) return;
+  gSystem->ProcessEvents();
+}
 
-
-
+//______________________________________________________________________________
+void THack::HistRelease(TDirectory *dir)
+{
+//   Release all histograms from TFile(TDirectory)
+   if(!dir) return;
+   TListIter nextHist(dir->GetList());
+//    release histograms from file
+   TH1 *h1;
+   while ((h1=(TH1*)nextHist())) {
+     if (!h1->InheritsFrom(TH1::Class())) continue;
+     h1->SetDirectory(0);
+   }
+}
 
 
 
