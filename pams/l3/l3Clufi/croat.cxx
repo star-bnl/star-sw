@@ -282,14 +282,19 @@ int croatFinder(u_char *adcin, ushort *cppin, uint *outres)
 			register int k ;
 			register uint *ri ;
 			uint tmp_charge ;
-
+			
+			/* this statment is senseless, just to produce no warning of the compiler */
+			/* this is bad style :( */
+			flags = last_falling;
+			flags = adc_offset[0][0];
+			flags = 0;
 
 			/* HACK */
 			cl_counter++ ; /* cluster counter */
 			if(cl_counter > 31) break ; /* too many clusters on this pad */
 
 			/* HACK */
-			if(start < prev_start) break ; 
+			if((int)start < (int)prev_start) break ; 
 			prev_start = start ;
 
 			/* get the stop bucket */
@@ -330,6 +335,7 @@ int croatFinder(u_char *adcin, ushort *cppin, uint *outres)
 #ifdef DECONVOLUTE_TIME
 			/* flags = 0 */
 			last_falling = flags = 0 ;
+			flags = last_falling;
 #endif
 #ifdef DECONVOLUTE_PAD
 			flags = 0 ;

@@ -33,8 +33,6 @@ long type_of_call l3totphit_(
     int sector,supersector;
     int rbindex,rboffset;
     int mzindex,mzoffset,mzlength;
-    double pad,time;
-    double xyz[3];
     long* bank;
     int hitcounter = 0;
     int cluspersec = 0;
@@ -118,16 +116,16 @@ long type_of_call l3totphit_(
 					    dword = (struct dataword*) &padinfo;
 					    pad = (double)(dword->info1)/64;
                                             time = (double)(dword->info2)/64;
-					    /* etract flag & time
+					    /* etract flag & time */
 					    flaginfo = bank[rboffset+mzoffset+10+2+rowoffset+(2*clusindex-1)+1];
-					    dword= &flaginfo;
-					    flag = dword->info1;
-					    charge = dword->info2;
+					    dword= (struct dataword*) &flaginfo;
+					    flag = (short) (dword->info1);
+					    charge = (short) (dword->info2);
 					    /* coordinate transformation */
 					    rawToGlobal(sector,row,pad,time,&xyz[0],&xyz[1],&xyz[2]);
 					    /*printf("sec:%d  row:%d  pad:%f time:%f  ",sector,row,(float)pad,(float)time); */
-					      /*printf("x:%f  y:%f  z:%f\n",(float)xyz[0],(float)xyz[1],(float)xyz[2]); */
-						/* filling */
+					    /*printf("x:%f  y:%f  z:%f\n",(float)xyz[0],(float)xyz[1],(float)xyz[2]); */
+					    /* filling */
 					    tpHit[hitcounter].x =  (float) xyz[0];
 					    tpHit[hitcounter].y =  (float) xyz[1];
 					    tpHit[hitcounter].z =  (float) xyz[2];

@@ -20,7 +20,8 @@ char* adc = NULL;
 int adcOff[ABS_ROWS][MAX_P] ;
 int cppOff[ABS_ROWS][MAX_P] ;
 int adc8to10[256];
-
+int asic_eve();
+int croatFinder(u_char *adcin, ushort *cppin, uint *outres);
 
 /* here we start the callable function */
 long type_of_call l3Clufi_(
@@ -58,12 +59,13 @@ long type_of_call l3Clufi_(
 
     int i, j;
     int ret;
-    int sector, rb, mz;
-    char first;
+    /*int sector;*/
+    int rb, mz;
+    /*char first; */
     short* adclong;
     long* bank;
     long* receiver;
-    int bankoffset;
+    /*int bankoffset;*/
     int sectornumb;
     struct TPCSECLP *seclp;
 
@@ -130,7 +132,7 @@ long type_of_call l3Clufi_(
 	}
 
     /* set pointer to first receiver board */
-    seclp = &bank[0];
+    seclp =(TPCSECLP *) &bank[0];
     if (sectornumb == 1) 
 	{
 	    /* fill TPCSECLP header */
@@ -201,7 +203,7 @@ long type_of_call l3Clufi_(
 	{ 
 	    struct TPCRBCLP *rbclp;
 	    
-	    rbclp = receiver;
+	    rbclp = (TPCRBCLP *) receiver;
 	    /* fill TPCRBCLP bank header for this Receiver Board */
 	    strncpy (rbclp->bh.bank_type, CHAR_TPCRBCLP, 8);
 	    rbclp->bh.length     = 32;
@@ -235,7 +237,7 @@ long type_of_call l3Clufi_(
 		    ret = croatInit(rb, mz);
 
 		    /* do the clusterfinding on this mz  */
-		    ret = croatFinder(adc, cpp, receiver);
+		    ret = croatFinder((u_char*)adc,(ushort*) cpp, (uint*) receiver);
 
 		    /* set length in TPCMZCLD bank */
 		    mzcld->length += ret;
@@ -262,7 +264,7 @@ long type_of_call l3Clufi_(
 }
 
 
-asic_eve()
+int asic_eve()
 {
     /* fill cpp array for this sector */
     int i, j, k ;
@@ -324,5 +326,5 @@ asic_eve()
 		}
 	}
 
-    /*return 1;*/
+    return 0;
 }
