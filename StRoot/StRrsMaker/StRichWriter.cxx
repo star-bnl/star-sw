@@ -1,10 +1,14 @@
 /*****************************************************
- * $Id: StRichWriter.cxx,v 1.9 2000/04/14 22:38:09 lasiuk Exp $
+ * $Id: StRichWriter.cxx,v 1.10 2000/05/17 22:21:51 lasiuk Exp $
  *
  * Description:
  *  Implementation of the StRichWriter output object.
  ******************************************************
  * $Log: StRichWriter.cxx,v $
+ * Revision 1.10  2000/05/17 22:21:51  lasiuk
+ * cleanup() does digitization
+ * check before adding MCinfo
+ *
  * Revision 1.9  2000/04/14 22:38:09  lasiuk
  * add print diagnostic for crash
  * extra careful on clearing the dataset
@@ -88,18 +92,35 @@ StRichWriter::~StRichWriter()
 
 void StRichWriter::putSignal(int row, int col, double s, int id, int gid, int track_p, StRichSignalType signalType)
 {
+    //
+    // The signal (s) should NEVER be negative
+    //
+    unsigned long ii;
     (*mStorage)[row][col].signal += s;
-    (*mStorage)[row][col].IDs.push_back(StRichID(id,
-						 gid,
-						 track_p,
-						 floor(s/mAdcConversion),
-						 signalType));
+
+    StRichID theMCInfo(id,gid,track_p,s,signalType);
+    int addTheInfo = 1;
+
+    for(ii=0; ii<(*mStorage)[row][col].IDs.size(); ii++) {
+	if ((*mStorage)[row][col].IDs[ii] == theMCInfo) {
+// 	    cout << " Match! old: " << (*mStorage)[row][col].IDs[ii].mCharge
+// 		 << " addition "    << s << endl;
+	    (*mStorage)[row][col].IDs[ii].mCharge += s;
+	    addTheInfo = 0;
+	    break;
+	}
+    }
+
+    if(addTheInfo) {
+	//
+	// Add it after finding no match:
+	//
+	(*mStorage)[row][col].IDs.push_back(theMCInfo);
+    }
 } 
 
 void StRichWriter::cleanUpMCInfo()
 {
-    anIDList aNewList;
-    id_iter theNewIter;
     id_iter theTmpIter;
 
     for(unsigned int iR=0; iR<mStorage->row_size(); iR++) {
@@ -108,37 +129,17 @@ void StRichWriter::cleanUpMCInfo()
 	    // Loop over existing structure;
 	    anIDList theTmpList = (*mStorage)[iR][iC].IDs;
 
-	    if(theTmpList.size() < 2 ) continue;
-	    //cout << "c/r=> " << iC << " " << iR << endl;
-
-	    aNewList.clear();
 	    for(theTmpIter  = theTmpList.begin();
 		theTmpIter != theTmpList.end();
 		theTmpIter++) {
-		
-		// is there a matching segment?
-		bool necessaryToAdd = true;
-		for(theNewIter  = aNewList.begin();
-		    theNewIter != aNewList.end();
-		    theNewIter++) {
-		    if(*theNewIter == *theTmpIter) {
-			if(theTmpIter->mAmount>0) {
-			    theNewIter->mAmount += theTmpIter->mAmount;
-			}
-			necessaryToAdd = false;
-			break;
-			// otherwise, check the next
-		    }
-		}
-		if(necessaryToAdd && theTmpIter->mAmount != 0) {
-		    aNewList.push_back(*theTmpIter);
-		}
-	    } // Tmp iterator
 
-	    //
-	    // swap the new and old list here
-	    //
-	    (*mStorage)[iR][iC].IDs = aNewList;
-	}
-    }
+		//{cout << " b cleanup: theTmpIter->mCharge " << theTmpIter->mCharge << endl; }
+		theTmpIter->mCharge = floor(theTmpIter->mCharge/mAdcConversion);
+		//{cout << " a cleanup: theTmpIter->mCharge " << theTmpIter->mCharge << endl; }
+
+	    }
+	    
+	    (*mStorage)[iR][iC].IDs = theTmpList; 
+	} // iC
+    } // iR
 }
