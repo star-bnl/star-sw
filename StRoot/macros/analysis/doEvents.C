@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.44 2000/04/12 15:29:05 kathy Exp $
+// $Id: doEvents.C,v 1.45 2000/04/12 17:33:45 kathy Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -35,6 +35,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.45  2000/04/12 17:33:45  kathy
+// put loading of libtpc_Tables back in since Iwona is going back to original tpt_track table
+//
 // Revision 1.44  2000/04/12 15:29:05  kathy
 // comment out libtpc by default
 //
@@ -103,7 +106,7 @@ void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
     gSystem->Load("libgen_Tables");
     gSystem->Load("libsim_Tables");
     gSystem->Load("libglobal_Tables");
-//  gSystem->Load("libtpc_Tables");
+    gSystem->Load("libtpc_Tables");
 
     gSystem->Load("StUtilities");
     gSystem->Load("StIOMaker");
