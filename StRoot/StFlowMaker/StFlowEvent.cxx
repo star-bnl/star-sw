@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.28 2001/12/18 19:22:02 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.29 2002/01/31 01:04:43 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -448,9 +448,17 @@ void StFlowEvent::SetSelections() {
     float  Pt  = pFlowTrack->Pt();
 
     // PID
-    Char_t pid[10];
-    strcpy(pid, pFlowTrack->Pid());
-    if (mPid[0] != '\0' && strstr(pid, mPid)==0) continue;
+    if (mPid[0] != '\0') {
+      if (strstr(mPid, "h")!=0) {
+	int charge = pFlowTrack->Charge();
+	if (strcmp("h+", mPid)==0 && charge != 1)  continue;
+	if (strcmp("h-", mPid)==0 && charge != -1) continue;
+      } else {
+	Char_t pid[10];
+	strcpy(pid, pFlowTrack->Pid());
+	if (strstr(pid, mPid)==0) continue;
+      }
+    }
 
     // Global DCA
     float gDca = pFlowTrack->DcaGlobal();
@@ -824,6 +832,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.29  2002/01/31 01:04:43  posk
+// *** empty log message ***
+//
 // Revision 1.28  2001/12/18 19:22:02  posk
 // "proton" and "antiproton" changed to "pr+" and "pr-".
 // Compiles on Solaris.

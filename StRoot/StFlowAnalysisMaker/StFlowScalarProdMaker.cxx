@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowScalarProdMaker.cxx,v 1.3 2002/01/14 23:42:52 posk Exp $
+// $Id: StFlowScalarProdMaker.cxx,v 1.4 2002/01/31 01:09:30 posk Exp $
 //
 // Authors: Method proposed by Art and Sergei, code written by Aihong
 //          Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -88,6 +88,10 @@ Int_t StFlowScalarProdMaker::Init() {
   if (pFlowSelect->PtMaxPart()) {
     ptMaxPart = pFlowSelect->PtMaxPart();
   }
+  int nPtBinsPart = Flow::nPtBinsPart;
+  if (pFlowSelect->PtBinsPart()) {
+    nPtBinsPart = pFlowSelect->PtBinsPart();
+  }
   xLabel = "Pseudorapidity";
   if (strlen(pFlowSelect->PidPart()) != 0) { xLabel = "Rapidity"; }
 
@@ -127,7 +131,7 @@ Int_t StFlowScalarProdMaker::Init() {
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObs2D =	new TProfile2D(histTitle->Data(),
-        histTitle->Data(), Flow::nEtaBins, Flow::etaMin, Flow::etaMax, Flow::nPtBins, 
+        histTitle->Data(), Flow::nEtaBins, Flow::etaMin, Flow::etaMax, nPtBinsPart, 
 		 Flow::ptMin, ptMaxPart, -100., 100., "");
       histFull[k].histFullHar[j].mHist_vObs2D->SetXTitle((char*)xLabel.Data());
       histFull[k].histFullHar[j].mHist_vObs2D->SetYTitle("Pt (GeV)");
@@ -150,7 +154,7 @@ Int_t StFlowScalarProdMaker::Init() {
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObsPt = new TProfile(histTitle->Data(),
-        histTitle->Data(), Flow::nPtBins, Flow::ptMin, ptMaxPart, -100., 100., "");
+        histTitle->Data(), nPtBinsPart, Flow::ptMin, ptMaxPart, -100., 100., "");
       histFull[k].histFullHar[j].mHist_vObsPt->SetXTitle("Pt (GeV)");
       histFull[k].histFullHar[j].mHist_vObsPt->SetYTitle("v (%)");
       delete histTitle;
@@ -159,7 +163,7 @@ Int_t StFlowScalarProdMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowScalerProdAnalysis", 2);
-  gMessMgr->Info("##### FlowScalerProdAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.3 2002/01/14 23:42:52 posk Exp $");
+  gMessMgr->Info("##### FlowScalerProdAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.4 2002/01/31 01:09:30 posk Exp $");
 
   return StMaker::Init();
 }
@@ -220,10 +224,12 @@ void StFlowScalarProdMaker::FillParticleHistograms() {
   for (itr = pFlowTracks->begin(); itr != pFlowTracks->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
 
-    float phi       = pFlowTrack->Phi();
+    float phi = pFlowTrack->Phi();
     if (phi < 0.) phi += twopi;
-    float eta       = pFlowTrack->Eta();
-    float pt        = pFlowTrack->Pt();
+    float eta = pFlowTrack->Eta();
+    float pt  = pFlowTrack->Pt();
+    TVector2 q_i;
+    TVector2 u_i;
 
     for (int k = 0; k < Flow::nSels; k++) {
       pFlowSelect->SetSelection(k);
@@ -233,9 +239,7 @@ void StFlowScalarProdMaker::FillParticleHistograms() {
 	if (pFlowSelect->SelectPart(pFlowTrack)) {
 	  bool oddHar = (j+1) % 2;
 	  double order  = (double)(j+1);
-	  TVector2 q_i;
 	  TVector2 mQ_i = mQ[k][j];
-          TVector2 q_i_unit;
 	  
 	  // Remove autocorrelations
 	  if (pFlowSelect->Select(pFlowTrack)) {
@@ -245,8 +249,8 @@ void StFlowScalarProdMaker::FillParticleHistograms() {
 	  }
 	  	  
 	  // Caculate v for all particles selected
-          q_i_unit.Set(cos(phi*order), sin(phi*order));
-	  float v = (mQ_i.X()*q_i_unit.X() + mQ_i.Y()*q_i_unit.Y());
+          u_i.Set(cos(phi*order), sin(phi*order));
+	  float v = (mQ_i.X()*u_i.X() + mQ_i.Y()*u_i.Y());
 	  float vFlip = v;
 	  if (eta < 0 && oddHar) vFlip *= -1;
 	  if (strlen(pFlowSelect->PidPart()) != 0) { 
@@ -385,6 +389,9 @@ Int_t StFlowScalarProdMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowScalarProdMaker.cxx,v $
+// Revision 1.4  2002/01/31 01:09:30  posk
+// *** empty log message ***
+//
 // Revision 1.3  2002/01/14 23:42:52  posk
 // Renamed ScalerProd histograms. Moved print commands to FlowMaker::Finish().
 //

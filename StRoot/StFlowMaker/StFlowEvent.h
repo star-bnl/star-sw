@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.34 2001/12/18 19:22:09 posk Exp $
+// $Id: StFlowEvent.h,v 1.35 2002/01/31 01:04:47 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -146,7 +146,7 @@ private:
   Flow::PhiWgtFtpc_t  mPhiWgtFtpcWest;                           //!flattening weights Ftpc west
   static Float_t      mPiPlusCuts[2];                            // PID cuts
   static Bool_t       mPtWgt;                                    // flag for pt weighting
-  static Char_t       mPid[10];                                  // pi-, pi+, pi, k+, k-, k, pr+, pr-, pr, e+, e-, e
+  static Char_t       mPid[10];                                  // h+, h-, pi-, pi+, pi, k+, k-, k, pr+, pr-, pr, e+, e-, e
   static Bool_t       mProbPid;                                  // flag for probability pid
   static Bool_t       mEtaSubs;                                  // flag for eta subevents
   static Bool_t       mOnePhiWgt;                                // flag for old phi weights
@@ -329,6 +329,9 @@ inline void StFlowEvent::SetPtWgt(Bool_t PtWgt) { mPtWgt = PtWgt; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.35  2002/01/31 01:04:47  posk
+// *** empty log message ***
+//
 // Revision 1.34  2001/12/18 19:22:09  posk
 // "proton" and "antiproton" changed to "pr+" and "pr-".
 // Compiles on Solaris.

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.60 2002/01/14 23:42:21 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.61 2002/01/31 01:09:10 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -21,7 +21,6 @@
 #include "StFlowTagMaker/StFlowTagMaker.h"
 #include "StFlowMaker/StFlowConstants.h"
 #include "StFlowMaker/StFlowSelection.h"
-//#include "StFlowMaker/StFlowCutTrack.h"
 #include "StEnumerations.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
@@ -33,7 +32,6 @@
 #include "TH3.h"
 #include "TProfile.h"
 #include "TProfile2D.h"
-//#include "TF1.h"
 #include "TOrdCollection.h"
 #include "StMessMgr.h"
 #include "TMath.h"
@@ -105,6 +103,10 @@ Int_t StFlowAnalysisMaker::Init() {
   float ptMaxPart = Flow::ptMaxPart;
   if (pFlowSelect->PtMaxPart()) {
     ptMaxPart = pFlowSelect->PtMaxPart();
+  }
+  int nPtBinsPart = Flow::nPtBinsPart;
+  if (pFlowSelect->PtBinsPart()) {
+    nPtBinsPart = pFlowSelect->PtBinsPart();
   }
   xLabel = "Pseudorapidity";
   if (strlen(pFlowSelect->PidPart()) != 0) { xLabel = "Rapidity"; }
@@ -186,7 +188,7 @@ Int_t StFlowAnalysisMaker::Init() {
          nCentBins         = 10,
 	 nDedxBins        = 200,
 	 nMomenBins       = 200,
-	 n_qBins          = 50
+	 n_qBins          =  50
   };
   
   // Trigger
@@ -353,7 +355,7 @@ Int_t StFlowAnalysisMaker::Init() {
 
   // Yield for particles correlated with the event plane
   mHistYieldPart2D = new TH2D("Flow_YieldPart2D", "Flow_YieldPart2D",
-    Flow::nEtaBins, Flow::etaMin, Flow::etaMax, Flow::nPtBins, Flow::ptMin, 
+    Flow::nEtaBins, Flow::etaMin, Flow::etaMax, nPtBinsPart, Flow::ptMin, 
 			      ptMaxPart);
   mHistYieldPart2D->Sumw2();
   mHistYieldPart2D->SetXTitle((char*)xLabel.Data());
@@ -367,7 +369,7 @@ Int_t StFlowAnalysisMaker::Init() {
   
   // Mean Pt in each bin
   mHistBinPt = new TProfile("Flow_Bin_Pt", "Flow_Bin_Pt",
-    Flow::nPtBins, Flow::ptMin, ptMaxPart, Flow::ptMin, ptMaxPart, "");
+    nPtBinsPart, Flow::ptMin, ptMaxPart, Flow::ptMin, ptMaxPart, "");
   mHistBinPt->SetXTitle("Pt (GeV)");
   mHistBinPt->SetYTitle("<Pt> (GeV)");
   
@@ -510,8 +512,8 @@ Int_t StFlowAnalysisMaker::Init() {
 
   // PID multiplicities selected
   mHistPidMult = new TProfile("Flow_PidMult", "Flow_PidMult",
-			      11, 0.5, 11.5, 0., 10000., "");
-  mHistPidMult->SetXTitle("all, pi+, pi-, pr+, pr-, K+, K-, d+, d-, e-, e+");
+			      13, 0.5, 13.5, 0., 10000., "");
+  mHistPidMult->SetXTitle("all, h+, h-, pi+, pi-, pr+, pr-, K+, K-, d+, d-, e-, e+");
   mHistPidMult->SetYTitle("Multiplicity");
     
   // Centrality
@@ -1023,7 +1025,7 @@ Int_t StFlowAnalysisMaker::Init() {
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObs2D =	new TProfile2D(histTitle->Data(),
-        histTitle->Data(), Flow::nEtaBins, Flow::etaMin, Flow::etaMax, Flow::nPtBins, 
+        histTitle->Data(), Flow::nEtaBins, Flow::etaMin, Flow::etaMax, nPtBinsPart, 
 		 Flow::ptMin, ptMaxPart, -100., 100., "");
       histFull[k].histFullHar[j].mHist_vObs2D->SetXTitle((char*)xLabel.Data());
       histFull[k].histFullHar[j].mHist_vObs2D->SetYTitle("Pt (GeV)");
@@ -1046,7 +1048,7 @@ Int_t StFlowAnalysisMaker::Init() {
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObsPt = new TProfile(histTitle->Data(),
-        histTitle->Data(), Flow::nPtBins, Flow::ptMin, ptMaxPart, -100., 100., "");
+        histTitle->Data(), nPtBinsPart, Flow::ptMin, ptMaxPart, -100., 100., "");
       histFull[k].histFullHar[j].mHist_vObsPt->SetXTitle("Pt (GeV)");
       histFull[k].histFullHar[j].mHist_vObsPt->SetYTitle("v (%)");
       delete histTitle;
@@ -1055,7 +1057,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.60 2002/01/14 23:42:21 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.61 2002/01/31 01:09:10 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1213,6 +1215,8 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
   float corrMultN  = 0.;
   float etaSymPosN = 0.;
   float etaSymNegN = 0.;
+  float hPlusN     = 0.;
+  float hMinusN    = 0.;
   float piPlusN    = 0.;
   float piMinusN   = 0.;
   float protonN    = 0.;
@@ -1282,6 +1286,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
       if (maxPts) mHistFitOverMaxTpc->Fill((float)fitPts/(float)maxPts);
       
       if (charge == 1) {
+	hPlusN++;
 	mHistMeanDedxPos2D->Fill(logp, dEdx);
 	float piPlus = pFlowTrack->PidPiPlus();
 	mHistPidPiPlus->Fill(piPlus);
@@ -1314,6 +1319,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  mHistPidPositronPart->Fill(positron);
 	  }
       } else if (charge == -1) {
+	hMinusN++;
 	mHistMeanDedxNeg2D->Fill(logp, dEdx);
 	float piMinus = pFlowTrack->PidPiMinus();
 	mHistPidPiMinus->Fill(piMinus);
@@ -1515,16 +1521,18 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
   // PID multiplicities
   float totalMult = (float)pFlowEvent->TrackCollection()->size();
   mHistPidMult->Fill(1., totalMult);
-  mHistPidMult->Fill(2., piPlusN);
-  mHistPidMult->Fill(3., piMinusN);
-  mHistPidMult->Fill(4., protonN);
-  mHistPidMult->Fill(5., pbarN);
-  mHistPidMult->Fill(6., kPlusN);
-  mHistPidMult->Fill(7., kMinusN);
-  mHistPidMult->Fill(8., deuteronN);
-  mHistPidMult->Fill(9., dbarN);
-  mHistPidMult->Fill(10., electronN);
-  mHistPidMult->Fill(11., positronN);
+  mHistPidMult->Fill(2., hPlusN);
+  mHistPidMult->Fill(3., hMinusN);
+  mHistPidMult->Fill(4., piPlusN);
+  mHistPidMult->Fill(5., piMinusN);
+  mHistPidMult->Fill(6., protonN);
+  mHistPidMult->Fill(7., pbarN);
+  mHistPidMult->Fill(8., kPlusN);
+  mHistPidMult->Fill(9., kMinusN);
+  mHistPidMult->Fill(10., deuteronN);
+  mHistPidMult->Fill(11., dbarN);
+  mHistPidMult->Fill(12., electronN);
+  mHistPidMult->Fill(13., positronN);
 
   // Multiplicity of particles correlated with the event planes
   corrMultN = corrMultN / (float)(Flow::nHars * Flow::nSels);
@@ -1774,6 +1782,9 @@ Int_t StFlowAnalysisMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.61  2002/01/31 01:09:10  posk
+// *** empty log message ***
+//
 // Revision 1.60  2002/01/14 23:42:21  posk
 // Renamed ScalerProd histograms. Moved print commands to FlowMaker::Finish().
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.15 2001/11/09 21:10:57 posk Exp $
+// $Id: StFlowSelection.cxx,v 1.16 2002/01/31 01:04:52 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -74,8 +74,14 @@ Bool_t StFlowSelection::SelectPart(StFlowTrack* pFlowTrack) {
 
   // PID
   if (mPidPart[0] != '\0') {
-    const Char_t* pid = pFlowTrack->Pid();
-    if (strstr(pid, mPidPart)==0) return kFALSE;
+    if (strstr(mPidPart, "h")!=0) {
+      int charge = pFlowTrack->Charge();
+      if (strcmp("h+", mPidPart)==0 && charge != 1)  return kFALSE;
+      if (strcmp("h-", mPidPart)==0 && charge != -1) return kFALSE;
+    } else {
+      const Char_t* pid = pFlowTrack->Pid();
+      if (strstr(pid, mPidPart)==0) return kFALSE;
+    }
   }
   
   // Pt
@@ -157,6 +163,9 @@ void StFlowSelection::PrintList() const {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
+// Revision 1.16  2002/01/31 01:04:52  posk
+// *** empty log message ***
+//
 // Revision 1.15  2001/11/09 21:10:57  posk
 // Switched from CERNLIB to TMath. Little q is now normalized.
 //
