@@ -27,6 +27,7 @@ created   22 april 98
 *
  entry  g2t 
  entry  g2t_start
+ begin  
 *
  If (First) Then
    first = .false.
@@ -156,6 +157,7 @@ created   22 april 98
 
       names(1)='g2t_vertex'//o
       names(2)='g2t_track'//o
+      print *,' calling g2t_get_kine ',iprin
       i = AMI_MODULE_CALL ('g2t_get_kine'//o,2,names)
       prin5 i; (' g2tmain: get_kine done with i=',i6)
 
@@ -220,3 +222,34 @@ created   22 april 98
   end
 
       
+*************************************************************************
+      SUBROUTINE  aGFVOLUa (Ivol,Cvol,Cshap,numed,par,npar)
+*
+* description: extract parameters of a give geant volume
+*
+*************************************************************************
++cde,typing,gcbank,gcunit.
+      integer   Ivol,numed,npar,nv
+*     integher  Ishap
+      character Cvol*4,Cshap*4
+      real      par(*)
+ 
+*         make GFVOLU call... ? => CVOL,CSHAP
+          Nv=-1;  npar=0;  numed=0;
+          If (JVOLUM>0) Nv=IQ(JVOLUM-1)
+          if (Ivol<1 | Ivol>Nv) 
+          { print *,' ivol,Nv=',ivol,nv; return; }
+
+          Call GFVOLU (Ivol,CVOL,CSHAP)
+*         Ishap     = Q(LQ(JVOLUM-IVOL)+2)
+*         Cshap     = Cshapes(Ishap)
+          Numed     = Q(LQ(JVOLUM-IVOL)+4)
+          Npar      = Q(LQ(JVOLUM-IVOL)+5)
+          Call UHTOC   (IQ(JVOLUM+IVOL),4,Cvol,4)
+          print *,' Npar=',Npar,ivol,cvol
+*         Numat     = Q(LQ(JTMED-Numed)+6)
+          Call Ucopy (Q(LQ(JVOLUM-IVOL)+7),par,min(50,Npar) )
+       end
+ 
+
+
