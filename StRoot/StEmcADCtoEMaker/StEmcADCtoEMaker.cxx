@@ -1,9 +1,9 @@
 //*-- Author : Alexandre Suaide
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.12 2001/10/25 21:31:36 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.13 2001/10/26 15:58:37 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
-// Revision 1.12  2001/10/25 21:31:36  suaide
-// modifications to get new database tables
+// Revision 1.13  2001/10/26 15:58:37  suaide
+// bypass status DB for a while
 //
 // Revision 1.11  2001/10/24 23:06:54  suaide
 // log messages included for easier debug
@@ -103,11 +103,11 @@ Int_t StEmcADCtoEMaker::Make()
   cout <<"\n\n\nStEmcADCtoEMaker::Make()******************************************************************\n";
       
   m_StatusDb=NULL;
-  if(isDaqFile)
-  {
-    m_StatusDb=GetInputDB("Calibrations/emc/status");
-    if(!m_StatusDb) gMessMgr->Warning("StEmcADCtoEMaker::Make() - Can not get new status tables.... will use default ");
-  } 
+  //if(isDaqFile)
+  //{
+  //  m_StatusDb=GetInputDB("Calibrations/emc/status");
+  //  if(!m_StatusDb) gMessMgr->Warning("StEmcADCtoEMaker::Make() - Can not get new status tables.... will use default ");
+  //} 
   
   if(!GetEmcEvent())
   {
@@ -176,6 +176,7 @@ void StEmcADCtoEMaker::GetStatus(Int_t det)
     if(m_StatusDb) run = (St_emcRunning*)m_StatusDb->Find(TableName.Data());
     if(run)
     {
+      cout <<"Got table from DataBase\n";
       emcRunning_st* runst=run->GetTable(); 
       for(Int_t i=1;i<=4800;i++) 
       {
@@ -187,13 +188,21 @@ void StEmcADCtoEMaker::GetStatus(Int_t det)
     {
       if(det==0)
       {
-        cout <<"Using bemc default status table\n";
+        Int_t d = GetDate();
+        Int_t t = GetTime();
+        cout <<"Using bemc default status table for "
+             <<"date = "<<d<<"  time = "<<time<<endl;
         for(Int_t i=1;i<=4800;i++)
         {
           status[i-1]=0;
           if (i>=1861 && i<=2340) status[i-1]=1; // initial 2001 configuration
           if (i>=2021 && i<=2100) status[i-1]=0; // initial 2001 configuration
+          if(i>=2021 && i<=2100)  // remove PTM 4
+          {
+            if(d>=20011015 && d<=20011020) status[i-1]=0;
+          }
           if(status[i-1]==1) nchannels++;
+
         }
 
         status[2309-1]=0;
