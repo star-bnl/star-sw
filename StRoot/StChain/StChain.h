@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.32 2000/03/23 00:15:22 fine Exp $
+// $Id: StChain.h,v 1.33 2000/07/26 20:58:22 fine Exp $
 // $Log: StChain.h,v $
+// Revision 1.33  2000/07/26 20:58:22  fine
+// StChain::GetOption virtual dummy methods have been introduced
+//
 // Revision 1.32  2000/03/23 00:15:22  fine
 // Adjusted to libSTAR for ROOT 2.24
 //
@@ -102,11 +105,13 @@ public:
    virtual Int_t      Make();
    virtual Int_t      IsChain() const {return 1;}
    virtual Int_t      MakeEvent(); // *MENU*
+   virtual Bool_t      GetOption(const TString *Opt) {return Opt ? GetOption(Opt->Data()):kFALSE;}
+   virtual Bool_t      GetOption(const Char_t *Opt)  {return kFALSE;}
    Int_t              GetVersion() {return m_Version;}
    Int_t              GetVersionDate() {return m_VersionDate;}
 
  virtual const char *GetCVS() const 
- {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.32 2000/03/23 00:15:22 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+ {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.33 2000/07/26 20:58:22 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StChain, 0)   //StChain control class
 };
 
