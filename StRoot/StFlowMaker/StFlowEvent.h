@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.42 2003/01/10 16:42:15 oldi Exp $
+// $Id: StFlowEvent.h,v 1.43 2003/04/01 00:27:07 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -31,6 +31,8 @@ public:
   virtual        ~StFlowEvent();
 
   Double_t       PhiWeight(Int_t selN, Int_t harN, StFlowTrack* pFlowTrack) const;
+  Double_t       PhiWeightRaw(Int_t selN, Int_t harN, StFlowTrack* pFlowTrack) const;
+  Double_t       Weight(Int_t selN, Int_t harN, StFlowTrack* pFlowTrack) const;
   Int_t          EventID() const;
   Int_t          RunID() const;
   Double_t       CenterOfMassEnergy() const;
@@ -371,6 +373,9 @@ inline void StFlowEvent::SetEtaWgt(Bool_t EtaWgt) { mEtaWgt = EtaWgt; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.43  2003/04/01 00:27:07  posk
+// Little q is now unweighted by pt or eta. Big Q is unaffected.
+//
 // Revision 1.42  2003/01/10 16:42:15  oldi
 // Several changes to comply with FTPC tracks:
 // - Switch to include/exclude FTPC tracks introduced.

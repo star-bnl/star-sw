@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.37 2003/02/25 19:28:40 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.38 2003/04/01 00:27:05 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -117,11 +117,10 @@ StFlowEvent::~StFlowEvent() {
 
 //-------------------------------------------------------------
 
-Double_t StFlowEvent::PhiWeight(Int_t selN, Int_t harN,	StFlowTrack*
+Double_t StFlowEvent::PhiWeightRaw(Int_t selN, Int_t harN, StFlowTrack*
 				pFlowTrack) const {
   // Weight for making the event plane isotropic in the lab.
 
-  bool oddHar = (harN+1) % 2;
   StTrackTopologyMap map = pFlowTrack->TopologyMap();
   float phi = pFlowTrack->Phi();
   if (phi < 0.) phi += twopi;
@@ -181,11 +180,24 @@ Double_t StFlowEvent::PhiWeight(Int_t selN, Int_t harN,	StFlowTrack*
     }
   }
 
+  return phiWgt;
+}
+
+//-------------------------------------------------------------
+
+Double_t StFlowEvent::Weight(Int_t selN, Int_t harN, StFlowTrack*
+			     pFlowTrack) const {
+  // Weight for enhancing the resolution.
+
+  bool oddHar = (harN+1) % 2;
+  Double_t phiWgt = 1.;
+
   if (mPtWgt) {
     float pt = pFlowTrack->Pt();
     phiWgt *= (pt < 2.) ? pt : 2.;  // pt weighting going constant above 2 GeV
   }
 
+  float eta = pFlowTrack->Eta();
   float etaAbs = fabs(eta);
   if (mEtaWgt && oddHar && etaAbs > 1.) {
     phiWgt *= etaAbs;
@@ -194,6 +206,19 @@ Double_t StFlowEvent::PhiWeight(Int_t selN, Int_t harN,	StFlowTrack*
   if (oddHar && eta < 0.) phiWgt *= -1.;
 
   return phiWgt;
+}
+
+//-------------------------------------------------------------
+
+Double_t StFlowEvent::PhiWeight(Int_t selN, Int_t harN, StFlowTrack*
+				pFlowTrack) const {
+  // Weight for making the event plane isotropic in the lab and
+  // enhancing the resolution.
+  
+  Double_t phiWgtRaw = PhiWeightRaw(selN, harN, pFlowTrack);
+  Double_t weight = Weight(selN, harN, pFlowTrack);
+  
+  return phiWgtRaw * weight;
 }
 
 //-------------------------------------------------------------
@@ -459,10 +484,35 @@ Double_t StFlowEvent::WgtMult_q6(StFlowSelection* pFlowSelect) {
 
 //-------------------------------------------------------------
 
-Float_t StFlowEvent::q(StFlowSelection* pFlowSelect) {
-  // Magnitude of normalized Q vector
- 
-  TVector2 mQ  = NormQ(pFlowSelect);
+Float_t StFlowEvent::q(StFlowSelection* pFlowSelect) { 
+  // Magnitude of normalized Q vector without pt or eta weighting
+
+  TVector2 mQ;
+  Double_t mQx=0., mQy=0.;
+  int selN     = pFlowSelect->Sel();
+  int harN     = pFlowSelect->Har();
+  double order = (double)(harN + 1);
+  double SumOfWeightSqr = 0;
+
+
+  StFlowTrackIterator itr;
+  for (itr = TrackCollection()->begin(); 
+       itr != TrackCollection()->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    if (pFlowSelect->Select(pFlowTrack)) {
+      
+      double phiWgt = PhiWeightRaw(selN, harN, pFlowTrack); // Raw
+      SumOfWeightSqr += phiWgt*phiWgt;
+
+      float phi = pFlowTrack->Phi();
+      mQx += phiWgt * cos(phi * order);
+      mQy += phiWgt * sin(phi * order);
+    }
+  }
+  
+  if (SumOfWeightSqr)
+    mQ.Set(mQx/sqrt(SumOfWeightSqr), mQy/sqrt(SumOfWeightSqr));
+  else mQ.Set(0.,0.);
   
   return mQ.Mod();
 }
@@ -894,6 +944,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.38  2003/04/01 00:27:05  posk
+// Little q is now unweighted by pt or eta. Big Q is unaffected.
+//
 // Revision 1.37  2003/02/25 19:28:40  posk
 // Changed a few unimportant default cuts.
 //
