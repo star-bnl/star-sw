@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.188 2001/04/09 19:27:01 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.189 2001/04/10 22:33:01 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -645,7 +645,8 @@ void StBFChain::SetOption(const Int_t k) {// set all off
   }
 }
 //_____________________________________________________________________
-Bool_t StBFChain::GetOption(const Int_t k) {
+Bool_t StBFChain::GetOption(const Int_t k) const 
+{
   return (k>0 && k <NoChainOptions) ? fBFC[k].Flag : kFALSE;
 }
 //_____________________________________________________________________________
