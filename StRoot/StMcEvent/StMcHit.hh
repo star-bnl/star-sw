@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.hh,v 2.7 2003/10/08 20:17:55 calderon Exp $
+ * $Id: StMcHit.hh,v 2.8 2004/01/13 21:02:51 fisyak Exp $
  * $Log: StMcHit.hh,v $
+ * Revision 2.8  2004/01/13 21:02:51  fisyak
+ * Add inheritance from StObject
+ *
  * Revision 2.7  2003/10/08 20:17:55  calderon
  * -using <iostream>, std::cout, std::ostream.
  * -changes in FTPC volume Id.
@@ -43,18 +46,18 @@
 #ifndef StMcHit_hh
 #define StMcHit_hh
 
-#include <iostream>
-#ifndef ST_NO_NAMESPACES
-using std::ostream;
-using std::cout;
-#endif
+#include "StObject.h"
+#include "Stiostream.h"
 #include "StThreeVectorF.hh"
 
 class StMcTrack;
 class g2t_hits_st;
 
-class StMcHit {
+class StMcHit : public StObject {
 public:
+  enum EMcHitBits {
+    kMatched = BIT(23) // if hit has matched with reconstructed one
+  };
     StMcHit();
     StMcHit(const StThreeVectorF&,const StThreeVectorF&,
 	  float, float, long, long,
@@ -94,8 +97,9 @@ protected:
     long                 mKey;
     long                 mVolumeId;
     StMcTrack*           mParentTrack;
+  ClassDef(StMcHit,1)
 };
-
+#ifndef __CINT__
 ostream&  operator<<(ostream& os, const StMcHit&);
 
 inline const StThreeVectorF& StMcHit::position() const { return mPosition;}
@@ -112,5 +116,6 @@ inline long StMcHit::volumeId() const { return mVolumeId; }
 
 inline StMcTrack* StMcHit::parentTrack() const { return mParentTrack; }	
 
+#endif
 #endif
 
