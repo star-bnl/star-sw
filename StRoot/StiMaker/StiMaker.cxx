@@ -261,8 +261,8 @@ Int_t StiMaker::Init()
     //The Tracker
     mtracker = new StiKalmanTrackFinder();
     mtracker->setTrackNodeFactory(mktracknodefactory);
-    //mtracker->setTrackSeedFinder(mEvaluableSeedFinder);
-    mtracker->setTrackSeedFinder(mcompseedfinder);
+    mtracker->setTrackSeedFinder(mEvaluableSeedFinder);
+    //mtracker->setTrackSeedFinder(mcompseedfinder);
     mtracker->isValid(true);
     
     return StMaker::Init();
