@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.108 2001/03/01 02:08:02 perev Exp $
+// $Id: StMaker.cxx,v 1.109 2001/03/02 16:54:44 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -936,7 +936,7 @@ static void doPs(const char *who, const char *where)
   if (!ps) {
 //		execute shell      
     ps = gSystem->Getenv("StarEndMakerShell"); 
-    if (!ps) ps = "";
+    ps = (ps) ? "yes" : "";
   }
   if (!ps[0]) return;
   printf("QAInfo: doPs for %20s:%12s \t",who,where);
@@ -1049,6 +1049,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.109  2001/03/02 16:54:44  perev
+// doPs fix
+//
 // Revision 1.108  2001/03/01 02:08:02  perev
 // StMem into doPs
 //
