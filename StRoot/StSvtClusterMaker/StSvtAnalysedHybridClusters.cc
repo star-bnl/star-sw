@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.cc,v 1.12 2004/01/27 02:30:29 perev Exp $
+ * $Id: StSvtAnalysedHybridClusters.cc,v 1.13 2004/11/24 02:41:35 jeromel Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.cc,v $
+ * Revision 1.13  2004/11/24 02:41:35  jeromel
+ * Minor protection issue on delete
+ *
  * Revision 1.12  2004/01/27 02:30:29  perev
  * LeakOff
  *
@@ -60,18 +63,18 @@
 
 StSvtAnalysedHybridClusters::StSvtAnalysedHybridClusters(int barrel, int ladder, int wafer, int hybrid):StSvtHybridObject(barrel,ladder,wafer,hybrid)
 { 
- mNumOfHits = 0;
- mHardWarePosition=0;
- mSvtHitData = NULL;
- mSvtHit = NULL;
- mPos=0;             
+ mNumOfHits        = 0;
+ mHardWarePosition = 0;
+ mSvtHitData       = 0;
+ mSvtHit           = 0;
+ mPos              = 0;
 }
 
 StSvtAnalysedHybridClusters::~StSvtAnalysedHybridClusters()
 { 
- delete [] mSvtHitData;
- delete [] mSvtHit;
- delete [] mPos;
+ if (mSvtHitData) delete [] mSvtHitData;
+ if (mSvtHit)     delete [] mSvtHit;
+ if (mPos)        delete [] mPos;
 }
 
 void StSvtAnalysedHybridClusters::setMembers(int numOfClu, int index)
@@ -86,6 +89,11 @@ void StSvtAnalysedHybridClusters::setMembers(int numOfClu, int index)
   HitSize = ( numOfClu < 10) ? 10 : mNumOfHits; 
   mHardWarePosition = index;
   assert( !mSvtHitData && !mSvtHit && !mPos);
+   
+  //cout << "DEBUG:: mSvtHitData" << (int *) mSvtHitData << endl;
+  //cout << "DEBUG:: mSvtHit    " << (int *) mSvtHit     << endl;
+  //cout << "DEBUG:: mPos       " << (int *) mPos        << endl; 
+   
   mSvtHitData = new StSvtHitData[HitSize];
   mSvtHit     = new StSvtHit[HitSize];
   mPos        = new StThreeVector<double>[HitSize];
