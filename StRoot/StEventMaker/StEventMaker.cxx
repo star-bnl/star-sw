@@ -1,6 +1,6 @@
 /*************************************************************************** 
  *
- * $Id: StEventMaker.cxx,v 2.17 2000/02/08 21:14:16 genevb Exp $
+ * $Id: StEventMaker.cxx,v 2.18 2000/02/11 16:12:33 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.17  2000/02/08 21:14:16  genevb
- * Handle cases with no tracks.
+ * Revision 2.18  2000/02/11 16:12:33  ullrich
+ * Modified check for valid primary vertices.
  *
  * Revision 2.28  2000/08/17 00:38:48  ullrich
  * Allow loading of tpt tracks.
@@ -132,10 +132,10 @@
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.17 2000/02/08 21:14:16 genevb Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.18 2000/02/11 16:12:33 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.17 2000/02/08 21:14:16 genevb Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.18 2000/02/11 16:12:33 ullrich Exp $";
 
 ClassImp(StEventMaker)
     doPrintEventInfo  = kFALSE;
@@ -491,16 +491,17 @@ StEventMaker::makeEvent()
 	    k++;
 	}
 	if (!k) nfailed++;
-    //  entry in the temprary vector (vecPrimaryTracks)
+    }
     if (nfailed) 
 	gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
-    //  New: iflag > 0 for event (primary) vertices.
+			    << " dedx rows, no corresponding tracks found." << endm;
         }
     }
     if (nfailed)
         gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
     }
-        if (dstVertices[i].iflag > 0 && dstVertices[i].vtx_id == kEventVtxId) {
+    //  global and primary tracks.
+    //
     //  Load the dedx table and assign the dE/dx traits to all loaded
     //  global, tpt and primary tracks.
     //
@@ -518,6 +519,7 @@ StEventMaker::makeEvent()
 		    vecPrimaryTracks[k] = 0;
 		}
         if (!k) nfailed++;
+    }
     if (nfailed)
         gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
                             << " dedx rows, no corresponding tracks found." << endm;
