@@ -1,5 +1,8 @@
-* $Id: tte.F,v 1.15 1998/07/09 12:47:31 sakrejda Exp $
+* $Id: tte.F,v 1.16 1998/07/10 20:45:55 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.16  1998/07/10 20:45:55  sakrejda
+* take care of cases where a reconstructed hit cannot be matched with a mc hit
+*
 * Revision 1.15  1998/07/09 12:47:31  sakrejda
 * printing of warnings from tte reduced
 *
@@ -632,12 +635,19 @@ c            fill the evaluation table with the info about this track:
 c            find a mc hit associated with this reconstructed hit
 c            and get it's momentum information.
              id_mc=tindex(list_index_rec(eval(eval_h.nok).inhit)).key1
-             ip_mc=list_g2t_hits(id_mc)
-             eval(eval_h.nok).pxg=g2t_hit(ip_mc).p(1)
-             eval(eval_h.nok).pyg=g2t_hit(ip_mc).p(2)
-             eval(eval_h.nok).pzg=g2t_hit(ip_mc).p(3)
-             eval(eval_h.nok).ptg=sqrt(g2t_hit(ip_mc).p(1)**2+
-     >       g2t_hit(ip_mc).p(2)**2)
+             if(id_mc.gt.0) then
+               ip_mc=list_g2t_hits(id_mc)
+               eval(eval_h.nok).pxg=g2t_hit(ip_mc).p(1)
+               eval(eval_h.nok).pyg=g2t_hit(ip_mc).p(2)
+               eval(eval_h.nok).pzg=g2t_hit(ip_mc).p(3)
+               eval(eval_h.nok).ptg=sqrt(g2t_hit(ip_mc).p(1)**2+
+     >         g2t_hit(ip_mc).p(2)**2)
+             else
+               eval(eval_h.nok).pxg=-999.0
+               eval(eval_h.nok).pyg=-999.0
+               eval(eval_h.nok).pzg=-999.0
+               eval(eval_h.nok).ptg=-999.0
+             endif
              eval(eval_h.nok).qr=track(list_tracks(track_num)).q
              eval(eval_h.nok).ptr=1.0/track(list_tracks(track_num)).invp
              eval(eval_h.nok).ptvr=1./track(list_tracks(track_num)).invp
@@ -704,31 +714,33 @@ c          to do it take a real hit id
 c          look up its position in the index table and take
 c          the mc hit id from this location
            id_mc=tindex(list_index_rec(ip)).key1
-c          find a pointer for this id
-           ip_mc=list_g2t_hits(id_mc)
-c          find a parent track for this point
-           mc_track=g2t_hit(ip_mc).track_p
-c          let's see how many different tracks got mixed up in this one...
-           iloc=0
-           do ii=1,mc_track_on_rec_track_nok
-              if(mc_track_on_rec_track(1,ii).eq.mc_track) iloc=ii
-           end do
-           if(iloc.eq.0) then
-             if(mc_track_on_rec_track_nok.lt.maxtrack)then
-                mc_track_on_rec_track_nok=mc_track_on_rec_track_nok+1
-                mc_track_on_rec_track(1,mc_track_on_rec_track_nok)=
-     >          mc_track
-                mc_track_on_rec_track(2,mc_track_on_rec_track_nok)=0
-                iloc=mc_track_on_rec_track_nok
+           if(id_mc.gt.0) then
+c            find a pointer for this id
+             ip_mc=list_g2t_hits(id_mc)
+c            find a parent track for this point
+             mc_track=g2t_hit(ip_mc).track_p
+c            let's see how many different tracks got mixed up in this one...
+             iloc=0
+             do ii=1,mc_track_on_rec_track_nok
+                if(mc_track_on_rec_track(1,ii).eq.mc_track) iloc=ii
+             end do
+             if(iloc.eq.0) then
+               if(mc_track_on_rec_track_nok.lt.maxtrack)then
+                 mc_track_on_rec_track_nok=mc_track_on_rec_track_nok+1
+                 mc_track_on_rec_track(1,mc_track_on_rec_track_nok)=
+     >           mc_track
+                 mc_track_on_rec_track(2,mc_track_on_rec_track_nok)=0
+                 iloc=mc_track_on_rec_track_nok
+               endif
              endif
+             mc_track_on_rec_track(2,iloc)=
+     >       mc_track_on_rec_track(2,iloc)+1
            endif
-           mc_track_on_rec_track(2,iloc)=
-     >     mc_track_on_rec_track(2,iloc)+1
            j=j+1
-           if(j.lt.hit_h.nok) then
-                    track_num_local=hit(loc_hit(j)).track/1000
+           if(j.le.hit_h.nok) then
+             track_num_local=hit(loc_hit(j)).track/1000
            else
-                    track_num_local=-1
+             track_num_local=-1
            endif
          end do
 
@@ -767,7 +779,7 @@ c        let's find the biggest contribution
          endif
          else
          i=i+1
-      endif
+         endif
       end do
       if(bad_track.gt.0) then
          write(m132(1),*) 
