@@ -17,7 +17,7 @@ public:
   StUKey &operator=( UInt_t from);
   StUKey &operator=( Int_t from){return *this=(UInt_t)from; return *this;}
   StUKey &operator=( const char *from);
-  void    Update(const StUKey &from);
+  void    Update(const StUKey &from,const char *name=0);
   void    SetName(const char *name){fName=name;} 
   const char *GetName() const {return fName;} 
   TString GetKey() const; 

@@ -53,9 +53,10 @@ StUKey &StUKey::operator=( const char *from)
   return *this;
 }
 //______________________________________________________________________________
-void  StUKey::Update( const StUKey &from)
+void  StUKey::Update( const StUKey &from, const char *name)
 {
   SetUrr(from.fUrr,from.fNUrr);
+  if (name) SetName(name);
 }
 //______________________________________________________________________________
 TString StUKey::GetKey() const
@@ -76,7 +77,7 @@ void StUKey::SetKey(const char *key)
   assert(n>0 && n<100);
   fName.Replace(0,999,key,n);
   for (fNUrr = 0,cc=key+n;*cc=='.'; cc+=11)
-    fUrr[++fNUrr] = strtoul(cc+1,0,10);
+    fUrr[fNUrr++] = strtoul(cc+1,0,10);
 }
 //______________________________________________________________________________
 UInt_t  StUKey::GetSum() const
