@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.14 2004/02/03 20:05:20 jml Exp $
+ * $Id: FCFMaker.cxx,v 1.15 2004/02/15 05:45:38 perev Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.15  2004/02/15 05:45:38  perev
+ * Increase size of broken array
+ *
  * Revision 1.14  2004/02/03 20:05:20  jml
  * *** empty log message ***
  *
@@ -206,14 +209,14 @@ void StRTSClientFCFMaker::SetMode(Int_t mode)
   }
 
   if(ignoreRawData)
-    printf("FCFMaker:: Not calculating clusters from raw data\n");
+    printf("FCFMaker::SetMode Not calculating clusters from raw data\n");
   else
-    printf("FCFMaker:: Will calculate clusters from raw data if present\n");
+    printf("FCFMaker::SetMode Will calculate clusters from raw data if present\n");
 
   if(ignoreFileClusters)
-    printf("FCFMaker:: Not reading clusters from data file\n");
+    printf("FCFMaker::SetMode Not reading clusters from data file\n");
   else
-    printf("FCFMaker:: Will read clusters from data file if present\n");
+    printf("FCFMaker::SetMode Will read clusters from data file if present\n");
 }
 
 Int_t StRTSClientFCFMaker::Init()
@@ -317,7 +320,7 @@ Int_t StRTSClientFCFMaker::InitRun(int run)
   daqReader = (StDAQReader *)(dr->GetObject());
 
   if(daqReader == NULL) {
-    printf("FCFMaker: No daqReader available...\n");
+    printf("FCFMaker::InitRun No daqReader available...\n");
   }
 
   for(int i=0;i<24;i++) {
@@ -333,7 +336,7 @@ Int_t StRTSClientFCFMaker::Make()
 {
   PrintInfo();
 
-  printf("FCFMaker: Making event...\n");
+  printf("<FCFMaker::Make> Making event...\n");
 
   // Hack for now untill ittf is in more complete shape...
   if(mCreate_stevent)
@@ -400,13 +403,13 @@ Int_t StRTSClientFCFMaker::Make()
   {
     //printf("FCFMaker: reading daq file clusters\n");
     n_daq_file_cl = build_daq_file_clusters();
-    printf("FCFMaker: done reading daq file clusters (%d found)\n",n_daq_file_cl);
+    printf("<FCFMaker::Make> done reading daq file clusters (%d found)\n",n_daq_file_cl);
   }
   if(!ignoreRawData)
   {
     //printf("FCFMaker: calculating clusters from raw data\n");
     n_croat_cl = build_croat_clusters();
-    printf("FCFMaker: done calculating clusters from raw data (%d found)\n",n_croat_cl);
+    printf("<FCFMaker::Make> done calculating clusters from raw data (%d found)\n",n_croat_cl);
   }
 
   int n_burned_daq_file_cl=-1;
@@ -481,33 +484,33 @@ Int_t StRTSClientFCFMaker::Make()
     
     // If no compare this is not satisfied...
     if(mismatch_sector != 0) {
-      printf("FCFMaker: There were mismatches between file & calculated clusters (sector=%02d mismatches=%6d nfile=%6d nraw=%6d)\n",s+1,mismatch_sector,n_burned_daq_file_cl_sector,n_burned_croat_cl_sector);
+      printf("<FCFMaker::Make> There were mismatches between file & calculated clusters (sector=%02d mismatches=%6d nfile=%6d nraw=%6d)\n",s+1,mismatch_sector,n_burned_daq_file_cl_sector,n_burned_croat_cl_sector);
     }
   }
 
   if(n_burned_daq_file_cl > 0) {
-    printf("FCFMaker: Merged %d of %d file clusters\n",n_daq_file_cl-n_burned_daq_file_cl,n_daq_file_cl);
+    printf("<FCFMaker::Make> Merged %d of %d file clusters\n",n_daq_file_cl-n_burned_daq_file_cl,n_daq_file_cl);
   }
 
   if(n_burned_croat_cl > 0) {
-    printf("FCFMaker: Merged %d of %d calculated clusters\n",n_croat_cl-n_burned_croat_cl,n_croat_cl);
+    printf("<FCFMaker::Make> Merged %d of %d calculated clusters\n",n_croat_cl-n_burned_croat_cl,n_croat_cl);
   }
 
   // Poor mans comparison....
   if((n_burned_croat_cl == -1) && 
      (n_burned_daq_file_cl == -1)) 
   {
-    printf("FCFMaker: No data available\n");
+    printf("<FCFMaker::Make> No data available\n");
   }
   else if((n_burned_croat_cl >= 0) &&
 	  (n_burned_daq_file_cl == -1)) 
   {
-    printf("FCFMaker: Only raw data available.  No daq file clusters\n");
+    printf("<FCFMaker::Make> Only raw data available.  No daq file clusters\n");
   }
   else if((n_burned_croat_cl == -1) &&
 	  (n_burned_daq_file_cl >= 0)) 
   {
-    printf("FCFMaker: Only daq file clusters available.  No raw data\n");
+    printf("<FCFMaker::Make> Only daq file clusters available.  No raw data\n");
   }
   else 
   {
@@ -630,7 +633,7 @@ Int_t StRTSClientFCFMaker::BuildCPP(int nrows, raw_row_st *row, raw_pad_st *pad,
   }
 
   if(offset == -1) {	// Huh?
-	  	gMessMgr->Error() << "Offset not updated???" << endm ;
+	  	gMessMgr->Error() << "<StRTSClientFCFMaker::BuildCPP> Offset not updated???" << endm ;
   }
 
   return offset;
@@ -1440,11 +1443,11 @@ int StRTSClientFCFMaker::build_croat_clusters()
       int sz2;	
 
       sz2 = BuildCPP(Trow_in->GetNRows(), row_in, pad_in, seq_in, sectorIdx);
-      if(sz2 == -1) printf("No data for sector %d, inner\n", sectorIdx);
+      if(sz2 == -1) printf("<StRTSClientFCFMaker::build_croat_clusters> No data for sector %d, inner\n", sectorIdx);
       else sz += sz2;
 
       sz2 = BuildCPP(Trow_out->GetNRows(), row_out, pad_out, seq_out, sectorIdx);
-      if(sz2 == -1) printf("No data for sector %d, outer\n", sectorIdx);
+      if(sz2 == -1) printf("<StRTSClientFCFMaker::build_croat_clusters> No data for sector %d, outer\n", sectorIdx);
       else sz += sz2;
     }
 
