@@ -24,6 +24,16 @@
 class St_DataSetIter;
 class TBrowser;
 
+//----- dataset flags
+enum ESetBits {
+     kMark        = BIT(22)   // if object is marked
+};
+
+enum EBitOpt { 
+               kSet   = kTRUE,
+               kReset = kFALSE
+             };
+
 // The control codes to navigate the St_DataSet structure via St_DataSet::Pass method
 
 typedef enum {
@@ -92,6 +102,8 @@ class St_DataSet : public TNamed
     virtual St_DataSet  *Last() const;
     virtual void         ls(Option_t *option="")  const;      // Option "*" means print all levels
     virtual void         ls(Int_t depth)  const;              // Print the "depth" levels of this datatset
+    virtual void         Mark();                              // *MENU*
+    virtual void         Mark(UInt_t flag,EBitOpt reset=kSet);
     virtual void         Update();                            // Update dataset
     virtual void         Update(St_DataSet *set,UInt_t opt=0);// Update this dataset with the new one
     ClassDef(St_DataSet,1)
