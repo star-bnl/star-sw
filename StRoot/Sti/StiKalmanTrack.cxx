@@ -1,3 +1,17 @@
+//StiKalmanTrack.cxx
+/*
+ * $Id: StiKalmanTrack.cxx,v 2.11 2003/03/04 15:16:22 andrewar Exp $
+ *
+ * /author Claude Pruneau
+ *
+ * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.11  2003/03/04 15:16:22  andrewar
+ * Added getTrackRadLength function to return radiation thickness along track (%).
+ *
+ */
+
+
+
 //Std
 #include <stdexcept>
 #include <math.h>
@@ -16,6 +30,7 @@
 #include "StiKTNIterator.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
+#include "StiMaterial.h"
 
 ostream& operator<<(ostream&, const StiHit&);
 
@@ -381,7 +396,7 @@ int StiKalmanTrack::getPointCount() const
 		  for (it=begin();it!=end();it++)
 		    {
 		      if ((*it).getHit())
-						nPts++;
+			    nPts++;
 		    }
 		}
 	return nPts;
@@ -500,6 +515,125 @@ double StiKalmanTrack::getTrackLength() const
   return sqrt(dz*dz+s*s);
 }
 
+
+/*! Calculate and return the track segment length between two nodes.
+  <h3>Notes</h3>
+  <ol>
+  <li>This is basically a wrapper for the StiKalmanTrackNode::pathLToNode function.</li>
+  </ol>
+  \return length
+ */
+//  inline double StiKalmanTrack::calculateTrackSegmentLength(const StiKalmanTrackNode &p1, const StiKalmanTrackNode &p2) const
+//  {
+//    return p1.pathLToNode(&p2);
+//  }
+
+/*! Calculates the radiation length of material crossed by the track.
+
+ */
+double StiKalmanTrack::getTrackRadLength() const
+{
+
+
+  double x1, x2, x3;  //lengths in different media
+  double r1, r2, r3;  //media radiation lengths
+  double d1, d2, d3;  //media densities
+  double x0_1, x0_2, x0_3;
+  bool mat1, mat2;    //type of material at Node
+
+  double totalR=0.;
+
+  StiKTNBidirectionalIterator tNode = begin();
+
+  //set initial conditions for tNode, the 'current' node;
+  //will also need 'nextNode', ie node which is next 
+  StiKalmanTrackNode *thisNode = &(*tNode);
+
+  x1=thisNode->pathlength()/2.; 
+  x3=0.;
+  x0_1 =  thisNode->getDetector()->getGas()->getX0();
+//    r1 = thisNode->getDetector()->getGas()->getRadLength();
+//    d1 = thisNode->getDetector()->getGas()->getDensity();
+  mat1=thisNode->getDetector()->isContinuousMedium();
+  while ((tNode++)!=end() && (*tNode).getDetector())
+    {
+
+      StiKalmanTrackNode *nextNode = &(*(tNode)); //incrimented tNode
+    
+      //cout <<"getTrackRadLength: In Detector: "<<thisNode->getDetector()->getName() << endl;
+      //cout <<"getTrackRadLength: Next Detector: "<<nextNode->getDetector()->getName() << endl;
+
+      x2=thisNode->pathLToNode(nextNode); 
+      //cout <<"X2: "<<x2<<endl;
+      x3=nextNode->pathlength()/2.;
+
+      if(x3==-1.) continue;  
+      //if there is an error with this node, go to next node
+      //without updating current node. This should provide
+      //function thisNode=thisNode, nextNode=new node
+
+      if (x2> (x1+x3)) 
+	{x2 = x2 - x1 - x3;} //x2 is now the gap distance
+      else {x2=0.;}
+
+      cout <<"getTrackRadLength: X's: "<<x1<<" "<<x2<<" "<<x3<<endl;
+
+      mat2=nextNode->getDetector()->isContinuousMedium();
+
+      if(mat1 && mat2)
+	{ //both TPC points, rad length same for each node
+	  totalR += (x1+x2+x3)/(x0_1);   //this could be streamlined a bit
+	}
+      else if(mat1 && !mat2)
+	{
+//        	  r2 = ((nextNode->getDetector())->getGas())->getRadLength();
+//  	  d2 = ((nextNode->getDetector())->getGas())->getDensity();
+//  	  r3 = ((nextNode->getDetector())->getMaterial())->getRadLength();
+//  	  d3 = ((nextNode->getDetector())->getMaterial())->getDensity();
+	  x0_2 = ((nextNode->getDetector())->getGas())->getX0();
+	  x0_3 = ((nextNode->getDetector())->getMaterial())->getX0();
+	  totalR +=x1/(x0_1)+x2/(x0_2)+x3/(x0_3);
+	}
+      else if(!mat1 && mat2)
+	{ //going from discrete to continuous, ie Tpc->IFC
+	  r2 = r1;
+	  x0_2=x0_1;
+//  	  r1 = ((thisNode->getDetector())->getMaterial())->getRadLength();
+//  	  r3 = ((nextNode->getDetector())->getGas())->getRadLength();
+//  	  d1 = ((thisNode->getDetector())->getMaterial())->getDensity();
+//  	  d3 = ((nextNode->getDetector())->getGas())->getDensity();
+	  x0_1=((thisNode->getDetector())->getMaterial())->getX0();
+	  x0_3=((nextNode->getDetector())->getGas())->getX0();
+	  totalR += x1/(x0_1)+x2/(x0_2)+x3/(x0_3);
+	}
+      else
+	{//discrete to discrete? SVT->IFC? (or SVT->SVT)
+	  r2 = r1;
+	  x0_2 = x0_1;
+//  	  r1 = ((thisNode->getDetector())->getMaterial())->getRadLength();
+//  	  r3 = ((nextNode->getDetector())->getMaterial())->getRadLength();
+//  	  d1 = ((thisNode->getDetector())->getMaterial())->getDensity();
+//  	  d3 = ((nextNode->getDetector())->getMaterial())->getDensity();
+	  x0_1 = ((thisNode->getDetector())->getMaterial())->getX0();
+	  x0_3 = ((nextNode->getDetector())->getMaterial())->getX0();
+	  totalR +=x1/(x0_1)+x2/(x0_2)+x3/(x0_3);
+	}//end if over material types
+
+      cout <<"Rad lengths:"<<x0_1<<" "<<x0_2<<" "<<x0_3<<endl;
+
+      //cache nextNode for next iteration...
+      thisNode = nextNode;
+      x1       = x3;
+      x0_1     = x0_3;
+      mat1     = mat2;
+
+    }
+
+  cout <<"Rad Length: "<<totalR;
+  return totalR;
+
+}
+
 /*! Return the inner most hit associated with this track.
    <h3>Notes</h3>
    <ol>
@@ -545,6 +679,7 @@ StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode()  const
    </ol>
 	 \return outer most hit node on this track
 */
+
 StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
 {
   if (firstNode==0 || lastNode==0)
