@@ -70,66 +70,35 @@ void HistoDocument::generateHistoEntry(const string & dir, TH1*histo)
 
 void HistoDocument::generateHistoEntry(const string & dir, TH1*histo1, TH1*histo2, int mode)
 {
-  /*  if (mode==0)
-    {
-      histo1->Draw(); 
-      histo2->Draw("SAME");
-      string heading = histo1->GetTitle();
-      heading += " vs ";
-      heading += histo2->GetTitle();
-      addHeading("2",heading);
-      string histoName = histo1->GetName(); 
-      histoName += " vs ";
-      histoName += histo2->GetName(); 
-      string fileNameEps = saveHistoAsEpsFile(dir,histoName);
-      string fileNameGif = saveHistoAsGifFile(dir,histoName);
-      string fileNameTable = saveHistoAsTableFile(dir,histo);
-      HtmlList * list = new HtmlList();
-      add(list);
-      HtmlListItem * item = new HtmlListItem();
-      item->add(new HtmlAnchor(fileNameGif,"Histo GIF Format"));
-      list->add(item); 
-      item = new HtmlListItem();
-      item->add(new HtmlAnchor(fileNameEps,"Histo EPS Format"));
-      list->add(item); 
-      item = new HtmlListItem();
-      item->add(new HtmlAnchor(fileNameTable,"Histo Table Format"));
-      list->add(item);
-      add(new HtmlImage(fileNameGif));
-    }
-  else
-    {
-      string heading = histo1->GetTitle();
-      heading += " vs ";
-      heading += histo2->GetTitle();
-      addHeading("2",heading);
-      histo1->Draw(); 
-      string histoName1 = histo1->GetName(); 
-      string fileNameEps1 = saveHistoAsEpsFile(dir,histoName1);
-      string fileNameGif1 = saveHistoAsGifFile(dir,histoName1);
-      string fileNameTable2 = saveHistoAsTableFile(dir,histo1);
-      string histoName2 = histo2->GetName(); 
-      string fileNameEps2 = saveHistoAsEpsFile(dir,histoName2);
-      string fileNameGif2 = saveHistoAsGifFile(dir,histoName2);
-      string fileNameTable2 = saveHistoAsTableFile(dir,histo2);
-      HtmlList * list = new HtmlList();
-      add(list);
-      HtmlListItem * item;
-      item = new HtmlListItem();
-      item->add(new HtmlAnchor(fileNameGif1,"Histo GIF Format"));  list->add(item); 
-      item = new HtmlListItem();
-      item->add(new HtmlAnchor(fileNameEps1,"Histo EPS Format"));  list->add(item); 
-      item = new HtmlListItem();
-      item->add(new HtmlAnchor(fileNameTable1,"Histo Table Format")); list->add(item);
-      item = new HtmlListItem();
-      item->add(new HtmlAnchor(fileNameGif2,"Histo GIF Format"));  list->add(item); 
-      item = new HtmlListItem();
-      item->add(new HtmlAnchor(fileNameEps2,"Histo EPS Format"));  list->add(item); 
-      item = new HtmlListItem();
-      item->add(new HtmlAnchor(fileNameTable2,"Histo Table Format")); list->add(item);
-      add(new HtmlImage(fileNameGif1));
-      add(new HtmlImage(fileNameGif1));
-      }*/
+  histo1->SetLineColor(2); //red
+  histo2->SetLineColor(4); //blue
+  histo1->Draw(); 
+  histo2->Draw("SAME");
+  string heading = histo1->GetTitle();
+  heading += " vs ";
+  heading += histo2->GetTitle();
+  addHeading("2",heading);
+  string histoName = histo1->GetName(); 
+  histoName += "Vs";
+  histoName += histo2->GetName(); 
+  string fileNameEps = saveHistoAsEpsFile(dir,histoName);
+  string fileNameGif = saveHistoAsGifFile(dir,histoName);
+  string fileNameTable1 = saveHistoAsTableFile(dir,histo1);
+  string fileNameTable2 = saveHistoAsTableFile(dir,histo2);
+  HtmlList * list = new HtmlList();
+  add(list);
+  HtmlListItem * item = new HtmlListItem();
+  item->add(new HtmlAnchor(fileNameGif,"Histo GIF Format"));
+  list->add(item); 
+  item = new HtmlListItem();
+  item->add(new HtmlAnchor(fileNameEps,"Histo EPS Format"));
+  list->add(item); 
+  item = new HtmlListItem();
+  item->add(new HtmlAnchor(fileNameTable1,"Histo Table Format"));
+  list->add(item);
+  item->add(new HtmlAnchor(fileNameTable2,"Histo Table Format"));
+  list->add(item);
+  add(new HtmlImage(fileNameGif));
 }
 
 const string HistoDocument::saveHistoAsEpsFile(const string & dir, const string& histoName)
@@ -176,6 +145,6 @@ const string HistoDocument::saveHistoAsTableFile(const string & dir, TH1*histo)
       cell->add(valueS);
     }
   doc->save();
-  return histoName+"_table.htm";
+  return histoName+"_table.html";
 }
 
