@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.cxx,v 2.1 2003/04/16 17:47:41 ullrich Exp $
+ * $Id: StTriggerData2003.cxx,v 2.2 2003/05/21 03:58:44 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.cxx,v $
+ * Revision 2.2  2003/05/21 03:58:44  ullrich
+ * Added more methods to retrieve spin bits.
+ *
  * Revision 2.1  2003/04/16 17:47:41  ullrich
  * Initial Revision.
  *
@@ -70,6 +73,21 @@ unsigned int StTriggerData2003::numberOfPostXing() const
     return mData->EvtDesc.npost;
 }
 
+unsigned short StTriggerData2003::tcuBits() const
+{
+    return mData->EvtDesc.DSMInput;
+}
+
+unsigned int StTriggerData2003::bunchCounterHigh() const
+{
+    return mData->EvtDesc.bunchXing_hi;
+}
+
+unsigned int StTriggerData2003::bunchCounterLow() const
+{
+    return mData->EvtDesc.bunchXing_lo;
+}
+
 unsigned int StTriggerData2003::bunchId48Bit() const
 {
     unsigned long long bxinghi,bxing1,bxinglo, bx;
@@ -82,23 +100,63 @@ unsigned int StTriggerData2003::bunchId48Bit() const
 
 unsigned int StTriggerData2003::bunchId7Bit() const
 {
-    int i, b7=0, b7dat, ibits=6; 
+    int b7=0, b7dat; 
     b7dat = mData->TrgSum.DSMdata.BCdata[2];
-    for (i=0; i<7; i++) {
-	b7 += (!((b7dat>>(ibits-i)) & 0x1) << (i)) & 0x7f;
-    }
+    b7 = b7dat & 0x7f;
     return b7;
 }
 
 unsigned int StTriggerData2003::spinBit() const
 {
-    int ldsm0,spin1,spin2,spin3,spin4;
-    ldsm0 = mData->TrgSum.DSMdata.lastDSM[0];
-    spin1 = (ldsm0>>8) & 0x1;
-    spin2 = (ldsm0>>9) & 0x1;
-    spin3 = (ldsm0>>10) & 0x1;
-    spin4 = (ldsm0>>11) & 0x1;
-    return spin1+spin2*2+spin3*4+spin4*8;
+  return (mData->TrgSum.DSMdata.lastDSM[7]/16)%256;
+}
+
+unsigned int StTriggerData2003::spinBitYellowFilled() const
+{
+  unsigned int sb = spinBit();
+  return sb%2;
+}
+
+unsigned int StTriggerData2003::spinBitYellowUp() const
+{
+  unsigned int sb = spinBit();
+  return (sb/2)%2;
+}
+
+unsigned int StTriggerData2003::spinBitYellowDown() const
+{
+  unsigned int sb = spinBit();
+  return (sb/4)%2;
+}
+
+unsigned int StTriggerData2003::spinBitYellowUnpol() const
+{
+  unsigned int sb = spinBit();
+  return (sb/8)%2;
+}
+
+unsigned int StTriggerData2003::spinBitBlueFilled() const
+{
+  unsigned int sb = spinBit();
+  return (sb/16)%2;
+}
+
+unsigned int StTriggerData2003::spinBitBlueUp() const
+{
+  unsigned int sb = spinBit();
+  return (sb/32)%2;
+}
+
+unsigned int StTriggerData2003::spinBitBlueDown() const
+{
+  unsigned int sb = spinBit();
+  return (sb/64)%2;
+}
+
+unsigned int StTriggerData2003::spinBitBlueUnpol() const
+{
+  unsigned int sb = spinBit();
+  return (sb/128)%2;
 }
 
 unsigned short  StTriggerData2003::ctb(int pmt, int prepost=0) const
@@ -216,39 +274,39 @@ unsigned short StTriggerData2003::fpd(int eastwest, int module, int pmt, int pre
 	//East
 	{
 	    //East North
-	    {  7,   6,  23,  22,  39,  38, 55, 
-	       5,   4,  21,  20,  37,  36, 54,
-	       3,   2,  19,  18,  35,  34, 53,
-	       1,   0,  17,  16,  33,  32, 52,
-	       15,  14,  31,  30,  47,  46, 51, 
-	       13,  12,  29,  28,  45,  44, 50, 
-	       11,  10,  27,  26,  43,  42, 49},
+	    {39, 38, 37, 36, 35, 34, 33,
+	      7,  6,  5, 23, 22, 21, 55,
+	      4,  3,  2, 20, 19, 18, 54,
+	      1,  0, 15, 17, 16, 31, 53,
+	     14, 13, 12, 30, 29, 28, 52,
+	     11, 10,  9, 27, 26, 25, 51,
+	     32, 47, 46, 45, 44, 43, 42},
 	    //East South
-	    { 71,  70,  87,  86, 103, 102, 48, 
-	      69,  68,  85,  84, 101, 100, 63,
-	      67,  66,  83,  82,  99,  98, 62,
-	      65,  64,  81,  80,  97,  96, 61,
-	      79,  78 , 95,  94, 111, 110, 60,
-	      77,  76,  93,  92, 109, 108, 59,
-	      75,  74,  91,  90, 107, 106, 58},
+	    { 103,101,100, 99,  98,  97, 96,
+	       71, 70, 69, 87,  86,  85, 48,
+	       68, 67, 66, 84,  83,  82, 63,
+	       65, 64, 79, 81,  80,  95, 61,
+	       78, 77 ,76, 94,  93,  92, 60,
+	       75, 74, 73, 91,  90,  89, 59,
+	      111,110,109,108, 107, 106,105},
 	    //East Top
-	    {135, 134, 133, 132, 131, 130, 129, 
-	     128, 143, 142, 119, 118, 117, 116, 
-	     115, 114, 113, 112, 127, 126, 125, 
-	     124, 123, 122, 121,  -1,  -1,  -1,
+	    {135, 134, 133, 132, 131, 130, 129, 128, 143, 142,
+	     119, 118, 117, 116, 115, 114, 113, 112,
+	     127, 126, 125, 124, 123, 122, 121,
+	     -1,  -1,  -1,
 	     -1,  -1,  -1,  -1,  -1,  -1,  -1,  
 	     -1,  -1,  -1,  -1,  -1,  -1,  -1,  
 	     -1,  -1,  -1,  -1,  -1,  -1,  -1},
 	    //East Bottom
-	    {167, 166, 165, 164, 163, 162, 161, 
-	     160, 175, 174, 151, 150, 149, 148, 
-	     147, 146, 145, 144, 159, 158, 157, 
-	     156, 155, 154, 153,  -1,  -1,  -1,
+	    {151, 150, 149, 148, 147, 146, 145, 144,
+	     159, 158, 157, 156, 155, 154, 153,
+	     167, 166, 165, 164, 163, 162, 161, 160, 175, 174,
+	     -1,  -1,  -1,
 	     -1,  -1,  -1,  -1,  -1,  -1,  -1,
 	     -1,  -1,  -1,  -1,  -1,  -1,  -1,
 	     -1,  -1,  -1,  -1,  -1,  -1,  -1},
 	    //East North PreShower
-	    {  9,   8,  25,  24,  41,  40,  57,
+	    {  50, 49, 141, 140, 139, 138, 137,
 	       -1,  -1,  -1,  -1,  -1,  -1,  -1,
 	       -1,  -1,  -1,  -1,  -1,  -1,  -1,
 	       -1,  -1,  -1,  -1,  -1,  -1,  -1,
@@ -256,7 +314,7 @@ unsigned short StTriggerData2003::fpd(int eastwest, int module, int pmt, int pre
 	       -1,  -1,  -1,  -1,  -1,  -1,  -1,
 	       -1,  -1,  -1,  -1,  -1,  -1,  -1},
 	    //East South PreShower
-	    { 73,  72,  89,  88, 105, 104,  56,
+	    { 58, 57, 173, 172, 171, 170, 169,
 	      -1,  -1,  -1,  -1,  -1,  -1,  -1,
 	      -1,  -1,  -1,  -1,  -1,  -1,  -1,
 	      -1,  -1,  -1,  -1,  -1,  -1,  -1,
@@ -267,39 +325,41 @@ unsigned short StTriggerData2003::fpd(int eastwest, int module, int pmt, int pre
 	//West
 	{
 	    //West North
-	    {  7,   6,  23,  22,  39,  38, 55, 
-	       5,   4,  21,  20,  37,  36, 54,
-	       3,   2,  19,  18,  35,  34, 53,
-	       1,   0,  17,  16,  33,  32, 52,
-	       15,  14,  31,  30,  47,  46, 51, 
-	       13,  12,  29,  28,  45,  44, 50, 
-	       11,  10,  27,  26,  43,  42, 49},
+	    {  -1, -1, -1, -1,  -1,  -1, -1,
+	       -1, -1, -1, -1,  -1,  -1, -1,
+	       -1, -1, -1, -1,  -1,  -1, -1,
+	       -1, -1, -1, -1,  -1,  -1, -1,
+	       -1, -1, -1, -1,  -1,  -1, -1,
+	       -1, -1, -1, -1,  -1,  -1, -1,
+	       -1, -1, -1, -1,  -1,  -1, -1},
 	    //West South
-	    { 71,  70,  87,  86, 103, 102, 48, 
-	      69,  68,  85,  84, 101, 100, 63,
-	      67,  66,  83,  82,  99,  98, 62,
-	      65,  64,  81,  80,  97,  96, 61,
-	      79,  78 , 95,  94, 111, 110, 60,
-	      77,  76,  93,  92, 109, 108, 59,
-	      75,  74,  91,  90, 107, 106, 58},
+	    {  7,  6, 25, 22, 41, 38, 48,
+	       5,  4, 21, 20, 37, 36, 54,
+	       3,  2, 19, 18, 35, 34, 53,
+	       1,  0, 17, 16, 33, 32, 52,
+	       15, 14, 31, 30, 47, 46, 51,
+	       13, 12, 29, 28, 45, 44, 50,
+	       9, 10, 27, 26, 43, 42, 49},
 	    //West Top
-	    {135, 134, 133, 132, 131, 130, 129, 
-	     128, 143, 142, 119, 118, 117, 116, 
-	     115, 114, 113, 112, 127, 126, 125, 
-	     124, 123, 122, 121,  -1,  -1,  -1,
-	     -1,  -1,  -1,  -1,  -1,  -1,  -1,  
-	     -1,  -1,  -1,  -1,  -1,  -1,  -1,  
-	     -1,  -1,  -1,  -1,  -1,  -1,  -1},
+	    {  -1, -1, -1, -1,  -1,  -1, -1,
+               -1, -1, -1, -1,  -1,  -1, -1,
+               -1, -1, -1, -1,  -1,  -1, -1,
+               -1, -1, -1, -1,  -1,  -1, -1,
+               -1, -1, -1, -1,  -1,  -1, -1,
+               -1, -1, -1, -1,  -1,  -1, -1,
+               -1, -1, -1, -1,  -1,  -1, -1},
 	    //West Bottom
-	    {167, 166, 165, 164, 163, 162, 161, 
-	     160, 175, 174, 151, 150, 149, 148, 
-	     147, 146, 145, 144, 159, 158, 157, 
-	     156, 155, 154, 153,  -1,  -1,  -1,
+	    {77, 70, 69, 68, 67,
+	     66, 65, 64, 79, 78,
+	     87, 86, 85, 84, 83,
+	     82, 81, 80, 95, 94,
+	     93, 76, 91, 90, 89,
+	     -1,  -1,  -1,
 	     -1,  -1,  -1,  -1,  -1,  -1,  -1,
 	     -1,  -1,  -1,  -1,  -1,  -1,  -1,
 	     -1,  -1,  -1,  -1,  -1,  -1,  -1},
 	    //West North PreShower
-	    {  9,   8,  25,  24,  41,  40,  57,
+	    {  -1,  -1,  -1,  -1,  -1,  -1,  -1,
 	       -1,  -1,  -1,  -1,  -1,  -1,  -1,
 	       -1,  -1,  -1,  -1,  -1,  -1,  -1,
 	       -1,  -1,  -1,  -1,  -1,  -1,  -1,
@@ -307,7 +367,7 @@ unsigned short StTriggerData2003::fpd(int eastwest, int module, int pmt, int pre
 	       -1,  -1,  -1,  -1,  -1,  -1,  -1,
 	       -1,  -1,  -1,  -1,  -1,  -1,  -1},
 	    //West South PreShower
-	    { 73,  72,  89,  88, 105, 104,  56,
+	    { 63,  62,  61,  60,  59,  58,  -1,
 	      -1,  -1,  -1,  -1,  -1,  -1,  -1,
 	      -1,  -1,  -1,  -1,  -1,  -1,  -1,
 	      -1,  -1,  -1,  -1,  -1,  -1,  -1,
@@ -317,14 +377,18 @@ unsigned short StTriggerData2003::fpd(int eastwest, int module, int pmt, int pre
 	}
     };
     int address = fpdmap[eastwest][module][pmt-1];
-    if(eastwest==0){
+    if(address>=0){
+      if(eastwest==0){
 	if(address<112) return mData->rawTriggerDet[prepostAddress(prepost)].FPDEastNSLayer0[address];
 	else            return mData->rawTriggerDet[prepostAddress(prepost)].FPDEastTBLayer0[address-112];
-    }else{
+      }else{
 	if(address<112) return mData->rawTriggerDet[prepostAddress(prepost)].FPDWestNSLayer0[address];
 	else            return mData->rawTriggerDet[prepostAddress(prepost)].FPDWestTBLayer0[address-112];
-    }
-}      
+      }
+    }else{
+      return 0;
+   }
+}
 
 unsigned short StTriggerData2003::fpdSum(int eastwest, int module) const
 {
@@ -339,8 +403,12 @@ void StTriggerData2003::dump() const
     printf(" Year=%d  Version=%x\n",year(),version());
     printf(" %d pre and %d post crossing data available\n",numberOfPreXing(),numberOfPostXing());
     printf(" Token=%d  TriggerWord=%x  ActionWord=%x  BusyStatus=%x\n",
-	   token(), triggerWord(), actionWord(), busyStatus());
-    printf(" BunchId 7bit=%d  48bit=%d  SpinBits=%d\n",bunchId7Bit(), bunchId48Bit(), spinBit());  
+	   token(), triggerWord(), actionWord(), busyStatus());    
+    printf(" TUC Bits=%d  : ",tcuBits());
+    for(int i=0; i<16; i++) {printf(" %d",(tcuBits()>>(15-i))%2);}; printf("\n");
+    printf(" BunchId 7bit=%d  48bit=%d\n",bunchId7Bit(), bunchId48Bit());  
+    printf(" Spin Bits=%d  : ",spinBit());
+    for(int i=0; i<8; i++) {printf(" %d",(spinBit()>>(7-i))%2);}; printf("\n");
     printf(" CTB ADC : ");       for(int i=0; i<240;i++){ printf("%d ",ctb(i,0));      }; printf("\n");
     printf(" MWC ADC : ");       for(int i=0; i<96; i++){ printf("%d ",mwc(i,0));      }; printf("\n");
     printf(" BBC East ADC : ");  for(int i=1; i<=24;i++){ printf("%d ",bbcADC(0,i,0)); }; printf("\n");

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.h,v 2.1 2003/04/16 17:47:41 ullrich Exp $
+ * $Id: StTriggerData2003.h,v 2.2 2003/05/21 03:58:44 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.h,v $
+ * Revision 2.2  2003/05/21 03:58:44  ullrich
+ * Added more methods to retrieve spin bits.
+ *
  * Revision 2.1  2003/04/16 17:47:41  ullrich
  * Initial Revision.
  *
@@ -39,10 +42,23 @@ public:
     unsigned int token() const;
     unsigned int triggerWord() const;
     unsigned int actionWord() const;      
+    unsigned int bunchCounterHigh() const;
+    unsigned int bunchCounterLow() const;
     unsigned int bunchId48Bit() const;
     unsigned int bunchId7Bit() const;
     unsigned int spinBit() const;
+    unsigned int spinBitYellowFilled() const;
+    unsigned int spinBitYellowUp() const;
+    unsigned int spinBitYellowDown() const;
+    unsigned int spinBitYellowUnpol() const;
+    unsigned int spinBitBlueFilled() const;
+    unsigned int spinBitBlueUp() const;
+    unsigned int spinBitBlueDown() const;
+    unsigned int spinBitBlueUnpol() const;
         
+    // High Level Trigger info
+    unsigned short tcuBits() const;
+    
     // CTB
     unsigned short ctb(int pmt, int prepost=0) const;
     
