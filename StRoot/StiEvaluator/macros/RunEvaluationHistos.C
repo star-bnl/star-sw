@@ -21,8 +21,9 @@ void RunEvaluationHistos(const char *MainFile= "/star/data22/ITTF/EvalData/MCNtu
     if (filename.Contains("minimc")) {
 	int preIndex = filename.Index("minimc",0);
 	filename.Remove(preIndex,7); //remove minimc
-	int fileBeginIndex = filename.Index("EvalItTest",0);
-	filename.Remove(0,fileBeginIndex);
+// 	int fileBeginIndex = filename.Index("EvalItTest",0);
+	int fileBeginIndex = filename.Last('/');
+	filename.Remove(0,fileBeginIndex+1);
     }
     filename.Prepend("rawHistos");
     filename.Prepend(outDir);
