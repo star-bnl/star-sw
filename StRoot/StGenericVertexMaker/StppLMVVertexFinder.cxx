@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.6 2004/08/05 22:08:04 balewski Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.7 2004/08/06 04:49:14 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -47,7 +47,7 @@ StppLMVVertexFinder::StppLMVVertexFinder() {
     mMinNumberOfFitPointsOnTrack = 15; // was 10 
     mMaxZrange=70; // for tracks
     mDVtxMax=4.0;  // max sigma multipl between tracks and current vertex, used for tracks rejection
-    mMinMatchTr=1; // minimal # of tracks matched to CTB // was 1
+    mMinMatchTr=2; // minimal # of tracks matched to CTB // was 1
     mBLequivNtr=20; // equivalent # of tracks for BeamLine
     mMatchCtbMax_eta=mCtbEtaSeg/2.+0.02;
     mMatchCtbMax_phi=mCtbPhiSeg/2.+C_PI*0./180.;
@@ -88,7 +88,7 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
   setFlagBase(); // what is that ? JB
   changeCuts();
 
-  gMessMgr->Message("","I") << "ppLMV::cuts"
+  gMessMgr->Message("","I") << "ppLMV5::cuts"
 			    <<"\n CtbThres_ch (real)="<<mCtbThres_ch
     			    <<"\n CtbThres_mev (M-C)="<<mCtbThres_mev
 			    <<"\n MinNumberOfFitPointsOnTrack="<<mMinNumberOfFitPointsOnTrack
@@ -546,7 +546,7 @@ void  StppLMVVertexFinder::changeCuts(){
   StGenericVertexMaker *mk=(StGenericVertexMaker *)mDumMaker->GetMaker("GenericVertex");
   int mode2=mk->GetMode2();
 
-  printf("ccc m_mode2='%c'\n",mode2);
+  printf("ccc m_mode2=%d\n",mode2);
   switch(mode2) {
   case 'a': mMaxTrkDcaRxy=1.5; break;
   case 'b': mMaxTrkDcaRxy=2.5; break;
@@ -568,6 +568,9 @@ void  StppLMVVertexFinder::changeCuts(){
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.7  2004/08/06 04:49:14  balewski
+ * that would be it
+ *
  * Revision 1.6  2004/08/05 22:08:04  balewski
  * toward working point
  *
