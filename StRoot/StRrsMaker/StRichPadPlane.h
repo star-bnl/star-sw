@@ -1,11 +1,15 @@
 /*****************************************************************
- * $Id: StRichPadPlane.h,v 1.2 2000/01/25 22:02:21 lasiuk Exp $   
+ * $Id: StRichPadPlane.h,v 1.3 2000/01/26 23:39:20 lasiuk Exp $   
  *   StRichPadPlane is a special container specialized to store 
  *   RICH Raw Data. 
  *
  * $Log: StRichPadPlane.h,v $
- * Revision 1.2  2000/01/25 22:02:21  lasiuk
- * Second Revision
+ * Revision 1.3  2000/01/26 23:39:20  lasiuk
+ * Forward declaration of classes to bypass CINT evaluation
+ * comment the list data member in StRichID
+ *
+ * Revision 1.4  2000/02/08 16:36:45  lasiuk
+ * Bring into line with HP
  *
  * Revision 1.3  2000/01/26 23:39:20  lasiuk
  * Forward declaration of classes to bypass CINT evaluation
@@ -51,7 +55,7 @@ typedef list<StRichID>        anIDList;
 #else
 typedef list<StRichID, allocator<StRichID> >           anIDList;
 #endif
-    anIDList IDs;
+
 struct StRichPad {
     StRichPad()
 	: signal(0), IDs() {/* nopt */}
