@@ -1,0 +1,19 @@
+//:Copyright 1995, Lawrence Berkeley National Laboratory
+//:>--------------------------------------------------------------------
+//:FILE:	pam.idl
+//:DESCRIPTION:	amiModule Interface Orbix-objects
+//:AUTHOR:	cet - Craig E. Tull, cetull@lbl.gov
+//:BUGS:	-- STILL IN DEVELOPMENT --
+//:HISTORY:	31may96-v000a-cet- creation
+//:<--------------------------------------------------------------------
+
+//:----------------------------------------------- INCLUDES           --
+
+//:----------------------------------------------- TYPEDEFS           --
+// STAR Analysis Framework Condition Value
+typedef long STAFCV_T;
+
+//:=============================================== INTERFACE          ==
+interface amiModule {
+};
+
