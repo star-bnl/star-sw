@@ -6,6 +6,7 @@
 #include "TKey.h"
 #include "TIterator.h"
 #include "TFile.h"
+#include "TTree.h"
 #include "TSystem.h"
 #include "TF1.h"
 #include "TCanvas.h"
@@ -77,6 +78,8 @@ CSMBuildRunMap::buildRunMap(const Char_t *directory, const Char_t* filter) {
 //    }
 //  }
 
+  Int_t runDate, runTime, minirunDate, minirunTime;
+  Float_t runFillNumber, minirunFillNumber;
   for (std::map<Int_t,set<string> >::const_iterator iter = runFileMap.begin();
         iter != runFileMap.end(); ++iter) {
     cout << "Creating status histogram for run " << iter->first << endl;
@@ -86,6 +89,13 @@ CSMBuildRunMap::buildRunMap(const Char_t *directory, const Char_t* filter) {
     sprintf(tempola,"/run%d.cal.total.hist.root",iter->first);
     strcat(buffer,tempola);
     TFile* outFile = new TFile(buffer,"RECREATE");
+    TTree* runTree = new TTree("calinfo","Extraneous Information");
+    runTree->Branch("fillnum",&runFillNumber,"fillnum/F");
+    runTree->Branch("thedate",&runDate,"thedate/I");
+    runTree->Branch("thetime",&runTime,"thetime/I");
+    runDate = 99999999;
+    runTime = 999999;
+    runFillNumber = 0;
     sprintf(buffer,"bemcStatusAdc_%d",iter->first);
     string BEMChistName(buffer);
     sprintf(buffer,"bemcStatusEnergy_%d",iter->first);
@@ -103,6 +113,22 @@ CSMBuildRunMap::buildRunMap(const Char_t *directory, const Char_t* filter) {
           filenames != iter->second.end(); ++filenames) {
       TFile *file = new TFile(filenames->c_str(),"READ");
       if (file->IsOpen()) {
+        TTree* minirunTree = dynamic_cast<TTree*>(file->Get("calinfo"));
+        if(minirunTree) {
+          minirunTree->SetBranchAddress("thedate",&minirunDate);
+          minirunTree->SetBranchAddress("thetime",&minirunTime);
+          minirunTree->SetBranchAddress("fillnum",&minirunFillNumber);
+          minirunTree->GetEvent(0);
+        } else {
+          assert(minirunTree);  //uh, where's the tree?
+        }
+        if(runDate > minirunDate) {
+          runDate = minirunDate;
+          runTime = minirunTime;
+        } else if(runDate == minirunDate && runTime > minirunTime) {
+          runTime = minirunTime;
+        }
+        runFillNumber = minirunFillNumber;
 	      TH2F* BEMChist = dynamic_cast<TH2F*>(file->Get(BEMChistName.c_str()));
 	      if (BEMChist) {
 	        if (!myBEMCRunHist) {
@@ -156,6 +182,9 @@ CSMBuildRunMap::buildRunMap(const Char_t *directory, const Char_t* filter) {
       file->Close();
       delete file;
     }
+    runTree->Fill();
+    myBEMCRunHist->Write();
+    myEEMCRunHist->Write();
     outFile->Write();
     outFile->Close();
     delete outFile;
