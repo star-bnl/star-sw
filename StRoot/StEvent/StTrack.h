@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.1 1999/10/28 22:27:24 ullrich Exp $
+ * $Id: StTrack.h,v 2.2 1999/11/01 12:45:06 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
- * Revision 2.1  1999/10/28 22:27:24  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.2  1999/11/01 12:45:06  ullrich
+ * Modified unpacking of point counter
  *
  * Revision 2.6  1999/11/29 17:32:45  ullrich
  * Added non-const method pidTraits().
@@ -53,6 +53,7 @@ class StTrackPidTraits;
 class StTrackNode;
 
 class StTrack : public StObject {
+public:
     StTrack();
     StTrack(const dst_track_st&);
     StTrack(const StTrack&);

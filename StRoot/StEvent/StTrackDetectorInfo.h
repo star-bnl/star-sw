@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.h,v 2.2 1999/10/28 22:27:30 ullrich Exp $
+ * $Id: StTrackDetectorInfo.h,v 2.3 1999/11/01 12:45:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.h,v $
- * Revision 2.2  1999/10/28 22:27:30  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.3  1999/11/01 12:45:12  ullrich
+ * Modified unpacking of point counter
  *
  * Revision 2.3  1999/11/01 12:45:12  ullrich
  * Modified unpacking of point counter
@@ -42,6 +42,7 @@ public:
     // StTrackDetectorInfo & operator=(const StTrackDetectorInfo&); use default
     virtual ~StTrackDetectorInfo();
 
+    const StThreeVectorF& firstPoint() const;
     const StThreeVectorF& lastPoint() const;
     UShort_t              numberOfPoints() const;
     UShort_t              numberOfPoints(StDetectorId) const;

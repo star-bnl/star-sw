@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.1 1999/10/28 22:27:21 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.2 1999/11/01 12:45:02 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
- * Revision 2.1  1999/10/28 22:27:21  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.2  1999/11/01 12:45:02  ullrich
+ * Modified unpacking of point counter
  *
  * Revision 2.9  1999/12/01 15:58:08  ullrich
  * New decoding for dst_track::method. New enum added.
@@ -46,7 +46,7 @@
  **************************************************************************/
 #include "StTrack.h"
 #include "tables/St_dst_track_Table.h"
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.1 1999/10/28 22:27:21 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.2 1999/11/01 12:45:02 ullrich Exp $";
 #include "StVertex.h"
 #include "StTrackGeometry.h"
     mReconstructionMethod = 0;
@@ -55,7 +55,7 @@ static const char rcsid[] = "$Id: StTrack.cxx,v 2.1 1999/10/28 22:27:21 ullrich 
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.1 1999/10/28 22:27:21 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.2 1999/11/01 12:45:02 ullrich Exp $";
 
 StTrack::StTrack()
 {
@@ -128,7 +128,36 @@ StTrack::operator=(const StTrack& track)
 	mPidTraitsVec = track.mPidTraitsVec;
         mNode = 0;                                 // do not assume any context here
     }
-StTrack::numberOfPossiblePoints() const { return mNumberOfPossiblePoints; }
+    return *this;
+}
+UChar_t
+StTrack::reconstructionMethod() const { return mReconstructionMethod; }
+    case kLine2StepId:
+	return kLine2StepId;
+	break;
+    case kLine3DId:
+	return kLine3DId;
+	break;
+    default:
+    case kUndefinedFitterId:
+	return kUndefinedFitterId;
+	break;
+    }
+}
+
+Float_t
+StTrack::impactParameter() const { return mImpactParameter; }
+
+Float_t
+StTrack::length() const { return mLength; }
+
+    // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
+    return (mNumberOfPossiblePoints%1000) +
+	((mNumberOfPossiblePoints%10000)/1000) +
+	(mNumberOfPossiblePoints/10000);
+    return (numberOfPossiblePoints(kTpcId) +
+	    numberOfPossiblePoints(kSvtId) +
+	    numberOfPossiblePoints(kSsdId));
 }
 
 UShort_t

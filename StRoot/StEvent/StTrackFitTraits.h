@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 2.1 1999/10/28 22:27:35 ullrich Exp $
+ * $Id: StTrackFitTraits.h,v 2.2 1999/11/01 12:45:17 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
- * Revision 2.1  1999/10/28 22:27:35  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.2  1999/11/01 12:45:17  ullrich
+ * Modified unpacking of point counter
  *
  * Revision 2.1  1999/10/28 22:27:35  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -39,6 +39,7 @@ public:
     virtual ~StTrackFitTraits();
 
     UShort_t              numberOfFitPoints() const;
+    UShort_t              numberOfFitPoints(StDetectorId) const;
     StParticleDefinition* pidHypothesis() const;
     StMatrixF             covariantMatrix() const;
     Double_t              chi2(UInt_t = 0) const;
