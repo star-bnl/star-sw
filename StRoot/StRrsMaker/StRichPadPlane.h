@@ -1,11 +1,14 @@
 /*****************************************************************
- * $Id: StRichPadPlane.h,v 1.4 2000/02/08 16:36:45 lasiuk Exp $   
+ * $Id: StRichPadPlane.h,v 1.5 2000/02/14 01:11:47 lasiuk Exp $   
  *   StRichPadPlane is a special container specialized to store 
  *   RICH Raw Data. 
  *
  * $Log: StRichPadPlane.h,v $
- * Revision 1.4  2000/02/08 16:36:45  lasiuk
- * Bring into line with HP
+ * Revision 1.5  2000/02/14 01:11:47  lasiuk
+ * alter StRichID for MC storage
+ *
+ * Revision 1.5  2000/02/14 01:11:47  lasiuk
+ * alter StRichID for MC storage
  *
  * Revision 1.4  2000/02/08 16:36:45  lasiuk
  * Bring into line with HP
@@ -22,6 +25,10 @@
  *
  ********************************************************************/
 
+#ifndef ST_RICH_PADPLANE_H
+#define ST_RICH_PADPLANE_H
+
+#ifdef __ROOT__
 #include "TObject.h"
 
 #endif
@@ -36,13 +43,14 @@ using std::list;
 #ifndef ST_NO_NAMESPACES
 //namespace StRichRawData {
 #endif
-	:  G_ID(0), amount(0.0) {/* nopt*/ }
+#include "StRichRrsMacros.h"
 struct StRichID {
-    StRichID(int i,double d =-1.0)
-	:  G_ID(i), amount(d) {/* nopt*/ }
+    StRichID()
+	:  mG_ID(0), mTrackp(0), mAmount(0.0) {/* nopt*/ }
 	
-    int G_ID;
-    double amount;
+    StRichID(int i, int track, double d =-1.0)
+	:  mG_ID(i), mTrackp(track), mAmount(d) {/* nopt*/ }
+	
     int mG_ID;
     int mTrackp;
     double mAmount;
@@ -87,7 +95,11 @@ typedef impl_type::const_iterator const_row_iter;
 typedef row_type::iterator pad_iter;
 typedef row_type::const_iterator const_pad_iter;
 	
-class StRichPadPlane {
+class StRichPadPlane :
+
+    public TObject
+class StRichPadPlane
+#ifdef __ROOT__
     : public TObject
 #endif
 {
