@@ -51,7 +51,7 @@ void doCorr(Int_t nevents,const Char_t **fileList,const char *qaflag)
      TString analysis1 = "analysis1";
      TString func1        = "InvariantMass";
      corr->AddAnalysis(analysis1);
-    
+     corr->SetDiagnosticsON(analysis1);
      corr->SetCorrelationFunction(analysis1,func1);
      corr->SetPtCutsTrack1(analysis1,0.0,10.0); 
      corr->SetPtCutsTrack2(analysis1,0.0,10.0); 

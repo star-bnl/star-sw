@@ -8,7 +8,8 @@
 // Description: 
 //
 // Environment:
-//  Software developed for the STAR Detector at Brookhaven National Laboratory
+//  Software developed for the STAR Detector at 
+//  Brookhaven National Laboratory
 //
 // Author List: 
 //  Craig Ogilvie, MIT
@@ -19,14 +20,17 @@
 
 #include "StEvent.h"
 #include <TNtuple.h>
-
+#include "StTrackForPool.h"
 
 class StDiagnosticTool {
 public:
-                  StDiagnosticTool();
-                  ~StDiagnosticTool();
-  void        Fill(StEvent& ev);
-  TString GetName();
+                                 StDiagnosticTool();
+  virtual                  ~StDiagnosticTool();
+  virtual  void        Fill(StEvent& ev);
+  virtual  void        Fill(StTrackForPool* t);
+  virtual  void        Fill(StTrackForPool* t1, StTrackForPool* t2);
+  virtual  void        Write();
+  virtual  TString GetName();
 
 private:
   

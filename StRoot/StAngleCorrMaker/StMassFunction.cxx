@@ -1,7 +1,6 @@
 #include "StMassFunction.h"
 #include <TH1.h>
 
-
 StMassFunction::~StMassFunction() {}
 
 void 
@@ -17,7 +16,6 @@ StMassFunction::Fill(StTrackForPool* t1, StTrackForPool* t2, TH1D* hist)
   correlation = sqrt((e1+e2)*(e1+e2) - ((px1+px2)*(px1+px2)  + (py1+py2)*(py1+py2) + (pz1+pz2)*(pz1+pz2)));
   hist->Fill(correlation,weight);
 }
-
 
 TString
 StMassFunction::GetName() 
