@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.20 2004/05/10 17:33:35 tonko Exp $
+ * $Id: FCFMaker.cxx,v 1.21 2004/05/11 17:33:38 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.21  2004/05/11 17:33:38  jml
+ * Moved initialializations from init() to constructor
+ *
  * Revision 1.20  2004/05/10 17:33:35  tonko
  * Fixed small bug with cl_id and data dump in saveClusters
  *
@@ -236,6 +239,32 @@ StRTSClientFCFMaker::StRTSClientFCFMaker(const char *name):StMaker(name)
   gMessMgr->Debug() << "Constructor for StRTSClientFCFMaker()" << endm;
   fcf = NULL;
   mCTransform = NULL;
+
+
+  ignoreFileClusters = false;
+  ignoreRawData = false;
+
+  mDp = .1;             // hardcoded errors
+  mDt = .2;
+  mDperp = .1;
+
+  splitRows = 1;        // split padrows as if real DAQ on i960s
+  doT0Corrections = 1;  // do the t0 corrections
+  doGainCorrections = 1; // done by St_tpcdaq_Maker - shouldn't be!!! Tonko
+  doZeroTruncation = 0; // don't 
+  fillDeconFlag = 1;
+
+  mCreate_stevent = 0;  // Use  StEvent for ittf
+  mFill_stevent = 0;
+  mFill_tphit = 1;
+
+  mStEvent = NULL;
+  mT_tphit = NULL;
+
+  // gMessMgr->Info() << "dpad=" <<mDp<<endm;
+  // gMessMgr->Info() << "dperp="<<mDperp<<endm;
+  // gMessMgr->Info() << "dt="<<mDt<<endm;
+  // gMessMgr->Info() << "splitRows="<<splitRows<<" (Are rows to be split as on i960's)"<<endm;
 }
 
 StRTSClientFCFMaker::~StRTSClientFCFMaker() 
@@ -311,30 +340,7 @@ Int_t StRTSClientFCFMaker::Init()
   //   else mPrfin = .26;
   //
 
-  ignoreFileClusters = false;
-  ignoreRawData = false;
 
-  mDp = .1;             // hardcoded errors
-  mDt = .2;
-  mDperp = .1;
-
-  splitRows = 1;        // split padrows as if real DAQ on i960s
-  doT0Corrections = 1;  // do the t0 corrections
-  doGainCorrections = 1; // done by St_tpcdaq_Maker - shouldn't be!!! Tonko
-  doZeroTruncation = 0; // don't 
-  fillDeconFlag = 1;
-
-  mCreate_stevent = 0;  // Use  StEvent for ittf
-  mFill_stevent = 0;
-  mFill_tphit = 1;
-
-  mStEvent = NULL;
-  mT_tphit = NULL;
-
-  // gMessMgr->Info() << "dpad=" <<mDp<<endm;
-  // gMessMgr->Info() << "dperp="<<mDperp<<endm;
-  // gMessMgr->Info() << "dt="<<mDt<<endm;
-  gMessMgr->Info() << "splitRows="<<splitRows<<" (Are rows to be split as on i960's)"<<endm;
 
   // Croat initializations
   //
