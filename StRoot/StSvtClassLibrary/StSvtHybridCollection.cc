@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridCollection.cc,v 1.3 2000/07/30 21:18:32 munhoz Exp $
+ * $Id: StSvtHybridCollection.cc,v 1.4 2000/08/23 12:48:44 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridCollection.cc,v $
+ * Revision 1.4  2000/08/23 12:48:44  munhoz
+ * add reset method
+ *
  * Revision 1.3  2000/07/30 21:18:32  munhoz
  * correction for getObject method and allow year 1 east side reading
  *
@@ -100,7 +103,7 @@ void StSvtHybridCollection::setConfiguration(char* config)
     mNumberOfBarrels = 3;
     mNumberOfLadders[0] = 0;
     mNumberOfLadders[1] = 0;
-    mNumberOfLadders[2] = 1;
+    mNumberOfLadders[2] = 2;
     mNumberOfWafers[0] = 0;
     mNumberOfWafers[1] = 0;
     mNumberOfWafers[2] = 7;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtData.cc,v 1.1.1.1 2000/03/10 14:26:21 munhoz Exp $
+ * $Id: StSvtData.cc,v 1.2 2000/08/23 12:48:38 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtData.cc,v $
+ * Revision 1.2  2000/08/23 12:48:38  munhoz
+ * add reset method
+ *
  * Revision 1.1.1.1  2000/03/10 14:26:21  munhoz
  * SVT Class Library
  *
@@ -27,7 +30,7 @@
 
 ClassImp(StSvtData)
 
-StSvtData::StSvtData(char* config, int run, int event, int trigger) : 
+StSvtData::StSvtData(char* config, int run, int event, int trigger, int time) : 
   StSvtHybridCollection(config)
 {
   // The Same as StSvtHybridCollection, with some additional parameters. 
@@ -37,6 +40,7 @@ StSvtData::StSvtData(char* config, int run, int event, int trigger) :
   mSCAZero = 0;
   for (int i = 0; i < N_SECTORS; i++)
     mTimeZero[i] = 0;
+  mUnixTime = time;
 }
 
 StSvtData::~StSvtData()
