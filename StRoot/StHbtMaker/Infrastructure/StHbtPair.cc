@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.13 2000/10/26 16:09:16 lisa Exp $
+ * $Id: StHbtPair.cc,v 1.14 2000/12/11 21:44:30 rcwells Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.cc,v $
+ * Revision 1.14  2000/12/11 21:44:30  rcwells
+ * Corrected qSideCMS function
+ *
  * Revision 1.13  2000/10/26 16:09:16  lisa
  * Added OpeningAngle PairCut class and method to StHbtPair
  *
@@ -133,20 +136,13 @@ double StHbtPair::qSideCMS() const
     StHbtThreeVector tmp1 = mTrack1->FourMomentum().vect();
     StHbtThreeVector tmp2 = mTrack2->FourMomentum().vect();
 
-    double dx = tmp1.x() - tmp2.x();
-    double xt = tmp1.x() + tmp2.x();
-    
-    double dy = tmp1.y() - tmp2.y();
-    double yt = tmp1.y() + tmp2.y();
+    double x1 = tmp1.x();  double y1 = tmp1.y();
+    double x2 = tmp2.x();  double y2 = tmp2.y();
 
+    double xt = x1+x2;  double yt = y1+y2;
+    double k1 = sqrt(xt*xt+yt*yt);
 
-    double k1 = (sqrt(xt*xt+yt*yt));
-    double k2 = (dx*xt+dy*yt);
-
-    double k3 = dx - (k2/(k1*k1))*xt;
-    double k4 = (k2/(k1*k1))*yt - dy;
-    
-    double tmp = sqrt(k3*k3 + k4*k4);
+    double tmp = 2.0*(x1*y2-x2*y1)/k1;
     return (tmp);
 }
 
