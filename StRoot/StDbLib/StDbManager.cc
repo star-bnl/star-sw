@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManager.cc,v 1.22 2000/04/25 18:26:03 porter Exp $
+ * $Id: StDbManager.cc,v 1.23 2000/05/04 15:13:11 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.23  2000/05/04 15:13:11  porter
+ * added dbOnl, dbRich, dbMwc domains as standards
+ *
  * Revision 1.22  2000/04/25 18:26:03  porter
  * added flavor & production time as settable query fields in
  * table &/or node. Associated SQL updated in mysqlAccessor.
@@ -166,6 +169,9 @@ mDomains.push_back(new dbDomain(dbDaq,"daq"));
 mDomains.push_back(new dbDomain(dbScaler,"scaler")); 
 mDomains.push_back(new dbDomain(dbGlobal,"global")); 
 mDomains.push_back(new dbDomain(dbL3,"l3")); 
+mDomains.push_back(new dbDomain(dbOnl,"onl")); 
+mDomains.push_back(new dbDomain(dbRich,"rich")); 
+mDomains.push_back(new dbDomain(dbMwc,"mwc")); 
 
 }
 
