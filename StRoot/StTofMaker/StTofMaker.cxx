@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.cxx,v 1.14 2004/01/27 23:17:01 dongx Exp $
+ * $Id: StTofMaker.cxx,v 1.15 2004/09/10 22:09:21 perev Exp $
  *
  * Author: W.J. Llope / Wei-Ming Zhang / Frank Geurts
  *
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StTofMaker.cxx,v $
+ * Revision 1.15  2004/09/10 22:09:21  perev
+ * more defence agains corrupted DAQ data
+ *
  * Revision 1.14  2004/01/27 23:17:01  dongx
- * change for year4 run (pVPD+TOFp+TOFr')
+ *  change for year4 run (pVPD+TOFp+TOFr')
  *  - Additional TOFr' ADC and TDC channels put in
  *  - Add TOTs of TOFr' in
  *
@@ -194,6 +197,7 @@ Int_t StTofMaker::Make(){
       mTheTofReader = mTheDataReader->getTOFReader();
       if (!mTheTofReader) {
 	cout << "StTofMaker Failed to getTofReader()...." << endl;
+	return kStWarn;
       }
 
 #ifdef TOFP_DEBUG
