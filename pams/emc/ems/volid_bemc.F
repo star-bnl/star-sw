@@ -15,7 +15,7 @@
       phi  = emc_chid(3)        ! module phi [1,120]
       sphi = emc_chid(4)        ! d(eta)=0.1 tower number [1,10]
       dep  = emc_chid(5)        ! depth section [1,2]
-      print *,'BEMC:rl,eta,phi,sphi,dep',rl,eta,phi,sphi,dep
+c      print *,'BEMC:rl,eta,phi,sphi,dep',rl,eta,phi,sphi,dep
       if(rl.eq.1) then
          phi=phi*2-2+sphi
       elseif(rl.eq.2) then
@@ -23,6 +23,6 @@
 c         phi=(120-phi)*2+3-sphi
          phi=238-(120-phi)*2+sphi
       endif
-      print *,'BEMC:eta,phi',eta,phi
+c      print *,'BEMC:eta,phi',eta,phi
       return
       end

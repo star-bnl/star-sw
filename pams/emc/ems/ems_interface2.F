@@ -43,7 +43,7 @@ c---- Tags
 
 c---- start executable statements...
       write(*,*) 'EMS_INTERFACE2:starting...'
-      ems_interface2 = STAFCV_BAD
+      EMS_INTERFACE2 = STAFCV_BAD
 
 c----
 c---- Barrel EMC/PRS
@@ -52,7 +52,6 @@ c----
          call vzero(tbemc, 41*120*2)
          nout     = 0
          do ihit = 1, g2t_emc_hit_h.nok
-            write(*,*) g2t_emc_hit_h.nok,i
             ivid = g2t_emc_hit(ihit).volume_id            
             itrk = g2t_emc_hit(ihit).track_p
             de = g2t_emc_hit(ihit).de
@@ -62,7 +61,6 @@ c----
             iparpid  = g2t_track(itrk).ge_pid
             if(tbemc(eta,phi,dep).eq.0) then
                nout=nout+1
-               write(*,*) nout, ems_hits_bemc_h.maxlen
                if(ems_hits_bemc_h.maxlen.le.nout) then
                   write(*,*) 'EMS INTERFACE2: Short of space in EMS_HITS_BEMC'
                   RETURN
@@ -192,6 +190,11 @@ c----
          enddo
          ems_hits_esmd_h.nok=nout
       endif
-      ems_interface2 = STAFCV_OK
+      write(*,*) 
+     +     'EMS_INTERFACE2:finished with # of hits at B/E EMC/SMD:',
+     +     ems_hits_bemc_h.nok,ems_hits_bsmd_h.nok,
+     +     ems_hits_eemc_h.nok,ems_hits_esmd_h.nok
+      EMS_INTERFACE2 = STAFCV_OK
       return
       end
+
