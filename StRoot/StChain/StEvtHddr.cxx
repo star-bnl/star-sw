@@ -18,12 +18,10 @@ StEvtHddr &StEvtHddr::operator=(const StEvtHddr &hddr)
 {
   if (!GetName() [0]) SetName (hddr.GetName ());
   if (!GetTitle()[0]) SetTitle(hddr.GetTitle());
-  Int_t oldRun = mRunNumber;
   memcpy(&mRunNumber,&hddr.mRunNumber,(char*)((&mEventNumber)+1)-(char*)&mRunNumber);
   mEventTime = hddr.mEventTime;
   mProdTime  = hddr.mProdTime;
   mEventType = hddr.mEventType;
-  mOldRunNumber = oldRun;
   return *this;
 }
 //_____________________________________________________________________________
