@@ -1,8 +1,8 @@
 //*-- Author :    Valery Fine   22/06/99  (E-mail: fine@bnl.gov)
-// $Id: PadBrowser.C,v 1.1 1999/06/23 19:11:32 fine Exp $
+// $Id: PadBrowser.C,v 1.2 1999/06/23 19:25:18 fine Exp $
 // $Log: PadBrowser.C,v $
-// Revision 1.1  1999/06/23 19:11:32  fine
-// TPC DAQ data browser
+// Revision 1.2  1999/06/23 19:25:18  fine
+// Wrong index fixed
 //
 //
 //////////////////////////////////////////////////////////////////////////
@@ -38,6 +38,7 @@ class StPadBrowserPanel {
   //  bar->AddButton("Init", "StPadBrowserPanel::Init();", "Load share library and initialize the maker");
      bar->AddButton("Add Axice","St_PolyLine3D::Axis();","Add 3D axice to the cuurent TPad view");
      bar->AddButton("Next Event", "StPadBrowserPanel::Make();", "Make one step");
+     bar->AddButton("Draw Next Histogram", "StPadBrowserPanel::MakeHists();", "Make one step");
      bar->AddButton("Finish","StPadBrowserPanel::Finish();","Finish job");
 
      bar->Show(); 
@@ -49,6 +50,16 @@ class StPadBrowserPanel {
      chain->Clear();
      if (chain->Make()>=kStEOF) printf("End of file\n");
      gPad->Update();
+  }
+  //_______________________________________________________________________________________
+  static void MakeHists(){
+    static TCanvas *histCanvas = 0;
+    static Int_t histCounter = 0;
+    if (!histCanvas) histCanvas = new TCanvas("Pads");
+    histCanvas->cd();
+    if (histCounter >= 12) histCounter = 0;
+    histCounter++;
+    chain->GetHists(histCounter++)->Draw("cont");
   }
 
 };
