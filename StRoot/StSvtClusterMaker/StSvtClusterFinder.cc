@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtClusterFinder.cc,v 1.3 2000/07/16 22:32:54 caines Exp $
+ * $Id: StSvtClusterFinder.cc,v 1.4 2000/08/21 13:06:58 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterFinder.cc,v $
+ * Revision 1.4  2000/08/21 13:06:58  caines
+ * Much improved hit finding and fitting
+ *
  * Revision 1.3  2000/07/16 22:32:54  caines
  * Fills spacepoint table correctly
  *
@@ -151,8 +154,7 @@ void StSvtClusterFinder::getClusterMembers(int& mAnode, int &mSeq)
 
 	 mNumOfCluMem[cluIndex-1] = memCount;
 
-
-	 if( memCount == 1 && mSeqLength==5){
+	 if( memCount == 1 && mSeqLength==1){
 	   cluIndex--;
 	 }
 	 
