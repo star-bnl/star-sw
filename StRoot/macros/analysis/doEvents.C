@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: doEvents.C,v 1.98 2004/08/27 00:17:11 fine Exp $
+// $Id: doEvents.C,v 1.99 2004/08/27 01:50:12 fine Exp $
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
 // what it does: reads .dst.root or .xdf files and then runs StEventMaker
@@ -358,7 +358,7 @@ void loadLibs(const char *opt)
   }
 
   if (strstr(opt,"disp")) {// EventDisplay stuff
- // gSystem->Load("St_g2t");  // is a part od St_Tables
+    gSystem->Load("St_g2t");  // is a part od St_Tables
     gSystem->Load("geometry");
     gSystem->Load("St_geant_Maker");
     gSystem->Load("StTableUtilities");
@@ -464,6 +464,9 @@ int gcInit(const char *request)
 //____________________________________________________________________________
 //////////////////////////////////////////////////////////////////////////////
 // $Log: doEvents.C,v $
+// Revision 1.99  2004/08/27 01:50:12  fine
+// restore g2t shared library. Geant complained
+//
 // Revision 1.98  2004/08/27 00:17:11  fine
 // use one extr custom filter is present
 //
