@@ -1,14 +1,17 @@
 //
-// $Id: PCollTag.idl,v 1.1 1999/02/08 14:48:57 wenaus Exp $
+// $Id: PCollTag.idl,v 1.2 1999/02/08 18:46:01 wenaus Exp $
 //
 // Peripheral collections group tag
 //
 // $Log: PCollTag.idl,v $
+// Revision 1.2  1999/02/08 18:46:01  wenaus
+// Fix structure name
+//
 // Revision 1.1  1999/02/08 14:48:57  wenaus
 // New tag tables
 //
 
-struct HighPtTag {
+struct PCollTag {
     long         chargedMultiplicity;
     long         numberOfPhotonClusters;
     long         numberOfElectronsInEmc;
