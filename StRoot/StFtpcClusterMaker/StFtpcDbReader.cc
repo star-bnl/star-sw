@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.18 2003/01/14 12:58:01 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.19 2003/01/15 10:39:31 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.19  2003/01/15 10:39:31  jcs
+// Correct error in message
+//
 // Revision 1.18  2003/01/14 12:58:01  jcs
 // use Geometry_ftpc/ftpcAsicMap to control corrections for error in Y2001-2002
 // FTPC asic mapping
@@ -120,7 +123,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   } else {
     gMessMgr->Message( " No data in table class St_ftpcAsicMap","E");
   }
-cout<<"StFtpcClusterMaker:rmEastIsInverted = "<<mEastIsInverted<<" mAsic2EastNotInverted = "<<mAsic2EastNotInverted<<endl;
+cout<<"StFtpcClusterMaker: mEastIsInverted = "<<mEastIsInverted<<" mAsic2EastNotInverted = "<<mAsic2EastNotInverted<<endl;
 
   //  just copy EField table start to pointer
   ftpcEField_st* efieldTable = (ftpcEField_st*)efield->GetTable();
