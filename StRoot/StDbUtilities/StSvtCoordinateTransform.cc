@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.13 2001/08/16 20:24:42 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.14 2002/01/30 14:29:13 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -23,10 +23,13 @@
 #include "St_ObjectSet.h"
 #include "StMessMgr.h"
 #include "StSvtClassLibrary/StSvtConfig.hh"
-#include "tables/St_svg_geom_Table.h"
-#include "tables/St_svg_shape_Table.h"
-#include "tables/St_srs_srspar_Table.h"
+#include "StSvtClassLibrary/StSvtGeometry.hh"
+#include "StSvtClassLibrary/StSvtWaferGeometry.hh"
+//#include "tables/St_svg_geom_Table.h"
+//#include "tables/St_svg_shape_Table.h"
+//#include "tables/St_srs_srspar_Table.h"
 #include <unistd.h>
+#include "TString.h"
 
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using namespace units;
@@ -117,12 +120,19 @@ void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
 						 svg_geom_st* geom, 
 						 svg_shape_st* shape,
 						 StSvtConfig* config){
-  mparam = param;
-  mgeom = geom;
+  mgeom = new StSvtGeometry(param, geom, shape);
   mconfig = config;
-  mshape = shape;
+  //  mparam = param;
+  //  mgeom = geom;
+  //  mshape = shape;
 
   
+};
+
+void StSvtCoordinateTransform::setParamPointers( StSvtGeometry* geom,
+						 StSvtConfig* config){
+  mgeom = geom;
+  mconfig = config;
 };
 
 //_____________________________________________________________________________
@@ -187,14 +197,16 @@ void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StSvtLo
   b.setPosition(StThreeVector<double>(CalcDriftLength(t),
 				      CalcTransLength(a.anode()),0.0));
   
-  int idShape = 0;
+  //  int idShape = 0;
   
   
   // Shift position because it is the North hybrid. Place relative to the center of the wafer, hybrid=1, anode 1=East
   if( a.hybrid() == 1 ){
     
-    b.position().setX( b.position().x() - mshape[idShape].shape[0]);
-    b.position().setY( b.position().y() - mshape[idShape].shape[1]);
+    //    b.position().setX( b.position().x() - mshape[idShape].shape[0]);
+    //    b.position().setY( b.position().y() - mshape[idShape].shape[1]);
+    b.position().setX( b.position().x() - mgeom->getWaferLength());
+    b.position().setY( b.position().y() - mgeom->getWaferWidth());
   }
   
   //Shift position because it is South hybrid. Place relative to the center of the wafer. Hybrid=2, anode 1=West
@@ -202,8 +214,10 @@ void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StSvtLo
   
   if( a.hybrid() == 2){
     
-    b.position().setX( mshape[idShape].shape[0] - b.position().x());
-    b.position().setY( mshape[idShape].shape[1] - b.position().y());
+    //    b.position().setX( mshape[idShape].shape[0] - b.position().x());
+    //    b.position().setY( mshape[idShape].shape[1] - b.position().y());
+    b.position().setX( mgeom->getWaferLength() - b.position().x());
+    b.position().setY( mgeom->getWaferWidth() - b.position().y());
   }
   
   return;
@@ -225,14 +239,16 @@ void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StSvtWa
   b.setWafer(a.wafer());
   b.setHybrid(a.hybrid());
   
-  int idShape = 0;
+  //  int idShape = 0;
   
   
   // Shift position because it is the North hybrid. Local coords are placed relative to the center of the wafer, hybrid=1, anode 1=East so undo this
   if( a.hybrid() == 1 ){
     
-   pos.setX( a.position().x() + mshape[idShape].shape[0]);
-   pos.setY( a.position().y() + mshape[idShape].shape[1]);
+    //   pos.setX( a.position().x() + mshape[idShape].shape[0]);
+    //   pos.setY( a.position().y() + mshape[idShape].shape[1]);
+    pos.setX( a.position().x() + mgeom->getWaferLength());
+    pos.setY( a.position().y() + mgeom->getWaferWidth());
   }
   
   //Shift position because it is South hybrid. Local coords are placed relative to the center of the wafer. Hybrid=2, anode 1=West so undo this
@@ -240,8 +256,10 @@ void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StSvtWa
   
   if( a.hybrid() == 2){
     
-    pos.setX( mshape[idShape].shape[0] - a.position().x());
-    pos.setY( mshape[idShape].shape[1] - a.position().y());
+    //    pos.setX( mshape[idShape].shape[0] - a.position().x());
+    //    pos.setY( mshape[idShape].shape[1] - a.position().y());
+    pos.setX( mgeom->getWaferLength() - a.position().x());
+    pos.setY( mgeom->getWaferWidth() - a.position().y());
   }
   
 
@@ -312,8 +330,8 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
   //Exception for year1 ladder Only one ladder which is wrongly labelled as barrel 3
   //even though its at r=10.4
 
-  if( mgeom[0].id > 5000) barrel = 3;
-      
+  //  if( mgeom[0].id > 5000) barrel = 3;
+  if( TString(mconfig->getConfiguration()) == "Y1L") barrel = 3;    
 
   // Find out what wafer hit is on
 
@@ -410,8 +428,9 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
   //Exception for year1 ladder Only one ladder which is wrongly labelled as barrel 3
   // ladder 1even though its at r=10.4 at 12 0'Clock
   
-  if( mgeom[0].id > 5000) ladderRangeLo = 1; 
-  
+  //  if( mgeom[0].id > 5000) ladderRangeLo = 1; 
+  if( TString(mconfig->getConfiguration()) == "Y1L") ladderRangeLo = 1;
+
   Found = 0;
   ibarrel = (barrel*2)-1;
   do{
@@ -489,6 +508,8 @@ int StSvtCoordinateTransform::LocaltoGlobal(const StSvtLocalCoordinate& a, StThr
   //     Error Conditions: none
 
   float xl[3];
+
+  /*
   int  HardWarePos, Gotit=0;
 
 
@@ -510,14 +531,34 @@ int StSvtCoordinateTransform::LocaltoGlobal(const StSvtLocalCoordinate& a, StThr
       
     }
   }
+  */
+
+  StSvtWaferGeometry* waferGeom = NULL;
+
+  if( index < 0){
+    index = mgeom->getWaferIndex(mgeom->getBarrelID(a.layer(),a.ladder()),(int)a.ladder(),(int)a.wafer());
+    if (index >= 0)
+      waferGeom = (StSvtWaferGeometry*)mgeom->at(index);
+
+    if (!waferGeom) {
+      x.setX(-999);
+      x.setY(-999);
+      x.setZ(-999);
+      return 0;
+    }
+  }    
 
   xl[0] = a.position().x();
   xl[1] = a.position().y();
   xl[2] = a.position().z();
   
-  x.setX(mgeom[index].x[0] + xl[0]*mgeom[index].d[0] + xl[1]*mgeom[index].t[0] + xl[2]*mgeom[index].n[0]); 
-  x.setY(mgeom[index].x[1] + xl[0]*mgeom[index].d[1] + xl[1]*mgeom[index].t[1] + xl[2]*mgeom[index].n[1]);
-  x.setZ(mgeom[index].x[2] + xl[0]*mgeom[index].d[2] + xl[1]*mgeom[index].t[2] + xl[2]*mgeom[index].n[2]); 
+  //  x.setX(mgeom[index].x[0] + xl[0]*mgeom[index].d[0] + xl[1]*mgeom[index].t[0] + xl[2]*mgeom[index].n[0]); 
+  //  x.setY(mgeom[index].x[1] + xl[0]*mgeom[index].d[1] + xl[1]*mgeom[index].t[1] + xl[2]*mgeom[index].n[1]);
+  //  x.setZ(mgeom[index].x[2] + xl[0]*mgeom[index].d[2] + xl[1]*mgeom[index].t[2] + xl[2]*mgeom[index].n[2]); 
+  
+  x.setX(waferGeom->x(0) + xl[0]*waferGeom->d(0) + xl[1]*waferGeom->t(0) + xl[2]*waferGeom->n(0)); 
+  x.setY(waferGeom->x(1) + xl[0]*waferGeom->d(1) + xl[1]*waferGeom->t(1) + xl[2]*waferGeom->n(1));
+  x.setZ(waferGeom->x(2) + xl[0]*waferGeom->d(2) + xl[1]*waferGeom->t(2) + xl[2]*waferGeom->n(2)); 
   
   return index;
 }
@@ -551,13 +592,14 @@ int StSvtCoordinateTransform::GlobaltoLocal( const StThreeVector<double>& x, StS
        c
 */
 
-  int Gotit=0;
+  //  int Gotit=0;
   float  xl[3];
   
   //     Executable Code
   //     ===============
   
 
+  /*
   if( index < 0){
     for( index=0; index< 216; index++){
       if( mgeom[index].id == HardWarePos ) {
@@ -575,14 +617,40 @@ int StSvtCoordinateTransform::GlobaltoLocal( const StThreeVector<double>& x, StS
     }
     
   }
+  */
   
-  xl[0] = x.x() - mgeom[index].x[0];
-  xl[1] = x.y() - mgeom[index].x[1];
-  xl[2] = x.z() - mgeom[index].x[2];
+  StSvtWaferGeometry* waferGeom = NULL;
+
+  if( index < 0){
+    index = mgeom->getWaferIndex(HardWarePos);
+    if (index >= 0)
+      waferGeom = (StSvtWaferGeometry*)mgeom->at(index);
+
+    //cout << "HardWarePos = " << HardWarePos << ", index = " << index << ", waferGeom = " << waferGeom << endl;
+
+    if (!waferGeom) {
+      b.position().setX(-999);
+      b.position().setY(-999);
+      b.position().setZ(-999);
+      return 0;
+    }
+  }    
   
-  b.position().setX(xl[0]*mgeom[index].d[0] + xl[1]*mgeom[index].d[1] + xl[2]*mgeom[index].d[2]);
-  b.position().setY(xl[0]*mgeom[index].t[0] + xl[1]*mgeom[index].t[1] + xl[2]*mgeom[index].t[2]);
-  b.position().setZ(xl[0]*mgeom[index].n[0] + xl[1]*mgeom[index].n[1] + xl[2]*mgeom[index].n[2]);
+  //  xl[0] = x.x() - mgeom[index].x[0];
+  //  xl[1] = x.y() - mgeom[index].x[1];
+  //  xl[2] = x.z() - mgeom[index].x[2];
+  
+  //  b.position().setX(xl[0]*mgeom[index].d[0] + xl[1]*mgeom[index].d[1] + xl[2]*mgeom[index].d[2]);
+  //  b.position().setY(xl[0]*mgeom[index].t[0] + xl[1]*mgeom[index].t[1] + xl[2]*mgeom[index].t[2]);
+  //  b.position().setZ(xl[0]*mgeom[index].n[0] + xl[1]*mgeom[index].n[1] + xl[2]*mgeom[index].n[2]);
+ 
+  xl[0] = x.x() - waferGeom->x(0);
+  xl[1] = x.y() - waferGeom->x(1);
+  xl[2] = x.z() - waferGeom->x(2);
+
+  b.position().setX(xl[0]*waferGeom->d(0) + xl[1]*waferGeom->d(1) + xl[2]*waferGeom->d(2));
+  b.position().setY(xl[0]*waferGeom->t(0) + xl[1]*waferGeom->t(1) + xl[2]*waferGeom->t(2));
+  b.position().setZ(xl[0]*waferGeom->n(0) + xl[1]*waferGeom->n(1) + xl[2]*waferGeom->n(2));
  
   return index;
   
@@ -630,8 +698,12 @@ double StSvtCoordinateTransform::CalcDriftLength(double x){
     
 //   if (distance>d) distance=d+v2*(t-d/v1);
   
+  // hard wired for the time being (07/29/2001) MM
+  float vd = 675000;
+  float fsca = 25000000;
 
-  distance = mparam->vd*x/mparam->fsca;
+  //distance = mparam->vd*x/mparam->fsca;
+  distance = vd*x/fsca;
   return distance;
   
 }
@@ -674,10 +746,16 @@ double StSvtCoordinateTransform::UnCalcDriftLength(double x){
 
 //   if (x>d) t = (x-d)/v2 + d/v1;
 
+  // hard wired for the time being (07/29/2001) MM
+  float vd = 675000;
+  float fsca = 25000000;
+
   double t;
-  t = x/mparam->vd;
+  //t = x/mparam->vd;
+  t = x/vd;
   
-  return (t*mparam->fsca);
+  //return (t*mparam->fsca);
+  return (t*fsca);
 
 }
 //_____________________________________________________________________________
@@ -685,7 +763,8 @@ double StSvtCoordinateTransform::UnCalcDriftLength(double x){
 double StSvtCoordinateTransform::CalcTransLength(double x){
 
   // Gives transverse distance of spt in cm in local coords (anode dir)
-       return x*mparam->pitch;
+  //       return x*mparam->pitch;
+  return x*mgeom->getAnodePitch();
 }
 
 
@@ -694,7 +773,8 @@ double StSvtCoordinateTransform::CalcTransLength(double x){
 double StSvtCoordinateTransform::UnCalcTransLength(double x){
 
   // Gives transverse distance of spt in cm in local coords (anode dir)
-       return x/mparam->pitch;
+  //       return x/mparam->pitch;
+  return x/mgeom->getAnodePitch();
 }
 
 //_____________________________________________________________________________
