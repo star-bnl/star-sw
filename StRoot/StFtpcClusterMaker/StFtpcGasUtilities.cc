@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 //
-//   $Id: StFtpcGasUtilities.cc,v 1.1 2003/11/13 14:12:17 jcs Exp $
+//   $Id: StFtpcGasUtilities.cc,v 1.2 2004/02/02 17:29:40 jcs Exp $
 //
 //   StFtpcGasUtilities
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////
 //
 //   $Log: StFtpcGasUtilities.cc,v $
+//   Revision 1.2  2004/02/02 17:29:40  jcs
+//   dbDate test works for y2004, now only print message for DEBUG
+//
 //   Revision 1.1  2003/11/13 14:12:17  jcs
 //   move pressure and gas corrections from StFtpcClusterMaker.cxx to StFtpcGasUtilities
 //
@@ -82,7 +85,7 @@ Int_t StFtpcGasUtilities::averageTemperatureWest(Int_t dbDate) {
       }		 
       // as of 2003-10-31 there are 2 additional body temperature sensors
       if ( dbDate >= 20031031 ) {
-         cout<<"dbDate = "<<dbDate<<" >= 20031031 activate additional body temperature sensors"<<endl;
+         if (DEBUG) cout<<"dbDate = "<<dbDate<<" >= 20031031 activate additional body temperature sensors"<<endl;
 /*
          if (mGas->getBody5West() >= mDb->minGasTemperature() && mGas->getBody5West() <= mDb->maxGasTemperature() ) {
             averageBodyTemperatureWest = averageBodyTemperatureWest + mGas>getBody5West();	 
@@ -136,7 +139,7 @@ Int_t StFtpcGasUtilities::averageTemperatureEast(Int_t dbDate) {
          }		 
       // as of 2003-10-31 there are 2 additional body temperature sensors
       if ( dbDate >= 20031031 ) {
-         cout<<"dbDate = "<<dbDate<<" >= 20031031 activate additional body temperature sensors"<<endl;
+        if (DEBUG)  cout<<"dbDate = "<<dbDate<<" >= 20031031 activate additional body temperature sensors"<<endl;
 /*
          if (mGas->getBody5East() >= mDb->minGasTemperature() && mGas->getBody5East() <= mDb->maxGasTemperature() ) {
             averageBodyTemperatureEast = averageBodyTemperatureEast + mGas>getBody5East();	 
