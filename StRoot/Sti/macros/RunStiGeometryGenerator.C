@@ -48,7 +48,7 @@ void RunStiGeometryGenerator()
     chain->Clear();
     int iev=0;
     int istat = chain->Make(iev);
-    chain->Finish();
+    //chain->Finish();
     
 }
 

@@ -7,11 +7,11 @@
 //SCL
 #include "StGetConfigValue.hh"
 //Sti
-#include "StiDetectorLayerContainer.h"
+#include "StiDetectorContainer.h"
 #include "StiDetector.h"
 #include "StiMapUtilities.h"
 
-StiDetector::StiDetector()
+StiDetector::StiDetector() : gas(0), material(0)
 {
 }
 
@@ -21,24 +21,32 @@ StiDetector::~StiDetector()
 
 void StiDetector::build(const char* buildfile)
 {
+    StiDetectorContainer* store = StiDetectorContainer::instance();
+    
     StGetConfigValue(buildfile, "on", on);
     StGetConfigValue(buildfile, "active", active);
     StGetConfigValue(buildfile, "continuousMedium", continuousMedium);
     StGetConfigValue(buildfile, "discreteScatterer", discreteScatterer);
     
-    materialmap materialMap = 
-        StiDetectorLayerContainer::instance()->getMaterialMap();
+    //materialmap materialMap =  StiDetectorContainer::instance()->getMaterialMap();
+    
     string gasName;
     StGetConfigValue(buildfile, "gas", gasName);
     if(gasName != "(null)"){
-      gas = materialMap[MaterialMapKey(gasName.c_str())];
+      gas = store->material( MaterialMapKey(gasName.c_str()) );
+    }
+    else {
+	gas = 0;
     }
     string materialName;
     StGetConfigValue(buildfile, "material", materialName);
     if(materialName != "(null)"){
-      material = materialMap[MaterialMapKey(materialName.c_str())];
+      material = store->material( MaterialMapKey(materialName.c_str()) );
+      //material = materialMap[MaterialMapKey(materialName.c_str())];
     }
-
+    else {
+	material=0;
+    }
     int code;
     StGetConfigValue(buildfile, "shapeCode", code);
     shapeCode = static_cast<StiShapeCode>(code);
@@ -46,6 +54,10 @@ void StiDetector::build(const char* buildfile)
     // we only store & read one representation of the geometry
     StGetConfigValue(buildfile, "centerRadius", centerRadius);
     StGetConfigValue(buildfile, "centerRefAngle", centerRefAngle);
+    
+    //Temporary Fix of ordering in phi
+    //if (centerRefAngle<0) centerRefAngle+=2.*M_PI;
+    
     StGetConfigValue(buildfile, "orientationAngle", orientationAngle);
     StGetConfigValue(buildfile, "halfWidth", halfWidth);
     updateNormalRep();
@@ -95,15 +107,25 @@ void StiDetector::write(const char *szFileName){
 
 ostream& operator<<(ostream& os, const StiDetector& d)
 {
-  return os <<d.isOn()<<" "<<d.isActive()<<" "<<d.isContinuousMedium()<<" "
-            <<d.isDiscreteScatterer()<<" "
-            <<*(d.getGas())<<" "<<*(d.getMaterial())<<" "
-            <<d.getShapeCode()<<" "
-            <<d.getCenterRadius()<<" "<<d.getCenterRefAngle()<<" "
-            <<d.getOrientationAngle()<<" "<<d.getHalfWidth()<<" "
-            <<d.getNormalRadius()<<" "<<d.getNormalRefAngle()<<" "
-            <<d.getYmin()<<" "<<d.getYmax()<<" "
-	    <<d.getActivePosition()<<" "<<d.getZCenter()<<" "
-            <<d.getHalfDepth()<<" "<<d.getThickness()<<" "
-            <<d.getSector()<<" "<<d.getPadrow()<<" "<<d.getName();
-} // <<
+    os <<d.isOn()<<" "<<d.isActive()<<" "<<d.isContinuousMedium()<<" "<<d.isDiscreteScatterer()<<" ";
+    if (!d.getGas()) {
+	cout <<"No Gas ";
+    }
+    else {
+	os <<*(d.getGas())<<" ";
+    }
+    if (!d.getMaterial()) {
+	cout <<"No Material ";
+    }
+    else {
+	os <<*(d.getMaterial())<<" ";
+    }
+    os <<d.getShapeCode()<<" "<<d.getCenterRadius()<<" "<<d.getCenterRefAngle()<<" ";
+    os <<d.getOrientationAngle()<<" "<<d.getHalfWidth()<<" ";
+    os <<d.getNormalRadius()<<" "<<d.getNormalRefAngle()<<" ";
+    os <<d.getYmin()<<" "<<d.getYmax()<<" ";
+    os <<d.getActivePosition()<<" "<<d.getZCenter()<<" ";
+    os <<d.getHalfDepth()<<" "<<d.getThickness()<<" ";
+    os <<d.getSector()<<" "<<d.getPadrow()<<" "<<d.getName();;
+    return os;
+}

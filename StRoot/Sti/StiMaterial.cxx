@@ -36,7 +36,8 @@ void StiMaterial::write(const char *szFileName){
 } // write()
 
 ostream& operator<<(ostream& os, const StiMaterial& m){
-  return os << m.getDensity() << " " 
-            << m.getRadLength() << " "
-            << m.getName();
+    os << m.getDensity() << " " 
+       << m.getRadLength() << " "
+       << m.getName();
+    return os;
 }

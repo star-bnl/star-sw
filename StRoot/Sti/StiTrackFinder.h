@@ -1,16 +1,13 @@
 #ifndef StiTrackFinder_H
 #define StiTrackFinder_H 1
 
-#include <iostream.h>
-#include <stdlib.h>
-#include "StiSeedFinder.h"
-#include "StiTrackFilter.h"
-#include "StiDetectorLayerContainer.h"
-#include "StiHitContainer.h"
-#include "StiTrackContainer.h"
-
 #include "StiFactoryTypedefs.h"
-//#include "StiTrackNodeFactory.h"
+
+class StiSeedfinder;
+class StiTrackFilter;
+class StiDetectorContainer;
+class StiHitContainer;
+class StiTrackContainer;
 
 class StiTrackFinder 
 {
@@ -27,7 +24,7 @@ class StiTrackFinder
   //_accessor methods_____________________________________________
   void setTrackSeedFinder(StiSeedFinder * finder);
   void setTrackFilter(StiTrackFilter * filter);
-  void setGeometryContainer(StiDetectorLayerContainer* geometry);
+  void setGeometryContainer(StiDetectorContainer* geometry);
   void setHitContainer(StiHitContainer * hitContainer);
   void setTrackContainer(StiTrackContainer * newTrackContainer);
   void setTrackNodeFactory(StiTrackNodeFactory * factory);
@@ -38,7 +35,7 @@ class StiTrackFinder
 
   StiSeedFinder             * getTrackSeedFinder()    const;
   StiTrackFilter            * getTrackFilter()        const;
-  StiDetectorLayerContainer * getGeometryContainer()  const;
+  StiDetectorContainer * getGeometryContainer()  const;
   StiHitContainer           * getHitContainer()       const;
   StiTrackContainer         * getTrackContainer()     const;
   StiTrackNodeFactory       * getTrackNodeFactory()   const;
@@ -55,7 +52,7 @@ class StiTrackFinder
 
   StiSeedFinder             * trackSeedFinder;
   StiTrackFilter            * trackFilter;
-  StiDetectorLayerContainer * geometryContainer;
+  StiDetectorContainer * geometryContainer;
   StiHitContainer           * hitContainer;
   StiTrackContainer         * trackContainer;
   StiTrackNodeFactory       * trackNodeFactory;
@@ -122,7 +119,7 @@ inline StiTrackContainer * StiTrackFinder::getTrackContainer() const
   return trackContainer;
 }
 
-inline StiDetectorLayerContainer * StiTrackFinder::getGeometryContainer() const
+inline StiDetectorContainer * StiTrackFinder::getGeometryContainer() const
 {
   //----------------------------------------------------------------- 
   // Returns the detector geometry used by this finder
