@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.456 2005/01/14 23:47:29 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.457 2005/01/15 01:31:52 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -116,7 +116,6 @@ Bfc_st BFC1[] = { // standard chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"doEvents"    ,""  ,"","in,StEvent,analysis,NoDb"                                      ,"","","",kFALSE},
   {"drawDst"     ,""  ,"","in,ry1h,globT,SCL,geant,display,NoDb,TbUtil"                   ,"","","",kFALSE},
-  {"Sdst"        ,""  ,"","global,dst,event"                                              ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,event,analysis,EventQA"                             ,"","","",kFALSE},
   {"C1default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits"    ,"","","Year 1 chain",kFALSE},
   {"C2default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,ftpc,svt,emcY2"
@@ -198,7 +197,7 @@ Bfc_st BFC1[] = { // standard chains
            ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
 
 
-  // Year 4 chains (2003/2004) *** CHAINS WILL BE RESHAPED AS RUN PROGRESS ***
+  // Year 4 chains (2003/2004) 
   {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpc,svt_daq,SvtD,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                    ,"Base chain for 2004 (tpc+svt)",kFALSE},
   {"P2004"       ,""     ,"","B2004,l3onl,fcf,ToF,emcDY2,fpd,Corr4,ftpc,trgd,ZDCvtx,OSpaceZ2","",""
@@ -206,6 +205,19 @@ Bfc_st BFC1[] = { // standard chains
   {"pp2004"     ,""   ,"",
    "B2004,fcf,ppOpt,VFppLMV5,-PreVtx,l3onl,ToF,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4,OSpaceZ2",
                     "","","Production chain for 2004 pp data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
+
+  //
+  // Year 5 chains *** CHAINS WILL BE RESHAPED AS RUN PROGRESS *** Initial copy from 2004
+  // THOSE MAY BE DROPPED AS WE WANT TO SUPPORT Sti BASED CHAINS
+  //
+  {"B2005"       ,""  ,"","ry2005,in,tpc_daq,tpc,svt_daq,SvtD,Physics,Cdst,Kalman,tags,Tree,evout","",""
+                                                                   ,"Base chain for 2005 (tpc+svt)",kFALSE},
+  {"P2005"       ,""     ,"","B2005,l3onl,fcf,ToF,emcDY2,fpd,ftpc,trgd,ZDCvtx","",""
+                ,"Production chain for winter 2004/2005 data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
+  {"pp2005"     ,""   ,"",
+   "B2005,fcf,ppOpt,VFppLMV5,-PreVtx,l3onl,ToF,emcDY2,fpd,ftpc,trgd,ZDCvtx",
+                    "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
+  
 
 
   // Other chains/Calibration
@@ -217,7 +229,7 @@ Bfc_st BFC1[] = { // standard chains
   {"VtxSeedCal","","",
    "ppOpt,ry2001,in,tpc_daq,tpc,global,-Tree,Physics,-PreVtx,FindVtxSeed,NoEvent,Corr2",
                                                                      "","","Pass0 Vertex evaluator",kFALSE},
-  {"SpcChgCal","","","B2004,-Cdst,Sdst,fcf,Corr3,OSpaceZ2,OShortR,SCEbyE,-Tree,-tags,-EvOut",
+  {"SpcChgCal","","","B2004,fcf,Corr3,OSpaceZ2,OShortR,SCEbyE,-Tree,-tags,-EvOut,-EventQA",
                                                                 "","","Pass0 SpaceCharge evaluator",kFALSE},
 
 
@@ -395,10 +407,10 @@ Bfc_st BFC1[] = { // standard chains
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db"                         ,"StTpcDbMaker","StTpcDb","",kFALSE},
   {"trgd"        ,"trgd","","TRGDef"  ,"StTriggerDataMaker","StTriggerDataMaker","Get trigger data",kFALSE},
 
-
-  {"Event"    ,"0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation>",kFALSE},
-  {"MakeEvent","","","","","",                                                         STR_OBSOLETE,kFALSE},
-
+//{"Event","","",",StEvent,tpcDB,detDb","StEventMaker",",StEventMaker","<StEvent creation/filling>",kFALSE},
+//{"MakeEvent","","","Event",""                                                    ,"",STR_OBSOLETE,kFALSE},
+  {"MakeEvent","0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker",
+                                                                         "<Early StEvent creation>",kFALSE},
 
   {"l0"          ,"l0Chain","","trg_T,globT,ctf,trg"                        ,"StMaker","StChain","",kFALSE},
   {"ctf"         ,"ctf","l0Chain","ctf_T,db"               ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE},
@@ -502,8 +514,9 @@ Bfc_st BFC1[] = { // standard chains
                                                                          "Regular dEdx calculation",kFALSE},
   {"svtdEdx"     ,"svtdEdx","globalChain","globT,TbUtil",         "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
 
+  {"Event",  "","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation/filling>",kFALSE},
   {"ZDCVtx"      ,"","","db"                              ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
-  {"dEdxY2"      ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
+  {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
 
@@ -527,7 +540,7 @@ Bfc_st BFC1[] = { // standard chains
 
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                ,"","","SSD full chain for simulation",kFALSE},
   {"sls"         ,"","","tls,Simu,SvtCL","St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker",
-                                                                           "... SSD slow simulator",kFALSE},
+                                                                            "... SSD slow simulator",kFALSE},
   {"spa"         ,"","","tls,Simu,SvtCL","St_spa_Maker","St_tpc,St_svt,StSsdSimulationMaker",
                                                                      "... SSD Pedestal Annihilator",kFALSE},
   {"scf"       ,"","","" ,"St_scf_Maker","St_tpc,St_svt,StSsdClusterMaker","... SSD cluster finder",kFALSE},
@@ -718,7 +731,6 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"doEvents"    ,""  ,"","in,StEvent,analysis,NoDb"                                      ,"","","",kFALSE},
   {"drawDst"     ,""  ,"","in,ry1h,globT,SCL,geant,display,NoDb,TbUtil"                   ,"","","",kFALSE},
-  {"Sdst"        ,""  ,"","global,dst,event"                                              ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,event,analysis,EventQA"                             ,"","","",kFALSE},
   {"C1default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits"    ,"","","Year 1 chain",kFALSE},
   {"C2default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,ftpc,svt,emcY2"
@@ -835,6 +847,16 @@ Bfc_st BFC2[] = { // ITTF Chains
               "","","Production chain for 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
 
 
+  // Year 5 Chains
+  {"B2005"       ,""        ,"","ry2005,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
+                                                              ,"Base chain for 2005 ITTF (tpc+svt)",kFALSE},
+  {"P2005"       ,"" ,"",
+                   "B2005,fcf,VFMinuit,l3onl,ToF,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT",
+              "","","Production chain for 2004/2005 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+  {"pp2005"      ,"" ,"",
+   "B2005,fcf,ppOpt,VFppLMV5,CtbMatchVtx,l3onl,ToF,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT",
+                "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+
 
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","","",
@@ -845,7 +867,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"VtxSeedCal","","",
    "ppOpt,ry2001,in,tpc_daq,tpc,global,-Tree,Physics,-PreVtx,FindVtxSeed,NoEvent,Corr2",
                                                                      "","","Pass0 Vertex evaluator",kFALSE},
-  {"SpcChgCal","","","B2004,-Cdst,Sdst,fcf,Corr3,OSpaceZ2,OShortR,SCEbyE,-Tree,-tags,-EvOut",
+  {"SpcChgCal","","","B2004,Sdst,fcf,Corr3,OSpaceZ2,OShortR,SCEbyE,-Tree,-tags,-EvOut,-EventQA",
                                                                 "","","Pass0 SpaceCharge evaluator",kFALSE},
 
 
@@ -1027,8 +1049,10 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db"                         ,"StTpcDbMaker","StTpcDb","",kFALSE},
   {"trgd"        ,"trgd","","TRGDef"  ,"StTriggerDataMaker","StTriggerDataMaker","Get trigger data",kFALSE},
 
-  {"Event"    ,"0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation>",kFALSE},
-  {"MakeEvent","","","","","",                                                         STR_OBSOLETE,kFALSE},
+//{"Event","","",",StEvent,tpcDB,detDb","StEventMaker",",StEventMaker","<StEvent creation/filling>",kFALSE},
+//{"MakeEvent","","","Event",""                                                    ,"",STR_OBSOLETE,kFALSE},
+  {"MakeEvent","0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker",
+                                                                         "<Early StEvent creation>",kFALSE},
 
   {"l0"          ,"l0Chain","","trg_T,globT,ctf,trg"                        ,"StMaker","StChain","",kFALSE},
   {"ctf"         ,"ctf","l0Chain","ctf_T,db"               ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE},
@@ -1138,6 +1162,7 @@ Bfc_st BFC2[] = { // ITTF Chains
 
 
   //  Reminder: You are within the ITTF chain definitions
+  {"Event"  ,"","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation/filling>",kFALSE},
   {"ZDCVtx"      ,"","","db"                              ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"genvtx"      ,"","","","StGenericVertexMaker","Sti,StGenericVertexMaker","Generic Vertex Finder",kFALSE},
   {"Mc"          ,"McChain","McEvent","sim_T,globT,McAss,McAna"             ,"StMaker","StChain","",kFALSE},
