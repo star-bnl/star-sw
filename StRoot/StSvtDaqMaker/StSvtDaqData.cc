@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqData.cc,v 1.6 2002/05/06 00:35:31 munhoz Exp $
+ * $Id: StSvtDaqData.cc,v 1.7 2002/05/10 21:12:36 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqData.cc,v $
+ * Revision 1.7  2002/05/10 21:12:36  caines
+ * Dont swap ladders 15 and 16 for pp sort this out properly late
+ *
  * Revision 1.6  2002/05/06 00:35:31  munhoz
  * correct hybrid swapping
  *
@@ -102,10 +105,10 @@ int StSvtDaqData::setData(StSVTReader* reader, char* option)
 	      if( hybrid ==2) index --;
 	    }
 	    else if( (barrel == 3) && (ladder == 16) && (wafer > 4)){
-	      index -= 14;
+	      //index -= 14;
 	    }
 	    else if( (barrel == 3) && (ladder == 15) && (wafer > 4)){
-	      index += 14;
+	      //index += 14;
 	    }
 	  }
 
