@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcLocalSectorCoordinate.cc,v 1.2 2000/02/02 23:01:38 calderon Exp $
+ * $Id: StTpcLocalSectorCoordinate.cc,v 1.3 2004/03/05 17:22:55 fisyak Exp $
  *
  * Author:  brian Jan 26, 1999
  *
@@ -11,6 +11,9 @@
  ************************************************************************
  *
  * $Log: StTpcLocalSectorCoordinate.cc,v $
+ * Revision 1.3  2004/03/05 17:22:55  fisyak
+ * Add TPC transformations for direction, aligned sectors, protection in order to stay in the same sector when moving from/to Pad coordinates
+ *
  * Revision 1.2  2000/02/02 23:01:38  calderon
  * Changes for CC5
  * Tests withs StTpcDb still going.
@@ -37,20 +40,7 @@
  *
  ***********************************************************************/
 #include "StTpcLocalSectorCoordinate.hh"
-
-static const char rcsid[] = "$Id: StTpcLocalSectorCoordinate.cc,v 1.2 2000/02/02 23:01:38 calderon Exp $";
-
-    
-StTpcLocalSectorCoordinate::StTpcLocalSectorCoordinate() {/**/}
-
-StTpcLocalSectorCoordinate::StTpcLocalSectorCoordinate(const double x, const double y, const double z, const int sect)
-    : mPosition(x,y,z), mFromSector(sect) { /* nopt */}
-
-StTpcLocalSectorCoordinate::StTpcLocalSectorCoordinate(const StThreeVector<double>& position, const int sect)
-    : mPosition(position), mFromSector(sect) { /* nopt */ }
-
-StTpcLocalSectorCoordinate::~StTpcLocalSectorCoordinate() {/**/}
-
+static const char rcsid[] = "$Id: StTpcLocalSectorCoordinate.cc,v 1.3 2004/03/05 17:22:55 fisyak Exp $";
 int StTpcLocalSectorCoordinate::operator==(const StTpcLocalSectorCoordinate& p) const
 {
     return (p.mPosition   == mPosition &&

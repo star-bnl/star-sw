@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.7 2001/05/22 22:32:14 hardtke Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.8 2004/03/05 17:22:54 fisyak Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
+ * Revision 1.8  2004/03/05 17:22:54  fisyak
+ * Add TPC transformations for direction, aligned sectors, protection in order to stay in the same sector when moving from/to Pad coordinates
+ *
  * Revision 1.7  2001/05/22 22:32:14  hardtke
  * Add tpc global to local transformations
  *
@@ -93,15 +96,6 @@
 #define ST_COORDINATE_TRANSFORM_HH
 
 #include <stdlib.h>
-#include <vector>
-#ifndef ST_NO_NAMESPACES
-using std::vector;
-#endif
-//#include <unistd.h>
-#ifndef ST_NO_EXCEPTIONS
-//#include <stdexcept>
-#endif
-
 // SCL
 #include "StGlobals.hh"
 #include "SystemOfUnits.h"
@@ -109,16 +103,23 @@ using std::vector;
 #include "StMatrix.hh"
 
 #include "StTpcDb/StTpcDb.h"
+#include "StObject.h"
 
-#define DEBUG_TPC 0
-#define idb if(DEBUG_TPC) cout
+//#define DEBUG_TPC 0
+//#define idb if(DEBUG_TPC) cout
 
 class StGlobalCoordinate;
 class StTpcLocalCoordinate;
 class StTpcLocalSectorCoordinate;
+class StTpcLocalSectorAlignedCoordinate;
 class StTpcPadCoordinate;
 
-class StTpcCoordinateTransform {
+class StGlobalDirection;
+class StTpcLocalDirection;
+class StTpcLocalSectorDirection;
+class StTpcLocalSectorAlignedDirection;
+
+class StTpcCoordinateTransform {//: public StObject {
 public:
   //StTpcCoordinateTransform(StTpcGeometry*, StTpcSlowControl*, StTpcElectronics*);
   StTpcCoordinateTransform(StTpcDb*);
@@ -136,16 +137,27 @@ public:
     void  operator()(const StTpcPadCoordinate&, StTpcLocalCoordinate&);
 // Tpc Local Sector <--> TPC Local
   
-    void  operator()(const  StTpcLocalCoordinate& ,StTpcLocalSectorCoordinate&);
-    void  operator()(const StTpcLocalSectorCoordinate&, StTpcLocalCoordinate&);
+  void  operator()(const              StTpcLocalCoordinate&, StTpcLocalSectorCoordinate&       );
+  void  operator()(const        StTpcLocalSectorCoordinate&, StTpcLocalCoordinate&             );
+  void  operator()(const        StTpcLocalSectorCoordinate&, StTpcLocalSectorAlignedCoordinate&);
+  void  operator()(const StTpcLocalSectorAlignedCoordinate&, StTpcLocalSectorCoordinate&       );
+
+  void  operator()(const               StTpcLocalDirection&, StTpcLocalSectorDirection&        );
+  void  operator()(const         StTpcLocalSectorDirection&, StTpcLocalDirection&              );
+  void  operator()(const         StTpcLocalSectorDirection&, StTpcLocalSectorAlignedDirection& );
+  void  operator()(const  StTpcLocalSectorAlignedDirection&, StTpcLocalSectorDirection&        );
 // Tpc Local Sector <--> Global
     void  operator()(const StTpcLocalSectorCoordinate&, StGlobalCoordinate&);
     void  operator()(const  StGlobalCoordinate& ,StTpcLocalSectorCoordinate&);
+    void  operator()(const StTpcLocalSectorDirection&, StGlobalDirection&);
+    void  operator()(const  StGlobalDirection& ,StTpcLocalSectorDirection&);
 
     
 // Internal TpcCoordinate <-->  Global Coordinate
     void  operator()(const StTpcLocalCoordinate&, StGlobalCoordinate&);
     void  operator()(const StGlobalCoordinate&, StTpcLocalCoordinate&);
+    void  operator()(const StTpcLocalDirection&, StGlobalDirection&);
+    void  operator()(const StGlobalDirection&, StTpcLocalDirection&);
 
 //      Raw Data          <-->  Global Coordinate
     void  operator()(const StTpcPadCoordinate&, StGlobalCoordinate&);
@@ -171,31 +183,36 @@ public:
     
     // (3d)rotations   From means "From the TPC local  Coordinates to Tpc Local  Sector Coordinates "     
   //    "to" means " from Tpc local sector  Coordinates to  TPC local  Coordinates "
-    StThreeVector<double> rotateToLocal(const StThreeVector<double>&, const int)  ;
-    StThreeVector<double> rotateFromLocal(const StThreeVector<double>&, const int);
+  // idir == 1 transformation for coordinate, idir != 1 transformation for direction
+    StThreeVector<double> rotateToLocal(const StThreeVector<double>&, const int sector, const int dir = 1)  ;
+    StThreeVector<double> rotateFromLocal(const StThreeVector<double>&, const int sector, const int dir = 1);
 
     // Utilities
     double      rad2deg(double)        const; //radians to degrees (should be in global?)
     int         nearestInteger(double) const;
-
+  const StMatrix<double>      &TpcToGlobalRotation() const {return *&mTpcToGlobalRotation;}
+  const StMatrix<double>      &GlobalToTpcRotation() const {return *&mGlobalToTpcRotation;}
+  const StThreeVector<double> &TpcPositionInGlobal() const {return *&mTpcPositionInGlobal;}
+      
 private:
-    vector<double>    mCosForSector;
-    vector<double>    mSinForSector;
+    double    mCosForSector[24];
+    double    mSinForSector[24];
     StMatrix<double>  mRotation;  // (2x2)
     StMatrix<double>  mRotate;    // (2x1)
     StMatrix<double>  mResult;    // (2x1)
     StMatrix<double>  mTpcToGlobalRotation; // (3X3)
     StMatrix<double>  mGlobalToTpcRotation; // (3X3)
     StThreeVector<double> mTpcPositionInGlobal; 
-    
-    //StTpcGeometry    *mTPCdb;         // singleton class
-    //StTpcSlowControl *mSCdb;          // singleton class
-    //StTpcElectronics *mElectronicsDb; // singleton class
+  double    mInnerPositionOffsetX[24]; // sector alignment
+  double    mOuterPositionOffsetX[24]; // 
+  double    mInnerRotation[24];        // rad
+  double    mOuterRotation[24];        //
     StTpcDb*          gTpcDbPtr; 
     double            mTimeBinWidth;
-    double            mInnerSectorzOffset; //These are in temporarily,
-    double            mOuterSectorzOffset; //until StTpcDb has them.
-    double            mDriftDistance; //ditto
+    double            mInnerSectorzOffset; 
+    double            mOuterSectorzOffset; 
+    double            mDriftDistance; 
+  //  ClassDef(StTpcCoordinateTransform,0) //
 };
 
 #endif

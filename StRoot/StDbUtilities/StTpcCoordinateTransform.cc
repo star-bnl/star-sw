@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.22 2004/01/14 22:39:08 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.23 2004/03/05 17:22:54 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,8 +16,11 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.23  2004/03/05 17:22:54  fisyak
+ * Add TPC transformations for direction, aligned sectors, protection in order to stay in the same sector when moving from/to Pad coordinates
+ *
  * Revision 1.22  2004/01/14 22:39:08  fisyak
- * unsigned int => size_t to make alpha happy
+ *  unsigned int => size_t to make alpha happy
  *
  * Revision 1.21  2001/05/23 00:09:55  hardtke
  * Add error message if rotation matrix inversion fails
@@ -178,7 +181,7 @@ using namespace units;
 // StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcGeometry* geomdb,
 // 						   StTpcSlowControl* scdb,
 // 						   StTpcElectronics* eldb)
-
+//ClassImp(StTpcCoordinateTransform);
 StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
 : mRotation(2,2,1), mRotate(2,1,0), mResult(2,1,0), mTpcToGlobalRotation(3,3,1), mGlobalToTpcRotation(3,3,1) {
   
@@ -206,8 +209,7 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
         mOuterSectorzOffset = gTpcDbPtr->Dimensions()->zOuterOffset();
 	double beta = 0;
 	int numSectors = gTpcDbPtr->Dimensions()->numberOfSectors();
-	mCosForSector.resize(numSectors);
-	mSinForSector.resize(numSectors);
+	double deg_2_rad = M_PI/180.;
 	for (int sector = 1; sector <= numSectors;
 	     sector++) {
 	    beta = (sector>12) ? (numSectors-sector)*2.*M_PI/(static_cast<double>(numSectors)/2.)
@@ -218,9 +220,16 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
 // 	    }
 	    mCosForSector[sector-1] = cos(beta); // careful, sector is the sector number, not index
 	    mSinForSector[sector-1] = sin(beta); // careful, sector is the sector number, not index
+	    double s = -1;
+	    if (sector > 12) s = +1;
+	    mInnerPositionOffsetX[sector-1] = s*gTpcDbPtr->SectorPosition(sector)->innerPositionOffsetX();
+	    mOuterPositionOffsetX[sector-1] = s*gTpcDbPtr->SectorPosition(sector)->outerPositionOffsetX();
+	    mInnerRotation[sector-1]        = s*gTpcDbPtr->SectorPosition(sector)->innerRotation()*deg_2_rad;
+	    mOuterRotation[sector-1]        = s*gTpcDbPtr->SectorPosition(sector)->outerRotation()*deg_2_rad;
 // 	    PR(beta);
 // 	    PR(cos(beta));
 // 	    PR(sin(beta));
+	    
 	}
 	double phi = 0.0;  //large uncertainty, so set to 0
         double theta = gTpcDbPtr->GlobalPosition()->TpcRotationAroundGlobalAxisY();
@@ -337,8 +346,9 @@ void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLoc
       gTpcDbPtr->DriftVelocity()*1e-6*    //cm/s -> cm/us
       (gTpcDbPtr->T0(a.sector())->getT0(a.row(),a.pad()) *mTimeBinWidth);  
       //t0 offset -- DH  27-Mar-00
-
-    tmp.setZ(zFromTB(a.timeBucket())-zoffset-t0zoffset);
+    Double_t z = zFromTB(a.timeBucket())-zoffset-t0zoffset;
+    if (z <= 0) z = 1.e-5;
+    tmp.setZ(z);
     b = StTpcLocalSectorCoordinate(tmp,a.sector());
 }
 //  Tpc Local Sector <--> Global
@@ -371,6 +381,34 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
 
     b = StTpcLocalCoordinate(tmp);
 }
+//________________________________________________________________________________
+void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, 
+					  StTpcLocalSectorAlignedCoordinate& b) {
+  int sector = a.fromSector(); 
+  int row    = rowFromLocal(a.position());
+  double offset = row <14 ? mInnerPositionOffsetX[sector-1] : mOuterPositionOffsetX[sector-1];
+  double xx  = a.position().x() - offset;
+  double yy  = a.position().y() - 123;
+  double rot = row <14 ? mInnerRotation[sector-1] : mOuterRotation[sector-1];
+  b = StTpcLocalSectorAlignedCoordinate(StThreeVector<double>(xx*cos(rot) + yy*sin(rot),
+						       -xx*sin(rot) + yy*cos(rot) + 123,
+						       a.position().z()),sector);
+}
+//________________________________________________________________________________
+void StTpcCoordinateTransform::operator()(const StTpcLocalSectorAlignedCoordinate& a, 
+					  StTpcLocalSectorCoordinate& b) {
+  int sector = a.fromSector(); 
+  int row    = rowFromLocal(a.position());
+  
+  double xx  = a.position().x();
+  double yy  = a.position().y() - 123;
+  double offset = row <14 ? mInnerPositionOffsetX[sector-1] : mOuterPositionOffsetX[sector-1];
+  double rot = row <14 ? mInnerRotation[sector-1] : mOuterRotation[sector-1];
+  b = StTpcLocalSectorCoordinate(StThreeVector<double>(xx*cos(rot) - yy*sin(rot) + offset,
+						       xx*sin(rot) + yy*cos(rot) + 123,
+						       a.position().z()),sector);
+}
+//________________________________________________________________________________
 void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate& a, StTpcLocalSectorCoordinate& b)
 {   int sector= sectorFromCoordinate(a);
     StThreeVector<double> tmp=rotateFromLocal(a.position(),sector);
@@ -603,7 +641,7 @@ int StTpcCoordinateTransform::tBFromZ(const double z) const
 	 + ( z / (gTpcDbPtr->DriftVelocity()*1e-6))
 		   ); // tZero + (z/v_drift); the z already has the proper offset
     
-  return((int)(time/(mTimeBinWidth)));//time bin starts at 0,HL,9/1/99
+  return((int)(time/(mTimeBinWidth) + 1e-5));//time bin starts at 0,HL,9/1/99
 }
 
 //
@@ -612,7 +650,7 @@ int StTpcCoordinateTransform::tBFromZ(const double z) const
 
 StThreeVector<double>
 StTpcCoordinateTransform::rotateToLocal(const StThreeVector<double>& a,
-				     const int sector)
+				     const int sector, const int idir)
 {   //  to local means " from sector 12 local to tpc local"
 
     // Speed up the code, don't use matrices.
@@ -623,18 +661,30 @@ StTpcCoordinateTransform::rotateToLocal(const StThreeVector<double>& a,
     
     // ( cos Þ  sin Þ )
     // ( -sin Þ   cos Þ )
+  // idir != 1 means transform direction
     double x = (sector>12)?a.x():-a.x(); // Undo the sign flip before rotation
+    
     StThreeVector<double> result(x*mCosForSector[sector-1] + a.y()*mSinForSector[sector-1],
-				 -x*mSinForSector[sector-1] + a.y()*mCosForSector[sector-1],
-				 0.); // z is done in the next line
+			  -x*mSinForSector[sector-1] + a.y()*mCosForSector[sector-1],
+			  0.); // z is done in the next line
 
-    return (sector>12)? (StThreeVector<double>(result.x(),result.y(),a.z()-mDriftDistance))
-                        : (StThreeVector<double>(result.x(),result.y(),-a.z()+mDriftDistance));
+    if (idir == 1) {
+//       return (sector>12)? (StThreeVector<double>(result.x(),result.y(),a.z()-mDriftDistance))
+// 	: (StThreeVector<double>(result.x(),result.y(),-a.z()+mDriftDistance));
+      double z = mDriftDistance-a.z();
+      if (z > mDriftDistance) z = mDriftDistance;
+      if (z < 1.e-5) z = 1.e-5;
+      if (sector > 12) z = -z;
+      return StThreeVector<double>(result.x(),result.y(),z);
+    }
+    else 
+      return (sector>12)? (StThreeVector<double>(result.x(),result.y(),a.z()))
+	: (StThreeVector<double>(result.x(),result.y(),-a.z()));
 }
  
 StThreeVector<double> 
 StTpcCoordinateTransform::rotateFromLocal(const StThreeVector<double>& a,
-						     const int sector)
+						     const int sector, const int idir)
 {   
     // FromLocal means " from the tpc local to sector 12 local"
     // define 2x2 rotation matrix
@@ -645,12 +695,28 @@ StTpcCoordinateTransform::rotateFromLocal(const StThreeVector<double>& a,
     // Speed up the code, don't use matrices.
     // Use array of cosines and sines created during construction.
     // careful, sector is the sector number, not index
+  // idir != 1 means transform direction
     StThreeVector<double> result(a.x()*mCosForSector[sector-1] - a.y()*mSinForSector[sector-1],
-				 a.x()*mSinForSector[sector-1] + a.y()*mCosForSector[sector-1],
-				 0.); // z is done in the next line
+			  a.x()*mSinForSector[sector-1] + a.y()*mCosForSector[sector-1],
+			  0.); // z is done in the next line
     //     PR(result);
-    return (sector>12) ? (StThreeVector<double>(result.x(),result.y(),a.z()+mDriftDistance))
-	               : (StThreeVector<double>(-result.x(),result.y(),-a.z()+mDriftDistance));
+    if (idir == 1) {
+      //      return (sector>12) ? (StThreeVector<double>(result.x(),result.y(),a.z()+mDriftDistance))
+      //	: (StThreeVector<double>(-result.x(),result.y(),-a.z()+mDriftDistance));
+      if (sector > 12) {
+	double z = a.z()+mDriftDistance; 
+	if (z < 1.e-5) z = 1.e-5;
+	return StThreeVector<double>(result.x(),result.y(),z);
+      }
+      else {
+	double z = a.z()-mDriftDistance;
+	if (z > -1.e-5) z = -1.e-5;
+	return StThreeVector<double>(-result.x(),result.y(),-z);
+      }
+    }
+    else
+      return (sector>12) ? (StThreeVector<double>(result.x(),result.y(),a.z()))
+	               : (StThreeVector<double>(-result.x(),result.y(),-a.z()));
 }
 
 /****************************************************************/
@@ -664,3 +730,74 @@ int StTpcCoordinateTransform::nearestInteger(double a) const
 {
     return static_cast<int>(a);
 }
+//________________________________________________________________________________
+void StTpcCoordinateTransform::operator()(const StTpcLocalDirection& a, StTpcLocalSectorDirection& b)
+{   int sector= b.fromSector();
+    StThreeVector<double> tmp=rotateFromLocal(a.position(),sector,2);
+    
+    b = StTpcLocalSectorDirection(tmp,sector);
+}
+//________________________________________________________________________________
+void StTpcCoordinateTransform::operator()(const StTpcLocalSectorDirection& a, StGlobalDirection& b) {
+  StTpcLocalDirection tmp;
+  this->operator()(a,tmp);
+  this->operator()(tmp,b); 
+}
+//________________________________________________________________________________
+void StTpcCoordinateTransform::operator()(const StGlobalDirection& a,  StTpcLocalSectorDirection& b) {
+  StTpcLocalDirection tmp;
+  this->operator()(a,tmp);
+  this->operator()(tmp,b); 
+}
+//________________________________________________________________________________
+void StTpcCoordinateTransform::operator()(const StTpcLocalSectorDirection& a, StTpcLocalDirection& b) {
+  int sector = a.fromSector();
+  StThreeVector<double> sector12Position(a.position().x(),
+					 a.position().y() ,
+					 a.position().z());
+  StThreeVector<double> tmp = rotateToLocal(sector12Position,sector,2);
+  b = StTpcLocalDirection(tmp);
+}
+//________________________________________________________________________________
+void StTpcCoordinateTransform::operator()(const StTpcLocalSectorDirection& a, 
+					  StTpcLocalSectorAlignedDirection& b) {
+  int sector = b.fromSector(); 
+  int row    = b.fromRow();
+  double xx  = a.position().x();
+  double yy  = a.position().y();
+  double rot = row <14 ? mInnerRotation[sector-1] : mOuterRotation[sector-1];
+  b = StTpcLocalSectorAlignedDirection(StThreeVector<double>(xx*cos(rot) + yy*sin(rot),
+							     -xx*sin(rot) + yy*cos(rot),
+							     a.position().z()),sector,row);
+}
+//________________________________________________________________________________
+void StTpcCoordinateTransform::operator()(const StTpcLocalSectorAlignedDirection& a, 
+					  StTpcLocalSectorDirection& b) {
+  int sector = a.fromSector(); 
+  int row    = a.fromRow();
+  double xx  = a.position().x();
+  double yy  = a.position().y();
+  double rot = row <14 ? mInnerRotation[sector-1] : mOuterRotation[sector-1];
+  b = StTpcLocalSectorDirection(StThreeVector<double>(xx*cos(rot) - yy*sin(rot),
+					       xx*sin(rot) + yy*cos(rot),
+					       a.position().z()),sector);
+}
+//________________________________________________________________________________
+void StTpcCoordinateTransform::operator()(const StTpcLocalDirection& a, StGlobalDirection& b) 
+{
+    // Requires survey DB i/o!
+    // Use matrix rotations and offset from database.  Hardtke, 22-may-2001
+
+    b = StGlobalDirection(mTpcToGlobalRotation*a.position());
+}
+//________________________________________________________________________________
+void StTpcCoordinateTransform::operator()(const StGlobalDirection& a, StTpcLocalDirection& b)
+{
+    // Requires survey DB i/o!
+    // Use matrix rotations and offset from database.  Hardtke, 22-may-2001
+
+    b = StTpcLocalDirection(mGlobalToTpcRotation*a.position());   
+}
+//________________________________________________________________________________
+
+
