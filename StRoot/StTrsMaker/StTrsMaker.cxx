@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.15 1999/02/17 17:02:16 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.16 1999/02/23 01:10:42 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.16  1999/02/23 01:10:42  lasiuk
+// 1st production version
+//
 // Revision 1.15  1999/02/17 17:02:16  lasiuk
 // streamline for production
 // remove debug.
@@ -94,7 +97,7 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.15 1999/02/17 17:02:16 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.16 1999/02/23 01:10:42 lasiuk Exp $";
 
 ClassImp(StTrsMaker)
 
@@ -251,6 +254,20 @@ void StTrsMaker::whichSector(int volId, int* isDet, int* sector, int* padrow){
 Int_t StTrsMaker::Make(){
     //  PrintInfo();
 
+    //
+    // Set Range for Processing
+    const int firstSectorToProcess = 1;
+    const int lastSectorToProcess = 24;
+    
+    int currentSectorProcessed = firstSectorToProcess;
+
+    cout << "Processing sectors "
+	 << firstSectorToProcess
+	 << "--"
+	 << lastSectorToProcess << endl;
+    //
+    //
+    
     //cout << "Make ofstream" << endl;
     //ofstream ofs("/star/u2b/lasiuk/geantdebug.txt", ios::out);
     //ofstream raw("/star/u2b/lasiuk/event.txt",ios::out);
@@ -273,12 +290,12 @@ Int_t StTrsMaker::Make(){
 
     // Where is the first hit in the TPC
     whichSector(tpc_hit->volume_id, &bisdet, &bsectorOfHit, &bpadrow);
-    int currentSectorProcessed = bsectorOfHit;
+    //int currentSectorProcessed = bsectorOfHit;
 
     // Limit the  processing to a fixed number of segments
     //no_tpc_hits = 20;
     for (int i=1; i<=no_tpc_hits; i++){
-	cout << "--> tpc_hit:  " << i << endl;
+	//cout << "--> tpc_hit:  " << i << endl;
 //  	raw << tpc_hit->volume_id   << ' '
 //  	    << tpc_hit->de          << ' '
 //  	    << tpc_hit->ds          << ' '
@@ -294,17 +311,26 @@ Int_t StTrsMaker::Make(){
 	
 	// Process until the next sector is reached.
 
+// 	PR(bsectorOfHit);
+
 	// Save time initially  - by not processing pseudo padrows
 	if(bisdet) {
-	    cout << "Segment in a pseudo-padRow. Skipping..." << endl;
+// 	    cout << "Segment in a pseudo-padRow. Skipping..." << endl;
 	    tpc_hit++;
 	    if(i != no_tpc_hits) continue;
 	}
 	//sleep(2);
-	
-	if( (currentSectorProcessed == bsectorOfHit) &&
-	    (i                      != no_tpc_hits )) {
+
+	if ( (bsectorOfHit < firstSectorToProcess) ||
+	     (bsectorOfHit >  (lastSectorToProcess+1) )) {
+	    tpc_hit++;  // increase the pointer...
+	    continue;
+	}
 	    
+	
+	if( (currentSectorProcessed == bsectorOfHit        ) &&
+	    (i                      != no_tpc_hits         )) {
+
 	    int pID = 1;  // I need to know the PID for ionization calculations
 
 	    // I can't believe this.  After such careful design of the coordinate
@@ -361,11 +387,12 @@ Int_t StTrsMaker::Make(){
 					(fabs(tpc_hit->de*GeV)),
 					tpc_hit->ds*centimeter,
 					pID);
-	    
+// 	    PR(hitPosition);
+// 	    PR(sector12Coordinate);
 // 	    PR(hitMomentum.mag());
 
 // 	    ofs << " " << aSegment << endl;
-//  	    PR(aSegment);
+//   	    PR(aSegment);
 	    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 	    vector<int> all[3];
@@ -400,7 +427,7 @@ Int_t StTrsMaker::Make(){
 	        // TRANSPORT HERE
 	        //
 		mChargeTransporter->transportToWire(*iter);
-// 		PR(*iter);
+//  		PR(*iter);
 		
 		//
 		// CHARGE COLLECTION AND AMPLIFICATION
@@ -474,8 +501,8 @@ Int_t StTrsMaker::Make(){
 
 	//
 	// you can skip out here if you only want to process a single sector...
-	if(currentSectorProcessed>3)
-	    break;  // Finish here
+// 	if(currentSectorProcessed>3)
+// 	    break;  // Finish here
 	//
     } // loop over all segments: for(int i...
   } // mDataSet
@@ -577,7 +604,7 @@ Int_t StTrsMaker::Make(){
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.15 1999/02/17 17:02:16 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.16 1999/02/23 01:10:42 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
