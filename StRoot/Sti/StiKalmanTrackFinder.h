@@ -71,6 +71,10 @@ public:
 			{
 				return mode;
 			}
+
+  int getTrackSeedFoundCount() const;
+  int getTrackFoundCount(StiTrackFilter * filter) const;
+  int getTrackFoundCount() const;
     
 protected:
 

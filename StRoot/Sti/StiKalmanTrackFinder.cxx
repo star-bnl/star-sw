@@ -731,3 +731,45 @@ void StiKalmanTrackFinder::doFinishLayer()
   //printState();
 }
 
+
+/*! Get the number of tracks found by this finder for the current event.
+<p>
+This convenience method returns the number of tracks found by this finder
+for the current. The number of tracks is simply determined based on the size
+of the track container used by this finder. All tracks inserted in the container
+are counted, no quality cut is used. 
+*/
+int StiKalmanTrackFinder::getTrackFoundCount() const
+{
+  return trackContainer->size();
+}
+
+/*! Get the number of tracks satisfying the given track filter.
+<p>
+This convenience method returns the number of tracks found by this finder
+for the current that satisfy the give track filter. 
+*/
+int StiKalmanTrackFinder::getTrackFoundCount(StiTrackFilter * filter) const
+{
+  StiKalmanTrack * t;
+  // reset filter counter to zero.
+  filter->reset();
+  KalmanTrackMap::const_iterator it;
+  for (it=trackContainer->begin(); 
+       it!=trackContainer->end(); 
+       ++it) 
+      filter->filter((*it).second);
+  return filter->getAcceptedTrackCount();
+}
+
+/*! Get the number of track seeds found by the seed finder used by this finder for the current event.
+<p>
+This convenience method returns the number of track seeds found by the 
+seed finder used by this finder for the current. 
+Note:needs to be fixed.
+*/
+int StiKalmanTrackFinder::getTrackSeedFoundCount() const
+{
+  return trackContainer->size();
+}
+
