@@ -203,7 +203,7 @@ int duiFindDS(DS_DATASET_T *& node, DS_DATASET_T* root, char* path)
 	   ||  !dsFindEntry(&pDSc, pDSr, s)
 	   ){
 	 if(s) FREE(s);  /*fix memory leak -akio/phenix*/
-	 EML_PUSHERROR(dsError("DSL-NODE_NOT_FOUND"));
+	 EML_PUSHERROR(DSL_NODE_NOT_FOUND);
 	 return FALSE;
      }
      pDSr = pDSc;

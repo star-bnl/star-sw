@@ -220,3 +220,9 @@ kam_dui_rmdir_()
    dui_rmdir(path);
 }
 
+void kam_dui_precious_() {
+  dui_precious();
+}
+void kam_dui_rm_nonprecious_() {
+  dui_rm_nonprecious();
+}

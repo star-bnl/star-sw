@@ -39,6 +39,24 @@ dui_df()
 }
 
 STAFCV_T 
+dui_rm_nonprecious()
+{
+   if( !dui->rm_nonprecious() ){
+      EML_FAILURE(METHOD_FAILURE);
+   }
+   EML_SUCCESS(STAFCV_OK);
+}
+
+STAFCV_T 
+dui_precious()
+{
+   if( !dui->precious() ){
+      EML_FAILURE(METHOD_FAILURE);
+   }
+   EML_SUCCESS(STAFCV_OK);
+}
+
+STAFCV_T 
 dui_du()
 {
    if( !dui->du("/dui",0) ){

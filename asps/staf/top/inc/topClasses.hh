@@ -179,6 +179,7 @@ public:
 
 //:----------------------------------------------- INTERFACE METHODS  --
    virtual char * list ();
+   STAFCV_T topOperator(tdmTable*,char*,char*,char*);
 
 //:- Project -----------------------
    virtual STAFCV_T deleteProject (const char * name);

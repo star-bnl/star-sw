@@ -37,6 +37,7 @@ extern CC_P void kam_top_newproject_();
 extern CC_P void kam_top_newjoin_();
 extern CC_P void kam_top_newsort_();
 extern CC_P void kam_topsort_agent_sort_();
+extern CC_P void kam_operate_();
 extern CC_P void kam_topsort_agent_column_();
 
 extern CC_P void kam_top_newcut_();
@@ -55,6 +56,7 @@ extern CC_P void kam_topjoin_agent_fastjoin_();
 extern CC_P void kam_topjoin_agent_reset_();
 /*-*/
 extern CC_P STAFCV_T topsort_agent_sort(char *agent,char *whichTable);
+extern CC_P STAFCV_T top_operator(char*,char*,char*,char*);
 extern CC_P STAFCV_T top_count();
 extern CC_P STAFCV_T top_list();
 extern CC_P STAFCV_T top_newproject(char* agent, char* select);

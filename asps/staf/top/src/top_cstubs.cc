@@ -78,6 +78,18 @@ topsort_agent_sort(char *agent,char *whichTable) {
 }
 
 STAFCV_T 
+top_operator(char *table,char *column,char *topOperator,char *value) {
+  tdmTable* tbl=NULL;
+  if( NULL == (tbl = tdm->findTable(table)) ){
+    EML_CONTEXT("ERROR: Did not find table '%s'.\n",table);
+    EML_FAILURE(OBJECT_NOT_FOUND);
+  }
+  if(!top->topOperator(tbl,column,topOperator,value)) 
+      EML_FAILURE(METHOD_FAILURE);
+  EML_SUCCESS(STAFCV_OK);
+}
+
+STAFCV_T 
 top_newsort(char *agent,char *whichCol) {
   if( !top->newSort(agent, whichCol) ){
     EML_FAILURE(METHOD_FAILURE);

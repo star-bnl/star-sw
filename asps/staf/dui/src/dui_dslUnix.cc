@@ -42,7 +42,7 @@ int dui_ls_l_Table(DS_DATASET_T *pDS, char*& listing)
    ||  !dsTableMaxRowCount(&maxrowcount,pDS)
    ||  !dsTableRowSize(&rowsize,pDS)
    ){
-      EML_PUSHERROR(dsError("invalid DSL table"));
+      EML_PUSHERROR(INVALID_DSL_TABLE);
       return FALSE;
    }
    char* result = (char*)MALLOC(256);
@@ -78,7 +78,7 @@ int dui_ls_ld_Dataset(DS_DATASET_T *pDS,char*& listing)
    ||  !dsDatasetMaxEntryCount(&maxelcount,pDS)
 #endif /*OLD_DSL*/
    ){
-      EML_PUSHERROR(dsError("invalid DSL dataset"));
+      EML_PUSHERROR(INVALID_DSL_DATASET);
       return FALSE;
    }
    char* result = (char*)MALLOC(256);
@@ -108,7 +108,7 @@ int dui_ls_l_Dataset(DS_DATASET_T *pDS, char*& listing)
    ||  !isDataset
    ||  !dsDatasetEntryCount(&elcount,pDS)
    ){
-      EML_PUSHERROR(dsError("invalid DSL dataset"));
+      EML_PUSHERROR(INVALID_DSL_DATASET);
       return FALSE;
    }
    dui_ls_l_Header(listing);
@@ -118,7 +118,7 @@ int dui_ls_l_Dataset(DS_DATASET_T *pDS, char*& listing)
       ||  !dsIsDataset(&isDataset, pEntry)
       ||  !(isTable || isDataset)
       ){
-	 EML_PUSHERROR(dsError("bad DSL entry"));
+	 EML_PUSHERROR(BAD_DSL_ENTRY);
 	 return FALSE;
       } else {
 	 if(isTable)dui_ls_l_Table(pEntry,listing);
