@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.28 2000/06/09 19:54:02 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.29 2001/04/27 18:41:47 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.29  2001/04/27 18:41:47  calderon
+ * Update with switches to use L3 Trigger.
+ *
  * Revision 1.28  2000/06/09 19:54:02  calderon
  * use the new StMcHitComparisons
  * use the message manager more extensively
@@ -349,7 +352,7 @@ StAssociationMaker::StAssociationMaker(const char *name, const char *title):StMa
     mFtpcHitResolution     = 0;
 
     doPrintMemoryInfo = kFALSE;
-    
+    mL3TriggerOn = false;
 }
 
 //_________________________________________________
@@ -590,9 +593,39 @@ Int_t StAssociationMaker::Make()
     //
     // Get StEvent
     //
-    StEvent* rEvent = 0;
-    rEvent = (StEvent*) GetInputDS("StEvent");
 
+    // Make the pointers to collections.
+    // Tpc
+    StTpcHitCollection*   rcTpcHitColl; 
+    StMcTpcHitCollection* mcTpcHitColl; 
+    // Svt				
+    StSvtHitCollection*   rcSvtHitColl; 
+    StMcSvtHitCollection* mcSvtHitColl; 
+    // Ftpc
+    StFtpcHitCollection*   rcFtpcHitColl;
+    StMcFtpcHitCollection* mcFtpcHitColl;
+
+
+    StEvent* rEvent = 0;
+    StL3Trigger* rL3Event = 0;
+    if (!mL3TriggerOn) {
+	rEvent = (StEvent*) GetInputDS("StEvent");
+
+	rcTpcHitColl = rEvent->tpcHitCollection();   
+	rcSvtHitColl = rEvent->svtHitCollection();   
+	rcFtpcHitColl = rEvent->ftpcHitCollection();
+    }
+    else {
+	rL3Event = (StL3Trigger*) GetInputDS("StL3Trigger");
+
+	rcTpcHitColl = rL3Event->tpcHitCollection();   
+	rcSvtHitColl = 0;   
+	rcFtpcHitColl = 0;
+	
+    }
+
+    StSPtrVecTrackNode& rcTrackNodes = (!mL3TriggerOn) ? rEvent->trackNodes() : rL3Event->trackNodes();
+    
     if (!rEvent) {
 	gMessMgr->Warning() << "No StEvent!!! " << endm;
 	gMessMgr->Warning() << "Bailing out ..." << endm;
@@ -614,16 +647,9 @@ Int_t StAssociationMaker::Make()
     // Get the Pointers to the Collections.
     //
 
-    // Tpc
-    StTpcHitCollection*   rcTpcHitColl = rEvent->tpcHitCollection();
-    StMcTpcHitCollection* mcTpcHitColl = mEvent->tpcHitCollection();
-    // Svt
-    StSvtHitCollection*   rcSvtHitColl = rEvent->svtHitCollection();
-    StMcSvtHitCollection* mcSvtHitColl = mEvent->svtHitCollection();
-    // Ftpc
-    StFtpcHitCollection*   rcFtpcHitColl = rEvent->ftpcHitCollection();
-    StMcFtpcHitCollection* mcFtpcHitColl = mEvent->ftpcHitCollection();
-
+	mcTpcHitColl = mEvent->tpcHitCollection();   
+	mcSvtHitColl = mEvent->svtHitCollection();   
+	mcFtpcHitColl = mEvent->ftpcHitCollection();
     
     // Get the pointer to the parameter DB,
     // the definitions of the cuts
@@ -961,7 +987,6 @@ Int_t StAssociationMaker::Make()
     // Start doing Track Associations ----------------------
     //
     
-    StSPtrVecTrackNode& rcTrackNodes = rEvent->trackNodes();
     StTrackNode*   trkNode;
     StGlobalTrack* rcTrack;
     
@@ -1269,7 +1294,7 @@ Int_t StAssociationMaker::Make()
     //
     // Start doing Vertex Associations ----------------------
     //
-
+    if (!mL3TriggerOn) {
     // Instantiate the Vertex maps
     mRcKinkMap = new rcKinkMapType;
     mMcKinkMap = new mcKinkMapType;
@@ -1279,7 +1304,7 @@ Int_t StAssociationMaker::Make()
     mMcXiMap   = new mcXiMapType;
     // Begin making associations
     if(Debug()) gMessMgr->Info() << "Making Vertex Associations" << endl;
-
+    
     StSPtrVecKinkVertex& kinks = rEvent->kinkVertices();
 
     
@@ -1411,6 +1436,8 @@ Int_t StAssociationMaker::Make()
     if(Debug()) {
 	gMessMgr->Info() << "Finished Making Xi Associations *********" << endl;
 	gMessMgr->Info() << "Number of Entries in Xi Maps: " << mRcXiMap->size() << endl;
+    }
+
     }
     if (doPrintMemoryInfo) {
 	cout << "End of Make()\n";
