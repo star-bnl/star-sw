@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: StEStructMCReader.h,v 1.2 2004/03/02 21:35:10 chunhuih Exp $
+ *  $Id: StEStructMCReader.h,v 1.3 2004/03/03 23:17:10 chunhuih Exp $
  *
  *  Author: Chunhui Han
  *
@@ -15,7 +15,12 @@
  ********************************************************************
  *
  *  $Log: StEStructMCReader.h,v $
+ *  Revision 1.3  2004/03/03 23:17:10  chunhuih
+ *  added mNentries to store the total entries in the rootuple, to reduce
+ *  redundant code.
+ *
  *  Revision 1.2  2004/03/02 21:35:10  chunhuih
+ *
  *  added impact parameter information to the StEStructEvent
  *
  *  Revision 1.1  2004/02/26 20:05:33  chunhuih
@@ -81,6 +86,7 @@ class StEStructMCReader : public StEStructEventReader {
   int mloopIndex;
   bool mAmDone;
   int mrefMult;
+  int mNentries;
 
   StEStructEventCuts *mECuts;
   StEStructTrackCuts *mTCuts;
@@ -88,11 +94,13 @@ class StEStructMCReader : public StEStructEventReader {
   void fillTracks(StEStructEvent *estructEvent);
   int getTotalEventCount();
   int getCharge(int);
+
   const int mIPMAX;
 
  public:
   StEStructMCReader(TTree *tree=0);
   StEStructMCReader(int nevents, TTree *tree = 0, StEStructEventCuts *ecuts = 0, StEStructTrackCuts *tcuts = 0);
+  StEStructMCReader(int nevents, char *fileListFile, StEStructEventCuts *ecuts = 0, StEStructTrackCuts *tcuts = 0);
   ~StEStructMCReader();
 
   void setEventCuts(StEStructEventCuts *cuts);
