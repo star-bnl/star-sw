@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHit.hh,v 2.5 2000/04/18 22:55:28 calderon Exp $
+ * $Id: StMcSvtHit.hh,v 2.6 2000/04/18 23:46:12 calderon Exp $
  * $Log: StMcSvtHit.hh,v $
+ * Revision 2.6  2000/04/18 23:46:12  calderon
+ * Fix bug in reurning barrel number
+ * Enumerations for the Max barrels, ladders & wafers modified for
+ * SSD inclusion in current scheme.
+ *
  * Revision 2.5  2000/04/18 22:55:28  calderon
  * Functions to access the volume Id
  * Added volume Id to output of operator<<
@@ -55,10 +60,10 @@ public:
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
 
-    unsigned long layer() const;      // layer=[1,6]
-    unsigned long ladder() const;     // ladder=[1-8]
-    unsigned long wafer() const;      // wafer=[1-7]
-    unsigned long barrel() const;     // barrel=[1-3]
+    unsigned long layer() const;      // layer=[1,6] with SSD [1-8]
+    unsigned long ladder() const;     // ladder=[1-8] with SSD [1-20]
+    unsigned long wafer() const;      // wafer=[1-7] with SSD [1-16]
+    unsigned long barrel() const;     // barrel=[1-3] with SSD [1-4]
     unsigned long hybrid() const;
     long          volumeId() const;
 
@@ -91,7 +96,7 @@ StMcSvtHit::wafer() const
 }
 
 inline unsigned long
-StMcSvtHit::barrel() const { return layer()/2; }
+StMcSvtHit::barrel() const { return (layer()+1)/2; }
 
 inline unsigned long
 StMcSvtHit::hybrid() const { return 0; } // to be implemented
