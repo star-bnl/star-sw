@@ -54,7 +54,8 @@ Bool_t StBemcData::checkTDC(Int_t i)
 	  for(int j=0;j<160;j++)
 		{
 			mDecoder->GetTowerIdFromTDC(i,j,id);
-			if(id>=1 && id<=4800) if(TowerStatus[id-1]==1) { sum+=TowerADC[i]; nt++; }
+			if(id>=1 && id<=4800) if(TowerStatus[id-1]==1) { sum+=TowerADC[id-1]; nt++; }
+  			if(!ok) TowerADC[id-1] = 0;
 		}
 	if(nt>0) avg = sum/nt;
 	if(avg>towerTh) ok = kFALSE;
