@@ -44,6 +44,7 @@
 **:           apr 19, 2000  cs  discard one-apd cluster (flag == 1) in readMezzanine(...)
 **:           jun 28, 2000  ppy replace sl3CoordinateTransform with class
 **:                             St_l3_Coordinate_Transformer
+**:           jul 12, 2000  ppy get rid of mergeFlag in fillTracks (not used)
 **:<------------------------------------------------------------------*/
 #include "FtfSl3.h"
 
@@ -58,16 +59,20 @@ ClassImp(FtfSl3)
 //   Check whether tracs are mergable
 //******************************************************************
 int FtfSl3::canItBeMerged ( FtfTrack* tTrack ) {
-// if ( thisTrack->nHits < 45 - para.minHitsPerTrack ) return 1 ; // no type 1 for now
-// float pt = thisTrack->pt ;
    double rTpcMin =  50. ;
    double rTpcMax = 210. ;
 //
 //   Get circle parameters
 //
-   double rc = tTrack->pt / ( 2.9979e-3 * para.bField );
-   double xc = para.xVertex - tTrack->a2Xy / ( 2. * tTrack->a1Xy ) ;
-   double yc = para.yVertex - 1.   /  ( 2. * tTrack->a1Xy ) ;
+// double rc = tTrack->pt / ( 2.9979e-3 * para.bField );
+// double xc = para.xVertex - tTrack->a2Xy / ( 2. * tTrack->a1Xy ) ;
+// double yc = para.yVertex - 1.   /  ( 2. * tTrack->a1Xy ) ;
+   double x0 = tTrack->r0 * cos (tTrack->phi0);
+   double y0 = tTrack->r0 * sin (tTrack->phi0);
+   double rc = tTrack->pt / (bFactor * para.bField);
+   double trackPhi0 = tTrack->psi + tTrack->q * 0.5 * M_PI / fabs ((double) tTrack->q);
+   double xc = x0 - rc * cos (trackPhi0);
+   double yc = y0 - rc * sin (trackPhi0);
 //   
 //   Calculate intersection with tracking area (sector or supersector) boundaries
 //
@@ -124,6 +129,21 @@ int FtfSl3::canItBeMerged ( FtfTrack* tTrack ) {
       }
 
    }
+   //
+   //  Check whether particle cross membrane
+   //
+   double zMembrane = 0 ;
+   double sToMembrane = (zMembrane - tTrack->z0 ) / tTrack->tanl ;   
+   double dangle      =  sToMembrane / rc ;    
+   double angle       = dangle + trackPhi0  ; 
+   double xMembrane   = xc + rc * cos(angle) ;
+   double yMembrane   = yc + rc * sin(angle) ;
+   double rMembrane   = sqrt(xMembrane*xMembrane+yMembrane*yMembrane);
+   if ( rMembrane > rTpcMin   &&  rMembrane < rTpcMax ) {
+//    printf ( "Membrane crossed at r %f !!!!\n", rMembrane ) ;
+      return 1 ;
+   }
+//
    return 0 ;
 }
 //******************************************************************
@@ -172,7 +192,8 @@ int FtfSl3::fillHits ( unsigned int maxBytes, char* buff, unsigned int token ) {
          hitP->RB_MZ   = (short)nextHit->hardwareId  ;
          hitP->trackId = track[i].id ;
          if ( !(nextHit->track) ) {
-            printf ( "FtfSl3:fillHits: we got a problem \n" ) ;
+            printf ( "FtfSl3:fillHits: we got a problem track %d row hit %d \n",
+	              track[i].id, hitP->padrow ) ;
          }
 	 hitP++ ;
          counter++ ;
@@ -212,8 +233,6 @@ int FtfSl3::fillTracks ( int maxBytes, char* buff, unsigned int token ) {
 //   Loop over tracks
 //
     int counter = 0 ;
-
-    short* mergeFlag = new short[nTracks] ;
 
     counter = nTracks ;
 //
@@ -323,12 +342,16 @@ int FtfSl3::fillTracks ( int maxBytes, char* buff, unsigned int token ) {
     }
 //  delete array
 
-    delete []mergeFlag ;
 //
     return nBytes ;
 //
 }
-
+//******************************************************************
+//   get nr of tracks
+//******************************************************************
+int FtfSl3::getNrTracks (void) {
+   return nTracks;
+}           
 //******************************************************************
 //   Initialize sl3 tracker
 //******************************************************************
@@ -345,72 +368,73 @@ int FtfSl3::setup ( int maxHitsIn, int maxTracksIn ) {
 //    Set sector geometry parameters
 //
   double toRad = acos(-1.)/180. ;
-  sectorGeo[ 0].phiMin =  45. * toRad ;
-  sectorGeo[ 1].phiMin =  15. * toRad ;
-  sectorGeo[ 2].phiMin = 345. * toRad ;
-  sectorGeo[ 3].phiMin = 315. * toRad ;
-  sectorGeo[ 4].phiMin = 285. * toRad ;
-  sectorGeo[ 5].phiMin = 255. * toRad ;
-  sectorGeo[ 6].phiMin = 225. * toRad ;
-  sectorGeo[ 7].phiMin = 195. * toRad ;
-  sectorGeo[ 8].phiMin = 165. * toRad ;
-  sectorGeo[ 9].phiMin = 135. * toRad ;
-  sectorGeo[10].phiMin = 105. * toRad ;
-  sectorGeo[11].phiMin =  75. * toRad ;
-  sectorGeo[12].phiMin = 105. * toRad ;
-  sectorGeo[13].phiMin = 135. * toRad ;
-  sectorGeo[14].phiMin = 165. * toRad ;
-  sectorGeo[15].phiMin = 195. * toRad ;
-  sectorGeo[16].phiMin = 225. * toRad ;
-  sectorGeo[17].phiMin = 255. * toRad ;
-  sectorGeo[18].phiMin = 285. * toRad ;
-  sectorGeo[19].phiMin = 315. * toRad ;
-  sectorGeo[20].phiMin = 345. * toRad ;
-  sectorGeo[21].phiMin =  15. * toRad ;
-  sectorGeo[22].phiMin =  45. * toRad ;
-  sectorGeo[23].phiMin =  75. * toRad ;
+  sectorGeometry* sectorG = (sectorGeometry *)sectorGeo ;
+  sectorG[ 0].phiMin =  45. * toRad ;
+  sectorG[ 1].phiMin =  15. * toRad ;
+  sectorG[ 2].phiMin = 345. * toRad ;
+  sectorG[ 3].phiMin = 315. * toRad ;
+  sectorG[ 4].phiMin = 285. * toRad ;
+  sectorG[ 5].phiMin = 255. * toRad ;
+  sectorG[ 6].phiMin = 225. * toRad ;
+  sectorG[ 7].phiMin = 195. * toRad ;
+  sectorG[ 8].phiMin = 165. * toRad ;
+  sectorG[ 9].phiMin = 135. * toRad ;
+  sectorG[10].phiMin = 105. * toRad ;
+  sectorG[11].phiMin =  75. * toRad ;
+  sectorG[12].phiMin = 105. * toRad ;
+  sectorG[13].phiMin = 135. * toRad ;
+  sectorG[14].phiMin = 165. * toRad ;
+  sectorG[15].phiMin = 195. * toRad ;
+  sectorG[16].phiMin = 225. * toRad ;
+  sectorG[17].phiMin = 255. * toRad ;
+  sectorG[18].phiMin = 285. * toRad ;
+  sectorG[19].phiMin = 315. * toRad ;
+  sectorG[20].phiMin = 345. * toRad ;
+  sectorG[21].phiMin =  15. * toRad ;
+  sectorG[22].phiMin =  45. * toRad ;
+  sectorG[23].phiMin =  75. * toRad ;
 //
-  sectorGeo[ 0].phiMax =  75. * toRad ;
-  sectorGeo[ 1].phiMax =  45. * toRad ;
-  sectorGeo[ 2].phiMax =  15. * toRad ;
-  sectorGeo[ 3].phiMax = 345. * toRad ;
-  sectorGeo[ 4].phiMax = 315. * toRad ;
-  sectorGeo[ 5].phiMax = 285. * toRad ;
-  sectorGeo[ 6].phiMax = 255. * toRad ;
-  sectorGeo[ 7].phiMax = 225. * toRad ;
-  sectorGeo[ 8].phiMax = 195. * toRad ;
-  sectorGeo[ 9].phiMax = 165. * toRad ;
-  sectorGeo[10].phiMax = 135. * toRad ;
-  sectorGeo[11].phiMax = 105. * toRad ;
-  sectorGeo[12].phiMax = 135. * toRad ;
-  sectorGeo[13].phiMax = 165. * toRad ;
-  sectorGeo[14].phiMax = 195. * toRad ;
-  sectorGeo[15].phiMax = 225. * toRad ;
-  sectorGeo[16].phiMax = 255. * toRad ;
-  sectorGeo[17].phiMax = 285. * toRad ;
-  sectorGeo[18].phiMax = 315. * toRad ;
-  sectorGeo[19].phiMax = 345. * toRad ;
-  sectorGeo[20].phiMax =  15. * toRad ;
-  sectorGeo[21].phiMax =  45. * toRad ;
-  sectorGeo[22].phiMax =  75. * toRad ;
-  sectorGeo[23].phiMax = 105. * toRad ;
+  sectorG[ 0].phiMax =  75. * toRad ;
+  sectorG[ 1].phiMax =  45. * toRad ;
+  sectorG[ 2].phiMax =  15. * toRad ;
+  sectorG[ 3].phiMax = 345. * toRad ;
+  sectorG[ 4].phiMax = 315. * toRad ;
+  sectorG[ 5].phiMax = 285. * toRad ;
+  sectorG[ 6].phiMax = 255. * toRad ;
+  sectorG[ 7].phiMax = 225. * toRad ;
+  sectorG[ 8].phiMax = 195. * toRad ;
+  sectorG[ 9].phiMax = 165. * toRad ;
+  sectorG[10].phiMax = 135. * toRad ;
+  sectorG[11].phiMax = 105. * toRad ;
+  sectorG[12].phiMax = 135. * toRad ;
+  sectorG[13].phiMax = 165. * toRad ;
+  sectorG[14].phiMax = 195. * toRad ;
+  sectorG[15].phiMax = 225. * toRad ;
+  sectorG[16].phiMax = 255. * toRad ;
+  sectorG[17].phiMax = 285. * toRad ;
+  sectorG[18].phiMax = 315. * toRad ;
+  sectorG[19].phiMax = 345. * toRad ;
+  sectorG[20].phiMax =  15. * toRad ;
+  sectorG[21].phiMax =  45. * toRad ;
+  sectorG[22].phiMax =  75. * toRad ;
+  sectorG[23].phiMax = 105. * toRad ;
 //
   double etaMin = 0.4 ;
   double etaMax = 2.3 ;
 //
   for ( int sector = 0 ; sector < NSECTORS ; sector++ ) {
-     sectorGeo[sector].phiShift = 0 ;
+     sectorG[sector].phiShift = 0 ;
      if ( sector < 12 ) {
-        sectorGeo[sector].etaMin = -1. * etaMin ;
-        sectorGeo[sector].etaMax = etaMax ;
+        sectorG[sector].etaMin = -1. * etaMin ;
+        sectorG[sector].etaMax = etaMax ;
      }
      else {
-        sectorGeo[sector].etaMin = -1. * etaMax ;
-        sectorGeo[sector].etaMax = etaMin ;
+        sectorG[sector].etaMin = -1. * etaMax ;
+        sectorG[sector].etaMax = etaMin ;
      }
   }
-  sectorGeo[ 2].phiShift = 16. * toRad ;
-  sectorGeo[20].phiShift = 16. * toRad ; 
+  sectorG[ 2].phiShift = 16. * toRad ;
+  sectorG[20].phiShift = 16. * toRad ; 
 //
 //    Reset tracker
 //
@@ -455,7 +479,6 @@ int FtfSl3::readMezzanine (int sector,        int readOutBoard,
    FtfHit *hitP = &hit[nHits];
 
    // Prepare transformation
-   St_l3_Coordinate_Transformer transformer;
    St_l3_xyz_Coordinate XYZ(0,0,0) ;
    St_l3_ptrs_Coordinate PTRS(0,0,0,0) ;
 
@@ -528,7 +551,7 @@ int FtfSl3::readMezzanine (int sector,        int readOutBoard,
 //	          fp, ft, c->c , c->f) ;
 //rawToGlobal(sector, row, fp, ft, &x, &y, &z);
 	 PTRS.Setptrs((double)fp, (double)ft,(double)row, (double)sector) ;
-	 transformer.raw_to_global(PTRS,XYZ) ;
+	 ((St_l3_Coordinate_Transformer *)coordinateTransformer)->raw_to_global(PTRS,XYZ) ;
 
 	 //	  printf(" sector row  x y  z %d  %d  %f  %f  %f  \n",
 	 //	   	                     sector, row, x, y, z);
@@ -596,10 +619,11 @@ int FtfSl3::readSector ( struct TPCSECLP *seclp ) {
    if ( swapByte ) sector = swap32(sector) ;
 
    sectorNr = sector;
-   para.phiMin = sectorGeo[sector-1].phiMin ;
-   para.phiMax = sectorGeo[sector-1].phiMax ;
-   para.etaMin = sectorGeo[sector-1].etaMin ;
-   para.etaMax = sectorGeo[sector-1].etaMax ;
+   sectorGeometry* sectorG = (sectorGeometry *)sectorGeo ;
+   para.phiMin = sectorG[sector-1].phiMin ;
+   para.phiMax = sectorG[sector-1].phiMax ;
+   para.etaMin = sectorG[sector-1].etaMin ;
+   para.etaMax = sectorG[sector-1].etaMax ;
    //
    //   Check Sector 
    //
@@ -624,12 +648,12 @@ int FtfSl3::readSector ( struct TPCSECLP *seclp ) {
 	    para.phiShift = 0.27 ; // ~15 degrees
 	 }
 	 else { 
-	    if ( sectorGeo[sector-1].phiMin < para.phiMin ) para.phiMin = sectorGeo[sector-1].phiMin ;
-	    if ( sectorGeo[sector-1].phiMax > para.phiMax ) para.phiMax = sectorGeo[sector-1].phiMax ;
+	    if ( sectorG[sector-1].phiMin < para.phiMin ) para.phiMin = sectorG[sector-1].phiMin ;
+	    if ( sectorG[sector-1].phiMax > para.phiMax ) para.phiMax = sectorG[sector-1].phiMax ;
             para.phiShift = 0 ;
 	 }
-	 if ( sectorGeo[sector-1].etaMin < para.etaMin ) para.etaMin = sectorGeo[sector-1].etaMin ;
-	 if ( sectorGeo[sector-1].etaMax > para.etaMax ) para.etaMax = sectorGeo[sector-1].etaMax ;
+	 if ( sectorG[sector-1].etaMin < para.etaMin ) para.etaMin = sectorG[sector-1].etaMin ;
+	 if ( sectorG[sector-1].etaMax > para.etaMax ) para.etaMax = sectorG[sector-1].etaMax ;
       }
      //rintf ( "sector %d rb %d phi min/max %f %f \n", sector, iRb, para.phiMin, para.phiMax ) ;
 
@@ -746,7 +770,7 @@ int FtfSl3::setParameters ( ) {
    para.etaMaxTrack      =  2.2F  ;
 
    para.dEdx             =  1     ;
-   para.getErrors        =  0     ;
+   para.getErrors        =  1     ;
    para.goBackwards      =  1     ;
    para.goodDistance     =  5.F   ;
    para.mergePrimaries   =  0     ;

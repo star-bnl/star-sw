@@ -153,6 +153,7 @@ void FtfTrack::add ( FtfTrack *piece )
      weight  = (weight1+weight2);
      z0   = ( weight1 * z0 + weight2 * piece->z0 ) / weight ; 
    }
+
 //
 //  Add space points to first track
 //
@@ -160,15 +161,16 @@ void FtfTrack::add ( FtfTrack *piece )
     if ( piece->outerMostRow < outerMostRow ){
       if ( lastHit != NULL ) {
          counter = 0 ;
-	 ((FtfBaseHit *)lastHit)->nextTrackHit = piece->firstHit ;
-	 lastHit         = piece->lastHit ;
 	 for ( currentHit   = piece->firstHit ; 
 	       currentHit != 0 && counter < piece->nHits ;
 	       currentHit  = ((FtfBaseHit *)currentHit)->nextTrackHit  ) {
 	    ((FtfBaseHit *)currentHit)->track = this   ;
 	    counter++ ;
 	 }
+	 ((FtfBaseHit *)lastHit)->nextTrackHit = piece->firstHit ;
+	 lastHit         = piece->lastHit ;
       }
+      piece->firstHit = 0 ;
       innerMostRow = piece->innerMostRow ;
       xLastHit     = piece->xLastHit ;
       yLastHit     = piece->yLastHit ;
@@ -186,8 +188,8 @@ void FtfTrack::add ( FtfTrack *piece )
 	  firstHit               = piece->firstHit ;
        }
        outerMostRow = piece->outerMostRow ;
+       piece->firstHit = 0 ;
     }
-//
 //
 //
    nHits  += piece->nHits ;
@@ -196,9 +198,11 @@ void FtfTrack::add ( FtfTrack *piece )
 //
 //   Update track parameters
 //
+//
    getPara()->szFitFlag = 0 ;
    if ( getPara()->fillTracks ) fill ( ) ;
    getPara()->szFitFlag = 1 ;
+//
 //
 //   Declare track 2 not to be used
 //
@@ -666,7 +670,7 @@ int FtfTrack::mergePrimary ( FtfContainer *trackArea ){
    short  track_merged ;
    register int  areaIndex ;
    int    i_phi, i_eta ;
-   FtfTrack *i_track ;
+   FtfTrack *i_track = 0 ;
    int    ip, ie ;
    double  delta_psi ;
 //

@@ -299,9 +299,9 @@ void St_l3_Coordinate_Transformer::Set_parameters_by_hand(const double mlengthPe
 void St_l3_Coordinate_Transformer::Set_parameters_by_hand()
 {
   // Set the parameters straight forward
-  lengthPerTb =  0.561;
-  drift_length_inner =  200.668 ;
-  drift_length_outer = 201.138  ;
+  lengthPerTb =  0.584;
+  drift_length_inner =  201. ;
+  drift_length_outer = 201.  ;
     
   // set max timebucket
   max_tb_inner = drift_length_inner/lengthPerTb;
