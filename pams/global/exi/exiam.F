@@ -1,55 +1,47 @@
-CC:>--------------------------------------------------------------------
-CC: FILE:       exiam.F
-CC: HISTORY:
-CC:             00jan96-v000a-hpl- Created by stic Version
-CC:  Id: idl.y,v 1.8 1996/10/15 18:33:35 ward Exp  
-CC:<--------------------------------------------------------------------
-
-      INTEGER*4 FUNCTION EXIAM(
-     1            exipar_h,            exipar ,
-     2           globtrk_h,           globtrk ,
-     3           privert_h,           privert ,
-     4            ev0out_h,            ev0out ,
-     5            exiout_h,            exiout ,
-     6         g2t_track_h,         g2t_track ,
-     7        g2t_vertex_h,        g2t_vertex ,
-     8       g2t_svt_hit_h,       g2t_svt_hit ) 
-      IMPLICIT NONE
-#include "exiam.inc"
-CC:>--------------------------------------------------------------------
-CC: ROUTINE:    EXIAM
-C   Input arguments  (One to a line with definition after ! ) 
+C>----------------------------------------------------------------------
+      INTEGER*4 FUNCTION EXIAM( exipar_h,    exipar,
+     +                          globtrk_h,   globtrk,
+     +                          vertex_h,    vertex,
+     +                          v0_vertex_h, v0_vertex,
+     +                          xi_vertex_h, xi_vertex,
+     +                          exiaux_h,    exiaux )
+C-----------------------------------------------------------------------
+C   Functional Description : Search for (Anti-)Xi and (Anti-)Omega decay
+C                            vertices. Only charged decay modes.
 C
+C   Input arguments:
 C     exipar_h:     control structure header
 C     exipar:       control structure
-C     globtrk_h:    global track structure header
-C     globtrk:      global track structure 
-C     privert_h:    main vertex information header
-C     privert:      main vertex information
-C     ev0out_h:     V0 input structure header
-C     ev0out:       V0 input structure 
-C     exiout_h:     result Ksi structure header
-C     exiout:       result Ksi structure 
-C     g2t_track_h:      kine structure header
-C     g2t_track:        kine structure
-C     g2t_vertex_h:      vert structure header
-C     g2t_vertex:        vert structure
-C     g2t_svt_hit_h:  svt hit structure header
-C     g2t_svt_hit:    svt hit structure
+C     globtrk_h:    dst track structure header
+C     globtrk:      dst track structure 
+C     vertex_h:     vertex information header
+C     vertex:       vertex information
+C     v0_vertex_h:  auxiliary v0 output structure header
+C     v0_vertex:    auxiliary v0 output structure 
+C     xi_vertex_h:  auxiliary xi output structure header
+C     xi_vertex:    auxiliary xi output structure 
+C     exiaux_h:     additional xi output structure header
+C     exiaux:       additional xi output structure 
 C
 C   Output arguments : 
-C     values in ev0out table
+C     values in track, vertex and exiaux tables
 C     iok = user status code
 C     
-C   Functional Description : Search for cascades
-C                            Only charged decay modes.
-C   Created  MARCH-1994         S. Margetis
+C   Created  MARCH-1994         S. Margetis 
 C   Modified by                 WK.Wilson
 C   Moved to STAF JUNE-1997     S. Margetis
-C   Error conditions    : None-Yet
-CC:<----------------------------------------------------------------------
+C   26-Aug-1998 PGJ Clean-up and modified to use dst tables.
+C   10-Feb-1999 PGJ Made ready for MDC2. 
+C
+C   Error conditions	: None-Yet
+C   Status		: Tested 
+C<----------------------------------------------------------------------
+      IMPLICIT NONE
 
-C---for internal use  only
+#include "exiam.inc"
+#include "math_constants.inc"
+#include "phys_constants.inc"
+
       STRUCTURE/local_track/
         INTEGER id
         REAL*4 r
@@ -59,77 +51,367 @@ C---for internal use  only
         REAL*4 tanl
         REAL*4 qR
       END STRUCTURE
+ 
+      INTEGER   id, id1, id2
+      INTEGER   ierr, iflag, iflag1
+      INTEGER   i, j, k, jk
+      INTEGER   id_vertex, id_v0
+      INTEGER   n_v, n_xi
+ 
+      REAL	dca_max, rv_min, rv_max, bxi_max, dmass, v0_mass, bsum_v0
+      REAL	dr, pb(3), rv, xv0(3), zcom(2)
+      REAL      dx,ptot, ptot_2, ptot_b, ptot_b2, ptot_v0, ptot_v02
+      REAL      epi, ek, ela, exi, eom
+      REAL	ptrk, trkb(6), bdotx, vdotx, pv0(3), ppar, npar, pper
+      REAL	trki(6), trkj(6)
+      REAL	xc1(2), r1, r2, xcom(2), ycom(2), bxi, bb, bv0
+      REAL      invms_xi, invms_om
+      REAL	xp(2), xn1(2), xn2(2), dca, xpp(3), pxi(3)
+      REAL      energy_v0, beta_v0, gamma_v0, ep, ppar_cm, vmain(3)
+      REAL      r0, phi0
+      REAL      xlocal(3), bfield(3), bscale
+      REAL      ptotp2, ptotn2, pdotn, eprp, eprn, epip, epin
 
-      RECORD /local_track/ trak(10000)
-C--
+      DATA      xlocal /3*0./
+      DATA      bscale /0.1/
+C-----------------------------------------------------------------------
 
-      INTEGER nok,idd(10000)
-      INTEGER ierr
-      INTEGER i,j,k,l
+c      id=exipar(1).pid
+c      IF(id.eq.23) THEN
+c        id1=9
+c        id2=18
+c      ELSEIF(id.eq.31) THEN
+c        id1=8
+c        id2=26
+c      ELSEIF(id.eq.24) THEN
+c        id1=12
+c        id2=18
+c      ELSEIF(id.eq.32) THEN
+c        id1=11
+c        id2=26
+c      ENDIF
 
-      REAL    pt,rr,pi,degrad,raddeg
+      dca_max = exipar(1).dca_max
+      rv_min  = exipar(1).rv_min
+      rv_max  = exipar(1).rv_max
+      bxi_max = exipar(1).bxi_max
+      dmass   = exipar(1).dmass     ! wkw cut for lambda mass
+      bsum_v0 = exipar(1).bsum_v0
 
-C---executable statements
-C
-      pi=acos(-1.)
-      degrad = pi/180.
-      raddeg = 180./pi      
-C----------------------------------------------------------------------
-C----------------------------------------------------------------------
-C
-C  set counters for number of rows of good data to 0
-         exiout_h.nok  = 0
-C
-C  set return code to normal success
-         exiam = STAFCV_OK
-c
-c Transform tracking parameters to local parameters
-c
-        nok=0
-        if((globtrk_h.nok).eq.0) return
-        DO i=1,globtrk_h.nok        
-        nok=nok+1
-        trak(nok).id  = globtrk(nok).id
-        trak(nok).r   = globtrk(nok).r0
-        trak(nok).rf  = globtrk(nok).r0*globtrk(nok).phi0*degrad
-        trak(nok).z   = globtrk(nok).z0
-        trak(nok).f   = globtrk(nok).psi*degrad    !degrees to radias
-        trak(nok).tanl= globtrk(nok).tanl
-        trak(nok).qR  = FLOAT(globtrk(nok).icharge)*
-     +                  (0.29979*5.)*globtrk(nok).invpt/1000.
-        idd(nok)=globtrk(nok).id_global_pid
-        IF(nok.ge.10000) GOTO 35
-        ENDDO
-  35    CONTINUE
-c
-c call reconstruction program
-c
-        CALL XI_RECONSTRUCT(nok,idd,trak,       !new by Ken Wilson
-     +                      exipar_h,exipar,
-     +                      ev0out_h,ev0out,
-     +                      exiout_h,exiout   )
-c
-c call analysis (clean up) module, exipar(2).iflag=1
-c
-c        IF( ev0par(2).iflag.eq.1) THEN
-c        CALL XI_CLEAN(nok,idd,trak,
-c     +                ev0par_h,ev0par,
-c     +                ev0out_h,ev0out   )
-c        ENDIF
-c
-c call evaluation module, ev0par(3).iflag=1
-c
-c        IF( ev0par(3).iflag.eq.1) THEN
-                CALL XI_EVAL( nok,idd,trak,
-     +                exipar_h,exipar,
-     +                exiout_h,exiout,   
-     +                g2t_track_h,  g2t_track,
-     +                g2t_vertex_h,  g2t_vertex)
-C         ENDIF
-C
-C return a normal success code
+c*** pgj: get magnetic field via call to gufld
+
+      call gufld(xlocal,bfield)
+      write(6,*) 'EXI - using a field of ',bfield(3),' KGauss'
+
+      bfield(1) = bfield(1)*bscale
+      bfield(2) = bfield(2)*bscale
+      bfield(3) = bfield(3)*bscale
+
+c*** pgj: current row counts
+
+      n_v = vertex_h.nok
+      n_xi = exiaux_h.nok
+
+c      exiaux_h.nok = 0
+
+c*** pgj: loop to find main vertex and maximum key value
+
+      vmain(1) = 0.
+      vmain(2) = 0.
+      vmain(3) = 0.
+
+      id_vertex = 0
+
+      if( vertex_h.nok .gt. 0 ) then
+        do i= 1, vertex_h.nok
+          if( vertex(i).vtx_id .eq. 1 ) then
+            vmain(1) = vertex(i).x
+            vmain(2) = vertex(i).y
+            vmain(3) = vertex(i).z
+c          else if( vertex(i).vtx_id .eq. 2 ) then
+          endif
+          id_vertex = max(id_vertex,vertex(i).id)
+        enddo
+      endif
+
+c*** pgj: loop over all vertices
+
+      DO 10 j = 1, v0_vertex_h.nok
+
+c*** pgj: apply cuts in v0 decay distance and daughter impact parameters
+
+        IF( abs(v0_vertex(j).dcan+v0_vertex(j).dcap).lt.bsum_v0 ) GOTO 20
+
+        ptotp2 = ( v0_vertex(j).pos_px*v0_vertex(j).pos_px +
+     >             v0_vertex(j).pos_py*v0_vertex(j).pos_py +
+     >             v0_vertex(j).pos_pz*v0_vertex(j).pos_pz )
+        ptotn2 = ( v0_vertex(j).neg_px*v0_vertex(j).neg_px +
+     >             v0_vertex(j).neg_py*v0_vertex(j).neg_py +
+     >             v0_vertex(j).neg_pz*v0_vertex(j).neg_pz )
+        pdotn  = ( v0_vertex(j).pos_px*v0_vertex(j).neg_px +
+     >             v0_vertex(j).pos_py*v0_vertex(j).neg_py +
+     >             v0_vertex(j).pos_pz*v0_vertex(j).neg_pz )
+
+c*** pgj: loop over all global tracks
+
+        DO 20 i = 1, globtrk_h.nok
+
+c*** decide here if dE/dx,TOF can say anything about PID
+c*** if yes .and. it is a pion/proton pair proceed if not
+c*** take GEANT ID or a (hypothetical) mass will be assigned
+
+c          IF(id.ne.0) THEN
+c            IF(idd(i).ne.id1) GOTO 10
+c          ENDIF
+
+c*** pgj: don't use tracks already used in the v0
+
+          IF( v0_vertex(j).idneg .eq. globtrk(i).id .or.
+     >        v0_vertex(j).idpos .eq. globtrk(i).id ) GOTO 20
+
+c*** pgj: apply M_LAMBDA mass check
+
+          IF( globtrk(i).icharge .gt. 0 ) then
+            epip = sqrt(M_PION_PLUS*M_PION_PLUS + ptotp2)
+            eprn = sqrt(M_ANTIPROTON*M_ANTIPROTON + ptotn2)
+            v0_mass = sqrt(M_PION_PLUS*M_PION_PLUS + 
+     >                     M_ANTIPROTON*M_ANTIPROTON + 2*(epip*eprn - pdotn))
+          ELSE
+            eprp = sqrt(M_PROTON*M_PROTON + ptotp2)
+            epin = sqrt(M_PION_MINUS*M_PION_MINUS + ptotn2)
+            v0_mass = sqrt(M_PROTON*M_PROTON + M_PION_MINUS*M_PION_MINUS +
+     >                     2*(eprp*epin - pdotn))
+          ENDIF
+
+          IF( abs(v0_mass-M_LAMBDA).gt.dmass ) GOTO 20
+
+c*** pgj: convert to local parameters
+
+          r0 = sqrt(globtrk(i).x0**2 + globtrk(i).y0**2)
+          phi0 = atan2(globtrk(i).y0,globtrk(i).x0)
+
+          trki(1) = r0
+          trki(2) = r0*phi0
+          trki(3) = globtrk(i).z0
+          trki(4) = globtrk(i).psi*C_RAD_PER_DEG
+          trki(5) = globtrk(i).tanl
+          trki(6) = FLOAT(globtrk(i).icharge)*C_D_CURVATURE*
+     >            bfield(3)*10*globtrk(i).invpt
+
+c*** pgj: calculate distance(s) of closest approach
+
+          trkj(1) = v0_vertex(j).pos_px + v0_vertex(j).neg_px
+          trkj(2) = v0_vertex(j).pos_py + v0_vertex(j).neg_py
+          trkj(3) = v0_vertex(j).pos_pz + v0_vertex(j).neg_pz
+          trkj(4) = 0.
+          trkj(5) = 0.
+          trkj(6) = 0.
+
+          pv0(1) = trkj(1)
+          pv0(2) = trkj(2)
+          pv0(3) = trkj(3)
+
+          id_v0 = v0_vertex(j).id_vertex
+
+c*** pgj: slow method for locating vertex index
+
+          do k = 1, vertex_h.nok
+            if( vertex(k).id .eq. id_v0 ) then
+              xv0(1) =vertex(k).x
+              xv0(2) =vertex(k).y
+              xv0(3) =vertex(k).z
+              GO TO 101
+            endif
+          enddo
+101       CONTINUE
+
+          CALL circle_param(trki,xc1,r1)
+
+          CALL vzero(xcom,2)
+          CALL vzero(ycom,2)
+
+          iflag1=0
+          CALL casc_geom(dca_max,pv0,xv0,xc1,r1,xcom,ycom,zcom,iflag1)
+          IF( iflag1.eq.5 ) GOTO 20
+
+c*** loop over the two intersection points
+
+          DO jk = 1,2
+
+            xp(1)=xcom(jk)
+            xp(2)=ycom(jk)
+
+            CALL exi_project_track(xc1,r1,xp,xn1)
+            CALL update_track_param(xc1,r1,xn1,trki,trkb)
+
+            dca=sqrt( (xn1(1)-xp(1))**2 + (xn1(2)-xp(2))**2 +
+     >                (trkb(3)-zcom(jk))**2 )
+
+            xpp(1)=(xn1(1)+xp(1))/2.
+            xpp(2)=(xn1(2)+xp(2))/2.
+            xpp(3)=(trkb(3)+zcom(jk))/2.
+            rv=sqrt(xpp(1)**2+xpp(2)**2+xpp(3)**2)
+
+c*** decide here if it is a good candidate (pgj: removed lambda mass check)
+
+            IF( (dca.le.dca_max).and.(rv.gt.rv_min).and.(rv.lt.rv_max) ) THEN 
+
+c*** calculate xi impact parameter - careful, needs main vertex at (0,0,0)
+
+              CALL track_mom(trkb,0,pb)
+
+              pxi(1) = pv0(1) + pb(1)
+              pxi(2) = pv0(2) + pb(2)
+              pxi(3) = pv0(3) + pb(3)
+
+              CALL casc_impact_param(vmain,xpp,pxi,bxi,iflag)
+
+              IF( (bxi.le.bxi_max).and.(iflag.ne.2) ) THEN
+
+c*** wkw: breakout if n_xi=maxlen
+
+                if( vertex_h.nok .ge. vertex_h.maxlen ) then
+                  write(6,*) 'EXI - Error: vertex table overflow'
+                  return
+                else
+                  n_v = vertex_h.nok + 1
+                endif
+
+                if( xi_vertex_h.nok .ge. xi_vertex_h.maxlen ) then
+                  write(6,*) 'EXI - Error: exi_aux vertex table overflow'
+                  return
+                else
+                  n_xi = xi_vertex_h.nok + 1
+                endif
+
+                vertex_h.nok = n_v
+                exiaux_h.nok = n_xi
+                xi_vertex_h.nok = n_xi
+
+c*** pgj: fill vertex table
+
+                vertex(n_v).id = id_vertex + n_xi
+                vertex(n_v).vtx_id = 3
+                vertex(n_v).x = xpp(1)
+                vertex(n_v).y = xpp(2)
+                vertex(n_v).z = xpp(3)
+                vertex(n_v).n_daughters = 2
+                vertex(n_v).id_aux_ent = n_xi
+
+c*** calculate parent and daughter kinematics
+
+                ptot_b2 = pb(1)**2 + pb(2)**2 + pb(3)**2
+                epi = sqrt(ptot_b2 + M_PION_MINUS**2)
+                ek  = sqrt(ptot_b2 + M_KAON_MINUS**2)
+
+                ptot_v02 = pv0(1)**2 + pv0(2)**2 + pv0(3)**2
+                ela = sqrt(ptot_v02 + M_LAMBDA**2)
+
+                ptot_2 = pxi(1)**2 + pxi(2)**2 + pxi(3)**2
+                ptot   = sqrt(ptot_2)
+                exi = sqrt( ptot_2 + M_XI_MINUS**2 )
+                eom = sqrt( ptot_2 + M_OMEGA_MINUS**2 )
+
+c*** calculate Armenteros variables
+
+                bdotx   = pb(1)*pxi(1)   + pb(2)*pxi(2)   + pb(3)*pxi(3)
+                vdotx   = pv0(1)*pxi(1)  + pv0(2)*pxi(2)  + pv0(3)*pxi(3)
+
+                if( globtrk(i).icharge .gt. 0 ) then
+                  ppar = bdotx/ptot
+                  npar = vdotx/ptot
+                  pper = sqrt(ptot_b2 - ppar*ppar)
+                else
+                  ppar = vdotx/ptot
+                  npar = bdotx/ptot
+                  pper = sqrt(ptot_v02 - ppar*ppar)
+                endif
+
+c*** calculate daughter impact parameters (wkw)
+
+                CALL exi_project_track(xc1,r1,vmain,xn1)
+                CALL update_track_param(xc1,r1,xn1,trki,trkb)
+
+                bb = sqrt( (xn1(1)-vmain(1))**2 + 
+     >                     (xn1(2)-vmain(2))**2 +
+     >                     (trkb(3)-vmain(3))**2 )
+
+                CALL ev0_v0_impact_param(vmain,xpp,pxi,ptot_2,bv0,iflag)
+                if( iflag.eq.2 ) bv0 = -999.
+
+c*** calculate cos(theta_c.m.)
+
+c                energy_v0 = sqrt(pv0*pv0+invms*invms)
+c                beta_v0   = pv0/energy_v0
+c                gamma_v0  = energy_v0/invms
+c                ep   = sqrt(pb(1)*pb(1) + pb(2)*pb(2)+
+c     +                      pb(3)*pb(3) + massl(1)*massl(1))
+c                ppar_cm = gv0*(ppar-bv0*ep)
+c                costh = cos(atan2(pper,ppar_cm))
+
+c*** pgj: fill auxiliary table
+
+                xi_vertex(n_xi).id    = n_xi
+                xi_vertex(n_xi).id_xi = id_vertex + n_xi
+                xi_vertex(n_xi).id_v0 = id_v0 
+                xi_vertex(n_xi).id_b  = globtrk(i).id
+                xi_vertex(n_xi).dca   = dca
+                xi_vertex(n_xi).b_xi  = bxi
+                xi_vertex(n_xi).b_b   = bb
+                xi_vertex(n_xi).b_v0  = bv0
+
+c*** pgj: fill exiaux table
+
+                exiaux(n_xi).id      = n_xi
+                exiaux(n_xi).id_xi   = id_vertex + n_xi
+                exiaux(n_xi).id_b    = globtrk(i).id
+                exiaux(n_xi).id_v0   = id_v0
+c                exiaux(n_xi).gpid_b  =
+c                exiaux(n_xi).ndegf   =
+                exiaux(n_xi).charge  = globtrk(i).icharge
+                exiaux(n_xi).dca     = dca
+                exiaux(n_xi).rv      = rv
+                exiaux(n_xi).b_xi    = bxi
+                exiaux(n_xi).b_b     = bb
+                exiaux(n_xi).b_v0    = bv0
+c                exiaux(n_xi).sag_b   =
+                exiaux(n_xi).px      = pxi(1)
+                exiaux(n_xi).py      = pxi(2)
+                exiaux(n_xi).pz      = pxi(3)
+                exiaux(n_xi).px_b    = pb(1)
+                exiaux(n_xi).py_b    = pb(2)
+                exiaux(n_xi).pz_b    = pb(3)
+                exiaux(n_xi).px_v    = pv0(1)
+                exiaux(n_xi).py_v    = pv0(2)
+                exiaux(n_xi).pz_v    = pv0(3)
+                exiaux(n_xi).ptarm   = pper
+                exiaux(n_xi).alpha   = (ppar-npar)/(ppar+npar)
+                exiaux(n_xi).mass_xi = sqrt((ela+epi)**2 - ptot_2)
+                exiaux(n_xi).mass_om = sqrt((ela+ek)**2  - ptot_2)
+                exiaux(n_xi).tau_xi  = exiaux(n_xi).mass_xi*rv/ptot     
+                exiaux(n_xi).tau_om  = exiaux(n_xi).mass_om*rv/ptot 
+                exiaux(n_xi).rap_xi  = 0.5*log((exi+pxi(3))/(exi-pxi(3)))
+                exiaux(n_xi).rap_om  = 0.5*log((eom+pxi(3))/(eom-pxi(3)))
+c                exiaux(n_xi).costh   =
+
+              ENDIF				! bxi and iflag check
+
+            ENDIF				! dca and rv check
+
+            IF( iflag1.eq.3 ) GOTO 30		! touching circles-loop once
+
+          ENDDO					! jk=1,2
+
+ 30	  CONTINUE
+
+ 20     CONTINUE
+
+ 10   CONTINUE	
+
+c*** return a normal success code
+
       exiam = STAFCV_OK
-  999 CONTINUE
+
       RETURN
       END
 
