@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer.C,v 1.14 2003/05/16 19:50:34 hjort Exp $
+// $Id: bfcMixer.C,v 1.15 2003/05/16 19:52:45 hjort Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -37,7 +37,7 @@ void Load(){
   if (chain) delete chain;
 }
 //_____________________________________________________________________
-void bfcMixer_v4(const Int_t Nevents=10,
+void bfcMixer(const Int_t Nevents=10,
              const Char_t *file1="/auto/pdsfdv09/starprod/daq/2001/minbias/st_physics_2270008_raw_0030.daq",
 	     const Char_t *file2="/auto/u/starofl/embedding/GSTAR/gtest.fz",
              const Char_t *file3="/auto/u/starofl/embedding/GSTAR/st_physics_2270008_raw_0030.vertices.dat",
