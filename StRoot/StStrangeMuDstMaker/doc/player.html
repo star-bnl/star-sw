@@ -7,7 +7,7 @@
  -->
 <head>
 <title>StStrangeMuDstPlayer: the Player</title>
-<!-- Changed by: Peter Graham Jones, 12-Dec-2000 -->
+<!-- Changed by: Peter Graham Jones, 13-Dec-2000 -->
 <meta name="Author" content="Peter G Jones">
 <meta name="Description" content="Prepared for the STAR computing and software w
 ebsite.">
@@ -64,6 +64,7 @@ t>
 <a href="#modes">Modes of operation</a><br>
 <a href="#options">Run-time options</a><br>
 <a href="#cuts">Applying cuts</a><br>
+<a href="#example">Example usage</a><br>
 </center>
 
 <p>
@@ -166,6 +167,32 @@ These cuts have been applied to all our common MuDsts.
 
 Clearly, not all possible cuts are implemented at this level. If you
 would like to see something added, please let me know.
+
+<a name="example"><h2>Example usage</h2></a>
+Below is an example of creating a MuDst, while filtering out candidates
+which do not pass the default cuts outlined above. In addition events
+which exhibit T0 jitter are aborted and the output is split across
+several files - one for each branch (i.e. V0, Xi and Kink). Note that
+the player processes all branches by default. This is not currently
+switchable.
+
+<pre>
+  // Set output file
+  Char_t *output = "evMuDst_P00hi_1244_T0Abort.root";
+
+  // Set input file(s)
+  StFile *input = new StFile();
+  input->AddFile("/star/rcf/data03/reco/P00hi/2000/08/*1244*.dst.root");
+
+  // Set number of events to analyse
+  const Int_t Nevents = 1000000;
+  
+  // Create player
+  StrangeMuDstPlayer player;
+  player.DoT0Abort();                 // Filter out T0 jitter events
+  player.DoFileSplit();               // Save branches to the separate files
+  player.Play(Nevents,input,output);
+</pre>
 
 </BODY>
 </HTML>
