@@ -4,8 +4,8 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
-#include "dsxdr.h"
-/*#include "dstype.h"*/
+/*#include "dsxdr.h"*/
+#include "dstype.h"
    static FILE         *f=NULL; /* input file      */
    static XDR           x;      /* XDR stream      */
    static DS_DATASET_T *d=NULL; /* "root" dataset  */
@@ -60,11 +60,11 @@ int  *igate;
 /*----------------------------------------------------------------------------*/
 void xdf_read_(igate)
 int  *igate;
-{  int    i,j,nv,nt,iv,jv,id,iz=0; 
-   long   lll; float fff; double ddd;
+{  int    i,nv,nt,iv,jv,id; 
+/* long   lll; float fff; double ddd; int j,iz=0;*/
+/* CPARTICLE_ST   cparticle; */
    float  z[4] = {0,0,0,0}; 
    extern int gcflag_,gcbank_;
-   CPARTICLE_ST   cparticle;
 
    jv=-(*igate); nt=0; nv=0;
 
