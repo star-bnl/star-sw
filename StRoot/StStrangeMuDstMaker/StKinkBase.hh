@@ -1,50 +1,37 @@
-/***********************************************************************
+/*!
+ * \class StKinkBase
+ * \author Gene Van Buren, BNL, 27-Apr-2001
  *
- * $Id: StKinkBase.hh,v 3.2 2002/04/30 16:02:47 genevb Exp $
- *
- * Author: Gene Van Buren, BNL, 27-Apr-2001
- *
- ***********************************************************************
- *
- * Description: Kink micro dst object base class
+ *              Kink micro dst object base class
  *              Used for StKinkMuDst (reconstructed), StKinkMc (Monte Carlo),
- *              and StKinkMc (Monte Carlo)
+ *              and StXiMc (Monte Carlo)
  *
- ***********************************************************************
- *
- * $Log: StKinkBase.hh,v $
- * Revision 3.2  2002/04/30 16:02:47  genevb
- * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
- *
- * Revision 3.1  2001/05/04 20:15:13  genevb
- * Common interfaces and reorganization of components, add MC event info
- *
- *
- ***********************************************************************/
+ */
+
 #ifndef  STAR_StKinkBase
 #define  STAR_StKinkBase
 #include "StKinkI.hh"
 #include "StStrangeMuDst.hh"
 
-class StKinkBase : public virtual StKinkI , public StStrangeMuDst {
+class StKinkBase : public StKinkI , public StStrangeMuDst {
 public:
   StKinkBase() {}
   virtual ~StKinkBase() {}
 
-  virtual Int_t    geantIdParent() const;
-  virtual Int_t    geantIdDaughter() const;
-  virtual Float_t  parentMomentumX() const;
-  virtual Float_t  parentMomentumY() const;
-  virtual Float_t  parentMomentumZ() const;
-  virtual Float_t  parentPrimMomentumZ() const;
-  virtual Float_t  parentPrimMomentumX() const;
-  virtual Float_t  parentPrimMomentumY() const;
-  virtual Float_t  daughterMomentumX() const;
-  virtual Float_t  daughterMomentumY() const;
-  virtual Float_t  daughterMomentumZ() const;
-  virtual Float_t  positionX() const;
-  virtual Float_t  positionY() const;
-  virtual Float_t  positionZ() const;
+  Int_t    geantIdParent() const;
+  Int_t    geantIdDaughter() const;
+  Float_t  parentMomentumX() const;
+  Float_t  parentMomentumY() const;
+  Float_t  parentMomentumZ() const;
+  Float_t  parentPrimMomentumZ() const;
+  Float_t  parentPrimMomentumX() const;
+  Float_t  parentPrimMomentumY() const;
+  Float_t  daughterMomentumX() const;
+  Float_t  daughterMomentumY() const;
+  Float_t  daughterMomentumZ() const;
+  Float_t  positionX() const;
+  Float_t  positionY() const;
+  Float_t  positionZ() const;
 
 protected:
   Int_t    mParentGeantId;
@@ -96,3 +83,18 @@ inline Float_t StKinkBase::positionZ() const
              { return mPositionZ; }
 
 #endif
+
+
+/***********************************************************************
+ * $Id: StKinkBase.hh,v 3.3 2003/05/30 21:20:18 genevb Exp $
+ * $Log: StKinkBase.hh,v $
+ * Revision 3.3  2003/05/30 21:20:18  genevb
+ * doxygen savvy, encoding of FTPC mults, change virtual funcs
+ *
+ * Revision 3.2  2002/04/30 16:02:47  genevb
+ * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+ *
+ * Revision 3.1  2001/05/04 20:15:13  genevb
+ * Common interfaces and reorganization of components, add MC event info
+ *
+ ***********************************************************************/

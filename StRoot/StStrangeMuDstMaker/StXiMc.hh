@@ -1,33 +1,16 @@
-/***********************************************************************
+/*!
+ * \class StXiMc
+ * \author Gene Van Buren
  *
- * $Id: StXiMc.hh,v 3.3 2001/08/23 13:21:00 genevb Exp $
- * $Log: StXiMc.hh,v $
- * Revision 3.3  2001/08/23 13:21:00  genevb
- * Many bug workarounds...
+ *               Monte Carlo Xi micro dst class
+ *               where MC Xi is treated as a MC Kink and a MC V0
  *
- * Revision 3.2  2001/05/04 20:15:15  genevb
- * Common interfaces and reorganization of components, add MC event info
- *
- * Revision 3.1  2000/07/14 21:28:34  genevb
- * Added V0Mc index for XiMc, fixed bug with entries for XiMc, cleaned up controllers
- *
- * Revision 3.0  2000/07/14 12:56:50  genevb
- * Revision 3 has event multiplicities and dedx information for vertex tracks
- *
- * Revision 2.0  2000/06/05 05:19:47  genevb
- * New version of Strangeness micro DST package
- *
- *
- ***********************************************************************
- *
- * Description: Monte Carlo Xi micro dst class
- *
- ***********************************************************************/
+ */
+
 #ifndef  STAR_StXiMc
 #define  STAR_StXiMc
 #include "StKinkMc.hh"
 #include "StXiI.hh"
-//#include "StStrangeMuDst.hh"   // Now inherited through StKinkMc
 #include "StDecayMode.hh"
 
 
@@ -64,6 +47,8 @@ public:
   Float_t momV0Y()  const {return 999;}
   Float_t momV0Z()  const {return 999;}
 
+  /// Returns the decay process for the vertex,
+  /// where the decay modes are enumerated in ::decayModeType
   Int_t decayMode() const;
   Int_t geantIdParent() const;
 
@@ -87,3 +72,27 @@ inline void    StXiMc::SetV0Index(Int_t index) {v0=index;}
 inline Int_t   StXiMc::geantIdParent() const {return StKinkMc::geantIdParent();}
 inline Int_t   StXiMc::decayMode() const {return StKinkMc::decayMode();}
 #endif
+
+
+/***********************************************************************
+ * $Id: StXiMc.hh,v 3.4 2003/05/30 21:20:20 genevb Exp $
+ * $Log: StXiMc.hh,v $
+ * Revision 3.4  2003/05/30 21:20:20  genevb
+ * doxygen savvy, encoding of FTPC mults, change virtual funcs
+ *
+ * Revision 3.3  2001/08/23 13:21:00  genevb
+ * Many bug workarounds...
+ *
+ * Revision 3.2  2001/05/04 20:15:15  genevb
+ * Common interfaces and reorganization of components, add MC event info
+ *
+ * Revision 3.1  2000/07/14 21:28:34  genevb
+ * Added V0Mc index for XiMc, fixed bug with entries for XiMc, cleaned up controllers
+ *
+ * Revision 3.0  2000/07/14 12:56:50  genevb
+ * Revision 3 has event multiplicities and dedx information for vertex tracks
+ *
+ * Revision 2.0  2000/06/05 05:19:47  genevb
+ * New version of Strangeness micro DST package
+ *
+ ***********************************************************************/

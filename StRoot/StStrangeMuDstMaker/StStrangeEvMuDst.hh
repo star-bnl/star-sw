@@ -1,17 +1,183 @@
+/*!
+ * \class StStrangeEvMuDst
+ * \author Gene Van Buren, UCLA, 24-Mar-2000
+ * \author Peter G. Jones, University of Birmingham, 19-Aug-1999
+ *
+ *               Strangeness event micro dst class
+ *
+ */
+
+#ifndef StStrangeEvMuDst_hh
+#define StStrangeEvMuDst_hh
+#include "StStrangeMuDst.hh"
+#include "TMath.h"
+#include "stdlib.h"
+
+
+class StEvent;
+class StMcEvent;
+
+class StStrangeEvMuDst : public StStrangeMuDst {
+public:
+  StStrangeEvMuDst();
+  ~StStrangeEvMuDst();
+  StStrangeEvMuDst(StEvent&);
+  StStrangeEvMuDst(StMcEvent&);
+  void Clear();
+  void Clear(Option_t* option) {TObject::Clear(option);}
+
+  static void SetCorrectionFile(char*); /// Set files to use
+  static void SetFractionFile(char*);
+
+  /// @name Accessor functions
+  //@{
+  /// Run number
+  Int_t   run()                    const;
+  /// Event number
+  Int_t   event()                  const;
+  /// Trigger bias
+  Bool_t  unbiasedTrigger()        const;
+  /// L0 trigger word
+  UInt_t  l0TriggerWord()          const;
+  /// Return whether FTPC information is good
+  Bool_t  ftpcGoodRun();
+  Float_t primaryVertexX()         const;
+  Float_t primaryVertexY()         const; /// Primary vtx position coordinates
+  Float_t primaryVertexZ()         const;
+  /// Magnetic field
+  Float_t magneticField()          const;
+  //@}
+
+  /// @name Multiplicities/Centralities
+  //@{
+  Int_t   globalTracks()           const;
+  Int_t   tpcTracks()              const;
+  Int_t   ftpcEastTracks()         const;
+  Int_t   ftpcWestTracks()         const;
+  Int_t   primaryTracks()          const;
+  Int_t   tpcPrimTracks()          const;
+  Int_t   ftpcEastPrimTracks()     const;
+  Int_t   ftpcWestPrimTracks()     const;
+  Int_t   primaryNegTracks()       const;
+  Float_t primaryCorrectedTracks() const;
+  /// ADC value given by ZDC west (for pAu event tagging)
+  UInt_t  zdcWestADC()             const;
+  /// Cross section fraction
+  Float_t fractionSigma()          const;
+  //@}
+
+  /// @name Set functions
+  //@{
+  void Fill(StEvent&);
+  void Fill(StMcEvent&);
+  void setMagneticField(Float_t);
+  void setL0TriggerWord(UInt_t);
+  void setGlobalTracks(Int_t);
+  void setPrimaryTracks(Int_t);
+  /// Set a neg value of the run number if FTPC information is bad
+  void tagRunNumber(Int_t);
+  //@}
+
+
+protected:
+                                  // These are written out
+  /// Negative mRun value for bad FTPC run (set via tagRunNumber())
+  Int_t   mRun;
+  /// Negative mEvent value for L3Bias (automatic during Fill())
+  Int_t   mEvent;
+  Float_t mPrimaryVertexX;
+  Float_t mPrimaryVertexY;
+  Float_t mPrimaryVertexZ;
+  Int_t   mGlobalTracks;
+  Int_t   mPrimaryTracks;
+  Int_t   mPrimaryNegTracks;
+  Float_t mMagneticField;
+  UInt_t  mL0TriggerWord;
+
+private:
+
+  Int_t FTPC(const Int_t) const;
+
+  ClassDef(StStrangeEvMuDst,8)
+};
+
+inline         StStrangeEvMuDst::StStrangeEvMuDst(StEvent& event)
+               { Fill(event); }
+inline         StStrangeEvMuDst::StStrangeEvMuDst(StMcEvent& event)
+               { Fill(event); }
+
+inline void    StStrangeEvMuDst::tagRunNumber(Int_t r)
+               { mRun = - TMath::Abs(r); }
+inline Bool_t  StStrangeEvMuDst::ftpcGoodRun()
+               { return (mRun > 0); }
+
+inline Int_t   StStrangeEvMuDst::run() const
+               { return TMath::Abs(mRun); }
+inline Int_t   StStrangeEvMuDst::event() const
+               { return TMath::Abs(mEvent); }
+inline Bool_t  StStrangeEvMuDst::unbiasedTrigger() const
+               { return (mEvent > 0); }
+inline UInt_t  StStrangeEvMuDst::l0TriggerWord() const
+               { return ((run() < 3999999) ? mL0TriggerWord :
+                                             (UInt_t) mL0TriggerWord%100000); }
+inline UInt_t  StStrangeEvMuDst::zdcWestADC() const
+               { return ((run() < 3999999) ? 0U :
+                                             (UInt_t) mL0TriggerWord/100000); }
+inline Float_t StStrangeEvMuDst::magneticField() const 
+               { return mMagneticField; }
+
+inline Float_t StStrangeEvMuDst::primaryVertexX() const 
+               { return mPrimaryVertexX; }
+inline Float_t StStrangeEvMuDst::primaryVertexY() const 
+               { return mPrimaryVertexY; }
+inline Float_t StStrangeEvMuDst::primaryVertexZ() const 
+               { return mPrimaryVertexZ; }
+
+// Store FTPCwest*724 + FTPCeast in most significant 19 bits (max = 723 each)
+// Store main TPC in least significant 13 bits (max = 8191)
+inline Int_t   StStrangeEvMuDst::FTPC(const Int_t x) const
+               { return ((Int_t) (((UInt_t) x)>>13)); }
+
+inline Int_t   StStrangeEvMuDst::globalTracks() const
+               { div_t ftpc = div(FTPC(mGlobalTracks),724);
+                 return (tpcTracks() + ftpc.quot + ftpc.rem); }
+inline Int_t   StStrangeEvMuDst::tpcTracks() const
+               { return mGlobalTracks & 0x1fff; }
+inline Int_t   StStrangeEvMuDst::ftpcEastTracks() const
+               { return FTPC(mGlobalTracks)%724; }
+inline Int_t   StStrangeEvMuDst::ftpcWestTracks() const
+               { return FTPC(mGlobalTracks)/724; }
+
+inline Int_t   StStrangeEvMuDst::primaryTracks() const
+               { div_t ftpc = div(FTPC(mPrimaryTracks),724);
+                 return (tpcPrimTracks() + ftpc.quot + ftpc.rem); }
+inline Int_t   StStrangeEvMuDst::tpcPrimTracks() const
+               { return mPrimaryTracks & 0x1fff; }
+inline Int_t   StStrangeEvMuDst::ftpcEastPrimTracks() const
+               { return FTPC(mPrimaryTracks)%724; }
+inline Int_t   StStrangeEvMuDst::ftpcWestPrimTracks() const
+               { return FTPC(mPrimaryTracks)/724; }
+inline Int_t   StStrangeEvMuDst::primaryNegTracks() const
+               { return mPrimaryNegTracks; }
+
+inline void    StStrangeEvMuDst::setMagneticField(Float_t b)
+               { mMagneticField = b; }
+inline void    StStrangeEvMuDst::setL0TriggerWord(UInt_t trgWrd)
+               { mL0TriggerWord = trgWrd; }
+inline void    StStrangeEvMuDst::setGlobalTracks(Int_t newGlob)
+               { mGlobalTracks = newGlob;}
+inline void    StStrangeEvMuDst::setPrimaryTracks(Int_t newPrim)
+               { mPrimaryTracks = newPrim;}
+
+#endif
+
+
 /***********************************************************************
- *
- * $Id: StStrangeEvMuDst.hh,v 3.7 2003/02/10 16:00:29 genevb Exp $
- *
- * Authors: Gene Van Buren, UCLA, 24-Mar-2000
- *          Peter G. Jones, University of Birmingham, 19-Aug-1999
- *
- ***********************************************************************
- *
- * Description: Strangeness event micro dst class
- *
- ***********************************************************************
- *
+ * $Id: StStrangeEvMuDst.hh,v 3.8 2003/05/30 21:20:19 genevb Exp $
  * $Log: StStrangeEvMuDst.hh,v $
+ * Revision 3.8  2003/05/30 21:20:19  genevb
+ * doxygen savvy, encoding of FTPC mults, change virtual funcs
+ *
  * Revision 3.7  2003/02/10 16:00:29  genevb
  * Implement cleared events
  *
@@ -51,86 +217,4 @@
  * Revision 1.1  2000/03/29 03:10:07  genevb
  * Int_troduction of Strangeness Micro DST package
  *
- *
  ***********************************************************************/
-#ifndef StStrangeEvMuDst_hh
-#define StStrangeEvMuDst_hh
-#include "StStrangeMuDst.hh"
-#include "TMath.h"
-
-class StEvent;
-class StMcEvent;
-
-class StStrangeEvMuDst : public StStrangeMuDst {
-public:
-  StStrangeEvMuDst();
-  ~StStrangeEvMuDst();
-  StStrangeEvMuDst(StEvent&);
-  StStrangeEvMuDst(StMcEvent&);
-  void Fill(StEvent&);
-  void Fill(StMcEvent&);
-  void Clear();
-  void Clear(Option_t* option) {TObject::Clear(option);}
-  static void SetCorrectionFile(char*);
-  static void SetFractionFile(char*);
-
-  Int_t   run() const;            // Run number
-  Int_t   event() const;          // Event number
-  Bool_t  unbiasedTrigger() const;// Trigger bias
-  UInt_t  l0TriggerWord() const;  // L0 trigger word
-  Float_t primaryVertexX() const; // Primary Vertex Position coordinates
-  Float_t primaryVertexY() const;
-  Float_t primaryVertexZ() const;
-  Int_t   globalTracks() const;   // Multiplicities and cross section fractions
-  Int_t   primaryTracks() const;
-  Int_t   primaryNegTracks() const;
-  Float_t primaryCorrectedTracks() const;
-  Float_t fractionSigma() const;
-  Float_t magneticField() const;  // Magnetic field
-  void    setMagneticField(Float_t);
-
-protected:
-  Int_t   mRun;                   // These are written out
-  Int_t   mEvent;
-  Float_t mPrimaryVertexX;
-  Float_t mPrimaryVertexY;
-  Float_t mPrimaryVertexZ;
-  Int_t   mGlobalTracks;
-  Int_t   mPrimaryTracks;
-  Int_t   mPrimaryNegTracks;
-  Float_t mMagneticField;
-  UInt_t  mL0TriggerWord;
-
-  ClassDef(StStrangeEvMuDst,8)
-};
-
-inline         StStrangeEvMuDst::StStrangeEvMuDst(StEvent& event)
-               { Fill(event); }
-inline         StStrangeEvMuDst::StStrangeEvMuDst(StMcEvent& event)
-               { Fill(event); }
-inline Int_t   StStrangeEvMuDst::run() const
-               { return mRun; }
-inline Int_t   StStrangeEvMuDst::event() const
-               { return TMath::Abs(mEvent); }
-inline Bool_t  StStrangeEvMuDst::unbiasedTrigger() const
-               { return (mEvent > 0 ? kTRUE : kFALSE); }
-inline UInt_t  StStrangeEvMuDst::l0TriggerWord() const
-               { return mL0TriggerWord; }
-inline Float_t StStrangeEvMuDst::primaryVertexX() const 
-               { return mPrimaryVertexX; }
-inline Float_t StStrangeEvMuDst::primaryVertexY() const 
-               { return mPrimaryVertexY; }
-inline Float_t StStrangeEvMuDst::primaryVertexZ() const 
-               { return mPrimaryVertexZ; }
-inline Int_t   StStrangeEvMuDst::globalTracks() const
-               { return mGlobalTracks; }
-inline Int_t   StStrangeEvMuDst::primaryTracks() const
-               { return mPrimaryTracks; }
-inline Int_t   StStrangeEvMuDst::primaryNegTracks() const
-               { return mPrimaryNegTracks; }
-inline void    StStrangeEvMuDst::setMagneticField(Float_t b)
-               { mMagneticField = b; }
-inline Float_t StStrangeEvMuDst::magneticField() const 
-               { return mMagneticField; }
-
-#endif

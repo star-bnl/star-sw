@@ -1,22 +1,11 @@
-/***********************************************************************
+/*!
+ * \class StKinkMc
+ * \author Gene Van Buren
  *
- * $Id: StKinkMc.hh,v 3.1 2001/05/04 20:15:14 genevb Exp $
- * $Log: StKinkMc.hh,v $
- * Revision 3.1  2001/05/04 20:15:14  genevb
- * Common interfaces and reorganization of components, add MC event info
+ *               Monte Carlo Kink micro dst class
  *
- * Revision 3.0  2000/07/14 12:56:48  genevb
- * Revision 3 has event multiplicities and dedx information for vertex tracks
- *
- * Revision 2.0  2000/06/05 05:19:40  genevb
- * New version of Strangeness micro DST package
- *
- *
- ***********************************************************************
- *
- * Description: Monte Carlo Kink micro dst class
- *
- ***********************************************************************/
+ */
+
 #ifndef  STAR_StKinkMc
 #define  STAR_StKinkMc
 #include "StKinkBase.hh"
@@ -24,7 +13,7 @@
 class StMcVertex;
 class StMcTrack;
 
-class StKinkMc : public virtual StKinkI, public StKinkBase {
+class StKinkMc : public StKinkBase {  // StKinkBase inherits StKinkI methods
 public:
   StKinkMc();
   StKinkMc(StMcVertex*, StMcTrack*);
@@ -60,3 +49,22 @@ inline Int_t StKinkMc::daughterCharge() const
              { return parentCharge(); }
 
 #endif
+
+
+/***********************************************************************
+ * $Id: StKinkMc.hh,v 3.2 2003/05/30 21:20:19 genevb Exp $
+ * $Log: StKinkMc.hh,v $
+ * Revision 3.2  2003/05/30 21:20:19  genevb
+ * doxygen savvy, encoding of FTPC mults, change virtual funcs
+ *
+ * Revision 3.1  2001/05/04 20:15:14  genevb
+ * Common interfaces and reorganization of components, add MC event info
+ *
+ * Revision 3.0  2000/07/14 12:56:48  genevb
+ * Revision 3 has event multiplicities and dedx information for vertex tracks
+ *
+ * Revision 2.0  2000/06/05 05:19:40  genevb
+ * New version of Strangeness micro DST package
+ *
+ ***********************************************************************/
+

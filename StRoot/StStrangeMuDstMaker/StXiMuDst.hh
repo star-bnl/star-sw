@@ -1,46 +1,12 @@
-/***********************************************************************
+/*!
+ * \class StXiMuDst
+ * \author Gene Van Buren, UCLA, 24-Mar-2000
+ * \author Peter G. Jones, University of Birmingham, 30-Mar-1999
  *
- * $Id: StXiMuDst.hh,v 3.4 2001/11/05 23:41:07 genevb Exp $
+ *               Xi (cascade) micro dst class
  *
- * Authors: Gene Van Buren, UCLA, 24-Mar-2000
- *          Peter G. Jones, University of Birmingham, 30-Mar-1999
- *
- ***********************************************************************
- *
- * Description: Xi (cascade) micro dst class
- *
- ***********************************************************************
- *
- * $Log: StXiMuDst.hh,v $
- * Revision 3.4  2001/11/05 23:41:07  genevb
- * Add more dEdx, B field info, careful of changes to TTree unrolling
- *
- * Revision 3.3  2001/05/04 20:15:15  genevb
- * Common interfaces and reorganization of components, add MC event info
- *
- * Revision 3.2  2000/08/10 01:16:25  genevb
- * Added number of dedx points
- *
- * Revision 3.1  2000/07/14 14:09:11  genevb
- * Fixed small typo
- *
- * Revision 3.0  2000/07/14 12:56:51  genevb
- * Revision 3 has event multiplicities and dedx information for vertex tracks
- *
- * Revision 2.0  2000/06/02 22:11:55  genevb
- * New version of Strangeness micro DST package
- *
- * Revision 1.3  2000/03/31 03:20:25  jones
- * Added topology map to V0/Xi; access funcs for each data member
- *
- * Revision 1.2  2000/03/29 20:52:14  genevb
- * Added StKinkMuDst, replaced arrays
- *
- * Revision 1.1  2000/03/29 03:10:08  genevb
- * Introduction of Strangeness Micro DST package
- *
- *
- ***********************************************************************/
+ */
+
 #ifndef StXiMuDst_hh
 #define StXiMuDst_hh
 #include "StV0MuDst.hh"
@@ -59,6 +25,7 @@ public:
   Float_t decayVertexXiX() const;      // Coordinate of decay vertex
   Float_t decayVertexXiY() const;
   Float_t decayVertexXiZ() const;
+  virtual Float_t decayLengthV0() const; // 3-d decay distance
   Float_t dcaXiDaughters() const;      // DCA of xi daughters at decay vertex
   Float_t dcaBachelorToPrimVertex() const; // DCA of bachelor to primary vertex
   Float_t dcaXiToPrimVertex() const;   // DCA of xi to primary vertex
@@ -123,6 +90,7 @@ inline Int_t   StXiMuDst::charge() const
 inline Float_t StXiMuDst::decayVertexXiX() const { return mDecayVertexXiX; }
 inline Float_t StXiMuDst::decayVertexXiY() const { return mDecayVertexXiY; }
 inline Float_t StXiMuDst::decayVertexXiZ() const { return mDecayVertexXiZ; }
+inline Float_t StXiMuDst::decayLengthV0() const { return StXiI::decayLengthV0(); }
 inline Float_t StXiMuDst::dcaXiDaughters() const 
              { return mDcaXiDaughters; }
 inline Float_t StXiMuDst::dcaXiToPrimVertex() const 
@@ -150,3 +118,40 @@ inline Float_t StXiMuDst::lenDedxBachelor() const
              { return (mNumDedxBachelor/100); }
 
 #endif
+
+
+/***********************************************************************
+ * $Id: StXiMuDst.hh,v 3.5 2003/05/30 21:20:20 genevb Exp $
+ * $Log: StXiMuDst.hh,v $
+ * Revision 3.5  2003/05/30 21:20:20  genevb
+ * doxygen savvy, encoding of FTPC mults, change virtual funcs
+ *
+ * Revision 3.4  2001/11/05 23:41:07  genevb
+ * Add more dEdx, B field info, careful of changes to TTree unrolling
+ *
+ * Revision 3.3  2001/05/04 20:15:15  genevb
+ * Common interfaces and reorganization of components, add MC event info
+ *
+ * Revision 3.2  2000/08/10 01:16:25  genevb
+ * Added number of dedx points
+ *
+ * Revision 3.1  2000/07/14 14:09:11  genevb
+ * Fixed small typo
+ *
+ * Revision 3.0  2000/07/14 12:56:51  genevb
+ * Revision 3 has event multiplicities and dedx information for vertex tracks
+ *
+ * Revision 2.0  2000/06/02 22:11:55  genevb
+ * New version of Strangeness micro DST package
+ *
+ * Revision 1.3  2000/03/31 03:20:25  jones
+ * Added topology map to V0/Xi; access funcs for each data member
+ *
+ * Revision 1.2  2000/03/29 20:52:14  genevb
+ * Added StKinkMuDst, replaced arrays
+ *
+ * Revision 1.1  2000/03/29 03:10:08  genevb
+ * Introduction of Strangeness Micro DST package
+ *
+ *
+ ***********************************************************************/
