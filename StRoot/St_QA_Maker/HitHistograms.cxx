@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// $Id: HitHistograms.cxx,v 1.2 2000/08/09 18:57:43 lansdell Exp $
+// $Id: HitHistograms.cxx,v 1.3 2000/08/25 16:04:09 genevb Exp $
 //
 // Author: M.L. Miller, Yale
 //
@@ -10,6 +10,9 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: HitHistograms.cxx,v $
+// Revision 1.3  2000/08/25 16:04:09  genevb
+// Introduction of files
+//
 // Revision 1.2  2000/08/09 18:57:43  lansdell
 // improvements in TPC gains code reduces CPU time per event by factor of 2
 //
@@ -32,8 +35,7 @@ HitHistograms::HitHistograms()
 }
 
 HitHistograms::HitHistograms(const char *name,const char *title,
-			     Int_t nbinsx,Axis_t xlow,Axis_t xup,
-			     Int_t nbinsy,Axis_t ylow,Axis_t yup)
+			     Int_t nbinsx,Axis_t xlow,Axis_t xup, Int_t nbinsy)
 {
   // if you change these constants, be sure to change them in StQABookHist
   // for the "dE/dx for all TPC sectors" histogram (m_dedx_all_sectors)
@@ -48,7 +50,11 @@ HitHistograms::HitHistograms(const char *name,const char *title,
 
   m_innerSectorDeDxHist = new TH1F(name1,title1,xbins,xmin,xmax);
   m_outerSectorDeDxHist = new TH1F(name2,title2,xbins,xmin,xmax);
-  m_allSectorsDeDxHist = new StMultiH1F(name,title,nbinsx,xlow,xup,nbinsy,ylow,yup);
+  m_allSectorsDeDxHist = new StMultiH1F(name,title,nbinsx,xlow,xup,nbinsy);
+  if (nbinsy == 2) {
+    m_allSectorsDeDxHist->Rebin(0,"Outer");
+    m_allSectorsDeDxHist->Rebin(1,"Inner");
+  }
 }
 
 HitHistograms::~HitHistograms()
