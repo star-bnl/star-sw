@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracking.cxx,v 1.4 2001/02/23 13:46:13 lmartin Exp $
+ * $Id: StEstTracking.cxx,v 1.5 2001/02/23 13:58:59 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracking.cxx,v $
+ * Revision 1.5  2001/02/23 13:58:59  lmartin
+ * cout replaced by gMessMgr.
+ *
  * Revision 1.4  2001/02/23 13:46:13  lmartin
  * Two arguments (hittmp,exclhit) of the RefitBranch method removed.
  *
@@ -24,6 +27,7 @@
  * First CVS commit
  *
  **************************************************************************/
+#include "StMessMgr.h"
 #include "StEstTracker.h"
 #include "StEstParams.hh"
 #include "Infrastructure/StEstWafer.hh"
@@ -48,7 +52,7 @@ int StEstTracker::Tracking(int slay) {
   //   mother branch.
   
   if(mDebugLevel>2)  {
-      cout << "StEstMaker::Tracking ****START****"<<endl;
+      gMessMgr->Info()<<"StEstMaker::Tracking ****START****"<<endm;
   }
 
   int TheNewHitIsGood;
@@ -63,15 +67,15 @@ int StEstTracker::Tracking(int slay) {
 
   StEstBranch *branch, *branch_new;
  
-  if(mDebugLevel>2) cout << "loop over the tracks START"<<endl;
+  if(mDebugLevel>2) gMessMgr->Info()<<"loop over the tracks START"<<endm;
   for (i=0;i<mNTrack;i++) { // loop over the tracks
     
     maxl = 0;
 
     if(mDebugLevel>2) {
-      cout << "StEstMaker::Tracking" << endl;
-      cout << " Track #"<<i<<"  Number of branches: "<<mTrack[i]->GetNBranches();
-      cout << "  mPt="<<mTrack[i]->mTPCTrack->mPt<< endl;
+      gMessMgr->Info()<<"StEstMaker::Tracking"<<endm;
+      gMessMgr->Info()<<" Track #"<<i<<"  Number of branches: "<<mTrack[i]->GetNBranches()
+		      <<"  mPt="<<mTrack[i]->mTPCTrack->mPt<<endm;
     }
 
     if(mTrack[i]->GetDoIt()!=1) continue;
@@ -80,7 +84,7 @@ int StEstTracker::Tracking(int slay) {
 
     for (j=0;j<nbranch;j++) { // loop over the branches in the track
       if(mDebugLevel>2)
-	cout << " Track #"<<i<<"  Branch #"<<j<<endl;
+	gMessMgr->Info()<<" Track #"<<i<<"  Branch #"<<j<<endm;
       branch = mTrack[i]->GetBranch(j);
 
       // get the wafer list.
@@ -92,8 +96,8 @@ int StEstTracker::Tracking(int slay) {
       maxl=mProjOut.nhit;
 
       if(mDebugLevel>2){
-	cout << " number of hits from projection: "<<maxl<<endl;
-	cout << " loop over the hits found in Projection"<<endl;
+	gMessMgr->Info()<<" number of hits from projection: "<<maxl<<endm;
+	gMessMgr->Info()<<" loop over the hits found in Projection"<<endm;
       }
 
       nbr = 0; 
@@ -101,12 +105,12 @@ int StEstTracker::Tracking(int slay) {
       for (k=0;k<maxl;k++) { // loop over the hits found in Projection
 
 	if(mDebugLevel>2)
-	  cout << "    k="<<k<<endl;
+	  gMessMgr->Info()<<"    k="<<k<<endm;
 	if(mDebugLevel>3) {
-	  cout << "    nbr="<<nbr<<endl;
-	  cout << "    branch=" << branch<<endl;
-	  cout << "    branch->GetNHits()="<<branch->GetNHits()<<endl;
-	  cout << "    mProjOut.dist= "<<mProjOut.dist[k]<<endl;
+	  gMessMgr->Info()<<"    nbr="<<nbr<<endm;
+	  gMessMgr->Info()<<"    branch=" << branch<<endm;
+	  gMessMgr->Info()<<"    branch->GetNHits()="<<branch->GetNHits()<<endm;
+	  gMessMgr->Info()<<"    mProjOut.dist= "<<mProjOut.dist[k]<<endm;
 	}
 
 	if (mProjOut.hit[k]->CheckAvailability()) {
@@ -173,18 +177,18 @@ int StEstTracker::Tracking(int slay) {
 	}
       }// ENd of ideal Tracking
       if(mDebugLevel>2)
-	cout << " hits found: " << kk << endl;
+	gMessMgr->Info()<<" hits found: "<<kk<<endm;
       if (kk>0) {
 	// connecting branch and hits, branch duplication
 	for (k=0;k<kk-1 && k<mParams[mPass]->nbranch[slay]-1;k++) { 
 
 	  if(mDebugLevel>2)
-	    cout << " duplicating...  k= "<<k<<endl;
+	    gMessMgr->Info()<<" duplicating...  k= "<<k<<endm;
 
 	  branch_new = branch->Duplicate();
 	  if (branch_new!=NULL) {
 	    if(mDebugLevel>3) 
-	      cout <<"  nBranch= "<<branch_new->mTrack->GetNBranches()<<endl;
+	      gMessMgr->Info()<<"  nBranch= "<<branch_new->mTrack->GetNBranches()<<endm;
 	    if (hitbra[distind[k]]->JoinBranch(branch_new,mTrack[i])==1) {
 	      branch_new->AddHit(hitbra[distind[k]],distbra[distind[k]]);
 	      RefitBranch(branch_new,0,&fitstatus);
@@ -211,25 +215,23 @@ int StEstTracker::Tracking(int slay) {
 	    else {
 	      delete branch_new;
 	      if(mDebugLevel>0) {
-		cout << "  hit was not added to the branch *1*"<<endl;	    
-		cout<<" hit id ="<<hitbra[distind[k]]->GetId()
-		    <<" Nbranch="<<hitbra[distind[k]]->GetNBranch()
-		    <<" MaxBranches="<<hitbra[distind[k]]->GetMaxBranches()
-		    <<" NShare="<<hitbra[distind[k]]->GetNShare()
-		    <<" MaxShare="<<hitbra[distind[k]]->GetMaxShare()<<endl;	
+		gMessMgr->Info()<< "  hit was not added to the branch *1*"<<endm;
+		gMessMgr->Info()<<" hit id ="<<hitbra[distind[k]]->GetId()
+				<<" Nbranch="<<hitbra[distind[k]]->GetNBranch()
+				<<" MaxBranches="<<hitbra[distind[k]]->GetMaxBranches()
+				<<" NShare="<<hitbra[distind[k]]->GetNShare()
+				<<" MaxShare="<<hitbra[distind[k]]->GetMaxShare()<<endm;	
       }
 	      continue;
 	    }
 	  }
 	  else
 	    if(mDebugLevel>0)
-	      cout << "  duplication error"<<endl;
-	  if(mDebugLevel>3)
-	    cout << " done..."<<endl;
+	      gMessMgr->Error()<<"  duplication error"<<endm;
 	} //for (k=0;k<kk...
 	// the last hit to join is connected to the old branch
 	if(mDebugLevel>3)
-	    cout << " the last...  k= "<<k<<endl;
+	    gMessMgr->Info()<<" the last...  k= "<<k<<endm;
 
 	if (hitbra[distind[k]]->JoinBranch(branch,mTrack[i])==1) {
 	  branch->AddHit(hitbra[distind[k]],distbra[distind[k]]);
@@ -257,12 +259,12 @@ int StEstTracker::Tracking(int slay) {
 	else {
 	  delete branch;
 	  if(mDebugLevel>0) {
-	    cout << "  hit was not added to the branch *2*"<<endl;	    	
-	    cout<<" hit id ="<<hitbra[distind[k]]->GetId()
-		<<" Nbranch="<<hitbra[distind[k]]->GetNBranch()
-		<<" MaxBranches="<<hitbra[distind[k]]->GetMaxBranches()
-		<<" NShare="<<hitbra[distind[k]]->GetNShare()
-		<<" MaxShare="<<hitbra[distind[k]]->GetMaxShare()<<endl;	
+	    gMessMgr->Info()<<"  hit was not added to the branch *2*"<<endm;
+	    gMessMgr->Info()<<" hit id ="<<hitbra[distind[k]]->GetId()
+			    <<" Nbranch="<<hitbra[distind[k]]->GetNBranch()
+			    <<" MaxBranches="<<hitbra[distind[k]]->GetMaxBranches()
+			    <<" NShare="<<hitbra[distind[k]]->GetNShare()
+			    <<" MaxShare="<<hitbra[distind[k]]->GetMaxShare()<<endm;
 	  }
 	}
       } //end of if (kk>0)...          
@@ -289,14 +291,14 @@ int StEstTracker::Tracking(int slay) {
       }
     }
     if(mDebugLevel>2)
-      cout << "loop over the branches in the track STOP"<<endl;
+      gMessMgr->Info()<<"loop over the branches in the track STOP"<<endm;
   }// end of "for (i=0;i<mNTrack;i++)"
 
-  if(mDebugLevel>2) cout << "loop over the tracks STOP"<<endl;
+  if(mDebugLevel>2) gMessMgr->Info()<<"loop over the tracks STOP"<<endm;
 
 
   if(mDebugLevel>2)
-    cout<<"StEstMaker::Tracking ****STOP****"<<endl;
+    gMessMgr->Info()<<"StEstMaker::Tracking ****STOP****"<<endm;
 
   return 0;
 }	    
