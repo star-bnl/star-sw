@@ -19,7 +19,7 @@ newtable cal  mwc_cal 384
 rowcount geom 1
 *
 tdm/table/cell/putvalue 'geom[0].init'         0
-tdm/table/cell/putvalue 'geom[0].neta'        16 
+tdm/table/cell/putvalue 'geom[0].neta'         4 
 tdm/table/cell/putvalue 'geom[0].nphi'        12 
 tdm/table/cell/putvalue 'geom[0].r1max'    118.669 
 tdm/table/cell/putvalue 'geom[0].r1min'     54.669
