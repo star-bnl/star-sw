@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.68  1999/04/13 20:36:21  fisyak
+#  clean up St_run_summary_Maker
+#
 #  Revision 1.67  1999/04/06 21:26:26  fisyak
 #  take out StDisplay
 #
@@ -280,7 +283,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/04/06 21:26:26 $ 
+#           Last modification $Date: 1999/04/13 20:36:21 $ 
 #  default setings
 # Current Working Directory
 #
@@ -331,13 +334,12 @@ ifndef SUBDIRS
   SUBDIRS := $(filter-out global, $(SUBDIRS)) $(filter global, $(SUBDIRS))
   SUBDIRS := $(filter util, $(SUBDIRS)) $(filter-out util, $(SUBDIRS)) 
   SUBDIRS := $(filter-out StDisplay, $(SUBDIRS))
-  SUBDIRS := $(filter-out StREvent, $(SUBDIRS))
+  SUBDIRS := $(filter-out StREvent StrEvent, $(SUBDIRS))
   SUBDIRS := $(filter-out St_mev_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out St_hbt_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out StRootEvent, $(SUBDIRS))
   SUBDIRS := $(filter-out St_emc_Maker St_io_Maker, $(SUBDIRS))
 #                         St_evg_Maker St_ebye_Maker St_fpt_Maker, $(SUBDIRS))
-  SUBDIRS := $(filter-out  St_laser_Maker St_run_summary_Maker St_tpctest_Maker , $(SUBDIRS))
   SUBDIRS := $(filter-out vpd par crs egz fri g2x mev, $(SUBDIRS))
 ifndef OBJY_HOME
   SUBDIRS := $(filter-out StObjectivity StOdbEvent StObjyLoaderMaker objy, $(SUBDIRS)) 
