@@ -1,5 +1,8 @@
-// $Id: StBFChain.h,v 1.16 2000/11/25 23:20:48 fisyak Exp $
+// $Id: StBFChain.h,v 1.17 2000/12/14 14:32:54 fisyak Exp $
 // $Log: StBFChain.h,v $
+// Revision 1.17  2000/12/14 14:32:54  fisyak
+// Add witch for input and oputput StTree Names
+//
 // Revision 1.16  2000/11/25 23:20:48  fisyak
 // Add dEdx maker to production chain
 //
@@ -84,18 +87,6 @@
 class St_XDFFile;
 class StFileI;
 class TObjArray;
-#if 0
-struct BfcItem {
-  Char_t       *Key;      // nick name
-  Char_t       *Name;     // maker name
-  Char_t       *Chain;    // its chain
-  Char_t       *Opts;     // required options
-  Char_t       *Maker;    // required Makers
-  Char_t       *Libs;     // libraries to be loaded
-  Char_t       *Comment;  
-  Bool_t        Flag;     // F/T to use it in chain
-};
-#endif
 class StBFChain : public StChain {
  private:
   St_XDFFile          *fXdfOut;  //! xdf output file if any
@@ -144,7 +135,7 @@ class StBFChain : public StChain {
    virtual Bool_t      GetOption(const TString *Opt) {return GetOption(kOpt(Opt));}
    virtual Bool_t      GetOption(const Char_t *Opt)  {return GetOption(kOpt(Opt));}
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.16 2000/11/25 23:20:48 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.17 2000/12/14 14:32:54 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StBFChain, 0)   //StBFChain control class
 };
 #endif
