@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.41 2004/08/18 00:19:17 oldi Exp $
+// $Id: StFlowCutTrack.cxx,v 1.42 2004/12/09 23:43:34 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -641,7 +641,7 @@ void StFlowCutTrack::PrintCutList() {
   cout << setprecision(3) << (float)mTpcTrackCutN/(float)mTrackN/perCent << "%\t (" 
        << setprecision(3) << (float)mTpcTrackCutN/(float)mTpcTrackN/perCent << "% Tpc) cut" << endl;
   cout << "#   FitPts (Tpc) cuts= " << mFitPtsTpcCuts[0] << ", " << mFitPtsTpcCuts[1] 
-       << " :\t " << setprecision(3) << (float)mFitPtsTpcCutN/(float)mTrackN/perCent 
+       << " :\t\t " << setprecision(3) << (float)mFitPtsTpcCutN/(float)mTrackN/perCent 
        << "%\t (" << setprecision(3) << (float)mFitPtsTpcCutN/(float)mTpcTrackN/perCent << "% Tpc) cut" << endl;
   cout << "#   FitOverMax cuts= " << mFitOverMaxCuts[0] << ", " << mFitOverMaxCuts[1]
        << " :\t " << setprecision(3) << (float)mFitOverMaxCutN/(float)mTrackN/perCent
@@ -710,6 +710,9 @@ void StFlowCutTrack::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.42  2004/12/09 23:43:34  posk
+// Minor changes in code formatting.
+//
 // Revision 1.41  2004/08/18 00:19:17  oldi
 // Several changes were necessary to comply with latest changes of MuDsts and StEvent:
 //

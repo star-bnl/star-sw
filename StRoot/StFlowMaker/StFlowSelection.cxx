@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.23 2004/12/07 17:01:13 posk Exp $
+// $Id: StFlowSelection.cxx,v 1.24 2004/12/09 23:43:38 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -66,6 +66,7 @@ Bool_t StFlowSelection::Select(StFlowTrack* pFlowTrack) {
 
   // Selected for event plane
   if (!pFlowTrack->Select(mHarmonic, mSelection, mSubevent)) return kFALSE;
+
   return kTRUE;
 }
 
@@ -174,6 +175,9 @@ void StFlowSelection::PrintList() const {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
+// Revision 1.24  2004/12/09 23:43:38  posk
+// Minor changes in code formatting.
+//
 // Revision 1.23  2004/12/07 17:01:13  posk
 // Changed the default value of the dca selection for particles correlated with
 // the event plane from 1 cm back to 2 cm.

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.41 2004/12/07 17:04:48 posk Exp $
+//  $Id: StFlowMaker.h,v 1.42 2004/12/09 23:43:37 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -66,7 +66,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.41 2004/12/07 17:04:48 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.42 2004/12/09 23:43:37 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -93,7 +93,7 @@ private:
   Bool_t           mPicoEventWrite;           // switch for pico-DST
   Bool_t           mPicoEventRead;            // switch for pico-DST
   Bool_t           mMuEventRead;              // switch for common Mu-DST
-  UInt_t           mEventCounter;         // number of Bytes in pico event
+  UInt_t           mEventCounter;             // number of Bytes in pico event
   Bool_t           mFirstLastPhiWgt;          // use z of first-last for phi weights
   Int_t            mRunID;                    // last run ID
   Int_t            ReadPhiWgtFile();          // get the weight file
@@ -169,6 +169,9 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.42  2004/12/09 23:43:37  posk
+//  Minor changes in code formatting.
+//
 //  Revision 1.41  2004/12/07 17:04:48  posk
 //  Eliminated the very old mOnePhiWgt, which used one phiWgt histogram for flttening
 //  instead of four.
