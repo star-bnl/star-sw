@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.63 1999/09/08 00:13:35 fisyak Exp $
+// $Id: StMaker.cxx,v 1.64 1999/09/12 01:42:14 fine Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.64  1999/09/12 01:42:14  fine
+// StMAker::MakeDoc has been adjusted to the new source tree
+//
 // Revision 1.63  1999/09/08 00:13:35  fisyak
 // Add static *GetChain()
 //
@@ -725,12 +728,13 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
  //           = "$(STAR)/StRoot/html" by default
  //
  //            The following subdirectories are used to look it up:
+ //            $(stardir)
  //            $(stardir) + "StRoot/St_base"
  //            $(stardir) + "StRoot/StChain"
  //            $(stardir) + "StRoot/xdf2root"
  //            $(stardir) + ".share/tables"
- //            $(stardir) + "StRoot/StUtilities"
- //            $(stardir) + "inc",
+ //            $(stardir) + "include",
+ //            $(stardir) + "include/tables",
  //            $(stardir) + "StRoot/<this class name>",
  //
  //   where $(stardir) is the input parameter (by default = "$(afs)/rhic/star/packages/dev/")
@@ -767,12 +771,15 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
                            ,"StRoot/StEvent"         , "StEvent"     ,    "StEvent"
                            ,"StRoot/St_TLA_Maker"    , "St_TLA_Maker",    "St_TLA_Maker"
                            ,".share/tables"          , ""            ,     ""
-                           ,"inc"                    , ""            ,     ""
+                           ,"include"                , ""            ,     ""
+                           ,"include/tables"         , ""            ,     ""
                            };
 
   const Int_t lsource = sizeof(source)/sizeof(const Char_t *);
  
   TString lookup = STAR;
+  lookup += delim;
+  lookup += STAR;
   lookup += "/StRoot/";
   lookup += classname;
 
@@ -819,8 +826,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
                       };
   Int_t nclass = sizeof(classes)/4;
   // Create the definitions of the classes not derived from TObjects
-  TString header = STAR;
-  header += "/inc/table_header.h";
+  TString header = "$STAF/inc/table_header.h";
 
   gSystem->ExpandPathName(header);
   header.ReplaceAll("//inc/","/inc/");
@@ -832,7 +838,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   static Bool_t makeAllAtOnce = kTRUE;
   if (makeAllAtOnce && baseClasses) { 
      makeAllAtOnce = kFALSE;
-     gHtml->MakeAll(); 
+//     gHtml->MakeAll(); 
      for (i=0;i<nclass;i++) gHtml->MakeClass(classes[i]);
   }
 
@@ -890,7 +896,7 @@ static void doPs(const char *who, const char *where)
 }
 
 //_____________________________________________________________________________
-void StMaker::Streamer(TBuffer &b)
+void StMaker::Streamer(TBuffer &)
 { Error("Streamer"," attempt to write %s\n ",GetName());
   assert(0);
 }
