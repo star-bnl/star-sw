@@ -1,14 +1,19 @@
 //
-// $Id: TrsRead.C,v 1.1 1999/11/09 19:10:47 calderon Exp $
+// $Id: TrsRead.C,v 1.2 2000/01/10 21:49:07 kathy Exp $
 //
-// Description:
-// Read in a .trs file created with TrsWrite.C
-//
-///////////////////////////////////////////////////////
+
 // $Log: TrsRead.C,v $
+// Revision 1.2  2000/01/10 21:49:07  kathy
+// put owner statement in macros
+//
 // Revision 1.1  1999/11/09 19:10:47  calderon
 // Initial Commit
 // Example macro to read .trs file.
+/////////////////////////////////////////////////////////
+// owner: Manuel Calderon
+//
+// Description:
+// Read in a .trs file created with TrsWrite.C
 //
 //
 ////////////////////////////////////////////////////////
