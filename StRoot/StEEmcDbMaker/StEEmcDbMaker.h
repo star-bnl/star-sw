@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.6 2003/04/27 23:08:13 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.7 2003/08/22 20:52:20 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -41,13 +41,14 @@ class eemcDbADCconf_st;
 class eemcDbPMTconf_st;
 class eemcDbPMTcal_st;
 class eemcDbPMTped_st;
+class eemcDbPMTstat_st;
 
 class  StEEmcDbIndexItem1;
 
 
 class StEEmcDbMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.6 2003/04/27 23:08:13 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.7 2003/08/22 20:52:20 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -58,10 +59,11 @@ class StEEmcDbMaker : public StMaker {
   
   // pointers to Db tables for each sector
   int *mDbsectorID; //!
-  eemcDbADCconf_st **mDbADCconf; //!
-  eemcDbPMTconf_st **mDbPMTconf; //!
-  eemcDbPMTcal_st  **mDbPMTcal ; //!
-  eemcDbPMTped_st  **mDbPMTped ; //!
+  eemcDbADCconf_st  **mDbADCconf; //!
+  eemcDbPMTconf_st  **mDbPMTconf; //!
+  eemcDbPMTcal_st   **mDbPMTcal ; //!
+  eemcDbPMTped_st   **mDbPMTped ; //!
+  eemcDbPMTstat_st  **mDbPMTstat ; //!
 
   // local fast look-up tables
   StEEmcDbIndexItem1   *mDbItem1; //!
@@ -73,19 +75,22 @@ class StEEmcDbMaker : public StMaker {
  
   float KsigOverPed; // defines threshold
   int nFound;
+  TString dbName; //name of the DB used 
 
  protected:
  public:  
   void print(int k=0);
   void setSectors(int ,int); ///< limit the range of sectors for speed
-  void  setThreshold(float x);// defines threshold for ADCs
+  void setThreshold(float x);// defines threshold for ADCs
 
   const  StEEmcDbIndexItem1* getT(int sec, char sub, int eta); ///< returns full DB info for one Tower channel
   const  StEEmcDbIndexItem1* get(int crate, int channel); ///< returns full DB info for any ADC channel
 
   void setTimeStampDay( int ); ///< to fix  time stamp for all events, default =not fixed 
+  
+  void setDBname(TString name){ dbName=name;}
 
-  int valid(){ return nFound;}
+  int valid(){ return nFound;} // return # of valid BD records
   unsigned int getTimeStampUnix(){return myTimeStampUnix;} ///< if zero then not fixed 
 
   StEEmcDbMaker(const char *name="EEmcDbMaker");
@@ -96,7 +101,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.6 2003/04/27 23:08:13 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.7 2003/08/22 20:52:20 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
