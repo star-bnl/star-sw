@@ -29,6 +29,7 @@ $STAR/pams/gen/kumac
  make gen/mev
  
  exec setup_dir
+ macro/global/import *
  
 message ' !!! MEVSIM expects to find mult_gen.in in top directory !!!!! '
 * initialize
