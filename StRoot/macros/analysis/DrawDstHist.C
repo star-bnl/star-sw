@@ -1,5 +1,8 @@
-// $Id: DrawDstHist.C,v 1.21 1999/05/21 21:05:43 kathy Exp $ 
+// $Id: DrawDstHist.C,v 1.22 1999/06/03 16:12:20 kathy Exp $ 
 // $Log: DrawDstHist.C,v $
+// Revision 1.22  1999/06/03 16:12:20  kathy
+// putting in new default files for some macros, remove unneeded macro dedx.C and put in new read_bfc_hist_list.C macro
+//
 // Revision 1.21  1999/05/21 21:05:43  kathy
 // fixed comments for DrawDstHist.C
 //
@@ -33,15 +36,17 @@ void Load()
 // DrawDstHist macro ======================================================
 // enter nevproc,firstHist,lastHist,input fileName,output psFile name
 
+
 // MDC2 dsts:
 //   *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0064_07_40evts.root
 //   *fileName="/disk1/star/test/hijing135/jetq_on/b0_3/year_1b/tfs_dst/set0016_01_51evts.dst.root",
+//*fileName="/disk00000/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/set0029_07_48evts.root",
 
 void DrawDstHist(
      Int_t nevproc=100,
      const Char_t *firstHist="*",
      const Char_t *lastHist="*",
-     const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0064_07_40evts.root",
+     const Char_t *fileName="/disk00000/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/set0016_01_51evts.root",
      const Char_t *psFile="QA_hist.ps")
 { 
 
