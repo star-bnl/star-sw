@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.17 2003/05/23 21:10:44 oldi Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.18 2003/06/27 13:11:25 putschke Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.18  2003/06/27 13:11:25  putschke
+// *** empty log message ***
+//
 // Revision 1.17  2003/05/23 21:10:44  oldi
 // Cosmetics.
 //
@@ -328,8 +331,8 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
   mHistoBins    = 300;
   mHistoMin     = -75. * centimeter;
   mHistoMax     =  75. * centimeter;
-  mMaxDcaVertex =   1. * centimeter;
-  mMinNumTracks = 200; // must be >0 !
+  mMaxDcaVertex =   100. * centimeter;
+  mMinNumTracks = 1; // must be >0 !
 
   // Tracker
   mRowSegments =  20;
@@ -631,8 +634,8 @@ Int_t StFtpcTrackingParams::InitTrackingParams(ftpcTrackingPars_st *trackParsTab
     mHistoBins    = trackParsTable->histoBins;
     mHistoMin     = trackParsTable->histoMin * centimeter;
     mHistoMax     = trackParsTable->histoMax * centimeter;
-    mMaxDcaVertex = 1. * centimeter;
-    mMinNumTracks = 200;  // must be >0 !
+    mMaxDcaVertex = 100. * centimeter;
+    mMinNumTracks = 1;  // must be >0 !
 
 
     // Tracker
