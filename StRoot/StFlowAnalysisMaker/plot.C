@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.41 2002/06/11 21:54:16 posk Exp $
+// $Id: plot.C,v 1.42 2002/11/26 22:11:54 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -648,6 +648,7 @@ static Double_t qDist(double* q, double* par) {
 static Double_t SubCorr(double* x, double* par) {
   // Calculates the cos(n(Psi_a - Psi_b)) distribution by fitting chi of JYO
   // From J.-Y. Ollitrault, Nucl. Phys. A590, 561c (1995), Eq. 6.
+  // The Struve function will be available stating with ROOT 3.03/08.
 
   double chi2 = par[0] * par[0];
   double z = chi2 * cos(x);
@@ -665,6 +666,9 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.42  2002/11/26 22:11:54  posk
+// First use of doxygen.
+//
 // Revision 1.41  2002/06/11 21:54:16  posk
 // Kirill's further correction to minBias.C for bins with one count.
 //

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.35 2002/10/28 19:45:55 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.36 2002/11/26 22:11:53 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -31,12 +31,22 @@ class TProfile2D;
 
 class StFlowAnalysisMaker : public StMaker {
 
+  /*!
+    \class StFlowAnalysisMaker
+    Makes histograms for the flow analysis. It reads event and particle quantities
+    from StFlowEvent. It removes autocorrelations of each particle with respect
+    to the event plane. For each harmonic and each selection makes a 2D histogram
+    of the anisotropic flow, v, vs. y and p_t.
+  */
+  
 public:
 
+  /// Default constructor
            StFlowAnalysisMaker(const Char_t* name="FlowAnalysis");
-           StFlowAnalysisMaker(const Char_t* name,
+  /// Constructor with selection object
+          StFlowAnalysisMaker(const Char_t* name,
 			       const StFlowSelection& pFlowSelect);
-           StFlowAnalysisMaker(const StFlowAnalysisMaker &from){};
+           StFlowAnalysisMaker(const StFlowAnalysisMaker &from) {};
   virtual  ~StFlowAnalysisMaker();
 
   Int_t    Init();
@@ -45,7 +55,7 @@ public:
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.35 2002/10/28 19:45:55 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.36 2002/11/26 22:11:53 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -212,6 +222,9 @@ inline Float_t StFlowAnalysisMaker::ResErr(Int_t eventN, Int_t harN) const
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.36  2002/11/26 22:11:53  posk
+// First use of doxygen.
+//
 // Revision 1.35  2002/10/28 19:45:55  posk
 // Eliminate events with Psi=0.
 //
