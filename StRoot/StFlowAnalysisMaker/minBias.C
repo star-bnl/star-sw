@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: minBias.C,v 1.2 2000/09/26 20:54:11 posk Exp $
+// $Id: minBias.C,v 1.3 2000/09/29 22:53:17 posk Exp $
 //
 // Author:       Sergei Voloshin and Art Poskanzer, Sep. 2000
 // Description:  Macro to add centrality-selected histograms together with
@@ -18,6 +18,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: minBias.C,v $
+// Revision 1.3  2000/09/29 22:53:17  posk
+// More histograms.
+//
 // Revision 1.2  2000/09/26 20:54:11  posk
 // Updated documentation.
 //
@@ -95,7 +98,7 @@ TCanvas* minBias(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2) {
   histName->Append(*sel);
   histName->Append("_Har");
   histName->Append(*har);
-  cout << " hist name= " << histName->Data() << endl;
+  cout << " input hist name= " << histName->Data() << endl;
   
   // make the graph page
   TCanvas* c = new TCanvas(baseName[pageNumber], baseName[pageNumber],
@@ -123,6 +126,7 @@ TCanvas* minBias(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2) {
   // book the minBias histogram
   TString* meanHistName = new TString(histName->Data());
   meanHistName->Append("_MinBias");
+  cout << " output hist name= " << meanHistName->Data() << endl;
   int nBins    = hist[0]->GetNbinsX();
   TAxis* xAxis = hist[0]->GetXaxis();
   float xMin   = xAxis->GetXmin();

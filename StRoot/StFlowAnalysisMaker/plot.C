@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.27 2000/09/26 20:54:12 posk Exp $
+// $Id: plot.C,v 1.28 2000/09/29 22:53:18 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -16,6 +16,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.28  2000/09/29 22:53:18  posk
+// More histograms.
+//
 // Revision 1.27  2000/09/26 20:54:12  posk
 // Updated documentation.
 //
@@ -103,6 +106,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   const char* baseName[] = { "Flow_Res_Sel",
 			     "Flow_Charge",
 			     "Flow_Dca",
+			     "Flow_DcaGlobal",
 			     "Flow_Chi2",
 			     "Flow_FitPts",
 			     "Flow_MaxPts",
@@ -111,29 +115,32 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_OrigMult",
 			     "Flow_MultOverOrig",
 			     "Flow_MultEta",
-			     "Flow_CorrMult",
+			     "Flow_MultPart",
 			     "Flow_VertexZ",
 			     "Flow_VertexXY2D",
 			     "Flow_EtaSymVerZ2D",
 			     "Flow_EtaSym",
-			     "Flow_CTBversusZDC",
-			     "Flow_MeanDedx",
+			     "Flow_CTBvsZDC2D",
+			     "Flow_MeanDedx2D",
 			     //"Flow_EtaPtPhi3D",
 			     "Flow_EtaPtPhi2D.PhiEta",
                              "Flow_EtaPtPhi2D.PhiPt",
   			     "Flow_YieldAll2D",
   			     "Flow_YieldAll.Eta",
   			     "Flow_YieldAll.Pt",
-  			     "Flow_PidPiPlusSel",
-  			     "Flow_PidPiMinusSel",
-  			     "Flow_PidProtonSel",
-  			     "Flow_PidAntiProtonSel",
-  			     "Flow_PidKplusSel",
-  			     "Flow_PidKminusSel",
-  			     "Flow_PidDeuteronSel",
-  			     "Flow_PidAntiDeuteronSel",
-  			     "Flow_PidElectronSel",
-  			     "Flow_PidPositronSel",
+  			     "Flow_YieldPart2D",
+  			     "Flow_YieldPart.Eta",
+  			     "Flow_YieldPart.Pt",
+  			     "Flow_PidPiPlusPart",
+  			     "Flow_PidPiMinusPart",
+  			     "Flow_PidProtonPart",
+  			     "Flow_PidAntiProtonPart",
+  			     "Flow_PidKplusPart",
+  			     "Flow_PidKminusPart",
+  			     "Flow_PidDeuteronPart",
+  			     "Flow_PidAntiDeuteronPart",
+  			     "Flow_PidElectronPart",
+  			     "Flow_PidPositronPart",
   			     "Flow_PidMult",
   			     "Flow_Cent",
    			     //"Flow_Bin_Eta",
@@ -160,7 +167,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_vEta_Sel",
 			     "Flow_vPt_Sel"};
   const int nNames = sizeof(baseName) / sizeof(char*);
-  const int nSingles = 35 + 1;
+  const int nSingles = 39 + 1;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -309,7 +316,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
       } else if (strstr(shortName[pageNumber],".Eta")!=0) { // 2D X projection
 	TH1D* projX = hist->ProjectionX(histName->Data(), 0, 9999, "E");
 	projX->SetName(histProjName->Data());
-	projX->SetXTitle("pseudorapidity");
+	char* xTitle = hist->GetXaxis()->GetTitle();
+	projX->SetXTitle(xTitle);
 	projX->SetYTitle("Counts");
 	gStyle->SetOptStat(10);
 	if (projX) projX->Draw("H");
@@ -539,7 +547,8 @@ TCanvas* plotSingles(char* shortName){
   } else if (strstr(shortName,".Eta")!=0) {         // 2D Eta projection
     TH1D* projX = hist->ProjectionX(histName->Data(), 0, 9999);
     projX->SetName(histProjName->Data());
-    projX->SetXTitle("pseudorapidity");
+    char* xTitle = hist->GetXaxis()->GetTitle();
+    projX->SetXTitle(xTitle);
     projX->SetYTitle("Counts");
     gStyle->SetOptStat(10);
     if (projX) projX->Draw("H");
