@@ -1,7 +1,0 @@
-usage:	
-		@ echo usage: make lib to build library or make install 
-		@ echo to install library and include files.	
-lib:
-		make_msg_lib	
-install:
-		installib	

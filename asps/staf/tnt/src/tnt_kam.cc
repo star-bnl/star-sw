@@ -57,7 +57,7 @@ tnt_list()
 {
   char *s;
   printf("%s", s=tnt->list());
-  free(s); /*fix memory leak -akio*/
+  FREE(s); /*fix memory leak -akio*/
   EML_SUCCESS(STAFCV_OK);
 }
 
@@ -165,7 +165,7 @@ tntcwntuple_title(long hid)
     EML_FAILURE(OBJECT_NOT_FOUND);
   }
   printf("TNTCWNTUPLE:\tTitle = (%s) \n",s=tuple->title()); /*fix memory leak -akio*/
-  free(s);  /*fix memory leak -akio*/
+  FREE(s);  /*fix memory leak -akio*/
 
   EML_SUCCESS(STAFCV_OK);
 }
