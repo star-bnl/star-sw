@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.9 1999/09/17 22:57:17 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.10 1999/09/18 00:36:46 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.10  1999/09/18 00:36:46  fisyak
+// remove .root extension
+//
 // Revision 1.9  1999/09/17 22:57:17  fisyak
 // Add l3t to default chain
 //
@@ -596,10 +599,10 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
       FileOut = new TString(gSystem->BaseName(InFile->Data()));
       FileOut->ReplaceAll("*","");
       FileOut->ReplaceAll("..",".");
-      FileOut->ReplaceAll(".daq",".root");
-      FileOut->ReplaceAll(".fzd",".root");
-      FileOut->ReplaceAll(".fz",".root");
-      FileOut->ReplaceAll(".xdf",".root");
+      FileOut->ReplaceAll(".daq","");
+      FileOut->ReplaceAll(".fzd","");
+      FileOut->ReplaceAll(".fz","");
+      FileOut->ReplaceAll(".xdf","");
       FileOut->Strip();
     }
     printf ("==============================================\n");
@@ -609,7 +612,7 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
     printf ("==============================================\n");
     if (GetOption(kXOUT)) {
       XdfFile = new TString(FileOut->Data());
-      XdfFile->ReplaceAll(".root",".dst.xdf");
+      XdfFile->Append(".dst.xdf");
       printf ("QAInfo:Open output xdf file  = %s \n ++++++++++++++++++++++\n",XdfFile->Data());
     }
   }
