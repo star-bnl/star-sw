@@ -1,14 +1,16 @@
 //StiResidualMaker.cxx
 /***************************************************************************
  *
- * $Id: StiResidualMaker.cxx,v 1.2 2002/11/15 17:07:01 andrewar Exp $
+ * $Id: StiResidualMaker.cxx,v 1.3 2002/11/19 22:32:26 andrewar Exp $
  *
- * /author Andrew Rose, Wayne State University 
- * October 2002
+ * \class  StiResidualMaker provides a utility for determining the
+ *         track residuals.
+ * \author Andrew Rose, Wayne State University 
+ * \date   October 2002
  ***************************************************************************
  * $Log: StiResidualMaker.cxx,v $
- * Revision 1.2  2002/11/15 17:07:01  andrewar
- * Fixed bug with virtual base class destructor.
+ * Revision 1.3  2002/11/19 22:32:26  andrewar
+ * Fixed bug with vector of node pointers.
  *
  * Revision 1.1  2002/10/16 18:42:04  andrewar
  * Initial commit. Methods for derived class StiResidualMaker.
@@ -49,8 +51,11 @@ class TFile;
 
 //Constructor
 StiResidualMaker::StiResidualMaker(StDetectorId det)
-  :mDetector(det)
+                  :mDetector(det)
 {
+
+  cout <<"StiResidualMaker::StiResidualMaker"<<endl;
+  
   //check for user sanity
   if(mDetector==kUnknownId)
     {//initialize with detector==0
@@ -85,6 +90,9 @@ StiResidualMaker::StiResidualMaker(StDetectorId det)
 //Methods
 int StiResidualMaker::Init()
 {
+
+  cout <<"StiResidualMaker::Init"<<endl;
+
   //!
   //! Initialize histograms (with detector info).
   //! Returns 0 if fails, 1 if success.
@@ -94,12 +102,12 @@ int StiResidualMaker::Init()
   int numLayers;
   float zLow, zHigh;
   float yLow, yHigh;
-  char* angleYBaseName = "yResidualCrossDip";
-  char* coordYBaseName = "yResidualZYRow";
-  char* angleZBaseName = "zResidualCrossDip";
-  char* coordZBaseName = "zResidualZYRow";
-  char* detectorBaseName;
-  char* incrimentName;
+  string angleYBaseName = "yResidualCrossDip";
+  string coordYBaseName = "yResidualZYRow";
+  string angleZBaseName = "zResidualCrossDip";
+  string coordZBaseName = "zResidualZYRow";
+  string detectorBaseName;
+  string incrimentName;
 
   //determine detector
   switch(mDetector)
@@ -123,23 +131,26 @@ int StiResidualMaker::Init()
   }
     //make hist name strings from base names. This makes the pointer
     //name unique.
-    (void)strcat(angleYBaseName,detectorBaseName);
-    (void)strcat(coordYBaseName,detectorBaseName);
-    (void)strcat(angleZBaseName,detectorBaseName);
-    (void)strcat(coordZBaseName,detectorBaseName);
+    angleYBaseName+=detectorBaseName;
+    coordYBaseName+=detectorBaseName;
+    angleZBaseName+=detectorBaseName;
+    coordZBaseName+=detectorBaseName;
 
 
   //setup hists
-  mYResidualCrossDipZ = new TH3D(angleYBaseName,"Residual in Y vs. Cross, Dip, and Z", 128, -45., 45., 128, -45., 45., 128, -2.,2.);
-  mYResidualZYRow=new TH3D(coordYBaseName,"",128,-2.,2.,128,-2.,2.,45,0.,44.);
-  mZResidualCrossDipZ = new TH3D(angleZBaseName,"Residual in Z vs. Cross, Dip, and Z", 128, -45., 45., 128, -45., 45., 128, -2.,2.);
-  mZResidualZYRow=new TH3D(coordZBaseName,"",128,-2.,2.,128,-2.,2.,45,0.,44.);
+  mYResidualCrossDipZ = new TH3D(angleYBaseName.c_str(),"Residual in Y vs. Cross, Dip, and Z", 128, -45., 45., 128, -45., 45., 128, -2.,2.);
+  mYResidualZYRow=new TH3D(coordYBaseName.c_str(),"",128,-2.,2.,128,-2.,2.,45,0.,44.);
+  mZResidualCrossDipZ = new TH3D(angleZBaseName.c_str(),"Residual in Z vs. Cross, Dip, and Z", 128, -45., 45., 128, -45., 45., 128, -2.,2.);
+  mZResidualZYRow=new TH3D(coordZBaseName.c_str(),"",128,-2.,2.,128,-2.,2.,45,0.,44.);
 
   return 1;
 }
 
 int StiResidualMaker::calcResiduals(StiTrackContainer *tracks)
 {
+  
+  cout <<"StiResidualMaker::calcResiduals"<<endl;
+
   if(mDetector==kUnknownId) 
     {
       cout <<"StiResidualMaker::calcResiduals ERROR -"
@@ -167,11 +178,18 @@ int StiResidualMaker::calcResiduals(StiTrackContainer *tracks)
 
 int StiResidualMaker::trackResidue(const StiTrack *track)
 {
+  //Take a general StiTrack. Since this maker is written
+  //specifically for StiKalmanTracks (needs handles in
+  //Kalman tracks), check for castness to Kalman track.
+  //If fails, exit. If success, call trackResidue(StiKalmanTrack).
+
+  cout <<"StiResidualMaker::trackResidue"<<endl;
+
   //cast to Kalman Track; if fail, end
 
        const StiKalmanTrack* kTrack = 
 	 static_cast<const StiKalmanTrack*>(track);  
-      if(kTrack==(const StiKalmanTrack*)NULL)
+      if(!kTrack)
 	{
 	  cout <<"Error: Could not cast to Kalman Track!"<<endl;
 	  return -10;
@@ -184,25 +202,53 @@ int StiResidualMaker::trackResidue(const StiTrack *track)
 int StiResidualMaker::trackResidue(const StiKalmanTrack *track)
 {
 
+  //! Retrieves the node list for the input KalmanTrack,
+  //! calls a ssubroutine to fill the hists with the
+  //! pertinant values (fillHist).
+
+  cout <<"StiResidualMaker::trackResidue(Kalman Track)"<<endl;
   //Get nodes in the detector 
   //(only returns nodes with hits in requested detector)
     vector<StiKalmanTrackNode*> nodes = track->getNodes(mDetector);
 
+    cout <<"got node vect"<<endl;
   if(nodes.size()==0)
     {
-      cout <<"StiResidualMaker:: Warning - track has no hits"
-	   <<" in requested detector (Detector Id "
-	   <<mDetector<<")"<<endl;
+      cout << "StiResidualMaker:: Warning - track has no hits"
+	   << " in requested detector (Detector Id "
+	   << mDetector << ")" << endl;
       return -5;
     }
+  cout <<"StiResidualMaker::trackResidue - got nodes"<<endl;
 
   //fill hists with residuals
   vector<StiKalmanTrackNode*>::iterator iT = nodes.begin();
-  while(iT!=nodes.end())
+
+
+  
+  cout <<"StiResidualMaker::trackResidue- got iterator"<<endl;
+ 
+  cout <<"Begining node: "<<*(nodes.begin())<<endl;
+   
+  StiKalmanTrackNode *iNode;
+  while(iT != nodes.end())
     {
-      FillHist((StiKalmanTrackNode*)iT);
+      cout <<"In while loop"<<endl;
+      //pass node to FillHist
+      if((StiKalmanTrackNode*)iT) 
+	{
+	  iNode=*iT;
+	  cout <<"trackResidue: "<<*iNode<<endl;
+	  FillHist(iNode);
+	}
+      else
+	{
+	  cout <<"Error! failed to get node!"<<endl;
+	}
       iT++;
     }
+
+  cout <<"StiResidualMaker::trackResidue - done"<<endl;
 
   return 1;
 }
@@ -210,6 +256,11 @@ int StiResidualMaker::trackResidue(const StiKalmanTrack *track)
 
 void StiResidualMaker::Write(char* outfile)
 {
+
+  //! Writes the residual hists to a file.
+
+  cout <<"StiResidualMaker::Write to file "<<outfile<<endl;
+
   if(mDetector==kUnknownId) 
     {
       cout <<"StiResidualMaker::calcResiduals ERROR -"
@@ -221,6 +272,10 @@ void StiResidualMaker::Write(char* outfile)
   TFile *f = new TFile(outfile);
 
   //dump hists to file
+  mYResidualCrossDipZ->Write();
+  mYResidualZYRow->Write();
+  mZResidualCrossDipZ->Write();
+  mZResidualZYRow->Write();
 
 
   //close file
@@ -229,29 +284,47 @@ void StiResidualMaker::Write(char* outfile)
 
 void StiResidualMaker::FillHist(StiKalmanTrackNode* node)
 {
+
+  //! Takes a Kalman Track Node and fills histograms with the
+  //! residuals. Residuals are calculated as Hit I - Node I,
+  //! where I is either the coordinate along the beam axis (Z),
+  //! or along the plane of the detector (Y).
+
+  cout <<"StiResidualMaker::FillHist"<<endl;
   //get node values
-  double cross = asin((node->fP3)*(node->fX)-(node->fP2));
-  double dip   = atan(node->fP4);
-  double nodeZ = node->fP0;
-  double nodeY = node->fP1;
+  double cross = node->crossAngle();
+  double dip   = node->pitchAngle();
+  double nodeZ = node->fP1;
+  double nodeY = node->fP0;
   double diff;
-  double row;
+  double row = 10;
+
+  cout <<"StiResidualMaker:: Node: "<<*node<<endl;
 
   //get hit pointer
   StiHit *hit=node->getHit();
 
   //trap if no hit with node
-  if(!hit) return;
+  if(hit==(StiHit*)NULL) return;
+  if(hit->detector()==NULL) cout <<"No DETECTOR!!"<<endl;
+  cout <<"Got hit"<<endl;
 
   //Fill local Y residuals
   diff = hit->y() - nodeY;
-  mYResidualCrossDipZ->Fill(diff, cross,dip,nodeZ);
-  mYResidualZYRow->Fill(diff, nodeZ,nodeY,row);
+
+  mYResidualCrossDipZ->Fill(diff, cross, dip, nodeZ);
+  mYResidualZYRow->Fill(diff, nodeZ, nodeY, row);
+  cout <<"Got Y values"<<endl;
+  cout <<"Y: "<<nodeY <<" Z: "<<nodeZ
+       <<"Hit Y: "<<hit->y() <<" Z: "<<hit->z()
+       <<"diff: "<< diff<<endl;
+
 
   //Fill local Z residuals
   diff = hit->z() - nodeZ;
-  mZResidualCrossDipZ->Fill(diff, cross,dip,nodeZ);
-  mZResidualZYRow->Fill(diff, nodeZ,nodeY,row);
-  
+  mZResidualCrossDipZ->Fill(diff, cross, dip, nodeZ);
+  mZResidualZYRow->Fill(diff, nodeZ, nodeY, row);
+  cout <<"Got Z Values"<<endl;
+
 }
 
