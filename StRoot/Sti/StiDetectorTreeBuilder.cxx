@@ -20,13 +20,13 @@
 ostream& operator<<(ostream&, const StiDetector&);
 
 StiDetectorTreeBuilder::StiDetectorTreeBuilder()
-  : mroot(0), 
-    mnodefactory(StiToolkit::instance()->getDetectorNodeFactory()), 
+    : mroot(0), 
+      mnodefactory(StiToolkit::instance()->getDetectorNodeFactory()), 
     mregion(0),
     _detectorFinder(StiDetectorFinder::instance() ),
     _messenger( *Messenger::instance(MessageType::kDetectorMessage) )
 {
-  _messenger <<"StiDetectorTreeBuilder::StiDetectorTreeBuilder() - INFO - Started/Done"<<endl;
+    _messenger <<"StiDetectorTreeBuilder::StiDetectorTreeBuilder() - INFO - Started/Done"<<endl;
 }
 
 StiDetectorTreeBuilder::~StiDetectorTreeBuilder()
@@ -34,31 +34,37 @@ StiDetectorTreeBuilder::~StiDetectorTreeBuilder()
 
 StiDetectorNode* StiDetectorTreeBuilder::build(StiDetectorBuilder * builder)
 {
-  _messenger <<"StiDetectorTreeBuilder::build() - Started"<<endl;
-  if (mroot) 
-    {
-      _messenger << "StiDetectorTreeBuilder::build()\tError!\troot tree already built"<<endl;
-      throw logic_error("StiDetectorTreeBuilder::build() - ERROR - Attempting to build on top of an existing detector");
+    _messenger <<"StiDetectorTreeBuilder::build() - Started"<<endl;
+    if (mroot) 	{
+	_messenger << "StiDetectorTreeBuilder::build()\tError!\troot tree already built"<<endl;
+	throw logic_error("StiDetectorTreeBuilder::build() - ERROR - Attempting to build on top of an existing detector");
     }
-  if (!builder)
-    throw logic_error("StiDetectorTreeBuilder::build() - ERROR - no builder provided");
-  if (!mnodefactory)
-    throw logic_error("StiDetectorTreeBuilder::build() - ERROR - no Factory<StiDetectorNode> provided");
-  mDetectorBuilder = builder;
-  _messenger <<"StiDetectorTreeBuilder::build() - INFO - Build root"<<endl;
-  buildRoot();
-  loopOnDetectors();
-  _messenger <<"StiDetectorTreeBuilder::build() - INFO - Sort Tree"<<endl;
-  //Now sort the tree:
-  SortDaughters<StiDetector> mysorter;
-  mysorter(mregion);
-  
-  //Now index the tree to give efficient sibling traversal
-  _messenger <<"StiDetectorTreeBuilder::build() - INFO - Index Tree"<<endl;
-  IndexDaughters<StiDetector> myindexer;
-  myindexer(mregion);
-  _messenger <<"StiDetectorTreeBuilder::build() - INFO - Done"<<endl;
-  return mroot;
+    if (!builder)
+	throw logic_error("StiDetectorTreeBuilder::build() - ERROR - no builder provided");
+    if (!mnodefactory)
+	throw logic_error("StiDetectorTreeBuilder::build() - ERROR - no Factory<StiDetectorNode> provided");
+    mDetectorBuilder = builder;
+    _messenger <<"StiDetectorTreeBuilder::build() - INFO - Build root"<<endl;
+
+    buildRoot();
+
+    loopOnDetectors();
+
+    _messenger <<"StiDetectorTreeBuilder::build() - INFO - Sort Tree"<<endl;
+
+    //Now sort the tree:
+    SortDaughters<StiDetector> mysorter;
+    //mysorter(mregion); (old)
+    mysorter(mroot); //new (MLM)
+    
+    //Now index the tree to give efficient sibling traversal
+    _messenger <<"StiDetectorTreeBuilder::build() - INFO - Index Tree"<<endl;
+    IndexDaughters<StiDetector> myindexer;
+    
+    myindexer(mroot);
+    //myindexer(mregion);
+    _messenger <<"StiDetectorTreeBuilder::build() - INFO - Done"<<endl;
+    return mroot;
 }
 
 void StiDetectorTreeBuilder::buildRoot()
@@ -67,18 +73,78 @@ void StiDetectorTreeBuilder::buildRoot()
     mroot->setName("star");
     //make 3 daughters
     StiDetectorNode* mid = mnodefactory->getInstance();
+    StiDetectorNode* fwd = mnodefactory->getInstance();
+    StiDetectorNode* bwd = mnodefactory->getInstance();
+    
     mid->setName("midrapidity");
+    fwd->setName("forwardrapidity");
+    bwd->setName("backwardrapidity");
+    
+    StiOrderKey midKey;
+    midKey.key = static_cast<double>(StiPlacement::kMidRapidity);
+    StiOrderKey fwdKey;
+    fwdKey.key = static_cast<double>(StiPlacement::kForwardRapidity);
+    StiOrderKey bwdKey;
+    bwdKey.key = static_cast<double>(StiPlacement::kBackwardRapidity);
+    
+    mid->setOrderKey(midKey);
+    fwd->setOrderKey(fwdKey);
+    bwd->setOrderKey(bwdKey);
+    
     mroot->add(mid);
+    mroot->add(fwd);
+    mroot->add(bwd);
+    
     mregion = mid;
 }
 
 
 void StiDetectorTreeBuilder::addToTree(StiDetector* layer)
 {
-    //Where do we hang in radius?
+    //Which region do we hang it on?
+
+    StiPlacement* placement = layer->getPlacement();
+    
+    SameOrderKey<StiDetector> mySameOrderKey;
+    StiOrderKey tempOrderKey;
+    tempOrderKey.key = static_cast<double>( placement->getRegion() );
+    mySameOrderKey.morderKey = tempOrderKey; //order is of type const StiOrderKey&
+    
+    StiDetectorNodeVector::iterator where = find_if(mroot->begin(), mroot->end(), mySameOrderKey); 
+    
+    if (where==mroot->end()) {
+	//must abort!!! If this happens do not go on!!!
+	cout <<"StiDetectorContainer::build() - ERROR - mid-rapidity region not found - where==0"<<endl;
+	abort();
+    }
+
+    //ok, now we have the region
+    mregion = (*where);
+    
+    //Where do we hang in radius (or z-position for fwd/bwd)?
+    StiPlacement::StiRegion theRegion = layer->getPlacement()->getRegion();
+    
     StiOrderKey radius;
-    radius.key = layer->getPlacement()->getLayerRadius();
-    string radstring = "_radius";
+    string radstring;
+    
+    if ( theRegion == StiPlacement::kMidRapidity ) {
+	radius.key = layer->getPlacement()->getLayerRadius();
+	radstring = "_radius";
+    }
+    else if ( theRegion==StiPlacement::kForwardRapidity) {
+	radius.key = layer->getPlacement()->getZcenter();
+	radstring = "_zcenter";
+    }
+    else if ( theRegion==StiPlacement::kBackwardRapidity ) {
+	//for backward, we have to sort by -1.*zCenter
+	radius.key = -1.* layer->getPlacement()->getZcenter();
+    }
+    else {
+	cout <<"StiDetectorBuiler::addToTree().  unkown region:\t"<<theRegion
+	     <<"\tfrom detector:\t"<<layer->getName()<<"\tabort"<<endl;
+	abort();
+    }
+
     StiDetectorNode* radialnode = hangWhere(mregion, radius, radstring);
 
     //Where do we hang in phi?
@@ -99,14 +165,13 @@ void StiDetectorTreeBuilder::addToTree(StiDetector* layer)
 
 // Starting with the given parent, use the ordering key of the given type
 // to determine where the new detector should be hung.
-StiDetectorNode* StiDetectorTreeBuilder::hangWhere(
-    StiDetectorNode* parent, const StiOrderKey& order, string& keystring)
+StiDetectorNode* StiDetectorTreeBuilder::hangWhere(StiDetectorNode* parent, const StiOrderKey& order,
+						   string& keystring)
 {
     SameOrderKey<StiDetector> mySameOrderKey;
-    mySameOrderKey.morderKey = order;
-
-    StiDetectorNodeVector::iterator where = find_if(parent->begin(), parent->end(), 
-                                            mySameOrderKey);
+    mySameOrderKey.morderKey = order; //order is of type const StiOrderKey&
+    
+    StiDetectorNodeVector::iterator where = find_if(parent->begin(), parent->end(), mySameOrderKey);
 
     if (where == parent->end()) {
 	//_messenger <<"hangWhere().  Start new node"<<endl;

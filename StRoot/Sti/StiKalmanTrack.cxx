@@ -1,10 +1,15 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.23 2003/04/29 18:48:21 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.24 2003/05/06 15:33:49 mmiller Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.24  2003/05/06 15:33:49  mmiller
+ * iCommitting changes to turn on multiple regions (StiPlacement::StiRegion -> kMidRapidity, kForwardRapidity, etc).
+ * Also added a point to StiToolkit for StiMaker.  This allows for the req. GetDataSet calls in the FTPC code.
+ * Not so elegant...
+ *
  * Revision 2.23  2003/04/29 18:48:21  pruneau
  * *** empty log message ***
  *
@@ -400,7 +405,7 @@ int StiKalmanTrack::getCharge() const
 */
 double  StiKalmanTrack::getChi2() const
 {
-  int theChi2 = 0;
+  double theChi2 = 0;
   if (firstNode)
     {
       StiKTNBidirectionalIterator it;

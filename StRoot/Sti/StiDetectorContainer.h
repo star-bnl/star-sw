@@ -99,7 +99,13 @@ public:
     
     ///Dereference current iterator and return a pointer to current StiDetector.
     StiDetector* operator*() const;
-    
+
+    ///Move to the next region. Ordered via StiPlacement::StiRegion
+    bool moveToNextRegion();
+
+    ///Move to previous region.  Ordered via StiPlacement::StiRegion
+    bool moveToPreviousRegion();
+
     ///Step out radially in STAR TPC global coordinates.
     bool moveOut();
     
@@ -133,20 +139,21 @@ private:
     ///The root of the tree representation of the detector material.
     StiDetectorNode* mroot;
 
-    ///An iterator representing the current region
-    ///(mid/forward/backward rapidity, etc).
-    StiDetectorNode* mregion;
-
     ///An iterator over the leaves of the detector tree.
     /// It is declared on heap for size concerns.
-    StiCompositeLeafIterator<StiDetector>* mLeafIt; 
+    StiCompositeLeafIterator<StiDetector>* mLeafIt;
 
+    ///An iterator representing the current region
+    ///(mid/forward/backward rapidity, etc).
+    StiDetectorNodeVector::const_iterator mregion; //Test (MLM)
+    //StiDetectorNode* mregion;
+    
     //A message stream
     Messenger& mMessenger;
     
     ///An iterator representing the current radial position.
     StiDetectorNodeVector::const_iterator mradial_it;
-
+    
     ///An iterator representing the current azimuthal position.
     StiDetectorNodeVector::const_iterator mphi_it;
 
