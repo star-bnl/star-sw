@@ -5,9 +5,6 @@
 #ifndef StiPolygon_HH
 #define StiPolygon_HH
 
-//Temp
-//#include "TObject.h"
-
 /*
   Simple class to represent the skeleton information of a polygon relevant for tracking.
   By no means is this a full representation of a Polygon.
@@ -57,7 +54,6 @@ protected:
     double mradius; //Radial distance to the center of all sides (cm)
 
 private:
-    //ClassDef(StiPolygon, 1)
 };
 
 //inlines--------------------------------------
