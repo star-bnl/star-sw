@@ -55,6 +55,7 @@ struct FileAttr => {
 
 for ($ii = 0; $ii < scalar(@dir_log); $ii++)  {
   opendir(DIR, $dir_log[$ii]) or die "can't open $dir_log[$ii]\n";
+  $nlist = 0;
   while( defined($flname = readdir(DIR)) ) {
            next if $flname =~ /^\.\.?$/;
            next if $flname =~ /.err/; 
