@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.106 2000/08/04 21:04:00 perev Exp $
+// $Id: St_QA_Maker.cxx,v 1.107 2000/08/22 15:37:05 lansdell Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.107  2000/08/22 15:37:05  lansdell
+// changed ftpc iflag check from >700 to >=700
+//
 // Revision 1.106  2000/08/04 21:04:00  perev
 // Leaks + Clear() cleanup
 //
@@ -837,7 +840,7 @@ void St_QA_Maker::MakeHistGlob(){
         }
 
 //  now fill all FTPC East histograms ------------------------------------------------
-        if (t->iflag>700 && t->iflag<800 && t->det_id==5) {
+        if (t->iflag>=700 && t->iflag<800 && t->det_id==5) {
 	
 // these are tpc & ftpc
 	m_pointFE->Fill(trkpnt);
@@ -870,7 +873,7 @@ void St_QA_Maker::MakeHistGlob(){
         }
 
 //  now fill all FTPC West histograms ------------------------------------------------
-        if (t->iflag>700 && t->iflag<800 && t->det_id==4) {
+        if (t->iflag>=700 && t->iflag<800 && t->det_id==4) {
 
 // these are tpc & ftpc
         m_glb_rfFW->Fill(sqrt((t->x_first[0]*t->x_first[0])+
@@ -1196,7 +1199,7 @@ void St_QA_Maker::MakeHistPrim(){
 
 /* The following is for the FTPC, which doesn't do primary tracking yet.
 //  now fill all FTPC East histograms ------------------------------------------------
-        if (t->iflag>700 && t->iflag<800 && t->det_id==5) {
+        if (t->=iflag>700 && t->iflag<800 && t->det_id==5) {
 	
 // these are tpc & ftpc
 	m_ppointFE->Fill(trkpnt);
@@ -1227,7 +1230,7 @@ void St_QA_Maker::MakeHistPrim(){
         }
 
 //  now fill all FTPC West histograms ------------------------------------------------
-        if (t->iflag>700 && t->iflag<800 && t->det_id==4) {
+        if (t->iflag>=700 && t->iflag<800 && t->det_id==4) {
 
 // these are tpc & ftpc
 	m_ppointFW->Fill(trkpnt);
