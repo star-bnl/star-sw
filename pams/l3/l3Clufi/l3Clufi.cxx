@@ -18,7 +18,7 @@
 
 /* functions  */
 Int_t asic_eve(UShort_t* cpp, UChar_t* adc);
-Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, uint* outres);
+Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, uint* outres, int, int);
 
 /* here we start the callable function */
 long type_of_call l3Clufi_(
@@ -35,7 +35,7 @@ long type_of_call l3Clufi_(
     OUT:
     hits.data = long = 4byte = 1 DATAWORD in DAQ Format
     hits    - PLEASE FILL IN DESCRIPTION HERE
-    hits_h   - header Structure for hits
+   hits_h   - header Structure for hits
    
   */
 
@@ -202,11 +202,8 @@ long type_of_call l3Clufi_(
 	  /* pointer set pointer behind TPCMZCLD bank header */
 	  receiver += mzcld->length;
 
-	  /* init this mz card */
-	  ret = croatInit(rb, mz);
-
 	  /* do the clusterfinding on this mz  */
-	  ret = croatFinder((UChar_t*)adc,(UShort_t*) cpp, (uint*) receiver);
+	  ret = croatFinder((UChar_t*)adc,(UShort_t*) cpp, (UInt_t*) receiver, rb ,mz);
 
 	  /* set length in TPCMZCLD bank */
 	  mzcld->length += ret;
