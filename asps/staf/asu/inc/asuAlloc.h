@@ -17,10 +17,12 @@ typedef enum asu_malloclevel_t {
 	ASU_MALLOC_COUNT,		/* ...and count calls to m&f */
 	ASU_MALLOC_TRACE,		/* ...and keep trace of m&f */
 	ASU_MALLOC_FILL,		/* ...and fill w/ pattern */
-	ASU_MALLOC_INIT		/* UNINITIALIZED */
+	ASU_MALLOC_VERBOSE,		/* ...and print every time */
+	ASU_MALLOC_INIT			/* UNINITIALIZED */
 }ASU_MALLOCLEVEL_T;
 
-#define ASU_MALLOC_PATTERN 0xbabe
+#define ASU_MALLOC_FILLPATTERN 0xbabe
+#define ASU_MALLOC_FREEPATTERN 0xdead
 
 #ifndef ASU_MALLOC_LEVEL
 #define ASU_MALLOC_LEVEL ASU_MALLOC_FAST
@@ -38,6 +40,8 @@ extern CC_P void asuMallocInitTrace();
 extern CC_P void asuMallocGrowTrace(size_t m);
 extern CC_P void asuMallocReset();
 extern CC_P void asuMallocStats();
+extern CC_P void asuMallocPrintTrace(void *p, size_t size, char* file
+		, int line);
 extern CC_P void asuMallocLevel(ASU_MALLOCLEVEL_T level);
 
 extern CC_P void asuMallocAdd(void *p, size_t size

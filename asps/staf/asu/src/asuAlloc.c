@@ -27,6 +27,8 @@ void asuMallocInit()
    asu_mallocLevel = ASU_MALLOC_LEVEL;
 
    switch(asu_mallocLevel) {
+   case ASU_MALLOC_VERBOSE:	/* ...and print every time */
+      fprintf(stderr,",VERBOSE ");
    case ASU_MALLOC_FILL:	/* ...and fill w/ pattern */
       fprintf(stderr,",FILL ");
    case ASU_MALLOC_TRACE:	/* ...and keep trace of m&f */
@@ -65,22 +67,21 @@ void asuMallocGrowTrace(size_t m)
 void asuMallocStats()
 {
    int i;
-   long v;
 
    fprintf(stderr,"\nASU_MALLOC: Memory allocation statistics: ");
 
    switch(asu_mallocLevel) {
+   case ASU_MALLOC_VERBOSE:	/* ...and print every time */
    case ASU_MALLOC_FILL:	/* ...and fill w/ pattern */
    case ASU_MALLOC_TRACE:	/* ...and keep trace of m&f */
       for( i=0;i<asu_nTrace;i++ ){
 	 if( asu_mallocTrace[i].p ){
-	    memcpy(&v,asu_mallocTrace[i].p,4);
-	    fprintf(stderr,"\n(%p) (SIZE %d) %s.%d [%x]"
-			, asu_mallocTrace[i].p
+	    fprintf(stderr,"\n");
+            asuMallocPrintTrace(
+			  asu_mallocTrace[i].p
 			, asu_mallocTrace[i].size
 			, asu_mallocTrace[i].file
 			, asu_mallocTrace[i].line
-			, v
 	    );
 	 }
       }
@@ -99,9 +100,18 @@ void asuMallocStats()
 }
 
 /*--------------------------------------------------------------------*/
+void asuMallocPrintTrace(void *p, size_t size, char* file, int line)
+{
+   long v;
+   memcpy(&v,p,4);
+   fprintf(stderr,"(%p:%d) %s.%d [%x]", p, size, file, line, v);
+}
+
+/*--------------------------------------------------------------------*/
 void asuMallocLevel(ASU_MALLOCLEVEL_T level)
 {
    switch(level) {
+   case ASU_MALLOC_VERBOSE:	/* ...and print every time */
    case ASU_MALLOC_FILL:	/* ...and fill w/ pattern */
    case ASU_MALLOC_TRACE:	/* ...and keep trace of m&f */
       switch(asu_mallocLevel) {
@@ -111,6 +121,7 @@ void asuMallocLevel(ASU_MALLOCLEVEL_T level)
 	 asuMallocInitTrace();
       case ASU_MALLOC_TRACE:	/* ...and keep trace of m&f */
       case ASU_MALLOC_FILL:	/* ...and fill w/ pattern */
+      case ASU_MALLOC_VERBOSE:	/* ...and print every time */
       default:
       break;
       }
@@ -143,12 +154,16 @@ void asuMallocReset()
 /*--------------------------------------------------------------------*/
 void asuMallocAdd(void *p, size_t size, char* file, int line)
 {
-   int i=ASU_MALLOC_PATTERN;
-   char *c = &i;
+   int patt=ASU_MALLOC_FILLPATTERN;
+   int *c = &patt;
 
    switch(asu_mallocLevel) {
+   case ASU_MALLOC_VERBOSE:	/* ...and print every time */
+      fprintf(stderr,"ASU_MALLOC: alloc ");
+      asuMallocPrintTrace(p,size,file,line);
+      fprintf(stderr,"\n");
    case ASU_MALLOC_FILL:	/* ...and fill w/ pattern */
-      memset(p,'*',size);	/* HACK ??? should be many memcpy's */
+      memset(p,'*',size);	/* HACK ? should be many memcpy's */
       if(size >= 4) memcpy(p,c,4);
    case ASU_MALLOC_TRACE:	/* ...and keep trace of m&f */
       if( asu_nTrace >= asu_maxTrace ){
@@ -175,14 +190,36 @@ void asuMallocAdd(void *p, size_t size, char* file, int line)
 void asuMallocRemove(void *p, char* file, int line)
 {
    int i;
+   int patt=ASU_MALLOC_FREEPATTERN;
+   int *c = &patt;
+   size_t size;
 
    switch(asu_mallocLevel) {
+   case ASU_MALLOC_VERBOSE:	/* ...and print every time */
    case ASU_MALLOC_FILL:	/* ...and fill w/ pattern */
    case ASU_MALLOC_TRACE:	/* ...and keep trace of m&f */
       for( i=0;i<asu_nTrace;i++ ){
 	 if( p == asu_mallocTrace[i].p ){
 	    asu_mallocTrace[i].p = NULL;
 	    asu_freeSize += asu_mallocTrace[i].size;
+
+	    size = asu_mallocTrace[i].size;
+	    switch(asu_mallocLevel) {
+	    case ASU_MALLOC_VERBOSE:	/* ...and print every time */
+	       fprintf(stderr,"ASU_MALLOC: free ");
+	       asuMallocPrintTrace(p,size,file,line);
+	       fprintf(stderr,"\n");
+	    case ASU_MALLOC_FILL:	/* ...and fill w/ pattern */
+	       memset(p,'-',size); /* HACK ? should be many memcpy's */
+	       if(size >= 4) memcpy(p,c,4);
+	    case ASU_MALLOC_TRACE:	/* ...and keep trace of m&f */
+	    case ASU_MALLOC_COUNT:	/* ...and count calls to m&f */
+	    case ASU_MALLOC_FAST:	/* only call m&f */
+	    case ASU_MALLOC_INIT:	/* UNINITIALIZED */
+	    default:
+	       break;
+	    }
+
 	    break;
 	 }
       }
@@ -191,7 +228,7 @@ void asuMallocRemove(void *p, char* file, int line)
    case ASU_MALLOC_FAST:	/* only call m&f */
    case ASU_MALLOC_INIT:	/* UNINITIALIZED */
    default:
-   break;
+      break;
    }
 
 }
