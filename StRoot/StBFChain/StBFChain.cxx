@@ -638,9 +638,9 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
   if (!fTFile) {
     if (GetOption("tags")  && fFileOut ||
 	GetOption("lana") ||  GetOption("Laser")) {
-      TString *TagsName = new  TString(fFileOut->Data());
-      TagsName->ReplaceAll(".root",".tags.root");
-      fTFile = new TFile(TagsName->Data(),"RECREATE");
+      TString TagsName = TString(fFileOut->Data());
+      TagsName.ReplaceAll(".root",".tags.root");
+      fTFile = new TFile(TagsName.Data(),"RECREATE");
     }
   }
   if (GetOption("xout") && fFileOut) {
@@ -743,5 +743,5 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.109 2000/06/29 15:56:45 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.110 2000/07/01 18:43:20 fisyak Exp $
 
