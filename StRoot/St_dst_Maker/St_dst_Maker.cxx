@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.55 2000/09/02 22:47:29 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.56 2000/09/09 18:09:21 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.56  2000/09/09 18:09:21  fisyak
+// Janet Seyboth corrections
+//
 // Revision 1.55  2000/09/02 22:47:29  fisyak
 // Accout the fact that event_header might be created in St_trg_Maker
 //
@@ -156,7 +159,6 @@
 #include "StMessMgr.h"
 
 #include "global/St_dst_dedx_filler_Module.h"
-#include "global/St_fill_ftpc_dst_Module.h"
 #include "global/St_dst_monitor_soft_filler_Module.h"
 
 #include "global/St_particle_dst_filler_Module.h"
@@ -170,13 +172,12 @@
 #include "tables/St_dst_mon_soft_rich_Table.h"
 #include "tables/St_sgr_groups_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.55 2000/09/02 22:47:29 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.56 2000/09/09 18:09:21 fisyak Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
   St_dst_Maker::St_dst_Maker(const char *name):
-StMaker(name),
-m_fdepar(0)
+StMaker(name)
 {
   fSelect = 0;
 }
@@ -188,6 +189,7 @@ St_dst_Maker::~St_dst_Maker(){
 Int_t St_dst_Maker::Init(){
   static const char *todst[] = {
     "match:",  "globtrk","CpyTrk", 
+    "fglobal:", "point","dst_dedx",
     "primary:","globtrk2", "primtrk", "vertex",
     "v0:",     "dst_v0_vertex","ev0_eval",
     "xi:",     "dst_xi_vertex",
@@ -320,8 +322,27 @@ Int_t  St_dst_Maker::Filler(){
   if (!dst) return kStWarn;
   int iMake = kStOK;
   int iRes = 0;
+
   St_dst_track     *globtrk     = (St_dst_track *)     dstI("globtrk");
+  // If no TPC/SVT globtrk table, get FTPC globtrk table if it exists
+  // otherwise create an empty globtrk table
+  if (!globtrk) {
+     St_DataSet *ds=0, *mk=0;
+     mk = GetInputDS("fglobal");
+     if (mk) { 
+        ds = mk->Find("globtrk");
+        if (ds) {
+           ds->Shunt(dst);
+           globtrk = (St_dst_track *) dstI("globtrk");
+        }
+     } 
+     if(!globtrk) {globtrk = new St_dst_track("globtrk",1);AddGarb(globtrk);}
+  }
+
   St_dst_vertex    *vertex      = (St_dst_vertex *)    dstI("vertex");    
+  //Make empty vertex table if none exists
+  if(!vertex) {vertex = new St_dst_vertex("vertex",1);AddGarb(vertex);}
+
   St_svm_evt_match *evt_match   = (St_svm_evt_match *) dstI("evt_match");
   //St_dst_run_summary *dst_run_summary = (St_dst_run_summary   *) m_ConstSet->Find("dst_run_summary");
   
@@ -373,14 +394,17 @@ Int_t  St_dst_Maker::Filler(){
  
   if(Debug()) gMessMgr->Debug() << " run_dst: Calling dst_point_filler" << endm;
   // dst_point_filler
-  St_DataSet *ftpc_hits   = GetInputDS("ftpc_hits");
-  St_fcl_fppoint *fcl_fppoint = 0;
-  if (ftpc_hits) fcl_fppoint = (St_fcl_fppoint *) ftpc_hits->Find("fcl_fppoint");
-  if (!fcl_fppoint) {fcl_fppoint = new St_fcl_fppoint("fcl_fppoint",1); AddGarb(fcl_fppoint);}
-  Int_t no_of_points    = tphit->GetNRows() + scs_spt->GetNRows() + fcl_fppoint->GetNRows();
+  Int_t no_of_points    = tphit->GetNRows() + scs_spt->GetNRows();
+  // If FTPC in chain, a point table already exists
   St_dst_point   *point = 0;
   if (no_of_points > 0) { 
-    point = new St_dst_point("point",no_of_points);  dstI.Add(point);
+    point     = (St_dst_point *)     dstI("point");
+    if (!point) {
+       point = new St_dst_point("point",no_of_points);  dstI.Add(point);
+    }
+    else {
+       point->ReAllocate(point->GetNRows() + no_of_points);
+    }
     iRes = dst_point_filler(tphit, scs_spt, point);
   //	   ========================================
     if (iRes !=kSTAFCV_OK) {
@@ -449,7 +473,14 @@ Int_t  St_dst_Maker::Filler(){
   if (!stk_track) {stk_track = new St_stk_track("stk_track",1); AddGarb(stk_track);}
 
   if(Debug()) gMessMgr->Debug() << " run_dst: Calling dst_dedx_filler" << endm;
-  dst_dedx = new St_dst_dedx("dst_dedx",20000); dstI.Add(dst_dedx);
+  // If FTPC in chain, dst_dedx table already exists
+  dst_dedx     = (St_dst_dedx *)     dstI("dst_dedx");
+  if (!dst_dedx) {
+     dst_dedx = new St_dst_dedx("dst_dedx",20000); dstI.Add(dst_dedx);
+  }
+  else {
+     dst_dedx->ReAllocate(20000);
+  }
  
   iRes = dst_dedx_filler(tptrack,stk_track,tpc_dedx,dst_dedx);
     //     ===========================================
@@ -459,34 +490,16 @@ Int_t  St_dst_Maker::Filler(){
     if(Debug()) gMessMgr->Debug() << " run_dst: finshed calling dst_dedx_filler" << endm;
   }
   
+  
+ // dst_mon_soft
   St_DataSet *ftpc_tracks = GetInputDS("ftpc_tracks");
   St_fpt_fptrack *fpt_fptrack = 0;
   if (ftpc_tracks)  fpt_fptrack = (St_fpt_fptrack *) ftpc_tracks->Find("fpt_fptrack");
-  if (point && fcl_fppoint &&  fpt_fptrack) {
-    if(Debug()) gMessMgr->Debug()<<" run_dst: Calling fill_ftpc_dst"<<endm;
-    Int_t No_of_Tracks = 0;
-    if (globtrk) No_of_Tracks += globtrk->GetNRows();
-    if (fpt_fptrack) No_of_Tracks += fpt_fptrack->GetNRows();
-    if (globtrk) globtrk->ReAllocate(No_of_Tracks);
-    else {globtrk     = new St_dst_track("globtrk", No_of_Tracks); dstI.Add(globtrk);}
-    dst_dedx->ReAllocate(No_of_Tracks);
-   
-    St_DataSet *ftpcpars = GetInputDB("ftpc");
-    assert(ftpcpars);
-    St_DataSetIter gime(ftpcpars);
-    m_fdepar = (St_fde_fdepar *) gime("fdepars/fdepar");
-    iRes = fill_ftpc_dst(fpt_fptrack, fcl_fppoint, m_fdepar, globtrk,
-                         point,dst_dedx);
-    //             ==========================================================
-    if (iRes != kSTAFCV_OK) {
-      iMake = kStWarn;
-      gMessMgr->Warning() << "Problem on return from FILL_FTPC_DST" << endm;
-      if(Debug()) gMessMgr->Debug() << " run_dst: finished calling fill_ftpc_dst" << endm;
-    }
-  }
-  
- // dst_mon_soft
   if (!fpt_fptrack) {fpt_fptrack = new St_fpt_fptrack("fpt_fptrack",1); AddGarb(fpt_fptrack);}
+  St_DataSet *ftpc_hits   = GetInputDS("ftpc_hits");
+  St_fcl_fppoint *fcl_fppoint = 0;
+  if (ftpc_hits) fcl_fppoint = (St_fcl_fppoint *) ftpc_hits->Find("fcl_fppoint");
+  if (!fcl_fppoint) {fcl_fppoint = new St_fcl_fppoint("fcl_fppoint",1); AddGarb(fcl_fppoint);}
   if (!evt_match)   {evt_match   = new St_svm_evt_match("evt_match",1); AddGarb(evt_match);}
   St_DataSet *ctf = GetInputDS("ctf");
   St_ctu_cor *ctb_cor = 0;
