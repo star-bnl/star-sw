@@ -71,6 +71,91 @@ void St_NodeView::Browse(TBrowser *b){
 }
 
 //______________________________________________________________________________
+Int_t St_NodeView::DistancetoPrimitive(Int_t px, Int_t py)
+{
+//*-*-*-*-*-*-*-*-*Compute distance from point px,py to a St_NodeView*-*-*-*-*-*
+//*-*                  ===========================================
+//*-*  Compute the closest distance of approach from point px,py to the position of 
+//*-*  this node.
+//*-*  The distance is computed in pixels units.
+//*-*
+//*-*  It is restricted by 2 levels of St_Nodes
+//*-*
+//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+ 
+   const Int_t big = 9999;
+   const Int_t inaxis = 7;
+   const Int_t maxdist = 5;
+ 
+   Int_t puxmin = gPad->XtoAbsPixel(gPad->GetUxmin());
+   Int_t puymin = gPad->YtoAbsPixel(gPad->GetUymin());
+   Int_t puxmax = gPad->XtoAbsPixel(gPad->GetUxmax());
+   Int_t puymax = gPad->YtoAbsPixel(gPad->GetUymax());
+ 
+//*-*- return if point is not in the user area
+   if (px < puxmin - inaxis) return big;
+   if (py > puymin + inaxis) return big;
+   if (px > puxmax + inaxis) return big;
+   if (py < puymax - inaxis) return big;
+ 
+   TView *view =gPad->GetView();
+   if (!view) return big;
+ 
+  St_Node *thisNode  = GetNode();
+  static St_NodePosition nullPosition;
+  St_NodePosition *position = &nullPosition;
+  TShape  *shape = 0;
+  if (thisNode) {
+    shape    = thisNode->GetShape();
+    position = GetPosition();
+
+//*-*- Update translation vector and rotation matrix for new level
+     gGeometry->UpdateTempMatrix(position->GetX(),position->GetY(),position->GetZ()
+                                ,position->GetMatrix()->GetMatrix()
+                                ,position->GetMatrix()->IsReflection());
+   }     
+//*-*- Paint Referenced shape
+   Int_t dist = big;
+   if (thisNode) {
+     if (thisNode->GetVisibility() && shape->GetVisibility()) {
+//        gNode = this;
+        dist = shape->DistancetoPrimitive(px,py);
+        if (dist < maxdist) {
+           gPad->SetSelected(this);
+           return 0;
+        }
+     }
+////      if ( TestBit(kSonsInvisible) ) return dist;
+   }
+ 
+//*-*- Loop on all sons
+   Int_t nsons = 0;
+   TList *fNodes =  GetList();
+   if (fNodes) nsons = fNodes->GetSize();
+   Int_t dnode = dist;
+   if (nsons) {
+      gGeometry->PushLevel();
+      St_Node *node;
+      TObject *obj;
+      TIter  next(fNodes);
+      while ((obj = next())) {
+         node = (St_Node*)obj;
+         dnode = node->DistancetoPrimitive(px,py);
+         if (dnode <= 0)  break;
+         if (dnode < dist) dist = dnode;
+         if (gGeometry->GeomLevel() > 2) break;
+      }
+      gGeometry->PopLevel();
+   }
+ 
+   if (gGeometry->GeomLevel()==0 && dnode > maxdist) {
+      gPad->SetSelected(view);
+      return 0;
+   } else
+      return dnode;
+}
+
+//______________________________________________________________________________
 void St_NodeView::Draw(Option_t *option)
 {
 //*-*-*-*-*-*-*-*-*-*-*-*Draw Referenced node with current parameters*-*-*-*
