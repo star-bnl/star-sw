@@ -62,7 +62,10 @@ HISTORY:      00aug96-v000a-hpl- Creation.
 			    * Change:
 			       abs(strack[ntrack].azx+999.0)<0.0001)  -->
 			      fabs(strack[ntrack].azx+999.0)<0.0001)
-
+              23 Sept 1999 WAL
+	                    * row_pnt, row_count code can only work for
+                              data in one sector.  Try first to cut out 
+                              all but one.
 ------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------
@@ -268,8 +271,11 @@ long type_of_call tpt_sts_(
     for (i=0; i<tphit_h[0].nok; i++){
 	loc_hit[i] -= 1;
 	j = loc_hit[i];
-	k = tphit[j].row%100 - 1;
-	if (row_count[k]++ == 0) row_pnt[k]=i;
+        isector = tphit[j].row/100;
+        if(isector == 18) {
+            k = tphit[j].row%100 - 1;
+	    if (row_count[k]++ == 0) row_pnt[k]=i;
+	}
     }
 
     nres = 0;
