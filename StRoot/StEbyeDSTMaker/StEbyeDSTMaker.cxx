@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeDSTMaker.cxx,v 1.3 2000/10/13 17:51:35 jgreid Exp $
+ * $Id: StEbyeDSTMaker.cxx,v 1.4 2001/09/14 17:45:44 perev Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *         incorporates elements of code by
@@ -19,6 +19,9 @@
  **********************************************************************
  *
  * $Log: StEbyeDSTMaker.cxx,v $
+ * Revision 1.4  2001/09/14 17:45:44  perev
+ * Removed references to StRun.
+ *
  * Revision 1.3  2000/10/13 17:51:35  jgreid
  * modified centrality calc to use all uncorrected primaries
  *
@@ -33,7 +36,7 @@
 
 #include "StEbyeDSTMaker.h"
 #include "StChain.h"
-#include "StRun.h"
+//-tu #include "StRun.h"
 #include "StEventTypes.h"
 #include "StGlobalTrack.h"
 #include "SystemOfUnits.h"
@@ -84,8 +87,8 @@ Int_t StEbyeDSTMaker::Make() {
   StEvent* mEvent = (StEvent *) GetInputDS("StEvent");
   if (!mEvent) return kStOK; // If no event, we're done
   StEvent& event = *mEvent;
-  StRun *run;
-  run = (StRun *) GetInputDS("StRun");
+  //-tu  StRun *run;
+  //-tu  run = (StRun *) GetInputDS("StRun");
 
   // define the necessary variables
   StEbyeTrack *ebyeTrack = new StEbyeTrack();

@@ -3,7 +3,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEbyeScaTagsMaker.h,v 1.7 2000/02/21 19:07:18 jgreid Exp $
+// $Id: StEbyeScaTagsMaker.h,v 1.8 2001/09/14 17:49:48 perev Exp $
 //
 // StEbyeScaTagsMaker
 //
@@ -19,6 +19,9 @@
 // History:
 //
 // $Log: StEbyeScaTagsMaker.h,v $
+// Revision 1.8  2001/09/14 17:49:48  perev
+// Removed references to StRun.
+//
 // Revision 1.7  2000/02/21 19:07:18  jgreid
 // added return value to fillTag()
 //
@@ -34,7 +37,7 @@
 #include "tables/St_ScaTag_Table.h"
 
 class StEvent;
-class StRun;
+//-tu class StRun;
 
 class StEbyeScaTagsMaker : public StMaker {
 
@@ -64,7 +67,7 @@ public:
   void printTag(ostream& = cout);
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeScaTagsMaker.h,v 1.7 2000/02/21 19:07:18 jgreid Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeScaTagsMaker.h,v 1.8 2001/09/14 17:49:48 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEbyeScaTagsMaker, 1)
 };
