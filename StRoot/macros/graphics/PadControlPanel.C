@@ -1,6 +1,12 @@
 //*-- Author :    Valery Fine   25/05/99  (E-mail: fine@bnl.gov)
-// $Id: PadControlPanel.C,v 1.2 1999/06/02 16:30:12 fine Exp $
+//
+// Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
+//
+// $Id: PadControlPanel.C,v 1.3 1999/06/02 22:25:12 fine Exp $
 // $Log: PadControlPanel.C,v $
+// Revision 1.3  1999/06/02 22:25:12  fine
+// 4 view command has been introduced
+//
 // Revision 1.2  1999/06/02 16:30:12  fine
 // Clean up
 //
@@ -32,6 +38,11 @@
 //  From the compiled C++ code:
 //  --------------------
 //   gROOT->LoadMacro("PadControlPanel.C");
+//
+//  Note:  If you don't like what it does make your private copy 
+//         change it with your favorite text editor and load it right
+//         away.
+//         NO EXTRA STEP like : compilation, linking, loading required 
 //
 ///////////////////////////////////////////////////////////////////////
 
@@ -71,7 +82,8 @@ static TControlBar *PadControlPanel(TControlBar *bar=0){
    bar->AddButton("Scale -","StPadControlPanel::Decrease3DScale();","Change the scale of the image");
    bar->AddButton("Top View","StPadControlPanel::TopView();","Show the top view");
    bar->AddButton("Side View","StPadControlPanel::SideView();","Show the side view");
-   bar->AddButton("Front View","StPadControlPanel::FrontView();","Show the fornt view");
+   bar->AddButton("Front View","StPadControlPanel::FrontView();","Show the front view");
+   bar->AddButton("4 views","StPadControlPanel::MakeFourView();","4 view");
 
    bar->Show();
    return bar;
@@ -108,22 +120,25 @@ static void RotateView(Float_t phi, Float_t theta, TVirtualPad *pad=0)
     if (view) {
       Int_t iret;
       view->SetView(phi, theta, 0, iret);
+      thisPad->SetPhi(-90-phi);
+      thisPad->SetTheta(90-theta);
       thisPad->Modified();
       thisPad->Update();
     }
   }
 }
+
 //_______________________________________________________________________________________
-static void FrontView(){
-  RotateView(0,-90.0);
+static void FrontView(TVirtualPad *pad=0){
+  RotateView(0,-90.0,pad);
 }
 //_______________________________________________________________________________________
-static void TopView(){
-  RotateView(90.0,-90.0);
+static void TopView(TVirtualPad *pad=0){
+  RotateView(90.0,-90.0,pad);
 }
 //_______________________________________________________________________________________
-static void SideView(){
-  RotateView(90.0,0.0);
+static void SideView(TVirtualPad *pad=0){
+  RotateView(90.0,0.0,pad);
 }
 //_______________________________________________________________________________________
 static void Centered3DImages()
@@ -171,6 +186,61 @@ static void Inscrease3DScale()
     view->SetRange(min,max);
     thisPad->Modified();
     thisPad->Update();
+  }
+}
+//_______________________________________________________________________________________
+void MakeFourView(TVirtualPad *pad=0)
+{
+//  Creates 4 pads view of the pad (or gPad)
+//   ------------------------------
+//   |              |             |
+//   |              |             |
+//   |              |             |
+//   |    Front     |   Top       |
+//   |    view      |   view      |
+//   |              |             |
+//   |              |             |
+//   |              |             |
+//   ---------------+-------------
+//   |              |             |
+//   |              |             |
+//   |              |             |
+//   |    Side      |  Spacial    |
+//   |    view      |   view      |
+//   |              |             |
+//   |              |             |
+//   |              |             |
+//   ------------------------------
+  TVirtualPad *thisPad = pad;
+  if (!thisPad) thisPad = gPad;
+  TView *view = 0; 
+  TList *thisPrimitives = 0; 
+  if (thisPad && (thisPrimitives = thisPad->GetListOfPrimitives()) && (view =  thisPad->GetView()) ) 
+  {
+    Float_t min[3],max[3];
+    view->GetRange(min,max);
+    Int_t system = view->GetSystem();
+    TCanvas *c = new TCanvas(" 4 views", thisPad->GetTitle(),600,600);
+    c->Divide(2,2);
+    TIter next(thisPrimitives);
+    for (int i =1; i <= 4; i++) {
+      c->cd(i);
+      TList *newPrimitives = gPad->GetListOfPrimitives();
+      TObject *obj = 0;
+      while (obj = next()) newPrimitives->Add(obj);
+      TView *newView = new TView(system);
+      newView->SetRange(min,max);
+      next.Reset();
+   }
+   // set separate view;
+   // Fron view
+    Int_t j = 1;
+    c->cd(j++); FrontView();
+    c->cd(j++); TopView();
+    c->cd(j++); SideView();
+    c->cd(j++); RotateView(60.0,60.0,0);
+    c->Modified();
+    c->Update();
   }
 }
 //_______________________________________________________________________________________
