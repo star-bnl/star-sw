@@ -36,27 +36,31 @@ temp = (StDbDataSet*)mk->GetData("StarDb");
    temp1 = temp->Find("Calibrations");
    if(temp1){tpc_calibrations = temp1->Find("tpc");}
    else{gMessMgr->Message("StTpcDb::Error 
-         Getting TPC Calibrations database","F");}
+         Getting TPC Calibrations database","E");}
    temp1 = temp->Find("Geometry");
    if(temp1)tpc_geometry = temp1->Find("tpc");
    else{gMessMgr->Message("StTpcDb::Error 
-         Getting TPC Geometry database","F");}
+         Getting TPC Geometry database","E");}
    temp1 = temp->Find("Conditions");
    if(temp1)tpc_conditions = temp1->Find("tpc");
    else{gMessMgr->Message("StTpcDb::Error 
-         Getting TPC Conditions database","F");}
+         Getting TPC Conditions database","E");}
    
  }
  else{
-   gMessMgr->Message("StTpcDb::Error Getting TPC database","F");
+   gMessMgr->Message("StTpcDb::Error Getting TPC database","E");
  }
 
 PadPlane=0;
+WirePlane=0;
+dimensions=0;
 gStTpcDb = this;
 }
 //_____________________________________________________________________________
 StTpcDb::~StTpcDb() {
 delete PadPlane;
+delete WirePlane;
+delete dimensions;
 gStTpcDb = 0;
 }
 //_____________________________________________________________________________
@@ -72,6 +76,32 @@ StTpcPadPlaneI* StTpcDb::PadPlaneGeometry(){
    PadPlane = (StTpcPadPlaneI*)pptemp; 
   }
  return PadPlane;
+}
+
+StTpcWirePlaneI* StTpcDb::WirePlaneGeometry(){
+  if (WirePlane==0){            // get wire plane from data base
+   StDbDataSet* wp = (StDbDataSet*)tpc_geometry->Find("tpcWirePlanes");
+   StDbTableI* table=wp->GetDbObject();
+   tpcWirePlanes* tpd;
+   tpd=(tpcWirePlanes*)table->GetTable(); 
+   StRTpcWirePlane* wptemp = new StRTpcWirePlane();
+   wptemp->AddData(tpd);
+   WirePlane = (StTpcWirePlaneI*)wptemp; 
+  }
+ return WirePlane;
+}
+
+StTpcDimensionsI* StTpcDb::Dimensions(){
+  if (dimensions==0){            // get wire plane from data base
+   StDbDataSet* wp = (StDbDataSet*)tpc_geometry->Find("tpcDimensions");
+   StDbTableI* table=wp->GetDbObject();
+   tpcDimensions* tpd;
+   tpd=(tpcDimensions*)table->GetTable(); 
+   StRTpcDimensions* wptemp = new StRTpcDimensions();
+   wptemp->AddData(tpd);
+   dimensions = (StTpcDimensionsI*)wptemp; 
+  }
+ return dimensions;
 }
 
 
