@@ -1,5 +1,9 @@
-// $Id: StFtpcDisplay.cc,v 1.15 2002/11/06 13:45:14 oldi Exp $
+// $Id: StFtpcDisplay.cc,v 1.16 2003/01/16 18:04:32 oldi Exp $
 // $Log: StFtpcDisplay.cc,v $
+// Revision 1.16  2003/01/16 18:04:32  oldi
+// Bugs eliminated. Now it compiles on Solaris again.
+// Split residuals for global and primary fit.
+//
 // Revision 1.15  2002/11/06 13:45:14  oldi
 // Code clean ups.
 //
@@ -286,7 +290,7 @@ StFtpcDisplay::~StFtpcDisplay()
 {
   // Destructor.
   
-  Delete();
+  DeleteAll();
 
   delete found_hit;
   delete found_hit_plus;
@@ -1478,7 +1482,7 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, M
   delete mX_Y_Zminus;
   delete mX_Y_Z;
   
-  Delete();
+  DeleteAll();
   
   return;
 }
@@ -1645,9 +1649,9 @@ void StFtpcDisplay::FillFound(Bool_t good_found, Bool_t st, MIntArray *split, MI
   StFtpcTrack *track;
   
   // coordinates of trackpoints
-  Float_t x[StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()];
-  Float_t y[StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()];
-  Float_t z[StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()];
+  Float_t *x = new Float_t[StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()];
+  Float_t *y = new Float_t[StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()];
+  Float_t *z = new Float_t[StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()];
 
   Int_t track_entries = mTrack->GetEntriesFast();
   Bool_t *good_track_to_show = new Bool_t[track_entries];
@@ -1977,6 +1981,10 @@ void StFtpcDisplay::FillFound(Bool_t good_found, Bool_t st, MIntArray *split, MI
   mX_Y_Zplus->Update();
   mX_Y_Zminus->Update();
   mX_Y_Z->Update();
+
+  delete[] x;
+  delete[] y;
+  delete[] z;
 
   return;
 }

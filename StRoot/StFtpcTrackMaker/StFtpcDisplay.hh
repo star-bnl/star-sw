@@ -1,5 +1,9 @@
-// $Id: StFtpcDisplay.hh,v 1.8 2002/04/05 16:50:28 oldi Exp $
+// $Id: StFtpcDisplay.hh,v 1.9 2003/01/16 18:04:32 oldi Exp $
 // $Log: StFtpcDisplay.hh,v $
+// Revision 1.9  2003/01/16 18:04:32  oldi
+// Bugs eliminated. Now it compiles on Solaris again.
+// Split residuals for global and primary fit.
+//
 // Revision 1.8  2002/04/05 16:50:28  oldi
 // Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
 // Each Track inherits from StHelix, now.
@@ -133,7 +137,7 @@ public:
   void  FillFound(Bool_t good_found, Bool_t st, MIntArray *split, MIntArray *unclean, MIntArray *found_hits, 
 		  Float_t eta_low, Float_t eta_up, Float_t pt_low, Float_t pt_up);             // fills found histograms
   void  DrawNodes();                                                                           // draw nodes
-  void  Delete();                                                                              // deletes objects of found and geant tracks
+  void  DeleteAll();                                                                              // deletes objects of found and geant tracks
   void  DeleteFound();                                                                         // deletes objects of found tracks
   void  DeleteGeant();                                                                         // deletes objects of geant tracks
   void  OnOff(Bool_t on);                                                                      // prints 'On' or 'Off'
@@ -161,7 +165,7 @@ inline void StFtpcDisplay::DrawNodes()
 }
 
 
-inline void StFtpcDisplay::Delete() 
+inline void StFtpcDisplay::DeleteAll() 
 {
   // Deletes objects of found and geant tracks.
 

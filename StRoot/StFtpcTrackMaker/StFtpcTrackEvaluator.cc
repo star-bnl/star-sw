@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackEvaluator.cc,v 1.17 2002/11/06 13:46:24 oldi Exp $
+// $Id: StFtpcTrackEvaluator.cc,v 1.18 2003/01/16 18:04:33 oldi Exp $
 // $Log: StFtpcTrackEvaluator.cc,v $
+// Revision 1.18  2003/01/16 18:04:33  oldi
+// Bugs eliminated. Now it compiles on Solaris again.
+// Split residuals for global and primary fit.
+//
 // Revision 1.17  2002/11/06 13:46:24  oldi
 // Code clean ups.
 //
@@ -341,7 +345,7 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_d
     gMessMgr->Message("", "I", "OST") << "Most information will be missing due to lack of geant hit information." << endm;
   }
   
-  Info();
+  InfoAll();
   FillHitsOnTrack();
 
   if (ffs_gepoint) {
@@ -401,7 +405,7 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_d
     gMessMgr->Message("", "I", "OST") << "Most information will be missing due to lack of geant hit information." << endm;
   }
   
-  Info();
+  InfoAll();
   FillHitsOnTrack();
 
   if (ffs_gepoint) {
@@ -735,7 +739,7 @@ void StFtpcTrackEvaluator::SetupHistos()
   
   if (strcmp(mWritePermission, "RECREATE") !=0 && strcmp(mWritePermission, "UPDATE") != 0) {
     gMessMgr->Message("Wrong write permission! Has to be RECREATE or UPDATE. Set to RECREATE.", "W", "OST");
-    mWritePermission = "RECREATE";
+    mWritePermission = (Char_t*)"RECREATE";
   }
 
   if (strcmp(mWritePermission, "RECREATE") == 0) {
@@ -2189,11 +2193,11 @@ void StFtpcTrackEvaluator::FillTimeHistos(StFtpcTracker *tracker)
 {
   // Fills histograms of time consumption.
 
-  mSetupTime->Fill(tracker->GetTime("init"));
-  mTrackingTime->Fill(tracker->GetTime("main_vertex"));
-  mExtensionTime->Fill(tracker->GetTime("extend"));
-  mSplitTime->Fill(tracker->GetTime("splits"));
-  mFitTime->Fill(tracker->GetTime("fit"));
+  mSetupTime->Fill(tracker->GetTime((Char_t*)"init"));
+  mTrackingTime->Fill(tracker->GetTime((Char_t*)"main_vertex"));
+  mExtensionTime->Fill(tracker->GetTime((Char_t*)"extend"));
+  mSplitTime->Fill(tracker->GetTime((Char_t*)"splits"));
+  mFitTime->Fill(tracker->GetTime((Char_t*)"fit"));
   mTotalTime->Fill(tracker->GetTime());
 
   return;
@@ -2324,7 +2328,7 @@ void StFtpcTrackEvaluator::TrackerInfo()
 }
 
 
-void StFtpcTrackEvaluator::Info()
+void StFtpcTrackEvaluator::InfoAll()
 {
   // Shows all information.
 

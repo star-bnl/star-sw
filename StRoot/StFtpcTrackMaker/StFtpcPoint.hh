@@ -1,5 +1,9 @@
-// $Id: StFtpcPoint.hh,v 1.10 2002/11/06 13:45:42 oldi Exp $
+// $Id: StFtpcPoint.hh,v 1.11 2003/01/16 18:04:33 oldi Exp $
 // $Log: StFtpcPoint.hh,v $
+// Revision 1.11  2003/01/16 18:04:33  oldi
+// Bugs eliminated. Now it compiles on Solaris again.
+// Split residuals for global and primary fit.
+//
 // Revision 1.10  2002/11/06 13:45:42  oldi
 // Flag for clusters not to be used for tracking introduced.
 // Code clean ups.
@@ -94,11 +98,6 @@ private:
   Int_t     mHitNumber;     // number of this cluster in this event
   Int_t     mNextHitNumber; // number of next hit on same track
   Int_t     mTrackNumber;   // track number to which this cluster belongs to
-  
-  Double_t  mXResidual;     // x distance of measured point to momentum fit
-  Double_t  mYResidual;     // y distance of measured point to momentum fit
-  Double_t  mRResidual;     // r of measured point to r of momentum fit
-  Double_t  mPhiResidual;   // angle of measured point to angle of momentum fit
 
   // additional input variables from cluster finder
   
@@ -114,6 +113,16 @@ private:
                             // bit6:global coords, bit7:don't use for tracking
   Double_t  mSigmaPhi;      // cluster sigma in pad direction
   Double_t  mSigmaR;        // cluster sigma in drift direction
+
+    // Residuals
+  Double_t  mXPrimResidual;     // x distance of measured point to primary momentum fit
+  Double_t  mYPrimResidual;     // y distance of measured point to primary momentum fit
+  Double_t  mRPrimResidual;     // r of measured point to r of primary momentum fit
+  Double_t  mPhiPrimResidual;   // angle of measured point to angle of primary momentum fit
+  Double_t  mXGlobResidual;     // x distance of measured point to global momentum fit
+  Double_t  mYGlobResidual;     // y distance of measured point to global momentum fit
+  Double_t  mRGlobResidual;     // r of measured point to r of global momentum fit
+  Double_t  mPhiGlobResidual;   // angle of measured point to angle of global momentum fit
 
 public:
   
@@ -181,10 +190,14 @@ public:
   Long_t   GetCharge()        const { return mCharge;          }
   Long_t   GetFlags()         const { return mFlags;           }
   
-  Double_t GetXResidual()     const { return mXResidual;       }
-  Double_t GetYResidual()     const { return mYResidual;       }
-  Double_t GetRResidual()     const { return mRResidual;       }
-  Double_t GetPhiResidual()   const { return mPhiResidual;     }
+  Double_t GetXPrimResidual()     const { return mXPrimResidual;       }
+  Double_t GetYPrimResidual()     const { return mYPrimResidual;       }
+  Double_t GetRPrimResidual()     const { return mRPrimResidual;       }
+  Double_t GetPhiPrimResidual()   const { return mPhiPrimResidual;     }
+  Double_t GetXGlobResidual()     const { return mXGlobResidual;       }
+  Double_t GetYGlobResidual()     const { return mYGlobResidual;       }
+  Double_t GetRGlobResidual()     const { return mRGlobResidual;       }
+  Double_t GetPhiGlobResidual()   const { return mPhiGlobResidual;     }
 
   // setter  
   void    SetX(Double_t f)        {     mCoord.SetX(f); }
@@ -209,13 +222,35 @@ public:
   void    SetSigmaPhi(Double_t f)   {      mSigmaPhi =  f;  }
   void    SetSigmaR(Double_t f)     {        mSigmaR =  f;  }
   
-  void    SetXResidual(Double_t f)  {      mXResidual = f;  }
-  void    SetYResidual(Double_t f)  {      mYResidual = f;  }
-  void    SetPhiResidual(Double_t f){    mPhiResidual = f;  }
-  void    SetRResidual(Double_t f)  {      mRResidual = f;  }
+  void    SetResidualsToZero();
+  void    SetXPrimResidual(Double_t f)  {      mXPrimResidual = f;  }
+  void    SetYPrimResidual(Double_t f)  {      mYPrimResidual = f;  }
+  void    SetRPrimResidual(Double_t f)  {      mRPrimResidual = f;  }
+  void    SetPhiPrimResidual(Double_t f){    mPhiPrimResidual = f;  }
+  void    SetXGlobResidual(Double_t f)  {      mXGlobResidual = f;  }
+  void    SetYGlobResidual(Double_t f)  {      mYGlobResidual = f;  }
+  void    SetRGlobResidual(Double_t f)  {      mRGlobResidual = f;  }
+  void    SetPhiGlobResidual(Double_t f){    mPhiGlobResidual = f;  }
   
   ClassDef(StFtpcPoint, 1)   //Ftpc point class
 };
+
+
+inline void StFtpcPoint::SetResidualsToZero()
+{
+  // Sets all residuals to 0.
+
+  SetXPrimResidual(0.);
+  SetYPrimResidual(0.);
+  SetRPrimResidual(0.);
+  SetPhiPrimResidual(0.);
+  SetXGlobResidual(0.);
+  SetYGlobResidual(0.);
+  SetRGlobResidual(0.);
+  SetPhiGlobResidual(0.);
+
+  return;
+}
 
 
 inline StFtpcTrack *StFtpcPoint::GetTrack(TObjArray *tracks) const

@@ -1,5 +1,9 @@
-// $Id: StFtpcPoint.cc,v 1.13 2002/11/21 15:46:21 oldi Exp $
+// $Id: StFtpcPoint.cc,v 1.14 2003/01/16 18:04:33 oldi Exp $
 // $Log: StFtpcPoint.cc,v $
+// Revision 1.14  2003/01/16 18:04:33  oldi
+// Bugs eliminated. Now it compiles on Solaris again.
+// Split residuals for global and primary fit.
+//
 // Revision 1.13  2002/11/21 15:46:21  oldi
 // Enabled rotation for FTPC west. If there is an observed shift of the vertex
 // position in y-direction (in FTPC west), just fill this offset into the Db.
@@ -122,6 +126,8 @@ StFtpcPoint::StFtpcPoint()
   SetSigmaR(0);
   SetFlags(0);
 
+  SetResidualsToZero();
+
   return;
 }
 
@@ -160,6 +166,8 @@ StFtpcPoint::StFtpcPoint(fcl_fppoint_st *point_st)
   SetFlags((Long_t) point_st->flags);
 
   SetGlobalCoord(GetGlobalFlag());
+
+  SetResidualsToZero();
 
   return;
 }
@@ -211,6 +219,8 @@ StFtpcPoint::StFtpcPoint(Long_t   row,
 
   SetGlobalCoord(GetGlobalFlag());
 
+  SetResidualsToZero();
+
   return;
 }  
 
@@ -247,6 +257,8 @@ StFtpcPoint::StFtpcPoint(Double_t *x, Int_t row)
   SetSigmaPhi(0.);
   SetSigmaR(0.);
   SetFlags(0);
+
+  SetResidualsToZero();
 
   return;
 }
