@@ -174,15 +174,19 @@ strlibc$(ARCH_TAG)_dbg.o : strlibc$(ARCH_TAG).c
 
 
 str_file_inc : str_file.inc
+	rm -f str_file_inc
 	ln -s str_file.inc str_file_inc
 
 str_parse_inc : str_parse.inc
+	rm -f str_parse_inc
 	ln -s str_parse.inc str_parse_inc
 
 str_time_inc : str_time.inc
+	rm -f str_time_inc
 	ln -s str_time.inc str_time_inc
 
 strterm_vms_inc : strterm_vms.inc
+	rm -f strterm_vms_inc
 	ln -s strterm_vms.inc strterm_vms_inc
 
 
@@ -215,10 +219,6 @@ strbyte_aix.c : strbyte_sgi.c
 strterm_hpu.f : strterm_sgi.f
 	rm -f strterm_hpu.f
 	ln -s strterm_sgi.f strterm_hpu.f
-
-strtermc_hpu.c : strtermc_sgi.c
-	rm -f strtermc_hpu.c
-	ln -s strtermc_sgi.c strtermc_hpu.c
 
 strbyte_hpu.c : strbyte_sgi.c
 	rm -f strbyte_hpu.c
