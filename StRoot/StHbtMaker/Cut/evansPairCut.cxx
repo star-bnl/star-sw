@@ -51,18 +51,18 @@ void evansPairCut::ParityPairCuts(ParityBuff *Plus, ParityBuff *Minus){
 
       cout <<"begin evans Pair Cut "<< newPlusSize<< " plus and "<< newMinusSize<<" minus tracks"<< endl; 
 
-      for (int jjj = 0; jjj < newPlusSize; jjj++){
+      {for (int jjj = 0; jjj < newPlusSize; jjj++){
                    PlusIsGood.push_back(1);
-      }     
-      for (int jjj = 0; jjj < newMinusSize; jjj++){
+      }}     
+      {for (int jjj = 0; jjj < newMinusSize; jjj++){
                    MinusIsGood.push_back(1);
-      }     
+      }}     
 
       // loop over all combinations of plus and minus tracks, flagging any pairs that are too close 
       double FdotS;
-      for (int bbb = 0; bbb < newPlusSize; bbb++){
+      {for (int bbb = 0; bbb < newPlusSize; bbb++){
 	FirstTrack = ((*Plus)[bbb]).vect();
-	for (int hhh = 0; hhh < newMinusSize; hhh++){
+	{for (int hhh = 0; hhh < newMinusSize; hhh++){
 	  SecondTrack = ((*Minus)[hhh]).vect();
 	  if (FirstTrack.z()*SecondTrack.z() > 0. ){  
 	    FdotS = FirstTrack.dot(SecondTrack);
@@ -73,14 +73,14 @@ void evansPairCut::ParityPairCuts(ParityBuff *Plus, ParityBuff *Minus){
 	       }		     
 	    }
 	  }
-	}
-      }
+	}}
+      }}
 
       // now check plus vectors with other plus vectors
 
-      for (int bbb = 0; bbb < newPlusSize; bbb++){
+      {for (int bbb = 0; bbb < newPlusSize; bbb++){
 	FirstTrack = ((*Plus)[bbb]).vect();
-	for (int hhh = (bbb+1); hhh < newPlusSize; hhh++){
+	{for (int hhh = (bbb+1); hhh < newPlusSize; hhh++){
 	  SecondTrack = ((*Plus)[hhh]).vect();
 	  if (FirstTrack.z()*SecondTrack.z() > 0. ){  
 	    FdotS = FirstTrack.dot(SecondTrack);
@@ -91,14 +91,14 @@ void evansPairCut::ParityPairCuts(ParityBuff *Plus, ParityBuff *Minus){
 	       }		     
 	    }
 	  }
-	}
-      }
+	}}
+      }}
 
       // now check minus vectors with other minus vectors
 
-      for (int bbb = 0; bbb < newMinusSize; bbb++){
+      {for (int bbb = 0; bbb < newMinusSize; bbb++){
 	FirstTrack = ((*Minus)[bbb]).vect();
-	for (int hhh = (bbb+1); hhh < newMinusSize; hhh++){
+	{for (int hhh = (bbb+1); hhh < newMinusSize; hhh++){
 	  SecondTrack = ((*Minus)[hhh]).vect();
 	  if (FirstTrack.z()*SecondTrack.z() > 0. ){  
 	    FdotS = FirstTrack.dot(SecondTrack);
@@ -109,8 +109,8 @@ void evansPairCut::ParityPairCuts(ParityBuff *Plus, ParityBuff *Minus){
 	       }		     
 	    }
 	  }
-	}
-      }
+	}}
+      }}
 
       // now remove the 'bad' tracks from the 'plus' and 'minus' vectors
 

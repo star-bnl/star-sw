@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.50 2001/04/03 17:46:06 oldi Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.51 2001/04/25 17:43:24 perev Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -931,7 +931,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.50 2001/04/03 17:46:06 oldi Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.51 2001/04/25 17:43:24 perev Exp $");
 
   return StMaker::Init();
 }
@@ -1578,19 +1578,19 @@ Int_t StFlowAnalysisMaker::Finish() {
 	/ (double)Flow::nPhiBinsFtpc;
       double meanFtpcWest = histFull[k].histFullHar[j].mHistPhiFtpcWest->Integral() 
 	/ (double)Flow::nPhiBinsFtpc;
-      for (int i = 0; i < Flow::nPhiBins; i++) {
+      {for (int i = 0; i < Flow::nPhiBins; i++) {
 	// Tpc
 	histFull[k].histFullHar[j].mHistPhiWgt->SetBinContent(i+1, mean);
 	histFull[k].histFullHar[j].mHistPhiWgt->SetBinError(i+1, 0.);
-      }
-      for (int i = 0; i < Flow::nPhiBinsFtpc; i++) {
+      }}
+      {for (int i = 0; i < Flow::nPhiBinsFtpc; i++) {
 	// Ftpc (east)
 	histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->SetBinContent(i+1, meanFtpcEast);
 	histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->SetBinError(i+1, 0.);
 	// Ftpc (west)
 	histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->SetBinContent(i+1, meanFtpcWest);
 	histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->SetBinError(i+1, 0.);
-      }
+      }}
       // Tpc
       histFull[k].histFullHar[j].mHistPhiWgt->
 	Divide(histFull[k].histFullHar[j].mHistPhi);
@@ -1640,6 +1640,9 @@ Int_t StFlowAnalysisMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.51  2001/04/25 17:43:24  perev
+// HPcorrs
+//
 // Revision 1.50  2001/04/03 17:46:06  oldi
 // Bug fix that excluded FTPC tracks from the determination of the reaction plane.
 //

@@ -57,7 +57,7 @@ YKPLongitudinal::YKPLongitudinal( const char* frame ,
     char TitQinvNum[100] ;
     char TitQinvDen[100] ;
     char TitQinvRatio[100] ;
-    for(int ktindex = 0 ; ktindex < mNumberKtBins ; ktindex++)
+    {for(int ktindex = 0 ; ktindex < mNumberKtBins ; ktindex++)
 	{ 
 	    for(int yindex = 0 ; yindex < mNumberYBins ; yindex++)	{ 
 		// numerator
@@ -110,7 +110,7 @@ YKPLongitudinal::YKPLongitudinal( const char* frame ,
 		mQinvDenominator[ktindex+yindex*mNumberKtBins].Sumw2() ; 
 		mQinvRatio[ktindex+yindex*mNumberKtBins].Sumw2() ;
 	    }
-	}
+	}}
 
     ////
     // set up y pt bins boundaries
@@ -119,11 +119,11 @@ YKPLongitudinal::YKPLongitudinal( const char* frame ,
     mktBinsMin = new double[mNumberKtBins] ;
     mktBinsMax = new double[mNumberKtBins] ;
     double ktstep = (double)(ktMax-ktMin)/(double) mNumberKtBins ;
-    for(int ktindex = 0 ; ktindex < mNumberKtBins  ;  ktindex++ )
+    {for(int ktindex = 0 ; ktindex < mNumberKtBins  ;  ktindex++ )
 	{
 	    mktBinsMin[ktindex] = ((double) ktindex) * ktstep + ktMin ;
 	    mktBinsMax[ktindex] = ((double) (ktindex+1)) * ktstep + ktMin ;
-	}
+	}}
     // rap
     mYBinsMin  = new double[mNumberKtBins] ;
     mYBinsMax  = new double[mNumberYBins] ;

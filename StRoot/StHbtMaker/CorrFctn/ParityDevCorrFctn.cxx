@@ -154,12 +154,12 @@ inline void ParityDevCorrFctn::ParityCompute(ParityBuff *Plus, ParityBuff *Minus
       }
     //     ****** Compute K- **********
 
-       for (int jjj = 0; jjj <plusSize; jjj++){
+       {for (int jjj = 0; jjj <plusSize; jjj++){
 	 KMinusPos += (*Plus)[jjj].vect().unit(); 
-       }
-       for (int jjj = 0; jjj < minusSize; jjj++){
+       }}
+       {for (int jjj = 0; jjj < minusSize; jjj++){
 	 KMinusNeg += (*Minus)[jjj].vect().unit(); 
-       }
+       }}
        KMinus = (KMinusPos/plusSize) - (KMinusNeg/minusSize);
        Kt = KMinus;
        Kt.setZ(0.);
@@ -168,21 +168,21 @@ inline void ParityDevCorrFctn::ParityCompute(ParityBuff *Plus, ParityBuff *Minus
        // now calculate Ktwist*Kt
 
        double plusSum = 0.;
-       for (int jjj = 0; jjj < plusSize; jjj++){
+       {for (int jjj = 0; jjj < plusSize; jjj++){
 	 StHbtThreeVector TempV = (*Plus)[jjj].vect();
 	 double step1 = (TempV.y() * Kt.x()-TempV.x() * Kt.y() );  // this is y-component rotated to Kt coordinates
 	 double step2 = step1*TempV.z();                                                                     // multiply by z-component
 	 double step3 = step2/(TempV.mag2() * Kt.mag());                         // normalize
 	 plusSum += step3;
-       }
+       }}
        double minusSum = 0.;
-       for (int jjj = 0; jjj < minusSize; jjj++){
+       {for (int jjj = 0; jjj < minusSize; jjj++){
 	 StHbtThreeVector TempV = (*Minus)[jjj].vect();
 	 double step1 = (TempV.y() * Kt.x()-TempV.x() * Kt.y() );  // this is y-component rotated to Kt coordinates
 	 double step2 = step1*TempV.z();                                                                     // multiply by z-component
 	 double step3 = step2/(TempV.mag2() * Kt.mag());                         // normalize
 	 minusSum += step3;
-       }
+       }}
 
        double Ktwist      = (plusSum/ plusSize) - (minusSum/ minusSize);
        KtwistKt = Ktwist*Kt.mag();	 
@@ -197,7 +197,7 @@ inline void ParityDevCorrFctn::ParityCompute(ParityBuff *Plus, ParityBuff *Minus
        int numJcKtPlus = 0;
        if (minusSize < plusSize) smallSize = minusSize;
        StHbtThreeVector Jc;
-        for (int jjj = 0; jjj < smallSize; jjj++){
+        {for (int jjj = 0; jjj < smallSize; jjj++){
 	 PlusTrack = (*Plus)[jjj];
 	 MinusTrack = (*Minus)[jjj];
 	      StHbtThreeVector vOne  = PlusTrack.vect();
@@ -220,7 +220,7 @@ inline void ParityDevCorrFctn::ParityCompute(ParityBuff *Plus, ParityBuff *Minus
 		 numJcKtPlus++;
 	       }
 	       // end binomial
-       }
+       }}
        Jc = Jc/(smallSize); // remember to change normalization if we go back to all pairs
        JcKt = Jc.dot(Kt);
        cout << "JcKt  is " << JcKt << endl;

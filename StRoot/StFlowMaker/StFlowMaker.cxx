@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.51 2000/12/29 19:40:39 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.52 2001/04/25 17:46:33 perev Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -177,7 +177,7 @@ Int_t StFlowMaker::Init() {
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.51 2000/12/29 19:40:39 snelling Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.52 2001/04/25 17:46:33 perev Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -258,18 +258,18 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 	for (int n = 0; n < Flow::nPhiBins; n++) {
 	  mPhiWgt[k][j][n] = (phiWgtHist) ? phiWgtHist->GetBinContent(n+1) : 1.;
 	}
-	for (int n = 0; n < Flow::nPhiBinsFtpc; n++) {
+	{for (int n = 0; n < Flow::nPhiBinsFtpc; n++) {
 	  mPhiWgtFtpcEast[k][j][n] = (phiWgtHistFtpcEast) ? phiWgtHistFtpcEast->GetBinContent(n+1) : 1.;
 	  mPhiWgtFtpcWest[k][j][n] = (phiWgtHistFtpcWest) ? phiWgtHistFtpcWest->GetBinContent(n+1) : 1.;
-	}      } 
+	}}      } 
       else {
-	  for (int n = 0; n < Flow::nPhiBins; n++) {
+	  {for (int n = 0; n < Flow::nPhiBins; n++) {
 	      mPhiWgt[k][j][n] = 1.;
-	  }
-	  for (int n = 0; n < Flow::nPhiBinsFtpc; n++) {
+	  }}
+	  {for (int n = 0; n < Flow::nPhiBinsFtpc; n++) {
 	      mPhiWgtFtpcEast[k][j][n] = 1.;
 	      mPhiWgtFtpcWest[k][j][n] = 1.;
-	  }
+	  }}
       }
       delete histTitle;
       delete histTitleFtpcEast;
@@ -937,6 +937,9 @@ Int_t StFlowMaker::InitPicoEventRead() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.52  2001/04/25 17:46:33  perev
+// HPcorrs
+//
 // Revision 1.51  2000/12/29 19:40:39  snelling
 // Used the new calibration file for PID
 //

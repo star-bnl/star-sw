@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.22 2001/04/23 19:28:13 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.23 2001/04/25 17:42:28 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.23  2001/04/25 17:42:28  perev
+ * HPcorrs
+ *
  * Revision 2.22  2001/04/23 19:28:13  ullrich
  * Added StClusteringHints and methods to access it.
  *
@@ -87,6 +90,7 @@
  **************************************************************************/
 #include <typeinfo>
 #include <algorithm>
+#include "TClass.h"
 #include "StEvent.h"
 #include "StEventClusteringHints.h"
 #include "StEventInfo.h"
@@ -113,11 +117,65 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.22 2001/04/23 19:28:13 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.22 2001/04/23 19:28:13 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.23 2001/04/25 17:42:28 perev Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.23 2001/04/25 17:42:28 perev Exp $";
 
 ClassImp(StEvent)
 
+#ifdef HPUX
+void _lookup(TClass *cl, StObject*&val, StSPtrVecObject &vec,int kase)
+{
+    
+    int ii = -2001;
+    for (unsigned int i=0; i<vec.size(); i++)
+	if (vec[i] && vec[i]->IsA() == cl) {ii=i; break;}
+
+    switch(kase){
+      case 0: val = (ii < 0) ? 0:vec[ii]; return;
+
+      case 1: val = (ii < 0) ? 0:vec[ii]; if (val) return; 
+              val = (StObject*)cl->New();
+              vec.push_back(val);
+              return;
+    
+      case 2: if (ii>=0) {delete vec[ii]; vec[ii]=val; return;}
+              if (!val) return;
+              vec.push_back(val);
+              return;
+    }
+}
+
+#define _LOOKUP(T)\
+void _lookup        (const T*& val, StSPtrVecObject &vec){_lookup(val->Class(),(StObject*&)val,vec,0);}\
+void _lookupOrCreate(const T*& val, StSPtrVecObject &vec){_lookup(val->Class(),(StObject*&)val,vec,1);}\
+void _lookupAndSet  (const T*& val, StSPtrVecObject &vec){_lookup(val->Class(),(StObject*&)val,vec,2);}\
+void _lookup        (      T*& val, StSPtrVecObject &vec){_lookup(val->Class(),(StObject*&)val,vec,0);}\
+void _lookupOrCreate(      T*& val, StSPtrVecObject &vec){_lookup(val->Class(),(StObject*&)val,vec,1);}\
+void _lookupAndSet  (      T*& val, StSPtrVecObject &vec){_lookup(val->Class(),(StObject*&)val,vec,2);}
+
+_LOOKUP(StEventInfo)
+_LOOKUP(StEventSummary)
+_LOOKUP(StSoftwareMonitor)
+_LOOKUP(StTpcHitCollection)
+_LOOKUP(StFtpcHitCollection)
+_LOOKUP(StSvtHitCollection)
+_LOOKUP(StSsdHitCollection)
+_LOOKUP(StEmcCollection)
+_LOOKUP(StRichCollection)
+_LOOKUP(StTofCollection)
+_LOOKUP(StL0Trigger)
+_LOOKUP(StL3Trigger)
+_LOOKUP(StTriggerDetectorCollection)
+_LOOKUP(StSPtrVecTrackDetectorInfo)
+_LOOKUP(StSPtrVecTrackNode)
+_LOOKUP(StSPtrVecPrimaryVertex)
+_LOOKUP(StSPtrVecV0Vertex)
+_LOOKUP(StSPtrVecXiVertex)
+_LOOKUP(StSPtrVecKinkVertex)
+_LOOKUP(StSPtrVecPsd)
+_LOOKUP(StPsd)
+
+#else /*-HPUX*/
 template<class T> void
 _lookup(T*& val, StSPtrVecObject &vec)
 {
@@ -152,7 +210,7 @@ _lookupAndSet(T* val, StSPtrVecObject &vec)
         }
     if (val) vec.push_back(val);
 }
-
+#endif /*-HPUX*/
 void
 StEvent::initToZero() { /* noop */ }
 

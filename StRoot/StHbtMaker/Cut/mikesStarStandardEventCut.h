@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mikesStarStandardEventCut.h,v 1.1 2000/09/04 16:27:15 lisa Exp $
+ * $Id: mikesStarStandardEventCut.h,v 1.2 2001/04/25 17:57:46 perev Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: mikesStarStandardEventCut.h,v $
+ * Revision 1.2  2001/04/25 17:57:46  perev
+ * HPcorrs
+ *
  * Revision 1.1  2000/09/04 16:27:15  lisa
  * added StarStandard multiplicity cut and modified mikesTrackCut to allow NOT cutting on charge sign
  *
@@ -31,7 +34,11 @@
 
 
 #include "StHbtMaker/Base/StHbtEventCut.h"
+#ifdef HPUX
+#include <fstream.h>
+#else
 #include <fstream>
+#endif
 
 class mikesStarStandardEventCut : public StHbtEventCut {
 

@@ -94,7 +94,7 @@ inline void ParityTwistCorrFctn::ParityCompute(ParityBuff *Plus, ParityBuff *Min
     int plusSize = Plus->size();
     int minusSize = Minus->size();
 
-       for (int jjj = 0; jjj < plusSize; jjj++){
+       {for (int jjj = 0; jjj < plusSize; jjj++){
 	 StHbtThreeVector TempV = (*Plus)[jjj].vect();
 	 sumXpos  += TempV.x();
 	 sumYpos  += TempV.y();
@@ -105,9 +105,9 @@ inline void ParityTwistCorrFctn::ParityCompute(ParityBuff *Plus, ParityBuff *Min
 	 sumXYpos  += TempV.x()*TempV.y();
 	 sumXZpos  += TempV.x()*TempV.z();
 	 sumYZpos  += TempV.y()*TempV.z();
-       }
+       }}
 
-       for (int jjj = 0; jjj < minusSize; jjj++){
+       {for (int jjj = 0; jjj < minusSize; jjj++){
 	 StHbtThreeVector TempV = (*Minus)[jjj].vect();
 	 sumXneg  += TempV.x();
 	 sumYneg  += TempV.y();
@@ -118,7 +118,7 @@ inline void ParityTwistCorrFctn::ParityCompute(ParityBuff *Plus, ParityBuff *Min
 	 sumXYneg  += TempV.x()*TempV.y();
 	 sumXZneg  += TempV.x()*TempV.z();
 	 sumYZneg  += TempV.y()*TempV.z();
-       }
+       }}
 
        Tzz = (  (sumXZpos * sumYneg ) + (sumYpos  * sumXZneg)
 		- (sumXpos  * sumYZneg) - (sumYZpos * sumXneg ) )  /  (plusSize*minusSize);

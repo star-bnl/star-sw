@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimField.cc,v 1.7 2001/04/24 12:54:59 oldi Exp $
+// $Id: StFtpcSlowSimField.cc,v 1.8 2001/04/25 17:52:04 perev Exp $
 // $Log: StFtpcSlowSimField.cc,v $
+// Revision 1.8  2001/04/25 17:52:04  perev
+// HPcorrs
+//
 // Revision 1.7  2001/04/24 12:54:59  oldi
 // mParam->slowSimPressure() used instead of mParam->normalizedNowPressure().
 //
@@ -124,7 +127,7 @@ StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader,
   preciseLorentzAngle = new float[nMagboltzBins*nPadrowPositions];
   
   float deltaP = mParam->slowSimPressure()-mParam->standardPressure();
-  for(int i=0; i<nMagboltzBins; i++)
+  {for(int i=0; i<nMagboltzBins; i++)
     {
       preciseEField[i] = mDb->magboltzEField(i);
       for(int j=0; j<nPadrowPositions; j++)
@@ -136,7 +139,7 @@ StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader,
 	    mDb->magboltzDeflection(i,j) 
 	    + deltaP * mDb->magboltzdDeflectiondP(i,j);
 	}
-    }
+    }}
   EFieldMin=preciseEField[0];
   EFieldStep=preciseEField[1]-EFieldMin;
   EFieldStepInverted= 1/EFieldStep;
