@@ -2,8 +2,11 @@
 //  This class is to provide "micky" test for RMath.h methods
 //  derived from CERNLIB 
 //  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
-// $Id: StMicky.h,v 1.5 1999/09/29 04:05:55 fine Exp $
+// $Id: StMicky.h,v 1.6 1999/09/30 15:50:22 fine Exp $
 // $Log: StMicky.h,v $
+// Revision 1.6  1999/09/30 15:50:22  fine
+// ClassDef has been introduced
+//
 // Revision 1.5  1999/09/29 04:05:55  fine
 // StMicky::Txmx prototype fixed for HP
 //
@@ -23,7 +26,9 @@
 // test system for RMath class has been introduced
 //
 
-// #include "Rtypes.h"
+#ifdef __ROOT__
+#include "Rtypes.h"
+#endif
 
 typedef struct {
          int iqbitw, iqchaw, itb, nlines, itimes;
@@ -43,6 +48,7 @@ typedef struct {
       PARAM param_1;
       BLNK  _BLNK__1;
       int *ia; int *ib;
+      double *da; double *db;
    public:
      StMicky();
      BLNK  &Blank() { return *(&(_BLNK__1)); }     
@@ -60,5 +66,8 @@ typedef struct {
      int ttrinv();
      int ttrla();
      int ttrcho();
+#ifdef __ROOT__
+     ClassDef(StMicky,0)
+#endif
  };
 
