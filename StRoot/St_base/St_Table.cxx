@@ -1,5 +1,5 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
-// $Id: St_Table.cxx,v 1.94 2000/02/22 00:59:01 fine Exp $ 
+// $Id: St_Table.cxx,v 1.95 2000/02/22 23:05:00 fine Exp $ 
 // 
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
@@ -2533,10 +2533,10 @@ Int_t St_Table::Streamer(StBufferAbc &R__b)
       St_Table::StreamerTable(R__b);
       if (*s_MaxIndex <= 0) return -1; 
       char *row= s_Table;
-      for (Int_t indx=0;indx<*s_MaxIndex;indx++) {
+      for (Int_t indx=0;indx<*s_MaxIndex;indx++,row += GetRowSize()) {
         tableDescriptor_st *nextCol = GetRowDescriptors()->GetTable();
         Int_t maxColumns = GetNumberOfColumns();
-        for (Int_t colCounter=0; colCounter < maxColumns; colCounter++) 
+        for (Int_t colCounter=0; colCounter < maxColumns; colCounter++,nextCol++) 
         {
           // Stream one table row supplied
           switch(nextCol->m_Type) {
@@ -2551,19 +2551,17 @@ Int_t St_Table::Streamer(StBufferAbc &R__b)
            StreamNMElementIn(Char);
           default:
             break;
-        };
-        nextCol++;
-      }
-      row += GetRowSize();
+        };        
+      }      
      }
    } else {
       St_Table::StreamerTable(R__b);
       if (*s_MaxIndex <= 0) return -1; 
       char *row= s_Table;
-      for (Int_t indx=0;indx<*s_MaxIndex;indx++) {
+      for (Int_t indx=0;indx<*s_MaxIndex;indx++,row += GetRowSize()) {
         tableDescriptor_st *nextCol = GetRowDescriptors()->GetTable();
         Int_t maxColumns = GetNumberOfColumns();
-        for (Int_t colCounter=0; colCounter < maxColumns; colCounter++) 
+        for (Int_t colCounter=0; colCounter < maxColumns; colCounter++,nextCol++) 
         {
           // Stream one table row supplied
           switch(nextCol->m_Type) {
@@ -2579,9 +2577,7 @@ Int_t St_Table::Streamer(StBufferAbc &R__b)
           default:
             break;
         };
-        nextCol++;
       }
-      row += GetRowSize();
      }
    }   
    return 0;
@@ -2596,10 +2592,10 @@ void St_Table::Streamer(TBuffer &R__b)
       St_Table::StreamerTable(R__b);
       if (*s_MaxIndex <= 0) return; 
       char *row= s_Table;
-      for (Int_t indx=0;indx<*s_MaxIndex;indx++) {
+      for (Int_t indx=0;indx<*s_MaxIndex;indx++,row += GetRowSize()) {
         tableDescriptor_st *nextCol = GetRowDescriptors()->GetTable();
         Int_t maxColumns = GetNumberOfColumns();
-        for (Int_t colCounter=0; colCounter < maxColumns; colCounter++) 
+        for (Int_t colCounter=0; colCounter < maxColumns; colCounter++,nextCol++) 
         {
           // Stream one table row supplied
           switch(nextCol->m_Type) {
@@ -2615,19 +2611,17 @@ void St_Table::Streamer(TBuffer &R__b)
           default:
             break;
         };
-        nextCol++;
       }
-      row += GetRowSize();
      }
    } else {
 //      R__b.WriteVersion(St_ev0_track2::IsA());
       St_Table::StreamerTable(R__b);
       if (*s_MaxIndex <= 0) return; 
       char *row= s_Table;
-      for (Int_t indx=0;indx<*s_MaxIndex;indx++) {
+      for (Int_t indx=0;indx<*s_MaxIndex;indx++,row += GetRowSize()) {
         tableDescriptor_st *nextCol = GetRowDescriptors()->GetTable();
         Int_t maxColumns = GetNumberOfColumns();
-        for (Int_t colCounter=0; colCounter < maxColumns; colCounter++) 
+        for (Int_t colCounter=0; colCounter < maxColumns; colCounter++,nextCol++) 
         {
           // Stream one table row supplied
           switch(nextCol->m_Type) {
@@ -2643,9 +2637,7 @@ void St_Table::Streamer(TBuffer &R__b)
           default:
             break;
         };
-        nextCol++;
       }
-      row += GetRowSize();
      }
    }   
 }
@@ -2703,6 +2695,9 @@ St_Table::EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {
 
 
 // $Log: St_Table.cxx,v $
+// Revision 1.95  2000/02/22 23:05:00  fine
+// Several loops for Streamer methods had been cleaned to avoid some problem in future
+//
 // Revision 1.94  2000/02/22 00:59:01  fine
 // check the row size of the table read vs the current table defintion
 //
