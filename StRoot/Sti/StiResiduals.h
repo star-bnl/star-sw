@@ -1,7 +1,7 @@
 //StiResidualMaker.h
 /***************************************************************************
  *
- * $Id: StiResiduals.h,v 2.1 2003/03/17 19:10:25 andrewar Exp $
+ * $Id: StiResiduals.h,v 2.2 2003/04/29 14:53:47 andrewar Exp $
  *
  * /author Andrew Rose, Wayne State University 
  * October 2002
@@ -11,6 +11,10 @@
  *
  ******************
  * $Log: StiResiduals.h,v $
+ * Revision 2.2  2003/04/29 14:53:47  andrewar
+ * Moved to ResidualCalculator (to conform to naming convention). Also additions
+ * to support StiDetectorBuilder calls.
+ *
  * Revision 2.1  2003/03/17 19:10:25  andrewar
  * Added ifdef statement
  *
@@ -32,6 +36,7 @@
 //forward declarations
 class StiTrack;
 class StiTrackContainer;
+class StiDetector;
 
 
 class StiResiduals
@@ -40,10 +45,8 @@ class StiResiduals
      StiResiduals(){/*noop*/};
      virtual ~StiResiduals(){};
  
-     //load track container into residual maker
-     //return 0 = failed
-     //return 1 = success
-     virtual int calcResiduals(StiTrackContainer *tracks)=0;
+
+     virtual void calcResiduals(StiTrackContainer *tracks)=0;
 
      //write out generated hists to file
      virtual void Write(char* outfile)=0;
@@ -51,6 +54,7 @@ class StiResiduals
    private:
      //setup hists etc.
      virtual int Init()=0;
+     virtual void initDetector(StiDetectorBuilder*)=0;
 
      virtual int trackResidue(const StiTrack*)=0;
 
