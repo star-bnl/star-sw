@@ -141,7 +141,7 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
   }
   if(date >= 20030701) // year 2004 AuAu and pp runs
   {
-    int TDC_Crate_tmp[]= {18,17,16,30,29,28,27,26,25,24,23,22,21,20,
+    int TDC_Crate_tmp[]= {18,17,16,30,29,28,27,26,25,24,23,22,21,20,19,
                           1,15,14,13,12,11,10,9,8,7,6,5,4,3,2};
     for(int i=0;i<30;i++) TDC_Crate[i]=TDC_Crate_tmp[i];      
     goto SMD;
