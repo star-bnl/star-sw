@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.h,v 1.3 2003/09/07 03:49:03 perev Exp $
+ * $Id: StMuDstFilterMaker.h,v 1.4 2003/11/24 23:36:36 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstFilterMaker_hh
@@ -35,7 +35,7 @@ class StMuDstFilterMaker : public StMaker {
     int Make();   ///< Filters the muDst and writes the filtered version
     int Finish(); ///< Writes and closes the output file
     virtual const char *GetCVS() const {
-	static const char cvs[]="Tag $Name:  $ $Id: StMuDstFilterMaker.h,v 1.3 2003/09/07 03:49:03 perev Exp $ built "__DATE__" "__TIME__ ; 
+	static const char cvs[]="Tag $Name:  $ $Id: StMuDstFilterMaker.h,v 1.4 2003/11/24 23:36:36 laue Exp $ built "__DATE__" "__TIME__ ; 
 	return cvs;
     }
   
@@ -67,11 +67,8 @@ class StMuDstFilterMaker : public StMaker {
     int addType(TClonesArray* tcaTo , T t);
     
     /// the list of TClonesArrays to copy
-    TClonesArray* arrays[__NARRAYS__];//->
     TClonesArray* mArrays[__NARRAYS__];//->
-    TClonesArray* strangeArrays[__NSTRANGEARRAYS__];//->
     TClonesArray* mStrangeArrays[__NSTRANGEARRAYS__];//->
-    TClonesArray* emcArrays[__NEMCARRAYS__];//->
     TClonesArray* mEmcArrays[__NEMCARRAYS__];//->
     
     ClassDef(StMuDstFilterMaker, 1)
@@ -83,6 +80,9 @@ class StMuDstFilterMaker : public StMaker {
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.h,v $
+ * Revision 1.4  2003/11/24 23:36:36  laue
+ * commented the StMuEmcCollection out
+ *
  * Revision 1.3  2003/09/07 03:49:03  perev
  * gcc 3.2 + WarnOff
  *
