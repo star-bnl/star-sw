@@ -25,7 +25,7 @@ socCatalog *soc;
 //:<--------------------------------------------------------------------
 int soc_init()
 {
-   EML_MESSAGE("SOC: Initializing.");
+   EML_MESSAGE("SOC:Initializing. ");
 
 /*- Define the SOC KUIP commands. -*/
    soc_def_();
@@ -41,7 +41,7 @@ int soc_init()
 //:<--------------------------------------------------------------------
 int soc_start()
 {
-   EML_MESSAGE("SOC: Starting.");
+   EML_MESSAGE("SOC:Starting. ");
 
 /*- Create the SOC Catalog. -*/
    soc = new socCatalog();
@@ -57,7 +57,7 @@ int soc_start()
 //:<--------------------------------------------------------------------
 int soc_stop()
 {
-   EML_MESSAGE("SOC: Stopping.");
+   EML_MESSAGE("SOC:Stopping. ");
 
 /*- Delete the SOC Catalog. -*/
    delete soc;

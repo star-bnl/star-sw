@@ -6,7 +6,7 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
-#define FILE_VERSION "$Id: socClasses.cc,v 1.15 1997/11/15 02:55:14 tull Exp $"
+#define FILE_VERSION "$Id: socClasses.cc,v 1.16 1997/12/12 02:04:37 tull Exp $"
 
 //:----------------------------------------------- INCLUDES           --
 #include <stream.h>
@@ -18,6 +18,7 @@
 #include "emlLib.h"
 #include "socClasses.hh"
 #include "soc_globals.h"
+#include "socdl.h"
 
 #define VALID_IDREF(A)  ( (0 <= A && A < count() && A < maxCount()) \
 	&& ( myObjs[A] != NULL ) )
@@ -139,7 +140,7 @@ char * socObject:: listing () {
    char *n, *t, *nn, *tt;
    sprintf(c,"| %5d %c %-15s | %-15s |"
    		, idRef(), l, nn=shortname(n=name(),15)
-		, tt=shortname(t=type()));
+		, tt=shortname(t=type(),15));
    FREE(n); FREE(t); FREE(nn); FREE(tt);
    return c;
 }
@@ -318,6 +319,20 @@ char * socCatalog:: version() {
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+STAFCV_T socCatalog :: bind (const char * pname){
+   int status;
+   status = soc_dl_init(pname);
+   status = soc_dl_start(pname);
+   return status;
+}
+
+//----------------------------------
+STAFCV_T socCatalog :: release (const char * pname){
+   return soc_dl_stop(pname);
+}
+
+
+//----------------------------------
 //- override socObject::implementsInterface
 unsigned char socCatalog :: implementsInterface (const char * iface) {
    if( 0 == strcmp("socCatalog",iface)
@@ -326,6 +341,7 @@ unsigned char socCatalog :: implementsInterface (const char * iface) {
    return FALSE;
 }
 
+//----------------------------------
 STAFCV_T socCatalog:: deleteID (IDREF_T id) {
    if( !VALID_IDREF(id) ){
       EML_ERROR(INVALID_IDREF);

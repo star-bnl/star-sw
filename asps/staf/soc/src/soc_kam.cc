@@ -14,15 +14,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef irix
-#define ARCH_DL_SUPPORTED
-#endif /*irix*/
-#ifdef sun
-#define ARCH_DL_SUPPORTED
-#endif /*sun*/
-#ifdef ARCH_DL_SUPPORTED
-#include <dlfcn.h>
-#endif
 
 #define KUIP
 #include "asuAlloc.h"
@@ -56,32 +47,12 @@ void kam_soc_bind_()
 
 STAFCV_T soc_bind(char* aspName, char* solibName)
 {
-#ifdef ARCH_DL_SUPPORTED
-   void *solibHandle;
-   char funcName[9];
-// void **funcHandle;
-   int (*asp_init)();
-   int (*asp_start)();
-
-   if( 0 == strcmp(solibName,"-") ){
-      solibName = (char*)MALLOC(9);
-      sprintf(solibName,"lib%3s.so",aspName);
+   if( 0 != soc->bind(aspName) ){
+      EML_SUCCESS(STAFCV_OK);
    }
-
-   solibHandle = dlopen(solibName,RTLD_LAZY);
-   sprintf(funcName,"%3s_init",aspName);
-   asp_init = (int(*)())dlsym(solibHandle,funcName);
-   sprintf(funcName,"%3s_start",aspName);
-   asp_start = (int(*)())dlsym(solibHandle,funcName);
-
-   asp_init();
-   asp_start();
-
-   FREE(solibName);
-   EML_SUCCESS(STAFCV_OK);
-#else /*ARCH_DL_SUPPORTED*/
-   EML_FAILURE(NO_DYNAMIC_LINKING);
-#endif /*ARCH_DL_SUPPORTED*/
+   else {
+      EML_FAILURE(NO_DYNAMIC_LINKING);
+   }
 }
 
 /*
@@ -104,28 +75,12 @@ void kam_soc_release_()
 
 STAFCV_T soc_release(char * aspName, char* solibName)
 {
-#ifdef ARCH_DL_SUPPORTED
-   if( 0 == strcmp(solibName,"-") ){
-      solibName = (char*)MALLOC(9);
-      sprintf(solibName,"lib%3s.so",aspName);
+   if( 0 != soc->release(aspName) ){
+      EML_SUCCESS(STAFCV_OK);
    }
-
-   void *solibHandle;
-   char funcName[9];
-// void **funcHandle;
-   int (*asp_stop)();
-
-   solibHandle = dlopen(solibName,RTLD_LAZY);
-   sprintf(funcName,"%3s_stop",aspName);
-   asp_stop = (int(*)())dlsym(solibHandle,funcName);
-
-   asp_stop();
-
-   FREE(solibName);
-   EML_SUCCESS(STAFCV_OK);
-#else /*ARCH_DL_SUPPORTED*/
-   EML_FAILURE(NO_DYNAMIC_LINKING);
-#endif /*ARCH_DL_SUPPORTED*/
+   else {
+      EML_FAILURE(NO_DYNAMIC_LINKING);
+   }
 }
 
 /*

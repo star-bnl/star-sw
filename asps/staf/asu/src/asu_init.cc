@@ -24,7 +24,7 @@ extern "C" void staf_kuip_init_();
 //:<--------------------------------------------------------------------
 int asu_init()
 {
-   EML_MESSAGE("ASU: Initializing.");
+   EML_MESSAGE("ASU:Initializing. ");
 
    asuMallocInit();			/* initalize asuAlloc */
 
@@ -46,7 +46,7 @@ int asu_init()
 //:<--------------------------------------------------------------------
 int asu_start()
 {
-   EML_MESSAGE("ASU: Starting.");
+   EML_MESSAGE("ASU:Starting. ");
 
    return TRUE;
 }
@@ -59,7 +59,7 @@ int asu_start()
 //:<--------------------------------------------------------------------
 int asu_stop()
 {
-   EML_MESSAGE("ASU: Stopping.");
+   EML_MESSAGE("ASU:Stopping. ");
 
    asuMallocStats();			/* show allocation stats */
    return TRUE;
