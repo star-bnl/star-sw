@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: dbloaddaq.pl,v 1.2 1999/07/21 09:16:32 wenaus Exp $
+# $Id: dbloaddaq.pl,v 1.3 1999/07/25 16:25:02 wenaus Exp $
 #
 # $Log: dbloaddaq.pl,v $
+# Revision 1.3  1999/07/25 16:25:02  wenaus
+# Suppress junk runs
+#
 # Revision 1.2  1999/07/21 09:16:32  wenaus
 # Add timestamp file; add LD_LIBRARY_PATH
 #
@@ -21,7 +24,6 @@
 # Usage: dbloaddaq.pl
 #
 
-print "Run dbloaddaq\n";
 use lib "/star/u2d/wenaus/datadb";
 use File::Find;
 use File::Basename;
@@ -31,6 +33,8 @@ use Time::Local;
 require "dbsetup.pl";
 
 my $debugOn=0;
+
+@junkRuns = ( 515, 621 );
 
 $timestampFile = '/disk1/star/daq/last_update';
 
@@ -187,7 +191,7 @@ foreach $line ( @content ) {
 
 # scan the DAQ data files and load new files
 @daqfiles = </disk1/star/daq/*.daq>;
-`rm $timestampFile; touch $timestampFile`;
+`rm -f $timestampFile; touch $timestampFile`;
 if ( @daqfiles>0 ) {
     foreach $daqf ( @daqfiles ) {
         if ( $daqf =~ m/([0-9]{2})([0-9]{2})([0-9]{2})\.([0-9]+)\.daq$/ ) {
@@ -251,6 +255,12 @@ sub dbaddfile {
         print "$sql\n" if $debugOn;
         $rv = $dbh->do($sql) || die $dbh->errstr;
         $runDaqscan = 1;
+    }
+    foreach $r ( @junkRuns ) {
+        if ( $nrun eq $r ) {
+            $runDaqscan = 0;
+            $last;
+        }
     }
     if ( ($nrun > 100) && $runDaqscan ) {
         print "======== $daqf $sizeMB MB===========================\n";
