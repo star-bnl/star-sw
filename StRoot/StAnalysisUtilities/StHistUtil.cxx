@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.6 2000/01/31 14:59:13 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.7 2000/01/31 17:22:31 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.7  2000/01/31 17:22:31  kathy
+// put chisq hist for globtrk,primtrk tpc+svt in logY scale
+//
 // Revision 1.6  2000/01/31 14:59:13  kathy
 // add default print list for ftpc
 //
@@ -819,6 +822,8 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "TabQaGtrkThetaT",
  "TabQaGtrkEtaT",
  "TabQaGtrkLengthT",
+ "TabQaGtrkChisq0T",
+ "TabQaGtrkChisq1T",
  "TabQaGtrkXf0TS",
  "TabQaGtrkYf0TS",
  "TabQaGtrkZf0TS",
@@ -841,6 +846,8 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "TabQaGtrkThetaTS",
  "TabQaGtrkEtaTS",
  "TabQaGtrkLengthTS",
+ "TabQaGtrkChisq0T",
+ "TabQaGtrkChisq1T",
  "TabQaGtrkNPntFE",
  "TabQaGtrkNPntMaxFE",
  "TabQaGtrkNPntFitFE",
@@ -892,6 +899,8 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "TabQaPtrkLength",
  "TabQaPtrkImpact",
  "TabQaPtrkNdof"
+ "TabQaPtrkChisq0",
+ "TabQaPtrkChisq1",
  "TabQaDedxNum",
  "TabQaDedxDedx0T", 
  "TabQaDedxDedx1T",
