@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvLikeSignCorrFctn_Minv_vs_Phi.h,v 1.2 2001/01/23 15:12:55 laue Exp $
+ * $Id: MinvLikeSignCorrFctn_Minv_vs_Phi.h,v 1.3 2001/06/04 19:09:51 rcwells Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -40,7 +40,7 @@ public:
   virtual void Finish();
   virtual void EventBegin(const StHbtEvent* ev) { 
     mReactionPlane = ev->ReactionPlane();
-    mReactionPlaneError = ev->ReactionPlaneError();
+    mReactionPlaneError = ev->ReactionPlaneSubEventDifference();
   }
 
   MinvLikeSignCorrFctn_Minv_vs_Phi* Clone();

@@ -144,7 +144,7 @@ StHbtEvent* StHbtGstarTxtReader::ReturnHbtEvent(){
   event->SetNumberOfTracks(ntracks);
   event->SetNumberOfGoodTracks(ntracks);  // same for now
   event->SetReactionPlane(0.);
-  event->SetReactionPlaneError(0.);
+  event->SetReactionPlaneSubEventDifference(0.);
   event->SetPrimVertPos(vertexPos); 
 
 

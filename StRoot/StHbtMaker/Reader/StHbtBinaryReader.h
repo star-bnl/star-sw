@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtBinaryReader.h,v 1.11 2001/05/10 21:01:30 laue Exp $ 
+ * $Id: StHbtBinaryReader.h,v 1.12 2001/06/04 19:09:53 rcwells Exp $ 
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtBinaryReader.h,v $
+ * Revision 1.12  2001/06/04 19:09:53  rcwells
+ * Adding B-field, run number, and improved reaction plane functionality
+ *
  * Revision 1.11  2001/05/10 21:01:30  laue
  * reduced output via new member 'mDebug' in StHbtEventReader (base)
  *
@@ -33,6 +36,11 @@
 #include <fstream.h>
 
 #include "StHbtMaker/Infrastructure/StHbtIOBinary.hh"
+
+class StFlowMaker;
+class StFlowEvent;
+class StFlowAnalysisMaker;
+
 
 #ifdef __ROOT__
 #include "StMaker.h"
@@ -61,6 +69,9 @@ private:
   unsigned short mStHbtEventVersion;
   unsigned short mStHbtTrackVersion;
   unsigned short mStHbtV0Version;
+
+  StFlowMaker* mFlowMaker;             //!
+  StFlowAnalysisMaker* mFlowAnalysisMaker; //!
 
   //  int mReaderStatus;                   //!
 
@@ -98,6 +109,8 @@ public:
   void SetFileName(const char*);
   void SetAppendix(const char*);
   void AddFileList(const char*);
+  void SetFlowMaker(StFlowMaker* flowMaker);
+  void SetFlowAnalysisMaker(StFlowAnalysisMaker* flowAnal);
 
  private:
   void init(const char* dir, const char* file, const char* appendix);
@@ -108,5 +121,9 @@ public:
       
 
 };
+inline void StHbtBinaryReader::SetFlowMaker(StFlowMaker* flowMaker){mFlowMaker = flowMaker;}
+inline void StHbtBinaryReader::SetFlowAnalysisMaker(StFlowAnalysisMaker* flowAnal) {
+  mFlowAnalysisMaker = flowAnal;
+}
 
 #endif
