@@ -1,7 +1,10 @@
 *
-* $Id: gskine.F,v 1.2 1998/04/16 16:59:41 fisyak Exp $
+* $Id: gskine.F,v 1.3 1999/01/03 03:22:39 nevski Exp $
 *
 * $Log: gskine.F,v $
+* Revision 1.3  1999/01/03 03:22:39  nevski
+* more then 64K tracks and media names corrected
+*
 * Revision 1.2  1998/04/16 16:59:41  fisyak
 * 2nd pass with gstar
 *
@@ -23,6 +26,7 @@ C.    *       Authors    R.Brun, F.Carena, M.Hansroul  *********       *
 C.    *                                                                *
 C.    *    Modifications:                                              *
 C.    *    PN: put all unknown particles as Geantino                   *
+C.    *    PN: create next kine banks if more then 64K tracks          *
 C.    ******************************************************************
 C.
 #include "gst/atcdes/typing.inc"
@@ -35,7 +39,7 @@ C.
  
       REAL      PLAB(3),BUF(1),P2,AMASS,E
       INTEGER   LGKINE,IPART,NV,NWBUF,NT,NTI,IER,JV,JPA,JK,JUK,NTG,
-     >          I,J,NFREE,JKIN
+     >          I,J,NFREE,JKIN,NPUSH
 C.
 C.    ------------------------------------------------------------------
 C.
@@ -51,11 +55,23 @@ C
    10 NT     = NTRACK + 1
       IF (JKINE.EQ.0) THEN
          CALL MZBOOK(IXDIV,JKINE,JKINE,1,'KINE',NCKINE,NCKINE,2,2,0)
-         IQ(JKINE-5)=0
+*        IQ(JKINE-5)=0
       ENDIF
-      J = LgKINE(JKIN,NT)
-      NTI=NT-IQ(JKIN+2)
-      IF(NTI.GT.IQ(JKIN-2)) CALL MZPUSH(IXDIV,JKIN,NPKINE,0,'I')
+      J   = LgKINE(JKIN,NT)
+      NTI = NT-IQ(JKIN+2)
+*
+      IF (NTI.GT.64000) then
+         CALL MZBOOK(IXDIV,JKIN,JKIN,0,'KINE',NCKINE,NCKINE,2,2,0)
+         IQ(JKIN+2)=NTRACK
+*        IQ(JKIN-5)=0
+         J   = LgKINE(JKIN,NT)
+         NTI = NT-IQ(JKIN+2)
+      endif
+ 
+      IF(NTI.GT.IQ(JKIN-2)) then
+         NPUSH=min(NPKINE*int(Alog(NT+2.)),64000-IQ(JKIN-2))
+         CALL MZPUSH(IXDIV,JKIN,NPUSH,0,'I')
+      ENDIF
       IF(NTI.GT.IQ(JKIN-2)) THEN
          PRINT *,' GSKINE ERROR: WRONG NTRACK ',NTRACK
          GOTO 90
@@ -112,5 +128,4 @@ C
   90  NT = 0
   99  RETURN
       END
- 
  
