@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.55 2002/02/28 23:34:04 jeromel Exp $
+// $Id: St_db_Maker.cxx,v 1.56 2002/03/01 14:56:42 jeromel Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.56  2002/03/01 14:56:42  jeromel
+// Finalized the timestamp as per June 15th.
+//
 // Revision 1.55  2002/02/28 23:34:04  jeromel
 // Since the svt geant geometry appears to have changed in Spectember 5th 2001,
 // the definition of y2001 geometry must have changed since MDC4 (where y2001
@@ -144,11 +147,11 @@ static const char *aliases[]={
 static const int   dates[]=  {
 19970101, 19980101, 19990101, 19990501, 19991001,
 19990615, 19990616, 19991206, 19991101, 19991201,
-20000614, 20010610, 20010501, 0, 0};
+20000614, 20010610, 20010501, 20010615, 0};
 static const int   times[]=  {
        0,        0,        0,        0,        0,
        0,   120000,    80000,        0,        0,
-  175430,        0,        0,        0};
+  175430,        0,        0,        0,        0};
 
 enum eDBMAKER {kUNIXOBJ = 0x2000};
 
