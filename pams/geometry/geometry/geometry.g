@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.43 2001/03/16 00:32:06 nevski Exp $
+* $Id: geometry.g,v 1.44 2001/03/16 22:09:13 nevski Exp $
 * $Log: geometry.g,v $
+* Revision 1.44  2001/03/16 22:09:13  nevski
+* some clean-up
+*
 * Revision 1.43  2001/03/16 00:32:06  nevski
 * switch on/off cooling water
 *
@@ -41,9 +44,9 @@
               zcal,mfld,mwc,pse,tof,t25,t1,four,ems,alpipe,svtw,
               on/.true./,off/.false./
    real       Par(1000),field,dcay(5),shift(2),wdm
-   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),nsup(2),
-              Nleft,Mleft,Rv,Wfr,Itof,y/-1/
-   character  Commands*4000
+   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),nonf(3),
+              Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx
+   character  Commands*4000,Geom*8
 * - - - - - - - - - - - - - - - - -
 +CDE,GCBANK,GCUNIT,GCPHYS,GCCUTS,GCFLAG,AGCKINE,QUEST.
 *  temporarely until GCTLIT is not part of GCTMED:
@@ -52,8 +55,9 @@
 * - - - - - - - - - - - - - - - - -
 replace[;ON#{#;] with [
   IF Index(Commands,'#1')>0 
-  { j=Index(Commands,'#1');  l=j+Lenocc('#1')-1;  Commands(j:l)=' ';
-    <W>; (' #1: #2');
+  { j=Index(Commands,'#1');  l=j+Lenocc('#1')-1; 
+    if (Commands(j:j+3)=='YEAR') Geom=Commands(j+4:l); 
+    Commands(j:l)=' ';  <W>; (' #1: #2');
 ]
 *
    call ASLGETBA ('GEOM','DETP',1000,LL,Par)
@@ -66,13 +70,18 @@ replace[;ON#{#;] with [
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
 * If an empty or no DETP GEOM was issued, geometry is defined externally.
 *
+   field=5                                             "defaults constants"
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
    {mwc,four,pse}=on      "MultiWire Chambers, 4th Si layer, pseudopadrows"   
    {tof,t25,t1,ems,rich,alpipe}=off   "TimeOfFlight, EM calorimeter Sector"
-   field=5; Nsi=7; Rv=2; Wfr=0; Itof=2; Wdm=6.0;       "defaults constants"
-   y=2; " keep y=1 for backward compibility : limited x in mwc hits (old) " 
-   svtw=on; "water and water manifold  in svt"
-   Commands=' '
+   Nsi=7; Wfr=0;  Wdm=0; " SVT+SSD, wafer number and width as in code     "
+   svtw=on               " water+water manifold in svt, off for Y2000 only"
+   mwx=2                 " for Geom=_1 mwx=1 limites x in mwc hits (<Y2K) "
+   Itof=2                " use btofgeo2 - default starting from Y2000     "
+   Rv=2                  " add non-sensetive hits to RICH system          "
+   Rp=2                  " select real RICH position instead of nominal   "
+   nonf={1,2,2}          " ecal on right side, FPD parts on left side     "
+   Commands=' '; Geom=' '
 *
 * -------------------- select USERS configuration ------------------------
 * On a non-empty DETP GEOM every keyword makes an action and is erased.
@@ -105,39 +114,40 @@ If LL>1
                   <W>;('Default: complete STAR with hadr_on,auto-split');
                   <W>;('--------------------------------------------- ');
                 }  
-  on COMPLETE   { Complete STAR geometry;                     tof=on; Itof=2; }
   on YEAR_1S    { starting in summer: TPC, CONE, AL pipe;          alpipe=on;
-                  y=1;                   {ftpc,vpdd,calb,ecal}=off;    Nsi=0; }
+                  {ftpc,vpdd,calb,ecal}=off;                           Nsi=0; }
   on YEAR_1A    { poor approximation to year1: TPC+CTB+FTPC;      
-                  y=1;                        {vpdd,calb,ecal}=off;    Nsi=0; }
+                  {vpdd,calb,ecal}=off;      Itof=1;                   Nsi=0; }
   on YEAR_1B    { better year1: TPC+CTB+FTPC+calo patch+RICH, no svt; 
-                        {vpdd,ecal}=off;  {rich,ems,t1}=on; 
-                  y=1;  nmod={12,0};  shift={87,0};  Itof=1;  Rv=1;    Nsi=0; }
+                  {vpdd,ecal}=off;  {rich,ems,t1}=on; 
+                  nmod={12,0}; shift={87,0}; Itof=1; {Rv,Rp}=1;        Nsi=0; }
   on YEAR_1C    { not a year1:  TPC+CTB+FTPC+calo;  
-                  y=1;                              {vpdd,ecal}=off;   Nsi=0; }
+                  {vpdd,ecal}=off;           Itof=1;                   Nsi=0; }
+
   on YEAR_1H    { even better y1:  TPC+CTB+FTPC+RICH+caloPatch+svtLadder;  
-                        {vpdd,ecal}=off;  {rich,ems,t1}=on; nmod={12,0};
-                  y=1;  shift={87,0};  Itof=1;  Rv=2;  Wdm=6.0;        Nsi=-3;}
-  on YEAR_1E    { even better y1:  TPC+CTB+RICH+caloPatch+svtLadder(4);  
+                  {vpdd,ecal}=off;  {rich,ems,t1}=on;  Itof=1; 
+                  nmod={12,0}; shift={87,0}; Rp=1; Rv=2; Wdm=6;        Nsi=-3;}
+
+  on YEAR_1E    { even better y1:  TPC+CTB+RICH+caloPatch+svtLadder;  
 *    HELEN:       one ladder at R=10.16cm with 7 wafers at the 12 O'Clock...
-                        {vpdd,ecal,ftpc}=off; {rich,ems,t1}=on; nmod={12,0}; 
-                  y=1;  shift={87,0}; Itof=1; Rv=2; Wfr=7; Wdm=6.0;    Nsi=-3;}
+                  {vpdd,ecal,ftpc}=off;  {rich,ems,t1}=on;  Itof=1;
+                  nmod={12,0}; shift={87,0}; Rp=1; Rv=2; Wfr=7; Wdm=6; Nsi=-3;}
 
-  on YEAR2000   { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder(4); 
+  on YEAR2000   { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder; 
 *                 corrected: MWC readout, RICH reconstructed position, no TOF 
-                  Field=2.5; svtw=off;
-                  {vpdd,ecal,ftpc}=off; {rich,ems}=on; nmod={12,0};
-                  y=2;  shift={87,0}; Itof=1; Rv=2; Wfr=7; Wdm=6.305;  Nsi=-3;}
-
-  on YEAR_2A    { asymptotic STAR;                                            }
+                  {vpdd,ecal,ftpc,svtw}=off; {rich,ems}=on; Field=2.5;
+                  nmod={12,0}; shift={87,0}; Rp=2; Rv=2; Wfr=7;        Nsi=-3;}
 
   on YEAR_2B    { 2001 geometry first guess - TPC+CTB+FTPC+RICH+CaloPatch+SVT;
-                        {rich,ems,t1}=on;  nmod={24,0};  nsup={0,1};
-                  y=2;  shift={21,0};  Itof=2;  Rv=2;  Wdm=6.305;      Nsi=6; }
+                  {rich,ems,t1}=on;  nmod={24,0}; shift={21,0};  
+                  nonf={0,2,2};  Itof=2;  Rv=2;                        Nsi=6; }
 
-  on YEAR2001   { 2001 geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT;
-                         {rich,ems,t1}=on;  nmod={24,0}; nsup={0,1};
-                  y=2;  shift={21,0};  Itof=2;  Rv=2;  Wdm=6.305;      Nsi=6; }
+  on YEAR2001   { 2001 geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD;
+                  {rich,ems,t1}=on;  nmod={24,0}; shift={21,0};  
+                  nonf={0,2,2};  Itof=2;  Rv=2;                        Nsi=6; }
+
+  on YEAR_2A    { old asymptotic STAR;    Itof=1; mwx=1;  nonf={3,0,0}        }
+  on COMPLETE   { Complete STAR geometry; Itof=2; tof=on; nonf={1,2,2}        }
 
   on HADR_ON    { all Geant Physics On;                                       }
   on HADR_OFF   { all Geant Physics on, except for hadronic interactions; 
@@ -169,6 +179,7 @@ If LL>1
      if (IPRIN==0) stop 'You better stop here to avoid problems'     
   }
 }
+
 * -------------------- setup selected configuration ------------------------
 * Now when all parameters and flags are ready, make gstar work as usually
 * ie put a MODE or/and DETP command and executing them for selected systems.
@@ -178,9 +189,6 @@ If LL>1
    If LL>1 { call AgDETP new ('Trac'); call AgDETP add ('TracDCAY',dcay,4) }
 *
    if (rich) ItCKOV = 1
-   if (rich & Rv>1) call AgDETP new ('Rich')
-   if (rich & Rv>1) call AgDETP add ('Rich.Version=',Rv,1) 
-   if (rich & y>1)  call AgDETP add ('Rich.Position=',y,1)
    if (cave)        Call cavegeo
    If (LL>1)        call AgDETP new ('PIPE')
    if (alpipe)      call AgDETP add ('pipg.BeLeng=', 0, 1)
@@ -190,46 +198,63 @@ If LL>1
 
    Call AGSFLAG('SIMU',2)
 * - to switch off the fourth svt layer:        DETP SVTT SVTG.nlayer=6 
-   If (LL>1) call AgDETP new ('SVTT')
-   if (svtt & Nsi < 7)   call AgDETP add ('svtg.nlayer=',   Nsi,1)
-   if (svtt & Wfr > 0)   call AgDETP add ('svtl(3).nwafer=',wfr,1)
-   if (svtt & wdm > 0)   call AgDETP add ('swca.WaferWid=', wdm,1)
-   if (svtt & wdm > 0)   call AgDETP add ('swca.WaferLen=', wdm,1)
-   if (svtt & .not.svtw) call AgDETP add ('swam.Len=',       0, 1)
+   If (LL>1 & svtt) then
+     call AgDETP new ('SVTT')
+     if (Nsi < 7)   call AgDETP add ('svtg.nlayer=',   Nsi,1)
+     if (Wfr > 0)   call AgDETP add ('svtl(3).nwafer=',wfr,1)
+     if (wdm > 0)   call AgDETP add ('swca.WaferWid=', wdm,1)
+     if (wdm > 0)   call AgDETP add ('swca.WaferLen=', wdm,1)
+     if (.not.svtw) call AgDETP add ('swam.Len=',       0, 1)
+   endif
    if (svtt) Call svttgeo
  
 * - MWC or pseudo padrows needed ? DETP TPCE TPCG(1).MWCread=0 TPRS(1).super=1
-* - for year 1 X in mwc hits was limited, keep this (y=1)
-*  CRAY does not accept construction: IF (mwc==off) ... I do it differntly:
-   If (LL>1) call AgDETP new ('TPCE')
-   if (.not.mwc) y=0
-   If (tpce &   y>=0 ) call AgDETP add ('tpcg(1).MWCread=',y,1)
-   If (tpce &.not.pse) call AgDETP add ('tprs(1).super='  ,1,1) 
+*   CRAY does not accept construction: IF (mwc==off) ... I do it differntly:
+* - for year_1 X in mwc hits was limited, keep this (mwx=1)
+   If (LL>1 & tpce) then
+     call AgDETP new ('TPCE')
+     If (Geom(1:2)='_1') mwx=1
+     If (  .not. mwc   ) mwx=0
+     If ( mwx <2 )  call AgDETP add ('tpcg(1).MWCread=',mwx,1)
+     If (.not.pse)  call AgDETP add ('tprs(1).super='  , 1, 1) 
+   endif 
    if (tpce) Call tpcegeo
    if (ftpc) Call ftpcgeo
    if (ftpc) Call supogeo
 
 * - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
-   If (LL>1) call AgDETP new ('BTOF')
-   if     (tof) { call AgDETP add ('btog.choice=',2,1) }
-   elseif (t25) { call AgDETP add ('btog.choice=',3,1) }
-   elseif (t1)  { call AgDETP add ('btog.choice=',4,1) }
-   else         { call AgDETP add ('btog.choice=',1,1) }
+   If (LL>1 & btof) then
+     call AgDETP new ('BTOF')
+     if     (tof) { call AgDETP add ('btog.choice=',2,1) }
+     elseif (t25) { call AgDETP add ('btog.choice=',3,1) }
+     elseif (t1)  { call AgDETP add ('btog.choice=',4,1) }
+     else         { call AgDETP add ('btog.choice=',1,1) }
+   endif
    if btof { If Itof==1 { call btofgeo1 } else { call btofgeo2 }}
      
    Call AGSFLAG('SIMU',1)
    if (vpdd) Call vpddgeo
 
 *  - barrel calorimeter may be a patch of 12 modules at the left side
-   If (LL>1) call AgDETP new ('CALB')
-   if (ems)  call AgDETP add ('calg.nmodule=',Nmod,2)
-   if (ems)  call AgDETP add ('calg.shift=',shift,2)
+   If (LL>1 & calb) then
+     call AgDETP new ('CALB')
+     if (ems)  call AgDETP add ('calg.nmodule=',Nmod, 2)
+     if (ems)  call AgDETP add ('calg.shift=',  shift,2)
+   endif
    if (calb) Call calbgeo
+*
+   if (LL>1 & rich) then
+      call AgDETP new ('Rich')
+      if (Rv>0) call AgDETP add ('Rich.Version=', Rv,1) 
+      if (Rp>0) call AgDETP add ('Rich.Position=',Rp,1)
+   endif
    if (rich) Call richgeo
 
 *  - endcap calorimeter may be controled here
-   If (LL>1) call AgDETP new ('ECAL')
-   if (2>1)  call AgDETP add ('emcg.nsupsec=',Nsup,2)
+   If (LL>1 & ecal) then
+      call AgDETP new ('ECAL')
+      call AgDETP add ('emcg.OnOff=',Nonf,3)
+   endif
    if (ecal) Call ecalgeo
    if (zcal) Call zcalgeo
    if (magp) Call magpgeo
@@ -256,5 +281,4 @@ If LL>1
    } 
 *
    end
-
 
