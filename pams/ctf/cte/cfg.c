@@ -6,7 +6,7 @@
 **:<------------------------------------------------------------------*/
 #include "cfg.h"
 
-long cfg_(
+long type_of_call cfg_(
   TABLE_HEAD_ST       *tptrack_h,     TPT_TRACK_ST        *tptrack ,
   TABLE_HEAD_ST       *globtrk_h,     EGR_GLOBTRK_ST      *globtrk )
 {

@@ -31,7 +31,7 @@ long   globtrk_pointer [GLOBTRK_LEN] ;
 
 
 
-extern "C" long cpi_(
+long type_of_call cpi_(
   TABLE_HEAD_ST *para_h,     CPI_PARA_ST     *para ,
   TABLE_HEAD_ST *globtrk_h,  EGR_GLOBTRK_ST  *globtrk ,
   TABLE_HEAD_ST *extra_h,    CTE_EXTRA_ST    *extra ,

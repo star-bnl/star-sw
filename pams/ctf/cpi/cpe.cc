@@ -77,7 +77,7 @@ CPE_MKINE_ST        *lkine       ;
 
 
 
-extern "C" long cpe_(
+long type_of_call cpe_(
   TABLE_HEAD_ST            *ge_h,        CTG_GEO_ST         *ge ,
   TABLE_HEAD_ST       *slt_phi_h,   CTG_SLAT_PHI_ST         *slt_phi,
   TABLE_HEAD_ST       *slt_eta_h,   CTG_SLAT_ETA_ST         *slt_eta,
