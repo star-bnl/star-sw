@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.3 2002/03/20 16:04:11 laue Exp $
+ * $Id: StMuDstMaker.h,v 1.4 2002/03/26 19:33:15 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -56,6 +56,7 @@ enum ioNameMode {ioFix, ioAuto};
 
 class StMuDstMaker : public StMaker{
  public:
+  StMuDstMaker(const char* name="MuDst");
   StMuDstMaker(ioMode mode, ioNameMode nameMode, const char* dirName="./", const char* fileName="test.event.root", const char* filter=".", int maxfiles=10 );
   ~StMuDstMaker();
   
@@ -129,6 +130,7 @@ private:
   void clear();
   TClonesArray* clonesArray(TClonesArray* p, const char* type, int size, int& counter);
 
+  void streamerOff();
   void fill();
   void fillTrees(StEvent* ev, StMuCut* cut=0);
   void fillEvent(StEvent* ev, StMuCut* cut=0);
@@ -168,11 +170,11 @@ private:
  
   friend class StMuDst;
 
-  TClonesArray* arrays[__NARRAYS__];
-  TClonesArray* mArrays[__NARRAYS__];
+  TClonesArray* arrays[__NARRAYS__]; //->
+  TClonesArray* mArrays[__NARRAYS__];//->
 
-  TClonesArray* strangeArrays[__NSTRANGEARRAYS__];
-  TClonesArray* mStrangeArrays[__NSTRANGEARRAYS__];
+  TClonesArray* strangeArrays[__NSTRANGEARRAYS__];//->
+  TClonesArray* mStrangeArrays[__NSTRANGEARRAYS__];//->
 
   ClassDef(StMuDstMaker, 1)
 };
@@ -204,6 +206,9 @@ inline void StMuDstMaker::setCompression(int comp) { mCompression = comp;}
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.4  2002/03/26 19:33:15  laue
+ * minor updates
+ *
  * Revision 1.3  2002/03/20 16:04:11  laue
  * minor changes, mostly added access functions
  *
