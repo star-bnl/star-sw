@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrgMaker.cxx,v 1.4 2001/07/27 17:40:18 ward Exp $
+ * $Id: StTrgMaker.cxx,v 1.5 2001/12/22 20:10:04 ward Exp $
  *
  * Author: Herbert Ward April 2001
  ***************************************************************************
@@ -8,13 +8,16 @@
  * Description:  Accepts a .event.root file as input, outputs a .out
  *               containing the CTB slat ADCs and also information
  *               about which slats were hit by tracks.  The .out file
- *               is ASCII; you can parse it               
+ *               is ASCII; you can parse it
  *               yourself or use an API from Herb Ward
  *               for reading it.
  *
  ***************************************************************************
  *
  * $Log: StTrgMaker.cxx,v $
+ * Revision 1.5  2001/12/22 20:10:04  ward
+ * New code for MWC.
+ *
  * Revision 1.4  2001/07/27 17:40:18  ward
  * Handles reversed B field, also has code for chking triggerWord.
  *
@@ -68,7 +71,7 @@ Int_t StTrgMaker::Finish() {
   return kStOK;
 }
 Int_t StTrgMaker::Make() {
-  FILE *out; double curvature,phi0,psi,r0,tanl,z0; long q; int adc;
+  FILE *out; double curvature,phi0,psi,r0,tanl,z0; long q; int adc,i,j;
   out=fopen("StTrgMaker.out","a"); assert(out);
   mEventCounter++;  // increase counter
 
@@ -89,7 +92,7 @@ Int_t StTrgMaker::Make() {
     return kStOK;
   }
 
-  StEventSummary *summary = event->summary();  // This should be in StTrgMaker::Init().  It wastes time 
+  StEventSummary *summary = event->summary();  // This should be in StTrgMaker::Init().  It wastes time
   assert(summary);                             // every event.  But no
   mMagneticField = summary->magneticField();   // big deal.
 
@@ -110,11 +113,17 @@ Int_t StTrgMaker::Make() {
   StCtbTriggerDetector &theCtb = theTriggers->ctb();
 
   fprintf(out,"e %d\n",mEventCounter);
-  for(unsigned int islat=0; islat<theCtb.numberOfSlats(); islat++) 
+  for(unsigned int islat=0; islat<theCtb.numberOfSlats(); islat++)
     for(unsigned int itray=0; itray<theCtb.numberOfTrays(); itray++) {
-      adc=theCtb.mips(itray, islat, 0);
+      adc=(int)(theCtb.mips(itray, islat, 0)+0.5);
       if(adc) fprintf(out,"a%d:%d %d\n",itray+1,islat+1,adc);
   }
+
+  // Output the MWC and ZDC data.
+  StZdcTriggerDetector &theZdc = theTriggers->zdc();
+  if(theZdc.adcSum()>0) fprintf(out,"z%g\n",theZdc.adcSum());
+  StMwcTriggerDetector &theMwc = theTriggers->mwc();
+  for(i=0;i<24;i++) for(j=0;j<4;j++) fprintf(out,"m%02d:%d %g\n",i+1,j+1,theMwc.mips(i,j,0));
 
   // Get the tracks and use them.
   StTrack *track; StTrackGeometry *geo;
@@ -136,7 +145,8 @@ Int_t StTrgMaker::Make() {
       tanl=geo->dipAngle();
       z0=o.z();
       // fprintf(out,"%2d %2d %g %g %g %g %g %g\n",++BBB,q,curvature,phi0,psi,r0,tanl,z0);
-      DoOneTrack(out,q,curvature,phi0,psi,r0,tanl,z0);
+      DoOneTrackCtb(out,q,curvature,phi0,psi,r0,tanl,z0);
+      DoOneTrackMwc(out,q,curvature,phi0,psi,r0,tanl,z0);
     }
   }
 
@@ -207,7 +217,68 @@ void StTrgMaker::CalcCenterOfCircleDefinedByTrack(int q,double radius,double psi
   *xcenter=xstart+radius*cos(RPD*(psi+angleOffset));
   *ycenter=ystart+radius*sin(RPD*(psi+angleOffset));
 }
-void StTrgMaker::DoOneTrack(FILE *oo,long q,double curvature,double phi0,
+// bbb You might want to assert a positive mag field in DoOneTrackMwc.
+#define MWC_LOCATION 200 // z location, centimeters bbb
+void StTrgMaker::Location2Sector(double tanl,double xAtMwc,double yAtMwc,int *sector,int *subsector) {
+  double rad,angleInDegrees;
+
+  *subsector=-123; *sector=-123;
+
+  angleInDegrees=atan2(yAtMwc,xAtMwc)/RPD;
+  while(angleInDegrees<-180) angleInDegrees+=360;
+  while(angleInDegrees> 180) angleInDegrees-=360;
+  /**/ if(  -15 <= angleInDegrees && angleInDegrees <=   15 ) *sector =  3;
+  else if(   15 <= angleInDegrees && angleInDegrees <=   45 ) *sector =  2;
+  else if(   45 <= angleInDegrees && angleInDegrees <=   75 ) *sector =  1;
+  else if(   75 <= angleInDegrees && angleInDegrees <=  105 ) *sector = 12;
+  else if(  105 <= angleInDegrees && angleInDegrees <=  135 ) *sector = 11;
+  else if(  135 <= angleInDegrees && angleInDegrees <=  165 ) *sector = 10;
+  else if(  165 <= angleInDegrees || angleInDegrees <= -165 ) *sector =  9; // This line has || instead of &&.
+  else if( -165 <= angleInDegrees && angleInDegrees <= -135 ) *sector =  8;
+  else if( -135 <= angleInDegrees && angleInDegrees <= -105 ) *sector =  7;
+  else if( -105 <= angleInDegrees && angleInDegrees <=  -75 ) *sector =  6;
+  else if(  -75 <= angleInDegrees && angleInDegrees <=  -45 ) *sector =  5;
+  else if(  -45 <= angleInDegrees && angleInDegrees <=  -15 ) *sector =  4;
+  else assert(0);
+
+  rad=sqrt(xAtMwc*xAtMwc+yAtMwc*yAtMwc);
+  if(rad >=  53.000 && rad <  85.000 ) *subsector=1;
+  if(rad >=  85.000 && rad < 117.000 ) *subsector=2;
+  if(rad >= 125.395 && rad < 157.395 ) *subsector=3;
+  if(rad >= 157.395 && rad < 189.395 ) *subsector=4;
+
+  if(*sector>0&&*subsector>0&&tanl<0) {
+    if(*sector==12) *sector=24; else *sector=24-*sector;
+  }
+  assert(*sector<=24);
+  assert(*subsector<=4);
+}
+void StTrgMaker::DoOneTrackMwc(FILE *oo,long q,double curvatureCircle2,double phi0Circle1,   // www
+         double psi,double r0Circle1,double tanl,double z0) {
+  // There are two trigonometric circles here.
+  // One centered at (0,0) uses variables r0Circle1 and phi0Circle1.
+  // Another, centered at (xCenterCircle2,ycenterCircle2), uses variables
+  // radiusCircle2, radiansAtStartCircle2,radiansInFlightCircle2, and radiansAtMwcCircle2.
+  int sector,subsector;
+  double xstart,ystart,xCenterCircle2,ycenterCircle2,dist,radiusCircle2,radiansInFlightCircle2;
+  double xAtMwc,yAtMwc,radiansAtStartCircle2,radiansAtMwcCircle2;
+  assert(curvatureCircle2>=0); // Not physical, just a convention for the code below.
+  if(tanl>0) dist=MWC_LOCATION-z0; else dist=-MWC_LOCATION-z0;
+  radiusCircle2=1/curvatureCircle2;
+  radiansInFlightCircle2=dist/(radiusCircle2*tanl);
+  assert(radiansInFlightCircle2>=0); // May become neg below.
+  if(radiansInFlightCircle2>PI) { fprintf(oo,"M-1:-1\n"); return; } // Hard to extend such a shallow trk.
+  if(q<0) radiansInFlightCircle2*=-1;
+  CalcCenterOfCircleDefinedByTrack(q,radiusCircle2,psi,r0Circle1,phi0Circle1,&xCenterCircle2,&ycenterCircle2);
+  xstart=r0Circle1*cos(RPD*phi0Circle1); ystart=r0Circle1*sin(RPD*phi0Circle1);
+  radiansAtStartCircle2=atan2(ystart,xstart);
+  radiansAtMwcCircle2=radiansAtStartCircle2+radiansInFlightCircle2;
+  xAtMwc=xCenterCircle2+radiusCircle2*cos(radiansAtMwcCircle2);
+  yAtMwc=ycenterCircle2+radiusCircle2*sin(radiansAtMwcCircle2);
+  Location2Sector(tanl,xAtMwc,yAtMwc,&sector,&subsector);
+  OO"M%d:%d\n",sector,subsector);
+}
+void StTrgMaker::DoOneTrackCtb(FILE *oo,long q,double curvature,double phi0,
          double psi,double r0,double tanl,double z0) {
   double xcenter,ycenter,radius;
   char inner,noIntersectionInner=0,noIntersectionOuter=0; /* These are boolean values (T/F). */
@@ -236,7 +307,7 @@ void StTrgMaker::DoOneTrack(FILE *oo,long q,double curvature,double phi0,
   PP"# i pts %d %d\n",numberIntersectionPointsInner,numberIntersectionPointsOuter);
   */
   /* Eliminate one of each pair:  the one which represents the second (chronologically) intersection. */
-  /* Do this using direction cosines calculated using vector dot products.                            */
+  /* Do this using direction cosines calculated from vector dot products.                            */
   /* It is, of course, not necessary if the "pair" is not a pair                                      */
   /* (numberIntersectionPointsInner<2 or numberIntersectionPointsOuter<2).                            */
   xUnitVector=cos(RPD*psi); yUnitVector=sin(RPD*psi); /* Direction of path at beginning of track. */
@@ -358,12 +429,12 @@ int StTrgMaker::TrayNumber(double x,double y,double z) {
   angle*=60/(2*PI); /* Var "angle" is in units of 1/60th of circle, ccw from x-axis. */
   if(z>0) {
     tv=120-angle+13.5; /* "120" avoids probs w double -> int conversion of negative doubles (next line). */
-    rv=tv;
+    rv=(int)tv;
     if(fabs((double)(tv-rv-0.5))>FIDUCIAL) return -1; /* Track is not close enough to centerline of slat. */
     while(rv<  1) rv+=60; while(rv> 60) rv-=60;
   } else {
     tv=120+angle+103.5;  /* "120" avoids probs w double -> int conversion of negative doubles (next line). */
-    rv=tv;
+    rv=(int)tv;
     if(fabs((double)(tv-rv-0.5))>FIDUCIAL) return -1; /* Track is not close enough to centerline of slat. */
     while(rv< 61) rv+=60; while(rv>120) rv-=60;
   }
