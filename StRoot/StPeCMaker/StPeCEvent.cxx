@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.cxx,v 1.2 2000/04/21 19:10:30 nystrand Exp $
+// $Id: StPeCEvent.cxx,v 1.3 2000/04/24 19:15:27 nystrand Exp $
 // $Log: StPeCEvent.cxx,v $
+// Revision 1.3  2000/04/24 19:15:27  nystrand
+// Fix of a possible memory leak
+//
 // Revision 1.2  2000/04/21 19:10:30  nystrand
 // Include StPeCPair class
 //
@@ -27,9 +30,15 @@ StPeCEvent::StPeCEvent() {
 
 StPeCEvent::~StPeCEvent() {
 #ifndef __CINT__
- delete pPrim;
- delete pNonPrim;
- delete pPair;
+  // The tracks have been instantiated by StEvent, so only the collections
+  // have to be deleted 
+  delete pPrim;
+  delete pNonPrim;
+  // Go through and delete the pairs
+  StPeCPairIterator iter;
+  for(iter=pPair->begin();iter!=pPair->end();iter++)delete *iter;
+  // Delete the collection
+  delete pPair;
 #endif /*__CINT__*/
 }
 
