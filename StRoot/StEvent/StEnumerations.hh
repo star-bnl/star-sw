@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEnumerations.hh,v 1.6 1999/02/26 14:01:17 ullrich Exp $
+ * $Id: StEnumerations.hh,v 1.7 1999/02/26 14:02:26 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.hh,v $
- * Revision 1.6  1999/02/26 14:01:17  ullrich
- * Removed enumeration StDetector (handled elsewhere).
+ * Revision 1.7  1999/02/26 14:02:26  ullrich
+ * Changed pragmas.
  *
  * Revision 1.6  1999/02/26 14:01:17  ullrich
  * Removed enumeration StDetector (handled elsewhere).
@@ -34,7 +34,6 @@
 #define StEnumeration_hh
 
 #ifdef __CINT__
-#pragma link C++ enum StDetector;
 #pragma link C++ enum StBeamDirection;
 #pragma link C++ enum StBeamPolarizationAxis;
 #pragma link C++ enum StVertexType;
