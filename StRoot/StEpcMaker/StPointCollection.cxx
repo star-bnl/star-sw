@@ -3,6 +3,9 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.10  2001/09/29 01:15:17  pavlinov
+// Clean up for production
+//
 // Revision 1.9  2001/09/24 15:14:55  pavlinov
 // No public constructor for StEmcGeom
 //
@@ -949,7 +952,7 @@ Int_t Ncluster3=Bsmdpcluster->numberOfClusters();
 
 	  }
   }
-  delete GeomIn;
+  //delete GeomIn;
   //  return kStOK;
 }
 
