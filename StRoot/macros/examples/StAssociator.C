@@ -1,5 +1,10 @@
-// $Id: StAssociator.C,v 1.7 1999/09/10 00:02:24 calderon Exp $
+// $Id: StAssociator.C,v 1.8 1999/09/10 19:11:55 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.8  1999/09/10 19:11:55  calderon
+// Write the Ntuple in StMcAnalysisMaker into a file.
+// This way it can be accessed after the macro finishes,
+// otherwise it gets deleted.
+//
 // Revision 1.7  1999/09/10 00:02:24  calderon
 // Made the following changes:
 // -load StUtilities
@@ -88,7 +93,7 @@ const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/ha
     parameterDB->setZCut(.2); // 2 mm
     parameterDB->setReqCommonHits(3); // Require 3 hits in common for tracks to be associated
     
-
+    
     // now execute the chain member functions
   
     chain->Init(); // This should call the Init() method in ALL makers

@@ -1,7 +1,12 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.3 1999/07/28 20:27:42 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.4 1999/09/10 19:11:54 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.4  1999/09/10 19:11:54  calderon
+ * Write the Ntuple in StMcAnalysisMaker into a file.
+ * This way it can be accessed after the macro finishes,
+ * otherwise it gets deleted.
+ *
  * Revision 1.3  1999/07/28 20:27:42  calderon
  * Version with SL99f libraries
  *
@@ -92,7 +97,6 @@ StMcEventMaker::~StMcEventMaker()
 void StMcEventMaker::Clear(const char*)
 {
     // StMcEventMaker - Clear,
-
     delete mCurrentMcEvent;
     mCurrentMcEvent = 0;
     StMaker::Clear();
@@ -104,7 +108,7 @@ void StMcEventMaker::Clear(const char*)
 void StMcEventMaker::PrintInfo() {
     // StMcEventMaker - PrintInfo,
     printf("**************************************************************\n");
-    printf("* $Id: StMcEventMaker.cxx,v 1.3 1999/07/28 20:27:42 calderon Exp $\n");
+    printf("* $Id: StMcEventMaker.cxx,v 1.4 1999/09/10 19:11:54 calderon Exp $\n");
     printf("**************************************************************\n");
 
    
@@ -121,7 +125,6 @@ Int_t StMcEventMaker::Finish()
     // Right now I'm not doing any histograms, later on, I would need to uncomment
     // the next line, and add a DrawHists() method.  Look in St_QA_Maker.cxx
     //if (drawinit)  DrawHists();
-
   return StMaker::Finish();
 }
 
