@@ -1,4 +1,4 @@
-// $Id: bfcread_tagsBranch.C,v 1.10 2000/05/25 18:23:56 kathy Exp $
+// $Id: bfcread_tagsBranch.C,v 1.11 2000/05/25 18:32:07 kathy Exp $
 // $Log $
 
 //======================================================================
@@ -141,6 +141,10 @@ void bfcread_tagsBranch(
 
 	cout << endl << endl;
         cout << " QAInfo: Average of all events & tags for Leaf 0 = " 
+              << AsumLeaf0 << endl;
+
+	fout << endl << endl;
+        fout << " QAInfo: Average of all events & tags for Leaf 0 = " 
               << AsumLeaf0 << endl;
 
   // stop timer and print results
