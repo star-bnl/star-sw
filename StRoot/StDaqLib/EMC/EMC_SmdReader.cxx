@@ -9,6 +9,8 @@
 /////////////////////////////////////////////////////////////////////
 EMC_SmdReader::EMC_SmdReader(EventReader* er,Bank_EMCP *pEMCP): pBankEMCP(pEMCP),ercpy(er)
 {
+  mNSMD = 8;
+
   EventInfo info=er->getEventInfo();
   unsigned int UnixTime=info.UnixTime;
   struct tm *time=gmtime((time_t*) &UnixTime);
@@ -24,7 +26,9 @@ EMC_SmdReader::EMC_SmdReader(EventReader* er,Bank_EMCP *pEMCP): pBankEMCP(pEMCP)
   unsigned int date=atoi(text1);
   unsigned int hour=atoi(text2);
   decoder = new StEmcDecoder(date,hour);
-  cout<<"EMC_SMDreader** Event time (Unix time) = "<<UnixTime<<endl;
+
+  if(date>20041201) mNSMD = 12;
+  cout<<"EMC_SMDreader** Event time (Unix time) = "<<UnixTime<<"  NSMD = "<<mNSMD<<endl;
   Initialize();
 }
 /////////////////////////////////////////////////////////////////////
@@ -37,8 +41,8 @@ EMC_SmdReader::~EMC_SmdReader()
 void EMC_SmdReader::Initialize()
 {
   mTheSmdAdcR.NSmdHits = 0;
-  for(int RDO=0;RDO<8;RDO++) mTheSmdAdcR.TimeBin[RDO]=999;
-  for(int RDO=0;RDO<8;RDO++) mTheSmdAdcR.HasData[RDO]=0;
+  for(int RDO=0;RDO<12;RDO++) mTheSmdAdcR.TimeBin[RDO]=999;
+  for(int RDO=0;RDO<12;RDO++) mTheSmdAdcR.HasData[RDO]=0;
 
   // Initialize SMDDATA array to 0's
   for(int i = 0 ; i <120 ; i++) 
@@ -194,20 +198,19 @@ int EMC_SmdReader::FillBarrelSmd(Bank_SMDADCR* pADCR,int RDO)
     mTheSmdAdcR.SMDADCArray[RDO][i]=pADCR->fiberData[index];
     sum+=mTheSmdAdcR.SMDADCArray[RDO][i];
     mTheSmdAdcR.BankType="BSMDADCR\n";
-    if(pADCR->fiberData[index]>0)mTheSmdAdcR.NSmdHits++;
-    int binstat=decoder->GetSmdCoord(RDO,index,det,mod,eta,sub);
-    
-    if(binstat)
+    if(RDO<8) // these are the SMD. PSD has header >=8
     {
-      //cout <<"RDO = "<<RDO<<"  index = "<<i<<"  det = "<<det<<"  m = "<<mod<<"  e = "<<eta<<"  s = "<<sub<<"  adc = "<<pADCR->fiberData[index]<<endl;
-      mTheSmdAdcR.DetFlag=det; //Detector flag for BSMDE=3,BSMDP=4
-      //SMDE
-      if(det==3) mTheSmdAdcR.SmdE_ADCMatrix[mod-1][eta-1]=pADCR->fiberData[index];
-
-      //SMDP
-      if(det==4)
+      if(pADCR->fiberData[index]>0)mTheSmdAdcR.NSmdHits++;
+      int binstat=decoder->GetSmdCoord(RDO,index,det,mod,eta,sub);
+    
+      if(binstat)
       {
-        mTheSmdAdcR.SmdP_ADCMatrix[mod-1][eta-1][sub-1]=pADCR->fiberData[index];
+        //cout <<"RDO = "<<RDO<<"  index = "<<i<<"  det = "<<det<<"  m = "<<mod<<"  e = "<<eta<<"  s = "<<sub<<"  adc = "<<pADCR->fiberData[index]<<endl;
+        mTheSmdAdcR.DetFlag=det; //Detector flag for BSMDE=3,BSMDP=4
+        //SMDE
+        if(det==3) mTheSmdAdcR.SmdE_ADCMatrix[mod-1][eta-1]=pADCR->fiberData[index];
+        //SMDP
+        if(det==4) mTheSmdAdcR.SmdP_ADCMatrix[mod-1][eta-1][sub-1]=pADCR->fiberData[index];
       }
     }
   }
@@ -222,9 +225,9 @@ int EMC_SmdReader::ProcessBarrelSmd(const Bank_EMCP* EmcPTR)
 
   if(barrelsmd)
   {
-    for(int RDO=0;RDO<8;RDO++)
+    for(int RDO=0;RDO<mNSMD;RDO++)
     {
-      //cout<<" taking SMDfiber RDO *** "<<RDO<<endl;
+      cout<<" taking SMDfiber RDO *** "<<RDO<<endl;
       Bank_EMCRBP* smdfiber=getBarrelSmdFiber(barrelsmd,RDO);
       if(smdfiber)
       {
