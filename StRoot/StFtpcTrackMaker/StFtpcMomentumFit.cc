@@ -1,7 +1,11 @@
 //////////////////////////////////////////////////////////////////
-// $Id: StFtpcMomentumFit.cc,v 1.5 2000/11/30 21:35:18 oldi Exp $
+// $Id: StFtpcMomentumFit.cc,v 1.6 2001/04/02 14:20:07 oldi Exp $
 //
 // $Log: StFtpcMomentumFit.cc,v $
+// Revision 1.6  2001/04/02 14:20:07  oldi
+// Some minor changes due to Insure++ was reporting problems.
+// These changes do not affect the physical output of StFtpcTrackMaker!
+//
 // Revision 1.5  2000/11/30 21:35:18  oldi
 // Problem of negative particles (nan, overflow) solved.
 // Changed poor programming style.
@@ -41,10 +45,9 @@ extern "C" {void gufld(float *, float *);}
 
 StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Vertex, StThreeVector<double> *Hit, int nHits)
 {
-  StThreeVector<double> Point[11];
-  double xWeight[11]={100,100,100,100,100,100,100,100,100,100,100};
-  double yWeight[11]={100,100,100,100,100,100,100,100,100,100,100};
-  // assume hit resolution = 0.01 cm if not otherwise stated
+  StThreeVector<double> Point[nHits+1];
+  double xWeight[nHits+1];
+  double yWeight[nHits+1];
 
   mYCenter = 0.;
   mXCenter = 0.;
@@ -54,8 +57,14 @@ StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Vertex, StThreeVecto
   mVertexPointOffset=1;
 
   Point[0]=Vertex[0];
-  for(int i=0; i<10; i++)
+  xWeight[0] = 100.;
+  yWeight[0] = 100.;
+  for(int i=0; i<mNumHits; i++)
     {
+      xWeight[i] = 100.;
+      yWeight[i] = 100.;
+      // assume hit resolution = 0.01 cm if not otherwise stated
+
       Point[i+1]=Hit[i];
     }
 
@@ -64,9 +73,9 @@ StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Vertex, StThreeVecto
 
 StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Vertex, double xVertexWeight, double yVertexWeight, StThreeVector<double> *Hit, double *xWeightVector, double *yWeightVector, int nHits)
 {
-  StThreeVector<double> Point[11];
-  double xWeight[11];
-  double yWeight[11];
+  StThreeVector<double> Point[nHits+1];
+  double xWeight[nHits+1];
+  double yWeight[nHits+1];
 
   mYCenter = 0.;
   mXCenter = 0.;
@@ -78,7 +87,7 @@ StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Vertex, double xVert
   Point[0]=Vertex[0];
   xWeight[0]=xVertexWeight;
   yWeight[0]=yVertexWeight;
-  for(int i=0; i<10; i++)
+  for(int i=0; i<mNumHits; i++)
     {
       Point[i+1]=Hit[i];
       xWeight[i+1]=xWeightVector[i];
@@ -90,17 +99,19 @@ StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Vertex, double xVert
 
 StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Hit, int nHits)
 {
-  StThreeVector<double> Point[11];
-  double xWeight[11]={100,100,100,100,100,100,100,100,100,100,100};
-  double yWeight[11]={100,100,100,100,100,100,100,100,100,100,100};
-  // assume hit resolution = 0.01 cm if not otherwise stated
+  StThreeVector<double> Point[nHits];
+  double xWeight[nHits];
+  double yWeight[nHits];
 
   mIterSteps=10;
   mNumHits=nHits;
   mVertexPointOffset=0;
 
-  for(int i=0; i<10; i++)
+  for(int i=0; i<mNumHits; i++)
     {
+      xWeight[i] = 100.;
+      yWeight[i] = 100.;
+      // assume hit resolution = 0.01 cm if not otherwise stated
       Point[i]=Hit[i];
     }
 
@@ -109,16 +120,16 @@ StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Hit, int nHits)
 
 StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Hit, double *xWeightVector, double *yWeightVector, int nHits)
 {
-  StThreeVector<double> Point[11];
-  double xWeight[11];
-  double yWeight[11];
+  StThreeVector<double> Point[nHits];
+  double xWeight[nHits];
+  double yWeight[nHits];
   // assume hit resolution = 0.01 cm if not otherwise stated
 
   mIterSteps=10;
   mNumHits=nHits;
   mVertexPointOffset=0;
 
-  for(int i=0; i<10; i++)
+  for(int i=0; i<mNumHits; i++)
     {
       Point[i]=Hit[i];
       xWeight[i]=xWeightVector[i];
@@ -130,10 +141,9 @@ StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Hit, double *xWeight
 
 StFtpcMomentumFit::StFtpcMomentumFit(double vx, double vy, double vz, double *posx, double *posy, double *posz, int nHits)
 {
-  StThreeVector<double> Point[11];
-  double xWeight[11]={100,100,100,100,100,100,100,100,100,100,100};
-  double yWeight[11]={100,100,100,100,100,100,100,100,100,100,100};
-  // assume hit resolution = 0.01 cm if not otherwise stated
+  StThreeVector<double> Point[nHits+1];
+  double xWeight[nHits+1];
+  double yWeight[nHits+1];
 
   mIterSteps=10;
   mNumHits=nHits;
@@ -142,8 +152,15 @@ StFtpcMomentumFit::StFtpcMomentumFit(double vx, double vy, double vz, double *po
   Point[0].setX(vx);
   Point[0].setY(vy);
   Point[0].setZ(vz);
-  for(int i=0; i<10; i++)
+  xWeight[0] = 100.;
+  yWeight[0] = 100.;
+
+  for(int i=0; i<mNumHits; i++)
     {
+      xWeight[i+1] = 100.;
+      yWeight[i+1] = 100.;
+      // assume hit resolution = 0.01 cm if not otherwise stated
+      
       Point[i+1].setX(posx[i]);
       Point[i+1].setY(posy[i]);
       Point[i+1].setZ(posz[i]);
@@ -154,9 +171,9 @@ StFtpcMomentumFit::StFtpcMomentumFit(double vx, double vy, double vz, double *po
 
 StFtpcMomentumFit::StFtpcMomentumFit(double vx, double vy, double vz, double xVertexWeight, double yVertexWeight, double *posx, double *posy, double *posz, double *xWeightVector, double *yWeightVector, int nHits)
 {
-  StThreeVector<double> Point[11];
-  double xWeight[11];
-  double yWeight[11];
+  StThreeVector<double> Point[nHits+1];
+  double xWeight[nHits+1];
+  double yWeight[nHits+1];
 
   mIterSteps=10;
   mNumHits=nHits;
@@ -167,7 +184,7 @@ StFtpcMomentumFit::StFtpcMomentumFit(double vx, double vy, double vz, double xVe
   Point[0].setZ(vz);
   xWeight[0]=xVertexWeight;
   yWeight[0]=yVertexWeight;
-  for(int i=0; i<10; i++)
+  for(int i=0; i<mNumHits; i++)
     {
       Point[i+1].setX(posx[i]);
       Point[i+1].setY(posy[i]);
@@ -181,17 +198,20 @@ StFtpcMomentumFit::StFtpcMomentumFit(double vx, double vy, double vz, double xVe
 
 StFtpcMomentumFit::StFtpcMomentumFit(double *posx, double *posy, double *posz, int nHits)
 {
-  StThreeVector<double> Point[11];
-  double xWeight[11]={100,100,100,100,100,100,100,100,100,100,100};
-  double yWeight[11]={100,100,100,100,100,100,100,100,100,100,100};
-  // assume hit resolution = 0.01 cm if not otherwise stated
+  StThreeVector<double> Point[nHits+1];
+  double xWeight[nHits+1];
+  double yWeight[nHits+1];
 
   mIterSteps=10;
   mNumHits=nHits;
   mVertexPointOffset=0;
 
-  for(int i=0; i<10; i++)
+  for(int i=0; i<mNumHits; i++)
     {
+      xWeight[i] = 100.;
+      yWeight[i] = 100.;
+      // assume hit resolution = 0.01 cm if not otherwise stated
+
       Point[i].setX(posx[i]);
       Point[i].setY(posy[i]);
       Point[i].setZ(posz[i]);
@@ -202,15 +222,15 @@ StFtpcMomentumFit::StFtpcMomentumFit(double *posx, double *posy, double *posz, i
 
 StFtpcMomentumFit::StFtpcMomentumFit(double *posx, double *posy, double *posz, double *xWeightVector, double *yWeightVector, int nHits)
 {
-  StThreeVector<double> Point[11];
-  double xWeight[11];
-  double yWeight[11];
+  StThreeVector<double> Point[nHits];
+  double xWeight[nHits];
+  double yWeight[nHits];
 
   mIterSteps=10;
   mNumHits=nHits;
   mVertexPointOffset=0;
 
-  for(int i=0; i<10; i++)
+  for(int i=0; i<mNumHits; i++)
     {
       Point[i].setX(posx[i]);
       Point[i].setY(posy[i]);

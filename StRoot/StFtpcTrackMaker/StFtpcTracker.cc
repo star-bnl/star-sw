@@ -1,5 +1,9 @@
-// $Id: StFtpcTracker.cc,v 1.12 2001/01/30 13:31:48 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.13 2001/04/02 14:20:15 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.13  2001/04/02 14:20:15  oldi
+// Some minor changes due to Insure++ was reporting problems.
+// These changes do not affect the physical output of StFtpcTrackMaker!
+//
 // Revision 1.12  2001/01/30 13:31:48  oldi
 // New variable mTime introduced to count total time consumption.
 //
@@ -501,7 +505,7 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
     }
     
     average_dedx /= TMath::Min(GetNumberOfTracks(), (Int_t)fdepar[0].max_track);
-    
+
     Sorter(weighted, index_arr, GetNumberOfClusters());
     
     // remove all hits over truncation threshold
@@ -594,7 +598,7 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
 }
 
 
-void StFtpcTracker::Sorter(Double_t arr[], Int_t *index, Int_t len)
+void StFtpcTracker::Sorter(Double_t *arr, Int_t *index, Int_t len)
 {
   // Sorts hits in ascending order (depending on dE/dx).
   // This function is needed to replace pams/ftpc/fde.
