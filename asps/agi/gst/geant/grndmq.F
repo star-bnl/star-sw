@@ -1,9 +1,9 @@
 *
-* $Id: grndmq.F,v 1.1 1998/07/02 23:24:33 nevski Exp $
+* $Id: grndmq.F,v 1.2 1998/07/04 20:25:52 nevski Exp $
 *
 * $Log: grndmq.F,v $
-* Revision 1.1  1998/07/02 23:24:33  nevski
-* GRNDM bug (undefined platform) corrected
+* Revision 1.2  1998/07/04 20:25:52  nevski
+* CERNLIB_LINUX flag introduced
 *
 * Revision 1.1.1.1  1995/10/24 10:21:42  cernlib
 * Geant
@@ -30,7 +30,8 @@ C.
       CHARACTER*12  CCHOPT
 #if defined(CERNLIB_CRAY)
       REAL ISEED
-#else
+#endif
+#if defined(CERNLIB_IBMALL)||defined(CERNLIB_IBMRT)||defined(CERNLIB_APO10K)||defined(CERNLIB_HPUX)||defined(CERNLIB_MSDOS)||defined(CERNLIB_WINNT)||defined(CERNLIB_LINUX)
       DOUBLE PRECISION ISEED
 #endif
       PARAMETER  (MAXSEQ=215)
