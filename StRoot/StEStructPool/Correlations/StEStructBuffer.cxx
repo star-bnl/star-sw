@@ -1,12 +1,20 @@
 /**********************************************************************
  *
- * $Id: StEStructBuffer.cxx,v 1.2 2005/03/03 01:30:43 porter Exp $
+ * $Id: StEStructBuffer.cxx,v 1.3 2005/03/28 22:59:08 porter Exp $
  *
  * Author: Jeff Porter 
  *
  **********************************************************************
  *
  * Description:  Data buffer to hold events for mixing per z-vertex
+ *
+ *  The algorithm is such that looping over events ceases cause the element,
+ *        mEvent[_MAXEBYEBUFFER_]=NULL  
+ *
+ *  The buffer is filled from [0] to [_MAX.._ -1] and numEvent counter
+ *  then stays and _MAX_-1 (so it should be called 'numEventIndex').
+ *  Once filled, event in [_MAX_-1] is deleted, all events are moved
+ *  'down' in the array and current event is added at [0].
  *
  *
  ***********************************************************************/
@@ -18,8 +26,8 @@
 StEStructBuffer::StEStructBuffer(){
 
   mnumEvents=0;
-  mEvent=new StEStructEvent*[_MAXEBYEBUFFER_];
-  for(int i=0;i<_MAXEBYEBUFFER_;i++)mEvent[i]=NULL;
+  mEvent=new StEStructEvent*[_MAXEBYEBUFFER_+1];
+  for(int i=0;i<=_MAXEBYEBUFFER_;i++)mEvent[i]=NULL;
   resetCounter();
 
 }
@@ -36,7 +44,10 @@ void StEStructBuffer::addEvent(StEStructEvent* event){
 
   if(!event)return;
   if(mnumEvents==_MAXEBYEBUFFER_-1){
-    if(mEvent[mnumEvents])delete mEvent[mnumEvents];
+    if(mEvent[mnumEvents]){ 
+      delete mEvent[mnumEvents];
+      mEvent[mnumEvents]=NULL;
+    }
   } else {
     mnumEvents++;
   }
@@ -48,6 +59,10 @@ void StEStructBuffer::addEvent(StEStructEvent* event){
 /***********************************************************************
  *
  * $Log: StEStructBuffer.cxx,v $
+ * Revision 1.3  2005/03/28 22:59:08  porter
+ * I opened a memory leak on last ci due to forgetting how StEStructBuffer
+ * actually worked! This is now fixed with explaination in description.
+ *
  * Revision 1.2  2005/03/03 01:30:43  porter
  * updated StEStruct2ptCorrelations to include pt-correlations and removed
  * old version of pt-correlations from chunhuih (StEStruct2ptPtNbar)
