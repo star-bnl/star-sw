@@ -33,7 +33,14 @@ foreach my $Rep (@Repo) {
 my @src     = sortu (@srcL);# print "src = @src\n";
 my @h_files = sortu (@h_filesL);
 my @idlM    = sortu (@idlML);# print "idlM = @idlM\n";
-
+if ($pkg eq 'g2t') {
+  my @srcg2t = ();
+  my @idlMg2t = ();
+  foreach my $s (@src)  {next if ($s =~ /g2.main.g$/);   push @srcg2t, $s;}
+  foreach my $s (@idlM) {next if ($s =~ /g2.main.idl$/); push @idlMg2t, $s;}
+  @src = @srcg2t;# print "scr = @src\n";
+  @idlM = @idlMg2t;# print "idlM = @idlM\n";
+}
 if ($#idlM > -1) {$PKG = "St_" . $PKG;}
 my $obj  = $ObjDir;  print "obj = $obj\n" if $param::debug;
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB}; print "SO_PKG = $SO_PKG\n" if $param::debug;
