@@ -51,12 +51,23 @@ CC:>--------------------------------------------------------------------
 c     filling the sgr_groups table
             do j=1,est_match(i).n_svt_hits
                igroups=igroups+1
+               if( igroups .gt. groups_h.maxlen) then
+                  EST_TOGLOB2=STAFCV_BAD
+                  write(6,*) "Not enough groups allocated quitting"
+                  goto 10
+               endif
+
                groups(igroups).ident=5
                groups(igroups).id2=est_match(i).id_hit(j)
-               groups(igroups).id1=istktrack
+               groups(igroups).id1=istktrack+1
             enddo
 c     filling the stk_track table
             istktrack=istktrack+1
+            if( istktrack .gt. stktrack_h.maxlen) then
+               EST_TOGLOB2=STAFCV_BAD
+               write(6,*) "Not enough stktracks allocated quitting"
+               goto 10
+            endif
             stktrack(istktrack).flag=2 ! all the tracks are found w/o the primvertex
             stktrack(istktrack).id=istktrack
             stktrack(istktrack).id_globtrk=0
@@ -76,7 +87,7 @@ c     filling the stk_track table
             stktrack(istktrack).dedx(1)=0 ! to be filled by the pid module
             stktrack(istktrack).dedx(2)=0
             stktrack(istktrack).impact=0
-            stktrack(istktrack).invpt=est_match(i).invp
+            stktrack(istktrack).invpt=est_match(i).invp*est_match(i).q
             stktrack(istktrack).phi0=est_match(i).phi0
             stktrack(istktrack).pid=0
             stktrack(istktrack).psi=est_match(i).psi
@@ -86,6 +97,11 @@ c     filling the stk_track table
 
 c     filling the svm_evt_match table
             imatch=imatch+1
+            if( imatch .gt. match_h.maxlen) then
+               EST_TOGLOB2=STAFCV_BAD
+               write(6,*) "Not enough svm_match allocated quitting"
+               goto 10
+            endif
             match(imatch).id=imatch
             match(imatch).idsvt=istktrack
             match(imatch).idsvt_2=0
@@ -107,5 +123,6 @@ c     filling the svm_evt_match table
          
       
       EST_TOGLOB2=STAFCV_OK
+ 10   continue
       RETURN
       END
