@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.83  2004/01/27 23:38:14  jeromel
+// Small change (more info in message)
+//
 // Revision 1.82  2004/01/05 16:51:29  ward
 // Fix bug in ipadrow limits.
 //
@@ -1035,7 +1038,7 @@ void St_tpcdaq_Maker::DAQ100clOutput(const unsigned int *pTPCP) {
 //________________________________________________________________________________
 Int_t St_tpcdaq_Maker::Make() {
   int output,errorCode; const char *pTPCP;
-  printf("St_tpcdaq_Maker::Make() method called\n"); 
+  printf("St_tpcdaq_Maker::Make() method called in Mode=%d DAQ=%d\n",m_Mode,daq_flag); 
 #ifdef DEVELOPMENT
   char junk[10];
   PP("\007St_tpcdaq_Maker::Make: Please input a value for daq_flag: ");
