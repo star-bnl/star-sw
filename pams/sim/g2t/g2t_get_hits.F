@@ -159,6 +159,7 @@ C :>--------------------------------------------------------------------
          print *,' D2M  flags  are = ',xD2M,pD2M
          print *,' pointer/counter position =',ip,in
       endif
+      call VZERO(numbv,Nmh)
 *
 * - - -     
       DO WHILE (agfhit1(ih,jtra,numbv,hits).eq.0)

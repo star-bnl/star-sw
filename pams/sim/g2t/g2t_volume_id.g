@@ -108,16 +108,24 @@
 
       else If (Csys.eq.'smd') then
 *7*
-        rileft=numbv(1) 
-        eta=idigi(2)+1
-        If (rileft.eq.1) then
-          phi=60-numbv(2)+1
-        else
-          phi=60+numbv(2)
-        endif     
-        forw_back=numbv(3)
+         if (numbv(3)>0) then
+	  rileft=numbv(1) 
+          eta=idigi(2)+1
+          If (rileft.eq.1) then
+            phi=60-numbv(2)+1
+          else
+            phi=60+numbv(2)
+          endif     
+          forw_back=numbv(3)
+          strip=idigi(3)+1
+	else
+	  rileft=0 
+          eta=idigi(1)+1
+          phi=60+numbv(1)
+          forw_back=numbv(2)
+          strip=idigi(2)+1
+	endif
         If (forw_back.eq.4) forw_back=3
-        strip=idigi(3)+1
         volume_id=100000000*rileft+1000000*eta+1000*phi+
      +                             100*forw_back+strip
 
