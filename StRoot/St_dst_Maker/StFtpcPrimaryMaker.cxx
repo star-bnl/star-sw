@@ -1,5 +1,10 @@
-// $Id: StFtpcPrimaryMaker.cxx,v 1.8 2001/12/12 16:35:22 jcs Exp $
+// $Id: StFtpcPrimaryMaker.cxx,v 1.9 2002/04/05 16:52:51 oldi Exp $
 // $Log: StFtpcPrimaryMaker.cxx,v $
+// Revision 1.9  2002/04/05 16:52:51  oldi
+// Minor changes:
+// Global refit was removed, because TPC vertex is known at tracking time already.
+// Chi2 calculation was fixed.
+//
 // Revision 1.8  2001/12/12 16:35:22  jcs
 // increase max_Dca from 1. to 2. for refit to primary vertex
 //
@@ -132,10 +137,10 @@ Int_t StFtpcPrimaryMaker::Make(){
 
 // Refit FTPC tracks with primary vertex
 
-    StFtpcVertex *refit_vertex = new StFtpcVertex(primvtx->x,primvtx->y,primvtx->z);
+    StFtpcVertex *refit_vertex = new StFtpcVertex(primvtx);
     Bool_t bench = (Bool_t)false;
     StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, points, tracks, bench, 2.);
-    refitter->FitAndWrite(tracks,primvtx->id);
+    refitter->FitAndWrite(tracks, primvtx->id);
     delete refitter;
     delete refit_vertex;
 
@@ -188,9 +193,6 @@ Int_t StFtpcPrimaryMaker::Make(){
     Int_t i = 0;
     for (i=0; i<15; i++) { ptrk->covar[i] = 0; }
     
-    ptrk->chisq[0]  = trk->chisq[0];
-    ptrk->chisq[1]  = trk->chisq[1];
-
     iglobtrk=trk->id_globtrk-1;
 
     for (i=0; i<3; i++) {
@@ -213,6 +215,9 @@ Int_t StFtpcPrimaryMaker::Make(){
     ptrk->n_point     = gtrk[iglobtrk].n_point;
     ptrk->n_max_point = gtrk[iglobtrk].n_max_point;
     ptrk->n_fit_point = gtrk[iglobtrk].n_fit_point + 1;
+
+    ptrk->chisq[0]  = trk->chisq[0]/(ptrk->n_fit_point-3);
+    ptrk->chisq[1]  = trk->chisq[1]/(ptrk->n_fit_point-2);
 
     ptrk->icharge  = trk->q;
     ptrk->id_start_vertex =  10*trk->id_start_vertex;

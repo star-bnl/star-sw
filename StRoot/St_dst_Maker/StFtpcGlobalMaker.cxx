@@ -1,5 +1,10 @@
-// $Id: StFtpcGlobalMaker.cxx,v 1.4 2002/02/01 01:59:25 jcs Exp $
+// $Id: StFtpcGlobalMaker.cxx,v 1.5 2002/04/05 16:52:47 oldi Exp $
 // $Log: StFtpcGlobalMaker.cxx,v $
+// Revision 1.5  2002/04/05 16:52:47  oldi
+// Minor changes:
+// Global refit was removed, because TPC vertex is known at tracking time already.
+// Chi2 calculation was fixed.
+//
 // Revision 1.4  2002/02/01 01:59:25  jcs
 // redo unconstrained fit for FTPC global tracks with primary vertex
 // (done in StFtpcTrackMaker with preVertex)
@@ -57,8 +62,6 @@ Int_t StFtpcGlobalMaker::Init(){
 //_____________________________________________________________________________
 Int_t StFtpcGlobalMaker::Make(){
   PrintInfo();  
-cout<<"StFtpcGlobalMaker::Make() entered"<<endl;
-  
   int iMake = kStOK;
 
   St_DataSet *primary = GetDataSet("primary");
@@ -132,7 +135,6 @@ cout<<"StFtpcGlobalMaker::Make() entered"<<endl;
    St_dst_point *dst_point = new St_dst_point("point",nfppoint);  
    AddData(dst_point);
    dst_point_st *point = dst_point->GetTable();
-   Int_t ipnt = 0;
 
    St_dst_dedx *dst_dedx = new St_dst_dedx("dst_dedx",nfptrack); 
    AddData(dst_dedx);
@@ -144,32 +146,20 @@ cout<<"StFtpcGlobalMaker::Make() entered"<<endl;
     m_fdepar = (St_fde_fdepar *) gime("fdepars/fdepar");
     fde_fdepar_st *fdepar = m_fdepar->GetTable();
 
+    gMessMgr->Info() << "Global fit for FTPC tracks not redone, because used vertex for tracking was the primary vertex." << endm;
+    /*
 // Redo unconstrained fit with primary vertex instead of preVertex
-    gMessMgr->Info() << "Using primary vertex: "<<primvtx->x<<", "<<primvtx->y<<", "<<primvtx->z<<endm;
-    StFtpcVertex *refit_vertex = new StFtpcVertex(primvtx->x,primvtx->y,primvtx->z);
+    StFtpcVertex *refit_vertex = new StFtpcVertex(primvtx);
+    gMessMgr->Info() << "Using primary vertex: "<< refit_vertex->GetX() << "+-" << refit_vertex->GetXerr() << ", " << refit_vertex->GetY() << "+-" << refit_vertex->GetYerr()  << ", " << refit_vertex->GetZ()  << "+-" << refit_vertex->GetZerr() << endm;
     Bool_t bench = (Bool_t)false;
     StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, fcl_fppoint, fpt_fptrack, bench, 2.);
     refitter->FitAnddEdxAndWrite(fpt_fptrack,fdepar,-primvtx->id);
     delete refitter;
     delete refit_vertex;
+    */
 
-  //  ==================  Local Variables  ======================== 
 const int  MAXHITS = 10;       // Maximum number of hits on an FTPC track
-
-const float FTPC_FAC = 2380.0; // Multiplication factor to achieve 4 micron accuracy
-const float FTPC_MIN = -270.0;   // Minimum FTPC z-coordinate
-const float FTPC_MAX =  270.0;   // Maximum FTPC z-coordinate
-
-
-const int two10 =    1024;    // 2**10
-const int two17 =  131072;    // 2**17
-const int two20 = 1048576;    // 2**20
-
-unsigned int ftpcx, ftpcy, ftpcz;
-unsigned int ftpcy10, ftpcy11;
-  
 Int_t ihit, iPoint;
-Int_t det_id;
 
   // Loop over all tracks in FTPC track table
   for (Int_t itrk=0; itrk<nfptrack; itrk++,iglobtrk++,idedx++) {
@@ -353,8 +343,25 @@ fppoint[iPoint].row = fppoint[iPoint].row + 100*globtrk[iglobtrk].id;
 dst_track->SetNRows(iglobtrk);
 dst_dedx->SetNRows(idedx);
 
-// Now save all unused hits
+// Now save all hits
+
+   Int_t ipnt = 0;
+   Int_t det_id=0;
+
+   const float FTPC_FAC = 2380.0; // Multiplication factor to achieve 4 micron accuracy
+   const float FTPC_MIN = -270.0;   // Minimum FTPC z-coordinate
+   const float FTPC_MAX =  270.0;   // Maximum FTPC z-coordinate
+
+
+   const int two10 =    1024;    // 2**10
+   const int two17 =  131072;    // 2**17
+   const int two20 = 1048576;    // 2**20
+
+   unsigned int ftpcx, ftpcy, ftpcz;
+   unsigned int ftpcy10, ftpcy11;
+
 //  Loop over all hits
+
    for (iPoint=0; iPoint<nfppoint; iPoint++,ipnt++) {
      if (fppoint[iPoint].row >=101) {
         point[ipnt].id_track    = fppoint[iPoint].row/100;
@@ -369,24 +376,14 @@ dst_dedx->SetNRows(idedx);
             det_id = kFtpcWestId;
        }
 //                 Rows 11->20 FTPC East  det_id=kFtpcEastId  
-       if (fppoint[iPoint].row >= 11 && fppoint[iPoint].row <=20 ) {
+       else if (fppoint[iPoint].row >= 11 && fppoint[iPoint].row <=20 ) {
             det_id = kFtpcEastId;
        }
-/*
-            //    hw_position  (30 bits)
-            //            bits  0-3   det_id
-            //            bits  4-8   FTPC pad plane (1-20)
-            //            bits  9-11  Sector number within pad-plane (1-6)
-            //            bits 12-20  number of pads in cluster (1-160)
-            //            bits 21-30  number of consecutive timebins in cluster (1-256)
-            point[ipnt].hw_position =
-                      (fppoint[iPoint].n_bins<<21)
-                    + (fppoint[iPoint].n_pads<<12)
-                    + (fppoint[iPoint].sector<<9)
-                    + (fppoint[iPoint].row<<4)
-                    + det_id;
-*/
+       else {
+          gMessMgr->Message("", "I", "OST") <<"StFtpcGlobalMaker: fppoint["<<iPoint<<"].row  = "<<fppoint[iPoint].row<<" is out of range"<< endm;
+       }
             //    hw_position  (32 bits)
+            //            bits  0-3   det_id
             //            bits 4-10   FTPC pad plane (1-20)
             //            bits 11-20  Sector number within pad-plane (1-6)
             //            bits 21-24  number of pads in cluster
