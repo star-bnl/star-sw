@@ -1,4 +1,4 @@
-// $Id: StEEmcDataMaker.cxx,v 1.8 2004/03/19 21:29:28 balewski Exp $
+// $Id: StEEmcDataMaker.cxx,v 1.9 2004/03/20 20:25:40 balewski Exp $
 
 #include <Stiostream.h>
 #include <math.h>
@@ -131,7 +131,7 @@ Int_t StEEmcDataMaker::Make(){
     block.setHead(steemcreader->getEemcHeadBlock(crate->fiber,type));
     block.setDataArray(steemcreader->getEemcDataBlock(crate->fiber,type));
     
-    block.print(1);
+    block.print(0);
 
     //StEvent-> Add(block) <===  THIS IS MISSING 
 
@@ -178,7 +178,7 @@ Int_t StEEmcDataMaker::Make(){
       if(!steemcreader) continue; // there was no data 
       int rawAdc=steemcreader->getEemcData(crate->fiber,chan,'T'); 
       
-      if(rawAdc<0) continue; // there was no data for this channel
+      if(rawAdc<=0) continue; // there was no data for this channel
       
       float adc=rawAdc - x->ped;
       float energy=-1.;
@@ -208,6 +208,9 @@ Int_t StEEmcDataMaker::Make(){
   }
 
 // $Log: StEEmcDataMaker.cxx,v $
+// Revision 1.9  2004/03/20 20:25:40  balewski
+// fix for empty ETOW/ESMD
+//
 // Revision 1.8  2004/03/19 21:29:28  balewski
 // new EEMC daq reader
 //
