@@ -1,7 +1,8 @@
 ARCH_TAG     = _sgi
 ARFLAGS      = vqs
 ARTS         = ar -t
-FF           = f77
+FF           = xlf23
+#FF           = f77
 FFLAGS       = -c -O -w -extend_source
 FFLAGS4      = -c -O -w -extend_source -irix4
 FFLAGS_DBG   = -c -g -w -extend_source
