@@ -36,8 +36,8 @@ StEmcPosition::~StEmcPosition()
 {
 }
 //------------------------------------------------------------------------------
-Bool_t StEmcPosition::projTrack( StThreeVectorD* atFinal, StThreeVectorD* momentumAtFinal, 
-                            StTrack* track, Double_t magField, Double_t radius, Int_t option )
+Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentumAtFinal, 
+                            StTrack* track, Double_t magField, Double_t radius, Int_t option)
 {
   StThreeVectorD Zero(0,0,0);
   *atFinal=Zero;
@@ -46,121 +46,113 @@ Bool_t StEmcPosition::projTrack( StThreeVectorD* atFinal, StThreeVectorD* moment
   const StThreeVectorF& origin = track->geometry()->origin();
   const StThreeVectorF& momentum = track->geometry()->momentum();
   Double_t charge = track->geometry()->charge();
-  StPhysicalHelixD* helix = new StPhysicalHelixD( momentum, origin, magField*tesla, charge );
-  pairD pathLength = helix->pathLength( radius );
-  
-  Double_t s,s1,s2, mods2s1Diff;  
+  StPhysicalHelixD* helix = new StPhysicalHelixD(momentum, origin, magField*tesla, charge);
+  pairD pathLength = helix->pathLength(radius);
+
+  Double_t s,s1,s2; 
   s=0;
   s1 = pathLength.first;
   s2 = pathLength.second;
-  
+
   Bool_t goProj;
   goProj = kFALSE;
-  
-  if ( option == 1)
+
+  if (finite(s1) != 0 && finite(s2) != 0) 
   {
-    if (s1 >= 0 && s2 >= 0)
-    {  
-      if (s1 < s2) s = s1;
-      else s = s2;
-      goProj = kTRUE;
-    }
+    cout << "Track couldn't be projected!" << endl;
+    return kFALSE;
+  } 
+
+  if (option == 1)  // Selects positive path lenght to project track forwards along its helix relative to
+                    // first point of track. The smaller solution is taken when both are positive
+  {
+    if (s1 >= 0 && s2 >= 0) {s = s1; goProj = kTRUE; }
     if (s1 >= 0 && s2 < 0) { s = s1; goProj = kTRUE; }
     if (s1 < 0 && s2 >= 0) { s = s2; goProj = kTRUE; }
   }
   
-  if ( option == -1)
+  if (option == -1) // Selects negative path lenght to project track backwards along its helix relative to
+                    // first point of track. The smaller absolute solution is taken when both are negative 
   {
-    if (s1 <= 0 && s2 <= 0)
-    {  
-      if (fabs(s1) < fabs(s2)) s = s1;
-      else s = s2;
-      goProj = kTRUE;
-    }
+    if (s1 <= 0 && s2 <= 0) { s = s2; goProj = kTRUE; }
     if (s1 <= 0 && s2 > 0) { s = s1; goProj = kTRUE; }
     if (s1 > 0 && s2 <= 0) { s = s2; goProj = kTRUE; }
   }
- 
+
   if (goProj) 
   {
     *atFinal = helix->at( s );
     *momentumAtFinal = helix->momentumAt( s, magField*tesla );
-    if ( charge == 0 ) *momentumAtFinal = momentum;
+    if (charge == 0) *momentumAtFinal = momentum;
     delete helix;
     return kTRUE;
   }
   else 
     return kFALSE;
-  // cout << " Projection of track failed - invalid radius " << endl;
 }
 //------------------------------------------------------------------------------
-Bool_t StEmcPosition::projTrack( StThreeVectorD* atFinal, StThreeVectorD* momentumAtFinal, 
-                            StMcTrack* mcTrack, Double_t magField, Double_t radius, Int_t option )
+Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentumAtFinal, 
+                            StMcTrack* mcTrack, Double_t magField, Double_t radius, Int_t option)
 {
   StThreeVectorD Zero(0,0,0);
   *atFinal=Zero;
   *momentumAtFinal=Zero;
-  
+
   const StThreeVectorF& origin = mcTrack->startVertex()->position();
   const StThreeVectorF& momentum = mcTrack->momentum();
   Double_t charge = mcTrack->particleDefinition()->charge();
-  StPhysicalHelixD* helix = new StPhysicalHelixD( momentum, origin, magField*tesla, charge );
-  pairD pathLength = helix->pathLength( radius );
-  
-  Double_t s,s1,s2, mods2s1Diff;  
+  StPhysicalHelixD* helix = new StPhysicalHelixD(momentum, origin, magField*tesla, charge);
+  pairD pathLength = helix->pathLength(radius);
+
+  Double_t s,s1,s2;  
   s=0;
   s1 = pathLength.first;
   s2 = pathLength.second;
-  
+
   Bool_t goProj;
   goProj = kFALSE;
-  
-  if ( option == 1)
+
+  if (finite(s1) != 0 && finite(s2) != 0) 
   {
-    if (s1 >= 0 && s2 >= 0)
-    {  
-      if (s1 < s2) s = s1;
-      else s = s2;
-      goProj = kTRUE;
-    }
+    cout << "Track couldn't be projected!" << endl;
+    return kFALSE;
+  } 
+
+  if (option == 1)  // Selects positive path lenght to project track forwards along its helix relative to
+                    // first point of track. The smaller solution is taken when both are positive
+  {                 
+    if (s1 >= 0 && s2 >= 0) { s = s1; goProj = kTRUE; }
     if (s1 >= 0 && s2 < 0) { s = s1; goProj = kTRUE; }
     if (s1 < 0 && s2 >= 0) { s = s2; goProj = kTRUE; }
   }
-  
-  if ( option == -1)
+
+  if (option == -1) // Selects negative path lenght to project track backwards along its helix relative to
+                    // first point of track. The smaller absolute solution is taken when both are negative 
   {
-    if (s1 <= 0 && s2 <= 0)
-    {  
-      if (fabs(s1) < fabs(s2) ) s = s1;
-      else s = s2;
-      goProj = kTRUE;
-    }
+    if (s1 <= 0 && s2 <= 0) { s = s2; goProj = kTRUE; }
     if (s1 <= 0 && s2 > 0) { s = s1; goProj = kTRUE; }
     if (s1 > 0 && s2 <= 0) { s = s2; goProj = kTRUE; }
   }
- 
+
   if (goProj) 
   {
     *atFinal = helix->at( s );
     *momentumAtFinal = helix->momentumAt( s, magField*tesla );
-    if ( charge == 0 ) *momentumAtFinal = momentum;
+    if (charge == 0) *momentumAtFinal = momentum;
     delete helix;
     return kTRUE;
   }
   else 
     return kFALSE;
-  // cout << " Projection of track failed - invalid radius " << endl;
-  
 }
-
 //------------------------------------------------------------------------------
 Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* momentum,
                             StTrack* track, Double_t magField, Double_t emcRadius )
 {  
   // There's no check for primary or secondary tracks
-
-  if (!track->geometry()) return kFALSE;  
   
+  if (!track->geometry()) return kFALSE;  
+
   const StThreeVectorD& origin = track->geometry()->origin();
   Float_t xO = origin.x();
   Float_t yO = origin.y();
@@ -181,16 +173,15 @@ Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* mome
 }
 //------------------------------------------------------------------------------
 Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* momentum,
-                            StMcTrack* track, Double_t magField, Double_t emcRadius )
-
+                            StMcTrack* mcTrack, Double_t magField, Double_t emcRadius )
 {  
-  Float_t startVertexX = track->startVertex()->position().x();
-  Float_t startVertexY = track->startVertex()->position().y();
+  Float_t startVertexX = mcTrack->startVertex()->position().x();
+  Float_t startVertexY = mcTrack->startVertex()->position().y();
   Float_t startVtxToOrigin = sqrt( pow( startVertexX, 2 ) + pow( startVertexY, 2 ) );
-  
-  if ( !track->stopVertex() && startVtxToOrigin < emcRadius )    
+
+  if ( !mcTrack->stopVertex() && startVtxToOrigin < emcRadius )    
   {
-   Bool_t projTrackOk = projTrack( position, momentum, track, magField, emcRadius );
+   Bool_t projTrackOk = projTrack( position, momentum, mcTrack, magField, emcRadius );
    if ( projTrackOk )  
     {
       Int_t m = 0, e = 0, s = 0;
@@ -199,19 +190,19 @@ Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* mome
       if ( mGeom[0]->getBin(phi, eta, m, e, s) == 0 && s != -1 ) return kTRUE;
     }
   } 
-      
+
   // Checking if stopVertex exists
   Float_t stopVtxToOrigin = -1;
-  if ( track->stopVertex() )     
+  if ( mcTrack->stopVertex() )     
   {
-    Float_t stopVertexX = track->stopVertex()->position().x();
-    Float_t stopVertexY = track->stopVertex()->position().y();
-    stopVtxToOrigin = sqrt( pow( stopVertexX,2 ) + pow( stopVertexY,2 ) );
+    Float_t stopVertexX = mcTrack->stopVertex()->position().x();
+    Float_t stopVertexY = mcTrack->stopVertex()->position().y();
+    stopVtxToOrigin = sqrt( pow( stopVertexX,2 ) + pow(stopVertexY,2) );
   }
   
   if (stopVtxToOrigin >= emcRadius)
   {
-    Bool_t projTrackOk = projTrack( position, momentum, track, magField, emcRadius );
+    Bool_t projTrackOk = projTrack( position, momentum, mcTrack, magField, emcRadius );
     if ( projTrackOk )  
     {
       Int_t m = 0, e = 0, s = 0;
@@ -220,7 +211,7 @@ Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* mome
       if ( mGeom[0]->getBin(phi, eta, m, e, s) == 0 && s != -1 ) return kTRUE;
     }
   }  
-  
+
   return kFALSE;
 }
 //------------------------------------------------------------------------------
