@@ -101,7 +101,11 @@ C	(row = 100*((SECTOR+1)/2)+ROW)
 C
 C    13 Mar 1995
 C     -	Fill dx and dy according to reasonable prescription.
-
+C
+C    30 Mar 1995
+C     - Also fill new entry in tphit table, nseq=nseq of contributing cluster
+C     -	now using consistent convention of sector=1..24, row=1..45 for all
+C       tables from tpseq,tpcluster on
 C
 C   Error conditions : 
 C   ================
@@ -205,6 +209,7 @@ C-----------------------------------------------------------------------
         data first/.true./
 C-----------------------------------------------------------------------
 	integer ichek	! mal -** temp
+        integer iisec,iirow
 
 c
 c       set status
@@ -239,14 +244,15 @@ c	   if (mod(jtpcl,ichek).eq.1) write(13,*)'cluster #',jtpcl	! mal -** temp
 
            nseq = tpcluster(jtpcl).nseq
            jseq = tpcluster(jtpcl).jseq
-           isec = tpcluster(jtpcl).secpad/100
-           irow = tpcluster(jtpcl).secpad-isec*100
-           if(mod(isec,2).eq.0)then
-              krow = irow + pad_plane(1).nrow_in
-           else
-              krow = irow
-           endif
-
+           isec = tpcluster(jtpcl).tpc_row/100
+           irow = tpcluster(jtpcl).tpc_row-isec*100
+c     note-- now, sector=1..24, row=1..45  mal 30mar95
+c           if(mod(isec,2).eq.0)then
+c              krow = irow + pad_plane(1).nrow_in
+c           else
+c              krow = irow
+c           endif
+           krow=irow
            if(nseq.ge.min_hit_seq)then
 
               call tph_get_cls_data(jseq, nseq, id_pad, krow
@@ -261,8 +267,10 @@ c	   if (mod(jtpcl,ichek).eq.1) write(13,*)'cluster #',jtpcl	! mal -** temp
               tphith.nok = tphith.nok + 1
 	      tphit(tphith.nok).id = tphith.nok		! mal 17jan95
               tphit(tphith.nok).cluster = jtpcl
+              tphit(tphith.nok).nseq = nseq
 c              tphit(tphith.nok).row = krow
-              tphit(tphith.nok).row = 100*((isec+1)/2)+krow	! mal 19jan95
+c              tphit(tphith.nok).row = 100*((isec+1)/2)+krow	! mal 19jan95
+              tphit(tphith.nok).row = 100*isec+krow     	! mal 30mar95
               tphit(tphith.nok).track = itrk   ! for now this is MC info
 
 	      call tph_fit_cluster(nseq, nclspix, npix_pad,
@@ -279,16 +287,29 @@ c          finally, transform everything to global coordinates !
 c
 c          account for "lower-edge" binning in z coordinate
 c
+
+c now I have to deal with tpg convention....
+c it wants sector=1..48, row=1..13 for inner, 1..32 for outer sector
+c mal 30mar95
+           if (irow.gt.pad_plane(1).nrow_in) then ! outer sector
+              iisec=isec*2
+              iirow=irow-pad_plane(1).nrow_in
+           else
+              iisec=isec*2-1
+              iirow=irow
+           endif
+
            invec(3)=dble(tphit(tphith.nok).z*time_bucket)
-           invec(2)=tpg_row_to_y(irow,isec)
+           invec(2)=tpg_row_to_y(iirow,iisec)
 c
 c mal 13dec94 - tpg_pad_to_x wants pad passed as integer which screws me
 c  		up, so I just do tpg's job explicitly...
 c           invec(1)=tpg_pad_to_x(tphit(tphith.nok).x,irow,isec)  
-	   invec(1) = sector(isec).xrow(irow) + 
-     +		  (tphit(tphith.nok).x-1.0)*sector(isec).pad_x_space
+	   invec(1) = sector(iisec).xrow(iirow) + 
+     +		  (tphit(tphith.nok).x-1.0)*sector(iisec).pad_x_space
 
-           lstat=tpg_local_to_global(isec,invec,outvec)
+           lstat=tpg_local_to_global(iisec,invec,outvec)
+
 
            tphit(tphith.nok).x = real(outvec(1))
            tphit(tphith.nok).y = real(outvec(2))
@@ -305,7 +326,7 @@ c
 c          perhaps consistency with simulation demands use of pad_sep_in/out ???
 c	   yes, I think so - mal
 c
-           if(mod(isec,2).eq.0)then
+           if(irow.gt.pad_plane(1).nrow_in)then
               pad_width = pad_plane(1).pad_sep_out
            else
               pad_width = pad_plane(1).pad_sep_in
@@ -400,6 +421,8 @@ c   ==============
 C   23nov94 - m lisa - added output argument of npix_pad=number of pixels
 C			in each sequence
 C
+C   30mar95 now sector=1..24,row=1..45
+C
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
@@ -433,9 +456,12 @@ C-----------------------------------------------------------------------
 	integer npix_pad(*)
 C-----------------------------------------------------------------------
         integer ldatum
-        integer*2 idatum(2),tdc_lo,tdc_hi
-        equivalence(idatum(1),ldatum)
-        integer*2 seqmask,botmask
+c 24mar95 -now data is packed in a new way in tppixel
+c        integer*2 idatum(2),tdc_lo,tdc_hi
+c        equivalence(idatum(1),ldatum)
+c        integer*2 seqmask,botmask
+	integer tdc_factor/'400'X/
+	integer numseq_factor/'100000'X/
 
         integer maxtrk, ntrk, ktrk, imax
         parameter (maxtrk=2000)
@@ -451,7 +477,7 @@ C-----------------------------------------------------------------------
 	integer iseq_num
 C-----------------------------------------------------------------------
         data id/0/
-        data seqmask/'3F00'X/,botmask/'FF'X/
+c        data seqmask/'3F00'X/,botmask/'FF'X/
 C-----------------------------------------------------------------------
 
         iclspix = 0
@@ -499,15 +525,20 @@ c
               return
            endif
 
-           iadc(iclspix) = real(idatum(1))
-
-           tdc_lo = iand(idatum(2),botmask)
-           tdc_hi = ibits(idatum(2),14,2)*'100'X
-           itdc(iclspix) = real(tdc_lo + tdc_hi) 
+c           iadc(iclspix) = real(idatum(1))
+c
+c           tdc_lo = iand(idatum(2),botmask)
+c           tdc_hi = ibits(idatum(2),14,2)*'100'X
+c           itdc(iclspix) = real(tdc_lo + tdc_hi) 
+c           kseqpix = iand(idatum(2),seqmask)/'100'X
+c new way to unpack data
+           kseqpix = ldatum/numseq_factor
+           itdc(iclspix) = real((ldatum - numseq_factor*kseqpix)/tdc_factor)
+           iadc(iclspix) = real(ldatum - numseq_factor*kseqpix 
+     +		- tdc_factor*int(itdc(iclspix)))
 
            ipad(iclspix) = real(tpseq(kseq).secpad-id_pad(irow))
 
-           kseqpix = iand(idatum(2),seqmask)/'100'X
 	   iseq_num = iseq_num+1
 	   npix_pad(iseq_num) = kseqpix
 
@@ -519,8 +550,10 @@ c
 	        return
 	      endif
               ldatum = tppixel(jpix+indx-1).datum
-              iadc(iclspix) = real(idatum(1))
+c              iadc(iclspix) = real(idatum(1))
               itdc(iclspix) = real(itdc(iclspix-1)+1.)
+              iadc(iclspix) = real(ldatum - numseq_factor*kseqpix 
+     +		- tdc_factor*int(itdc(iclspix)))
               ipad(iclspix) = real(ipad(iclspix-1))
 c
 c             for MC data!
@@ -1257,16 +1290,20 @@ C-----------------------------------------------------------------------
         integer jseq,nseq,irow,nclspix
 C-----------------------------------------------------------------------
         integer ldatum
-        integer*2 idatum(2),tdc_lo,tdc_hi
-        equivalence(idatum(1),ldatum)
-        integer*2 seqmask,botmask
+c        integer*2 idatum(2),tdc_lo,tdc_hi
+c        equivalence(idatum(1),ldatum)
+c        integer*2 seqmask,botmask
+c data now packed in new way.... malisa 24mar95
+        integer nseq_factor/'100000'X/
+        integer tdc_factor/'400'X/
+        integer itdc
 
         integer kseq,kpix,kseqpix
         integer jpix,iclspix,indx
         integer iseq
 
 C-----------------------------------------------------------------------
-        data seqmask/'3F00'X/,botmask/'FF'X/
+c        data seqmask/'3F00'X/,botmask/'FF'X/
 C-----------------------------------------------------------------------
 
         iseq = 0
@@ -1276,15 +1313,19 @@ C-----------------------------------------------------------------------
            jpix = tpseq(kseq).jpix
 
            ldatum = tppixel(jpix).datum
-           iadc(iseq) = real(idatum(1))
+           kseqpix = ldatum/nseq_factor
+           itdc = (ldatum - kseqpix*nseq_factor)/tdc_factor
+c           iadc(iseq) = real(idatum(1))
+           iadc(iseq) = real(ldatum - kseqpix*nseq_factor - itdc*tdc_factor)
 
            ipad(iseq) = real(tpseq(kseq).secpad-id_pad(irow))
 
-           kseqpix = iand(idatum(2),seqmask)/'100'X
+c           kseqpix = iand(idatum(2),seqmask)/'100'X
 
            do indx = 2, kseqpix
               ldatum = tppixel(jpix+indx-1).datum
-              iadc(iseq) = iadc(iseq) + real(idatum(1))
+              itdc = (ldatum - kseqpix*nseq_factor)/tdc_factor
+              iadc(iseq) = iadc(iseq) + real(ldatum - kseqpix*nseq_factor - itdc*tdc_factor)
            enddo
 
         enddo
