@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cc,v 1.12 1999/04/08 14:58:32 ullrich Exp $
+ * $Id: StGlobalTrack.cc,v 1.13 1999/05/22 19:30:10 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cc,v $
- * Revision 1.12  1999/04/08 14:58:32  ullrich
- * Moved PID traits from StTrack to StGlobalTrack.
+ * Revision 1.13  1999/05/22 19:30:10  perev
+ * length & methods added
+ *
+ * Revision 1.13  1999/05/22 19:30:10  perev
+ * length & methods added
  *
  * Revision 1.12  1999/04/08 14:58:32  ullrich
  * Moved PID traits from StTrack to StGlobalTrack.
@@ -49,10 +52,10 @@
  * Revision 1.2  1999/01/15 22:53:44  wenaus
  * version with constructors for table-based loading
  *
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.12 1999/04/08 14:58:32 ullrich Exp $";
+ **************************************************************************/
 #include "StEvent/StGlobalTrack.hh"
 
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.12 1999/04/08 14:58:32 ullrich Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.13 1999/05/22 19:30:10 perev Exp $";
  
 StGlobalTrack::StGlobalTrack() : mPidTraits(*this)
 {
@@ -69,6 +72,7 @@ StGlobalTrack::StGlobalTrack(dst_track_st* trk,
 			     int h) : 
     StTrack(trk, curvature, dip, phase, origin, h), mPidTraits(*this)
 {  
+    mTpcDedx = 0; 
     mFtpcDedx = 0;
     mSvtDedx = 0; 
     mLength = trk->length;
