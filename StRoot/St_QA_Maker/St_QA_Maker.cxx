@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.103 2000/07/26 19:57:51 lansdell Exp $
+// $Id: St_QA_Maker.cxx,v 1.104 2000/07/28 19:25:21 lansdell Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.104  2000/07/28 19:25:21  lansdell
+// added histogram of number of events without a primary vertex
+//
 // Revision 1.103  2000/07/26 19:57:51  lansdell
 // new histograms and functionality added (e.g., overlay several histograms, new printlist option qa_shift)
 //
@@ -388,10 +391,28 @@ Int_t St_QA_Maker::Make(){
 // St_QA_Maker - Make; fill histograms
     
   dst = GetDataSet("dst");
- 
+  bool foundPrimVtx = kFALSE;
+
   if (dst) {
-    return StQABookHist::Make();
-  } else {
+    St_DataSetIter dstI(dst);           
+    // check that primary vertex exists !!!
+    St_dst_vertex *vertex = (St_dst_vertex *) dstI["vertex"];
+    if (vertex) {
+      dst_vertex_st *tt = vertex->GetTable();
+      for (Int_t i=0; i<vertex->GetNRows(); i++, tt++) {
+	if (tt->iflag==1 && tt->vtx_id==kEventVtxId) {
+	  foundPrimVtx = kTRUE;
+	  return StQABookHist::Make();
+	}
+      }
+    }
+  }
+  if (foundPrimVtx == kFALSE) {
+    cout << "Error in St_QA_Maker::Make(): no primary vertex found!" << endl;
+    mNullPrimVtx->Fill(0);
+    return kStOk;
+  }
+  else {
     cout << "Error in St_QA_Maker::Make(): no dst dataset found!" << endl;
     return kStErr;
   }

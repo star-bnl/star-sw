@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.46 2000/07/26 19:57:50 lansdell Exp $ 
+// $Id: StQABookHist.cxx,v 1.47 2000/07/28 19:25:20 lansdell Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.47  2000/07/28 19:25:20  lansdell
+// added histogram of number of events without a primary vertex
+//
 // Revision 1.46  2000/07/26 19:57:50  lansdell
 // new histograms and functionality added (e.g., overlay several histograms, new printlist option qa_shift)
 //
@@ -216,6 +219,8 @@ ClassImp(StQABookHist)
 StQABookHist::StQABookHist(const char *name, const char *title, const char* type) : StMaker(name,title), QAHistType(type) {
 
 //  - zero all pointers defined in the header file
+
+  mNullPrimVtx = 0; //! histogram for number of events without primary vertex
 
 // for method MakeEvSum - from table event_summary
   m_trk_tot_gd = 0;         //! number of good global tracks divided by total
@@ -631,6 +636,9 @@ Int_t StQABookHist::Init(){
   cout << " In StQABookHist::Init  " << endl;
 
 //book histograms --------------
+  mNullPrimVtx = new TH1F("QaNullPrimVtx","num. of events missing primary vertex",5,-1,1);
+  mNullPrimVtx->SetYTitle("# of events");
+
   BookHistEvSum();
   BookHistGlob();
   BookHistPrim();
