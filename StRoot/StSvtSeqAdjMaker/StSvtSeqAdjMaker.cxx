@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.45 2003/01/28 20:21:17 munhoz Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.46 2003/04/14 15:56:59 munhoz Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.46  2003/04/14 15:56:59  munhoz
+ * changes for gain calibration file
+ *
  * Revision 1.45  2003/01/28 20:21:17  munhoz
  * changing from Init() to InitRun()
  *
@@ -1072,6 +1075,7 @@ void StSvtSeqAdjMaker::MakeHistogramsAdc(StSvtHybridData* hybridData, int index,
     { 
       adc = svtSequence[mSeq].firstAdc;
       len = svtSequence[mSeq].length;
+      if (len>12) continue;
       for(int j = 0 ; j < len; j++){
 	mRawAdc[index]->Fill(Anode,(int)adc[j]);
 	//mTimeAn[index]->Fill(Anode,j+svtSequence[mSeq].startTimeBin,(int)adc[j]);
