@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.15 2000/02/21 19:07:18 jgreid Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.16 2000/02/25 20:04:59 jgreid Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.16  2000/02/25 20:04:59  jgreid
+ * changed to primary tracks, added abs(y) calculation
+ *
  * Revision 1.15  2000/02/21 19:07:18  jgreid
  * added return value to fillTag()
  *
@@ -161,12 +164,14 @@ Int_t StEbyeScaTagsMaker::fillTag(StEvent& event) {
   float meanPtSquaredPlus = 0.0;
   float meanEtaPlus = 0.0;
   float meanEtaSquaredPlus = 0.0;
+  float totalAbsEtaPlus = 0.0;
 
   float trackCountMinus = 0.0;
   float meanPtMinus = 0.0;
   float meanPtSquaredMinus = 0.0;
   float meanEtaMinus = 0.0;
   float meanEtaSquaredMinus = 0.0;
+  float totalAbsEtaMinus = 0.0;
 
   double s;
   StThreeVectorD dca, p;
@@ -175,6 +180,7 @@ Int_t StEbyeScaTagsMaker::fillTag(StEvent& event) {
   
   // temporarily use the first (currently only) primary vertex
   StVertex *primeVertex;
+  StTrack *currentTrack;
 
   StThreeVectorD origin(0,0,0);
   StThreeVectorD primaryVertexPosition;
@@ -206,72 +212,92 @@ Int_t StEbyeScaTagsMaker::fillTag(StEvent& event) {
     const StSPtrVecTrackNode& theNodes = event.trackNodes();
     for (unsigned int k=0; k<theNodes.size(); k++) {
 
-      // get the momentum of the current track
-      pt = theNodes[k]->track(global)->geometry()->momentum().perp();
+      currentTrack = theNodes[k]->track(primary);
+      if (currentTrack) {
 
-      // get the charge of the current track
-      charge = theNodes[k]->track(global)->geometry()->charge();
+        // cut out tracks marked as bad [cut #1]
+	if (currentTrack->flag() > 0) {
 
-      // get Nfound & Nmax
-      nFound = theNodes[k]->track(global)->fitTraits().numberOfFitPoints();
-      nMax = theNodes[k]->track(global)->numberOfPossiblePoints();
+          // cut out tracks with bad goodness of fit [cut #2]
+          if (currentTrack->fitTraits().chi2() < 3) {
 
-      // calculate distance of closest approach to the primary vertex position
-      s = theNodes[k]->track(global)->geometry()->helix().pathLength(primaryVertexPosition);
-      p = theNodes[k]->track(global)->geometry()->helix().at(s);
-      dca = p-primaryVertexPosition;
-      dcaX = dca.x()/centimeter;
-      dcaY = dca.y()/centimeter;
-      dcaZ = dca.z()/centimeter;
-      dcaM = (abs(dca))/centimeter;
+            // get the momentum of the current track
+            pt = currentTrack->geometry()->momentum().perp();
 
-      // calculate mt (needed for temperature calculation)
-      mt = sqrt(pt*pt + PI_MASS*PI_MASS)-PI_MASS;
-      imtbin  = (int) ((mt - mt_min)/mt_binsize);
+            // get the charge of the current track
+            charge = currentTrack->geometry()->charge();
 
-      // calculate eta
-      dip = theNodes[k]->track(global)->geometry()->dipAngle();
-      theta = (M_PI/2.0)-dip;
-      eta = -log(tan(theta/2.0));
+            // get Nfound & Nmax
+            nFound = currentTrack->fitTraits().numberOfFitPoints();
+            nMax = currentTrack->numberOfPossiblePoints();
 
-      // ** transverse DCA cut [cut #3] 
-      if (((dcaX > dcaX_min) && (dcaX < dcaX_max)) && ((dcaY > dcaY_min) && (dcaY < dcaY_max))) {
-        // ** rapidity cut [cut #2] 
-        if ((eta > eta_min) && (eta < eta_max)) {
+            // ** nFound/nMax cut [cut #3] 
+            if ( (nFound/nMax) > 0.5 ) {
 
-          // ** cut out extreme pt values [cut #1]
-          if ((pt > 0) && (pt < 20.0)) {
+              // calculate distance of closest approach to the primary vertex position
+              s = currentTrack->geometry()->helix().pathLength(primaryVertexPosition);
+              p = currentTrack->geometry()->helix().at(s);
+              dca = p-primaryVertexPosition;
+              dcaX = dca.x()/centimeter;
+              dcaY = dca.y()/centimeter;
+              dcaZ = dca.z()/centimeter;
+              dcaM = (abs(dca))/centimeter;
 
-            /* dN/mt*dy*dmt histogram */
-            if (0<=imtbin && imtbin<NBINS) mt_histo[imtbin] += mtweight1/mt; 
+              // calculate mt (needed for temperature calculation)
+              mt = sqrt(pt*pt + PI_MASS*PI_MASS)-PI_MASS;
+              imtbin  = (int) ((mt - mt_min)/mt_binsize);
 
-	    if (charge > 0) {
+              // calculate eta
+              dip = currentTrack->geometry()->dipAngle();
+              theta = (M_PI/2.0)-dip;
+              eta = -log(tan(theta/2.0));
+
+              // ** transverse DCA cut [cut #4] 
+              if (((dcaX > dcaX_min) && (dcaX < dcaX_max)) && ((dcaY > dcaY_min) && (dcaY < dcaY_max))) {
+
+                // ** rapidity cut [cut #5] 
+                if ((eta > eta_min) && (eta < eta_max)) {
+
+                  // ** cut out extreme pt values [cut #6]
+                  if ((pt > 0) && (pt < 20.0)) {
+
+                    /* dN/mt*dy*dmt histogram */
+                    if (0<=imtbin && imtbin<NBINS) mt_histo[imtbin] += mtweight1/mt; 
+
+	            if (charge > 0) {
   
-              // calculate number of + particles that make the cuts, and the first two pt moments
-              trackCountPlus++;
-              meanPtSquaredPlus += pt*pt;
-              meanPtPlus += pt;
+                      // calculate number of + particles that make the cuts, and the first two pt moments
+                      trackCountPlus++;
+                      meanPtSquaredPlus += pt*pt;
+                      meanPtPlus += pt;
 
-  	      meanEtaSquaredPlus += eta*eta;
-	      meanEtaPlus += eta;
+  	              meanEtaSquaredPlus += eta*eta;
+	              meanEtaPlus += eta;
+                      // be sure to us floating point absolute value!
+                      totalAbsEtaPlus += fabs(eta);
 
-	    } else if (charge < 0) {
+	            } else if (charge < 0) {
   
-              // calculate number of - particles that make the cuts, and the first two pt moments
-              trackCountMinus++;
-              meanPtSquaredMinus += pt*pt;
-              meanPtMinus += pt;
+                      // calculate number of - particles that make the cuts, and the first two pt moments
+                      trackCountMinus++;
+                      meanPtSquaredMinus += pt*pt;
+                      meanPtMinus += pt;
 
-  	      meanEtaSquaredMinus += eta*eta;
-	      meanEtaMinus += eta;
+  	              meanEtaSquaredMinus += eta*eta;
+	              meanEtaMinus += eta;
+                      // be sure to us floating point absolute value!
+                      totalAbsEtaMinus += fabs(eta);
 
-	    }
+	            }
 
-	  } // [cut #1]
+	          } // [cut #6]
+	        } // [cut #5]
+              } // [cut #4]
+            } // [cut #3]
+          } // [cut #2]
+        } // [cut #1]
 
-	} // [cut #2]
-
-      } // [cut #3]
+      } // if (currentTrack)
 
     } // ** end of track loop **
 
@@ -302,15 +328,23 @@ Int_t StEbyeScaTagsMaker::fillTag(StEvent& event) {
     // 8,9 - eventwise mean rapidities squared
     mTag->chargedParticles_Means[8] = meanEtaSquaredPlus;
     mTag->chargedParticles_Means[9] = meanEtaSquaredMinus;
-    // 10 - estimated temperature of the event
+    // 10,11 - total abs(rapidity)
+    mTag->chargedParticles_Means[10] = totalAbsEtaPlus;
+    mTag->chargedParticles_Means[11] = totalAbsEtaMinus;
+    // 12 - estimated temperature of the event
     //     (based on slope fit to 1/mt dN/dmt)
-    mTag->chargedParticles_Means[10] = mtInverseSlope(mt_histo, 0, NBINS);
+    mTag->chargedParticles_Means[12] = mtInverseSlope(mt_histo, 0, NBINS);
 
     //uncomment the next line to send the analysis results to cout
     //    for charge > 0 ...
-    //cout << trackCountPlus << " " << meanPtPlus/GeV << " " << meanPtSquaredPlus/(GeV*GeV) << endl;
+    cout << trackCountPlus << " " << meanPtPlus/GeV << " " << meanPtSquaredPlus/(GeV*GeV) << endl;
     //    for charge < 0 ...
-    //cout << trackCountMinus << " " << meanPtMinus/GeV << " " << meanPtSquaredMinus/(GeV*GeV) << endl;
+    cout << trackCountMinus << " " << meanPtMinus/GeV << " " << meanPtSquaredMinus/(GeV*GeV) << endl;
+    //    for charge > 0 ...
+    cout << meanEtaPlus << " " << meanEtaSquaredPlus << " " << totalAbsEtaPlus << endl;
+    //    for charge < 0 ...
+    cout << meanEtaMinus << " " << meanEtaSquaredMinus << " " << totalAbsEtaMinus << endl;
+
 
     //uncomment the next line (and declaration of outFile above) to append results to a file
     //     for charge > 0 ...
@@ -370,7 +404,9 @@ void StEbyeScaTagsMaker::printTag(ostream& os) {
       os <<  "<y>_Minus = " << mTag->chargedParticles_Means[7] << endl;
       os <<  "<y^2>_Plus = " << mTag->chargedParticles_Means[8] << endl;
       os <<  "<y^2>_Minus = " << mTag->chargedParticles_Means[9] << endl;
-      os <<  "T = " << mTag->chargedParticles_Means[10] << endl;
+      os <<  "abs(y_Plus) = " << mTag->chargedParticles_Means[10] << endl;
+      os <<  "abs(y_Minus) = " << mTag->chargedParticles_Means[11] << endl;
+      os <<  "T = " << mTag->chargedParticles_Means[12] << endl;
       os <<  "...and more to be filled later" << endl;
     }
 }
