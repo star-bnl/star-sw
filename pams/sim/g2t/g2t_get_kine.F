@@ -157,7 +157,7 @@ c       p_vert(iv).daughter_p - filled by tracks ! first daughter in linked list
  61       LabelT  = LabelT + 1 
           call AgNZGETP(1,1,LabelT,ISTAT,IDPDG,P,AM,MOTH,TIME,IDAU,V)
           if (ISTAT.gt.1) go to 61
-          Label1  = 0
+          Label1  = 99999
           if (ISTAT.eq.1) then
              Label1  = LabelT
              D       = VDIST(Pvert,P,3)
