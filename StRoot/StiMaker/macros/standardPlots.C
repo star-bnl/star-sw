@@ -1,10 +1,13 @@
 /*
  *
- * $Id: standardPlots.C,v 1.2 2002/06/26 14:27:54 andrewar Exp $
+ * $Id: standardPlots.C,v 1.3 2002/07/02 18:58:52 andrewar Exp $
  *  A. Rose, WSU
  *  
  *
  * $Log: standardPlots.C,v $
+ * Revision 1.3  2002/07/02 18:58:52  andrewar
+ * fixed bug with Pt plot
+ *
  * Revision 1.2  2002/06/26 14:27:54  andrewar
  * Added cut function and track efficiency hists.
  *
@@ -71,8 +74,8 @@ void standardPlots::makeTrackEffPlots()
    TProfile* globalTrackEffMult=new TProfile("globalTrackEffMult","GlobalTrack Finding Efficiency vs. McMult",100,0,MAX_TRACKS);
 
 
-   TH1D* primaryTrackEffPt=new TH1D("primaryTrackEffPt","PrimaryTrack Pt",100,0,5);
-   TH1D* primaryTrackEffEta=new TH1D("primaryTrackEffEta","PrimaryTrack Eta",100,-1,1);
+   TH1D* primaryTrackPt=new TH1D("primaryTrackPt","PrimaryTrack Pt",100,0,5);
+   TH1D* primaryTrackEta=new TH1D("primaryTrackEta","PrimaryTrack Eta",100,-1,1);
    TH1D* mcTrackEffPt=new TH1D("mcTrackEffPt","McTrack Pt",100,0,5);
    TH1D* mcTrackEffEta=new TH1D("mcTrackEffEta","McTrack Eta",100,-1,1);
    TProfile* globalTrackEffPt=new TProfile("globalTrackEffPt","GlobalTrack Finding Efficiency vs. McPt",100,0,5);
@@ -97,8 +100,8 @@ void standardPlots::makeTrackEffPlots()
 	{
 	  if(!trackCut(ientry,iTrack)) continue;  //next track if trackCut 
 	                                          //doesn't pass
-	  primaryTrackEffEta->Fill(mMatchedPairs_mEtaPr[iTrack]);
-	  primaryTrackEffPt->Fill(mMatchedPairs_mEtaPr[iTrack]);
+	  primaryTrackEta->Fill(mMatchedPairs_mEtaPr[iTrack]);
+	  primaryTrackPt->Fill(mMatchedPairs_mEtaPr[iTrack]);
 	}
 
       //make Pt and Eta spectra of MC tracks
@@ -125,14 +128,14 @@ void standardPlots::makeTrackEffPlots()
    
    cout <<"\tDisplaying Mc Track and Sti Track Eta Distribution:"<<endl;
    mcTrackEffEta->Draw();
-   primaryTrackEffEta->SetMarkerColor(4);
-   primaryTrackEffEta->SetLineColor(4);
-   primaryTrackEffEta->Draw("same");
+   primaryTrackEta->SetMarkerColor(4);
+   primaryTrackEta->SetLineColor(4);
+   primaryTrackEta->Draw("same");
    cout <<"\tDisplaying Mc Track and Sti Track Pt Distribution:"<<endl;
    mcTrackEffPt->Draw();
-   primaryTrackEffPt->SetMarkerColor(4);
-   primaryTrackEffPt->SetLineColor(4);
-   primaryTrackEffPt->Draw("same");
+   primaryTrackPt->SetMarkerColor(4);
+   primaryTrackPt->SetLineColor(4);
+   primaryTrackPt->Draw("same");
 
 
    cout <<"\tDisplaying Track Efficiency vs. Multiplicity:"<<endl;
