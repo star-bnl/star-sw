@@ -44,6 +44,17 @@ StiDetectorContainer::~StiDetectorContainer()
     clearAndDestroy();
 }
 
+const materialmap& StiDetectorContainer::materialMap() const
+{
+    return mmaterialmap;
+}
+
+StiMaterial* StiDetectorContainer::material(const MaterialMapKey& key) const
+{
+    materialmap::const_iterator where = mmaterialmap.find(key);
+    return (where!= mmaterialmap.end()) ? (*where).second : 0;
+}
+
 void StiDetectorContainer::push_back(StiDetPolygon* poly)
 {
     insert( detectorMapValType( poly->radius(), poly ) );
@@ -56,12 +67,45 @@ void StiDetectorContainer::clearAndDestroy()
 	delete (*it).second;
 	(*it).second = 0;
     }
-
+    
     for (materialmap::iterator it=mmaterialmap.begin(); it!=mmaterialmap.end(); ++it) {
 	delete (*it).second;
 	(*it).second = 0;
     }
     return;
+}
+
+void StiDetectorContainer::setToDetector(double radius)
+{
+    reset(); //full reset
+    //Look to see first instance with position greater than this
+    detectormap::iterator where = lower_bound(radius);
+    if (where==end()) { //Didn't find it, set to outermost layer
+	--where;
+    }
+
+    mcurrent = where;
+
+    //Now we have to check if one less postion is closer (as long as we're not at the beginning)
+    if ( where!=begin()) { //Nothing below us
+	double found_radius = (*mcurrent).second->operator*()->getCenterRadius();
+	double one_less_radius = (*(--where)).second->operator*()->getCenterRadius();
+	if ( fabs(one_less_radius - radius) < fabs(found_radius - radius) ) {
+	    mcurrent = where;
+	}
+    }
+    return;
+}
+
+void StiDetectorContainer::setToDetector(double radius, double angle)
+{
+    setToDetector(radius);
+    (*mcurrent).second->setToAngle( angle);
+}
+
+void StiDetectorContainer::setToDetector(StiDetector*layer)
+{
+    setToDetector( layer->getCenterRadius(), layer->getCenterRefAngle() );
 }
 
 void StiDetectorContainer::push_back(StiDetector* layer)
@@ -74,17 +118,6 @@ void StiDetectorContainer::push_back(StiDetector* layer)
     }
     (*where).second->push_back(layer);
     return;
-}
-
-const materialmap& StiDetectorContainer::materialMap() const
-{
-    return mmaterialmap;
-}
-
-StiMaterial* StiDetectorContainer::material(const MaterialMapKey& key) const
-{
-    materialmap::const_iterator where = mmaterialmap.find(key);
-    return (where!= mmaterialmap.end()) ? (*where).second : 0;
 }
 
 void StiDetectorContainer::reset()
