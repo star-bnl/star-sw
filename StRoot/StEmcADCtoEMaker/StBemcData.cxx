@@ -138,11 +138,11 @@ Bool_t StBemcData::make(StMuEmcCollection* muEmc, StEvent* event)
       if(detector) detector->setCrateStatus(crate,(StEmcCrateStatus)mCrateStatus[det-1][crate-1]);
     }
     StEmcGeom* geo = StEmcGeom::instance(det);
-    Int_t nh;
-    Int_t ADC,ID,CRATE,RDO,INDEX,CAP,DAQ;
-    Int_t m,e,s;
-    Float_t E;
-    Int_t S;
+    Int_t nh=0;
+    Int_t ADC=0,ID=0,CRATE=0,RDO=0,INDEX=0,CAP=0,DAQ=0;
+    Int_t m=0,e=0,s=0;
+    Float_t E=0;
+    Int_t S=0;
     if (det==BTOW) nh = BTOWCH; 
     if (det==BPRS) nh=muEmc->getNPrsHits(det);
     if (det==BSMDE || det==BSMDP) nh=muEmc->getNSmdHits(det);
