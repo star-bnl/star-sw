@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98 
-// $Id: St_NodeView.h,v 1.15 1999/06/14 08:45:28 fine Exp $
+// $Id: St_NodeView.h,v 1.16 1999/06/14 09:30:31 fine Exp $
 // $Log: St_NodeView.h,v $
+// Revision 1.16  1999/06/14 09:30:31  fine
+// default ctor clean
+//
 // Revision 1.15  1999/06/14 08:45:28  fine
 // List of the shapes have been introduced for St_NodeView
 //
@@ -51,7 +54,7 @@ protected:
   virtual void    PaintShape(Option_t *option);
 
 public:
-  St_NodeView():St_ObjectSet(){;}
+  St_NodeView():St_ObjectSet(),fListOfShapes(0) {;}
   St_NodeView(St_NodeView *viewNode,St_NodePosition *nodePosition=0);
   St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition=0,EDataSetPass iopt=kAll,Int_t level=0);
   St_NodeView(Double_t *translate, Double_t *rotate, UInt_t positionId, St_Node *thisNode,
