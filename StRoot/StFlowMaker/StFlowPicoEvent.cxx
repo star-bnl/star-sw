@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.cxx,v 1.5 2000/09/05 16:11:34 snelling Exp $
+// $Id: StFlowPicoEvent.cxx,v 1.6 2000/09/15 22:51:31 posk Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -23,6 +23,9 @@
 ////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.cxx,v $
+// Revision 1.6  2000/09/15 22:51:31  posk
+// Added pt weighting for event plane calcualtion.
+//
 // Revision 1.5  2000/09/05 16:11:34  snelling
 // Added global DCA, electron and positron
 //
@@ -61,6 +64,7 @@ StFlowPicoEvent::StFlowPicoEvent()
   if (!fgTracks) fgTracks = new TClonesArray("StFlowPicoTrack", 4000);
   fTracks = fgTracks;
   mNtrack = 0;
+  mVersion = 0;
 }
 
 //-----------------------------------------------------------------------
@@ -72,6 +76,7 @@ void StFlowPicoEvent::Clear(Option_t *option)
 }
 
 //---------------------------------------------------------------------
+
 void StFlowPicoEvent::AddTrack(StFlowPicoTrack* inputTrack) {
  
   TClonesArray &tracks = *fTracks;

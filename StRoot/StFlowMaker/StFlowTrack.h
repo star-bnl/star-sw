@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.11 2000/09/15 01:20:04 snelling Exp $
+// $Id: StFlowTrack.h,v 1.12 2000/09/15 22:51:35 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.12  2000/09/15 22:51:35  posk
+// Added pt weighting for event plane calcualtion.
+//
 // Revision 1.11  2000/09/15 01:20:04  snelling
 // Added methods for P and Y and added selection on Y
 //
@@ -87,16 +90,16 @@ public:
                 StFlowTrack();
   virtual       ~StFlowTrack();
 
-  Float_t       PidPiPlus()  const;
-  Float_t       PidPiMinus() const;
-  Float_t       PidProton()  const;
-  Float_t       PidKaonMinus()  const;
-  Float_t       PidKaonPlus()   const;
-  Float_t       PidAntiProton() const;
-  Float_t       PidDeuteron()   const;
-  Float_t       PidAntiDeuteron()   const;
-  Float_t       PidElectron()   const;
-  Float_t       PidPositron()   const;
+  Float_t       PidPiPlus()       const;
+  Float_t       PidPiMinus()      const;
+  Float_t       PidProton()       const;
+  Float_t       PidKaonMinus()    const;
+  Float_t       PidKaonPlus()     const;
+  Float_t       PidAntiProton()   const;
+  Float_t       PidDeuteron()     const;
+  Float_t       PidAntiDeuteron() const;
+  Float_t       PidElectron()     const;
+  Float_t       PidPositron()     const;
 
   const Char_t* Pid()        const;
   Float_t       Phi()        const;
@@ -167,33 +170,33 @@ private:
   ClassDef(StFlowTrack, 1)                     // macro for rootcint
 };
 
-inline Float_t  StFlowTrack::PidPiPlus()  const { return mPidPiPlus/1000.; }
-inline Float_t  StFlowTrack::PidPiMinus() const { return mPidPiMinus/1000.; }
-inline Float_t  StFlowTrack::PidProton()  const { return mPidProton/1000.; }
-inline Float_t  StFlowTrack::PidKaonMinus()  const { return mPidKaonMinus/1000.; }
-inline Float_t  StFlowTrack::PidKaonPlus()   const { return mPidKaonPlus/1000.; }
+inline Float_t  StFlowTrack::PidPiPlus()   const { return mPidPiPlus/1000.; }
+inline Float_t  StFlowTrack::PidPiMinus()  const { return mPidPiMinus/1000.; }
+inline Float_t  StFlowTrack::PidProton()   const { return mPidProton/1000.; }
+inline Float_t  StFlowTrack::PidKaonMinus() const { return mPidKaonMinus/1000.; }
+inline Float_t  StFlowTrack::PidKaonPlus() const { return mPidKaonPlus/1000.; }
 inline Float_t  StFlowTrack::PidAntiProton() const { return mPidAntiProton/1000.; }
 inline Float_t  StFlowTrack::PidDeuteron() const { return mPidDeuteron/1000.; }
 inline Float_t  StFlowTrack::PidAntiDeuteron() const { return mPidAntiDeuteron/1000.; }
 inline Float_t  StFlowTrack::PidElectron() const { return mPidElectron/1000.; }
 inline Float_t  StFlowTrack::PidPositron() const { return mPidPositron/1000.; }
-inline const Char_t* StFlowTrack::Pid()   const { return mPid; }
-inline Float_t  StFlowTrack::Phi()        const { return mPhi; }   
-inline Float_t  StFlowTrack::Eta()        const { return mEta; }     
-inline Float_t  StFlowTrack::Dedx()       const { return mDedx; }     
-inline Float_t  StFlowTrack::Pt()         const { return mPt; }                
-inline Short_t  StFlowTrack::Charge()     const { return mCharge; }   
-inline Float_t  StFlowTrack::Dca()        const { return mDca; }
-inline Float_t  StFlowTrack::DcaGlobal()  const { return mDcaGlobal; }
-inline Float_t  StFlowTrack::Chi2()       const { return mChi2; } 
-inline Int_t    StFlowTrack::FitPts()     const { return mFitPts; }  
-inline Int_t    StFlowTrack::MaxPts()     const { return mMaxPts; }  
+inline const Char_t* StFlowTrack::Pid()    const { return mPid; }
+inline Float_t  StFlowTrack::Phi()         const { return mPhi; }   
+inline Float_t  StFlowTrack::Eta()         const { return mEta; }     
+inline Float_t  StFlowTrack::Dedx()        const { return mDedx; }     
+inline Float_t  StFlowTrack::Pt()          const { return mPt; }                
+inline Short_t  StFlowTrack::Charge()      const { return mCharge; }   
+inline Float_t  StFlowTrack::Dca()         const { return mDca; }
+inline Float_t  StFlowTrack::DcaGlobal()   const { return mDcaGlobal; }
+inline Float_t  StFlowTrack::Chi2()        const { return mChi2; } 
+inline Int_t    StFlowTrack::FitPts()      const { return mFitPts; }  
+inline Int_t    StFlowTrack::MaxPts()      const { return mMaxPts; }  
 
-inline Float_t StFlowTrack::P()          const { 
+inline Float_t StFlowTrack::P()            const { 
   float momentum = mPt/sqrt(1-(tanh(mEta)*tanh(mEta)));
   return momentum; }
 
-inline Float_t StFlowTrack::Y()          const { 
+inline Float_t StFlowTrack::Y()            const { 
   float M = 0.139; 
   if (strcmp(mPid, "none") == 0)     M = 0.139;
   if (strcmp(mPid, "pi+") == 0)      M = 0.139;
@@ -262,9 +265,9 @@ inline void StFlowTrack::SetPt(Float_t pt)          { mPt = pt; }
 
 inline void StFlowTrack::SetCharge(Short_t charge)  { mCharge = charge; }     
 
-inline void StFlowTrack::SetDca(Float_t dca)        {mDca = dca; }
+inline void StFlowTrack::SetDca(Float_t dca)        { mDca = dca; }
 
-inline void StFlowTrack::SetDcaGlobal(Float_t gdca) {mDcaGlobal = gdca; }
+inline void StFlowTrack::SetDcaGlobal(Float_t gdca) { mDcaGlobal = gdca; }
 
 inline void StFlowTrack::SetChi2(Float_t chi2)      { mChi2 = chi2; }
 

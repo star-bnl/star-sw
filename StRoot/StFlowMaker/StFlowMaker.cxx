@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.41 2000/09/11 17:24:07 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.42 2000/09/15 22:51:30 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.42  2000/09/15 22:51:30  posk
+// Added pt weighting for event plane calcualtion.
+//
 // Revision 1.41  2000/09/11 17:24:07  snelling
 // Put picoreader for different versions in seperate methods
 //
@@ -290,7 +293,7 @@ Int_t StFlowMaker::Init() {
   if (mFlowEventRead)  kRETURN += InitFlowEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.41 2000/09/11 17:24:07 snelling Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.42 2000/09/15 22:51:30 posk Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -400,9 +403,9 @@ void StFlowMaker::FillFlowEvent() {
   pFlowEvent->SetVertexPos(vertex);
 
   // include trigger (ZDC and CTB)
-  Float_t ctb =-1.;
-  Float_t zdce =-1.;
-  Float_t zdcw =-1.;
+  Float_t ctb  = -1.;
+  Float_t zdce = -1.;
+  Float_t zdcw = -1.;
   StTriggerDetectorCollection *triggers = pEvent->triggerDetectorCollection();
   if (triggers)	{
     StCtbTriggerDetector &CTB = triggers->ctb();
@@ -417,7 +420,6 @@ void StFlowMaker::FillFlowEvent() {
     zdce = ZDC.adcSum(east);
     zdcw = ZDC.adcSum(west);
   } 
-  
   pFlowEvent->SetCTB(ctb);
   pFlowEvent->SetZDCe(zdce);
   pFlowEvent->SetZDCw(zdcw);
@@ -430,18 +432,18 @@ void StFlowMaker::FillFlowEvent() {
   // loop over tracks in StEvent
   int goodTracks    = 0;
   int goodTracksEta = 0;
+  StTpcDedxPidAlgorithm tpcDedxAlgo;
+  Float_t nSigma;
 
   //  const StSPtrVecPrimaryTrack& tracks = 
   //    pEvent->primaryVertex(0)->daughters();
   //  StSPtrVecPrimaryTrackConstIterator itr;
   StSPtrVecTrackNode& trackNode = pEvent->trackNodes();
-  // new global loop
-
-  StTpcDedxPidAlgorithm tpcDedxAlgo;
-  Float_t nSigma;
 
   //  for (itr = tracks.begin(); itr != tracks.end(); itr++) {
   //    StPrimaryTrack* pTrack = *itr;
+
+  // new global loop
   for (unsigned int j=0; j < trackNode.size(); j++) {
     StGlobalTrack* gTrack = 
       static_cast<StGlobalTrack*>(trackNode[j]->track(global));
@@ -450,7 +452,7 @@ void StFlowMaker::FillFlowEvent() {
 
     if (pTrack && pTrack->flag() > 0) {
       StThreeVectorD p = pTrack->geometry()->momentum();
-      // calculate the number of tracks with positive flag 
+      // calculate the number of tracks with positive flag & |eta| < 0.75
       if (fabs(p.pseudoRapidity()) < 0.75) {
 	goodTracksEta++;
       }
@@ -484,7 +486,7 @@ void StFlowMaker::FillFlowEvent() {
 	nSigma = (float)tpcDedxAlgo.numberOfSigma(StDeuteron::instance());
 	pFlowTrack->SetPidDeuteron(nSigma);
 	if (pTrack->geometry()->charge() < 0) {
-	pFlowTrack->SetPidAntiDeuteron(nSigma);
+	  pFlowTrack->SetPidAntiDeuteron(nSigma);
 	}
 	nSigma = (float)tpcDedxAlgo.numberOfSigma(StElectron::instance());
 	pFlowTrack->SetPidElectron(nSigma);
@@ -496,7 +498,7 @@ void StFlowMaker::FillFlowEvent() {
 	StDedxPidTraits* pid;
 	for (unsigned int i = 0; i < traits.size(); i++) {
 	  pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
-	  if (pid && pid->method()==kTruncatedMeanId) break;
+	  if (pid && pid->method() == kTruncatedMeanId) break;
 	}
 	pFlowTrack->SetDedx(pid->mean());
 
