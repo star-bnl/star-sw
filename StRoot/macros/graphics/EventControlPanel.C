@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: EventControlPanel.C,v 1.3 2001/09/01 19:58:14 perev Exp $
+// $Id: EventControlPanel.C,v 1.4 2001/09/01 23:36:57 perev Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -121,6 +121,7 @@ public:
       
    fBar = new TGButtonGroup(gClient->GetRoot(), "Event Control Panel");
    fgBar = fBar;
+   gVirtualX->SetWindowName(fBar->GetId(),"Event");
    fL1  = new TGLayoutHints(kLHintsCenterY | kLHintsExpandX, 1, 1, 1, 1);
       
    int i;

@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.C,v 1.18 2001/09/01 19:58:14 perev Exp $
+// $Id: PadControlPanel.C,v 1.19 2001/09/01 23:36:57 perev Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -97,6 +97,7 @@ void  Build()
 
    fBar = new TGButtonGroup(gClient->GetRoot(), "Pad Control Panel");
    mainBar=fBar;
+   gVirtualX->SetWindowName(fBar->GetId(),"Pad");
    fL1 = new TGLayoutHints(kLHintsCenterY | kLHintsExpandX, 1, 1, 1, 1);
    for (int i=0;fills[i];i+=2) {AddButt(fills[i],fills[i+1]);}
 
@@ -348,6 +349,9 @@ StPadControlPanel __StPadControlPanel__;
 
 
 // $Log: PadControlPanel.C,v $
+// Revision 1.19  2001/09/01 23:36:57  perev
+// WindowName added
+//
 // Revision 1.18  2001/09/01 19:58:14  perev
 // scripts for StEvent draw inside of StEventDisplayMaker
 //
