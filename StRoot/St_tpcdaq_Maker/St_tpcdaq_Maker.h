@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.10 1999/08/07 16:44:37 ward Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.11 1999/08/12 15:23:38 ward Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.11  1999/08/12 15:23:38  ward
+// 8 to 10 bit conversion has been implemented
+//
 // Revision 1.10  1999/08/07 16:44:37  ward
 // Default ctor from Yuri.
 //
@@ -93,7 +96,7 @@ class St_tpcdaq_Maker : public StMaker {
    void SeqWrite(St_raw_seq *raw_seq_gen,int rownum,
                   int startTimeBin,int numberOfBinsInSequence);
    void PixelWrite(St_type_shortdata *pixel_data_gen,
-                    int rownum,unsigned char datum);
+                    int rownum,unsigned short datum);
    void PadWrite(St_raw_pad *raw_pad_gen,int padR,int padOffset,
       int seqOffset,int nseq,int nSeqB4Offset,int pad);
    void RowWrite(St_raw_row *raw_row_gen,int rownumber,
@@ -129,7 +132,7 @@ class St_tpcdaq_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.10 1999/08/07 16:44:37 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.11 1999/08/12 15:23:38 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tpcdaq_Maker, 1)   //StAF chain virtual base class for Makers
 };

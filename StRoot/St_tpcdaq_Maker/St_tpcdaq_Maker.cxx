@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.33  1999/08/12 15:23:37  ward
+// 8 to 10 bit conversion has been implemented
+//
 // Revision 1.32  1999/08/07 16:44:37  ward
 // Default ctor from Yuri.
 //
@@ -101,6 +104,7 @@
 #include "St_ObjectSet.h"
 #include "TH1.h"
 #include "StTpcRawDataEvent.hh"
+#include "trans_table.hh"
 // #include "StTrsMaker/include/StTrsRawDataEvent.hh"
 // #include "StTrsMaker/include/StDacRawDataEvent.hh"
 #ifdef TRS_SIMPLE
@@ -244,7 +248,7 @@ void St_tpcdaq_Maker::PadWrite(St_raw_pad *raw_pad_gen,int padR,int padOffset,
   raw_pad_gen->AddAt(&singlerow,padR);
 }
 inline void St_tpcdaq_Maker::PixelWrite(St_type_shortdata *pixel_data_gen,
-      int rownum,unsigned char datum) {
+      int rownum,unsigned short datum) {
   int nAlloc,nUsed;
   type_shortdata_st singlerow;
   singlerow.data=datum;
@@ -403,6 +407,7 @@ int St_tpcdaq_Maker::Output() {
   St_type_shortdata *pixel_data_in,*pixel_data_out,*pixel_data_gen;
   unsigned char *padlist;
   unsigned char *pointerToAdc;
+  unsigned short conversion;
   char dataOuter[NSECT],dataInner[NSECT];
   St_DataSet *sector;
   St_DataSetIter raw_data_tpc(m_DataSet); // m_DataSet set from name in ctor
@@ -504,11 +509,11 @@ int St_tpcdaq_Maker::Output() {
 #endif
           numberOfUnskippedSeq++;
           for(ibin=0;ibin<seqLen;ibin++) {
-            pixCnt++;
+            pixCnt++; conversion=log8to10_table[*(pointerToAdc++)]; 
 #ifdef HISTOGRAMS
-            m_pix_AdcValue->Fill((Float_t)(*pointerToAdc));
+            m_pix_AdcValue->Fill((Float_t)(conversion));
 #endif
-            PixelWrite(pixel_data_gen,pixR++,*(pointerToAdc++));
+            PixelWrite(pixel_data_gen,pixR++,conversion);
             nPixelThisPadRow++; nPixelThisPad++;
           }
           seqR++;
