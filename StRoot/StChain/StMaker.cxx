@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.161 2004/11/16 17:48:10 fine Exp $
+// $Id: StMaker.cxx,v 1.162 2005/02/05 00:56:20 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -638,6 +638,7 @@ void StMaker::EndMaker(int ierr)
  */
 Int_t StMaker::Finish()
 {
+   if (TestBit(kFiniEnd)) return 1;
    TURN_LOGGER(this);
 
    int nerr = 0;
@@ -712,9 +713,10 @@ Int_t StMaker::Finish()
    {
       TURN_LOGGER(maker);
 
-      if (maker->TestBit(kFiniEnd)) 
+      if (maker->TestBit(kFiniEnd)) {
         maker->Warning("Finish","maker %s.%s Finished twice"
                ,maker->GetName(),maker->ClassName());
+        continue;}
       StMkDeb::SetCurrent(maker,4);
       maker->SetBit(kFiniBeg);
       if ( maker->Finish() ) nerr++;
@@ -1582,6 +1584,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.162  2005/02/05 00:56:20  perev
+// More tests for second call Finish()
+//
 // Revision 1.161  2004/11/16 17:48:10  fine
 // fixed the doPs method printout
 //
