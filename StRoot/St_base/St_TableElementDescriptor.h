@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_TableElementDescriptor.h,v 1.1 1999/05/18 18:00:43 fine Exp $
+// $Id: St_TableElementDescriptor.h,v 1.2 1999/05/18 20:08:47 fine Exp $
 // $Log: St_TableElementDescriptor.h,v $
+// Revision 1.2  1999/05/18 20:08:47  fine
+// St_TAbleElementDescriptor class have been introduced
+//
 // Revision 1.1  1999/05/18 18:00:43  fine
 // The first implementation of the table column descriptor
 //  
@@ -34,6 +37,7 @@ class St_TableElementDescriptor : public TNamed {
     void   SetSize(UInt_t size)      {m_Size       = size;  }
     void   SetDimensions(UInt_t dim) {m_Dimensions = dim;   }
     void   SetType(EColumnType type) {m_Type       = type;  }
+    ClassDef(St_TableElementDescriptor,0)
 };
 
 #endif
