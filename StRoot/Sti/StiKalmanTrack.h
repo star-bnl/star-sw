@@ -147,6 +147,7 @@ class StiKalmanTrack : public StiTrack
    * @return dca in cm.
    */
    double  getDca()    const;
+   virtual double  getDca(const StiHit * vertex)    const;
 
    void setDca(double dca);
    
@@ -195,7 +196,7 @@ class StiKalmanTrack : public StiTrack
    * vertex was included as a point to the track because it had low enough
    * a incremental chi2.
    */
-  bool isPrimary() const;
+   virtual bool isPrimary() const;
 
 	double calculateTrackLength() const;
 	double calculateTrackSegmentLength(const StiKalmanTrackNode &p1, const StiKalmanTrackNode &p2) const;

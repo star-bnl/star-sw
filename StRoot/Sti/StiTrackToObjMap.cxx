@@ -51,30 +51,73 @@ void StiTrackToObjMap::clear()
   TrackToObjMap::clear();
 }
 
-void StiTrackToObjMap::analyze(Filter<StiTrack> * filter)
+void StiTrackToObjMap::analyze(Filter<StiTrack> * filter, StiHit * vertex)
 {
+  cout << "StiTrackToObjMap::analyze() -I- Started"<<endl;
+  if (!filter || !vertex)
+    {
+      cout << "StiTrackToObjMap::analyze() -E- filter :" << filter <<" vertex:" << vertex<<endl;
+      return;
+    }
   double analyzed = 0;
   double accepted = 0;
-  double matched  = 0;
+  double acceptedPrimary = 0;
+  double matched1  = 0;
+  double matched2  = 0;
+  double matched3  = 0;
+  double matchedPrimary  = 0;
+  double matchedPrimaryGoodDca  = 0;
   for(StiTrackToObjMap::iterator iter=begin();iter!=end(); ++iter)
     {
+      cout << "StiTrackToObjMap::analyze() -I- loop "<<endl;          
+      StiTrack * first = iter->first;
+      if(!first) continue;
+      StiTrack * second; 
       ++analyzed;
-      if (filter->filter(iter->first))
+      if (filter->filter(first))
 	{
 	  ++accepted;
+	  bool firstPrimary = first->isPrimary();
+	  if (firstPrimary)
+	    ++acceptedPrimary;
+	  
 	  StiTrackToIntMap * trackToIntMap = iter->second;
 	  if (trackToIntMap)
 	    {
-	      cout << "Number of cnadidates:"<<trackToIntMap->getSize()<<endl;
-	      if (trackToIntMap->getBestTrackHitCount()>10)
-		++matched;
+	      //cout << "Number of cnadidates:"<<trackToIntMap->getSize()<<endl;
+	      if (trackToIntMap->getBestTrackHitCount()>5)
+		++matched1;
+	      if (trackToIntMap->getBestTrackHitCount()>5 && trackToIntMap->getSize()<2)
+		++matched2;
+	      if (trackToIntMap->getBestTrackHitCount()>5 && trackToIntMap->getSize()<3)
+		++matched3;
+	      second = trackToIntMap->getBestTrack();
+	      if (firstPrimary)
+		{
+		  ++matchedPrimary;
+		  if (vertex && second->getDca(vertex)<3.)
+		    ++matchedPrimaryGoodDca;
+		}
 	    }
 	}
     }  
   cout << "Analysis Results:" << endl
        << "   analyzed:" << analyzed << endl
        << "   accepted:" << accepted << endl
-       << "    matched:" << matched <<endl;
+       << "    matched1:" << matched1 <<endl
+       << "    matched2:" << matched2 <<endl
+       << "    matched3:" << matched3 <<endl;
   if (accepted>0)
-    cout << " efficiency:" << matched/accepted << endl;
+    {
+      cout << " efficiency1:" << matched1/accepted << endl;
+      cout << " efficiency2:" << matched2/accepted << endl;
+      cout << " efficiency3:" << matched3/accepted << endl;
+    }
+  cout << "Primaries Results"<<endl
+       << "  accepted primaries" << acceptedPrimary << endl
+       << "  matched  primaries" << matchedPrimary << endl
+       << "  good dca primaries" << matchedPrimaryGoodDca << endl;
+  if (acceptedPrimary>0)
+    cout << " matched primary  eff:"<< matchedPrimary/acceptedPrimary << endl
+	 << " good dca primary eff:"<< matchedPrimaryGoodDca/acceptedPrimary << endl;
 }

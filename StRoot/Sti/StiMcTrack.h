@@ -47,6 +47,8 @@ class StiMcTrack : public StiTrack
   bool extendToVertex(StiHit* vertex);
   vector<StiHit*> getHits();
   void addHit(StiHit*hit);
+  virtual bool isPrimary() const;
+
  protected:
   const StMcTrack * mcTrack;
   vector<StiHit*> _hits;
@@ -79,6 +81,7 @@ inline const StMcTrack * StiMcTrack::getStMcTrack(const StMcTrack * track) const
 {
   return mcTrack;
 }
+
 
 #endif
 
