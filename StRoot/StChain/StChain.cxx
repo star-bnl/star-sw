@@ -31,8 +31,12 @@
 */
 
 
-#include <TROOT.h>
-#include <TBrowser.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "TROOT.h"
+#include "TBrowser.h"
+#include "TBenchmark.h"
+#include "TSystem.h"
 #include "StChain.h"
 #include "StEvtHddr.h"
 
@@ -44,6 +48,7 @@ StMaker(name),m_EvtHddr(0)
 {
    m_Version     = 100;       //StChain  version number and release date
    m_VersionDate = 180698;
+   mNTotal = 0; mNFailed = 0;
    if ( UseOwnHeader || !(dynamic_cast<StEvtHddr*>(GetDataSet("EvtHddr"))))  
 			  m_EvtHddr = new StEvtHddr(m_ConstSet); 
    gROOT->GetListOfBrowsables()->Add(this,GetName());
@@ -69,7 +74,13 @@ void StChain::Clear(Option_t *option)
 //_____________________________________________________________________________
 Int_t StChain::Finish(){
  // StartTimer();
+ if (TestBit(kFiniEnd)){ 
+   Warning("Finish","chain %s.%s Finished twice, Ignore it"
+           ,GetName(),ClassName());
+   return 1;
+ }
  Int_t res = StMaker::Finish();
+ SetBit  (kFiniEnd);
  // StopTimer();
  PrintTotalTime();
  return res;
@@ -97,12 +108,43 @@ Int_t StChain::MakeEvent()
   Clear();
   return StMaker::IMake(GetNumber()+1);
 }
+//_____________________________________________________________________________
+Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk) 
+{
+  TBenchmark evnt;
+  int jCur=0,iMake=0;
+  for (jCur=jBeg; jCur<=jEnd; jCur++) {
+     evnt.Reset(); evnt.Start("QAInfo:");
+
+     Clear();
+     iMake = Make(jCur);
+
+     if (outMk && iMake == kStErr) {outMk->IMake(jCur); mNFailed++;}
+     if (iMake%10 >= kStEOF) break;
+     mNTotal++;
+     evnt.Stop("QAInfo:");
+     //  evnt.Show("QAInfo:");
+     printf ("QAInfo: Done with Event [no. %d/run %d/evt. %d/Date.Time %d.%d/sta %d] Real Time = %10.2f seconds Cpu Time =  %10.2f seconds \n",
+	jCur,GetRunNumber(),GetEventNumber(),GetDate(), GetTime(),
+	     iMake,evnt.GetRealTime("QAInfo:"),evnt.GetCpuTime("QAInfo:"));
+  }
+
+  printf ("QAInfo:EventLoop completed code %d",iMake);
+  gSystem->Exec("date");
+  TDatime t;
+  printf ("\nQAInfo:Run is finished at Date/Time %i/%i; Total events processed :%i and not completed: %i\n",
+	    t.GetDate(),t.GetTime(),mNTotal,mNFailed);
+
+  fflush(stdout);
+  return iMake;
+}
 
 
-
-
-// $Id: StChain.cxx,v 1.47 2002/03/12 21:19:00 fisyak Exp $
+// $Id: StChain.cxx,v 1.48 2002/11/26 02:16:39 perev Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.48  2002/11/26 02:16:39  perev
+// EventLoop added
+//
 // Revision 1.47  2002/03/12 21:19:00  fisyak
 // Set only one StEvtHddr as default option (due to Embedding)
 //

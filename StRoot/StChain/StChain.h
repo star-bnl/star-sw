@@ -32,6 +32,8 @@ class StChain : public StMaker {
  private:
    Int_t               m_Version;    	//StChain version number
    Int_t               m_VersionDate;   //StChain version date
+   Int_t               mNTotal;   	//Total   events processed
+   Int_t               mNFailed;   	//Failed events processed
  protected:
    StEvtHddr         *m_EvtHddr;     	//Header of event
  public:
@@ -44,19 +46,25 @@ class StChain : public StMaker {
    virtual Int_t      Make(Int_t num){return IMake(num);}
    virtual Int_t      IsChain() const {return 1;}
    virtual Int_t      MakeEvent(); // *MENU*
-   Int_t              GetVersion() {return m_Version;}
-   Int_t              GetVersionDate() {return m_VersionDate;}
+   virtual Int_t      EventLoop(Int_t jBeg=1,Int_t jEnd=1000000, StMaker *outMk=0); 
+   Int_t              GetVersion()     const {return m_Version;}
+   Int_t              GetVersionDate() const {return m_VersionDate;}
+   Int_t              GetNTotal()      const {return mNTotal;}
+   Int_t              GetNFailed()     const {return mNFailed;}
 
  virtual const char *GetCVS() const 
- {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.40 2002/03/12 21:19:00 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+ {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.41 2002/11/26 02:16:39 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StChain, 0)   //StChain control class
 };
 
 #endif
 
 
-// $Id: StChain.h,v 1.40 2002/03/12 21:19:00 fisyak Exp $
+// $Id: StChain.h,v 1.41 2002/11/26 02:16:39 perev Exp $
 // $Log: StChain.h,v $
+// Revision 1.41  2002/11/26 02:16:39  perev
+// EventLoop added
+//
 // Revision 1.40  2002/03/12 21:19:00  fisyak
 // Set only one StEvtHddr as default option (due to Embedding)
 //
