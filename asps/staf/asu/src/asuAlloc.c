@@ -116,8 +116,9 @@ void asuMallocPrintTrace(void *p, size_t size, char* file, int line)
    long v; char c[5], *s=c; memcpy(&v,p,4); memcpy(s,p,4); c[4]=0;
    fprintf(stderr,"(%p:%d) %s.%d [%lx:%4s]", p, size, file, line, v, s);
    ===========================================================*/
-   if(!file) { fprintf("file==NULL !!!!\n"); return; }
-   fprintf("asuMallocPrintTrace(p=%p, size=%d, file=%s, line=%d).\n",
+   if(!file) { fprintf(stderr,"file==NULL !!!!\n"); return; }
+   fprintf(stderr,
+      "asuMallocPrintTrace(p=%p, size=%d, file=%s, line=%d).\n",
       p,size,file,line);
 }
 
