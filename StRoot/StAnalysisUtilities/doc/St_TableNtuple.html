@@ -22,6 +22,14 @@ Basically, this is a TTree with some add-ons. It is very similar to a
 TNtuple, except that it requires using tables to fill it, and entries
 are not forced to be floats. Here's how to use it...
 
+First, one needs at least the following libraries loaded (as of Oct. 7, 1999):
+
+     gSystem->Load("St_base");
+     gSystem->Load("St_Tables");
+     gSystem->Load("xdf2root");
+     gSystem->Load("StUtilities");
+     gSystem->Load("StAnalysisUtilities");
+
 The constructor must be called with an St_Table-derived table.
 Here for example, I'll use the St_tpt_track table.
 
