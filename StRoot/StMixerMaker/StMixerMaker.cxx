@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMixerMaker.cxx,v 1.6 2000/03/15 22:23:53 pfachini Exp $
+ * $Id: StMixerMaker.cxx,v 1.7 2000/07/10 13:32:42 pfachini Exp $
  *
  * Author: Patricia Fachini
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StMixerMaker.cxx,v $
+ * Revision 1.7  2000/07/10 13:32:42  pfachini
+ * *** empty log message ***
+ *
  * Revision 1.6  2000/03/15 22:23:53  pfachini
  * Now using only TPC_DB parameters
  *
@@ -203,7 +206,7 @@ Int_t StMixerMaker::Make() {
     //St_ObjectSet* trsEventDataSet1 = (St_ObjectSet*) GetDataSet("mixer/.make/TrsFirst/.const/Event"); 
     St_ObjectSet* trsEventDataSet1 = (St_ObjectSet*) GetDataSet("Input1"); 
     // Get the pointer to the raw data. 
-
+    //printf("Class=%s\n", trsEventDataSet1->ClassName());
     StTpcRawDataEvent* trsEvent1 = (StTpcRawDataEvent*) trsEventDataSet1->GetObject(); 
     // Instantiate the DetectorReader. Version will be default if not given 
     string version = "TrsDatav1.0"; 
@@ -260,7 +263,12 @@ Int_t StMixerMaker::Make() {
 	      padraw=padListRaw[ipadraw];
 	      int nseqraw;
 	      StSequence* listOfSequencesRaw; 
-	      getSequences1(isector,irow+1,padraw,&nseqraw,&listOfSequencesRaw); 
+	      if(!strcmp(GetConfig1(),"daq")) {
+		getSequences1(isector,irow+1,padraw,&nseqraw,&listOfSequencesRaw); 
+	      }
+	      if(!strcmp(GetConfig2(),"daq")) {
+		getSequences2(isector,irow+1,padraw,&nseqraw,&listOfSequencesRaw); 
+	      }
 	      // Note that ipad is an index, NOT the pad number. 
 	      // The pad number comes from padList[ipad] 
 	      for(int iseqraw=0;iseqraw<nseqraw;iseqraw++) {
@@ -286,7 +294,12 @@ Int_t StMixerMaker::Make() {
 	      padraw=padListRaw[ipadraw];
 	      int nseqraw;
 	      StSequence* listOfSequencesRaw; 
-	      getSequences1(isector,irow+1,padraw,&nseqraw,&listOfSequencesRaw); 
+	      if(!strcmp(GetConfig1(),"daq")) {
+		getSequences1(isector,irow+1,padraw,&nseqraw,&listOfSequencesRaw); 
+	      }
+	      if(!strcmp(GetConfig2(),"daq")) {
+		getSequences2(isector,irow+1,padraw,&nseqraw,&listOfSequencesRaw); 
+	      }
 	      // Note that ipad is an index, NOT the pad number. 
 	      // The pad number comes from padList[ipad] 
 	      for(int iseqraw=0;iseqraw<nseqraw;iseqraw++) {
