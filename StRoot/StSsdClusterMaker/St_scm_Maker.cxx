@@ -12,6 +12,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TFile.h"
+#include "StMessMgr.h"
 ClassImp(St_scm_Maker)
 //_____________________________________________________________________________
 St_scm_Maker::St_scm_Maker(const char *name):
@@ -40,24 +41,16 @@ Int_t St_scm_Maker::Init(){
   m_sls_ctrl     = (St_sls_ctrl          *)local("ssd/sls_ctrl");
   m_scm_ctrl     = (St_scm_ctrl          *)local("ssd/scm_ctrl");
 
-  Int_t res = 1;
-  if ((!m_geom_par)||(!m_condition_db)||(!m_geom))
-    {
-      res = 0;
-      cout<<"*** IN SCM_AM MODULE ***"<<endl;
-      cout<<"*** scm parameter tables are missing ***"<<endl;
-      return kStWarn;
-      
-    }
-  else
-    {
-      if ((!m_scm_ctrl)||(!m_scm_ctrl))
-	{
-	  cout<<"*** a parameter table is missing ***"<<endl;
-	  return kStWarn;
-	}
-    }
-  // 		Create SCM histograms
+  if ((!m_geom_par)||(!m_geom)) {
+    gMessMgr->Error() << "No  access to geometry parameters" << endm;
+  }   
+  if (!m_condition_db) {
+    gMessMgr->Error() << "No  access to condition database" << endm;
+  }   
+  if ((!m_sls_ctrl)||(!m_sls_ctrl)) {
+    gMessMgr->Error() << "No  access to control parameters" << endm;
+  } 
+// 		Create SCM histograms
 
   matchisto = new TH2S("matching Histo","Matching Adc (1p-1n)",50,0,1000,50,0,1000);
   matchisto->SetXTitle("PSide ADC count");
@@ -82,6 +75,8 @@ Int_t St_scm_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_scm_Maker::Make()
 {
+  if (Debug())  gMessMgr->Debug() << "In St_scm_Maker::Make() ... "
+                               << GetName() << endm;
   // 		Create output tables
   Int_t res = 0; 
 
@@ -93,8 +88,10 @@ Int_t St_scm_Maker::Make()
   res = scm_am(m_geom_par, m_condition_db, m_geom,
         scf_cluster, m_sls_ctrl, m_scm_ctrl, scm_spt);
 
-  if(res!=kSTAFCV_OK) return kStWarn;
-  if (Debug()) m_DataSet->ls("*");
+   if(res!=kSTAFCV_OK){
+     gMessMgr->Warning("St_scm_Maker: no output");
+     return kStWarn;
+   }
 
   makeScmCtrlHistograms();
   writeScmCtrlHistograms();
@@ -141,8 +138,14 @@ void St_scm_Maker::writeScmCtrlHistograms()
 void St_scm_Maker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: St_scm_Maker.cxx,v 1.1 2000/07/21 15:08:54 hippolyt Exp $\n");
+  printf("* $Id: St_scm_Maker.cxx,v 1.2 2000/08/15 19:34:52 hippolyt Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
 
+//_____________________________________________________________________________
+Int_t St_scm_Maker::Finish() {
+  if (Debug()) gMessMgr->Debug() << "In St_scm_Maker::Finish() ... "
+                               << GetName() << endm; 
+  return kStOK;
+}
