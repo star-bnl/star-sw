@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEnumerations.hh,v 1.4 1999/02/24 01:55:34 genevb Exp $
+ * $Id: StEnumerations.hh,v 1.5 1999/02/24 02:58:30 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.hh,v $
- * Revision 1.4  1999/02/24 01:55:34  genevb
- * Add Xi vertex type
+ * Revision 1.5  1999/02/24 02:58:30  ullrich
+ * StDetector now reflects official STAR detector numbers.
+ *
+ * Revision 1.6  1999/02/26 14:01:17  ullrich
+ * Removed enumeration StDetector (handled elsewhere).
  *
  * Revision 1.5  1999/02/24 02:58:30  ullrich
  * StDetector now reflects official STAR detector numbers.
@@ -32,8 +35,10 @@
 
 #ifdef __CINT__
 #pragma link C++ enum StDetector;
-enum StDetector {tpc, svt, ssd, ftpcEast, ftpcWest, rich, tof,
-		 emcTower, emcPreShower, smdEta, smdPhi};
+#pragma link C++ enum StBeamDirection;
+#pragma link C++ enum StBeamPolarizationAxis;
+#pragma link C++ enum StVertexType;
+enum StDetector {tpc = 1, svt, ftpcWest, ftpcEast, rich, tof,
 		 barrelEmcTower, barrelEmcPreShower, barrelSmdEta, barrelSmdPhi,
 		 endcapEmcTower, endcapEmcPreShower, endcapSmdEta, endcapSmdPhi,
                  ctb, ssd, zdcWest, zdcEast, mwpcWest, mwpcEast};
