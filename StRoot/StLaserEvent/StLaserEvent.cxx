@@ -1,6 +1,9 @@
 // 
 // ROOT Tree for Laser Events tracking by tpt. -- Bill Love
 //$Log: StLaserEvent.cxx,v $
+//Revision 1.6  2001/03/23 15:27:59  love
+//Updated README text
+//
 //Revision 1.5  2000/04/24 14:28:03  love
 //Added clock, drivel and tZero to event Header
 //
@@ -37,11 +40,15 @@
 //        TClonesArray  *fHits;
 //        TClonesArray  *fPixels;
 //
-//   The EventHeader class has 3 data members (integers):
+//   The EventHeader class has 3 integer and 4 float data members:
 //     public:
 //        Int_t          fEvtNum;
 //        Int_t          fRun;
 //        Int_t          fDate;
+//        Float_t ftZero;
+//        Float_t fDriVel;
+//        Float_t fClock;
+//        Float_t fTrigger;
 //
 //
 //   The St_LaserEvent data members fTracks, fHits, fPixels are pointers to 
@@ -143,7 +150,8 @@ void StLaserEvent::AddHit(Float_t q,Float_t x,Float_t y,Float_t z,
 void StLaserEvent::AddHit(Float_t q,Float_t x,Float_t y,Float_t z, 
    Int_t row, Int_t track, Int_t flag, Int_t tksector, Float_t tkzl,
  Float_t tkpsi, Float_t tkinvp, Int_t tknfit, Float_t dx,Float_t dz,
- Float_t alpha,Float_t lambda, Float_t prf,Float_t zrf)
+ Float_t alpha,Float_t lambda, Float_t prf,Float_t zrf, Float_t exbdx,
+ Float_t exbdy)
 {
    // Add a new hit to the list of hits for this event.
    // To avoid calling the very time consuming operator new for each hit,
@@ -153,7 +161,7 @@ void StLaserEvent::AddHit(Float_t q,Float_t x,Float_t y,Float_t z,
 
    TClonesArray &hits = *fHits;
    new(hits[fNhit++]) Hit(q,x,y,z,row,track,flag,tksector,tkzl,tkpsi,
-   tkinvp,tknfit,dx,dz,alpha,lambda,prf,zrf);
+   tkinvp,tknfit,dx,dz,alpha,lambda,prf,zrf,exbdx,exbdy);
 }
 
 //______________________________________________________________________________
@@ -205,6 +213,16 @@ void StLaserEvent::SetHeader(Int_t i, Int_t run, Int_t date,
    fNpixel = 0;
    fEvtHdr.Set(i, run, date);
    fEvtHdr.SetE(tzero, drivel, clock);
+}
+//______________________________________________________________________________
+void StLaserEvent::SetHeader(Int_t i, Int_t run, Int_t date,
+     Float_t tzero, Float_t drivel, Float_t clock, Float_t trigger)
+{
+   fNtrack = 0;
+   fNhit = 0;
+   fNpixel = 0;
+   fEvtHdr.Set(i, run, date);
+   fEvtHdr.SetE(tzero, drivel, clock, trigger);
 }
 
 //______________________________________________________________________________
@@ -283,7 +301,7 @@ Hit::Hit(Float_t q,Float_t x, Float_t y, Float_t z,Int_t row, Int_t track,
 Hit::Hit(Float_t q,Float_t x, Float_t y, Float_t z,Int_t row, Int_t track,
   Int_t flag, Int_t tksector, Float_t tkzl, Float_t tkpsi, Float_t tkinvp,
   Int_t tknfit, Float_t dx, Float_t dz, Float_t alpha, Float_t lambda,
-  Float_t prf,Float_t zrf) : TObject()
+  Float_t prf,Float_t zrf, Float_t exbdx, Float_t exbdy) : TObject()
 {
    // Create a hit object.
    fx = x;
@@ -304,6 +322,8 @@ Hit::Hit(Float_t q,Float_t x, Float_t y, Float_t z,Int_t row, Int_t track,
    flambda = lambda;
    fprf = prf;
    fzrf = zrf;
+   fexbdx = exbdx;
+   fexbdy = exbdy;
 }
 
 //_____________________________________________________________________________
@@ -318,41 +338,4 @@ Pixel::Pixel(Int_t row, Int_t pad, Int_t time,Int_t adc,
    fadc = adc;
    fx = x;   fy = y;   fz = z;
 }
-//_____________________________________________________________________________
-  void Track::DOCA(Float_t r0,Float_t phi0,Float_t z0, Float_t psi,
-                      Float_t tanl, Float_t curvature , Int_t q,
-                      Int_t *sector, Float_t *xl, Float_t *yl, Float_t *zl) {
-  // calculate distance of closest approach to the 6 laser sources
-  // for the track and return the sector number for the smallest.
-  static const Float_t xpt[6]={-171.88,-169.36,2.505,171.88,169.36,-2.505};
-  static const Float_t ypt[6]={96.33,-100.67,-197.02,-96.31,100.68,197.01};
-    Float_t x, y;
-  //
-    Float_t ang = 0.017453292 * phi0;
-    Float_t x0 = r0 * cos(ang);
-    Float_t y0 = r0 * sin(ang);
-    // calculate circle center position
-    ang = 0.017453292 * psi;
-    Float_t px = cos(ang); Float_t py = sin(ang);
-    Float_t xc = x0 + q*py/curvature;
-    Float_t yc = y0 - q*px/curvature;
-    Float_t test = 200.0; // cutoff the source match at 10 X 10 cm
-    *sector = 99;  *xl = 0.0; *yl = 0.0; *zl = 0.0;
-       for (int i=0;i<6;i++){
-    Float_t xp = xpt[i]; Float_t yp= ypt[i];
-    Float_t d = xc - xp; Float_t a = yc - yp;
-    Float_t c = d/a;  
-    Float_t dy = 1./sqrt(1. + c*c)/curvature;
-    Float_t dx = c*dy;
-    if(a<0) { x = xc + dx;  y = yc + dy;}
-    else    { x = xc - dx;  y = yc - dy;}
-    Float_t disq = (x-xp)*(x-xp) + (y-yp)*(y-yp);
-      if (disq<test) {test=disq; 
-                    *xl=x; *yl=y;  *sector = 2*i+14;
-		    Float_t sign =1.0; // account for direction to origin
-         if((*xl*px+*yl*py)<0) sign=-1.0;
-                  *zl = z0 + sign*tanl*sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0));}
-       }
-  }
-//______________________________________________________________________________
-
+//____________________________________________________________________________
