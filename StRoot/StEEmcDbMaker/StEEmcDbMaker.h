@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.28 2004/09/01 04:16:39 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.29 2005/01/24 05:08:26 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -65,7 +65,7 @@ class StEEmcDbMaker : public StMaker {
   // private:
  public:
 
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.28 2004/09/01 04:16:39 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.29 2005/01/24 05:08:26 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -143,8 +143,6 @@ class StEEmcDbMaker : public StMaker {
 
   const EEmcDbItem* getT(int sec, char sub, int eta){return getTile(sec,sub,eta,'T');}
 
-
-
   const EEmcDbItem* getP(int sec, char sub, int eta){return getTile(sec,sub,eta,'P');}
   const EEmcDbItem* getQ(int sec, char sub, int eta){return getTile(sec,sub,eta,'Q');}
   const EEmcDbItem* getR(int sec, char sub, int eta){return getTile(sec,sub,eta,'R');}
@@ -164,7 +162,8 @@ class StEEmcDbMaker : public StMaker {
      setPreferredFlavor( flavor, tableNameMask); // typo...
   }
 
-
+  int getFirstSecID(){ return mfirstSecID;}
+  int getLastSecID(){ return mlastSecID;}
   void setDBname(TString name){ dbName=name;}
 
   int valid(){ return nFound;} // return # of valid BD records
@@ -178,7 +177,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.28 2004/09/01 04:16:39 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.29 2005/01/24 05:08:26 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -189,6 +188,9 @@ class StEEmcDbMaker : public StMaker {
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.29  2005/01/24 05:08:26  balewski
+// more get-methods
+//
 // Revision 1.28  2004/09/01 04:16:39  balewski
 // bug fix for getU(...), getV()  - order of argument was wrong in implementation
 //
