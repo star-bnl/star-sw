@@ -35,7 +35,7 @@ class St_DataSet : public TNamed
 {
  friend class St_DataSetIter;
  friend class St_DataSetTree;
- protected:
+ protected: 
     TObject     *fMother; // pointer to mother of the directory
     TList       *fList;   // List of the the the objects included into this dataset
     virtual void SetParent(St_DataSet *parent);
@@ -49,6 +49,7 @@ class St_DataSet : public TNamed
             void         Add(St_DataSet *dataset);
     virtual void         Browse(TBrowser *b);
     virtual St_DataSet  *Data() { return HasData() ? this : 0; }  // returns this pointer the derived classes if any
+    virtual void         Delete(Option_t *opt="");   
             TObject     *GetMother() const { return fMother; }
     virtual St_DataSet  *GetParent() const { return (St_DataSet *)fMother;}
             TList       *GetList() const {return fList;}
@@ -63,7 +64,7 @@ class St_DataSet : public TNamed
     virtual void         Update(St_DataSet *set,UInt_t opt=0);// Update this dataset with the new one
            TString       Path();                              // return the "full" path of this dataset
     virtual EDataSetPass Pass(EDataSetPass ( *callback)(St_DataSet *),Int_t depth=0);
-
+    virtual Int_t        Purge(Option_t *opt="");   
     virtual void         Remove(St_DataSet *set);
     virtual void         Shunt(St_DataSet *dataset);
     ClassDef(St_DataSet,1)

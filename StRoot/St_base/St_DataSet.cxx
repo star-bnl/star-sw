@@ -40,29 +40,7 @@ St_DataSet::St_DataSet(const Char_t *name, St_DataSet *parent) : TNamed(), fList
 //______________________________________________________________________________
 St_DataSet::~St_DataSet()
 {
-  // First we should break our relationship with the parent if any
-  if (fMother && !TestBit(kCanDelete) ) 
-  {
-    St_DataSet *parent = GetParent();
-    if (parent) parent->Remove(this);
-  }
-
-  // Delete list of the St_DataSet
-  if (fList) {
-    TIter next(fList);   
-    St_DataSet *son = 0;
- // Delete the sons of this St_DataSet only
-    while (son = (St_DataSet *)next()) {
-       if (this == son->GetParent()) {
-       // mark the object is deleted from the St_DataSet dtor
-          son->SetBit(kCanDelete);
-          delete son;        
-       }
-    }
-//    fList->Delete();
-    delete fList;
-    fList = 0;
-  }
+   Delete();
 }
 //______________________________________________________________________________
 void St_DataSet::Add(St_DataSet *dataset)
@@ -88,6 +66,31 @@ void St_DataSet::Browse(TBrowser *b)
    if (b)
        while (obj = next())
                  b->Add(obj,obj->GetName());
+}
+//______________________________________________________________________________
+void St_DataSet::Delete(Option_t *opt){
+  // First we should break our relationship with the parent if any
+  if (fMother && !TestBit(kCanDelete) ) 
+  {
+    St_DataSet *parent = GetParent();
+    if (parent) parent->Remove(this);
+  }
+
+  // Delete list of the St_DataSet
+  if (fList) {
+    TIter next(fList);   
+    St_DataSet *son = 0;
+ // Delete the sons of this St_DataSet only
+    while (son = (St_DataSet *)next()) {
+       if (this == son->GetParent()) {
+       // mark the object is deleted from the St_DataSet dtor or Delete method
+          son->SetBit(kCanDelete);
+          delete son;        
+       }
+    }
+    delete fList;
+    fList = 0;
+  }
 }
  
 //______________________________________________________________________________
@@ -225,6 +228,23 @@ EDataSetPass St_DataSet::Pass(EDataSetPass ( *callback)(St_DataSet *),Int_t dept
     }
   }
   return condition;
+}
+//______________________________________________________________________________
+Int_t St_DataSet::Purge(Option_t *opt)
+{
+ if (fList) {
+   TIter next(fList);   
+   St_DataSet *son = 0;
+// Purge the sons of this St_DataSet only
+   while (son = (St_DataSet *)next()) {
+     if (this == son->GetParent()) {
+     // mark the object is deleted from the St_DataSet dtor
+        son->Purge();
+        if (son->HasData() == 0 && son->GetListSize() == 0) delete son;
+     }
+   }
+ }
+ return 0;
 }
 //______________________________________________________________________________
 void  St_DataSet::SetParent(St_DataSet *parent){
