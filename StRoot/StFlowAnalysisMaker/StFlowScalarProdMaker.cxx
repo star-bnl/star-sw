@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowScalarProdMaker.cxx,v 1.5 2002/02/13 22:31:46 posk Exp $
+// $Id: StFlowScalarProdMaker.cxx,v 1.6 2002/02/18 01:11:53 jeromel Exp $
 //
 // Authors: Method proposed by Art and Sergei, code written by Aihong
 //          Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -13,6 +13,7 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include <math.h>
+#include <float.h>
 #include "StMaker.h"
 #include "StFlowScalarProdMaker.h"
 #include "StFlowMaker/StFlowMaker.h"
@@ -159,7 +160,7 @@ Int_t StFlowScalarProdMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowScalerProdAnalysis", 2);
-  gMessMgr->Info("##### FlowScalerProdAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.5 2002/02/13 22:31:46 posk Exp $");
+  gMessMgr->Info("##### FlowScalerProdAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.6 2002/02/18 01:11:53 jeromel Exp $");
 
   return StMaker::Init();
 }
@@ -385,6 +386,9 @@ Int_t StFlowScalarProdMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowScalarProdMaker.cxx,v $
+// Revision 1.6  2002/02/18 01:11:53  jeromel
+// Mandatory fix for FLT_MAX fix i.e. include float.h
+//
 // Revision 1.5  2002/02/13 22:31:46  posk
 // Pt Weight now also weights Phi Weight. Added Eta Weught, default=FALSE.
 //
