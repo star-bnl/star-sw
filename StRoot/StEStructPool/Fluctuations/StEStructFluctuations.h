@@ -24,12 +24,12 @@ const int NCENTBINS = 11;
 const int NPTCENTBINS = 3;
 #endif
 #ifdef PPDATA
-const int NCENTBINS = 2;
+const int NCENTBINS = 5;
 const int NPTCENTBINS = 2;
 #endif
 
-const float ETAMIN =  0.0;
-const float ETAMAX = +1.0;
+const float ETAMIN = -3.0;
+const float ETAMAX = +3.0;
 
 
 class StEStructFluctuations: public StEStructAnalysis {
@@ -47,7 +47,7 @@ class StEStructFluctuations: public StEStructAnalysis {
     StTimer*  mtimer;       //!
 
     int   doingPairCuts;
-    int   summingMode;
+    int   etaSummingMode, phiSummingMode;
     int   histosFilled;
 
     int   nTotEvents, nCentEvents[NCENTBINS];
@@ -64,23 +64,23 @@ class StEStructFluctuations: public StEStructAnalysis {
     TH2F *hfUnique;
     TH1D *hTotEvents[NCENTBINS][5];
     TH1D *hNSum[NCENTBINS][2];
-    TH1D *hNDiff[NCENTBINS][2];
+    TH1D *hNDel[NCENTBINS][2];
     TH1D *hNPlus[NCENTBINS][2];
     TH1D *hNMinus[NCENTBINS][2];
     TH1D *hNPlusMinus[NCENTBINS];
     TH1D *hPSum[NCENTBINS][4];
     TH1D *hPPlus[NCENTBINS][4];
     TH1D *hPMinus[NCENTBINS][4];
-    TH1D *hPPlusMinus[NCENTBINS][4];
+    TH1D *hPPlusMinus[NCENTBINS][8];
     TH1D *hPNSum[NCENTBINS][4];
     TH1D *hPNPlus[NCENTBINS][4];
     TH1D *hPNMinus[NCENTBINS][4];
-    TH1D *hPNPlusMinus[NCENTBINS][4];
+    TH1D *hPNPlusMinus[NCENTBINS][12];
     TH1D *hPtSumSq[3];
 
     TH1D *hptTotEvents[NPTCENTBINS][NPTBINS][5];
     TH1D *hptNSum[NPTCENTBINS][NPTBINS][2];
-    TH1D *hptNDiff[NPTCENTBINS][NPTBINS][2];
+    TH1D *hptNDel[NPTCENTBINS][NPTBINS][2];
     TH1D *hptNPlus[NPTCENTBINS][NPTBINS][2];
     TH1D *hptNMinus[NPTCENTBINS][NPTBINS][2];
     TH1D *hptNPlusMinus[NPTCENTBINS][NPTBINS];
@@ -137,9 +137,11 @@ class StEStructFluctuations: public StEStructAnalysis {
     void  deleteArraysAndHistograms();
     void  moveEvents();
 
-    StEStructFluctuations(int mode=0, int invokePairCuts = 0, int sumMode=1);
+    StEStructFluctuations(int mode=0, int invokePairCuts = 0,
+                          int etaSumMode=1, int phiSumMode=1);
     StEStructFluctuations(const char* cutFileName, int mode=0,
-                        int invokePairCuts = 0, int sumMode=1);
+                          int invokePairCuts = 0,
+                          int etaSumMode=1, int phiSumMode=1);
     virtual ~StEStructFluctuations();
 
     StEStructPairCuts& getPairCuts();
@@ -148,6 +150,7 @@ class StEStructFluctuations: public StEStructAnalysis {
 
   //---> support of interface  
     bool loadUserCuts(const char* name, const char** vals, int nvals);
+    virtual void setOutputFileName(const char* outFileName);
     bool  doEvent(StEStructEvent* p);
     void  init();
     void  cleanUp();
@@ -164,7 +167,7 @@ class StEStructFluctuations: public StEStructAnalysis {
     void constantMultStruct(int nt, float val);
     void randomMultStruct(double p, float val);
     void AddEvent(multStruct *ms);
-    void AddToPtBin( int jPhi, int jEta, int iCent, int iPt, int iBin,
+    void AddToPtBin( int iCent, int iPt, int iBin,
                      double plus, double minus, double pplus, double pminus );
     void AddToBin( int jPhi, int jEta, int iCent, int iBin,
                    double plus, double minus, double pplus, double pminus );

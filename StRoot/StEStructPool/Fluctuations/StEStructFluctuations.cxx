@@ -13,17 +13,20 @@
 ClassImp(StEStructFluctuations)
 
 //--------------------------------------------------------------------------
-StEStructFluctuations::StEStructFluctuations(int mode, int invokePairCuts, int sumMode): manalysisMode(mode), mskipPairCuts(false), mdoPairCutHistograms(false) {
+StEStructFluctuations::StEStructFluctuations(int mode, int invokePairCuts,
+            int etaSumMode, int phiSumMode): manalysisMode(mode), mskipPairCuts(false), mdoPairCutHistograms(false) {
     doingPairCuts = invokePairCuts;
-    summingMode   = sumMode;
+    etaSummingMode   = etaSumMode;
+    phiSummingMode   = phiSumMode;
     init();
 }
 
 //--------------------------------------------------------------------------
 StEStructFluctuations::StEStructFluctuations(const char* cutFileName, int mode, int invokePairCuts,
-                                             int sumMode): manalysisMode(mode), mskipPairCuts(false), mdoPairCutHistograms(false), mPair(cutFileName) {
+                                             int etaSumMode, int phiSumMode): manalysisMode(mode), mskipPairCuts(false), mdoPairCutHistograms(false), mPair(cutFileName) {
     doingPairCuts = invokePairCuts;
-    summingMode   = sumMode;
+    etaSummingMode   = etaSumMode;
+    phiSummingMode   = phiSumMode;
     init();
 }
 
@@ -34,6 +37,9 @@ StEStructFluctuations::~StEStructFluctuations() {
 
 
 void StEStructFluctuations::init() {
+
+  mCurrentEvent=NULL;
+  mtimer=NULL;
 
   if(manalysisMode & 1) {
      mskipPairCuts=true;
@@ -173,12 +179,14 @@ void StEStructFluctuations::makeMultStruct() {
     StEStructTrack* t;
 
     int iEta, iPhi, iPt;
+    int nPlus = 0, nMinus = 0;
+    int nPlusAdded = 0, nMinusAdded = 0;
 
     ms->NewEvent(mCurrentEvent->Vx(), mCurrentEvent->Vy(), mCurrentEvent->Vz() );
-    int nGoodTracks = 0;
 
     tc = mCurrentEvent->TrackCollectionP();
     for(Iter=tc->begin(); Iter!=tc->end(); ++Iter){
+        nPlus++;
         t = *Iter;
         if (t->Chi2() < 0) {
             continue;
@@ -199,11 +207,12 @@ void StEStructFluctuations::makeMultStruct() {
             continue;
         }
 
+        nPlusAdded++;
         ms->AddTrack( iPhi, iEta, iPt, +1, t->Pt() );
-        nGoodTracks++;
     }
     tc = mCurrentEvent->TrackCollectionM();
     for(Iter=tc->begin(); Iter!=tc->end(); ++Iter){
+        nMinus++;
         t = *Iter;
         if (t->Chi2() < 0) {
             continue;
@@ -224,8 +233,8 @@ void StEStructFluctuations::makeMultStruct() {
             continue;
         }
 
+        nMinusAdded++;
         ms->AddTrack( iPhi, iEta, iPt, -1, t->Pt() );
-        nGoodTracks++;
     }
 
     AddEvent(ms);
@@ -266,7 +275,7 @@ void StEStructFluctuations::AddEvent(multStruct *ms) {
 
     nTotEvents++;
 
-    if ((jCent = getCentBin(ms->mRefMult)) < 0) {
+    if ((jCent = getCentBin(ms->GetRefMult())) < 0) {
         return;
     }
     nCentEvents[jCent]++;
@@ -276,7 +285,7 @@ void StEStructFluctuations::AddEvent(multStruct *ms) {
     //    To try getting better performance I move all variable declarations
     //    outside these loops.
     int iPhi, jPhi, kPhi, lPhi, dPhi, iEta, jEta, kEta, lEta, dEta;
-    int jBin, jPt;
+    int iBin, jPt;
     double binNPlus = 0, binNMinus = 0;
     double binPPlus = 0, binPMinus = 0;
     double ptBinNPlus = 0, ptBinNMinus = 0;
@@ -288,11 +297,12 @@ void StEStructFluctuations::AddEvent(multStruct *ms) {
 
             // Second two loops are over all bins at this scale
             // Details of this are chosen by the summingMode.
-            jBin = 0;
+            iBin = offset[jPhi][jEta];
             iPhi = 1;
             while ( (kPhi=getPhiStart(iPhi,dPhi)) >= 0) {
                 iEta = 1;
                 while ( (kEta=getEtaStart(iEta,dEta)) >= 0) {
+                    iBin++;
 
                     // Next loop is over Pt binning.
                     // We keep bins that are summed over all pt in
@@ -315,7 +325,7 @@ void StEStructFluctuations::AddEvent(multStruct *ms) {
                                 ptBinPMinus += ms->mTrackBinMinus[jPt][lPhi][lEta][1];
                             }
                         }
-                        AddToPtBin( jPhi, jEta, jPtCent, jPt, jBin,
+                        AddToPtBin( jPtCent, jPt, iBin,
                                     ptBinNPlus, ptBinNMinus,
                                     ptBinPPlus, ptBinPMinus );
                         binNPlus  += ptBinNPlus;
@@ -324,10 +334,9 @@ void StEStructFluctuations::AddEvent(multStruct *ms) {
                         binPMinus += ptBinPMinus;
                     }
 
-                    AddToBin( jPhi, jEta, jCent, jBin,
+                    AddToBin( jPhi, jEta, jCent, iBin,
                               binNPlus, binNMinus,
                               binPPlus, binPMinus );
-                    jBin++;
                     iEta++;
                 }
                 iPhi++;
@@ -410,8 +419,7 @@ void StEStructFluctuations::AddEvent(multStruct *ms) {
         }
     }
 }
-void StEStructFluctuations::AddToPtBin( int jPhi, int jEta,
-                                        int jPtCent, int jPt, int jBin,
+void StEStructFluctuations::AddToPtBin( int jPtCent, int jPt, int iBin,
                                         double Nplus,   double Nminus,
                                         double Pplus,   double Pminus ) {
 
@@ -423,7 +431,6 @@ void StEStructFluctuations::AddToPtBin( int jPhi, int jEta,
     double Ndiff = Nplus - Nminus;
     double Psum  = Pplus + Pminus;
 
-    int iBin = 1 + jBin + offset[jPhi][jEta];
     hptTotEvents[jPtCent][jPt][0]->Fill(iBin);
     if (Nsum > 0) {
         hptTotEvents[jPtCent][jPt][1]->Fill(iBin);
@@ -441,8 +448,8 @@ void StEStructFluctuations::AddToPtBin( int jPhi, int jEta,
     hptNSum[jPtCent][jPt][0]->Fill(iBin,Nsum);
     hptNSum[jPtCent][jPt][1]->Fill(iBin,Nsum*Nsum);
 
-    hptNDiff[jPtCent][jPt][0]->Fill(iBin,Ndiff);
-    hptNDiff[jPtCent][jPt][1]->Fill(iBin,Ndiff*Ndiff);
+    hptNDel[jPtCent][jPt][0]->Fill(iBin,Ndiff);
+    hptNDel[jPtCent][jPt][1]->Fill(iBin,Ndiff*Ndiff);
 
     hptNPlus[jPtCent][jPt][0]->Fill(iBin,Nplus);
     hptNPlus[jPtCent][jPt][1]->Fill(iBin,Nplus*Nplus);
@@ -525,7 +532,7 @@ void StEStructFluctuations::AddToPtBin( int jPhi, int jEta,
     }
 }
 void StEStructFluctuations::AddToBin( int jPhi,       int jEta,
-                                      int jCent,      int jBin,
+                                      int jCent,      int iBin,
                                       double Nplus,   double Nminus,
                                       double Pplus,   double Pminus ) {
     double Nsum  = Nplus + Nminus;
@@ -539,7 +546,6 @@ void StEStructFluctuations::AddToBin( int jPhi,       int jEta,
     diff[jPhi][jEta][jCent]->Fill(Ndiff);
 #endif
 
-    int iBin = 1 + jBin + offset[jPhi][jEta];
     hTotEvents[jCent][0]->Fill(iBin);
     if (Nsum > 0) {
         hTotEvents[jCent][1]->Fill(iBin);
@@ -557,8 +563,8 @@ void StEStructFluctuations::AddToBin( int jPhi,       int jEta,
     hNSum[jCent][0]->Fill(iBin,Nsum);
     hNSum[jCent][1]->Fill(iBin,Nsum*Nsum);
 
-    hNDiff[jCent][0]->Fill(iBin,Ndiff);
-    hNDiff[jCent][1]->Fill(iBin,Ndiff*Ndiff);
+    hNDel[jCent][0]->Fill(iBin,Ndiff);
+    hNDel[jCent][1]->Fill(iBin,Ndiff*Ndiff);
 
     hNPlus[jCent][0]->Fill(iBin,Nplus);
     hNPlus[jCent][1]->Fill(iBin,Nplus*Nplus);
@@ -577,32 +583,32 @@ void StEStructFluctuations::AddToBin( int jPhi,       int jEta,
     double sqs = sqrt(Nsum);
     double sqp = sqrt(Nplus);
     double sqm = sqrt(Nminus);
-    double rs, rs2, rp, rp2, rm, rm2;
+    double r, r2;
     if (Nsum > 0) {
         hPSum[jCent][0]->Fill(iBin,Psum);
-        rs  = Psum/Nsum;
-        rs2 = rs*rs;
-        hPSum[jCent][1]->Fill(iBin,Psum*rs);
-        hPSum[jCent][2]->Fill(iBin,rs2);
-        hPSum[jCent][3]->Fill(iBin,rs2*rs2);
+        r  = Psum/Nsum;
+        r2 = r*r;
+        hPSum[jCent][1]->Fill(iBin,Psum*r);
+        hPSum[jCent][2]->Fill(iBin,r2);
+        hPSum[jCent][3]->Fill(iBin,r2*r2);
     }
 
     if (Nplus > 0) {
         hPPlus[jCent][0]->Fill(iBin,Pplus);
-        rp  = Pplus/Nplus;
-        rp2 = rp*rp;
-        hPPlus[jCent][1]->Fill(iBin,Pplus*rp);
-        hPPlus[jCent][2]->Fill(iBin,rp2);
-        hPPlus[jCent][3]->Fill(iBin,rp2*rp2);
+        r  = Pplus/Nplus;
+        r2 = r*r;
+        hPPlus[jCent][1]->Fill(iBin,Pplus*r);
+        hPPlus[jCent][2]->Fill(iBin,r2);
+        hPPlus[jCent][3]->Fill(iBin,r2*r2);
     }
 
     if (Nminus > 0) {
         hPMinus[jCent][0]->Fill(iBin,Pminus);
-        rm  = Pminus/Nminus;
-        rm2 = rm*rm;
-        hPMinus[jCent][1]->Fill(iBin,Pminus*rm);
-        hPMinus[jCent][2]->Fill(iBin,rm2);
-        hPMinus[jCent][3]->Fill(iBin,rm2*rm2);
+        r  = Pminus/Nminus;
+        r2 = r*r;
+        hPMinus[jCent][1]->Fill(iBin,Pminus*r);
+        hPMinus[jCent][2]->Fill(iBin,r2);
+        hPMinus[jCent][3]->Fill(iBin,r2*r2);
     }
 
     if ((Nplus > 0) && (Nminus > 0)) {
@@ -610,6 +616,10 @@ void StEStructFluctuations::AddToBin( int jPhi,       int jEta,
         hPPlusMinus[jCent][1]->Fill(iBin,Pplus*sqm/sqp);
         hPPlusMinus[jCent][2]->Fill(iBin,Pminus*sqp/sqm);
         hPPlusMinus[jCent][3]->Fill(iBin,Pplus*Pminus/(sqp*sqm));
+        hPPlusMinus[jCent][4]->Fill(iBin,Nplus);
+        hPPlusMinus[jCent][5]->Fill(iBin,Pplus);
+        hPPlusMinus[jCent][6]->Fill(iBin,Nminus);
+        hPPlusMinus[jCent][7]->Fill(iBin,Pminus);
     }
 
     if (Nsum > 0) {
@@ -638,6 +648,14 @@ void StEStructFluctuations::AddToBin( int jPhi,       int jEta,
         hPNPlusMinus[jCent][1]->Fill(iBin,Nminus*sqp);
         hPNPlusMinus[jCent][2]->Fill(iBin,Pminus*Nplus/sqm);
         hPNPlusMinus[jCent][3]->Fill(iBin,Nplus*sqm);
+        hPNPlusMinus[jCent][4]->Fill(iBin,Nplus);
+        hPNPlusMinus[jCent][5]->Fill(iBin,Pplus);
+        hPNPlusMinus[jCent][6]->Fill(iBin,sqp);
+        hPNPlusMinus[jCent][7]->Fill(iBin,Pplus/sqp);
+        hPNPlusMinus[jCent][8]->Fill(iBin,Nminus);
+        hPNPlusMinus[jCent][9]->Fill(iBin,Pminus);
+        hPNPlusMinus[jCent][10]->Fill(iBin,sqm);
+        hPNPlusMinus[jCent][11]->Fill(iBin,Pminus/sqm);
     }
 }
 // iEta runs from 1 up to the number of etaBins that fit in,
@@ -648,7 +666,7 @@ int StEStructFluctuations::getEtaStart( int iEta, int dEta ) {
     if (dEta > NETABINS) {
         return -1;
     }
-    if (1 == summingMode) {
+    if (1 == etaSummingMode) {
         int nEta = NETABINS / dEta;
         int oEta = NETABINS % dEta;
         if ( iEta*dEta <= NETABINS ) {
@@ -661,25 +679,25 @@ int StEStructFluctuations::getEtaStart( int iEta, int dEta ) {
             return oEta+(iEta-nEta-1)*dEta;
         }
         return -1;
-    } else if (2 == summingMode) {
+    } else if (2 == etaSummingMode) {
         if (iEta+dEta <= NETABINS) {
             return iEta - 1;
         } else {
             return -1;
         }
-    } else if (3 == summingMode) {
+    } else if (3 == etaSummingMode) {
         if (iEta > 1) {
             return -1;
         } else {
             return 0;
         }
-    } else if (4 == summingMode) {
+    } else if (4 == etaSummingMode) {
         if (iEta > 1) {
             return -1;
         } else {
             return NETABINS-dEta-1;
         }
-    } else if (5 == summingMode) {
+    } else if (5 == etaSummingMode) {
         if (iEta > 1) {
             return -1;
         } else {
@@ -692,7 +710,7 @@ int StEStructFluctuations::getPhiStart( int iPhi, int dPhi ) {
     if (dPhi > NPHIBINS) {
         return -1;
     }
-    if (1 == summingMode) {
+    if (1 == phiSummingMode) {
         int nPhi = NPHIBINS / dPhi;
         int oPhi = NPHIBINS % dPhi;
         if ( iPhi*dPhi <= NPHIBINS ) {
@@ -705,25 +723,25 @@ int StEStructFluctuations::getPhiStart( int iPhi, int dPhi ) {
             return oPhi+(iPhi-nPhi-1)*dPhi;
         }
         return -1;
-    } else if (2 == summingMode) {
+    } else if (2 == phiSummingMode) {
         if (iPhi+dPhi <= NPHIBINS) {
             return iPhi - 1;
         } else {
             return -1;
         }
-    } else if (3 == summingMode) {
+    } else if (3 == phiSummingMode) {
         if (iPhi > 1) {
             return -1;
         } else {
             return 0;
         }
-    } else if (4 == summingMode) {
+    } else if (4 == phiSummingMode) {
         if (iPhi > 1) {
             return -1;
         } else {
             return NPHIBINS-dPhi - 1;
         }
-    } else if (5 == summingMode) {
+    } else if (5 == phiSummingMode) {
         if (iPhi > 1) {
             return -1;
         } else {
@@ -733,7 +751,7 @@ int StEStructFluctuations::getPhiStart( int iPhi, int dPhi ) {
     return -1;
 }
 int StEStructFluctuations::getNumEtaBins( int dEta ) {
-    if (1 == summingMode) {
+    if (1 == etaSummingMode) {
         int nEta = NETABINS / dEta;
         int oEta = NETABINS % dEta;
         if ( 0 == oEta ) {
@@ -741,19 +759,19 @@ int StEStructFluctuations::getNumEtaBins( int dEta ) {
         } else {
             return 2 * nEta;
         }
-    } else if (2 == summingMode) {
+    } else if (2 == etaSummingMode) {
         return NETABINS + 1 - dEta;
-    } else if (3 == summingMode) {
+    } else if (3 == etaSummingMode) {
         return 1;
-    } else if (4 == summingMode) {
+    } else if (4 == etaSummingMode) {
         return 1;
-    } else if (5 == summingMode) {
+    } else if (5 == etaSummingMode) {
         return 1;
     }
     return 0;
 }
 int StEStructFluctuations::getNumPhiBins( int dPhi ) {
-    if (1 == summingMode) {
+    if (1 == phiSummingMode) {
         int nPhi = NPHIBINS / dPhi;
         int oPhi = NPHIBINS % dPhi;
         if ( 0 == oPhi ) {
@@ -761,13 +779,13 @@ int StEStructFluctuations::getNumPhiBins( int dPhi ) {
         } else {
             return 2 * nPhi;
         }
-    } else if (2 == summingMode) {
+    } else if (2 == phiSummingMode) {
         return NPHIBINS + 1 - dPhi;
-    } else if (3 == summingMode) {
+    } else if (3 == phiSummingMode) {
         return 1;
-    } else if (4 == summingMode) {
+    } else if (4 == phiSummingMode) {
         return 1;
-    } else if (5 == summingMode) {
+    } else if (5 == phiSummingMode) {
         return 1;
     }
     return 0;
@@ -780,6 +798,8 @@ int StEStructFluctuations::getNumPhiBins( int dPhi ) {
 
 
 //--------------------------------------------------------------------------
+void StEStructFluctuations::setOutputFileName(const char* outFileName) {
+}
 void StEStructFluctuations::writeHistograms(TFile* tf){
 
     tf->cd();
@@ -812,7 +832,7 @@ void StEStructFluctuations::writeHistograms(TFile* tf){
 
         for (int jStat=0;jStat<2;jStat++) {
             hNSum[jC][jStat]->Write();
-            hNDiff[jC][jStat]->Write();
+            hNDel[jC][jStat]->Write();
             hNPlus[jC][jStat]->Write();
             hNMinus[jC][jStat]->Write();
         }
@@ -822,7 +842,7 @@ void StEStructFluctuations::writeHistograms(TFile* tf){
             hPPlus[jC][jStat]->Write();
             hPMinus[jC][jStat]->Write();
         }
-        for (int jStat=0;jStat<4;jStat++) {
+        for (int jStat=0;jStat<8;jStat++) {
             hPPlusMinus[jC][jStat]->Write();
         }
         for (int jStat=0;jStat<4;jStat++) {
@@ -830,7 +850,7 @@ void StEStructFluctuations::writeHistograms(TFile* tf){
             hPNPlus[jC][jStat]->Write();
             hPNMinus[jC][jStat]->Write();
         }
-        for (int jStat=0;jStat<4;jStat++) {
+        for (int jStat=0;jStat<12;jStat++) {
             hPNPlusMinus[jC][jStat]->Write();
         }
     }
@@ -845,7 +865,7 @@ void StEStructFluctuations::writeHistograms(TFile* tf){
             }
             for (int jStat=0;jStat<2;jStat++) {
                 hptNSum[jC][jPt][jStat]->Write();
-                hptNDiff[jC][jPt][jStat]->Write();
+                hptNDel[jC][jPt][jStat]->Write();
                 hptNPlus[jC][jPt][jStat]->Write();
                 hptNMinus[jC][jPt][jStat]->Write();
             }
@@ -877,7 +897,8 @@ void StEStructFluctuations::writeHistograms(TFile* tf){
     cout << "For this analysis we used doingPairCuts = " << doingPairCuts << endl;
     cout << "(0 means don't invoke pair cuts, 1 means invoke pair cuts.)" << endl;
     cout << endl;
-    cout << "For this analysis we have used summingMode = " << summingMode << endl;
+    cout << "For this analysis we have used etaSummingMode = " << etaSummingMode << endl;
+    cout << "For this analysis we have used phiSummingMode = " << phiSummingMode << endl;
     cout << "(1 = start at bin 0. Fit as many non-overlapping bins as possible" <<endl;
     cout << "   If it doesn't end evenly start at end and work back.)" << endl;
     cout << "(2 = start at bin 0, shift over one bin until we hit the end.)" << endl;
@@ -1079,8 +1100,8 @@ cout << "Allocating histograms to store info." << endl;
         for (int jStat=0;jStat<2;jStat++) {
             sprintf( line, "NSum%i_%i", jC, jStat );
             hNSum[jC][jStat] = new TH1D(line,line,totBins,0.5,totBins+0.5);
-            sprintf( line, "NDiff%i_%i", jC, jStat );
-            hNDiff[jC][jStat] = new TH1D(line,line,totBins,0.5,totBins+0.5);
+            sprintf( line, "NDel%i_%i", jC, jStat );
+            hNDel[jC][jStat] = new TH1D(line,line,totBins,0.5,totBins+0.5);
             sprintf( line, "NPlus%i_%i", jC, jStat );
             hNPlus[jC][jStat] = new TH1D(line,line,totBins,0.5,totBins+0.5);
             sprintf( line, "NMinus%i_%i", jC, jStat );
@@ -1096,7 +1117,7 @@ cout << "Allocating histograms to store info." << endl;
             sprintf( line, "PMinus%i_%i", jC, jStat );
             hPMinus[jC][jStat] = new TH1D(line,line,totBins,0.5,totBins+0.5);
         }
-        for (int jStat=0;jStat<4;jStat++) {
+        for (int jStat=0;jStat<8;jStat++) {
             sprintf( line, "PPlusMinus%i_%i", jC, jStat );
             hPPlusMinus[jC][jStat] = new TH1D(line,line,totBins,0.5,totBins+0.5);
         }
@@ -1108,7 +1129,7 @@ cout << "Allocating histograms to store info." << endl;
             sprintf( line, "PNMinus%i_%i", jC, jStat );
             hPNMinus[jC][jStat] = new TH1D(line,line,totBins,0.5,totBins+0.5);
         }
-        for (int jStat=0;jStat<4;jStat++) {
+        for (int jStat=0;jStat<12;jStat++) {
             sprintf( line, "PNPlusMinus%i_%i", jC, jStat );
             hPNPlusMinus[jC][jStat] = new TH1D(line,line,totBins,0.5,totBins+0.5);
         }
@@ -1134,8 +1155,8 @@ cout << "Allocating histograms to store Pt info. " << endl;
             for (int jStat=0;jStat<2;jStat++) {
                 sprintf( line, "ptNSum%i_%i_%i", jC, jPt, jStat );
                 hptNSum[jC][jPt][jStat] = new TH1D(line,line,totBins,0.5,totBins+0.5);
-                sprintf( line, "ptNDiff%i_%i_%i", jC, jPt, jStat );
-                hptNDiff[jC][jPt][jStat] = new TH1D(line,line,totBins,0.5,totBins+0.5);
+                sprintf( line, "ptNDel%i_%i_%i", jC, jPt, jStat );
+                hptNDel[jC][jPt][jStat] = new TH1D(line,line,totBins,0.5,totBins+0.5);
                 sprintf( line, "ptNPlus%i_%i_%i", jC, jPt, jStat );
                 hptNPlus[jC][jPt][jStat] = new TH1D(line,line,totBins,0.5,totBins+0.5);
                 sprintf( line, "ptNMinus%i_%i_%i", jC, jPt, jStat );
@@ -1240,7 +1261,7 @@ cout << "freeing h Array histograms." << endl;
 
         for (int jStat=0;jStat<2;jStat++) {
             delete hNSum[jC][jStat];
-            delete hNDiff[jC][jStat];
+            delete hNDel[jC][jStat];
             delete hNPlus[jC][jStat];
             delete hNMinus[jC][jStat];
         }
@@ -1250,7 +1271,7 @@ cout << "freeing h Array histograms." << endl;
             delete hPPlus[jC][jStat];
             delete hPMinus[jC][jStat];
         }
-        for (int jStat=0;jStat<4;jStat++) {
+        for (int jStat=0;jStat<8;jStat++) {
             delete hPPlusMinus[jC][jStat];
         }
         for (int jStat=0;jStat<4;jStat++) {
@@ -1258,7 +1279,7 @@ cout << "freeing h Array histograms." << endl;
             delete hPNPlus[jC][jStat];
             delete hPNMinus[jC][jStat];
         }
-        for (int jStat=0;jStat<4;jStat++) {
+        for (int jStat=0;jStat<12;jStat++) {
             delete hPNPlusMinus[jC][jStat];
         }
     }
@@ -1275,7 +1296,7 @@ cout << "freeing hpt Array histograms." << endl;
 
             for (int jStat=0;jStat<2;jStat++) {
                 delete hptNSum[jC][jPt][jStat];
-                delete hptNDiff[jC][jPt][jStat];
+                delete hptNDel[jC][jPt][jStat];
                 delete hptNPlus[jC][jPt][jStat];
                 delete hptNMinus[jC][jPt][jStat];
             }
@@ -1323,7 +1344,8 @@ int StEStructFluctuations::getCentBin( int mult ) {
 // The next line is for common mult for 200GeV pp data using refMult.
 // I use the same cuts for tracks in |eta| < 1.
 //    int multCut[] = { 2, 5, 8, 11, 14, 25};
-    int multCut[] = { 3, 8, 25};
+    int multCut[] = { 3, 7, 13, 21, 26, 50};
+//    int multCut[] = { 3, 8, 25};
 #endif
 #endif
 #ifdef USEREFMULT
