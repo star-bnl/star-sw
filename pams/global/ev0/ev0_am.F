@@ -1,7 +1,6 @@
        INTEGER*4 FUNCTION EV0_AM(
      1            ev0par_h,            ev0par ,
      2           globtrk_h,            globtrk ,
-     3           privert_h,            privert ,
      4            vertex_h,            vertex ,
      5            ev0out_h,            ev0out,
      6              trak_h,            trak,
@@ -13,8 +12,6 @@ C     ev0par_h:     control structure header
 C     ev0par:       control structure
 C     globtrk_h:    global track structure header
 C     globtrk:      global track structure 
-C     privert_h:    main vertex information header
-C     privert:      main vertex information
 C     vertex_h:     dst vertex table header
 C     vertex:       dst vertex table, co-ords and pointers to aux tables
 C     ev0out_h:     auxiallary vertex structure header
@@ -105,7 +102,6 @@ c call reconstruction program
 c
         CALL V0_RECONSTRUCT(trak_h, trak,
      +                      ev0par_h,ev0par,
-     +                      privert_h,privert,
      +                      vertex_h,vertex,
      +                      ev0out_h,ev0out,
      +                      bmag_h, bmag)

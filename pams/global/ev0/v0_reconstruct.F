@@ -1,6 +1,5 @@
       INTEGER FUNCTION V0_RECONSTRUCT(trak_h,trak,
      +     ev0par_h,ev0par,
-     +     privert_h,privert,
      +     vertex_h,vertex,
      +     ev0out_h,ev0out,
      +     bmag_h, bmag)
@@ -17,11 +16,13 @@ C     Status		: Tested with svt_hits
 C                       :  JUNE-1997  H. Caines 
 C                          Order in which calcs/tests were made was altered to
 C                          improve speed of search
+C
+C     Modifications:
+C         1.  Removed use of obsolete table evr_privert; L.Ray, 8/19/98
 C----------------------------------------------------------------------
 #include "PAM.inc"
 #include "dst_vertex.inc"
 #include "ev0_aux.inc"
-#include "evr_privert.inc"
 #include "ev0_ev0par.inc"
 #include "ev0_track.inc"
 #include "mft_control.inc"
@@ -29,8 +30,6 @@ C---------------
   
       RECORD/ table_head_st/ ev0par_h
       RECORD/ ev0_ev0par_st/ ev0par(*)
-      RECORD/ table_head_st/ privert_h
-      RECORD/ evr_privert_st/ privert(*)
       RECORD/ table_head_st/ vertex_h
       RECORD/ dst_vertex_st/ vertex(*)
       RECORD/ table_head_st/ ev0out_h
@@ -91,9 +90,22 @@ C---------------
 	rv_cut=ev0par(index).dlen
 	rmin_cut=ev0par(index).dcav0**2
 *
-        mainv(1) = privert(1).x
-        mainv(2) = privert(1).y
-        mainv(3) = privert(1).z
+CC:  Load Primary vertex position coordinates:
+
+      mainv(1) = 0.0
+      mainv(2) = 0.0
+      mainv(3) = 0.0
+      if(vertex_h.nok .gt. 0) then
+         do i = 1,vertex_h.nok
+            if(vertex(i).vtx_id .eq. 1) then
+               mainv(1) = vertex(i).x
+               mainv(2) = vertex(i).y
+               mainv(3) = vertex(i).z
+               go to 100
+            end if
+         end do
+100      continue
+      end if
 
 *-----steering routine------------------------------------------------
 *     
@@ -261,6 +273,7 @@ C---- find square of impact param of reconstructed particle------
                        vertex(vertex_h.nok).pchi2 = 0
                        vertex(vertex_h.nok).id_aux_ent= ok
                        vertex(vertex_h.nok).id = vertex_h.nok
+                       vertex(vertex_h.nok).n_daughters = 2
                        ev0out(ok).px=pp(1)
                        ev0out(ok).py=pp(2)
                        ev0out(ok).pz=pp(3)

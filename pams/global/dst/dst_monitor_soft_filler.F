@@ -56,6 +56,7 @@ CC:>--------------------------------------------------------------------
 CC:  Local Variable Type Declarations:
 
       integer*4 i, secnum, padrow, clusterrow,zindex,ntpc_max
+      integer*4 tpc_track
       parameter (ntpc_max = 10000)
       integer*4 track_index(ntpc_max), tpc_trk_row
 
@@ -140,12 +141,9 @@ CC:  Fill TPC reconstructed space points summary information:
 
       if(tcl_tphit_h.nok .gt. 0) then
          do i = 1,tcl_tphit_h.nok
-            clusterrow = tcl_tphit(i).cluster
-            if(clusterrow.ge.1 .and.
-     1         clusterrow.le.tcl_tpcluster_h.nok) then
-               secnum = tcl_tpcluster(clusterrow).tpc_row/100
+               secnum = tcl_tphit(i).row/100
                if(secnum.ge.1 .and. secnum.le.24) then
-                  padrow = tcl_tphit(i).row
+                  padrow = tcl_tphit(i).row - 100*secnum
                   if(padrow.ge.1 .and. padrow.le.13) then
                      dst_monitor_soft(1).n_pts_tpc_in(secnum) =
      1               dst_monitor_soft(1).n_pts_tpc_in(secnum) + 1
@@ -154,7 +152,6 @@ CC:  Fill TPC reconstructed space points summary information:
      1               dst_monitor_soft(1).n_pts_tpc_out(secnum) + 1
                   end if
                end if
-            end if
          end do
       end if
 
@@ -196,12 +193,9 @@ CC:  Accumulate total charge deposition in TPC in 10 z-bins:
             dst_monitor_soft(1).chrg_tpc_tot = 
      1      dst_monitor_soft(1).chrg_tpc_tot + tcl_tphit(i).q
 
-            clusterrow = tcl_tphit(i).cluster
-            if(clusterrow.ge.1 .and.
-     1         clusterrow.le.tcl_tpcluster_h.nok) then
-               secnum = tcl_tpcluster(clusterrow).tpc_row/100
+               secnum = tcl_tphit(i).row/100
                if(secnum.ge.1 .and. secnum.le.24) then
-                  padrow = tcl_tphit(i).row
+                  padrow = tcl_tphit(i).row - 100*secnum
                   if(padrow.ge.1 .and. padrow.le.13) then
                      dst_monitor_soft(1).chrg_tpc_in(secnum) = 
      1               dst_monitor_soft(1).chrg_tpc_in(secnum) + 
@@ -212,7 +206,6 @@ CC:  Accumulate total charge deposition in TPC in 10 z-bins:
      2                  tcl_tphit(i).q
                   end if
                end if
-            end if
          end do
       end if
 
@@ -402,9 +395,10 @@ CC:           to both be of order 0.5 .
 
       if(tcl_tphit_h.nok .gt. 0) then
          do i = 1,tcl_tphit_h.nok
-            if(tcl_tphit(i).track .gt. 0 .and.
-     1         tcl_tphit(i).track .le. ntpc_max) then
-               tpc_trk_row = track_index(tcl_tphit(i).track)
+         tpc_track = tcl_tphit(i).track/1000
+            if(tpc_track .gt. 0 .and.
+     1         tpc_track .le. ntpc_max) then
+               tpc_trk_row = track_index(tpc_track)
                if(tpc_trk_row .gt. 0 .and. tpc_trk_row .le.
      1            tpt_track_h.nok) then
                   if(tpt_track(tpc_trk_row).tanl .ge. 0.0) then

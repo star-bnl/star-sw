@@ -5,7 +5,6 @@
 #include "PAM.idl"
 #include "ev0_ev0par.idl"
 #include "dst_track.idl"
-#include "evr_privert.idl"
 #include "ev0_aux.idl"
 #include "dst_vertex.idl"
 #include "ev0_track.idl"
@@ -16,7 +15,6 @@ interface ev0_am : amiModule {
                 STAFCV_T call
                         ( in    ev0_ev0par      ev0par
                         , inout dst_track      globtrk
-                        , in    evr_privert    privert
 		        , inout dst_vertex     vertex
                         , out   ev0_aux        ev0out
 		        , inout ev0_track      trak

@@ -18,8 +18,9 @@ C     gtrk     - the refitting array
 C     gtrk contains TPC stats if itpct>0, otherwise has SVT stats
 C     tphit_h     - header for the tphit (tpc hits) table
 C     tphit      - rows of the tphit table
-C     privert_h    - header for the privert (primary vertex) table
-C     privert     - rows of the privert table
+C     privert_h  - header for the dst_vertex table,
+C                  (used to get the primary vertex).
+C     privert    - rows of the dst_vertex table
 C     svt_spt_h  - header for the svt_spt (SVT points) table
 C     svt_spt   - rows of the svt_spt table
 C     svt_track_h - header for the svt_track (SVT candidates) table
@@ -37,6 +38,11 @@ C     iok = user status code
 C     
 C     Functional description:
 C     Fits a helix to the TPC track ipt, including primary vertex point.
+C
+C     Modifications:
+C     1.  Removed the evr_privert table and replaced with the dst_vertex
+C         table; the former having become obsolete -- L. Ray, 8/19/98
+C
 C<-----------------------------------------------------------------------
  
       IMPLICIT NONE
@@ -44,7 +50,7 @@ C<-----------------------------------------------------------------------
 #include "scs_spt.inc"
 #include "tpt_track.inc"
 #include "tcl_tphit.inc"
-#include "evr_privert.inc"
+#include "dst_vertex.inc"
 #include "egr_egrpar.inc"
 #include "egr_track_pointers.inc"
 #include "stk_track.inc"
@@ -62,7 +68,7 @@ C______________________________________________________________________
       RECORD /table_head_st/   svt_group_h
       RECORD /sgr_groups_st/   svt_group(*)
       RECORD /table_head_st/     privert_h
-      RECORD /evr_privert_st/       privert(*)
+      RECORD /dst_vertex_st/       privert(*)
       RECORD /table_head_st/     egrpar_h
       RECORD /egr_egrpar_st/        egrpar(*)
       RECORD /table_head_st/     evt_match_h
@@ -87,6 +93,7 @@ C     Local variables
       REAL    wcir(mxpnt),wlin(mxpnt),pnt(mxpnt)
       REAL    as,bs,cf,xold,yold,theta
       REAL    covar(3,3)
+      REAL*4  prim_vrtx_x, prim_vrtx_y, prim_vrtx_z
       DATA    imsg /0/
 
 C Load the gtrk array with the vertex and SVT points
@@ -124,6 +131,23 @@ C     at start mark all the points that belong to a track as good
       ntry   = 1
       enough=.false.
 
+CC:   Load primary vertex position coordinates:
+
+      prim_vrtx_x = 0.0
+      prim_vrtx_y = 0.0
+      prim_vrtx_z = 0.0
+      if(privert_h.nok .gt. 0) then
+         do i = 1,privert_h.nok
+            if(privert(i).vtx_id .eq. 1) then
+               prim_vrtx_x = privert(i).x
+               prim_vrtx_y = privert(i).y
+               prim_vrtx_z = privert(i).z
+               go to 100
+            end if
+         end do
+100      continue
+      end if
+
 C     try to fit until successful( enough=.true.) or maximum number of
 C     iterations exceeded
 C
@@ -135,9 +159,9 @@ C     load the fitting arrays for the primary vertex
 
          if (ipriv.eq.1) then
             ncir = ncir + 1
-            xcir(ncir) = privert(1).x
-            ycir(ncir) = privert(1).y
-            zcir(ncir) = privert(1).z
+            xcir(ncir) = prim_vrtx_x
+            ycir(ncir) = prim_vrtx_y 
+            zcir(ncir) = prim_vrtx_z
             wcir(ncir) = 500.0        ! Arbitrary, but large, for now
             wlin(ncir) = 1000.0
             pnt(ncir) = gtrk(igtrk).nhit
