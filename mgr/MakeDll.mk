@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.117 1999/09/30 20:07:34 fisyak Exp $
+# $Id: MakeDll.mk,v 1.118 1999/09/30 21:34:49 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.118  1999/09/30 21:34:49  fisyak
+# Reduce include Path
+#
 # Revision 1.117  1999/09/30 20:07:34  fisyak
 # Synchronize cons and makel Path
 #
@@ -295,21 +298,15 @@ SRC_DIRS  += $(ALL_DIRS)
 endif
 
 # 	Define internal and external includes dirs
-INC_NAMES := $(addprefix StRoot/,St_base StChain StUtilities StAnalysisUtilities \
-	xdf2root StarClassLibrary StEvent  StDbLib) \
-        StRoot .share include include/tables .share/$(PKG) pams inc StDb/include
-#                            StarClassLibrary/include
-INC_DIRS  := $(wildcard $(GEN_DIR) $(SRC_DIRS) $(SRC_DIR)/include)
-INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) 
+INC_NAMES := include include/$(PKG)
+INC_DIRS  := $(addprefix $(ROOT_DIR)/,$(INC_NAMES)) $(SRC_DIR)
 ifneq ($(ROOT_DIR),$(STAR))
-INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES)))) $(STAR)
+INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES)))) $(subst $(ROOT_DIR),$(STAR),$(SRC_DIR))
 endif
-INC_DIRS  += $(STAF)/inc $(ROOT_DIR)
-INCINT    := $(INC_DIRS) $(GEN_DIR_INC) $(STAR)/include/$(DOMAIN) $(CERN_ROOT)/include $(ROOTSYS)/src
-FFLAGS   += -DCERNLIB_TYPE
-INC_DIRS  += $(INCINT) $(STAF_UTILS_INCS) 
-
-INC_DIRS += $(CERN_ROOT)/include
+INC_DIRS  += $(STAF)/inc $(ROOTSYS)/src
+INCINT    := $(INC_DIRS)
+FFLAGS    += -DCERNLIB_TYPE
+INC_DIRS  += $(STAF_UTILS_INCS) $(CERN_ROOT)/include 
 
 #	Special includes & .a libraries
 #		MySQL
