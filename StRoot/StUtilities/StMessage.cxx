@@ -1,5 +1,8 @@
-// $Id: StMessage.cxx,v 1.15 1999/09/11 23:12:23 fisyak Exp $
+// $Id: StMessage.cxx,v 1.16 1999/09/14 15:42:03 genevb Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.16  1999/09/14 15:42:03  genevb
+// Some bug fixes, workaround for nulls in strings
+//
 // Revision 1.15  1999/09/11 23:12:23  fisyak
 // Add cast for HP
 //
@@ -76,12 +79,13 @@ ClassImp(StMessage)
 StMessage::StMessage(char *mess, char *ty, char* opt) :
 type(new char[2]),
 messTime() {
-  char* type1 = (char *) type;
+  char* type1 = (const_cast<char*> (type));
   *type1 = *ty;
   *(++type1) = 0;
   static char space = ' ';
   size_t len = strlen(opt);
-  option = new char[len];
+  option = new char[(len+1)];
+  option[len] = 0;
   while (len--)
     option[len] = toupper(opt[len]);  // capitalize while copying
 //  location = "Unknown";
@@ -95,6 +99,9 @@ messTime() {
 }
 //_____________________________________________________________________________
 StMessage::~StMessage() {
+  delete [] message;
+  delete [] (const_cast<char*> (type));
+  delete [] option;
 }
 //_____________________________________________________________________________
 int StMessage::Print(int nChars) {
@@ -149,7 +156,7 @@ int StMessage::Print(int nChars) {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.15 1999/09/11 23:12:23 fisyak Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.16 1999/09/14 15:42:03 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

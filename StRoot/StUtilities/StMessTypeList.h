@@ -1,5 +1,8 @@
-// $Id: StMessTypeList.h,v 1.5 1999/09/10 21:05:55 genevb Exp $
+// $Id: StMessTypeList.h,v 1.6 1999/09/14 15:42:03 genevb Exp $
 // $Log: StMessTypeList.h,v $
+// Revision 1.6  1999/09/14 15:42:03  genevb
+// Some bug fixes, workaround for nulls in strings
+//
 // Revision 1.5  1999/09/10 21:05:55  genevb
 // Some workarounds for RedHat6.0
 //
@@ -72,9 +75,9 @@ class StMessTypeList {
             const char* FindNumType(size_t typeNum);
             const char* FindNumText(size_t typeNum);
             const char* Text(const char* type) {
-                          static StMessTypePair* temp = FindType(type);
+                          StMessTypePair* temp = FindType(type);
                           return ( (temp) ? temp->Text() : 0 );
-                          }
+                        }
                     int ListTypes();
 };
 
