@@ -18,7 +18,7 @@
 * by positioning of modules.
 * 
 +include,AGECOM,GCUNIT,GCONST.
-    Author    Subhasis Chattopadhyay,
+    Author    Subhasis, Viyogi, Bedanga
     Created   03-july-2001
     Content   PHMD,PMDA,PHCA,PCBA,BASA,AIRA,PPBA,PFEA,
 	      STRA,PDCU,PDGS,PSTR,PHMS
