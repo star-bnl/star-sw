@@ -1,19 +1,18 @@
 #! /usr/local/bin/perl -w 
 
-# parse production log file
+# parse production log file and create summary file
 
 #=========================================================
 use strict;
 use Sys::Hostname;
 my $hostname     = hostname();
-my $dir_log      = "/disk00001/star/MDC3/testl";
-my $dir_sum      = "../sum";   
+my $dir_log      = "/disk00001/star/prod4/log/tfs";
+my $dir_sum      = "../../sum/tfs";   
 my @set ;
 my @list;      
 my $job_log;
 my $dummy;
 my $file_sum;
-my $dir_lg       = "../log";
 my $name_log;
 
 #=========================================================
@@ -26,8 +25,7 @@ foreach my $file (@list) {
              timestamp($file);
               chop $file;
             $name_log = $file; 
-         $dummy = `mv $file_sum sum`;
-#         $dummy = `mv $name_log $dir_lg`;   
+         $dummy = `mv $file_sum $dir_sum`;   
            }             
     }
 
