@@ -46,7 +46,7 @@ EEfeeDataBlock ::  ~EEfeeDataBlock() {
 //--------------------------------------------------
 void EEfeeDataBlock :: print(int flag){
   printf("feeDataBlock Head: 0x%04hx 0x%04hx 0x%04hx 0x%04hx ",head[0],head[1],head[2],head[3]);
-  printf("\n --> token/hex=%2x  crateID=%x  trigType=%x NpositiveData=%d\n",
+  printf("\n --> token=0x%2x  crateID=0x%x  trigType=0x%x  NpositiveData=%d\n",
 	 getToken(),getCrateID(),getTrigType(),getNData(0));
   
   if(flag<=0) return;
