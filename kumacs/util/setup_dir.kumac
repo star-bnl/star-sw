@@ -43,14 +43,10 @@ mkdir  /dui/geant/Run
 
  
 mkdir  /dui/raw_data 
-mkdir  /dui/raw_data/ctf/
-mkdir  /dui/raw_data/ctf/pixels
 mkdir  /dui/raw_data/emc/
 mkdir  /dui/raw_data/emc/pixels
 mkdir  /dui/raw_data/ftpc/
 mkdir  /dui/raw_data/ftpc/pixels
-mkdir  /dui/raw_data/mwc/
-mkdir  /dui/raw_data/mwc/pixels
 mkdir  /dui/raw_data/svt/
 mkdir  /dui/raw_data/svt/pixels
 mkdir  /dui/raw_data/tpc/
@@ -58,8 +54,6 @@ mkdir  /dui/raw_data/tpc/pixels
   
 mkdir  /dui/data/ 
 mkdir  /dui/data/ctf/
-mkdir  /dui/data/ctf/tracks/
-mkdir  /dui/data/ctf/hits/
 mkdir  /dui/data/emc/
 mkdir  /dui/data/emc/tracks/
 mkdir  /dui/data/emc/hits/
@@ -70,11 +64,10 @@ mkdir  /dui/data/global
 mkdir  /dui/data/global/tracks
 mkdir  /dui/data/global/vertices
 mkdir  /dui/data/mwc/
-mkdir  /dui/data/mwc/tracks/
-mkdir  /dui/data/mwc/hits/
 mkdir  /dui/data/svt/
 mkdir  /dui/data/svt/tracks/
 mkdir  /dui/data/svt/hits/
 mkdir  /dui/data/tpc/
 mkdir  /dui/data/tpc/tracks/
 mkdir  /dui/data/tpc/hits/
+mkdir  /dui/data/trg       
