@@ -8,7 +8,7 @@
        long      id_globtrk; /* id of reconstructed/sim global track */
        long      nseq;       /* number of sequences contributing to hit */
        long      row;        /* TPC row number */
-       long      track;      /* id of a track to which the pnt was assgn */
+       long      track;      /* track_id*1000+position on on a track (starts from 1) */
        float     alpha;      /* reconstructed crossing angle in xy */
        float     dalpha;     /* error on the crossing angle */
        float     dlambda;    /* error on the dip angle (degree) */
@@ -25,6 +25,6 @@
        float     z;          /* reconstructed z coordinate */
        float     zrf;        /* value of the drift response (cm) */
    };
-/*  Last mod. for tphit: $Date: 1999/02/22 21:26:23 $ */
+/*  Last mod. for tphit: $Date: 1999/11/07 02:57:16 $ */
 
 
