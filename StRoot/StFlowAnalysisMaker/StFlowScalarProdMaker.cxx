@@ -1,9 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowScalarProdMaker.cxx,v 1.1 2001/12/18 23:46:47 aihong Exp $
+// $Id: StFlowScalarProdMaker.cxx,v 1.2 2001/12/21 17:01:59 aihong Exp $
 //
 // Authors: Method proposed by Art and Sergei, code written by Aihong
-//
+//          Frame adopted from Art and Raimond's StFlowAnalysisMaker.
 ////////////////////////////////////////////////////////////////////////////
 //
 // Description:  Maker to analyze Flow using the scalar product method
@@ -85,7 +85,7 @@ Int_t StFlowScalarProdMaker::Make() {
 Int_t StFlowScalarProdMaker::Init() {
   // Book histograms
 
-  float ptMaxPart = 6.;
+  float ptMaxPart = Flow::ptMaxPart;
   if (pFlowSelect->PtMaxPart()) {
     ptMaxPart = pFlowSelect->PtMaxPart();
   }
@@ -166,7 +166,7 @@ Int_t StFlowScalarProdMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.1 2001/12/18 23:46:47 aihong Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.2 2001/12/21 17:01:59 aihong Exp $");
 
   return StMaker::Init();
 }
@@ -413,6 +413,9 @@ Int_t StFlowScalarProdMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowScalarProdMaker.cxx,v $
+// Revision 1.2  2001/12/21 17:01:59  aihong
+// minor changes
+//
 // Revision 1.1  2001/12/18 23:46:47  aihong
 // install scalar product method
 //
