@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.13 2000/05/01 21:08:57 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.14 2000/05/12 20:29:48 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -171,11 +171,11 @@
    $CC       = "cc";
    $LD       = $CXX;
    $SO       = $CXX;
-   $CXXFLAGS = "+W70,495,740,749,823,829 -z +Z -Dextname ";
-   $R_CPPFLAGS .= " -DR__ACC -DG__REGEXP -DG__UNIX -DG__HPUXCPPDLL -DG__SHAREDLIB -D_POSIX2_SOURCE -DG__ROOT -DG__REDIRECTIO -D__STDCPP__";
-   $CINTCXXFLAGS = "-z +Z " . " " . $R_CPPFLAGS;
-   $CFLAGS   = " -Ae -z +Z -Dextname ";  
-   $CINTCFLAGS = $CFLAGS .  $R_CPPFLAGS . " -D__STDCPP__";
+   $CXXFLAGS = "+W70,495,740,749,823,829 -z +Z -Dextname";
+   $R_CPPFLAGS .= " -DR__ACC -DG__REGEXP -DG__UNIX -DG__HPUXCPPDLL -DG__SHAREDLIB  -DG__ROOT -DG__REDIRECTIO -D__STDCPP__";
+   $CINTCXXFLAGS = "-z +Z " . $R_CPPFLAGS . " -D_POSIX2_SOURCE"; 
+   $CFLAGS   = " -Ae -z +Z -Dextname";  
+   $CINTCFLAGS = $CFLAGS .  $R_CPPFLAGS . " -D_POSIX2_SOURCE";
    $SOEXT    = "sl";
 #   $XLIBS    = $ROOTSYS . "../lib/libXpm.a -lX11";
    $XLIBS    = $ROOTSYS . "/lib/libXpm.a -L/usr/lib/X11R5 -lX11";
