@@ -36,8 +36,6 @@ class StEmcDecoder
     int       TDC_Crate[30];
     int       Crate_TDC[30];
     int       ReverseOrder[4800];
-		int       PMT_Box[60];
-		int       ReversePMT_Box[4800][2];
     
     int       SmdModules[8][15];
     int       FEE1[4],FEE2[4],FEE3[4];
@@ -62,12 +60,10 @@ class StEmcDecoder
     int       GetDaqIdFromTowerId(int,int&);///< Get Daq Id from Software Id for towers
     int       GetTowerIdFromCrate(int,int,int&);///<Get Software Id from Crate number and position in crate for towers
     int       GetTowerIdFromTDC(int,int,int&);///<Get Software Id from TDC channel number and position in TDC for towers
-    int       GetTowerIdFromPMTBox(int,int,int&);///<Get Software Id from PMT Box number and position in the box for towers
     int       GetTowerCrateFromDaqId(int,int&,int&);///< Get crate number from Daq Id for towers
     int       GetTowerCrateFromTDC(int,int&);///<Get crate number from TDC channel for towers
     int       GetTowerTDCFromCrate(int,int&);///< Get TDC channel from crate number for towers
     int       GetTowerTDCFromDaqId(int,int&);///< Get TDC channel from Daq Id for towers
-		int       GetPMTBoxFromTowerId(int,int&,int&); ///<Get PMT box and position from tower Id
     int       GetTowerBin(int,int&,int&,int&);///<Transition from environment rid to m,e,s for towers
     
     int       GetSmdCoord(int,int,int&,int&,int&,int&);///<Get SMD detector (3==SMDE, 4==SMDP), m, e, s from RDO and position for SMD
