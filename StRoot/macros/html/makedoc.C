@@ -1,5 +1,8 @@
-// $Id: makedoc.C,v 1.44 1999/10/03 00:09:53 fine Exp $
+// $Id: makedoc.C,v 1.45 1999/10/29 16:45:06 fine Exp $
 // $Log: makedoc.C,v $
+// Revision 1.45  1999/10/29 16:45:06  fine
+// new macro videoStyle and bolStyle have been introduced
+//
 // Revision 1.44  1999/10/03 00:09:53  fine
 // New classes docs StMicky and StCL have been introduced
 //
@@ -236,6 +239,8 @@
   // Make HTML docs for the "plain" text files those are not in the dictionaries
   cout << " Making HTML's for macros" << endl;
   html.Convert("../test/micky.C","\"Micky\" to test the <matrix> and <triangilar matrix> methods");
+  html.Convert("../graphics/boldStyle.C","Style file for making presentation histograms.");
+  html.Convert("../graphics/videoStyle.C","Style file for video presentation histograms.");
   html.Convert("../graphics/PadBrowser.C","How to use St_geom_Maker and StPadDisplayMaker");
   html.Convert("../graphics/basic3dPrimitives.C","An example of the basic 3D STAR object");
   html.Convert("../graphics/EventPanel.C","An example of the ToolBar to control an applications");
