@@ -157,7 +157,7 @@ St_NodeView::St_NodeView(Double_t *translate, Double_t *rotate, UInt_t positionI
 
 //_____________________________________________________________________________
 St_NodeView::St_NodeView(St_Node *thisNode,St_NodePosition *nodePosition)
-            : St_ObjectSet(thisNode->GetName(),(TObject *)nodePosition),fListOfShapes(0)
+            : St_ObjectSet(thisNode?thisNode->GetName():"",(TObject *)nodePosition),fListOfShapes(0)
 {
   SafeDelete(fListOfShapes);
   if (thisNode) 
