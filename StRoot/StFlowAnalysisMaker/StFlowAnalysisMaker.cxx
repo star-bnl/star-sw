@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.13 2000/01/13 21:50:22 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.14 2000/01/14 01:13:34 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.14  2000/01/14 01:13:34  snelling
+// modified spt (sum pt) to mpt (mean pt) because FlowTag changed
+//
 // Revision 1.13  2000/01/13 21:50:22  posk
 // Updates and corrections.
 //
@@ -148,7 +151,7 @@ Int_t StFlowAnalysisMaker::Make() {
 
 void StFlowAnalysisMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.13 2000/01/13 21:50:22 posk Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.14 2000/01/14 01:13:34 snelling Exp $"
        << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
@@ -566,10 +569,10 @@ void StFlowAnalysisMaker::fillFromTags() {
     mMultSub[1][j]   = pFlowTag->nb[j];
     mMultSub[2][j]   = pFlowTag->nc[j];
     mMultSub[3][j]   = pFlowTag->nd[j];
-    mMeanPtSub[0][j] = pFlowTag->spta[j];
-    mMeanPtSub[1][j] = pFlowTag->sptb[j];
-    mMeanPtSub[2][j] = pFlowTag->sptc[j];
-    mMeanPtSub[3][j] = pFlowTag->sptd[j];
+    mMeanPtSub[0][j] = pFlowTag->mpta[j];
+    mMeanPtSub[1][j] = pFlowTag->mptb[j];
+    mMeanPtSub[2][j] = pFlowTag->mptc[j];
+    mMeanPtSub[3][j] = pFlowTag->mptd[j];
 
     // calculate Psi
     for (int i = 0; i < nSels+nSubs; i++) {
