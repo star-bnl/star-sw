@@ -18,7 +18,7 @@ memset(&row,0,tableSet->GetRowSize());
     row.adcConversion           =  1000.0; // D=  electrons/adc value    ;
     row.chamberCathodeVoltage   =  -10000; // D=  drift cathode voltage [V]    ;
     row.sigmaPadResponseFuntion =    1500; // D=  pad-response-function sigma [um]    ;
-    row.shaperTime	        =     150; // D=  shaper time FWHM [ns]    ;
+    row.shaperTime	        =     507; // D=  shaper time FWHM [ns] -> 350ns measured + 45% to match dAu data  ;
     row.slowSimPressure         = 1013.25; // D = atmospheric pressure used;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
