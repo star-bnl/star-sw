@@ -6,6 +6,9 @@ Package coordinator: Thomas Ullrich
 Modification history
 ====================
 
+02/10/1999 T. Wenaus
+  - print the required 'lousy compiler' line only for the lousy (Sun)
+    compiler (StEvent.cc)
 01/30/1999 T. Wenaus
   - minor changes to table loader constructor interfaces
   - StTables/ => tables/ which is understood by standard makefiles
