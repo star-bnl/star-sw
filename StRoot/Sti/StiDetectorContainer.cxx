@@ -40,7 +40,7 @@ void StiDetectorContainer::kill()
     return;
 }
 
-StiDetectorContainer::StiDetectorContainer() : mroot(0), mregion(0)
+StiDetectorContainer::StiDetectorContainer() : mroot(0), mregion(0), mLeafIt(0)
 {
     cout <<"StiDetectorContainer::StiDetectorContainer()"<<endl;
     sinstance = this;
@@ -49,7 +49,10 @@ StiDetectorContainer::StiDetectorContainer() : mroot(0), mregion(0)
 StiDetectorContainer::~StiDetectorContainer()
 {
     cout <<"StiDetectorContainer::~StiDetectorContainer()"<<endl;
-//    clearAndDestroy();
+    if (mLeafIt) {
+	delete mLeafIt;
+	mLeafIt=0;
+    }
 }
 
 void StiDetectorContainer::setToDetector(double radius)
@@ -78,29 +81,26 @@ void StiDetectorContainer::setToDetector(double radius, double angle)
 
 void StiDetectorContainer::setToDetector(StiDetector* layer)
 {
-    StiCompositeLeafIterator<data_t> leafit(mroot); //Find the leaves
+    //StiCompositeLeafIterator<data_t> leafit(mroot); //Find the leaves
     
     SameData<data_t> mySameData;
     mySameData.thedata = layer;
 
-    data_node_vec::const_iterator where = find_if(leafit.const_begin(), leafit.const_end(), mySameData);
-    if (where==leafit.const_end()) {
+    data_node_vec::const_iterator where = find_if(mLeafIt->const_begin(), mLeafIt->const_end(), mySameData);
+    if (where==mLeafIt->const_end()) {
 	cout <<"StiDetectorContainer::setToDetector(StiDetector*)\tError:\tlayer not found in leaves.  Reset and Abort"<<endl;
 	reset();
 	return;
     }
     else {
-	setToStartPoint(*where);
+	setToLeaf(*where);
     }
 }
 
 void StiDetectorContainer::reset()
 {
-    //mradial_it = mregion->begin();
-    //mphi_it = (*mradial_it)->begin();
-    mstart_it = mstartvec.begin();
-    setToStartPoint(*mstart_it);
-    
+    mradial_it = mregion->begin();
+    mphi_it = (*mradial_it)->begin();
     return;
 }
 
@@ -176,8 +176,10 @@ void StiDetectorContainer::buildDetectors(const char* buildDirectory, data_node_
     if (where==mroot->end()) {
 	cout <<"Error:\tmidrapidity region not found"<<endl;
     }
+    //Find leaves
+    mLeafIt = new StiCompositeLeafIterator<data_t>(mroot);
+
     mregion = (*where);
-    findStartPoints();
     reset();
 
     return;
@@ -187,70 +189,22 @@ void StiDetectorContainer::print() const
 {
 }
 
-bool StiDetectorContainer::hasMoreStartPoints() const
+//We assume that the node is a leaf in phi
+void StiDetectorContainer::setToLeaf(data_node* node)
 {
-    data_node_vec::const_iterator last = mstartvec.end();
-    --last;
-    bool val = (mstart_it < last);
-    return val;
-}
-
-void StiDetectorContainer::nextStartPoint()
-{
-    if (mstart_it != mstartvec.end()) {
-	++mstart_it;
-	setToStartPoint(*mstart_it);
-    }
-}
-
-//Assume that the node is a leaf in phi
-void StiDetectorContainer::setToStartPoint(data_node* node)
-{
-    //cout <<"StiDetectorContainer::setToStartPoint()"<<endl;
-    //Find where we are in phi ordering
-    //cout <<"Set To node:\t"<<node->getName()<<endl;
+    //cout <<"StiDetectorContainer::setToLeaf()"<<endl;
     data_node* parent_in_phi = node->getParent();
-    //cout <<"Parent_in_phi:\t"<<parent_in_phi->getName()<<endl;
     mphi_it = find(parent_in_phi->begin(), parent_in_phi->end(), node);
     if (mphi_it == parent_in_phi->end() ) {
-	cout <<"StiDetectorContainer::setToStartPoint()\tError!\t parent in phi iterator not found"<<endl;
+	cout <<"StiDetectorContainer::setToLeaf()\tError!\t parent in phi iterator not found"<<endl;
 	return;
     }
-    //cout <<"(*phi_it):\t"<<(*mphi_it)->getName()<<endl;
     //Find where we are in radial ordering
     data_node* parent_in_radius = parent_in_phi->getParent();
-    //cout <<"Parent_in_radius:\t"<<parent_in_radius->getName()<<endl;
     mradial_it = find(parent_in_radius->begin(), parent_in_radius->end(), parent_in_phi);
     if (mradial_it == parent_in_radius->end() ) {
-	cout <<"StiDetectorContainer::setToStartPoint()\tError!\t parent in radius iterator not found"<<endl;
+	cout <<"StiDetectorContainer::setToLeaf()\tError!\t parent in radius iterator not found"<<endl;
 	return;
     }
-    //cout <<"(*radial_it):\t"<<(*mradial_it)->getName()<<endl;
 }
 
-void StiDetectorContainer::findStartPoints() 
-{
-    if (!mroot) {
-	cout <<"StiDetectorContainer::findStartPoints\tError!\troot undefined"<<endl;
-	return;
-    }
-
-    //Find last radial point
-    else if (mregion->size()<=0) {
-	cout <<"StiDetectorContainer::findStartPoints\tError!\tRegion has zero size"<<endl;
-	return;
-    }
-    else {
-	/*
-	  data_node_vec::iterator radial_outside = (mregion->end());
-	  --radial_outside;
-	  //Get last points 
-	  for (data_node_vec::iterator it=(*radial_outside)->begin(); it!=(*radial_outside)->end(); ++it) {
-	*/
-	//Get last points 
-	for (data_node_vec::iterator it=mregion->back()->begin(); it!=mregion->back()->end(); ++it) {
-	    mstartvec.push_back(*it);
-	}
-    }
-    mstart_it = mstartvec.begin();
-}
