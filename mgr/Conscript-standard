@@ -71,14 +71,14 @@ my $STIC    = $env->{STIC};
 my $EXTRA_CPPFLAGS = $env->{EXTRA_CPPFLAGS};
 my ($i, $obj);
 my $LIBPKG = "";
-my @g77pkgs = qw(gcalor geant321 agetof StBichsel Bichsel geometry gen sim StEeFit); 
-my $g77pkgs = join('|', @g77pkgs);
-if ($FC eq 'pgf77' && $pkg =~ /$g77pkgs/) {
+my @g77pkgs = qw(geometry gen sim); 
+my $g77pkgs = join('|', @g77pkgs); print "FC = $FC pkg = $pkg DirPath = $DirPath\n" if $param::debug;
+if ($FC eq 'pgf77' and ($DirPath  =~ /$g77pkgs/ or $DirPath !~ /pams/)) {
   $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
   $FFLAGS   = $env->{G77FLAGS}; 
   $FEXTEND  = $env->{G77EXTEND};
 } 
-if ($FC eq 'g77' and ($pkg eq 'gen' or $pkg eq 'sim' or  $DirPath =~ /pams|StRoot/ and ! ($pkg =~ /$g77pkgs/))) {
+if ($FC eq 'g77' and $DirPath =~ /pams/) {
   $FCCOM    = $env->{FCviaAGETOFCOM};
 }
 
@@ -211,7 +211,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     } elsif ( $pkg =~ m/^StDaqLib$/ ) {
 	$CPPPATH = "#" . $Dir . $main::PATH_SEPARATOR . $env->{CPPPATH};
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
-    } elsif ( $pkg =~ m/^gcalor$/ || $pkg =~ m/^geant321$/) {
+      } elsif ( $pkg =~ m/^gcalor$/ || $pkg =~ m/^geant321$/) {
         $LIBPKG = "lib" . $pkg . "." . $env->{SUFLIB};
 	$SO_PKG = "";
 	$FCPATH = "#" . $Dir . "/../geant321" .
@@ -221,7 +221,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$FPPFLAGS = " -DCOMMONS_CONFIG_H -DCERNLIB_LINUX -DCPP_VERS=\"'W'\"";
       } elsif ( $pkg =~ m/^g2t/ || $pkg =~ m/^gstar/ || $pkg =~ m/^geometry/ ) {
 	$FCPATH .=  $main::PATH_SEPARATOR . "#asps/Simulation/starsim/include/atlsim";
-      }
+      } 
     if ( $#idlM > -1 ) {
 	$CPPPATH = $INCLUDE . "/" . $pkg . $main::PATH_SEPARATOR . $CPPPATH;
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
@@ -230,7 +230,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$CPPPATH .= $main::PATH_SEPARATOR . $INCLUDE . "/tables" . $main::PATH_SEPARATOR . "#";;
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
     }
-
+    
 
     if ( $LIBPKG && $Dir =~ /pams\// || $STAR_SYS =~ /^intel_wnt$/ ) {
 	$LIBS .= " -l" . $pkg;    #"lib" . $pkg . "." . $env->{SUFLIB};
@@ -241,9 +241,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	}
     }
     if (($pkg eq 'StHbtMaker' or $pkg eq 'StMuDSTMaker') and $CC ne 'gcc' and $CC ne 'icc') {
-# fight with __PRETTY_FUNCTION__
+      # fight with __PRETTY_FUNCTION__
       $EXTRA_CPPFLAGS .= " -DDEBUGMESSAGE\\\(x\\\)=\"\"  -DDEBUGMESSAGE1\\\(x\\\)=\"\"  -DDEBUGMESSAGE2\\\(x\\\)=\"\"  -DDEBUGMESSAGE3\\\(x\\\)=\"\"  -DFORCEDDEBUGMESSAGE\\\(x\\\)=\"\"";
-}
+    }
     #print "_+_+_+_+_+ $CPPPATH $CXXFLAGS $LIBS $CPPPATH $LIBPATH _+_+_+_+_+\n";
 
     if ( $STAR_SYS =~ /^sun4x_5.$/ ) { $CXXFLAGS .= " -ptr" . $obj_dir; }
