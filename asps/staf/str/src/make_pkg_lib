@@ -35,8 +35,8 @@ if ( "$STAR_ARCH" == "sun4" ) then
 else if ( "$STAR_ARCH" == "hpux" ) then
    setenv ARCH_TAG    "_hpu"
    setenv ARFLAGS     " lqv "
-   setenv FFLAGS      " +e +es -c +ppu +U77 +800 "
-   setenv FFLAGS_DBG  " +e +es -c -g +ppu +U77 +800 "
+   setenv FFLAGS      " +e +es -c +ppu +800 "
+   setenv FFLAGS_DBG  " +e +es -c -g +ppu +800 "
    setenv CCFLAGS     " -c -DHPUX "
    setenv CCFLAGS_DBG " -c -g -DHPUX "
 else if ( "$STAR_ARCH" == "irix" ) then
