@@ -142,17 +142,6 @@ tdm/table/cell/putvalue 'stk_filler[0].wth87' 120.0
 
 cd /dui
 
- message ' !!! init_stk: vertex not found,  filled from MC ***'
- 
-  cd [data]/global/vertices
-  tdm/newtable stk_vtx stk_vtx 1
-  tdm/table/rowcount stk_vtx 1
-  tdm/table/cell/putvalue 'stk_vtx[0].id' 1
-  tdm/table/cell/putvalue 'stk_vtx[0].flag' 1
-  tdm/table/cell/putvalue 'stk_vtx[0].t' 0
-  tdm/table/cell/putvalue 'stk_vtx[0].x' 0.0 0.0 0.0
-  tdm/table/cell/putvalue 'stk_vtx[0].cov' 0.0 0.0 0.0 0.0 0.0 0.0 
-cd /dui
 
 
 
