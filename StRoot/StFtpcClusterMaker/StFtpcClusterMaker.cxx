@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.22 2001/04/23 19:57:51 oldi Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.23 2001/06/13 14:37:54 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.23  2001/06/13 14:37:54  jcs
+// change StDaqReader to StDAQReader
+//
 // Revision 1.22  2001/04/23 19:57:51  oldi
 // The chargestep histogram is only filled but the evaluated value of the
 // normalized pressure is not used for a correction. This was done due to the
@@ -190,7 +193,7 @@ Int_t StFtpcClusterMaker::Make()
   St_DataSet *daqDataset;
   StDAQReader *daqReader;
   StFTPCReader *ftpcReader=NULL;
-  daqDataset=GetDataSet("StDaqReader");
+  daqDataset=GetDataSet("StDAQReader");
   if(daqDataset)
     {
       gMessMgr->Message("", "I", "OST") << "Using StDAQReader to get StFTPCReader" << endm;
