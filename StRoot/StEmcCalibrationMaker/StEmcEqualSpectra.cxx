@@ -162,6 +162,7 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
 		b=-log((A2*I1)/(A1*I2));
 		EqDone=kTRUE;
     if(!finite(a) || !finite(b) || a<=0 || b>1000) EqDone = kFALSE;
+    b=0;
     cout <<"  id = "<<position2<<"  ref = "<<position1<<"  slopes = "<<m2<<" , "<<m1
          <<"  a = "<<a<<"  b = "<<b<<"  EQDONE = "<<(Int_t)EqDone<<endl;
 		delete f;
