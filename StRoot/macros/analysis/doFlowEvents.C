@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.41 2002/06/10 22:56:40 posk Exp $
+// $Id: doFlowEvents.C,v 1.42 2002/07/01 16:11:54 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -96,7 +96,6 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   gSystem->Load("StMagF");
 
   gSystem->Load("StFlowMaker");
-  gSystem->Load("StFlowTagMaker");
   gSystem->Load("StFlowAnalysisMaker");
 
   gSystem->Load("StStrangeMuDstMaker");
@@ -200,19 +199,14 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   
   //////////////
   // Flow Makers
-  //   Use of the TagMaker is optional.
   //   The AnalysisMaker, CumulantMaker, and ScalarProdMaker may be used with
   //   a selection object.
-  bool tagMaker = kFALSE;
-  //bool tagMaker = kTRUE;
   //bool anaMaker = kFALSE;
   bool anaMaker = kTRUE;
   bool cumMaker = kFALSE;
   //bool cumMaker = kTRUE;
   bool spMaker = kFALSE;
   //bool spMaker = kTRUE;
-
-  if (tagMaker) StFlowTagMaker* flowTagMaker = new StFlowTagMaker();
 
   if (makerName[0]=='\0') { // blank if there is no selection object
     if (anaMaker) StFlowAnalysisMaker*  flowAnalysisMaker = new StFlowAnalysisMaker();
@@ -243,7 +237,6 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   
   // Set Debug status
 //  flowMaker->SetDebug();
-//  flowTagMaker->SetDebug();
 //  flowAnalysisMaker->SetDebug();
 //  flowCumulantMaker->SetDebug();
 //  flowScalarProdMaker->SetDebug();
@@ -433,16 +426,8 @@ void doFlowEvents(const Int_t nevents)
 // PDSF pico files
   // 200 GeV
   
-  // P02gc
-//   Char_t* filePath="/auto/stardata/starspec2/flow_pDST_production/reco/ProductionMinBias/FullField/P02gc/2001/";
-//   if (nevents < 250) {
-//     Char_t* fileExt="2269018/st_physics_2269018_raw_0001.flowpicoevent.root";
-//   } else {
-//     Char_t* fileExt="*/*.flowpicoevent.root";
-//   }
-
-  // P02gd
-//   Char_t* filePath="/auto/stardata/starspec3/flow_pDST_production/reco/ProductionMinBias/ReversedFullField/P02gd/2001/2258044/";
+  // P02gcd
+//   Char_t* filePath="/auto/stardata/starspec3/flow_pDST_production_removed_l3_trigged_events/reco/ProductionMinBias/ReversedFullField/P02gc_P02gd/2001/2258044/";
 //   if (nevents < 250) {
 //     Char_t* fileExt="st_physics_2258044_raw_0026.flowpicoevent.root";
 //    } else {
@@ -485,6 +470,9 @@ void doFlowEvents(const Int_t nevents)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.42  2002/07/01 16:11:54  posk
+// Removed StFlowTagMaker.
+//
 // Revision 1.41  2002/06/10 22:56:40  posk
 // pt and eta weighting now default.
 //
