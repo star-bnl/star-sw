@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.15 2003/05/20 18:35:04 oldi Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.16 2003/05/21 09:47:35 putschke Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.16  2003/05/21 09:47:35  putschke
+// Include rotation around y-axis for FTPC east and west
+//
 // Revision 1.15  2003/05/20 18:35:04  oldi
 // Cuts for vertex estimation introduced (globDca < 1 cm, multiplicity >= 200).
 //
@@ -156,9 +159,16 @@ inline StThreeVectorD StFtpcTrackingParams::TpcPositionInGlobal() { return mTpcP
 
 inline StMatrixD StFtpcTrackingParams::FtpcRotation(Int_t i)          { return *mFtpcRotation[i];           }
 inline StMatrixD StFtpcTrackingParams::FtpcRotationInverse(Int_t i)   { return *mFtpcRotationInverse[i];    }
+inline StMatrixD StFtpcTrackingParams::FtpcRotationX(Int_t i)         { return *mFtpcRotationX[i];           }
+inline StMatrixD StFtpcTrackingParams::FtpcRotationXInverse(Int_t i)  { return *mFtpcRotationXInverse[i];    }
+inline StMatrixD StFtpcTrackingParams::FtpcRotationY(Int_t i)         { return *mFtpcRotationY[i];           }
+inline StMatrixD StFtpcTrackingParams::FtpcRotationYInverse(Int_t i)  { return *mFtpcRotationYInverse[i];    }
+
+inline  Double_t StFtpcTrackingParams::InstallationPointX(Int_t i)    { return (i>=0 && i<=1) ? mInstallationPointX[i] : 0.; }
 inline  Double_t StFtpcTrackingParams::InstallationPointY(Int_t i)    { return (i>=0 && i<=1) ? mInstallationPointY[i] : 0.; }
 inline  Double_t StFtpcTrackingParams::InstallationPointZ(Int_t i)    { return (i>=0 && i<=1) ? mInstallationPointZ[i] : 0.; }
 inline  Double_t StFtpcTrackingParams::ObservedVertexOffsetY(Int_t i) { return (i>=0 && i<=1) ? mObservedVertexOffsetY[i] : 0.; }
+inline  Double_t StFtpcTrackingParams::ObservedVertexOffsetX(Int_t i) { return (i>=0 && i<=1) ? mObservedVertexOffsetX[i] : 0.; }
 
 // magnetic field table
 inline Double_t StFtpcTrackingParams::MagFieldFactor()  { return mMagFieldFactor; }
@@ -240,6 +250,15 @@ StFtpcTrackingParams::StFtpcTrackingParams(St_ftpcTrackingPars *trackPars,
   mFtpcRotation[1] = new StMatrixD(3, 3, 1);
   mFtpcRotationInverse[0] = new StMatrixD(3, 3, 1);
   mFtpcRotationInverse[1] = new StMatrixD(3, 3, 1);
+  mFtpcRotationX[0] = new StMatrixD(3, 3, 1);
+  mFtpcRotationX[1] = new StMatrixD(3, 3, 1);
+  mFtpcRotationXInverse[0] = new StMatrixD(3, 3, 1);
+  mFtpcRotationXInverse[1] = new StMatrixD(3, 3, 1);
+  mFtpcRotationY[0] = new StMatrixD(3, 3, 1);
+  mFtpcRotationY[1] = new StMatrixD(3, 3, 1);
+  mFtpcRotationYInverse[0] = new StMatrixD(3, 3, 1);
+  mFtpcRotationYInverse[1] = new StMatrixD(3, 3, 1);
+  
 
   InitTrackingParams(trackPars->GetTable());
   InitdEdx(dEdxPars->GetTable());
@@ -259,6 +278,14 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
   mFtpcRotation[1] = new StMatrixD(3, 3, 1);
   mFtpcRotationInverse[0] = new StMatrixD(3, 3, 1);
   mFtpcRotationInverse[1] = new StMatrixD(3, 3, 1);
+  mFtpcRotationX[0] = new StMatrixD(3, 3, 1);
+  mFtpcRotationX[1] = new StMatrixD(3, 3, 1);
+  mFtpcRotationXInverse[0] = new StMatrixD(3, 3, 1);
+  mFtpcRotationXInverse[1] = new StMatrixD(3, 3, 1);
+  mFtpcRotationY[0] = new StMatrixD(3, 3, 1);
+  mFtpcRotationY[1] = new StMatrixD(3, 3, 1);
+  mFtpcRotationYInverse[0] = new StMatrixD(3, 3, 1);
+  mFtpcRotationYInverse[1] = new StMatrixD(3, 3, 1);
 
   // FTPC geometry
   mInnerRadius =  7.73 * centimeter;
@@ -426,13 +453,15 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
   }
     
   // internal FTPC rotation [has do be done before local -> global]
+  mInstallationPointX[0] = 0.0 * centimeter;
+  mInstallationPointX[1] = 0.0 * centimeter;
   mInstallationPointY[0] = -22.25 * centimeter;
   mInstallationPointY[1] = -22.25 * centimeter;
   mInstallationPointZ[0] = -234.325 * centimeter;
   mInstallationPointZ[1] =  234.325 * centimeter;
   
-  mObservedVertexOffsetY[0] = 0.3427 * centimeter;
-  mObservedVertexOffsetY[1] = 0. * centimeter;
+  mObservedVertexOffsetY[0] = 0.1 * centimeter;
+  mObservedVertexOffsetY[1] = -0.034 * centimeter;
   
   for (Int_t i = 0; i <= 1; i++) { // east and west rotation
 
@@ -474,18 +503,89 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
     // rotation maxtrix : rotation about r(rx, ry, rz) with angle alpha
     // before that the coordinate system has to be transformed to x_installation, 
     // y_installation, z_installation as new coordinate system origin
-    (*mFtpcRotation[i])(1, 1) = rx * rx * (1 - TMath::Cos(alpha)) +      TMath::Cos(alpha);
-    (*mFtpcRotation[i])(1, 2) = ry * rx * (1 - TMath::Cos(alpha)) - rz * TMath::Sin(alpha);
-    (*mFtpcRotation[i])(1, 3) = rz * rx * (1 - TMath::Cos(alpha)) + ry * TMath::Sin(alpha);
-    (*mFtpcRotation[i])(2, 1) = rx * ry * (1 - TMath::Cos(alpha)) + rz * TMath::Sin(alpha);
-    (*mFtpcRotation[i])(2, 2) = ry * ry * (1 - TMath::Cos(alpha)) +      TMath::Cos(alpha);
-    (*mFtpcRotation[i])(2, 3) = rz * ry * (1 - TMath::Cos(alpha)) - rx * TMath::Sin(alpha);
-    (*mFtpcRotation[i])(3, 1) = rx * ry * (1 - TMath::Cos(alpha)) - ry * TMath::Sin(alpha);
-    (*mFtpcRotation[i])(3, 2) = ry * rz * (1 - TMath::Cos(alpha)) + rx * TMath::Sin(alpha);
-    (*mFtpcRotation[i])(3, 3) = rz * rz * (1 - TMath::Cos(alpha)) +      TMath::Cos(alpha);
+    (*mFtpcRotationY[i])(1, 1) = rx * rx * (1 - TMath::Cos(alpha)) +      TMath::Cos(alpha);
+    (*mFtpcRotationY[i])(1, 2) = ry * rx * (1 - TMath::Cos(alpha)) - rz * TMath::Sin(alpha);
+    (*mFtpcRotationY[i])(1, 3) = rz * rx * (1 - TMath::Cos(alpha)) + ry * TMath::Sin(alpha);
+    (*mFtpcRotationY[i])(2, 1) = rx * ry * (1 - TMath::Cos(alpha)) + rz * TMath::Sin(alpha);
+    (*mFtpcRotationY[i])(2, 2) = ry * ry * (1 - TMath::Cos(alpha)) +      TMath::Cos(alpha);
+    (*mFtpcRotationY[i])(2, 3) = rz * ry * (1 - TMath::Cos(alpha)) - rx * TMath::Sin(alpha);
+    (*mFtpcRotationY[i])(3, 1) = rx * ry * (1 - TMath::Cos(alpha)) - ry * TMath::Sin(alpha);
+    (*mFtpcRotationY[i])(3, 2) = ry * rz * (1 - TMath::Cos(alpha)) + rx * TMath::Sin(alpha);
+    (*mFtpcRotationY[i])(3, 3) = rz * rz * (1 - TMath::Cos(alpha)) +      TMath::Cos(alpha);
     
-    (*mFtpcRotationInverse[i]) = (*mFtpcRotation[i]).inverse(ierr);
+    (*mFtpcRotationYInverse[i]) = (*mFtpcRotationY[i]).inverse(ierr);
     
+    if (ierr!=0) { 
+      gMessMgr->Message("", "E", "OST") << "Can't invert FTPC ";
+      if (i == 0) *gMessMgr << " east rotation matrix Y !" << endm;
+      else *gMessMgr << " west rotation matrix Y !" << endm;
+      gMessMgr->Message("", "I", "OST") << "FTPC rotation matrix Y :" << (*mFtpcRotationY[i]) << endm;
+      gMessMgr->Message("", "I", "OST") << "Inverse FTPC rotation matrix Y :" << (*mFtpcRotationYInverse[i]) << endm;
+    }
+
+    // define rotation axis
+
+    mObservedVertexOffsetX[0] = 0. * centimeter;
+    mObservedVertexOffsetX[1] = -0.08 * centimeter;
+
+    rx = 0.0 * centimeter;
+    ry = 1.0 * centimeter;
+    rz = 0.0 * centimeter;
+    
+    norm_r = TMath::Sqrt(rx*rx + ry*ry + rz*rz);
+
+    rx = rx/norm_r;
+    ry = ry/norm_r;
+    rz = rz/norm_r;
+
+    // calculate beta analog to alpha
+
+    pq = TMath::Sqrt(TMath::Power(mObservedVertexOffsetX[i], 2.) 
+			      - 2.*mObservedVertexOffsetX[i]*mInstallationPointX[i] 
+			      + TMath::Power(mInstallationPointZ[i], 2.)); // p-q-formula
+
+    Double_t beta=0;
+
+    if (i == 0) { // east
+      zShift = (mInstallationPointZ[i] + pq) * centimeter; // take correct solution of p-q-formula
+      phi0 = TMath::ATan((mInstallationPointX[i] - mObservedVertexOffsetX[i]) / mInstallationPointZ[i]) * radian;
+      phi1 = TMath::ATan(mInstallationPointX[i] / (mInstallationPointZ[i] - zShift)) * radian;
+      beta = phi0 - phi1;
+    }
+    
+    else if (i == 1) { //west
+      zShift = (mInstallationPointZ[i] - pq) * centimeter; // take correct solution of p-q-formula
+      phi0 = TMath::ATan((mObservedVertexOffsetX[i] - mInstallationPointX[i]) / mInstallationPointZ[i]) * radian;
+      phi1 = TMath::ATan(mInstallationPointX[i] / (zShift - mInstallationPointZ[i]));
+      beta = phi1 - phi0;
+    }
+
+    (*mFtpcRotationX[i])(1, 1) = rx * rx * (1 - TMath::Cos(beta)) +      TMath::Cos(beta);
+    (*mFtpcRotationX[i])(1, 2) = ry * rx * (1 - TMath::Cos(beta)) - rz * TMath::Sin(beta);
+    (*mFtpcRotationX[i])(1, 3) = rz * rx * (1 - TMath::Cos(beta)) + ry * TMath::Sin(beta);
+    (*mFtpcRotationX[i])(2, 1) = rx * ry * (1 - TMath::Cos(beta)) + rz * TMath::Sin(beta);
+    (*mFtpcRotationX[i])(2, 2) = ry * ry * (1 - TMath::Cos(beta)) +      TMath::Cos(beta);
+    (*mFtpcRotationX[i])(2, 3) = rz * ry * (1 - TMath::Cos(beta)) - rx * TMath::Sin(beta);
+    (*mFtpcRotationX[i])(3, 1) = rx * ry * (1 - TMath::Cos(beta)) - ry * TMath::Sin(beta);
+    (*mFtpcRotationX[i])(3, 2) = ry * rz * (1 - TMath::Cos(beta)) + rx * TMath::Sin(beta);
+    (*mFtpcRotationX[i])(3, 3) = rz * rz * (1 - TMath::Cos(beta)) +      TMath::Cos(beta);
+    
+    (*mFtpcRotationXInverse[i]) = (*mFtpcRotationX[i]).inverse(ierr);
+
+    if (ierr!=0) { 
+      gMessMgr->Message("", "E", "OST") << "Can't invert FTPC ";
+      if (i == 0) *gMessMgr << " east rotation matrix X !" << endm;
+      else *gMessMgr << " west rotation matrix X !" << endm;
+      gMessMgr->Message("", "I", "OST") << "FTPC rotation matrix X :" << (*mFtpcRotationX[i]) << endm;
+      gMessMgr->Message("", "I", "OST") << "Inverse FTPC rotation matrix X :" << (*mFtpcRotationXInverse[i]) << endm;
+    }
+
+    // combine Y and X rotation to rotation matrix
+
+    (*mFtpcRotation[i]) = (*mFtpcRotationY[i])*(*mFtpcRotationX[i]);
+    (*mFtpcRotationInverse[i])=(*mFtpcRotation[i]).inverse(ierr);
+
+
     if (ierr!=0) { 
       gMessMgr->Message("", "E", "OST") << "Can't invert FTPC ";
       if (i == 0) *gMessMgr << " east rotation matrix!" << endm;
@@ -502,6 +602,10 @@ StFtpcTrackingParams::~StFtpcTrackingParams() {
   for (Int_t i = 0; i < 1; i++) {
     delete mFtpcRotation[i];
     delete mFtpcRotationInverse[i];
+    delete mFtpcRotationX[i];
+    delete mFtpcRotationXInverse[i];
+    delete mFtpcRotationY[i];
+    delete mFtpcRotationYInverse[i];
   }
 
   delete mPadRowPosZ;
@@ -615,6 +719,8 @@ Int_t StFtpcTrackingParams::InitDimensions(ftpcDimensions_st* dimensionsTable) {
     mOuterRadius = dimensionsTable->outerRadiusSensitiveVolume * centimeter;
     mNumberOfPadRows        = dimensionsTable->totalNumberOfPadrows;
     mNumberOfPadRowsPerSide = dimensionsTable->numberOfPadrowsPerSide;
+    mInstallationPointX[0] = dimensionsTable->installationPointX[0] * centimeter;
+    mInstallationPointX[1] = dimensionsTable->installationPointX[1] * centimeter;
     mInstallationPointY[0] = dimensionsTable->installationPointY[0] * centimeter;
     mInstallationPointY[1] = dimensionsTable->installationPointY[1] * centimeter;
     mInstallationPointZ[0] = dimensionsTable->installationPointZ[0] * centimeter;
@@ -659,6 +765,8 @@ Int_t StFtpcTrackingParams::InitCoordTransformation() {
 
   mObservedVertexOffsetY[0] = -9999.;
   mObservedVertexOffsetY[1] = -9999.;
+  mObservedVertexOffsetX[0] = -9999.;
+  mObservedVertexOffsetX[1] = -9999.;
 
   return 1;
 }
@@ -669,19 +777,32 @@ Int_t StFtpcTrackingParams::InitCoordTransformation(ftpcCoordTrans_st* ftpcCoord
 
   if (ftpcCoordTrans) {
     
-    Double_t old[2] = {mObservedVertexOffsetY[0] * centimeter, mObservedVertexOffsetY[1] * centimeter};
-    
-    mObservedVertexOffsetY[0] = ftpcCoordTrans->observedVertexOffsetY[0] * centimeter;
-    mObservedVertexOffsetY[1] = ftpcCoordTrans->observedVertexOffsetY[1] * centimeter;  // not used
+    Double_t oldY[2] = {mObservedVertexOffsetY[0] * centimeter, mObservedVertexOffsetY[1] * centimeter};
+    Double_t oldX[2] = {mObservedVertexOffsetX[0] * centimeter, mObservedVertexOffsetX[1] * centimeter};
 
-    if ((mObservedVertexOffsetY[0] != old[0] || mObservedVertexOffsetY[1] != old[1]) && 
-	(old[0] < -9990. || old[1] < -9990.)) {
+    mObservedVertexOffsetY[0] = ftpcCoordTrans->observedVertexOffsetY[0] * centimeter;
+    mObservedVertexOffsetY[1] = ftpcCoordTrans->observedVertexOffsetY[1] * centimeter;
+
+    mObservedVertexOffsetX[0] = ftpcCoordTrans->observedVertexOffsetX[0] * centimeter;
+    mObservedVertexOffsetX[1] = ftpcCoordTrans->observedVertexOffsetX[1] * centimeter;
+
+    if ((mObservedVertexOffsetY[0] != oldY[0] || mObservedVertexOffsetY[1] != oldY[1]) && 
+	(oldY[0] < -9990. || oldY[1] < -9990.)) {
       
       gMessMgr->Message("", "I", "OST") << "Observed vertex offset in y direction has changed. Changed from " 
-					<< old[0] << " to " <<  mObservedVertexOffsetY[0] << " (east) and from " 
-					<< old[1] << " to " <<  mObservedVertexOffsetY[1] << " (west)." << endm;
+					<< oldY[0] << " to " <<  mObservedVertexOffsetY[0] << " (east) and from " 
+					<< oldY[1] << " to " <<  mObservedVertexOffsetY[1] << " (west)." << endm;
     }   
-        
+    
+
+    if ((mObservedVertexOffsetX[0] != oldX[0] || mObservedVertexOffsetX[1] != oldX[1]) && 
+	(oldX[0] < -9990. || oldX[1] < -9990.)) {
+      
+      gMessMgr->Message("", "I", "OST") << "Observed vertex offset in x direction has changed. Changed from " 
+					<< oldX[0] << " to " <<  mObservedVertexOffsetX[0] << " (east) and from " 
+					<< oldX[1] << " to " <<  mObservedVertexOffsetX[1] << " (west)." << endm;
+    }
+
     return 1;
   }
   
@@ -775,20 +896,88 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
     // rotation maxtrix : rotation about r(rx, ry, rz) with angle alpha
     // before that the coordinate system has to be transformed to x_installation, 
     // y_installation, z_installation as new coordinate system origin
-    (*mFtpcRotation[i])(1, 1) = rx * rx * (1 - TMath::Cos(alpha)) +      TMath::Cos(alpha);
-    (*mFtpcRotation[i])(1, 2) = ry * rx * (1 - TMath::Cos(alpha)) - rz * TMath::Sin(alpha);
-    (*mFtpcRotation[i])(1, 3) = rz * rx * (1 - TMath::Cos(alpha)) + ry * TMath::Sin(alpha);
-    (*mFtpcRotation[i])(2, 1) = rx * ry * (1 - TMath::Cos(alpha)) + rz * TMath::Sin(alpha);
-    (*mFtpcRotation[i])(2, 2) = ry * ry * (1 - TMath::Cos(alpha)) +      TMath::Cos(alpha);
-    (*mFtpcRotation[i])(2, 3) = rz * ry * (1 - TMath::Cos(alpha)) - rx * TMath::Sin(alpha);
-    (*mFtpcRotation[i])(3, 1) = rx * ry * (1 - TMath::Cos(alpha)) - ry * TMath::Sin(alpha);
-    (*mFtpcRotation[i])(3, 2) = ry * rz * (1 - TMath::Cos(alpha)) + rx * TMath::Sin(alpha);
-    (*mFtpcRotation[i])(3, 3) = rz * rz * (1 - TMath::Cos(alpha)) +      TMath::Cos(alpha);
+    (*mFtpcRotationY[i])(1, 1) = rx * rx * (1 - TMath::Cos(alpha)) +      TMath::Cos(alpha);
+    (*mFtpcRotationY[i])(1, 2) = ry * rx * (1 - TMath::Cos(alpha)) - rz * TMath::Sin(alpha);
+    (*mFtpcRotationY[i])(1, 3) = rz * rx * (1 - TMath::Cos(alpha)) + ry * TMath::Sin(alpha);
+    (*mFtpcRotationY[i])(2, 1) = rx * ry * (1 - TMath::Cos(alpha)) + rz * TMath::Sin(alpha);
+    (*mFtpcRotationY[i])(2, 2) = ry * ry * (1 - TMath::Cos(alpha)) +      TMath::Cos(alpha);
+    (*mFtpcRotationY[i])(2, 3) = rz * ry * (1 - TMath::Cos(alpha)) - rx * TMath::Sin(alpha);
+    (*mFtpcRotationY[i])(3, 1) = rx * ry * (1 - TMath::Cos(alpha)) - ry * TMath::Sin(alpha);
+    (*mFtpcRotationY[i])(3, 2) = ry * rz * (1 - TMath::Cos(alpha)) + rx * TMath::Sin(alpha);
+    (*mFtpcRotationY[i])(3, 3) = rz * rz * (1 - TMath::Cos(alpha)) +      TMath::Cos(alpha);
     
     UInt_t ierr;
     
-    (*mFtpcRotationInverse[i]) = (*mFtpcRotation[i]).inverse(ierr);
+    (*mFtpcRotationYInverse[i]) = (*mFtpcRotationY[i]).inverse(ierr);
     
+    if (ierr!=0) { 
+      gMessMgr->Message("", "E", "OST") << "Can't invert FTPC ";
+      if (i == 0) *gMessMgr << " east rotation matrix! Y " << endm;
+      else *gMessMgr << " west rotation matrix! Y " << endm;
+      gMessMgr->Message("", "I", "OST") << "FTPC rotation matrix Y :" << (*mFtpcRotationY[i]) << endm;
+      gMessMgr->Message("", "I", "OST") << "Inverse FTPC rotation matrix Y :" << (*mFtpcRotationYInverse[i]) << endm;
+    }
+
+    // define rotation axis
+
+    rx = 0.0 * centimeter;
+    ry = 1.0 * centimeter;
+    rz = 0.0 * centimeter;
+    
+    norm_r = TMath::Sqrt(rx*rx + ry*ry + rz*rz);
+
+    rx = rx/norm_r;
+    ry = ry/norm_r;
+    rz = rz/norm_r;
+
+    // calculate beta analog to alpha
+
+    pq = TMath::Sqrt(TMath::Power(mObservedVertexOffsetX[i], 2.) 
+			      - 2.*mObservedVertexOffsetX[i]*mInstallationPointX[i] 
+			      + TMath::Power(mInstallationPointZ[i], 2.)); // p-q-formula
+
+    Double_t beta=0;
+
+    if (i == 0) { // east
+      zShift = (mInstallationPointZ[i] + pq) * centimeter; // take correct solution of p-q-formula
+      phi0 = TMath::ATan((mInstallationPointX[i] - mObservedVertexOffsetX[i]) / mInstallationPointZ[i]) * radian;
+      phi1 = TMath::ATan(mInstallationPointX[i] / (mInstallationPointZ[i] - zShift)) * radian;
+      beta = phi0 - phi1;
+    }
+    
+    else if (i == 1) { //west
+      zShift = (mInstallationPointZ[i] - pq) * centimeter; // take correct solution of p-q-formula
+      phi0 = TMath::ATan((mObservedVertexOffsetX[i] - mInstallationPointX[i]) / mInstallationPointZ[i]) * radian;
+      phi1 = TMath::ATan(mInstallationPointX[i] / (zShift - mInstallationPointZ[i]));
+      beta = phi1 - phi0;
+    }
+
+    (*mFtpcRotationX[i])(1, 1) = rx * rx * (1 - TMath::Cos(beta)) +      TMath::Cos(beta);
+    (*mFtpcRotationX[i])(1, 2) = ry * rx * (1 - TMath::Cos(beta)) - rz * TMath::Sin(beta);
+    (*mFtpcRotationX[i])(1, 3) = rz * rx * (1 - TMath::Cos(beta)) + ry * TMath::Sin(beta);
+    (*mFtpcRotationX[i])(2, 1) = rx * ry * (1 - TMath::Cos(beta)) + rz * TMath::Sin(beta);
+    (*mFtpcRotationX[i])(2, 2) = ry * ry * (1 - TMath::Cos(beta)) +      TMath::Cos(beta);
+    (*mFtpcRotationX[i])(2, 3) = rz * ry * (1 - TMath::Cos(beta)) - rx * TMath::Sin(beta);
+    (*mFtpcRotationX[i])(3, 1) = rx * ry * (1 - TMath::Cos(beta)) - ry * TMath::Sin(beta);
+    (*mFtpcRotationX[i])(3, 2) = ry * rz * (1 - TMath::Cos(beta)) + rx * TMath::Sin(beta);
+    (*mFtpcRotationX[i])(3, 3) = rz * rz * (1 - TMath::Cos(beta)) +      TMath::Cos(beta);
+    
+    (*mFtpcRotationXInverse[i]) = (*mFtpcRotationX[i]).inverse(ierr);
+
+    if (ierr!=0) { 
+      gMessMgr->Message("", "E", "OST") << "Can't invert FTPC ";
+      if (i == 0) *gMessMgr << " east rotation matrix X !" << endm;
+      else *gMessMgr << " west rotation matrix X !" << endm;
+      gMessMgr->Message("", "I", "OST") << "FTPC rotation matrix X :" << (*mFtpcRotationX[i]) << endm;
+      gMessMgr->Message("", "I", "OST") << "Inverse FTPC rotation matrix X :" << (*mFtpcRotationXInverse[i]) << endm;
+    }
+
+    // combine Y and X rotation to rotation matrix
+
+    (*mFtpcRotation[i]) = (*mFtpcRotationY[i])*(*mFtpcRotationX[i]);
+    (*mFtpcRotationInverse[i])=(*mFtpcRotation[i]).inverse(ierr);
+
+
     if (ierr!=0) { 
       gMessMgr->Message("", "E", "OST") << "Can't invert FTPC ";
       if (i == 0) *gMessMgr << " east rotation matrix!" << endm;
@@ -796,6 +985,7 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
       gMessMgr->Message("", "I", "OST") << "FTPC rotation matrix:" << (*mFtpcRotation[i]) << endm;
       gMessMgr->Message("", "I", "OST") << "Inverse FTPC rotation matrix:" << (*mFtpcRotationInverse[i]) << endm;
     }
+
   }
 
   return 1;
@@ -948,14 +1138,24 @@ void StFtpcTrackingParams::PrintParams() {
 
   gMessMgr->Message("", "I", "OST") << endm;
   gMessMgr->Message("", "I", "OST") << "FTPC to global transformation" << endm;
-  gMessMgr->Message("", "I", "OST") << "Installation point y, z (east, cm).: " << InstallationPointY(0) << ", " << InstallationPointZ(0) << endm;
-  gMessMgr->Message("", "I", "OST") << "Installation point y, z (west, cm).: " << InstallationPointY(1) << ", " << InstallationPointZ(1) << endm;
+  gMessMgr->Message("", "I", "OST") << "Installation point x , y, z (east, cm).: " << InstallationPointX(0) << " , "<<InstallationPointY(0) << ", " << InstallationPointZ(0) << endm;
+  gMessMgr->Message("", "I", "OST") << "Installation point x , y, z (west, cm).: " << InstallationPointX(1) << " , "<< InstallationPointY(1) << ", " << InstallationPointZ(1) << endm;
   gMessMgr->Message("", "I", "OST") << "Observed vertex offset y (east, cm): " << ObservedVertexOffsetY(0) << endm;
-  gMessMgr->Message("", "I", "OST") << "Observed vertex offset y (west, cm): " << ObservedVertexOffsetY(1) << " (not used)" << endm;
-  gMessMgr->Message("", "I", "OST") << "FTPC east to global rotation: " << FtpcRotation(0) << endm;
-  gMessMgr->Message("", "I", "OST") << "Global to FTPC east rotation: " << FtpcRotationInverse(0) << endm;
-  gMessMgr->Message("", "I", "OST") << "FTPC west to global rotation: " << FtpcRotation(1) << endm;
-  gMessMgr->Message("", "I", "OST") << "Global to FTPC west rotation: " << FtpcRotationInverse(1) << endm;
+  gMessMgr->Message("", "I", "OST") << "Observed vertex offset y (west, cm): " << ObservedVertexOffsetY(1) << endm;
+  gMessMgr->Message("", "I", "OST") << "Observed vertex offset x (east, cm): " << ObservedVertexOffsetX(0) << endm;
+  gMessMgr->Message("", "I", "OST") << "Observed vertex offset x (west, cm): " << ObservedVertexOffsetX(1) << endm;
+  gMessMgr->Message("", "I", "OST") << "FTPC east to global rotation Y : " << FtpcRotationY(0) << endm;
+  gMessMgr->Message("", "I", "OST") << "Global to FTPC east rotation Y : " << FtpcRotationYInverse(0) << endm;
+  gMessMgr->Message("", "I", "OST") << "FTPC west to global rotation Y: " << FtpcRotationY(1) << endm;
+  gMessMgr->Message("", "I", "OST") << "Global to FTPC west rotation Y : " << FtpcRotationYInverse(1) << endm;
+  gMessMgr->Message("", "I", "OST") << "FTPC east to global rotation X : " << FtpcRotationX(0) << endm;
+  gMessMgr->Message("", "I", "OST") << "Global to FTPC east rotation X : " << FtpcRotationXInverse(0) << endm;
+  gMessMgr->Message("", "I", "OST") << "FTPC west to global rotation X: " << FtpcRotationX(1) << endm;
+  gMessMgr->Message("", "I", "OST") << "Global to FTPC west rotation X : " << FtpcRotationXInverse(1) << endm;
+  gMessMgr->Message("", "I", "OST") << "FTPC east to global rotation : " << FtpcRotation(0) << endm;
+  gMessMgr->Message("", "I", "OST") << "Global to FTPC east rotation : " << FtpcRotationInverse(0) << endm;
+  gMessMgr->Message("", "I", "OST") << "FTPC west to global rotation : " << FtpcRotation(1) << endm;
+  gMessMgr->Message("", "I", "OST") << "Global to FTPC west rotation : " << FtpcRotationInverse(1) << endm;
     
   gMessMgr->Message("", "I", "OST") << "TPC to global transformation" << endm;
   gMessMgr->Message("", "I", "OST") << "Position of TPC (cm)..: " << TpcPositionInGlobal() <<endm;
