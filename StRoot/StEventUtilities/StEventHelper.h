@@ -100,6 +100,7 @@ class StTrackPoints : public StPoints3DABC
 public:
    StTrackPoints(StTrack *st,const char *name="",const char *title="");
   ~StTrackPoints(){};
+virtual Int_t DistancetoPrimitive(Int_t px, Int_t py);
 
 private:
   void Init() ;
