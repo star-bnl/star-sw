@@ -5,12 +5,15 @@
 #ifndef EEmcGeomSimple_h
 #define EEmcGeomSimple_h
 /*********************************************************************
- * $Id: EEmcGeomSimple.h,v 1.4 2003/01/19 03:47:11 zolnie Exp $
+ * $Id: EEmcGeomSimple.h,v 1.5 2003/02/20 21:15:17 zolnie Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
  *********************************************************************
  * $Log: EEmcGeomSimple.h,v $
+ * Revision 1.5  2003/02/20 21:15:17  zolnie
+ * *** empty log message ***
+ *
  * Revision 1.4  2003/01/19 03:47:11  zolnie
  * still further improvements
  *
@@ -23,7 +26,7 @@
  *********************************************************************/
 #include "TObject.h"
 
-#include "EEmcDefs.h"
+#include "StRoot/StEEmcUtil/EEmcGeom/EEmcDefs.h"
 
 class StThreeVectorD;
 class StEmcRawHit;

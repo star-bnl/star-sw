@@ -1,5 +1,8 @@
-// $Id: EEmcGeomSimple.cxx,v 1.4 2003/01/19 03:47:10 zolnie Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.5 2003/02/20 21:15:17 zolnie Exp $
 // $Log: EEmcGeomSimple.cxx,v $
+// Revision 1.5  2003/02/20 21:15:17  zolnie
+// *** empty log message ***
+//
 // Revision 1.4  2003/01/19 03:47:10  zolnie
 // still further improvements
 //
@@ -19,7 +22,8 @@
 #include "StTrackGeometry.h"
 #include "StTrack.h"
 
-#include "EEmcGeomSimple.h"
+#include "StEEmcUtil/EEmcGeom/EEmcDefs.h"
+#include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
 
 // ######################################################################
