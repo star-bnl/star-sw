@@ -7,13 +7,15 @@
 //
 //
 //
-// $Id: bfcMixer.C,v 1.4 2000/07/10 15:51:44 pfachini Exp $
+// $Id: bfcMixer.C,v 1.5 2000/08/25 17:03:18 pfachini Exp $
 //////////////////////////////////////////////////////////////////////////
 
 TBrowser *b = 0;
 class StChain;
 class StBFChain;
 StChain  *chain=0;
+class StMaker;
+StMaker    *treeMk=0;
 StBFChain *chain1, *chain2, *chain3;
 class StEvent;
 StEvent *Event;
@@ -22,6 +24,7 @@ class StIOMaker;
 class StEventDisplayMaker; StEventDisplayMaker *dsMk = 0;
 class StEventMaker; StEventMaker *evMk = 0;
 class StMixerMaker;
+class StEvtHddr;
 //_____________________________________________________________________
 void Load(){
   gSystem->Load("St_base");
@@ -31,13 +34,11 @@ void Load(){
   if (chain) delete chain;
 }
 //_____________________________________________________________________
-void bfcMixer(const Int_t Nevents=20,
+void bfcMixer(const Int_t Nevents=9999,
              const Char_t *kind1="fz",
-             const Char_t *file1="/star/rcf/pwg/spectra/embedding/MickeyMouse/MickeyMousePi+_1185015_4276evt.fz",
+             const Char_t *file1="/star/rcf/data06/reco/embedding/fz/pi-/st_physics_1185015_raw_0002.fz",
              const Char_t *kind2="daq",
-             const Char_t *file2="/star/data08/daq/2000/07/st_physics_1185015_raw_*.daq")
-  //const Char_t *kind2="daq",
-  //const Char_t *file2="/star/data08/daq/2000/07/st_physics_1185015_raw_*.daq")
+             const Char_t *file2="/star/rcf/data08/daq/2000/07/st_physics_1185015_raw_0002.daq")
 {
   // Dynamically link some shared libs
   if (gClassTable->GetID("StBFChain") < 0) Load();
@@ -59,7 +60,7 @@ void bfcMixer(const Int_t Nevents=20,
   if (!strcmp(kind2,"daq")) {
     chain2 = new StBFChain("Two");
     saveMk = chain2->cd();
-    chain2->SetFlags("in"); //  
+    chain2->SetFlags("in db"); //  
     chain2->Set_IO_Files(file2);
     chain2->Load();
     chain2->Instantiate();
@@ -69,7 +70,7 @@ void bfcMixer(const Int_t Nevents=20,
     kind1="trs";
     chain1 = new StBFChain("One");
     saveMk = chain1->cd();
-    chain1->SetFlags("fzin y1h gen_T geomT sim_T tpc HalfField trs -tcl -tpt -PreVtx -tpc_daq"); // 
+    chain1->SetFlags("fzin gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq"); // 
     chain1->Set_IO_Files(file1);
     chain1->Load();
     chain1->Instantiate();
@@ -92,9 +93,12 @@ void bfcMixer(const Int_t Nevents=20,
   mixer->writeFile("mixer.trs",Nevents);
   chain3 = new StBFChain("Three");
   saveMk = chain3->cd();
-  chain3->SetFlags("NoInput tpc tpc_daq cdst allevent tree");
-  //chain3->SetFlags("NoInput tdaq tpc HalfField cdst allevent tree");
-  chain3->Set_IO_Files(0,"output");
+  chain3->SetFlags("NoInput ry1h in tpc_daq tpc global dst Kalman Tree AllEvent");
+  TString OutputFileName(gSystem->BaseName(file2));
+  OutputFileName.ReplaceAll("*","");
+  OutputFileName.ReplaceAll(".daq","");
+  OutputFileName.Append(".root");
+  chain3->Set_IO_Files(0,OutputFileName.Data());
   chain3->Load();
   chain3->Instantiate();
   St_geant_Maker *geantMk = chain->GetMaker("geant");
@@ -117,13 +121,18 @@ void bfcMixer(const Int_t Nevents=20,
     Int_t iInit = chain->Init();
   }
   //chain->SetDEBUG();
+  treeMk = chain->GetMaker("tree");
   TBenchmark evnt;
-  Int_t iMake = 0, i = 1;
+  Int_t iMake = 0, i = 1, iBad = 0;
  EventLoop: if (i <= Nevents && iMake != kStEOF && iMake != kStFatal) {
    evnt->Reset();
    evnt->Start("QAInfo:");
    chain->Clear();
    iMake = chain->Make(i);
+   if (treeMk && iMake == kStErr) {treeMk->Make(i); iBad++;}
+   StEvtHddr *fEvtHddr = (StEvtHddr*)chain->GetDataSet("EvtHddr");
+   StEvtHddr *fEvtHddrDaq = (StEvtHddr*)chain2->GetDataSet("EvtHddr");
+   *fEvtHddr = *fEvtHddrDaq;
   //    gSystem->Exec("ps ux");
   evnt->Stop("QAInfo:");
   //  evnt->Show("QAInfo:");
