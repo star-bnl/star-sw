@@ -1,0 +1,18 @@
+/*    tpcChargeStepCalib.idl
+*
+*  Table: tpcChargeStepCalib
+*
+*       description: //  This table is a calibration file that allows the charge step
+*/ 
+
+
+struct tpcChargeStepCalib { 
+
+   float  laserVelocityEast;   /*   cm/us : from laser beam analysis  */
+   float  laserVelocityWest;   /*   cm/us : from laser beam analysis  */
+   float  chargeStepInnerEast;   /*   tb    : from charge step analysis  */
+   float  chargeStepInnerWest;   /*   tb    : from charge step analysis  */
+   float  chargeStepOuterEast;   /*   tb    : from charge step analysis  */
+   float  chargeStepOuterWest;   /*   tb    : from charge step analysis  */
+
+ };  
