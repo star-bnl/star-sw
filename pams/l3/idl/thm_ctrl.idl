@@ -1,0 +1,28 @@
+/*   thm_ctrl 
+ * Control thm_ctrl
+ */
+struct thm_ctrl {
+   long    nRadialDivs;   // no. of divs in rho, phi and eta
+   long    nPhiDivs;
+   long    nEtaDivs;
+   float   phiMin ;
+   float   phiMax ;
+   float   etaMin ;
+   float   etaMax ;
+   float   etaStep ;
+   float   phiStep ;
+   float   phiSetp ;
+   short   innerMostRow ;
+   short   outerMostRow ;
+   short   fillEvaluationTable ; // ==0 no, yes otherwise
+   short   debug ;               // debug level
+   float   goodDistance ; 
+};
+
+
+
+
+
+
+
+
