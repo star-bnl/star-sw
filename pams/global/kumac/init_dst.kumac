@@ -1,11 +1,9 @@
-MACRO  init_dst
+macro init_rsum
 
 macro/global/import *
 
-message ' Initializing the Event and Run Header Tables'
+message ' Initializing the Run header & summary Tables'
 
-tdm/table/rowcount [run_dst]/run_header 1
-tdm/table/rowcount [dst]/event_header   1
 cd [run_dst]
 
 tdm/table/cell/putvalue 'run_header[0].run_id'       0
@@ -22,6 +20,14 @@ tdm/table/cell/putvalue 'run_header[0].west_z'       0
 tdm/table/cell/putvalue 'run_header[0].west_pol'     0. 0. 0.
 tdm/table/cell/putvalue 'run_header[0].west_pol_cov' 0. 0. 0. 0. 0. 0. 
 
+cd /dui
+
+return
+***************************************************************
+*
+macro init_esum
+ macro/global/import *
+
 cd [dst]
 
 tdm/table/cell/putvalue 'event_header[0].n_event'      0  0
@@ -36,4 +42,9 @@ cd /dui
 RETURN
 
 * ***************************************************************
+
+
+
+
+
 
