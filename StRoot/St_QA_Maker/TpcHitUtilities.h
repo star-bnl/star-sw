@@ -13,6 +13,10 @@ class StThreeVectorD;
 #include <vector>
 #include <map>
 
+#ifndef ST_NO_NAMESPACES
+using std::vector;
+#endif
+
 class TpcHitUtilities {
 public:
     TpcHitUtilities();
