@@ -131,7 +131,7 @@ extern "C" long type_of_call cts_(
 //
 //    Check tables
 //
-   if ( geo_h->maxlen != 1 ) {
+   if ( geo_h->maxlen < 1 ) {
      sprintf ( OutMessage, " Geo maxlen = %d is not valid ", geo_h->maxlen ) ;
      MessageOut ( OutMessage ) ;
      return STAFCV_BAD ;
