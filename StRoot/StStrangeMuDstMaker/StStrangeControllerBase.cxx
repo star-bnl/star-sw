@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.cxx,v 3.15 2003/05/30 21:20:19 genevb Exp $
+// $Id: StStrangeControllerBase.cxx,v 3.16 2003/11/13 02:57:08 perev Exp $
 // $Log: StStrangeControllerBase.cxx,v $
+// Revision 3.16  2003/11/13 02:57:08  perev
+// LeakOff TClonesArray::Clear() ==> Delete()
+//
 // Revision 3.15  2003/05/30 21:20:19  genevb
 // doxygen savvy, encoding of FTPC mults, change virtual funcs
 //
@@ -231,7 +234,7 @@ TBranch* StStrangeControllerBase::AssignBranch(const char* name,
 Int_t StStrangeControllerBase::MakeCreateSubDst() {
   // If no entries to copy, skip data and association copying
   if (!entries) {
-    if (doMc) assocArray->Clear();
+    if (doMc) assocArray->Delete();
     return kStOK;
   }
 
@@ -283,12 +286,12 @@ void StStrangeControllerBase::Clear(Option_t* opt) {
     }
   }
   if (dataArray) {
-    dataArray->Clear();
+    dataArray->Delete();
     entries = 0;
     if (doMc) {
-      mcArray->Clear();
+      mcArray->Delete();
       mcEntries = 0;
-      assocArray->Clear();
+      assocArray->Delete();
       assocEntries = 0;
     }
   }
