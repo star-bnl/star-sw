@@ -55,6 +55,8 @@ public:
 	virtual StAssociationMaker * getAssociationMaker();
 	virtual void setAssociationMaker(StAssociationMaker * a);
 	
+	virtual StiHitErrorCalculator * getHitErrorCalculator();
+	
 protected:
 
 	friend class StiToolkit;
@@ -70,34 +72,36 @@ protected:
   virtual ~StiDefaultToolkit();
   
   
-	// small object factories
-	StiObjectFactoryInterface<StiHit> * hitFactory;
-	StiObjectFactoryInterface<StiKalmanTrack> * trackFactory;
-	StiObjectFactoryInterface<StiDetector> * detectorFactory;
-	StiObjectFactoryInterface<StiDetectorNode> * detectorNodeFactory;
-	StiObjectFactoryInterface<StiKalmanTrackNode> * trackNodeFactory;
-	
-	// common object containers
-	StiDetectorContainer      * detectorContainer;
-	StiHitContainer           * hitContainer;
-	StiTrackContainer         * trackContainer;
-
-	// service and convenience class objects.
-	StiGeometryTransform  * geometryTransform;
-	StiCoordinateTransform  * coordinateTransform;
-	StiDetectorFinder     * detectorFinder;
-	StiSeedFinder         * trackSeedFinder;
-	//StiTrackSeedFinder  * trackSeedFinder;
-	StiTrackFilter        * trackFilter;
-	StiTrackFinder        * trackFinder;
-	StiTrackFitter        * trackFitter;
-	StiTrackMerger        * trackMerger;
-	StiDisplayManager     * displayManager;
-	//StiEvaluator          * evaluator;
-	//StiEventAssociator    * eventAssociator;
-	StiIOBroker * ioBroker;
-	StiHitFiller * hitFiller;
-	StAssociationMaker * associationMaker; 
+  // small object factories
+  StiObjectFactoryInterface<StiHit> * hitFactory;
+  StiObjectFactoryInterface<StiKalmanTrack> * trackFactory;
+  StiObjectFactoryInterface<StiDetector> * detectorFactory;
+  StiObjectFactoryInterface<StiDetectorNode> * detectorNodeFactory;
+  StiObjectFactoryInterface<StiKalmanTrackNode> * trackNodeFactory;
+  
+  // common object containers
+  StiDetectorContainer      * detectorContainer;
+  StiHitContainer           * hitContainer;
+  StiTrackContainer         * trackContainer;
+  
+  // service and convenience class objects.
+  StiGeometryTransform  * geometryTransform;
+  StiCoordinateTransform  * coordinateTransform;
+  StiDetectorFinder     * detectorFinder;
+  StiSeedFinder         * trackSeedFinder;
+  //StiTrackSeedFinder  * trackSeedFinder;
+  StiTrackFilter        * trackFilter;
+  StiTrackFinder        * trackFinder;
+  StiTrackFitter        * trackFitter;
+  StiTrackMerger        * trackMerger;
+  StiDisplayManager     * displayManager;
+  //StiEvaluator          * evaluator;
+  //StiEventAssociator    * eventAssociator;
+  StiIOBroker * ioBroker;
+  StiHitFiller * hitFiller;
+  StAssociationMaker * associationMaker; 
+  StiHitErrorCalculator * hitErrorCalculator;
+  
 };
 
 #endif

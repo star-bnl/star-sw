@@ -44,8 +44,7 @@
 #include "../StiEvaluator/StiEventAssociator.h"
 #include "../Sti/StiEvaluableTrackSeedFinder.h"
 #include "StAssociationMaker/StAssociationMaker.h"
-
-
+#include "../Sti/StiHitErrorCalculator.h"
 
 StiDefaultToolkit::StiDefaultToolkit() :
 	hitFactory(0),
@@ -307,49 +306,58 @@ StiDisplayManager    * StiDefaultToolkit::getDisplayManager()
 
 StiHitFiller    * StiDefaultToolkit::getHitFiller()
 {
-	if (hitFiller)
-		return hitFiller;
-	hitFiller = new StiHitFiller();//getHitContainer(), getHitFactory());
-	hitFiller->addDetector(kTpcId);
-	hitFiller->addDetector(kSvtId);
-	return hitFiller;
-}
-/*
-StiEvaluator         * StiDefaultToolkit::getEvaluator(const string& fname)
-{
-	if (evaluator)
-		return evaluator;
-	StiEventAssociator::instance(getAssociationMaker());
-	evaluator = StiDefaultEvaluator::instance(fname);
-	return evaluator;
+  if (hitFiller)
+    return hitFiller;
+  hitFiller = new StiHitFiller();//getHitContainer(), getHitFactory());
+  hitFiller->addDetector(kTpcId);
+  hitFiller->addDetector(kSvtId);
+  return hitFiller;
 }
 
-StiEvaluator         * StiDefaultToolkit::getEvaluator()
-{
-	if (evaluator)
-		return evaluator;
-	evaluator = StiDefaultEvaluator::instance("Evaluator.root");
-	return evaluator;
-}
+/*
+  StiEvaluator         * StiDefaultToolkit::getEvaluator(const string& fname)
+  {
+  if (evaluator)
+  return evaluator;
+  StiEventAssociator::instance(getAssociationMaker());
+  evaluator = StiDefaultEvaluator::instance(fname);
+  return evaluator;
+  }
+  
+  StiEvaluator         * StiDefaultToolkit::getEvaluator()
+  {
+  if (evaluator)
+  return evaluator;
+  evaluator = StiDefaultEvaluator::instance("Evaluator.root");
+  return evaluator;
+  }
 */
+
 StiIOBroker * StiDefaultToolkit::getIOBroker()
 {
-	if (ioBroker)
-		return ioBroker;
-	// currently only one io broker is available... 
-	ioBroker = new StiRootIOBroker();
-	return ioBroker;
+  if (!ioBroker)
+    ioBroker = new StiRootIOBroker();
+  return ioBroker;
 }
 
 StAssociationMaker * StiDefaultToolkit::getAssociationMaker()
 {
-	if (!associationMaker)
-		cout << "StiDefaultToolkit::getAssociationMaker() - FATAL - associationMaker is NULL, stupid !!!!!!" << endl;
-	return associationMaker;
+  if (!associationMaker)
+    cout << "StiDefaultToolkit::getAssociationMaker() - FATAL - associationMaker is NULL, stupid !!!!!!" << endl;
+  return associationMaker;
 }
 
 
 void StiDefaultToolkit::setAssociationMaker(StAssociationMaker * a)
 {
-	associationMaker = a;
+  associationMaker = a;
 }
+
+
+StiHitErrorCalculator * StiDefaultToolkit::getHitErrorCalculator()
+{
+  if (!hitErrorCalculator)
+    hitErrorCalculator = new StiHitErrorDefault();
+  return hitErrorCalculator;
+}
+
