@@ -25,7 +25,7 @@
           nfile=tphit.ntup _
           nid=111_
           table=tpc/tracks/mctrk_
-          adcxyzon=1
+          adcxyzon=0
   
   
 *  this is an example!! you must change to fill your needs
