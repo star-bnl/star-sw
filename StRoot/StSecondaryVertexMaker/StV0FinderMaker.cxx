@@ -159,7 +159,7 @@ Int_t StV0FinderMaker::Prepare() {
 
   // Get pars
   GetPars();
-		ITTFflag=32770;
+		ITTFflag=kITKalmanFitId;
 
   // Get event 
   event = (StEvent*) GetInputDS("StEvent");
@@ -188,8 +188,8 @@ Int_t StV0FinderMaker::Prepare() {
 
       StTrack* tri = theNodes[i]->track(global,j);
       //Cut: track type
-      if ((tri->encodedMethod() != ITTFflag && (UsingITTFTracks() == kUseITTF)) ||
-          (tri->encodedMethod() == ITTFflag && (UsingITTFTracks() == kUseTPT))) continue;
+      if ((tri->fittingMethod() != ITTFflag && (UsingITTFTracks() == kUseITTF)) ||
+          (tri->fittingMethod() == ITTFflag && (UsingITTFTracks() == kUseTPT))) continue;
 
       //Cut: track flag
       if (tri->flag() <= 0) continue;
@@ -317,8 +317,8 @@ Int_t StV0FinderMaker::Make() {
       j = ntrk[jj];
 
       if (UsingITTFTracks() == kUseBOTH)
-						   {if ((trk[i]->encodedMethod() == ITTFflag) && (trk[j]->encodedMethod() != ITTFflag)) continue;
-									 if ((trk[i]->encodedMethod() != ITTFflag) && (trk[j]->encodedMethod() == ITTFflag)) continue;
+						   {if ((trk[i]->fittingMethod() == ITTFflag) && (trk[j]->fittingMethod() != ITTFflag)) continue;
+									 if ((trk[i]->fittingMethod() != ITTFflag) && (trk[j]->fittingMethod() == ITTFflag)) continue;
 									 }
 
       // Determine detector id of V0 for pars
@@ -535,7 +535,7 @@ Int_t StV0FinderMaker::Make() {
 
       rmin   = sqrt(rmin);
       dca_ij = sqrt(dca_ij);
-      if (trk[i]->encodedMethod() == ITTFflag) dca_ij=-dca_ij;
+      if (trk[i]->fittingMethod() == ITTFflag) dca_ij=-dca_ij;
       
       // Fill an StV0Vertex
       v0Vertex = new StV0Vertex();
@@ -629,8 +629,11 @@ void StV0FinderMaker::Trim() {
                       " V0 candidates" << endm;
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.3 2003/04/30 20:38:22 perev Exp $
+// $Id: StV0FinderMaker.cxx,v 1.4 2003/05/02 21:21:08 lbarnby Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.4  2003/05/02 21:21:08  lbarnby
+// Now identify ITTF tracks by fittingMethod() equal to  kITKalmanFitId
+//
 // Revision 1.3  2003/04/30 20:38:22  perev
 // Warnings cleanup. Modified lines marked VP
 //
