@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.22 1999/07/02 21:56:57 kathy Exp $
+//! $Id: St_QA_Maker.h,v 1.23 1999/07/07 16:58:34 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.23  1999/07/07 16:58:34  kathy
+//! put log scales on some histograms
+//!
 //! Revision 1.22  1999/07/02 21:56:57  kathy
 //! update for tables which exist in 99f AND put in changes to event summary and globtrk histogram sets requested by offline analysis meeting
 //!
@@ -121,7 +124,7 @@ class TCanvas;
 class St_QA_Maker : public StMaker {
  private:
   Bool_t drawinit;
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.22 1999/07/02 21:56:57 kathy Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.23 1999/07/07 16:58:34 kathy Exp $";
   //! Histograms booking constants
   static const Int_t nxpT;
   static const Int_t nyeta;
@@ -222,6 +225,7 @@ class St_QA_Maker : public StMaker {
   TH1F     *m_globtrk_iflag; //! iflag value
   TH1F     *m_det_id;        //! detector id of track
   TH1F     *m_point;         //! number of points on the track
+  TH1F     *m_max_point;     //! number of max possible track points
   TH1F     *m_fit_point;     //! number of track points used for fitting
   TH1F     *m_glb_charge;    //! particle charge in units of |e|
   TH1F     *m_glb_x0;        //! x-coord. at start of helix

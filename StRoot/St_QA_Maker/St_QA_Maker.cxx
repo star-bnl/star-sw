@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.35 1999/07/02 21:56:56 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.36 1999/07/07 16:58:32 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.36  1999/07/07 16:58:32  kathy
+// put log scales on some histograms
+//
 // Revision 1.35  1999/07/02 21:56:56  kathy
 // update for tables which exist in 99f AND put in changes to event summary and globtrk histogram sets requested by offline analysis meeting
 //
@@ -244,6 +247,7 @@ ClassImp(St_QA_Maker)
   m_globtrk_iflag=0;
   m_det_id=0;
   m_point=0;
+  m_max_point=0;
   m_fit_point=0;
   m_glb_charge=0;
   m_glb_x0=0;
@@ -656,16 +660,36 @@ void St_QA_Maker::SetDefaultLogYList(){
 
   cout << " **** Now in St_QA_Maker::SetDefaultLogYList  **** " << endl;
 
-  const Char_t *sdefList[] = {"QaGlobtrkPt", 
-                              "QaGlobtrkNPoint", 
-                              "QaGlobtrkNPointFit",
-                              "QaGlobtrkChisq0P",
-                              "QaGlobtrkChisq1P",
-                              "QaDstDedxNdedx",
-                              "QaDstDedxDedx0", 
-                              "QaDstDedxDedx1",
-                              "QaPrimtrkPt",
-                              "QaParticlePt"};
+  const Char_t *sdefList[] = {
+ "QaGlobtrkTot",
+ "QaGlobtrkGood",
+ "QaGlobtrkFlag",
+ "QaGlobtrkNPnt",
+ "QaGlobtrkNPntMax",
+ "QaGlobtrkNPntFit",
+ "QaGlobtrkX0",
+ "QaGlobtrkXf",
+ "QaGlobtrkY0",
+ "QaGlobtrkYf",
+ "QaGlobtrkZ0",
+ "QaGlobtrkZf",
+ "QaGlobtrkTanl ",
+ "QaGlobtrkTheta ",
+ "QaGlobtrkEta",
+ "QaGlobtrkPt",
+ "QaGlobtrkP",
+ "QaGlobtrkChisq0P",
+ "QaGlobtrkChisq1P",
+ "QaGlobtrkLength",
+ "QaGlobtrkImpact",
+ "QaGlobtrkNdof",
+ "QaGlobtrkPtVsEta", 
+ "QaGlobtrkPVsTrkLength",
+ "QaDstDedxNdedx",
+ "QaDstDedxDedx0", 
+ "QaDstDedxDedx1",
+ "QaPrimtrkPt",
+ "QaParticlePt"};
 
   Int_t lengofList = 0;
   lengofList = sizeof(sdefList)/4;
@@ -782,6 +806,7 @@ void St_QA_Maker::BookHistGlob(){
   m_globtrk_iflag = new TH1F("QaGlobtrkFlag", "globtrk: iflag ",10,-1000.,1000.);
   m_det_id     = new TH1F("QaGlobtrkDetId",   "globtrk: Detector ID for tracks",11,-0.5,10.5);
   m_point      = new TH1F("QaGlobtrkNPnt",    "globtrk: N points on track", 50, 0.,50.);
+  m_max_point  = new TH1F("QaGlobtrkNPntMax", "globtrk: N max points on track", 50, 0.,50.);
   m_fit_point  = new TH1F("QaGlobtrkNPntFit", "globtrk: N fit points on track", 50, 0.,50.);
   m_glb_charge = new TH1F("QaGlobtrkChrg",    "globtrk: charge ", 20,-2.,2.);
   m_glb_x0     = new TH1F("QaGlobtrkX0",      "globtrk: x coor. on helix at start ", 50,-200.,200.);
@@ -791,7 +816,7 @@ void St_QA_Maker::BookHistGlob(){
   m_glb_z0     = new TH1F("QaGlobtrkZ0",      "globtrk: z coor. on helix at start ", 50,-200.,200.);
   m_glb_zf     = new TH1F("QaGlobtrkZf",      "globtrk: z coor. of first tpc hit ",  50,-200.,200.);
   m_psi        = new TH1F("QaGlobtrkPsi",     "globtrk: psi distribution", 36, 0.,360.);
-  m_tanl       = new TH1F("QaGlobtrkTanl",    "globtrk: tanl distribution",20,-5.,5.);
+  m_tanl       = new TH1F("QaGlobtrkTanl",    "globtrk: tanl distribution",32,-4.,4.);
   m_glb_theta  = new TH1F("QaGlobtrkTheta",   "globtrk: theta distribution",20,0.,4.);
   m_eta        = new TH1F("QaGlobtrkEta",     "globtrk: eta distribution",60,-3.0,3.0);
   m_pT         = new TH1F("QaGlobtrkPt",      "globtrk: pT distribution",50,0.,5.);
@@ -869,11 +894,11 @@ void St_QA_Maker::BookHistGlob(){
     m_chisq1_z0->SetXTitle("z0");
     m_chisq1_z0->SetYTitle("chisq1");
 
-  m_nfptonpt_mom = new TH2F("QaGlobtrkRPntMom","globtrk: ratio Nfitpnt,Npnt vs Mom",20,0.,5.,20,0.,10.0); 
-     m_nfptonpt_mom->SetXTitle("Momentum");
+  m_nfptonpt_mom = new TH2F("QaGlobtrkRPntMom","globtrk: ratio Nfitpnt,Npnt vs Mom",20,0.,5.,40,0.,2.0); 
+     m_nfptonpt_mom->SetXTitle("Momentum") ;
      m_nfptonpt_mom->SetYTitle("Ratio Nfitpnt/Npnt");
 
-  m_nfptonpt_eta = new TH2F("QaGlobtrkRPntEta","globtrk: ratio Nfitpnt,Npnt vs Eta",20,-2.,2.,20,0.,10.0); 
+  m_nfptonpt_eta = new TH2F("QaGlobtrkRPntEta","globtrk: ratio Nfitpnt,Npnt vs Eta",20,-2.,2.,40,0.,2.0); 
      m_nfptonpt_eta->SetXTitle("eta");
      m_nfptonpt_eta->SetYTitle("Ratio Nfitpnt/Npnt");
 
@@ -1066,6 +1091,7 @@ void St_QA_Maker::MakeHistGlob(St_DataSet *dst){
 
  	m_det_id->Fill(t->det_id);
 	m_point->Fill(t->n_point);
+	m_max_point->Fill(t->n_max_point);
 	m_fit_point->Fill(t->n_fit_point);
         m_glb_charge->Fill(t->icharge);
         m_glb_x0->Fill(t->x0);
@@ -1337,7 +1363,7 @@ void St_QA_Maker::MakeHistXi(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.35 1999/07/02 21:56:56 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.36 1999/07/07 16:58:32 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
