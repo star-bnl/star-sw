@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerInclude.h,v 2.1 2000/06/09 22:17:10 genevb Exp $
+// $Id: StStrangeControllerInclude.h,v 3.0 2000/07/14 12:56:49 genevb Exp $
 // $Log: StStrangeControllerInclude.h,v $
+// Revision 3.0  2000/07/14 12:56:49  genevb
+// Revision 3 has event multiplicities and dedx information for vertex tracks
+//
 // Revision 2.1  2000/06/09 22:17:10  genevb
 // Allow MC data to be copied between DSTs, other small improvements
 //
@@ -40,7 +43,7 @@ class StV0Controller : public StStrangeControllerBase {
   virtual Int_t MakeReadDst();
   virtual Int_t MakeCreateDst(StEvent& event);
   virtual Int_t MakeCreateMcDst(StMcVertex* mcVert);
-  ClassDef(StV0Controller,1)
+  ClassDef(StV0Controller,3)
 };
 
 class StXiController : public StStrangeControllerBase {
@@ -50,7 +53,7 @@ class StXiController : public StStrangeControllerBase {
   virtual Int_t MakeReadDst();
   virtual Int_t MakeCreateDst(StEvent& event);
   virtual Int_t MakeCreateMcDst(StMcVertex* mcVert);
-  ClassDef(StXiController,1)
+  ClassDef(StXiController,3)
 };
 
 class StKinkController : public StStrangeControllerBase {
@@ -60,7 +63,7 @@ class StKinkController : public StStrangeControllerBase {
   virtual Int_t MakeReadDst();
   virtual Int_t MakeCreateDst(StEvent& event);
   virtual Int_t MakeCreateMcDst(StMcVertex* mcVert);
-  ClassDef(StKinkController,1)
+  ClassDef(StKinkController,3)
 };
 
 #endif

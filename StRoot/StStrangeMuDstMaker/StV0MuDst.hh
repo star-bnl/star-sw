@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MuDst.hh,v 2.0 2000/06/02 22:11:54 genevb Exp $
+ * $Id: StV0MuDst.hh,v 3.0 2000/07/14 12:56:50 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 04-Jun-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StV0MuDst.hh,v $
+ * Revision 3.0  2000/07/14 12:56:50  genevb
+ * Revision 3 has event multiplicities and dedx information for vertex tracks
+ *
  * Revision 2.0  2000/06/02 22:11:54  genevb
  * New version of Strangeness micro DST package
  *
@@ -103,6 +106,8 @@ public:
   Float_t clNeg()   const;        // Confidence level of neg. daughter
   Long_t  detectorIdV0();         // Detector ID for V0 Vertex
   virtual Long_t detectorIdPars();// Detector ID for pars used in V0 finder
+  Float_t dedxPos() const;        // dE/dX of pos. daughter
+  Float_t dedxNeg() const;        // dE/dX of neg. daughter
 
 protected:
   StStrangeEvMuDst *mEvent;       //!
@@ -143,7 +148,10 @@ protected:
 
   Long_t detectorIdTrack(StTrackTopologyMap&);
 
-  ClassDef(StV0MuDst, 2)
+  Float_t mDedxPos;
+  Float_t mDedxNeg;
+
+  ClassDef(StV0MuDst,3)
 };
 
 inline StV0MuDst::StV0MuDst(StV0Vertex* v1,StStrangeEvMuDst* e1)
@@ -184,4 +192,6 @@ inline Float_t StV0MuDst::chi2Pos() const { return mChi2Pos; }
 inline Float_t StV0MuDst::clPos()   const { return mClPos; }
 inline Float_t StV0MuDst::chi2Neg() const { return mChi2Neg; }
 inline Float_t StV0MuDst::clNeg()   const { return mClNeg; }
+inline Float_t StV0MuDst::dedxPos() const { return mDedxPos; }
+inline Float_t StV0MuDst::dedxNeg() const { return mDedxNeg; }
 #endif

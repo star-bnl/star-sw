@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkMuDst.cc,v 2.0 2000/06/02 22:11:54 genevb Exp $
+ * $Id: StKinkMuDst.cc,v 3.0 2000/07/14 12:56:48 genevb Exp $
  *
  * Author: Wensheng Deng, Kent State University, 29-Mar-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StKinkMuDst.cc,v $
+ * Revision 3.0  2000/07/14 12:56:48  genevb
+ * Revision 3 has event multiplicities and dedx information for vertex tracks
+ *
  * Revision 2.0  2000/06/02 22:11:54  genevb
  * New version of Strangeness micro DST package
  *
@@ -23,6 +26,7 @@
 #include "StKinkVertex.h"
 #include "StTrack.h"
 #include "StTrackFitTraits.h"
+#include "StDedxPidTraits.h"
 
 #include <stdlib.h>
 #include "phys_constants.h"
@@ -53,10 +57,32 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex)
   mPositionZ = kinkVertex->position().z();
   mChi2Kink = kinkVertex->chiSquared();
   mClKink = kinkVertex->probChiSquared();
-  mChi2Parent = kinkVertex->parent()->fitTraits().chi2(0);
-  mClParent = kinkVertex->parent()->fitTraits().chi2(1);
-  mChi2Daughter = kinkVertex->daughter()->fitTraits().chi2(0);
-  mClDaughter = kinkVertex->daughter()->fitTraits().chi2(1);
+  
+  StTrack* trk = kinkVertex->parent();
+  mChi2Parent = trk->fitTraits().chi2(0);
+  mClParent = trk->fitTraits().chi2(1);
+  // For now, get the truncated mean dE/dX from the TPC
+  StPtrVecTrackPidTraits pidParent = trk->pidTraits(kTpcId);
+  for (UInt_t i=0; i<pidParent.size(); i++) {
+    StDedxPidTraits* pid = (StDedxPidTraits*) pidParent[i];
+    if (pid->method() == kTruncatedMeanId) {
+      mDedxParent = pid->mean();
+      break;
+    }
+  }
+
+  trk = kinkVertex->daughter();
+  mChi2Daughter = trk->fitTraits().chi2(0);
+  mClDaughter = trk->fitTraits().chi2(1);
+  // For now, get the truncated mean dE/dX from the TPC
+  StPtrVecTrackPidTraits pidDaughter = trk->pidTraits(kTpcId);
+  for (UInt_t i=0; i<pidDaughter.size(); i++) {
+    StDedxPidTraits* pid = (StDedxPidTraits*) pidDaughter[i];
+    if (pid->method() == kTruncatedMeanId) {
+      mDedxDaughter = pid->mean();
+      break;
+    }
+  }
 
   findMinDeltaEnergy(kinkVertex);
   findDecayLength(kinkVertex);

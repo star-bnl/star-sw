@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.cxx,v 2.1 2000/06/09 22:17:10 genevb Exp $
+// $Id: StStrangeControllerBase.cxx,v 3.0 2000/07/14 12:56:48 genevb Exp $
 // $Log: StStrangeControllerBase.cxx,v $
+// Revision 3.0  2000/07/14 12:56:48  genevb
+// Revision 3 has event multiplicities and dedx information for vertex tracks
+//
 // Revision 2.1  2000/06/09 22:17:10  genevb
 // Allow MC data to be copied between DSTs, other small improvements
 //
@@ -209,6 +212,34 @@ void StStrangeControllerBase::Select(Int_t i) {
   } else if (i < ent) {
     if (ent > selections->GetSize()) selections->Set(ent+increment);
     selections->AddAt(i,entries++);
+  }
+}
+//_____________________________________________________________________________
+void StStrangeControllerBase::Unselect(Int_t i) {
+  if ((!selections) || (!dstMaker) || (!entries)) return;
+  if (i<0) {
+    entries = 0;
+    selections->AddAt(0,0);
+    return;
+  }
+  Int_t ent = GetDstController()->GetN();
+  if (i >= ent) return;
+  if (selections->At(0) < 0) {
+    // If entire event selected, set to none and select each individual entry
+    Unselect(-1);
+    for (Int_t entry=0; entry<ent; entry++) {
+      if (i != entry) Select(entry);
+    }
+  } else {
+    for (Int_t entry=(entries-1); entry>=0; entry--) {
+      if (i == selections->At(entry)) {
+        entries--;
+	// Cheap and fast step: move last entry to the unselected one
+	// Cost: order of selection is lost
+        if (entries) selections->AddAt(selections->At(entries),entry);
+	return;
+      }
+    }
   }
 }
 //_____________________________________________________________________________

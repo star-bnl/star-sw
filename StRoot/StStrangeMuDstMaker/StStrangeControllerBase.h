@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.h,v 2.1 2000/06/09 22:17:10 genevb Exp $
+// $Id: StStrangeControllerBase.h,v 3.0 2000/07/14 12:56:48 genevb Exp $
 // $Log: StStrangeControllerBase.h,v $
+// Revision 3.0  2000/07/14 12:56:48  genevb
+// Revision 3 has event multiplicities and dedx information for vertex tracks
+//
 // Revision 2.1  2000/06/09 22:17:10  genevb
 // Allow MC data to be copied between DSTs, other small improvements
 //
@@ -51,6 +54,7 @@ class StStrangeControllerBase : public TNamed {
   
   // Functions for sub-dsts:
   virtual void Select(Int_t i=-1);     // use i<0 to specify whole event
+  virtual void Unselect(Int_t i=-1);   // use i<0 to specify whole event
   
   virtual void InitReadDst();
   virtual void InitCreateDst(const char* filename);
@@ -102,7 +106,7 @@ class StStrangeControllerBase : public TNamed {
   TString assocName;
   
  private:
-  ClassDef(StStrangeControllerBase,1)
+  ClassDef(StStrangeControllerBase,3)
 };
 
 inline TClonesArray* StStrangeControllerBase::GetDataArray()

@@ -1,7 +1,7 @@
-// $Id: StKinkController.cxx,v 2.2 2000/07/03 02:07:52 perev Exp $
+// $Id: StKinkController.cxx,v 3.0 2000/07/14 12:56:47 genevb Exp $
 // $Log: StKinkController.cxx,v $
-// Revision 2.2  2000/07/03 02:07:52  perev
-// StEvent: vector<TObject*>
+// Revision 3.0  2000/07/14 12:56:47  genevb
+// Revision 3 has event multiplicities and dedx information for vertex tracks
 //
 // Revision 2.1  2000/06/09 22:17:09  genevb
 // Allow MC data to be copied between DSTs, other small improvements
@@ -21,13 +21,13 @@
 #include "StAssociationMaker/StAssociationMaker.h"
 #include "StAssociationMaker/StTrackPairInfo.hh"
 #include "StTrack.h"
-#include "StTrackDetectorInfo.h"
 #include "StGlobalTrack.h"
 #include "StKinkVertex.h"
 #include "StKinkMuDst.hh"
 #include "StKinkMc.hh"
 #include "StMcEventTypes.hh"
 #include "StParticleDefinition.hh"
+#include "StTrackDetectorInfo.h"
 
 #include "StStrangeControllerInclude.h"  // Location of header for this class
 
@@ -117,7 +117,6 @@ Int_t StKinkController::MakeCreateMcDst(StMcVertex* mcVert) {
       new((*assocArray)[assocEntries++]) 
 		    StStrangeAssoc(indexRecoArray,mcEntries-1);
       if(indexRecoArray!=-1) {
-        StGlobalTrack *globalMatch;
         pair<mcTrackMapIter,mcTrackMapIter> mcTrackBounds = 
               theMcTrackMap->equal_range(*DTrackIt);
         StTrackPairInfo*   bestPairInfo = (*mcTrackBounds.first).second;
@@ -127,13 +126,8 @@ Int_t StKinkController::MakeCreateMcDst(StMcVertex* mcVert) {
 	         bestPairInfo = (*mcMapIt).second;
         } 
         if (mcTrackBounds.first != mcTrackBounds.second) {
-          Int_t hits = 0, commonHits = 0;
-          globalMatch = bestPairInfo->partnerTrack();
-          commonHits = bestPairInfo->commonTpcHits();  //Common hits
-          StPtrVecHit recTpcHits =globalMatch->detectorInfo()->hits(kTpcId);
-          hits = recTpcHits.size();                    //Reconstructed hits
-			   
-          ((StKinkMc*) mcArray->At(mcEntries-1))->SetHitInfo(hits,commonHits);
+          ((StKinkMc*)
+	   mcArray->At(mcEntries-1))->SetHitInfo(bestPairInfo->commonTpcHits());
         }
       }
     }

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MuDst.cc,v 2.0 2000/06/02 22:11:54 genevb Exp $
+ * $Id: StV0MuDst.cc,v 3.0 2000/07/14 12:56:50 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 04-Jun-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StV0MuDst.cc,v $
+ * Revision 3.0  2000/07/14 12:56:50  genevb
+ * Revision 3 has event multiplicities and dedx information for vertex tracks
+ *
  * Revision 2.0  2000/06/02 22:11:54  genevb
  * New version of Strangeness micro DST package
  *
@@ -32,6 +35,7 @@
 #include "StTrackFitTraits.h"
 #include "StV0Vertex.h"
 #include "StStrangeEvMuDst.hh"
+#include "StDedxPidTraits.h"
 ClassImp(StV0MuDst)
 
 StV0MuDst::StV0MuDst() { 
@@ -61,12 +65,30 @@ void StV0MuDst::Fill(StV0Vertex* v0Vertex,
   mTopologyMapPos = trk->topologyMap();
   mChi2Pos = trk->fitTraits().chi2(0);
   mClPos = trk->fitTraits().chi2(1);
+  // For now, get the truncated mean dE/dX from the TPC
+  StPtrVecTrackPidTraits pidPos = trk->pidTraits(kTpcId);
+  for (UInt_t i=0; i<pidPos.size(); i++) {
+    StDedxPidTraits* pid = (StDedxPidTraits*) pidPos[i];
+    if (pid->method() == kTruncatedMeanId) {
+      mDedxPos = pid->mean();
+      break;
+    }
+  }
 
   trk = v0Vertex->daughter(negative);
   mKeyNeg = trk->key();
   mTopologyMapNeg = trk->topologyMap();
   mChi2Neg = trk->fitTraits().chi2(0);
   mClNeg = trk->fitTraits().chi2(1);
+  // For now, get the truncated mean dE/dX from the TPC
+  StPtrVecTrackPidTraits pidNeg = trk->pidTraits(kTpcId);
+  for (UInt_t i=0; i<pidNeg.size(); i++) {
+    StDedxPidTraits* pid = (StDedxPidTraits*) pidNeg[i];
+    if (pid->method() == kTruncatedMeanId) {
+      mDedxNeg = pid->mean();
+      break;
+    }
+  }
 }
 
 void StV0MuDst::Clear() {

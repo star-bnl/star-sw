@@ -1,7 +1,10 @@
 /***********************************************************************
  *
- * $Id: StV0Mc.hh,v 2.0 2000/06/05 05:19:45 genevb Exp $
+ * $Id: StV0Mc.hh,v 3.0 2000/07/14 12:56:50 genevb Exp $
  * $Log: StV0Mc.hh,v $
+ * Revision 3.0  2000/07/14 12:56:50  genevb
+ * Revision 3 has event multiplicities and dedx information for vertex tracks
+ *
  * Revision 2.0  2000/06/05 05:19:45  genevb
  * New version of Strangeness micro DST package
  *
@@ -43,21 +46,17 @@ public:
   Float_t  positionY() const;
   Float_t  positionZ() const;
 
-  Int_t positiveTpcHits() const;
   Int_t positiveSimTpcHits() const;
   Int_t positiveCommonTpcHits() const;
-  Int_t negativeTpcHits() const;
   Int_t negativeSimTpcHits() const;
   Int_t negativeCommonTpcHits() const;
 
-  void SetHitInfoPositive(Int_t hits, Int_t commonHits);
-  void SetHitInfoNegative(Int_t hits, Int_t commonHits);
+  void SetHitInfoPositive(Int_t commonHits);
+  void SetHitInfoNegative(Int_t commonHits);
   
-  Int_t mPositiveTpcHits;
   Int_t mPositiveSimTpcHits;
   Int_t mPositiveCommonTpcHits;
   
-  Int_t mNegativeTpcHits;
   Int_t mNegativeSimTpcHits;
   Int_t mNegativeCommonTpcHits;
 
@@ -79,23 +78,19 @@ public:
   Float_t  mPositionZ;
 
 private:
-  ClassDef(StV0Mc,1)
+  ClassDef(StV0Mc,3)
 };
 
 inline Int_t StV0Mc::decayMode() const
             { return mDecayMode; }
-inline void StV0Mc::SetHitInfoPositive(Int_t hits, Int_t commonHits)
-            { mPositiveTpcHits = hits; mPositiveCommonTpcHits = commonHits; }
-inline Int_t StV0Mc::positiveTpcHits() const
-            { return mPositiveTpcHits; }
+inline void StV0Mc::SetHitInfoPositive(Int_t commonHits)
+            { mPositiveCommonTpcHits = commonHits; }
 inline Int_t StV0Mc::positiveCommonTpcHits() const
             { return mPositiveCommonTpcHits; }
 inline Int_t StV0Mc::positiveSimTpcHits() const
             { return mPositiveSimTpcHits; }
-inline void StV0Mc::SetHitInfoNegative(Int_t hits, Int_t commonHits)
-            { mNegativeTpcHits = hits; mNegativeCommonTpcHits = commonHits; }
-inline Int_t StV0Mc::negativeTpcHits() const
-            { return mNegativeTpcHits; }
+inline void StV0Mc::SetHitInfoNegative(Int_t commonHits)
+            { mNegativeCommonTpcHits = commonHits; }
 inline Int_t StV0Mc::negativeCommonTpcHits() const
             { return mNegativeCommonTpcHits; }
 inline Int_t StV0Mc::negativeSimTpcHits() const

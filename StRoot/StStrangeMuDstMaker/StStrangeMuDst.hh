@@ -1,7 +1,10 @@
 /***********************************************************************
  *
- * $Id: StStrangeMuDst.hh,v 2.1 2000/06/09 22:17:10 genevb Exp $
+ * $Id: StStrangeMuDst.hh,v 3.0 2000/07/14 12:56:49 genevb Exp $
  * $Log: StStrangeMuDst.hh,v $
+ * Revision 3.0  2000/07/14 12:56:49  genevb
+ * Revision 3 has event multiplicities and dedx information for vertex tracks
+ *
  * Revision 2.1  2000/06/09 22:17:10  genevb
  * Allow MC data to be copied between DSTs, other small improvements
  *
@@ -22,7 +25,7 @@ class StStrangeMuDst : public TObject {
 public:
   StStrangeMuDst() {}
   virtual ~StStrangeMuDst() {}
-  ClassDef(StStrangeMuDst, 1)
+  ClassDef(StStrangeMuDst,3)
 };
 
 //_____________________________________________________________________________
@@ -41,7 +44,7 @@ public:
 private:
   Int_t mIndexRecoArray;
   Int_t mIndexMcArray;
-  ClassDef(StStrangeAssoc,1)
+  ClassDef(StStrangeAssoc,3)
 };
 
 inline Int_t StStrangeAssoc::indexRecoArray() const

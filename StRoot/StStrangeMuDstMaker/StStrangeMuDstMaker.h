@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.h,v 2.1 2000/06/09 22:17:11 genevb Exp $
+// $Id: StStrangeMuDstMaker.h,v 3.0 2000/07/14 12:56:50 genevb Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 3.0  2000/07/14 12:56:50  genevb
+// Revision 3 has event multiplicities and dedx information for vertex tracks
+//
 // Revision 2.1  2000/06/09 22:17:11  genevb
 // Allow MC data to be copied between DSTs, other small improvements
 //
@@ -117,10 +120,14 @@ class StStrangeMuDstMaker : public StMaker {
   
   // Selects entire event for sub DST...
   void SelectEvent();                  // selects whole event for sub DST
+  void UnselectEvent();                // unselects whole event for sub DST
   // ...or select portions (use i<0 to select all of the V0s, etc...
-  void SelectV0(Int_t i=-1)   { v0->Select(i); }
-  void SelectXi(Int_t i=-1)   { xi->Select(i); }
-  void SelectKink(Int_t i=-1) { kink->Select(i); }
+  void SelectV0(Int_t i=-1)     { v0->Select(i); }
+  void SelectXi(Int_t i=-1)     { xi->Select(i); }
+  void SelectKink(Int_t i=-1)   { kink->Select(i); }
+  void UnselectV0(Int_t i=-1)   { v0->Unselect(i); }
+  void UnselectXi(Int_t i=-1)   { xi->Unselect(i); }
+  void UnselectKink(Int_t i=-1) { kink->Unselect(i); }
   
  protected:
   virtual void InitReadDst();
@@ -167,7 +174,7 @@ class StStrangeMuDstMaker : public StMaker {
   StStrangeControllerBase* xi;    //!
   StStrangeControllerBase* kink;  //!
  private:
-  ClassDef(StStrangeMuDstMaker,1)
+  ClassDef(StStrangeMuDstMaker,3)
 };
 
 inline StrangeEnum StStrangeMuDstMaker::GetMode()
