@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.26 2002/04/19 16:36:41 perev Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.27 2002/12/11 15:35:53 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.27  2002/12/11 15:35:53  aihong
+ * put in fabs in processPIDAsFuntion()
+ *
  * Revision 1.26  2002/04/19 16:36:41  perev
  * bug fix,init to zero
  *
@@ -990,12 +993,12 @@ void StuProbabilityPidAlgorithm::processPIDAsFunction (double theCent, double th
 
      if (mPIDTableRead) {
 
-          double rig    =theRig;
+          double rig    =fabs(theRig);
           double dedx   =theDedx;
 	  double dca    =theDca; //in units of cm.
           int    nhits  =theNhits;
           int    charge =theCharge;
-          double eta    =theEta; 
+          double eta    =fabs(theEta); 
           double cent   =theCent; // % central
 
 
