@@ -133,7 +133,7 @@ Block BBCA is one BBC Annulus module
 
 		Create and Position THXM in BBCA z=0 x=xtrip y=ytrip,
 			phix=phi0	phiy=90+phi0	phiz=0,
-			thetax=90	thetax=90	thetaz=0
+			thetax=90	thetax=90	thetaz=0  konly='MANY'
 
 	Enddo
 
