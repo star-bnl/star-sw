@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.cc,v 1.2 1999/03/02 19:47:35 ullrich Exp $
+ * $Id: StHelix.cc,v 1.3 1999/03/07 14:55:41 wenaus Exp $
  *
  * Author: Thomas Ullrich, Sep 26 1997
  ***************************************************************************
@@ -11,9 +11,12 @@
  ***************************************************************************
  *
  * $Log: StHelix.cc,v $
- * Revision 1.2  1999/03/02 19:47:35  ullrich
- * Added method to find dca between two helices
+ * Revision 1.3  1999/03/07 14:55:41  wenaus
+ * fix scope problem
  *
+ * Revision 1.8  2000/05/22 21:11:21  ullrich
+ * In pathLength(StThreeVector&): Increased number of max iteration
+ * in Newton method from 10 to 100. Improved initial guess in case
  * it is off by n period.
  *
  * Revision 1.7  2000/03/06 20:24:25  ullrich
@@ -300,7 +303,8 @@ double StHelix::pathLength(const StThreeVector<double>& r,
 #else
     const double NoSolution = DBL_MAX;
 #endif
-	for (int i=0; i<MaxIterations; i++) {
+
+    if (mSingularity) {
 	double t = n.z()*mSinDipAngle +
 	           n.y()*mCosDipAngle*mCosPhase -
 	           n.x()*mCosDipAngle*mSinPhase;

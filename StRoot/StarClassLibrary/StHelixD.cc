@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixD.cc,v 1.2 1999/03/02 19:47:40 ullrich Exp $
+ * $Id: StHelixD.cc,v 1.3 1999/03/07 14:56:28 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,8 +15,11 @@
  ***************************************************************************
  *
  * $Log: StHelixD.cc,v $
- * Revision 1.2  1999/03/02 19:47:40  ullrich
- * Added method to find dca between two helices
+ * Revision 1.3  1999/03/07 14:56:28  wenaus
+ * fix scope problem
+ *
+ * Revision 1.8  2000/05/22 21:38:32  ullrich
+ * Add parenthesis to make Linux compiler happy.
  *
  * Revision 1.7  2000/05/22 21:14:40  ullrich
  * In pathLength(StThreeVector&): Increased number of max iteration
@@ -299,7 +302,8 @@ double StHelixD::pathLength(const StThreeVectorD& r,
     // the max. largest value for s is returned.
     //
     double s;
-	for (int i=0; i<MaxIterations; i++) {
+    const double NoSolution = DBL_MAX;
+
     if (mSingularity) {
 	double t = n.z()*mSinDipAngle +
 	           n.y()*mCosDipAngle*mCosPhase -
