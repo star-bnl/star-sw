@@ -61,7 +61,7 @@ void RunStiMaker(Int_t nevents=1,
     chain->SetDebug();
     
     // add makers to the chain
-    
+
     StIOMaker* ioMaker = new StIOMaker("IO","r",MainFile,"bfcTree");
     ioMaker->SetDebug();
     ioMaker->SetIOMode("r");
@@ -69,7 +69,7 @@ void RunStiMaker(Int_t nevents=1,
     ioMaker->SetBranch("geantBranch",0,"r");  //activate geant Branch
     ioMaker->SetBranch("dstBranch",0,"r");    //activate Event Branch
     ioMaker->SetBranch("runcoBranch",0,"r");  //activate runco Branch
-    
+
     const char* calibDB = "MySQL:StarDb";
     const char* paramsDB = "$STAR/StarDb";
     St_db_Maker* calibMk = new St_db_Maker("StarDb",calibDB,paramsDB);
