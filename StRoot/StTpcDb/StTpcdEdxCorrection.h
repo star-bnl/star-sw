@@ -1,9 +1,10 @@
-// $Id: StTpcdEdxCorrection.h,v 1.1 2004/03/05 17:23:49 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.2 2004/06/05 23:38:22 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
+//
 #include "TObject.h"
 #include "Stiostream.h"
-#include "tables/St_tpcCorrection_Table.h"
+#include "St_tpcCorrectionC.h"
 #include "tables/St_tpcGas_Table.h"
 #include "tables/St_TpcSecRowCor_Table.h"
 #include "tables/St_tpcGas_Table.h"
@@ -83,56 +84,66 @@ class dEdx_t : public TObject {
 }; 
 
 class StTpcdEdxCorrection : public TObject {
- private:
-  St_TpcSecRowCor     *m_TpcSecRow;            //!
-  St_tpcCorrection    *m_drift;                //!
-  St_tpcCorrection    *m_Multiplicity;         //!
-  St_tpcCorrection    *m_AdcCorrection;        //!
-  St_tpcCorrection    *m_zCorrection;          //!
-  St_tpcCorrection    *m_dXCorrection;         //!
-  St_tpcCorrection    *m_TpcdEdxCor;           //!
-  St_tpcCorrection    *m_TpcLengthCorrection;  //!
-  St_tpcGas           *m_tpcGas;               //!
-  St_tpcCorrection    *m_tpcPressure;          //!
-  //  St_trigDetSums      *m_trigDetSums;          //!
-  //  trigDetSums_st      *m_trig;                 //!
-  //  St_tpcGainMonitor   *m_tpcGainMonitor;       //!
  public:
   enum ESector  {kTpcOuter = 0, kTpcInner = 1};
+  enum EOptions {
+    kTpcSecRow           ,
+    kDrift               ,
+    kMultiplicity        ,
+    kAdcCorrection       ,
+    kzCorrection         ,
+    kdXCorrection        ,
+    kTpcdEdxCor          ,
+    kTpcLengthCorrection ,
+    ktpcGas              ,
+    ktpcPressure };
+    //  ktrigDetSums      ,
+    //  ktpcGainMonitor   ,
+  StTpcdEdxCorrection(Int_t Option=0);
+  ~StTpcdEdxCorrection();
+  Int_t dEdxCorrection(dEdx_t &dEdx); 
 
-  StTpcdEdxCorrection();
-  ~StTpcdEdxCorrection() {}
-  Int_t dEdxCorrection(dEdx_t &dEdx, Double_t sign = 1); 
-  static Double_t CalcCorrection(const tpcCorrection_st *cor,const Double_t x);
-  static Double_t SumSeries(const Double_t &X,const Int_t &N,const Float_t *params);
-  static Double_t SumSeries(const Double_t &X,const Int_t &N,const Double_t *params);
-
-  void SetTpcSecRow            (St_TpcSecRowCor     *m = 0);
-  void Setdrift                (St_tpcCorrection    *m = 0);
-  void SetMultiplicity         (St_tpcCorrection    *m = 0);
-  void SetAdcCorrection        (St_tpcCorrection    *m = 0);
-  void SetzCorrection          (St_tpcCorrection    *m = 0);
-  void SetdXCorrection         (St_tpcCorrection    *m = 0);
-  void SetTpcdEdxCor           (St_tpcCorrection    *m = 0);
-  void SetTpcLengthCorrection  (St_tpcCorrection    *m = 0);
-  void SettpcGas               (St_tpcGas           *m = 0);
-  void SettpcPressure          (St_tpcCorrection    *m = 0);
+  void SetTpcSecRow            (St_TpcSecRowCor    *m = 0);
+  void Setdrift                (St_tpcCorrection   *m = 0);
+  void SetMultiplicity         (St_tpcCorrection   *m = 0);
+  void SetAdcCorrection        (St_tpcCorrection   *m = 0);
+  void SetzCorrection          (St_tpcCorrection   *m = 0);
+  void SetdXCorrection         (St_tpcCorrection   *m = 0);
+  void SetTpcdEdxCor           (St_tpcCorrection   *m = 0);
+  void SetTpcLengthCorrection  (St_tpcCorrection   *m = 0);
+  void SettpcGas               (St_tpcGas          *m = 0);
+  void SettpcPressure          (St_tpcCorrection   *m = 0);
   //  void SettrigDetSums          (St_trigDetSums      *m = 0);
   //  void SettpcGainMonitor       (St_tpcGainMonitor   *m = 0);
 
   St_TpcSecRowCor   *TpcSecRow()           {return m_TpcSecRow;}
-  St_tpcCorrection  *drift()               {return m_drift;}
-  St_tpcCorrection  *Multiplicity()        {return m_Multiplicity;}
-  St_tpcCorrection  *AdcCorrection()       {return m_AdcCorrection;}
-  St_tpcCorrection  *zCorrection()         {return m_zCorrection;}
-  St_tpcCorrection  *dXCorrection()        {return m_dXCorrection;}
-  St_tpcCorrection  *TpcdEdxCor()          {return m_TpcdEdxCor;}
-  St_tpcCorrection  *TpcLengthCorrection() {return m_TpcLengthCorrection;}
+  St_tpcCorrectionC *drift()               {return m_drift;}
+  St_tpcCorrectionC *Multiplicity()        {return m_Multiplicity;}
+  St_tpcCorrectionC *AdcCorrection()       {return m_AdcCorrection;}
+  St_tpcCorrectionC *zCorrection()         {return m_zCorrection;}
+  St_tpcCorrectionC *dXCorrection()        {return m_dXCorrection;}
+  St_tpcCorrectionC *TpcdEdxCor()          {return m_TpcdEdxCor;}
+  St_tpcCorrectionC *TpcLengthCorrection() {return m_TpcLengthCorrection;}
   St_tpcGas         *tpcGas()              {return m_tpcGas;}
-  St_tpcCorrection  *tpcPressure()         {return m_tpcPressure;}
+  St_tpcCorrectionC *tpcPressure()         {return m_tpcPressure;}
   //  St_trigDetSums    *trigDetSums()         {return m_trigDetSums;}
   //  St_tpcGainMonitor *tpcGainMonitor()      {return m_tpcGainMonitor;}
 
+ private:
+  Int_t                m_Mask;                  //!
+  St_TpcSecRowCor     *m_TpcSecRow;            //!
+  St_tpcCorrectionC   *m_drift;                //!
+  St_tpcCorrectionC   *m_Multiplicity;         //!
+  St_tpcCorrectionC   *m_AdcCorrection;        //!
+  St_tpcCorrectionC   *m_zCorrection;          //!
+  St_tpcCorrectionC   *m_dXCorrection;         //!
+  St_tpcCorrectionC   *m_TpcdEdxCor;           //!
+  St_tpcCorrectionC   *m_TpcLengthCorrection;  //!
+  St_tpcGas           *m_tpcGas;               //!
+  St_tpcCorrectionC   *m_tpcPressure;          //!
+  //  St_trigDetSums      *m_trigDetSums;          //!
+  //  trigDetSums_st      *m_trig;                 //!
+  //  St_tpcGainMonitor   *m_tpcGainMonitor;       //!
   ClassDef(StTpcdEdxCorrection,0)   //StAF chain virtual base class for Makers
 };
 

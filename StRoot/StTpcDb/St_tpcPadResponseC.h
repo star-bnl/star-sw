@@ -6,6 +6,7 @@
 class St_tpcPadResponseC : public TChair {
  public:
   St_tpcPadResponseC (St_tpcPadResponse *table=0) : TChair(table) {}
+  virtual ~St_tpcPadResponseC() {}
   Float_t  innerGasGainFluctuation() ;
   Float_t  outerGasGainFluctuation() ;
   Float_t  innerPadResponseSigma()   ;
@@ -14,9 +15,9 @@ class St_tpcPadResponseC : public TChair {
   Float_t  outerWirePadCoupling()    ;
   Float_t  innerRowNormalization()   ;
   Float_t  outerRowNormalization()   ;
-  Float_t  BoundaryOfStepFunctions(Int_t i) ;
-  Float_t  innerChargeFractionConstants(Int_t i) ;
-  Float_t  outerChargeFractionConstants(Int_t i) ;
+  Float_t  BoundaryOfStepFunctions(Int_t i=0) ;
+  Float_t  innerChargeFractionConstants(Int_t i=0) ;
+  Float_t  outerChargeFractionConstants(Int_t i=0) ;
   Float_t  errorFunctionRange() ;
   Int_t    errorFunctionEntry() ;
   Float_t  longitudinalDiffusionConstant() ;
