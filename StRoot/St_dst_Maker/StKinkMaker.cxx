@@ -385,109 +385,130 @@ Int_t StKinkMaker::Make(){
 	  dstVtxRow.sigma[2] = 0.;
 	  dstVtxRow.pchi2    = 0.;
 	  dstVtxRow.id_aux_ent = kinkVtxIndex + 1;
-	  
+
+	  kinkCandidate++;		  
 //==========================================================================
-	  St_DataSet *tpcTracks = GetDataSet("tpc_tracks"); 
-	  St_DataSetIter tpcI(tpcTracks);  
-	  
-	  St_tpt_track  *tptTrack = (St_tpt_track *) tpcI["tptrack"];
-	  St_tte_eval   *tteEval  = (St_tte_eval *)  tpcI["evaltrk"];
-	  
-	  tpt_track_st* tptPtr  = tptTrack->GetTable();
-	  tte_eval_st*  tteEPtr = tteEval->GetTable();
-	  
-	  Int_t daughterMcId;
-	  
-	  for(Int_t m=0; m<tptTrack->GetNRows(); m++)
-	    {
-	      if(tptPtr->id_globtrk == myTrack2->getId())
-		{
-		  for(Int_t n=0; n<tteEval->GetNRows(); n++)
-		    {
-		      if(tteEPtr->rtrk == tptPtr->id)
-			{
-			  daughterMcId = tteEPtr->mtrk;
-			  break;		
-			}
-		      tteEPtr++;
-		    }
-		}
-	      tptPtr++;
-	    }
-
-  //==============================================================
-	  tpt_track_st* tptPtr1  = tptTrack->GetTable();
-	  tte_eval_st*  tteEPtr1 = tteEval->GetTable();
-	  
-	  Int_t parentMcId;
-	  Int_t parentPid;
-	  
-	  for(Int_t x=0; x<tptTrack->GetNRows(); x++)
-	    {
-	      if(tptPtr1->id_globtrk == myTrack1->getId())
-		{
-		  for(Int_t y=0; y<tteEval->GetNRows(); y++)
-		    {
-		      if(tteEPtr1->rtrk == tptPtr1->id)
-			{
-			  parentMcId = tteEPtr1->mtrk;
-			  parentPid = tteEPtr1->pid;		  
-			  break;		
-			}
-		      tteEPtr1++;
-		    }
-		}
-	      tptPtr1++;
-	    }
-
+	  if(m_kinkEvalOn) {
+	    St_DataSet *tpcTracks = GetDataSet("tpc_tracks"); 
+	    St_DataSetIter tpcI(tpcTracks);  
+	    
+	    St_tpt_track  *tptTrack = (St_tpt_track *) tpcI["tptrack"];
+	    St_tte_eval   *tteEval  = (St_tte_eval *)  tpcI["evaltrk"];
+	   
+	    tpt_track_st* tptPtr  = tptTrack->GetTable();
+	    tte_eval_st*  tteEPtr = tteEval->GetTable(); 
+	    
+	    Int_t daughterMcId;
+	    
+	    for(Int_t m=0; m<tptTrack->GetNRows(); m++)
+	      {
+		if(tptPtr->id_globtrk == myTrack2->getId())
+		  {
+		    for(Int_t n=0; n<tteEval->GetNRows(); n++)
+		      {
+			if(tteEPtr->rtrk == tptPtr->id)
+			  {
+			    daughterMcId = tteEPtr->mtrk;
+			    break;		
+			  }
+			tteEPtr++;
+		      }
+		  }
+		tptPtr++;
+	      }
+	    
+//==============================================================
+	    tpt_track_st* tptPtr1  = tptTrack->GetTable();
+	    tte_eval_st*  tteEPtr1 = tteEval->GetTable();
+	    
+	    Int_t parentMcId;
+	    Int_t parentPid;
+	    
+	    for(Int_t x=0; x<tptTrack->GetNRows(); x++)
+	      {
+		if(tptPtr1->id_globtrk == myTrack1->getId())
+		  {
+		    for(Int_t y=0; y<tteEval->GetNRows(); y++)
+		      {
+			if(tteEPtr1->rtrk == tptPtr1->id)
+			  {
+			    parentMcId = tteEPtr1->mtrk;
+			    parentPid = tteEPtr1->pid;		  
+			    break;		
+			  }
+			tteEPtr1++;
+		      }
+		  }
+		tptPtr1++;
+	      }
+	    
   //=====================================================================
-
-	  St_DataSet *geant = GetDataSet("geant"); 
-	  St_DataSetIter geantI(geant);         
-	  
-	  St_g2t_track  *g2tTrack  = (St_g2t_track *)  geantI["g2t_track"];
-	  St_g2t_vertex *g2tVertex = (St_g2t_vertex *) geantI["g2t_vertex"];
-	  
-	  if( daughterMcId>g2tTrack->GetNRows() ) continue;
-	  if( parentMcId>g2tTrack->GetNRows() ) continue;
-	  
-	  g2t_track_st*   g2tTrackStart  = g2tTrack->GetTable();
-	  g2t_vertex_st*  g2tVertexStart = g2tVertex->GetTable();
-	  
-	  g2t_track_st*  g2tTrackPtr;
-	  g2t_vertex_st* g2tVertexPtr;
-	  
-	  g2tTrackPtr = g2tTrackStart + (parentMcId -1);
-	  
-	  Int_t stopIdParent = g2tTrackPtr->stop_vertex_p;
-   //-----------------------------------------------------------------
-	  g2tTrackPtr = g2tTrackStart + (daughterMcId -1);
-	  
-	  Int_t vertexGeProc; 
-	  Int_t startIdDaughter = g2tTrackPtr->start_vertex_p;
-	  
-	  g2tVertexPtr = g2tVertexStart + (startIdDaughter -1);
-	  
-	  vertexGeProc = g2tVertexPtr->ge_proc;
-	  
-	  if( stopIdParent==startIdDaughter  && ( parentPid==11 || parentPid==12 ) && vertexGeProc==5 )
-	    {
-	      dstVtxRow.iflag       = 1;
-	      dstVtxRow.vtx_id      = kKinkVtxId;
-	      dstVtxRow.n_daughters = 1; 
-	    } else {
-	      dstVtxRow.iflag       = 0;
-	      dstVtxRow.vtx_id      = kOtherVtxId;
-	      dstVtxRow.n_daughters = 9999;                  //????????????
+	    Int_t stopIdParent;
+	    Int_t startIdDaughter;	
+	    Int_t vertexGeProc; 
+	    
+	    St_DataSet *geant = GetDataSet("geant"); 
+	    St_DataSetIter geantI(geant);         
+	    
+	    St_g2t_track  *g2tTrack  = (St_g2t_track *)  geantI["g2t_track"];
+	    St_g2t_vertex *g2tVertex = (St_g2t_vertex *) geantI["g2t_vertex"];
+	    
+	    g2t_track_st*   g2tTrackStart  = g2tTrack->GetTable();
+	    g2t_vertex_st*  g2tVertexStart = g2tVertex->GetTable();
+	    
+	    g2t_track_st*  g2tTrackPtr;
+	    g2t_vertex_st* g2tVertexPtr;
+	    
+	    if( daughterMcId>g2tTrack->GetNRows() || daughterMcId<1  ) {
+	      goto WRONGFILL; 	    
 	    }
- //================================================================================ 
+	    if( parentMcId>g2tTrack->GetNRows() || parentMcId<1 ) {
+	      goto WRONGFILL; 	    
+	    }
+	    
+	    g2tTrackPtr = g2tTrackStart + (parentMcId -1);
 
+	    stopIdParent = g2tTrackPtr->stop_vertex_p;
+ //-----------------------------------------------------------------
+	    g2tTrackPtr = g2tTrackStart + (daughterMcId -1);
+
+	    startIdDaughter = g2tTrackPtr->start_vertex_p;
+	    
+	    if( stopIdParent>g2tVertex->GetNRows() || stopIdParent<1 )  {
+	      goto WRONGFILL; 	    
+	    }
+	    if( startIdDaughter>g2tVertex->GetNRows() || startIdDaughter<1 ) {
+	      goto WRONGFILL; 
+	    }
+	    
+	    g2tVertexPtr = g2tVertexStart + (startIdDaughter -1);
+	    
+	    vertexGeProc = g2tVertexPtr->ge_proc;
+	    
+	    if( stopIdParent==startIdDaughter  && ( parentPid==11 || parentPid==12 ) && vertexGeProc==5 )
+	      {
+		dstVtxRow.iflag       = 1;
+		dstVtxRow.vtx_id      = kKinkVtxId;
+		dstVtxRow.n_daughters = 1; 
+	      } else {
+		dstVtxRow.iflag       = 0;
+		dstVtxRow.vtx_id      = kOtherVtxId;
+		dstVtxRow.n_daughters = 9999;                  //????????????
+	      }
+	    goto PROPERFILL;
+	  }
+//================================================================================ 
+WRONGFILL:
+	  cout << "filling dst_vertex.iflag with 2. \n" << endl; 
+	  dstVtxRow.iflag       = 2;
+	  dstVtxRow.vtx_id      = 0;
+	  dstVtxRow.n_daughters = 0; 
+PROPERFILL:	  
 	  kinkVertex->AddAt(&kinkVtxRow, kinkVtxIndex);
 	  vertex->AddAt(&dstVtxRow, dstVtxIndex);
 	  
 	  kinkVtxIndex++;	
 	  dstVtxIndex++;
-	  kinkCandidate++;	
 	}
     }
   trackArray->Delete();
@@ -499,7 +520,7 @@ Int_t StKinkMaker::Make(){
 //_____________________________________________________________________________
 void StKinkMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StKinkMaker.cxx,v 1.2 1999/07/01 17:30:45 fisyak Exp $\n");
+  printf("* $Id: StKinkMaker.cxx,v 1.3 1999/07/02 19:56:15 wdeng Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
