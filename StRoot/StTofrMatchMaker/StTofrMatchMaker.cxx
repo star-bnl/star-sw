@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.3 2004/03/11 22:30:34 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.4 2004/03/16 22:30:49 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.4  2004/03/16 22:30:49  dongx
+ * fix the warning message when compiling
+ *
  * Revision 1.3  2004/03/11 22:30:34  dongx
  * -move m_Mode control to Init()
  * -clear up
@@ -63,6 +66,8 @@ StTofrMatchMaker::StTofrMatchMaker(const Char_t *name): StMaker(name){
 
   mTofrGeom = 0;
   mDaqMap = 0;
+
+  mWidthPad = 3.45;
 
   setValidAdcRange(1,1200);
   setValidTdcRange(1,2047);

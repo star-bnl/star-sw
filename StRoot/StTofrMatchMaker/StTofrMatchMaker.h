@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.h,v 1.3 2004/03/11 22:30:34 dongx Exp $
+ * $Id: StTofrMatchMaker.h,v 1.4 2004/03/16 22:30:51 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.h,v $
+ * Revision 1.4  2004/03/16 22:30:51  dongx
+ * fix the warning message when compiling
+ *
  * Revision 1.3  2004/03/11 22:30:34  dongx
  * -move m_Mode control to Init()
  * -clear up
@@ -94,8 +97,9 @@ private:
     static const Int_t mNTOFP = 41;
     static const Int_t mNPVPD = 6;
     static const Int_t mNTOFR = 120;
-    static const Float_t mWidthPad = 3.45;
-    
+    //    static const Float_t mWidthPad = 3.45;
+
+    Float_t     mWidthPad;
     Float_t	mTofrAdc[mNTOFR];
     Float_t	mTofrTdc[mNTOFR];
     Float_t	mPvpdAdc[mNPVPD];
@@ -197,7 +201,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.3 2004/03/11 22:30:34 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.4 2004/03/16 22:30:51 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StTofrMatchMaker,1)
 };
