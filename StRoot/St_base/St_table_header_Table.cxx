@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: St_table_header_Table.cxx,v 1.5 2000/04/13 23:12:07 fine Exp $
+// $Id: St_table_header_Table.cxx,v 1.6 2000/07/06 16:33:11 fine Exp $
 //
 #include "St_table_header_Table.h"
 /////////////////////////////////////////////////////////////////////////
@@ -43,15 +43,21 @@ void *ReAllocate(table_head_st *header, Int_t newsize)
   // newsize - is a new size of the STAF table.
   //           If it is smaller is the old one then nothing happens
   //
- if (header && newsize)
-   return ((TTable *)header->dsl_pointer)->ReAllocate(newsize);
- else
-   return 0;
+ void *newTable = 0;
+ if (header && newsize) {
+   newTable = ((TTable *)header->dsl_pointer)->ReAllocate(newsize);
+   // update the counter
+   header->maxlen = ((TTable *)header->dsl_pointer)->GetTableSize();  // # rows allocated 
+ }
+ return newTable;
 }
  
 
 //______________________________________________________________________________
 // $Log: St_table_header_Table.cxx,v $
+// Revision 1.6  2000/07/06 16:33:11  fine
+// Bug fix: St_table_header::ReAllocate(). Thanks Iwona
+//
 // Revision 1.5  2000/04/13 23:12:07  fine
 // Bug fix
 //
