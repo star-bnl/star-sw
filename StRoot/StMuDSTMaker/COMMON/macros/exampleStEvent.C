@@ -1,6 +1,7 @@
 // NOTE - chain needs to be declared global so for StHbtEventReader
 //==========================================================================================
 class StMuDstMaker;
+class StEvent;
 
 StMuDstMaker* maker;
 StEvent* ev;
@@ -30,17 +31,23 @@ void exampleStEvent() {
   cout << " loading done " << endl;
   
   StMuDebug::setLevel(0);  // switch of some debug output
-
+ 
   int iret=0;
-  maker = new StMuDstMaker(0,0,"MuDST/central/ReversedFullField/runs/","","MuDst.root",1);   // set up maker in read mode
-  iret = maker->Make();  // read an event 
-  iret = maker->Make();  
+  maker = new StMuDstMaker(0,0,"","AuAu200.lis","MuDst.root:st_physics",3);   // set up maker in read mode
 
-  StMuEvent* e = maker->muDst()->event();
-  ev = maker->muDst()->createEvent();
+  StMuDbReader* db = StMuDbReader::instance();
+  db->addDb("/star/u/laue/afsWork/P02g.db");
 
-  printf("EVENT id=%d, runId=%d  unix time=%d trigWord=0x%0x bXing=%d spinBits=%d nPrim=%d\n", info.id(), info.runId(), info.time(), t.triggerWord(),t.bunchCrossingId(), t.spinBits(),n);
-
+  StEvent* ev=0;
+  int n;
+  while ( maker->Make()==0 ) {
+    cout << n++ << " ";
+    cout.flush();
+    StMuDst* mu = maker->muDst();
+    if (mu) ev = mu->createStEvent();
+    if (ev) delete ev; ev=0;
+  }
+  cout << endl;
 
 }
 

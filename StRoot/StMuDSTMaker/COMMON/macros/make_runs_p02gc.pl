@@ -8,6 +8,31 @@ my %cens = (
 	    minbias=>[qw(ProductionMinBias MinBias MinBiasVertex MinBiasVtx)],
 	    "22gev"=>[qw(minBias22GeVZDC)],
 	   );
+my @alreadydirs = qw(/star/data27/MuDST/Common /star/data24/MuDST/Common);
+my %alreadyruns = ();
+for my $dir (@alreadydirs) {
+  opendir DIR,$dir or next;
+  my @under1 = readdir DIR;
+  closedir DIR;
+  for my $under1 (@under1) {
+    next if ($under1=~ /^\.*$/);
+    next unless (-d "${dir}/${under1}");
+    opendir DIR,"${dir}/${under1}" or next;
+    my @under2 = readdir DIR;
+    closedir DIR;
+    for my $under2 (@under2) {
+      next if ($under2=~ /^\.*$/);
+      next unless (-d "${dir}/${under1}/${under2}");
+      opendir FILEDIR,"${dir}/${under1}/${under2}/runs" or next;
+      my @files = grep {/MuDst.root/} readdir FILEDIR;
+      closedir FILEDIR;
+      for my $file (@files) {
+	my ($run,$raw) = $file =~ /st_physics_(\d+)_raw_(\d+)/;
+	$alreadyruns{$run}{$raw} = 1;
+      }
+    }
+  }
+}
 for my $cen (sort keys %cens) {
   print STDERR "$cen\n";
   unless (-d $cen) {
@@ -38,7 +63,7 @@ for my $cen (sort keys %cens) {
 	    print $is;
 	    print ": Good\n";
 	    push @setdirs,$is;
-	  }
+	  } 
 	  else {
 #	    print ": Bad\n";
 	    next;
@@ -55,13 +80,16 @@ for my $cen (sort keys %cens) {
       }
     }
     for my $dir (@dirs) {
-      opendir DIR,$dir or die;
+      opendir DIR,$dir or next;
       my @files = grep {/.event.root/} readdir DIR;
       closedir DIR;
       for my $file (@files) {
 	my @stats = stat "$dir/$file";
 	next if ($stats[9]>$nowtime);
 	next if ($file=~/tags.root/);
+	my ($run,$raw) = $file =~ /st_physics_(\d+)_raw_(\d+)/;
+	next if $alreadyruns{$run}{$raw};
+
 	symlink "${dir}/${file}","runs/${file}";
       }
     }

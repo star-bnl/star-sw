@@ -28,8 +28,7 @@ void dbMaker(const char* dbName="test.db", const char* inputList="test.lis") {
 
   StMuDebug::setLevel(0);  // switch of some debug output
   StMuDbReader* db = StMuDbReader::instance();
-  db->addDb("P02gc.db");
-  db->addDb("P02gd.db");
+  db->addDb(dbName);
   StMuDebug::setLevel(0);  // switch of some debug output
   db->createDB(dbName,inputList);
 }
