@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.h,v 1.4 2000/08/31 18:58:20 posk Exp $
+// $Id: StFlowCutTrack.h,v 1.5 2000/10/12 22:46:35 snelling Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Nov 1999
 //
@@ -13,6 +13,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.h,v $
+// Revision 1.5  2000/10/12 22:46:35  snelling
+// Added support for the new pDST's and the probability pid method
+//
 // Revision 1.4  2000/08/31 18:58:20  posk
 // For picoDST, added version number, runID, and multEta for centrality.
 // Added centrality cut when reading picoDST.
@@ -55,6 +58,7 @@
 #include <stdlib.h>
 #include "Rtypes.h"
 class StPrimaryTrack;
+class StGlobalTrack;
 class StFlowPicoTrack;
 
 class StFlowCutTrack {
@@ -65,6 +69,7 @@ class StFlowCutTrack {
   virtual        ~StFlowCutTrack();
 
   static Int_t   CheckTrack(StPrimaryTrack* pTrack);
+  static Int_t   CheckTrack(StGlobalTrack* gTrack);
   static Int_t   CheckTrack(StFlowPicoTrack* pPicoTrack);
   static void    PrintCutList();
   static UInt_t  EtaSymPos();

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.17 2000/09/22 22:02:59 posk Exp $
+// $Id: StFlowEvent.h,v 1.18 2000/10/12 22:46:36 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.18  2000/10/12 22:46:36  snelling
+// Added support for the new pDST's and the probability pid method
+//
 // Revision 1.17  2000/09/22 22:02:59  posk
 // Clean up.
 //
@@ -135,10 +138,13 @@ public:
   Float_t        ZDCe() const;
   Float_t        ZDCw() const;
   Bool_t         PtWgt() const;
+  Bool_t         ProbPid() const;
   StFlowTrackCollection* TrackCollection() const;
  
   void SetSelections();
   void SetPids();
+  void SetPidsDeviant();
+  void SetPidsProb();
   void PrintSelectionList();
   void MakeSubEvents();
   void SetEventID(const Int_t&);
@@ -166,6 +172,7 @@ public:
   static void SetDeuteronCut(Float_t lo, Float_t hi);
   static void SetAntiDeuteronCut(Float_t lo, Float_t hi);
   static void SetPtWgt();
+  static void SetProbPid();
 
 private:
 
@@ -183,6 +190,7 @@ private:
   Flow::PhiWgt_t  mPhiWgt;                              //!flattening weights
   static Float_t  mPiPlusCuts[2];                       // PID cuts
   static Bool_t   mPtWgt;                               // flag for pt weighting
+  static Bool_t   mProbPid;                              // flag for probability pid
   static Float_t  mPiMinusCuts[2];
   static Float_t  mProtonCuts[2];
   static Float_t  mKMinusCuts[2];
@@ -222,6 +230,8 @@ inline Float_t  StFlowEvent::ZDCe() const { return mZDCe; }
 inline Float_t  StFlowEvent::ZDCw() const { return mZDCw; }
 
 inline Bool_t   StFlowEvent::PtWgt() const { return mPtWgt; }
+
+inline Bool_t   StFlowEvent::ProbPid() const { return mProbPid; }
 
 #ifndef __CINT__
 inline void StFlowEvent::SetPhiWeight(const Flow::PhiWgt_t& pPhiWgt) {
@@ -284,5 +294,7 @@ inline void  StFlowEvent::SetZDCe(const Float_t zdce) { mZDCe = zdce; }
 inline void  StFlowEvent::SetZDCw(const Float_t zdcw) { mZDCw = zdcw; }
 
 inline void  StFlowEvent::SetPtWgt() { mPtWgt = kTRUE; }
+
+inline void  StFlowEvent::SetProbPid() { mProbPid = kTRUE; }
 
 #endif

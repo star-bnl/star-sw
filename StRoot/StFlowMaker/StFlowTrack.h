@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.14 2000/09/22 22:03:01 posk Exp $
+// $Id: StFlowTrack.h,v 1.15 2000/10/12 22:46:40 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.15  2000/10/12 22:46:40  snelling
+// Added support for the new pDST's and the probability pid method
+//
 // Revision 1.14  2000/09/22 22:03:01  posk
 // Clean up.
 //
@@ -109,10 +112,14 @@ public:
 
   const Char_t* Pid()        const;
   Float_t       Phi()        const;
+  Float_t       PhiGlobal()  const;
   Float_t       Eta()        const;
+  Float_t       EtaGlobal()  const;
   Float_t       Dedx()       const;
   Float_t       Pt()         const;
+  Float_t       PtGlobal()   const;
   Float_t       P()          const;
+  Float_t       PGlobal()    const;
   Float_t       Y()          const;
   Short_t       Charge()     const;
   Float_t       Dca()        const;
@@ -121,6 +128,9 @@ public:
   Int_t         FitPts()     const;
   Int_t         MaxPts()     const;
   Int_t Select(Int_t harmonic, Int_t selection, Int_t subevent= -1) const;
+  Int_t         MostLikelihoodPID()    const; 
+  Float_t       MostLikelihoodProb()   const; 
+  Int_t         ExtrapTag()            const; 
 
   void SetPidPiPlus(Float_t);
   void SetPidPiMinus(Float_t);
@@ -134,9 +144,12 @@ public:
   void SetPidPositron(Float_t);
   void SetPid(const Char_t*);
   void SetPhi(Float_t);
+  void SetPhiGlobal(Float_t);
   void SetEta(Float_t);
+  void SetEtaGlobal(Float_t);
   void SetDedx(Float_t);
   void SetPt(Float_t);
+  void SetPtGlobal(Float_t);
   void SetCharge(Short_t);
   void SetDca(Float_t);
   void SetDcaGlobal(Float_t);
@@ -145,6 +158,9 @@ public:
   void SetMaxPts(Int_t);
   void SetSelect(Int_t harmonic, Int_t selection);
   void SetSubevent(Int_t harmonic, Int_t selection, Int_t subevent);
+  void SetMostLikelihoodPID(Int_t); 
+  void SetMostLikelihoodProb(Float_t); 
+  void SetExtrapTag(Int_t); 
 
 private:
 
@@ -160,9 +176,12 @@ private:
   Int_t   mPidPositron;
   Char_t  mPid[10];
   Float_t mPhi;
+  Float_t mPhiGlobal;
   Float_t mEta;
+  Float_t mEtaGlobal;
   Float_t mDedx;
   Float_t mPt;
+  Float_t mPtGlobal;
   Short_t mCharge;
   Float_t mDca;
   Float_t mDcaGlobal;
@@ -172,6 +191,9 @@ private:
   Int_t   mSelection;
   Short_t mSubevent[Flow::nHars][Flow::nSels];
   static  Float_t maxInt;
+  Int_t   mMostLikelihoodPID;
+  Float_t mMostLikelihoodProb;
+  Int_t   mExtrapTag; //merging area tag.  
 
   ClassDef(StFlowTrack, 1)                     // macro for rootcint
 };
@@ -188,18 +210,32 @@ inline Float_t  StFlowTrack::PidElectron()  const { return mPidElectron/1000.; }
 inline Float_t  StFlowTrack::PidPositron()  const { return mPidPositron/1000.; }
 inline const Char_t* StFlowTrack::Pid()     const { return mPid; }
 inline Float_t  StFlowTrack::Phi()          const { return mPhi; }   
+inline Float_t  StFlowTrack::PhiGlobal()    const { return mPhiGlobal; }   
 inline Float_t  StFlowTrack::Eta()          const { return mEta; }     
+inline Float_t  StFlowTrack::EtaGlobal()    const { return mEtaGlobal; }     
 inline Float_t  StFlowTrack::Dedx()         const { return mDedx; }     
-inline Float_t  StFlowTrack::Pt()           const { return mPt; }                
+inline Float_t  StFlowTrack::Pt()           const { return mPt; }
+inline Float_t  StFlowTrack::PtGlobal()     const { return mPtGlobal; }
 inline Short_t  StFlowTrack::Charge()       const { return mCharge; }   
 inline Float_t  StFlowTrack::Dca()          const { return mDca; }
 inline Float_t  StFlowTrack::DcaGlobal()    const { return mDcaGlobal; }
 inline Float_t  StFlowTrack::Chi2()         const { return mChi2; } 
 inline Int_t    StFlowTrack::FitPts()       const { return mFitPts; }  
 inline Int_t    StFlowTrack::MaxPts()       const { return mMaxPts; }  
+inline Int_t    StFlowTrack::MostLikelihoodPID() const
+{ return mMostLikelihoodPID;} 
+inline Float_t  StFlowTrack::MostLikelihoodProb() const 
+{ return mMostLikelihoodProb;} 
+inline Int_t    StFlowTrack::ExtrapTag()    const { return mExtrapTag;} 
+
+
 
 inline Float_t StFlowTrack::P()             const { 
   float momentum = mPt/sqrt(1-(tanh(mEta)*tanh(mEta)));
+  return momentum; }
+
+inline Float_t StFlowTrack::PGlobal()       const { 
+  float momentum = mPtGlobal/sqrt(1-(tanh(mEtaGlobal)*tanh(mEtaGlobal)));
   return momentum; }
 
 inline Float_t StFlowTrack::Y()             const { 
@@ -230,6 +266,15 @@ inline Int_t StFlowTrack::Select(Int_t harmonic, Int_t selection,
   }
   return kFALSE;         
 }
+
+inline void StFlowTrack::SetMostLikelihoodPID(Int_t val){
+         mMostLikelihoodPID=val;} 
+inline void StFlowTrack::SetMostLikelihoodProb(Float_t val){
+         mMostLikelihoodProb=val;} 
+inline void StFlowTrack::SetExtrapTag(Int_t val){
+         mExtrapTag=val;} 
+
+
 
 inline void StFlowTrack::SetPidPiPlus(Float_t pid)  {
   if (fabs(pid) > maxInt) pid = maxInt; mPidPiPlus = (Int_t)(pid*1000.); }
@@ -265,11 +310,17 @@ inline void StFlowTrack::SetPid(const Char_t* pid)  { strncpy(mPid, pid, 9);
                                                          mPid[9] = '\0'; }
 inline void StFlowTrack::SetPhi(Float_t phi)        { mPhi = phi; }      
 
+inline void StFlowTrack::SetPhiGlobal(Float_t gphi) { mPhiGlobal = gphi; }   
+
 inline void StFlowTrack::SetEta(Float_t eta)        { mEta = eta; }       
+
+inline void StFlowTrack::SetEtaGlobal(Float_t geta) { mEtaGlobal = geta; } 
 
 inline void StFlowTrack::SetDedx(Float_t dedx)      { mDedx = dedx; }       
 
 inline void StFlowTrack::SetPt(Float_t pt)          { mPt = pt; }              
+
+inline void StFlowTrack::SetPtGlobal(Float_t gpt)   { mPtGlobal = gpt; }
 
 inline void StFlowTrack::SetCharge(Short_t charge)  { mCharge = charge; }     
 
