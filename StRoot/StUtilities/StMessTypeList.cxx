@@ -1,5 +1,8 @@
-// $Id: StMessTypeList.cxx,v 1.2 1999/06/24 16:30:41 genevb Exp $
+// $Id: StMessTypeList.cxx,v 1.3 1999/06/26 00:24:51 genevb Exp $
 // $Log: StMessTypeList.cxx,v $
+// Revision 1.3  1999/06/26 00:24:51  genevb
+// Fixed const type mismatches
+//
 // Revision 1.2  1999/06/24 16:30:41  genevb
 // Fixed some memory leaks
 //
@@ -55,7 +58,7 @@ Int_t StMessTypeList::AddType(const Char_t* type, const Char_t* text) {
   return messList.size();
 }
 //_____________________________________________________________________________
-Int_t StMessTypeList::FindTypeNum(Char_t* type) {
+Int_t StMessTypeList::FindTypeNum(const Char_t* type) {
   StMessTypeVecIter iter;
   Char_t ty=toupper(*type);
   Int_t j=0;
@@ -66,12 +69,12 @@ Int_t StMessTypeList::FindTypeNum(Char_t* type) {
   return 0;
 }
 //_____________________________________________________________________________
-StMessTypePair* StMessTypeList::FindType(Char_t* type) {
+StMessTypePair* StMessTypeList::FindType(const Char_t* type) {
   Int_t j = FindTypeNum(type);
   return ( (j) ? messList[(j-1)] : 0 );
 }
 //_____________________________________________________________________________
-const Char_t* StMessTypeList::Text(Char_t* type) {
+const Char_t* StMessTypeList::Text(const Char_t* type) {
   StMessTypePair* temp = FindType(type);
   return ( (temp) ? temp->Text() : 0 );
 }

@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.4 1999/06/25 22:57:58 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.5 1999/06/26 00:24:53 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.5  1999/06/26 00:24:53  genevb
+// Fixed const type mismatches
+//
 // Revision 1.4  1999/06/25 22:57:58  genevb
 // Fixed a small bug in MSG compatibiliti
 //
@@ -284,8 +287,8 @@
 #include <ctype.h>
 #include <string.h>
 
-StMessageManager* gMessMgr=0;
-
+StMessageManager* gMessMgr = 0;
+static char* defaultMessType = "I";
 StMessageManager* StMessageManager::mInstance = 0;
 
 //
@@ -293,7 +296,7 @@ StMessageManager* StMessageManager::mInstance = 0;
 //________________________________________
 void type_of_call Message_(Char_t* mess, int lines, int id) {
   char* cptr = strchr(mess,'-');
-  char* type = "I";
+  char* type = defaultMessType;
   if (cptr) strncpy(type,++cptr,1);
   StMessageManager::Instance()->Message(mess,type);
 }
@@ -368,12 +371,14 @@ StMessage& StMessageManager::Message(Char_t* mess, Char_t* type, Char_t* opt) {
 // Message declarator - creates a new message (of class StMessage) and places
 // it on the list of known messages.
 //
+  int typeN = messTypeList->FindTypeNum(type);
+  if (!typeN) {
+    type = defaultMessType;      // default type is Info
+    typeN = 1;                   // type number for Info is 1
+  }
   messObj = new StMessage(mess, type, opt);
   if (!strchr(opt,'-')) {
     messList.push_back(messObj);
-    Char_t ty = toupper(type[0]);
-    int typeN = messTypeList->FindTypeNum(&ty);
-    if (!typeN) typeN = 1;                          // default is Info
     messCollection[typeN]->push_back(messObj);
   }
   return (*messObj);
@@ -490,7 +495,8 @@ void StMessageManager::Summary(Int_t nTerms) {
   cout << "  ***** StMessageManager message summary *****" << endl;
   for (i=0; i<nMess; i++) {
     done.push_back(kFALSE);
-    mType.push_back(temp = messList[i]->GetType());
+    temp = new Char_t(*(messList[i]->GetType()));
+    mType.push_back(temp);
     toks.push_back(*(new CharPtrVec));
     temp = new Char_t[81];
     temp = strncpy(temp,(messList[i]->GetMessage()),80);
@@ -550,7 +556,7 @@ int StMessageManager::AddType(const Char_t* type, const Char_t* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.4 1999/06/25 22:57:58 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.5 1999/06/26 00:24:53 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
