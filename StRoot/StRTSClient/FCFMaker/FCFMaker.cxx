@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.12 2004/01/27 16:30:15 jml Exp $
+ * $Id: FCFMaker.cxx,v 1.13 2004/01/27 18:38:18 jeromel Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.13  2004/01/27 18:38:18  jeromel
+ * Change SetDAQFlag to overloaded SetMode
+ *
  * Revision 1.12  2004/01/27 16:30:15  jml
  * added FCF_ to defines
  *
@@ -175,7 +178,7 @@ StRTSClientFCFMaker::~StRTSClientFCFMaker()
 StDAQReader *daqReader;
 StTPCReader *tpcReader;
 
-void StRTSClientFCFMaker::SetDAQFlag(Int_t mode)
+void StRTSClientFCFMaker::SetMode(Int_t mode)
 {
   switch(mode) {
   case 0x0:

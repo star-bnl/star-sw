@@ -3,11 +3,14 @@
 
 /***************************************************************************
  *
- * $Id: FCFMaker.h,v 1.7 2004/01/27 16:30:15 jml Exp $
+ * $Id: FCFMaker.h,v 1.8 2004/01/27 18:38:18 jeromel Exp $
  *
  *--------------------------------------------------------------------------
  *
  * $Log: FCFMaker.h,v $
+ * Revision 1.8  2004/01/27 18:38:18  jeromel
+ * Change SetDAQFlag to overloaded SetMode
+ *
  * Revision 1.7  2004/01/27 16:30:15  jml
  * added FCF_ to defines
  *
@@ -179,7 +182,7 @@ class StRTSClientFCFMaker:public StMaker
 
  public:    
 
-  void SetDAQFlag(Int_t mode);
+  void SetMode(Int_t mode);
 
   StRTSClientFCFMaker(const char *name="tpc_hits");
   ~StRTSClientFCFMaker() ;
