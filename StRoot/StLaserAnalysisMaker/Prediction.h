@@ -1,5 +1,8 @@
 // 
 // $Log: Prediction.h,v $
+// Revision 1.2  2000/01/31 15:14:52  fisyak
+// Try to find out memory leak
+//
 // Revision 1.1.1.1  2000/01/29 16:23:06  fisyak
 // First release of StLaserAnalysisMaker
 //
@@ -139,7 +142,7 @@ struct LaserTrack  {
 class LTrack : public TObject {
  public: 
   LTrack(){};
-  LTrack(LaserTrack *L);
+  LTrack(const LaserTrack &L);
   ~LTrack() {};
  private:
   Int_t Sector;
@@ -175,7 +178,7 @@ class LEvent : public TObject {
   virtual ~LEvent() { }
   virtual void Clear(Option_t *Option);
   virtual void SetPred(Prediction *pred=0) {if (pred) fPred = *pred;}
-  virtual void SetLTrack(LaserTrack *laser = 0) {fLTrack = LTrack(laser);}
+  virtual void SetLTrack(const LaserTrack &laser) {fLTrack = laser;}
   virtual void SetAverage(Float_t ADC = 0, Float_t ADC3x3 = 0, Float_t ratio = 0,
 			  Int_t nY1 = 0,Int_t nY2 = 0,Int_t nZ1 = 0,Int_t nZ2 = 0,
 			  Float_t Yav = 0,Float_t Zav = 0,
@@ -193,6 +196,9 @@ class LEvent : public TObject {
     fAverage.SetCYZ(CYZ);
     fAverage.SetDZZ(DZZ);
   }
+  virtual Int_t             GetNoY()   {return fNoY;}
+  virtual Int_t             GetNoZ()   {return fNoZ;}
+  virtual Int_t             GetNoYZ()  {return fNoYZ;}
   virtual TClonesArray     *GetYProf() {return fYProf;}
   virtual TClonesArray     *GetZProf() {return fZProf;}
   virtual TClonesArray     *GetAdc()      {return fAdc;}

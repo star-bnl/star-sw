@@ -1,5 +1,8 @@
-// $Id: Prediction.cxx,v 1.1.1.1 2000/01/29 16:23:07 fisyak Exp $
+// $Id: Prediction.cxx,v 1.2 2000/01/31 15:14:52 fisyak Exp $
 // $Log: Prediction.cxx,v $
+// Revision 1.2  2000/01/31 15:14:52  fisyak
+// Try to find out memory leak
+//
 // Revision 1.1.1.1  2000/01/29 16:23:07  fisyak
 // First release of StLaserAnalysisMaker
 //
@@ -108,22 +111,19 @@ ClassImp(ZProf)
 ClassImp(Adc)
 //________________________________________________________________________________
 ClassImp(LTrack)
-LTrack::LTrack(LaserTrack *L){
-  if (L) {
-    Sector	= L->Sector;      
-    Mirror	= L->Mirror;      
-    ZBoundle	= L->ZBoundle;  
-    NoTracks	= L->NoTracks;  
-    psi	        = L->psi;            
-    Dpsi	= L->Dpsi;          
-    tanl	= L->tanl;          
-    Dtanl	= L->Dtanl;        
-    xl	        = L->xl;       
-    Dxl	        = L->Dxl;      
-    yl	        = L->yl;       
-    Dyl	        = L->Dyl;      
-    zl	        = L->zl;       
-    Dzl	        = L->Dzl;       
-    
-  }
+LTrack::LTrack(const LaserTrack &L){
+  Sector	= L.Sector;      
+  Mirror	= L.Mirror;      
+  ZBoundle	= L.ZBoundle;  
+  NoTracks	= L.NoTracks;  
+  psi	        = L.psi;            
+  Dpsi	= L.Dpsi;          
+  tanl	= L.tanl;          
+  Dtanl	= L.Dtanl;        
+  xl	        = L.xl;       
+  Dxl	        = L.Dxl;      
+  yl	        = L.yl;       
+  Dyl	        = L.Dyl;      
+  zl	        = L.zl;       
+  Dzl	        = L.Dzl;       
 }
