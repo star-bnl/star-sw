@@ -171,6 +171,7 @@ if ( $pkg =~ m/^StEventDisplay/){
 # directory structure using auto-globbing
 } elsif ( $pkg =~ m/^StMuDSTMaker$/ ||
 	  $pkg =~ m/^StRichPool$/   ||
+	  $pkg =~ m/^StEmcUtil$/    ||
 	  $pkg =~ m/^Sti/           ) {
     $CPPPATH = "#" . $Dir;
 
