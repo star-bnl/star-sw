@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.33 2002/09/18 22:21:35 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.34 2002/09/18 22:50:33 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.34  2002/09/18 22:50:33  jhthomas
+ * Set default space charge density to zero.  Time dependent values come from DB.
+ *
  * Revision 1.33  2002/09/18 22:21:35  jhthomas
  * Add new option for 1/R**2 space charge density distribution.  Flag = 0x800
  *
@@ -241,8 +244,8 @@ void StMagUtilities::CommonStart ( Int_t mode, StTpcDb* dbin, TDataSet* dbin2 )
   TPC_Z0      =    209.3 ;      // Z location of STAR TPC Ground wire Plane (cm)
   XTWIST      =   -0.165 ;      // X Displacement of West end of TPC wrt magnet (mRad)
   YTWIST      =    0.219 ;      // Y Displacement of West end of TPC wrt magnet (mRad)
-  SpaceCharge =      0.0055 ;      // Space Charge parameter (uniform in the TPC, Coulombs/Epsilon-nought)
-  SpaceChargeR2 =    0.0029 ;      // Space Charge parameter (space charge from event ~1/R**2, Coulombs/Epsilon-nought)
+  SpaceCharge =      0.0 ;      // Space Charge parameter (uniform in the TPC, Coulombs/Epsilon-nought)
+  SpaceChargeR2 =    0.0 ;      // Space Charge parameter (space charge from event ~1/R**2, Coulombs/Epsilon-nought)
   IFCShift    =   0.0080 ;      // Shift of the IFC towards the West Endcap (cm) (2/1/2002)
   CathodeV    = -31000.0 ;      // Cathode Voltage (volts)
   GG          =   -127.5 ;      // Gating Grid voltage (volts)
