@@ -1,5 +1,9 @@
-// $Id: St_mwc_Maker.cxx,v 1.3 1999/02/11 19:46:33 druss Exp $
+// $Id: St_mwc_Maker.cxx,v 1.4 1999/02/19 18:22:58 druss Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.4  1999/02/19 18:22:58  druss
+// init routine now uses parameter files from StRoot/params
+// included a few histograms
+//
 // Revision 1.3  1999/02/11 19:46:33  druss
 // MWC maker for mdc2.  Removed print statements, set parameters
 //
@@ -39,6 +43,8 @@
 #include "mwc/St_mwg_Module.h"
 #include "mwc/St_mws_Module.h"
 #include "mwc/St_mwu_Module.h"
+#include "TH1.h"
+#include "TH2.h"
 ClassImp(St_mwc_Maker)
 
 //_____________________________________________________________________________
@@ -52,46 +58,19 @@ St_mwc_Maker::~St_mwc_Maker(){
 //_____________________________________________________________________________
 Int_t St_mwc_Maker::Init(){
 
-   // set pointers to table wrappers
+// Read Parameter tables
 
-   m_geom = new St_mwc_geo("geom",1);
-   m_cal  = new St_mwc_cal("cal",1);
-   m_mpar = new St_mwc_mpar("mpar",1);
+   St_DataSetIter params(gStChain->DataSet("params"));
+   m_geom = (St_mwc_geo  *) params("mwc/mwcpars/geom");
+   m_cal  = (St_mwc_cal  *) params("mwc/mwcpars/cal");
+   m_mpar = (St_mwc_mpar *) params("mwc/mwcpars/mpar");
 
-   // create tables
+// Create Histograms 
 
-   mwc_geo_st   geom;
-   mwc_cal_st   cal;
-   mwc_mpar_st  mpar;
+   m_xy = new TH2F("xy","MWC: x vs y",256,-200.,200.,256,-200.,200.);
+   m_pxy = new TH2F("pxy","MWC: px vs py",100,-1.0,1.0,100,-1.0,1.0);
+   m_pz = new TH1F("pz","MWC: pz",100,0.,4.0);
 
-   // setting table values
-
-   geom.init  = 0;
-   geom.neta  = 4;
-   geom.nphi  = 12;
-   geom.r1max = 118.669;
-   geom.r1min = 54.669;
-   geom.r2max = 189.488;
-   geom.r2min = 125.488;
-   m_geom->AddAt(&geom,0);
-
-   cal.cc     = 1.00;
-   cal.pd     = 0.00;
-   cal.ps     = 0.00;
-   m_cal->AddAt(&cal,0);
-
-   mpar.gain            = 11.0;     
-   mpar.de_thresh_in    = 2.0e-8;     
-   mpar.de_thresh_out   = 3.0e-8;
-   mpar.tof_thresh      = 0.0;      
-   mpar.num_counts_out  = 96.0;
-   mpar.num_wires_count = 80.0;
-   mpar.el_noise_width  = 0.00;
-   mpar.min_ion         = 0.00;
-
-   m_mpar->AddAt(&mpar,0);
-
-// Create Histograms    
    return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -138,14 +117,27 @@ Int_t St_mwc_Maker::Make(){
         printf("**** Problems with mwc ****\n");
         return kStErr;
      }
-
+     g2t_mwc_hit_st *hitTable = g2t_mwc_hit->GetTable();
+     table_head_st *hitHead  = g2t_mwc_hit->GetHeader();
+     float px,py,pz,x,y;
+     for (int iii=0;iii<hitHead->nok;iii++)
+       {
+	 x  = (hitTable+iii)->x[0];
+	 y  = (hitTable+iii)->x[1];
+	 px = (hitTable+iii)->p[0]; 
+	 py = (hitTable+iii)->p[1]; 
+	 pz = (hitTable+iii)->p[2];
+	 m_xy->Fill(x,y);
+	 m_pxy->Fill(px,py);
+	 m_pz ->Fill(pz);
+       }
 }
  return kStOK;
 }
 //_____________________________________________________________________________
 void St_mwc_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_mwc_Maker.cxx,v 1.3 1999/02/11 19:46:33 druss Exp $\n");
+  printf("* $Id: St_mwc_Maker.cxx,v 1.4 1999/02/19 18:22:58 druss Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
