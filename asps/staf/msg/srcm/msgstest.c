@@ -1,6 +1,6 @@
 
-#include <stdlib.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <msg.h>
 
 	void main( int argc, char*argv[] )
@@ -28,7 +28,7 @@
 	static int ID10=0;
 
 
-	MsgInit( "s", argv[0] );
+	MsgInit( "s" );
 	if ( !MsgJournalOpen( "msg.jou" ) ) {
 	  exit(1);
 	}

@@ -1,6 +1,6 @@
 global allPidsList
 global LoadFrom
-global Executable
+global ProcessID
 global StoreTo
 global ListInactives
 global Prefix
@@ -19,7 +19,7 @@ global Shmid
 proc initMsgVariables {} {
 	upvar #0 allPidsList allPidsList
 	upvar #0 LoadFrom LoadFrom
-	upvar #0 Executable Executable
+	upvar #0 ProcessID ProcessID
 	upvar #0 Prefix Prefix
 	upvar #0 Counts Counts
 	upvar #0 CountLimit CountLimit
@@ -34,7 +34,7 @@ proc initMsgVariables {} {
 	upvar #0 Shmid Shmid
 	set allPidsList ""
 	set LoadFrom default.msg
-	set Executable "msgstest"
+	set ProcessID 0
 	set Prefix ""
 	set Counts 0
 	set CountLimit 0
@@ -59,12 +59,13 @@ proc MsgDo { root command } {
 	  set base $root
 	}
 	upvar #0 LoadFrom LoadFrom
-	upvar #0 Executable Executable
+	upvar #0 ProcessID ProcessID
 
-	if { [string length $Executable] > 0 } {
-	  catch { eval exec msgControl -e$Executable $command | tee msg.err > msg.tmp } Error
+
+	if { [string length $ProcessID] > 0 } {
+	  catch { eval exec msgControl -m -p$ProcessID $command |& tee msg.err > msg.tmp } Error
 	} else {
-	  catch { eval exec msgControl -f$LoadFrom   $command | tee msg.err > msg.tmp } Error
+	  catch { eval exec msgControl -m -f$LoadFrom  $command |& tee msg.err > msg.tmp } Error
 	}
 
 	if { $Error != "" } {
@@ -104,15 +105,15 @@ proc MsgLoadFrom {root} {
 	}
 	upvar #0 StoreTo StoreTo
 	upvar #0 LoadFrom LoadFrom
-	upvar #0 Executable Executable
+	upvar #0 ProcessID ProcessID
 
 	if { [string length $LoadFrom] <= 0 } {
-	  set Error "You need to specify an Msg state file (path) to load the executable from."
+	  set Error "You need to specify an Msg state file (path) to load the process from."
 	  catch { rm msg.err }
-	} elseif { [string length $Executable] > 0 } {
-	  catch { exec msgControl -e$Executable load $LoadFrom | tee msg.err > msg.tmp } Error
+	} elseif { [string length $ProcessID] > 0 } {
+	  catch { exec msgControl -m -p$ProcessID load $LoadFrom |& tee msg.err > msg.tmp } Error
 	} else {
-	  set Error "You need to specify an executable file (path) to be loaded from the state file."
+	  set Error "You need to specify a process ID to be loaded from the Msg state file."
 	  catch { rm msg.err } 
 	}
 
@@ -152,7 +153,7 @@ proc MsgPrefixDelete { root } {
 	  set base $root
 	}
 	upvar #0 LoadFrom LoadFrom
-	upvar #0 Executable Executable
+	upvar #0 ProcessID ProcessID
 	upvar #0 Prefix Prefix
 	upvar #0 Counts Counts
 	upvar #0 CountLimit CountLimit
@@ -183,7 +184,7 @@ proc MsgPrefixGet { root } {
 	  set base $root
 	}
 	upvar #0 LoadFrom LoadFrom
-	upvar #0 Executable Executable
+	upvar #0 ProcessID ProcessID
 	upvar #0 Prefix Prefix
 	upvar #0 Counts Counts
 	upvar #0 CountLimit CountLimit
@@ -263,7 +264,7 @@ proc MsgPrefixSet { root } {
 	  set base $root
 	}
 	upvar #0 LoadFrom LoadFrom
-	upvar #0 Executable Executable
+	upvar #0 ProcessID ProcessID
 	upvar #0 Prefix Prefix
 	upvar #0 Counts Counts
 	upvar #0 CountLimit CountLimit
@@ -319,20 +320,20 @@ proc MsgRemoveShmid { root } {
 	} else {
 	  set base $root
 	}
-	upvar #0 Shmid Shmid
-	if { $Shmid > 0 } { exec rmid $Shmid }
+	upvar #0 ProcessID ProcessID
+	if { $ProcessID > 0 } { exec rmid $ProcessID }
 }
 
 
 
 
-proc MsgSelectExecutable { root } {
+proc MsgSelectProcess { root } {
 	if {$root == "."} {
 	  set base ""
 	} else {
 	  set base $root
 	}
-	upvar #0 Executable Executable
+	upvar #0 ProcessID ProcessID
 }
 
 
@@ -379,15 +380,15 @@ proc MsgStoreTo {root} {
 	}
 	upvar #0 StoreTo StoreTo
 	upvar #0 LoadFrom LoadFrom
-	upvar #0 Executable Executable
+	upvar #0 ProcessID ProcessID
 
 	if { [string length $StoreTo] <= 0 } {
-	  set Error "You need to specify an Msg state file (path) in which to store the executable's Msg state."
+	  set Error "You need to specify an Msg state file (path) in which to store the process's Msg state."
 	  catch { rm msg.err } 
-	} elseif { [string length $Executable] > 0 } {
-	  catch { exec msgControl -e$Executable store $StoreTo | tee msg.err > msg.tmp } Error
+	} elseif { [string length $ProcessID] > 0 } {
+	  catch { exec msgControl -m -p$ProcessID store $StoreTo |& tee msg.err > msg.tmp } Error
 	} else {
-	  set Error "You need to specify an executable file (path) to have its state stored in the state file."
+	  set Error "You need to specify a process ID to have its msg state stored in the state file."
 	  catch { rm msg.err } 
 	}
 
@@ -498,6 +499,12 @@ proc listFill { root wholetext } {
 	  if { $next > 0 } {
 	    $base.listbox#1 insert end [string range $text 0 [expr $next-1 ] ]
 	    set text [string range $text [expr $next+1] end]
+#	    Skip leading spaces (apparently, the carriage return at the end of the
+#	                         summary lines gets translated in 10 spaces!):
+	    while {(  [string length $text] > 0             ) && (
+	             ([string compare [string index $text 0] " "]==0) ) } {
+	      set text [string range $text 1 end]
+	    }
 	  } elseif { $next == 0 } {
 	    set text [string range $text [expr $next+1] end]
 	  }

@@ -13,15 +13,15 @@
 	integer TL, JL
 	integer I
 
-	integer ID1, ID2, ID3, ID4, ID5, ID6, ID7, ID8
-	save    ID1, ID2, ID3, ID4, ID5, ID6, ID7, ID8
+	integer ID1, ID2, ID3, ID4, ID5, ID6
+	save    ID1, ID2, ID3, ID4, ID5, ID6
 
 	external MsgAlarmRoutineSample
 	logical Msg_Journal_Close
 	logical Msg_Journal_Open
 
-	data    ID1, ID2, ID3, ID4, ID5, ID6, ID7, ID8
-     1	       / 0, 0, 0, 0, 0, 0, 0, 0 /
+	data    ID1, ID2, ID3, ID4, ID5, ID6
+     1	       / 0, 0, 0, 0, 0, 0 /
 
 
 	call Msg_Ini( MSG_Journal_LUN_P )

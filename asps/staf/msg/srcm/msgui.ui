@@ -1,4 +1,4 @@
-WidGet file, version 0.3, created:  Tue Nov 12 08:36:42 EST 1996
+WidGet file, version 0.3, created:  Thu Nov 20 10:11:15 EST 1997
 Widget button#10
 	geometry columnspan 4
 	other reqwidth {}
@@ -25,7 +25,7 @@ Widget button#10
 	configure text {remove shmid}
 	configure justify left
 	other comments {}
-	geometry column 25
+	geometry column 20
 Widget label#5
 	geometry row 14
 	geometry columnspan 3
@@ -38,14 +38,14 @@ Widget label#5
 	configure font Helvetica,10,Bold
 	other tags {}
 	geometry fill x
-	configure background #d88700
-	other level {}
 	other reqwidth {}
+	other level {}
+	configure background #d88700
 	other help {}
-	other comments {}
 	geometry column 1
-	other tabbing {}
+	other comments {}
 	other item_name label#5
+	other tabbing {}
 Widget button#1
 	geometry columnspan 4
 	other reqwidth {}
@@ -71,7 +71,7 @@ Widget button#1
 	other type button
 	configure text {   Summary    }
 	other comments {}
-	geometry column 20
+	geometry column 25
 Widget entry#3
 	geometry columnspan 2
 	configure textvariable AbortLimit
@@ -109,22 +109,22 @@ Widget listbox#1
 	other type listbox
 	other master .frame#1
 	other pathname listbox#1
-	geometry fill both
-	other tags {}
 	configure font Screen,14
-	other reqwidth {}
-	other level {}
-	configure width 133
-	configure selectbackground #FFA831
+	other tags {}
+	geometry fill both
 	configure background #9d3d00
+	configure selectbackground #FFA831
+	configure width 133
+	other level {}
+	other reqwidth {}
 	other help {}
 	configure foreground white
-	geometry column 1
-	other comments {}
 	configure borderwidth 6
-	other item_name listbox#1
-	other tabbing {}
+	other comments {}
+	geometry column 1
 	configure yscrollcommand {%B.scrollbar#1 set}
+	other tabbing {}
+	other item_name listbox#1
 Widget entry#4
 	geometry columnspan 15
 	configure textvariable LoadFrom
@@ -144,7 +144,7 @@ Widget entry#4
 	other tabbing {}
 	other item_name entry#4
 	configure highlightbackground #d88700
-	geometry row 16
+	geometry row 15
 	other reqheight {}
 	other type entry
 	configure width 71
@@ -157,20 +157,20 @@ Widget label#7
 	other reqheight {}
 	other type label
 	other master .frame#1
-	configure text {Executable }
+	configure text {Process ID }
 	other pathname label#7
 	configure justify left
 	geometry fill x
 	other tags {}
 	configure font Helvetica,10,Bold
-	other reqwidth {}
-	other level {}
 	configure background #d88700
+	other level {}
+	other reqwidth {}
 	other help {}
-	geometry column 1
 	other comments {}
-	other item_name label#7
+	geometry column 22
 	other tabbing {}
+	other item_name label#7
 Widget entry#5
 	geometry columnspan 2
 	configure textvariable AlarmLevel
@@ -222,7 +222,7 @@ Widget button#3
 	configure text {   CPU Usage }
 	configure justify left
 	other comments {}
-	geometry column 20
+	geometry column 25
 Widget label#8
 	geometry row 14
 	geometry columnspan 3
@@ -235,14 +235,14 @@ Widget label#8
 	geometry fill x
 	other tags {}
 	configure font Helvetica,10,Bold
-	other reqwidth {}
-	other level {}
 	configure background #d88700
+	other level {}
+	other reqwidth {}
 	other help {}
-	geometry column 20
 	other comments {}
-	other item_name label#8
+	geometry column 25
 	other tabbing {}
+	other item_name label#8
 Widget entry#6
 	geometry columnspan 15
 	configure textvariable StoreTo
@@ -262,14 +262,14 @@ Widget entry#6
 	other tabbing {}
 	other item_name entry#6
 	configure highlightbackground #d88700
-	geometry row 17
+	geometry row 16
 	other reqheight {}
 	other type entry
 	configure width 71
 	other comments {}
 	geometry column 4
 Widget button#4
-	geometry columnspan 6
+	geometry columnspan 4
 	other reqwidth {}
 	configure foreground red
 	configure activebackground #ffa831
@@ -280,7 +280,7 @@ Widget button#4
 	configure padx 10
 	configure pady 3
 	configure command { MsgQuit .}
-	other focus .widget.form.can.f.button#4,activebackground,entry
+	other focus .widget.form.can.f.button#4,text,entry
 	other master .frame#1
 	other pathname button#4
 	geometry fill x
@@ -290,32 +290,37 @@ Widget button#4
 	other item_name button#4
 	configure activeforeground red
 	configure highlightbackground #d88700
-	geometry row 17
+	geometry row 16
 	other reqheight {}
 	other type button
-	configure text {               Quit                }
-	other comments {}
-	geometry column 20
-Widget label#9
-	geometry row 11
-	geometry columnspan 2
-	configure highlightbackground #d88700
-	other reqheight {}
-	other type label
-	other master .frame#1
-	configure text shmid
-	other pathname label#9
-	configure font Helvetica,10,Bold
-	other tags {}
-	geometry fill x
-	configure background #d88700
-	other level {}
-	other reqwidth {}
-	other help {}
+	configure text {  Quit}
 	other comments {}
 	geometry column 25
+Widget entry#7
+	geometry columnspan 4
+	configure textvariable ProcessID
+	other reqwidth {}
+	configure foreground white
+	configure cursor {}
+	other error {}
+	other tags {}
+	other level {}
+	other help {}
+	other focus .widget.form.can.f.entry#7,textvariable,entry
+	other master .frame#1
+	other pathname entry#7
+	configure font screen,14
+	geometry fill x
+	configure background #9d3d00
 	other tabbing {}
-	other item_name label#9
+	other item_name entry#7
+	configure highlightbackground #d88700
+	geometry row 15
+	other reqheight {}
+	other type entry
+	configure width 16
+	other comments {}
+	geometry column 25
 Widget button#5
 	geometry columnspan 3
 	other reqwidth {}
@@ -342,31 +347,26 @@ Widget button#5
 	configure text {  Get  }
 	other comments {}
 	geometry column 12
-Widget entry#7
-	geometry columnspan 15
-	configure textvariable Executable
-	other reqwidth {}
-	configure foreground white
-	configure cursor {}
-	other error {}
-	other tags {}
-	other level {}
-	other help {}
-	other focus .widget.form.can.f.entry#7,textvariable,entry
-	other master .frame#1
-	other pathname entry#7
-	configure font screen,14
-	geometry fill x
-	configure background #9d3d00
-	other tabbing {}
-	other item_name entry#7
+Widget label#9
+	geometry row 11
+	geometry columnspan 2
 	configure highlightbackground #d88700
-	geometry row 15
 	other reqheight {}
-	other type entry
-	configure width 71
+	other type label
+	other master .frame#1
+	configure text shmid
+	other pathname label#9
+	configure font Helvetica,10,Bold
+	other tags {}
+	geometry fill x
+	other reqwidth {}
+	other level {}
+	configure background #d88700
+	other help {}
+	geometry column 20
 	other comments {}
-	geometry column 4
+	other item_name label#9
+	other tabbing {}
 Widget button#6
 	geometry columnspan 3
 	other reqwidth {}
@@ -393,6 +393,72 @@ Widget button#6
 	configure text {  Set  }
 	other comments {}
 	geometry column 12
+Widget entry#9
+	configure textvariable PageLength
+	other reqwidth {}
+	configure foreground white
+	configure cursor {}
+	other error {}
+	other tags {}
+	other level {}
+	other help {}
+	other focus .widget.form.can.f.entry#9,textvariable,entry
+	other master .frame#1
+	other pathname entry#9
+	configure font screen,14
+	geometry fill x
+	configure background #9d3d00
+	other tabbing {}
+	other item_name entry#9
+	configure highlightbackground #d88700
+	geometry row 14
+	other reqheight {}
+	other type entry
+	configure width 3
+	other comments {}
+	geometry column 28
+Widget button#7
+	geometry columnspan 3
+	other reqwidth {}
+	configure activebackground #ffa831
+	other error {}
+	other tags {}
+	other level {}
+	other help {}
+	configure padx 10
+	configure pady 3
+	configure command {MsgPrefixDelete .}
+	other focus .widget.form.can.f.button#7,command,entry
+	other master .frame#1
+	other pathname button#7
+	geometry fill x
+	configure font Helvetica,10,Bold
+	configure background #d88700
+	other tabbing {}
+	other item_name button#7
+	configure highlightbackground #d88700
+	geometry row 14
+	other reqheight {}
+	other type button
+	configure text Delete
+	other comments {}
+	geometry column 12
+Widget f
+	other panel {}
+	other resize_row {0 0 0 0 0 0 0 0 0 0 0 0}
+	other type frame
+	other min_row {30 30 30 30 30 30 30 30 30 30 30 30}
+	other master {}
+	other pathname f
+	other tags {}
+	other resize_column {0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0}
+	other level 0
+	configure background #e9e9e9
+	other help {}
+	other min_column {30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30}
+	other comments {}
+	other item_name f
+	other tabbing {}
 Widget checkbutton#1
 	geometry columnspan 4
 	other reqwidth {}
@@ -420,99 +486,6 @@ Widget checkbutton#1
 	geometry column 7
 	other comments {}
 	configure relief raised
-Widget f
-	other panel {}
-	other resize_row {0 0 0 0 0 0 0 0 0 0 0 0}
-	other type frame
-	other min_row {30 30 30 30 30 30 30 30 30 30 30 30}
-	other master {}
-	other pathname f
-	other tags {}
-	other resize_column {0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0}
-	other level 0
-	configure background #e9e9e9
-	other help {}
-	other min_column {30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30}
-	other comments {}
-	other item_name f
-	other tabbing {}
-Widget button#7
-	geometry columnspan 3
-	other reqwidth {}
-	configure activebackground #ffa831
-	other error {}
-	other tags {}
-	other level {}
-	other help {}
-	configure padx 10
-	configure pady 3
-	configure command {MsgPrefixDelete .}
-	other focus .widget.form.can.f.button#7,command,entry
-	other master .frame#1
-	other pathname button#7
-	geometry fill x
-	configure font Helvetica,10,Bold
-	configure background #d88700
-	other tabbing {}
-	other item_name button#7
-	configure highlightbackground #d88700
-	geometry row 14
-	other reqheight {}
-	other type button
-	configure text Delete
-	other comments {}
-	geometry column 12
-Widget entry#9
-	configure textvariable PageLength
-	other reqwidth {}
-	configure foreground white
-	configure cursor {}
-	other error {}
-	other tags {}
-	other level {}
-	other help {}
-	other focus .widget.form.can.f.entry#9,textvariable,entry
-	other master .frame#1
-	other pathname entry#9
-	configure font screen,14
-	geometry fill x
-	configure background #9d3d00
-	other tabbing {}
-	other item_name entry#9
-	configure highlightbackground #d88700
-	geometry row 14
-	other reqheight {}
-	other type entry
-	configure width 3
-	other comments {}
-	geometry column 23
-Widget button#8
-	geometry columnspan 3
-	other reqwidth {}
-	configure activebackground #ffa831
-	other error {}
-	other tags {}
-	other level {}
-	other help {}
-	configure padx 10
-	configure pady 3
-	configure command {MsgStoreTo .}
-	other focus .widget.form.can.f.button#8,command,entry
-	other master .frame#1
-	other pathname button#8
-	geometry fill x
-	configure font Helvetica,10,Bold
-	configure background #d88700
-	other tabbing {}
-	other item_name button#8
-	configure highlightbackground #d88700
-	geometry row 17
-	other reqheight {}
-	other type button
-	configure text Store
-	configure justify left
-	other comments {}
-	geometry column 1
 Widget checkbutton#2
 	geometry columnspan 4
 	other reqwidth {}
@@ -540,7 +513,7 @@ Widget checkbutton#2
 	other comments {}
 	geometry column 7
 	configure relief raised
-Widget button#9
+Widget button#8
 	geometry columnspan 3
 	other reqwidth {}
 	configure activebackground #ffa831
@@ -550,23 +523,48 @@ Widget button#9
 	other help {}
 	configure padx 10
 	configure pady 3
-	configure command {MsgLoadFrom .}
-	other focus .widget.form.can.f.button#9,command,entry
+	configure command {MsgStoreTo .}
+	other focus .widget.form.can.f.button#8,command,entry
 	other master .frame#1
-	other pathname button#9
+	other pathname button#8
 	geometry fill x
 	configure font Helvetica,10,Bold
 	configure background #d88700
 	other tabbing {}
-	other item_name button#9
+	other item_name button#8
 	configure highlightbackground #d88700
 	geometry row 16
 	other reqheight {}
 	other type button
-	configure text Load
+	configure text Store
 	configure justify left
 	other comments {}
 	geometry column 1
+Widget scrollbar#1
+	other focus .widget.form.can.f.scrollbar#1,activebackground,entry
+	configure troughcolor #D88700
+	configure highlightbackground #d88700
+	geometry row 2
+	other reqheight {}
+	configure orient v
+	other error {}
+	geometry rowspan 9
+	other type scrollbar
+	configure activerelief sunken
+	other master .frame#1
+	other pathname scrollbar#1
+	other tags {}
+	geometry fill y
+	other level {}
+	other reqwidth {}
+	configure background #9d3d00
+	other help {}
+	configure activebackground #ffa831
+	other comments {}
+	geometry column 28
+	configure command {%B.listbox#1 yview}
+	other tabbing {}
+	other item_name scrollbar#1
 Widget checkbutton#3
 	geometry columnspan 4
 	other reqwidth {}
@@ -595,31 +593,63 @@ Widget checkbutton#3
 	geometry column 7
 	other comments {}
 	configure relief raised
-Widget scrollbar#1
-	other focus .widget.form.can.f.scrollbar#1,activebackground,entry
-	configure troughcolor #D88700
-	configure highlightbackground #d88700
-	geometry row 2
-	other reqheight {}
-	configure orient v
-	other error {}
-	geometry rowspan 9
-	other type scrollbar
-	configure activerelief sunken
-	other master .frame#1
-	other pathname scrollbar#1
-	geometry fill y
-	other tags {}
-	configure background #9d3d00
+Widget button#9
+	geometry columnspan 3
 	other reqwidth {}
+	configure activebackground #ffa831
+	other error {}
+	other tags {}
 	other level {}
 	other help {}
-	configure activebackground #ffa831
-	geometry column 28
-	other comments {}
-	other item_name scrollbar#1
+	configure padx 10
+	configure pady 3
+	configure command {MsgLoadFrom .}
+	other focus .widget.form.can.f.button#9,command,entry
+	other master .frame#1
+	other pathname button#9
+	geometry fill x
+	configure font Helvetica,10,Bold
+	configure background #d88700
 	other tabbing {}
-	configure command {%B.listbox#1 yview}
+	other item_name button#9
+	configure highlightbackground #d88700
+	geometry row 15
+	other reqheight {}
+	other type button
+	configure text Load
+	configure justify left
+	other comments {}
+	geometry column 1
+Widget message#1
+	configure highlightbackground #d88700
+	other focus .widget.form.can.f.message#1,text,entry
+	geometry row 1
+	geometry columnspan 27
+	configure aspect 100000
+	other reqheight {}
+	other error {}
+	other type message
+	configure anchor sw
+	geometry anchor sw
+	other master .frame#1
+	configure text {
+}
+	other pathname message#1
+	configure font screen,14
+	other tags {}
+	geometry fill x
+	configure background #d88700
+	other level {}
+	other reqwidth {}
+	other help {}
+	configure foreground black
+	configure padx 7
+	configure pady 3
+	other comments {}
+	geometry column 1
+	configure borderwidth 1
+	other tabbing {}
+	other item_name message#1
 Widget checkbutton#4
 	geometry columnspan 4
 	other reqwidth {}
@@ -645,38 +675,8 @@ Widget checkbutton#4
 	other type checkbutton
 	configure text {List Inactives}
 	other comments {}
-	geometry column 20
+	geometry column 25
 	configure relief raised
-Widget message#1
-	configure highlightbackground #d88700
-	other focus .widget.form.can.f.message#1,text,entry
-	geometry row 1
-	geometry columnspan 27
-	configure aspect 100000
-	other reqheight {}
-	other error {}
-	other type message
-	configure anchor sw
-	geometry anchor sw
-	other master .frame#1
-	configure text {
-}
-	other pathname message#1
-	geometry fill x
-	other tags {}
-	configure font screen,14
-	other reqwidth {}
-	other level {}
-	configure background #d88700
-	other help {}
-	configure foreground black
-	configure padx 7
-	configure borderwidth 1
-	geometry column 1
-	other comments {}
-	configure pady 3
-	other item_name message#1
-	other tabbing {}
 Widget message#2
 	other focus .widget.form.can.f.message#2,aspect,entry
 	geometry row 12
@@ -688,21 +688,48 @@ Widget message#2
 	other type message
 	other master .frame#1
 	other pathname message#2
+	other tags {}
 	configure font screen,14
 	geometry fill x
-	other tags {}
-	other reqwidth {}
-	other level {}
 	configure background #9d3d00
+	other level {}
+	other reqwidth {}
 	other help {}
 	configure foreground white
 	configure padx 7
-	geometry column 16
-	other comments {}
 	configure pady 3
-	other item_name message#2
-	other tabbing {}
+	other comments {}
+	geometry column 16
 	configure relief ridge
+	other tabbing {}
+	other item_name message#2
+Widget message#4
+	other focus .widget.form.can.f.message#4,textvariable,entry
+	geometry row 11
+	geometry columnspan 2
+	configure aspect 1000
+	configure highlightbackground #D88700
+	other reqheight {}
+	other error {}
+	other type message
+	configure textvariable Shmid
+	other master .frame#1
+	other pathname message#4
+	configure font screen,14
+	other tags {}
+	geometry fill x
+	configure background #9d3d00
+	other level {}
+	other reqwidth {}
+	other help {}
+	configure foreground white
+	configure padx 7
+	configure pady 3
+	other comments {}
+	geometry column 22
+	configure relief ridge
+	other tabbing {}
+	other item_name message#4
 Widget label#1
 	configure highlightbackground #d88700
 	geometry row 11
@@ -716,42 +743,15 @@ Widget label#1
 	geometry fill x
 	other tags {}
 	configure font Helvetica,10,Bold
-	other reqwidth {}
-	other level {}
 	configure background #d88700
+	other level {}
+	other reqwidth {}
 	other help {}
 	configure foreground black
+	other comments {}
 	geometry column 1
-	other comments {}
+	other tabbing {}
 	other item_name label#1
-	other tabbing {}
-Widget message#4
-	other focus .widget.form.can.f.message#4,textvariable,entry
-	geometry row 11
-	geometry columnspan 2
-	configure aspect 1000
-	configure highlightbackground #D88700
-	other reqheight {}
-	other error {}
-	other type message
-	configure textvariable Shmid
-	other master .frame#1
-	other pathname message#4
-	geometry fill x
-	other tags {}
-	configure font screen,14
-	other reqwidth {}
-	other level {}
-	configure background #9d3d00
-	other help {}
-	configure foreground white
-	configure padx 7
-	geometry column 27
-	other comments {}
-	configure pady 3
-	other item_name message#4
-	other tabbing {}
-	configure relief ridge
 Widget label#2
 	geometry row 12
 	geometry columnspan 3
@@ -764,58 +764,13 @@ Widget label#2
 	configure font Helvetica,10,Bold
 	other tags {}
 	geometry fill x
-	configure background #d88700
-	other level {}
 	other reqwidth {}
+	other level {}
+	configure background #d88700
 	other help {}
-	other comments {}
 	geometry column 1
-	other tabbing {}
+	other comments {}
 	other item_name label#2
-Widget entry#1
-	geometry columnspan 15
-	configure textvariable Prefix
-	other reqwidth {}
-	configure foreground white
-	configure cursor {}
-	other error {}
-	other tags {}
-	other level {}
-	other help {}
-	other focus .widget.form.can.f.entry#1,width,highlightbackground,entry
-	other master .frame#1
-	other pathname entry#1
-	configure font screen,14
-	geometry fill x
-	configure background #9d3d00
-	other tabbing {}
-	other item_name entry#1
-	configure highlightbackground #d88700
-	geometry row 11
-	other reqheight {}
-	other type entry
-	configure width 71
-	other comments {}
-	geometry column 4
-Widget label#3
-	configure highlightbackground #d88700
-	geometry row 13
-	geometry columnspan 3
-	other reqheight {}
-	other type label
-	other master .frame#1
-	configure text {Abort Limit}
-	other pathname label#3
-	geometry fill x
-	other tags {}
-	configure font Helvetica,10,Bold
-	other level {}
-	other reqwidth {}
-	configure background #d88700
-	other help {}
-	geometry column 1
-	other comments {}
-	other item_name label#3
 	other tabbing {}
 Widget entry#10
 	geometry columnspan 3
@@ -842,29 +797,51 @@ Widget entry#10
 	configure width 12
 	other comments {}
 	geometry column 16
-Widget frame#1
-	other panel {}
-	geometry row 1
-	geometry columnspan 18
-	other resize_row {0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0}
+Widget label#3
+	configure highlightbackground #d88700
+	geometry row 13
+	geometry columnspan 3
 	other reqheight {}
-	geometry rowspan 12
-	other type frame
-	other min_row {30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30}
-	other master {}
-	other pathname frame#1
-	other resize_column {0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0}
-	geometry fill both
+	other type label
+	other master .frame#1
+	configure text {Abort Limit}
+	other pathname label#3
+	geometry fill x
 	other tags {}
-	other reqwidth {}
-	other level 1
+	configure font Helvetica,10,Bold
 	configure background #d88700
-	other min_column {30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30}
+	other reqwidth {}
+	other level {}
 	other help {}
-	geometry column 1
 	other comments {}
-	other item_name frame#1
+	geometry column 1
 	other tabbing {}
+	other item_name label#3
+Widget entry#1
+	geometry columnspan 15
+	configure textvariable Prefix
+	other reqwidth {}
+	configure foreground white
+	configure cursor {}
+	other error {}
+	other tags {}
+	other level {}
+	other help {}
+	other focus .widget.form.can.f.entry#1,width,highlightbackground,entry
+	other master .frame#1
+	other pathname entry#1
+	configure font screen,14
+	geometry fill x
+	configure background #9d3d00
+	other tabbing {}
+	other item_name entry#1
+	configure highlightbackground #d88700
+	geometry row 11
+	other reqheight {}
+	other type entry
+	configure width 71
+	other comments {}
+	geometry column 4
 Widget entry#2
 	geometry columnspan 2
 	configure textvariable CountLimit
@@ -890,3 +867,26 @@ Widget entry#2
 	configure width 8
 	geometry column 4
 	other comments {}
+Widget frame#1
+	other panel {}
+	geometry row 1
+	geometry columnspan 18
+	other resize_row {0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0}
+	other reqheight {}
+	geometry rowspan 12
+	other type frame
+	other min_row {30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30}
+	other master {}
+	other pathname frame#1
+	other tags {}
+	other resize_column {0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0}
+	geometry fill both
+	configure background #d88700
+	other level 1
+	other reqwidth {}
+	other help {}
+	other min_column {30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30}
+	other comments {}
+	geometry column 1
+	other tabbing {}
+	other item_name frame#1

@@ -26,6 +26,7 @@ typedef struct {
   int TimeStampCPU;      /* If true, time-stamps occur on changed CPU times. */
   int Sorted;            /* Whether ID list is sorted                        */
   int shmid;             /* Shared memory ID, if shared, -1 if not.          */
+  pid_t ProcessID;       /* Process ID of owner of shared memory (zero means self.) */
 
   /*	msg Summary output features:                                                     */
   int SummaryPageLength;   /* Number of lines output on summary page between form feeds. */

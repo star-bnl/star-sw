@@ -14,6 +14,14 @@
 #include <stdio.h>
 #endif
 
+#ifndef	NULL
+#include <stdlib.h>
+#endif
+
+#ifndef pid_t
+#include <sys/types.h>
+#endif
+
 #ifndef TRUE
 #define TRUE -1
 #endif
@@ -30,6 +38,8 @@ typedef	void	(*funcPoint)(const char*, const char*, const int*);
 	void	MsgAlarm( const char *msg, int  severity );
 	void	MsgAlarmRegister( funcPoint AlarmRoutine );
 	void	MsgAlarmRoutineSample( char* Prefix, char* sansPrefix, int *Level );
+	void	MsgAppendReturn( void );
+	void	MsgNoAppendReturn( void );
 	char	*MsgCela(int ELA);
 	void	MsgCheck( const char *msg, int *ID, int *Active, int *Alarming, int *Counting );
 	void	MsgClassDefine( const char *Class, const char *State, int CountLimit, int AbortLimit );
@@ -87,7 +97,8 @@ typedef	void	(*funcPoint)(const char*, const char*, const int*);
 	void	MsgSetSummaryModeInactive( int Mode );
 	void	MsgSetSummaryPageLength( int Page_Length );
 	void	MsgSetTimeStampCPU( int Mode );
-	int	MsgShare( const char *ImageName );
+	int	MsgShare( const pid_t ProcessID );
+	int	MsgShareNoCreate( const pid_t ProcessID );
 	void	MsgSort( void );
 	void	MsgState( int Counts, int Limit, int Level, int AbortLimit, int Active, int Counting, int Alarming, char State[9] );
 	int	MsgStateLoad(  const char *fileName );

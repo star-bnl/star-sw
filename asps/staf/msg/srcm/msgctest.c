@@ -21,8 +21,6 @@
 	static int ID4=0;
 	static int ID5=0;
 	static int ID6=0;
-	static int ID7=0;
-	static int ID8=0;
 
 	MsgIni( MSG_Journal_LUN_P );
 	if ( !MsgJournalOpen( "msg.jou" ) )

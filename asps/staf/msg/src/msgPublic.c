@@ -42,12 +42,13 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 10-Oct-1996, \tcom
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
+#include <sys/systeminfo.h>
 
 #include <errno.h>
 #include <msg.h>
 #include <msgData.h>
 
-#define MAX_FILE_VERSIONS 999
+#define MAX_FILE_VERSIONS 99
 
 extern msgData_t *Msg;
 extern msgData_t msg;
@@ -64,6 +65,9 @@ extern funcPoint MsgAlarmRoutine;
 
 extern char   m1000[1000];  /*  Some "scratch" message space.  */
 extern char   s1000[1000];  /*  Some "scratch" string space.  */
+
+int MsgInitialized = FALSE; /* This is set to TRUE when initialized.  */
+static int AppendReturn   = FALSE; /* Default is to not append carriage return at end of summary lines.  Set to TRUE for gui. */
 
 	void	Message(
 
@@ -148,8 +152,8 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	a "\n" at the very end.  msg may have as many newlines as desired.  */
 
 /*	Send message on standard output: */
-	printf( "%s\n", msg );
-	fflush( stdout );
+	fprintf(stderr, "%s\n", msg );
+	fflush( stderr );
 
 /*	Display time & message on journal file:  */
 	MsgToFileOut( msg, JournalFILE );
@@ -225,6 +229,9 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 
 
 
+	void	MsgAppendReturn(){   AppendReturn = -1; return; }
+	void	MsgNoAppendReturn(){ AppendReturn =  0; return; }
+
 	void	MsgClassDefine(
 
 /*   Inputs:                                                                                */
@@ -275,8 +282,8 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	Found = MsgFindClass( Class, &ID );      /* Look up the class in the index.  */
 	if ( !Found ) {                          /* Didn't find it.                  */
 	  if ( !MsgEnterClass( Class, &ID ) ) {  /* Failed & already complained.     */
-	    printf( "MsgDefineClass-D1  Didn't find class [%s]\n", Class );
-	    fflush( stdout );
+	    fprintf(stderr, "MsgDefineClass-D1  Didn't find class [%s]\n", Class );
+	    fflush( stderr );
 	    return;
 	  }
 	}
@@ -297,7 +304,7 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	class[ID].AbortLimit = AbortLimit;
 	class[ID].AlarmLevel = 3;
 
-/*	printf( "MsgDefineClass-D2  Defined class [%s] ID:%d Active:%d Counting:%d Alarming:%d\n", Class, ID
+/*	fprintf(stderr, "MsgDefineClass-D2  Defined class [%s] ID:%d Active:%d Counting:%d Alarming:%d\n", Class, ID
 	      , class[ID].Active, class[ID].Counting, class[ID].Alarming );  */
 
 	return;
@@ -568,8 +575,8 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	"\n" at the very end.  msg may have as many newlines as desired.                           */
 
 /*	Display message on standard output:  */
-	printf( "%s\n", msg );
-	fflush( stdout );
+	fprintf(stderr, "%s\n", msg );
+	fflush( stderr );
 
 	return;
 }
@@ -853,8 +860,8 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	  while ( !stat( &s1000[3], &buf ) ) {    /*  While versions exist, work continues.  */
 	    if ( version > MAX_FILE_VERSIONS ) {  /*  Discard versions higher than this. */
 	      if ( system( s1000 ) ) {            /*  rm the file.  */
-	        printf( "MsgFileOpen-E1  Failed to %s\n", s1000 );
-	        fflush( stdout );
+	        fprintf(stderr, "MsgFileOpen-E1  Failed to %s\n", s1000 );
+	        fflush( stderr );
 	        return( NULL );
 	      }
 	    } else {
@@ -866,15 +873,15 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	    version--;
 	    sprintf( s1000, "mv %s.p%3.3d %s.p%3.3d", FileName, version, FileName, version+1 );
 	    if ( system( s1000 ) ) {            /*  mv the file.  */
-	      printf( "MsgFileOpen-E2  Failed to %s\n", s1000 );
-	      fflush( stdout );
+	      fprintf(stderr, "MsgFileOpen-E2  Failed to %s\n", s1000 );
+	      fflush( stderr );
 	      return( NULL );
 	    }
 	  }
 	  sprintf( s1000, "mv %s %s.p%3.3d", FileName, FileName, 1 );
 	  if ( system( s1000 ) ) {            /*  mv the file.  */
-	    printf( "MsgFileOpen-E3  Failed to %s\n", s1000 );
-	    fflush( stdout );
+	    fprintf(stderr, "MsgFileOpen-E3  Failed to %s\n", s1000 );
+	    fflush( stderr );
 	    return( NULL );
 	  }
 	}
@@ -904,19 +911,19 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	  Zeroes all msg prefix accounting, but retains all prefix definitions
 	  and states.                                                                          */
 
-	static int MsgInitialized = FALSE;
 	int ID;
-	char *shareName = "";
 	
 	control->shmid = -1;                            /*  Indicate msg memory not (yet) shared.  */
+	control->ProcessID = 0;
 	if ( switches ) {
 	  if ( strchr( switches, 's' ) ) {
 /*	    Variable argument list machinations to get optional shareName (executable file name):  */
-	    va_list ap;
-	    char *initArgs;
-	    va_start( ap, switches );        /*  Make ap point to 1st unnamed arg.                 */
-	    shareName = va_arg(   ap, char* );
-	    control->shmid = MsgShare( shareName );               /*  Share the msg memory.        */
+/*	    const char* shareName = "";                                                            */
+/*	    va_list ap;                                                                            */
+/*	    char *initArgs;                                                                        */
+/*	    va_start( ap, switches );        /*  Make ap point to 1st unnamed arg.                 */
+/*	    shareName = va_arg(   ap, char* );                                                     */
+	    control->shmid = MsgShare( 0 );  /*  Share the msg memory; "0" causes this process's ID to be used. */
 	  }
 	  if ( strchr( switches, 'h' ) ) MsgInitialized = FALSE;  /*  Force hard initialization.   */
 	}
@@ -940,7 +947,8 @@ extern char   s1000[1000];  /*  Some "scratch" string space.  */
 	  control->Alarming     = FALSE;
 	  control->Sorted       = FALSE;
 	  MsgJournalOff();
-	  MsgNodeNameSet( "" );
+	  if ( sysinfo( SI_HOSTNAME, s1000, 1000) < 0 ) s1000[0] = NULL;
+	  MsgNodeNameSet( s1000 );
 
 /*	  Msg Summary defaults:                                                                */
 	  MsgSetSummaryPageLength (   60 );   /* 60 lines per page.                            */
@@ -2455,19 +2463,33 @@ Message-Prefix & Truncated Sample of last occurance              Total CPU Usage
 	  if ( PageLine != 0 ) {     /*  Don't do the header:  */
 	  } else if ( Nevents <= 0 ) {  /*  No fractional occurances:  */
 
-	    sprintf( s1000, "\f\n\
+	    if ( AppendReturn ) {
+	      sprintf( s1000, "\f\n\
              --- Message Accounting Summary --- (%-23.23s)\n\
 Message-Prefix & Truncated Sample of last occurance                  Counts      Limit      Lookups  AbortLimit    State\r\n"
 	                , MsgCtime() );
+	    } else {
+	      sprintf( s1000, "\f\n\
+             --- Message Accounting Summary --- (%-23.23s)\n\
+Message-Prefix & Truncated Sample of last occurance                  Counts      Limit      Lookups  AbortLimit    State\n"
+	                , MsgCtime() );
+	    }
 	    MsgToFileOut( s1000, fid );
 
 	    PageLine = 2;
 	  } else {
 
-	    sprintf( s1000, "\f\n\
+	    if ( AppendReturn ) {
+	      sprintf( s1000, "\f\n\
              --- Message Accounting Summary --- (%-23.23s)\n\
 Message-Prefix & Truncated Sample of last occurance                  Counts   Counts/evt      Limit    Lookups  AbortLimit    State\
 \r\n"                , MsgCtime() );
+	    } else {
+	      sprintf( s1000, "\f\n\
+             --- Message Accounting Summary --- (%-23.23s)\n\
+Message-Prefix & Truncated Sample of last occurance                  Counts   Counts/evt      Limit    Lookups  AbortLimit    State\
+\n"                , MsgCtime() );
+	    }
 	    MsgToFileOut( s1000, fid );
 
 	    PageLine = 2;
@@ -2535,16 +2557,30 @@ Message-Prefix & Truncated Sample of last occurance                  Counts   Co
 	    }
 
 	    if ( Nevents <= 0 ) {
-	      sprintf( s1000, "%-64.64s|%10d %10d   %10d %11d %c%c%c%c%c%c%c%c\r"
+	      if ( AppendReturn ) {
+	        sprintf( s1000, "%-64.64s|%10d %10d   %10d %11d %c%c%c%c%c%c%c%c\r"
 	             , Sample, prefix[SID].Counts
 	             , prefix[SID].CountLimit, prefix[SID].Lookups, prefix[SID].AbortLimit
 	             , State[0], State[1], State[2], State[3], State[4], State[5], State[6], State[7] );
+	      } else {
+	        sprintf( s1000, "%-64.64s|%10d %10d   %10d %11d %c%c%c%c%c%c%c%c"
+	             , Sample, prefix[SID].Counts
+	             , prefix[SID].CountLimit, prefix[SID].Lookups, prefix[SID].AbortLimit
+	             , State[0], State[1], State[2], State[3], State[4], State[5], State[6], State[7] );
+	      }
 	    } else {
 	      Fraction = ( (float) prefix[SID].Counts ) / ( (float) Nevents );
-	      sprintf( s1000, "%-64.64s|%10d %12.4f %10d  %9d %11d %c%c%c%c%c%c%c%c\r"
+	      if ( AppendReturn ) {
+	        sprintf( s1000, "%-64.64s|%10d %12.4f %10d  %9d %11d %c%c%c%c%c%c%c%c\r"
 	             , Sample, prefix[SID].Counts, Fraction
 	             , prefix[SID].CountLimit, prefix[SID].Lookups, prefix[SID].AbortLimit
 	             , State[0], State[1], State[2], State[3], State[4], State[5], State[6], State[7] );
+	      } else {
+	        sprintf( s1000, "%-64.64s|%10d %12.4f %10d  %9d %11d %c%c%c%c%c%c%c%c"
+	             , Sample, prefix[SID].Counts, Fraction
+	             , prefix[SID].CountLimit, prefix[SID].Lookups, prefix[SID].AbortLimit
+	             , State[0], State[1], State[2], State[3], State[4], State[5], State[6], State[7] );
+	      }
 	    }
 
 	    EPT = MsgLNB( s1000, SUMMARY_WIDTH );  /*Find last non-blank.  */
@@ -2657,8 +2693,8 @@ Message-Prefix & Truncated Sample of last occurance                  Counts   Co
 	    strcpy( LastNodeName, control->NodeName );
 	  }
 	  if ( !fid ) { /*  Put it on standard out:  */
-	    printf( "%s\n", s1000 );
-	    fflush( stdout );
+	    fprintf(stderr, "%s\n", s1000 );
+	    fflush( stderr );
 	  } else if ( fid == JournalFILE ) {
 	    if ( control->JournalEnabled ) {
 	      fprintf( fid, "%s\n", s1000 );
@@ -2875,9 +2911,9 @@ Message-Prefix & Truncated Sample of last occurance                  Counts   Co
 /*  Description:  Write a message to a file, specified by fid, bypassing msg accounting.
 */
 {
-	if ( !fid ) { /*  Put it on standard out:  */
-	  printf( "%s\n", msg );
-	  fflush( stdout );
+	if ( !fid ) { /*  Put it on standard error:  */
+	  fprintf(stderr, "%s\n", msg );
+	  fflush( stderr );
 	} else if ( fid == JournalFILE ) {
 	  if ( control->JournalEnabled ) {
 	    MsgTimeStampFile( fid );  /* Time.  */
