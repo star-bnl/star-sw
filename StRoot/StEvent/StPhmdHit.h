@@ -4,7 +4,7 @@
 */
 /********************************************************************
  *
- * $Id: StPhmdHit.h,v 2.1 2002/12/20 22:33:00 ullrich Exp $
+ * $Id: StPhmdHit.h,v 2.2 2002/12/21 00:32:33 ullrich Exp $
  *
  * Author: Subhasis Chattopadhyay, Dec 2002
  ********************************************************************
@@ -14,6 +14,9 @@
  ********************************************************************
  *
  * $Log: StPhmdHit.h,v $
+ * Revision 2.2  2002/12/21 00:32:33  ullrich
+ * Corrected typo in module().
+ *
  * Revision 2.1  2002/12/20 22:33:00  ullrich
  * Initial Revision.
  *
@@ -59,7 +62,7 @@ inline   int    StPhmdHit::superModule() const {return mSuperModuleNumber;}
 inline   int    StPhmdHit::module()
 {
     // return module in range 0-11
-    if (mSuperModuleNumber<=12) 
+    if (mSuperModuleNumber < 12) 
 	return mSuperModuleNumber;
     else
 	return -1;
