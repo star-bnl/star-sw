@@ -1,12 +1,12 @@
 //*-- Author :    Valeri Fine  08/12/94 begin_html mailto://fine@bnl.gov  end_html
 
-#ifndef ROOT_Stypes
-#define ROOT_Stypes
+#ifndef STAR_Stypes
+#define STAR_Stypes
  
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // Stypes                                                               //
-// $Id: Stypes.h,v 1.12 2000/02/29 01:54:49 fine Exp $                                                               
+// $Id: Stypes.h,v 1.13 2000/03/02 00:15:24 fine Exp $                                                               
 // Basic types used by STAF - ROOT interface.                           //
 //                                                                      //
 // This header file contains the set of the macro definitions           //
@@ -82,6 +82,9 @@ void _NAME2_(St_,name)::Streamer(TBuffer &R__b) {                        \
   TableStreamerImp(name)
 
 // $Log: Stypes.h,v $
+// Revision 1.13  2000/03/02 00:15:24  fine
+// macro ROOT is replaced with macro STAR to avoid clash with ROOT
+//
 // Revision 1.12  2000/02/29 01:54:49  fine
 // St_Table -> turn automatic schema evolution for table version 2 and above
 //
