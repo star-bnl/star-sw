@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.cc,v 1.18 2000/04/25 18:26:02 porter Exp $
+ * $Id: StDbConfigNode.cc,v 1.19 2000/06/30 01:57:01 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.cc,v $
+ * Revision 1.19  2000/06/30 01:57:01  porter
+ * fixed a delete bug & small memory leak found by Akio via Insure++ ,
+ * updated SetTable() method for containing idList, corrected enumeration
+ * map to rhic domain for Conditions_rhic database
+ *
  * Revision 1.18  2000/04/25 18:26:02  porter
  * added flavor & production time as settable query fields in
  * table &/or node. Associated SQL updated in mysqlAccessor.
@@ -502,7 +507,8 @@ StDbConfigNode::resolveNodeInfo(StDbNodeInfo* node){
     char* tmpElements = new char[slen];
     ostrstream es(tmpElements,slen);
 
-    for(int ip=0;ip<prows-1;ip++){
+    int ip;
+    for(ip=0;ip<prows-1;ip++){
       for(int ic=0;ic<crows;ic++){
         if(celements[ic]==pelements[ip]){
           es<<pelements[ip]<<",";
@@ -511,7 +517,7 @@ StDbConfigNode::resolveNodeInfo(StDbNodeInfo* node){
       }
     }
 
-    int ip=prows-1;
+    ip=prows-1;
     int ifound=0;
     for(int ic=0;ic<crows;ic++){
       if(celements[ic]==pelements[ip]){
@@ -530,6 +536,8 @@ StDbConfigNode::resolveNodeInfo(StDbNodeInfo* node){
      
     if(node->elementID) delete [] node->elementID;
     node->elementID = tmpElements;
+       if(pelements)delete [] pelements;
+       if(celements)delete [] celements;
 
 }
 

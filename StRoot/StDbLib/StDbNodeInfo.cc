@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNodeInfo.cc,v 1.5 2000/04/25 18:26:03 porter Exp $
+ * $Id: StDbNodeInfo.cc,v 1.6 2000/06/30 01:57:02 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbNodeInfo.cc,v $
+ * Revision 1.6  2000/06/30 01:57:02  porter
+ * fixed a delete bug & small memory leak found by Akio via Insure++ ,
+ * updated SetTable() method for containing idList, corrected enumeration
+ * map to rhic domain for Conditions_rhic database
+ *
  * Revision 1.5  2000/04/25 18:26:03  porter
  * added flavor & production time as settable query fields in
  * table &/or node. Associated SQL updated in mysqlAccessor.
@@ -233,6 +238,7 @@ while(id){
  retVal = new int[numElements];
  for(k=0;k<numElements;k++)retVal[k]=tmpElements[k];
  numRows = numElements;
+
  delete [] tmpElements;
  delete [] tmpName; 
 

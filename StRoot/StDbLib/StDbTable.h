@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.h,v 1.13 2000/06/02 13:37:37 porter Exp $
+ * $Id: StDbTable.h,v 1.14 2000/06/30 01:57:02 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: StDbTable.h,v $
+ * Revision 1.14  2000/06/30 01:57:02  porter
+ * fixed a delete bug & small memory leak found by Akio via Insure++ ,
+ * updated SetTable() method for containing idList, corrected enumeration
+ * map to rhic domain for Conditions_rhic database
+ *
  * Revision 1.13  2000/06/02 13:37:37  porter
  * built up list of minor changes:
  *  - made buffer more robust for certain null inputs
@@ -178,7 +183,7 @@ public:
   virtual StDbTable*  Clone();
   virtual char*       GetTable(); 
   virtual void*       GetTableCpy(); //! calloc'd version of data for StRoot
-  virtual void        SetTable(char* data, int nrows);
+  virtual void        SetTable(char* data, int nrows, int* idList=0);
   virtual void        AddRows(char* data, int nrows);
   virtual int         GetNRows() const;
   virtual void        SetNRows(int nrows);
