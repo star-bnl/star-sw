@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.cxx,v 1.4 2001/02/12 21:15:42 yepes Exp $
+// $Id: StPeCEvent.cxx,v 1.5 2001/02/12 22:33:51 yepes Exp $
 // $Log: StPeCEvent.cxx,v $
+// Revision 1.5  2001/02/12 22:33:51  yepes
+// avoid printing
+//
 // Revision 1.4  2001/02/12 21:15:42  yepes
 // New version of StPeCMaker, lots of changes
 //
@@ -174,14 +177,14 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
 
         TClonesArray &spairs = *sPairs;
         lPair = new(spairs[nSPairs++]) StPeCPair(trk1,trk2,0,event) ;
-//#ifdef PECPRINT
+#ifdef PECPRINT
         cout << "StPeCEvent : Secondary Pair : " 
            << "  sumQ = " << lPair->getSumCharge()
            << "  sumPt = " << lPair->getSumPt()
            << "  mInv = " << lPair->getMInv(pion)
            << "  opening angle = " << lPair->getOpeningAngle()
            << "  cos(theta*) = " << lPair->getCosThetaStar(pion) << endl;
-//#endif	   
+#endif	   
      }
   }
 
