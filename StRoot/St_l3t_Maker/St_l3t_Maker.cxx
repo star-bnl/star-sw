@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.cxx,v 1.5 1999/04/17 22:37:34 fisyak Exp $
+// $Id: St_l3t_Maker.cxx,v 1.6 1999/05/05 18:30:16 yepes Exp $
 // $Log: St_l3t_Maker.cxx,v $
+// Revision 1.6  1999/05/05 18:30:16  yepes
+// define maximum number of tracks as NHits/20
+//
 // Revision 1.5  1999/04/17 22:37:34  fisyak
 // remove annoying printf
 //
@@ -181,6 +184,7 @@ Int_t St_l3t_Maker::Make(){
 //
     *l3hit = *tphit ;
 //
+    maxNofTracks = nHits / 20 ;
     St_tpt_track   *track = new St_tpt_track("l3Track",maxNofTracks); m_DataSet->Add(track);
     St_sl3Monitor  *mon   = new St_sl3Monitor("sl3Monitor",1000); m_DataSet->Add(mon);
 
@@ -215,7 +219,7 @@ void St_l3t_Maker::MakeHistograms() {
 //_____________________________________________________________________________
 void St_l3t_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_l3t_Maker.cxx,v 1.5 1999/04/17 22:37:34 fisyak Exp $\n");
+  printf("* $Id: St_l3t_Maker.cxx,v 1.6 1999/05/05 18:30:16 yepes Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
