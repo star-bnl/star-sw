@@ -1,3 +1,10 @@
+// $Id: StSsdStripList.cc,v 1.4 2005/03/18 14:17:39 lmartin Exp $
+//
+// $Log: StSsdStripList.cc,v $
+// Revision 1.4  2005/03/18 14:17:39  lmartin
+// missing CVS header added
+//
+
 #include "StSsdStripList.hh"
 #include <Stiostream.h>
 #include "StSsdStrip.hh"

@@ -1,3 +1,10 @@
+// $Id: StSsdStripList.hh,v 1.2 2005/03/18 14:17:39 lmartin Exp $
+//
+// $Log: StSsdStripList.hh,v $
+// Revision 1.2  2005/03/18 14:17:39  lmartin
+// missing CVS header added
+//
+
 #ifndef STSSDSTRIPLIST_HH
 #define STSSDSTRIPLIST_HH
 

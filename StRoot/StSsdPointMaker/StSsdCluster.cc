@@ -1,3 +1,10 @@
+// $Id: StSsdCluster.cc,v 1.4 2005/03/18 14:24:21 lmartin Exp $
+//
+// $Log: StSsdCluster.cc,v $
+// Revision 1.4  2005/03/18 14:24:21  lmartin
+// missing CVS header added
+//
+
 #include "StSsdCluster.hh"
 
 StSsdCluster::StSsdCluster(int rNCluster)

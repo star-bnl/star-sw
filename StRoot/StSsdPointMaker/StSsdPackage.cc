@@ -1,3 +1,10 @@
+// $Id: StSsdPackage.cc,v 1.2 2005/03/18 14:21:44 lmartin Exp $
+//
+// $Log: StSsdPackage.cc,v $
+// Revision 1.2  2005/03/18 14:21:44  lmartin
+// missing CVS header added
+//
+
 #include "StSsdPackage.hh"
 #include <Stiostream.h>
 #include "StSsdCluster.hh"

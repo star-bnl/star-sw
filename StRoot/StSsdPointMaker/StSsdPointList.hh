@@ -1,3 +1,10 @@
+// $Id: StSsdPointList.hh,v 1.2 2005/03/18 14:19:05 lmartin Exp $
+//
+// $Log: StSsdPointList.hh,v $
+// Revision 1.2  2005/03/18 14:19:05  lmartin
+// missing CVS header added
+//
+
 #ifndef STSSDPOINTLIST_HH
 #define STSSDPOINTLIST_HH
 
