@@ -105,6 +105,7 @@ sub parse_log($) {
   my $jrun = "Run not completed";
   my $segmentation_violation;
   my $break_buss;
+  my $Err_messg = "none";
   my $previous_line = "";
   #----------------------------------------------------------
 
@@ -157,7 +158,7 @@ sub parse_log($) {
   my $avr_ftpc_hits;
   my @word_tr;
   my $i;
-  my $last_maker;
+  my $last_maker = 0;
   my @size_line;
   my $ij = 0;
   my @line_tag;
@@ -271,13 +272,13 @@ sub parse_log($) {
  }   
     # check if job crashed due to break_buss_error
      if($line =~ /bus error/) {
-         $break_buss = "Break bus error";
+         $Err_messg = "Break bus error";
        }
 
 
     # check if job crashed due to segmentation violation
     if ($line =~ /segmentation violation/) {
-             $segmentation_violation = "segmentation violation";
+             $Err_messg = "segmentation violation";
     }
 
     $previous_line = $line;
@@ -287,12 +288,35 @@ sub parse_log($) {
           
           $jrun = "Done";      
 	}
-}
+     }
+##----------------------------------------------------------------------------
+# parse error log file
 
+   my @err_out;
+   my $mline;
+   my $jLog_err;
+ 
+    $jLog_err = $filename;
+    $jLog_err =~ s/log/err/g;
+  print "Error file = ",$jLog_err, "\n";
+     @err_out = `tail -100 $jLog_err`;
+  foreach $mline (@err_out){
+          chop $mline;
+       if ( $mline =~ /No space left on device/)  {
+        $Err_messg = "No space left on device";
+     } 
+	elsif ($mline =~ /Error calling module/) {
+       chop $mline;  
+      $Err_messg = $mline;
+      }
+       if ( $mline =~ /Assertion/ & $mline =~ /failed/)  {
+        $jrun = "Assertion failed";
+     } 
+   }
+  
   #--------------------------------------------------------------------------
    $num_event = $no_event;   
-
-
+ 
   # output header info
   
   print '=' x 80, "\n";
@@ -319,18 +343,8 @@ sub parse_log($) {
    print '-' x 80, "\n"; 
 
    
-   if ( defined($segmentation_violation) ){
-
-   print( "***Segmentation violation found:  ", "***\n");
-
- }
-  if ( defined($break_buss) ){
-
-   print( "***Break *** buss error:  ", "\n");
-
- } 
-
-  print("Job status:  ", $jrun, " \n");
+   print("Job status:  ", $jrun, " \n");
+   print("Error message:  ", $Err_messg, " \n");
 
    print '=' x 80, "\n";
    print(">>>>>>>>>> Maker's tag <<<<<<<<<<\n");
@@ -339,13 +353,13 @@ sub parse_log($) {
    for ($i = 0; $i <= $last_tag_line; $i++){
    print $line_tag[$i], "\n";
  }
-  if ( !defined($segmentation_violation) and !defined ($break_buss))  {
+#  if ( !defined($segmentation_violation) and !defined ($break_buss))  {
      
    print '=' x 80, "\n";
    print(">>> Average number of tracks, vertices and hits found <<<\n");
    print '=' x 80, "\n";
 
-  if( $num_event ne 0 )  {
+  if( $num_event ne 0 & $last_maker ne 0)  {
    $avr_tracks    = $tot_tracks/$num_event;
    $avr_vertices  = $tot_vertices/$num_event;
    $avr_tpc_hits  = $tot_tpc_hits/$num_event;
@@ -377,7 +391,8 @@ sub parse_log($) {
    printf("Package   %s     Memory size =  %10.3f  MB; \n", $maker_name[$i], $msize_aver[$i]);
     }
   }
-}
+#}
+
  #--------------------------------------------------------------------------
   
  # parse end of file
