@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.17 2002/04/18 23:22:41 jeromel Exp $
+ * $Id: StEnumerations.h,v 2.18 2004/04/29 14:05:00 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.18  2004/04/29 14:05:00  fisyak
+ * Add track finding method Id defines (for StTrackMethod.inc and sync. with StEnumerations)
+ *
  * Revision 2.17  2002/04/18 23:22:41  jeromel
  * Changes for SVT 2 tables scheme.
  *
@@ -105,17 +108,18 @@ enum StTrackModel {helixModel, kalmanModel};
 /*!
  * \enum StTrackFinderMethod 
  */
-enum StTrackFinderMethod { svtGrouper = 4,                             /**< enum value svtGrouper  */
-                           svtStk,                                     /**< enum value svtStk */
-                           svtOther,                                   /**< enum value svtOther */
-                           tpcStandard,                                /**< enum value tpcStandard */
-                           tpcOther,                                   /**< enum value tpcOther */
-                           ftpcConformal,                              /**< enum value ftpcConformal */
-                           ftpcCurrent,                                /**< enum value ftpcCurrent */
-                           svtTpcSvm,                                  /**< enum value svtTpcSvm */
-                           svtTpcEst,                                  /**< enum value svtTpcEst */
-                           svtTpcPattern,
-                           l3Standard};
+enum StTrackFinderMethod { svtGrouper    = ksvtGrouperIdentifier,    
+                           svtStk        = ksvtStkIdentifier,       
+                           svtOther      = ksvtOtherIdentifier,     
+                           tpcStandard   = ktpcStandardIdentifier,  
+                           tpcOther      = ktpcOtherIdentifier,     
+                           ftpcConformal = kftpcConformalIdentifier,
+                           ftpcCurrent   = kftpcCurrentIdentifier,  
+                           svtTpcSvm     = ksvtTpcSvmIdentifier,    
+                           svtTpcEst     = ksvtTpcEstIdentifier,    
+                           svtTpcPattern = ksvtTpcPatternIdentifier,
+                           l3Standard    = kl3StandardIdentifier   
+};
 
 //
 // The fitter methods are defined in

@@ -28,6 +28,7 @@
 **   Line 2 Step                  4
 **   Line 3D                      5
 **   L3 Fitter                    6
+**   ITTF Kalman Fit              7
 **   Spare                    upto 15 (total of 4 bits)
 */
 
@@ -41,4 +42,19 @@
 #define kLine3DIdentifier               5
 #define kL3FitIdentifier                6
 #define kITKalmanFitIdentifier          7
+
+/* numbering schem for track finding method has to be in synch. with StEn*/
+#define ksvtGrouperIdentifier      4                           /**< enum value svtGrouper  */
+#define ksvtStkIdentifier          5                           /**< enum value svtStk */
+#define ksvtOtherIdentifier        6                           /**< enum value svtOther */
+#define ktpcStandardIdentifier     7                           /**< enum value tpcStandard */
+#define ktpcOtherIdentifier        8                           /**< enum value tpcOther */
+#define kftpcConformalIdentifier   9                           /**< enum value ftpcConformal */
+#define kftpcCurrentIdentifier    10                           /**< enum value ftpcCurrent */
+#define ksvtTpcSvmIdentifier      11                           /**< enum value svtTpcSvm */
+#define ksvtTpcEstIdentifier      12                           /**< enum value svtTpcEst */
+#define ksvtTpcPatternIdentifier  13
+#define kl3StandardIdentifier     14
+
+
 #endif
