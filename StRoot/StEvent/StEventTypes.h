@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.10 2000/08/17 00:12:55 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.11 2001/03/14 03:50:42 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.11  2001/03/14 03:50:42  ullrich
+ * Added StPsd.h
+ *
  * Revision 2.10  2000/08/17 00:12:55  ullrich
  * Added StTptTrack.h
  *
@@ -78,6 +81,7 @@
 #include "StMwcTriggerDetector.h"
 #include "StPrimaryTrack.h"
 #include "StPrimaryVertex.h"
+#include "StPsd.h"
 #include "StRichCluster.h"
 #include "StRichCollection.h"
 #include "StRichHit.h"
