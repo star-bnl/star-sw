@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.5 2000/06/07 11:16:29 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.6 2000/06/13 14:25:56 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.6  2000/06/13 14:25:56  oldi
+// Changed cout to gMessMgr->Message().
+// Printed output changed (slightly).
+//
 // Revision 1.5  2000/06/07 11:16:29  oldi
 // Changed 0 pointers to NULL pointers.
 // Function HandleSplitTracks() called.
@@ -23,7 +27,7 @@
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 07.06.2000
+//----------Last Modified: 13.06.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include <iostream.h>
@@ -56,6 +60,8 @@
 #include "TClonesArray.h"
 #include "TCanvas.h"
 #include "TFile.h"
+
+#include "StMessMgr.h"
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -103,7 +109,7 @@ Int_t StFtpcTrackMaker::Init()
 Int_t StFtpcTrackMaker::Make()
 {
   // Here the real stuff happens...
-  cout << endl << "Tracking (FTPC) started..." << endl;
+  gMessMgr->Message("", "I", "OST") << "Tracking (FTPC) started..." << endm;
 
   fpt_fptpar_st *fpt_fptpar = m_fptpar->GetTable();
   St_DataSet *ftpc_data = GetDataSet("ftpc_hits");
@@ -120,7 +126,6 @@ Int_t StFtpcTrackMaker::Make()
     return kStWarn;
   }
   
-  cout<<"Using primary vertex coordinates ";
   Int_t iflag = 0;
   
   //pointer to preVertex dataset
@@ -131,9 +136,9 @@ Int_t StFtpcTrackMaker::Make()
   
   //pointer to preVertex
   St_dst_vertex  *preVtx  = (St_dst_vertex *)preVertexI("preVertex");
+  gMessMgr->Message("", "I", "OST") << "Using primary vertex coordinates "; 
   
   if (preVtx) {
-    cout<<"(preVertex): ";
     dst_vertex_st *preVtxPtr = preVtx->GetTable();
     
     for (Int_t i = 0; i <preVtx->GetNRows();i++,preVtxPtr++) {
@@ -143,19 +148,21 @@ Int_t StFtpcTrackMaker::Make()
 	fpt_fptpar->primary_vertex[1] = preVtxPtr->y;
 	fpt_fptpar->primary_vertex[2] = preVtxPtr->z;
 	iflag = 101;
+	*gMessMgr << "(preVertex): ";
       }
     }
   }
   
   if ( iflag != 101 ) {
     //    preVertex not found  - compute and store Holm's preVertex
-    cout<<"(Holm's vertex): ";
+    *gMessMgr << "(Holm's vertex): ";
 
     StFtpcVertex *vertex = new StFtpcVertex(fcl_fppoint->GetTable(), fcl_fppoint->GetNRows());
 
     if (isnan(vertex->GetZ())) {
       // handels problem if there are not enough tracks and therefore a vertex cannot be found
-      cout << "No vertex found! Ftpc tracking stopped!" << endl;
+      *gMessMgr << endm;
+      gMessMgr->Error() << "No vertex found! Ftpc tracking stopped!" << endm;
       delete vertex;
       return kStWarn;
     }
@@ -165,7 +172,7 @@ Int_t StFtpcTrackMaker::Make()
       if (!preVtx) {
 	// no preVertex table exists
 	// create preVertex table with 1 row
-	preVtx = new St_dst_vertex("preVertex",1);
+	preVtx = new St_dst_vertex("preVertex", 1);
 	preVtx->SetNRows(1);
 	AddData(preVtx);
       }
@@ -198,8 +205,12 @@ Int_t StFtpcTrackMaker::Make()
     delete vertex;
   }
   
-  cout << fpt_fptpar->primary_vertex[0] << ", " << fpt_fptpar->primary_vertex[1] << ", " << fpt_fptpar->primary_vertex[2] << "." << endl;
+  *gMessMgr << " " << fpt_fptpar->primary_vertex[0] << ", " << fpt_fptpar->primary_vertex[1] << ", " << fpt_fptpar->primary_vertex[2] << "." << endm;
   
+  if (TMath::Abs(fpt_fptpar->primary_vertex[2]) > 50.) {
+    gMessMgr->Message("Found vertex is more than 50 cm off from z = 0!", "W", "OTS");
+  }
+
   Double_t vertexPos[3] = {fpt_fptpar->primary_vertex[0], fpt_fptpar->primary_vertex[1], fpt_fptpar->primary_vertex[2]};
   StFtpcConfMapper *tracker = new StFtpcConfMapper(fcl_fppoint, vertexPos, Debug());
   
@@ -236,13 +247,13 @@ Int_t StFtpcTrackMaker::Make()
   
   // dE/dx calculation
   if (Debug()) {
-    cout << "start fde" << endl;
+    gMessMgr->Message("", "I", "OST") << "dE/dx module (fde) started" << endm;
   }
 
   Int_t Res_fde = fde(fcl_fppoint, fpt_fptrack, m_fdepar);
   
   if(Debug()) {
-    cout << "finish fde: " << Res_fde << endl;
+    gMessMgr->Message("", "I", "OST") << "dE/dx module finished: " << Res_fde << endm;
   }
 
   /*
@@ -259,30 +270,30 @@ Int_t StFtpcTrackMaker::Make()
   */
 
   /*
-    // Track Evaluator
-    
-    // Uncomment this block to get information about the quality 
-    // of the found tracks in comparison to the simulated input event.
-    
-    St_DataSet *geant = GetInputDS("geant");  
-    
-    StFtpcTrackEvaluator *eval = new StFtpcTrackEvaluator(geant, ftpc_data, tracker->GetVertex(), tracker->GetClusters(), tracker->GetTracks(), "ftpc_evaluator.root", "UPDATE");
-    eval->Info();
-    eval->FillHitsOnTrack();
-    eval->FillParentHistos();
-    eval->FillMomentumHistos();
-    eval->FillEventHistos();
-    eval->FillCutHistos();
-    eval->DivideHistos();
-    eval->WriteHistos();
-    
-    // Uncomment the following line if you want to 'see' the information (split tracks, unclean tracks, ...) 
-    // evaluated by the TrackEvaluator.  
-    //eval->ShowTracks();
-    
-    delete eval;
+  // Track Evaluator
+  
+  // Uncomment this block to get information about the quality 
+  // of the found tracks in comparison to the simulated input event.
+  
+  St_DataSet *geant = GetInputDS("geant");  
+  
+  StFtpcTrackEvaluator *eval = new StFtpcTrackEvaluator(geant, ftpc_data, tracker->GetVertex(), tracker->GetClusters(), tracker->GetTracks(), "ftpc_evaluator.root", "RECREATE");
+  eval->Info();
+  eval->FillHitsOnTrack();
+  eval->FillParentHistos();
+  eval->FillMomentumHistos();
+  eval->FillEventHistos();
+  eval->FillCutHistos();
+  eval->DivideHistos();
+  eval->WriteHistos();
+  
+  // Uncomment the following line if you want to 'see' the information (split tracks, unclean tracks, ...) 
+  // evaluated by the TrackEvaluator.  
+  eval->ShowTracks();
+  
+  delete eval;
   */
-
+  
   delete tracker;
 
   /*
@@ -303,7 +314,7 @@ Int_t StFtpcTrackMaker::Make()
   */
 
   MakeHistograms();
-  cout << "Tracking (FTPC) completed." << endl << endl;
+  gMessMgr->Message("", "I", "OST") << "Tracking (FTPC) completed." << endm;
 
   return kStOK;;
 }
@@ -340,9 +351,9 @@ void StFtpcTrackMaker::PrintInfo()
 {
   // prints some information
 
-  cout << "******************************************************************" << endl;
-  cout << "* $Id: StFtpcTrackMaker.cxx,v 1.5 2000/06/07 11:16:29 oldi Exp $ *" << endl;
-  cout << "******************************************************************" << endl;
+  gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.6 2000/06/13 14:25:56 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
     StMaker::PrintInfo();
