@@ -14,9 +14,13 @@ C                     **                 **
 C
 C----------------------------------------------------------------------
 C
-        INTEGER FUNCTION TCL_Make_Clusters( pad_plane_h, pad_plane,
-     1     tppad_h, tppad, tppixel_h, tppixel, tpmcpix_h, 
-     1     tpmcpix, tpcluster_h, tpcluster, tpseq_h, tpseq )
+        INTEGER FUNCTION TCL_Make_Clusters(
+     +     pad_plane_h, pad_plane,
+     +     tppad_h, tppad,
+     +     tppixel_h, tppixel,
+     +     tpmcpix_h, tpmcpix,
+     +     tpcluster_h, tpcluster,
+     +     tpseq_h, tpseq )
 
 	IMPLICIT NONE
 
@@ -269,7 +273,7 @@ c
 #include "PAM.inc"
 #include "tpg_pad_plane.inc"
 	RECORD /TABLE_HEAD_ST/PAD_PLANE_H
-	RECORD /PAD_PLANE_ST/PAD_PLANE(*)
+	RECORD /tpg_PAD_PLANE_ST/PAD_PLANE(*)
 #include "tss_tppad.inc"
 	RECORD /TABLE_HEAD_ST/TPPAD_H
 	RECORD /TSS_TPPAD_ST/TPPAD(*)
@@ -361,7 +365,6 @@ c see if it is worth it first...
 
 	IF ( .NOT. TCL_Get_Row_Seq
      1                 ( Sector, Row, Nrowseqs_max
-     1                 , pad_plane_h, pad_plane
      1	               , tppad_h, tppad, tppixel_h, tppixel, tpmcpix_h
      1	               , tpmcpix
      1	               , Nrowseqs, Ipix, Ipad, Itlo, Ithi, Itid
@@ -537,7 +540,6 @@ C----------------------------------------------------------------------
 C
         LOGICAL FUNCTION  TCL_Get_Row_Seq
      1                 ( Sector, Row, Nseqs_max
-     1                 , pad_plane_h, pad_plane
      1	               , tppad_h, tppad, tppixel_h, tppixel, tpmcpix_h
      1	               , tpmcpix
      1	               , Nseqs, Ipix, Ipad, Itlo, Ithi, Itid, padptr ) 
@@ -597,9 +599,6 @@ c		     properly index pixel pointer if there are more than
 c		     one sequence on a pad
 c
 #include "PAM.inc"
-#include "tpg_pad_plane.inc"
-        RECORD      /TABLE_HEAD_ST/             pad_plane_h
-        RECORD       /PAD_PLANE_ST/            pad_plane(*)
 #include "tss_tppad.inc"
         RECORD      /TABLE_HEAD_ST/                 tppad_h
         RECORD       /TSS_TPPAD_ST/                tppad(*)
