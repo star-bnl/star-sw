@@ -183,7 +183,7 @@ void StMessageManager::BuildMessage(const char* mess, const char* type,
     typeN = 1;                                // type number for Info is 1
   }
   gMessage = new StMessage(mess, curType, curOpt);
-  if ((!remember) || (gMessage->GetOption() & kMessOptDash)) {
+  if ((remember) || (gMessage->GetOption() & kMessOptDash)) {
     if (gMessage) delete gMessage;            // not keeping in memory
     gMessage = endm;
   } else {
@@ -438,7 +438,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.41 2004/04/15 21:28:02 fine Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.42 2004/09/16 02:25:54 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
@@ -451,8 +451,11 @@ static StMessMgr* temp=StMessageManager::Instance();
 
 
 //_____________________________________________________________________________
-// $Id: StMessageManager.cxx,v 1.41 2004/04/15 21:28:02 fine Exp $
+// $Id: StMessageManager.cxx,v 1.42 2004/09/16 02:25:54 perev Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.42  2004/09/16 02:25:54  perev
+// typo fixed, memory leak off
+//
 // Revision 1.41  2004/04/15 21:28:02  fine
 // Remove the redundant StMessageManager RootCint dictionary. User shoudl use the base StMessMgr class anyway
 //
