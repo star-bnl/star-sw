@@ -281,12 +281,18 @@ void  St_DataSet::SetParent(St_DataSet *parent){
 //______________________________________________________________________________
 void St_DataSet::SetWrite()
 {
-  St_DataSet *set = new St_DataSet(GetName());
+  St_DataSet *mothersav = GetParent();
+  SetParent();
+  this->Write();
+  SetParent(mothersav);
+#if 0
+  set = new St_DataSet(GetName());
   set->Update(this);
   set->Write();
   this->Delete();
   this->Update(set);
   delete set;
+#endif
 }
 //______________________________________________________________________________
 void St_DataSet::Shunt(St_DataSet *dataset)
