@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.57 2000/02/03 19:34:40 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.58 2000/02/29 22:25:52 lasiuk Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.58  2000/02/29 22:25:52  lasiuk
+// added FREO and QUAR to Rich hits
+//
 // Revision 1.57  2000/02/03 19:34:40  fisyak
 // Clean up St_geant_Maker::Init, move its parameters to ctor
 //
@@ -389,7 +392,7 @@ Int_t St_geant_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Make()
 {
-    Int_t    nhits,nhit1,nhit2,link=1,ide=1,npart,irun,ievt,iwtfl;
+    Int_t    nhits,nhit1,nhit2,nhit3,nhit4,link=1,ide=1,npart,irun,ievt,iwtfl;
     Float_t  vert[4],weigh;
 
     Char_t   cgnam[20];
@@ -502,7 +505,10 @@ Int_t St_geant_Maker::Make()
 
     geant3->Gfnhit("RICH","RGAP", nhit1);
     geant3->Gfnhit("RICH","RCSI", nhit2);
-    nhits=nhit1+nhit2;
+    geant3->Gfnhit("RICH","FREO", nhit3);
+    geant3->Gfnhit("RICH","QUAR", nhit4);
+    cout << nhit1 << " " << nhit2 << " " << nhit3 << " " << nhit4 << endl;
+    nhits=nhit1+nhit2+nhit3+nhit4;
     if (nhits>0) {
       St_g2t_rch_hit *g2t_rch_hit = new St_g2t_rch_hit("g2t_rch_hit",nhits);
       m_DataSet->Add(g2t_rch_hit);
