@@ -162,6 +162,7 @@ public:
   double pitchAngle() const;
   double crossAngle() const;
   double sinCrossAngle() const;
+  double pathlength() const;
   double getDedx() const;
   double nice(double angle) const;
   /// Return center of helix circle in global coordinates
@@ -427,12 +428,20 @@ inline StThreeVector<double> StiKalmanTrackNode::getGlobalPoint() const
   return StThreeVector<double>(_cosAlpha*_x-_sinAlpha*_p0, _sinAlpha*_x+_cosAlpha*_p0, _p1);
 }
 
-inline double StiKalmanTrackNode::getDedx() const
+inline double StiKalmanTrackNode::pathlength() const
 {
   const StiDetector * det = _hit->detector();
-  if (!det) return -1.;
+  if (!det) return -1.; 
   double thickness = det->getShape()->getThickness();
-  return _hit->getEloss()*sqrt(1.+_p4*_p4)/thickness/_cosCA;
+  return thickness*_cosCA/sqrt(1.+_p4*_p4);
+}
+
+inline double StiKalmanTrackNode::getDedx() const
+{
+  double de=_hit->getEloss();
+  double dx=pathlength();
+  if(dx>0 && de>0) return de/dx;
+  return -1;
 }
 
 inline const StiDetector * StiKalmanTrackNode::getDetector() const 
