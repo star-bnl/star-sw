@@ -1,5 +1,8 @@
-// $Id: StArray.cxx,v 1.5 1999/05/04 22:45:22 perev Exp $
+// $Id: StArray.cxx,v 1.6 1999/05/10 19:19:35 fisyak Exp $
 // $Log: StArray.cxx,v $
+// Revision 1.6  1999/05/10 19:19:35  fisyak
+// Add Valery's update for Browser
+//
 // Revision 1.5  1999/05/04 22:45:22  perev
 // Default ctr for StArray
 //
@@ -12,6 +15,7 @@
 #include <assert.h>
 #include "StArray.h"
 #include "TDatime.h"
+#include "TBrowser.h"
 
 TObjArray *StRegistry::fReg = 0;
 
@@ -100,6 +104,30 @@ const TIterator *StObjArray::Begin() const
   if (iter) delete iter;
   iter =  MakeIterator();
   return iter;
+}
+//______________________________________________________________________________
+void StObjArray::Browse(TBrowser *b)
+{
+   // Browse this collection (called by TBrowser).
+   // If b=0, there is no Browse call TObject::Browse(0) instead.
+   //         This means TObject::Inspect() will be invoked indirectly
+ 
+   const maxBrowsable =  10;
+   TIter next(this);
+   TObject *obj;
+    
+   if (b) {
+      Int_t counter = 0;
+      Int_t totalSize = GetSize();
+      while ((obj = next()) && ++counter <  maxBrowsable ) {
+          TString browseName = obj->GetName();
+          char buffer[10];
+          sprintf(buffer,"_%d_of_%d",counter,totalSize);
+          b->Add(obj,buffer);
+      }
+   }
+   else
+      TObject::Browse(b);
 }
 //______________________________________________________________________________
 const TIterator *StObjArray::End() const
