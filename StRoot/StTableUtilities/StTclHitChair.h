@@ -40,25 +40,25 @@ class StTclHitChair : public StHitChair {
     virtual void    SetZ       (Float_t z,Int_t i)     {fTab_tcl[i].z=z;}
 //===============================================
     Bool_t   IsValid(Int_t i)         const;
-    static Long_t   GetTrackFactor(); 
+    static Int_t    GetTrackFactor(); 
     static UShort_t GetSectorFactor(); 
     static UShort_t UpckSec(UShort_t row);
     static UShort_t UpckRow(UShort_t row);
-    static Long_t   UpckTrackId (Long_t track);
-    static Long_t   UpckPosition(Long_t track);
-    static Long_t   PckTrack(Long_t trackId, Long_t position);
+    static Int_t    UpckTrackId (Int_t  track);
+    static Int_t    UpckPosition(Int_t  track);
+    static Int_t    PckTrack(Int_t  trackId, Int_t  position);
     static UShort_t PckRow(UShort_t sector,UShort_t row);
 
     tcl_tphit_st *GetTable(Int_t i=0) const;
     tcl_tphit_st &operator[](Int_t i){return *GetTable(i);}
 
     UShort_t SectorRow(Int_t i,UShort_t sector,UShort_t row);
-    Long_t IdPosition(Int_t i, Long_t track_Id, Long_t position);
+    Int_t  IdPosition(Int_t i, Int_t  track_Id, Int_t  position);
 
     ClassDef(StTclHitChair,0)
 };
 
-inline Long_t   StTclHitChair::GetTrackFactor()         
+inline Int_t    StTclHitChair::GetTrackFactor()         
                 { return 1000;}
 
 inline UShort_t StTclHitChair::GetSectorFactor()        
@@ -70,13 +70,13 @@ inline UShort_t StTclHitChair::UpckSec(UShort_t row)
 inline UShort_t StTclHitChair::UpckRow(UShort_t row)    
                 { return row  - UpckSec(row)*GetSectorFactor() ;}
 
-inline Long_t   StTclHitChair::UpckTrackId(Long_t track)
+inline Int_t    StTclHitChair::UpckTrackId(Int_t  track)
                 { return track/GetTrackFactor();}
 
-inline Long_t   StTclHitChair::UpckPosition(Long_t track)
+inline Int_t    StTclHitChair::UpckPosition(Int_t  track)
                 { return track - UpckTrackId(track)*GetTrackFactor();}
 
-inline Long_t   StTclHitChair::PckTrack(Long_t trackId, Long_t position)
+inline Int_t    StTclHitChair::PckTrack(Int_t  trackId, Int_t  position)
                 { return trackId*GetTrackFactor() + position; }
 
 inline UShort_t StTclHitChair::PckRow(UShort_t sector,UShort_t row)
@@ -95,7 +95,7 @@ inline Bool_t StTclHitChair::IsValid(Int_t i)  const {return (fTab_tcl[i].z)*(Se
 inline UShort_t StTclHitChair::SectorRow(Int_t i, UShort_t sector,UShort_t row)
 { return fTab_tcl[i].row = PckRow(sector,row); }
 
-inline Long_t StTclHitChair::IdPosition(Int_t i, Long_t trackId, Long_t position)
+inline Int_t  StTclHitChair::IdPosition(Int_t i, Int_t  trackId, Int_t  position)
 {return fTab_tcl[i].track = PckTrack(trackId,position);}
 
 #endif

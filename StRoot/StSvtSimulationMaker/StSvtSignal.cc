@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSignal.cc,v 1.1 2000/11/30 20:47:49 caines Exp $
+ * $Id: StSvtSignal.cc,v 1.2 2001/04/25 19:04:38 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSignal.cc,v $
+ * Revision 1.2  2001/04/25 19:04:38  perev
+ * HPcorrs
+ *
  * Revision 1.1  2000/11/30 20:47:49  caines
  * First version of Slow Simulator - S. Bekele
  *
@@ -43,10 +46,9 @@ StSvtSignal::StSvtSignal()
  mPeakSignal = 0.0;
  mMinUnderShoot = 0.0;
 
- GAP_TWIDTH = 36*pow(10,-6);
+ GAP_TWIDTH = 36*1.e-6;
 
- for(int i = 0; i < 128; i++)
-   mSignal[i] = 0.0;
+ memset(mSignal,0,sizeof(mSignal[0])*128);
 
  mPasaGain = 0.0;
  mPasaMax = 0.0;
@@ -352,8 +354,8 @@ void StSvtSignal::peakingTime()
   double t = 0.0;  
  // double tStep = 0.04;
  double tStep = mTimeBinSize*0.001;     //microseconds
- double pasaFunValue = -1.0*pow(10,20);
- mPasaMax = -2.0*pow(10,20);
+ double pasaFunValue = -1.e20;
+ mPasaMax = -2.0e20;
 
  do {
      mPasaMax = pasaFunValue;
@@ -423,7 +425,7 @@ void StSvtSignal::halfWidthAtHalfMax()
 
 void StSvtSignal::normPasaConst()
 {
- double s1 = 9.5*pow(10,-6)/mPasaMax;
+ double s1 = 9.5*1.e-6/mPasaMax;
  
  for(int i = 0; i <= 4; i++)
     mPasa[i] = s1*mPasa[i];
@@ -435,7 +437,7 @@ void StSvtSignal::normPasaConst()
 
 void StSvtSignal::arrays()
 {
- mArray1[0] = 2.46196981473530512524*pow(10,-10);
+ mArray1[0] = 2.46196981473530512524e-10;
  mArray1[1] = 0.564189564831068821977;
  mArray1[2] = 7.46321056442269912687;
  mArray1[3] = 48.6371970985681366614;
@@ -682,7 +684,7 @@ double StSvtSignal::analConvInt(double tim, double sigmat, double tc)
    Erra = prob2(ta,sigmat);  expa = exp(-a*(tim - tc - a*(sigmat2*0.5)));
 
 
-   gaus = (sigmat/sqrt(2*acos(-1)))*exp(-0.5*ta2/sigmat2);
+   gaus = (sigmat/sqrt(2*M_PI))*exp(-0.5*ta2/sigmat2);
 
   //double c1d1 = expb*Errb;
   //double c2d2 = expa*Erra;
@@ -739,7 +741,7 @@ double StSvtSignal::gausInput(double tim)
 {
   double tPr2, PI,Exp1;
   
-  PI = acos(-1);
+  PI = M_PI;
  //cout<<"tim = "<<tim<<endl;
  // 1.0/sqrt(2*PI) = 0.39894228040143;
 
@@ -782,7 +784,7 @@ double StSvtSignal::prob1(double anOrTimeDiff , double  sigma)
 {
    double num = 0;
  
-   num = anOrTimeDiff/(sqrt(2)*sigma);
+   num = anOrTimeDiff/(M_SQRT2*sigma);
 
    double fraction = 0.5*(1 + erf(num));
 
@@ -795,9 +797,9 @@ double StSvtSignal::freq(double num)
  double frq = 0;
 
  if(num > 0.0)
-  frq = 0.5 + 0.5*erfc( num/sqrt(2));
+  frq = 0.5 + 0.5*erfc( num/M_SQRT2);
  else
-  frq =  0.5* erfc(num/sqrt(2));
+  frq =  0.5* erfc(num/M_SQRT2);
 
  return frq;
 
@@ -820,7 +822,7 @@ double StSvtSignal::prob2(double num , double  sigma)
       if(j==0)
        {
         mFactorial = 1.0;
-        mPowerTerm = fabs(num)/(sqrt(2)*sigma);
+        mPowerTerm = fabs(num)/(M_SQRT2*sigma);
         mPowerTermSquared = mPowerTerm*mPowerTerm;
         mCountTerm = mPowerTerm;
        }
@@ -841,7 +843,7 @@ double StSvtSignal::prob2(double num , double  sigma)
     
      }
 
-     mErrf = (2.0/sqrt(acos(-1)))*mSum;
+     mErrf = (2.0/sqrt(M_PI))*mSum;
 
      if(num < 0.0)
        mErrf = (-1.0)*mErrf;

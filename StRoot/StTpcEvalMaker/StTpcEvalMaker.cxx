@@ -1,6 +1,9 @@
 //-----------------------------------------------------------------------
-// * $Id: StTpcEvalMaker.cxx,v 1.5 2001/04/06 22:27:20 flierl Exp $
+// * $Id: StTpcEvalMaker.cxx,v 1.6 2001/04/25 19:08:04 perev Exp $
 // * $Log: StTpcEvalMaker.cxx,v $
+// * Revision 1.6  2001/04/25 19:08:04  perev
+// * HPcorrs
+// *
 // * Revision 1.5  2001/04/06 22:27:20  flierl
 // * add zillion of comments
 // *
@@ -69,7 +72,7 @@ using std::distance;
 #include "StTpcEvalEvent.h"
 #include "StTpcEvalHistograms.h"
 
-static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.5 2001/04/06 22:27:20 flierl Exp $";
+static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.6 2001/04/25 19:08:04 perev Exp $";
 ClassImp(StTpcEvalMaker)
 
 //-------------------------------------------------
@@ -237,17 +240,17 @@ void StTpcEvalMaker::HitIteration()
     unsigned int nAssociatedHits[45];
     unsigned int nReconstructedHits[45];
     unsigned int nGeneratedHits[45];
-    for (unsigned int i = 0; i < 45; i++) 
+    {for (unsigned int i = 0; i < 45; i++) 
 	{
 	    nAssociatedHits[i] = 0;
 	    nReconstructedHits[i] = 0;
 	    nGeneratedHits[i] = 0;
-	}
+	}}
 
     /////
     // loop over mc hits    
     /////
-    for (unsigned int isec = 0; isec < mcTpcHitCollection->numberOfSectors(); isec++) 
+    {for (unsigned int isec = 0; isec < mcTpcHitCollection->numberOfSectors(); isec++) 
 	{
 	    for (unsigned int irow = 0; irow < mcTpcHitCollection->sector(isec)->numberOfPadrows(); irow++) 
 		{
@@ -297,7 +300,7 @@ void StTpcEvalMaker::HitIteration()
 			    histograms.matchesToRcHits->Fill(nMatches);
 			}
 		}
-	}// loop over mc hits
+	}}// loop over mc hits
     
     ////
     // loop over rc hits    
@@ -311,7 +314,7 @@ void StTpcEvalMaker::HitIteration()
 	}
   
     // loop over rc hits
-    for (unsigned int isec=0; isec<rcTpcHitCollection->numberOfSectors(); isec++) 
+    {for (unsigned int isec=0; isec<rcTpcHitCollection->numberOfSectors(); isec++) 
 	{
 	    for (unsigned int irow=0;irow<rcTpcHitCollection->sector(isec)->numberOfPadrows(); irow++) 
 		{
@@ -356,7 +359,7 @@ void StTpcEvalMaker::HitIteration()
 			    histograms.matchesToMcHits->Fill(nMatches);
 			}
 		}
-	} // loop over rc hits
+	}} // loop over rc hits
     
     
     ///
@@ -365,7 +368,7 @@ void StTpcEvalMaker::HitIteration()
     float HitEfficiency = 0 ;
     float HitPurity = 0 ;
 
-    for (unsigned int i = 0; i < 45; i++) 
+    {for (unsigned int i = 0; i < 45; i++) 
 	{
 	    // calculate efficiency and purity per padrow
 	    HitEfficiency = (float)nAssociatedHits[i] / (float)nGeneratedHits[i];
@@ -373,7 +376,7 @@ void StTpcEvalMaker::HitIteration()
 	    // fill histos
 	    histograms.mHitEfficiency->Fill((float)i+1, HitEfficiency);
 	    histograms.mHitPurity->Fill((float) i+1, HitPurity);
-	}
+	}}
 }
 //-----------------------------------------------------------------------
 void StTpcEvalMaker::mcTrackIteration() 
@@ -642,7 +645,7 @@ void StTpcEvalMaker::HitSeparation()
     MatchedHitPair hitPair(mStTpcDb);
  
     // loop over hits
-    for (unsigned int isec = 0; isec < mcTpcHitCollection->numberOfSectors(); isec++) 
+    {for (unsigned int isec = 0; isec < mcTpcHitCollection->numberOfSectors(); isec++) 
 	{
 	    cout << "In Sector: " << isec + 1 << endl;
 	    cout << "In Row: ";
@@ -667,7 +670,7 @@ void StTpcEvalMaker::HitSeparation()
 			}
 		}
 	    cout << " " << endl;
-	}
+	}}
     
     /////
     //  rc hits
@@ -680,7 +683,7 @@ void StTpcEvalMaker::HitSeparation()
 	    return;
 	}
     // loop over rc hits
-    for (unsigned int isec = 0; isec < rcTpcHitCollection->numberOfSectors(); isec++)
+    {for (unsigned int isec = 0; isec < rcTpcHitCollection->numberOfSectors(); isec++)
 	{
 	    cout << "In Sector: " << isec + 1 << endl;
 	    cout << "In Row: ";
@@ -706,6 +709,6 @@ void StTpcEvalMaker::HitSeparation()
 			}
 		}
 	    cout << " " << endl;
-	}
+	}}
 }
 //-----------------------------------------------------------------------

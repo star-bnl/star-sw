@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.8 2001/04/17 23:54:51 hardtke Exp $
+// $Id: StTpcT0Maker.cxx,v 1.9 2001/04/25 19:08:33 perev Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.9  2001/04/25 19:08:33  perev
+// HPcorrs
+//
 // Revision 1.8  2001/04/17 23:54:51  hardtke
 // add z Vertex contraint -- default to +-40cm
 //
@@ -146,7 +149,7 @@ Int_t StTpcT0Maker::Make(){
     St_dst_vertex *vert = (St_dst_vertex *) dsiter.Find("vertex");
     if (!vert)  return kStErr;
     dst_vertex_st *sth = vert->GetTable();
-    for (int ij=0;ij<vert->GetNRows();ij++,sth++){
+    {for (int ij=0;ij<vert->GetNRows();ij++,sth++){
      if(sth->iflag==1&&sth->vtx_id==kEventVtxId){
        zVertexWest = sth->z;
        yVertexWest = sth->y;
@@ -154,7 +157,7 @@ Int_t StTpcT0Maker::Make(){
        multWest = (float)(sth->n_daughters);
        break;    // found primary vertex
      }    
-    }
+    }}
 
   tcl->Clear();
   GetMaker("tpc_tracks")->Clear();
@@ -182,7 +185,7 @@ Int_t StTpcT0Maker::Make(){
     St_dst_vertex *vert1 = (St_dst_vertex *) dsiter1.Find("vertex");
     if (!vert1)  return kStErr;
     dst_vertex_st *sth1 = vert1->GetTable();
-    for (int ij=0;ij<vert1->GetNRows();ij++,sth1++){
+    {for (int ij=0;ij<vert1->GetNRows();ij++,sth1++){
      if(sth1->iflag==1&&sth1->vtx_id==kEventVtxId){
        zVertexEast = sth1->z;
        yVertexEast = sth1->y;
@@ -190,7 +193,7 @@ Int_t StTpcT0Maker::Make(){
        multEast = (float)(sth1->n_daughters);
        break;    // found primary vertex
      }    
-    }
+    }}
 
     if (zVertexEast>-999&&zVertexWest>-999&&zVertexEast>zVertexMin&&zVertexEast<zVertexMax){
       t0current = (zVertexEast-zVertexWest)/(2*dvel_assumed) + t0guess;
@@ -255,7 +258,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.8 2001/04/17 23:54:51 hardtke Exp $\n");
+  printf("* $Id: StTpcT0Maker.cxx,v 1.9 2001/04/25 19:08:33 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();

@@ -50,8 +50,8 @@ double StSvtHybridNoise::prob(double sigma,  double threshold)
 
  double num = 0, prob = 0;
 
-   num = threshold/(sqrt(2)*sigma);
-   prob = 0.5*(1 - erf(num));
+   num = threshold/(M_SQRT2*sigma);
+   prob = 0.5*(1. - erf(num));
 
    return prob;
  }
@@ -60,8 +60,8 @@ double StSvtHybridNoise::maxDistValue(double sigma ,double threshold)
 {
  double num = 0, distValue = 0, coeff;
 
- num = threshold/(sqrt(2)*sigma);
- coeff = 1.0/(sigma*acos(-1));
+ num = threshold/(M_SQRT2*sigma);
+ coeff = 1.0/(sigma*M_PI);
 
  distValue = coeff*exp(-num*num);
 
@@ -74,7 +74,7 @@ double StSvtHybridNoise::countAboveThreshold(double sigma, double randNum)
 
  double count = 0;
 
- count = sigma*sqrt(2*acos(-1))*randNum;
+ count = sigma*sqrt(2*M_PI)*randNum;
  count =sigma*sqrt( -2.0*log(count));
 
  return count;
