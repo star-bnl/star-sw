@@ -6,7 +6,7 @@
 #include "StTrackPairInfo.hh"
 #include "StMcEvent/StMcTrack.hh"
 
-static const char rcsid[] = "$Id: StTrackPairInfo.cc,v 1.1.1.1 1999/06/30 21:54:36 calderon Exp $";
+static const char rcsid[] = "$Id: StTrackPairInfo.cc,v 1.2 1999/07/13 21:44:44 calderon Exp $";
 
 StTrackPairInfo::StTrackPairInfo(StMcTrack* t, unsigned int pings) 
 {

@@ -8,8 +8,8 @@
  *************************************************/
 
 #include <iostream.h>
-#include <cmath>
-
+//#include <cmath>
+#include <stdlib.h>
 //#include "TStyle.h"
 //#include "TCanvas.h"
 //#include "TH1.h"
@@ -18,7 +18,6 @@ using std::string;
 using std::vector;
 #include "StTrackPairInfo.hh"
 
-#include "StThreeVector.hh"
 //#include "StPhysicalHelixD.hh"
 #include "SystemOfUnits.h"
 #include "StChain/StChain.h"
@@ -34,6 +33,10 @@ using std::vector;
 #include "StTpcLocalHit_recon.hh"
 #include "StTrackPairInfo.hh"
 
+//#define USING_PERSISTENT
+#ifndef USING_PERSISTENT
+#include "StThreeVector.hh"
+
 #include "StEvent/StEvent.hh"
 #include "StEvent/StTpcHit.hh"
 #include "StEvent/StVecPtrTpcHit.hh"
@@ -41,6 +44,17 @@ using std::vector;
 #include "StEvent/StTrackCollection.hh"
 #include "StEvent/StVertex.hh"
 #include "StEvent/StVertexCollection.hh"
+
+#include "StEventReaderMaker/StEventReaderMaker.h"
+#else
+#include "StEvent/StEvent.h"
+#include "StEvent/StTpcHit.h"
+#include "StEvent/StGlobalTrack.h"
+#include "StEvent/StVertex.h"
+
+#include "StEventMaker/StEventMaker.h"
+#endif
+#include "StThreeVectorF.hh"
 
 #include "StMcEvent/StMcEvent.hh"
 #include "StMcEvent/StMcTpcHit.hh"
@@ -50,9 +64,7 @@ using std::vector;
 #include "StMcEvent/StMcVertex.hh"
 #include "StMcEvent/StMcVertexCollection.hh"
 #include "StEventTypes.h"
-#include "StEventReaderMaker/StEventReaderMaker.h"
-
-#include "StMcEventReaderMaker/StMcEventReaderMaker.h"
+#include "StMcEventTypes.hh"
 
 #include "StEventMaker/StEventMaker.h"
 #include "StMcEventMaker/StMcEventMaker.h"
@@ -160,16 +172,22 @@ Int_t StAssociationMaker::Finish()
     mFtpcHitResolution->SetYTitle("PHImc - PHIrec (deg)");
     
     return StMaker::Init();
+}
 
 //_________________________________________________
     cout << "AssociationMaker -- In Make()" << endl;
     
-    
+   
     //
+#ifndef USING_PERSISTENT
     rEvent = ((StEventReaderMaker*) gStChain->Maker("events"))->event();
+#else
+    //rEvent = ((StEventMaker*) gStChain->Maker("events"))->event();
+    // Get StEvent
+#endif
     if (!rEvent) cout << "No StEvent!!! " << endl;
     //
-    mEvent = ((StMcEventReaderMaker*) gStChain->Maker("MCEvent"))->currentMcEvent();
+    // Get StMcEvent
     if (!mEvent) cout << "No StMcEvent!!! " << endl;
     
     
@@ -178,6 +196,7 @@ Int_t StAssociationMaker::Finish()
     
     StSubDetector* rTpcLocal = new StSubDetector(24,45);
     cout << "Defined Tpc for rec. hits" << endl;
+    
     StTpcHitCollection* rTpcHits = rEvent->tpcHitCollection();
     cout << "Got " << rTpcHits->size() << " rec. Tpc Hits in this event" << endl;
     StTpcHitIterator riter;
@@ -185,6 +204,7 @@ Int_t StAssociationMaker::Finish()
     for (riter=rTpcHits->begin(); riter!=rTpcHits->end(); riter++){
 	rHit = *riter;
 	rTpcLocal->addHit(rHit);
+	
 	
     }
     cout << "Prepared reconstructed hits." << endl;
@@ -267,6 +287,9 @@ Int_t StAssociationMaker::Finish()
     StTrackCollection* recTracks = rEvent->trackCollection();
     StTrackIterator recTrackIter;
     StGlobalTrack* recTrack;
+#ifdef USING_PERSISTENT
+    typedef StTpcHitIterator StVecPtrTpcHitIterator;// needed because dev version was lacking it!! Yuri is fixing it
+#endif
     
     StVecPtrTpcHitIterator recHitIter;
 
@@ -323,13 +346,13 @@ Int_t StAssociationMaker::Finish()
 	// Clear the candidate vector
 	candidates.clear();
 	const StVecPtrTpcHit& recTpcHits = recTrack->tpcHits();
-	for (int i=0; i<recTpcHits.size(); i++) { // Had to put this in here because we don't have 
-	  keyHit = recTpcHits[i];                 // a const iterator for the hits of a track.  HP complains
-// 	for (recHitIter  = recTpcHits.begin();
-// 	     recHitIter != recTpcHits.end();
-// 	     recHitIter++) { // Loop over the hits of the track
+// 	for (int i=0; i<recTpcHits.size(); i++) { // Had to put this in here because we don't have 
+// 	  keyHit = recTpcHits[i];                 // a const iterator for the hits of a track.  HP complains
+	for (recHitIter  = recTpcHits.begin();
+	     recHitIter != recTpcHits.end();
+	     recHitIter++) { // Loop over the hits of the track
 	// Loop over the East FTPC hits of the track
-// 	    keyHit = *recHitIter;
+	    keyHit = *recHitIter;
 	    bounds = mTpcHitMap->equal_range(keyHit);
 		
 	    
@@ -337,7 +360,7 @@ Int_t StAssociationMaker::Finish()
 	    
 	    for (tpcHitMapIter hmIter=bounds.first; hmIter!=bounds.second; ++hmIter) {
 
-		monteCarloHit = hmIter->second;
+		monteCarloHit = (*hmIter).second;
 		trackCand = monteCarloHit->parentTrack();
 		
 		mcValueFtpcHit = (*ftpcHMIter).second;

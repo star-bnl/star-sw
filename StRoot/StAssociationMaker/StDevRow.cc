@@ -20,6 +20,7 @@ StDevRow::~StDevRow(){
 void StDevRow::addHit(const StTpcHit* hit, float xLocal, float zGlobal){
   StTpcLocalHit_recon* h = new StTpcLocalHit_recon(hit,xLocal,zGlobal);
   localHits.push_back(h);
+  
 }
 
 //________________________
