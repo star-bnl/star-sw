@@ -1,5 +1,8 @@
-// $Id: tpcdraw.C,v 1.8 1999/11/10 00:16:16 snelling Exp $
+// $Id: tpcdraw.C,v 1.9 1999/11/16 19:28:08 snelling Exp $
 // $Log: tpcdraw.C,v $
+// Revision 1.9  1999/11/16 19:28:08  snelling
+// Changed kOption to "Option" in chain->GetOption()
+//
 // Revision 1.8  1999/11/10 00:16:16  snelling
 // Removed drawing of pseudo-padrow hits for GEANT points
 //
@@ -293,10 +296,12 @@ void tpcdraw() {
    * -----------------------------------------------------------------*/
   gSystem->Load("StAnalysisUtilities");
 
-  if (chain->GetOption(kMINIDAQ)) {
+  /*
+  if (chain->GetOption("miniDAQ")) {
     chain->SetInput("BEGIN_RUN",".make/xdfin/.const/BEGIN_RUN");
     chain->SetInput("ChainFlags[kTPC]_DATA",".make/xdfin/.data/ChainFlags[kTPC]_DATA");
   }
+  */
 
   gStyle->SetCanvasColor(10);              // white
   gStyle->SetPadColor(10);                 // white
@@ -339,24 +344,24 @@ void tpcdraw() {
   pad4->Draw();
 
   pad1->cd();
-  if (chain->GetOption(kTSS) || chain->GetOption(kTRS) || chain->GetOption(kMINIDAQ) ||
-      chain->GetOption(kTDAQ)) {
+  if (chain->GetOption("tss") || chain->GetOption("trs") || 
+      chain->GetOption("miniDAQ") || chain->GetOption("TDAQ")) {
     DrawPixels("y:x","(adc>2)*adc","box");
   }
   if (DrawPixels == 0) { DrawHits("y:x","","same,scat"); }
   else { DrawHits("y:x","","scat"); }
-  if (!chain->GetOption(kMINIDAQ) && !chain->GetOption(kTDAQ)) {
+  if (!chain->GetOption("miniDAQ") && !chain->GetOption("TDAQ")) {
     DrawGeantHits("x1:x0","volume_id<2446","same,scat");
   }  
 
   pad2->cd();
-  if (chain->GetOption(kTSS) || chain->GetOption(kTRS) || chain->GetOption(kMINIDAQ) ||
-      chain->GetOption(kTDAQ)) {
+  if (chain->GetOption("tss") || chain->GetOption("trs") || 
+      chain->GetOption("miniDAQ") || chain->GetOption("TDAQ")) {
     DrawPixels("z:x","(adc>2)*adc","box");
   }
   if (DrawPixels == 0) { DrawHits("z:x","","same,scat"); }
   else { DrawHits("z:x","","scat"); }
-  if (!chain->GetOption(kMINIDAQ) && !chain->GetOption(kTDAQ)) {
+  if (!chain->GetOption("miniDAQ") && !chain->GetOption("TDAQ")) {
     DrawGeantHits("x2:x0","volume_id<2446","same,scat");
   }
   
