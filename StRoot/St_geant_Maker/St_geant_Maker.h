@@ -1,4 +1,4 @@
-// $Id: St_geant_Maker.h,v 1.11 1999/04/06 19:40:09 nevski Exp $
+// $Id: St_geant_Maker.h,v 1.12 1999/04/15 20:36:40 fine Exp $
 
 #ifndef STAR_St_geant_Maker
 #define STAR_St_geant_Maker
@@ -50,7 +50,7 @@ public:
    virtual void   SetNwPAW   (Int_t n=      0) {nwpaw   = n;} // *MENU
    virtual void   SetIwtype  (Int_t n=      0) {iwtype  = n;} // *MENU
 
-   virtual void   Work();
+   virtual St_Node *Work();
    virtual void   Call(const Char_t *name); // *MENU 
    virtual TRotMatrix *GetMatrix(float theta1, float phi1,
                                  float theta2, float phi2,
