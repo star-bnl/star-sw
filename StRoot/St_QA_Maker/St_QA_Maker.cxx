@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.84 2000/02/04 19:53:58 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.85 2000/02/07 19:49:07 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.85  2000/02/07 19:49:07  kathy
+// removed L3 trigger histograms and methods that created them - this table is no longer standard on the DST; created methods BookHistEval and MakeHistEval for geant vs reco evaluation histograms; filled geant vs reco evaluation histograms for table-based data
+//
 // Revision 1.84  2000/02/04 19:53:58  kathy
 // added 2 more histograms - for med and small range of # hits in detector
 //
@@ -291,6 +294,10 @@
 #include "tables/St_ev0_eval_Table.h"          // ev0_eval
 #include "tables/St_tpt_track_Table.h"         // l3Track
 
+// tables  from geant
+#include "tables/St_g2t_vertex_Table.h"
+
+
 // Spiros added following line on 10jan00
 // this routine is from pams/global/egr
 extern "C" {float prop_one_track( float * ,  float * , float * );}
@@ -327,6 +334,7 @@ Int_t St_QA_Maker::Make(){
 // St_QA_Maker - Make; fill histograms
     
   dst = GetDataSet("dst");
+ 
   if (dst) {
     return StQABookHist::Make();
   } else {
@@ -1240,23 +1248,6 @@ void St_QA_Maker::MakeHistKink(){
 
 
 //_____________________________________________________________________________
-void St_QA_Maker::MakeHistL3(){
-  if (Debug()) cout << " *** in St_QA_Maker - filling L3 histograms " << endl;
-
-  St_DataSetIter dstI(dst);           
-
-  St_tpt_track *pt = (St_tpt_track*) dstI["l3Track"];
-  if (pt) {
-
-    Int_t cntrows=0;
-    cntrows = pt->GetNRows();
-    m_l3_tot->Fill(cntrows);
-
-  }
-
-}
-
-//_____________________________________________________________________________
 void St_QA_Maker::MakeHistV0Eval(){
   if (Debug()) cout << " *** in St_QA_Maker - filling ev0_eval histograms " << endl;
 
@@ -1294,4 +1285,62 @@ void St_QA_Maker::MakeHistRich(){
 //_____________________________________________________________________________
 
 
+void St_QA_Maker::MakeHistEval(){
+  if (Debug()) cout << " *** in St_QA_Maker - filling geant,reco eval histograms " << endl;
+
+
+// -- get geant vtx ----------------------------------------------------
+  
+
+  St_DataSet *geant;      //! Pointer to current dataset - geant
+  geant = GetDataSet("geant");
+  if( !geant ){ 
+     cout << " St_QA_Maker::Make - No pointer to GEANT DataSet \n" << endl; 
+  }
+
+  St_DataSetIter geantI(geant);
+
+   St_g2t_vertex *geantVertex=(St_g2t_vertex *) geant->Find("g2t_vertex"); 
+  if( !geantVertex ) { 
+      cout << "St_QA_Maker::MakeHistEval - NULL pointer to St_g2t_vertex table\n"<< endl;
+      return; 
+  } 
+  if( geantVertex->GetNRows()<=0) {
+      cout << " St_QA_Maker::MakeHistEval - empty St_g2t_vertex table\n" << endl; 
+      return; 
+  } 
+
+  g2t_vertex_st *gvt=geantVertex->GetTable();
+  Float_t geantX, geantY, geantZ; 
+  geantX = gvt->ge_x[0];
+  geantY = gvt->ge_x[1];
+  geantZ = gvt->ge_x[2];
+
+
+// get reco vtx ----------------------------------------------------
+  St_DataSetIter dstI(dst);
+
+  St_dst_vertex      *vertex     = (St_dst_vertex *) dstI["vertex"];
+
+  Float_t recoX, recoY, recoZ; 
+  if (vertex) {
+    dst_vertex_st  *t   = vertex->GetTable();
+    for (Int_t i = 0; i < vertex->GetNRows(); i++,t++){
+      if (t->iflag==1 && t->vtx_id==1){       
+        recoX = t->x;
+        recoY = t->y;
+        recoZ = t->z;
+       }
+    }
+  }
+
+// fill geant,reco comparison histograms -----------------------------------
+  m_geant_reco_pvtx_x->Fill(geantX-recoX);
+  m_geant_reco_pvtx_y->Fill(geantY-recoY);
+  m_geant_reco_pvtx_z->Fill(geantZ-recoZ);
+  m_geant_reco_vtx_z_z->Fill(geantZ-recoZ,recoZ);
+
+}
+
+//_____________________________________________________________________________
 

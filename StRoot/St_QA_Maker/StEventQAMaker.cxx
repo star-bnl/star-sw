@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.27 2000/02/02 17:01:49 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.28 2000/02/07 19:49:05 kathy Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.28  2000/02/07 19:49:05  kathy
+// removed L3 trigger histograms and methods that created them - this table is no longer standard on the DST; created methods BookHistEval and MakeHistEval for geant vs reco evaluation histograms; filled geant vs reco evaluation histograms for table-based data
+//
 // Revision 1.27  2000/02/02 17:01:49  lansdell
 // changed range on phi; fixed psi vs phi histo
 //
@@ -898,13 +901,6 @@ void StEventQAMaker::MakeHistKink() {
   m_kink_tot->Fill(cntrows);
 }
 
-//_____________________________________________________________________________
-void StEventQAMaker::MakeHistL3() {
-
-  if (Debug()) cout << " *** in StEventQAMaker - filling L3 histograms " << endl;
-
-  m_l3_tot->Fill(event->softwareMonitor()->l3()->nTotalTracks);
-}
 
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistV0Eval() {
@@ -931,6 +927,15 @@ void StEventQAMaker::MakeHistRich() {
   if (Debug()) cout << " *** in StEventQAMaker - filling Rich histograms " << endl;
 
   m_rich_tot->Fill(event->softwareMonitor()->rich()->mult_rich_tot);
+}
+
+//_____________________________________________________________________________
+
+void StEventQAMaker::MakeHistEval() {
+
+  if (Debug()) cout << " *** in StEventQAMaker - filling Eval histograms " << endl;
+
+
 }
 
 //_____________________________________________________________________________

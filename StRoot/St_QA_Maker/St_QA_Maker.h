@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.37 1999/11/23 19:00:51 lansdell Exp $
+//! $Id: St_QA_Maker.h,v 1.38 2000/02/07 19:49:07 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.38  2000/02/07 19:49:07  kathy
+//! removed L3 trigger histograms and methods that created them - this table is no longer standard on the DST; created methods BookHistEval and MakeHistEval for geant vs reco evaluation histograms; filled geant vs reco evaluation histograms for table-based data
+//!
 //! Revision 1.37  1999/11/23 19:00:51  lansdell
 //! Reorganized Make() and include files (Gene)
 //!
@@ -152,9 +155,11 @@ class St_DataSet;
 
 class St_QA_Maker : public StQABookHist {
  private:
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.37 1999/11/23 19:00:51 lansdell Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.38 2000/02/07 19:49:07 kathy Exp $";
 
-  St_DataSet *dst;      //! Pointer to current dataset
+  St_DataSet *dst;        //! Pointer to current dataset - dst
+  //  St_DataSet *geant;      //! Pointer to current dataset - geant
+
   
 //------------------------------------------------------------------------
   
@@ -177,13 +182,13 @@ class St_QA_Maker : public StQABookHist {
   virtual void   MakeHistXi();
   virtual void   MakeHistPoint();
   virtual void   MakeHistKink();
-  virtual void   MakeHistL3();
   virtual void   MakeHistV0Eval();
   virtual void   MakeHistRich();
+  virtual void   MakeHistEval();
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.37 1999/11/23 19:00:51 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.38 2000/02/07 19:49:07 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(St_QA_Maker, 1)   //StAF chain virtual base class for Makers
     };
