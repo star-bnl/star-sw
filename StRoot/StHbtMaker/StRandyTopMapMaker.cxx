@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRandyTopMapMaker.cxx,v 1.2 2000/04/02 20:41:17 rcwells Exp $
+ * $Id: StRandyTopMapMaker.cxx,v 1.3 2000/04/03 20:28:10 rcwells Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRandyTopMapMaker.cxx,v $
+ * Revision 1.3  2000/04/03 20:28:10  rcwells
+ * Removed remnant Pt tag in code from StAnalysisMaker.
+ *
  * Revision 1.2  2000/04/02 20:41:17  rcwells
  * Fixed the FTPC bit check.
  *
@@ -32,15 +35,13 @@
 #include "StTrackGeometry.h"
 #include "StTrackTopologyMap.h"
 
-static const char rcsid[] = "$Id: StRandyTopMapMaker.cxx,v 1.2 2000/04/02 20:41:17 rcwells Exp $";
+static const char rcsid[] = "$Id: StRandyTopMapMaker.cxx,v 1.3 2000/04/03 20:28:10 rcwells Exp $";
 
 ClassImp(StRandyTopMapMaker)
 
 StRandyTopMapMaker::StRandyTopMapMaker(const Char_t *name) : StMaker(name)
 {
     drawinit = kFALSE;
-    theTag = 0;
-    nevents = 0;
 }
 
 StRandyTopMapMaker::~StRandyTopMapMaker() { /* noop */ }
@@ -54,7 +55,6 @@ StRandyTopMapMaker::Init()
 void
 StRandyTopMapMaker::Clear(Option_t *opt)
 {
-    delete theTag; theTag = 0;
     StMaker::Clear();
 }
 

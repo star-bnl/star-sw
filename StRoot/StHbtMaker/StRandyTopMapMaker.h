@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRandyTopMapMaker.h,v 1.1 2000/04/02 19:56:52 rcwells Exp $
+ * $Id: StRandyTopMapMaker.h,v 1.2 2000/04/03 20:28:10 rcwells Exp $
  *
  * Author: Randy Wells, Ohio State
  ***************************************************************************
@@ -12,7 +12,6 @@
 #ifndef StRandyTopMapMaker_HH
 #define StRandyTopMapMaker_HH
 #include "StMaker.h"
-#include "HighPtTag.h"
 
 class StEvent;
 class StRun;
@@ -28,19 +27,13 @@ public:
     virtual Int_t  Make();
     virtual Int_t  Finish();
     
-    HighPtTag_st* tag() {return theTag;} // Tag accessor
-    
     virtual const char *GetCVS() const
-    {static const char cvs[]="$Id: StRandyTopMapMaker.h,v 1.1 2000/04/02 19:56:52 rcwells Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="$Id: StRandyTopMapMaker.h,v 1.2 2000/04/03 20:28:10 rcwells Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
 private:
     Bool_t drawinit;
     Char_t collectionName[256];
-    
-    // Maker generates a tag
-    HighPtTag_st* theTag; //!
-    Int_t nevents;
-    
+        
     ClassDef(StRandyTopMapMaker,1)
 };
 #endif
