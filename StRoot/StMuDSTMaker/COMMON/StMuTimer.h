@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTimer.h,v 1.3 2003/10/15 17:34:17 laue Exp $
+ * $Id: StMuTimer.h,v 1.4 2004/05/02 04:10:14 perev Exp $
  *
  * Author: Thomas Ullrich, April 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMuTimer.h,v $
+ * Revision 1.4  2004/05/02 04:10:14  perev
+ * private => protected
+ *
  * Revision 1.3  2003/10/15 17:34:17  laue
  * StMuDstMaker:  Reading fixed. Delete() changed back to Clear()
  * StMuEmcCollection: Re-implemented the DeleteThis() function,
@@ -43,7 +46,7 @@ public:
     void          start();
     void          stop();
     
-private:
+protected:
     double        mStartTime;
     double        mStopTime;
     int           mIsStopped;

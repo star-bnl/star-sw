@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.h,v 1.11 2003/04/21 18:18:53 laue Exp $
+ * $Id: StMuChainMaker.h,v 1.12 2004/05/02 04:10:13 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** @class StMuChainMaker
@@ -45,7 +45,7 @@ public:
     string dirname(string);
     string buildFileName(string dir, string fileName, string extention);
 
-private:
+protected:
     static string mSQLConnection;
     TChain *mChain;
     StMuDbReader* mDbReader;
@@ -66,6 +66,9 @@ private:
 /***************************************************************************
  *
  * $Log: StMuChainMaker.h,v $
+ * Revision 1.12  2004/05/02 04:10:13  perev
+ * private => protected
+ *
  * Revision 1.11  2003/04/21 18:18:53  laue
  * Modifications for the new scheduler implementation:
  * - the filenames and the number of events per files are now supplied

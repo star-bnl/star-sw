@@ -245,10 +245,9 @@ void StMuEmcUtil::fillMuEmc(StMuEmcCollection *muEmc,StEmcCollection *emccol)
             if(eta == cl->getEta() && phi==cl->getPhi())
             {
               muPt->setCluster(cl,det);
-              goto cont2;
+              break;
             }
           }
-          cont2: continue;
         }
       } // loop detector
     } // loop points

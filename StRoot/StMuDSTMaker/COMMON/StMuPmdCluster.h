@@ -1,5 +1,5 @@
 /*****************************************************************
- * $Id: StMuPmdCluster.h,v 1.1 2004/04/02 03:36:21 jeromel Exp $
+ * $Id: StMuPmdCluster.h,v 1.2 2004/05/02 04:10:14 perev Exp $
  *
  * Class : StMuPmdCluster
  * Author: Supriya Das
@@ -8,6 +8,9 @@
  * Description: This is the Cluster class for PMD in MuDst
  * ****************************************************************
  * $Log: StMuPmdCluster.h,v $
+ * Revision 1.2  2004/05/02 04:10:14  perev
+ * private => protected
+ *
  * Revision 1.1  2004/04/02 03:36:21  jeromel
  * New files for PMD
  *
@@ -46,7 +49,7 @@ class StMuPmdCluster : public TObject
   void		SetPID(Int_t var)		{mPID = var;}
   void		SetMcPID(Int_t var)		{mMcPID = var;}
 
- private:
+ protected:
   Int_t		mSuperModule;
   Int_t		mNcell;
   Float_t	mEta;

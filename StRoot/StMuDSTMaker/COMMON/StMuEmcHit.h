@@ -25,12 +25,12 @@ class StMuEmcHit: public TObject
     void            setCalType(int a) { mCalType = (char)a;}
     void            setEnergy(float e){ mEnergy = e;}    
     
-  private:
+  protected:
+    float           mEnergy;
     short           mId;
     short           mAdc;
     char            mCalType;
-    float           mEnergy;
         
-    ClassDef(StMuEmcHit,1)
+    ClassDef(StMuEmcHit,2)
 };
 #endif  

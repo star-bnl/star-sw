@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StMuTofHitCollection.h,v 1.1 2004/04/02 03:39:12 jeromel Exp $
+ * $Id: StMuTofHitCollection.h,v 1.2 2004/05/02 04:10:14 perev Exp $
  *
  * Author: Xin Dong, April 2004
  *
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StMuTofHitCollection.h,v $
+ * Revision 1.2  2004/05/02 04:10:14  perev
+ * private => protected
+ *
  * Revision 1.1  2004/04/02 03:39:12  jeromel
  * New files for TTOF
  *
@@ -50,7 +53,7 @@ public:
 
     void clear();
     
-private:
+protected:
 
     hitVector         mHitVector;
 };

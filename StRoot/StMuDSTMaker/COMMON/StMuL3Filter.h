@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuL3Filter.h,v 1.4 2002/09/11 21:02:42 laue Exp $
+ * $Id: StMuL3Filter.h,v 1.5 2004/05/02 04:10:14 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -16,7 +16,7 @@ class StMuL3Filter : public StMuCut {
  public: 
   StMuL3Filter();
   ~StMuL3Filter();
- private: 
+ protected: 
   BetheBloch* mBB;
 
   bool accept( const StEvent*);
@@ -36,6 +36,9 @@ class StMuL3Filter : public StMuCut {
 /***************************************************************************
  *
  * $Log: StMuL3Filter.h,v $
+ * Revision 1.5  2004/05/02 04:10:14  perev
+ * private => protected
+ *
  * Revision 1.4  2002/09/11 21:02:42  laue
  * added cut on track encoded method for ITTF
  *

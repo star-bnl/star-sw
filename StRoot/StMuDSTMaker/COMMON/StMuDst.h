@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.17 2004/04/20 18:41:11 perev Exp $
+ * $Id: StMuDst.h,v 1.18 2004/05/02 04:10:13 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -82,7 +82,7 @@ public:
   /// creates a StTrack from an StMuTrack and return pointer to it
   StTrack* createStTrack(StMuTrack*);
 
- private:
+ protected:
   /// array of TClonesArrays
   static TClonesArray** arrays;
   /// array of TClonesArrays for the stuff inherited from the StStrangeMuDst
@@ -212,6 +212,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.18  2004/05/02 04:10:13  perev
+ * private => protected
+ *
  * Revision 1.17  2004/04/20 18:41:11  perev
  * Change arrays to pointer to StMuDstMaker::arrays StMuDst.h
  *

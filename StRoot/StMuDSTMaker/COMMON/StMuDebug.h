@@ -71,7 +71,7 @@ class StMuDebug : public TObject{
   static void off() { mDebug = -1*absolut(mDebug); }
   /// returns debug level
   static int level() { return mDebug;}
- private:
+ protected:
   /// returns the absolute of the debug level
   static int absolut(int i) { return (i>0) ? i : -i; }
   /// debug level
@@ -84,6 +84,9 @@ class StMuDebug : public TObject{
 /***********************************************************************
  *
  * $Log: StMuDebug.h,v $
+ * Revision 1.7  2004/05/02 04:10:13  perev
+ * private => protected
+ *
  * Revision 1.6  2004/02/17 04:56:36  jeromel
  * Extended help, added crs support, restored __GNUC__ for PRETTY_FUNCTION(checked once
  * more and yes, it is ONLY defined in GCC and so is __FUCTION__),  use of a consistent

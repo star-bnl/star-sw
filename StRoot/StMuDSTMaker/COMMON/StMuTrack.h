@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.8 2004/04/14 03:27:30 jeromel Exp $
+ * $Id: StMuTrack.h,v 1.9 2004/05/02 04:10:14 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -92,7 +92,7 @@ class StMuTrack : public TObject {
     StMuProbPidTraits probPidTraits() const; ///< Returns Yuri Fisyac new pid probabilities. 
     static void setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm*); ///< Sets the StuProbabilityPidAlgorithm. Important in order to calculate Aihong's pids.
     static void setProbabilityPidCentrality(double cent); ///< Sets the centrality for calculating Aihong's pid.
-private:
+protected:
   Short_t mId;
   Short_t mType;
   Short_t mFlag;
@@ -186,6 +186,9 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.9  2004/05/02 04:10:14  perev
+ * private => protected
+ *
  * Revision 1.8  2004/04/14 03:27:30  jeromel
  * Change init of mNSigma
  *

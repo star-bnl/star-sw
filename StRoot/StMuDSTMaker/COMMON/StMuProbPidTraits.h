@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuProbPidTraits.h,v 1.4 2003/11/08 14:18:41 laue Exp $
+ * $Id: StMuProbPidTraits.h,v 1.5 2004/05/02 04:10:14 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -47,7 +47,7 @@ public:
   void   setNdf(unsigned int);                 ///< set number of degrees of freedom
   void   setProbability(unsigned int, double); ///< set the probability for particle i
 
-private:
+protected:
   unsigned char mNDF; 
   float mdEdxFit;
   float mdEdxErrorFit;
@@ -84,6 +84,9 @@ inline void   StMuProbPidTraits::setNdf(unsigned int i) { mNDF = i; }
 /***************************************************************************
  *
  * $Log: StMuProbPidTraits.h,v $
+ * Revision 1.5  2004/05/02 04:10:14  perev
+ * private => protected
+ *
  * Revision 1.4  2003/11/08 14:18:41  laue
  * incrmented ClassDef version numbber
  *

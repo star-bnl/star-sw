@@ -1,5 +1,5 @@
 /*****************************************************************
- * $Id: StMuPmdCollection.h,v 1.2 2004/04/26 00:11:07 perev Exp $
+ * $Id: StMuPmdCollection.h,v 1.3 2004/05/02 04:10:14 perev Exp $
  *
  * Class : StMuPmdCollection
  * Author: Supriya Das & Subhasis Chattopadhyay
@@ -8,6 +8,9 @@
  * Description: This class holds the PMD clusters for MuDst
  * ****************************************************************
  * $Log: StMuPmdCollection.h,v $
+ * Revision 1.3  2004/05/02 04:10:14  perev
+ * private => protected
+ *
  * Revision 1.2  2004/04/26 00:11:07  perev
  * forward declaration of StMuPmdCluster
  *
@@ -33,6 +36,7 @@ class StMuPmdCollection: public TObject
                       StMuPmdCollection(StMuPmdCollection&);
     virtual           ~StMuPmdCollection();
     void              clear(Option_t *option="");     
+    void              Clear(Option_t *option=""){clear(option);}     
     void              DeleteThis();
     
     int               getNClusters(int detector);
@@ -40,7 +44,7 @@ class StMuPmdCollection: public TObject
 
     void              addCluster(int detector);
         
-  private:
+  protected:
     void              init(int detector);
     void              packbits(unsigned char*, unsigned int, unsigned int, unsigned int);
     unsigned int      unpackbits(unsigned char*, unsigned int, unsigned int);
