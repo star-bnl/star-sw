@@ -911,7 +911,12 @@ void StFile::SetInfo(TDataSet *ds)
 
 //              ROOT
   if (strcmp(".root",ext)==0) {
-    tit.Replace(0,0," format=root ");
+    int lfname = strlen(fname);
+    if (strcmp(".MuDst.root",fname+lfname-11)==0){
+        tit.Replace(0,0," format=mudst ");
+    } else {
+        tit.Replace(0,0," format=root " );
+    }
     known |= 1;
 //              ... now try to know branch name
     TString bran = fname;
