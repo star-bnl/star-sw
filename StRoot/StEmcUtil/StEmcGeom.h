@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.5 2001/03/22 21:50:35 pavlinov Exp $
+ * $Id: StEmcGeom.h,v 1.6 2001/04/25 01:03:10 pavlinov Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.6  2001/04/25 01:03:10  pavlinov
+ * Clean up
+ *
  * Revision 1.5  2001/03/22 21:50:35  pavlinov
  * Clean up for mdc4
  *
@@ -187,6 +190,7 @@ public:
 
   Float_t  toDeg(const Float_t angR) {return C_DEG_PER_RAD*angR;} // Service
   Float_t  toRad(const Float_t angD) {return angD/C_DEG_PER_RAD;} // functions
+  void     getGeantGeometryTable();
 
   ClassDef(StEmcGeom,1)                      // Standard Root macro;
 };

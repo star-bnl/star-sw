@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.3 2001/03/23 18:59:05 pavlinov Exp $
+ * $Id: StEmcGeom.cxx,v 1.4 2001/04/25 01:03:03 pavlinov Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.4  2001/04/25 01:03:03  pavlinov
+ * Clean up
+ *
  * Revision 1.3  2001/03/23 18:59:05  pavlinov
  * delete gROOT definition because exist in TROOT.h
  *
@@ -49,11 +52,12 @@
  * class StEmcGeom was created and maker was remade for new maker scheme
  *
  **************************************************************************/
-#include <strings.h>
 #include "StEmcGeom.h"
-#include "TROOT.h"
+#include <assert.h>
+#include <strings.h>
+#include <TROOT.h>
 #include "StBFChain.h"
-#include "emc_def.h"
+#include "StEmcUtil/emcInternalDef.h"
 
 ClassImp(StEmcGeom)
 
@@ -95,6 +99,7 @@ void StEmcGeom::initGeom(const Int_t det)
   defineModuleGridOnPhi();
 
   mMaxAdc = 1024; if(det==1) mMaxAdc = 4096;
+  getGeantGeometryTable();
 
   switch (det){
   case 1:
@@ -132,20 +137,7 @@ StEmcGeom::StEmcGeom(const Int_t det, const Char_t *mode)
 {
   mMode=mode; mMode.ToLower();
   if(mMode == "geant"){ // Compare without case 
-    // Will be work if BFC has name "bfc" !!! Be carefull
-    TList *tl = (TList*)gROOT->GetListOfBrowsables();
-    if(tl) {mChain=(StBFChain*)tl->FindObject("bfc"); 
-      if(mChain){mGeantGeom = mChain->GetDataSet("geom");
-      }
-    }
-    if(mGeantGeom == 0) {mCalg = 0;mCalr = 0;}
-    else{
-      mCalg    = (St_calb_calg   *) mGeantGeom->Find("calb_calg");
-      mCalg_st = mCalg->GetTable();
-      mCalr = (St_calb_calr   *) mGeantGeom->Find("calb_calr");
-      mCalr_st = mCalr->GetTable();
-      if(!mCalg_st && !mCalr_st) mMode.Append(" : No table");
-    }
+    getGeantGeometryTable();
   }
   else mMode.Append(" : wrong option !!! "); 
 
@@ -196,8 +188,9 @@ StEmcGeom::StEmcGeom(const Int_t det, const Char_t *mode)
     printf(" StEmcGeom: Bad value of mDetector %i \n", mDetector);
   }
 }
-// _____________________________________________________________________
-void StEmcGeom::defineDefaultCommonConstants()
+
+void 
+StEmcGeom::defineDefaultCommonConstants()
 {
   // Common information for all detectors
   mNModule  = 120;
@@ -213,8 +206,9 @@ void StEmcGeom::defineDefaultCommonConstants()
   mPhiStepHalf = 3. * C_PI/180.;
 
 }
-// _____________________________________________________________________
-void StEmcGeom::defineCommonConstants()
+
+void 
+StEmcGeom::defineCommonConstants()
 {
   Float_t lW[2], smdW;
   mNModule      = 120;  // mCalg_st->maxmodul;
@@ -222,8 +216,12 @@ void StEmcGeom::defineCommonConstants()
 
   mPhiStepHalf  = 360. / (Float_t)mNModule; // in degree
 
-  mPhiOffset[0] = toRad(mCalg_st->shift[0] - mPhiStepHalf);
-  mPhiOffset[1] = toRad(mCalg_st->shift[1] + mPhiStepHalf);
+  //
+  // 24-apr 2001 because mCalg_st->shift can change in Geant !!!
+  //
+  mPhiOffset[0] = (75.-3.)/ 180. * C_PI;
+  mPhiOffset[1] = (105.+3.)/180. * C_PI;
+
   mPhiStep[0]   = -toRad(2.*mPhiStepHalf); 
   mPhiStep[1]   = -mPhiStep[0];
   mPhiStepHalf  = toRad(mPhiStepHalf);
@@ -241,8 +239,9 @@ void StEmcGeom::defineCommonConstants()
   // Radius of end of SMD (Phi plane)
   rsmdPhi=rsmdEta + 2.*smdW;
 }
-// _____________________________________________________________________
-void StEmcGeom::defineModuleGridOnPhi()
+
+void 
+StEmcGeom::defineModuleGridOnPhi()
 {
   //
   // -pi <= phi < pi
@@ -263,8 +262,9 @@ void StEmcGeom::defineModuleGridOnPhi()
     else printf("<W> Something wrong in StEmcGeom::defineModuleGridOnPhi()\n");
   }
 }
-// _____________________________________________________________________
-void StEmcGeom::initBEMCorBPRS() 
+
+void 
+StEmcGeom::initBEMCorBPRS() 
 {
   if(mMode.CompareTo("geant") == 0) {
     mNEta = (Int_t)mCalg_st->netat;
@@ -412,6 +412,7 @@ Int_t &sub, Int_t &detector)
 
   static Int_t emcIvid[5]={10000000,100000,100,10,1};
   Int_t emcChid[5], i, ividw, rl, phi, dep;
+  assert(mCalg_st); // 24-apr
 
   ividw = ivid;
   for(i=0; i<5; i++){
@@ -433,15 +434,15 @@ Int_t &sub, Int_t &detector)
       printf("<W> StEmcGeom::getVolIdBemc => wrong value of dep %i \n",dep);
     }
     if     (rl==1) {
-      phi+=((Int_t)toDeg(mPhiOffset[0])-75)/6;
-      if     (phi<=0)  phi+=60;
-      else if(phi>=61) phi-=60;
+      phi += Int_t((mCalg_st->shift[0]-75.)/6.);
+      while (phi<=0)  phi+=60;
+      while (phi>=61) phi-=60;
       module=phi;
     }
     else if(rl==2) {
-      phi+=((Int_t)toDeg(mPhiOffset[1])-105)/6;
-      if     (phi<=0)  phi+=60;
-      else if(phi>=61) phi-=60;
+      phi += Int_t((mCalg_st->shift[1]-105.)/6.);
+      while (phi<=0)  phi+=60;
+      while (phi>=61) phi-=60;
       module=phi+60;
       sub   =(sub+1)%2+1;
     }
@@ -468,6 +469,7 @@ Int_t &sub, Int_t &detector)
   // See  emc/util/volid_bsmd.F
   static Int_t smdIvid[5]={100000000,1000000,1000,100,1}; //matched with AGI&G2T
   Int_t smdChid[5], i, ividw, rl, phi, t, strip;
+  assert(mCalg_st); // 24-apr
 
   ividw = ivid;
   for(i=0; i<5; i++){
@@ -481,15 +483,15 @@ Int_t &sub, Int_t &detector)
     t      = smdChid[3];  // SMD type 1->3
     strip  = smdChid[4];  // strip number 1-75(type 1,2) 1-15(type 3)
     if     (rl==1) {
-      phi+=((Int_t)toDeg(mPhiOffset[0])-75)/6;
-      if     (phi<=0)  phi+=60;
-      else if(phi>=61) phi-=60;
+      phi += Int_t((mCalg_st->shift[0]-75.)/6.);
+      while (phi<=0)  phi+=60;
+      while (phi>=61) phi-=60;
       module=phi;
     }
     else if(rl==2) {
-      phi+=((Int_t)toDeg(mPhiOffset[1])-105)/6;
-      if     (phi<=0)  phi+=60;
-      else if(phi>=61) phi-=60;
+      phi += Int_t((mCalg_st->shift[1]-105.)/6.);
+      while (phi<=0)  phi+=60;
+      while (phi>=61) phi-=60;
       module=phi+60;
     }
     else{
@@ -780,9 +782,37 @@ Float_t  StEmcGeom::relativeError(Float_t a, Float_t b)
     return perr;
   }
 }
-// _____________________________________________________________________
-void  StEmcGeom::printError(Float_t err)
+
+void  
+StEmcGeom::printError(Float_t err)
 {
   if(err>perr) printf(" | perr=%6.3f%% \n",err);
   else printf("\n");
+}
+
+void 
+StEmcGeom::getGeantGeometryTable()
+{
+  // 24-apr-2000 for MDC4
+  // Will be work if BFC has name "bfc" !!! Be carefull
+  TList *tl = (TList*)gROOT->GetListOfBrowsables();
+  if(tl) {
+    mChain=(StBFChain*)tl->FindObject("bfc"); 
+    if(mChain) mGeantGeom = mChain->GetDataSet("geom");
+  }
+  if(mGeantGeom == 0) {
+    mCalg = 0;
+    mCalr = 0;
+  }
+  else{
+    mCalg    = (St_calb_calg   *) mGeantGeom->Find("calb_calg");
+    if(mCalg) {
+      mCalg_st = mCalg->GetTable();
+      for(Int_t i=0;i<2;i++) 
+      printf(" Barrel %i Angle shift %6.0f \n", i+1, mCalg_st->shift[i]); 
+    }
+    mCalr = (St_calb_calr   *) mGeantGeom->Find("calb_calr");
+    if(mCalr) mCalr_st = mCalr->GetTable(); // BARREL EMC RADIUSES
+    if(!mCalg_st && !mCalr_st) mMode.Append(" : No table");
+  }
 }
