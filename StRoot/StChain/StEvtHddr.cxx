@@ -8,7 +8,7 @@ StEvtHddr::StEvtHddr(St_DataSet *parent):St_DataSet("EvtHddr",parent)
   SetDateTime(19950101,0);
   SetEventType("NONE");
   memset(&mRunNumber,0,(char*)&mEventNumber-(char*)&mRunNumber); 
-  mEventNumber=0;
+  mRunNumber=-1;mOldRunNumber=-1;mEventNumber=-1;
 }  
 //_____________________________________________________________________________
   void StEvtHddr::SetGMTime(ULong_t ut)

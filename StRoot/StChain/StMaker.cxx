@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.70 1999/09/14 17:30:37 fine Exp $
+// $Id: StMaker.cxx,v 1.71 1999/09/21 15:05:17 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.71  1999/09/21 15:05:17  perev
+// InitRun & FinishRun added
+//
 // Revision 1.70  1999/09/14 17:30:37  fine
 // some clean ups
 //
@@ -592,7 +595,8 @@ Int_t StMaker::Finish()
 //    Terminate a run
 //   place to make operations on histograms, normalization,etc.
    int nerr = 0;
-
+   int run = GetRunNumber();
+   if (run>-1) FinishRun(run);
    TIter next(GetMakeList());
    StMaker *maker;
    Double_t totalCpuTime = 0;
@@ -631,23 +635,29 @@ Int_t StMaker::Finish()
 Int_t StMaker::Make()
 {
 //   Loop on all makers
-   Int_t ret;
+   Int_t ret,run=-1;
    TList *tl = GetMakeList();
    if (!tl) return kStOK;
-   
+   StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");   
    TIter nextMaker(tl);
    StMaker *maker;
    while ((maker = (StMaker*)nextMaker())) {
-     if (maker->IsActive()) {
-       // Call Maker
-       maker->StartMaker();
-       ret = maker->Make();
-       maker->EndMaker(ret);
-     
-       if (Debug()) printf("*** %s::Make() == %d ***\n",maker->ClassName(),ret);
-       
-       if (ret>kStWarn) { if (Debug()) maker->ls(3); return ret;}
+     if (!maker->IsActive()) continue;
+     if (hd && hd->IsNewRun()) {
+       run = hd->GetOldRunNumber();  
+       if (run>-1) maker->FinishRun(run);
+       run = hd->GetRunNumber();  
+       maker->InitRun(run);
      }
+// 		Call Maker
+     maker->StartMaker();
+     ret = maker->Make();
+     maker->EndMaker(ret);
+
+     if (Debug()) printf("*** %s::Make() == %d ***\n",maker->ClassName(),ret);
+
+     if (ret>kStWarn) { if (Debug()) maker->ls(3); return ret;}
+     
    }
    return kStOK;
 }
@@ -701,6 +711,13 @@ Int_t        StMaker::GetRunNumber() const
    StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
    if (!hd) return -1;
    return hd->GetRunNumber();
+}
+//_____________________________________________________________________________
+StMaker     *StMaker::GetParentChain() const 
+{
+    const StMaker *mk = GetParentMaker();
+    while(mk && !mk->IsChain()) {mk = mk->GetParentMaker();}
+    return (StMaker*)mk;
 }
 //_____________________________________________________________________________
 TDatime  StMaker::GetDateTime() const 
