@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.47 1999/12/21 18:58:15 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.48 1999/12/22 15:27:34 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -231,7 +231,11 @@ void StEventDisplayMaker::AddName(const Char_t *name)
   //   Attention:     NO EXPRESSION, yet !!!
 
   if (!m_ListDataSetNames) m_ListDataSetNames = new TList;
-  m_ListDataSetNames->Add(new TObjString(name));
+  // check name
+  TIter next(m_ListDataSetNames);
+  TObjString *str = 0;
+  while ((str = (TObjString *)next()) && str->String() != name);
+  if (!str) m_ListDataSetNames->Add(new TObjString(name));
 }
 //______________________________________________________________________________
 void StEventDisplayMaker::ClearEvents()
@@ -959,6 +963,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.48  1999/12/22 15:27:34  fine
+// Protection against of double names
+//
 // Revision 1.47  1999/12/21 18:58:15  fine
 // new default for SizeAttributes
 //
