@@ -71,20 +71,38 @@ Int_t StSvtdEdxMaker::Make()
   }
 
   St_DataSet     *svtracks = GetInputDS("est");
+  if (! svtracks) {
+    gMessMgr->Warning() <<"no svt tracks" << endm;
+    return kStWarn;
+  }
   St_DataSet     *svthits  = GetInputDS("svt_hits");
-  
+  if (! svthits) {
+    gMessMgr->Warning() <<"no svt hits" << endm;
+    return kStWarn;
+  }
   St_stk_track   *Tracks   = 0;
   St_sgr_groups  *Groups   = 0;
   St_scs_spt     *Hits     = 0;
-
+  
  // Case svt tracking performed
   if (svtracks) {
-    Tracks = (St_stk_track  *) svtracks->Find("EstSvtTrk");
+    Tracks = (St_stk_track  *) svtracks->Find("EstSvtTrk"); 
+    if (! Tracks) {
+      gMessMgr->Warning() <<"no EstSvtTrk" << endm;
+      return kStWarn;
+    }
     Groups = (St_sgr_groups *) svtracks->Find("EstGroups");
-    
+    if (! Groups) {
+      gMessMgr->Warning() <<"no EstGroups" << endm;
+      return kStWarn;
+    }
   }
   if (svthits) {
     Hits     = (St_scs_spt    *)  svthits->Find("scs_spt");
+  }
+  if (! Hits) {
+      gMessMgr->Warning() <<"no scs_spt" << endm;
+      return kStWarn;
   }
   
   St_DataSet *Dst = GetDataSet("dst"); assert(Dst);

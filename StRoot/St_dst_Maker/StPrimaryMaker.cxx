@@ -273,13 +273,14 @@ Int_t StPrimaryMaker::Make(){
       bool isset;
 
       //First set all bits in map to zero before doing bitwise ops
-      for(i=0;i<primtrk->GetNRows();i++){
+      Int_t nPrimTrks = primtrk->GetNRows();
+      for(i=0;i<nPrimTrks;i++){
       	track[i].map[0] = 0UL;
       	track[i].map[1] = 0UL;
       }
 
       for( i=0; i<tpc_groups->GetNRows(); i++, tgroup++){
-	if( tgroup->id1 != 0 && tgroup->ident >= 0){
+	if( tgroup->id1 != 0 && tgroup->ident >= 0 && spc[spt_id].id_globtrk <= nPrimTrks){
 	  spt_id = tgroup->id2-1;
 	  if( spt_id <0) {
 	    cout << spt_id << endl;
@@ -359,13 +360,14 @@ Int_t StPrimaryMaker::Make(){
 	bool isset;
 	
 	//First set all bits in map to zero before doing bitwise ops
-	for(i=0;i<EstPrimary->GetNRows();i++){
+	Int_t nEstPrim = EstPrimary->GetNRows();
+	for(i=0;i<nEstPrim;i++){
 	  track[i].map[0] = 0UL;
 	  track[i].map[1] = 0UL;
 	}
 	
 	for( i=0; i<tpc_groupsEst->GetNRows(); i++, tgroup++){
-	  if( tgroup->id1 != 0 && tgroup->ident >= 0){
+	  if( tgroup->id1 != 0 && tgroup->ident >= 0 && spc[spt_id].id_globtrk <= nEstPrim){
 	  spt_id = tgroup->id2-1;
 	  if( spt_id <0) {
 	    cout << spt_id << endl;
@@ -397,10 +399,10 @@ Int_t StPrimaryMaker::Make(){
 	
 	for( i=0; i<svt_groups->GetNRows(); i++, sgroup++){
 	  
-	  if( sgroup->id1 != 0 && sgroup->ident >= 0){
+	  if( sgroup->id1 != 0 && sgroup->ident >= 0 && s_spc[spt_id].id_globtrk <= nEstPrim){
 	    spt_id = sgroup->id2-1;
 	    row = s_spc[spt_id].id_wafer/1000;
-	    if(  s_spc[spt_id].id_globtrk-1 < 0){
+	    if(  s_spc[spt_id].id_globtrk-1 < 0) {
 	      cout << spt_id << " " << s_spc[spt_id].id_globtrk<< " " << endl;
 	      return kStErr;
 	    }
@@ -538,8 +540,11 @@ Int_t StPrimaryMaker::Make(){
  return iMake;
   }
 //_____________________________________________________________________________
-// $Id: StPrimaryMaker.cxx,v 1.81 2004/05/16 20:56:20 fisyak Exp $
+// $Id: StPrimaryMaker.cxx,v 1.82 2004/05/17 20:52:43 fisyak Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.82  2004/05/17 20:52:43  fisyak
+// Add protection for no field data
+//
 // Revision 1.81  2004/05/16 20:56:20  fisyak
 // Fix global and primary tracks fits for Field OFF
 //
