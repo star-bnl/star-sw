@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 1.5 2002/04/09 16:03:13 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 1.6 2002/04/16 13:11:30 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 1.6  2002/04/16 13:11:30  pruneau
+ * *** empty log message ***
+ *
  * Revision 1.5  2002/04/09 16:03:13  pruneau
  * Included explicit extension of tracks to the main vertex.
  *
@@ -163,7 +166,7 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 		//cout <<" --- Hits for next track --- "<<endl;
 		//for_each(vec.begin(), vec.end(), StreamStHit());
 		
-		//cout << "track " << *kTrack << endl;
+		//cout << "StiStEventFiller::fillEvent() - INFO - track: " << *kTrack << endl;
 		
 		// detector info
 		StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
@@ -200,11 +203,17 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, const StiT
     // if this gets modified later in ITTF, this must be changed here
     // but maybe use track->getPointCount() later?
 
-    vector<StHit*> hitVec = track->stHits();
+	//vector<StHit*> hitVec = track->stHits();
+    vector<StMeasuredPoint*> hitVec = track->stHits();
 		detInfo->setFirstPoint(hitVec.front()->position());
     detInfo->setLastPoint(hitVec.back()->position());
     detInfo->setNumberOfPoints(encodedStEventFitPoints(track));
-    for (vector<StHit*>::iterator hi = hitVec.begin(); hi!=hitVec.end(); ++hi) detInfo->addHit(*hi);
+    for (vector<StMeasuredPoint*>::iterator point = hitVec.begin(); point!=hitVec.end(); ++point) 
+			{
+				StHit * hh = dynamic_cast<StHit*>(*point);
+				if (hh)
+					detInfo->addHit(hh);
+			}
     return;
 }
 
@@ -285,7 +294,7 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, const StiTrack* track, bool
 // }
         
 void StiStEventFiller::fillFitTraits(StTrack* gTrack, const StiTrack* track){
-	cout << "StiStEventFiller::fillFitTraits()" << endl;
+	//cout << "StiStEventFiller::fillFitTraits()" << endl;
 
     // mass
     double massHyp = track->getMass();  // change: perhaps this mass is not set right?
@@ -344,25 +353,23 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, const StiTrack* track){
     gTrack->setEncodedMethod(32770);
 
     gTrack->setImpactParameter(impactParameter(track));//gTrack->setImpactParamter(track->getDca(vertex)); // change: need to calculate impact parameter or use 
-    //cout << "getTrackLength() " << endl;
     gTrack->setLength(track->getTrackLength());
     // StiTracks don't return this in the format used by StEvent,
     // change: StiTracks need methods to calculate this by detector
-    //cout << "max Point Count() " << endl;
     int maxPoints = track->getMaxPointCount();
-    //does not compile... -CP// gTrack->setNumberOfPossiblePoints(static_cast<unsigned short>(maxPoints));
-
+		
+		gTrack->setNumberOfPossiblePoints(static_cast<unsigned short>(maxPoints));
     fillGeometry(gTrack, track, false); // inner geometry
     fillGeometry(gTrack, track, true);  // outer geometry
     fillFitTraits(gTrack, track);
-
     return;
 }
 unsigned short StiStEventFiller::encodedStEventFitPoints(const StiTrack* track) {
 	//cout << "StiStEventFiller::encodedStEventFitPoints()" << endl;
     // need to write the fit points in StEvent following the convention
     // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
-    vector<StHit*> hitVec = track->stHits();
+	//vector<StHit*> hitVec = track->stHits();
+    vector<StMeasuredPoint*> hitVec = track->stHits();
     
     unsigned short nFitTpc, nFitSvt, nFitSsd; // maybe need ftpc (east, west), emc, rich, tof, later
     nFitTpc = nFitSvt = nFitSsd = 0;
@@ -370,22 +377,26 @@ unsigned short StiStEventFiller::encodedStEventFitPoints(const StiTrack* track) 
     // loop here to get the hits in each detector
     // use StDetectorId's and switch
 
-    for (vector<StHit*>::iterator hi = hitVec.begin(); hi!=hitVec.end();++hi) {
-	StDetectorId detId = (*hi)->detector();
-	switch (detId) {
-	case kTpcId:
-	    ++nFitTpc;
-	    break;
-	case kSvtId:
-	    ++nFitSvt;
-	    break;
-	case kSsdId:
-	    ++nFitSsd;
-	    break;
-	default:
-	    cout << "StiStEventFiller::encodedStEventFitPoints()\t"
-		 << "hit->detector() " << (unsigned long)(*hi)->detector() << " not forseen in the logic" << endl;
-	}
+    for (vector<StMeasuredPoint*>::iterator point = hitVec.begin(); point!=hitVec.end();++point) {
+			StHit * hit = dynamic_cast<StHit *>(*point);
+			if (hit)
+				{
+					StDetectorId detId = hit->detector();
+					switch (detId) {
+					case kTpcId:
+						++nFitTpc;
+						break;
+					case kSvtId:
+						++nFitSvt;
+						break;
+					case kSsdId:
+						++nFitSsd;
+						break;
+					default:
+						cout << "StiStEventFiller::encodedStEventFitPoints()\t"
+								 << "hit->detector() " << (unsigned long)hit->detector() << " not forseen in the logic" << endl;
+					}
+				}
     }
     //        1*tpc + 1000*svt     + 10000*ssd       (Helen/Spiros Oct 29, 1999)
     return (nFitTpc + 1000*nFitSvt + 10000*nFitSsd);
@@ -411,9 +422,9 @@ float StiStEventFiller::impactParameter(const StiTrack* track) {
     StThreeVector<double> vxD(vxF.x(),vxF.y(),vxF.z());
     //cout << "primary vertex " << vxD << endl;
     // return distance of closest approach to primary vertex
-    cout << "helix " << *helix << endl;
+    //cout << "helix " << *helix << endl;
     float dca = static_cast<float>(helix->distance(vxD));
-    cout << "dca " << dca << endl;
+    //cout << "dca " << dca << endl;
     delete helix;
     return dca;
 }
