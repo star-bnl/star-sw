@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.20 2000/07/05 13:17:05 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.21 2000/07/21 23:11:08 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -155,12 +155,6 @@
      $CXXFLAGS.= " --display_error_number --diag_suppress 191 -fPIC";
      $CLIBS    = "-L/usr/X11R6/lib  -lXt -lXpm -lX11 -lm -ldl -Bdynamic";
      $SYSLIBS  = "-lm -ldl";
-     $FC       = "pgf77";
-     $FLIBS    = "-L/usr/pgi/linux86/lib -lpgftnrtl -lpgc";
-     $FLIBS   .= " -L/opt/star/lib -lpgf77S -lpgf77A";
-#     $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
-     $FFLAGS   = "-DPGI";  
-     $FEXTEND  = "-Mextend";
      $LD       = $CXX;
      $LDFLAGS  = $CXXOPT;
      $SO       = $CXX;
@@ -168,17 +162,8 @@
    }
    else {
      $CLIBS    = "-L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic";
-     $FC       = "pgf77";
-     $FLIBS    = "-L/opt/star/lib -lpgf77S -lpgf77A";
-     $FLIBS   .= " -L/usr/pgi/linux86/lib -lpgftnrtl -lpgc";
-#     $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
-     $FFLAGS   = "-DPGI";  
-     $FEXTEND  = "-Mextend";
      if ($HOST =~ /pcstar/) {# From Janet for MPI /usr/pgi -> /usr/local/pgi
        $CLIBS    = "-L/usr/local/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11 -lpgc -lm -ldl  -rdynamic";
-       $FLIBS    = "-L/usr/local/pgi/linux86/lib -lpgftnrtl -lpgc";
-       $FLIBS   .= " -L/opt/star/lib -lpgf77S -lpgf77A";
-#       $FLIBS   .= " -L/usr/local/egcs/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
      }
    }
    if (/^i386_linux2/) {$FLIBS   .= " -lI77 -lF77";}
@@ -190,6 +175,13 @@
      $LD       = $CXX;
      $SO       = $CXX;
    } 
+   if ($PGI) {
+     $FC       = "pgf77";
+     $FLIBS    = "-L/usr/pgi/linux86/lib -lpgftnrtl -lpgc";
+     $FLIBS   .= " -L/opt/star/lib -lpgf77S -lpgf77A";
+     $FFLAGS   = "-DPGI";  
+     $FEXTEND  = "-Mextend";
+   }
    $F77LIBS = " -lg2c -lnsl";
    $FLIBS .= $F77LIBS;
  }
