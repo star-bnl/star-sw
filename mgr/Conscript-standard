@@ -118,13 +118,10 @@ if ( $pkg =~ m/^StEventDisplay/){
 	$CXXFLAGS.= " -DR__QT";
     }
 
-
-} elsif ( $pkg =~ m/^St.*Db/ ) {
-  $CPPPATH .= $main::PATH_SEPARATOR . $MYSQLINC;
-
-
-# This block is used for libraries requiering mysql
-# include
+#
+# This is more strict with -lmysqlclient addition
+# and MUST appear PRIOR to the next block ...
+#
 } elsif ( $pkg =~ m/^StDbLib$/ || 
 	  $pkg =~ m/^StDbBroker$/) {
     if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }
@@ -135,6 +132,13 @@ if ( $pkg =~ m/^StEventDisplay/){
     print "LIBS    = $LIBS\n" if $param::debug;
     $CPPPATH .=  $main::PATH_SEPARATOR . $MYSQLINC;
     print "CPPPATH = $CPPPATH\n" if $param::debug;
+
+
+    #... next block wich only requires the includes
+    # but no link with the client library
+} elsif ( $pkg =~ m/^St.*Db/ ) {
+  $CPPPATH .= $main::PATH_SEPARATOR . $MYSQLINC;
+  print "CPPPATH = $CPPPATH\n" if $param::debug;
 
 } elsif ( $pkg =~ m/^pyth$/ ) {
   my $CERN_ROOT = $env->{ENV}->{CERN_ROOT};
