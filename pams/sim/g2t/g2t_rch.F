@@ -52,7 +52,7 @@
          endif
          g2t_rch_hit(i).tof           = tof
          g2t_rch_hit(i).de            = Elos
-*        g2t_rch_hit(i).ds            = Step
+        g2t_rch_hit(i).ds            = Step
          g2t_rch_hit(i).track_p       = trac
          g2t_rch_hit(i).volume_id     = volume+Isys*1000
 *
