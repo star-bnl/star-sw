@@ -4,12 +4,14 @@ StChain *chain=0;
 
 
 int rdMuDst2print(
-	  char* file    = "cc.MuDst.root",
+	  char* file    = "R50530.MuDst.root",
 	  Int_t nFiles  = 1, 
 	  char* inDir   = "./",
-	  int nEve=5)
+	  int nEve=1)
 { 
 
+  //file    = "R5086033e.MuDst.root";
+  file    = "R5015034x.MuDst.root";
 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
@@ -51,19 +53,22 @@ int rdMuDst2print(
 //===========================================
 //===========================================
 printEEtower( StMuEmcCollection* emc ) {
-  int isec,ieta,isub,istrip,adc,ipre;
+  int sec,eta,sub,adc;
   StMuEmcHit *hit;
   
   int i, nh;
   
-  printf("\Total %d hits in Tower\n",emc->getNEndcapTowerADC());
+  printf("\Total %d hits in Tower (only ADC>0)\n",emc->getNEndcapTowerADC());
   nh=0;
   for (i=0; i< emc->getNEndcapTowerADC(); i++) {
-    emc->getEndcapTowerADC(i,adc,isec,isub,ieta);
-    if (adc<=0) continue; // print only non-zero values
+    emc->getEndcapTowerADC(i,adc,sec,sub,eta);
+    //  if (adc<=0) continue; // print only non-zero values
     nh++;
-    printf("  Tower %2.2dT%c%2.2d   adc=%4d\n",isec+1,isub+'A',ieta+1,adc );
-  }
+    printf("i=%d  Tower %2.2dT%c%2.2d   adc=%4d\n",i,sec,sub+'A'-1,eta,adc );
+    //    printf("  Tower isec=%d ieta=%d isub=%d    adc=%4d\n",sec,eta, sub,adc );
+    int adcX=1000+ (eta-1) + (sub-1)*12 +(sec-1)*60;
+    //    assert(adc==adcX );
+}
   printf("  Total %d towers with ADC>0\n",nh);
 }
 
@@ -71,15 +76,21 @@ printEEtower( StMuEmcCollection* emc ) {
 //===========================================
 //===========================================
 printEEpre( StMuEmcCollection* emc ) {
-  int isec,ieta,isub,istrip,adc,ipre;
+  int sec,eta,sub,pre,adc;
   StMuEmcHit *hit;
   
   int i, nh;
   nh= emc->getNEndcapPrsHits();
   printf("\nTotal %d hits in pre1+2+post\n",nh);
   for (i=0; i<nh; i++) {
-    hit=emc->getEndcapPrsHit(i,isec,isub,ieta,ipre);
-    printf("  pre/post(%d) %2.2d%c%c%2.2d : energy=%f  adc=%d\n",ipre+1,isec+1,ipre+'P',isub+'A',ieta+1,hit->getEnergy(),hit->getAdc());
+    hit=emc->getEndcapPrsHit(i,sec,sub,eta,pre);
+    int ss=sub + 5*(pre-1);
+    adc=hit->getAdc();
+    printf("i=%d  pre/post(%d) %2.2d%c%c%2.2d : energy=%f  adc=%d\n",i,pre,sec,pre+'P'-1,sub+'A'-1,eta,hit->getEnergy(),adc);
+    int adcX=      (eta-1) + (sub-1) *12 +(sec-1)*60 + 1000*pre;
+    
+    //    assert(adc==adcX  );
+
   }
 }
 
@@ -87,15 +98,18 @@ printEEpre( StMuEmcCollection* emc ) {
 //===========================================
 //===========================================
 printEEsmd( StMuEmcCollection* emc ) {
-  int isec,ieta,isub,istrip,adc,ipre; char uv='U';
+  int sec,strip,adc;
+  char uv='U';
   
   for(uv='U'; uv<='V'; uv++) {
     int nh= emc->getNEndcapSmdHits(uv);
     printf("\nTotal %d hits in SMD-%c\n",nh,uv);
     for (int i=0; i<nh; i++) {
-      hit=emc->getEndcapSmdHit(uv,i,isec,istrip);
-      printf("  SMD-%c  %2.2d%c%3.3d : energy=%f  adc=%d\n",uv,isec+1,uv,istrip+1,hit->getEnergy(),hit->getAdc());
-      
+      hit=emc->getEndcapSmdHit(uv,i,sec,strip);
+      adc=hit->getAdc();
+      printf("  SMD-%c  %2.2d%c%3.3d : energy=%f  adc=%d\n",uv,sec,uv,strip,hit->getEnergy(),adc);
+       int adcX= 1000 + strip-1  +(sec-1)*300;
+       //       assert(adc==adcX  );
     }
   }
 }
