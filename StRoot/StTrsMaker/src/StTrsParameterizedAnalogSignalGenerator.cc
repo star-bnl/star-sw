@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.21 2000/07/30 02:50:05 long Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.22 2000/08/04 03:30:18 long Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.22  2000/08/04 03:30:18  long
+ * 1)parameterize reponse function in Z
+ * 2) add normalization factor 1.4 to match real data.It should
+ *    eventually go to database somewhere.
+ *
  * Revision 1.21  2000/07/30 02:50:05  long
  * 1) restructure code
  * 2)add new pad response function to take into account of the charge spread
@@ -205,6 +210,61 @@ StTrsParameterizedAnalogSignalGenerator::StTrsParameterizedAnalogSignalGenerator
     mAddNoise = true;
    mNoiseRMS=1.2;
    mAdcConversion=mElectronicsDb->adcConversion();
+   landauConstant=0.2703;
+   landauMean=2.256; 
+   landauSigma=1.197;
+   expConstant=1.56538;
+   expSlope=-0.589033;
+   landauCut=3.6;
+
+   GausConstant[0]=0.2482;
+   GausMean[0]=2.317; 
+   GausSigma2[0]=1.326*1.326;
+   
+   ExpConstant[0]=1.46831;
+   ExpSlope[0]=-0.569438;
+   cutT[0]=3.6;
+   
+   GausConstant[1]=0.315;
+   GausMean[1]=2.385; 
+   GausSigma2[1]=1.464*1.464;
+   
+   ExpConstant[1]=1.44213;
+   ExpSlope[1]=-0.55952;
+   cutT[1]=3.7;
+  
+   GausConstant[2]=0.2153;
+   GausMean[2]=2.473; 
+   GausSigma2[2]=1.636*1.636;
+   
+   ExpConstant[2]=1.4916;
+   ExpSlope[2]=-0.55763;
+   cutT[2]=4;
+  
+   GausConstant[3]=0.2;
+   GausMean[3]=2.566; 
+   GausSigma2[3]=1.83*1.83;
+   
+   ExpConstant[3]=1.73945;
+   ExpSlope[3]=-0.57317;
+   cutT[3]=4.5;
+ 
+   GausConstant[4]=0.1861;
+   GausMean[4]=2.599; 
+   GausSigma2[4]=1.983*1.983;
+   
+   ExpConstant[4]=1.54719;
+   ExpSlope[4]=-0.544514;
+   cutT[4]=4.5; 
+   GausConstant[5]=0.1734;
+   GausMean[5]=2.658; 
+   GausSigma2[5]=2.17*2.17;
+   
+   ExpConstant[5]=1.70843;
+   ExpSlope[5]=-0.54852;
+   cutT[5]=5;
+   
+   
 }
 StTrsParameterizedAnalogSignalGenerator::~StTrsParameterizedAnalogSignalGenerator() {/* missing */}
 
@@ -286,12 +346,11 @@ double  StTrsParameterizedAnalogSignalGenerator::erf_fast(double argument) const
 
 
 void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wireHistogram)
-{
-    double offset=transformer.zFromTB(0);
+{ double offset=transformer.zFromTB(0);
 
     int PadsAtRow;
     double sigma_xpad2;
-    double InOuterFactor=1.0075;
+    double InOuterFactor=1.0075,normalFactor=1.4 ;;
     double charge_fraction[7]; 
     int wire_index;
     double *SignalSum;
@@ -309,7 +368,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 	return;
     }
         double x,y,z,xCentroidOfPad,yCentroidOfPad;
-        double xp,yp;
+        double xp,yp,t;
         double electrons;
         double tZero;
         tZero=mElectronicsDb->tZero();
@@ -332,18 +391,18 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 	aTpcWire currentWire = wireHistogram->getWire(jj);
 	aTpcWire::iterator iter;
         int Repeat;
-           int timeBinUpperLimit = 6;
-           int timeBinLowerLimit = 2; 
-        //     int timeBinUpperLimit = 7;
-	//	     int timeBinLowerLimit = 3;
+	//    int timeBinUpperLimit = 6;
+	//    int timeBinLowerLimit = 2; 
+             int timeBinUpperLimit = 6;
+	     int timeBinLowerLimit = 2;
 	     double dAvalanch=0.015;//cm
         int bin_low,bin_high; 
         double signalTime;	
         double pulseHeight ;
         int max_bin=bin_end;
-        double  timeBinT ;
+        double  timeBinT;
         double *D,Dx,Dz,sigmaLz,Dt,sigmaLt;
-        double B1,B0,A,LAMBDAP,GAMAP,LAMBDAM,GAMAM,s1,s2;
+         double B1,B0,A;
 	for(iter  = currentWire.begin();
 	    iter != currentWire.end();
 	    iter++) {
@@ -367,35 +426,46 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
     
             pulseHeight= iter->numberOfElectrons();
            
-            bin_low=max(0,(int)(signalTime/mTimeBinWidth)-timeBinLowerLimit+1);
+            bin_low=max(0,(int)(signalTime/mTimeBinWidth)-timeBinLowerLimit+1);            
             bin_high=min(max_bin-1,(int)(signalTime/mTimeBinWidth)+timeBinUpperLimit);     
 	  
-             K = sigmaLoverTau*sqrt(z)/mDriftVelocity; 
-	    if(D[2]>3.5*sigmaLz){
-     
-                 for(int itbin=bin_low;itbin<=bin_high;itbin++){
+	    //  K = sigmaLoverTau*sqrt(z)/mDriftVelocity; 
+	   
+
+           
+                 A=sigmaLt/mTau;
+		 if(A<0.6){
+		  
+                      
+                      for(int itbin=bin_low;itbin<=bin_high;itbin++){
 	                SignalInTimeBin[itbin]=0.;
                         timeBinT = itbin*mTimeBinWidth; 
-		        B1=(timeBinT-signalTime+Dt/2)/mTau;
-                        B0=(timeBinT-signalTime-Dt/2)/mTau;
-                        if(B0>0)
-			  SignalInTimeBin[itbin]=0.5*((B0*B0-2*B0+2)*exp(-B0)
-						    -(B1*B1-2*B1+2)*exp(-B1))*mTimeBinWidth/Dt;
+                      
+                        t=(timeBinT-signalTime)/mTau;
+			if(t<=landauCut)
+			SignalInTimeBin[itbin]=landauConstant*exp(-(t-landauMean)*(t-landauMean))/(2.*landauSigma*landauSigma)*mTimeBinWidth/mTau;
                         else
-                          if(B1>0)
-                           SignalInTimeBin[itbin]=0.5*((B0*B0-2*B0+2)*exp(-B0)-2)/Dt*mTimeBinWidth;
-                          else
-			     SignalInTimeBin[itbin]=0.;
-
-	             if(SignalInTimeBin[itbin]<0.)SignalInTimeBin[itbin]=0.;
+                        SignalInTimeBin[itbin]=expConstant*exp(t*expSlope)*mTimeBinWidth/mTau;
+			  
+		                                                     }     
+                                           
+                           }
+                 else
+		    {
+		      int index=(int)((A-0.6)/0.2);
+                      if(index>=5.5)index=5;
+                      for(int itbin=bin_low;itbin<=bin_high;itbin++){
+	                SignalInTimeBin[itbin]=0.;
+                        timeBinT = itbin*mTimeBinWidth; 
+                      
+                        t=(timeBinT-signalTime)/mTau;
+			if(t<=cutT[index])
+			SignalInTimeBin[itbin]=GausConstant[index]*exp(-(t-GausMean[index])*(t-GausMean[index])/(2.*GausSigma2[index]))*mTimeBinWidth/mTau;
+                        else
+			  SignalInTimeBin[itbin]=ExpConstant[index]*exp(t*ExpSlope[index])*mTimeBinWidth/mTau;}
 		
- 	                                                        }// for itbin 
-               }
-
-           else 
-             
-	     {
-                 for(int itbin=bin_low;itbin<=bin_high;itbin++){
+		        //for 
+		      /*     for(itbin=bin_low;itbin<=bin_high;itbin++){
 	                SignalInTimeBin[itbin]=0.;
                         timeBinT = itbin*mTimeBinWidth; 
 		
@@ -406,11 +476,14 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 	  
 	  lambda/sqrtTwoPi*exp(-.5*lambdasqr)))
                                       *mTimeBinWidth;
+		       
 			if(SignalInTimeBin[itbin]<0.)SignalInTimeBin[itbin]=0.;
 		
- 	                                                  }// for itbin 
-	                         
-	     }
+			}// for itbin */
+		       }//if endif
+ 	              
+	                                                                  
+	       
 
 
 	    Repeat=0;
@@ -628,7 +701,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
           
 	      if(a<=mSignalThreshold)continue;
                mElectronicSignal.setTime(itbin3);
-	      mElectronicSignal.setAmplitude(a*1.1);
+	      mElectronicSignal.setAmplitude(a*normalFactor);
               mDiscreteAnalogTimeSequence.push_back(mElectronicSignal);
 	      
             }  
@@ -637,6 +710,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 	  }
       }
     free(SignalSum);
+    
 }
 
 double StTrsParameterizedAnalogSignalGenerator::realShaperResponse(double tbin, StTrsAnalogSignal& sig)
