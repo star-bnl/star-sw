@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrgMaker.cxx,v 1.7 2002/03/06 18:16:49 ward Exp $
+ * $Id: StTrgMaker.cxx,v 1.8 2002/03/25 21:34:18 ward Exp $
  *
  * Author: Herbert Ward April 2001
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StTrgMaker.cxx,v $
+ * Revision 1.8  2002/03/25 21:34:18  ward
+ * Three bug fixes.
+ *
  * Revision 1.7  2002/03/06 18:16:49  ward
  * Filter out tracks which begin beyone the MWC.  Remove dead weight from trigCtb.C.
  *
@@ -148,7 +151,7 @@ Int_t StTrgMaker::Make() {
       phi0=o.phi()*180/3.1415926;    // StEvent is in radians, contrary to STAR convention.
       psi=geo->psi()*180/3.1415926;  // StEvent is in radians, contrary to STAR convention.
       r0=sqrt(o.x()*o.x()+o.y()*o.y());
-      tanl=geo->dipAngle();
+      tanl=tan(geo->dipAngle());
       z0=o.z();
       // fprintf(out,"%2d %2d %g %g %g %g %g %g\n",++BBB,q,curvature,phi0,psi,r0,tanl,z0);
       DoOneTrackCtb(out,q,curvature,phi0,psi,r0,tanl,z0);
@@ -159,7 +162,8 @@ Int_t StTrgMaker::Make() {
   fclose(out); return kStOK;
 }
 bool StTrgMaker::accept(StTrack* track) {
-  return track && track->flag() >= 0;
+  if(track) assert(track->flag()!=0); // Lee Barnby, starsoft mail Mar 22 2002.
+  return track && track->flag() > 0;
 }
 void StTrgMaker::FindIntersectionOfTwoCircles(
      double center1x,double center1y,double radius1,  /* input (circle 1) */
@@ -281,10 +285,10 @@ void StTrgMaker::DoOneTrackMwc(FILE *oo,long q,double curvatureCircle2,double ph
          double psi,double r0Circle1,double tanl,double z0) {
   // There are two trigonometric circles here.
   // One centered at (0,0) uses variables r0Circle1 and phi0Circle1.
-  // Another, centered at (xCenterCircle2,ycenterCircle2), uses variables
+  // Another, centered at (xCenterCircle2,yCenterCircle2), uses variables
   // radiusCircle2, radiansAtStartCircle2,radiansInFlightCircle2, and radiansAtMwcCircle2.
   int sector,subsector;
-  double xstart,ystart,xCenterCircle2,ycenterCircle2,dist,radiusCircle2,radiansInFlightCircle2;
+  double xstart,ystart,xCenterCircle2,yCenterCircle2,dist,radiusCircle2,radiansInFlightCircle2;
   double xAtMwc,yAtMwc,radiansAtStartCircle2,radiansAtMwcCircle2,errDistPhi,errDistRad;
   assert(curvatureCircle2>=0); // Not physical, just a convention for the code below.
   if(tanl>0) {
@@ -300,13 +304,13 @@ void StTrgMaker::DoOneTrackMwc(FILE *oo,long q,double curvatureCircle2,double ph
   //    z0,dist,radiusCircle2,tanl,q,radiansInFlightCircle2);
   assert(radiansInFlightCircle2>=0); // May become neg below.
   if(radiansInFlightCircle2>PI) { fprintf(oo,"M-1:-1\nR999\nN999\n"); return; } // don't extend so shallow a trk
-  if(q<0) radiansInFlightCircle2*=-1;
-  CalcCenterOfCircleDefinedByTrack(q,radiusCircle2,psi,r0Circle1,phi0Circle1,&xCenterCircle2,&ycenterCircle2);
+  if(q>0) radiansInFlightCircle2*=-1;
+  CalcCenterOfCircleDefinedByTrack(q,radiusCircle2,psi,r0Circle1,phi0Circle1,&xCenterCircle2,&yCenterCircle2);
   xstart=r0Circle1*cos(RPD*phi0Circle1); ystart=r0Circle1*sin(RPD*phi0Circle1);
-  radiansAtStartCircle2=atan2(ystart,xstart);
+  radiansAtStartCircle2=atan2(ystart-yCenterCircle2,xstart-xCenterCircle2);
   radiansAtMwcCircle2=radiansAtStartCircle2+radiansInFlightCircle2;
   xAtMwc=xCenterCircle2+radiusCircle2*cos(radiansAtMwcCircle2);
-  yAtMwc=ycenterCircle2+radiusCircle2*sin(radiansAtMwcCircle2);
+  yAtMwc=yCenterCircle2+radiusCircle2*sin(radiansAtMwcCircle2);
   Location2Sector(tanl,xAtMwc,yAtMwc,&sector,&subsector,&errDistPhi,&errDistRad);
   OO"M%d:%d\n",sector,subsector);
   OO"R%4.2f\n",errDistRad); // dist from edge of MWC subsector in radial direction, cm
