@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.56 2001/11/10 01:09:05 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.57 2001/11/13 22:47:17 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -106,20 +106,15 @@ Int_t StFlowAnalysisMaker::Make() {
 Int_t StFlowAnalysisMaker::Init() {
   // Book histograms
 
-  float ptMaxPart = 2.;
+  float ptMaxPart = 8.;
   if (pFlowSelect->PtMaxPart()) {
     ptMaxPart = pFlowSelect->PtMaxPart();
   }
   xLabel = "Pseudorapidity";
   if (strlen(pFlowSelect->PidPart()) != 0) { xLabel = "Rapidity"; }
 
-  //const float etaMin          =  -4.5;
-  //const float etaMax          =   4.5;
   const float triggerMin      =    0.;
   const float triggerMax      =   10.;
-  //const float ptMin           =    0.;
-  //const float ptMax           =    2.;
-  //const float ptMax           =    8.;
   const float chargeMin       =  -2.5;
   const float chargeMax       =   2.5; 
   const float dcaMin          =    0.;
@@ -941,7 +936,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.56 2001/11/10 01:09:05 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.57 2001/11/13 22:47:17 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1434,7 +1429,7 @@ static Double_t chi(double res) {
 
 Int_t StFlowAnalysisMaker::Finish() {
   // Calculates resolution and mean flow values
-  // Fits q distribution and outputs phiWgt values
+  // Outputs phiWgt values
   TString* histTitle;
 
   // PhiWgt histogram collection
@@ -1566,22 +1561,6 @@ Int_t StFlowAnalysisMaker::Finish() {
 	histFull[k].mHist_v->SetBinError(j+1, 0.);
       }
 
-      // Fit q distribution
-      float area = histFull[k].histFullHar[j].mHist_q->
-	Integral() * qMax / (float)n_qBins; 
-      float mult = histFull[k].histFullHar[j].mHistMult->GetMean();
-      TF1* func_q = new TF1("qDist", qDist, 0., qMax, 3); // fit q dist
-      func_q->SetParNames("v", "mult", "area");
-      float qMean = histFull[k].histFullHar[j].mHist_q->GetMean();
-      //float v2N = (qMean > 1.) ? qMean - 1. : 0.;
-      //float vGuess = 100. * sqrt(v2N / mult);
-      float vGuess = (qMean > 2.) ? 8. : 1.;
-      func_q->SetParameters(vGuess, mult, area); // initial values
-      func_q->SetParLimits(1, 1, 1);             // mult is fixed
-      func_q->SetParLimits(2, 1, 1);             // area is fixed
-      histFull[k].histFullHar[j].mHist_q->Fit("qDist", "Q0");
-      delete func_q;
-
       // Calculate PhiWgt
       double mean = histFull[k].histFullHar[j].mHistPhi->Integral() 
 	/ (double)Flow::nPhiBins;
@@ -1620,13 +1599,11 @@ Int_t StFlowAnalysisMaker::Finish() {
 
   // Write all histograms
   TFile histFile("flow.hist.root", "RECREATE");
-  //histFile.SetFormat(1);
   GetHistList()->Write();
   histFile.Close();
   
   // Write PhiWgt histograms
   TFile phiWgtNewFile("flowPhiWgtNew.hist.root", "RECREATE");
-  //phiWgtNewFile.SetFormat(1);
   phiWgtHistNames->Write();
   phiWgtNewFile.Close();
   delete phiWgtHistNames;
@@ -1646,6 +1623,9 @@ Int_t StFlowAnalysisMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.57  2001/11/13 22:47:17  posk
+// Documentation updated. Fit to q function moved to macro.
+//
 // Revision 1.56  2001/11/10 01:09:05  posk
 // Moved some constants into StFlowConstants.
 //
