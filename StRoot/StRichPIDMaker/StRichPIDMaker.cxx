@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.47 2001/10/27 19:43:42 dunlop Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.48 2001/11/12 16:16:44 jeromel Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.48  2001/11/12 16:16:44  jeromel
+ * Removed unused variable 'olddist' ; unknown escape sequence `\W' fixed.
+ *
  * Revision 2.47  2001/10/27 19:43:42  dunlop
  * Fix segfault when richCollection not present
  *
@@ -315,7 +318,7 @@ using std::less;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.47 2001/10/27 19:43:42 dunlop Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.48 2001/11/12 16:16:44 jeromel Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -701,7 +704,7 @@ Int_t StRichPIDMaker::Make() {
     if (!goodRichEvent) return kStWarn;
     if (!richCollection) {
 	cout << "StRichPIDMaker::Make()\n";
-	cout << "\WARNING: Cannot get richCollection from StEvent\n";
+	cout << "\tWARNING: Cannot get richCollection from StEvent\n";
 	cout << "\tSkip Event" << endl;
 	return kStWarn;
     }
@@ -1227,9 +1230,9 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	double quartzPath    = ringCalculator->getMeanPathInQuartz();
 	double radPath       = ringCalculator->getMeanPathInRadiator();
 	
-	double olddist  = ((outerDistance/ringWidth > 1 &&
-			    (innerDistance/ringWidth < outerDistance/ringWidth )) ? 
-			   (-1.0):(1.0))*innerDistance/ringWidth;
+	//	double olddist  = ((outerDistance/ringWidth > 1 &&
+	//		    (innerDistance/ringWidth < outerDistance/ringWidth )) ? 
+	//		   (-1.0):(1.0))*innerDistance/ringWidth;
 //	double oldsigma = this->getHitSigma(olddist);
 	  
 
