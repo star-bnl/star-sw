@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.12 2000/01/24 23:01:00 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.13 2000/02/11 20:53:10 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.13  2000/02/11 20:53:10  posk
+// Commented out random_shuffle and cout formatting so as to work under CC5.
+//
 // Revision 1.12  2000/01/24 23:01:00  posk
 // Merged updates
 //
@@ -90,7 +93,7 @@ Int_t StFlowMaker::Make() {
   if (!pEvent) return kStOK; // If no event, we're done
 
   // Check the event cuts and fill StFlowEvent
-  pFlowEvent = 0;
+  pFlowEvent = NULL;
   if (StFlowCutEvent::CheckEvent(pEvent)) fillFlowEvent();
 
   return kStOK;
@@ -99,7 +102,7 @@ Int_t StFlowMaker::Make() {
 //-----------------------------------------------------------------------
 
 void StFlowMaker::PrintInfo() {
-  cout << "$Id: StFlowMaker.cxx,v 1.12 2000/01/24 23:01:00 posk Exp $" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.13 2000/02/11 20:53:10 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 
 }
@@ -111,7 +114,7 @@ Int_t StFlowMaker::Init() {
   readPhiWgtFile();
 
   // Set the event cuts
-//   StFlowCutEvent::SetMult(20, 2000);
+//   StFlowCutEvent::SetMult(1999, 2000);
 //   StFlowCutEvent::SetVertexX(0., 0.);
 //   StFlowCutEvent::SetVertexY(0., 0.);
 //   StFlowCutEvent::SetVertexZ(-50., 50.);
@@ -233,7 +236,7 @@ void StFlowMaker::fillFlowEvent() {
   // Check Eta Symmetry
   if (!StFlowCutEvent::CheckEtaSymmetry()) {  // if kFALSE delete this event
     delete pFlowEvent;
-    pFlowEvent = 0;
+    pFlowEvent = NULL;
 
     return;
   }

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.6 2000/01/13 22:19:16 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.7 2000/02/11 20:53:06 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.7  2000/02/11 20:53:06  posk
+// Commented out random_shuffle and cout formatting so as to work under CC5.
+//
 // Revision 1.6  2000/01/13 22:19:16  posk
 // Updates and corrections.
 //
@@ -167,9 +170,11 @@ void StFlowCutEvent::PrintCutList() {
   cout << "#   VertexZ cuts= " << mVertexZCuts[0] << ", " << mVertexZCuts[1]
        << " :\t Events Cut= " << mVertexZCut << endl;
   cout << "#   Eta Symmetry cuts= " << mEtaSymCuts[0] << ", " << mEtaSymCuts[1] 
-       << " :\t " <<  setprecision(4) << (float)mEtaSymCutN/(float)mEventN/perCent
+    //       << " :\t " <<  setprecision(4) << (float)mEtaSymCutN/(float)mEventN/perCent
+       << " :\t " << (float)mEtaSymCutN/(float)mEventN/perCent
        << "% cut" << endl;
-  cout << "# Good Events = " << mGoodEventN << ", " << setprecision(4) <<
+  //  cout << "# Good Events = " << mGoodEventN << ", " << setprecision(4) <<
+  cout << "# Good Events = " << mGoodEventN << ", " << 
     (float)mGoodEventN/(float)mEventN/perCent << "%" << endl;
   cout << "#######################################################" << endl;
 
