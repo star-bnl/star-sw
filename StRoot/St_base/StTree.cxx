@@ -173,17 +173,17 @@ Int_t StBranch::SetFile(const Char_t *file,const Char_t *mode,int insist)
 Int_t StBranch::UpdateFile(const Char_t *file)
 {
 TString outFile = file; gSystem->ExpandPathName(outFile);
-TString outDir  = gSystem->DirName(outFile);
+TString outDir  = gSystem->DirName (outFile);
 TString outBas  = gSystem->BaseName(outFile);
-TString intDir  = gSystem->DirName(fFile);
-TString intBas  = gSystem->BaseName(fFile);
+TString intDir  = gSystem->DirName (GetFile());
+TString intBas  = gSystem->BaseName(GetFile());
 Char_t * newFile = gSystem->ConcatFileName(outDir,intBas);
 if (intBas == outBas || outBas.IsNull()) 	goto RETN00;
 if (fIOMode&1 == 0) 				goto RETN99;
 if (gSystem->AccessPathName(newFile)) 		goto RETN99;
 RETN00: fFile = newFile;
 printf("<StBranch::UpdateFile> Branch=%s file %s\n",GetName(),newFile); 
-RETN99: delete newFile;
+RETN99: delete [] newFile;
 return 0;
 }
 //_______________________________________________________________________________
@@ -314,6 +314,7 @@ void StBranch::SetParAll(TList *savList)
 void StBranch::OpenTFile()
 {
   if (fTFile) return;
+  gDirectory = 0;
   TObject *tf = gROOT->FindObject(GetFile());
   if (tf && !tf->InheritsFrom(TFile::Class())) tf = 0;
   fTFile = (TFile*)tf;
@@ -589,16 +590,13 @@ Int_t StFile::AddWild(const Char_t *file)
     tname = name;
 
     cc = gSystem->ConcatFileName(tdir,name);
-    fullname = cc; delete cc;
+    fullname = cc; delete [] cc;
 
     Long_t idqwe,sizeqwe,flags,modtimeqwe;
     gSystem->GetPathInfo(fullname,&idqwe,&sizeqwe,&flags,&modtimeqwe); 
     if (flags&1 || flags&2 || !flags&4) continue;
     
 //		prepare simple regular expression
-    tbase.ReplaceAll(".","\\.");
-    tbase.ReplaceAll("*",".*");
-    tbase.ReplaceAll("?",".");
     TRegexp rexp(tbase,kTRUE);
     int len=0; 
     if (rexp.Index(tname,&len)!=0) 	continue;
