@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.cc,v 1.5 2000/06/13 14:34:25 oldi Exp $
+// $Id: StFtpcConfMapper.cc,v 1.6 2000/07/03 12:39:21 jcs Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.6  2000/07/03 12:39:21  jcs
+// correct comment
+//
 // Revision 1.5  2000/06/13 14:34:25  oldi
 // Excluded function call to TrackLoop().
 // Changed cout to gMessMgr->Message().
@@ -16,7 +19,7 @@
 // StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n) now calculates the
 // chi squared. Therefore the pointer to 'a' has to be a pointer to an 6-dim array
 // (a[6]). Also the code of this function was modified to take care of the first
-// point which is not allowd to be used in the circle fit (to avoid infinities).
+// point which is not allowed to be used in the circle fit (to avoid infinities).
 // Introduction of new function CreateTrack() to cleanup ClusterLoop().
 // Introduction of new function TrackLoop() and ExtendTrack() to get cleaner
 // tracks.
