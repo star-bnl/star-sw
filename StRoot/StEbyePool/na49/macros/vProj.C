@@ -1,14 +1,18 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: vProj.C,v 1.10 2002/03/26 17:48:42 posk Exp $
+// $Id: vProj.C,v 1.11 2002/11/15 22:35:17 posk Exp $
 //
 // Author:       Art Poskanzer, May 2000
 // Description:  Projects v(y,pt) on the y and Pt axes
 //                 with yield or cross section weighting.
 //               Also makes the min. bias histograms
-//                 and v as a function of centrality.
+//                 and v as a function of centrality
+//                 from these projections.
 //               Saves output histograms to a file.
-//               The cross sections come from dNdydPt.C .
+//               The cross sections come from dNdydPt.C times
+//                 the fraction of events at each centrality.
+//               Min. bias only sums centralities 1 to 5
+//                 and uses the fraction of geometric cross section.
 //               Centrality = 0 is min. bias
 //               Centralites 7, 8, and 9 are the 
 //                 combined 1-2, 3-4, and 5-6 centralities.
@@ -19,7 +23,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
 #include "TString.h"
-//#include <math.h>
 
 TCanvas*  can;
 char      runName[6];
@@ -29,15 +32,17 @@ const int nCens = 6;
 
 void vProj(char* part = "pion") {
   
-  int   eBeam = 158; //select full beam energy
-  //int   eBeam = 40;  //select 40Gev beam energy
+  //int   eBeam = 158; // select full beam energy
+  int   eBeam = 40;  // select 40Gev beam energy
+
   bool  pion = kFALSE;
   if (strcmp(part, "pion")==0) pion = kTRUE;
+
   bool  crossSection = kTRUE;
   //bool  crossSection = kFALSE;       // use yield weighting
   bool  pCons = kTRUE;               // do momentum consevation corr.
   //bool  pCons = kFALSE;
-  //bool  pTFlow = kTRUE;      //calculate Flow weighted with pt
+  //bool  pTFlow = kTRUE;      // calculate Flow weighted with pt
   bool  pTFlow = kFALSE;
 
   const int nPlots = 1 + nCens + nCens/2;
@@ -57,8 +62,9 @@ void vProj(char* part = "pion") {
     float  vPtMax = 20.;
     float  vPtMin = -10.;
     float  sumPt2All[nCens] = {773.,623.,455.,305.,203.,122.}; // from Glenn
-    float  meanMul[nCens] = {135.,184.,152.,108.,75.,46.}; // for har 1
-    float  meanPt[nCens] = {0.166,0.255,0.288,0.282,0.279,0.275}; // for har 1
+    float  meanMul[nCens] = {119.,181.,154.,110.,78.,46.}; // for har 1
+    float  meanPt[nCens] = {0.166,0.254,0.293,0.288,0.284,0.279}; // for har 1
+    Double_t fracEvents[nCens] = {0.231, 0.189, 0.134, 0.134, 0.115, 0.197};
   } else if (eBeam == 40) {
     double yCM    =  2.24;
     float  yLow   =  yCM;              // for pt proj.
@@ -70,16 +76,15 @@ void vProj(char* part = "pion") {
     float  vPtMax =  5.;
     float  vPtMin = -5.;
     float  sumPt2All[nCens] = {579.,467.,344..,231.,155.,94.}; // from Glenn
-    //float  meanMul[nCens] = {281.,244.,172.,112.,75.,45.}; // for har 1 sel 1
-    float  meanMul[nCens] = {84.,74.,54.,37.,25.,15.}; // for har 1 sel 2
-    //float  meanMul[nCens] = {142.,60.,59.,39.,27.,17.}; // for har 1 sel 1 stripes 
-    //float  meanMul[nCens] = {45.,40.,21.,14.,11.,7.}; // for har 1 sel 2 stripes 
-    float  meanPt[nCens] = {0.326,0.322,0.316,0.309,0.302,0.297}; //for har 1
+    float  meanMul[nCens] = {89.3,76.4,59.5,42.2,29.7,17.7}; // for har 1
+    float  meanPt[nCens] = {0.284,0.281,0.273,0.270,0.265,0.257}; // for har 1
+    Double_t fracEvents[nCens] = {0.085, 0.129, 0.191, 0.178, 0.170, 0.247};
   } else {
     cout << " Not valid beam energy" << endl;
     return;
   }
-
+  Double_t fracGeom[nCens]   = {0.05, 0.075, 0.11, 0.10, 0.10, 0.57};
+ 
   TFile*    anaFile[nCens];
   TH2*      v2D[nCens][nHars];
   TH2*      vObs2D[nCens][nHars];
@@ -103,6 +108,7 @@ void vProj(char* part = "pion") {
   double    y;
   double    pt;
   double    yield;
+  double    yieldReal;
   double    yieldSum;
   double    v;
   double    vErr;
@@ -175,17 +181,16 @@ void vProj(char* part = "pion") {
 	   << ", sub-to-full-fact/sqrt(2) = " << fullSubFact/sqrt2 << endl;
     }
     
-    //get the resolution histogram
-    if (pCons) {
-      histName = new TString("Flow_Res_Sel");
-      histName->Append(*selText);
-      resHist[n] = dynamic_cast<TH1*>(anaFile[n]->Get(histName->Data()));
-      if (!resHist[n]) {
-	cout << "### Can't find histogram " << histName->Data() << endl;
-	return;
-      }
-      delete histName;
-    }      
+    // get the resolution histogram
+    histName = new TString("Flow_Res_Sel");
+    histName->Append(*selText);
+    resHist[n] = dynamic_cast<TH1*>(anaFile[n]->Get(histName->Data()));
+    if (!resHist[n]) {
+      cout << "### Can't find histogram " << histName->Data() << endl;
+      return;
+    }
+    delete histName;
+    
 
     for (int j = 0; j < nHars; j++) {
       // get the 2D v histograms
@@ -212,7 +217,7 @@ void vProj(char* part = "pion") {
       // Conservation of momentum correction for v1     
       if (pCons && j==0) {
 
-	// Get the 2D vObs histograms
+	// get the 2D vObs histograms
 	histName = new TString("Flow_vObs2D_Sel");
 	histName->Append(*selText);
 	histName->Append("_Har");
@@ -225,19 +230,14 @@ void vProj(char* part = "pion") {
 	delete histName;
 	v2D[n][j]->Reset();
 
-	// Get the resolution and calculate chi
+	// get the resolution and calculate chi
 	double res = resHist[n]->GetBinContent(j+1);
 	double chi = chi(res);
-	double chiSub;
-	if (eBeam == 158) {
-	  chiSub = chi /  sqrt(2.);
-	} else {
-	  chiSub = chi / 2.;
-	}
+	double chiSub = chi / sqrt(2.);
 	double resCorr;
 	double chiFactCorr;
 	if (chiSub < 0.1 && frac < 0.1) {
-	  // Approximate solution
+	  // approximate solution
 	  double chiApprox = sqrt(chi*chi + frac2);
 	  double resCorr = resEventPlane(chiApprox);
 	  double chiFactCorr = F(chiApprox);
@@ -247,7 +247,7 @@ void vProj(char* part = "pion") {
 	  cout << " F approx= " << chiFactCorr << ", corr.= " <<
 	    chiFactCorr/sqrtPiOver2 << endl;
 	} else {
-	  // Starting from resSub
+	  // starting from resSub
 	  double resSub = resEventPlane(chiSub);
 	  double chiSubCorr = chi(resSub, frac);
 	  double chiCorr = chiSubCorr * fullSubFact;
@@ -279,15 +279,53 @@ void vProj(char* part = "pion") {
       }
     }
 
-    // Get the 2D yield histograms
+    // get the 2D yield histograms
     yieldPartHist[n] = dynamic_cast<TH2*>(anaFile[n]->Get("Flow_YieldPart2D"));
     if (!yieldPartHist[n]) {
       cout << "### Can't find yield part histogram Flow_YieldPart2D"
 	   << endl;
       return;
     }
+
+    // get the histograms to print the number of events and <Eveto>.
+    TH1* multHist = dynamic_cast<TH1*>(anaFile[n]->Get("Flow_Mult"));
+    if (!multHist) {
+      cout << "### Can't find histogram Flow_Mult"<< endl;
+      return;
+    }
+    Float_t events = multHist->GetEntries();
+
+    TH1* vetoHist = dynamic_cast<TH1*>(anaFile[n]->Get("Flow_EVeto"));
+    if (!vetoHist) {
+      cout << "### Can't find histogram Flow_EVeto"<< endl;
+      return;
+    }
+    Float_t vetoMean = vetoHist->GetMean();
+
+    // get the resolution of the second harmonic event plane.
+    Float_t res2 = resHist[n]->GetBinContent(2);
+
+    // get the histograms to print <M> and <pt> for momentum conservation corr.
+    TH1* mulHist = dynamic_cast<TH1*>(anaFile[n]->Get("Flow_Mul_Sel2_Har1"));
+    if (!multHist) {
+      cout << "### Can't find histogram Flow_Mul_Sel2_Har1"<< endl;
+      return;
+    }
+    Float_t meanMult = mulHist->GetMean();
+
+    TH2* yieldHist = dynamic_cast<TH2*>(anaFile[n]->Get("Flow_Yield2D_Sel2_Har1"));
+    if (!yieldHist) {
+      cout << "### Can't find histogram Flow_Yield2D_Sel2_Har1"<< endl;
+      return;
+    }
+    TH1* ptHist = yieldHist->ProjectionY("pt", 0, 9999, "E");
+    Float_t ptMean  = ptHist->GetMean();
+
+    cout << " events= " << events << " EVeto= " << vetoMean 
+	 << " mult= " << meanMult << " pt= " << ptMean 
+	 << " res. har. 2= " << res2 << endl;
   }
-  // Get the axes properties
+  // get the axes properties
   float  xMin  = xAxis->GetXmin();
   float  xMax  = xAxis->GetXmax();
   float  yMin  = yAxis->GetXmin();
@@ -298,7 +336,7 @@ void vProj(char* part = "pion") {
   for (int n = 0; n < nPlots; n++) {
     sprintf(cenText, "%d", n);
 
-    // Create 1D Yield histograms
+    // create 1D Yield histograms
     histName = new TString("Flow_YieldY_Sel");
     histName->Append(*selText);
     histName->Append("_Cen");
@@ -320,7 +358,7 @@ void vProj(char* part = "pion") {
     for (int j = 0; j < nHars; j++) {
       sprintf(harText, "%d", j+1);
 
-      // Create the 1D v histograms
+      // create the 1D v histograms
       histName = new TString("Flow_vY_Sel");
       histName->Append(*selText);
       histName->Append("_Har");
@@ -350,7 +388,7 @@ void vProj(char* part = "pion") {
     }
   }
       
-  // Create the histograms for v as a function of centrality
+  // create the histograms for v as a function of centrality
   histName = new TString("Flow_Yield_Sel");
   histName->Append(*selText);
   yieldCen = new TH1F(histName->Data(), histName->Data(), nCens, 0.5, nCens+0.5);
@@ -372,7 +410,7 @@ void vProj(char* part = "pion") {
       delete histName;
   }
 
-  // Create the histogram for the triply integrated v
+  // create the histogram for the triply integrated v
   histName = new TString("Flow__v_Sel");
   histName->Append(*selText);
   _v = new TH1F(histName->Data(), histName->Data(), nHars, 0.5, 
@@ -398,6 +436,7 @@ void vProj(char* part = "pion") {
 	  for (int yBin=1; yBin<=yBins; yBin++) {
 	    pt = yAxis->GetBinCenter(yBin);
 	    if (pt < ptUp) {
+	      yieldReal = yieldPartHist[n-1]->GetCellContent(xBin, yBin);
 	      if (crossSection) {
 		if (pion) {
 		  yield = dNdydPt(0, y - yCM, pt, n) +
@@ -405,11 +444,12 @@ void vProj(char* part = "pion") {
 		} else {
 		  yield = dNdydPt(4, y - yCM, pt, n);         // p
 		}
+		yield *= fracEvents[n-1];
 	      } else {
-		yield = yieldPartHist[n-1]->GetCellContent(xBin, yBin);
+		yield = yieldReal;
 	      }
 	      v = v2D[n-1][j]->GetCellContent(xBin, yBin);
-	      if (v != 0.0) {
+	      if (v != 0.0 && yieldReal > 1.) { // error is wrong for one count
 		yieldSum += yield;
 		if (pTFlow) {
 		  vSum     += yield * v *pt;
@@ -428,7 +468,7 @@ void vProj(char* part = "pion") {
 	    error   = sqrt(err2Sum) / yieldSum;
 	  }
 	  if(j != 1 || n != 1 || eBeam != 40) // 40 GeV v2 cen 1 res. zero
-	    yieldY[n]->SetBinContent(xBin, yieldSum);
+	    {yieldY[n]->SetBinContent(xBin, yieldSum);}
 	  vY[n][j]->SetBinContent(xBin, content);
 	  vY[n][j]->SetBinError(xBin, error);
 	}
@@ -447,6 +487,7 @@ void vProj(char* part = "pion") {
 	  if (y > yLow && y < yUp) {
 	    v = v2D[n-1][j]->GetCellContent(xBin, yBin);
 	    if (j % 2 == 1 && y < yCM) v *= -1; // backward particles for odd har
+	    yieldReal = yieldPartHist[n-1]->GetCellContent(xBin, yBin);
 	    if (crossSection) {
 	      if (pion) {
 		yield = dNdydPt(0, y - yCM, pt, n) +
@@ -454,10 +495,11 @@ void vProj(char* part = "pion") {
 	      } else {
 		yield = dNdydPt(4, y - yCM, pt, n);           // p
 	      }
+	      yield *= fracEvents[n-1];
 	    } else {
-	      yield = yieldPartHist[n-1]->GetCellContent(xBin, yBin);
+	      yield = yieldReal;
 	    }
-	    if (v != 0.0) {
+	    if (v != 0.0 && yieldReal > 1.) { // error is wrong for one count
 	      yieldSum += yield;
 	      if (pTFlow) {
 		vSum += yield * v *pt;
@@ -474,7 +516,7 @@ void vProj(char* part = "pion") {
           if (pTFlow) error *= pt;
 	}
 	if(j != 1 || n != 1 || eBeam != 40) // 40 GeV v2 cen 1 res. zero
-	  yieldPt[n]->SetBinContent(yBin, yieldSum);
+	  {yieldPt[n]->SetBinContent(yBin, yieldSum);}
 	vPt[n][j]->SetBinContent(yBin, content);
 	vPt[n][j]->SetBinError(yBin, error);
       }
@@ -482,6 +524,8 @@ void vProj(char* part = "pion") {
   }
   
   // fill the min. bias projections (cen = 0) --------------------------
+  // only for centralities 1 to 5
+  // but using the fraction of geometric cross section
   for (int j = 0; j < nHars; j++) {
     for (int xBin=1; xBin<=xBins; xBin++) {
       yieldSum = 0.;
@@ -489,9 +533,9 @@ void vProj(char* part = "pion") {
       err2Sum  = 0.;
       content  = 0.;
       error    = 0.;
-      for (int n = 1; n <= nCens; n++) {
+      for (int n = 1; n < nCens; n++) {
 	v     = vY[n][j] ->GetBinContent(xBin);
-	yield = yieldY[n]->GetBinContent(xBin);
+	yield = (yieldY[n]->GetBinContent(xBin)) * fracGeom[n-1]/fracEvents[n-1];
 	if(v != 0.0) {
 	  yieldSum += yield;
 	  vSum     += yield * v;
@@ -513,9 +557,9 @@ void vProj(char* part = "pion") {
       err2Sum  = 0.;
       content  = 0.;
       error    = 0.;
-      for (int n = 1; n <= nCens; n++) {
+      for (int n = 1; n < nCens; n++) {
 	v     = vPt[n][j] ->GetBinContent(xBin);
-	yield = yieldPt[n]->GetBinContent(xBin);
+	yield = yieldPt[n]->GetBinContent(xBin) * fracGeom[n-1]/fracEvents[n-1];
 	if(v != 0.0) {
 	  yieldSum += yield;
 	  vSum     += yield * v;
@@ -617,15 +661,17 @@ void vProj(char* part = "pion") {
   }
   
   // fill the triply integrated histogram ---------------------------
+  // only for centralities 1 to 5
+  // but using the fraction of geometric cross section
   for (int j = 0; j < nHars; j++) {
     yieldSum = 0.;
     vSum     = 0.;
     err2Sum  = 0.;
     content  = 0.;
     error    = 0.;
-    for (int n = 1; n <= nCens; n++) {
+    for (int n = 1; n < nCens; n++) {
       v     = vCen[j] ->GetBinContent(n);
-      yield = yieldCen->GetBinContent(n);
+      yield = (yieldCen->GetBinContent(n)) * fracGeom[n-1]/fracEvents[n-1];
       if(v != 0.0) {
 	yieldSum += yield;
 	vSum     += yield * v;
@@ -921,6 +967,7 @@ static Double_t chi(double res, double f) {
 
 static Double_t F(double chi) {
   // Calculates the F function for momentum conservation as a function of chi_JYO
+  // The corr. = -pt * F * fracFact / sumPt2All
 
   double sqrtPiOver2 = sqrt(TMath::Pi()) / 2.;
   double chi2Over2   = chi*chi/2.;
@@ -935,6 +982,9 @@ static Double_t F(double chi) {
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: vProj.C,v $
+// Revision 1.11  2002/11/15 22:35:17  posk
+// Require > 1 count/bin. Use number of events or frac. of crosssection when combining centralities.
+//
 // Revision 1.10  2002/03/26 17:48:42  posk
 // Corrected sqrt(2) mistake.
 //
