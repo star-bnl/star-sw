@@ -407,6 +407,7 @@ BINARYSEARCH(valuetype)
 #define SEARCHORDER(valuetype) Search##valuetype
 
 //_____________________________________________________________________________
+#ifdef NOINLINES
 //_____________________________________________________________________________
 Int_t St_TableSorter::BSearch(Float_t value)
 {
@@ -414,6 +415,12 @@ Int_t St_TableSorter::BSearch(Float_t value)
 }
 //_____________________________________________________________________________
 Int_t St_TableSorter::BSearch(Int_t value)
+{
+  return BSearch(&value);
+}
+
+//_____________________________________________________________________________
+Int_t St_TableSorter::BSearch(Long_t value)
 {
   return BSearch(&value);
 }
@@ -435,6 +442,8 @@ Int_t St_TableSorter::BSearch(TString &value)
 {
   return BSearch(value.Data());
 }
+#endif
+
 //_____________________________________________________________________________
 Int_t St_TableSorter::BSearch(const void *value) {
   Int_t index = -1;
