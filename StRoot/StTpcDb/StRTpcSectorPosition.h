@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcSectorPosition.h,v 1.1 2001/08/14 18:18:03 hardtke Exp $
+ * $Id: StRTpcSectorPosition.h,v 1.2 2004/08/26 21:05:10 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -22,14 +22,14 @@ class StRTpcSectorPosition : public StTpcSectorPositionI {
 
 private:
 
-  St_tpcSectorPosition* mSectorPosition;
+  tpcSectorPosition_st mSectorPosition;
 
 public:
 
   StRTpcSectorPosition(St_tpcSectorPosition* SectPosIn=0){AddData(SectPosIn);}
   ~StRTpcSectorPosition(){}
    void AddData(St_tpcSectorPosition* SectPosIn) {
-   mSectorPosition = SectPosIn;
+     if (SectPosIn) mSectorPosition = (*SectPosIn)[0];
  } 
 
   //Implements Abstract Interface 
@@ -45,13 +45,13 @@ public:
 
 };
 
-inline double  StRTpcSectorPosition::innerPositionOffsetX() const { return (*mSectorPosition)[0].innerSectorLocalxShift;}
+inline double  StRTpcSectorPosition::innerPositionOffsetX() const { return mSectorPosition.innerSectorLocalxShift;}
 
-inline double  StRTpcSectorPosition::outerPositionOffsetX() const { return (*mSectorPosition)[0].outerSectorLocalxShift;}
+inline double  StRTpcSectorPosition::outerPositionOffsetX() const { return mSectorPosition.outerSectorLocalxShift;}
 
-inline double  StRTpcSectorPosition::innerRotation() const { return (*mSectorPosition)[0].innerSectorRotationAngle;}
+inline double  StRTpcSectorPosition::innerRotation() const { return mSectorPosition.innerSectorRotationAngle;}
 
-inline double  StRTpcSectorPosition::outerRotation() const { return (*mSectorPosition)[0].outerSectorRotationAngle;}
+inline double  StRTpcSectorPosition::outerRotation() const { return mSectorPosition.outerSectorRotationAngle;}
 
 
 #endif
