@@ -1,7 +1,0 @@
-/* dst_L2_Trigger.idl      */
-/* Table: dst_L2_Trigger   */
-
- struct dst_L2_Trigger {
-  unsigned long            L2_result[32];        /* L2 analysis result */
- };
-/*  Last mod. for dst_L2_Trigger:   $Date: 2000/02/04 22:36:59 $ */
