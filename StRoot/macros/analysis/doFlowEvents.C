@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.36 2002/01/15 17:36:34 posk Exp $
+// $Id: doFlowEvents.C,v 1.37 2002/01/30 13:05:13 oldi Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -262,6 +262,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 //   StFlowCutEvent::SetVertexY(0., 0.);
 //   StFlowCutEvent::SetVertexZ(0., 0.);
 //   StFlowCutEvent::SetEtaSym(0., 0.);
+//   StFlowCutEvent::SetTrigger(0.);
   
   // Set the track cuts
 //   StFlowCutTrack::SetFitPtsTpc(0, 0);
@@ -409,7 +410,7 @@ void doFlowEvents(const Int_t nevents)
   // Commit to cvs with these defaults:
    const Char_t *filePath="-";
    const Char_t *fileExt="/afs/rhic/star/data/samples/gstar.dst.root";
-  
+
   // BNL
 //  Char_t* filePath="/star/rcf/scratch/posk/P00hg3";
 //  Char_t* fileExt="*.flowpicoevent.root";
@@ -458,6 +459,9 @@ void doFlowEvents(const Int_t nevents)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.37  2002/01/30 13:05:13  oldi
+// Trigger cut implemented.
+//
 // Revision 1.36  2002/01/15 17:36:34  posk
 // Can instantiate StFlowScalarProdMaker.
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.22 2001/05/22 20:17:13 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.23 2002/01/30 13:04:10 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -39,6 +39,8 @@ UInt_t   StFlowCutEvent::mVertexYCut     = 0;
 UInt_t   StFlowCutEvent::mVertexZCut     = 0;
 Float_t  StFlowCutEvent::mEtaSymCuts[2]  = {-3., 3.};
 UInt_t   StFlowCutEvent::mEtaSymCutN     = 0;     
+Float_t  StFlowCutEvent::mTriggerCut     = 0;
+UInt_t   StFlowCutEvent::mTriggerCutN    = 0;
 
 //-----------------------------------------------------------------------
 
@@ -101,6 +103,26 @@ Bool_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
     return kFALSE;
   }
 
+  // Trigger
+  StL0Trigger* pTrigger = pEvent->l0Trigger();
+  Float_t trigger = 10.;
+
+  if (pTrigger) {
+    UInt_t triggerWord = pTrigger->triggerWord();
+    
+    switch (triggerWord) {
+    case 4096:  trigger = 1.;  break; // minbias
+    case 4352:  trigger = 2.;  break; // central
+    case 61952: trigger = 3.;  break; // laser
+    default:    trigger = 10.; break; // no clue
+    }
+  }
+
+  if (mTriggerCut && trigger != mTriggerCut) {
+    mTriggerCutN++;
+    return kFALSE;
+  }
+
   mGoodEventN++;
   return kTRUE;
 }
@@ -151,6 +173,22 @@ Bool_t StFlowCutEvent::CheckEvent(StFlowPicoEvent* pPicoEvent) {
   if (mVertexZCuts[1] > mVertexZCuts[0] &&
      (vertexZ < mVertexZCuts[0] || vertexZ >= mVertexZCuts[1])) {
     mVertexZCut++;
+    return kFALSE;
+  }
+
+  // Trigger
+  UInt_t triggerWord = pPicoEvent->L0TriggerWord();
+  Float_t trigger = 10.;
+
+  switch (triggerWord) {
+  case 4096:  trigger = 1.;  break; // minbias
+  case 4352:  trigger = 2.;  break; // central
+  case 61952: trigger = 3.;  break; // laser
+  default:    trigger = 10.; break; // no clue
+  }
+
+  if (mTriggerCut && trigger != mTriggerCut) {
+    mTriggerCutN++;
     return kFALSE;
   }
 
@@ -240,6 +278,9 @@ void StFlowCutEvent::PrintCutList() {
   cout << "#   EtaSym cuts= " << mEtaSymCuts[0] << ", " << mEtaSymCuts[1] 
        << " :\t Events Cut= " << mEtaSymCutN << "\t (" <<  setprecision(3) << 
     (float)mEtaSymCutN/(float)mEventN/perCent << "% cut)" << endl;
+  cout << "#   Trigger cut= " << mTriggerCut 
+       << " :\t\t Events Cut= " << mTriggerCutN << "\t (" <<  setprecision(3) << 
+    (float)mTriggerCutN/(float)mEventN/perCent << "% cut)" << endl;
   cout << "# Good Events = " << mGoodEventN << ", " << setprecision(3) <<
     (float)mGoodEventN/(float)mEventN/perCent << "%" << endl;
   cout << "#######################################################" << endl;
@@ -249,6 +290,9 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.23  2002/01/30 13:04:10  oldi
+// Trigger cut implemented.
+//
 // Revision 1.22  2001/05/22 20:17:13  posk
 // Now can do pseudorapidity subevents.
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.h,v 1.6 2000/12/12 20:22:05 posk Exp $
+// $Id: StFlowCutEvent.h,v 1.7 2002/01/30 13:04:20 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -39,7 +39,8 @@ class StFlowCutEvent {
   static void   SetVertexY(const Float_t lo, const Float_t hi);
   static void   SetVertexZ(const Float_t lo, const Float_t hi);
   static void   SetEtaSym(Float_t lo, Float_t hi);
-  
+  static void   SetTrigger(const Float_t value);   
+
  private:
 
   static UInt_t  mEventN;                // number of events
@@ -63,6 +64,9 @@ class StFlowCutEvent {
   static UInt_t  mEtaSymCutN;            // number not accepted
   static Float_t mEtaSymCuts[2];         // range
 
+  static UInt_t  mTriggerCutN;           // number not accepted
+  static Float_t mTriggerCut;            // allowed trigger value
+
   ClassDef(StFlowCutEvent,1)             // macro for rootcint
 }; 
 
@@ -84,11 +88,17 @@ inline void StFlowCutEvent::SetVertexZ(const Float_t lo, const Float_t hi) {
 inline void StFlowCutEvent::SetEtaSym(Float_t lo, Float_t hi) {
   mEtaSymCuts[0] = lo; mEtaSymCuts[1] = hi; }
 
+inline void StFlowCutEvent::SetTrigger(const Float_t value) {
+  mTriggerCut = value; }
+
 #endif
 
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.h,v $
+// Revision 1.7  2002/01/30 13:04:20  oldi
+// Trigger cut implemented.
+//
 // Revision 1.6  2000/12/12 20:22:05  posk
 // Put log comments at end of files.
 // Deleted persistent StFlowEvent (old micro DST).
