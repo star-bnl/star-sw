@@ -9,7 +9,7 @@ typedef unsigned short UINT16 ;
 typedef unsigned char UINT8 ;
 #endif
 
-#include </star/u2a/struck/work/l3offline/CROAT/include/sector.h>	// for the constants
+#include "sector.h"	/* for the constants */
 
 #define FMT_ADCD	(1 << 0)
 #define FMT_ADCR	(1 << 1)
@@ -26,24 +26,24 @@ typedef unsigned char UINT8 ;
 #define FMT_CFGR	(1 << 12)
 
 
-// special events
+/* special events */
 #define FMT_SPEC_PED	(1 << 0) 
 #define FMT_SPEC_SIGMA	(1 << 1)
 #define FMT_SPEC_GAIN	(1 << 2)
 #define FMT_SPEC_BADC	(1 << 3)
 
 
-// Version below corresponds to "DAQ Raw Data Format" document's version
-#define DAQ_RAW_FORMAT_VERSION	0x00020000	// 2.0
+/* Version below corresponds to "DAQ Raw Data Format" document's version */
+#define DAQ_RAW_FORMAT_VERSION	0x00020000	/* 2.0 */
 
-// Define for linker-level checking only! See comment at the
+/* Define for linker-level checking only! See comment at the
 // end of this file.
-//#define VERIFY_SIZES
+//#define VERIFY_SIZES */
 
 #define DAQ_RAW_FORMAT_ORDER	0x04030201
 #define DAQ_RAW_FORMAT_WORD9	0x9999c0de
 
-// order in the mezzanine bank
+/* order in the mezzanine bank */
 #define TPC_ADCD	0
 #define TPC_SEQD	1
 #define TPC_ADCX	2
@@ -59,7 +59,7 @@ typedef unsigned char UINT8 ;
 
 #define TPC_MZP_BANKS_NUM	12
 
-// character names
+/* character names */
 #define CHAR_LRHD	"LRHD    "
 #define CHAR_BEGR	"BEGR    "
 #define CHAR_ENDR	"ENDR    "
@@ -106,7 +106,7 @@ typedef unsigned char UINT8 ;
 #pragma pack 1
 #endif
 
-// generic section for all of DAQ
+/* generic section for all of DAQ */
 struct bankHeader {
         char bank_type[8] ;
         UINT32 length ;
@@ -144,7 +144,7 @@ struct LOGREC {
 	UINT32 crc ;
 } ;
 
-// Level 3 structures
+/* Level 3 structures */
 struct TPCSECLP {
 	struct bankHeader bh ;
 	struct offlen rb[SB_RB_NUM] ;
@@ -165,16 +165,17 @@ struct mzCentroid {
 
 
 
-// this is a local structure that is just used to allocate space
-// it will be recast to the real TPCMZCLD later...
+/* this is a local structure that is just used to allocate space
+ it will be recast to the real TPCMZCLD later... */
 struct TPCMZCLD_local {
 	struct bankHeader bh ;
-	UINT32 padrowFiller[2*6] ;	// max 4 padrows, each occupies 2 UINT32s...
+    /* max 4 padrows, each occupies 2 UINT32s... */ 
+	UINT32 padrowFiller[2*6] ;	
 	struct mzCentroid centroidFiller[MZ_TPC_CPP_PER_PAD*MZ_TPC_MAX_PADS_PER_MEZ] ; 
-} ;
+} ; 
 
 
-// Formatting structures
+/* Formatting structures */
 struct TPCSECP {
 	struct bankHeader bh ;
 	struct offlen rb[SB_RB_NUM] ;
@@ -198,20 +199,20 @@ struct TPCADCX {
 		UINT32 row ;
 		UINT32 offADC ;
 		UINT32 offSEQ ;
-	} lrow[6] ;	// MAX 6 padrows in a mezzanine
+	} lrow[6] ;	/* MAX 6 padrows in a mezzanine */
 } ;
 
 struct TPCADCD {
 	struct bankHeader bh ;
-	UINT8	adc[MZ_TPC_MAX_PADS_PER_MEZ*MZ_TPC_TIMEBINS] ;	// this is the worst case
+	UINT8	adc[MZ_TPC_MAX_PADS_PER_MEZ*MZ_TPC_TIMEBINS] ;	/* this is the worst case
 				// 384 represents the maximum _logical_
-				// number of pads per mezzanine
+				// number of pads per mezzanine */
 } ;
 
 struct TPCSEQD {
 	struct bankHeader bh ;
-	UINT16	seq[MZ_TPC_MAX_PADS_PER_MEZ*(MZ_TPC_TIMEBINS/2)] ;	// theoretical maximum
-					// see TPCADCD...
+	UINT16	seq[MZ_TPC_MAX_PADS_PER_MEZ*(MZ_TPC_TIMEBINS/2)] ;	/* theoretical maximum */
+    /* see TPCADCD... */
 } ;
 
 struct TPCPADK {
@@ -271,7 +272,7 @@ struct TPCCPPR_l {
 } ;
 
 
-// Level 3 banks
+/* Level 3 banks*/
 struct L3_SECLP {
 	struct bankHeader bh ;
 } ;
@@ -288,13 +289,13 @@ struct DATAP {
 	UINT32 trg_word ;
 	UINT32 trg_in_word ;
 	UINT32 detector ;
-	struct offlen det[61] ; // total data len is 128 words
+    struct offlen det[61] ; /* total data len is 128 words*/
 } ;
 
 
 struct TPCP {
 	struct bankHeader bh ;
-	struct offlen sb[24] ;	// 24 sectors
+    struct offlen sb[24] ;	/* 24 sectors */
 } ;
 
 #if (CPU == I960HX)

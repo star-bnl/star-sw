@@ -1,3 +1,4 @@
+
 /*:>--------------------------------------------------------------------
    **: FILE:       l3Clufi.c.template
    **: HISTORY:
@@ -66,7 +67,7 @@ long type_of_call l3Clufi_(
     int sectornumb;
     struct TPCSECLP *seclp;
 
-   
+    /*
     //printf("\n Start clusterfinding module \n");
     
     //////
@@ -80,9 +81,10 @@ long type_of_call l3Clufi_(
     //
     // get the pixeldata only for one sector
     //
+    */
     adclong = &pixels->data;
    
-    //
+    /*
     // check pixel data
     //
     //printf("adc :%d  pixels:%d\n",adclong,&pixels->data);
@@ -98,25 +100,26 @@ long type_of_call l3Clufi_(
     // printf("time:%d   pix:%d\n",time,pixels[i].data);
     //       }
     // }
+    */
 
-    //
+    /*
     // 10 to 8 bit conversion (croat.c expects packed data)
-    //
+    */
     adc = (char*) calloc (MAX_T*MAX_P*ABS_ROWS,sizeof(*adc));
     for ( i = 0; i < MAX_T*MAX_P*ABS_ROWS; i++)
 	{
 	    adc[i]=log8to10_table[adclong[i]];
 	}
 
-    //
+    /*
     // get pointer for outgoing bank, calculate pointer to first rc bank
-    //
+    */
     bank = &hits->data;
-    //printf("bank :%d  hits:%d\n",bank,&hits->data);
-    //printf("offset : %d\n",bank[34]);
-
-    // check if it's the first or second sector in a supersector
-    // pretty weak inquiry, i know :)
+    /*printf("bank :%d  hits:%d\n",bank,&hits->data);*/
+    /*printf("offset : %d\n",bank[34]);*/
+    
+    /* check if it's the first or second sector in a supersector*/
+    /* pretty weak inquiry, i know :)*/
     if ( bank[2] != 34 ) 
 	{
 	    sectornumb = 1; 
@@ -126,25 +129,25 @@ long type_of_call l3Clufi_(
 	    sectornumb = 2; 
 	}
 
-    // set pointer to first receiver board
+    /* set pointer to first receiver board */
     seclp = &bank[0];
     if (sectornumb == 1) 
 	{
-	    // fill TPCSECLP header
+	    /* fill TPCSECLP header */
 	    strncpy (seclp->bh.bank_type, CHAR_TPCSECLP, 8);
 	    seclp->bh.length     = 34; 
-	    //seclp->bh.bank_id    = 77; must be set in the maker !! must be 1,3..,23
+	    /*seclp->bh.bank_id    = 77; must be set in the maker !! must be 1,3..,23 */
 	    seclp->bh.format_ver = DAQ_RAW_FORMAT_VERSION;
 	    seclp->bh.byte_order = DAQ_RAW_FORMAT_ORDER;
 	    seclp->bh.token      = 1;
 	    seclp->bh.w9         = DAQ_RAW_FORMAT_WORD9;
 	    seclp->bh.crc        = 0;
-	    // set address of first receiver bank behind seclp
+	    /* set address of first receiver bank behind seclp */
 	    receiver = &bank[34]; 
 	}
     else if (sectornumb == 2)
 	{
-	    // calculate offset from sector 1
+	    /* calculate offset from sector 1  */
 	    int offset = 0;
 	    for (i = 10 ; i <33;i=i+2)
 		{
@@ -155,10 +158,11 @@ long type_of_call l3Clufi_(
 		    printf("problems with supersector ...\n");
 		    return 0;
 		}
-	    //printf("offset :%d \n",offset);
+	    /*printf("offset :%d \n",offset);  */
 	    receiver = bank+offset;
 	}
-
+    
+    /*
     //printf("receiver: %d\n",receiver);
     // check it the other way means fill it:
     //for(i=0;i<1;i++)
@@ -166,56 +170,56 @@ long type_of_call l3Clufi_(
     //bank[i+bankoffset] = 55;
     //    printf("bank [%d] = %d  hits[%d].data = %d\n",i,bank[i],i,hits[i].data);
     //	}
+    */
 
-
-    //
+    /*
     // prepare cpp array
-    //
+    */
     cpp = (short*) malloc(ABS_ROWS*MAX_P*MAX_C*sizeof(*cpp) );
     cpp = (short*) memset((short *)cpp, 0x0000, ABS_ROWS*MAX_P*MAX_C*sizeof(*cpp));
    
-    //
+    /*
     // lets simulate the asic : 
     // means fill cpp array with start and end timebucket of sequenz
     // pretty bad 0 suppresion
     // lets do it for this sector
-    //
+    */
     asic_eve();
   
-    // fill adcOff and cppOff arrays with offsets
+    /* fill adcOff and cppOff arrays with offsets  */
     for( i=0; i<ABS_ROWS; i++) 
 	{
 	    for( j=0; j<MAX_P; j++) 
 		{
 		    adcOff[i][j] = i*MAX_T*MAX_P + j*MAX_T ;
-		    cppOff[i][j] = i*MAX_C*MAX_P + j*MAX_C ;	// 2 entities each...
+		    cppOff[i][j] = i*MAX_C*MAX_P + j*MAX_C ;	/* 2 entities each...  */
 		}
 	}
 
-    // loop over receiver boards 
+    /* loop over receiver boards  */ 
     for( rb=1; rb<=6; rb++ ) 
 	{ 
 	    struct TPCRBCLP *rbclp;
 	    
 	    rbclp = receiver;
-	    // fill TPCRBCLP bank header for this Receiver Board
+	    /* fill TPCRBCLP bank header for this Receiver Board */
 	    strncpy (rbclp->bh.bank_type, CHAR_TPCRBCLP, 8);
 	    rbclp->bh.length     = 32;
-	    rbclp->bh.bank_id    = rb+(sectornumb-1)*6; // Receiver Board no. as seen by Sector Broker (1 .. 12)
+	    rbclp->bh.bank_id    = rb+(sectornumb-1)*6; /* Receiver Board no. as seen by Sector Broker (1 .. 12) */
 	    rbclp->bh.format_ver = DAQ_RAW_FORMAT_VERSION;
 	    rbclp->bh.byte_order = DAQ_RAW_FORMAT_ORDER;
 	    rbclp->bh.token      = 1;
 	    rbclp->bh.w9         = DAQ_RAW_FORMAT_WORD9;
 	    rbclp->bh.crc        = 0;
-	    // pointer set pointer behind TPCRBCLP bank
+	    /* pointer set pointer behind TPCRBCLP bank  */
 	    receiver += rbclp->bh.length;
 
-	    // loop over mezzanine cards
+	    /* loop over mezzanine cards  */
 	    for( mz=1; mz<=3; mz++ ) 
 		{
 		    struct bankHeader *mzcld;
 		    mzcld = (struct bankHeader *) receiver;
-		    // fill TPCRBCLP bank header for this Receiver Board
+		    /* fill TPCRBCLP bank header for this Receiver Board  */
 		    strncpy (mzcld->bank_type, CHAR_TPCMZCLD, 8);
 		    mzcld->length     = 10;
 		    mzcld->bank_id    = mz;
@@ -224,76 +228,76 @@ long type_of_call l3Clufi_(
 		    mzcld->token      = 1;
 		    mzcld->w9         = DAQ_RAW_FORMAT_WORD9;
 		    mzcld->crc        = 0;
-		    // pointer set pointer behind TPCMZCLD bank header
+		    /* pointer set pointer behind TPCMZCLD bank header */
 		    receiver += mzcld->length;
 
-		    // init this mz card
+		    /* init this mz card */
 		    ret = croatInit(rb, mz);
 
-		    // do the clusterfinding on this mz 
+		    /* do the clusterfinding on this mz  */
 		    ret = croatFinder(adc, cpp, receiver);
 
-		    // set length in TPCMZCLD bank
+		    /* set length in TPCMZCLD bank */
 		    mzcld->length += ret;
-		    // set new bank pointer
+		    /* set new bank pointer */
 		    receiver += ret;
 
-		    //fill TPCRBCLP data words 
+		    /* fill TPCRBCLP data words */ 
 		    rbclp->mz[mz-1].off = (int *)mzcld - (int *)rbclp;
 		    rbclp->mz[mz-1].len = mzcld->length;
 		}
-	    //fill TPCSECLP data words
+	    /* fill TPCSECLP data words */
 	    seclp->rb[rb+(sectornumb-1)*6-1].off = (int *)rbclp - (int *)seclp;
 	    seclp->rb[rb+(sectornumb-1)*6-1].len = (int *)receiver - (int *)rbclp;
 	}
 
-    // write our result for one sector
-    // writeout(outpointer)!!!
+    /* write our result for one sector */
+    /* writeout(outpointer)!!! */
     free(cpp);
     free(adc);
 
-    // done 
-    //printf("  Finished clusterfinding module!\n");
+    /* done  */
+    /* printf("  Finished clusterfinding module!\n"); */
     return 1;
 }
 
 
-void asic_eve(void)
+asic_eve()
 {
-    // fill cpp array for this sector
+    /* fill cpp array for this sector */
     int i, j, k ;
-    int found_max = 64 ; // maximum sequenzes on pad : 32
+    int found_max = 64 ; /* maximum sequenzes on pad : 32 */
     char val ;
     int found, start_time ; 
-    int t_max = 512 ;   // why not MAX_T ?
+    int t_max = 512 ;   /* why not MAX_T ? */
     
-    // loop over rows on this sector
+    /* loop over rows on this sector */
     for (k=0; k<ABS_ROWS; k++) 
 	{
-	    // loop over pads in this row
+	    /* loop over pads in this row  */
 	    for (i=0; i<MAX_P; i++) 
 		{
 		    found = 0 ;
 		    start_time = 0 ;
-		    // loop over time buckets
+		    /* loop over time buckets  */
 		    for (j=0; j<MAX_T; j++) 
 			{
-			    // get adc entry
+			    /* get adc entry  */
 			    val = *(adc + k*MAX_T*MAX_P + i*MAX_T + j) ;
-			    // get start bucket
+			    /* get start bucket  */
 			    if ((val > 0) && (start_time == 0)) 
 				{
-				    // make it bigger than 0 to keep the inquiry "if (start_time)" reasonable
+				    /* make it bigger than 0 to keep the inquiry "if (start_time)" reasonable */
 				    start_time = j+1 ;
 				}
 			    else if (val==0) 
 				{
-				    // if start_time != 0
+				    /* if start_time != 0  */
 				    if (start_time) 
 					{
-					    // start timebucket of sequence
+					    /* start timebucket of sequence  */
 					    *(cpp + k*MAX_C*MAX_P + i*MAX_C + found++) = start_time - 1 ;
-					    // end timebucket of sequence
+					    /* end timebucket of sequence */
 					    *(cpp + k*MAX_C*MAX_P + i*MAX_C + found++) = j - 1 ;
 					    
 					    if (found == (found_max-2)) break ;
@@ -302,16 +306,16 @@ void asic_eve(void)
 				}
 			}
 
-		    // if sequenz touches upper end of time scale
+		    /* if sequenz touches upper end of time scale  */
 		    if(start_time && (found != (found_max-2))) 
 			{
-			    // start time bucket
+			    /* start time bucket */
 			    *(cpp + k*MAX_C*MAX_P + i*MAX_C + found++) = start_time-1 ;
-			    // set end time bucket to max number 
+			    /* set end time bucket to max number  */
 			    *(cpp + k*MAX_C*MAX_P + i*MAX_C + found++) = t_max - 1 ;
 			}
 
-		    // fill the rest with zero and 1  (= ff00)
+		    /* fill the rest with zero and 1  (= ff00)  */
 		    for(j=found;j<found_max;j+=2) 
 			{
 			    *(cpp + k*MAX_C*MAX_P + i*MAX_C + j) = 0xff00 ;
@@ -320,5 +324,5 @@ void asic_eve(void)
 		}
 	}
 
-    return 1;
+    /*return 1;*/
 }
