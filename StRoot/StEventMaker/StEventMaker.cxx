@@ -1,6 +1,6 @@
 /*************************************************************************** 
  *
- * $Id: StEventMaker.cxx,v 2.10 1999/12/21 15:13:13 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.11 2000/01/05 16:07:44 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.10  1999/12/21 15:13:13  ullrich
- * Modified to cope with new compiler version on Sun (CC5.0).
+ * Revision 2.11  2000/01/05 16:07:44  ullrich
+ * Added loading of SSD hits and handling of runco branch.
  *
  * Revision 2.27  2000/05/26 11:36:19  ullrich
  * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
@@ -84,13 +84,15 @@
  *
  * Revision 2.7  1999/11/17 14:10:27  ullrich
  * Added more checks to protect from corrupted table data.
+ *
  * Revision 2.6  1999/11/11 17:46:30  ullrich
  * Added more checks and warning messages. Handling
  * of primary vertices made safer
-    doPrintRunInfo    = kTRUE;  // TMP 
-    doPrintEventInfo  = kTRUE;  // TMP
  *
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.10 1999/12/21 15:13:13 ullrich Exp $";
+ * Revision 2.5  1999/11/11 10:02:58  ullrich
+ * Added warning message in case some hits cannot be stored.
+ *
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.11 2000/01/05 16:07:44 ullrich Exp $";
  * Delete hit if it cannot be added to collection.
  *
  * Revision 2.3  1999/11/08 17:04:59  ullrich
@@ -127,10 +129,10 @@ static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.10 1999/12/21 15:13:13 ul
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.10 1999/12/21 15:13:13 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.11 2000/01/05 16:07:44 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.10 1999/12/21 15:13:13 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.11 2000/01/05 16:07:44 ullrich Exp $";
 
 ClassImp(StEventMaker)
     doPrintEventInfo  = kFALSE;
@@ -138,22 +140,36 @@ ClassImp(StEventMaker)
     if(title) SetTitle(title);
     mEventManager = new StRootEventManager();
     mEventManager->setMaker(this);
-    if (status == oocError) return kStWarn;
+    mCurrentRun = 0;
+    mCurrentEvent = 0;
+    doPrintEventInfo  = kTRUE; // TMP
+    doLoadTpcHits     = kTRUE;
     doLoadSvtHits     = kTRUE;
     doLoadSsdHits     = kTRUE;
     doLoadTptTracks   = kFALSE;
+    doPrintRunInfo    = kFALSE;
     doPrintEventInfo  = kFALSE;
     doPrintMemoryInfo = kTRUE;
-        status = makeRun();
-        if (status == kStOK) AddRunCont(mCurrentRun);
+    doPrintCpuInfo    = kTRUE;
+    mCreateEmptyInstance = kFALSE;
+}
+
+StEventMaker::~StEventMaker() { /* noop */ }
+
+void
+StEventMaker::Clear(const char*)
+{
     mCurrentEvent=0;
     StMaker::Clear();
 }
 
 StEventManager*
 StEventMaker::eventManager() {return mEventManager;};
-    if (status == kStOK) AddData(mCurrentEvent);
-    
+
+StEvent*
+StEventMaker::event() { return mCurrentEvent;};
+
+    //    
 
 Int_t
 	gMessMgr->Warning() << "StEventMaker::Make(): cannot open 'dstBranch'." << endm;
@@ -179,7 +195,7 @@ Int_t
     //  properly. Nevertheless we will create an empty instance.
     //  Note that in this case also no instance of StRun can
     //  get instantiated.
-    //  it with the parameters of the current StRun instance.
+    //
     int status = mEventManager->openEvent("dst");
 	AddData(mCurrentEvent);
     if (isNewRun()) {
@@ -197,6 +213,27 @@ Int_t
 	StMemoryInfo::instance()->print();
             AddRunCont(mCurrentRun);
         else
+	timer.stop();
+	cout << "CPU time for StEventMaker::Make(): "
+	     << timer.elapsedTime() << " sec\n" << endl;
+            gMessMgr->Warning() << "StEventMaker::Make(): cannot load run constants." << endm;
+    }
+    
+    //
+    //  Setup the event (StEvent and all subclasses)
+    //
+    status = makeEvent();
+    if (status == kStOK)
+        AddData(mCurrentEvent);
+    else
+        gMessMgr->Warning() << "StEventMaker::Make(): error in makeEvent(), no StEvent object created." << endm;
+    if (!mDstSummaryParam) {
+	StEventManager* theEventManager = new StRootEventManager();
+	theEventManager->setMaker(this);
+	long nrows;
+	if (theEventManager->openEvent("runco") != oocError) 
+	    mDstSummaryParam = theEventManager->returnTable_dst_summary_param(nrows);
+	else
 	    gMessMgr->Warning() << "StEventMaker::loadRunConstants(): cannot open 'runcoBranch'." << endm;
     if (doPrintEventInfo) printEventInfo();
         StMemoryInfo::instance()->snapshot();
@@ -211,8 +248,6 @@ StEventMaker::isNewRun()
     //
     if (!mCurrentRun) return kTRUE;
 
-        gMessMgr->Warning() << "StEventMaker::makeRun(): cannot load run_header_st, "
-                            << "no StRun object created." << endm;
 	mDstSummaryParam = theEventManager->returnTable_dst_summary_param(nrows);
 	theEventManager->closeEvent();
 	if (mDstSummaryParam) return kStOK;
@@ -247,12 +282,11 @@ StEventMaker::loadRunConstants()
     }
     
     //  2nd suppose we are in doEvents
-    dst_summary_param_st* dstSummaryParam = mEventManager->returnTable_dst_summary_param(nrows);
     if (theEventManager->openEvent("dstRunco") != oocError) {
-    if (!dstEventSummary || !dstSummaryParam)
+        mDstSummaryParam = theEventManager->returnTable_dst_summary_param(nrows);
         theEventManager->closeEvent();
         if (mDstSummaryParam) return kStOK;
-        mCurrentEvent = new StBrowsableEvent(*dstEventHeader, *dstEventSummary, *dstSummaryParam);
+    }
 
     gMessMgr->Warning() << "StEventMaker::loadRunConstants(): cannot find dst_summary_param" << endm;
     return kStWarn;
@@ -501,8 +535,9 @@ StEventMaker::makeEvent()
     if (nfailed) 
 	gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
 			    << " Xi vertices, invalid foreign key to vertex table." << endm;
+    
     if (nfailed)
-    if (doLoadTpcHits || doLoadFtpcHits || doLoadSvtHits) {
+        gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
                             << " V0 vertices, no valid id_vertex." << endm;
 
     //
@@ -570,6 +605,35 @@ StEventMaker::makeEvent()
 		gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
 				    << " TPC hits, wrong hardware address." << endm;
         if (doLoadTpcHits) {
+            info    = 0;
+            nfailed = 0;
+            StTpcHit *tpcHit;
+            begin = index[kTpcId].first;
+            end   = index[kTpcId].first+index[kTpcId].second;
+	    info    = 0;
+	    nfailed = 0;
+                tpcHit = new StTpcHit(dstPoints[i]);
+                if (tpcHitColl->addHit(tpcHit)) {
+                    id = dstPoints[i].id_track;
+                        info = vecGlobalTracks[id]->detectorInfo();
+                        info->addHit(tpcHit);
+                    }
+		    id = dstPoints[i].id_track;
+		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
+			info = vecGlobalTracks[id]->detectorInfo();
+			info->addHit(svtHit);
+		    }
+		    if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
+		    if (id < vecGlobalTracks.size() && vecGlobalTracks[id])
+			vecGlobalTracks[id]->detectorInfo()->addHit(ssdHit);
+		    else if (id < vecPrimaryTracks.size() && vecPrimaryTracks[id])
+			vecPrimaryTracks[id]->detectorInfo()->addHit(ssdHit);
+        }
+        
+	    if (nfailed) 
+		gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
+				    << " SVT hits, wrong hardware address." << endm;
+        if (doLoadSvtHits) {
             info    = 0;
             nfailed = 0;
             StSvtHit *svtHit;
@@ -917,6 +981,23 @@ StEventMaker::makeEvent()
 		}
     cout << "collection size = "
          << mCurrentEvent->kinkVertices().size() << endl;
+    
+    if (mCurrentEvent->kinkVertices().size()) {
+        cout << "---------------------------------------------------------" << endl;
+        cout << "StKinkVertex at "
+             << (void*) mCurrentEvent->kinkVertices()[0]                    << endl;
+        cout << "---------------------------------------------------------" << endl;
+	nhits = ftpcColl->numberOfHits();
+	cout << "# of hits in collection = " << nhits << endl;
+	gotOneHit = kFALSE;
+	for (k=0; !gotOneHit && k<ftpcColl->numberOfPlanes(); k++)
+	    for (j=0; !gotOneHit && j<ftpcColl->plane(k)->numberOfSectors(); j++)
+		if (ftpcColl->plane(k)->sector(j)->hits().size()) {
+		    ftpcColl->plane(k)->sector(j)->hits()[0]->Dump();
+		    gotOneHit = kTRUE;
+		}
+    cout << "---------------------------------------------------------" << endl;
+    if (tpcColl) {
         nhits = tpcColl->numberOfHits();
         cout << "# of hits in collection = " << nhits << endl;
         gotOneHit = kFALSE;
