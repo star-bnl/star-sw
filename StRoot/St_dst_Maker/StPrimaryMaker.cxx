@@ -125,7 +125,9 @@ Int_t StPrimaryMaker::Make(){
   if (! tphit)    {tphit = new St_tcl_tphit("tphit",1); AddGarb(tphit);} 
   
   St_sgr_groups     *tpc_groups = (St_sgr_groups *) matchI("tpc_groups");
+  St_sgr_groups     *tpc_groupsEst = (St_sgr_groups *) matchI("tpc_groupsEst");
   if (! tpc_groups)    {tpc_groups = new St_sgr_groups("tpc_groups",1); AddGarb(tpc_groups);} 
+if (! tpc_groupsEst)    {tpc_groupsEst = new St_sgr_groups("tpc_groupsEst",1); AddGarb(tpc_groupsEst);} 
   
   St_DataSet     *svtracks = GetInputDS("est");
   St_DataSet     *svthits  = GetInputDS("svt_hits");
@@ -335,7 +337,7 @@ Int_t StPrimaryMaker::Make(){
 	
 	
 	spc   = tphit->GetTable();
-	tgroup = tpc_groups->GetTable();
+	tgroup = tpc_groupsEst->GetTable();
 	track  = EstPrimary->GetTable();
 	
 	int spt_id = 0;
@@ -348,7 +350,7 @@ Int_t StPrimaryMaker::Make(){
 	  track[i].map[1] = 0UL;
 	}
 	
-	for( i=0; i<tpc_groups->GetNRows(); i++, tgroup++){
+	for( i=0; i<tpc_groupsEst->GetNRows(); i++, tgroup++){
 	  if( tgroup->id1 != 0 && tgroup->ident >= 0){
 	  spt_id = tgroup->id2-1;
 	  if( spt_id <0) {
@@ -514,8 +516,11 @@ Int_t StPrimaryMaker::Make(){
  return iMake;
   }
 //_____________________________________________________________________________
-// $Id: StPrimaryMaker.cxx,v 1.76 2002/04/24 21:15:20 caines Exp $
+// $Id: StPrimaryMaker.cxx,v 1.77 2002/05/16 01:59:19 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.77  2002/05/16 01:59:19  caines
+// Send in differnt group tables for the TPC and est refit so flagging of hits correct
+//
 // Revision 1.76  2002/04/24 21:15:20  caines
 // Fix EstPrimary.id_start_vertex flagging so the tracks get saved to the primary vertex in StEvent and it doesnt crash
 //

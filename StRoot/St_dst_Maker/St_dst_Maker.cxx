@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.72 2002/05/09 22:49:19 caines Exp $
+// $Id: St_dst_Maker.cxx,v 1.73 2002/05/16 01:59:19 caines Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.73  2002/05/16 01:59:19  caines
+// Send in differnt group tables for the TPC and est refit so flagging of hits correct
+//
 // Revision 1.72  2002/05/09 22:49:19  caines
 // Dont save svt hit info on events when SVT not there
 //
@@ -223,7 +226,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.72 2002/05/09 22:49:19 caines Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.73 2002/05/16 01:59:19 caines Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -516,6 +519,7 @@ Int_t  St_dst_Maker::Filler(){
     if( dataSetSvt)
        mSvtCluColl = (StSvtHybridCollection*)(dataSetSvt->GetObject());
     if(mSvtCluColl){
+	
       for(int barrel = 1;barrel <= mSvtCluColl->getNumberOfBarrels();barrel++) {
 	
 	for (int ladder = 1;ladder <= mSvtCluColl->getNumberOfLadders(barrel);ladder++) {
