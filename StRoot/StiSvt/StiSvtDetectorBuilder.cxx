@@ -163,20 +163,23 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 	  nx = waferGeom->n(0);
 	  ny = waferGeom->n(1);
 	  nz = waferGeom->n(2);
+	  double nt = sqrt(nx*nx+ny*ny);
 	  dx = waferGeom->d(0);
 	  dy = waferGeom->d(1);
 	  dz = waferGeom->d(2);
 	  rc = sqrt(x*x+y*y);
-	  rn = x*nx+y*ny;
-	  dPhi = acos((x*nx+y*ny)/rc);
+	  rn = (x*nx+y*ny)/nt;
+	  dPhi = acos((x*nx+y*ny)/(rc*nt));
 	  phiC = fLadderPhi = atan2(y,x);
 	  phiN = atan2(ny,nx);
 	  dPhi = phiC-phiN;
 	  yOff = sqrt(rc*rc-rn*rn);
 	  StiPlacement *pPlacement = new StiPlacement;
 	  pPlacement->setZcenter(0.);
-	  //pPlacement->setLayerRadius(fLayerRadius);
-	  pPlacement->setLayerRadius(rn);
+	  pPlacement->setLayerRadius(fLayerRadius);
+	  //pPlacement->setLayerRadius(rn);
+	  //pPlacement->setLayerAngle(phiC);
+	  pPlacement->setLayerAngle(fLadderPhi);
 	  pPlacement->setRegion(StiPlacement::kMidRapidity);
 	  pPlacement->setCenterRep(phiC, rc, -dPhi); 
 	  sprintf(name, "Svt/Layer_%d/Ladder_%d/Wafers", layer, ladder);
@@ -198,6 +201,7 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 	  pPlacement = new StiPlacement;
 	  pPlacement->setZcenter(0.);
 	  pPlacement->setLayerRadius(fLayerRadius);
+	  pPlacement->setLayerAngle(fLadderPhi + fDeltaPhi);
 	  pPlacement->setRegion(StiPlacement::kMidRapidity);
 	  pPlacement->setNormalRep(fLadderPhi + fDeltaPhi, 
 				   fGapRadius,
@@ -213,11 +217,12 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 	  pHybrid1->setMaterial(_hybridMat);
 	  pHybrid1->setShape(_hybridShape[layer]);
 	  pHybrid1->setPlacement(pPlacement);
-	  add(pHybrid1);
+	  //add(pHybrid1);
 	  // hybrid 2
 	  pPlacement = new StiPlacement;
 	  pPlacement->setZcenter(0.);
 	  pPlacement->setLayerRadius(fLayerRadius);
+	  pPlacement->setLayerAngle(fLadderPhi - fDeltaPhi);
 	  pPlacement->setRegion(StiPlacement::kMidRapidity);
 	  pPlacement->setNormalRep(fLadderPhi - fDeltaPhi, 
 				   fGapRadius,
@@ -227,7 +232,7 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 	  pHybrid2->copy(*pHybrid1);
 	  pHybrid2->setName(name);
 	  pHybrid2->setPlacement(pPlacement);
-	  add(pHybrid2);
+	  //add(pHybrid2);
 	} // for ladder
     } // for layer
 }
