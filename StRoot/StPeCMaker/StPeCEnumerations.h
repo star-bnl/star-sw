@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEnumerations.h,v 1.3 2001/02/12 21:15:40 yepes Exp $
+// $Id: StPeCEnumerations.h,v 1.4 2001/04/23 21:44:29 meissner Exp $
 // $Log: StPeCEnumerations.h,v $
+// Revision 1.4  2001/04/23 21:44:29  meissner
+// add dEdx z variable to tree, setFormat(1) for tree, use private BetheBloch (temp solution)
+//
 // Revision 1.3  2001/02/12 21:15:40  yepes
 // New version of StPeCMaker, lots of changes
 //
@@ -18,4 +21,17 @@
 #define StPeCEnumerations_hh
 const Int_t nSpecies = 5 ;
 enum StPeCSpecies {pion, kaon, proton, electron, muon};
+
+
+#define mElectron 0.000510999
+#define mMuon     0.105658389
+#define mPion     0.139567
+#define mKaon     0.493677
+#define mProton   0.93827231
+
+
+// Maximmum number of tracka
+#define StPeCnMaxTracks 10
+
+
 #endif
