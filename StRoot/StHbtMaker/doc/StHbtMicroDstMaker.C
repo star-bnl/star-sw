@@ -1,3 +1,4 @@
+enum dataFormat {dst, evt};
 
 // NOTE - chain needs to be declared global so for StHbtEventReader
 class StChain;
@@ -30,15 +31,17 @@ void mess(const char* c="alive") {
 }
 
 
-void StHbtExampleQQ(const Int_t nevents, const Char_t **fileList, const Char_t*, const Char_t* );
+
+void StHbtExampleQQ(const dataFormat format, const Int_t nevents, const Char_t **fileList, const Char_t*, const Char_t* );
 
 
 //==========================================================================================
 //==========================================================================================
-void StHbtMicroDstMaker(const Int_t nevents=9999,
+void StHbtMicroDstMaker(const dataFormat format,
+			const Int_t nevents=9999,
 			const Char_t *path=venusPath,
 			const Char_t *file=venusFile,
-			const Char_t* outDir="/star/rcf/pwg/hbt/Laue/Test/V5/",		
+			const Char_t* outDir="/star/rcf/pwg/hbt/Laue/Test/SL00hg/",		
 			const Char_t* outFile="dummy",
 			const Char_t* appendix="test.microDst")		
 { 
@@ -48,14 +51,15 @@ void StHbtMicroDstMaker(const Int_t nevents=9999,
   } else {
     fileListQQ[0] = gSystem->ConcatFileName(path,file);
   }
-  StHbtExampleQQ(nevents,fileListQQ,outDir,outFile);
+  StHbtExampleQQ(format,nevents,fileListQQ,outDir,outFile);
 }
 //==========================================================================================
 //==========================================================================================
-void StHbtExampleQQ(const Int_t nevents, const Char_t **fileList, const Char_t* dirName, const Char_t* fileName)
+void StHbtExampleQQ(const dataFormat format, const Int_t nevents, const Char_t **fileList, const Char_t* dirName, const Char_t* fileName)
 {
 
 // Dynamically link needed shared libs
+gSystem->Load("StarRoot");
 gSystem->Load("St_base");
 gSystem->Load("StChain");
 gSystem->Load("St_Tables");
@@ -68,12 +72,14 @@ gSystem->Load("xdf2root");
 gSystem->Load("St_xdfin_Maker");
 gSystem->Load("StEvent");
 gSystem->Load("StEventMaker");
+gSystem->Load("StEventUtilities"); 
 gSystem->Load("StMcEvent"); 
 gSystem->Load("StMcEventMaker"); 
 gSystem->Load("StAssociationMaker");
 gSystem->Load("StMcAnalysisMaker");
-gSystem->Load("StHbtMaker");   
 gSystem->Load("StStrangeMuDstMaker");
+gSystem->Load("StHbtMaker");   
+
 
 cout << " loading done " << endl;
 
@@ -98,23 +104,37 @@ ioMaker->SetDebug();
 
 ioMaker->SetIOMode("r");
 ioMaker->SetDebug();
-ioMaker->SetBranch("*",0,"0");                 //deactivate all branches
-ioMaker->SetBranch("dstBranch",0,"r"); //activate EventBranch
+ioMaker->SetBranch("*",0,"0");         //deactivate all branches
+// **************
+// StHbtTagReader
+// **************
+//StHbtTagReader* tagReader = new StHbtTagReader(ioMaker);
+cout << "Just instantiated StHbtTagReader... lets go StHbtMaker!" << endl;
 
 // ***********
 // Event Maker 
 // ***********
-StEventMaker* eventMaker = new StEventMaker("events","title");
-cout << "Just instantiated StEventMaker... lets go StHbtMaker!" << endl;
+StEventMaker* eventMaker =0;
 
-// Stick in the toplogy map maker
-//  StRandyTopMapMaker* myTopMapFixer = new StRandyTopMapMaker();
+if (format==dst) {
+  eventMaker = new StEventMaker("events","title");
+  ioMaker->SetBranch("dstBranch",0,"r"); //activate dst.root Branch
+  cout << " dst" << endl;
+}
+else if(format==evt) {  
+  eventMaker =0;
+  ioMaker->SetBranch("eventBranch",0,"r"); //activate evt.root Branch
+  cout << " evt" << endl;
+}
+else return;
+cout << "Just instantiated StEventMaker... lets go StHbtMaker!" << eventMaker << endl;
 
 // Set up the v0muDstMaker
- StStrangeMuDstMaker* v0dst = new StStrangeMuDstMaker("v0dst");
- v0dst->DoV0(); //Set v0MiniDstMaker to find only v0s
- v0dst->SetNoKeep(); 
- v0dst->SetWrite(); // Set V0muDStMaker output file and Event output file
+    StStrangeMuDstMaker* v0dst = new StStrangeMuDstMaker("v0dst");
+    v0dst->DoV0(); //Set v0MiniDstMaker to find only v0s
+    v0dst->DoKink(); //Set v0MiniDstMaker to find only v0s
+    v0dst->SetNoKeep(); 
+    v0dst->SetWrite(); // Set V0muDStMaker output file and Event output file
 // v0dst->SetWrite("StrangemuEventHBTPeriphdst.root","Strangemuv0HBTPeriphdst.root"); // Set V0muDStMaker output file and Event output file
  cout << "Just instantiated StStrangeMuDstMaker... lets go StHbt!" << endl;
 
@@ -142,6 +162,7 @@ StHbtManager* TheManager = hbtMaker->HbtManager();
 StStandardHbtEventReader* Reader = new StStandardHbtEventReader;
 Reader->SetTheEventMaker(eventMaker);     // gotta tell the reader where it should read from
 Reader->SetTheV0Maker(v0dst); //Gotta tell the reader where to read the v0 stuff from
+Reader->SetTheTagReader(0); //Gotta tell the reader where to read the tag stuff from
 TheManager->SetEventReader(Reader);
 
 cout << "READER SET UP.... " << endl;
@@ -151,7 +172,7 @@ cout << "READER SET UP.... " << endl;
 // ***** set up event cut *****
  mikesEventCut* EventCut = new mikesEventCut;
  EventCut->SetEventMult(0,100000);      // selected multiplicity range
- EventCut->SetVertZPos(-350.0,350.0);     // selected range of vertex z-position
+ EventCut->SetVertZPos(-75.0,75.0);     // selected range of vertex z-position
 
 // ***** set up anti track cut *****
  franksTrackCut* AntiTrackCut = new franksTrackCut;
@@ -161,7 +182,7 @@ cout << "READER SET UP.... " << endl;
  AllTrackCut->SetNSigmaPion(-1000.0,1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
  AllTrackCut->SetNSigmaKaon(-1000.0,1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
  AllTrackCut->SetNSigmaProton(-1000.0,1000.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
- AllTrackCut->SetNHits(5,1000);           // range on number of TPC hits on the track
+ AllTrackCut->SetNHits(10,1000);           // range on number of TPC hits on the track
  AllTrackCut->SetP(0.0,50.0);               // range in P
  AllTrackCut->SetPt(0.0,50.0);              // range in Pt
  AllTrackCut->SetRapidity(-15,15);       // range in rapidity
@@ -173,23 +194,35 @@ cout << "READER SET UP.... " << endl;
  PionTrackCut->SetNSigmaPion(-3.0,+3.);   // number of Sigma in TPC dEdx away from nominal pion dEdx
  PionTrackCut->SetNSigmaKaon(-1000.0,1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
  PionTrackCut->SetNSigmaProton(-1000.0,1000.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
- PionTrackCut->SetNHits(5,1000);           // range on number of TPC hits on the track
+ PionTrackCut->SetNHits(10,1000);           // range on number of TPC hits on the track
  PionTrackCut->SetP(0.0,5.0);               // range in P
  PionTrackCut->SetPt(0.0,5.0);              // range in Pt
  PionTrackCut->SetRapidity(-1.5,1.5);       // range in rapidity
  PionTrackCut->SetDCA(0.0,2.);              // range in Distance of Closest Approach to primary vertex
  PionTrackCut->SetCharge(0);                // no cut on charge
  PionTrackCut->SetMass(0.139);              // pion mass
+// ***** set up pion+ cut *****
+ franksTrackCut* PionPlusTrackCut = new franksTrackCut;
+ PionPlusTrackCut->SetNSigmaPion(-3.0,+3.);   // number of Sigma in TPC dEdx away from nominal pion dEdx
+ PionPlusTrackCut->SetNSigmaKaon(-1000.0,1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
+ PionPlusTrackCut->SetNSigmaProton(-1000.0,1000.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
+ PionPlusTrackCut->SetNHits(10,1000);           // range on number of TPC hits on the track
+ PionPlusTrackCut->SetP(0.0,5.0);               // range in P
+ PionPlusTrackCut->SetPt(0.0,5.0);              // range in Pt
+ PionPlusTrackCut->SetRapidity(-1.5,1.5);       // range in rapidity
+ PionPlusTrackCut->SetDCA(0.0,2.);              // range in Distance of Closest Approach to primary vertex
+ PionPlusTrackCut->SetCharge(+1);                // no cut on charge
+ PionPlusTrackCut->SetMass(0.139);              // pion mass
 // ***** set up kaon cut *****
  franksTrackCut* KaonTrackCut = new franksTrackCut;
- KaonTrackCut->SetNSigmaPion(-1000.0,1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
+ // KaonTrackCut->SetNSigmaPion(+1.0,1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
  KaonTrackCut->SetNSigmaKaon(-3.,3.);   // number of Sigma in TPC dEdx away from nominal kaon dEdx
- KaonTrackCut->SetNSigmaProton(-1000.0,1000.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
- KaonTrackCut->SetNHits(5,1000);           // range on number of TPC hits on the track
- KaonTrackCut->SetP(0.0,5.0);               // range in P
- KaonTrackCut->SetPt(0.0,5.0);              // range in Pt
+ // KaonTrackCut->SetNSigmaProton(-1000.0,-1.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
+ KaonTrackCut->SetNHits(10,1000);           // range on number of TPC hits on the track
+ KaonTrackCut->SetP(0.0,2.0);               // range in P
+ KaonTrackCut->SetPt(0.0,2.0);              // range in Pt
  KaonTrackCut->SetRapidity(-1.5,1.5);       // range in rapidity
- KaonTrackCut->SetDCA(0.0,2.);              // range in Distance of Closest Approach to primary vertex
+ KaonTrackCut->SetDCA(0.0,3.);              // range in Distance of Closest Approach to primary vertex
  KaonTrackCut->SetCharge(0);                // no cut on charge
  KaonTrackCut->SetMass(0.494);              // kaon mass
 // ***** set up kaon cut *****
@@ -197,7 +230,7 @@ cout << "READER SET UP.... " << endl;
  KaonMinusTrackCut->SetNSigmaPion(-1000.0,1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
  KaonMinusTrackCut->SetNSigmaKaon(-3.,3.);   // number of Sigma in TPC dEdx away from nominal kaon dEdx
  KaonMinusTrackCut->SetNSigmaProton(-1000.0,1000.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
- KaonMinusTrackCut->SetNHits(5,1000);           // range on number of TPC hits on the track
+ KaonMinusTrackCut->SetNHits(10,1000);           // range on number of TPC hits on the track
  KaonMinusTrackCut->SetP(0.0,5.0);               // range in P
  KaonMinusTrackCut->SetPt(0.0,5.0);              // range in Pt
  KaonMinusTrackCut->SetRapidity(-1.5,1.5);       // range in rapidity
@@ -209,7 +242,7 @@ cout << "READER SET UP.... " << endl;
  ProtonTrackCut->SetNSigmaPion(-1000.0,1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
  ProtonTrackCut->SetNSigmaKaon(-1000.,1000.);   // number of Sigma in TPC dEdx away from nominal proton dEdx
  ProtonTrackCut->SetNSigmaProton(-3.0,3.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
- ProtonTrackCut->SetNHits(5,1000);           // range on number of TPC hits on the track
+ ProtonTrackCut->SetNHits(10,1000);           // range on number of TPC hits on the track
  ProtonTrackCut->SetP(0.0,5.0);               // range in P
  ProtonTrackCut->SetPt(0.0,5.0);              // range in Pt
  ProtonTrackCut->SetRapidity(-1.5,1.5);       // range in rapidity
@@ -224,17 +257,17 @@ cout << "READER SET UP.... " << endl;
 // ***** set up lambda cut *****
  helensV0Cut* LambdaCut = new helensV0Cut;  // use V0 particle cut object
  LambdaCut->SetV0Type("lambda");           // Which particle do I cut on
- LambdaCut->SetV0MassRange(.05,.05);     // Width cut around /\ mass keep it loose as I want k0s too
+ LambdaCut->SetV0MassRange(1.105,1.125);     // Width cut around /\ mass keep it loose as I want k0s too
  LambdaCut->SetdcaV0daughters(0.,1.0);   // DCA between 2 tracks
  LambdaCut->SetdcaV0ToPrimVertex(0.,1.); // DCA between V0 and event vertex
- LambdaCut->SetdecayLengthV0(3.0,50.);  // Decay length from prim. vertex
+ LambdaCut->SetdecayLengthV0(3.0,5000.);  // Decay length from prim. vertex
  LambdaCut->SettpcHitsPos(10,50);       // Number of TPC hits on + track
  LambdaCut->SettpcHitsNeg(10,50);       // Number of TPC hits on - track
- LambdaCut->SetdcaPosToPrimVertex(2.,50.); // Min. value + track at intersect
- LambdaCut->SetdcaNegToPrimVertex(2.,50.); // Min. value - track at intersect
+ LambdaCut->SetdcaPosToPrimVertex(1.8,50.); // Min. value + track at intersect
+ LambdaCut->SetdcaNegToPrimVertex(3.5,50.); // Min. value - track at intersect
  LambdaCut->SetptArmV0(0.,0.25);        //K0 (0.1,0.25), Lambda (0.,.25)
- LambdaCut->SetalphaV0(0.5,1.);         //K0 (-1,1.), Lambda (0.5,1.0)
- LambdaCut->SetPt(0.,2.0);            // range in Pt
+ LambdaCut->SetalphaV0(0.0,1.);         //K0 (-1,1.), Lambda (0.5,1.0)
+ LambdaCut->SetPt(0.,10.0);            // range in Pt
  LambdaCut->SetRapidity(-50.0,50.0);     // range in rapidity
  LambdaCut->SetMass(1.11567);            // /\ mass
 // ***** set up a K0 cut *****
@@ -259,28 +292,39 @@ cout << "READER SET UP.... " << endl;
 
 
 
-  //   set up a microDstWriter 
-  StHbtBinaryReader* allWriter = new StHbtBinaryReader(ioMaker,dirName,"dummy",".microDst");
-  TheManager->AddEventWriter(allWriter);
-  allWriter->SetEventCut(EventCut);
-  allWriter->SetTrackCut(AllTrackCut);
-  cout << "WRITER SET UP.... " << endl;
 
   //   set up a microDstWriter 
-//   StHbtBinaryReader* pionWriter = new StHbtBinaryReader(ioMaker,dirName,"dummy",".pion.microDst");
-//   TheManager->AddEventWriter(pionWriter);
-//   pionWriter->SetEventCut(EventCut);
-//   pionWriter->SetTrackCut(PionTrackCut);
-//   pionWriter->SetV0Cut(AntiV0Cut);
+ StHbtTTreeReader* allWriter = new StHbtTTreeReader(1,ioMaker,"./","",".hbtTTreeMuDst","");
+ // StHbtBinaryReader* allWriter = new StHbtBinaryReader(ioMaker,dirName,"dummy",".microDst");
+ TheManager->AddEventWriter(allWriter);
+ allWriter->SetEventCut(EventCut);
+ allWriter->SetTrackCut(AllTrackCut);
+ allWriter->SetV0Cut(AntiV0Cut);
+ cout << "WRITER SET UP.... " << endl;
+
+  //   set up a microDstWriter 
+//     StHbtBinaryReader* sigma1385Writer = new StHbtBinaryReader(ioMaker,dirName,"dummy",".sigma1385.microDst");
+//     TheManager->AddEventWriter(sigma1385Writer);
+//     sigma1385Writer->SetEventCut(EventCut);
+//     sigma1385Writer->SetTrackCut(PionPlusTrackCut);
+//     sigma1385Writer->SetV0Cut(LambdaCut);
+//    cout << "WRITER SET UP.... " << endl;
+
+  //   set up a microDstWriter 
+//     StHbtBinaryReader* pionWriter = new StHbtBinaryReader(ioMaker,dirName,"dummy",".pion.microDst");
+//     TheManager->AddEventWriter(pionWriter);
+//     pionWriter->SetEventCut(EventCut);
+//     pionWriter->SetTrackCut(PionTrackCut);
+//     pionWriter->SetV0Cut(AntiV0Cut);
 //   cout << "WRITER SET UP.... " << endl;
     
   //   set up a microDstWriter 
-//  StHbtBinaryReader* kaonWriter = new StHbtBinaryReader(ioMaker,dirName,"dummy",".kaon.microDst");
-//  TheManager->AddEventWriter(kaonWriter);
-//  kaonWriter->SetEventCut(EventCut);
-//  kaonWriter->SetTrackCut(KaonTrackCut);
-//  kaonWriter->SetV0Cut(AntiV0Cut);
-// cout << "WRITER SET UP.... " << endl;
+//   StHbtTTreeReader* kaonWriter = new StHbtTTreeReader(ioMaker,"./",".kaon.hbtTTreeMuDst");
+//   TheManager->AddEventWriter(kaonWriter);
+//   kaonWriter->SetEventCut(EventCut);
+//   kaonWriter->SetTrackCut(KaonTrackCut);
+//   kaonWriter->SetV0Cut(AntiV0Cut);
+//   cout << "WRITER SET UP.... " << endl;
     
   //   set up a microDstWriter 
 //   StHbtBinaryReader* protonWriter = new StHbtBinaryReader(ioMaker,dirName,"dummy",".proton.microDst");
@@ -331,8 +375,6 @@ cout << "READER SET UP.... " << endl;
 
  chain->Init(); // This should call the Init() method in ALL makers
  chain->PrintInfo();
- 
- // exit(); 
  for (Int_t iev=0;iev<nevents; iev++) {
    cout << "StHbtExample -- Working on eventNumber " << iev << endl;
    chain->Clear();
