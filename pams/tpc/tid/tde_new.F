@@ -1,10 +1,10 @@
-* $Id: tde.F,v 1.2 1999/08/18 20:46:39 fisyak Exp $
-* $Log: tde.F,v $
-* Revision 1.2  1999/08/18 20:46:39  fisyak
+* $Id: tde_new.F,v 1.19 1999/08/18 20:46:39 fisyak Exp $
+* $Log: tde_new.F,v $
+* Revision 1.19  1999/08/18 20:46:39  fisyak
 * replace ran by rmdn
 *
-* Revision 1.1  1999/08/12 16:35:02  ogilvie
-* storing results in tpc_dedx table, changing default to tde.F, will freeze tde_new.F
+* Revision 1.18  1999/08/18 02:31:31  ogilvie
+* obsolete files removed
 *
 * Revision 1.17  1999/07/19 19:15:51  genevb
 * Use StMessMgr
@@ -57,9 +57,8 @@
 * Split sources
 *
 *23456789012345678901234567890123456789012345678901234567890123456789012
-      INTEGER FUNCTION tde(tdpar_h,tdpar,hit_h,hit,
-     >                         track_h,track,pad_h,pad,
-     >                         tpcdedx_h, tpcdedx)
+      INTEGER FUNCTION tde_new(tdpar_h,tdpar,hit_h,hit,
+     >                         track_h,track,pad_h,pad)
 
       IMPLICIT NONE
 C
@@ -84,7 +83,7 @@ C      A module that calculate dE/dx from reconstructed tracking data
 C
 C-----------------------------------------------------------------------
 
-#include "tde.inc"
+#include "tde_new.inc"
       STRUCTURE /tde_local/
                 REAL length
                 REAL charge
@@ -111,7 +110,7 @@ C-----------------------------------------------------------------------
       REAL fndedx,fract,frndm
       real z(10),erf(10),frachalf(10),zcut,nontrunc,slope
       real average,sigma,dedx_upper,rndm
-      INTEGER iseed, nde_old, ipos,nzero
+      INTEGER iseed, nde_old, ipos
 C
 c     variables for maximumum likeihood
 c
@@ -150,7 +149,7 @@ C Abort if there are no TPC hits to work with
       if (hit_h.nok.eq.0) then
         call message('TDE_DEDX-W: No TPC hitss.'// 
      >               ' TDE aborted.',1,imsg2)
-         tde=STAFCV_BAD
+         tde_new=STAFCV_BAD
          return
       endif
 C Abort if there are too many TPC hits to work with
@@ -158,7 +157,7 @@ C Abort if there are too many TPC hits to work with
       if (hit_h.nok.gt.nlocmax) then
         call message('TDE_DEDX-W: Too many TPC hits.'// 
      >                 'TDE aborted.',1,imsg2)
-         tde=STAFCV_BAD
+         tde_new=STAFCV_BAD
          return
       endif
 
@@ -167,7 +166,7 @@ C Abort if there are no TPC tracks to work with
       if (track_h.nok.eq.0) then
         call message('TDE_DEDX-W: No TPC tracks.'//
      >                 'TDE aborted.',1,imsg3)
-         tde=STAFCV_BAD
+         tde_new=STAFCV_BAD
          return
       endif
 C Abort if there are too many TPC tracks to work with
@@ -175,7 +174,7 @@ C Abort if there are too many TPC tracks to work with
       if (track_h.nok.gt.nloctrc) then
         call message('TDE_DEDX-W: too many TPC tracks.'// 
      >                 'TDE aborted.',1,imsg3)
-         tde=STAFCV_BAD
+         tde_new=STAFCV_BAD
          return
       endif
 
@@ -201,7 +200,7 @@ c       tdpar(1).truncopt = 5
         nontrunc = 2.*( (1 - tdpar(1).truncfact) - 0.5)
         do i=1, 10
           frachalf(i)=1-erf(i)
-          write(m132,*) 'TDE - ',erf(i),frachalf(i),z(i)
+          write(m132,*) 'TDE_NEW - ',erf(i),frachalf(i),z(i)
           call StInfo(m132)
         enddo
         ipos = 1
@@ -216,11 +215,11 @@ c       tdpar(1).truncopt = 5
         endif
        endif
       
-      write(m132,*)  'TDE - averaging, truncation methods: ',
+      write(m132,*)  'TDE_NEW - averaging, truncation methods: ',
      >     tdpar(1).averaging_method, tdpar(1).truncopt   
       call StInfo(m132)        
       if (tdpar(1).usemerge.ne.0) then
-           call StInfo('TDE - using merged hits!!!')
+           call StInfo('TDE_NEW - using merged hits!!!')
       endif
          
 C Sort the hit array according to the track number
@@ -242,7 +241,7 @@ C       and do some more initialisation for
       end do
 
 C Loop over tracks and calculate average de/dx for each point
-      nzero = 0
+
       l=hit_h.nok
       last = 0
 c
@@ -475,10 +474,7 @@ c tries to smooth out nde
 c no truncation
             nde=nde_orig
          endif   
-         if(nde.lt.0) then
-            nde=0
-            nzero=nzero+1
-         endif
+         if(nde.lt.0) nde=0
  
          track(j).ndedx=nde
          track(j).dedx(1)=0.
@@ -564,25 +560,13 @@ c            write(6,*) 'resoultion' , hsig(2)/hparam(2)
          endif
 c
 c
-c fill tpcdedx table
-         tpcdedx_h.nok = tpcdedx_h.nok+1
-         k=tpcdedx_h.nok
-         tpcdedx(k).ndedx = nde
-         tpcdedx(k).dedx(1) = track(j).dedx(1)
-         tpcdedx(k).dedx(2) = track(j).dedx(2)
-         tpcdedx(k).id_track = track(j).id
-         tpcdedx(k).iflag = tdpar(1).averaging_method 
   
        end do 
 c      if (tdpar(1).averaging_method.eq.2) then
 c         call hdelet(hhid)
 c      endif
-       write(m132,*)  'TDE - num_tptracks, num_tpcdedx, nzeroes: ',
-     >       track_h.nok,tpcdedx_h.nok,nzero
-       call StInfo(m132)        
-  
 
-      tde=STAFCV_OK
+      tde_new=STAFCV_OK
       end
 
 
