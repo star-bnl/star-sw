@@ -53,7 +53,7 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 10-Oct-1996, \tcom
 #ifdef sgi
 #ifndef IRIX
 #define IRIX TRUE
-#error (This is not an error!)   Compiling maplun version (sgi only).
+/*#error (This is not an error!)   Compiling maplun version (sgi only).  */
 #endif
 #endif
 
@@ -183,7 +183,8 @@ int maplun_( int *LUN );
 	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 
 /*	  Send message on standard output: */
-	  printf( "%s\n", f1000 );
+	  fprintf(stderr, "%s\n", f1000 );
+	  fflush( stderr );
 
 /*	  Display time & message on journal file:  */
 	  MsgToFileOut( f1000, JournalFILE );
@@ -476,7 +477,8 @@ int maplun_( int *LUN );
 	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 
 /*	  Send message on standard output: */
-	  printf( "%s\n", f1000 );
+	  fprintf(stderr, "%s\n", f1000 );
+	  fflush( stderr );
 	}
 	return;
 }
@@ -601,7 +603,8 @@ int maplun_( int *LUN );
 	  L = MsgLNB( f1000, N );   f1000[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 
 /*	  Send message to standard output: */
-	  printf( "%s\n", f1000 );
+	  fprintf(stderr, "%s\n", f1000 );
+	  fflush( stderr );
 
 	  MsgToFileOut( f1000, stream );  /*  If LUN is 6, this will cause lines to be doubled. */
 
@@ -873,6 +876,24 @@ int maplun_( int *LUN );
 */
 {
 	MsgInit("");
+	return;
+}
+
+
+
+
+	void 	msg_ini_shared_( int *Journal_LUN )
+/*  Fortran callable interface to msg;  Fortran equivalent to:
+	SUBROUTINE			MSG_Ini_Shared( Journal_LUN )
+
+*  Input:
+	INTEGER Journal_LUN !FORTRAN logical unit number of journal file (ignored).
+
+
+*  Description:  MSG package initializion and journal-LUN specification, shared memory.
+*/
+{
+	MsgInit("s");
 	return;
 }
 

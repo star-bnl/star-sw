@@ -24,8 +24,10 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 10/1/96 14:34:38, 
 
 #ifndef HPUX
 #ifndef AIX
+#ifndef sun
 /*#error  (This is not an error!)   Compiling dlfcn (sgi, sun) version of msgControl  */
 #define DOdlfcn TRUE
+#endif
 #endif
 #endif
 
@@ -44,9 +46,10 @@ void usage( int argc, char*argv[] )
   fprintf(stderr,"Usage:\n\tmsgControl [-<switchName1>[<switchValue1>]] ... [-<switchNameN>[<switchValueN>]] [command line]\n");
 
   fprintf(stderr,"Switches:  (Must preceed the command)\n");
-  fprintf(stderr,"\t-e<pathName>\t- specify name of msg-linked executable to manipulate.\n");
+  fprintf(stderr,"\t-p<processID>\t- specify process ID of running msg-linked executable to manipulate.\n");
   fprintf(stderr,"\t-f<fileName>\t- specify name of msg state file to manipulate.  default: default.msg\n");
   fprintf(stderr,"\t-h\t- get this list of switches and commands.\n");
+  fprintf(stderr,"\t-m\t- append carriage return in summary listings (for gui applications).\n");
   fprintf(stderr,"\t-l<1 or 0>whether to list inactive prefixes (1) or not (0 -- default).\n");
 
   fprintf(stderr,"Commands:  (see MsgSetByCommand -- these commands are the same.)\n" );
@@ -66,8 +69,11 @@ void	main( int argc, char*argv[] )
 	char msgFileName[1000];
 	char msgExecutable[1000];
 	char msgCommand[1000];
+	pid_t  msgProcessID;
 	int listInactives=0;
 	int JournalEnabled=0;
+
+	int AppendReturn = 0;
 
 	int ret;
 	int i, j, k;
@@ -77,7 +83,9 @@ void	main( int argc, char*argv[] )
 	int UseExecutable = FALSE;
 #ifdef DOdlfcn
 	void *handle;
-	int  (*MsgShare)(char*);
+	void (*MsgAppendReturn)(void);
+	int  (*MsgShare)(pid_t);
+	int  (*MsgShareNoCreate)(pid_t);
 	void (*MsgSummaryFile)(FILE*);
 	int  (*MsgStateLoad)(char*);
 	void (*MsgSetSummaryModeInactive)(int);
@@ -88,25 +96,23 @@ void	main( int argc, char*argv[] )
 	int  (*MsgStateStore)(char*);
 #endif
   
-	char c1000[1000];
 	int shmid;
 
-	static int idd1 = 0;
-	static int idd2 = 0;
-	static int ide4 = 0;
-
 	strcpy( msgExecutable, "libmsg.so" );
+	msgProcessID = 0;
 
 	for (i=1; i<argc; i++) {
+/*	  fprintf(stderr, "MsgControl-I1 arg[%2d] is [%s]\n",i,&argv[i][0]);  */
 	  if (argv[i][0]=='-') {
 	    arg = &argv[i][2];
 	    switch (argv[i][1]) {
-	      case 'e': strcpy( msgExecutable, arg );UseExecutable = TRUE; break;
-	      case 'f': strcpy( msgFileName, arg );UseExecutable = FALSE; break;
+	      case 'p': msgProcessID=strtoul( arg, NULL, 10 ); UseExecutable = TRUE;  break;
+	      case 'f': strcpy( msgFileName, arg );            UseExecutable = FALSE; break;
 	      case 'h': usage(argc,argv); break;
 	      case 'l': listInactives=strtoul( arg, NULL, 10 ); break;
+	      case 'm': AppendReturn = -1; break;
 	      default: {
-	        printf( "MsgControl-E1 Unknown option: %s\n",&argv[i][0]);
+	        fprintf(stderr, "MsgControl-E1 Unknown option: %s\n",&argv[i][0]);
 	        usage(argc,argv);
 	        exit(0);
 	      }
@@ -121,16 +127,25 @@ void	main( int argc, char*argv[] )
 	        sprintf( &msgCommand[k], "%s ", arg );
 	        k = strlen( msgCommand );
 	      }
+/*	      fprintf(stderr, "MsgControl-I2 msgCommand is [%s].\n",msgCommand);  */
 
 #ifdef DOdlfcn
+/*	      Notes for the future                                     */
+/*	      Make a string like this:                                 */
+/*  eval where `ps -p<pid> -o"comm" | tail -1`                         */
+/*  Then, get msgExecutable (the path to an executable), and proceed.  */
+/*  For now, hang onto the default:  libmsg.so .                       */
+
 	      handle = dlopen( msgExecutable, RTLD_LAZY);
 
 	      if ( !handle ) {
-	        printf( "msgControl-F1 Could not open executable [%s]\n   So long, now!\n", msgExecutable );
+	        fprintf(stderr, "msgControl-F1 Could not open executable [%s]\n   So long, now!\n", msgExecutable );
 	        exit(1);
 	      }
 
+	      MsgAppendReturn           = dlsym( handle, "MsgAppendReturn" );
 	      MsgShare                  = dlsym( handle, "MsgShare" );
+	      MsgShareNoCreate          = dlsym( handle, "MsgShareNoCreate" );
 	      MsgSetSummaryModeInactive = dlsym( handle, "MsgSetSummaryModeInactive" );
 	      MsgSetByCommand           = dlsym( handle, "MsgSetByCommand" );
 	      MsgStateLoad              = dlsym( handle, "MsgStateLoad" );
@@ -142,7 +157,8 @@ void	main( int argc, char*argv[] )
 
 	      if ( UseExecutable ) {
 
-	        shmid = (*MsgShare)( msgExecutable );
+	        shmid = (*MsgShareNoCreate)( msgProcessID );
+	        if ( AppendReturn) (*MsgAppendReturn)();
 	        JournalEnabled = (*MsgJournalEnabled)();
 	        if ( listInactives ) (*MsgSetSummaryModeInactive)( TRUE  ); /*  List inactive messages */
 	        if ( JournalEnabled ) (*MsgJournalOff)();
@@ -152,6 +168,7 @@ void	main( int argc, char*argv[] )
 
 	      } else {
 
+	        if ( AppendReturn) (*MsgAppendReturn)();
 	        ret = (*MsgStateLoad)( msgFileName );
 	        if ( ret ) {
 	          if ( listInactives ) (*MsgSetSummaryModeInactive)( TRUE  ); /*  List inactive messages */
@@ -165,7 +182,8 @@ void	main( int argc, char*argv[] )
 #else
 	      if ( UseExecutable ) {
 
-	        shmid = MsgShare( msgExecutable );
+	        shmid = MsgShareNoCreate( msgProcessID );
+	        if ( AppendReturn) MsgAppendReturn();
 	        JournalEnabled = MsgJournalEnabled();
 	        if ( listInactives ) MsgSetSummaryModeInactive( TRUE  ); /*  List inactive messages */
 	        if ( JournalEnabled ) MsgJournalOff();
@@ -175,6 +193,7 @@ void	main( int argc, char*argv[] )
 
 	      } else {
 
+	        if ( AppendReturn) MsgAppendReturn();
 	        ret = MsgStateLoad( msgFileName );
 	        if ( ret ) {
 	          if ( listInactives ) MsgSetSummaryModeInactive( TRUE  ); /*  List inactive messages */

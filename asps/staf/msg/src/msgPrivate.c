@@ -4,6 +4,9 @@
 	==  msg Private Routines in this file.  ==
 	===================+++====================
 
+	Modified Shared memory to use process ID,
+	and <stderr> replaces <stdout>:
+	        19-Nov-1997   Robert Hackenburg
 	Converted to C, with shared memory:
 	started  9-Oct-1996   Robert Hackenburg
 	"done"  22-Oct-1996   Robert Hackenburg
@@ -53,6 +56,8 @@ FILE *JournalFILE;    /* Journal-file descriptor                          */
 control_t *control = &msg.control;
 prefix_t  *prefix = &msg.prefix[0];
 class_t   *class = &msg.class[0];
+
+extern int MsgInitialized; /* This starts out FALSE, and is set to TRUE when initialized.  */
 
 int CPUtime0 = 0;
 int ELAtime0 = 0;
@@ -461,7 +466,7 @@ char   s1000[1000];  /*  Some "scratch" string space.  */
 	Do nothing if ID is .LE. 0.
 */
 
-	char Class[CLASS_MAXLEN];
+	char Class[CLASS_MAXLEN+1];
 	int CID;
 
 	if ( ID <= 0 ) return;
@@ -710,11 +715,11 @@ MsgEnter-E1 No room left for new prefixes;  prefix not entered:\n\
 
 
 
-
 	LID = *ID;   /* Make a local copy.  */
 	CallerBug = FALSE;
 
 	if        ( LID <= 0 ) { /* Look up the message in the index: */
+	  if ( !MsgInitialized ) MsgInit( "" );
 	  MsgGetPrefix( msg, Prefix );
 	  Found = MsgFind( Prefix, &LID, Active, Alarming, Counting ); /*  Get its ID & flags.  */
 	} else if ( LID <= control->Nprefixes ) {   /* It's in the index:  */
@@ -1068,17 +1073,98 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 
 
 	int	MsgShare(
-/*  Input:                                                                       */
-	const char *ImageName )  /* Preferably, the name of an executable.
-	                            This is critical when sharing memory;
-	                            it must be the same for all who share
-	                            one copy of msg memory.                      */
+/*  Input:                                                                          */
+	const pid_t  ProcessID )   /* The ID of the process to share msg memory with. */
 {
 /* Description:  Set Msg up to share its memory.
 	         When this routine returns TRUE, the memory is being shared.
 	         This should be the very first Msg call.
 	         If a journal file was open at the time of this call, it is closed.
 	         The journal will need to be reopened if it had been open.
+
+   Returns:
+	shmid if successful,
+	-1 for failure.                                                          */
+
+	void *SharedAddress;
+	void *addr;
+	int size;
+	int i;
+
+	int shmid;
+	key_t key;
+	int shmflg;
+	unsigned long L;
+
+	const int ID = 1;
+	FILE *shmidLogFILE; /* shmid log-file descriptor                         */
+
+	JournalFILE = fopen( "/dev/null", "w" );  /* Ensure that this isn't NULL, or it'll start outputing to standard out.  */
+
+	size = sizeof( msg );
+	addr = &msg;
+	addr = 0;
+
+/*	fprintf(stderr,"MsgShare-d1  ID:%d ProcessID:%d  Size:%d  addr:%d 0x%x\n", ID, ProcessID, size, addr, addr);  */
+
+	if ( ProcessID <= 0 ) {
+	  control->ProcessID = getpid();
+	} else {
+	  control->ProcessID = ProcessID;
+	}
+	key = (key_t)( control->ProcessID );
+
+	shmflg = 0660 | IPC_CREAT;  /*  Read/Write Owner/Group  */
+/*	fprintf(stderr,"MsgShare-d2 key: %d shmflg: 0%o \n", key, shmflg );  */
+
+	shmid = shmget( key, size, shmflg );  /*  unique key, size, read/write user/group.  */
+
+
+/*	fprintf(stderr,"MsgShare-d3  shmid: %d  errno: %d\n", shmid, errno);  */
+	if ( shmid < 0 ) {
+	  perror( "MsgShare-e1 system error:\n" );
+	  return( -1 );
+	}
+
+	SharedAddress = shmat( shmid, addr, shmflg );
+/*	fprintf(stderr, "MsgShare-d4  SharedAddress: %x  Address: %x\n", SharedAddress, addr );  */
+
+	Msg = SharedAddress;
+
+/*	fprintf(stderr, "MsgShare-d5  Old msg.control address: %x\n", (int)(control) );  */
+
+	control = &Msg->control;
+	prefix  = &Msg->prefix[0];
+	class   = &Msg->class[0];
+
+/*	fprintf(stderr, "MsgShare-d6  New msg.control address: %x\n", (int)(control) ); */
+
+	if ( !SharedAddress ) {
+	  perror( "MsgShare-e2 system error:\n" );
+	  return( -1 );
+	}
+
+	shmidLogFILE = fopen( "msg.shmid", "a" );  /* Append to this log file -- keep track of shmids!  */
+	MsgTimeStampFileOut( shmidLogFILE );       /* Put a time stamp on it.                           */
+	fprintf( shmidLogFILE, "msg Shared Memory segment attached/created, shmid:%d  pid:%d\n", shmid, key );
+	fclose( shmidLogFILE );
+
+	return( shmid );
+}
+
+
+
+
+	int	MsgShareNoCreate(
+/*  Input:                                                                          */
+	const pid_t  ProcessID )   /* The ID of the process to share msg memory with. */
+{
+/* Description:  Set Msg up to share its memory.
+	         When this routine returns TRUE, the memory is being shared.
+	         This should be the very first Msg call.
+	         If a journal file was open at the time of this call, it is closed.
+	         The journal will need to be reopened if it had been open.
+	         If the segment doesn't exist, a new one will not be created.
 
    Returns:
 	shmid if successful,
@@ -1102,34 +1188,39 @@ MsgEnterClass-E1 No room left for new classes;  class not entered:\n\
 	addr = &msg;
 	addr = 0;
 
-/*	printf("MsgShare-d1  ID:%d ImageName:%s  Size:%d  addr:%d 0x%x\n", ID, ImageName, size, addr, addr);  */
+/*	fprintf(stderr,"MsgShare-d1  ID:%d ProcessID:%d  Size:%d  addr:%d 0x%x\n", ID, ProcessID, size, addr, addr);  */
 
-	key = ftok( ImageName, ID );
+	if ( ProcessID <= 0 ) {
+	  control->ProcessID = getpid();
+	} else {
+	  control->ProcessID = ProcessID;
+	}
+	key = (key_t)( control->ProcessID );
 
-	shmflg = 0660 | IPC_CREAT;  /*  Read/Write Owner/Group  */
-/*	printf("MsgShare-d2 key: %d shmflg: 0%o \n", key, shmflg );  */
+	shmflg = 0660;  /*  Read/Write Owner/Group  */
+/*	fprintf(stderr,"MsgShare-d2 key: %d shmflg: 0%o \n", key, shmflg );  */
 
 	shmid = shmget( key, size, shmflg );  /*  unique key, size, read/write user/group.  */
 
 
-/*	printf("MsgShare-d3  shmid: %d  errno: %d\n", shmid, errno);  */
+/*	fprintf(stderr,"MsgShare-d3  shmid: %d  errno: %d\n", shmid, errno);  */
 	if ( shmid < 0 ) {
 	  perror( "MsgShare-e1 system error:\n" );
 	  return( -1 );
 	}
 
 	SharedAddress = shmat( shmid, addr, shmflg );
-/*	printf( "MsgShare-d4  SharedAddress: %x  Address: %x\n", SharedAddress, addr );  */
+/*	fprintf(stderr, "MsgShare-d4  SharedAddress: %x  Address: %x\n", SharedAddress, addr );  */
 
 	Msg = SharedAddress;
 
-/*	printf( "MsgShare-d5  Old msg.control address: %x\n", (int)(control) );  */
+/*	fprintf(stderr, "MsgShare-d5  Old msg.control address: %x\n", (int)(control) );  */
 
 	control = &Msg->control;
 	prefix  = &Msg->prefix[0];
 	class   = &Msg->class[0];
 
-/*	printf( "MsgShare-d6  New msg.control address: %x\n", (int)(control) ); */
+/*	fprintf(stderr, "MsgShare-d6  New msg.control address: %x\n", (int)(control) ); */
 
 	if ( !SharedAddress ) {
 	  perror( "MsgShare-e2 system error:\n" );

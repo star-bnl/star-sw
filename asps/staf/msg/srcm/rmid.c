@@ -14,12 +14,22 @@ extern int errno;
 void main( int argc, char*argv[] )
 
 {
-
 	int i;
+	int shmflg;
 	int shmid;
+	int ProcessID;
+	key_t key;
+
 	for (i=1; i<argc; i++) {
-	  shmid = strtoul( argv[i], NULL, 10 );
-	  printf( "Removing shmid %d\n", shmid );
+	  ProcessID = strtoul( argv[i], NULL, 10 );
+	  key = (key_t)( ProcessID );
+	  shmflg = 0660;  /*  Read/Write Owner/Group  */
+	  shmid = shmget( key, 0, shmflg );  /*  unique key, size, read/write user/group.  */
+	  if ( shmid < 0 ) {
+	    perror( "rmid-e1 system error:\n" );
+	    exit( -1 );
+	  }
+	  fprintf(stderr, "Removing shmid %d (pid %d)\n", shmid, ProcessID );
 	  shmctl( shmid, IPC_RMID, NULL );
 	}
 	exit(0);
