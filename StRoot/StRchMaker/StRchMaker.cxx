@@ -1,6 +1,6 @@
-/***************************************************************************
+ /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 1.3 1999/02/12 18:28:53 lyons Exp $
+ * $Id: StRchMaker.cxx,v 1.4 1999/02/12 21:47:16 lyons Exp $
  *
  * Author: Dan Lyons
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
+ * Revision 1.4  1999/02/12 21:47:16  lyons
+ * *** empty log message ***
+ *
  * Revision 1.3  1999/02/12 18:28:53  lyons
  * Another revision, merge fisyak additions with a couple changes...
  * trying to get to compile...
@@ -67,31 +70,33 @@ StRchMaker::StRchMaker(const char *name,
       St_dst_rch *dst_rch = new St_dst_rch("dst_rch_hit",no_rch_hits);
       m_DataSet->Add(dst_rch);
 #ifdef RCH_DEBUG
-	for(int i=0;i<no_rch_hits;i++,g2t_rch_hit++) {
+	for(int i=0;i<no_rch_hits;i++,rch_hit++) {
 	    cout << "Hit number " << i << "of" << no_rch_hits << endl;
-	    cout << " id: " << g2t_rch_hit->id << endl;
-	    cout << " track_p: " << g2t_rch_hit->track_p << endl;
-	    cout << " volume_id: " << g2t_rch_hit->volume_id << endl;
-	    cout << " de: " << g2t_rch_hit->de << endl;
-	    cout << " tof: " << g2t_rch_hit->tof << endl;
+	    cout << " id: " << rch_hit->id << endl;
+	    cout << " track_p: " << rch_hit->track_p << endl;
+	    cout << " volume_id: " << rch_hit->volume_id << endl;
+	    cout << " de: " << rch_hit->de << endl;
+	    cout << " tof: " << rch_hit->tof << endl;
 	    cout << " x[3]: ("
-		 << g2t_rch_hit->x[0] << ","
-		 << g2t_rch_hit->x[1] << ","
-		 << g2t_rch_hit->x[2] << ")" << endl;
+		 << rch_hit->x[0] << ","
+		 << rch_hit->x[1] << ","
+		 << rch_hit->x[2] << ")" << endl;
 	    cout << " p[3]: ("
-		 << g2t_rch_hit->p[0] << ","
-		 << g2t_rch_hit->p[1] << ","
-		 << g2t_rch_hit->p[2] << ")" << endl;
+		 << rch_hit->p[0] << ","
+		 << rch_hit->p[1] << ","
+		 << rch_hit->p[2] << ")" << endl;
 	}
 #endif
- }
+   } // if(g2t_rch_hit)
+ } // if(!m_DataSet->GetList()
+ return kStOK;
 // 	PR(mSingleHitCollection->mTheHits[zz]);
 
 
 void StRchMaker::PrintInfo() 
 {
   printf("**************************************************************\n");
-  printf("* $Id: StRchMaker.cxx,v 1.3 1999/02/12 18:28:53 lyons Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.4 1999/02/12 21:47:16 lyons Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
