@@ -15,7 +15,7 @@ extern FTFinder      tracker ;
 
 extern "C" long r_ftpc_(
   TABLE_HEAD_ST     *ctrl_h,       R_FTPC_CTRL_ST     *ctrl,        
-  TABLE_HEAD_ST     *point_h,      FCL_FPPOINT_ST     *point,        
+  TABLE_HEAD_ST     *point_h,      TRG_FCL_FPPOINT_ST *point,        
   TABLE_HEAD_ST     *fptrack_h,    TPT_TRACK_ST       *fptrack   )
 {
 /*:>--------------------------------------------------------------------
