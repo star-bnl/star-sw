@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventScavenger.cxx,v 2.3 2000/10/16 21:06:32 ullrich Exp $
+ * $Id: StEventScavenger.cxx,v 2.4 2001/03/16 04:59:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventScavenger.cxx,v $
+ * Revision 2.4  2001/03/16 04:59:24  ullrich
+ * Added missing method removeTriggerDetectorCollection().
+ *
  * Revision 2.3  2000/10/16 21:06:32  ullrich
  * Added new method: removeTpcHitsNotOnTracks()
  *
@@ -188,6 +191,16 @@ bool StEventScavenger::removeRichCollection(StEvent* evt)
 {
     if (evt && evt->richCollection()) {
 	evt->richCollection()->makeZombie();
+	return true;
+    }
+    else
+	return false;
+}
+
+bool StEventScavenger::removeTriggerDetectorCollection(StEvent* evt)
+{
+    if (evt && evt->triggerDetectorCollection()) {
+	evt->triggerDetectorCollection()->makeZombie();
 	return true;
     }
     else
