@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.378 2004/01/31 01:41:14 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.379 2004/02/01 23:27:48 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -355,14 +355,14 @@ Bfc_st BFC1[] = {
   {"ZDCVtx"      ,"","tpcChain","db"                      ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls",                   "St_tcl_Maker","St_tpc,St_tcl_Maker",
                                                                         "Cluster Finder (from raw)",kFALSE},
-  {"fcf"         ,"","tpcChain","daq",           "StRTSClientFCFMaker","StRTSClientFCF,StRTSClientFCFMaker",
+  {"fcf"         ,"","tpcChain","daq,-tcl",      "StRTSClientFCFMaker","StRTSClientFCF,StRTSClientFCFMaker",
                                                                        "Offline FCF Cluster finder",kFALSE},
   {"daqclf"      ,"","tpcChain","","StDaqClfMaker","StDaqClfMaker",    "Offline DAQ Cluster finder",kFALSE},
 
 
   {"Velo"        ,"","tpcChain","tpc_T,tls"                         ,"StVeloMaker","StVeloMaker","",kFALSE},
   {"TpcHitFilter","tpc_hit_filter","tpcChain",""    ,"StTpcHitFilterMaker","StTpcHitFilterMaker","",kFALSE},
-  {"TpcHitMover" ,"tpc_hit_mover","tpcChain","",        
+  {"TpcHitMover" ,"tpc_hit_mover","tpcChain","",
                       "StTpcHitMover","StTpcHitMoverMaker","TPC hits coord transform + corrections",kFALSE},
   {"tpt"         ,"tpc_tracks","tpcChain","tpc_T,tls,TpcHitMover",
                                                             "St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
@@ -460,17 +460,17 @@ Bfc_st BFC1[] = {
 
 
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                ,"","","SSD full chain for simulation",kFALSE},
-  {"sls"         ,"","","tls,Simu,SvtCL","St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker",    
+  {"sls"         ,"","","tls,Simu,SvtCL","St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker",
                                                                             "... SSD slow simulator",kFALSE},
-  {"spa"         ,"","","tls,Simu,SvtCL","St_spa_Maker","St_tpc,St_svt,StSsdSimulationMaker", 
+  {"spa"         ,"","","tls,Simu,SvtCL","St_spa_Maker","St_tpc,St_svt,StSsdSimulationMaker",
                                                                      "... SSD Pedestal Annihilator",kFALSE},
   {"scf"       ,"","","" ,"St_scf_Maker","St_tpc,St_svt,StSsdClusterMaker","... SSD cluster finder",kFALSE},
-  {"scm"         ,"","","" ,"St_scm_Maker","St_tpc,St_svt,StSsdClusterMaker",     
+  {"scm"         ,"","","" ,"St_scm_Maker","St_tpc,St_svt,StSsdClusterMaker",
                                                               "... SSD Cluster Matcher (both side)",kFALSE},
   {"spt"         ,"","",""      ,"StSsdPointMaker","St_svt,StSsdPointMaker","... SSD Point Creator",kFALSE},
   {"sce"         ,"","",""                        ,"St_sce_Maker","St_tpc,St_svt,StSsdEvalMaker",
                                                                                 "... SSD Evaluator",kFALSE},
- 
+
 
   {"V02"         ,"v02","","db,StEvent","StV0FinderMaker","StSecondaryVertexMaker",
                                                                             "Find V0s from StEvent",kFALSE},
@@ -896,16 +896,16 @@ Bfc_st BFC2[] = {
   {"ZDCVtx"      ,"","tpcChain","db"                      ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls"                   ,"St_tcl_Maker","St_tpc,St_tcl_Maker",
                                                                         "Cluster Finder (from raw)",kFALSE},
-  {"fcf"         ,"","tpcChain","daq",           "StRTSClientFCFMaker","StRTSClientFCF,StRTSClientFCFMaker",
+  {"fcf"         ,"","tpcChain","daq,-tcl",      "StRTSClientFCFMaker","StRTSClientFCF,StRTSClientFCFMaker",
                                                                        "Offline FCF Cluster finder",kFALSE},
   {"daqclf"      ,"","tpcChain","","StDaqClfMaker","StDaqClfMaker",    "Offline DAQ Cluster finder",kFALSE},
 
 
   {"Velo"        ,"","tpcChain","tpc_T,tls"                         ,"StVeloMaker","StVeloMaker","",kFALSE},
   {"TpcHitFilter","tpc_hit_filter","tpcChain",""    ,"StTpcHitFilterMaker","StTpcHitFilterMaker","",kFALSE},
-  {"TpcHitMover" ,"tpc_hit_mover","tpcChain","",        
+  {"TpcHitMover" ,"tpc_hit_mover","tpcChain","",
                       "StTpcHitMover","StTpcHitMoverMaker","TPC hits coord transform + corrections",kFALSE},
-  {"tpt"         ,"tpc_tracks","tpcChain","tpc_T,tls,TpcHitMover",     
+  {"tpt"         ,"tpc_tracks","tpcChain","tpc_T,tls,TpcHitMover",
                                                             "St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
   {"tpt_old"     ,"tpc_tracks","tpcChain","tpc_T,tls",      "St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
   {"TpcT0"       ,"TpcT0","","tpc_T,svt_T,ctf_T,ftpcT,globT,tls,db,tpcDB,tpc_daq,kalman","StTpcT0Maker",
@@ -1000,12 +1000,12 @@ Bfc_st BFC2[] = {
 
 
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                ,"","","SSD full chain for simulation",kFALSE},
-  {"sls"         ,"","","tls,Simu,SvtCL","St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker",    
+  {"sls"         ,"","","tls,Simu,SvtCL","St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker",
                                                                             "... SSD slow simulator",kFALSE},
-  {"spa"         ,"","","tls,Simu,SvtCL","St_spa_Maker","St_tpc,St_svt,StSsdSimulationMaker", 
+  {"spa"         ,"","","tls,Simu,SvtCL","St_spa_Maker","St_tpc,St_svt,StSsdSimulationMaker",
                                                                      "... SSD Pedestal Annihilator",kFALSE},
   {"scf"       ,"","","" ,"St_scf_Maker","St_tpc,St_svt,StSsdClusterMaker","... SSD cluster finder",kFALSE},
-  {"scm"         ,"","","" ,"St_scm_Maker","St_tpc,St_svt,StSsdClusterMaker",     
+  {"scm"         ,"","","" ,"St_scm_Maker","St_tpc,St_svt,StSsdClusterMaker",
                                                               "... SSD Cluster Matcher (both side)",kFALSE},
   {"spt"         ,"","",""      ,"StSsdPointMaker","St_svt,StSsdPointMaker","... SSD Point Creator",kFALSE},
   {"sce"         ,"","",""                        ,"St_sce_Maker","St_tpc,St_svt,StSsdEvalMaker",
@@ -1520,7 +1520,7 @@ Int_t StBFChain::Instantiate()
 	  if (maker == "StRTSClientFCFMaker"){
 	    Int_t DMode=0;
 	    // use the online TPC clusters (DAQ100) info if any
-	    if ( GetOption("onlcl") && ! GetOption("onlraw") )  DMode = DMode | 0x2;  
+	    if ( GetOption("onlcl") && ! GetOption("onlraw") )  DMode = DMode | 0x2;
 	    // use the TPC raw hit information
 	    if ( GetOption("onlraw")&& ! GetOption("onlcl")  )  DMode = DMode | 0x1;
 	    mk->SetMode(DMode);                               // set flag (matches tcpdaqMk->SetDAQFlag())
