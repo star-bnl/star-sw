@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.23 1999/12/10 17:38:41 genevb Exp $
+// $Id: StPrimaryMaker.cxx,v 1.24 1999/12/15 01:28:56 nystrand Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.24  1999/12/15 01:28:56  nystrand
+// changed return code from lmv to be consistent with evr
+//
 // Revision 1.23  1999/12/10 17:38:41  genevb
 // Added fixed vtx functionality, allow lmv and fixed vtx only one vtx entry
 //
@@ -288,6 +291,13 @@ Int_t StPrimaryMaker::Make(){
       if(Debug()) gMessMgr->Debug() << "run_lmv: calling lmv" << endm;
       iRes = lmv(globtrk,vertex,mdate);
       //   ================================================
+      // Do this to solve inconsistency between kSt* and kSTAFCV* return codes
+      if( iRes == kStOK ){
+        iRes = kSTAFCV_OK;
+      }
+      else{
+        iRes = kSTAFCV_ERR;
+      }
     }
     else{    
       // evr
