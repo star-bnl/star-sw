@@ -1,4 +1,6 @@
 /* tpt_cpu.c				created 25-Oct-1991  D. Olson
+ *					modified 12jun95 - CETull
+ *						for sun4os5
  *
  * This routine makes a machine independent fortran callable
  * cpu time function.
@@ -12,7 +14,7 @@
 
 
 
-#ifdef SUN /* SUN definitions ************************************************/
+#ifdef sun4 /* sun OS 4 definitions *******************************************/
 
 #define HZ 60.
 #include <sys/types.h>
@@ -21,7 +23,14 @@
 #include <sys/resource.h>
 int getrusage();
 
-#endif /* SUN ****************************************************************/
+#endif /* sun4 ****************************************************************/
+
+#ifdef sun4os5 /* Solaris definition ******************************************/
+
+#include <sys/types.h>
+#include <sys/times.h>
+#include <sys/param.h>
+#endif /* sun4os5 ************************************************************/
 
 #ifdef VAX /* VAX definitions ************************************************/
 

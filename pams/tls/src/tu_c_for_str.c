@@ -1,5 +1,5 @@
 /* C functions to convert character strings between C and FORTRAN. */
-#include <strings.h>
+#include <string.h>
 
 /* Convert C string to FORTRAN string. */
 char* c2f_string(char* fs, char* cs)

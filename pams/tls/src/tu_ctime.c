@@ -6,38 +6,18 @@
  *  tu_ctime - a Fortran callable routine that translates an integer time
  *		like the C ctime() function.
  *
+ *  12jun95 - cetull@lbl.gov - modify for Solaris
  */
 
 void tu_ctime_();
 void tu_ctime();
 
-#ifdef SUN
-#include <time.h>
-#include <string.h>
-#endif /* SUN */
-
-#ifdef HPUX
-#include <time.h>
-#include <string.h>
-#endif /* HPUX */
-
-#ifdef AIX
-#include <time.h>
-#include <string.h>
-#endif /* AIX */
-
-#ifdef IRIX
-#include <time.h>
-#include <string.h>
-#endif /* IRIX */
-
 #ifdef VMS
-
 #include <descrip.h>
+#endif /* VMS */
+
 #include <time.h>
 #include <string.h>
-
-#endif /* VMS */
 
 
 
