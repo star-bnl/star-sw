@@ -89,6 +89,29 @@ proc msgui_ui {root args} {
 			-font -*-Helvetica-Bold-R-Normal-*-*-100-*-*-*-*-*-*
 	}
 
+	label $base.label#9 \
+		-background #d88700 \
+		-highlightbackground #d88700 \
+		-text shmid
+	catch {
+		$base.label#9 configure \
+			-font -*-Helvetica-Bold-R-Normal-*-*-100-*-*-*-*-*-*
+	}
+
+	message $base.message#4 \
+		-aspect 1000 \
+		-background #9d3d00 \
+		-foreground white \
+		-highlightbackground #D88700 \
+		-padx 7 \
+		-pady 3 \
+		-relief ridge \
+		-textvariable Shmid
+	catch {
+		$base.message#4 configure \
+			-font -*-screen-Medium-R-Normal-*-*-140-*-*-*-*-*-*
+	}
+
 	label $base.label#2 \
 		-background #d88700 \
 		-highlightbackground #d88700 \
@@ -161,6 +184,20 @@ proc msgui_ui {root args} {
 		-text {   CPU Usage }
 	catch {
 		$base.button#3 configure \
+			-font -*-Helvetica-Bold-R-Normal-*-*-100-*-*-*-*-*-*
+	}
+
+	button $base.button#10 \
+		-activebackground #ffa831 \
+		-background #d88700 \
+		-command {MsgRemoveShmid .} \
+		-highlightbackground #d88700 \
+		-justify left \
+		-padx 10 \
+		-pady 3 \
+		-text {remove shmid}
+	catch {
+		$base.button#10 configure \
 			-font -*-Helvetica-Bold-R-Normal-*-*-100-*-*-*-*-*-*
 	}
 
@@ -285,19 +322,6 @@ proc msgui_ui {root args} {
 	catch {
 		$base.button#7 configure \
 			-font -*-Helvetica-Bold-R-Normal-*-*-100-*-*-*-*-*-*
-	}
-
-	message $base.message#4 \
-		-aspect 1000 \
-		-background #9d3d00 \
-		-foreground white \
-		-highlightbackground #D88700 \
-		-padx 7 \
-		-pady 3 \
-		-relief ridge
-	catch {
-		$base.message#4 configure \
-			-font -*-screen-Medium-R-Normal-*-*-140-*-*-*-*-*-*
 	}
 
 	label $base.label#8 \
@@ -437,6 +461,12 @@ proc msgui_ui {root args} {
 	blt_table $base.frame#1 $base.button#1 	11,20  \
 		-columnspan 4 \
 		-fill x
+	blt_table $base.frame#1 $base.label#9 	11,25  \
+		-columnspan 2 \
+		-fill x
+	blt_table $base.frame#1 $base.message#4 	11,27  \
+		-columnspan 2 \
+		-fill x
 	blt_table $base.frame#1 $base.label#2 	12,1  \
 		-columnspan 3 \
 		-fill x
@@ -453,6 +483,9 @@ proc msgui_ui {root args} {
 		-columnspan 3 \
 		-fill x
 	blt_table $base.frame#1 $base.button#3 	12,20  \
+		-columnspan 4 \
+		-fill x
+	blt_table $base.frame#1 $base.button#10 	12,25  \
 		-columnspan 4 \
 		-fill x
 	blt_table $base.frame#1 $base.label#3 	13,1  \
@@ -483,9 +516,6 @@ proc msgui_ui {root args} {
 		-columnspan 4 \
 		-fill x
 	blt_table $base.frame#1 $base.button#7 	14,12  \
-		-columnspan 3 \
-		-fill x
-	blt_table $base.frame#1 $base.message#4 	14,16  \
 		-columnspan 3 \
 		-fill x
 	blt_table $base.frame#1 $base.label#8 	14,20  \

@@ -3,7 +3,7 @@
 (
 
 /*  Inputs:  */
-	  char *Prefix /* A message prefix. */
+	  const char *Prefix /* A message prefix. */
 	, int Limit ) /* Maximum no. of times to display a message before aborting. */
 {
 /*  Description:  Set the abort limit for the message recognized by Prefix.
@@ -13,6 +13,5 @@
 	for Prefix), is set to the same value -- aborting msg calls
 	should not be quiet without deliberate intervention (ie, re-specify
 	the count-limit after this call to obtain silent aborts -- don't
-	do it!).
-*/
+	do it!).  */
 </pre>

@@ -62,7 +62,7 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 10-Oct-1996, \tcom
 
 #define MAX_FILE_VERSIONS 999
 
-extern msg_t msg;
+extern msgData_t msg;
 extern FILE *JournalFILE;    /* Journal-file descriptor                          */
 
 extern control_t *control;
@@ -72,7 +72,6 @@ extern class_t   *class;
 extern int CPUtime0;
 extern int ELAtime0;
 
-typedef	void	(*funcPoint)(const char*, const char*, const int*);
 extern funcPoint MsgAlarmRoutine;
 
 extern char   m1000[1000];  /*  Some "scratch" message space.  */
@@ -172,7 +171,7 @@ extern char   f1000[1000];  /*  Some "scratch" Fortran-string conversion space. 
 /* Description:  Compatibility routine -- don't use in new code.
 	             ---->  Use MsgInit instead.  <----
 */
-	MsgInit();
+	MsgInit("");
 	return;
 }
 

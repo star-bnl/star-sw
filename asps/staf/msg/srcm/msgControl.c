@@ -17,13 +17,22 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 10/1/96 14:34:38, 
 #include <assert.h>
 #include <sys/signal.h>
 
-#include <dlfcn.h>
+#include <time.h>
 
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
+#ifndef HPUX
+#ifndef AIX
+/*#error  (This is not an error!)   Compiling dlfcn (sgi, sun) version of msgControl  */
+#define DOdlfcn TRUE
+#endif
+#endif
 
-#include <time.h>
+#ifdef DOdlfcn
+#include <dlfcn.h>
+#endif
+
 
 #include <msg.h>
 
@@ -66,6 +75,7 @@ void	main( int argc, char*argv[] )
 
 /*	Shared object stuff:  */
 	int UseExecutable = FALSE;
+#ifdef DOdlfcn
 	void *handle;
 	int  (*MsgShare)(char*);
 	void (*MsgSummaryFile)(FILE*);
@@ -76,14 +86,16 @@ void	main( int argc, char*argv[] )
 	void (*MsgJournalOn)(void);
 	int  (*MsgSetByCommand)(char*);
 	int  (*MsgStateStore)(char*);
+#endif
   
 	char c1000[1000];
+	int shmid;
 
 	static int idd1 = 0;
 	static int idd2 = 0;
 	static int ide4 = 0;
 
-	strcpy( msgExecutable, "libMsg.so" );
+	strcpy( msgExecutable, "libmsg.so" );
 
 	for (i=1; i<argc; i++) {
 	  if (argv[i][0]=='-') {
@@ -110,6 +122,7 @@ void	main( int argc, char*argv[] )
 	        k = strlen( msgCommand );
 	      }
 
+#ifdef DOdlfcn
 	      handle = dlopen( msgExecutable, RTLD_LAZY);
 
 	      if ( !handle ) {
@@ -129,7 +142,7 @@ void	main( int argc, char*argv[] )
 
 	      if ( UseExecutable ) {
 
-	        (*MsgShare)( msgExecutable );
+	        shmid = (*MsgShare)( msgExecutable );
 	        JournalEnabled = (*MsgJournalEnabled)();
 	        if ( listInactives ) (*MsgSetSummaryModeInactive)( TRUE  ); /*  List inactive messages */
 	        if ( JournalEnabled ) (*MsgJournalOff)();
@@ -149,6 +162,30 @@ void	main( int argc, char*argv[] )
 	          }
 	        }
 	      }
+#else
+	      if ( UseExecutable ) {
+
+	        shmid = MsgShare( msgExecutable );
+	        JournalEnabled = MsgJournalEnabled();
+	        if ( listInactives ) MsgSetSummaryModeInactive( TRUE  ); /*  List inactive messages */
+	        if ( JournalEnabled ) MsgJournalOff();
+	        ret = MsgSetByCommand( msgCommand );
+	        if ( JournalEnabled ) MsgJournalOn();
+	        if ( listInactives ) MsgSetSummaryModeInactive( FALSE ); /*  Revert msg state before storing.  */
+
+	      } else {
+
+	        ret = MsgStateLoad( msgFileName );
+	        if ( ret ) {
+	          if ( listInactives ) MsgSetSummaryModeInactive( TRUE  ); /*  List inactive messages */
+	          ret = MsgSetByCommand( msgCommand );
+	          if ( listInactives ) MsgSetSummaryModeInactive( FALSE ); /*  Revert msg state before storing.  */
+	          if ( ret ) {
+	            ret = MsgStateStore( msgFileName );
+	          }
+	        }
+	      }
+#endif
 	      if ( !ret ) exit(1);
 	      exit(0);
 	  }                        /* if (argv[i][0]=='-')  */

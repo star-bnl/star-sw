@@ -25,6 +25,7 @@ typedef struct {
   int JournalEnabled;    /* If true, Journal-file is enabled.                */
   int TimeStampCPU;      /* If true, time-stamps occur on changed CPU times. */
   int Sorted;            /* Whether ID list is sorted                        */
+  int shmid;             /* Shared memory ID, if shared, -1 if not.          */
 
   /*	msg Summary output features:                                                     */
   int SummaryPageLength;   /* Number of lines output on summary page between form feeds. */

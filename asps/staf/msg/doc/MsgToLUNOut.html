@@ -7,9 +7,10 @@
 	                     submitted for display;  lines separated by "newline" characters.  */
 	, int       LUN ) /* FORTRAN logical unit number for time-stamp to be written on.      */
 {
-/*  Description:  Write a message to a FORTRAN LUN;  bypass accounting.
+/* Description:  Compatibility routine -- don't use in new code.
+	             ---->  Use MsgToFileOut instead.  <----
 	Display a message, containing one or more lines of no particular
-	length (or length-limit), on FORTRAN logical unit LUN.
+	length (or length-limit), on FORTRAN logical unit LUN.  Bypass msg accounting.
 
 	This routine ends with a call to STRFlush( LUN ), flushing the output
 	output buffer.  This seems to be necessary to get some machines to

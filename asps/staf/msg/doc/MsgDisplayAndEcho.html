@@ -5,7 +5,7 @@
 /*   Inputs:                                                                               */
 	  const char *msg /* Character-string message, with prefix, submitted for display. */
 	, int         LUN /* FORTRAN logical unit number for msg to be echoed to;          */
-	                  /* The file refered to by LUN must be opened FORTRAN style.      */
+	                  /* The file refered to by LUN must be already opened.            */
 
 /*   Input/Output:                                                                         */
 	, int       *ID ) /* Fast-reference message ID.  Set to zero by caller 
@@ -16,7 +16,8 @@
 	                     If ID is negative, ID remains unchanged, and lookup
 	                     is then always by prefix.                                     */
 {
-/* Description:  Display a message on the terminal and echo on a FORTRAN LUN.
+/* Description:  Compatibility routine -- don't use in new code.
+	             ---->  Use MsgDisplayAndFile instead.  <----
 	Conditionally display a message msg on standard out and echo it to LUN.
 	The message is displayed unless disabled.
 	The message is counted unless counting is disabled.
