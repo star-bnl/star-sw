@@ -63,7 +63,7 @@ STAFCV_T soc_bind(char* aspName, char* solibName)
    int (*asp_start)();
 
    if( 0 == strcmp(solibName,"-") ){
-      solibName = (char*)ASUALLOC(9);
+      solibName = (char*)MALLOC(9);
       sprintf(solibName,"lib%3s.so",aspName);
    }
 
@@ -76,7 +76,7 @@ STAFCV_T soc_bind(char* aspName, char* solibName)
    asp_init();
    asp_start();
 
-   ASUFREE(solibName);
+   FREE(solibName);
    EML_SUCCESS(STAFCV_OK);
 #else /*ARCH_DL_SUPPORTED*/
    EML_ERROR(NO_DYNAMIC_LINKING);
@@ -105,7 +105,7 @@ STAFCV_T soc_release(char * aspName, char* solibName)
 {
 #ifdef ARCH_DL_SUPPORTED
    if( 0 == strcmp(solibName,"-") ){
-      solibName = (char*)ASUALLOC(9);
+      solibName = (char*)MALLOC(9);
       sprintf(solibName,"lib%3s.so",aspName);
    }
 
@@ -120,7 +120,7 @@ STAFCV_T soc_release(char * aspName, char* solibName)
 
    asp_stop();
 
-   ASUFREE(solibName);
+   FREE(solibName);
    EML_SUCCESS(STAFCV_OK);
 #else /*ARCH_DL_SUPPORTED*/
    EML_ERROR(NO_DYNAMIC_LINKING);
@@ -157,7 +157,7 @@ STAFCV_T socobject_name(long idref)
 
    char *n;
    printf("SOC:\tObject name = %s \n",n=p->name());
-   delete[] n;
+   FREE(n);
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -191,7 +191,7 @@ STAFCV_T socobject_type(long idref)
 
    char *t;
    printf("SOC:\tObject type = %s \n",t=p->type());
-   delete[] t;
+   FREE(t);
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -345,7 +345,7 @@ STAFCV_T soc_list()
 {
    char *c;
    printf("%s",c = soc->list() );
-   ASUFREE(c);
+   FREE(c);
    EML_SUCCESS(STAFCV_OK);
 }
 
