@@ -10,7 +10,7 @@
        float     y;             /* vertex coordinates in STAR reference system  */
        float     z;
        long      sigma;         /* position uncertainty (x,y,z packed)          */
-       flost     pchi2;         /* P(chi^2,ndf) of vertex fit                   */
+       float     pchi2;         /* P(chi^2,ndf) of vertex fit                   */
        long      id_aux_vert;   /* id of auxilliary vertex table                */
    } ;
-/*  Last mod. for dst_vertex:   $Date: 1998/03/27 14:21:02 $ */
+/*  Last mod. for dst_vertex:   $Date: 1998/05/08 20:25:01 $ */
