@@ -26,15 +26,15 @@ $FPPFLAGS = "-DCERNLIB_TYPE -DCERNLIB_UNIX -DCERNLIB_BSLASH -DCERNLIB_DZDOC ".
   "-DCERNLIB_SHL -DCERNLIB_NONEWL -DCERNLIB_HIGZ -DCERNLIB_CG  -DCERNLIB_HADRON -DCERNLIB_COMIS";# -DCERNLIB_GCALOR";
 $CPPFLAGS = $FPPFLAGS;
 $FPPFLAGS .= " -DCERNLIB_MONITOR"; 
-if ( $STAR_SYS =~ /^rh/) {
-  if ($FC =~ 'pgf') { 
-    $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
-    $FFLAGS   = $env->{G77FLAGS}; 
-    $FEXTEND  = $env->{G77EXTEND};
-    $FPPFLAGS .= " -DCERNLIB_LINUX -DCERNLIB_LNX -DCERNLIB_QMGLIBC -DCERNLIB_BLDLIB";# -DCERNLIB_MYSQL";
-    $FPPFLAGS .= " -DCPP_DATE=0 -DCPP_TIME=0 -DCPP_VERS=\"''\" -DCPP_TITLE_CH=\"''\"";
-  }
-  $CPPFLAGS   = $FPPFLAGS;
+if ($FC =~ /pgf77/) { 
+  $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
+  $FFLAGS   = $env->{G77FLAGS}; 
+  $FEXTEND  = $env->{G77EXTEND};
+  $FPPFLAGS .= " -DCERNLIB_LINUX -DCERNLIB_LNX -DCERNLIB_QMGLIBC -DCERNLIB_BLDLIB";# -DCERNLIB_MYSQL";
+  $FPPFLAGS .= " -DCPP_DATE=0 -DCPP_TIME=0 -DCPP_VERS=\"''\" -DCPP_TITLE_CH=\"''\"";
+}
+$CPPFLAGS   = $FPPFLAGS;
+if ($STAR_SYS =~ /^rh80/) {
   $CPPFLAGS  .= " -Df2cFortran -DCERNLIB_QMGLIBC";
 }
 $env2 = $env->clone('FC'           => $FC,
