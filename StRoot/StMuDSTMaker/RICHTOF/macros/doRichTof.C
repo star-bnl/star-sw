@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doRichTof.C,v 1.1 2002/03/14 16:36:36 dunlop Exp $
+// $Id: doRichTof.C,v 1.2 2002/03/17 02:11:40 dunlop Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -148,7 +148,7 @@ void doRichTof(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const
     gSystem->Load("StTofUtil");
     gSystem->Load("StStrangeMuDstMaker");
     
-    gSystem->Load("StRichTofMuDstMaker");
+    gSystem->Load("StMuDSTMaker");
     
     //
     // Handling depends on whether file is a ROOT file or XDF file
@@ -243,7 +243,7 @@ void doRichTof(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const
       cout << "!!!! doRichTof: will write out .event.root file !!" << endl << endl;
       StIOMaker *outMk = new StIOMaker("EvOut","w","test.event.root","bfcTree");
 //        outMk->SetBranch("eventBranch","test.event.root","w");
-        outMk->IntoBranch("evtselBranch","StEvent");
+        outMk->IntoBranch("richtofBranch","StEvent");
       IOMk->SetNotify("CloseFile",outMk);
       IOMk->SetNotify("OpenFile" ,outMk);
     }
@@ -345,6 +345,9 @@ void doRichTof(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doRichTof.C,v $
+// Revision 1.2  2002/03/17 02:11:40  dunlop
+// Changed the branch to richtof branch.  Loaded right library
+//
 // Revision 1.1  2002/03/14 16:36:36  dunlop
 // First revision.  Works.
 //
