@@ -19,6 +19,8 @@
 // 'for' scope to define the variable elsewhere. At the very least this makes 
 // gdb very confused. Now the offending rcb is defined outside the scope of
 // all for loops
+// 21-Jun-99 MJL change behavior on discovering a "bit 5" error. Now skip sequences
+// until next "switch=1" sequence
 
 TPCV2P0_ZS_SR::TPCV2P0_ZS_SR(int s, TPCV2P0_Reader *det)
 {
@@ -91,10 +93,6 @@ int TPCV2P0_ZS_SR::initialize()
 	  for (int pad=1; pad<=tpcRowLen[row-1]; pad++) {
 	    padkr->get(row, pad, &ent);
 	    if((ent.mz != mz+1) || (ent.rb != rcb+1)) continue;
-	    //	      if (sector==11 && row==12 && pad==3) 
-// 	    if (sector==10 && row==5 && pad==115)
-// 	      printf("%s::%d  RB%d MZ%d:  row %d pad %d\n",
-// 		     __FILE__,__LINE__,ent.rb,ent.mz,row,pad);
 	    struct ASIC_Cluster *clusters = 
 	      (ASIC_Cluster *)(cppr->entry + 32*ent.offset);
 
@@ -160,22 +158,28 @@ int TPCV2P0_ZS_SR::initialize()
 	// First malloc the Sequence arrays needed
 	// Second fill in the Sequence structs
 
-	for (int i=0; i<numseq; i++) {
+	// get a pointer to the CPPr bank for debugging only
+	classname(Bank_TPCCPPR) *cppr =
+	  detector->getBankTPCCPPR(sector,rcb,mz) ; //pointer to CPP raw bank
+	// get a pointer to the PADK bank for debugging only
+	//	TPCV2P0_PADK_SR *padkr = detector->getPADKReader(sector);
+
+	int i=0;
+	while (i<numseq) {
 	  if (seqd_p[rcb][mz]->sequence[i]<0) { //padrow, pad
 	    padrow = (seqd_p[rcb][mz]->sequence[i]>>8)& 0x7f;
 	    pad = (seqd_p[rcb][mz]->sequence[i])& 0xff;
 	    if (pad==255) break; 
 	    //pad 255 exists only in extraneous last word
 	    oldstart = 0;
+	    lastbin = -2;
+	    i++;
 	  }
 	  else { // start|lastseq|len
 	    if (padrow <0 || pad <0) {
 	      printf("encountered bad SEQD bank RB %d, Mezz %d\n", rcb+1, mz+1);
 	      return FALSE;
 	    }
-// 	    if (sector==10 && padrow==5 && pad==115)
-// 	      printf("%s::%d  RB%d MZ%d seq %d:  row %d pad %d\n",
-// 		     __FILE__,__LINE__,rcb,mz,i,padrow,pad);
 
 	    unsigned short work = seqd_p[rcb][mz]->sequence[i];
 	    int start = work>>6;
@@ -203,14 +207,33 @@ int TPCV2P0_ZS_SR::initialize()
 		lastbin = -2; // set lastbin for new pad
 		oldstart=0;
 	      }
+	      i++;
+	      continue;
 	    }
 	    else {     // starting new pad without bit 5 set!
 	      printf("new pad detected with bit 5 clear!\n");
 	      fflush(stdout);
-	      return FALSE;
-	    }
-	  }
-	}
+	      // for debug only:
+	      // classname(Bank_TPCPADK) *padk = detector->getBankTPCPADK(sector, rcb, mz);
+
+	      while (seqd_p[rcb][mz]->sequence[i]>0 && i<numseq) i++; // skip until "switch=1"
+	      //	      return FALSE;
+	      int nseq = Pad_array[padrow-1][pad-1].nseq;
+	      if (nseq) { // only if there are sequences on this pad
+		// allocate memory for Sequence arrays
+		// make sure we don't do it more than once
+		if (Pad_array[padrow-1][pad-1].seq==NULL) {
+		  Pad_array[padrow-1][pad-1].seq= 
+		    (Sequence *)malloc(nseq*sizeof(Sequence));
+		  if (Pad_array[padrow-1][pad-1].seq==NULL) {
+		    cout << "failed to malloc() Sequence structures " << endl;
+		    return FALSE;
+		  }
+		}
+	      }  // if (nseq)
+	    }    //  else { ...starting new pad without bit 5 set
+	  }      //  else { ...start|lastseq|len
+	}        // while (i<numseq)
 	int nseq = Pad_array[padrow-1][pad-1].nseq;
 	if (nseq) { // only if there are sequences on this pad
 	  // allocate memory for Sequence arrays
@@ -231,7 +254,7 @@ int TPCV2P0_ZS_SR::initialize()
       //second pass ***** this can be incorporated into the first loop !!
   // This stupid compiler thinks rcb's scope extends here, so I removed int
   // The original line should go in when we upgrade to a better compiler 
-  // for(int rcb = 0; rcb < 6; rcb++) {
+  // for(int rcb = 0; rcb < 6; rcb++) { [Iwona]
   for(rcb = 0; rcb < 6; rcb++) {
     for(int mz = 0; mz < 3; mz++) {
       if (seqd_p[rcb][mz] == (classname(Bank_TPCSEQD) *)NULL) continue;
@@ -239,23 +262,21 @@ int TPCV2P0_ZS_SR::initialize()
       int padrow=-1, pad=-1, lastbin=-2, pad_seq, oldstart = 0;
       int len = seqd_p[rcb][mz]->header.BankLength - (sizeof(Bank_Header)/4);
       int numseq = (4*len)/sizeof(short); // find # sequences this bank
-
-      for (int i=0; i<numseq; i++) {
+      int i=0;
+      while  (i<numseq)  {
 	if (seqd_p[rcb][mz]->sequence[i]<0) { //padrow, pad
 	  padrow = (seqd_p[rcb][mz]->sequence[i]>>8)& 0x7f;
 	  pad = (seqd_p[rcb][mz]->sequence[i])& 0xff;
 	  if (pad==255) break; //pad 255 exists only in extraneous last word
 	  pad_seq = 0;
 	  oldstart=0;
+	  lastbin = -2;
+	  i++;
 	}
-	else {
+	else { // (start|lastseq|len)
 	  unsigned short work = seqd_p[rcb][mz]->sequence[i];
 	  int start = work>>6;
 	  int len = work & 0x1f;
-	  //	  if (sector==11 && padrow==12 && pad==3)
-// 	  if (sector==10 && padrow==5 && pad==115)
-// 	    printf("%s::%d  RB%d MZ%d seq %d:  row %d pad %d\n",
-// 		   __FILE__,__LINE__,rcb,mz,i,padrow,pad);
 	  if (start >= oldstart) { // still on same pad
 	  //is this sequence adjacent to previous one?
 	    if (start>lastbin+1)  { //no
@@ -276,20 +297,22 @@ int TPCV2P0_ZS_SR::initialize()
 	      adc_locn +=len;
 	    }
 	    lastbin = start+len-1;
+	    oldstart = start;
 	    if (work & 0x20) {//last sequence ?
 	      pad++;    // default to next pad in this padrow
 	      pad_seq = 0;
 	      lastbin = -2; // set lastbin for new pad	
 	      oldstart=0;
 	    }
+	    i++;
 	  }
 	  else {    // starting new pad without bit 5 set!
 	    printf("new pad detected with bit 5 clear!\n");
 	    fflush(stdout);
-	    return FALSE;
+	    while (seqd_p[rcb][mz]->sequence[i]>0 && i<numseq) i++; // skip until next "switch=1"
 	  }
-	}
-      }
+	}  // (start|lastseq|len)
+      }    // while (i<numseq)
     }
   }
   return TRUE;
