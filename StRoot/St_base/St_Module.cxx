@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Module.cxx,v 1.12 2000/03/26 01:59:23 fine Exp $
+// $Id: St_Module.cxx,v 1.13 2000/03/27 02:19:26 fine Exp $
 
 #include <assert.h>
 #include <string.h>
@@ -251,7 +251,7 @@ Int_t St_Module::ExecuteModule()
        printf("%i parameters: ",thisSize);
      for (Int_t i=0;i<thisSize;i++)
      {
-        if (fParams->At(i)) printf(" %x ",*((ULong_t *)fParams->At(i)));
+        if (fParams->At(i)) printf(" %lx ",*((ULong_t *)fParams->At(i)));
         else { 
             errcode++; 
 	    //yf            Char_t *suffix[4]={"st","nd","d","th"};
@@ -343,6 +343,9 @@ void St_Module::Streamer(TBuffer &)
 
 //________________________________________________________________________
 // $Log: St_Module.cxx,v $
+// Revision 1.13  2000/03/27 02:19:26  fine
+// warning removed
+//
 // Revision 1.12  2000/03/26 01:59:23  fine
 // new version of St_Module. Works for STAF module only
 //
