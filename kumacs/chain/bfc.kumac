@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.48 1998/09/14 15:14:56 kathy Exp $
+* $Id: bfc.kumac,v 1.49 1998/09/14 16:49:41 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.49  1998/09/14 16:49:41  kathy
+* clean up
+*
 * Revision 1.48  1998/09/14 15:14:56  kathy
 * clean up
 *
@@ -359,7 +362,7 @@ MACRO bfc _
    chain=' fzin rg2t tpg svg tfs srs tpt tid tte_e sgr drhd dehd svm evr egr ev0 ddedx dpnt desum dmsft drsum dout ' _
    skip=0 _
    first=1 _
-  no_events=1 _
+   no_events=1 _
    input_data_file=/net/rmds03/disk1/star/auau200/hijing135/default/b0_3/year1a/hadronic_off/Gstardata/set100/set100_01_45evts.fz _
    output_file=set100_01_45evts _
    log=bfc.log
