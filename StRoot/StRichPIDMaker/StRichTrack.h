@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichTrack.h,v 2.9 2000/12/08 06:32:11 lasiuk Exp $
+ * $Id: StRichTrack.h,v 2.10 2001/01/30 16:38:44 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.h,v $
+ *  Revision 2.10  2001/01/30 16:38:44  horsley
+ *  updated PID maker for next production run, included new class for TTree
+ *
  *  Revision 2.9  2000/12/08 06:32:11  lasiuk
  *  correctedMomentum()
  *  xcorrection
@@ -109,13 +112,13 @@ public:
 
     StTrack*         getStTrack();
     StRichHit*       getAssociatedMIP();
-    void             assignMIP(const StSPtrVecRichHit*);  
+    void           assignMIP(const StSPtrVecRichHit*);  
 
     //
     // Pid Trait manipulation
     //
     StRichPidTraits* getPidTrait();  
-    void             addPidTrait(StRichPidTraits*); 
+    void           addPidTrait(StRichPidTraits*); 
     
     void  clearHits();
     void  addHit(StRichHit*, double, double, double, double, double, StParticleDefinition* );
@@ -145,17 +148,11 @@ public:
     double  getExpectedNPhots(StParticleDefinition* particle);
     double  getEnergyLoss() const;
 
-    int     getOrigConstHits(int) const;
-    int     getNewConstHits(int)  const;
-    int     getOrigTotHits(int)   const;
-    int     getNewTotHits(int)    const;
-
-    void    assignHits(int cHits, int tHits, int refit, int pid);
     
     bool    isGood(StParticleDefinition* );
     bool    correctTrajectory();
-
-
+    bool    getRefit();
+  
     void    useUnCorrected();
     
     int     fastEnough(StParticleDefinition* particle);
@@ -224,6 +221,8 @@ protected:
     double mKaonMass;
     double mProtonMass;
     
+    bool mRefit;
+
     StThreeVectorF mImpactPoint;
     
     StThreeVectorF mUnCorrectedImpactPoint;  
@@ -249,21 +248,7 @@ protected:
     StRichMomentumTransform*   momentumTransformation;
     StRichMaterialsDb*         myMaterialsDb;
 
-    int mOrigPiConstHits;
-    int mOrigKConstHits;
-    int mOrigPConstHits;
 
-    int mNewPiConstHits;
-    int mNewKConstHits;
-    int mNewPConstHits;
-
-    int mOrigPiTotHits;
-    int mOrigKTotHits;
-    int mOrigPTotHits;
-
-    int mNewPiTotHits;
-    int mNewKTotHits;
-    int mNewPTotHits;
 };
 
 #endif

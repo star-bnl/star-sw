@@ -1,11 +1,14 @@
 /**********************************************************
- * $Id: StRichPIDMaker.h,v 2.12 2000/12/14 19:21:37 horsley Exp $
+ * $Id: StRichPIDMaker.h,v 2.13 2001/01/30 16:38:44 horsley Exp $
  *
  * Description:
  *  StRrsMaker is the main module
  *  StRichRawData. It has the standard Maker functions:
  *
  *  $Log: StRichPIDMaker.h,v $
+ *  Revision 2.13  2001/01/30 16:38:44  horsley
+ *  updated PID maker for next production run, included new class for TTree
+ *
  *  Revision 2.12  2000/12/14 19:21:37  horsley
  *  added data member to keep track of run id, mEventRunId
  *
@@ -94,6 +97,11 @@ using std::vector;
 #include "StDaqLib/L3/L3.Banks.hh"
 #endif
 
+
+#include "TreeEntryClasses.h"
+
+
+
 // SCL
 class StParticleDefinition;
 
@@ -131,167 +139,121 @@ class St_g2t_track;
 class StRichPIDMaker : public StMaker {
 
 private:
-    Bool_t drawinit;
-    Char_t collectionName[256];  
-    vector<StRichTrack* > mListOfStRichTracks; //!
-    vector<StParticleDefinition* > mListOfParticles; //!
+  Bool_t drawinit;
+  Char_t collectionName[256];  
+  vector<StRichTrack* > mListOfStRichTracks; //!
+  vector<StParticleDefinition* > mListOfParticles; //!
+  
+  bool  mTrackRefit;
+  bool  mDoGapCorrection;
+  
+  double mPionSaturatedArea;
+  double mKaonSaturatedArea;
+  double mProtonSaturatedArea;
+  
+  bool   mPrintThisEvent;
 
-    bool  mRefit;
-    bool  mDoGapCorrection;
-
-    double mPionSaturatedArea;
-    double mKaonSaturatedArea;
-    double mProtonSaturatedArea;
-
-    bool   mPrintThisEvent;
-
+  int mTotalEvents;
+  int mGoodEvents;
+  
   //
   // monte carlo event
   //
   StMcEvent* mEvent; //!
-
-    //
-    // Event Parameters
-    //
-    StThreeVectorF mVertexPos;
-    float          mMagField;
-    int            mEventN;
-    int            mEventRunId;
-
-
-    //
-    // Tracks in the RICH
-    //
-    int mNumberOfPrimaries;
-    int mNegativePrimaries;
-    int mNumberOf1GeV;
-    int mNumberOfRingHits;
-    int mRichTracks;
   
-    //
-    // wavelength bounds
-    //
-    double mShortWave;
-    double mLongWave;
-    double mDefaultShortWave;
-    double mDefaultLongWave;
-
-    // hit filter
-    double innerDistance,outerDistance,meanDistance;
-    double innerAngle,outerAngle,meanAngle; 
-    double ringWidth;
-
-    double meanD[6][2];
-    double sigmaD[6][2];
-    
-    //
-    // pad plane dimensions
-    StThreeVector<double>   mPadPlaneDimension; //!
-    StThreeVector<double>   mRadiatorDimension; //!
-    
-    StRichPadMonitor*  mPadMonitor; //!
-    StRichGeometryDb*  mGeometryDb; //!
-    StRichMaterialsDb* mMaterialDb; //! 
-    StRichCoordinateTransform* mCoordinateTransformation; // !  
-    StRichMomentumTransform*   mMomentumTransformation; //!
-
-    //
-    // Cuts: parameters and types
-    //
-    // Event
-    float mVertexWindow;
-    
-    // Hits
-    int   mAdcCut;
-    
-    // Track
-    float mLastHitCut;
-    float mDcaCut;
-    int   mFitPointsCut;
-    float mEtaCut;
-    float mPtCut;
-    float mPathCut;
-    float mPadPlaneCut;
-    float mRadiatorCut;
-    float mThresholdMomentum;
-
-    // convergence limit for psi determination
-    double mPrecision;
-    
-    char* fileName; //!
-    char* mySaveDirectory; //!
-
-    // particles
-    StPionMinus*  pion;   //!
-    StKaonMinus*  kaon;   //!
-    StAntiProton* proton; //!
-    
-    TFile*   file;          //!
-    TNtuple* trackNtuple;   //!
-    TNtuple* geantTrackNtuple;   //!
-    TNtuple* geantPhotonNtuple;   //!
-    TNtuple* geantPixelNtuple;   //!
-    TNtuple* geantCloseHitNtuple;   //!
-
-    //
-    // brian
-    //
-    TNtuple* distup; //!
-    
-    TNtuple* hitNtup;  //!
-    TNtuple* evtNtup;  //!
-    TNtuple* closeHitNtup;   //!
-    
-    TH3F*    pionResid;      //!
-    TH3F*    pionResid_x;    //! 
-    TH3F*    pionResid_y;    //!
-
-    TH3F*    pionTheta;      //!
-    TH3F*    pionTheta_x;    //! 
-    TH3F*    pionTheta_y;    //!
-    TH3F*    pionPsi;        //!  
-    
-    TH3F*    pionResidb;      //!
-    TH3F*    pionResid_xb;    //! 
-    TH3F*    pionResid_yb;    //!
-    
-    TH3F*    pionThetab;      //!
-    TH3F*    pionTheta_xb;    //! 
-    TH3F*    pionTheta_yb;    //!
-    
-    TH3F*    pionPsib;        //!
-    
-    TH3F*    pionRadius;     //!
-
-    TNtuple* trackCorrectedNtuple;   //!
-
-    TH3F*    pionCorrectedResid;      //!
-    TH3F*    pionCorrectedResid_x;    //! 
-    TH3F*    pionCorrectedResid_y;    //!
-    
-    TH3F*    pionCorrectedTheta;      //!
-    TH3F*    pionCorrectedTheta_x;    //! 
-    TH3F*    pionCorrectedTheta_y;    //!
-    
-    TH3F*    pionCorrectedPsi;        //!
-    
-    TH3F*    pionCorrectedResidb;      //!
-    TH3F*    pionCorrectedResid_xb;    //! 
-    TH3F*    pionCorrectedResid_yb;    //!
-
-    TH3F*    pionCorrectedThetab;      //!
-    TH3F*    pionCorrectedTheta_xb;    //! 
-    TH3F*    pionCorrectedTheta_yb;    //!
-    
-    TH3F*    pionCorrectedPsib;        //!
- 
-    TNtuple*    overLap;      //!
-    TpcHitVecUtilities* util; //!
-    bool     kWriteNtuple;    //!
-
-    TNtuple*    psiFixNtuple;      //!
-
+  //
+  // Event Parameters
+  //
+  StThreeVectorF mVertexPos;
+  float         mMagField;
+  int           mEventN;
+  int           mEventRunId;
   
+  
+  //
+  // Tracks in the RICH
+  //
+  int mNumberOfPrimaries;
+  int mNegativePrimaries;
+  int mNumberOf1GeV;
+  int mNumberOfRingHits;
+  int mRichTracks;
+  
+  //
+  // wavelength bounds
+  //
+  double mShortWave;
+  double mLongWave;
+  double mDefaultShortWave;
+  double mDefaultLongWave;
+  
+  // hit filter
+  double innerDistance,outerDistance,meanDistance;
+  double innerAngle,outerAngle,meanAngle; 
+  double ringWidth;
+  
+  
+  //
+  // pad plane dimensions
+  StThreeVector<double>   mPadPlaneDimension; //!
+  StThreeVector<double>   mRadiatorDimension; //!
+  
+  StRichPadMonitor*  mPadMonitor; //!
+  StRichGeometryDb*  mGeometryDb; //!
+  StRichMaterialsDb* mMaterialDb; //! 
+  StRichCoordinateTransform* mCoordinateTransformation; // !  
+  StRichMomentumTransform*   mMomentumTransformation; //!
+  
+  //
+  // Cuts: parameters and types
+  //
+  // Event
+  float mVertexWindow;
+  
+  // Hits
+  int   mAdcCut;
+  
+  // Track
+  float mLastHitCut;
+  float mDcaCut;
+  int   mFitPointsCut;
+  float mEtaCut;
+  float mPtCut;
+  float mPathCut;
+  float mPadPlaneCut;
+  float mRadiatorCut;
+  float mThresholdMomentum;
+  
+  // convergence limit for psi determination
+  double mPrecision;
+  
+  char* fileName; //!
+  char* mySaveDirectory; //!
+  
+  // particles
+  StPionMinus*  pion;   //!
+  StKaonMinus*  kaon;   //!
+  StAntiProton* proton; //!
+  
+  TFile*   file;          //!
+  TNtuple* geantTrackNtuple;   //!
+  TNtuple* geantPhotonNtuple;   //!
+  TNtuple* geantPixelNtuple;   //!
+  TNtuple* geantCloseHitNtuple;   //!
+
+  TTree* myTree; 
+  TrackEntry* m_Track; 
+
+
+  //
+  // brian
+  //
+  TNtuple* distup; //!
+  
+  TpcHitVecUtilities* util; //!
+  bool     kWriteNtuple;    //!
+  
+      
 public:
   
     StRichPIDMaker(const Char_t *name="RICHPID", bool writeNtuple=false);
@@ -307,10 +269,8 @@ public:
     //
     // hit operations
     //
-    void hitFilter(const StSPtrVecRichHit*, StRichRingCalculator*, int);
+    void hitFilter(const StSPtrVecRichHit*, StRichRingCalculator*);
     void hitFilter(StRichRingCalculator* , StThreeVectorF&, float&, float&);
-
-    void examineTemporaryHits(StRichRingCalculator*,int);
     
     float getHitSigma(float); 
     void  tagMips(StEvent*, StSPtrVecRichHit*);
@@ -363,16 +323,7 @@ public:
     void setTrackRefit(bool);
     void drawPadPlane(StEvent*, bool );
   
-    //
-    // Diagnostic and output
-    //
-    void fillEvtNtuple(StEvent* , int, int, const StSPtrVecRichHit* , const StSPtrVecRichPixel* );
-    void fillHitNtuple(const StSPtrVecRichHit* , const StSPtrVecRichCluster* );
-    void fillPIDNtuple();
 
-    void fillOverLapHist(const StSPtrVecRichHit*);
-
-    void fillCorrectedNtuple();
 
     // StEvent
     void fillPIDTraits(StRichRingCalculator*);
