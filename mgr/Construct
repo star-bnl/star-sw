@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.96 2000/06/12 13:46:43 fisyak Exp $
+# $Id: Construct,v 1.97 2000/06/27 21:02:23 fisyak Exp $
 use Env;
 #use lib qw($STAR . "/mgr"); # Modify perl include path
 use lib $STAR . "/mgr"; # Modify perl include path
@@ -34,16 +34,16 @@ $CPPPATH .= ":" . $CERN_ROOT . "/include:/opt/star/include" . $EXTRA_CPPPATH;
 $FCPPPATH ="";
 (my $DirPath  = cwd()) =~ s/\/$//g;
 print "Build directory: $DirPath;" unless ($param::quiet);
-if (defined($ARG{Salt}) and $ARG{Salt} ne 'undef') {$Salt = $ARG{Salt};}
 (my $DirPath  = cwd()) =~ s/\/$//g; print "DirPath = $DirPath \n" unless ($param::quiet);
 chdir($STAR); my $repository = cwd(); chdir($DirPath);# print "repository $repository\n";
 Repository ($repository);# unless $param::noRepository;
 my @Repo = Repository_List; 
 if ($#Repo > -1) {
   print "Repositories:  \"@Repo\";" unless ($param::quiet);
-  if (!$Salt) {$Salt = "user";}
+  if (defined($ARG{Salt}))       {$Salt = $ARG{Salt};}
+  elsif (!defined($ARG{NoSalt}))  {$Salt = "user";}
+  if ($Salt) {Salt($Salt); print "\tSet Salt to \"$param::salt\"\n" unless ($param::quiet);}
 }
-if ($Salt) {Salt($Salt); print "\tSet Salt to \"$param::salt\"\n" unless ($param::quiet);}
 $BUILD  = "#" . $build;
 if ($DEBUG eq "-g") {
   $LIB    = $BUILD . "/lib";
