@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.9 2002/04/11 14:19:30 laue Exp $
+ * $Id: StMuDstMaker.h,v 1.10 2002/04/26 20:57:31 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -74,6 +74,12 @@ class StMuDstMaker : public StMaker {
 
   void setSplit(int=99);
   void setCompression(int comp=9);
+
+  virtual const char *GetCVS() const {
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.10 2002/04/26 20:57:31 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    return cvs;
+  }
+
 
 private:
   enum ioMode {ioRead, ioWrite};
@@ -213,6 +219,9 @@ inline void StMuDstMaker::setCompression(int comp) { mCompression = comp;}
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.10  2002/04/26 20:57:31  jeromel
+ * Added GetCVS()
+ *
  * Revision 1.9  2002/04/11 14:19:30  laue
  * - update for RH 7.2
  * - decrease default arrays sizes
