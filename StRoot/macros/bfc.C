@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.161 2004/06/08 22:40:44 jeromel Exp $
+// $Id: bfc.C,v 1.162 2004/09/10 21:59:04 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -182,6 +182,10 @@ void bfc(const Int_t First,
   Int_t iTotal = 0, iBad = 0;
   St_XDFFile *xdf_out = 0;
   Int_t iMake = 0, i = First;
+
+  chain->SetAttr(".Privilege",1,"StIOInterFace::*" ); 	//All IO makers are priviliged
+  chain->SetAttr(".Privilege",1,"St_geant_Maker::*"); 	//It is also IO maker
+
   if (Last >= 0) {
     Int_t iInit = chain->Init();
     if (iInit >=  kStEOF) {
