@@ -362,6 +362,8 @@ macro bfc_init _
     (ev0j)  exec init_ev0join
    (smdst)  exec create_tables_strange#smdst
             exec init_smdst#init
+    (dchkt) exec init_dst_chk_tabl#run_header
+    (dwntp)
     (user)  exec init_user
     (ntup)  exec write_table_to_ntuple#init_disk [nunit] [nfile]
     (fzout) user/output o [output_fzd_file]
@@ -637,8 +639,12 @@ return
                endif
     (ev0j)     exec run_ev0join
    (smdst)     exec run_smdst#run
-    (user)     exec run_user
-    (ntup)     exec write_table_to_ntuple#write_event_disk [nid] [ntable]
+    (dchkt)    exec run_dst_chk_tabl#dst_tables
+               exec run_dst_chk_tabl#event_header
+               exec run_dst_chk_tabl#event_summary    
+    (dwntp)    
+     (user)     exec run_user
+     (ntup)     exec write_table_to_ntuple#write_event_disk [nid] [ntable]
     (evout)    if [output_xdf_file]="" then
                  message "Empty output file"
                else
@@ -719,8 +725,10 @@ macro bfc_finish _
              exec finish_sca#finish
              exec run_sca#close [calib_dir] [ebye_prior_switch] _
                                 [ebye_ensemble_switch] [ebye_analysis_switch]
-      (user) exec finish_user
-      (ntup) exec write_table_to_ntuple#close_disk [nunit] [nid]
+    (dchkt) exec finish_dst_chk_tabl#run_summary
+    (dwntp)
+     (user) exec finish_user
+     (ntup) exec write_table_to_ntuple#close_disk [nunit] [nid]
      (evout,esout) 
             if [output_xdf_file]="" then
                  message "Empty output file"
