@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtCoulomb.cxx,v 1.15 2003/01/31 19:44:00 magestro Exp $
+ * $Id: StHbtCoulomb.cxx,v 1.16 2003/02/04 21:10:31 magestro Exp $
  *
  * Author: Randy Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtCoulomb.cxx,v $
+ * Revision 1.16  2003/02/04 21:10:31  magestro
+ * Cleaned up a couple functions
+ *
  * Revision 1.15  2003/01/31 19:44:00  magestro
  * Cleared up simple compiler warnings on i386_linux24
  *
@@ -394,17 +397,12 @@ StHbt1DHisto* StHbtCoulomb::CorrectionHistogram(const double& mass1, const doubl
 
 #ifdef __ROOT__
 StHbt1DHisto* StHbtCoulomb::CorrectionHistogram(const StHbt1DHisto* histo, const double mass) {
-  double mass1=mass;
-  double mass2=mass;
-  if ( mass1!=mass2 ) {
-    cout << "Masses not equal ... try again.  No histogram created." << endl;
-    assert(0);
-  }
+
   StHbt1DHisto* correction = (StHbt1DHisto*) ((StHbt1DHisto*)histo)->Clone();
   correction->Reset();
   correction->SetDirectory(0);
   int    nBins = correction->GetXaxis()->GetNbins();
-  const double reducedMass = mass1*mass2/(mass1+mass2);
+  const double reducedMass = 0.5*mass;
   double qInv;
   double eta;
   for (int ii=1; ii<=nBins; ii++) 
@@ -418,19 +416,14 @@ StHbt1DHisto* StHbtCoulomb::CorrectionHistogram(const StHbt1DHisto* histo, const
 }
 
 StHbt3DHisto* StHbtCoulomb::CorrectionHistogram(const StHbt3DHisto* histo, const double mass) {
-  double mass1=mass;
-  double mass2=mass;
-  if ( mass1!=mass2 ) {
-    cout << "Masses not equal ... try again.  No histogram created." << endl;
-    assert(0);
-  }
+
   StHbt3DHisto* correction = (StHbt3DHisto*) ((StHbt3DHisto*)histo)->Clone();
   correction->Reset();
   correction->SetDirectory(0);
   int    nBinsX = correction->GetXaxis()->GetNbins();
   int    nBinsY = correction->GetYaxis()->GetNbins();
   int    nBinsZ = correction->GetZaxis()->GetNbins();
-  const double reducedMass = mass1*mass2/(mass1+mass2);
+  const double reducedMass = 0.5*mass;
   double eta;
   double qInv;
   int binNumber;
