@@ -1,6 +1,6 @@
 // *-- Author : Rene Fatemi
 // 
-// $Id: MuEzCorrMaker.cxx,v 1.1 2004/11/19 15:51:14 rfatemi Exp $
+// $Id: MuEzCorrMaker.cxx,v 1.2 2004/11/29 19:37:14 balewski Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -13,15 +13,9 @@
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 
-#include "StEvent/StTriggerData2003.h"
-#include "StEvent/StTriggerData2004.h"
-#include "StEvent/StTriggerData2005.h"
-
 #include "StMuDSTMaker/EZTREE/EztEventHeader.h"
 #include "StMuDSTMaker/EZTREE/EztTrigBlob.h"
 #include "StMuDSTMaker/EZTREE/EztEmcRawData.h"
-
-#include "StEEmcUtil/EEfeeRaw/EEfeeDataBlock.h"
 
 
 ClassImp(MuEzCorrMaker)
@@ -32,7 +26,6 @@ MuEzCorrMaker::MuEzCorrMaker( const char* self ,const char* muDstMakerName) : St
   mMuDstMaker = (StMuDstMaker*)GetMaker(muDstMakerName);
   assert(mMuDstMaker);
 
-  trgAkio=0;
   nInpEve=0;
   HList=0;
   mode=0;
@@ -42,7 +35,7 @@ MuEzCorrMaker::MuEzCorrMaker( const char* self ,const char* muDstMakerName) : St
 //___________________ _____________________________
 //________________________________________________
 MuEzCorrMaker::~MuEzCorrMaker(){
-  delete trgAkio;
+ 
 }
 
 //___________________ _____________________________
@@ -143,43 +136,6 @@ Int_t MuEzCorrMaker::Make(){
 #endif  
 }
 
-
-
-
-//________________________________________________
-//________________________________________________
-void MuEzCorrMaker::unpackTrigEzt(){
-  
-  gMessMgr->Message("","D") <<GetName()<<"::unpackTrigEzt() is called "<<endm;
-
-  EztTrigBlob * trigBlob=mMuDstMaker->muDst()->eztTrig(); 
-  assert(trigBlob);
-  trigBlob->print(0);
- 
-  time_t  timeStamp=trigBlob->getTimeStamp();  
-  //  printf("event time stamp=%d %s\n", (int)timeStamp, ctime((const time_t *)&timeStamp));
-  
-  const int timeStamp2003=1041397201; //==Wed Jan  1 00:00:01 2003
-  const int timeStamp2004=1072933201; //==Thu Jan  1 00:00:01 2004
-  const int timeStampNovember04=1099371601; //=Tue Nov  2 00:00:01 2004;
-
-  delete trgAkio;// clear old event
-  void *blob=trigBlob->trgd->GetArray();
-
-  if( timeStamp>timeStampNovember04) {
-     trgAkio= new StTriggerData2005( (const TrgDataType2005 *)blob);
-  } else if( timeStamp>timeStamp2004) {
-    trgAkio= new StTriggerData2004( (const TrgDataType2004 *)blob);
-  } else if( timeStamp>timeStamp2003) {
-    trgAkio= new StTriggerData2003( (const TrgDataType2003 *)blob);
-  } else {
-    printf("now TRigger decoder before 2003, STOP\n"); assert(1==2);
-  }
-
-  trgAkio->dump();// lot of print out per eve
-}
-
-
 //________________________________________________
 //________________________________________________
 void MuEzCorrMaker::test1(EztEmcRawData* tw, int flag){
@@ -221,10 +177,9 @@ void MuEzCorrMaker::scanETowCorrupt(){
     int crID=ib+1;
     if( eETow->sizeHeader(ib)<=0) continue;
     // printf("ib=%d sizeH=%d sizeD=%d\n",ib,eETow->sizeHeader(ib),eETow->sizeData(ib));
-    EEfeeDataBlock b;
-    b.setHead(eETow->header(ib));
-    UChar_t  sanity  =b.isHeadValid(headToken, crID,lenCount,trigComm,errFlag);
-    //b.print(0);
+ 
+    UChar_t  sanity  =eETow->isHeadValid(ib,headToken, crID,lenCount,trigComm,errFlag);
+ 
     
     int i;
     for(i=0;i<4;i++) {// examin all sanity bits
@@ -286,11 +241,8 @@ void MuEzCorrMaker::scanESmdCorrupt(){
     int crID=ib+1;
     if( eESmd->sizeHeader(ib)<=0) continue;
     printf("ib=%d sizeH=%d sizeD=%d\n",ib,eESmd->sizeHeader(ib),eESmd->sizeData(ib));
-    EEfeeDataBlock b;
-    b.setHead(eESmd->header(ib));
-    UChar_t  sanity  =b.isHeadValid(headToken, crID,lenCount,trigComm,errFlag);
-    b.print(0);
-    
+    UChar_t  sanity  =eESmd->isHeadValid(ib,headToken, crID,lenCount,trigComm,errFlag);
+
     int i;
     for(i=0;i<4;i++) {// examin all sanity bits
       if(sanity&(1<<i)) ESlist[ib][i]=1;
@@ -328,6 +280,9 @@ void MuEzCorrMaker::printCorrupt(){
 
 //---------------------------------------------------
 // $Log: MuEzCorrMaker.cxx,v $
+// Revision 1.2  2004/11/29 19:37:14  balewski
+// fix to match EZTREE evolution
+//
 // Revision 1.1  2004/11/19 15:51:14  rfatemi
 // Maker to check corruption in ezTree branch of MuDst
 //

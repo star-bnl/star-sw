@@ -2,7 +2,7 @@
 #define STAR_MuEzCorrMaker
 
 /************************************************************
- * $Id: MuEzCorrMaker.h,v 1.1 2004/11/19 15:50:53 rfatemi Exp $
+ * $Id: MuEzCorrMaker.h,v 1.2 2004/11/29 19:37:14 balewski Exp $
  ************************************************************
  Goal: XXXXXX detects stale EEMC data
  *
@@ -16,7 +16,6 @@
 
 class TObjArray  ;
 class StMuDstMaker;
-class StTriggerData ;
 class EztEmcRawData;
 class EztEventHeader;
 class MuEzCorrMaker : public StMaker, public CorrAna{
@@ -25,7 +24,6 @@ class MuEzCorrMaker : public StMaker, public CorrAna{
   enum {mxH=16};
   StMuDstMaker* mMuDstMaker;  
   void   unpackTrigEzt();
-  StTriggerData *trgAkio;
   TH1F *h[mxH]; // some  histograms
   TH2F *hTow[6];//Tower crate histos
   int nInpEve; /// no. of input events
@@ -37,7 +35,6 @@ class MuEzCorrMaker : public StMaker, public CorrAna{
   EztEventHeader *eHead;
   EztEmcRawData  *eETow;
   EztEmcRawData  *eESmd;
-
 
  public: 
   MuEzCorrMaker(const char *self="EEstale", const char* muDstMakerName="muDstMaker");
@@ -52,7 +49,7 @@ class MuEzCorrMaker : public StMaker, public CorrAna{
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: MuEzCorrMaker.h,v 1.1 2004/11/19 15:50:53 rfatemi Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: MuEzCorrMaker.h,v 1.2 2004/11/29 19:37:14 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -63,6 +60,9 @@ class MuEzCorrMaker : public StMaker, public CorrAna{
 
 
 // $Log: MuEzCorrMaker.h,v $
+// Revision 1.2  2004/11/29 19:37:14  balewski
+// fix to match EZTREE evolution
+//
 // Revision 1.1  2004/11/19 15:50:53  rfatemi
 // Maker to check corruption from ezTree branch in MuDst
 //
