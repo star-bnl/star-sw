@@ -3,7 +3,7 @@
  * \author
  */
 /***********************************************************
- * $Id: StPmdClusterMaker.h,v 1.1 2002/08/27 12:06:59 subhasis Exp $
+ * $Id: StPmdClusterMaker.h,v 1.2 2003/05/12 12:12:18 subhasis Exp $
  *
  * Author:
  *
@@ -14,8 +14,8 @@
  ************************************************************
  *
  * $Log: StPmdClusterMaker.h,v $
- * Revision 1.1  2002/08/27 12:06:59  subhasis
- * First version
+ * Revision 1.2  2003/05/12 12:12:18  subhasis
+ * StEvent added
  *
  * Initial version:
  ************************************************************/
@@ -37,7 +37,7 @@ class StPmdClusterMaker: public StMaker{
   
    protected:
   
-  //! booking Pmd cluster histograms
+  // booking Pmd cluster histograms
   TH1F *mSmPmdCluster;      //!  supermodule no for Pmd
   TH1F *mEdepPmdCluster;    //!  cluster edep in Pmd
   TH1F *mSigmaPmdCluster;    //!  cluster Sigma in Pmd
@@ -49,6 +49,7 @@ class StPmdClusterMaker: public StMaker{
   TH2F *mHitVscluster;        //!  phi vs.mod  in Pmd 
   TH1F *mExtraclusterPmd;        //!  phi vs.mod  in Pmd 
   TH2F *mClusterEdepFracPmd;  //!  nclust vs. frac. edep in Pmd
+  TH1F *mPmdCluster; //!number of Pmd clusters
 
   TH1F *mSmCpvCluster;      //!  supermodule no for Cpv
   TH1F *mEdepCpvCluster;    //!  cluster edep in Cpv
@@ -59,18 +60,20 @@ class StPmdClusterMaker: public StMaker{
   TH2F *mPhi2ModCpv;        //!  phi vs.mod  in Cpv
   TH1F *mExtraclusterCpv;        //!  phi vs.mod  in Cpv  
   TH2F *mClusterEdepFracCpv;  //!  nclust vs. frac. edep in Cpv
-   public: 
+  TH1F *mCpvCluster; //!number of Cpv clusters
+   public:
+  //!constructor 
   StPmdClusterMaker(const char *name="PmdClust"); 
-  ~StPmdClusterMaker();
+  ~StPmdClusterMaker();//!
 
   virtual Int_t Init();
   virtual Int_t Make();
 
   Int_t getChoice(Int_t num); 
+  void  FillStEvent(StPmdDetector*, StPmdDetector*);
 
-
-  void  bookHistograms();
-  void  FillHistograms(StPmdDetector*, StPmdDetector*);
+  void  bookHistograms(); //! booking histograms
+  void  FillHistograms(StPmdDetector*, StPmdDetector*); //! filling histograms
   Float_t  AddEdep(StPmdDetector*, StPmdDetector*);
   void  Browse(TBrowser* b); 
 

@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.1 2002/08/27 12:06:10 subhasis Exp $
+ * $Id: StPmdClustering.cxx,v 1.2 2003/05/12 12:12:18 subhasis Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -11,8 +11,8 @@
  ***********************************************************
  *
  * $Log: StPmdClustering.cxx,v $
- * Revision 1.1  2002/08/27 12:06:10  subhasis
- * First version
+ * Revision 1.2  2003/05/12 12:12:18  subhasis
+ * StEvent added
  *
  *
  ***********************************************************/
@@ -45,6 +45,7 @@
 ClassImp(StPmdClustering)
 
 Double_t d1[96][72], clusters[4][2000], coord[2][96][72];
+Double_t crd_org[2][96][72];
 
 Int_t iord[2][6912], infocl[2][96][72], inford[3][6912], clno;
 const Int_t nmx=6912;   //! (72 x 96)maximum number of cells in a supermodule
@@ -77,6 +78,7 @@ void StPmdClustering::findPmdClusters()
       for(i=0; i<96; i++){
 	for(j=0;j<72;j++){
 	  coord[0][i][j]=i+j/2.; coord[1][i][j]=sqrth*j; 
+	  crd_org[0][i][j]=i; crd_org[1][i][j]=j; 
 	}
       }
       i=0;
@@ -90,7 +92,7 @@ void StPmdClustering::findPmdClusters()
 	}
 	
 	StPmdModule * pmd_mod=m_pmd_det->module(id);  //! getting module(id)
-      //      TObjArray* pmd_hit=pmd_mod->Hits();
+
       
       if(m_pmd_det->module_hit(id)>0){
 	Int_t nmh=m_pmd_det->module_hit(id);  //! total no.of hits in the supermodule  
@@ -99,6 +101,7 @@ void StPmdClustering::findPmdClusters()
 	StPmdHit *spmcl;   //! pointer for hits
 	for(Int_t im=0; im<nmh; im++)
 	  {
+
 	    spmcl = (StPmdHit*)next();
 	    if(spmcl){
 	      ypad=spmcl->Row();          //! row of the hit
@@ -107,6 +110,7 @@ void StPmdClustering::findPmdClusters()
 	      gsuper = spmcl->Gsuper();   //! supermodule
 	      idet=spmcl->SubDetector();  //! detector(= 1) for Pmd
 	      xpad = xpad -1;ypad = ypad -1; 
+
 	      if(idet==1){
 		d1[xpad][ypad]=d1[xpad][ypad]+edep;  //! edep added for each cell
 	      }
@@ -116,7 +120,7 @@ void StPmdClustering::findPmdClusters()
 	idet=1;
 	order(idet);  //! order the data according to edep ( largest to smallest )
 	//! cutoff is the threshold above which value the data is analysed.
-	cutoff=0.000000;
+	cutoff=0.0000002;
 	ave=0.; nmx1=-1;
 	for(Int_t jj=0;jj<nmx; jj++){
 	  i1=iord[0][jj]; i2=iord[1][jj];
@@ -126,17 +130,16 @@ void StPmdClustering::findPmdClusters()
 	ave=ave/nmx1;
 	//!compare cutoff with the average energy deposited. Has no use in calc.
 
-	cutoff=0.0; //! cutoff is the threshold above which value the data is analysed.
+	cutoff=0.0000002; //! cutoff is the threshold above which value the data is analysed.
 
-	/*! crude clusters. superclusters are formed. These are separated from each
-	 * other by cells having edep smaller than cutoff. */
+	/* crude clusters. superclusters are formed. These are separated from each other by cells having edep smaller than cutoff. */
 	incr=crclust(ave, cutoff, nmx1, idet);
 
 	arrange(incr);  //! arrange cells in each supercluster
 	
-	refclust(incr, id, idet,pmdclus);  //! resolve superclusters into clusters
+       	refclust(m_pmd_det,incr, id, idet,pmdclus);  //! resolve superclusters into clusters
       }
-//	cout << " supermodule (PMD)" << id<< " done"<<endl;
+      //	cout << " supermodule (PMD)" << id<< " done"<<endl;
     }
   }
 }
@@ -172,7 +175,9 @@ void StPmdClustering::findCpvClusters()
 	     idet=spmcl->SubDetector();    //!  detector(= 2) for Cpv
 
 	     //! x,y,eta,phi of the hits has been calculated
-	     geom->DetCell_xy(gsuper,Float_t(ypad),Float_t(xpad),x,y,clueta,cluphi); 
+	     //	     geom->DetCell_xy(gsuper,Float_t(ypad),Float_t(xpad),x,y,clueta,cluphi); 
+
+	     geom->IntDetCell_xy(gsuper,ypad,xpad,x,y,clueta,cluphi); 
 
 	     //! Hits of CPV are written as clusters here 
 
@@ -191,35 +196,29 @@ void StPmdClustering::findCpvClusters()
   }
 }
 //-----------------------------------------
-void StPmdClustering::printclust(Int_t i, Int_t clno, Int_t idet,StPmdClusterCollection *pmdclus)
+
+void StPmdClustering::printclust(Int_t i,Int_t m, StPmdCluster* pclust)
 {
 
   //! for printing cluster details ( position ( x and y ), and strength
   //! info about # of cells in a cluster to be added. 
   Float_t x0, y0, x, y,xc,yc,zc, cells;
-  for(Int_t m=0;m<=clno;m++){
+
     xc = clusters[0][m];yc = clusters[1][m];  //!cluster position
     zc = clusters[2][m];   //! cluster strength
     cells = clusters[3][m];  //! number of cells in the cluster	
     Float_t clusigma = clusters[4][m];	 //! sigma of the cluster
     Float_t cluedep=zc; y0 = yc/sqrth; x0 = xc - y0/2.;
     Float_t clueta,cluphi;
-
     geom->DetCell_xy(i,y0+1,x0+1,x,y,clueta,cluphi);
-
-    StPmdCluster *pclust = new StPmdCluster();
     Int_t members=(Int_t)cells;
 
-    if(idet==1){
     pclust->setModule(i);
     pclust->setCluEdep(cluedep);
     pclust->setCluEta(clueta);
     pclust->setCluPhi(cluphi);
     pclust->setCluSigma(clusigma);
     pclust->setNumofMems(Int_t(members));    
-    pmdclus->addCluster(pclust);
-    }
-  }
 }
 //------------------------------------------------------
 
@@ -294,16 +293,19 @@ void StPmdClustering::arrange(Int_t incr)
  * Cluster positions,strengths,and widths has has been calculated
  * by adopting minimization process. */
  
-void StPmdClustering::refclust(Int_t incr, Int_t supmod, Int_t idet,StPmdClusterCollection *pmdclus)
+void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod, Int_t idet,StPmdClusterCollection *pmdclus)
 {
   Int_t clno, i, j, k, i1, i2, id, icl, ncl[2000], iord[2000], itest, ihld;
   Int_t ig, nsupcl,lev1[20],lev2[20];
   Double_t x[2000], y[2000], z[2000], x1, y1, z1, x2, y2, z2, rr,dist;
+  Double_t x_org[2000], y_org[2000];
   Double_t xc[2000], yc[2000], zc[2000], d[96][72], cells[2000],sum,rc[2000];
   //! clno counts the final clusters
   //! nsupcl =  # of superclusters; ncl[i]= # of cells in supercluster i
-  clno=-1;
-  nsupcl=-1;
+
+       clno=-1;
+        nsupcl=-1;
+
   if(idet == 1){
     for(i1=0; i1<96; i1++){
       for(i2=0; i2<72; i2++){
@@ -316,7 +318,7 @@ void StPmdClustering::refclust(Int_t incr, Int_t supmod, Int_t idet,StPmdCluster
     if(inford[0][i] != nsupcl){ nsupcl=nsupcl+1; }
     ncl[nsupcl]=ncl[nsupcl]+1;
   }
-//  cout<<"# of super cells "<<incr<<" # of supercluster"<<nsupcl<<endl;
+  //  cout<<"# of super cells****** "<<incr<<" # of supercluster"<<nsupcl<<endl;
   id=-1;
   icl=-1;
 
@@ -328,25 +330,51 @@ void StPmdClustering::refclust(Int_t incr, Int_t supmod, Int_t idet,StPmdCluster
     clno=clno+1; i1=inford[1][id]; i2=inford[2][id];
     clusters[0][clno]=coord[0][i1][i2]; clusters[1][clno]=coord[1][i1][i2];
     clusters[2][clno]=d[i1][i2]; clusters[3][clno]=1.;clusters[4][clno]=0.5;
+    
+    //Create the StPmdCluster and add to the ClusterCollection
+    StPmdCluster *pclust = new StPmdCluster();
+    pmdclus->addCluster(pclust);
+    
+    printclust(supmod,clno,pclust);
+
+    //Get StPmdHit* corresponding to the co-ordinate of single cell
+    StPmdHit* phit = GetHit(m_pmd_det,supmod,crd_org[0][i1][i2],crd_org[1][i1][i2]);
+    if(phit)pclust->addHitCollection(phit);
+
     }else if(ncl[i] == 1){
+      //Create the StPmdCluster and add to the ClusterCollection
+      StPmdCluster *pclust = new StPmdCluster();
+      pmdclus->addCluster(pclust);
       id=id+1; icl=icl+1;
       clno=clno+1; i1=inford[1][id]; i2=inford[2][id]; x1=coord[0][i1][i2];
       y1=coord[1][i1][i2]; z1=d[i1][i2];
+      
+      //Get StPmdHit* corresponding to the co-ordinate of first cell
+      StPmdHit* phit = GetHit(m_pmd_det,supmod,crd_org[0][i1][i2],crd_org[1][i1][i2]);
+      if(phit)pclust->addHitCollection(phit);
+      
       id=id+1; i1=inford[1][id]; i2=inford[2][id];
       x2=coord[0][i1][i2]; y2=coord[1][i1][i2]; z2=d[i1][i2];
+
+      //Get StPmdHit* corresponding to the co-ordinate of second cell
+      phit = GetHit(m_pmd_det,supmod,crd_org[0][i1][i2],crd_org[1][i1][i2]);
+      if(phit)pclust->addHitCollection(phit);
+      
       clusters[0][clno]=(x1*z1+x2*z2)/(z1+z2); 
       clusters[1][clno]=(y1*z1+y2*z2)/(z1+z2);
       clusters[2][clno]=z1+z2; clusters[3][clno]=2.; clusters[4][clno]=0.5;
+      printclust(supmod,clno,pclust);
     }else{
       id=id+1; iord[0]=0;
-      /*! super-cluster of more than two cells - broken up into smaller clusters
-       * gaussian centers computed. (peaks separated by > 1 cell). Start from top */
+      /* super-cluster of more than two cells - broken up into smaller clusters gaussian centers computed. (peaks separated by > 1 cell). Start from top */
       i1=inford[1][id]; i2=inford[2][id];
       x[0]=coord[0][i1][i2]; y[0]=coord[1][i1][i2]; z[0]=d[i1][i2];iord[0]=0;
+      x_org[0]=crd_org[0][i1][i2]; y_org[0]=crd_org[1][i1][i2];
       for(j=1;j<=ncl[i];j++){
         id=id+1;
         i1=inford[1][id]; i2=inford[2][id];iord[j]=j;
         x[j]=coord[0][i1][i2]; y[j]=coord[1][i1][i2]; z[j]=d[i1][i2];
+        x_org[j]=crd_org[0][i1][i2]; y_org[j]=crd_org[1][i1][i2];
       }
       //!ordering
       for(j=1;j<=ncl[i];j++){
@@ -376,14 +404,16 @@ void StPmdClustering::refclust(Int_t incr, Int_t supmod, Int_t idet,StPmdCluster
       }
       gaussfit(ncl[i], ig, x[0], y[0] ,z[0], xc[0], yc[0], zc[0], rc[0]);
       icl=icl+ig+1;
+
+
       for(j=0; j<=ig; j++){
         cells[j]=0.;
       }
       if(ig > 0){
-	for(j=0; j<=ncl[i]; j++){
+	for(j=0; j<=ncl[i]; j++){  // loop over all cells in supercluster
 	  lev1[0]=0; lev2[0]=0;
-	  for(k=0; k<=ig; k++){
-	    dist=Dist(x[j], y[j], xc[k], yc[k]);
+	  for(k=0; k<=ig; k++){  // loop over all clus found after gaussian.
+	    dist=Dist(x[j], y[j], xc[k], yc[k]); 
 	    if(dist < sqrt(3.) ){
 	      lev1[0]++; i1=lev1[0]; lev1[i1]=k;
 	    }else{
@@ -391,7 +421,9 @@ void StPmdClustering::refclust(Int_t incr, Int_t supmod, Int_t idet,StPmdCluster
 		lev2[0]++; i1=lev2[0]; lev2[i1]=k;
 	      }
 	    }
-	  }
+	  }  // loop to find level1 and level2 cls for each cell
+
+
 	  if(lev1[0] != 0){
 	    if(lev1[0] == 1){cells[lev1[1]]=cells[lev1[1]]+1.;}
 	    else{
@@ -425,12 +457,30 @@ void StPmdClustering::refclust(Int_t incr, Int_t supmod, Int_t idet,StPmdCluster
 	}else{
 	  clusters[3][clno]=cells[j];
 	}
+
+//subhasis , ig = no of gaussians.
+//
+// looping over clusters first and cells within to 
+// create StPmdCluster and attach cells to them
+	StPmdCluster *pclust = new StPmdCluster();
+	pmdclus->addCluster(pclust);
+
+	printclust(supmod,clno,pclust);
+	for(Int_t jk=0; jk<=ncl[i]; jk++){// loop over all cells in supercluster
+	  dist=Dist(x[jk], y[jk], xc[j], yc[j]); 
+	  if(dist < 2.1){
+	    StPmdHit* phit = GetHit(m_pmd_det,supmod,x_org[jk],y_org[jk]);
+	    if(phit)pclust->addHitCollection(phit);
+	    // attach the hits
+	  }
+	}
+	
       }
+      
     }
   }
-  //!  cout<<"CLUSTER NUMBER IS "<<clno<<"supmod**"<<supmod<<endl;
-  printclust(supmod, clno, idet,pmdclus);
-
+  //  cout<<"CLUSTER NUMBER IS "<<clno<<"supmod**"<<supmod<<endl;
+  
 }
 //-------------------------------------------------------
 
@@ -507,7 +557,7 @@ void StPmdClustering::gaussfit(Int_t ncell, Int_t nclust, Double_t &x, Double_t 
 
 //----------------------------------------------
 
-//! distance between centre of two clusters
+/*! distance between centre of two clusters */
 Double_t StPmdClustering::Dist(Double_t x1, Double_t y1, Double_t x2, Double_t y2)
 {
   return sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
@@ -654,7 +704,28 @@ Double_t StPmdClustering::ranmar()
 }        
 //-----------------------------------------------------
 
-
+StPmdHit*
+StPmdClustering::GetHit(StPmdDetector* pdet,Int_t id,Int_t xc, Int_t yc)
+{
+        Int_t xpad,ypad,super;
+        Int_t nmh=pdet->module_hit(id);
+        StPmdModule * pmod=pdet->module(id);
+        TIter next(pmod->Hits());
+        StPmdHit *spmcl;
+// Loop over hits for each SM
+        for(Int_t im=0; im<nmh; im++)
+          {
+            spmcl = (StPmdHit*)next();
+            if(spmcl){
+              ypad=spmcl->Row();
+              xpad=spmcl->Column();
+              super = spmcl->Gsuper();
+	      if((yc+1)==ypad && (xc+1)==xpad && id == super)   return spmcl;
+          }
+       }
+    return NULL;
+}
+ 
 
 
 

@@ -1,6 +1,6 @@
 /*************************************************
  *
- * $Id: StPmdClusterMaker.cxx,v 1.1 2002/08/27 12:09:08 subhasis Exp $
+ * $Id: StPmdClusterMaker.cxx,v 1.2 2003/05/12 12:12:18 subhasis Exp $
  * Author: Subhasis Chattopadhyay
  *************************************************
  *
@@ -9,8 +9,8 @@
  *************************************************
  *
  * $Log: StPmdClusterMaker.cxx,v $
- * Revision 1.1  2002/08/27 12:09:08  subhasis
- * First version
+ * Revision 1.2  2003/05/12 12:12:18  subhasis
+ * StEvent added
  *
  *
  *************************************************/
@@ -36,10 +36,14 @@
 #include "StPmdUtil/StPmdClusterCollection.h" //! will be obtained 
 #include "StPmdUtil/StPmdCluster.h" //! will be obtained 
 
+
+#include "StEventTypes.h"
+
+
 ClassImp(StPmdClusterMaker)
- 
+  
   TDataSet *clusterIn;
-  StPmdCollection *cluster_hit;
+StPmdCollection *cluster_hit;
 
 //-------------------- 
 StPmdClusterMaker::StPmdClusterMaker(const char *name):StMaker(name)
@@ -62,9 +66,10 @@ void StPmdClusterMaker::bookHistograms()
   mSmPmdCluster   = new TH1F("Smno_pmd","SuperModule No",24,1.,24.);
   mEdepPmdCluster = new TH1F("EdepPmd","Energy deposited",600,0.,0.00004);  
   mSigmaPmdCluster = new TH1F("SigmaClusterPmd","Cluster Sigma",50,0.5,4.5);  
-  mNcellPmdCluster = new TH1F("NcellPmd","No of Cellsper cls",50,-0.5,49.5);  
+  mNcellPmdCluster = new TH1F("NcellPmd","No of Cells per cls",50,-0.5,49.5);  
   mEtaPmdCluster  = new TH1F("EtaPmd","Eta Distribution",100,-4.,-2.);  
   mPhiPmdCluster  = new TH1F("PhiPmd","Phi Distribution",100,-3.14,3.14);
+  mPmdCluster  = new TH1F("PmdCluster"," NCluster in PMD",100,0,5000);
   mPhi2ModPmd  = new TH2F("Phi2ModPmd","Phi vs Mod",12,0.5,12.5,360,-3.14,3.14);
   mHitVscluster  = new TH2F("Pmd_hitvsClus","Hit vsclusPMD",50,0.5,50.5,50,0.5,50.5);
 
@@ -73,6 +78,7 @@ void StPmdClusterMaker::bookHistograms()
   mNcellCpvCluster = new TH1F("NcellCpv","No of Cellsper cls (CPV)",50,-0.5,49.5);  
   mEtaCpvCluster  = new TH1F("EtaCpv","Cpv Eta Distribution",100,-4.,-2.);  
   mPhiCpvCluster  = new TH1F("PhiCpv","Cpv Phi Distribution",100,-3.14,3.14);
+  mCpvCluster  = new TH1F("CPVCluster"," NCluster in CPV",100,0,5000);
 }
 //--------------------------------
 Int_t StPmdClusterMaker::Make() 
@@ -97,11 +103,12 @@ Int_t StPmdClusterMaker::Make()
 	cout<<"clust1 not made"<<endl;
       }
     }
+    FillStEvent(pmd_det,cpv_det);
     
     FillHistograms(pmd_det,cpv_det);
   }
  return kStOK;
-}//! loop for make ends here.
+}/*! loop for make ends here.*/
 //--------------------------
 void StPmdClusterMaker::Browse(TBrowser *b)
 {
@@ -119,7 +126,8 @@ void StPmdClusterMaker::FillHistograms(StPmdDetector* pmd_det, StPmdDetector* cp
       Int_t nmh=pmd_det->module_hit(id);
       tothitpmd+=nmh;  
     }
-    if(pmd_det->module_hit(id)>0){
+
+    if(cpv_det->module_hit(id)>0){
       Int_t nmh1=pmd_det->module_hit(id);
       tothitcpv+=nmh1;  
     }
@@ -134,8 +142,12 @@ void StPmdClusterMaker::FillHistograms(StPmdDetector* pmd_det, StPmdDetector* cp
   
   Int_t nclust_cpv = cpvclusters->Nclusters(); //! no of Cpv clusters
 
+  cout<<" TOTAL HIT PMD, CPV " <<tothitpmd<<" "<<tothitcpv<<endl;
+  cout<<" NClust PMD, NClust CPV" <<" "<<nclust<<" "<<nclust_cpv<<endl;
+
   //! First Fill PMD
   TIter next(clusters->Clusters());
+
   StPmdCluster *spmcl1;
   for(Int_t i=0; i<nclust ; i++)
     {
@@ -146,15 +158,31 @@ void StPmdClusterMaker::FillHistograms(StPmdDetector* pmd_det, StPmdDetector* cp
       Float_t sigma=spmcl1->CluSigma();
       Int_t mod=spmcl1->Module();
       Int_t ncell=spmcl1->NumofMems();
+      //      cout<<"Eta,Phi,Edep,Sigma,Ncell "<<eta<<" "<<phi<<" "<<edep<<" "<<sigma<<" "<<ncell<<endl;
+      TIter next1(spmcl1->HitCollection());
+      StPmdHit  *hit;
+
+      for(Int_t im=0;im<ncell;im++){
+	hit = (StPmdHit*)next1();
+
+	if(hit){
+	  //	  Int_t row = hit->Row();
+	  //	  Int_t super = hit->Gsuper();
+	  //	  Int_t col = hit->Column();
+
+	}
+      }
+  
       mSmPmdCluster->Fill(Float_t(mod));
       mEdepPmdCluster->Fill(edep);
       mSigmaPmdCluster->Fill(sigma);
       mNcellPmdCluster->Fill(Float_t(ncell));
       mEtaPmdCluster->Fill(eta);
       mPhiPmdCluster->Fill(phi);
-				        }
+    }
   mHitVscluster->Fill(tothitpmd,Float_t(nclust));
-  
+  mPmdCluster->Fill(nclust);
+  mCpvCluster->Fill(nclust_cpv);  
   //! NOW for Fill CPV
   TIter nextcpv(cpvclusters->Clusters());
   StPmdCluster *spmcl2;
@@ -205,8 +233,91 @@ Float_t StPmdClusterMaker::AddEdep(StPmdDetector* pmd_det, StPmdDetector* cpv_de
 }
 
 
+//---------------------------------------------------
+void StPmdClusterMaker::FillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_det)
+{
+	cout<<"filling SytEvent in ClusterMaker"<<endl;
+// Get StEvent
+	StPhmdCollection * PmdCollection; 
+	StEvent *currevent = (StEvent*)GetInputDS("StEvent");
+	if(!currevent){
+		cout<<"ClusterMaker **, No StEvent Pointer "<<endl;
+	}
 
+        if(currevent)PmdCollection= currevent->phmdCollection();
+	  if(PmdCollection){
+		  StPhmdDetector* evtdet0 = PmdCollection->detector(StDetectorId(kPhmdId));
+	    StPhmdDetector* evtdet1 = PmdCollection->detector(StDetectorId(kPhmdCpvId));
+	       // add clustercollection
+	    StPhmdClusterCollection* cluscollpmd = new StPhmdClusterCollection();
+	     cluscollpmd->setClusterFinderId(1);
+	     cluscollpmd->setClusterFinderParamVersion(1);
+//CPV
+	     StPhmdClusterCollection* cluscollcpv = new StPhmdClusterCollection();
+	     cluscollcpv->setClusterFinderId(1);
+	     cluscollcpv->setClusterFinderParamVersion(1);
+  
+	     StPmdClusterCollection* clusters = (StPmdClusterCollection*)pmd_det->cluster();
+  StPmdClusterCollection* cpvclusters = (StPmdClusterCollection*)cpv_det->cluster();
+  
+  Int_t nclust = clusters->Nclusters();   //! no of Pmd clusters
+  
+  Int_t nclust_cpv = cpvclusters->Nclusters(); //! no of Cpv clusters
 
+  //! First Fill PMD
+	  if(evtdet0){
+	     evtdet0->setCluster(cluscollpmd);
+  TIter next(clusters->Clusters());
+  StPmdCluster *spmcl1;
+  for(Int_t i=0; i<nclust ; i++)
+    {
+      spmcl1 = (StPmdCluster*)next();
+      Float_t eta=spmcl1->CluEta();
+      Float_t phi=spmcl1->CluPhi();
+      Float_t edep=spmcl1->CluEdep();
+      Float_t sigma=spmcl1->CluSigma();
+      Int_t mod=spmcl1->Module();
+      Int_t ncell=spmcl1->NumofMems();
+      // Filling PmdCluster for StEvent
+               StPhmdCluster *pcls = new StPhmdCluster();
+               pcls->setModule(mod);     
+               pcls->setNumberOfCells(ncell); 
+               pcls->setEta(eta);
+               pcls->setPhi(phi);
+               pcls->setEnergy(edep);
+               pcls->setSigma(sigma);
+               cluscollpmd->addCluster(pcls);
+//	       cout<<"PMDclust added  "<<endl;
+    }       
+	  } 
+  //! NOW for Fill CPV
+ if(evtdet1){
+	     evtdet1->setCluster(cluscollcpv);
+  TIter nextcpv(cpvclusters->Clusters());
+  StPmdCluster *spmcl2;
+  for(Int_t i=0; i<nclust_cpv ; i++)
+    {
+      spmcl2 = (StPmdCluster*)nextcpv();
+      Float_t eta=spmcl2->CluEta();
+      Float_t phi=spmcl2->CluPhi();
+      Float_t edep=spmcl2->CluEdep();
+      Float_t sigma=spmcl2->CluSigma();
+      Int_t mod=spmcl2->Module();
+      Int_t ncell=spmcl2->NumofMems();
+      // Filling PmdCluster for StEvent
+               StPhmdCluster *pcls = new StPhmdCluster();
+               pcls->setModule(mod);     
+               pcls->setNumberOfCells(ncell); 
+               pcls->setEta(eta);
+               pcls->setPhi(phi);
+               pcls->setEnergy(edep);
+               pcls->setSigma(sigma);
+               cluscollcpv->addCluster(pcls);
+    }       
+}
+}
+	cout<<"filled SytEvent in ClusterMaker"<<endl;
+}
 
 
 
