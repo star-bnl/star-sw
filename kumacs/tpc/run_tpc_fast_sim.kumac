@@ -83,7 +83,8 @@ $STAR/pams/trg/kumac
   
 * tpc fast sim init
   exec tpc_fast_sim#initialize 
-
+  
+*  exec write_table_to_ntuple#init_disk [funit] [nfile]
 
 * read event and then process thru tpc fast sim
   do i=1,[num_events]
@@ -94,13 +95,7 @@ $STAR/pams/trg/kumac
       if STAF_STATUS(1).eq.0 then
         message ' problem with tfs '
       endif
-* write table from tpc fast sim to ntuple
-    if [i]=1 then
-      exec write_table_to_ntuple#init_disk _
-       [funit] [nfile] [nid] [table]
-    else
-      exec write_table_to_ntuple#write_event_disk [nid] [table]
-    endif
+    exec write_table_to_ntuple#write_event_disk [nid] [table]
   enddo
 
  
