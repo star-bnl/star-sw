@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.408 2004/04/07 18:52:02 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.409 2004/04/07 22:34:50 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -463,7 +463,7 @@ Bfc_st BFC1[] = {
                                                                      "Bichsel method used for dEdx",kFALSE},
 
 
-  {"pmdRaw"    ,"pmdRaw","","pmdRead,pmdClust"                 ,"StMaker","StChain","PMD Raw chain",kFALSE},
+  {"pmdRaw"    ,"pmdRaw","","PmdUtil,pmdRead,pmdClust"         ,"StMaker","StChain","PMD Raw chain",kFALSE},
   {"pmd"       ,"pmd","","geant,pmdSim,pmdClust,pmdDis","StMaker","StChain", "PMD Simulation chain",kFALSE},
   {"pmdRead"   ,"","","PmdUtil","StPmdReadMaker"            ,"StPmdReadMaker", "DAQ reader for PMD",kFALSE},
   {"pmdSim"    ,"","","geant,PmdUtil","StPmdSimulatorMaker",
@@ -1023,7 +1023,7 @@ Bfc_st BFC2[] = {
 
 
 
-  {"pmdRaw"    ,"pmdRaw","","pmdRead,pmdClust"                 ,"StMaker","StChain","PMD Raw chain",kFALSE},
+  {"pmdRaw"    ,"pmdRaw","","PmdUtil,pmdRead,pmdClust"         ,"StMaker","StChain","PMD Raw chain",kFALSE},
   {"pmd"       ,"pmd","","geant,pmdSim,pmdClust,pmdDis","StMaker","StChain", "PMD Simulation chain",kFALSE},
   {"pmdRead"   ,"","","PmdUtil","StPmdReadMaker"            ,"StPmdReadMaker", "DAQ reader for PMD",kFALSE},
   {"pmdSim"    ,"","","geant,PmdUtil","StPmdSimulatorMaker",
