@@ -189,6 +189,15 @@ all:
 else
 
 MY_SO  := $(SO_LIB)
+  QWE  := $(wildcard $(MY_SO).*)
+SL_NEW := $(MY_SO).1000
+ifdef QWE
+  NQWE := $(words $(QWE))
+  QWE  := $(word $(NQWE),$(QWE))
+  QWE  := $(subst $(MY_SO).,,$(QWE))
+  QWE  := $(shell expr $(QWE) + 1)
+  SL_NEW := $(MY_SO).$(QWE)
+endif
 MY_AR  := $(addsuffix .a, $(basename $(MY_SO)))
 #
 
@@ -252,7 +261,10 @@ Libraries : $(MY_SO)
 
 
 $(MY_SO) : $(FILES_O)
-	cd $(OBJ_DIR); $(SO) $(SOFLAGS) -o $(SO_LIB) $(notdir $(FILES_O)) $(STAR_FILES_O) $(LIBRARY)
+	cd $(OBJ_DIR); \
+        $(SO) $(SOFLAGS) -o $(SL_NEW) $(notdir $(FILES_O)) $(STAR_FILES_O) $(LIBRARY); \
+        $(RM) $(MY_SO); $(LN) $(SL_NEW) $(MY_SO)'
+	@echo "           Shared library " $(MY_SO) " has been created"   
 
 #_________________dependencies_____________________________
 ifneq (, $(strip $(FILES_D))) 
