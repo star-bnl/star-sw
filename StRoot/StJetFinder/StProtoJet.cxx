@@ -7,7 +7,7 @@
 //4/02
 
 //std
-#include <Stiostream.h>
+#include <iostream>
 #include <algorithm>
 using std::copy;
 using std::find;

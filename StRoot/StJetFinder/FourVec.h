@@ -3,7 +3,8 @@
 #ifndef FourVec_HH
 #define FourVec_HH
 
-#include <Stiostream.h>
+using namespace std;
+#include <iostream>
 #include <math.h>
 
 class AbstractFourVec

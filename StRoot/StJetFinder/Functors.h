@@ -5,7 +5,8 @@
 #ifndef Functors_HH
 #define Functors_HH
 
-#include <Stiostream.h>
+using namespace std;
+#include <iostream>
 
 class StJetEtCell;
 
@@ -67,4 +68,3 @@ inline ostream& operator<<(ostream& os, const StEtGridKey& key)
 }
 
 #endif
-

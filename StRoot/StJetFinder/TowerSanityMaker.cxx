@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TowerSanityMaker.cxx,v 1.3 2003/09/07 03:49:03 perev Exp $
+ * $Id: TowerSanityMaker.cxx,v 1.4 2003/09/11 18:14:04 thenry Exp $
  * 
  * Author: Thomas Henry August 2003
  ***************************************************************************
@@ -13,8 +13,8 @@
  * Revision 1.0  2003/02/20 thenry
  *
  **************************************************************************/
-#include <string.h>
-#include "Stiostream.h"
+#include <string>
+#include <iostream>
 #include <math.h>
 #include <sys/times.h>
 
@@ -52,6 +52,9 @@ TowerSanityMaker::TowerSanityMaker(const char* name,
   SafetyArray(name), adcToE(adcToEMaker), muDstMkr(uDstMkr),
   dbName(dataBaseName), dbUse(dbu), ofile(NULL) 
 {
+  runThreshold = 0.007;
+  maxTowerThreshold = 12.0;
+  avgTowerThreshold = 0.03;
 }
 
 Int_t TowerSanityMaker::Make()
@@ -121,14 +124,32 @@ Int_t TowerSanityMaker::Finish()
 bool TowerSanityMaker::isGood(unsigned int runNumber, long index)
 {
   if(runAverageEnergyPerTower(runNumber) > runThreshold)
-    return false;
+    {
+      cout << "runAverageEnergyPerTower(runNumber)=" <<
+	runAverageEnergyPerTower(runNumber) 
+	   << '(' << runNumber << ')' << endl;
+      return false;
+    }
   if(maxTowerEnergy(runNumber, index) > maxTowerThreshold)
-    return false;
+    {
+      cout << "maxTowerEnergy(runNumber, index)=" <<
+	maxTowerEnergy(runNumber, index) << '(' << runNumber << 
+	", " << index << ')' << endl;
+      return false;
+    }
   if(averageTowerEnergy(runNumber, index) > avgTowerThreshold)
-    return false;
+    {
+      cout << "averageTowerEnergy(runNumber, index)=" <<
+	averageTowerEnergy(runNumber, index) << '(' << runNumber << 
+	", " << index << ')' << endl;
+      return false;
+    }
   return true;
 }
 #endif //__ROOT__
+
+
+
 
 
 

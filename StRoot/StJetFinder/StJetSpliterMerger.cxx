@@ -7,7 +7,7 @@
 //10/02
 
 //std
-#include <Stiostream.h>
+#include <iostream>
 #include <ctime>
 #include <algorithm>
 #include <list>
