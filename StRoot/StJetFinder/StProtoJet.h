@@ -46,8 +46,10 @@ public:
 	
     ///Add a protojet to this one w/o calculating the new parameters
     void add(const StProtoJet&);
-	void remove(StProtoJet&);
+    void remove(StProtoJet&);
 
+    ///Retrieve the indices of the tracks associated with this protojet
+    vector<int> tracks(void); 
 	
     ///update the parameters of this protojet (in case some have been added via add())
     void update();
