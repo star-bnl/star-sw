@@ -172,6 +172,7 @@ int sutStripWhitespace(char **outstring,char* string)
 char* strntok(const char * str,const char * del,const int n)
 {
    int i;
+   size_t len;
    char *d,*w;
 
    d = (char*)str;
@@ -181,8 +182,10 @@ char* strntok(const char * str,const char * del,const int n)
    }
    d += strspn(d,del);          /* skip tokens */
    if( strcspn(d,del) > 0 ){
-      w = (char*)CALLOC(1,strcspn(d,del) +1);
-      strncpy(w,d,strcspn(d,del)); 
+      len=strcspn(d,del);        /* hjw 27mar98   I removed CALLOC */
+      w = (char*)MALLOC(len+1);  /* and substituted MALLOC.        */
+      strncpy(w,d,len);
+      w[len]=0;
       return (char*)w;
    }
    return NULL;
