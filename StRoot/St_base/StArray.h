@@ -125,7 +125,7 @@ protected:
 //#ifndef __CINT__
 VecTObj fV;
 //#endif //_CINT__
-ClassDef(StObjArray,3)
+ClassDef(StObjArray,4)
 };
 
 
