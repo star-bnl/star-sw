@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRandyTopMapMaker.h,v 1.3 2000/05/02 22:13:24 laue Exp $
+ * $Id: StRandyTopMapMaker.h,v 1.4 2001/09/14 18:00:21 perev Exp $
  *
  * Author: Randy Wells, Ohio State
  ***************************************************************************
@@ -14,7 +14,7 @@
 #include "StMaker.h"
 
 class StEvent;
-class StRun;
+//-tu class StRun;
 
 class StRandyTopMapMaker : public StMaker {
 public:
@@ -28,7 +28,7 @@ public:
     virtual Int_t  Finish();
     
     virtual const char *GetCVS() const
-    {static const char cvs[]="$Id: StRandyTopMapMaker.h,v 1.3 2000/05/02 22:13:24 laue Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="$Id: StRandyTopMapMaker.h,v 1.4 2001/09/14 18:00:21 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
 private:
     //    Bool_t drawinit;

@@ -1,6 +1,9 @@
-// $Id: StPeCMaker.h,v 1.10 2001/02/12 21:15:57 yepes Exp $
+// $Id: StPeCMaker.h,v 1.11 2001/09/14 18:00:22 perev Exp $
 //
 // $Log: StPeCMaker.h,v $
+// Revision 1.11  2001/09/14 18:00:22  perev
+// Removed references to StRun.
+//
 // Revision 1.10  2001/02/12 21:15:57  yepes
 // New version of StPeCMaker, lots of changes
 //
@@ -55,7 +58,7 @@
 
 class StEvent;
 class StPeCEvent;
-class StRun;
+//-tu class StRun;
 class TH1F;
 class TH2F;
 
@@ -93,7 +96,7 @@ private:
   Int_t triggerSim(StEvent *);
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.10 2001/02/12 21:15:57 yepes Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.11 2001/09/14 18:00:22 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StPeCMaker, 1)
 };

@@ -1,5 +1,8 @@
-// $Id: StSpectraMaker.cxx,v 1.12 2000/03/28 03:20:06 munhoz Exp $
+// $Id: StSpectraMaker.cxx,v 1.13 2001/09/14 18:00:24 perev Exp $
 // $Log: StSpectraMaker.cxx,v $
+// Revision 1.13  2001/09/14 18:00:24  perev
+// Removed references to StRun.
+//
 // Revision 1.12  2000/03/28 03:20:06  munhoz
 // correcting normalization of weighted histogram
 //
@@ -43,7 +46,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "StSpectraMaker.h"
 #include "StChain.h"
-#include "StRun.h"
+//-tu #include "StRun.h"
 #include "StEventTypes.h"
 #include "StSpectraAnalysis.h"
 #include "StTpcDeviantSpectraAnalysis.h"
@@ -67,7 +70,7 @@ string readString(ifstream& ifs) {
   return line;
 }
 
-static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.12 2000/03/28 03:20:06 munhoz Exp $";
+static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.13 2001/09/14 18:00:24 perev Exp $";
 
 StSpectraMaker::StSpectraMaker(const Char_t *name) : StMaker(name) {
 }
