@@ -35,7 +35,8 @@
  *          May 5, 1998 - Kathy
  *          May 22, 1998 - editted by Kathy Turner 
  *                       - broke up tpc into simulation & tracker
-**************************************************
+ *  editted June 3, 1998 by Kathy Turner - new versions of tpc kumacs 
+ **************************************************
  
 MACRO run_all _
    no_events=1 _ 
@@ -73,6 +74,8 @@ message ' *** EV0 Finder            -->  ' [ev0_finder]
  DEFAULT = _
 ./kumacs/util,_
 ./kumacs/chain,_
+./kumacs/emc,_
+./kumacs/svt,_
 ./kumacs/tpc,_
 ./pams/emc/kumac,_
 ./pams/global/kumac,_
@@ -80,6 +83,8 @@ message ' *** EV0 Finder            -->  ' [ev0_finder]
 ./pams/tpc/kumac,_
 $STAR/kumacs/util,_
 $STAR/kumacs/chain,_
+$STAR/kumacs/emc,_
+$STAR/kumacs/svt,_
 $STAR/kumacs/tpc,_
 $STAR/pams/ctf/kumac,_
 $STAR/pams/emc/kumac,_
@@ -90,6 +95,7 @@ $STAR/pams/mwc/kumac,_
 $STAR/pams/svt/kumac,_
 $STAR/pams/tpc/kumac,_
 $STAR/pams/trg/kumac
+
 
  def [DEFAULT]
  message 'Define default kumac search path as' def
@@ -132,7 +138,7 @@ $STAR/pams/trg/kumac
   v/create vegr
   v/create vev0
 
-
+  
  **=====================================================================
  **   Here's where main processing begins
  **=====================================================================
@@ -159,7 +165,6 @@ $STAR/pams/trg/kumac
  *****************************************
 
  exec init_svg
- message ' called init_svg'
 
 
  ****************************************
@@ -238,7 +243,8 @@ $cptime
     go to NEXT_EVENT
   endif
 
-
+  
+*  SVT tracking
  *  svt track finding and momentum reconstruction -----------------------
 
     if [svt_tracker]= stk then
@@ -255,20 +261,19 @@ $cptime
     endif
     sigma vstk = vstk + $cptime
 
-  message ' made it thru the SVT tracking!'
 
 TPC:
 
 * TPC tracking ----------------------------------------------------------
 
    if [tpc_tracker]=tpt then
-     exec tpc_tracker#tpt [ievent]
+     exec tpc_tracker#process_event_tpt [ievent]
      if (staf_status(1) .ne. stafcv_ok) then
       message ' problem with tpc_tracker_tpt'
       goto NEXT_EVENT
      endif
    elseif [tpc_tracker]=tte then
-     exec tpc_tracker#tte [ievent]
+     exec tpc_tracker#process_event_tte [ievent]
      if (staf_status(1) .ne. stafcv_ok) then
       message ' problem with tpc_tracker_tte'
       goto NEXT_EVENT
