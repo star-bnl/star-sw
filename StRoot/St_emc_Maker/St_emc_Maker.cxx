@@ -1,5 +1,8 @@
-// $Id: St_emc_Maker.cxx,v 1.10 1999/07/16 18:24:27 pavlinov Exp $
+// $Id: St_emc_Maker.cxx,v 1.11 2000/01/29 00:04:58 akio Exp $
 // $Log: St_emc_Maker.cxx,v $
+// Revision 1.11  2000/01/29 00:04:58  akio
+// temprary fix for endcap. need more work, but no more junk messages and crash
+//
 // Revision 1.10  1999/07/16 18:24:27  pavlinov
 // Little correction for StEclMake
 //
@@ -79,7 +82,12 @@ Int_t St_emc_Maker::Init(){
 Int_t St_emc_Maker::Make(){
 
   mEmcCalib   = GetInputDB("calib");
-  if(!mEmcCalib) return kStWarn;;   
+  if(!mEmcCalib){
+    cout << "Warning in St_emc_Maker: Database not found" << endl;
+    return kStWarn;;   
+  }else{
+    assert(mEmcCalib);
+  }
 
   if (!m_DataSet->GetList()){   //if DataSet is empty, create object and fill it
     //Making Hits
@@ -93,11 +101,13 @@ Int_t St_emc_Maker::Make(){
       if(adc->GetTitle() == tit){  // Get only emc_hits
 	TString name = adc->GetName(); 
         name.ReplaceAll("emc_hits_","");
+	for(int i=4; i<8; i++){if(detname[i]==name){goto SKIP;}} //only barrel for now
 	StEmcHitCollection *hit = new StEmcHitCollection(name);
         hit->setEmcCalib(mEmcCalib);
         m_DataSet->Add(hit);
 	if(hit->fill(adc) != kStOK) return kStWarn;
       }
+    SKIP:;
     }
   }
 

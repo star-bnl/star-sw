@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.3 1999/07/16 18:03:45 pavlinov Exp $
+ * $Id: StEmcGeom.h,v 1.4 2000/01/29 00:04:57 akio Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.4  2000/01/29 00:04:57  akio
+ * temprary fix for endcap. need more work, but no more junk messages and crash
+ *
  * Revision 1.3  1999/07/16 18:03:45  pavlinov
  * Little correction for StEclMake
  *
@@ -80,6 +83,9 @@ public:
   void     initBEMCorBPRS();
   void     initBSMDE();
   void     initBSMDP();
+  void     initEEMCorEPRS();
+  void     initESMDE();
+  void     initESMDP();
   void     printGeom();
   ClassDef(StEmcGeom,1)                      // Standard Root macro;
 };
@@ -98,7 +104,7 @@ inline void    StEmcGeom::setDetector(const Int_t val) { mDetector = val;}
 inline Int_t   StEmcGeom::checkModule(const Int_t m)
 {
   if(m>=1 && m<=mNModule) return 0;
-  else cout<<" Bad module# "<<m<<endl; return 1;
+  else cout<<" Bad module# "<<m<<"/"<<mNModule<<" in Detector "<<mDetector<<endl; return 1;
 }
 // _____________________________________________________________________
 inline Int_t   StEmcGeom::checkEta(const Int_t e)
@@ -195,3 +201,5 @@ inline Int_t StEmcGeom::getEtaPhi(const Int_t rid, Float_t &eta, Float_t &phi)
 }
 
 #endif
+
+
