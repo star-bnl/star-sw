@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.9 2001/04/25 19:08:33 perev Exp $
+// $Id: StTpcT0Maker.cxx,v 1.10 2001/07/18 20:52:13 hardtke Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.10  2001/07/18 20:52:13  hardtke
+// Extend range of histogram for t0 result
+//
 // Revision 1.9  2001/04/25 19:08:33  perev
 // HPcorrs
 //
@@ -79,7 +82,7 @@ Int_t StTpcT0Maker::Init(){
   t0guess = 0;
   zVertexWest = -999.0;
   zVertexEast = -999.0; 
-  T0HIST_MIN = 36.0;
+  T0HIST_MIN = 35.0;
   T0HIST_MAX = 38.0;
   t0result = new TH1F("t0result","t0result",1000,T0HIST_MIN,T0HIST_MAX);
   t0guessError = new TH1F("t0guessError","t0 measured - t0 guess",1000,-1,1);
@@ -258,7 +261,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.9 2001/04/25 19:08:33 perev Exp $\n");
+  printf("* $Id: StTpcT0Maker.cxx,v 1.10 2001/07/18 20:52:13 hardtke Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
