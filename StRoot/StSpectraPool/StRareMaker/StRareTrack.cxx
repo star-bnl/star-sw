@@ -35,7 +35,7 @@ StRareTrack::StRareTrack(StPrimaryTrack* track){
              StTrackPidTraits* thisTrait = traits[itrait];
   	     dedxPidTr = dynamic_cast<StDedxPidTraits*>(thisTrait);
 	     if (dedxPidTr && dedxPidTr->method() == kTruncatedMeanId) {
-              fdedx = dedxPidTr->mean();
+              fdedx = 1e6*dedxPidTr->mean();
               fndedx = dedxPidTr->numberOfPoints();
              }
       }
