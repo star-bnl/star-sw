@@ -31,30 +31,40 @@ void wait(int n, const char* c) {
 
 
 //_______________________________
-StHbtBinaryReader::StHbtBinaryReader(const char* dir, const char* file, const char* appendix) : mInputStream(0), mOutputStream(0), mReaderStatus(ioOK), mRetrieve(0) {
-  //cout << dir << " " << file << " " << appendix << endl;
-  mDirName=dir;
-  mFileName=file;
-  mAppendix=appendix;
-  mStHbtEventVersion = mStHbtTrackVersion = mStHbtV0Version = 1;
+StHbtBinaryReader::StHbtBinaryReader(const char* dir, const char* file, const char* appendix) {
+  init(dir, file, appendix);
 #ifdef __ROOT__
   mIOMaker =0;
 #endif
 }
 //_______________________________
 #ifdef __ROOT__
-StHbtBinaryReader::StHbtBinaryReader(StIOMaker* ioMaker, const char* dir, const char* file, const char* appendix) : mInputStream(0), mOutputStream(0), mReaderStatus(ioOK), mRetrieve(0) {
-  //cout << dir << " " << file << " " << appendix << endl;
+StHbtBinaryReader::StHbtBinaryReader(StIOMaker* ioMaker, const char* dir, const char* file, const char* appendix) {
+  init(dir, file, appendix);
+  mRetrieve = 1;
+  mIOMaker = ioMaker;
+#ifdef STHBTDEBUG
+  cout << " StHbtBinaryReader::StHbtBinaryReader() -  mIOMaker : " << mIOMaker << endl;
+#endif
+}
+#endif
+//_______________________________
+void StHbtBinaryReader::init(const char* dir, const char* file, const char* appendix) {
+  cout << dir << " " << file << " " << appendix << endl;
   mDirName=dir;
   mFileName=file;
   mAppendix=appendix;
-  mRetrieve = 1;
-  mIOMaker = ioMaker;
-  //#ifdef STHBTDEBUG
-  cout << " StHbtBinaryReader::StHbtBinaryReader() -  mIOMaker : " << mIOMaker << endl;
-  //#endif
+  if ( strstr(mFileName,".lis") ) { 
+      cout <<  " AddFileList " << endl;
+      AddFileList(file);
+  }  
+
+  mReaderStatus = ioOK;
+  mRetrieve = 0;
+  mStHbtEventVersion = 1;
+  mStHbtTrackVersion = 2,
+  mStHbtV0Version = 2;
 }
-#endif
 //_______________________________
 StHbtBinaryReader::~StHbtBinaryReader(){
   delete mFileName;
@@ -63,8 +73,8 @@ StHbtBinaryReader::~StHbtBinaryReader(){
 //_______________________________
 StHbtEvent* StHbtBinaryReader::ReturnHbtEvent(){
   StHbtEvent* event = new StHbtEvent;
-  if (mReaderStatus == ioOK ) mReaderStatus = binaryIO->readEvent(*event);  
-  if (mReaderStatus != ioERR) {
+  if (mReaderStatus == ioOK ) mReaderStatus = binaryIO->read(*event,mStHbtEventVersion,mStHbtTrackVersion,mStHbtV0Version);
+  if (mReaderStatus != ioOK) {
     cout << " StHbtBinaryReader::ReturnHbtEvent() -  event read with status " << mReaderStatus << endl;
     cout << " StHbtBinaryReader::ReturnHbtEvent() -  fileName: " << mFileName << endl;
   }
@@ -73,8 +83,8 @@ StHbtEvent* StHbtBinaryReader::ReturnHbtEvent(){
       delete event; event = new StHbtEvent; // in case we read an incomplete event
       if ( binaryIO ) delete binaryIO; // this closes the file
       mReaderStatus = NextFile();      // write next file from list into mFileName
-      if (mReaderStatus == ioOK) mReaderStatus = Init("r",mTheMessage); // instantiate new reader, open file mFileName
-      if (mReaderStatus == ioOK) mReaderStatus = binaryIO->readEvent(*event);
+      if (mReaderStatus == ioOK ) mReaderStatus = Init("r",mTheMessage); // instantiate new reader, open file mFileName
+      if (mReaderStatus == ioOK ) mReaderStatus = binaryIO->read(*event,mStHbtEventVersion,mStHbtTrackVersion,mStHbtV0Version);
     }
   }
   if (mReaderStatus != ioOK) {
@@ -88,12 +98,6 @@ StHbtEvent* StHbtBinaryReader::ReturnHbtEvent(){
 #endif
   return event;
 }
-
-//_______________________________
-//StHbtString StHbtBinaryReader::Report(){
-//  StHbtString temp = "\n This is the StHbtBinaryReader - no Early Cuts applied\n";
-//  return temp;
-//}
 
 //_______________________________
 int StHbtBinaryReader::WriteHbtEvent(StHbtEvent* event){
@@ -111,16 +115,16 @@ int StHbtBinaryReader::WriteHbtEvent(StHbtEvent* event){
     }
   }
 #endif
-  if (mReaderStatus == ioOK) {
+  if (mReaderStatus == ioOK ) { // > means o.k (number of bytes)
     if (!mEventCut || mEventCut->Pass(event)) {
 #ifdef STHBTDEBUG
       cout << " StHbtBinaryReader::WriteHbtEvent(StHbtEvent* event) - eventCut passed" << endl;
 #endif
-      StHbtEvent newEvent(*event, mTrackCut, mV0Cut);
-      mReaderStatus = binaryIO->writeEvent(newEvent);
+      StHbtEvent newEvent(*event, mTrackCut, mV0Cut);  // apply cuts while copying event
+      mReaderStatus = binaryIO->write(newEvent,mStHbtEventVersion,mStHbtTrackVersion,mStHbtV0Version);
     }
   }
-  if (mReaderStatus != ioOK) {
+  if (mReaderStatus != ioOK) { //  > means o.k (number of bytes)
     cout << " StHbtBinaryReader::WriteHbtEvent(StHbtEvent* event) - error# ";
     cout << mReaderStatus << " while writing" << endl;
   }
@@ -137,15 +141,22 @@ int StHbtBinaryReader::Init(const char* ReadWrite, StHbtString& Message){
   mReaderStatus = ioOK;
   if (((*ReadWrite)=='r')|| ((*ReadWrite)=='R')){  // this object will be a reader
     binaryIO = new StHbtIOBinary( mDirName,mFileName, mAppendix ,"r");   // create input object and open file 
-    binaryIO->readString(Message);                 // read file header
+    cout << " StHbtBinaryReader::Init() - inputStreamStatus = " << binaryIO->inputStreamStatus();
+    cout << " StHbtBinaryReader::Init() - now read message " << endl;
+    mReaderStatus = binaryIO->readHeader(Message);                 // read file header
     if (mTheMessage!=Message) {
       mTheMessage = Message;
       cout << Message.c_str() << endl;
     }
+    cout << " mReaderStatus " << binaryIO->outputStreamStatus() << endl;
 
-    binaryIO->read(mStHbtEventVersion);
-    binaryIO->read(mStHbtTrackVersion);
-    binaryIO->read(mStHbtV0Version);
+    cout << " StHbtBinaryReader::Init() - now read versions " << endl;
+    mReaderStatus = binaryIO->read(mStHbtEventVersion);
+    cout << " mReaderStatus " << binaryIO->outputStreamStatus();
+    mReaderStatus = binaryIO->read(mStHbtTrackVersion);
+    cout << " mReaderStatus " << binaryIO->outputStreamStatus();
+    mReaderStatus = binaryIO->read(mStHbtV0Version);
+    cout << " mReaderStatus " << binaryIO->outputStreamStatus();
     cout << " StHbtEventVersion=" << mStHbtEventVersion;
     cout << " StHbtTrackVersion=" << mStHbtTrackVersion;
     cout << " StHbtV0Version=" << mStHbtV0Version << endl;
@@ -153,13 +164,21 @@ int StHbtBinaryReader::Init(const char* ReadWrite, StHbtString& Message){
   else{                                            // this object will be a writer
     mTheMessage = Message;
     binaryIO = new StHbtIOBinary(mDirName, mFileName, mAppendix,"w");   // create output object and open file
-    binaryIO->writeString(Message);                // output file header (Message);
-    binaryIO->write(mStHbtEventVersion);
-    binaryIO->write(mStHbtTrackVersion);
-    binaryIO->write(mStHbtV0Version);
+    cout << " mReaderStatus " << binaryIO->outputStreamStatus();
+    mReaderStatus = binaryIO->writeHeader(Message);                // output file header (Message);
+    cout << " mReaderStatus " << mReaderStatus << endl;
+    mReaderStatus = binaryIO->write(mStHbtEventVersion);
+    cout << " mReaderStatus " << mReaderStatus << endl;
+    mReaderStatus = binaryIO->write(mStHbtTrackVersion);
+    cout << " mReaderStatus " << mReaderStatus << endl;
+    mReaderStatus = binaryIO->write(mStHbtV0Version);
+    cout << " mReaderStatus " << mReaderStatus << endl;
+    cout << " StHbtEventVersion=" << mStHbtEventVersion;
+    cout << " StHbtTrackVersion=" << mStHbtTrackVersion;
+    cout << " StHbtV0Version=" << mStHbtV0Version << endl;
   }
   cout << " StHbtBinaryReader::Init(const char* ReadWrite, StHbtString& Message) - mReaderStatus: " << mReaderStatus << endl;
- return (mReaderStatus);
+  return mReaderStatus;
 }
 
 //_______________________________
@@ -193,9 +212,11 @@ void StHbtBinaryReader::AddFileList(const char* fileList) {
     return;
   }
   char* temp;
+  cout << " inputStream->good() : " << inputStream->good() << endl;
   for (;inputStream->good();) {
     temp = new char[200];
     inputStream->getline(temp,200);
+    cout << temp << endl;
     StHbtString* newFile = new StHbtString(temp);
     if ( newFile->length()>0 ) { 
       mFileList->push_back(newFile);
@@ -207,3 +228,30 @@ void StHbtBinaryReader::AddFileList(const char* fileList) {
     mFileName = mFileList->front()->c_str();
 }
 
+//__________________
+StHbtString StHbtBinaryReader::Report(){
+  StHbtString temp = "\n This is the StHbtBinaryEventReader\n";
+  temp += "---> EventCuts in Reader: ";
+  if (mEventCut) {
+    temp += mEventCut->Report();
+  }
+  else {
+    temp += "NONE";
+  }
+  temp += "\n---> TrackCuts in Reader: ";
+  if (mTrackCut) {
+    temp += mTrackCut->Report();
+  }
+  else {
+    temp += "NONE";
+  }
+  temp += "\n---> V0Cuts in Reader: ";
+  if (mV0Cut) {
+    temp += mV0Cut->Report();
+  }
+  else {
+    temp += "NONE";
+  }
+  temp += "\n";
+  return temp;
+}

@@ -53,8 +53,6 @@ private:
   unsigned short mStHbtTrackVersion;
   unsigned short mStHbtV0Version;
 
-  ifstream* mInputStream;              //!
-  ofstream* mOutputStream;             //! 
   int mReaderStatus;                   //!
   const char* mFileName;               //!
   const char* mDirName;                //!
@@ -80,19 +78,25 @@ public:
 
   // generic StHbtEventReader methods
   StHbtEvent* ReturnHbtEvent();
-  //StHbtString Report();
   int WriteHbtEvent(StHbtEvent*);
   int Init(const char* ReadWrite, StHbtString& Message);
   void Finish();
-
+  StHbtString Report();
+  
   // methods special to this Reader
-  void SetFileName(const char*);
   void SetDirName(const char*);
+  void SetFileName(const char*);
   void SetAppendix(const char*);
   void AddFileList(const char*);
+
+ private:
+  void init(const char* dir, const char* file, const char* appendix);
+
 #ifdef __ROOT__
   ClassDef(StHbtBinaryReader, 0)
 #endif
+      
+
 };
 
 
