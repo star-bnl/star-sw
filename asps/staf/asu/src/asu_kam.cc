@@ -16,6 +16,7 @@
 #include <time.h>
 
 #include "kuip.h"
+#define KUIP
 
 #include "asuAlloc.h"
 #include "asuLib.h"	/* Analysis Service Utilities */
