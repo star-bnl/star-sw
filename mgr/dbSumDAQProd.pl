@@ -14,7 +14,7 @@
 
 use CGI;
 
-require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
+require "/afs/rhic/star/packages/dev/mgr/dbCpProdSetup.pl";
 
 use File::Find;
 use Class::Struct;

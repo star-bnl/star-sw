@@ -7,7 +7,7 @@
 ############################################################################
 
 
-require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
+require "/afs/rhic/star/packages/dev/mgr/dbCpProdSetup.pl";
 use Class::Struct;
 
 ## Output html (plus temporary backup) file names

@@ -13,9 +13,9 @@ use File::Basename;
 use File::Find;
 use Net::FTP;
 
-require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
-require "/afs/rhic/star/packages/DEV00/mgr/dbOnLineSetup.pl";
-require "/afs/rhic/star/packages/DEV00/mgr/dbDescriptorSetup.pl";
+require "/afs/rhic/star/packages/dev/mgr/dbCpProdSetup.pl";
+require "/afs/rhic/star/packages/dev/mgr/dbOnLineSetup.pl";
+require "/afs/rhic/star/packages/dev/mgr/dbDescriptorSetup.pl";
 
 my $debugOn=0;
 
