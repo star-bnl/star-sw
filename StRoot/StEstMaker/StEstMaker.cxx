@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.16 2002/05/21 20:33:28 caines Exp $
+ * $Id: StEstMaker.cxx,v 1.17 2002/10/11 21:25:08 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.17  2002/10/11 21:25:08  caines
+ * Fix min radius cut to larger value
+ *
  * Revision 1.16  2002/05/21 20:33:28  caines
- * Fix radii determination
+ *  Fix radii determination
  *
  * Revision 1.15  2002/04/30 22:49:19  caines
  * Make est work with shifted SVT geom, change search radii to 1cm
@@ -313,7 +316,7 @@ Int_t StEstMaker::Init(){
   
   mSegments[1]->chisqcut = 100;
   mSegments[1]->minhits=2;
-  mSegments[1]->rminTPC=500;
+  mSegments[1]->rminTPC=2000;
   mSegments[1]->minTPChits=0;
   mSegments[1]->slay[3]=0;
   mSegments[1]->slay[2]=1;
