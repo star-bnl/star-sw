@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDcaAnalysis.cxx,v 1.1 2002/04/02 20:05:18 jklay Exp $
+ * $Id: StDcaAnalysis.cxx,v 1.2 2002/04/03 00:23:27 jklay Exp $
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDcaAnalysis.cxx,v $
+ * Revision 1.2  2002/04/03 00:23:27  jklay
+ * Fixed private member access bugs in analysis code
+ *
  * Revision 1.1  2002/04/02 20:05:18  jklay
  * Bums analysis tools for highpt uDSTs
  *
@@ -143,28 +146,28 @@ StDcaAnalysis::trackLoop()
   // event stuff
   // 
   /*
-  Float_t zdcSum = mHiMicroEvent->mZDCe + mHiMicroEvent->mZDCw;
-  Float_t ctb    = mHiMicroEvent->mCTB;
-  Float_t flowCent   = mHiMicroEvent->mCentrality;
+  Float_t zdcSum = mHiMicroEvent->ZDCe() + mHiMicroEvent->ZDCw();
+  Float_t ctb    = mHiMicroEvent->CTB();
+  Float_t flowCent   = mHiMicroEvent->Centrality();
   NchCentrality zdcCent = centrality(zdcSum,ctb);
   */
 
-  Int_t nTrack = mHiMicroEvent->mNTrack;
+  Int_t nTrack = mHiMicroEvent->NTrack();
   StHiMicroTrack* track;
   
   for(Int_t i=0; i<nTrack; i++){
     track =(StHiMicroTrack*) mHiMicroEvent->tracks()->At(i);
 
-    Float_t vertexZ = mHiMicroEvent->mVertexZ;
-    Float_t dcaXYGl = track->mDcaXYGl;
-    Int_t charge = track->mCharge;
-    Float_t phiGlDeg = track->mPhiGl*180./M_PI;
+    Float_t vertexZ = mHiMicroEvent->VertexZ();
+    Float_t dcaXYGl = track->DcaXYGl();
+    Int_t charge = track->Charge();
+    Float_t phiGlDeg = track->PhiGl()*180./M_PI;
     phiGlDeg = (phiGlDeg<-165) ? (phiGlDeg += 360) : phiGlDeg;
-    Float_t eta  = track->mEtaPr;
+    Float_t eta  = track->EtaPr();
 
     Float_t z = vertexZ;
 
-    //Float_t exitZ = vtxZ+200*TMath::Tan(track->mDipAnglePr);
+    //Float_t exitZ = vtxZ+200*TMath::Tan(track->DipAnglePr());
 
     if(!CutRc::AcceptTrackHalf(track,vertexZ)) continue;
 
@@ -173,7 +176,7 @@ StDcaAnalysis::trackLoop()
 
     mNHiPtTrack++;
 
-    if(track->mPtGl >1.7 && track->mPtGl<6){ // glpt
+    if(track->PtGl() >1.7 && track->PtGl()<6){ // glpt
       if(charge>0){ //pos
 	dca[MEAN].hPosGlPtZFD->Fill(z,phiGlDeg,dcaXYGl,dcaXYGl);
 	dca[RMS].hPosGlPtZFD->Fill(z,phiGlDeg,dcaXYGl,dcaXYGl*dcaXYGl);
@@ -194,7 +197,7 @@ StDcaAnalysis::trackLoop()
       dca[RMS].hPosMinusNegGlPtZFD->Fill(z,phiGlDeg,dcaXYGl,dcaXYGl*dcaXYGl);
       dca[NUM].hPosMinusNegGlPtZFD->Fill(z,phiGlDeg,dcaXYGl);
     }
-    if(track->mPtPr>1.7 && track->mPtPr<6){
+    if(track->PtPr()>1.7 && track->PtPr()<6){
       if(charge>0){ //pos
 	dca[MEAN].hPosPrPtZFD->Fill(z,phiGlDeg,dcaXYGl,dcaXYGl);
 	dca[RMS].hPosPrPtZFD->Fill(z,phiGlDeg,dcaXYGl,dcaXYGl*dcaXYGl);

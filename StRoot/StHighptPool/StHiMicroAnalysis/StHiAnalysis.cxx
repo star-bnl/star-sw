@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiAnalysis.cxx,v 1.1 2002/04/02 20:05:18 jklay Exp $                                    
+ * $Id: StHiAnalysis.cxx,v 1.2 2002/04/03 00:23:27 jklay Exp $                                    
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHiAnalysis.cxx,v $
+ * Revision 1.2  2002/04/03 00:23:27  jklay
+ * Fixed private member access bugs in analysis code
+ *
  * Revision 1.1  2002/04/02 20:05:18  jklay
  * Bums analysis tools for highpt uDSTs
  *
@@ -329,44 +332,44 @@ StHiAnalysis::trackLoop()
   //
   // event stuff
   // 
-  Float_t zdcSum = mHiMicroEvent->mZDCe + mHiMicroEvent->mZDCw;
-  Float_t ctb    = mHiMicroEvent->mCTB;
-  Float_t flowCent   = mHiMicroEvent->mCentrality;
+  Float_t zdcSum = mHiMicroEvent->ZDCe() + mHiMicroEvent->ZDCw();
+  Float_t ctb    = mHiMicroEvent->CTB();
+  Float_t flowCent   = mHiMicroEvent->Centrality();
   NchCentrality zdcCent = centrality(zdcSum,ctb);
 
 
-  Int_t nTrack = mHiMicroEvent->mNTrack;
+  Int_t nTrack = mHiMicroEvent->NTrack();
   StHiMicroTrack* track;
   
   for(Int_t i=0; i<nTrack; i++){
     track =(StHiMicroTrack*) mHiMicroEvent->tracks()->At(i);
 
-    Int_t iCharge = (track->mCharge>0) ? 0 : 1; //plus is 0
+    Int_t iCharge = (track->Charge()>0) ? 0 : 1; //plus is 0
     
-    Float_t ptPr  = track->mPtPr;
-    Float_t ptGl  = track->mPtGl;
+    Float_t ptPr  = track->PtPr();
+    Float_t ptGl  = track->PtGl();
     Float_t resPtPrGlPr = (ptPr-ptGl)/ptPr;
     Float_t resPtPrGlGl = (ptPr-ptGl)/ptGl;
     
 
-    Float_t sDcaGl = (track->mDcaXYGl>0) ? track->mDcaGl : -track->mDcaGl;
-    Float_t dcaXYGl = track->mDcaXYGl;
-    Float_t dcaGl = track->mDcaGl;
-    Float_t etaGl = track->mEtaGl;
-    Float_t etaPr  = track->mEtaPr;
+    Float_t sDcaGl = (track->DcaXYGl()>0) ? track->DcaGl() : -track->DcaGl();
+    Float_t dcaXYGl = track->DcaXYGl();
+    Float_t dcaGl = track->DcaGl();
+    Float_t etaGl = track->EtaGl();
+    Float_t etaPr  = track->EtaPr();
 
-    Float_t phiPr = track->mPhiPr;
-    Float_t phiGl = track->mPhiGl;
+    Float_t phiPr = track->PhiPr();
+    Float_t phiGl = track->PhiGl();
     Float_t phiGlDeg = phiGl*180./TMath::Pi();
     Float_t phiPrDeg = phiPr*180./TMath::Pi();
 
-    Int_t fitPts = track->mFitPts;
-    Int_t allPts = track->mAllPts;
+    Int_t fitPts = track->FitPts();
+    Int_t allPts = track->AllPts();
 
     phiGlDeg = (phiGlDeg<-165) ? (phiGlDeg += 360) : phiGlDeg;
     phiPrDeg = (phiPrDeg<-165) ? (phiPrDeg += 360) : phiPrDeg;
 
-    Float_t vertexZ = mHiMicroEvent->mVertexZ;
+    Float_t vertexZ = mHiMicroEvent->VertexZ();
 
     //**********************************************************
     
@@ -463,28 +466,28 @@ StHiAnalysis::trackLoop()
 void
 StHiAnalysis::fillEventHistograms()
 {
-  h1Centrality->Fill(mHiMicroEvent->mCentrality);
+  h1Centrality->Fill(mHiMicroEvent->Centrality());
 
   if(CutRc::AcceptVertexZ(mHiMicroEvent))
-    h1CentralityCut->Fill(mHiMicroEvent->mCentrality);
+    h1CentralityCut->Fill(mHiMicroEvent->Centrality());
 
-  h3VtxXYZ->Fill(mHiMicroEvent->mVertexX,
-		 mHiMicroEvent->mVertexY,
-		 mHiMicroEvent->mVertexZ);
+  h3VtxXYZ->Fill(mHiMicroEvent->VertexX(),
+		 mHiMicroEvent->VertexY(),
+		 mHiMicroEvent->VertexZ());
 
   if(CutRc::AcceptCent(mHiMicroEvent) && 
      CutRc::AcceptVertexZ(mHiMicroEvent)){
-    h1VtxZCentCut->Fill(mHiMicroEvent->mVertexZ);
+    h1VtxZCentCut->Fill(mHiMicroEvent->VertexZ());
   }
 
-  Float_t zdcSum = mHiMicroEvent->mZDCe + mHiMicroEvent->mZDCw;
+  Float_t zdcSum = mHiMicroEvent->ZDCe() + mHiMicroEvent->ZDCw();
  
-  h3ZdcHMinusVtxZ->Fill(zdcSum,mHiMicroEvent->mNUncorrectedNegativePrimaries,
-			mHiMicroEvent->mVertexZ);
+  h3ZdcHMinusVtxZ->Fill(zdcSum,mHiMicroEvent->NUncorrectedNegativePrimaries(),
+			mHiMicroEvent->VertexZ());
 
   float vertexCut=fabs(Cut::mVertexZ[0]);
-  if(fabs(mHiMicroEvent->mVertexZ)<vertexCut){
-    //h3ZdcHMinusCtbVtxZCut->Fill(zdcSum,mHiMicroEvent->mNUncorrectedNegativePrimaries,mHiMicroEvent->mCTB);
+  if(fabs(mHiMicroEvent->VertexZ())<vertexCut){
+    //h3ZdcHMinusCtbVtxZCut->Fill(zdcSum,mHiMicroEvent->NUncorrectedNegativePrimaries(),mHiMicroEvent->CTB());
     //h3ZdcHMinusCtbVtxZCut->Fill(0,0,0);
   }
 }

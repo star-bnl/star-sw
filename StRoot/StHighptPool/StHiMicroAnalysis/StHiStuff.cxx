@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiStuff.cxx,v 1.1 2002/04/02 20:05:18 jklay Exp $
+ * $Id: StHiStuff.cxx,v 1.2 2002/04/03 00:23:27 jklay Exp $
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHiStuff.cxx,v $
+ * Revision 1.2  2002/04/03 00:23:27  jklay
+ * Fixed private member access bugs in analysis code
+ *
  * Revision 1.1  2002/04/02 20:05:18  jklay
  * Bums analysis tools for highpt uDSTs
  *
@@ -353,78 +356,78 @@ StHiStuff::trackLoop()
   //
   // event stuff
   // 
-  Float_t zdcSum = mHiMicroEvent->mZDCe + mHiMicroEvent->mZDCw;
-  Float_t ctb    = mHiMicroEvent->mCTB;
-  Float_t flowCent   = mHiMicroEvent->mCentrality;
+  Float_t zdcSum = mHiMicroEvent->ZDCe() + mHiMicroEvent->ZDCw();
+  Float_t ctb    = mHiMicroEvent->CTB();
+  Float_t flowCent   = mHiMicroEvent->Centrality();
   NchCentrality zdcCent = centrality(zdcSum,ctb);
 
 
-  Int_t nTrack = mHiMicroEvent->mNTrack;
+  Int_t nTrack = mHiMicroEvent->NTrack();
   StHiMicroTrack* track;
   
   for(Int_t i=0; i<nTrack; i++){
     track =(StHiMicroTrack*) mHiMicroEvent->tracks()->At(i);
 
-    Float_t vertexZ = mHiMicroEvent->mVertexZ;
+    Float_t vertexZ = mHiMicroEvent->VertexZ();
 
-    Float_t ptPr  = track->mPtPr;
-    Float_t ptGl  = track->mPtGl;
-    Float_t etaGl = track->mEtaGl;
-    Float_t etaPr = track->mEtaPr;
-    //Float_t curvPr = track->mCurvPr;
-    //Float_t curvGl = track->mCurvGl;
+    Float_t ptPr  = track->PtPr();
+    Float_t ptGl  = track->PtGl();
+    Float_t etaGl = track->EtaGl();
+    Float_t etaPr = track->EtaPr();
+    //Float_t curvPr = track->CurvPr();
+    //Float_t curvGl = track->CurvGl();
     //Float_t resPt = (ptPr-ptGl)/ptPr;
     //Float_t resCurvPrGl = (curvPr-curvGl)/curvPr;
     //Float_t resCurvGlPr = (curvGl-curvPr)/curvGl;
     Float_t resPtPrGlOverPr = (ptPr-ptGl)/ptPr;
     Float_t resPtPrGl = (ptPr-ptGl)/ptGl;
-    Float_t fracPts = (Float_t) track->mFitPts/ (Float_t) track->mAllPts;
-    Float_t dcaXYGl = track->mDcaXYGl;
-    // Float_t dPhi = track->mPhiPr - track->mPhiGl;
-    Float_t phiPr = track->mPhiPr;
-    Float_t phiGl = track->mPhiGl;
-    //Float_t midZ = 100*TMath::Tan(track->mDipAnglePr) + vertexZ;
-    Int_t   fitPts = track->mFitPts;
-    Int_t   allPts = track->mAllPts;
-    Int_t   charge = track->mCharge;
+    Float_t fracPts = (Float_t) track->FitPts()/ (Float_t) track->AllPts();
+    Float_t dcaXYGl = track->DcaXYGl();
+    // Float_t dPhi = track->PhiPr() - track->PhiGl();
+    Float_t phiPr = track->PhiPr();
+    Float_t phiGl = track->PhiGl();
+    //Float_t midZ = 100*TMath::Tan(track->DipAnglePr()) + vertexZ;
+    Int_t   fitPts = track->FitPts();
+    Int_t   allPts = track->AllPts();
+    Int_t   charge = track->Charge();
     Float_t phiGlDeg = phiGl*180./TMath::Pi();
     Float_t phiPrDeg = phiPr*180./TMath::Pi();
 
     phiGlDeg = (phiGlDeg<-165) ? (phiGlDeg += 360) : phiGlDeg;
     phiPrDeg = (phiPrDeg<-165) ? (phiPrDeg += 360) : phiPrDeg;
 
-    //Float_t exitZ = vtxZ+200*TMath::Tan(track->mDipAnglePr);
+    //Float_t exitZ = vtxZ+200*TMath::Tan(track->DipAnglePr());
 
     // east west cut
     if(
        CutRc::Half() && 
-       !CutRc::IsSameSide(vertexZ,track->mFirstZ,track->mLastZ)
+       !CutRc::IsSameSide(vertexZ,track->FirstZ(),track->LastZ())
        ) continue;
 
-    Int_t iCharge = (track->mCharge>0) ? 0 : 1; //plus is 0
+    Int_t iCharge = (track->Charge()>0) ? 0 : 1; //plus is 0
 
     // ** analysis cut
     if(CutRc::AcceptTrackHalf(track,vertexZ)){
       // fit points
       if(CutRc::AcceptFitPts(track)){
-	pm[iCharge].h2VtxZLastZ->Fill(vertexZ,track->mLastZ);
+	pm[iCharge].h2VtxZLastZ->Fill(vertexZ,track->LastZ());
 
 	pm[iCharge].h3VtxZEtaPrPtPrCut->Fill(vertexZ,etaPr,ptPr);
 	pm[iCharge].h3VtxZEtaGlPtGlCut->Fill(vertexZ,etaGl,ptGl);
 	
-	if(fabs(track->mEtaGl)<0.7){
-	  if(track->mFirstZ < 0 ) { //east
+	if(fabs(track->EtaGl())<0.7){
+	  if(track->FirstZ() < 0 ) { //east
 	    pm[iCharge].h3ResPtDcaXYGlPtGlEastCut->Fill(resPtPrGl,dcaXYGl,
 							ptGl);
 	    pm[iCharge].h3ResPtDcaXYGlPtPrEastCut->Fill(resPtPrGlOverPr,dcaXYGl,
 							ptPr);
-	    if(fabs(track->mDcaXYGl)<1.2)
+	    if(fabs(track->DcaXYGl())<1.2)
 	      pm[iCharge].h3PhiGlPtPrPtGlEastCut->Fill(phiGlDeg,ptPr,ptGl);
 	  }
 	  else{
 	    pm[iCharge].h3ResPtDcaXYGlPtGlWestCut->Fill(resPtPrGl,dcaXYGl,ptGl);
 	    pm[iCharge].h3ResPtDcaXYGlPtPrWestCut->Fill(resPtPrGlOverPr,dcaXYGl,ptPr);
-	    if(fabs(track->mDcaXYGl)<1.2)
+	    if(fabs(track->DcaXYGl())<1.2)
 	      pm[iCharge].h3PhiGlPtPrPtGlWestCut->Fill(phiGlDeg,ptPr,ptGl);
 	  }
 	}
@@ -507,7 +510,7 @@ StHiStuff::trackLoop()
 
     // fit pts, tight eta, pt
     if(CutRc::AcceptFitPts(track) && fabs(etaPr)<0.1 &&
-       fabs(track->mDcaGl)<3){
+       fabs(track->DcaGl())<3){
       if(ptGl>1.5 && ptGl<6)
 	pm[iCharge].h3PhiGlDcaXYGlVertexZ->Fill(phiGlDeg,dcaXYGl,vertexZ);
       if(ptPr>1.5 && ptPr<6)

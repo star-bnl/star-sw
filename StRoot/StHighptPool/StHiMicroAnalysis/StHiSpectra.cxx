@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiSpectra.cxx,v 1.1 2002/04/02 20:05:18 jklay Exp $                                    
+ * $Id: StHiSpectra.cxx,v 1.2 2002/04/03 00:23:27 jklay Exp $                                    
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  * 
  * $Log: StHiSpectra.cxx,v $
+ * Revision 1.2  2002/04/03 00:23:27  jklay
+ * Fixed private member access bugs in analysis code
+ *
  * Revision 1.1  2002/04/02 20:05:18  jklay
  * Bums analysis tools for highpt uDSTs
  *
@@ -310,10 +313,10 @@ StHiSpectra::trackLoop()
   if(mDebug)
     cout << "StHiSpectra::spectraTrackLoop()" << endl;
 
-  Int_t nTrack = mHiMicroEvent->mNTrack;
+  Int_t nTrack = mHiMicroEvent->NTrack();
   StHiMicroTrack* track;
   
-  Float_t vertexZ = mHiMicroEvent->mVertexZ;
+  Float_t vertexZ = mHiMicroEvent->VertexZ();
 
   for(Int_t i=0; i<nTrack; i++){
     track =(StHiMicroTrack*) mHiMicroEvent->tracks()->At(i);
@@ -324,11 +327,11 @@ StHiSpectra::trackLoop()
     if(!CutRc::Accept(track)) continue; // cuts
     
     //**************************************************************
-    Float_t ptPr = track->mPtPr;
-    Float_t eta = track->mEtaPr;
-    Float_t ptGl = track->mPtGl;
-    //Float_t midZ = 100*TMath::Tan(track->mDipAnglePr) + vertexZ ;
-    //Float_t exitZ = 200*TMath::Tan(track->mDipAnglePr) + vertexZ ;
+    Float_t ptPr = track->PtPr();
+    Float_t eta = track->EtaPr();
+    Float_t ptGl = track->PtGl();
+    //Float_t midZ = 100*TMath::Tan(track->DipAnglePr()) + vertexZ ;
+    //Float_t exitZ = 200*TMath::Tan(track->DipAnglePr()) + vertexZ ;
     //
     // efficiency correction here
     //
@@ -354,7 +357,7 @@ StHiSpectra::trackLoop()
     // spectra stuff here
     //
 
-    Int_t iCharge = (track->mCharge>0) ? 0 : 1; //plus is 0
+    Int_t iCharge = (track->Charge()>0) ? 0 : 1; //plus is 0
 
     for(Int_t iBin=0; iBin<mNVarBin; iBin++){
       
@@ -393,18 +396,18 @@ StHiSpectra::trackLoop()
 void
 StHiSpectra::fillEventHistograms()
 {
-  h1Centrality->Fill(mHiMicroEvent->mCentrality);
+  h1Centrality->Fill(mHiMicroEvent->Centrality());
 
-  h1VertexZ->Fill(mHiMicroEvent->mVertexZ);
+  h1VertexZ->Fill(mHiMicroEvent->VertexZ());
 		  
-  h1VertexZThin->Fill(mHiMicroEvent->mVertexZ);
+  h1VertexZThin->Fill(mHiMicroEvent->VertexZ());
 
   if(CutRc::AcceptVertexZ(mHiMicroEvent))
-    h1CentralityCut->Fill(mHiMicroEvent->mCentrality);
+    h1CentralityCut->Fill(mHiMicroEvent->Centrality());
 
   if(CutRc::AcceptZdcCtbCent(mHiMicroEvent)){
-    h1VertexZCut->Fill(mHiMicroEvent->mVertexZ);
-    //h1VertexRCut->Fill(mHiMicroEvent->mVertexR);
+    h1VertexZCut->Fill(mHiMicroEvent->VertexZ());
+    //h1VertexRCut->Fill(mHiMicroEvent->VertexR());
   }
 }
 
