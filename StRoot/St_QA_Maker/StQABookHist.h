@@ -1,5 +1,8 @@
-//! $Id: StQABookHist.h,v 1.24 2000/07/26 19:57:50 lansdell Exp $ 
+//! $Id: StQABookHist.h,v 1.25 2000/07/28 19:25:21 lansdell Exp $ 
 //! $Log: StQABookHist.h,v $
+//! Revision 1.25  2000/07/28 19:25:21  lansdell
+//! added histogram of number of events without a primary vertex
+//!
 //! Revision 1.24  2000/07/26 19:57:50  lansdell
 //! new histograms and functionality added (e.g., overlay several histograms, new printlist option qa_shift)
 //!
@@ -89,7 +92,7 @@ class TH2F;
 class StQABookHist : public StMaker {
  public:
 
-//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.24 2000/07/26 19:57:50 lansdell Exp $";
+//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.25 2000/07/28 19:25:21 lansdell Exp $";
 
 //! Histograms booking constants
   static const Int_t nxpT;
@@ -149,6 +152,9 @@ class StQABookHist : public StMaker {
   static const Float_t cmindedx; 
   static const Float_t cmaxdedx; 
   
+  // histogram for number of events without primary vertex
+  TH1F     *mNullPrimVtx;         //!
+
   // for method MakeEvSum - from table event_summary
   TH1F     *m_trk_tot_gd;         //! num of good trks over total - global
   TH1F     *m_glb_trk_tot;        //! # tracks total from globtrk
@@ -626,7 +632,7 @@ class StQABookHist : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.24 2000/07/26 19:57:50 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.25 2000/07/28 19:25:21 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StQABookHist, 1)   //needed for all code that will be used in CINT
     };

@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.45 2000/07/26 19:57:49 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.46 2000/07/28 19:25:20 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.46  2000/07/28 19:25:20  lansdell
+// added histogram of number of events without a primary vertex
+//
 // Revision 1.45  2000/07/26 19:57:49  lansdell
 // new histograms and functionality added (e.g., overlay several histograms, new printlist option qa_shift)
 //
@@ -182,8 +185,16 @@ Int_t StEventQAMaker::Make() {
   
   event = (StEvent *)GetInputDS("StEvent");
   if (event) {
-    return StQABookHist::Make();
-  } else {
+    // only process if a primary vertex exists !!!
+    if (event->primaryVertex())
+      return StQABookHist::Make();
+    else {
+      cout << "Error in StEventQAMaker::Make(): no primary vertex found!" << endl;
+      mNullPrimVtx->Fill(0);
+      return kStOk;
+    }
+  }
+  else {
     cout << "Error in StEventQAMaker::Make(): no event found!" << endl;
     return kStErr;
   }

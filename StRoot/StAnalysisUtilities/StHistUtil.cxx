@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.23 2000/07/26 19:57:48 lansdell Exp $
+// $Id: StHistUtil.cxx,v 1.24 2000/07/28 19:25:19 lansdell Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.24  2000/07/28 19:25:19  lansdell
+// added histogram of number of events without a primary vertex
+//
 // Revision 1.23  2000/07/26 19:57:48  lansdell
 // new histograms and functionality added (e.g., overlay several histograms, new printlist option qa_shift)
 //
@@ -1297,6 +1300,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 // Cosmic Data Table QA list .............................................
   if (strcmp(dirName,"QA")==0 && strcmp(analType,"Cosmic")==0) {
    Char_t* sdefList1[] = {
+ "QaNullPrimVtx",
  "TabQaEvsumTrkTot",
  "TabQaEvsumTrkTotsm",
  "TabQaEvsumPlusMinusTrk",
@@ -1438,6 +1442,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 // St_QA_Maker histograms without svt and ftpc histograms
   if (strcmp(dirName,"QA")==0 && strcmp(analType,"year1")==0) {
     Char_t* sdefList5[] = {
+     "QaNullPrimVtx",
      "TabQaEvsumTrkGoodDTotal",
      "TabQaEvsumTrkTot",
      "TabQaEvsumTrkTotsm",
@@ -1619,6 +1624,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 // St_QA_Maker histograms without the svt and ftpc histograms
   if (strcmp(dirName,"EventQA")==0 && strcmp(analType,"year1")==0) {
     Char_t* sdefList6[] = {
+     "QaNullPrimVtx",
      "QaInnerSectorDeDx",
      "QaOuterSectorDeDx",
      "QaDedxAllSectors",
@@ -1795,6 +1801,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 // St_QA_Maker histograms for QA shift
   if (strcmp(dirName,"QA")==0 && strcmp(analType,"qa_shift")==0) {
     Char_t* sdefList7[] = {
+     "QaNullPrimVtx",
      "TabQaEvsumTrkGoodDTotal",
      "TabQaEvsumTrkTot",
      "TabQaEvsumTotChg",
@@ -1868,6 +1875,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 // St_QA_Maker histograms for QA shift
   if (strcmp(dirName,"EventQA")==0 && strcmp(analType,"qa_shift")==0) {
     Char_t* sdefList8[] = {
+     "QaNullPrimVtx",
      "QaDedxAllSectors",
      "StEQaEvsumTrkGoodDTotal",
      "StEQaEvsumTrkTot",
