@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.cc,v 1.28 2003/10/12 04:15:20 perev Exp $
+// $Id: StFtpcConfMapper.cc,v 1.29 2003/11/20 03:14:37 perev Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.29  2003/11/20 03:14:37  perev
+// LeakOff
+//
 // Revision 1.28  2003/10/12 04:15:20  perev
 // few bugs fixed. division by zero disappeared
 //
@@ -347,7 +350,7 @@ StFtpcConfMapper::StFtpcConfMapper(TObjArray *hits, StFtpcVertex *vertex, Bool_t
   // So it is possible to fill in arbitrary hits.
 
   if (bench) { 
-    mBench = new TBenchmark();
+//VP    mBench = new TBenchmark(); //leak, already made in base class
     mBench->Start("init");
   }
 
