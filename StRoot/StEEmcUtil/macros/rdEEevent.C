@@ -1,7 +1,7 @@
 // read TTree
 
 rdEEevent(int neve=300,  TString Tname0="/star/u/eemcdb/dataFeb11/run00006.eeTree", int flag=0, float Emax=40.){  
-  //TString Tname0="eve400.eetree";
+  TString Tname0="../sim2003/mc_eve2";
   gSystem->Load("StRoot/StEEmcUtil/EEevent/libEEevent.so");
   
   //  gStyle->SetPalette(1,0);
