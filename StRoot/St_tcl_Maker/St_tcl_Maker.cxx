@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.47 1999/10/07 03:24:49 snelling Exp $
+// $Id: St_tcl_Maker.cxx,v 1.48 1999/11/11 16:27:46 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.48  1999/11/11 16:27:46  fisyak
+// Add cast to ceil for HP
+//
 // Revision 1.47  1999/10/07 03:24:49  snelling
 // created tables dynamically, correct for TFS - TRS/DATA ipix/10
 //
@@ -321,7 +324,7 @@ Int_t St_tcl_Maker::Make() {
     // table smart enough to contain biggest events. Therefore max number of hits
     // can be number of pixels divided by 10 (no 1 pad hits and estimated sequence
     // length to be 5)
-    int max_hit = (int) ceil(isumpix/10);
+    int max_hit = (int) ceil((float)(isumpix/10));
     cout << "number of estimated hits used: " << max_hit << endl;
     // create tables used with a reasonable size
     tphit = new St_tcl_tphit("tphit",max_hit); 
