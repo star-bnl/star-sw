@@ -1,12 +1,16 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.26 2003/07/15 13:56:19 andrewar Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.27 2003/07/22 17:16:13 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
- * Revision 2.26  2003/07/15 13:56:19  andrewar
- * Revert to previous version to remove bug.
+ * Revision 2.27  2003/07/22 17:16:13  pruneau
+ * various
+ *
+ * Revision 2.25  2003/07/07 17:27:50  pruneau
+ * Changed the source of detector dependent tracking parameters to be that
+ * of detector builders rather than the centralized _pars.
  *
  * Revision 2.24  2003/05/22 18:42:33  andrewar
  * Changed max eloss correction from 1% to 10%.
@@ -415,16 +419,19 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   cylinderShape = 0;
   _refX = place->getNormalRadius();
   position = propagate(_refX,sh->getShapeCode()); 
+
   if (position<0) 
-    return position;
+    {
+      return position;
+    }
   position = locate(place,sh);
-  MESSENGER <<"SKTN::propagate(pNode,tDet) -I- (2) Position:"<< position<<" Node:"<<*this<<endl;
-  if (position>kEdgeZplus || position<0) return position;
+ 
+  if (position>kEdgeZplus || position<0) 
+    {
+      return position;
+    }  
   propagateError();
-  // Multiple scattering
-  if (pars->mcsCalculated)
-      propagateMCS(pNode,tDet);
-  MESSENGER <<"SKTN::propagate(pNode,tDet) -I- (3) Position:"<< position<<" Node:"<<*this<<endl;
+  if (pars->mcsCalculated)  propagateMCS(pNode,tDet);
   return position;
 }
 
@@ -462,6 +469,9 @@ bool StiKalmanTrackNode::propagate(const StiKalmanTrackNode *parentNode, StiHit 
 int  StiKalmanTrackNode::propagate(double xk, int option)
 {
   x1=_x;  y1=_p0;  z1=_p1; cosCA1 =_cosCA; sinCA1 =_sinCA;
+
+  bool tempo = false;//xk<5.;//&& 0.8<getPt();
+
   switch (option)
     {
     case kPlanar: 
@@ -474,32 +484,50 @@ int  StiKalmanTrackNode::propagate(double xk, int option)
       double R = 1/_p3;
       double x0 = _p2/_p3;
       double r0sq= x0*x0+y0*y0;
-      if (r0sq<=0.) return -1;
+      if (r0sq<=0.) 
+	{
+	  return -1;
+	}
       double a = 0.5*(r0sq+L*L-R*R);
-      if (a<=0.) return -1;
+      if (a==0.) 
+	{
+	  return -6;
+	}
       double b = L*L/(a*a);
       double sq = b*r0sq-1;
-      if (sq<0) return -1;
+      if (sq<0) 
+	{
+	  return -2;
+	}
       sq = sqrt(sq);				
       double x_p = a*(x0+y0*sq)/r0sq;
+      double x_m = a*(x0-y0*sq)/r0sq;
+
       if (x_p>0)
 	x2 = x_p;
       else 
 	{
-	  double x_m = a*(x0-y0*sq)/r0sq;
 	  if (x_m>0)
 	    x2 = x_m;
 	  else
-	    return -1;
-	}
+	    { 
+	      return -3;
+	    }
+	} 
     }
   dx=x2-x1;  
   sinCA2=_p3*x2 - _p2; 
-  if (fabs(sinCA2)>1.) return -1;
+  if (fabs(sinCA2)>1.) 
+    { 
+      return -4;
+    }
   cosCA2   = sqrt(1.-sinCA2*sinCA2);
   sumSin   = sinCA1+sinCA2;
   sinCA1plusCA2    = sinCA1*cosCA2 + sinCA2*cosCA1;
-  if (fabs(sinCA1plusCA2)==0) return -1;
+  if (fabs(sinCA1plusCA2)==0) 
+    { 
+      return -5;
+    }
   sumCos   = cosCA1+cosCA2;
   _p0      += dx*sumSin/sumCos;
   _p1      += dx*_p4*sumSin/sinCA1plusCA2;
@@ -634,7 +662,6 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
   if (pL2> (pL1+pL3)) 
     {
       pL2=pL2-pL1-pL3;
-      //cout<< "pL2':"<<pL2;
       if (dx>0)
 	{
 	  x0Gas = tDet->getGas()->getX0();
@@ -681,6 +708,7 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
   double pt = getPt();
   if (!finite(pt) || !finite(dxEloss) || !finite(relRadThickness))
     {
+      cout << "StiKalmanTrackNode::propagateMCS() -E- Infintes"<<endl;
       cout <<" dx:"<<dx<<" x0p:"<<x0p<<" x0:"<<x0<<" x0Gas:"<<x0Gas<<" relRadThick:"<<relRadThickness<<endl;
       cout << "pt:"<<pt<<" _p4:"<<_p4<<endl;
       cout << *this;
@@ -712,7 +740,7 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
   else
     sign = -1.;
   double eloss = _elossCalculator->calculate(1.,0.5,m, beta2,5.);
-  double fudge = 0.7;
+  double fudge = 1.7;
   dE = fudge*sign*dxEloss*eloss;
   if(!finite(dxEloss))
     {
@@ -759,9 +787,9 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
 	    cout << "STKN::propagate() -E- !finite(dE)"<<endl;
 	  return;
 	}
-      //limit our correction to at most 1% per layer.
-      if (correction>1.1) correction = 1.1;
-      if (correction<0.9) correction = 0.9;
+      //limit our correction to at most 20% per layer.
+      if (correction>1.2) correction = 1.2;
+      if (correction<0.8) correction = 0.8;
       _p3 = _p3 *correction;
       if (!finite(_p3)) 
 	{
@@ -1077,26 +1105,27 @@ ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
 
 double StiKalmanTrackNode::getWindowY()
 {	  
-  const StiHitErrorCalculator * calc = getDetector()->getHitErrorCalculator();
+  const StiHitErrorCalculator * calc  = getDetector()->getHitErrorCalculator();
+  const StiTrackingParameters * tPars = getDetector()->getTrackingParameters();
   if (!calc)
     {
       cout << "SKTN::getWindowY() -E- Detector:"<<getDetector()->getName()<<" has no calculator"<<endl;
       throw runtime_error("SKTN::getWindowY() -E- calc==0");
     }
   calc->calculateError(this);
-  double window = pars->searchWindowScale*sqrt(_c00+eyy);
+  double window = tPars->getSearchWindowScale()*sqrt(_c00+eyy);
   /*  double sqrtC00 = sqrt(_c00);
-  double sqrtEyy = sqrt(eyy);
-  double eta = 180*getDipAngle()/3.1415;
-  if (fabs(eta)<10.) cout << "getWindowY() _refX: "<< _refX
-			  <<" eta:"<< eta
-			  << " sqrt(_c00):"<<sqrtC00
-			  <<" ey:"<<sqrtEyy
-			  << " window:"<<window;*/
-  if (window<pars->minSearchWindow)
-    window = pars->minSearchWindow;
-  else if (window>pars->maxSearchWindow)
-    window = pars->maxSearchWindow;
+      double sqrtEyy = sqrt(eyy);
+      double eta = 180*getDipAngle()/3.1415;
+      if (fabs(eta)<10.) cout << "getWindowY() _refX: "<< _refX
+      <<" eta:"<< eta
+      << " sqrt(_c00):"<<sqrtC00
+      <<" ey:"<<sqrtEyy
+      << " window:"<<window;*/
+  if (window<tPars->getMinSearchWindow())
+    window = tPars->getMinSearchWindow();
+  else if (window>tPars->getMaxSearchWindow())
+    window = tPars->getMaxSearchWindow();
   //if (fabs(eta)<10.)cout <<" win corr:"<<window<<endl;
   return window;
 }
@@ -1104,21 +1133,21 @@ double StiKalmanTrackNode::getWindowY()
 //_____________________________________________________________________________
 double StiKalmanTrackNode::getWindowZ() const
 {	 
-  double window = pars->searchWindowScale*sqrt(_c11+ezz);  
+  const StiTrackingParameters * tPars = getDetector()->getTrackingParameters();
+  double window = tPars->getSearchWindowScale()*sqrt(_c11+ezz);  
   /*
-  double sqrtC11 = sqrt(_c11);
-  double sqrtEzz = sqrt(ezz);
-  double eta = 180*getDipAngle()/3.1415;
-  if (fabs(eta)<10.) cout << "getWindowZ() _refX: "<< _refX
-			  <<" eta:"<< eta
-			  << " sqrt(_c11):"<<sqrtC11
-			  <<" ez:"<<sqrtEzz
-			  <<" window:"<<window;*/
-  if (window<pars->minSearchWindow)
-    window = pars->minSearchWindow;
-  else if (window>pars->maxSearchWindow)
-    window = pars->maxSearchWindow;
-  //if (fabs(eta)<10.)cout <<" win corr:"<<window<<endl;
+    double sqrtC11 = sqrt(_c11);
+    double sqrtEzz = sqrt(ezz);
+    double eta = 180*getDipAngle()/3.1415;
+    if (fabs(eta)<10.) cout << "getWindowZ() _refX: "<< _refX
+    <<" eta:"<< eta
+    << " sqrt(_c11):"<<sqrtC11
+    <<" ez:"<<sqrtEzz
+    <<" window:"<<window;*/
+  if (window<tPars->getMinSearchWindow())
+    window = tPars->getMinSearchWindow();
+  else if (window>tPars->getMaxSearchWindow())
+    window = tPars->getMaxSearchWindow();
   return window;
 }
 
@@ -1134,4 +1163,59 @@ StThreeVector<double> StiKalmanTrackNode::getHelixCenter() const
 void StiKalmanTrackNode::setParameters(StiKalmanTrackFinderParameters *parameters)
 {
   pars = parameters;
+}
+
+
+int StiKalmanTrackNode::locate(StiPlacement*place,StiShape*sh)
+{
+  int position;
+  double yOff, yAbsOff, detHW, detHD,edge,innerY, outerY, innerZ, outerZ, zOff, zAbsOff;
+
+  yOff = _p0 - place->getNormalYoffset();
+  yAbsOff = fabs(yOff);
+  zOff = _p1 - place->getZcenter();
+  zAbsOff = fabs(zOff);
+  switch (sh->getShapeCode())
+    {
+    case kPlanar:
+      {
+	planarShape = static_cast<StiPlanarShape *>(sh);
+	detHW = planarShape->getHalfWidth();
+	detHD = planarShape->getHalfDepth();
+	//if (_refX<65. && _refX>57.) cout << "   detHW:"<< detHW<<" detHD:"<<detHD<<endl;
+	edge  = 4.;//shape->getEdgeHalfWidth();
+	break;
+      }
+    case kCylindrical:
+      {
+	StiCylindricalShape * cylinderShape = static_cast<StiCylindricalShape *>(sh);
+	detHW = cylinderShape->getHalfWidth(); // will never be outside
+	detHD = cylinderShape->getHalfDepth();
+	edge  = 0.5;//shape->getEdgeHalfWidth();
+	break;
+      }
+    default:
+      {
+	throw logic_error("SKTN::locate() - ERROR - Invalid detector shape code");
+      }
+    }
+  innerY = detHW - edge;
+  outerY = innerY + 2*edge;
+  innerZ = detHD - edge;
+  outerZ = innerZ + 2*edge;
+  if (yAbsOff<innerY && zAbsOff<innerZ)
+    position = kHit; 
+  else if (yAbsOff>outerY && (yAbsOff-outerY)>(zAbsOff-outerZ))
+    // outside detector to positive or negative y (phi)
+    position = yOff>0 ? kMissPhiPlus : kMissPhiMinus;
+  else if (zAbsOff>outerZ && (zAbsOff-outerZ)>(yAbsOff-outerY))
+    // outside detector to positive or negative z (west or east)
+    position = zOff>0 ? kMissZplus : kMissZminus;
+  else if ((yAbsOff-innerY)>(zAbsOff-innerZ))
+    // positive or negative phi edge
+    position = yOff>0 ? kEdgePhiPlus : kEdgePhiMinus;
+  else
+    // positive or negative z edge
+    position = zOff>0 ? kEdgeZplus : kEdgeZminus;
+  return position;
 }

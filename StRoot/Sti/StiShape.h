@@ -20,6 +20,7 @@ public:
 
     // accessors
     float getHalfDepth() const { return _halfDepth; }
+    virtual float getHalfWidth() const=0;
     float getThickness() const { return _thickness; }
     virtual StiShapeCode getShapeCode() const = 0;
     float getEdgeWidth() const { return _edgeWidth; }

@@ -26,7 +26,7 @@ StiDetectorTreeBuilder::StiDetectorTreeBuilder()
     _detectorFinder(StiDetectorFinder::instance() ),
     _messenger( *Messenger::instance(MessageType::kDetectorMessage) )
 {
-    _messenger <<"StiDetectorTreeBuilder::StiDetectorTreeBuilder() - INFO - Started/Done"<<endl;
+    _messenger <<"StiDetectorTreeBuilder::StiDetectorTreeBuilder() -I- Started/Done"<<endl;
 }
 
 StiDetectorTreeBuilder::~StiDetectorTreeBuilder()
@@ -34,36 +34,33 @@ StiDetectorTreeBuilder::~StiDetectorTreeBuilder()
 
 StiDetectorNode* StiDetectorTreeBuilder::build(StiDetectorBuilder * builder)
 {
-    _messenger <<"StiDetectorTreeBuilder::build() - Started"<<endl;
+    _messenger <<"StiDetectorTreeBuilder::build() -I- Started"<<endl;
     if (mroot) 	{
 	_messenger << "StiDetectorTreeBuilder::build()\tError!\troot tree already built"<<endl;
-	throw logic_error("StiDetectorTreeBuilder::build() - ERROR - Attempting to build on top of an existing detector");
+	throw logic_error("StiDetectorTreeBuilder::build() -E- Attempting to build on top of an existing detector");
     }
     if (!builder)
-	throw logic_error("StiDetectorTreeBuilder::build() - ERROR - no builder provided");
+	throw logic_error("StiDetectorTreeBuilder::build() -E- no builder provided");
     if (!mnodefactory)
-	throw logic_error("StiDetectorTreeBuilder::build() - ERROR - no Factory<StiDetectorNode> provided");
+	throw logic_error("StiDetectorTreeBuilder::build() -E- no Factory<StiDetectorNode> provided");
     mDetectorBuilder = builder;
-    _messenger <<"StiDetectorTreeBuilder::build() - INFO - Build root"<<endl;
+    _messenger <<"StiDetectorTreeBuilder::build() -I- Build root"<<endl;
 
     buildRoot();
 
     loopOnDetectors();
 
-    _messenger <<"StiDetectorTreeBuilder::build() - INFO - Sort Tree"<<endl;
+    _messenger <<"StiDetectorTreeBuilder::build() -I- Sort Tree"<<endl;
 
     //Now sort the tree:
     SortDaughters<StiDetector> mysorter;
-    //mysorter(mregion); (old)
-    mysorter(mroot); //new (MLM)
+    mysorter(mroot); 
     
     //Now index the tree to give efficient sibling traversal
-    _messenger <<"StiDetectorTreeBuilder::build() - INFO - Index Tree"<<endl;
+    _messenger <<"StiDetectorTreeBuilder::build() -I- Index Tree"<<endl;
     IndexDaughters<StiDetector> myindexer;
-    
     myindexer(mroot);
-    //myindexer(mregion);
-    _messenger <<"StiDetectorTreeBuilder::build() - INFO - Done"<<endl;
+    _messenger <<"StiDetectorTreeBuilder::build() -I- Done"<<endl;
     return mroot;
 }
 
@@ -98,7 +95,7 @@ void StiDetectorTreeBuilder::buildRoot()
     mregion = mid;
 }
 
-
+///Add the given detector object to the detector tree.
 void StiDetectorTreeBuilder::addToTree(StiDetector* layer)
 {
     //Which region do we hang it on?
@@ -112,11 +109,8 @@ void StiDetectorTreeBuilder::addToTree(StiDetector* layer)
     
     StiDetectorNodeVector::iterator where = find_if(mroot->begin(), mroot->end(), mySameOrderKey); 
     
-    if (where==mroot->end()) {
-	//must abort!!! If this happens do not go on!!!
-	cout <<"StiDetectorContainer::build() - ERROR - mid-rapidity region not found - where==0"<<endl;
-	abort();
-    }
+    if (where==mroot->end())
+      throw runtime_error("StiDetectorTreeBuilder::addToTree(StiDetector* layer) -F- mid-rapidity region not found");
 
     //ok, now we have the region
     mregion = (*where);
@@ -139,12 +133,8 @@ void StiDetectorTreeBuilder::addToTree(StiDetector* layer)
 	//for backward, we have to sort by -1.*zCenter
 	radius.key = -1.* layer->getPlacement()->getZcenter();
     }
-    else {
-	cout <<"StiDetectorBuiler::addToTree().  unkown region:\t"<<theRegion
-	     <<"\tfrom detector:\t"<<layer->getName()<<"\tabort"<<endl;
-	abort();
-    }
-
+    else 
+      throw runtime_error("StiDetectorBuiler::addToTree() -F- unkown region requested");
     StiDetectorNode* radialnode = hangWhere(mregion, radius, radstring);
 
     //Where do we hang in phi?
@@ -174,7 +164,6 @@ StiDetectorNode* StiDetectorTreeBuilder::hangWhere(StiDetectorNode* parent, cons
     StiDetectorNodeVector::iterator where = find_if(parent->begin(), parent->end(), mySameOrderKey);
 
     if (where == parent->end()) {
-	//_messenger <<"hangWhere().  Start new node"<<endl;
 	StiDetectorNode* temp = mnodefactory->getInstance();
 	char* tempname = new char[100];
 	sprintf(tempname,"_%f", order.key);
@@ -195,19 +184,17 @@ StiDetectorNode* StiDetectorTreeBuilder::hangWhere(StiDetectorNode* parent, cons
 
 void StiDetectorTreeBuilder::loopOnDetectors()
 {
-  _messenger << "StiDetectorTreeBuilder::loopOnDetectors() - INFO - Started"<<endl;
+  _messenger << "StiDetectorTreeBuilder::loopOnDetectors() -I- Started"<<endl;
   while(mDetectorBuilder->hasMore())
     {
-      //StiDetector* layer = mdetfactory->getInstance();
-      //mDetectorBuilder->fillNext(layer);
       StiDetector* detector = mDetectorBuilder->next();
       if (!detector)
-	throw runtime_error("StiDetectorTreeBuilder::loopOnDetectors() - ERROR - detector==0");
+	throw runtime_error("StiDetectorTreeBuilder::loopOnDetectors() -E- detector==0");
       detector->build();
       addToTree(detector);
       // add to by-name map
       _detectorFinder->addDetector(detector);
     }
-  _messenger << "StiDetectorTreeBuilder::loopOnDetectors() - INFO - Done"<<endl;
+  _messenger << "StiDetectorTreeBuilder::loopOnDetectors() -I- Done"<<endl;
   return;
 }

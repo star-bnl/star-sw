@@ -34,6 +34,7 @@ using namespace std;
 #include "StiEvaluableTrackSeedFinder.h"
 #include "StiCompositeSeedFinder.h"
 #include "StiTrack.h"
+#include "StiTrackingParameters.h"
 #include "StiMcTrack.h"
 #include "StiGui/StiRootDrawableMcTrack.h"
 #include "StiKalmanTrackFinder.h"
@@ -361,7 +362,11 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
       else
 	_detectorContainer->moveOut();
       tDet = **_detectorContainer;
-      _messenger << tDet->getName()<<" ACTIVE:" << tDet->isActive() << endl;
+
+      if (!tDet->isActive()&&false)
+	{
+	  cout << "Non active detector: " <<  tDet->getName()<< endl;
+	}
 	  
       leadDet = tDet;
       // tDet==0 implies a severe detector container error - exit
@@ -376,16 +381,15 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 	  testNode.reset();
 	  testNode.setChi2(1e50);
 	  position = testNode.propagate(sNode,tDet);
-	  if(debug)cout << "tDet:" << *tDet << "  POSITION:"<<position<<endl;
 	  if (position<0)
 	    { // not reaching this detector layer - stop track
-	      if(debug)cout << "TRACK DOES NOT REACH CURRENT LAYER"<<endl;
 	      trackDone = true; break;
 	    }
 	  else if (position<=kEdgeZplus) 
 	    { 
 	      testNode.setDetector(tDet);
-	      if (tDet->isActive()) 
+	      if (tDet->isActive() && (testNode.nullCount  <  _pars->maxNullCount &&
+		   testNode.contiguousNullCount  <  _pars->maxContiguousNullCount)) 
 		{ // active detector may have a hit
 		  _hitContainer->setRefPoint(testNode);
 		  while (_hitContainer->hasMore()) 
@@ -393,25 +397,24 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 		      stiHit = _hitContainer->getHit();
 		      if (!stiHit) throw logic_error("StiKalmanTrackFinder::doNextDetector() - FATAL - StiHit*hit==0");
 		      chi2 = testNode.evaluateChi2(stiHit);
-		      if (chi2<_pars->maxChi2ForSelection && chi2<testNode.getChi2())
+		      if (chi2<tDet->getTrackingParameters()->getMaxChi2ForSelection() && 
+			  chi2<testNode.getChi2())
 			{
 			  testNode.setHit(stiHit);
 			  testNode.setChi2(chi2);
-			  if(debug)cout << " hit OK"<<endl;
 			}
 		    } 
 		}
 	      // add best node to track if it has a hit or
 	      // if the maximum of node with null hit has NOT been exceeded
-	      if (testNode.getHit() ||
-		  (testNode.nullCount  <  _pars->maxNullCount &&
-		   testNode.contiguousNullCount  <  _pars->maxContiguousNullCount) )
-		{
+	      /*	      if (testNode.getHit() ||
+			      (testNode.nullCount  <  _pars->maxNullCount &&
+			      testNode.contiguousNullCount  <  _pars->maxContiguousNullCount) )
+			      {*/
 		  StiKalmanTrackNode * node = _trackNodeFactory->getInstance();
 		  if (node==0) throw logic_error("SKTF::find() - ERROR - node==null");
 		  node->reset();
 		  *node = testNode;
-		  if(debug)cout << " hit selected for addition"<<endl;
 		  sNode = track->add(node);
 		  if (node->getHit())
 		    {
@@ -425,7 +428,8 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 			node->contiguousNullCount = sNode->contiguousNullCount;
 		      node->nullCount = sNode->nullCount;
 		    }
-		  else if (position>0) // detectors edge - don't really expect a hit here
+		  // detectors edge - don't really expect a hit here
+		  else if (position>0) 
 		    {
 		      _messenger<<"SKTN::add(SKTN*) -I- Add node WIHTOUT hit:"<<endl;
 		      node->nullCount           = sNode->nullCount;
@@ -445,12 +449,12 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 		  leadDet = sNode->getDetector();
 		  if(debug)cout << " hit added"<<endl;
 		  break;
-		}
-	      else
-		{
-		  //cout <<"TRACK IS DONE"<<endl;
-		  trackDone = true;  break;
-		}
+		  /*	}
+			else
+			{
+			//cout <<"TRACK IS DONE"<<endl;
+			trackDone = true;  break;
+			}*/
 	    }
 	  else if ( (position==kEdgePhiPlus || position==kMissPhiPlus)  && lastMove>=0 )
 	    {
@@ -462,7 +466,7 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 	      //cout << " MOVE MINUUS PHI"<<endl;
 	      _detectorContainer->moveMinusPhi(); lastMove--;
 	    }
-	  if (abs(lastMove)>2) break;
+	  if (abs(lastMove)>2) break; 
 	  nextDet = **_detectorContainer;
 	  if (nextDet==0 || tDet==nextDet) 
 	    {

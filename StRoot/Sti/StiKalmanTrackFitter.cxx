@@ -53,7 +53,8 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	    {
 	      chi2 = targetNode->evaluateChi2(targetHit);
 	      targetNode->setChi2(chi2);
-	      targetNode->updateNode();
+	      if (chi2<3.)
+		targetNode->updateNode();
 	    }
 	  source++;//cout<<"=="<<endl;
 	}
@@ -77,7 +78,8 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	    {
 	      chi2 = targetNode->evaluateChi2(targetHit);
 	      targetNode->setChi2(chi2);
-	      targetNode->updateNode();
+	      if (chi2<3.)
+		targetNode->updateNode();
 	    }
 	  source--;//cout<<"!="<<endl;
 	}

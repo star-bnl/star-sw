@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.cxx,v 2.8 2003/05/01 20:46:52 pruneau Exp $
+ * $Id: StiTrackingPlots.cxx,v 2.9 2003/07/22 17:16:29 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.cxx,v $
+ * Revision 2.9  2003/07/22 17:16:29  pruneau
+ * various
+ *
  * Revision 2.8  2003/05/01 20:46:52  pruneau
  * changed error parametrization
  *
@@ -36,6 +39,8 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
+#include "TProfile.h"
+#include "TProfile2D.h"
 #include "TFile.h"
 
 #include "Sti/StiDefaultTrackFilter.h"
@@ -45,6 +50,8 @@
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiTrackingPlots.h"
+#include "Sti/StiToolkit.h"
+#include "Sti/StiHitContainer.h"
 
 StiTrackingPlots::StiTrackingPlots()
   : HistogramGroup()
@@ -63,9 +70,10 @@ void StiTrackingPlots::initialize()
 {
   cout <<"StiTrackingPlots::StiTrackingPlots() -I- Started"<<endl;
   numTracks=book("numTracks","Number of tracks in Container", 128,0.,10000.);
-  radLengthZ   =book("radLengthZ","Absorption Length (%) vs. Z",400,-200,200,  100,0,100);
-  radLengthPhi =book("radLengthPhi","Absorption Length (%) vs. Phi",128,0,360, 256,0,1);
-  radLengthEta =book("radLengthEta","Absorption Length (%) vs. Eta",128,-2,2, 256,0,1);
+  _radLengthVsPhi =book("radLengthVsPhi","Absorption Length (%) vs. Phi",120,-180.,180., 400,0,0.2);
+  _radLengthVsEta =book("radLengthVsEta","Absorption Length (%) vs. Eta",60,-1.5,1.5, 400,0,0.2);
+  _radLengthVsPhiProf =bookProfile("radLengthVsPhiProf","Absorption Length Profile(%) vs. Phi",120,-180.,180.);
+  _radLengthVsEtaProf =bookProfile("radLengthVsEtaProf","Absorption Length Profile(%) vs. Eta",60,-1.5,1.5);
   _eta        = book("eta",     "Track Eta",  200, -2.,2.);
   _etaPlus    = book("etaPlus", "Track Eta +",200, -2.,2.);
   _etaMinus   = book("etaMinus","Track Eta -",200, -2.,2.);
@@ -108,6 +116,9 @@ void StiTrackingPlots::initialize()
 
   _chi2 = book("chi2","chi2",100,0.,10.);
   _chi2VsNpts = book("chi2VsNpts","chi2VsNpts",50,0.,50.,100,0.,10.);
+
+  _yVsXPosEta = book("yVsXPosEta","yVsXPosEta",800,-200.,200., 200,-200.,200.);
+  _yVsXNegEta = book("yVsXNegEta","yVsXNegEta",800,-200.,200., 200,-200.,200.);
 
   //cout <<"StiTrackingPlots::StiTrackingPlots() -I- Done"<<endl;
 }
@@ -165,6 +176,7 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 	{
 	  //cout << "StiTrackPlots::fill() -I- kTrack OK";
 	  double x1 = kTrack->getInnerMostNode()->_x;
+	  double z = kTrack->getInnerMostNode()->_p1;
 	  //cout << " x1:"<<x1;
 	  double x2 = kTrack->getInnerMostHitNode()->_x;
 	  //cout << " x2:"<<x2;
@@ -173,6 +185,21 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 	    _xLastHitVsXLastNode1->Fill(x1,x2);
 	  else if (fabs(eta)<0.8 && fabs(eta)>0.5 )
 	    _xLastHitVsXLastNode2->Fill(x1,x2);
+	  
+	  StiKalmanTrackNode * aNode = static_cast<StiKalmanTrackNode *>(kTrack->getInnerMostNode());
+	  double x3 = aNode->_x;
+
+	  if(nPts>40 && x2<2. && x3<5. && fabs(z)<50. && thePt>0.4)
+	    {
+	      double radLength = kTrack->getTrackRadLength();
+	      if (fabs(eta)<0.4)
+		{
+		  _radLengthVsPhi->Fill(180.*phi/3.1415,radLength);
+		  _radLengthVsPhiProf->Fill(180.*phi/3.1415,radLength);
+		}
+	      _radLengthVsEta->Fill(eta,radLength);
+	      _radLengthVsEtaProf->Fill(eta,radLength);
+	    }
 	  //cout << " - Filled OK";
 	}
       //else
@@ -204,5 +231,19 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
     }//end loop over tracks
   //cout <<"StiTrackingPlots::fill() -I- Done Filling histos" <<endl;
 
+  StiHitContainer * hitContainer = StiToolkit::instance()->getHitContainer();
+  HitVectorType hits = hitContainer->getAllHits();
+  HitVectorType::const_iterator iter;
+  for (iter=hits.begin();iter!=hits.end();++iter)
+    {
+      double x = (*iter)->x_g();
+      double y = (*iter)->y_g();
+      double z = (*iter)->z_g();
+      if (z>0)
+	_yVsXPosEta->Fill(x,y);
+      else
+	_yVsXNegEta->Fill(x,y);
+    }
 }
+  
 

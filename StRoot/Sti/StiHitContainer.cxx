@@ -332,12 +332,20 @@ ostream& operator<<(ostream& os, const StiHitContainer& store)
 
 HitVectorType StiHitContainer::getAllHits()
 {
-  int allHitsSize = size();
-  HitVectorType allHits(allHitsSize);
-  HitMapToVectorAndEndType::const_iterator it;
-  for (it=mmap.begin(); it!=mmap.end(); it++) 
+  HitVectorType allHits;
+  // HitMapToVectorAndEndType & tempMap= mmap.hits();
+
+  for(HitMapToVectorAndEndType::const_iterator iter= mmap.begin(); iter !=mmap.end(); iter++)
     {
-      copy( it->second.theHitVec.begin(), it->second.theHitVec.end(), allHits.end());
+      // cout<<"first loop of get all hits entered"<<endl;
+      const HitVectorType & t_hits = (*iter).second.theHitVec;
+      for (vector<StiHit*>::const_iterator it=t_hits.begin();
+	   it!=t_hits.end();
+	   ++it)
+	{
+	  allHits.push_back(*it);
+	  
+	}
     }
   return allHits;
 }

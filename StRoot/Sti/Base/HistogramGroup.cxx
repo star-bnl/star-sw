@@ -88,3 +88,27 @@ TH3D * HistogramGroup::book(const string &title,
   return dynamic_cast<TH3D*>(add(new TH3D(histoName.c_str(),histoDesc.c_str(),nx,xMin,xMax,ny,yMin,yMax,nz,zMin,zMax)) );
 }
 
+TProfile * HistogramGroup::bookProfile(const string &title, 
+				       const string & description, 
+				       int nx, 
+				       double xMin,
+				       double xMax)
+{
+  string histoName = getName() + "_" + title;
+  string histoDesc = getName() + " " + description;
+  return dynamic_cast<TProfile*>(add(new TProfile(histoName.c_str(),histoDesc.c_str(),nx,xMin,xMax)));
+}
+
+TProfile2D * HistogramGroup::bookProfile(const string &title, 
+					 const string & description, 
+					 int nx, 
+					 double xMin,
+					 double xMax,
+					 int ny, 
+					 double yMin,
+					 double yMax)
+{
+  string histoName = getName() + "_" + title;
+  string histoDesc = getName() + " " + description;
+  return dynamic_cast<TProfile2D*>(add(new TProfile2D(histoName.c_str(),histoDesc.c_str(),nx,xMin,xMax,ny,yMin,yMax)) );
+}
