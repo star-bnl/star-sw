@@ -11,8 +11,8 @@ use Sys::Hostname;
 #my $debugOn=0;
 
 my $hostname     = hostname();
-my $mdir_log      = "/star/rcf/disk00001/star/P00hd_1/log/";
-my $mdir_sum      = "/star/rcf/disk00001/star/P00hd_1/sum/"; 
+my $mdir_log      = "/star/rcf/disk00001/star/P00he/log/";
+my $mdir_sum      = "/star/rcf/disk00001/star/P00he/sum/"; 
 my @dir_ext      = ("daq","tfs");  
 my @set ;
 my @list;
@@ -79,7 +79,7 @@ foreach my $logFile (@list) {
        
         my $ltime = `mod_time $mfile`;
            if( $ltime > 3600){
-		    if ($msize < 2000 )  {
+		    if ($msize < 5000 )  {
 #     print "Crashed job :", $mfile, "\n";
    }else { 
               $f_flag = 0;
@@ -155,19 +155,19 @@ sub parse_log($) {
   my $break_buss;
   my $Err_messg = "none";
   my $previous_line = "";
-  #----------------------------------------------------------
+#----------------------------------------------------------
 
   my $not_found_string = "Not found";
 
-  #----------------------------------------------------------
+#----------------------------------------------------------
   
   open (LOGFILE, $filename ) or die "cannot open $filename: $!\n";
   
   open (STDOUT, ">$file_sum");
 
-  #---------------------------------------------------------
+#---------------------------------------------------------
   
-  # dump contents of log file to array for parsing
+# dump contents of log file to array for parsing
   my @logfile = <LOGFILE>;
   my $num_line = 0;
   my $no_event = 0;  
@@ -225,10 +225,10 @@ sub parse_log($) {
   my $star_level = "n/\a";
   my $root_level = "n/\a"; 
   my $exmessg = "none";
-
-  #---------------------------------------------------------
+   my $Anflag = 0;
+#---------------------------------------------------------
   
-  # parse beginning of file
+# parse beginning of file
   
   $first_line = $logfile[1];
    chop $first_line ;
@@ -243,24 +243,24 @@ sub parse_log($) {
       $root_level = $nparts[8];    
      }
     
-    # get library version
+# get library version
     if ( (! $lib_version) && $line =~ /={3} You are in (\w+)/ ) {
       $lib_version = $1;
       $record_run_options = 1;
     }
     
-    # get input file name
+# get input file name
     if ( (! $input_fn) && $line =~ /Input file name = (\w+)/ ) {
 #     if ( (! $input_fn) && $line =~ /Input file name/) {
       $input_fn = $1;
       $record_run_options = 0;
     }
     
-    # concatenate run options
+# concatenate run options
     $record_run_options and $run_option_length and $run_option_string .= $line."\n";
     $record_run_options and $run_option_length++;
 
-    # print tag for each Maker
+# print tag for each Maker
      if ( $line =~ /built/) {      
       if($tag_flag != 1) { 
       @tag_word = split(" ", $line);
@@ -272,7 +272,7 @@ sub parse_log($) {
         $ij++;
      } 
     }
-    # get memory size for each Maker
+# get memory size for each Maker
      if ($num_line > 100){
      if( $line =~ /EndMaker/){
        @size_line = split(" ",$line); 
@@ -289,7 +289,7 @@ sub parse_log($) {
       }
      }
    }
-    # get  number of events
+# get  number of events
     if ( $line =~ /QAInfo: Done with Event/ ) {
       @nparts = split ( "/",$line);
       $noEvts = $nparts[2];
@@ -299,10 +299,14 @@ sub parse_log($) {
     }
       $no_event++;
   } 
-    # get number of tracks, vertices and hits
 
-     if ($line =~ /QAInfo: StAnalysisMaker/ ) {
+# get number of tracks, vertices and hits
 
+     if ($line =~ /StMessageManager message summary/) {
+      $Anflag = 1;
+    }
+
+     if ($line =~ /QAInfo: StAnalysisMaker/ && $Anflag == 0 ) {
            my  $string = $logfile[$num_line];
              @word_tr = split /:/,$string;
               $no_tracks = $word_tr[2];
@@ -342,13 +346,13 @@ sub parse_log($) {
              $tot_ftpc_hits += $no_ftpc_hits; 
            
  }   
-    # check if job crashed due to break_buss_error
+# check if job crashed due to break_buss_error
      if($line =~ /bus error/) {
          $Err_messg = "Break bus error";
        }
 
 
-    # check if job crashed due to segmentation violation
+# check if job crashed due to segmentation violation
     if ($line =~ /segmentation violation/) {
              $Err_messg = "segmentation violation";
     }
@@ -364,7 +368,7 @@ sub parse_log($) {
    }      
     
     
-    #check if job is completed
+#check if job is completed
     if ( $line =~ /Run completed/) {
           
           $jrun = "Done";      
@@ -422,10 +426,10 @@ sub parse_log($) {
 
   }
   
-  #--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
    $EvDone = $no_event;
  
-  # output header info
+# output header info
   
   print '=' x 80, "\n";
 
@@ -478,7 +482,7 @@ sub parse_log($) {
 
   $num_event = $no_event - $EvSkip;
 
-  if( $num_event ne 0 & $last_maker ne 0)  {
+  if( $num_event ne 0 )  {
    $avr_tracks    = $tot_tracks/$num_event;
    $avr_vertices  = $tot_vertices/$num_event;
    $avr_tpc_hits  = $tot_tpc_hits/$num_event;
@@ -512,9 +516,9 @@ sub parse_log($) {
   }
 #}
 
- #--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
   
- # parse end of file
+# parse end of file
  sub timestamp($) {
    my $job_log = $_[0];   
    my @cpu_output;
@@ -532,7 +536,7 @@ sub parse_log($) {
     print '=' x 80, "\n";    
 
    if ($num_event ne 0) {
- @cpu_output = `tail -250 $job_log`;
+ @cpu_output = `tail -750 $job_log`;
   foreach $end_line (@cpu_output){
           chop $end_line;
    if ($end_line =~ /seconds Cpu Time/) {

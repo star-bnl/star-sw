@@ -177,7 +177,7 @@ struct JFileAttr => {
  my $pvpath;
  my $pvjbId;
  my $pvavail;
-
+ 
   $now = time;
 ##### connect to DB TestJobs
 
@@ -307,7 +307,7 @@ $newAvail = "n\/a";
   print  "files to be updated:", $pvjbId, " % ",$mpath, " % ",$pvTime, " % ", $newAvail, "\n"; 
 
      &updateJSTable();
-      
+     
         &logInfo("$fullname", "$platf");
 
       $jobTime = $timeS;  
@@ -727,6 +727,8 @@ sub  updateJSTable {
 
    my @logfile = <LOGFILE>;
 
+my $Anflag = 0;
+
    foreach my $line (@logfile) {
        chop $line ;
         $num_line++; 
@@ -770,8 +772,11 @@ sub  updateJSTable {
     }
 # get number of tracks and vertices
 
-      if ($line =~ /QAInfo: StAnalysisMaker/ ) {
-       next if ($line =~ /...................../);
+    if ($line =~ /StMessageManager message summary/) {
+      $Anflag = 1;
+    }
+
+      if ($line =~ /QAInfo: StAnalysisMaker/ && $Anflag == 0 ) {
             my  $string = $logfile[$num_line];
               @word_tr = split /:/,$string;
               $no_tracks = $word_tr[2];
