@@ -70,7 +70,7 @@ public:
    St_Table    &operator=(const St_Table &rhs);
    virtual    ~St_Table();
   
-   virtual     void       Adopt(Int_t n, Char_t *array);
+   virtual     void       Adopt(Int_t n, void *array);
    virtual     void       AddAt(ULong_t *c, Int_t i);
    virtual     void      *At(Int_t i);
    virtual     void       Browse(TBrowser *b);
@@ -98,7 +98,8 @@ public:
    virtual     void       Set(Int_t n);
    virtual     void       Set(Int_t n, Char_t *array);
    virtual     void       Reset(Int_t c=0);
-   virtual     void       Update(){;}
+   virtual     void       Update();
+   virtual     void       Update(St_DataSet *set,UInt_t opt=0);
    virtual     void      *operator[](Int_t i);
  
    ClassDef(St_Table,0)  // Array of the STAF structure
