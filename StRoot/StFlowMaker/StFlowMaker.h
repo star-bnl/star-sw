@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.24 2001/07/24 22:29:26 snelling Exp $
+//  $Id: StFlowMaker.h,v 1.25 2001/07/27 01:26:30 snelling Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -23,7 +23,7 @@
 #include "StFlowConstants.h"
 class StRun;
 class StEvent;
-class StPrimaryTrack;
+class StTrack;
 class StParticleDefinition;
 class StFlowEvent;
 class StFlowPicoTrack;
@@ -58,7 +58,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.24 2001/07/24 22:29:26 snelling Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.25 2001/07/27 01:26:30 snelling Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -99,7 +99,7 @@ private:
   TFile*           pPicoDST;                  //! pointer to pico-DST File
   TChain*          pPicoChain;                //! pointer to chain of pico files
   Float_t          calcDcaSigned(const StThreeVectorF pos, 
-				 const StPrimaryTrack* track);
+				 const StTrack* track);
 
   ClassDef(StFlowMaker, 1)                    // macro for rootcint
 };
@@ -128,6 +128,9 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.25  2001/07/27 01:26:30  snelling
+//  Added and changed variables for picoEvent. Changed trackCut class to StTrack
+//
 //  Revision 1.24  2001/07/24 22:29:26  snelling
 //  First attempt to get a standard root pico file again, added variables
 //

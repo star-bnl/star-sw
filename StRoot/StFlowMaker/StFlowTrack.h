@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.20 2001/07/24 22:29:44 snelling Exp $
+// $Id: StFlowTrack.h,v 1.21 2001/07/27 01:26:43 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //         FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -17,7 +17,7 @@
 #include "StObject.h"
 #include "StFlowConstants.h"
 #include "StTrackTopologyMap.h"
-#include "StThreeVectorF.hh"
+#include "StThreeVectorD.hh"
 
 class StFlowTrack : public StObject {
 
@@ -56,6 +56,7 @@ public:
   Int_t         FitPts()     const;
   Int_t         MaxPts()     const;
   Int_t         Nhits()      const;
+  Int_t         NdedxPts()   const;
   Float_t       TrackLength() const;
   Int_t Select(Int_t harmonic, Int_t selection, Int_t subevent= -1) const;
   Int_t         MostLikelihoodPID()    const; 
@@ -65,7 +66,7 @@ public:
   Float_t       PionPlusMinusProb()    const; 
   Float_t       KaonPlusMinusProb()    const; 
   Float_t       ProtonPbarProb()    const;
-  StThreeVectorF FirstPoint() const; 
+  StThreeVectorD DcaGlobal3() const; 
   const StTrackTopologyMap& TopologyMap() const;
 
   void SetPidPiPlus(Float_t);
@@ -94,6 +95,7 @@ public:
   void SetFitPts(Int_t);
   void SetMaxPts(Int_t);
   void SetNhits(Int_t);
+  void SetNdedxPts(Int_t);
   void SetTrackLength(Float_t);
   void SetSelect(Int_t harmonic, Int_t selection);
   void SetSubevent(Int_t harmonic, Int_t selection, Int_t subevent);
@@ -104,7 +106,7 @@ public:
   void SetPionPlusMinusProb(Float_t);
   void SetKaonPlusMinusProb(Float_t);
   void SetProtonPbarProb(Float_t);
-  void SetFirstPoint(StThreeVectorF fp);
+  void SetDcaGlobal3(StThreeVectorD gdca3);
   void SetTopologyMap(StTrackTopologyMap map);
   
 private:
@@ -135,6 +137,7 @@ private:
   Int_t   mFitPts;
   Int_t   mMaxPts;
   Int_t   mNhits;
+  Int_t   mNdedxPts;
   Float_t mTrackLength;
   Int_t   mSelection;
   Short_t mSubevent[Flow::nHars][Flow::nSels];
@@ -146,7 +149,7 @@ private:
   Float_t mPionPlusMinusProb;  
   Float_t mKaonPlusMinusProb;  
   Float_t mProtonPbarProb;
-  StThreeVectorF mFirstPoint;  
+  StThreeVectorD mDcaGlobal3;  
   StTrackTopologyMap mTopology;
 
   ClassDef(StFlowTrack, 1)                     // macro for rootcint
@@ -178,6 +181,7 @@ inline Float_t  StFlowTrack::Chi2()         const { return mChi2; }
 inline Int_t    StFlowTrack::FitPts()       const { return mFitPts; }  
 inline Int_t    StFlowTrack::MaxPts()       const { return mMaxPts; }  
 inline Int_t    StFlowTrack::Nhits()        const { return mNhits; }
+inline Int_t    StFlowTrack::NdedxPts()     const { return mNdedxPts; }  
 inline Float_t  StFlowTrack::TrackLength()  const { return mTrackLength; }  
 inline Int_t    StFlowTrack::MostLikelihoodPID() const
 { return mMostLikelihoodPID;} 
@@ -188,7 +192,7 @@ inline Float_t  StFlowTrack::ElectronPositronProb() const { return mElectronPosi
 inline Float_t  StFlowTrack::PionPlusMinusProb() const { return mPionPlusMinusProb; }
 inline Float_t  StFlowTrack::KaonPlusMinusProb() const { return mKaonPlusMinusProb; }
 inline Float_t  StFlowTrack::ProtonPbarProb() const { return mProtonPbarProb; }
-inline StThreeVectorF StFlowTrack::FirstPoint() const { return mFirstPoint; }
+inline StThreeVectorD StFlowTrack::DcaGlobal3() const { return mDcaGlobal3; }
 inline const StTrackTopologyMap& StFlowTrack::TopologyMap() const { return mTopology; }
 
 
@@ -312,6 +316,8 @@ inline void StFlowTrack::SetMaxPts(Int_t maxPts)    { mMaxPts = maxPts; }
 
 inline void StFlowTrack::SetNhits(Int_t nhits)      { mNhits = nhits; }
 
+inline void StFlowTrack::SetNdedxPts(Int_t ndedxPts) { mNdedxPts = ndedxPts; }
+
 inline void StFlowTrack::SetTrackLength(Float_t tl) { mTrackLength = tl; }
 
 inline void StFlowTrack::SetSelect(Int_t harmonic, Int_t selection) {
@@ -321,7 +327,7 @@ inline void StFlowTrack::SetSelect(Int_t harmonic, Int_t selection) {
 inline void StFlowTrack::SetSubevent(Int_t harmonic, Int_t selection,
  Int_t subevent) { mSubevent[harmonic][selection] = subevent; }
 
-inline void StFlowTrack::SetFirstPoint(StThreeVectorF fp) { mFirstPoint = fp; }
+inline void StFlowTrack::SetDcaGlobal3(StThreeVectorD gdca3) { mDcaGlobal3 = gdca3; }
 
 inline void StFlowTrack::SetTopologyMap(StTrackTopologyMap map) { mTopology = map; }
 
@@ -330,6 +336,9 @@ inline void StFlowTrack::SetTopologyMap(StTrackTopologyMap map) { mTopology = ma
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.21  2001/07/27 01:26:43  snelling
+// Added and changed variables for picoEvent. Changed trackCut class to StTrack
+//
 // Revision 1.20  2001/07/24 22:29:44  snelling
 // First attempt to get a standard root pico file again, added variables
 //

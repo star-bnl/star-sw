@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoTrack.cxx,v 1.7 2001/07/24 22:29:37 snelling Exp $
+// $Id: StFlowPicoTrack.cxx,v 1.8 2001/07/27 01:26:37 snelling Exp $
 //
 // Author: Raimond Snellings, March 2000
 //
@@ -34,9 +34,10 @@ StFlowPicoTrack::StFlowPicoTrack(StFlowPicoTrack *track) : TObject() {
   mFitPts    = track->FitPts();
   mMaxPts    = track->MaxPts();
   mNhits     = track->Nhits();
-  mFirstPointX  = track->FirstPointX();
-  mFirstPointY  = track->FirstPointY();
-  mFirstPointZ  = track->FirstPointZ();
+  mNdedxPts  = track->NdedxPts();
+  mDcaGlobalX = (Float_t)track->DcaGlobalX();
+  mDcaGlobalY = (Float_t)track->DcaGlobalY();
+  mDcaGlobalZ = (Float_t)track->DcaGlobalZ();
   mTrackLength = track->TrackLength();
   mMostLikelihoodPID  = track->MostLikelihoodPID();
   mMostLikelihoodProb = track->MostLikelihoodProb();
@@ -64,6 +65,9 @@ StFlowPicoTrack::StFlowPicoTrack(StFlowPicoTrack *track) : TObject() {
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoTrack.cxx,v $
+// Revision 1.8  2001/07/27 01:26:37  snelling
+// Added and changed variables for picoEvent. Changed trackCut class to StTrack
+//
 // Revision 1.7  2001/07/24 22:29:37  snelling
 // First attempt to get a standard root pico file again, added variables
 //
