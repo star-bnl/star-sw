@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpMaker.cxx,v 1.2 2000/04/09 16:36:43 aihong Exp $
+ * $Id: StPidAmpMaker.cxx,v 1.3 2000/04/09 18:50:47 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpMaker.cxx,v $
+ * Revision 1.3  2000/04/09 18:50:47  aihong
+ * change Make() to read directly from dst tables instead of StEvent
+ *
  * Revision 1.2  2000/04/09 16:36:43  aihong
  * change for adapting NHitDcaNet added
  *
@@ -22,16 +25,17 @@
 
 #include "StPidAmpMaker/StPidAmpMaker.h"
 #include "StChain.h"
-#include "StEventTypes.h"
+#include "St_Table.h"
+#include "St_DataSetIter.h"
 #include "StMessMgr.h"
 
 #include "StPidAmpMaker/Include/StPidAmpConst.hh"
 
 
 
-void fillStPidAmpTrks(StEvent& event, StPidAmpTrkVector* trks,TH3D* histo);
+void fillStPidAmpTrks(St_Table* theTrackTable, St_Table* theDedxTable, St_Table* theVertexTable, StPidAmpTrkVector* trks,TH3D* histo);
 void readDataFromDisk(StPidAmpTrkVector* trks,TH3D* histo);//read trks from disk.
-void writeTrks(StEvent& event);//write trks to disk for quik reading.vi readDataFromDisk.
+void writeTrks(St_Table* theTrackTable, St_Table* theDedxTable, St_Table* theVertexTable);//write trks to disk for quik reading.vi readDataFromDisk.
 
 ClassImp(StPidAmpMaker)
 
@@ -88,17 +92,27 @@ StPidAmpMaker::Finish()
 Int_t
 StPidAmpMaker::Make()
 {
+  St_DataSet *dst_data = GetInputDS("dst");
+  if (!dst_data) return 0;
 
-    StEvent* mEvent;
-    mEvent = (StEvent *) GetInputDS("StEvent");
-    if (! mEvent) return kStOK; // If no event, we're done
-    StEvent& ev = *mEvent;
-    
-    // OK, we've got the event. Pass it and process it.
+  St_DataSetIter  local(dst_data);
 
-     fillStPidAmpTrks(ev,ampTrks,dependHisto);
-    //    writeTrks(ev);
+  St_Table* globalTable   =0;
+  St_Table* dst_dedxTable =0;
+  St_Table* vertexTable   =0;
+
+  globalTable   =(St_Table *)local["globtrk"];
+  dst_dedxTable =(St_Table *)local["dst_dedx"];
+  vertexTable   =(St_Table* )local["vertex"];
+
+    // OK, we've got the tables. Pass them and process them.
+
+     if (globalTable && dst_dedxTable && vertexTable) {
+    fillStPidAmpTrks(globalTable, dst_dedxTable,vertexTable, ampTrks,dependHisto);
+    //    writeTrks(globalTable, dst_dedxTable,vertexTable);
     return kStOK;
+     } else return 0;
+
 }
 
 void
