@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.61 1999/09/02 22:27:11 fisyak Exp $
+// $Id: StMaker.cxx,v 1.62 1999/09/03 23:11:48 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.62  1999/09/03 23:11:48  perev
+// Add .runcont directory
+//
 // Revision 1.61  1999/09/02 22:27:11  fisyak
 // Add SetDEBUG
 //
@@ -194,7 +197,8 @@ StMaker::StMaker(const char *name,const char *):St_DataSet(name,".maker"),fActiv
    m_DataSet  = new St_ObjectSet(".data") ;Add(m_DataSet);
    m_ConstSet = new St_ObjectSet(".const");Add(m_ConstSet);
    m_GarbSet  = new St_ObjectSet(".garb" );Add(m_GarbSet);
-   m_Inputs  =  new St_ObjectSet(".aliases" );Add(m_Inputs);
+   m_Inputs   = new St_ObjectSet(".aliases" );Add(m_Inputs);
+   m_RunCont  = new St_ObjectSet(".runcontrol" );Add(m_RunCont);
    AddHist(0); m_Histograms = GetHistList();
    gStChain = this; //?????????????????????????????????????????????????????
 ::doPs(GetName(),"constructor");
@@ -269,8 +273,18 @@ St_ObjectSet *StMaker::AddObj(TObject *obj,const char *dir)
   if (h->InheritsFrom(TH1::Class())) h->SetDirectory(0);
   AddObj(h,".hist");
 }    
+//______________________________________________________________________________
+ void StMaker::AddRunCont (double par,const char* name,const char* comment)
+{
+   assert (name && name && comment[0]); 
 
-
+   St_DataSet *dp = new St_DataSet(name,m_RunCont);
+   TString ts("  // "); ts += comment;
+   char buf[40];
+   sprintf(buf,"%f",par);
+   ts.Replace(0,0,buf);
+   dp->SetTitle((const char*)ts);
+}
 
 
 //______________________________________________________________________________
@@ -907,5 +921,5 @@ void StMaker::SetDEBUG(Int_t l)
    
    TIter nextMaker(tl);
    StMaker *maker;
-   while (maker = (StMaker*)nextMaker()) maker->SetDEBUG(l);
+   while ((maker = (StMaker*)nextMaker())) maker->SetDEBUG(l);
 }
