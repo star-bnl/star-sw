@@ -2,7 +2,7 @@
 %
 % StMcEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StMcEvent.tex,v 2.3 2000/04/18 00:55:47 calderon Exp $
+% $Id: StMcEvent.tex,v 2.4 2000/04/18 15:49:38 calderon Exp $
 %
 % Authors:Michael A. Lisa
 %         Thomas S. Ullrich
@@ -23,6 +23,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StMcEvent.tex,v $
+% Revision 2.4  2000/04/18 15:49:38  calderon
+% Updated documentation on particle table, added Table of Contents for
+% PDF.
+%
 % Revision 2.3  2000/04/18 00:55:47  calderon
 % Updated documentation in class reference.  Added section about
 % inclusion of particle table.
@@ -57,6 +61,7 @@
 \usepackage{times}
 \usepackage{verbatim}
 \usepackage{makeidx}
+\usepackage[dvips=true,hyperindex=true,colorlinks=true,linkcolor=blue,bookmarks=true]{hyperref}
 
 \PScommands      % init boxit
 \makeindex
@@ -656,36 +661,41 @@ and one that doesn't.  This can be done in several ways, according to
 the following properties (or conventions, if you will):
 
 \begin{itemize}
-	\item Tracks with an event generator label > 0 have a corresponding
-	entry in the particle table.
-	\item Tracks with a key > 0 have a corresponding entry in the g2t\_track
-	table.
-	\item Only tracks from the g2t\_track table are assigned a start vertex.  This also means that
-	the method \name{StMcVertex::daughters()} will not return any tracks from the particle
+	\item {\bf Tracks with an event generator label $> 0$ have a corresponding
+	entry in the particle table.}
+	\item {\bf Tracks with a key $> 0$ have a corresponding entry in the g2t\_track table.}
+	\item {\bf Only tracks from the g2t\_track table are assigned a start vertex.} This also means that
+	the method \name{StMcVertex::daughters()} will {\bf NOT} return any tracks from the particle
 	table.  It is important to realize this if one wants to asks for the daughters of the
 	primary vertex.  This will only return the tracks that actually have the primary
-	vertex as their parent, according to the start\_vertex\_p entry of the table.  (These tracks
+	vertex as their parent, according to the start\_vertex\_p entry of g2t\_track the table.
+	(These tracks
 	are most probably also in the particle table, this scheme will of course not exclude them.  But
-	the point is that tracks that only appear in the particle table will NOT have a start vertex
-	and they will not appear as daughters of any vertex, not even the primary).
-	\item To find out the genealogy of a particle, the \name{StMcTrack::parent()} method is provided.
+	the point is that tracks that only appear in the particle table will {\bf NOT} have a start vertex
+	and they will not appear as daughters of any vertex, {\it not even the primary}).
+	\item {\bf To find out the genealogy of a particle, the \name{StMcTrack::parent()} method is provided.}
 	This method will return a pointer to the parent track, if there is one, otherwise it will return
 	a null pointer.  Using this method, one can get to the parent particle of a decay daughter all
 	the way into the particle table.  The parentage is followed not just until we reach the
 	particle table, but it is also followed {\it within} the particle table, i.e. down to the quarks and gluons
 	of the event generator.
 	It should be stressed, of course, that
-	this parentage is only event generator bookkeeping, and should not be used for more than this.	
+	this further parentage is {\it only} event generator bookkeeping, and should not be used for more than this.
+	For g2t\_tracks, one can also find daughters by going through their stop vertex (if there is one),
+	which then knows about its daughter tracks.
 \end{itemize}
 Let's illustrate this with a simple example.  Suppose that we have an event generator and
 we want to look at $\phi \longrightarrow e^{+}e^{-}$ and the $\phi$ was decayed by the
 event generator.  To get to them, we can do the following.
 \begin{enumerate}
-	\item We get the daughters of the primary vertex.
-	\item We loop over the primary tracks thus obtained.
-	\item For each of the primary tracks, we check whether it is an electron.
-	\item If it is, we check whether its parent is a phi.
-	\item If it is, then we found it and we're done.
+	\item We get a pointer to the primary vertex (\name{StMcEvent::primaryVertex()}).
+	\item We get the daughters of the primary vertex (\name{StMcVertex::daughters()}).
+	\item We loop over the primary tracks thus obtained (Look in the containers section ~\ref{sec:containers}).
+	\item For each of primary tracks, we check whether it is an electron (\name{StMcTrack::particleDefinition()}).
+	\item If it is, we check whether its parent is a $\phi$ (\name{StMcTrack::parent()}, followed by
+	\name{StMcTrack::particleDefinition()}.  Be careful with NULL pointers!).
+	\item If it is a $\phi$, then we found it and we can do whatever we want with it, e.g. fill a 2-D
+	histogram of $p_{\bot}$ vs. $y$.
 \end{enumerate}
 For more information on the specific methods to do this, refer to the relevant sections for
 \name{StMcVertex} ~\ref{sec:StMcVertex} and \name{StMcTrack}  ~\ref{sec:StMcTrack}.
@@ -845,8 +855,15 @@ ObjectSpace implementation of the STL) have been solved and
 now \StMcEvent\ and \StAssociationMaker\ compile and run
 on Linux gcc, Solaris CC4.2 and CC5 and HP aCC.
 
+The particle table has also been added to \StMcEvent, and this
+allows to find particles of interest that have been decayed by
+the event generator.
+
+
 For corrections to this manual, typos, suggestions, etc. send an email
-to {\tt calderon@star.physics.yale.edu}.
+to
+
+{\tt calderon@star.physics.yale.edu}.
 \clearpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
