@@ -17,6 +17,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "StAngleCorrMaker.h"
+#include "StTrackForPool.hh"
 #include "StRoot/StEventReaderMaker/StEventReaderMaker.h"
 #include "StChain/StChain.h"
 #include "StEvent/StRun.hh"
@@ -24,6 +25,8 @@
 
 #include <TOrdCollection.h>
 #include <TH1.h>
+#include <TCanvas.h>
+#include <TFile.h>
 
 #define TRACKSMAX 100000 
 
@@ -33,6 +36,9 @@ Int_t StAngleCorrMaker::Init() {
   // StTrackForPool has momentum and event number information
 
   mCollectionOfTracks= new TOrdCollection(TRACKSMAX);
+  mNumberEventsInPool= 0;
+  // output file
+  mOutput = new TFile("corr.root","RECREATE");
 
   // book an histogram for the numerator of the angular correlation
   int nbin = 180;
@@ -59,13 +65,30 @@ Int_t StAngleCorrMaker::Make() {
   // fill histograms, and add tracks to pool of tracks
   //
   analyseRealPairs(ev,eventNumber);
-
+  mNumberEventsInPool++;
+  //
+  // check how many tracks in pool
+  //
+  StTrackForPool *trackfrompool;
+  trackfrompool = (StTrackForPool* ) mCollectionOfTracks->Last();
+  Int_t poolCounter = mCollectionOfTracks->IndexOf(trackfrompool);
+  double aveTracksPerEvent = 
+    float(( poolCounter + 1)) / float( mNumberEventsInPool);
+  //
+  // include in this decision some estimate of average tracks per event
+  //
+  double numPossiblePairs = pow((float(poolCounter) - aveTracksPerEvent),2);
+  if (numPossiblePairs > 1000000 ) {
+    analyseMixedPairs();
+    //  empty collection 
+    mCollectionOfTracks->Delete();
+    mNumberEventsInPool = 0;       
+  };
   return kStOK;
 }
 
 
-StAngleCorrMaker::StAngleCorrMaker(const Char_t *name, const Char_t *title) : StMaker(name, title) {
-  drawinit = kFALSE;  
+StAngleCorrMaker::StAngleCorrMaker(const Char_t *name, const Char_t *title) : StMaker(name, title) {  
 }
 
 StAngleCorrMaker::~StAngleCorrMaker() {
@@ -74,7 +97,7 @@ StAngleCorrMaker::~StAngleCorrMaker() {
 
 void StAngleCorrMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StAngleCorrMaker.cxx,v 1.2 1999/04/28 15:14:49 ogilvie Exp $\n");
+  printf("* $Id: StAngleCorrMaker.cxx,v 1.3 1999/04/29 16:53:26 ogilvie Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -85,8 +108,12 @@ void StAngleCorrMaker::Clear(Option_t *opt) {
 }
 
 Int_t StAngleCorrMaker::Finish() {
-  // draw histograms
-  mHistPhiNumerator->Draw();
+
+  // write out histograms
+
+  mOutput->Write("MyKey",kSingleKey);
+  mOutput->Close();
+
   return kStOK;
 }
 
