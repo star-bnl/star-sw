@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.4 2002/03/26 19:33:15 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.5 2002/03/27 00:50:11 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -21,6 +21,7 @@
 #include "StarClassLibrary/StTimer.hh"
 
 #include "StIOMaker/StIOMaker.h"
+#include "StTreeMaker/StTreeMaker.h"
 
 #include "StStrangeMuDstMaker/StStrangeMuDstMaker.h"
 #include "StStrangeMuDstMaker/StStrangeEvMuDst.hh"
@@ -53,25 +54,31 @@ ClassImp(StMuDstMaker)
   using namespace units;
 #endif
 
-
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-StMuDstMaker::StMuDstMaker(const char* name,) {
-  mStEvent = 0; 
-  mStStrangeMuDstMaker = 0; 
-  mIOMaker = 0;
-  mIoMode = 1;(mode);
-  mIoNameMode = 1;
-  mSplit = 99;
-  mCompression = 9;
-  mBufferSize(65536*4);
+StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
+  mStEvent(0), mStStrangeMuDstMaker(0), mIOMaker(0), mTreeMaker(0),
+  mIoMode(1), mIoNameMode(1),
+  mTrackType(256), mReadTracks(1), 
+  mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
+  mSplit(99), mCompression(9), mBufferSize(65536*4)
 {
+  mDirName="";
+  mFileName="";
   streamerOff();
+  if (mIoMode==ioRead) openRead();
+  if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
+  mEventCounter=0;
+  mStMuDst = new StMuDst();
+  createArrays();
+  
 }
-
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 StMuDstMaker::StMuDstMaker(ioMode mode, ioNameMode nameMode, const char* dirName, const char* fileName, const char* filter, int maxFiles) : 
-  mStEvent(0), mStStrangeMuDstMaker(0), mIOMaker(0),
+  mStEvent(0), mStStrangeMuDstMaker(0), mIOMaker(0), mTreeMaker(0),
   mIoMode(mode), mIoNameMode(nameMode),
   mDirName(dirName), mFileName(fileName), mFilter(filter), mMaxFiles(maxFiles),
   mTrackType(256), mReadTracks(1), 
@@ -79,28 +86,27 @@ StMuDstMaker::StMuDstMaker(ioMode mode, ioNameMode nameMode, const char* dirName
   mSplit(99), mCompression(9), mBufferSize(65536*4)
 {
   streamerOff();
-
-  mEventCounter=0;
-  mStMuDst = new StMuDst();
-  /// from muDst
-  for ( int i=0; i<__NARRAYS__; i++) {
-    arrays[i] = 0;
-    mArrays[i]= clonesArray(arrays[i],StMuArrays::arrayTypes[i],StMuArrays::arraySizes[i],StMuArrays::arrayCounters[i]);
-  }
-  /// from strangeness group
-  for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
-    strangeArrays[i] = 0;
-    mStrangeArrays[i]= clonesArray(strangeArrays[i],StMuArrays::strangeArrayTypes[i],StMuArrays::strangeArraySizes[i],StMuArrays::strangeArrayCounters[i]);
-  }
-
-  mStMuDst->set(this);
-
   if (mIoMode==ioRead) openRead();
   if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
-
+  
+  
+  mEventCounter=0;
+  mStMuDst = new StMuDst();
+  createArrays();
+  
 }
-
- void  StMuDstMaker::streamerOff() {
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+StMuDstMaker::~StMuDstMaker() {
+  delete mStMuDst;
+  for ( int i=0; i<__NARRAYS__; i++) delete arrays[i];
+  for ( int i=0; i<__NSTRANGEARRAYS__; i++) delete strangeArrays[i];
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void  StMuDstMaker::streamerOff() {
   StStrangeMuDst::Class()->IgnoreTObjectStreamer();
   StV0MuDst::Class()->IgnoreTObjectStreamer();
   StXiMuDst::Class()->IgnoreTObjectStreamer();
@@ -110,20 +116,28 @@ StMuDstMaker::StMuDstMaker(ioMode mode, ioNameMode nameMode, const char* dirName
   StKinkMc::Class()->IgnoreTObjectStreamer();
   StMuTrack::Class()->IgnoreTObjectStreamer();
   StMuHelix::Class()->IgnoreTObjectStreamer();
- }
-
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-StMuDstMaker::~StMuDstMaker(){
 }
-
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDstMaker::createArrays() {
+  for ( int i=0; i<__NARRAYS__; i++) {
+    arrays[i] = 0;
+    mArrays[i]= clonesArray(arrays[i],StMuArrays::arrayTypes[i],StMuArrays::arraySizes[i],StMuArrays::arrayCounters[i]);
+  }
+  /// from strangeness group
+  for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
+    strangeArrays[i] = 0;
+    mStrangeArrays[i]= clonesArray(strangeArrays[i],StMuArrays::strangeArrayTypes[i],StMuArrays::strangeArraySizes[i],StMuArrays::strangeArrayCounters[i]);
+  }
+  mStMuDst->set(this);
+}
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::clear(){
   DEBUGMESSAGE1("");
-
+  
   /// from muDst
   for ( int i=0; i<__NARRAYS__; i++) {
     clear(mArrays[i],StMuArrays::arrayCounters[i]);
@@ -131,8 +145,6 @@ void StMuDstMaker::clear(){
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
     clear(mStrangeArrays[i],StMuArrays::strangeArrayCounters[i]);
   }
-
-
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -159,10 +171,10 @@ TClonesArray* StMuDstMaker::clonesArray(TClonesArray* p, const char* type, int s
 int StMuDstMaker::Init(){
   DEBUGMESSAGE1("");
   mIOMaker = (StIOMaker*)GetMaker("IOMaker");
+  mTreeMaker = (StTreeMaker*)GetMaker("outputStream");
   mStStrangeMuDstMaker = (StStrangeMuDstMaker*)GetMaker("StrangeMaker");
   return 0;
 }
-
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -203,15 +215,12 @@ void StMuDstMaker::fill(){
     DEBUGMESSAGE1("no StEvent");
     return;
   }
-  
   /// once per event the pid algorithm has to be set up
   /// we make it static for the StMuTrack, because all tracks use the same instance
   if (mProbabilityPidAlgorithm) delete mProbabilityPidAlgorithm;
   mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm(*mStEvent);
   StMuTrack::setProbabilityPidAlgorithm(mProbabilityPidAlgorithm);
   StMuTrack::setProbabilityPidCentrality(uncorrectedNumberOfNegativePrimaries(*mStEvent));
-
-
   try {
     fillTrees(mStEvent);
   }
@@ -225,8 +234,6 @@ void StMuDstMaker::fill(){
 //-----------------------------------------------------------------------
 void StMuDstMaker::write(){
   DEBUGMESSAGE1("");
-
-
   try {
     fill();
   }
@@ -234,18 +241,22 @@ void StMuDstMaker::write(){
     return;
   }
 
-  // filename
   string ioMakerFileName;
-  if (mIOMaker) {  // if the ioMaker is specified, we take the output filename from the ioMaker
-    ioMakerFileName = string(mIOMaker->GetFile()); 
-  }
-  else { // if not then construct the filename
-    ioMakerFileName = mDirName+mFileName;
+  string theFileName;
+  if (mIoNameMode==0) {
+    theFileName = buildFileName(dirname(mDirName),basename(mFileName),".MuDst.root");  }
+  else {
+    if (mIOMaker) { 
+      ioMakerFileName = string(mIOMaker->GetFile()); 
+      theFileName = buildFileName(dirname(mDirName),basename(ioMakerFileName),".MuDst.root"); 
+    }    
+    if (mTreeMaker) {  
+      ioMakerFileName = mTreeMaker->GetTree()->GetBaseName();
+      theFileName = buildFileName(dirname(ioMakerFileName),basename(ioMakerFileName),".MuDst.root"); 
+    }
   }
   DEBUGVALUE1(ioMakerFileName.c_str());
 
-
-  string theFileName = buildFileName(mDirName,basename(ioMakerFileName),".MuDst.root");
   if (theFileName != mCurrentFileName) {
     closeWrite();
     openWrite(theFileName);
@@ -289,7 +300,7 @@ void StMuDstMaker::openRead() {
   for ( int i=0; i<__NARRAYS__; i++) {
     mChain->SetBranchAddress(StMuArrays::arrayNames[i],&mArrays[i]);
   } 
-
+  
   // strange stuff
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
     mChain->SetBranchAddress(StMuArrays::strangeArrayNames[i],&mStrangeArrays[i]);
@@ -326,12 +337,12 @@ void StMuDstMaker::openWrite(string fileName) {
   mCurrentFile = new TFile(fileName.c_str(),"RECREATE","StMuDst");
   
   if (!mCurrentFile) throw StMuExceptionNullPointer("no file openend",PF);
-
+  
   mCurrentFile->SetCompressionLevel(mCompression);
   
   // Create a ROOT Tree and one superbranch
   DEBUGMESSAGE2("now create trees and branches");
-
+  
   TBranch* branch;
   int bufsize = mBufferSize;
   if (mSplit) bufsize /= 4;
@@ -340,19 +351,19 @@ void StMuDstMaker::openWrite(string fileName) {
   mTTree = new TTree("MuDst", "StMuDst",mSplit);
   if (!mTTree) throw StMuExceptionNullPointer("can not create tree",PF);
   mTTree->SetAutoSave(1000000);  // autosave when 1 Mbyte written
-    DEBUGMESSAGE("arrays");
+  DEBUGMESSAGE("arrays");
   for ( int i=0; i<__NARRAYS__; i++) {
     DEBUGVALUE2(i);
     branch = mTTree->Branch(StMuArrays::arrayNames[i],&mArrays[i], bufsize, mSplit);
   }
-
+  
   // strange stuff
-    DEBUGMESSAGE("strange arrays");
+  DEBUGMESSAGE("strange arrays");
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
     DEBUGVALUE2(i);
     branch = mTTree->Branch(StMuArrays::strangeArrayNames[i],&mStrangeArrays[i], bufsize, mSplit);
   }
- 
+  
   mCurrentFileName = fileName;
 }
 //-----------------------------------------------------------------------
@@ -557,57 +568,6 @@ StRichSpectra* StMuDstMaker::richSpectra(const StTrack* track) {
   }
   return 0;
 }
-//---------------------------------------------------------------------
-//---------------------------------------------------------------------
-//---------------------------------------------------------------------
-// int StMuDstMaker::addRichSpectra(const StRichSpectra* rich) {
-//   DEBUGMESSAGE3("");
-//   int index = -1;
-//   int counter;//! = mStRichSpectraTCA->GetEntries();
-//   try {
-//     //    new((*mStRichSpectraTCA)[counter]) StRichSpectra(*rich);
-//     index = counter;
-//   }
-//   catch (StMuException e) {
-//     e.print();
-//   }
-//   return index; /// return index to self if newly created, else return -1
-// }
-// //---------------------------------------------------------------------
-// //---------------------------------------------------------------------
-// //---------------------------------------------------------------------
-// int StMuDstMaker::addDetectorState(const StDetectorState* states) {
-//   DEBUGMESSAGE3("");
-//   int index = -1;
-//   int counter;// = mStDetectorStateTCA->GetEntries();
-//   try {
-//     //    new((*mStDetectorStateTCA)[counter]) StDetectorState(*states);
-//     index = counter;
-//   }
-//   catch (StMuException e) {
-//     e.print();
-//   }
-//   return index; /// return index to self if newly created, else return -1
-// }
-// //-----------------------------------------------------------------------
-// //-----------------------------------------------------------------------
-// //-----------------------------------------------------------------------
-// int StMuDstMaker::addL3AlgorithmInfo(TClonesArray* tca, StL3AlgorithmInfo* alg) {
-//   DEBUGMESSAGE3("");
-//   int index = -1;
-//   int counter = tca->GetEntries();
-//   try{
-//     new((*tca)[counter]) StL3AlgorithmInfo(*alg);
-//     index = counter;
-//   }
-//   catch (StMuException e) {
-//     IFDEBUG3(e.print());
-//   }
-//   return index;  /// return index to self if newly created, else return -1;
-// }
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
 void StMuDstMaker::fillStrange(StStrangeMuDstMaker* maker) {
   DEBUGMESSAGE2("");
   /// now fill the strangeness stuff
@@ -689,20 +649,31 @@ string StMuDstMaker::buildFileName(string dir, string fileName, string extention
 //-----------------------------------------------------------------------
 string StMuDstMaker::basename(string s){
   string name(s);
-  while ( name.find("/") != string::npos ) {
-    string::size_type pos =  name.find("/");
-    name.erase(0, pos+1 );
-  }
-  string::size_type pos =  name.find(".event.root");
-  if (pos != string::npos) name.erase(pos,pos+11);
+  size_t pos;
+  pos = name.find_last_of("/");
+  if (pos!=string::npos ) name.erase(0, pos+1 );
+  pos = name.find_first_of(".");
+  if (pos!=string::npos ) name.erase(pos,name.length() );
   return name;
-}  
+} 
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+string StMuDstMaker::dirname(string s){
+  string name(s);
+  size_t pos;
+  pos = name.find_last_of("/");
+  if (pos!=string::npos ) name.erase(pos, name.length());
+  return name;
+} 
+ 
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::makeChain(const char* dir, const char* filter, int maxFiles) {
   DEBUGMESSAGE1("");
   mChain = new TChain("MuDst");
+
   //  TChain* mChain2 = new TChain("StrangeMuDst");
   // read directory
   void *pDir = gSystem->OpenDirectory(dir);
@@ -733,8 +704,8 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
- * Revision 1.4  2002/03/26 19:33:15  laue
- * minor updates
+ * Revision 1.5  2002/03/27 00:50:11  laue
+ * bux fix from earlier check in
  *
  * Revision 1.3  2002/03/20 16:04:11  laue
  * minor changes, mostly added access functions

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.4 2002/03/26 19:33:14 laue Exp $
+ * $Id: StMuDst.cxx,v 1.5 2002/03/27 00:50:11 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -193,8 +193,9 @@ StTrack* StMuDst::createStTrack(StMuTrack* track) {
   if (track->type() == global) t = new StGlobalTrack();
   t->setFlag( track->flag() );
 
-  t->setGeometry( trackGeometry( track->charge(), &track->helix()) );
-  t->setOuterGeometry( trackGeometry( track->charge(), &track->outerHelix()) );
+  StPhysicalHelixD helix;
+  helix = track->helix(); t->setGeometry( trackGeometry( track->charge(), &helix ) );
+  helix = track->outerHelix(); t->setOuterGeometry( trackGeometry( track->charge(), &helix ) );
 
   return t;
 }
@@ -205,6 +206,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.5  2002/03/27 00:50:11  laue
+ * bux fix from earlier check in
+ *
  * Revision 1.4  2002/03/26 19:33:14  laue
  * minor updates
  *
