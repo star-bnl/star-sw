@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.74 2002/02/23 19:25:55 perev Exp $
+// $Id: doEvents.C,v 1.75 2002/04/14 22:27:29 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -190,7 +190,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
      IOMk->SetIOMode("r");
      IOMk->SetBranch("*",0,"0");	//deactivate all branches
      if(!mainBranch.IsNull())	IOMk->SetBranch(mainBranch,0,"r");  
-     IOMk->SetBranch("dstBranch",0,"r");
+//     IOMk->SetBranch("dstBranch",0,"r");
 //     IOMk->SetBranch("runcoBranch",0,"r");
      IOMk->SetDebug();
 //for test only     IOMk->SetMaxEvent(2);
@@ -328,6 +328,9 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.75  2002/04/14 22:27:29  perev
+// remove reading dst by default
+//
 // Revision 1.74  2002/02/23 19:25:55  perev
 // NotifyMe used
 //
