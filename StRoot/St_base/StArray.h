@@ -33,7 +33,7 @@
 #include "TObjArray.h"
 #include "TNamed.h"
 #include "TArrayI.h"
-
+#include <assert.h>
 class StVectorInt : public TArrayI
 {
 public:
