@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.139 2004/01/15 00:11:53 fisyak Exp $
+# $Id: Construct,v 1.140 2004/01/15 01:01:48 fisyak Exp $
 use Env;
 use lib $ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -295,7 +295,7 @@ foreach my $dir( "pams", "StRoot" ,"StPiD") {
 }
 print "subdirs = @subdirs\n" if $param::debug;
 my @Targets = ();
-my @sysdirlist = qw(asps/agi/agetof asps/staf/sdd asps/rexe StDb cern/geant321 asps/agi/gcalor asps/agi/AtlsimMain);
+my @sysdirlist = qw(asps/Simulation/agetof asps/staf/sdd asps/rexe StDb cern/geant321 asps/Simulation/gcalor asps/Simulation/AtlsimMain);
 if ( $STAR_HOST_SYS !~ /^alpha_dux/) {push @sysdirlist, "asps/Jprof";}
 foreach $dir(@sysdirlist , @subdirs ) {
     if ( -d $dir ) {
