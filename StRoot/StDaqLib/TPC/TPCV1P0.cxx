@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV1P0.cxx,v 1.4 1999/07/10 21:31:25 levine Exp $
+ * $Id: TPCV1P0.cxx,v 1.5 2000/01/11 22:03:44 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description:  TPCV1P0 implementation
@@ -10,6 +10,10 @@
  *
  ***************************************************************************
  * $Log: TPCV1P0.cxx,v $
+ * Revision 1.5  2000/01/11 22:03:44  levine
+ * convert string to char* via c_str() member
+ * (from Brian Lasiuk)
+ *
  * Revision 1.4  1999/07/10 21:31:25  levine
  * Detectors RICH, EMC, TRG now have their own (defined by each detector) interfaces.
  * Existing user code will not have to change any calls to TPC-like detector
@@ -205,7 +209,7 @@ TPCV1P0_PADK_SR *TPCV1P0_Reader::getPADKReader(int sector)
     if(!p->initialize())
     {
       cout << "Error Reading PADK banks, sector=" << sector 
-	   << ": " << errstr() << endl;
+	   << ": " << errstr().c_str() << endl;
       delete p;
       return NULL;
     }

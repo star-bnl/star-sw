@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0.cxx,v 1.7 1999/07/27 23:19:32 levine Exp $
+ * $Id: TPCV2P0.cxx,v 1.8 2000/01/11 22:03:44 levine Exp $
  * Author: Jeff Landgraf and M.J. LeVine
  ***************************************************************************
  * Description: common TPC (V2) implementation stuff
@@ -19,6 +19,10 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0.cxx,v $
+ * Revision 1.8  2000/01/11 22:03:44  levine
+ * convert string to char* via c_str() member
+ * (from Brian Lasiuk)
+ *
  * Revision 1.7  1999/07/27 23:19:32  levine
  * implemented methods TPCV2P0_Reader::getBankTPCPEDR()
  *                     TPCV2P0_Reader::getBankTPCRMSR()
@@ -240,7 +244,7 @@ TPCV2P0_PADK_SR *TPCV2P0_Reader::getPADKReader(int sector)
     if(!p->initialize())
     {
       if (ercpy->verbose) cout << "Error Reading PADK banks, sector=" << sector 
-	   << ": " << errstr() << endl;
+	   << ": " << errstr().c_str() << endl;
       delete p;
       return NULL;
     }
