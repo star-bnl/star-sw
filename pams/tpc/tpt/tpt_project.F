@@ -1,6 +1,10 @@
-* $Id: tpt_project.F,v 1.13 2000/02/13 22:45:49 sakrejda Exp $
+* $Id: tpt_project.F,v 1.14 2000/02/15 02:50:45 sakrejda Exp $
 * $Log: tpt_project.F,v $
+* Revision 1.14  2000/02/15 02:50:45  sakrejda
+* Clean up, skip calculating prediction if a row is repeated
+*
 * Revision 1.13  2000/02/13 22:45:49  sakrejda
+*
 * CVo ----------------------------------------------------------------------
 * nly truly edge pads left out
 * 
@@ -105,9 +109,9 @@ C     Local variables
       INTEGER tgc_sec24_to_sec12
       INTEGER longrow, irow_last
 
-      LOGICAL more
-      REAL    xp(2),yp(2),devsum0,dist,dc,alpha,devsum
-      REAL    xold,yold,cf,zp, row_fact
+      LOGICAL more, repeat
+      REAL    xp(2),yp(2),zp(2),devsum0,dist,dc,alpha,devsum
+      REAL    xold,yold,cf, row_fact
       real    atand
 C_____________________________________________________________________
 C
@@ -152,10 +156,12 @@ C        loop over rows
          more=.true.
          if(irow.lt.1.or.irow.gt.45) more=.false.
          isect = is(mdir)
+         repeat = .false.
          do while(more)
            row_fact=1.0
            if(irow.lt.14)row_fact=1.5
 C          find predictions for this row
+           if(.not.repeat)then
            iret = tpt_helix_pred(itrk,trk,isect,
      >            irow,tpar_h,tpar,np,xp,yp,ipass)
 C
@@ -166,24 +172,29 @@ C
      >               irow,tpar_h,tpar,np,xp,yp,ipass)
               if(np.eq.0) then
                  isect = is(mdir)-1
-                 if(isect.eq.0) isect=1
+                 if(isect.eq.0) isect=12
                  iret = tpt_helix_pred(itrk,trk,isect,
      >                  irow,tpar_h,tpar,np,xp,yp,ipass)
               endif
            endif
+           do lk=1,np
+c            calculate distance along the track (from cross product of two vectors)
+             dc = abs((hit(ip(mdir)).x - trk(itrk).p(3))*(yp(lk)-trk(itrk).p(4))
+     >          -(hit(ip(mdir)).y - trk(itrk).p(4))*(xp(lk)-trk(itrk).p(3)))/
+     >          sqrt(((hit(ip(mdir)).x - trk(itrk).p(3))**2+
+     >          (hit(ip(mdir)).y - trk(itrk).p(4))**2)*((yp(lk)-trk(itrk).p(4))**2+
+     >          (xp(lk)-trk(itrk).p(3))**2))
+             alpha = asin(dc)
+             zp(lk) = hit(ip(mdir)).z+st(mdir)*alpha*abs(trk(itrk).p(2))*trk(itrk).p(7)
+           end do
+           endif
+           repeat=.false.
            if(np.ne.0) then
              nf=0
              devsum0=10000000000.0
              do lk=1,np
-               dc = sqrt((hit(ip(mdir)).x-xp(lk))**2+
-     >                   (hit(ip(mdir)).y-yp(lk))**2)
-               if(abs(trk(itrk).p(2))-0.5*dc.lt.0)
-     >         dc=2.0*abs(trk(itrk).p(2))
-               alpha = asin(0.5*dc/abs(trk(itrk).p(2)))
-               zp = hit(ip(mdir)).z+st(mdir)*
-     >         2.0*alpha*abs(trk(itrk).p(2))*trk(itrk).p(7)
-               if(abs(zp).lt.210.0)then
-               irets=tpt_find_slic(zp,tpar(ipass).nzslic,islic)
+               if(abs(zp(lk)).lt.210.0)then
+               irets=tpt_find_slic(zp(lk),tpar(ipass).nzslic,islic)
                is_pnt = slice_loc(isect,irow,islic) 
                l = slice_pnt(1,is_pnt)
 C              loop over all hits within a z-slice
@@ -192,10 +203,10 @@ C              loop over all hits within a z-slice
                    dist = (hit(l).x-xp(lk))**2+(hit(l).y-yp(lk))**2
                    if(dist.lt.row_fact*(tpar(ipass).drstr*hit(l).prf)**2) then
 C                    check z
-                     if(abs(zp-hit(l).z).lt.sqrt(hit(l).zrf**2+
-     >               hit(ip(mdir)).zrf**2)*tpar(ipass).dzstr) then
+                     if((zp(lk)-hit(l).z)**2.lt.(hit(l).zrf**2+
+     >               hit(ip(mdir)).zrf**2)*tpar(ipass).dzstr**2) then
 C                        a good candidate found
-                         devsum = (zp-hit(l).z)**2+dist
+                         devsum = (zp(lk)-hit(l).z)**2+dist
                          if(devsum.lt.devsum0) then
 C                          memorize it
                            imem = l
@@ -230,6 +241,7 @@ C              a hit found
                   tpt_project = STAFCV_OK
                   irow_last=irow
                   irow=irow-st(mdir)
+                  repeat=.true.
                endif
              endif
            endif
