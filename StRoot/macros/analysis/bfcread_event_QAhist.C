@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QAhist.C,v 1.3 2000/06/02 20:26:10 lansdell Exp $
+// $Id: bfcread_event_QAhist.C,v 1.4 2000/06/13 00:58:59 lansdell Exp $
 // $Log: bfcread_event_QAhist.C,v $
+// Revision 1.4  2000/06/13 00:58:59  lansdell
+// added libglobal_Tables to resolve crashes
+//
 // Revision 1.3  2000/06/02 20:26:10  lansdell
 // added check on Make() return codes
 //
@@ -76,6 +79,7 @@ void bfcread_event_QAhist(
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("StUtilities");
+  gSystem->Load("libglobal_Tables");
   gSystem->Load("StAnalysisUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
