@@ -1,5 +1,8 @@
-// $Id: ebye.C,v 1.6 1999/01/27 00:18:15 dhammika Exp $
+// $Id: ebye.C,v 1.7 1999/02/16 22:35:04 dhammika Exp $
 // $Log: ebye.C,v $
+// Revision 1.7  1999/02/16 22:35:04  dhammika
+// cleaned up a little bit
+//
 // Revision 1.6  1999/01/27 00:18:15  dhammika
 // EbyE PKG works for more than one event in ROOT
 //
@@ -42,7 +45,9 @@ void Load(){
   gSystem->Load("St_params_Maker");
   //gSystem->Load("St_calib_Maker");
   //gSystem->Load("St_dst_Maker");
-  //gSystem->Load("St_run_summary_Maker");
+  gSystem->Load("global");
+  gSystem->Load("St_global");
+  gSystem->Load("St_run_summary_Maker");
   //gSystem->Load("St_ana_Maker");
   gSystem->Load("ebye");
   gSystem->Load("St_ebye");
@@ -53,8 +58,8 @@ void Load(){
 ebye(const Int_t   SetmakePrior       = 0,
      const Int_t   SetmakeEnsembleAve = 0,
      const Int_t   SetdoAnalysis      = 1,
-     const Int_t   Nevents            = 20,
-     const Int_t   Nskip              = 0,
+     const Int_t   Nevents            = 10,
+     const Int_t   Nskip              = 94,
      const Char_t *fileinp            = 
      "/star/scr2b/dhammika/psc362_02_160evts_h_dst.xdf",
      //const Char_t *fileprior          = "sca_prior_dir.xdf",
@@ -80,22 +85,18 @@ ebye(const Int_t   SetmakePrior       = 0,
   // Create the main chain object
   if (chain) delete chain;
   chain = new StChain("ebye");
-  //St_TLA_Maker      *params = new St_TLA_Maker("params","params");
   //chain->SetDebug(1);
-  St_params_Maker   *params = new St_params_Maker("params","params");
-  //St_calib_Maker    *calib  = new St_calib_Maker("calib","calib");
+  St_params_Maker       *params = new St_params_Maker("params","params");
+  //St_calib_Maker        *calib  = new St_calib_Maker("calib","calib");
   // Set input file
   if (xdf_in) {
-    St_xdfin_Maker *my_xdfin = new St_xdfin_Maker("xdfin");
+    St_xdfin_Maker    *my_xdfin = new St_xdfin_Maker("xdfin");
     chain->SetInputXDFile(xdf_in);
   }
   //  Create the makers to be called by the current chain
-  //St_dst_Maker   *my_dst = new St_dst_Maker("dst","dst");
-  St_TLA_Maker  *summary = new St_TLA_Maker("run_summary","dst");
-  //St_run_summary_Maker *summary  = new St_TLA_Maker("run_summary","run/dst");
-  St_TLA_Maker   *dst    = new St_TLA_Maker("dst","event/data/global/dst");
-  //St_ana_Maker   *my_dst = new St_ana_Maker("dst","dst");
-  St_ebye_Maker *my_ebye = new St_ebye_Maker("ebye","event/data/ebye/sca");
+  St_TLA_Maker             *dst = new St_TLA_Maker("dst","event/data/global/dst");
+  St_run_summary_Maker *summary = new St_run_summary_Maker("run_summary","run/dst");
+  St_ebye_Maker        *my_ebye = new St_ebye_Maker("ebye","event/data/ebye/sca");
   // Create HTML docs of all Maker's involved
   //chain->MakeDoc();
   if (DEBUG) printf("====>ebye.C::Begin chain.PrintInfo\n");
@@ -143,28 +144,31 @@ ebye(const Int_t   SetmakePrior       = 0,
   
   gBenchmark->Start("ebye");
   printf("====>ebye.C::Beging Benchmark(ebye) \n"); 
+  Int_t ngood=0;
   Int_t i=1;
   for (Int_t i =1; i <= Nevents; i++){
     iret = chain->Make(i);
-    if (iret) {
+    if (iret == 2) {
       printf ("====>ebye.C:: <<< ERROR >>> <Chain::Make()>: failed in Event no. %d \n \t  chain->Make(i) = %d \n",i, iret);
-      // break;
+      break;
     }
-    if (i != Nevents) chain->Clear();
+    if (!iret) ngood++;
+    //if (i != Nevents) chain->Clear();
     // Write out SCA output
     if (!iret && SetdoAnalysis ){
       if (xdf_out){
 	gBenchmark->Start("xdf_out");
 	St_DataSet *ebye_out = chain->DataSet("ebye");
-	//St_DataSetIter       ebyetables(ebye_out); ebyetables.Du();
 	xdf_out->NextEventPut(ebye_out); // xdf output
 	gBenchmark->Stop("xdf_out");
       }
-      printf ("====>ebye.C:: ========================== Done with Event no. %d\n",i);
+      printf ("====>ebye.C:: ========================================= Done with Event no. %d\n\n",i);
     }
+    if (i != Nevents) chain->Clear();
   }
   // Set the total #of good events processed.
-  my_ebye->SetnEvents(i);
+  my_ebye->SetnEvents(ngood);
+      printf ("====>ebye.C:: ================================================== Total good events processed. %d\n\n",ngood);  
   // Write out prior
   if (SetmakePrior && xdf_prior){
     my_ebye->PutPrior();
