@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.53 2000/08/31 23:04:39 lbarnby Exp $
+// $Id: St_dst_Maker.cxx,v 1.54 2000/09/01 13:27:50 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.54  2000/09/01 13:27:50  fisyak
+// Fix EventHeader
+//
 // Revision 1.53  2000/08/31 23:04:39  lbarnby
 // get event_header table from trigger instead of creating it
 //
@@ -164,7 +167,7 @@
 #include "tables/St_dst_mon_soft_rich_Table.h"
 #include "tables/St_sgr_groups_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.53 2000/08/31 23:04:39 lbarnby Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.54 2000/09/01 13:27:50 fisyak Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -330,13 +333,14 @@ Int_t  St_dst_Maker::Filler(){
   event_header_st  event =   {"Collision", //event_type
                               0,           // n_event
                               0, 0, 0, 0, // exp_run_id,time,trig_mask,bunch_cross
-			      0,0}; // bunchXing
+			      {0,0}}; // bunchXing
   if (GetEventType()) strcpy (&event.event_type[0],GetEventType());
   event.n_event    = GetEventNumber();
   event.exp_run_id = GetRunNumber();
   if(event_header){
-    event.bunchXing[0] = event_header->bunchXing[0];
-    event.bunchXing[1] = event_header->bunchXing[1];
+    St_event_header &EventHeader = *event_header;
+    event.bunchXing[0] = EventHeader[0].bunchXing[0];
+    event.bunchXing[1] = EventHeader[0].bunchXing[1];
   }
   time_t tt  =  GetDateTime().Convert()-timezone; // UTC -> local uncorrected for daylight saving time
   event.time = localtime(&tt)->tm_isdst ? tt+3600 : tt; // assign and correct for summer time
