@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.11 2000/06/12 15:04:02 perev Exp $
+ * $Id: StDAQReader.h,v 1.12 2000/06/12 15:41:19 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.12  2000/06/12 15:41:19  perev
+ * StTPCRead.h added into StDAQReader.h
+ *
  * Revision 1.11  2000/06/12 15:04:02  perev
  * SVT + cleanup
  *
@@ -54,7 +57,7 @@ class StTRGReader ;
 class StSVTReader ;
 #ifndef __CINT__
 #include "StDaqLib/RICH/RICH_Reader.hh"
-#endif 
+#endif /*__CINT__*/
 typedef RICH_Reader StRICHReader;
 //
 
@@ -117,5 +120,5 @@ char fFTPCVersion[12];
 
 };
 
-
+#include "StTPCReader.h"
 #endif
