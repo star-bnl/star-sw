@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.hh,v 1.8 2000/01/11 22:04:40 levine Exp $
+ * $Id: EventReader.hh,v 1.9 2000/01/31 19:38:51 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: common definitions for all detectors
@@ -16,9 +16,13 @@
  * 20-Jul-99 MJL add alternate getEventReader with name of logfile
  * 20-Jul-99 MJL add overloaded printEventInfo(FILE *)
  * 28-Dec-99 MJL add alternate InitEventReaders, mapped and unmapped
+ * 31-Jan-00 MJL change to #if !defined ST_NO_NAMESPACES
  *
  ***************************************************************************
  * $Log: EventReader.hh,v $
+ * Revision 1.9  2000/01/31 19:38:51  levine
+ * chamge to #if !defined ST_NO_NAMESPACES
+ *
  * Revision 1.8  2000/01/11 22:04:40  levine
  * EventReader.hh  // change the header file to include std::string
  * EventReader.cxx // convert string to char* via c_str() member
@@ -73,7 +77,7 @@
 #include <sys/types.h>
 
 #include <string>
-#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+#if !defined ST_NO_NAMESPACES
 using std::string;
 #endif
 
