@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.15 2001/09/16 22:09:28 caines Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.16 2001/09/22 01:07:09 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.16  2001/09/22 01:07:09  caines
+ * Fixes now that AddData() is cleared everyevent
+ *
  * Revision 1.15  2001/09/16 22:09:28  caines
  * Add extra checks for when SVT isnt in every event
  *
@@ -96,7 +99,6 @@ StSvtClusterAnalysisMaker::StSvtClusterAnalysisMaker(const char *name) : StMaker
    mSvtHit          = NULL;
    mSvtAnalClusters = NULL; 
 
-   mEventNum        = 0;
    mNumOfClusters   = 0;
    mTotNumOfClusters = 0;
    mTotNumOfGoodClusters = 0;
@@ -122,15 +124,13 @@ Int_t StSvtClusterAnalysisMaker::Init()
 
   mNoEvents=0;
   
-  GetSvtCluster();
   GetSvtRawEvent();
-  GetSvtEvent();
-  SetSvtAnalysis();
+  //GetSvtEvent();
+  //GetSvtCluster();
+  //SetSvtAnalysis();
 
-  mDataType = (char*)mSvtAdjEvent->getConfiguration();
-  mEventNum = mSvtAdjEvent->getEventNumber();
- 
-  mTotalNumberOfHybrids = mSvtClusterColl->getTotalNumberOfHybrids();
+   
+  mTotalNumberOfHybrids = mSvtRawEventColl->getTotalNumberOfHybrids();
   CreateClusterHist(mTotalNumberOfHybrids);
 
 
@@ -172,11 +172,9 @@ Int_t StSvtClusterAnalysisMaker::GetSvtCluster()
   St_DataSet *dataSet;
 
   dataSet = GetDataSet("StSvtCluster");
-  assert(dataSet);
+  if( !dataSet) return kStWarn;
   mSvtClusterColl = (StSvtHybridCollection*)(dataSet->GetObject());
-  //mSvtClusterColl = (StSvtData*)(dataSet->GetObject());
-  assert(mSvtClusterColl);
-
+  if( !mSvtClusterColl) return kStWarn;
   return kStOK;
 }
 
@@ -199,13 +197,13 @@ Int_t StSvtClusterAnalysisMaker::GetSvtPixels()
 Int_t StSvtClusterAnalysisMaker::SetSvtAnalysis()
 {
   mSvtAnalSet = new St_ObjectSet("StSvtAnalResults");
-  AddConst(mSvtAnalSet);  
+  AddData(mSvtAnalSet);  
   SetOutput(mSvtAnalSet); //Declare for output
 
   mSvtAnalColl = new StSvtHybridCollection(mSvtAdjEvent->getConfiguration());
   //cout<<"mSvtAnalColl  = "<<mSvtAnalColl<<endl;
   mSvtAnalSet->SetObject((TObject*)mSvtAnalColl); 
-  assert(mSvtAnalColl);
+  //assert(mSvtAnalColl);
 
   return kStOK;
 }
@@ -235,12 +233,12 @@ Int_t StSvtClusterAnalysisMaker::CreateClusterHist(Int_t tNuOfHyb)
   char* titlerawc;
   char* titleadcc;
   
-   for (int barrel = 1;barrel <= mSvtClusterColl->getNumberOfBarrels();barrel++) {
-     for (int ladder = 1;ladder <= mSvtClusterColl->getNumberOfLadders(barrel);ladder++) {
-       for (int wafer = 1;wafer <= mSvtClusterColl->getNumberOfWafers(barrel);wafer++) {
-	 for (int hybrid = 1;hybrid <= mSvtClusterColl->getNumberOfHybrids();hybrid++) {
+   for (int barrel = 1;barrel <= mSvtRawEventColl->getNumberOfBarrels();barrel++) {
+     for (int ladder = 1;ladder <= mSvtRawEventColl->getNumberOfLadders(barrel);ladder++) {
+       for (int wafer = 1;wafer <= mSvtRawEventColl->getNumberOfWafers(barrel);wafer++) {
+	 for (int hybrid = 1;hybrid <= mSvtRawEventColl->getNumberOfHybrids();hybrid++) {
            
-	   int index = mSvtClusterColl->getHybridIndex(barrel,ladder,wafer,hybrid);
+	   int index = mSvtRawEventColl->getHybridIndex(barrel,ladder,wafer,hybrid);
 	   if(index < 0) continue;
 	   sprintf(title1,"TimAnodecluster");
 	   sprintf(titleraw,"TimAnodeRaw");
@@ -277,6 +275,16 @@ Int_t StSvtClusterAnalysisMaker::Make()
     gMessMgr->Warning() << " StSvtClusterAnalysisMaker::Make :No SVT RAW data " << endm;
     return kStWarn;
   }
+  if( GetSvtEvent()){
+    gMessMgr->Warning() << " StSvtClusterAnalysisMaker::Make :No SVT seq data " << endm;
+    return kStWarn;
+  }
+  if( GetSvtCluster()){
+    gMessMgr->Warning() << " StSvtClusterAnalysisMaker::Make :No SVT cluster data " << endm;
+    return kStWarn;
+  }
+
+  SetSvtAnalysis();
   SetClusterAnalysis();
 
   if( Debug()) MakeHistograms();
@@ -590,6 +598,12 @@ Int_t StSvtClusterAnalysisMaker::Finish(){
 				<<   GetName() << endm;
 
   return kStOK;
+}
+//____________________________________________________________________________
+
+void StSvtClusterAnalysisMaker::Clear(Option_t *option){
+
+  StMaker::Clear(option);
 }
 
 //_____________________________________________________________________________

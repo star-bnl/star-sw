@@ -1,5 +1,8 @@
-// $Id: StSvtClusterMaker.h,v 1.4 2001/08/07 20:52:15 caines Exp $
+// $Id: StSvtClusterMaker.h,v 1.5 2001/09/22 01:07:09 caines Exp $
 // $Log: StSvtClusterMaker.h,v $
+// Revision 1.5  2001/09/22 01:07:09  caines
+// Fixes now that AddData() is cleared everyevent
+//
 // Revision 1.4  2001/08/07 20:52:15  caines
 // Implement better packing of svt hardware and charge values
 //
@@ -48,10 +51,11 @@ class StSvtClusterMaker : public StMaker
   virtual Int_t Finish();
 
   Int_t Reset();
+  Int_t GetSvtRawData();
   Int_t SetSvtCluster();
   Int_t SetHybridClusters();
-  virtual const char *GetCVS()
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterMaker.h,v 1.4 2001/08/07 20:52:15 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterMaker.h,v 1.5 2001/09/22 01:07:09 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  protected:

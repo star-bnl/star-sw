@@ -1,5 +1,8 @@
-// $Id: StSvtHitMaker.h,v 1.6 2001/08/07 20:52:16 caines Exp $
+// $Id: StSvtHitMaker.h,v 1.7 2001/09/22 01:07:09 caines Exp $
 // $Log: StSvtHitMaker.h,v $
+// Revision 1.7  2001/09/22 01:07:09  caines
+// Fixes now that AddData() is cleared everyevent
+//
 // Revision 1.6  2001/08/07 20:52:16  caines
 // Implement better packing of svt hardware and charge values
 //
@@ -61,13 +64,15 @@ class StSvtHitMaker : public StMaker
   virtual Int_t Make();
   virtual Int_t Finish();
   Int_t FillHistograms();
+  Int_t GetSvtRawData();
+  Int_t GetSvtClusterData();
   void TransformIntoSpacePoint();
   void SaveIntoTable(int numOfCluster, int index);
   void SaveIntoNtuple(int numOfCluster, int index);
   void SetWriteNtuple(int iwrite){iWrite = iwrite;};
   Int_t Eval();
-  virtual const char *GetCVS()
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.6 2001/08/07 20:52:16 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.7 2001/09/22 01:07:09 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  protected:

@@ -1,5 +1,8 @@
-// $Id: StSvtClusterAnalysisMaker.h,v 1.6 2001/09/16 22:09:31 caines Exp $
+// $Id: StSvtClusterAnalysisMaker.h,v 1.7 2001/09/22 01:07:09 caines Exp $
 // $Log: StSvtClusterAnalysisMaker.h,v $
+// Revision 1.7  2001/09/22 01:07:09  caines
+// Fixes now that AddData() is cleared everyevent
+//
 // Revision 1.6  2001/09/16 22:09:31  caines
 // Add extra checks for when SVT isnt in every event
 //
@@ -54,6 +57,7 @@ class StSvtClusterAnalysisMaker : public StMaker
   virtual Int_t Init();
   virtual Int_t Make();
   virtual Int_t Finish();
+  virtual void Clear(Option_t *option="");
 
   Int_t Reset();
 
@@ -73,14 +77,13 @@ class StSvtClusterAnalysisMaker : public StMaker
   void  printClusterInfo();
   void MakeHistograms(); // Tracking histograms
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterAnalysisMaker.h,v 1.6 2001/09/16 22:09:31 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterAnalysisMaker.h,v 1.7 2001/09/22 01:07:09 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     
  protected:
 
   Int_t mThreshOld;
   Int_t mOffSet;
-  Int_t mEventNum;
   Int_t mNumOfClusters;
   Int_t mNumOfMembers;
   Int_t mTotNumOfClusters;
@@ -92,7 +95,6 @@ class StSvtClusterAnalysisMaker : public StMaker
 
 
   Float_t adcArray[128*240];
-  Char_t* mDataType;
 
   StSvtData* mSvtAdjEvent;                    //! 
   StSvtHybridData* mHybridRawData ;           //!
