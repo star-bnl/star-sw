@@ -1,8 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.31 2000/12/08 17:04:09 oldi Exp $
+// $Id: plot.C,v 1.32 2000/12/12 15:01:11 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
+//               FTPC added by Markus Oldenburg, MPI, Dec 2000
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
 //               If selN = 0 plot all selections and harmonics.
 //               First time type .x plot.C() to see the menu.
@@ -12,77 +13,6 @@
 //               After the first execution, just type plot(N) .
 //               A negative N plots all pages starting with page N.
 //               Place a symbolic link to this file in StRoot/macros/analysis .
-//
-///////////////////////////////////////////////////////////////////////////////
-//
-// $Log: plot.C,v $
-// Revision 1.31  2000/12/08 17:04:09  oldi
-// Phi weights for both FTPCs included.
-//
-// Revision 1.29  2000/10/12 21:01:32  posk
-// Minor update.
-//
-// Revision 1.28  2000/09/29 22:53:18  posk
-// More histograms.
-//
-// Revision 1.27  2000/09/26 20:54:12  posk
-// Updated documentation.
-//
-// Revision 1.26  2000/09/15 22:52:56  posk
-// Added Pt weighting for event plane calculation.
-//
-// Revision 1.25  2000/08/31 18:50:32  posk
-// Added plotCen.C to plot from a series of files with different centralities.
-//
-// Revision 1.24  2000/08/12 20:20:15  posk
-// More centrality bins.
-//
-// Revision 1.23  2000/08/01 21:51:20  posk
-// Added doubly integrated v.
-//
-// Revision 1.22  2000/07/12 17:49:39  posk
-// Changed EtaSym plots.
-//
-// Revision 1.21  2000/06/30 14:51:20  posk
-// Using MessageMgr. Added graph for Eta Symmetry vs. Vertex Z.
-//
-// Revision 1.20  2000/05/26 21:25:23  posk
-// Use TProfile2D class and profile projection methods.
-// Correction needed for >2 subevents.
-//
-// Revision 1.19  2000/05/03 16:38:35  posk
-// Compatable with ROOT 2.24/02.
-//
-// Revision 1.18  2000/04/13 22:34:16  posk
-// Resolution correction is now made.
-//
-// Revision 1.17  2000/04/10 18:49:10  posk
-// Asks for the histogram file number.
-//
-// Revision 1.16  2000/03/28 23:25:37  posk
-// Allow multiple instances.
-//
-// Revision 1.15  2000/03/21 00:24:45  posk
-// Added GetCVS and changed some plot names.
-//
-// Revision 1.12  2000/02/18 23:44:54  posk
-// Added PID and centrality.
-//
-// Revision 1.11  2000/02/04 16:26:43  posk
-// Added correct calculation of event plane resolution for large flow.
-//
-// Revision 1.10  2000/01/27 00:04:31  posk
-// Corrected error in pt plots.
-//
-// Revision 1.7  1999/12/21 18:14:14  posk
-// More graphs.
-//
-// Revision 1.6  1999/12/21 01:19:29  posk
-// Added more histograms.
-//
-// Revision 1.2  1999/10/05 16:54:14  posk
-// Added getPhiWeight method for making the event plane isotropic.
-//
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -174,7 +104,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_Psi_Subs",
 			     "Flow_Psi_Sel",
 			     "Flow_Mul_Sel",
-			     "Flow_MeanPt_Sel",
 			     "Flow_q_Sel",
 			     "Flow_Psi_Sub_Corr_Sel",
 			     "Flow_Psi_Sub_Corr_Diff_Sel",
@@ -629,3 +558,60 @@ void plotAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
   }
   cout << "  plotAll Done" << endl;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// $Log: plot.C,v $
+// Revision 1.32  2000/12/12 15:01:11  posk
+// Put log comments at end of file.
+//
+// Revision 1.31  2000/12/08 17:04:09  oldi
+// Phi weights for both FTPCs included.
+//
+// Revision 1.27  2000/09/26 20:54:12  posk
+// Updated documentation.
+//
+// Revision 1.26  2000/09/15 22:52:56  posk
+// Added Pt weighting for event plane calculation.
+//
+// Revision 1.25  2000/08/31 18:50:32  posk
+// Added plotCen.C to plot from a series of files with different centralities.
+//
+// Revision 1.24  2000/08/12 20:20:15  posk
+// More centrality bins.
+//
+// Revision 1.23  2000/08/01 21:51:20  posk
+// Added doubly integrated v.
+//
+// Revision 1.22  2000/07/12 17:49:39  posk
+// Changed EtaSym plots.
+//
+// Revision 1.21  2000/06/30 14:51:20  posk
+// Using MessageMgr. Added graph for Eta Symmetry vs. Vertex Z.
+//
+// Revision 1.20  2000/05/26 21:25:23  posk
+// Use TProfile2D class and profile projection methods.
+// Correction needed for >2 subevents.
+//
+// Revision 1.18  2000/04/13 22:34:16  posk
+// Resolution correction is now made.
+//
+// Revision 1.17  2000/04/10 18:49:10  posk
+// Asks for the histogram file number.
+//
+// Revision 1.16  2000/03/28 23:25:37  posk
+// Allow multiple instances.
+//
+// Revision 1.15  2000/03/21 00:24:45  posk
+// Added GetCVS and changed some plot names.
+//
+// Revision 1.12  2000/02/18 23:44:54  posk
+// Added PID and centrality.
+//
+// Revision 1.11  2000/02/04 16:26:43  posk
+// Added correct calculation of event plane resolution for large flow.
+//
+// Revision 1.2  1999/10/05 16:54:14  posk
+// Added getPhiWeight method for making the event plane isotropic.
+//
+///////////////////////////////////////////////////////////////////////////////

@@ -1,147 +1,14 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.48 2000/12/10 02:02:01 oldi Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.49 2000/12/12 15:01:10 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
+//          FTPC added by Markus Oldenburg, MPI, Dec 2000
 //
 ////////////////////////////////////////////////////////////////////////////
 //
 // Description:  Maker to analyze Flow using the FlowTags and/or StFlowEvent
 //
-////////////////////////////////////////////////////////////////////////////
-//
-// $Log: StFlowAnalysisMaker.cxx,v $
-// Revision 1.48  2000/12/10 02:02:01  oldi
-// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
-// The evaluation of either a track originates from the FTPC or not is
-// unambiguous now. The evaluation itself is easily extendible for other
-// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
-// they contain TPC tracks only (backward compatibility).
-//
-// Revision 1.47  2000/12/08 17:04:09  oldi
-// Phi weights for both FTPCs included.
-//
-// Revision 1.45  2000/10/12 21:01:30  posk
-// Minor update.
-//
-// Revision 1.44  2000/09/29 22:53:14  posk
-// More histograms.
-//
-// Revision 1.43  2000/09/22 22:01:38  posk
-// Doubly integrated v now contains resolution error.
-//
-// Revision 1.42  2000/09/16 22:23:04  snelling
-// Auto magically switch to rapidity when identified particles are used
-//
-// Revision 1.41  2000/09/15 22:52:53  posk
-// Added Pt weighting for event plane calculation.
-//
-// Revision 1.40  2000/09/12 01:31:00  snelling
-// Added pid histograms for e- e+ and dbar
-//
-// Revision 1.39  2000/09/07 17:02:45  snelling
-// Made the hist file standard root compatible
-//
-// Revision 1.38  2000/09/05 16:12:12  snelling
-// Added the new particles to the pid histogram
-//
-// Revision 1.37  2000/08/31 18:50:29  posk
-// Added plotCen.C to plot from a series of files with different centralities.
-//
-// Revision 1.36  2000/08/12 20:20:13  posk
-// More centrality bins.
-//
-// Revision 1.35  2000/08/09 21:38:59  snelling
-// Added monitor histograms
-//
-// Revision 1.34  2000/08/01 21:51:18  posk
-// Added doubly integrated v.
-//
-// Revision 1.33  2000/07/12 17:49:37  posk
-// Changed EtaSym plots.
-//
-// Revision 1.32  2000/06/30 14:51:18  posk
-// Using MessageMgr. Added graph for Eta Symmetry vs. Vertex Z.
-//
-// Revision 1.31  2000/06/01 18:29:56  posk
-// When resolution=0 reset histograms.
-//
-// Revision 1.30  2000/05/26 21:25:20  posk
-// Use TProfile2D class and profile projection methods.
-// Correction needed for >2 subevents.
-//
-// Revision 1.27  2000/04/13 22:34:13  posk
-// Resolution correction is now made.
-//
-// Revision 1.26  2000/03/28 23:25:36  posk
-// Allow multiple instances.
-//
-// Revision 1.25  2000/03/21 00:24:43  posk
-// Added GetCVS and changed some plot names.
-//
-// Revision 1.24  2000/03/15 23:32:03  posk
-// Added StFlowSelection.
-//
-// Revision 1.23  2000/03/02 22:55:32  posk
-// Changed header file extensions from .hh to .h .
-//
-// Revision 1.22  2000/02/29 21:55:12  posk
-// Removed static const int& statements.
-//
-// Revision 1.21  2000/02/18 23:44:52  posk
-// Added PID and centrality.
-//
-// Revision 1.20  2000/02/10 01:47:30  snelling
-// Make changes for HP compiler
-//
-// Revision 1.19  2000/02/04 16:26:41  posk
-// Added correct calculation of event plane resolution for large flow.
-//
-// Revision 1.18  2000/01/27 00:04:29  posk
-// Corrected error in pt plots.
-//
-// Revision 1.15  2000/01/14 01:35:52  snelling
-// changed include path ../FlowMaker/ to FlowMaker/
-//
-// Revision 1.14  2000/01/14 01:13:34  snelling
-// modified spt (sum pt) to mpt (mean pt) because FlowTag changed
-//
-// Revision 1.12  1999/12/21 01:19:26  posk
-// Added more histograms.
-//
-// Revision 1.11  1999/12/04 00:15:39  posk
-// Works with StFlowEvent which works with the new StEvent
-//
-// Revision 1.10  1999/11/24 18:14:05  posk
-// Now reads event quantities with StFlowEvent methods
-//
-// Revision 1.9  1999/11/11 23:16:43  posk
-// Rearrangement of files.
-//
-// Revision 1.8  1999/11/05 00:02:02  posk
-// Changed the flow vector, Q, to a TVector2.
-//
-// Revision 1.7  1999/10/05 16:54:07  posk
-// Added getPhiWeight method for making the event plane isotropic.
-//
-// Revision 1.6  1999/09/24 01:23:06  fisyak
-// Reduced Include Path
-//
-// Revision 1.5  1999/09/16 19:54:12  posk
-// Added more histograms.
-//
-// Revision 1.4  1999/09/03 01:05:59  fisyak
-// replace iostream/stdlib by iostream.h/stdlib.h
-//
-// Revision 1.3  1999/08/24 18:02:37  posk
-// Calculates event plane resolution.
-// Added macros for plotting histograms.
-//
-// Revision 1.1.1.1  1999/08/09 19:50:37  posk
-//
-// Revision 1.0  1999/08/02 
-//
-//  
 ////////////////////////////////////////////////////////////////////////////
 
 #include <iostream.h>
@@ -300,8 +167,6 @@ Int_t StFlowAnalysisMaker::Init() {
   const float phiMax          = twopi; 
   const float psiMin          =    0.;
   const float psiMax          = twopi; 
-  const float meanPtMin       =    0.;
-  const float meanPtMax       =    1.;
   const float multMin         =    0.;
   const float multMax         = 2000.;
   const float qMin            =    0.;
@@ -333,7 +198,6 @@ Int_t StFlowAnalysisMaker::Init() {
 	 nPhi3DBins        = 18,
 	 nPsiBins          = 36,
 	 nMultBins         = 40,
-	 nMeanPtBins       = 50,
 	 nPidBins          = 50,
          nCentBins         = 10,
 	 nDedxBins       = 1000,
@@ -1005,17 +869,6 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHist_q->SetYTitle("Counts");
       delete histTitle;
       
-      // <p_t>
-      histTitle = new TString("Flow_MeanPt_Sel");
-      histTitle->Append(*countSels);
-      histTitle->Append("_Har");
-      histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHistMeanPt = new TH1F(histTitle->Data(),
-        histTitle->Data(), nMeanPtBins, meanPtMin, meanPtMax);
-      histFull[k].histFullHar[j].mHistMeanPt->SetXTitle("Mean Pt (GeV)");
-      histFull[k].histFullHar[j].mHistMeanPt->SetYTitle("Counts");
-      delete histTitle;
-
       // particle-plane azimuthal correlation
       histTitle = new TString("Flow_Phi_Corr_Sel");
       histTitle->Append(*countSels);
@@ -1078,7 +931,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.48 2000/12/10 02:02:01 oldi Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.49 2000/12/12 15:01:10 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1102,10 +955,6 @@ void StFlowAnalysisMaker::FillFromTags() {
     mMultSub[1][j]   = pFlowTag->nb[j];
     mMultSub[2][j]   = pFlowTag->nc[j];
     mMultSub[3][j]   = pFlowTag->nd[j];
-    mMeanPtSub[0][j] = pFlowTag->mpta[j];
-    mMeanPtSub[1][j] = pFlowTag->mptb[j];
-    mMeanPtSub[2][j] = pFlowTag->mptc[j];
-    mMeanPtSub[3][j] = pFlowTag->mptd[j];
 
     // calculate Psi
     for (int i = 0; i < nSels * nSubs; i++) {
@@ -1119,7 +968,6 @@ void StFlowAnalysisMaker::FillFromTags() {
       mMult[k][j]   = mMultSub[nSels*k][j] + mMultSub[nSels*k+1][j];
       m_q[k][j]     = (mMult[k][j] > 0) ? mQ[k][j].Mod()/sqrt((double)mMult[k][j])
 	: 0.;
-      mMeanPt[k][j] = (mMeanPtSub[nSels*k][j] + mMeanPtSub[nSels*k+1][j])/2.;
     }
   }
 
@@ -1147,7 +995,6 @@ void StFlowAnalysisMaker::FillFromFlowEvent() {
       mPsi[k][j]    = pFlowEvent->Psi(pFlowSelect);
       m_q[k][j]     = pFlowEvent->q(pFlowSelect);
       mMult[k][j]   = pFlowEvent->Mult(pFlowSelect);
-      mMeanPt[k][j] = pFlowEvent->MeanPt(pFlowSelect);
     }
   }
 
@@ -1220,9 +1067,6 @@ void StFlowAnalysisMaker::FillEventHistograms() {
       }
       histFull[k].histFullHar[j].mHistMult->Fill((float)mMult[k][j]);
       histFull[k].histFullHar[j].mHist_q->Fill(m_q[k][j]);
-      if (mMult[k][j] > 0) {
-	histFull[k].histFullHar[j].mHistMeanPt->Fill(mMeanPt[k][j]);
-      }
     }
   }
 
@@ -1794,3 +1638,123 @@ Int_t StFlowAnalysisMaker::Finish() {
 
   return StMaker::Finish();
 }
+
+////////////////////////////////////////////////////////////////////////////
+//
+// $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.49  2000/12/12 15:01:10  posk
+// Put log comments at end of file.
+//
+// Revision 1.48  2000/12/10 02:02:01  oldi
+// A new member (StTrackTopologyMap mTopology) was added to StFlowPicoTrack.
+// The evaluation of either a track originates from the FTPC or not is
+// unambiguous now. The evaluation itself is easily extendible for other
+// detectors (e.g. SVT+TPC). Old flowpicoevent.root files are treated as if
+// they contain TPC tracks only (backward compatibility).
+//
+// Revision 1.47  2000/12/08 17:04:09  oldi
+// Phi weights for both FTPCs included.
+//
+// Revision 1.43  2000/09/22 22:01:38  posk
+// Doubly integrated v now contains resolution error.
+//
+// Revision 1.42  2000/09/16 22:23:04  snelling
+// Auto magically switch to rapidity when identified particles are used
+//
+// Revision 1.41  2000/09/15 22:52:53  posk
+// Added Pt weighting for event plane calculation.
+//
+// Revision 1.40  2000/09/12 01:31:00  snelling
+// Added pid histograms for e- e+ and dbar
+//
+// Revision 1.39  2000/09/07 17:02:45  snelling
+// Made the hist file standard root compatible
+//
+// Revision 1.38  2000/09/05 16:12:12  snelling
+// Added the new particles to the pid histogram
+//
+// Revision 1.37  2000/08/31 18:50:29  posk
+// Added plotCen.C to plot from a series of files with different centralities.
+//
+// Revision 1.36  2000/08/12 20:20:13  posk
+// More centrality bins.
+//
+// Revision 1.35  2000/08/09 21:38:59  snelling
+// Added monitor histograms
+//
+// Revision 1.34  2000/08/01 21:51:18  posk
+// Added doubly integrated v.
+//
+// Revision 1.33  2000/07/12 17:49:37  posk
+// Changed EtaSym plots.
+//
+// Revision 1.32  2000/06/30 14:51:18  posk
+// Using MessageMgr. Added graph for Eta Symmetry vs. Vertex Z.
+//
+// Revision 1.31  2000/06/01 18:29:56  posk
+// When resolution=0 reset histograms.
+//
+// Revision 1.30  2000/05/26 21:25:20  posk
+// Use TProfile2D class and profile projection methods.
+// Correction needed for >2 subevents.
+//
+// Revision 1.27  2000/04/13 22:34:13  posk
+// Resolution correction is now made.
+//
+// Revision 1.26  2000/03/28 23:25:36  posk
+// Allow multiple instances.
+//
+// Revision 1.25  2000/03/21 00:24:43  posk
+// Added GetCVS and changed some plot names.
+//
+// Revision 1.24  2000/03/15 23:32:03  posk
+// Added StFlowSelection.
+//
+// Revision 1.23  2000/03/02 22:55:32  posk
+// Changed header file extensions from .hh to .h .
+//
+// Revision 1.22  2000/02/29 21:55:12  posk
+// Removed static const int& statements.
+//
+// Revision 1.21  2000/02/18 23:44:52  posk
+// Added PID and centrality.
+//
+// Revision 1.20  2000/02/10 01:47:30  snelling
+// Make changes for HP compiler
+//
+// Revision 1.19  2000/02/04 16:26:41  posk
+// Added correct calculation of event plane resolution for large flow.
+//
+// Revision 1.15  2000/01/14 01:35:52  snelling
+// changed include path ../FlowMaker/ to FlowMaker/
+//
+// Revision 1.14  2000/01/14 01:13:34  snelling
+// modified spt (sum pt) to mpt (mean pt) because FlowTag changed
+//
+// Revision 1.11  1999/12/04 00:15:39  posk
+// Works with StFlowEvent which works with the new StEvent
+//
+// Revision 1.10  1999/11/24 18:14:05  posk
+// Now reads event quantities with StFlowEvent methods
+//
+// Revision 1.8  1999/11/05 00:02:02  posk
+// Changed the flow vector, Q, to a TVector2.
+//
+// Revision 1.7  1999/10/05 16:54:07  posk
+// Added getPhiWeight method for making the event plane isotropic.
+//
+// Revision 1.6  1999/09/24 01:23:06  fisyak
+// Reduced Include Path
+//
+// Revision 1.4  1999/09/03 01:05:59  fisyak
+// replace iostream/stdlib by iostream.h/stdlib.h
+//
+// Revision 1.3  1999/08/24 18:02:37  posk
+// Calculates event plane resolution.
+// Added macros for plotting histograms.
+//
+// Revision 1.1.1.1  1999/08/09 19:50:37  posk
+//
+// Revision 1.0  1999/08/02 
+//  
+////////////////////////////////////////////////////////////////////////////

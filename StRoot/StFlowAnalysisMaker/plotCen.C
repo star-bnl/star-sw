@@ -1,8 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.6 2000/12/08 17:04:09 oldi Exp $
+// $Id: plotCen.C,v 1.7 2000/12/12 15:01:11 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
+//               FTPC added by Markus Oldenburg, MPI, Dec 2000
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
 //               Plots a set of histograms with different centrality
 //               starting with anaXX.root given by first run number XX.
@@ -12,28 +13,6 @@
 //               After the first execution, just type plotCen(N) .
 //               A negative N plots all pages starting with page N.
 //               Place a symbolic link to this file in StRoot/macros/analysis .
-//
-//
-///////////////////////////////////////////////////////////////////////////////
-//
-// $Log: plotCen.C,v $
-// Revision 1.6  2000/12/08 17:04:09  oldi
-// Phi weights for both FTPCs included.
-//
-// Revision 1.5  2000/09/29 22:53:19  posk
-// More histograms.
-//
-// Revision 1.4  2000/09/26 20:54:13  posk
-// Updated documentation.
-//
-// Revision 1.3  2000/09/15 22:52:56  posk
-// Added Pt weighting for event plane calculation.
-//
-// Revision 1.2  2000/09/07 16:42:09  posk
-// Updated list of histograms.
-//
-// Revision 1.1  2000/08/31 18:50:33  posk
-// Added plotCen.C to plot from a series of files with different centralities.
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -122,7 +101,6 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2){
 			     "Flow_Psi_Subs",
 			     "Flow_Psi_Sel",
 			     "Flow_Mul_Sel",
-			     "Flow_MeanPt_Sel",
 			     "Flow_q_Sel",
 			     "Flow_Psi_Sub_Corr_Sel",
 			     "Flow_Psi_Sub_Corr_Diff_Sel",
@@ -515,3 +493,20 @@ void plotCenAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
   }
   cout << "  Done" << endl;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// $Log: plotCen.C,v $
+// Revision 1.7  2000/12/12 15:01:11  posk
+// Put log comments at end of file.
+//
+// Revision 1.6  2000/12/08 17:04:09  oldi
+// Phi weights for both FTPCs included.
+//
+// Revision 1.3  2000/09/15 22:52:56  posk
+// Added Pt weighting for event plane calculation.
+//
+// Revision 1.1  2000/08/31 18:50:33  posk
+// Added plotCen.C to plot from a series of files with different centralities.
+//
+///////////////////////////////////////////////////////////////////////////////
