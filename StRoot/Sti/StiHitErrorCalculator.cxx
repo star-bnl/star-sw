@@ -1,5 +1,5 @@
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.11 2003/07/14 21:12:43 andrewar Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.12 2003/07/22 17:14:50 pruneau Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.12  2003/07/22 17:14:50  pruneau
+ * removed scaling
+ *
  * Revision 2.11  2003/07/14 21:12:43  andrewar
  * Revert to old version to eliminate introduced bug
  *
@@ -90,12 +93,7 @@ void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node) con
   double edip=coeff[3]+coeff[4]*dz*cosDipInv2+coeff[5]*tanDip*tanDip;
   if (ecross>50) ecross = 50.; 
   if (edip>50) edip = 50.; 
-  double scaling;
-  if (node->_x>120)
-    scaling = StiKalmanTrackNode::pars->getOuterScaling();
-  else
-    scaling = StiKalmanTrackNode::pars->getInnerScaling();
-  node->eyy = ecross*scaling*scaling; // in cm^2
-  node->ezz = edip*scaling*scaling;
+  node->eyy = ecross; // in cm^2
+  node->ezz = edip;
 }
 
