@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrDaqMap.cxx,v 1.3 2004/04/08 21:11:11 dongx Exp $
+ * $Id: StTofrDaqMap.cxx,v 1.4 2004/04/09 15:17:19 jeromel Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrDaqMap.cxx,v $
+ * Revision 1.4  2004/04/09 15:17:19  jeromel
+ * void function returning a value is forbidden by standards
+ *
  * Revision 1.3  2004/04/08 21:11:11  dongx
  * remove assert() functions
  *
@@ -57,14 +60,14 @@ void StTofrDaqMap::initFromDbase(StMaker *maker) {
   if(!mDbTOFDataSet) {
     gMessMgr->Error("unable to access Calibrations TOF parameters","OS");
     //    assert(mDbTOFDataSet);
-    return kStErr;
+    return; // kStErr;
   }
 
   St_tofModuleConfig* tofModuleConf = static_cast<St_tofModuleConfig*>(mDbTOFDataSet->Find("tofModuleConfig"));
   if(!tofModuleConf) {
     gMessMgr->Error("unable to get tof Module Configuration parameters","OS");
     //    assert(tofModuleConf);
-    return kStErr;
+    return; // kStErr;
   }
   tofModuleConfig_st* moduleConf = static_cast<tofModuleConfig_st*>(tofModuleConf->GetArray());
   //  Int_t numRows = tofModuleConf->GetNRows();
@@ -87,7 +90,7 @@ void StTofrDaqMap::initFromDbase(StMaker *maker) {
   if(!tofDaqMap) {
     gMessMgr->Error("unable to get tof daq map","OS");
     //    assert(tofDaqMap);
-    return kStErr;
+    return; // kStErr;
   }
   tofCamacDaqMap_st* tofmap = static_cast<tofCamacDaqMap_st*>(tofDaqMap->GetArray());
   //  Int_t ndaqRows = tofDaqMap->GetNRows();
