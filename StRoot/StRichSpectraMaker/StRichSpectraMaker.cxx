@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.cxx,v 1.16 2002/05/23 02:00:52 dunlop Exp $
+ * $Id: StRichSpectraMaker.cxx,v 1.17 2003/04/30 20:38:16 perev Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StRichSpectraMaker.cxx,v $
+ * Revision 1.17  2003/04/30 20:38:16  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 1.16  2002/05/23 02:00:52  dunlop
  * Put mVertexWindow, etc. back to what was used for SL02[cde], so
  * we don't have a mishmash of versions in the MuDst's.
@@ -736,7 +739,7 @@ Int_t StRichSpectraMaker::Make() {
 	// for production.  The integer could
 	// be used as a coded number
 	// dynamic_cast<StRichPidTraits*>(theSelectedTrait)->setProbability(mass2);
-	dynamic_cast<StRichPidTraits*>(theSelectedTrait)->setId(mHistogram->numberOfPhotons());
+	dynamic_cast<StRichPidTraits*>(theSelectedTrait)->setId((int)mHistogram->numberOfPhotons());
 
 	StRichSpectra *oldSpectra =
 	    dynamic_cast<StRichPidTraits*>(theSelectedTrait)->getRichSpectra();
@@ -748,7 +751,7 @@ Int_t StRichSpectraMaker::Make() {
 			      mCalculatedResidual.x(), mCalculatedResidual.y(), 
 			      cerenkovAngle,
 			      mHistogram->cerenkovSigma()/degree,
-			      mHistogram->numberOfPhotons(),
+			 (int)mHistogram->numberOfPhotons(),
 			      peakAngle/degree, numberOfPhotons, mUniqueRingHits,
 			      mass2, lineIntegralRatio, totalPath,
 			      mTracer->trackAngle()/degree, iflag, dEdx,
@@ -775,7 +778,7 @@ Int_t StRichSpectraMaker::Make() {
 void StRichSpectraMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRichSpectraMaker.cxx,v 1.16 2002/05/23 02:00:52 dunlop Exp $\n");
+    printf("* $Id: StRichSpectraMaker.cxx,v 1.17 2003/04/30 20:38:16 perev Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }

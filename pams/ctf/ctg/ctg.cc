@@ -36,7 +36,7 @@ long type_of_call ctg_(
 //: RETURNS:    STAF Condition Value
 //:>--------------------------------------------------------------------
 //
-   int   message_id = 0 ;
+//VPunused   int   message_id = 0 ;
    char  OutMessage[100] ;
    float const Todeg = 360. / Twopi ;
 //
@@ -308,7 +308,7 @@ long ctg_i_phi ( float phi,
    if ( phi < 0     ) phi = phi + Twopi ;
    if ( phi > Twopi ) phi = phi - Twopi ;
 // long phi_guess = phi / ( Twopi / n_phi ) + 1 ; 
-   long phi_guess = phi / ( Twopi / n_phi )  ; 
+   long phi_guess = long(phi / ( Twopi / n_phi ))  ; 
 //
    long i_phi_next, right_left = 1 ;
    float phi_min, phi_max ;
@@ -377,7 +377,6 @@ long ctg_index ( long i_phi, long i_eta, long n_eta ){
 //: RETURNS:    Global index             
 //:>--------------------------------------------------------------------
 //
-   long i ;
    return (n_eta) * (i_phi-1) + (i_eta- 1) ; 
 } 
 

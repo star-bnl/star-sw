@@ -199,7 +199,7 @@ void ctf_cor_pnt ( void )
       if ( index >= 0 && index < CTF_SLAT_LEN )
          ctf_cor_pointer[index] = i ;
       else {
-         sprintf ( OutMessage, "\n CTE:  %d index out of bounds ", index ) ;
+         sprintf ( OutMessage, "\n CTE:  %ld index out of bounds ", index ) ;
          MessageOut ( OutMessage ) ;
       }
    }
@@ -238,7 +238,7 @@ void cte_cor_time (  float z, long iphi, long ieta, float& tcor, float& dz )
    long n_eta = geo->n_counter_eta * geo->n_tray_eta ;
    long index = ctg_index ( iphi, ieta, n_eta ) ;
    if ( index < 0 || index >= CTF_SLAT_LEN ) {
-      sprintf ( OutMessage, "\n CTE_COR_TIME: Crazy index = %d ",index ) ;
+      sprintf ( OutMessage, "\n CTE_COR_TIME: Crazy index = %ld ",index ) ;
       MessageOut ( OutMessage ) ;
       return ;
    }
@@ -622,7 +622,7 @@ long  cte_select_slat ( CTE_EXTRA_ST* l_extra, EGR_GLOBTRK_ST* track )
 //
    ihphi = ctg_i_phi ( l_extra->phi_extra, geo_h, geo, slat_phi_h, slat_phi ) ;
    if ( ihphi <= 0 || ihphi > MX_PHI ) {
-      sprintf ( OutMessage, "\n CTE_SELECT_SLAT: ihphi %d out of range ",ihphi ) ;
+      sprintf ( OutMessage, "\n CTE_SELECT_SLAT: ihphi %ld out of range ",ihphi ) ;
       MessageOut ( OutMessage ) ;
       return 1 ;
    }

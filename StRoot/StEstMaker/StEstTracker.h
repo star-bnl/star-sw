@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.h,v 1.11 2002/04/30 22:49:19 caines Exp $
+ * $Id: StEstTracker.h,v 1.12 2003/04/30 20:36:55 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.h,v $
+ * Revision 1.12  2003/04/30 20:36:55  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 1.11  2002/04/30 22:49:19  caines
  * Make est work with shifted SVT geom, change search radii to 1cm
  *
@@ -172,7 +175,7 @@ class StEstTracker {
 	       StEstSegments** mSegments,
 	       St_egr_egrpar* m_egr_egrpar,
 	       table_head_st* m_egrpar_h);
-  ~StEstTracker();
+  virtual ~StEstTracker();
   int GetNTrack();
   int GetIdealPrim() {return mNIdealPrim;};
   int GetIdealSeco() {return mNIdealSeco;};

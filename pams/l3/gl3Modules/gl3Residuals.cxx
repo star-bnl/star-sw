@@ -140,7 +140,7 @@ int gl3Residuals::process ( gl3Event* event ) {
 	  if (sector>12) 
 	    xcocg = -xcoc;
 	  
-	  double ycocl = transformer.GetSectorSin(sector-1) * xcocg + transformer.GetSectorCos(sector-1) * ycoc;
+//VPunused	  double ycocl = transformer.GetSectorSin(sector-1) * xcocg + transformer.GetSectorCos(sector-1) * ycoc;
 	  //double beta=asin(localTrackXYZ.Gety()/rcoc-ycocl/rcoc);
 
 	  //if(fabs(beta*todeg)>5) continue; //only consider tracks normal to padrow

@@ -47,8 +47,8 @@ long type_of_call sca_filter_(
 
 
   double xmin, ymin, zmin,xmax, ymax, zmax;
-  float px,py,pz,T;
-  int   idstTrack=0, iGoodTrack = 0, nhits=0;
+  float /*px,py,*/pz,T;
+  int   idstTrack=0, iGoodTrack = 0/*, nhits=0*/;
   float pt,mt,energy,rapidity,Transversity ;
 
   // =================  Begin Executable Code  ================== 

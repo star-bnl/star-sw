@@ -4,7 +4,8 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
-/*#include "dsxdr.h"*/
+#include "dsxdr.h"
+#include "dscodes.h"
 #include "dstype.h"
    static FILE         *f=NULL; /* input file      */
    static XDR           x;      /* XDR stream      */
@@ -48,6 +49,14 @@ typedef struct cparticle_st {
       double phep[5]; /* p4 and mass (GeV) */
       double vhep[4]; /* production vertex (mm) and time (mm/c) */
 } CPARTICLE_ST;
+
+ void rebank_(char *,void*,void *,void*,void*,int);
+ void ucopy_ (void*,void*,int*);
+ void apdg2gea_(void*,void*); 
+ void agsvert_ (void*,void*,void*,void*,void*,void*); 
+ void agskine_ (void*,void*,void*,void*,void*,void*); 
+ int dsFindTab (DS_DATASET_T **ppEntry, DS_DATASET_T* pDataset, char* spec);
+
 /*----------------------------------------------------------------------------*/
 void gstar_readxdf_()     { printf("  Gstar xdf format readout activated \n"); }
 /*----------------------------------------------------------------------------*/
@@ -153,7 +162,7 @@ char *name; int  n;
    printf("trying to get %s \n",sname);
    if (pp)  free(pp);    /*   ???   */
    if (ptr) free(ptr);   /*   ???   */
-   if (GET(ptr,sname,pp,nn)) printf("xdf_geta ok %d %d %d\n",ptr,pp,nn);
+   if (GET(ptr,sname,pp,nn)) printf("xdf_geta ok %p %p %d\n",ptr,pp,nn);
 }
 
 /****************************************************************************\

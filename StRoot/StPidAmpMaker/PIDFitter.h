@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: PIDFitter.h,v 1.1 2002/02/14 21:25:55 aihong Exp $
+// $Id: PIDFitter.h,v 1.2 2003/04/30 20:37:56 perev Exp $
 //
 // Authors: Aihong Tang
 //
@@ -24,7 +24,7 @@ class PIDFitter  {
  public:
 
   PIDFitter();
-  ~PIDFitter(){};
+  virtual ~PIDFitter(){};
 
       void  FitMultiGaus(Char_t* fileNameOfInput, Char_t* fileNameOfOutput);
       void  DoPhaseSpaceCalibration(Char_t* fileName4Calibration,Char_t* phaseSpaceCalibFileName);
@@ -95,6 +95,9 @@ class PIDFitter  {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: PIDFitter.h,v $
+// Revision 1.2  2003/04/30 20:37:56  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.1  2002/02/14 21:25:55  aihong
 // re-install the new version
 //

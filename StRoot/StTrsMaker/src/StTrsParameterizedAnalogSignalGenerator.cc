@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.25 2002/04/29 21:42:15 hardtke Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.26 2003/04/30 20:39:08 perev Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.26  2003/04/30 20:39:08  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 1.25  2002/04/29 21:42:15  hardtke
  * change normalFactor back to 1.0
  *
@@ -368,7 +371,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
     int wire_index;
     double *SignalSum;
     double pitch=mGeomDb->anodeWirePitch();
-    int PadAtRow;
+//VPunused    int PadAtRow;
     
     //double mPadResponseFunctionSigma;
     //
@@ -381,8 +384,8 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 	return;
     }
         double x,y,z,xCentroidOfPad,yCentroidOfPad;
-        double xp,yp,t;
-        double electrons;
+        double t; //VP xp,yp unused
+//VPunused        double electrons;
         double tZero;
         tZero=mElectronicsDb->tZero();
 	//reset all the datatbase value to keep them updated
@@ -420,8 +423,8 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
         double pulseHeight ;
         int max_bin=bin_end;
         double  timeBinT;
-        double *D,Dx,Dz,sigmaLz,Dt,sigmaLt;
-         double B1,B0,A;
+        double *D,Dx,sigmaLz,Dt,sigmaLt;
+        double A;
 	for(iter  = currentWire.begin();
 	    iter != currentWire.end();
 	    iter++) {
@@ -794,10 +797,10 @@ void StTrsParameterizedAnalogSignalGenerator::sampleAnalogSignal()
     // I have the centroid IN TIME (make sure!!!!) of each hit!
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
     vector<StTrsAnalogSignal> continuousAnalogTimeSequence;
-    vector<StTrsAnalogSignal>::iterator lowerBound;
+//VPunused    vector<StTrsAnalogSignal>::iterator lowerBound;
 #else
     vector<StTrsAnalogSignal, allocator<StTrsAnalogSignal> > continuousAnalogTimeSequence;
-    vector<StTrsAnalogSignal, allocator<StTrsAnalogSignal> >::iterator lowerBound;
+//VPunused    vector<StTrsAnalogSignal, allocator<StTrsAnalogSignal> >::iterator lowerBound;
 #endif
     //double freq = mElectronicsDb->samplingFrequency();
     //PR(freq);

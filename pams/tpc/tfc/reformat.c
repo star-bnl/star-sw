@@ -78,6 +78,8 @@
 #include "reformat.h"
 
 /* bring in the math library explicitly */
+#include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 
 /* Include the row and pad number arrays for geometry mapping */

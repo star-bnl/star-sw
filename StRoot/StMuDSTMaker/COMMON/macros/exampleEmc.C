@@ -6,7 +6,7 @@ StMuDstMaker* maker;
 
 void exampleEmc(const char* list) {
    if (gClassTable->GetID("TTable") < 0) {
-     gSystem->Load("libStar");
+     gSystem->Load("libTable");
      gSystem->Load("libPhysics");
    }     
   gSystem->Load("St_base");

@@ -1,10 +1,13 @@
-//$Id: St_srs_Maker.cxx,v 1.32 2003/04/16 19:02:54 caines Exp $
+//$Id: St_srs_Maker.cxx,v 1.33 2003/04/30 20:39:23 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
 // Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
 //$Log: St_srs_Maker.cxx,v $
+//Revision 1.33  2003/04/30 20:39:23  perev
+//Warnings cleanup. Modified lines marked VP
+//
 //Revision 1.32  2003/04/16 19:02:54  caines
 //Make srs pick up Vd and T0 from database not table
 //
@@ -250,7 +253,7 @@ Int_t St_srs_Maker::Make()
 						       DriftVel, T0);
   
   // cope with pile up events and fill hit collection
-   srs_srspar_st* mSvtSrsPar = m_srs_srspar->GetTable();
+//VPunused   srs_srspar_st* mSvtSrsPar = m_srs_srspar->GetTable();
 
    int MaxTimeBucket;
    StSvtWaferCoordinate WaferCoord;

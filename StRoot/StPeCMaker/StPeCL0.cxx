@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCL0.cxx,v 1.4 2002/12/16 23:04:01 yepes Exp $
+// $Id: StPeCL0.cxx,v 1.5 2003/04/30 20:37:54 perev Exp $
 // $Log: StPeCL0.cxx,v $
+// Revision 1.5  2003/04/30 20:37:54  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.4  2002/12/16 23:04:01  yepes
 // Field comes in KGauss and should be passed to routines in Teslas
 // problem pointed out by Vladimir
@@ -793,7 +796,7 @@ void StPeCL0::setP4SLuts() {
 //
 //   Depth 2 LUT
 //
-   int ns[4][4] = {4,4,1,1,1,1,4,4,1,1,4,4,4,4,1,1};
+   int ns[4][4] = {{4,4,1,1},{1,1,4,4},{1,1,4,4},{4,4,1,1}};
    int adc_sum_min=2, adc_sum_max=9;
 
    for ( i = 0 ; i < nL0Phi ; i++ ) {

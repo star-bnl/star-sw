@@ -27,7 +27,7 @@ int gl3MomRes::process ( gl3Event* event ) {
   
   // printf("In momres\n");
 
-  float todeg = 180./ M_PI;
+//VPunused  float todeg = 180./ M_PI;
   float dpsi=0.03;
   float dx=0.5,dy=0.5,dz=1;
   int MinHits=20;

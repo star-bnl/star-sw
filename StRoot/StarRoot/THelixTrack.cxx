@@ -38,7 +38,12 @@ THelixTrack::THelixTrack(const THelixTrack &from)
   int n = (char*)&fKind - (char*)fX + sizeof(fKind);
   memcpy(fX,from.fX,n);
 }
-
+//_____________________________________________________________________________
+THelixTrack::THelixTrack()
+{
+  int n = (char*)&fKind - (char*)fX + sizeof(fKind);
+  memset(fX,0,n);
+}
 //_____________________________________________________________________________
 THelixTrack::THelixTrack(const double *pnts,int npnts, int rowsize)
 //
@@ -79,8 +84,8 @@ double THelixTrack::Fit(const double *pnts,int npnts, int rowsize)
      {
        if (ign[ip]) 	continue;
        np++;
-       x = pnts[lv+0];  
-       y = pnts[lv+1];  
+       x = pnts[lv+0]-pnts[0];  
+       y = pnts[lv+1]-pnts[1];  
        if (np==1) {x1st=x; y1st=y;}
        xm   += x;   ym  += y;
        xxm  += x*x; yym += y*y; xym += x*y;
@@ -134,7 +139,8 @@ double THelixTrack::Fit(const double *pnts,int npnts, int rowsize)
      fP[1] = -Xcd;
      fP[2] = 0;
      if (xm*fP[0]+ym*fP[1] < 0) {fP[0] = -fP[0];fP[1] = -fP[1]; Rho = -Rho;}
-
+     fX[0] += pnts[0];
+     fX[1] += pnts[1];
 
      Set(fX,fP,Rho,0);
      THelixTrack temp(*this);
@@ -174,6 +180,7 @@ double THelixTrack::Fit(const double *pnts,int npnts, int rowsize)
      if (resmax < 9*res) 	break;
      if (np <= 3)		break;
      ign[maxres] = 1;
+                                break;//VP
    }
   delete [] ign;
   delete [] stp;

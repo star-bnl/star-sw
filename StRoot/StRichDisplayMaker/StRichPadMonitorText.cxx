@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichPadMonitorText.cxx,v 2.0 2000/08/09 16:28:04 gans Exp $
+ * $Id: StRichPadMonitorText.cxx,v 2.1 2003/04/30 20:38:04 perev Exp $
  *
  * Description:
  *  Text window filled by clickable actions onthe padmonitor
@@ -8,6 +8,9 @@
  ***************************************************************
  *
  * $Log: StRichPadMonitorText.cxx,v $
+ * Revision 2.1  2003/04/30 20:38:04  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 2.0  2000/08/09 16:28:04  gans
  * Created New Maker for all drawable objects.
  *
@@ -38,7 +41,7 @@ void StRichPadMonitorText::drawText(StRichDrawableTPad* tpad)
 {
     char text[100];
     
-    sprintf(text,"pad= %d row= %d adc = %d\0",tpad->pad(),tpad->row(),tpad->adc());
+    sprintf(text,"pad= %d row= %d adc = %d",tpad->pad(),tpad->row(),tpad->adc());
     myLabel->SetLabel(text);
     myLabel->Draw();
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.25 2001/02/15 21:34:54 perev Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.26 2003/04/30 20:39:09 perev Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
+ * Revision 1.26  2003/04/30 20:39:09  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 1.25  2001/02/15 21:34:54  perev
  * clear improved
  *
@@ -285,8 +288,8 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin,int sector)
     double Prob;
     double  nQOnWire;
     double y1,y2,y3,y4;
-    double ax=0.;
-    double  az=0.;
+//VPunused    double ax=0.;
+//VPunused    double  az=0.;
     double nQ=0; 
     int Qtotal=0;
     D=D/4;
@@ -310,7 +313,7 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin,int sector)
 	    Prob=Prob*sigma/dy/4.0*M_SQRT2;
 	    // Prob=0.5*(table_fast(y2)-table_fast(y1));
         nQOnWire=	(int)(Prob* Q+0.5);  
-        Qtotal+=nQOnWire;
+        Qtotal+=(int)nQOnWire;
 	  if( Qtotal> Q)nQOnWire--;  
             
                
@@ -582,8 +585,8 @@ double StTrsWireHistogram::gaussianAvalanche(int iWire, double numElec)
     // The fluctuation values (13%) should be set via the
     // db or some macro call.  For now we will keep them
     // here
-    double innerFluc;
-    double outerFluc;
+//VPunused    double innerFluc;
+//VPunused    double outerFluc;
     double b=0.4;
     //   mInnerSectorGasGain=2503;
          mInnerSectorGasGain=3558;

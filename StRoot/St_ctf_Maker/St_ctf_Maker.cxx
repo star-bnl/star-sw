@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.cxx,v 1.14 2000/06/26 22:13:06 fisyak Exp $
+// $Id: St_ctf_Maker.cxx,v 1.15 2003/04/30 20:39:14 perev Exp $
 // $Log: St_ctf_Maker.cxx,v $
+// Revision 1.15  2003/04/30 20:39:14  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.14  2000/06/26 22:13:06  fisyak
 // remove params
 //
@@ -117,7 +120,7 @@ Int_t St_ctf_Maker::Init(){
   m_tof_slat_eta = (St_ctg_slat_eta *) gime("tof_slat_eta");
   m_tof_slat     = (St_ctg_slat     *) gime("tof_slat");
 
-  Int_t Res_ctg_tof  =  ctg (m_tof,m_tof_slat_phi,m_tof_slat_eta,m_tof_slat);
+  Int_t Res_ctg_tof  =  ctg (m_tof,m_tof_slat_phi,m_tof_slat_eta,m_tof_slat); if(Res_ctg_tof){};
   // Special treatment for double names
   //  m_cts          = (St_cts_mpara    *) params("ctf/cts")->GetList()->FindObject("cts");
   St_DataSet *ctfs = GetInputDB("ctf/cts");
@@ -154,8 +157,8 @@ Int_t St_ctf_Maker::Make(){
       St_ctu_cor   *ctb_cor   = new  St_ctu_cor("ctb_cor",     240); m_DataSet->Add(ctb_cor);
       Int_t Res_cts_ctb = cts(g2t_ctb_hit, g2t_track,
 			      m_ctb,  m_ctb_slat, m_ctb_slat_phi, m_ctb_slat_eta, m_cts_ctb,
-			      ctb_event, ctb_mslat, ctb_raw);
-      Int_t Res_ctu_ctb = ctu(m_ctb,  m_ctb_slat, ctb_raw, ctb_cor);
+			      ctb_event, ctb_mslat, ctb_raw); if(Res_cts_ctb){};
+      Int_t Res_ctu_ctb = ctu(m_ctb,  m_ctb_slat, ctb_raw, ctb_cor);if(Res_ctu_ctb){};
       ctu_raw_st *raw   = ctb_raw->GetTable();
       for (Int_t i=0; i<ctb_raw->GetNRows();i++,raw++){
         m_adcc->Fill((Float_t) raw->adc);
@@ -170,7 +173,7 @@ Int_t St_ctf_Maker::Make(){
       St_ctu_cor   *tof_cor   = new  St_ctu_cor("tof_cor",     50); m_DataSet->Add(tof_cor); 
       Int_t Res_cts_tof = cts(g2t_tof_hit, g2t_track,
 			      m_tof,  m_tof_slat, m_tof_slat_phi, m_tof_slat_eta, m_cts_tof,
-			      tof_event, tof_mslat, tof_raw);
+			      tof_event, tof_mslat, tof_raw);if(Res_cts_tof){}
       St_DataSet *tpc_tracks = GetDataSet("tpc_tracks");
       St_tpt_track  *tptrack = 0;
       St_tte_mctrk  *mctrk   = 0;
@@ -195,7 +198,7 @@ Int_t St_ctf_Maker::Make(){
 					      m_tof,m_tof_slat,
 					      m_tof_slat_phi,m_tof_slat_eta,
 					      m_cts_tof,tof_mslat,
-					      dst_tof_trk,dst_tof_evt);
+					      dst_tof_trk,dst_tof_evt); if(Res_fill_dst_tof){};
          dst_tof_trk_st *dst = dst_tof_trk->GetTable();
          for (Int_t i=0; i<dst_tof_trk->GetNRows();i++,dst++){
            m_tsvsp->Fill(dst->ptot,dst->ts_mtime);
@@ -204,7 +207,7 @@ Int_t St_ctf_Maker::Make(){
            }
          }
       }	 
-      Int_t Res_ctu_tof = ctu(m_tof,  m_tof_slat, tof_raw, tof_cor);
+      Int_t Res_ctu_tof = ctu(m_tof,  m_tof_slat, tof_raw, tof_cor);if(Res_ctu_tof){}
       ctu_raw_st *raw   = tof_raw->GetTable();
       for (Int_t i=0; i<tof_raw->GetNRows();i++,raw++){
         m_adct->Fill((Float_t) raw->adc);

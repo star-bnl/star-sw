@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.28 2002/12/20 20:26:44 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.29 2003/04/30 20:37:12 perev Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.29  2003/04/30 20:37:12  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 1.28  2002/12/20 20:26:44  aihong
  * let it handle P02gd table
  *
@@ -857,7 +860,7 @@ double StuProbabilityPidAlgorithm::getCentrality(int theMult){
   else return 0.99;
 
   }
-
+  return 0.99;
 
 
 }

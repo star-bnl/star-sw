@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StEtGrid.cxx,v 1.2 2002/06/24 13:22:59 akio Exp $
+// $Id: StEtGrid.cxx,v 1.3 2003/04/30 20:38:37 perev Exp $
 // $Log: StEtGrid.cxx,v $
+// Revision 1.3  2003/04/30 20:38:37  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.2  2002/06/24 13:22:59  akio
 // numerous bug fix & updates
 //
@@ -61,7 +64,7 @@ int StEtGrid::add(int key, float et){
   int n = mGrid->GetLast()+1;
   if(n>=nKeys) {cout << "StEtGrid::add  TClonesArray limit exceeded" << endl; return 1;}
   TClonesArray &g = *mGrid;
-  StEtCell *c = new(g[n]) StEtCell(key,etaMinKey[key],etaMaxKey[key],phiMinKey[key],phiMaxKey[key],et);
+  new(g[n]) StEtCell(key,etaMinKey[key],etaMaxKey[key],phiMinKey[key],phiMaxKey[key],et);
   mState=3;
   return 0;
 }

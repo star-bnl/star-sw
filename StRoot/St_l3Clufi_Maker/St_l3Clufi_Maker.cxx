@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.25 2001/08/06 17:53:23 dietel Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.26 2003/04/30 20:39:21 perev Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.26  2003/04/30 20:39:21  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.25  2001/08/06 17:53:23  dietel
 // Added missing file: RC_config.h
 //
@@ -465,7 +468,7 @@ Int_t St_l3Clufi_Maker::WriteClustersIntoTables()
 		}
 	    // get hit array (=bank)
 	    St_hitarray* bank_entries = (St_hitarray*)sec_bank_iter(secname);
-	    hitarray_st* bank_entries_st = (hitarray_st*) bank_entries->GetTable();
+//VPunused  hitarray_st* bank_entries_st = (hitarray_st*) bank_entries->GetTable();
 	
       // fill banks into tphit structs
 	    St_l3banks_2_tphits* filler = new St_l3banks_2_tphits(stl3hit,bank_entries);

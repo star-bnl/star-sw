@@ -175,7 +175,7 @@ extern "C" long type_of_call cts_(
 //    Check local index dimensions (I had problems with dynamic allocation on the ibm )
 //
    if ( n_eta * n_phi > max_local_index ) {
-     sprintf ( OutMessage, " Local index not long enough, %d ", max_local_index ) ;
+     sprintf ( OutMessage, " Local index not long enough, %ld ", max_local_index ) ;
      MessageOut ( OutMessage ) ;
      return STAFCV_BAD ;
    }
@@ -325,7 +325,7 @@ long cts_detector_response (
 //
       if (  i_phi < geo->i_phi_min || i_phi > geo->i_phi_max
          || i_eta < geo->i_eta_min || i_eta > geo->i_eta_max ) {
-           sprintf ( OutMessage, " Hit %d has Phi or Eta indexes %d %d out of range ", 
+           sprintf ( OutMessage, " Hit %d has Phi or Eta indexes %ld %ld out of range ", 
                                    i_hit, i_phi, i_eta ) ;
            MessageOut ( OutMessage ) ;
            continue ;
@@ -376,7 +376,7 @@ long cts_detector_response (
       long n_phe ;
       if ( !(mpara->slat_para) ) {
 //---- Exponential attenuation
-         n_phe = mhit[i_hit].de * cts_slat_response_exp ( Length, mpara ) ;
+         n_phe = long(mhit[i_hit].de * cts_slat_response_exp ( Length, mpara )) ;
       }
       else {
 //---- Get distance to closest edges and use maps
@@ -387,8 +387,8 @@ long cts_detector_response (
          float d_phi_2 = fabs(slat_phi[i_phi].phi_max/Todeg-phi) ;
          if ( d_phi_2 > Pi ) d_phi_2 = 2. * Pi - d_phi_2 ;
          float d_edge = geo->r * min(d_phi_1,d_phi_2) ;
-         n_phe = mhit[i_hit].de * 
-                 cts_slat_response_table ( Length, d_edge, mhit[i_hit].tof, mpara ) ;
+         n_phe = long(mhit[i_hit].de * 
+                 cts_slat_response_table ( Length, d_edge, mhit[i_hit].tof, mpara )) ;
       }
 //
 //---- Check the slat number
@@ -473,9 +473,9 @@ long cts_detector_response (
 //
 //---- Store number of slats with signal
 	if (geo->detector == 2) {     //WJL
-      printf(" cts: No. struck TOF slats = %d\n", n_slats_on); 
+      printf(" cts: No. struck TOF slats = %ld\n", n_slats_on); 
     } else {
-      printf(" cts: No. struck CTB slats = %d\n", n_slats_on); 
+      printf(" cts: No. struck CTB slats = %ld\n", n_slats_on); 
     }
     mslat_h->nok  = n_slats_on ;
 //
@@ -510,7 +510,7 @@ void cts_fill_event (
 //
    if ( n_event >= event_h->maxlen ) {
      sprintf ( OutMessage, " cts_fill_event: n_event = %d > maxlen = %d  ",
-                             n_event, event_h->maxlen ) ;
+                             n_event, (int)event_h->maxlen ) ;
      MessageOut ( OutMessage ) ;
      return ;
    }
@@ -576,8 +576,8 @@ void cts_fill_raw (
 //
 //WJL   for ( index = 0 ; index < n_eta*n_phi ; index++ ) {
    for ( index = 0 ; index < raw_h->nok ; index++ ) {
-       raw[index].adc = 0. ;
-       raw[index].tdc = 0. ;
+       raw[index].adc = 0 ;
+       raw[index].tdc = 0 ;
    }
 //
    for ( int i_slat = 0 ; i_slat < mslat_h->nok ; i_slat++ ) {
@@ -599,8 +599,8 @@ void cts_fill_raw (
 //?WJL      mslat[index].adc = raw[i_raw].adc ;
 //
       offset = slat[index].offset_adc + rg32_(1)*slat[index].ods_adc;
-      mslat[i_slat].adc = (int)((float)mslat[i_slat].n_phe*mpara->nphe_to_adc)
-                        + offset;
+      mslat[i_slat].adc = (int)((float)mslat[i_slat].n_phe*mpara->nphe_to_adc
+                        + offset);
       if ( mslat[i_slat].adc > mpara->adc_overflow )
            mslat[i_slat].adc = mpara->adc_overflow ;
       if ( mslat[i_slat].adc < 0 )
@@ -614,7 +614,7 @@ void cts_fill_raw (
 //?WJL      mslat[i_slat].tdc = raw[i_raw].tdc ;
 //
       offset = slat[index].offset_tdc + rg32_(1)* (float)slat[index].ods_tdc ;
-      mslat[i_slat].tdc = mslat[i_slat].mtime / slat[index].cc_tdc + offset ;
+      mslat[i_slat].tdc = int(mslat[i_slat].mtime / slat[index].cc_tdc + offset) ;
       if ( mslat[i_slat].tdc > mpara->tdc_overflow )
            mslat[i_slat].tdc = mpara->tdc_overflow ;
       if ( mslat[i_slat].tdc < 0 )
@@ -640,8 +640,8 @@ void cts_fill_raw (
 
       raw[index].i_phi = slat[index].i_phi ;
       raw[index].i_eta = slat[index].i_eta ;
-      raw[index].adc   = slat[index].offset_adc + rg32_(1)* slat[index].ods_adc ;
-      raw[index].tdc   = slat[index].offset_tdc + rg32_(1)* slat[index].ods_tdc ;
+      raw[index].adc   = int(slat[index].offset_adc + rg32_(1)* slat[index].ods_adc) ;
+      raw[index].tdc   = int(slat[index].offset_tdc + rg32_(1)* slat[index].ods_tdc) ;
    }
 //
 //   Set number of slats with raw data
@@ -705,11 +705,11 @@ void cts_electronic_noise (
 //
 //      Generated ADC&TDC signals
 //
-        raw[i_slat].adc = mpara->amin_noise +
-               rndm_(1) * (mpara->amax_noise-mpara->amin_noise) ;
+        raw[i_slat].adc = int(mpara->amin_noise +
+               rndm_(1) * (mpara->amax_noise-mpara->amin_noise)) ;
 
-        raw[i_slat].tdc = mpara->tmin_noise +
-               rndm_(1) * (mpara->tmax_noise-mpara->tmin_noise) ;
+        raw[i_slat].tdc = int(mpara->tmin_noise +
+               rndm_(1) * (mpara->tmax_noise-mpara->tmin_noise)) ;
 //
 //     Add info in Raw
 //
@@ -762,7 +762,7 @@ void cts_get_ctb_indexes ( long volume, long &i_phi, long &i_eta ) {
 //
     long i1 ;
     i1     = int(volume/100) ;
-    i_phi  = fmod((double)volume,100.) ;
+    i_phi  = (long)fmod((double)volume,100.) ;
     if ( i1 < 20 ) {
        i_phi = 14 - i_phi ;
        if ( i_phi < 1 ) i_phi = i_phi + 60 ;
@@ -951,7 +951,7 @@ float cts_slat_response_table ( float& z, float& dd, float& tof,
    long max_z = sizeof(mpara->z_grid) / sizeof(mpara->z_grid[0]) ;
 //
    if ( mpara->n_z < 1 || mpara->n_z > max_z ) {
-     sprintf ( OutMessage, " cts_slat_response_table: n_z = %d, max_z = %d  ",
+     sprintf ( OutMessage, " cts_slat_response_table: n_z = %d, max_z = %ld  ",
                              mpara->n_z, max_z ) ;
      MessageOut ( OutMessage ) ;
      return -1 ;
@@ -959,7 +959,7 @@ float cts_slat_response_table ( float& z, float& dd, float& tof,
 //
    long max_d = sizeof(mpara->d_grid) / sizeof(mpara->d_grid[0]) ;
    if ( mpara->n_d < 1 || mpara->n_d > max_d ) {
-     sprintf ( OutMessage, " cts_slat_response_table: n_d = %d, max_d = %d  ",
+     sprintf ( OutMessage, " cts_slat_response_table: n_d = %d, max_d = %ld  ",
                              mpara->n_d, max_d ) ;
      MessageOut ( OutMessage ) ;
      return -1 ;
@@ -967,7 +967,7 @@ float cts_slat_response_table ( float& z, float& dd, float& tof,
 //
    long max_zd = sizeof(mpara->slat_response) / sizeof(mpara->slat_response[0]) ;
    if ( mpara->n_d < 1 || mpara->n_d > max_d ) {
-     sprintf ( OutMessage, " cts_slat_response_table: n_d * n_z = %d, max_zd = %d  ",
+     sprintf ( OutMessage, " cts_slat_response_table: n_d * n_z = %d, max_zd = %ld  ",
                              mpara->n_d*mpara->n_z, max_zd ) ;
      MessageOut ( OutMessage ) ;
      return -1 ;
@@ -975,7 +975,7 @@ float cts_slat_response_table ( float& z, float& dd, float& tof,
 //
    long max_t = sizeof(mpara->time_response) / sizeof(mpara->time_response[0]) ;
    if ( mpara->n_time < 1 || mpara->n_time > max_t ) {
-     sprintf ( OutMessage, " cts_slat_response_table: n_time = %d, max_t = %d  ",
+     sprintf ( OutMessage, " cts_slat_response_table: n_time = %d, max_t = %ld  ",
                              mpara->n_time, max_t ) ;
      MessageOut ( OutMessage ) ;
      return -1 ;

@@ -1,6 +1,6 @@
 void loadSharedLibraries() {
   // Dynamically link needed shared libs
-  gSystem->Load("libStar");
+  gSystem->Load("libTable");
   gSystem->Load("libPhysics");
   gSystem->Load("St_base");
   gSystem->Load("StChain");

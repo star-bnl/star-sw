@@ -1,7 +1,10 @@
-// $Id: XDFBrowser.C,v 1.5 2000/08/01 19:26:54 fine Exp $
+// $Id: XDFBrowser.C,v 1.6 2003/04/30 20:40:12 perev Exp $
 // $Log: XDFBrowser.C,v $
+// Revision 1.6  2003/04/30 20:40:12  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.5  2000/08/01 19:26:54  fine
-// Loading libStar share library has been added
+// Loading libTable share library has been added
 //
 // Revision 1.4  1999/05/21 15:33:55  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
@@ -30,7 +33,7 @@ St_XDFFile *xdf=0;
 // To get another file just re-call XDFBRowser("with another file name here")
 //
 Load(){
- gSystem->Load("libStar");
+ gSystem->Load("libTable");
  gSystem->Load("St_base");
  gSystem->Load("xdf2root");
  gSystem->Load("St_Tables");

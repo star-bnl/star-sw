@@ -31,7 +31,7 @@ using std::sort;
 void StJetSpliterMerger::splitMerge(ValueCellList& preJets)
 {
     //cout <<"--- StJetSpliterMerger::splitMerge(CellList&) ---"<<endl;
-    clock_t begin = clock();
+    clock_t begin = clock(); if(begin) {/*touch*/}
 	
     //copy into work array
     copyPreJets(preJets);
@@ -145,8 +145,8 @@ void StJetSpliterMerger::splitMerge(ValueCellList& preJets)
     }
 	
     //copyPostJets(preJets);
-    clock_t end = clock();
-    double elapsedTime = static_cast<double>(end-begin)/static_cast<double>(CLOCKS_PER_SEC);
+    //clock_t end = clock();
+    //double elapsedTime = static_cast<double>(end-begin)/static_cast<double>(CLOCKS_PER_SEC);
     //cout <<"\tFinished in:\t"<<elapsedTime<<"\tcpu sec"<<endl;
 
 }

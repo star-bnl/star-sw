@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfcS.C,v 1.5 2002/01/26 23:48:08 jeromel Exp $
+// $Id: bfcS.C,v 1.6 2003/04/30 20:40:04 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -45,7 +45,7 @@ StEventMaker *evMk = 0;
 StTpcT0Maker *t0mk = 0;
 //_____________________________________________________________________
 void Load(){
-  if (gClassTable->GetID("TTable") < 0) gSystem->Load("libStar");
+  if (gClassTable->GetID("TTable") < 0) gSystem->Load("libTable");
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("StUtilities");

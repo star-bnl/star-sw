@@ -5,7 +5,7 @@ void RunChainMerger(const char* dir, const char* outfile)
 {
     cout <<"Loading Libraries"<<endl;
     
-    if (gClassTable->GetID("TTable") < 0) gSystem->Load("libStar");
+    if (gClassTable->GetID("TTable") < 0) gSystem->Load("libTable");
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");

@@ -283,7 +283,7 @@ void TrackEntry::addTrackInfo(StRichTrack* richTrack, StEvent* event, StRichMate
   prtotazi = -999;
 
 
-  for (int j=0;j<theRichPids.size();j++) {
+  for (int j=0;j<(int)theRichPids.size();j++) {
     
     int consAreaOneSigmaHits = 0; 
     int consAreaTwoSigmaHits = 0;

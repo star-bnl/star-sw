@@ -139,7 +139,7 @@ void StSmdPedMaker::FillPedestal()
       ok = kTRUE;
       StEmcModule* module = detector->module(j);
       StSPtrVecEmcRawHit& rawHit=module->hits();
-      for(Int_t k=0;k<rawHit.size();k++)
+      for(Int_t k=0;k<(int)rawHit.size();k++)
       {
         Int_t m = rawHit[k]->module();
         Int_t e = rawHit[k]->eta();

@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichDrawableTControl.cxx,v 2.1 2000/08/11 20:20:07 gans Exp $
+ * $Id: StRichDrawableTControl.cxx,v 2.2 2003/04/30 20:38:03 perev Exp $
  *
  * Description: A Clickabe Control Button
  *
@@ -59,14 +59,14 @@ void StRichDrawableTControl::ExecuteEvent(Int_t event, Int_t px, Int_t py)
 	    TCanvas * tempCanvas = mPadMon->getRichCanvas();
 	    unsigned int ww = tempCanvas->GetWw();
 	    unsigned int wh = tempCanvas->GetWh();
-	    tempCanvas->SetCanvasSize(1.25*ww,1.25*wh);
+	    tempCanvas->SetCanvasSize((int)1.25*ww,(int)1.25*wh);
 	    tempCanvas->ForceUpdate();
 	}
 	if(mControlType == eZoomOut){
 	    TCanvas * tempCanvas = mPadMon->getRichCanvas();
 	    unsigned int ww = tempCanvas->GetWw();
 	    unsigned int wh = tempCanvas->GetWh();
-	    tempCanvas->SetCanvasSize(.8*ww,.8*wh);
+	    tempCanvas->SetCanvasSize((int).8*ww,(int).8*wh);
 	    tempCanvas->ForceUpdate();
 	}
 	

@@ -375,6 +375,6 @@ void globtrk_pnt  ( TABLE_HEAD_ST  *globtrk_h,    EGR_GLOBTRK_ST  *globtrk )
       if ( id > -1 && id < GLOBTRK_LEN )
          globtrk_pointer[id] = i ;
       else
-         printf ( "\n GLOBTRK_PNT:  %d index out of bounds ", id ) ;
+         printf ( "\n GLOBTRK_PNT:  %ld index out of bounds ", id ) ;
    }
 }

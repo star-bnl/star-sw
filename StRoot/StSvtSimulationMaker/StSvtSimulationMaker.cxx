@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.10 2001/11/06 20:12:06 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.11 2003/04/30 20:38:49 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.11  2003/04/30 20:38:49  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 1.10  2001/11/06 20:12:06  caines
  * Add include for new compiler
  *
@@ -845,7 +848,7 @@ Int_t StSvtSimulationMaker::Make()
 	  if(mPasaSigAttributes){
 
 	    mPasaSignals = mSvtSimulation->getPasaSigAttributes();
-	    float peakVal = 0,timeCenter = 0,timeWidth =0;
+	    float peakVal = 0/*,timeCenter = 0,timeWidth =0*/; //VP
 	    float unShootVal = 0;
 
 	    for(int i = 0; i < 7; i++){
@@ -1017,7 +1020,7 @@ Int_t StSvtSimulationMaker::checkOneHybrid(StSvtHybridPixels* SvtSimDataPixels)
           if(mPasaSigAttributes){
 
 	    mPasaSignals = mSvtSimulation->getPasaSigAttributes();
-	    float peakVal = 0,timeCenter = 0,timeWidth =0;
+	    float peakVal = 0/*,timeCenter = 0,timeWidth =0*/; //VP
 	    float unShootVal = 0;
 
 	    for(int i = 0; i < 7; i++){
@@ -1050,7 +1053,7 @@ Int_t StSvtSimulationMaker::checkAllHybrids()
    cout<<"StSvtSimulationMaker::checkAllHybrids()"<<endl;
    
    int k, HardWarePos,Layer;
-   int idShape = 0;
+//VPunused   int idShape = 0;
    int layer,ladder ,wafer ,hybrid ;
    float locPx, locPy ,locPz;
    float xPos,yPos,zPos ;
@@ -1278,7 +1281,7 @@ Int_t StSvtSimulationMaker::doDriftTimeShift(StSvtHybridPixels* SvtSimDataPixels
      if(mPasaSigAttributes){
 
        mPasaSignals = mSvtSimulation->getPasaSigAttributes();
-       float peakVal = 0,timeCenter = 0,timeShift = 0;
+       float peakVal = 0/*,timeCenter = 0,timeShift = 0*/; //VP
        float unShootVal = 0;
 
        float sumAdc = 0;

@@ -1,7 +1,10 @@
 //*-- Author : Alexandre Suaide and Marcia Moura
 // 
-// $Id: StEmcExampleMaker.cxx,v 1.1 2003/02/14 16:30:54 suaide Exp $
+// $Id: StEmcExampleMaker.cxx,v 1.2 2003/04/30 20:36:41 perev Exp $
 // $Log: StEmcExampleMaker.cxx,v $
+// Revision 1.2  2003/04/30 20:36:41  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.1  2003/02/14 16:30:54  suaide
 // added example maker
 //
@@ -90,7 +93,7 @@ Int_t StEmcExampleMaker::Make()
         cout <<"Energy = "<<cluster[j]->energy()<<"\n";
         cout <<"********* Hits for this cluster\n";
 
-        for(Int_t k=0;k<rawHit.size();k++)
+        for(Int_t k=0;k<(int)rawHit.size();k++)
         {
           cout <<"Hit number = "<<k<<"  module = " << rawHit[k]->module()<<"  eta = "<<rawHit[k]->eta() << "  sub = "<< rawHit[k]->sub() <<"  adc = "<<rawHit[k]->adc()<<"  energy = "<<rawHit[k]->energy()<<"\n";
         }
@@ -103,7 +106,7 @@ Int_t StEmcExampleMaker::Make()
   cout<<"STEVENT POINTS\n\n ";
   StSPtrVecEmcPoint& points = emccol->barrelPoints();
   cout <<"barrel points size = "<<points.size()<<"\n";
-  for(Int_t i=0;i<points.size();i++)
+  for(Int_t i=0;i<(int)points.size();i++)
   {
     cout <<"Point number "<<i<<endl;
     cout <<"Energy = "<<points[i]->energy()<<"  chi = "<<points[i]->chiSquare()<<endl;
@@ -124,7 +127,7 @@ Int_t StEmcExampleMaker::Make()
         cout <<"Energy = "<<cluster[j]->energy()<<"\n";
         cout <<"********* Hits for this cluster\n";
 
-        for(Int_t k=0;k<rawHit.size();k++)
+        for(Int_t k=0;k<(int)rawHit.size();k++)
         {
           cout <<"Hit number = "<<k<<"  module = " << rawHit[k]->module()<<"  eta = "<<rawHit[k]->eta() << "  sub = "<< rawHit[k]->sub() <<"  adc = "<<rawHit[k]->adc()<<"  energy = "<<rawHit[k]->energy()<<"\n";
         }

@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.125 2002/04/28 00:53:42 jeromel Exp $
+// $Id: StMaker.cxx,v 1.126 2003/04/30 20:36:23 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -45,7 +45,7 @@ StMaker *StMaker::fgStChain = 0;
 StMaker *StMaker::fgFailedMaker = 0;
 Int_t    StMaker::fgTallyMaker[kStFatal+1] = {0,0,0,0,0};
 Int_t MaxWarnings = 26;
-
+typedef TDataSet::EDataSetPass EDataSetPass;
 ClassImp(StMaker)
 
 static void doPs(const char *who,const char *where);
@@ -599,14 +599,14 @@ Int_t StMaker::Make()
 // 		Call Maker
      maker->StartMaker();
      ret = maker->Make();
-     assert(ret>=0 && ret<=kStFatal);     
+     assert((ret%10)>=0 && (ret%10)<=kStFatal);     
      fgTallyMaker[ret]++;
      maker->EndMaker(ret);
      
      if (Debug() || ret) printf("*** %s::Make() == %d ***\n",maker->ClassName(),ret);
 
      maker->ResetBit(kMakeBeg);
-     if (ret>kStWarn) { 
+     if ((ret%10)>kStWarn) { 
        fgFailedMaker = maker;
        return ret;}
      
@@ -1141,6 +1141,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.126  2003/04/30 20:36:23  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.125  2002/04/28 00:53:42  jeromel
 // More doc added ...
 //

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BetheBlochCalibrator.C,v 1.3 2002/12/30 20:03:19 aihong Exp $
+ * $Id: BetheBlochCalibrator.C,v 1.4 2003/04/30 20:37:10 perev Exp $
  *
  * Author:Aihong Tang           Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: BetheBlochCalibrator.C,v $
+ * Revision 1.4  2003/04/30 20:37:10  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 1.3  2002/12/30 20:03:19  aihong
  * change include path
  *
@@ -136,10 +139,10 @@ double minimumIonizingdEdx(double calib, double pionPosition){
     return pionPlusBandCenter->Eval(pionPosition,0,0);
 }
     
-double look4MinDeltaDiff(double calibStart, double calibEnd, int calibSteps, double pionPosition, double protonPosition, double DeltaRef){
+double look4MinDeltaDiff(double calibTablet, double calibEnd, int calibSteps, double pionPosition, double protonPosition, double DeltaRef){
 
-     double calibSeg=(calibEnd-calibStart)/double(calibSteps);
-     double thisCalib=calibStart;
+     double calibSeg=(calibEnd-calibTablet)/double(calibSteps);
+     double thisCalib=calibTablet;
      double minDeltaDiffCalib=5000;//calib associated with minDeltaDiff.
      double minDeltaDiff=5000;
 

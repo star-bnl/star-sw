@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiMicroMaker.cxx,v 1.4 2002/05/31 21:50:14 jklay Exp $                                      
+ * $Id: StHiMicroMaker.cxx,v 1.5 2003/04/30 20:37:32 perev Exp $                                      
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHiMicroMaker.cxx,v $
+ * Revision 1.5  2003/04/30 20:37:32  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 1.4  2002/05/31 21:50:14  jklay
  * Fixed the way centrality is calculated, see README
  *
@@ -181,7 +184,7 @@ StHiMicroMaker::Make()
     //
     //30.May.2002 nGoodEta is no longer used, as there is a common defintion
     //from StEvent now...
-    Int_t nGoodEta = fillTracks(event);
+    //    Int_t nGoodEta = fillTracks(event);
     //
     // fill StHiMicroEvent
     //

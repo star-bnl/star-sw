@@ -1,7 +1,10 @@
 //*-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StEEmcTrigSimuMaker.cxx,v 1.2 2003/02/14 00:04:31 balewski Exp $
+// $Id: StEEmcTrigSimuMaker.cxx,v 1.3 2003/04/30 20:36:37 perev Exp $
 // $Log: StEEmcTrigSimuMaker.cxx,v $
+// Revision 1.3  2003/04/30 20:36:37  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.2  2003/02/14 00:04:31  balewski
 // remove few printouts
 //
@@ -97,7 +100,7 @@ Int_t StEEmcTrigSimuMaker::Make(){
 	int sub= emcTowerHits[j]->sub()+'A';
 	int eta= emcTowerHits[j]->eta()+1;
 	float energy= emcTowerHits[j]->energy();
-	printf("j=%d, sec=%d, sub=%C, eta=%d adc=%d ener=%f\n",j,sec,sub,eta,adc,energy);
+	printf("j=%d, sec=%d, sub=%c, eta=%d adc=%d ener=%f\n",j,sec,sub,eta,adc,energy);
       }
     } 
   }

@@ -216,7 +216,7 @@ Int_t StV0FinderMaker::Prepare() {
         heli[trks] = triGeom->helix();
        
         p = triGeom->momentum();
-	Float_t bf = 4.97958;
+//VPunused	Float_t bf = 4.97958;
 
 	pt[trks] = p.perp();
         ptot[trks] = p.mag();
@@ -629,8 +629,11 @@ void StV0FinderMaker::Trim() {
                       " V0 candidates" << endm;
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.2 2003/04/30 19:14:27 faivre Exp $
+// $Id: StV0FinderMaker.cxx,v 1.3 2003/04/30 20:38:22 perev Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.3  2003/04/30 20:38:22  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.2  2003/04/30 19:14:27  faivre
 // ITTF vs TPT V0s
 //

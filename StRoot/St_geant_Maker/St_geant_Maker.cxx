@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.79 2003/04/18 15:53:26 geurts Exp $
+// $Id: St_geant_Maker.cxx,v 1.80 2003/04/30 20:39:19 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.80  2003/04/30 20:39:19  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.79  2003/04/18 15:53:26  geurts
 // Code added for TOFr (tfr) tables.
 //
@@ -495,15 +498,15 @@ Int_t St_geant_Maker::Make()
       {
 	fEvtHddr->SetBImpact  (p->phep[0]);
 	fEvtHddr->SetPhImpact (p->phep[1]);
-	fEvtHddr->SetGenerType(p->phep[2]);
+	fEvtHddr->SetGenerType((int)p->phep[2]);
 	fEvtHddr->SetCenterOfMassEnergy(p->phep[3]);
 	Int_t west = (int)p->phep[4];
 	Int_t east = (int)(1000.*p->phep[4]-1000.*((float)west));
 	fEvtHddr->SetAWest(west);
 	fEvtHddr->SetAEast(east);
 	if (fEvtHddr->GetRunNumber() != p->vhep[0])
-	  fEvtHddr->SetRunNumber(p->vhep[0]);
-	fEvtHddr->SetEventNumber(p->vhep[1]);
+	  fEvtHddr->SetRunNumber((int)p->vhep[0]);
+	fEvtHddr->SetEventNumber((int)p->vhep[1]);
 	fEvtHddr->SetProdDateTime();
         Int_t id = p->jdahep[0];
         Int_t it = p->jdahep[1];
@@ -833,10 +836,10 @@ TShape *St_geant_Maker::MakeShape(TString *name, Int_t ivo){
 			     p->par[5]);
     break;
     case PGON: t = new TPGON((Char_t *) name->Data(),"PGON",(Char_t *) Astring.Data(),
-			     p->par[0],p->par[1],p->par[2],p->par[3]);
+			     p->par[0],p->par[1],(int)p->par[2],(int)p->par[3]);
     break;
     case PCON: t = new TPCON((Char_t *) name->Data(),"PCON",(Char_t *) Astring.Data(),
-			     p->par[0],p->par[1],p->par[2]);
+			     p->par[0],p->par[1],(int)p->par[2]);
     break;
     case ELTU: t = new TELTU((Char_t *) name->Data(),"ELTU",(Char_t *) Astring.Data(),
 			     p->par[0],p->par[1],p->par[2]);
@@ -861,11 +864,11 @@ TShape *St_geant_Maker::MakeShape(TString *name, Int_t ivo){
     default: assert(0);
 
     } 
-    if (att->lseen  != 1) t->SetVisibility(att->lseen);
-    if (att->lstyle != 1) t->SetLineStyle(att->lstyle);
-    if (att->lwidth != 1) t->SetLineWidth(att->lwidth);
-    if (att->lcolor != 1) t->SetLineColor(att->lcolor);
-    if (att->lfill  != 1) t->SetFillStyle(att->lfill);
+    if (att->lseen  != 1) t->SetVisibility((int)att->lseen);
+    if (att->lstyle != 1) t->SetLineStyle ((int)att->lstyle);
+    if (att->lwidth != 1) t->SetLineWidth ((int)att->lwidth);
+    if (att->lcolor != 1) t->SetLineColor ((int)att->lcolor);
+    if (att->lfill  != 1) t->SetFillStyle ((int)att->lfill);
   }
   return t;
 }
@@ -945,7 +948,7 @@ TVolume *St_geant_Maker::Work()
                          p[0],p[1],p[2],p[3],p[4],p[5]);          break;
         case PARA: t=new TPARA(nick,"PARA","void",
                          p[0],p[1],p[2],p[3],p[4],p[5]);          break;
-        case PGON: t=new TPGON(nick,"PGON","void",p[0],p[1],p[2],p[3]);  
+        case PGON: t=new TPGON(nick,"PGON","void",p[0],p[1],(int)p[2],(int)p[3]);  
                    { Float_t *pp = p+4;
                      for (Int_t i=0; i<p[3]; i++) {
                           Float_t z    = *pp++;
@@ -956,7 +959,7 @@ TVolume *St_geant_Maker::Work()
 //                         (( TPGON*)t)->DefineSection(i,*pp++,*pp++,*pp++);
                      }
                    }                                              break;
-        case PCON: t=new TPCON(nick,"PCON","void",p[0],p[1],p[2]);
+        case PCON: t=new TPCON(nick,"PCON","void",p[0],p[1],(int)p[2]);
                    { Float_t *pp = p+3;
                      for (Int_t i=0; i<p[2]; i++) {
                           Float_t z    = *pp++;
@@ -980,12 +983,12 @@ TVolume *St_geant_Maker::Work()
         default:   t=new TBRIK(nick,"BRIK","void",
                          p[0],p[1],p[2]);                         break;
       };
-      t->SetLineColor(att[4]);
+      t->SetLineColor((int)att[4]);
  
       // to build a compressed tree, name should be checked for repetition
       newVolume = new TVolume(name,nick,t);
 //      newVolume -> SetVisibility(ENodeSEEN(MapGEANT2StNodeVis(att[1])));
-      newVolume -> SetVisibility((TVolume::ENodeSEEN)TVolume::MapGEANT2StNodeVis(att[1]));
+      newVolume -> SetVisibility((TVolume::ENodeSEEN)TVolume::MapGEANT2StNodeVis((int)att[1]));
       H->SetPointer(newVolume);
     }
 
@@ -1146,7 +1149,7 @@ void St_geant_Maker::RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec,
 
   // Use St_Table::New(...)  when it is available as follows:
   St_Table *table =  St_Table::New(t.Data(),t.Data(),iq,k);
-  if (table) {fgGeom->Add(table); table->SetBit(kIsNotOwn);}
+  if (table) {fgGeom->Add(table); table->SetBit(TTable::kIsNotOwn);}
   else       cout << "Dictionary for table :" << t.Data() 
                   << " has not been defined yet. Skip it" 
                   << endl;

@@ -55,7 +55,7 @@ void StiCircleCalculator::calculateRadius(const StThreeVector<double>& pt1,
     //           / C \               |
     //        a /     \ b             ------>
     //         /       \                    x
-    //        /         \
+    //        /         \  
     //  p1   / B       A \  p3
     // (v1) #-------------# (v3)
     //            c

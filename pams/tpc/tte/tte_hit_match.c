@@ -6,6 +6,7 @@
 **:<------------------------------------------------------------------*/
 #include "tte_hit_match.h"
 #include <math.h>
+#include <string.h>
 
 int ds2ReallocTable (TABLE_HEAD_ST **h, char** ppData, int newsize);
 
@@ -82,11 +83,11 @@ float dist_current; /* current sqared smallest distance between the geant and re
    
 /* Sort all the reconstructed hits according to sector/row*/
     tls_quick_sort_ii_(&tphit_h[0].nok, &tphit[0].row,
-		      &tphit[1].row,&tphit[0].cluster);
+		      &tphit[1].row,(long*)&tphit[0].cluster);
 
 /* Sort all the geant hits according to sector/row*/
-    tls_qsort_herb_i_(&g2t_hit_h[0].nok, &g2t_hit[0].volume_id,
-		      &g2t_hit[1].volume_id,&g2t_hit[0].id);
+    tls_qsort_herb_i_((long*)&g2t_hit_h[0].nok, &g2t_hit[0].volume_id,
+		      &g2t_hit[1].volume_id,(long*)&g2t_hit[0].id);
 
 /* Clear counter table */
     memset(count_hit_rec,0,total_len*sizeof(long));

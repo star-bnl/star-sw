@@ -28,7 +28,7 @@ long type_of_call fake_adcslope_(
 **:      OUT:
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
-    long i, j, k, l, nok_c, nok_cc, nok_fp;
+    long i, j, k, l, nok_c, nok_cc;
     short func, det, nmod, neta, nsub, tot;
     long iseed=9999; 
     float bits;

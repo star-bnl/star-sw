@@ -3,9 +3,9 @@
 ClassImp(StRichUstHit)
 StRichUstHit::StRichUstHit() {
     charge = -999;
-    maxAdc = -999;
+    maxAdc = 0;
     nPads = -999;
-    flag = -999;
+    flag = (ULong_t)(-999);
     clusterNumber = -999;
     clusterFirstPad = -999;
     nClusterPads = -999;

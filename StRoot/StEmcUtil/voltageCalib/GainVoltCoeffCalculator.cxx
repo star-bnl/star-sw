@@ -60,7 +60,7 @@ void GainVoltCoeffCalculator::process()
     {
       // loop over all PMTs, and perform a fit.
       GVP_iterator i;
-      int count=0;
+      //VPunused int count=0;
       for (i=_pmts.begin();i!=_pmts.end();i++)
 	{
 	  (*i)->fit();

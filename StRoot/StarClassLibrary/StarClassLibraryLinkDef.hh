@@ -1,7 +1,7 @@
 // LinkDef.h
 /***************************************************************************
  *
- * $Id: StarClassLibraryLinkDef.hh,v 1.4 2001/12/05 23:34:44 ullrich Exp $
+ * $Id: StarClassLibraryLinkDef.hh,v 1.5 2003/04/30 20:39:43 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -23,6 +23,9 @@
  ***************************************************************************
  *
  * $Log: StarClassLibraryLinkDef.hh,v $
+ * Revision 1.5  2003/04/30 20:39:43  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 1.4  2001/12/05 23:34:44  ullrich
  * Added Victor modifications to cope with error recovery.
  *
@@ -109,7 +112,7 @@
 #pragma link C++ class StMatrixF-;
 // #pragma link C++ class StMatrixRowF;
 // #pragma link C++ class StMatrixRowConstF;
-#pragma link C++ function recovErr(const StMatrixF&);
+// #pragma link C++ function recovErr(const StMatrixF&);
 #pragma link C++ function operator*(const StMatrixF&,const StMatrixF&);            
 #pragma link C++ function operator*(const StMatrixF&, const StThreeVectorF&);      
 #pragma link C++ function operator*(const StMatrixF&, const StThreeVectorD&);      

@@ -50,9 +50,9 @@ long l; /* loop index */
 long j; /* running track index */
 long id_track;
 long newmaxlen; /* new rowcount for the resolution table */
-float x1,y1,z1;
+float x1,yi,z1;
 float xc,yc,psic,radius;
-float phi, phi0,phidif, tanl;
+float phi, phi0,phidif, tanL;
 float arclen;
 TCL_TPHIT_ST *jhit;
 TPT_RES_ST *jres;
@@ -64,7 +64,7 @@ if(hit_h->nok == 0) return STAFCV_OK;
 if(track_h->nok ==0) return STAFCV_OK;
 
 /* Sort hits according to hit[i].track */
-tls_index_sort_i_(&hit_h[0].nok, &hit[0].track,
+tls_index_sort_i_((long*)&hit_h[0].nok, &hit[0].track,
 		      &hit[1].track,&loc_hit[0],&mylen);
 
 /* Correct for c indexing by subtracting 1 */
@@ -100,21 +100,21 @@ while (l<hit_h->nok && hit[loc_hit[l]].track>0)
     /* and calculate the track parameters */
     /* calculate the firstpoint on the track */
     x1 = track[j].r0*cos(track[j].phi0*C_RAD_PER_DEG);
-    y1 = track[j].r0*sin(track[j].phi0*C_RAD_PER_DEG);
+    yi = track[j].r0*sin(track[j].phi0*C_RAD_PER_DEG);
     z1 = track[j].z0;
     
     /* calculate radius */
 
     radius = 1.0/track[j].curvature;
     psic   = track[j].psi*C_RAD_PER_DEG + track[j].q/fabs(track[j].q)*C_PI*0.5;
-    tanl   = track[j].tanl;
+    tanL   = track[j].tanl;
 
     /* and the position of the circle center */
     xc = x1 - radius*cos(psic);
-    yc = y1 - radius*sin(psic);
+    yc = yi - radius*sin(psic);
 
     /* get the azimuthal angle (with respect to the center) for the first point */
-    phi0=atan2(y1-yc,x1-xc);
+    phi0=atan2(yi-yc,x1-xc);
     arclen=0;
 
     /* loop over all the points and calculate residuals */
@@ -135,7 +135,7 @@ while (l<hit_h->nok && hit[loc_hit[l]].track>0)
         phidif = (phidif<C_2PI-phidif) ? phidif : C_2PI-phidif;
         arclen=radius*phidif;
 	/*        phi0 = phi;*/
-        jres->resz=jhit->z-z1-arclen*tanl;
+        jres->resz=jhit->z-z1-arclen*tanL;
 	/* increase pointer to the residuals and increase the residual count */
 	jres++;
         res_h->nok = res_h->nok+1;

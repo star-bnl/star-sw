@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstRefitBranch.cxx,v 1.6 2003/04/14 18:31:35 munhoz Exp $
+ * $Id: StEstRefitBranch.cxx,v 1.7 2003/04/30 20:36:54 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstRefitBranch.cxx,v $
+ * Revision 1.7  2003/04/30 20:36:54  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 1.6  2003/04/14 18:31:35  munhoz
  * allow 1 hit tracks
  *
@@ -88,7 +91,7 @@ int StEstTracker::RefitBranch(StEstBranch *br, int usevertex, int *fitstatus) {
   float  wlin[220]={0};
   float  wcir[220]={0};
   float dx,dy,dz;
-  float cf,xold,yold,theta;
+  float cf/*VPunused ,xold,yold,theta*/;
   int good_hit[220],enough,ntry;
   int pnt[220];
   int iret;

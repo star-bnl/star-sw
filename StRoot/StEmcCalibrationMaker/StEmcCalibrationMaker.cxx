@@ -390,9 +390,9 @@ Bool_t StEmcCalibrationMaker::CheckPedestal()
       ibin       = mPed->FindBin(id,1); //rms
       Float_t rms= mPed->GetBinContent(ibin);
       ibin       = mPed->FindBin(id,2); //chi2
-      Float_t chi= mPed->GetBinContent(ibin);
+//VPunused      Float_t chi= mPed->GetBinContent(ibin);
       ibin       = mPed->FindBin(id,3); //status
-      Int_t stat = (Int_t)mPed->GetBinContent(ibin);
+//VPunused      Int_t stat = (Int_t)mPed->GetBinContent(ibin);
 			ibin       = mHitsAdc->FindBin(id);
 			Float_t y  = mHitsAdc->GetBinContent(ibin);
       y-=p;

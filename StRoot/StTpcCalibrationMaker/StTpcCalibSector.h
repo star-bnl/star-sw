@@ -1,5 +1,8 @@
-// $Id: StTpcCalibSector.h,v 1.8 2001/02/17 20:16:09 perev Exp $
+// $Id: StTpcCalibSector.h,v 1.9 2003/04/30 20:38:51 perev Exp $
 // $Log: StTpcCalibSector.h,v $
+// Revision 1.9  2003/04/30 20:38:51  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.8  2001/02/17 20:16:09  perev
 // add defence against Solaris typedef in iostream
 //
@@ -93,7 +96,7 @@ public :
   void writeAllHisto();
 
   // Additional
-  ~StTpcCalibSector();
+  virtual ~StTpcCalibSector();
 
   ClassDef(StTpcCalibSector, 1) //
 };

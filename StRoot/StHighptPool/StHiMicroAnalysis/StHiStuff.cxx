@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiStuff.cxx,v 1.3 2002/05/31 21:58:30 jklay Exp $
+ * $Id: StHiStuff.cxx,v 1.4 2003/04/30 20:37:30 perev Exp $
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHiStuff.cxx,v $
+ * Revision 1.4  2003/04/30 20:37:30  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 1.3  2002/05/31 21:58:30  jklay
  * Updated analysis code to use new cut class
  *
@@ -341,9 +344,9 @@ StHiStuff::trackLoop()
   //
   // event stuff
   // 
-  Float_t zdcSum = mHiMicroEvent->ZDCe() + mHiMicroEvent->ZDCw();
-  Float_t ctb    = mHiMicroEvent->CTB();
-  Float_t flowCent   = mHiMicroEvent->Centrality();
+//VPunused  Float_t zdcSum = mHiMicroEvent->ZDCe() + mHiMicroEvent->ZDCw();
+//VPunused  Float_t ctb    = mHiMicroEvent->CTB();
+//VPunused  Float_t flowCent   = mHiMicroEvent->Centrality();
 //  NchCentrality zdcCent = centrality(zdcSum,ctb);
 
 
@@ -374,7 +377,7 @@ StHiStuff::trackLoop()
     //Float_t midZ = 100*TMath::Tan(track->DipAnglePr()) + vertexZ;
     Int_t   fitPts = track->FitPts();
     Int_t   allPts = track->AllPts();
-    Int_t   charge = track->Charge();
+//VPunused    Int_t   charge = track->Charge();
     Float_t phiGlDeg = phiGl*180./TMath::Pi();
     Float_t phiPrDeg = phiPr*180./TMath::Pi();
     Int_t firstSector = track->FirstSector();

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.19 2003/04/14 18:31:10 munhoz Exp $
+ * $Id: StEstMaker.cxx,v 1.20 2003/04/30 20:36:54 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.20  2003/04/30 20:36:54  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 1.19  2003/04/14 18:31:10  munhoz
  * allow 1 hit tracks
  *
@@ -456,7 +459,7 @@ Int_t StEstMaker::Make() {
   StSvtGeometry* m_geom = (StSvtGeometry*)dataSet->GetObject();
   StSvtWaferGeometry* waferGeom;
 
-  int index;
+  //VPunused int index;
 
   for (int i=0;i<mNPass;i++){
     waferGeom = (StSvtWaferGeometry*)m_geom->at(6);

@@ -41,7 +41,7 @@ using namespace units;
 typedef pair<unsigned int, double> candidate;
 bool operator<(const candidate &a, const candidate &b) {return (a.second<b.second);};
 
-static const char rcsid[] = "$Id: StRichLambdaSimpleUst.cxx,v 1.1 2002/11/19 18:32:02 dunlop Exp $";
+static const char rcsid[] = "$Id: StRichLambdaSimpleUst.cxx,v 1.2 2003/04/30 20:38:10 perev Exp $";
 
 Int_t StRichLambdaSimpleUst::Make() 
 { 
@@ -338,8 +338,8 @@ Int_t StRichLambdaSimpleUst::Make()
 	mRichUstStruct->SetNNegPrimaries(uncorrectedNumberOfNegativePrimaries(*mEvent));
     }
     
-    mRichUstStruct->SetNCTB(ctbsum);
-    mRichUstStruct->SetNCTBpre(ctbpre);
+    mRichUstStruct->SetNCTB((int)ctbsum);
+    mRichUstStruct->SetNCTBpre((int)ctbpre);
 
     mRichUstStruct->SetZdcSum(zdcsum);
     mRichUstStruct->SetTriggerWord(theTriggerWord);
@@ -1218,8 +1218,8 @@ Int_t StRichLambdaSimpleUst::Make()
     for (StSPtrVecRichHitConstIterator iter = theHits.begin();
 	 iter != theHits.end(); ++iter) {
 	StRichLambdaUstHit blah;
-	blah.SetCharge((*iter)->charge());
-	blah.SetMaxAdc((*iter)->maxAmplitude());
+	blah.SetCharge((int)(*iter)->charge());
+	blah.SetMaxAdc((int)(*iter)->maxAmplitude());
 	blah.SetNPads((*iter)->numberOfPads());
 	blah.SetFlag((*iter)->reservedLong());
 	
@@ -1228,7 +1228,7 @@ Int_t StRichLambdaSimpleUst::Make()
 	blah.SetClusterFirstPad(theClusters[theClusterNumber]->firstPad());
 	blah.SetNClusterPads(theClusters[theClusterNumber]->numberOfPads());
 	blah.SetNClusterLocalMax(theClusters[theClusterNumber]->numberOfLocalMax());
-	blah.SetClusterMinAmp(theClusters[theClusterNumber]->minimumAmplitudeOfLocalMax());
+	blah.SetClusterMinAmp((int)theClusters[theClusterNumber]->minimumAmplitudeOfLocalMax());
 	
 
 	blah.SetRawX((*iter)->internal().x());
@@ -1316,7 +1316,7 @@ Int_t StRichLambdaSimpleUst::Finish()
     return kStOK; 
 }
 
-//const char* StRichLambdaSimpleUst::GetCVS() {static const char cvs[]="Tag $Name:  $ $Id: StRichLambdaSimpleUst.cxx,v 1.1 2002/11/19 18:32:02 dunlop Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+//const char* StRichLambdaSimpleUst::GetCVS() {static const char cvs[]="Tag $Name:  $ $Id: StRichLambdaSimpleUst.cxx,v 1.2 2003/04/30 20:38:10 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 

@@ -363,7 +363,7 @@ StAngleCorrAnalysis::AnalyseBackgroundPairs()
 
       // loop over the events randomly and make random track pairs
       int trackPairs=0;
-      Double_t evCounter1,evCounter2,trCounter1,trCounter2;
+      Int_t evCounter1,evCounter2,trCounter1,trCounter2;
       Double_t totalNumberOfEvents = mBackgroundTracks1.Size();
       Double_t totalTrackPairs     = mNumberOfBackgroundPairs;
 
@@ -371,11 +371,11 @@ StAngleCorrAnalysis::AnalyseBackgroundPairs()
       while(trackPairs < totalTrackPairs) 
 	{ 
 	  Int_t eventLoopCounter=0;
-	  evCounter1 =  ran->Rndm()*totalNumberOfEvents;
+	  evCounter1 =  (Int_t)(ran->Rndm()*totalNumberOfEvents+0.5);
 	  evCounter2 =  evCounter1;
 	  while (evCounter2==evCounter1) 
 	    {
-	      evCounter2 =  ran->Rndm()*totalNumberOfEvents;
+	      evCounter2 =  (Int_t)(ran->Rndm()*totalNumberOfEvents+0.5);
 	      eventLoopCounter++;
 	      if (eventLoopCounter>TooManyIterations) break;
 	    }
@@ -390,8 +390,8 @@ StAngleCorrAnalysis::AnalyseBackgroundPairs()
 	  trackPairs++;
 	  if (mBackgroundTracks1.GetTracks(evCounter1).Size() > 0 && mBackgroundTracks2.GetTracks(evCounter2).Size() > 0) 
 	    {
-	      trCounter1 = ran->Rndm()*mBackgroundTracks1.GetTracks(evCounter1).Size();
-	      trCounter2 = ran->Rndm()*mBackgroundTracks2.GetTracks(evCounter2).Size();
+	      trCounter1 = (Int_t)(0.5+ran->Rndm()*mBackgroundTracks1.GetTracks(evCounter1).Size());
+	      trCounter2 = (Int_t)(0.5+ran->Rndm()*mBackgroundTracks2.GetTracks(evCounter2).Size());
 	      tr1 = mBackgroundTracks1.GetTrack(evCounter1,trCounter1);
 	      tr2 = mBackgroundTracks2.GetTrack(evCounter2,trCounter2);
 	      if (IdenticalTrackCheck(tr1,tr2)==kFALSE) 

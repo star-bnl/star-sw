@@ -71,12 +71,12 @@ Int_t StDetectorDbMaker::Make(){
     // Also need to update instances for classes done in InitRun.
     // This is needed because of a feature in TTable
     // Please ingore unused variables..the call to instane() is needed!
-    StDetectorDbTpcRDOMasks* masks = StDetectorDbTpcRDOMasks::instance();
-    StDetectorDbMagnet* magnet = StDetectorDbMagnet::instance();
+//VPunused    StDetectorDbTpcRDOMasks* masks = StDetectorDbTpcRDOMasks::instance();
+//VPunused    StDetectorDbMagnet* magnet = StDetectorDbMagnet::instance();
     StDetectorDbSpaceCharge* spaceCharge = StDetectorDbSpaceCharge::instance();
-    StDetectorDbClock* clock = StDetectorDbClock::instance();
-    StDetectorDbBeamInfo* beam = StDetectorDbBeamInfo::instance();
-    StDetectorDbTriggerID* trigger = StDetectorDbTriggerID::instance();
+//VPunused    StDetectorDbClock* clock = StDetectorDbClock::instance();
+//VPunused    StDetectorDbBeamInfo* beam = StDetectorDbBeamInfo::instance();
+//VPunused    StDetectorDbTriggerID* trigger = StDetectorDbTriggerID::instance();
 
     // Jamie Asked for SpaceCharge to be couted every event
     cout << "Space Charge Correction = " << spaceCharge->getSpaceChargeCoulombs()

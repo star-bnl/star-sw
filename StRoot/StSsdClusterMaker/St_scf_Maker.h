@@ -59,8 +59,8 @@ class St_scf_Maker : public StMaker {
    virtual Int_t  Finish();
    virtual void   PrintInfo();
 
-   virtual const char *GetCVS()
-     {static const char cvs[]="Tag $Name:  $ $Id: St_scf_Maker.h,v 1.3 2002/03/25 20:13:05 suire Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   virtual const char *GetCVS() const
+     {static const char cvs[]="Tag $Name:  $ $Id: St_scf_Maker.h,v 1.4 2003/04/30 20:38:40 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_scf_Maker, 1)   //StAF chain virtual base class for Makers
 };
@@ -69,6 +69,9 @@ class St_scf_Maker : public StMaker {
  /**************************************************************************
  * 
  *  $Log: St_scf_Maker.h,v $
+ *  Revision 1.4  2003/04/30 20:38:40  perev
+ *  Warnings cleanup. Modified lines marked VP
+ *
  *  Revision 1.3  2002/03/25 20:13:05  suire
  *  Small memory leak fixes, doxygen documentation
  *

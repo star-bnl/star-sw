@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StSpinTagMaker.cxx,v 1.2 2003/01/03 16:40:39 balewski Exp $
+// $Id: StSpinTagMaker.cxx,v 1.3 2003/04/30 20:39:59 perev Exp $
 // $Log: StSpinTagMaker.cxx,v $
+// Revision 1.3  2003/04/30 20:39:59  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.2  2003/01/03 16:40:39  balewski
 // cleanup (2)
 //
@@ -39,7 +42,7 @@ Int_t StSpinTagMaker::Init(){
 }
 
 Int_t StSpinTagMaker::Make(){
-  float BemcTowerThres=0.15;
+  float BemcTowerThres=0.15; if(BemcTowerThres){/*unused*/}
 
   printf("Make: %s ...\n",GetName());
 

@@ -1,4 +1,4 @@
-// $Id: DstStruct.C,v 3.7 2000/08/17 01:31:26 fine Exp $
+// $Id: DstStruct.C,v 3.8 2003/04/30 20:40:06 perev Exp $
 
 #include <iomanip.h>
 class StChain;
@@ -24,7 +24,7 @@ void DstStruct(Int_t firstEvent, Int_t numberOfEvents, const char *MainFile)
 
   if (numberOfEvents < 0) return;
 
-  gSystem->Load("libStar");
+  gSystem->Load("libTable");
   gSystem->Load("St_base");
   gSystem->Load("StChain");
     
@@ -185,6 +185,9 @@ void DstStruct(const char *MainFile="/afs/rhic/star/data/samples/gstar.dst.root"
 //__________________________________________________________________________
 //__________________________________________________________________________
 // $Log: DstStruct.C,v $
+// Revision 3.8  2003/04/30 20:40:06  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 3.7  2000/08/17 01:31:26  fine
 // Estimatine time for event branches if event file is provided
 //

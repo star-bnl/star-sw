@@ -209,7 +209,7 @@ Bool_t StXiFinderMaker::UseV0() {
   double rv,massV0;
   StThreeVectorF xPvx, bfield;
   StV0Vertex *v0Vtx;
-  StHelixModel *bachGeom2;
+//VPunused  StHelixModel *bachGeom2;
   xPvx=mainv;
   gufldX[0]=xPvx.x();
   gufldX[1]=xPvx.y();
@@ -664,8 +664,11 @@ Bool_t StXiFinderMaker::UseV0() {
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.2 2003/04/30 19:16:04 faivre Exp $
+// $Id: StXiFinderMaker.cxx,v 1.3 2003/04/30 20:38:22 perev Exp $
 // $Log: StXiFinderMaker.cxx,v $
+// Revision 1.3  2003/04/30 20:38:22  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.2  2003/04/30 19:16:04  faivre
 // Fix storage part. ITTF vs TPT Xis.
 //

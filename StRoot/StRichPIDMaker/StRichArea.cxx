@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichArea.cxx,v 2.7 2001/06/22 15:05:18 jeromel Exp $
+ * $Id: StRichArea.cxx,v 2.8 2003/04/30 20:38:06 perev Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichArea.cxx,v $
+ *  Revision 2.8  2003/04/30 20:38:06  perev
+ *  Warnings cleanup. Modified lines marked VP
+ *
  *  Revision 2.7  2001/06/22 15:05:18  jeromel
  *  Removed unused variables cosineOfD idist testangle
  *
@@ -286,7 +289,7 @@ double StRichArea::calculateArea(double areaCut, double psiCut) {
   //   
   double angle1,angle2;
   angle1 = mStartAngle;
-  if (!getRingPoints(angle1,angle2,mInXYA,mOutXYA,mPositiveDirection)) {
+  if (!getRingPoints(angle1,angle2,mInXYA,mOutXYA,(int)mPositiveDirection)) {
     cout 
       << "StRichNewArea::calculateArea  a --> starting point returns false. abort!" << endl;
     //abort();
@@ -314,7 +317,7 @@ double StRichArea::calculateArea(double areaCut, double psiCut) {
     mCorrectedAreaSegment   = 0.0;
     mUnCorrectedAreaSegment = 0.0;
     mAreaSegment = 0.0;
-    if (getRingPoints(angle1,angle2,mInXYB,mOutXYB,mPositiveDirection)) { 
+    if (getRingPoints(angle1,angle2,mInXYB,mOutXYB,(int)mPositiveDirection)) { 
      
       //
       // here we calculate the area of a single area segment defined 
@@ -400,7 +403,7 @@ double StRichArea::calculateArea(double areaCut, double psiCut) {
   // ---------   -pi ---> 0 degs  -------------------- //
   angle1 = -mStartAngle;
 
-  if (!getRingPoints(angle1,angle2,mInXYA,mOutXYA,mNegativeDirection)) {
+  if (!getRingPoints(angle1,angle2,mInXYA,mOutXYA,(int)mNegativeDirection)) {
     cout << "StRichNewArea::calculateArea  b --> starting point returns false. abort!" << endl;
     //abort();
     return -999;
@@ -415,7 +418,7 @@ double StRichArea::calculateArea(double areaCut, double psiCut) {
     mUnCorrectedAreaSegment = 0.0;
     mAreaSegment = 0.0;
 
-    if (getRingPoints(angle1,angle2,mInXYB,mOutXYB,mNegativeDirection)) {
+    if (getRingPoints(angle1,angle2,mInXYB,mOutXYB,(int)mNegativeDirection)) {
 
       getAreaSegment(tempSegment,angle1,angle2,mInXYA,mOutXYA,mInXYB,mOutXYB,
 		     mCorrectedAreaSegment,mUnCorrectedAreaSegment,mAreaSegment);

@@ -127,7 +127,7 @@ long  type_of_call fill_dst_event_summary_ (
     dstEventSummary->energy_emc_eta[irange]  = 0;
     dstEventSummary->energy_emc_phi[irange]  = 0;
   }
-  nphirange = (float) NRANGE ;
+  nphirange = NRANGE ;
 
   for (i=0; i<3; i++) {
     dstEventSummary->prim_vrtx[i]          = 0.;

@@ -22,7 +22,7 @@ extern "C" int type_of_call tdm_get_ccount_(TABLE_HEAD_ST* pTab)
 //__________________________________________________________________//
 extern "C" int type_of_call tdm_get_column_(TABLE_HEAD_ST* pTab,int* k,char* c,
                                  char* d,unsigned* l, unsigned* e, unsigned* m)
-{  char *cc; char *dd;
+{ //VP char *cc; char *dd;
    St_Table *table = (St_Table *)pTab->dsl_pointer;
    if (!table) return 0;
    TClass *classPtr = table->GetRowClass();

@@ -14,6 +14,16 @@ public:
     virtual void reset();
     virtual void build();
     virtual void add(StiDetectorBuilder *builder);
+
+//VP  to supress "hide" warnings
+    virtual StiMaterial * add(StiMaterial *material)
+            {return StiDetectorBuilder::add(material);}
+    virtual StiShape    * add(StiShape    *shape)
+            {return StiDetectorBuilder::add(shape);}
+    virtual StiDetector * add(StiDetector *detector)
+            {return StiDetectorBuilder::add(detector);}
+    virtual StiDetector * add(unsigned int row, unsigned int sector, StiDetector *detector)
+            {return StiDetectorBuilder::add(row,sector,detector);}
 };
 
 #endif 

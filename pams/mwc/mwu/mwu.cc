@@ -40,7 +40,7 @@ long type_of_call mwu_(
    for ( long i_sector = 0 ; i_sector < raw_h->nok ; i_sector++ ) { 
       index = raw[i_sector].sector ;
       cor[i_sector].sector   = raw[i_sector].sector ;
-      cor[i_sector].no_mip   = raw[i_sector].count * cal[i_sector].cc ;
+      cor[i_sector].no_mip   = int(raw[i_sector].count * cal[i_sector].cc) ;
    }
 //
 //    Define the number of slats with raw data

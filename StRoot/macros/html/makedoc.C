@@ -1,4 +1,4 @@
-// $Id: makedoc.C,v 1.58 2001/09/10 13:48:00 jeromel Exp $
+// $Id: makedoc.C,v 1.59 2003/04/30 20:40:17 perev Exp $
 //=======================================================================
 // owner: Valery Fine
 // what it does: 
@@ -6,7 +6,7 @@
   {
  //*-- Author :    Valery Fine   25/12/98
  gROOT.Reset();
-  Char_t *libs[] = { "libStar", "Star2Root","St_base","xdf2root","St_Tables"                    
+  Char_t *libs[] = { "libTable", "Star2Root","St_base","xdf2root","St_Tables"                    
                     , "StChain","StUtilities","StBFChain"};
 
  TString AFS; // STAR root directory
@@ -32,7 +32,7 @@
     
    }
    else {
-     gSystem->Load("libStar");
+     gSystem->Load("libTable");
      gSystem->Load("Star2Root");
      gSystem->Load("St_base");
      gSystem->Load("St_baseTest");
@@ -307,6 +307,9 @@
 //___________________________________________________________________________
 //___________________________________________________________________________
 // $Log: makedoc.C,v $
+// Revision 1.59  2003/04/30 20:40:17  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.58  2001/09/10 13:48:00  jeromel
 // Modif by Valeri but not commited
 //

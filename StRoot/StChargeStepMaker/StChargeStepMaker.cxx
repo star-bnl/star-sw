@@ -1,5 +1,8 @@
-// $Id: StChargeStepMaker.cxx,v 1.10 2002/04/19 22:24:01 perev Exp $
+// $Id: StChargeStepMaker.cxx,v 1.11 2003/04/30 20:36:25 perev Exp $
 // $Log: StChargeStepMaker.cxx,v $
+// Revision 1.11  2003/04/30 20:36:25  perev
+// Warnings cleanup. Modified lines marked VP
+//
 // Revision 1.10  2002/04/19 22:24:01  perev
 // fixes for ROOT/3.02.07
 //
@@ -199,7 +202,7 @@ Int_t StChargeStepMaker::Make() {
       Int_t pixel_offset_row =(Int_t) (row_st[rowindex].ipixel);
       Int_t seq_offset_row   =(Int_t) (row_st[rowindex].iseq  );
       Int_t pad_offset_row   =(Int_t) (row_st[rowindex].ipad  );
-      Int_t row_id           =(Int_t) (row_st[rowindex].RowId );
+//VP  Int_t row_id           =(Int_t) (row_st[rowindex].RowId );
 
       /////////
       // loop over pads
@@ -328,7 +331,7 @@ Int_t StChargeStepMaker::Make() {
 
 void StChargeStepMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StChargeStepMaker.cxx,v 1.10 2002/04/19 22:24:01 perev Exp $\n");
+  printf("* $Id: StChargeStepMaker.cxx,v 1.11 2003/04/30 20:36:25 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -398,7 +401,7 @@ void StChargeStepMaker::MakeHistograms() {
 //-----------------------------------------------------------------
 float StChargeStepMaker::GetWeightedMean(TH1S* hist){
 int peak = hist->GetMaximumBin();
- int location = hist->GetBinCenter(peak);
+ double location = hist->GetBinCenter(peak);
  if (location<theGuess-10||location>theGuess+10) {
    cout << "StChargeStepMaker:: False peak found at tb = " << location << endl;
    cout << "StChargeStepMaker:: Database may be way off" << endl;
@@ -407,7 +410,7 @@ int peak = hist->GetMaximumBin();
 float mom1=0.0;
 float ysum=0.0;
 float value;
- float maxval = hist->GetBinContent(peak);
+//VPunused float maxval = hist->GetBinContent(peak);
  for (int i = peak-5;i<peak+5;i++){
   value = (float)hist->GetBinContent(i);
   ysum += value;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstProjection.cxx,v 1.8 2002/04/30 22:49:19 caines Exp $
+ * $Id: StEstProjection.cxx,v 1.9 2003/04/30 20:36:54 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstProjection.cxx,v $
+ * Revision 1.9  2003/04/30 20:36:54  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 1.8  2002/04/30 22:49:19  caines
  * Make est work with shifted SVT geom, change search radii to 1cm
  *
@@ -154,8 +157,8 @@ int StEstTracker::Preprojection(StEstBranch *branch, int slayer) {
     else{
       //vect1 = helix->at(sd);
       vect1 = mSvtToGlobalRotation*helix->at(sd)+mSvtPositionInGlobal;
-      phi=floor((atan2(vect1.y(), vect1.x())+M_PI)*C_DEG_PER_RAD/mPhiBin);
-      z=floor(vect1.z()/mZBin)+mNZBins/2; 
+      phi=(int)floor((atan2(vect1.y(), vect1.x())+M_PI)*C_DEG_PER_RAD/mPhiBin);
+      z=(int)floor(vect1.z()/mZBin)+mNZBins/2; 
 
       //last chance for track
       // need to be verified

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBadDcaAnalysis.cxx,v 1.3 2002/05/31 21:58:29 jklay Exp $
+ * $Id: StBadDcaAnalysis.cxx,v 1.4 2003/04/30 20:37:30 perev Exp $
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StBadDcaAnalysis.cxx,v $
+ * Revision 1.4  2003/04/30 20:37:30  perev
+ * Warnings cleanup. Modified lines marked VP
+ *
  * Revision 1.3  2002/05/31 21:58:29  jklay
  * Updated analysis code to use new cut class
  *
@@ -66,7 +69,7 @@ StBadDcaAnalysis::initHistograms()
 
   //*********************
 
-  char title[500],name[500];
+  char name[500];
 
   char* cPM[2] = {"Plus","Minus"};
 
@@ -172,8 +175,8 @@ StBadDcaAnalysis::trackLoop()
     
     //**************************************************************
     Float_t ptPr = track->PtPr();
-    Float_t eta = track->EtaPr();
-    Float_t ptGl = track->PtGl();
+//VPunused    Float_t eta = track->EtaPr(); 
+//VPunused    Float_t ptGl = track->PtGl(); 
     
      float fitPts = track->FitPts();
     float allPts = track->AllPts();

@@ -29,7 +29,7 @@ long type_of_call fake_pedestal_(
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
 
-    long i, j, k, l, nok_c, nok_cc, det, nmod, neta, nsub, temp, tot;
+    long i, j, k, l, nok_c, nok_cc, det, nmod, neta, nsub, tot;
     long iseed=999; 
 
     nok_c = ems_control_h->nok - 1;
@@ -47,7 +47,7 @@ long type_of_call fake_pedestal_(
       puts("***fake_pedestal: emc_cal_control.det is invalid. Specify the detector.");
       return STAFCV_BAD;
     }
-    printf("fake_pedestal: det,nmod,neta,nsub=%d,%d,%d,%d\n",det,nmod,neta,nsub);
+    printf("fake_pedestal: det,nmod,neta,nsub=%ld,%ld,%ld,%ld\n",det,nmod,neta,nsub);
     if(nmod < 1 || neta < 1 || nsub < 1){
       puts("***fake_pedestal: nmod,neta or nsub is less than 1, need inputs in ems_control.");
       return STAFCV_BAD;

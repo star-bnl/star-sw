@@ -105,3 +105,6 @@ static unsigned short log8to10_table[256] = {
   743,  753,  764,  775,  786,  798,  809,  821,
   833,  845,  857,  870,  882,  895,  907,  920,
   934,  947,  961,  975,  989, 1003, 1017, 1023 };
+
+inline unsigned char  log10to8_tableTouch(int i){return log10to8_table[i];}
+inline unsigned short log8to10_tableTouch(int i){return log8to10_table[i];}
