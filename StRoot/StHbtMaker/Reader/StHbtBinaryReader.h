@@ -20,8 +20,8 @@
 #define StHbtBinaryReader_hh
 
 #include "StHbtMaker/Base/StHbtEventReader.hh"
-#include <iostream>
-#include <fstream>
+#include <iostream.h>
+#include <fstream.h>
 
 #include "StHbtMaker/Infrastructure/StHbtIOBinary.hh"
 
