@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.75 2004/09/07 14:31:48 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.76 2004/10/09 18:02:57 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.76  2004/10/09 18:02:57  suaide
+// small fix
+//
 // Revision 1.75  2004/09/07 14:31:48  suaide
 // small change on histograms
 //
@@ -233,6 +236,7 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
     mAdc[i] = NULL;    //!
     mEnergyHist[i] = NULL; //!
     mGeo[i] = NULL; 
+    mExtGain[i] = kFALSE;
     for (j=0 ; j < 18001 ; j++)
     {
       mPed[i][j][0]    = 0.0;
@@ -471,20 +475,30 @@ Bool_t StEmcADCtoEMaker::getTables()
         } 
         else for(int i=0;i<4800;i++) for(int j=0;j<5;j++) mCalib[det][i][j] = 0;
 		
-		    TableName = detname[det]+"Gain";
-		    St_emcGain* b = (St_emcGain*) mDb->Find(TableName.Data());
-		    if(b) 
+        if(!mExtGain[det])
         {
-          emcgainst = b->GetTable();
-          if(emcgainst)
+		      TableName = detname[det]+"Gain";
+		      St_emcGain* b = (St_emcGain*) mDb->Find(TableName.Data());
+		      if(b) 
           {
-            mHasGain[det] = kTRUE;
-            for(int i=0;i<4800;i++) mGain[det][i] = emcgainst[0].Gain[i];
-          }
+            emcgainst = b->GetTable();
+            if(emcgainst)
+            {
+              mHasGain[det] = kTRUE;
+              for(int i=0;i<4800;i++) mGain[det][i] = emcgainst[0].Gain[i];
+            }
+            else for(int i=0;i<4800;i++) mGain[det][i] = 1;          
+		      }
           else for(int i=0;i<4800;i++) mGain[det][i] = 1;
-          
-		    }
-        else for(int i=0;i<4800;i++) mGain[det][i] = 1;
+        }
+        else
+        {
+          ifstream G(mExtFile[det].Data());
+          int tmp;
+          for(int i=0;i<4800;i++) G >> tmp >> mGain[det][i];
+          mHasGain[det] = kTRUE;
+          G.close();
+        }
         
 		    if(mControlADCtoE->DeductPedestal[det]==1)
 		    {
@@ -521,19 +535,30 @@ Bool_t StEmcADCtoEMaker::getTables()
 		    }
         else for(int i=0;i<18000;i++) for(int j=0;j<5;j++) mCalib[det][i][j] = 0;
         
-		    TableName = detname[det]+"Gain";
-		    St_smdGain* b = (St_smdGain*) mDb->Find(TableName.Data());
-		    if(b) 
+        if(!mExtGain[det])
         {
-          smdgainst = b->GetTable();
-          if(smdgainst)
+		      TableName = detname[det]+"Gain";
+		      St_smdGain* b = (St_smdGain*) mDb->Find(TableName.Data());
+		      if(b) 
           {
-            mHasGain[det] = kTRUE;
-            for(int i=0;i<18000;i++) mGain[det][i] = smdgainst[0].Gain[i];
+            smdgainst = b->GetTable();
+            if(smdgainst)
+            {
+              mHasGain[det] = kTRUE;
+              for(int i=0;i<18000;i++) mGain[det][i] = smdgainst[0].Gain[i];
+            }
+            else for(int i=0;i<18000;i++) mGain[det][i] = 1;
           }
           else for(int i=0;i<18000;i++) mGain[det][i] = 1;
         }
-        else for(int i=0;i<18000;i++) mGain[det][i] = 1;
+        else
+        {
+          ifstream G(mExtFile[det].Data());
+          int tmp;
+          for(int i=0;i<18000;i++) G >> tmp >> mGain[det][i];
+          mHasGain[det] = kTRUE;
+          G.close();        
+        }
 		
 		    if(mControlADCtoE->DeductPedestal[det]==1)
 		    {
@@ -1066,7 +1091,7 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 				EN+=c*ADCPOWER; 
         ADCPOWER*=ADCSUB;
       }
-      if(PED<=0) EN = 0;
+      if(PED<0) EN = 0;
 			Float_t gain = 1;
 			if(mHasGain[det]) gain = mGain[det][id-1];
 			EN*=gain;
