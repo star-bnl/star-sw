@@ -145,7 +145,6 @@ void StMinuitVertexMaker::DoFit(){
 Int_t StMinuitVertexMaker::Make()
 {
 
-  int i;
   nEVtot++;
   primV=NULL;
   stEvent=NULL;
@@ -159,7 +158,6 @@ Int_t StMinuitVertexMaker::Make()
 
 void StMinuitVertexMaker::MakeEvalNtuple(){
   stEvent= (StEvent *) GetInputDS("StEvent");  assert(stEvent);
-  int EventId=stEvent->id();
 
   // get geant vertex
   St_DataSet *gds=GetDataSet("geant");
