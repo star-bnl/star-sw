@@ -1,8 +1,17 @@
 #include <stdlib.h>
+#include <errno.h>
 /*
- * $Id: memget.c,v 1.5 2000/01/09 21:20:03 nevski Exp $
+ * $Id: memget.c,v 1.6 2003/09/25 21:28:19 potekhin Exp $
  *
  * $Log: memget.c,v $
+ * Revision 1.6  2003/09/25 21:28:19  potekhin
+ * 1) Made the function memgetf much less cryptic in terms
+ * of variable names and comments
+ * 2) Introduced proper error checking whereby both ERRNO
+ * and the pointer form malloc are checked for validity.
+ * If invalid, a zero value is returned, which shall be
+ * checked for by the fortran client.
+ *
  * Revision 1.5  2000/01/09 21:20:03  nevski
  * hit interface update
  *
@@ -41,7 +50,20 @@ unsigned long type_of_call memget_  (unsigned int *n)
 {  return ( (unsigned long) malloc(*n) );  }
 
 unsigned long type_of_call memgetf_ (unsigned int *n)
-{  return ( (unsigned long) malloc(*n<<2)>>2);  }
+{
+  /* see comment above about the Fortran vs C memory count -- 4 byte words vs bytes */
+  unsigned int n_bytes= *n<<2;
+  void* mem_pointer = malloc(n_bytes);
+
+  if(!mem_pointer || errno==ENOMEM) { /* have to check both as per man pages */
+    return 0;
+    /* to signal the caller that we failed here; the caller MUST check for zero */
+  }
+
+  unsigned long mem = (unsigned long) mem_pointer;
+  mem=mem>>2;
+  return mem;
+}
 
 unsigned long type_of_call iudivd_ (unsigned long *u1, unsigned long *u2) 
 { return (*u1 / *u2);}
