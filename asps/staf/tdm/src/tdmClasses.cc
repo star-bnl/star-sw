@@ -631,12 +631,12 @@ long tdmTable:: columnElcount (long ncol) {
 STAFCV_T tdmTable:: getCell (TDM_CELLDATA_T& data
 		, long nrow, long ncol) {
    if( !VALID_CELL(nrow,ncol) ) {
-     EML_CONTEXT("ERROR: Check that your row number %d is in range.\n",nrow);
+     EML_CONTEXT("ERROR: Check that row number %d is in range (A).\n",nrow);
      EML_ERROR(INVALID_TABLE_CELL);
    }
    data.data.v = cellAddress(nrow,ncol);
    if(!data.data.v) {
-     EML_CONTEXT("ERROR: Check that your row number %d is in range.\n",nrow);
+     EML_CONTEXT("ERROR: Check that row number %d is in range (B).\n",nrow);
      EML_ERROR(INVALID_ROW_OR_COLUMN);
    }
    data._d = columnTypeCode(ncol);
@@ -650,7 +650,7 @@ STAFCV_T tdmTable:: putCell (const TDM_CELLDATA_T& data
    if( !VALID_CELL(nrow,ncol) ) EML_ERROR(INVALID_TABLE_CELL);
    void *pData = cellAddress(nrow,ncol);
    if(!pData) {
-      EML_CONTEXT("ERROR: Check that your row number %d is in range.\n",nrow);
+      EML_CONTEXT("ERROR: Check that row number %d is in range (C).\n",nrow);
       EML_ERROR(INVALID_ROW_OR_COLUMN);
    }
    memcpy(pData,data.data.v,columnSize(ncol));
@@ -732,7 +732,7 @@ void * tdmTable:: cellAddress(long nrow, long ncol) {
       return NULL;
    }
 
-   if( 0 <= nrow < (long) rCount ){
+   if( 0 <= nrow && nrow < (long) rCount ){
       if( !dsCellAddress(&pData, pDSthis, nrow, ncol) ){
 	 return NULL;
       }
