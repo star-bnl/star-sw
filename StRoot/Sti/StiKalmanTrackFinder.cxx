@@ -309,24 +309,44 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
 /// Find extension (track) to the given track seed in the given direction
 /// Return Ok      if operation was successful
 //______________________________________________________________________________
+class StiKalmanTrackFinder::QAFind {
+public: 
+  double sum; 	//summ of chi2
+  int    hits;  //total number of hits
+  int    nits;  //total number of no hits
+  int    qa;	// quality flag for current level
+		//   qa =  1 == new hit accepted
+		//   qa =  0 == no hits was expected. dead material or edge
+		//   qa = -1 == hit expected but not found
+		//   qa = -2 == close to beam, stop processing of it
+		//   qa = -3 == fake track, stop processing of it
+
+  	QAFind()		{reset();                  }
+void 	reset()			{sum=0; hits =0; nits=0; qa=0;}
+void operator+=(const QAFind &q){sum+=q.sum; hits+=q.hits; nits+=q.nits;}
+};
+
+//______________________________________________________________________________
 bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_error, logic_error
 {
 static int nCall=0; nCall++;
 StiKalmanTrackNode::Break(nCall);
-
-  double chi2sum=0;
+  
   track = dynamic_cast<StiKalmanTrack *> (t);
   int dirIn = (direction==kOutsideIn);
   StiKalmanTrackNode *leadNode = track->getInnOutMostNode(!dirIn,2);
   if (!leadNode) throw runtime_error("SKTF::find() -E- track leadNode ==0");
+  leadNode->cutTail(direction);
   assert(leadNode->isValid());
-  int nAdded = find(track,direction,leadNode,chi2sum);
-  return nAdded>0;
+  QAFind qa;
+  find(track,direction,leadNode,qa);
+  track->setFirstLastNode(leadNode);
+  return qa.hits>0;
 }
 
 //______________________________________________________________________________
-int StiKalmanTrackFinder::find(StiKalmanTrack * track, int direction
-                              ,StiKalmanTrackNode *leadNode,double &chi2sum) 
+void StiKalmanTrackFinder::find(StiKalmanTrack * track, int direction
+                              ,StiKalmanTrackNode *leadNode,QAFind &qa) 
 {
 static int nCall=0; nCall++;
 StiKalmanTrackNode::Break(nCall);
@@ -338,9 +358,9 @@ StiKalmanTrackNode::Break(nCall);
   const double ref1a  = 110.*degToRad;
   //  const double ref2a  = 2.*3.1415927-ref1a;
 
+  int status;
   int dirIn = (direction==kOutsideIn);
   StiKalmanTrackNode testNode;
-  int nAdded       = 0;
   int position;
   StiHit * stiHit;
   double  leadAngle,leadRadius;
@@ -407,8 +427,7 @@ StiKalmanTrackNode::Break(nCall);
        diff = projAngle-angle;
        if (diff >  M_PI) diff -= 2*M_PI;
        if (diff < -M_PI) diff += 2*M_PI;
-       diff = fabs(diff);
-       if (diff <= OpenAngle) { detectors.push_back(detector);}
+       if (fabs(diff) <= OpenAngle) { detectors.push_back(detector);}
        ++sector;
     }
     int nDets = detectors.size(); 
@@ -436,75 +455,129 @@ StiKalmanTrackNode::Break(nCall);
 	if (debug() > 1) cout << StiKalmanTrackNode::Comment() << endl;
 	continue; // will try the next available volume on this layer
       }
+
+      if (testNode.isEnded()) { qa.qa= -4; return;}
       if (debug() > 2) cout << "position " << position << "<=kEdgeZplus";
       assert(testNode.isValid());
       testNode.setDetector(tDet);
-      bool active = tDet->isActive(testNode.getY(),testNode.getZ());
+      int active = tDet->isActive(testNode.getY(),testNode.getZ());
 
       if (debug() > 2) cout << " vol active:" << active<<endl;
-      int maxNullCount           = _pars.maxNullCount+3;
-      int maxContiguousNullCount = _pars.maxContiguousNullCount+3;
       double maxChi2 = tDet->getTrackingParameters()->getMaxChi2ForSelection();
 
-      if (active && testNode.getNullCount()<maxNullCount 
-	         && testNode.getContigNullCount()<maxContiguousNullCount+3) {
+
+      StiHitContino hitCont;
+      if (active) {
 
 	if (debug() > 2)cout<<" search hits";
 	// active detector may have a hit
 	vector<StiHit*> & candidateHits = _hitContainer->getHits(testNode);//,true);
 	vector<StiHit*>::iterator hitIter;
 	if (debug() > 2) cout << " candidates:"<< candidateHits.size();
-	for (hitIter=candidateHits.begin();hitIter!=candidateHits.end();++hitIter){
+	for (hitIter=candidateHits.begin();hitIter!=candidateHits.end();++hitIter)
+	{
 	  stiHit = *hitIter;
           if (stiHit->detector() && stiHit->detector()!=tDet) continue;
+          status = testNode.nudge(stiHit);
+          testNode.setReady();
+          if (status)		continue;
 	  chi2 = testNode.evaluateChi2(stiHit);
 	  if (debug() > 2)   cout<< " got chi2:"<< chi2 << " for hit:"<<*stiHit<<endl;
-//VP	    if (chi2>0 && chi2<maxChi2 && chi2<testNode.getChi2())
-	  if (chi2>maxChi2) continue;
-//VP	    testNode.setHit(stiHit); testNode.setChi2(chi2);
-	  testNode.hits().add(stiHit,chi2);
+	  if (chi2>maxChi2) 	continue;
+	  hitCont.add(stiHit,chi2);
 	  if (debug() > 2) cout << " hit selected"<<endl;
 	}// for (hitIter)
       }//if(active)
 
-      if (debug() > 2) cout << " node to be added to track";
-      StiKalmanTrackNode * node = _trackNodeFactory->getInstance();
-      node->reset();
-      *node = testNode;
-      sNode = track->add(node);
-      if (debug()) cout << StiKalmanTrackNode::Comment() << endl;
+      int nHits = hitCont.getNHits();
+      if (nHits==0) nHits=1;
+      if (direction) nHits=1;
+//      if (direction || testNode.getX()>22.5) nHits=1;
+//      nHits=1;
+      QAFind qaBest,qaTry;
+      for (int jHit=0;jHit<nHits; jHit++)
+      {//Loop over Hits
+        stiHit = hitCont.getHit(jHit);
+	StiKalmanTrackNode * node = _trackNodeFactory->getInstance();
+	node->reset(); *node = testNode;
+        status = 0;
+        do {//fake do
+          if (!stiHit) break;
+          node->setHit(stiHit);
+          status = node->updateNode();
+          if (status)  break;
+          node->setChi2(hitCont.getChi2(jHit));
+        }while(0);
+        if (status)  continue;
 
-      if (sNode==0) { //node was not actually added to track...
-	  if (debug() > 2) cout << " sNode==0 nudge or update failed...";
-	  continue;
+        nodeQA(node,position,active,qaTry);
+	leadNode->add(node,direction);
+
+        if (qaTry.qa>-2) find(track,direction,node,qaTry);
+
+        if (jHit==0) { qaBest=qaTry; continue;}
+        int igor = compQA(qaBest,qaTry);
+        if (igor<0)  { leadNode->remove(0);}
+        else         { leadNode->remove(1);qaBest=qaTry;}
       }
-
-      if (debug() > 2) cout << " testNode before hit analysis:"<<testNode;
-
-      if (node->getHit()){
-	if (debug() > 2)cout << " got Hit! "<<endl ;
-	nAdded++; node->getHitCount()++; node->getContigHitCount()++;
-	if (node->getContigHitCount()>_pars.minContiguousHitCountForNullReset) node->getContigNullCount() = 0;
-
-      } else if (position>0 || !active) {// detectors edge - don't really expect a hit here
-	  if (debug() > 2) cout << " position>0 || !active"<<endl;
-      } else {// there should have been a hit but we found none
-	  if (debug() > 2) cout << " no hit but expected one"<<endl;
-	  node->getNullCount()++; node->getContigNullCount()++; node->getContigHitCount()  = 0;
-      }//node->getHit()
-
-      assert(sNode->isValid());
-      if (dirIn) {
-      xg = sNode->x_g();
-      yg = sNode->y_g();
-      if (TMath::Sqrt(xg*xg + yg*yg) < 4.2) return nAdded;
-      }
-
-      return nAdded+find(track,direction,sNode,chi2sum);
+      qa += qaBest;
+      return;
     }//End Detectors
   }while(0);if(dirIn){++rlayer;}else{++layer;}}
 //end layers
-  return 0;
+  return;
+}
+
+
+//______________________________________________________________________________
+void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
+                                 ,int active,QAFind &qa)
+{
+
+  qa.reset();
+
+  int maxNullCount           = _pars.maxNullCount+3;
+  int maxContiguousNullCount = _pars.maxContiguousNullCount+3;
+//		Check and count node
+  if (node->getHit()) {
+    if (debug() > 2)cout << " got Hit! "<<endl ;
+    qa.sum = node->getChi2();
+    qa.hits=1; qa.qa=1;
+    node->getHitCount()++;
+    node->getContigHitCount()++;
+    if (node->getContigHitCount()>_pars.minContiguousHitCountForNullReset)
+       node->getContigNullCount() = 0;
+
+  } else if (position>0 || !active) {// detectors edge - don't really expect a hit here
+    qa.qa=0;
+
+  } else {// there should have been a hit but we found none
+      if (debug() > 2) cout << " no hit but expected one"<<endl;
+      node->getNullCount()++; 
+      node->getContigNullCount()++;
+      node->getContigHitCount() = 0;
+      qa.nits=1; qa.qa=-1;
+      if (node->getNullCount()>maxNullCount) 			qa.qa= -3;
+      if (node->getContigNullCount()>maxContiguousNullCount)	qa.qa= -3;
+  }//node->getHit()
+
+  double xg = node->x_g();
+  double yg = node->y_g();
+  if (sqrt(xg*xg + yg*yg) < 4.2) qa.qa= -2;
+
+}
+//______________________________________________________________________________
+int StiKalmanTrackFinder::compQA(QAFind &qaBest,QAFind &qaTry)
+{
+
+   if ( qaTry.qa   ==         -3)  	return -1;
+   if (qaBest.qa   ==         -3)  	return  1;
+   if (qaBest.hits >  qaTry.hits) 	return -1;
+   if (qaBest.hits <  qaTry.hits) 	return  1;
+   if (qaBest.nits <  qaTry.nits) 	return -1;
+   if (qaBest.nits >  qaTry.nits) 	return  1;
+   if (qaBest.sum  <= qaTry.sum ) 	return -1;
+   					return  1;
 }
 
 //______________________________________________________________________________
