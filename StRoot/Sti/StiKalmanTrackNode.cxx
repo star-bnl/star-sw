@@ -164,7 +164,7 @@ void StiKalmanTrackNode::setAsCopyOf(const StiKalmanTrackNode * n)
     fC40  = n->fC40; fC41  = n->fC41; fC42  = n->fC42; fC43  = n->fC43; fC44  = n->fC44;
     fdEdx = n->fdEdx;
     pathLength = n->pathLength;
-    targetDet  = n->targetDet;
+    //targetDet  = n->targetDet;
     hitCount   = n->hitCount;
     nullCount  = n->nullCount;
     contiguousHitCount  =  n->contiguousHitCount;
@@ -1048,8 +1048,7 @@ ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
     // print to the ostream "os" the parameters of this node 
     // and all its children recursively
     int nChildren = n.getChildCount();
-    os << "Level: " << n.mDepth << "\t"
-       << " x:" << n.fX  <<"\t"
+    os << " x:" << n.fX  <<"\t"
        << "alpha:" << 180*n.fAlpha/M_PI<<" degs\t"
        << "dedx:" << n.fdEdx <<"\t"
        << "chi2:" << n.fChi2 << endl
@@ -1086,7 +1085,7 @@ ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
  return os;
 }
 
-
+/*
 //_____________________________________________________________________________
 void StiKalmanTrackNode::setTargetDet(const StiDetector * target)
 {
@@ -1098,7 +1097,7 @@ const StiDetector * StiKalmanTrackNode::getTargetDet()
 {
     return targetDet;
 }
-
+*/
 //_____________________________________________________________________________
 double StiKalmanTrackNode::getWindowY() const
 {	 

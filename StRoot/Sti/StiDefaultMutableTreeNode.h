@@ -59,13 +59,14 @@ class StiDefaultMutableTreeNode : public StiTreeNode
 
   virtual ~StiDefaultMutableTreeNode(){};
   StiDefaultMutableTreeNode();
-  StiDefaultMutableTreeNode(bool allowsChildren);
+  //StiDefaultMutableTreeNode(bool allowsChildren);
 
   void reset();
-  void set(int depth);
+  //void set(int depth);
   void setAsCopyOf(const StiDefaultMutableTreeNode * node);
 
-  void initialize(bool allowsChildren);
+  //void initialize(bool allowsChildren);
+  void initialize();
   void insert(StiTreeNode * newChild, int childIndex);
   void remove(int childIndex) ;
   void setParent(StiTreeNode *  newParent) ;
@@ -73,8 +74,8 @@ class StiDefaultMutableTreeNode : public StiTreeNode
   StiTreeNode *  getChildAt(int index) const;
   int getChildCount() const;
   int getIndex(StiTreeNode *  aChild) ;
-  void setAllowsChildren(bool allows);
-  bool getAllowsChildren() ;
+  //void setAllowsChildren(bool allows);
+  bool getAllowsChildren(){return true;} ;
   void removeFromParent() ;
   void remove(StiTreeNode *  aChild) ;
   void removeAllChildren();
@@ -103,15 +104,15 @@ class StiDefaultMutableTreeNode : public StiTreeNode
   StiDefaultMutableTreeNode *  getLastLeaf(); 
   StiDefaultMutableTreeNode *  getNextLeaf();
   StiDefaultMutableTreeNode *  getPreviousLeaf() ;
-  void           setDepth(int depth);
-  int            getDepth() const;
+  //void           setDepth(int depth);
+  //int            getDepth() const;
 
   StiDefaultMutableTreeNodeVector * breadthFirstEnumeration();
   void appendChildrenToVector(StiDefaultMutableTreeNode *node, 
 			      StiDefaultMutableTreeNodeVector *v);
  protected:
-  int           mDepth;
-  bool          allowsChildren;
+	//  int           mDepth;
+  //  bool          allowsChildren;
   StiTreeNode * parent;
   StiDefaultMutableTreeNodeVector children;
 

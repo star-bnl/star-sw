@@ -85,8 +85,8 @@ public:
     void extendToVertex(); //throw (Exception);
     void rotate(double alpha); //throw ( Exception);
     void add(StiKalmanTrackNode * newChild);
-    void setTargetDet(const StiDetector * targetDet);
-    const StiDetector * getTargetDet();
+    //void setTargetDet(const StiDetector * targetDet);
+    //const StiDetector * getTargetDet();
   
     double getWindowY() const;
     double getWindowZ() const;
@@ -133,21 +133,6 @@ public:
 			}
 
     static double  getFieldConstant()         { return pars->field;}; 
-		/*
-    static void    setFieldConstant(double f) { kField = f;};
-    static void    setMassHypothesis(double m);
-    static double  getMassHypothesis(); 
-    static void    setElossCalculated(bool option);
-    static void    setMCSCalculated(bool option);
-    static bool    getElossCalculated();
-    static bool    getMCSCalculated();  
-    static int    minContiguousHitCountForNullReset;
-    static int    maxNullCount;  
-    static int    maxContiguousNullCount;
-    static double minSearchWindow;
-    static double maxSearchWindow;
-    static double searchWindowScale;
-		*/
     friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
     
     static bool  recurse;
@@ -155,17 +140,7 @@ public:
 		static StiKalmanTrackFinderParameters * pars;
     
  protected:   
-    
-
-    const StiDetector * targetDet; // not persistent
-    
-		/*
-    static double kField;
-    static bool   elossCalculated;
-    static bool   mcsCalculated;
-    static double massHypothesis;
-    */
-
+    //const StiDetector * targetDet; // not persistent
     static int   shapeCode;
     static const StiDetector * det;
     static const StiPlanarShape * planarShape;
@@ -177,7 +152,6 @@ public:
     static double x1,x2,y1,z1,dx,r1,r2,c1,c2,c1sq,c2sq,x0,y0;
     static double radThickness, density;
     static double gasDensity,matDensity,gasRL,matRL;
-    
 };
 
 //stl helper functor

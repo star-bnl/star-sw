@@ -32,7 +32,7 @@ public:
     //inherited
     virtual void findTracks();
 		virtual void fitTracks(); 
-		virtual void extendTracksToVertex();
+		virtual void extendTracksToVertex(StiHit * vertex);
 		virtual void findNextTrack();
 		virtual void fitNextTrack();
 		virtual void findNextTrackSegment();
@@ -40,8 +40,6 @@ public:
 		virtual void reset();
     virtual bool isValid(bool debug=false) const; //Check if everything is kosher
     
-    virtual void doTrackFit();
-    virtual void doTrackFind();
     virtual bool hasMore();
     
 		void setParameters(StiKalmanTrackFinderParameters *par);
@@ -49,11 +47,10 @@ public:
 
     //Local
     virtual void findTrack(StiTrack * t); //throw ( Exception);
-    virtual StiKalmanTrackNode * followTrackAt(StiKalmanTrackNode * node); //throw (Exception);
     void removeNodeFromTrack(StiKalmanTrackNode * node, StiKalmanTrack* track);
     void pruneNodes(StiKalmanTrackNode * node);
     void reserveHits(StiKalmanTrackNode * node);
-    void extendToMainVertex(StiKalmanTrackNode * node);
+    void extendToMainVertex(StiKalmanTrackNode * node, StiHit * vertex);
     
     void doInitTrackSearch();
     void doScanLayer();
@@ -107,7 +104,6 @@ private:
     bool hasDet;
     
     void initSearch(StiKalmanTrackNode * node);
-    void search();
     
     Messenger & trackMes;
 		StiKalmanTrackFinderParameters * pars;

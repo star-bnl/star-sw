@@ -6,46 +6,51 @@
 /// allows children.
 StiDefaultMutableTreeNode::StiDefaultMutableTreeNode()
 {
-    initialize(true);
+	//initialize(true);
+	initialize();
 }
-
+/*
 /// Creates a tree node with no parent, no children
 /// 
 /// @param allowsChildren if true, the node is allowed to have child
 ///        nodes -- otherwise, it is always a leaf node
 StiDefaultMutableTreeNode::StiDefaultMutableTreeNode(bool allowsChild) 
 {
-    initialize(allowsChild);
+	//initialize(allowsChild);
+	initialize();
 }
-
+*/
 void StiDefaultMutableTreeNode::reset()
 {
-    initialize(true);
-    children.clear();
+	//initialize(true);
+	initialize();
+	children.clear();
 }
 
 
-
-void StiDefaultMutableTreeNode::set(int depth)
-{
-    mDepth = depth;
-}
+/*
+	void StiDefaultMutableTreeNode::set(int depth)
+	{
+	mDepth = depth;
+	}
+*/
 
 void StiDefaultMutableTreeNode::setAsCopyOf(const StiDefaultMutableTreeNode * node)
 {
-  mDepth = node->mDepth;
+  //mDepth = node->mDepth;
   parent = node->parent;
-  allowsChildren = node->allowsChildren;
+  //allowsChildren = node->allowsChildren;
   children = node->children;
 }
 
 
 
   ///  Initialize data members of the class
-void StiDefaultMutableTreeNode::initialize(bool allowsChild)
+//void StiDefaultMutableTreeNode::initialize(bool allowsChild)
+void StiDefaultMutableTreeNode::initialize()
 {
   parent         = 0;
-  allowsChildren = allowsChild;
+  //allowsChildren = allowsChild;
 }
 
 
@@ -67,14 +72,16 @@ void StiDefaultMutableTreeNode::insert(StiTreeNode * newChild, int childIndex)
   /// @see	#isNodeDescendant
   //--------------------------------------------------------------
 {
+	/*
   if (!allowsChildren) 
     {
       cout << "StiDefaultMutableTreeNode::insert() - ERROR" << endl
 	   << "     Attempting to insert a node into a node " << endl
 	   << "     which does not accept children" << endl;
       return;
-    }
-  else if (newChild == 0) 
+			}
+	*/
+	if (newChild == 0) 
     {
       cout << "StiDefaultMutableTreeNode::insert() - ERROR" << endl
 	   << "     Attempting to insert null object " << endl;
@@ -94,7 +101,7 @@ void StiDefaultMutableTreeNode::insert(StiTreeNode * newChild, int childIndex)
       oldParent->remove(newChild);
     }
   newChild->setParent(this);
-  newChild->setDepth(1+mDepth);
+  //newChild->setDepth(1+mDepth);
   
   // insert the child at the end of the queue for now....
   children.push_back(dynamic_cast<StiDefaultMutableTreeNode *>(newChild));
@@ -192,6 +199,7 @@ int StiDefaultMutableTreeNode::getIndex(StiTreeNode *  aChild)
   return 0;
 }
 
+/*
 //--------------------------------------------------------------
 // Determines whether or not this node is allowed to have children. 
 // If <code>allows</code> is false, all of this node's children are
@@ -222,7 +230,7 @@ bool StiDefaultMutableTreeNode::getAllowsChildren()
 {
   return allowsChildren;
 }
-
+*/
 //--------------------------------------------------------------
 //  Derived methods
 //--------------------------------------------------------------
@@ -441,38 +449,38 @@ bool StiDefaultMutableTreeNode::isNodeRelated(StiDefaultMutableTreeNode *  aNode
   return (aNode != 0) && (getRoot() == aNode->getRoot());
 }
 
-
-int StiDefaultMutableTreeNode::getDepth() const
-{
+/*
+	int StiDefaultMutableTreeNode::getDepth() const
+	{
   // Returns the depth of this node relative to the root of the tree.
   // If this node is the root, this should be 0;
   return mDepth;
-}
-
-void StiDefaultMutableTreeNode::setDepth(int d)
-{
+	}
+	
+	void StiDefaultMutableTreeNode::setDepth(int d)
+	{
   mDepth = d;
-}
-
-//--------------------------------------------------------------
-// Returns the number of levels above this node -- the distance from
-// the root to this node.  If this node is the root, returns 0.
-//
-// @see	#getDepth
-// @return	the number of levels above this node
-//--------------------------------------------------------------
-int StiDefaultMutableTreeNode::getLevel() 
-{
+	}
+*/
+	//--------------------------------------------------------------
+	// Returns the number of levels above this node -- the distance from
+	// the root to this node.  If this node is the root, returns 0.
+	//
+	// @see	#getDepth
+	// @return	the number of levels above this node
+	//--------------------------------------------------------------
+	int StiDefaultMutableTreeNode::getLevel() 
+	{
   StiTreeNode *  ancestor;
   int levels = 0;
   
   ancestor = this;
   while((ancestor = ancestor->getParent()) != 0){
-    levels++;
+	levels++;
   }
   
   return levels;
-}
+	}
 
 //--------------------------------------------------------------
 // Returns the root of the tree that contains this node.  The root is
