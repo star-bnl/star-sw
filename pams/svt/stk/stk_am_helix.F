@@ -53,8 +53,8 @@ C     ===================
       real     x1, y1, z1, b, e, x0(3), delphi, r, h,  dels, s, k
       real     ptot, pt, p(3), costh, sinth, cosl, sinl, ph, th
       real   lambda
-      real     ran
-      external ran
+      real     rndm
+      external rndm
 
       
 c     error/message
@@ -129,11 +129,11 @@ c     proceed to generation as requested
       do  ikine = 1, hlx(1).nkine
 
          ptot = hlx(1).pmin + 
-     >             (hlx(1).pmax - hlx(1).pmin)*ran(idummy)
+     >             (hlx(1).pmax - hlx(1).pmin)*rndm(idummy)
          th   = hlx(1).thmin + 
-     >             (hlx(1).thmax - hlx(1).thmin)*ran(idummy)
+     >             (hlx(1).thmax - hlx(1).thmin)*rndm(idummy)
          ph   = hlx(1).phmin + 
-     >             (hlx(1).phmax - hlx(1).phmin)*ran(idummy)
+     >             (hlx(1).phmax - hlx(1).phmin)*rndm(idummy)
 
          p(1) = ptot * sind(th) * cosd(ph)
          p(2) = ptot * sind(th) * sind(ph)
