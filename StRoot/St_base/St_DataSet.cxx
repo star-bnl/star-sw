@@ -4,6 +4,7 @@
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
  
 //*KEEP,TDataset,T=C++.
+#include <iostream.h>
 #include "St_DataSetIter.h"
 #include "St_DataSet.h"
 //*KEEP,TBrowser.
@@ -27,6 +28,7 @@ ClassImp(St_DataSet)
 //______________________________________________________________________________
 St_DataSet::St_DataSet(const Char_t *name, St_DataSet *parent) : TNamed(), fList(0), fMother(0)
 {
+  //  cout << "ctor for " << GetName() << " - " << GetTitle() << endl;
    if (strchr(name,'/')) {
       Error("St_DataSet::St_DataSet","dataset name cannot contain a slash", name);
       return;
@@ -54,6 +56,7 @@ St_DataSet::St_DataSet(const St_DataSet &pattern,EDataSetPass iopt)
   //   All new-created sets become the structural ones anyway.
   //
 
+  //  cout << "ctor for " << GetName() << " - " << GetTitle() << endl;
   SetName(pattern.GetName());
   SetTitle(pattern.GetTitle());
 
@@ -81,6 +84,7 @@ St_DataSet::St_DataSet(TNode &src)
   // ====   St_DataSet
   //
 
+  //  cout << "ctor for " << GetName() << " - " << GetTitle() << endl;
   SetName(src.GetName());
   SetTitle(src.GetTitle());
 
@@ -97,6 +101,7 @@ St_DataSet::St_DataSet(TNode &src)
 //______________________________________________________________________________
 St_DataSet::~St_DataSet()
 {
+  //  cout << "Default destructor for " << GetName() << " - " << GetTitle() << endl;
    Delete();
 } 
 //______________________________________________________________________________
