@@ -1,7 +1,10 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@bnl.gov)   07/04/99
-// $Id: testdataset.c,v 1.13 2000/09/30 17:51:54 perev Exp $
+// $Id: testdataset.c,v 1.14 2001/02/05 19:08:44 fine Exp $
 // $Log: testdataset.c,v $
+// Revision 1.14  2001/02/05 19:08:44  fine
+// An extra check to test TDataSetIter::FindObject method
+//
 // Revision 1.13  2000/09/30 17:51:54  perev
 // Evolution On/Off SetEvol.C added
 //
@@ -83,6 +86,12 @@
   }
   else {
       cout <<  "Object: " << v3212 << " has not been found." << endl;
+      cout << "Try FindByName" << endl;
+      TDataSet *lost = d.FindByName(v3212);
+      if (lost) {
+	cout << "The wrong implementation of TDataSetIter::FindObject method has been discovered" << endl;
+            lost->ls();
+      }
       return;
   }
 
