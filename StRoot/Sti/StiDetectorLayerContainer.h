@@ -21,8 +21,6 @@ class StiDetectorLayerContainer : public detectormap
 {
 public:
     
-    //enum StiSectorBounds {kMinSector=1, kMaxSector=4}; //Needed for steps from one sector to another
-    
     virtual ~StiDetectorLayerContainer();
 
     //Singleton Access
@@ -56,12 +54,6 @@ public:
     
     //Set iterator at position closest to this point
     void setRefDetector(double refangle, double position); //Not implemented yet
-    
-    //Set iterator at outermost padrow of the sector closest to this sector
-    void setRefDetector(int sector); 
-
-    //Set iterator at position.  If it doesn't exist, calls setRefDetector(int sector)
-    void setRefDetector(int sector, int padrow);
         
     //False if step not available
     bool padrowStepPlus(); //step to next radial layer in same sector (in)

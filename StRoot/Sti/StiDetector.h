@@ -10,7 +10,7 @@
 #include "TObject.h"
 #include "StiMaterial.h"
 
-class StiDetector : public TObject{
+class StiDetector {
     
 public:
 

@@ -22,8 +22,8 @@ struct MapKeyLessThan{
 struct DetectorMapKey {
   bool operator==(const DetectorMapKey&) const;
   bool operator<(const DetectorMapKey&) const;
-  int padrow;
-  int sector;
+  double position;
+  double refangle;
   double z;
 };
 

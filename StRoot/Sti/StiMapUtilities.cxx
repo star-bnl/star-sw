@@ -55,29 +55,29 @@ bool StizHitLessThan::operator() (const StiHit* lhs, const StiHit* rhs) const
 
 //----------------------- Detector Map Utilities ------------------------------------
 
-//Equality defined by padrow and sector
+//Equality defined by position and refangle, not z!!!!
 bool DetectorMapKey::operator==(const DetectorMapKey& key2) const
 {
-  return (this->padrow==key2.padrow && this->sector==key2.sector);
+  return (this->position==key2.position && this->refangle==key2.refangle);
 }
 
 bool DetectorMapKey::operator<(const DetectorMapKey& key2) const
 {
-    bool val = false;
-    if (sector > key2.sector) {val =  false;}
-    else if (sector < key2.sector) {val = true;}
+  bool val = false;
+  if (refangle > key2.refangle) {val =  false;}
+  else if (refangle < key2.refangle) {val = true;}
+  else {
+    if (position < key2.position) {val = false;}
+    else if (position > key2.position) {val = true;}
     else {
-	if (padrow < key2.padrow) {val = false;}
-	else if (padrow > key2.padrow) {val = true;}
-	else {
-	    if (z > key2.z) {val = false;}
-	    else if (z < key2.z) {val = true;}
-	    else {val=false;}
-	}
+      if (z > key2.z) {val = false;}
+      else if (z < key2.z) {val = true;}
+      else {val=false;}
     }
-    return val;
+  }
+  //cout <<"\tLessThan:\t"<<(*this)<<"\t"<<key2<<"\t"<<val<<endl;
+  return val;
 }
-
 
 //----------------------- Streamers -------------------------------------------------
 ostream& operator<<(ostream& os, const HitMapKey& a)
@@ -87,5 +87,6 @@ ostream& operator<<(ostream& os, const HitMapKey& a)
 
 ostream& operator<<(ostream& os, const DetectorMapKey& a)
 {
-    return os <<a.sector<<"\t"<<a.padrow<<"\t"<<a.z;
+  return os <<a.refangle<<"\t"<<a.position<<"\t"<<a.z;
 }
+
