@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCuts.cxx,v 1.1 2003/10/15 18:20:32 porter Exp $
+ * $Id: StEStructCuts.cxx,v 1.2 2004/08/23 19:12:13 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -83,34 +83,109 @@ void StEStructCuts::setCutFile(const char* cutFileName) {
 };
 
 //-------------------------------------------------------------------
+bool StEStructCuts::loadCutDB() {
+  // Loads pre-defined cuts from database
+
+  bool flag = false;
+
+  if (!strcmp(mcutFileName,"test-1")) {
+    // Some crazy cuts for testing... 
+    loadBaseCuts("primaryVertexZ","-15","25");        
+    loadBaseCuts("Pt","0.15","5");                    
+    loadBaseCuts("Phi","-1","0.8");                   
+    loadBaseCuts("Eta","-1.5","0.5");                 
+    
+    flag = true;
+  }
+
+  // ***** begin copy here ******* 
+  if (!strcmp(mcutFileName,"template")) {   // example template for adding new cuts 
+    /***********************************************************************************************
+     * Title:  example cuts for 200 GeV p-p correlation analysis
+     * PA:  john doe
+     * Date:  August 2004
+     * fileCatalog:  production=P04XX,trgsetupname=productionCentral,filetype=daq_reco_MuDst,etc.
+     * Notes:  Analysis for PRL paper "Transverse Momentum vs Unleaded Gasoline Prices at RHIC"
+     *         results in ~johndoe/work/fakeanalysis/data
+     *         Webpage at protected/estruct/johndoe/...
+     ***********************************************************************************************/
+    
+    // syntax: loadBaseCuts("cut name", "min value", "max value")  
+    //   min and max define the accepted region; e.g. loadBaseCut("mycut","0","1") cuts everything below 0 and above 1
+    // Note: some cuts (names begin with "good") need to be called with loadUserCuts instead of loadBaseCuts
+
+    // Event Cuts
+    loadBaseCuts("primaryVertexZ","-25.","25");           // primary vertex cut
+    
+    // Track Cuts
+    loadBaseCuts("Flag","0","2000");                      // track flag cut
+    loadBaseCuts("Charge","-1","1");                      // charge cut
+    loadBaseCuts("NFitPoints","15","50");                 // fit points cut
+    loadBaseCuts("NFitPerNMax","0.52","1.0");             // fitpoints per possible cut
+    loadBaseCuts("GlobalDCA","0.","3.0");                 // global DCA cut
+    loadBaseCuts("Chi2","0.","3.0");                      // chi square cut
+    loadBaseCuts("Pt","0.15","15.45");                    // pt cut
+    loadBaseCuts("Yt","0.1","2.");                        // yt cut
+    loadBaseCuts("Phi","-1","1");                         // phi cut
+    loadBaseCuts("Eta","-1.0","1.0");                     // eta cut
+    loadBaseCuts("NSigmaElectron","0.0","1.5");           // num sigma electron cut
+
+    // Pair Cuts
+    loadBaseCuts("DeltaPhi","-.5","0.333");
+    loadBaseCuts("DeltaEta","0.","0.15");
+    loadBaseCuts("DeltaMt","-7.","0.250");
+    loadBaseCuts("qInv","0.1","5.0");
+    loadBaseCuts("EntranceSep","5.0","200");
+    loadBaseCuts("ExitSep","0.0","600");
+    loadBaseCuts("Quality","-0.5","0.75");
+    loadBaseCuts("MidTpcSepLikeSign","5.","7.5");
+    loadBaseCuts("MidTpcSepUnlikeSign","5.","7.5");
+    
+    flag = true;
+  }
+  // ******** end copy here *******
+  
+  //if (!flag) cout << "No entry for " << mcutFileName << " found in database.  Looking for file..." << endl;    
+  
+  return flag;
+}
+
+//-------------------------------------------------------------------
 bool StEStructCuts::loadCuts(){
 
   if(!isLoaded()) return false;
  
-  ifstream from(mcutFileName);
-
-  if(!from){ 
-    cout<<" Cut file Not Found "<<endl; 
-    return false;
+  if (loadCutDB()) {    // Search for entry in cut DB
+    cout << "Using entry " << mcutFileName << " in cut DB." << endl;
+    return true;
   }
-
-  bool done = false;
- 
-  char line[256], lineRead[256];
-  char* puteol;
-  char** val = new char*[100];
-  int ival;
-
-  while(!done) {
-    if(from.eof()){
-      done=true;
-    } else {
-      from.getline(lineRead,256);
-      strcpy(line,lineRead);
-      if( (line[0]=='#') )continue;
-      if((puteol=strstr(line,"#")))*puteol='\0';
-      ival=0;
-      val[ival]=line;
+  
+  else {   // try to load from file 
+    cout << "Loading file " << mcutFileName <<endl;
+    ifstream from(mcutFileName);
+    
+    if(!from){ 
+      cout<<" Cut file Not Found "<<endl; 
+      return false;
+    }
+    
+    bool done = false;
+    
+    char line[256], lineRead[256];
+    char* puteol;
+    char** val = new char*[100];
+    int ival;
+    
+    while(!done) {
+      if(from.eof()){
+	done=true;
+      } else {
+	from.getline(lineRead,256);
+	strcpy(line,lineRead);
+	if( (line[0]=='#') )continue;
+	if((puteol=strstr(line,"#")))*puteol='\0';
+	ival=0;
+	val[ival]=line;
       char* fcomma;
       while((fcomma=strstr(val[ival],","))){
         *fcomma='\0';
@@ -122,16 +197,41 @@ bool StEStructCuts::loadCuts(){
       const char* name=val[0];
       char** values=&val[1];
       if(!loadBaseCuts(name,(const char**)values,ival))loadUserCuts(name,(const char**)values,ival);
+      }
     }
-  }
 
-  from.close();
-  delete [] val;
-
-  return true;
-} 
+    from.close();
+    delete [] val;
     
-            
+    return true;
+  } // else
+
+} 
+
+//-------------------------------------------------------------------    
+bool StEStructCuts::loadBaseCuts(const char* name,const char* val1,const char* val2) {
+  // Overloaded function
+  char** tmp = new char*[2];
+  tmp[0] = new char[strlen(val1) + 1];
+  tmp[1] = new char[strlen(val2) + 1];
+  strcpy(tmp[0],val1);
+  strcpy(tmp[1],val2);
+  if(loadBaseCuts(name, (const char**)tmp, 2)) return true;
+  else return false;
+}
+
+//-------------------------------------------------------------------
+void StEStructCuts::loadUserCuts(const char* name,const char* val1,const char* val2) {
+  // Overloaded function
+  char** tmp = new char*[2];
+  tmp[0] = new char[strlen(val1) + 1];
+  tmp[1] = new char[strlen(val2) + 1];
+  strcpy(tmp[0],val1);
+  strcpy(tmp[1],val2);
+  loadUserCuts(name, (const char**)tmp, 2);
+}
+
+//-------------------------------------------------------------------            
 int StEStructCuts::createCutHists(const char* name, float* range, int nvals){
  
 
@@ -232,6 +332,9 @@ void StEStructCuts::printCuts(const char* fileName){
 /***********************************************************************
  *
  * $Log: StEStructCuts.cxx,v $
+ * Revision 1.2  2004/08/23 19:12:13  msd
+ * Added pre-compiled cut database, minor changes to cut base class
+ *
  * Revision 1.1  2003/10/15 18:20:32  porter
  * initial check in of Estruct Analysis maker codes.
  *
