@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichDrawableTHit.h,v 2.0 2000/08/09 16:28:02 gans Exp $
+ * $Id: StRichDrawableTHit.h,v 2.1 2000/11/01 16:53:59 lasiuk Exp $
  *
  * Description:
  *   Cluster which is drawn in the pad monitor
@@ -7,8 +7,8 @@
  ****************************************************************
  *
  * $Log: StRichDrawableTHit.h,v $
- * Revision 2.0  2000/08/09 16:28:02  gans
- * Created New Maker for all drawable objects.
+ * Revision 2.1  2000/11/01 16:53:59  lasiuk
+ * add interface for the StRichHit
  *
  * Revision 2.0  2000/08/09 16:28:02  gans
  * Created New Maker for all drawable objects.
@@ -35,34 +35,40 @@
 #ifndef ST_RICH_DRAWABLE_THIT_H
 #define ST_RICH_DRAWABLE_THIT_H
 
+class StRichSimpleHit;
+class StRichHit;
 
 #include "TMarker.h"
-
-class StRichSimpleHit;
 
 class StRichDrawableTHit : public TMarker {
 public:
     StRichDrawableTHit();
+
+    //
+    // type[4](5) is a [circle](cross)
     StRichDrawableTHit(double xl, double yl, int type=5);
     StRichDrawableTHit(StRichSimpleHit&, int type=5);
-    StRichDrawableTHit(StRichDrawableTHit&);
+    StRichDrawableTHit(StRichHit*, int type=4);
+
     virtual ~StRichDrawableTHit();
 
-    double getCharge(){return mCharge;};
+    // should be constant but has warnings
+    StRichDrawableTHit(StRichDrawableTHit&);
+    //StRichDrawableTHit& operator=(const StRichDrawableTHit&);
 
-    //StRichDrawableTHit(const StRichDrawableTHit&) {/*use default*/|
-    //StRichDrawableTHit& operator=(const StRichDrawableTHit&) {/*use default*/}
-
+    double     getCharge()  const;
+    StRichHit* getRichHit() const;
+    
     //void ExecuteEvent(Int_t event, Int_t px, Int_t py) ;
 
 protected:
-    
-    double    mCharge;
-protected:
+    StRichHit* mRichHit;//!
+    double     mCharge;
 
     ClassDef(StRichDrawableTHit,1)
 };
 
+inline double StRichDrawableTHit::getCharge() const {return mCharge;}
 
 #endif /* THIT_H */
 #endif /* ROOT */
