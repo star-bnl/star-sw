@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.18 2003/01/10 04:19:20 porter Exp $
+ * $Id: StDbSql.cc,v 1.19 2003/01/29 03:44:54 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.19  2003/01/29 03:44:54  porter
+ * added setRowNumber in QueryDbFunction method to simplify codes that use
+ * this when plotting directly from the database
+ *
  * Revision 1.18  2003/01/10 04:19:20  porter
  * added feature of getting timestamp list (but no data) for a table.
  * fixed 2 features sometimes used in online in query-by-whereclause.
@@ -624,6 +628,7 @@ StDbSql::QueryDbFunction(StDbTable* table, const char* whereClause, char* funcNa
 
    for(i=0;i<numTables;i++) delete [] dataTables[i];
    delete [] dataTables;
+   table->setRowNumber();
 
    return numRowsReturned;
 #undef __METHOD__
