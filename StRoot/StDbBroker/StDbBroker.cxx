@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.42 2003/09/12 01:48:06 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.43 2003/09/15 19:16:39 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,10 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.43  2003/09/15 19:16:39  porter
+ * added #include <sstream> to fix rh7.2 compile problem introduced with recent fix
+ * for rh8 compilation.
+ *
  * Revision 1.42  2003/09/12 01:48:06  porter
  * removed all strstream objects in favor of stringstream+string directly
  *
@@ -145,6 +149,7 @@
  *
  *
  **************************************************************************/
+#include <sstream>
 #include <Stiostream.h>
 #include <stdlib.h> 
 
