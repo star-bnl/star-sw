@@ -1,8 +1,11 @@
-// $Id: StLaserEventMaker.cxx,v 1.8 2001/03/26 18:27:00 love Exp $
+// $Id: StLaserEventMaker.cxx,v 1.9 2001/07/17 17:17:57 love Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.9  2001/07/17 17:17:57  love
+// phi variable added to lasertrack def
+//
 // Revision 1.8  2001/03/26 18:27:00  love
-// Added many features.  Calculates DOCA for laser tracks to mirror positions.  POCA
-//  for non laser events to x,y = 0,0.
+// Added many features.  Calculates DOCA for laser tracks to mirror positions.
+//  POCA  for non laser events to x,y = 0,0.
 //
 // 8 Jan 2001 Change curvature cut in DOCA from .0001 to .000001
 // Revision 1.7  2000/07/26 22:49:40  didenko
@@ -205,19 +208,21 @@ Int_t StLaserEventMaker::Make(){
 	St_tpt_track * n_track = (St_tpt_track *) tpc_tracks["tptrack"];
           Int_t ntks=n_track->GetNRows();
 	  //Create matching arrays to hold the sector and laser source
-	  // point for each track
+	  // point and phi angle for each track
 	  Int_t *sector = new Int_t[ntks];
           Float_t *xl = new Float_t[ntks];
           Float_t *yl = new Float_t[ntks];
           Float_t *zl = new Float_t[ntks];
+          Float_t *phil = new Float_t[ntks];
           tpt_track_st *ta = n_track->GetTable();
 	  for(int itk=0;itk<ntks;itk++,ta++){
-	    if(m_lasers)
+	    if(m_lasers){
           DOCA(ta->r0, ta->phi0, ta->z0, ta->psi, ta->tanl, ta->curvature,
            ta->q, &sector[itk], &xl[itk], &yl[itk], &zl[itk]);
+	    }
 	    else 
           POCA(ta->r0, ta->phi0, ta->z0, ta->psi, ta->tanl, ta->curvature,
-           ta->q, &xl[itk], &yl[itk], &zl[itk]);
+           ta->q, &xl[itk], &yl[itk], &zl[itk], &phil[itk]);
 	  }
     //
      St_tfc_adcxyz  *n_adc = 0;
@@ -255,7 +260,7 @@ Int_t StLaserEventMaker::Make(){
             Float_t resz = h->z-z1-te->tanl*
                         sqrt((h->x-x1)*(h->x-x1) + (h->y-y1)*(h->y-y1));
             Float_t phi = te->psi;
-	    //	    if(phi>180.0) phi-=180.0;  This was a mistake
+
                event->AddHit(h->q,h->x,h->y,h->z,h->row,h->track, h->flag,
        sector[itrk],zl[itrk],phi,te->invp*te->q,te->nfit,
        resy,resz,h->alpha,h->lambda,h->prf,h->zrf,exbdx,exbdy);
@@ -273,13 +278,11 @@ Int_t StLaserEventMaker::Make(){
          ngtk++;
 	 Float_t phi = t->psi;
 	 Float_t tlam = t->tanl;
-	 //	 if(phi>180.0){phi=phi-180.0; tlam=-tlam;} 
-         //the rest of the mistake
-         event->AddTrack(t->flag,t->hitid,t->id,t->id_globtrk,
+        event->AddTrack(t->flag,t->hitid,t->id,t->id_globtrk,
          t->ndedx, t->nfit, t->nrec, t->npos, t->q,
          t->chisq[0], t->chisq[1], t->dedx[0], t->invp, t->curvature,
          phi, tlam, t->phi0, t->r0, t->z0, sector[itrk],xl[itrk],
-         yl[itrk],zl[itrk] );
+         yl[itrk],zl[itrk], phil[itrk] );
 	 }
      } //end of itrk for loop 
      cout <<  ntks << " total tracks " << ngtk << " good tracks" << endl;
@@ -421,10 +424,10 @@ Int_t StLaserEventMaker::Make(){
 //_____________________________________________________________________________
   void StLaserEventMaker::POCA(Float_t r0,Float_t phi0,Float_t z0,
                       Float_t psi, Float_t tanl, Float_t curvature, Int_t q,
-                      Float_t *xl, Float_t *yl, Float_t *zl) {
+                      Float_t *xl, Float_t *yl, Float_t *zl, Float_t *phil) {
   // calculate point of closest approach to the centerline of the beam.
-    Float_t x, y, z, disxy;
-    *xl = 100.0; *yl = 100.0; *zl = 0.0;
+    Float_t x, y, z, disxy, xp = 0.15, yp = 0.15;
+    *xl = 100.0; *yl = 100.0; *zl = 0.0, *phil=0.0;
   //
     Float_t ang = 0.017453292 * phi0;
     Float_t x0 = r0 * cos(ang);
@@ -437,7 +440,6 @@ Int_t StLaserEventMaker::Make(){
 	// helix track, calculate circle center position
 	Float_t xc = x0 + q*py/curvature;
 	Float_t yc = y0 - q*px/curvature;
-	Float_t xp = 0; Float_t yp=0;
         Float_t d = xc - xp; Float_t a = yc - yp;
         Float_t c = d/a;  
         Float_t dy = 1./sqrt(1. + c*c)/curvature;
@@ -448,7 +450,11 @@ Int_t StLaserEventMaker::Make(){
 	if (disq<test) { 
             *xl=x; *yl=y;
             disxy = sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0)); 
-            *zl = z0 - tanl*disxy;}
+            *zl = z0 - tanl*disxy;
+	    // calculate phi angle at the POCA to the vertex.
+	    *phil = 57.29578*atan(a/d) +90.0;
+	    if(a*q*(*phil-90.0)<0)*phil+=180.0;
+	}
 	}
     else
       {
@@ -456,7 +462,6 @@ Int_t StLaserEventMaker::Make(){
       Float_t slope = tan(psi*0.017453292);
       Float_t ax = 1./(x0 - y0/slope);
       Float_t ay = 1./(y0 - x0*slope);
-      Float_t xp = 0.5; Float_t yp= 0.5;
       Float_t d = ax*ax +ay*ay;
       x = (ax + ay*ay*xp - ax*ay*yp)/d;
       y = (ay + ax*ax*yp - ax*ay*xp)/d;
@@ -465,7 +470,7 @@ Int_t StLaserEventMaker::Make(){
       z = z0 + -tanl*disxy;
       Float_t disq = (x-xp)*(x-xp) + (y-yp)*(y-yp);
 	 if (disq<test) {
-	 *xl=x; *yl=y; *zl=z; 
+	 *xl=x; *yl=y; *zl=z; *phil=psi; 
 	  }
       }
   }
@@ -612,9 +617,7 @@ void StLaserEventMaker::UndoExB(Float_t *x, Float_t *y, Float_t *z){
     }
   xp = xp + delxy[0];
   yp = yp + delxy[1];
-  // temporary printout for Al Saulys.
-  //  cout <<" x, dx " << *x << " "  << delxy[0] << " y, dy " << *y 
-  //     << " " << delxy[1] <<" z "<< *z<< endl;
+
   *x = xp; *y = yp; *z = zp;  
 }
 

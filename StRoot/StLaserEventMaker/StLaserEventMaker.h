@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.h,v 1.5 2001/03/26 18:27:00 love Exp $
+// $Id: StLaserEventMaker.h,v 1.6 2001/07/17 17:18:45 love Exp $
 // $Log: StLaserEventMaker.h,v $
+// Revision 1.6  2001/07/17 17:18:45  love
+// phi variable added to lasertrack def
+//
 // Revision 1.5  2001/03/26 18:27:00  love
 // Added many features.  Calculates DOCA for laser tracks to mirror positions.  POCA
 //  for non laser events to x,y = 0,0.
@@ -82,7 +85,7 @@ public:
                       Int_t *sector, Float_t *xl, Float_t *yl, Float_t *zl); 
   virtual void  POCA(Float_t r0,Float_t phi0,Float_t z0,
                       Float_t psi, Float_t tanl, Float_t curvature, Int_t q,
-                      Float_t *xl, Float_t *yl, Float_t *zl); 
+                      Float_t *xl, Float_t *yl, Float_t *zl, Float_t *phi); 
   virtual void   SetRun(Int_t run) {m_runno = run;} 
   virtual void   SetDate(Int_t date) {m_date = date;} 
   virtual void   SetRows(Int_t min, Int_t max) {m_rowmin=min; m_rowmax=max;}
@@ -93,7 +96,7 @@ public:
   virtual void   UndoExB(Float_t *x,Float_t *y,Float_t *z);
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.5 2001/03/26 18:27:00 love Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.6 2001/07/17 17:18:45 love Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 ClassDef(StLaserEventMaker, 1)   //StAF chain virtual base class for Makers
 };
