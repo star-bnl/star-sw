@@ -13,7 +13,7 @@
 * ***********************************************************************
 ************************************************************************
  macro run__
-          TOP=/scr22/kathy/testdev _
+          TOP=$STAR _
           domain='geometry tpc' _ 
           INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
           input_g2t_file=event_0000050.xdf_
