@@ -1,5 +1,8 @@
-// $Id: bfcread_runcoBranch.C,v 1.10 2000/05/03 19:04:34 kathy Exp $
+// $Id: bfcread_runcoBranch.C,v 1.11 2000/06/22 21:24:07 kathy Exp $
 // $Log: bfcread_runcoBranch.C,v $
+// Revision 1.11  2000/06/22 21:24:07  kathy
+// force only 1 event to be processed in runco Branch
+//
 // Revision 1.10  2000/05/03 19:04:34  kathy
 // update to make consistent with other macros of same type
 //
@@ -58,6 +61,11 @@ void bfcread_runcoBranch(
   const char *fname="qa_runco.out")
 {
 //
+  if (nevents != 1){
+    cout << " there is only 1 event in this branch!! " << endl;
+  }
+  nevents=1;
+
   cout << " events to process  = " << nevents << endl;
   cout << " Input File Name = " << MainFile << endl;
   cout << " Output file containing printouts = " << fname << endl;
