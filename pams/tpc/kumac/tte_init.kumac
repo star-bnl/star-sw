@@ -1,10 +1,8 @@
 macro init
 
-  macro/global/import PARAMS_TPC
-
   cd /dui/constants/tpc/params
 
-  dio/newfilestream    ttepar [PARAMS_TPC]tte_pars.xdf r
+  dio/newfilestream    ttepar $STAR/params/tpc/tte_pars.xdf r
   dio/stream/getevent  ttepar
   dio/stream/close     ttepar
 

@@ -1,12 +1,8 @@
-
 macro init
-
-  macro/global/import PARAMS_TPC
-
 
 cd /dui/constants/tpc/params
 
-  dio/newfilestream    tidpar [PARAMS_TPC]tid_pars.xdf r
+  dio/newfilestream    tidpar $STAR/params/tpc/tid_pars.xdf r
   dio/stream/getevent  tidpar
   dio/stream/close     tidpar
 
