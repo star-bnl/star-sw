@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.6 2004/09/30 13:58:46 mmiller Exp $
+ * $Id: StJetMaker.cxx,v 1.7 2004/10/12 18:17:37 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -51,9 +51,9 @@
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 
 //StJetMaker
-#include "StJetMaker.h"
-#include "StJet.h"
-#include "StFourPMaker.h"
+#include "StJetMaker/StJetMaker.h"
+#include "StJetMaker/StJet.h"
+#include "StJetMaker/StFourPMakers/StFourPMaker.h"
 
 //temp, MLM
 void dumpProtojetToStream(int event, int jet, ostream& os, StProtoJet& pj);
@@ -63,14 +63,20 @@ double gDeltaR(const TLorentzVector* jet, const StThreeVectorF& track);
 
 ClassImp(StJetMaker)
   
-    StJetMaker::StJetMaker(const Char_t *name, StFourPMaker* fPMaker, 
-			   StMuDstMaker* uDstMaker, const char *outputName) 
-	: StMaker(name), fourPMaker(fPMaker), muDstMaker(uDstMaker),
+/*
+  StJetMaker::StJetMaker(const Char_t *name, StFourPMaker* fPMaker, 
+  StMuDstMaker* uDstMaker, const char *outputName) 
+  : StMaker(name), fourPMaker(fPMaker), muDstMaker(uDstMaker),
+  outName(outputName), mGoodCounter(0), mBadCounter(0), mEventCounter(0), mOfstream(0)
+*/
+    StJetMaker::StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *outputName) 
+	: StMaker(name), muDstMaker(uDstMaker),
 	  outName(outputName), mGoodCounter(0), mBadCounter(0), mEventCounter(0), mOfstream(0)
 {
     infoLevel = 0;
     mudst=0;
-}
+
+    }
 /*!
   Constructing a new jet analysis requires three elements:
   (1) An instance of StppAnaPars that defines the track and jet cuts used in the analysis.
@@ -81,17 +87,15 @@ ClassImp(StJetMaker)
   (3) A unique character string which is used to identify this branch in the jets TTree
 
 */
-void StJetMaker::addAnalyzer(const StppAnaPars* ap, const StJetPars* jp, const char* name)
+void StJetMaker::addAnalyzer(const StppAnaPars* ap, const StJetPars* jp, StFourPMaker* fp, const char* name)
 {
-    jetBranches[name] = new StppJetAnalyzer(ap, jp);
+    jetBranches[name] = new StppJetAnalyzer(ap, jp, fp);
 }
 
 void StJetMaker::InitFile(void)
 {
     // creating Jet nanoDst file name
     TString jetFileName(outName);
-    if(jetFileName == "/dev/null") {return; }
-    jetFileName += ".root";
     cout << "StJetMaker: jet output file: " << jetFileName << endl;
     
     //open udst file
@@ -137,6 +141,8 @@ Int_t StJetMaker::Make()
 	    abort();
 	}
 
+	StFourPMaker* fourPMaker = thisAna->fourPMaker();
+	
 	if(fourPMaker == NULL) {
 	    cout << "StJetMaker::Make() ERROR:\tfourPMaker is NULL! abort()" << endl;
 	    abort();
@@ -162,8 +168,18 @@ Int_t StJetMaker::Make()
 	if (cJets.size() > 0) hadJets = true;
 
 	int ijet=0;
+	
+	cout <<"Number Jets Found:\t"<<cJets.size()<<endl;
 	for(JetList::iterator it=cJets.begin(); it!=cJets.end(); ++it) {
-
+	    
+	    StProtoJet& pj = (*it);
+	    cout <<"jet "<<ijet<<"\t\t"<<pj.pt()<<"\t"<<pj.phi()<<"\t"<<pj.eta()<<endl;
+	    StProtoJet::FourVecList &trackList = pj.list(); // Get the tracks too.	    
+	    for(StProtoJet::FourVecList::iterator it2=trackList.begin(); it2!=trackList.end(); ++it2)  {
+		AbstractFourVec* v = (*it2);
+		cout <<"\t"<<"\t\t"<<v->pt()<<"\t"<<v->phi()<<"\t"<<v->eta()<<endl;
+	    }
+	    
 	    /*
 	    //temp check from here.................
 	    //dumpProtojetToStream(mudst->event()->eventId(), ijet, *mOfstream, *it);
@@ -183,13 +199,15 @@ Int_t StJetMaker::Make()
 	    muDstJets->addProtoJet(*it);
 	    ++ijet;
 	}
+	
+	/*
 	cout << "Number Jets Found: " << muDstJets->nJets() << endl;
 	
 	for(int i = 0; i < muDstJets->nJets(); i++) {
 	    StJet* jet = (StJet*) muDstJets->jets()->At(i);
 	    cout<<"jet "<<i<<"\t\t"<<jet->E()<<"\t\t"<<jet->Phi()<<"\t\t"<<jet->Eta()<<endl;
-
 	}
+	*/
     }
     
     jetTree->Fill();

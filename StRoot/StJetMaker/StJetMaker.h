@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.3 2004/09/22 15:46:20 mmiller Exp $
+ * $Id: StJetMaker.h,v 1.4 2004/10/12 18:17:37 mmiller Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.4  2004/10/12 18:17:37  mmiller
+ * Organized into subdirectories, add StPythia, StJetSimuUtil, and StEmcHitMakers
+ *
  * Revision 1.3  2004/09/22 15:46:20  mmiller
  * Added a double check to verify that jet 4p is equal to the vector sum of
  * the particles 4-p.  Removed troublesome access methods to StJets.  See
@@ -99,7 +102,8 @@ public:
     typedef map<string, StppJetAnalyzer*, less<string> > jetBranchesMap;
     
     ///The constructor requires a valid instance of both a StFourPMaker and a StMuDstMaker
-    StJetMaker(const Char_t *name, StFourPMaker* fPMaker, StMuDstMaker* uDstMaker, const char *outputFile);
+    //!StJetMaker(const Char_t *name, StFourPMaker* fPMaker, StMuDstMaker* uDstMaker, const char *outputFile);
+    StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *outputFile);
     
     virtual Int_t Init();
     virtual Int_t Make();
@@ -109,7 +113,7 @@ public:
     TTree* tree();
     
     ///Construct a new jet analysis.
-    void addAnalyzer(const StppAnaPars*, const StJetPars*, const char* anaName);
+    void addAnalyzer(const StppAnaPars*, const StJetPars*, StFourPMaker*, const char* anaName);
     
     ///Access to StJets objects, stored in a std::map keyed by the StJets name
     jetBranchesMap& getJets();
@@ -121,7 +125,7 @@ protected:
     jetBranchesMap jetBranches;  
 
 protected:
-    StFourPMaker*   fourPMaker;   //!
+    //!StFourPMaker*   fourPMaker;   //!
     StMuDstMaker*   muDstMaker;   //!
 
 private:

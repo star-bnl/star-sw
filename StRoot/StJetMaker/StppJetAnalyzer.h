@@ -15,6 +15,9 @@
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StJets.h"
 
+class StFourPMaker;
+
+
 class StMuTrackFourVec;
 
 /*!
@@ -89,7 +92,7 @@ public:
     typedef vector<AbstractFourVec*> FourList;
 
     ///Construct a new Analyzer
-    StppJetAnalyzer(const StppAnaPars* ap, const StJetPars* jp);
+    StppJetAnalyzer(const StppAnaPars* ap, const StJetPars* jp, StFourPMaker* fp);
     virtual ~StppJetAnalyzer();
 
     ///simple gets/sets
@@ -110,6 +113,9 @@ public:
     ///Access to the StJets object  associated with this analyzer
     StJets* getmuDstJets(void) { return muDstJets; };
 
+    ///Access to the FourPMaker associated with this analyzer.  This 4-p may be shared with other analyzers
+    StFourPMaker* fourPMaker() {return mFourPMaker;}
+
     ///Hang the owned StJets object on the TTree
     void addBranch(const char *name, void *stppudst); 
 
@@ -128,6 +134,7 @@ protected:
     JetList mProtoJets; //!
     FourList mFourList; //!
     StJets *muDstJets; //!
+    StFourPMaker* mFourPMaker; //!
 
 private:
     StppJetAnalyzer(); //Not implemented
