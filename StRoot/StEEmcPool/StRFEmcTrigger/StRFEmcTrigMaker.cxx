@@ -1,5 +1,6 @@
-
-
+// *-- Author : Renee Fatemi
+// 
+// $Id: StRFEmcTrigMaker.cxx,v 1.5 2004/08/18 14:56:29 balewski Exp $
 
 #include "StRFEmcTrigMaker.h"
 #include "StChain.h"
@@ -25,6 +26,8 @@
 ClassImp(StRFEmcTrigMaker)
 
 StRFEmcTrigMaker::StRFEmcTrigMaker(const char *name):StMaker(name){
+  acceptAll=true;
+  activeBBC=false;
 }
 
 StRFEmcTrigMaker::~StRFEmcTrigMaker(){
@@ -58,16 +61,8 @@ Int_t StRFEmcTrigMaker::Init(){
    return StMaker::Init();
 }
 
-//_____________________________________________________________________________
-void StRFEmcTrigMaker::setDataMode(int data){
-
-//0=muDst
-//1=StEvent
-
- DataMode=data;
-
-}
-//______________________________________________________________________
+//____________________________________________________
+//____________________________________________________
 void StRFEmcTrigMaker::Sum(int *sum,int *sumadd){
 
   (*sum)=(*sumadd)+(*sum);
@@ -176,8 +171,38 @@ Int_t StRFEmcTrigMaker::getBEMC_TOT_ADC(){
 
 }
 
+//_____________________________________________________
+//_____________________________________________________
+void  StRFEmcTrigMaker:: Clear(const char *opt){
+  // printf("\n\n Clear is called, JB\n\n");
+  
+  bbcTrig=0;
 
-//_____________________________________________________________________________
+   // set array values to zero before each event
+   memset(jpBsum,0,sizeof(jpBsum));
+   memset(jpBmax,0,sizeof(jpBmax));
+   memset(jpB_hit_num,0,sizeof(jpB_hit_num));
+   memset(tpBsum,0,sizeof(tpBsum));
+   memset(tpBmax,0,sizeof(tpBmax));
+   
+   
+   // set array values to zero before each event
+   memset(jpEsum,0,sizeof(jpEsum));
+   memset(jpEmax,0,sizeof(jpEmax));
+   memset(jpE_hit_num,0,sizeof(jpE_hit_num));
+   memset(tpEsum,0,sizeof(tpEsum));
+   memset(tpEmax,0,sizeof(tpEmax));
+   
+   BHTmaxt=0;   //Hold HT for whole Barrel
+   BJPmaxt=0;   //Holds max JP sum for whole Barrel
+   BJPsumt=0;  //Holds sum of all JP in Barrel
+   EHTmaxt=0;   //Hold HT for whole EEMC
+   EJPmaxt=0;   //Holds max JP sum for whole EEMC
+   EJPsumt=0;  //Holds sum of all JP in EEMC
+
+}
+
+//_____________________________________________________
 /// Make - this method is called in loop for each event
 Int_t StRFEmcTrigMaker::Make(){
 
@@ -211,27 +236,6 @@ Int_t StRFEmcTrigMaker::Make(){
    }
     
 
-   // set array values to zero before each event
-   memset(jpBsum,0,sizeof(jpBsum));
-   memset(jpBmax,0,sizeof(jpBmax));
-   memset(jpB_hit_num,0,sizeof(jpB_hit_num));
-   memset(tpBsum,0,sizeof(tpBsum));
-   memset(tpBmax,0,sizeof(tpBmax));
-   
-   
-   // set array values to zero before each event
-   memset(jpEsum,0,sizeof(jpEsum));
-   memset(jpEmax,0,sizeof(jpEmax));
-   memset(jpE_hit_num,0,sizeof(jpE_hit_num));
-   memset(tpEsum,0,sizeof(tpEsum));
-   memset(tpEmax,0,sizeof(tpEmax));
-   
-   BHTmaxt=0;   //Hold HT for whole Barrel
-   BJPmaxt=0;   //Holds max JP sum for whole Barrel
-   BJPsumt=0;  //Holds sum of all JP in Barrel
-   EHTmaxt=0;   //Hold HT for whole EEMC
-   EJPmaxt=0;   //Holds max JP sum for whole EEMC
-   EJPsumt=0;  //Holds sum of all JP in EEMC
    
    muEmcCol=muDstMaker->muDst()->emcCollection();
    if(muEmcCol) {
@@ -420,28 +424,6 @@ Int_t StRFEmcTrigMaker::Make(){
   StEmcCollection* EmcCol =(StEmcCollection*)event->emcCollection(); 
   if(EmcCol) {
     
-    // set array values to zero before each event
-    memset(jpBsum,0,sizeof(jpBsum));
-    memset(jpBmax,0,sizeof(jpBmax));
-    memset(jpB_hit_num,0,sizeof(jpB_hit_num));
-    memset(tpBsum,0,sizeof(tpBsum));
-    memset(tpBmax,0,sizeof(tpBmax));
-    
-    
-    // set array values to zero before each event
-    memset(jpEsum,0,sizeof(jpEsum));
-    memset(jpEmax,0,sizeof(jpEmax));
-    memset(jpE_hit_num,0,sizeof(jpE_hit_num));
-    memset(tpEsum,0,sizeof(tpEsum));
-    memset(tpEmax,0,sizeof(tpEmax));
-    
-    BHTmaxt=0;   //Hold HT for whole Barrel
-    BJPmaxt=0;   //Holds max JP sum for whole Barrel
-    BJPsumt=0;  //Holds sum of all JP in Barrel
-    EHTmaxt=0;   //Hold HT for whole EEMC
-    EJPmaxt=0;   //Holds max JP sum for whole EEMC
-    EJPsumt=0;  //Holds sum of all JP in EEMC
-    
      // According to STAR NOTE#229A all detectors should be numbered first from the +z side (West End) looking toward the interactions region 
      // If a detector needs additional numbering on the -z side then the numbers should be consecutive with the +z elements.
      // Following this, standing on the west side looking at the interaction region, module 58 is at 12 o'clock and in JP0 with JP1 and so on
@@ -590,7 +572,21 @@ Int_t StRFEmcTrigMaker::Make(){
     printf("EJPsum=%d ,EHTmax=%d,EJPmax=%d\n",EJPsumt,EHTmaxt,EJPmaxt);
     printf("BJPsum=%d ,BHTmax=%d,BJPmax=%d\n",BJPsumt,BHTmaxt,BJPmaxt);
   }
-  if(!EmcCol) cout << "No StEvent info!" << endl;  
+  if(!EmcCol) cout << "No EmcCol info!" << endl;  
  }
+
+ // common mu/St code
+
+ printf("BBCtrig=%d\n",getBBCtrig());
+ 
+ if(acceptAll)  return kStOK;
+ if(activeBBC &&  !getBBCtrig()) return kStWarn;
+
+ // accept this eve
  return kStOK;
 }
+
+// $Log: StRFEmcTrigMaker.cxx,v $
+// Revision 1.5  2004/08/18 14:56:29  balewski
+// trying to get BBC working
+//
