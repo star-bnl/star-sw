@@ -1,5 +1,8 @@
-// $Id: StBemcRaw.h,v 1.1 2004/10/18 18:20:07 suaide Exp $
+// $Id: StBemcRaw.h,v 1.2 2004/10/19 13:10:38 suaide Exp $
 // $Log: StBemcRaw.h,v $
+// Revision 1.2  2004/10/19 13:10:38  suaide
+// small fix
+//
 // Revision 1.1  2004/10/18 18:20:07  suaide
 // New Maker. Will replace StEmcADCtoEMaker in production.
 // It reads only DAQ structures. Output is StEvent.
@@ -58,8 +61,8 @@ class StBemcRaw : public TObject
                             StBemcRaw(); ///< StBemcRaw constructor
   virtual                   ~StBemcRaw(); ///< StBemcRaw destructor
   
-  virtual Bool_t            make(TDataSet*,StEvent*); ///< Make the BEMC detector from DAQ
-  virtual Bool_t            make(StEmcRawData*,StEvent*); ///< Make the BEMC detector from StEmcRaw
+  Bool_t                    make(TDataSet*,StEvent*); ///< Make the BEMC detector from DAQ
+  Bool_t                    make(StEmcRawData*,StEvent*); ///< Make the BEMC detector from StEmcRaw
   Bool_t                    convertFromDaq(TDataSet*, StEmcRawData*); ///< Convert DAQ format into StEmcRawData format
   Int_t                     getBemcADCRaw(Int_t, Int_t, StEmcRawData*, Int_t&, Int_t&); ///< get ADC from StEmcRawData structure
   void                      checkHeaders(StEmcRawData*);///<Check all BEMC detector headers
