@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.70 2003/10/30 00:15:42 potekhin Exp $
+* $Id: geometry.g,v 1.71 2003/11/12 18:45:09 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.71  2003/11/12 18:45:09  potekhin
+* As per Fabrice, change the number of layer in the
+* SVT to 7 to ensure that the ssd in its current
+* version is also included
+*
 * Revision 1.70  2003/10/30 00:15:42  potekhin
 * To perfect our already sophisticated taxonomy of
 * the geometry tags, we rename Y2003C into Y2004,
@@ -401,7 +406,7 @@ If LL>1
 *************************************************************************************************************
   on COMPLETE  { New Complete + correction 3 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
                   "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     nsi=7  " 3 bi-plane layers + ssd ";
                      wfr=0  " numbering is in the code   ";
                      wdm=0  " width is in the code      ";
                   "tpc: standard, i.e.  "
