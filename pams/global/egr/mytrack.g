@@ -27,10 +27,10 @@
        call Eufilv (Npred, inputError, NameV, numv, iovlIn);
 100    continue
        if (p1(1)**2 + p1(2)**2 + p1(3)**2 .le. 1.e-18) then 
-	 write (*,*) 'mytrack: Momentum is too low: ns = ', ns , ' id = ', id
-	 write (*,*) 'vert1(1) =', vert1(1), ' vert1(2) =', vert1(2), ' vert1(3) = ',vert1(3)
-	 write (*,*) 'px =', px, ' py =', py, ' pz = ',pz
-	 write (*,*) 'p1(1) =', p1(1), ' p1(2) =', p1(2), ' p1(3) = ',p1(3)
+C	 write (*,*) 'mytrack: Momentum is too low: ns = ', ns , ' id = ', id
+C	 write (*,*) 'vert1(1) =', vert1(1), ' vert1(2) =', vert1(2), ' vert1(3) = ',vert1(3)
+C	 write (*,*) 'px =', px, ' py =', py, ' pz = ',pz
+C	 write (*,*) 'p1(1) =', p1(1), ' p1(2) =', p1(2), ' p1(3) = ',p1(3)
 	 istop =1 
          return
        endif
