@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.8 2000/11/25 11:52:21 lasiuk Exp $
+ * $Id: StContainers.cxx,v 2.9 2001/03/14 02:29:16 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.9  2001/03/14 02:29:16  ullrich
+ * Added StPsd container.
+ *
  * Revision 2.8  2000/11/25 11:52:21  lasiuk
  * addition of Rich Photon Info
  *
@@ -51,6 +54,7 @@
 #include "StEmcPoint.h"
 #include "StPrimaryTrack.h"
 #include "StPrimaryVertex.h"
+#include "StPsd.h"
 #include "StTrackNode.h"
 #include "StTrackPidTraits.h"
 #include "StTrackDetectorInfo.h"
@@ -62,6 +66,7 @@ StCollectionImp(Object)
 StCollectionImp(Hit)
 StCollectionImp(PrimaryTrack)
 StCollectionImp(PrimaryVertex)
+StCollectionImp(Psd)
 StCollectionImp(SvtHit)
 StCollectionImp(SsdHit)
 StCollectionImp(TpcHit)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.8 2000/11/25 11:52:23 lasiuk Exp $
+ * $Id: StContainers.h,v 2.9 2001/03/14 02:29:17 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
+ * Revision 2.9  2001/03/14 02:29:17  ullrich
+ * Added StPsd container.
+ *
  * Revision 2.8  2000/11/25 11:52:23  lasiuk
  * addition of Rich Photon Info
  *
@@ -43,6 +46,7 @@ class StObject;
 class StHit;
 class StPrimaryTrack;
 class StPrimaryVertex;
+class StPsd;
 class StSvtHit;
 class StSsdHit;
 class StTpcHit;
@@ -68,6 +72,7 @@ StCollectionDef(Object)
 StCollectionDef(Hit)
 StCollectionDef(PrimaryTrack)
 StCollectionDef(PrimaryVertex)
+StCollectionDef(Psd)
 StCollectionDef(SvtHit)
 StCollectionDef(SsdHit)
 StCollectionDef(TpcHit)
