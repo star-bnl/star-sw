@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.84 1999/07/11 00:24:45 fisyak Exp $
+// $Id: bfc.C,v 1.85 1999/07/12 02:56:04 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -481,7 +481,7 @@ void bfc (const Int_t First,
   if (!chain) delete chain;
   chain = new StChain("bfc");
   printf ("Run chain version %s on %s in %s\n",
-	  chain->GetCVSTag(),
+	  chain->GetCVS(),
 	  gSystem->HostName(),
 	  gSystem->WorkingDirectory());
   chain->SetDebug();
