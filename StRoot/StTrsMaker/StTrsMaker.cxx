@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.31 1999/04/23 19:18:08 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.32 1999/04/27 19:38:37 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.32  1999/04/27 19:38:37  lasiuk
+// Bfield units in kG from STAR database
+//
 // Revision 1.31  1999/04/23 19:18:08  lasiuk
 // change magnetic field initialization to use gufld from GEANT
 //
@@ -178,7 +181,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.31 1999/04/23 19:18:08 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.32 1999/04/27 19:38:37 lasiuk Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -290,7 +293,8 @@ Int_t StTrsMaker::Init()
    float B[3];
    gufld(x,B);
    StThreeVector<double> Bfield(B[0],B[1],B[2]);
-   PR(Bfield);
+   Bfield*=kilogauss;
+   PR(Bfield/tesla);
    mMagneticFieldDb =
       StSimpleMagneticField::instance(Bfield);  // default is .5T field in z direction
    
@@ -827,7 +831,7 @@ Int_t StTrsMaker::Finish()
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.31 1999/04/23 19:18:08 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.32 1999/04/27 19:38:37 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
