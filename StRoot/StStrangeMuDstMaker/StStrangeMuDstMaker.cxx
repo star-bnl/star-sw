@@ -6,6 +6,7 @@
 #include "StStrangeMuDstMaker.h"
 #include "TFile.h"
 #include "TChain.h"
+#include "THack.h"
 #include "StTree.h"
 #include "StEvent/StEvent.h"
 #include "StMcEventMaker/StMcEventMaker.h"
@@ -462,10 +463,10 @@ void StStrangeMuDstMaker::ClearForReal(Option_t *option) {
     if (dstMaker) {                                   // Making a subDST
       MakeCreateSubDst();
     } else {
-      if (evClonesArray) evClonesArray->Delete();      // Not if making a subDST
-      if (evMcArray) evMcArray->Delete();              // Not if making a subDST
+      if (evClonesArray) THack::ClearClonesArray(evClonesArray);      // Not if making a subDST
+      if (evMcArray) THack::ClearClonesArray(evMcArray);              // Not if making a subDST
     }
-    cutsArray->Delete();
+    THack::ClearClonesArray(cutsArray);
 
     EachController(Clear());
     if (GetMode() == StrangeNoKeep) tree->Reset();
@@ -655,8 +656,11 @@ char* StStrangeMuDstMaker::GetFile() const {
 }       
 
 //_____________________________________________________________________________
-// $Id: StStrangeMuDstMaker.cxx,v 3.30 2004/07/12 21:45:34 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.31 2004/08/19 19:55:52 perev Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.31  2004/08/19 19:55:52  perev
+// Replace Delete to THack:ClearClone
+//
 // Revision 3.30  2004/07/12 21:45:34  genevb
 // Handle missing Event branch info condition
 //
