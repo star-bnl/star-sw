@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichMixerMaker.cxx,v 1.2 2003/09/02 17:58:53 perev Exp $
+ * $Id: StRichMixerMaker.cxx,v 1.3 2003/09/24 02:57:39 hippolyt Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRichMixerMaker.cxx,v $
+ * Revision 1.3  2003/09/24 02:57:39  hippolyt
+ * init pointers and arrays
+ *
  * Revision 1.2  2003/09/02 17:58:53  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -65,9 +68,41 @@ ClassImp(StRichMixerMaker) // macro
 StRichMixerMaker::StRichMixerMaker(const char *name)
     : StMaker(name)
 {
+    mTheRichDaqData    = 0;
+    mTheDaqDataReader  = 0;
+    mSimStreamReader   = 0;
+    mDaqStreamReader   = 0;
+
+    mDaq               = 0;
+    mPads              = 0;
+    mRows              = 0;
+    mNumberOfPads      = 0;
+    mEventNumber       = 0;
+    mSaturatedValue    = 0;
+
+    // flags
+    mPixelCollectionPresent   = 0;
+    mClusterCollectionPresent = 0;
+    mHitCollectionPresent     = 0;
+
+    //pedestal
+    mPedestalSubtract         = 0;
+    Int_t i                   = 0;
+    Int_t j                   = 0;
+    for(i=0;i<160;i++){
+      for(j=0;j<96;j++){
+	mPedestal[i][j]       = 0;
+	mSigma[i][j]          = 0;
+      }
+    }
+    mPedestalFile             = 0;
+    
+    mTheRichCollection        = 0;
+
 #ifdef RCH_HISTOGRAM
     mTupleFile = 0;
     mPadPlane = 0;
+    for(i=0;i<4;i++) mRawData[i] = 0;
 #endif
     
     drawinit=kFALSE;
@@ -431,7 +466,7 @@ Int_t StRichMixerMaker::Make() {
 void StRichMixerMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRichMixerMaker.cxx,v 1.2 2003/09/02 17:58:53 perev Exp $\n");
+    printf("* $Id: StRichMixerMaker.cxx,v 1.3 2003/09/24 02:57:39 hippolyt Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
