@@ -1,10 +1,13 @@
 /***************************************************************
- * $Id: StRichDrawableTPad.cxx,v 1.3 2000/04/05 15:57:52 lasiuk Exp $
+ * $Id: StRichDrawableTPad.cxx,v 1.4 2000/05/17 22:18:40 lasiuk Exp $
  *
  * Description:
  *
  ***************************************************************
  * $Log: StRichDrawableTPad.cxx,v $
+ * Revision 1.4  2000/05/17 22:18:40  lasiuk
+ * use charge() instead of adc()/amp()
+ *
  * Revision 1.3  2000/04/05 15:57:52  lasiuk
  * const pointer for compiler
  *
@@ -27,7 +30,7 @@ StRichPadMonitorText* StRichDrawableTPad::mText = 0;
 StRichDrawableTPad::StRichDrawableTPad() {/*nopt*/}
 
 StRichDrawableTPad::StRichDrawableTPad(double xl, double yl, double xu, double yu, const StRichSinglePixel* pix)
-    : TBox(xl,yl,xu,yu), mPad(pix->pad()), mRow(pix->row()), mAdc(pix->amplitude())
+    : TBox(xl,yl,xu,yu), mPad(pix->pad()), mRow(pix->row()), mAdc(pix->charge())
 {/* nopt */}
 
 StRichDrawableTPad::StRichDrawableTPad(double xl, double yl, double xu, double yu, int row, int pad, int adc)
