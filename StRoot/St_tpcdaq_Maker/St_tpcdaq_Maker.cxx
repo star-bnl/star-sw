@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.10  1999/04/02 21:02:52  ward
+// Is now more tolerant of sent pads with zero sequences.
+//
 // Revision 1.9  1999/03/31 00:38:29  fisyak
 // Replace search for Event and Decoder
 //
@@ -277,7 +280,7 @@ int St_tpcdaq_Maker::Output() {
         if(nseq) {
           numPadsWithSignal++; 
           if(ipadrow>=13) dataOuter[isect-1]=7; else dataInner[isect-1]=7;
-        }
+        } else continue; // So we don't write meaningless rows in pad table.
         timeOff=1; offIntoPixTbl=pixR; timeWhere=0; prevStartTimeBin=-123;
         for(iseq=0;iseq<nseq;iseq++) {
           startTimeBin=listOfSequences[iseq].startTimeBin;
@@ -340,7 +343,7 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
 Int_t St_tpcdaq_Maker::Make() {
   int ii,errorCode;
   mErr=0;
-  printf("I am Sylvester the Cat. St_tpcdaq_Maker::Make().\n");
+  printf("I am Elmer Fudd. St_tpcdaq_Maker::Make().\n");
   errorCode=GetEventAndDecoder();
   printf("GetEventAndDecoder() = %d\n",errorCode);
   if(errorCode) {
@@ -361,7 +364,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.9 1999/03/31 00:38:29 fisyak Exp $ \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.10 1999/04/02 21:02:52 ward Exp $ \n");
   printf("**************************************************************\n");
   if(Debug()) StMaker::PrintInfo();
 }
