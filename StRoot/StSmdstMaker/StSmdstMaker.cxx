@@ -1,5 +1,8 @@
-// $Id: StSmdstMaker.cxx,v 1.9 1999/06/28 00:07:57 fisyak Exp $
+// $Id: StSmdstMaker.cxx,v 1.10 1999/07/08 23:03:58 genevb Exp $
 // $Log: StSmdstMaker.cxx,v $
+// Revision 1.10  1999/07/08 23:03:58  genevb
+// Now using StMessMgr, a couple small changes
+//
 // Revision 1.9  1999/06/28 00:07:57  fisyak
 // Fix typo with size()
 //
@@ -45,11 +48,9 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
 #include "TROOT.h"
 
 #include "StSmdstMaker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include <TH2.h>
 #include <TCanvas.h>
@@ -62,6 +63,7 @@
 #include "PhysicalConstants.h"
 #include "TMath.h"
 #include "StMagF/StMagF.h"
+#include "StMessMgr.h"
 
 ClassImp(StSmdstMaker)
 
@@ -184,9 +186,12 @@ Int_t StSmdstMaker::Make() {
 // Make() calls FillV0Table to fill the output table. If DoHistograms()
 // has been called, FillHistograms() is run for histograms.
 //
+   gMessMgr->Info("StSmdstMaker - now working.");
    Int_t result = FillV0Table();
-   if (!result && draw_histos) FillV0Histograms();
-   FillXiHistograms();
+   if (!result && draw_histos) {
+     FillV0Histograms();
+     FillXiHistograms();
+   }
    return result;
 }
 //_____________________________________________________________________________
@@ -207,21 +212,16 @@ Int_t StSmdstMaker::FillV0Table() {
    Float_t dx, dy, dz;
    Float_t primX, primY, primZ;
   
-#if 0
-   StEventReaderMaker* evMaker = (StEventReaderMaker*) gStChain->Maker("events");
-   StEvent *ev = evMaker->event();
-   if (!ev) return kStOK;
-#endif
   StEvent* ev = (StEvent *) GetInputDS("StEvent");
   if (!ev) return kStOK; // If no event, we're done
    
    StVertexCollection *vertices = ev->vertexCollection();
    if (!vertices) {
-     printf("StSmdstMaker: Warning - no vertex collection in event.\n");
+     gMessMgr->Warning("StSmdstMaker - no vertex collection in event.");
      return kStOK;
    }
-   if (!vertices->size()) {
-     printf("StSmdstMaker: Warning - no vertices in event.\n");
+   if (!(vertices->size())) {
+     gMessMgr->Warning("StSmdstMaker - no vertices in event.");
      return kStOK;
    }
 
@@ -231,17 +231,16 @@ Int_t StSmdstMaker::FillV0Table() {
    agufld_(x,bf);
    bf[2] = bf[2]*0.1;
    if( bf[2] == 0. )
-     printf("StSmdstMaker: Warning - magnetic field not loaded.\n");
+     gMessMgr->Warning("StSmdstMaker - magnetic field not loaded.");
 
    StVertex *primaryVertex = ev->primaryVertex();
    if (primaryVertex) {
-     primaryVertex = vertices->front();
      const StThreeVectorF& primaryPos = primaryVertex->position();
      primX = primaryPos.x();
      primY = primaryPos.y();
      primZ = primaryPos.z();
    } else {
-     printf("StSmdstMaker: Warning - no primary vertex, setting to (0,0,0).\n");
+     gMessMgr->Warning("StSmdstMaker - no primary vertex, setting to (0,0,0).");
      primX = 0.;
      primY = 0.;
      primZ = 0.;
@@ -285,7 +284,7 @@ Int_t StSmdstMaker::FillV0Table() {
 
       
        if (++out == m_v0_maxlen) {
-         printf("StSmdstMaker: Error - v0 table maxlen exceeded.\n");
+         gMessMgr->Error("StSmdstMaker - v0 table maxlen exceeded.");
          return kStErr;
        }
 
@@ -441,20 +440,16 @@ void StSmdstMaker::FillXiHistograms() {
   Float_t ek0b, epib, elav;
   Float_t maxi, maom;
 
-#if 0
-  StEventReaderMaker* evMaker = (StEventReaderMaker*) gStChain->Maker("events");
-  StEvent *ev = event();
-#endif
   StEvent* ev = (StEvent *) GetInputDS("StEvent");
-   StVertexCollection *vertices = ev->vertexCollection();
-   if (!vertices) {
-     printf("StSmdstMaker: Warning - no vertex collection in event.\n");
-     return;
-   }
-   if (!vertices->size()) {
-     printf("StSmdstMaker: Warning - no vertices in event.\n");
-     return;
-   }
+  StVertexCollection *vertices = ev->vertexCollection();
+  if (!vertices) {
+    gMessMgr->Warning("StSmdstMaker - no vertex collection in event.");
+    return;
+  }
+  if (!(vertices->size())) {
+    gMessMgr->Warning("StSmdstMaker - no vertices in event.");
+    return;
+  }
 
   if (m_DataSet && update) {
     StVertexIterator vtxI;
@@ -463,8 +458,6 @@ void StSmdstMaker::FillXiHistograms() {
      StVertex *vtx = *vtxI;
      if ( vtx->type() != Xi) continue;
      StXiVertex *vertex = (StXiVertex *) vtx;
-
-     StGlobalTrack* bTrack = vertex->bachelor();
 
      const StThreeVectorF& bMom = vertex->momentumOfBachelor();
      const StThreeVectorF vMom = vertex->momentumOfV0();
@@ -514,7 +507,7 @@ void StSmdstMaker::PrintInfo() {
 // PrintInfo() prints information about the class to standard output.
 //
   printf("**************************************************************\n");
-  printf("* $Id: StSmdstMaker.cxx,v 1.9 1999/06/28 00:07:57 fisyak Exp $\n");
+  printf("* $Id: StSmdstMaker.cxx,v 1.10 1999/07/08 23:03:58 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   if (draw_histos) printf("* Strangeness Histograms are active\n");
   printf("**************************************************************\n");
