@@ -20,5 +20,8 @@
 #pragma link C++ class QWERTYIter-;
 #pragma link C++ class St_PolyLine3D-;
 #pragma link C++ class St_PointsArray3D-;
+#pragma link C++ class St_TablePoints;
+#pragma link C++ class St_Table3Points;
+#pragma link C++ class St_TableElementDescriptor;
 #pragma link C++ enum  EReturnCodes;
 #endif

@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_TableElementDescriptor.cxx,v 1.1 1999/05/18 18:00:43 fine Exp $
+// $Id: St_TableElementDescriptor.cxx,v 1.2 1999/05/18 20:08:46 fine Exp $
 // $Log: St_TableElementDescriptor.cxx,v $
+// Revision 1.2  1999/05/18 20:08:46  fine
+// St_TAbleElementDescriptor class have been introduced
+//
 // Revision 1.1  1999/05/18 18:00:43  fine
 // The first implementation of the table column descriptor
 //  
@@ -11,6 +14,8 @@
 #include "TClass.h"
 #include "TDataMember.h"
 #include "TDataType.h"
+
+ClassImp(St_TableElementDescriptor)
 
 //____________________________________________________________________________
 void St_TableElementDescriptor::LearnTable(St_Table *parentTable, const Char_t *columnName)
