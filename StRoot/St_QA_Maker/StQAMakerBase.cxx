@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.2 2000/08/25 20:29:34 lansdell Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.3 2000/08/25 22:06:15 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.3  2000/08/25 22:06:15  genevb
+// Raised high mult bin to 2500 global tracks
+//
 // Revision 2.2  2000/08/25 20:29:34  lansdell
 // year1 print list changed slightly; cosmetic improvement of some event summary histograms
 //
@@ -90,7 +93,7 @@ Int_t StQAMakerBase::Make(){
     case (1) : {
       if (multiplicity < 50) multClass = 0;
       else if (multiplicity < 500) multClass = 1;
-      else if (multiplicity < 1000) multClass = 2;
+      else if (multiplicity < 2500) multClass = 2;
       else multClass = 3;
 
       mMultClass->Fill(multClass);
