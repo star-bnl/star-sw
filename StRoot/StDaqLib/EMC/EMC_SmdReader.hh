@@ -20,13 +20,17 @@ public:
   int FillBarrelSmd(Bank_SMDADCR*,int);
   void PrintSmdArray();
 
+//methods used for conversion after Jo's aug'01 mail
   int getSmdBin(const int,const int,int &,int &,int&);
   int get_RDOch(const int,const int,int&,int&,int&);
-  int getmodule(const int,int&,int&);
-  int get_fiberno(const int,int&);
+  int GetModuleFromConnector(int&,int&);
   int checkdummy(int&);
   int getsmdfiber(int&,int&,int&,int&);
   int get_smdphistrip(int&,int&,int&);
+
+//additional methods used for conversion before Jo's aug'01 mail
+  int getmodule(const int,int&,int&);
+  int get_fiberno(const int,int&);
 
   // int checkTowerId(const int);
   Bank_BSMDADCR& getBSMDADCR();

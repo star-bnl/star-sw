@@ -12,6 +12,17 @@
 #include <assert.h>
 #define MAX_ADC 0xFFF
 
+int FEE1[4]={1,1,1,2};
+int FEE2[4]={2,2,3,3};
+int FEE3[4]={3,4,4,4};
+ 
+int connector1[20]={1,2,3,1,4,5,6,4,7,8,9,7,10,11,12,10,13,14,15,13};
+int connector2[20]={2,3,1,2,5,6,4,5,8,9,7,8,11,12,10,11,14,15,13,14};
+int connector3[20]={3,1,2,3,6,4,5,6,9,7,8,9,12,10,11,12,15,13,14,15};         
+
+
+
+
 EMC_SmdReader::EMC_SmdReader(EventReader* er,Bank_EMCP *pEMCP): pBankEMCP(pEMCP),ercpy(er)
 {
   cout<<"ctor EMC_Smdreader**"<<endl;
@@ -301,6 +312,65 @@ Bank_BSMDADCR& EMC_SmdReader::getBSMDADCR()
  }
 
 
+
+int EMC_SmdReader::getSmdBin(const int RDO,const int daq_smd,int &mod,int &strip,int&det)
+
+{
+int category=daq_smd/1600;
+int wire=(daq_smd-category*1600)/20;
+int A_step=daq_smd%4;
+int S_step=daq_smd%20;
+int A_value;
+int S_value;
+ 
+if(category==0){
+A_value=FEE1[A_step];
+S_value=connector1[S_step];
+}
+if(category==1){
+A_value=FEE2[A_step];
+S_value=connector2[S_step];
+}
+if(category==2){
+A_value=FEE3[A_step];
+S_value=connector3[S_step];
+}                                                                               
+//detector no
+int half=0;
+ 
+if(A_value==1){
+det=3;
+half=2;
+}
+if(A_value==2){
+det=4;
+half=1;
+}
+if(A_value==3){
+det=4;
+half=2;
+}
+if(A_value==4){
+det=3;
+half=1;
+}
+ 
+int mod_stat=GetModuleFromConnector(S_value,mod);
+ 
+if(mod_stat){
+//Get strip no
+  int temp1=wire+1;
+  int dummy=checkdummy(temp1);
+  if(dummy==0){
+    int stat=getsmdfiber(det,half,temp1,strip);
+if(mod==60)cout<<daq_smd<<"  "<<wire+1<<"   "<<mod<<"   "<<A_value<<"   "<<det<<"    "<<half<<"    "<<strip<<endl;
+  }
+//  else{cout<<"dummy fiber**"<<wire<<endl;}
+}
+
+}
+
+/*
 // conversion from FEE Tower number to m,e,s for Tower
 
 int EMC_SmdReader::getSmdBin(const int RDO,const int rid,int &mod,int &strip,int&det)
@@ -416,4 +486,5 @@ int EMC_SmdReader::get_smdphistrip(int& strip,int& smdphi_bin,int&smdphi_strip)
   return 1; // 0 is bad
 }
 
+*/
 
