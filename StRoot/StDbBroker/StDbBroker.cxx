@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.37 2002/02/22 22:17:43 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.38 2002/02/25 17:52:10 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.38  2002/02/25 17:52:10  porter
+ * prodTime check for run level queries
+ *
  * Revision 1.37  2002/02/22 22:17:43  porter
  * run test added on runs>=year1
  *
@@ -489,8 +492,17 @@ void StDbBroker::makeDateTime(const char* dateTime,UInt_t& iDate,UInt_t& iTime){
 //_____________________________________________________________________________
 bool StDbBroker::UseRunLog(StDbTable* table){
 
+  unsigned int prodTime=table->getProdTime();    
     ostrstream rq;
     rq<<" where runNumber="<<m_runNumber<<ends;
+
+    if(prodTime==0){
+      rq<<"AND deactive=0 "<<ends;
+    } else {
+      rq<<"AND (deactive=0 OR deactive>="<<prodTime<<")";
+      rq<<" AND unix_timestamp(entryTime)<="<<prodTime<<ends;
+    } 
+
     bool fetchStatus=mgr->fetchDbTable(table,rq.str());
     rq.freeze(0);
 
