@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.cxx,v 1.20 2002/06/22 17:53:31 lisa Exp $
+ * $Id: StHbtAnalysis.cxx,v 1.21 2002/06/26 17:27:09 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.cxx,v $
+ * Revision 1.21  2002/06/26 17:27:09  lisa
+ * fixed small bug in StHbtAnalysis associated with the new feature to require ParticleCollections to have some minimum number of particles
+ *
  * Revision 1.20  2002/06/22 17:53:31  lisa
  * implemented switch to allow user to require minimum number of particles in First and Second ParticleCollections - default value is zero so if user does not Set this value then behaviour is like before
  *
@@ -342,7 +345,7 @@ void StHbtAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
     // mal - implement a switch which allows only using events with ParticleCollections containing a minimum
     // number of entries (jun2002)
     if ((mPicoEvent->FirstParticleCollection()->size() >= mMinSizePartCollection )
-	&& (mPicoEvent->SecondParticleCollection()->size() >= mMinSizePartCollection )) {
+	&& ( AnalyzeIdenticalParticles() || (mPicoEvent->SecondParticleCollection()->size() >= mMinSizePartCollection ))) {
 
 
       // OK, pico event is built
