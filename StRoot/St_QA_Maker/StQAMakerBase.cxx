@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.16 2002/03/01 22:51:20 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.17 2002/03/11 20:59:58 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.17  2002/03/11 20:59:58  genevb
+// Fixed bug with placement of trigger hists
+//
 // Revision 2.16  2002/03/01 22:51:20  genevb
 // Small set-to-zero possible bug fix
 //
@@ -236,6 +239,8 @@ void StQAMakerBase::BookHistGeneral(){
 //_____________________________________________________________________________
 void StQAMakerBase::BookHistTrigger(){  
 
+  QAH::maker = (StMaker*) (this);
+  QAH::preString = QAMakerType;
   if (mTrigWord) return;
   mTrigWord = QAH::H1F("QaTrigWord","trigger word",8,0.5,8.5);
   mTrigWord->SetXTitle("1=MinBias, 2=Central, 3=Other Physics, 4=pp, 7=Laser, 8=Other");
