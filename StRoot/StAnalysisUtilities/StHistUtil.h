@@ -1,5 +1,8 @@
-//! $Id: StHistUtil.h,v 1.8 2000/06/23 18:05:36 kathy Exp $
+//! $Id: StHistUtil.h,v 1.9 2000/06/23 20:55:40 kathy Exp $
 //! $Log: StHistUtil.h,v $
+//! Revision 1.9  2000/06/23 20:55:40  kathy
+//! moved #endif to end where it's supposed to be
+//!
 //! Revision 1.8  2000/06/23 18:05:36  kathy
 //! add new method PrintInfoHists which prints info about hist to screen & file -- name,entries,mean,rms
 //!
@@ -142,13 +145,11 @@ class StHistUtil {
   
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.8 2000/06/23 18:05:36 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.9 2000/06/23 20:55:40 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
-    
-#endif
-    
+        
 inline void StHistUtil::SetHistsNamesDraw(const Char_t *firstName, const Char_t *lastName)
                          { m_FirstHistName = firstName;  m_LastHistName  = lastName; }
 
@@ -172,3 +173,6 @@ inline TH1**  StHistUtil::getNewHist()
 
 inline Int_t StHistUtil::getNewHistSize()
                            {return maxHistCopy; }
+
+
+#endif
