@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.45 1999/09/24 01:23:42 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.46 1999/10/20 19:18:17 nevski Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.46  1999/10/20 19:18:17  nevski
+// g2t_event table filled
+//
 // Revision 1.45  1999/09/24 01:23:42  fisyak
 // Reduced Include Path
 //
@@ -192,7 +195,9 @@ extern "C" int isprint (int);
 #include "tables/St_g2t_track_Table.h"
 
 #include "St_DataSetIter.h"
+#include "g2r/St_g2t_get_event_Module.h"
 #include "g2r/St_g2t_get_kine_Module.h"
+#include "g2r/St_g2t_particle_Module.h"
 #include "g2r/St_g2t_svt_Module.h"
 #include "g2r/St_g2t_tpc_Module.h"
 #include "g2r/St_g2t_mwc_Module.h"
@@ -206,7 +211,6 @@ extern "C" int isprint (int);
 #include "g2r/St_g2t_esm_Module.h"
 #include "g2r/St_g2t_zdc_Module.h"
 #include "g2r/St_g2t_vpd_Module.h"
-#include "g2r/St_g2t_particle_Module.h"
 
 common_gcbank *cbank;
 common_quest  *cquest; 
@@ -360,7 +364,8 @@ Int_t St_geant_Maker::Make()
     m_DataSet->Add(g2t_track);
     
     iRes = g2t_get_kine(g2t_vertex,g2t_track);
-    
+    iRes = g2t_get_event(g2t_event);
+
     //---------------------- inner part -------------------------//
 
     gfnhit_ ("SVTH","SVTD", &nhit1, 4,4);
