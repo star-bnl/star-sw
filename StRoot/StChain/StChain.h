@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.12 1998/10/06 18:00:27 perev Exp $
+// $Id: StChain.h,v 1.13 1998/10/07 18:43:59 perev Exp $
 // $Log: StChain.h,v $
+// Revision 1.13  1998/10/07 18:43:59  perev
+// Add Spy classes for Farm Monitor
+//
 // Revision 1.12  1998/10/06 18:00:27  perev
 // cleanup
 //
@@ -38,6 +41,9 @@
 //   - Creates the physics objects makers                               //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
+#include <stdlib.h>
+#include <stdio.h>
+
 
 #ifndef ROOT_TTree
 #include <TTree.h>
@@ -66,7 +72,7 @@
 class TBrowser;
 class TChain;
 class St_XDFFile; 
-//static Char_t      *m_VersionCVS="$Id: StChain.h,v 1.12 1998/10/06 18:00:27 perev Exp $";//StChain header CVS version
+//static Char_t      *m_VersionCVS="$Id: StChain.h,v 1.13 1998/10/07 18:43:59 perev Exp $";//StChain header CVS version
 
 class StChain : public StMaker {
 public:
@@ -84,7 +90,6 @@ private:
    TList              *m_Makers;            //List of Makers
    St_XDFFile         *m_File;              //!Pointer to input file 
    St_XDFFile         *m_FileOut;           //!Pointer to output file 
-
 public:
                       StChain();
                       StChain(const char *name, const char *title="STAR Big Full Chain");
@@ -124,6 +129,7 @@ public:
    virtual void       SetInputXDFile(St_XDFFile *file) {m_File = file;}
    virtual void       SetOutputXDFile(St_XDFFile *file) {m_FileOut = file;}
    virtual St_XDFFile *XDFFile() {return m_File;}
+   virtual void	      Fatal(int Ierr, const char *Com);  
 
    TList             *Makers()    {return m_Makers;}
    StMaker           *Maker(const char *name) {return (StMaker*)m_Makers->FindObject(name);}
