@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.18 2001/07/12 13:05:00 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.19 2001/07/12 13:08:49 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.19  2001/07/12 13:08:49  oldi
+// Remove display !@#$%^&*(.
+//
 // Revision 1.18  2001/07/12 13:05:00  oldi
 // QA histogram of FTPC vertex estimation is generated.
 // FTPC vertex estimation is stored as pre vertex (id = 301) in any case, now.
@@ -329,7 +332,7 @@ Int_t StFtpcTrackMaker::Make()
     tracker->TrackingInfo();
   }
     
-  ///*
+  /*
   // Track Display
   
   // Uncomment this block if you want to see (I mean see!) the found tracks.
@@ -340,7 +343,7 @@ Int_t StFtpcTrackMaker::Make()
   //display->ShowClusters();
   display->ShowTracks();
   delete display;
-  //*/
+  */
 
   /*
   // Track Evaluator
@@ -401,7 +404,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.18 2001/07/12 13:05:00 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.19 2001/07/12 13:08:49 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
