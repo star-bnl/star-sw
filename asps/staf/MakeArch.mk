@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.4  1998/04/02 21:40:50  fisyak
+#  Add grep
+#
 #  Revision 1.3  1998/04/01 18:42:34  fisyak
 #  Add hpux
 #
@@ -26,7 +29,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/04/01 18:42:34 $ 
+#             Last modification $Date: 1998/04/02 21:40:50 $ 
 #. default setings
 GREP := grep
 #GCC := /afs/rhic/opt/rhic/bin/gcc
@@ -168,7 +171,7 @@ ifneq (,$(findstring $(STAF_ARCH),sgi_52 sgi_53))
 #  ====================
   OSFID := sgi
   GREP  := /afs/rhic/asis/sgi_52/usr.local/bin/ggrep
-  FFLAGS    := -Nn20000 -static -trapuv  -extend_source -D
+  FFLAGS    := -Nn20000 -static -trapuv  -extend_source
   CC        :=    cc
   CFLAGS    := -signed -fullwarn
   CXX       :=   CC
