@@ -1,8 +1,12 @@
 /*
- * $Id: StiTrackingPlots.h,v 2.9 2003/07/30 19:19:24 pruneau Exp $
+ * $Id: StiTrackingPlots.h,v 2.10 2003/11/14 22:31:57 andrewar Exp $
  *
  *
  * $Log: StiTrackingPlots.h,v $
+ * Revision 2.10  2003/11/14 22:31:57  andrewar
+ * Added isPrimary() cut so only Primary tracks are histogrammed
+ * (not a mix of Primary and global).
+ *
  * Revision 2.9  2003/07/30 19:19:24  pruneau
  * sigh
  *
@@ -47,10 +51,10 @@ class StiTrackingPlots : public HistogramGroup
   void initialize();
   void setOutFileName(string nme){mOutFile = nme;}
   void fill(StiTrackContainer* mTrackStore);
-  void addFilter(StiDefaultTrackFilter *filter){mFilter=filter;}
+  void addFilter(StiDefaultTrackFilter *filter){mFilter.push_back(filter);}
 
  private:
-  StiDefaultTrackFilter *mFilter;
+  vector<StiDefaultTrackFilter *> mFilter;
   string mOutFile;
 
   TH1D *numTracks;
@@ -107,6 +111,28 @@ class StiTrackingPlots : public HistogramGroup
   TH3D * mMomZ;
   TH3D * mPhase;
 
+  TH3D * mGDcavNptsvEtaA;
+  //TH3D * mPDcavNptsvEtaA;
+  TH3D * mGDcavNptsvPtA;
+  //TH3D * mPDcavNptsvPtA;
+  TH3D * mNptsvPtvEtaA;
+  TH3D * mGDcavEtavPtA;
+  //TH3D * mPDcavEtavPtA;
+  TH3D * mGDcavNptsvEtaP;
+  //TH3D * mPDcavNptsvEtaP;
+  TH3D * mGDcavNptsvPtP;
+  //TH3D * mPDcavNptsvPtP;
+  TH3D * mNptsvPtvEtaP;
+  TH3D * mGDcavEtavPtP;
+  //TH3D * mPDcavEtavPtP;
+  TH3D * mGDcavNptsvEtaM;
+  //TH3D * mPDcavNptsvEtaM;
+  TH3D * mGDcavNptsvPtM;
+  //TH3D * mPDcavNptsvPtM;
+  TH3D * mNptsvPtvEtaM;
+  TH3D * mGDcavEtavPtM;
+  //TH3D * mPDcavEtavPtM;
+  
 };
 
 

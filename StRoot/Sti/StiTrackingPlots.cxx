@@ -1,8 +1,12 @@
 /*
- * $Id: StiTrackingPlots.cxx,v 2.11 2003/09/02 17:59:42 perev Exp $
+ * $Id: StiTrackingPlots.cxx,v 2.12 2003/11/14 22:31:57 andrewar Exp $
  *
  *
  * $Log: StiTrackingPlots.cxx,v $
+ * Revision 2.12  2003/11/14 22:31:57  andrewar
+ * Added isPrimary() cut so only Primary tracks are histogrammed
+ * (not a mix of Primary and global).
+ *
  * Revision 2.11  2003/09/02 17:59:42  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -115,6 +119,76 @@ void StiTrackingPlots::initialize()
   _chi2 = book("chi2","chi2",100,0.,10.);
   _chi2VsNpts = book("chi2VsNpts","chi2VsNpts",50,0.,50.,100,0.,10.);
 
+  mGDcavNptsvEtaA = book("mGDcavNptsvEtaA",
+				"Global DCA vs. Npts vs. Eta, All charges",
+				100,0.,20.,645,0.,645.,30,-2.,2.);
+  //mPDcavNptsvEtaA = book("mPDcavNptsvEtaA",
+  //			"Primary DCA vs. Npts vs. Eta, All charges",
+  //			100,0.,20.,645,0.,645.,30,-2.0,2.);
+  mGDcavNptsvPtA = book("mGDcavNptsvPtA",
+				"Global DCA vs. Npts vs. Pt, All charges",
+				100,0.,20.,645,0.,645.,50,0.,5.);
+  //mPDcavNptsvPtA = book("mPDcavNptsvPtA",
+  //			"Global DCA vs. Npts vs. Pt, All charges",
+  //			100,0.,20.,645,0.,645.,50,0.,5.);
+  
+  mNptsvPtvEtaA = book("mNptsvPtvEtaA",
+				"Npts vs. Pt. vs. Eta, All charges",
+				645,0.,645.,30,-2.,2., 50,0.,5.);
+  mGDcavEtavPtA = book("mGDcavEtavPtA",
+		       "Global DCA vs. Eta vs. Pt",
+       		      100,0.,20.,20,-2.,2.,50,0.,5.);
+  //mPDcavEtavPtA= book("mPDcavEtavPtA",
+  //		      "Primary DCA vs. Eta vs. Pt"
+  //		      100,0,20.,20,-2.,2.,50,0.,5.);
+
+  mGDcavNptsvEtaP = book("mGDcavNptsvEtaP",
+				"Global DCA vs. Npts vs. Eta, P All charges",
+				100,0.,20.,645,0.,645.,30,-2.,2.);
+  //mPDcavNptsvEtaP = book("mPDcavNptsvEtaP",
+  //			"Primary DCA vs. Npts vs. Eta, All charges",
+  //			100,0.,20.,645,0.,645.,30,-2.0,2.);
+  mGDcavNptsvPtP = book("mGDcavNptsvPtP",
+				"Global DCA vs. Npts vs. Pt, All charges",
+				100,0.,20.,645,0.,645.,50,0.,5.);
+  //mPDcavNptsvPtP = book("mPDcavNptsvPtP",
+  //			"Global DCA vs. Npts vs. Pt, All charges",
+  //			100,0.,20.,645,0.,645.,50,0.,5.);
+  
+  mNptsvPtvEtaP = book("mNptsvPtvEtaP",
+				"Npts vs. Pt. vs. Eta, All charges",
+				645,0.,645.,30,-2.,2., 50,0.,5.);
+  mGDcavEtavPtP = book("mGDcavEtavPtP",
+		       "Global DCA vs. Eta vs. Pt",
+		       100,0,20.,20,-2.,2.,50,0.,5.);
+  //mPDcavEtavPtP= book("mPDcavEtavPtP",
+  //		      "Primary DCA vs. Eta vs. Pt"
+  //		      100,0,20.,20,-2.,2.,50,0.,5.);
+
+  mGDcavNptsvEtaM = book("mGDcavNptsvEtaM",
+				"Global DCA vs. Npts vs. Eta, P All charges",
+				100,0.,20.,645,0.,645.,30,-2.,2.);
+  //mPDcavNptsvEtaM = book("mPDcavNptsvEtaM",
+  //			"Primary DCA vs. Npts vs. Eta, All charges",
+  //			100,0.,20.,645,0.,645.,30,-2.0,2.);
+  mGDcavNptsvPtM = book("mGDcavNptsvPtM",
+				"Global DCA vs. Npts vs. Pt, All charges",
+				100,0.,20.,645,0.,645.,50,0.,5.);
+  //mPDcavNptsvPtM = book("mPDcavNptsvPtM",
+  //			"Global DCA vs. Npts vs. Pt, All charges",
+  //			100,0.,20.,645,0.,645.,50,0.,5.);
+  
+  mNptsvPtvEtaM = book("mNptsvPtvEtaM",
+  			"Npts vs. Pt. vs. Eta, All charges",
+  			645,0.,645.,30,-2.,2., 50,0.,5.);
+  mGDcavEtavPtM = book("mGDcavEtavPtM",
+		       "Global DCA vs. Eta vs. Pt",
+       		      100,0,20.,20,-2.,2.,50,0.,5.);
+  //mPDcavEtavPtM= book("mPDcavEtavPtM",
+  //			      "Primary DCA vs. Eta vs. Pt"
+  //			      100,0,20.,20,-2.,2.,50,0.,5.);
+
+  
   //cout <<"StiTrackingPlots::StiTrackingPlots() -I- Done"<<endl;
 }
   
@@ -139,9 +213,10 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
     {
       const StiTrack* track = (*trackIt).second;
       const StiKalmanTrack * kTrack = dynamic_cast<const StiKalmanTrack *>(track);
-      if(!track) continue; 
+      if(!track) continue;
+      if(!kTrack->isPrimary()) continue;
       double nPts = track->getPointCount();
-      if(nPts<15) continue;
+      if(nPts<5) continue;
       double phi = track->getPhi();
       double eta = track->getPseudoRapidity();
       double thePt  = track->getPt();
@@ -153,6 +228,32 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
       _phi->Fill(phi);
       _pt->Fill(thePt);
       _globalDca->Fill(dca);
+
+      int tpcPoints = (kTrack->getNodes(1)).size();
+      int svtPoints = (kTrack->getNodes(2)).size();
+      int mPts=100*svtPoints+tpcPoints;
+      
+      mGDcavNptsvEtaA->Fill(dca,mPts,eta);
+      mGDcavNptsvPtA->Fill(dca,mPts, thePt);
+      mNptsvPtvEtaA->Fill(mPts,thePt,eta);
+      mGDcavEtavPtA->Fill(dca,eta,thePt);
+
+      if(track->getCharge())
+	{//charge > 0
+	  mGDcavNptsvEtaP->Fill(dca,mPts,eta);
+	  mGDcavNptsvPtP->Fill(dca,mPts, thePt);
+	  mNptsvPtvEtaP->Fill(mPts,thePt,eta);
+	  mGDcavEtavPtP->Fill(dca,eta,thePt);
+	}
+      else
+	{//charge < 0
+	  mGDcavNptsvEtaM->Fill(dca,mPts,eta);
+	  mGDcavNptsvPtM->Fill(dca,mPts, thePt);
+	  mNptsvPtvEtaM->Fill(mPts,thePt,eta);
+	  mGDcavEtavPtM->Fill(dca,eta,thePt);
+	}
+      
+
       if (nPts>=40) _dca40->Fill(dca); 
       _nptsVsPt->Fill(thePt,nPts);
       _nptsVsEta->Fill(eta,nPts);
