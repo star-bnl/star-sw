@@ -201,10 +201,10 @@ St_XDFFile *g2t_file_init (Char_t *g2t_file){
 //stream/getevent G2Tfile /dui/geant 
   St_DataSet *run_old = geant->Next("Run");
   if (run_old) delete run_old;
-  St_DataSet *run = G2Tfile->NextEvent();
+  St_DataSet *run = G2Tfile->NextEventGet();
   (geant->Pwd())->Add(run);
 #ifdef __CINT__
-  St_g2t_run *g2t_run = geant->GetTableObject("Run/g2t_run");
+  St_g2t_run *g2t_run = geant->GetTableObj("Run/g2t_run");
   
   g2t_run_st *g2t_run_t =  g2t_run->GetTable();
   cout << " g2t_run :" << g2t_run_t[0]->author;
@@ -236,10 +236,9 @@ void g2t_file_read(St_XDFFile *file){
 
 // stream/getevent G2Tfile /dui/geant
   // geant->Rmdir("Event"); 
- St_DataSet *p = geant->Pwd();
  St_DataSet *set = geant->Next("Event");
- p->Remove(set); delete set;
- St_DataSet *event = file->NextEvent();
+ if (set) delete set;
+ St_DataSet *event = file->NextEventGet();
  if (event) {cout << event << endl;
  geant->Pwd()->Add(event);
  event->ls();}
@@ -253,7 +252,7 @@ void GetXdFile(Char_t *filename, const St_DataSet *dataset)
   cout << " Opening input file:"<< filename  << endl;
   if (!(dataset && filename && strlen(filename))) return;
   St_XDFFile tpg_xdf(filename);
-  St_DataSet *event = tpg_xdf.NextEvent();
+  St_DataSet *event = tpg_xdf.NextEventGet();
   if (event) dataset->Add(event);
 }
 //__________________________________________________________________________
@@ -296,7 +295,8 @@ void create_tables_tpc_slow_sim_tss(){
 //  tdm/newtable tppad   tss_tppad    10000
 //  tdm/newtable tppixel tss_tppixel  900000 
 //  tdm/newtable tpmcpix tss_tpmcpix  900000
-  St_tss_tppad   *tppad   = new St_tss_tppad  ("tppad",  900000); local.AddTable(tppad);  
+  //  St_tss_tppad   *tppad   = new St_tss_tppad  ("tppad",  196560); local.AddTable(tppad);  
+  St_tss_tppad   *tppad   = new St_tss_tppad  ("tppad",   10000); local.AddTable(tppad);  
   St_tss_tppixel *tppixel = new St_tss_tppixel("tppixel",900000); local.AddTable(tppixel);
   St_tss_tpmcpix *tpmcpix = new St_tss_tpmcpix("tpmcpix",900000); local.AddTable(tpmcpix);
      
@@ -384,17 +384,17 @@ cout << "start tss_run" << endl;
 //  tdm/table/rowcount /dui/raw_data/tpc/pixels/tppixel 0
 //  tdm/table/rowcount /dui/raw_data/tpc/pixels/tpmcpix 0
 //  tdm/table/rowcount /dui/raw_data/tpc/pixels/tppad   0
-St_tss_tsspar    *tsspar       = constant->GetTableObject("tpc/params/tsspars/tsspar");
-St_tpg_detector  *tpg_detector = constant->GetTableObject("tpc/geometry/tpgpar/tpg_detector");
-St_tpg_pad_plane *tpg_pad_plane= constant->GetTableObject("tpc/geometry/tpgpar/tpg_pad_plane");
-St_g2t_tpc_hit   *g2t_tpc_hit  = geant->GetTableObject("Event/g2t_tpc_hit");
-St_g2t_track     *g2t_track    = geant->GetTableObject("Event/g2t_track");
-St_tss_tppixel       *tppixel  = raw_data->GetTableObject("tpc/pixels/tppixel");
-St_tss_tpmcpix       *tpmcpix  = raw_data->GetTableObject("tpc/pixels/tpmcpix");
-St_tss_tppad         *tppad    = raw_data->GetTableObject("tpc/pixels/tppad");
-St_bad_channels  *bad_channels = constant->GetTableObject("tpc/calib/bad_channels");
-St_readout_map   *readout_map  = constant->GetTableObject("tpc/calib/readout_map");
-St_tpc_pedestal  *tpc_pedestal = constant->GetTableObject("tpc/calib/tpc_pedestal");
+St_tss_tsspar    *tsspar       = constant->GetTableObj("tpc/params/tsspars/tsspar");
+St_tpg_detector  *tpg_detector = constant->GetTableObj("tpc/geometry/tpgpar/tpg_detector");
+St_tpg_pad_plane *tpg_pad_plane= constant->GetTableObj("tpc/geometry/tpgpar/tpg_pad_plane");
+St_g2t_tpc_hit   *g2t_tpc_hit  = geant->GetTableObj("Event/g2t_tpc_hit");
+St_g2t_track     *g2t_track    = geant->GetTableObj("Event/g2t_track");
+St_tss_tppixel       *tppixel  = raw_data->GetTableObj("tpc/pixels/tppixel");
+St_tss_tpmcpix       *tpmcpix  = raw_data->GetTableObj("tpc/pixels/tpmcpix");
+St_tss_tppad         *tppad    = raw_data->GetTableObj("tpc/pixels/tppad");
+St_bad_channels  *bad_channels = constant->GetTableObj("tpc/calib/bad_channels");
+St_readout_map   *readout_map  = constant->GetTableObj("tpc/calib/readout_map");
+St_tpc_pedestal  *tpc_pedestal = constant->GetTableObj("tpc/calib/tpc_pedestal");
 
 //
 //  ami/module/call tssam_
@@ -441,11 +441,14 @@ cout << "start tfc_run" << endl;
 //  alias/create STAFCV_OK 1
 //  alias/create STAFCV_BAD 0
 
-St_tpg_pad_plane *tpg_pad_plane = constant->GetTableObject("tpc/geometry/tpgpar/tpg_pad_plane");
-St_tpg_detector  *tpg_detector  = constant->GetTableObject("tpc/geometry/tpgpar/tpg_detector");
-St_tss_tppixel       *tppixel   = raw_data->GetTableObject("tpc/pixels/tppixel");
-St_tss_tppad         *tppad     = raw_data->GetTableObject("tpc/pixels/tppad");
-St_tfc_adcxyz        *adcxyz    = raw_data->GetTableObject("tpc/pixels/adcxyz");
+printf("reached PLACE1\n");
+St_tpg_pad_plane *tpg_pad_plane = constant->GetTableObj("tpc/geometry/tpgpar/tpg_pad_plane");
+printf("reached PLACE2\n");
+St_tpg_detector  *tpg_detector  = constant->GetTableObj("tpc/geometry/tpgpar/tpg_detector");
+printf("reached PLACE3\n");
+St_tss_tppixel       *tppixel   = raw_data->GetTableObj("tpc/pixels/tppixel");
+St_tss_tppad         *tppad     = raw_data->GetTableObj("tpc/pixels/tppad");
+St_tfc_adcxyz        *adcxyz    = raw_data->GetTableObj("tpc/pixels/adcxyz");
 
 //  ami/module/call xyz_
 //       /dui/constants/tpc/geometry/tpgpar/tpg_pad_plane_
@@ -479,12 +482,12 @@ cout << "start run_tcl_make_clusters" << endl;
 //  alias/create STAFCV_OK 1
 //  alias/create STAFCV_BAD 0
 
-St_tpg_pad_plane *tpg_pad_plane = constant->GetTableObject("tpc/geometry/tpgpar/tpg_pad_plane");
-St_tss_tppad     *tppad         = raw_data->GetTableObject("tpc/pixels/tppad");
-St_tss_tppixel   *tppixel       = raw_data->GetTableObject("tpc/pixels/tppixel");
-St_tss_tpmcpix   *tpmcpix       = raw_data->GetTableObject("tpc/pixels/tpmcpix");
-St_tcl_tpcluster *tpcluster     = data->GetTableObject("tpc/hits/tpcluster");
-St_tcl_tpseq     *tpseq         = data->GetTableObject("tpc/hits/tpseq");
+St_tpg_pad_plane *tpg_pad_plane = constant->GetTableObj("tpc/geometry/tpgpar/tpg_pad_plane");
+St_tss_tppad     *tppad         = raw_data->GetTableObj("tpc/pixels/tppad");
+St_tss_tppixel   *tppixel       = raw_data->GetTableObj("tpc/pixels/tppixel");
+St_tss_tpmcpix   *tpmcpix       = raw_data->GetTableObj("tpc/pixels/tpmcpix");
+St_tcl_tpcluster *tpcluster     = data->GetTableObj("tpc/hits/tpcluster");
+St_tcl_tpseq     *tpseq         = data->GetTableObj("tpc/hits/tpseq");
 
 //  ami/module/call tcl_make_clusters_
 //        /dui/constants/tpc/geometry/tpgpar/tpg_pad_plane_
@@ -493,8 +496,14 @@ St_tcl_tpseq     *tpseq         = data->GetTableObject("tpc/hits/tpseq");
 //        /dui/raw_data/tpc/pixels/tpmcpix_
 //        /dui/data/tpc/hits/tpcluster_
 //        /dui/data/tpc/hits/tpseq
+ tpg_pad_plane->Dump(); cout << "tpg_pad_plane" << tpg_pad_plane->GetTable() << endl;
+ tppad->Dump();         cout << "tppad" << tppad->GetTable() << endl;
+ tppixel->Dump();       cout << "tppixel" << tppixel->GetTable() << endl;
+ tpmcpix->Dump();       cout << "tpmcpix" << tpmcpix->GetTable() << endl;
+ tpcluster->Dump();     cout << "tpcluster" << tpcluster->GetTable() << endl;
+ tpseq->Dump();         cout << "tpseq" << tpseq->GetTable() << endl;
   staf_status = tcl_make_clusters(tpg_pad_plane,tppad,tppixel,tpmcpix,tpcluster,tpseq);
-    wait(); 
+  //    wait(); 
 //  if ( staf_status(1) .ne. STAFCV_OK) then
   if (staf_status != STAFCV_OK) cout << "Problem running tcl_make_clusters..." << endl;
   else   cout << "finish run_tcl_make_clusters" << endl;
@@ -503,8 +512,10 @@ St_tcl_tpseq     *tpseq         = data->GetTableObject("tpc/hits/tpseq");
 //_________________________________________
 
 void run_tpham(){
-
-cout << "start run_tpham" << endl;
+St_DataSet *set = constant->Next("tpc");
+// St_DataSetIter tpcIterator(set); 
+ St_DataSetIter *tpcIterator=  new St_DataSetIter (set);
+ // cout << "start run_tpham" << endl;
 
 //  cd /dui
 //  tdm/table/rowcount /dui/data/tpc/hits/tphit 0
@@ -512,22 +523,22 @@ cout << "start run_tpham" << endl;
 
 //  alias/create STAFCV_OK 1
 //  alias/create STAFCV_BAD 0
-St_DataSetIter tpcIterator(constant->Next("tpc")); 
+//tpcIterator.Dump();
 //tpcIterator.Cd("tpc");
-St_tcl_tclpar    *tclpar        = tpcIterator.GetTableObject("tpc/params/tclpars/tclpar");
-St_tss_tsspar    *tsspar        = tpcIterator.GetTableObject("tpc/params/tsspars/tsspar");
-St_tpg_detector  *tpg_detector  = tpcIterator.GetTableObject("tpc/geometry/tpgpar/tpg_detector");
-St_tpg_pad_plane *tpg_pad_plane = tpcIterator.GetTableObject("tpc/geometry/tpgpar/tpg_pad_plane");
+ St_tpg_detector  *tpg_detector  = 0;// tpcIterator.GetTableObj("tpc/geometry/tpgpar/tpg_detector");
+St_tcl_tclpar    *tclpar        = tpcIterator.GetTableObj("tpc/params/tclpars/tclpar");
+St_tss_tsspar    *tsspar        = tpcIterator.GetTableObj("tpc/params/tsspars/tsspar");
+St_tpg_pad_plane *tpg_pad_plane = tpcIterator.GetTableObj("tpc/geometry/tpgpar/tpg_pad_plane");
 
 St_DataSetIter raw_tpc(raw_data->Next("tpc")); raw_tpc.Cd("tpc");
-St_tss_tppixel *tppixel     = raw_tpc.GetTableObject("pixels/tppixel");
-St_tss_tpmcpix *tpmcpix     = raw_tpc.GetTableObject("pixels/tpmcpix");
+St_tss_tppixel *tppixel     = raw_tpc.GetTableObj("pixels/tppixel");
+St_tss_tpmcpix *tpmcpix     = raw_tpc.GetTableObj("pixels/tpmcpix");
 
 St_DataSetIter hits(data->Next("tpc/hits")); hits.Cd("hits");
-St_tcl_tpseq     *tpseq     = hits.GetTableObject("tpseq");
-St_tcl_tpcluster *tpcluster = hits.GetTableObject("tpcluster");
-St_tcl_tphit     *tphit     = hits.GetTableObject("tphit");
-St_tcl_tphit_aux *tphitau   = hits.GetTableObject("tphit_aux");
+St_tcl_tpseq     *tpseq     = hits.GetTableObj("tpseq");
+St_tcl_tpcluster *tpcluster = hits.GetTableObj("tpcluster");
+St_tcl_tphit     *tphit     = hits.GetTableObj("tphit");
+St_tcl_tphit_aux *tphitau   = hits.GetTableObj("tphit_aux");
 
 //  ami/module/call tpham_
 //        /dui/constants/tpc/params/tclpars/tclpar_
@@ -551,8 +562,8 @@ cout << "dui/data/tpc/hits" << tpseq << endl;
 cout << "dui/data/tpc/hits" << tpcluster << endl;
 cout << "dui/data/tpc/hits" << tphit << endl;
 cout << "dui/data/tpc/hits" << tphitau << endl;
-
-  staf_status = tpham(tclpar,tsspar,tpg_detector,tpg_pad_plane,tppixel,tpmcpix,tpseq,tpcluster,tphit,tphitau);
+wait();
+ staf_status = tpham(tclpar,tsspar,tpg_detector,tpg_pad_plane,tppixel,tpmcpix,tpseq,tpcluster,tphit,tphitau);
     wait(); 
   //  if ( staf_status(1) .ne. STAFCV_OK) then
   if ( staf_status != STAFCV_OK) cout << "Problem running tpham..." << endl;
@@ -563,8 +574,8 @@ void process_event(Int_t nev, Int_t adcxyzon){
   cout << " TPC slow sim: Processing Event # "<< nev << endl; 
   cout << "  adcxyzon = "<< adcxyzon << endl;
 // call tssam - simulated tpc pixels
-  //   tss_run(); //exec tss_run
-
+    tss_run(); //exec tss_run
+
 // call xyz - reordered tpc pixels with more info
 //  if [adcxyzon].eq.1 then
   if (adcxyzon == 1) tfc_run();//    exec tfc_run
@@ -579,8 +590,8 @@ void process_event(Int_t nev, Int_t adcxyzon){
 //________________________________________________________________
 void tpc_slow_sim(){
   gBenchmark->Start("tpc_slow_sim");
-//Char_t *input_g2t_file = "/star/mds/data/SD98/auau200/g2t/central/hijing/set0001/regular/auau_ce_b0-2_0001_0010.xdf";
-  Char_t *input_g2t_file = "/afs/rhic/star/data/samples/muons_100_ctb.dsl";
+  Char_t *input_g2t_file = "/star/mds/data/SD98/auau200/g2t/central/hijing/set0001/regular/auau_ce_b0-2_0001_0010.xdf";
+  //  Char_t *input_g2t_file = "/afs/rhic/star/data/samples/muons_100_ctb.dsl";
   Int_t  num_events=1;
   Int_t  tpc_sector_first=1;
   Int_t  tpc_sector_last=24;
@@ -627,7 +638,7 @@ void tpc_slow_sim(){
 
 // * now overwrite which sector you want to run (in case you don't want default).q
   // St_DataSet *set = dui("/dui/constants/tpc/params/tsspars");// cd /dui/constants/tpc/params/tsspars
-   St_tss_tsspar *tsspar    = constant->GetTableObject("tpc/params/tsspars/tsspar");
+   St_tss_tsspar *tsspar    = constant->GetTableObj("tpc/params/tsspars/tsspar");
    tss_tsspar_st *tsspar_st = tsspar->GetTable();
 // tdm/table/cell/putvalue 'tsspar[0].min_sect' [tpc_sector_first]
    tsspar_st[0]->min_sect = tpc_sector_first;
@@ -647,6 +658,7 @@ void tpc_slow_sim(){
       cout << " processing event " << i << endl; 
       g2t_file_read(g2t_file); //exec input_g2t_file_read
 //    if STAF_STATUS(1).eq.0 goto ENDOFDATA    
+      //      return;
       if (!geant->Next("Event")) break;
       process_event(i,adcxyzon);//   exec process_event [i] [adcxyzon]
   wait();

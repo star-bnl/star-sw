@@ -50,8 +50,8 @@ class St_DataSet : public TNamed
 
 inline void St_DataSet::Add(St_Table *table){s_StafTable = table;}
 
-inline St_Table   *St_DataSet::GetStafTable(){ return GetTableObj(); }
 inline St_Table   *St_DataSet::GetTableObj() { return s_StafTable; }
+inline St_Table   *St_DataSet::GetStafTable(){ return GetTableObj(); }
 inline TList      *St_DataSet::GetListOfDataset(){ return s_ListOfDataSet; }
 inline Int_t       St_DataSet::GetListSize(){ return s_ListOfDataSet ? s_ListOfDataSet->GetSize():0; }
 inline St_DataSet *St_DataSet::GetParent(){ return s_ListOfDataSet ? 

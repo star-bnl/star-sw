@@ -3,9 +3,9 @@
 // void mevsimtest()
 
 //   Read XDF file
-//   St_XDFFile  xdf("/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2_4801_5000.xdf");
-   St_XDFFile xdf = St_XDFFile("/afs/rhic/star/packages/dev/params/tpc/tpg_pars.xdf");
-   St_Event *event = xdf.NextEvent();
+   St_XDFFile  xdf("/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2_4801_5000.xdf");
+//   St_XDFFile xdf = St_XDFFile("/afs/rhic/star/packages/dev/params/tpc/tpg_pars.xdf");
+   St_DataSet *event = xdf.NextEventGet(); 
    event->ls("*");
    St_DataSet *set=0;
    St_DataSetIter root(event);
@@ -14,7 +14,7 @@
      set->ls("*");
      printf(" Getting the tables \n");
 
-     St_particle *pa=(St_particle *)(set->GetStafTable());
+     St_particle *pa=set->GetTableObj();
 
 
      printf(" Checking the results \n");
