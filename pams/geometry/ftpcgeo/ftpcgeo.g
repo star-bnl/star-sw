@@ -16,11 +16,12 @@ Module   FTPCGEO  is the geometry of the Forward TPC in STAR
 *           removed unused definitions
 *           declare FROM  konly='MANY'
 *           declare FGAS  konly='ONLY'
+* PN. 27-07-98 : FROM position corrected, content declared MANY
 ******************************************************************************
 +CDE,AGECOM,GCONST,GCUNIT.
 *
 	Content FTPC, FIAL, FMPT, FOAL, FDUM, FGAS, FSEN, FSEC,
-		FIFR, FKWI, FFSL, FFCE, FROS, FROM, FROR, FROB, 
+		FIFR, FKWI, FFSL, FFCE, FROS, FROM, FROB, 
 		FROE, FROL, FROP, FROT, FREL, FRCC, FRCE,
 		FSER, FSRA, FSRB, FSPG, FSPI, FSSM, FSRI, FSBA,
 		FPAD, FFRA
@@ -52,7 +53,7 @@ Module   FTPCGEO  is the geometry of the Forward TPC in STAR
                         PGonPDZ, SBSDy}
 *
 	Integer  k,n,jj,ww,gg,hh,Iring
-        Integer krueck
+        Integer  krueck
         Integer  iflaga(5),iflagb(5)
         Data     iflaga /0,1,1,2,2/
         Data     iflagb /0,0,1,1,2/
@@ -60,7 +61,6 @@ Module   FTPCGEO  is the geometry of the Forward TPC in STAR
         Real     z1,z2
 	Real     frob_x1
 	Integer  Agexist
-
 *
 * ----------------------------------------------------------------------------
 
@@ -98,7 +98,6 @@ Module   FTPCGEO  is the geometry of the Forward TPC in STAR
         SBSRDz          = 3.1   ! Half length of Stabil. Block for Supp.Ring
         GasVolDz        = 59.5   ! Half length of active volume
    Endfill
-
 *
    Fill FFCC	    ! Field-Cage Caps data
 	Version		= 1	! geometry Version
@@ -229,8 +228,6 @@ Block FTPC is the Forward TPC mother (needed for standalong test only)
 *
 *
 *
-
-*
 * Start here with the Support Structure
 *
 
@@ -265,7 +262,6 @@ Block FTPC is the Forward TPC mother (needed for standalong test only)
 *
 *
 *
-
 
 Endblock
 
@@ -405,11 +401,6 @@ Endblock
 * ----------------------------------------------------------------------------
 Block FSEC is a sensitive gas sector
 *
-* PN: May be divisions  ? Otherwize the whole volume does not make sense
-*     and should be deleted (anyway, it is not positioned !).
-*     HITS can be moved in FSEN
-*
-*     SHAPE     TUBE
       Shape     division Iaxis=2  Ndiv=6 C0=30 
 *
 *  may be: ... cx:0.01: cy:0.01: cz:0.01: ptot:16:(-100,100) instead of px,py,pz
@@ -469,13 +460,10 @@ Block FROS is one Ring of Readout Modules in the support Structure
 *
 * Create different modules for the readout ring
 *
-
            Create FROM
            Create FREL
            Create FRCC
            Create FRCE
-
-
 * 
 * Do Loop position Readoutmodules, electronic plus cooling
 *
@@ -537,7 +525,6 @@ Block FROS is one Ring of Readout Modules in the support Structure
 
             EndDO
 
-
 *
 *End of one complete Readout Ring 
 *
@@ -552,9 +539,6 @@ Block FROM is one Module of the Readout Chamber
 
 * PN: default is position in current block, 'IN FROM' not needed
 
-if (1>2) then
-  	Create and position FROR  AlphaX=frbd_Phi7 y=frbd_RaHol  konly='MANY'
-endif
         Create and position FROE  x=frbd_XEHol y=frbd_YEHol      konly='MANY'
         Create and position FROE  x=-(frbd_XEHol) y=frbd_YEHol   konly='MANY'
 
@@ -571,16 +555,6 @@ endif
          frob_x1 = frob_x1 + 5.96 
         EndDo
          
-Endblock
-* ----------------------------------------------------------------------------
-Block FROR is the Radius in the Readout Chamber
-	Material Air
-	Attribute FROR seen=1 colo=4
-	shape TUBS Rmin=frbd_CakeHIR,
-                   Rmax=frbd_CakeHOR,
-                   Dz= frbd_CakeHWZ,
-                   Phi1=frbd_Phi3,
-                   Phi2=frbd_Phi5
 Endblock
 * ----------------------------------------------------------------------------
 Block FROB are the Box Holes in the Readout Chamber
