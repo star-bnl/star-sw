@@ -6,7 +6,7 @@
 #
 # dbupdateDEV.pl
 #
-# Create File Catalog for nightly test files
+# update JobStatus and FileCatalog for DEV test jobs
 # Run this script next day after jobs have been submitted
 ##############################################################################
 
@@ -92,15 +92,15 @@ for ($i = 0; $i < 2; $i++) {
 
 ##### setup output directories for DEV with beforeDay
 
-for ($i = 0; $i < 2; $i++) {
-     for ($j = 0; $j < 2; $j++) {
-      for ($ll = 0; $ll < scalar(@hc_dir); $ll++) {
-   $OUT_DIR[$ii] = $TOP_DIRD . $node_dir[$i] . "/" . $beforeDay . "/". $dir_year[$j] . "/" . $hc_dir[$ll];
-    print "Output Dir for DEV :", $OUT_DIR[$ii], "\n";
-        $ii++;
-      }
-  }
-}
+#for ($i = 0; $i < 2; $i++) {
+#     for ($j = 0; $j < 2; $j++) {
+#      for ($ll = 0; $ll < scalar(@hc_dir); $ll++) {
+#   $OUT_DIR[$ii] = $TOP_DIRD . $node_dir[$i] . "/" . $beforeDay . "/". $dir_year[$j] . "/" . $hc_dir[$ll];
+#    print "Output Dir for DEV :", $OUT_DIR[$ii], "\n";
+#        $ii++;
+#      }
+#  }
+#}
 
 struct FileAttr => {
       fjbID     => '$',
@@ -221,7 +221,7 @@ struct JFileAttr => {
 
 #####  select all files from JobStatusT from testDay direcroties
 
- $sql="SELECT jobID, path, logFile, avail FROM $JobStatusT WHERE path LIKE '%$testDay%'";
+ $sql="SELECT jobID, path, logFile, avail FROM $JobStatusT WHERE path LIKE '%$testDay%' AND avail = 'Y'";
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
    $cursor->execute;
@@ -249,7 +249,7 @@ struct JFileAttr => {
 
 #####  select all files from JobStatusT from beforeDay direcroties
 
- $sql="SELECT jobID, path, logFile, avail FROM $JobStatusT WHERE path LIKE '%$beforeDay%'";
+ $sql="SELECT jobID, path, logFile, avail FROM $JobStatusT WHERE path LIKE '%$beforeDay%' AND avail = 'Y'";
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
    $cursor->execute;
@@ -534,9 +534,9 @@ foreach  $eachOutNDir (@OUT_DIR) {
 
 ##### make files from previous test in $thisday directories in DB unavailable 
 
-#####  select all files from FilesCatalog from testDay direcroties
+#####  select all files from FilesCatalog from testDay directories
 
- $sql="SELECT jobID, path, fileName, avail FROM $FilesCatalogT WHERE path LIKE '%$testDay%'";
+ $sql="SELECT jobID, path, fName, avail FROM $FilesCatalogT WHERE path LIKE '%$testDay%' AND avail = 'Y'";
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
    $cursor->execute;
@@ -553,7 +553,7 @@ foreach  $eachOutNDir (@OUT_DIR) {
         
         ($$fObjAdr)->oldjbId($fvalue)   if( $fname eq 'jobID');
         ($$fObjAdr)->oldpath($fvalue)   if( $fname eq 'path');
-        ($$fObjAdr)->oldfile($fvalue)   if( $fname eq 'fileName'); 
+        ($$fObjAdr)->oldfile($fvalue)   if( $fname eq 'fName'); 
         ($$fObjAdr)->oldvail($fvalue)   if( $fname eq 'avail'); 
    }
 
@@ -564,7 +564,7 @@ foreach  $eachOutNDir (@OUT_DIR) {
 
 #####  select all files from FilesCatalog from beforeDay direcroties
 
-  $sql="SELECT path, fileName, avail FROM $FilesCatalogT WHERE path LIKE '%$beforeDay%'";
+  $sql="SELECT path, fName, avail FROM $FilesCatalogT WHERE path LIKE '%$beforeDay%' AND avail = 'Y'";
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
    $cursor->execute;
@@ -581,7 +581,7 @@ foreach  $eachOutNDir (@OUT_DIR) {
 
         ($$fObjAdr)->oldjbId($fvalue)   if( $fname eq 'jobID');
         ($$fObjAdr)->oldpath($fvalue)   if( $fname eq 'path');
-        ($$fObjAdr)->oldfile($fvalue)   if( $fname eq 'fileName'); 
+        ($$fObjAdr)->oldfile($fvalue)   if( $fname eq 'fName'); 
         ($$fObjAdr)->oldvail($fvalue)   if( $fname eq 'avail'); 
    }
 
@@ -661,7 +661,7 @@ foreach  $eachOutNDir (@OUT_DIR) {
           $pvavail = ($$eachOldFile)->oldvail;
           $pfullName = $pvpath . "/" . $pvfile;
 
-	   if (($pfullName eq $thfullName) and  ($pvavail eq "Y")) {
+	   if ($pfullName eq $thfullName) {
 
               $newAvail = "N";
    print "Changing availability for test files", "\n";
@@ -692,7 +692,7 @@ sub fillDbTable {
     $sql.="LibTag='$mLibT',";
     $sql.="platform='$mplform',";
     $sql.="eventType='$mevtType',";
-    $sql.="fileName='$mflName',";
+    $sql.="fName='$mflName',";
     $sql.="path='$mpath',";
     $sql.="geometry='$mgeom',";
     $sql.="eventGen='$mevtGen',";
@@ -717,7 +717,7 @@ sub  updateDbTable {
      $sql="update $FilesCatalogT set ";
      $sql.="avail='$newAvail',";
      $sql.="status= 1";
-     $sql.=" WHERE jobID = '$pvjbId' AND path = '$pvpath' AND fileName = '$pvfile'";   
+     $sql.=" WHERE jobID = '$pvjbId' AND path = '$pvpath' AND fName = '$pvfile'";   
      print "$sql\n" if $debugOn;
      $rv = $dbh->do($sql) || die $dbh->errstr;
 
@@ -750,7 +750,7 @@ sub fillJSTable {
     $sql.="avg_no_primaryT='$avr_prtracks',";
     $sql.="avg_no_XiVrt='$avr_xivertices',";
     $sql.="avg_no_KinkVrt='$avr_knvertices',";
-    $sql.="node='$node_name',"; 
+    $sql.="nodeID='$node_name',"; 
     $sql.="avail='$mavail'"; 
 
     print "$sql\n" if $debugOn;
