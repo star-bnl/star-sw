@@ -26,6 +26,17 @@
 #pragma link C++ class StMem-;
 #pragma link C++ class TPageMap-;
 
-
+ //  STAR logger
+#pragma link C++ class StMessMgr;
+#pragma link C++ global gMessMgr;
+#pragma link C++ global gMessage;
+// #pragma link C++ global gMess;
+#pragma link C++ global endm;
+#pragma link C++ function operator<<(ostream& ,StMessage*);
+#pragma link C++ function operator++(StMessMgr&);
+#pragma link C++ function operator-(StMessMgr&);
+#pragma link C++ function operator--(StMessMgr&);
+#pragma link C++ function operator~(StMessMgr&);
+ 
 
 #endif
