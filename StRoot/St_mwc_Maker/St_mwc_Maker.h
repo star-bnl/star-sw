@@ -1,10 +1,13 @@
-// $Id: St_mwc_Maker.h,v 1.9 2000/12/12 04:51:09 vlmrz Exp $
+// $Id: St_mwc_Maker.h,v 1.10 2002/04/08 22:35:27 vlmrz Exp $
 // $Log: St_mwc_Maker.h,v $
+// Revision 1.10  2002/04/08 22:35:27  vlmrz
+// *** empty log message ***
+//
 // Revision 1.9  2000/12/12 04:51:09  vlmrz
 // *** empty log message ***
 //
 // Revision 1.8  2000/12/11 10:33:35  vlmrz
-// *** empty log message ***
+// *** empty   log message ***
 //
 // Revision 1.7  1999/07/15 13:58:17  perev
 // cleanup
@@ -71,14 +74,26 @@ class TH2F;
 class St_mwc_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_mwc_Maker.h,v 1.9 2000/12/12 04:51:09 vlmrz Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_mwc_Maker.h,v 1.10 2002/04/08 22:35:27 vlmrz Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
    St_mwc_geo  *m_geom; //!
    St_mwc_cal  *m_cal;  //!
    St_mwc_mpar *m_mpar; //!
    St_mwc_pars *m_pars; //!
- 
+   Float_t r1max;
+   Float_t r1min;
+   Float_t r2max;
+   Float_t r2min;
+   Float_t outsect_ir;
+   Float_t insect_ir;
+   Float_t wire_step;
+   Float_t num_wires_sect;
+   Float_t phi_step;
+   Int_t empty_counter;
+   Int_t skip_counter;
+   Int_t double_counter;
+
  protected:
    TH1F   *m_px;  //!
    TH1F   *m_py;  //!
@@ -87,6 +102,7 @@ class St_mwc_Maker : public StMaker {
    TH1F   *m_nWiresHit; //!
    TH1F   *m_nSectorsHit; //!
    TH2F   *m_EtaPhi; //!
+   TH1F   *m_HitCount; //!
  
   
  public: 
@@ -97,7 +113,7 @@ class St_mwc_Maker : public StMaker {
    virtual Int_t  Finish();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_mwc_Maker.h,v 1.9 2000/12/12 04:51:09 vlmrz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_mwc_Maker.h,v 1.10 2002/04/08 22:35:27 vlmrz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_mwc_Maker, 1)   //StAF chain virtual base class for Makers
 };
