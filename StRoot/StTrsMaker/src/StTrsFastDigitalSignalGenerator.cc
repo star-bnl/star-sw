@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.8 1999/01/28 02:52:22 lasiuk Exp $
+ * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.9 1999/02/04 18:35:24 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,9 +10,13 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
- * Revision 1.8  1999/01/28 02:52:22  lasiuk
- * printout for SUN
+ * Revision 1.9  1999/02/04 18:35:24  lasiuk
+ * digital sector removed from constructor;
+ * fillSector() added in base class
  *
+ * sleep/unistd
+ *
+ * Revision 1.9  1999/02/04 18:35:24  lasiuk
  * digital sector removed from constructor;
  * fillSector() added in base class
  *
@@ -51,8 +55,8 @@
  *
  **************************************************************************/
 #include <unistd.h>
-StTrsFastDigitalSignalGenerator::StTrsFastDigitalSignalGenerator(StTpcElectronics* el, StTrsSector* sec, StTrsDigitalSector* digiSec)
-    : StTrsDigitalSignalGenerator(el, sec, digiSec)
+
+#include <utility>
 #include "StTrsFastDigitalSignalGenerator.hh"
 
 StTrsDigitalSignalGenerator* StTrsFastDigitalSignalGenerator::mInstance = 0; // static member
@@ -75,10 +79,10 @@ StTrsFastDigitalSignalGenerator::instance()
 	cerr << "StTrsFastDigitalSignalGenerator::instance() Must Supply a File name" << endl;
 	cerr << "Exitting..." << endl;
 	exit(1);
-StTrsFastDigitalSignalGenerator::instance(StTpcElectronics* el, StTrsSector* sec, StTrsDigitalSector* digiSec)
+#endif
     }
     return mInstance;
-	mInstance = new StTrsFastDigitalSignalGenerator(el, sec, digiSec);
+}
 
 StTrsDigitalSignalGenerator*
 StTrsFastDigitalSignalGenerator::instance(StTpcElectronics* el, StTrsSector* sec)
