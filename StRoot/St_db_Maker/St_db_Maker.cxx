@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.76 2004/01/06 16:44:42 jeromel Exp $
+// $Id: St_db_Maker.cxx,v 1.77 2004/01/06 23:58:01 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.77  2004/01/06 23:58:01  perev
+// (JL) More printing ...
+//
 // Revision 1.76  2004/01/06 16:44:42  jeromel
 // Logic error not(()&&())
 //
@@ -490,6 +493,9 @@ SWITCH:  switch (kase) {
       if( ! ((val->fTimeMin.Get()<= uevent) && (val->fTimeMax.Get()>uevent) )){
 	(void) printf("CheckFail:: Assert will fail for Table %s TimeMin=%d TimeMax=%d uevent=%d\n",
 		      ds->GetName(),val->fTimeMin.Get(),val->fTimeMax.Get(),uevent);
+	(void) printf("\tTimeMin "); val->fTimeMin.Print();
+	(void) printf("\tuevent  "); currenTime.Print();
+	(void) printf("\tTimeMax "); val->fTimeMax.Print();
       }
       assert((val->fTimeMin.Get()<= uevent) && (val->fTimeMax.Get()>uevent));
       break;
