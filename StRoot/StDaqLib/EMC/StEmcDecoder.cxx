@@ -51,6 +51,19 @@ StEmcDecoder::StEmcDecoder(unsigned int date,unsigned int time)
       }
     }
   
+  // reverse order for PSD
+  int id;
+  for(int RDO=0;RDO<4;RDO++)
+    for(int index=0;index<4800;index++)
+    {
+      int status=GetPsdId(RDO,index,id);
+      if(status==1 && id>0 && id<4801)
+      {
+        PsdRDO[id-1] = RDO;
+        PsdIndex[id-1]=index;
+      }
+    }
+  
 }
 //--------------------------------------------------------
 StEmcDecoder::~StEmcDecoder()
@@ -73,7 +86,11 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
                         3860,4020,4180,4340,4500,2180,2020,1860,1700,1540,
                         1380,1220,1060,900,740,580,420,260,100,2340};
   for(int i=0;i<30;i++) Init_Crate[i]=Init_Crate_tmp[i];
-  
+                       
+  // this tells which crate each one of the PMT boxes are connected to
+  int PMT_tmp[] = {16,16,17,17,18,18,19,19,20,20,21,21,22,22,23,23,24,24,25,25,26,26,27,27,28,28,29,29,30,30,
+                   1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13,14,14,15,15};
+	for(int i=0;i<60;i++) PMT_Box[i]=PMT_tmp[i];
 
   // which crate is connected to each TDC channel. See log book for details
   if(date <= 20011223)
@@ -122,13 +139,7 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
     int TDC_Crate_tmp[]= {18,17,16,30,29,28,27,26,25,24,23,22,21,20,19,4,3,2,1,15,14,13,12,11,10,9,8,7,6,5};
     for(int i=0;i<30;i++) TDC_Crate[i]=TDC_Crate_tmp[i];      
     goto SMD;
-  }
-	
-	{
-		int PMT_tmp[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-		for(int i=0;i<60;i++) PMT_Box[i]=PMT_tmp[i];
-	}
-   
+  }   
 
   ///////////////////////////////////////////////////////////////////////
   // these tables are for SMD decoding //////////////////////////////////
@@ -218,6 +229,7 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
   	connector2[i]=connector2_tmp[i];
   	connector3[i]=connector3_tmp[i];
   }
+  
   ///////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////
   // these tables are for PSD decoding //////////////////////////////////
@@ -226,12 +238,24 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
   if(date >= 20040101) // year 2002/2003 pp and dAu runs
   {
     int PsdModules_tmp[4][15]={
-                              {46,47,48,49,50,51,52,53,54,55,56,57,58,59,60},                //RDO 0
-                              {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15},                         //RDO 1
+                              {11,12,13,14,15,16,17,18,19,20,21,22,23,24,25},                //RDO 0
+                              {1,2,3,4,5,6,7,8,9,10,26,27,28,29,30},                         //RDO 1
                               {31,32,33,34,35,36,37,38,39,40,41,42,43,44,45},                //RDO 2
-                              {16,17,18,19,20,21,22,23,24,25,26,27,28,29,30}};               //RDO 3
+                              {46,47,48,49,50,51,52,53,54,55,56,57,58,59,60}};               //RDO 3
     for(int i=0;i<4;i++) for(int j=0;j<15;j++) PsdModules[i][j]=PsdModules_tmp[i][j];
+    goto PSDTables;
   }
+  
+  PSDTables:
+  int PsdOffset_tmp[40] = {20,21,22,23,0,1,2,3,24,25,26,27,4,5,6,7,28,29,30,31,
+                           8,9,10,11,32,33,34,35,12,13,14,15,36,37,38,39,16,17,18,19};
+  for(int i=0;i<40;i++) PsdOffset[i] = PsdOffset_tmp[i];
+  
+  int PsdStart_tmp[60] = {2261,2181,2101,2021,1941,1861,1781,1701,1621,1541,1461,1381,1301,1221,1141,1061,
+                          981,901,821,741,661,581,501,421,341,261,181,101,21,2341,
+                          4661,4741,2421,2501,2581,2661,2741,2822,2901,2981,3061,3141,3221,3301,3381,3461,
+                          3541,3621,3701,3782,3861,3941,4021,4101,4181,4261,4341,4421,4501,4581};
+  for(int i=0;i<60;i++) PsdStart[i] = PsdStart_tmp[i];
   return;
 }
 //--------------------------------------------------------
@@ -667,21 +691,67 @@ int StEmcDecoder::getSmdpStrip(int pin,int& eta,int& sub)
 }       
 //--------------------------------------------------------
 /*!
-\param RDO is the SMD fiber number
+\param RDO is the PSD fiber number
 \param index is the position in the fiber
 \param id is the software Id
+
+The Pre Shower and SMD crates are identical and they share almost
+the same decoder.
 */
 int StEmcDecoder::GetPsdId(int RDO,int index, int& id,bool print)
 {
   id=0;  
   if(RDO<0 || RDO>3) return 0;
   if(index <0 || index >4799) return 0; 
-  return 0;
+  char line[300];
+    
+  if(print) sprintf(line,"RDO=%1d  index=%4d",RDO,index);
+  
+  int daq_smd=index;
+  
+  int category=daq_smd/1600;
+  int wire=(daq_smd-category*1600)/20+1;  
+  int A_step=daq_smd%4;
+  int S_step=daq_smd%20;
+  int A_value=0;
+  int S_value=0;
+  int SCA = S_step/5+1;
+  
+  if(print) sprintf(line,"%s cat=%2d  wire=%3d  As=%4d  Ss=%3d  SCA=%1d",line,category,wire,A_step,S_step,SCA);
+    
+  if(category==0) { A_value=FEE1[A_step]; S_value=connector1[S_step]; }
+  if(category==1) { A_value=FEE2[A_step]; S_value=connector2[S_step]; }
+  if(category==2) { A_value=FEE3[A_step]; S_value=connector3[S_step]; }
+  
+  if(print) sprintf(line,"%s  Slot=%02d  A%1d",line,S_value,A_value);
+  
+  if(A_value==3 || A_value==4 || wire>40) 
+  {
+    if(print) cout<<line<<endl;
+    return 0;
+  }
+  int half;
+  if(A_value==1) half=40;
+  if(A_value==2) half=0;
+  
+  int PMTBox = PsdModules[RDO][S_value-1];
+  int start  = PsdStart[PMTBox-1];
+  int offset = PsdOffset[wire-1];
+  
+  id = start+offset+half;
+  
+  if(PMTBox==30 && id>2400) id-=2400;
+  if(PMTBox==32 && id>4800) id-=2400;
+  
+  if(print) sprintf(line,"%s  PMTB=%2d  start=%4d  offset=%2d  half=%2d  SoftId=%4d",line,PMTBox,start,offset,half,id);   
+  if(print) cout<<line<<endl;
+  
+  return 1;
 }
 //--------------------------------------------------------
 /*!
 \param id is the software Id
-\param RDO is the SMD fiber number
+\param RDO is the PSD fiber number
 \param index is the position in the fiber
 */
 int StEmcDecoder::GetPsdRDO(int id, int& RDO,int& index)
@@ -689,7 +759,9 @@ int StEmcDecoder::GetPsdRDO(int id, int& RDO,int& index)
   RDO=0;
   index=0;
   if(id<1 || id>4800) return 0;
-  return 0;
+  RDO = PsdRDO[id-1];
+  index = PsdIndex[id-1];
+  return 1;
 }
 //--------------------------------------------------
 void StEmcDecoder::PrintTowerMap(ofstream *out)
@@ -739,6 +811,37 @@ void StEmcDecoder::PrintSmdMap(ofstream *out)
       *out <<"  RDO = "<<i<<"  index = "<<index;
       if(status == 1)
         *out <<" detector = "<<det<<"  mod = "<<m<<"  eta = "<<e<<"  sub = "<<s<<endl;
+      else
+        *out <<"  dummy connection\n";
+    }
+  }
+  *out <<endl;
+}
+//--------------------------------------------------
+void StEmcDecoder::PrintPsdMap(ofstream *out)
+{
+  *out <<"PMT Boxes connected to PSD crate\n";
+  *out <<"-----------------------------------------------------------\n";
+  
+  for(int i=0;i<4;i++) 
+  {
+    *out <<"PSD CRATE number "<<i+1<<endl;
+    for(int j=0;j<15;j++)
+      *out <<"  channel "<<j<<" is connected to PMT Box "<<PsdModules[i][j]<<endl;
+  }
+  *out <<"\nPSD MAP\n";
+  *out <<"-----------------------------------------------------------\n";
+  
+  for(int i=0;i<4;i++) 
+  {
+    *out <<"PSD CRATE number "<<i+1<<endl;
+    for(int index =0;index<4800;index++)
+    {
+      int id;
+      int status = GetPsdId(i,index,id);
+      *out <<"  RDO = "<<i<<"  index = "<<index;
+      if(status == 1)
+        *out <<" id = "<<id<<endl;
       else
         *out <<"  dummy connection\n";
     }
