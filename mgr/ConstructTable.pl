@@ -36,7 +36,12 @@ sub tableH ($) {
   print OUT "  ",$stem,"_st &operator[](Int_t i){ assert(i>=0 && i < GetNRows()); return *GetTable(i); }\n";
   print OUT "  const ",$stem,"_st &operator[](Int_t i) const { assert(i>=0 && i < GetNRows()); return *((const ",$stem,"_st *)(GetTable(i))); }\n";
   print OUT "\n";
-  print OUT "  ClassDef(St_",$stem,",0) //C++ wrapper for <",$stem,"> StAF table\n";
+  if ($stem eq "g2t_rch_hit") {
+    print OUT "  ClassDef(St_",$stem,",1) //C++ wrapper for <",$stem,"> StAF table\n";
+  }
+  else {
+    print OUT "  ClassDef(St_",$stem,",0) //C++ wrapper for <",$stem,"> StAF table\n";
+}
   print OUT "};\n";
   print OUT "\n";
   print OUT "#endif\n";
@@ -88,6 +93,11 @@ sub TableCXX {
   my $dir = dirname($dst);
   rmkdir($dir);
   open (OUT,">$dst") or die "Can't open $dst\n";
+  if ($stem eq "g2t_rch_hit") {
+    my $g2t_rch_hit_streamer = g2t_rch_hit_streamer();
+    print OUT $g2t_rch_hit_streamer;
+  }
+  else {
   print OUT "#include \"tables/St_",$stem,"_Table.h\"\n";
   print OUT "/////////////////////////////////////////////////////////////////////////\n";
   print OUT "//\n";
@@ -98,6 +108,7 @@ sub TableCXX {
   print OUT "\n";
   print OUT "#include \"Stypes.h\"\n";
   print OUT "TableImpl(",$stem,")\n";
+}
   close (OUT);
 }
 #________________________________________
@@ -128,4 +139,73 @@ sub rmkdir {
     $dir .= $term; #print "dir = $dir\n";
     if (!-d $dir && ! mkdir($dir,0755)) {die "$0: can't create directory $path ($!).\n";}
   }
+}
+#____________________________________________________________
+sub g2t_rch_hit_streamer {
+  my $g2t_rch = '
+#include "tables/St_g2t_rch_hit_Table.h"
+/////////////////////////////////////////////////////////////////////////
+//
+//  Class St_g2t_rch_hit wraps the STAF table g2t_rch_hit
+//  It has been generated "by automatic". Please don\'t change it "by hand"
+//
+/////////////////////////////////////////////////////////////////////////
+
+#include "Stypes.h" 
+#include "St_tableDescriptor.h"
+#include "St_TableElementDescriptor.h"
+//____________________________________________________________________________
+  St_tableDescriptor *St_g2t_rch_hit::fgColDescriptors = 0;
+  TableImp(g2t_rch_hit)
+
+#define StreamElementIn(type)  case St_TableElementDescriptor::_NAME2_(k,type):            \
+ if (nextCol->m_Dimensions)                                   \
+   R__b.ReadStaticArray((_NAME2_(type,_t) *)(row+nextCol->m_Offset));                      \
+ else                                                         \
+   R__b >> *(_NAME2_(type,_t) *)(row+nextCol->m_Offset);      \
+ break 
+
+//____________________________________________________________________________
+void St_g2t_rch_hit::Streamer(TBuffer &R__b) 
+{
+   if (!R__b.IsReading()) {
+     R__b.WriteVersion(St_g2t_rch_hit::IsA());
+     St_Table::Streamer(R__b); 
+   } else {
+      Version_t R__v = R__b.ReadVersion(); if (R__v) { }
+      St_Table::StreamerTable(R__b);
+      if (*s_MaxIndex <= 0) return; 
+      char *row= s_Table;
+      for (Int_t indx=0;indx<*s_MaxIndex;indx++,row += GetRowSize()) {
+        tableDescriptor_st *nextCol = GetRowDescriptors()->GetTable();
+        Int_t maxColumns = GetNumberOfColumns();
+        for (Int_t colCounter=0; colCounter < maxColumns; nextCol++,colCounter++) 
+        {
+         //   Skip 5th elememnt
+         //   float ds; /* energy deposition over ds */
+          if (R__v == 0 && colCounter == 4) {
+              *(Float_t *)(row+nextCol->m_Offset) = -1956.;
+              continue; 
+          }
+          // Stream one table row supplied
+          switch(nextCol->m_Type) {
+           StreamElementIn(Float);
+           StreamElementIn(Int);
+           StreamElementIn(Long);
+           StreamElementIn(Short);
+           StreamElementIn(Double);
+           StreamElementIn(UInt);
+           StreamElementIn(ULong);
+           StreamElementIn(UChar);
+           StreamElementIn(Char);
+          default:
+            break;
+         }
+       }     
+     }
+   }
+}
+
+';
+return $g2t_rch;
 }
