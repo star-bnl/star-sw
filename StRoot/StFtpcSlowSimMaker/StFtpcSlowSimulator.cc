@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimulator.cc,v 1.2 2000/11/27 14:08:08 hummler Exp $
+// $Id: StFtpcSlowSimulator.cc,v 1.3 2001/01/11 17:37:25 jcs Exp $
 // $Log: StFtpcSlowSimulator.cc,v $
+// Revision 1.3  2001/01/11 17:37:25  jcs
+// replace math.h with PhysicalConstants.h
+//
 // Revision 1.2  2000/11/27 14:08:08  hummler
 // inplement tzero and lorentz angle correction factor
 //
@@ -11,7 +14,8 @@
 //
 // This is the main routine  for the FTPC Simulator
 //
-#include <math.h>
+
+#include "PhysicalConstants.h"
 
 #include "StFtpcSlowSimulator.hh"
 #include "StFtpcSlowSimField.hh"
@@ -153,7 +157,7 @@ int StFtpcSlowSimulator::simulate()
 
         //  cross angle with respect to plane defined by z- and r- axes
 	cross_ang = atan(p_rad / pz);
-	if(cross_ang>M_PI*0.5) cross_ang = cross_ang - M_PI;
+	if(cross_ang>halfpi) cross_ang = cross_ang - pi;
 
 	//   Limit cross_ang to 1.5 to avoid nonsensical results             jcs
 	//(if this works put cross_ang_max in fss_param.idl and make necessary changes
@@ -173,18 +177,18 @@ int StFtpcSlowSimulator::simulate()
         if (xx > 0.0) {
             if (yy >= 0.0)
             //  quadrant I - necessary because phi_min=90deg   jcs
-                phi_tmp = 2*M_PI + atan(yy/xx);    //jcs
+                phi_tmp = twopi + atan(yy/xx);    //jcs
             else
-                phi_tmp = 2*M_PI + atan(yy/xx);
+                phi_tmp = twopi + atan(yy/xx);
         }
         else if (xx < 0.0) {
-                phi_tmp = M_PI + atan(yy/xx);
+                phi_tmp = pi + atan(yy/xx);
         }
         else {
             if (yy >= 0.0)
-                phi_tmp = 0.5*M_PI;
+                phi_tmp = halfpi;
             else
-                phi_tmp = 1.5*M_PI ;
+                phi_tmp = 1.5*pi ;
         }
 
 
