@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.27 2004/01/25 19:42:00 fisyak Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.28 2004/03/26 04:25:08 fisyak Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.28  2004/03/26 04:25:08  fisyak
+* use for IdTruth pixel with maximum charge and Id > 0
+*
 * Revision 1.27  2004/01/25 19:42:00  fisyak
 * fix bug with vzeros
 *
@@ -152,6 +155,7 @@ c
       integer nmc_tracks        ! Number of MC tracks
       integer nocc_track(nmc_tracks_max) ! Number of pixels on MC track
       real    q_track(nmc_tracks_max)    ! Charge in cluster from MC track
+      integer iqmaxpx           ! charge for max pixel
       integer pad_n             ! Pad index
 c
       real adc_ipix             ! ADC for pixel
@@ -391,13 +395,16 @@ c     switch if interested in real data (or real data performance)
       if (lookat_mc) then
          nmc_tracks = 0
          q_sum = 0
+         imax = 0
+         iqmaxpx = 0
          do ipix=1,nclspix
             ktrk=itrk(ipix)
-            mtrk=iucomp(ktrk,imc_track,nmc_tracks)
             q_sum = q_sum + iadc(ipix)
+            mtrk=iucomp(ktrk,imc_track,nmc_tracks)
             if (mtrk .eq. 0) then
                if (nmc_tracks .lt. nmc_tracks_max) then
                   nmc_tracks=nmc_tracks+1
+                  mtrk = nmc_tracks
                   imc_track(nmc_tracks) = ktrk
                   nocc_track(nmc_tracks) = 1
                   q_track(nmc_tracks) = iadc(ipix)
@@ -410,8 +417,11 @@ c     switch if interested in real data (or real data performance)
                q_track(mtrk) = q_track(mtrk)+iadc(ipix)
             endif
          enddo
+         if (ktrk .gt. 0 .and. iadc(ipix) .gt. iqmaxpx) then
+            imax = mtrk
+            iqmaxpx = iadc(ipix)
+         endif
 *yf      imax = lvsimx(nocc_track,nmc_tracks,1)
-         imax = lvmax(q_track,nmc_tracks)
          track(1)   = 0
          quality(1) = 0
          if (imax .gt. 0 .and. q_sum .gt. 0) then
