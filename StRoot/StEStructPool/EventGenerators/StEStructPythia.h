@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPythia.h,v 1.2 2004/02/26 20:20:06 chunhuih Exp $
+ * $Id: StEStructPythia.h,v 1.3 2004/06/25 03:13:01 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -28,6 +28,7 @@ class StEStructPythia : public StEStructEventReader {
   int meventsToDo;
   bool mAmDone;
   int mrefMult;
+  bool mstarTrigger;
 
   StEStructEventCuts* mECuts;
   StEStructTrackCuts* mTCuts;
@@ -60,7 +61,9 @@ inline bool StEStructPythia::done(){ return mAmDone; };
 
 inline bool StEStructPythia::measureable(int pid){
   bool retVal=false;
+
   if(pid<0)pid*=-1;
+  if(pid!=211)return false;
 
   switch(pid){
 
@@ -136,7 +139,11 @@ inline float* StEStructPythia::globalDCA(float* p, float* v){
 /**********************************************************************
  *
  * $Log: StEStructPythia.h,v $
+ * Revision 1.3  2004/06/25 03:13:01  porter
+ * added simple trigger selection implemented like BBC-AND plus CTB
+ *
  * Revision 1.2  2004/02/26 20:20:06  chunhuih
+ *
  * Fixed the method globalDCA().
  * Assign the globalDCA, but leave its x, y, z coordinates zero.
  *

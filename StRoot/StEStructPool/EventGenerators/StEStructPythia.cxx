@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPythia.cxx,v 1.3 2004/06/09 22:37:51 prindle Exp $
+ * $Id: StEStructPythia.cxx,v 1.4 2004/06/25 03:13:01 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -53,7 +53,7 @@ StEStructEvent* StEStructPythia::generateEvent(){
   retVal = new StEStructEvent();
 
   fillTracks(retVal);
-  bool useEvent=mECuts->goodNumberOfTracks(mrefMult);
+  bool useEvent= (mstarTrigger && mECuts->goodNumberOfTracks(mrefMult));
   if(!useEvent){
     delete retVal;
     retVal=NULL;
@@ -68,6 +68,8 @@ StEStructEvent* StEStructPythia::generateEvent(){
 //--------------------------------------------------------------------------
 void StEStructPythia::fillTracks(StEStructEvent* estructEvent){
 
+  mstarTrigger=false;
+  bool subtrig[3]={false,false,false};
   mrefMult=0;
   Pyjets_t* pstr= mpythia->GetPyjets();
   int numParticles=mpythia->GetN();
@@ -77,9 +79,11 @@ void StEStructPythia::fillTracks(StEStructEvent* estructEvent){
 
   for(int i=2;i<numParticles;i++){ // 0 & 1 for incoming protons 
 
-    eTrack->SetInComplete();
+    if(pstr->K[0][i]==21) continue;
     pid = pstr->K[1][i];
-    if(!measureable(pid))continue;  // checks if pi,k,p or e
+    // require no daughters & if pi,k,proton, or electron; else skip...
+    if(!(0==pstr->K[3][i]) || !measureable(pid))continue;  
+
     float p[3];
     float v[3];
     for(int k=0;k<3;k++){
@@ -90,6 +94,7 @@ void StEStructPythia::fillTracks(StEStructEvent* estructEvent){
     float pt=sqrt(p[0]*p[0]+p[1]*p[1]);
     if(pt<0.15)continue;
 
+    eTrack->SetInComplete();
 
     float eta=-999.;
 
@@ -98,6 +103,11 @@ void StEStructPythia::fillTracks(StEStructEvent* estructEvent){
 
     float theta=acos(p[2]/ptotal);
     eta=-1.0*log(tan(theta/2.0));
+
+    if(eta<-3.5 && eta>-5.0 && pt>0.2)subtrig[0]=true;
+    if(eta>3.5 && eta<5.0 && pt>0.2)subtrig[1]=true;
+    if(fabs(eta)<0.5 && pt>0.15)subtrig[2]=true;
+
 
     float* gdca = globalDCA(p,v);    
     bool useTrack=true;
@@ -112,6 +122,7 @@ void StEStructPythia::fillTracks(StEStructEvent* estructEvent){
        if(arg>0.) eta=0.5*log(arg);
     }
     */
+
     useTrack = (mTCuts->goodEta(eta) && useTrack);
     float phi=atan2((double)p[1], (double)p[0]);
     useTrack=(mTCuts->goodPhi(phi) && useTrack);
@@ -147,8 +158,28 @@ void StEStructPythia::fillTracks(StEStructEvent* estructEvent){
     } else {
       eTrack->SetCharge(1);
     }    
+
+    // now add fragmentation history (up to 4 lines back) in the tpcmap area
+
+    int ip[4]={0,0,0,0};
+    ip[0] = pstr->K[2][i];
+    for(int k=1;k<4;k++){
+      if(ip[k-1]<3){
+	ip[k-1]=0;
+        break;
+      } 
+     ip[k]=pstr->K[2][ip[k-1]-1];    
+    }
+    unsigned int map[2];
+    map[0]=(unsigned int)((ip[1]<<16)+ip[0]);
+    map[1]=(unsigned int)((ip[3]<<16)+ip[2]);
+    eTrack->SetTopologyMapData(0,map[0]);
+    eTrack->SetTopologyMapData(1,map[1]);
+
     estructEvent->AddTrack(eTrack);
-  }
+  }; // particle loop
+
+  mstarTrigger=(subtrig[0] && subtrig[1] && subtrig[2]);
 
   delete eTrack;
   return;
@@ -176,6 +207,9 @@ void StEStructPythia::setTrackCuts(StEStructTrackCuts* cuts){
 /**********************************************************************
  *
  * $Log: StEStructPythia.cxx,v $
+ * Revision 1.4  2004/06/25 03:13:01  porter
+ * added simple trigger selection implemented like BBC-AND plus CTB
+ *
  * Revision 1.3  2004/06/09 22:37:51  prindle
  * Moved some variable declarations inside comment to get rid of
  * unused variable warnings.
