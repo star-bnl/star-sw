@@ -73,25 +73,16 @@ void type_of_call Message_(const char* mess, int* lines, int*, size_t len) {
   char* mess2=const_cast<char*> (mess);
   int del_mess = 0;
   if (*lines>1) {
-#ifdef LINUX
-    // Linux sometimes makes messSize too big. This algorithm seems to work.
-    float lineSize2 = ((float) messSize)/((float) *lines);
-    float lineSize1 = floor(lineSize2 - 0.51);
-    if ((lineSize2-lineSize1) <= 1.0) lineSize1++;
-    int lineSize = (int) lineSize1;
-#else
-    int lineSize = messSize/(*lines);
-#endif
     char* mess1 = const_cast<char*> (mess);
-    mess2 = new char[messSize];    // Build a new version of the
+    mess2 = new char[messSize];          // Build a new version of the
     *mess2 = 0;                          // message with trailing spaces
     for (int i=(*lines); i>0; i--) {     // removed, and \n's inserted.
-      int clen = lineSize;
+      int clen = len;                    // Now trusting line length argument.
       while (mess1[--clen] == space) {}
       strncat(mess2,mess1,(++clen));
       if (i>1) {
         strcat(mess2,messReturnChar);
-        mess1 = &(mess1[lineSize]);
+        mess1 = &(mess1[len]);
       }
     }
     strcat(mess2,emptyString);
@@ -654,7 +645,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.37 2003/10/01 20:06:50 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.38 2003/10/10 23:28:43 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
@@ -666,8 +657,11 @@ StMessMgr* temp=StMessageManager::Instance();
 StMessMgr& gMess = (*temp);
 
 //_____________________________________________________________________________
-// $Id: StMessageManager.cxx,v 1.37 2003/10/01 20:06:50 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.38 2003/10/10 23:28:43 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.38  2003/10/10 23:28:43  genevb
+// Trust line length argument from Fortran, works better than algorithm now
+//
 // Revision 1.37  2003/10/01 20:06:50  genevb
 // Initialize and test ostrstream buffer sizes (support for gcc before 3.2)
 //
