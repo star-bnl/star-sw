@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.h,v 1.1 2003/10/15 18:20:46 porter Exp $
+ * $Id: StEStructBinning.h,v 1.2 2004/04/13 16:58:37 chunhuih Exp $
  *
  * Author: Jeff Porter 
  *
@@ -28,7 +28,7 @@
 #define EBYE_ETA_BINS 26
 #define EBYE_MT_BINS 40
 #define EBYE_DELTAMT_BINS 26
-#define EBYE_YT_BINS 28
+#define EBYE_YT_BINS 1
 
 #define EBYE_DPHI_BINS 26
 #define EBYE_DETA_BINS 26
@@ -193,99 +193,115 @@ inline StEStructBinning* StEStructBinning::Instance(){
 }
 
 inline int StEStructBinning::iphi(float phi){
-  return ( (j=(int)((phi-minPhi)/dPhi))<0 || j>EBYE_PHI_BINS-2) ? (int)EBYE_PHI_BINS-1 : j;
+  if( phi < minPhi ) return EBYE_PHI_BINS - 1;
+  int j = (int)((phi-minPhi)/dPhi);
+  return (j > EBYE_PHI_BINS - 2) ? EBYE_PHI_BINS - 1 : j;
 }
 
 inline int StEStructBinning::idphi(float phi){
   if(phi<minDPhi)phi+=2*M_PI;
-  return ((j=(int)((phi-minDPhi)/dDPhi))<0 || j>EBYE_DPHI_BINS-2) ? (int)EBYE_DPHI_BINS-1 : j;
+  if( phi < minDPhi ) return EBYE_DPHI_BINS - 1;
+  int j = (int)((phi-minDPhi)/dDPhi);
+  return (j > EBYE_DPHI_BINS - 2) ? EBYE_DPHI_BINS - 1 : j;
 }
 
 inline int StEStructBinning::isphi(float phi){
-  return ((j=(int)((phi-minSPhi)/dSPhi))<0 || j>EBYE_SPHI_BINS-2) ? (int)EBYE_SPHI_BINS-1  : j;
+  if( phi < minSPhi ) return EBYE_SPHI_BINS - 1;
+  int j = (int)((phi-minSPhi)/dSPhi);
+  return (j > EBYE_SPHI_BINS - 2) ? EBYE_SPHI_BINS - 1 : j;
 }
 
 inline float StEStructBinning::phiVal(int iphi){
   return minPhi+iphi*dPhi+dPhi/2;
-};
+}
 
 inline float StEStructBinning::sphiVal(int isphi){
   return minSPhi+isphi*dSPhi+dSPhi/2;
-};
+}
 
 inline float StEStructBinning::dphiVal(int idphi){
   return minDPhi+idphi*dDPhi+dDPhi/2;
-};
-
+}
 
 inline int StEStructBinning::ieta(float eta){
-  return ((j=(int)((eta-minEta)/dEta))<0 || j>EBYE_ETA_BINS-2) ? (int)EBYE_ETA_BINS-1 : j;  
+  if( eta < minEta ) return EBYE_ETA_BINS - 1;
+  int j = (int)( (eta - minEta) / dEta );
+  return (j > EBYE_ETA_BINS - 2) ? EBYE_ETA_BINS - 1 : j;  
 }
 
 inline int StEStructBinning::ideta(float eta){
-  return ((j=(int)((eta-minDEta)/dDEta))<0 || j>EBYE_DETA_BINS-2) ? (int)EBYE_DETA_BINS-1 : j;
+  if( eta < minDEta ) return EBYE_ETA_BINS - 1;
+  int j = (int)( (eta-minDEta)/dDEta );
+  return (j > EBYE_DETA_BINS - 2) ? EBYE_DETA_BINS - 1 : j;
 }
 
 inline int StEStructBinning::iseta(float eta){
-  return ((j=(int)((eta-minSEta)/dSEta))<0 || j>EBYE_SETA_BINS-2) ? (int)EBYE_SETA_BINS-1 : j;
-  
+  if( eta < minSEta ) return EBYE_ETA_BINS - 1;
+  return (j > EBYE_SETA_BINS - 2) ? EBYE_SETA_BINS - 1 : j;
 }
 
 inline float StEStructBinning::etaVal(int ieta){
   return minEta+ieta*dEta+dEta/2;
-};
+}
 
 inline float StEStructBinning::setaVal(int iseta){
   return minSEta+iseta*dSEta+dSEta/2;
-};
+}
 
 inline float StEStructBinning::detaVal(int ideta){
   return minDEta+ideta*dDEta+dDEta/2;
-};
-
-
+}
 
 inline int StEStructBinning::imt(float mt){
-  return ((j=(int)((mt-minMt)/dMt))<0 || j>EBYE_MT_BINS-2) ? (int)EBYE_MT_BINS-1 : j;  
-
+  if( mt < minMt ) return EBYE_MT_BINS - 1;
+  int j = (int)((mt-minMt)/dMt);
+  return (j > EBYE_MT_BINS - 2) ? EBYE_MT_BINS - 1 : j;  
 }
 
 inline int StEStructBinning::idmt(float mt){
-  return ((j=(int)((mt-minDMt)/dDMt))<0 || j>EBYE_DMT_BINS-2) ? (int)EBYE_DMT_BINS-1 : j;
-  
+  if( mt < minDMt ) return EBYE_DMT_BINS - 1;
+  int j = (int)((mt-minDMt)/dDMt);
+  return (j > EBYE_DMT_BINS - 2) ? EBYE_DMT_BINS-1 : j;
 }
+
 inline int StEStructBinning::ismt(float mt){
-  return ((j=(int)((mt-minSMt)/dSMt))<0 || j>EBYE_SMT_BINS-2) ? (int)EBYE_SMT_BINS-1 : j;
-  
+  if( mt < minSMt ) return EBYE_SMT_BINS - 1;
+  int j = (int)((mt-minSMt)/dSMt);
+  return (j > EBYE_SMT_BINS - 2) ? EBYE_SMT_BINS-1 : j;
 }
 
 inline float StEStructBinning::mtVal(int imt){
   return minMt+imt*dMt+dMt/2;
-};
+}
 
 inline float StEStructBinning::smtVal(int ismt){
   return minSMt+ismt*dSMt+dSMt/2;
-};
+}
 
 inline float StEStructBinning::dmtVal(int idmt){
   return minDMt+idmt*dDMt+dDMt/2;
-};
-
+}
 
 inline int StEStructBinning::iDeltaMt(float mt){
-  return ((j=(int)((mt-minDeltaMt)/dDeltaMt))<0 || j>EBYE_DELTAMT_BINS-2) ? (int)EBYE_DELTAMT_BINS-1 : j;
-  
+  if( mt < minDeltaMt ) return EBYE_DELTAMT_BINS - 1;
+  int j = (int)((mt-minDeltaMt)/dDeltaMt);
+  return (j > EBYE_DELTAMT_BINS - 2) ? EBYE_DELTAMT_BINS-1 : j;
 }
 
 inline float StEStructBinning::deltaMtVal(int ideltaMt){
   return minDeltaMt+ideltaMt*dDeltaMt+dDeltaMt/2;
-};
+}
 
 #endif
 
 /***********************************************************************
  *
  * $Log: StEStructBinning.h,v $
+ * Revision 1.2  2004/04/13 16:58:37  chunhuih
+ * changed a set of binning functions, so that when the variable is below the
+ * minimum of the binning range, the function returns the correct overflow bin
+ * index.
+ *
  * Revision 1.1  2003/10/15 18:20:46  porter
  * initial check in of Estruct Analysis maker codes.
  *
