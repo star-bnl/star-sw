@@ -2,6 +2,14 @@
 #include "StiPlacement.h"
 
 StiPlacement::StiPlacement(){
+    normalRefAngle=0; 
+    normalRadius=0;   
+    normalYoffset=0;
+    centerRefAngle=0; 
+    centerRadius=0;   
+    centerOrientation=0;  
+    layerRadius=0;
+    zCenter=0;
   setCenterRep(0., 0., 0.);
 }// StiPlacement()
 
@@ -11,6 +19,7 @@ void StiPlacement::setCenterRep(float refAngle_, float radius_,
   while(refAngle_ <  -M_PI){ refAngle_ += 2.*M_PI; }
   while(refAngle_ >=  M_PI){ refAngle_ -= 2.*M_PI; }
   centerRefAngle = refAngle_;
+
 
   if(radius_ >= 0.){ centerRadius = radius_; }
   
@@ -34,7 +43,6 @@ void StiPlacement::setNormalRep(float refAngle_, float radius_,
   normalRefAngle = refAngle_;
 
   if(radius_ >= 0.){ normalRadius = radius_; }
-  
   normalYoffset = yOffset_;
 
   // the checking above makes these values within bounds, also

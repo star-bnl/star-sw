@@ -77,9 +77,6 @@ bool StiLocalTrackMerger::configureMaxTrack(StiKalmanTrack* lowerTrack)
 	return false;
     }
     
-    mMaxTrack.reset();
-    mMaxTrackNode.reset();
-    
     //Now find the upper limit for search:
     mMaxTrack.reset();
     mMaxTrackNode.reset();

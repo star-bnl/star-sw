@@ -76,8 +76,9 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	  if (targetHit && status==0)
 	    {
 	      chi2 = targetNode->evaluateChi2(targetHit);
-	      targetNode->setChi2(chi2);
+	      targetNode->setChi2(1e52);
 	      if (chi2<_pars.getMaxChi2() ) 
+	        targetNode->setChi2(chi2);
 		status = targetNode->updateNode();
 	    }
 	  if (status<0)
@@ -142,10 +143,11 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	  if (targetHit && status==0)
 	    {
 	      chi2 = targetNode->evaluateChi2(targetHit);
-	      targetNode->setChi2(chi2);
+	      targetNode->setChi2(1e51);
 	      if (chi2>20)
 		status = -50.;
 	      else if (chi2 < _pars.getMaxChi2())
+	        targetNode->setChi2(chi2);
 		status = targetNode->updateNode();
 	    }
 	  if (status<0)

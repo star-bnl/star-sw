@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.35 2004/10/25 14:15:56 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.36 2004/10/26 06:45:37 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.36  2004/10/26 06:45:37  perev
+ * version V2V
+ *
  * Revision 2.35  2004/10/25 14:15:56  pruneau
  * various changes to improve track quality.
  *
@@ -178,6 +181,7 @@ void StiKalmanTrackNode::setState(const StiKalmanTrackNode * n)
   nullCount = n->nullCount;
   contiguousHitCount = n->contiguousHitCount;
   contiguousNullCount = n->contiguousNullCount;
+  setChi2(1e59);   //VP
 }
 
 
@@ -337,10 +341,12 @@ double StiKalmanTrackNode::getPhase() const
   //! This function translates between ITTF helix parameters and
   //! StHelixModel phi. It is only used to fill StTrackGeometry.
   //! For a StPhysicalHelix, phi must be transformed by -h*pi/2.
-  const StThreeVector<double> p=getGlobalMomentum();
-  double h = getHelicity();
-  return (p.y()==0&&p.x()==0) ? (1-2.*h)*M_PI/4. : p.phi();
+  return getPsi()-getHelicity()*M_PI/2;
 
+}
+double StiKalmanTrackNode::getPsi() const
+{
+  return getGlobalMomentum().phi();
 }
 
 /// returns momentum and its error matrix 
@@ -812,11 +818,13 @@ double StiKalmanTrackNode::pathLToNode(const StiKalmanTrackNode * const oNode)
 
 inline double StiKalmanTrackNode::length(const StThreeVector<double>& delta, double curv)
 {
-  double tR = fabs(2./curv);
-  double m = delta.magnitude();
-  if(m<tR) return  tR*asin(delta.magnitude()/tR);
-  //  cout <<"Trapping m"<<endl;
-  return tR*M_PI/2.;
+  
+  double m = delta.perp();
+  double as = 0.5*m*curv;
+  double lxy=0;
+  if (fabs(as)<0.01) { lxy = m*(1.+as*as/24);}
+  else               { lxy = 2.*asin(as)/curv;}
+  return sqrt(lxy*lxy+delta.z()*delta.z());
 }
 
 StThreeVector<double> StiKalmanTrackNode::getPointAt(double xk) const

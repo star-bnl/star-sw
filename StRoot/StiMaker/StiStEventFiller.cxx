@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.42 2004/10/14 02:21:34 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 2.43 2004/10/26 06:45:41 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.43  2004/10/26 06:45:41  perev
+ * version V2V
+ *
  * Revision 2.42  2004/10/14 02:21:34  calderon
  * Updated code in StTrackDetectorInfo, now only increment the reference count
  * for globals, not for primaries.  So fillTrackDetectorInfo changed to reflect
@@ -614,28 +617,25 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanTrack* track, bool refCountIncr) 
 {
   //cout << "StiStEventFiller::fillDetectorInfo() -I- Started"<<endl;
+  int dets[100]; memset(dets,0,sizeof(dets));
   vector<StMeasuredPoint*> hitVec = track->stHits();
-  vector<StMeasuredPoint*>::iterator first = hitVec.begin();
-  if (StHit* firstHit = dynamic_cast<StHit*> (*first)) {
-      detInfo->setFirstPoint(firstHit->position());
-  }
-  else {
-      first++;
-      detInfo->setFirstPoint((*first)->position());      
-  }
-  detInfo->setLastPoint(hitVec.back()->position());
-  // Now the number of Points are filled by detector, encoding
-  // is no longer needed.
-  detInfo->setNumberOfPoints(static_cast<unsigned char>(stEventPoints(track,kTpcId)),kTpcId);
-  detInfo->setNumberOfPoints(static_cast<unsigned char>(stEventPoints(track,kSvtId)),kSvtId);
-  detInfo->setNumberOfPoints(static_cast<unsigned char>(stEventPoints(track,kSsdId)),kSsdId);
-  for (vector<StMeasuredPoint*>::iterator point = hitVec.begin(); point!=hitVec.end(); ++point) 
+  int numb = hitVec.size();
+  detInfo->setFirstPoint(hitVec[     0]->position());
+  detInfo->setLastPoint (hitVec[numb-1]->position());
+
+  for (int i=0;i<numb;i++) 
     {
-      StHit * hh = dynamic_cast<StHit*>(*point);
-      if (hh) {
-	  detInfo->addHit(hh,refCountIncr);
-      }
+      StHit * hh = (StHit*)hitVec[i];
+      detInfo->addHit(hh,refCountIncr);
+      hh->setFitFlag(1);
+      StDetectorId id = hh->detector();
+      dets[id]++;
     }
+  for (int i=0;i<int(sizeof(dets)/sizeof(int));i++) {
+    if (!dets[i]) continue;
+    detInfo->setNumberOfPoints(dets[i],static_cast<StDetectorId>(i));
+  }
+
   //cout << "StiStEventFiller::fillDetectorInfo() -I- Done"<<endl;
 }
 
@@ -653,18 +653,21 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
     node = track->getOuterMostHitNode();
   else
     node = track->getInnerMostHitNode();
- 
-
-
+  StiHit *ihit = node->getHit();
   StThreeVectorF origin(node->getX(),node->getY(),node->getZ());
+  StThreeVectorF hitpos(ihit->x()   ,ihit->y()   ,ihit->z()   );
+  double dif = (hitpos-origin).mag();
+  if (dif>5.) {
+    printf("*** DIFF TOO BIG %g\n",dif);
+    printf("H=%g %g %g N =%g %g %g\n",hitpos.x(),hitpos.y(),hitpos.z(),origin.x(),origin.y(),origin.z());
+  //assert(dif<5.);
+  }
   origin.rotateZ(node->getRefAngle());
-  // making some checks.  Seems the curvature is infinity sometimes and
+
+    // making some checks.  Seems the curvature is infinity sometimes and
   // the origin is sometimes filled with nan's...
   
-  if (!finite(origin.x()) ||
-      !finite(origin.y()) ||
-      !finite(origin.z()) ||
-      !finite(node->getCurvature())) {
+  if (origin.bad()) {
       cout << "StiStEventFiller::fillGeometry() Encountered non-finite numbers!!!! Bail out completely!!! " << endl;
       cout << "Last node had:" << endl;
       cout << "Ref Position  " << node->getRefPosition() << endl;
@@ -676,7 +679,7 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
       abort();
   }
   StTrackGeometry* geometry =new StHelixModel(short(track->getCharge()),
-					      node->getPhase(),
+					      node->getPsi(),
 					      fabs(node->getCurvature()),
 					      node->getDipAngle(),
 					      origin, 
@@ -749,9 +752,14 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   StTrackFitTraits fitTraits(geantIdPidHyp,0,chi2,covMFloat);
   // Now we have to use the new setters that take a detector ID to fix
   // a bug.  There is no encoding anymore.
-  fitTraits.setNumberOfFitPoints(static_cast<unsigned char>(stEventFitPoints(track,kTpcId)),kTpcId);
-  fitTraits.setNumberOfFitPoints(static_cast<unsigned char>(stEventFitPoints(track,kSvtId)),kSvtId);
-  fitTraits.setNumberOfFitPoints(static_cast<unsigned char>(stEventFitPoints(track,kSsdId)),kSsdId);
+
+  int nFitPoints[100]; memset(nFitPoints,0,sizeof(nFitPoints));
+  stEventFitPoints(track,nFitPoints);
+
+  for (int i=0;i<int(sizeof(nFitPoints)/sizeof(int));i++) {
+    if (!nFitPoints[i]) continue;
+    fitTraits.setNumberOfFitPoints((unsigned char)nFitPoints[i],(StDetectorId)i);
+  }
   if (gTrack->type()==primary) {
      fitTraits.setPrimaryVertexUsedInFit(true);
   }
@@ -892,75 +900,36 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
   gTrack->setNumberOfPossiblePoints(static_cast<unsigned char>(maxPointsTpc),kTpcId);
   gTrack->setNumberOfPossiblePoints(static_cast<unsigned char>(maxPointsSvt),kSvtId);
   gTrack->setNumberOfPossiblePoints(static_cast<unsigned char>(maxPointsSsd),kSsdId);
+
   fillGeometry(gTrack, track, false); // inner geometry
-  fillGeometry(gTrack, track, true);  // outer geometry
+  fillGeometry(gTrack, track, true ); // outer geometry
   fillFitTraits(gTrack, track);
-  //fillPidTraits(gTrack, track);
   fillFlags(gTrack);
   return;
 }
 bool StiStEventFiller::accept(StiKalmanTrack* track) {
     return (track->getTrackLength()>0); // insert other filters for riff-raff we don't want in StEvent here.
 }
-unsigned short StiStEventFiller::stEventPoints(StiKalmanTrack* track,StDetectorId id) 
-{
-  // need to write the fit points in StEvent following the convention
-  // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
-  //vector<StHit*> hitVec = track->stHits();
-  vector<StMeasuredPoint*> hitVec = track->stHits();
-    
-  unsigned short nPoints(0);
-    
-  // loop here to get the hits in each detector
-  // use StDetectorId's to count for each detector.
-    
-  for (vector<StMeasuredPoint*>::iterator point = hitVec.begin(); point!=hitVec.end();++point) {
-    StHit * hit = dynamic_cast<StHit *>(*point);
-    if (hit) {
-      StDetectorId detId = hit->detector();
-      if (detId == id) {
-	++nPoints;
-      }
-    }
-  }
-  return (nPoints); // No encoding is necessary anymore
-    
-}
-unsigned short StiStEventFiller::stEventFitPoints(StiKalmanTrack* track, StDetectorId id) 
+void StiStEventFiller::stEventFitPoints(StiKalmanTrack* track, int *nFitPoints) 
 {
     // need to write the fit points in StEvent,
     // where now StEvent has a set method that knows about the detector id.
     // No encoding is necessary anymore.
-    //vector<StMeasuredPoint*> hitVec = track->stHits();
-    unsigned short nFitPoints(0);
-    unsigned char ImUsed = 1;
+
     StiKTNBidirectionalIterator it;
     double maxChi2 = track->fitPars()->getMaxChi2();
     // loop here to get the hits using iterator.
     for (it=track->begin();it!=track->end();it++) {
 	StiKalmanTrackNode& ktn = (*it);
-	if (ktn.getChi2() < maxChi2) {
-	    // use StDetectorId's and switch
-	    const StHit* chit = dynamic_cast<const StHit*>(ktn.getHit()->stHit());
-	    if (chit) {
-		// the stHit function returns a const StHit, so we can't modify it
-		// unless we do the dirty trick of const_cast...
-		StHit* hit = const_cast<StHit*>(chit);
-		// setFitFlag is needed for all hits
-		// one additional reminder that if one
-		// doesn't call this method for the 3 detectors (tpc, svt, ssd)
-		// the information will be incomplete.
-		StDetectorId detId = hit->detector();
-		if  (detId==id) {		
-		    hit->setFitFlag(ImUsed);
-		    ++nFitPoints;
-		}
-	    } // if (hit)
-	} // if (chi2<maxChi2)
+	if (ktn.getChi2() > maxChi2)	continue;
+        StiHit *stih = ktn.getHit();
+        if (!stih)			continue;
+	const StHit* hit = (const StHit*)stih->stHit();
+        if (!hit) 			continue;
+          // use StDetectorId's and accumulate
+	StDetectorId detId = hit->detector();
+	nFitPoints[detId]++;
     } // KTNode loop    
-
-  return (nFitPoints);
-    
 }
 
 float StiStEventFiller::impactParameter(StiKalmanTrack* track) 
@@ -984,7 +953,7 @@ float StiStEventFiller::impactParameter(StiKalmanTrack* track)
 
   physicalHelix->setParameters(fabs(node->getCurvature()),
 			       node->getDipAngle(),
-			       node->getPhase()-node->getHelicity()*M_PI/2.,
+			       node->getPhase(),
 			       *originD,
 			       node->getHelicity());
   
