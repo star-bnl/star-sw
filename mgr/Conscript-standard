@@ -103,7 +103,7 @@ if ($Dir !~ /pams\//) {
     my $hh = $Dir . "/" . $h;
     if (-r $hh) {
       open (In,$hh) or die "Can't open $hh";
-      while ($line = <In>) {if ($line =~/ClassDef/) {push @Defs, $h; next;}}
+      while ($line = <In>) {if ($line =~/ClassDef/ || $line =~ /StCollectionDef/) {push @Defs, $h; goto ENDL;}}
       close(In);
     }
     else {      
@@ -113,12 +113,13 @@ if ($Dir !~ /pams\//) {
 	  my $hh = $RepDir . "/" . $h;
 	  if (-r $hh) {
 	    open (In,$hh) or die "Can't open $hh";
-	    while ($line = <In>) {if ($line =~/ClassDef/) {push @Defs, $h; next;}}
+	    while ($line = <In>) {if ($line =~/ClassDef/ || $line =~ /StCollectionDef/) {push @Defs, $h; goto ENDL;}}
 	    close(In);
 	  }
 	}
       }
     }
+  ENDL:
   }
 }
 else {
