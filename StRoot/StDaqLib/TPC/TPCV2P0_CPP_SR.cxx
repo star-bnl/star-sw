@@ -8,6 +8,7 @@
 // TPC V1.0 Raw Reader
 // change log
 // 03-Jun-99 MJL added return TRUE to TPCV2P0_CPP_SR::initialize()
+// 21-Jun-99 MJL test for existence of CPP bank before printing ASIC params (line 38)
 
 TPCV2P0_CPP_SR::TPCV2P0_CPP_SR(int s, TPCV2P0_Reader *det)
 {
@@ -34,6 +35,7 @@ int TPCV2P0_CPP_SR::initialize()
     {
       banks[rcb][mz] = detector->getBankTPCCPPR(sector,rcb,mz);
       classname(Bank_TPCCPPR) *cpp = banks[rcb][mz];
+      if (cpp)
       printf("ASIC params sec%d RB%d MZ %d: TH_LO %d, TH_HI %d, NSEQ_LO %d, NSEQ_HI %d\n",sector+1, rcb+1, mz+1, 
 	     cpp->asic_params.thresh_lo,
 	     cpp->asic_params.thresh_hi,
