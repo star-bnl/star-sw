@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.cc,v 1.20 2003/12/22 18:59:36 perev Exp $
+ * $Id: StHelix.cc,v 1.21 2004/01/27 02:49:48 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1997
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelix.cc,v $
+ * Revision 1.21  2004/01/27 02:49:48  perev
+ * Big value appropriate for float
+ *
  * Revision 1.20  2003/12/22 18:59:36  perev
  * remove test for only +ve pathLeng added before
  *
@@ -407,11 +410,12 @@ double StHelix::pathLength(const StThreeVector<double>& r,
     // the max. largest value for s is returned.
     //
     double s;
-#ifndef ST_NO_NUMERIC_LIMITS 
-    const double NoSolution = numeric_limits<double>::max();
-#else
-    const double NoSolution = DBL_MAX;
-#endif
+//#ifndef ST_NO_NUMERIC_LIMITS 
+//    const double NoSolution = numeric_limits<double>::max();
+//#else
+//    const double NoSolution = DBL_MAX;
+//#endif
+    const double NoSolution = 3.e+33;
 
     if (mSingularity) {
 	double t = n.z()*mSinDipAngle +
@@ -467,11 +471,12 @@ double StHelix::pathLength(const StThreeVector<double>& r,
 pair<double, double>
 StHelix::pathLengths(const StHelix& h) const
 {
-#ifndef ST_NO_NUMERIC_LIMITS 
-    const double NoSolution = numeric_limits<double>::max();
-#else
-    const double NoSolution = DBL_MAX;
-#endif
+//#ifndef ST_NO_NUMERIC_LIMITS 
+//    const double NoSolution = numeric_limits<double>::max();
+//#else
+//    const double NoSolution = DBL_MAX;
+//#endif
+    const double NoSolution = 3.e+33;
 
     //
     //	Cannot handle case where one is a helix
