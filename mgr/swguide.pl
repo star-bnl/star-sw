@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: swguide.pl,v 1.3 1999/07/07 13:21:07 wenaus Exp $
+# $Id: swguide.pl,v 1.4 1999/07/10 13:17:21 wenaus Exp $
 #
 # $Log: swguide.pl,v $
+# Revision 1.4  1999/07/10 13:17:21  wenaus
+# Add ROOT class doc links, when they exist, which isn't too often
+#
 # Revision 1.3  1999/07/07 13:21:07  wenaus
 # faster and more info presented
 #
@@ -96,6 +99,8 @@ Pointers and comments...
     recent CVS commit, and the most recent tag for that file version
     <li> Ball color indicates time since most recent mod:
     <img src="/images/redball.gif">=2days, <img src="/images/greenball.gif">=2weeks, <img src="/images/blueball.gif">=2months, <img src="/images/whiteball.gif">=older
+    <li> <img src="/STAR/html/comp_l/image/new.gif"> C++ filenames now linked 
+    to the ROOT-generated class doc if it exists
 </ul>
 END
 
@@ -653,8 +658,18 @@ sub showFiles {
                 }
                 $ballUrl="<img src=\"/images/".$ball."ball.gif\">";
 
-                $output .= sprintf("%s%-35s %s%-7s%s %s %s %s%s%9s%s %s %s\n",
-                                   $ballUrl,$fname,
+                ## Does ROOT class doc exist?
+                $fnameFull = $fname;
+                $fnameLen = length $fname;
+                $fillLen = 35 - $fnameLen;
+                if ( $ftype eq 'C++' ) {
+                    if ( -e "/afs/rhic/star/packages/$rel/StRoot/html/$ff.html" ) {
+                        $fnameFull = "<a href=\"http://www.star.bnl.gov/STARAFS/comp/src/$rel/StRoot/html/$ff.html\">$ff</a>$ee";
+                    }
+                }
+                $blank='                                              ';
+                $output .= sprintf("%s%s%s %s%-7s%s %s %s %s%s%9s%s %s %s\n",
+                                   $ballUrl,$fnameFull,substr($blank,0,$fillLen),
                                    "<a href=\"http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/$theDir/$thePkg/$fname?rev=$cver&content-type=text/x-cvsweb-markup\">",$cver,"</a>",
                                    $date,
                                    "<a href=\"http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/$theDir/$thePkg/$fname\">CVS</a>",
