@@ -68,8 +68,8 @@ void StiHitContainer::add(StiHit* hit)
   const StiDetector* det = hit->detector();
   if (!det) 
     throw runtime_error("StiHitContainer::add() -E- Given hit has no associated detector");
-  _key.refangle = det->getPlacement()->getCenterRefAngle();
-  _key.position = det->getPlacement()->getCenterRadius();
+  _key.refangle = det->getPlacement()->getNormalRefAngle();
+  _key.position = det->getPlacement()->getNormalRadius();
   _map[_key].theHitVec.push_back(hit);
   return;
 }
@@ -122,15 +122,15 @@ unsigned int StiHitContainer::size() const
 
 vector<StiHit*>::iterator StiHitContainer::hitsBegin(const StiDetector* layer)
 {
-    _key.refangle = layer->getPlacement()->getCenterRefAngle();
-    _key.position = layer->getPlacement()->getCenterRadius();
+    _key.refangle = layer->getPlacement()->getNormalRefAngle();
+    _key.position = layer->getPlacement()->getNormalRadius();
     return _map[_key].theHitVec.begin();
 }
 
 vector<StiHit*>::iterator StiHitContainer::hitsEnd(const StiDetector* layer)
 {
-    _key.refangle = layer->getPlacement()->getCenterRefAngle();
-    _key.position = layer->getPlacement()->getCenterRadius();
+    _key.refangle = layer->getPlacement()->getNormalRefAngle();
+    _key.position = layer->getPlacement()->getNormalRadius();
     //if (_map[_key].theHitVec.end() != _map[_key].theEffectiveEnd) {
     //cout <<"StiHitContainer::hitsEnd(const StiDetector*). ERROR:\t"
     //     <<"theEffectiveEnd != theHitVec.end()"<<endl

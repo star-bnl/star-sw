@@ -74,8 +74,8 @@ bool StiLocalTrackSeedFinder::extendHit(StiHit& hit)
   //Done if the inner most detector is reached.
   if ( _detectorContainer->moveIn()==false ) return false;
   const StiDetector* newLayer = _detectorContainer->getCurrentDetector(); //**_detectorContainer;
-  StiHit* closestHit = _hitContainer->getNearestHit(newLayer->getPlacement()->getCenterRadius(),
-						    newLayer->getPlacement()->getCenterRefAngle(),
+  StiHit* closestHit = _hitContainer->getNearestHit(newLayer->getPlacement()->getNormalRadius(),
+						    newLayer->getPlacement()->getNormalRefAngle(),
 						    hit.y(), hit.z(),_pars._deltaY, _pars._deltaZ);
   bool returnValue;
   if (closestHit ) 
@@ -148,7 +148,7 @@ StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
    We try to extrapolate the segment (pt1->pt2) to predict pt3.  We
    do this in two projections (r,y) and (r,z) where y is the distance
    along pad, z is the global z, and r is the inward pointing sector
-   normal (i.e., StiPlacement->getCenterRadius() )
+   normal (i.e., StiPlacement->getNormalRadius() )
 
    In the r,y plane, e.g., we define r = m*y + b s.t.
    m = (r2-r1) / (y2-y1)
@@ -185,7 +185,7 @@ bool StiLocalTrackSeedFinder::extrapolate()
     }
 
   const StiDetector* newLayer = **_detectorContainer;
-  double r3 = newLayer->getPlacement()->getCenterRadius();
+  double r3 = newLayer->getPlacement()->getNormalRadius();
   
   //Temp hack by Mike
   if (r3<=60.) { return false; }
@@ -231,7 +231,7 @@ bool StiLocalTrackSeedFinder::extrapolate()
     <<"query hit container for extension hits"<<endl;
   */
   StiHit* closestHit = _hitContainer->getNearestHit(r3,
-						    newLayer->getPlacement()->getCenterRefAngle(),
+						    newLayer->getPlacement()->getNormalRefAngle(),
 						    y3,z3,  
 						    fabs(y3_plus-y3_minus) /2.,
 						    fabs(z3_plus-z3_minus) /2.);
@@ -341,12 +341,12 @@ bool RPhiLessThan::operator()(const StiDetector* lhs, const StiDetector* rhs)
   StiPlacement* lhsp = lhs->getPlacement();
   StiPlacement* rhsp = rhs->getPlacement();
     
-  if (lhsp->getCenterRadius()<rhsp->getCenterRadius())
+  if (lhsp->getNormalRadius()<rhsp->getNormalRadius())
     return false;
-  else if (lhsp->getCenterRadius()>rhsp->getCenterRadius()) 
+  else if (lhsp->getNormalRadius()>rhsp->getNormalRadius()) 
     return true;
   else
-    return (lhsp->getCenterRefAngle()<rhsp->getCenterRefAngle());
+    return (lhsp->getNormalRefAngle()<rhsp->getNormalRefAngle());
 }
 */
 

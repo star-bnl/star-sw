@@ -101,7 +101,7 @@ bool StiDetectorNodePositionLessThan::operator() (const StiCompositeTreeNode<Sti
     StiPlacement* lhsp = lhs->getData()->getPlacement();
     StiPlacement* rhsp = rhs->getData()->getPlacement();
 
-    return lhsp->getCenterRadius()<rhsp->getCenterRadius();
+    return lhsp->getNormalRadius()<rhsp->getNormalRadius();
 }
 
 /*
