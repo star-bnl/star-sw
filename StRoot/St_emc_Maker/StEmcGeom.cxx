@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.3 2000/01/29 00:04:57 akio Exp $
+ * $Id: StEmcGeom.cxx,v 1.4 2000/04/11 19:48:40 pavlinov Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.4  2000/04/11 19:48:40  pavlinov
+ * Merge versions of Pavlinov and Ogawa
+ *
  * Revision 1.3  2000/01/29 00:04:57  akio
  * temprary fix for endcap. need more work, but no more junk messages and crash
  *
@@ -23,6 +26,7 @@
 #include <strings.h>
 #include "StEmcGeom.h"
 ClassImp(StEmcGeom)
+
 // _____________________________________________________________________
 StEmcGeom::StEmcGeom(const Int_t det) 
 {
@@ -52,22 +56,42 @@ void StEmcGeom::initGeom(const Int_t det)
   mDetector = det;
   // Common information for all detectors
   mNModule  = 120;
+  mEtaMax   = 0.99;
   mPhiOffset.Set(2);  mPhiStep.Set(2); 
 
-  mPhiOffset[0] = (75.-3.)/ 180. * M_PI;
-  mPhiOffset[1] = (105.+3.)/180. * M_PI;
+  mPhiOffset[0] = (75.-3.)/ 180. * C_PI;
+  mPhiOffset[1] = (105.+3.)/180. * C_PI;
+  mPhiStep[0] = -C_2PI /(mNModule/2); mPhiStep[1] = -mPhiStep[0];
 
-  mPhiStep[0] = -2.*M_PI /(mNModule/2); mPhiStep[1] = -mPhiStep[0];
+  mPhiBound.Set(2);
+  mPhiBound[0] = 75. /180. * C_PI;
+  mPhiBound[1] = 105./180. * C_PI;
+  mPhiStepHalf = 3. * C_PI/180.;
+
+  mPhiModule.Set(mNModule);
+  for(Int_t i=0; i<mNModule; i++){
+    Int_t im = 2*i/mNModule;
+    Float_t phiW=mPhiOffset[im]+mPhiStep[im]*i;
+    while(phiW >=  C_PI) phiW -= C_2PI;
+    while(phiW <  -C_PI) phiW += C_2PI;
+    mPhiModule[i] = phiW;
+  }
 
   switch (det){
   case 1:
   case 2:
+    mRadius   = 225.405;   // Edge of SC1 (223.5+2* 0.9525)
+    mYWidth   = 11.1716;  
     initBEMCorBPRS();
     break;
   case 3:
+    mRadius   = 230.467;   // See find_pos_ems.F or Geant Geometry
+    mYWidth   = 11.2014*2;  
     initBSMDE();
     break;
   case 4:
+    mRadius   = 232.467;   // See find_pos_ems.F or Geant Geometry
+    mYWidth   = 22.835;  
     initBSMDP();
     break;
   case 5:
@@ -83,7 +107,6 @@ void StEmcGeom::initGeom(const Int_t det)
   default:
     printf(" StEmcGeom: Bad value of mDtector %i \n", mDetector);
   }
-  //printGeom();
 }
 // _____________________________________________________________________
 void StEmcGeom::initBEMCorBPRS() 
@@ -92,15 +115,13 @@ void StEmcGeom::initBEMCorBPRS()
   mNSub     = 2;  
   mNes      = mNEta * mNSub;
   mNRaw     = mNes  * mNModule;
-  mRadius   = 225.405;  // Edge of SC1 (223.5+2* 0.9525)
-  mYWidth   = 11.1716;  
   mZlocal.Set(mNEta);  mEta.Set(mNEta); 
   mYlocal.Set(mNSub);  mPhi.Set(mNSub); 
   
   // Eta variable ( Z direction)
   TArrayF etaw(mNEta+1); Int_t i;
 
-  for(i=0; i<mNEta; i++) {etaw[i] = 0.05*i;} etaw[mNEta]=0.99;
+  for(i=0; i<mNEta; i++) {etaw[i] = 0.05*i;} etaw[mNEta]=mEtaMax;;
 
   for(i=0; i< mNEta; i++){
     mEta[i]    = (etaw[i+1] + etaw[i])/2.;
@@ -114,7 +135,6 @@ void StEmcGeom::initBEMCorBPRS()
   mPhi.Set(mNSub); 
   mPhi[0] =  atan2(mYWidth/2.,mRadius);    mPhi[1] = -mPhi[0];
 
-  //  cout<<" Default constructor for StEmcGeom (Ver. 1.00 # 20-Jun-1999 )"<<endl;
 }
 // _____________________________________________________________________
 void StEmcGeom::initBSMDE(){
@@ -122,8 +142,6 @@ void StEmcGeom::initBSMDE(){
   mNSub     = 1;  
   mNes      = mNEta * mNSub;
   mNRaw     = mNes  * mNModule;
-  mRadius   = 230.467;   // See find_pos_ems.F or Geant Geometry
-  mYWidth   = 11.2014*2;  
   mZlocal.Set(mNEta);  mEta.Set(mNEta); 
   mYlocal.Set(mNSub);  mPhi.Set(mNSub); 
   
@@ -158,8 +176,6 @@ void StEmcGeom::initBSMDP()
   mNSub     = 15;  
   mNes      = mNEta * mNSub;
   mNRaw     = mNes  * mNModule;
-  mRadius   = 232.467;   // See find_pos_ems.F or Geant Geometry
-  mYWidth   = 22.835;  
   mZlocal.Set(mNEta);  mEta.Set(mNEta); 
   mYlocal.Set(mNSub);  mPhi.Set(mNSub); 
   
@@ -167,7 +183,7 @@ void StEmcGeom::initBSMDP()
   TArrayF etaw(mNEta+1); Int_t i;
 
   for(i=0; i<mNEta; i++) {etaw[i] = 0.1*i;} 
-  etaw[mNEta]=0.99;
+  etaw[mNEta]=mEtaMax;
 
   for(i=0; i< mNEta; i++){
     mEta[i]    = (etaw[i+1] + etaw[i])/2.;
@@ -184,6 +200,7 @@ void StEmcGeom::initBSMDP()
 
   for(i=0; i<mNSub; i++){
     mYlocal[i] = shift - (sphiwdh+sphidwdh)*2*i;
+    if(mDetector==4) mYlocal[i] = - mYlocal[i];    // 26-oct-1999 => !!! ?? 
     mPhi[i] = atan2(mYlocal[i], mRadius);
   }
 }
@@ -303,8 +320,11 @@ void  StEmcGeom::printGeom()
   cout<<" mNRaw      "<<mNRaw<<endl;
   cout<<" mRadius    "<<mRadius<<endl;
   cout<<" mYWidth    "<<mYWidth<<endl;
-  cout<<" mPhiOffset "<<mPhiOffset[0]<<"  "<<mPhiOffset[1]<<endl;
-  cout<<" mPhiStep   "<<mPhiStep[0]<<"  "<<mPhiStep[1]<<endl;
+  cout<<" mEtaMax    "<<mEtaMax<<endl;
+  cout<<" mPhiOffset "<<mPhiOffset[0]<<"("<<toDeg(mPhiOffset[0])<<")   "
+      <<mPhiOffset[1]<<"("<<toDeg(mPhiOffset[0])<<")"<<endl;
+  cout<<" mPhiStep   "<<mPhiStep[0]<<"("<<toDeg(mPhiStep[0])<<")   "
+      <<mPhiStep[1]<<"("<<toDeg(mPhiStep[1])<<")"<<endl;
 
   Int_t i;
   cout<<"\n Z grid and Eta grid "<<endl;
@@ -315,4 +335,10 @@ void  StEmcGeom::printGeom()
   for(i=0; i<mNSub; i++){
     cout<<" i "<<i<<" Yl "<<mYlocal[i]<<" Phi "<<mPhi[i]<<endl;
   }
-} 
+  cout<<"\n Phi grid for center of module in STAR system "<<endl;
+  for(i=0; i<mNModule; i++){
+    if(i==60) cout<<"\n == "<<endl;
+    printf(" %i phi %7.4f (%5.0f) \n",i+1,mPhiModule[i],mPhiModule[i]*C_DEG_PER_RAD);
+  }
+  cout<<"\n == "<<endl; 
+}
