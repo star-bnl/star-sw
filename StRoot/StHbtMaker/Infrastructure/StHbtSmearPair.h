@@ -1,5 +1,5 @@
 /***************************************
- * $Id: StHbtSmearPair.h,v 1.1 2001/05/23 00:19:05 lisa Exp $
+ * $Id: StHbtSmearPair.h,v 1.2 2003/01/31 19:00:38 magestro Exp $
  *
  * Author: Mike Lisa, Ohio State lisa@mps.ohio-state.edu
  ****************************************
@@ -13,6 +13,9 @@
  ******************************************
  *
  * $Log: StHbtSmearPair.h,v $
+ * Revision 1.2  2003/01/31 19:00:38  magestro
+ * Destructor made virtual, due to virtual destructor of a data member
+ *
  * Revision 1.1  2001/05/23 00:19:05  lisa
  * Add in Smearing classes and methods needed for momentum resolution studies and correction
  *
@@ -29,7 +32,7 @@ class StHbtSmearPair{
 
   StHbtSmearPair();
   StHbtSmearPair(const StHbtPair* unSmearedPair);
-  ~StHbtSmearPair();
+  virtual ~StHbtSmearPair();
 
   void SetUnsmearedPair(const StHbtPair* unSmearedPair);  // essentially same as c'tor
 
