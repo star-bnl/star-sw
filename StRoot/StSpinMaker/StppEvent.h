@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.h,v 1.1 2002/01/16 20:22:53 akio Exp $ 
+// $Id: StppEvent.h,v 1.2 2002/01/24 17:38:33 akio Exp $ 
 // $Log: StppEvent.h,v $
+// Revision 1.2  2002/01/24 17:38:33  akio
+// add L3 info, zdc info & fix phi/psi confusion
+//
 // Revision 1.1  2002/01/16 20:22:53  akio
 // First version
 //
@@ -20,10 +23,13 @@
 #define StppEvent_h
 
 #define _Offline_tracks_
+//#define _take_global_tracks_
 #define _L3_tracks_
+#define _L3_Info_
 
 #include "TObject.h"
 #include "TClonesArray.h"
+
 class StppTrack;
 class StEvent;
 
@@ -37,8 +43,7 @@ class StppEvent : public TObject {
 #endif /*__CINT__*/
   void clear();
   void reset();
-  
-  
+    
   Int_t        runN;
   Int_t        eventN;
   Int_t        token;
@@ -76,31 +81,25 @@ class StppEvent : public TObject {
   Float_t      weightedPhiL3;
 #endif
 
-  Int_t        bbcAdcSum;   
-  Int_t        bbcNHit;   
-  Float_t      zVertexBbc;
-
-  Int_t        fpdAdcSumNorth;   
-  Int_t        fpdAdcSumSouth;   
-  Int_t        fpdAdcSumTop;   
-  Int_t        fpdAdcSumBottom;   
-  Int_t        fpdAdcSumPres1;   
-  Int_t        fpdAdcSumPres2;   
-  Int_t        fpdAdcSumSmdX;   
-  Int_t        fpdAdcSumSmdY;   
-  Int_t        fpdSouthVeto;   
+#ifdef _L3_Info_
+  Int_t        L3PileupFilterOn;
+  Int_t        L3PileupFilterAcc;
+  Float_t      L3PileupFilterData[10];
+#endif
 
   Float_t      ctbAdcSum;   
   Int_t        ctbNHit;   
+  Float_t      zdcEast;   
+  Float_t      zdcWest;   
 
   Int_t        svtNHit;   
   Float_t      emcHighTower;   
   
   void setInfoLevel(int level) {infoLevel = level;};  
   
- private:
+private:
   Int_t infoLevel;//!  
-
+  
   ClassDef(StppEvent,1)
 };
 
