@@ -1,5 +1,6 @@
 ARCH_TAG     = _sgi
 ARFLAGS      = vqs
+ARTS         = ar -t
 FF           = f77
 FFLAGS       = -c -O -w -extend_source
 FFLAGS4      = -c -O -w -extend_source -irix4
@@ -8,6 +9,7 @@ CC           = cc
 CCFLAGS      = -c -O -ansi -fullwarn -prototypes
 CCFLAGS4     = -c -O -ansi -fullwarn -prototypes -irix4
 CCFLAGS_DBG  = -c -g -ansi -fullwarn -prototypes
+FFCC_LINK_FLAGS = 
 
 hi :
 	@echo "str Makefile hi"
@@ -42,6 +44,7 @@ strbyte$(ARCH_TAG).o strtermc$(ARCH_TAG).o strlibc$(ARCH_TAG).o
 	ar $(ARFLAGS) libstr.a strlib.o strlib$(ARCH_TAG).o strmth.o strplot.o \
 	strterm$(ARCH_TAG).o str_file.o str_parse.o str_time.o \
 	strbyte$(ARCH_TAG).o strtermc$(ARCH_TAG).o strlibc$(ARCH_TAG).o
+	$(ARTS) libstr.a
 
 libstr4.a : strlib.o4 strlib$(ARCH_TAG).o4 strmth.o4 strplot.o4 strterm$(ARCH_TAG).o4 str_file.o4 \
 str_parse.o4 str_time.o4 \
@@ -50,6 +53,7 @@ strbyte$(ARCH_TAG).o4 strtermc$(ARCH_TAG).o4 strlibc$(ARCH_TAG).o4
 	ar $(ARFLAGS) libstr4.a strlib.o4 strlib$(ARCH_TAG).o4 strmth.o4 strplot.o4 \
 	strterm$(ARCH_TAG).o4 str_file.o4 str_parse.o4 str_time.o4 \
 	strbyte$(ARCH_TAG).o4 strtermc$(ARCH_TAG).o4 strlibc$(ARCH_TAG).o4
+	$(ARTS) libstr4.a
 
 libstr_dbg.a : strlib_dbg.o strlib$(ARCH_TAG)_dbg.o strmth_dbg.o strplot_dbg.o strterm$(ARCH_TAG)_dbg.o str_file_dbg.o \
 str_parse_dbg.o str_time_dbg.o \
@@ -58,6 +62,7 @@ strbyte$(ARCH_TAG)_dbg.o strtermc$(ARCH_TAG)_dbg.o strlibc$(ARCH_TAG)_dbg.o
 	ar $(ARFLAGS) libstr_dbg.a strlib_dbg.o strlib$(ARCH_TAG)_dbg.o strmth_dbg.o strplot_dbg.o \
 	strterm$(ARCH_TAG)_dbg.o str_file_dbg.o str_parse_dbg.o str_time_dbg.o \
 	strbyte$(ARCH_TAG)_dbg.o strtermc$(ARCH_TAG)_dbg.o strlibc$(ARCH_TAG)_dbg.o
+	$(ARTS) libstr_dbg.a
 
 
 strlib.o4 : strlib.f
