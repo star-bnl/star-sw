@@ -325,13 +325,8 @@ Int_t StStrangeMuDstMaker::MakeCreateMcDst() {
       case ( 9) : // Pion-
       case (11) : // Kaon+
       case (12) : // Kaon-
-        if (doT[kinkT]) {
-          // No need to keep decays not within the TPC
-          // (must change if looking for kinks inside inner TPC radius)
-          float rad = (*mcVertexIt)->position().perp();
-          if ((rad < 195.) && (rad > 65.))
-            cont[kinkT]->MakeCreateMcDst(*mcVertexIt);
-        }
+        // Keep all kinks
+        if (doT[kinkT]) cont[kinkT]->MakeCreateMcDst(*mcVertexIt);
         break;
 
       default   : {}
@@ -593,8 +588,11 @@ void StStrangeMuDstMaker::SetFractionFile(char* fname) {
 }
 
 //_____________________________________________________________________________
-// $Id: StStrangeMuDstMaker.cxx,v 3.18 2002/05/29 19:08:16 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.19 2002/06/19 15:08:40 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.19  2002/06/19 15:08:40  genevb
+// Allow all MC kinks to be kept
+//
 // Revision 3.18  2002/05/29 19:08:16  genevb
 // Better handling of improperly closed files
 //
