@@ -72,6 +72,7 @@ long fake_pedestal_(
                               *(ran0(&iseed) - 0.5) );
       }
     } 
-   fake_ped_h->nok++;
-   return STAFCV_OK;
+    ems_cal_control[nok_cc].iseed=iseed;
+    fake_ped_h->nok++;
+    return STAFCV_OK;
 }

@@ -1,4 +1,4 @@
-/*:>--------------------------------------------------------------------
+/**:>--------------------------------------------------------------------
 **: FILE:       emc_adc_hist.c
 **: HISTORY:
 **:             00jan93-v000a-hpl- Created by OGAWA, Akio
@@ -6,7 +6,17 @@
 **:<------------------------------------------------------------------*/
 #include <stdio.h>
 #include "emc_adc_hist.h"
-#include "emc_def.h"
+#include "emc_def.h" 
+#include "cfortran.h"
+#include "hbook.h"
+
+#define BOOK     0
+#define FILL     1
+#define RESET    2
+#define DEL      3
+#define MAX_CH   10
+#define MEAN_CH  11
+#define GAUSS    12
 
 long emc_adc_hist_(
   TABLE_HEAD_ST          *ems_control_h, EMS_CONTROL_ST           *ems_control ,
@@ -28,24 +38,27 @@ long emc_adc_hist_(
 **:           emc_adc_h   - header Structure for emc_adc
 **:    INOUT: files...
 **:      OUT: to the histgrams...
-**:           emc_adc_cal - fitting results foor mode 5
+**:           emc_adc_cal - fitting results for mode>10
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
-    char title[80], cdet[5];
-    long i, j, det, neta, nphi, eta, phi, bits, base, id, nbin;
-    long nok_c, nok_h, nok_a;
+    char title[80], cdet[5], copt[5]="HIST";
+    long i, j, k, det, neta, nphi, eta, phi, bits, base;
+    long nok_c, nok_h, nok_a, nok_f, mode;
+    int id, nbin, num=1, ic=1;
+    int count, max_count, chan;
     float min, max, vmx=0.0, adc, one=1.0; 
+    float c, av, sd, chi2, par[3];
 
     nok_h=emc_adc_hist_control_h->nok-1;
     det=emc_adc_hist_control[nok_h].det;
     base = emc_adc_hist_control[nok_h].id_base;
-    switch (emc_adc_hist_control[nok_h].init){
+    mode = emc_adc_hist_control[nok_h].init;
 
-    case 0: /* book histgrams */
-      nok_c=ems_control_h->nok-1;
+    if(mode != FILL){
+      nok_c=ems_control_h->nok-1;	
       min = (float)emc_adc_hist_control[nok_h].min;
       max = (float)emc_adc_hist_control[nok_h].max;
-      nbin = emc_adc_hist_control[nok_h].nbin;
+      nbin = (int)emc_adc_hist_control[nok_h].nbin;
       switch (det) {
       case BEMC:
 	nphi = ems_control[nok_c].bemc_phi_nbin;
@@ -84,40 +97,72 @@ long emc_adc_hist_(
 	sprintf(cdet, "EPRSL");
 	break;
       default:
-	puts("emc_adc_hist_control.det is invalid. Specify the detector\n");
+	puts("***emc_adc_hist: emc_adc_hist_control.det is invalid\n");
 	return STAFCV_BAD;
       }      
+      if(mode >= MAX_CH){
+	if(emc_adc_cal_h->nok < emc_adc_cal_h->maxlen){
+	  nok_f = emc_adc_cal_h->nok++;
+	}else{
+	  puts("***emc_adc_hist: not enough space in emc_adc_cal\n");
+	  return STAFCV_BAD;
+	}
+      }
       for(i=0; i<nphi; i++){
 	for(j=0; j<neta; j++){
-	  id=1000*i+j+base;
-	  sprintf(title,"%5s:phi=%d,eta=%d$\n", cdet, i, j);
-	  printf("%40s\n",title);
-	  printf("%d, %d, %f, %f, %f\n", id, nbin, min, max, vmx);
-	  hbook1_(&id, title, &nbin, &min, &max, &vmx); 
+	  id=1000*(i+1)+(j+1)+base;
+	  switch (mode){
+	  case BOOK: 
+	    if(HEXIST(id) == 1) HDELET(id);
+	    sprintf(title,"%5s:phi=%d,eta=%d$", cdet, i+1, j+1);
+	    HBOOK1(id, title, nbin, min, max, vmx); 
+	    break;	
+	  case RESET:
+	    HRESET(id, " "); 
+	    break;
+	  case DEL:  
+	    HDELET(id); 
+	    break;
+	  case MAX_CH:
+	    max_count=0;
+	    chan=0;
+	    for(k=0; k<nbin; k++){
+	      count = HI(id,k);
+	      if(max_count < count){
+		max_count=count;
+		chan=k;
+	      }
+	    }
+	    emc_adc_cal[nok_f].ch[i][j]=(short)chan;
+	    emc_adc_cal[nok_f].dev[i][j]=0.0;
+	    break;
+	  case MEAN_CH:
+	    emc_adc_cal[nok_f].ch[i][j]=(short)HSTATI(id, 1, copt, num);
+	    emc_adc_cal[nok_f].dev[i][j]=(short)HSTATI(id, 2, copt, num);
+	    break;
+	  case GAUSS:
+	    HFITGA(id, c, av, sd, chi2, ic, par); 
+	    emc_adc_cal[nok_f].ch[i][j]=(short)av;
+	    emc_adc_cal[nok_f].dev[i][j]=(short)sd;
+	    break;
+	  default:
+	    puts("***emc_adc_hist: emc_adc_hist_control.init is invalid.\n");
+	    return STAFCV_BAD;
+	  }
 	}
-      }  
-      emc_adc_hist_control[nok_h].init = 1;
-      break;
-
-    case 1:  /* filling */
+      }
+    }else{    /* filling */
       nok_a=emc_adc_h->nok-1;
       for(i = 0; i < emc_adc_h->nok; i++){
 	phi = (long)emc_adc[i].phi_bin;
         eta = (long)emc_adc[i].eta_bin;
-	id = 1000*phi + eta + base;
+      	id = 1000*(phi+1) + (eta+1) + base;
 	adc = (float)emc_adc[i].adc;
-	hf1_(&id, &adc, &one);
+	HF1(id, adc, one);
       }
-      break;
-
-    default:
-      puts("emc_adc_hist_control.init is invalid.\n");
-      return STAFCV_BAD;
     }
     return STAFCV_OK;
 }
-
-
 
 
 

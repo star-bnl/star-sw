@@ -99,6 +99,7 @@ long energy_to_adc_(
 	      emc_adc[i].adc = 2*bits - 1;
 	    }
 	}
-    }
+    }    
+    ems_cal_control[nok_cc].iseed=iseed;
     return STAFCV_OK;
 }
