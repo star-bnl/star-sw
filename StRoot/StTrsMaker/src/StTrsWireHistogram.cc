@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.6 1999/02/10 04:28:29 lasiuk Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.7 1999/02/10 18:03:42 lasiuk Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,9 +11,13 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
- * Revision 1.6  1999/02/10 04:28:29  lasiuk
- * comment debug
+ * Revision 1.7  1999/02/10 18:03:42  lasiuk
+ * gas gain manual setting
+ * debug output
  *
+ * Revision 1.9  1999/02/14 20:44:32  lasiuk
+ * gas gain settable via member function
+ * escape if min()<0
  *
  * Revision 1.8  1999/02/12 01:26:38  lasiuk
  * Limit debug output
@@ -138,8 +142,8 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
 	    mGeomDb->numberOfOuterSectorAnodeWires() - 1;
     }
 
-    PR(wireIndex);
-    PR(wireCoordinate(wireIndex));
+    // CAREFUL at the i/o sector boundaries
+    // let boundary wires catch more than +/- pitch/2
     //if (tmpWire<0) tmpWire -=.5;
     int    wireIndex = static_cast<int>(tmpWire) + offSet; 
     if(wireIndex < offSet)
@@ -150,7 +154,7 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
     //PR(offSet);
     //PR(wireLimit);
 //     PR(wireIndex);
-	    PR(avalancheFactor);
+
     //
     // Check Wire Index before doing any further calculations:
 // 	    PR(avalancheFactor);
@@ -182,7 +186,7 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
 #endif
 		double increase = 250*micrometer/millimeter*distanceToWire;
 		//PR(increase);
-        cout << "Try add # " << wireIndex <<endl;
+        cout << "add at wire # " << wireIndex <<endl;
 		bin.position().setZ((oldDriftLength+increase));
 	    }
 //         cout << "add at wire # " << wireIndex <<endl;
@@ -257,6 +261,17 @@ aTpcWirePlane& StTrsWireHistogram::getWireHistogram()
 // 	throw range_error("StTrsWireHistogram::putWire() index error!");
 // #else
 // 	cerr << "StTrsWireHistogram::putWire() index error!" << endl;
+// #endif
+//     }
+// }
+
+void StTrsWireHistogram::setDoGasGainFluctuations(bool doIt)
+{
+    // Make sure if you turn "on" fluctuations, that gas gain is on!
+    if(doIt && !mDoGasGain)
+	mDoGasGain = true;
+    mDoGasGainFluctuations = doIt;
+}
 
 // These two could be inline, but are only called once so probably doesn't matter
 void StTrsWireHistogram::setGasGainInnerSector(double v)
