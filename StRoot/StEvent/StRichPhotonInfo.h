@@ -1,15 +1,18 @@
 /***************************************************************************
  *
- * $Id: StRichPhotonInfo.h,v 2.2 2001/03/24 03:34:56 perev Exp $
+ * $Id: StRichPhotonInfo.h,v 2.3 2001/04/05 04:00:40 ullrich Exp $
  *
  * Author: Brian Lasiuk, Nov 2000
  ***************************************************************************
  *
- * Description: Definition of the persistent Photon Info object 
+ * Description: Definition of the persistent Photon Info object
  *
  ***************************************************************************
  *
  * $Log: StRichPhotonInfo.h,v $
+ * Revision 2.3  2001/04/05 04:00:40  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.2  2001/03/24 03:34:56  perev
  * clone() -> clone() const
  *
@@ -35,13 +38,13 @@ public:
     //StRichPhotonInfo(const StRichPhotonInfo&){ /* nopt */ }
     //StRichPhotonInfo& operator=(const StRichPhotonInfo&){/* nopt */}
 
-    void    setD(Float_t);
-    void    setSigma(Float_t);
-    void    setAzimuth(Float_t);
+    void    setD(float);
+    void    setSigma(float);
+    void    setAzimuth(float);
     
-    Float_t d()       const; 
-    Float_t sigma()   const;
-    Float_t azimuth() const;
+    float d()       const;
+    float sigma()   const;
+    float azimuth() const;
     
 protected:
     StObject* clone() const;
@@ -50,16 +53,16 @@ protected:
     Float_t    mSigma;
     Float_t    mAzimuth;
     
-    ClassDef(StRichPhotonInfo,1) 
+    ClassDef(StRichPhotonInfo,1)
 };
 
-inline void StRichPhotonInfo::setD(Float_t d) {mD = d;}
-inline void StRichPhotonInfo::setSigma(Float_t s) {mSigma = s;}
-inline void StRichPhotonInfo::setAzimuth(Float_t psi) {mAzimuth = psi;}
+inline void StRichPhotonInfo::setD(float d) {mD = d;}
+inline void StRichPhotonInfo::setSigma(float s) {mSigma = s;}
+inline void StRichPhotonInfo::setAzimuth(float psi) {mAzimuth = psi;}
     
-inline Float_t StRichPhotonInfo::d() const {return mD;} 
-inline Float_t StRichPhotonInfo::sigma() const {return mSigma;} 
-inline Float_t StRichPhotonInfo::azimuth() const {return mAzimuth;} 
+inline float StRichPhotonInfo::d() const {return mD;}
+inline float StRichPhotonInfo::sigma() const {return mSigma;}
+inline float StRichPhotonInfo::azimuth() const {return mAzimuth;}
 
 //non-members
 ostream& operator<<(ostream& os, const StRichPhotonInfo& hit);

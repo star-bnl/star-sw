@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.h,v 2.7 2001/03/24 03:34:43 perev Exp $
+ * $Id: StDedxPidTraits.h,v 2.8 2001/04/05 04:00:34 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.h,v $
+ * Revision 2.8  2001/04/05 04:00:34  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.7  2001/03/24 03:34:43  perev
  * clone() -> clone() const
  *
@@ -39,19 +42,19 @@
 class StDedxPidTraits : public StTrackPidTraits {
 public:
     StDedxPidTraits();
-    StDedxPidTraits(StDetectorId, Short_t,
-                    UShort_t, Float_t , Float_t);
+    StDedxPidTraits(StDetectorId, short,
+                    unsigned short, float , float);
     StDedxPidTraits(const dst_dedx_st&);
     // StDedxPidTraits(const StDedxPidTraits&);            use default
     // StDedxPidTraits& operator=(const StDedxPidTraits&); use default
     virtual ~StDedxPidTraits();
     
-    StDedxMethod method() const;
-    Short_t      encodedMethod() const;
-    UShort_t     numberOfPoints() const;
-    Float_t      length() const;
-    Float_t      mean() const;
-    Float_t      errorOnMean() const;
+    StDedxMethod     method() const;
+    short            encodedMethod() const;
+    unsigned short   numberOfPoints() const;
+    float            length() const;
+    float            mean() const;
+    float            errorOnMean() const;
     
 protected:
     UShort_t mNumberOfPoints;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrigger.h,v 2.0 1999/10/12 18:43:13 ullrich Exp $
+ * $Id: StTrigger.h,v 2.1 2001/04/05 04:00:46 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrigger.h,v $
+ * Revision 2.1  2001/04/05 04:00:46  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.0  1999/10/12 18:43:13  ullrich
  * Completely Revised for New Version
  *
@@ -22,19 +25,19 @@
 class StTrigger : public StObject {
 public:
     StTrigger();
-    StTrigger(UShort_t aw, UShort_t w);
+    StTrigger(unsigned short aw, unsigned short w);
     // StTrigger(const StTrigger&);             use default
     // StTrigger& operator=(const StTrigger&);  use default
     virtual ~StTrigger();
 
-    Int_t operator==(const StTrigger&) const;
-    Int_t operator!=(const StTrigger&) const;
+    int operator==(const StTrigger&) const;
+    int operator!=(const StTrigger&) const;
 
-    virtual UShort_t triggerActionWord() const;
-    virtual UShort_t triggerWord() const;
+    virtual unsigned short triggerActionWord() const;
+    virtual unsigned short triggerWord() const;
 
-    virtual void setTriggerActionWord(UShort_t);
-    virtual void setTriggerWord(UShort_t);
+    virtual void setTriggerActionWord(unsigned short);
+    virtual void setTriggerWord(unsigned short);
     
 protected:
     UShort_t mTriggerActionWord;

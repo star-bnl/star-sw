@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.20 2001/03/14 02:35:43 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.21 2001/04/05 04:00:49 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.21  2001/04/05 04:00:49  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.20  2001/03/14 02:35:43  ullrich
  * Added container and methods to handle PSDs.
  *
@@ -106,8 +109,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.20 2001/03/14 02:35:43 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.20 2001/03/14 02:35:43 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.21 2001/04/05 04:00:49 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.21 2001/04/05 04:00:49 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -116,10 +119,10 @@ _lookup(T*& val, StSPtrVecObject &vec)
 {
     val = 0;
     for (unsigned int i=0; i<vec.size(); i++)
-	if (vec[i] && typeid(*vec[i]) == typeid(T)) {
-	    val = static_cast<T*>(vec[i]);
-	    break;
-	}
+        if (vec[i] && typeid(*vec[i]) == typeid(T)) {
+            val = static_cast<T*>(vec[i]);
+            break;
+        }
 }
 
 template<class T> void
@@ -128,8 +131,8 @@ _lookupOrCreate(T*& val, StSPtrVecObject &vec)
     T* t = 0;
     _lookup(t, vec);
     if (!t) {
-	t = new T;
-	vec.push_back(t);
+        t = new T;
+        vec.push_back(t);
     }
     val = t;
 }
@@ -138,11 +141,11 @@ template<class T> void
 _lookupAndSet(T* val, StSPtrVecObject &vec)
 {
     for (unsigned int i=0; i<vec.size(); i++)
-	if (vec[i] && typeid(*vec[i]) == typeid(T)) {
-	    delete vec[i];
-	    vec[i] = val;
-	    return;
-	}    
+        if (vec[i] && typeid(*vec[i]) == typeid(T)) {
+            delete vec[i];
+            vec[i] = val;
+            return;
+        }
     if (val) vec.push_back(val);
 }
 
@@ -188,7 +191,7 @@ StEvent::type() const
     return info ? info->type() : TString();
 }
 
-Long_t
+int
 StEvent::id() const
 {
     StEventInfo* info = 0;
@@ -196,7 +199,7 @@ StEvent::id() const
     return info ? info->id() : 0;
 }
 
-Long_t
+int
 StEvent::runId() const
 {
     StEventInfo* info = 0;
@@ -204,24 +207,24 @@ StEvent::runId() const
     return info ? info->runId() : 0;
 }
 
-Long_t
-StEvent::time() const 
+int
+StEvent::time() const
 {
     StEventInfo* info = 0;
     _lookup(info, mContent);
     return info ? info->time() : 0;
 }
 
-ULong_t
-StEvent::triggerMask() const  
+unsigned int
+StEvent::triggerMask() const
 {
     StEventInfo* info = 0;
     _lookup(info, mContent);
     return info ? info->triggerMask() : 0;
 }
 
-ULong_t
-StEvent::bunchCrossingNumber(UInt_t i) const  
+unsigned int
+StEvent::bunchCrossingNumber(unsigned int i) const
 {
     StEventInfo* info = 0;
     _lookup(info, mContent);
@@ -472,7 +475,7 @@ StEvent::trackNodes() const
     return *nodes;
 }
 
-UInt_t
+unsigned int
 StEvent::numberOfPrimaryVertices() const
 {
     StSPtrVecPrimaryVertex *vertices = 0;
@@ -481,7 +484,7 @@ StEvent::numberOfPrimaryVertices() const
 }
 
 StPrimaryVertex*
-StEvent::primaryVertex(UInt_t i)
+StEvent::primaryVertex(unsigned int i)
 {
     StSPtrVecPrimaryVertex *vertices = 0;
     _lookup(vertices, mContent);
@@ -492,7 +495,7 @@ StEvent::primaryVertex(UInt_t i)
 }
 
 const StPrimaryVertex*
-StEvent::primaryVertex(UInt_t i) const
+StEvent::primaryVertex(unsigned int i) const
 {
     StSPtrVecPrimaryVertex *vertices = 0;
     _lookup(vertices, mContent);
@@ -550,51 +553,54 @@ StEvent::kinkVertices() const
     return *vertices;
 }
 
-StSPtrVecPsd*
-StEvent::psds()
-{
-    StSPtrVecPsd *psdVector = 0;
-    _lookup(psdVector, mContent);
-    return psdVector;
-}
-
-const StSPtrVecPsd*
-StEvent::psds() const
-{
-    StSPtrVecPsd *psdVector = 0;
-    _lookup(psdVector, mContent);
-    return psdVector;
-}
-
 StPsd*
 StEvent::psd(StPwg p, int i)
 {
-    StSPtrVecPsdIterator iter;
-    StSPtrVecPsd *psdVector = psds();
-    if (psdVector)
-        for (iter = psdVector->begin(); iter != psdVector->end(); iter++)
-	    if ((*iter) && (*iter)->pwg() == p && (*iter)->id() == i)
-		return *iter;
-    return 0;
+    StPsd *thePsd = 0;
+    _lookup(thePsd, mContent);
+    if (thePsd && thePsd->pwg() == p && thePsd->id() == i)
+	return thePsd;
+    else
+	return 0;
 }
 
 const StPsd*
 StEvent::psd(StPwg p, int i) const
 {
-    StSPtrVecPsdConstIterator iter;
-    const StSPtrVecPsd *psdVector = psds();
-    if (psdVector)
-        for (iter = psdVector->begin(); iter != psdVector->end(); iter++)
-	    if ((*iter) && (*iter)->pwg() == p && (*iter)->id() == i)
-		return *iter;
-    return 0;
+    const StPsd *thePsd = 0;
+    _lookup(thePsd, mContent);
+    if (thePsd && thePsd->pwg() == p && thePsd->id() == i)
+	return thePsd;
+    else
+	return 0;
+}
+
+unsigned int
+StEvent::numberOfPsds() const
+{
+    int nPsds = 0;
+    for (unsigned int i=0; i<mContent.size(); i++)
+	if (dynamic_cast<StPsd*>(mContent[i])) nPsds++;
+    return nPsds;
+}
+
+unsigned int
+StEvent::numberOfPsds(StPwg p) const
+{
+    StPsd* thePsd;
+    int nPsds = 0;
+    for (unsigned int i=0; i<mContent.size(); i++) {
+	thePsd = dynamic_cast<StPsd*>(mContent[i]);
+	if (thePsd && thePsd->pwg() == p) nPsds++;
+    }
+    return nPsds;
 }
 
 StSPtrVecObject&
 StEvent::content() { return mContent; }
 
 void
-StEvent::setType(const Char_t* val)
+StEvent::setType(const char* val)
 {
     StEventInfo* info = 0;
     _lookupOrCreate(info, mContent);
@@ -602,7 +608,7 @@ StEvent::setType(const Char_t* val)
 }
 
 void
-StEvent::setRunId(Long_t val)
+StEvent::setRunId(int val)
 {
     StEventInfo* info = 0;
     _lookupOrCreate(info, mContent);
@@ -610,7 +616,7 @@ StEvent::setRunId(Long_t val)
 }
 
 void
-StEvent::setId(Long_t val)
+StEvent::setId(int val)
 {
     StEventInfo* info = 0;
     _lookupOrCreate(info, mContent);
@@ -618,7 +624,7 @@ StEvent::setId(Long_t val)
 }
 
 void
-StEvent::setTime(Long_t val)
+StEvent::setTime(int val)
 {
     StEventInfo* info = 0;
     _lookupOrCreate(info, mContent);
@@ -626,7 +632,7 @@ StEvent::setTime(Long_t val)
 }
 
 void
-StEvent::setTriggerMask(ULong_t val)
+StEvent::setTriggerMask(unsigned int val)
 {
     StEventInfo* info = 0;
     _lookupOrCreate(info, mContent);
@@ -634,7 +640,7 @@ StEvent::setTriggerMask(ULong_t val)
 }
 
 void
-StEvent::setBunchCrossingNumber(ULong_t val, UInt_t i)
+StEvent::setBunchCrossingNumber(unsigned int val, unsigned int i)
 {
     StEventInfo* info = 0;
     _lookupOrCreate(info, mContent);
@@ -724,9 +730,9 @@ void
 StEvent::addPrimaryVertex(StPrimaryVertex* vertex)
 {
     if (vertex) {
-	StSPtrVecPrimaryVertex* vertexVector = 0;
-	_lookupOrCreate(vertexVector, mContent);
-	vertexVector->push_back(vertex);
+        StSPtrVecPrimaryVertex* vertexVector = 0;
+        _lookupOrCreate(vertexVector, mContent);
+        vertexVector->push_back(vertex);
         
         //
         //  Sort new entry.
@@ -735,7 +741,7 @@ StEvent::addPrimaryVertex(StPrimaryVertex* vertex)
         //
         for (int i=vertexVector->size()-1; i>0; i--) {
             if ((*vertexVector)[i]->numberOfDaughters() >
-		(*vertexVector)[i-1]->numberOfDaughters())
+                (*vertexVector)[i-1]->numberOfDaughters())
                 swap((*vertexVector)[i], (*vertexVector)[i-1]);
             else
                 break;
@@ -747,25 +753,20 @@ void
 StEvent::addPsd(StPsd* p)
 {
     if (p) {
-	if (psd(p->pwg(), p->id())) {
-	    cerr << "StEvent::addPsd(): Error, PSD with same identifiers already exist. Nothing added." << endl;
-	    return;
-	}
-	StSPtrVecPsd* psdVector = 0;
-	_lookupOrCreate(psdVector, mContent);
-	psdVector->push_back(p);
+        if (psd(p->pwg(), p->id()))
+            cerr << "StEvent::addPsd(): Error, PSD with same identifiers already exist. Nothing added." << endl;
+        else
+	    mContent.push_back(p);
     }
 }
 
 void StEvent::removePsd(StPsd* p)
 {
-    StSPtrVecPsdIterator iter;
+    StSPtrVecObjectIterator iter;
     if (p) {
-	StSPtrVecPsd* psdVector = psds();
-	if (psdVector)
-	    for (iter = psdVector->begin(); iter != psdVector->end(); iter++)
-                if (*iter == p)
-		    psdVector->erase(iter);
+	for (iter = mContent.begin(); iter != mContent.end(); iter++)
+	    if (*iter == p)
+		mContent.erase(iter);
     }
 }
 
@@ -778,15 +779,15 @@ void StEvent::Browse(TBrowser* b)
 void StEvent::statistics()
 {
     cout << "Statistics and information for event " << id() << endl;
-    cout << "\tthis:                      " << static_cast<void*>(this) << endl;
-//  cout << "\tcvsTag:                    " << cvsTag() << endl;
-    cout << "\ttype:                      " << type() << endl;
-    cout << "\tid:                        " << id() << endl;
-    cout << "\trunId:                     " << runId() << endl;
-    cout << "\ttime:                      " << time() << endl;
-    cout << "\ttriggerMask:               " << triggerMask() << endl;
-    cout << "\tbunchCrossingNumber(0):    " << bunchCrossingNumber(0) << endl;
-    cout << "\tbunchCrossingNumber(1):    " << bunchCrossingNumber(1) << endl;
+    cout << "\tthis:                        " << static_cast<void*>(this) << endl;
+//  cout << "\tcvsTag:                      " << cvsTag() << endl;
+    cout << "\ttype:                        " << type() << endl;
+    cout << "\tid:                          " << id() << endl;
+    cout << "\trunId:                       " << runId() << endl;
+    cout << "\ttime:                        " << time() << endl;
+    cout << "\ttriggerMask:                 " << triggerMask() << endl;
+    cout << "\tbunchCrossingNumber(0):      " << bunchCrossingNumber(0) << endl;
+    cout << "\tbunchCrossingNumber(1):      " << bunchCrossingNumber(1) << endl;
     cout << "\tStEventSummary:              " << static_cast<void*>(summary());
     cout << "\tStSoftwareMonitor:           " << static_cast<void*>(softwareMonitor());
     cout << "\tStTpcHitCollection:          " << static_cast<void*>(tpcHitCollection());
@@ -813,5 +814,5 @@ void StEvent::statistics()
     cout << "\t# of hits in EMC:            " << (emcCollection() ? emcCollection()->barrelPoints().size() : 0) << endl;
     cout << "\t# of hits in EEMC:           " << (emcCollection() ? emcCollection()->endcapPoints().size() : 0) << endl;
     cout << "\t# of hits in RICH:           " << (richCollection() ? richCollection()->getRichHits().size() : 0) << endl;
-    cout << "\t# of PSDs:                   " << (psds() ? psds()->size() : 0) << endl;
+    cout << "\t# of PSDs:                   " << numberOfPsds() << endl;
 }

@@ -1,15 +1,18 @@
 /***************************************************************************
  *
- * $Id: StRichMCHit.h,v 2.2 2001/03/24 03:34:55 perev Exp $
+ * $Id: StRichMCHit.h,v 2.3 2001/04/05 04:00:40 ullrich Exp $
  *
  * Author: Brian Lasiuk, May 2000
  ***************************************************************************
  *
- * Description: Definition of the persistent MC Hit object 
+ * Description: Definition of the persistent MC Hit object
  *
  ***************************************************************************
  *
  * $Log: StRichMCHit.h,v $
+ * Revision 2.3  2001/04/05 04:00:40  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.2  2001/03/24 03:34:55  perev
  * clone() -> clone() const
  *
@@ -28,10 +31,10 @@ public:
     StRichMCHit();
     StRichMCHit(const StThreeVectorF& xg, const StThreeVectorF& dx);
     StRichMCHit(const StThreeVectorF& xg, const StThreeVectorF& dx,
-	      ULong_t hp, Float_t q, Float_t maxAdc, UChar_t tc);
+              unsigned int hp, float q, float maxAdc, unsigned char tc);
     StRichMCHit(const StThreeVectorF& xg, const StThreeVectorF& dx,
-		ULong_t hp, Float_t q, Float_t maxAdc, UChar_t tc,
-		StRichMCInfo& info);
+                unsigned int hp, float q, float maxAdc, unsigned char tc,
+                StRichMCInfo& info);
     
     ~StRichMCHit();
     
@@ -46,7 +49,7 @@ protected:
     
     StRichMCInfo  mInfo;
     
-    ClassDef(StRichMCHit,1) 
+    ClassDef(StRichMCHit,1)
 };
 
 inline const StRichMCInfo& StRichMCHit::getMCInfo() const { return mInfo; }

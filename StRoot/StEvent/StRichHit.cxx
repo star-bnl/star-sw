@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichHit.cxx,v 2.2 2001/03/24 03:34:54 perev Exp $
+ * $Id: StRichHit.cxx,v 2.3 2001/04/05 04:00:52 ullrich Exp $
  *
  * Author: Brian Lasiuk, May 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichHit.cxx,v $
+ * Revision 2.3  2001/04/05 04:00:52  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.2  2001/03/24 03:34:54  perev
  * clone() -> clone() const
  *
@@ -21,7 +24,7 @@
 #include "StRichHit.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StRichHit.cxx,v 2.2 2001/03/24 03:34:54 perev Exp $";
+static const char rcsid[] = "$Id: StRichHit.cxx,v 2.3 2001/04/05 04:00:52 ullrich Exp $";
 
 ClassImp(StRichHit)
     
@@ -33,7 +36,7 @@ StRichHit::StRichHit(const StThreeVectorF& xl, const StThreeVectorF& dx)
     // This is used for off-line
 }
 StRichHit::StRichHit(const StThreeVectorF& xg, const StThreeVectorF& dx,
-		     ULong_t hp, Float_t q, Float_t maxAdc, UChar_t tc)
+                     unsigned int hp, float q, float maxAdc, unsigned char tc)
     : StHit(xg,dx,hp,q,tc),mMaxAmplitude(maxAdc)
 {
     // For Storage in the StRichHitCollection
@@ -46,8 +49,8 @@ ostream&
 operator<<(ostream& os, const StRichHit& hit)
 {
     return (os << "StRichHit::> " << hit.internal() << ", q= "
-	                          << hit.charge()   << ", (#"
-	                          << hit.clusterNumber() << ')');
+                                  << hit.charge()   << ", (#"
+                                  << hit.clusterNumber() << ')');
 }
 
 StObject*

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StCtbTriggerDetector.cxx,v 2.4 2000/05/09 10:22:17 ullrich Exp $
+ * $Id: StCtbTriggerDetector.cxx,v 2.5 2001/04/05 04:00:47 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StCtbTriggerDetector.cxx,v $
+ * Revision 2.5  2001/04/05 04:00:47  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.4  2000/05/09 10:22:17  ullrich
  * Updated to cope with modified dst_TrgDet.idl
  *
@@ -26,7 +29,7 @@
 #include "StCtbTriggerDetector.h"
 #include "tables/St_dst_TrgDet_Table.h"
 
-static const char rcsid[] = "$Id: StCtbTriggerDetector.cxx,v 2.4 2000/05/09 10:22:17 ullrich Exp $";
+static const char rcsid[] = "$Id: StCtbTriggerDetector.cxx,v 2.5 2001/04/05 04:00:47 ullrich Exp $";
 
 ClassImp(StCtbTriggerDetector)
 
@@ -34,15 +37,15 @@ StCtbTriggerDetector::StCtbTriggerDetector()
 {
     int i, j, k;
     for(i=0; i<mMaxTrays; i++)
-	for(j=0; j<mMaxSlats; j++)
-	    for(k=0; k<mMaxEventSamples; k++) {
-		mMips[i][j][k] = 0;
-		mTime[i][j][k] = 0;
-	    }
+        for(j=0; j<mMaxSlats; j++)
+            for(k=0; k<mMaxEventSamples; k++) {
+                mMips[i][j][k] = 0;
+                mTime[i][j][k] = 0;
+            }
 
     for(i=0; i<mMaxAux; i++)
-	for(j=0; j<mMaxEventSamples; j++)
-	    mAux[i][j] = 0;
+        for(j=0; j<mMaxEventSamples; j++)
+            mAux[i][j] = 0;
     
     mNumberOfPreSamples = 0;
     mNumberOfPostSamples = 0;
@@ -52,15 +55,15 @@ StCtbTriggerDetector::StCtbTriggerDetector(const dst_TrgDet_st& t)
 {
     int i, j, k;
     for(i=0; i<mMaxTrays; i++)
-	for(j=0; j<mMaxSlats; j++)
-	    for(k=0; k<mMaxEventSamples; k++) {
-		mMips[i][j][k] = t.nCtb[i][j][k];
-		mTime[i][j][k] = t.timeCtb[i][j][k];
-	    }
+        for(j=0; j<mMaxSlats; j++)
+            for(k=0; k<mMaxEventSamples; k++) {
+                mMips[i][j][k] = t.nCtb[i][j][k];
+                mTime[i][j][k] = t.timeCtb[i][j][k];
+            }
 
     for(i=0; i<mMaxAux; i++)
-	for(j=0; j<mMaxEventSamples; j++)
-	    mAux[i][j] = t.ctbaux[i][j];
+        for(j=0; j<mMaxEventSamples; j++)
+            mAux[i][j] = t.ctbaux[i][j];
     
     mNumberOfPreSamples = t.npre;
     mNumberOfPostSamples = t.npost;
@@ -68,65 +71,65 @@ StCtbTriggerDetector::StCtbTriggerDetector(const dst_TrgDet_st& t)
 
 StCtbTriggerDetector::~StCtbTriggerDetector() {/* noop */}
 
-UInt_t
+unsigned int
 StCtbTriggerDetector::numberOfTrays() const {return mMaxTrays;}
 
-UInt_t
+unsigned int
 StCtbTriggerDetector::numberOfSlats() const {return mMaxSlats;}
 
-UInt_t
+unsigned int
 StCtbTriggerDetector::numberOfAuxWords() const {return mMaxAux;}
 
-UInt_t
+unsigned int
 StCtbTriggerDetector::numberOfPreSamples() const {return mNumberOfPreSamples;}
 
-UInt_t
+unsigned int
 StCtbTriggerDetector::numberOfPostSamples() const {return mNumberOfPostSamples;}
 
-Float_t
-StCtbTriggerDetector::mips(UInt_t i, UInt_t j, UInt_t k) const
+float
+StCtbTriggerDetector::mips(unsigned int i, unsigned int j, unsigned int k) const
 {
     return mMips[i][j][k];
 }
 
-Char_t
-StCtbTriggerDetector::time(UInt_t i, UInt_t j, UInt_t k) const
+char
+StCtbTriggerDetector::time(unsigned int i, unsigned int j, unsigned int k) const
 {
     return mTime[i][j][k];
 }
     
-Float_t
-StCtbTriggerDetector::aux(UInt_t i, UInt_t j) const
+float
+StCtbTriggerDetector::aux(unsigned int i, unsigned int j) const
 {
     return mAux[i][j];
 }
 
 void
-StCtbTriggerDetector::setMips(UInt_t i, UInt_t j, UInt_t k, Float_t val)
+StCtbTriggerDetector::setMips(unsigned int i, unsigned int j, unsigned int k, float val)
 {
     mMips[i][j][k] = val;
 }
 
 void
-StCtbTriggerDetector::setTime(UInt_t i, UInt_t j, UInt_t k, Char_t val)
+StCtbTriggerDetector::setTime(unsigned int i, unsigned int j, unsigned int k, char val)
 {
     mTime[i][j][k] = val;
 }
 
 void
-StCtbTriggerDetector::setAux(UInt_t i, UInt_t j, Float_t val)
+StCtbTriggerDetector::setAux(unsigned int i, unsigned int j, float val)
 {
     mAux[i][j] = val;
 }
 
 void
-StCtbTriggerDetector::setNumberOfPreSamples(UInt_t val)
+StCtbTriggerDetector::setNumberOfPreSamples(unsigned int val)
 {
     mNumberOfPreSamples = val;
 }
 
 void
-StCtbTriggerDetector::setNumberOfPostSamples(UInt_t val)
+StCtbTriggerDetector::setNumberOfPostSamples(unsigned int val)
 {
     mNumberOfPostSamples = val;
 }

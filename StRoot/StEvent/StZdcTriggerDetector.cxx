@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcTriggerDetector.cxx,v 2.4 2000/07/13 12:51:09 ullrich Exp $
+ * $Id: StZdcTriggerDetector.cxx,v 2.5 2001/04/05 04:00:59 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StZdcTriggerDetector.cxx,v $
+ * Revision 2.5  2001/04/05 04:00:59  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.4  2000/07/13 12:51:09  ullrich
  * Added new method numberOfZdcWords to replace old one with wrong name.
  *
@@ -31,7 +34,7 @@ using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.4 2000/07/13 12:51:09 ullrich Exp $";
+static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.5 2001/04/05 04:00:59 ullrich Exp $";
 
 ClassImp(StZdcTriggerDetector)
 
@@ -54,14 +57,14 @@ StZdcTriggerDetector::StZdcTriggerDetector(const dst_TrgDet_st& t)
 
 StZdcTriggerDetector::~StZdcTriggerDetector() {/* noop */}
 
-UInt_t
+unsigned int
 StZdcTriggerDetector::numberOfZdcCounters() const {return mMaxZdcWords;}
 
-UInt_t
+unsigned int
 StZdcTriggerDetector::numberOfZdcWords() const {return mMaxZdcWords;}
 
-Float_t
-StZdcTriggerDetector::adc(UInt_t i) const
+float
+StZdcTriggerDetector::adc(unsigned int i) const
 {
     if (i < mMaxZdcWords)
         return mAdc[i];
@@ -69,8 +72,8 @@ StZdcTriggerDetector::adc(UInt_t i) const
         return 0;
 }
 
-Float_t
-StZdcTriggerDetector::tdc(UInt_t i) const
+float
+StZdcTriggerDetector::tdc(unsigned int i) const
 {
     if (i < mMaxZdcWords)
         return mTdc[i];
@@ -78,37 +81,37 @@ StZdcTriggerDetector::tdc(UInt_t i) const
         return 0;
 }
 
-Float_t
+float
 StZdcTriggerDetector::adcSum(StBeamDirection dir) const
 {
     return mSumAdc[dir];
 }
 
-Float_t
+float
 StZdcTriggerDetector::adcSum() const {return mSum;}
 
 void
-StZdcTriggerDetector::setAdc(UInt_t i, Float_t val)
+StZdcTriggerDetector::setAdc(unsigned int i, float val)
 {
     if (i < mMaxZdcWords)
         mAdc[i] = val;
 }
 
 void
-StZdcTriggerDetector::setTdc(UInt_t i, Float_t val)
+StZdcTriggerDetector::setTdc(unsigned int i, float val)
 {
     if (i < mMaxZdcWords)
         mTdc[i] = val;
 }
 
 void
-StZdcTriggerDetector::setAdcSum(StBeamDirection dir, Float_t val)
+StZdcTriggerDetector::setAdcSum(StBeamDirection dir, float val)
 {
     mSumAdc[dir] = val;
 }
 
 void
-StZdcTriggerDetector::setAdcSum(Float_t val)
+StZdcTriggerDetector::setAdcSum(float val)
 {
     mSum = val;
 }

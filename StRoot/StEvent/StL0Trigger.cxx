@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL0Trigger.cxx,v 2.2 1999/12/21 15:08:59 ullrich Exp $
+ * $Id: StL0Trigger.cxx,v 2.3 2001/04/05 04:00:51 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.cxx,v $
+ * Revision 2.3  2001/04/05 04:00:51  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.2  1999/12/21 15:08:59  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
  *
@@ -28,7 +31,7 @@ using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StL0Trigger.cxx,v 2.2 1999/12/21 15:08:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StL0Trigger.cxx,v 2.3 2001/04/05 04:00:51 ullrich Exp $";
 
 ClassImp(StL0Trigger)
 
@@ -54,11 +57,11 @@ StL0Trigger::StL0Trigger(const dst_L0_Trigger_st& t)
 
 StL0Trigger::~StL0Trigger() { /* noop */ }
 
-UInt_t
+unsigned int
 StL0Trigger::coarsePixelArraySize() {return mMaxPixels;}
 
-Long_t
-StL0Trigger::coarsePixelArray(UInt_t i)
+int
+StL0Trigger::coarsePixelArray(unsigned int i)
 {
     if (i < mMaxPixels)
         return mCoarsePixelArray[i];
@@ -66,32 +69,32 @@ StL0Trigger::coarsePixelArray(UInt_t i)
         return 0;
 }
 
-Long_t
+int
 StL0Trigger::mwcCtbMultiplicity() const { return mMwcCtbMultiplicity;}
 
-Long_t
+int
 StL0Trigger::mwcCtbDipole() const { return mMwcCtbDipole;}
 
-Long_t
+int
 StL0Trigger::mwcCtbTopology() const { return mMwcCtbTopology;}
 
-Long_t
+int
 StL0Trigger::mwcCtbMoment() const { return mMwcCtbMoment;}
 
 void
-StL0Trigger::setMwcCtbMultiplicity(Long_t val) { mMwcCtbMultiplicity = val; }
+StL0Trigger::setMwcCtbMultiplicity(int val) { mMwcCtbMultiplicity = val; }
 
 void
-StL0Trigger::setMwcCtbDipole(Long_t val) { mMwcCtbDipole = val; }
+StL0Trigger::setMwcCtbDipole(int val) { mMwcCtbDipole = val; }
    
 void
-StL0Trigger::setMwcCtbTopology(Long_t val) { mMwcCtbTopology = val; }
+StL0Trigger::setMwcCtbTopology(int val) { mMwcCtbTopology = val; }
 
 void
-StL0Trigger::setMwcCtbMoment(Long_t val) { mMwcCtbMoment = val; }
+StL0Trigger::setMwcCtbMoment(int val) { mMwcCtbMoment = val; }
 
 void
-StL0Trigger::setCoarsePixelArray(UInt_t i, Long_t val)
+StL0Trigger::setCoarsePixelArray(unsigned int i, int val)
 {
     if (i < mMaxPixels)
         mCoarsePixelArray[i] = val;

@@ -1,15 +1,18 @@
 /***************************************************************************
  *
- * $Id: StEmcClusterCollection.cxx,v 2.2 2000/07/28 19:49:27 akio Exp $
+ * $Id: StEmcClusterCollection.cxx,v 2.3 2001/04/05 04:00:47 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
  *
- * Description: 
+ * Description:
  *
  ***************************************************************************
  *
  * $Log: StEmcClusterCollection.cxx,v $
+ * Revision 2.3  2001/04/05 04:00:47  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.2  2000/07/28 19:49:27  akio
  * Change in Detector Id for Endcap SMD
  *
@@ -21,7 +24,7 @@
 
 ClassImp(StEmcClusterCollection);
 
-static const char rcsid[] = "$Id: StEmcClusterCollection.cxx,v 2.2 2000/07/28 19:49:27 akio Exp $";
+static const char rcsid[] = "$Id: StEmcClusterCollection.cxx,v 2.3 2001/04/05 04:00:47 ullrich Exp $";
 
 StEmcClusterCollection::StEmcClusterCollection() {/*noop*/};
 
@@ -33,7 +36,7 @@ StEmcClusterCollection::detector() const  {return mDetector;}
 void
 StEmcClusterCollection::setDetector(StDetectorId var)  {mDetector = var;}
 
-Int_t
+int
 StEmcClusterCollection::numberOfClusters() const{return mClusters.size();}
 
 void
@@ -48,14 +51,14 @@ StEmcClusterCollection::clusters() {return mClusters;}
 const StSPtrVecEmcCluster&
 StEmcClusterCollection::clusters() const {return mClusters;}
 
-Int_t
+int
 StEmcClusterCollection::clusterFinderId() const  {return mClusterFinderId;}
 
-Int_t
+int
 StEmcClusterCollection::clusterFinderParamVersion() const  {return mClusterFinderParamVersion;}
 
 void
-StEmcClusterCollection::setClusterFinderId(Int_t var) {mClusterFinderId = var;}
+StEmcClusterCollection::setClusterFinderId(int var) {mClusterFinderId = var;}
 
 void
-StEmcClusterCollection::setClusterFinderParamVersion(Int_t var) {mClusterFinderParamVersion = var;}
+StEmcClusterCollection::setClusterFinderParamVersion(int var) {mClusterFinderParamVersion = var;}

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackPidTraits.h,v 2.4 2001/03/24 03:35:00 perev Exp $
+ * $Id: StTrackPidTraits.h,v 2.5 2001/04/05 04:00:46 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackPidTraits.h,v $
+ * Revision 2.5  2001/04/05 04:00:46  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.4  2001/03/24 03:35:00  perev
  * clone() -> clone() const
  *
@@ -42,7 +45,7 @@ public:
     // StTrackPidTraits& operator=(const StTrackPidTraits&); use default
     virtual ~StTrackPidTraits();
     
-    Short_t detector() const;
+    short detector() const;
 
 protected:
     Short_t mDetectorId;

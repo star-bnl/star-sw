@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichMCHit.cxx,v 2.2 2001/03/24 03:34:55 perev Exp $
+ * $Id: StRichMCHit.cxx,v 2.3 2001/04/05 04:00:52 ullrich Exp $
  *
  * Author: Brian Lasiuk, May 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichMCHit.cxx,v $
+ * Revision 2.3  2001/04/05 04:00:52  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.2  2001/03/24 03:34:55  perev
  * clone() -> clone() const
  *
@@ -20,7 +23,7 @@
 
 #include "StRichMCHit.h"
 
-static const char rcsid[] = "$Id: StRichMCHit.cxx,v 2.2 2001/03/24 03:34:55 perev Exp $";
+static const char rcsid[] = "$Id: StRichMCHit.cxx,v 2.3 2001/04/05 04:00:52 ullrich Exp $";
 
 ClassImp(StRichMCHit)
     
@@ -33,15 +36,15 @@ StRichMCHit::StRichMCHit(const StThreeVectorF& xl, const StThreeVectorF& dx)
 }
 
 StRichMCHit::StRichMCHit(const StThreeVectorF& xg, const StThreeVectorF& dx,
-		     ULong_t hp, Float_t q, Float_t maxAdc, UChar_t tc)
+                     unsigned int hp, float q, float maxAdc, unsigned char tc)
     : StRichHit(xg,dx,hp,q,maxAdc,tc)
 {
     // For Storage in the StRichHitCollection
 }
 
 StRichMCHit::StRichMCHit(const StThreeVectorF& xg, const StThreeVectorF& dx,
-			 ULong_t hp, Float_t q, Float_t maxAdc, UChar_t tc,
-			 StRichMCInfo& info)
+                         unsigned int hp, float q, float maxAdc, unsigned char tc,
+                         StRichMCInfo& info)
     : StRichHit(xg,dx,hp,q,maxAdc,tc), mInfo(info)
 {
     // For Storage in the StRichHitCollection

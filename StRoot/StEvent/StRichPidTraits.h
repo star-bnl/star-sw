@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPidTraits.h,v 2.5 2001/03/24 03:34:57 perev Exp $
+ * $Id: StRichPidTraits.h,v 2.6 2001/04/05 04:00:41 ullrich Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPidTraits.h,v $
+ * Revision 2.6  2001/04/05 04:00:41  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.5  2001/03/24 03:34:57  perev
  * clone() -> clone() const
  *
@@ -49,7 +52,7 @@ public:
     //StRichPidTraits(const StRichPidTraits&) {/* nopt */}
     //StRichPidTraits& operator=(const StRichPidTraits&) {/* nopt */}
     
-    Int_t  operator==(const StRichPidTraits&) const;
+    int  operator==(const StRichPidTraits&) const;
     
     void                    addPid(StRichPid* );
   
@@ -59,24 +62,24 @@ public:
     StRichPid*              getPid(StParticleDefinition* t);
     const StRichPid*        getPid(StParticleDefinition* t)  const;
 
-    void setProductionVersion(Int_t);
-    void setId(Int_t);
-    void setProbability(Float_t);
-    void setAssociatedMip(StRichHit*);
-    void setMipResidual(const StThreeVectorF&);
-    void setRefitResidual(const StThreeVectorF&);
-    void setSignedDca2d(Float_t);
-    void setSignedDca3d(Float_t);
+    void  setProductionVersion(int);
+    void  setId(int);
+    void  setProbability(float);
+    void  setAssociatedMip(StRichHit*);
+    void  setMipResidual(const StThreeVectorF&);
+    void  setRefitResidual(const StThreeVectorF&);
+    void  setSignedDca2d(float);
+    void  setSignedDca3d(float);
     
-    Int_t   productionVersion() const;
-    Int_t   id() const;
-    Float_t probability() const;
+    int   productionVersion() const;
+    int   id() const;
+    float probability() const;
 
-    StRichHit* associatedMip() const;
-    const StThreeVectorF& mipResidual() const;
-    const StThreeVectorF& refitResidual() const;
-    Float_t signedDca2d() const;
-    Float_t signedDca3d() const;
+    StRichHit*             associatedMip() const;
+    const StThreeVectorF&  mipResidual() const;
+    const StThreeVectorF&  refitResidual() const;
+    float                  signedDca2d() const;
+    float                  signedDca3d() const;
     
 private:
     StSPtrVecRichPid mThePids;
@@ -85,7 +88,7 @@ private:
     Int_t            mId;
     Float_t          mProbability;
 
-    StRichHit*       mAssociatedMip;//$LINK
+    StRichHit*       mAssociatedMip; //$LINK
     StThreeVectorF   mMipResidual;
     StThreeVectorF   mRefitResidual;
 
@@ -106,24 +109,24 @@ inline void  StRichPidTraits::addPid(StRichPid* t) {mThePids.push_back(t);}
 
 inline StObject* StRichPidTraits::clone() const {return new StRichPidTraits(*this);}
 
-inline void StRichPidTraits::setProductionVersion(Int_t id) {mProductionVersion = id;}
-inline void StRichPidTraits::setId(Int_t id) {mId = id;} 
-inline void StRichPidTraits::setProbability(Float_t p) {mProbability = p;}
+inline void StRichPidTraits::setProductionVersion(int id) {mProductionVersion = id;}
+inline void StRichPidTraits::setId(int id) {mId = id;}
+inline void StRichPidTraits::setProbability(float p) {mProbability = p;}
 inline void StRichPidTraits::setAssociatedMip(StRichHit* hit) {mAssociatedMip = hit;}
 inline void StRichPidTraits::setMipResidual(const StThreeVectorF& res) {mMipResidual = res;}
 inline void StRichPidTraits::setRefitResidual(const StThreeVectorF& res) {mRefitResidual = res;}
-inline void StRichPidTraits::setSignedDca2d(Float_t v) {mSigned2dDca = v;}
-inline void StRichPidTraits::setSignedDca3d(Float_t v) {mSigned3dDca = v;}
+inline void StRichPidTraits::setSignedDca2d(float v) {mSigned2dDca = v;}
+inline void StRichPidTraits::setSignedDca3d(float v) {mSigned3dDca = v;}
 
-inline Int_t StRichPidTraits::productionVersion() const { return mProductionVersion;}
-inline Int_t StRichPidTraits::id() const {return mId;}
-inline Float_t StRichPidTraits::probability() const {return mProbability;}
+inline int StRichPidTraits::productionVersion() const { return mProductionVersion;}
+inline int StRichPidTraits::id() const {return mId;}
+inline float StRichPidTraits::probability() const {return mProbability;}
 
 inline StRichHit* StRichPidTraits::associatedMip() const { return mAssociatedMip;}
 inline const StThreeVectorF& StRichPidTraits::mipResidual() const {return mMipResidual;}
 inline const StThreeVectorF& StRichPidTraits::refitResidual() const { return mRefitResidual;}
-inline Float_t StRichPidTraits::signedDca2d() const { return mSigned2dDca;}
-inline Float_t StRichPidTraits::signedDca3d() const { return mSigned3dDca;}
+inline float StRichPidTraits::signedDca2d() const { return mSigned2dDca;}
+inline float StRichPidTraits::signedDca3d() const { return mSigned3dDca;}
 
 //non-members
 ostream& operator<<(ostream& os, const StRichPidTraits& t);

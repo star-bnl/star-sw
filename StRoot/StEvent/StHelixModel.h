@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixModel.h,v 2.3 2001/03/24 03:34:49 perev Exp $
+ * $Id: StHelixModel.h,v 2.4 2001/04/05 04:00:37 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelixModel.h,v $
+ * Revision 2.4  2001/04/05 04:00:37  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.3  2001/03/24 03:34:49  perev
  * clone() -> clone() const
  *
@@ -28,23 +31,23 @@
 class StHelixModel : public StTrackGeometry {
 public:
     StHelixModel();
-    StHelixModel(Short_t q, Float_t psi, Float_t c, Float_t dip,
+    StHelixModel(short q, float psi, float c, float dip,
                  const StThreeVectorF& o, const StThreeVectorF& p);
     StHelixModel(const dst_track_st&);
     // StHelixModel(const StHelixModel&);            use default
     // StHelixModel& operator=(const StHelixModel&); use default
     ~StHelixModel();
 
-    StTrackModel          model() const;
-    Short_t               charge() const;
-    Double_t              curvature() const;
-    Double_t              psi() const;
-    Double_t              dipAngle() const;
-    const StThreeVectorF& origin() const;
-    const StThreeVectorF& momentum() const;
-    StPhysicalHelixD      helix() const;
+    StTrackModel           model() const;
+    short                  charge() const;
+    double                 curvature() const;
+    double                 psi() const;
+    double                 dipAngle() const;
+    const StThreeVectorF&  origin() const;
+    const StThreeVectorF&  momentum() const;
+    StPhysicalHelixD       helix() const;
 
-    StTrackGeometry*      copy() const;     // virtual constructor
+    StTrackGeometry*       copy() const;     // virtual constructor
 
 protected:
     StObject*      clone() const;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.12 2001/03/14 02:33:37 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.13 2001/04/05 04:00:35 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.13  2001/04/05 04:00:35  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.12  2001/03/14 02:33:37  ullrich
  * Fixed typo.
  *
@@ -66,35 +69,35 @@ enum StTrackType {global, primary, tpt, secondary};
 enum StTrackModel {helixModel, kalmanModel};
 
 enum StTrackFinderMethod { svtGrouper = 4,
-			   svtStk,
-			   svtOther, 
-			   tpcStandard,
-			   tpcOther,
-			   ftpcConformal,
-			   svtTpcSvm,
-			   svtTpcEst,
-			   svtTpcPattern };
+                           svtStk,
+                           svtOther,
+                           tpcStandard,
+                           tpcOther,
+                           ftpcConformal,
+                           svtTpcSvm,
+                           svtTpcEst,
+                           svtTpcPattern };
 
 enum StRichPidFlag {eNoMip = 1,
-		    eFastEnough = 2,
-		    eLightOnPadPlane = 4};
+                    eFastEnough = 2,
+                    eLightOnPadPlane = 4};
 
 enum StRichHitFlag {eDeconvoluted=1,
-		    eMip=2,
-		    eSaturatedPad=4 ,
-		    ePhotoElectron=8,
-		    eAssociatedMip=16,
-		    eMultiplyAssigned=32,
-		    eInAreaPi=64,
-		    eInAreaK=128,
-		    eInAreap=256,
-		    eInConstantAnglePi=512,
-		    eInConstantAngleK=1024,
-		    eInConstantAnglep=2048,
-		    eInConstantAreaPi=4096,
-		    eInConstantAreaK=8192,
-		    eInConstantAreap=16384,
-		    eInMultipleAreaPi=32768,
+                    eMip=2,
+                    eSaturatedPad=4 ,
+                    ePhotoElectron=8,
+                    eAssociatedMip=16,
+                    eMultiplyAssigned=32,
+                    eInAreaPi=64,
+                    eInAreaK=128,
+                    eInAreap=256,
+                    eInConstantAnglePi=512,
+                    eInConstantAngleK=1024,
+                    eInConstantAnglep=2048,
+                    eInConstantAreaPi=4096,
+                    eInConstantAreaK=8192,
+                    eInConstantAreap=16384,
+                    eInMultipleAreaPi=32768,
                     eInMultipleAreaK=65536,
                     eInMultipleAreap=131072,
                     eInMultipleCAnglePi=262144,
@@ -111,11 +114,11 @@ enum StRichHitFlag {eDeconvoluted=1,
                     e2Sigmap=536870912};
 
 enum StPwg         {generic,
-		    ebye,
-		    hbt,
-		    highpt,
-		    pcoll,
-		    spectra,
-		    spin,
-		    strangeness};
+                    ebye,
+                    hbt,
+                    highpt,
+                    pcoll,
+                    spectra,
+                    spin,
+                    strangeness};
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.h,v 2.5 2000/03/08 14:29:56 ullrich Exp $
+ * $Id: StVertex.h,v 2.6 2001/04/05 04:00:46 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
+ * Revision 2.6  2001/04/05 04:00:46  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.5  2000/03/08 14:29:56  ullrich
  * New method probChiSquared() added.
  *
@@ -48,33 +51,33 @@ public:
     // StVertex& operator=(const StVertex&); use default
     virtual ~StVertex();
     
-    Int_t operator==(const StVertex&) const;
-    Int_t operator!=(const StVertex&) const;
+    int operator==(const StVertex&) const;
+    int operator!=(const StVertex&) const;
 
     virtual StVertexId     type() const = 0;
-    Long_t                 flag() const;
-    Float_t                chiSquared() const;
-    Float_t                probChiSquared() const;
+    int                    flag() const;
+    float                  chiSquared() const;
+    float                  probChiSquared() const;
     StMatrixF              covariantMatrix() const;  // overwrite inherited
     StThreeVectorF         positionError() const;    // overwrite inherited
     StTrack*               parent();
     const StTrack*         parent() const;
-    virtual UInt_t         numberOfDaughters() const = 0;
-    virtual StTrack*       daughter(UInt_t) = 0;
-    virtual const StTrack* daughter(UInt_t) const = 0;
+    virtual unsigned int   numberOfDaughters() const = 0;
+    virtual StTrack*       daughter(unsigned int) = 0;
+    virtual const StTrack* daughter(unsigned int) const = 0;
     virtual StPtrVecTrack  daughters(StTrackFilter&) = 0;
 
-    virtual void setFlag(Long_t);
-    virtual void setCovariantMatrix(Float_t[6]);
-    virtual void setChiSquared(Float_t);
-    virtual void setProbChiSquared(Float_t);
+    virtual void setFlag(int);
+    virtual void setCovariantMatrix(float[6]);
+    virtual void setChiSquared(float);
+    virtual void setProbChiSquared(float);
     virtual void setParent(StTrack*);
     virtual void addDaughter(StTrack*) = 0;
     virtual void removeDaughter(StTrack*) = 0;
 
 protected:
     StVertexId    mType;
-    Long_t        mFlag;
+    Int_t         mFlag;
     Float_t       mCovariantMatrix[6];
     Float_t       mChiSquared;
     Float_t       mProbChiSquared;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL0Trigger.h,v 2.0 1999/10/12 18:42:26 ullrich Exp $
+ * $Id: StL0Trigger.h,v 2.1 2001/04/05 04:00:38 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.h,v $
+ * Revision 2.1  2001/04/05 04:00:38  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.0  1999/10/12 18:42:26  ullrich
  * Completely Revised for New Version
  *
@@ -28,26 +31,26 @@ public:
     // StL0Trigger& operator=(const StL0Trigger&); use default
     ~StL0Trigger();
 
-    UInt_t          coarsePixelArraySize();
-    Long_t          coarsePixelArray(UInt_t);
-    Long_t          mwcCtbMultiplicity() const;
-    Long_t          mwcCtbDipole() const;
-    Long_t          mwcCtbTopology() const;
-    Long_t          mwcCtbMoment() const;
+    unsigned int  coarsePixelArraySize();
+    int           coarsePixelArray(unsigned int);
+    int           mwcCtbMultiplicity() const;
+    int           mwcCtbDipole() const;
+    int           mwcCtbTopology() const;
+    int           mwcCtbMoment() const;
 
-    void setMwcCtbMultiplicity(Long_t);
-    void setMwcCtbDipole(Long_t);
-    void setMwcCtbTopology(Long_t);
-    void setMwcCtbMoment(Long_t);
-    void setCoarsePixelArray(UInt_t, Long_t);
+    void setMwcCtbMultiplicity(int);
+    void setMwcCtbDipole(int);
+    void setMwcCtbTopology(int);
+    void setMwcCtbMoment(int);
+    void setCoarsePixelArray(unsigned int, int);
     
 protected:
     enum {mMaxPixels = 32};
-    Long_t         mCoarsePixelArray[mMaxPixels];
-    Long_t         mMwcCtbMultiplicity;
-    Long_t         mMwcCtbDipole;
-    Long_t         mMwcCtbTopology;
-    Long_t         mMwcCtbMoment;
+    Int_t         mCoarsePixelArray[mMaxPixels];
+    Int_t         mMwcCtbMultiplicity;
+    Int_t         mMwcCtbDipole;
+    Int_t         mMwcCtbTopology;
+    Int_t         mMwcCtbMoment;
     
     ClassDef(StL0Trigger,1)
 };

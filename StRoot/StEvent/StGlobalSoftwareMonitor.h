@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalSoftwareMonitor.h,v 2.1 1999/10/13 19:43:17 ullrich Exp $
+ * $Id: StGlobalSoftwareMonitor.h,v 2.2 2001/04/05 04:00:37 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StGlobalSoftwareMonitor.h,v $
+ * Revision 2.2  2001/04/05 04:00:37  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.1  1999/10/13 19:43:17  ullrich
  * Initial Revision
  *
@@ -28,8 +31,8 @@ public:
     // StGlobalSoftwareMonitor& operator=(const StGlobalSoftwareMonitor&); use default
     ~StGlobalSoftwareMonitor();
 
-    Long_t  n_trk_match[2];
-    Long_t  prim_vrtx_ntrk;
+    Int_t   n_trk_match[2];
+    Int_t   prim_vrtx_ntrk;
     Float_t prim_vrtx_cov[6];
     Float_t prim_vrtx_chisq;
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHitCollection.h,v 2.1 1999/10/13 19:43:06 ullrich Exp $
+ * $Id: StFtpcHitCollection.h,v 2.2 2001/04/05 04:00:36 ullrich Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFtpcHitCollection.h,v $
+ * Revision 2.2  2001/04/05 04:00:36  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.1  1999/10/13 19:43:06  ullrich
  * Initial Revision
  *
@@ -28,12 +31,12 @@ public:
     // StFtpcHitCollection& operator=(const StFtpcHitCollection&); use default
     ~StFtpcHitCollection();
     
-    Bool_t  addHit(StFtpcHit*);
-    ULong_t numberOfHits() const;
-    UInt_t  numberOfPlanes() const;
+    bool          addHit(StFtpcHit*);
+    unsigned int  numberOfHits() const;
+    unsigned int  numberOfPlanes() const;
     
-    StFtpcPlaneHitCollection*       plane(UInt_t);
-    const StFtpcPlaneHitCollection* plane(UInt_t) const;
+    StFtpcPlaneHitCollection*       plane(unsigned int);
+    const StFtpcPlaneHitCollection* plane(unsigned int) const;
 
 private:
     enum { mNumberOfPlanes = 20 };

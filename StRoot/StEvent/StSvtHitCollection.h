@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitCollection.h,v 2.2 2000/02/17 18:13:14 ullrich Exp $
+ * $Id: StSvtHitCollection.h,v 2.3 2001/04/05 04:00:43 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitCollection.h,v $
+ * Revision 2.3  2001/04/05 04:00:43  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.2  2000/02/17 18:13:14  ullrich
  * Changed the SVT hit storage model. Hits are now stored according
  * to barrel/ladder/wafer not by layer/ladder/wafer.
@@ -32,12 +35,12 @@ public:
     // StSvtHitCollection(const StSvtHitCollection&);            use default
     // StSvtHitCollection& operator=(const StSvtHitCollection&); use default
     
-    Bool_t  addHit(StSvtHit*);
-    ULong_t numberOfHits() const;
-    UInt_t  numberOfBarrels() const;
+    bool          addHit(StSvtHit*);
+    unsigned int  numberOfHits() const;
+    unsigned int  numberOfBarrels() const;
     
-    StSvtBarrelHitCollection*       barrel(UInt_t);
-    const StSvtBarrelHitCollection* barrel(UInt_t) const;
+    StSvtBarrelHitCollection*       barrel(unsigned int);
+    const StSvtBarrelHitCollection* barrel(unsigned int) const;
 
 private:
     enum { mNumberOfBarrels = 3 };

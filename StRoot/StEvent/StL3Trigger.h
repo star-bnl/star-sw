@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL3Trigger.h,v 2.1 2000/03/29 16:53:11 ullrich Exp $
+ * $Id: StL3Trigger.h,v 2.2 2001/04/05 04:00:38 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StL3Trigger.h,v $
+ * Revision 2.2  2001/04/05 04:00:38  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.1  2000/03/29 16:53:11  ullrich
  * Initial Revision
  *
@@ -38,9 +41,9 @@ public:
     StSPtrVecTrackNode&                 trackNodes();
     const StSPtrVecTrackNode&           trackNodes() const;
 
-    UInt_t                              numberOfPrimaryVertices() const;
-    StPrimaryVertex*                    primaryVertex(UInt_t = 0);
-    const StPrimaryVertex*              primaryVertex(UInt_t = 0) const;
+    unsigned int                        numberOfPrimaryVertices() const;
+    StPrimaryVertex*                    primaryVertex(unsigned int = 0);
+    const StPrimaryVertex*              primaryVertex(unsigned int = 0) const;
 
     void setTpcHitCollection(StTpcHitCollection*);
     void addPrimaryVertex(StPrimaryVertex*);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcCluster.cxx,v 2.4 2001/03/24 03:34:44 perev Exp $
+ * $Id: StEmcCluster.cxx,v 2.5 2001/04/05 04:00:48 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCluster.cxx,v $
+ * Revision 2.5  2001/04/05 04:00:48  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.4  2001/03/24 03:34:44  perev
  * clone() -> clone() const
  *
@@ -27,34 +30,34 @@
 
 ClassImp(StEmcCluster)
     
-static const char rcsid[] = "$Id: StEmcCluster.cxx,v 2.4 2001/03/24 03:34:44 perev Exp $";
+static const char rcsid[] = "$Id: StEmcCluster.cxx,v 2.5 2001/04/05 04:00:48 ullrich Exp $";
 
 StEmcCluster::StEmcCluster() {/* noop*/};
 
 StEmcCluster::~StEmcCluster() {/* noop */};
 
-Float_t
-StEmcCluster::eta() const {return mEta;} 
+float
+StEmcCluster::eta() const {return mEta;}
 
-Float_t
+float
 StEmcCluster::phi() const {return mPhi;}
 
-Float_t
+float
 StEmcCluster::sigmaEta() const {return mSigmaEta;}
 
-Float_t
+float
 StEmcCluster::sigmaPhi() const {return mSigmaPhi;}
 
-Float_t
+float
 StEmcCluster::energy() const {return mEnergy;}
 
-Int_t
+int
 StEmcCluster::nHits() const {return mHits.size();}
 
-Int_t
+int
 StEmcCluster::nNeighbors() const {return mNeighbors.size();}
 
-Int_t
+int
 StEmcCluster::nTracks() const {return mTracks.size();}
 
 StPtrVecEmcRawHit&
@@ -76,19 +79,19 @@ const StPtrVecTrack&
 StEmcCluster::track() const {return mTracks;}
 
 void
-StEmcCluster::setEta(Float_t ver)      {mEta=ver;}
+StEmcCluster::setEta(float ver)      {mEta=ver;}
 
 void
-StEmcCluster::setPhi(Float_t ver)      {mPhi=ver;}
+StEmcCluster::setPhi(float ver)      {mPhi=ver;}
 
 void
-StEmcCluster::setSigmaEta(Float_t ver) {mSigmaEta=ver;}
+StEmcCluster::setSigmaEta(float ver) {mSigmaEta=ver;}
 
 void
-StEmcCluster::setSigmaPhi(Float_t ver) {mSigmaPhi=ver;}
+StEmcCluster::setSigmaPhi(float ver) {mSigmaPhi=ver;}
 
 void
-StEmcCluster::setEnergy(Float_t ver)   {mEnergy=ver;}
+StEmcCluster::setEnergy(float ver)   {mEnergy=ver;}
 
 void
 StEmcCluster::addHit(StEmcRawHit* hit) {mHits.push_back(hit);}
@@ -104,10 +107,10 @@ StEmcCluster::clone() const {return new StEmcCluster(*this);}
 
 ostream&
 operator<<(ostream &os, const StEmcCluster& cl)
-{ 
+{
   return (os << " Energy " << cl.energy() << endl
-	  << " Eta "    << cl.eta() << "+/-" << cl.sigmaEta() << endl 
-	  << " Phi "    << cl.phi() << "+/-" << cl.sigmaPhi() << endl
-	  << " # of hits " << cl.nHits() << ",# of neighbor " << cl.nNeighbors() << endl);
+          << " Eta "    << cl.eta() << "+/-" << cl.sigmaEta() << endl
+          << " Phi "    << cl.phi() << "+/-" << cl.sigmaPhi() << endl
+          << " # of hits " << cl.nHits() << ",# of neighbor " << cl.nNeighbors() << endl);
 }
 

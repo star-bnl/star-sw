@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSsdHit.h,v 2.5 2001/03/24 03:34:58 perev Exp $
+ * $Id: StSsdHit.h,v 2.6 2001/04/05 04:00:42 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *         Lilian Martin, Dec 1999
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.h,v $
+ * Revision 2.6  2001/04/05 04:00:42  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.5  2001/03/24 03:34:58  perev
  * clone() -> clone() const
  *
@@ -39,7 +42,7 @@ public:
     StSsdHit();
     StSsdHit(const StThreeVectorF&,
              const StThreeVectorF&,
-             ULong_t, Float_t, UChar_t = 0);
+             unsigned int, float, unsigned char = 0);
     StSsdHit(const dst_point_st&);
     // StSsdHit(const StSsdHit&);            use default
     // StSsdHit& operator=(const StSsdHit&); use default
@@ -48,12 +51,12 @@ public:
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }    
 
-    ULong_t ladder() const;              // ladder=[1-20]
-    ULong_t wafer() const;               // wafer=[1-16]
-    ULong_t centralStripNSide() const;  
-    ULong_t centralStripPSide() const;  
-    ULong_t clusterSizeNSide() const;   
-    ULong_t clusterSizePSide() const;
+    unsigned int ladder() const;              // ladder=[1-20]
+    unsigned int wafer() const;               // wafer=[1-16]
+    unsigned int centralStripNSide() const;  
+    unsigned int centralStripPSide() const;  
+    unsigned int clusterSizeNSide() const;   
+    unsigned int clusterSizePSide() const;
 
 protected:
     static StMemoryPool mPool;  //!

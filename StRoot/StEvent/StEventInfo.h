@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventInfo.h,v 2.2 2000/09/06 22:34:24 ullrich Exp $
+ * $Id: StEventInfo.h,v 2.3 2001/04/05 04:00:36 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jun 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventInfo.h,v $
+ * Revision 2.3  2001/04/05 04:00:36  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.2  2000/09/06 22:34:24  ullrich
  * Changed mBunchCrossingNumber from scalar to array to hold all 64 bits.
  *
@@ -33,26 +36,26 @@ public:
     virtual ~StEventInfo();
 
     const TString& type() const;
-    Long_t         id() const;
-    Long_t         runId() const;
-    Long_t         time() const;
-    ULong_t        triggerMask() const;
-    ULong_t        bunchCrossingNumber(UInt_t) const;
+    int            id() const;
+    int            runId() const;
+    int            time() const;
+    unsigned int   triggerMask() const;
+    unsigned int   bunchCrossingNumber(unsigned int) const;
      
-    void setType(const Char_t*);
-    void setRunId(Long_t);
-    void setId(Long_t);
-    void setTime(Long_t);
-    void setTriggerMask(ULong_t);
-    void setBunchCrossingNumber(ULong_t, UInt_t);
+    void setType(const char*);
+    void setRunId(int);
+    void setId(int);
+    void setTime(int);
+    void setTriggerMask(unsigned int);
+    void setBunchCrossingNumber(unsigned int, unsigned int);
     
 protected:
     TString  mType;
-    Long_t   mRunId;
-    Long_t   mId;
-    Long_t   mTime;
-    ULong_t  mTriggerMask;
-    ULong_t  mBunchCrossingNumber[2];
+    Int_t    mRunId;
+    Int_t    mId;
+    Int_t    mTime;
+    UInt_t   mTriggerMask;
+    UInt_t   mBunchCrossingNumber[2];
 
     ClassDef(StEventInfo,1)
 };

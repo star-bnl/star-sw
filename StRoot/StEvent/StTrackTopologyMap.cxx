@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.cxx,v 2.10 2000/12/08 20:21:08 genevb Exp $
+ * $Id: StTrackTopologyMap.cxx,v 2.11 2001/04/05 04:00:58 ullrich Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.cxx,v $
+ * Revision 2.11  2001/04/05 04:00:58  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.10  2000/12/08 20:21:08  genevb
  * Changed kTofPatchId -> kTofId
  *
@@ -51,7 +54,7 @@ using std::adjacent_difference;
 using std::max_element;
 #endif
 
-static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.10 2000/12/08 20:21:08 genevb Exp $";
+static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.11 2001/04/05 04:00:58 ullrich Exp $";
 
 ClassImp(StTrackTopologyMap)
 
@@ -60,46 +63,40 @@ StTrackTopologyMap::StTrackTopologyMap()
     mMap0 = mMap1 = 0;
 }
 
-StTrackTopologyMap::StTrackTopologyMap(ULong_t m1, ULong_t m2)
-{
-    mMap0 = static_cast<Int_t>(m1);
-    mMap1 = static_cast<Int_t>(m2);
-}
+StTrackTopologyMap::StTrackTopologyMap(unsigned int m1, unsigned int m2) : mMap0(m1), mMap1(m2) { /* noop */ }
 
-StTrackTopologyMap::StTrackTopologyMap(const ULong_t* m)
-{
-    mMap0 = static_cast<Int_t>(m[0]);
-    mMap1 = static_cast<Int_t>(m[1]);
-}
+StTrackTopologyMap::StTrackTopologyMap(const unsigned int* m) : mMap0(m[0]), mMap1(m[1]) { /* noop */ }
+
+StTrackTopologyMap::StTrackTopologyMap(const unsigned long* m) : mMap0(m[0]), mMap1(m[1]) { /* noop */ }
 
 StTrackTopologyMap::~StTrackTopologyMap() { /* noop */ }
 
-Bool_t
-StTrackTopologyMap::bit(Int_t i) const
+bool
+StTrackTopologyMap::bit(int i) const
 {
     return i>31 ? (mMap1>>(i-32) & 1U) : (mMap0>>i & 1U);
 }
 
-Bool_t
+bool
 StTrackTopologyMap::ftpcFormat() const
 {
     return bit(63);
 }
 
-ULong_t
-StTrackTopologyMap::data(UInt_t i) const
+unsigned int
+StTrackTopologyMap::data(unsigned int i) const
 {
-    return static_cast<ULong_t>(i<2 ? (i<1 ? mMap0 : mMap1) : 0);
+    return static_cast<unsigned int>(i<2 ? (i<1 ? mMap0 : mMap1) : 0);
 }
 
-Bool_t
+bool
 StTrackTopologyMap::primaryVertexUsed() const { return bit(0); }
 
-Bool_t
+bool
 StTrackTopologyMap::turnAroundFlag() const { return bit(62); }
 
-Bool_t
-StTrackTopologyMap::hasHitInSvtLayer(UInt_t layer) const
+bool
+StTrackTopologyMap::hasHitInSvtLayer(unsigned int layer) const
 {
     if (ftpcFormat())
         return kFALSE;
@@ -107,8 +104,8 @@ StTrackTopologyMap::hasHitInSvtLayer(UInt_t layer) const
         return bit(layer);
 }
 
-Bool_t
-StTrackTopologyMap::hasHitInRow(StDetectorId id, UInt_t row) const
+bool
+StTrackTopologyMap::hasHitInRow(StDetectorId id, unsigned int row) const
 {
     switch (id) {
     case kTpcId:
@@ -126,7 +123,7 @@ StTrackTopologyMap::hasHitInRow(StDetectorId id, UInt_t row) const
     }
 }
 
-UInt_t
+unsigned int
 StTrackTopologyMap::numberOfHits(StDetectorId id) const
 {
     if (ftpcFormat() &&
@@ -185,11 +182,11 @@ StTrackTopologyMap::numberOfHits(StDetectorId id) const
     return n;
 }
 
-Int_t
+int
 StTrackTopologyMap::largestGap(StDetectorId id) const
 {
     if (ftpcFormat() && !(id == kFtpcWestId || id == kFtpcEastId))
-	return -1;
+        return -1;
 
     vector<int> rows;
     int i;

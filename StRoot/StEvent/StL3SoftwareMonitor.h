@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL3SoftwareMonitor.h,v 2.1 1999/10/13 19:43:24 ullrich Exp $
+ * $Id: StL3SoftwareMonitor.h,v 2.2 2001/04/05 04:00:38 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StL3SoftwareMonitor.h,v $
+ * Revision 2.2  2001/04/05 04:00:38  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.1  1999/10/13 19:43:24  ullrich
  * Initial Revision
  *
@@ -28,19 +31,19 @@ public:
     // StL3SoftwareMonitor& operator=(const StL3SoftwareMonitor&); use default
     ~StL3SoftwareMonitor();
 
-    Long_t  id_algorithm;
-    Long_t  id_hardware;
-    Short_t triggermask;
-    Long_t  nTotalHits ;
-    Long_t  nTotalTracks;
-    Long_t  nTotalPrimaryTracks;
-    Short_t processorId[24] ;
-    Float_t vertex[3][24];
-    Short_t id_param[24];
-    Long_t  nHits[24];
-    Long_t  nTracks[24];
-    Long_t  nPrimaryTracks[24];
-    Float_t cpuTime[24];
+    Int_t    id_algorithm;
+    Int_t    id_hardware;
+    Short_t  triggermask;
+    Int_t    nTotalHits ;
+    Int_t    nTotalTracks;
+    Int_t    nTotalPrimaryTracks;
+    Short_t  processorId[24] ;
+    Float_t  vertex[3][24];
+    Short_t  id_param[24];
+    Int_t    nHits[24];
+    Int_t    nTracks[24];
+    Int_t    nPrimaryTracks[24];
+    Float_t  cpuTime[24];
 
     ClassDef(StL3SoftwareMonitor,1)
 };

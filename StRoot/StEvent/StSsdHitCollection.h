@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSsdHitCollection.h,v 2.1 2000/01/05 16:00:07 ullrich Exp $
+ * $Id: StSsdHitCollection.h,v 2.2 2001/04/05 04:00:42 ullrich Exp $
  *
  * Author: Lilian Martin, Thomas Ullrich, Dec 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSsdHitCollection.h,v $
+ * Revision 2.2  2001/04/05 04:00:42  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.1  2000/01/05 16:00:07  ullrich
  * Initial Revision.
  *
@@ -28,12 +31,12 @@ public:
     // StSsdHitCollection(const StSsdHitCollection&);            use default
     // StSsdHitCollection& operator=(const StSsdHitCollection&); use default
     
-    Bool_t  addHit(StSsdHit*);
-    ULong_t numberOfHits() const;
-    UInt_t  numberOfLadders() const;
+    bool          addHit(StSsdHit*);
+    unsigned int  numberOfHits() const;
+    unsigned int  numberOfLadders() const;
     
-    StSsdLadderHitCollection*       ladder(UInt_t);
-    const StSsdLadderHitCollection* ladder(UInt_t) const;
+    StSsdLadderHitCollection*       ladder(unsigned int);
+    const StSsdLadderHitCollection* ladder(unsigned int) const;
 
 private:
     enum { mNumberOfLadders = 20 };

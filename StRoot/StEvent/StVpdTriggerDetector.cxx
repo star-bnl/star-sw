@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVpdTriggerDetector.cxx,v 2.3 1999/12/21 15:09:25 ullrich Exp $
+ * $Id: StVpdTriggerDetector.cxx,v 2.4 2001/04/05 04:00:59 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StVpdTriggerDetector.cxx,v $
+ * Revision 2.4  2001/04/05 04:00:59  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.3  1999/12/21 15:09:25  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
  *
@@ -28,7 +31,7 @@ using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StVpdTriggerDetector.cxx,v 2.3 1999/12/21 15:09:25 ullrich Exp $";
+static const char rcsid[] = "$Id: StVpdTriggerDetector.cxx,v 2.4 2001/04/05 04:00:59 ullrich Exp $";
 
 ClassImp(StVpdTriggerDetector)
 
@@ -51,11 +54,11 @@ StVpdTriggerDetector::StVpdTriggerDetector(const dst_TrgDet_st& t)
 
 StVpdTriggerDetector::~StVpdTriggerDetector() {/* noop */}
 
-UInt_t
+unsigned int
 StVpdTriggerDetector::numberOfVpdCounters() const {return mMaxVpdCounter;}
 
-Float_t
-StVpdTriggerDetector::adc(UInt_t i) const
+float
+StVpdTriggerDetector::adc(unsigned int i) const
 {
     if (i < mMaxVpdCounter)
         return mAdc[i];
@@ -63,8 +66,8 @@ StVpdTriggerDetector::adc(UInt_t i) const
         return 0;
 }
 
-Float_t
-StVpdTriggerDetector::time(UInt_t i) const
+float
+StVpdTriggerDetector::time(unsigned int i) const
 {
     if (i < mMaxVpdCounter)
         return mTime[i];
@@ -72,37 +75,37 @@ StVpdTriggerDetector::time(UInt_t i) const
         return 0;
 }
 
-Float_t
+float
 StVpdTriggerDetector::minimumTime(StBeamDirection dir) const
 {
     return mMinimumTime[dir];
 }
 
-Float_t
+float
 StVpdTriggerDetector::vertexZ() const {return mVertexZ;}
 
 void
-StVpdTriggerDetector::setAdc(UInt_t i, Float_t val)
+StVpdTriggerDetector::setAdc(unsigned int i, float val)
 {
     if (i < mMaxVpdCounter)
         mAdc[i] = val;
 }
 
 void
-StVpdTriggerDetector::setTime(UInt_t i, Float_t val)
+StVpdTriggerDetector::setTime(unsigned int i, float val)
 {
     if (i < mMaxVpdCounter)
         mTime[i] = val;
 }
 
 void
-StVpdTriggerDetector::setMinimumTime(StBeamDirection dir, Float_t val)
+StVpdTriggerDetector::setMinimumTime(StBeamDirection dir, float val)
 {
     mMinimumTime[dir] = val;
 }
 
 void
-StVpdTriggerDetector::setVertexZ(Float_t val)
+StVpdTriggerDetector::setVertexZ(float val)
 {
     mVertexZ = val;
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.h,v 2.5 2001/03/24 03:34:54 perev Exp $
+ * $Id: StPrimaryVertex.h,v 2.6 2001/04/05 04:00:39 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.h,v $
+ * Revision 2.6  2001/04/05 04:00:39  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.5  2001/03/24 03:34:54  perev
  * clone() -> clone() const
  *
@@ -39,9 +42,9 @@ public:
     ~StPrimaryVertex();
     
     StVertexId                   type() const;
-    UInt_t                       numberOfDaughters() const;
-    StTrack*                     daughter(UInt_t);
-    const StTrack*               daughter(UInt_t) const;
+    unsigned int                       numberOfDaughters() const;
+    StTrack*                     daughter(unsigned int);
+    const StTrack*               daughter(unsigned int) const;
     StPtrVecTrack                daughters(StTrackFilter&);
     StSPtrVecPrimaryTrack&       daughters();
     const StSPtrVecPrimaryTrack& daughters() const;

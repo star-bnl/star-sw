@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StKinkVertex.cxx,v 2.5 2001/03/24 03:34:51 perev Exp $
+ * $Id: StKinkVertex.cxx,v 2.6 2001/04/05 04:00:51 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StKinkVertex.cxx,v $
+ * Revision 2.6  2001/04/05 04:00:51  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.5  2001/03/24 03:34:51  perev
  * clone() -> clone() const
  *
@@ -38,7 +41,7 @@ using std::copy;
 
 ClassImp(StKinkVertex)
 
-static const char rcsid[] = "$Id: StKinkVertex.cxx,v 2.5 2001/03/24 03:34:51 perev Exp $";
+static const char rcsid[] = "$Id: StKinkVertex.cxx,v 2.6 2001/04/05 04:00:51 ullrich Exp $";
 
 StKinkVertex::StKinkVertex()
 {
@@ -81,17 +84,17 @@ StKinkVertex::clone() const { return new StKinkVertex(*this); }
 StVertexId
 StKinkVertex::type() const { return kKinkVtxId; }
 
-UInt_t
+unsigned int
 StKinkVertex::numberOfDaughters() const { return mDaughter ? 1 : 0; }
 
 StTrack*
-StKinkVertex::daughter(UInt_t i)
+StKinkVertex::daughter(unsigned int i)
 {
     return i==0 ? mDaughter : 0;
 }
 
 const StTrack*
-StKinkVertex::daughter(UInt_t i) const
+StKinkVertex::daughter(unsigned int i) const
 {
     return i==0 ? mDaughter : 0;
 }
@@ -116,29 +119,29 @@ StKinkVertex::pidDaughter() const
     return StParticleTable::instance()->findParticleByGeantId(mDaughterGeantId);
 }
     
-UShort_t
+unsigned short
 StKinkVertex::geantIdParent() const { return mParentGeantId; }
 
-UShort_t
+unsigned short
 StKinkVertex::geantIdDaughter() const { return mDaughterGeantId; }
 
-Float_t
+float
 StKinkVertex::dcaParentDaughter() const { return mDcaParentDaughter; }
 
-Float_t
+float
 StKinkVertex::dcaDaughterPrimaryVertex() const { return mDcaDaughterPrimaryVertex; }
    
-Float_t
+float
 StKinkVertex::dcaParentPrimaryVertex() const { return mDcaParentPrimaryVertex; }
 
-Float_t
+float
 StKinkVertex::hitDistanceParentDaughter() const { return mHitDistanceParentDaughter; }
 
-Float_t
+float
 StKinkVertex::hitDistanceParentVertex() const { return mHitDistanceParentVertex; }
 
-Float_t
-StKinkVertex::dE(UInt_t i) const
+float
+StKinkVertex::dE(unsigned int i) const
 {
     if (i < 3)
         return mDeltaEnergy[i];
@@ -146,10 +149,10 @@ StKinkVertex::dE(UInt_t i) const
         return 0;
 }
 
-Float_t
+float
 StKinkVertex::decayAngle() const { return mDecayAngle; }
 
-Float_t
+float
 StKinkVertex::decayAngleCM() const { return mDecayAngleCM; }
 
 const StThreeVectorF&
@@ -165,37 +168,37 @@ StThreeVectorF&
 StKinkVertex::daughterMomentum() { return mDaughterMomentum; }
 
 void
-StKinkVertex::setGeantIdParent(UShort_t val) { mParentGeantId = val; }
+StKinkVertex::setGeantIdParent(unsigned short val) { mParentGeantId = val; }
 
 void
-StKinkVertex::setGeantIdDaughter(UShort_t val) { mDaughterGeantId = val; }
+StKinkVertex::setGeantIdDaughter(unsigned short val) { mDaughterGeantId = val; }
 
 void
-StKinkVertex::setDcaParentDaughter(Float_t val) { mDcaParentDaughter = val; }
+StKinkVertex::setDcaParentDaughter(float val) { mDcaParentDaughter = val; }
 
 void
-StKinkVertex::setDcaDaughterPrimaryVertex(Float_t val) { mDcaDaughterPrimaryVertex = val; }
+StKinkVertex::setDcaDaughterPrimaryVertex(float val) { mDcaDaughterPrimaryVertex = val; }
 
 void
-StKinkVertex::setDcaParentPrimaryVertex(Float_t val) { mDcaParentPrimaryVertex = val; }
+StKinkVertex::setDcaParentPrimaryVertex(float val) { mDcaParentPrimaryVertex = val; }
 
 void
-StKinkVertex::setHitDistanceParentDaughter(Float_t val) { mHitDistanceParentDaughter = val; }
+StKinkVertex::setHitDistanceParentDaughter(float val) { mHitDistanceParentDaughter = val; }
 
 void
-StKinkVertex::setHitDistanceParentVertex(Float_t val) { mHitDistanceParentVertex = val; }
+StKinkVertex::setHitDistanceParentVertex(float val) { mHitDistanceParentVertex = val; }
 
 void
-StKinkVertex::setdE(UInt_t i, Float_t val)
+StKinkVertex::setdE(unsigned int i, float val)
 {
     if (i < 3) mDeltaEnergy[i] = val;
 }
 
 void
-StKinkVertex::setDecayAngle(Float_t val) { mDecayAngle = val; }
+StKinkVertex::setDecayAngle(float val) { mDecayAngle = val; }
 
 void
-StKinkVertex::setDecayAngleCM(Float_t val) { mDecayAngleCM = val; }
+StKinkVertex::setDecayAngleCM(float val) { mDecayAngleCM = val; }
 
 void
 StKinkVertex::setParentMomentum(const StThreeVectorF& val) { mParentMomentum = val; }

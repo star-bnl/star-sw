@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.cxx,v 2.3 2001/03/24 03:35:01 perev Exp $
+ * $Id: StXiVertex.cxx,v 2.4 2001/04/05 04:00:59 ullrich Exp $
  *
  * Author: Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.cxx,v $
+ * Revision 2.4  2001/04/05 04:00:59  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.3  2001/03/24 03:35:01  perev
  * clone() -> clone() const
  *
@@ -31,7 +34,7 @@
 #include "tables/St_dst_vertex_Table.h"
 #include "tables/St_dst_xi_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StXiVertex.cxx,v 2.3 2001/03/24 03:35:01 perev Exp $";
+static const char rcsid[] = "$Id: StXiVertex.cxx,v 2.4 2001/04/05 04:00:59 ullrich Exp $";
 
 ClassImp(StXiVertex)
 
@@ -46,7 +49,7 @@ StXiVertex::StXiVertex()
 }
 
 StXiVertex::StXiVertex(const dst_vertex_st& vtx,
-		       const dst_xi_vertex_st& xivtx) :
+                       const dst_xi_vertex_st& xivtx) :
     StVertex(vtx)
 {
     mType = kXiVtxId;
@@ -68,17 +71,17 @@ StXiVertex::clone() const { return new StXiVertex(*this); }
 StVertexId
 StXiVertex::type() const { return kXiVtxId; }
 
-UInt_t
+unsigned int
 StXiVertex::numberOfDaughters() const { return mDaughter ? 1 : 0;}
 
 StTrack*
-StXiVertex::daughter(UInt_t i)
+StXiVertex::daughter(unsigned int i)
 {
     return i == 0 ? mDaughter : 0;
 }
 
 const StTrack*
-StXiVertex::daughter(UInt_t i) const
+StXiVertex::daughter(unsigned int i) const
 {
     return i == 0 ? mDaughter : 0;
 }
@@ -91,7 +94,7 @@ StXiVertex::daughters(StTrackFilter& filter)
     return vec;
 }
 
-Float_t
+float
 StXiVertex::dcaV0ToPrimaryVertex() const
 {
     if (mV0Vertex)
@@ -112,7 +115,7 @@ StXiVertex::momentumOfV0() const
         return StThreeVectorF();
 }
 
-Float_t
+float
 StXiVertex::dcaBachelorToPrimaryVertex () const
 {
     return mDcaBachelorToPrimaryVertex;
@@ -127,10 +130,10 @@ StXiVertex::momentum() const
     return mMomentumOfBachelor + momentumOfV0();
 }
 
-Float_t
+float
 StXiVertex::dcaDaughters() const { return mDcaDaughters; }
 
-Float_t
+float
 StXiVertex::dcaParentToPrimaryVertex() const { return mDcaParentToPrimaryVertex; }
 
 StV0Vertex*
@@ -140,12 +143,12 @@ StTrack*
 StXiVertex::bachelor() { return mDaughter; }
 
 void
-StXiVertex::setDcaBachelorToPrimaryVertex(Float_t val)
+StXiVertex::setDcaBachelorToPrimaryVertex(float val)
 {
     mDcaBachelorToPrimaryVertex = val;
 }
 
-Double_t
+double
 StXiVertex::chargeOfBachelor()
 {
     StTrack* b = bachelor();
@@ -159,10 +162,10 @@ StXiVertex::setMomentumOfBachelor(const StThreeVectorF& v)
 }
 
 void
-StXiVertex::setDcaDaughters(Float_t val) { mDcaDaughters = val; }
+StXiVertex::setDcaDaughters(float val) { mDcaDaughters = val; }
 
 void
-StXiVertex::setDcaParentToPrimaryVertex(Float_t val) { mDcaParentToPrimaryVertex = val; }
+StXiVertex::setDcaParentToPrimaryVertex(float val) { mDcaParentToPrimaryVertex = val; }
 
 void
 StXiVertex::setV0Vertex(StV0Vertex* v0vtx)

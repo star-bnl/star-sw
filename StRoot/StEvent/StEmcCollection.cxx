@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEmcCollection.cxx,v 2.3 2000/07/28 19:49:27 akio Exp $
+ * $Id: StEmcCollection.cxx,v 2.4 2001/04/05 04:00:48 ullrich Exp $
  *
  * Author: Akio Ogawa, Nov 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCollection.cxx,v $
+ * Revision 2.4  2001/04/05 04:00:48  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.3  2000/07/28 19:49:27  akio
  * Change in Detector Id for Endcap SMD
  *
@@ -25,7 +28,7 @@
 
 ClassImp(StEmcCollection)
 
-static const char rcsid[] = "$Id: StEmcCollection.cxx,v 2.3 2000/07/28 19:49:27 akio Exp $";
+static const char rcsid[] = "$Id: StEmcCollection.cxx,v 2.4 2001/04/05 04:00:48 ullrich Exp $";
 
 StEmcCollection::StEmcCollection() {/* noop*/}
 
@@ -39,30 +42,30 @@ const StEmcDetector*
 StEmcCollection::detector(StDetectorId id) const
 {
     if(id >= kBarrelEmcTowerId && id <= kEndcapSmdVStripId)
-	return mDetector[id-kBarrelEmcTowerId]; 
+        return mDetector[id-kBarrelEmcTowerId];
     else
-	return 0;
+        return 0;
 }
 
 StEmcDetector*
 StEmcCollection::detector(StDetectorId id)
 {
     if(id >= kBarrelEmcTowerId && id <= kEndcapSmdVStripId)
-	return mDetector[id-kBarrelEmcTowerId]; 
+        return mDetector[id-kBarrelEmcTowerId];
     else
-	return 0;
+        return 0;
 }
 
 void
 StEmcCollection::setDetector(StEmcDetector* val)
 {
     if (val) {
-	UInt_t id = val->detectorId();
-	if (id >= kBarrelEmcTowerId && id <= kEndcapSmdVStripId) {
-	    if (mDetector[id-kBarrelEmcTowerId]) delete mDetector[id-kBarrelEmcTowerId];
-	    mDetector[id-kBarrelEmcTowerId] = val;
-	}
-    } 
+        unsigned int id = val->detectorId();
+        if (id >= kBarrelEmcTowerId && id <= kEndcapSmdVStripId) {
+            if (mDetector[id-kBarrelEmcTowerId]) delete mDetector[id-kBarrelEmcTowerId];
+            mDetector[id-kBarrelEmcTowerId] = val;
+        }
+    }
 }
 
 const StSPtrVecEmcPoint&
@@ -77,8 +80,8 @@ StEmcCollection::endcapPoints() const { return mEndcap; }
 StSPtrVecEmcPoint&
 StEmcCollection::endcapPoints() { return mEndcap; }
 
-void 
+void
 StEmcCollection::addBarrelPoint(const StEmcPoint* p){mBarrel.push_back(p);}
 
-void 
+void
 StEmcCollection::addEndcapPoint(const StEmcPoint* p){mEndcap.push_back(p);}

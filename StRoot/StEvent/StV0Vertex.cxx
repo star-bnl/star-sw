@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.cxx,v 2.3 2001/03/24 03:35:00 perev Exp $
+ * $Id: StV0Vertex.cxx,v 2.4 2001/04/05 04:00:59 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.cxx,v $
+ * Revision 2.4  2001/04/05 04:00:59  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.3  2001/03/24 03:35:00  perev
  * clone() -> clone() const
  *
@@ -36,7 +39,7 @@ using std::copy;
 
 ClassImp(StV0Vertex)
 
-static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.3 2001/03/24 03:35:00 perev Exp $";
+static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.4 2001/04/05 04:00:59 ullrich Exp $";
 
 StV0Vertex::StV0Vertex()
 {
@@ -75,17 +78,17 @@ StV0Vertex::clone() const { return new StV0Vertex(*this); }
 StVertexId
 StV0Vertex::type() const { return kV0VtxId; }
 
-UInt_t
+unsigned int
 StV0Vertex::numberOfDaughters() const { return 2; }
 
 StTrack*
-StV0Vertex::daughter(UInt_t i)
+StV0Vertex::daughter(unsigned int i)
 {
     return i < 2 ?  mDaughters[i] : 0;
 }
 
 const StTrack*
-StV0Vertex::daughter(UInt_t i) const
+StV0Vertex::daughter(unsigned int i) const
 {
     return i < 2 ?  mDaughters[i] : 0;
 }
@@ -129,7 +132,7 @@ StV0Vertex::daughter(StChargeSign sign) const
     return mDaughters[sign];
 }
 
-Float_t
+float
 StV0Vertex::dcaDaughterToPrimaryVertex(StChargeSign sign) const
 {
     return mDcaDaughtersToPrimaryVertex[sign];
@@ -148,14 +151,14 @@ StV0Vertex::momentum() const
             mMomentumOfDaughters[positive]);
 }
 
-Float_t
+float
 StV0Vertex::dcaDaughters() const { return mDcaDaughters; }
 
-Float_t
+float
 StV0Vertex::dcaParentToPrimaryVertex() const { return mDcaParentToPrimaryVertex; }
 
 void
-StV0Vertex::setDcaDaughterToPrimaryVertex(StChargeSign sign, Float_t val)
+StV0Vertex::setDcaDaughterToPrimaryVertex(StChargeSign sign, float val)
 {
     mDcaDaughtersToPrimaryVertex[sign] = val;
 }
@@ -167,7 +170,7 @@ StV0Vertex::setMomentumOfDaughter(StChargeSign sign, const StThreeVectorF& v)
 }
 
 void
-StV0Vertex::setDcaDaughters(Float_t val) { mDcaDaughters = val; }
+StV0Vertex::setDcaDaughters(float val) { mDcaDaughters = val; }
 
 void
-StV0Vertex::setDcaParentToPrimaryVertex(Float_t val) { mDcaParentToPrimaryVertex = val; }
+StV0Vertex::setDcaParentToPrimaryVertex(float val) { mDcaParentToPrimaryVertex = val; }

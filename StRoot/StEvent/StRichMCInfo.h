@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichMCInfo.h,v 2.1 2000/05/22 21:44:38 ullrich Exp $
+ * $Id: StRichMCInfo.h,v 2.2 2001/04/05 04:00:40 ullrich Exp $
  *
  * Author: Brian Lasiuk, May 2000
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichMCInfo.h,v $
+ * Revision 2.2  2001/04/05 04:00:40  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.1  2000/05/22 21:44:38  ullrich
  * Initial Revision
  *
@@ -24,35 +27,35 @@
 class StRichMCInfo : public StObject {
 public:
     StRichMCInfo();
-    StRichMCInfo(Long_t id, Long_t gid,  Long_t trk,
-		 Float_t q, Long_t process);
+    StRichMCInfo(int id, int gid,  int trk,
+                 float q, int process);
     // StRichMCInfo(const StRichMCInfo&);            use default
     // StRichMCInfo& operator=(const StRichMCInfo&); use default
     ~StRichMCInfo();
     
-    Int_t operator==(const StRichMCInfo&) const;
-    Int_t operator!=(const StRichMCInfo&) const;
+    int operator==(const StRichMCInfo&) const;
+    int operator!=(const StRichMCInfo&) const;
 
-    Long_t  id()      const;
-    Long_t  gid()     const;
-    Long_t  trackp()  const;
-    Float_t charge()  const;
-    Long_t  process() const;
+    int   id()      const;
+    int   gid()     const;
+    int   trackp()  const;
+    float charge()  const;
+    int   process() const;
     
 protected:
-    Long_t  mId;
-    Long_t  mGid;
-    Long_t  mTrackp;
+    Int_t     mId;
+    Int_t     mGid;
+    Int_t     mTrackp;
     Float_t   mCharge;
-    Long_t  mProcess;
+    Int_t     mProcess;
     
     ClassDef(StRichMCInfo,1)
 };
 
-inline Long_t StRichMCInfo::id()  const { return ( mId ); }
-inline Long_t StRichMCInfo::gid()  const { return ( mGid );}
-inline Long_t StRichMCInfo::trackp()  const {return ( mTrackp );}
-inline Float_t StRichMCInfo::charge()  const {return ( mCharge );}
-inline Long_t StRichMCInfo::process()  const { return ( mProcess );}
+inline int StRichMCInfo::id()  const { return ( mId ); }
+inline int StRichMCInfo::gid()  const { return ( mGid );}
+inline int StRichMCInfo::trackp()  const {return ( mTrackp );}
+inline float StRichMCInfo::charge()  const {return ( mCharge );}
+inline int StRichMCInfo::process()  const { return ( mProcess );}
 
 #endif

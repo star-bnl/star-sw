@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.10 2001/03/24 03:34:59 perev Exp $
+ * $Id: StTrack.h,v 2.11 2001/04/05 04:00:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.11  2001/04/05 04:00:45  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.10  2001/03/24 03:34:59  perev
  * clone() -> clone() const
  *
@@ -71,15 +74,15 @@ public:
 
     virtual StTrackType            type() const = 0;
     virtual const StVertex*        vertex() const = 0;
-    virtual UShort_t               key() const;
-    Short_t                        flag() const;
-    UShort_t                       encodedMethod() const;
-    Bool_t                         finderMethod(StTrackFinderMethod) const;
+    virtual unsigned short         key() const;
+    short                          flag() const;
+    unsigned short                 encodedMethod() const;
+    bool                           finderMethod(StTrackFinderMethod) const;
     StTrackFittingMethod           fittingMethod() const;
-    Float_t                        impactParameter() const;
-    Float_t                        length() const;
-    UShort_t                       numberOfPossiblePoints() const;
-    UShort_t                       numberOfPossiblePoints(StDetectorId) const;
+    float                          impactParameter() const;
+    float                          length() const;
+    unsigned short                 numberOfPossiblePoints() const;
+    unsigned short                 numberOfPossiblePoints(StDetectorId) const;
     const StTrackTopologyMap&      topologyMap() const;
     StTrackGeometry*               geometry();
     const StTrackGeometry*         geometry() const;
@@ -94,10 +97,10 @@ public:
     StTrackNode*                   node();
     const StTrackNode*             node() const;
     
-    void         setFlag(Short_t);
-    void         setEncodedMethod(UShort_t);
-    void         setImpactParameter(Float_t);
-    void         setLength(Float_t);
+    void         setFlag(short);
+    void         setEncodedMethod(unsigned short);
+    void         setImpactParameter(float);
+    void         setLength(float);
     void         setTopologyMap(const StTrackTopologyMap&);
     void         setGeometry(StTrackGeometry*);
     void         setFitTraits(const StTrackFitTraits&);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.cxx,v 2.6 2001/03/24 03:34:53 perev Exp $
+ * $Id: StPrimaryVertex.cxx,v 2.7 2001/04/05 04:00:52 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.cxx,v $
+ * Revision 2.7  2001/04/05 04:00:52  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.6  2001/03/24 03:34:53  perev
  * clone() -> clone() const
  *
@@ -39,7 +42,7 @@
 
 ClassImp(StPrimaryVertex)
 
-static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.6 2001/03/24 03:34:53 perev Exp $";
+static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.7 2001/04/05 04:00:52 ullrich Exp $";
 
 StPrimaryVertex::StPrimaryVertex()
 { mType = kEventVtxId; }
@@ -55,20 +58,20 @@ StPrimaryVertex::clone() const { return new StPrimaryVertex(*this); }
 StVertexId
 StPrimaryVertex::type() const { return kEventVtxId; }
 
-UInt_t
+unsigned int
 StPrimaryVertex::numberOfDaughters() const
 {
     return mDaughters.size();
 }
 
 StTrack*
-StPrimaryVertex::daughter(UInt_t i)
+StPrimaryVertex::daughter(unsigned int i)
 {
     return i < mDaughters.size() ? mDaughters[i] : 0;
 }
 
 const StTrack*
-StPrimaryVertex::daughter(UInt_t i) const
+StPrimaryVertex::daughter(unsigned int i) const
 {
     return i < mDaughters.size() ? mDaughters[i] : 0;
 }
@@ -93,8 +96,8 @@ StPrimaryVertex::addDaughter(StTrack* t)
 {
     StPrimaryTrack* p = dynamic_cast<StPrimaryTrack*>(t);
     if (p) {
-	mDaughters.push_back(p);
-	p->setVertex(this);
+        mDaughters.push_back(p);
+        p->setVertex(this);
     }
 }
 
@@ -106,9 +109,9 @@ StPrimaryVertex::removeDaughter(StTrack* t)
     StSPtrVecPrimaryTrackIterator iter;
     for (iter=mDaughters.begin(); iter != mDaughters.end(); iter++)
         if (*iter == t) {
-	    mDaughters.erase(iter);
-	    p->setVertex(0);
-	}
+            mDaughters.erase(iter);
+            p->setVertex(0);
+        }
 }
 
 void

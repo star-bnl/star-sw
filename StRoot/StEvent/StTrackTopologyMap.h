@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.h,v 2.5 2000/05/17 17:21:38 ullrich Exp $
+ * $Id: StTrackTopologyMap.h,v 2.6 2001/04/05 04:00:46 ullrich Exp $
  *
  * Author: Thomas Ullrich, AUg 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.h,v $
+ * Revision 2.6  2001/04/05 04:00:46  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.5  2000/05/17 17:21:38  ullrich
  * New method largestGap() and new output operator.
  *
@@ -36,31 +39,29 @@
 class StTrackTopologyMap : public StObject {
 public:
     StTrackTopologyMap();
-    StTrackTopologyMap(ULong_t, ULong_t);
-    StTrackTopologyMap(const ULong_t*);
+    StTrackTopologyMap(unsigned int, unsigned int);
+    StTrackTopologyMap(const unsigned long*);
+    StTrackTopologyMap(const unsigned int*);
     // StTrackTopologyMap(const StTrackTopologyMap&);            use default
     // StTrackTopologyMap& operator=(const StTrackTopologyMap&); use default
     ~StTrackTopologyMap();
 
-    Bool_t   primaryVertexUsed() const;
-    UInt_t   numberOfHits(StDetectorId) const;
-    Bool_t   hasHitInRow(StDetectorId, UInt_t) const; // first row = 1
-    Bool_t   hasHitInSvtLayer(UInt_t) const;          // first layer = 1
-    Bool_t   turnAroundFlag() const;
-    ULong_t  data(UInt_t) const;
+    bool           primaryVertexUsed() const;
+    unsigned int   numberOfHits(StDetectorId) const;
+    bool           hasHitInRow(StDetectorId, unsigned int) const; // first row = 1
+    bool           hasHitInSvtLayer(unsigned int) const;          // first layer = 1
+    bool           turnAroundFlag() const;
+    unsigned int   data(unsigned int) const;
 
-    Int_t    largestGap(StDetectorId) const;
+    int            largestGap(StDetectorId) const;
     
 protected:
-    Bool_t bit(Int_t) const;             // range 0-63
-    Bool_t ftpcFormat() const;
+    bool bit(int) const;             // range 0-63
+    bool ftpcFormat() const;
     
 private:
-    // Used to store as unsigned longs, but this caused problems with
-    // storing StTrackTopologyMap in TTrees (not supported by TBranch).
-    // ULong_t mMap[2];
-    UInt_t mMap0;
-    UInt_t mMap1;
+    UInt_t  mMap0;
+    UInt_t  mMap1;
     
     ClassDef(StTrackTopologyMap,1)
 };

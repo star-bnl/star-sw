@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofHit.h,v 2.2 2001/03/24 03:34:59 perev Exp $
+ * $Id: StTofHit.h,v 2.3 2001/04/05 04:00:43 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, Dec 2000
  ***************************************************************************
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StTofHit.h,v $
+ * Revision 2.3  2001/04/05 04:00:43  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.2  2001/03/24 03:34:59  perev
  * clone() -> clone() const
  *
@@ -32,41 +35,41 @@ public:
     //StTofHit& operator=(const StTofHit&);
     ~StTofHit();
 
-    UShort_t slatIndex()      const;
-    UShort_t numberOfMips()   const;
-    Float_t  flightTime()     const;
+    unsigned short slatIndex()      const;
+    unsigned short numberOfMips()   const;
+    float          flightTime()     const;
 
-    void setSlatIndex(UShort_t);
-    void setNumberOfMips(UShort_t);
-    void setFlightTime(Float_t);
+    void setSlatIndex(unsigned short);
+    void setNumberOfMips(unsigned short);
+    void setFlightTime(float);
     
 protected:
     StObject* clone() const;
 
-    UShort_t                  mSlatIndex;
-    UShort_t                  mNumberOfMips;
-    Float_t                   mFlightTime;
+    UShort_t  mSlatIndex;
+    UShort_t  mNumberOfMips;
+    Float_t   mFlightTime;
 
     ClassDef(StTofHit,1)
 };
 
-inline UShort_t
+inline unsigned short
 StTofHit::slatIndex() const { return mSlatIndex; }
 
-inline UShort_t
+inline unsigned short
 StTofHit::numberOfMips() const {return mNumberOfMips;}
 
-inline Float_t
+inline float
 StTofHit::flightTime() const {return mFlightTime;}
 
 inline void
-StTofHit::setSlatIndex(UShort_t slatId) {mNumberOfMips = slatId;}
+StTofHit::setSlatIndex(unsigned short slatId) {mNumberOfMips = slatId;}
 
 inline void
-StTofHit::setNumberOfMips(UShort_t nm) {mNumberOfMips = nm;}
+StTofHit::setNumberOfMips(unsigned short nm) {mNumberOfMips = nm;}
 
 inline void
-StTofHit::setFlightTime(Float_t tof) {mFlightTime = tof;}
+StTofHit::setFlightTime(float tof) {mFlightTime = tof;}
 
 //non-members
 ostream& operator<<(ostream&, const StTofHit&);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVpdTriggerDetector.h,v 2.1 1999/10/13 19:44:20 ullrich Exp $
+ * $Id: StVpdTriggerDetector.h,v 2.2 2001/04/05 04:00:47 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StVpdTriggerDetector.h,v $
+ * Revision 2.2  2001/04/05 04:00:47  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.1  1999/10/13 19:44:20  ullrich
  * Initial Revision
  *
@@ -29,16 +32,16 @@ public:
     // StVpdTriggerDetector& operator=(const StVpdTriggerDetector&); use default
     virtual ~StVpdTriggerDetector();
     
-    UInt_t   numberOfVpdCounters() const;
-    Float_t  adc(UInt_t) const;
-    Float_t  time(UInt_t) const;
-    Float_t  minimumTime(StBeamDirection) const;
-    Float_t  vertexZ() const;
+    unsigned int  numberOfVpdCounters() const;
+    float         adc(unsigned int) const;
+    float         time(unsigned int) const;
+    float         minimumTime(StBeamDirection) const;
+    float         vertexZ() const;
 
-    void setAdc(UInt_t, Float_t);
-    void setTime(UInt_t, Float_t);
-    void setMinimumTime(StBeamDirection, Float_t);
-    void setVertexZ(Float_t);
+    void setAdc(unsigned int, float);
+    void setTime(unsigned int, float);
+    void setMinimumTime(StBeamDirection, float);
+    void setVertexZ(float);
     
 protected:
     enum {mMaxVpdCounter = 48};

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSoftwareMonitor.h,v 2.2 2000/09/28 10:57:55 ullrich Exp $
+ * $Id: StRichSoftwareMonitor.h,v 2.3 2001/04/05 04:00:41 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichSoftwareMonitor.h,v $
+ * Revision 2.3  2001/04/05 04:00:41  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.2  2000/09/28 10:57:55  ullrich
  * Major update.
  *
@@ -33,64 +36,64 @@ public:
 
     // ClusterFinder
 
-    void    setNumberOfPixels(Long_t);
-    void    setNumberOfClusters(Long_t);
-    void    setNumberOfHits(Long_t);
-    void    setTotalCharge(Long_t);
+    void   setNumberOfPixels(int);
+    void   setNumberOfClusters(int);
+    void   setNumberOfHits(int);
+    void   setTotalCharge(int);
     
-    Long_t  numberOfPixels() const;
-    Long_t  numberOfClusters() const;
-    Long_t  numberOfHits() const;
-    Long_t  totalCharge() const;
+    int    numberOfPixels() const;
+    int    numberOfClusters() const;
+    int    numberOfHits() const;
+    int    totalCharge() const;
 
     // PID Maker
-    void   setNumberOfTracksCrossing(Long_t);
-    void   setNumberOfTracksPidCalculated(Long_t);
-    void   setNumberOfTracksAbove1Gev(Long_t);
-    void   setNumberOfHitsInRings(Long_t);
-    void   setNumberOfRings(Long_t);
+    void   setNumberOfTracksCrossing(int);
+    void   setNumberOfTracksPidCalculated(int);
+    void   setNumberOfTracksAbove1Gev(int);
+    void   setNumberOfHitsInRings(int);
+    void   setNumberOfRings(int);
     
-    Long_t  numberOfTracksCrossing() const;
-    Long_t  numberOfTracksPidCalculated() const;
-    Long_t  numberOfTracksAbove1Gev() const;
-    Long_t  numberOfHitsInRings() const;
+    int    numberOfTracksCrossing() const;
+    int    numberOfTracksPidCalculated() const;
+    int    numberOfTracksAbove1Gev() const;
+    int    numberOfHitsInRings() const;
     
-    Long_t  mult_rich_tot;
+    int    mult_rich_tot;
 
 private:
-    Long_t mNumberOfPixels;
-    Long_t mNumberOfClusters;
-    Long_t mNumberOfHits;
-    Long_t mTotalCharge;
+    Int_t  mNumberOfPixels;
+    Int_t  mNumberOfClusters;
+    Int_t  mNumberOfHits;
+    Int_t  mTotalCharge;
 
-    Long_t  mNumberOfTracksCrossing;
-    Long_t  mNumberOfTracksPidCalculated;
-    Long_t  mNumberOfTracksAbove1Gev;
-    Long_t  mNumberOfHitsInRings;
-    Long_t  mNumberOfRings;
+    Int_t  mNumberOfTracksCrossing;
+    Int_t  mNumberOfTracksPidCalculated;
+    Int_t  mNumberOfTracksAbove1Gev;
+    Int_t  mNumberOfHitsInRings;
+    Int_t  mNumberOfRings;
     
     ClassDef(StRichSoftwareMonitor,1)
 };
 
-inline void StRichSoftwareMonitor::setNumberOfPixels(Long_t n) { mNumberOfPixels = n;}
-inline void StRichSoftwareMonitor::setNumberOfClusters(Long_t n) { mNumberOfClusters= n;}
-inline void StRichSoftwareMonitor::setNumberOfHits(Long_t n){ mNumberOfHits = n;}
-inline void StRichSoftwareMonitor::setTotalCharge(Long_t n){ mTotalCharge = n;}
+inline void StRichSoftwareMonitor::setNumberOfPixels(int n) { mNumberOfPixels = n;}
+inline void StRichSoftwareMonitor::setNumberOfClusters(int n) { mNumberOfClusters= n;}
+inline void StRichSoftwareMonitor::setNumberOfHits(int n){ mNumberOfHits = n;}
+inline void StRichSoftwareMonitor::setTotalCharge(int n){ mTotalCharge = n;}
     
-inline Long_t StRichSoftwareMonitor::numberOfPixels() const {return mNumberOfPixels;}
-inline Long_t StRichSoftwareMonitor::numberOfClusters() const {return mNumberOfClusters;}
-inline Long_t StRichSoftwareMonitor::numberOfHits() const {return mNumberOfHits;}
-inline Long_t StRichSoftwareMonitor::totalCharge() const {return mTotalCharge;}
+inline int StRichSoftwareMonitor::numberOfPixels() const {return mNumberOfPixels;}
+inline int StRichSoftwareMonitor::numberOfClusters() const {return mNumberOfClusters;}
+inline int StRichSoftwareMonitor::numberOfHits() const {return mNumberOfHits;}
+inline int StRichSoftwareMonitor::totalCharge() const {return mTotalCharge;}
 
     // PID Maker
-inline void StRichSoftwareMonitor::setNumberOfTracksCrossing(Long_t n) { mNumberOfTracksCrossing = n;}
-inline void StRichSoftwareMonitor::setNumberOfTracksPidCalculated(Long_t n) { mNumberOfTracksPidCalculated = n;}
-inline void StRichSoftwareMonitor::setNumberOfTracksAbove1Gev(Long_t n) { mNumberOfTracksAbove1Gev= n;}
-inline void StRichSoftwareMonitor::setNumberOfHitsInRings(Long_t n) { mNumberOfHitsInRings = n;}
-inline void StRichSoftwareMonitor::setNumberOfRings(Long_t n) { mNumberOfRings = n;}
+inline void StRichSoftwareMonitor::setNumberOfTracksCrossing(int n) { mNumberOfTracksCrossing = n;}
+inline void StRichSoftwareMonitor::setNumberOfTracksPidCalculated(int n) { mNumberOfTracksPidCalculated = n;}
+inline void StRichSoftwareMonitor::setNumberOfTracksAbove1Gev(int n) { mNumberOfTracksAbove1Gev= n;}
+inline void StRichSoftwareMonitor::setNumberOfHitsInRings(int n) { mNumberOfHitsInRings = n;}
+inline void StRichSoftwareMonitor::setNumberOfRings(int n) { mNumberOfRings = n;}
     
-inline Long_t StRichSoftwareMonitor::numberOfTracksCrossing() const {return mNumberOfTracksCrossing;}
-inline Long_t StRichSoftwareMonitor::numberOfTracksPidCalculated() const {return mNumberOfTracksPidCalculated;}
-inline Long_t StRichSoftwareMonitor::numberOfTracksAbove1Gev() const {return mNumberOfTracksAbove1Gev;}
-inline Long_t StRichSoftwareMonitor::numberOfHitsInRings() const {return mNumberOfHitsInRings;}
+inline int StRichSoftwareMonitor::numberOfTracksCrossing() const {return mNumberOfTracksCrossing;}
+inline int StRichSoftwareMonitor::numberOfTracksPidCalculated() const {return mNumberOfTracksPidCalculated;}
+inline int StRichSoftwareMonitor::numberOfTracksAbove1Gev() const {return mNumberOfTracksAbove1Gev;}
+inline int StRichSoftwareMonitor::numberOfHitsInRings() const {return mNumberOfHitsInRings;}
 #endif

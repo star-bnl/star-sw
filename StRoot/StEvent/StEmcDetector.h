@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcDetector.h,v 2.2 2000/10/26 00:02:24 ullrich Exp $
+ * $Id: StEmcDetector.h,v 2.3 2001/04/05 04:00:35 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcDetector.h,v $
+ * Revision 2.3  2001/04/05 04:00:35  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.2  2000/10/26 00:02:24  ullrich
  * Fixed various problems causing I/O failures.
  *
@@ -30,23 +33,23 @@ class StEmcClusterCollection;
 class StEmcDetector : public StObject {
 public:
     StEmcDetector();
-    StEmcDetector(StDetectorId, UInt_t);
+    StEmcDetector(StDetectorId, unsigned int);
     ~StEmcDetector();
     
     StDetectorId  detectorId() const;
-    UInt_t  numberOfModules() const;
+    unsigned int  numberOfModules() const;
     
-    Bool_t  addHit(StEmcRawHit*);
-    UInt_t  numberOfHits() const;
+    bool          addHit(StEmcRawHit*);
+    unsigned int  numberOfHits() const;
     
-    StEmcModule*       module(UInt_t);
-    const StEmcModule* module(UInt_t) const;
+    StEmcModule*       module(unsigned int);
+    const StEmcModule* module(unsigned int) const;
     
     StEmcClusterCollection*         cluster();
     const StEmcClusterCollection*   cluster() const;
 
     void setCluster(StEmcClusterCollection*);
-    void setModule(StEmcModule*,Int_t);
+    void setModule(StEmcModule*,int);
     
 private:
     StDetectorId            mDetectorId;

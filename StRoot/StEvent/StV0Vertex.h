@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.h,v 2.2 2001/03/24 03:35:01 perev Exp $
+ * $Id: StV0Vertex.h,v 2.3 2001/04/05 04:00:46 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.h,v $
+ * Revision 2.3  2001/04/05 04:00:46  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.2  2001/03/24 03:35:01  perev
  * clone() -> clone() const
  *
@@ -36,25 +39,25 @@ public:
     ~StV0Vertex();
     
     StVertexId            type() const;
-    UInt_t                numberOfDaughters() const;
+    unsigned int          numberOfDaughters() const;
     StTrack*              daughter(StChargeSign sign);
     const StTrack*        daughter(StChargeSign sign) const;
-    StTrack*              daughter(UInt_t);
-    const StTrack*        daughter(UInt_t) const;
+    StTrack*              daughter(unsigned int);
+    const StTrack*        daughter(unsigned int) const;
     StPtrVecTrack         daughters(StTrackFilter&);
     void                  addDaughter(StTrack*);
     void                  removeDaughter(StTrack*);
 
-    Float_t               dcaDaughterToPrimaryVertex(StChargeSign sign) const;
-    Float_t               dcaDaughters() const;
-    Float_t               dcaParentToPrimaryVertex() const;
+    float                 dcaDaughterToPrimaryVertex(StChargeSign sign) const;
+    float                 dcaDaughters() const;
+    float                 dcaParentToPrimaryVertex() const;
     const StThreeVectorF& momentumOfDaughter(StChargeSign sign) const;
     StThreeVectorF        momentum() const;
     
-    void setDcaDaughterToPrimaryVertex(StChargeSign, Float_t);
+    void setDcaDaughterToPrimaryVertex(StChargeSign, float);
     void setMomentumOfDaughter(StChargeSign, const StThreeVectorF&);
-    void setDcaDaughters(Float_t);
-    void setDcaParentToPrimaryVertex(Float_t);
+    void setDcaDaughters(float);
+    void setDcaParentToPrimaryVertex(float);
 
 private:
     StPtrVecTrack    mDaughters;

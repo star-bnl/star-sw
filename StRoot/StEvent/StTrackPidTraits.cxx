@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackPidTraits.cxx,v 2.4 1999/11/29 17:07:29 ullrich Exp $
+ * $Id: StTrackPidTraits.cxx,v 2.5 2001/04/05 04:00:58 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackPidTraits.cxx,v $
+ * Revision 2.5  2001/04/05 04:00:58  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.4  1999/11/29 17:07:29  ullrich
  * Moved method() from StTrackPidTraits to StDedxPidTraits.cxx
  *
@@ -31,7 +34,7 @@
 
 ClassImp(StTrackPidTraits)
 
-static const char rcsid[] = "$Id: StTrackPidTraits.cxx,v 2.4 1999/11/29 17:07:29 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackPidTraits.cxx,v 2.5 2001/04/05 04:00:58 ullrich Exp $";
 
 StTrackPidTraits::StTrackPidTraits() :
     mDetectorId(0) { /* noop */ }
@@ -44,5 +47,5 @@ StTrackPidTraits::StTrackPidTraits(const dst_dedx_st& t) :
 
 StTrackPidTraits::~StTrackPidTraits() { /* noop */ }
 
-Short_t
+short
 StTrackPidTraits::detector() const { return mDetectorId; }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPixel.cxx,v 2.4 2000/01/13 21:06:19 lasiuk Exp $
+ * $Id: StRichPixel.cxx,v 2.5 2001/04/05 04:00:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPixel.cxx,v $
+ * Revision 2.5  2001/04/05 04:00:53  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.4  2000/01/13 21:06:19  lasiuk
  * add rich pixel info/containers
  *
@@ -27,7 +30,7 @@
  **************************************************************************/
 #include "StRichPixel.h"
 
-static const char rcsid[] = "$Id: StRichPixel.cxx,v 2.4 2000/01/13 21:06:19 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPixel.cxx,v 2.5 2001/04/05 04:00:53 ullrich Exp $";
 
 ClassImp(StRichPixel)
 
@@ -35,19 +38,19 @@ StRichPixel::StRichPixel()
     : mPackedData(0)
 { /* nopt */ }
 
-StRichPixel::StRichPixel(ULong_t rawData)
+StRichPixel::StRichPixel(unsigned int rawData)
    : mPackedData(rawData)
 { /* noop */ }
 
 StRichPixel::~StRichPixel() { /* noop */ }
     
-Int_t
+int
 StRichPixel::operator==(const StRichPixel& p) const
 {
     return (p.mPackedData  == mPackedData);
 }
 
-Int_t
+int
 StRichPixel::operator!=(const StRichPixel& p) const
 {
     return !(*this == p);  // use operator==()

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.9 2001/03/24 03:34:50 perev Exp $
+ * $Id: StHit.cxx,v 2.10 2001/04/05 04:00:51 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.10  2001/04/05 04:00:51  ullrich
+ * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
+ *
  * Revision 2.9  2001/03/24 03:34:50  perev
  * clone() -> clone() const
  *
@@ -28,7 +31,7 @@
  * Change in Detector Id for Endcap SMD
  *
  * Revision 2.4  2000/06/07 09:43:17  ullrich
- * Changed return type of flag() to UInt_t
+ * Changed return type of flag() to unsigned int
  *
  * Revision 2.3  2000/06/01 21:38:53  ullrich
  * Added member mFlag and access member flag() and setFlag().
@@ -48,7 +51,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.9 2001/03/24 03:34:50 perev Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.10 2001/04/05 04:00:51 ullrich Exp $";
 
 ClassImp(StHit)
 
@@ -62,7 +65,7 @@ StHit::StHit()
 
 StHit::StHit(const StThreeVectorF& p,
              const StThreeVectorF& e,
-             ULong_t hp, Float_t q, UChar_t c)
+             unsigned int hp, float q, unsigned char c)
     : StMeasuredPoint(p), mHardwarePosition(hp),
       mCharge(q), mTrackRefCount(c), mPositionError(e)
 {
@@ -74,48 +77,48 @@ StHit::~StHit() { /* noop */ }
 StObject*
 StHit::clone() const { return new StHit(*this); }
    
-Int_t
+int
 StHit::operator==(const StHit& h) const
 {
     return h.mPosition         == mPosition &&
            h.mPositionError    == h.mPositionError &&
            h.mCharge           == mCharge &&
            h.mHardwarePosition == mHardwarePosition &&
-	   h.mFlag             == mFlag;
+           h.mFlag             == mFlag;
 }
 
-Int_t
+int
 StHit::operator!=(const StHit& h) const
 {
     return !(*this == h);  // use operator==()
 }
 
 void
-StHit::setCharge(Float_t val) { mCharge = val; }
+StHit::setCharge(float val) { mCharge = val; }
 
 void
-StHit::setTrackReferenceCount(UChar_t val) { mTrackRefCount = val; }
+StHit::setTrackReferenceCount(unsigned char val) { mTrackRefCount = val; }
     
 void
-StHit::setFlag(UChar_t val) { mFlag = val; }
+StHit::setFlag(unsigned char val) { mFlag = val; }
     
 void
-StHit::setHardwarePosition(ULong_t val) { mHardwarePosition = val; }
+StHit::setHardwarePosition(unsigned int val) { mHardwarePosition = val; }
 
 void
 StHit::setPositionError(const StThreeVectorF& e) { mPositionError = e; }
     
-Float_t
+float
 StHit::charge() const { return mCharge; }
 
-UInt_t
-StHit::flag() const { return static_cast<UInt_t>(mFlag); }
+unsigned int
+StHit::flag() const { return static_cast<unsigned int>(mFlag); }
 
-Int_t
-StHit::usedInFit() const { return static_cast<Int_t>(mFitFlag); } 
+int
+StHit::usedInFit() const { return static_cast<int>(mFitFlag); }
 
-UInt_t
-StHit::trackReferenceCount() const { return static_cast<UInt_t>(mTrackRefCount); }
+unsigned int
+StHit::trackReferenceCount() const { return static_cast<unsigned int>(mTrackRefCount); }
 
 StDetectorId
 StHit::detector() const
@@ -141,7 +144,7 @@ StPtrVecTrack
 StHit::relatedTracks(const StSPtrVecTrackNode& nodes, StTrackType type)
 {
     StPtrVecTrack vec;
-    StPtrVecHit hvec; 
+    StPtrVecHit hvec;
     StDetectorId id = this->detector();
 
     for (unsigned int i=0; i<nodes.size(); i++) {
