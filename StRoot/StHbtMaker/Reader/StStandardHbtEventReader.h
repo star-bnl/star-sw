@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.h,v 1.3 1999/09/03 22:39:17 lisa Exp $
+ * $Id: StStandardHbtEventReader.h,v 1.4 1999/09/08 04:15:53 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.h,v $
+ * Revision 1.4  1999/09/08 04:15:53  lisa
+ * persistent microDST implementation tweaked to please fickle solaris details
+ *
  * Revision 1.3  1999/09/03 22:39:17  lisa
  * Readers now MUST have Report() methods and MAY have WriteHbtEvent() methods
  *
@@ -42,21 +45,28 @@
 #include "StHbtMaker/Base/StHbtEventReader.hh"
 //#include "StChain/StChain.h"
 #include "StChain/StMaker.h"
+#include "StHbtMaker/Base/StHbtEventCut.hh"
+#include "StHbtMaker/Base/StHbtParticleCut.hh"
 
 class StStandardHbtEventReader : public StHbtEventReader{
 
 private:
   StMaker* mTheEventMaker;      //! this is the chain where the StEventReaderMaker is
+  StHbtEventCut* mEventCut;     //!
+  StHbtParticleCut* mParticleCut; //!
 
 public:
   StStandardHbtEventReader();
-  //  ~StStandardHbtEventReader();
+  ~StStandardHbtEventReader();
 
   virtual StHbtEvent* ReturnHbtEvent();
   virtual StHbtString Report();
 
   void SetTheEventMaker(StMaker*);
   StMaker* TheEventMaker();
+
+  void SetEventCut(StHbtEventCut*);          // use these methods to do
+  void SetParticleCut(StHbtParticleCut*);    // "front-loaded" cuts
 
   ClassDef(StStandardHbtEventReader, 1)
 

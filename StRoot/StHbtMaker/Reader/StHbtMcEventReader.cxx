@@ -105,7 +105,7 @@ ClassImp(StHbtMcEventReader)
 
 //__________________
 StHbtMcEventReader::StHbtMcEventReader(){
-  /* no-op */
+  mReaderStatus = 0;
 }
 //__________________
 //StHbtMcEventReader::~StHbtMcEventReader(){
