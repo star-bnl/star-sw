@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.29 2003/12/24 13:44:53 fisyak Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.30 2004/03/26 04:18:35 fisyak Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.30  2004/03/26 04:18:35  fisyak
+ * Assign IdTruth even two or more tracks hit the same pixel
+ *
  * Revision 1.29  2003/12/24 13:44:53  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
  *
@@ -797,9 +800,11 @@ double StTrsParameterizedAnalogSignalGenerator::realShaperResponse(double tbin, 
 //________________________________________________________________________________
 void  StTrsParameterizedAnalogSignalGenerator::addSignal(const int id, const double signal, SignalSum_t &S) {
   S.Sum += signal;
-  if (S.TrackId == id || S.TrackId == -1) return;
-  if (S.TrackId ==  0) {S.TrackId = id; return;}
-  S.TrackId = -1;
+  if ( id ) {
+    if (! S.TrackId ) S.TrackId = id;
+    else  // switch Id, works only for 2 tracks, more tracks ?
+      if ( S.TrackId != id && S.Sum < 2*signal) S.TrackId = id;
+  }
   return;
 }
 //________________________________________________________________________________
