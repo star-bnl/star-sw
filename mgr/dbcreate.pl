@@ -1,6 +1,6 @@
 #!/opt/star/bin/perl -w
 #
-# $Id: dbcreate.pl,v 1.2 1999/07/07 13:22:10 wenaus Exp $
+# $Id: dbcreate.pl,v 1.3 1999/07/25 16:23:09 wenaus Exp $
 #
 ######################################################################
 #
@@ -14,6 +14,9 @@
 # Usage:    create.pl <pwd>
 #
 # $Log: dbcreate.pl,v $
+# Revision 1.3  1999/07/25 16:23:09  wenaus
+# Modify DB access to allow remote use
+#
 # Revision 1.2  1999/07/07 13:22:10  wenaus
 # incorporate run log
 #
@@ -565,7 +568,7 @@ sub addFile {
 
 ######################
 sub StDbDeleteTables {
-    open ( DELTABLES, "| /usr/local/mysql/bin/mysql -u $dbuser --password=$dbpass") or die "Open failure: $!";
+    open ( DELTABLES, "| /usr/local/mysql/bin/mysql --user=$dbuser --host=$dbhost --password=$dbpass") or die "Open failure: $!";
     print DELTABLES <<END;
     use $dbname;
     drop table $DataFileT;
@@ -586,7 +589,7 @@ END
 
 ######################
 sub StDbCreateTables {
-    open ( MAKETABLES, "| /usr/local/mysql/bin/mysql -u $dbuser --password=$dbpass ") or die "Open failure: $!";
+    open ( MAKETABLES, "| /usr/local/mysql/bin/mysql --user=$dbuser --host=$dbhost --password=$dbpass ") or die "Open failure: $!";
     $dbCmd =<<END_BLOCK;
 # --------- Table building -----------
     use $dbname;
