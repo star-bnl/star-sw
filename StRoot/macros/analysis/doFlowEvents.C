@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.23 2000/09/15 22:54:44 posk Exp $
+// $Id: doFlowEvents.C,v 1.24 2000/09/16 22:21:15 snelling Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -44,6 +44,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.24  2000/09/16 22:21:15  snelling
+// Added lines to set selection on P and global DCA
+//
 // Revision 1.23  2000/09/15 22:54:44  posk
 // Added Pt weighting for event plane calculation.
 //
@@ -202,11 +205,13 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //flowSelect->SetPid("pi"); 
   //flowSelect->SetPidPart("pi"); 
   //flowSelect->SetPtPart(0.15, 5.); // pt selection for parts. wrt plane
+  //flowSelect->SetPPart(0.15, 5.); // pt selection for parts. wrt plane
   //flowSelect->SetEtaPart(0., 0.); // eta selection for parts. wrt plane
   //flowSelect->SetFitPtsPart(20, 50); // for parts. wrt plane
   //flowSelect->SetFitOverMaxPtsPart(0.52, 1.); // for parts. wrt plane
   //flowSelect->SetChiSqPart(0.1, 1.3); // for parts. wrt plane
   //flowSelect->SetDcaPart(0., 0.8); // for parts. wrt plane
+  //flowSelect->SetDcaGlobalPart(0., 0.8); // for parts. wrt plane
   //flowSelect->SetYPart(-0.5, 0.5); // for parts. wrt plane
 
   // uncomment next line if you make a selection object
