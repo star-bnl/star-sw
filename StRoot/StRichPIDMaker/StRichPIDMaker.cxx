@@ -1,10 +1,14 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.37 2001/02/07 15:58:31 lasiuk Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.38 2001/02/22 21:06:05 lasiuk Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.38  2001/02/22 21:06:05  lasiuk
+ * fill the new StEvent structures in PidTraits, and richCollection
+ * dca code now included
+ *
  * Revision 2.37  2001/02/07 15:58:31  lasiuk
  * update for production (production version and StEvent changes)
  * refit and momentum loss are default behavior (Nikolai's parameterization)
@@ -172,8 +176,6 @@
  ******************************************************/
 #include "StRichPIDMaker.h"
 
-#define nEW_PRODUCTION 1
-
 #include <algorithm>
 #ifndef ST_NO_NAMESPACES
 using std::min;
@@ -277,7 +279,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.37 2001/02/07 15:58:31 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.38 2001/02/22 21:06:05 lasiuk Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -289,7 +291,7 @@ StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(n
 
   //
   // default version
-  mProductionVersion = 0;
+  mProductionVersion = -999;
 
   //
   // initialize cuts, values and parameters for processing
@@ -403,7 +405,8 @@ void StRichPIDMaker::Clear(Option_t *opt) {
 
 Int_t StRichPIDMaker::Make() { 
     
-    cout << "StRichPIDMaker::Make()" << endl;
+    cout << "StRichPIDMaker::Make() production= ";
+    cout << this->productionVersion() << endl;
 
     mPrintThisEvent = false;
     mNumberOfRingHits=0;
@@ -447,7 +450,8 @@ Int_t StRichPIDMaker::Make() {
     //
     // get hits, clusters, pixels from StEvent
     //
-    const StRichCollection*     richCollection = rEvent->richCollection();
+    //const
+    StRichCollection*     richCollection = rEvent->richCollection();
     mRichCollection = richCollection;
     
     if (!richCollection) {
@@ -595,6 +599,21 @@ Int_t StRichPIDMaker::Make() {
 
 	if (mTrackRefit) richTrack->correctTrajectory();
 
+	//
+	// for the refit assign the residual.  Note
+	// there is no energy loss associated with
+	// this residual.  It would require us to
+	// assume a PID.  This will be done later in
+	// the StRichPid structure
+	//
+	
+	StThreeVectorF refitResidual(-999.,-999.,-999.);
+
+	if(richTrack->getAssociatedMIP()) {
+	    refitResidual = richTrack->getProjectedMIP() - richTrack->getAssociatedMIP()->local();
+	}
+	richTrack->getPidTrait()->setRefitResidual(refitResidual);
+	
 	if(richTrack->getStTrack()->detectorInfo())
 	    tpcHits = richTrack->getStTrack()->detectorInfo()->hits(kTpcId);
 
@@ -684,10 +703,12 @@ Int_t StRichPIDMaker::Make() {
       //
       // reprocessTheTraits is commented out for now
       //
-       if(!this->reprocessTheTraits(theTraits)) {
-	//
-	// if necessary I can take action here
-	//
+      if(!this->reprocessTheTraits(theTraits)) {
+	  //
+	  // if necessary I can take action here
+	  //
+	  cout << "StRichPIDMaker::Make()\n";
+	  cout << "\treprocessTheTraits() failed." << endl;
        }
       
       //
@@ -841,6 +862,10 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent,
 #else 
 	    StRichTrack* tempTrack   = new StRichTrack(track,mMagField);
 #endif
+	    //
+	    // we need theGlobalTrack to calculate the signed dca
+	    //
+	    StTrack* theGlobalTrack = track->node()->track(global);
 	    
 	    if(this->checkTrack(tempTrack)) {
 		
@@ -876,18 +901,33 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent,
 		    theMipResidual =
 			tempTrack->getProjectedMIP() - theAssociatedMip->local();
 		}
-#ifdef NEW_PRODUCTION
-		theRichPidTraits->setProductionVersion(mProductionVersion);
-		theRichPidTraits->setAssociatedMip(tempTrack->getAssociatedMIP());
-		theRichPidTraits->setResidual(theMipResidual);
 
+		theRichPidTraits->setProductionVersion(mProductionVersion);
+
+		theRichPidTraits->setAssociatedMip(theAssociatedMip);
+		theRichPidTraits->setMipResidual(theMipResidual);
+
+		double signed3dDca = -999.;
+		double signed2dDca = -999.;
+		
+		if(theGlobalTrack) {
+		    signed3dDca = this->calculateSignedDca(theGlobalTrack, &signed2dDca);
+		}
+		PR(signed2dDca);
+		PR(signed3dDca);
+		
+		theRichPidTraits->setSignedDca2d(signed2dDca);
+		theRichPidTraits->setSignedDca3d(signed3dDca);
+		
 		mRichCollection->addTrack(tempTrack->getStTrack());
-#endif
+
 		//
 		// Add the StRichPidTrait to the StRichTrack
 		// ...this will be passed to StEvent
 		// (NO RESPONSIBILITY FOR MEMORY)
+		// This will show up as a memory leak
 		//
+		
 		tempTrack->addPidTrait(theRichPidTraits);
 
 		//
@@ -922,6 +962,36 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent,
     return mNumberOfPrimaries;
 }
 
+
+Float_t StRichPIDMaker::calculateSignedDca(const StTrack* track, double* dca2d)  {
+
+    //
+    // Calculation of the signed dca to the vertex
+    // -- the 3d value is the function return value
+    // -- the 2d value is returned by pointer
+    //
+    
+    StHelixD aHelix = track->geometry()->helix();
+
+    double dca3d = aHelix.distance(mVertexPos);
+
+    //
+    // now determine the sign
+    //
+    StThreeVectorD circleCenter(aHelix.xcenter(), aHelix.ycenter(), 0.);
+
+    StThreeVectorD vertex2d(mVertexPos.x(), mVertexPos.y(), 0.);
+
+    double distanceToCircleCenterFromVertex =
+	abs(circleCenter - vertex2d);
+	
+    *dca2d =
+	(1./aHelix.curvature() - distanceToCircleCenterFromVertex);
+
+    double signOfDca = sign((*dca2d));
+
+    return (signOfDca * dca3d);
+}
 
 void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 			       StRichRingCalculator* ringCalculator) {
@@ -2249,10 +2319,11 @@ void StRichPIDMaker::fillPIDTraits(StRichRingCalculator* ringCalc) {
 	}
 	
 	//
-	// Please do not use this.  The residual is
-	// set in the PidTrait and is the same for all Pids
-	// This will be removed eventually, but is kept for now
-	// to ensure compatibility
+	// This residual is specifically for the refit
+	// when the particle species energy/momentum loss
+	// is used.
+	// The "generic" residual is stored in the PidTrait
+	// and is the same for all Pids
 	//
 	pid->setMipResidual(residual);
       

@@ -1,11 +1,15 @@
 /**********************************************************
- * $Id: StRichPIDMaker.h,v 2.15 2001/02/07 15:58:31 lasiuk Exp $
+ * $Id: StRichPIDMaker.h,v 2.16 2001/02/22 21:06:05 lasiuk Exp $
  *
  * Description:
  *  StRrsMaker is the main module
  *  StRichRawData. It has the standard Maker functions:
  *
  *  $Log: StRichPIDMaker.h,v $
+ *  Revision 2.16  2001/02/22 21:06:05  lasiuk
+ *  fill the new StEvent structures in PidTraits, and richCollection
+ *  dca code now included
+ *
  *  Revision 2.15  2001/02/07 15:58:31  lasiuk
  *  update for production (production version and StEvent changes)
  *  refit and momentum loss are default behavior (Nikolai's parameterization)
@@ -173,7 +177,7 @@ private:
     //
     // rich collection
     //
-    const StRichCollection* mRichCollection;//!
+    StRichCollection* mRichCollection;//!
     
   //
   // monte carlo event
@@ -303,7 +307,8 @@ public:
     // track operations
     //
     Int_t fillTrackList(StEvent*, const StSPtrVecRichHit*);
-
+    Float_t calculateSignedDca(const StTrack*, double*);
+    
     //
     // functions to apply cuts
     // and set cut parameters
