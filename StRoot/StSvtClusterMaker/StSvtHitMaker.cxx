@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.6 2000/11/30 20:42:08 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.7 2001/02/07 19:15:54 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.7  2001/02/07 19:15:54  caines
+ * Change evaluation flag when running with GEANT
+ *
  * Revision 1.6  2000/11/30 20:42:08  caines
  * Some more evaluation and use dataase
  *
@@ -126,9 +129,9 @@ Int_t StSvtHitMaker::Init()
 
   m_waf_no = new TH2F*[2*mSvtCluColl->getNumberOfBarrels()];
   
-  char title1[16];
+  char title1[20];
   char* title3;
-  char  title2[3];
+  char  title2[4];
 
   int barrel=0;
 
@@ -162,21 +165,22 @@ Int_t StSvtHitMaker::Init()
     m_hfile = new TFile("clusters.root","RECREATE","Clusters");
     
     m_ClusTuple = new TNtuple("Clusters","Clusters","flag:xl:yl:x:y:z:charge:mom2x:mom2y:numAnodes:numPixels:peak:hybrid:evt");
+    cluInfo.open("ClusterInfo.dat",ios::out);    
+  }
 
+  if (mSvtGeantHitColl){
+    
     mXHitResolution = new TH1F("hitXRes","Delta X for Hits",1000,-2.0,2.0);
     mZHitResolution = new TH1F("hitZRes","Delta Z for Hits",1000,-2.0,2.0);			      
     mHitResolution = new TH2F("hitRes","Delta Z Vs Delta X for Hits",1000,-2.0,2.0,1000,-2.0,2.0);
-			  
+    
     mXHitResolution->SetXTitle("delta X (cm)");
     mZHitResolution->SetYTitle("delta Z (cm)");
     mHitResolution->SetXTitle("delta X (cm)");
     mHitResolution->SetYTitle("delta Z (cm)");
-
-    cluInfo.open("ClusterInfo.dat",ios::out);    
   }
-
   return  StMaker::Init();
-
+    
 }
 
 //___________________________________________________________________________
