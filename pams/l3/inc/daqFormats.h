@@ -9,8 +9,7 @@ typedef unsigned short UINT16 ;
 typedef unsigned char UINT8 ;
 #endif
 
-//#include <SECTOR/sector.h>	// for the constants
-#include "sector.h"	// for the constants
+#include "sector.h"	/* for the constants */
 
 #define FMT_ADCD	(1 << 0)
 #define FMT_ADCR	(1 << 1)
@@ -27,27 +26,29 @@ typedef unsigned char UINT8 ;
 #define FMT_CFGR	(1 << 12)
 
 
-// special events
+/* special events */
 #define FMT_SPEC_PED	(1 << 0) 
 #define FMT_SPEC_SIGMA	(1 << 1)
 #define FMT_SPEC_GAIN	(1 << 2)
 #define FMT_SPEC_BADC	(1 << 3)
 
 
-// Version below corresponds to "DAQ Raw Data Format" document's version
-#define DAQ_RAW_FORMAT_VERSION	0x00020002	// 2.2
+/* Version below corresponds to "DAQ Raw Data Format" document's version */
+#define DAQ_RAW_FORMAT_VERSION	0x00020002	/* 2.2 */
 
-// Define for linker-level checking only! See comment at the
-// end of this file.
-//#define VERIFY_SIZES
+/* Define for linker-level checking only! See comment at the */
+/* end of this file. */
+/*#define VERIFY_SIZES */
 
 #define DAQ_RAW_FORMAT_ORDER	0x04030201
 #define DAQ_RAW_FORMAT_WORD9	0x9999c0de
 
+/*
 // ALL the structures and defines that share the same structure types as the TPC
 // (i.e. SVT, FTPC, SSD) will be called, by definition, TPC_
+*/
 
-// order in the mezzanine bank
+/* order in the mezzanine bank */
 #define TPC_ADCD	0
 #define TPC_SEQD	1
 #define TPC_ADCX	2
@@ -63,7 +64,7 @@ typedef unsigned char UINT8 ;
 
 #define TPC_MZP_BANKS_NUM	12
 
-// gloabal character names
+/* gloabal character names *.
 #define CHAR_LRHD	"LRHD    "
 #define CHAR_BEGR	"BEGR    "
 #define CHAR_ENDR	"ENDR    "
@@ -72,7 +73,7 @@ typedef unsigned char UINT8 ;
 
 #define CHAR_DATAP	"DATAP   "
 
-// real TPC names
+/* real TPC names    */
 #define CHAR_TPCP	"TPCP    "
 
 #define CHAR_TPCSECLP	"TPCSECLP"
@@ -95,7 +96,7 @@ typedef unsigned char UINT8 ;
 #define CHAR_TPCGAINR	"TPCGAINR"
 #define CHAR_TPCBADR	"TPCBADR "
 
-// real SVT names
+/* real SVT names */
 #define CHAR_SVTP	"SVTP    "
 
 #define CHAR_SVTSECLP	"SVTSECLP"
@@ -118,7 +119,7 @@ typedef unsigned char UINT8 ;
 #define CHAR_SVTGAINR	"SVTGAINR"
 #define CHAR_SVTBADR	"SVTBADR "
 
-// real FTP names
+/* real FTP names */
 #define CHAR_FTPP	"FTPP    "
 
 #define CHAR_FTPSECLP	"FTPSECLP"
@@ -141,7 +142,7 @@ typedef unsigned char UINT8 ;
 #define CHAR_FTPGAINR	"FTPGAINR"
 #define CHAR_FTPBADR	"FTPBADR "
 
-// real RICH names
+/* real RICH names   */
 #define CHAR_RICHP	"RICHP   "
 #define CHAR_RICHD	"RICHD   "
 #define CHAR_RICHPED	"RICHPED "
@@ -149,13 +150,14 @@ typedef unsigned char UINT8 ;
 #define CHAR_RICHTHR	"RICHTHR "
 #define CHAR_RICHBADC	"RICHBADC"
 
-
+/*
 //#pragma align 1
 //#if (CPU == I960HX)
 //#pragma pack 1
 //#endif
+*/
 
-// generic section for all of DAQ
+/* generic section for all of DAQ */
 struct bankHeader {
         char bank_type[8] ;
         UINT32 length ;
@@ -207,18 +209,19 @@ struct DATAP {
 	UINT32 trg_word ;
 	UINT32 trg_in_word ;
 	UINT32 detector ;
-	struct offlen det[61] ; // total data len is 128 words
+	struct offlen det[61] ; /* total data len is 128 words */
 } ;
 
 
 struct TPCP {
 	struct bankHeader bh ;
-	struct offlen sb[24] ;	// 24 sectors
+	struct offlen sb[24] ;	/* 24 sectors  */
 } ;
 
+/*
 // Level 3 structures
 // Level 3 banks - most are defined in  file included at end
-//
+*/
 
 struct TPCSECLP {
 	struct bankHeader bh ;
@@ -242,7 +245,7 @@ struct mzCentroid {
 
 
 
-// Formatting structures
+/* Formatting structures */
 struct TPCSECP {
 	struct bankHeader bh ;
 	struct offlen rb[SB_RB_NUM] ;
@@ -259,13 +262,14 @@ struct TPCMZP {
 	struct bankHeader bh ;
 	struct offlen banks[TPC_MZP_BANKS_NUM] ;
 } ;
-
-// this is a local structure that is just used to allocate space
-// it will be recast to the real TPCMZCLD later...
+/*
+   this is a local structure that is just used to allocate space
+   it will be recast to the real TPCMZCLD later...
+*/
 struct TPCMZCLD_local {
 	struct bankHeader bh ;
-	UINT32 rows ;	// how many "rowlike" objects follow...
-	UINT32 padrowFiller[2*MZ_MAX_ROWS] ;	// max 6 padrows, each occupies 2 UINT32s...
+	UINT32 rows ;	
+	UINT32 padrowFiller[2*MZ_MAX_ROWS] ;
 	struct mzCentroid centroidFiller[MZ_MAX_CPPS] ;
 } ;
 
@@ -275,18 +279,18 @@ struct TPCADCX {
 		UINT32 row ;
 		UINT32 offADC ;
 		UINT32 offSEQ ;
-	} lrow[MZ_MAX_ROWS] ;	// MAX 6 padrows/hybrids in a mezzanine
+	} lrow[MZ_MAX_ROWS] ;	/* MAX 6 padrows/hybrids in a mezzanine */
 } ;
 
 struct TPCADCD {
 	struct bankHeader bh ;
-	UINT8	adc[MZ_MAX_CHANNELS] ;	// this is the worst case
+	UINT8	adc[MZ_MAX_CHANNELS] ;	/* this is the worst case */
 } ;
 
 struct TPCSEQD {
 	struct bankHeader bh ;
-	UINT16	seq[MZ_MAX_CHANNELS/2] ;	// theoretical maximum
-					// see TPCADCD...
+	UINT16	seq[MZ_MAX_CHANNELS/2] ;/* theoretical maximum */
+					/* see TPCADCD... */
 } ;
 
 struct TPCPEDR {
@@ -314,7 +318,7 @@ struct TPCCPPR_l {
 } ;
 
 
-// structures that are detector dependent
+/* structures that are detector dependent */
 
 struct DETPADK {
 	struct bankHeader bh ;
@@ -425,15 +429,19 @@ struct SVTBADR {
 	struct row_pad rp[MZ_SVT_MAX_PADS_PER_MEZ] ;
 } ;
 
+/*
 // Level 3 structures
 // Level 3 banks
 //#include "L3/L3Formats.h"
+*/
 #include "L3Formats.h"
 
+/*
 //#if (CPU == I960HX)
 //#pragma pack 0
 //#endif
 //#pragma align 0
+*/
 
 
 #ifdef VERIFY_SIZES

@@ -16,7 +16,7 @@
    public:
        void         printLinks ( ) ;
        void         printLinks ( int level ) ;
-       void         setStatus ( FtfTrack* this_track, FtfPara *para ) ;
+       void         setStatus ( FtfTrack* this_track ) ;
 
        long         id ;
        short        phiIndex ;        // Phi index    

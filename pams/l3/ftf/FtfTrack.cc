@@ -53,7 +53,7 @@ void FtfTrack::add ( FtfHit *thisHit, int way )
 //
 //        Declare hit as used and fill chi2
 //
-  thisHit->setStatus ( this, para ) ;
+  thisHit->setStatus ( this ) ;
 //
 //    Check whether a fit update is needed
 //
@@ -147,18 +147,18 @@ void FtfTrack::add ( FtfTrack *piece )
       counter = 0 ;
       lastHit->nextTrackHit = piece->firstHit ;
       lastHit         = piece->lastHit ;
-      for ( FtfHit *currentHit   = (FtfHit *)piece->firstHit ; 
-                     currentHit != 0 && counter < piece->nHits ;
-                     currentHit  = (FtfHit *)currentHit->nextTrackHit  ) {
+      for ( currentHit   = (FtfHit *)piece->firstHit ; 
+            currentHit != 0 && counter < piece->nHits ;
+            currentHit  = (FtfHit *)currentHit->nextTrackHit  ) {
         currentHit->track = this   ;
 	counter++ ;
        }
     }
     else {
       counter = 0 ;
-      for ( FtfHit *currentHit   = (FtfHit *)piece->firstHit ; 
-                     currentHit != 0 && counter < piece->nHits ;
-                     currentHit  = (FtfHit *)currentHit->nextTrackHit  ) {
+      for ( currentHit   = (FtfHit *)piece->firstHit ; 
+            currentHit != 0 && counter < piece->nHits ;
+            currentHit  = (FtfHit *)currentHit->nextTrackHit  ) {
         currentHit->track = this   ;
 	counter++;
       }
@@ -277,7 +277,7 @@ void FtfTrack::deleteCandidate(void)
     currentHit->szChi2   =  
     currentHit->s        =  0.F ;
 
-    currentHit->setStatus ( 0, para ) ;
+    currentHit->setStatus ( 0 ) ;
     currentHit = nextHit;
   }
 }
@@ -301,7 +301,7 @@ void FtfTrack::fill (  ) {
    else{
       if ( para->primaries ) fillPrimary ( xc, yc, rc ) ;
       else
-         fillSecondary ( xc, yc, rc ) ;
+         fillSecondary ( xc, yc ) ;
 //
 //    Get Errors
 //
@@ -377,7 +377,7 @@ void FtfTrack::fillPrimary (  double &xc, double &yc, double &rc  ) {
 //   Fill track information tables
 //
 //****************************************************************************
-void FtfTrack::fillSecondary ( double &xc, double &yc, double &rc )
+void FtfTrack::fillSecondary ( double &xc, double &yc )
 {
    xc = - a2Xy / ( 2. * a1Xy ) + refHit->x ;
    yc = - 1.   /  ( 2. * a1Xy ) + refHit->y ;
