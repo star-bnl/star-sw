@@ -1,15 +1,15 @@
 /**********************************************************
- * $Id: StRichRingPoint.h,v 1.1 2000/04/03 19:36:08 horsley Exp $
+ * $Id: StRichRingPoint.h,v 1.2 2000/05/19 19:06:11 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingPoint.h,v $
+ *  Revision 1.2  2000/05/19 19:06:11  horsley
+ *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
+ *
  *  Revision 1.1  2000/04/03 19:36:08  horsley
  *  initial revision
- *
- *  
- *
  **********************************************************/
 
 #ifndef StRichRingPoint_h
@@ -38,6 +38,7 @@ private:
   StRichRingDefinition mRingType;
   double mInnerWavelength;
   double mOuterWavelength;
+  double mMeanWavelength;
   
   // track parameters
   double mTrackTheta;
@@ -51,6 +52,7 @@ private:
   double mTrackSinTheta;
   double mTrackCosPhi;
   double mTrackSinPhi;
+  double mTrackTanTheta;
   double mTanCher;
 
   StThreeVector<double> mImpactPoint;
@@ -59,11 +61,12 @@ private:
 
   // detector parameters
   double mDepthRad;
+  double mMeanDepthRad;
   double mDepthQuar;
   double mDepthProx;
-  double mIndexRad[2];
-  double mIndexQuartz[2];
-  double mIndexMeth[2];
+  double mIndexRad[3];
+  double mIndexQuartz[3];
+  double mIndexMeth[3];
 
   // detector parameters
   StRichMaterialsDb* richMaterialsDb;

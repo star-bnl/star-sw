@@ -1,15 +1,15 @@
 /**********************************************************
- * $Id: StRichMaterialsDb.h,v 1.1 2000/04/03 19:36:07 horsley Exp $
+ * $Id: StRichMaterialsDb.h,v 1.2 2000/05/19 19:06:10 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMaterialsDb.h,v $
+ *  Revision 1.2  2000/05/19 19:06:10  horsley
+ *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
+ *
  *  Revision 1.1  2000/04/03 19:36:07  horsley
  *  initial revision
- *
- *  
- *
  **********************************************************/
 
 #ifndef ST_RICH_MATERIALS_H
@@ -22,7 +22,13 @@ public:
 
   static StRichMaterialsDb* getDb();
   
-  // Interface     
+  // Interface
+  // common to all materials
+  double meanWaveLength();
+  double shortestWaveLength();
+  double longestWaveLength();
+  double meanRadiatorDepth();  
+
   // C6F14    
   double indexOfRefractionOfC6F14At(double wavelength);
   double absorptionCoefficientOfC6F14At(double wavelength);
@@ -53,7 +59,11 @@ private:
   double mVersion;
   double mLongestWaveLength;
   double mShortestWaveLength;
+  double mMeanWaveLength;  
   double mConversion;
+
+  double mMeanRadiatorDepth;
+  
 
     ///////////    measured CERN data    /////////////
     /* index of refraction measured at 11 different wavelengths  169 -- 220 */

@@ -1,23 +1,22 @@
 /**********************************************************
- * $Id: StRichArea.h,v 1.1 2000/04/03 19:36:07 horsley Exp $
+ * $Id: StRichArea.h,v 1.2 2000/05/19 19:06:10 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichArea.h,v $
+ *  Revision 1.2  2000/05/19 19:06:10  horsley
+ *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
+ *
  *  Revision 1.1  2000/04/03 19:36:07  horsley
  *  initial revision
- *
- *  
- *
- **********************************************************/
+**********************************************************/
 
 #ifndef StRichArea_H
 #define StRichArea_H
 
 #include "StThreeVector.hh"
 #include "StRichRingPoint.h"
-#include "TNtuple.h"
 
 
 class StRichGeometryDb;
@@ -25,72 +24,79 @@ class StRichGeometryDb;
 class StRichArea {
 
 public:
-  StRichArea(StRichRingPoint* irp, StRichRingPoint* orp);
+  StRichArea(StRichRingPoint*, StRichRingPoint*);
   ~StRichArea();
-  void    calculateArea(double psiCut);
-  double getPadPlaneArea();
-  double getTotalArea();
+  double    calculateArea(double);
+  double getTotalAngleOnPadPlane();
   
 private:
 
- 
-  void getStoppingAngles(double& ipsi, double& opsi, 
-			        double psiCut);
+  double getStoppingAngle(double);
   
-  bool   getRingPoints(double& psi1, double& psi2,
-		             StThreeVector<double>& ixy, StThreeVector<double>& oxy,
-		             int direction);
+  bool   getRingPoints(double&, 
+		       StThreeVector<double>&, 
+		       StThreeVector<double>&, 
+		       int);
   
-  void getAreaSegment(StThreeVector<double>& ixya, StThreeVector<double>& oxya,
-		            StThreeVector<double>& ixyb, StThreeVector<double>& oxyb,
-		            double& totArea, double& padArea);
-
-  void swapPoints(StThreeVector<double>& ixya, StThreeVector<double>& oxya,
-		      StThreeVector<double>& ixyb, StThreeVector<double>& oxyb);
+  void getAreaSegment(StThreeVector<double>& , 
+		      StThreeVector<double>& ,
+		      StThreeVector<double>& , 
+		      StThreeVector<double>&,
+		      double&);
   
-  bool fullGapCorrectionNecessary(StThreeVector<double>& ixy, 
-                                            StThreeVector<double>& oxy,
-			                    StThreeVector<double>& itemp,
-				            StThreeVector<double>& otemp);
-
-  bool partialGapCorrectionNecessary(StThreeVector<double>& ixy, 
-				                StThreeVector<double>& oxy);
+  void swapPoints(StThreeVector<double>&, 
+		  StThreeVector<double>&,
+		  StThreeVector<double>&, 
+		  StThreeVector<double>& );
   
-  bool quadCheck(StThreeVector<double>& ixy, StThreeVector<double>& oxy);
-
-  bool gapCheck(StThreeVector<double>& xy);
+  bool fullGapCorrectionNecessary(StThreeVector<double>&, 
+				  StThreeVector<double>&,
+				  StThreeVector<double>&,
+				  StThreeVector<double>&);
   
-  bool outOfBoundsCorrection(StThreeVector<double>& ixy, StThreeVector<double>& oxy);
+  bool partialGapCorrectionNecessary(StThreeVector<double>&, 
+				     StThreeVector<double>&);
   
-  bool inBounds(StThreeVector<double> xy);
-
+  bool quadCheck(StThreeVector<double>&, 
+		 StThreeVector<double>&);
+  
+  bool gapCheck(StThreeVector<double>&);
+  
+  bool outOfBoundsCorrection(StThreeVector<double>&, 
+			     StThreeVector<double>&);
+  
+  bool inBounds(StThreeVector<double>&);
+  
+  bool sanityCheck(StThreeVector<double>& ,
+		   StThreeVector<double>& ,
+		   StThreeVector<double>& );
+  
   // data members
-  double mInnerAngleIncrement;
-  double mOuterAngleIncrement;
+  bool    mCorrectForGap;
+  double mNumberOfSteps;
+  
+  double mTotalAngleOnPadPlane;
+  double mStartAngle;
+  double mStopAngle;
+  double mAngleIncrement;
   double mSmallAngleStep;
+  
   double mSmallDistance;
   double mPositiveDirection;
   double mNegativeDirection;
-  double mSmallAngleIncrement; 
-  double mAreaElement;
+  
+  double mAreaSegment;
   double mTotalArea;
-  double mPadPlaneArea;
-  double mNumberOfSteps;
   
   StThreeVector<double> mInXYA;
   StThreeVector<double> mOutXYA;
   StThreeVector<double> mInXYB;
   StThreeVector<double> mOutXYB;
   
-  bool mStatus;
-  bool mCorrectForGap;
-  
   StRichRingPoint* mInnerRing;
   StRichRingPoint* mOuterRing;
   
   StRichGeometryDb* myGeometryDb;
-  
-  //  TNtuple* ntup;
   
 };
 

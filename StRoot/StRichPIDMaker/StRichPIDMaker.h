@@ -1,15 +1,15 @@
 /**********************************************************
- * $Id: StRichPIDMaker.h,v 1.1 2000/04/03 19:36:08 horsley Exp $
+ * $Id: StRichPIDMaker.h,v 1.2 2000/05/19 19:06:10 horsley Exp $
  *
  * Description:
  *  StRrsMaker is the main module
  *  StRichRawData. It has the standard Maker functions:
  *
  *  $Log: StRichPIDMaker.h,v $
- *  Revision 1.1  2000/04/03 19:36:08  horsley
- *  initial revision
+ *  Revision 1.2  2000/05/19 19:06:10  horsley
+ *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
  *
- *  
+ *  min/max algorithms
  *
  *  Revision 2.4  2000/10/19 01:13:23  horsley
  *  added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
@@ -25,12 +25,17 @@
  *  many additions, added features to pad plane display (MIPS, rings, etc)
 
 #include "StRrsMaker/StRichCoordinateTransform.h"
+#include "StRrsMaker/StRichMomentumTransform.h"
+ *  Revision 1.1  2000/04/03 19:36:08  horsley
+ *  initial revision
  **********************************************************/
 #include "StRichTrackingControl.h"
 #define StRichPIDMaker_HH
 
 #include "TFile.h"
 using std::vector;
+#endif
+
 //#include "StRichMcSwitch.h"
 #include "StRichTrackingControl.h"
 #include "StRichMcSwitch.h"
@@ -38,24 +43,33 @@ class StRichSimpleHitCollection;
 
 // StDisplay
 class StRichPadMonitor;
-  StThreeVectorD  mRichGlobalRadiatorPoint; 
-  StThreeVectorD  mRichNormalVector; 
-
-  StRichGeometryDb*  mRichGeometryDb; //!
 
   Char_t collectionName[256];
+
+   
   // containers of particles, tracks
-  vector<StTrack* > mListOfStTracks; //!
+  vector<StParticleDefinition* > mListOfPositiveParticles; //!
+  vector<StParticleDefinition* > mListOfNegativeParticles; //!
 // StEvent
+  vector<StRichTrack* > mListOfStRichTracks; //!
+  vector<StTrack* >     mListOfStTracks; //!
   vector<StRichTrack* > mListOfStRichTracks; //!
 
   // hit collection
-  double mLongestPathLength;
-  double mMinimumNumberOfTrackPoints;
+  StRichSimpleHitCollection* mRichHits; //!
+
+  // track filter
   StRichTrackFilter trackFilter; //!
   int mNumberOfRingHits;
   double mShortWave;
-   
+  double innerDistance,outerDistance;
+  double innerAngle,outerAngle; 
+  double mDefaultShortWave;
+  double mDefaultLongWave;
+  int evtN;
+
+  
+  // analysis
   TNtuple* rings;
   TNtuple* photNtup;
   TFile*   file;
@@ -66,12 +80,14 @@ class StRichPadMonitor;
 
   StRichPIDMaker(const Char_t *name="RICHPID");
     TH3F*    pionCorrectedResid_yb;    //!
-  Int_t hitFilter( StThreeVector<double>& hit, StRichRingCalculator& ringCalculator);
   virtual void  Clear(Option_t *option="");
+    TH3F*    pionCorrectedThetab;      //!
+    TH3F*    pionCorrectedTheta_xb;    //! 
+  StRichPIDMaker(const Char_t *name="RICHPID", bool writeNtuple=false);
 
-  vector<StTrack* >& getListOfStTracks();
+  Int_t hitFilter(StThreeVector<double>& hit, StRichRingCalculator& ringCalculator, double& ang, double& dist, double cut, double& meanD);
 
-ClassDef(StRichPIDMaker,1)
+  vector<StRichTrack* >& getListOfStRichTracks();
   vector<StTrack* >&     getListOfStTracks();
   
   ClassDef(StRichPIDMaker,1)
