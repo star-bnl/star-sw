@@ -23,13 +23,16 @@ my $debugOn=0;
 my @Sets = (
               "auau128/hijing/b0_3/halffield/year_1e/hadronic_on",
               "auau128/hijing/b0_12/halffield/year_1e/hadronic_on", 
+              "auau200/single/default/central/year_1e/hadronic_on", 
+              "auau130/mevsim/vanilla_flow/central/year_1h/hadronic_on",
 #             "pp200/pythia/default/minibias/year_2a/hadronic_on",
-              "auau200/hijing/beamgas/nitrogen/year_1h/hadronic_on",
-              "auau200/hijing/beamgas/hydrogen/year_1h/hadronic_on" 
+#              "auau200/hijing/beamgas/nitrogen/year_1h/hadronic_on",
+#              "auau200/hijing/beamgas/hydrogen/year_1h/hadronic_on" 
+#               "auau200/hijing135/default/b0_3/year_1h/hadronic_on",
 );
 
 my $prodPeriod = "prod6"; 
-my @chName = ("tfs5h","tfs8a") ;
+my @chName = ("tfs7h","tfs8a") ;
 my $prodDir = "tfs_7";              
 my $chainDir = "tfs";
 
@@ -185,7 +188,6 @@ my $filename;
      my $jset = ($$jobnm)->setN;
      my $flname = ($$jobnm)->fileN;
      my $jfile = $flname;
-     next if ($flname =~ /^psc/);
      if($jfile =~ /fzd/) {
       $jfile =~ s/.fzd//g;
     }
@@ -324,8 +326,8 @@ my $filename;
      my $hpss_dst_file2 = $gfile . ".tags.root";
      my $hpss_dst_file3 = $gfile . ".runco.root";
      my $hpss_dst_file4 = $gfile . ".geant.root";
-     my $hpss_dst_file5 = $gfile . ".event.root";
-     my $executable     = "/afs/rhic/star/packages/" . $jlibVer . "/mgr/bfc.csh";
+#     my $hpss_dst_file5 = $gfile . ".event.root";
+     my $executable     = "/afs/rhic/star/packages/" . $jlibVer . "/mgr/bfcm.csh";
      my $executableargs = $fchain;
      my $log_dir       = $logDir;
      my $log_name      = $gfile . ".log";
@@ -340,7 +342,7 @@ my $filename;
        print TOM_SCRIPT "      inputdir[0]=$hpss_raw_dir\n";
        print TOM_SCRIPT "      inputfile[0]=$hpss_raw_file\n";
        print TOM_SCRIPT "#output\n";
-       print TOM_SCRIPT "      outputnumstreams=6\n";
+       print TOM_SCRIPT "      outputnumstreams=5\n";
        print TOM_SCRIPT "#output stream \n";
        print TOM_SCRIPT "      outputstreamtype[0]=HPSS\n";
        print TOM_SCRIPT "      outputdir[0]=$hpss_dst_dir\n";
@@ -357,10 +359,7 @@ my $filename;
        print TOM_SCRIPT "      outputstreamtype[4]=HPSS\n";
        print TOM_SCRIPT "      outputdir[4]=$hpss_dst_dir\n";
        print TOM_SCRIPT "      outputfile[4]=$hpss_dst_file4\n";
-       print TOM_SCRIPT "      outputstreamtype[5]=HPSS\n";
-       print TOM_SCRIPT "      outputdir[5]=$hpss_dst_dir\n";
-       print TOM_SCRIPT "      outputfile[5]=$hpss_dst_file5\n";
-       print TOM_SCRIPT "#standard out -- Should be six outputs\n";
+       print TOM_SCRIPT "#standard out -- Should be five outputs\n";
        print TOM_SCRIPT "      stdoutdir=$log_dir\n";
        print TOM_SCRIPT "      stdout=$log_name\n";
        print TOM_SCRIPT "#standard error -- Should be five\n";
