@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.49 1999/09/20 20:12:17 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.50 1999/09/20 20:22:19 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.50  1999/09/20 20:22:19  kathy
+// oops - one more fix to make sure that QA_Maker doesn't depend on StHistUtil
+//
 // Revision 1.49  1999/09/20 20:12:17  kathy
 // moved the histogram utility methods out of St_QA_Maker and into StHistUtil because they can really be used by any Maker and associated histograms
 //
@@ -429,8 +432,8 @@ Int_t St_QA_Maker::Finish() {
 // St_QA_Maker - Finish, Draw histograms if SetDraw true
 //  Use DrawHists method from StHistUtil
 //    - must have pointer to StHistUtil from using SetHistUtil member function
-  if (drawinit)  
-    m_PntrToHistUtil->DrawHists();
+  //  if (drawinit)  
+  //  m_PntrToHistUtil->DrawHists();
 
   return StMaker::Finish();
 }
