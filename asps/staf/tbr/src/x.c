@@ -688,6 +688,7 @@ void RunValue(size_t row) {
     PP"Table browser fatal error 611p.\n");
     PP"buf=%s, len should be %d.\n",buf,EXT); gDone=7; return;
   }
+  if(!gTruncateStrings) strcat(buf," ");
   for(hlLstIx=0;hlLstIx<gWin[gRunWhWin]->nhlLst;hlLstIx++) {
     lnfhl=gWin[gRunWhWin]->hlLst[hlLstIx];
     if(!gWin[gRunWhWin]->isHilited[lnfhl]) Err( 60);
