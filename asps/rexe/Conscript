@@ -38,7 +38,7 @@ my $Libraries =  $env->{Libraries};
 my $FC    = $env->{FC};
 my $FFLAGS = $env->{FFLAGS};
 my $FEXTEND = $env->{FEXTEND};
-if ($STAR_SYS =~ /^i386/) {
+if ($STAR_SYS =~ /^i386/ or $STAR_SYS =~ /^rh/) {
   $FC = "g77";
   $FFLAGS   = "-w %DEBUG -fno-second-underscore -fno-automatic";
   $FEXTEND  = "-ffixed-line-length-132"; 
@@ -68,6 +68,7 @@ foreach my $d (@GDIRS){
   foreach my $s (@sources) {
     my $ss = $d . "/" . $s;
     next if $ss =~ /\/gst\/agsim\/agdummy\.g/ or $ss =~ /traceqc/ or $ss =~ /ighcxy/;
+#    next if $ss =~ /\/gst\/geant\/grndm\.F/ or $ss =~ /\/gst\/geant\/grndmq\.F/;
 #    next if $ss =~ /kgsim/;
 #    next if $ss =~ /\gst\/geant\/grndm\.F/ or  $ss =~ /\gst\/geant\/grndmq\.F/; 
     push @src, $ss; 
