@@ -92,6 +92,7 @@ class StDbBroker  {
     void   SetBeginTime(UInt_t BeginTime) {m_BeginTime = BeginTime;}
     void   SetEndDate(UInt_t EndDate)     {m_EndDate = EndDate;    }
     void   SetEndTime(UInt_t EndTime)     {m_EndTime = EndTime;    }
+    static int DbInit(const char *);  		//dbInit
 
     ClassDef(StDbBroker,0)
 };
@@ -114,6 +115,6 @@ extern "C" void *DbUse(uint*,           //&nRows,
 		       uint,           //sizeOfStruct
 		       StDbBroker::Descriptor *d);
 
-extern "C"  int DbInit(const char *);  //dbName
+extern "C" int DbInit(const char *);  		//dbInit
 
 #endif
