@@ -5,7 +5,7 @@ StChain *chain=0;
 
 void DoSt2feeTTree(Int_t nevents=2){
   //char *fname="/star/data22/MC/balewski/pp4run3/minb200-10k.event.root";
-char *fname="out.event.root";
+char *fname="out3.event.root";
 char *fileT="myOut.root"; // output TTree
 
   //
@@ -61,7 +61,7 @@ char *fileT="myOut.root"; // output TTree
  // My Makers  1
   StEEmcDbMaker  *myMk1=new StEEmcDbMaker("eemcDBio");
   myMk1->setSectors(1,12);
-  myMk1->setTimeStampDay(20021215);  // format: yyyymmdd
+  myMk1->setTimeStampDay(20030214);  // format: yyyymmdd
 
 
   St_db_Maker *dbMk = new St_db_Maker("StarDb","MySQL:StarDb");
