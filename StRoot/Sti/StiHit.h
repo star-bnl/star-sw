@@ -179,19 +179,11 @@ public:
 
 inline void StiHit::scaleError(float scale)
 {
-  msxx*=scale;
-  msyy*=scale;
-  mszz*=scale;
-  msxy*=scale;
-  msxz*=scale;
-  msyz*=scale;
+  for (int i=0;i<6;i++) (&msxx)[i]*=scale;
 }
-inline float StiHit::x() const {return mx;}
-inline float StiHit::y() const {return my;}
-inline float StiHit::z() const {return mz;}
-//inline float StiHit::x_g() const {return msthit->position().x();}
-//inline float StiHit::y_g() const {return msthit->position().y();}
-//inline float StiHit::z_g() const {return msthit->position().z();}
+inline float StiHit::x()   const {return mx;}
+inline float StiHit::y()   const {return my;}
+inline float StiHit::z()   const {return mz;}
 inline float StiHit::x_g() const {return _xg;}
 inline float StiHit::y_g() const {return _yg;}
 inline float StiHit::z_g() const {return _zg;}
