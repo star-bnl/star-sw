@@ -8,8 +8,8 @@
 
 struct svtRmsAnode { 
 
-  int ID;
+  long ID;
 
-  char  rms[240];   /*Rms at anode level   */
+  octet  rms[240];   /*Rms at anode level   */
 
  };  
