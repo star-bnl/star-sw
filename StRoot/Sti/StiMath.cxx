@@ -5,8 +5,6 @@
 #include "Sti/StiMath.h"
 ClassImp(StiMath)
 
-double StiMath::_logGamma[200];
-
 double StiMath::chi2(double x, int n)
 {
   double n2 = double(n)/2.;
@@ -16,26 +14,10 @@ double StiMath::chi2(double x, int n)
 
 
 
-void StiMath::initialize()
-{
-  _logGamma[0] = 1.;
-  _logGamma[1] = sqrt(M_PI);
-  _logGamma[2] = 1.;
-  _logGamma[3] = 1.5*_logGamma[1];
-  double x;
-  int i;
-  for (i=4;i<200;)
-    {
-      x = log((double)i);
-      _logGamma[i] = x+_logGamma[i-2]; ++i;
-      x = log(((double)i)/2);
-      _logGamma[i] = x+_logGamma[i-2]; ++i;
-    }
-}
-
 ///Calculates the log of the gamma fct 
 ///based on a clever recipee by Lanczos
 ///This code taken from Numerical Recipees by Press et al.
+///Values defined only for xx>0.
 double StiMath::logGamma(double xx)
 {
  double x,y,tmp,ser;
@@ -52,14 +34,50 @@ double StiMath::logGamma(double xx)
  return -tmp+log(2.5066282746310005*ser/x);
 }
 
-
+///Calculates and returns the value of the Gamma function
+///for the given value.
+///Values defined only for x>0.
 double StiMath::gamma(double x)
 {
-  if (x<0)
-    throw runtime_error("gamma(double x) -E- Invalid argument: x<0");
-  if (x>=100.)
-    return DBL_MAX;
-  int n = int(2*x);
-  return exp(_logGamma[n]);  
+  if (x<=0)
+    throw runtime_error("gamma(double x) -E- Invalid argument: x<=0");
+  return exp(logGamma(x));  
 }
 
+///Calculates and return the factorial of given n
+///valid only for n>=0.
+///May overflow for large n.
+double StiMath::factorial(int n)
+{
+  static int nTop=4;
+  static double fac[33]={1.0,1.,2.0,6.0,24.0};
+  int j;
+  if (n<0)
+    throw runtime_error("StiMath:factorial(int n) -E- n out of bound");
+  if (n>32)
+    return gamma(n+1.0);
+  while (n>nTop)
+    {
+      j=nTop++;
+      fac[nTop]=fac[j]*nTop;
+    }
+  return fac[n];
+}
+
+///Calculates and returns the log(factorial(n))
+///Valid only for n>=0
+///May overflow for large n
+double StiMath::logFactorial(int n)
+{
+  static double _logFac[101];
+  if (n<0) throw runtime_error("StiMath:logFactorial(int n) -E- n out of bound");
+  if (n<=1) return 0.0;
+  if (n<=100) return _logFac[n]?_logFac[n]:(_logFac[n]=logGamma(n+1.0));
+  else
+  return logGamma(n+1.0);
+}
+
+double StiMath::binomial(int n, int k)
+{
+  return floor(0.5+exp(logFactorial(n)-logFactorial(k)-logFactorial(n-k)));
+}
