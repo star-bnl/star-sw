@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.41 1999/11/24 16:26:27 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.42 1999/11/24 19:01:15 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -15,7 +15,7 @@
 //         $STAR/StRoot/StEvent/St_TLA_EventFiler.h                     //
 // 3. Replace all "_TLA_" with the name of the filter you've chosen     //
 // 4. Edit St<your_name>EventFiler.cxx to introduce your own version of //
-//    St<your_name>EventFiler::Filter methods                           //
+//    St<your_name>EventFiler::Channel methods                           //
 // 5. Create the "regular" STAR share library for yor filter class      //
 // 6. Create/Edit "chain" macro  (see drawEvent.C )                     //
 //    6.1. Load in there your filter share library                      //
@@ -311,7 +311,7 @@ Int_t StEventDisplayMaker::MakeGlobalTracks()
      StGlobalTrack *globTrack = 0;
      while ( ( globTrack = (StGlobalTrack *)next() ) && trackCounter < maxTrackCounter) {
         StVirtualEventFilter *filter = (StVirtualEventFilter *)m_FilterArray->At(kGlobalTracks);
-        if (filter && (filter->IsOff() || ( filter->Filter(globTrack,size,style)==0 ) ) ) continue;
+        if (filter && (filter->IsOff() || ( filter->Channel(globTrack,size,style)==0 ) ) ) continue;
         // ------------------------   Tracks   ------------------------- //
         filter = (StVirtualEventFilter *)m_FilterArray->At(kTrack);
         if (!filter || filter->IsOn() ) 
@@ -589,7 +589,7 @@ Int_t StEventDisplayMaker::MakeHits(const StObjArray *eventCollection,StVirtualE
     Width_t hitSize  = 2;
 
     // ---------------------------- hits filter ----------------------------- //
-    if (filter) hitColor =  filter->Filter(eventCollection,hitSize,hitStyle); //
+    if (filter) hitColor =  filter->Channel(eventCollection,hitSize,hitStyle); //
     // ---------------------------------------------------------------------- //
 #ifdef STEVENT
     if (hitColor > 0) {
@@ -624,7 +624,7 @@ Int_t StEventDisplayMaker::MakeVertex(const StVertex *vertex,StVirtualEventFilte
 
 #ifdef STEVENT
     // ---------------------------- hits filter ----------------------------- //
-    if (filter) vertexColor =  filter->Filter(vertex,vertexSize,vertexStyle); //
+    if (filter) vertexColor =  filter->Channel(vertex,vertexSize,vertexStyle); //
     // ---------------------------------------------------------------------- //
     if (vertexColor > 0) {
        const StThreeVectorF &vertexVector = ((StVertex *)vertex)->position();
@@ -661,7 +661,7 @@ Int_t StEventDisplayMaker::MakeVertices(const StObjArray *eventCollection,StVirt
     Width_t hitSize  = 2;
 #ifdef STEVENT
     // ---------------------------- hits filter ----------------------------- //
-    if (filter) hitColor =  filter->Filter(eventCollection,hitSize,hitStyle); //
+    if (filter) hitColor =  filter->Channel(eventCollection,hitSize,hitStyle); //
     // ---------------------------------------------------------------------- //
     if (hitColor > 0) {
       StVertices3DPoints *hitsPoints  = new StVertices3DPoints((StObjArray *)eventCollection);
@@ -693,7 +693,7 @@ Int_t StEventDisplayMaker::MakeTracks( StGlobalTrack *globTrack,StVirtualEventFi
     Width_t trackSize  = 2;
 #ifdef STEVENT
     // --------------------- tracks filter ---------------------------------- //
-    if (filter) trackColor =  filter->Filter(globTrack,trackSize,trackStyle); //
+    if (filter) trackColor =  filter->Channel(globTrack,trackSize,trackStyle); //
     // ---------------------------------------------------------------------- //
     if (trackColor > 0) {
        StHelix3DPoints *tracksPoints  = new StHelix3DPoints(globTrack);
@@ -754,7 +754,7 @@ Int_t StEventDisplayMaker::MakeTableTracks(const St_Table *points,StVirtualEvent
       filter = (StVirtualEventFilter *)m_FilterArray->At(kTptTrack);
       if (!filter || filter->IsOn() ) {
         // --------------------- tracks filter ------------------------------------ //
-        if (filter) trackColor =  filter->Filter(tptTrack,i,trackSize,trackStyle);  //
+        if (filter) trackColor =  filter->Channel(tptTrack,i,trackSize,trackStyle);  //
         // ------------------------------------------------------------------------ //
         if (trackColor > 0) {
            tpt_track_st &t = *(track+i);
@@ -807,7 +807,7 @@ Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFi
     for (i=0;i<maxTrackCounter;i++) 
     { 
        // -------------------------- hits filter -------------------------------------- //
-       if (filter) hitColor =  filter->Filter(track2Line,nextKeyIndx,hitSize,hitStyle); //
+       if (filter) hitColor =  filter->Channel(track2Line,nextKeyIndx,hitSize,hitStyle); //
        if (filter->IsOff() ) break;                                                     //
        // ----------------------------------------------------------------------------- //
        if (hitColor > 0) {
@@ -940,6 +940,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 // --  end of filter list --
 
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.42  1999/11/24 19:01:15  fine
+// all StVirtual::Filter have been renamed to Channel
+//
 // Revision 1.41  1999/11/24 16:26:27  fine
 // Overlap the corrupted v.1.40 with 1.39
 //
