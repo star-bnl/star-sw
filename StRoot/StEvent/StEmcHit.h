@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcHit.h,v 1.1 1999/01/30 03:58:05 fisyak Exp $
+ * $Id: StEmcHit.h,v 1.2 1999/02/09 20:01:21 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEmcHit.h,v $
- * Revision 1.1  1999/01/30 03:58:05  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/09 20:01:21  fisyak
+ * Import new Torre staff
  *
  * Revision 1.3  1999/02/23 15:25:55  ullrich
  * Complete Revision

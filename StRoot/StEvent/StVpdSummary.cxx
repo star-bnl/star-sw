@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVpdSummary.cxx,v 1.1 1999/01/30 03:58:10 fisyak Exp $
+ * $Id: StVpdSummary.cxx,v 1.2 1999/02/09 19:53:22 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVpdSummary.cxx,v $
- * Revision 1.1  1999/01/30 03:58:10  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/09 19:53:22  fisyak
+ * Import new Torre staff
  *
  * Revision 1.3  1999/03/17 22:22:51  ullrich
  * Some cosmetics
@@ -19,13 +19,13 @@
  * Revision 1.2  1999/01/15 22:54:26  wenaus
  * version with constructors for table-based loading
  *
-static const Char_t rcsid[] = "$Id: StVpdSummary.cxx,v 1.1 1999/01/30 03:58:10 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StVpdSummary.cxx,v 1.2 1999/02/09 19:53:22 fisyak Exp $";
 
 #ifdef __ROOT__
 #include "StVpdSummary.h"
 
 #endif
-static const Char_t rcsid[] = "$Id: StVpdSummary.cxx,v 1.1 1999/01/30 03:58:10 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StVpdSummary.cxx,v 1.2 1999/02/09 19:53:22 fisyak Exp $";
 ClassImp(StVpdSummary)
 
 StVpdSummary::StVpdSummary()

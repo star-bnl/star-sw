@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 1.1 1999/01/30 03:58:05 fisyak Exp $
+ * $Id: StEnumerations.h,v 1.2 1999/02/09 20:01:42 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
- * Revision 1.1  1999/01/30 03:58:05  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/09 20:01:42  fisyak
+ * Import new Torre staff
  *
  * Added CINT link pragmas, detector enumeration changed but official
  * version still pending, added enum StTrackSign.

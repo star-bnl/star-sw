@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.h,v 1.1 1999/01/30 03:58:09 fisyak Exp $
+ * $Id: StV0Vertex.h,v 1.2 1999/02/09 19:53:53 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.h,v $
- * Revision 1.1  1999/01/30 03:58:09  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/09 19:53:53  fisyak
+ * Import new Torre staff
+ *
+ * Revision 1.5  1999/02/18 15:41:42  ullrich
+ * Momemtum of daughter tracks added.
  *
  * Revision 1.4  1999/01/30 23:03:18  wenaus
  * table load intfc change; include ref change
@@ -30,7 +33,7 @@
 #include "TObject.h"
 #endif
  * Completely Revised for New Version
-#include "dst_v0_vertex.h"
+#include "tables/dst_v0_vertex.h"
 #include "dst_vertex.h"
 
 #ifndef __ROOT__
