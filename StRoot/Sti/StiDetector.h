@@ -9,6 +9,7 @@
 
 #include "TObject.h"
 #include "StiMaterial.h"
+#include "math.h"
 
 class StiDetector {
     
@@ -93,11 +94,11 @@ public:
 
     void setSector(int val) {sector = val;}
     void setPadrow(int val) {padrow = val;}
-    void setName(char* val) {name = val;}
+    void setName(const char *val) { strncpy(name, val, 99); }
 
     //action
     virtual void build(const char* infile);  //for now, build from SCL parsable ascii file
-    
+    virtual void write(const char* szFileName);
 protected:
 
     //--------------------------------------------------------------------
@@ -186,7 +187,7 @@ protected:
     // naming
     int sector;  //Generalized sector (azimuthal ordering)
     int padrow;  //Generalized padrow (radial ordering)
-    char* name;  //Name of the class, a char to avoid template problems
+    char name[100];  //Name of the class, a char to avoid template problems
 
 };
 
