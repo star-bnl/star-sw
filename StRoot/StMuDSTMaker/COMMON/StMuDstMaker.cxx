@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.40 2003/10/23 04:08:29 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.41 2003/10/27 23:54:33 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -556,16 +556,16 @@ void StMuDstMaker::closeWrite(){
 void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
   DEBUGMESSAGE2("");
   
-  try {
+//VP try {
     fillEvent(ev);
     fillL3AlgorithmInfo(ev);
     fillDetectorStates(ev);
     fillEmc(ev);
-  }
-  catch(StMuException e) {
-    e.print();
-    throw e;
-  }
+//VP  }
+//VP  catch(StMuException e) {
+//VP    e.print();
+//VP    throw e;
+//VP  }
   
   try {
     fillTracks(ev,mTrackFilter);
@@ -599,7 +599,7 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
 //-----------------------------------------------------------------------
 void StMuDstMaker::fillEvent(StEvent* ev, StMuCut* cut) {
   DEBUGMESSAGE2("");
-  StMuEvent typeOfEvent;
+  StMuEvent *typeOfEvent=0;
   if (!ev) throw StMuExceptionNullPointer("no StEvent",PF);
   StTimer timer;
   timer.start();
@@ -692,8 +692,10 @@ void StMuDstMaker::fillDetectorStates(StEvent* ev) {
   timer.start();
   for (int i=0; i<StMuArrays::arraySizes[muState]; i++) {
     StDetectorState* state = ev->detectorState((StDetectorId) i);
-    if (state)
-      addType( mArrays[muState], ev->detectorState((StDetectorId)i) );
+    if (state) {
+      addType( mArrays[muState], *state );
+      assert (mArrays[muState]->Last()->GetName());
+    }
   }
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
@@ -772,15 +774,15 @@ void StMuDstMaker::fillStrange(StStrangeMuDstMaker* maker) {
   /// now fill the strangeness stuff
   if (!maker) throw StMuExceptionNullPointer("no StrangeMuDstMaker",PF);
  
-  StStrangeEvMuDst ev;
-  StV0MuDst v0;     
-  StStrangeAssoc assoc;
-  StXiMuDst xi;     
-  StKinkMuDst kink; 
-  StV0Mc v0Mc;      
-  StXiMc xiMc;      
-  StKinkMc kinkMc;  
-  TCut strangeCut;
+  StStrangeEvMuDst *ev=0;
+  StV0MuDst *v0=0;     
+  StStrangeAssoc *assoc=0;
+  StXiMuDst *xi=0;     
+  StKinkMuDst *kink=0; 
+  StV0Mc *v0Mc=0;      
+  StXiMc *xiMc=0;      
+  StKinkMc *kinkMc=0;  
+  TCut *strangeCut=0;
 
   addType(maker->GetEvClonesArray(),  mStrangeArrays[0],ev);
   addType(maker->GetEvMcArray(),      mStrangeArrays[1],ev);
@@ -804,7 +806,7 @@ void StMuDstMaker::fillStrange(StStrangeMuDstMaker* maker) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 template <class T>
-void StMuDstMaker::addType(TClonesArray* tcaFrom, TClonesArray* tcaTo , T t) {
+void StMuDstMaker::addType(TClonesArray* tcaFrom, TClonesArray* tcaTo , T *t) {
   if (tcaFrom && tcaTo) {
     int n = tcaFrom->GetEntries();
     int counter = tcaTo->GetEntries();
@@ -817,7 +819,7 @@ void StMuDstMaker::addType(TClonesArray* tcaFrom, TClonesArray* tcaTo , T t) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-// int StMuDstMaker::addType(TClonesArray* tcaTo , StMuEmcCollection t) {
+// int StMuDstMaker::addType(TClonesArray* tcaTo , StMuEmcCollection *t) {
 //   int counter =-1;
 //   if (tcaTo) {
 //     counter = tcaTo->GetEntries();
@@ -830,7 +832,7 @@ void StMuDstMaker::addType(TClonesArray* tcaFrom, TClonesArray* tcaTo , T t) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 template <class T>
-int StMuDstMaker::addType(TClonesArray* tcaTo , T t) {
+int StMuDstMaker::addType(TClonesArray* tcaTo , T &t) {
   int counter =-1;
   if (tcaTo) {
     counter = tcaTo->GetEntries();
@@ -842,7 +844,7 @@ int StMuDstMaker::addType(TClonesArray* tcaTo , T t) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 template <class T, class U>
-int StMuDstMaker::addType(TClonesArray* tcaTo , U u, T t) {
+int StMuDstMaker::addType(TClonesArray* tcaTo , U &u, T *t) {
   int counter =-1;
   if (tcaTo) {
     counter = tcaTo->GetEntries();
@@ -919,6 +921,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.41  2003/10/27 23:54:33  perev
+ * weird template bug fized and templates simplified
+ *
  * Revision 1.40  2003/10/23 04:08:29  perev
  * use SetBranchStatus fixed
  *
