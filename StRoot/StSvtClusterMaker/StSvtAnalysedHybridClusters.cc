@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.cc,v 1.4 2001/11/12 22:58:06 caines Exp $
+ * $Id: StSvtAnalysedHybridClusters.cc,v 1.5 2001/11/21 19:02:43 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.cc,v $
+ * Revision 1.5  2001/11/21 19:02:43  caines
+ * Set mNumOfHits properly as for real data I was setting arrays to size 0 then filling
+ *
  * Revision 1.4  2001/11/12 22:58:06  caines
  * Add functions for filling hits from srs data
  *
@@ -51,16 +54,17 @@ StSvtAnalysedHybridClusters::~StSvtAnalysedHybridClusters()
 void StSvtAnalysedHybridClusters::setMembers(int numOfClu, int index)
 {
 
-  // If numOfClu small default to making arrays of size 10
- 
-  if( numOfClu < 10) mNumOfHits = 10; 
-  mHardWarePosition = index;
-  mSvtHitData = new StSvtHitData[mNumOfHits];
-  mSvtHit = new StSvtHit[mNumOfHits];
-  mPos = new StThreeVector<double>[mNumOfHits];
-  // But remember actual number to date
+  int HitSize;
 
+  // If numOfClu small default to making arrays of size 10
+  // But remember how many you really have 
   mNumOfHits = numOfClu;
+
+  HitSize = ( numOfClu < 10) ? 10 : mNumOfHits; 
+  mHardWarePosition = index;
+  mSvtHitData = new StSvtHitData[HitSize];
+  mSvtHit = new StSvtHit[HitSize];
+  mPos = new StThreeVector<double>[HitSize];
 
 }
 
@@ -150,8 +154,7 @@ int StSvtAnalysedHybridClusters::setSvtHit(scs_spt_st* mSrsHit)
   
   mSvtHit[mNumOfHits].setFlag((unsigned char)(mSrsHit->flag));
   mSvtHit[mNumOfHits].setHardwarePosition(mHardWarePosition<<4);
-  mSvtHit[mNumOfHits].setCharge(mSrsHit->de[0]);
-  
+  mSvtHit[mNumOfHits].setCharge(mSrsHit->de[0]*300000); // put GEANT dE roughly into ADC counts
   
   mPos[mNumOfHits].setX(mSrsHit->xl[0]);
   mPos[mNumOfHits].setY(mSrsHit->xl[1]);
@@ -170,7 +173,7 @@ int StSvtAnalysedHybridClusters::setSvtHit(scs_spt_st* mSrsHit)
   mSvtHit[mNumOfHits].setPosition(mGlobalPos);  //invokes StMeasuredPoint::setPosition(StThreeVectorF&)
   
   
-  mSvtHitData[mNumOfHits].peakAdc = 0;
+  mSvtHitData[mNumOfHits].peakAdc = mSvtHit[mNumOfHits].charge()/4; //Put in a PEAK ADC value of quarter of charge
   mSvtHitData[mNumOfHits].numOfAnodesInClu = 0;
   mSvtHitData[mNumOfHits].numOfPixelsInClu = 0;
   mSvtHitData[mNumOfHits].mom2[0] = mSrsHit->mom2[0];
