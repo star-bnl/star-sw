@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofSimParam.cxx,v 1.1 2001/09/28 19:09:40 llope Exp $
+ * $Id: StTofSimParam.cxx,v 1.2 2002/01/22 07:18:08 geurts Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,15 +10,35 @@
  *****************************************************************
  *
  * $Log: StTofSimParam.cxx,v $
+ * Revision 1.2  2002/01/22 07:18:08  geurts
+ * doxygenized
+ *
  * Revision 1.1  2001/09/28 19:09:40  llope
  * first version
  *
  *******************************************************************/
+//! Time-of-Flight Simulation Utilities
+/*! \class StTofSimParam
+    \author Frank Geurts
+
+    <p>A package of simulation routines for the STAR Time-of-Flight
+    detector. Currently the only method prints the default initialized
+    values.<p>
+
+    To do:
+    <ul>
+    <li> create STAR dBase entries and add members to access those<li>
+    <li> move general simulation methods from the StTofSimMaker into
+         StTofSimParam</li>
+    </ul>
+*/
 #include "StTofSimParam.h"
 #include <iostream.h>
 //#include "St_XDFFile.h"
 //#include "St_DataSetIter.h"
 
+
+/// default constructor, initializes default simulation parameters
 StTofSimParam::StTofSimParam(){ 
   m_adc_overflow       = 1024.0     ;
   m_attlen             =  110.0     ;
@@ -40,8 +60,12 @@ StTofSimParam::StTofSimParam(){
   m_tdc_overflow       = 2048.0     ;
 }
 
+
+/// default empty destructor
 StTofSimParam::~StTofSimParam(){ /* nope */}
 
+
+/// initializes calibration from XDF or dBase (not functioning yet)
 void StTofSimParam::init(){
   // Char_t *InputXdfFile= "cts_pars.xdf";
   // St_XDFFile xdf(InputXdfFile);
