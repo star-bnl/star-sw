@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.4 2001/08/17 22:15:03 posk Exp $
+// $Id: plotCen.C,v 1.5 2001/10/24 21:48:41 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -16,6 +16,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.5  2001/10/24 21:48:41  posk
+// Improved graphs.
+//
 // Revision 1.4  2001/08/17 22:15:03  posk
 // Updated to also do 40 GeV.
 //
@@ -112,6 +115,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     "Flow_Mean_Cos_Flat2D_Sel",
     "Flow_Mean_Sin_Flat2D_Sel",
     "Flow_Mul_Sel",
+    "Flow_SumPt2_Sel",
     "Flow_Yield2D_Sel",
     "Flow_Yield.Y_Sel",
     "Flow_Yield.Pt_Sel",

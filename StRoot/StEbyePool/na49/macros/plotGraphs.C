@@ -7,8 +7,9 @@ void plotGraphs(Char_t* part = "pion") {
   Bool_t pion = kFALSE;
   if (strcmp(part, "pion")==0) pion = kTRUE;
 
-  Bool_t crossSection = kTRUE;
   // The directories must exist
+  Bool_t crossSection = kTRUE;
+
   //Bool_t crossSection = kFALSE;  // yield weighting
 //   if (crossSection) {
 //     Char_t* fileExt = ".root";
@@ -17,6 +18,7 @@ void plotGraphs(Char_t* part = "pion") {
 //     Char_t* fileExt = "Yield.root";
 //     Char_t* plotExt = "YieldPlots";
 //   }
+
   if (crossSection) {
     Char_t* fileExt = "Pcons.root";
     Char_t* plotExt = "PconsPlots";
@@ -25,9 +27,9 @@ void plotGraphs(Char_t* part = "pion") {
     Char_t* plotExt = "PconsYieldPlots";
   }
 
-  //Char_t pstype[255] = "ps";
+  Char_t pstype[255] = "ps";
   //Char_t pstype[255] = "eps";
-  Char_t pstype[255] = "gif";
+  //Char_t pstype[255] = "gif";
 
   gROOT->SetStyle("Bold");
   gStyle->SetOptStat(kFALSE);
@@ -61,14 +63,16 @@ void plotGraphs(Char_t* part = "pion") {
   if (pion) {
     yMax    = 4.9;
     yMin    = 2.85;
-    yRefMax = 3.1;
+    yRefMax = 3.0;
     yRefMin = 1.1;
   } else {
-    yMax    = 4.5;
+    yMax    = 4.75;
     yMin    = 2.85;
     yRefMax = 3.0;
-    yRefMin = 1.35;
+    yRefMin = 1.1;
   }
+  Float_t yAllMax = 4.4;
+  Float_t yAllRefMin = 1.4;
 
   // pt polynomials with zero intercepts
   TF1* p1 = new TF1("p1", "[0]*x", 0., 1.85);
@@ -77,10 +81,13 @@ void plotGraphs(Char_t* part = "pion") {
   TF1* p4 = new TF1("p4", "[0]*x + [1]*x*x + [2]*x*x*x + [3]*x*x*x*x", 0., 1.85);
 
   // pt polynomials with constant offsets
-  TF1* o1 = new TF1("o1", "pol2", 0., 1.85);
-  TF1* o2 = new TF1("o2", "pol3", 0., 1.85);
-  TF1* o3 = new TF1("o3", "pol4", 0., 1.85);
-  TF1* o4 = new TF1("o4", "pol5", 0., 1.85);
+  TF1* o1 = new TF1("o1", "pol2", 0.05, 1.85);
+  TF1* o2 = new TF1("o2", "pol3", 0.05, 1.85);
+  TF1* o3 = new TF1("o3", "pol4", 0.05, 1.85);
+  TF1* o4 = new TF1("o4", "pol5", 0.05, 1.85);
+
+  // pt polynomial which goes to zero
+  TF1* n1 = new TF1("n1", "[0]*x + [1]*x*x", 0., 0.08);
 
   // y for first (f), second (s), and reflected (r)
   TF1* s1 = new TF1("s1", "[0] + [1]*pow(x-2.92,2)", yMin, yMax);
@@ -90,9 +97,19 @@ void plotGraphs(Char_t* part = "pion") {
     yMin, yMax);
   TF1* r2 = new TF1("r2", "[0] + [1]*pow(x-2.92,2) + [2]*pow(x-2.92,4)",
     yRefMin, yRefMax);
+  TF1* s2All = new TF1("s2All", "[0] + [1]*pow(x-2.92,2) + [2]*pow(x-2.92,4)", 
+    yMin, yAllMax);
+  TF1* r2All = new TF1("r2All", "[0] + [1]*pow(x-2.92,2) + [2]*pow(x-2.92,4)",
+    yAllRefMin, yRefMax);
   TF1* f2 = new TF1("f2", "[0] + [1]*(x-2.92) + [2]*pow(x-2.92,3)", yMin, yMax);
   TF1* f3 = new TF1("f3",
-    "[0] + [1]*(x-2.92) + [2]*pow(x-2.92,3) + [3]*pow(x-2.92,5)", yMin, yMax);
+    "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yMin, yMax);
+  TF1* r3 = new TF1("r3",
+    "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yRefMin, yRefMax);
+  TF1* f3All = new TF1("f3All",
+    "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yMin, yAllMax);
+  TF1* r3All = new TF1("r3All",
+    "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yAllRefMin, yRefMax);
 
   // centrality polynomials
   TF1* c1 = new TF1("c1", "pol2", 1., 6.);
@@ -148,8 +165,8 @@ void plotGraphs(Char_t* part = "pion") {
 	  Pt[i][j]->Rebin(8);
 	  Pt[i][j]->Scale(0.125);
 	} else {
-	  Pt[i][j]->Rebin(2);
-	  Pt[i][j]->Scale(0.5);
+	  //Pt[i][j]->Rebin(2);
+	  //Pt[i][j]->Scale(0.5);
 	}
 	delete histName;
       }
@@ -248,7 +265,18 @@ void plotGraphs(Char_t* part = "pion") {
 	if (j) { flip = 1.; }
 	else { flip = -1.; }	
 	if (i==0 || i==7 || i==8 || i==9){
-	  for (Int_t k = 0; k < 8; k++) {
+	  for (Int_t k = 0; k < 4; k++) {
+	    if (Pt[i][j]->GetBinError(k+1) < 3){
+	      flowPt[i][j][0]->SetPoint(k, Pt[i][j]->GetBinCenter(k+1),
+					flip * Pt[i][j]->GetBinContent(k+1));
+	      flowPt[i][j][0]->SetPointError(k, 0., Pt[i][j]->GetBinError(k+1));
+	    } else {
+	      flowPt[i][j][0]->SetPoint(k,-1,0);
+	    }
+	  }	    
+	  Pt[i][j]->Rebin();
+	  Pt[i][j]->Scale(0.5);
+	  for (Int_t k = 4; k < 8; k++) {
 	    if (Pt[i][j]->GetBinError(k+1) < 3){
 	      flowPt[i][j][0]->SetPoint(k, Pt[i][j]->GetBinCenter(k+1),
 					flip * Pt[i][j]->GetBinContent(k+1));
@@ -333,15 +361,16 @@ void plotGraphs(Char_t* part = "pion") {
     max = 4.;
     min = -4.;
   } else {
-    max = 7.;
-    min = -1.;
+    max = 4.;
+    min = -4.;
   }
   hist->SetMaximum(max);
   hist->SetMinimum(min);
   hist->Draw();
   flowY[0][0][0]->Fit("f3", "R");
   flowY[0][0][0]->Draw("P");
-  //flowY[0][0][1]->Draw("P");
+  flowY[0][0][1]->Fit("r3", "R");
+  flowY[0][0][1]->Draw("P");
   if (pion) {
     flowY[0][1][0]->Fit("s2", "R");
     flowY[0][1][1]->Fit("r2", "R");
@@ -377,9 +406,9 @@ void plotGraphs(Char_t* part = "pion") {
     l.SetTextColor(kGreen); 
     l.DrawLatex(0.7,0.82,"v_{2}"); 
   } else {
-    l.DrawLatex(0.75,0.5,"v_{1}"); 
+    l.DrawLatex(0.8,0.8,"v_{1}"); 
     l.SetTextColor(kGreen); 
-    l.DrawLatex(0.75,0.3,"v_{2}"); 
+    l.DrawLatex(0.6,0.7,"v_{2}"); 
   }
 
   sprintf(outfile, "%smb_y.%s", outdir, pstype);
@@ -414,6 +443,7 @@ void plotGraphs(Char_t* part = "pion") {
   if (pion) {
     //flowPt[0][0][0]->Draw("PC");
     flowPt[0][0][0]->Fit("o2", "R");
+    flowPt[0][0][0]->Fit("n1", "R+");
     flowPt[0][0][0]->Draw("P");
   } else {
     flowPt[0][0][0]->Fit("p3", "R");
@@ -509,7 +539,7 @@ void plotGraphs(Char_t* part = "pion") {
   canvas->Clear();
   TH1F *hist = new TH1F(title, title, 10, 1, 5);
   if (pion) {
-    max = 2.;
+    max = 7.;
     min = -7.;
   } else {
     max = 10.;
@@ -520,10 +550,16 @@ void plotGraphs(Char_t* part = "pion") {
   hist->Draw();
   flowY[7][0][0]->Draw("P");
   for (Int_t i = 7; i <= 9; i++) {
-    //for (Int_t k = 0; k < 2; k++) {
-    for (Int_t k = 0; k < 1; k++) {
-      flowY[i][0][k]->Fit("f3", "R");
-      flowY[i][0][k]->Draw("P");
+    if (!pion) {
+      flowY[i][0][0]->Fit("f3All", "R");
+      flowY[i][0][0]->Draw("P");
+      flowY[i][0][1]->Fit("r3All", "R");
+      flowY[i][0][1]->Draw("P");
+    } else {
+      flowY[i][0][0]->Fit("f3", "R");
+      flowY[i][0][0]->Draw("P");
+      flowY[i][0][1]->Fit("r3", "R");
+      flowY[i][0][1]->Draw("P");
     }
   }
   
@@ -551,7 +587,7 @@ void plotGraphs(Char_t* part = "pion") {
   l.DrawLatex(0.7,0.05,"rapidity" ); 
 
   l.SetTextSize(0.04); 
-  l.DrawLatex(0.2,0.8,"p_{t} < 2 GeV/c");
+  l.DrawLatex(0.3,0.8,"p_{t} < 2 GeV/c");
   l.SetTextSize(0.06); 
 
   sprintf(outfile, "%sv1_all_y.%s", outdir, pstype);
@@ -586,11 +622,11 @@ void plotGraphs(Char_t* part = "pion") {
     }
   } else {
     for (Int_t i = 7; i <= 9; i++) {
-      flowY[i][1][0]->Fit("s2", "R");
+      flowY[i][1][0]->Fit("s2All", "R");
       flowY[i][1][0]->Draw("P");
     }
     for (Int_t i = 7; i <= 9; i++) {
-      flowY[i][1][1]->Fit("r2", "R");
+      flowY[i][1][1]->Fit("r2All", "R");
       flowY[i][1][1]->Draw("P");
     }
   }
@@ -646,6 +682,7 @@ void plotGraphs(Char_t* part = "pion") {
     if (pion) {
       //flowPt[i][0][0]->Draw("PC");
       flowPt[i][0][0]->Fit("o3", "R");
+      flowPt[i][0][0]->Fit("n1", "R+");
       flowPt[i][0][0]->Draw("P");
     } else {
       flowPt[i][0][0]->Fit("p3", "R");
