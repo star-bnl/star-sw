@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeCuts.cc,v 3.0 2000/07/14 12:56:49 genevb Exp $
+ * $Id: StStrangeCuts.cc,v 3.1 2001/01/30 04:06:45 genevb Exp $
  *
  * Author: Gene Van Buren, UCLA, 26-May-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeCuts.cc,v $
+ * Revision 3.1  2001/01/30 04:06:45  genevb
+ * Better handling of file switches
+ *
  * Revision 3.0  2000/07/14 12:56:49  genevb
  * Revision 3 has event multiplicities and dedx information for vertex tracks
  *
@@ -64,8 +67,10 @@ void StStrangeCuts::Append(TOrdCollection* oldCuts) {
   // Add any new cuts to any old cuts
   if (oldCuts) {
     if (cuts) {
-      for (Int_t i=(oldCuts->GetSize() - 1); i>=0; i--)
-        cuts->AddFirst(oldCuts->At(i));
+      for (Int_t i=(oldCuts->GetSize() - 1); i>=0; i--) {
+        TObject* oldCut = oldCuts->At(i);
+        if (NewCut(oldCut)) cuts->AddFirst(oldCut);
+      }
     } else cuts = oldCuts;
   } else {
     gMessMgr->Warning() << "StStrangeCuts: no StrangeCuts to read in.\n "
@@ -73,3 +78,15 @@ void StStrangeCuts::Append(TOrdCollection* oldCuts) {
     Assure();
   }
 }
+//_____________________________________________________________________________
+Bool_t StStrangeCuts::NewCut(TObject* aCut) {
+  for (Int_t i=0; i<(cuts->GetSize()); i++) {
+    TObject* bCut = cuts->At(i);
+    if (!(bCut->Compare(aCut))) {
+      if (!(strcmp(bCut->GetTitle(),aCut->GetTitle())))
+        return kFALSE;
+    }
+  }
+  return kTRUE;
+}
+

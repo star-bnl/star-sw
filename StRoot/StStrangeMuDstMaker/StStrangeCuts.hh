@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeCuts.hh,v 3.0 2000/07/14 12:56:49 genevb Exp $
+ * $Id: StStrangeCuts.hh,v 3.1 2001/01/30 04:06:54 genevb Exp $
  *
  * Author: Gene Van Buren, UCLA, 26-May-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeCuts.hh,v $
+ * Revision 3.1  2001/01/30 04:06:54  genevb
+ * Better handling of file switches
+ *
  * Revision 3.0  2000/07/14 12:56:49  genevb
  * Revision 3 has event multiplicities and dedx information for vertex tracks
  *
@@ -42,6 +45,7 @@ public:
   void Append(TOrdCollection*);
   void Assure();
  protected:
+  Bool_t NewCut(TObject*);
   TOrdCollection* cuts;
   ClassDef(StStrangeCuts,0)
 };
