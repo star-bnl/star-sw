@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsAnalogSignalGenerator.hh,v 1.4 1999/02/28 20:13:40 lasiuk Exp $
+ * $Id: StTrsAnalogSignalGenerator.hh,v 1.5 1999/04/23 19:20:55 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsAnalogSignalGenerator.hh,v $
+ * Revision 1.5  1999/04/23 19:20:55  lasiuk
+ * add mTimeShiftOfSignalCentroid
+ *
  * Revision 1.4  1999/02/28 20:13:40  lasiuk
  * noise additions
  *
@@ -118,7 +121,10 @@ protected:
     bool   mAddNoise;
     bool   mAddNoiseUnderSignalOnly;
     double mNoiseRMS;
-    
+
+
+    // Time Shift for electronics
+    double mTimeShiftOfSignalCentroid;
     static HepJamesRandom mEngine;
     static RandGauss      mGaussDistribution;
 };
