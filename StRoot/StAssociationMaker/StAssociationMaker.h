@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StAssociationMaker.h,v 1.18 2003/09/10 19:47:03 perev Exp $
+ * $Id: StAssociationMaker.h,v 1.19 2004/02/08 00:08:19 calderon Exp $
  * $Log: StAssociationMaker.h,v $
+ * Revision 1.19  2004/02/08 00:08:19  calderon
+ * Added method useEstTracks() requested by Helen, for association of estGlobals.
+ *
  * Revision 1.18  2003/09/10 19:47:03  perev
  * ansi corrs
  *
@@ -418,6 +421,7 @@ class StAssociationMaker : public StMaker {
     virtual Int_t Finish();
     void useL3Trigger() {mL3TriggerOn = true;}
     void useInTracker() {mInTrackerOn = true;}
+    void useEstTracks() {mEstTracksOn = true;}
     TH2F*     mTpcLocalHitResolution;    //! Diff btw local  x and z coords of TPC hits.
     TH2F*     mSvtHitResolution;         //! Diff btw global x and z coords of SVT hits.
     TH2F*     mFtpcHitResolution;        //! Diff btw global r and phi coords of FTPC hits.
@@ -462,8 +466,9 @@ private:
     Bool_t drawinit;
     bool              mL3TriggerOn; //!
     bool              mInTrackerOn; //!
+    bool              mEstTracksOn; //!
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.18 2003/09/10 19:47:03 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.19 2004/02/08 00:08:19 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StAssociationMaker,0)
 
