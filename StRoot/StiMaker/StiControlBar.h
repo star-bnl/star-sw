@@ -52,9 +52,6 @@ public:
     static void movePlusPhi();
     static void moveMinusPhi();
     
-    static void nextStartPoint();
-    //static void previousStartPoint();
-    
     static void memoryInfo();
     static void printFactorySize();
     

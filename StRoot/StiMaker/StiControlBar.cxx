@@ -216,26 +216,6 @@ void StiControlBar::moveIn()
     //cout <<"\t Leaving StiControlBar::moveIn()"<<endl;
 }
 
-void StiControlBar::nextStartPoint()
-{
-    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
-    if (rdet.hasMoreStartPoints()) {
-	StiControlBar::setCurrentDetectorToDefault();
-	rdet.nextStartPoint();
-	StiControlBar::showCurrentDetector();
-    }
-}
-
-//void StiControlBar::previousStartPoint()
-//{
-//  StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
-//  if (rdet.hasMoreStartPoints()) {
-//StiControlBar::setCurrentDetectorToDefault();
-//rdet.previousStartPoint();
-//StiControlBar::showCurrentDetector();
-//  }
-//}
-
 void StiControlBar::movePlusPhi()
 {
     //cout <<"Function Not Currently Implemented"<<endl;
@@ -350,9 +330,6 @@ TControlBar* StiControlBar::makeControlBar()
     bar->AddButton("Show Hits for Current Detector","StiControlBar::printHitContainerForDetector()",
 		   "Show hits for Current Detector");
 
-    bar->AddButton("Next Start Point", "StiControlBar::nextStartPoint()","Move to Next Starting Point");
-    //bar->AddButton("Previous Start Point", "StiControlBar::previousStartPoint()","Move to Previous Starting Point");
-    
     bar->AddButton("Move Out","StiControlBar::moveOut()","Step Radially to Next Padrow Out");
     bar->AddButton("Move In","StiControlBar::moveIn()","Step Radially to Next Padrow In");
     
