@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.55 2000/01/22 00:34:57 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.56 2000/01/25 14:29:49 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.56  2000/01/25 14:29:49  fisyak
+// Add StFlowMaker to chain
+//
 // Revision 1.55  2000/01/22 00:34:57  fisyak
 // Add dependence emc on db & calib
 //
@@ -283,7 +286,7 @@ BfcItem BFC[] = {
   {"in"          ,""  ,"","xin"                                               ,"","","Alias to xin",kFALSE},
   {"xin"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
   {"xdf2root"    ,""  ,"",""                        ,"","xdf2root","Read [XDF|DAQ|ROOT] input file",kFALSE},
-  {"geant","geant","","NoFieldSet,tables","St_geant_Maker","geometry,St_g2r,St_geant_Maker","GEANT",kFALSE}, 
+  {"geant","geant","","NoFieldSet,tables","St_geant_Maker","geometry,St_g2t,St_geant_Maker","GEANT",kFALSE}, 
   {"db"          ,""  ,"","tables,xdf2root"      ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"calib"       ,""  ,"","tables,xdf2root"      ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"magF"        ,"","","NoFieldSet,tables,db","StMagFMaker","StMagF"
@@ -327,9 +330,11 @@ BfcItem BFC[] = {
   {"dst"         ,"dst","global","SCL,tables,tls","St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Event"       ,"StEventMaker","","tables,SCL"          ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
   {"HighPtTag"   ,"","","analysis"                                       ,"","","Alias to analysis",kFALSE},
+  {"Tags"        ,"Tags","",""                                         ,"StChainMaker","StChain","",kFALSE},
   {"analysis"    ,"","Tags","Event"                ,"StAnalysisMaker","StAnalysisMaker","HighPtTag",kFALSE},
   {"EbyeScaTags" ,"","Tags","Event"        ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","EbyeScaTags",kFALSE},
-  {"FlowTag"     ,"","Tags","Event"                    ,"StFlowTagMaker","StFlowTagMaker","FlowTag",kFALSE},
+  {"Flow"        ,"","Tags","Event"                                 ,"StFlowMaker","StFlowMaker","",kFALSE},
+  {"FlowTag"     ,"","Tags","Event,Flow"               ,"StFlowTagMaker","StFlowTagMaker","FlowTag",kFALSE},
   {"StrangeTags" ,"","Tags","Event"        ,"StStrangeTagsMaker","StStrangeTagsMaker","StrangeTags",kFALSE},
   {"tags"        ,"","Tags","Event,HighPtTag,EbyeScaTags,FlowTag,StrangeTags"    
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
