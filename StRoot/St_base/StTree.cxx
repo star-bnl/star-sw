@@ -537,7 +537,7 @@ void StTree::SetIOMode(Option_t *iomode)
 //_______________________________________________________________________________
 Int_t StTree::SetFile(const Char_t *file,const Char_t *mode,int insist)
 {
-  if (mode && *mode) SetIOMode(mode); 
+  if (mode && *mode) StBranch::SetIOMode(mode); 
   if (!file || !*file) 	return 0;
 
   if (fIOMode&1)  {	//ReadMode
@@ -688,7 +688,7 @@ StTree *StTree::GetTree(TFile *file, const char *treeName)
   StUKey treeKey(treeName,2000); 
   StTree *ret = (StTree*)StIO::Read(file,treeKey);
   if ((Long_t)ret == -1) ret = 0;
-  if (ret) ret->SetIOMode("r");
+  if (ret) ret->SetIOMode("0");
   return ret;
 }
 
