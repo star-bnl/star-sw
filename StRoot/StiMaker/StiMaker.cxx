@@ -52,6 +52,7 @@
 
 //StiEvaluator
 #include "StiEvaluator/StiEvaluator.h"
+#include "StiEvaluator/StiTrackAssociator.h"
 
 // StiMaker
 #include "StiMaker.h"
@@ -200,6 +201,10 @@ Int_t StiMaker::Init()
 	mdisplay->cd();
     }
 
+    if (stiIO->simulated()==true) {
+	StiTrackAssociator::instance(mAssociationMaker);
+    }
+    
     //The track store
     mtrackstore = StiTrackContainer::instance();
 
