@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Reader.cxx,v 1.10 2001/08/17 17:12:27 struck Exp $
+ * $Id: L3_Reader.cxx,v 1.11 2001/08/20 05:37:45 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: L3_Reader.cxx,v $
+ * Revision 1.11  2001/08/20 05:37:45  struck
+ * removed naming conflicts with 'Stl3Utils/foreign/L3Formats.h'
+ *
  * Revision 1.10  2001/08/17 17:12:27  struck
  * cs: getI960ClusterReader() now returns NULL pointer if number of clusters == 0
  *
@@ -76,7 +79,7 @@ L3_Reader::L3_Reader(EventReader *er, Bank_L3_P *pL3P)
   // so we can access it here without checking again
   mTime = mBankL3P->time;
   mGl3Id = mBankL3P->gl3Id;
-  mL3sum = (L3_summary *)mBankL3P->L3_summary;
+  mL3sum = (L3_Summary *)mBankL3P->L3_Summary;
 }
 
 //----------------------------------------------------------
@@ -554,7 +557,7 @@ I960ClusterReader::I960ClusterReader (L3_Reader *l3r)
 {
   mL3 = l3r;
   mSector = -1;
-  mCluster = new l3_cluster[maxClusterPerSector];
+  mCluster = new L3_Cluster[maxClusterPerSector];
   mNCluster = 0;
   for (int rb=0; rb<12; rb++) {
         for (int mz=0; mz<3; mz++) {
@@ -629,7 +632,7 @@ int I960ClusterReader::initialize (int sec)
 
 
 	// copy i960 cluster into l3 cluster struct
-	l3_cluster *pcluster;
+	L3_Cluster *pcluster;
 	pcluster = mCluster;
 
 	for ( rb=1; rb<=12; rb++) {

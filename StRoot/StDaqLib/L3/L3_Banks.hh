@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Banks.hh,v 1.2 2001/07/17 19:16:11 struck Exp $
+ * $Id: L3_Banks.hh,v 1.3 2001/08/20 05:37:45 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: L3_Banks.hh,v $
+ * Revision 1.3  2001/08/20 05:37:45  struck
+ * removed naming conflicts with 'Stl3Utils/foreign/L3Formats.h'
+ *
  * Revision 1.2  2001/07/17 19:16:11  struck
  * update to 2001 data format (backwards compatible)Z
  *
@@ -71,7 +74,7 @@ struct Bank_L3_P: public Bank
   Pointer sector[24];
   Pointer tracks;            // offset/length to/of L3_GTD
   Pointer summary_data;      // offset/length to/of L3_SUMD
-  unsigned int L3_summary[4];   // struct L3_summary
+  unsigned int L3_Summary[4];   // struct L3_summary
   // following in format verion 4 _only_!!!
   Pointer svt[5];      // 4 svt 'sectors' + 1 ssd
   Pointer ftpc[2];
@@ -79,7 +82,7 @@ struct Bank_L3_P: public Bank
 };
 
 
-struct L3_summary
+struct L3_Summary
 {
     unsigned int accept;
     unsigned int build;
@@ -88,7 +91,7 @@ struct L3_summary
 };
 
 
-struct algorithm_data
+struct Algorithm_Data
 {
     int algId;                 // unique algorithm identifier (for non-humans)
     char on;                   // 1 if this alg. was running on this event, 0 if not.
@@ -106,7 +109,7 @@ struct Bank_L3_SUMD: public Bank {
   unsigned int nProcessed;      // all events looked at
   unsigned int nReconstructed;  // nProcessed that didn't crash
   int nAlg;                     // nr of registered algorithms
-  struct algorithm_data alg[1]; // array of size nAlg
+  struct Algorithm_Data alg[1]; // array of size nAlg
 
   int swap();
 };
@@ -181,7 +184,7 @@ struct globalTrack
 
 
 // cluster data produced on sl3:
-struct l3_cluster
+struct L3_Cluster
 {
     unsigned short pad;     // in 1/64 pads
     unsigned short time;    // in 1/64 time bins
@@ -237,7 +240,7 @@ struct Bank_L3_SECTP: public Bank
 struct Bank_L3_SECCD: public Bank
 {
     unsigned int  nrClusters_in_sector;
-    l3_cluster    cluster[1];
+    L3_Cluster    cluster[1];
 
     int swap();
 };
