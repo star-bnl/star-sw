@@ -10,6 +10,7 @@
 #include "dsxdr.h"
 #include <X11/Intrinsic.h>
 #include <X11/IntrinsicP.h>
+#include <X11/cursorfont.h>
 #include <X11/CoreP.h>
 #include <X11/Shell.h>
 #include <Xm/Xm.h>
@@ -34,8 +35,30 @@
 #define EXTERN extern
 #include "brow.h"
 #include "x.h"
+/******************************************************  GLOBALS  **/
+extern int gNDs;
+int gLastWhWin=-10,gDone;
+myBool gBlurb2,gBlurb1;
+char *gBlurb7="Click on the abbreviation (to\n\
+expand/contract) to the left.  Do not click\n\
+directly on the names of datasets.  (You can\n\
+can click on names of tables.)";
+char *gMess0=
+"Do not click on this line:\n\
+ 1. Columns cannot be expanded or contracted.\n\
+ 2. Columns are not individually viewable.\n\
+ 3. Perhaps you want to click on the name (not\n\
+    on the abbreviation \"TB\") of the table\n\
+    which contains this column.";
+Widget gSecondLabel,gProgressPopup,gProgressScale;
 /******************************************************  PROTOTYPES  **/
-void AuxOutputFromOneLn(int whWin,int whAct);
+myBool TableHasMoreThanZeroCols(int tlm);
+XtCP ExpandCB(Widget w,caddr_t cld,caddr_t cad);
+XtCP ExpandExceptCB(Widget w,caddr_t cld,caddr_t cad);
+XtCP ContractCB(Widget w,caddr_t cld,caddr_t cad);
+myBool ToggleCase(int wds);
+myBool ATable(int x);
+void Blurb(void),AuxOutputFromOneLn(int whWin,int whAct);
 void DrawLineXOnly(int x1,int y1,int x2,int y2);
 void DrawLine(float x1,float y1,float x2,float y2);
 void DrawString(float xf,float yf,char *cc);
@@ -49,6 +72,9 @@ void CreateMenuItems(Widget mbar,int whichWindow);
 XtCP TextCB(Widget w,caddr_t cld,caddr_t cad);
 void Say(char *mess);
 /***********************************************************  FUNCTIONS  **/
+void Ose(void) {
+  PP"------------------------------------------------  STAR TABLE BROWSER\n");
+}
 void DrawXaxisTicks(float minn,float maxx,float ts) {
   float frac,xx;  int ii,cc;
   xx=minn; ii=0;
@@ -83,7 +109,7 @@ void SendMail(void) {
   system("echo $USER browser `date` > junk.OoEEeFc77 2> /dev/null");
 
   ff=fopen("junk.OoEEeFc77","a"); if(ff==NULL) return;
-  fprintf(ff,"\n%s\n",gInFile); fclose(ff);
+  fprintf(ff,"\n%s\n","We don't know whether in tas or not."); fclose(ff);
 
   system("cat junk.OoEEeFc77 | mail ward@physics.utexas.edu 2> /dev/null");
   system("rm junk.OoEEeFc77 2> /dev/null");
@@ -105,8 +131,60 @@ void DrawLine(float x1,float y1,float x2,float y2) {
   iy2=gDown-(gDown-gUp)*y2+0.5;
   DrawLineXOnly(ix1,iy1,ix2,iy2);
 }
-void Progress(int x) {
-  /* compare to numRows in DoCuts BBB */
+void TimeoutCursors(int on) {
+    static int locked;
+    static Cursor cursor;
+    XSetWindowAttributes attrs;
+    Display *dpy = XtDisplay(gAppShell);
+
+    /* "locked" keeps track if we've already called the function.
+     * This allows recursion and is necessary for most situations.
+     */
+    on? locked++ : locked--;
+    if ( (locked > 1) || (locked == 1 && on == 0) )
+        return; /* already locked and we're not unlocking */
+
+    if (!cursor) /* make sure the timeout cursor is initialized */
+        cursor = XCreateFontCursor(dpy, XC_watch);
+
+    /* if "on" is true, then turn on watch cursor, otherwise, return
+     * the shell's cursor to normal.
+     */
+    attrs.cursor = on? cursor : None;
+
+    /* change the main application shell's cursor to be the timeout
+     * cursor (or to reset it to normal).  If other shells exist in
+     * this application, they will have to be listed here in order
+     * for them to have timeout cursors too.
+     */
+    XChangeWindowAttributes(dpy, XtWindow(gAppShell), CWCursor, &attrs);
+    XFlush(dpy);
+}
+void Progress(int x,int max,char *label,char *label2) {
+  ARGS
+  int val; XmString title;
+  if(x==-5) {
+    TimeoutCursors(TRUE);
+    title=XmStringCreateLtoR(label2,XmSTRING_DEFAULT_CHARSET);
+    nn=0;
+    XtSetArg(args[nn],XmNlabelString,title); nn++;
+    XtSetValues(gSecondLabel,args,nn);
+
+    title=XmStringCreateLtoR(label,XmSTRING_DEFAULT_CHARSET);
+    nn=0;
+    XtSetArg(args[nn],XmNtitleString,title); nn++;
+    XtSetValues(gProgressScale,args,nn);
+
+    XtPopup(gProgressPopup,XtGrabNone);
+    XmStringFree(title); x=0;
+  }
+  if(x==-10) {
+    TimeoutCursors(FALSE);
+    XtPopdown(gProgressPopup); return;
+  }
+  val=(100.0*x)/max+0.5;
+  XmScaleSetValue(gProgressScale,val);
+  XmUpdateDisplay(gProgressPopup);
 }
 Widget Column(Widget parent) {
   Widget rv; Arg args[59]; register int nn;
@@ -124,10 +202,47 @@ Widget Row(Widget parent) {
 }
 void DoOnce2(void) {
   gCalculateAverages=TRUE;
-  SendMail();
+  /* SendMail(); */
   gLast=-1;
   gNGraphicsUp=0;
   gNWin=0;
+}
+void PrepareProgressPopup() {
+  Arg args[14];
+  int n;
+  Widget junk,rrr,theWindow;
+  XmString title;
+  n=0;
+  gProgressPopup=XtCreatePopupShell("",transientShellWidgetClass,gMainWindow,
+  args,n);
+  n=0;
+  theWindow=XmCreateMainWindow(gProgressPopup,"",args,n);
+  XtManageChild(theWindow);
+  n=0;
+  XtSetArg(args[n], XmNorientation, XmVERTICAL); n++;
+  rrr=XmCreateRowColumn(theWindow,"",args,n);
+  XtManageChild(rrr);
+  title=XmStringCreateLtoR(" ",XmSTRING_DEFAULT_CHARSET);
+  n=0;
+  XtSetArg(args[n],XmNlabelString,title); n++;
+  junk=XmCreateLabel(rrr,"",args,n);
+  XtManageChild(junk);
+  n=0;
+  XtSetArg(args[n],XmNlabelString,title); n++;
+  gSecondLabel=XmCreateLabel(rrr,"",args,n);
+  XtManageChild(gSecondLabel);
+  n=0;
+  XtSetArg(args[n],XmNtitleString,title); n++;
+  XtSetArg(args[n],XmNheight,400); n++;
+  XtSetArg(args[n],XmNorientation,XmHORIZONTAL); n++;
+  XtSetArg(args[n],XmNshowValue,FALSE); n++;
+  gProgressScale=XmCreateScale(rrr,"",args,n);
+  XtManageChild(gProgressScale);
+  n=0;
+  XtSetArg(args[n],XmNlabelString,title); n++;
+  junk=XmCreateLabel(rrr,"",args,n);
+  XtManageChild(junk);
+  XmStringFree(title);
 }
 void Say(char *mess) {
   XmString messWidget,okWidget,titleWidget;
@@ -172,7 +287,7 @@ void FinishThisMenu(Widget mbar,Widget mpane,char *menuName) {
   XtManageChild(cas);
 }
 void QuitCB(Widget w,caddr_t cld,caddr_t cad) {
-  PP"Normal end of STAR table browser.\n"); exit(0);
+  gDone=7;
 }
 void Complain5(void) {
  Say("\
@@ -218,6 +333,7 @@ myBool GetTheCuts(char *out,char *tableName) {
 }
 char *ColName(int ln,int whWin) {
   int ii,nl=0,len; char *cc,*rr;
+  if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) Err(828);
   len=strlen(gWin[whWin]->textClickPart);
   for(ii=0;ii<len;ii++) {
     if(nl>=ln) break; if(gWin[whWin]->textClickPart[ii]=='\n') nl++;
@@ -356,10 +472,23 @@ void SayError0(void) {
  See \"Using this window\" under \"Help\".\n\
  ");
 }
-void BotBigCB(Widget ww,caddr_t cld,caddr_t cad) {
+void WrBotCB(Widget ww,caddr_t cld,caddr_t cad) {
+  ARGS
+  FILE *ff; XmString scratch;
+  int whWin; whWin=(int)cld;
+  ff=fopen("browDump.txt","w"); if(ff==NULL) {
+    Say("I can't write on browDump.txt."); return;
+  }
+  scratch=XmTextGetString(gWin[whWin]->txtWidWriteH);
+  fprintf(ff,"%s\n",scratch); XtFree(scratch);
+  fprintf(ff,"%s\n",gWin[whWin]->textOutput);
+  fclose(ff); Say("Your file is named \"browDump.txt\".");
+}
+void BotLongerCB(Widget ww,caddr_t cld,caddr_t cad) {
   ARGS
   short rr;
   int whWin; whWin=(int)cld;
+  /* if(!gBlurb1) Blurb(); gBlurb1=TRUE; */
   rr=gWin[whWin]->nRowsWritePart; rr+=4; gWin[whWin]->nRowsWritePart=rr;
   nn=0;
   XtSetArg(args[nn],XmNrows,rr); nn++;
@@ -374,6 +503,7 @@ void RunNull(size_t row) { /* Menu item just counts selected rows. */
 }
 void RunHistMinMax(size_t row) {
   int irow=row; float val;
+  if(gWin[gRunWhWin]->tlm[gRunWhichHilitedLine]<0) Err( 48);
   val=ValueWrapper(gWin[gRunWhWin]->wh_gDs,
       gWin[gRunWhWin]->tlm[gRunWhichHilitedLine],irow,
       gWin[gRunWhWin]->subscript[gRunWhichHilitedLine]);
@@ -384,6 +514,7 @@ void RunHistMinMax(size_t row) {
 }
 void RunHistFill(size_t row) {
   int hist,irow=row; float val;
+  if(gWin[gRunWhWin]->tlm[gRunWhichHilitedLine]<0) Err( 49);
   val=ValueWrapper(gWin[gRunWhWin]->wh_gDs,
       gWin[gRunWhWin]->tlm[gRunWhichHilitedLine],irow,
       gWin[gRunWhWin]->subscript[gRunWhichHilitedLine]);
@@ -392,13 +523,15 @@ void RunHistFill(size_t row) {
   }
   hist=(HIST-1)*(val-gMin)/(gMax-gMin);
   if(hist>=HIST||hist<0) {
+    PP"Table browser fatal error 711p.\n");
     PP"hist=%d, HIST=%d, gMax=%e, gMin=%e\n",hist,HIST,gMax,gMin);
-    exit(2);
+    gDone=7; return;
   }
   gHist[hist]++;
 }
 void RunAverage(size_t row) {
   int irow=row;
+  if(gWin[gRunWhWin]->tlm[gRunWhichHilitedLine]<0) Err( 50);
   gRunTotal+=ValueWrapper(gWin[gRunWhWin]->wh_gDs,
       gWin[gRunWhWin]->tlm[gRunWhichHilitedLine],irow,
       gWin[gRunWhWin]->subscript[gRunWhichHilitedLine]);
@@ -407,21 +540,31 @@ void RunAverage(size_t row) {
   }
 }
 void RunValue(size_t row) {
-  int fo=0,ii,irow=row; float val;
+  int fo=0,tt,hlLstIx,lnfhl,irow=row; float val;
   char tt2[60],format[22],tmp[100],buf[422];
   sprintf(buf,"%s%6d",gSumCol,row+1);
   if(strlen(buf)!=EXT) {
-    PP"buf=%s, len should be %d.\n",buf,EXT); exit(2);
+    PP"Table browser fatal error 611p.\n");
+    PP"buf=%s, len should be %d.\n",buf,EXT); gDone=7; return;
   }
-  for(ii=0;ii<gWin[gRunWhWin]->nLineClickPart;ii++) { /* user-selected cols */
-    if(!gWin[gRunWhWin]->isHilited[ii]) continue; fo++;
+  for(hlLstIx=0;hlLstIx<gWin[gRunWhWin]->nhlLst;hlLstIx++) {
+    lnfhl=gWin[gRunWhWin]->hlLst[hlLstIx];
+    if(!gWin[gRunWhWin]->isHilited[lnfhl]) Err( 60);
+    fo++;
+    if(gWin[gRunWhWin]->tlm[lnfhl]<0) Err( 51);
     val=ValueWrapper(gWin[gRunWhWin]->wh_gDs,
-          gWin[gRunWhWin]->tlm[ii],irow,gWin[gRunWhWin]->subscript[ii]);
+          gWin[gRunWhWin]->tlm[lnfhl],irow,gWin[gRunWhWin]->subscript[lnfhl]);
     if(gTableValueError) {
       Say("Table has unsupported data type"); gBreakRowsLoop=TRUE; break;
     }
-    Format(WIDE-1,tmp,val);
-    sprintf(format,"%%%ds",WIDE); sprintf(tt2,format,tmp);
+    sprintf(format,"%%%ds",WIDE);
+    if(gStrValueWrapper) {
+      gStr[WIDE-1]='\0';
+      for(tt=WIDE-2;tt>=0;tt--) { if(gStr[tt]!=' ') break; gStr[tt]='\0'; }
+      sprintf(tt2,format,gStr);
+    } else {
+      Format(WIDE-1,tmp,val); sprintf(tt2,format,tmp);
+    }
     strcat(buf,tt2);
   }
   if(fo>0) { strcat(buf,"\n"); Write(buf,gRunWhWin);  }
@@ -429,8 +572,11 @@ void RunValue(size_t row) {
 }
 void OneLnPerRowCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
   int whAct,whWin; char act[111];
+  static int whActS,whWinS;
   void (*runFunc)();
-  whWin=((int)cld)%1000; whAct=((int)cld)/1000;
+  if((int)w==2&&(int)cld==5&&(int)cad==14) { whAct=whActS; whWin=whWinS; }
+  else { whWin=((int)cld)%1000; whAct=((int)cld)/1000; }
+  gLastWhWin=whWin;
   gRunWhWin=whWin; if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) Err(128);
   switch(whAct) {
     case 0: strcpy(act,"Value"); runFunc=RunValue; break;
@@ -440,14 +586,27 @@ void OneLnPerRowCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
   gRunNRowsDone=0;
   RunTheRows(FALSE,whWin,runFunc);
   if(gRunNRowsDone==0) Say("No rows were\nselected by \"ROW SELECTION\".");
+  whActS=whAct; whWinS=whWin;
 }
 /* Comment 8b: OneLnAllRowsCB is the callback for "half" the Action menu
    items.  It decodes the client data into whWin and whAct, selects which
    function pointer should be passed to RunTheRows, handles auxiliary output
    like writing the number of rows used and the cuts string, and loops over
    the selected columns. */
+void IncrementByOneCol(int whWin) {
+  ARGS
+  short rr;
+  gWin[whWin]->ncol++;
+  gWin[whWin]->width+=WIDE;
+  /* if(!gBlurb2) Blurb(); gBlurb2=TRUE; */
+  rr=gWin[whWin]->width;
+  nn=0;
+  XtSetArg(args[nn],XmNcolumns,rr); nn++;
+  XtSetValues(gWin[whWin]->txtWidWrite,args,nn);
+  XtSetValues(gWin[whWin]->txtWidWriteH,args,nn);
+}
 void OneLnAllRowsCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
-  int cnt,whAct,nCol=0,fo=0,ii,whWin; char tt[111],sumCol[211];
+  int ii,cnt,whAct,nCol=0,fo=0,lnfhl,hlLstIx,whWin; char tt[111],sumCol[211];
   float summary;
   myBool firstTime=TRUE,dalo; /* dalo=doAtLeastOne */
   char act[30],tt2[45],format[30];
@@ -464,25 +623,31 @@ void OneLnAllRowsCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
   }
   sprintf(sumCol,"%6s %6s",act,RadStr(whWin));
   if(strlen(sumCol)!=EXT) Err(122); cnt=0;
-  for(ii=0;ii<gWin[whWin]->nLineClickPart;ii++) {
-    /* over user-selected cols */
-    if(!gWin[whWin]->isHilited[ii] && !(ii==0&&dalo) ) continue;
-    if(whAct==2&&++cnt>1) { Complain1(); return; } gHistWhLine=ii;
-    if(++nCol>MCOL) Err(123); /*ShouldBeProtectedInSetHiliteWIN_TYPE_TABLE*/
-    fo++; gRunTotal=0; gRunNRowsDone=0; gRunWhichHilitedLine=ii;
+  for(hlLstIx=0; (dalo&&hlLstIx==0) || (hlLstIx<gWin[whWin]->nhlLst);
+        hlLstIx++) {
+    if(gWin[whWin]->nhlLst>0) lnfhl=gWin[whWin]->hlLst[hlLstIx];
+    else lnfhl=0;  /* see the complicated for() which governs this loop */
+    if(!dalo&&!gWin[whWin]->isHilited[lnfhl]) Err( 61);
+    if(whAct==2&&++cnt>1) { Complain1(); return; } gHistWhLine=lnfhl;
+    if(++nCol>MCOL) Err( 44); /*ShouldBeProtectedInSetHiliteWIN_TYPE_TABLE*/
+    fo++; gRunTotal=0; gRunNRowsDone=0; gRunWhichHilitedLine=lnfhl;
     if(firstTime) { firstTime=FALSE; RunTheRows(FALSE,whWin,runFunc); }
     else RunTheRows(TRUE,whWin,runFunc);
-    if(gRunNRowsDone>0) {
-      switch(whAct) {
-        case 0: summary=gRunTotal/gRunNRowsDone;
-          Format(WIDE-1,tt,summary); sprintf(format,"%%%ds",WIDE);
-          sprintf(tt2,format,tt); strcat(sumCol,tt2); break;
-        case 1: case 2: break;
-        default: Err(130);
+    if(gStrValueWrapper) { /* we don't do this in OneLnPerRowCB() */
+      Say("You can't do that with strings."); return;
+    } else {
+      if(gRunNRowsDone>0) {
+        switch(whAct) {
+          case 0: summary=gRunTotal/gRunNRowsDone;
+            Format(WIDE-1,tt,summary); sprintf(format,"%%%ds",WIDE);
+            sprintf(tt2,format,tt); strcat(sumCol,tt2); break;
+          case 1: case 2: break;
+          default: Err(130);
+        }
       }
-    }
-    else { Write("\"ROW SELECTION\" selected zero rows.\n",whWin); break; }
-  }
+      else { Write("\"ROW SELECTION\" selected zero rows.\n",whWin); break; }
+    }	/* if/else gStrValueWrapper */
+  }	/* loop hlLstIx */
   if(gMax==gMin) { gMax=gMin+0.1*fabs(gMin); gMin=gMin-0.1*fabs(gMin); }
   if(gMax==gMin) { gMax+=1; gMin-=1; }
   switch(whAct) {
@@ -548,7 +713,7 @@ void RunTheRows(myBool skipInit,int whWin,void (*fnct)()) {
   gBreakRowsLoop=FALSE;
   for(row=start;row<=end;row++) {
     /* ActionCB/RunAverage are a simple example of how to use this */
-    if(gWin[whWin]->useCuts) { if(!RowPassedCuts(ba,(long)row)) continue; }
+    if(gWin[whWin]->useCuts) { if(!dsuRowPassedCuts(ba,(long)row)) continue; }
     fnct(row);
     gRunNRowsDone++;
     if(gBreakRowsLoop) break;
@@ -576,15 +741,14 @@ void SigFigCB(Widget w,caddr_t cld,caddr_t cad) { /* pops it up */
 }
 void HelpSelTabCB(Widget w,caddr_t cld,caddr_t cad) {
  Say("\
- The top part of this window gives info on the\n\
- data set you selected earlier.  The bottom part\n\
- is a list of the tables which are available in\n\
- this dataset.\n\
+ Indentation indicates hierarchy.\n\
  \n\
- Click on the table that you want to look at.\n\
- A new window will pop up.  You can pop up as\n\
- many such windows as you like.  Further help\n\
- is given there.\n\
+ STEP 1. Click on the two-letter abbrevi-\n\
+ ations until you see a table (abbrevi-\n\
+ ation=TB) that you are interested in.\n\
+ \n\
+ STEP 2. When you see a table you like, click\n\
+ on its name (not the abbreviation).\n\
  ");
 }
 void HelpUtwCB(Widget w,caddr_t cld,caddr_t cad) {
@@ -598,26 +762,27 @@ void HelpUtwCB(Widget w,caddr_t cld,caddr_t cad) {
  \n\
  CRITICAL:\n\
  Items from the \"Action\" menu only work on rows\n\
- selected in the top right corner of the window, so be care-\n\
- ful with row-wise wholesale actions like averaging and his-\n\
- tograms when you have a subtle \"ROW SELECTION\" like \"Cuts\".\n\
+ selected in \"ROW SELECTION\", so be careful with\n\
+ row-wise wholesale actions like averaging and his-\n\
+ tograms when you have a subtle \"ROW SELECTION\"\n\
+ like \"Cuts\".\n\
  ");
 }
 void HelpCutsCB(Widget w,caddr_t cld,caddr_t cad) {
   *gPass='\0';
-  strcat(gPass,"Cuts are held in file stargl.cuts.\n");
-  strcat(gPass,"A sample five-line cuts file is:\n\n");
+  strcat(gPass,"Cuts are in file stargl.cuts.  Five-line sample:\n");
+  strcat(gPass,"--------\n");
   strcat(gPass,"# Comment line\n");
   strcat(gPass,"globtrk  id.gt.10.and.id.le.110\n");
   strcat(gPass,"# globtrk  (id.eq.1.or.icharge.eq.1).and.(invpt.gt.7)\n");
   strcat(gPass,"tphit    id_globtrk.gt.10.and.id_globtrk.le.110\n");
   strcat(gPass,"tptrack    cov[5].gt.3.12\n");
+  strcat(gPass,"--------\n");
   strcat(gPass,"Each non-comment line begins with a table name.\n");
   strcat(gPass,"Specifiers in the conditionals (eg, id_globtrk) are\n");
   strcat(gPass,"column names.  Note the use of\n");
   strcat(gPass,"square brackets (NOT PARENTHESES, AS IN TAS)\n");
   strcat(gPass,"for columns whose data types are arrays.\n");
-  strcat(gPass,"\n");
   strcat(gPass,"\n");
   strcat(gPass,"You can alter your cuts while running this table brow-\n");
   strcat(gPass,"ser by opening the cuts file with an editor, making your\n");
@@ -634,8 +799,18 @@ void CreateMenuItems(Widget mbar,int type) {
   if(type!=WIN_TYPE_PRIMARY) {
     MakeMenuItem(NOTUSED,mpane,"Close this window",(XtCP)CloseThisWindowCB);
   }
+  if(type==WIN_TYPE_TABLE) {
+    MakeMenuItem(NOTUSED,mpane,"Dump this window to .txt file",(XtCP)WrBotCB);
+  }
   MakeMenuItem(NOTUSED,mpane,"Quit",(XtCP)QuitCB);
   FinishThisMenu(mbar,mpane,"File ");
+  if(type==WIN_TYPE_PRIMARY) {
+    mpane=XmCreatePulldownMenu(mbar,"a2",args,0);
+    MakeMenuItem(0,mpane,"Expand",    (XtCP)ExpandCB);
+    MakeMenuItem(0,mpane,"Expand except for columns",(XtCP)ExpandExceptCB);
+    MakeMenuItem(0,mpane,"Contract",(XtCP)ContractCB);
+    FinishThisMenu(mbar,mpane,"Hierarchy ");
+  }
   if(type==WIN_TYPE_TABLE) {
     mpane=XmCreatePulldownMenu(mbar,"a2",args,0);
     MakeMenuItem(0,mpane,"Show value(s).",             (XtCP)OneLnPerRowCB);
@@ -649,21 +824,21 @@ void CreateMenuItems(Widget mbar,int type) {
     MakeMenuItem(NOTUSED,mpane,"Write .ps file of histogram",(XtCP)DumpPsCB);
     FinishThisMenu(mbar,mpane,"WritePostScript ");
   }
-  if(type==WIN_TYPE_TABLE||type==WIN_TYPE_DATASET) {
+  if(type==WIN_TYPE_TABLE||type==WIN_TYPE_PRIMARY) {
     mpane=XmCreatePulldownMenu(mbar,"a2",args,0);
-    if(type==WIN_TYPE_DATASET) {
+    if(type==WIN_TYPE_PRIMARY) {
       MakeMenuItem(NOTUSED,mpane,"Skip averages (faster)",(XtCP)SkipCB);
       MakeMenuItem(NOTUSED,mpane,"Calc averages (slower)",(XtCP)DoCB);
     }
     if(type==WIN_TYPE_TABLE) {
       MakeMenuItem(NOTUSED,mpane,"Format of numerical output",(XtCP)SigFigCB);
-      MakeMenuItem(NOTUSED,mpane,"Bottom part bigger (may be iterated)",
-        (XtCP)BotBigCB);
+      MakeMenuItem(NOTUSED,mpane,"Bottom part longer (may be iterated)",
+        (XtCP)BotLongerCB);
     }
     FinishThisMenu(mbar,mpane,"Preferences ");
   }
   mpane=XmCreatePulldownMenu(mbar,"a2",args,0);
-  if(type==WIN_TYPE_DATASET) {
+  if(type==WIN_TYPE_PRIMARY) {
     MakeMenuItem(NOTUSED,mpane,"Using this window",(XtCP)HelpSelTabCB);
   }
   if(type==WIN_TYPE_TABLE) {
@@ -691,13 +866,22 @@ Position Pos(int whWin,Position x,Position y) {
   rv=XmTextXYToPos(text,x,y);
   return rv;
 }
-int LineNumber(int whWin,Position pos) {
-  int rv,ii,len; char *text;
+int LineNumber(myBool *inTriangle,int whWin,Position pos) {
+  int fromLeft=0,rv,ii,len; char *text;
+  myBool reachedTriangle=FALSE;
   if(whWin<0||whWin>=gNWin) Err(103);
   text=gWin[whWin]->textClickPart;
   len=strlen(text); if(pos>len) Err(107);
   rv=0;
   for(ii=pos-1;ii>=0;ii--) if(text[ii]=='\n') rv++;
+  for(ii=0;ii<pos;ii++) {
+    if(text[ii]=='\n') { reachedTriangle=FALSE; fromLeft=0; continue; }
+    if(text[ii]!=' ') {
+      reachedTriangle=TRUE;
+    }
+    if(reachedTriangle) fromLeft++;
+  }
+  if(fromLeft>3) *inTriangle=FALSE; else *inTriangle=TRUE;
   return rv;
 }
 void Complain(void) {
@@ -718,33 +902,39 @@ void Abbr(char *x) {
     x[WIDE-2]='\0'; /* 1 for null byte offset, and 1 for space between cols */
   }
 }
+void DelFromHiliteList(int whWin,int lineNum) {
+  int jj,ii;
+  for(ii=gWin[whWin]->nhlLst-1;ii>=0;ii--) {
+    if(gWin[whWin]->hlLst[ii]==lineNum) break;
+  }
+  if(ii<0) return;
+  for(jj=ii;jj<gWin[whWin]->nhlLst;jj++) {
+    gWin[whWin]->hlLst[jj]=gWin[whWin]->hlLst[jj+1];
+  }
+  ii=gWin[whWin]->nhlLst; gWin[whWin]->nhlLst=ii-1;
+}
+void AddToHiliteList(int whWin,int lineNum) {
+  int ii;
+  for(ii=gWin[whWin]->nhlLst-1;ii>=0;ii--) {
+    if(gWin[whWin]->hlLst[ii]==lineNum) {
+      PP"I am being asked to add line# %d to my highlight list for\n",lineNum);
+      PP"window %d, but it is already on the list.\n",whWin);
+      Err(772);
+    }
+  }
+  ii=gWin[whWin]->nhlLst;
+  if(ii>=MAX_LINES_CLICK_PART) Err(773);
+  gWin[whWin]->hlLst[ii]=lineNum; gWin[whWin]->nhlLst=ii+1;
+}
 void SetHilite(int control,int whWin,int lineNum) {
   /* What the user sees is set in Loop A, what program sees is
   ** gWin[]->isHilited[].  Up to programmer to keep these two equal. */
   char buf[WIDE*MCOL+EXT+1]; /* see comments in x.h for meaning of MCOL etc */
   char tmp[111],format[22];
   char cp[43],*otext; int num=0,len,ii,ln; myBool doReturn=FALSE;
+  int hlLstIx,lnfhl; /* line number from hilite list */
   XmTextPosition left,right;
   Widget txtWid;
-  if(gWin[whWin]->win_type==WIN_TYPE_TABLE) {
-    /* erase write part and adjust its header txtWidWriteH */
-    sprintf(format,"%%%ds",WIDE); /* -1 for space between columns */
-    strcpy(buf,"  What RowNum"); /* EXT = size of this string */
-    for(ii=0;ii<gWin[whWin]->nLineClickPart;ii++) { /* Loop A */
-      if((ii!=lineNum&& gWin[whWin]->isHilited[ii]) ||
-      (ii==lineNum&&!gWin[whWin]->isHilited[ii])) {
-        if(num++>=MCOL) { Complain(); doReturn=TRUE; break; }
-        strcpy(cp,ColName(ii,whWin)); Abbr(cp); sprintf(tmp,format,cp);
-        if(strlen(tmp)+strlen(buf)>WIDE*MCOL+EXT) {
-          PP"This is error 91P. %d + %d > %d, MCOL = %d.\n",
-          strlen(tmp),strlen(buf),WIDE*MCOL+EXT,MCOL); exit(2);
-        } strcat(buf,tmp);
-      }
-    }
-    if(doReturn) return; gWin[whWin]->textOutput[0]='\0';
-    XmTextSetString(gWin[whWin]->txtWidWrite,gWin[whWin]->textOutput);
-    XmTextSetString(gWin[whWin]->txtWidWriteH,buf);
-  }
   txtWid=gWin[whWin]->txtWidClick;
   otext=gWin[whWin]->textClickPart;
   len=strlen(otext); left=0; right=len-1; ln=0;
@@ -752,17 +942,69 @@ void SetHilite(int control,int whWin,int lineNum) {
     if(otext[ii]=='\n') { right=ii; if(ln==lineNum) break; left=ii+1; ln++; }
   }
   if(control==HILITE_TURN_ON||!gWin[whWin]->isHilited[lineNum]) {
+    AddToHiliteList(whWin,lineNum);
     gWin[whWin]->isHilited[lineNum]=TRUE;
     XmTextSetHighlight(txtWid,left,right,XmHIGHLIGHT_SELECTED);
   } else {
-    gWin[whWin]->isHilited[lineNum]=FALSE;
+    DelFromHiliteList(whWin,lineNum);
+    gWin[whWin]->isHilited[lineNum]=FALSE; /*BBB is isHilited still needed? */
     XmTextSetHighlight(txtWid,left,right,XmHIGHLIGHT_NORMAL);
   }
   XmUpdateDisplay(txtWid);
+  if(gWin[whWin]->win_type==WIN_TYPE_TABLE) {
+    sprintf(format,"%%%ds",WIDE); strcpy(buf,"  What RowNum");
+    for(hlLstIx=0;hlLstIx<gWin[whWin]->nhlLst;hlLstIx++) {
+      lnfhl=gWin[whWin]->hlLst[hlLstIx];
+      if(!gWin[whWin]->isHilited[lnfhl]) Err(666);
+      if(num>=gWin[whWin]->ncol) IncrementByOneCol(whWin);
+      if(num++>=MCOL) { Complain(); doReturn=TRUE; break; }
+      strcpy(cp,ColName(lnfhl,whWin)); Abbr(cp); sprintf(tmp,format,cp);
+      if(strlen(tmp)+strlen(buf)>WIDE*MCOL+EXT) {
+        PP"Table browser fatal error 712p.\n");
+        PP"This is error 91P. %d + %d > %d, MCOL = %d.\n",
+        strlen(tmp),strlen(buf),WIDE*MCOL+EXT,MCOL); gDone=7; return;
+      } strcat(buf,tmp);
+    } /* loop over hlLstIx */
+    if(doReturn) return; gWin[whWin]->textOutput[0]='\0';
+    XmTextSetString(gWin[whWin]->txtWidWrite,gWin[whWin]->textOutput);
+    XmTextSetString(gWin[whWin]->txtWidWriteH,buf);
+  }
+}
+void ResetTheTriangles(int wds) {
+  XmTextPosition pos;
+  char junk[100]; int len,ii,nLines;
+  if(wds>=0) {
+    if(!ToggleCase(wds)) {
+      Say(
+      "You can't expand/contract that.\nIt's the lowest hierarchical level.");
+      return;
+    }
+  }
+  else if(wds==-10) { for(ii=0;ii<gNDs;ii++) ExpandCase(ii); }
+  else if(wds==-15) { for(ii=0;ii<gNDs;ii++) ExpandExceptCase(ii); }
+  else if(wds==-20) { for(ii=0;ii<gNDs;ii++) ContractCase(ii); }
+  else Err(123);
+  PrimaryList(junk,0,&nLines,gWin[0]->tlm,MAX_LINES_CLICK_PART,
+              gWin[0]->textClickPart,TEXT_SIZE_PART_2);
+  gWin[0]->nlcpwtto=nLines;
+  XmTextDisableRedisplay(gWin[0]->txtWidClick);
+  pos=XmTextGetTopCharacter(gWin[0]->txtWidClick);
+  XmTextSetString(gWin[0]->txtWidClick,gWin[0]->textClickPart);
+  XmTextSetTopCharacter(gWin[0]->txtWidClick,pos);
+  XmTextEnableRedisplay(gWin[0]->txtWidClick);
+}
+XtCP ContractCB(Widget w,caddr_t cld,caddr_t cad) {
+  ResetTheTriangles(-20);
+}
+XtCP ExpandExceptCB(Widget w,caddr_t cld,caddr_t cad) {
+  ResetTheTriangles(-15);
+}
+XtCP ExpandCB(Widget w,caddr_t cld,caddr_t cad) {
+  ResetTheTriangles(-10);
 }
 XtCP TextCB(Widget w,caddr_t cld,caddr_t cad) { /* user click in text window */
-  int whWin,whatThisLinePointsTo;
-  /* whatThisLinePointsTo is either an index for gDs
+  int whWin,tlm; myBool inTri;
+  /* tlm is either an index for gDs
   or it is an arg (cast to size_t) for dsColumnName (column number). */
   XmAnyCallbackStruct *xx; Position pos;
   XButtonEvent *bev; int lineNumber;
@@ -771,17 +1013,27 @@ XtCP TextCB(Widget w,caddr_t cld,caddr_t cad) { /* user click in text window */
   xx=(XmAnyCallbackStruct*)cad;
   bev=(XButtonEvent*)(xx->event); /* Vol1 p512 */
   pos=Pos(whWin,(Position)(bev->x),(Position)(bev->y));
-  lineNumber=LineNumber(whWin,pos);
-  if(lineNumber<0||lineNumber>=gWin[whWin]->nLineClickPart) return 0;
-  whatThisLinePointsTo=gWin[whWin]->tlm[lineNumber];
+  lineNumber=LineNumber(&inTri,whWin,pos);
+  if(lineNumber<0||lineNumber>=gWin[whWin]->nlcpwtto) {
+    PP"lineNumber=%d, whWin=%d, gWin[whWin]->nlcpwtto=%d.\n",
+    lineNumber,whWin,gWin[whWin]->nlcpwtto);
+    Say("You clicked too low."); return 0;
+  }
+  tlm=gWin[whWin]->tlm[lineNumber];
   switch(gWin[whWin]->win_type) {
-    case WIN_TYPE_PRIMARY: /* user clicked in primary window */
-      MakeWindow(whatThisLinePointsTo,WIN_TYPE_DATASET);
+    case WIN_TYPE_D_TREE: /* does not work yet */
+      Err(192); /* June 28 1995 see err(552) */
+      MakeWindow(tlm,WIN_TYPE_PRIMARY);
       SetHilite(HILITE_TURN_ON,whWin,lineNumber); /*BBB un-hilite when closed*/
       break;
-    case WIN_TYPE_DATASET: /* user clicked in dataset window, chose a table */
+    case WIN_TYPE_PRIMARY:
+      if(tlm<0) { Say(gMess0); return NULL; }
+      if(inTri) { ResetTheTriangles(tlm); return NULL; }
+      if(!ATable(tlm)) { Say(gBlurb7); return; }
+      if(!TableHasMoreThanZeroCols(tlm)) return;
+      if(!TableHasMoreThanZeroRows(tlm)) return;
       SetHilite(HILITE_TURN_ON,whWin,lineNumber); /*BBB un-hilite when closed*/
-      MakeWindow(whatThisLinePointsTo,WIN_TYPE_TABLE);
+      MakeWindow(tlm,WIN_TYPE_TABLE);
       break;
     case WIN_TYPE_TABLE: /* user has selected a column */
       SetHilite(HILITE_TOGGLE,whWin,lineNumber); /*tlmUsedInRunAverage()Etc*/
@@ -870,7 +1122,7 @@ size_t FirstRow(int whWin) {
     case 3: rv=gLast+1; break;
     default: Err(114);
   }
-  if(rv<0||rv>=gWin[whWin]->nRow) rv=0;
+  if(rv<0||rv>=gWin[whWin]->nRow) { rv=0; gLast=-1; }
   return rv;
 }
 size_t LastRow(myBool skipInit,int whWin) {
@@ -936,7 +1188,7 @@ void MakeWindow(int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
   if(type==WIN_TYPE_PRIMARY) {
     gMainWindow=XmCreateMainWindow(gAppShell,"0hhh",args,nn); mw=gMainWindow;
   } else {
-    if(type==WIN_TYPE_DATASET) strcpy(name,"Dataset Browser");
+    if(type==WIN_TYPE_PRIMARY) strcpy(name,"Dataset Browser");
     else if(type==WIN_TYPE_TABLE) strcpy(name,"Table Browser");
     else if(type==WIN_TYPE_GRAPHICS) strcpy(name,"Table Browser Graphics");
     else Err(134);
@@ -949,8 +1201,12 @@ void MakeWindow(int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
   gWin[gNWin]=malloc(sizeof(WINDOW_INFO)); if(gWin[gNWin]==0) Err(100);
   for(ii=MAX_LINES_CLICK_PART-1;ii>=0;ii--) gWin[gNWin]->isHilited[ii]=FALSE;
   gWin[gNWin]->win_type=type; ver=Column(mw);
+  gWin[gNWin]->width=COL;
+  gWin[gNWin]->whichRadio=0;
+  gWin[gNWin]->ncol=MCOL_INIT;
   switch(type) {
-    case WIN_TYPE_PRIMARY: /* make primary window (for choosing a dataset) */
+    case WIN_TYPE_D_TREE: /* make primary window (for choosing a dataset) */
+      Err(552); /* June 28 1995 */
       gWin[gNWin]->rowSel=ROW_SEL_NOT_USED;
       SetToPrimaryInfo(gWin[gNWin]->textTop,TEXT_SIZE_PART_1);
       DatasetList(&nLines,gWin[gNWin]->tlm,MAX_LINES_CLICK_PART,
@@ -959,14 +1215,16 @@ void MakeWindow(int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
       gWin[gNWin]->txtWidClick=TxtWid(ver,gWin[gNWin]->textClickPart,1,8,46);
       gWin[gNWin]->txtWidWrite=NULL;
       break;
-    case WIN_TYPE_DATASET: /* we are making a window for choosing a table */
+    case WIN_TYPE_PRIMARY: /* we are making a window for choosing a table */
+      if(++gNumDatasetWindows>1) Err(553); /*6-28-95*/
+      if(wh_gDs!=0) Err(554); /*6-28-95*/
       gWin[gNWin]->rowSel=ROW_SEL_NOT_USED;
       SetToDatasetInfo(wh_gDs,gWin[gNWin]->textTop,TEXT_SIZE_PART_1); /*BBB*/
-      TableList(header,wh_gDs,&nLines,gWin[gNWin]->tlm,MAX_LINES_CLICK_PART,
+      PrimaryList(header,wh_gDs,&nLines,gWin[gNWin]->tlm,MAX_LINES_CLICK_PART,
               gWin[gNWin]->textClickPart,TEXT_SIZE_PART_2);
-      gWin[gNWin]->txtWidTop=TxtWid(ver,gWin[gNWin]->textTop,0,5,43);
-      gWin[gNWin]->txtWidClickH=TxtWid(ver,header,0,1,43);
-      gWin[gNWin]->txtWidClick=TxtWid(ver,gWin[gNWin]->textClickPart,1,6,41);
+      /* gWin[gNWin]->txtWidTop=TxtWid(ver,gWin[gNWin]->textTop,0,5,T41+2); */
+      /* June 28 1995 gWin[gNWin]->txtWidClickH=TxtWid(ver,header,0,1,T41+2);*/
+      gWin[gNWin]->txtWidClick=TxtWid(ver,gWin[gNWin]->textClickPart,1,22,T41);
       gWin[gNWin]->txtWidWrite=NULL;
       break;
     case WIN_TYPE_TABLE: /* we are making a window for browsing a TAS table */
@@ -978,14 +1236,16 @@ void MakeWindow(int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
           gWin[gNWin]->textClickPart,TEXT_SIZE_PART_2,
           gWin[gNWin]->subscript);
       gWin[gNWin]->textOutput=malloc(TEXT_SIZE_PART_3);
-      if(gWin[gNWin]->textOutput==NULL) Err(118);
+      if(gWin[gNWin]->textOutput==NULL) {
+        PP"Table browser:  no more dynamic memory.\n"); Err(118);
+      }
       strcpy(gWin[gNWin]->textOutput,"");
       hor=Row(ver);
       gWin[gNWin]->txtWidTop=TxtWid(hor,gWin[gNWin]->textTop,0,7,30);
       MakeRowSelectionWidget(hor);
       gWin[gNWin]->txtWidClickH=TxtWid(ver,header,0,1,COL);
       gWin[gNWin]->txtWidClick=TxtWid(ver,gWin[gNWin]->textClickPart,1,6,COL);
-      gWin[gNWin]->txtWidWriteH=TxtWid(ver,"",0,1,47);
+      gWin[gNWin]->txtWidWriteH=TxtWid(ver,"",0,1,5); /* 47->5 */
       gWin[gNWin]->txtWidWrite=TxtWid(ver,gWin[gNWin]->textOutput,2,RW,COL);
       gWin[gNWin]->nRowsWritePart=RW; /* num Rows in Write part init */
       break;
@@ -995,41 +1255,66 @@ void MakeWindow(int wh_gDs,int type) { /* one of WIN_TYPE_XXX */
       break;
     default: Err(101);
   }
-  gWin[gNWin]->nLineClickPart=nLines; gWin[gNWin]->shell=ls;
+  gWin[gNWin]->nlcpwtto=nLines;
+  gWin[gNWin]->shell=ls;
   gNWin++; /*BBB chk init */
   if(type!=WIN_TYPE_PRIMARY) XtPopup(ls,XtGrabNone);
   if(type==WIN_TYPE_GRAPHICS) Clear();
 }
+void GetRidOfWindows(void) {
+  XtUnrealizeWidget(gAppShell);
+  XtDestroyWidget(gAppShell);
+}
 void DoXStuff(void) {
   ARGS
-  XEvent event; /* XButtonEvent *bev; */
+  XEvent event; static myBool haveInited=FALSE;
+  XButtonEvent *bev;
   Widget j1; caddr_t j2,j3; int zero=0;
   DoOnce2();
-  XtToolkitInitialize();
-  gAppCon=XtCreateApplicationContext();
-  gDisplay=XtOpenDisplay(gAppCon,NULL,"Dataset Catalog Browser",
+#ifdef STANDALONE
+  PP"Doing X Toolkit init.\n"); XtToolkitInitialize();
+#else
+  PP"Skipping X Toolkit init.\n");
+#endif
+  gBlurb2=FALSE; gBlurb1=FALSE;
+  PP"XtCreateApplicationContext()\n");
+  if(!haveInited) { gAppCon=XtCreateApplicationContext(); }
+  PP"XtOpenDisplay()\n");
+  if(!haveInited) {
+    gDisplay=XtOpenDisplay(gAppCon,NULL,"Dataset Catalog Browser",
       "1hhh",(XrmOptionDescRec*)NULL,0,&zero,NULL);
+  }
   if(!gDisplay) {
     PP"STAR Table Browser is an X-windows program.\n");
     PP"I can't open a display.\n");
-    PP"Have you set your DISPLAY env var?\n"); exit(2);
+    PP"Have you set your DISPLAY env var?\n"); gDone=7; return;
   }
   nn=0;
+  PP"XtAppCreateShell()\n");
   gAppShell=XtAppCreateShell("Dataset Catalog Browser",
-      "starbrowser",applicationShellWidgetClass,gDisplay,args,nn);
-  MakeWindow(-10,WIN_TYPE_PRIMARY); /* -10 not used */
+  "starbrowser",applicationShellWidgetClass,gDisplay,args,nn);
+  PP"MakeWindow()\n");
+  MakeWindow(0,WIN_TYPE_PRIMARY);
+  PrepareProgressPopup();
+  PP"XtRealizeWidget()\n");
+  haveInited=TRUE;
   XtRealizeWidget(gAppShell);
+  PP"main loop\n");
   for(;;) {
     XtAppNextEvent(gAppCon,&event);
-    /*---------------------------------------
     if(event.type==ButtonPress) {
-      bev=(XButtonEvent*)&event; * Vol1 p512 *
-      if(bev->button==1) {
-        PP"gFocus=%d. (%03d,%03d)  (%03d,%03d)\n",gFocus,
-        bev->x_root,bev->y_root, bev->x,bev->y);
+      bev=(XButtonEvent*)&event;
+      if(bev->button==2&&gLastWhWin>=0) {
+        if(gWin[gLastWhWin]->whichRadio==3) {
+          OneLnPerRowCB((Widget)2,(caddr_t)5,(caddr_t)14);
+        } else {
+          Say("This only works when we are doing\n\"Next 10\".");
+        }
       }
     }
-    ---------------------------------------*/
     XtDispatchEvent(&event);    /* Vol1 p509 */
+    if(gDone) break;
   }
 }
+        /* PP"gFocus=%d. (%03d,%03d)  (%03d,%03d)\n",gFocus,
+        bev->x_root,bev->y_root, bev->x,bev->y); */
