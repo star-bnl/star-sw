@@ -6,7 +6,7 @@ filterType:	StiRectangular2HitComboFilter
 
 //Hit Filter members
 deltaD:			2.
-deltaZ:			2.
+deltaZ:			5.
 
 //Track Seed Finder type
 seedFinderType:		StiTrackSeedFinder
