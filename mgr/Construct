@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.134 2003/09/16 20:51:17 jeromel Exp $
+# $Id: Construct,v 1.135 2003/09/17 17:50:27 jeromel Exp $
 use Env;
 use lib $ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -293,6 +293,7 @@ foreach my $dir( "pams", "StRoot" ,"StPiD" ) {
 		     $subsub_dir =~ m/^run/      ||
 		     $subsub_dir =~ m/^wrk$/     || 
 		     $subsub_dir =~ m/^example/  ||
+		     $subsub_dir =~ m/^include/  ||
 		     $subsub_dir =~ m/^macros/   ||
 		     $subsub_dir =~ m/^kumac/ ){
 		    #print "=== Skipping $subsub_dir in $subsub_DIR\n";
