@@ -570,7 +570,7 @@ ClassImp(StFilterABC)
 
 int StFilterABC::fgDial=0;
 //______________________________________________________________________________
-StFilterABC::StFilterABC(const char *name):TNamed(name,"")
+StFilterABC::StFilterABC(const char *name):TNamed(name,""),fActive(kTRUE)
 {
 #ifdef OLDDISPLAY
    char cbuf[200];
@@ -583,8 +583,6 @@ void StFilterABC::SetDefs()
 {
   for (int i=0; GetNams()[i]; i++) {GetPars()[i]=GetDefs()[i];}
 }
-
-
 //______________________________________________________________________________
 void   StFilterABC::Update()
 {
@@ -657,7 +655,7 @@ const float  *StFilterDef::GetDefs() const
   return defs;   
 }   
 //______________________________________________________________________________
-Int_t StFilterDef::Accept(StPoints3DABC *pnt) 
+Int_t StFilterDef::AcceptCB(StPoints3DABC *pnt) 
 {
    static TRandom rrr;
    float x,y,z,r2xy,phid,len,pt,q;
@@ -744,7 +742,7 @@ const float  *StMuDstFilterHelper::GetDefs() const
   return defs;   
 }
 //______________________________________________________________________________
-Int_t StMuDstFilterHelper::Accept(const StTrack* track) {
+Int_t StMuDstFilterHelper::AcceptCB(const StTrack* track) {
   
   float pCutHigh        = fpCutHigh;    // high momentum cut for RICH/Upsilon candidates 
   int   nHitsCutHighP   = int(fnHitsCutHighP);     // nHits cut for all tracks
@@ -759,6 +757,9 @@ Int_t StMuDstFilterHelper::Accept(const StTrack* track) {
   float dEdxFractionCutLow  = fdEdxFractionCutLow;
 
   int iret = 0;
+  int chargeOK = 0;
+  int dedxOK = 0;
+
 
   // next: take all tracks above fpCutHigh
   if (track->geometry()->momentum().magnitude() > pCutHigh
@@ -769,10 +770,6 @@ Int_t StMuDstFilterHelper::Accept(const StTrack* track) {
   else {
         if (track->detectorInfo()->numberOfPoints() >= nHitsCutLowP
 	    && track->geometry()->momentum().magnitude() > pCutLow) {
-
-	      int chargeOK = 0;
-	      int dedxOK = 0;
-
 	      // check charge
 	      if (chargeForLowP==0) 
 		    chargeOK = 1;
@@ -806,14 +803,12 @@ Int_t StMuDstFilterHelper::Accept(const StTrack* track) {
 	      // final answer
 	      iret = chargeOK * dedxOK;
 	} // if (pCutLow && nHitsCutLowP)
-
   }
-
   return iret;
 }
 
 //______________________________________________________________________________
-Int_t StMuDstFilterHelper::Accept(StPoints3DABC *pnt) 
+Int_t StMuDstFilterHelper::AcceptCB(StPoints3DABC *pnt) 
 {
    TObject *to;
    StTrack *trk;
@@ -821,5 +816,5 @@ Int_t StMuDstFilterHelper::Accept(StPoints3DABC *pnt)
    if (!to) 						return 1;
    if (!to->InheritsFrom(StTrack::Class()))		return 1;
    trk = (StTrack*)to;
-   return Accept(trk);
+   return AcceptCB(trk);
 }
