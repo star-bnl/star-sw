@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.3 1999/06/24 23:23:58 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.4 1999/06/25 22:57:58 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.4  1999/06/25 22:57:58  genevb
+// Fixed a small bug in MSG compatibiliti
+//
 // Revision 1.3  1999/06/24 23:23:58  genevb
 // Added message call for compatibility with old fortran code
 //
@@ -291,7 +294,7 @@ StMessageManager* StMessageManager::mInstance = 0;
 void type_of_call Message_(Char_t* mess, int lines, int id) {
   char* cptr = strchr(mess,'-');
   char* type = "I";
-  strncpy(type,cptr,1);
+  if (cptr) strncpy(type,++cptr,1);
   StMessageManager::Instance()->Message(mess,type);
 }
 //________________________________________
@@ -547,7 +550,7 @@ int StMessageManager::AddType(const Char_t* type, const Char_t* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.3 1999/06/24 23:23:58 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.4 1999/06/25 22:57:58 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

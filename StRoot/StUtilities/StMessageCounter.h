@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.h,v 1.2 1999/06/24 16:30:42 genevb Exp $
+// $Id: StMessageCounter.h,v 1.3 1999/06/25 22:57:57 genevb Exp $
 // $Log: StMessageCounter.h,v $
+// Revision 1.3  1999/06/25 22:57:57  genevb
+// Fixed a small bug in MSG compatibiliti
+//
 // Revision 1.2  1999/06/24 16:30:42  genevb
 // Fixed some memory leaks
 //
@@ -35,6 +38,7 @@ class StMessageCounter {
    StMessTypeList* messTypeList;
    const Char_t* limitMessage;
    Char_t* outMessage;
+   Int_t yesLimits;
 
  protected:
    StMessageCounter();
