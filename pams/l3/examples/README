@@ -19,7 +19,7 @@ DAQ format. The executable "sl3Daq" is generated with
 "/afs/rhic/star/users/yepes/try/cos_B1.dta".
 
 To generate these two executables the compilation flag -D SL3ROOT
-should NOT be used.
+should NOT be used. See inside the Makefile file.
 
 ROOT and Graphic Interface
 =========================
