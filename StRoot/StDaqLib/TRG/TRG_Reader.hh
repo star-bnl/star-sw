@@ -78,6 +78,7 @@ public:
   int HerbSwap2000();       //!
   int HerbSwap2003(char*);  //!
   int HerbSwap2004(char*);  //!
+  int HerbSwap2005(char*);  //!
   // void PrintAllTheData(FILE *ff);
   // void PrintDataCompact(FILE *ff);
   char *PrintHelp(char*,int);
@@ -104,5 +105,6 @@ private:
   void SanityCheck2000(int);               //!
   void SanityCheck2003(char*, int);        //!
   void SanityCheck2004(char*, int);        //!
+  void SanityCheck2005(char*, int);        //!
 };
 TRG_Reader *getTRGReader(EventReader *er);
