@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.26 1999/11/10 16:15:20 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.27 1999/11/10 20:45:03 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.27  1999/11/10 20:45:03  fisyak
+// Fix Xi maker, remove dependence tpc_daq->xin
+//
 // Revision 1.26  1999/11/10 16:15:20  fisyak
 // One more bug fix due to infile
 //
@@ -175,7 +178,7 @@ BfcItem BFC[] = {
   {"TSS"         ,"tpc_raw","tpc","tls,-trs"               ,"St_tss_Maker","St_tpc,St_tss_Maker","",kFALSE},  
   {"TRS"         ,"tpc_raw","tpc","scl,-tss,tpc_daq"                  ,"StTrsMaker","StTrsMaker","",kFALSE},
   {"MINIDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE}, 
-  {"tpc_daq"     ,"tpc_raw","tpc","xin"                     ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
+  {"tpc_daq"     ,"tpc_raw","tpc",""                        ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
   {"TFS"         ,""  ,"","tpc,-trs,-tss","",""     ,"use TFS       (no St_[tss_ and no Trs]Maker)",kFALSE},
   {"TCL"         ,"tpc_hits","tpc","tables,tls"            ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
   {"TPT"         ,"tpc_tracks","tpc","tables,tls"          ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
@@ -200,7 +203,7 @@ BfcItem BFC[] = {
   {"MATCH"     ,"match","global","SCL,tables,tls","StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"PRIMARY","primary","global","SCL,tables,tls","StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"V0"          ,"v0","global","SCL,tables,tls"    ,"StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"XI"          ,"xi","global","SCL,tables,tls"    ,"StXIMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"XI"          ,"xi","global","SCL,tables,tls"    ,"StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"KINK"        ,"kink","global","SCL,tables,tls","StKinkMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"DST"         ,"dst","global","SCL,tables,tls","St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"EVENT"       ,"StEventMaker","","tables,SCL","StEventMaker","St_Tables,StEvent,StEventMaker","",kFALSE},
