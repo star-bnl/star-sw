@@ -5,8 +5,11 @@
 //                                                                      //
 // StPrimaryMaker virtual base class for Maker                          //
 //                                                                      //
-// $Id: StPrimaryMaker.h,v 1.11 2001/09/07 23:18:16 genevb Exp $
+// $Id: StPrimaryMaker.h,v 1.12 2001/11/28 23:02:58 balewski Exp $
 // $Log: StPrimaryMaker.h,v $
+// Revision 1.12  2001/11/28 23:02:58  balewski
+// ppLMV uses only tracks matched to CTB slats
+//
 // Revision 1.11  2001/09/07 23:18:16  genevb
 // Additional vertex fixing from file capabilities
 //
@@ -54,9 +57,14 @@ class St_srs_srspar;
 class dst_vertex_st;
 class St_dst_track;
 class St_dst_vertex;
- 
+
+class CtbResponse;
+class MatchedTrk ;
+
 class StPrimaryMaker : public StMaker {
-  
+  friend CtbResponse;
+  friend MatchedTrk;
+ 
  private:
   Int_t            m_flag;       //
   St_evr_privert *m_evr_privert; //!  
@@ -72,15 +80,15 @@ class StPrimaryMaker : public StMaker {
   TArrayI m_fixedArrayE;
   Bool_t embedVerts;
   float zCutppLMV;
-  long ppLMV(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate);
-  long ppLMV3(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate);
-  TH1F *hppLMV1[16];
-  TH1F *hppLMV2[16];
+  float ppLMVparF[10];
+  int ppLMVparI[10];
+  long ppLMV4(MatchedTrk &, St_dst_track *trackAll,St_dst_vertex *vertex, Int_t mdate);
   TH1F *hPiFi[16];
  protected:
   virtual Int_t FixVertexFileRead(char* fname, Bool_t idMatch);
-  
-  
+  TH1F *hctb[16];
+  TH1F *hmtr[16];
+
  public: 
   StPrimaryMaker(const char *name="primary");
   virtual       ~StPrimaryMaker();
@@ -95,10 +103,11 @@ class StPrimaryMaker : public StMaker {
   virtual void  UnFixVertex();
   Int_t GetFixedSize() { return m_fixedArrayX.GetSize(); }
   Int_t GetMatchedSize() { return m_fixedArrayE.GetSize(); }
-  void ppLMVuse(float z)
-    { zCutppLMV=z; printf("ppLMVuse(z=%f cm) called\n", zCutppLMV=z);}
+  void ppLMVuse(int *parI, float *parF);
+  //  void ppLMVuse(float z)
+  //  { zCutppLMV=z; printf("ppLMVuse(z=%f cm) called\n", zCutppLMV=z);}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.11 2001/09/07 23:18:16 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.12 2001/11/28 23:02:58 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StPrimaryMaker, 0)   //StAF chain virtual base class for Makers
     };
