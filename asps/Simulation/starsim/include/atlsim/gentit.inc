@@ -1,9 +1,7 @@
-* $Id: gentit.inc,v 1.1.1.1 2004/01/12 23:49:41 potekhin Exp $
+* $Id: gentit.inc,v 1.2 2004/01/15 02:39:23 fisyak Exp $
 * $Log: gentit.inc,v $
-* Revision 1.1.1.1  2004/01/12 23:49:41  potekhin
-*
-* Revision 1.1  2001/12/14 23:11:39  nevski
-* upgrade atlsim library to atlsim main level
+* Revision 1.2  2004/01/15 02:39:23  fisyak
+* Bug fixes
 *
 * Revision 1.1  2001/02/27 10:15:56  nevski
 *  first working release
@@ -31,6 +29,6 @@
       Real            FHmin,FHmax,FHbin,hits
       Integer         nvl,numbv
       common /gensit/ Cset,Cdet, nvl(Nmh),numbv(Nmh),hits(Nmh),
-                      FHmin(Nmh),FHmax(Nmh),FHbin(Nmh),chit(Nmh)
+     >                FHmin(Nmh),FHmax(Nmh),FHbin(Nmh),chit(Nmh)
 *     - - - - - - - - -
 *
