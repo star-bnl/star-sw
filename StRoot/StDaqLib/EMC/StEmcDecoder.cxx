@@ -554,6 +554,7 @@ int StEmcDecoder::GetSmdRDO(int detector,int module, int eta, int sub, int& RDO,
     if(sub<1 || sub>15) return 0;
     RDO=SmdpRDO[module-1][eta-1][sub-1];
     index=SmdpIndex[module-1][eta-1][sub-1];
+    return 1;
   }
   return 0;
 }
