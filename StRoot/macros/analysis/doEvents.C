@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: doEvents.C,v 1.97 2004/08/17 15:58:59 perev Exp $
+// $Id: doEvents.C,v 1.98 2004/08/27 00:17:11 fine Exp $
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
 // what it does: reads .dst.root or .xdf files and then runs StEventMaker
@@ -246,6 +246,11 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const char **fileList, const ch
     displayMk->AddFilter(new StFilterDef("MainFilter"));
     displayMk->AddFilter(new StMuDstFilterHelper("MuL3Filter",kFALSE));
     displayMk->AddFilter(new StColorFilterHelper("Color schema",kFALSE));
+//  Check whether any Custom filter is present  
+    if (!gSystem->Load("StCustomFilter")) { 
+      displayMk->AddFilter(new StCustomFilter("Custom filter",kFALSE));
+    }
+    
   }
 
   // Initialize chain
@@ -459,6 +464,9 @@ int gcInit(const char *request)
 //____________________________________________________________________________
 //////////////////////////////////////////////////////////////////////////////
 // $Log: doEvents.C,v $
+// Revision 1.98  2004/08/27 00:17:11  fine
+// use one extr custom filter is present
+//
 // Revision 1.97  2004/08/17 15:58:59  perev
 // StMuAnalysisMaker loading added
 //
