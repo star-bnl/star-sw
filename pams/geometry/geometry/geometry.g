@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.42 2001/03/15 01:24:47 nevski Exp $
+* $Id: geometry.g,v 1.43 2001/03/16 00:32:06 nevski Exp $
 * $Log: geometry.g,v $
+* Revision 1.43  2001/03/16 00:32:06  nevski
+* switch on/off cooling water
+*
 * Revision 1.42  2001/03/15 01:24:47  nevski
 * default btof forced to no TOF tray
 *
@@ -35,7 +38,7 @@
 ***************************************************************************
    Implicit   none
    Logical    cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,upst,rich,
-              zcal,mfld,mwc,pse,tof,t25,t1,four,ems,alpipe,
+              zcal,mfld,mwc,pse,tof,t25,t1,four,ems,alpipe,svtw,
               on/.true./,off/.false./
    real       Par(1000),field,dcay(5),shift(2),wdm
    Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),nsup(2),
@@ -68,6 +71,7 @@ replace[;ON#{#;] with [
    {tof,t25,t1,ems,rich,alpipe}=off   "TimeOfFlight, EM calorimeter Sector"
    field=5; Nsi=7; Rv=2; Wfr=0; Itof=2; Wdm=6.0;       "defaults constants"
    y=2; " keep y=1 for backward compibility : limited x in mwc hits (old) " 
+   svtw=on; "water and water manifold  in svt"
    Commands=' '
 *
 * -------------------- select USERS configuration ------------------------
@@ -121,7 +125,8 @@ If LL>1
 
   on YEAR2000   { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder(4); 
 *                 corrected: MWC readout, RICH reconstructed position, no TOF 
-                  Field=2.5; {vpdd,ecal,ftpc}=off; {rich,ems}=on; nmod={12,0};
+                  Field=2.5; svtw=off;
+                  {vpdd,ecal,ftpc}=off; {rich,ems}=on; nmod={12,0};
                   y=2;  shift={87,0}; Itof=1; Rv=2; Wfr=7; Wdm=6.305;  Nsi=-3;}
 
   on YEAR_2A    { asymptotic STAR;                                            }
@@ -186,10 +191,11 @@ If LL>1
    Call AGSFLAG('SIMU',2)
 * - to switch off the fourth svt layer:        DETP SVTT SVTG.nlayer=6 
    If (LL>1) call AgDETP new ('SVTT')
-   if (svtt & Nsi < 7) call AgDETP add ('svtg.nlayer=',   Nsi,1)
-   if (svtt & Wfr > 0) call AgDETP add ('svtl(3).nwafer=',wfr,1)
-   if (svtt & wdm > 0) call AgDETP add ('swca.WaferWid=', wdm,1)
-   if (svtt & wdm > 0) call AgDETP add ('swca.WaferLen=', wdm,1)
+   if (svtt & Nsi < 7)   call AgDETP add ('svtg.nlayer=',   Nsi,1)
+   if (svtt & Wfr > 0)   call AgDETP add ('svtl(3).nwafer=',wfr,1)
+   if (svtt & wdm > 0)   call AgDETP add ('swca.WaferWid=', wdm,1)
+   if (svtt & wdm > 0)   call AgDETP add ('swca.WaferLen=', wdm,1)
+   if (svtt & .not.svtw) call AgDETP add ('swam.Len=',       0, 1)
    if (svtt) Call svttgeo
  
 * - MWC or pseudo padrows needed ? DETP TPCE TPCG(1).MWCread=0 TPRS(1).super=1
