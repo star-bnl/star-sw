@@ -27,7 +27,9 @@ C
      +,			      tppixelh, tppixel 
      +,			      tpmcpixh, tpmcpix 
      +,			      pad_planeh, pad_plane
-     +,			      detectorh, detector )
+     +,			      detectorh, detector,
+     +                        tpc_indexh, tpc_index,
+     +                        tpc_index_typeh, tpc_index_type)
 
       IMPLICIT NONE
 
@@ -99,6 +101,11 @@ C-----------------------------------------------------------------------
 #include "tpg_detector_pars.inc"
 #include "tpg_detector_st.inc"
 
+#include "tcl_tpc_index_pars.inc"
+#include "tcl_tpc_index_st.inc"
+
+#include "tcl_tpc_index_type_pars.inc"
+#include "tcl_tpc_index_type_st.inc"
 C-----------------------------------------------------------------------
       RECORD/ table_head_st/ tphith
       RECORD/ tphit_row_st/ tphit(*)
@@ -113,30 +120,36 @@ C-----------------------------------------------------------------------
       RECORD/ table_head_st/ tssparh
       RECORD/ tsspar_row_st/ tsspar(*)
 
-	RECORD/ table_head_st/ tpclusterh
-	RECORD/ tpcluster_row_st/ tpcluster(*)
+      RECORD/ table_head_st/ tpclusterh
+      RECORD/ tpcluster_row_st/ tpcluster(*)
 
-	RECORD/ table_head_st/ tpseqh
-	RECORD/ tpseq_row_st/ tpseq(*)
+      RECORD/ table_head_st/ tpseqh
+      RECORD/ tpseq_row_st/ tpseq(*)
+      
+      RECORD/ table_head_st/ tppixelh
+      RECORD/ tppixel_row_st/ tppixel(*)
+      
+      RECORD/ table_head_st/ tpmcpixh
+      RECORD/ tpmcpix_row_st/ tpmcpix(*)
+      
+      RECORD/ table_head_st/ pad_planeh
+      RECORD/ pad_plane_row_st/ pad_plane(*)
+      
+      RECORD/ table_head_st/ detectorh
+      RECORD/ detector_row_st/ detector(*)
 
-	RECORD/ table_head_st/ tppixelh
-	RECORD/ tppixel_row_st/ tppixel(*)
+      RECORD/ table_head_st/ tpc_indexh
+      RECORD/ tpc_index_row_st/ tpc_index(*)
 
-	RECORD/ table_head_st/ tpmcpixh
-	RECORD/ tpmcpix_row_st/ tpmcpix(*)
-
-	RECORD/ table_head_st/ pad_planeh
-	RECORD/ pad_plane_row_st/ pad_plane(*)
-
-	RECORD/ table_head_st/ detectorh
-	RECORD/ detector_row_st/ detector(*)
+      RECORD/ table_head_st/ tpc_index_typeh
+      RECORD/ tpc_index_type_row_st/ tpc_index_type(*)
 
 C-----------------------------------------------------------------------
 c
 c        functions
 c
 c        integer lochar        ! Obsolete
-         integer lenocc,icloc
+      integer lenocc,icloc
 c
 C-----------------------------------------------------------------------
 c
@@ -594,6 +607,16 @@ c     within 2 cm.)
 c     if closest>2.0) then there is no nearby reconstructed hit with same MCID
                         
                         if(closest.lt.max_sep_same_mcid)then
+c-------------------------------------------
+c store the correlated pair in the tpc_index table... -- ** new 24jul95 mal
+                           tpc_indexh.nok = tpc_indexh.nok+1
+                           tpc_index(tpc_indexh.nok).type = 
+     +                          tpc_index_type(1).tphit_mhitstpc
+                           tpc_index(tpc_indexh.nok).key1 =
+     +                          tphit(dtptr(idummy,jdummy)).id
+                           tpc_index(tpc_indexh.nok).key2 = 
+     +                          mhits_tpc(mcptr(idummy,i_incidence)).id
+c-------------------------------------------                           
                            used_recon_hit(jdummy)=.true.
                            vec(5) = tphit(dtptr(idummy,jdummy)).x
                            vec(6) = tphit(dtptr(idummy,jdummy)).y
@@ -826,6 +849,16 @@ c  kind of stuff can be tricky
                      ghost_is_saved(jdummy)=.true.
                      lost_is_found(i_maybe_lost)=.true.
                      ptr_ghost=maybe_ghost(jdummy,idummy)
+c-------------------------------------------
+c store the correlated pair in the tpc_index table... -- ** new 24jul95 mal
+                     tpc_indexh.nok = tpc_indexh.nok+1
+                     tpc_index(tpc_indexh.nok).type = 
+     +                    tpc_index_type(1).tphit_mhitstpc
+                     tpc_index(tpc_indexh.nok).key1 =
+     +                    tphit(ptr_ghost).id
+                     tpc_index(tpc_indexh.nok).key2 = 
+     +                    mhits_tpc(ptr_lost).id
+c-------------------------------------------
                      vec(5)=tphit(ptr_ghost).x
                      vec(6)=tphit(ptr_ghost).y
                      vec(7)=tphit(ptr_ghost).z
@@ -837,10 +870,10 @@ c  kind of stuff can be tricky
                      vec(14)=tphit(ptr_ghost).dx
                      vec(15)=tphit(ptr_ghost).dy
                      vec(16)=tphit(ptr_ghost).dz
-                     vec(19) = tphit(dtptr(idummy,jdummy)).phi
-                     vec(20) = tphit(dtptr(idummy,jdummy)).lambda
-                     vec(22) = tphit(dtptr(idummy,jdummy)).alpha
-                     vec(23) = real(tphit(dtptr(idummy,jdummy)).id)
+                     vec(19) = tphit(ptr_ghost).phi
+                     vec(20) = tphit(ptr_ghost).lambda
+                     vec(22) = tphit(ptr_ghost).alpha
+                     vec(23) = real(tphit(ptr_ghost).id)
 c find out how many mc tracks contributed to this hit's cluster...
                      nmc_found=0
                      iclstr=tphit(ptr_ghost).cluster
@@ -867,6 +900,15 @@ c find out how many mc tracks contributed to this hit's cluster...
  44                  continue   ! ok, done searching cluster...
                      vec(18) = real(nmc_found)
                   else          ! it really is lost...
+c-------------------------------------------
+c store the correlated pair in the tpc_index table... -- ** new 24jul95 mal
+                     tpc_indexh.nok = tpc_indexh.nok+1
+                     tpc_index(tpc_indexh.nok).type = 
+     +                    tpc_index_type(1).tphit_mhitstpc
+                     tpc_index(tpc_indexh.nok).key1 = 0
+                     tpc_index(tpc_indexh.nok).key2 = 
+     +                    mhits_tpc(mcptr(idummy,i_incidence)).id
+c-------------------------------------------
                      vec(5)=0.0
                      vec(6)=0.0
                      vec(7)=0.0
@@ -892,6 +934,15 @@ c
                do i_maybe_ghost=1,n_maybe_ghost(idummy)
                   if (.not.ghost_is_saved(i_maybe_ghost)) then
                      ptr_ghost=maybe_ghost(i_maybe_ghost,idummy)
+c-------------------------------------------
+c store the correlated pair in the tpc_index table... -- ** new 24jul95 mal
+                     tpc_indexh.nok = tpc_indexh.nok+1
+                     tpc_index(tpc_indexh.nok).type = 
+     +                    tpc_index_type(1).tphit_mhitstpc
+                     tpc_index(tpc_indexh.nok).key1 =
+     +                    tphit(dtptr(idummy,jdummy)).id
+                     tpc_index(tpc_indexh.nok).key2 = 0
+c-------------------------------------------
                      vec(1)=tphit(ptr_ghost).track
                      vec(2)=0.0
                      vec(3)=0.0

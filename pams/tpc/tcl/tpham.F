@@ -399,15 +399,12 @@ c     invec(1)=tpg_pad_to_x(tphit(tphith.nok).x,irow,isec)
               
               lstat=tpg_local_to_global(iisec,invec,outvec)
               
+              if (.not.lstat)
+     +             write(6,*)'TPHAM - GLOBAL TRANSFORM FAILED'
               
               tphit(tphith.nok).x = real(outvec(1))
               tphit(tphith.nok).y = real(outvec(2))
               tphit(tphith.nok).z = real(outvec(3))
-              
-              
-c     while we have these numbers, fill the lambda field of tphit,
-c     with the ansatz that the track comes from (0,0,0)
-              tphit(tphith.nok).lambda=sngl(datand(outvec(3)/invec(2)))
               
 c     
 c     zrf in units of time bins --> cm
@@ -436,7 +433,21 @@ c     for explanation of what follows, see bottom of notebook p95
      +             abs(tphit(tphith.nok).y)/rad
               tphit(tphith.nok).dy = dx_prime *
      +             abs(tphit(tphith.nok).x)/rad
+
               
+c     while we have these numbers, fill the lambda field of tphit,
+c     with the ansatz that the track comes from (0,0,0)
+              tphit(tphith.nok).lambda = 
+     +             - abs(atand(tphit(tphith.nok).z/rad)) ! lambda < 0 always
+
+c     and I *think* I can calcualte alpha as well
+              if (tand(tphit(tphith.nok).phi).ne.0.0) then
+                 tphit(tphith.nok).alpha =
+     +                atand(tand(tphit(tphith.nok).lambda)/
+     +                tand(tphit(tphith.nok).phi))
+              else
+                 tphit(tphith.nok).alpha=0.0
+              endif
               
 c     here, at the very end, I make up for the sins of Bob Hackenburg, who
 c     spurns convention, and makes the fast and slow simulator routes have
