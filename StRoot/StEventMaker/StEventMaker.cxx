@@ -1,5 +1,8 @@
-// $Id: StEventMaker.cxx,v 1.13 1999/07/15 13:57:02 perev Exp $
+// $Id: StEventMaker.cxx,v 1.14 1999/07/18 22:49:45 perev Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.14  1999/07/18 22:49:45  perev
+// Used StVecPtrVertex instead of StVertexCollection
+//
 // Revision 1.13  1999/07/15 13:57:02  perev
 // cleanup
 //
@@ -117,8 +120,11 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-// $Id: StEventMaker.cxx,v 1.13 1999/07/15 13:57:02 perev Exp $
+// $Id: StEventMaker.cxx,v 1.14 1999/07/18 22:49:45 perev Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.14  1999/07/18 22:49:45  perev
+// Used StVecPtrVertex instead of StVertexCollection
+//
 // Revision 1.13  1999/07/15 13:57:02  perev
 // cleanup
 //
@@ -247,7 +253,7 @@
 #endif
 #include "StEventMaker/StRootEventManager.hh"
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.13 1999/07/15 13:57:02 perev Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.14 1999/07/18 22:49:45 perev Exp $";
 #include "StEventManager.hh"
  * Revision 2.23  2000/05/22 21:53:41  ullrich
 const long detid_tpc = 1;
@@ -445,11 +451,7 @@ Int_t StEventMaker::Make(){
     // vertices are ordered
     
     // First, find the total number of vertices
-#ifdef TRANSIENT_STEVENT
-    StVertexCollection vtxPtr;
-#else
-    StVertexCollection vtxPtr("MyVertices");
-#endif
+    StVecPtrVertex vtxPtr;
     int indexCount = 0;                    // count vertices added to collection
     int vertexMatchIndex[20000];
     dst_vertex_st* dstVertex = theEventManager->returnTable_dst_vertex(nVertex);
@@ -698,9 +700,9 @@ const static int iTab[]={1,2, 1,3, 2,3, 1,4, 2,4, 3,4, 1,5, 2,5, 3,5, 4,5, 0};
 	  StTrackCollection* theTrackCollection = currentEvent->trackCollection();
 	  StGlobalTrack* theTrack = 0;
 	  if (itrk >=0) theTrack = (*theTrackCollection)[itrk];
-	  //	  if (! theTrack) {
-	  //	      cout << "StEventMaker: ERROR: Track find failed for ID " << itrk << endl;
-	  //	  } else {
+
+
+
 	      // Handle point depending on what detector it comes from
 	  idet = thePoint->hw_position%16;
 	  if (idet == detid_tpc) {
