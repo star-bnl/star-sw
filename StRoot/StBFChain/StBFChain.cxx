@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.389 2004/03/05 17:44:14 calderon Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.390 2004/03/10 06:01:07 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -72,8 +72,10 @@ Bfc_st BFC1[] = {
                                "year2003: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL",kFALSE},
   {"Y2003X" ,"","","db,detDb","","",
                   "y2003X: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL - Full B/E EMC",kFALSE},
-  {"Y2003a" ,"","","db,detDb","","",                                 "Who knows what that is (\? )",kFALSE},
-  {"Y2003b" ,"","","db,detDb","","",                                 "Who knows what that is (\? )",kFALSE},
+  {"Y2003a" ,"","","db,detDb","","",
+                                  "Year2003 geometry with corrected barrel EMC and SVT layer radii",kFALSE},
+  {"Y2003b" ,"","","db,detDb","","",      
+    "Year2003 geometry with corrected barrel EMC and SVT layer radii and extra material in the SVT",kFALSE},
   {"Y2004"  ,"","","db,detDb","","",                                 "Who knows what that is (\? )",kFALSE},
 
   {"Complete","","","db,detDb"            ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
@@ -254,7 +256,7 @@ Bfc_st BFC1[] = {
   {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
   {"ReadAll"     ,""  ,"","",""                                 ,"","Activate all branches to read",kFALSE},
 
-  {"pp"      ,""  ,"","ppOpt,SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","",
+  {"pp"          ,""  ,"","ppOpt,SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","",
                                                             "Use pp-like + makers *** OBSOLETE ***",kFALSE},
   {"ppOpt"       ,""  ,"","","","",                      "pp option without enabling special cases",kFALSE},
 
@@ -385,7 +387,7 @@ Bfc_st BFC1[] = {
   {"SvtSSim","SvtSSimu","svtChain","svtDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit"
                                   ,"StSvtSimulationMaker","StSvtSimulationMaker,StSvtCalibMaker","",kFALSE},
 
-  {"SvtOnlSeq","SvtOnlSeq","svtChain","svtDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit"
+  {"SvtOnlSeq"   ,"SvtOnlSeq","svtChain","svtDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit"
                                              ,"StSvtOnlineSeqAdjSimMaker","StSvtSimulationMaker","",kFALSE},
 
   {"srs"         ,"svt_hits","svtChain","svtDb,tls,Simu,SvtCL,-sss,-SvtSlowSim,StEvent"
@@ -397,14 +399,14 @@ Bfc_st BFC1[] = {
   {"SvtHit"      ,"svt_hits","svtChain","SvtCL"             ,"StSvtHitMaker","StSvtClusterMaker","",kFALSE},
   {"SvtVtx"      ,"SvtVtx","SvtChain",""           ,"StSvtVertexFinderMaker","StSvtClusterMaker","",kFALSE},
   {"stk"        ,"svt_tracks","svtChain","tls,SvtCL","St_stk_Maker","St_tpc,St_svt,St_stk_Maker","",kFALSE},
-  {"Est"      ,"","svtChain","globT"                 ,"StEstMaker","St_global,St_svt,StEstMaker","",kFALSE},
+  {"Est"         ,"","svtChain","globT"              ,"StEstMaker","St_global,St_svt,StEstMaker","",kFALSE},
 
 
-  {"Ftpc"        ,"ftpcChain"  ,"","ftpcT,fcl,fpt,Fglobal,Fprimary"         ,"StMaker","StChain","",kFALSE},
-  {"fss"    ,"ftpc_raw","ftpcChain","SCL,Simu",
+  {"Ftpc"      ,"ftpcChain"  ,"","ftpcT,fcl,fpt,Fglobal,Fprimary"           ,"StMaker","StChain","",kFALSE},
+  {"fss"       ,"ftpc_raw","ftpcChain","SCL,Simu",
                                     "StFtpcSlowSimMaker","StFtpcSlowSimMaker","FTPC Slow simulator",kFALSE},
-  {"Fcl"    ,"ftpc_hits","ftpcChain","SCL"
-   ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,StFtpcTrackMaker,StFtpcClusterMaker","FTPC cluster finder",kFALSE},
+  {"Fcl"       ,"ftpc_hits","ftpcChain","SCL","StFtpcClusterMaker",
+                    "StDaqLib,StDAQMaker,StFtpcTrackMaker,StFtpcClusterMaker","FTPC cluster finder",kFALSE},
 
 
   {"pmdRaw"    ,"pmdRaw","","pmdRead,pmdClust,pmdDis"          ,"StMaker","StChain","PMD Raw chain",kFALSE},
@@ -609,8 +611,10 @@ Bfc_st BFC2[] = {
                                "year2003: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL",kFALSE},
   {"Y2003X" ,"","","db,detDb","","",
                   "y2003X: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL - Full B/E EMC",kFALSE},
-  {"Y2003a" ,"","","db,detDb","","",                                 "Who knows what that is (\? )",kFALSE},
-  {"Y2003b" ,"","","db,detDb","","",                                 "Who knows what that is (\? )",kFALSE},
+  {"Y2003a" ,"","","db,detDb","","",
+                                  "Year2003 geometry with corrected barrel EMC and SVT layer radii",kFALSE},
+  {"Y2003b" ,"","","db,detDb","","",      
+    "Year2003 geometry with corrected barrel EMC and SVT layer radii and extra material in the SVT",kFALSE},
   {"Y2004"  ,"","","db,detDb","","",                                 "Who knows what that is (\? )",kFALSE},
 
   {"Complete","","","db,detDb"            ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
@@ -792,7 +796,7 @@ Bfc_st BFC2[] = {
   {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
   {"ReadAll"     ,""  ,"","",""                                 ,"","Activate all branches to read",kFALSE},
 
-  {"pp"      ,""  ,"","ppOpt,SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","",
+  {"pp"          ,""  ,"","ppOpt,SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","",
                                                        "Use pp-like + Spin makers *** OBSOLETE ***",kFALSE},
   {"ppOpt"       ,""  ,"","","","",                      "pp option without enabling special cases",kFALSE},
 
@@ -932,18 +936,18 @@ Bfc_st BFC2[] = {
   {"svt_daq"     ,"svt_raw","svtChain","SvtCL"                  ,"StSvtDaqMaker","StSvtDaqMaker","",kFALSE},
   {"SvtSeqAdj"   ,"SvtSeqAdj","svtChain","SvtCL"          ,"StSvtSeqAdjMaker","StSvtSeqAdjMaker","",kFALSE},
   {"SvtClu"      ,"SvtClu","svtChain","StEvent,SvtCL"   ,"StSvtClusterMaker","StSvtClusterMaker","",kFALSE},
-  {"SvtCluAnal" ,"SvtCluAnal","svtChain","SvtCL","StSvtClusterAnalysisMaker","StSvtClusterMaker","",kFALSE},
+  {"SvtCluAnal"  ,"SvtCluAnal","svtChain","SvtCL","StSvtClusterAnalysisMaker","StSvtClusterMaker","",kFALSE},
   {"SvtHit"      ,"svt_hits","svtChain","SvtCL"             ,"StSvtHitMaker","StSvtClusterMaker","",kFALSE},
   {"SvtVtx"      ,"SvtVtx","SvtChain",""           ,"StSvtVertexFinderMaker","StSvtClusterMaker","",kFALSE},
   {"stk"        ,"svt_tracks","svtChain","tls,SvtCL","St_stk_Maker","St_tpc,St_svt,St_stk_Maker","",kFALSE},
-  {"Est"      ,"","svtChain","globT"                 ,"StEstMaker","St_global,St_svt,StEstMaker","",kFALSE},
+  {"Est"         ,"","svtChain","globT"              ,"StEstMaker","St_global,St_svt,StEstMaker","",kFALSE},
 
 
-  {"Ftpc"        ,"ftpcChain"  ,"","ftpcT,fcl,fpt,Fglobal,Fprimary"         ,"StMaker","StChain","",kFALSE},
-  {"fss"    ,"ftpc_raw","ftpcChain","SCL,Simu",
+  {"Ftpc"      ,"ftpcChain"  ,"","ftpcT,fcl,fpt,Fglobal,Fprimary"           ,"StMaker","StChain","",kFALSE},
+  {"fss"       ,"ftpc_raw","ftpcChain","SCL,Simu",
                                     "StFtpcSlowSimMaker","StFtpcSlowSimMaker","FTPC Slow simulator",kFALSE},
-  {"Fcl"    ,"ftpc_hits","ftpcChain","SCL"
-               ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,StFtpcTrackMaker,StFtpcClusterMaker","FTPC cluster finder",kFALSE},
+  {"Fcl"       ,"ftpc_hits","ftpcChain","SCL","StFtpcClusterMaker",
+                    "StDaqLib,StDAQMaker,StFtpcTrackMaker,StFtpcClusterMaker","FTPC cluster finder",kFALSE},
 
   {"pmdRaw"    ,"pmdRaw","","pmdRead,pmdClust,pmdDis"          ,"StMaker","StChain","PMD Raw chain",kFALSE},
   {"pmd"       ,"pmd","","geant,pmdSim,pmdClust,pmdDis","StMaker","StChain", "PMD Simulation chain",kFALSE},
@@ -954,11 +958,11 @@ Bfc_st BFC2[] = {
   {"pmdDis"    ,"pmdDis","PmdClust","","StPmdDiscriminatorMaker",
                                                   "StPmdDiscriminatorMaker","Discriminator for PMD",kFALSE},
 
-  {"emcY2"             ,"emcY2","","geant,emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
+  {"emcY2"    ,"emcY2","","geant,emc_T,tpc_T,db,emcSim,PreEcl,epc","StMaker","StChain",
                             "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
   {"emcSim"   ,"emcRaw","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker",
                                                                            "New simulator for BEMC",kFALSE},
-  {"emcDY2","",""                    ,"db,StEvent,EmcUtil,PreEcl,Epc","StEmcADCtoEMaker","StEmcADCtoEMaker",
+  {"emcDY2"   ,"",""                 ,"db,StEvent,EmcUtil,PreEcl,Epc","StEmcADCtoEMaker","StEmcADCtoEMaker",
                                                                                     "EMC raw chain",kFALSE},
 
 
@@ -1124,7 +1128,7 @@ ClassImp(StBFChain)
 StBFChain::StBFChain(const char *name, const Bool_t UseOwnHeader):
   StChain(name,UseOwnHeader),fXdfOut(0),fTFile(0),fSetFiles(0),fInFile(0),fFileOut(0),fXdfFile(0) {
 
-  (void) printf("StBFChain :: Default Constructor called.\n");
+  gMessMgr->Info("StBFChain::StBFChain Default Constructor called.");
   fBFC = new Bfc_st[NoChainOptions1];
   memcpy (fBFC, &BFC1, sizeof (BFC1));
   NoChainOptions = NoChainOptions1;
@@ -1147,14 +1151,14 @@ StBFChain::StBFChain(Int_t mode):
   StChain("bfc",kFALSE),fXdfOut(0),fTFile(0),fSetFiles(0),fInFile(0),fFileOut(0),fXdfFile(0) {
 
   if(mode == 2){
-    (void) printf("StBFChain :: Special Constructor called using chain-setup 2\n");
+    gMessMgr->Info("StBFChain::StBFChain Special Constructor called using chain-setup 2");
     fBFC = new Bfc_st[NoChainOptions2];
     memcpy (fBFC, &BFC2, sizeof (BFC2));
     FDate  = FTime  = 0;
     FDateS = FTimeS = 0;
     NoChainOptions= NoChainOptions2;
   } else {
-    (void) printf("StBFChain :: Special Constructor called using chain-setup 1\n");
+    gMessMgr->Info("StBFChain::StBFChain Special Constructor called using chain-setup 1");
     fBFC = new Bfc_st[NoChainOptions1];
     memcpy (fBFC, &BFC1, sizeof (BFC1));
     FDate  = FTime  = 0;
@@ -1315,9 +1319,9 @@ Int_t StBFChain::Instantiate()
 	    if (GetOption("big"))    NwGeant = 20;
 	    if (GetOption("bigbig")) NwGeant = 40;
 	    Int_t IwType = 0;
-	    if (GetOption("Higz"))  IwType = 1;
+	    if (GetOption("Higz"))   IwType = 1;
 	    Int_t NwPaw = 0;
-	    if (GetOption("paw")) NwPaw  = 2;
+	    if (GetOption("paw"))    NwPaw  = 2;
 	    geantMk = new St_geant_Maker("geant",NwGeant,NwPaw,IwType);
 	    if (geantMk) {
 	      strcpy (fBFC[i].Name,(Char_t *) geantMk->GetName());
@@ -1391,8 +1395,8 @@ Int_t StBFChain::Instantiate()
 	      pars->useFtpc=kTRUE;
 	      pars->activeFtpc=kTRUE;
 	    }
-	    cout << "Sti Parameters (seen in bfc):" << endl;
-	    cout << *pars << endl;
+	    cout << "Sti Parameters (seen in bfc):" << endl 
+		 << *pars << endl;
 
 	    if (GetOption("Simu")) tk->setMcEnabled(kTRUE);
 	  }
@@ -1524,10 +1528,13 @@ Int_t StBFChain::Instantiate()
 	    // bit 0  =   do GAIN_CORRECTION
 	    // bit 1  =   do NOISE_ELIM
 	    // bit 2  =   do ASIC_THRESHOLDS
-	    if ( GetOption("fcf")   ){
+	    // WARNING Option FCF is checked in StDAQMaker
+	    if ( GetOption("fcf")   ){   
+	      tcpdaqMk->SetSequenceMerging(0);
 	      if ( GetOption("Trs")   )  tcpdaqMk->SetCorrection(0x5); // ASIC + GAIN
 	      else                       tcpdaqMk->SetCorrection(0x0); // fcf && ! trs => no corrections
 	    } else {
+	      tcpdaqMk->SetSequenceMerging(1);
 	      tcpdaqMk->SetCorrection(0x7);
 	    }
 
@@ -1580,7 +1587,7 @@ Int_t StBFChain::Instantiate()
 	      if (GetOption("LaserTest")) mode += 2;
 	      if (GetOption("PulserSvt")) mode += 4;
 	    } else {
-	      printf("QAInfo: 'alltrigger' option on. All others ignored\n");
+	      gMessMgr->QAInfo() << "'alltrigger' option on. All others ignored" << endm;
 	    }
 	    if (mode) mk->SetMode(mode);
 	  }
@@ -1604,14 +1611,14 @@ Int_t StBFChain::Instantiate()
 	  if (maker == "StHitFilterMaker"){
 	    if( GetOption("SvtHitFilt")){
 	      // Filter out SVT bad hits, TPC hits not on tracks and all hits if fabs(ZVert)>30
-	      printf("QAInfo: SVT hit filter is ON\n");
+	      gMessMgr->QAInfo() << "SVT hit filter is ON" << endm;
 	      StHitFilterMaker *Filtmk=(StHitFilterMaker*)mk;
 	      Filtmk->setPtLowerCut(-99.);
 	      Filtmk->setPtUpperCut(-99.);
 	      Filtmk->setAbsEtaCut(-99);
 	      Filtmk->setAbsZVertCut(30);
 	    } else {
-	      printf("QAInfo: Default hit filtering is ON\n");
+	      gMessMgr->QAInfo() << "Default hit filtering is ON" << endm;
 	    }
 	  }
 
@@ -1627,9 +1634,10 @@ Int_t StBFChain::Instantiate()
 	}
         else status = kStErr;
 	if (status != kStOk && i != iFail) {
-	  printf("QAInfo: ======================================\n");
-	  printf("QAInfo: problem with Instantiation of %s\n",fBFC[i].Maker);
-	  printf("QAInfo: ======================================\n");
+	  gMessMgr->QAInfo()
+	    << " ======================================\n" 
+	    << " problem with Instantiation of "         << fBFC[i].Maker << "\n"
+	    << " ======================================" << endm;
 	  iFail = i;
 	}
       }
@@ -1853,9 +1861,9 @@ void StBFChain::SetFlags(const Char_t *Chain)
   }
   TString STAR_VERSION("$STAR_VERSION");
   gSystem->ExpandPathName(STAR_VERSION);
-  printf ("==============================================\n");
-  gMessMgr->QAInfo() << "============= You are in " << STAR_VERSION.Data() << " ===============" << endm;
   TString tChain(Chain);
+  gMessMgr->QAInfo() << "=============================================="  << endm;
+  gMessMgr->QAInfo() << "============= You are in " << STAR_VERSION.Data() << " ===============" << endm;
   gMessMgr->QAInfo() << "Requested chain " << GetName() << " is :\t" << tChain.Data() << endm;
   TObjArray Opts;
   ParseString(tChain,Opts);
@@ -1928,8 +1936,6 @@ void StBFChain::SetFlags(const Char_t *Chain)
     if (GetOption(k)) {
       (void) printf("QAInfo: ================== %4d %15s\tis ON \t: %s\n",
 		    k, (char *) fBFC[k].Key, (char *) fBFC[k].Comment);
-      //      gMessMgr->QAInfo() << "================== " << k << "\t"
-      //		 << fBFC[k].Key << "\tis ON \t:" << fBFC[k].Comment << endm;
       Bfc->AddAt(&fBFC[k]);
     }
   }
@@ -2234,7 +2240,7 @@ void StBFChain::SetDbOptions(){
 	else if (GetOption("Y2003b"))db->SetDateTime("y2003b");
 	else if (GetOption("Y2003X"))db->SetDateTime("y2003x");
 	else if (GetOption("Y2004"))db->SetDateTime("y2004");
-	else (void) printf("QAInfo: StBFChain::SetDbOptions() Chain has not set a time-stamp\n");
+	else gMessMgr->QAInfo() << "StBFChain::SetDbOptions() Chain has not set a time-stamp" << endm;
       }
 
 
@@ -2247,8 +2253,8 @@ void StBFChain::SetDbOptions(){
       // MaxEntry over-write
       if (Idate) {
 	db->SetMaxEntryTime(Idate,Itime);
-	cout << "\tSet DataBase max entry time " << Idate << "/" << Itime
-	     << " for St_db_Maker(\"" << db->GetName() <<"\")" << endl;
+	gMessMgr->Info() << "\tSet DataBase max entry time " << Idate << "/" << Itime
+			 << " for St_db_Maker(\"" << db->GetName() <<"\")" << endm;
       }
     } // check if maker is St_db_Maker
   }   // loop over makers
