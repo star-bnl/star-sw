@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.20 2003/02/19 14:51:46 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.21 2003/02/27 22:53:12 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.21  2003/02/27 22:53:12  jcs
+// make default temperature values from database available to the FTPC slow simulator (needed for embedding)
+//
 // Revision 1.20  2003/02/19 14:51:46  jcs
 // get default temperatures from database
 //
@@ -126,7 +129,6 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   } else {
     gMessMgr->Message( " No data in table class St_ftpcAsicMap","E");
   }
-cout<<"StFtpcClusterMaker: mEastIsInverted = "<<mEastIsInverted<<" mAsic2EastNotInverted = "<<mAsic2EastNotInverted<<endl;
 
   //  just copy EField table start to pointer
   ftpcEField_st* efieldTable = (ftpcEField_st*)efield->GetTable();
@@ -279,7 +281,6 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   } else {
     gMessMgr->Message( " No data in table class St_ftpcAsicMap","E");
   }
-cout<<"StFtpcSlowSimMaker: mEastIsInverted = "<<mEastIsInverted<<" mAsic2EastNotInverted = "<<mAsic2EastNotInverted<<endl;
 
 
   //  just copy EField table start to pointer
@@ -335,6 +336,9 @@ cout<<"StFtpcSlowSimMaker: mEastIsInverted = "<<mEastIsInverted<<" mAsic2EastNot
    mBaseTemperature        = gasTable->baseTemperature;
    mBasePressure           = gasTable->basePressure;
    mPressureOffset         = gasTable->pressureOffset;
+   mTemperatureDifference  = gasTable->temperatureDifference;
+   mDefaultTemperatureWest = gasTable->defaultTemperatureWest;
+   mDefaultTemperatureEast = gasTable->defaultTemperatureEast;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcGas","E");
   }
