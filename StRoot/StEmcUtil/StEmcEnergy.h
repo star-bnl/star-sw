@@ -48,6 +48,7 @@ class StEmcEnergy : public TObject
     	Float_t   getChHadDepEt();                  ///< Return full charged hadronic transverse energy on EMC
     	Float_t   getQ0HadDepEt();                  ///< Return full neutral hadronic transverse energy on EMC
     	Float_t   getEmEt();                        ///< Return full eletromagnetic transverse energy on EMC
+        Int_t   getNTracks();                     ///< Return the number of tracks used to subtract hadronic background
  StEmcFilter*   getFilter();                      ///< Return EmcFilter being used
             
     	Float_t   getChHadEnergyInBtow(UInt_t);     ///< Return Charged hadronic energy in one tower               
@@ -89,7 +90,8 @@ class StEmcEnergy : public TObject
        Float_t   mBemcEt;
        Float_t   mChHadEt;
        Float_t   mQ0HadEt;
-       Float_t   mEmEt;            
+       Float_t   mEmEt;   
+			   Int_t   mNTracks;         
             
        Float_t   mMcChHadEnergyInBtow[4800];
        
@@ -120,6 +122,7 @@ inline Float_t StEmcEnergy::getBemcEt(){ return mBemcEt; }
 inline Float_t StEmcEnergy::getChHadDepEt(){ return mChHadEt; }
 inline Float_t StEmcEnergy::getQ0HadDepEt(){ return mQ0HadEt; }
 inline Float_t StEmcEnergy::getEmEt(){ return mEmEt; }
+inline   Int_t StEmcEnergy::getNTracks(){ return mNTracks; }
 
 inline void    StEmcEnergy::setEval( evalMetd metd) { mEvalMetd = metd; }
 inline void    StEmcEnergy::setEvent(StEvent* event){ mEvent = event; }
