@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.35 1999/11/16 14:40:15 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.36 1999/11/21 00:56:58 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -178,7 +178,7 @@ Int_t StEventDisplayMaker::BuildGeometry()
   St_DataSetIter volume(m_Hall,0);
 // ---  Create "standard" TPC and SVT views ----
   St_Node *sector = 0;
-  const Char_t *volueNames[] = {"TPSS","SLDI","SFMD"};
+  const Char_t *volueNames[] = {"TPSS","SLDI","SFDM"};
   const Int_t lvolueNames = sizeof(volueNames)/sizeof(Char_t *);
   while ( (sector = ( St_Node *)volume()) ){
     Bool_t found = kFALSE;
@@ -966,6 +966,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 // --  end of filter list --
 
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.36  1999/11/21 00:56:58  fine
+// SVT volume name typo fixed
+//
 // Revision 1.35  1999/11/16 14:40:15  fine
 // reference type has been introduced
 //
