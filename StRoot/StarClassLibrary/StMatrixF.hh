@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrixF.hh,v 1.8 2003/09/02 17:59:35 perev Exp $
+ * $Id: StMatrixF.hh,v 1.9 2003/10/07 02:52:20 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StMatrixF.hh,v $
+ * Revision 1.9  2003/10/07 02:52:20  perev
+ * Cleanup for Insure, no bugs
+ *
  * Revision 1.8  2003/09/02 17:59:35  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -57,6 +60,7 @@ class StMatrixD;
 
 class StMatrixF
 {
+friend class StMatrixD;
 public:
     StMatrixF();
     StMatrixF(size_t p, size_t q, size_t init=0);
