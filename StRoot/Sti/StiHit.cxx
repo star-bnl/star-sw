@@ -168,8 +168,7 @@ void StiHit::setGlobal(const StiDetector * detector,
       mrefangle = placement->getNormalRefAngle();
       mposition = placement->getLayerRadius();
       mx =  detector->_cos*gx + detector->_sin*gy;
-      my = -detector->_sin*gx + detector->_cos*gy - placement->getNormalYoffset();
-      //my = -detector->_sin*gx + detector->_cos*gy + placement->getNormalYoffset();
+      my = -detector->_sin*gx + detector->_cos*gy;
     }
   else
     {
