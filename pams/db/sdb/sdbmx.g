@@ -60,10 +60,7 @@ C.....
 
   begin
 
-   prin1 
-   (' Module sdbm - Simple Data Base Manager')
-   prin2 first
-   (' *** SDBM: first=',l)
+   prin1;   (' Module sdbm - Simple Data Base Manager')
 
 ********************* Initialization part **********************
 
