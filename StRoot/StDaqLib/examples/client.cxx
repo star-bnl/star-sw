@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: client.cxx,v 1.9 2000/06/08 12:45:10 jml Exp $
+ * $Id: client.cxx,v 1.10 2000/07/03 16:03:17 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: sample top-level code sould be used as a tutorial
@@ -14,6 +14,9 @@
  *
  ***************************************************************************
  * $Log: client.cxx,v $
+ * Revision 1.10  2000/07/03 16:03:17  ward
+ * Minor improvements to client.cxx, eg a usage message.
+ *
  * Revision 1.9  2000/06/08 12:45:10  jml
  * Added <assert.h> to fix compile error in offline
  *
@@ -119,9 +122,11 @@ int main(int argc, char *argv[])
 
   if (argc==3) offset = atol(argv[2]);
  
-  if(argc == 1)
+  if(argc<2)
   {
-    filename = "/scratch/2sbWith2Rcv_from_Tape.dat";
+    printf("Usage:   %s file.daq [offset]\n",argv[0]);
+    printf("Example: %s /scratch/2sbWith2Rcv_from_Tape.dat\n",argv[0]);
+    exit(2);
   }
   else
   {
@@ -144,9 +149,11 @@ int main(int argc, char *argv[])
       EventReader *er = getEventReader(fd,offset,(const char *)logfile,1);
       if(!er) 
 	{
+          cout << "============================================" << endl;
 	  cout << "Error creating ER" << endl;
+          cout << "This may be simply the end of the .daq file." << endl;
 	  close(fd);
-	  assert(0);
+	  assert(0); // This may be simply the end of the .daq file.
 	}
 
       er->printEventInfo();
