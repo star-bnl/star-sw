@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.1 2001/02/23 00:57:53 posk Exp $
+// $Id: doFlowEvents.C,v 1.2 2001/05/14 23:15:20 posk Exp $
 //
 // Description: 
 // Chain to read events from microDST files into StFlowEvent and analyze.
@@ -32,6 +32,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.2  2001/05/14 23:15:20  posk
+// Lower pt uppers for centralities 1 and 2.
+//
 // Revision 1.1  2001/02/23 00:57:53  posk
 // NA49 version of STAR software.
 //
@@ -99,7 +102,6 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
   char makerName[30];
   StFlowSelection flowSelect;
   // particles:  pi+, pi-, pi, e-, e+, pbar, proton
-  //flowSelect->SetPid("p");                    // for all charged particles
   flowSelect->SetPidPart("pi");               // for parts. wrt plane
   //flowSelect->SetPtPart(0., 1.);              // for parts. wrt plane
   //flowSelect->SetPPart(0.15, 5.);             // for parts. wrt plane
@@ -125,7 +127,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
     goto END;
   }
   
-  if (makerName[0] =='\0') {
+  if (makerName[0]=='\0') {
     StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker();
   } else {
     sprintf(makerName, "FlowAnalysis");
@@ -153,11 +155,11 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
   //
 
   // Set the event cuts
-//    StFlowCutEvent::SetCent(1, 1);
+//   StFlowCutEvent::SetCent(4, 4);
 //    StFlowCutEvent::SetMult(10, 10000);
 //    StFlowCutEvent::SetVertexX(-3.6, 3.6);
 //    StFlowCutEvent::SetVertexY(-3.5, 3.5);
-//    StFlowCutEvent::SetVertexZ(-580., -578.);
+//    StFlowCutEvent::SetVertexZ(-579.8, -578.);
 //    StFlowCutEvent::SetEtaSym(0., 0.);
   
   // Set the track cuts
@@ -183,21 +185,25 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
 //   StFlowEvent::SetYCut(0., 0., 1, 1); // harmonic 2, selection 2
 //   StFlowEvent::SetYCut(0., 0., 2, 1); // harmonic 3, selection 2
 
-//   StFlowEvent::SetPtCut(0., 2., 0, 0);
-//   StFlowEvent::SetPtCut(0., 2., 1, 0);
+//    StFlowEvent::SetPtCut(0.05, 1., 0, 0);
+//    StFlowEvent::SetPtCut(0.05, 1., 1, 0);
 //   StFlowEvent::SetPtCut(0., 2., 2, 0);
-//   StFlowEvent::SetPtCut(0., 2., 0, 1);
-//   StFlowEvent::SetPtCut(0., 2., 1, 1);
+//    StFlowEvent::SetPtCut(0.05, 1., 0, 1);
+//    StFlowEvent::SetPtCut(0.05, 1., 1, 1);
 //   StFlowEvent::SetPtCut(0., 2., 2, 1);
 
-//   StFlowEvent::SetMeanSinCosCut(-0.1, 0.1);
+//   StFlowEvent::SetMeanSinCosCut(-0.15, 0.15);
 
-   // Use weights in the event plane calcualtion
-//   StFlowEvent::SetPtWgt();
-//   StFlowEvent::SetYWgt();
+  // Use weights in the event plane calcualtion
+  StFlowEvent::SetPtWgt();
+  StFlowEvent::SetYWgt();
 
-   //Make striped subevents
+  // Make striped subevents
   //StFlowEvent::SetStripes(2);  // either 1 or 2
+
+  // Particles for the event plane
+  // particles:  pi+, pi-, pi, e-, e+, pbar, proton
+  // StFlowEvent::SetPid("p");                    // for all charged particles
 
   // Use probability PID method
   //  StFlowEvent::SetProbPid();
@@ -266,9 +272,9 @@ void doFlowEvents(const Int_t nevents)
   //Char_t* fileExt="*muDST.root";
 
   //LBL
-  Char_t* filePath="/auto/pdsfdv04/na49/160GeV/std+";
-  //Char_t* filePath="/auto/pdsfdv04/na49/160GeV/std-";
-  //Char_t* filePath="/auto/pdsfdv04/na49/160GeV/std+cen";
+  Char_t* filePath="/auto/pdsfdv03/na49/160GeV/std+";
+  //Char_t* filePath="/auto/pdsfdv03/na49/160GeV/std-";
+  //Char_t* filePath="/auto/pdsfdv03/na49/160GeV/std+cen";
   Char_t* fileExt="*muDST.root";
 
   doFlowEvents(nevents, filePath, fileExt);
