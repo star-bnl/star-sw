@@ -1,5 +1,8 @@
-// $Id: St_ems_Maker.cxx,v 1.18 2000/06/23 19:57:06 fisyak Exp $
+// $Id: St_ems_Maker.cxx,v 1.19 2001/02/02 22:07:47 pavlinov Exp $
 // $Log: St_ems_Maker.cxx,v $
+// Revision 1.19  2001/02/02 22:07:47  pavlinov
+// added method for getting pointer to StEmcCollection directly
+//
 // Revision 1.18  2000/06/23 19:57:06  fisyak
 // remove access to params
 //
@@ -301,13 +304,12 @@ Int_t St_ems_Maker::Make(){
 //_____________________________________________________________________________
 Int_t St_ems_Maker::fillStEvent(){
   unsigned int  i, j, k;
-  
 
   //Create StEmcHitCollection  
-  StEmcCollection* emc = new StEmcCollection();
+  mEmcCollection = new StEmcCollection();
 
   //Add it to dataset as ObjectSet 
-  AddData(new St_ObjectSet("EmcCollection" , emc));
+  AddData(new St_ObjectSet("EmcCollection" , mEmcCollection));
 
   //Loop over detectors
   int nModule[8] = {120, 120, 120, 120, 24, 24, 24, 24}; // temp.->database
@@ -322,7 +324,7 @@ Int_t St_ems_Maker::fillStEvent(){
     if(table){
       //Create StEmcDetector
       StEmcDetector* detector = new StEmcDetector(id, nModule[i]);
-      emc->setDetector(detector);
+       mEmcCollection->setDetector(detector);
       //Get table
       emc_hits_st *t = table->GetTable();
       //Create StEmcHit

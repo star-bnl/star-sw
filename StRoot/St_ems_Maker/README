@@ -10,6 +10,8 @@ dep_e_toadc and emc_adc_sim. Same as chain 'ems' in bfc.kumac.
 
 Modification history (reverse chronological)
 ====================
+02-Feb 2001 A.Pavlinov
+- added staf for getting pointer to StEmcCollection directly.
 
 01-Jul 1999  A. Pavlinov
 - added QA histograms and new switches for control of maker  
