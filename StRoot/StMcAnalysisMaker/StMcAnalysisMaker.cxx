@@ -1,7 +1,12 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.8 1999/09/28 15:03:29 didenko Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.9 1999/10/01 14:11:15 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.9  1999/10/01 14:11:15  calderon
+ * Chech to see whether StEvent has primary vertex
+ * before trying to use it.  If no primary vertex is
+ * found, assume its position is (0,0,0).
+ *
  * Revision 1.8  1999/09/28 15:03:29  didenko
  * Cleanup dependencies on non existing h-files
  *
@@ -97,8 +102,8 @@
 // Define data Members for the histograms
 const Int_t   StMcAnalysisMaker::mNumDeltaX = 50;
 const Int_t   StMcAnalysisMaker::mNumDeltaZ = 50;
-const Float_t StMcAnalysisMaker::mMinDeltaX = -0.12;
-const Float_t StMcAnalysisMaker::mMaxDeltaX =  0.12;
+const Float_t StMcAnalysisMaker::mMinDeltaX = -0.52;
+const Float_t StMcAnalysisMaker::mMaxDeltaX =  0.52;
 const Float_t StMcAnalysisMaker::mMinDeltaZ = -0.24;
 const Float_t StMcAnalysisMaker::mMaxDeltaZ =  0.24;
 
@@ -159,7 +164,7 @@ Int_t StMcAnalysisMaker::Init()
     SetZones();  // This is my method to set the zones for the canvas.
 
     // Book Histograms Here so they can be found and deleted by Victor's chain (I hope).
-    mHitResolution = new TH2F("Hit Resolution using Map","Delta X Vs Delta Z for Hits",
+    mHitResolution = new TH2F("Hit Resolution using Map","Delta Z Vs Delta X for Hits",
 			     mNumDeltaX,mMinDeltaX,mMaxDeltaX,mNumDeltaZ,mMinDeltaZ,mMaxDeltaZ);
     mHitResolution->SetXTitle("Delta X (cm)");
     mHitResolution->SetYTitle("Delta Z (cm)");
@@ -213,8 +218,19 @@ Int_t StMcAnalysisMaker::Make()
     //          Map is not needed for this, but it's a good check,
     //          tracking will not be good if primary vertex was not well placed.
 
-    cout << "Position of Primary Vertex from StEvent:" << endl;
-    cout << rEvent->primaryVertex()->position() << endl;
+    // First check whether the Primary Vertex is there at all.
+    StThreeVectorF VertexPos(0,0,0);
+    if (rEvent->primaryVertex()) {
+	VertexPos = rEvent->primaryVertex()->position();
+	cout << "Position of Primary Vertex from StEvent:" << endl;
+	cout << VertexPos << endl;
+    }
+    else {
+	cout << "----------- WARNING ------------" << endl;
+	cout << "No primary vertex from StEvent!!" << endl;
+	cout << "Assume it is at (0,0,0)         " << endl;
+	
+    }
     cout << "Position of Primary Vertex from StMcEvent:" << endl;
     cout << mEvent->primaryVertex()->position() << endl;
     
@@ -256,7 +272,7 @@ Int_t StMcAnalysisMaker::Make()
     StTpcHit* keyHit;
     StTpcHitCollection* recHits = rEvent->tpcHitCollection();
      
-	    
+    
     // Loop over Rec Hits
     for (StTpcHitIterator iter = recHits->begin(); iter != recHits->end(); iter++) {
 	keyHit = *iter;
@@ -273,18 +289,18 @@ Int_t StMcAnalysisMaker::Make()
     } // Rec hits loop
     
     keyHit = 0;
-
+    
     // Example: look at the magnitude of the momentum of
     //          the MC track associated with first track in track Collection
     
     StGlobalTrack*     firstTrack;
     firstTrack = *(rEvent->trackCollection()->begin());
-    
     pair<trackMapIter,trackMapIter> trackBounds = theTrackMap->equal_range(firstTrack);
-    
     // Calculate the momentum of the track at the start vertex and compare it to MC Track
     StPhysicalHelixD& helix = (*trackBounds.first).first->helix();
-    double s = helix.pathLength(firstTrack->startVertex()->position()); // path length at start vertex
+    double s = 0;
+    if (firstTrack->startVertex()) s = helix.pathLength(firstTrack->startVertex()->position()); // path length at start vertex
+    else s = helix.pathLength(VertexPos);
     double B = 0.5*tesla;  // magnetic field
 
     cout << "MC Tracks associated with first Track in collection: " << theTrackMap->count(firstTrack) << endl;
@@ -329,7 +345,8 @@ Int_t StMcAnalysisMaker::Make()
 	pmc = mcTrack->momentum();
 	for (int k=0; k<3; k++) values[k] = pmc[k];
 	values[3]=pmc.mag();
-	s = recTrack->helix().pathLength(recTrack->startVertex()->position());
+	if (recTrack->startVertex()) s = recTrack->helix().pathLength(recTrack->startVertex()->position());
+	else s = recTrack->helix().pathLength(VertexPos);
 	p = recTrack->helix().momentumAt(s, B);
 	for (int j=0; j<3; j++) values[j+4] = p[j];
 	values[7]=p.mag();
