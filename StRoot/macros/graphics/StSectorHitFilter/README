@@ -6,7 +6,7 @@ In addition the filter can manage the globtrk
 tables to draw the tracks refered by the seclected hits.
 
 If the "primtrk" table present the tracks from this color will
-be "blue". The 'regular" tracks from globtrk is drawn in yellow.
+be "blue". The "regular" tracks from globtrk is drawn in yellow.
 
   To use this filter:
 
@@ -51,6 +51,6 @@ and  send any question complain  to fine@bnl.gov
 
   Valerie Fine (fine@bnl.gov, 19/06/2000)
 
-$Id: README,v 1.1 2000/07/19 21:53:22 fine Exp $
+$Id: README,v 1.2 2000/07/23 02:10:06 fine Exp $
 
 

@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StSectorHitFilter.h,v 1.1 2000/07/19 21:53:23 fine Exp $ 
+// $Id: StSectorHitFilter.h,v 1.2 2000/07/23 02:10:07 fine Exp $ 
 //
 #ifndef STAR_StSectorHitFilter
 #define STAR_StSectorHitFilter
@@ -23,18 +23,23 @@ using std::set;
 
 class St_tcl_tphit;
 class St_dst_track;
+class St_tpt_track;
 
 class StSectorHitFilter : public StVirtualEventFilter  {
  private:
     Int_t     m_badCounter;   // # hits with no track id assigned
     Int_t     m_row[100];     // array of the sector/padrow's to look up
     Int_t     m_nRow;         // the total number of the padrows to look up
-    set<long> m_trackId;      //! the list of the track's ids
+    set<long> m_trackId;      //! the list of the global track's ids
+    set<long> m_TptTrackID;   //! the list of the track's ids
     const TTableSorter *m_Primtrk;
 
  protected:
+    Int_t DstHitSubChannel(const TTableSorter *tableObject, Int_t index,Size_t &size, Style_t &style);
     Int_t HitSubChannel(const TTableSorter *tableObject,Int_t index,Size_t &size,Style_t &style); 
     Int_t SubChannel(St_dst_track   &track, Int_t rowNumber,Size_t &size,Style_t &style); 
+    Int_t SubChannel(St_tpt_track   &track, Int_t rowNumber,Size_t &size,Style_t &style);
+
  public:
     StSectorHitFilter() :m_nRow(0), m_Primtrk(0) {}
     virtual ~StSectorHitFilter() {Reset();}
@@ -48,6 +53,9 @@ class StSectorHitFilter : public StVirtualEventFilter  {
 
 //__________________________________________________
 // $Log: StSectorHitFilter.h,v $
+// Revision 1.2  2000/07/23 02:10:07  fine
+// New featues: The filter can handle dst_point tables from STAR dst
+//
 // Revision 1.1  2000/07/19 21:53:23  fine
 // Graphical filter to draw the hits from the selected PadRows and the associated tracks too
 //
