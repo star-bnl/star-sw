@@ -1,10 +1,15 @@
 /**********************************************************
- * $Id: StRichTrack.h,v 2.8 2000/12/08 04:56:30 lasiuk Exp $
+ * $Id: StRichTrack.h,v 2.9 2000/12/08 06:32:11 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.h,v $
+ *  Revision 2.9  2000/12/08 06:32:11  lasiuk
+ *  correctedMomentum()
+ *  xcorrection
+ *  comment setMomentum()
+ *
  *  Revision 2.8  2000/12/08 04:56:30  lasiuk
  *  MC define switch for xCorrection
  *  energyLoss() members
@@ -119,6 +124,7 @@ public:
     StThreeVectorF& getProjectedCTBPoint();
     StThreeVectorF& getLastHit();
     StThreeVectorF& getUnCorrectedImpactPoint();
+    StThreeVectorF& getCorrectedMomentum(); 
     StThreeVectorF& getUnCorrectedMomentum(); 
     StThreeVectorF& getUnCorrectedProjectedMIP(); 
     StThreeVectorF& getProjectedMIP(); 
@@ -127,7 +133,8 @@ public:
     StThreeVectorF& getMomentumAtPadPlane();
 
     bool    setEnergyLoss();
-
+    void    setCorrectedMomentum(StThreeVectorF);
+    
     double  getTheta();
     double  getPhi();
     double  getPathLength();  
@@ -222,6 +229,7 @@ protected:
     StThreeVectorF mUnCorrectedImpactPoint;  
     StThreeVectorF mUnCorrectedProjectedMIP;  
     StThreeVectorF mUnCorrectedMomentum;  
+    StThreeVectorF mCorrectedMomentum;  
     
     StThreeVectorF mRichNormal;
     StThreeVectorF mRadiatorGlobal;
