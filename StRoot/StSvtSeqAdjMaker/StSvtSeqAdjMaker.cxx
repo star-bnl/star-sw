@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.35 2001/10/19 23:31:30 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.36 2001/12/13 03:08:11 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.36  2001/12/13 03:08:11  caines
+ * Can now subtract common mode noise via black anodes 239 and 2
+ *
  * Revision 1.35  2001/10/19 23:31:30  caines
  * Correct problem that if anodes were missing didnt do average common mode noise calc
  *
@@ -116,6 +119,7 @@
 
 #include "StChain.h"
 #include "TH1.h"
+#include "TH2.h"
 #include "StSequence.hh"
 #include "StSvtClassLibrary/StSvtData.hh"
 #include "StSvtClassLibrary/StSvtHybridData.hh"
@@ -326,6 +330,7 @@ Int_t StSvtSeqAdjMaker::SetLowInvProd(int LowInvProd)
 Int_t StSvtSeqAdjMaker::GetBadAnodes()
 {
 
+  fstream BadAnodeFile;
   int index;
   StSvtBadAnode* mHybridBadAnodeData;
 
@@ -335,12 +340,37 @@ Int_t StSvtSeqAdjMaker::GetBadAnodes()
   mSvtBadAnodes = new StSvtHybridCollection(mSvtRawData->getConfiguration());
 
   mSvtBadAnodeSet->SetObject((TObject*)mSvtBadAnodes); 
-  assert(mSvtBadAnodes);
+  //assert(mSvtBadAnodes);
 
 
   if(  !strncmp(mSvtRawData->getConfiguration(), "FULL", strlen("FULL"))){
 
-    //Put in bad Anodes by hand
+    //read in bad anodes from file
+
+    //    BadAnodeFile.open("StarDb/svt/HotAnodeList.txt",ios::in);
+    ///int barrel, ladder, wafer, hybrid, anode, anode2;
+    
+ //    while( !BadAnodeFile.eof()){
+      
+//       BadAnodeFile >> barrel >> ladder >> wafer >> hybrid >> anode;
+//       index = mSvtRawData->getHybridIndex(barrel,ladder,wafer,hybrid);
+//       mHybridBadAnodeData = new StSvtBadAnode();
+//       mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
+
+
+//       if( anode !=1){
+// 	if( anode > 0) mHybridBadAnodeData->SetBadAnode(anode, 1);
+// 	else{
+// 	  anode *= -1;
+// 	  BadAnodeFile >> anode2;
+// 	  {for( int i=anode; i<anode2; i++){
+// 	    mHybridBadAnodeData->SetBadAnode(i, 1);}
+// 	  }
+// 	}
+//       }
+//       cout << " Bad Anode index !!!!!!!!!!!!! = " << index;    
+//     }
+   //Put in bad Anodes by hand
     
     // L01B1-D3H1 anode 159 to 160    
     index = mSvtRawData->getHybridIndex(1,1,3,1);
@@ -468,8 +498,7 @@ Int_t StSvtSeqAdjMaker::GetBadAnodes()
     mHybridBadAnodeData = new StSvtBadAnode();
     mSvtBadAnodes->put_at(mHybridBadAnodeData,index);
     {for( int i=1; i<81; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);}
-    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;    
-
+    cout << "Bad Anode index !!!!!!!!!!!!! = " << index;   
   }
   return kStOK; 
 }
@@ -482,15 +511,14 @@ Int_t StSvtSeqAdjMaker::CreateHist(Int_t tNuOfHyb)
    mInvProdSeqAdj= new TH1D*[tNuOfHyb];
    mRawAdc = new TH1F*[tNuOfHyb];
    mAdcAfter = new TH1F*[tNuOfHyb];
+   mTimeAn = new TH2F*[tNuOfHyb];
  
-   char invProdTitle_cut[25];
-   char RawTitle[25];
-   char AdcAfterTitle[25];
+   char invProdTitle_cut[25], RawTitle[25], AdcAfterTitle[25], TimeAnTitle[25];
    char  Index[4];
    char* prodTitle_cut;
    char* RawTitle_cut;
    char* AdcAf_cut;
-
+   char* TimeAnCh;
   for (int barrel = 1;barrel <= mSvtRawData->getNumberOfBarrels();barrel++) {
     for (int ladder = 1;ladder <= mSvtRawData->getNumberOfLadders(barrel);ladder++) {
       for (int wafer = 1;wafer <= mSvtRawData->getNumberOfWafers(barrel);wafer++) {
@@ -502,14 +530,17 @@ Int_t StSvtSeqAdjMaker::CreateHist(Int_t tNuOfHyb)
             sprintf(invProdTitle_cut,"InvProdSeqAdj"); 
             sprintf(RawTitle,"RawAdcIn");
  	    sprintf(AdcAfterTitle,"AdcAfterCuts");
+	    sprintf(TimeAnTitle,"TimeAn");
             sprintf(Index,"%d", index);
             prodTitle_cut = strcat(invProdTitle_cut,Index);
             RawTitle_cut = strcat(RawTitle,Index);
-	    AdcAf_cut = strcat(AdcAfterTitle,Index);	    
+	    AdcAf_cut = strcat(AdcAfterTitle,Index);
+	    TimeAnCh = strcat(TimeAnTitle,Index);
 
 	    mInvProdSeqAdj[index] = new TH1D(prodTitle_cut,"freqOfInvProd vs log10 of InvProd After Seq Adusting",100,0.,30.);
 	    mRawAdc[index] = new TH1F(RawTitle_cut,"freq Of Adc Values Before Seq Adjusting",150,-50.,100.);
 	    mAdcAfter[index] = new TH1F(AdcAf_cut,"freq Of Adc Values After Seq Adjusting",150,-50.,100.);
+	    mTimeAn[index] = new TH2F(TimeAnCh,"Time vs Anode",240,0,240,128,0,128);
 	}
       }
     }
@@ -526,11 +557,7 @@ Int_t StSvtSeqAdjMaker::Make()
 {
   if (Debug()) gMessMgr->Debug() << " In StSvtSeqAdjMaker::Make()" << GetName() << endm; 
 
-  int Anode, doCommon, status, length;
-  int i, j, startTimeBin;
-  int nSequence = 0;
-  StSequence* Seq = NULL;
-  unsigned char *adc;
+  int Anode;
 
   StSvtBadAnode* BadAnode=NULL;
 
@@ -571,77 +598,16 @@ Int_t StSvtSeqAdjMaker::Make()
 	  if (mHybridAdjData)
 	    delete mHybridAdjData;
 	  mHybridAdjData = new StSvtHybridData(Barrel,Ladder,Wafer,Hybrid); 
-
-	  // Decide whether to do common mode noise from average timebucket value or via first two black anodes
-	  doCommon = 0;
-	  int mNAnodes=2;
-	  int adcAv=0;
- 
-	  status= mHybridRawData->getSequences(1,nSequence,Seq);
-	  length = 0;
-
-	  for( i=0; i<nSequence; i++)  length += Seq[i].length;
-	  if( length < 126) doCommon =1;
-	  if( !doCommon){
-	    
-	    // Fill in array of adc values of first anode
-	    for( int nSeq=0; nSeq< nSequence ; nSeq++){
-	      
-	      adc=Seq[nSeq].firstAdc;
-	      length = Seq[nSeq].length;
-	      startTimeBin=Seq[nSeq].startTimeBin;
-	      j=0;
-	      while( j<length){
-		adcCommon[startTimeBin+j] = (float)adc[j]-mPedOffSet;
-		adcAv += (int) adc[j];
-		j++;
-	      }
-	    }
-	    if( adcAv <100) mNAnodes--;
-	  }
-	  
-	  status= mHybridRawData->getSequences(2,nSequence,Seq);
-	  length = 0;
-	  
-	  for( i=0; i<nSequence; i++)  length += Seq[i].length;
-	  if( length < 126){
-	    status= mHybridRawData->getSequences(240,nSequence,Seq);
-	    length = 0;
-	    
-	    for( i=0; i<nSequence; i++)  length += Seq[i].length;
-	    if( length < 126){
-	      doCommon=1;
-	    }
-	  }
-	      
-	  if( !doCommon){
-	 
-	    // Fill in array of adc values of second anode
-	    adcAv=0;
-	    for( int nSeq=0; nSeq< nSequence ; nSeq++){
-	      
-	      adc=Seq[nSeq].firstAdc;
-	      length = Seq[nSeq].length;
-	      startTimeBin=Seq[nSeq].startTimeBin;
-	      j=0;
-	      while( j<length){
-		adcCommon[startTimeBin+j] += (float)adc[j]-mPedOffSet;
-		adcAv += (int)  adc[j];
-		j++;
-	      }
-	    }
-	    if( adcAv <100) mNAnodes--;
-	  }
-	
+	  mNAnodes = FindBlackAnodes();
 	  if( doCommon || !mNAnodes ){
 	    cout << "Doing Common mode average for index " << index << endl;
+
 	    // Zero Common Mode Noise arrays
 	    for(int Timebin=0; Timebin<128; Timebin++){
 	      mCommonModeNoise[Timebin]=0;
 	      mCommonModeNoiseAn[Timebin]=0;	
 	    } 
 	  }
-
 	  for( int iAnode= 0; iAnode< mHybridRawData->getAnodeList(anolist); iAnode++)
             {
 	      Anode = anolist[iAnode];
@@ -701,7 +667,7 @@ Int_t StSvtSeqAdjMaker::Make()
 	      }
 
 	      if( doCommon) CommonModeNoiseSub(iAnode);
-	      else SubtractFirstAnode(iAnode, mNAnodes);
+	      else SubtractFirstAnode(iAnode);
 
 	      //Perform Asic like zero suppression
 	      AdjustSequences1(iAnode, Anode);
@@ -996,7 +962,7 @@ void StSvtSeqAdjMaker::CommonModeNoiseSub(int iAnode){
 
 //_____________________________________________________________________________
 
-void StSvtSeqAdjMaker::SubtractFirstAnode(int iAnode, int mNAnodes){
+void StSvtSeqAdjMaker::SubtractFirstAnode(int iAnode){
 
   // Calc common mode noise
 
@@ -1005,6 +971,7 @@ void StSvtSeqAdjMaker::SubtractFirstAnode(int iAnode, int mNAnodes){
   float adcMean;
   StSequence* Sequence;
   unsigned char* adc;
+
 
   status= mHybridRawData->getListSequences(iAnode,nSeqOrig,Sequence);
 
@@ -1030,7 +997,123 @@ void StSvtSeqAdjMaker::SubtractFirstAnode(int iAnode, int mNAnodes){
   }
   return;
 }
+//_______________________________________________________________________________
 
+int StSvtSeqAdjMaker::FindBlackAnodes(){
+  // Decide whether to do common mode noise from average timebucket 
+  //value or via first two black anodes.Have many options andoes 1&240,
+  //1&2 or 2&239. IN some case one of the black anodes is bad so only 
+  //subtract one.
+
+  int status, length;
+  int i, j, startTimeBin;
+  int nSequence = 0;
+  StSequence* Seq = NULL;
+  unsigned char *adc;
+  
+  doCommon = 0;
+  mNAnodes=2;
+  int adcAv=0;
+  
+  status= mHybridRawData->getSequences(240,nSequence,Seq);
+  length = 0;
+  
+  for( i=0; i<nSequence; i++)  length += Seq[i].length;
+  if( length < 126){
+    // IF anode 240 isnt black try 239
+    status= mHybridRawData->getSequences(239,nSequence,Seq);
+    length = 0;
+    
+    for( i=0; i<nSequence; i++)  length += Seq[i].length;
+    if( length < 126){
+      //if that one isnt black either try 2
+      status= mHybridRawData->getSequences(2,nSequence,Seq);
+      length = 0;
+      
+      for( i=0; i<nSequence; i++)  length += Seq[i].length;
+      if( length < 126){
+	// If that isnt black too do common mode noise subtraction
+	doCommon =1;
+      }
+    }
+  }
+  
+  // If one of those anodes was black fill adc array
+  if( !doCommon){
+    
+    // Fill in array of adc values of first anode
+    for( int nSeq=0; nSeq< nSequence ; nSeq++){
+      
+      adc=Seq[nSeq].firstAdc;
+      length = Seq[nSeq].length;
+      startTimeBin=Seq[nSeq].startTimeBin;
+      j=0;
+      while( j<length){
+	adcCommon[startTimeBin+j] = (float)adc[j]-mPedOffSet;
+	adcAv += (int) adc[j];
+	j++;
+      }
+    }
+    // If this black anode was bad dont count it in subtraction
+    if( adcAv <100) {
+      mNAnodes--;
+      for(j=0; j<128; j++) adcCommon[j]=0;
+    }
+  }
+  
+  // now find second black anode
+  
+  status= mHybridRawData->getSequences(1,nSequence,Seq);
+  length = 0;
+  
+  for( i=0; i<nSequence; i++)  length += Seq[i].length;
+  if( length < 126){
+    status= mHybridRawData->getSequences(2,nSequence,Seq);
+    length = 0;	  
+    
+    for( i=0; i<nSequence; i++)  length += Seq[i].length;
+    if( length < 126){
+      doCommon=1;
+    }
+    
+  }
+  if( !doCommon){
+    // Fill in array of adc values of second anode
+    adcAv=0;
+    for( int nSeq=0; nSeq< nSequence ; nSeq++){
+      
+      adc=Seq[nSeq].firstAdc;
+      length = Seq[nSeq].length;   
+      startTimeBin=Seq[nSeq].startTimeBin;
+      j=0;
+      while( j<length){
+	adcCommon[startTimeBin+j] += (float)adc[j]-mPedOffSet;
+	adcAv += (int)  adc[j];
+	j++;
+      }
+    }
+    
+    if( adcAv <100) {
+      mNAnodes--;
+      // If black anode is bad subtract back of wrong adc values
+      // from average will subtract from all other anodes
+      if( mNAnodes){
+	for( int nSeq=0; nSeq< nSequence ; nSeq++){
+	  
+	  adc=Seq[nSeq].firstAdc;
+	  length = Seq[nSeq].length;
+	  startTimeBin=Seq[nSeq].startTimeBin;
+	  j=0;
+	  while( j<length){
+	    adcCommon[startTimeBin+j] -= (float)adc[j]-mPedOffSet;
+	    j++;
+	  }
+	}
+      }
+    }
+  }
+  return mNAnodes;
+}
 //______________________________________________________________________________
 void StSvtSeqAdjMaker::MakeHistogramsProb(int index,int Anode){
   
@@ -1076,8 +1159,12 @@ void StSvtSeqAdjMaker::MakeHistogramsAdc(StSvtHybridData* hybridData, int index,
       len = svtSequence[mSeq].length;
       for(int j = 0 ; j < len; j++)
 	{
-	  if( Count ==1) mRawAdc[index]->Fill((int)adc[j]-mPedOffSet);
-	  else  mAdcAfter[index]->Fill((int)adc[j]-mPedOffSet);
+	  if( Count ==1) {
+	    mRawAdc[index]->Fill((int)adc[j]-mPedOffSet);
+	    mTimeAn[index]->Fill(Anode,j+svtSequence[mSeq].startTimeBin);
+	  }
+	  else 
+	    mAdcAfter[index]->Fill((int)adc[j]-mPedOffSet);
 	}
     }
   
