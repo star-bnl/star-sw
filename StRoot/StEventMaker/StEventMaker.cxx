@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.21 2000/03/22 17:11:20 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.22 2000/04/26 20:29:13 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,9 +11,8 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.21  2000/03/22 17:11:20  ullrich
- * Added further checks for case were tables exist but have
- * zero length. Added for primary and global tracks.
+ * Revision 2.22  2000/04/26 20:29:13  ullrich
+ * Create instance of StEvent not StBrowsableEvent.
  *
  * Revision 2.28  2000/08/17 00:38:48  ullrich
  * Allow loading of tpt tracks.
@@ -133,10 +132,10 @@ using std::pair;
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.21 2000/03/22 17:11:20 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.22 2000/04/26 20:29:13 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.21 2000/03/22 17:11:20 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.22 2000/04/26 20:29:13 ullrich Exp $";
 
 ClassImp(StEventMaker)
     doPrintEventInfo  = kFALSE;
@@ -333,9 +332,9 @@ StEventMaker::makeEvent()
     if (!dstEventHeader) {
         mCurrentEvent = 0;
         mCurrentEvent = new StEvent;
-        mCurrentEvent = new StBrowsableEvent(*dstEventHeader);
+                            << "no StEvent object created." << endm;
         return kStWarn;
-        mCurrentEvent = new StBrowsableEvent(*dstEventHeader, *dstEventSummary, *mDstSummaryParam);
+    }
 	return kStOK;
     dst_event_summary_st* dstEventSummary = mEventManager->returnTable_dst_event_summary(nrows);
 
