@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.27 2001/09/26 23:26:56 perev Exp $
+// $Id: StEventDisplayMaker.h,v 1.28 2002/12/13 00:47:41 fine Exp $
 // $Log: StEventDisplayMaker.h,v $
+// Revision 1.28  2002/12/13 00:47:41  fine
+// first version with Qt interface
+//
 // Revision 1.27  2001/09/26 23:26:56  perev
 // Sorting by color added
 //
@@ -42,7 +45,9 @@
 //////////////////////////////////////////////////////////////////////////
 #include "TSeqCollection.h"
 #include "TObjString.h"
+#if 0
 #include "TRootHelpDialog.h"
+#endif
 
 #include "StMaker.h"
 #include "StDefaultFilter.h"
@@ -65,7 +70,7 @@ class StEventDisplayInfo;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.27 2001/09/26 23:26:56 perev Exp $";
+// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.28 2002/12/13 00:47:41 fine Exp $";
 
  private: 
  enum {kCOLORS=20};
@@ -167,7 +172,7 @@ static StEventDisplayInfo *fgInfo;
    // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.27 2001/09/26 23:26:56 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.28 2002/12/13 00:47:41 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:
@@ -185,20 +190,6 @@ inline TVirtualPad *StEventDisplayMaker::GetEventPad()
   }
   return (TVirtualPad *)m_PadBrowserCanvas;
 };
-
-
-class StEventDisplayInfo : public TRootHelpDialog
-{
-public:
-  StEventDisplayInfo(StEventDisplayInfo **kaddr, const char* title, UInt_t w=100, UInt_t h=50)
-  :TRootHelpDialog(gClient->GetRoot(),title,w,h){fKAddr=kaddr;*fKAddr=this;}
-  virtual ~StEventDisplayInfo(){*fKAddr=0;}
-private:
- StEventDisplayInfo **fKAddr;	//!
-ClassDef(StEventDisplayInfo,0)
-};
-
-
 
 
 

@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.82 2002/04/14 21:58:15 perev Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.83 2002/12/13 00:47:40 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -90,12 +90,17 @@
 #include "tables/St_tpt_track_Table.h"
 #include "tables/St_dst_event_summary_Table.h"
 
+#include "PadControlPanel.h"
+
 #include "StTrackChair.h"
 
 #include "StArray.h"
 #include "StEvent.h"
 #include "StDefaultFilter.h"
 #include "StEventHelper.h"
+
+// Qt header files
+#include <qtextview.h>
 
 // StVirtualEventFilter hitsOffFilter(0);
 // StVirtualEventFilter hitsOnFilter(1);
@@ -107,8 +112,24 @@ StEventDisplayInfo *StEventDisplayMaker::fgInfo      = 0;
 
 
 
+class StEventDisplayInfo : public QTextView 
+{
+public:
+  StEventDisplayInfo(StEventDisplayInfo **kaddr, const char* title, UInt_t w=100, UInt_t h=50)
+  :QTextView(title)
+  {  
+    resize(w,h);
+    fKAddr=kaddr;*fKAddr=this;
 
-ClassImp(StEventDisplayInfo)
+  }
+  virtual ~StEventDisplayInfo(){*fKAddr=0;}
+private:
+ StEventDisplayInfo **fKAddr;	//!
+public:
+ void SetText(const char *info){ setText(info);}
+ void Popup(){ show();}
+};
+
 
 //_____________________________________________________________________________
 //
@@ -162,7 +183,8 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
 
   gROOT->LoadMacro("EventControlPanel.C");
   gSystem->DispatchOneEvent(1);
-  gROOT->LoadMacro("PadControlPanel.C"  );
+//  gROOT->LoadMacro("PadControlPanel.C"  );
+  new StPadControlPanel();
   gSystem->DispatchOneEvent(1);
 
 
@@ -1055,7 +1077,6 @@ void StEventDisplayMaker::Info(const char *info)
   fgInfo->Popup();
 }
 
-
 #define DISPLAY_FILTER_DEFINITION(filterName)                                \
 Int_t  StEventDisplayMaker::_NAME3_(Set,filterName,Flag)(Int_t flag)         \
 { return SetFlag(flag,_NAME2_(k,filterName)); }                              \
@@ -1075,6 +1096,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.83  2002/12/13 00:47:40  fine
+// first version with Qt interface
+//
 // Revision 1.82  2002/04/14 21:58:15  perev
 // Increase size of hit 10 times
 //
