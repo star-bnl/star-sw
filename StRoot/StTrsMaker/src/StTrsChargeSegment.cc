@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.29 2000/11/23 02:08:49 lbarnby Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.30 2001/03/07 20:22:56 long Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.30  2001/03/07 20:22:56  long
+ * *** empty log message ***
+ *
  * Revision 1.29  2000/11/23 02:08:49  lbarnby
  * More protection against Nan
  *
@@ -389,7 +392,8 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 	StTrsMiniChargeSegment aSingleMiniSegment(mPosition,
 						  mNumberOfElectrons,
 						  mDs);
-	listOfMiniSegments->push_back(aSingleMiniSegment);
+        
+	if(aSingleMiniSegment.position().z()>0)listOfMiniSegments->push_back(aSingleMiniSegment);
 // 	PR(mPosition);
 // 	PR(mNumberOfElectrons);
     }
@@ -568,7 +572,7 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 	StTrsMiniChargeSegment aBadMiniSegment(mPosition,
 					       mNumberOfElectrons,
 					       mDs);
-	listOfMiniSegments->push_back(aBadMiniSegment);
+	if(aSingleMiniSegment.position().z()>0)listOfMiniSegments->push_back(aBadMiniSegment);  //HL,03/2001 protect against negative z.
     }
 }
 
