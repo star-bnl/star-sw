@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.78 2000/01/10 21:22:29 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.79 2000/01/11 15:28:32 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.79  2000/01/11 15:28:32  kathy
+// limits on residual histograms changed; St_QA_Maker changed to give proper inputs to routine prop_one_track which is from pams/global/egr - NOTE! Now St_QA_Maker class requires that you load the St_global librarycvs -n update!
+//
 // Revision 1.78  2000/01/10 21:22:29  kathy
 // now use Spiros' new code in pams/global/egr/prop_one_track to get primary track residuals - note must now load St_global library! - don't have magnetic field working from the dst yet...
 //
@@ -781,7 +784,7 @@ void St_QA_Maker::MakeHistDE() {
 void St_QA_Maker::MakeHistPrim(){
 
 // Spiros added the following line on 10jan00
-  float gtrack[7],target[2],ptrack[3];
+  float gtrack[8],target[2],ptrack[3];
 
   St_DataSetIter dstI(dst);           
 
@@ -863,10 +866,11 @@ void St_QA_Maker::MakeHistPrim(){
         gtrack[4] = t->tanl;
         gtrack[5] = (float) t->icharge;
         gtrack[6] = t->invpt;
+        gtrack[7] = t->curvature;
         Float_t mytst = prop_one_track( gtrack, target, ptrack);
-        cout << " ptrack 0,1,2 = " << ptrack[0] << "  " 
-                                   << ptrack[1] << "  " 
-                                   << ptrack[2] << "  " << endl;
+        if (mytst != 5) {
+         cout << " !! error from prop_one_track !!, iret = " << mytst << endl;
+        }
         Float_t x0s  =  ptrack[0];
         Float_t y0s  =  ptrack[1];
         Float_t xdif =  (t->x_first[0])-x0s;
