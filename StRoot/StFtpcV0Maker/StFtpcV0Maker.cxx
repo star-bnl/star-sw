@@ -1,6 +1,9 @@
-// $Id: StFtpcV0Maker.cxx,v 1.8 2000/06/26 22:10:55 fisyak Exp $
+// $Id: StFtpcV0Maker.cxx,v 1.9 2000/07/04 02:36:50 perev Exp $
 //
 // $Log: StFtpcV0Maker.cxx,v $
+// Revision 1.9  2000/07/04 02:36:50  perev
+// formal corrections, gStChain removed
+//
 // Revision 1.8  2000/06/26 22:10:55  fisyak
 // remove params
 //
@@ -88,7 +91,7 @@ Int_t StFtpcV0Maker::Make(){
     fv0_vertex_st *fv0_table = fv0_vertex->GetTable();
 
     //Get the ftpc tracks table    
-    St_DataSet *ftpc_data = gStChain->DataSet("ftpc_tracks");
+    St_DataSet *ftpc_data = GetDataSet("ftpc_tracks");
     if (ftpc_data) { //if good data
       // data exist 
       St_DataSetIter next(ftpc_data);
@@ -125,9 +128,9 @@ Int_t StFtpcV0Maker::Make(){
 	P.setX(trk[p].p[1]*GeV); 
 	P.setY(trk[p].p[2]*GeV); 
 	P.setZ(trk[p].p[3]*GeV); 
-	X.setX(trk[p].v[1]*centimeter); 
-	X.setY(trk[p].v[2]*centimeter); 
-	X.setZ(trk[p].v[3]*centimeter);
+// 	X.setX(trk[p].v[1]*centimeter); 
+// 	X.setY(trk[p].v[2]*centimeter); 
+// 	X.setZ(trk[p].v[3]*centimeter);
 	
 	StFtpcTrack PosTrack(P,X,mag,1);
 	double dcaTp=PosTrack.distance(origin);
@@ -138,9 +141,9 @@ Int_t StFtpcV0Maker::Make(){
 	  P.setX(trk[n].p[1]*GeV); 
 	  P.setY(trk[n].p[2]*GeV); 
 	  P.setZ(trk[n].p[3]*GeV); 
-	  X.setX(trk[n].v[1]*centimeter); 
-	  X.setY(trk[n].v[2]*centimeter); 
-	  X.setZ(trk[n].v[3]*centimeter);
+// 	  X.setX(trk[n].v[1]*centimeter); 
+// 	  X.setY(trk[n].v[2]*centimeter); 
+// 	  X.setZ(trk[n].v[3]*centimeter);
 	  
 	  StFtpcTrack NegTrack(P,X,mag,-1);
 	  double dcaTn=NegTrack.distance(origin);

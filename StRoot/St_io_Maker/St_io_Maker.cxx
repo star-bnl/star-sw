@@ -1,7 +1,7 @@
 //*CMZ :          23/02/99  18.27.27  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@bnl.gov)   03/07/98
 //
-// $Id: St_io_Maker.cxx,v 1.22 2000/05/04 20:03:59 fine Exp $
+// $Id: St_io_Maker.cxx,v 1.23 2000/07/04 02:36:55 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -120,12 +120,12 @@ void St_io_Maker::Add(const Char_t *dataName, const Char_t *fileName)
 {
   // fileName for this "dataName"  (= "maker name" by default)
   // Check whether we have Maker("dataName");
-  StMaker *maker =  gStChain->Maker(dataName);
+  StMaker *maker =  Maker(dataName);
   if (!maker) return;
 
   // Get tree
   TTree *tree = GetTree();
-  if (!tree) tree = MakeTree(gStChain->GetName(),gStChain->GetTitle());
+  if (!tree) tree = MakeTree(GetName(),GetTitle());
   if (!CreateBranchList()) return;
 
   // Create branch  
@@ -154,7 +154,7 @@ void St_io_Maker::Add(TBranch *branch,const Char_t *,const Char_t *fileName)
 {
 
 // Check whether we have Maker("dataName");
-//  StMaker *maker =  gStChain->Maker(dataName);
+//  StMaker *maker =  Maker(dataName);
 //  if (!maker) return;
 
   if (!branch)  return;
@@ -321,7 +321,6 @@ Int_t St_io_Maker::Finish()
 }
 //_____________________________________________________________________________
 TTree *St_io_Maker::GetTree(){
-//  return m_Tree ? m_Tree : fgStChain->Tree();
   return m_Tree;
 }
 
@@ -370,7 +369,7 @@ Int_t St_io_Maker::NextEventGet(Int_t nEvent)
 //VP       // determinate the recepient
 //VP        TString name = obj->GetName();
 //VP        name.ReplaceAll("_Branch","");
-//VP        StMaker *maker = gStChain->Maker(name.Data());
+//VP        StMaker *maker = Maker(name.Data());
 //VP        if (maker) {
            if (counter == -1) counter = 0;
            if (m_Entries == -1) m_Entries = GetEntries(obj);
@@ -514,6 +513,9 @@ TTree *St_io_Maker::SetNextTree()
 
 //__________________
 // $Log: St_io_Maker.cxx,v $
+// Revision 1.23  2000/07/04 02:36:55  perev
+// formal corrections, gStChain removed
+//
 // Revision 1.22  2000/05/04 20:03:59  fine
 // CVS id introduced
 // 

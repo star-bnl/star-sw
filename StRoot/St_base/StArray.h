@@ -15,19 +15,21 @@
 #include "TString.h"
 #include "StObject.h"
 #ifndef __CINT__
-#include <vector>
-#include <algorithm>
-using std::vector;
-using std::random_shuffle;
-typedef vector<TObject*> VecTObj;
-typedef vector<TObject*>::iterator       VecTObjIter;
-typedef vector<TObject*const>::iterator const_VecTObjIter;
-typedef VecTObjIter StObjArrayIter;
-typedef VecTObjIter StStrArrayIter;
-typedef VecTObjIter StRefArrayIter;
-typedef const_VecTObjIter const_StObjArrayIter;
-typedef const_VecTObjIter const_StStrArrayIter;
-typedef const_VecTObjIter const_StRefArrayIter;
+  #include <vector>
+  #include <algorithm>
+  #ifndef ST_NO_NAMESPACES
+    using std::vector;
+    using std::random_shuffle;
+  #endif /*ST_NO_NAMESPACES*/
+  typedef vector<TObject*> VecTObj;
+  typedef vector<TObject*>::iterator       VecTObjIter;
+  typedef vector<TObject*const>::iterator const_VecTObjIter;
+  typedef VecTObjIter StObjArrayIter;
+  typedef VecTObjIter StStrArrayIter;
+  typedef VecTObjIter StRefArrayIter;
+  typedef const_VecTObjIter const_StObjArrayIter;
+  typedef const_VecTObjIter const_StStrArrayIter;
+  typedef const_VecTObjIter const_StRefArrayIter;
 #endif /*!__CINT__*/
 
 #ifdef __CINT__

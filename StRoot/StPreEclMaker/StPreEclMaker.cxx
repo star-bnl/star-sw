@@ -1,7 +1,10 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.1 2000/05/15 21:24:01 subhasis Exp $
+// $Id: StPreEclMaker.cxx,v 1.2 2000/07/04 02:36:52 perev Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.2  2000/07/04 02:36:52  perev
+// formal corrections, gStChain removed
+//
 // Revision 1.1  2000/05/15 21:24:01  subhasis
 // initial version
 //
@@ -88,7 +91,7 @@ Int_t StPreEclMaker::Make(){
   if (!m_DataSet->GetList()){   //if DataSet is empty, create object and fill it
     StEmcHitCollection *hit = 0;
     StEmcHitCollection dummy; TString tit = dummy.GetTitle();
-    St_DataSetIter itr(gStChain->DataSet("emc_hits"));
+    St_DataSetIter itr(GetDataSet("emc_hits"));
     while ( (hit = (StEmcHitCollection *)itr()) ) {
       if(hit->GetTitle() == tit){
 	TString name = hit->GetName();
@@ -120,7 +123,7 @@ Int_t StPreEclMaker::Make(){
     }
   }
   MakeHistograms(); // Fill QA histgrams
-  Int_t fill = fillStEvent();
+  Int_t fill = fillStEvent(); if (fill){/*touch*/}
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -260,7 +263,7 @@ Int_t StPreEclMaker::fillStEvent(){
     if(cluster->GetTitle() == tit){
       Int_t n = cluster->Nclusters();
       if(n>0){
-        Int_t det = cluster->Detector();
+        Int_t det = cluster->Detector(); if(det){/*touch*/}
  
         TIter next(cluster->Clusters());
         StEmcPreCluster *cl;
@@ -295,8 +298,8 @@ Int_t StPreEclMaker::fillStEvent(){
 //_____________________________________________________________________________
 void StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.1 2000/05/15 21:24:01 subhasis Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.2 2000/07/04 02:36:52 perev Exp $   \n");
   printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
+  if (Debug()) StMaker::PrintInfo();
 }
 //_____________________________________________________________________________
