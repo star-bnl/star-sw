@@ -6,27 +6,24 @@
  *********************************************************/
 #include "StHbtMaker/Infrastructure/StHbtIOBinary.hh"
 
-typedef unsigned int colSizeType;
 
-StHbtIOBinary::StHbtIOBinary(const char* dirName, const char* fileName, const char* appendix, const char* readWrite) {
+StHbtIOBinary::StHbtIOBinary(const char* dirName, const char* fileName, const char* appendix, const char* readWrite) : mOStream(0), mIStream(0) {
   //cout << " StHbtIOBinary(const char* fileName, const char* readWrite " << endl;
   byteCounterTotal=0;
   byteCounterEvent=0;
   if (((*readWrite)=='w')|| ((*readWrite)=='W')){  // this object will be a writer
-    mOStream = new ofstream;
-    mOStream->open( parseDirFile(dirName, fileName, appendix) );
-    if (!mOStream){
+    mOStream = new ofstream( parseDirFile(dirName, fileName, appendix) );
+    if ( !mOStream ){
       cout << "StHbtIOBinary::Init() - Cannot open output file! " << endl;
-      exit(-1);
+      exit(ioERROpen);
     }
     cout << "StHbtIOBinary::Init() - being configured as a Writer " << readWrite << endl;
   }
   else {
-    mIStream = new ifstream;
-    mIStream->open( parseDirFile( dirName, fileName, appendix) ); 
-    if (!mIStream){
+    mIStream = new ifstream( parseDirFile( dirName, fileName, appendix) ); 
+    if ( !mIStream ){
       cout << "StHbtIOBinary::Init() - Cannot open input file! " << endl;
-      exit(-1);
+      exit(ioERROpen);
     }
     cout << fileName << " open " << endl;
     cout << "StHbtIOBinary::Init() - being configured as a Reader " << readWrite << endl;
@@ -45,209 +42,614 @@ StHbtIOBinary::~StHbtIOBinary() {
   }
 }
 
+int StHbtIOBinary::readHeader(StHbtString& header){
+  return readString( header );
+}
+
+int StHbtIOBinary::writeHeader(const StHbtString& header){
+  return writeString( header );
+}
+
 int StHbtIOBinary::bytesWritten() { return byteCounterTotal; }
 int StHbtIOBinary::bytesRead() { return byteCounterTotal; }
 
-//------------------------- string ----------------------------------
-void StHbtIOBinary::writeString(StHbtString& Message){
-  *mOStream << Message.c_str();
-  *mOStream << endl;
-  *mOStream << "-*-*-*-* End of Input Reader Report" << endl;  // write THIS out even if there is no report
-
-}
-void StHbtIOBinary::readString(StHbtString& Message){
-  char temp[200] = "";
-  string stemp;
-  do {
-    Message += temp;
-    Message += "\n";
-    mIStream->getline(temp,200);
-    stemp = temp;
-  } while (stemp != "-*-*-*-* End of Input Reader Report");
-  cout << "Here is the message that was at the beginning of the file...\n";
-  cout << Message.c_str();
-}
-//------------------------- StHbtTrack -----------------------------------
-int StHbtIOBinary::writeTrack(StHbtTrack& trk){
-  mOStream->write( (char*)&trk, sizeof(trk) );
-  byteCounterEvent+=sizeof(trk);
-  //cout << " track size " << sizeof(trk) << endl;
-  return ioOK;
-}
-int StHbtIOBinary::readTrack(StHbtTrack& trk){
-  mIStream->read( (char*)&trk, sizeof(trk) );
-  byteCounterEvent+=sizeof(trk);
-  //cout << " track size " << sizeof(trk) << endl;
-  return ioOK;
-}
-//------------------------- StHbtV0 --------------------------------------
-int StHbtIOBinary::writeV0(StHbtV0& v0){
-  mOStream->write( (char*)&v0, sizeof(v0) );
-  byteCounterEvent+=sizeof(v0);
-  //cout << " track size " << sizeof(v0) << endl;
-  return ioOK;
-}
-int StHbtIOBinary::readV0(StHbtV0& v0){
-  mIStream->read( (char*)&v0, sizeof(v0) );
-  byteCounterEvent+=sizeof(v0);
-  //cout << " track size " << sizeof(v0) << endl;
-  return ioOK;
-}
-//------------------------- StHbtEvent -----------------------------------
-int StHbtIOBinary::writeEvent(StHbtEvent& ev){
-  cout << "StHbtIOBinary::writeEvent(StHbtEvent& ev) " << endl;
-  byteCounterEvent=0;
-  //event properties
-  byteCounterEvent += binaryWrite( mOStream, ev.EventNumber()        );
-  byteCounterEvent += binaryWrite( mOStream, ev.CtbMult()            );
-  byteCounterEvent += binaryWrite( mOStream, ev.ZdcAdcEast()         );
-  byteCounterEvent += binaryWrite( mOStream, ev.ZdcAdcWest()         );
-  byteCounterEvent += binaryWrite( mOStream, ev.NumberOfTpcHits()    );
-  byteCounterEvent += binaryWrite( mOStream, ev.NumberOfTracks()     );
-  byteCounterEvent += binaryWrite( mOStream, ev.NumberOfGoodTracks() );
-  byteCounterEvent += binaryWrite( mOStream, ev.ReactionPlane()      );
-  byteCounterEvent += binaryWrite( mOStream, ev.ReactionPlaneError() );
-  byteCounterEvent += binaryWrite( mOStream, ev.PrimVertPos()        );
-  // tracks
-  colSizeType colSize;
-  colSize = (colSizeType) ev.TrackCollection()->size();
-  byteCounterEvent += binaryWrite( mOStream,  colSize );
-  StHbtTrack trk;
-  for (StHbtTrackIterator iter=ev.TrackCollection()->begin();
-       iter != ev.TrackCollection()->end(); iter++){
-    writeTrack(**iter);
-  } 
-  // v0 tracks 
-  colSize = (colSizeType) ev.V0Collection()->size();
-  byteCounterEvent += binaryWrite( mOStream,  colSize );
-  StHbtV0 v0;
-  for (StHbtV0Iterator iterv0=ev.V0Collection()->begin();
-       iterv0 != ev.V0Collection()->end(); iterv0++){
-    writeV0(**iterv0);
-  } 
-  byteCounterTotal+=byteCounterEvent;
-  return ioOK;
-}
-
-//------------------------- StHbtEvent -----------------------------------
-int StHbtIOBinary::readEvent(StHbtEvent& ev){
-  cout << "StHbtIOBinary::readEvent(StHbtEvent& ev) " << endl;
-  byteCounterEvent=0;
-
-  unsigned short eventNumber;           //
-  unsigned short ctbMultiplicity;       // Central Trigger Barrel
-  unsigned short zdcAdc[2];       // Zero-degree calorimeter 
-                                         //values east/west
-  int tpcNhits;                         // number of TPC hits
-  unsigned short numberOfTracks;     // total number of TPC tracks
-  unsigned short numberOfGoodTracks; // number of "good" tracks
-  float reactionPlane[2]; //reaction plane/error  //   
-  StHbtThreeVector primVertPos;
-
-  byteCounterEvent += binaryRead( mIStream, eventNumber);
-  if (mIStream->eof()) {
-    cout << "Hit end of file " << endl;
-    return ioEOF; 
-  } 
-  ev.SetEventNumber(eventNumber);
-
-  byteCounterEvent += binaryRead( mIStream, ctbMultiplicity);  ev.SetCtbMult(ctbMultiplicity);
-  byteCounterEvent += binaryRead( mIStream, zdcAdc[0]);            ev.SetZdcAdcEast(zdcAdc[0]);
-  byteCounterEvent += binaryRead( mIStream, zdcAdc[1]);            ev.SetZdcAdcWest(zdcAdc[1]);
-  byteCounterEvent += binaryRead( mIStream, tpcNhits);             ev.SetNumberOfTpcHits(tpcNhits);
-  byteCounterEvent += binaryRead( mIStream, numberOfTracks);       ev.SetNumberOfTracks(numberOfTracks);
-  byteCounterEvent += binaryRead( mIStream, numberOfGoodTracks);   ev.SetNumberOfGoodTracks(numberOfGoodTracks);
-  byteCounterEvent += binaryRead( mIStream, reactionPlane[0]);     ev.SetReactionPlane(reactionPlane[0]);
-  byteCounterEvent += binaryRead( mIStream, reactionPlane[1]);     ev.SetReactionPlaneError(reactionPlane[1]);
-  byteCounterEvent += binaryRead( mIStream, primVertPos);          ev.SetPrimVertPos(primVertPos);
-
-  // 
-  //  OK, time to read in Track and V0 collections
-  //
-  if (!(mIStream->good())){
-    cout << "StHbtEvent input operator finds stream in bad state ! " << endl;
-    return ioERR;
-  } 
-  //  ev.mTrackCollection = new StHbtTrackCollection; <-- NO!
-  //  the TrackCollection is instantiated by constructor!!
-  //
-  // since this should *overwrite* any StHbtTracks in the
-  // StHbtTrackCollection, let's erase any that might be there
-  //
-  StHbtTrackIterator iter;
-  for (iter=ev.TrackCollection()->begin();iter!=ev.TrackCollection()->end();iter++){
-    delete *iter;
-  }
-  // ok, now we have gotten rid of the tracks themselves.  Let's lose the pointers to those deleted tracks
-  ev.TrackCollection()->clear();  // if this doesn't work then just delete the collection and make a new one.
-
-  colSizeType NtracksInCollection;
-  byteCounterEvent += binaryRead( mIStream, NtracksInCollection);
-  cout << " reading " << NtracksInCollection << " tracks " << endl;
-  for (unsigned int itrk=0; itrk <NtracksInCollection; itrk++){
-    StHbtTrack* trk = new StHbtTrack;
-    if ( readTrack(*trk) ){
-      cout << "StHbtEvent input operator finds stream in bad state during track read ! ";
-      cout << itrk << " of " << NtracksInCollection << " intended" << endl;
-      return ioERR;
-    }
-    //cout << " track read " << endl;
-    ev.TrackCollection()->push_back(trk);  // ?ok?
-    //cout << " " << itrk << "/" << NtracksInCollection;
-    //cout << " track pushed " << endl;
-    //wait(10,"");
-  }
-
-  // now we should do the v0 collection...
-  // since this should *overwrite* any StHbtV0s in the
-  // StHbtV0Collection, let's erase any that might be there
-  //
-  StHbtV0Iterator iterv0;
-  for (iterv0=ev.V0Collection()->begin();iterv0!=ev.V0Collection()->end();iterv0++){
-   delete *iterv0;
-  }
-  // ok, now we have gotten rid of the v0s themselves.  Let's lose the pointers to those deleted v0ss
-  ev.V0Collection()->clear();  // if this doesn't work then just delete the collection and make a new one.
-
-  colSizeType NV0sInCollection;
-  byteCounterEvent += binaryRead( mIStream, NV0sInCollection);
-  cout << " reading " << NV0sInCollection << " V0s " << endl;
-  if ( !(mIStream->good()) ) {
-    cout << "StHbtEvent input operator finds stream in bad state ! " << endl;
-    return ioERR;
-  }
- 
-  for (unsigned int iv0=0; iv0<NV0sInCollection; iv0++){
-    StHbtV0* v0 = new StHbtV0;
-    if ( readV0(*v0) ){
-      cout << "StHbtEvent input operator finds stream in bad state during v0 read ! ";
-      cout << iv0 << " of " << NV0sInCollection << " intended" << endl;
-      return ioERR;
-    }
-    ev.V0Collection()->push_back(v0);  // ?ok?
-    //cout << " " << iv0;
-  }
-  byteCounterTotal+=byteCounterEvent;
-  return ioOK;
-} 
-
 // **********************************************************************
 const char* StHbtIOBinary::parseDirFile(const char* dir, const char* file, const char* appendix) {
-  if (dir) cout << dir << endl;
-  if (file) cout << file << endl;
-  if (appendix) cout << appendix << endl;
+  if (dir)      cout << " StHbtIOBinary::parseDirFile() - dir      " << dir << endl;
+  if (file)     cout << " StHbtIOBinary::parseDirFile() - file     " << file << endl;
+  if (appendix) cout << " StHbtIOBinary::parseDirFile() - appendix " << appendix << endl;
 
   if (!dir || !appendix) return file;  // no dir specified
   StHbtString theDir = (char*)dir;
   StHbtString theFile = (char*)file;
   StHbtString theAppendix = (char*)appendix;
   while ( theFile.find("/") != string::npos ) {
+#ifdef STHBTDEBUG
     cout << theFile.c_str() << " ";
+#endif
     string::size_type pos =  theFile.find("/");
+#ifdef STHBTDEBUG
     cout << pos << endl;
+#endif
     theFile.erase(0, pos+1 );
+#ifdef STHBTDEBUG
     cout << theFile.c_str() << endl;
+#endif
   }
-  cout << (theDir+theFile+theAppendix).c_str() << endl;
+  cout << " StHbtIOBinary::parseDirFile() " << (theDir+theFile+theAppendix).c_str() << endl;
   return (theDir+theFile+theAppendix).c_str();
 }
+
+
+
+
+//------------------------- string ----------------------------------
+int StHbtIOBinary::writeString(const StHbtString& Message){
+  *mOStream << Message.c_str();
+  *mOStream << endl;
+  *mOStream << "-*-*-*-* End of Input Reader Report" << endl;  // write THIS out even if there is no report
+  byteCounterEvent += Message.size();
+  return (!mOStream->good());
+}
+int StHbtIOBinary::readString(StHbtString& Message){
+  char temp[200] = "";
+  Message = "";
+  string stemp;
+  do {
+    Message += stemp;
+    Message += "\n";
+    mIStream->getline(temp,200);
+    stemp = temp;
+    //    cout << stemp.c_str() << endl;
+  } while (stemp != "-*-*-*-* End of Input Reader Report" && mIStream->good() );
+  cout << "Here is the message that was at the beginning of the file...\n";
+  cout << Message.c_str();
+  byteCounterEvent += Message.size();
+  return (!mIStream->good());
+}
+
+//------------------------- StHbtEvent -----------------------------------
+int StHbtIOBinary::read(StHbtEvent& ev, unsigned short evVersion, unsigned short trVersion, unsigned short v0Version){
+  cout << " read(StHbtEvent& ev) -   Versions: " << evVersion << " " << trVersion << " " << v0Version << endl;
+  int iret;
+  byteCounterEvent = 0;
+  switch ( (int)evVersion ) {
+  case 0: iret = read_V0( ev, trVersion, v0Version); break;
+  case 1: iret = read_V1( ev, trVersion, v0Version); break;
+  case 2: iret = read_V2( ev, trVersion, v0Version); break;
+  default: 
+    iret = ioERR;
+    cout << " can not write this event version " << endl;
+    break;
+  }
+  byteCounterTotal += byteCounterEvent;
+  cout << " byteCounterTotal= " << byteCounterTotal << "  byteCounterEvent = " << byteCounterEvent << endl;
+  return iret;
+} 
+
+//------------------------- StHbtEvent -----------------------------------
+int StHbtIOBinary::write( const StHbtEvent& ev, unsigned short evVersion, unsigned short trVersion, unsigned short v0Version){
+  cout << " write(StHbtEvent& ev) -  Versions: " << evVersion << " " << trVersion << " " << v0Version << endl;
+  int iret;
+  byteCounterEvent = 0;
+  switch ( (int)evVersion ) {
+  case 0: iret = write_V0( ev, trVersion, v0Version); break;
+  case 1: iret = write_V1( ev, trVersion, v0Version); break;
+  case 2: iret = write_V2( ev, trVersion, v0Version); break;
+  default: 
+    iret = ioERR; 
+    cout << " can not write this event version " << endl; 
+    break;
+  }
+  byteCounterTotal += byteCounterEvent;
+  cout << " byteCounterTotal= " << byteCounterTotal << "  byteCounterEvent = " << byteCounterEvent << endl;
+  return iret;
+} 
+
+//------------------------- StHbtTrack -----------------------------------
+int StHbtIOBinary::read( StHbtTrack& x, unsigned short version){
+#ifdef STHBTDEBUG
+  cout << " StHbtIOBinary::readTrack() - Version : " << version << endl;
+#endif
+  int iret;
+  switch ( (int)version ) {
+  case 0: 
+  case 1: 
+    iret = read_V1( x );
+    break;
+  case 2: 
+    iret = read_V2( x );
+    break;
+  default: 
+    cout << " can not write this track version " << endl;
+    return ioERR;
+  }
+
+  return ioOK;
+}
+
+//------------------------- StHbtTrack -----------------------------------
+int StHbtIOBinary::write( const StHbtTrack& x, unsigned short version){
+#ifdef STHBTDEBUG
+  cout << " StHbtIOBinary::writeTrack() - Version : " << version << endl;
+#endif
+  int iret;
+  switch ( (int)version ) {
+  case 0: 
+  case 1: 
+    iret = write_V1( x );
+    break;
+ case 2: 
+    iret = write_V2( x );
+    break;
+  default: 
+    cout << " can not write this track version " << endl;
+    return ioERR;
+  }
+  return ioOK;
+}
+
+//------------------------- StHbtV0 -----------------------------------
+int StHbtIOBinary::read( StHbtV0& x, unsigned short version){
+#ifdef STHBTDEBUG
+  cout << " StHbtIOBinary::readV0() - Version : " << version << endl;
+#endif
+  int iret;
+  switch ( (int)version ) {
+  case 0: 
+  case 1: 
+    iret = read_V1( x );
+    break;
+  case 2: 
+    iret = read_V2( x);
+    break;
+  default: 
+    cout << " can not write this V0 version " << endl;
+    return ioERR;
+  }
+
+  return ioOK;
+}
+
+//------------------------- StHbtV0 -----------------------------------
+int StHbtIOBinary::write(const StHbtV0& x, unsigned short version){
+#ifdef STHBTDEBUG
+  cout << " StHbtIOBinary::writeV0() - Version : " << version << endl;
+#endif
+  int iret;
+  switch ( (int)version ) {
+  case 0: 
+  case 1:
+    iret = write_V1( x );
+    break;
+ case 2: 
+    iret = write_V2( x );
+    break;
+  default: 
+    cout << " can not write this V0 version " << endl;
+    return ioERR;
+  }
+  return ioOK;
+}
+
+
+//------------------------- StHbtEvent Versions -----------------------------------
+//------------------------- StHbtEvent Versions -----------------------------------
+//------------------------- StHbtEvent Versions -----------------------------------
+//------------------------- StHbtEvent Versions -----------------------------------
+//------------------------- StHbtEvent Versions -----------------------------------
+int StHbtIOBinary::read_V0(StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version ) {
+  cout << " StHbtIOBinary::read_V0(StHbtEvent& event, unsigned short trVersion, unsigned short v0Version )" << endl;
+  int iret;
+  int idummy = 0;
+  iret =  read( ev.mEventNumber);
+  if (mIStream->eof()) {
+    cout << "Hit end of file " << endl;
+    return ioEOF; 
+  } 
+  iret =  read( ev.mCtbMultiplicity );
+  iret =  read( ev.mZdcAdc[0]);
+  iret =  read( ev.mZdcAdc[1]);
+  iret =  read( ev.mTpcNhits);
+  iret =  read( ev.mNumberOfTracks);
+  iret =  read( ev.mNumberOfGoodTracks);
+  iret =  read( ev.mReactionPlane[0]);
+  iret =  read( ev.mReactionPlane[1]);
+  iret =  read( idummy              );
+  iret =  read( idummy              );
+  iret =  read( idummy              );
+  iret =  read( ev.mPrimVertPos);
+#ifdef STHBTDEBUG
+  cout << ev << endl;
+#endif
+  //  OK, time to read in Track and V0 collections
+  if (!(mIStream->good())){
+    cout << "StHbtEvent input operator finds stream in bad state ! " << endl;
+    return ioERR;
+  } 
+  // read tracks 
+  ev.TrackCollection()->clear();
+  colSizeType NtracksInCollection;
+  iret =  read( NtracksInCollection);
+  cout << " reading " << NtracksInCollection << " tracks " << endl;
+  for (colSizeType itrk=0; itrk <NtracksInCollection; itrk++){
+    StHbtTrack* trk = new StHbtTrack;
+    iret =  read(*trk, trVersion);
+    ev.TrackCollection()->push_back(trk);  // ?ok?
+#ifdef STHBTDEBUG
+    cout << " track read " << *trk << endl;
+    cout << " " << itrk << "/" << NtracksInCollection;
+    cout << " track pushed " << endl;
+#endif
+  }
+  // read v0s
+  ev.V0Collection()->clear(); 
+  colSizeType NV0sInCollection;
+  iret =  read( NV0sInCollection);
+  cout << " reading " << NV0sInCollection << " V0s " << endl;
+  if ( !(mIStream->good()) ) {
+    cout << "StHbtEvent input operator finds stream in bad state ! " << endl;
+    return ioERR;
+  }
+  for (unsigned int iv0=0; iv0<NV0sInCollection; iv0++){
+    StHbtV0* v0 = new StHbtV0;
+    iret =  read( *v0, v0Version);
+    ev.V0Collection()->push_back(v0);
+  }
+  return ioOK;
+};
+int StHbtIOBinary::write_V0(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version){
+  cout << " StHbtIOBinary::write_V0(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version) " << endl;
+  int iret;
+  int idummy = 0;
+  //event properties
+  iret =  write( ev.mEventNumber        );
+  iret =  write( ev.mCtbMultiplicity    );
+  iret =  write( ev.mZdcAdc[0]          );
+  iret =  write( ev.mZdcAdc[1]          );
+  iret =  write( ev.mTpcNhits           );
+  iret =  write( ev.mNumberOfTracks     );
+  iret =  write( ev.mNumberOfGoodTracks );
+  iret =  write( ev.mReactionPlane[0]   );
+  iret =  write( ev.mReactionPlane[1]   );
+  iret =  write( idummy                 );
+  iret =  write( idummy                 );
+  iret =  write( idummy                 );
+  iret =  write( ev.mPrimVertPos        );
+  // tracks
+  colSizeType colSize;
+  colSize = (colSizeType) ev.TrackCollection()->size();
+  iret =  write(  colSize );
+  StHbtTrack trk;
+  for (StHbtTrackIterator iter=ev.TrackCollection()->begin(); iter != ev.TrackCollection()->end(); iter++){
+    iret =  write( **iter,trVersion);
+   } 
+  // v0 tracks 
+  colSize = (colSizeType) ev.V0Collection()->size();
+  iret =  write(  colSize );
+  StHbtV0 v0;
+  for (StHbtV0Iterator iterv0=ev.V0Collection()->begin(); iterv0 != ev.V0Collection()->end(); iterv0++){
+    iret = write( **iterv0,v0Version);
+  } 
+  return ioOK;
+};
+int StHbtIOBinary::read_V1(StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version ) {
+  cout << " StHbtIOBinary::read_V1(StHbtEvent& event, unsigned short trVersion, unsigned short v0Version )" << endl;
+  int iret;
+  iret =  read( ev.mEventNumber);
+  if (mIStream->eof()) {
+    cout << "Hit end of file " << endl;
+    return ioEOF; 
+  } 
+  iret =  read( ev.mCtbMultiplicity );
+  iret =  read( ev.mZdcAdc[0]);
+  iret =  read( ev.mZdcAdc[1]);
+  iret =  read( ev.mTpcNhits);
+  iret =  read( ev.mNumberOfTracks);
+  iret =  read( ev.mNumberOfGoodTracks);
+  iret =  read( ev.mReactionPlane[0]);
+  iret =  read( ev.mReactionPlane[1]);
+  iret =  read( ev.mPrimVertPos);
+#ifdef STHBTDEBUG
+  cout << ev << endl;
+#endif
+  //  OK, time to read in Track and V0 collections
+  if (!(mIStream->good())){
+    cout << "StHbtEvent input operator finds stream in bad state ! " << endl;
+    return ioERR;
+  } 
+  // read tracks 
+  ev.TrackCollection()->clear();
+  colSizeType NtracksInCollection;
+  iret =  read( NtracksInCollection);
+  cout << " reading " << NtracksInCollection << " tracks " << endl;
+  for (colSizeType itrk=0; itrk <NtracksInCollection; itrk++){
+    StHbtTrack* trk = new StHbtTrack;
+    iret =  read(*trk, trVersion);
+    ev.TrackCollection()->push_back(trk);  // ?ok?
+#ifdef STHBTDEBUG
+    cout << " track read " << *trk << endl;
+    cout << " " << itrk << "/" << NtracksInCollection;
+    cout << " track pushed " << endl;
+#endif
+  }
+  // read v0s
+  ev.V0Collection()->clear(); 
+  colSizeType NV0sInCollection;
+  iret =  read( NV0sInCollection);
+  cout << " reading " << NV0sInCollection << " V0s " << endl;
+  if ( !(mIStream->good()) ) {
+    cout << "StHbtEvent input operator finds stream in bad state ! " << endl;
+    return ioERR;
+  }
+  for (unsigned int iv0=0; iv0<NV0sInCollection; iv0++){
+    StHbtV0* v0 = new StHbtV0;
+    iret =  read( *v0, v0Version);
+    ev.V0Collection()->push_back(v0);
+  }
+  return ioOK;
+};
+int StHbtIOBinary::write_V1(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version){
+  cout << " StHbtIOBinary::write_V1(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version) " << endl;
+  int iret;
+  //event properties
+  iret =  write( ev.mEventNumber        );
+  iret =  write( ev.mCtbMultiplicity    );
+  iret =  write( ev.mZdcAdc[0]          );
+  iret =  write( ev.mZdcAdc[1]          );
+  iret =  write( ev.mTpcNhits           );
+  iret =  write( ev.mNumberOfTracks     );
+  iret =  write( ev.mNumberOfGoodTracks );
+  iret =  write( ev.mReactionPlane[0]   );
+  iret =  write( ev.mReactionPlane[1]   );
+  iret =  write( ev.mPrimVertPos        );
+  // tracks
+  colSizeType colSize;
+  colSize = (colSizeType) ev.TrackCollection()->size();
+  iret =  write(  colSize );
+  StHbtTrack trk;
+  for (StHbtTrackIterator iter=ev.TrackCollection()->begin(); iter != ev.TrackCollection()->end(); iter++){
+    iret =  write( **iter,trVersion);
+  } 
+  // v0 tracks 
+  colSize = (colSizeType) ev.V0Collection()->size();
+  iret =  write(  colSize );
+  StHbtV0 v0;
+  for (StHbtV0Iterator iterv0=ev.V0Collection()->begin(); iterv0 != ev.V0Collection()->end(); iterv0++){
+    iret = write( **iterv0,v0Version);
+  } 
+  return ioOK;
+};
+//------------------------- StHbtEvent Versions -----------------------------------
+//------------------------- StHbtEvent Versions -----------------------------------
+//------------------------- StHbtEvent Versions -----------------------------------
+//------------------------- StHbtEvent Versions -----------------------------------
+int StHbtIOBinary::read_V2(StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version ) {
+  cout << " StHbtIOBinary::read_V2(StHbtEvent& event, unsigned short trVersion, unsigned short v0Version )" << endl;
+  int iret;
+  iret =  read( ev.mEventNumber);
+  if (mIStream->eof()) {
+    cout << "Hit end of file " << endl;
+    return ioEOF; 
+  } 
+  iret =  read( ev.mCtbMultiplicity );
+  iret =  read( ev.mZdcAdc[0]);
+  iret =  read( ev.mZdcAdc[1]);
+  iret =  read( ev.mTpcNhits);
+  iret =  read( ev.mNumberOfTracks);
+  iret =  read( ev.mNumberOfGoodTracks);
+  iret =  read( ev.mReactionPlane[0]);
+  iret =  read( ev.mReactionPlane[1]);
+  iret =  read( ev.mPrimVertPos);
+#ifdef STHBTDEBUG
+  cout << ev << endl;
+#endif
+  //  OK, time to read in Track and V0 collections
+  if (!(mIStream->good())){
+    cout << "StHbtEvent input operator finds stream in bad state ! " << endl;
+    return ioERR;
+  } 
+  // read tracks 
+  ev.TrackCollection()->clear();
+  colSizeType NtracksInCollection;
+  iret =  read( NtracksInCollection);
+  cout << " reading " << NtracksInCollection << " tracks " << endl;
+  for (colSizeType itrk=0; itrk <NtracksInCollection; itrk++){
+    StHbtTrack* trk = new StHbtTrack;
+    iret =  read(  *trk, trVersion);
+    ev.TrackCollection()->push_back(trk);  // ?ok?
+#ifdef STHBTDEBUG
+    cout << " track read " << *trk << endl;
+    cout << " " << itrk << "/" << NtracksInCollection;
+    cout << " track pushed " << endl;
+#endif
+  }
+  // read v0s
+  ev.V0Collection()->clear(); 
+  colSizeType NV0sInCollection;
+  iret =  read( NV0sInCollection);
+  cout << " reading " << NV0sInCollection << " V0s " << endl;
+  if ( !(mIStream->good()) ) {
+    cout << "StHbtEvent input operator finds stream in bad state ! " << endl;
+    return ioERR;
+  }
+  for (unsigned int iv0=0; iv0<NV0sInCollection; iv0++){
+    StHbtV0* v0 = new StHbtV0;
+    iret =  read(  *v0, v0Version);
+    ev.V0Collection()->push_back(v0);
+  }
+  return ioOK;
+};
+int StHbtIOBinary::write_V2(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version){
+  cout << " StHbtIOBinary::write_V2(const StHbtEvent& ev, unsigned short trVersion, unsigned short v0Version)" << endl;
+  int iret;
+  //event properties
+  iret =  write( ev.mEventNumber        );
+  iret =  write( ev.mCtbMultiplicity    );
+  iret =  write( ev.mZdcAdc[0]          );
+  iret =  write( ev.mZdcAdc[1]          );
+  iret =  write( ev.mTpcNhits           );
+  iret =  write( ev.mNumberOfTracks     );
+  iret =  write( ev.mNumberOfGoodTracks );
+  iret =  write( ev.mReactionPlane[0]   );
+  iret =  write( ev.mReactionPlane[1]   );
+  iret =  write( ev.mPrimVertPos        );
+  // tracks
+  colSizeType colSize;
+  colSize = (colSizeType) ev.TrackCollection()->size();
+  iret =  write(  colSize );
+  for (StHbtTrackIterator iter=ev.TrackCollection()->begin(); iter != ev.TrackCollection()->end(); iter++){
+    iret =  write( **iter, trVersion);
+  } 
+  // v0 tracks 
+  colSize = (colSizeType) ev.V0Collection()->size();
+  iret =  write(  colSize );
+  for (StHbtV0Iterator iterv0=ev.V0Collection()->begin(); iterv0 != ev.V0Collection()->end(); iterv0++){
+    iret =  write( **iterv0, v0Version);
+  } 
+  return ioOK;
+};
+//------------------------- StHbtTrack Versions -----------------------------------
+//------------------------- StHbtTrack Versions -----------------------------------
+//------------------------- StHbtTrack Versions -----------------------------------
+//------------------------- StHbtTrack Versions -----------------------------------
+int StHbtIOBinary::read_V1(StHbtTrack& x) {
+#ifdef STHBTDEBUG
+  cout << " StHbtIOBinary::read_V1(StHbtTrack&)  " << endl;
+#endif
+  return read(x);  // works only with in root
+};
+int StHbtIOBinary::write_V1(const StHbtTrack& x){
+#ifdef STHBTDEBUG
+  cout << " StHbtIOBinary::write_V1(const StHbtTrack&)" << endl;
+#endif
+  return write(x); // works only with in root
+};
+//------------------------- StHbtTrack Versions -----------------------------------
+//------------------------- StHbtTrack Versions -----------------------------------
+//------------------------- StHbtTrack Versions -----------------------------------
+//------------------------- StHbtTrack Versions -----------------------------------
+int StHbtIOBinary::read_V2(StHbtTrack& x) {
+  int iret;
+  iret = read( x.mCharge );
+  iret = read( x.mNHits );
+  iret = read( x.mNHitsPoss );
+  iret = read( x.mNSigmaElectron  );
+  iret = read( x.mNSigmaPion );
+  iret = read( x.mNSigmaKaon );
+  iret = read( x.mNSigmaProton );
+  iret = read( x.mdEdx );
+  iret = read( x.mDCAxy );
+  iret = read( x.mDCAz );
+  iret = read( x.mChiSqXY );
+  iret = read( x.mChiSqZ );
+  iret = read( x.mMap[0] );
+  iret = read( x.mMap[1] );
+  iret = read( x.mTrackId );
+  iret = read( x.mPt );
+  iret = read( x.mP );        // use template specialisation
+  iret = read( x.mHelix );    // use template specialisation
+  return ioOK;
+};
+int StHbtIOBinary::write_V2(const StHbtTrack& x) {
+  int iret;
+  iret = write( x.mCharge );
+  iret = write( x.mNHits );
+  iret = write( x.mNHitsPoss );
+  iret = write( x.mNSigmaElectron  );
+  iret = write( x.mNSigmaPion );
+  iret = write( x.mNSigmaKaon );
+  iret = write( x.mNSigmaProton );
+  iret = write( x.mdEdx );
+  iret = write( x.mDCAxy );
+  iret = write( x.mDCAz );
+  iret = write( x.mChiSqXY );
+  iret = write( x.mChiSqZ );
+  iret = write( x.mMap[0] );
+  iret = write( x.mMap[1] );
+  iret = write( x.mTrackId );
+  iret = write( x.mPt );
+  iret = write( x.mP );       // use template specialisation
+  iret = write( x.mHelix );   // use template specialisation
+  return ioOK;
+};
+//------------------------- StHbtV0 Versions -----------------------------------
+//------------------------- StHbtV0 Versions -----------------------------------
+//------------------------- StHbtV0 Versions -----------------------------------
+//------------------------- StHbtV0 Versions -----------------------------------
+int StHbtIOBinary::read_V1(StHbtV0& x) {
+#ifdef STHBTDEBUG
+  cout << " StHbtIOBinary::read_V1(StHbtV0&) " << endl;
+#endif
+  return read(x);  // works only with in root
+};
+int StHbtIOBinary::write_V1(const StHbtV0& x){
+#ifdef STHBTDEBUG
+  cout << " StHbtIOBinary::write_V1(const StHbtV0&) " << endl;
+#endif
+  return write(x); // works only with in root
+};
+//------------------------- StHbtV0 Versions -----------------------------------
+//------------------------- StHbtV0 Versions -----------------------------------
+//------------------------- StHbtV0 Versions -----------------------------------
+//------------------------- StHbtV0 Versions -----------------------------------
+int StHbtIOBinary::read_V2(StHbtV0& x) {
+  int iret;
+  iret = read( x.mdecayLengthV0 );
+  iret = read( x.mdecayVertexV0 );  
+  iret = read( x.mdcaV0Daughters );
+  iret = read( x.mdcaV0ToPrimVertex );
+  iret = read( x.mdcaPosToPrimVertex );
+  iret = read( x.mdcaNegToPrimVertex );
+  iret = read( x.mmomPos );
+  iret = read( x.mmomNeg );     
+  iret = read( x.mtpcHitsPos );
+  iret = read( x.mtpcHitsNeg );               
+  iret = read( x.mrapLambda );
+  iret = read( x.mrapK0Short );
+  iret = read( x.mcTauLambda );
+  iret = read( x.mcTauK0Short );
+  iret = read( x.midPos );
+  iret = read( x.midNeg );
+  iret = read( x.mTrackTopologyMapPos[0] );
+  iret = read( x.mTrackTopologyMapPos[1] );
+  iret = read( x.mTrackTopologyMapNeg[0] );
+  iret = read( x.mTrackTopologyMapNeg[1] );
+  //  cout << " pos track id = " << x.midPos << "   neg track id = " << x.midNeg << endl; 
+  x.UpdateV0();
+  return ioOK;
+};
+int StHbtIOBinary::write_V2(const StHbtV0& x) {
+  int iret;
+  iret = write( x.mdecayLengthV0 );
+  iret = write( x.mdecayVertexV0 );  
+  iret = write( x.mdcaV0Daughters );
+  iret = write( x.mdcaV0ToPrimVertex );
+  iret = write( x.mdcaPosToPrimVertex );
+  iret = write( x.mdcaNegToPrimVertex );
+  iret = write( x.mmomPos );
+  iret = write( x.mmomNeg );     
+  iret = write( x.mtpcHitsPos );
+  iret = write( x.mtpcHitsNeg );               
+  iret = write( x.mrapLambda );
+  iret = write( x.mrapK0Short );
+  iret = write( x.mcTauLambda );
+  iret = write( x.mcTauK0Short );
+  iret = write( x.midPos );
+  iret = write( x.midNeg );
+  iret = write( x.mTrackTopologyMapPos[0] );
+  iret = write( x.mTrackTopologyMapPos[1] );
+  iret = write( x.mTrackTopologyMapNeg[0] );
+  iret = write( x.mTrackTopologyMapNeg[1] );
+  //  cout << " pos track id = " << x.midPos << "   neg track id = " << x.midNeg << endl; 
+  return ioOK;
+};
+
+
+
+
+
+
+
+
+
