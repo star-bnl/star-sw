@@ -332,13 +332,11 @@ void StiGeometryTransform::operator() (const StTpcHit* tpchit, StiHit* stihit)
     //Transform 
     tpcTransform->operator()(gHit, lsHit);
 
-    //Careful, we have to swap z for all hits, and x and y
-    
     //Keep z in global coordinates
     stihit->setZ( tpchit->position().z() );
 
-    //Swap x for y, 
-    if (tpchit->position().z() >0) {
+    //Swap x for y (we switched sign of z, so we're ok with right-hand-rule)
+    if (tpchit->position().z() > 0) {
 	stihit->setX( lsHit.position().y() );
 	stihit->setY( lsHit.position().x() );
     }
@@ -349,10 +347,12 @@ void StiGeometryTransform::operator() (const StTpcHit* tpchit, StiHit* stihit)
 	stihit->setY( -1.*lsHit.position().x() );
     }
 
+    /*
     double phi=tpchit->position().phi();
     while (phi<0.) {
 	if (phi<0.) phi+=(2.*M_PI);
     }
+    */
 
     //Now Transform Errors
     StMatrixF covMatrix = tpchit->covariantMatrix();
@@ -365,11 +365,13 @@ void StiGeometryTransform::operator() (const StTpcHit* tpchit, StiHit* stihit)
       }
     */
 
-    // find detector for this hit
+    // find detector for this hit, remembering that we (ITTF) only use
+    // 12 tpc sectors (1-12) instead of separate sectors for the east end
     StiDetectorFinder *pFinder = StiDetectorFinder::instance();
     char szBuf[100];
+    int iIttfSector = 12 - (tpchit->sector() - 12)%12;
     sprintf(szBuf, "Tpc/Padrow_%d/Sector_%d", (int) tpchit->padrow(),
-           (int) tpchit->sector());
+            iIttfSector);
     stihit->setDetector( pFinder->findDetector(szBuf) );
 
     return;
@@ -407,9 +409,8 @@ void StiGeometryTransform::operator() (const StSvtHit* svthit, StiHit* stihit){
   StiDetectorFinder *pFinder = StiDetectorFinder::instance();
   char szBuf[100];
   sprintf(szBuf, "Svg/Layer_%d/Ladder_%d/Ladder", (int) svthit->layer(),
-          (int) svthit->ladder());
+          (int) (svthit->ladder() + 1)/2);
   stihit->setDetector( pFinder->findDetector(szBuf) );
-  
 }
 void StiGeometryTransform::operator() (const StiHit* stihit, StSvtHit* svthit){
 }
@@ -441,7 +442,6 @@ void StiGeometryTransform::operator() (const StSsdHit* ssdhit, StiHit* stihit){
   char szBuf[100];
   sprintf(szBuf, "Svg/Layer_7/Ladder_%d/Ladder", (int) ssdhit->ladder());
   stihit->setDetector( pFinder->findDetector(szBuf) );
-
 }
 
 void StiGeometryTransform::operator() (const StiHit* stihit, StSsdHit* ssdhit){
