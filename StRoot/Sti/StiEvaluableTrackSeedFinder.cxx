@@ -54,6 +54,11 @@ StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder()
     }
 }
 
+//No-op
+void StiEvaluableTrackSeedFinder::reset()
+{
+}
+
 void StiEvaluableTrackSeedFinder::setEvent(StMcEvent* mcevt) 
 {
     mMcEvent = mcevt;

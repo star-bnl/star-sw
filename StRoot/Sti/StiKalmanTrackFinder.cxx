@@ -43,6 +43,8 @@
 #include "StiKalmanTrackFinder.h"
 #include "StiMaterialInteraction.h"
 
+ostream& operator<<(ostream&, const StiTrack&);
+
 StiKalmanTrackFinder::StiKalmanTrackFinder()
 {
     cout <<"StiKalmanTrackFinder::StiKalmanTrackFinder()"<<endl;    
@@ -100,9 +102,10 @@ void StiKalmanTrackFinder::doTrackFit()
 		    return;
 		}
 		fitInward(ccc);
-		//if (trackFilter->accept(track)) 
+		//if (trackFilter->accept(track))
 		trackContainer->push_back(track);
 		track->update();  //This updates the track on the display
+		cout <<*track<<endl;
 	    }
 	}
 	
@@ -343,32 +346,28 @@ void StiKalmanTrackFinder::fitInward(StiKalmanTrackNode * node) throw (Exception
   StiDetector * cDet;  // child detector
   //double chi2;
   
-	cout << "StiKalmanTrackFinder::fitInward()" << endl;
-
   pNode = node;
   pDet  = pNode->getDetector();
-	cout << "StiKalmanTrackFinder::fitInward()" << endl
-			 << "FIRST NODE::" << endl
-			 << *pNode << endl;
-	int pos;
-  while (pNode->getChildCount()>0)
-    {
+  cout << "StiKalmanTrackFinder::fitInward()" << endl
+       << "FIRST NODE::" << endl
+       << *pNode << endl;
+  int pos;
+  while (pNode->getChildCount()>0)      {
       cNode = dynamic_cast<StiKalmanTrackNode *>(pNode->getFirstChild());
       cout << "Child: " <<  *cNode;
       cDet  = cNode->getHit()->detector();
       
       pos = cNode->propagate(pNode,cDet);	  // evolve state from pDet to cDet
-			if (pos<0)
-				{
-					cout << "POSITION < 0 =======================" << endl;
-					break;
-				}
+      if (pos<0)	      {
+	  cout << "POSITION < 0 =======================" << endl;
+	  break;
+      }
       cNode->evaluateChi2();
       cNode->updateNode();
       cout << "UPDATED: " <<  *cNode;
       pNode = cNode;
       pDet  = cDet;
-    }
+  }
 }
 
 void StiKalmanTrackFinder::fitOutward(StiKalmanTrackNode * node) throw (Exception)

@@ -199,7 +199,7 @@ void StiCompositeSeedFinder::StiSeedFinderRep::init()
 {
     //cout <<"StiCompositeSeedFinder::StiSeedFinderRep::init()"<<endl;
     //Clear
-    mSeedFinder->clear();
+    mSeedFinder->reset();
     StiDetector* layer = 0;
     //Add pointer to hits
     for (StiDetectorVec_t::iterator it=(*mCurrentStartPoint).begin(); it!=(*mCurrentStartPoint).end(); ++it) {
@@ -267,7 +267,8 @@ StiKalmanTrack* StiCompositeSeedFinder::next()
 	    }
 	}
     }
-    return track;
+    //return track;
+    return 0;
 }
 
 bool StiCompositeSeedFinder::incrementRep()

@@ -40,6 +40,7 @@ public:
     virtual bool hasMore();
     virtual StiKalmanTrack* next();
     virtual void build();
+    virtual void reset();
 
 protected:
     StiEvaluableTrack* makeTrack(StMcTrack*);

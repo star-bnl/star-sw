@@ -43,9 +43,9 @@ public:
     virtual bool hasMore();
     virtual StiKalmanTrack* next();
     virtual void build();
+    virtual void reset();
     
     void addLayer(double refangle, double position);
-    virtual void clear();
     
     virtual void print() const; //Print contents of iterator
     int numberOfLayers() const;
