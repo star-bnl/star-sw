@@ -1,12 +1,17 @@
 /***************************************************************************
+ *$Id: StPmdReadMaker.h,v 1.2 2003/12/03 11:52:38 subhasis Exp $
  *
  *  StPmdReadMaker
  *
  * Author: Supriya Das and Subhasis Chattopadhyay
  ***************************************************************************
  *
- * Description: Pmd Data Reading to store hits in Stevent
+ * Description: Pmd Data Reader to store hits in Stevent
  ***************************************************************************
+ * $Log: StPmdReadMaker.h,v $
+ * Revision 1.2  2003/12/03 11:52:38  subhasis
+ * Comment header changed by Supriya
+ *
  */
 #ifdef __ROOT__
 #ifndef STAR_StPmdReadMaker
@@ -55,6 +60,10 @@ class StPmdReadMaker : public StMaker {
   Int_t  fillStEvent(StPmdDetector*, StPmdDetector*);  // Fills StEvent
   virtual Int_t  Finish();                         // Finish
   void SetPmdPrint(Bool_t);			//Set print flag
+  virtual const char *GetCVS() const {
+	    static const char cvs[]="Tag $Name:  $ $Id: StPmdReadMaker.h,v 1.2 2003/12/03 11:52:38 subhasis Exp $ built "__DATE__" "__TIME__ ;
+	        return cvs;
+		  }
 
  protected:
 

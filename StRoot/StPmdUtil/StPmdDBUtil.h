@@ -4,19 +4,20 @@
  */
 /*********************************************************
  *
- * $Id: StPmdDBUtil.h,v 1.1 2003/11/27 12:32:37 subhasis Exp $
+ * $Id: StPmdDBUtil.h,v 1.2 2003/12/03 11:55:59 subhasis Exp $
  *
- * Author: Dipak Mishra
+ * Author: Subhasis Chattopadhyay
  *
  ************************************************************
  *
- * Description: This is the class of PMD geometry for offline 
+ * Description: This is the class of PMD Utility which provides
+ *              FEE boardwise info. 
  *
  *************************************************************
  *
  * $Log: StPmdDBUtil.h,v $
- * Revision 1.1  2003/11/27 12:32:37  subhasis
- * First version
+ * Revision 1.2  2003/12/03 11:55:59  subhasis
+ * Comment header changed by Supriya
  *
  *************************************************************/
 #ifndef STAR_StPmdDBUtil
