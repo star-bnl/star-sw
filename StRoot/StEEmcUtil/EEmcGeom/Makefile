@@ -23,13 +23,11 @@ CFLAGS   = -Wall $(DEBUG) $(DEFINES) -fPIC $(ROOTCFLAGS)
 CXXFLAGS = $(CFLAGS)
 LDFLAGS  = -shared 
 
-all:	$(LIBNAME) $(LIBNAME)-static
+all:	$(LIBNAME) 
 	-rm  $(LINK) $(DICT).*	
 
 $(LIBNAME): $(OBJS)
 	$(CXX) $(LDFLAGS) $^ -o lib$(LIBNAME).so
-
-$(LIBNAME)-static: $(OBJS)
 	$(AR)  lib$(LIBNAME).a $^
 
 clean:
