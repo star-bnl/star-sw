@@ -106,7 +106,7 @@ MatchedTrk:: MatchedTrk(StVertexMaker* head, int *ipar, float *fpar, CtbResponse
 
     head->hmtr[1]->Fill(strag); 
     head->hmtr[2]->Fill(-spath); 
-    printf("stragling=%f %f %f %f \n",strag,beta,pmom.mag(),spath);
+    //printf("straglingqq=%f %f %f %f \n",strag,beta,pmom.mag(),spath);
 
 
     n4++;
