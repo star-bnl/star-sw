@@ -16,44 +16,27 @@
 
 /**************************************************************************
  *                                                                        *
- * StiFactory	                                                          *				   
+ * StiHit					                  *
  *                                                                        *
  * Author:  Claude Pruneau, Wayne State University                        *
- * Created: March 2001                                                    *
+ * Created: April 2001                                                    *
  *                                                                        *
- * Description: Base class used to define factories.                      *
- * It is assumed factories will have a name and shall be known as         *
- * factories but should otherwise have no other apriori attribute.        *
+ * Description: A concrete class used to hold information about hits      *
+ * used in the reconstruction of tracks in Star detector                  *
  *                                                                        *
  **************************************************************************/
-#include "StiFactory.h"
+#include "StiHit.h"
 
-ClassImp(StiFactory) 
+ClassImp(StiHit) 
 
-
-StiFactory::StiFactory(const char * newName)
+StiHit::StiHit()
 {
-  name = 0;
-  setName(newName);
+  x=0;
+  y=0;
+  z=0;
 }
 
-StiFactory::~StiFactory()
-{
-  delete name;
-}
-
-const char * StiFactory::getName()
-{
-  return name;
-}
- 
-
-void  StiFactory::setName(const char * newName)
-{
-  if (name!=0 && name!=newName)
-    delete name;
-  int size = 1+strlen(newName);
-  name = malloc(size);
-  strcpy(newName,name);
+StiHit::~StiHit()
+{  
 }
 

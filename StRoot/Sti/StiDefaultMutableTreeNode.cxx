@@ -723,6 +723,7 @@ StiTreeNode *  StiDefaultMutableTreeNode::getFirstChild()
   if (getChildCount() == 0) {
     cout << "StiDefaultMutableTreeNode::getFirstChild()  - ERROR" << endl 
 	 << "        node has no children" << endl;
+    return 0;
   }
   return getChildAt(0);
 }
@@ -740,6 +741,7 @@ StiTreeNode *  StiDefaultMutableTreeNode::getLastChild()
     {
       cout << "StiDefaultMutableTreeNode::getLastChild() - ERROR" << endl 
 	   << "          node has no children" << endl;
+      return 0;
     }
   return getChildAt(getChildCount()-1);
 }
@@ -764,6 +766,7 @@ StiTreeNode *  StiDefaultMutableTreeNode::getChildAfter(StiTreeNode *  aChild)
   if (aChild == 0) {
     cout << "StiDefaultMutableTreeNode::getChildAfter(StiTreeNode *) - ERROR" << endl 
 	 << "       argument is 0" << endl;
+    return 0;
   }
   
   int index = getIndex(aChild);		// linear search
@@ -771,13 +774,17 @@ StiTreeNode *  StiDefaultMutableTreeNode::getChildAfter(StiTreeNode *  aChild)
   if (index == -1) {
     cout << "StiDefaultMutableTreeNode::getChildAfter(StiTreeNode *) - ERROR" << endl 
 	 << "       node is not a child" << endl;
-  }
-  
-  if (index < getChildCount() - 1) {
-    return getChildAt(index + 1);
-  } else {
     return 0;
   }
+  
+  if (index < getChildCount() - 1) 
+    {
+      return getChildAt(index + 1);
+    } 
+  else 
+    {
+      return 0;
+    }
 }
 
 
@@ -798,20 +805,26 @@ StiTreeNode *  StiDefaultMutableTreeNode::getChildBefore(StiTreeNode *  aChild)
   if (aChild == 0) {
     cout << "StiDefaultMutableTreeNode::getChildBefore(StiTreeNode *  aChild) - ERROR" << endl 
 	 << "argument is 0" << endl;
+    return 0;
 }
   
   int index = getIndex(aChild);		// linear search
   
-  if (index == -1) {
+  if (index == -1) 
+    {
     cout << "StiDefaultMutableTreeNode:: - ERROR" << endl 
 	 << "  --> argument is not a child" << endl;
-  }
-  
-  if (index > 0) {
-    return getChildAt(index - 1);
-  } else {
     return 0;
-  }
+    }
+  
+  if (index > 0) 
+    {
+      return getChildAt(index - 1);
+    } 
+  else 
+    {
+    return 0;
+    }
 }
 
 
@@ -832,20 +845,25 @@ bool StiDefaultMutableTreeNode::isNodeSibling(StiTreeNode *  anotherNode)
 {
   bool retval;
   
-  if (anotherNode == 0) {
-    retval = false;
-  } else if (anotherNode == this) {
-    retval = true;
-  } else {
-    StiTreeNode *   myParent = getParent();
-    retval = (myParent != 0 && myParent == anotherNode->getParent());
-    
-    if (retval && !((StiDefaultMutableTreeNode * )getParent())
-	->isNodeChild(anotherNode)) {
-      cout << "StiDefaultMutableTreeNode::isNodeSibling(StiTreeNode *  anotherNode) - ERROR" << endl 
-	   << "sibling has different parent" << endl;
+  if (anotherNode == 0) 
+    {
+      retval = false;
+    } 
+  else if (anotherNode == this) 
+    {
+      retval = true;
+    } 
+  else 
+    {
+      StiTreeNode *   myParent = getParent();
+      retval = (myParent != 0 && myParent == anotherNode->getParent());
+      
+      if (retval && !((StiDefaultMutableTreeNode * )getParent())
+	  ->isNodeChild(anotherNode)) {
+	cout << "StiDefaultMutableTreeNode::isNodeSibling(StiTreeNode *  anotherNode) - ERROR" << endl 
+	     << "sibling has different parent" << endl;
+      }
     }
-  }
   
   return retval;
 }
@@ -862,11 +880,14 @@ int StiDefaultMutableTreeNode::getSiblingCount()
 {
   StiTreeNode *  myParent = getParent();
   
-  if (myParent == 0) {
-    return 1;
-  } else {
-    return myParent->getChildCount();
-  }
+  if (myParent == 0) 
+    {
+      return 1;
+    } 
+  else 
+    {
+      return myParent->getChildCount();
+    }
 }
 
 
@@ -886,15 +907,20 @@ StiDefaultMutableTreeNode *  StiDefaultMutableTreeNode::getNextSibling()
   
   StiDefaultMutableTreeNode *  myParent = (StiDefaultMutableTreeNode * )getParent();
   
-  if (myParent == 0) {
-    retval = 0;
-  } else {
-    retval = (StiDefaultMutableTreeNode * )myParent->getChildAfter(this);	// linear search
-  }
+  if (myParent == 0) 
+    {
+      retval = 0;
+    } 
+  else 
+    {
+      retval = (StiDefaultMutableTreeNode * )myParent->getChildAfter(this);	// linear search
+    }
   
-  if (retval != 0 && !isNodeSibling(retval)) {
-    cout << "StiDefaultMutableTreeNode::getNextSibling() - ERROR" << endl 
-	 << "child of parent is not a sibling" << endl;
+  if (retval != 0 && !isNodeSibling(retval)) 
+    {
+      cout << "StiDefaultMutableTreeNode::getNextSibling() - ERROR" << endl 
+	   << "child of parent is not a sibling" << endl;
+      return 0;
   }
   
   return retval;
@@ -915,16 +941,20 @@ StiDefaultMutableTreeNode *  StiDefaultMutableTreeNode::getPreviousSibling()
   
   StiDefaultMutableTreeNode *  myParent = (StiDefaultMutableTreeNode * )getParent();
   
-  if (myParent == 0) {
-    retval = 0;
-  } else {
-    retval = (StiDefaultMutableTreeNode * )myParent->getChildBefore(this);	// linear search
-  }
+  if (myParent == 0) 
+    {
+      retval = 0;
+    } 
+  else 
+    {
+      retval = (StiDefaultMutableTreeNode * )myParent->getChildBefore(this);	// linear search
+    }
   
   if (retval != 0 && !isNodeSibling(retval))
     {
       cout << "StiDefaultMutableTreeNode::getPreviousSibling() - ERROR" << endl
 	   << "       child of parent is not a sibling" << endl;
+      return 0;
     }
   return retval;
 }
@@ -1010,7 +1040,8 @@ StiDefaultMutableTreeNode *  StiDefaultMutableTreeNode::getLastLeaf()
 // @see	#isLeaf
 // @return	returns the next leaf past this node
 //--------------------------------------------------------------
-StiDefaultMutableTreeNode *  StiDefaultMutableTreeNode::getNextLeaf() {
+StiDefaultMutableTreeNode *  StiDefaultMutableTreeNode::getNextLeaf() 
+{
   StiDefaultMutableTreeNode *  nextSibling;
   StiDefaultMutableTreeNode *  myParent = (StiDefaultMutableTreeNode * )getParent();
   
