@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.24 2000/07/28 19:25:19 lansdell Exp $
+// $Id: StHistUtil.cxx,v 1.25 2000/07/31 19:29:47 lansdell Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.25  2000/07/31 19:29:47  lansdell
+// primary vertex check histogram now contains entries for events with or without a primary vertex (with = 1, without = -1)
+//
 // Revision 1.24  2000/07/28 19:25:19  lansdell
 // added histogram of number of events without a primary vertex
 //
@@ -1300,7 +1303,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 // Cosmic Data Table QA list .............................................
   if (strcmp(dirName,"QA")==0 && strcmp(analType,"Cosmic")==0) {
    Char_t* sdefList1[] = {
- "QaNullPrimVtx",
+ "TabQaNullPrimVtx",
  "TabQaEvsumTrkTot",
  "TabQaEvsumTrkTotsm",
  "TabQaEvsumPlusMinusTrk",
@@ -1442,7 +1445,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 // St_QA_Maker histograms without svt and ftpc histograms
   if (strcmp(dirName,"QA")==0 && strcmp(analType,"year1")==0) {
     Char_t* sdefList5[] = {
-     "QaNullPrimVtx",
+     "TabQaNullPrimVtx",
      "TabQaEvsumTrkGoodDTotal",
      "TabQaEvsumTrkTot",
      "TabQaEvsumTrkTotsm",
@@ -1624,7 +1627,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 // St_QA_Maker histograms without the svt and ftpc histograms
   if (strcmp(dirName,"EventQA")==0 && strcmp(analType,"year1")==0) {
     Char_t* sdefList6[] = {
-     "QaNullPrimVtx",
+     "StEQaNullPrimVtx",
      "QaInnerSectorDeDx",
      "QaOuterSectorDeDx",
      "QaDedxAllSectors",
@@ -1801,7 +1804,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 // St_QA_Maker histograms for QA shift
   if (strcmp(dirName,"QA")==0 && strcmp(analType,"qa_shift")==0) {
     Char_t* sdefList7[] = {
-     "QaNullPrimVtx",
+     "TabQaNullPrimVtx",
      "TabQaEvsumTrkGoodDTotal",
      "TabQaEvsumTrkTot",
      "TabQaEvsumTotChg",
@@ -1875,7 +1878,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 // St_QA_Maker histograms for QA shift
   if (strcmp(dirName,"EventQA")==0 && strcmp(analType,"qa_shift")==0) {
     Char_t* sdefList8[] = {
-     "QaNullPrimVtx",
+     "StEQaNullPrimVtx",
      "QaDedxAllSectors",
      "StEQaEvsumTrkGoodDTotal",
      "StEQaEvsumTrkTot",
