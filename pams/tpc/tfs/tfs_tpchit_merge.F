@@ -1,5 +1,8 @@
-* $Id: tfs_tpchit_merge.F,v 1.15 2000/02/22 20:06:27 hardtke Exp $
+* $Id: tfs_tpchit_merge.F,v 1.16 2000/03/17 08:39:13 sakrejda Exp $
 * $Log: tfs_tpchit_merge.F,v $
+* Revision 1.16  2000/03/17 08:39:13  sakrejda
+* Flag 5 assigned only to those hits with de<0 that had flag=0 before.
+*
 * Revision 1.15  2000/02/22 20:06:27  hardtke
 * replace tgc functions with tpc functions
 *
@@ -454,7 +457,7 @@ C              now find this hit in the hit table
      >         hit_id,i_rows,ii_rows)
                if (ii_rows.eq.0) then
                   call StError('TFS_TPCHIT_MERGE - *** internal ERROR #3***')
-               else
+               else if( tphit(i_rows(1)).flag.eq.0) then
                   tphit(i_rows(1)).flag=5
                endif
             endif               
