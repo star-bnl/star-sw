@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_Reader.hh,v 1.4 1999/07/10 21:31:26 levine Exp $
+ * $Id: TPCV2P0_Reader.hh,v 1.5 1999/07/22 17:56:27 levine Exp $
  * Author: Jeff Landgraf and M.J. LeVine
  ***************************************************************************
  * Description: common definitions for TPC
@@ -11,6 +11,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0_Reader.hh,v $
+ * Revision 1.5  1999/07/22 17:56:27  levine
+ * add TPCMZCLD (mezz cluster pointer bank) description
+ *
  * Revision 1.4  1999/07/10 21:31:26  levine
  * Detectors RICH, EMC, TRG now have their own (defined by each detector) interfaces.
  * Existing user code will not have to change any calls to TPC-like detector
@@ -67,6 +70,7 @@ struct classname(Bank_TPCPEDR) ;
 struct classname(Bank_TPCRMSR) ;
 struct classname(Bank_TPCGAINR) ;
 struct classname(Bank_TPCBADR) ;
+struct classname(Bank_TPCMZCLD) ;
 
 
 class TPCV2P0_Reader : public DetectorReader
@@ -110,7 +114,7 @@ protected:
   classname(Bank_TPCRBP) *getBankTPCRBP(int interleaved_rb, classname(Bank_TPCSECP) *pBank_TPCSECP);
   classname(Bank_TPCMZP) *getBankTPCMZP(int mz, classname(Bank_TPCRBP) *pBank_TPCRBP);
   classname(Bank_TPCMZP) *getBankTPCMZP(int sector, int rb, int mz);
-
+  classname(Bank_TPCMZCLD) *getBankTPCMZCLD(int sector, int rb, int mz);
   // Sector Reader Buffers
   TPCV2P0_PADK_SR *getPADKReader(int sector);
   TPCV2P0_PADK_SR *padk[24];   // One PADK for each sector

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0.Banks.hh,v 1.2 1999/07/02 04:43:23 levine Exp $
+ * $Id: TPCV2P0.Banks.hh,v 1.3 1999/07/22 17:56:27 levine Exp $
  * Author: M.W. Schulz, Jeff Landgraf and M.J. LeVine
  ***************************************************************************
  * Description:  Record Formats for Version 2.0
@@ -7,9 +7,13 @@
  *
  *   change log
  * 02-Jun-99 MJL changed HyperSector[12] to HyperSector[24]
+ * 12-Jul-99 MJL add TPCMZCLD
  *
  ***************************************************************************
  * $Log: TPCV2P0.Banks.hh,v $
+ * Revision 1.3  1999/07/22 17:56:27  levine
+ * add TPCMZCLD (mezz cluster pointer bank) description
+ *
  * Revision 1.2  1999/07/02 04:43:23  levine
  * Many changes -
  *  navigates to head of TPCP bank independent of position.
@@ -198,6 +202,14 @@ struct classname(Bank_TPCGAINR) : public Bank
   INT32 MeanGain;
   GAINR_entry Gain[384];
 
+  int swap();
+};
+
+// override swap
+struct classname(Bank_TPCMZCLD) : public Bank
+{
+  INT32 NumRows;
+  INT32 stuff[10]; // placeholder for actual bank contents
   int swap();
 };
 
