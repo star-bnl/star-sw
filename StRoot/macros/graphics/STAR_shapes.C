@@ -76,12 +76,14 @@
 
    // Create "view" object of the "node1" to browse 
    St_NodeView view(*node1);   
-   TBrowser bb("BB",&view);
+ //  TBrowser bb("BB",&view);
 
+   view.Draw();
+//   node1->Draw();
    // Create ROOT node to draw
-   TNode *rootNode = node1->CreateTNode();
-   rootNode->cd();
-   rootNode->Draw();  
+//   TNode *rootNode = node1->CreateTNode();
+//   rootNode->cd();
+//   rootNode->Draw();  
    // Draw this geometry in the current canvas
 //   node1->cd();
 //   node1->Draw();

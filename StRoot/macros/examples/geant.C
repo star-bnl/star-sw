@@ -1,5 +1,8 @@
-// $Id: geant.C,v 1.4 1999/02/02 17:33:11 fine Exp $
+// $Id: geant.C,v 1.5 1999/02/05 16:31:42 fine Exp $
 // $Log: geant.C,v $
+// Revision 1.5  1999/02/05 16:31:42  fine
+// StarGeom.C macro has been improved
+//
 // Revision 1.4  1999/02/02 17:33:11  fine
 // makedoc.C creates html directory itself now
 //
@@ -34,7 +37,7 @@ void geant()
   // Create the main chain object
   if (! chain) chain = new StChain("bfc");
   //  Create the makers to be called by the current chain
-  St_TLA_Maker geom = new St_TLA_Maker("geom","run/geant/Run");
+  St_TLA_Maker *geom = new St_TLA_Maker("geom","run/geant/Run");
   if (! geant) geant = new St_geant_Maker("geant","event/geant/Event");
   geant->SetNwGEANT(20 000 000);
   //  geant->SetNwPAW(1000000);

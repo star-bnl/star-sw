@@ -110,10 +110,10 @@
                        ,"St_DataSet", "St_DataSetIter","St_FileSet"
                        ,"StParticleView","St_ObjectSet","St_Node","St_NodePosition"
                        ,"StMaker",     "StChain",       "St_NodeView"
-                       ,"table_head_st"
+                       ,"table_head_st","St_NodeViewIter"
                        ,"St_srs_Maker","St_tpt_Maker","St_xdfin_Maker"
                       };
-  Int_t nclass = 15;
+  Int_t nclass = 16;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("//sol/afs_rhic/star/packages/dev/inc/table_header.h");
@@ -151,6 +151,7 @@
 
   // Make HTML docs for the "plain" text files those are not in the dictionaries
   cout << " Makeing HTML's for macros" << endl;
+  html.Convert("./StarGeom.C","An example of the ROOT/STAR/GEANT interface");
   html.Convert("./TestSorter.C","An example of the STAF table sort utility");
   html.Convert("./XDFBrowser.C","XDF file interactive ROOT browser");
   html.Convert("./../Chain/xdf.C","STAR chain example");
