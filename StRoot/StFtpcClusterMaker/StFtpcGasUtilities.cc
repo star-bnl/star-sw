@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 //
-//   $Id: StFtpcGasUtilities.cc,v 1.16 2005/03/23 14:32:28 jcs Exp $
+//   $Id: StFtpcGasUtilities.cc,v 1.17 2005/03/30 11:40:35 jcs Exp $
 //
 //   StFtpcGasUtilities
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////
 //
 //   $Log: StFtpcGasUtilities.cc,v $
+//   Revision 1.17  2005/03/30 11:40:35  jcs
+//   Calculate the average temperature correctly for year 2005+ runs when only one set of temperature readings (body or extra) is available
+//
 //   Revision 1.16  2005/03/23 14:32:28  jcs
 //   additional changes for using body + extra temperatures starting with y2005
 //
@@ -106,12 +109,12 @@ Int_t StFtpcGasUtilities::barometricPressure() {
    }
 }   
 
-// Calculate FTPC West gas temperature from body temperatures only
  
 Int_t StFtpcGasUtilities::averageTemperatureWest(Int_t dbDate, Int_t runNumber) {
 	
    Int_t numberBodyTemperaturesWest = 0;
    Float_t averageBodyTemperatureWest = 0.0;
+   Float_t averageGasTempWest = 0.0;
 
    if ( dbDate >= 20050101 ) {
 
@@ -153,12 +156,10 @@ Int_t StFtpcGasUtilities::averageTemperatureWest(Int_t dbDate, Int_t runNumber) 
      }  
 
 
-     // calculate average body temperature west
+     // print out average body temperature west
      if (numberBodyTemperaturesWest > 0) {
         cout<<" = "<<averageBodyTemperatureWest<<endl;
-        cout<<"averageBodyTemperatureWest = "<<averageBodyTemperatureWest<<"/"<<numberBodyTemperaturesWest<<" = ";
-        averageBodyTemperatureWest = averageBodyTemperatureWest/numberBodyTemperaturesWest;
-        cout<<averageBodyTemperatureWest<<endl;
+        cout<<"averageBodyTemperatureWest = "<<averageBodyTemperatureWest<<"/"<<numberBodyTemperaturesWest<<" = "<<averageBodyTemperatureWest/numberBodyTemperaturesWest<<endl;
      }
      
      ftpcTemps_st* tempT = mTemps->GetTable();
@@ -197,17 +198,16 @@ Int_t StFtpcGasUtilities::averageTemperatureWest(Int_t dbDate, Int_t runNumber) 
         cout<<" + "<<tempT->extra6West<<"(extra6West)";
      }
 
-     // calculate average extra temperature west
+     // print out average extra temperature west
      if (numberExtraTempsWest > 0) {
         cout<<" = "<<averageExtraTempsWest<<endl;
-        cout<<"averageExtraTempsWest = "<<averageExtraTempsWest<<"/"<<numberExtraTempsWest<<" = ";
-        averageExtraTempsWest = averageExtraTempsWest/numberExtraTempsWest;
-        cout<<averageExtraTempsWest<<endl;
+        cout<<"averageExtraTempsWest = "<<averageExtraTempsWest<<"/"<<numberExtraTempsWest<<" = "<<averageExtraTempsWest/numberExtraTempsWest<<endl;
      }
     
      if ( (averageBodyTemperatureWest + averageExtraTempsWest) != 0 ) {
-        cout<<"setGasTemperatureWest = ("<<averageBodyTemperatureWest<<" + "<<averageExtraTempsWest<<")/2 + "<<mDb->adjustAverageWest()<<"  = "<<(averageBodyTemperatureWest+averageExtraTempsWest)/2 + mDb->adjustAverageWest()<<endl;
-        mParam->setGasTemperatureWest((averageExtraTempsWest + averageBodyTemperatureWest)/2 + mDb->adjustAverageWest());
+        averageGasTempWest = (averageBodyTemperatureWest + averageExtraTempsWest)/(numberBodyTemperaturesWest + numberExtraTempsWest) + mDb->adjustAverageWest();
+        cout<<"setGasTemperatureWest = averageGasTempWest = ("<<averageBodyTemperatureWest<<" + "<<averageExtraTempsWest<<")/("<<numberBodyTemperaturesWest<<" + "<<numberExtraTempsWest<<") + "<<mDb->adjustAverageWest()<<"  = "<<(averageBodyTemperatureWest+averageExtraTempsWest)/(numberBodyTemperaturesWest+numberExtraTempsWest) + mDb->adjustAverageWest()<<endl;
+        mParam->setGasTemperatureWest(averageGasTempWest);
         return kStOK;
      }
      else {
@@ -299,6 +299,7 @@ Int_t StFtpcGasUtilities::averageTemperatureEast(Int_t dbDate, Int_t runNumber) 
 	
    Int_t numberBodyTemperaturesEast = 0;
    Float_t averageBodyTemperatureEast = 0.0;
+   Float_t averageGasTempEast = 0.0;
 
    if ( dbDate >= 20050101 ) {
 
@@ -340,12 +341,10 @@ Int_t StFtpcGasUtilities::averageTemperatureEast(Int_t dbDate, Int_t runNumber) 
          cout<<" + "<<mGas->getBody6East()<<"(body6East)";
      }  
 
-     // calculate average body temperature east
+     // print out average body temperature east
     if (numberBodyTemperaturesEast > 0) {
        cout<<" = "<<averageBodyTemperatureEast<<endl;
-       cout<<"averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<"/"<<numberBodyTemperaturesEast<<" = ";
-       averageBodyTemperatureEast = averageBodyTemperatureEast/numberBodyTemperaturesEast;
-       cout<<averageBodyTemperatureEast<<endl;
+       cout<<"averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<"/"<<numberBodyTemperaturesEast<<" = "<<averageBodyTemperatureEast/numberBodyTemperaturesEast<<endl;
     }
      
     ftpcTemps_st* tempT = mTemps->GetTable();
@@ -389,17 +388,16 @@ Int_t StFtpcGasUtilities::averageTemperatureEast(Int_t dbDate, Int_t runNumber) 
         cout<<" + "<<tempT->extra7East<<"(extra7East)";
     }
 
-    // calculate average extra temperature east
+    // print out average extra temperature east
     if (numberExtraTempsEast > 0) {
         cout<<" = "<<averageExtraTempsEast<<endl;
-        cout<<"averageExtraTempsEast = "<<averageExtraTempsEast<<"/"<<numberExtraTempsEast<<" = ";
-        averageExtraTempsEast = averageExtraTempsEast/numberExtraTempsEast;
-        cout<<averageExtraTempsEast<<endl;
+        cout<<"averageExtraTempsEast = "<<averageExtraTempsEast<<"/"<<numberExtraTempsEast<<" = "<<averageExtraTempsEast/numberExtraTempsEast<<endl;
     }
 
     if ( (averageBodyTemperatureEast + averageExtraTempsEast) != 0 ) {
-        cout<<"setGasTemperatureEast = ("<<averageBodyTemperatureEast<<" + "<<averageExtraTempsEast<<")/2 + "<<mDb->adjustAverageEast()<<" = "<<(averageBodyTemperatureEast + averageExtraTempsEast)/2 + mDb->adjustAverageEast()<<endl;
-        mParam->setGasTemperatureEast((averageBodyTemperatureEast + averageExtraTempsEast)/2 + mDb->adjustAverageEast());
+        averageGasTempEast = (averageBodyTemperatureEast + averageExtraTempsEast)/(numberBodyTemperaturesEast + numberExtraTempsEast) + mDb->adjustAverageEast();
+        cout<<"setGasTemperatureEast = averageGasTempEast = ("<<averageBodyTemperatureEast<<" + "<<averageExtraTempsEast<<")/("<<numberBodyTemperaturesEast<<" + "<<numberExtraTempsEast<<") + "<<mDb->adjustAverageEast()<<"  = "<<(averageBodyTemperatureEast+averageExtraTempsEast)/(numberBodyTemperaturesEast+numberExtraTempsEast) + mDb->adjustAverageEast()<<endl;
+        mParam->setGasTemperatureEast(averageGasTempEast);
         return kStOK;
      }
      else {
