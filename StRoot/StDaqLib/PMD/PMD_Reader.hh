@@ -16,7 +16,8 @@
 #define	PMD_SECTOR	 2
 #define	PMD_CRAMS_MAX	 12
 #define	PMD_CRAMS_BLOCK	 2
-#define	PMD_CRAMS_CH_MAX 2016
+#define	PMD_CRAMS_CH_MAX 1728
+//#define	PMD_CRAMS_CH_MAX 2016
  
 // bank seqeuence in the SECP bank
 #define PMD_ADCD_N      0
