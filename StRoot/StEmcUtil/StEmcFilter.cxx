@@ -57,6 +57,7 @@ StEmcFilter::StEmcFilter():TObject()
   // tracks cuts
   mDCACut=300000.0;
   mPtCut=0.0;
+	mPtCutMax=1000.0;
   mEtaMin=-10000.;
   mEtaMax=10000.;
   mFitPointsCut=0;
@@ -139,7 +140,7 @@ Bool_t StEmcFilter::accept(StEvent* event)
     if(fabs(vz)>fabs(mZVertexCut)) 
     {
       msg("Event","ZVertexCut");
-      cout <<"Vertex = "<<vz<<endl;
+      cout <<"\nVertex = "<<vz<<endl<<endl;
       return kFALSE;
     }
     
@@ -232,10 +233,13 @@ void StEmcFilter::initEmcTowers(StEvent *event,Int_t mode)
           Int_t m = Hits[k]->module();
           Int_t e = Hits[k]->eta();
           Int_t s = abs(Hits[k]->sub());
-          Int_t rid;
-          mGeo[0]->getId(m,e,s,rid);
-          mETower[rid-1]=Hits[k]->energy();
-        }
+					if(abs(m)<=120)
+					{
+          	Int_t rid;
+          	mGeo[0]->getId(m,e,s,rid);
+          	mETower[rid-1]=Hits[k]->energy();
+        	}
+				}
     }
   }
   
@@ -302,6 +306,7 @@ Bool_t StEmcFilter::accept(StTrack *track)
   if(p.mag()==0) return kFALSE;
 
   if(p.perp()<mPtCut) return kFALSE;
+	if(p.perp()>mPtCutMax) return kFALSE;
   
   if(p.pseudoRapidity()<mEtaMin || p.pseudoRapidity()>mEtaMax) return kFALSE;
   if(track->fitTraits().numberOfFitPoints()<mFitPointsCut) return kFALSE;
@@ -511,10 +516,22 @@ Float_t StEmcFilter::getPtTower(Int_t m, Int_t e, Int_t s)
 \param track is the pointer to StTrack
 \param mass is the mass of idetified track
 \param id is the geant id of the identified track
-
-To the present, only pions, kaons, protons and electrons are tested.
 */
 Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id)
+{
+	TArrayF nSigma;
+	return getTrackId(track,mass,id,nSigma);
+}
+//------------------------------------------------------------------------------
+/*!
+\param track is the pointer to StTrack
+\param mass is the mass of idetified track
+\param id is the geant id of the identified track
+\param nSigmaFinal is the array that contains the number of sigmas for pions, protons, kaons and electrons (in this order)
+
+To the present, only pions, protons, kaons and electrons are tested. 
+*/
+Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id,TArrayF nSigmaFinal)
 {
  // dE/dx
   id=8;
@@ -560,11 +577,14 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id)
             
     Int_t charge=track->geometry()->charge();
     
-    for(Int_t i=0;i<4;i++)
+    nSigmaFinal.Set(4);
+		nSigmaFinal.Reset();
+		for(Int_t i=0;i<4;i++)
     {
       dedx_expected=mBB(momentum/m[i])*mdEdXScale;
       z = log(dEdX/dedx_expected);
-      nSigma[i]=fabs((Float_t) z/dedx_resolution) ;
+			nSigmaFinal[i]=(Float_t) z/dedx_resolution;
+      nSigma[i]=fabs(nSigmaFinal[i]) ;
     }
   
     Float_t SigmaOrder[4];
