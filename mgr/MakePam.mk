@@ -73,8 +73,8 @@ ifeq (,$(findstring $(LEVEL),0 1))
 SUFFIXES := .c .cc .C .cxx .f .F .g .h .hpp .inc .idl
 sources := $(strip $(sort $(dir $(foreach s, $(SUFFIXES), $(wildcard $(SRC_DIR)/*$(s) $(SRC_DIR)/*/*$(s) $(SRC_DIR)/*/*/*$(s))))))
 SRC_DIRS:= $(subst /TAIL, ,$(addsuffix TAIL, $(sources)))
-IDL_DIRS:= $(sort $(wildcard $(OUT_DIR)/pams/*/idl $(STAR)/pams/*/idl))
-INC_DIRS:= $(sort $(wildcard $(OUT_DIR)/pams/*/inc $(STAR)/pams/*/inc))
+IDL_DIRS:= $(wildcard $(OUT_DIR)/pams/*/idl $(STAR)/pams/*/idl)
+INC_DIRS:= $(wildcard $(OUT_DIR)/pams/*/inc $(STAR)/pams/*/inc)
 VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_DIR) $(GEN_TAB) $(OBJ_DIR) $(IDL_DIRS)
 #-------------------------------includes----------------------------
 STIC       := $(STAR_BIN)/stic
