@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.53 1999/04/14 23:09:42 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.54 1999/04/21 18:32:58 genevb Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.54  1999/04/21 18:32:58  genevb
+// Vertex table declaration was reverted to old version when new maker schema was introduced
+//
 // Revision 1.53  1999/04/14 23:09:42  fisyak
 // Add primtrk to dataset
 //
@@ -604,7 +607,7 @@ Int_t St_glb_Maker::Make(){
     if (iRes !=kSTAFCV_OK) iMake = kStWarn;
 #endif
   }
-  vertex = new St_dst_vertex("vertex",20000); dst.Add(vertex);
+  vertex = new St_dst_vertex("vertex",1); dst.Add(vertex);
   
   // egr
   
@@ -844,7 +847,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.53 1999/04/14 23:09:42 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.54 1999/04/21 18:32:58 genevb Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
