@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.9 2001/07/12 18:19:31 jcs Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.10 2001/07/12 20:43:28 jcs Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.10  2001/07/12 20:43:28  jcs
+// remove tzero from ftpcDriftField
+//
 // Revision 1.9  2001/07/12 18:19:31  jcs
 // compute drift map according to FTPC cathode voltage and magnetic field
 //
@@ -99,7 +102,6 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor)
     ftpcDriftField_st *ftpcDriftField = m_driftfield->GetTable();
     ftpcDriftField->numberOfEFieldBinsUsed    = 761;
     ftpcDriftField->maximumNumberOfEFieldBins = 1101;
-    ftpcDriftField->tZero                     =   0;
     ftpcDriftField->minimumDriftField         = 240;
     ftpcDriftField->stepSizeDriftField        =   1;
     ftpcDriftField->radiusTimesField          =  7365.1;
