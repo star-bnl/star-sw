@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.21 2000/06/30 14:51:20 posk Exp $
+// $Id: plot.C,v 1.22 2000/07/12 17:49:39 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -17,6 +17,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.22  2000/07/12 17:49:39  posk
+// Changed EtaSym plots.
+//
 // Revision 1.21  2000/06/30 14:51:20  posk
 // Using MessageMgr. Added graph for Eta Symmetry vs. Vertex Z.
 //
@@ -97,9 +100,9 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_CorrMult",
 			     "Flow_VertexZ",
 			     "Flow_VertexXY2D",
-			     "Flow_EtaSym",
 			     "Flow_EtaSymVerZ2D",
 			     "Flow_EtaSymVerZ",
+			     "Flow_EtaSym",
 			     //"Flow_EtaPtPhi3D",
 			     "Flow_EtaPtPhi2D.PhiEta",
                              "Flow_EtaPtPhi2D.PhiPt",
@@ -189,8 +192,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   cout << "  graph name= " << shortName[pageNumber] << endl;
 
   // set constants
-  //float qMax    =     2.;
-  float qMax    =     5.;
+  float qMax    =     3.5;
   float phiMax  = twopi; 
   int   n_qBins =    50;
   TString* histProjName = NULL;
