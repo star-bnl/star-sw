@@ -1,7 +1,11 @@
-*****************************************************************
+********************************************************************
       function g2t_volume_id(Csys,numbv)
-* 
-*****************************************************************
+*
+* Modification history:                                            *
+* PN 28.12.99: use structure control access to avoid warnings      *
+* PN 28.12.99: make decision on CALB 2/3 level numbering based on  *
+*              CALB_Nmodule(1) and (2), not on RICH presence !     *
+********************************************************************
       implicit none
       integer  g2t_volume_id
 * 
@@ -22,7 +26,7 @@
       Structure  BTOG  {version, choice, posit1, posit2 }
       Structure  CALG  {version, Nmodule(2) }
       logical          first/.true./
-*c - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+c - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 *
       if (First) then
           first=.false.
@@ -35,7 +39,7 @@
           call RBPOPD
           if (itpc>=0) print *,' g2t_volume_id: TPC version =',tpcg_version
           if (ibtf>=0) print *,'              : TOF version =',btog_version,
-                                   ' choice  =',btog_choice,btog_posit1
+     >                         ' choice  =',btog_choice,btog_posit1
           if (ical>=0) print *,'              : CALB patch  =',calg_nmodule
       endif
 
@@ -55,7 +59,7 @@
              wafer    = 8-wafer     
            else
              print *,' G2T warning: layer number ',lnumber,
-     *               '     in svt hits not found' 
+     >               '     in svt hits not found' 
            endif
            volume_id  = 1000*lnumber+100*wafer+ladder
         else If (Cd=='SFSD') then
@@ -126,19 +130,22 @@
 
       else If (Csys=='emc') then
 *6*                                barrel calorimeter - K.Shester
-        if (numbv(3)>0) then
-          rileft=numbv(1)
-	  phi   =numbv(2)
-	  superl=numbv(3)
-	else
-	  if(CALG_Nmodule(1)==0) then
-            rileft=2
-          else
-            rileft=1
-	  endif
-          phi   =numbv(1)
-          superl=numbv(2)
-	endif
+        if (CALG_Nmodule(1)*CALG_Nmodule(2)>0) then
+*          both left and right barrels:
+           rileft = numbv(1)
+           phi    = numbv(2)
+           superl = numbv(3)
+	else                   
+*          only one barrel - left or write 
+	   if(CALG_Nmodule(1)>0) then
+              rileft=1
+           else
+              rileft=2
+	   endif
+           phi    = numbv(1)
+           superl = numbv(2)
+        endif
+*
         eta=idigi(1)+1
         phi_sub=idigi(2)
         If (rileft==1) then
@@ -153,22 +160,23 @@
 
       else If (Csys=='smd') then
 *7*
-	 if (numbv(3)>0) then
+        if (CALG_Nmodule(1)*CALG_Nmodule(2)>0) then
            rileft   =numbv(1)
-	   phi      =numbv(2)
-	   forw_back=numbv(3)
-	 else
-           if(CALG_Nmodule(1)==0) then
-             rileft=2
+           phi      =numbv(2)
+           forw_back=numbv(3)
+        else
+           if (CALG_Nmodule(1)>0) then
+              rileft=1
            else
-             rileft=1
+              rileft=2
            endif
            phi      =numbv(1)
            forw_back=numbv(2)
         endif
-	eta=idigi(2)+1
+
+        eta  =idigi(2)+1
         strip=idigi(3)+1
-*       print *,' smd eta,strip=',eta,strip
+
         If (forw_back==4) forw_back=3
         If (rileft==1) then
           phi=60-phi+1
