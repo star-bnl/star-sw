@@ -9,9 +9,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-extern "C" {
 #define G__ANSIHEADER
 #include "G__ci.h"
+extern "C" {
 extern void G__cpp_setup_tagtableFtfBaseTrackDict();
 extern void G__cpp_setup_inheritanceFtfBaseTrackDict();
 extern void G__cpp_setup_typetableFtfBaseTrackDict();
@@ -25,12 +25,13 @@ extern void G__set_cpp_environmentFtfBaseTrackDict();
 
 #include "TROOT.h"
 #include "TMemberInspector.h"
-#include "FtfBaseTrack.h"
+#include "../inc/FtfBaseTrack.h"
 
 #ifndef G__MEMFUNCBODY
 #endif
 
 extern G__linked_taginfo G__FtfBaseTrackDictLN_TClass;
 extern G__linked_taginfo G__FtfBaseTrackDictLN_FtfBaseTrack;
+extern G__linked_taginfo G__FtfBaseTrackDictLN_Ftf3DHit;
 extern G__linked_taginfo G__FtfBaseTrackDictLN_FtfBaseHit;
 extern G__linked_taginfo G__FtfBaseTrackDictLN_FtfPara;
