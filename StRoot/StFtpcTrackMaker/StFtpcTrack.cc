@@ -1,5 +1,13 @@
-// $Id: StFtpcTrack.cc,v 1.20 2002/10/11 15:45:14 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.21 2002/10/24 16:37:41 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.21  2002/10/24 16:37:41  oldi
+// dca (impact parameter) is calculated using StHelix::distance(vertexPos), now.
+// Therefore it is the smallest three dimensional distance of the helix to the
+// primary vertex.
+// dca for primary tracks is filled correctly, now. (Even though this value
+// shouldn't be of great use.)
+// Code clean-ups.
+//
 // Revision 1.20  2002/10/11 15:45:14  oldi
 // Get FTPC geometry and dimensions from database.
 // No field fit activated: Returns momentum = 0 but fits a helix.
@@ -454,27 +462,21 @@ void StFtpcTrack::CalculateNMax()
 }
 
 
-Double_t StFtpcTrack::CalcDca(StFtpcVertex *vertex)
+Double_t StFtpcTrack::CalcDca(StFtpcVertex *vertex, Bool_t primaryFit)
 {
   // Calculates distance of closest approach to vertex.
 
   // call fit class
-  MomentumFit();
-
-  StThreeVector<Double_t> rv(vertex->GetX(), vertex->GetY(), vertex->GetZ());
-  StThreeVector<Double_t> nv(0,0,1);
-  Double_t pl = pathLength(rv, nv);
-  Double_t xvert = x(pl) - vertex->GetX();
-  Double_t yvert = y(pl) - vertex->GetY();
-
-  return TMath::Sqrt(xvert * xvert + yvert * yvert);
+  MomentumFit(primaryFit ? vertex : 0);
+  StThreeVector<Double_t> vertexPos(vertex->GetX(), vertex->GetY(), vertex->GetZ());
+  return distance(vertexPos);
 }
 
 
 void StFtpcTrack::CalcResiduals() {
   // Calculates the residuals to the momentum fit helix for each point.
   
-  StThreeVector<Double_t> nv(0,0,1);
+  StThreeVector<Double_t> nv(0., 0., 1.);
 
   for (Int_t i = 0; i < mPoints->GetEntriesFast(); i++) {
     // loop over all points on track
@@ -527,13 +529,9 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
   StThreeVector<Double_t> vertexPos(vertex->GetX(), vertex->GetY(), vertex->GetZ());
   StThreeVector<Double_t> lastPoint(lastP->GetX(), lastP->GetY(), lastP->GetZ());
   StThreeVector<Double_t> firstPoint;
-  StThreeVector<Double_t> nv(0, 0, 1);
+  StThreeVector<Double_t> nv(0., 0., 1.);
 
-  Double_t pl = pathLength(vertexPos, nv);
-  Double_t xvert = x(pl) - vertexPos.x();
-  Double_t yvert = y(pl) - vertexPos.y();
-
-  mDca = TMath::Sqrt(xvert * xvert + yvert * yvert);
+  mDca = distance(vertexPos);
 
   if (id_start_vertex < 0 ) {    
     firstPoint = StThreeVector<Double_t>(firstP->GetX(), firstP->GetY(), firstP->GetZ());
@@ -549,20 +547,21 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
   
   else {
     
-    if (mDca > max_Dca) {
+    if (mDca > max_Dca) { // no refit
       firstPoint = StThreeVector<Double_t>(firstP->GetX(), firstP->GetY(), firstP->GetZ());
       mFromMainVertex = (Bool_t)false;
     }
     
     else {
-      MomentumFit(vertex);
+      MomentumFit(vertex); // refit
       
       firstPoint = StThreeVector<Double_t>(vertexPos.x(), vertexPos.y(), vertexPos.z());
       mFromMainVertex = (Bool_t)true;
+      mDca = distance(vertexPos); // change dca (even if this dca isn't very useful)
     }
   }
 
-  pl = pathLength(firstPoint, nv);
+  Double_t pl = pathLength(firstPoint, nv);
   mTrackLength = pathLength(lastPoint, nv);
   
   mP.SetX(momentum().x());
@@ -740,7 +739,7 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
   setParameters(1/mFitRadius, dipAngle, startPhase, startHit, orientation);
 
   // get z-component of B-field at 0,0,0 for first momentum guess
-  Float_t pos[3] = {0, 0, 0};
+  Float_t pos[3] = {0., 0., 0.};
   Float_t centralField[3];
   StFtpcTrackingParams::Instance()->MagField()->B3DField(pos, centralField);
   centralField[0] *= kilogauss;
@@ -749,16 +748,16 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
   mZField = (Double_t) centralField[2];
   
   // get momentum at track origin and charge
-  StThreeVector<Double_t> rv(0, 0, zval[0]);
-  StThreeVector<Double_t> nv(0, 0, 1);
+  StThreeVector<Double_t> rv(0., 0., zval[0]);
+  StThreeVector<Double_t> nv(0., 0., 1.);
   Double_t pl = pathLength(rv, nv);
   mHelixMomentum = momentumAt(pl, mZField);
   SetCharge(charge(mZField));
 
   // store helix fitted hit positions
   for(i = 0; i < GetNumberOfPoints() + mVertexPointOffset; i++) {
-    StThreeVector<Double_t> rvec(0, 0, zval[i]);
-    StThreeVector<Double_t> nvec(0, 0, 1);
+    StThreeVector<Double_t> rvec(0., 0., zval[i]);
+    StThreeVector<Double_t> nvec(0., 0., 1.);
     Double_t plength = pathLength(rvec, nvec);
     xhelix[i] = x(plength);
     yhelix[i] = y(plength);
@@ -832,8 +831,8 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
       }
       
       // change position array to compensate for distortion
-      StThreeVector<Double_t> rvec(0, 0, zval[i]);
-      StThreeVector<Double_t> nvec(0, 0, 1);
+      StThreeVector<Double_t> rvec(0., 0., zval[i]);
+      StThreeVector<Double_t> nvec(0., 0., 1.);
       Double_t plength=pathLength(rvec, nvec);
       
       if (zval[1] > 0) {

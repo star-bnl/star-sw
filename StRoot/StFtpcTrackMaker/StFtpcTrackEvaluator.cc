@@ -1,5 +1,13 @@
-// $Id: StFtpcTrackEvaluator.cc,v 1.15 2002/10/11 15:45:22 oldi Exp $
+// $Id: StFtpcTrackEvaluator.cc,v 1.16 2002/10/24 16:37:46 oldi Exp $
 // $Log: StFtpcTrackEvaluator.cc,v $
+// Revision 1.16  2002/10/24 16:37:46  oldi
+// dca (impact parameter) is calculated using StHelix::distance(vertexPos), now.
+// Therefore it is the smallest three dimensional distance of the helix to the
+// primary vertex.
+// dca for primary tracks is filled correctly, now. (Even though this value
+// shouldn't be of great use.)
+// Code clean-ups.
+//
 // Revision 1.15  2002/10/11 15:45:22  oldi
 // Get FTPC geometry and dimensions from database.
 // No field fit activated: Returns momentum = 0 but fits a helix.
@@ -1646,7 +1654,7 @@ void StFtpcTrackEvaluator::DivideHistos()
   mPtEtaGoodRatio->Divide(mPtEtaGoodF, mPtEtaGoodG);
   mPtEtaBadRatio->Divide(mPtEtaBadF, mPtEtaBadG);
   mPtEtaContamination->Divide(mPtEtaLookLikeGood, mPtEtaFVtx);
-  // Splits have to be substacted, dtill. They are available in PtEta up to now but mPtEtaLookLikeGood would be overwritten..
+  // Splits have to be substracted, still. They are available in PtEta up to now but mPtEtaLookLikeGood would be overwritten.
   // mPtEtaContaWoSplits->Divide(mPtEtaLookLikeGood->Add(mPtEtaSplitLoliGood, -1), mPtEtaFVtx);
 
   return;
@@ -1665,11 +1673,11 @@ void StFtpcTrackEvaluator::FillGCutHistos()
     TObjArray   *hits  = (TObjArray*) track->GetHits();
 
     if (IsGoodMainVertexTrack(track)) {
-      mDcaGMainVertex->Fill(track->CalcDca(mVertex));
+      mDcaGMainVertex->Fill(track->CalcDca(mVertex, 0));
     }
 
     if (IsGoodNonVertexTrack(track)) {
-      mDcaGNonVertex->Fill(track->CalcDca(mVertex));
+      mDcaGNonVertex->Fill(track->CalcDca(mVertex, 0));
     }
     
     if (IsGoodTrack(track)) {

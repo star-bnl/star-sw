@@ -1,5 +1,13 @@
-// $Id: StFtpcTrack.hh,v 1.12 2002/10/11 15:45:19 oldi Exp $
+// $Id: StFtpcTrack.hh,v 1.13 2002/10/24 16:37:45 oldi Exp $
 // $Log: StFtpcTrack.hh,v $
+// Revision 1.13  2002/10/24 16:37:45  oldi
+// dca (impact parameter) is calculated using StHelix::distance(vertexPos), now.
+// Therefore it is the smallest three dimensional distance of the helix to the
+// primary vertex.
+// dca for primary tracks is filled correctly, now. (Even though this value
+// shouldn't be of great use.)
+// Code clean-ups.
+//
 // Revision 1.12  2002/10/11 15:45:19  oldi
 // Get FTPC geometry and dimensions from database.
 // No field fit activated: Returns momentum = 0 but fits a helix.
@@ -149,7 +157,7 @@ public:
       void   Fit();                                                               // momentum fit
       void   Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_vertex);  // momentum fit with vertex
       void   CalculateNMax();                                                     // calculates the max. possible number of points
-  Double_t   CalcDca(StFtpcVertex *vertex);                                       // calculation of distance of closest approach (dca) to main vertex
+  Double_t   CalcDca(StFtpcVertex *vertex, Bool_t primaryFit);                    // calculation of distance of closest approach (dca) to main vertex
   Double_t   CalcAlpha0();                                                        // calculation of the angle of xt with respect to the x axis
       void   CalcAndSetAlpha0() { this->SetAlpha0(this->CalcAlpha0()); }          // calculates and sets the angle of xt with respect to the x axis
       void   CalcResiduals();                                                     // calulates the residuals for each point on track
