@@ -1,115 +1,62 @@
 // Hey Emacs this is -*-c++-*-
+// $Id: EEmcTTMatch.h,v 1.2 2004/05/05 21:37:38 zolnie Exp $
 #ifndef STAR_EEmcTTMatch
 #define STAR_EEmcTTMatch
-// $Id: EEmcTTMatch.h,v 1.1 2004/05/04 18:28:57 zolnie Exp $
 
-/*!
- *                                                                     
- * \class  EEmcTTMatch
- * \author Piotr A. Zolnierczuk
- * \date   2004/04/30
- *
- * \brief  FIXME
- *
- * FIXME
- * 
- */                                                                      
+
 #include <ostream>
-#include <map>
 
 
 #include "TObject.h"
 #include "TVector3.h"
 
+
 #if !defined(ST_NO_NAMESPACES)
-using std::map;
 using std::ostream;
 #endif
 
 class StMuTrack;
+class EEmcTower;
 
-class EEmcTower : public TObject  {
+
+class EEmcTTMatch : public TObject {
 public:
-  EEmcTower()  { mSec=mSub=mEta=-1; mEdep=0.0; mLabel=NULL; };
-  EEmcTower(int s, int ss, int e, float ene=0.0) { 
-    mSec  = (unsigned char)s;
-    mSub  = (unsigned char)ss;
-    mEta  = (unsigned char)e;
-    mEdep = ene;
-    mLabel= NULL;
-    WriteLabel();
-  };
-  EEmcTower(const char *label, float ene=0.0);
-
-  ~EEmcTower() { if(mLabel) delete mLabel; }
-
-  float dE() const    { return mEdep; }
-  float dE(float e)   { mEdep=e; return mEdep; }
-  
-  // get/set tower computer indices 0-offset (0,....)
-  int  Sec   () const { return mSec; }
-  int  Sec   (int s)  { mSec=(char)s; return s; }
-  //
-  int  SubSec() const { return mSub; }
-  int  SubSec(int s)  { mSub=(char)s; return s; }
-  //
-  int  Eta   () const { return mEta; }
-  int  Eta   (int e)  { mEta=(char)e; return e; }
-  //
-  // get/set tower mortal human indices 1-offset (1-12,'A'-'E')
-  int  SecLabel   () const { return mSec+1; }
-  int  SecLabel   (int s)  { mSec=(char)(s-1  ); return s; }
-  //
-  int  SubSecLabel() const { return mSub+'A'; }
-  int  SubSecLabel(int s)  { mSub=(char)(s-'A'); return s; }
-  //
-  int  EtaLabel   () const { return mEta+1; }
-  int  EtaLabel   (int e)  { mEta=(char)(e-1  ); return e; }
-
-  //maybe later will implement 
-  const char *TowerLabel() { return mLabel; }
-  
-  //
-  // print tower hit info in xml-like style
-  ostream& Out ( ostream &out ) const ;  
-  
-private:
-  //
-  void  WriteLabel();
-  void  ParseLabel(const char* label);
-  //
-  char  mSec;
-  char  mSub;
-  char  mEta;
-  float mEdep;
-  char *mLabel; //! do not store this variable
-public:
-  ClassDef(EEmcTower, 1)   // 
-};
-
-
-
-class EEmcTTMatch: public EEmcTower {
-public:
+  /// the constructor
   EEmcTTMatch();
-  ~EEmcTTMatch(); 
+  /// the destructor
+  virtual ~EEmcTTMatch(); 
 
+  /// clears list of matches
   void    Clear(Option_t *opt);
-  void    Add(EEmcTower *t) { mTower = t; }
+  /// adds tower data
+  void    Add(EEmcTower *t);
+  /// adds a track to list of matches
   void    Add(StMuTrack *t);
+  /// returns a tower data
   EEmcTower *Tower()   { return mTower;   }
+  /// returns a list of matched tracks
   TList     *Tracks()  { return mTracks;  }
+  /// returns number of matched tracks
   Int_t      Matches() { return mNTracks; }
 
+
+  /// prints itself to a ostream
+  /// \param out ostream reference
   ostream& Out(ostream &out ) const; 
 
-
+  /// extrapolate given track to depth z 
+  /// \param track a pointer to StMuTrack
+  /// \param z     depth to extrapolate to
+  /// \param r     resulting 3-d vector 
   static  Bool_t  ExtrapolateToZ    ( const StMuTrack *track , const double  z, TVector3 &r); 
 
 private:
-   EEmcTower *mTower; 
-   TList     *mTracks;
-   Int_t      mNTracks; //! 
+  /// tower data
+  EEmcTower *mTower;   //->
+  /// list of matched tracks
+  TList     *mTracks;  //->
+  /// number of matched tracks (do not trust root)
+  Int_t      mNTracks; //! 
 
 public:
 
@@ -117,8 +64,6 @@ public:
 
 };
 
-
-ostream&  operator<<(ostream &out, const EEmcTower    &t  );
 ostream&  operator<<(ostream &out, const StMuTrack    &t  );  
 ostream&  operator<<(ostream &out, const EEmcTTMatch  &m  );
 

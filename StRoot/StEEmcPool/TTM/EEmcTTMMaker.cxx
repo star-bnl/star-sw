@@ -1,80 +1,98 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.18 2004/05/04 18:28:55 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.19 2004/05/05 21:37:37 zolnie Exp $
 // doxygen info here
 /** 
-    \mainpage TTM - an endcap Tower to Track Match maker (FIXME not updated!!!)
+ * \class  EEmcTTMMaker
+ * \author Piotr A. Zolnierczuk
+ * \date   2003/12/08
+ *
+ * \brief  EEMC tower to track matching
+ *
+ * This a MuDST based class to match TPC tracks to EEMC towers
+ */
+
+/*!
+    \mainpage TTM - an endcap Tower to Track Match maker 
 
     \section intro Introduction
     This a MuDST based class to get tower calibration from matching TPC tracks
-    Since cint in root/root4star does not allow to pass function pointers 
-    (that would be ideal for user defineable AcceptTrack/MatchTrack)
-    we're stuck with FORTRAN++
+  
 
 
     \section algorithm Algorithm
-    
-    1. build a list of good TPC tracks/event (using AcceptTrack)
-     - flag() > 0        (see StEvent manual for information)
-     - type() == primary (see StEvent manual for information)
-     - hits/track      >= mMinTrackHits   (user changeable via SetMinTrackHits  (Int_t    v)
-     - track  length   >= mMinTrackLength (user changeable via SetMinTrackLength(Double_t v)
-     - transverse momentum >= mMinTrackPt     (user changeable via SetMinTrackPt    (Double_t v)
 
-     2. loop over all EEMC tower hits (with adc>ped)
-     for each track check if it matches a tower at preselected positions (mZ)
-         - extrapolate track to a mZ with ExtrapolateToZ() to get track_hit_position
-         - match is established with MatchTrack()
-	     - if the distance from track_hit_position to tower_center in phi/eta
-             - is smaller than mPhiFac/mEtaFac x tower_half_width
-         - if the match is found the data (see struct NTuple_TTM ) is written to mFileName file
+    1. Events with CTB sum greater than MaxCTBsum (EEmcTTMMaker::SetMaxCTBSum) are rejected.
+    
+    2. First build a list of good TPC tracks/event (using EEmcTTMMaker::AcceptTrack)
+     - tpc tracks only
+     - type() == primary (see StEvent manual for information)
+     - flag() > 0        (see StEvent manual for information)
+     - hits/track      >= MinTrackHits   (changeable via EEmcTTMMaker::SetMinTrackHits)
+     - track  length   >= MinTrackLength (changeable via EEmcTTMMaker::SetMinTrackLength)
+     - transverse momentum >= MinTrackPt     (changeable via EEmcTTMMaker::SetMinTrackPt)
+     - MinTrackEta <= track eta <= MaxTrackEta 
+(changeable via EEmcTTMMaker::SetMinTrackEta and EEmcTTMMaker::SetMaxTrackEta)
+
+     3. loop over all EEMC tower hits (with adc>ped)
+     for each track check if it matches a tower at a set of preselected positions (z1,z2,..)
+         - extrapolate track to a mZ with EEmcTTMatch::ExtrapolateToZ() to get track intersection with a plane z=z1,z2
+         - match is established with EEmcTTMMaker::MatchTrack()    	     
+	 - if the distance from the intersection to tower center in eta and phi is smaller than predefined fraction (expressed in tower half-widths), cf. EEmcTTMMaker::SetDeltaPhiCut and EEmcTTMMaker::SetDeltaEtaCut)
+	 
+    4. If a match is established add a tower with a list of matched track to the list of matches.
+    The list is accessible with EEmcTTMMaker::GetMatchList.
 
     \section params Parameters
-    user may change _almost_ everything
-    - mMinTrackHits   (default kDefMinTrackHits  ) changeable via SetMinTrackHits  (Int_t    v)
-    - mMinTrackLength (default kDefMinTrackLength) changeable via SetMinTrackLength(Double_t v)
-    - mMinTrackPt     (default kDefMinTrackPt    ) changeable via SetMinTrackPt    (Double_t v)
-    - mPhiFac/mEtaFac (default 1.0)  user changeable via  SetPhiFactor/SetEtaFactor(Double_t v)
-    - mZ              (default   "pres" => kEEmcZPRE1+0.1,
-	                         "post" => kEEmcZPOST-0.1,
-	                         "smd"  => kEEmcSMD       ) 
+    Here are the defaults. Each parameter is changeable via corresponding Set method.
 
-	 changeable via ResetZPositions() and subsequent calls to AppendZPosition("name",value)
+    For general event selection:
+    - CTB sum is no greater than EEmcTTMMaker::kDefMaxCTBsum
 
-	 NOTE: "name" will define 2 new branches in TTree deta+name and dphi+name
-                     that will hold distances in eta/phi for matched tracks for further cutting
-                     to e.g. reduce fiducial volume         
-     - mFileName       (default lowercase(MakerName)+".root") changeable with SetFileName
+    For track selection
+    - track has at least EEmcTTMMaker::kDefMinTrackHits hist
+    - track is at least  EEmcTTMMaker::kDefMinTrackLength cm long
+    - track pt is at least EEmcTTMMaker::kDefMinTrackPt GeV
+    - track pseudorapidity at the origin is at least EEmcTTMMaker::kDefMinTrackEta
+    - track pseudorapidity at the origin is no greater than EEmcTTMMaker::kDefMaxTrackEta
 
+    For track match
+    - track must be no further than EEmcTTMMaker::kDefDeltaPhiCut x tower phi-half-width 
+from the tower center
+    - track must be no further than EEmcTTMMaker::kDefDeltaEtaCut x tower eta-half-width 
+the tower center
+    - tracks are matched at the following depths (cf. StRoot/StEEmcUtil/EEmcGeom/EEmcGeomDefs.h)
+      - pres=kEEmcZPRE1+0.1cm
+      - post=kEEmcZPOST-0.1cm 
+      - smd=kEEmcZSMD
 
      \section example Example
-     see 
-      - macros/TTM/ttm.C   an example how to analyze MuDST data
-      - macros/TTM/show.C  an example how to display MuDST data (track/towers)
+     \include ttmexample.C
 
-      root -q -b './StRoot/StEEmcPool/macros/TTM/ttm.C("/star/2003/mudst/","","R4145010.root")'
-     
-      this will produce a simple tree file called R4145010.root
+     See also:
+      - StRoot/StEEmcPool/macros/TTM/ttmexample.C an example how to use EEmcTTMMaker
+      - StRoot/StEEmcPool/macros/TTM/show.C       an example how to display MuDST track and towers
 
-       \image html  snapshot.jpg "Screen Shot"
-       \image html  eemc.gif     "Two track event"
-       \image latex eemc.eps     "Two track event" width=10cm
-
-
-     \section final Final Analysis 
-     Final analysis is done with macros e.g. mipcalib.C 
-     
-     make -f StRoot/StEEmcPool/macros/TTM/Makefile
-     
-     ./mipcalib -f R4145010.root
-
-     ./mipcalib -h will print all the options
+     \section displat Display matches
+     Here are some examples of matched tracks (from Run2003)
+        \image html  snapshot.jpg "Screen Shot"
+        \image html  eemc.gif     "Two track event"
+        \image latex eemc.eps     "Two track event" width=10cm
      
 
-     \todo    nothing on the todo list right now
-     
+     \todo    
+     - write additional makers that would produce electron and MIP calibrations
+     - more documentation?
 
-     \bug     No known bugs at this moment
+     \bug     
+     - The matching algorithm assumes that z depths at which matching is performed
+     are in fact inside the EEMC, i.e. it is only phi and eta that are checked
+     at given z. So it is up to the user to ensure that z depths are really inside EEMC.
+     And the defaults are.
+
+     - Since cint in root/root4star does not allow to pass function pointers 
+    (that would be ideal for user defineable EEmcTTMMaker::AcceptTrack and 
+    EEmcTTMMaker::MatchTrack) we're stuck with FORTRAN++
 
  */
 
@@ -87,7 +105,7 @@
 #include "TTree.h"
 #include "TH1F.h"
 
-#include "EEmcTTMMaker.h"
+
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -116,7 +134,10 @@
 #include "StEEmcDbMaker/EEmcDbItem.h"
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h"
 
+#include "EEmcTower.h"
 #include "EEmcTTMatch.h"
+#include "EEmcTTMMaker.h"
+
 
 #define DEBUG        0
 
@@ -200,7 +221,8 @@ EEmcTTMMaker::EEmcTTMMaker(
 
 //_____________________________________________________________________________
 /// destructor - cleanup
-EEmcTTMMaker::~EEmcTTMMaker(){
+EEmcTTMMaker::~EEmcTTMMaker() {
+  if( mTree  !=NULL ) delete mTree;
   if( mFile  !=NULL ) delete mFile;
   if( mGeom  !=NULL ) delete mGeom;
 
@@ -213,27 +235,28 @@ EEmcTTMMaker::~EEmcTTMMaker(){
 //_____________________________________________________________________________
 /// Init()
 Int_t 
-EEmcTTMMaker::Init(){
+EEmcTTMMaker::Init() {
 
   ResetStats();
-
+  //
   mFile = new TFile(mFileName, "RECREATE");   if(!mFile) return kStErr;
   mTree = new TTree("ttm","MuDST tracks");    if(!mTree) return kStErr;
-
-  //(void)mTree
-
+  //
+  mTree->Branch("matches","TList",&mMatchList,32768,99);
+  
+  // control histos
   mFile->mkdir("histos");
   mFile->cd("histos");
 
   // remove magic constants later
-  hTrackNHits = new TH1F("hTrankNHits","hits/track"         ,100,  0.0,100  );
-  hTrackLen   = new TH1F("hTrackLen"  ,"track length [cm]"  ,500,  0.0,500.0);
-  hTrackPt    = new TH1F("hTrackPt"   ,"p_T   [GeV]"        ,500,  0.0,  5.0);
-  hTrackPtot  = new TH1F("hTrackPtot" ,"p_tot [GeV]"        ,500,  0.0,  5.0);
+  hTrackNHits = new TH1F("hTrankNHits","hits/track"        ,100,  0.0,100  );
+  hTrackLen   = new TH1F("hTrackLen"  ,"track length [cm]" ,500,  0.0,500.0);
+  hTrackPt    = new TH1F("hTrackPt"   ,"p_T   [GeV]"       ,500,  0.0,  5.0);
+  hTrackPtot  = new TH1F("hTrackPtot" ,"p_tot [GeV]"       ,500,  0.0,  5.0);
 
-  hTrackDCA[0] = new TH1F("hTrackDCAX" , "x_vtxdca [cm]"     ,200,- 50.0, 50.0);
-  hTrackDCA[1] = new TH1F("hTrackDCAY" , "y_vtxdca [cm]"     ,200, -50.0, 50.0);
-  hTrackDCA[2]  = new TH1F("hTrackDCAZ" , "z_vtxdca [cm]"     ,200,  -5.0,  5.0);
+  hTrackDCA[0] = new TH1F("hTrackDCAX" , "x_vtxdca [cm]"   ,200,- 50.0, 50.0);
+  hTrackDCA[1] = new TH1F("hTrackDCAY" , "y_vtxdca [cm]"   ,200, -50.0, 50.0);
+  hTrackDCA[2] = new TH1F("hTrackDCAZ" , "z_vtxdca [cm]"   ,200,  -5.0,  5.0);
 
   mFile->cd("");
 
@@ -355,7 +378,7 @@ EEmcTTMMaker::Make(){
     if(adcped<0.0) continue;
     goodTowerHits++;
     //
-    EEmcTower   *eemcHit   = new EEmcTower(sec,sub,eta,adcped);
+    EEmcTower   *eemcHit   = new EEmcTower(sec,sub,eta,adcped,edep);
     EEmcTTMatch *eemcMatch = new EEmcTTMatch();
     mTowerList->Add(eemcHit);
     eemcMatch->Add(eemcHit);
@@ -376,6 +399,7 @@ EEmcTTMMaker::Make(){
 	double z = zpos->first;
 	matched=false;
 	if( ! EEmcTTMatch::ExtrapolateToZ(track,z,r)   ) break; // track 'hit' at z
+	// FIXME the matching algorithm implicitely assumes that zpos depths are inside EEMC 
 	dphi = tc.Phi()            - r.Phi()           ;
 	deta = tc.PseudoRapidity() - r.PseudoRapidity();
 	if( ! MatchTrack(dphi,deta,phiHW,etaHW) ) break; 
@@ -387,7 +411,7 @@ EEmcTTMMaker::Make(){
     }
     if( eemcMatch->Matches() > 0 ) mMatchList->Add(eemcMatch); 
   }
-
+  mTree->Fill();
   mNMatched += ntrack;
   return kStOK;
 }
@@ -406,6 +430,7 @@ EEmcTTMMaker::Clear(Option_t *option ) {
 /// finish the job, write TTree 
 Int_t 
 EEmcTTMMaker::Finish () {
+  if(mTree) mFile->Write();
   return kStOK;
 }
 
@@ -506,6 +531,9 @@ ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm)  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.19  2004/05/05 21:37:37  zolnie
+// ver 2.0 released
+//
 // Revision 1.18  2004/05/04 18:28:55  zolnie
 // version after split
 //
