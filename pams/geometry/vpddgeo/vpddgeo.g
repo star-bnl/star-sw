@@ -1,5 +1,8 @@
-* $Id: vpddgeo.g,v 1.10 2004/03/12 20:51:27 llope Exp $
+* $Id: vpddgeo.g,v 1.11 2004/03/24 18:24:07 llope Exp $
 * $Log: vpddgeo.g,v $
+* Revision 1.11  2004/03/24 18:24:07  llope
+* Zposns increased by 4" w.r.t. the run-3 posns, radiator changed to quartz to plastic scintillator
+*
 * Revision 1.10  2004/03/12 20:51:27  llope
 * only added a print statement to confirm Z-positioning during run-time
 *
@@ -76,8 +79,8 @@ Created 21 June 2000
 *
      FILL VPDG  ! pVPD basic dimensions
         version   =    3.     ! geometry version
-        zposEast  =  564.4388 ! Z position of the East pVPD volume
-        zposWest  =  563.4069 ! Z position of the West pVPD volume
+        zposEast  =  574.5688 ! Z position East: run-3 564.4388, run-4 574.5688
+        zposWest  =  573.5669 ! Z position West: run-3 563.4069, run-4 573.5669
         rmin      =    6.35   ! mothervolume rmin		(2.5inch)
         rmax      =   31.27375! mothervolume rmin		(12.3125inch)
         BPwidth   =   30.48   ! baseplate width 		(12inch)
@@ -91,16 +94,16 @@ Created 21 June 2000
         FPwidth   =    7.62   ! frontplate width		(3inch)
         FPheight  =   25.45842! frontplate height		(10.023inch)
         FPthick   =    2.54   ! frontplate thickness		(1inch)
-	FPAwidth  =    6.63956! frontpl.part A width            (2.614inch)
-	FPAhght   =    8.35405! frontpl.part A height           (3.289inch)
-	FPChght   =   12.573  ! frontpl.part C height           (4.95inch)
+        FPAwidth  =    6.63956! frontpl.part A width            (2.614inch)
+        FPAhght   =    8.35405! frontpl.part A height           (3.289inch)
+        FPChght   =   12.573  ! frontpl.part C height           (4.95inch)
         FPHhght   =    3.81   ! frontpl. hook height            (1.5inch)
         FPHwidth  =    5.08   ! frontpl. hook width             (2inch)
         FPHthick  =    0.635  ! frontpl. hook thickness         (0.25inch)
         STthick   =    0.635  ! strut thickness			(0.25inch)
         STheight  =   23.1775 ! strut height			(9.125 inch)
-	STangle   =   25.     ! strut angle (degr)
-	STdiagsz  =    5.08   ! diagnoal strut size             (2inch)
+        STangle   =   25.     ! strut angle (degr)
+        STdiagsz  =    5.08   ! diagnoal strut size             (2inch)
         SCwidth   =    7.62   ! strut clamp width               (3inch)
         SCheight  =    3.81   ! strut clamp height              (1.5inch)
         SClength  =    3.81   ! strut clamp length              (1.5inch)
@@ -108,7 +111,7 @@ Created 21 June 2000
         CLheight  =    3.4925 ! clamp height			(1.375inch)
         CLwidth   =    3.81   ! clamp width			(1.5inch)
         CLlength  =   41.275  ! clamp length			(16.25inch)
-	CLthick   =    0.3175 ! clamp plate thickness           (0.125inch)
+        CLthick   =    0.3175 ! clamp plate thickness           (0.125inch)
         DETlen    =   33.02   ! PMT assembly length		(13inch)
         DETrad    =    3.81   ! PMT assembly radius		(1.5inch)
         DETfront  =    1.016  ! PMT ass. frontplate thickness	(0.4inch)
@@ -492,9 +495,15 @@ Block VCNV  is converter layer (radiator included)
 EndBlock
 *
 Block VRAD  is Cerenkov Radiator layer
-     Component Si    A=28.09   Z=14  W=1
-     Component O2    A=16      Z=8   W=2
-     Mixture   SiO2  Dens=2.65
+*
+*---- radiator is Quartz.....
+*     Component Si    A=28.09   Z=14  W=1
+*     Component O2    A=16      Z=8   W=2
+*     Mixture   SiO2  Dens=2.65
+*
+*---- radiator is Scintillator (pVPD)....
+     Material  Polystyren
+*
      Medium    sensitive   IsVol=1
      Attribute VRAD   seen=1   colo=3
      Shape     TUBE   dz=vpdg_RadiThk/2
