@@ -26,7 +26,10 @@ if($SYSNM ne ""){
 my $debug = 0;
 my @dirs = ();
 if ($#ARGV > -1) {
-    push(@dirs, $ARGV[0]);
+    my ($dir);
+    if ( ! -d $ARGV[0]){ $dir = $SYSNM.$ARGV[0];}
+    else {               $dir = $ARGV[0];}
+    push(@dirs, $dir);
 } else {
     push(@dirs,$SYSNM."obj");
     push(@dirs,$SYSNM."OBJ");
