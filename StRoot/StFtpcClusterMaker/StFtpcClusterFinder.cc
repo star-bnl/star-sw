@@ -1,6 +1,10 @@
-// $Id: StFtpcClusterFinder.cc,v 1.32 2002/03/22 08:58:46 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.33 2002/04/05 16:45:54 oldi Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.33  2002/04/05 16:45:54  oldi
+// Small code clean ups, to be sure that this part is recompiled. It relies
+// on StFtpcTracker/StFtpcPoint.* which were changed.
+//
 // Revision 1.32  2002/03/22 08:58:46  jcs
 // invert cluster pad number in FTPC East
 // convert cluster cartestian coordinates for FTPC west into STAR global coordinate system
@@ -193,7 +197,7 @@ int StFtpcClusterFinder::search()
   pdeflection = new Double_t[mParam->numberOfDriftSteps()
                                *mDb->numberOfPadrowsPerSide()];
 
-  if(pradius == NULL || pdeflection == 0)
+  if(pradius == 0 || pdeflection == 0)
     {
       gMessMgr->Message("", "E", "OST") << "Padtrans memory allocation failed, exiting!" << endm;
       return 0;
@@ -237,10 +241,10 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
   clusters = 0;
 
   /* initialize sequence and cluster lists */ 
-  NewSequences=NULL;
-  FirstCUC = NULL;
+  NewSequences = 0;
+  FirstCUC = 0;
   iOldSeqNumber = 0;
-  iNewSeqIndex=0;
+  iNewSeqIndex = 0;
 
 #ifdef DEBUGFILE
   fin=fopen("test00", "w");
@@ -284,7 +288,7 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 	      iPad=padlist[iHardRow-1][iThPad];
 
 	      // search, fit and remove finished CUCs  
-	      for(CurrentCUC = FirstCUC; CurrentCUC!=NULL; 
+	      for(CurrentCUC = FirstCUC; CurrentCUC!=0; 
 		  CurrentCUC = CurrentCUC->NextClusterUC)
 		{
 		  // check if CurrentCUC is adjacent to this pad
@@ -372,7 +376,7 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 		{
 
 		  // mark sequence as unused 
-		  SequenceInCUC=NULL;
+		  SequenceInCUC = 0;
 
 		  // compare this sequence to old sequences
 		  for(iOldSeqIndex=iOldSeqBuf; iOldSeqIndex < iOldSeqNumber; 
@@ -405,7 +409,7 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
  
 			  // compare matching sequences to old CUCs  
 			  // loop over all active CUCs 
-			  for(CurrentCUC = FirstCUC; CurrentCUC!=NULL; 
+			  for(CurrentCUC = FirstCUC; CurrentCUC != 0; 
 			      CurrentCUC = CurrentCUC->NextClusterUC)
 			    {
 			      LastCUC=CurrentCUC;
@@ -426,7 +430,7 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 				      // check if new sequence is already used 
 				      if(SequenceInCUC!=CurrentCUC)
 					{
-					  if(SequenceInCUC!=NULL && SequenceInCUC!=CurrentCUC)
+					  if(SequenceInCUC != 0 && SequenceInCUC!=CurrentCUC)
 					    {
 					      // yes, already used, merge CUCs 
 					      // mark old CUC for removal
@@ -471,7 +475,7 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 					      // sequence is now in CurrentCUC
 					      SequenceInCUC=CurrentCUC;
 					    }
-					  else // to: if(SequenceInCUC!=NULL)
+					  else // to: if(SequenceInCUC!=0)
 					    {
 					      // sequence did not belong to any CUC before
 					      // add sequence to CurrentCUC
@@ -495,18 +499,18 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 						{
 						  CurrentCUC->CutOff=1;
 						}
-					    } // end of: if(SequenceInCUC!=NULL) ... else 
+					    } // end of: if(SequenceInCUC!=0) ... else 
 					} // end of: if(SequenceInCUC...) 
 				    } // end of: if((OldSequences...)) 
 				} // end of: for(ICUCSequence...) 
 			    } // end of: for(CurrentCUC...)
-			  if(SequenceInCUC==NULL && NewSequences[iNewSeqIndex].Length>1)
+			  if(SequenceInCUC==0 && NewSequences[iNewSeqIndex].Length>1)
 			    {
 			      // no matching CUC was found: create new CUC
 			      // allocate memory
 			      CurrentCUC=cucAlloc(CUCMemory, CUCMemoryArray, 
 						  &CUCMemoryPtr);
-			      if(CurrentCUC == NULL)
+			      if(CurrentCUC == 0)
 				{
 				  // no free memory, overwrite last CUC
 #ifdef DEBUG
@@ -518,7 +522,7 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 			      else
 				{
 				  // set pointers to this CUC
-				  if(FirstCUC == NULL)
+				  if(FirstCUC == 0)
 				    {
 				      FirstCUC = CurrentCUC;
 				    }
@@ -528,7 +532,7 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 				    }
 				  
 				  // this is the newest CUC 
-				  CurrentCUC->NextClusterUC=NULL;
+				  CurrentCUC->NextClusterUC=0;
 				}
 		      
 			      // fill new CUC structure
@@ -567,7 +571,7 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 				{
 				  CurrentCUC->CutOff=0;
 				}
-			    }   // end of: if(SequenceInCUC==NULL)
+			    }   // end of: if(SequenceInCUC==0)
 			  else
 			    {
 			      if(bOldSequenceUsed==0 && SequenceInCUC!=0)
@@ -601,7 +605,7 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 	    } // end of: for(iThPad...)
 
 	  // sector done, fit and remove all remaining CUCs  
-	  for(CurrentCUC = FirstCUC; CurrentCUC!=NULL; 
+	  for(CurrentCUC = FirstCUC; CurrentCUC!=0; 
 	      CurrentCUC = CurrentCUC->NextClusterUC)
 	    {
 	      // CurrentCUC is finished 
@@ -2046,7 +2050,7 @@ TClusterUC *StFtpcClusterFinder::cucAlloc(TClusterUC memory[MAXNUMCUC], int Real
 #ifdef DEBUG
       printf("CUC memory exhausted! requested %d CUCs\n", *pointer);
 #endif
-      return NULL;
+      return 0;
     }
 }
 
