@@ -1,7 +1,7 @@
 // LinkDef.h
 /***************************************************************************
  *
- * $Id: StarClassLibraryLinkDef.hh,v 1.5 2003/04/30 20:39:43 perev Exp $
+ * $Id: StarClassLibraryLinkDef.hh,v 1.6 2003/05/07 20:34:23 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -23,6 +23,9 @@
  ***************************************************************************
  *
  * $Log: StarClassLibraryLinkDef.hh,v $
+ * Revision 1.6  2003/05/07 20:34:23  perev
+ * functions for CINT added
+ *
  * Revision 1.5  2003/04/30 20:39:43  perev
  * Warnings cleanup. Modified lines marked VP
  *
@@ -54,18 +57,18 @@
 #pragma link C++ class StThreeVectorF-;
 // #pragma link C++ function operator<<(ostream&, const StThreeVectorF&);                  
 // #pragma link C++ function operator>>(istream&, StThreeVectorF&);                        
-// #pragma link C++ function abs(const StThreeVectorF&);                                      
-// #pragma link C++ function cross_product(const StThreeVectorF&, const StThreeVectorF&); 
-// #pragma link C++ function cross_product(const StThreeVectorF&, const StThreeVectorD&); 
-// #pragma link C++ function operator+ (const StThreeVectorF&, const StThreeVectorF&);    
-// #pragma link C++ function operator+ (const StThreeVectorF&, const StThreeVectorD&);    
-// #pragma link C++ function operator- (const StThreeVectorF&, const StThreeVectorF&);    
-// #pragma link C++ function operator- (const StThreeVectorF&, const StThreeVectorD&);    
-// #pragma link C++ function operator* (const StThreeVectorF&, const StThreeVectorF&);    
-// #pragma link C++ function operator* (const StThreeVectorF&, const StThreeVectorD&);    
-// #pragma link C++ function operator* (const StThreeVectorF&, double);                     
-// #pragma link C++ function operator* (double, const StThreeVectorF&);                     
-// #pragma link C++ function operator/ (const StThreeVectorF&, double);                     
+#pragma link C++ function abs(const StThreeVectorF&);                                      
+#pragma link C++ function cross_product(const StThreeVectorF&, const StThreeVectorF&); 
+#pragma link C++ function cross_product(const StThreeVectorF&, const StThreeVectorD&); 
+#pragma link C++ function operator+ (const StThreeVectorF&, const StThreeVectorF&);    
+#pragma link C++ function operator+ (const StThreeVectorF&, const StThreeVectorD&);    
+#pragma link C++ function operator- (const StThreeVectorF&, const StThreeVectorF&);    
+#pragma link C++ function operator- (const StThreeVectorF&, const StThreeVectorD&);    
+#pragma link C++ function operator* (const StThreeVectorF&, const StThreeVectorF&);    
+#pragma link C++ function operator* (const StThreeVectorF&, const StThreeVectorD&);    
+#pragma link C++ function operator* (const StThreeVectorF&, double);                     
+#pragma link C++ function operator* (double, const StThreeVectorF&);                     
+#pragma link C++ function operator/ (const StThreeVectorF&, double);                     
 
 #pragma link C++ class StThreeVectorD-;
 #pragma link C++ function operator<<(ostream&, const StThreeVectorD&);                     
