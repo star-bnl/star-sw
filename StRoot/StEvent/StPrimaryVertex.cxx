@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.cxx,v 2.4 1999/11/09 15:44:11 ullrich Exp $
+ * $Id: StPrimaryVertex.cxx,v 2.5 2000/04/03 15:30:23 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.cxx,v $
- * Revision 2.4  1999/11/09 15:44:11  ullrich
- * Removed method unlink() and all calls to it.
+ * Revision 2.5  2000/04/03 15:30:23  ullrich
+ * addDaughter() now assigns the right vertex, i.e. this, to
+ * the primary tracks stored within this primary vertex.
  *
  * Revision 2.4  1999/11/09 15:44:11  ullrich
  * Removed method unlink() and all calls to it.
@@ -35,7 +36,7 @@
 
 ClassImp(StPrimaryVertex)
 
-static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.4 1999/11/09 15:44:11 ullrich Exp $";
+static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.5 2000/04/03 15:30:23 ullrich Exp $";
 
 StPrimaryVertex::StPrimaryVertex()
 { mType = kEventVtxId; }
@@ -88,15 +89,23 @@ void
 StPrimaryVertex::addDaughter(StTrack* t)
 {
     StPrimaryTrack* p = dynamic_cast<StPrimaryTrack*>(t);
-    if (p) mDaughters.push_back(p);
+    if (p) {
+	mDaughters.push_back(p);
+	p->setVertex(this);
+    }
 }
 
 void
 StPrimaryVertex::removeDaughter(StTrack* t)
 {
+    StPrimaryTrack* p = dynamic_cast<StPrimaryTrack*>(t);
+    if (!p) return;
     StSPtrVecPrimaryTrackIterator iter;
     for (iter=mDaughters.begin(); iter != mDaughters.end(); iter++)
-        if (*iter == t) mDaughters.erase(iter);
+        if (*iter == t) {
+	    mDaughters.erase(iter);
+	    p->setVertex(0);
+	}
 }
 
 void
