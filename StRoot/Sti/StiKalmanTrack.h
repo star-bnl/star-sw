@@ -1,7 +1,13 @@
 #ifndef StiKalmanTrack_H
 #define StiKalmanTrack_H 1
 
+//SCL
+#include "StThreeVector.hh"
+
+//STD
 #include <math.h>
+
+//Sti
 #include "StiTrack.h"
 #include "StiObjectFactory.h"
 #include "StiTrackNode.h"
@@ -59,7 +65,7 @@ class StiKalmanTrack : public StiTrack
 
   void initialize(double alpha, double x[5], double e[15], const hitvector &);
   void getStateNear(double x, double &xx, double x[5], double e[15]);
-  void getPointNear(double x, double x[3]);
+  StThreeVector<double> getPointNear(double x);
   
   static StiTrackNodeFactory * trackNodeFactory;
 

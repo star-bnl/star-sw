@@ -30,7 +30,12 @@
 #include "StiMaker/StiMaker.h"
 
 //Sti
+#include "StiPlacement.h"
+#include "StiDetector.h"
+#include "StiDetectorContainer.h"
+#include "StiMapUtilities.h"
 #include "StiHit.h"
+#include "StiHitContainer.h"
 #include "StiGeometryTransform.h"
 
 StiGeometryTransform* StiGeometryTransform::sinstance = 0;
@@ -398,24 +403,3 @@ StThreeVectorD StiGeometryTransform::operator() (const StThreeVectorD& globalPos
     return g2dEulerRotation(globalPosition, refAngle);
 }
 
-void StiGeometryTransform::operator() (const StTrack* st, StiTrack* sti)
-{
-    //First, establish the ref-Angle for the Track using the last point on StTrack
-    const StThreeVectorF& lastPointF = st->detectorInfo()->lastPoint();
-    StThreeVector<double> lastPoint(lastPointF.x(), lastPointF.y(), lastPointF.z());
-    
-    //Get the refAngle from the last point on the track (find the real last point!)
-    int sector = sectorForTpcCoords(lastPoint);
-    double refAngle = phiForSector( sector, 12);
-
-    //Now get the helix
-    StPhysicalHelixD sthelix = st->geometry()->helix();
-
-    //Establish the origin in TpcCoordinates
-    const StThreeVectorD& originD = sthelix.origin();
-
-    //Transform to StiCoordinates
-    StThreeVectorD stioriginD = this->operator()(originD, refAngle);
-    
-    //cout <<sector<<" "<<refAngle<<"\t\t"<<originD<<"\t\t"<<stioriginD<<endl;    
-}

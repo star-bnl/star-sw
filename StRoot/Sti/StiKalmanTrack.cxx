@@ -1,9 +1,13 @@
+#include <iostream.h>
+
 
 //Sti
 #include "StiHit.h"
 #include "StiDefaultMutableTreeNode.h"
 #include "StiTrackNode.h"
 #include "StiKalmanTrack.h"
+
+ostream& operator<<(ostream&, const StiHit&);
 
 StiKalmanTrack::StiTrackNodeFactory* StiKalmanTrack::trackNodeFactory = 0;
 
@@ -279,14 +283,31 @@ StiHit * StiKalmanTrack::getHit(int index)
 
 void StiKalmanTrack::initialize(double alpha, double x[5], double e[15], const hitvector & v)
 {
-  hitvector::const_iterator it;
-  StiTrackNode * newNode;
-  StiHit * hit;
-  for (it=v.begin(); it!=v.end();it++)
-    {
-      hit = *it;
-      newNode = addHit(hit);
-      newNode->set(x,e,hit->x(),alpha);
+    //cout <<"StiKalmanTrack::initialize(double, double[5], double[15], hitvector)"<<endl;
+    if (!trackNodeFactory) {
+	cout <<"StiKalmanTrack::initialize()\tERROR:\ttrackNodeFactory==0.  Abort"<<endl;
+    }
+
+    /*
+      cout <<"alpha: "<<alpha<<endl;
+      cout <<"Passed State"<<endl;
+      for (int i=0; i<5; ++i) {
+      cout <<"x["<<i<<"]:\t"<<x[i]<<endl;
+      }
+      for (int i=0; i<15; ++i) {
+      cout <<"e["<<i<<"]:\t"<<e[i]<<endl;
+      }
+    */
+    
+    hitvector::const_iterator it;
+    StiTrackNode * newNode;
+    StiHit * hit;
+    for (it=v.begin(); it!=v.end(); ++it) {
+	//cout <<"Adding Hit: "<<(*(*it))<<endl;
+	newNode = addHit(*it);
+	//cout <<"Hit Added, setting parameters"<<endl;
+	newNode->set(x,e,hit->x(),alpha);
+	//cout <<"Parameters set"<<endl;
     }
 }
 
@@ -320,12 +341,13 @@ void StiKalmanTrack::getStateNear(double x, double &xx, double state[5], double 
   delete nodes;
 }
 
-void StiKalmanTrack::getPointNear(double x, double point[3])
+StThreeVector<double> StiKalmanTrack::getPointNear(double x)
 {
   double xx;
   double state[5];
   getStateNear(x,xx,state,0);
-  point[0] = xx;
-  point[1] = state[0];
-  point[2] = state[1];
+  return (StThreeVector<double>(xx, state[0], state[1]));
+  //point[0] = xx;
+  //point[1] = state[0];
+  //point[2] = state[1];
 }

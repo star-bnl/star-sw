@@ -13,6 +13,7 @@
 #include "StiHitContainer.h" //Include temp., so that we can use typedefs
 #include "CombinationIterator.h"
 
+class StiRootDrawableHits;
 class StiKalmanTrack;
 class StTrack;
 
@@ -23,8 +24,8 @@ class StiTrackSeedFinder : public StiSeedFinder
 
 public:
     StiTrackSeedFinder(); //Not Implemented
-    StiTrackSeedFinder(StiHitContainer*);
     StiTrackSeedFinder(const StiTrackSeedFinder&); //Not Implemented
+    StiTrackSeedFinder(StiHitContainer*);
     virtual ~StiTrackSeedFinder();
     
     //Enforced User interface
@@ -43,6 +44,7 @@ protected:
     StiHitContainer* mhitstore;
     combo_iterator* miterator;
     int mnlayers;
+    StiRootDrawableHits* mdrawablehits;
 };
 
 #endif

@@ -54,6 +54,11 @@ struct StHitRadiusLessThan
     bool operator() (const StHit*, const StHit*) const;
 };
 
+struct StHitRadiusGreaterThan
+{
+    bool operator() (const StHit*, const StHit*) const;
+};
+
 struct StiHitLessThan
 {
     bool operator() (const StiHit*, const StiHit*) const;

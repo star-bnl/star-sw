@@ -63,12 +63,15 @@ class CombinationIterator
   }
   
   virtual void push_back(const tvector& vec) {
-    VectorEntry entry(vec);
-    entry.init();
-    mvector.push_back(entry);
-    return;
+      if (vec.size()==0) {
+	  cout <<"template <class T> StiCombinationIterator::push_back()\tError: vec is empty"<<endl;
+      }
+      VectorEntry entry(vec);
+      entry.init();
+      mvector.push_back(entry);
+      return;
   }
-  
+    
   virtual void clear() {
     mvector.clear();
     return;
@@ -135,10 +138,10 @@ class CombinationIterator
       if ( (*it).thevec.size() != 0 ) {
 	cout <<"\t Tvector:"<<endl;
 	for (tvector::const_iterator it2=(*it).thevec.begin(); it2!=(*it).thevec.end(); ++it2) {
-	    //cout <<"\t\t"<<*(*it2)<<endl;
+	    cout <<"\t\t"<<*(*it2)<<endl;
 	}
 	cout <<"\t Iterator:\t"<<endl;
-	//cout <<"\t\t"<<*(*((*it).theit))<<endl;
+	cout <<"\t\t"<<*(*((*it).theit))<<endl;
       }
     }  
     return;
