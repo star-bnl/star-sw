@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.417 2004/05/21 20:44:41 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.418 2004/05/28 18:35:27 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1303,7 +1303,11 @@ Int_t StBFChain::Instantiate()
 	  if (Key.CompareTo("db",TString::kIgnoreCase) == 0) {
             if (!dbMk && ! GetChain()->GetMaker(fBFC[i].Name)) {
 	      if (!GetOption("NoMySQLDb") && !GetOption("NoCintDb"))
-		dbMk = new St_db_Maker(fBFC[i].Name,"MySQL:StarDb","$STAR/StarDb","$PWD/StarDb");
+		if ( GetOption("NoCintCalDb") ){ 
+		  dbMk = new St_db_Maker(fBFC[i].Name,"MySQL:StarDb","$STAR/StarDb");
+		} else {
+		  dbMk = new St_db_Maker(fBFC[i].Name,"MySQL:StarDb","$STAR/StarDb","$PWD/StarDb");
+		}
 	      else {
 		if (GetOption("NoMySQLDb") && GetOption("NoCintDb"))
 		  dbMk = new St_db_Maker(fBFC[i].Name,"$PWD/StarDb");
