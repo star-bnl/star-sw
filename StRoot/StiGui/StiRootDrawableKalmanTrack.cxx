@@ -7,7 +7,10 @@
 //07/01
 
 //STD
+#include <stdexcept>
+#include <iostream.h>
 #include <algorithm>
+using namespace std;
 
 //StEvent
 #include "StEventTypes.h"
@@ -19,6 +22,7 @@
 //Sti
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiMapUtilities.h"
+#include "Sti/StiKTNIterator.h"
 
 //StiGui
 #include "StiTPolyLine3D.h"
@@ -93,25 +97,67 @@ void StiRootDrawableKalmanTrack::fillHitsForDrawing()
     //Set color and line type
     mLineHitPair.first->clearLine();
     
-    //Let's try to find out where the first node is:
-    StiKalmanTrackNode* inner = getNodeNear(0.);
-    double xStart = inner->fX;
+    //Loop over nodes by hand (faster than using StiKalmanTrack interface)
+    //This is essentailly the guts of an interpolation routine that should become
+    // a class at some point.
+    double step = 1.; //cm
     
-    for (double xLocal=xStart; xLocal<200.; xLocal+=1.) {
-	StThreeVector<double> pos = getGlobalPointNear(xLocal);
-	//cout <<"Adding Position:\t"<<pos<<endl;
-	//mLineHitPair.first->push_back( pos );
-	mLineHitPair.first->push_back( pos.x() );
-	mLineHitPair.first->push_back( pos.y() );
-	mLineHitPair.first->push_back( pos.z() );
+    bool go = true;
+    StiKalmanTrackNode * lastNode = getLastNode();
+    double xLocal = lastNode->fX;
+    StiKTNForwardIterator it(lastNode);
+    StiKTNForwardIterator end = it.end();
+    
+    while( go && it!=end ) {
+	//cout <<"Entered loop";
+	StiKalmanTrackNode& node = *it;
+	//cout <<"\tDereferenced it";
 	
+	++it;
+	if (it==end) { //we're done
+	    //cout <<"We're finished, go on"<<endl;
+	    go=false;
+	}
+	else {
+	    StiKalmanTrackNode& next = *it;
+	    while (xLocal<next.fX) {
+		bool threw = false;
+		//Try the new method:
+		StThreeVector<double> pos;
+		try {
+		    pos = node.getPointAt(xLocal);
+		}
+		catch (runtime_error & rte)	{
+		    threw=true;
+		    //cout << "RunTime Error Exception: " << rte.what()<<endl;
+		}
+		catch (exception & e) {
+		    threw=true;
+		    //cout << "Exception: " << e.what()<<endl;
+		}
+
+		if (threw==false) {
+		    mLineHitPair.first->push_back(pos.x());
+		    mLineHitPair.first->push_back(pos.y());
+		    mLineHitPair.first->push_back(pos.z());
+		}
+		else {
+		    mLineHitPair.first->setColor( 3 );
+		    mLineHitPair.second->setColor( 3 );
+		}
+		
+		xLocal+=step;
+	    }
+	    //cout <<"Done stepping"<<endl;
+	    //} //temporary patch
+	}
     }
 
     //now fill hits for real:
     //remember, we *ARE* an StiKalmanTrack (public inheritance)
     StiKalmanTrackNode* node = getLastNode(); //start at innermost
     int hits=0;
-    bool go=true;
+    go=true;
     while (go) {
 	if (node->getHit()) {
 
