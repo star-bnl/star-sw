@@ -1,5 +1,8 @@
-// $Id: StSvtClusterAnalysisMaker.h,v 1.3 2001/04/04 19:12:01 didenko Exp $
+// $Id: StSvtClusterAnalysisMaker.h,v 1.4 2001/07/19 20:42:24 caines Exp $
 // $Log: StSvtClusterAnalysisMaker.h,v $
+// Revision 1.4  2001/07/19 20:42:24  caines
+// Add Reset functions
+//
 // Revision 1.3  2001/04/04 19:12:01  didenko
 // remove ! from comments to create Streamer
 //
@@ -46,6 +49,7 @@ class StSvtClusterAnalysisMaker : public StMaker
   virtual Int_t Make();
   virtual Int_t Finish();
 
+  Int_t Reset();
 
   Int_t GetSvtEvent();
   Int_t GetSvtPixels();
@@ -103,7 +107,7 @@ class StSvtClusterAnalysisMaker : public StMaker
   TH2F **m_time_anode_clu;                    //! Timebucket vs anode for clusters
   TH2F **m_time_anode_raw;                    //! Timebucket vs anode for raw sequences
   TH2F *m_SumADCvsTime;                       //! Timebucket vs SUM ADC of clusters
-
+ TH2F *m_PeakADCvsTime;                       //! Timebucket vs Peak ADC of clusters
 
 
  private:

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.12 2001/05/04 14:20:05 caines Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.13 2001/07/19 20:42:20 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.13  2001/07/19 20:42:20  caines
+ * Add Reset functions
+ *
  * Revision 1.12  2001/05/04 14:20:05  caines
  * Improved historgramming
  *
@@ -206,6 +209,7 @@ Int_t StSvtClusterAnalysisMaker::CreateClusterHist(Int_t tNuOfHyb)
   m_n_seq = new TH1F("NSeqClust","No. Pixels on cluster",100,0.,300.);
   m_nClust = new TH2F("NClust","No. clusters per event",1000,0.,1000.,100,0.,3000.);
   m_SumADCvsTime = new TH2F("SumAdcVsTime" ,"Time bucket vs Sum ADC",128,0.,128.,1000,0,100);
+  m_PeakADCvsTime = new TH2F("PeakAdcVsTime" ,"Time bucket vs PeakADC",128,0.,128.,50,0,50);
   m_time_anode_clu = new TH2F*[tNuOfHyb];
   m_time_anode_raw = new TH2F*[tNuOfHyb];
   m_sumADC = new TH1F*[tNuOfHyb];
@@ -235,8 +239,8 @@ Int_t StSvtClusterAnalysisMaker::CreateClusterHist(Int_t tNuOfHyb)
 	   titleadcc = strcat(titleadc,title2);
 	   //	   cout << title3 <<" " << titlerawc << " " << titleadcc << " " << index << " " <<  tNuOfHyb << endl;
 	   if( Debug()){
-	     m_time_anode_clu[index] = new TH2F(title3 ,"Time bucket vs anode",240,0.,240.,128.,0.,128.);	   
-	     m_time_anode_raw[index] = new TH2F(titlerawc ,"Time bucket vs anode",240,0.,240.,128.,0.,128.);
+	     m_time_anode_clu[index] = new TH2F(title3 ,"Time bucket vs anode",240,0.5,240.5,129,-0.5,128.5);	   
+	     m_time_anode_raw[index] = new TH2F(titlerawc ,"Time bucket vs anode",240,0.5,240.5,129,-0.5,128.5);
 	     m_sumADC[index] = new TH1F(titleadcc,"Sum of ADC counts in cluster",100,0,1000);
 	   }
 	}
@@ -302,7 +306,7 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
           mSvtAnalysis->CluLastTimeBin();
           mSvtAnalysis->MomentAnalysis();
           mSvtAnalysis->SetBadAnTb(mNumOfClusters);   //note I dont look at decon here
-          //mSvtAnalysis->Report(index);
+          if( Debug()) mSvtAnalysis->Report(index);
 
 
 	  mSvtAnalClusters = (StSvtAnalysedHybridClusters*)
@@ -317,15 +321,15 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
 	    mSvtAnalClusters->setSvtHit(mSvtAnalysis);
 	    mSvtAnalColl->at(index) = mSvtAnalClusters;
 	   
-	  
-	    
-	    if( index != 11 && index !=10){
-	      for( int clu=0; clu<mSvtAnalysis->GetnSvtClu(); clu++){
-		if(Debug()) m_sumADC[index]->Fill(mSvtAnalysis->GetCluCharge(clu));
+	    for( int clu=0; clu<mSvtAnalysis->GetnSvtClu(); clu++){
+	      if(Debug()) m_sumADC[index]->Fill(mSvtAnalysis->GetCluCharge(clu));
+	      if( mSvtAnalysis->GetCluFlag(clu) < 4){
 		m_SumADCvsTime->Fill((float)mSvtAnalysis->GetMeanClusterTimeBin(clu),(float)mSvtAnalysis->GetCluCharge(clu));
+	       
+		m_PeakADCvsTime->Fill((float)mSvtAnalysis->GetMeanClusterTimeBin(clu),(float)mSvtAnalysis->GetCluPeakAdc(clu));
 		m_n_seq->Fill(mSvtAnalysis->GetCluNumPixels(clu));
-		
 	      }
+	    
 	    }
 	  }
         }
@@ -488,9 +492,7 @@ void StSvtClusterAnalysisMaker::MakeHistograms(){
 
          mNumOfClusters = mHybridCluster->getNumberOfClusters(); 
 
-	 if( index != 11 && index!= 12){
-	   TotalClusters+=mNumOfClusters;
-	 }
+	 TotalClusters+=mNumOfClusters;
 	 gMessMgr->Message()<<"numOfClusters = "<<mNumOfClusters << " For index = " << index<< " " ;
 	 
          tempMemberInfo =  new StSvtClusterMemberInfo*[mNumOfClusters];
@@ -533,6 +535,32 @@ void StSvtClusterAnalysisMaker::MakeHistograms(){
  gMessMgr->Message()<< " Found " << TotalClusters << " clusters."<< endm;
 
  m_nClust->Fill((float)mNoEvents,(float)TotalClusters);
+}
+//____________________________________________________________________________
+Int_t StSvtClusterAnalysisMaker::Reset(){
+
+   delete mSvtAnalClusters; 
+   delete mSvtAnalColl;
+   delete mSvtAnalysis;
+
+   mSvtAdjEvent     = NULL;
+
+   mHybridRawData   = NULL;
+   mHybridAdjData   = NULL;
+   mHybridPixelData = NULL;
+
+   mSvtRawEventColl = NULL;
+   mSvtClusterColl  = NULL;
+   mSvtPixelColl    = NULL;
+   mSvtAnalColl     = NULL;
+
+   mSvtAnalysis     = NULL;
+   mSvtHit          = NULL;
+   mSvtAnalClusters = NULL; 
+
+   m_ConstSet->Delete();
+
+   return kStOK;
 }
 
 //____________________________________________________________________________
