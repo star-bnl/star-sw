@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.65 2001/03/13 22:09:19 long Exp $
+// $Id: StTrsMaker.cxx,v 1.66 2001/03/20 01:44:24 perev Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.66  2001/03/20 01:44:24  perev
+// drift velocity print added
+//
 // Revision 1.65  2001/03/13 22:09:19  long
 // *** empty log message ***
 //
@@ -355,7 +358,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.65 2001/03/13 22:09:19 long Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.66 2001/03/20 01:44:24 perev Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -682,7 +685,7 @@ Int_t StTrsMaker::Make(){
     cout << "\n -- Begin TRS Processing -- \n";
     time_t trsMakeBegin = time(0);
     cout << "Started at: " << ctime(&trsMakeBegin);    
-
+    cout << "========= driftVelocity used = " << mSlowControlDb->driftVelocity() << endl;
     int currentSectorProcessed = mFirstSectorToProcess;
 
     cout << "Processing sectors "
