@@ -6,6 +6,7 @@
 #define StiMaker_HH
 
 #include "StMaker.h"
+#include "StEvent/StEnumerations.h"
 #include "Sti/StiFactoryTypedefs.h"
 #include "Sti/StiTrackNode.h"
 #include "StiGui/StiGuiTypedefs.h"
@@ -35,7 +36,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.14 2001/08/20 18:55:47 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.15 2001/08/27 13:16:44 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -46,6 +47,7 @@ public:
     //Gets/sets
     void setMaterialBuildPath(char* val);
     void setDetectorBuildPath(char* val);
+    void setDrawableStTrackType(StTrackType);
 
     void printStatistics() const;
     
@@ -84,6 +86,8 @@ private:
     
     char* mmaterialbuildpath; //!
     char* mdetectorbuildpath; //!
+
+    StTrackType mStTrackType;
     
     static StiMaker* sinstance; //!
 
@@ -92,6 +96,14 @@ private:
     ClassDef(StiMaker, 1)
 
 };
+
+//inlines
+
+inline void StiMaker::setDrawableStTrackType(StTrackType val)
+{
+    mStTrackType = val;
+}
+
 #endif
 
 
