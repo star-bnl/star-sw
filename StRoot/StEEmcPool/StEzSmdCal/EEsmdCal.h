@@ -3,7 +3,7 @@
 #ifndef EEsmdCal_h
 #define EEsmdCal_h
 /*********************************************************************
- * $Id: EEsmdCal.h,v 1.4 2004/06/29 16:37:41 balewski Exp $
+ * $Id: EEsmdCal.h,v 1.5 2004/07/08 01:20:20 balewski Exp $
  *********************************************************************
  * Descripion:
  *  Calibration of SMD/pre/post using MIPs from UxV
@@ -37,8 +37,11 @@ class EEsmdCal {
  private: 
   
   float thrMipSmdE; // threshold on MIP signal in SMD strip
-  float twMipEdev; // relative maximal energy deviation for MIP in towers 
+  float twMipRelEneLow, twMipRelEneHigh; // relative maximal energy deviation for MIP in towers 
   float presMipElow,presMipEhigh ; // relative maximal energy deviation for MIP in pres1,2,post 
+
+  float offCenter;// cut on deviation of UxV from tower center in eta & phi
+
   int emptyStripCount; // minimal # of SMD strops below threshold
   float towerMipE [MaxEtaBins]; // mean energy for MIP
   int dbMapped;// flag indicating local DB is mapped
@@ -50,7 +53,7 @@ class EEsmdCal {
   EEmcSmdGeom *geoSmd;
   
   // cuts: 0=inclusive, 1=tagged with PostShower,  2=Tagged & UxVinTower, etc.
-  enum {kCut=5}; 
+  enum {kCut=7}; 
 
   TH1F *hA[32]; // some global (test) histograms
   // all histograms are created for only one sector
@@ -58,12 +61,21 @@ class EEsmdCal {
   TH1F *hT[kCut][mxTile][MaxEtaBins][MaxPhiBins]; // tower histograms 
   TH1F *hSs[kCut][MaxSmdPlains][MaxSmdStrips]; // individual SMD strips ,inclusive
   TH1F *hSp[kCut][MaxSmdPlains][MaxSmdStrips]; // pair of SMD strips
+ 
+  enum {stripGang=20, MaxAt=15}; // study of attenuation in SMD
+  //stripGang- how many strips are added together 
+  TH1F *hSc[MaxSmdPlains][MaxSubSec][MaxAt];// SMD attenuation study  
+  TH1F *hSeta[MaxSmdPlains][MaxSubSec][MaxAt];//    -//-
+  TH1F *hSdist[MaxSmdPlains][MaxSubSec][MaxAt];//   -//-
 
-  void initTileHist(char cut, char * title, int col=1); 
-  void initSmdHist(char cut, char * title, int col=1); 
+
+  void initTileHistoAdc(char cut, char * title, int col=1); 
+  void initTileHistoEne(char cut, char * title, int col=1); 
+  void initSmdHist(char cut, char * title, int col=1);
+  void initSmdAttenHist(); 
   void initAuxHisto();
   void mapTileDb();
-  void addTwMipEbarsToHisto (int col);
+  void addTwMipEbarsToHisto (int col, char mxC);
   void addPresMipEbarsToHisto (int col, char cT);
   
   void fillSmdHisto_a();
@@ -94,8 +106,7 @@ class EEsmdCal {
 
   void clear();
   void findSectorMip();
-  void calibPQRwithMip(int iStrU, int iStrV);
-  void calibSMDwithMip(int iU, int iStrU);
+  void calibAllwithMip(int iStrU, int iStrV);
   EEDB *eeDb; /// DB access point
   TObjArray  *HList; /// output histo access point
 
@@ -107,9 +118,10 @@ class EEsmdCal {
 
   void init(); 
   void initRun(int runID);// must be called after DB timestamp is known
-  void setMipCuts(float x, int y, float z, float a, float b) 
-    { thrMipSmdE=x; emptyStripCount=y; twMipEdev=z; presMipElow=a; presMipEhigh=b;}
-
+  void setSmdCuts(float xs, int n1){ thrMipSmdE=xs; emptyStripCount=n1;}
+  void setTwCuts( float e1, float e2 ){twMipRelEneLow=e1; twMipRelEneHigh=e2;}
+  void setPQRCuts(float a, float b ){ presMipElow=a; presMipEhigh=b;  }
+  
   void saveHisto(TString fname="fixMe3");
  
   ClassDef(EEsmdCal,1) 
@@ -120,6 +132,9 @@ class EEsmdCal {
 
 /*****************************************************************
  * $Log: EEsmdCal.h,v $
+ * Revision 1.5  2004/07/08 01:20:20  balewski
+ * merged with Murad
+ *
  * Revision 1.4  2004/06/29 16:37:41  balewski
  * towards SMD calib
  *

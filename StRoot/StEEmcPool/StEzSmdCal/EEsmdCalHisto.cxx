@@ -1,4 +1,4 @@
-// $Id: EEsmdCalHisto.cxx,v 1.5 2004/06/29 19:39:51 balewski Exp $
+// $Id: EEsmdCalHisto.cxx,v 1.6 2004/07/08 01:20:20 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -20,10 +20,9 @@
   #include "StEEmcDbMaker/StEEmcDbMaker.h"
 #endif
 
-
 //--------------------------------------------------
 //--------------------------------------------------
-void EEsmdCal::initTileHist(char cut, char *title, int col) {
+void EEsmdCal::initTileHistoAdc(char cut, char *title, int col) {
   int iCut=cut -'a';
   assert(iCut>=0 && iCut<kCut);
   char tt1[100], tt2[500];
@@ -52,6 +51,41 @@ void EEsmdCal::initTileHist(char cut, char *title, int col) {
   }
 }
 
+
+
+
+//--------------------------------------------------
+//--------------------------------------------------
+void EEsmdCal::initTileHistoEne(char cut, char *title, int col) {
+  int iCut=cut -'a';
+  assert(iCut>=0 && iCut<kCut);
+  char tt1[100], tt2[500];
+
+  char *cTile[mxTile]={"Tower","Pres1","Pres2","Post"};
+  char cT[mxTile]={'T','P','Q','R'};
+  
+  int iT=0;
+  for(iT=0;iT<mxTile;iT++) {
+    for(char iSub=0; iSub<MaxSubSec; iSub++){
+      for(int iEta=0; iEta<MaxEtaBins; iEta++){
+	char sub=iSub+'A';
+	int eta=iEta+1;
+	int iPhi=iSect*MaxSubSec+iSub;
+	char core[100];
+	sprintf(core,"%02d%c%c%02d",sectID,cT[iT],sub,eta);
+	sprintf(tt1,"%c%s",cut,core);
+	sprintf(tt2,"%s(%c) %s , %s; ADC-ped/gain",cTile[iT],cut,core,title);
+	//printf("tt1=%s, tt2=%s\n",tt1,tt2);
+	TH1F *h=new TH1F(tt1,tt2,250,-3.,22.);
+	h->SetLineColor(col);
+	HList->Add(h);
+	hT[iCut][iT][iEta][iPhi]=h;
+      }
+    }
+  }
+}
+
+
 //--------------------------------------------------
 //--------------------------------------------------
 void EEsmdCal:: mapTileDb(){
@@ -73,7 +107,7 @@ void EEsmdCal:: mapTileDb(){
 
 //--------------------------------------------------
 //--------------------------------------------------
-void EEsmdCal::addTwMipEbarsToHisto (int col) {
+void EEsmdCal::addTwMipEbarsToHisto (int col, char mxC) {
   // search all existing tower histo (with '05T' in name) and add 
   // bars for MIP limits
 
@@ -87,6 +121,7 @@ void EEsmdCal::addTwMipEbarsToHisto (int col) {
   while( (h=(TH1*) it->Next())) {
     const char *name=h->GetName();
     if(strstr(name,core)==0) continue;
+    if(name[0]>mxC) continue; // to skip energy-like histos declared later
     //printf("%s\n",h->GetName());
     int iSub=name[4]-'A';
     int iEta=atoi(name+5)-1;
@@ -94,15 +129,19 @@ void EEsmdCal::addTwMipEbarsToHisto (int col) {
     const EEmcDbItem *x=dbT[kT][iEta][iPhi];
     assert(x);
     if(x->gain<=0) continue;
-    float adcL=(1-twMipEdev)* towerMipE[iEta]*x->gain;
-    float adcH=(1+twMipEdev)* towerMipE[iEta]*x->gain;
-    TLine *lnL=new TLine(adcL,0,adcL,yMax);
-    TLine *lnH=new TLine(adcH,0,adcH,yMax);
-    lnL->SetLineColor(col);
-    lnH->SetLineColor(col);
     TList *L=h->GetListOfFunctions();
-    L->Add(lnH);
-    L->Add(lnL);
+
+    float adcC=towerMipE[iEta]*x->gain;
+
+    float adc=adcC*twMipRelEneLow;
+    TLine *ln=new TLine(adc,0,adc,yMax);
+    ln->SetLineColor(col);
+    L->Add(ln);
+
+    adc=adcC*twMipRelEneHigh;
+    ln=new TLine(adc,0,adc,yMax);
+    ln->SetLineColor(col);
+    L->Add(ln);
   }
 }
 
@@ -170,7 +209,7 @@ void EEsmdCal::initSmdHist(char cut, char *title, int col) {
 	sprintf(tt1,"%c%s",cut,core);
 	sprintf(tt2,"SMD(%c) %s , %s; ADC-ped/gain",cut,core,title);
 	//printf("tt1=%s, tt2=%s\n",tt1,tt2);
-	h=new TH1F(tt1,tt2,300,-100,200);
+	h=new TH1F(tt1,tt2,300,-50,250);
 	h->SetLineColor(col);
 
 	HList->Add(h);
@@ -183,19 +222,57 @@ void EEsmdCal::initSmdHist(char cut, char *title, int col) {
 
 //--------------------------------------------------
 //--------------------------------------------------
+void EEsmdCal::initSmdAttenHist(){
+  // histos to measure attenuation of light in strips
+
+  assert(stripGang*MaxAt<=MaxSmdStrips);
+  char tt2[500];
+
+  int iuv;
+  for(iuv=0;iuv<MaxSmdPlains;iuv++) {
+    for(char iSub=0; iSub<MaxSubSec; iSub++){
+      for(int iG=0; iG<MaxAt; iG++){
+	char sub=iSub+'A';
+	int strip=1+ stripGang*iG;
+	char core[100]; // 05AU001, 05AU021, ...
+	sprintf(core,"%02d%c%c%03d",sectID,sub,iuv+'U', strip  );
+	TString coreT=core;
+
+	sprintf(tt2,"strip resp to MIP %s ; ADC-ped/gain",core);
+	//printf("tt1=%s, tt2=%s\n",core,tt2);
+	TH1F *h=new TH1F("m"+coreT,tt2,200,-1,5.);
+	HList->Add(h);
+	hSc[iuv][iSub][iG]=h;
+
+	sprintf(tt2,"r.eta() pointing to %s ; pseudorapidity",core);
+	h=new TH1F("e"+coreT,tt2,100,0,2.5);
+	HList->Add(h);
+	hSeta[iuv][iSub][iG]=h;
+
+	sprintf(tt2,"distance (cm) to readout, %s ; dist(cm)",core);
+	h=new TH1F("d"+coreT,tt2,150,0,150);
+	HList->Add(h);
+	hSdist[iuv][iSub][iG]=h;
+      }
+    }
+  }
+}
+
+//--------------------------------------------------
+//--------------------------------------------------
 void EEsmdCal::initAuxHisto(){
   int i;
   //  float Emax=2;
   memset(hA,0,sizeof(hA));
 
-  hA[9]=new TH1F ("myStat","type of events ",30,.5,30.5);
+  char tt1[100], tt2[500];
 
-  // use 10-16 for SMD
-
+  sprintf(tt1,"myStat%02d",sectID);
+  hA[9]=new TH1F (tt1,"type of events ",30,.5,30.5);
+ 
   TH1F *h;
   TH2F *h2;
-  char tt1[100], tt2[500];
- 
+
   for(i=0;i<MaxSmdPlains;i++) {
     
     sprintf(tt1,"fr%02d%c",sectID,i+'U');
@@ -238,13 +315,6 @@ void EEsmdCal::initAuxHisto(){
   sprintf(tt2,"MIP #DeltaE from 4-strips in tagged tower, SMD %02dU+V; eta bin;  #DeltaE a.u.",sectID);
   h2=new TH2F(tt1,tt2,12,.5,12.5,50,-.1,7.5);
   hA[23]=(TH1F*)h2;
-  
-  sprintf(tt1,"xy%02ds",sectID);
-  sprintf(tt2," accepted MIP for SMD calib, plane %02d; X(cm); Y(cm) ",sectID);
-  h2=new TH2F(tt1,tt2,200,-40,160,200,-250,-50);
-  hA[24]=(TH1F*)h2;
-  
-
 
   // add histos to the list (if provided)
   if(HList) {

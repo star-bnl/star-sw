@@ -1,4 +1,4 @@
-// $Id: EEsmdCal.cxx,v 1.5 2004/06/29 19:39:50 balewski Exp $
+// $Id: EEsmdCal.cxx,v 1.6 2004/07/08 01:20:20 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -9,6 +9,7 @@
 #include <TH1.h> 
 #include <TH2.h> 
 #include <TFile.h> 
+
 
 #include "EEsmdCal.h"
 #include "EEsmdPlain.h"
@@ -48,7 +49,9 @@ EEsmdCal::EEsmdCal(){
   mapSmd= EEmcSmdMap::instance();
 
   thrMipSmdE=-1; emptyStripCount=-2; 
-  twMipEdev=-3; presMipElow=-4,  presMipElow=-5;
+  twMipRelEneLow=-3; twMipRelEneHigh=-4;
+
+  offCenter=0.7;
 
   printf("EEsmdCal() constructed\n");
 }
@@ -66,16 +69,8 @@ void EEsmdCal::initRun(int runID){
   mapTileDb();
   dbMapped=runID;
 
-  // Here you can overwrite DB informtaion by reading it from ASCII file
-#ifdef StRootFREE
-  eeDb->changeGains("setG1.dat");
-  eeDb->changeMask("setM1.dat");
-#else
-  assert(strstr("not implemented", "ix it"));
-#endif
-
   // now init all what relays on DB inofrmation
-  addTwMipEbarsToHisto(kGreen);
+  addTwMipEbarsToHisto(kGreen,'e');
   addPresMipEbarsToHisto(kGreen,'P');
   addPresMipEbarsToHisto(kGreen,'Q');
   addPresMipEbarsToHisto(kGreen,'R');
@@ -89,14 +84,18 @@ void EEsmdCal::init( ){
 
   initAuxHisto();
 
-  initTileHist('a',"inclusive  ",kBlack);
-  initTileHist('b',"tag: thrR",kRed);
-  initTileHist('c',"tag: thrR UxV",kBlue);
-  initTileHist('d',"tag: UxV 2xthr",kBlack);
-  initTileHist('e',"tag: mipT UxV 2*thr",kBlue);
+  initTileHistoAdc('a',"inclusive ADC ",kBlack);
+  initTileHistoAdc('b',"ADC, tag: thrR",kRed);
+  initTileHistoAdc('c',"ADC, tag: thrR UxV",kBlue);
+  initTileHistoAdc('d',"ADC, tag: UxV 2*thr",kBlack);
+  initTileHistoAdc('e',"ADC, tag: mipT UxV 2*thr",kBlue);
 
-  initSmdHist('a',"inclusive");
-  initSmdHist('b',"tag: best MIP",kBlue);
+  initTileHistoEne('f',"energy, tag: UxV 2*thr",kBlack);
+  initTileHistoEne('g',"energy, tag: mipT UxV 2*thr",kBlue);
+
+  initSmdHist('a',"inclusive ADC");
+  initSmdHist('b',"ADC, tag: best MIP",kBlue);
+  initSmdAttenHist(); 
 
   //.................... initialize MIP finding algo for SMD
   int i;
@@ -104,11 +103,11 @@ void EEsmdCal::init( ){
     smdHitPl[i].set(thrMipSmdE,emptyStripCount,i+'U');
   }
 
-  printf("use thrMipSmdE=%f emptyStripCount=%d  twMipEdev=%f presMipElow/high=%f/%f\n", thrMipSmdE,emptyStripCount, twMipEdev,presMipElow,presMipEhigh);
+  printf("use thrMipSmdE=%f emptyStripCount=%d  twMipRelEne/high=%f/%f\npresMipElow/high=%f/%f\n", thrMipSmdE,emptyStripCount,twMipRelEneLow, twMipRelEneHigh,presMipElow,presMipEhigh);
   assert(sectID>0 && sectID<=MaxSectors);
 
   //....................... initilize energy cuts for MIPs in towers
-  assert(twMipEdev>0 && twMipEdev<1.);
+  assert(twMipRelEneLow< twMipRelEneHigh);
   for(int i=0;i<MaxEtaBins;i++){
     float etaValue=(geoTw->getEtaMean(i));
     float mean=1./(2.89*TMath::TanH(etaValue));
@@ -166,100 +165,16 @@ void EEsmdCal::findSectorMip( ){
   for(nU=0;nU<plU->nMatch;nU++){
     for(nV=0;nV<plV->nMatch;nV++){
       hA[9]->Fill(4);// any UxV pair
-      calibPQRwithMip(plU->iStrip[nU],plV->iStrip[nV]);
+      calibAllwithMip(plU->iStrip[nU],plV->iStrip[nV]);
     }
   }
 
-  // calibrate V with U
-  for(nU=0;nU<plU->nMatch;nU++){
-    calibSMDwithMip(kU,plU->iStrip[nU]);
-  }
-
-
-
+  return;
 }
 
-
 //-------------------------------------------------
 //-------------------------------------------------
-void EEsmdCal::calibSMDwithMip(int iU, int iStrU){
-  int iCut='b'-'a';
-  int stripStep=emptyStripCount;
-  float twMatchAcc=0.9;
-  int iV=1-iU; // calibrated plane
-
-  int nT=mapSmd-> getNTowers(iSect,iU,iStrU);
-  //printf("nT=%d for iStrU=%d\n",nT, iStrU);
-  int iSub, iEta;
-  int i;
-  for(i=0;i<nT;i++) {
-    mapSmd-> getTower(iSect,iU,iStrU,i,iSub,iEta);
-    // tmp use B & C only
-    //if(iSub!=3 && iSub!=4) continue;
-    //if(iSub!=4) continue;
-    int iPhi=iSect*MaxSubSec+iSub;
-
-    int iMin,iMax;
-    mapSmd-> getRangeTw2Smd(iSect,iSub,iEta,iU,iMin,iMax);
-    if( iStrU< iMin+stripStep || iStrU>iMax-stripStep) continue;
-    // printf(" found TW %c-plane isub/ieta=%d/%d istrip range %d - %d\n",'U'+iU,iEta,iSub,iMin,iMax);
-
-   // note, current calibration is ch/MIP for pre/post
-    int j;
-    int nMip=0;
-    for(j=kP; j<=kR ; j++) {
-      nMip+=tileEne[j][iEta][iPhi]>presMipElow && 
-	    tileEne[j][iEta][iPhi]<presMipEhigh  ||
-   	        dbT[j][iEta][iPhi]->fail; // accept bead towers as good
-      //isMip*= tileThr[j][iEta][iPhi];
-    } 
-    if(nMip<3) continue;
-
-    float twEne=tileEne[kT][iEta][iPhi];
-    //printf("TW ener=%f goal=%f diff%f\n", twEne,towerMipE[iEta], twEne-towerMipE[iEta]);
-
-    bool mipT=fabs( twEne-towerMipE[iEta]) <twMipEdev*towerMipE[iEta];
-    mipT=  mipT ||  dbT[kT][iEta][iPhi]->fail; // recover dead tower
-    if(!mipT) continue;
-    // printf("i=%d iSub=%d iEta%d\n",i,iSub,iEta);
-    
-    int jMin,jMax;
-    mapSmd-> getRangeTw2Smd(iSect,iSub,iEta,iV,jMin,jMax);
-    // printf(" found %c-plane istrip range %d - %d\n",'U'+iV,jMin,jMax);
-    
-    for(j=jMin+stripStep; j<=jMax-stripStep; j++) {      
-      TVector3 r;
-      if(iV==kV)
-	r=geoSmd->getIntersection (iSect,iStrU,j);
-      else // reverse U with V
-	r=geoSmd->getIntersection (iSect,j,iStrU);
-      
-      // verify UxV is with this tower
-      int     iSecX, iSubX, iEtaX;
-      Float_t dphi, deta;
-      int ret=geoTw->getTower(r, iSecX, iSubX, iEtaX,dphi, deta);
-      if(ret==0 || iSecX!=iSect || iSubX!=iSub || iEtaX!=iEta ) continue;
-      int inCenter2=(fabs(dphi)< twMatchAcc && fabs(deta)< twMatchAcc);
-      if(!inCenter2) continue;
-
-      // ........... accept this strip
-      hSs[iCut][iV][j]->Fill(smdAdc[iV][j]); // calibration
- 
-      // QA of MIP's
-     ((TH2F*) hA[24])->Fill( r.x(),r.y());
-     hA[14+iV]->Fill(j+1);
-    }
-
-  }
-
-}
-
-
-
-
-//-------------------------------------------------
-//-------------------------------------------------
-void EEsmdCal::calibPQRwithMip(int iStrU, int iStrV){
+void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
 
   // find MIP for a UxV pair of strips
 
@@ -279,7 +194,7 @@ void EEsmdCal::calibPQRwithMip(int iStrU, int iStrV){
   hA[11]->Fill(iStrV+1);
   
   // select central MIP in tower
-  int inCenter=(fabs(dphi)<0.7 && fabs(deta)<0.7);
+  int inCenter=(fabs(dphi)<offCenter && fabs(deta)<offCenter);
   ((TH2F*) hA[21])->Fill( r.x(),r.y());
 
   if(!inCenter) return; 
@@ -296,16 +211,21 @@ void EEsmdCal::calibPQRwithMip(int iStrU, int iStrV){
   bool thrR= tileThr[kR][iEtaX][iPhiX] || dbT[kR][iEtaX][iPhiX]->fail;
 
   // check MIP upper/lower limits
-  float twEne=tileEne[kT][iEtaX][iPhiX];
-  bool mipT=fabs( twEne-towerMipE[iEtaX]) <twMipEdev*towerMipE[iEtaX];
+  float RelTwEne=tileEne[kT][iEtaX][iPhiX]/towerMipE[iEtaX];
+  bool mipT=  RelTwEne>twMipRelEneLow &&  RelTwEne<twMipRelEneHigh;
   mipT=  mipT ||  dbT[kT][iEtaX][iPhiX]->fail; // recover dead tower
-
  
   // ped corrected adc
   float adcT=tileAdc[kT][iEtaX][iPhiX];
   float adcP=tileAdc[kP][iEtaX][iPhiX];
   float adcQ=tileAdc[kQ][iEtaX][iPhiX];
   float adcR=tileAdc[kR][iEtaX][iPhiX];
+
+  // calibrated energy
+  float eneT=tileEne[kT][iEtaX][iPhiX];
+  float eneP=tileEne[kP][iEtaX][iPhiX];
+  float eneQ=tileEne[kQ][iEtaX][iPhiX];
+  float eneR=tileEne[kR][iEtaX][iPhiX];
 
   if(thrR){
     hA[9]->Fill(7);
@@ -327,7 +247,20 @@ void EEsmdCal::calibPQRwithMip(int iStrU, int iStrV){
   if( mipT && thrP         && thrR ) hT[iCut][kQ][iEtaX][iPhiX]->Fill(adcQ);
   if( mipT && thrP && thrQ         ) hT[iCut][kR][iEtaX][iPhiX]->Fill(adcR);
  
- 
+  // calibrated MIP spectra 
+  iCut='f'-'a';
+  if( thrP && thrQ && thrR ) hT[iCut][kT][iEtaX][iPhiX]->Fill(eneT);
+  if(         thrQ && thrR ) hT[iCut][kP][iEtaX][iPhiX]->Fill(eneP);
+  if( thrP         && thrR ) hT[iCut][kQ][iEtaX][iPhiX]->Fill(eneQ);
+  if( thrP && thrQ         ) hT[iCut][kR][iEtaX][iPhiX]->Fill(eneR);
+
+  iCut='g'-'a';
+  if( mipT && thrP && thrQ && thrR ) hT[iCut][kT][iEtaX][iPhiX]->Fill(eneT);
+  if( mipT &&         thrQ && thrR ) hT[iCut][kP][iEtaX][iPhiX]->Fill(eneP);
+  if( mipT && thrP         && thrR ) hT[iCut][kQ][iEtaX][iPhiX]->Fill(eneQ);
+  if( mipT && thrP && thrQ         ) hT[iCut][kR][iEtaX][iPhiX]->Fill(eneR);
+  
+
   // SMD energy for pairs
   iCut='b'-'a';
   float eU=smdEne[kU][iStrU]+smdEne[kU][iStrU+1];
@@ -339,6 +272,45 @@ void EEsmdCal::calibPQRwithMip(int iStrU, int iStrV){
   ((TH2F*) hA[20])->Fill(iStrU+1,eU);
   ((TH2F*) hA[20])->Fill(iStrV+1,eV);
   ((TH2F*) hA[23])->Fill(iEtaX+1,eU+eV); 
+
+
+  // calibration of SMD strips
+  if( mipT && thrP && thrQ && thrR ) {
+    int iuv,i2;
+    const int mx=2; // # of strips from given plain
+    int iStr[MaxSmdPlains];
+    iStr[0]=iStrU;
+    iStr[1]=iStrV;
+    for(iuv=0;iuv<MaxSmdPlains;iuv++)
+      for(i2=0;i2<mx;i2++) {
+	int istrip=iStr[iuv]+i2;
+
+	if(smdAdc[iuv][istrip]<3) continue;// drop pedestal, tmp
+	// re-calibration of strips
+	int iCut='b'-'a';
+	hSs[iCut][iuv][istrip]->Fill(smdAdc[iuv][istrip]);
+	if(smdAdc[iuv][istrip]>3) hA[14+iuv]->Fill(istrip+1); // only above ped
+
+	// SMD light attenuation for pair of strips
+	StructEEmcStrip* bar=geoSmd->getStripPtr(istrip,iuv,iSect);
+	TVector3 r1=bar->end1;
+	TVector3 r2=bar->end2;
+	float dx,dy;
+	if(r1.Eta()<r2.Eta()) {
+	  dx=r1.x()-r.x(); 
+	  dy=r1.y()-r.y();
+	} else {
+	  dx=r2.x()-r.x();
+	  dy=r2.y()-r.y();
+	} 
+	float dist=sqrt(dx*dx+dy*dy);
+	int iG=istrip/stripGang;
+	assert(iG>=0 && iG <MaxAt);
+	hSc[iuv][iSubX][iG]->Fill(smdEne[iuv][istrip]); 
+	hSeta[iuv][iSubX][iG]->Fill(r.Eta());
+	hSdist[iuv][iSubX][iG]->Fill(dist);
+      } 
+  }
   
 }
 
@@ -365,11 +337,68 @@ int EEsmdCal::getUxVmip(){
 }
 
 
+#include <TLine.h> // just for drawing
+#include <TText.h> // just for drawing
+#include <TCanvas.h> // just for drawing
 
 //-------------------------------------------------
 //-------------------------------------------------
 void EEsmdCal::finish(){
-  printf("\n  EEsmdCal::finish() nInpEve=%d\n",nInpEve);
+  printf("\n  EEsmdCal::finish(sec=%d) nInpEve=%d\n",sectID,nInpEve);
+
+#if 1
+  // some test drawing:
+  printf("drawing ...\n");
+  TFile* f=new TFile("outSec5b/mip05b-8zAB.hist.root");
+
+  int iuv=1;
+  TCanvas *c=new TCanvas();
+  c->Divide(2,1);
+  TH2F * h=(TH2F *)f->Get("xy05ct");
+
+  for(iuv=0;iuv<2;iuv++) {
+    c->cd(iuv+1);
+    h->Draw("colz");
+    char uv='U'+iuv;
+    int i;
+    for(i=0;i<13;i++) {
+      int strip=i*20+21;   
+      StructEEmcStrip* bar=geoSmd->getStripPtr(strip-1,iuv,iSect);
+      // printf("len=%f\n",bar->lenght);
+      
+      TVector3 r1=bar->end1;
+      TVector3 r2=bar->end2;
+      
+      TLine *ln=new TLine(r1.x(),r1.y(),r2.x(),r2.y());
+      ln->Draw();
+      ln->SetLineColor(kRed);
+
+      if(strip==161 ||strip==201 ||strip==241 ) continue;
+      TString strT=uv; strT+=strip;
+      TText *tx;
+      if(uv=='U') 
+	tx=new TText(r2.x()+1,r2.y()-5,strT);
+      else {
+	if(strip>140)
+	  tx=new TText(r2.x()-10,r2.y()-8,strT);
+	else
+	  tx=new TText(r2.x()-20,r2.y(),strT);
+      }
+      tx->Draw();
+    }
+    char sub;
+    for(sub='A'; sub<='E';sub++) {
+      int i=sub-'A';
+      float x=45 -i*8;
+      float y=-55 -i*5;
+      TString strT=sub;
+      TText *tx=new TText(x,y,strT);
+      tx->Draw();
+    }
+
+  }
+  
+#endif
 }
 
 
