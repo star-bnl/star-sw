@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.49 2002/02/01 16:17:34 lasiuk Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.50 2002/02/18 22:59:34 dunlop Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.50  2002/02/18 22:59:34  dunlop
+ * Keep also primaries > 1.5 GeV.  Is global or primary now
+ *
  * Revision 2.49  2002/02/01 16:17:34  lasiuk
  * include float.h to allow for use of FLT_MAX (gcc7.2)
  *
@@ -322,7 +325,7 @@ using std::less;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.49 2002/02/01 16:17:34 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.50 2002/02/18 22:59:34 dunlop Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -636,8 +639,9 @@ Int_t StRichPIDMaker::Make() {
 		StSPtrVecTrackNode& theNodes = rEvent->trackNodes();
 		for (size_t nodeIndex = 0; nodeIndex<theNodes.size(); ++nodeIndex) {
 		    StTrackNode* theTrackNode = theNodes[nodeIndex];
-		    for (size_t globalIndex=0; globalIndex<theTrackNode->entries(global);++globalIndex) {
-			StTrack* currentTrack = theTrackNode->track(global,globalIndex);
+// Anything
+		    for (size_t globalIndex=0; globalIndex<theTrackNode->entries();++globalIndex) {
+			StTrack* currentTrack = theTrackNode->track(globalIndex);
 			// Hard coded cuts on global pt and eta
 			if (currentTrack->geometry()->momentum().perp()>=1.5 
 			    && 
