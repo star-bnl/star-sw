@@ -1,0 +1,59 @@
+///////////////////////////////////////////////////////////////////////////////
+//
+// $Id: boldStyle.C,v 1.1 1999/10/28 21:24:07 posk Exp $
+//
+// Author: Art Poskanzer, LBNL, Sep. 1999
+// Description:  Style file for presentation histograms.
+//               Just execute this macro before making your graph.
+//               You can return to defaultStyle with gROOT->SetStyle("Default").
+//
+///////////////////////////////////////////////////////////////////////////////
+//
+// $Log: boldStyle.C,v $
+// Revision 1.1  1999/10/28 21:24:07  posk
+// Style file for making presentation histograms.
+//
+//
+//
+///////////////////////////////////////////////////////////////////////////////
+
+//  A graph made with the ROOT defaultStyle:
+//  Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/defaultStyle.gif"> </P> End_Html //
+// 
+//  The same graph made with this boldStyle:
+//  Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/boldStyle.gif"> </P> End_Html // 
+
+{
+TStyle* myStyle = new  TStyle("boldStyle", "Bold Style");
+
+myStyle->SetPalette(1,0);
+myStyle->SetCanvasColor(10);
+myStyle->SetCanvasBorderMode(0);
+myStyle->SetFrameLineWidth(4);
+myStyle->SetFrameFillColor(10);
+myStyle->SetPadColor(10);
+myStyle->SetPadTickX(1);
+myStyle->SetPadTickY(1);
+myStyle->SetPadBottomMargin(0.15);
+myStyle->SetPadLeftMargin(0.17);
+myStyle->SetHistLineWidth(6);
+myStyle->SetHistLineColor(kRed);
+myStyle->SetLabelSize(0.04,"X");
+myStyle->SetLabelSize(0.04,"Y");
+//myStyle->SetLabelOffset(0.01,"X");
+//myStyle->SetLabelOffset(0.01,"Y");
+myStyle->SetLabelColor(kBlue,"X");
+myStyle->SetLabelColor(kBlue,"Y");
+myStyle->SetTitleSize(0.06,"X");
+myStyle->SetTitleSize(0.06,"Y");
+//myStyle->SetTitleOffset(0.08,"X");
+//myStyle->SetTitleOffset(0.08,"Y");
+myStyle->SetTitleColor(10);
+//myStyle->SetOptStat(1110111);
+myStyle->SetStatColor(10);
+myStyle->SetFuncWidth(6);
+myStyle->SetFuncColor(kGreen);
+
+gROOT->ForceStyle();
+gStyle->ls();  
+}
