@@ -88,11 +88,11 @@ if (/^i386_/) {
     $FFLAGS   = "-w %DEBUG -fno-second-underscore -fno-automatic";
     $FCCOM    = "test -f %>.g && rm %>.g ; test -f %>.f && rm %>.f;";
     $FCCOM   .= "%FC -E -P %CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %< %Fout%>.g &&"; 
-    $FCCOM   .= "%GEANT3 -v 1 -i %>.g %Fout%>.f;"; 
-    $FCCOM   .= "test -f %>.f && %FC %FFLAGS -c %>.f %Fout%> ||";
-    $FCCOM   .= "%FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>";
+    $FCCOM   .= "%GEANT3 -V 1 -V f -i %>.g %Fout%>.f;"; 
+    $FCCOM   .= "if [ -f %>.f ]; then %FC %FFLAGS -c %>.f %Fout%> ;";
+    $FCCOM   .= "else %FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>; fi";
     my $GEANT3COM= $FCCOM;
-    $FEXTEND  = "-ffixed-line-length-132"; #"-fextended-source";
+    $FEXTEND  = "-ffixed-line-length-132"; 
   }
   else {
     $CLIBS    = "-L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic";
@@ -140,7 +140,7 @@ elsif (/^sun4x_56_CC5$/) {
   $FC        = "/opt/WS5.0/bin/f77";
   $CXXFLAGS  = "-KPIC -I/usr/openwin/include -D__SunOS_5_6 -library=iostream,no_Cstd";
   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen";#4 -L/usr/ucblib -lucb -L/usr/ccs/lib -lgen";
-  $FLIBS     = "-lM77 -lF77 -lsunmath";
+  $FLIBS     = "-L/opt/WS5.0/lib -lM77 -lF77 -lsunmath";
   $FFLAGS    = "-KPIC -w";
   $FEXTEND   = "-e";
   $CFLAGS    = "-KPIC -I/usr/openwin/include";
