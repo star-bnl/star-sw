@@ -11,7 +11,7 @@ ami/mod/call egr_fitter_
         [data]/tpc/tracks/tptrack_
         [data]/tpc/tracks/evaltrk_
         [data]/svt/hits/scs_spt_
-        [params]/global/egr_egrpar_
+        [params]/global/egrpars/egr_egrpar_
         [data]/svt/tracks/stk_track_
         [data]/svt/tracks/groups_
         [data]/global/tracks/evt_match_

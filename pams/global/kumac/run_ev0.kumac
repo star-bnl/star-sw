@@ -6,7 +6,7 @@ MACRO ev0_am
 
 
  ami/mod/call ev0_am _
-      	[params]/global/ev0par _
+      	[params]/global/ev0pars/ev0par _
         [dst]/globtrk _
         [dst]/vertex _
         [dst]/ev0out _	
