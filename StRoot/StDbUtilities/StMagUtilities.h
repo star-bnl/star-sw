@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.12 2001/06/14 22:12:11 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.13 2001/08/01 18:34:40 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.13  2001/08/01 18:34:40  jhthomas
+ * Add temporary mode flag for year 2 running (different cathode potentials)
+ *
  * Revision 1.12  2001/06/14 22:12:11  jhthomas
  * Speedup UndoBDistorion by adding table lookups
  *
@@ -49,7 +52,7 @@ class StMagUtilities {
 
  private:
 
-  virtual void    Init ( ) ;
+  virtual void    Init ( Int_t mode ) ;
   virtual void    ReadField ( ) ;
   virtual void    Search ( Int_t N, Float_t Xarray[], Float_t x, Int_t &low ) ;
   virtual Float_t Interpolate ( const Float_t Xarray[], const Float_t Yarray[], 
@@ -66,6 +69,7 @@ class StMagUtilities {
  public:
 
   StMagUtilities () ;
+  StMagUtilities ( Int_t mode ) ;
   StMagUtilities ( const EBField map, const Float_t factor ) ;
   virtual ~StMagUtilities() {}
 
