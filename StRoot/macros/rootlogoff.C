@@ -1,5 +1,8 @@
-// $Id: rootlogoff.C,v 1.8 2004/01/15 00:53:55 perev Exp $
+// $Id: rootlogoff.C,v 1.9 2004/01/23 21:55:07 perev Exp $
 // $Log: rootlogoff.C,v $
+// Revision 1.9  2004/01/23 21:55:07  perev
+// delete chain only in .DEV
+//
 // Revision 1.8  2004/01/15 00:53:55  perev
 // Delete chain only for DEBUG lib
 //
@@ -40,7 +43,7 @@ if (rootlogoff::tclassMk && rootlogoff::tclassMk->GetClassInfo())
     
 
     rootlogoff::mk->Finish();
-    if (!gSystem->Getenv("NODEBUG")) delete rootlogoff::mk;
+    if (strstr(gSystem->Getenv("STAR"),".DEV")) delete rootlogoff::mk;
     else                            printf ("*** Chain not deleted***\n");
   }
 }
