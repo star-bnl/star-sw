@@ -1,6 +1,7 @@
  
  macro init
    macro/global/import *
+   exec fill 
  return
 * ***************************************************************
  
