@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.64 2000/08/22 00:17:54 hardtke Exp $
+// $Id: St_tcl_Maker.cxx,v 1.65 2001/02/13 21:38:16 genevb Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.65  2001/02/13 21:38:16  genevb
+// Separated TCL and TPH sector loops to reduce memory usage
+//
 // Revision 1.64  2000/08/22 00:17:54  hardtke
 // Add ability to turn off either half of TPC:  new functions EastOff(), WestOff(), AllOn()
 //
@@ -160,7 +163,6 @@ Int_t St_tcl_Maker::Make() {
   tpcluster = NULL;
   morph = NULL;
   index = NULL;
-
   St_DataSet* sector;
   St_DataSet* raw_data_tpc = GetInputDS("tpc_raw");
   m_raw_data_tpc = kFALSE;
@@ -222,8 +224,6 @@ Int_t St_tcl_Maker::Make() {
       gMessMgr->Info() << "number of estimated hits used: " << max_hit 
 		       << endm;
     // create tables used with a reasonable size
-    tphit = new St_tcl_tphit("tphit",max_hit); 
-    m_DataSet->Add(tphit);
     tpcluster = new St_tcl_tpcluster("tpcluster",max_hit); 
     m_DataSet->Add(tpcluster);
 
@@ -245,7 +245,7 @@ Int_t St_tcl_Maker::Make() {
 
     next.Reset();
 
-    while ((sector=next())) {  // loop over sectors
+    while ((sector=next())) {  // loop over sectors for TCL
      const  Char_t *name = 0;
       if ((name = strstr(sector->GetName(),"Sector"))) {
 	// look for the sector number
@@ -300,6 +300,29 @@ Int_t St_tcl_Maker::Make() {
 	  Int_t tcc_res = cluster_morphology( indx, pixel_data_in, pixel_data_out);
 	  if(tcc_res) { printf("ERROR %d, tcl maker\n",tcc_res); return kStErr; }
 	}
+      }
+    }
+    tpseq->Purge();
+    tpcluster->Purge();
+    tphit = new St_tcl_tphit("tphit",max_hit);
+    m_DataSet->Add(tphit);
+    next.Reset();
+
+    while ((sector=next())) {  // loop over sectors for TPH
+     const  Char_t *name = 0;
+      if ((name = strstr(sector->GetName(),"Sector"))) {
+	// look for the sector number
+	name  = strchr(name,'_') + 1; 
+	Int_t indx = atoi(name);
+	if (Debug()) printf(" Sector = %d \n", indx);
+	tcl_sector_index_st *tcl_sector_index = m_tcl_sector_index->GetTable();
+	m_tcl_sector_index->SetNRows(1);
+	tcl_sector_index->CurrentSector = indx;
+        if (m_EastOff&&indx>12) continue;
+        if (m_WestOff&&indx<=12) continue;
+	St_DataSetIter sect(sector);
+	St_type_shortdata  *pixel_data_in  = (St_type_shortdata *) sect("pixel_data_in");
+	St_type_shortdata  *pixel_data_out = (St_type_shortdata *) sect("pixel_data_out");
 	sector_tot++;
 
 	//      TPH
@@ -317,6 +340,7 @@ Int_t St_tcl_Maker::Make() {
 	}
       }
     }
+
     if (sector_tot && m_tclEvalOn) { //slow simulation exist and evaluation switch set
       if (Debug()) cout << "start run_tte_hit_match" << endl;
       St_DataSet *geant = GetInputDS("geant");
@@ -407,7 +431,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.64 2000/08/22 00:17:54 hardtke Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.65 2001/02/13 21:38:16 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
