@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.17 2000/08/15 19:41:32 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.18 2000/08/16 01:28:40 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.18  2000/08/16 01:28:40  ward
+// Report TrgActionWd as diagnostic for oo.
+//
 // Revision 1.17  2000/08/15 19:41:32  ward
 // Configuration via m_mode of which event types are skipped.
 //
@@ -223,8 +226,9 @@ int St_trg_Maker::Daq(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger *ds
   if (m_Mode) {
     if((m_Mode & 1 && !isPhysics) || (m_Mode & 2 && !isLaser)) {
       oo="";
-      if(isPhysics) oo="physics"; if(isLaser) oo="laser";
-      printf("St_trg_Maker, we have a  %s event, returning kStErr.\n",oo);
+      if(isPhysics) oo="Physics"; if(isLaser) oo="Laser";
+      printf("St_trg_Maker.  %s event.  TrgActionWd=0x%x.  Returning kStErr.\n",
+          oo,GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd);
       return kStErr; // Skip this event.
     }
   }
