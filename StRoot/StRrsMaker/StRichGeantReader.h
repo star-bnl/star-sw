@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichGeantReader.h,v 1.1 2000/01/18 21:32:01 lasiuk Exp $
+ * $Id: StRichGeantReader.h,v 1.2 2000/02/08 16:24:56 lasiuk Exp $
  *
  * Description:
  *   StRichGeantReader is the input module for  
@@ -16,8 +16,8 @@
  *   be put into place.
  *
  * $Log: StRichGeantReader.h,v $
- * Revision 1.1  2000/01/18 21:32:01  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/02/08 16:24:56  lasiuk
+ * Remove from package next revision.  I/O handled by maker
  *
  * Revision 1.2  2000/02/08 16:24:56  lasiuk
  * Remove from package next revision.  I/O handled by maker
@@ -29,7 +29,7 @@
  *     - 7/29/1999 created the class,               Alexandre Nevski.
  *     - 7/30/1999 re-implementation of operator(), Alexandre Nevski.
  *     - 8/5/1999  changed bool return type to int
-
+ *                 added filter()                 , Alexandre Nevski.
  * 
  ********************************************************************/
 #ifdef NEVER
@@ -74,6 +74,7 @@
 #endif
 
 #endif
+
 
 
 
