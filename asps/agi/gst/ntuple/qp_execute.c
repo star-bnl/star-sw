@@ -6,9 +6,12 @@
  *
  *  Author:   Maarten Ballintijn <Maarten.Ballintijn@cern.ch>
  *
- *  $Id: qp_execute.c,v 1.1 1998/06/05 20:55:25 perev Exp $
+ *  $Id: qp_execute.c,v 1.2 1998/11/07 16:51:27 fisyak Exp $
  *
  *  $Log: qp_execute.c,v $
+ *  Revision 1.2  1998/11/07 16:51:27  fisyak
+ *  VP correct to remove warning
+ *
  *  Revision 1.1  1998/06/05 20:55:25  perev
  *  AGI commit
  *
@@ -1355,7 +1358,7 @@ exec_op( FCode fc, UInt32 opc, int *errp )
 	bool			running = TRUE;
 	DataType	fctype;
 
-	fctype = ( fc >> 6 ) & 0xf;
+	fctype = (DataType) (( fc >> 6 ) & 0xf);
 
 	if ( (opc & FC_VECTOR_BIT) != 0 ) {
 /*
