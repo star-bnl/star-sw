@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.46 1999/07/17 01:51:19 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.47 1999/07/23 17:26:36 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.47  1999/07/23 17:26:36  kathy
+// changes to histogram limits
+//
 // Revision 1.46  1999/07/17 01:51:19  kathy
 // changed limits and titles of some histograms
 //
@@ -852,7 +855,7 @@ void St_QA_Maker::BookHistEvSum(){
                              50,0.9,1.1);
     m_trk_tot_gd->SetXTitle("number of good/total tracks");
   m_glb_trk_tot   = new TH1F("QaEvsumTrkTot","evsum: num tracks total ",
-                             ntrk, mintrk, maxtrk);
+                             ntrk, 0., 10000.);
   m_glb_trk_plusminus  = new TH1F("QaEvsumPlusMinusTrk", "evsum: num pos. over neg trks",
                              ntrk,0.8,1.4);
   m_glb_trk_prim    = new TH1F("QaEvsumTrkPrim","evsum: num good tracks from primaries ",
@@ -878,10 +881,10 @@ void St_QA_Maker::BookHistGlob(){
 // for method MakeGlob - from table globtrk
 
 // 1D
-  m_globtrk_tot   = new TH1F("QaGlobtrkTot",  "globtrk: tot # tracks",40,0.,8000.);
-  m_globtrk_iflag = new TH1F("QaGlobtrkFlag", "globtrk: iflag ",10,-1000.,1000.);
+  m_globtrk_tot   = new TH1F("QaGlobtrkTot",  "globtrk: tot # tracks",40,0.,10000.);
+  m_globtrk_iflag = new TH1F("QaGlobtrkFlag", "globtrk: iflag ",200,-999.,1001.);
 
-  m_globtrk_good  = new TH1F("QaGlobtrkGood", "globtrk: tot # good tracks",40,0.,8000.);  
+  m_globtrk_good  = new TH1F("QaGlobtrkGood", "globtrk: tot # good tracks",40,0.,10000.);  
   m_det_id     = new TH1F("QaGlobtrkDetId",   "globtrk: Detector ID for tracks",11,-0.5,10.5);
   m_point      = new TH1F("QaGlobtrkNPnt",    "globtrk: N points on track", 50, 0.,50.);
   m_max_point  = new TH1F("QaGlobtrkNPntMax", "globtrk: N max points on track", 50, 0.,50.);
@@ -893,7 +896,7 @@ void St_QA_Maker::BookHistGlob(){
   m_glb_yf0    = new TH1F("QaGlobtrkYf0",     "globtrk: y of first hit - on helix at start",50,-20.,20.);
   m_glb_zf     = new TH1F("QaGlobtrkZf",      "globtrk: z of first hit on trk", 50,-250.,250.);
   m_glb_zf0    = new TH1F("QaGlobtrkZf0",     "globtrk: z of first hit - on helix at start",50,-20.,20.);
-  m_glb_radf   = new TH1F("QaGlobtrkR",   "globtrk: radial position of first tpc hit", 50,0.,250.);
+  m_glb_radf   = new TH1F("QaGlobtrkR",       "globtrk: radial position of first tpc hit", 50,0.,250.);
   m_glb_ratio  = new TH1F("QaGlobtrkRnf",     "globtrk: ratio Nfitpnt over Npnt", 50, 0., 1.2005);
   m_psi        = new TH1F("QaGlobtrkPsi",     "globtrk: psi distribution", 36, 0.,360.);
   m_tanl       = new TH1F("QaGlobtrkTanl",    "globtrk: tanl distribution",32,-4.,4.);
@@ -943,37 +946,37 @@ void St_QA_Maker::BookHistGlob(){
     m_fpoint_length->SetXTitle("length");
     m_fpoint_length->SetYTitle("Npoints");
 
-  m_chisq0_mom = new TH2F("QaGlobtrkChi0Mom","globtrk: Chisq0 vs log mom",40,1.,4.,50,0.,15.);
+  m_chisq0_mom = new TH2F("QaGlobtrkChi0Mom","globtrk: Chisq0 vs log mom",40,1.,4.,50,0.,5.);
     m_chisq0_mom->SetXTitle("log P (MeV)");
     m_chisq0_mom->SetYTitle("chisq0") ;
 
-  m_chisq1_mom = new TH2F("QaGlobtrkChi1Mom","globtrk: Chisq1 vs log mom",40,1.,4.,50,0.,15.);
+  m_chisq1_mom = new TH2F("QaGlobtrkChi1Mom","globtrk: Chisq1 vs log mom",40,1.,4.,50,0.,5.);
     m_chisq1_mom->SetXTitle("log P (MeV)");
     m_chisq1_mom->SetYTitle("chisq1");
 
 
-  m_chisq0_eta = new TH2F("QaGlobtrkChi0Eta","globtrk: Chisq0 vs eta",20,-2.,2.,20,0.,15.);
+  m_chisq0_eta = new TH2F("QaGlobtrkChi0Eta","globtrk: Chisq0 vs eta",20,-2.,2.,20,0.,5.);
     m_chisq0_eta->SetXTitle("eta");
     m_chisq0_eta->SetYTitle("chisq0");
 
-  m_chisq1_eta = new TH2F("QaGlobtrkChi1Eta","globtrk: Chisq1 vs eta",20,-2.,2.,20,0.,15.);
+  m_chisq1_eta = new TH2F("QaGlobtrkChi1Eta","globtrk: Chisq1 vs eta",20,-2.,2.,20,0.,5.);
     m_chisq1_eta->SetXTitle("eta");
     m_chisq1_eta->SetYTitle("chisq1");
 
 
-  m_chisq0_dip = new TH2F("QaGlobtrkChi0Tanl","globtrk: Chisq0 vs tanl(dip)",20,-5.,5.,20,0.,15.);
+  m_chisq0_dip = new TH2F("QaGlobtrkChi0Tanl","globtrk: Chisq0 vs tanl(dip)",20,-5.,5.,20,0.,5.);
     m_chisq0_dip->SetXTitle("dip angle");
     m_chisq0_dip->SetYTitle("chisq0");
 
-  m_chisq1_dip = new TH2F("QaGlobtrkChi1Tanl","globtrk: Chisq1 vs tanl(dip)",20,-5.,5.,20,0.,15.);
+  m_chisq1_dip = new TH2F("QaGlobtrkChi1Tanl","globtrk: Chisq1 vs tanl(dip)",20,-5.,5.,20,0.,5.);
     m_chisq1_dip->SetXTitle("dip angle");
     m_chisq1_dip->SetYTitle("chisq1");
 
-  m_chisq0_zf = new TH2F("QaGlobtrkChi0zf","globtrk: Chisq0 vs zfirst",20,-250.,250.,20,0.,15.);
+  m_chisq0_zf = new TH2F("QaGlobtrkChi0zf","globtrk: Chisq0 vs zfirst",20,-250.,250.,20,0.,5.);
     m_chisq0_zf->SetXTitle("zfirst");
     m_chisq0_zf->SetYTitle("chisq0");
 
-  m_chisq1_zf = new TH2F("QaGlobtrkChi1zf","globtrk: Chisq1 vs zfirst",20,-250.,250.,20,0.,15.);
+  m_chisq1_zf = new TH2F("QaGlobtrkChi1zf","globtrk: Chisq1 vs zfirst",20,-250.,250.,20,0.,5.);
     m_chisq1_zf->SetXTitle("zfirst");
     m_chisq1_zf->SetYTitle("chisq1");
 
@@ -995,10 +998,10 @@ void St_QA_Maker::BookHistPrim(){
 // for method MakeHistPrim - from table primtrk
 
 // 1D
-  m_primtrk_tot   = new TH1F("QaPrimtrkTot",  "primtrk: tot # tracks",40,0.,8000.);
-  m_primtrk_iflag = new TH1F("QaPrimtrkFlag", "primtrk: iflag ",10,-1000.,1000.);
+  m_primtrk_tot   = new TH1F("QaPrimtrkTot",  "primtrk: tot # tracks",40,0.,10000.);
+  m_primtrk_iflag = new TH1F("QaPrimtrkFlag", "primtrk: iflag ",200,-999.,1001.);
 
-  m_primtrk_good  = new TH1F("QaPrimtrkGood",  "primtrk: tot # good tracks",40,0.,8000.);  
+  m_primtrk_good  = new TH1F("QaPrimtrkGood",  "primtrk: tot # good tracks",40,0.,10000.);  
   m_pdet_id     = new TH1F("QaPrimtrkDetId",   "primtrk: Detector ID for tracks",11,-0.5,10.5);
   m_ppoint      = new TH1F("QaPrimtrkNPnt",    "primtrk: N points on track", 50, 0.,50.);
   m_pmax_point  = new TH1F("QaPrimtrkNPntMax", "primtrk: N max points on track", 50, 0.,50.);
@@ -1061,36 +1064,36 @@ void St_QA_Maker::BookHistPrim(){
     m_pfpoint_length->SetXTitle("length");
     m_pfpoint_length->SetYTitle("Npoints");
 
-  m_pchisq0_mom = new TH2F("QaPrimtrkChi0Mom","primtrk: Chisq0 vs log mom",40,1.,4.,35,0.,7.);
+  m_pchisq0_mom = new TH2F("QaPrimtrkChi0Mom","primtrk: Chisq0 vs log mom",40,1.,4.,25,0.,5.);
     m_pchisq0_mom->SetXTitle("log P (MeV)");
     m_pchisq0_mom->SetYTitle("chisq0") ;
 
-  m_pchisq1_mom = new TH2F("QaPrimtrkChi1Mom","primtrk: Chisq1 vs log mom",40,1.,4.,35,0.,7.);
+  m_pchisq1_mom = new TH2F("QaPrimtrkChi1Mom","primtrk: Chisq1 vs log mom",40,1.,4.,25,0.,5.);
     m_pchisq1_mom->SetXTitle("log P (MeV)");
     m_pchisq1_mom->SetYTitle("chisq1");
 
 
-  m_pchisq0_eta = new TH2F("QaPrimtrkChi0Eta","primtrk: Chisq0 vs eta",20,-2.,2.,35,0.,7.);
+  m_pchisq0_eta = new TH2F("QaPrimtrkChi0Eta","primtrk: Chisq0 vs eta",20,-2.,2.,25,0.,5.);
     m_pchisq0_eta->SetXTitle("eta");
     m_pchisq0_eta->SetYTitle("chisq0");
 
-  m_pchisq1_eta = new TH2F("QaPrimtrkChi1Eta","primtrk: Chisq1 vs eta",20,-2.,2.,35,0.,7.);
+  m_pchisq1_eta = new TH2F("QaPrimtrkChi1Eta","primtrk: Chisq1 vs eta",20,-2.,2.,25,0.,5.);
     m_pchisq1_eta->SetXTitle("eta");
     m_pchisq1_eta->SetYTitle("chisq1");
 
-  m_pchisq0_dip = new TH2F("QaPrimtrkChi0Tanl","primtrk: Chisq0 vs tanl(dip)",20,-5.,5.,35,0.,7.);
+  m_pchisq0_dip = new TH2F("QaPrimtrkChi0Tanl","primtrk: Chisq0 vs tanl(dip)",20,-5.,5.,25,0.,5.);
     m_pchisq0_dip->SetXTitle("dip angle");
     m_pchisq0_dip->SetYTitle("chisq0");
 
-  m_pchisq1_dip = new TH2F("QaPrimtrkChi1Tanl","primtrk: Chisq1 vs tanl(dip)",20,-5.,5.,35,0.,7.);
+  m_pchisq1_dip = new TH2F("QaPrimtrkChi1Tanl","primtrk: Chisq1 vs tanl(dip)",20,-5.,5.,25,0.,5.);
     m_pchisq1_dip->SetXTitle("dip angle");
     m_pchisq1_dip->SetYTitle("chisq1");
 
-  m_pchisq0_zf = new TH2F("QaPrimtrkChi0zf","primtrk: Chisq0 vs zfirst",20,-250.,250.,35,0.,7.);
+  m_pchisq0_zf = new TH2F("QaPrimtrkChi0zf","primtrk: Chisq0 vs zfirst",20,-250.,250.,25,0.,5.);
     m_pchisq0_zf->SetXTitle("zfirst");
     m_pchisq0_zf->SetYTitle("chisq0");
 
-  m_pchisq1_zf = new TH2F("QaPrimtrkChi1zf","primtrk: Chisq1 vs zfirst",20,-250.,250.,35,0.,7.);
+  m_pchisq1_zf = new TH2F("QaPrimtrkChi1zf","primtrk: Chisq1 vs zfirst",20,-250.,250.,25,0.,7.);
     m_pchisq1_zf->SetXTitle("zfirst");
     m_pchisq1_zf->SetYTitle("chisq1");
 
