@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.h,v 1.2 2004/06/25 03:11:49 porter Exp $
+ * $Id: StEStruct2ptCorrelations.h,v 1.3 2004/09/16 23:37:25 chunhuih Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -122,8 +122,6 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   TH2F ** mHJtSEtaSMt[6];//!
   TH2F ** mHJtSEtaSPhi[6];//!
 
-  void  initArraysAndHistograms();
-  void  deleteArraysAndHistograms();
   void  moveEvents();
 
  public:
@@ -137,17 +135,20 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   void  setCutFile(const char* cutFileName);  
 
   //---> support of interface  
-  virtual void  setOutputFileName(const char* outFileName);
+  void  setOutputFileName(const char* outFileName);
   bool  doEvent(StEStructEvent* p);
+
   void  init();
   void  cleanUp();
   void  finish();
-  void  fillHistograms();
-  void  writeHistograms(TFile* tf);
+  virtual void  fillHistograms();
+  virtual void  writeHistograms(TFile* tf);
+  virtual void  initArraysAndHistograms();
+  virtual void  deleteArraysAndHistograms();
 
   // analysis specific functions 
   bool  makeSiblingAndMixedPairs();
-  void  makePairs(StEStructEvent* e1, StEStructEvent* e2, int j);
+  virtual void  makePairs(StEStructEvent* e1, StEStructEvent* e2, int j);
 
   int   getNumPairs(int i){ return numPairs[i]; };
   int   getNumPairsProcessed(int i){ return numPairsProcessed[i]; };
@@ -197,6 +198,10 @@ inline void StEStruct2ptCorrelations::logStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.h,v $
+ * Revision 1.3  2004/09/16 23:37:25  chunhuih
+ * changed a number of methods to be virtual, so that its behavior can
+ * be dynamically changed.
+ *
  * Revision 1.2  2004/06/25 03:11:49  porter
  * New cut-binning implementation and modified pair-cuts for chunhui to review
  *
