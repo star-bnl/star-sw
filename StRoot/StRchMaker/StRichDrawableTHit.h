@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichDrawableTHit.h,v 1.4 2000/05/25 21:35:32 fisyak Exp $
+ * $Id: StRichDrawableTHit.h,v 1.5 2000/06/16 02:07:31 lasiuk Exp $
  *
  * Description:
  *   Cluster which is drawn in the pad monitor
@@ -7,6 +7,9 @@
  ****************************************************************
  *
  * $Log: StRichDrawableTHit.h,v $
+ * Revision 1.5  2000/06/16 02:07:31  lasiuk
+ * copy c'tor
+ *
  * Revision 1.4  2000/05/25 21:35:32  fisyak
  * Make rootcint happy
  *
@@ -36,7 +39,7 @@ public:
     StRichDrawableTHit();
     StRichDrawableTHit(double xl, double yl, int type=3);
     StRichDrawableTHit(StRichSimpleHit&, int type=3);
-    
+    StRichDrawableTHit(StRichDrawableTHit&);
     virtual ~StRichDrawableTHit();
 
     //StRichDrawableTHit(const StRichDrawableTHit&) {/*use default*/|
@@ -45,7 +48,7 @@ public:
     //void ExecuteEvent(Int_t event, Int_t px, Int_t py) ;
 
 protected:
-    double    mX;
+    double    mX; // Brian..why are these here??
     double    mY;
 
 protected:
