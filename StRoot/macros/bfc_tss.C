@@ -1,4 +1,4 @@
-// $Id: bfc_tss.C,v 1.2 1999/02/23 02:10:39 fisyak Exp $
+// $Id: bfc_tss.C,v 1.3 1999/02/23 02:26:26 fisyak Exp $
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -110,7 +110,7 @@ bfc_tss(const Int_t Nevents=100,
   chain->PrintInfo();
 
   // Init the chain and all its makers
-  chain->SetDebug(1);
+  //  chain->SetDebug(1);
   int iInit = chain->Init();
   if (iInit) chain->Fatal(iInit,"on init");
 
