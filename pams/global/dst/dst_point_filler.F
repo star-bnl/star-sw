@@ -155,7 +155,7 @@ CC:  Fill space point position errors>>>
                dst_point(dst_point_h.nok).pos_err(2) =
      1            tpcy10 + two10*tpcz
 
-CC:  Fill charge deposition and errors>>>
+CC:  Fill charge deposition and iflag information>>>
 
                if(tcl_tphit(i).q .ge. 0.0 .and. tcl_tphit(i).q
      1            .lt. (1.0/float(two9))) then
@@ -163,12 +163,13 @@ CC:  Fill charge deposition and errors>>>
                else
                   tpcq = 0
                end if
-               if(tcl_tphit(i).dq .ge. 0.0 .and. tcl_tphit(i).dq
-     1            .lt. (1.0/float(two9))) then
-                  tpcdq = int(two24*tcl_tphit(i).dq)
-               else
-                  tpcdq = 0
-               end if
+c               if(tcl_tphit(i).dq .ge. 0.0 .and. tcl_tphit(i).dq
+c     1            .lt. (1.0/float(two9))) then
+c                  tpcdq = int(two24*tcl_tphit(i).dq)
+c               else
+c                  tpcdq = 0
+c               end if
+               tpcdq = tcl_tphit(i).flag
                dst_point(dst_point_h.nok).charge = 
      1            tpcq + two16*tpcdq
 
@@ -319,7 +320,7 @@ CC:  Fill space point position errors>>>
                dst_point(dst_point_h.nok).pos_err(2) =
      1            svty10 + two10*svtz
 
-CC:  Fill charge deposition and errors>>>
+CC:  Fill charge deposition and iflag information>>>
 
                if(scs_spt(i).de(1).ge.0.0 .and. scs_spt(i).de(1)
      1            .lt. (1.0/float(two5))) then
@@ -327,12 +328,13 @@ CC:  Fill charge deposition and errors>>>
                else
                   svtq = 0
                end if
-               if(scs_spt(i).de(2).ge.0.0 .and. scs_spt(i).de(2)
-     1            .lt. (1.0/float(two5))) then
-                  svtdq = int(two20*scs_spt(i).de(2))
-               else
-                  svtdq = 0
-               end if
+c               if(scs_spt(i).de(2).ge.0.0 .and. scs_spt(i).de(2)
+c     1            .lt. (1.0/float(two5))) then
+c                  svtdq = int(two20*scs_spt(i).de(2))
+c               else
+c                  svtdq = 0
+c               end if
+               svtdq = scs_spt(i).flag
                dst_point(dst_point_h.nok).charge = 
      1            svtq + two16*svtdq
 

@@ -140,13 +140,14 @@ CC:  Determine which detector this space point is located in>>>
                tpcdq = dst_point(i).charge/two16
                tpcq  = dst_point(i).charge - two16*tpcdq
                tcl_tphit(tcl_tphit_h.nok).q  = float(tpcq)/float(two25)
-               tcl_tphit(tcl_tphit_h.nok).dq = float(tpcdq)/float(two24)
+               tcl_tphit(tcl_tphit_h.nok).dq  = 0.
+               tcl_tphit(tcl_tphit_h.nok).flag = tpcdq
 
                tcl_tphit(tcl_tphit_h.nok).id_globtrk = 
      1            dst_point(i).id_track
 
                tcl_tphit(tcl_tphit_h.nok).cluster   = 0
-               tcl_tphit(tcl_tphit_h.nok).flag      = 0
+c               tcl_tphit(tcl_tphit_h.nok).flag      = 0
                tcl_tphit(tcl_tphit_h.nok).id        = tcl_tphit_h.nok
                tcl_tphit(tcl_tphit_h.nok).track     =
      1            dst_point(i).id_track
@@ -197,12 +198,13 @@ CC:  Determine which detector this space point is located in>>>
                svtdq = dst_point(i).charge/two16
                svtq  = dst_point(i).charge - two16*svtdq
                scs_spt(scs_spt_h.nok).de(1) = float(svtq)/float(two21)
-               scs_spt(scs_spt_h.nok).de(2) = float(svtdq)/float(two20)
+               scs_spt(scs_spt_h.nok).de(2) = 0.
+               scs_spt(scs_spt_h.nok).flag = svtdq
 
                scs_spt(scs_spt_h.nok).id_globtrk = 
      1            dst_point(i).id_track
 
-               scs_spt(scs_spt_h.nok).flag      = 0
+c               scs_spt(scs_spt_h.nok).flag      = 0
                scs_spt(scs_spt_h.nok).id        = scs_spt_h.nok
                scs_spt(scs_spt_h.nok).id_cluster = 0
                scs_spt(scs_spt_h.nok).id_match   = 0
