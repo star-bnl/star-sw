@@ -449,6 +449,7 @@ St_DataSet *St_db_Maker::LoadTable(St_DataSet* left)
     case 2: // .C file
 
       command = ".L "; command += dbfile;
+      if (GetDebug()) printf("LoadTable: %s\n",(const char*)command);
       gInterpreter->ProcessLine(command);
       newdat = (St_DataSet *) gInterpreter->Calc("CreateTable()");
       command.ReplaceAll(".L ",".U "); 
