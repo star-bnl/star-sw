@@ -1,5 +1,8 @@
-// $Id: St_ems_Maker.h,v 1.10 2000/03/29 20:25:33 akio Exp $ 
+// $Id: St_ems_Maker.h,v 1.11 2001/02/02 22:07:47 pavlinov Exp $ 
 // $Log: St_ems_Maker.h,v $
+// Revision 1.11  2001/02/02 22:07:47  pavlinov
+// added method for getting pointer to StEmcCollection directly
+//
 // Revision 1.10  2000/03/29 20:25:33  akio
 // Add StEvent
 //
@@ -71,6 +74,7 @@ class St_emc_calib_header;
 class St_emc_pedestal;
 class St_emc_adcslope;
 class St_calb_calg;
+class StEmcCollection; // 02-feb-2001 for backward capability
 
 class St_ems_Maker : public StMaker {
 public: 
@@ -92,9 +96,11 @@ public:
   void   setEEMC(Short_t key){mEEMC = key; if (Debug()) printmEEMC();}
   void   setHistControl(Short_t key) {mHistControl = key;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_ems_Maker.h,v 1.10 2000/03/29 20:25:33 akio Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_ems_Maker.h,v 1.11 2001/02/02 22:07:47 pavlinov Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  StEmcCollection*      getEmcCollection() {return  mEmcCollection;} //! 02-feb-2001 for backward capability
 
 protected:
+  StEmcCollection* mEmcCollection; //! 02-feb-2001 for backward capability
   TH2F *m_nhit;           //! 
   TH2F *m_etot;           //!
   TH2F *m_hits[MAXDET];   //!
