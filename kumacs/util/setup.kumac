@@ -50,11 +50,11 @@ macro set_globals
  macro/global/create event     /dui/event
  macro/global/create calib     /dui/calib
      
- macro/global/create constants [run]
- macro/global/create params    [constants]/params
- macro/global/create geometry  [constants]/params
- macro/global/create geantR    [run]/geant    
- macro/global/create geant_Run [geantR]/Run
+ macro/global/create constants  [run]
+ macro/global/create params     [constants]/params
+ macro/global/create geometry   [constants]/params
+ macro/global/create geantR     [run]/geant    
+ macro/global/create geant_Run  [geantR]/Run
  macro/global/create run_dst    [run]/dst    
    
  macro/global/create evgen       [event]/evgen    
