@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.15 1999/01/02 19:08:22 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.16 1999/01/08 23:18:30 sakrejda Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.16  1999/01/08 23:18:30  sakrejda
+// index  table created only once and only for the mc run
+//
 // Revision 1.15  1999/01/02 19:08:22  fisyak
 // Add ctf
 //
@@ -132,7 +135,7 @@ Int_t St_tcl_Maker::Make(){
   if (!m_DataSet->GetList()) {// If DataSet list empty then create it
     St_tcl_tphit     *tphit     = new St_tcl_tphit("tphit",max_hit);         m_DataSet->Add(tphit);
     St_tcl_tphit_aux *tphitau   = new St_tcl_tphit_aux("tphitau",max_hit);   m_DataSet->Add(tphitau);
-    St_tcl_tpc_index *index     = new St_tcl_tpc_index("index",max_hit);     m_DataSet->Add(index);
+    //    St_tcl_tpc_index *index     = new St_tcl_tpc_index("index",max_hit);     m_DataSet->Add(index);
     St_tcl_tpcluster *tpcluster = new St_tcl_tpcluster("tpcluster",max_hit); m_DataSet->Add(tpcluster);
     St_tcl_tp_seq    *tpseq     = new St_tcl_tp_seq("tpseq",5*max_hit);      m_DataSet->Add(tpseq);
     St_DataSet       *sector;
@@ -180,10 +183,14 @@ Int_t St_tcl_Maker::Make(){
 	cout << "start run_tte_hit_match" << endl;
 	St_DataSetIter geant(gStChain->DataSet("geant"));
 	St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
+        if (g2t_tpc_hit){//geant data exists too
+	// create the index table
+	St_tcl_tpc_index  *index = new St_tcl_tpc_index("index",2*max_hit); m_DataSet->Add(index);
 	
 	Int_t Res_tte =  tte_hit_match(g2t_tpc_hit,index,m_type,tphit); 
 	if (Res_tte !=  kSTAFCV_OK)  cout << "Problem with tte_hit_match.." << endl;
 	cout << "finish run_tte_hit_match" << endl;
+	}
       }
     }
     // Row data does not exit, check GEANT. if it does then use fast cluster simulation
@@ -214,7 +221,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.15 1999/01/02 19:08:22 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.16 1999/01/08 23:18:30 sakrejda Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
