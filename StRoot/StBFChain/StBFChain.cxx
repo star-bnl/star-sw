@@ -1,6 +1,6 @@
-// $Id: StBFChain.cxx,v 1.75 2000/02/29 01:58:30 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.76 2000/02/29 01:58:47 fisyak Exp $
 // $Log: StBFChain.cxx,v $
-// Revision 1.75  2000/02/29 01:58:30  fisyak
+// Revision 1.76  2000/02/29 01:58:47  fisyak
 // Fix MDC3 chain
 //
 // Revision 1.74  2000/02/27 22:29:52  fisyak
@@ -302,6 +302,7 @@ BfcItem BFC[] = {
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"C H A I N S ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"mdc3"        ,""  ,"","cy1h,GeantOut"                               ,"","","MDC3 default chain",kFALSE},
   {"doEvents"    ,""  ,"","xin,event,analysis,FieldOn"                                    ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis"                                  ,"","","",kFALSE},
   {"Cdefault"    ,""  ,"","tpc,ftpc,rrs,rich,l0,l3,Cdst,qa,tags,tree"        ,"","","Default chain",kFALSE}, 
@@ -312,7 +313,6 @@ BfcItem BFC[] = {
   {"cy1e"        ,""  ,"","y1e,Cdefault"                                 ,"","","Turn on chain y1h",kFALSE},
   {"cy1h"        ,""  ,"","y1h,Cdefault"                                 ,"","","Turn on chain y1e",kFALSE},
   {"Cy2a"        ,""  ,"","y2a,Cdefault,svt"                             ,"","","Turn on chain y2a",kFALSE},
-  {"mdc3"        ,""  ,"","cy1h,GeantOut"                               ,"","","MDC3 default chain",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
