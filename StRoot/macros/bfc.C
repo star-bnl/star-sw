@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.87 1999/07/15 00:56:16 fisyak Exp $
+// $Id: bfc.C,v 1.88 1999/07/15 15:06:55 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -260,68 +260,66 @@ void SetOption(int k){// set all OFF
     }
     break;
   case kTDAQ:
+    SetOption(kER99);
+    break;
+  case  kY1b:
     if (!ChainFlags[kDEFAULT]) {
-      SetOption(kER99);
+      SetOption(kEMS);
+      SetOption(kEMC);
+      SetOption(kRICH);
     }
-      break;
-    case  kY1b:
-      if (!ChainFlags[kDEFAULT]) {
-	SetOption(kEMS);
-	SetOption(kEMC);
-	SetOption(kRICH);
-      }
-    case kSD97:
-    case kSD98:
-    case  kY1a:
-    case kES99:
-    case kER99:
-    case  kY1c:
-      if (!ChainFlags[kDEFAULT]) {
-	SetOption(kDEFAULT);
-	SetOption(kTPC);
-	SetOption(kFTPC);
-	SetOption(kTRG);
-	SetOption(kGLOBAL);
-	SetOption(kDST);
-	SetOption(kQA);
-	SetOption(kEVENT);
-	SetOption(kANALYSIS);
-	SetOption(kTREE);
-      }
-      break;
-    case  kY2a:
-      if (!ChainFlags[kDEFAULT]) {
-	SetOption(kDEFAULT);
-	SetOption(kEMS);
-	SetOption(kEMC);
-	SetOption(kTPC);
-	SetOption(kFTPC);
-	SetOption(kTRG);
-	SetOption(kGLOBAL);
-	SetOption(kDST);
-	SetOption(kQA);
-	SetOption(kEVENT);
-	SetOption(kANALYSIS);
-	SetOption(kTREE);
-      }
-      break;
-    case kGSTAR:
-      if (!ChainFlags[kDEFAULT]) {
-	printf ("no setup defined ==> use Y2a\n");
-	SetOption(kY2a);
-      }
-      SetOption(kGEANT);
-      break;
-    default:
-      break;
+  case kSD97:
+  case kSD98:
+  case  kY1a:
+  case kES99:
+  case kER99:
+  case  kY1c:
+    if (!ChainFlags[kDEFAULT]) {
+      SetOption(kDEFAULT);
+      SetOption(kTPC);
+      SetOption(kFTPC);
+      SetOption(kTRG);
+      SetOption(kGLOBAL);
+      SetOption(kDST);
+      SetOption(kQA);
+      SetOption(kEVENT);
+      SetOption(kANALYSIS);
+      SetOption(kTREE);
     }
+    break;
+  case  kY2a:
+    if (!ChainFlags[kDEFAULT]) {
+      SetOption(kDEFAULT);
+      SetOption(kEMS);
+      SetOption(kEMC);
+      SetOption(kTPC);
+      SetOption(kFTPC);
+      SetOption(kTRG);
+      SetOption(kGLOBAL);
+      SetOption(kDST);
+      SetOption(kQA);
+      SetOption(kEVENT);
+      SetOption(kANALYSIS);
+      SetOption(kTREE);
+    }
+    break;
+  case kGSTAR:
+    if (!ChainFlags[kDEFAULT]) {
+      printf ("no setup defined ==> use Y2a\n");
+      SetOption(kY2a);
+    }
+    SetOption(kGEANT);
+    break;
+  default:
+    break;
   }
-  //_____________________________________________________________________
-  void SetOptionOff(Int_t k){// set all OFF
-    SetOption(-k);
-  }
-  //_____________________________________________________________________
-  void SetChainOff(){// set all OFF
+}
+//_____________________________________________________________________
+void SetOptionOff(Int_t k){// set all OFF
+  SetOption(-k);
+}
+//_____________________________________________________________________
+void SetChainOff(){// set all OFF
   for (Int_t k = kFIRST;k<NoChainOptions;k++)  ChainFlags[k] = kFALSE;
 }
 //_____________________________________________________________________
