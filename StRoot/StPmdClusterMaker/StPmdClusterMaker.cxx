@@ -1,6 +1,6 @@
 /*************************************************
  *
- * $Id: StPmdClusterMaker.cxx,v 1.4 2003/09/02 17:58:48 perev Exp $
+ * $Id: StPmdClusterMaker.cxx,v 1.5 2003/11/27 12:30:07 subhasis Exp $
  * Author: Subhasis Chattopadhyay
  *************************************************
  *
@@ -9,6 +9,9 @@
  *************************************************
  *
  * $Log: StPmdClusterMaker.cxx,v $
+ * Revision 1.5  2003/11/27 12:30:07  subhasis
+ * Dataset (PmdReader) access included
+ *
  * Revision 1.4  2003/09/02 17:58:48  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -67,7 +70,7 @@ StPmdClusterMaker::~StPmdClusterMaker()
 void StPmdClusterMaker::bookHistograms()
 {
   mSmPmdCluster   = new TH1F("Smno_pmd","SuperModule No",24,1.,24.);
-  mEdepPmdCluster = new TH1F("EdepPmd","Energy deposited",600,0.,0.00004);  
+  mEdepPmdCluster = new TH1F("EdepPmd","Energy deposited",500,0.,1000);  
   mSigmaPmdCluster = new TH1F("SigmaClusterPmd","Cluster Sigma",50,0.5,4.5);  
   mNcellPmdCluster = new TH1F("NcellPmd","No of Cells per cls",50,-0.5,49.5);  
   mEtaPmdCluster  = new TH1F("EtaPmd","Eta Distribution",100,-4.,-2.);  
@@ -77,7 +80,7 @@ void StPmdClusterMaker::bookHistograms()
   mHitVscluster  = new TH2F("Pmd_hitvsClus","Hit vsclusPMD",50,0.5,50.5,50,0.5,50.5);
   mSigmaCpvCluster = new TH1F("SigmaClusterCpv","Cluster Sigma",50,0.5,4.5);  
   mSmCpvCluster   = new TH1F("Smno_cpv","CPV SuperModule No",24,1.,24.);
-  mEdepCpvCluster = new TH1F("EdepCpv","Cpv Energy deposited",600,0.,0.00004);  
+  mEdepCpvCluster = new TH1F("EdepCpv","Cpv Energy deposited",500,0.,1000.);  
   mNcellCpvCluster = new TH1F("NcellCpv","No of Cellsper cls (CPV)",50,-0.5,49.5);  
   mEtaCpvCluster  = new TH1F("EtaCpv","Cpv Eta Distribution",100,-4.,-2.);  
   mPhiCpvCluster  = new TH1F("PhiCpv","Cpv Phi Distribution",100,-3.14,3.14);
@@ -86,8 +89,22 @@ void StPmdClusterMaker::bookHistograms()
 //--------------------------------
 Int_t StPmdClusterMaker::Make() 
 {
+	
   clusterIn = GetDataSet("PmdSimulator"); //! getting data from StPmdSimulator
-  cluster_hit = (StPmdCollection*)clusterIn->Find("PmdCollection");
+ if(!clusterIn){
+  clusterIn = GetDataSet("pmdReader"); //! getting data from StPmdSimulator
+ }
+ if(!clusterIn){
+	 cout<<" No Hit_dataset found, return "<<endl;
+	 return kStWarn;
+ }
+	 cluster_hit = (StPmdCollection*)clusterIn->Find("PmdCollection");
+
+  if(!cluster_hit){
+	 cout<<" No PmdCollection found, return "<<endl;
+	 return kStWarn;
+ }
+       	
 
   if(cluster_hit){
     StPmdDetector * pmd_det = cluster_hit->detector(Int_t(0));
@@ -131,7 +148,7 @@ void StPmdClusterMaker::FillHistograms(StPmdDetector* pmd_det, StPmdDetector* cp
     }
 
     if(cpv_det->module_hit(id)>0){
-      Int_t nmh1=pmd_det->module_hit(id);
+      Int_t nmh1=cpv_det->module_hit(id);
       tothitcpv+=nmh1;  
     }
   }
@@ -178,7 +195,7 @@ void StPmdClusterMaker::FillHistograms(StPmdDetector* pmd_det, StPmdDetector* cp
       }
   
       mSmPmdCluster->Fill(Float_t(mod));
-      mEdepPmdCluster->Fill(edep);
+      mEdepPmdCluster->Fill(edep);    // In keV
       mSigmaPmdCluster->Fill(sigma);
       mNcellPmdCluster->Fill(Float_t(ncell));
       mEtaPmdCluster->Fill(eta);
@@ -214,7 +231,7 @@ void StPmdClusterMaker::FillHistograms(StPmdDetector* pmd_det, StPmdDetector* cp
 	}
       }
       mSmCpvCluster->Fill(Float_t(mod));
-      mEdepCpvCluster->Fill(edep);
+      mEdepCpvCluster->Fill(edep); //In keV
       mSigmaCpvCluster->Fill(sigma);
       mNcellCpvCluster->Fill(Float_t(ncell1));
       mEtaCpvCluster->Fill(eta);
