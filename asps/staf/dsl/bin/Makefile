@@ -64,7 +64,9 @@ tmp-dscodes.h:	$(LIBFILES)
 		echo "#define DSCODES_H" >>tmp-dscodes.h
 		echo "typedef enum ds_codes_t {" >>tmp-dscodes.h
 		echo "	DS_E_OK = 0," >>tmp-dscodes.h
-		grep "_ERROR(DS_E_"  $^ |sed -e 's/.*(/	/p' -e 's/).*/,/' |\
+		grep "_ERROR(DS_E_"  $^ |\
+		sed -e 's/.*(/	/p' |\
+		sed -e 's/).*/,/' |\
 		sort -u |grep -v DS_E_OK >>tmp-dscodes.h
 		echo "	DS_E_CODE_COUNT" >>tmp-dscodes.h
 		echo "}DS_CODES_T;" >>tmp-dscodes.h
