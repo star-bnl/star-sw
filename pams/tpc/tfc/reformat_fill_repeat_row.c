@@ -136,7 +136,7 @@ long  reformat_fill_repeat_row
      else {
             ik=0;
 	   /* copy all the data with PadId>iRepeatPad to another variables from  raw_pad_io */
-	    for(ij=iRepeatPad;ij<raw_pad_io_h->nok+1;ij++){
+	    for(ij=iRepeatPad;ij<raw_pad_io_h->nok;ij++){
                     raw_pad_temp[ik].SeqModBreak=raw_pad_io[ij].SeqModBreak;
                     raw_pad_temp[ik].nseq=raw_pad_io[ij].nseq;
                     raw_pad_temp[ik].PadId=raw_pad_io[ij].PadId;
