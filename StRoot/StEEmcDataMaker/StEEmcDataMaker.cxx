@@ -1,5 +1,8 @@
-// $Id: StEEmcDataMaker.cxx,v 1.2 2003/04/27 23:08:02 balewski Exp $
+// $Id: StEEmcDataMaker.cxx,v 1.3 2003/04/29 16:18:39 balewski Exp $
 // $Log: StEEmcDataMaker.cxx,v $
+// Revision 1.3  2003/04/29 16:18:39  balewski
+// some ideas added
+//
 // Revision 1.2  2003/04/27 23:08:02  balewski
 // clean up of daq-reader
 //
@@ -101,7 +104,17 @@ Int_t StEEmcDataMaker::Make(){
   
   
   StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection();
-  
+/*  make it work
+    if(!mEmc)
+                                        {
+                                                mEmc =new StEmcCollection();
+                                                if(event) event->setEmcCollection(mEmc);
+                                        }
+
+
+*/ 
+
+ 
   int det = kEndcapEmcTowerId; 
   StDetectorId id = StDetectorId(det);
   StEmcDetector* d = new StEmcDetector(id,12);
