@@ -59,11 +59,9 @@ for my $h  (split / /,$sources) {#  print "SRC:", $h, "\n";
 	$class_hfile{$class} = $h; #print "class: $class, written: $class_written{$class}, h: $class_hfile{$class}\n"; 
       }
     }
-    else {
-      if ($line =~ /CollectionDef/ && !$line =~ /\#define/) {
-	$coll++;# print $line;
-      }
-      else {next;}
+    if ($line =~ /\#define/) {next;}
+    if ($line =~ /StCollectionDef/) {
+      $coll++;  #print "$coll, $line\n";
     }
   }
   close (In);
@@ -77,6 +75,11 @@ for my $h  (split / /,$sources) {#  print "SRC:", $h, "\n";
 	my @Class = split /([\(\)])/, $line;
 	my $class = $Class[2];
 	if ($class) {
+	  (my $core = $class) =~ s/^St//g; # print "core $core\n";
+          my $cl = "";
+	  $cl = "St" . $core . "Collection-"; push @classes, $cl; $class_hfile{$cl} = $h;
+	  $cl = "St" . $core . "Iterator-";   push @classes, $cl; $class_hfile{$cl} = $h;
+	  $cl = "StVecPtr" . $core . "-";     push @classes, $cl; $class_hfile{$cl} = $h;
 	  open(DEF, $macro) || die "Can't open Macros $macro \n";
 	  my $def = 0;
 	  while ($line = <DEF>) {
@@ -94,9 +97,10 @@ for my $h  (split / /,$sources) {#  print "SRC:", $h, "\n";
 	  }
 	}
       }
+      else {print OUTPUT $line;}
     }
     close (OUTPUT);
-    my $flag = `mv $tmp $h;`; print "mv $tmp $h;";
+    my $flag = `mv $tmp $h;`; print "mv $tmp $h;\n";
   }
 }
 my $opened = "";
