@@ -1,5 +1,8 @@
-* * $Id: bfc.kumac,v 1.64 1998/09/24 15:10:15 kathy Exp $
+* * $Id: bfc.kumac,v 1.65 1998/09/24 16:33:19 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.65  1998/09/24 16:33:19  kathy
+* implement new ev0j chain variable; fix print message for log file in bfc.kumac; kumac to read dst and create ev0join table; kumacs to analyse ev0join ntuple
+*
 * Revision 1.64  1998/09/24 15:10:15  kathy
 * update event counters and messages
 *
@@ -523,7 +526,7 @@ MACRO bfc _
  message ' *** Ebye Prior Switch       --> ' [ebye_prior_switch]
  message ' *** Ebye Ensemble Switch    --> ' [ebye_ensemble_switch]
  message ' *** Ebye Analysis Switch    --> ' [ebye_analysis_switch] 
- message ' *** log_file                --> ' [log_file]
+ message ' *** log_file                --> ' [log]
 
 ***********************************************************
 * GLOBAL VARIABLES - created from macro inputs 

@@ -118,7 +118,11 @@
 *                              nev_total = total # events read in, including skipped events
 *                              nev_proc = total # events processed (not incl. skipped)
 *                              nev_pass = total # events passed the processing
-*                           - put in error checking in rg2t (Pavel)  
+*                           - put in error checking in rg2t (Pavel) 
+* 
+* editted 9/24/98 K. Turner - implement following chain variables:
+*                               chain:  module:   
+*                                ev0j   ams/global - joins ev0out & vertex tables
 *
 * ************************************************************
 *                     BFC_UTIL.KUMAC
@@ -329,7 +333,8 @@ macro bfc_init _
             exec init_sca#init_params [calib_dir] [output_file] _
              [ebye_prior_switch] [ebye_ensemble_switch]  [ebye_analysis_switch]
             exec init_sca#init_analysis [calib_dir] [output_file] _
-             [ebye_prior_switch] [ebye_ensemble_switch]  [ebye_analysis_switch]
+	      [ebye_prior_switch] [ebye_ensemble_switch]  [ebye_analysis_switch]
+    (ev0j)  exec init_ev0join
     (user)  exec init_user
     (ntup)  exec write_table_to_ntuple#init_disk [nunit] [nfile]
     (fzout) user/output o [output_fzd_file]
@@ -546,6 +551,7 @@ ABEND:
                if ( staf_status(1) .ne. STAFCV_OK) then
                  message <<< WARNING >>>  Problem with sca_runsca in event [i]
                endif
+    (ev0j)     exec run_ev0join       
     (user)     exec run_user
     (ntup)     exec write_table_to_ntuple#write_event_disk [nid] [ntable]
     (evout)    if [output_xdf_file]="" then
