@@ -1,5 +1,8 @@
-// $Id: StRareMaker.cxx,v 1.3 2001/09/06 20:51:23 hardtke Exp $
+// $Id: StRareMaker.cxx,v 1.4 2001/10/15 20:20:27 struck Exp $
 // $Log: StRareMaker.cxx,v $
+// Revision 1.4  2001/10/15 20:20:27  struck
+// first version with L3 included
+//
 // Revision 1.3  2001/09/06 20:51:23  hardtke
 // Update
 //
@@ -25,29 +28,37 @@
 #include "StRareEvent.h"
 #include "StRareEventCut.h"
 #include "StRareTrackCut.h"
+#include "StL3RareTrackCut.h"
 #include "StAcceptAllEvents.h"
 #include "StAcceptAllTracks.h"
+#include "StAcceptAllL3Tracks.h"
 #include "StChain.h"
 #include "StEventTypes.h"
 #include "StMessMgr.h"
 #include "StarClassLibrary/StThreeVector.hh"
+
 ClassImp(StRareEventCut)
 ClassImp(StRareTrackCut)
+ClassImp(StL3RareTrackCut)
 
-static const char rcsid[] = "$Id: StRareMaker.cxx,v 1.3 2001/09/06 20:51:23 hardtke Exp $";
+static const char rcsid[] = "$Id: StRareMaker.cxx,v 1.4 2001/10/15 20:20:27 struck Exp $";
 
 double dEdx_formula(double momentum, double mass);
 
 ClassImp(StRareMaker)
 
 StRareMaker::StRareMaker(const Char_t *name) : StMaker(name) {
+  mRareEvent = new StRareEvent();
   out = new TFile("RareEvent.root","RECREATE");
   out->SetCompressionLevel(2);
   m_Tree = new TTree("RareTree","RareTree");
+  //  m_Tree->SetBranchStyle(0); 
   m_Tree->AutoSave();
   m_Tree->SetAutoSave(10000000);
-  EventCut = new StAcceptAllEvents(); 
-  TrackCut = new StAcceptAllTracks(); 
+  m_Tree->Branch("StRareEvent","StRareEvent",&mRareEvent,64000,1);
+  mEventCut = new StAcceptAllEvents(); 
+  mTrackCut = new StAcceptAllTracks();
+  mL3TrackCut = new StAcceptAllL3Tracks();
 }
 
 StRareMaker::StRareMaker(const Char_t *name,StRareEventCut* cut, StRareTrackCut* track) : StMaker(name) {
@@ -55,10 +66,26 @@ StRareMaker::StRareMaker(const Char_t *name,StRareEventCut* cut, StRareTrackCut*
   m_Tree = new TTree("RareTree","RareTree",1000000);
   m_Tree->AutoSave();
   m_Tree->SetAutoSave(10000000);
-  revt = new StRareEvent();  
-  m_Tree->Branch("StRareEvent","StRareEvent",&revt,64000,1);
-  EventCut = cut; 
-  TrackCut = track; 
+  mRareEvent = new StRareEvent();  
+  m_Tree->Branch("StRareEvent","StRareEvent",&mRareEvent,64000,1);
+  mEventCut = cut; 
+  mTrackCut = track;
+  mL3TrackCut = 0;
+}
+
+StRareMaker::StRareMaker(const Char_t *name, StRareEventCut* cut,
+			 StRareTrackCut* trackCut,
+			 StL3RareTrackCut* l3trackCut) : StMaker(name) {
+  //out = new TFile("/direct/star+data01/pwg/spectra/struck/2001/RareEvent.root","RECREATE");
+  out = new TFile("RareEvent.root","RECREATE");
+  m_Tree = new TTree("RareTree","RareTree",1000000);
+  m_Tree->AutoSave();
+  m_Tree->SetAutoSave(10000000);
+  mRareEvent = new StRareEvent();
+  m_Tree->Branch("StRareEvent","StRareEvent",&mRareEvent,64000,1);
+  mEventCut = cut; 
+  mTrackCut = trackCut;
+  mL3TrackCut = l3trackCut;
 }
 
 Int_t StRareMaker::Make() {
@@ -69,24 +96,45 @@ Int_t StRareMaker::Make() {
     //
     StEvent* mEvent;
     mEvent = (StEvent *) GetInputDS("StEvent");
-    if (! mEvent) return kStOK; // If no event, we're done
-    StEvent& ev = *mEvent;
-    if (EventCut->Accept(mEvent)){
-     revt->FillRareEvent(mEvent);
-     StPrimaryTrackIterator itr;
-     StPrimaryTrack *trk;
-     if (ev.primaryVertex()){
-      const StSPtrVecPrimaryTrack& tracks = ev.primaryVertex()->daughters();
-      for (itr=tracks.begin();itr != tracks.end(); itr++){
-        trk = *itr;
-	if (TrackCut->Accept(trk)) revt->AddTrack(trk);
-      }
-     }
-      m_Tree->Fill();
-      revt->Clear();
-     //     m_Tree->Print();
+    if (!mEvent) return kStOK; // If no event, we're done
+
+    // test
+    // get event number
+    cout << " event ID = " << mEvent->id() << endl;  
+
+    mRareEvent->clear();
+
+    if (mEventCut->Accept(mEvent)) {
+          mRareEvent->fillRareEvent(mEvent);
+	  StPrimaryTrackIterator itr;
+	  StPrimaryTrack *trk;
+	  if (mEvent->primaryVertex()) {
+	        const StSPtrVecPrimaryTrack& tracks = mEvent->primaryVertex()->daughters();
+		for (itr=tracks.begin(); itr != tracks.end(); itr++){
+		      trk = *itr;
+		      if (mTrackCut->Accept(trk)) mRareEvent->addTrack(trk);
+		}
+	  }
+
+	  // now look for L3
+	  StL3Trigger* l3Event;
+	  l3Event = (StL3Trigger*) mEvent->l3Trigger();
+	  if (mL3TrackCut && l3Event) {
+	        mRareEvent->fillL3Info(l3Event);
+		// Loop over tracks
+		StGlobalTrack *l3trk;
+		StSPtrVecTrackNode& mtracknodes = (StSPtrVecTrackNode&) l3Event->trackNodes();
+		for (Int_t i=0; i<mtracknodes.size(); i++) {
+		      l3trk = (StGlobalTrack* )mtracknodes[i]->track(0);
+		      if (mL3TrackCut->Accept(l3trk)) mRareEvent->addL3Track(l3trk);
+		}
+	  }
+
+	  m_Tree->Fill();
+	  //m_Tree->Print();
+	  mRareEvent->Clear();
     }
-  return kStOK;
+    return kStOK;
 }
 
 Int_t StRareMaker::Init() {
@@ -96,14 +144,14 @@ Int_t StRareMaker::Init() {
 }
 
 void StRareMaker::Report(){
-  EventCut->Report();
-  TrackCut->Report();
+  mEventCut->Report();
+  mTrackCut->Report();
 }
 
 
 void StRareMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StRareMaker.cxx,v 1.3 2001/09/06 20:51:23 hardtke Exp $\n");
+  printf("* $Id: StRareMaker.cxx,v 1.4 2001/10/15 20:20:27 struck Exp $\n");
   printf("**************************************************************\n");
 }
 
