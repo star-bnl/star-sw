@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.70 2004/11/23 19:18:16 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.71 2004/12/10 23:07:37 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.71  2004/12/10 23:07:37  jcs
+// Only fill FTPC software monitor if it exists
+//
 // Revision 1.70  2004/11/23 19:18:16  jcs
 // Store FTPC vertices (east and west) in StEvent/StCalibrationVertex
 // Comment out (should eventually be removed) Ftpc vertex - Tpc vertex histograms,
@@ -284,8 +287,8 @@
 //#define DEBUGFILE
 
 // Select tracking method
-#define TWOCYCLETRACKING
-//#define LASERTRACKING
+//#define TWOCYCLETRACKING
+#define LASERTRACKING
 
 #include "StFtpcTrackMaker.h"
 #include "StFtpcVertex.hh"
@@ -599,7 +602,7 @@ Int_t StFtpcTrackMaker::Make()
      }      
   }       	       
 
-  FillMonSoftFtpc(event,&tracker,ftpcMon);
+  if (ftpcMon) FillMonSoftFtpc(event,&tracker,ftpcMon);
 
   // write global tracks, do primary fit, write primary tracks
   StFtpcTrackToStEvent trackToStEvent;
@@ -791,7 +794,7 @@ void StFtpcTrackMaker::FillMonSoftFtpc(StEvent *event,StFtpcTracker *tracker, St
     
     iftpc = (firstPoint->GetDetectorId() == 5) ? 0 : 1; // 0 for detId == 5 and 1 for detId == 4
 
-    ftpcMon->n_trk_ftpc[iftpc]++;
+   ftpcMon->n_trk_ftpc[iftpc]++;
 
     Int_t nFitPoints = track->GetHits()->GetEntriesFast();
     ftpcMon->res_pad_ftpc[iftpc] += track->GetChiSq()[0] / (nFitPoints - 3);
@@ -857,7 +860,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.70 2004/11/23 19:18:16 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.71 2004/12/10 23:07:37 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
