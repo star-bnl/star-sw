@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: dbbrowse.pl,v 1.2 1999/07/07 13:22:10 wenaus Exp $
+# $Id: dbbrowse.pl,v 1.3 1999/07/10 13:18:40 wenaus Exp $
 #
 # $Log: dbbrowse.pl,v $
+# Revision 1.3  1999/07/10 13:18:40  wenaus
+# add links to log files
+#
 # Revision 1.2  1999/07/07 13:22:10  wenaus
 # incorporate run log
 #
@@ -70,7 +73,7 @@ if ($mode eq "dataset") {
     $orderBy = "cTime desc";
 } else {
     $table = $DataFileT;
-    $selection = "name,cTime,subset,size";
+    $selection = "name,cTime,subset,size,beam,mcgen,param,bimp,geom,had,bfc,dataset";
     @badKeys = 0;
     $orderBy = "cTime desc";
 }
@@ -161,6 +164,7 @@ while(@fields = $cursor->fetchrow) {
     print "\n";
     my $cols=$cursor->{NUM_OF_FIELDS};
     $name = "";
+    %fhash = 0;
     for($i=0;$i<$cols;$i++) {
         $datatype=$cursor->{TYPE}->[$i]; #ODBC 1==char 11==date 4==int -1==text
         if($datatype == -1 || $datatype==252) {next}
@@ -171,15 +175,16 @@ while(@fields = $cursor->fetchrow) {
         $fn=lc($fname);
         $fn=lc($fname);
         print "$fn = $fvalue<br>" if $debugOn;
+        $fhash{$fn} = $fvalue;
         if ($fn eq "name") {            
             if ($mode eq "dataset") {
                 printf("<b>%10s</b>",$fvalue);
                 $ds = $fvalue;
-                print " <a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/browse.pl?mode=subset&dataset=$fvalue\">subsets</a>";
-                print " <a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/browse.pl?dataset=$fvalue\">files</a>";
+                print " <a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/dbbrowse.pl?mode=subset&dataset=$fvalue\">subsets</a>";
+                print " <a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/dbbrowse.pl?dataset=$fvalue\">files</a>";
             } elsif ($mode eq "subset") {
                 printf("<b>%20s</b>",$fvalue);
-                print " <a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/browse.pl?subset=$fvalue\">files</a>";
+                print " <a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/dbbrowse.pl?subset=$fvalue\">files</a>";
             } else {
                 $name = $fvalue;
             }
@@ -190,8 +195,12 @@ while(@fields = $cursor->fetchrow) {
             print substr($fvalue,2,14);
         } elsif ($fn eq "nfiles") {
             printf("%3d files",$fvalue);
+        } elsif ($fn eq "bfc") {
+        } elsif ($fn eq "dataset") {
+        } elsif ($fn eq "had") {
+#        } elsif ($fn eq "param") {
         } elsif ($fn eq "subset") {
-            print " <a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/browse.pl?subset=$fvalue\">subset</a>";
+            print " <a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/dbbrowse.pl?subset=$fvalue\">subset</a>";
         } elsif($fn eq 'userkey' || $fn eq 'password'|| $fn eq 'date_created' || $fn eq 'date_updated') {
             next;
         } elsif($fn eq 'id') { #generate a submit href
@@ -205,7 +214,33 @@ while(@fields = $cursor->fetchrow) {
             printf("%10s",$fvalue);
         }
     }
-    if ($name ne "") { print " ".$name };
+    if ($name ne "") {
+
+        ### Check for log file
+        $logURL='   ';
+        $logfile='';
+        $bfc = $fhash{'bfc'};
+        if ( $bfc eq 'tss' || $bfc eq 'trs' || $bfc eq 'tfs' ) {
+            $logloc = $fhash{'mcgen'}."_".$fhash{'param'}."_".$fhash{'bimp'}."_".$fhash{'geom'}."_".$fhash{'had'}."_".$fhash{'subset'};
+            $logloc =~ s/year1/year_1/;
+            $logloc =~ s/year2/year_2/;  # idiocies to put up with
+            $logprefix = "/disk00001/star/MDC3/$bfc/";
+            $urlprefix = "/data/disk00001_star/MDC3/$bfc/";
+            if ( -e $logprefix.$fhash{'beam'}."_".$logloc ) {
+                $logloc = $fhash{'beam'}."_".$logloc;
+            }
+        } elsif ( lc($bfc) eq 'gst' ) {
+            $logprefix = '/star/scr2a/starreco/MDC1/tests/';
+            $urlprefix = '/data/scr2a/starreco/MDC1/tests/';
+            $logloc = $fhash{beam}."/".$fhash{'mcgen'}."/".$fhash{'param'}."/".$fhash{'bimp'}."/".$fhash{'geom'}."/".$fhash{'had'}."/Gstardata/".$fhash{'dataset'}.".log";
+            $logloc =~ s/year1/year_1/;
+            $logloc =~ s/year2/year_2/;  # idiocies to put up with
+        }
+        $logfile = $logprefix.$logloc;
+        if ( -e $logfile ) {$logURL="<a href=\"$urlprefix$logloc\">log</a>"}
+#        $logURL="<a href=\"$urlprefix$logloc\">log</a>";
+        print " $logURL $name";
+    }
 #    if ($mode eq "dataset") { &getSubsets($ds); }
     $count++;
 }
@@ -303,7 +338,7 @@ sub getSubsets {
 			my $fname=$cursor2->{NAME}->[$i];
 			$fn=lc($fname);
 			if($fn eq 'name') {
-                print "<a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/browse.pl?subset=$fvalue\">$fvalue</a>  ";
+                print "<a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/dbbrowse.pl?subset=$fvalue\">$fvalue</a>  ";
             }
         }
     }
