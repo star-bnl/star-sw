@@ -1,19 +1,5 @@
-/***************************************************************************
- *
- * $Id: StFtpcClusterFinder.hh,v 1.1 1999/11/02 09:41:28 jcs Exp $
- *
- * Author:   Holm Huemmler  (hummler@mppmu.mpg.de)
- ***************************************************************************
- *
- * Description:
- *
- ***************************************************************************
- *
- * $Log: StFtpcClusterFinder.hh,v $
- * Revision 1.1  1999/11/02 09:41:28  jcs
- * add source files to empty StFtpcClusterMaker
- *
- **************************************************************************/
+#ifndef STAR_StFtpcClusterFinder
+#define STAR_StFtpcClusterFinder
 /*#define DEBUG 1*/
 /*#define DEBUGFILE 1*/
 
@@ -22,7 +8,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+#include <cmath>
 #include "fcl_det.h"
 #include "fcl_zrow.h"
 #include "fcl_padtrans.h"
@@ -31,6 +17,11 @@
 #include "fcl_ampoff.h"
 #include "fcl_ampslope.h"
 #include "fcl_fppoint.h"
+#include "fcl_ftpcsqndx.h"
+#include "fcl_ftpcadc.h"
+#include "tables/St_fcl_fppoint_Table.h"
+
+#include "StFtpcCluster.hh"
 
 #define TRUE 1
 #define FALSE 0
@@ -99,17 +90,33 @@ class StFtpcClusterFinder
  private:
   TSequence test;
  public:
-   StFtpcClusterFinder();
-   ~StFtpcClusterFinder();
-   int FindHits(TClusterUC *Cluster, int, int, double*, double*, FCL_FTPCADC_ST*, FCL_DET_ST*, FCL_ZROW_ST*, float *, int *, int *, FCL_FPPOINT_ST*, FCL_AMPSLOPE_ST*, FCL_AMPOFF_ST*, FCL_TIMEOFF_ST*);//!
-   int GetSeqPeaksAndCalibAmp(TSequence*, int, int, int, TPadPeak*, int*, FCL_FTPCADC_ST*, FCL_AMPSLOPE_ST*, FCL_AMPOFF_ST*);//!
-   int FitPoints(TClusterUC*, int, int, double*, double*, TPeak*, int, FCL_FTPCADC_ST*, FCL_DET_ST*, FCL_ZROW_ST*, float*, int*, int*, FCL_FPPOINT_ST*, FCL_TIMEOFF_ST*);//!
-   int Padtrans(TPeak*, int, int, FCL_DET_ST*, FCL_ZROW_ST*, double*, double*);//!
-   float gauss_2d(int, int, float, float, float, float, float);//!
-   float sigmax(float);//!
-   float sigmat(float);//!
-   int calcpadtrans(FCL_DET_ST*, FCL_PADTRANS_ST*, double*, double*);//!
-   int CUCInit(TClusterUC*, int*, int*);//!
-   TClusterUC *CUCAlloc(TClusterUC*, int*, int*);//!
-   int CUCFree(TClusterUC*, int*, int*, TClusterUC*);//!
+  StFtpcClusterFinder();
+  ~StFtpcClusterFinder();
+  StFtpcCluster *search(fcl_det_st *det,
+			fcl_padtrans_st *padtrans,
+			fcl_zrow_st *zrow,
+			fcl_ampoff_st *ampoff,
+			fcl_ampslope_st *ampslope,
+			fcl_timeoff_st *timeoff,
+			fcl_ftpcsqndx_st *ftpcsqndx,
+			fcl_ftpcadc_st *ftpcadc,
+			St_fcl_fppoint *fcl_fppoint,
+			int padtransRows,
+			int ampslopeRows,
+			int ampoffRows,
+			int timeoffRows,
+			int ftpcsqndxRows);
+  int findHits(TClusterUC *Cluster, int, int, double*, double*, FCL_FTPCADC_ST*, FCL_DET_ST*, FCL_ZROW_ST*, float *, int *, int *, FCL_FPPOINT_ST*, FCL_AMPSLOPE_ST*, FCL_AMPOFF_ST*, FCL_TIMEOFF_ST*);//!
+  int getSeqPeaksAndCalibAmp(TSequence*, int, int, int, TPadPeak*, int*, FCL_FTPCADC_ST*, FCL_AMPSLOPE_ST*, FCL_AMPOFF_ST*);//!
+  int fitPoints(TClusterUC*, int, int, double*, double*, TPeak*, int, FCL_FTPCADC_ST*, FCL_DET_ST*, FCL_ZROW_ST*, float*, int*, int*, FCL_FPPOINT_ST*, FCL_TIMEOFF_ST*);//!
+  int padtrans(TPeak*, int, int, FCL_DET_ST*, FCL_ZROW_ST*, double*, double*);//!
+  float gauss_2d(int, int, float, float, float, float, float);//!
+  float sigmax(float);//!
+  float sigmat(float);//!
+  int calcpadtrans(FCL_DET_ST*, FCL_PADTRANS_ST*, double*, double*);//!
+  int cucInit(TClusterUC*, int*, int*);//!
+  TClusterUC *cucAlloc(TClusterUC*, int*, int*);//!
+  int cucFree(TClusterUC*, int*, int*, TClusterUC*);//!
 };
+
+#endif

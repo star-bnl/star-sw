@@ -1,7 +1,8 @@
-// $Id: StFtpcClusterMaker.h,v 1.1 1999/11/02 09:41:28 jcs Exp $
+// $Id: StFtpcClusterMaker.h,v 1.2 1999/12/02 13:20:59 hummler Exp $
 // $Log: StFtpcClusterMaker.h,v $
-// Revision 1.1  1999/11/02 09:41:28  jcs
-// add source files to empty StFtpcClusterMaker
+// Revision 1.2  1999/12/02 13:20:59  hummler
+// Move cluster processing from maker to cluster finder class.
+// (Preparations for new raw data implementation.)
 //
 //
 #ifndef STAR_StFtpcClusterMaker
@@ -31,7 +32,7 @@ class St_ffs_gaspar;
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.1 1999/11/02 09:41:28 jcs Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.2 1999/12/02 13:20:59 hummler Exp $";
    St_fcl_ampoff   *m_ampoff;    //!
    St_fcl_ampslope *m_ampslope;  //!
    St_fcl_timeoff  *m_timeoff;   //!
@@ -57,7 +58,7 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.1 1999/11/02 09:41:28 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.2 1999/12/02 13:20:59 hummler Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker, 1)   //StAF chain virtual base class for Makers
 };
