@@ -1,5 +1,8 @@
-* $Id: tpt_helix_fit.F,v 1.6 1999/09/14 00:53:13 liq Exp $
+* $Id: tpt_helix_fit.F,v 1.7 2000/01/21 07:55:46 sakrejda Exp $
 * $Log: tpt_helix_fit.F,v $
+* Revision 1.7  2000/01/21 07:55:46  sakrejda
+* Calculation of track length along the helix improved. Makes chisq and residuals symmetric.
+*
 * Revision 1.6  1999/09/14 00:53:13  liq
 * add tpt_mxdim.inc, use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
 *
@@ -56,6 +59,7 @@ C____________________________________________________________________
       REAL    acent, bcent, charge,dpsi,scir(mxpnt),rr,zint
       REAL    dtanl,dzint,h(3,3)
       REAL    xcir(*),ycir(*),wcir(*),zcir(*),wlin(*)
+      REAL    refx,refy,refmod,curx,cury,curmod
       LOGICAL good
       CHARACTER*80 m80
       INTEGER ier1,ipass
@@ -91,6 +95,9 @@ C        evaluate charge
          if(charge.lt.0) sgn = -1.0
 C        evaluate errors
          ier = circov(xcir,ycir,wcir,ncir,acent,bcent,rad,h)
+         refx=xcir(1)-acent
+         refy=ycir(1)-bcent
+         refmod=sqrt(refx**2+refy**2)
          phi0 = atan2(ycir(1)-bcent,xcir(1)-acent)
          scir(1)=0.
          rr=abs(rad)
@@ -98,14 +105,11 @@ C        evaluate errors
          good = .true.
          do while(ks.lt.ncir.and.good)
              ks = ks + 1
-             dpsi=sqrt((ycir(ks)-ycir(ks-1))**2
-     >             +   (xcir(ks)-xcir(ks-1))**2)/(2.*rr)
-             if(dpsi.le.1.0) then
-                scir(ks) = scir(ks-1) + 2.0*rr*asin(dpsi)
-             else
-                ncir = ks-1
-                good = .false.
-             endif
+             curx=xcir(ks)-acent
+             cury=ycir(ks)-bcent
+             curmod=sqrt(curx**2+cury**2)
+             dpsi = abs(refx*cury-refy*curx)/(refmod*curmod)
+             scir(ks) = rr*asin(dpsi)
          end do
          chil = 999999.0
          if(ncir.ge.3)then
