@@ -4,20 +4,19 @@
  */
 /*********************************************************
  *
- * $Id: StPmdDBUtil.h,v 1.2 2003/12/03 11:55:59 subhasis Exp $
+ * $Id: StPmdDBUtil.h,v 1.3 2004/03/11 11:31:21 subhasis Exp $
  *
- * Author: Subhasis Chattopadhyay
+ * Author: Dipak Mishra
  *
  ************************************************************
  *
- * Description: This is the class of PMD Utility which provides
- *              FEE boardwise info. 
+ * Description: This is the class of PMD geometry for offline 
  *
  *************************************************************
  *
  * $Log: StPmdDBUtil.h,v $
- * Revision 1.2  2003/12/03 11:55:59  subhasis
- * Comment header changed by Supriya
+ * Revision 1.3  2004/03/11 11:31:21  subhasis
+ * Board status based mapping added
  *
  *************************************************************/
 #ifndef STAR_StPmdDBUtil
@@ -47,6 +46,7 @@ class StPmdDBUtil {
  protected:
   Int_t m_BoardNumber[PMD_CRAMS_MAX*2][PMD_ROW_MAX][PMD_COL_MAX];
   Int_t m_ChannelInBoard[PMD_CRAMS_MAX*2][PMD_ROW_MAX][PMD_COL_MAX];
+  Int_t m_Chain[PMD_CRAMS_MAX*2][PMD_ROW_MAX][PMD_COL_MAX];
  public: 
   StPmdDBUtil();                 //! A constructor
   virtual  ~StPmdDBUtil();       //! A destructor
@@ -54,6 +54,7 @@ class StPmdDBUtil {
   void GetBoardInfo();
   void BoardNumber( Int_t,Int_t,Int_t,Int_t& ); 
   void ChannelInBoard( Int_t,  Int_t, Int_t, Int_t& ); 
+  void Chain( Int_t,  Int_t, Int_t, Int_t& ); 
   
   
   ClassDef(StPmdDBUtil, 1)
@@ -64,6 +65,9 @@ class StPmdDBUtil {
 
 inline void StPmdDBUtil::ChannelInBoard(Int_t sm, Int_t row, Int_t col, Int_t& channel)
 {channel=m_ChannelInBoard[sm][row][col];}
+
+inline void StPmdDBUtil::Chain(Int_t sm, Int_t row, Int_t col, Int_t& chain)
+{chain=m_Chain[sm][row][col];}
 
 #endif
 
