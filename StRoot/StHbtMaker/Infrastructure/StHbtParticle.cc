@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.5 1999/09/17 22:38:02 lisa Exp $
+ * $Id: StHbtParticle.cc,v 1.6 1999/12/11 15:58:29 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
+ * Revision 1.6  1999/12/11 15:58:29  lisa
+ * Add vertex decay position datum and accessor to StHbtParticle to allow pairwise cuts on seperation of V0s
+ *
  * Revision 1.5  1999/09/17 22:38:02  lisa
  * first full integration of V0s into StHbt framework
  *
@@ -59,6 +62,7 @@ StHbtParticle::StHbtParticle(const StHbtV0* const hbtV0,const double& mass){
   double ener = sqrt(temp.mag2()+mass*mass);
   mFourMomentum.setE(ener);
 
+  mDecayVertexV0 = hbtV0->decayVertexV0();
   //  mHelix = hbtTrack->Helix(); ?? what to do with mHelix for a Particle coming from a V0?
 }
 //_____________________
