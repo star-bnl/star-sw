@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: NonId3DCorrFctn.cxx,v 1.2 2001/04/05 22:05:59 kisiel Exp $
+ * $Id: NonId3DCorrFctn.cxx,v 1.3 2002/12/12 17:02:49 kisiel Exp $
  *
  * Author: Adam Kisiel, Warsaw University of Technology
  ***************************************************************************
@@ -13,8 +13,13 @@
  ***************************************************************************
  *
  * $Log: NonId3DCorrFctn.cxx,v $
+ * Revision 1.3  2002/12/12 17:02:49  kisiel
+ * Use KStar instead of 2*KStar for non-identical particles
+ *
  * Revision 1.2  2001/04/05 22:05:59  kisiel
- * Fix for the Insure++ warnings,
+ *
+ *
+ *   Fix for the Insure++ warnings,
  *   and change the name of the developer, so that
  *   it is clear who to blame :)
  *
@@ -214,42 +219,42 @@ void NonId3DCorrFctn::makeHistos(char* title, const int& nbins, const float& Qin
   strcpy(htitle,"HLongKDiff");
   mHLongKDiff = new  StHbt2DHisto(strcat(htitle,title),htitle,
 				 100,-klim,klim,nbins,QinvLo,kstarlim);
-  strcpy(htitle,"HQSideExitNum");
-  mHQSideExitNum = new  StHbt2DHisto(strcat(htitle,title),htitle,
-				 100,-klim2,klim2,nbins,0.0,exitlim);
-  strcpy(htitle,"HKStarExitNumSideP");
-  mHKStarExitNumSideP = new  StHbt2DHisto(strcat(htitle,title),htitle,
-				 nbins,QinvLo,QinvHi,100,0.0,exitlim);
-  strcpy(htitle,"HKStarExitNumSideN");
-  mHKStarExitNumSideN = new  StHbt2DHisto(strcat(htitle,title),htitle,
-				 nbins,QinvLo,QinvHi,100,0.0,exitlim);
-  strcpy(htitle,"HQOutExitNum");
-  mHQOutExitNum = new  StHbt2DHisto(strcat(htitle,title),htitle,
-				 100,-klim2,klim2,nbins,0.0,exitlim);
-  strcpy(htitle,"HKStarExitNumOutP");
-  mHKStarExitNumOutP = new  StHbt2DHisto(strcat(htitle,title),htitle,
-				 nbins,QinvLo,QinvHi,100,0.0,exitlim);
-  strcpy(htitle,"HKStarExitNumOutN");
-  mHKStarExitNumOutN = new  StHbt2DHisto(strcat(htitle,title),htitle,
-				 nbins,QinvLo,QinvHi,100,0.0,exitlim);
-  strcpy(htitle,"HQSideExitDen");
-  mHQSideExitDen = new  StHbt2DHisto(strcat(htitle,title),htitle,
-				 100,-klim2,klim2,nbins,0.0,exitlim);
-  strcpy(htitle,"HKStarExitDenSideP");
-  mHKStarExitDenSideP = new  StHbt2DHisto(strcat(htitle,title),htitle,
-				 nbins,QinvLo,QinvHi,100,0.0,exitlim);
-  strcpy(htitle,"HKStarExitDenSideN");
-  mHKStarExitDenSideN = new  StHbt2DHisto(strcat(htitle,title),htitle,
-				 nbins,QinvLo,QinvHi,100,0.0,exitlim);
-  strcpy(htitle,"HQOutExitDen");
-  mHQOutExitDen = new  StHbt2DHisto(strcat(htitle,title),htitle,
-				 100,-klim2,klim2,nbins,0.0,exitlim);
-  strcpy(htitle,"HKStarExitDenOutP");
-  mHKStarExitDenOutP = new  StHbt2DHisto(strcat(htitle,title),htitle,
-				 nbins,QinvLo,QinvHi,100,0.0,exitlim);
-  strcpy(htitle,"HKStarExitDenOutN");
-  mHKStarExitDenOutN = new  StHbt2DHisto(strcat(htitle,title),htitle,
-				 nbins,QinvLo,QinvHi,100,0.0,exitlim);
+//  strcpy(htitle,"HQSideExitNum");
+//  mHQSideExitNum = new  StHbt2DHisto(strcat(htitle,title),htitle,
+//				 100,-klim2,klim2,nbins,0.0,exitlim);
+//  strcpy(htitle,"HKStarExitNumSideP");
+//  mHKStarExitNumSideP = new  StHbt2DHisto(strcat(htitle,title),htitle,
+//				 nbins,QinvLo,QinvHi,100,0.0,exitlim);
+//  strcpy(htitle,"HKStarExitNumSideN");
+//  mHKStarExitNumSideN = new  StHbt2DHisto(strcat(htitle,title),htitle,
+//				 nbins,QinvLo,QinvHi,100,0.0,exitlim);
+//  strcpy(htitle,"HQOutExitNum");
+//  mHQOutExitNum = new  StHbt2DHisto(strcat(htitle,title),htitle,
+//				 100,-klim2,klim2,nbins,0.0,exitlim);
+//  strcpy(htitle,"HKStarExitNumOutP");
+//  mHKStarExitNumOutP = new  StHbt2DHisto(strcat(htitle,title),htitle,
+//				 nbins,QinvLo,QinvHi,100,0.0,exitlim);
+//  strcpy(htitle,"HKStarExitNumOutN");
+//  mHKStarExitNumOutN = new  StHbt2DHisto(strcat(htitle,title),htitle,
+//				 nbins,QinvLo,QinvHi,100,0.0,exitlim);
+//  strcpy(htitle,"HQSideExitDen");
+//  mHQSideExitDen = new  StHbt2DHisto(strcat(htitle,title),htitle,
+//				 100,-klim2,klim2,nbins,0.0,exitlim);
+//  strcpy(htitle,"HKStarExitDenSideP");
+//  mHKStarExitDenSideP = new  StHbt2DHisto(strcat(htitle,title),htitle,
+//				 nbins,QinvLo,QinvHi,100,0.0,exitlim);
+//  strcpy(htitle,"HKStarExitDenSideN");
+//  mHKStarExitDenSideN = new  StHbt2DHisto(strcat(htitle,title),htitle,
+//				 nbins,QinvLo,QinvHi,100,0.0,exitlim);
+//  strcpy(htitle,"HQOutExitDen");
+//  mHQOutExitDen = new  StHbt2DHisto(strcat(htitle,title),htitle,
+//				 100,-klim2,klim2,nbins,0.0,exitlim);
+//  strcpy(htitle,"HKStarExitDenOutP");
+//  mHKStarExitDenOutP = new  StHbt2DHisto(strcat(htitle,title),htitle,
+//				 nbins,QinvLo,QinvHi,100,0.0,exitlim);
+//  strcpy(htitle,"HKStarExitDenOutN");
+//  mHKStarExitDenOutN = new  StHbt2DHisto(strcat(htitle,title),htitle,
+//				 nbins,QinvLo,QinvHi,100,0.0,exitlim);
 
 }
 
@@ -259,6 +264,14 @@ NonId3DCorrFctn::NonId3DCorrFctn(char* title, const int& nbins, const float& Qin
   makeHistos(title, nbins, QinvLo, QinvHi);
   mqSideSel = aqSideSel;
 }
+
+NonId3DCorrFctn::NonId3DCorrFctn(char* title, const int& nbins, const float& QinvLo, 
+		  const float& QinvHi, const float KCompCut)
+{
+  makeHistos(title, nbins, QinvLo, QinvHi);
+  mKCompCut = KCompCut;
+}
+
 
 //____________________________
 NonId3DCorrFctn::~NonId3DCorrFctn(){
@@ -296,18 +309,23 @@ NonId3DCorrFctn::~NonId3DCorrFctn(){
   delete  mHLongKSame;
   delete  mHLongKDiff;
 
-  delete mHQSideExitNum;
-  delete mHKStarExitNumSideP;
-  delete mHKStarExitNumSideN;
-  delete mHQOutExitNum;
-  delete mHKStarExitNumOutP;
-  delete mHKStarExitNumOutN;
-  delete mHQSideExitDen;
-  delete mHKStarExitDenSideP;
-  delete mHKStarExitDenSideN;
-  delete mHQOutExitDen;
-  delete mHKStarExitDenOutP;
-  delete mHKStarExitDenOutN;
+//   delete mHQSideExitNum;
+//   delete mHKStarExitNumSideP;
+//   delete mHKStarExitNumSideN;
+//   delete mHQOutExitNum;
+//   delete mHKStarExitNumOutP;
+//   delete mHKStarExitNumOutN;
+//   delete mHQSideExitDen;
+//   delete mHKStarExitDenSideP;
+//   delete mHKStarExitDenSideN;
+//   delete mHQOutExitDen;
+//   delete mHKStarExitDenOutP;
+//   delete mHKStarExitDenOutN;
+
+//  delete mHPt1KStarOutNum;
+//  delete mHPt1KStarOutDen;
+//  delete mHPt2KStarOutNum;
+//  delete mHPt2KStarOutDen;
 }
 //_________________________
 void NonId3DCorrFctn::Finish(){
@@ -420,18 +438,23 @@ void NonId3DCorrFctn::Write(){
   mHLongKSame->Write();
   mHLongKDiff->Write();
 
-  mHQSideExitNum->Write();
-  mHKStarExitNumSideP->Write();
-  mHKStarExitNumSideN->Write();
-  mHQOutExitNum->Write();
-  mHKStarExitNumOutP->Write();
-  mHKStarExitNumOutN->Write();
-  mHQSideExitDen->Write();
-  mHKStarExitDenSideP->Write();
-  mHKStarExitDenSideN->Write();
-  mHQOutExitDen->Write();
-  mHKStarExitDenOutP->Write();
-  mHKStarExitDenOutN->Write();
+//   mHQSideExitNum->Write();
+//   mHKStarExitNumSideP->Write();
+//   mHKStarExitNumSideN->Write();
+//   mHQOutExitNum->Write();
+//   mHKStarExitNumOutP->Write();
+//   mHKStarExitNumOutN->Write();
+//   mHQSideExitDen->Write();
+//   mHKStarExitDenSideP->Write();
+//   mHKStarExitDenSideN->Write();
+//   mHQOutExitDen->Write();
+//   mHKStarExitDenOutP->Write();
+//   mHKStarExitDenOutN->Write();
+
+//  mHPt1KStarOutNum->Write();
+//  mHPt1KStarOutDen->Write();
+//  mHPt2KStarOutNum->Write();
+//  mHPt2KStarOutDen->Write();
 }
 
 //____________________________
@@ -461,82 +484,161 @@ StHbtString NonId3DCorrFctn::Report(){
 }
 //____________________________
 void NonId3DCorrFctn::AddRealPair(const StHbtPair* pair){
-  double tKStar = 2*fabs(pair->KStar());
+  double tKStar = fabs(pair->KStar());
   double tKOut = pair->dKOut();
   double tKSide = pair->dKSide();
   double tKLong = pair->dKLong();
   double exitsep = pair->NominalTpcExitSeparation();
 
-  if ((!mqSideSel) || (mqSideSel * tKSide > 0)) {
-    if(tKOut>0.){
-      mNumOutP->Fill(tKStar);
-      mHKStarExitNumOutP->Fill(tKStar,exitsep,1.0);
+   if (mKCompCut <= 0.0)
+    {
+      if ((!mqSideSel) || (mqSideSel * tKSide > 0)) {
+	if(tKOut>0.){
+	  mNumOutP->Fill(tKStar);
+// 	  mHKStarExitNumOutP->Fill(tKStar,exitsep,1.0);
+	}
+	else{
+	  mNumOutN->Fill(tKStar);    
+// 	  mHKStarExitNumOutN->Fill(tKStar,exitsep,1.0);
+	}
+	if(tKSide>0.){
+	  mNumSideP->Fill(tKStar);
+// 	  mHKStarExitNumSideP->Fill(tKStar,exitsep,1.0);
+	}
+	else{
+	  mNumSideN->Fill(tKStar);    
+// 	  mHKStarExitNumSideN->Fill(tKStar,exitsep,1.0);
+	}
+	if(tKLong>0.){
+	  mNumLongP->Fill(tKStar);
+	}
+	else{
+	  mNumLongN->Fill(tKStar);    
+	}
+      }
     }
-    else{
-      mNumOutN->Fill(tKStar);    
-      mHKStarExitNumOutN->Fill(tKStar,exitsep,1.0);
+  else  
+    {
+      if ((fabs(tKLong) < mKCompCut) && (fabs(tKSide) < mKCompCut))
+	{
+	  if(tKOut>0.){
+	    mNumOutP->Fill(tKStar);
+// 	    mHKStarExitNumOutP->Fill(tKStar,exitsep,1.0);
+	  }
+	  else{
+	    mNumOutN->Fill(tKStar);    
+// 	    mHKStarExitNumOutN->Fill(tKStar,exitsep,1.0);
+	  }
+	}
+      if ((fabs(tKOut) < mKCompCut) && (fabs(tKLong) < mKCompCut))
+	{
+	  if(tKSide>0.){
+	    mNumSideP->Fill(tKStar);
+// 	    mHKStarExitNumSideP->Fill(tKStar,exitsep,1.0);
+	  }
+	  else{
+	    mNumSideN->Fill(tKStar);    
+// 	    mHKStarExitNumSideN->Fill(tKStar,exitsep,1.0);
+	  }
+	}
+      if ((fabs(tKOut) < mKCompCut) && (fabs(tKSide) < mKCompCut))
+	{
+	  if(tKLong>0.){
+	    mNumLongP->Fill(tKStar);
+	  }
+	  else{
+	    mNumLongN->Fill(tKStar);    
+	  }
+	}
     }
-    if(tKSide>0.){
-      mNumSideP->Fill(tKStar);
-      mHKStarExitNumSideP->Fill(tKStar,exitsep,1.0);
-    }
-    else{
-      mNumSideN->Fill(tKStar);    
-      mHKStarExitNumSideN->Fill(tKStar,exitsep,1.0);
-    }
-    if(tKLong>0.){
-      mNumLongP->Fill(tKStar);
-    }
-    else{
-      mNumLongN->Fill(tKStar);    
-    }
-  }
   mHOutKSame->Fill(tKOut, tKStar, 1.);
   mHSideKSame->Fill(tKSide, tKStar, 1.);
   mHLongKSame->Fill(tKLong, tKStar, 1.);
 
-  mHQSideExitNum->Fill(tKSide,exitsep,1.0);
-  mHQOutExitNum->Fill(tKOut,exitsep,1.0);
+//  mHPt1KStarOutNum->Fill(pair->track1()->FourMomentum().perp(),tKStar*((tKOut>0)*2-1),1.0);
+//  mHPt2KStarOutNum->Fill(pair->track2()->FourMomentum().perp(),tKStar*((tKOut>0)*2-1),1.0);
+
+//   mHQSideExitNum->Fill(tKSide,exitsep,1.0);
+//   mHQOutExitNum->Fill(tKOut,exitsep,1.0);
 }
 //____________________________
 void NonId3DCorrFctn::AddMixedPair(const StHbtPair* pair){
-  double tKStar = 2*fabs(pair->KStar());
+  double tKStar = fabs(pair->KStar());
   double tKOut = pair->dKOut();
   double tKSide = pair->dKSide();
   double tKLong = pair->dKLong();
   double exitsep = pair->NominalTpcExitSeparation();
 
-  if ((!mqSideSel) || (mqSideSel * tKSide > 0)) {
-    if(tKOut>0.){
-      mDenOutP->Fill(tKStar);
-      mHKStarExitDenOutP->Fill(tKStar,exitsep,1.0);
+  if (mKCompCut <= 0.0)
+    {
+      if ((!mqSideSel) || (mqSideSel * tKSide > 0)) {
+	if(tKOut>0.){
+	  mDenOutP->Fill(tKStar);
+// 	  mHKStarExitDenOutP->Fill(tKStar,exitsep,1.0);
+	}
+	else{
+	  mDenOutN->Fill(tKStar);    
+// 	  mHKStarExitDenSideP->Fill(tKStar,exitsep,1.0);
+	}
+	if(tKSide>0.){
+	  mDenSideP->Fill(tKStar);
+// 	  mHKStarExitDenSideP->Fill(tKStar,exitsep,1.0);
+	}
+	else{
+	  mDenSideN->Fill(tKStar);    
+// 	  mHKStarExitDenSideN->Fill(tKStar,exitsep,1.0);
+	}
+	if(tKLong>0.){
+	  mDenLongP->Fill(tKStar);
+	}
+	else{
+	  mDenLongN->Fill(tKStar);    
+	}
+      }
     }
-    else{
-      mDenOutN->Fill(tKStar);    
-      mHKStarExitDenSideP->Fill(tKStar,exitsep,1.0);
+  else  
+    {
+      if ((fabs(tKLong) < mKCompCut) && (fabs(tKSide) < mKCompCut))
+	{
+	  if(tKOut>0.){
+	    mDenOutP->Fill(tKStar);
+// 	    mHKStarExitDenOutP->Fill(tKStar,exitsep,1.0);
+	  }
+	  else{
+	    mDenOutN->Fill(tKStar);    
+// 	    mHKStarExitDenOutN->Fill(tKStar,exitsep,1.0);
+	  }
+	}
+      if ((fabs(tKOut) < mKCompCut) && (fabs(tKLong) < mKCompCut))
+	{
+	  if(tKSide>0.){
+	    mDenSideP->Fill(tKStar);
+// 	    mHKStarExitDenSideP->Fill(tKStar,exitsep,1.0);
+	  }
+	  else{
+	    mDenSideN->Fill(tKStar);    
+// 	    mHKStarExitDenSideN->Fill(tKStar,exitsep,1.0);
+	  }
+	}
+      if ((fabs(tKOut) < mKCompCut) && (fabs(tKSide) < mKCompCut))
+	{
+	  if(tKLong>0.){
+	    mDenLongP->Fill(tKStar);
+	  }
+	  else{
+	    mDenLongN->Fill(tKStar);    
+	  }
+	}
     }
-    if(tKSide>0.){
-      mDenSideP->Fill(tKStar);
-      mHKStarExitDenSideP->Fill(tKStar,exitsep,1.0);
-    }
-    else{
-      mDenSideN->Fill(tKStar);    
-      mHKStarExitDenSideN->Fill(tKStar,exitsep,1.0);
-    }
-    if(tKLong>0.){
-      mDenLongP->Fill(tKStar);
-    }
-    else{
-      mDenLongN->Fill(tKStar);    
-    }
-  }
 
   mHOutKDiff->Fill(tKOut, tKStar, 1.);
   mHSideKDiff->Fill(tKSide, tKStar, 1.);
   mHLongKDiff->Fill(tKLong, tKStar, 1.);
 
-  mHQSideExitDen->Fill(tKSide,exitsep,1.0);
-  mHQOutExitDen->Fill(tKOut,exitsep,1.0);
+//   mHQSideExitDen->Fill(tKSide,exitsep,1.0);
+//   mHQOutExitDen->Fill(tKOut,exitsep,1.0);
+//  mHPt1KStarOutDen->Fill(pair->track1()->FourMomentum().perp(),tKStar*((tKOut>0)*2-1),1.0);
+//  mHPt2KStarOutDen->Fill(pair->track2()->FourMomentum().perp(),tKStar*((tKOut>0)*2-1),1.0);
 }
 
 
