@@ -15,6 +15,9 @@
 
 /*
 $Log: TGeant3.cxx,v $
+Revision 1.4  2000/01/10 16:21:28  fisyak
+Modify Eufilv for multiple volume entries
+
 Revision 1.3  2000/01/07 17:51:24  fisyak
 Add Gtmedi
 
@@ -396,7 +399,7 @@ extern "C"
   void type_of_call ertrgo();
   void type_of_call eufill (Int_t &, Float_t*, Float_t*);
   void type_of_call eufilp (Int_t &, Float_t*, Float_t*, Float_t*);
-  void type_of_call eufilv (Int_t &, Float_t*, DEFCHARD, Int_t *, Int_t & DEFCHARL);
+  void type_of_call eufilv (Int_t &, Float_t*, DEFCHARD, Int_t *, Int_t * DEFCHARL);
   void type_of_call agmain(Int_t &,Int_t &,Int_t &);
   void type_of_call gufld(Float_t *, Float_t *);
   void type_of_call agxuser();
@@ -3424,7 +3427,7 @@ void TGeant3::Eufilp(Int_t &n, Float_t* ein, Float_t* pli, Float_t * plf){
   eufilp (n ,ein, pli, plf);
 }
 //______________________________________________________________________________
-void TGeant3::Eufilv(Int_t &n, Float_t* ein, const Char_t *cnamv, Int_t *numv, Int_t &Iovl){
+void TGeant3::Eufilv(Int_t &n, Float_t* ein, const Char_t *cnamv, Int_t *numv, Int_t *Iovl){
   eufilv (n ,ein, PASSCHARD(cnamv), numv, Iovl PASSCHARL(cnamv));
 }
 //______________________________________________________________________________
