@@ -1,3 +1,4 @@
+*CMZ :  2.00/03 17/02/2000  17.37.34  by  Pavel Nevski
 *CMZ :  2.00/00 28/09/98  01.03.58  by  Pavel Nevski
 *CMZ :  1.40/05 24/08/98  22.02.41  by  Pavel Nevski
 *CMZ :  1.30/00 29/04/97  23.40.13  by  Pavel Nevski
@@ -127,7 +128,7 @@ c
      >        ,udecay_pathlength_entrance
 *---------------------------------------------------------------------------
  
-      Integer       CSADDR, LENOCC, Input, Li, Ifile, Iadr, L, L1
+      Integer       CSADDR, LENOCC, Input, Li, Ifile, Iadr, L, L1, token
       character*32  command
       character*256 string1/' '/, string/' '/
       character*1   blank  /' '/, char, C
@@ -241,6 +242,10 @@ c***  Get command and number of parameters passed
          call KUGETI( NsubToSkip )
          call KUGETI( NsubRan(1) )
          call KUGETI( NsubRan(2) )
+         If (NtoSkip.lt.0) then
+            CALL ATOKENS(token)
+            If (token.gt.0) NtoSkip=(token-1)*abs(NtoSkip)
+         endif
          NEVENT = IEVENT+NtoSKIP
          CALL QNEXT
 *
@@ -380,7 +385,7 @@ c----------------------------------------------------------------------
        end
  
  
-*CMZ :          02/01/2000  21.01.14  by  Pavel Nevski
+*CMZ :  2.00/01 02/01/2000  21.01.14  by  Pavel Nevski
 *CMZ :  2.00/00 27/08/99  19.38.31  by  Pavel Nevski
 *CMZ :  1.40/05 26/08/98  20.16.56  by  Pavel Nevski
 *CMZ :  1.40/05 26/08/98  19.34.12  by  Pavel Nevski
@@ -999,6 +1004,7 @@ C
 10000 FORMAT(A8)
 10100 FORMAT('?',I7)
       END
+*CMZ :  2.00/02 19/01/2000  23.42.44  by  Pavel Nevski
 *CMZ :  2.00/00 16/12/99  15.45.32  by  Pavel Nevski
 *CMZ :  2.02/00 20/11/92  10.03.42  by  R. DeWolf
 *-- Author :    R. DeWolf   25/09/91
@@ -1168,6 +1174,7 @@ C
       IMVRT = 0
 C Zero total rotation
       AROT = 0.
+      ANGR = 0.
       LUNIQ=.TRUE.
       TSTAR = 0.
 C
@@ -1392,10 +1399,10 @@ C                                       Link to:
       EQUIVALENCE (LKSLUG(3),LKTFLM)   ! permanent track filter structure
       EQUIVALENCE (LKSLUG(4),LKTFLT)   ! temporary track filter structure
       EQUIVALENCE (LKSLUG(5),LKAMOD)   ! MODule parameters (Dont know this)
-      EQUIVALENCE (LKSLUG(6),LKAGEV)   ! Link to general event structure
+      EQUIVALENCE (LKSLUG(6),LKAGEV)   ! event KINE copy before splitting
       EQUIVALENCE (LKSLUG(7),LKAMCH)   ! MonteCarlo Hits ( not GEANT I guess)
       EQUIVALENCE (LKSLUG(8),LKADIG)   ! DIGitized hits (again not GEANT...?)
-      EQUIVALENCE (LKSLUG(9),LKMAPP)   ! map structure
+      EQUIVALENCE (LKSLUG(9),LKMAPP)   ! Event direct access map structure
       EQUIVALENCE (LKSLUG(10),LKMFLD)  ! magnetic field banks
       EQUIVALENCE (LKSLUG(11),LKRUNT)  ! run tree bank (vertical structure)
       EQUIVALENCE (LKSLUG(12),LKEVNT)  ! event tree bank (vertical struct)
