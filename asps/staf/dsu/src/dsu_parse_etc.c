@@ -109,8 +109,8 @@ int SingleExpressionResult(DS_DATASET_T *pTable,long row,char *cuts) {
   v2=Val2(cuts,location,pTable,row);
 #ifdef DEBUG
   /* PP"type=%d (le%d ge%d gt%d lt%d eq%d), val1=%f val2=%f\n",
-  type, OPERATOR_TYPE_LE, OPERATOR_TYPE_GE, OPERATOR_TYPE_GT,
-  OPERATOR_TYPE_LT, OPERATOR_TYPE_EQ,v1,v2); */
+  ** type, OPERATOR_TYPE_LE, OPERATOR_TYPE_GE, OPERATOR_TYPE_GT,
+  ** OPERATOR_TYPE_LT, OPERATOR_TYPE_EQ,v1,v2); */
 #endif
   switch(type) {
     case OPERATOR_TYPE_LE: return(v1<=v2);
