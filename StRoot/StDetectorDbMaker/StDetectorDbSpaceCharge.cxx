@@ -1,19 +1,8 @@
 #include "StDetectorDbSpaceCharge.h"
-//#include "tables/St_spaceChargeCor_Table.h"
-// Temp declaration of struct for autobuild not to choke!
-struct spaceChargeCor_st{
-    double fullFieldB;
-    double halfFieldB;
-    double zeroField;
-    double halfFieldA;
-    double fullFieldA;
-    double satRate;
-};
-
-
+#include "tables/St_spaceChargeCor_Table.h"
 #include "TUnixTime.h"
-#include "TTable.h"
 #include "StDetectorDbMagnet.h"
+#include "StDetectorDbRichScalers.h"
 
 /// Initialize Instance
 StDetectorDbSpaceCharge* StDetectorDbSpaceCharge::sInstance = 0;
@@ -89,6 +78,25 @@ double StDetectorDbSpaceCharge::getSpaceChargeCorrection(){
 
 };
 
+/// Returns Space Charge Correction for given
+double StDetectorDbSpaceCharge::getSpaceChargeCoulombs(double scaleFactor){
+
+    StDetectorDbRichScalers* scalers = StDetectorDbRichScalers::instance();
+    double mult = scalers->getMult();
+    double saturation = this->getSpaceChargeSatRate();
+    double correction = this->getSpaceChargeCorrection(scaleFactor);
+
+    double intens = (mult < saturation) ? mult : saturation;
+    return intens * correction;
+    
+};
+
+/// Returns Space Charge Correction for given
+double StDetectorDbSpaceCharge::getSpaceChargeCoulombs(){
+    StDetectorDbMagnet * magnet = StDetectorDbMagnet::instance();
+    return getSpaceChargeCoulombs(magnet->getScaleFactor());
+};
+
 /// Returns Space Charge Saturation Rate
 double StDetectorDbSpaceCharge::getSpaceChargeSatRate(){
     double value = 0;
@@ -110,7 +118,8 @@ ostream& operator<<(ostream& os, StDetectorDbSpaceCharge& v){
     os << "Positive Full Field: " << v.getSpaceChargeCorrection(1.0) << endl;
     os << "Currerently Using:   " << v.getSpaceChargeCorrection() << endl;
     os << endl;
-    os << "Saturation Rate:     " << v.getSpaceChargeSatRate() << endl; 
+    os << "Saturation Rate:     " << v.getSpaceChargeSatRate() << endl;
+    os << "Coulombs:            " << v.getSpaceChargeCoulombs() << endl;
     
     return os;
 };
