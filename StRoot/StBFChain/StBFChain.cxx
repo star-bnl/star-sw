@@ -39,16 +39,16 @@ BfcItem BFC[] = {
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"mdc3"        ,""  ,"","cy1h,GeantOut"                               ,"","","MDC3 default chain",kFALSE},
   {"doEvents"    ,""  ,"","xin,event,analysis,FieldOn"                                    ,"","","",kFALSE},
-  {"Cdst"        ,""  ,"","global,dst,qa,event,analysis"                                  ,"","","",kFALSE},
-  {"Cdefault"    ,""  ,"","tpc,ftpc,rrs,rich,l0,l3,Cdst,Kalman,qa,tags,Tree" ,"","","Default chain",kFALSE}, 
+  {"Cdst"        ,""  ,"","global,dst,qa,event,analysis,EventQA"                          ,"","","",kFALSE},
+  {"Cdefault"    ,""  ,"","tpc,ftpc,rrs,rich,l0,l3,Cdst,Kalman,tags,Tree"    ,"","","Default chain",kFALSE}, 
   {"Cy1a"        ,""  ,"","y1a,Cdefault"                                 ,"","","Turn on chain y1a",kFALSE},
   {"Cy1b"        ,""  ,"","y1b,Cdefault"                                 ,"","","Turn on chain y1b",kFALSE},
   {"Cy1c"        ,""  ,"","y1c,Cdefault"                                 ,"","","Turn on chain y1c",kFALSE},
   {"Cy1d"        ,""  ,"","y1d,Cdefault"                                 ,"","","Turn on chain y1d",kFALSE},
   {"cy1e"        ,""  ,"","y1e,Cdefault"                                 ,"","","Turn on chain y1h",kFALSE},
   {"cy1h"        ,""  ,"","y1h,Cdefault"                                 ,"","","Turn on chain y1e",kFALSE},
-  {"Cy2a"        ,""  ,"","y2a,tpc,ftpc,emc,l0,l3,Cdst,qa,tags,Tree,svt" ,"","","Turn on chain y2a",kFALSE},
-  {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,Cdst,qa,tags,Tree,evout" ,"",""
+  {"Cy2a"        ,""  ,"","y2a,tpc,ftpc,emc,l0,l3,Cdst,tags,Tree,svt"    ,"","","Turn on chain y2a",kFALSE},
+  {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,Cdst,tags,Tree,evout","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----","------------------------------------------------","","","",kFALSE},
@@ -57,10 +57,10 @@ BfcItem BFC[] = {
   {"Eval"        ,""  ,"","","",""                ,"Turn on evaluation switch for different makers",kFALSE},
   {"Ev03"        ,""  ,"","","",""                                 ,"Turn on alternative V0 method",kFALSE},
   {"off"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
-  {"gstar"       ,""  ,"","geant","",""      ,"gstar for 10 muon tracks with pT = 10GeV in |eta|<1",kFALSE}, 
+  {"gstar"       ,""  ,"","geant,Simu","","" ,"gstar for 10 muon tracks with pT = 10GeV in |eta|<1",kFALSE}, 
   {"tdaq"        ,""  ,"","xin,tpc_daq"                                                   ,"","","",kFALSE},  
   {"miniDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE}, 
-  {"fzin"        ,""  ,"","geant","" ,""                                      ,"read gstar fz-file",kFALSE},
+  {"fzin"        ,""  ,"","geant,Simu","" ,""                                 ,"read gstar fz-file",kFALSE},
   {"NoInput"     ,""  ,"","","" ,""                                                ,"No input file",kFALSE},
   {"util"        ,""  ,"","","","StAnalysisUtilities",                   "Load StAnalysisUtilities",kFALSE},
   {"NoFieldSet"  ,""  ,"","-FieldOn,-FieldOff,-HalfField,-ReverseField,-magF" ,"","","No Field Set",kFALSE},
@@ -124,11 +124,11 @@ BfcItem BFC[] = {
   {"magF"        ,"","","NoFieldSet,StDbT,db","StMagFMaker","StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
   {"tpc"         ,"tpc","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"   ,"StChainMaker","StChain","",kFALSE},
-  {"tpcDB"       ,"tpcDB","tpc","dbutil,db"                            ,"StTpcDbMaker","StTpcDb","",kFALSE},
-  {"Trs"         ,"","tpc","scl,tpcDB,tpc_daq"                        ,"StTrsMaker","StTrsMaker","",kFALSE},
+  {"tpcDB"       ,"tpcDB","tpc","tpc_T,dbutil,db"                      ,"StTpcDbMaker","StTpcDb","",kFALSE},
+  {"Trs"         ,"","tpc","scl,tpcDB,tpc_daq,Simu"                   ,"StTrsMaker","StTrsMaker","",kFALSE},
   {"Mixer"      ,"tpc_raw","tpc","","StMixerMaker","StDaqLib,StDAQMaker,StTrsMaker,StMixerMaker","",kFALSE},
   {"tpc_daq"     ,"tpc_raw","tpc","tpc_T"                   ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
-  {"tfs"         ,""  ,"tpc","","",""                                    ,"use tfs (no StTrsMaker)",kFALSE},
+  {"tfs"         ,""  ,"tpc","Simu"                                ,"","","use tfs (no StTrsMaker)",kFALSE},
   {"tcl"         ,"tpc_hits","tpc","tpc_T,tls"             ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
   {"tpt"         ,"tpc_tracks","tpc","tpc_T,tls,"          ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
   {"laser"       ,"tpc_tracks","tpc","tdaq,tpc,-tpt"
@@ -139,10 +139,10 @@ BfcItem BFC[] = {
   {"ems"         ,"emc_raw","emc","geant,emc_T"    ,"St_ems_Maker","StEvent,St_emc,St_ems_Maker","",kFALSE},
   {"emh"         ,"emc_hits","emc","geant,emc_T,tpc_T"     ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
   {"svt"         ,"svt","","svt_T,srs,stk"                             ,"StChainMaker","StChain","",kFALSE},
-  {"srs"         ,"svt_hits","svt","tls"            ,"St_srs_Maker","St_tpc,St_svt,St_srs_Maker","",kFALSE},
+  {"srs"         ,"svt_hits","svt","tls,Simu"       ,"St_srs_Maker","St_tpc,St_svt,St_srs_Maker","",kFALSE},
   {"stk"         ,"svt_tracks","svt","tls"          ,"St_stk_Maker","St_tpc,St_svt,St_stk_Maker","",kFALSE},
   {"Ftpc"        ,"ftpc"  ,"","ftpcT,fcl,fpt"                          ,"StChainMaker","StChain","",kFALSE},
-  {"fss"         ,"ftpc_raw","ftpc","SCL"                 ,"St_fss_Maker","St_ftpc,St_fss_Maker","",kFALSE},
+  {"fss"         ,"ftpc_raw","ftpc","SCL,Simu"            ,"St_fss_Maker","St_ftpc,St_fss_Maker","",kFALSE},
   {"Fcl"         ,"ftpc_hits","ftpc","SCL"
                           ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,St_ftpc,StFtpcClusterMaker","",kFALSE},
   {"fpt"         ,"ftpc_tracks","ftpc","SCL"              ,"StFtpcTrackMaker","St_ftpc,StFtpcTrackMaker","",kFALSE},
@@ -164,7 +164,7 @@ BfcItem BFC[] = {
                                                                 ,"St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Event"       ,"","","globT,SCL"                       ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
   {"PreEcl"      ,"preecl","emc","emh"                          ,"StPreEclMaker","StPreEclMaker","",kFALSE},
-  {"Rrs"         ,"","","sim_T"                                       ,"StRrsMaker","StRrsMaker","",kFALSE},
+  {"Rrs"         ,"","","sim_T,Simu"                                  ,"StRrsMaker","StRrsMaker","",kFALSE},
   {"rich"        ,"","","sim_T,globT"                      ,"StRchMaker","StRrsMaker,StRchMaker","",kFALSE},
   {"l3"          ,"l3","","l3cl,l3t"                                 ,"StChainMaker","StBFChain","",kFALSE},
   {"l3cl"        ,"","l3","l3_T"                    ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
@@ -180,6 +180,7 @@ BfcItem BFC[] = {
   {"tags"        ,"","TagsChain","TagsChain,globT,Event,FlowTag,StrangeTags,EbyeScaTags,TpcTag"    
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
   {"QA"          ,"QA","","globT,SCL,global"                        ,"St_QA_Maker","St_QA_Maker","",kFALSE},
+  {"EventQA"     ,"EventQA","","Event"                           ,"StEventQAMaker","St_QA_Maker","",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display"     ,"EventDisplay","","SCL,St_geom"   ,"StEventDisplayMaker","StEventDisplayMaker","",kFALSE},
@@ -187,8 +188,9 @@ BfcItem BFC[] = {
   {"McEvent"     ,"","Mc","Event",                   "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
   {"McAss"       ,"","Mc","McEvent",                   "StAssociationMaker","StAssociationMaker","",kFALSE},
   {"McAna"       ,"","Mc","McEvent",                     "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
-  {"LAna"       ,"","","in,db,geant,SCL","StLaserAnalysisMaker"
+  {"LAna"        ,"","","in,RY1h,geant,tpcDb","StLaserAnalysisMaker"
                                                       ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},
+  
   {"xout"        ,""  ,"",""                                 ,"","xdf2root","Write dst to XDF file",kFALSE}, 
   {"Tree"        ,""  ,"",""                                        ,"StTreeMaker","StTreeMaker","",kFALSE}
 };
@@ -289,8 +291,15 @@ Int_t StBFChain::Instantiate()
 	  if (Key == "calib") {
 	    if (!GetOption("NoCintCalDb")) {
 	      const char *calibDB = "$STAR_ROOT/calib";
-	      if (!calibMk) calibMk = new St_db_Maker("calib",calibDB);
-	      if (!calibMk) status = kStErr;
+	      if (!calibMk) {
+		calibMk = new St_db_Maker("calib",calibDB);
+		if (!calibMk) status = kStErr;
+		else {
+		  fBFC[i].Name = (Char_t *) calibMk->GetName();
+		  if (GetOption("Simu")) calibMk->SetFlavor("sim");
+		  else                   calibMk->SetFlavor("ofl");
+		}
+	      }
 	    } 
 	  }
 	  else {
@@ -303,19 +312,35 @@ Int_t StBFChain::Instantiate()
 	      if (STAR != PWD && gSystem->AccessPathName("./StDb/params") == 0)  userDB = "./StDb/params";
 	      gMessMgr->QAInfo() << " Main DataBase == " << mainDB << endm;  
 	      if (userDB) gMessMgr->QAInfo() << " User DataBase == " << PWD.Data() << "/" << userDB << endm;  
-	      if (!dbMk) dbMk = new St_db_Maker("db",mainDB,userDB);
-	      if (!dbMk) status = kStErr;
+	      if (!dbMk) {
+		dbMk = new St_db_Maker("db",mainDB,userDB);
+		if (!dbMk) status = kStErr;
+		else {
+		  fBFC[i].Name = (Char_t *) dbMk->GetName();
+		  if (GetOption("Simu")) dbMk->SetFlavor("sim");
+		  else                   dbMk->SetFlavor("ofl");
+		  SetDbOptions();
+		}
+	      }
 	    }
 	    if (!GetOption("NoMySQLDb")) {
 	      if (GetOption("tpcDB")){// 
-		if (!StarDbMk) StarDbMk     = new St_db_Maker("StarDb","MySQL:StarDb");
-		if (!StarDbMk) status = kStErr;
-	      }
-	      if (!RunLogMk) RunLogMk = new St_db_Maker("RunConditions","MySQL:RunLog");
-	      if (!RunLogMk) status = kStErr;
-	      if (dbMk) {
-		fBFC[i].Name = (Char_t *) dbMk->GetName();
-		SetDbOptions();
+		if (!StarDbMk) {
+		  StarDbMk     = new St_db_Maker("StarDb","MySQL:StarDb");
+		  if (!StarDbMk) status = kStErr;
+		  else {
+		    if (GetOption("Simu")) StarDbMk->SetFlavor("sim");
+		    else                   StarDbMk->SetFlavor("ofl");
+		  }
+		}
+		if (!RunLogMk) {
+		  RunLogMk = new St_db_Maker("RunConditions","MySQL:RunLog");
+		  if (!RunLogMk) status = kStErr;
+		  else {
+		    if (GetOption("Simu")) RunLogMk->SetFlavor("sim");
+		    else                   RunLogMk->SetFlavor("ofl");
+		  }
+		}
 	      }
 	    }
 	  }
@@ -530,8 +555,6 @@ void StBFChain::SetFlags(const Char_t *Chain)
        GetOption("Xi")    || GetOption("Kink"))) SetOption("global");
   if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval"); 
   if (!GetOption("event")) SetOption("-analysis");
-  //  SetOption("-emc");
-  //  SetOption("-Kink");
   // Print set values
   for (k = 1; k<NoChainOptions;k++) {
     if (GetOption(k)) {
@@ -546,6 +569,25 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
   // define input file
   if (infile) fInFile = new TString(infile);
   if (!GetOption("NoInput")) {
+    if (!fInFile && GetOption("Lana")) {
+      if (GetOption("FieldOff")) {// Laser data
+	fInFile = new TString("/star/rcf/daq/2000/03/st_physics_1062035_raw_0001.daq");
+	fInFile->Append(",/star/rcf/scratch/love/st_physics_1062036_raw_0002.daq");
+	printf ("Use default input file %s for Laser, FieldOff \n",fInFile->Data());
+      }
+      else {
+	if (GetOption("HalfField")) {// Laser data
+	  fInFile = new TString("/star/rcf/daq/2000/03/st_physics_1062006_raw_0002.daq");
+	  fInFile->Append(",/star/rcf/daq/2000/03/st_physics_1062004_raw_0002.daq");
+	  printf ("Use default input file %s for Laser, HalfField \n",fInFile->Data());
+	}
+	else {
+	  fInFile = new TString("/star/rcf/daq/2000/03/st_physics_1063012_raw_0002.daq");
+	  fInFile->Append(",/star/rcf/daq/2000/03/st_physics_1063013_raw_0002.daq");
+	  printf ("Use default input file %s for Laser, Full Field \n",fInFile->Data());
+	}
+      }
+    }
     if (!fInFile && GetOption("miniDAQ")) {
       fInFile = new TString("/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf"); // laser data
       printf ("Use default input file %s for %s \n",fInFile->Data(),"miniDAQ");
@@ -715,8 +757,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.96 2000/06/09 13:02:53 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.97 2000/06/10 23:13:45 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.97  2000/06/10 23:13:45  fisyak
+// Add flavour for Db
+//
 // Revision 1.96  2000/06/09 13:02:53  fisyak
 // Move l3 chain after StEventMaker
 //
