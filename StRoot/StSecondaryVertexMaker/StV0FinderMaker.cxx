@@ -322,54 +322,56 @@ Int_t StV0FinderMaker::Prepare() {
 
       //Cut: track flag
       if (tri->flag() <= 0) continue;
-
-        // Determine detector id of track i
-        const StTrackTopologyMap& map = tri->topologyMap();
-        Bool_t tpcHit = map.hasHitInDetector(kTpcId);
-        Bool_t silHit = map.hasHitInDetector(kSvtId) ||
-                        map.hasHitInDetector(kSsdId);
-        if (tpcHit) {
-          if (silHit)
-            detId[trks] = 3; //SVT+TPC
-          else
-            detId[trks] = 1; //TPC-only
-        } else if (silHit)
-          detId[trks] = 2; //SVT-only
-        else
-          //ignore this track
-          continue;
-
-        trk[trks] = tri;
-
-        StTrackGeometry* triGeom = tri->geometry();
-        heli[trks] = triGeom->helix();
-       
-        p = triGeom->momentum();
-
-	pt[trks] = p.perp();
-        ptot[trks] = p.mag();
-	trkID[trks]=tri->key();
-
-        // Determine number of hits (in SVT+TPC)
-        hits[trks] = map.numberOfHits(kTpcId) +
-                     map.numberOfHits(kSvtId) +
-                     map.numberOfHits(kSsdId);
-
-        if (!trks)
-           {StThreeVectorD p1 = triGeom->momentum();
-            StThreeVectorD p2 = heli[trks].momentum(Bfield);
-            if (p2.x() != 0) Bfield *= p1.x()/p2.x();
-               else Bfield *= p1.y()/p2.y();
-            if (triGeom->charge()*triGeom->helicity() > 0) Bfield = -fabs(Bfield);
+      
+      // Determine detector id of track i
+      const StTrackTopologyMap& map = tri->topologyMap();
+      Bool_t tpcHit = map.hasHitInDetector(kTpcId);
+      Bool_t silHit = map.hasHitInDetector(kSvtId) ||
+	map.hasHitInDetector(kSsdId);
+      if (tpcHit) {
+	if (silHit)
+	  detId[trks] = 3; //SVT+TPC
+	else
+	  detId[trks] = 1; //TPC-only
+      } else if (silHit)
+	detId[trks] = 2; //SVT-only
+      else
+	//ignore this track
+	continue;
+      
+      trk[trks] = tri;
+      
+      StTrackGeometry* triGeom = tri->geometry();
+      if(!triGeom) continue; //ignore the track if it has no geometry 
+      
+      heli[trks] = triGeom->helix();
+      
+      p = triGeom->momentum();
+      
+      pt[trks] = p.perp();
+      ptot[trks] = p.mag();
+      trkID[trks]=tri->key();
+      
+      // Determine number of hits (in SVT+TPC)
+      hits[trks] = map.numberOfHits(kTpcId) +
+	map.numberOfHits(kSvtId) +
+	map.numberOfHits(kSsdId);
+      
+      if (!trks)
+	{StThreeVectorD p1 = triGeom->momentum();
+	StThreeVectorD p2 = heli[trks].momentum(Bfield);
+	if (p2.x() != 0) Bfield *= p1.x()/p2.x();
+	else Bfield *= p1.y()/p2.y();
+	if (triGeom->charge()*triGeom->helicity() > 0) Bfield = -fabs(Bfield);
                else Bfield = fabs(Bfield);
-            }
-	
-        if (triGeom->charge() > 0) ptrk[ptrks++] = trks;
-        else if (triGeom->charge() < 0) ntrk[ntrks++] = trks;
-        trks++;
+	}
+      
+      if (triGeom->charge() > 0) ptrk[ptrks++] = trks;
+      else if (triGeom->charge() < 0) ntrk[ntrks++] = trks;
+      trks++;
     }
   }
-
+  
   gMessMgr->Info() << "StV0FinderMaker : No. of nodes is : "
                    << nNodes << endm;
   gMessMgr->Info() << "StV0FinderMaker : No. of tracks is : "
@@ -804,8 +806,11 @@ void StV0FinderMaker::Trim() {
                       " V0 candidates" << endm;
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.16 2004/02/03 09:52:45 faivre Exp $
+// $Id: StV0FinderMaker.cxx,v 1.17 2004/02/16 16:18:39 betya Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.17  2004/02/16 16:18:39  betya
+// added a check on (!triGeom) in V0Finder::Prepare()
+//
 // Revision 1.16  2004/02/03 09:52:45  faivre
 // Update user-friendliness ; default options now use SVT and ITTF+TPT ; remove warning.
 //
