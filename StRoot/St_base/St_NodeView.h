@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98 
-// $Id: St_NodeView.h,v 1.8 1999/04/09 23:24:08 fine Exp $
+// $Id: St_NodeView.h,v 1.9 1999/04/10 15:05:05 fine Exp $
 // $Log: St_NodeView.h,v $
+// Revision 1.9  1999/04/10 15:05:05  fine
+// First working version of SavePrimitive. New ctor has been introduced to back SavePrimitive
+//
 // Revision 1.8  1999/04/09 23:24:08  fine
 // St_NodeView::SavePrimitive() - first approach
 //
@@ -29,8 +32,10 @@ class St_NodeView : public St_ObjectSet {
 public:
   St_NodeView():St_ObjectSet(){;}
   St_NodeView(St_NodeView *viewNode,St_NodePosition *nodePosition=0);
-  St_NodeView(St_Node *thisNode,St_NodePosition *nodePosition);
   St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition=0,EDataSetPass iopt=kAll,Int_t level=0);
+  St_NodeView(Double_t *translate, Double_t *rotate, St_Node *thisNode,
+              const Char_t *thisNodePath, const Char_t *matrixName=0, const Int_t matrixType=0);
+  St_NodeView(St_Node *thisNode,St_NodePosition *nodePosition);
   virtual ~St_NodeView();
   virtual void Browse(TBrowser *b);
   virtual void Draw(Option_t *option); // *MENU* 

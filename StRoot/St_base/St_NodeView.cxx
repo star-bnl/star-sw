@@ -37,6 +37,11 @@ ClassImp(St_NodeView)
 St_NodeView::St_NodeView(St_NodeView *viewNode,St_NodePosition *nodePosition)
             : St_ObjectSet(viewNode->GetName(),(TObject *)nodePosition)
 {
+  //
+  // This ctor creates a St_NodeView structure from the "marked" nodes
+  // of the "viewNode" input structure
+  // It re-calculates all positions according of the new topology
+  //
   if (viewNode) 
   {
      SetTitle(viewNode->GetTitle());
@@ -56,20 +61,13 @@ St_NodeView::St_NodeView(St_NodeView *viewNode,St_NodePosition *nodePosition)
     }
   }
 }
-//_____________________________________________________________________________
-St_NodeView::St_NodeView(St_Node *thisNode,St_NodePosition *nodePosition)
-            : St_ObjectSet(thisNode->GetName(),(TObject *)nodePosition)
-{
-  if (thisNode) 
-     SetTitle(thisNode->GetTitle());
-}
 
 //_____________________________________________________________________________
 St_NodeView::St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition,EDataSetPass iopt,Int_t level)
             : St_ObjectSet(pattern.GetName(),(TObject *)nodePosition)
 {
   //
-  // Creates St_DataSet (clone) with a topology similar with St_DataSet *pattern
+  // Creates St_NodeView (view) with a topology similar with St_Node *pattern
   //
   //  Parameters:
   //  -----------
@@ -112,10 +110,60 @@ St_NodeView::St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition,ED
      
   }
 }
+
+//_____________________________________________________________________________
+St_NodeView::St_NodeView(Double_t *translate, Double_t *rotate, St_Node *topNode,
+                         const Char_t *thisNodePath, const Char_t *matrixName, const Int_t matrixType)
+{
+  // Special ctor to back St_NodeView::SavePrimitive() method
+  St_Node *thisNode = 0;
+  Double_t thisX  = translate[0]; 
+  Double_t thisY  = translate[1];
+  Double_t thisZ  = translate[2];
+
+  // Find St_Node by path; 
+  if (topNode) { 
+    thisNode =  (St_Node *)topNode->Find(thisNodePath);     
+    if (!thisNode->InheritsFrom("St_Node")) { 
+           thisNode = 0; 
+           fprintf(stderr,"Error wrong node <%s> on path: \"%s\"\n",thisNode->GetName(),thisNodePath); 
+    } 
+  } 
+
+  TRotMatrix *thisRotMatrix =  0;
+  if (matrixName && strlen(matrixName)) thisRotMatrix = gGeometry->GetRotMatrix(matrixName); 
+  St_NodePosition *thisPosition = 0; 
+  if (thisRotMatrix)  
+      thisPosition = new St_NodePosition(thisNode,thisX, thisY, thisZ, matrixName); 
+  else if (matrixType==2)  
+      thisPosition = new St_NodePosition(thisNode,thisX, thisY, thisZ); 
+  else if (rotate) {
+       const Char_t *title = "rotation";
+      thisRotMatrix = new TRotMatrix((Text_t *)matrixName,(Text_t *)title,rotate);
+      thisPosition  = new St_NodePosition(thisNode,thisX, thisY, thisZ, thisRotMatrix); 
+  }
+  else
+       Error("St_NodeView"," No rotation matrix is defined");
+
+  SetObject(thisPosition);
+  if (thisNode) {
+    SetName(thisNode->GetName());
+    SetTitle(thisNode->GetTitle());
+  }
+}
+
+//_____________________________________________________________________________
+St_NodeView::St_NodeView(St_Node *thisNode,St_NodePosition *nodePosition)
+            : St_ObjectSet(thisNode->GetName(),(TObject *)nodePosition)
+{
+  if (thisNode) 
+     SetTitle(thisNode->GetTitle());
+}
+
 //______________________________________________________________________________
 St_NodeView::~St_NodeView()
 {
-
+// default dtor (empty for this class)
 }
 
 //_____________________________________________________________________________
@@ -295,48 +343,26 @@ void St_NodeView::Paint(Option_t *option)
 void St_NodeView::SavePrimitive(ofstream &out, Option_t *option)
 {
 const Char_t *sceleton[] = {
-   "St_NodeView *CreateNodeView(St_Node *topNode)"
-  ,"{"
-  ,"  TString thisNodePath = "
+   "St_NodeView *CreateNodeView(St_Node *topNode) {"
+  ,"  TString     thisNodePath   = "
   ," "
-  ,"  // Define position"
+  ,"  Double_t thisTranslate[3]  = "
   ," "
-  ,"  Double_t thisX  = "
-  ,"  Double_t thisY  = "
-  ,"  Double_t thisZ  = "
-  ," "
-  ,"  TString matrixName = " 
-  ,"  Int_t type = "
-  ,"  Double_t *thisMatrix[] = {  "
-  ,"                              "
-  ,"                              "
-  ,"                            };"
-  ,"  St_Node *thisNode = 0;"
-  ,"  // Find St_Node by path;"
-  ,"  if (topNode) {"
-  ,"    thisNode =  (St_Node *)topNode->Find(thisNodePath);    "
-  ,"    if (!thisNode->InheritsFrom(\"St_Node\")) {"
-  ,"           thisNode = 0;"
-  ,"           fprintf(stderr,\"Error wrong node <%s> on path: \\\"%s\\\"\\n\",thisNode->GetName(),thisModePath.Data());"
-  ,"    }" 
-  ,"  }"
-  ,"  TRotMatrix *thisRotMatrix =  gGeometry->GetRotMatrix(matrixName.Data());"
-  ,"  St_NodePosition *thisPosition = 0;"
-  ,"  if (thisRotMatrix) "
-  ,"      thisPosition = new St_NodePosition(thisNode,thisX, thisY, thisZ, matrixName.Data());"
-  ,"  else if (type==2) "
-  ,"       thisPosition = new St_NodePosition(thisNode,thisX, thisY, thisZ);"
-  ,"  else "
-  ,"       thisPosition = new St_NodePosition(thisNode,thisX, thisY, thisZ, thisMatrix);"
-  ,"  }"
-  ,"  St_NodeView *thisView = new St_NodeView(thisNode,thisPosition);"
-  ,"  return thisView;"
+  ,"  TString        matrixName  = " 
+  ,"  Int_t          matrixType  = "
+  ,"  Double_t     thisMatrix[]  = {  "
+  ,"                                  "
+  ,"                                  "
+  ,"                               };"
+  ,"  return = new St_NodeView(thisTranslate, thisMatrix, topNode,"
+  ,"                          thisNodePath.Data(),matrixName.Data(), matrixType);"
   ,"}"
   };
 //------------------- end of sceleton ---------------------
   Int_t sceletonSize = sizeof(sceleton)/4;
   St_NodePosition *thisPosition = GetPosition();
-  TString thisNodePath = Path();
+  St_Node *thisFullNode = GetNode();
+  TString thisNodePath = thisFullNode ? thisFullNode->Path() : TString("");
   // Define position
   Double_t thisX  = thisPosition ? thisPosition->GetX():0;
   Double_t thisY  = thisPosition ? thisPosition->GetY():0;
@@ -345,7 +371,7 @@ const Char_t *sceleton[] = {
   TRotMatrix *matrix = thisPosition ? thisPosition->GetMatrix():0;
   Int_t matrixType = 2;
   TString matrixName = " ";
-  Double_t *thisMatrix[] = { 0,0,0, 0,0,0, 0,0,0 };
+  Double_t thisMatrix[] = { 0,0,0, 0,0,0, 0,0,0 };
   if (matrix) {
      matrixName = matrix->GetName();
      memcpy(thisMatrix,matrix->GetMatrix(),9*sizeof(Double_t));
@@ -353,44 +379,26 @@ const Char_t *sceleton[] = {
   }
   Int_t im = 0;
   for (Int_t lineNumber =0; lineNumber < sceletonSize; lineNumber++) {
-    out << sceleton[lineNumber];  cout << lineNumber << ". " << sceleton[lineNumber];
+    out << sceleton[lineNumber];                             // cout << lineNumber << ". " << sceleton[lineNumber];
     switch (lineNumber) {
-    case  2:  out  << "\"" << thisNodePath.Data() << "\";" ; cout  << "\"" << thisNodePath.Data() << "\";" ;
+    case  1:  out  << "\"" << thisNodePath.Data() << "\";" ; // cout  << "\"" << thisNodePath.Data() << "\";" ;
        break;
-    case  6:  out << thisX << ";" ;  cout << thisX << ";" ;
+    case  3:  out << "{" << thisX << ", " << thisY << ", "<< thisZ << "};";  // cout << thisX << ";" ;
        break;
-    case  7:  out << thisY << ";" ; cout << thisY << ";" ;
+    case  5:  out << "\"" << matrixName << "\";" ;           // cout << "\"" << matrixName << "\";" ;
        break;
-    case  8:  out << thisZ << ";" ; cout << thisZ << ";" ;
+    case  6:  out <<  matrixType << ";" ;                    // cout <<  matrixType << ";" ;
        break;
-    case 10:  out << "\"" << matrixName << "\";" ; cout << "\"" << matrixName << "\";" ;
-       break;
-    case 11:  out <<  matrixType << ";" ; cout <<  matrixType << ";" ;
-       break;
-    case 12:  out << thisMatrix[im++] << ", " << thisMatrix[im++] << ", " << thisMatrix[im++]  << ", " ;
+    case  7:  out << thisMatrix[im++] << ", " << thisMatrix[im++] << ", " << thisMatrix[im++]  << ", " ;
        break; 
-    case 13:  out << thisMatrix[im++] << ", " << thisMatrix[im++] << ", " << thisMatrix[im++]  << ", " ;
+    case  8:  out << thisMatrix[im++] << ", " << thisMatrix[im++] << ", " << thisMatrix[im++]  << ", " ;
        break;
-    case 14:  out << thisMatrix[im++] << ", " << thisMatrix[im++] << ", " << thisMatrix[im++] ;
+    case  9:  out << thisMatrix[im++] << ", " << thisMatrix[im++] << ", " << thisMatrix[im++] ;
        break;
     default:
        break;
    };
-   cout << " " << endl;
+//   cout << " " << endl;
    out << " " << endl;
  }
-
-#if 0
-  // Save itself
-  gSystem->MakeDirectory(GetName());
-  gSystem->ChangeDirectory(GetName());
-  
-  if (option && strstr(option,"f")) {
-    St_DataSetIter next(this)
-    St_NodeView *view = 0;
-    while( (view = next()) 
-       view->SavePrimirtive(out ,option);
-    
-  }
-#endif
 }
