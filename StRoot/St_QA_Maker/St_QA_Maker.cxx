@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.20 1999/04/21 20:19:18 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.21 1999/04/23 14:04:07 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.21  1999/04/23 14:04:07  kathy
+// just cleaning up comments
+//
 // Revision 1.20  1999/04/21 20:19:18  kathy
 // put in comments and cleaned up - works for mdc2 dst in dev now
 //
@@ -342,7 +345,7 @@ Int_t St_QA_Maker::DrawHists()
   TList *dirList = gDirectory->GetList();
   Int_t padCount = 0;
   //_____________________
-  // Create an itertor
+  // Create an iterator
   TIter nextHist(dirList);
   Int_t histCounter = 0;
   Int_t histReadCounter = 0;
@@ -1058,7 +1061,7 @@ void St_QA_Maker::MakeHistEmsHitsBsmd(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.20 1999/04/21 20:19:18 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.21 1999/04/23 14:04:07 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
