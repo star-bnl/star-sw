@@ -3,8 +3,8 @@
 #include "StEventTypes.h"
 #include "StMuEmcCollection.h"
 #include "SystemOfUnits.h"
-#include "StEmcUtil/StEmcGeom.h"
-#include "StEmcUtil/emcDetectorName.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEmcUtil/others/emcDetectorName.h"
 
 ClassImp(StMuEmcUtil)
 
