@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: summarizeEvent.cc,v 1.12 1999/11/04 21:02:27 ullrich Exp $
+ * $Id: summarizeEvent.cc,v 2.0 1999/11/04 16:10:11 ullrich Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,10 +14,7 @@
  ***************************************************************************
  *
  * $Log: summarizeEvent.cc,v $
- * Revision 1.12  1999/11/04 21:02:27  ullrich
- * Revision for new StEvent
- *
- * Revision 1.12  1999/11/04 21:02:27  ullrich
+ * Revision 2.0  1999/11/04 16:10:11  ullrich
  * Revision for new StEvent
  *
  * Revision 2.1  1999/11/16 12:28:44  ullrich
@@ -30,7 +27,7 @@
 #include "StEventTypes.h"
 #include "StMessMgr.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 1.12 1999/11/04 21:02:27 ullrich Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.0 1999/11/04 16:10:11 ullrich Exp $";
 
 void
 summarizeEvent(StEvent& event, Int_t &nevents)

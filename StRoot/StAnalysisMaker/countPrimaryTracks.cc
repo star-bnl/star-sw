@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: countPrimaryTracks.cc,v 1.7 1999/11/04 21:02:27 ullrich Exp $
+ * $Id: countPrimaryTracks.cc,v 2.0 1999/11/04 16:10:08 ullrich Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,16 +14,13 @@
  ***************************************************************************
  *
  * $Log: countPrimaryTracks.cc,v $
- * Revision 1.7  1999/11/04 21:02:27  ullrich
- * Revision for new StEvent
- *
- * Revision 1.7  1999/11/04 21:02:27  ullrich
+ * Revision 2.0  1999/11/04 16:10:08  ullrich
  * Revision for new StEvent
  *
  **************************************************************************/
 #include "StEventTypes.h"
 
-static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.7 1999/11/04 21:02:27 ullrich Exp $";
+static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 2.0 1999/11/04 16:10:08 ullrich Exp $";
 
 long countPrimaryTracks(StEvent& event)
 {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: tagFiller.cc,v 1.6 1999/11/04 21:02:27 ullrich Exp $
+ * $Id: tagFiller.cc,v 2.0 1999/11/04 16:10:14 ullrich Exp $
  *
  * Author: Torre Wenaus, BNL, 1/99
  *         Thomas Ullrich, Nov 1999
@@ -14,10 +14,7 @@
  ***************************************************************************
  *
  * $Log: tagFiller.cc,v $
- * Revision 1.6  1999/11/04 21:02:27  ullrich
- * Revision for new StEvent
- *
- * Revision 1.6  1999/11/04 21:02:27  ullrich
+ * Revision 2.0  1999/11/04 16:10:14  ullrich
  * Revision for new StEvent
  *
  **************************************************************************/
@@ -25,7 +22,7 @@
 #include "StEventTypes.h"
 #include "HighPtTag.h"
 
-static const char rcsid[] = "$Id: tagFiller.cc,v 1.6 1999/11/04 21:02:27 ullrich Exp $";
+static const char rcsid[] = "$Id: tagFiller.cc,v 2.0 1999/11/04 16:10:14 ullrich Exp $";
 
 void
 tagFiller(StEvent& event, HighPtTag_st& hptTag)
