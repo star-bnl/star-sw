@@ -9,6 +9,6 @@
 struct svtDriftCurve { 
 
    long  ID;   /*   */
-   double  driftCurve[3][9];   /* 9deg poly fit/analog from bench measurements  */
+   double  driftCurve[3][10];   /* 9deg poly fit/analog from bench measurements  */
 
  };  
