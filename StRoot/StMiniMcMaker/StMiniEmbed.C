@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// $Id: StMiniEmbed.C,v 1.5 2002/06/28 22:15:12 calderon Exp $
+// $Id: StMiniEmbed.C,v 1.6 2003/07/09 01:07:23 calderon Exp $
 // owner: Manuel Calderon de la Barca Sanchez
 //
 // what it does: reads .geant.root file from emedding data, produces minimc.root file 
@@ -10,6 +10,12 @@
 //       so if one needs to run elsewhere, and the output directory doesn't have the same
 //       lower level directory structure, no output files will be done.
 // $Log: StMiniEmbed.C,v $
+// Revision 1.6  2003/07/09 01:07:23  calderon
+// Addition of FTPC reference multiplicity
+// Addition of other multiplicity values for StMiniMcEvent
+// Changes to reflect the use of the setters and getters, no longer
+// access the data members directly.
+//
 // Revision 1.5  2002/06/28 22:15:12  calderon
 // Changes to deal with seg. faults in the file name handling:
 // Conventions:
@@ -41,36 +47,6 @@
 //
 // Revision 1.3  2002/06/07 02:21:48  calderon
 // Protection against empty vector in findFirstLastHit
-// $Log: StMiniEmbed.C,v $
-// Revision 1.5  2002/06/28 22:15:12  calderon
-// Changes to deal with seg. faults in the file name handling:
-// Conventions:
-// StMiniMcMaker looks for the input file from the IO maker to figure out
-// if the file has changed.  This is done using TString::Contains() in Make().
-// Usually we will run one file at a time, but in order not to break Bum's scheme of being
-// able to process several files in one go, this is left as is.  However, for
-// embedding, the file name is not enough, in Eric's new scheme there are repeated
-// file names.  This is resolved by adding a prefix to the output file name.  However,
-// this prefix should not be overwritten, so the current code only replaces the
-// string inside the output file name pertaining to the input file name, and leaves
-// the prefix of the output file intact.  This was done for embedding looking for
-// st_physics, and here is where the problem arose: hijing files begin with a different
-// prefix.  To solve this problem, the input file name prefix is now an input parameter
-// in the macro.
-//
-// StMiniEmbed.C and StMiniHijing.C now conform to this convention.  StMiniEmbed.C
-// did not change its prototype, because all embedding files have st_phyics as prefix.
-// StMiniHijing.C changed its prototype, now it takes as an input argument the prefix,
-// but in order not to break Jenn's scripts if she was already using this macro,
-// this parameter was added at the end and defaults to "rcf", which is appropriate
-// for hijing files reconstructed in rcf.
-//
-// Revision 1.4  2002/06/11 19:09:34  calderon
-// Bug fix: the filename that was set in the macro was being overwritten
-// in InitRun, so the emb80x string which was added to the filename was lost.
-// This was fixed by not replacing the filename in InitRun and only replacing
-// the current filename starting from st_physics.
-// and $Id: StMiniEmbed.C,v 1.5 2002/06/28 22:15:12 calderon Exp $ plus header comments for the macros
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -92,11 +68,7 @@ void StMiniEmbed(Int_t nevents=2,
   gSystem->Load("St_base");
   gSystem->Load("StChain");
 
-  gSystem->Load("libglobal_Tables");
-  gSystem->Load("libgeometry_Tables");
-  gSystem->Load("libsim_Tables");
-  gSystem->Load("libgen_Tables");
-  gSystem->Load("libtpc_Tables"); // needed for StTpcDb
+  gSystem->Load("St_Tables");
   gSystem->Load("StUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");

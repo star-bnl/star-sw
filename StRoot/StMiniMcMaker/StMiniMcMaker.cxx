@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.10 2003/05/14 00:12:20 calderon Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.11 2003/07/09 01:07:23 calderon Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -7,6 +7,12 @@
  * \author Bum Choi, Manuel Calderon de la Barca Sanchez
  * \date   March 2001
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.11  2003/07/09 01:07:23  calderon
+ * Addition of FTPC reference multiplicity
+ * Addition of other multiplicity values for StMiniMcEvent
+ * Changes to reflect the use of the setters and getters, no longer
+ * access the data members directly.
+ *
  * Revision 1.10  2003/05/14 00:12:20  calderon
  * The minimc replaces now whatever it finds between the first and last '.', not
  * just geant.root, in the creation of the output file name.
@@ -55,6 +61,12 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.11  2003/07/09 01:07:23  calderon
+ * Addition of FTPC reference multiplicity
+ * Addition of other multiplicity values for StMiniMcEvent
+ * Changes to reflect the use of the setters and getters, no longer
+ * access the data members directly.
+ *
  * Revision 1.10  2003/05/14 00:12:20  calderon
  * The minimc replaces now whatever it finds between the first and last '.', not
  * just geant.root, in the creation of the output file name.
@@ -99,7 +111,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.10 2003/05/14 00:12:20 calderon Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.11 2003/07/09 01:07:23 calderon Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -168,7 +180,6 @@ StMiniMcMaker::StMiniMcMaker(const Char_t *name, const Char_t *title)
   mGhost(kFALSE), 
   mDebug(kFALSE),
   mMinPt(0),mMaxPt(99999),
-  mBField(-999),
   mNSplit(0),mNRc(0),mNGhost(0),mNContam(0)
     
 {
@@ -264,7 +275,6 @@ StMiniMcMaker::Init()
   cout << "###StMiniMcMaker::Init()" << endl;
 
   cout << "\tpt cut : " << mMinPt << " , " << mMaxPt << endl;
-
   return StMaker::Init();
 }   
 
@@ -413,7 +423,10 @@ StMiniMcMaker::trackLoop()
   if(mDebug) cout << "##StMiniMcMaker::trackLoop()" << endl;
 
   Int_t nMatched(0), nAcceptedRaw(0),nAccepted(0), 
-    nMerged(0), nSplit(0), nContam(0), nGhost(0), nContamNew(0);
+      nMerged(0), nSplit(0), nContam(0), nGhost(0), nContamNew(0),
+      nRcGoodGlobal20(0), nRcGlobal(0), nMcGoodGlobal20(0), 
+      nMcNch(0), nMcHminus(0), nMcFtpcWNch(0), nMcFtpcENch(0);
+      
 
   RCFOUNDMAP rcFoundMap; // to find split tracks
   MCFOUNDMAP mcFoundMap; // dont look for a rc match to mc tracks 
@@ -445,7 +458,18 @@ StMiniMcMaker::trackLoop()
     if(!acceptRaw(mcTrack)) continue; // loose eta cuts, etc
 
     nAcceptedRaw++;
-    
+
+    if(fabs(mcTrack->pseudoRapidity())<.5 && isPrimaryTrack(mcTrack) && mcTrack->particleDefinition()){
+	if(mcTrack->particleDefinition()->charge()!=0) nMcNch++;
+	if(mcTrack->particleDefinition()->charge()<0) nMcHminus++;
+    }
+    if(mcTrack->particleDefinition()->charge()!=0 && isPrimaryTrack(mcTrack) ) {
+        if(mcTrack->pseudoRapidity()<-2.8 && mcTrack->pseudoRapidity()>-3.8) nMcFtpcENch++;
+        if(mcTrack->pseudoRapidity()>2.8 && mcTrack->pseudoRapidity()<3.8) nMcFtpcWNch++;
+    }
+
+    if(acceptGood20(mcTrack)) nMcGoodGlobal20++;
+
     Int_t nAssocGl = mMcTrackMap->count(mcTrack);
     Int_t nAssocPr = 0;  // value maybe reset below.
 
@@ -491,7 +515,7 @@ StMiniMcMaker::trackLoop()
 
 	  StGlobalTrack* glTrack   = (*iterBestMatchPair)->partnerTrack();
 	  StPrimaryTrack* prTrack  = isPrimaryTrack(glTrack);
-	  	
+
 	  //
 	  // 02/15/01
 	  // safer idea.  given an mc track, find the pr track
@@ -528,7 +552,7 @@ StMiniMcMaker::trackLoop()
 	    // but must lie with the loose cut (acceptRaw)
 	    // and mc hits cut (accept)
 	    if(!acceptRaw(mcCandTrack) || !accept(mcCandTrack)) continue; 
-
+	    
 	    // 
 	    // loop over the rc tracks matched with this cand mc track.
 	    // is this mc track best matched with the original rc track?
@@ -548,7 +572,7 @@ StMiniMcMaker::trackLoop()
 	      mcMergedPair.push_back(assocPair);
 	    }
 	  }
-	  
+
 	  //
 	  // now we have all the possible mc merged tracks to this rc track.
 	  // (always sort.  probably not cpu intensive to sort one element)
@@ -596,7 +620,6 @@ StMiniMcMaker::trackLoop()
 	      rcFoundMap[prTrack->key()]=1; // the value is meaningless
 	      nMatched++;
 	      foundBest = kTRUE;
-
 	    }
 	    else{
 	      // 02/02/02 rc pt cut
@@ -619,7 +642,6 @@ StMiniMcMaker::trackLoop()
 	    mcFoundMap[mergedMcTrack->key()]=1;
 	
 	  } // 'merged' pair loop
-
 	  if(mDebug==2 && mcMergedPair.size()>1) 
 	    cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
 	} // found a matched rc track
@@ -638,12 +660,14 @@ StMiniMcMaker::trackLoop()
     }
   } // mc track iter
 
+  //nSplit(0), nContam(0), nGhost(0), nContamNew(0);
+  
   //
   // need to loop over the rc primary tracks to get
   // the event centrality values, etc.
   // also look for 'split tracks','ghost tracks'...
   //
-  Int_t nGoodTrackEta(0), nUncorrected(0);
+  Int_t nGoodTrackEta(0), nFtpcWUncorrected(0), nFtpcEUncorrected(0);
 
   const StSPtrVecPrimaryTrack& prTracks = 
     mRcEvent->primaryVertex(0)->daughters();
@@ -663,11 +687,14 @@ StMiniMcMaker::trackLoop()
     // centrality 
     //
     if(acceptCentrality(prTrack)) nGoodTrackEta++;
+    nRcGlobal++;	//These are identical and ok(prTrack) checks the flag
+    if(acceptGood20(glTrack)) nRcGoodGlobal20++;
 
     //
     // uncorrected negative primaries
     // 02/25/02 no longer used.  uses manuels function in fillEventInfo
-    if(acceptUncorrected(prTrack)) nUncorrected++;
+    if(acceptFTPC(prTrack) && prTrack->geometry()->momentum().pseudoRapidity() < 0. ) nFtpcEUncorrected++;
+    if(acceptFTPC(prTrack) && prTrack->geometry()->momentum().pseudoRapidity() > 0. ) nFtpcWUncorrected++;
     
     //
     // rc pt cut ?
@@ -679,7 +706,8 @@ StMiniMcMaker::trackLoop()
     //
     if(!accept(glTrack) || !accept(prTrack)) continue; 
 
-    mNRc++;
+    // tracks we'll put in the tree.
+    mNRc++; // for printing in Finish()
 
     UInt_t nAssocGl=0, nAssocPr=0;
     UInt_t nAssocMc = mRcTrackMap->count(glTrack);
@@ -788,7 +816,10 @@ StMiniMcMaker::trackLoop()
   // fill all the event info
   // 
 
-  fillEventInfo(nGoodTrackEta);
+  fillEventInfo(nGoodTrackEta,nRcGlobal,nRcGoodGlobal20,
+		nAcceptedRaw,
+		nMcGoodGlobal20,nMcNch,nMcHminus,
+		nMcFtpcENch, nMcFtpcWNch,nFtpcEUncorrected,nFtpcWUncorrected);
   
   delete miniMcPair;
   delete contamPair;
@@ -800,8 +831,8 @@ StMiniMcMaker::trackLoop()
 
   cout << "\tall rc tracks: " << prTracks.size() << endl;
   cout << "\tn good eta   : " << nGoodTrackEta << endl;
-  cout << "\tcentrality   : " << mMiniMcEvent->mCentrality  << endl;
-  cout << "\tuncorrected  : " << nUncorrected << endl;
+  cout << "\tcentrality   : " << mMiniMcEvent->centrality()  << endl;
+  cout << "\tuncorrected  : " << mMiniMcEvent->nUncorrectedPrimaries() << endl;
   cout << "\tall mc tracks: " << mcTracks.size() << endl;
   cout << "\taccepted raw : " << nAcceptedRaw << endl;
   cout << "\taccepted mc  : " << nAccepted << endl;
@@ -901,34 +932,52 @@ StMiniMcMaker::closeFile()
  */
 
 void
-StMiniMcMaker::fillEventInfo(Int_t nGoodTrackEta)
+StMiniMcMaker::fillEventInfo(Int_t nGoodTrackEta, Int_t nRcGlobal, Int_t nRcGoodGlobal20,
+			     Int_t nMcGlobal, Int_t nMcGoodGlobal20,
+			     Int_t nMcNch, Int_t nMcHminus, Int_t nMcFtpcENch, Int_t nMcFtpcWNch, Int_t nFtpcEUncorrected, 
+			     Int_t nFtpcWUncorrected)
 {
-  mMiniMcEvent->mEventId = (Int_t) mRcEvent->id();
-  mMiniMcEvent->mRunId   = (Int_t) mRcEvent->runId();
-  mMiniMcEvent->mOriginMult  = 
-    (Int_t)mRcEvent->primaryVertex(0)->numberOfDaughters();
-  mMiniMcEvent->mCentralMult = nGoodTrackEta;
+  mMiniMcEvent->setEventId((Int_t) mRcEvent->id());
+  mMiniMcEvent->setRunId((Int_t) mRcEvent->runId());
+  mMiniMcEvent->setOriginMult((Int_t)mRcEvent->primaryVertex(0)->numberOfDaughters());
+  mMiniMcEvent->setCentralMult(nGoodTrackEta);
 
+  mMiniMcEvent->setNMcNch(nMcNch);
+  mMiniMcEvent->setNMcFtpcWNch(nMcFtpcWNch);
+  mMiniMcEvent->setNMcFtpcENch(nMcFtpcENch);
+  mMiniMcEvent->setNMcHminus(nMcHminus);
   
-  mMiniMcEvent->mNUncorrectedNegativePrimaries = 
-    uncorrectedNumberOfNegativePrimaries(*mRcEvent);
-  
-  mMiniMcEvent->mNUncorrectedPrimaries = 
-    uncorrectedNumberOfPrimaries(*mRcEvent);
+  mMiniMcEvent->setNMcGlobal(nMcGlobal); // from nAcceptedRaw, no point in doing two variables for the same number
+  mMiniMcEvent->setNMcGoodGlobal20(nMcGoodGlobal20);
 
-  mMiniMcEvent->setCentrality(nGoodTrackEta);
-  mMiniMcEvent->mMcMult      = mMcEvent->numberOfPrimaryTracks();
-  
-  mMiniMcEvent->mVertexX     = mRcVertexPos->x();
-  mMiniMcEvent->mVertexY     = mRcVertexPos->y();
-  mMiniMcEvent->mVertexZ     = mRcVertexPos->z();
+  mMiniMcEvent->setNRcGlobal(nRcGlobal);
+  mMiniMcEvent->setNRcGoodGlobal20(nRcGoodGlobal20);
 
-  mMiniMcEvent->mMcVertexX     = mMcVertexPos->x();
-  mMiniMcEvent->mMcVertexY     = mMcVertexPos->y();
-  mMiniMcEvent->mMcVertexZ     = mMcVertexPos->z();
+  mMiniMcEvent->setNUncorrectedNegativePrimaries(uncorrectedNumberOfNegativePrimaries(*mRcEvent));
+  mMiniMcEvent->setNUncorrectedPrimaries(uncorrectedNumberOfPrimaries(*mRcEvent));
 
-  mMiniMcEvent->mMagField    = static_cast<Float_t>(mRcEvent->runInfo()->magneticField());
+  mMiniMcEvent->setNFtpcWUncorrectedPrimaries(nFtpcWUncorrected);
+  mMiniMcEvent->setNFtpcEUncorrectedPrimaries(nFtpcEUncorrected);
+
+  mMiniMcEvent->setCentrality(getIndex((size_t) mMiniMcEvent->nUncorrectedPrimaries()));
+  mMiniMcEvent->setMcMult(mMcEvent->numberOfPrimaryTracks());
   
+  mMiniMcEvent->setVertexX(mRcVertexPos->x());
+  mMiniMcEvent->setVertexY(mRcVertexPos->y());
+  mMiniMcEvent->setVertexZ(mRcVertexPos->z());
+
+  mMiniMcEvent->setMcVertexX(mMcVertexPos->x());
+  mMiniMcEvent->setMcVertexY(mMcVertexPos->y());
+  mMiniMcEvent->setMcVertexZ(mMcVertexPos->z());
+
+  if (mRcEvent->runInfo()) {
+      mMiniMcEvent->setMagField(static_cast<Float_t>(mRcEvent->runInfo()->magneticField()));
+      mMiniMcEvent->setBackgroundRate(mRcEvent->runInfo()->backgroundRate());
+      mMiniMcEvent->setCenterOfMassEnergy(mRcEvent->runInfo()->centerOfMassEnergy());
+      mMiniMcEvent->setBeamMassNumberEast(mRcEvent->runInfo()->beamMassNumber(east));
+      mMiniMcEvent->setBeamMassNumberWest(mRcEvent->runInfo()->beamMassNumber(west));
+  }
+
   Float_t ctb  = -1., zdce = -1, zdcw = -1;
 
   StTriggerDetectorCollection *triggers 
@@ -947,9 +996,9 @@ StMiniMcMaker::fillEventInfo(Int_t nGoodTrackEta)
     zdcw = ZDC.adcSum(west);
   } 
   
-  mMiniMcEvent->mCTB = ctb;
-  mMiniMcEvent->mZDCe = zdce;
-  mMiniMcEvent->mZDCw = zdcw;
+  mMiniMcEvent->setCtb(ctb);
+  mMiniMcEvent->setZdcE(zdce);
+  mMiniMcEvent->setZdcW(zdcw);
 
 }
   
@@ -1045,7 +1094,7 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
   Float_t errorGl[5] = {gCM(1,1),gCM(2,2),gCM(3,3),gCM(4,4),gCM(5,5)};
   
   tinyRcTrack->setPtPr(prMom.perp());
-  tinyRcTrack->setPzPr(prMom.z());
+  tinyRcTrack->setPzPr(prMom.z()); 
   tinyRcTrack->setEtaPr(prMom.pseudoRapidity());
   tinyRcTrack->setPhiPr(prMom.phi());
   tinyRcTrack->setCurvPr(prTrack->geometry()->curvature());
@@ -1086,47 +1135,6 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
   tinyRcTrack->setDcaZPr(dcaz(prHelix,*mRcVertexPos));
 
 
-  //
-  // pid stuff from the flow maker
-  //
-  /*
-  prTrack->pidTraits(*mTpcDedxAlgo);       // initialize
-
-  Float_t nSigma = 0;
-  
-  if(prTrack->geometry()->charge()>0){
-      
-    nSigma = (Float_t)mTpcDedxAlgo->numberOfSigma(StPionPlus::instance());
-    tinyRcTrack->setPidPion(Int_t(nSigma*1000)/1000.0);
-    nSigma = (Float_t)mTpcDedxAlgo->numberOfSigma(StProton::instance());
-    tinyRcTrack->setPidProton(Int_t(nSigma*1000)/1000.0);
-    nSigma = (Float_t)mTpcDedxAlgo->numberOfSigma(StKaonPlus::instance());
-    tinyRcTrack->setPidKaon(Int_t(nSigma*1000)/1000.0);
-    nSigma = (Float_t)mTpcDedxAlgo->numberOfSigma(StPositron::instance());
-    tinyRcTrack->setPidElectron(Int_t(nSigma*1000)/1000.0);
-    
-    }
-  else {
-    nSigma = (Float_t)mTpcDedxAlgo->numberOfSigma(StPionMinus::instance());
-    tinyRcTrack->setPidPion(Int_t(nSigma*1000)/1000.0);
-    nSigma = (Float_t)mTpcDedxAlgo->numberOfSigma(StAntiProton::instance());
-    tinyRcTrack->setPidProton(Int_t(nSigma*1000)/1000.0);
-    nSigma = (Float_t)mTpcDedxAlgo->numberOfSigma(StKaonMinus::instance());
-    tinyRcTrack->setPidKaon(Int_t(nSigma*1000)/1000.0);
-    nSigma = (Float_t)mTpcDedxAlgo->numberOfSigma(StElectron::instance());
-    tinyRcTrack->setPidElectron(Int_t(nSigma*1000)/1000.0);
-  }
-  */
-
-  //
-  // most probable pid
-  //
-  //const StParticleDefinition* def = prTrack->pidTraits(*mPidAlgo);
-  //def->charge(); // does nothing.
-
-  //tinyRcTrack->setMostLikelihoodPID = mPidAlgo->mostLikelihoodParticleGeantID();
-  //tinyRcTrack->setMostLikelihoodProb = mPidAlgo->mostLikelihoodProbability();
-  //tinyRcTrack->setExtrapTag = (Int_t)(mPidAlgo->isExtrap()) ? 0 : 1;
 
  
   //
@@ -1188,10 +1196,6 @@ StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
 
   const StThreeVectorF& mcMom = mcTrack->momentum();
     
-  // calculate the curvature
-  // the mc field was preset !
-  
-  //  Float_t curvMc = .003*mBField/mcTrack->momentum().perp();
   
   tinyMcTrack->setPtMc(mcMom.perp());
   tinyMcTrack->setPzMc(mcMom.z());
@@ -1326,7 +1330,7 @@ StMiniMcMaker::acceptRaw(StMcTrack* mcTrack)
 {
   return (mcTrack &&
 //	  mcTrack->particleDefinition()->charge()!=0&&
-	  fabs(mcTrack->momentum().pseudoRapidity())<=2.);	  
+	  fabs(mcTrack->momentum().pseudoRapidity())<=4.);	  
 }
 
 /*
@@ -1412,6 +1416,21 @@ StMiniMcMaker::acceptUncorrected(StTrack* track)
 	  );    
 }
 
+Bool_t 
+StMiniMcMaker::acceptFTPC(StTrack* prTrack)
+{
+  if(!prTrack) return false;
+  StTrack* glTrack=prTrack->node()->track(global);
+
+  return (prTrack &&
+          glTrack->geometry()->helix().distance(*mRcVertexPos)<3&&
+          prTrack->geometry()->momentum().perp() < 3 &&
+          glTrack->fitTraits().numberOfFitPoints(kTpcId) >=5 &&
+          fabs(prTrack->geometry()->momentum().pseudoRapidity())>=2.8 &&
+          fabs(prTrack->geometry()->momentum().pseudoRapidity())<3.8
+          );
+}
+
 /*
   positive track flag
  */
@@ -1419,6 +1438,24 @@ inline Bool_t
 StMiniMcMaker::ok(StTrack* track)
 {
   return (track && track->flag()>0);
+}
+/*
+  Good Global RC Tracks with fitpts > 20
+ */
+inline Bool_t
+StMiniMcMaker::acceptGood20(StTrack* track)
+{
+  UInt_t nFitPoint = track->fitTraits().numberOfFitPoints(kTpcId);
+  return (track && nFitPoint >= 20);
+}
+
+/*
+  Good Global MC Tracks with fitpts > 20
+ */
+inline Bool_t
+StMiniMcMaker::acceptGood20(StMcTrack* track)
+{
+  return (track && track->tpcHits().size() >= 20);
 }
 
 /*
@@ -1669,6 +1706,24 @@ StMiniMcMaker::checkContam(StMcTrack* mcTrack, StGlobalTrack* glTrack,
 	 << ", rc key=" << testGlTrack->key() << endl;
   }
   
+}
+
+size_t StMiniMcMaker::getIndex(size_t mult) {
+
+    // note: this depends on the production
+    //
+
+    // P02gd, 2k2 data, Nch cuts
+    if (mult >= 510) return 0;
+    if (mult >= 431) return 1;
+    if (mult >= 312) return 2;
+    if (mult >= 217) return 3;
+    if (mult >= 146) return 4;
+    if (mult >= 94 ) return 5;
+    if (mult >= 56 ) return 6;
+    if (mult >= 30 ) return 7;
+    if (mult >= 14 ) return 8;
+    return 9;
 }
   
 //
