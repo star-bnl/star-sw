@@ -1,6 +1,8 @@
 #include "StEvtHddr.h"
 #include <stdio.h>
 #include <time.h>
+#include <assert.h>
+
 ClassImp(StEvtHddr)
 //_____________________________________________________________________________
 StEvtHddr::StEvtHddr(TDataSet *parent):TDataSet("EvtHddr",parent)
@@ -25,13 +27,15 @@ StEvtHddr &StEvtHddr::operator=(const StEvtHddr &hddr)
 //_____________________________________________________________________________
 void StEvtHddr::FillTag(EvtHddr_st *tag)
 {
-  memcpy(tag,&mRunNumber,(char*)&mEventNumber-(char*)&mRunNumber); 
-  tag->mEventTime = mEventTime.GetTime();
-  tag->mEventDate = mEventTime.GetDate();
-  tag->mProdTime = mProdTime.GetTime();
-  tag->mProdDate = mProdTime.GetDate();
-  //  tag->mProdTime  = mProdTime;
-  //  tag->mEventType = mEventType;
+  
+  assert((char*)&mEventNumber     -(char*)&mRunNumber 
+       ==(char*)&tag->mEventNumber-(char*)&tag->mRunNumber);
+       
+  memcpy(tag,&mRunNumber,(char*)(&mEventNumber+1)-(char*)&mRunNumber); 
+  tag->mEventTime = mEventTime.GetDate() + mEventTime.GetTime()/1000000.;
+  tag->mProdTime  =  mProdTime.GetDate() +  mProdTime.GetTime()/1000000. ;
+  tag->mEventType[0] = 0;
+  strncat(tag->mEventType,mEventType,15);
 }
 //_____________________________________________________________________________
   void StEvtHddr::SetGMTime(UInt_t ut)
