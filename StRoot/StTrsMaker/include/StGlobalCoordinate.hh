@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StGlobalCoordinate.hh,v 1.2 1998/11/16 19:40:21 lasiuk Exp $
+ * $Id: StGlobalCoordinate.hh,v 1.3 1999/10/25 18:38:29 calderon Exp $
  *
  * Author:  brian Feb 6, 1998
  *
@@ -11,6 +11,10 @@
  *************************************************************************
  *
  * $Log: StGlobalCoordinate.hh,v $
+ * Revision 1.3  1999/10/25 18:38:29  calderon
+ * changed mPos and pos() to mPosition and position() to
+ * be compatible with StEvent/StMcEvent.
+ *
  * Revision 1.2  1998/11/16 19:40:21  lasiuk
  * constructors do not use reference for doubles
  *
@@ -45,13 +49,13 @@ public:
     //StGlobalCoordinate& operator=(const StGlobalCoordinate&);
     
     // access functions provided by StThreeVector
-    const StThreeVector<double>& pos() const;
+    const StThreeVector<double>& position() const;
     
 private:
-    StThreeVector<double> mPos;
+    StThreeVector<double> mPosition;
 };
 
-inline const StThreeVector<double>& StGlobalCoordinate::pos() const {return(mPos);}
+inline const StThreeVector<double>& StGlobalCoordinate::position() const {return(mPosition);}
 
 // Non-Member
 ostream& operator<<(ostream&, const StGlobalCoordinate&);

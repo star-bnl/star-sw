@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * $Id: StGlobalCoordinate.cc,v 1.2 1998/11/16 19:41:58 lasiuk Exp $
+ * $Id: StGlobalCoordinate.cc,v 1.3 1999/10/25 18:38:48 calderon Exp $
  *
  * Author:  brian May 20, 1998
  *
@@ -12,6 +12,10 @@
  ***************************************************************************
  *
  * $Log: StGlobalCoordinate.cc,v $
+ * Revision 1.3  1999/10/25 18:38:48  calderon
+ * changed mPos and pos() to mPosition and position() to
+ * be compatible with StEvent/StMcEvent.
+ *
  * Revision 1.2  1998/11/16 19:41:58  lasiuk
  * constructor do not use reference for double&
  *
@@ -31,10 +35,10 @@
 StGlobalCoordinate::StGlobalCoordinate() {/**/}
 
 StGlobalCoordinate::StGlobalCoordinate(const double x, const double y, const double z)
-    : mPos(x,y,z) { /**/ }
+    : mPosition(x,y,z) { /**/ }
 
 StGlobalCoordinate::StGlobalCoordinate(const StThreeVector<double>& x)
-    : mPos(x) {/**/}
+    : mPosition(x) {/**/}
 
 StGlobalCoordinate::~StGlobalCoordinate() {/**/}
 
@@ -42,7 +46,7 @@ StGlobalCoordinate::~StGlobalCoordinate() {/**/}
 ostream& operator<<(ostream& os, const StGlobalCoordinate& a)
 {
     return os << "TPC_GC ("
-	      << a.pos().x() << ", "
-	      << a.pos().y() << ", "
-	      << a.pos().z() << ")";
+	      << a.position().x() << ", "
+	      << a.position().y() << ", "
+	      << a.position().z() << ")";
 }

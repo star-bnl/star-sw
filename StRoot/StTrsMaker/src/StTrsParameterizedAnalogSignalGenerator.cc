@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.4 1999/10/22 15:51:47 calderon Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.5 1999/10/25 18:38:49 calderon Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.5  1999/10/25 18:38:49  calderon
+ * changed mPos and pos() to mPosition and position() to
+ * be compatible with StEvent/StMcEvent.
+ *
  * Revision 1.4  1999/10/22 15:51:47  calderon
  * Remove ifdefs for erf.  Problem is solved by loading libm at the
  * macro level.
@@ -209,7 +213,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 		centralRow + mDeltaRow : centralRow;
 
 	    // Careful No inner/outer sector coupling!!
-	    if(xyCoord.pos().y() < mGeomDb->outerSectorEdge()) {
+	    if(xyCoord.position().y() < mGeomDb->outerSectorEdge()) {
 		mRowLimits.second = min(mRowLimits.second, mGeomDb->numberOfInnerRows());
 	    }
 	    else {
@@ -287,8 +291,8 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 // 		    PR(tpcRaw);
 // 		    PR(xyCoord);
 		    // Integral limits for nearest pad
-		    double xCentroidOfPad = xyCoord.pos().x();
-		    double yCentroidOfPad = xyCoord.pos().y();
+		    double xCentroidOfPad = xyCoord.position().x();
+		    double yCentroidOfPad = xyCoord.position().y();
                     double delx           = xCentroidOfPad-iter->position().x();
 		    double sigma_x        = sigmaT*sqrt(mGeomDb->frischGrid()-iter->position().z());
                      sigma_x=sqrt(sqr(sigma_x )+sqr( mPadRespondFunctionSigma)); 

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: StTpcLocalCoordinate.hh,v 1.3 1998/11/16 19:40:19 lasiuk Exp $
+ * $Id: StTpcLocalCoordinate.hh,v 1.4 1999/10/25 18:38:29 calderon Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -11,6 +11,10 @@
  **********************************************************************
  *
  * $Log: StTpcLocalCoordinate.hh,v $
+ * Revision 1.4  1999/10/25 18:38:29  calderon
+ * changed mPos and pos() to mPosition and position() to
+ * be compatible with StEvent/StMcEvent.
+ *
  * Revision 1.3  1998/11/16 19:40:19  lasiuk
  * constructors do not use reference for doubles
  *
@@ -48,17 +52,17 @@ public:
     //StTpcLocalCoordinate& operator=(const StTpcLocalCoordinate&);
     
     // access functions provided by StThreeVector
-    const StThreeVector<double>& pos()  const;
+    const StThreeVector<double>& position()  const;
 
     // To Modify Coordinates
-    StThreeVector<double>& pos();
+    StThreeVector<double>& position();
 
 private:
-    StThreeVector<double> mPos;
+    StThreeVector<double> mPosition;
 };
 
-inline const StThreeVector<double>& StTpcLocalCoordinate::pos() const { return(mPos); }
-inline StThreeVector<double>& StTpcLocalCoordinate::pos() { return(mPos); }
+inline const StThreeVector<double>& StTpcLocalCoordinate::position() const { return(mPosition); }
+inline StThreeVector<double>& StTpcLocalCoordinate::position() { return(mPosition); }
 // Non-member
 ostream& operator<<(ostream&, const StTpcLocalCoordinate&);
 #endif

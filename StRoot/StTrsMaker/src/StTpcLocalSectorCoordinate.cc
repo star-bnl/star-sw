@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcLocalSectorCoordinate.cc,v 1.2 1999/10/04 15:25:53 long Exp $
+ * $Id: StTpcLocalSectorCoordinate.cc,v 1.3 1999/10/25 18:38:49 calderon Exp $
  *
  * Author:  brian Jan 26, 1999
  *
@@ -11,6 +11,10 @@
  ************************************************************************
  *
  * $Log: StTpcLocalSectorCoordinate.cc,v $
+ * Revision 1.3  1999/10/25 18:38:49  calderon
+ * changed mPos and pos() to mPosition and position() to
+ * be compatible with StEvent/StMcEvent.
+ *
  * Revision 1.2  1999/10/04 15:25:53  long
  * change mVolumeId to mFromSector
  *
@@ -25,10 +29,10 @@
 StTpcLocalSectorCoordinate::StTpcLocalSectorCoordinate() {/**/}
 
 StTpcLocalSectorCoordinate::StTpcLocalSectorCoordinate(const double x, const double y, const double z, const int sect)
-    : mPos(x,y,z), mFromSector(sect) { /* nopt */}
+    : mPosition(x,y,z), mFromSector(sect) { /* nopt */}
 
-StTpcLocalSectorCoordinate::StTpcLocalSectorCoordinate(const StThreeVector<double>& pos, const int sect)
-    : mPos(pos), mFromSector(sect) { /* nopt */ }
+StTpcLocalSectorCoordinate::StTpcLocalSectorCoordinate(const StThreeVector<double>& position, const int sect)
+    : mPosition(position), mFromSector(sect) { /* nopt */ }
 
 StTpcLocalSectorCoordinate::~StTpcLocalSectorCoordinate() {/**/}
 
@@ -36,8 +40,8 @@ StTpcLocalSectorCoordinate::~StTpcLocalSectorCoordinate() {/**/}
 ostream& operator<<(ostream& os, const StTpcLocalSectorCoordinate& a)
 {
     return os << "TPC_Local _Sector( ("
-	      << a.pos().x()  << ", "
-	      << a.pos().y()  << ", "
-	      << a.pos().z()  << "),"
+	      << a.position().x()  << ", "
+	      << a.position().y()  << ", "
+	      << a.position().z()  << "),"
 	      << a.fromSector() << ")";
 }

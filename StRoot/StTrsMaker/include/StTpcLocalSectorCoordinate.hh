@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: StTpcLocalSectorCoordinate.hh,v 1.2 1999/10/04 16:05:59 long Exp $
+ * $Id: StTpcLocalSectorCoordinate.hh,v 1.3 1999/10/25 18:38:29 calderon Exp $
  *
  * Author: brian Jan 26, 1999
  *
@@ -11,6 +11,10 @@
  **********************************************************************
  *
  * $Log: StTpcLocalSectorCoordinate.hh,v $
+ * Revision 1.3  1999/10/25 18:38:29  calderon
+ * changed mPos and pos() to mPosition and position() to
+ * be compatible with StEvent/StMcEvent.
+ *
  * Revision 1.2  1999/10/04 16:05:59  long
  * change mVolumeId to mFromSector
  *
@@ -40,21 +44,21 @@ public:
     //StTpcLocalSectorCoordinate& operator=(const StTpcLocalCoordinate&);
     
     // access functions provided by StThreeVector
-    const StThreeVector<double>& pos()  const;
+    const StThreeVector<double>& position()  const;
     //  int   volumeId()                    const;
      int  fromSector()                       const;//HL
     // To Modify Coordinates
-    StThreeVector<double>& pos();
+    StThreeVector<double>& position();
 
 private:
-    StThreeVector<double> mPos;
+    StThreeVector<double> mPosition;
   // int                   mVolumeId;
      int                   mFromSector;
     
 };
 
-inline const StThreeVector<double>& StTpcLocalSectorCoordinate::pos() const { return(mPos); }
-inline StThreeVector<double>& StTpcLocalSectorCoordinate::pos() { return(mPos); }
+inline const StThreeVector<double>& StTpcLocalSectorCoordinate::position() const { return(mPosition); }
+inline StThreeVector<double>& StTpcLocalSectorCoordinate::position() { return(mPosition); }
 //inline int StTpcLocalSectorCoordinate::volumeId() const { return(mVolumeId); }
 inline int StTpcLocalSectorCoordinate::fromSector() const { return(mFromSector); }//HL
 // Non-member
