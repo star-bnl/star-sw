@@ -4,17 +4,21 @@
 *****************************************************************
       implicit none
       integer  g2t_volume_id
-c 
-      Character*4  Csys
-      Integer      NUMBV(15)
-      Integer      innout,sector,sub_sector,volume_id
-      Integer      rileft,eta,phi,phi_sub,superl,forw_back,strip
-      Integer      endcap,zslice,innour,lnumber,wafer,phi_30d
-      Integer      section,tpgv,tpss,tpad,sector,isdet
+* 
+      Character*4      Csys
+      Integer          NUMBV(15)
+      Integer          innout,sector,sub_sector,volume_id
+      Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
+      Integer          endcap,zslice,innour,lnumber,wafer,phi_30d
+      Integer          section,tpgv,tpss,tpad,sector,isdet
+*
+*    this is an internal agfhit/digi information - need a better access.
       integer          idigi
       common /AgCdigi/ idigi(15)
-      common structure dete { int Isys, char ctab, char csys, char cdet }
-c - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      Integer          Iprin,Nvb
+      Character*4                   cs,cd
+      COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
+*c - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 *
       volume_id = 0
 *
@@ -38,14 +42,14 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
       else If (Csys.eq.'tpc') then
 *2*                                        Peter M. Jacobs
-        tpgv=numbv(1)
-        tpss=numbv(2)
-        tpad=numbv(3)
-        sector=tpss+12*(tpgv-1) 
-        isdet=0
+        tpgv  = numbv(1)
+        tpss  = numbv(2)
+        tpad  = numbv(3)
+        sector= tpss+12*(tpgv-1) 
 
-        If (dete_Cdet.eq.'TPAI')  isdet=1
-        If (dete_Cdet.eq.'TPAO')  isdet=2
+        isdet = 0
+        If (cd.eq.'TPAI')  isdet=1
+        If (cd.eq.'TPAO')  isdet=2
 
         volume_id=100000*isdet+100*sector+tpad
 
