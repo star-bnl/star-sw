@@ -6,10 +6,10 @@
 #include "StMcEvent.hh"
 #include <stdexcept>
 
-StiEmcDetectorGroup::StiEmcDetectorGroup(bool active)
+StiEmcDetectorGroup::StiEmcDetectorGroup(bool active, const string & inputFile)
   : StiDetectorGroup<StEvent,StMcEvent>("EMC",
 			      active?new StiEmcHitLoader():0,
-			      new StiEmcDetectorBuilder(active),
+			      new StiEmcDetectorBuilder(active,inputFile),
 			      0,
 			      0)
 {}

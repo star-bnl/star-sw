@@ -14,7 +14,7 @@ class StiDetectorBuilder;
 class StiEmcDetectorGroup : public StiDetectorGroup<StEvent,StMcEvent>
 {
   public:
-  StiEmcDetectorGroup(bool active=true);
+  StiEmcDetectorGroup(bool active, const string & inputFile);
   ~StiEmcDetectorGroup();
 };
 

@@ -8,10 +8,10 @@
 #include "Sti/StiElossCalculator.h"
 #include <stdexcept>
 
-StiFtpcDetectorGroup::StiFtpcDetectorGroup(bool active)
+StiFtpcDetectorGroup::StiFtpcDetectorGroup(bool active, const string & inputFile)
   : StiDetectorGroup<StEvent,StMcEvent>("FTPC",
 			      active?new StiFtpcHitLoader():0,
-			      new StiFtpcDetectorBuilder(active),0,0)
+			      new StiFtpcDetectorBuilder(active,inputFile),0,0)
 {}
 
 

@@ -5,7 +5,7 @@
 class StiFtpcDetectorBuilder : public StiDetectorBuilder
 {
 public:
-    StiFtpcDetectorBuilder(bool active);
+    StiFtpcDetectorBuilder(bool active, const string & inputFile);
     virtual ~StiFtpcDetectorBuilder(); 
     virtual void buildDetectors(StMaker&source);
 };

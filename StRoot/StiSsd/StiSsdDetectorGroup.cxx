@@ -7,10 +7,10 @@
 #include "StEvent.h"
 #include <stdexcept>
 
-StiSsdDetectorGroup::StiSsdDetectorGroup(bool active)
+StiSsdDetectorGroup::StiSsdDetectorGroup(bool active, const string & inputFile)
   : StiDetectorGroup<StEvent,StMcEvent>("SSD",
 			      active?new StiSsdHitLoader():0,
-			      new StiSsdDetectorBuilder(active),0,0)
+			      new StiSsdDetectorBuilder(active,inputFile),0,0)
 {}
 
 StiSsdDetectorGroup::~StiSsdDetectorGroup()
