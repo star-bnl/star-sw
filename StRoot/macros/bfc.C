@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.79 1999/07/09 14:04:18 fisyak Exp $
+// $Id: bfc.C,v 1.80 1999/07/09 14:29:34 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -731,8 +731,13 @@ void bfc (const Int_t First,
   //  else {b = new TBrowser("BFC chain",chain);}
 }
 //_____________________________________________________________________
-void bfc (const Int_t Nevents=1, 
+void bfc (const Int_t Nevents, 
 	  const Char_t *Chain="gstar tfs",Char_t *infile=0, Char_t *outfile=0)
 {
   bfc(1,Nevents,Chain,infile,outfile);
+}
+//_____________________________________________________________________
+void bfc (const Char_t *Chain="gstar tfs",Char_t *infile=0, Char_t *outfile=0)
+{
+  bfc(1,1,Chain,infile,outfile);
 }
