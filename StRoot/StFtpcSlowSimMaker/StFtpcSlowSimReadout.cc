@@ -1,5 +1,10 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.5 2001/04/02 12:04:37 jcs Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.6 2001/04/20 12:52:09 jcs Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.6  2001/04/20 12:52:09  jcs
+// change if/else statements for calculating polar coordinates to avoid
+// problem with optimizer
+// cleanup comments
+//
 // Revision 1.5  2001/04/02 12:04:37  jcs
 // get FTPC calibrations,geometry from MySQL database and code parameters from StarDb/ftpc
 //
@@ -73,7 +78,7 @@ StFtpcSlowSimReadout::StFtpcSlowSimReadout(StFtpcParamReader *paramReader,
     *mDb->numberOfPads()
     *mDb->numberOfTimebins();
   for(int i=0; i<imax; ++i) 
-    mADCArray[i] = 0.0;    //jcs
+    mADCArray[i] = 0.0;
   
   if (mRandomNumberGenerator == 1) {
     // initialize the random number generator
@@ -137,7 +142,7 @@ void StFtpcSlowSimReadout::ShaperResponse(const StFtpcSlowSimCluster *cl)
   sigma_tim = sqrt( sig_time*sig_time + srf*srf) ;
 }
 
-void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int irow)                                                              //jcs
+void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int irow)
 {
   float n_sigmas_to_calc  = 5.0;        
   
@@ -149,8 +154,8 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
   // get the readout position in azimuthal direction
   float delta_phi  = mDb->radiansPerPad();
   float phi        = cl->GetPhi();
-  int isec, jsec, nsecs;                                //jcs
-  int     ipad       = WhichPad(phi,isec);         //jcs
+  int isec, jsec, nsecs;
+  int     ipad       = WhichPad(phi,isec);
   
   // big if() loop
   if ( itim > 2 && itim < (mDb->numberOfTimebins()-3) &&
@@ -186,31 +191,31 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
 	    }
 	  if(DEBUG)
 	    cout << current_sub_hit << "th subhit at time " << time << " phi " << phi << " => padpos " << mOuterRadius*phi << endl;
-	  ipad       = WhichPad(phi,isec);         //jcs
-	  int isec_min;                                              //jcs
-	  int isec_max;                                              //jcs
-	  int pad_max_save;                                          //jcs
-	  int npad;                                                  //jcs
-	  int pad_min = WhichPad(phi-width_phi+twopi,isec_min);       //jcs
-	  int pad_max = WhichPad(phi+width_phi,isec_max);       //jcs
-	  if ( isec_min > isec_max )                                 //jcs
-	    nsecs = mDb->numberOfSectors() - isec_min + isec_max + 1;                 //jcs
-	  else 
-	    if (isec_min == isec_max && pad_min >= pad_max )           //jcs
-	      nsecs = mDb->numberOfSectors() + 1;                                       //jcs
-	    else                                                       //jcs
-	      nsecs = isec_max - isec_min + 1;                        //jcs
-	  int isec = isec_min;                                       //jcs
-	  for (jsec=1; jsec<nsecs+1; ++jsec) {                           //jcs
-	    if (isec != isec_max || (isec == isec_max && pad_min >= pad_max )) {  //jcs 
-	      pad_max_save = pad_max;              //jcs
-	      pad_max = mDb->numberOfPads()-1;                    //jcs
-	    }                                          //jcs  
-	    npad    = (pad_max - pad_min + 1);                          //jcs
+	  ipad       = WhichPad(phi,isec);
+	  int isec_min;
+	  int isec_max;
+	  int pad_max_save=0;
+	  int npad;
+	  int pad_min = WhichPad(phi-width_phi+twopi,isec_min);
+	  int pad_max = WhichPad(phi+width_phi,isec_max);
+	  if ( isec_min > isec_max )
+	    nsecs = mDb->numberOfSectors() - isec_min + isec_max + 1;
+	  else
+	    if (isec_min == isec_max && pad_min >= pad_max )
+	      nsecs = mDb->numberOfSectors() + 1;
+	    else
+	      nsecs = isec_max - isec_min + 1;
+	  int isec = isec_min;
+	  for (jsec=1; jsec<nsecs+1; ++jsec) {
+	    if (isec != isec_max || (isec == isec_max && pad_min >= pad_max )) {
+	      pad_max_save = pad_max;
+	      pad_max = mDb->numberOfPads()-1;
+	    }
+	    npad    = (pad_max - pad_min + 1);
 	    float* pad = new float[npad];  // signal dist. in pads
 	    int i;
 	    
-	    float dphi = fmod(phi-phiMin+twopi,twopi);   //jcs
+	    float dphi = fmod(phi-phiMin+twopi,twopi);
 	    isec = (int)(dphi/(phiMax-phiMin));
 	    dphi = dphi - isec*(phiMax-phiMin);
 	    
@@ -249,24 +254,24 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
 	      // integrate over this slice
 	    }  // end for loop
 	    
-	    // Now fill the mADCArray[irow,isec,pad,tim] array            //jcs
+	    // Now fill the mADCArray[irow,isec,pad,tim] array
 	    if(DEBUG)
 	      cout << current_sub_hit << "th subhit from time " << tim_min << " to " << tim_min+ntim << " pad " << pad_min << " to " << pad_min+npad << endl;
 	    for (i=0; i<npad; ++i) 
 	      for (j=0; j<ntim; ++j) {
-		int k = irow*mDb->numberOfSectors()*mDb->numberOfPads()*mDb->numberOfTimebins()+isec*mDb->numberOfPads()*mDb->numberOfTimebins()+(i+pad_min)*mDb->numberOfTimebins() + (j+tim_min) ;   //jcs
+		int k = irow*mDb->numberOfSectors()*mDb->numberOfPads()*mDb->numberOfTimebins()+isec*mDb->numberOfPads()*mDb->numberOfTimebins()+(i+pad_min)*mDb->numberOfTimebins() + (j+tim_min) ;
 		mADCArray[k] += (float)(mFinalElectrons * pad[i] * sca[j])/(2*n_sub_hits+1);
 	      }
 	    
 	    // recycle sca[] and pad[]
 	    delete [] sca;
 	    delete [] pad;
-	    pad_min = 0;                                                 //jcs
-	    pad_max = pad_max_save;                                      //jcs
-	    ++isec;                                                      //jcs
+	    pad_min = 0;
+	    pad_max = pad_max_save;
+	    ++isec;
 	    if ( isec > mDb->numberOfSectors()-1 )
-	      isec = 0;                                                  //jcs                                
-	  }  // end of loop over sectors for multisector cluster       jcs
+	      isec = 0;
+	  }  // end of loop over sectors for multisector cluster
 	} // end of loop over subhits
     } // end big if() loop
 }
@@ -316,10 +321,10 @@ float StFtpcSlowSimReadout::PhiOfPad(const int pad, const int deg_or_rad)
     return (pad+0.5)*mDb->radiansPerPad() + mDb->radiansPerBoundary()/2;
 }
 
-int StFtpcSlowSimReadout::WhichPad(const float phi, int &isec)   //jcs
+int StFtpcSlowSimReadout::WhichPad(const float phi, int &isec)
 {
     // phi and phi_min in rad
-    float dphi = fmod(phi-phiMin+twopi,twopi);   //jcs
+    float dphi = fmod(phi-phiMin+twopi,twopi);
     isec = (int)(dphi/(phiMax-phiMin));
     dphi = dphi - isec*(phiMax-phiMin)- mDb->radiansPerBoundary()/2;
     int ipad = (int) (dphi/mDb->radiansPerPad() +0.5) ;
