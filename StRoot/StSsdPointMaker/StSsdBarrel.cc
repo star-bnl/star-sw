@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.7 2005/03/18 14:57:49 lmartin Exp $
+// $Id: StSsdBarrel.cc,v 1.8 2005/03/22 10:57:18 lmartin Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.8  2005/03/22 10:57:18  lmartin
+// hardware position information fully implemented
+//
 // Revision 1.7  2005/03/18 14:57:49  lmartin
 // readNoiseFromTable methods modified to transmit the pedestal
 //
@@ -373,10 +376,6 @@ int StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* 
      
 	while (pSpt){// Start of Point Loop
 	  if (ssdHitColl){ // If Available, Fill the StEvent Container
-	    //
-	    //StSsdHit::StSsdHit(const StThreeVectorF& p,
-	    //const StThreeVectorF& e,
-	    // unsigned int hw, float q, unsigned char c) : StHit(p, e, hw, q, c)
 	    for (i = 0 ; i < 3 ; i++){
 	      gPos[i]      =  pSpt->getXg(i);
 	      gPosError[i] =  0.0; 
@@ -385,33 +384,49 @@ int StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* 
 	    q =  pSpt->getDe(0);
 	     
 	    currentSsdHit = new StSsdHit(gPos,gPosError,hw,q,c);
-
-// 	      spt.flag          = pSpt->getFlag();
-// 	      spt.id            = 10000*(pSpt->getNPoint())+idCurrentWaf;
-// 	      spt.id_cluster    = pSpt->getNCluster();
-// 	      spt.id_globtrk    = 0;
-// 	      spt.id_match      = pSpt->getNMatched();
-// 	      for (i = 0 ; i < 5 ; i++)
-// 		{	  
-// 		  spt.id_mchit[i]   = pSpt->getNMchit(i);
 	    currentSsdHit->setIdTruth(pSpt->getNMchit(0));// need to check first = most probable!
-// 		  spt.id_mctrack[i] = 0;
-// 		  spt.id_track[i]   = 0;
-// 		}	  
-// 	      spt.id_wafer      = idCurrentWaf;
-// 	      for (i = 0 ; i < 3 ; i++)
-// 		{	  
-// 		  spt.cov[i]        = 0;
-// 		  spt.res[i]        = 0;
-// 		  spt.x[i]          = pSpt->getXg(i);
-// 		  spt.xl[i]         = pSpt->getXl(i);
-// 		}
-// 	      for (i = 0 ; i < 2 ; i++)
-// 		{
-// 		  spt.mom2[i]       = 0;
-// 		  spt.de[i]         = pSpt->getDe(i);
-// 		}
+
 	    currentSsdHit->setHardwarePosition(8+16*idWaferToWaferNumb(idCurrentWaf));
+
+	    //looking for the correct clusters...
+	    int Id_P_Side = pSpt->getIdClusterP();
+	    int Id_N_Side = pSpt->getIdClusterN();
+
+            StSsdClusterList *currentListP_j = mLadders[iLad]->mWafers[iWaf]->getClusterP();
+            StSsdCluster     *cluster_P_j   = currentListP_j->first();
+            while(cluster_P_j)
+	    {
+	      if(cluster_P_j->getNCluster()==Id_P_Side) 
+                break;
+              cluster_P_j = currentListP_j->next(cluster_P_j);
+	    }
+
+
+            StSsdClusterList *currentListN_j = mLadders[iLad]->mWafers[iWaf]->getClusterN();
+            StSsdCluster *cluster_N_j       = currentListN_j->first();
+            while(cluster_N_j)
+	    {
+	      if(cluster_N_j->getNCluster()==Id_N_Side) 
+		break;
+	      cluster_N_j = currentListN_j->next(cluster_N_j);
+	    }
+
+	    // encode the hardware position
+	    // 2^3  detector ID number (8) 
+	    // 2^4  4-12 num_wafer (0-319)
+	    // 2^13 13-22 cebtral strip of the n-side cluster
+	    // 2^23 23-27 strip of the p-side cluster relat. to n-side (-15,+16)
+	    // 2^28 28-29 n-side cluster size(1-4) 
+	    // 2^30 30-31 p-side cluster size(1-4)
+            hw  =         
+                         8                                                                             
+	      +         16 * idWaferToWaferNumb(idCurrentWaf)                                          
+	      +       8192 * (int)cluster_P_j->getStripMean()                                          
+	      +    8388608 * ((int)cluster_P_j->getStripMean() - (int)cluster_N_j->getStripMean() +15)
+	      +  268435456 * (int)cluster_N_j->getClusterSize()                                       
+	      + 1073741824 * (int)cluster_P_j->getClusterSize();
+	    currentSsdHit->setHardwarePosition(hw);
+
 	    inContainer += ssdHitColl->addHit(currentSsdHit);
 	  }// Container condition
 
