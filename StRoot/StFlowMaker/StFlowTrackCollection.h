@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrackCollection.h,v 1.1 2000/03/02 23:03:00 posk Exp $
+// $Id: StFlowTrackCollection.h,v 1.2 2000/03/15 23:28:55 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrackCollection.h,v $
+// Revision 1.2  2000/03/15 23:28:55  posk
+// Added StFlowSelection.
+//
 // Revision 1.1  2000/03/02 23:03:00  posk
 // Changed extensions from .hh and .cc to .h and .cxx .
 //
@@ -42,13 +45,8 @@
 using std::vector;
 #endif
 
-#ifdef ST_NO_TEMPLATE_DEF_ARGS
-typedef vector<StFlowTrack*, allocator<StFlowTrack*> > StFlowTrackCollection;
-typedef vector<StFlowTrack*, allocator<StFlowTrack*> >::iterator StFlowTrackIterator;
-#else
 typedef vector<StFlowTrack*>            StFlowTrackCollection;
 typedef vector<StFlowTrack*>::iterator  StFlowTrackIterator;
-#endif
 
 #endif
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.19 2000/03/08 02:28:28 posk Exp $
+// $Id: StFlowTagMaker.cxx,v 1.20 2000/03/15 23:30:55 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTagMaker.cxx,v $
+// Revision 1.20  2000/03/15 23:30:55  posk
+// Added StFlowSelection.
+//
 // Revision 1.19  2000/03/08 02:28:28  posk
 // Increased the range of the multiplicity histograms to prevent overflow.
 //
@@ -74,6 +77,7 @@
 #include "StFlowMaker/StFlowMaker.h"
 #include "StFlowMaker/StFlowEvent.h"
 #include "StFlowMaker/StFlowConstants.h"
+#include "StFlowMaker/StFlowSelection.h"
 #include "StFlowTagMaker.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
@@ -89,6 +93,13 @@ ClassImp(StFlowTagMaker)
 //-------------------------------------------------------------
 
 StFlowTagMaker::StFlowTagMaker(const Char_t* name) : StMaker(name) {
+  pFlowSelect = new StFlowSelection();
+}
+
+StFlowTagMaker::StFlowTagMaker(const Char_t* name,
+			       const StFlowSelection& flowSelect) :
+  StMaker(name) {
+  pFlowSelect = new StFlowSelection(flowSelect); // copy constructor
 }
 
 //-------------------------------------------------------------
@@ -120,11 +131,11 @@ Int_t StFlowTagMaker::Make() {
   // fill the Flow Tags 
   StFlowMaker* pFlowMaker = (StFlowMaker*)GetMaker("Flow");
   if (pFlowMaker) pFlowEvent = pFlowMaker->FlowEventPointer();
-  if (pFlowEvent && pFlowTag) {
+  if (pFlowEvent && pFlowTag && pFlowSelect->Select(pFlowEvent)) {
     FillFlowTag();                                // fill the tag database
   } else {
     pFlowTag = NULL;
-    return kStOK;                       // no StFlowEvent or no Tag pointer
+    return kStOK;      // no StFlowEvent or no Tag pointer or no selection
   }
 
   if (Debug()) PrintTag();
@@ -138,7 +149,7 @@ Int_t StFlowTagMaker::Make() {
 //-------------------------------------------------------------
 
 void StFlowTagMaker::PrintInfo() {
-  cout << "$Id: StFlowTagMaker.cxx,v 1.19 2000/03/08 02:28:28 posk Exp $" << endl;
+  cout << "$Id: StFlowTagMaker.cxx,v 1.20 2000/03/15 23:30:55 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
@@ -160,6 +171,7 @@ void StFlowTagMaker::PrintTag(ostream& os) {
 
 Int_t StFlowTagMaker::Finish() {
 
+  delete pFlowSelect;
   return StMaker::Finish();
 }
 
@@ -248,43 +260,48 @@ void StFlowTagMaker::FillFlowTag() {
   // Fill Tag table
 
   TVector2 Q;
-  int selN, subN;
 
   for (int j = 0; j < Flow::nHars ; j++) {
+    pFlowSelect->SetHarmonic(j);
 
     // fill sub1 tags
-    selN = 0, subN = 0;
-    Q = pFlowEvent->Q(j, selN, subN);
+    pFlowSelect->SetSelection(0);
+    pFlowSelect->SetSubevent(0);
+    Q = pFlowEvent->Q(pFlowSelect);
     pFlowTag->qxa[j]  = Q.X();
     pFlowTag->qya[j]  = Q.Y();
-    pFlowTag->na[j]   = pFlowEvent->Mult(j, selN, subN);
-    pFlowTag->mpta[j] = pFlowEvent->MeanPt(j, selN, subN);
+    pFlowTag->na[j]   = pFlowEvent->Mult(pFlowSelect);
+    pFlowTag->mpta[j] = pFlowEvent->MeanPt(pFlowSelect);
 
     // fill sub2 tags
-    selN = 0, subN = 1;
-    Q = pFlowEvent->Q(j, selN, subN);
+    pFlowSelect->SetSelection(0);
+    pFlowSelect->SetSubevent(1);
+    Q = pFlowEvent->Q(pFlowSelect);
     pFlowTag->qxb[j]  = Q.X();
     pFlowTag->qyb[j]  = Q.Y();
-    pFlowTag->nb[j]   = pFlowEvent->Mult(j, selN, subN);
-    pFlowTag->mptb[j] = pFlowEvent->MeanPt(j, selN, subN);
+    pFlowTag->nb[j]   = pFlowEvent->Mult(pFlowSelect);
+    pFlowTag->mptb[j] = pFlowEvent->MeanPt(pFlowSelect);
 
     // fill sub3 tags
-    selN = 1, subN = 0;
-    Q = pFlowEvent->Q(j, selN, subN);
+    pFlowSelect->SetSelection(1);
+    pFlowSelect->SetSubevent(0);
+    Q = pFlowEvent->Q(pFlowSelect);
     pFlowTag->qxc[j]  = Q.X();
     pFlowTag->qyc[j]  = Q.Y();
-    pFlowTag->nc[j]   = pFlowEvent->Mult(j, selN, subN);
-    pFlowTag->mptc[j] = pFlowEvent->MeanPt(j, selN, subN);
+    pFlowTag->nc[j]   = pFlowEvent->Mult(pFlowSelect);
+    pFlowTag->mptc[j] = pFlowEvent->MeanPt(pFlowSelect);
 
     // fill sub4 tags
-    selN = 1, subN = 1;
-    Q = pFlowEvent->Q(j, selN, subN);
+    pFlowSelect->SetSelection(1);
+    pFlowSelect->SetSubevent(1);
+    Q = pFlowEvent->Q(pFlowSelect);
     pFlowTag->qxd[j]  = Q.X();
     pFlowTag->qyd[j]  = Q.Y();
-    pFlowTag->nd[j]   = pFlowEvent->Mult(j, selN, subN);
-    pFlowTag->mptd[j] = pFlowEvent->MeanPt(j, selN, subN);
+    pFlowTag->nd[j]   = pFlowEvent->Mult(pFlowSelect);
+    pFlowTag->mptd[j] = pFlowEvent->MeanPt(pFlowSelect);
 
   }
+
 }
 
 //-------------------------------------------------------------

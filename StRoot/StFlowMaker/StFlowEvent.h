@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.1 2000/03/02 23:02:50 posk Exp $
+// $Id: StFlowEvent.h,v 1.2 2000/03/15 23:28:51 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.2  2000/03/15 23:28:51  posk
+// Added StFlowSelection.
+//
 // Revision 1.1  2000/03/02 23:02:50  posk
 // Changed extensions from .hh and .cc to .h and .cxx .
 //
@@ -60,6 +63,7 @@
 #include "Rtypes.h"
 #include "SystemOfUnits.h"
 #include "TVector2.h"
+class StFlowSelection;
 
 class StFlowEvent{
 
@@ -73,15 +77,13 @@ public:
   UInt_t         OrigMult() const;
   UInt_t         Centrality() const;
   StThreeVectorF VertexPos() const;
-  UInt_t         Mult(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
-  TVector2       Q(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
-  Float_t        q(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
-  Float_t        MeanPt(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
-  Float_t        Psi(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
+  UInt_t         Mult(StFlowSelection*);
+  TVector2       Q(StFlowSelection*);
+  Float_t        q(StFlowSelection*);
+  Float_t        MeanPt(StFlowSelection*);
+  Float_t        Psi(StFlowSelection*);
   StFlowTrackCollection* TrackCollection() const;
 
-  static void SetEtaCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
-  static void SetPtCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
   void SetSelections();
   void SetPids();
   void PrintSelectionList();
@@ -91,6 +93,8 @@ public:
   void SetCentrality(const UInt_t&);
   void SetVertexPos(const StThreeVectorF&);
   void SetPhiWeight(const Flow::PhiWgt_t &pPhiWgt);
+  static void SetEtaCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
+  static void SetPtCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
   static void SetPiPlusCut(Float_t lo, Float_t hi);
   static void SetPiMinusCut(Float_t lo, Float_t hi);
   static void SetProtonCut(Float_t lo, Float_t hi);
@@ -100,8 +104,6 @@ public:
   friend istream& operator>>(istream& in,  StFlowEvent& ev);
 
 private:
-
-  Int_t checkInput(Int_t harN, Int_t selN, Int_t subN) const;
 
   UInt_t          mEventNumber;                        // number of the event
   UInt_t          mOrigMult;                           // number of tracks

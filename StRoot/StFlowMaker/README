@@ -9,7 +9,12 @@ Files:		StFlowMaker.cxx
 		StFlowCutEvent.h
 		StFlowCutTrack.cxx
 		StFlowCutTrack.h
+		StFlowNanoEvent.h
+		StFlowNanoEvent.cxx
+		StFlowSelection.h
+		StFlowSelection.cxx
 		StFlowConstants.h
+		StFlowConstants.cxx
 Authors		Raimond Snellings and Art Poskanzer
 		with lots of help from Glenn Cooper 
 Date:		Dec 1999
@@ -27,8 +32,8 @@ isotropic in the lab.
 
 In Make, it stores in StFlowEvent the PhiWgt values, the original
 track multiplicity, and the primary vertex position. In each
-StFlowTrack it stores phi, eta, p_t, charge, dca, pid, chi2,
-fit points, and max points.
+StFlowTrack it stores phi, eta, p_t, charge, dca, pid, chi2, fit
+points, and max points.
 
 In Finish, it prints the lists of cuts and selections.
 
@@ -36,15 +41,14 @@ In Finish, it prints the lists of cuts and selections.
 
 StFlowEvent contains member functions which return PhiWeight, Mult,
 MeanPt, Q (the event plane vector), Psi (the event plane angle), and q
-(=Q/sqrt(Mult)). It contains the function which sets the flags for
-each track saying whether it is used in the event plane determined for
-each harmonic and each selection. It also contains the functions which
-make the random sub-events and set the pid values.
+(=Q/sqrt(Mult)). It contains the functions which make the random
+sub-events and set the pid values.  It also contains the function
+which sets the flags for each track saying whether it is used in the
+event plane determined for each harmonic, each selection, and each
+subevent.  StFlowEvent is used in the flow analysis by StFlowTagMaker
+and StFlowAnalysisMaker.
 
-StFlowEvent is used in the flow analysis by StFlowTagMaker and
-StFlowAnalysisMaker.
-
-** CutClasses:
+** Cut Classes:
 
 The StFlowCutEvent and StFlowCutTrack classes have all functions and
 data members static. Therefore, there is no need to instantiate. Just
@@ -58,14 +62,30 @@ position. The track cuts are on fit points and the ratio of fit point
 to max points. It is set up so that other cuts can be easily
 added. If lo >= hi on a cut, the cut is not applied.
 
-In CheckEvent and CheckTrack the calling argument is a pointer to the event
-or track.
+In CheckEvent and CheckTrack the calling argument is a pointer to the
+event or track.
 
 CutTrack also stores the number of tracks with positive and negative
-pseudorapidity. In CheckEvent::CheckEtaSymmetry these counters are used to 
-calculate (Pos - Neg) / (Pos + Neg) and put a cut on this ratio. The purpose
-is to eliminate beam-gas background where most of the particles would go one
-way or the other.
+pseudorapidity. In CheckEvent::CheckEtaSymmetry these counters are
+used to calculate (Pos - Neg) / (Pos + Neg) and put a cut on this
+ratio. The purpose is to eliminate beam-gas background where most of
+the particles would go one way or the other.
+
+** StFlowNanoEvent:
+
+This is a persistent sub-set of StFlowEvent which can be written out
+to disk.
+
+** Selection Class:
+
+The StFlowSelection class is used to select events and tracks from
+StFlowEvent which have already passed the above cuts. If one calls the
+Select() member function with a pointer to StFlowEvent it selects on
+centrality. If one calls it with a pointer to StFlowTrack it selects
+tracks for the event plane determination which have the indicated
+harmonic, selection, subevent, and PID. The SelectPart() member
+function selects the PID of tracks for correlating with the event
+plane
 
 ** Constants:
 

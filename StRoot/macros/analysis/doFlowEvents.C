@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.2 2000/03/07 17:51:23 snelling Exp $
+// $Id: doFlowEvents.C,v 1.3 2000/03/15 23:33:54 posk Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -36,6 +36,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.3  2000/03/15 23:33:54  posk
+// Added StFlowSelection.
+//
 // Revision 1.2  2000/03/07 17:51:23  snelling
 // Added switch for Nano DST
 //
@@ -110,13 +113,23 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 
     //
     // Flow Makers
+    //   Use either the ones without selection, or the ones with selection
+    //   Use of the TagMaker is optional
     //
-    StFlowMaker *flowMaker = new StFlowMaker("Flow");
-    StFlowTagMaker *flowTagMaker = new StFlowTagMaker("FlowTag");
-    StFlowAnalysisMaker *flowAnalysisMaker = new StFlowAnalysisMaker("FlowAnalysis");
+    StFlowMaker* flowMaker = new StFlowMaker("Flow");
+    //StFlowTagMaker* flowTagMaker = new StFlowTagMaker("FlowTag");
+    //StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker("FlowAnalysis");
+    StFlowSelection flowSelect;
+    //flowSelect->SetNumber(1);
+    //flowSelect->SetCentrality(0);
+    //flowSelect->SetPid("pi+");
+    //flowSelect->SetPidPart("pi-");
+    StFlowTagMaker* flowTagMaker = new StFlowTagMaker("FlowTag", flowSelect);
+    StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker("FlowAnalysis", flowSelect);
 
 //     flowMaker->NanoFlowEventOff();
 //     flowMaker->NanoFlowEventOn();
+
 //     flowMaker->SetDebug();
 //     flowTagMaker->SetDebug();
 //     flowAnalysisMaker->SetDebug();

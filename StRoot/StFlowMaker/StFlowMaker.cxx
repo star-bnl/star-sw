@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.19 2000/03/07 17:50:57 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.20 2000/03/15 23:28:52 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.20  2000/03/15 23:28:52  posk
+// Added StFlowSelection.
+//
 // Revision 1.19  2000/03/07 17:50:57  snelling
 // Added Nano DST
 //
@@ -98,7 +101,7 @@ ClassImp(StFlowMaker)
 
 //-----------------------------------------------------------------------
 
-StFlowMaker::StFlowMaker(const Char_t *name): 
+StFlowMaker::StFlowMaker(const Char_t* name): 
   StMaker(name),
   mNanoFlowEventOn(kFALSE),
   pEvent(NULL) {
@@ -119,17 +122,18 @@ Int_t StFlowMaker::Make() {
 
   // Check the event cuts and fill StFlowEvent
   pFlowEvent = NULL;
-  if (StFlowCutEvent::CheckEvent(pEvent)) FillFlowEvent();
-  if (mNanoFlowEventOn) {
-    if (StFlowCutEvent::CheckEvent(pEvent)) FillFlowNanoEvent();
+  if (StFlowCutEvent::CheckEvent(pEvent)) {
+    FillFlowEvent();
+    if (mNanoFlowEventOn) FillFlowNanoEvent();
   }
+
   return kStOK;
 }
 
 //-----------------------------------------------------------------------
 
 void StFlowMaker::PrintInfo() {
-  cout << "$Id: StFlowMaker.cxx,v 1.19 2000/03/07 17:50:57 snelling Exp $" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.20 2000/03/15 23:28:52 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 
 }
@@ -142,15 +146,6 @@ Int_t StFlowMaker::Init() {
   if (mNanoFlowEventOn) {
     InitFlowNanoEvent();
   }
-  // Set the event cuts
-//   StFlowCutEvent::SetMult(1999, 2000);
-//   StFlowCutEvent::SetVertexX(0., 0.);
-//   StFlowCutEvent::SetVertexY(0., 0.);
-//   StFlowCutEvent::SetVertexZ(-50., 50.);
-
-  // Set the track cuts
-  StFlowCutTrack::SetFitPts(0, 0);
-  //StFlowCutTrack::SetFitOverMaxPts(0, 0);
 
   return StMaker::Init();
 }
@@ -240,7 +235,7 @@ void StFlowMaker::FillFlowEvent() {
   // loop over tracks in StEvent
   int goodTracks = 0;
   const StSPtrVecPrimaryTrack& tracks = pEvent->primaryVertex(0)->daughters();
-  StSPtrVecPrimaryTrackIterator itr = 0;
+  StSPtrVecPrimaryTrackIterator itr;
   StTpcDedxPidAlgorithm tpcDedxAlgo;
   Float_t nSigma;
 
@@ -346,7 +341,7 @@ void StFlowMaker::FillFlowNanoEvent() {
     pFlowNanoEvent->SetHeader(eventID, 200, 960312);
   }
   else {
-    cout << "Warning No FlowNanoEvent" << endl;
+    cout << "Warning: No FlowNanoEvent" << endl;
   }
 
   for (itr = pFlowTracks->begin(); itr != pFlowTracks->end(); itr++) {
@@ -358,7 +353,7 @@ void StFlowMaker::FillFlowNanoEvent() {
       pFlowNanoEvent->AddTrack(Pt,Phi,Eta);
     }
     else {
-      cout << "Warning No FlowNanoEvent" << endl;
+      cout << "Warning: No FlowNanoEvent" << endl;
     }
   }
 
