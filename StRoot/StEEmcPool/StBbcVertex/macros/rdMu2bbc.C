@@ -11,9 +11,9 @@ StMuDstMaker* muMk;
 StChain *chain=0;
 
 int rdMu2bbc(
- TString fullName="cc2j",
- int nEve=4000000,
- Int_t nFiles  = 4000,
+ TString fullName="ccX",
+ int nEve=10000,
+ Int_t nFiles  = 4,
  char* file="inp/R5112017.lis", // min-b
  //char* file="inp/R5118053.lis", // prodPP
  char* inDir   = "./",
@@ -38,9 +38,9 @@ int rdMu2bbc(
   myMk3=new StBbcVertexMaker("bbcVertex","MuDst");
   TObjArray  HList;
   myMk3->SetHList(&HList);
-  //  myMk3->readCalib("outBbc/bbcEcalib2.dat");
+  myMk3->readCalib("outBbc/bbcEcalib2.dat");
   myMk3->readCalib("outBbc/bbcWcalib2.dat");
-  myMk3->setTdcCalib(2.); // cm/tdc ch
+  myMk3->setTdcCalib(2.0); // cm/tdc ch
 
   gMessMgr->SwitchOff("D");
   gMessMgr->SwitchOn("I");
