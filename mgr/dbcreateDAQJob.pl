@@ -27,8 +27,8 @@ my @SetD = (
              "daq/2000/08",               
 );
 
-my $prodPeriod = "P00hg"; 
-my @chName = ("p00h6", "p00h1");              
+my $prodPeriod = "P00hi"; 
+my @chName = ("p00h7", "p00h1");              
 my $chainDir = "daq";
 
 ###Set directories to be created for jobfiles
@@ -176,7 +176,7 @@ my $nrunSet = 0;
  $jobDIn_no = 0; 
  for ($ii=0; $ii< scalar(@SetD); $ii++)  { 
 
-  $sql="SELECT path, fName, Nevents FROM $FileCatalogT WHERE fName LIKE '%daq' AND path LIKE '%$SetD[$ii]' AND runID > '1223001' AND hpss = 'Y'";
+  $sql="SELECT path, fName, Nevents FROM $FileCatalogT WHERE fName LIKE '%daq' AND path LIKE '%$SetD[$ii]' AND runID > '1231000' AND hpss = 'Y'";
     $cursor =$dbh->prepare($sql)
      || die "Cannot prepare statement: $DBI::errstr\n";
            $cursor->execute;
@@ -223,7 +223,8 @@ my $mrunId;
      }else {
        $mrunId = 0;
      }
-        if ( $mrunId < 1223003 || $mrunId > 1228003 ) {   
+#        if ( $mrunId < 1223003 || $mrunId > 1228003 ) {   
+      if ( $mrunId == 1244027 ) {
       foreach my $runNum (@runSet) {
 
         if ( $mrunId eq $runNum) {      
@@ -365,7 +366,7 @@ my $mrunId;
       my $hpss_dst_file2 = $gfile . ".tags.root";
       my $hpss_dst_file3 = $gfile . ".runco.root";
       my $hpss_dst_file4 = $gfile . ".event.root";
-      my $executable     = "/afs/rhic/star/packages/" . $jlibVer . "/mgr/bfc.csh";
+      my $executable     = "/afs/rhic/star/packages/" . $jlibVer . "/mgr/bfcc.csh";
       my $executableargs = $fchain;
       my $log_dir       = $logDir;
       my $log_name      = $gfile . ".log";
