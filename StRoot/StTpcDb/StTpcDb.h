@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.22 2002/02/06 18:39:13 hardtke Exp $
+ * $Id: StTpcDb.h,v 1.23 2002/04/02 00:16:31 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.23  2002/04/02 00:16:31  hardtke
+ * New class that gets hit errors from database
+ *
  * Revision 1.22  2002/02/06 18:39:13  hardtke
  * Add tpc Field Cage structure
  *
@@ -95,6 +98,7 @@
 #include "StRTpcGlobalPosition.h"
 #include "StRTpcSectorPosition.h"
 #include "StRTpcFieldCage.h"
+#include "StRTpcHitErrors.h"
 #include "St_DataSet.h"
 class StMaker;
 class St_tpcDriftVelocity;
@@ -116,6 +120,7 @@ class StTpcDb {
  StTpcSectorPositionI* sect[24];    //! 
  StTpcGlobalPositionI* GlobPos; //!
  StTpcFieldCageI*      FC;
+ StTpcHitErrorsI*      hitErrors;
  St_DataSet*           tpc[3];        //!
  St_DataSet*           trg[3];        //!
  St_tpcDriftVelocity*  dvel;          //!
@@ -138,6 +143,7 @@ class StTpcDb {
    StTpcElectronicsI* Electronics();
    StTpcGlobalPositionI* GlobalPosition();
    StTpcFieldCageI* FieldCage();
+   StTpcHitErrorsI* HitErrors();
    StTpcGainI* Gain(int sector);
    StTpcT0I* T0(int sector);
    StTpcSectorPositionI* SectorPosition(int sector);
