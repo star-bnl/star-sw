@@ -1,10 +1,13 @@
 /***************************************************************
- * $Id: StRichDrawableTPad.cxx,v 2.0 2000/08/09 16:28:03 gans Exp $
+ * $Id: StRichDrawableTPad.cxx,v 2.1 2000/08/09 23:40:43 gans Exp $
  *
  * Description:
  *
  ***************************************************************
  * $Log: StRichDrawableTPad.cxx,v $
+ * Revision 2.1  2000/08/09 23:40:43  gans
+ * *** empty log message ***
+ *
  * Revision 2.0  2000/08/09 16:28:03  gans
  * Created New Maker for all drawable objects.
  *
@@ -26,7 +29,7 @@
  ***************************************************************/
 #ifdef __ROOT__
 
-#include "StRrsMaker/StRichPadMonitorText.h"
+#include "StRichPadMonitorText.h"
 #include "StRrsMaker/StRichSinglePixel.h"
 
 ClassImp(StRichDrawableTPad)
