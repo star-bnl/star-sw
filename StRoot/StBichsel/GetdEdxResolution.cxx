@@ -2,10 +2,10 @@
 #include "TMath.h"
 #include "tpcCorrection.h"
 Double_t Bichsel::GetdEdxResolution(Int_t k, Double_t TrackLengthInTPC) {
-  static tpcCorrection_st params[2] = {
+  static tpcCorrection_st params[] = {
     //N min   max  a[10]
-    {4, 2.3, 4.79, 1.82545e+00, -1.13077e+00, 2.49432e-01,-1.89606e-02,           0,           0,0,0,0,0}, //run II
-    {6, 2.5, 5.00, 4.57033e+00, -5.57244e+00, 2.77197e+00,-6.78880e-01, 8.11349e-02,-3.77213e-03,0,0,0,0}  //run III
+    {4, 2.3, 4.79, {1.82545e+00,-1.13077e+00, 2.49432e-01,-1.89606e-02,           0,           0,0,0,0,0}}, //run II
+    {6, 2.5, 5.00, {4.57033e+00,-5.57244e+00, 2.77197e+00,-6.78880e-01, 8.11349e-02,-3.77213e-03,0,0,0,0}}  //run III
   };
   if (TrackLengthInTPC <= 0.0 || k < 0 || k > 1) return -999;
   Double_t X = TMath::Log(TrackLengthInTPC);
