@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.335 2003/05/02 22:43:07 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.336 2003/05/19 20:17:37 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -27,8 +27,6 @@
 #include "St_QA_Maker/StEventQAMaker.h"
 #include "StMessMgr.h"
 #include "StiMaker/StiDefaultToolkit.h"
-#include "StiMaker/StiMakerParameters.h"
-#include "StiMaker/StiMaker.h"
 
 //_____________________________________________________________________
 Bfc_st BFC1[] = {
@@ -103,12 +101,10 @@ Bfc_st BFC1[] = {
   {"MDC4New"     ,""  ,"","y2001n,C2default,trs,srs,fss,rrs,big,GeantOut","","",
                                                      "Turn on chain for MDC4 (for after September)",kFALSE},
   {"PostMDC4"    ,""  ,"","C2001,trs,sss,fss,rrs,big,GeantOut"     ,"","","Turn on Post MDC4 chain",kFALSE},
-  {"ppMDC4"      ,""  ,"","ppOpt,C2001,-PreVtx,mwc,trs,srs,rrs,big,GeantOut",
+  {"ppMDC4"      ,""  ,"","pp,C2001,-PreVtx,ppMCTrig,mwc,ppLPeval1,trs,srs,rrs,big,GeantOut",
                                                                     "","","Turn on chain for ppMDC",kFALSE},
 
   {"dAuMDC"      ,""  ,"","ppOpt,C2003,-PreVtx,trs,srs,fss,big,GeantOut","","","Chain for d+Au",kFALSE},
-  {"dAuMDCa"     ,""  ,"","ppOpt,C2003,-PreVtx,trs,srs,fss,big,GeantOut,est","","",
-                                                                                   "Chain for d+Au",kFALSE},
   {"CComplete"   ,""  ,"","Complete,C2default"             ,"","","Turn on chain for Complete STAR",kFALSE},
 
 
@@ -138,7 +134,7 @@ Bfc_st BFC1[] = {
                                ,"Production chain for summer 2001 data (+ ftpc, svt, l3, tof, emc)",kFALSE},
 
   // pp Chains
-  {"pp2001"      ,""  ,"","ppOpt,B2001,-PreVtx,l3onl,tofDat,emcDY2,Corr2","",""
+  {"pp2001"      ,""  ,"","pp,B2001,-PreVtx,-SpinTag,l3onl,tofDat,emcDY2,Corr2","",""
                                                                         ,"pp 2001 (+ l3, tof, emc)",kFALSE},
   {"pp2001a"     ,""  ,"","pp2001,svt_daq,SvtD,ftpc","",""
                                                              ,"pp 2001 (+ ftpc, svt, l3, tof, emc)",kFALSE},
@@ -149,12 +145,7 @@ Bfc_st BFC1[] = {
   {"B2003"       ,""  ,"","ry2003,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                        ,"Base chain for 2003 (tpc)",kFALSE},
   {"dau2003"     ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
-                 ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc)",kFALSE},
-  {"dau2003a"    ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
-           ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
-
-  {"pp2003"      , "" ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
-           ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
+                  ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc",kFALSE},
 
 
 
@@ -179,6 +170,7 @@ Bfc_st BFC1[] = {
   {"tdaq"        ,""  ,"","xin,tpc_daq"                                                   ,"","","",kFALSE},
   {"miniDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE},
   {"fzin"        ,""  ,"","geant,Simu","" ,""                                 ,"read gstar fz-file",kFALSE},
+  {"clearDAQCTB" ,""  ,"","","" ,""                             ,"clear DAQ CTB Hits for embedding",kFALSE},
   {"NoInput"     ,""  ,"","","" ,""                                                ,"No input file",kFALSE},
   {"util"        ,""  ,"","","","StAnalysisUtilities",                   "Load StAnalysisUtilities",kFALSE},
   {"FieldOn"     ,""  ,"","MagF"                                   ,"","" ,"Constant nominal field",kFALSE},
@@ -231,11 +223,10 @@ Bfc_st BFC1[] = {
   {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
   {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
   {"ReadAll"     ,""  ,"","",""                                 ,"","Activate all branches to read",kFALSE},
-
-  {"pp"      ,""  ,"","ppOpt,SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","",
-                                                            "Use pp-like + makers *** OBSOLETE ***",kFALSE},
-  {"ppOpt"       ,""  ,"","","","",                      "pp option without enabling special cases",kFALSE},
-
+  {"pp"      ,""  ,"","SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","",
+                                   "Use pp-like specific treatement (ppLMV, CTB match etc..)",kFALSE},
+  {"ppOpt"       ,""  ,"","pp,-SpinTag,-ppLPfind1,-SpinSortA,-ppLPprojectA","","",
+                                                                    "pp option without spin makers",kFALSE},
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
   {"beamLine"    ,""  ,"","",""                                       ,"","LMV Beam line constrain",kFALSE},
@@ -270,9 +261,8 @@ Bfc_st BFC1[] = {
   {"SCL"         ,""  ,"","",""                         ,"StarClassLibrary","Load StarClassLibrary",kFALSE},
   {"SvtCL"       ,""  ,"","",""                                             ,"StSvtClassLibrary","",kFALSE},
   {"TbUtil"      ,""  ,"","sim_T,tpc_t,globT,SCL",""    ,"StTableUtilities","Load StTableUtilities",kFALSE},
-  {"TRGDef"      ,""  ,"","",""                          ,"StTriggerDataMaker","Load StTriggerData",kFALSE},
   {"TofUtil"     ,""  ,"","",""                                       ,"StTofUtil","Load StTofUtil",kFALSE},
-  {"StEvent"     ,""  ,"","globT,SCL,TRGDef",""                           ,"StEvent","Load StEvent",kFALSE},
+  {"StEvent"     ,""  ,"","globT,SCL",""                                  ,"StEvent","Load StEvent",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T",""                                  ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -291,7 +281,6 @@ Bfc_st BFC1[] = {
   {"dbutil"      ,""     ,"","SCL"            ,"","StSvtDbMaker,StDbUtilities","Load StDbUtilities",kFALSE},
   {"calib"       ,"calib","","xdf2root"          ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"detDb"       ,""     ,"",""   ,"StDetectorDbMaker","StDetectorDbMaker","Load StDetectorDbMaker",kFALSE},
-  {"eemcDb"      ,"eeDb" ,"","db",                                "StEEmcDbMaker","StEEmcDbMaker","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Valid Db    ","Versions   ","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -312,8 +301,6 @@ Bfc_st BFC1[] = {
   {"magF"        ,"","","geant,StDbT,db","StMagFMaker","geometry,StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db"                         ,"StTpcDbMaker","StTpcDb","",kFALSE},
-  {"trgd"        ,"trgd","","TRGDef"  ,"StTriggerDataMaker","StTriggerDataMaker","Get trigger data",kFALSE},
-
   {"l0"          ,"l0Chain","","trg_T,globT,ctf,trg"                        ,"StMaker","StChain","",kFALSE},
   {"ctf"         ,"ctf","l0Chain","ctf_T,db"               ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE},
   {"mwc"         ,"mwc","l0Chain","mwc_T,db,tpcDB"         ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE},
@@ -414,12 +401,12 @@ Bfc_st BFC1[] = {
                                                                      "Performs vertex seed finding",kFALSE},
   {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil,-dEdxY2", "StdEdxMaker","StdEdxMaker",
                                                                          "Regular dEdx calculation",kFALSE},
-  {"svtdEdx"     ,"svtdEdx","globalChain","globT,TbUtil",         "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
+  {"svtdEdx"     ,"svtdEdx","globalChain","globT",                "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
 
 
-  {"Event"       ,"","","StEvent,tpcDB","StEventMaker","StBichsel,StDetectorDbMaker,StEventMaker",
+  {"Event"       ,"","","StEvent,tpcDB","StEventMaker","StDetectorDbMaker,StEventMaker",
                                                                                "<StEvent creation>",kFALSE},
-  {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
+  {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StBichsel,StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
 
@@ -433,8 +420,6 @@ Bfc_st BFC1[] = {
 
   {"EEfs"        ,"eefs","",                   "geant,db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker",
                                                                               "EEMC fast simulator",kFALSE},
-  {"eemcD"       ,"eeRaw","","eemcDb,EEmcUtil",                         "StEEmcDataMaker","StEEmcDataMaker",
-                                                                                  "EEMC data maker",kFALSE},
 
 
   {"rich"        ,"RichChain","","rch,RichPiD,RichSpectra",        "StMaker","StChain","RICH chain",kFALSE},
@@ -488,8 +473,8 @@ Bfc_st BFC1[] = {
   {"EventQA"     ,"EventQA","","Event"     ,"StEventQAMaker","St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
-  {"Display"     ,"","","TbUtil,St_geom",
-                       "StEventDisplayMaker","StEventUtilities,StEventDisplayMaker","Event Display",kFALSE},
+  {"Display"     ,"","","SCL,St_geom",
+                                    "StEventDisplayMaker","StEventDisplayMaker,StTableUtilities","",kFALSE},
   {"Mc"          ,"McChain","","sim_T,globT,McAss,McAna"                    ,"StMaker","StChain","",kFALSE},
   {"McEvent"     ,"","McChain","Event,EmcUtil",      "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
   {"McAss"       ,"","McChain","McEvent",              "StAssociationMaker","StAssociationMaker","",kFALSE},
@@ -586,12 +571,10 @@ Bfc_st BFC2[] = {
   {"MDC4New"     ,""  ,"","y2001n,C2default,trs,srs,fss,rrs,big,GeantOut","","",
                                                      "Turn on chain for MDC4 (for after September)",kFALSE},
   {"PostMDC4"    ,""  ,"","C2001,trs,sss,fss,rrs,big,GeantOut"     ,"","","Turn on Post MDC4 chain",kFALSE},
-  {"ppMDC4"      ,""  ,"","ppOpt,C2001,-PreVtx,mwc,trs,srs,rrs,big,GeantOut",
+  {"ppMDC4"      ,""  ,"","pp,C2001,-PreVtx,ppMCTrig,mwc,ppLPeval1,trs,srs,rrs,big,GeantOut",
                                                                     "","","Turn on chain for ppMDC",kFALSE},
 
   {"dAuMDC"      ,""  ,"","ppOpt,C2003,-PreVtx,trs,srs,fss,big,GeantOut","","","Chain for d+Au",kFALSE},
-  {"dAuMDCa"     ,""  ,"","ppOpt,C2003,-PreVtx,trs,srs,fss,big,GeantOut,est","","",
-                                                                                   "Chain for d+Au",kFALSE},
   {"CComplete"   ,""  ,"","Complete,C2default"             ,"","","Turn on chain for Complete STAR",kFALSE},
 
 
@@ -621,7 +604,7 @@ Bfc_st BFC2[] = {
                                ,"Production chain for summer 2001 data (+ ftpc, svt, l3, tof, emc)",kFALSE},
 
   // pp Chains
-  {"pp2001"      ,""  ,"","ppOpt,B2001,-PreVtx,l3onl,tofDat,emcDY2,Corr2","",""
+  {"pp2001"      ,""  ,"","pp,B2001,-PreVtx,-SpinTag,l3onl,tofDat,emcDY2,Corr2","",""
                                                                         ,"pp 2001 (+ l3, tof, emc)",kFALSE},
   {"pp2001a"     ,""  ,"","pp2001,svt_daq,SvtD,ftpc","",""
                                                              ,"pp 2001 (+ ftpc, svt, l3, tof, emc)",kFALSE},
@@ -632,12 +615,8 @@ Bfc_st BFC2[] = {
   {"B2003"       ,""  ,"","ry2003,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                        ,"Base chain for 2003 (tpc)",kFALSE},
   {"dau2003"     ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
-                 ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc)",kFALSE},
-  {"dau2003a"    ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
-                 ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc)",kFALSE},
+                  ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc",kFALSE},
 
-  {"pp2003"      , "" ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
-                 ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc)",kFALSE},
 
 
   // Other chains/Calibration
@@ -662,6 +641,7 @@ Bfc_st BFC2[] = {
   {"tdaq"        ,""  ,"","xin,tpc_daq"                                                   ,"","","",kFALSE},
   {"miniDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE},
   {"fzin"        ,""  ,"","geant,Simu","" ,""                                 ,"read gstar fz-file",kFALSE},
+  {"clearDAQCTB" ,""  ,"","","" ,""                             ,"clear DAQ CTB Hits for embedding",kFALSE},
   {"NoInput"     ,""  ,"","","" ,""                                                ,"No input file",kFALSE},
   {"util"        ,""  ,"","","","StAnalysisUtilities",                   "Load StAnalysisUtilities",kFALSE},
   {"FieldOn"     ,""  ,"","MagF"                                   ,"","" ,"Constant nominal field",kFALSE},
@@ -714,11 +694,10 @@ Bfc_st BFC2[] = {
   {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
   {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
   {"ReadAll"     ,""  ,"","",""                                 ,"","Activate all branches to read",kFALSE},
-
-  {"pp"      ,""  ,"","ppOpt,SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","",
-                                                       "Use pp-like + Spin makers *** OBSOLETE ***",kFALSE},
-  {"ppOpt"       ,""  ,"","","","",                      "pp option without enabling special cases",kFALSE},
-
+  {"pp"      ,""  ,"","SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","",
+                                   "Use pp-like specific treatement (ppLMV, CTB match etc..)",kFALSE},
+  {"ppOpt"       ,""  ,"","pp,-SpinTag,-ppLPfind1,-SpinSortA,-ppLPprojectA","","",
+                                                                    "pp option without spin makers",kFALSE},
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
   {"beamLine"    ,""  ,"","",""                                       ,"","LMV Beam line constrain",kFALSE},
@@ -753,9 +732,8 @@ Bfc_st BFC2[] = {
   {"SCL"         ,""  ,"","",""                         ,"StarClassLibrary","Load StarClassLibrary",kFALSE},
   {"SvtCL"       ,""  ,"","",""                                             ,"StSvtClassLibrary","",kFALSE},
   {"TbUtil"      ,""  ,"","sim_T,tpc_t,globT,SCL",""    ,"StTableUtilities","Load StTableUtilities",kFALSE},
-  {"TRGDef"      ,""  ,"","",""                          ,"StTriggerDataMaker","Load StTriggerData",kFALSE},
   {"TofUtil"     ,""  ,"","",""                                       ,"StTofUtil","Load StTofUtil",kFALSE},
-  {"StEvent"     ,""  ,"","globT,SCL,TRGDef",""                           ,"StEvent","Load StEvent",kFALSE},
+  {"StEvent"     ,""  ,"","globT,SCL",""                                  ,"StEvent","Load StEvent",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T",""                                  ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -774,7 +752,6 @@ Bfc_st BFC2[] = {
   {"dbutil"      ,""     ,"","SCL"            ,"","StSvtDbMaker,StDbUtilities","Load StDbUtilities",kFALSE},
   {"calib"       ,"calib","","xdf2root"          ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"detDb"       ,""     ,"",""   ,"StDetectorDbMaker","StDetectorDbMaker","Load StDetectorDbMaker",kFALSE},
-  {"eemcDb"      ,"eeDb" ,"","db",                              "StEEmcDbMaker","StEEmcDbMaker","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Valid Db    ","Versions   ","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -795,8 +772,6 @@ Bfc_st BFC2[] = {
   {"magF"        ,"","","geant,StDbT,db","StMagFMaker","geometry,StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db"                         ,"StTpcDbMaker","StTpcDb","",kFALSE},
-  {"trgd"        ,"trgd","","TRGDef"  ,"StTriggerDataMaker","StTriggerDataMaker","Get trigger data",kFALSE},
-
   {"l0"          ,"l0Chain","","trg_T,globT,ctf,trg"                        ,"StMaker","StChain","",kFALSE},
   {"ctf"         ,"ctf","l0Chain","ctf_T,db"               ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE},
   {"mwc"         ,"mwc","l0Chain","mwc_T,db,tpcDB"         ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE},
@@ -897,14 +872,14 @@ Bfc_st BFC2[] = {
                                                                      "Performs vertex seed finding",kFALSE},
   {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil,-dEdxY2", "StdEdxMaker","StdEdxMaker",
                                                                          "Regular dEdx calculation",kFALSE},
-  {"svtdEdx"     ,"svtdEdx","globalChain","globT,tpUtil",         "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
+  {"svtdEdx"     ,"svtdEdx","globalChain","globT",                "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
 
 
-  {"Event"       ,"","","StEvent,tpcDB","StEventMaker","StBichsel,StDetectorDbMaker,StEventMaker",
+  {"Event"       ,"","","StEvent,tpcDB","StEventMaker","StDetectorDbMaker,StEventMaker",
                                                                                "<StEvent creation>",kFALSE},
   {"Sti"         ,"Sti","","SCL,StEvent,tables","StiMaker",
               "StSvtDbMaker,StTpcDb,Sti,StiGui,libGui,StiMaker,StiTpc,StiSvt,StiEmc","ITTF tracker",kFALSE},
-  {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
+  {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StBichsel,StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
 
@@ -918,8 +893,6 @@ Bfc_st BFC2[] = {
 
   {"EEfs"        ,"eefs","",                   "geant,db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker",
                                                                               "EEMC fast simulator",kFALSE},
-  {"eemcD"       ,"eeRaw","","eemcDb,EEmcUtil",                         "StEEmcDataMaker","StEEmcDataMaker",
-                                                                                  "EEMC data maker",kFALSE},
 
 
   {"rich"        ,"RichChain","","rch,RichPiD,RichSpectra",        "StMaker","StChain","RICH chain",kFALSE},
@@ -973,8 +946,8 @@ Bfc_st BFC2[] = {
   {"EventQA"     ,"EventQA","","Event"     ,"StEventQAMaker","St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
-  {"Display"     ,"","","TbUtil,St_geom",
-                       "StEventDisplayMaker","StEventUtilities,StEventDisplayMaker","Event Display",kFALSE},
+  {"Display"     ,"","","SCL,St_geom",
+                                    "StEventDisplayMaker","StEventDisplayMaker,StTableUtilities","",kFALSE},
   {"Mc"          ,"McChain","","sim_T,globT,McAss,McAna"                    ,"StMaker","StChain","",kFALSE},
   {"McEvent"     ,"","McChain","Event,EmcUtil",      "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
   {"McAss"       ,"","McChain","McEvent",              "StAssociationMaker","StAssociationMaker","",kFALSE},
@@ -1229,15 +1202,15 @@ Int_t StBFChain::Instantiate()
 	  if (!geantMk) status = kStErr;
 	  continue;
 	}
-	
+	if (maker == "StiMaker") {
+	  StiDefaultToolkit * tk = new StiDefaultToolkit();
+	  StiToolkit::setToolkit(tk);
+	  tk->setGuiEnabled(kFALSE);
+	  tk->setMcEnabled(kFALSE);
+	  if (GetOption("Simu")) tk->setMcEnabled(kTRUE);
+	}
 	StMaker *mk = 0;
-
-	// Special makers already created or action which
-	// need to take place before 'maker' is created.
 	if (maker == "StTpcDbMaker") mk = GetChain()->GetMaker(fBFC[i].Name);
-	if (maker == "StiMaker")     StiToolkit::setToolkit( new StiDefaultToolkit() );
-
-	// All Makers created here
 	if (!mk) {
 	  if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
 	  else  {
@@ -1245,45 +1218,28 @@ Int_t StBFChain::Instantiate()
 	    if (mk) strcpy (fBFC[i].Name,(Char_t *) mk->GetName());
 	  }
 	}
-
-
 	// special maker options
 	if (mk) {
-	  if (maker == "StiMaker") {
-	    StiMaker   *stiMk = (StiMaker*) mk;
-
-	    
-	    StiToolkit         * tk   = stiMk->getToolkit();
-	    if (! tk)            tk   = new StiDefaultToolkit();
-
-	    StiMakerParameters * pars = stiMk->getParameters();
-	    if ( ! pars ){       pars = new StiMakerParameters(); //default Sti parameters
-	                         stiMk->setParameters(pars);
-	    }
-
-	    // ready to set options and parameters
-	    tk->setGuiEnabled(kFALSE);
-	    tk->setMcEnabled(kFALSE);
-
-	    if (GetOption("Simu")) tk->setMcEnabled(kTRUE);
-
-
-	  }
-
-	  if (GetOption("ppOpt") ) {                         // pp specific stuff
+	  if (GetOption("pp") ) {                            // pp specific stuff
 	    if (maker == "StTrsMaker") mk->SetMode(1);       // Pile-up correction
 	    if (maker == "StVertexMaker"){
 	      mk->SetMode(1);                                // Switch vertex finder to ppLMV
 	      StVertexMaker *pMk = (StVertexMaker*) mk;
 	      if( GetOption("beamLine")){
-		  pMk->SetBeam4ppLMV();                      // Add beam-line constrain
+		pMk->SetBeam4ppLMV();                        // Add beam-line constrain
 	      }
 
-	      if( GetOption("fzin")){                        // if fzin, get CTB's from MC
-		  pMk->SetCTBMode(1);
-	      } else{
-		  pMk->SetCTBMode(0);                        // Else get from DAQ
+	      if( GetOption("fzin") ){                       // if fzin, get CTB's from MC (DAQ in embedding)
+		cout << "QAInfo: fzin used, setting CTB Mode to 1" << endl;
+		pMk->SetCTBMode(1);
+	      } else if ( GetOption("clearDAQCTB") ){        // remove CTB from DAQ (embedding)
+		cout << "QAInfo: clearDAQCTB used, will removed CTB hits from DAQ"  << endl;
+		pMk->SetCTBMode(2);
+	      } else {                                       // Else get from DAQ
+		cout << "QAInfo: Will get CTB from DAQ file" << endl;
+		pMk->SetCTBMode(0);
 	      }
+
 	    }
 	  }
 	  if (GetOption("CMuDST") && GetOption("StrngMuDST")) {
@@ -1352,9 +1308,8 @@ Int_t StBFChain::Instantiate()
 	    Int_t DMode=0;
 	    St_tpcdaq_Maker *tcpdaqMk = (St_tpcdaq_Maker *) mk;
 
-	    if      (GetOption("Trs"))   mk->SetMode(1); // trs
-	    else if (GetOption("Simu"))  mk->SetMode(2); // daq, no gain
-	    else                         mk->SetMode(0); // daq
+	    if (GetOption("Trs")) mk->SetMode(1); // trs
+	    else                  mk->SetMode(0); // daq
 
 	    if ( GetOption("onlcl") )   DMode = DMode | 0x2;  // use the online TPC clusters info if any
 	    if ( GetOption("onlraw") )  DMode = DMode | 0x1;  // use the TPC raw hit information
@@ -1367,7 +1322,7 @@ Int_t StBFChain::Instantiate()
 	  }
 
 	  // Turn on alternative V0 method
-	  if (maker == "StV0Maker" && GetOption("Ev03")) mk->SetMode(1); 
+	  if (maker == "StV0Maker" && GetOption("Ev03")) mk->SetMode(1);
 
 	  if (maker == "StEventQAMaker") {
 	    if ( GetOption("alltrigger") ){
