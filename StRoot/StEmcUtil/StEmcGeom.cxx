@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.10 2001/05/02 20:34:02 pavlinov Exp $
+ * $Id: StEmcGeom.cxx,v 1.11 2001/05/30 18:01:22 perev Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.11  2001/05/30 18:01:22  perev
+ * stdlib.h added
+ *
  * Revision 1.10  2001/05/02 20:34:02  pavlinov
  * mCalg must zero on constractor
  *
@@ -73,6 +76,7 @@
 #include "StEmcGeom.h"
 #include <assert.h>
 #include <strings.h>
+#include <stdlib.h>
 #include <TROOT.h>
 #include "StMaker.h"
 #include "StEmcUtil/emcInternalDef.h"

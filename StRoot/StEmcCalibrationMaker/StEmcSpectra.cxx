@@ -7,6 +7,7 @@
 #include "StEmcSpectra.h"
 #include <iostream.h>
 #include <math.h>
+#include <stdlib.h>
 #include "emc_def.h"
 #include "TCanvas.h"
 #include "TH1.h"
