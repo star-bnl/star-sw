@@ -8,7 +8,9 @@
 #include "StiDetectorLayerContainer.h"
 #include "StiHitContainer.h"
 #include "StiTrackContainer.h"
-#include "StiTrackNodeFactory.h"
+
+#include "StiFactoryTypedefs.h"
+//#include "StiTrackNodeFactory.h"
 
 class StiTrackFinder 
 {
