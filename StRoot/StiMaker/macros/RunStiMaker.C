@@ -6,7 +6,7 @@ class StChain;
 StChain *chain=0;
 
 void RunStiMaker(Int_t nevents=1,
-		 
+
 		 bool simulated=true, /*!sim or data?*/
 		 
 		 //bool doFit=true, /*! true->fit track only */
@@ -15,7 +15,8 @@ void RunStiMaker(Int_t nevents=1,
 const char* outfile = "Evaluation.root",
 
 //This file points to 30 events of 10 neg muons w/ pt=.9
-const char* MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_8_01/*.event.root")
+								 //const char* MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_8_01/*.event.root")
+	const char* MainFile="/star/data17/ITTF/EvalData/MCNtuple/muon_100_neg.event.root")
 
 //This file points to 110 events from mevsim (homebrew had. cocktail)
 //const char* MainFile="/star/data17/ITTF/data/mevsim/10_9_01/*.event.root")
