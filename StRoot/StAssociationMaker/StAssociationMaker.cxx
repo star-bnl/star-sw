@@ -1,15 +1,21 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.10 1999/10/01 14:08:54 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.11 1999/10/14 01:18:44 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.11  1999/10/14 01:18:44  calderon
+ * -Delete StTrackPairInfo objects owned by trackMap in
+ *  StAssociationMaker destructor.
+ * -Make sure there is a closestHit for filling the
+ *  mLocalHitResolution histogram.
+ *
+ * -Make sure there is a closestHit for filling the
+ *  mLocalHitResolution histogram.
+ *
  * Revision 1.10  1999/10/01 14:08:54  calderon
  * Added Local Hit resolution Histogram. It is made by default
  * without any requirement of association, to serve
  * as a diagnostic.
  * Before building track multimap, check the size of the
- * tpc hit map.  If it is too small, print out a warning
- * and exit.
- *
  * tpc hit map.  If it is too small, print out a warning
  * and exit.
  *
@@ -170,7 +176,17 @@ StAssociationMaker::StAssociationMaker(const char *name, const char *title):StMa
 
 //_________________________________________________
 StAssociationMaker::~StAssociationMaker()
+
+    // Delete TpcHitMap 
+    mTpcHitMap->clear();
     SafeDelete(mTpcHitMap);
+    
+    // Delete the TrackPairInfos
+    for (trackMapIter i=mTrackMap->begin(); i!=mTrackMap->end(); i++){
+	delete (*i).second;
+    }
+    // Delete the TrackMap
+    mTrackMap->clear();
     SafeDelete(mTrackMap);
     //SafeDelete(mLocalHitResolution);
 	SafeDelete(mMcXiMap);
@@ -292,30 +308,30 @@ Int_t StAssociationMaker::Finish()
 	
 	for (unsigned int iPadrow=0; iPadrow<rTpcLocal->device(iSector)->numOfRows(); iPadrow++) {
 	    
-	    
+	     iPadrow<tpcSectHitColl->numberOfPadrows();
 	    for (unsigned int iHit=0; iHit<rTpcLocal->device(iSector)->row(iPadrow)->nHits(); iHit++){
-		
+	    for (unsigned int iHit=0;
 		recHit = (StTpcLocalHit_recon*) rTpcLocal->device(iSector)->row(iPadrow)->hit(iHit);
-		float distance=200;
+		float distance;
 		StTpcLocalHit_mc* closestHit = 0;
 		for (unsigned int jHit=0; jHit<mTpcLocal->device(iSector)->row(iPadrow)->nHits(); jHit++){
-		    
+		for (unsigned int jHit=0;
 		    mcHit = (StTpcLocalHit_mc*) mTpcLocal->device(iSector)->row(iPadrow)->hit(jHit);
 		    float xDiff = mcHit->localX()-recHit->localX();
 		    float zDiff = mcHit->globalZ()-recHit->globalZ();
-		    if (xDiff*xDiff+zDiff*zDiff<distance) {
+		    
+		    if (xDiff*xDiff+zDiff*zDiff<distance || jHit==0) {
 			distance = xDiff*xDiff+zDiff*zDiff;
 			closestHit = mcHit;
 		    if (xDiff*xDiff+zDiff*zDiff<tpcHitDistance) {
 			tpcHitDistance = xDiff*xDiff+zDiff*zDiff;
 		    if ( (StLocalHit) *recHit == (StLocalHit) *mcHit) {
 			// Make Associations  Use map,
-			
 			mTpcHitMap->insert(tpcHitMapValType (recHit->globalHitPtr(), mcHit->globalHitPtr()) );
 			// Make Associations  Use maps,
 			mRcTpcHitMap->insert(rcTpcHitMapValType (rcTpcHit, mcTpcHit) );
 			mMcTpcHitMap->insert(mcTpcHitMapValType (mcTpcHit, rcTpcHit) );
-		mLocalHitResolution->Fill(closestHit->localX()-recHit->localX(), closestHit->globalZ()-recHit->globalZ());
+		if (closestHit) mLocalHitResolution->Fill(closestHit->localX()-recHit->localX(), closestHit->globalZ()-recHit->globalZ());
 						 rcTpcHit->position().x(),
 						 closestTpcHit->position().z()-
 						 rcTpcHit->position().z() );
