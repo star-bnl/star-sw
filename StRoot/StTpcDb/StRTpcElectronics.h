@@ -1,17 +1,17 @@
 #ifndef __STRTPCELECTRONICS__
 #define __STRTPCELECTRONICS__
 #include "StTpcElectronicsI.h"
-#include "tables/St_tpcelectronics_Table.h"
+#include "tables/St_tpcElectronics_Table.h"
 
 class StRTpcElectronics : public StTpcElectronicsI {
 
 private:
-    St_tpcelectronics* mElec;
+    St_tpcElectronics* mElec;
 
 public:
-    StRTpcElectronics(St_tpcelectronics* In=0){AddData(In);}
+    StRTpcElectronics(St_tpcElectronics* In=0){AddData(In);}
     ~StRTpcElectronics(){}
-    void AddData(St_tpcelectronics* In){
+    void AddData(St_tpcElectronics* In){
      mElec = In;
     }
  

@@ -1,19 +1,19 @@
 #ifndef __STRTPCWIREPLANE__
 #define __STRTPCWIREPLANE__
 #include "StTpcWirePlaneI.h"
-#include "tables/St_tpc_wireplanes_Table.h"
+#include "tables/St_tpcWirePlanes_Table.h"
 
 class StRTpcWirePlane : public StTpcWirePlaneI {
 
  private:
 
-   St_tpc_wireplanes* mWirePlane;
+   St_tpcWirePlanes* mWirePlane;
 
 public:
-  StRTpcWirePlane(St_tpc_wireplanes* WireIn){ AddData(WireIn);}
+  StRTpcWirePlane(St_tpcWirePlanes* WireIn){ AddData(WireIn);}
   StRTpcWirePlane():mWirePlane(0) {}
   ~StRTpcWirePlane(){}
-  void AddData(St_tpc_wireplanes* WireIn){
+  void AddData(St_tpcWirePlanes* WireIn){
     mWirePlane = WireIn;
   }
 

@@ -30,7 +30,7 @@ class St_Table;
 
 class StTpcDb {
  private:
- enum { kCalibration,kGeometry,kConditions } ;
+ enum { kCalibrarion,kGeometry,kConditions } ;
  StMaker* mk;
  StTpcPadPlaneI*       PadPlane;      //!
  StTpcWirePlaneI*      WirePlane;     //!
