@@ -1,113 +1,60 @@
-#!/usr/local/bin/tcsh
-#  $Id: bfc,v 1.1 1998/07/22 01:17:10 fisyak Exp $
-#  $Log: bfc,v $
-#  Revision 1.1  1998/07/22 01:17:10  fisyak
-#  Fix release SL98e
+#!/usr/local/bin/perl
+# $Id: bfc,v 1.2 1999/05/20 21:58:31 didenko Exp $
+# $Log: bfc,v $
+# Revision 1.2  1999/05/20 21:58:31  didenko
+# Replace cshell version by perl one
 #
-#  Revision 1.1  1998/05/17 16:18:11  fisyak
-#  New fast
-#
-#  Revision 1.9  1998/05/15 22:02:08  fisyak
-#  check commitlog once again
-#
-#  Revision 1.8  1998/05/15 21:55:02  fisyak
-#  check commitlog once again
-#
-#  Revision 1.7  1998/05/15 21:54:02  fisyak
-#  check commitlog once again
-#
-#  Revision 1.6  1998/05/15 21:52:26  fisyak
-#  check commitlog once again
-#
-#  Revision 1.5  1998/05/15 21:51:02  fisyak
-#  check commitlog once again
-#
-#  Revision 1.4  1998/05/15 21:44:37  fisyak
-#  check commitlog
-#
-#  Revision 1.3  1998/05/15 21:43:18  fisyak
-#  check commitlog
-#
-#  Revision 1.2  1998/05/15 21:41:44  fisyak
-#  check commitlog
-#
-#  Revision 1.1  1998/05/15 21:38:49  fisyak
-#  add fast
-#
-# This script is to submit an example job to execute  NQS queues.
-# You can submit it with the command: 
-#	qsub -q express star_nqs.batch      
-# You can modify your copy of this script to suit your needs.
-#
-# When this script starts executing, assumes as default directory
-# the directory from where you submitted it. First compiles any
-# fortran files and after that creates the executable at the NQS
-# workspace. Several files are linked to the current directory to
-# create the default running environment.
-# 
-# During the execution output files are written at the directory you
-# submitted the script. Check if your quota space is enough.
-#
-#  
-# DQS embedded directives  follow
-#@$ -a 12241200  # date-time to run, format [[CC]yy]MMDDhhmm[.SS]
-#$ -eo           # merge std error and out
-#$ -m bes        # Mail at beginning/end/on suspension
-#$ -M fisyak@bnl.gov       # Send mail to these users
-#$ -s /usr/local/bin/tcsh # under what shell to execute
-#    
-# Go to the directory from where job was submitted.
-#   
-echo Starting job execution at `date`
-set first      = 1
-set no_events  = 200
-set input_file_prefix  = /star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2
-set output_file_prefix = /star/mds/data/SD98/auau200/bfc/central/hijing/set0001/regular/tss/auau_ce_b0-2
-while ( $#argv > 0 )
-        switch ($1)
-        case -f:        # set first
-        shift; if ( $#argv > 0 ) set first  = $1
-                breaksw
-        case -n:        # no. of event to process
-        shift; if ( $#argv > 0 ) set no_events = $1
-                breaksw
-	case -h:
-	shift; if ( $#argv > 0 ) set home = $1
-        default:
-                echo $1 unrecognised
-        endsw
-        shift
-end
-if ( -d $output_file_prefix) mkdir -p $output_file_prefix
-#
-cd ${SCRATCH}
-if ( -d bfc == 0) mkdir -p bfc
-cd bfc
-set log  = `hostname`_bfc_${first}_`date +"%d_%h_%Y"`
-if ( -e ${log}) rm ${log}
-if ( -d bfc_$first == 0) mkdir -p bfc_$first
-cd bfc_$first
-if ( -e  batch_${first}.kumac ) rm  batch_${first}.kumac 
-cat > batch_${first}.kumac <<EOF
-trace off
-debug on
-exec $STAR/kumacs/chain/bfc_mdc _
-first=${first} _
-input_file_prefix=${input_file_prefix} _
-output_file_prefix=${output_file_prefix}
-exit
-EOF
-time  staf -w 0 -g 20 -b batch_${first}.kumac >& ${SCRATCH}/bfc/${log}
-# Clean files/links not needed anymore...
-echo
-echo   Job finished at `date`
+use Env;
+use File::Basename;
+system 'echo "Starting job execution at" `date` " on " $HOSTNAME';
+print "STAR_LEVEL = $STAR_LEVEL\n";
+die "No input Chain defined" if ! defined($ARGV[0]);
+my $Chain = $ARGV[0];
+my  $input_file;
+if ($ACTUAL_INPUT0) {
+  chomp ($ACTUAL_INPUT0);
+  print "Input: ",$ACTUAL_INPUT0, "\n";
+  $input_file = basename($ACTUAL_INPUT0);
+  print "input: ",$input_file,"\n";
+  my $OUTPUT_FILE0 = convert($ACTUAL_OUTPUT0);
+  my $OUTPUT_FILE1 = convert($ACTUAL_OUTPUT1);
+  my $OUTPUT_FILE2 = convert($ACTUAL_OUTPUT2);
+  print "Output:", $ACTUAL_OUTPUT0,",",$ACTUAL_OUTPUT1,",",$ACTUAL_OUTPUT2,"\n";
+  print "Output:", $OUTPUT_FILE0,",",$OUTPUT_FILE1,",",$OUTPUT_FILE2,"\n";
+  my $output_file0 = basename($OUTPUT_FILE0);
+  my $output_file1 = basename($OUTPUT_FILE1);
+  my $output_file2 = basename($OUTPUT_FILE2);
+  my $out_dir      = dirname ($OUTPUT_FILE0);
+  print "Output:", $output_file0,",",$output_file1,",",$output_file2,"\n";
+  print "Dirname:", $out_dir, "\n";
+  if ($out_dir && !-d $out_dir) {mkdir $out_dir,0773;}
+  if (-f $output_file0) {system 'rm $output_file0';}
+  if (-f $output_file1) {system 'rm $output_file1';}
+  if (-f $output_file2) {system 'rm $output_file2';}
+  symlink $INPUT0      ,  $input_file;
+  symlink $OUTPUT_FILE0,  $output_file0;
+  symlink $OUTPUT_FILE1,  $output_file1;
+  symlink $OUTPUT_FILE2,  $output_file2;
+  symlink $output_file0,  $OUTPUT0;
+  symlink $output_file1,  $OUTPUT1;
+  symlink $output_file2,  $OUTPUT2;
+}
+else {
+  if (defined($ARGV[1])) {
+    $input_file = $ARGV[1];
+  }
+}
+die "No input file has been defined" if ! $input_file;
+my $cmd = " root4star -b -q 'bfc.C(999,\"" . $Chain . "\",\"" . $input_file . "\")\'";
+print $cmd,"\n";
+system $cmd;
+system 'echo "Finished job execution at" `date` " on " `hostname`'; 
 
+exit 0;
+#______________________________________________________
+sub convert($) {
+  my $new_name = @_[0];
+  $new_name =~ s'/home/starreco/reco'/disk00001/star'g;
+  return $new_name;
+}
 #END
-
-
-
-
-
-
-
-
