@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0.Banks.hh,v 1.1 2000/01/18 18:01:20 levine Exp $
+ * $Id: FTPV1P0.Banks.hh,v 1.2 2001/06/24 22:27:25 jcs Exp $
  * Author: M.J. LeVine, J.Klay, H.Huemmler
  ***************************************************************************
  * Description:  Record Formats for Version 1.0
@@ -9,6 +9,9 @@
  *
  ***************************************************************************
  * $Log: FTPV1P0.Banks.hh,v $
+ * Revision 1.2  2001/06/24 22:27:25  jcs
+ * cleanup comments
+ *
  * Revision 1.1  2000/01/18 18:01:20  levine
  * Hummler's implementaiton of FTPC reader. Note that method
  *
@@ -131,8 +134,9 @@ struct classname(Bank_FTPADCX) : public Bank  // Mezzanine Index Bank
   FTPADCX_entry entry[VARLENGTH]; 
 };
 
+// Already defined in StDaqLib/GENERIC/RecHeaderFormats.hh
 // struct ASIC_params
-//  // these params used to emulate ASIC behavior in the reader
+// these params used to emulate ASIC behavior in the reader
 // {
 //   unsigned char thresh_lo;
 //   unsigned char thresh_hi;
