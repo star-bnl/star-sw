@@ -43,10 +43,10 @@ CCCCCCCCCCCC
          iret=tgc_x_to_pad(1.0,1.0,dummy3,pad_plane_h,pad_plane)
          iret=tgc_y_to_row(60.0,dummy2,pad_plane_h,pad_plane)
          iret=tgc_row_par(1,1.0,dummy3,dummy4,pad_plane_h,pad_plane)
-         iret=tgc_time_to_z(1.0,1.0,1.0,1.0,dummy2,
-     +        tpg_pad_h,tpg_pad,tpg_detector_h,tpg_detector)
-         iret=tgc_z_to_time(1.0,1.0,1.0,1.0,dummy2,
-     +        TPG_PAD_H,TPG_PAD,TPG_DETECTOR_H,TPG_DETECTOR)
+*         iret=tgc_time_to_z(1.0,1.0,1.0,1.0,dummy2,
+*     +        tpg_pad_h,tpg_pad,tpg_detector_h,tpg_detector)
+*         iret=tgc_z_to_time(1.0,1.0,1.0,1.0,dummy2,
+*     +        TPG_PAD_H,TPG_PAD,TPG_DETECTOR_H,TPG_DETECTOR)
          init_flag=1
       endif
 CCCCC
