@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.4 2002/08/23 17:30:18 laue Exp $
+ * $Id: StMuEvent.h,v 1.5 2003/01/09 18:59:46 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -9,6 +9,7 @@
 
 #include "TObject.h"
 #include "StMuL3EventSummary.h"
+#include "StMuEmcCollection.h"
 
 #include "StEvent/StEventInfo.h"
 #include "StEvent/StRunInfo.h"
@@ -83,6 +84,8 @@ class StMuEvent : public TObject {
   StBbcTriggerDetector mBbcTriggerDetector;
   StFpdCollection mFpdCollection; 
   StL0Trigger mL0Trigger; 
+
+  // special classes from MuDst
   StMuL3EventSummary mL3EventSummary;
 
   UShort_t mRefMultPos;
@@ -134,6 +137,9 @@ inline StThreeVectorF StMuEvent::primaryVertexPosition() { return mEventSummary.
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.5  2003/01/09 18:59:46  laue
+ * initial check in of new EMC classes and the changes required
+ *
  * Revision 1.4  2002/08/23 17:30:18  laue
  * additional member functions added (Helen Caines' request)
  *
