@@ -9,6 +9,9 @@
 
 ClassImp(StMuEmcUtil)
 
+#define __EMC_HITS_ID_DIM__ 18000
+
+
 StMuEmcUtil::StMuEmcUtil()
 {
   for(Int_t i =0;i<4;i++) mGeo[i]=StEmcGeom::getEmcGeom(detname[i].Data());
@@ -35,14 +38,14 @@ void StMuEmcUtil::fillMuEmc(StMuEmcCollection *muEmc,StEmcCollection *emccol)
 {
   if(!emccol) return;
   if(!muEmc) return;
-  Int_t HitsId[18000];
+  Int_t HitsId[__EMC_HITS_ID_DIM__];
       
   // starting by hits;    
   //cout <<"Filling hits and clusters \n";
   for(Int_t d=0; d<8; d++)
   {  
     Int_t EmcDet=d+1;
-    for(Int_t i=0;i<18000;i++) HitsId[i]=-1;
+    for(Int_t i=0 ; i<__EMC_HITS_ID_DIM__ ; i++) HitsId[i]=-1;
     
     StDetectorId id = static_cast<StDetectorId>(d+kBarrelEmcTowerId);
     StEmcDetector* detector=emccol->detector(id);
@@ -81,7 +84,8 @@ void StMuEmcUtil::fillMuEmc(StMuEmcCollection *muEmc,StEmcCollection *emccol)
                 {
                   if(getEndcapId(EmcDet,m,e,s,rid)) continue;// on error
                 }
-                HitsId[rid-1] = HitIndex;
+                if(rid > 0 && rid < __EMC_HITS_ID_DIM__) HitsId[rid-1] = HitIndex;
+		else  gMessMgr->Error() << "StMuEmcUtil::fillMuEmc (1) index out of range" << endm;
                 HitIndex++;
               
                 if(EmcDet == 1 || EmcDet == 5  ) // towers save only ADC
@@ -147,7 +151,10 @@ void StMuEmcUtil::fillMuEmc(StMuEmcCollection *muEmc,StEmcCollection *emccol)
               {
                 if(getEndcapId(EmcDet,m,e,s,rid)) continue;// on error
               }
-              Int_t index = HitsId[rid-1];
+	      Int_t index=-1;
+	      if(rid > 0 && rid < __EMC_HITS_ID_DIM__) index = HitsId[rid-1];
+	      else  gMessMgr->Error() << "StMuEmcUtil::fillMuEmc (2) index out of range" << endm;
+
               if(EmcDet==1||EmcDet==5) index=rid;
               if(index!=-1) muCl->setHitId(k,index);
             }
@@ -577,8 +584,7 @@ int  StMuEmcUtil::getEndcapId(int d,int m, int e, int s,int &rid){
  abort:
   gMessMgr->Error() <<"StMuEmcUtil::getEndcapId(), FATAL internal error: "
 		    <<text<<"\n d="<<d<<" m="<<m<<" e="<<" s="<<s<<" rid "<<rid
-		    <<"\n ENDCAP data may be wrong, "
-		    <<" assert() should be here, JB"<<endm;
+		    <<"\n ENDCAP data may be wrong, " << endm;
   return 1;
 }
 
