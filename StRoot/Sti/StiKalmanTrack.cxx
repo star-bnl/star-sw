@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.53 2005/02/17 23:19:02 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.53 2005/02/17 23:19:02 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.54 2005/02/18 19:02:31 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.54 2005/02/18 19:02:31 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.54  2005/02/18 19:02:31  fisyak
+ * Add debug print out for extendToVertex
+ *
  * Revision 2.53  2005/02/17 23:19:02  perev
  * NormalRefangle + Error reseting
  *
@@ -1177,6 +1180,8 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 #ifdef Sti_DEBUG      
 	cout << "StiKalmanTrack::extendToVertex: TrackAfter:" << *this << endl;
 #endif
+	if (debug()) cout << "extendToVertex:: " << StiKalmanTrackNode::Comment() << endl;
+	
 	}
     }
   //else

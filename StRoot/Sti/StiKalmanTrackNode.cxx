@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.62 2005/02/17 23:19:02 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.63 2005/02/18 19:02:55 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.63  2005/02/18 19:02:55  fisyak
+ * Add debug print out for extendToVertex
+ *
  * Revision 2.62  2005/02/17 23:19:02  perev
  * NormalRefangle + Error reseting
  *
@@ -629,10 +632,9 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 bool StiKalmanTrackNode::propagate(const StiKalmanTrackNode *parentNode, StiHit * vertex,int dir)
 {
   setState(parentNode);
-  if (debug()) ResetComment(::Form("%30s ",parentNode->getDetector()->getName().c_str()));
+  if (debug()) ResetComment(::Form("Vtx:%8.3f %8.3f %8.3f",vertex->x(),vertex->y(),vertex->z()));
   //double locVx = _cosAlpha*vertex->x() + _sinAlpha*vertex->y();
-  if (propagate(vertex->x(),kPlanar,dir) < 0)
-    return false; // track does not reach vertex "plane"
+  if (propagate(vertex->x(),kPlanar,dir) < 0)    return false; // track does not reach vertex "plane"
   propagateError();
   if (debug() & 8) { PrintpT("V");}
   _hit = vertex;
