@@ -1,5 +1,8 @@
-// $Id: StEmcHitCollection.h,v 1.7 1999/09/24 01:23:38 fisyak Exp $
+// $Id: StEmcHitCollection.h,v 1.8 2001/04/23 21:58:09 pavlinov Exp $
 // $Log: StEmcHitCollection.h,v $
+// Revision 1.8  2001/04/23 21:58:09  pavlinov
+// Change StEmcGeom.h to StEmcUtil/StEmcGeom.h
+//
 // Revision 1.7  1999/09/24 01:23:38  fisyak
 // Reduced Include Path
 //
@@ -31,7 +34,7 @@
 #include "St_Table.h"
 #include "St_TableSorter.h"
 #include "StMaker.h"
-#include "StEmcGeom.h"
+#include "StEmcUtil/StEmcGeom.h"
 #include "StChain.h"
 #include "TArrayS.h"
 #include "TArrayF.h"
