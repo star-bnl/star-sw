@@ -137,12 +137,12 @@ StBranch::StBranch(const Char_t *name, StTree *parent):St_DataSet(name,parent)
 {
 
   SetTitle(".StBranch");
-  fNEvents=0;fUKey=0;fIOMode=0;fTFile=0;fTFileOwner=0,fDebug=0;
+  fNEvents=0;fUKey=0;fIOMode=0;fTFile=0;fDebug=0;
 }
 StBranch::~StBranch()
 {
  Close();
- if (fTFile && fTFileOwner) delete fTFile;
+
 }
 //_______________________________________________________________________________
 void StBranch::SetOption(Option_t *opt)
@@ -152,6 +152,7 @@ void StBranch::SetOption(Option_t *opt)
 //_______________________________________________________________________________
 void StBranch::SetIOMode(Option_t *iomode)
 { 
+if (!iomode || !iomode[0]) return;
 fIOMode = ::IntOMode(iomode[0]);
 }    
 //_______________________________________________________________________________
@@ -161,11 +162,11 @@ IOMODE[0] = RWU[fIOMode]; return IOMODE;
 }    
   
 //_______________________________________________________________________________
-Int_t StBranch::SetFile(const Char_t *file,const Char_t *mode)
+Int_t StBranch::SetFile(const Char_t *file,const Char_t *mode,int insist)
 { 
-  if (fTFile) { Error("SetFile","File is already opened");return kStWarn;}
-  if (file) fFile=file; 
-  if (mode) SetIOMode(mode);
+  if (fTFile && !insist) { Error("SetFile","File is already opened");return kStWarn;}
+  if (file && file[0]) fFile=file; 
+  if (mode && mode[0]) SetIOMode(mode);
   return 0;
 }
 //_______________________________________________________________________________
@@ -190,10 +191,11 @@ Int_t StBranch::SetTFile(TFile *tfile)
 { 
   if (!tfile) 		return 0;
   if (fTFile==tfile) 	return 0;
-  if (!fTFile) { fTFile=tfile; fFile = fTFile->GetName(); fTFileOwner=0; return 0;}
-
-  Error("SetTFile","TFile is already attached");
-  return kStWarn;
+  if (fTFile) Close();
+  fTFile=0;
+  SetFile(tfile->GetName());
+  Open();
+  return 0;
 }
 
 //_______________________________________________________________________________
@@ -201,11 +203,18 @@ void StBranch::Close(const char *)
 { 
   if (!fIOMode) return;
   if (!fTFile) 	return;
-  fTFile->Close("");
+  TFile *tf = fTFile;
+  fTFile = 0;
+  TString ts(tf->GetTitle());
+  int idx = ts.Index("StBranch=Y");
+  assert (idx>=0);
+  ts.Replace(idx+9,1,"");
+  tf->SetTitle(ts);
+  if (ts.Contains("StBranch=Y")) return;
+  tf->Close("");
   printf("** <StBranch::Close> Branch=%s \tFile=%s \tClosed **\n"
         ,GetName(),(const char*)fFile); 
-  if (fTFileOwner) delete fTFile;
-  fTFile = 0;
+  delete tf;
 }
 //_______________________________________________________________________________
 const char *StBranch::GetFile()
@@ -305,10 +314,27 @@ void StBranch::SetParAll(TList *savList)
 void StBranch::OpenTFile()
 {
   if (fTFile) return;
-  fTFileOwner=1; 
-  fTFile = new TFile(GetFile(),TFOPT[fIOMode],GetName());
-  printf("** <StBranch::Open> Branch=%s \tMode=%s \tFile=%s \tOpened **\n"
+  TObject *tf = gROOT->FindObject(GetFile());
+  if (tf && !tf->InheritsFrom(TFile::Class())) tf = 0;
+  fTFile = (TFile*)tf;
+  if (!fTFile) fTFile = new TFile(GetFile(),TFOPT[fIOMode],GetName());
+  if (fTFile->IsZombie()) {
+    Error("OpenTFile","File %s NOT OPENED ***\n",fTFile->GetName());
+    Error("OpenTFile","Branch %s desactivated ***\n",GetName());
+    delete fTFile; fTFile=0; SetIOMode("0");
+  } else {  
+    TString ts(fTFile->GetTitle());
+    if (ts.Contains("StBranch="))
+    {  ts.ReplaceAll("StBranch=","StBranch=Y");}
+    else 
+    {  ts += " StBranch=Y";}
+    fTFile->SetTitle(ts);
+    if (tf) return;      
+      
+    printf("** <StBranch::Open> Branch=%s \tMode=%s \tFile=%s \tOpened **\n"
         ,GetName(),TFOPT[fIOMode],(const char*)fFile);
+
+  }
 }
 //_______________________________________________________________________________
 void StBranch::Clear(Option_t *)
@@ -337,14 +363,17 @@ void StTree::SetIOMode(Option_t *iomode)
  while ((br=(StBranch*)next())) { br->SetIOMode(iomode);}
 } 
 //_______________________________________________________________________________
-Int_t StTree::SetFile(const Char_t *file,const Char_t *mode)
+Int_t StTree::SetFile(const Char_t *file,const Char_t *mode,int insist)
 {
+  St_DataSetIter next(this);StBranch *br;
+  if (insist) {while ((br=(StBranch*)next())) br->SetFile(file,mode); return 0;}
+
   TString br1Name = ::GetBranchByFile(file);
   TString br2Name;
   if (!br1Name.IsNull()) br2Name = br1Name + "Branch";
 
-  St_DataSetIter next(this);StBranch *br;
   const char *brName,*curFile,*oldFile=0;
+
   while ((br=(StBranch*)next())) { //loop over branches
     curFile = br->GetFile();
     brName = br->GetName();
@@ -374,22 +403,11 @@ void StTree::Clear(Option_t*)
 //_______________________________________________________________________________
 Int_t StTree::Open()
 {  
-  int iret=0;
-
-  St_DataSetIter nextA(this);StBranch *brA,*brB;
+  St_DataSetIter nextA(this);StBranch *brA;
   while ((brA=(StBranch*)nextA())) { 
-    if (brA->GetTFile()); 		continue;
-    const char *fileA = brA->GetFile();
-    St_DataSetIter nextB(this);
-    while ((brB=(StBranch*)nextB())) { 
-      TFile *tfB = brB->GetTFile();
-      if (!tfB) 				continue;
-      if (strcmp(fileA,tfB->GetName()))	continue;
-      brA->SetTFile(tfB);
-      break;
-    }
-    if (brA->GetTFile()) continue;
-    brA->Open(); iret++;
+    if (brA->GetIOMode()[0]=='0') 	continue;
+    if (brA->GetTFile()) 		continue;
+    brA->Open();
   }
   return 0;
 }
@@ -444,21 +462,19 @@ void StTree::Close(const char* opt)
 {  
   TString treeKey(GetName());
   Clear();
-  for(int iter=0; iter <2; iter++) {//iter=0==Save 1=close
-
-    St_DataSetIter next(this); StBranch *br;
-    while ((br=(StBranch*)next())) { //branch loop
-      if (!br->fIOMode) 				continue;
+  St_DataSetIter next(this); StBranch *br;
+  while ((br=(StBranch*)next())) { //branch loop
+    if (br->fIOMode&2) {  
+      br->Open();
       TFile *tfbr = br->GetTFile(); if(!tfbr) 	continue;
-      if (!iter && br->fIOMode&2 && tfbr->IsWritable()) {
+      if (tfbr->IsWritable()) {
 	St_DataSet *par = GetParent(); SetParent(0);
 	StIO::Write(tfbr,(const char*)treeKey,2000,this);
 	SetParent(par);}
-
-      if (!iter || (opt && strcmp(opt,"keep")==0)) continue;
-      br->Close();
-    }// end branch loop
-  }// end iters
+    }
+    if ((opt && strcmp(opt,"keep")==0)) continue;
+    br->Close();
+  }// end branch loop
 }  
 
 //_______________________________________________________________________________
