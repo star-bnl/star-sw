@@ -1,31 +1,28 @@
 *
-* $Id: dzioph.F,v 1.2 1998/04/16 16:11:40 fisyak Exp $
+* $Id: dzioph.F,v 1.3 1998/04/16 17:00:29 fisyak Exp $
 *
 * $Log: dzioph.F,v $
-* Revision 1.2  1998/04/16 16:11:40  fisyak
-* put gstar in cvs
-*
-* Revision 1.1  1998/04/10 15:31:06  fisyak
-* Move gstar into CVS
+* Revision 1.3  1998/04/16 17:00:29  fisyak
+* 2nd pass with gstar
 *
 *
 * -----------------------------------------------------------------
-#include "packlib/zebra/zebra/pilot.h
+#include "dzdoc/pilot.h"
 *CMZ :  1.30/00 11/02/96  22.08.12  by  Pavel Nevski
 *CMZU:  1.00/01 22/01/96  00.49.05  by  Sasha Vanyashin
 *-- Author :
 #if (defined(CERNLIB_DEBUGON))&&(defined(CERNLIB_VFORT))
-#include "packlib/zebra/zebra/debugvf1.inc"
+#include "zebra/debugvf1.inc"
 #endif
       SUBROUTINE DZIOPH (IFIRST,ILAST)
       SAVE KFOTYP
-#include "packlib/zebra/zebra/mqsys.inc"
-#include "packlib/zebra/zebra/qequ.inc"
-#include "packlib/zebra/zebra/mzioc.inc"
-#include "packlib/zebra/zebra/zbcdk.inc"
-#include "packlib/zebra/zebra/zunit.inc"
-#include "packlib/zebra/zebra/dzc1.inc"
-#include "packlib/zebra/zebra/bkfoparq.inc"
+#include "zebra/mqsys.inc"
+#include "zebra/qequ.inc"
+#include "zebra/mzioc.inc"
+#include "zebra/zbcdk.inc"
+#include "zebra/zunit.inc"
+#include "zebra/dzc1.inc"
+#include "zebra/bkfoparq.inc"
  
       CHARACTER CHROUT*(*),CHSTAK*6,KFOTYP(0:11)*1
 #if defined(CERNLIB_QMCRY)||defined(CERNLIB_QMCDC)
@@ -42,7 +39,7 @@
       DATA KFOTYP /'U','B','I','F','D','H','*','S','*','N','*','L'/
  
 #if (defined(CERNLIB_DEBUGON))&&(defined(CERNLIB_VFORT))
-#include "packlib/zebra/zebra/debugvf2.inc"
+#include "zebra/debugvf2.inc"
 #endif
 *SEQ, Q$JBIT.
  

@@ -1,15 +1,13 @@
 *
-* $Id: ztell.F,v 1.2 1998/04/16 16:11:51 fisyak Exp $
+* $Id: ztell.F,v 1.3 1998/04/16 16:58:12 fisyak Exp $
 *
 * $Log: ztell.F,v $
-* Revision 1.2  1998/04/16 16:11:51  fisyak
-* put gstar in cvs
-*
-* Revision 1.1  1998/04/10 15:31:14  fisyak
-* Move gstar into CVS
+* Revision 1.3  1998/04/16 16:58:12  fisyak
+* 2nd pass with gstar
 *
 *
-#include "packlib/zebra/zebra/pilot.h
+#include "sys/CERNLIB_machine.h"
+#include "pilot.h"
 *CMZ :          17/10/97  12.42.42  by  Pavel Nevski
 *CMZ :  1.30/00 19/03/97  22.28.33  by  Pavel Nevski
 *-- Author :

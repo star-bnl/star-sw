@@ -1,12 +1,12 @@
 *
-* $Id: gsdetv.F,v 1.1 1998/04/10 15:31:29 fisyak Exp $
+* $Id: gsdetv.F,v 1.2 1998/04/16 16:59:40 fisyak Exp $
 *
 * $Log: gsdetv.F,v $
-* Revision 1.1  1998/04/10 15:31:29  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:40  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :  1.30/00 24/05/96  21.28.46  by  Pavel Nevski
 *CMZ :  3.21/02 29/03/94  15.41.20  by  S.Giani
 *-- Author :
@@ -95,10 +95,10 @@ C.    * Modifications:                                                 *
 C.    *  PN, 20.04.96:  warning on non-sensetive volume in DEBUG only  *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcunit.inc"
-#include "geant321/geant321/gcmzfo.inc"
-#include "geant321/geant321/gcflag.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcunit.inc"
+#include "geant321/gcmzfo.inc"
+#include "geant321/gcflag.inc"
       CHARACTER*4 IUSET,IUDET
 C.
 C.    ------------------------------------------------------------------

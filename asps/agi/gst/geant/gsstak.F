@@ -1,12 +1,12 @@
 *
-* $Id: gsstak.F,v 1.1 1998/04/10 15:31:30 fisyak Exp $
+* $Id: gsstak.F,v 1.2 1998/04/16 16:59:42 fisyak Exp $
 *
 * $Log: gsstak.F,v $
-* Revision 1.1  1998/04/10 15:31:30  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:42  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :          25/03/98  00.20.33  by  Pavel Nevski
 *CMZ :  1.30/00 04/05/97  23.58.54  by  Pavel Nevski
 *CMZ :  3.21/02 29/03/94  15.41.23  by  S.Giani
@@ -36,19 +36,19 @@ C.    *   - accept all unknown IPART as geantino                       *
 C.    ******************************************************************
 C.
 #include "gst/atcdes/typing.inc"
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gctrak.inc"
-#include "geant321/geant321/gckine.inc"
-#include "geant321/geant321/gcking.inc"
-#include "geant321/geant321/gcflag.inc"
-#include "geant321/geant321/gcjloc.inc"
-#include "geant321/geant321/gcmzfo.inc"
-#include "geant321/geant321/gcnum.inc"
-#include "geant321/geant321/gcstak.inc"
-#include "geant321/geant321/gcvolu.inc"
-#include "geant321/geant321/gctmed.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gctrak.inc"
+#include "geant321/gckine.inc"
+#include "geant321/gcking.inc"
+#include "geant321/gcflag.inc"
+#include "geant321/gcjloc.inc"
+#include "geant321/gcmzfo.inc"
+#include "geant321/gcnum.inc"
+#include "geant321/gcstak.inc"
+#include "geant321/gcvolu.inc"
+#include "geant321/gctmed.inc"
 #if defined(CERNLIB_USRJMP)
-#include "geant321/geant321/gcjump.inc"
+#include "geant321/gcjump.inc"
 #endif
 *
       INTEGER         NVTX,ITR

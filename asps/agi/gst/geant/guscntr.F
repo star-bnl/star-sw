@@ -1,12 +1,12 @@
 *
-* $Id: guscntr.F,v 1.1 1998/04/10 15:31:37 fisyak Exp $
+* $Id: guscntr.F,v 1.2 1998/04/16 16:59:48 fisyak Exp $
 *
 * $Log: guscntr.F,v $
-* Revision 1.1  1998/04/10 15:31:37  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:48  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :  1.30/00 12/05/97  15.31.50  by  Pavel Nevski
 *CMZU:  1.00/00 17/03/94  10.22.21  by  Andrea DellAcqua
 *-- Author :    *MRT : by Pavel Nevski
@@ -21,13 +21,13 @@
 *----------------------------------------------------------------------*
 #include "gst/atcdes/typing.inc"
 *  - GEANT common GCTMED (version 3.15)
-#include "geant321/geant321/gctmed.inc"
+#include "geant321/gctmed.inc"
 *  - GEANT common GCTRACK (version 3.15)
-#include "geant321/geant321/gctrak.inc"
+#include "geant321/gctrak.inc"
 *  - Multi-level current volume description
-#include "geant321/geant321/gcvolu.inc"
+#include "geant321/gcvolu.inc"
 *  - Geant logical units
-#include "geant321/geant321/gcunit.inc"
+#include "geant321/gcunit.inc"
 *
       INTEGER ICNT,IPRI,MSTEP,LU
       REAL SAFEOLD,ONLY,PRECOR

@@ -1,15 +1,13 @@
 *
-* $Id: rzmake.F,v 1.2 1998/04/16 16:11:48 fisyak Exp $
+* $Id: rzmake.F,v 1.3 1998/04/16 16:58:11 fisyak Exp $
 *
 * $Log: rzmake.F,v $
-* Revision 1.2  1998/04/16 16:11:48  fisyak
-* put gstar in cvs
-*
-* Revision 1.1  1998/04/10 15:31:12  fisyak
-* Move gstar into CVS
+* Revision 1.3  1998/04/16 16:58:11  fisyak
+* 2nd pass with gstar
 *
 *
-#include "packlib/zebra/zebra/pilot.h
+#include "sys/CERNLIB_machine.h"
+#include "pilot.h"
 *CMZ :          25/03/98  19.29.54  by  Pavel Nevski
 *-- Author :
       SUBROUTINE RZMAKE(LUNIN,CHDIR,NWKEY,CHFORM,CHTAG,NRECP,CHOPT)
@@ -64,13 +62,13 @@
 *          : 10.12.97 P.Nevski  Default is NEW
 ************************************************************************
 *
-#include "packlib/zebra/zebra/zunit.inc"
-#include "packlib/zebra/zebra/zstate.inc"
-#include "packlib/zebra/zebra/rzcl.inc"
-#include "packlib/zebra/zebra/rzdir.inc"
-#include "packlib/zebra/zebra/rzclun.inc"
-#include "packlib/zebra/zebra/rzk.inc"
-#include "packlib/zebra/zebra/rzcycle.inc"
+#include "zebra/zunit.inc"
+#include "zebra/zstate.inc"
+#include "zebra/rzcl.inc"
+#include "zebra/rzdir.inc"
+#include "zebra/rzclun.inc"
+#include "zebra/rzk.inc"
+#include "zebra/rzcycle.inc"
 #if defined(CERNLIB_QMVAX)
       CHARACTER*16 CHORG
 #endif
@@ -84,7 +82,7 @@
 *
 *-----------------------------------------------------------------------
 *
-#include "packlib/zebra/zebra/q_jbit.inc"
+#include "zebra/q_jbit.inc"
       IQUEST(1)=0
       LOGLV = MIN(NQLOGD,4)
       LOGLV = MAX(LOGLV,-3)

@@ -1,9 +1,9 @@
 *
-* $Id: pcodat.inc,v 1.1 1998/04/10 15:31:59 fisyak Exp $
+* $Id: pcodat.inc,v 1.2 1998/04/16 16:58:50 fisyak Exp $
 *
 * $Log: pcodat.inc,v $
-* Revision 1.1  1998/04/10 15:31:59  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:58:50  fisyak
+* 2nd pass with gstar
 *
 *
 *

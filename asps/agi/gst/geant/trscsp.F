@@ -1,12 +1,12 @@
 *
-* $Id: trscsp.F,v 1.1 1998/04/10 15:31:43 fisyak Exp $
+* $Id: trscsp.F,v 1.2 1998/04/16 16:59:53 fisyak Exp $
 *
 * $Log: trscsp.F,v $
-* Revision 1.1  1998/04/10 15:31:43  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:53  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :          14/11/97  16.33.57  by  Pavel Nevski
 *CMZ :  1.00/00 19/03/92  12.19.31  by  Federico Carminati
 *-- Author :
@@ -38,7 +38,7 @@ C     SPX       SIGN OF X-COMPONENT OF PARTICLE MOMENTUM   OUTPUT
 C
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       REAL   PC,PS,H,RC,RS,CH,SPX
-#include "geant321/geant321/trcom3.inc"
+#include "geant321/trcom3.inc"
       DIMENSION PC(3),PS(3),H(3),RC(15),RS(15)
       DIMENSION UN(3),VN(3)
 C

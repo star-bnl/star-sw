@@ -1,12 +1,12 @@
 *
-* $Id: ggordq.F,v 1.1 1998/04/10 15:31:22 fisyak Exp $
+* $Id: ggordq.F,v 1.2 1998/04/16 16:59:33 fisyak Exp $
 *
 * $Log: ggordq.F,v $
-* Revision 1.1  1998/04/10 15:31:22  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:33  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZU:  1.00/01 25/01/96  14.17.49  by  A. DellAcqua
 *CMZ :  3.21/02 29/03/94  15.41.28  by  S.Giani
 *-- Author :
@@ -31,8 +31,8 @@ C.    *    Author: Stephan Egli (large parts are copies of GGORD)     *
 C.    *                                                               *
 C.    *****************************************************************
 C.
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcunit.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcunit.inc"
 *
  
       DIMENSION CLOW(500),CHIGH(500),CORD(1000),ITYPE(1000),

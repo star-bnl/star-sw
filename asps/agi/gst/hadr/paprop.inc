@@ -1,9 +1,9 @@
 *
-* $Id: paprop.inc,v 1.1 1998/04/10 15:31:58 fisyak Exp $
+* $Id: paprop.inc,v 1.2 1998/04/16 16:58:48 fisyak Exp $
 *
 * $Log: paprop.inc,v $
-* Revision 1.1  1998/04/10 15:31:58  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:58:48  fisyak
+* 2nd pass with gstar
 *
 *
 *

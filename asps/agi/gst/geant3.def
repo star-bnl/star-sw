@@ -951,4 +951,15 @@ REPLACE  [;;]   with [;]
 ;;
 %%
 
++SELF,IF=CRAY.
+replace [AADATA    #/#/]      with [DATA    #1/#2/]
+replace [AADATA #(#)/#/]      with [DATA    #1/#3/]
+replace [AADATA  #*#/#/]      with [DATA    #1/#3/]
+replace [AADATA  #,#/#/]      with [AADATA  #2/#3/]
+replace [INTEGER #/#/#;]      with [INTEGER      #1 #3; AADATA #1/#2/;]
+replace [REAL    #/#/#;]      with [REAL         #1 #3; AADATA #1/#2/;]
+replace [LOGICAL #/#/#;]      with [LOGICAL      #1 #3; AADATA #1/#2/;]
+replace [CHARACTER*# #/#/#;]  with [CHARACTER*#1 #2 #4; AADATA #2/#3/;]
+replace [CHARACTER   #/#/#;]  with [CHARACTER    #1 #3; AADATA #1/#2/;]
++SELF.
 

@@ -1,12 +1,12 @@
 *
-* $Id: gtckov.F,v 1.1 1998/04/10 15:31:31 fisyak Exp $
+* $Id: gtckov.F,v 1.2 1998/04/16 16:59:44 fisyak Exp $
 *
 * $Log: gtckov.F,v $
-* Revision 1.1  1998/04/10 15:31:31  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:44  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :          09/02/98  16.15.20  by  Pavel Nevski
 *CMZ :  3.21/04 13/12/94  15.17.13  by  S.Giani
 *-- Author :
@@ -34,21 +34,21 @@ C.    *          - more generalized formula for refraction             *
 C.    *   PN, 9-feb-98: Let c-photons inter non-transparent media      *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gccuts.inc"
-#include "geant321/geant321/gcjloc.inc"
-#include "geant321/geant321/gconsp.inc"
-#include "geant321/geant321/gcphys.inc"
-#include "geant321/geant321/gcstak.inc"
-#include "geant321/geant321/gctmed.inc"
-#include "geant321/geant321/gctrak.inc"
-#include "geant321/geant321/gcvolu.inc"
-#include "geant321/geant321/gcnum.inc"
-#include "geant321/geant321/gcvol1.inc"
-#include "geant321/geant321/gcunit.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gccuts.inc"
+#include "geant321/gcjloc.inc"
+#include "geant321/gconsp.inc"
+#include "geant321/gcphys.inc"
+#include "geant321/gcstak.inc"
+#include "geant321/gctmed.inc"
+#include "geant321/gctrak.inc"
+#include "geant321/gcvolu.inc"
+#include "geant321/gcnum.inc"
+#include "geant321/gcvol1.inc"
+#include "geant321/gcunit.inc"
  
 #if !defined(CERNLIB_OLD)
-#include "geant321/geant321/gcvdma.inc"
+#include "geant321/gcvdma.inc"
 #endif
 *
 * ** The following common is in GTMEDI. LSAMVL is set to true if

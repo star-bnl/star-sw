@@ -1,12 +1,12 @@
 *
-* $Id: gmedia.F,v 1.1 1998/04/10 15:31:25 fisyak Exp $
+* $Id: gmedia.F,v 1.2 1998/04/16 16:59:36 fisyak Exp $
 *
 * $Log: gmedia.F,v $
-* Revision 1.1  1998/04/10 15:31:25  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:36  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 #if !defined(CERNLIB_OLD)
 *CMZ :          13/02/98  18.13.57  by  Pavel Nevski
 *CMZ :  1.30/00 30/04/97  22.41.05  by  Pavel Nevski
@@ -35,16 +35,16 @@ C.    *   PN: in MANY volums the search should start from top          *
 C.    *                                                                *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gcflag.inc"
-#include "geant321/geant321/gckine.inc"
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcvolu.inc"
-#include "geant321/geant321/gctrak.inc"
+#include "geant321/gcflag.inc"
+#include "geant321/gckine.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcvolu.inc"
+#include "geant321/gctrak.inc"
 #if defined(CERNLIB_USRJMP)
-#include "geant321/geant321/gcjump.inc"
+#include "geant321/gcjump.inc"
 #endif
-#include "geant321/geant321/gcvdma.inc"
-#include "geant321/geant321/gchvir.inc"
+#include "geant321/gcvdma.inc"
+#include "geant321/gchvir.inc"
 C.
       DIMENSION  X(*)
       REAL       XC(6)

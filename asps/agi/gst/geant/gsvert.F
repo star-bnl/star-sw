@@ -1,12 +1,12 @@
 *
-* $Id: gsvert.F,v 1.1 1998/04/10 15:31:31 fisyak Exp $
+* $Id: gsvert.F,v 1.2 1998/04/16 16:59:43 fisyak Exp $
 *
 * $Log: gsvert.F,v $
-* Revision 1.1  1998/04/10 15:31:31  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:43  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :  1.30/00 03/05/97  16.32.36  by  Pavel Nevski
 *CMZ :  3.21/02 29/03/94  15.41.21  by  S.Giani
 *-- Author :
@@ -26,13 +26,13 @@ C.    * PN, 07/Feb/97: allow negative NTbeam and NTtarg                *
 C.    ******************************************************************
 C.
 #include "gst/atcdes/typing.inc"
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcnum.inc"
-#include "geant321/geant321/gcflag.inc"
-#include "geant321/geant321/gcpush.inc"
-#include "geant321/geant321/gctrak.inc"
-#include "geant321/geant321/gckine.inc"
-#include "geant321/geant321/gcunit.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcnum.inc"
+#include "geant321/gcflag.inc"
+#include "geant321/gcpush.inc"
+#include "geant321/gctrak.inc"
+#include "geant321/gckine.inc"
+#include "geant321/gcunit.inc"
 #include "gst/atcdes/quest.inc"
       REAL     V(3),UBUF(1)
       INTEGER  LGKINE,NTBEAM,NTTARG,NWBUF,NVTX,NT(2),IER,

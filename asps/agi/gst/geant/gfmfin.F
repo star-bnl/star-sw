@@ -1,29 +1,29 @@
 *
-* $Id: gfmfin.F,v 1.1 1998/04/10 15:31:21 fisyak Exp $
+* $Id: gfmfin.F,v 1.2 1998/04/16 16:59:32 fisyak Exp $
 *
 * $Log: gfmfin.F,v $
-* Revision 1.1  1998/04/10 15:31:21  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:32  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 #if defined(CERNLIB_HADRON)
 *CMZ :          16/12/97  13.31.05  by  Pavel Nevski
 *CMZ :  3.21/02 29/03/94  15.41.47  by  S.Giani
 *-- Author :
       SUBROUTINE GFMFIN
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gccuts.inc"
-#include "geant321/geant321/gcjloc.inc"
-#include "geant321/geant321/gcflag.inc"
-#include "geant321/geant321/gckine.inc"
-#include "geant321/geant321/gcking.inc"
-#include "geant321/geant321/gcmate.inc"
-#include "geant321/geant321/gcphys.inc"
-#include "geant321/geant321/gctrak.inc"
-#include "geant321/geant321/gsecti.inc"
-#include "geant321/geant321/gctmed.inc"
-#include "geant321/geant321/gcunit.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gccuts.inc"
+#include "geant321/gcjloc.inc"
+#include "geant321/gcflag.inc"
+#include "geant321/gckine.inc"
+#include "geant321/gcking.inc"
+#include "geant321/gcmate.inc"
+#include "geant321/gcphys.inc"
+#include "geant321/gctrak.inc"
+#include "geant321/gsecti.inc"
+#include "geant321/gctmed.inc"
+#include "geant321/gcunit.inc"
 *KEEP,DIMPAR.
 *                                                                     *
 *=== dimpar ==========================================================*

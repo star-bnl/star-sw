@@ -1,13 +1,13 @@
 *
-* $Id: csmap.F,v 1.1 1998/04/10 15:30:54 fisyak Exp $
+* $Id: csmap.F,v 1.2 1998/04/16 17:02:20 fisyak Exp $
 *
 * $Log: csmap.F,v $
-* Revision 1.1  1998/04/10 15:30:54  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 17:02:20  fisyak
+* 2nd pass with gstar
 *
 *
 * ------------------------------------------------------------------
-#include "pawlib/comis/comis/pilot.h"
+#include "comis/pilot.h"
 *CMZ :          31/10/97  13.20.19  by  Pavel Nevski
 *CMZ :  1.18/14 19/09/94  10.05.14  by  Vladimir Berezhnoi
 *-- Author : V.Berezhnoi

@@ -1,12 +1,12 @@
 *
-* $Id: gfinds.F,v 1.1 1998/04/10 15:31:19 fisyak Exp $
+* $Id: gfinds.F,v 1.2 1998/04/16 16:59:31 fisyak Exp $
 *
 * $Log: gfinds.F,v $
-* Revision 1.1  1998/04/10 15:31:19  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:31  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :          06/12/97  17.19.33  by  Pavel Nevski
 *CMZ :  3.21/02 06/07/94  18.26.03  by  S.Giani
 *-- Author :
@@ -32,10 +32,10 @@ C.    *       Modified  V.Perev                                        *
 C.    *       Jattf corrected by Bagdan Pavlik (Cracow)                *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcsets.inc"
-#include "geant321/geant321/gcvolu.inc"
-#include "geant321/geant321/gctmed.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcsets.inc"
+#include "geant321/gcvolu.inc"
+#include "geant321/gctmed.inc"
 #if defined(CERNLIB_DEBUG)
       INTEGER        LNAM(15), LNUM(15)
 #endif

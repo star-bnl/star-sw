@@ -1,13 +1,13 @@
 *
-* $Id: csfile.F,v 1.1 1998/04/10 15:30:52 fisyak Exp $
+* $Id: csfile.F,v 1.2 1998/04/16 17:02:18 fisyak Exp $
 *
 * $Log: csfile.F,v $
-* Revision 1.1  1998/04/10 15:30:52  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 17:02:18  fisyak
+* 2nd pass with gstar
 *
 *
 * -----------------------------------------------------------------
-#include "pawlib/comis/comis/pilot.h"
+#include "comis/pilot.h"
 *CMZ :          10/11/97  12.13.09  by  Pavel Nevski
 *CMZ :  1.18/14 20/09/94  14.48.52  by  Fons Rademakers
 *-- Author : V.Berezhnoi
@@ -23,7 +23,7 @@
       COMMON /CSERRNO/ IERR
       COMMON /CSDEBUG/ ICSDEBUG
 #if defined(CERNLIB_SHL)
-#include "pawlib/comis/comis/cshlnm.inc"
+#include "comis/cshlnm.inc"
 *     CHPATH='/tmp/' comes from CSHLNM
       CHARACTER  LIBNAME*72,LINE*80,PATH*72,NAME*72,CPID*8,FEXT*8
       INTEGER    SYSTEMF

@@ -1,28 +1,26 @@
 *
-* $Id: mzpush.F,v 1.2 1998/04/16 16:11:45 fisyak Exp $
+* $Id: mzpush.F,v 1.3 1998/04/16 16:58:07 fisyak Exp $
 *
 * $Log: mzpush.F,v $
-* Revision 1.2  1998/04/16 16:11:45  fisyak
-* put gstar in cvs
-*
-* Revision 1.1  1998/04/10 15:31:09  fisyak
-* Move gstar into CVS
+* Revision 1.3  1998/04/16 16:58:07  fisyak
+* 2nd pass with gstar
 *
 *
-#include "packlib/zebra/zebra/pilot.h
+#include "sys/CERNLIB_machine.h"
+#include "pilot.h"
 *CMZ :  1.30/00 18/03/97  19.04.33  by  Pavel Nevski
 *-- Author :
       SUBROUTINE MZPUSH (IXDIV,LORGP,INCNLP,INCNDP,CHOPT)
  
 C-    Change the size of a bank, user called
  
-#include "packlib/zebra/zebra/zbcd.inc"
-#include "packlib/zebra/zebra/zstate.inc"
-#include "packlib/zebra/zebra/zunit.inc"
-#include "packlib/zebra/zebra/mqsys.inc"
-#include "packlib/zebra/zebra/mzcl.inc"
-#include "packlib/zebra/zebra/mzcn.inc"
-#include "packlib/zebra/zebra/mzct.inc"
+#include "zebra/zbcd.inc"
+#include "zebra/zstate.inc"
+#include "zebra/zunit.inc"
+#include "zebra/mqsys.inc"
+#include "zebra/mzcl.inc"
+#include "zebra/mzcn.inc"
+#include "zebra/mzct.inc"
 C--------------    End CDE                             --------------
       DIMENSION    IXDIV(9),LORGP(9),INCNLP(9),INCNDP(9)
       CHARACTER    *(*) CHOPT
@@ -38,11 +36,11 @@ C--------------    End CDE                             --------------
       PARAMETER   (NAMESR = 'MZPUSH  ')
 #endif
  
-#include "packlib/zebra/zebra/q_jbit.inc"
-#include "packlib/zebra/zebra/q_sbit.inc"
-#include "packlib/zebra/zebra/q_sbyt.inc"
+#include "zebra/q_jbit.inc"
+#include "zebra/q_sbit.inc"
+#include "zebra/q_sbyt.inc"
  
-#include "packlib/zebra/zebra/qtrace.inc"
+#include "zebra/qtrace.inc"
  
       IF (IXDIV(1).EQ.-7)          GO TO 12
       CALL MZSDIV (IXDIV,0)
@@ -409,7 +407,7 @@ C------            Finished, reset LORG, clear new data words
  
    81 LORGP(1) = LNEW
       IF (INCND.GT.0)  CALL VZERO (IQ(KQS+LNEW+ND+1),INCND)
-#include "packlib/zebra/zebra/qtrace99.inc"
+#include "zebra/qtrace99.inc"
       RETURN
  
 C----              Error conditions
@@ -436,7 +434,7 @@ C----              Error conditions
    91 NQCASE = NQCASE + 1
       NQFATA = NQFATA + 1
       IQUEST(11) = LORG
-#include "packlib/zebra/zebra/qtofatal.inc"
+#include "zebra/qtofatal.inc"
       END
 *      ==================================================
-#include "packlib/zebra/zebra/qcardl.inc"
+#include "zebra/qcardl.inc"

@@ -1,12 +1,12 @@
 *
-* $Id: gbrele.F,v 1.1 1998/04/10 15:31:17 fisyak Exp $
+* $Id: gbrele.F,v 1.2 1998/04/16 16:59:29 fisyak Exp $
 *
 * $Log: gbrele.F,v $
-* Revision 1.1  1998/04/10 15:31:17  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:29  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :  1.30/00 30/10/96  18.44.39  by  Pavel Nevski
 *CMZ :  3.21/02 29/03/94  15.41.21  by  S.Giani
 *-- Author :      L.Urban
@@ -24,8 +24,8 @@ C.    *    ( correction for T>100. GeV)                                *
 C.    *                                                                *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gconsp.inc"
-#include "geant321/geant321/gcmate.inc"
+#include "geant321/gconsp.inc"
+#include "geant321/gcmate.inc"
       DIMENSION C(100),C1(60),C2(40)
       EQUIVALENCE (C(1),C1(1)),(C(61),C2(1))
 #if !defined(CERNLIB_BETHE)

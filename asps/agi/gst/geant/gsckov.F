@@ -1,12 +1,12 @@
 *
-* $Id: gsckov.F,v 1.1 1998/04/10 15:31:28 fisyak Exp $
+* $Id: gsckov.F,v 1.2 1998/04/16 16:59:40 fisyak Exp $
 *
 * $Log: gsckov.F,v $
-* Revision 1.1  1998/04/10 15:31:28  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:40  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :          09/02/98  16.09.29  by  Pavel Nevski
 *CMZ :  3.21/02 21/03/94  17.01.28  by  Rene Brun
 *-- Author :
@@ -37,8 +37,8 @@ C.    *       PN, 9-feb-98:   multiple calls subsitute same banks      *
 C.    *                                                                *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcunit.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcunit.inc"
 C
       DIMENSION PPCKOV(*), ABSCO(*), EFFIC(*), RINDEX(*)
 C.

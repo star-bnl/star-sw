@@ -1,12 +1,12 @@
 *
-* $Id: gxpick.F,v 1.1 1998/04/10 15:31:40 fisyak Exp $
+* $Id: gxpick.F,v 1.2 1998/04/16 16:59:50 fisyak Exp $
 *
 * $Log: gxpick.F,v $
-* Revision 1.1  1998/04/10 15:31:40  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:50  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :  1.30/00 31/05/96  19.39.03  by  Unknown
 *CMZ :  3.21/02 29/03/94  15.41.33  by  S.Giani
 *-- Author :
@@ -25,14 +25,14 @@ C.    *       Authors:   S.Egli      **********                        *
 C.    *                                                                *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gconsp.inc"
-#include "geant321/geant321/gcvolu.inc"
-#include "geant321/geant321/gcdraw.inc"
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcsets.inc"
-#include "geant321/geant321/gctmed.inc"
-#include "geant321/geant321/gcmate.inc"
-#include "geant321/geant321/gcunit.inc"
+#include "geant321/gconsp.inc"
+#include "geant321/gcvolu.inc"
+#include "geant321/gcdraw.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcsets.inc"
+#include "geant321/gctmed.inc"
+#include "geant321/gcmate.inc"
+#include "geant321/gcunit.inc"
 *
 * this COMMON filled in routine GDRAW !
 *

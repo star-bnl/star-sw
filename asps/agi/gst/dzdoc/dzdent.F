@@ -1,16 +1,13 @@
 *
-* $Id: dzdent.F,v 1.2 1998/04/16 16:11:37 fisyak Exp $
+* $Id: dzdent.F,v 1.3 1998/04/16 17:00:27 fisyak Exp $
 *
 * $Log: dzdent.F,v $
-* Revision 1.2  1998/04/16 16:11:37  fisyak
-* put gstar in cvs
-*
-* Revision 1.1  1998/04/10 15:31:04  fisyak
-* Move gstar into CVS
+* Revision 1.3  1998/04/16 17:00:27  fisyak
+* 2nd pass with gstar
 *
 *
 * ----------------------------------------------------------------
-#include "packlib/zebra/zebra/pilot.h
+#include "dzdoc/pilot.h"
 *CMZ :  1.30/00 11/02/96  22.08.12  by  Pavel Nevski
 *CMZU:  1.00/01 21/01/96  20.40.48  by  Sasha Vanyashin
 *CMZ :          09/12/95  16.20.44  by  Pavel Nevski
@@ -44,21 +41,21 @@
 *.**********************************************************************
 C     SAVE
  
-#include "graflib/dzdoc/dzdoc/bkwrp.inc"
-#include "graflib/dzdoc/dzdoc/tapes.inc"
+#include "dzdoc/bkwrp.inc"
+#include "dzdoc/tapes.inc"
 *         From DZEBRA
-#include "packlib/zebra/zebra/zbcdk.inc"
-#include "graflib/dzdoc/dzdoc/linout.inc"
+#include "zebra/zbcdk.inc"
+#include "dzdoc/linout.inc"
       LOGICAL BTEST, LTHERE, RTHERE,BTHERE,DTHERE
 *--     General information
       CHARACTER CFORM*4
-#include "graflib/dzdoc/dzdoc/docparq.inc"
-#include "graflib/dzdoc/dzdoc/dzdocobk.inc"
-#include "graflib/dzdoc/dzdoc/bknuparq.inc"
-#include "packlib/zebra/zebra/bkfoparq.inc"
-#include "graflib/dzdoc/dzdoc/bkstparq.inc"
-#include "graflib/dzdoc/dzdoc/bktgparq.inc"
-#include "graflib/dzdoc/dzdoc/bktgdatq.inc"
+#include "dzdoc/docparq.inc"
+#include "dzdoc/dzdocobk.inc"
+#include "dzdoc/bknuparq.inc"
+#include "zebra/bkfoparq.inc"
+#include "dzdoc/bkstparq.inc"
+#include "dzdoc/bktgparq.inc"
+#include "dzdoc/bktgdatq.inc"
  
       LTHERE=.FALSE.
       RTHERE=.FALSE.

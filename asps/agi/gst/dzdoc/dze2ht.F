@@ -1,16 +1,13 @@
 *
-* $Id: dze2ht.F,v 1.2 1998/04/16 16:11:39 fisyak Exp $
+* $Id: dze2ht.F,v 1.3 1998/04/16 17:00:29 fisyak Exp $
 *
 * $Log: dze2ht.F,v $
-* Revision 1.2  1998/04/16 16:11:39  fisyak
-* put gstar in cvs
-*
-* Revision 1.1  1998/04/10 15:31:06  fisyak
-* Move gstar into CVS
+* Revision 1.3  1998/04/16 17:00:29  fisyak
+* 2nd pass with gstar
 *
 *
 * ----------------------------------------------------------------
-#include "packlib/zebra/zebra/pilot.h
+#include "dzdoc/pilot.h"
 *CMZ :  1.30/00 11/02/96  22.08.12  by  Pavel Nevski
 *CMZ :  1.00/01 09/12/95  16.20.44  by  Pavel Nevski
 *-- Author :    O.Schaile

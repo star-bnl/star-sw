@@ -1,12 +1,12 @@
 *
-* $Id: gphot.F,v 1.1 1998/04/10 15:31:27 fisyak Exp $
+* $Id: gphot.F,v 1.2 1998/04/16 16:59:39 fisyak Exp $
 *
 * $Log: gphot.F,v $
-* Revision 1.1  1998/04/10 15:31:27  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:39  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :  3.21/02 29/03/94  15.41.22  by  S.Giani
 *-- Author :
       SUBROUTINE GPHOT
@@ -26,14 +26,14 @@ C.    *       AUTHOR    : J. Chwastowski                               *
 C.    *                                                                *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gctrak.inc"
-#include "geant321/geant321/gcphys.inc"
-#include "geant321/geant321/gconsp.inc"
-#include "geant321/geant321/gcking.inc"
-#include "geant321/geant321/gccuts.inc"
-#include "geant321/geant321/gcjloc.inc"
-#include "geant321/geant321/gcunit.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gctrak.inc"
+#include "geant321/gcphys.inc"
+#include "geant321/gconsp.inc"
+#include "geant321/gcking.inc"
+#include "geant321/gccuts.inc"
+#include "geant321/gcjloc.inc"
+#include "geant321/gcunit.inc"
       DIMENSION POT(4),PROB(4),RNA(9)
       EQUIVALENCE (RNA(1),RN01),(RNA(2),RN02),(RNA(3),RN03)
       EQUIVALENCE (RNA(4),RN04),(RNA(5),RN05),(RNA(6),RN06)

@@ -1,12 +1,12 @@
 *
-* $Id: gxphys.F,v 1.1 1998/04/10 15:31:40 fisyak Exp $
+* $Id: gxphys.F,v 1.2 1998/04/16 16:59:49 fisyak Exp $
 *
 * $Log: gxphys.F,v $
-* Revision 1.1  1998/04/10 15:31:40  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:49  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :  1.30/00 06/07/96  18.25.27  by  Pavel Nevski
 *CMZ :  3.21/04 09/11/94  15.31.28  by  S.Ravndal
 *-- Author :    R.Brun
@@ -26,14 +26,14 @@
 **    ******************************************************************
 **
 #include "gst/atcdes/typing.inc"
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcphys.inc"
-#include "geant321/geant321/gccuts.inc"
-#include "geant321/geant321/gconst.inc"
-#include "geant321/geant321/gcunit.inc"
-#include "geant321/geant321/gcmulo.inc"
-#include "geant321/geant321/gctmed.inc"
-#include "geant321/geant321/gctrak.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcphys.inc"
+#include "geant321/gccuts.inc"
+#include "geant321/gconst.inc"
+#include "geant321/gcunit.inc"
+#include "geant321/gcmulo.inc"
+#include "geant321/gctmed.inc"
+#include "geant321/gctrak.inc"
 *
       Integer       Npar,i,j,Ipart,Imate,Npoint,JTM,JTMi,JM,JMA
       Real          Stepa

@@ -1,12 +1,12 @@
 *
-* $Id: gsahit.F,v 1.1 1998/04/10 15:31:27 fisyak Exp $
+* $Id: gsahit.F,v 1.2 1998/04/16 16:59:39 fisyak Exp $
 *
 * $Log: gsahit.F,v $
-* Revision 1.1  1998/04/10 15:31:27  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:39  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :          19/07/97  13.08.07  by  Pavel Nevski
 *CMZ :  1.30/00 18/04/97  18.05.51  by  Pavel Nevski
 *CMZ :  3.21/02 29/03/94  15.41.20  by  S.Giani
@@ -82,9 +82,9 @@ C.    *       Author    R.Brun  *********                              *
 C.    *                                                                *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcunit.inc"
-#include "geant321/geant321/gcflag.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcunit.inc"
+#include "geant321/gcflag.inc"
       COMMON/GCLOCA/NLOCAL(2),JS,JD,JDH,JH,JHD,LOCAL(15)
       DIMENSION NUMBV(1),HITS(1)
       SAVE NMESS

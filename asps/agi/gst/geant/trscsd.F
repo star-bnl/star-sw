@@ -1,12 +1,12 @@
 *
-* $Id: trscsd.F,v 1.1 1998/04/10 15:31:42 fisyak Exp $
+* $Id: trscsd.F,v 1.2 1998/04/16 16:59:53 fisyak Exp $
 *
 * $Log: trscsd.F,v $
-* Revision 1.1  1998/04/10 15:31:42  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:53  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :  1.00/00 26/08/95  01.41.40  by  Pavel Nevski
 *-- Author :
 C
@@ -41,7 +41,7 @@ C
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       REAL  PC,PD,H,RC,RD,CH,DJ,DK,SPU
 #endif
-#include "geant321/geant321/trcom3.inc"
+#include "geant321/trcom3.inc"
       DIMENSION PC(3),PD(3),H(3),RC(15),RD(15),DJ(3),DK(3)
       DIMENSION UN(3),VN(3),DI(3),TVW(3)
 C

@@ -1,12 +1,12 @@
 *
-* $Id: gltrac.F,v 1.1 1998/04/10 15:31:25 fisyak Exp $
+* $Id: gltrac.F,v 1.2 1998/04/16 16:59:36 fisyak Exp $
 *
 * $Log: gltrac.F,v $
-* Revision 1.1  1998/04/10 15:31:25  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:36  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :          25/03/98  00.13.37  by  Pavel Nevski
 *CMZ :  1.30/00 03/05/97  16.07.14  by  Pavel Nevski
 *CMZ :  3.21/04 13/12/94  15.36.22  by  S.Giani
@@ -28,15 +28,15 @@ C.    *   2. all unknown particle are treated as geantino              *
 C.    *                                                                *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gckine.inc"
-#include "geant321/geant321/gcnum.inc"
-#include "geant321/geant321/gconsp.inc"
-#include "geant321/geant321/gcphys.inc"
-#include "geant321/geant321/gcstak.inc"
-#include "geant321/geant321/gctmed.inc"
-#include "geant321/geant321/gctrak.inc"
-#include "geant321/geant321/gcvolu.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gckine.inc"
+#include "geant321/gcnum.inc"
+#include "geant321/gconsp.inc"
+#include "geant321/gcphys.inc"
+#include "geant321/gcstak.inc"
+#include "geant321/gctmed.inc"
+#include "geant321/gctrak.inc"
+#include "geant321/gcvolu.inc"
       DIMENSION RNDM(5)
 #if !defined(CERNLIB_SINGLE)
       DOUBLE PRECISION P2,GETOTD,GEKIND

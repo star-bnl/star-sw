@@ -1,18 +1,18 @@
 *
-* $Id: csfilx.F,v 1.1 1998/04/10 15:30:52 fisyak Exp $
+* $Id: csfilx.F,v 1.2 1998/04/16 17:02:18 fisyak Exp $
 *
 * $Log: csfilx.F,v $
-* Revision 1.1  1998/04/10 15:30:52  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 17:02:18  fisyak
+* 2nd pass with gstar
 *
 *
-#include "pawlib/comis/comis/pilot.h"
+#include "comis/pilot.h"
 *CMZ :          02/12/97  12.36.02  by  Pavel Nevski
 *CMZ :  1.18/00 25/01/94  18.26.31  by  Vladimir Berezhnoi
 *-- Author : V.Berezhnoi
       SUBROUTINE CSFILX(NAME)
 ***---------------------------------
-#include "pawlib/comis/comis/cslun.inc"
+#include "comis/cslun.inc"
 #if defined(CERNLIB_IBM)
          CHARACTER *80 VMIBM
 #endif

@@ -1,15 +1,13 @@
 *
-* $Id: rzink.F,v 1.2 1998/04/16 16:11:48 fisyak Exp $
+* $Id: rzink.F,v 1.3 1998/04/16 16:58:10 fisyak Exp $
 *
 * $Log: rzink.F,v $
-* Revision 1.2  1998/04/16 16:11:48  fisyak
-* put gstar in cvs
-*
-* Revision 1.1  1998/04/10 15:31:11  fisyak
-* Move gstar into CVS
+* Revision 1.3  1998/04/16 16:58:10  fisyak
+* 2nd pass with gstar
 *
 *
-#include "packlib/zebra/zebra/pilot.h
+#include "sys/CERNLIB_machine.h"
+#include "pilot.h"
 *CMZ :  1.30/00 15/04/97  17.42.11  by  Pavel Nevski
 *-- Author :
       SUBROUTINE RZINK(KEYU,ICYCLE,CHOPT)
@@ -55,12 +53,12 @@
 *          : 04.03.94 S.Banerjee (Change in cycle structure)
 *          : 15.04.97 P.Nevski   accept both selection KEY versions
 ************************************************************************
-#include "packlib/zebra/zebra/rzcl.inc"
-#include "packlib/zebra/zebra/rzclun.inc"
-#include "packlib/zebra/zebra/rzcout.inc"
-#include "packlib/zebra/zebra/rzk.inc"
-#include "packlib/zebra/zebra/rzckey.inc"
-#include "packlib/zebra/zebra/rzcycle.inc"
+#include "zebra/rzcl.inc"
+#include "zebra/rzclun.inc"
+#include "zebra/rzcout.inc"
+#include "zebra/rzk.inc"
+#include "zebra/rzckey.inc"
+#include "zebra/rzcycle.inc"
       CHARACTER*(*) CHOPT
       DIMENSION KEYU(*)
       EQUIVALENCE (IOPTA,IQUEST(91)), (IOPTC,IQUEST(92))
@@ -69,7 +67,7 @@
 *
 *-----------------------------------------------------------------------
 *
-#include "packlib/zebra/zebra/q_jbit.inc"
+#include "zebra/q_jbit.inc"
 *
       IQUEST(1)=0
       CALL UOPTC(CHOPT,'ACDNRS',IQUEST(91))

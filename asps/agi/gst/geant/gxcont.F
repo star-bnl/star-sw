@@ -1,12 +1,12 @@
 *
-* $Id: gxcont.F,v 1.1 1998/04/10 15:31:37 fisyak Exp $
+* $Id: gxcont.F,v 1.2 1998/04/16 16:59:48 fisyak Exp $
 *
 * $Log: gxcont.F,v $
-* Revision 1.1  1998/04/10 15:31:37  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:48  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :  1.30/00 16/04/97  20.12.19  by  Pavel Nevski
 *CMZ :  3.21/02 07/07/94  19.47.38  by  S.Giani
 *-- Author :
@@ -32,20 +32,20 @@
 **    ******************************************************************
 **
 #include "gst/atcdes/quest.inc"
-#include "geant321/geant321/pawc.inc"
+#include "geant321/pawc.inc"
 #include "gst/atcdes/sclink.inc"
-#include "packlib/zebra/zebra/zstate.inc"
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gctmed.inc"
-#include "geant321/geant321/gcunit.inc"
-#include "geant321/geant321/gcflag.inc"
-#include "geant321/geant321/gckine.inc"
-#include "geant321/geant321/gcphys.inc"
-#include "geant321/geant321/gcmulo.inc"
-#include "geant321/geant321/gclist.inc"
-#include "geant321/geant321/gcstak.inc"
-#include "geant321/geant321/gcdraw.inc"
-#include "geant321/geant321/gctime.inc"
+#include "zebra/zstate.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gctmed.inc"
+#include "geant321/gcunit.inc"
+#include "geant321/gcflag.inc"
+#include "geant321/gckine.inc"
+#include "geant321/gcphys.inc"
+#include "geant321/gcmulo.inc"
+#include "geant321/gclist.inc"
+#include "geant321/gcstak.inc"
+#include "geant321/gcdraw.inc"
+#include "geant321/gctime.inc"
 *
       Integer      IGIWTY,IwkSty,i,N,Npar,Npk,Nch,Level,Numb,Imat,
      +             NumHit,Llow,Lhigh,Llo1,Lhig1,Llo2,Lhig2,NW,

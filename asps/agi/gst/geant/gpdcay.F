@@ -1,12 +1,12 @@
 *
-* $Id: gpdcay.F,v 1.1 1998/04/10 15:31:26 fisyak Exp $
+* $Id: gpdcay.F,v 1.2 1998/04/16 16:59:38 fisyak Exp $
 *
 * $Log: gpdcay.F,v $
-* Revision 1.1  1998/04/10 15:31:26  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:38  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :  1.30/00 19/04/97  17.50.02  by  Pavel Nevski
 *-- Author :    Pavel Nevski
 *
@@ -21,10 +21,12 @@
 *-    *                                                                *
 *-    ******************************************************************
 *-
-#include "gst/atcdes/typing.inc"
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcnum.inc"
-#include "geant321/geant321/gcunit.inc"
+#if defined(CERNLIB_TYPE)
+      IMPLICIT NONE
+#endif
+#include "geant321/gcbank.inc"
+#include "geant321/gcnum.inc"
+#include "geant321/gcunit.inc"
       REAL      BRATIO
       INTEGER   LENOCC,IPART,IP1,IP2,IP,JPA,
      >          MODE,JDK1,JDK2,L1,L,LL,I,JP,M1

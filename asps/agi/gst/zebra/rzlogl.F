@@ -1,15 +1,13 @@
 *
-* $Id: rzlogl.F,v 1.2 1998/04/16 16:11:48 fisyak Exp $
+* $Id: rzlogl.F,v 1.3 1998/04/16 16:58:10 fisyak Exp $
 *
 * $Log: rzlogl.F,v $
-* Revision 1.2  1998/04/16 16:11:48  fisyak
-* put gstar in cvs
-*
-* Revision 1.1  1998/04/10 15:31:12  fisyak
-* Move gstar into CVS
+* Revision 1.3  1998/04/16 16:58:10  fisyak
+* 2nd pass with gstar
 *
 *
-#include "packlib/zebra/zebra/pilot.h
+#include "sys/CERNLIB_machine.h"
+#include "pilot.h"
 *CMZ :          18/03/98  17.23.05  by  Pavel Nevski
 *-- Author :
       SUBROUTINE RZLOGL(LUN,LOGLEV)
@@ -40,9 +38,9 @@
 *            18.03.98 PN  - NQLOGD is really used in RZ package...
 *
 ************************************************************************
-#include "packlib/zebra/zebra/zunit.inc"
-#include "packlib/zebra/zebra/zstate.inc"
-#include "packlib/zebra/zebra/rzcl.inc"
+#include "zebra/zunit.inc"
+#include "zebra/zstate.inc"
+#include "zebra/rzcl.inc"
 *-----------------------------------------------------------------------
 *
       NQLOGD = LOGLEV

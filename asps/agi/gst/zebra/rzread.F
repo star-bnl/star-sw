@@ -1,15 +1,13 @@
 *
-* $Id: rzread.F,v 1.2 1998/04/16 16:11:49 fisyak Exp $
+* $Id: rzread.F,v 1.3 1998/04/16 16:58:11 fisyak Exp $
 *
 * $Log: rzread.F,v $
-* Revision 1.2  1998/04/16 16:11:49  fisyak
-* put gstar in cvs
-*
-* Revision 1.1  1998/04/10 15:31:13  fisyak
-* Move gstar into CVS
+* Revision 1.3  1998/04/16 16:58:11  fisyak
+* 2nd pass with gstar
 *
 *
-#include "packlib/zebra/zebra/pilot.h
+#include "sys/CERNLIB_machine.h"
+#include "pilot.h"
 *CMZ :          08/08/97  16.00.05  by  Pavel Nevski
 *-- Author :
       SUBROUTINE RZREAD(V,N,IPC,IFORM)
@@ -29,13 +27,13 @@
 *
 ************************************************************************
 #if !defined(CERNLIB_FQXISN)
-#include "packlib/zebra/zebra/zunit.inc"
+#include "zebra/zunit.inc"
 #endif
-#include "packlib/zebra/zebra/rzcl.inc"
-#include "packlib/zebra/zebra/rzclun.inc"
-#include "packlib/zebra/zebra/rzcout.inc"
-#include "packlib/zebra/zebra/rzk.inc"
-#include "packlib/zebra/zebra/mzioc.inc"
+#include "zebra/rzcl.inc"
+#include "zebra/rzclun.inc"
+#include "zebra/rzcout.inc"
+#include "zebra/rzk.inc"
+#include "zebra/mzioc.inc"
       DIMENSION V(*)
 *
 *-----------------------------------------------------------------------

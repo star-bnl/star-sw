@@ -1,12 +1,12 @@
 *
-* $Id: trprop.F,v 1.1 1998/04/10 15:31:42 fisyak Exp $
+* $Id: trprop.F,v 1.2 1998/04/16 16:59:52 fisyak Exp $
 *
 * $Log: trprop.F,v $
-* Revision 1.1  1998/04/10 15:31:42  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:52  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :          14/11/97  16.33.57  by  Pavel Nevski
 *CMZ :  1.00/00 26/08/95  00.38.03  by  Pavel Nevski
 *-- Author :
@@ -52,8 +52,8 @@ C               4    PARTICLE MOVES IN Z - DIRECTION
 C
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       REAL  X1,P1,H1,X2,P2,H2,R,CH,PS,PC,XL,SPX
-#include "geant321/geant321/trcom3.inc"
-#include "geant321/geant321/gcunit.inc"
+#include "geant321/trcom3.inc"
+#include "geant321/gcunit.inc"
       DIMENSION X1(3),P1(3),H1(9),X2(3),P2(3),H2(9)
       DIMENSION R(15),PS(3),PC(3),HN(9)
 C

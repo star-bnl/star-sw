@@ -1,13 +1,13 @@
 *
-* $Id: csaddr.F,v 1.1 1998/04/10 15:30:51 fisyak Exp $
+* $Id: csaddr.F,v 1.2 1998/04/16 17:02:17 fisyak Exp $
 *
 * $Log: csaddr.F,v $
-* Revision 1.1  1998/04/10 15:30:51  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 17:02:17  fisyak
+* 2nd pass with gstar
 *
 *
 * ----------------------------------------------------------------
-#include "pawlib/comis/comis/pilot.h"
+#include "comis/pilot.h"
 *CMZ :          10/11/97  12.13.09  by  Pavel Nevski
 *CMZ :  1.18/03 09/06/94  17.55.36  by  Rene Brun
 *-- Author : V.Berezhnoi
@@ -19,7 +19,7 @@
       CHARACTER*(*)    CHNAME
       INTEGER          CSADDR,CSLTGP,CSITGP
       CHARACTER*32     NAME
-#include "pawlib/comis/comis/cstab.inc"
+#include "comis/cstab.inc"
 #if defined(CERNLIB_SHL)
       INTEGER          CS_GET_FUNC
       COMMON /CSDEBUG/ ICSDEBUG

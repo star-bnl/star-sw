@@ -1,15 +1,13 @@
 *
-* $Id: mzstor.F,v 1.2 1998/04/16 16:11:46 fisyak Exp $
+* $Id: mzstor.F,v 1.3 1998/04/16 16:58:08 fisyak Exp $
 *
 * $Log: mzstor.F,v $
-* Revision 1.2  1998/04/16 16:11:46  fisyak
-* put gstar in cvs
-*
-* Revision 1.1  1998/04/10 15:31:10  fisyak
-* Move gstar into CVS
+* Revision 1.3  1998/04/16 16:58:08  fisyak
+* 2nd pass with gstar
 *
 *
-#include "packlib/zebra/zebra/pilot.h
+#include "sys/CERNLIB_machine.h"
+#include "pilot.h"
 *CMZ :          25/03/98  17.51.27  by  Pavel Nevski
 *-- Author :
       SUBROUTINE MZSTOR (IXSTOR,CHNAME,CHOPT
@@ -17,12 +15,12 @@
  
 C-    Initialize new Zebra store region, user called
  
-#include "packlib/zebra/zebra/zbcd.inc"
-#include "packlib/zebra/zebra/zmach.inc"
-#include "packlib/zebra/zebra/zstate.inc"
-#include "packlib/zebra/zebra/zunit.inc"
-#include "packlib/zebra/zebra/mqsys.inc"
-#include "packlib/zebra/zebra/mzcwk.inc"
+#include "zebra/zbcd.inc"
+#include "zebra/zmach.inc"
+#include "zebra/zstate.inc"
+#include "zebra/zunit.inc"
+#include "zebra/mqsys.inc"
+#include "zebra/mzcwk.inc"
 C--------------    End CDE                             --------------
       DIMENSION    IXSTOR(9),IFENCE(9)
       DIMENSION    LV(9),LLR(9),LLD(9),LIMIT(9),LAST(9)
@@ -53,10 +51,10 @@ C--------------    End CDE                             --------------
       DATA  MMSYSL / 0,0,0,101,2/
 #endif
  
-#include "packlib/zebra/zebra/q_jbit.inc"
-#include "packlib/zebra/zebra/q_sbit.inc"
-#include "packlib/zebra/zebra/q_shift.inc"
-#include "packlib/zebra/zebra/q_locf.inc"
+#include "zebra/q_jbit.inc"
+#include "zebra/q_sbit.inc"
+#include "zebra/q_shift.inc"
+#include "zebra/q_locf.inc"
  
  
 C--                Clear Zebra tables on first entry
@@ -96,7 +94,7 @@ C-      KQFT=342 relies on LQFSTA(1) to be LQSTA(1+342) in /MZCC/
       CALL UCTOH ('QDIV'    ,NAMEDV, 4,4)
 #endif
  
-#include "packlib/zebra/zebra/qtrace.inc"
+#include "zebra/qtrace.inc"
  
       CALL UOPTC (CHOPT,'Q:',IQUEST)
       LOGQ   = IQUEST(1)
@@ -309,7 +307,7 @@ C--                Range of possible values for an origin-link
       IQTABV(KQT+13) = MIN (1, LOCAR)
       IQTABV(KQT+14) = MAX (LQSTA(KQT+21), LOCARE)
  
-#include "packlib/zebra/zebra/qtrace99.inc"
+#include "zebra/qtrace99.inc"
       RETURN
 C------            Error conditions
  
@@ -327,11 +325,11 @@ C------            Error conditions
       IQUEST(17) = NDATAT
       IQUEST(18) = NQMINR
       IQUEST(19) = NWF
-#include "packlib/zebra/zebra/qtofatal.inc"
+#include "zebra/qtofatal.inc"
 *  prevent "never used" warning
 #if defined(CERNLIB_HPUX)
       N=NOT(IAND(IBITS(1,1,1),1))
 #endif
       END
 *      ==================================================
-#include "packlib/zebra/zebra/qcardl.inc"
+#include "zebra/qcardl.inc"

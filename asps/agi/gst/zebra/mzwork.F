@@ -1,15 +1,13 @@
 *
-* $Id: mzwork.F,v 1.2 1998/04/16 16:11:47 fisyak Exp $
+* $Id: mzwork.F,v 1.3 1998/04/16 16:58:09 fisyak Exp $
 *
 * $Log: mzwork.F,v $
-* Revision 1.2  1998/04/16 16:11:47  fisyak
-* put gstar in cvs
-*
-* Revision 1.1  1998/04/10 15:31:10  fisyak
-* Move gstar into CVS
+* Revision 1.3  1998/04/16 16:58:09  fisyak
+* 2nd pass with gstar
 *
 *
-#include "packlib/zebra/zebra/pilot.h
+#include "sys/CERNLIB_machine.h"
+#include "pilot.h"
 *CMZ :          06/12/97  11.43.18  by  Pavel Nevski
 *-- Author :
       SUBROUTINE MZWORK (IXSTOR,DFIRST,DLAST,IFLAGP)
@@ -23,10 +21,10 @@ C-             2  vary  only DLAST  limit, keep links and common data
 C-             3  reset only DFIRST limit, zero all links
 C-             4  vary  only DFIRST limit, keep common links
 C-            >5  allocate reserve between WS and DIV1
-#include "packlib/zebra/zebra/zmach.inc"
-#include "packlib/zebra/zebra/zstate.inc"
-#include "packlib/zebra/zebra/zunit.inc"
-#include "packlib/zebra/zebra/mqsys.inc"
+#include "zebra/zmach.inc"
+#include "zebra/zstate.inc"
+#include "zebra/zunit.inc"
+#include "zebra/mqsys.inc"
       COMMON /MZCDN/ LQRSTA(20),LQREND(20)
 C--------------    End CDE                             --------------
       INTEGER      DFIRST(9), DLAST(9), IFLAGP(9)
@@ -42,10 +40,10 @@ C--------------    End CDE                             --------------
       PARAMETER   (NAMESR = 'MZWORK  ')
 #endif
  
-#include "packlib/zebra/zebra/q_jbit.inc"
-#include "packlib/zebra/zebra/q_locf.inc"
-#include "packlib/zebra/zebra/qtrace.inc"
-#include "packlib/zebra/zebra/qstore.inc"
+#include "zebra/q_jbit.inc"
+#include "zebra/q_locf.inc"
+#include "zebra/qtrace.inc"
+#include "zebra/qstore.inc"
  
       IFLAG = IFLAGP(1)
       JSTO  = JBYT (IXSTOR,27,4)
@@ -115,7 +113,7 @@ C----              Set new limits
       IF (NQLOGL.GE.2) WRITE (IQLOG,9071) JQSTOR,IFLAG,NQLINK,NEWD
  9071 FORMAT (' MZWORK-  Store',I3,' Flag=',I2,' Last Link/Data',2I7)
  
-#include "packlib/zebra/zebra/qtrace99.inc"
+#include "zebra/qtrace99.inc"
       RETURN
  
 C------            Error conditions
@@ -129,7 +127,7 @@ C------            Error conditions
       IQUEST(12) = NEWL
       IQUEST(13) = NEWD
       IQUEST(14) = IFLAG
-#include "packlib/zebra/zebra/qtofatal.inc"
+#include "zebra/qtofatal.inc"
       END
 *      ==================================================
-#include "packlib/zebra/zebra/qcardl.inc"
+#include "zebra/qcardl.inc"

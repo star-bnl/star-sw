@@ -1,25 +1,23 @@
 *
-* $Id: mzlint.F,v 1.2 1998/04/16 16:11:44 fisyak Exp $
+* $Id: mzlint.F,v 1.3 1998/04/16 16:58:06 fisyak Exp $
 *
 * $Log: mzlint.F,v $
-* Revision 1.2  1998/04/16 16:11:44  fisyak
-* put gstar in cvs
-*
-* Revision 1.1  1998/04/10 15:31:08  fisyak
-* Move gstar into CVS
+* Revision 1.3  1998/04/16 16:58:06  fisyak
+* 2nd pass with gstar
 *
 *
-#include "packlib/zebra/zebra/pilot.h
+#include "sys/CERNLIB_machine.h"
+#include "pilot.h"
 *CMZ :          21/11/97  17.09.55  by  Pavel Nevski
 *-- Author :
       SUBROUTINE MZLINT (IXSTOR,CHNAME,LAREA,LREF,LREFL)
  
 C-    Set permanent link area, user called
  
-#include "packlib/zebra/zebra/zbcd.inc"
-#include "packlib/zebra/zebra/zstate.inc"
-#include "packlib/zebra/zebra/zunit.inc"
-#include "packlib/zebra/zebra/mqsys.inc"
+#include "zebra/zbcd.inc"
+#include "zebra/zstate.inc"
+#include "zebra/zunit.inc"
+#include "zebra/mqsys.inc"
 C--------------    End CDE                             --------------
       DIMENSION    LAREA(9),LREF(9),LREFL(9),NAME(2)
       CHARACTER    *(*) CHNAME
@@ -35,14 +33,14 @@ C--------------    End CDE                             --------------
       PARAMETER   (NAMESR = 'MZLINT  ')
 #endif
  
-#include "packlib/zebra/zebra/q_jbit.inc"
-#include "packlib/zebra/zebra/q_sbit.inc"
-#include "packlib/zebra/zebra/q_locf.inc"
+#include "zebra/q_jbit.inc"
+#include "zebra/q_sbit.inc"
+#include "zebra/q_locf.inc"
  
  
-#include "packlib/zebra/zebra/qtrace.inc"
+#include "zebra/qtrace.inc"
  
-#include "packlib/zebra/zebra/qstore.inc"
+#include "zebra/qstore.inc"
 #if defined(CERNLIB_QDEBUG)
       IF (IQVSTA.NE.0)       CALL ZVAUTX
 #endif
@@ -66,7 +64,7 @@ C--                Set link area active
  
    19 LAREA(1) = 7
       CALL VZERO (LAREA(3),NL-2)
-#include "packlib/zebra/zebra/qtrace99.inc"
+#include "zebra/qtrace99.inc"
       RETURN
  
 C------            Initialize for the first time
@@ -224,9 +222,9 @@ C------            Error conditions
       IQUEST(15) = LOCRL + LQSTOR
       IQUEST(16) = NSM2
       IQUEST(17) = NLM2
-#include "packlib/zebra/zebra/qtofatal.inc"
+#include "zebra/qtofatal.inc"
 *     prevent warning only
       L = MSBIT0 (NS,31)
       END
 *      ==================================================
-#include "packlib/zebra/zebra/qcardl.inc"
+#include "zebra/qcardl.inc"

@@ -1,9 +1,9 @@
 *
-* $Id: s_consts.inc,v 1.1 1998/04/10 15:32:00 fisyak Exp $
+* $Id: s_consts.inc,v 1.2 1998/04/16 16:58:51 fisyak Exp $
 *
 * $Log: s_consts.inc,v $
-* Revision 1.1  1998/04/10 15:32:00  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:58:51  fisyak
+* 2nd pass with gstar
 *
 *
 *

@@ -1,13 +1,13 @@
 *
-* $Id: cscrsl.F,v 1.1 1998/04/10 15:30:52 fisyak Exp $
+* $Id: cscrsl.F,v 1.2 1998/04/16 17:02:18 fisyak Exp $
 *
 * $Log: cscrsl.F,v $
-* Revision 1.1  1998/04/10 15:30:52  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 17:02:18  fisyak
+* 2nd pass with gstar
 *
 *
 * -----------------------------------------------------------------
-#include "pawlib/comis/comis/pilot.h"
+#include "comis/pilot.h"
 *CMZ :          29/10/97  09.43.10  by  Pavel Nevski
 *CMZ :  1.18/02 07/04/94  15.26.09  by  Vladimir Berezhnoi
 *-- Author :    Vladimir Berezhnoi   07/01/94
@@ -23,7 +23,7 @@
       CHARACTER *(*)   NAME,CPID,FEXT
       COMMON /CSTBCS/  ITBC,ITBS
 #if defined(CERNLIB_SHL)
-#include "pawlib/comis/comis/cshlnm.inc"
+#include "comis/cshlnm.inc"
       CHARACTER*72     CHLINE,FEXEC
       INTEGER          SYSTEMF,CS_SHL_LOAD
       COMMON /CSDEBUG/ ICSDEBUG

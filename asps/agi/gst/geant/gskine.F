@@ -1,12 +1,12 @@
 *
-* $Id: gskine.F,v 1.1 1998/04/10 15:31:29 fisyak Exp $
+* $Id: gskine.F,v 1.2 1998/04/16 16:59:41 fisyak Exp $
 *
 * $Log: gskine.F,v $
-* Revision 1.1  1998/04/10 15:31:29  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:41  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :          25/03/98  00.14.32  by  Pavel Nevski
 *CMZ :  1.30/00 23/03/97  22.06.36  by  Pavel Nevski
 *CMZ :  3.21/02 28/03/94  01.30.59  by  S.Giani
@@ -26,11 +26,11 @@ C.    *    PN: put all unknown particles as Geantino                   *
 C.    ******************************************************************
 C.
 #include "gst/atcdes/typing.inc"
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcnum.inc"
-#include "geant321/geant321/gcflag.inc"
-#include "geant321/geant321/gcpush.inc"
-#include "geant321/geant321/gcunit.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcnum.inc"
+#include "geant321/gcflag.inc"
+#include "geant321/gcpush.inc"
+#include "geant321/gcunit.inc"
 #include "gst/atcdes/quest.inc"
  
       REAL      PLAB(3),BUF(1),P2,AMASS,E

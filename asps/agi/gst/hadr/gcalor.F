@@ -1,13 +1,13 @@
 *
-* $Id: gcalor.F,v 1.1 1998/04/10 15:31:56 fisyak Exp $
+* $Id: gcalor.F,v 1.2 1998/04/16 16:58:46 fisyak Exp $
 *
 * $Log: gcalor.F,v $
-* Revision 1.1  1998/04/10 15:31:56  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:58:46  fisyak
+* 2nd pass with gstar
 *
 *
 #if defined(CERNLIB_HADR)
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :          16/12/97  14.29.01  by  Pavel Nevski
 *CMZ :  1.04/08 31/08/95  12.01.02  by  Christian Zeitnitz
 *-- Author : Christian Zeitnitz
@@ -32,21 +32,21 @@
 ********************************************************************
 C.
 C. --- GEANT Commons
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcjloc.inc"
-#include "geant321/geant321/gckine.inc"
-#include "geant321/geant321/gcking.inc"
-#include "geant321/geant321/gcmate.inc"
-#include "geant321/geant321/gcphys.inc"
-#include "geant321/geant321/gctrak.inc"
-#include "geant321/geant321/gsecti.inc"
-#include "geant321/geant321/gconst.inc"
-#include "geant321/geant321/gccuts.inc"
-#include "geant321/geant321/gcflag.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcjloc.inc"
+#include "geant321/gckine.inc"
+#include "geant321/gcking.inc"
+#include "geant321/gcmate.inc"
+#include "geant321/gcphys.inc"
+#include "geant321/gctrak.inc"
+#include "geant321/gsecti.inc"
+#include "geant321/gconst.inc"
+#include "geant321/gccuts.inc"
+#include "geant321/gcflag.inc"
 C --- CALOR - GEANT Interface common
 #include "gst/hadr/calgea.inc"
-#include "geant321/geant321/cerrcm.inc"
-#include "geant321/geant321/camass.inc"
+#include "geant321/cerrcm.inc"
+#include "geant321/camass.inc"
 C
 C  Avogadro number multiplied by 1.E-24
       PARAMETER(XNAVO = 0.60221367)

@@ -1,12 +1,12 @@
 *
-* $Id: gxdz.F,v 1.1 1998/04/10 15:31:39 fisyak Exp $
+* $Id: gxdz.F,v 1.2 1998/04/16 16:59:49 fisyak Exp $
 *
 * $Log: gxdz.F,v $
-* Revision 1.1  1998/04/10 15:31:39  fisyak
-* Move gstar into CVS
+* Revision 1.2  1998/04/16 16:59:49  fisyak
+* 2nd pass with gstar
 *
 *
-#include "geant321/geant321/pilot.h"
+#include "geant321/pilot.h"
 *CMZ :  1.30/00 25/05/96  05.56.55  by  Pavel Nevski
 *CMZ :  1.00/00 20/11/95  03.51.01  by  Pavel Nevski
 *-- Author :
@@ -25,9 +25,9 @@ C.    *  PN, 25.05.96: reaccess link in DISP command after RZ access   *
 C.    *  PN, 25.05.96: default documentation file detm.rz introduced   *
 C.    ******************************************************************
 C.
-#include "geant321/geant321/gcbank.inc"
-#include "geant321/geant321/gcunit.inc"
-#include "geant321/geant321/gcxlun.inc"
+#include "geant321/gcbank.inc"
+#include "geant321/gcunit.inc"
+#include "geant321/gcxlun.inc"
       COMMON/GCLTMP/LTEMPA(3)
       COMMON/QUEST/IQUEST(100)
       CHARACTER*20  CHOPT
