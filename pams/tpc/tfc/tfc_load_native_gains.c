@@ -7,15 +7,16 @@
 #include "tfc_load_native_gains.h"
 #define nRows 45		/* number of rows */
 /* Some global variables for indexing the ped/gain tables */
-int           RowOffset[nRows]={0,   88,   184,   288,   400, 
-                              518,  644,   778,   920,  1070,
-			     1228, 1394,  1568,     0,    98,
-                              198,  300,   404,   510,   616,
-			      724,  834,   946,  1058,  1172,
-			     1288, 1406,  1526,  1648,  1770,
-                             1894, 2020,  2148,  2276,  2406,
-			     2538, 2672,  2808,  2946,  3084,
-			     3224, 3366,  3510,  3654,  3798};
+int           RowOffset[nRows]={1662, 1566, 1462, 1350, 1232, 
+                                1106, 972,  830,  680,  522,
+			        356,  182,  0,    3844, 3744,
+                                3642, 3538, 3432, 3326, 3218,
+                                3108, 2996, 2884, 2770, 2654, 
+                                2536, 2416, 2294, 2172, 2048,
+                                1922, 1794, 1666, 1536, 1404,
+                                1270, 1134, 996,  858,  718,
+				576,  432,  288,  144,  0};
+
 int           pads_in_row[nRows]={ 88,  96, 104, 112, 118,
 				   126, 134, 142, 150, 158,
 			           166, 174, 182,  98, 100,
@@ -136,12 +137,12 @@ for (i=0;i< indextbl_h[0].nok;i++)
          DataRow=  indextbl[i].data_row;
          Row=      indextbl[i].rgm;
          Npads=structtbl[StructRow].info;
-	 k=0;
-         while(k++<Npads){
+	 k=1;
+         while(k++<=Npads){
 	 Pad=structtbl[StructRow+k].info;
-         if(Row<13){gains_in[RowOffset[Row]+Pad-1].data=
+         if(Row<13){gains_in[RowOffset[Row-1]+Pad-1].data=
 		      (gain_bad[DataRow+k-1].gain<=0.0)?1.0:gain_bad[DataRow+k-1].gain;}
-	 else{gains_out[RowOffset[Row]+Pad-1].data=
+	 else{gains_out[RowOffset[Row-1]+Pad-1].data=
 		      (gain_bad[DataRow+k-1].gain<=0.0)?1.0:gain_bad[DataRow+k-1].gain;}
          }
 	   }
