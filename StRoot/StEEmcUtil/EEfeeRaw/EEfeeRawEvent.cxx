@@ -93,7 +93,7 @@ void EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken) {
   // add more patterns below
   int listA[]={1,2,3,4,5,6};
   int listB[]={1,2,3,4,5,6,84,85,86};
-  int listC[]={1,2,3,4,5,6,84,85,86,87,88,89,90,91,92,93,94,95};
+  int listC[]={1,2,3,4,5,6,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99};
 
   int *list, dim;
   if (timeStamp< 1068761131)  //Thu Nov 13 17:05:31 2003
@@ -134,6 +134,9 @@ UShort_t  EEfeeRawEvent::getValue(int crateID, int channel) const {
 
 /*
  * $Log: EEfeeRawEvent.cxx,v $
+ * Revision 1.12  2004/01/13 16:32:28  balewski
+ * fix bug for sector 8 mapmt
+ *
  * Revision 1.11  2003/12/10 04:43:19  balewski
  * first QA
  *
