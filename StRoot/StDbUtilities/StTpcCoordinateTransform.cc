@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.7 2000/03/30 17:03:24 hardtke Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.8 2000/04/03 16:23:51 calderon Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,11 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.8  2000/04/03 16:23:51  calderon
+ * Fix bug in rowFromLocal.  Boundary btw inner and outer sector is now
+ * taken as midpoint of last inner row (plus half its row pitch) and
+ * first outer row (minus half its row pitch).
+ *
  * Revision 1.7  2000/03/30 17:03:24  hardtke
  * add pad-by-pad t0 offsets to z calculation
  *
@@ -364,11 +369,13 @@ int StTpcCoordinateTransform::rowFromLocal(const StThreeVector<double>& b) const
     double referencePosition;
     double rowPitch;
     int    offset;
-    double innerSectorBoundary =
-      gTpcDbPtr->PadPlaneGeometry()->outerSectorEdge() -
-      gTpcDbPtr->PadPlaneGeometry()->ioSectorSeparation();
+    double boundary =
+      (gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(13) +
+       gTpcDbPtr->PadPlaneGeometry()->innerSectorRowPitch2()/2. +
+       gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(14) -
+       gTpcDbPtr->PadPlaneGeometry()->outerSectorRowPitch()/2.)/2.;
 
-    if(b.y() > innerSectorBoundary) {    // in the outer sector
+    if(b.y() > boundary) {    // in the outer sector
 	referencePosition = gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(14);
 	rowPitch          = gTpcDbPtr->PadPlaneGeometry()->outerSectorRowPitch();
 	offset            = 14;
@@ -391,9 +398,12 @@ int StTpcCoordinateTransform::rowFromLocal(const StThreeVector<double>& b) const
     int probableRow =
 	static_cast<int>( (b.y() - (referencePosition-rowPitch/2))/rowPitch )+offset;
 
-    if(b.y() > innerSectorBoundary && probableRow<14)
+    if(b.y() < boundary && probableRow>13) { //This should almost never be called, but ensures proper numbering
+	probableRow=13;
+    } 
+    if(b.y() > boundary && probableRow<14){ //ditto above
 	probableRow=14;
-
+    }
     if (probableRow<1)
 	probableRow = 1;
     if (probableRow>45)
