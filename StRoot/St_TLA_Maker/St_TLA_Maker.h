@@ -1,5 +1,8 @@
-// $Id: St_TLA_Maker.h,v 1.8 1999/03/10 15:02:07 fine Exp $
+// $Id: St_TLA_Maker.h,v 1.9 1999/03/11 03:33:16 perev Exp $
 // $Log: St_TLA_Maker.h,v $
+// Revision 1.9  1999/03/11 03:33:16  perev
+// new schema
+//
 // Revision 1.8  1999/03/10 15:02:07  fine
 // HTML link to STAR problem report form has been introduced
 //
@@ -37,14 +40,11 @@
 //class St_stk_stkpar;
 class St_TLA_Maker : public StMaker {
  private:
-   Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_TLA_Maker.h,v 1.8 1999/03/10 15:02:07 fine Exp $";
-// Int_t          m_mode;        // mode 1 = primaries;
-// St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
+// static Char_t  m_VersionCVS = "$Id: St_TLA_Maker.h,v 1.9 1999/03/11 03:33:16 perev Exp $";
  
  protected:
  public: 
-                  St_TLA_Maker(const char *name="TLA", const char *title="TLA_something");
+                  St_TLA_Maker(const char *name="TLA");
    virtual       ~St_TLA_Maker();
    virtual Int_t Init();
    virtual Int_t  Make();
