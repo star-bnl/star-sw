@@ -60,7 +60,12 @@
 #include "StMcVertex.hh"
 
 #include "StParticleDefinition.hh"
+#include "StKaonZeroShort.hh"
+#include "StLambda.hh"
+#include "StAntiLambda.hh"
 #include "StPhysicalHelix.hh"
+
+
 
 #ifdef __ROOT__
 ClassImp(StHbtMcEventReader)
@@ -338,117 +343,87 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
   // ******************
   // fill v0 collection
   // ******************
+  StKaonZeroShort* k0Short = StKaonZeroShort::instance();
+  StLambda* lambda = StLambda::instance();
+  StAntiLambda* antiLambda = StAntiLambda::instance();
   for (StMcVertexIterator vIter=mcEvent->vertices().begin(); vIter!=mcEvent->vertices().end(); vIter++){
     StMcVertex*  vertex = *vIter;
-    int nDaughters = vertex->numberOfDaughters();
-    if ( nDaughters!=2) {
+    StMcTrack* parent  = (StMcTrack*)vertex->parent();  // get parent
+    if (parent) {
+      if ( parent->particleDefinition() == k0Short ||
+	   parent->particleDefinition() == lambda ||
+	   parent->particleDefinition() == antiLambda &&
+	   vertex->numberOfDaughters() == 2) {
 #ifdef STHBTDEBUG 
-      long geantProcess = vertex->geantProcess();
-      cout << " geant Process : " << geantProcess  << endl;
-      cout << " daughters : " << nDaughters  << endl;
+	cout << " v0 Id : " << parent->particleDefinition()->name() << endl;
 #endif
-      continue; // not a v0
-    }
-    
-    //StMcTrack* parent = vertex->parent();
-    StMcTrack* daughter1 = *(vertex->daughters().begin());
-    StMcTrack* daughter2 = *(vertex->daughters().end()-1);
-    //cout << parent << " " << daughter1 << " " << daughter2 << " " << endl;
-    /*
-      if (!(parent && daughter1 && daughter2)) {
-      cout << " two daughters, but no parent " << endl;
-      }
-    */
-    
-    double daughter1Charge = daughter1->particleDefinition()->charge();
-    double daughter2Charge = daughter2->particleDefinition()->charge();
-    double parentCharge = daughter1Charge+daughter2Charge;
-    
-    if (!( parentCharge+daughter1Charge+daughter2Charge==0 && daughter1Charge*daughter2Charge<0 )) {
-      continue;  // not a v0
-    }
-    
-#ifdef STHBTDEBUG
-    cout << " got a v0 "  << endl;
-    cout << " charge ";
-    cout << daughter1->particleDefinition()->charge() << " ";
-    cout << daughter2->particleDefinition()->charge() << " ";
-    cout << endl;
-#endif    
-    
-    // fill the V0MiniDst structure
-    StHbtV0* hbtv0 = new StHbtV0();
-    hbtv0->SetdecayLengthV0( abs(vertex->position()-VertexPosition) );
-    hbtv0->SetdecayVertexV0( vertex->position() );
-    
-    StMcTrack* pos;
-    StMcTrack* neg;
-    
-    if ( daughter1Charge>0 ) {
-      pos = daughter1;
-      neg = daughter2;
-    }
-    else {
-      pos = daughter2;
-      neg = daughter1;
-    }
+	StMcTrack* pos;
+	StMcTrack* neg;
+	if ( (*(vertex->daughters().begin()))->particleDefinition()->charge() > 0  ) {
+	  pos = *(vertex->daughters().begin());  // positive daughter
+	  neg = *(vertex->daughters().end()-1);  // negative daughter
+	} 
+	else if ( (*(vertex->daughters().begin()))->particleDefinition()->charge() < 0  ) {
+	  neg = *(vertex->daughters().begin());  // negative daughter 
+	  pos = *(vertex->daughters().end()-1);  // positive daughter
+	}
+	else continue;
 
-    StPhysicalHelixD posHelix = StPhysicalHelixD( pos->momentum(), vertex->position(), HBT_BFIELD, pos->particleDefinition()->charge() ); 
-    StPhysicalHelixD negHelix = StPhysicalHelixD( neg->momentum(), vertex->position(), HBT_BFIELD, neg->particleDefinition()->charge() ); 
-    StPhysicalHelixD v0Helix = StPhysicalHelixD( pos->momentum()+neg->momentum(), vertex->position(), HBT_BFIELD, 0 );
+	// fill the V0MiniDst structure
+	StHbtV0* hbtv0 = new StHbtV0();
+	hbtv0->SetdecayLengthV0( abs(vertex->position()-VertexPosition) );
+	hbtv0->SetdecayVertexV0( vertex->position() );
+	
+	StPhysicalHelixD posHelix = StPhysicalHelixD( pos->momentum(), vertex->position(), 
+						      HBT_BFIELD, pos->particleDefinition()->charge() ); 
+	StPhysicalHelixD negHelix = StPhysicalHelixD( neg->momentum(), vertex->position(), 
+						      HBT_BFIELD, neg->particleDefinition()->charge() ); 
+	StPhysicalHelixD v0Helix = StPhysicalHelixD( pos->momentum()+neg->momentum(), vertex->position(), 
+						     HBT_BFIELD, 0 );
  
-    double posPathLength = posHelix.pathLength( vertex->position() );
-    double negPathLength = negHelix.pathLength( vertex->position() );
+	double posPathLength = posHelix.pathLength( vertex->position() );
+	double negPathLength = negHelix.pathLength( vertex->position() );
 
-    hbtv0->SetdcaV0Daughters( abs(posHelix.at(posPathLength)-negHelix.at(negPathLength))  );
-    //cout << " dcaV0Daughters " << hbtv0->dcaV0Daughters() << endl;
+	hbtv0->SetdcaV0Daughters( abs(posHelix.at(posPathLength)-negHelix.at(negPathLength))  );
+	//cout << " dcaV0Daughters " << hbtv0->dcaV0Daughters() << endl;
 
-    hbtv0->SetdcaV0ToPrimVertex( v0Helix.distance( VertexPosition ) );    // VertexPosition = prim vert pos
-    //cout << " dcaV0ToPrimVertex " << hbtv0->dcaV0ToPrimVertex() << endl;
+	hbtv0->SetdcaV0ToPrimVertex( v0Helix.distance( VertexPosition ) );
+	//cout << " dcaV0ToPrimVertex " << hbtv0->dcaV0ToPrimVertex() << endl;
 
-    hbtv0->SetdcaPosToPrimVertex( posHelix.distance( VertexPosition ) );    // VertexPosition = prim vert pos
-    hbtv0->SetdcaNegToPrimVertex( negHelix.distance( VertexPosition ) );    // VertexPosition = prim vert pos
+	hbtv0->SetdcaPosToPrimVertex( posHelix.distance( VertexPosition ) );    // VertexPosition = prim vert pos
+	hbtv0->SetdcaNegToPrimVertex( negHelix.distance( VertexPosition ) );    // VertexPosition = prim vert pos
     
-    hbtv0->SetmomPos( pos->momentum() );
-    hbtv0->SetmomNeg( neg->momentum() );
+	hbtv0->SetmomPos( pos->momentum() );
+	hbtv0->SetmomNeg( neg->momentum() );
 
-    hbtv0->SettpcHitsPos( pos->tpcHits().size() );
-    hbtv0->SettpcHitsNeg( neg->tpcHits().size() );
+	hbtv0->SettpcHitsPos( pos->tpcHits().size() );
+	hbtv0->SettpcHitsNeg( neg->tpcHits().size() );
 
-    StThreeVectorF v0P = pos->momentum()+neg->momentum();
+	//hbtv0->SetTrackTopologyMapPos(0,pos->topologyMap().data(0));
+	//hbtv0->SetTrackTopologyMapPos(1,pos->topologyMap().data(1));
+	//hbtv0->SetTrackTopologyMapNeg(0,neg->topologyMap().data(0));
+	//hbtv0->SetTrackTopologyMapNeg(1,neg->topologyMap().data(1));
 
-    float eLambda=sqrt( pow((double)v0P.mag(),2.) + pow(M_LAMBDA,2.) );
-    float rapLambda = 0.5*log( (eLambda+v0P.z()) / (eLambda-v0P.z()) );
-    float tauLambda = M_LAMBDA*(hbtv0->decayLengthV0()) / sqrt( pow((double)v0P.mag(),2.) );
-    hbtv0->SetrapLambda( rapLambda );
-    hbtv0->SetcTauLambda( tauLambda );
+	hbtv0->SetkeyPos(pos->key());
+	hbtv0->SetkeyNeg(neg->key());
 
-    float eK0Short=sqrt( pow((double)v0P.mag(),2.) + pow(M_KAON_0_SHORT,2.) );
-    float rapK0Short = 0.5*log( (eK0Short+v0P.z()) / (eK0Short-v0P.z()) );
-    float tauK0Short = M_KAON_0_SHORT*(hbtv0->decayLengthV0()) / sqrt( pow((double)v0P.mag(),2.) );
-    hbtv0->SetrapK0Short( rapK0Short );
-    hbtv0->SetcTauK0Short( tauK0Short );
+	hbtv0->UpdateV0();
 
-    /*
-    hbtv0->SetidPos( pos->geantId() );
-    hbtv0->SetidNeg( neg->geantId() );
-    cout << pos->geantId() << " " << pos->geantId() << endl;
-    */
-    hbtv0->UpdateV0();
+	// apply v0 cut
+	if (mV0Cut){
+	  if (!(mV0Cut->Pass(hbtv0))){                  // track failed - delete it and skip the push_back
+	    delete hbtv0;
+	    continue;
+	  }
+	}
 
-    // apply v0 cut
-    if (mV0Cut){
-      if (!(mV0Cut->Pass(hbtv0))){                  // track failed - delete it and skip the push_back
-	delete hbtv0;
-	continue;
+	hbtEvent->V0Collection()->push_back(hbtv0);
       }
     }
-
-    hbtEvent->V0Collection()->push_back(hbtv0);
   }
   //Store total number of v0s in v0minidst so can start from there next time
   cout << hbtEvent->V0Collection()->size() << " v0s pushed to collection" << endl;
-
+  
   return hbtEvent;
 }
 

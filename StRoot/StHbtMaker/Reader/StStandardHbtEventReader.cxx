@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.21 2000/05/25 21:04:30 laue Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.22 2000/06/08 16:12:11 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,10 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.22  2000/06/08 16:12:11  laue
+ * StStandardHbtEventReader.cxx: Topology map for V0 fixed
+ * StHbtMcEventReader.cxx:       V0 updated
+ *
  * Revision 1.21  2000/05/25 21:04:30  laue
  * StStandarsHbtEventReader updated for the new StStrangMuDstMaker
  *
@@ -460,6 +464,8 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     hbtV0->SettpcHitsPos(v0FromMuDst->topologyMapPos().numberOfHits(kTpcId));
     hbtV0->SettpcHitsNeg(v0FromMuDst->topologyMapNeg().numberOfHits(kTpcId));
     hbtV0->SetTrackTopologyMapPos(0,v0FromMuDst->topologyMapPos().data(0));
+    hbtV0->SetTrackTopologyMapPos(1,v0FromMuDst->topologyMapPos().data(1));
+    hbtV0->SetTrackTopologyMapNeg(0,v0FromMuDst->topologyMapNeg().data(0));
     hbtV0->SetTrackTopologyMapNeg(1,v0FromMuDst->topologyMapNeg().data(1));
     hbtV0->SetkeyPos(v0FromMuDst->keyPos());
     hbtV0->SetkeyNeg(v0FromMuDst->keyNeg());
