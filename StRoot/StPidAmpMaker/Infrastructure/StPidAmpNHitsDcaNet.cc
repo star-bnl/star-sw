@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNHitsDcaNet.cc,v 1.5 2000/05/01 16:59:26 aihong Exp $
+ * $Id: StPidAmpNHitsDcaNet.cc,v 1.6 2000/07/12 15:38:35 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNHitsDcaNet.cc,v $
+ * Revision 1.6  2000/07/12 15:38:35  aihong
+ * update for real data
+ *
  * Revision 1.5  2000/05/01 16:59:26  aihong
  * clean up
  *
@@ -56,7 +59,7 @@ StPidAmpNHitsDcaNet::StPidAmpNHitsDcaNet(StPidAmpParticle def, StPidAmpChannelIn
 //------------------------------
 void StPidAmpNHitsDcaNet::fitBand(){
 
-   double varyRange=0.1;
+   double varyRange=0.05;
 
 
    TF1 *mBetheBlochFcn = new TF1 ("mBetheBlochFcn",funcBandPt, BandsBegin,BandsEnd,NBandParam);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNet.cc,v 1.8 2000/07/06 01:55:15 perev Exp $
+ * $Id: StPidAmpNet.cc,v 1.9 2000/07/12 15:38:35 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNet.cc,v $
+ * Revision 1.9  2000/07/12 15:38:35  aihong
+ * update for real data
+ *
  * Revision 1.8  2000/07/06 01:55:15  perev
  * fix related to ROOT float -> double
  *
@@ -45,7 +48,8 @@
 #include "StMessMgr.h"
 
 #include "StPidAmpMaker/Infrastructure/StPidAmpNet.hh"
-#include "StPidAmpMaker/Include/BetheBloch.hh"
+//#include "StPidAmpMaker/Include/BetheBloch.hh"
+#include "StPidAmpMaker/Include/BetheBlochFunction.hh"
 
 #include "StPidAmpMaker/Infrastructure/StPidAmpChannelCollection.hh"
 
@@ -93,8 +97,9 @@ StPidAmpNet::StPidAmpNet(StPidAmpParticle def, StPidAmpChannelInfo channelInfo){
              mFitAmp=true;
             mFitReso=true;
 
-      StPidAmpNet::funcBandPt=&BetheBloch;
-     
+	    // StPidAmpNet::funcBandPt=&BetheBloch;
+           StPidAmpNet::funcBandPt=&BetheBlochFunction;
+
      if(mParticleType.id()>0) setUp(); //set up slices and paths.
      //although setUp() is declared as virtual, in the constructor a 
      //call to setUp() does not call the setUp() in the derivated class,

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannelCollection.cc,v 1.7 2000/07/06 01:55:14 perev Exp $
+ * $Id: StPidAmpChannelCollection.cc,v 1.8 2000/07/12 15:38:34 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannelCollection.cc,v $
+ * Revision 1.8  2000/07/12 15:38:34  aihong
+ * update for real data
+ *
  * Revision 1.7  2000/07/06 01:55:14  perev
  * fix related to ROOT float -> double
  *
@@ -236,9 +239,9 @@ void StPidAmpChannelCollection::filterOptions(StPidAmpNetType theNetType,TString
     if (mFitOpt.Contains("A")) mFitOpt.Append("R");
     //fit amp alone does not make sense. so add fit resolution.
 
-    if ( ((mFitOpt.Contains("A")) || (mFitOpt.Contains("R"))) && 
-         (!((mFitOpt.Contains("I")) || (mFitOpt.Contains("B"))) ) )
-         mFitOpt.Append("B");
+    //   if ( ((mFitOpt.Contains("A")) || (mFitOpt.Contains("R"))) && 
+    //     (!((mFitOpt.Contains("I")) || (mFitOpt.Contains("B"))) ) )
+    //     mFitOpt.Append("B");
     //if fit amp or fit resolution, we have to fit band first.
     
     if (!(mFitOpt.Contains("B"))) mFitOpt.ReplaceAll("T","");
@@ -308,10 +311,14 @@ void StPidAmpChannelCollection::setUpChannels(int n, int* nhitsAry,int p, double
 void StPidAmpChannelCollection::setDefaultBandParameters(){
      
     StPidParamVector pars;
-
+    /*
     pars.push_back(1.10177);
     pars.push_back(0.169534);
     pars.push_back(1.97245e-07);
+    */
+    pars.push_back(1.07174);
+    pars.push_back(0.319880);
+    pars.push_back(1.02801e-07);
 
     StPidAmpNet::setDefaultBandParams(pars);
 
