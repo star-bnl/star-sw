@@ -1,6 +1,6 @@
 
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.17 2004/01/30 21:39:38 pruneau Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.18 2004/02/02 22:22:54 pruneau Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -12,6 +12,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.18  2004/02/02 22:22:54  pruneau
+ * Fixed include
+ *
  * Revision 2.17  2004/01/30 21:39:38  pruneau
  * Added load method to fetch db data
  *
@@ -71,8 +74,7 @@
 //Sti inlcudes
 #include "StiKalmanTrackNode.h"
 #include "StiHitErrorCalculator.h"
-#include "HitError.h"
-
+#include "tables/St_HitError_Table.h"
 
 StiDefaultHitErrorCalculator::StiDefaultHitErrorCalculator()
 {
