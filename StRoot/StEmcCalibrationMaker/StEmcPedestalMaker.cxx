@@ -176,7 +176,7 @@ void StEmcPedestalMaker::saveToDb(char* timeStamp)
     float ped = getPedestal(id);
     float rms = getRms(id);
     float chi = getChi(id);
-    int status = getStatus(id);
+    int status = (int)getStatus(id);
     if(getDetector()<3)
     {
       tnew.Status[i] = (char)status;

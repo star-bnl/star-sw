@@ -1,8 +1,8 @@
 #include "StEmcCalibrationMaker.h"
 #include "StEventTypes.h"
 #include "StEvent.h"
-#include <iostream.h>
-#include "fstream.h"
+#include "Stiostream.h"
+#include "Stsstream.h"
 #include <math.h>
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEmcUtil/filters/StEmcFilter.h"
