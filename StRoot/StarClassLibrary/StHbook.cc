@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbook.cc,v 1.2 1999/12/21 15:14:05 ullrich Exp $
+ * $Id: StHbook.cc,v 1.3 2001/05/30 18:12:32 perev Exp $
  *
  * Author: Thomas Ullrich, Yale University
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbook.cc,v $
+ * Revision 1.3  2001/05/30 18:12:32  perev
+ * string.h added
+ *
  * Revision 1.2  1999/12/21 15:14:05  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
  *
@@ -27,6 +30,7 @@
 #include <stdio.h>
 #include "StGlobals.hh"
 #include "StHbook.hh"
+#include <string.h>
 #if defined (__SUNPRO_CC)
 #include <strings.h>
 #endif
