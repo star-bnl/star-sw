@@ -173,30 +173,53 @@ C   Status	     : Test
 C---------------------------------------------------------------------
       REAL r,xp(2),xc(2),x(2)
       REAL x1,x2,yy,zz
-      REAL a,b,c
+      REAL a,b,c,d
 C-----first find the two possible solutions for closest approach-----
-      a=xc(1)-xp(1)
-      b=xc(2)-xp(2)
-      IF(b.eq.0.0) THEN
-	x(2)=xc(2)
-	x2=xc(2)
-	x(1)=xc(1)+r	
-	x1=xc(1)-r	
+      d=xc(1)-xp(1)
+      a=xc(2)-xp(2)
+      IF(a.eq.0.0) THEN
+        IF(d.ge.0) THEN
+          x(1) = xc(1)-r
+        ELSE
+          x(1) = xc(1)+r
+        ENDIF
+        x(2) = xc(2)
       ELSE
-      	c=a/b
+        c=d/a
 	yy= r/sqrt(c*c+1.)
 	zz=c*yy
-	x(1)=zz+xc(1)
-	x1=-zz+xc(1)
-	x(2)=yy+xc(2)
-	x2=-yy+xc(2)
-      ENDIF	!b.eq.0
+        IF(a.ge.0) THEN
+          x(1) = -zz+xc(1)
+          x(2) = -yy+xc(2)
+        ELSE
+          x(1) = zz+xc(1)
+          x(2) = yy+xc(2)
+        ENDIF
+      ENDIF	!a.eq.0
+
+C----Old, slow way
+C     d=xc(1)-xp(1)
+C     a=xc(2)-xp(2)
+C     IF(a.eq.0.0) THEN
+C       x(2)=xc(2)
+C       x2=xc(2)
+C       x(1)=xc(1)+r    
+C       x1=xc(1)-r      
+C     ELSE
+C       c=d/a
+C       yy= r/sqrt(c*c+1.)
+C       zz=c*yy
+C       x(1)=zz+xc(1)
+C       x1=-zz+xc(1)
+C       x(2)=yy+xc(2)
+C       x2=-yy+xc(2)
+C     ENDIF     !a.eq.0
 C-------choose the right one----------------------------------------
-      a=(xp(1)-xc(1))*(x(1)-xc(1)) + (xp(2)-xc(2))*(x(2)-xc(2))
-      IF(a.le.0.) THEN
-	x(1)=x1
-	x(2)=x2
-      ENDIF	!a.le.0.
+C     b=(xp(1)-xc(1))*(x(1)-xc(1)) + (xp(2)-xc(2))*(x(2)-xc(2))
+C     IF(b.le.0.) THEN
+C	x(1)=x1
+C	x(2)=x2
+C     ENDIF	!b.le.0.
 
   999 CONTINUE
       RETURN
@@ -222,28 +245,26 @@ C----------------------------------------------------------------------
       INTEGER iflag
       REAL    trk(6),p(3),phi,rc
       REAL    const,beta
-      REAL    sph,cph,pt,ptot
+      REAL    sph,cph,pt
       PARAMETER (const=0.299792458)
 
 C-----Extract momentum components from helix --------------------------
 
-	phi  =trk(4)
-	cph  =cos(phi)
-	sph  =sin(phi)
+C	phi  =trk(4)
+	cph  =cos(trk(4))
+	sph  =sin(trk(4))
 
 C-------check if it is a neutral particle------------------------------
 
        IF(iflag.eq.5) THEN
-	ptot =1./trk(6)
-	pt   =ptot*cos( atan(trk(5)))
+	pt   = cos( atan(trk(5)))/trk(6)
        ELSE
-	pt   =(beta*const*rc)/100.
-	ptot =sqrt(pt*pt+p(3)*p(3))
+	pt   = (beta*const*rc)/100.
        ENDIF	!iflag.eq.5
 
         p(3) = pt*trk(5)
-	p(1) =pt*cph
-	p(2) =pt*sph
+	p(1) = pt*cph
+	p(2) = pt*sph
 
   999 CONTINUE
       RETURN
@@ -463,8 +484,8 @@ C     om2=( -b*c-abs(a)*d ) / asq_plus_bsq
       om2=( om_1-om_2 ) / asq_plus_bsq
       r1sq_minus_om1sq = r1sq-om1*om1
       r1sq_minus_om2sq = r1sq-om2*om2
-      IF( r1sq_minus_om1sq.ge.0.) THEN
 C----find the right pair---------------------------------------------
+      IF( r1sq_minus_om1sq.ge.0.) THEN
 	ph1=sqrt(r1sq_minus_om1sq)
 	ph2=-ph1
         ph1_plus_a_sq = (ph1+a)**2
@@ -472,12 +493,11 @@ C----find the right pair---------------------------------------------
         om1_plus_b_sq_minus_r2sq = (om1+b)**2 - r2sq
 	IF( abs(ph1_plus_a_sq + om1_plus_b_sq_minus_r2sq).le.
      +      abs(ph2_plus_a_sq + om1_plus_b_sq_minus_r2sq) ) THEN
-		y(1)=om1+xc1(2)
 		x(1)=ph1+xc1(1)
 	ELSE
-		y(1)=om1+xc1(2)
 		x(1)=ph2+xc1(1)
 	ENDIF	
+	y(1)=om1+xc1(2)
       ENDIF	
 C------second pair------------------------------------------------
       IF( r1sq_minus_om2sq.ge.0.) THEN
@@ -488,12 +508,11 @@ C------second pair------------------------------------------------
         om2_plus_b_sq_minus_r2sq = (om2+b)**2 - r2sq
 	IF( abs(ph1_plus_a_sq + om2_plus_b_sq_minus_r2sq).le.
      +      abs(ph2_plus_a_sq + om2_plus_b_sq_minus_r2sq) ) THEN
-		y(2)=om2+xc1(2)
 		x(2)=ph1+xc1(1)
 	ELSE
-		y(2)=om2+xc1(2)
 		x(2)=ph2+xc1(1)
 	ENDIF	
+	y(2)=om2+xc1(2)
       ENDIF
 C----------------------------------------------------------------------
   999 CONTINUE
