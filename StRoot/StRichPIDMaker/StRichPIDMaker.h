@@ -1,11 +1,14 @@
 /**********************************************************
- * $Id: StRichPIDMaker.h,v 2.17 2001/04/25 00:31:59 lasiuk Exp $
+ * $Id: StRichPIDMaker.h,v 2.18 2002/02/01 16:18:16 lasiuk Exp $
  *
  * Description:
  *  StRrsMaker is the main module
  *  StRichRawData. It has the standard Maker functions:
  *
  *  $Log: StRichPIDMaker.h,v $
+ *  Revision 2.18  2002/02/01 16:18:16  lasiuk
+ *  include the getCVS function per request of JL
+ *
  *  Revision 2.17  2001/04/25 00:31:59  lasiuk
  *  HP changes
  *
@@ -384,7 +387,9 @@ public:
 #ifdef RICH_WITH_L3_TRACKS
   double findL3ZVertex(globalTrack *,int);
 #endif    
-  
+    virtual const char *GetCVS()
+    {static const char cvs[]="Tag $Name:  $ $Id: StRichPIDMaker.h,v 2.18 2002/02/01 16:18:16 lasiuk Exp $ built "__DATE__" "__TIME__
+	 ; return cvs;}  
   ClassDef(StRichPIDMaker,1)
     };
 
