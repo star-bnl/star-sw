@@ -114,7 +114,7 @@ long toy_simulator_(
       puts("ems_cal_control.toy_sim_mode is out of range");
       return STAFCV_BAD;
     }
-
+    ems_cal_control[nok_cc].iseed=iseed;
     emc_adc_h->nok = n;
     return STAFCV_OK;
 }

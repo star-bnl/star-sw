@@ -101,5 +101,6 @@ long fake_adcslope_(
     fake_adcslope[n].funA=func;
     fake_adcslope[n].funB=func;
     fake_adcslope_h->nok++;
+    ems_cal_control[nok_cc].iseed=iseed;
     return STAFCV_OK;
 }

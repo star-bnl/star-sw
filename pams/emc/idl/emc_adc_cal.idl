@@ -1,6 +1,6 @@
 /*****************************************************************************
 *   Table: emc_adc_cal
-*        description: Table which contains pedestal ADC callibrations
+*        description: Table which contains pedestal/ADC callibrations
 *        auther:      OGAWA, Akio
 */
    struct emc_adc_cal { 
@@ -11,6 +11,7 @@
        long        det;           /* see emc_def.h */
        long        neta;          /* number of eta bin */
        long        nphi;          /* number of phi bin */
-       short       ch[120][40];   /* ADC channel */
+       short       ch[120][40];   /* ADC channel peak */
+       short       dev[120][40];  /* ADC channel deviation */
    };
 
