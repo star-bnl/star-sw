@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.24 1999/02/13 20:22:31 caines Exp $
+// $Id: St_glb_Maker.cxx,v 1.25 1999/02/14 18:38:22 caines Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.25  1999/02/14 18:38:22  caines
+// Fixed ev0 bugs in hist
+//
 // Revision 1.24  1999/02/13 20:22:31  caines
 // Added exi and temp dir for when svt not there
 //
@@ -155,7 +158,7 @@ Int_t St_glb_Maker::Init(){
   //egr 
   m_egr_egrpar = (St_egr_egrpar *) params("global/egrpars/egr_egrpar");
   egr_egrpar_st *egr_egrpar = m_egr_egrpar->GetTable();
-  egr_egrpar->scenario =   8;
+  egr_egrpar->scenario =   0;
   egr_egrpar->mxtry =     10;
   egr_egrpar->minfit =     2;
   egr_egrpar->prob[0] =    2;
@@ -164,7 +167,7 @@ Int_t St_glb_Maker::Init(){
   egr_egrpar->debug[0] =   1; 
   egr_egrpar->svtchicut =  0;
   egr_egrpar->usetpc =     1;
-  egr_egrpar->usesvt =     1;
+  egr_egrpar->usesvt =     0;
   egr_egrpar->usevert =    0;
   egr_egrpar->useglobal =  2;
   //  egr_egrpar->scenario  = m_scenario;
@@ -216,15 +219,17 @@ Int_t St_glb_Maker::Init(){
     params("global/ev0pars")->Add(m_ev0par2);
   }
   ev0_ev0par2_st *ev0par2 = m_ev0par2->GetTable();
+  m_ev0par2->SetNRows(3);
   Int_t l;
   // TPC only cuts
 
   ev0par2->dca        =  0.8;
   ev0par2->dcav0      =  0.3;
-  ev0par2->dlen       =  2.;
+  //  ev0par2->dlen       =  2.;
+  ev0par2->dlen       =  0.6;
   ev0par2->alpha_max  = 1.2;
   ev0par2->ptarm_max  = 0.3;
-  ev0par2->dcapnmin   = 0.3;
+  ev0par2->dcapnmin   = 0.1;
   ev0par2++;
 
   //SVT only cuts
@@ -243,7 +248,7 @@ Int_t St_glb_Maker::Init(){
   ev0par2->dlen       = 0.6;
   ev0par2->alpha_max  = 1.2;
   ev0par2->ptarm_max  = 0.3;
-  ev0par2->dcapnmin   = 0.3;
+  ev0par2->dcapnmin   = 0.1;
   //exi
   if (!m_exiaux) m_exiaux = new St_exi_aux("exi_aux",1);
   m_exipar = (St_exi_exipar *)  params("global/exipars/exipar");
@@ -303,8 +308,8 @@ Int_t St_glb_Maker::Init(){
   m_tlength = new TH1F("tlenght","dst track length",100,0.,200.);
   m_chi2xd  = new TH1F("chi2xd","x chisq/degf",100,0.,10.);
   m_chi2yd  = new TH1F("chi2yd","y chisq/degf",100,0.,10.);
-  m_ev0_lama_hist  = new TH1F("ev0_lama_hist","Lambda mass",100,1.05,1.25);
-  m_ev0_k0ma_hist  = new TH1F("ev0_k0ma_hist","k0 mass",100,.4,.6);
+  m_ev0_lama_hist  = new TH1F("ev0_lama_hist","Lambda mass",50,1.05,1.25);
+  m_ev0_k0ma_hist  = new TH1F("ev0_k0ma_hist","k0 mass",50,.4,.6);
   // Spectra/pid histograms. C.Ogilvie
   Int_t np = 100;
   Int_t ndedx = 100;
@@ -521,13 +526,13 @@ Int_t St_glb_Maker::Make(){
     }
 #endif
     // exi
-    cout << "Calling exi..."<< endl;
-    if (! dst_xi_vertex) {
-      dst_xi_vertex = new St_dst_xi_vertex("dst_xi_vertex",10000);
-      dst.Add(dst_xi_vertex);
-    }
-    Int_t Res_exi = exiam(m_exipar,globtrk,vertex,dst_v0_vertex,dst_xi_vertex,m_exiaux);
-    if (Res_exi != kSTAFCV_OK) {cout << " Problem on return from EXI " << endl;}
+    //cout << "Calling exi..."<< endl;
+    //if (! dst_xi_vertex) {
+    //  dst_xi_vertex = new St_dst_xi_vertex("dst_xi_vertex",10000);
+    //  dst.Add(dst_xi_vertex);
+    // }
+    //Int_t Res_exi = exiam(m_exipar,globtrk,vertex,dst_v0_vertex,dst_xi_vertex,m_exiaux);
+    //if (Res_exi != kSTAFCV_OK) {cout << " Problem on return from EXI " << endl;}
     // dst 
     // dst_dedx_filler
     if (tptrack && stk_track) {
@@ -680,6 +685,8 @@ Int_t St_glb_Maker::Make(){
   }
   // V0
   if (dst_v0_vertex) {
+
+    cout << "Filling ev0 histos" << endl;
     dst_v0_vertex_st *v0 = dst_v0_vertex->GetTable();
     Float_t m_prmass2 = proton_mass_c2*proton_mass_c2;
     Float_t m_pimass2 = (0.139567*0.139567);
@@ -692,13 +699,13 @@ Int_t St_glb_Maker::Make(){
       e2 += m_pimass2;
       e1 = TMath::Sqrt(e1);
       e2 = TMath::Sqrt(e2);
-      Float_t p = v0->neg_px+v0->pos_px +  v0->neg_py+v0->pos_py +
-	v0->neg_pz+v0->pos_pz;
-      Float_t p2 = p*p;
-      Float_t inv_mass_la = TMath::Sqrt((e1+e2)*(e1+e2) - p2);
+      Float_t p = (v0->neg_px+v0->pos_px)*(v0->neg_px+v0->pos_px)
+	+  (v0->neg_py+v0->pos_py)*(v0->neg_py+v0->pos_py)
+	+ (v0->neg_pz+v0->pos_pz)*(v0->neg_pz+v0->pos_pz);
+      Float_t inv_mass_la = TMath::Sqrt((e1+e2)*(e1+e2) - p);
       e1 = e1a + m_pimass2;
       e1 = TMath::Sqrt(e1);
-      Float_t inv_mass_k0 = TMath::Sqrt((e1+e2)*(e1+e2) - p2);
+      Float_t inv_mass_k0 = TMath::Sqrt((e1+e2)*(e1+e2) - p);
       m_ev0_lama_hist->Fill(inv_mass_la);
       m_ev0_k0ma_hist->Fill(inv_mass_k0);   
     }
@@ -740,7 +747,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.24 1999/02/13 20:22:31 caines Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.25 1999/02/14 18:38:22 caines Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
