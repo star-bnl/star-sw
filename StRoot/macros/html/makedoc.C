@@ -1,56 +1,4 @@
-// $Id: makedoc.C,v 1.47 1999/12/11 00:27:14 fine Exp $
-// $Log: makedoc.C,v $
-// Revision 1.47  1999/12/11 00:27:14  fine
-// StNFChain has been added
-//
-// Revision 1.46  1999/11/18 13:21:45  fine
-// Adjusted to the new source tree
-//
-// Revision 1.45  1999/10/29 16:45:06  fine
-// new macro videoStyle and bolStyle have been introduced
-//
-// Revision 1.44  1999/10/03 00:09:53  fine
-// New classes docs StMicky and StCL have been introduced
-//
-// Revision 1.43  1999/09/26 02:59:54  fine
-// html for RMath has been introduced
-//
-// Revision 1.42  1999/09/14 15:30:40  fine
-// makedocs adjusted to the new source tree
-//
-// Revision 1.41  1999/09/12 01:09:57  fine
-// Adjusted to the new source tree
-//
-// Revision 1.40  1999/08/07 18:36:33  fine
-// StDisplayMaker has been included into makedoc
-//
-// Revision 1.39  1999/07/10 22:59:55  fine
-//   St_TLA_Maker docs was introduced
-//
-// Revision 1.38  1999/06/30 16:29:04  fine
-// New scheme to create gif directories. St_geom_Maker introduced
-//
-// Revision 1.37  1999/06/11 21:41:19  fine
-// StarClassLibary share lib is to be loaded
-//
-// Revision 1.36  1999/06/07 22:56:45  fisyak
-// Add EventRead
-//
-// Revision 1.35  1999/06/04 01:46:09  fine
-// New examples have been included
-//
-// Revision 1.34  1999/06/02 16:32:46  fine
-// PadControlPanel macro html has been introduced
-//
-// Revision 1.33  1999/06/01 01:46:41  fine
-// New classes have been added StTrack, StHit, StHelixD StObjArray
-//
-// Revision 1.32  1999/05/23 21:36:40  fine
-// New class have been introduce for html
-//
-// Revision 1.31  1999/05/21 15:33:59  kathy
-// made sure Log & Id are in each file and also put in standard comment line with name of owner
-//
+// $Id: makedoc.C,v 1.48 1999/12/13 17:05:42 fine Exp $
 //=======================================================================
 // owner: Valery Fine
 // what it does: 
@@ -257,6 +205,10 @@
      , "/test/XDFcopy.C",              "How to read/write XDF file"
      , "/test/XDFtest.C",              "How to read/write XDF and ROOT files"
 
+     , "/graphics/TurnDisplay.C",     "Macro to plug StEventDisplayMaker in to chain and trun it on."
+     , "/graphics/SetObjectFilter.C",  "Macro to adjust the parameters of the current \"event filter\"."
+     , "/graphics/StTrackFilters/StTrackFilter.cxx", "an example of the implementation of the \"advanced\"  event filter.");
+     , "/graphics/StTrackFilters/StTrackFilter.h",   "an example of the definition of the \"advanced\"  event filter.");
      , "/graphics/boldStyle.C",        "Style file for making presentation histograms."
      , "/graphics/videoStyle.C",       "Style file for video presentation histograms."
      , "/graphics/PadBrowser.C",       "How to use St_geom_Maker and StPadDisplayMaker"
@@ -316,3 +268,62 @@
  html.MakeClass("EModuleTypes");
  html.MakeIndex();
 }
+
+//___________________________________________________________________________
+//___________________________________________________________________________
+// $Log: makedoc.C,v $
+// Revision 1.48  1999/12/13 17:05:42  fine
+// new marcos TurnDisplay.C SetObjectFilter included
+//
+// Revision 1.47  1999/12/11 00:27:14  fine
+// StBFChain has been added
+//
+// Revision 1.46  1999/11/18 13:21:45  fine
+// Adjusted to the new source tree
+//
+// Revision 1.45  1999/10/29 16:45:06  fine
+// new macro videoStyle and bolStyle have been introduced
+//
+// Revision 1.44  1999/10/03 00:09:53  fine
+// New classes docs StMicky and StCL have been introduced
+//
+// Revision 1.43  1999/09/26 02:59:54  fine
+// html for RMath has been introduced
+//
+// Revision 1.42  1999/09/14 15:30:40  fine
+// makedocs adjusted to the new source tree
+//
+// Revision 1.41  1999/09/12 01:09:57  fine
+// Adjusted to the new source tree
+//
+// Revision 1.40  1999/08/07 18:36:33  fine
+// StDisplayMaker has been included into makedoc
+//
+// Revision 1.39  1999/07/10 22:59:55  fine
+//   St_TLA_Maker docs was introduced
+//
+// Revision 1.38  1999/06/30 16:29:04  fine
+// New scheme to create gif directories. St_geom_Maker introduced
+//
+// Revision 1.37  1999/06/11 21:41:19  fine
+// StarClassLibary share lib is to be loaded
+//
+// Revision 1.36  1999/06/07 22:56:45  fisyak
+// Add EventRead
+//
+// Revision 1.35  1999/06/04 01:46:09  fine
+// New examples have been included
+//
+// Revision 1.34  1999/06/02 16:32:46  fine
+// PadControlPanel macro html has been introduced
+//
+// Revision 1.33  1999/06/01 01:46:41  fine
+// New classes have been added StTrack, StHit, StHelixD StObjArray
+//
+// Revision 1.32  1999/05/23 21:36:40  fine
+// New class have been introduce for html
+//
+// Revision 1.31  1999/05/21 15:33:59  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+//___________________________________________________________________________
