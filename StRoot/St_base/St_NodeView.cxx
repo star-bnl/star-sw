@@ -94,7 +94,7 @@ St_NodeView::St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition,ED
   Bool_t optAll    = (iopt == kAll);
   Bool_t optMarked = (iopt == kMarked);
   Int_t thisLevel = level + 1;
-  while (position = (St_NodePosition *)next()) {
+  while ( (position = (St_NodePosition *)next()) ) {
     // define the the related St_Node
      St_Node *node = position->GetNode(); 
      if (node) {
@@ -561,7 +561,7 @@ void St_NodeView::Sizeof3D() const
    if (GetListOfShapes()) {
      TIter nextShape(GetListOfShapes());
      TShape *shape = 0;
-      while(shape = (TShape *)nextShape()) {
+      while( (shape = (TShape *)nextShape()) ) {
         if (shape->GetVisibility())  shape->Sizeof3D();
      }
    }
@@ -570,7 +570,7 @@ void St_NodeView::Sizeof3D() const
    if (thisNode && thisNode->GetVisibility()) {
      TIter nextShape(thisNode->GetListOfShapes());
      TShape *shape = 0;
-      while(shape = (TShape *)nextShape()) {
+      while( (shape = (TShape *)nextShape()) ) {
         if (shape->GetVisibility())  shape->Sizeof3D();
      }
    }
