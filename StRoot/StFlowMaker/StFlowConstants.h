@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.13 2002/03/12 02:33:18 posk Exp $
+// $Id: StFlowConstants.h,v 1.14 2002/05/23 18:54:09 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -26,14 +26,15 @@ class Flow{
     nSubs        =   2,
     nPhiBins     = 120,
     nPhiBinsFtpc = 360,
-    nEtaBins     = 90,
-    //nEtaBins     = 30,
+    //nEtaBins     = 90,
+    nEtaBins     = 30,
     nPtBins      = 40,
     nPtBinsPart  = 40,
     nCumulIntegOrders =   3, 
     nCumulInteg_qMax  =   8,
     nCumulDiffOrders  =   2,
-    nCumulDiff_qMax   =   8
+    nCumulDiff_qMax   =   8,
+    nCents       = 9
   };
 
   typedef Double_t PhiWgt_t[nSels][nHars][nPhiBins];
@@ -45,6 +46,11 @@ class Flow{
   static Float_t ptMax;
   static Float_t ptMaxPart;
 
+  static Int_t   cent200Full[nCents];
+  static Int_t   cent200Half[nCents];
+  static Int_t   cent130[nCents];
+  static Int_t   cent22[nCents];
+
   ClassDef(Flow,1)               // macro for rootcint
 };
 
@@ -53,6 +59,9 @@ class Flow{
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.14  2002/05/23 18:54:09  posk
+// Moved centrality cuts into StFlowConstants
+//
 // Revision 1.13  2002/03/12 02:33:18  posk
 // Now makes pico files in SL02c.
 //
