@@ -46,11 +46,6 @@ public:
 	     double& dEdx,
 	     double& chi2);
     
-    ///Return the position (in node's coordinate system) of the helix represented by the node
-    /// at the given value of the independent variable x.  This routine essentiall extrapolates
-    /// the helix to the given place
-    StThreeVector<double> getPositionAt(double xLocal);
-    
     /// Calculates and returns the momentum and error of the track at this node. The momentum is 
     /// in the local reference frame of this node.
     void getMomentum(double p[3], double e[6]=0) const;

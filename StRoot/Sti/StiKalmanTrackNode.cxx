@@ -418,11 +418,6 @@ void StiKalmanTrackNode::getGlobalMomentum(double p[3], double e[6]) const
     e[5] = d22;  // pz-pz
 }
 
-StThreeVector<double> StiKalmanTrackNode::getPositionAt(double xLocal)
-{
-  return StThreeVector<double>(0,0,0);    
-}
-
 double StiKalmanTrackNode::getTanL() const
 {
     return fP4;
