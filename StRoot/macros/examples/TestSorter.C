@@ -1,5 +1,8 @@
-// $Id: TestSorter.C,v 1.8 2000/01/19 21:00:40 kathy Exp $
+// $Id: TestSorter.C,v 1.9 2000/06/05 18:14:13 fine Exp $
 // $Log: TestSorter.C,v $
+// Revision 1.9  2000/06/05 18:14:13  fine
+// Adjuested to ROOT 2.24
+//
 // Revision 1.8  2000/01/19 21:00:40  kathy
 // update macros to use standard default xdf files in /afs/rhic/star/data/samples
 //
@@ -16,12 +19,11 @@
 // owner: Valery Fine
 // what it does: 
 //=======================================================================
-class St_TableSorter;
+class TTableSorter;
 class St_particle;
-St_TableSorter *sorter = 0;
+TTableSorter *sorter = 0;
 St_particle *table=0;
 void Load() {
-    if (gSystem.Load("St_base"))      printf(" Loading DLL \"St_base\" failed \n");
     if (gSystem.Load("xdf2root"))     printf(" Loading DLL \"xdf2root\" failed \n");
     if (gSystem.Load("St_Tables"))    printf(" Loading DLL \"St_Tables\" failed \n");
 }
@@ -30,16 +32,15 @@ void TestSorter(Char_t *xdffilename="/afs/rhic/star/data/samples/test.xdf",const
  //   Read XDF file
     Load();
     St_XDFFile  xdf(xdffilename);
-    St_DataSet *event = xdf.NextEventGet();
+    TDataSet *event = xdf.NextEventGet();
     if (!event) { printf(" NO events \n"); return;}
     table=0;
-    St_DataSetIter root(event);
+    TDataSetIter root(event);
     table = (St_particle *)root["/evgen/particle"]; // [] means we are looking for the "real" table/ not just a St_DataSet
     if (table) {
        TString colName = col;
-       sorter = new St_TableSorter(table,colName,1,5);  
-//       sorter = new St_TableSorter(*table,colName,1,5);  
-//       sorter = new St_TableSorter(table->GetHeader(),colName,1,5);  
+       sorter = new TTableSorter(table,colName,1,5);  
+//       sorter = new TTableSorter(*table,colName,1,5);  
        table->Print(0,6);
        int cols = sorter->GetFirstRow() + sorter->GetNRows() -1;
        cout << " Result of the ordering the table: " << endl 
@@ -82,10 +83,10 @@ void TestSorter(Char_t *xdffilename="/afs/rhic/star/data/samples/test.xdf",const
       table =  (St_dst_vertex *)event->FindByName("vertex");
       if (table) {
         TString colName = "vtx_id";
-//        sorter = new St_TableSorter(table,colName,1,5);  
-//        sorter = new St_TableSorter(*table,colName,1,5);  
-        sorter = new St_TableSorter(table->GetHeader(),colName,1,5);  
-        St_TableSorter &sort = *sorter;  
+          sorter = new TTableSorter(table,colName,1,5);  
+//        sorter = new TTableSorter(*table,colName,1,5);  
+//        sorter = new TTableSorter(table->GetHeader(),colName,1,5);  
+        TTableSorter &sort = *sorter;  
         table->Print(0,6);
         int cols = sorter->GetFirstRow() + sorter->GetNRows() - 1;
         cout << " Result of the ordering the table: " << endl 
