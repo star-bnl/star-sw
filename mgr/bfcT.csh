@@ -2,7 +2,7 @@
 source /star/u/starreco/.tcshrc 
 source /afs/rhic/rhstar/group/.starnew
 setenv NODEBUG yes
-starver 01i
+starver 01k
 echo "Start $0 with $argv on" `date`
 perl $STAR/mgr/bfcT $argv
 
