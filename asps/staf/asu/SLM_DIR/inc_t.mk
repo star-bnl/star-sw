@@ -5,7 +5,11 @@
 ifndef INC_T_MK
 INC_T_MK+= DONE
 #
-inc_all: $(LOADFILES) $(notdir $(shell ls $(GENFILES)))
+# HACK 25jun96
+# inc_all: $(LOADFILES) $(notdir $(shell ls $(GENFILES)))
+inc_all:
+	cp ../idl/*.h .
+	cp ../idl/*.inc .
 #
 inc_clean:
 	-rm $(notdir $(shell ls $(GENFILES))) core

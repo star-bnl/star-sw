@@ -9,7 +9,11 @@ c:----------------------------------------------------------------------
 #define STAFCV_T        INTEGER*4
 
 #define STAFCV_BAD      0
+      STAFCV_T stafcv_bad
+      parameter (stafcv_bad=STAFCV_BAD)
 #define STAFCV_OK       1
+      STAFCV_T stafcv_ok
+      parameter (stafcv_ok=STAFCV_OK)
 
 #define EML_ERROR(code) EML_LOG_ERROR(code) \
 		return .FALSE.

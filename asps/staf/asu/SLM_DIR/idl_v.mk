@@ -31,7 +31,7 @@ ifneq ($(ASP),$(EMPTY))
 IDL		:= $(shell which idl)
 IDLFLAGS        += -S -C -c C.cc -s S.cc
 IDLFLAGS	+= $(addprefix -I, $(IDLDIRS))
-IDLFLAGS	+= $(filter -D%,$(CPPFLAGS))
+export IDLFLAGS	+= $(filter -D%,$(CPPFLAGS))
 endif
 ifneq ($(PAM),$(EMPTY))
 IDL := $(STAR_LIB)/$(STAR_SYS_LEVEL)/sys/bin/stic
