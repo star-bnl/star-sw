@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.289 2002/03/20 18:39:17 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.290 2002/03/22 21:50:19 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -103,8 +103,7 @@ Bfc_st BFC1[] = {
 
   {"B2000"       ,""  ,"","ry2000a,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                   ,"Base chain for 2001 (tpc+rhic)",kFALSE},
-  {"P2000a"      ,""  ,"",
-   "B2000,AlignSectors,ExB,OBmap,OClock,OPr13","",""       ,"Production chain for summer 2000 data",kFALSE},
+  {"P2000a"      ,""  ,"","B2000,Corr1","",""              ,"Production chain for summer 2000 data",kFALSE},
 
 
 
@@ -112,20 +111,16 @@ Bfc_st BFC1[] = {
   // B2001 is a base-chain for 2001 (with tpc+rhic). 
   {"B2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                   ,"Base chain for 2001 (tpc+rhic)",kFALSE},
-  {"P2001"       ,""  ,"",
-   "B2001,l3onl,tofDat,AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC,OSpaceZ",
-   "",""                                       ,"Production chain for summer 2001 data (+ l3, tof)",kFALSE},
-
-  {"P2001a"      ,""  ,"",
-   "B2001,svt_daq,SvtD,ftpc,l3onl,tofDat,emcDY2,AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC,OSpaceZ",
-   "",""                       ,"Production chain for summer 2001 data (+ ftpc, svt, l3, tof, emc)",kFALSE},
+  {"P2001"       ,""  ,"","B2001,l3onl,tofDat,Corr2,OSpaceZ","",""
+                                               ,"Production chain for summer 2001 data (+ l3, tof)",kFALSE},
+  {"P2001a"      ,""  ,"","B2001,svt_daq,SvtD,ftpc,l3onl,tofDat,emcDY2,Corr2,OSpaceZ","",""                       
+                               ,"Production chain for summer 2001 data (+ ftpc, svt, l3, tof, emc)",kFALSE},
 
   // pp Chains 
-  {"pp2001"      ,""  ,"",
-   "pp,B2001,-PreVtx,-SpinTag,l3onl,tofDat,emcDY2,AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC",
-   "",""                                                                ,"pp 2001 (+ l3, tof, emc)",kFALSE},
-  {"pp2001a"      ,""  ,"",
-   "pp2001,svt_daq,SvtD,ftpc","",""                          ,"pp 2001 (+ ftpc, svt, l3, tof, emc)",kFALSE},
+  {"pp2001"      ,""  ,"","pp,B2001,-PreVtx,-SpinTag,l3onl,tofDat,emcDY2,Corr2","",""          
+                                                                        ,"pp 2001 (+ l3, tof, emc)",kFALSE},
+  {"pp2001a"      ,""  ,"","pp2001,svt_daq,SvtD,ftpc","",""                          
+                                                             ,"pp 2001 (+ ftpc, svt, l3, tof, emc)",kFALSE},
 
 
   // Other chains/Calibration
@@ -133,7 +128,7 @@ Bfc_st BFC1[] = {
                                                                           "Laser Calibration Chain",kFALSE},
   {"L3Counter","" ,"","db,detDb,xin,l3count","","",                    "L3 Counter extraction pass",kFALSE},
   {"VtxSeedCal","","",
-   "pp2001 -l3onl -rich -rch -RichPiD -tofDat -v0 -xi -kink FindVtxSeed NoEvent -tree -tags -QA -EventQA",
+   "ppOpt,ry2001,in,tpc_daq,tpc,Physics,-PreVtx,FindVtxSeed,NoEvent,Corr2",
                                                                      "","","Pass0 Vertex evaluator",kFALSE},
 
 
@@ -177,6 +172,11 @@ Bfc_st BFC1[] = {
   {"TrsOut"      ,""  ,"","Tree"                                ,"","","Write Trs output to StTree",kFALSE},
   {"AllEvent"    ,""  ,"","Tree"                               ,"","","Write whole event to StTree",kFALSE},
   {"AllTables"   ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
+
+  {"Corr1"       ,""  ,"","AlignSectors,ExB,OBmap,OClock,OPr13","","",
+                                                      "... AlignSectors,ExB,OBmap,OClock,OPr13 ...",kFALSE},
+  {"Corr2"       ,""  ,"","AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC","","",
+                                          "... AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC ...",kFALSE},
   {"ExB"         ,""  ,"","",""                       ,"","Activate ExB correction in St_tpt_Maker",kFALSE},
   {"EB1"         ,""  ,"","",""                                     ,"","Force ExB configuration 1",kFALSE},
   {"EB2"         ,""  ,"","",""                                     ,"","Force ExB configuration 2",kFALSE},
@@ -189,11 +189,13 @@ Bfc_st BFC1[] = {
   {"OIFC"        ,""  ,"","",""                                         ,"","Field Cage correction",kFALSE},
   {"OSpaceZ"     ,""  ,"","",""                                      ,"","Space Charge corrections",kFALSE},
   {"AlignSectors",""  ,"","",""          ,"","Activate Sector Alignment correction in St_tpt_Maker",kFALSE},
+
   {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
   {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
   {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
   {"ReadAll"     ,""  ,"","",""                                 ,"","Activate all branches to read",kFALSE},
   {"pp"      ,""  ,"","SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","","Use pp specific parameters",kFALSE},
+  {"ppOpt"       ,""  ,"","pp,-SpinTag,-ppLPfind1,-SpinSortA,-ppLPprojectA",   "","","pp no makers",kFALSE},
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
   {"beamLine"    ,""  ,"","",""                                       ,"","LMV Beam line constrain",kFALSE},
