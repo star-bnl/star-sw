@@ -1,10 +1,15 @@
 /**********************************************************
- * $Id: StRichRingCalculator.h,v 2.3 2000/11/21 16:24:23 horsley Exp $
+ * $Id: StRichRingCalculator.h,v 2.4 2001/02/07 16:03:34 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingCalculator.h,v $
+ *  Revision 2.4  2001/02/07 16:03:34  lasiuk
+ *  systemOfUnits added
+ *  getRing() modified for return value
+ *  inline where possible
+ *
  *  Revision 2.3  2000/11/21 16:24:23  horsley
  *  Major overhaul of StRichArea, introduced monte carlo integration cross check,
  *  all possible areas, angles calculated together. StRichRingCalculator, StRichPIDMaker modified to support new StRichArea. StRichPIDMaker's hit finder
@@ -144,10 +149,7 @@ private:
   double mMeanPathInQuartz;
 };
 
-
-
 inline double StRichRingCalculator::getConstantAreaAngle() const {return mConstantAreaAngle;}
-
 
 inline double StRichRingCalculator::getTotalArea() const {return mTotalArea;}
 inline double StRichRingCalculator::getTotalAngle() const {return mTotalAngle;}
@@ -158,7 +160,6 @@ inline double StRichRingCalculator::getTotalAngleOnPadPlane() const {return mTot
 inline double StRichRingCalculator::getTotalAreaOnActivePadPlane() const {return mTotalAreaOnActivePadPlane;}
 inline double StRichRingCalculator::getTotalAngleOnActivePadPlane() const {return mTotalAngleOnActivePadPlane;}
 
-
 inline double StRichRingCalculator::getTotalConstantArea() const {return mTotalConstantArea;}
 inline double StRichRingCalculator::getTotalConstantAngle() const {return mTotalConstantAngle;}
 
@@ -168,12 +169,20 @@ inline double StRichRingCalculator::getTotalConstantAngleOnPadPlane() const {ret
 inline double StRichRingCalculator::getTotalConstantAreaOnActivePadPlane() const {return mTotalConstantAreaOnActivePadPlane;}
 inline double StRichRingCalculator::getTotalConstantAngleOnActivePadPlane() const {return mTotalConstantAngleOnActivePadPlane;}
 
-
-
 inline double StRichRingCalculator::getMeanPathInRadiator() const { return mMeanPathInRadiator;}
 inline double StRichRingCalculator::getMeanPathInQuartz() const { return mMeanPathInQuartz;}
 
 inline StThreeVectorF& StRichRingCalculator::getOuterRingPoint() { return closestOuterRingPoint;}
 inline StThreeVectorF& StRichRingCalculator::getInnerRingPoint() { return closestInnerRingPoint;}
 inline StThreeVectorF& StRichRingCalculator::getMeanRingPoint()  { return closestMeanRingPoint;}
+
+
+inline void StRichRingCalculator::drawRingPoints(bool flag) {mDrawRingPoints = flag;}
+inline TArrayD StRichRingCalculator::getMonteCarloArea() { return mMonteCarloArea;}
+inline vector<StThreeVectorF>&  StRichRingCalculator::getMonteCarloPoints() {return mMonteCarloPoints;}
+inline void StRichRingCalculator::setMonteCarloSwitch(bool set) { mMonteCarloSwitch = set;}
+
+inline vector<StRichAreaSegment >&
+StRichRingCalculator::getPtsToDraw() { return vectorOfPtsToDraw;}
+
 #endif
