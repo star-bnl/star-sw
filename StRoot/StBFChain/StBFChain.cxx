@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.57 2000/01/28 21:06:46 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.58 2000/01/31 15:18:23 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.58  2000/01/31 15:18:23  fisyak
+// Add Laser Analysis
+//
 // Revision 1.57  2000/01/28 21:06:46  fisyak
 // Add Mc Event and Mc Ass to chain
 //
@@ -353,6 +356,8 @@ BfcItem BFC[] = {
   {"McEvent"     ,"","Mc","Event",                   "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},       
   {"McAss"       ,"","Mc","McEvent",                   "StAssociationMaker","StAssociationMaker","",kFALSE},       
   {"McAna"       ,"","Mc","McEvent",                     "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},       
+  {"LAna"       ,"","","in,db,geant,SCL","StLaserAnalysisMaker"
+                                                      ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},       
   {"xout"        ,""  ,"",""                                 ,"","xdf2root","Write dst to XDF file",kFALSE}, 
   {"Tree"        ,""  ,"",""                                        ,"StTreeMaker","StTreeMaker","",kFALSE}
 };
