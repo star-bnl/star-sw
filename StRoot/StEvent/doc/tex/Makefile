@@ -6,7 +6,8 @@ DVIPDF          = dvipdf
 LATEX           = latex
 MKINDEX         = makeindex -s StEventIndex.sty
 PSNUP		= psnup -2 -pletter
-PSSRC		= StEventTitle.eps StarIcon.eps
+PSSRC		= StEventTitle.eps StarIcon.eps umlForHits.eps \
+		  umlForEvents.eps umlForTracks.eps umlForVertices.eps
 
 all:			$(TEXSRC).ps
 
