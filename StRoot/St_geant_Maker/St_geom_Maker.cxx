@@ -1,5 +1,8 @@
-// $Id: St_geom_Maker.cxx,v 1.6 1998/12/17 14:38:00 fisyak Exp $
+// $Id: St_geom_Maker.cxx,v 1.7 1998/12/25 21:02:13 nevski Exp $
 // $Log: St_geom_Maker.cxx,v $
+// Revision 1.7  1998/12/25 21:02:13  nevski
+// Add Set/Get method
+//
 // Revision 1.6  1998/12/17 14:38:00  fisyak
 // Change default to no Higz window
 //
@@ -65,7 +68,6 @@
 #include "TGTRA.h"
 #include "TCTUB.h"
 
-extern "C" void geant_     ();
 extern "C" void agmain_    (Int_t*,Int_t*,Int_t*);
 extern "C" void agxuser_   ();
 extern "C" void agxinit_   ();
@@ -85,20 +87,19 @@ ClassImp(St_geom_Maker)
 //_____________________________________________________________________________
 St_geom_Maker::St_geom_Maker(const Char_t *name, const Char_t *title):
 StMaker(name,title){
-  drawinit=kFALSE;
+  drawinit= kFALSE;
+  nwgeant = 100000;
+  nwpaw   =      0;
+  iwtype  =      0;
 }
 //_____________________________________________________________________________
 St_geom_Maker::~St_geom_Maker(){
 }
 //_____________________________________________________________________________
 Int_t St_geom_Maker::Init(){
-// Create tables
-   St_DataSetIter       local(gStChain->DataSet("params"));
+// Initialize GEANT
    printf (" calling agmain \n");
-   Int_t nwg = 100000;
-   Int_t nwp = 0;
-   Int_t iwtyp = 0;
-   agmain_(&nwg,&nwp,&iwtyp); 
+   agmain_(&nwgeant,&nwpaw,&iwtype); 
    Do("detp geometry field_only");
 
    geometry_();
@@ -120,7 +121,7 @@ Int_t St_geom_Maker::Make(){
 //_____________________________________________________________________________
 void St_geom_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geom_Maker.cxx,v 1.6 1998/12/17 14:38:00 fisyak Exp $\n");
+  printf("* $Id: St_geom_Maker.cxx,v 1.7 1998/12/25 21:02:13 nevski Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
