@@ -1,8 +1,8 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.17 1998/09/23 02:48:13 fine Exp $ 
+// $Id: St_Table.cxx,v 1.18 1998/09/23 20:22:24 fisyak Exp $ 
 // $Log: St_Table.cxx,v $
-// Revision 1.17  1998/09/23 02:48:13  fine
-// The bit kIsNotOwn has been introduced to avoid clash with kCanDelete used with St_DataSet
+// Revision 1.18  1998/09/23 20:22:24  fisyak
+// Set kIsNotOwn=23
 //
 // Revision 1.16  1998/09/21 15:43:02  fine
 // St_Table::Update bug has been fixed
@@ -16,7 +16,7 @@
 //
 // Revision 1.11  1998/09/07 19:23:39  fine
 // St_Table::Print() - malloc/fre have been replaced with new [] / delete []  due a problem under Linux
-// St_DataSet::~St_DataSet has been changed to take in account the "strutural" links. Some opt have been done too
+// St_DataSet::~St_DataSet has been changed to take in account the "structural" links. Some opt have been done too
 //
 // Revision 1.10  1998/08/18 14:05:07  fisyak
 // Add to bfc dst
