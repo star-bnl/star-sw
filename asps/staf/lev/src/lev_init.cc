@@ -13,6 +13,11 @@
 #include "levClasses.hh"
 #include "lev_globals.h"
 
+#include "fortranc.h"   /* The definition of the Fortran/C interface */
+
+#define lev_def_ F77_NAME(lev_def,LEV_DEF)
+extern "C" void type_of_call lev_def_();
+
 //Later.  levFactory *lev_Factory;
 levFactory *lev;
 

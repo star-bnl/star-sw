@@ -378,7 +378,7 @@ void WriteMakefile() {
   char ok=0;
 #ifdef aix
   PP"Note to programmer:  use Root/Aix/Makefile as a template\n");
-  PP"when writing WriteMakefile_aix(); Exit(__LINE__);
+  PP"when writing"); WriteMakefile_aix(); Exit(__LINE__);
 #endif
 #ifdef sun4os5pc
   WriteMakefile_sun4os5pc(); ok=7;
