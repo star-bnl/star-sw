@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.27 2000/09/01 15:00:23 genevb Exp $
+// $Id: StV0Maker.cxx,v 1.28 2000/10/12 14:52:14 genevb Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.28  2000/10/12 14:52:14  genevb
+// Remove vertex table entries when trimming V0s
+//
 // Revision 1.27  2000/09/01 15:00:23  genevb
 // Reset dcaV0 to 0.8cm
 //
@@ -97,6 +100,11 @@
 #include "global/St_ev0_eval2_Module.h"
 
 #include "tables/St_dst_xi_vertex_Table.h"
+#include "tables/St_dst_tkf_vertex_Table.h"
+
+St_dst_xi_vertex* dst_xi_vertex = 0;
+St_dst_tkf_vertex* dst_tkf_vertex = 0;
+Int_t rsize,rvsize,lastV0;
 
 ClassImp(StV0Maker)
   
@@ -172,6 +180,8 @@ Int_t StV0Maker::Make(){
   
   int iMake = kStOK;
   int iRes = 0;
+  vertex = 0;
+  dst_v0_vertex = 0;
   
   St_DataSet     *match = GetDataSet("match"); 
   if (!match) {
@@ -192,13 +202,12 @@ Int_t StV0Maker::Make(){
     return kStWarn;
   }
   St_DataSetIter primaryI(primary);
-  St_dst_vertex  *vertex   = (St_dst_vertex *) primaryI("vertex");
+  vertex   = (St_dst_vertex *) primaryI("vertex");
   if (!vertex) {
     gMessMgr->Warning() << "StV0Maker::Make(): vertex is missing" << endm;
     return kStWarn;
   }
   
-  dst_v0_vertex = 0;
   St_ev0_eval   *ev0_eval  = 0;
   St_DataSet    *tpctracks = GetInputDS("tpc_tracks");
   St_tpt_track  *tptrack   = 0;
@@ -297,16 +306,29 @@ Int_t StV0Maker::Make(){
 }
 //_____________________________________________________________________________
 void StV0Maker::Trim(){
-  if (!dst_v0_vertex) return;
+  if (!((dst_v0_vertex) && (vertex))) return;
+
+  // Get Xi vertices
   St_DataSet *xi = GetDataSet("xi"); 
   if (!xi) return;
   St_DataSetIter xiI(xi);         
-  St_dst_xi_vertex *dst_xi_vertex  = (St_dst_xi_vertex *) xiI("dst_xi_vertex");
+  dst_xi_vertex = (St_dst_xi_vertex *) xiI("dst_xi_vertex");
   if (!dst_xi_vertex) return;
+
+  // Get Kink vertices (if they are done)
+  St_DataSet *kink = GetDataSet("kink"); 
+  if (kink) {
+    St_DataSetIter kinkI(kink);         
+    dst_tkf_vertex = (St_dst_tkf_vertex *) kinkI("dst_tkf_vertex");
+  } else
+    dst_tkf_vertex = 0;
 
   Int_t ixi = dst_xi_vertex->GetNRows() - 1;
   ev0_ev0par2_st* pars = m_ev0parT->GetTable(0);
-  Int_t rsize = dst_v0_vertex->GetRowSize();
+  rsize = dst_v0_vertex->GetRowSize();
+  rvsize = vertex->GetRowSize();
+  gMessMgr->Info() << "StV0Maker::Trim(): start with " << vertex->GetNRows()
+                   << " vertex candidates" << endm;
 
   for (Int_t iv0 = 0; iv0 < dst_v0_vertex->GetNRows(); iv0++) {
     dst_v0_vertex_st* v0row = dst_v0_vertex->GetTable(iv0);
@@ -318,10 +340,11 @@ void StV0Maker::Trim(){
       v0row->dcav0 = - (v0row->dcav0);
     } else if (!(isXiV0 || passV0)) {
 
-      // Want to delete this V0
+      // Want to delete this V0 and vertex
       // Take last good V0 and move it here
       Bool_t notGood = kTRUE;
-      Int_t lastV0 = dst_v0_vertex->GetNRows();
+      lastV0 = dst_v0_vertex->GetNRows();
+      Long_t idVert = v0row->id_vertex;
       while (notGood) {
         if ((--lastV0)==iv0) {
           break;
@@ -348,14 +371,69 @@ void StV0Maker::Trim(){
               ixi--;
 	    }
 	  }
-	}
+	} else ChopVertex(v0rowL->id_vertex);
       }
       dst_v0_vertex->SetNRows(lastV0);
+      ChopVertex(idVert);
       iv0--; // Repeat analysis of this V0
     }
   }
 
   dst_v0_vertex->Purge();
-  gMessMgr->Info() << "StV0Maker::Trim() saving " << dst_v0_vertex->GetNRows()
+  vertex->Purge();
+  gMessMgr->Info() << "StV0Maker::Trim(): saving " << dst_v0_vertex->GetNRows()
                    << " V0 candidates" << endm;
+}
+//_____________________________________________________________________________
+void StV0Maker::ChopVertex(Long_t idVert){
+
+  // Want to delete this vertex
+  // Take last vertex and move it here
+  Int_t ivert = (Int_t) idVert - 1;
+  Int_t lastVert = vertex->GetNRows();
+  if ((--lastVert)!=ivert) {
+    dst_vertex_st* vertrow = vertex->GetTable(ivert);
+    dst_vertex_st* vertrowL = vertex->GetTable(lastVert);
+    Long_t idVertL = vertrowL->id;
+    memcpy(vertrow,vertrowL,rvsize);
+    vertrow->id = idVert;
+    Int_t i;
+    switch (vertrowL->vtx_id) {
+      case kV0DecayIdentifier : {
+        for (i = lastV0; i>0 ; i--) {
+          dst_v0_vertex_st* v0row = dst_v0_vertex->GetTable(i-1);
+          if (v0row->id_vertex == idVertL) {
+            v0row->id_vertex = idVert;
+            break;
+          }
+        }
+        break; }
+      case kXiDecayIdentifier : {
+        for (i = dst_xi_vertex->GetNRows(); i>0 ; i--) {
+          dst_xi_vertex_st* xirow = dst_xi_vertex->GetTable(i-1);
+          if (xirow->id_xi == idVertL) {
+            xirow->id_xi = idVert;
+            break;
+          }
+        }
+        break; }
+      case kKinkDecayIdentifier : {
+	if (!dst_tkf_vertex) {
+	  gMessMgr->Warning() << "StV0Maker::Trim(): "
+	    << " Deleting kink vertex, but no kinks done" << endm;
+          break;
+	}
+        for (i = dst_tkf_vertex->GetNRows(); i>0 ; i--) {
+          dst_tkf_vertex_st* kinkrow = dst_tkf_vertex->GetTable(i-1);
+          if (kinkrow->id_vertex == idVertL) {
+            kinkrow->id_vertex = idVert;
+            break;
+          }
+        }
+        break; }
+      default : gMessMgr->Warning() << "StV0Maker::Trim(): "
+	    << " Deleting vertex of unkown type=" << vertrowL->vtx_id << endm;
+    }
+  }
+  vertex->SetNRows(lastVert);
 }
