@@ -80,6 +80,10 @@ void StiKalmanTrackNode::setState(const StiKalmanTrackNode * n)
   _c20   = n->_c20; _c21 = n->_c21; _c22 = n->_c22;
   _c30   = n->_c30; _c31 = n->_c31; _c32 = n->_c32; _c33 = n->_c33;
   _c40   = n->_c40; _c41 = n->_c41; _c42 = n->_c42; _c43 = n->_c43; _c44 = n->_c44;
+	hitCount = n->hitCount;
+  nullCount = n->nullCount;
+  contiguousHitCount = n->contiguousHitCount;
+  contiguousNullCount = n->contiguousNullCount;
 }
 
 
@@ -317,7 +321,9 @@ void StiKalmanTrackNode::getGlobalMomentum(double p[3], double e[6]) const
 }
 
 
-/*! Steering routine that propagates the track encapsulated by the given node "pNode" to the given detector "tDet". The propagation involves the following steps.
+/*! Steering routine that propagates the track encapsulated by the given node "pNode" to the given detector "tDet". 
+	<p>
+	The propagation involves the following steps.
  <OL>
  <LI>Extrapolation of the existing track to the next layer, by "transporting" the
      track a smaller radius.</LI>

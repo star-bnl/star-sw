@@ -36,7 +36,18 @@ void EditableParameters::setDefaults()
     {
       EditableParameter * ep = static_cast<EditableParameter *>(*iter);
       if (ep)
-	ep->reset();
+        ep->reset();
     }
 }
 
+
+ostream& operator<<(ostream& os, const EditableParameters&pars)
+{
+  ParameterConstIterator iter;
+  for (iter=pars.begin();iter!=pars.end();iter++)
+    {
+      EditableParameter * ep = static_cast<EditableParameter *>(*iter);
+      if (ep) os << *ep;
+    }
+	return os;
+}
