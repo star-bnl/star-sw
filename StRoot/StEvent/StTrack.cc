@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cc,v 1.5 1999/02/24 12:48:59 ullrich Exp $
+ * $Id: StTrack.cc,v 1.6 1999/03/07 15:31:38 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cc,v $
+ * Revision 1.6  1999/03/07 15:31:38  wenaus
+ * Order constructor inits to remove g+ warnings
+ *
  * Revision 1.5  1999/02/24 12:48:59  ullrich
  * Added argument (h) to constructor needed to instatiate helix
  *
@@ -28,7 +31,7 @@
  **************************************************************************/
 #include "StEvent/StTrack.hh"
 
-static const char rcsid[] = "$Id: StTrack.cc,v 1.5 1999/02/24 12:48:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cc,v 1.6 1999/03/07 15:31:38 wenaus Exp $";
 
 StTrack::StTrack() : mHelix(0, 0, 0, StThreeVector<double>())
 {
@@ -36,8 +39,8 @@ StTrack::StTrack() : mHelix(0, 0, 0, StThreeVector<double>())
     mStopVertex   = 0;
 }
 
-StTrack::StTrack(dst_track_st* trk) : mFitTraits(trk),
-  mHelix(0, 0, 0, StThreeVector<double>())
+StTrack::StTrack(dst_track_st* trk) : 
+  mHelix(0, 0, 0, StThreeVector<double>()), mFitTraits(trk)
 {
     mStartVertex = 0;
     mStopVertex   = 0;
@@ -48,8 +51,8 @@ StTrack::StTrack(dst_track_st* trk,
                  double dip,
                  double phase,
                  StThreeVector<double>& origin,
-		 int h) : mFitTraits(trk),
-  mHelix(curvature, dip, phase, origin, h)
+		 int h) : 
+  mHelix(curvature, dip, phase, origin, h), mFitTraits(trk)
 {  
 }
 
