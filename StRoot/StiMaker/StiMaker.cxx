@@ -31,11 +31,12 @@
 #include "Sti/StiDetectorContainer.h"
 #include "Sti/StiTrackContainer.h"
 #include "Sti/StiGeometryTransform.h"
+#include "Sti/StiEvaluableTrackSeedFinder.h"
 
 //StiGui
-//#include "StiGui/StiRootDrawableDetector.h"
 #include "StiGui/StiDrawableHits.h"
 #include "StiGui/StiRootDrawableHits.h"
+#include "StiGui/StiRootDrawableLine.h"
 #include "StiGui/StiDisplayManager.h"
 
 // StiMaker
@@ -80,6 +81,15 @@ StiMaker::~StiMaker()
     
     delete mdisplay;
     mdisplay = 0;
+
+    delete mtrackfactory;
+    mtrackfactory = 0;
+
+    delete mtrackseedfinder;
+    mtrackseedfinder = 0;
+    
+    //delete md_trackfactory;
+    md_trackfactory = 0;
     
     StiDetectorContainer::kill();
     mdetector = 0;
@@ -102,6 +112,15 @@ void StiMaker::Clear(const char*)
     
     //Reset HitFactory
     mhitfactory->reset();
+
+    //Reset TrackFactory
+    mtrackfactory->reset();
+
+    //Reset Drawable TrackFactory
+    md_trackfactory->reset();
+    
+    //Reset DisplayManager
+    mdisplay->reset();
     
     StMaker::Clear();
 }
@@ -113,15 +132,32 @@ Int_t StiMaker::Finish()
 
 Int_t StiMaker::Init()
 {
-    //Ben, uncomment the next line to produce seg-fualt, and then look at StiGeometryTransform constructor.  MLM
-    //StiGeometryTransform* trans = StiGeometryTransform::instance();
-    
+    //The track store
     mtrackstore = StiTrackContainer::instance();
+
+    //The hit container
     mhitstore = StiHitContainer::instance();
+
+    //The Hit Factory
     mhitfactory = new StiHitFactory("HitFactory");
     mhitfactory->setIncrementalSize(50000); //Allocate in chunks of 50k hits
-    mhitfactory->setMaxIncrementCount(10);  //So, we can have 10 allocations at 50k a pop -> 500k hits max.  Throw's error if over this!
+    mhitfactory->setMaxIncrementCount(10);  //So, we can have 10 allocations at 50k a pop -> 500k hits max.
 
+    //The Evalualbe Track Factory
+    mtrackfactory = new StiEvaluableTrackFactory("EvaluableTrackFactory");
+    mtrackfactory->setIncrementalSize(1000);
+    mtrackfactory->setMaxIncrementCount(10);
+
+    md_trackfactory = new StiRDEvaluableTrackFactory("DrawableEvaluableTrackFactory");
+    md_trackfactory->setIncrementalSize(1000);
+    md_trackfactory->setMaxIncrementCount(10);
+
+    //EvaluableTrack SeedFinder
+    mtrackseedfinder = new StiEvaluableTrackSeedFinder();
+    mtrackseedfinder->setFactory(mtrackfactory);
+    mtrackseedfinder->setStTrackType(global);
+
+    //The Display
     mdisplay = StiDisplayManager::instance(); //Must come before anything that you want to be drawn
     mdisplay->cd();
     mdisplay->draw();
@@ -131,7 +167,8 @@ Int_t StiMaker::Init()
     mdrawablehits = new StiRootDrawableHits();
     mdrawablehits->clear();
     mdisplay->addDrawable(mdrawablehits);
-    
+
+    //The Detector Tree
     //Must build Polygons and Materials before detectors
     mdetector = StiDetectorContainer::instance();
     mdetector->buildPolygons(mpolygonbuildpath);
@@ -143,6 +180,7 @@ Int_t StiMaker::Init()
     mdisplay->draw();
     mdisplay->update();
 
+    //The Hit Filler
     mhitfiller = new StiHitFiller();
     mhitfiller->addDetector(kTpcId);
     //mhitfiller->addDetector(kSvtId);
@@ -177,6 +215,24 @@ Int_t StiMaker::Make()
 	    }
 	}
 	mdrawablehits->fillHitsForDrawing();
+
+	//Temp patch to test the SeedFinder, draw some tracks
+	//Initialize the SeedFinder, loop on tracks
+	mtrackseedfinder->setEvent(mevent);
+	while (mtrackseedfinder->hasMore()) {
+	    StiEvaluableTrack* thetrack = dynamic_cast<StiEvaluableTrack*>(mtrackseedfinder->next());
+	    if (thetrack) {
+		StTrack* sttrack = thetrack->stTrack();
+		cout <<sttrack->geometry()->momentum()<<endl;
+
+		//Make a drawable track, add to display
+		StiRootDrawableStiEvaluableTrack* drawabletrack = md_trackfactory->getObject();
+		drawabletrack->setStTrack(sttrack);
+		drawabletrack->fillHitsForDrawing();
+		mdisplay->addDrawable(drawabletrack);
+	    }
+	    
+	}
 	
     }
     mdisplay->draw();
