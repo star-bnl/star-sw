@@ -1,8 +1,12 @@
-* $Id: tte.F,v 1.7 1998/04/13 16:02:55 sakrejda Exp $
+* $Id: tte.F,v 1.8 1998/04/14 23:24:48 sakrejda Exp $
 * $Log: tte.F,v $
-* Revision 1.7  1998/04/13 16:02:55  sakrejda
-* calls to message added, protected against overflows, comments added, cleaned up - still needs work
+* Revision 1.8  1998/04/14 23:24:48  sakrejda
+* filling tte_mctrack structure thoroughly debugged
 *
+* Revision 1.8  1998/04/14 23:24:48  sakrejda
+* filling tte_mctrack structure thoroughly debugged
+*
+* Revision 1.7  1998/04/13 16:02:55  sakrejda
 * calls to message added, protected against overflows, comments added,
 * cleaned up - still needs work
 *
@@ -135,15 +139,18 @@ c                                              <-> real hit assignement
       integer   id_mc, ip_mc, mc_track
 
       integer   my_charge(100)
+      real      radius,hrot,xc,yc,psic,xs,ys,x0,y0,phis,psis,psisc
+      integer   il, ie, ibig, isubtract
+      real      dedxbig, dedxsum
       integer   event_number
       data      event_number /0/
       save      event number
-      integer idI1, idI2, idI3, idI4, idI5, idI6, idI7, idI8, idI9, idI10
-      integer idI11
-      data idI1, idI2, idI3, idI4, idI5, idI6, idI7, idI8, idI9, idI10 / 10*0 /
-      data idI11 /0/
-      save idI1, idI2, idI3, idI4, idI5, idI6, idI7, idI8, idI9, idI10
-      save idI11
+
+      integer idI10, idI11
+      character*132 m132(10)                ! for messages
+      data idI10, idI11 /2*0/
+      integer idI10, idI11, idI12, idI13, idI14
+      save idI10, idI11
       data idI10, idI11, idI12, idI13, idI14 /5*0/
       save idI1, idI2, idI3, idI4, idI5, idI6, idI7, idI8, idI9
       save idI10, idI11, idI12, idI13, idI14
@@ -164,6 +171,7 @@ C_____________________________________________________________________________
       call Msg_Enable( 'TTE-I6' )
       call Msg_Enable( 'TTE-I7' )
       call Msg_Enable( 'TTE-I8' )
+c      call Msg_Enable( 'TTE-I12' )
       call Msg_Enable( 'TTE-I13' )
       call Msg_Enable( 'TTE-I14' )
       event_number=event_number+1
@@ -180,9 +188,9 @@ c     but first clean up the list
 c
       call vzero(list_g2t_hits,list_size)
 C
-             write(m132(1),*) 'TTE-I1 list_size not big enough ','i = ', i
-             write(m132(2),*) 'list_size = ', list_size, 'g2t_hit(i).id = ',
-     >                         g2t_hit(i).id
+      do i=1,g2t_hit_h.nok
+         if(g2t_hit(i).id.gt.list_size.or.g2t_hit(i).id.lt.1) then
+             tte=STAFCV_BAD
              write(m132(1),*) 'TTE-I1 list_size not big enough ','i= ',i
              write(m132(2),*) 'list_size = ',list_size,'g2t_hit(i).id = '
      >                         ,g2t_hit(i).id
@@ -196,7 +204,7 @@ c
 c     set up an index table to address a reconstructed hit by its hit id
 c     but first clean up the list
       call vzero(list_hits,hit_size)
-             write(m132(1),*) 'TTE-I2 list_size not big enough ','i = ', i
+      do i=1,hit_h.nok
          if(hit(i).id.gt.list_size.or.hit(i).id.lt.1) then
              tte=STAFCV_BAD
              write(m132(1),*) 'TTE-I2 list_size not big enough ','i= ',i
@@ -214,8 +222,8 @@ c     set up an index table to address mc tracks in g2t_track table by the
 c     track id
       call vzero(list_g2t_tracks,track_size)
       do i=1,g2t_track_h.nok
-             write(m132(2),*) 'track_size = ',track_size,' g2t_track(i).id = ',
-     >                         g2t_track(i).id
+         if(g2t_track(i).id.gt.track_size.or.g2t_track(i).id.lt.1) then
+             tte=STAFCV_BAD
              write(m132(1),*) 'TTE-I3 track_size not big enough, i = ',i
              write(m132(2),*) 'track_size = ',track_size,
      >                        ' g2t_track(i).id = ',g2t_track(i).id
@@ -229,7 +237,7 @@ c     set up an index table to address rec tracks by the rec track id
 c     
       call vzero(list_tracks,track_size)
       do i=1,track_h.nok
-             write(m132(2),*) 'list_size = ',list_size,' track(i).id = ',
+         if(track(i).id.gt.track_size.or.track(i).id.lt.1) then
              tte=STAFCV_BAD
              write(m132(1),*) 'TPT-I4 track_size not big enough, i = ',i
              write(m132(2),*) 'list_size = ',list_size,' track(i).id= ',
@@ -280,6 +288,7 @@ c     let's count dropped mc hits
 *     skip  if there is no hits on this track
 *     at this time we can also calculate a dedx for the track
       if(g2t_track(i).n_tpc_hit.ne.0) then
+          call vzero(dedx_list,max_track_length)
            evmc_h.nok=evmc_h.nok+1
            ntrack=0
            evmc(evmc_h.nok).evnum=  event_number
@@ -322,8 +331,9 @@ c              merging and filtering.....
 c              so check whether we have this id on a list of reconstructed
 c              hits
                if(list_hits(tindex(index_mc).key2).gt.0) then
-                   write(m132(1),*) 'TTE-I6 long_list not long enough, hit_size ='
-                   write(m132(2),*) hit_size, ' tindex(index_mc).key2 = ',
+                 if(tindex(index_mc).key2.gt.hit_size.or.
+     >             tindex(index_mc).key2.lt.1) then
+                   tte=STAFCV_BAD
                    write(m132(1),*) 'TTE-I6 long_list not long enough,'
      >                              //'hit_size ='
                    write(m132(2),*) hit_size, 'tindex(index_mc).key2 =',
@@ -331,13 +341,15 @@ c              hits
                    call Message (m132, 2, idI6 )
                    return
                  endif
-                   if(rec_hit_on_mc_track(1,ii).eq.tindex(index_mc).key2)iloc=ii
+c                find whether this hit is on our short list
+                 iloc=0
                  do ii=1,rec_hit_on_mc_track_nok
                    if(rec_hit_on_mc_track(1,ii).eq.
      >                tindex(index_mc).key2)iloc=ii
                  end do
                  if(max_track_length.gt.rec_hit_on_mc_track_nok) then
-                   rec_hit_on_mc_track(1,rec_hit_on_mc_track_nok)=tindex(index_mc).key2
+                 if(iloc.eq.0) then
+                   rec_hit_on_mc_track_nok=rec_hit_on_mc_track_nok+1
 c                  memorize the id of a reconstructed hit
                    rec_hit_on_mc_track(1,rec_hit_on_mc_track_nok)=
      >             tindex(index_mc).key2
@@ -385,8 +397,8 @@ c          so now it's time to calculate dedx for this track
            else
              evmc(evmc_h.nok).dedxg=-1.0 
            endif
-               write(m132(1),*) 'TTE-I7 track_size not big enough', track_size,
-     >         track_h.maxlen 
+
+c          go through all the points on the long_list list
            if(track_h.maxlen.gt.track_size) then
                write(m132(1),*) 'TTE-I7 track_size not big enough', 
      >         track_size, track_h.maxlen 
@@ -428,9 +440,12 @@ c                check whether we have it on our rec_track_on_mc_track list
                  iloc=0
                  do ii=1,rec_track_on_mc_track_nok
                      if(rec_track_on_mc_track(1,ii).eq.id_track) iloc=ii
-                       rec_track_on_mc_track_nok=rec_track_on_mc_track_nok+1
-                       rec_track_on_mc_track(1,rec_track_on_mc_track_nok)=id_track
-                       rec_track_on_mc_track(2,rec_track_on_mc_track_nok)=0
+                 end do
+                 if(iloc.eq.0) then
+                    if(rec_track_on_mc_track_nok.lt.maxtrack)then
+                      rec_track_on_mc_track_nok=
+     >                rec_track_on_mc_track_nok+1
+                      rec_track_on_mc_track(1,rec_track_on_mc_track_nok)
      >                =id_track
                       rec_track_on_mc_track(2,rec_track_on_mc_track_nok)
      >                =0
@@ -445,12 +460,14 @@ c          with tracks
            evmc(evmc_h.nok).nseg=rec_track_on_mc_track_nok
            evmc(evmc_h.nok).nrec1=0
            evmc(evmc_h.nok).nrec2=0
-             if(rec_track_on_mc_track(2,j).gt.evmc(evmc_h.nok).nrec1) then
+           evmc(evmc_h.nok).recid=0
+           do j=1,rec_track_on_mc_track_nok
              it=rec_track_on_mc_track(1,j)
              if(rec_track_on_mc_track(2,j).gt.
      >       evmc(evmc_h.nok).nrec1) then
                 if(evmc(evmc_h.nok).nrec1.gt.evmc(evmc_h.nok).nrec2) 
-             else if(rec_track_on_mc_track(2,j).gt.evmc(evmc_h.nok).nrec2) then
+     >          evmc(evmc_h.nok).nrec2=evmc(evmc_h.nok).nrec1
+                evmc(evmc_h.nok).nrec1=rec_track_on_mc_track(2,j)
                 evmc(evmc_h.nok).recid=it
              else if(rec_track_on_mc_track(2,j).gt.
      >       evmc(evmc_h.nok).nrec2) then
@@ -495,6 +512,21 @@ c           and calculate the quality factor
 c           add the dedx information
             evmc(i).dedxr = track(it).dedx(1)
          endif
+
+      end do
+c
+c     now go over the mc tracks and check whether they share reconstructed 
+c     track
+      do i=1,evmc_h.nok-1
+         if(evmc(i).nseg.gt.0) then
+         do j=i+1,evmc_h.nok
+            if(evmc(i).recid.eq.evmc(j).recid) then
+               if(evmc(i).nrec1.le.evmc(j).nrec1) then
+                   evmc(i).nseg = -abs(evmc(i).nseg)
+               else
+                   evmc(j).nseg = -abs(evmc(j).nseg)
+               endif
+            endif
          end do
          endif
       end do
@@ -543,8 +575,10 @@ c        and get it's momentum information.
          eval(eval_h.nok).qr=track(list_tracks(track_num)).q
          eval(eval_h.nok).ptr=1.0/track(list_tracks(track_num)).invp
          eval(eval_h.nok).ptvr=1.0/track(list_tracks(track_num)).invp
-         eval(eval_h.nok).chisq(1)=track(list_tracks(track_num)).chisq(1)
-         eval(eval_h.nok).chisq(2)=track(list_tracks(track_num)).chisq(2)
+         eval(eval_h.nok).chisq(1)=
+     >   track(list_tracks(track_num)).chisq(1)
+         eval(eval_h.nok).chisq(2)=
+     >   track(list_tracks(track_num)).chisq(2)
          eval(eval_h.nok).pxr=eval(eval_h.nok).ptr*
      >   cos(track(list_tracks(track_num)).psi*C_RAD_PER_DEG)
          eval(eval_h.nok).pyr=eval(eval_h.nok).ptr*
@@ -619,7 +653,8 @@ c          let's see how many different tracks got mixed up in this one...
            do ii=1,rec_track_on_mc_track_nok
               if(rec_track_on_mc_track(1,ii).eq.mc_track) iloc=ii
            end do
-                rec_track_on_mc_track(1,rec_track_on_mc_track_nok)=mc_track
+           if(iloc.eq.0) then
+             if(rec_track_on_mc_track_nok.lt.maxtrack)then
                 rec_track_on_mc_track_nok=rec_track_on_mc_track_nok+1
                 rec_track_on_mc_track(1,rec_track_on_mc_track_nok)=
      >          mc_track
