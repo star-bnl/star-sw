@@ -73,6 +73,8 @@ C: Sanity check of header for table 'p_vert' & 'p_track'
           if (Istop.eq.0) meca=-meca
           Ivol     = Mecat/100
           Call aGFVOLU (Ivol,Cvol,Cshap,numed,par,npar)
+          if (npar.lt.0) print *,' G2T_get_kine error: Vertex ',iv,
+     *                           ' refers a non-existing volume',ivol 
         endif
 *
         p_vert(iv).Id           = Iv             ! primary key 
@@ -94,7 +96,6 @@ c       p_vert(iv).daughter_p - filled by tracks ! first daughter in linked list
         p_vert(iv).next_itrmd_p = 0              ! next intermedate vertex 
         p_vert(iv).next_prim_v_p= 0              ! next primary vertex
         p_vert_h.nok            = iv
-
       EndDo
 *
 *     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
