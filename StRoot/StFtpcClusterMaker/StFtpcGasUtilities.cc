@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 //
-//   $Id: StFtpcGasUtilities.cc,v 1.14 2005/01/17 15:58:05 jcs Exp $
+//   $Id: StFtpcGasUtilities.cc,v 1.15 2005/03/14 22:57:18 jcs Exp $
 //
 //   StFtpcGasUtilities
 //
@@ -11,6 +11,10 @@
 ////////////////////////////////////////////////////////////////////////
 //
 //   $Log: StFtpcGasUtilities.cc,v $
+//   Revision 1.15  2005/03/14 22:57:18  jcs
+//   clean up code
+//   use body + extra temperature readings starting with y2005
+//
 //   Revision 1.14  2005/01/17 15:58:05  jcs
 //   use all 6 ftpc west body temperature readings for 2005 run
 //
@@ -97,7 +101,7 @@ Int_t StFtpcGasUtilities::barometricPressure() {
    }
 }   
 
-// Calculate FTPC gas temperature from body temperatures
+// Calculate FTPC West gas temperature from body temperatures only
  
 Int_t StFtpcGasUtilities::averageTemperatureWest(Int_t dbDate, Int_t runNumber) {
 	
@@ -107,57 +111,57 @@ Int_t StFtpcGasUtilities::averageTemperatureWest(Int_t dbDate, Int_t runNumber) 
    // Year2004: from runs after run 5027147 on 2004-01-27 to the end of run on  2004-05-15, only Body1, Body3 and Body4 temperature readings are useable for FTPC West
    // The averageBodyTemperatureWest must be adjusted since only 3 instead of 6 temperature readings are used
    if ( runNumber > 5027147 && runNumber < 5136001 ) {
-      cout<<"ruNumber = "<<runNumber<<" > 5027147 && <= 5136001: only Body1, Body3 and Body4 are useable for FTPC West. The averageBodyTemperatureWest is adjusted by  "<<mDb->adjustAverageWest()<<endl;
+      cout<<"runNumber = "<<runNumber<<" > 5027147 && <= 5136001: only Body1, Body3 and Body4 are useable for FTPC West. The averageBodyTemperatureWest is adjusted by  "<<mDb->adjustAverageWest()<<endl;
       if (mGas->getBody1West() >= mDb->minGasTemperature() && mGas->getBody1West() <= mDb->maxGasTemperature() ) {
-         averageBodyTemperatureWest = averageBodyTemperatureWest + mGas->getBody1West();	 
+         averageBodyTemperatureWest += mGas->getBody1West();	 
 	 numberBodyTemperaturesWest++;
-	 cout<<mGas->getBody1West()<<" (body1West) + ";
+	 cout<<mGas->getBody1West()<<"(body1West)";
       }  
       if (mGas->getBody3West() >= mDb->minGasTemperature() && mGas->getBody3West() <= mDb->maxGasTemperature() ) {
-         averageBodyTemperatureWest = averageBodyTemperatureWest + mGas->getBody3West();	 
+         averageBodyTemperatureWest += mGas->getBody3West();	 
 	 numberBodyTemperaturesWest++;
-	 cout<<mGas->getBody3West()<<" (body3West) + ";
+	 cout<<" + "<<mGas->getBody3West()<<"(body3West)";
       }  
       if (mGas->getBody4West() >= mDb->minGasTemperature() && mGas->getBody4West() <= mDb->maxGasTemperature() ) {
-         averageBodyTemperatureWest = averageBodyTemperatureWest + mGas->getBody4West();	 
+         averageBodyTemperatureWest += mGas->getBody4West();	 
 	 numberBodyTemperaturesWest++;
-	 cout<<mGas->getBody4West()<<" (body4West) ";
+	 cout<<" + "<<mGas->getBody4West()<<"(body4West)";
       }  
    }  
 
    else {
       if (mGas->getBody1West() >= mDb->minGasTemperature() && mGas->getBody1West() <= mDb->maxGasTemperature()) {      
-	 averageBodyTemperatureWest = averageBodyTemperatureWest + mGas->getBody1West();
+	 averageBodyTemperatureWest += mGas->getBody1West();
 	 numberBodyTemperaturesWest++;
-	 cout<<mGas->getBody1West()<<" (body1West) + ";
+	 cout<<mGas->getBody1West()<<"(body1West)";
       }		 
       if (mGas->getBody2West() >= mDb->minGasTemperature() && mGas->getBody2West()<= mDb->maxGasTemperature() ) {
-	 averageBodyTemperatureWest = averageBodyTemperatureWest + mGas->getBody2West();
+	 averageBodyTemperatureWest += mGas->getBody2West();
 	 numberBodyTemperaturesWest++;
-	 cout<<mGas->getBody2West()<<" (body2West) + ";
+	 cout<<" + "<<mGas->getBody2West()<<"(body2West)";
       }		 
       if (mGas->getBody3West() >= mDb->minGasTemperature() && mGas->getBody3West()<= mDb->maxGasTemperature() ) {
-	 averageBodyTemperatureWest = averageBodyTemperatureWest + mGas->getBody3West();
+	 averageBodyTemperatureWest += mGas->getBody3West();
 	 numberBodyTemperaturesWest++;
-	 cout<<mGas->getBody3West()<<" (body3West) + ";
+	 cout<<" + "<<mGas->getBody3West()<<"(body3West)";
       }		 
       if (mGas->getBody4West() >= mDb->minGasTemperature() && mGas->getBody4West() <= mDb->maxGasTemperature() ) {
-	 averageBodyTemperatureWest = averageBodyTemperatureWest + mGas->getBody4West();
+	 averageBodyTemperatureWest += mGas->getBody4West();
 	 numberBodyTemperaturesWest++;
-	 cout<<mGas->getBody4West()<<" (body4West) ";
+	 cout<<" + "<<mGas->getBody4West()<<"(body4West)";
       }		 
       // from 2003-10-31 -> 2004-01-24 and as of 2004-04-04 there are 2 additional body temperature sensors
       if ( dbDate >= 20031031 && dbDate <= 20040124 || dbDate >= 20040404) {
          cout<<"(dbDate = "<<dbDate<<" >= 20031031 && <= 20040124 ||  >= 20040404 activate additional body temperature sensors) ";
          if (mGas->getBody5West() >= mDb->minGasTemperature() && mGas->getBody5West() <= mDb->maxGasTemperature() ) {
-            averageBodyTemperatureWest = averageBodyTemperatureWest + mGas->getBody5West();	 
+            averageBodyTemperatureWest += mGas->getBody5West();	 
 	    numberBodyTemperaturesWest++;
-	    cout<<" + "<<mGas->getBody5West()<<" (body5West) + ";
+	    cout<<" + "<<mGas->getBody5West()<<"(body5West)";
 	 }  
          if (mGas->getBody6West() >= mDb->minGasTemperature() && mGas->getBody6West() <= mDb->maxGasTemperature() ) {
-	    averageBodyTemperatureWest = averageBodyTemperatureWest + mGas->getBody6West();
+	    averageBodyTemperatureWest += mGas->getBody6West();
 	    numberBodyTemperaturesWest++;
-	    cout<<mGas->getBody6West()<<" (body6West) ";
+	    cout<<" + "<<mGas->getBody6West()<<"(body6West)";
 	  }  
       }  
    }      
@@ -180,7 +184,114 @@ Int_t StFtpcGasUtilities::averageTemperatureWest(Int_t dbDate, Int_t runNumber) 
   }	  
 }
 
+// Calculate FTPC West gas temperature from body + extra temperature readings
+// (the extra temperature readings are available as of 2005-01-01)
  
+Int_t StFtpcGasUtilities::averageTemperatureWest(Int_t dbDate, Int_t runNumber,St_ftpcTemps *ftpcTemps) {
+	
+     cout<<" dbDate = "<<dbDate<<"(>2005-01-01) Use FTPC West body temperatures + FTPC West extra temperature readings 1,3-6 (2 is unstable in the year 2005 run)"<<endl;
+
+   Int_t numberBodyTemperaturesWest = 0;
+   Float_t averageBodyTemperatureWest = 0.0;
+        
+   if (mGas->getBody1West() >= mDb->minGasTemperature() && mGas->getBody1West() <= mDb->maxGasTemperature()) {      
+      averageBodyTemperatureWest += mGas->getBody1West();
+      numberBodyTemperaturesWest++;
+      cout<<mGas->getBody1West()<<"(body1West)";
+   }		 
+   if (mGas->getBody2West() >= mDb->minGasTemperature() && mGas->getBody2West()<= mDb->maxGasTemperature() ) {
+       averageBodyTemperatureWest += mGas->getBody2West();
+       numberBodyTemperaturesWest++;
+       cout<<" + "<<mGas->getBody2West()<<"(body2West)";
+   }		 
+   if (mGas->getBody3West() >= mDb->minGasTemperature() && mGas->getBody3West()<= mDb->maxGasTemperature() ) {
+       averageBodyTemperatureWest += mGas->getBody3West();
+       numberBodyTemperaturesWest++;
+       cout<<" + "<<mGas->getBody3West()<<"(body3West)";
+   }		 
+   if (mGas->getBody4West() >= mDb->minGasTemperature() && mGas->getBody4West() <= mDb->maxGasTemperature() ) {
+       averageBodyTemperatureWest += mGas->getBody4West();
+       numberBodyTemperaturesWest++;
+       cout<<" + "<<mGas->getBody4West()<<"(body4West)";
+   }		 
+   if (mGas->getBody5West() >= mDb->minGasTemperature() && mGas->getBody5West() <= mDb->maxGasTemperature() ) {
+       averageBodyTemperatureWest += mGas->getBody5West();	 
+       numberBodyTemperaturesWest++;
+       cout<<" + "<<mGas->getBody5West()<<"(body5West)";
+   }  
+   if (mGas->getBody6West() >= mDb->minGasTemperature() && mGas->getBody6West() <= mDb->maxGasTemperature() ) {
+       averageBodyTemperatureWest += mGas->getBody6West();
+       numberBodyTemperaturesWest++;
+       cout<<" + "<<mGas->getBody6West()<<"(body6West)";
+   }  
+
+
+   // calculate average body temperature west
+  if (numberBodyTemperaturesWest > 0) {
+     cout<<" = "<<averageBodyTemperatureWest<<endl;
+     cout<<"averageBodyTemperatureWest = "<<averageBodyTemperatureWest<<"/"<<numberBodyTemperaturesWest<<" = ";
+     averageBodyTemperatureWest = averageBodyTemperatureWest/numberBodyTemperaturesWest;
+     cout<<averageBodyTemperatureWest<<endl;
+  }
+     
+     ftpcTemps_st* tempT = (ftpcTemps_st*)ftpcTemps->GetTable();
+
+     Int_t numberExtraTempsWest = 0;
+     Float_t averageExtraTempsWest = 0.0;
+
+     if (tempT->extra1West >= mDb->minGasTemperature() && tempT->extra1West <= mDb->maxGasTemperature() ) {
+        averageExtraTempsWest += tempT->extra1West;
+        numberExtraTempsWest++;
+        cout<<tempT->extra1West<<"(extra1West)";
+     }
+     //if (tempT->extra2West >= mDb->minGasTemperature() && tempT->extra2West <= mDb->maxGasTemperature() ) {
+     //   averageExtraTempsWest += tempT->extra2West;
+     //   numberExtraTempsWest++;
+     // cout<<" + "<<tempT->extra2West<<"(extra2West)";
+     //}
+     if (tempT->extra3West >= mDb->minGasTemperature() && tempT->extra3West <= mDb->maxGasTemperature() ) {
+        averageExtraTempsWest += tempT->extra3West;
+        numberExtraTempsWest++;
+        cout<<" + "<<tempT->extra3West<<"(extra3West)";
+     }
+     if (tempT->extra4West >= mDb->minGasTemperature() && tempT->extra4West <= mDb->maxGasTemperature() ) {
+        averageExtraTempsWest += tempT->extra4West;
+        numberExtraTempsWest++;
+        cout<<" + "<<tempT->extra4West<<"(extra4West)";
+     }
+     if (tempT->extra5West >= mDb->minGasTemperature() && tempT->extra5West <= mDb->maxGasTemperature() ) {
+        averageExtraTempsWest += tempT->extra5West;
+        numberExtraTempsWest++;
+        cout<<" + "<<tempT->extra5West<<"(extra5West)";
+     }
+     if (tempT->extra6West >= mDb->minGasTemperature() && tempT->extra6West <= mDb->maxGasTemperature() ) {
+        averageExtraTempsWest += tempT->extra6West;
+        numberExtraTempsWest++;
+        cout<<" + "<<tempT->extra6West<<"(extra6West)";
+     }
+
+     // calculate average extra temperature west
+     if (numberExtraTempsWest > 0) {
+        cout<<" = "<<averageExtraTempsWest<<endl;
+        cout<<"averageExtraTempsWest = "<<averageExtraTempsWest<<"/"<<numberExtraTempsWest<<" = ";
+        averageExtraTempsWest = averageExtraTempsWest/numberExtraTempsWest;
+        cout<<averageExtraTempsWest<<endl;
+     }
+    
+     if ( (averageBodyTemperatureWest + averageExtraTempsWest) != 0 ) {
+        cout<<"setGasTemperatureWest = ("<<averageBodyTemperatureWest<<" + "<<averageExtraTempsWest<<")/2 + "<<mDb->adjustAverageWest()<<"  = "<<(averageBodyTemperatureWest+averageExtraTempsWest)/2 + mDb->adjustAverageWest()<<endl;
+        mParam->setGasTemperatureWest((averageExtraTempsWest + averageBodyTemperatureWest)/2 + mDb->adjustAverageWest());
+        return kStOK;
+     }
+     else {
+        cout<<"No FTPC West body temperatures or FTPC Extra temperatures found for run number "<<runNumber<<"dbDate "<<dbDate<<endl;
+        if (mParam->gasTemperatureWest() != 0) cout<<"Using defaultTemperatureWest = "<<mParam->gasTemperatureWest()<<endl; 
+        return kStWarn;
+     }	  
+}
+
+// Calculate average FTPC East gas temperature from body temperatures only
+
 Int_t StFtpcGasUtilities::averageTemperatureEast(Int_t dbDate, Int_t runNumber) {
 	
    Int_t numberBodyTemperaturesEast = 0;
@@ -189,58 +300,58 @@ Int_t StFtpcGasUtilities::averageTemperatureEast(Int_t dbDate, Int_t runNumber) 
    // Year2004: from runs after run 5027147 on 2004-01-27 to run 5093053, the last run of the AuAu 62GeV run on  2004-04-02, only Body3, Body4 and Body5 temperature readings are useable for FTPC East
    // The averageBodyTemperatureEast must be adjusted since only 3 instead of 6 temperature readings are used
    if ( runNumber > 5027147 && runNumber <= 5093053 ) {
-      cout<<"ruNumber = "<<runNumber<<" > 5027147 && <= 5093053: only Body3, Body4 and Body5 are useable for FTPC East. The averageBodyTemperatureEast is adjusted by  "<<mDb->adjustAverageEast()<<endl;
+      cout<<"runNumber = "<<runNumber<<" > 5027147 && <= 5093053: only Body3, Body4 and Body5 are useable for FTPC East. The averageBodyTemperatureEast is adjusted by  "<<mDb->adjustAverageEast()<<endl;
       if (mGas->getBody3East() >= mDb->minGasTemperature() && mGas->getBody3East() <= mDb->maxGasTemperature() ) {
-         averageBodyTemperatureEast = averageBodyTemperatureEast + mGas->getBody3East();	 
+         averageBodyTemperatureEast += mGas->getBody3East();	 
 	 numberBodyTemperaturesEast++;
-	 cout<<mGas->getBody3East()<<" (body3East) + ";
+	 cout<<mGas->getBody3East()<<"(body3East)";
       }  
       if (mGas->getBody4East() >= mDb->minGasTemperature() && mGas->getBody4East() <= mDb->maxGasTemperature() ) {
-         averageBodyTemperatureEast = averageBodyTemperatureEast + mGas->getBody4East();	 
+         averageBodyTemperatureEast += mGas->getBody4East();	 
 	 numberBodyTemperaturesEast++;
-	 cout<<mGas->getBody4East()<<" (body4East) + ";
+	 cout<<" + "<<mGas->getBody4East()<<"(body4East)";
       }  
       if (mGas->getBody5East() >= mDb->minGasTemperature() && mGas->getBody5East() <= mDb->maxGasTemperature() ) {
-         averageBodyTemperatureEast = averageBodyTemperatureEast + mGas->getBody5East();	 
+         averageBodyTemperatureEast += mGas->getBody5East();	 
 	 numberBodyTemperaturesEast++;
-	 cout<<mGas->getBody5East()<<" (body5East) ";
+	 cout<<" + "<<mGas->getBody5East()<<"(body5East)";
       }  
    }  
 
    else {
 
       if (mGas->getBody1East() >= mDb->minGasTemperature() && mGas->getBody1East() <= mDb->maxGasTemperature()) {      
-		 averageBodyTemperatureEast = averageBodyTemperatureEast + mGas->getBody1East();
+		 averageBodyTemperatureEast += mGas->getBody1East();
 		 numberBodyTemperaturesEast++;
-	         cout<<mGas->getBody1East()<<" (body1East) + ";
+	         cout<<mGas->getBody1East()<<"(body1East)";
       }		 
       if (mGas->getBody2East() >= mDb->minGasTemperature() && mGas->getBody2East()<= mDb->maxGasTemperature() ) {
-		 averageBodyTemperatureEast = averageBodyTemperatureEast + mGas->getBody2East();
+		 averageBodyTemperatureEast += mGas->getBody2East();
 		 numberBodyTemperaturesEast++;
-	         cout<<mGas->getBody2East()<<" (body2East) + ";
+	         cout<<" + "<<mGas->getBody2East()<<"(body2East)";
       }		 
       if (mGas->getBody3East() >= mDb->minGasTemperature() && mGas->getBody3East()<= mDb->maxGasTemperature() ) {
-		 averageBodyTemperatureEast = averageBodyTemperatureEast + mGas->getBody3East();
+		 averageBodyTemperatureEast += mGas->getBody3East();
 		 numberBodyTemperaturesEast++;
-	         cout<<mGas->getBody3East()<<" (body3East) + ";
+	         cout<<" + "<<mGas->getBody3East()<<"(body3East)";
       }		 
       if (mGas->getBody4East() >= mDb->minGasTemperature() && mGas->getBody4East() <= mDb->maxGasTemperature() ) {
-		 averageBodyTemperatureEast = averageBodyTemperatureEast + mGas->getBody4East();
+		 averageBodyTemperatureEast += mGas->getBody4East();
 		 numberBodyTemperaturesEast++;
-	         cout<<mGas->getBody4East()<<" (body4East) ";
+	         cout<<" + "<<mGas->getBody4East()<<"(body4East)";
       }		 
       // from 2003-10-31 -> 2004-01-24 and as of 2004-04-04 there are 2 additional body temperature sensors
       if ( dbDate >= 20031031 && dbDate <= 20040124 || dbDate >= 20040404 ) {
          cout<<"(dbDate = "<<dbDate<<" >= 20031031 && <= 20040124 ||  >= 20040404 activate additional body temperature sensors) ";
          if (mGas->getBody5East() >= mDb->minGasTemperature() && mGas->getBody5East() <= mDb->maxGasTemperature() ) {
-            averageBodyTemperatureEast = averageBodyTemperatureEast + mGas->getBody5East();	 
+            averageBodyTemperatureEast += mGas->getBody5East();	 
 	    numberBodyTemperaturesEast++;
-	    cout<<" + "<<mGas->getBody5East()<<" (body5East) ";
+	    cout<<" + "<<mGas->getBody5East()<<"(body5East)";
 	 }  
          if (mGas->getBody6East() >= mDb->minGasTemperature() && mGas->getBody6East() <= mDb->maxGasTemperature() ) {
-	    averageBodyTemperatureEast = averageBodyTemperatureEast + mGas->getBody6East();
+	    averageBodyTemperatureEast += mGas->getBody6East();
 	    numberBodyTemperaturesEast++;
-	    cout<<mGas->getBody6East()<<" (body6East) ";
+	    cout<<mGas->getBody6East()<<"(body6East)";
 	 } 
        }  
    }      
@@ -261,6 +372,118 @@ Int_t StFtpcGasUtilities::averageTemperatureEast(Int_t dbDate, Int_t runNumber) 
         if (mParam->gasTemperatureEast() != 0) cout<<"Using defaultTemperatureEast = "<<mParam->gasTemperatureEast()<<endl; 
         return kStWarn;
      }	  
+}
+
+// Calculate FTPC East gas temperature from body temperatures 
+// if no body temperature readings available use extra temperature readings
+// (the extra temperature readings are available as of 2005-01-01)
+ 
+Int_t StFtpcGasUtilities::averageTemperatureEast(Int_t dbDate, Int_t runNumber,St_ftpcTemps *ftpcTemps) {
+	
+     cout<<" dbDate = "<<dbDate<<"(>2005-01-01) Use FTPC East body temperatures + FTPC East extra temperature readings 1-7"<<endl;
+
+   Int_t numberBodyTemperaturesEast = 0;
+   Float_t averageBodyTemperatureEast = 0.0;
+        
+   if (mGas->getBody1East() >= mDb->minGasTemperature() && mGas->getBody1East() <= mDb->maxGasTemperature()) {      
+      averageBodyTemperatureEast += mGas->getBody1East();
+      numberBodyTemperaturesEast++;
+      cout<<mGas->getBody1East()<<"(body1East)";
+   }		 
+   if (mGas->getBody2East() >= mDb->minGasTemperature() && mGas->getBody2East()<= mDb->maxGasTemperature() ) {
+       averageBodyTemperatureEast += mGas->getBody2East();
+       numberBodyTemperaturesEast++;
+       cout<<" + "<<mGas->getBody2East()<<"(body2East)";
+   }		 
+   if (mGas->getBody3East() >= mDb->minGasTemperature() && mGas->getBody3East()<= mDb->maxGasTemperature() ) {
+       averageBodyTemperatureEast += mGas->getBody3East();
+       numberBodyTemperaturesEast++;
+       cout<<" + "<<mGas->getBody3East()<<"(body3East)";
+   }		 
+   if (mGas->getBody4East() >= mDb->minGasTemperature() && mGas->getBody4East() <= mDb->maxGasTemperature() ) {
+       averageBodyTemperatureEast += mGas->getBody4East();
+       numberBodyTemperaturesEast++;
+       cout<<" + "<<mGas->getBody4East()<<"(body4East)";
+   }		 
+   if (mGas->getBody5East() >= mDb->minGasTemperature() && mGas->getBody5East() <= mDb->maxGasTemperature() ) {
+       averageBodyTemperatureEast += mGas->getBody5East();	 
+       numberBodyTemperaturesEast++;
+       cout<<" + "<<mGas->getBody5East()<<"(body5East)";
+   }  
+   if (mGas->getBody6East() >= mDb->minGasTemperature() && mGas->getBody6East() <= mDb->maxGasTemperature() ) {
+       averageBodyTemperatureEast += mGas->getBody6East();
+       numberBodyTemperaturesEast++;
+       cout<<" + "<<mGas->getBody6East()<<"(body6East)";
+   }  
+
+
+   // calculate average body temperature east
+  if (numberBodyTemperaturesEast > 0) {
+     cout<<" = "<<averageBodyTemperatureEast<<endl;
+     cout<<"averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<"/"<<numberBodyTemperaturesEast<<" = ";
+     averageBodyTemperatureEast = averageBodyTemperatureEast/numberBodyTemperaturesEast;
+     cout<<averageBodyTemperatureEast<<endl;
+  }
+     
+     ftpcTemps_st* tempT = (ftpcTemps_st*)ftpcTemps->GetTable();
+
+     Int_t numberExtraTempsEast = 0;
+     Float_t averageExtraTempsEast = 0.0;
+
+     if (tempT->extra1East >= mDb->minGasTemperature() && tempT->extra1East <= mDb->maxGasTemperature() ) {
+        averageExtraTempsEast += tempT->extra1East;
+        numberExtraTempsEast++;
+        cout<<tempT->extra1East<<"(extra1East)";
+     }
+     if (tempT->extra2East >= mDb->minGasTemperature() && tempT->extra2East <= mDb->maxGasTemperature() ) {
+        averageExtraTempsEast += tempT->extra2East;
+        numberExtraTempsEast++;
+        cout<<" + "<<tempT->extra2East<<"(extra2East)";
+     }
+     if (tempT->extra3East >= mDb->minGasTemperature() && tempT->extra3East <= mDb->maxGasTemperature() ) {
+        averageExtraTempsEast += tempT->extra3East;
+        numberExtraTempsEast++;
+        cout<<" + "<<tempT->extra3East<<"(extra3East)";
+     }
+     if (tempT->extra4East >= mDb->minGasTemperature() && tempT->extra4East <= mDb->maxGasTemperature() ) {
+        averageExtraTempsEast += tempT->extra4East;
+        numberExtraTempsEast++;
+        cout<<" + "<<tempT->extra4East<<"(extra4East)";
+     }
+     if (tempT->extra5East >= mDb->minGasTemperature() && tempT->extra5East <= mDb->maxGasTemperature() ) {
+        averageExtraTempsEast += tempT->extra5East;
+        numberExtraTempsEast++;
+        cout<<" + "<<tempT->extra5East<<"(extra5East)";
+     }
+     if (tempT->extra6East >= mDb->minGasTemperature() && tempT->extra6East <= mDb->maxGasTemperature() ) {
+        averageExtraTempsEast += tempT->extra6East;
+        numberExtraTempsEast++;
+        cout<<" + "<<tempT->extra6East<<"(extra6East)";
+     }
+     if (tempT->extra7East >= mDb->minGasTemperature() && tempT->extra7East <= mDb->maxGasTemperature() ) {
+        averageExtraTempsEast += tempT->extra7East;
+        numberExtraTempsEast++;
+        cout<<" + "<<tempT->extra7East<<"(extra7East)";
+     }
+
+     // calculate average extra temperature east
+     if (numberExtraTempsEast > 0) {
+        cout<<" = "<<averageExtraTempsEast<<endl;
+        cout<<"averageExtraTempsEast = "<<averageExtraTempsEast<<"/"<<numberExtraTempsEast<<" = ";
+        averageExtraTempsEast = averageExtraTempsEast/numberExtraTempsEast;
+        cout<<averageExtraTempsEast<<endl;
+     }
+
+     if ( (averageBodyTemperatureEast + averageExtraTempsEast) != 0 ) {
+        cout<<"setGasTemperatureEast = ("<<averageBodyTemperatureEast<<" + "<<averageExtraTempsEast<<")/2 + "<<mDb->adjustAverageEast()<<" = "<<(averageBodyTemperatureEast + averageExtraTempsEast)/2 + mDb->adjustAverageEast()<<endl;
+        mParam->setGasTemperatureEast((averageBodyTemperatureEast + averageExtraTempsEast)/2 + mDb->adjustAverageEast());
+        return kStOK;
+      }
+      else {
+        cout<<"No FTPC East body temperatures or FTPC Extra temperatures found for run number "<<runNumber<<"dbDate "<<dbDate<<endl;
+        if (mParam->gasTemperatureEast() != 0) cout<<"Using defaultTemperatureEast = "<<mParam->gasTemperatureEast()<<endl; 
+        return kStWarn;
+      }	  
 }
 
 Int_t StFtpcGasUtilities::defaultTemperatureWest(Int_t dbDate,Bool_t SVT_On) {
