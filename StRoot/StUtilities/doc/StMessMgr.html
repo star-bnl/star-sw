@@ -18,7 +18,7 @@ Section I. Basic usage: creating a message
 
 Section II. Advanced features
 <a href="#ii1">II-1.  Message summary</a>
-<a href="#ii2">II-2.  Specifying output streams</a>
+<a href="#ii2">II-2.  Specifying options and output streams</a>
 <a href="#ii3">II-3.  Non-accounted messages</a>
 <a href="#ii4">II-4.  Turning off printing of the time-date stamp</a>
 <a href="#ii5">II-5.  Turning off printing of the leading "St"</a>
@@ -29,6 +29,7 @@ Section II. Advanced features
 <a href="#ii10">II-10. Printing a list of messages</a>
 <a href="#ii11">II-11. Formatting output</a>
 <a href="#ii12">II-12. Limiting message counts</a>
+<a href="#ii13">II-13. Memory usage management</a>
 
 </pre>
 <hr size=5>
@@ -106,7 +107,10 @@ version for non-predefined types where the type must be specified - to
 do so, the message inside the Message() call must be empty (""). The
 third example shows another way of ending the message and printing it
 to the output: gMessMgr->Print(). This is the option which must be used
-in CINT as "endm" is not recognized properly there.
+in CINT as "endm" is not recognized properly there. Without the use of
+either "endm" or Print() on a streamed message, the message is not yet
+terminated and any subsequent message calls will append to the current
+one.
 
 </pre>
 <hr align=left width="50%">
@@ -199,28 +203,35 @@ A message summary can be displayed with:
 
 This function compares messages by type and by the first n "tokens"
 (text separated by spaces) of their message strings. By default, n=1.
-Using n=0 would summarize messages by type.
+Using n=0 would summarize messages by type. Example output looks like:
+
+    ***** StMessageManager message summary *****
+  StInfo: Starting job...................................................... 1
+  QAInfo: Requested chain bfc is : P2001.................................... 1
+  StInfo: Starting an event............................................... 579
+    ***** StMessageManager memory usage = 8019 bytes (8 kb) *****
 
 </pre>
 <hr align=left width="50%">
-<a name="ii2">*** II-2.  Specifying output streams</a>
+<a name="ii2">*** II-2.  Specifying options and output streams</a>
 <pre>
 
 Message declarations have a third field (second field for the predefined
 declarations) for an options string. By default, this string contains only
 the letter "O". This means that when the message is printed, it will go
 to stdout (like cout). One can also specify the letter "E" so that the
-message goes to stderr (like cerr). One can even use both: "OE".
+message goes to stderr (like cerr). One can even use both: "OE". Any
+given set of options are valid for that single message only.
 
 </pre>
 <hr align=left width="50%">
 <a name="ii3">*** II-3.  Non-accounted messages</a>
 <pre>
 
-Using the additional option "-" means that a message will not be saved
+Using the additional option "-" means that a message will not be stored
 by the message manager. This means it will not show up in subsequent
-summaries or prints. The message will, however, be printed to the
-stdout or stderr if (and only if) "O" and/or "E" is included in the option
+summaries or finds. The message will, however, be printed to the stdout
+or stderr if (and only if) "O" and/or "E" is included in the option
 string.
 
 </pre>
@@ -271,7 +282,7 @@ matches for up to four search strings:
 Message lists in the form of a vector of StMessage pointers are called
 a messVec. A list of messages can be found which match up to four strings:
 
-  messVec* myList = gMessMgr->FindMessageList("sun","moon","planet")
+  messVec* myList = gMessMgr->FindMessageList("sun","moon","planet");
 
 </pre>
 <hr align=left width="50%">
@@ -280,6 +291,8 @@ a messVec. A list of messages can be found which match up to four strings:
 
 Both FindMessage() and FindMessageList() take a fifth argument which is
 messVec pointer.
+
+  messVec* smallList = gMessMgr->FindMessageList("my","big","fat","hat",bigList);
 
 </pre>
 <hr align=left width="50%">
@@ -290,6 +303,8 @@ messVec pointer.
 Call PrintList() with a pointer to the messVec list of messages:
 
   gMessMgr->PrintList(myList);
+
+  gMessMgr->PrintList(gMessMgr->FindMessageList("TPC Gain"));
 
 </pre>
 <hr align=left width="50%">
@@ -307,14 +322,14 @@ Notice that once an StMessage gets printed (either by a Print() call
 or the use of "endm"), a message is closed to further streamed input.
 
 One should not forget that character strings can also be formatted by
-sprintf() before adding them to the message.
+sprintf() before adding them to a message.
 
 </pre>
 <hr align=left width="50%">
 <a name="ii12">*** II-12. Limiting message counts</a>
 <pre>
 
-The message manager provide message limiting in two ways:
+The message manager provides message limiting in two ways:
 
   gMessMgr->SetLimit("full disk",10);    // by message string
   gMessMgr->SetLimit("I",150);           // by message type
@@ -335,12 +350,33 @@ There are also a few shortcuts to limiting message counts:
 - RemoveLimit(string/type) sets the limit on a string/type to -1, thereby
   effectively removing the limit.
 - SwitchOff(string/type) sets the limit to zero. This is the default case
-  for type "D", debug messages - on can use SwitchOn("D") to enable them.
+  for type "D", debug messages - one can use SwitchOn("D") to enable them.
 - SwitchOn(string/type) sets the limit to -1, removing any limit.
 - FixOn(string/type) sets the limit to -5, removing any limit (ever).
 - NoLimits() turns off ALL message limiting. This is useful for debugging,
   but can result in a large amount of messages that had been previously
   hidden.
+
+</pre>
+<hr align=left width="50%">
+<a name="ii13">*** II-13. Memory usage management</a>
+<pre>
+
+A summary of the memory usage by the stored messages can be displayed
+like this:
+
+  gMessMgr->MemorySummary();
+
+This information is also by default displayed at the end of a message
+summary. If it is important for the memory manager not to use memory
+by storing messages, there are functions for turning off/on the storage
+of subsequent message calls:
+
+  gMessMgr->MemoryOff();
+  gMessMgr->MemoryOn();
+
+Note that any messages created while storage is off will be
+non-accounted messages.
 
 </pre>
 </html>
