@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.20 2004/11/11 18:25:55 posk Exp $
+// $Id: plotCen.C,v 1.21 2004/11/19 16:54:41 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -356,7 +356,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
 	lineZero->Draw();
       } else if (strstr(shortName[pageNumber],"Dedx")!=0) {   // dE/dx
 	gStyle->SetOptStat(10);
-	gPad  ->SetLogz();
+	(TVirtualPad::Pad())  ->SetLogz();
 	hist2D->Draw("COLZ");
       } else if (strstr(shortName[pageNumber],"_v")!=0) {    // v
 	hist2D->SetMaximum(20.);
@@ -390,7 +390,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
       projY->SetName(histProjName->Data());
       projY->SetXTitle("Pt (GeV)");
 	projY->SetYTitle("Counts");
-	gPad->SetLogy();
+	(TVirtualPad::Pad())->SetLogy();
 	gStyle->SetOptStat(0);
 	if (projY) projY->Draw("H");
     } else if (strstr(shortName[pageNumber],"Corr")!=0) { // azimuthal corr.
@@ -495,7 +495,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
       hist->Draw();
       lineZeroHar->Draw();
     } else if (strstr(shortName[pageNumber],"PidMult")!=0) {  // PID Mult
-      gPad->SetLogy();
+      (TVirtualPad::Pad())->SetLogy();
       gStyle->SetOptStat(0);
       hist->Draw();
     } else if (strstr(shortName[pageNumber],"_v")!=0 ) {      // v 1D
@@ -580,107 +580,18 @@ static Double_t SubCorr(double* x, double* par) {
   double TwoOverPi = 2./TMath::Pi();
 
   Double_t dNdPsi = exp(-chi2)/TwoOverPi * (TwoOverPi*(1.+chi2) 
-                    + z*(TMath::BesselI0(z) + StruveL0(z))
-                    + chi2*(TMath::BesselI1(z) + StruveL1(z)));
+                    + z*(TMath::BesselI0(z) + TMath::StruveL0(z))
+                    + chi2*(TMath::BesselI1(z) + TMath::StruveL1(z)));
 
   return dNdPsi;
-}
-
-//-----------------------------------------------------------------------
-
-static Double_t StruveL1(Double_t x)
-{
-  // Modified Struve Function of Order One
-  //
-
-  const Double_t pi=TMath::Pi();
-  Double_t a1,sl1,bi1,s;
-  Double_t r=1.0;
-  Int_t km;
-  
-  if (x<=20.) {
-    s=0.0;
-    for (int i=1; i<=60;i++){
-      r*=x*x/(4.0*i*i-1.0);
-      s+=r;
-      if(TMath::Abs(r)<TMath::Abs(s)*1.e-12)break;
-    }
-    sl1=2.0/pi*s;
-  }else{
-    s=1.0;
-    km=int(0.5*x);
-    if(x>50.0)km=25;
-    for (int i=1; i<=km; i++){
-      r*=(2*i+3)*(2*i+1)/x/x;
-      s+=r;
-      if(TMath::Abs(r/s)<1.0e-12)break;
-    }
-    sl1=2.0/pi*(-1.0+1.0/(x*x)+3.0*s/(x*x*x*x));
-    a1=TMath::Exp(x)/TMath::Sqrt(2*pi*x);
-    r=1.0;
-    bi1=1.0;
-    for (int i=1; i<=16; i++){
-      r=-0.125*r*(4.0-(2.0*i-1.0)*(2.0*i-1.0))/(i*x);
-      bi1+=r;
-      if(TMath::Abs(r/bi1)<1.0e-12)break;
-    }
-    sl1+=a1*bi1;
-  }
-  
-  return sl1;
-  
-}
-
-static Double_t StruveL0(Double_t x)
-{
-  // Modified Struve Function of Order Zero
-  //
-  
-  const Double_t pi=TMath::Pi();
-  
-  Double_t s=1.0;
-  Double_t r=1.0;
-  
-  Double_t a0,sl0,a1,bi0;
-  
-  Int_t km;
-  
-  if (x<=20.) {
-    a0=2.0*x/pi;
-    for (int i=1; i<=60;i++){
-      r*=(x/(2*i+1))*(x/(2*i+1));
-      s+=r;
-      if(TMath::Abs(r/s)<1.e-12)break;
-    }
-    sl0=a0*s;
-  }else{
-    km=int(5*(x+1.0));
-    if(x>=50.0)km=25;
-    for (int i=1; i<=km; i++){
-      r*=(2*i-1)*(2*i-1)/x/x;
-      s+=r;
-      if(TMath::Abs(r/s)<1.0e-12)break;
-    }
-    a1=TMath::Exp(x)/TMath::Sqrt(2*pi*x);
-    r=1.0;
-    bi0=1.0;
-    for (int i=1; i<=16; i++){
-      r=0.125*r*(2.0*i-1.0)*(2.0*i-1.0)/(i*x);
-      bi0+=r;
-      if(TMath::Abs(r/bi0)<1.0e-12)break;
-    }
-    
-    bi0=a1*bi0;
-    sl0=-2.0/(pi*x)*s+bi0;
-  }
-  
-  return sl0;
-  
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.21  2004/11/19 16:54:41  posk
+// Replaced gPad with (TVirtualPad::Pad()). Reverted to TMath::Struve functions.
+//
 // Revision 1.20  2004/11/11 18:25:55  posk
 // Minor updates.
 //

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.58 2004/11/11 18:25:43 posk Exp $
+// $Id: plot.C,v 1.59 2004/11/19 16:54:40 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -165,11 +165,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_MultEta",
     "Flow_MultPart",
     "Flow_DcaGlobal_Tpc",
-    "Flow_Dca1_Tpc",
-    "Flow_Dca2_Tpc",
-    "Flow_Dca3_Tpc",
-    "Flow_Dca4_Tpc",
-    "Flow_Dca5_Tpc",
     "Flow_Chi2_Tpc",
     "Flow_FitPts_Tpc",
     "Flow_MaxPts_Tpc",
@@ -469,7 +464,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  lineZeroX->Draw();
 	  lineZeroY->Draw();
 	} else if (strstr(shortName[pageNumber],"Dedx")!=0) {   // dE/dx
-	  gPad->SetLogz();
+	  TVirtualPad::Pad()->SetLogz();
 	  gStyle->SetOptStat(10);
 	  hist2D->Draw("COLZ");
 	} else if (strstr(shortName[pageNumber],"_v")!=0) {    // v
@@ -504,7 +499,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	projY->SetName(histProjName->Data());
 	projY->SetXTitle("Pt (GeV/c)");
 	projY->SetYTitle("Counts");
-	gPad->SetLogy();
+	TVirtualPad::Pad()->SetLogy();
 	gStyle->SetOptStat(0);
 	if (projY) projY->Draw("H");
       } else if (strstr(shortName[pageNumber],".Phi")!=0) { // 2D Phi projection
@@ -643,7 +638,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	hist->Draw();
 	lineDiagonal->Draw();
       } else if (strstr(shortName[pageNumber],"PidMult")!=0) {  // PID Mult
-	gPad->SetLogy();
+	TVirtualPad::Pad()->SetLogy();
 	gStyle->SetOptStat(0);
 	hist->Draw();
       } else {                                              // all other 1D
@@ -653,7 +648,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
       delete [] temp;
       delete histName;
       if (histProjName) delete histProjName;
-      //gPad->Update();
     }
   }
   for (int m = 0; m < nNames; m++) {  
@@ -768,114 +762,24 @@ static Double_t qDist(double* q, double* par) {
 static Double_t SubCorr(double* x, double* par) {
   // Calculates the n(Psi_a - Psi_b) distribution by fitting chi
   // From J.-Y. Ollitrault, Nucl. Phys. A590, 561c (1995), Eq. 6. with correc.
-  // The Struve functions are included.
 
   double chi2 = par[0] * par[0] / 2;     // divide by two for SV chi
   double z = chi2 * cos(par[1]*x[0]);
   double TwoOverPi = 2./TMath::Pi();
 
   Double_t dNdPsi = exp(-chi2)/TwoOverPi * (TwoOverPi*(1.+chi2) 
-                    + z*(TMath::BesselI0(z) + StruveL0(z))
-                    + chi2*(TMath::BesselI1(z) + StruveL1(z)));
+                    + z*(TMath::BesselI0(z) + TMath::StruveL0(z))
+                    + chi2*(TMath::BesselI1(z) + TMath::StruveL1(z)));
 
   return dNdPsi;
-}
-
-//-----------------------------------------------------------------------
-
-static Double_t StruveL1(Double_t x)
-{
-  // Modified Struve Function of Order One
-  //
-
-  const Double_t pi=TMath::Pi();
-  Double_t a1,sl1,bi1,s;
-  Double_t r=1.0;
-  Int_t km;
-  
-  if (x<=20.) {
-    s=0.0;
-    for (int i=1; i<=60;i++){
-      r*=x*x/(4.0*i*i-1.0);
-      s+=r;
-      if(TMath::Abs(r)<TMath::Abs(s)*1.e-12)break;
-    }
-    sl1=2.0/pi*s;
-  }else{
-    s=1.0;
-    km=int(0.5*x);
-    if(x>50.0)km=25;
-    for (int i=1; i<=km; i++){
-      r*=(2*i+3)*(2*i+1)/x/x;
-      s+=r;
-      if(TMath::Abs(r/s)<1.0e-12)break;
-    }
-    sl1=2.0/pi*(-1.0+1.0/(x*x)+3.0*s/(x*x*x*x));
-    a1=TMath::Exp(x)/TMath::Sqrt(2*pi*x);
-    r=1.0;
-    bi1=1.0;
-    for (int i=1; i<=16; i++){
-      r=-0.125*r*(4.0-(2.0*i-1.0)*(2.0*i-1.0))/(i*x);
-      bi1+=r;
-      if(TMath::Abs(r/bi1)<1.0e-12)break;
-    }
-    sl1+=a1*bi1;
-  }
-  
-  return sl1;
-  
-}
-
-static Double_t StruveL0(Double_t x)
-{
-  // Modified Struve Function of Order Zero
-  //
-  
-  const Double_t pi=TMath::Pi();
-  
-  Double_t s=1.0;
-  Double_t r=1.0;
-  
-  Double_t a0,sl0,a1,bi0;
-  
-  Int_t km;
-  
-  if (x<=20.) {
-    a0=2.0*x/pi;
-    for (int i=1; i<=60;i++){
-      r*=(x/(2*i+1))*(x/(2*i+1));
-      s+=r;
-      if(TMath::Abs(r/s)<1.e-12)break;
-    }
-    sl0=a0*s;
-  }else{
-    km=int(5*(x+1.0));
-    if(x>=50.0)km=25;
-    for (int i=1; i<=km; i++){
-      r*=(2*i-1)*(2*i-1)/x/x;
-      s+=r;
-      if(TMath::Abs(r/s)<1.0e-12)break;
-    }
-    a1=TMath::Exp(x)/TMath::Sqrt(2*pi*x);
-    r=1.0;
-    bi0=1.0;
-    for (int i=1; i<=16; i++){
-      r=0.125*r*(2.0*i-1.0)*(2.0*i-1.0)/(i*x);
-      bi0+=r;
-      if(TMath::Abs(r/bi0)<1.0e-12)break;
-    }
-    
-    bi0=a1*bi0;
-    sl0=-2.0/(pi*x)*s+bi0;
-  }
-  
-  return sl0;
-  
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.59  2004/11/19 16:54:40  posk
+// Replaced gPad with (TVirtualPad::Pad()). Reverted to TMath::Struve functions.
+//
 // Revision 1.58  2004/11/11 18:25:43  posk
 // Minor updates.
 //
