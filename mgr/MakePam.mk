@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.124 1999/10/04 14:35:35 fisyak Exp $
+# $Id: MakePam.mk,v 1.125 1999/10/12 14:05:44 fine Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.125  1999/10/12 14:05:44  fine
+# assert for St_Table::operator[] fixed
+#
 # Revision 1.124  1999/10/04 14:35:35  fisyak
 # Add StRoot in include path
 #
@@ -323,7 +326,7 @@ echo "  St_$(STEM)(Text_t *name) : St_Table(name,sizeof($(STEM)_st)) {SetType(\"
 echo "  St_$(STEM)(Int_t n): St_Table(\"$(STEM)\",n,sizeof($(STEM)_st)) {SetType(\"$(STEM)\");}   ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
 echo "  St_$(STEM)(Text_t *name,Int_t n): St_Table(name,n,sizeof($(STEM)_st)) {SetType(\"$(STEM)\");} ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
 echo "  $(STEM)_st *GetTable(Int_t i=0){ return ($(STEM)_st *)s_Table+i;}                           ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "  $(STEM)_st &operator[](Int_t i){ assert(i<0 || i >= GetNRows()); return *GetTable(i); }     ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
+echo "  $(STEM)_st &operator[](Int_t i){ assert(i>=0 && i<GetNRows()); return *GetTable(i); }     ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
 echo "                                           ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
 echo "  ClassDef(St_$(STEM),0) // class particle STAF tables  ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
 echo "};                                                            ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
