@@ -28,6 +28,8 @@ void StBemcData::zeroAll()
     SmdpADC[i] = 0;
     SmdeEnergy[i] = 0;
     SmdpEnergy[i] = 0;
+    PsdADC[i] = 0;
+    PsdEnergy[i] = 0;
   }
 	for(int i=4800;i<18000;i++)
 	{
@@ -106,6 +108,12 @@ void StBemcData::validateData()
 	if(!SMDPresent) ok = kFALSE;
 	if(SMDErrorFlag ==1) ok = kFALSE;
 	ValidSMDEvent = ok;
+	
+	//PSD
+	ok = kTRUE;
+	if(!PSDPresent) ok = kFALSE;
+	if(PSDErrorFlag ==1) ok = kFALSE;
+	ValidPSDEvent = ok;
 }
 void StBemcData::printTower()
 {
