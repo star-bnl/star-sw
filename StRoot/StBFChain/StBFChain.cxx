@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.460 2005/01/26 23:01:25 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.461 2005/01/31 20:16:57 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1418,7 +1418,7 @@ Int_t StBFChain::Load()
 	    (void) printf("QAInfo: Library %-20s\t(%s)\tis loaded\n",libe->GetString().Data(),
 			  gSystem->DynamicPathName(libe->GetString().Data()));
 	  }
-	  assert(iok == 0);
+	  assert(iok >= 0);
 	ENDL: //yf ? continue;
 	  LoadedLibs.Delete();
 	}
