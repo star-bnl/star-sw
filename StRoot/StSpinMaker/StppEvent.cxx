@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.27 2004/01/24 02:02:54 akio Exp $
+// $Id: StppEvent.cxx,v 1.28 2004/01/24 02:04:12 akio Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.28  2004/01/24 02:04:12  akio
+// oop added test print out code. removing it
+//
 // Revision 1.27  2004/01/24 02:02:54  akio
 // Adding call for init and finish for 2004
 //
@@ -796,21 +799,6 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
 	if(year==2004){
 	  StTriggerData2004* t2004=(StTriggerData2004*)trgdata;
 	  TrgDataType2004* trgd=t2004->getTriggerStructure2004();
-
-	  //ZDC tests
-	  for(int i=0; i<16; i++){
-	    printf("ZDC at channel=%d   %d\n",i,t2004->zdcAtChannel(i));
-	  }  
-	  for(int i=0; i<16; i++){
-	    printf("ZDC at address=%d   %d\n",i,t2004->zdcAtAddress(i));
-	  }
-	  printf("ZDC east sumU=%d\n",t2004->zdcUnAttenuated(0));
-	  printf("ZDC west sumU=%d\n",t2004->zdcUnAttenuated(1));
-	  printf("ZDC east sumA=%d\n",t2004->zdcAttenuated(0));
-	  printf("ZDC west sumA=%d\n",t2004->zdcAttenuated(1));
-	  printf("ZDC east tac=%d\n",t2004->zdcTDC(0));
-	  printf("ZDC west tac=%d\n",t2004->zdcTDC(1));
-	  //ZDC tests
 	  
 	  int iin[100], iout[100];
 	  float rin[100], rout[100];
