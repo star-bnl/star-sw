@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.cxx,v 1.12 2003/02/11 20:45:39 yepes Exp $
+// $Id: StPeCEvent.cxx,v 1.13 2003/03/18 21:20:28 yepes Exp $
 // $Log: StPeCEvent.cxx,v $
+// Revision 1.13  2003/03/18 21:20:28  yepes
+// correcting problem with bField
+//
 // Revision 1.12  2003/02/11 20:45:39  yepes
 // Events without a vertex in MuDst should vertex parameters to -9999
 //
@@ -371,7 +374,7 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
 	 // --------
 	 // get pointer to memebr ?
 	 // TClonesArray &ppairs = *pPairs;
-	 lPair = new((*sPairs)[nSPairs++]) StPeCPair(muTrk1,muTrk2,1,event) ;
+	 lPair = new((*sPairs)[nSPairs++]) StPeCPair(muTrk1,muTrk2,0,event) ;
 #ifdef PECPRINT
 	 cout << "StPeCEvent : Primary Pair : " 
 	    << "  sumQ = " << lPair->getSumCharge()

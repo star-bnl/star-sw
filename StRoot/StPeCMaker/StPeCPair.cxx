@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.cxx,v 1.10 2003/02/05 17:14:05 yepes Exp $
+// $Id: StPeCPair.cxx,v 1.11 2003/03/18 21:20:41 yepes Exp $
 // $Log: StPeCPair.cxx,v $
+// Revision 1.11  2003/03/18 21:20:41  yepes
+// correcting problem with bField
+//
 // Revision 1.10  2003/02/05 17:14:05  yepes
 // Adding bField and pPairs.psi to tree
 //
@@ -122,8 +125,8 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEventSummary* summary,
 
    // The momentum we do not need for the primary pair ....
    if ( !primaryFlag ) {
-      p1 = h1.momentumAt(dcaLengths.first, bField*0.1 ) ;
-      p2 = h2.momentumAt(dcaLengths.second, bField*0.1 ) ;
+      p1 = h1.momentumAt(dcaLengths.first, tesla*bField*0.1 ) ;
+      p2 = h2.momentumAt(dcaLengths.second, tesla*bField*0.1 ) ;
    }
 
    StThreeVectorD x1 = h1.at(dcaLengths.first);
