@@ -1,3 +1,4 @@
+#include "TMath.h"
 #include "GtHash.h"
 
 class GtCradle : public TObject 
@@ -36,7 +37,9 @@ ULong_t GtCradle::Hash() const
 { 
   ULong_t *me = (ULong_t *)fArray;
   ULong_t ret = fNWords;
-  for (int i=0; i<fNWords; i++) ret ^= me[i];
+//VP  for (int i=0; i<fNWords; i++) ret ^= me[i];
+  ret = TMath::Hash(me,fNWords*sizeof(ULong_t));
+
   return ret;
 }
 GtHash::~GtHash(){Delete(); if (fPoka) delete fPoka;};
