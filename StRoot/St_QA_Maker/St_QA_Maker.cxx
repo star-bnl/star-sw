@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.66 1999/12/08 22:58:18 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.67 1999/12/12 23:09:47 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.67  1999/12/12 23:09:47  kathy
+// add pt vs eta in ftpc histogram as per Janet
+//
 // Revision 1.66  1999/12/08 22:58:18  kathy
 // changed histogram limits and made names smaller
 //
@@ -443,6 +446,7 @@ void St_QA_Maker::MakeHistGlob(){
 	m_chisq1FE->Fill(chisq1);
 	
 // these are for tpc & ftpc
+	m_pT_eta_recFE->Fill(eta,lmevpt);
         m_globtrk_xf_yfFE->Fill(t->x_first[0],t->x_first[1]);
         m_eta_trklengthFE->Fill(eta,t->length);
 	m_npoint_lengthFE->Fill(t->length,Float_t(t->n_point));
@@ -475,6 +479,7 @@ void St_QA_Maker::MakeHistGlob(){
 	m_chisq1FW->Fill(chisq1);
 	
 // these are for tpc & ftpc
+	m_pT_eta_recFW->Fill(eta,lmevpt);
         m_globtrk_xf_yfFW->Fill(t->x_first[0],t->x_first[1]);
         m_eta_trklengthFW->Fill(eta,t->length);
 	m_npoint_lengthFW->Fill(t->length,Float_t(t->n_point));
