@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.7 1999/11/05 16:30:16 kathy Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.8 1999/11/05 22:50:40 kathy Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.8  1999/11/05 22:50:40  kathy
+// now input global title for all output pages in the macro for printing & drawing histograms
+//
 // Revision 1.7  1999/11/05 16:30:16  kathy
 // minor changes to documentation in macro
 //
@@ -60,7 +63,8 @@ StIOMaker *IOMk=0;
 void bfcread_hist_to_ps(
   const Char_t *MainFile="/disk00000/star/test/new/tfs_Solaris/year_1b/set0352_01_35evts.hist.root",
   const Char_t *MakerHist="QA",
-  const Char_t *psFile="QA_hist.ps")
+  const Char_t *psFile="QA_hist.ps",
+  const Char_t *PageTitle="")
 {             
 
 //
@@ -70,6 +74,8 @@ void bfcread_hist_to_ps(
     gSystem->Load("StIOMaker");
     gSystem->Load("St_QA_Maker");
     gSystem->Load("StarClassLibrary");
+
+
 
 // setup chain with IOMaker - can read in .dst.root, .dst.xdf files
   StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
@@ -113,6 +119,8 @@ void bfcread_hist_to_ps(
     HU->SetZones(2,3);
     HU->SetPaperSize();
     HU->SetDefaultLogYList(MakerHist);
+      if (PageTitle=="") PageTitle=MainFile;
+    HU->SetGlobalTitle(PageTitle);
 
    Int_t numLog = 0;
    numLog = HU->ExamineLogYList();
