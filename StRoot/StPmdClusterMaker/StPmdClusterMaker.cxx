@@ -1,6 +1,6 @@
 /*************************************************
  *
- * $Id: StPmdClusterMaker.cxx,v 1.10 2004/07/26 12:01:18 subhasis Exp $
+ * $Id: StPmdClusterMaker.cxx,v 1.11 2004/09/03 14:31:53 subhasis Exp $
  * Author: Subhasis Chattopadhyay
  *************************************************
  *
@@ -9,6 +9,9 @@
  *************************************************
  *
  * $Log: StPmdClusterMaker.cxx,v $
+ * Revision 1.11  2004/09/03 14:31:53  subhasis
+ * OptHist introduced
+ *
  * Revision 1.10  2004/07/26 12:01:18  subhasis
  * sigmaL, sigmaS stored in one place till StPhmdCluster.h modified
  *
@@ -38,6 +41,7 @@
  *************************************************/
 
 #include<Stiostream.h>
+#include "TStopwatch.h"
 #include<assert.h>
 #include<math.h>
 #include"TROOT.h"
@@ -68,6 +72,8 @@ StPmdCollection *cluster_hit;
 //-------------------- 
 StPmdClusterMaker::StPmdClusterMaker(const char *name):StMaker(name)
 {
+	mOptHist=kFALSE;
+
 }
 //-------------------
 
@@ -78,7 +84,7 @@ StPmdClusterMaker::~StPmdClusterMaker()
 Int_t StPmdClusterMaker::Init()
 {
   
-  bookHistograms();
+  if(mOptHist)bookHistograms();
   
   return StMaker::Init();
 }
@@ -86,6 +92,11 @@ Int_t StPmdClusterMaker::Init()
 //--------------------------------------
 void StPmdClusterMaker::bookHistograms()
 {
+  mNclust= new TH1F("Nclust","Nclust (no cut)",100,-0.5,100.5);
+  mNclust1= new TH1F("Nclust1","Nclust (1MIP cut)",100,-0.5,100.5);
+  mNclust2= new TH1F("Nclust2","Nclust (2MIP cut)",100,-0.5,100.5);
+  mNclust3= new TH1F("Nclust3","Nclust (3MIP cut)",100,-0.5,100.5);
+  
   mSmPmdCluster   = new TH1F("Smno_pmd","SuperModule No",24,1.,24.);
   mEdepPmdCluster = new TH1F("EdepPmd","Energy deposited",10000,0.,10000);  
   mSigmaLPmdCluster = new TH1F("SigmaLClusterPmd","Cluster SigmaL",50,0.5,4.5);  
@@ -110,6 +121,8 @@ void StPmdClusterMaker::bookHistograms()
 //--------------------------------
 Int_t StPmdClusterMaker::Make() 
 {
+	TStopwatch clock;
+	  clock.Start();
   clusterIn = GetDataSet("PmdSimulator"); //! getting data from StPmdSimulator
   if(!clusterIn){
     clusterIn = GetDataSet("pmdReader"); //! getting data from StPmdReader
@@ -149,9 +162,16 @@ Int_t StPmdClusterMaker::Make()
       } // if loop 'choice'
       
       FillStEvent(pmd_det,cpv_det);
-      FillHistograms(pmd_det,cpv_det);
+      cout<<"stevent filled , to go hist "<<endl;
+      if(mOptHist)FillHistograms(pmd_det,cpv_det);
+      cout<<"hist filled  "<<endl;
       
     }
+   clock.Stop();
+     cout <<"Time to run StPmdClusterEMaker::Make() real = "<<clock.RealTime()<<"  cpu = "<<clock.CpuTime()<<" \n";
+     cout <<"*******************************************************************************************\n\n\n";
+
+
   return kStOK;
 }/*! loop for make ends here.*/
 //--------------------------
@@ -286,6 +306,9 @@ void StPmdClusterMaker::FillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_d
 	  evtdet0->setCluster(cluscollpmd);
 	  TIter next(clusters->Clusters());
 	  StPmdCluster *spmcl1;
+	  Int_t clustmip1=0;
+	  Int_t clustmip2=0;
+	  Int_t clustmip3=0;
 	  for(Int_t i=0; i<nclust ; i++)
 	    {
 	      spmcl1 = (StPmdCluster*)next();
@@ -297,6 +320,9 @@ void StPmdClusterMaker::FillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_d
 	      Int_t tempL=Int_t(sigmaL*1000);
 	      Int_t tempS=Int_t(sigmaS*1000);
 	      Int_t SigInt=tempL*10000+tempS;
+	      if(edep>2.5)clustmip1++;
+	      if(edep>5.)clustmip2++;
+	      if(edep>7.5)clustmip3++;
 
 	      Int_t mod=spmcl1->Module();
 	      Float_t ncell=spmcl1->NumofMems();
@@ -316,7 +342,14 @@ void StPmdClusterMaker::FillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_d
 	      // spce for two of them
 	      cluscollpmd->addCluster(pcls);  // Adding to ClusterCollection in StEvent
 	    }       
+      if(mOptHist){
+      mNclust->Fill(nclust);
+      mNclust1->Fill(clustmip1);
+      mNclust2->Fill(clustmip2);
+      mNclust3->Fill(clustmip3);
+      }
 	} 
+
       //! NOW for Fill CPV
       if(evtdet1)
 	{
