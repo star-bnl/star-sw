@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.58 1999/07/01 01:45:31 fisyak Exp $ 
+// $Id: St_Table.cxx,v 1.59 1999/07/02 21:00:31 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.59  1999/07/02 21:00:31  fine
+// Browse method prints empty table now
+//
 // Revision 1.58  1999/07/01 01:45:31  fisyak
 // GetRowDescritors => GetRowDescriptors
 //
@@ -445,6 +448,7 @@ Char_t *St_Table::Create()
 void St_Table::Browse(TBrowser *b){
   St_DataSet::Browse(b);
   Int_t nrows = TMath::Min(Int_t(GetNRows()),6);
+  if (nrows == 0) nrows = 1;
   Print(0,nrows);
 }
 //______________________________________________________________________________
