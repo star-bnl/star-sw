@@ -21,10 +21,36 @@ StEmcMipMaker::StEmcMipMaker(const char *name):StEmcCalibMaker(name)
   mPmin = 1.0;
   setRange(200);
   for(int i=0;i<10;i++) mNFailed[i]=0;
+  mMipPos 	= 0;
+  mMipPosErr 	= 0;
+  mMipWid 	= 0;
+  mMipWidErr 	= 0;
+  mGain 	= 0;
+  mGainDistr 	= 0;
+  mChi2 	= 0;
+  mIntegral 	= 0;
+                            
+  funcFit	= 0;       
+  funcFitPeak	= 0;       
+  funcFitBack	= 0;       
+              
 }
 //_____________________________________________________________________________
 StEmcMipMaker::~StEmcMipMaker()
 {
+  delete mMipPos;
+  delete mMipPosErr;
+  delete mMipWid;
+  delete mMipWidErr;
+  delete mGain;
+  delete mGainDistr;
+  delete mChi2;
+  delete mIntegral;
+                            
+  delete funcFit;       
+  delete funcFitPeak;       
+  delete funcFitBack;       
+              
 }
 //_____________________________________________________________________________
 Int_t StEmcMipMaker::Init()
@@ -89,12 +115,15 @@ void StEmcMipMaker::fit(TH1F* h)
   
   float p[] = {maxy-maxback,max,WIDTH,maxback,0,50};
   
+  delete funcFitPeak;
   funcFitPeak = new TF1("peak","gaus(0)",0,1000);
   funcFitPeak->SetLineColor(2);
   funcFitPeak->SetLineWidth(1);
+  delete funcFitBack;
   funcFitBack = new TF1("back","gaus(0)",0,1000);
   funcFitBack->SetLineWidth(1);
   funcFitBack->SetLineColor(3);
+  delete funcFit;
   funcFit = new TF1("func","gaus(0)+gaus(3)",0,1000);
   funcFit->SetLineWidth(1);
   funcFit->SetLineColor(4);
@@ -197,9 +226,9 @@ TH1F* StEmcMipMaker::findMip(int id, int rebin, bool print)
   float mip = 0;
   float width =0;
   float chi = 0;
-  funcFitPeak = NULL;
-  funcFitBack = NULL;
-  funcFit = NULL;
+  delete funcFitPeak; funcFitPeak = NULL;
+  delete funcFitBack; funcFitBack = NULL;
+  delete funcFit    ; funcFit     = NULL;
   if(!mSpec) return NULL;
   if(gROOT->FindObject("id")) delete (TH1D*)gROOT->FindObject("id");
   TH1F *h = (TH1F*)mSpec->ProjectionY("id",id,id);
@@ -214,7 +243,7 @@ TH1F* StEmcMipMaker::findMip(int id, int rebin, bool print)
   
   fit(h);
   
-  TF1*func = funcFit;
+  TF1 *func = funcFit;
   
   chi=func->GetChisquare()/(func->GetNDF());
   if(chi<0 || chi>1000) chi = 1000;

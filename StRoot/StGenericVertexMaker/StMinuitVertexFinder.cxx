@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.12 2004/08/04 21:57:56 balewski Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.13 2004/08/17 20:41:18 perev Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.13  2004/08/17 20:41:18  perev
+ * LeakOff
+ *
  * Revision 1.12  2004/08/04 21:57:56  balewski
  * toward smarter ppLMV5
  *
@@ -89,6 +92,9 @@ StMinuitVertexFinder::StMinuitVertexFinder() {
      delete mBeamHelix;mBeamHelix=0;
      gMessMgr->Warning() << "Skipping delete Minuit in StMinuitVertexFinder::~StMinuitVertexFinder()" << endm;
    //delete mMinuit;
+    mHelices.clear();
+    mSigma.clear();
+    mCTB.clear();
  }
 
 bool
