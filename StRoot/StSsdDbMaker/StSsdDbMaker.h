@@ -1,12 +1,6 @@
 /***************************************************************************
- *
- * $Id: StSsdDbMaker.h,v 1.1 2004/03/12 04:56:55 jeromel Exp $
- *
- * Author: cr
- ***************************************************************************
- *
+ * Author: christelle roy
  * Description: SSD DB access Maker
- *
  **************************************************************************/
 
 #ifndef STSSDDBMAKER_H
@@ -22,25 +16,14 @@ class St_SsdDb_Reader;
 class StSsdDbReader; 
 class StSsdHybridCollection;
 class StSsdGeometry;
-class svg_geom_st;
-
-/* #ifndef __CINT__ */
-/* #include "StarCallf77.h" */
-/* #define SsdLtoG_ F77_NAME(ssdltog,SSDLTOG) */ 
-/* #define SsdGtoL_ F77_NAME(ssdgtol,SSDGTOL) */ 
-/* extern "C" { */
-/* int type_of_call SsdLtoG_(float *x, float *xp, int *index); */
-/* int type_of_call SsdGtoL_(float *x, float *xp,  int *index); */
-/* } */
-/* #endif */
+class StSsdDbWriter;
 
 class StSsdDbMaker : public StMaker {
  private:
   Text_t *mTimeStamp;        //!
   Int_t   mUnixTimeStamp;    //!
-
   St_SsdDb_Reader *m_Reader; //!
-  //  StSsdDbReader *mReader;    //! 
+  StSsdDbWriter *mWriter;
 
  protected:
 
@@ -64,11 +47,12 @@ class StSsdDbMaker : public StMaker {
   void setSsdPedestals();
   void readSsdPedestals();
 
+  void setSsdDbWriter(int unixTime);
+
   St_SsdDb_Reader* get_SsdDb_Reader(){return m_Reader;}
-  //  StSsdDbReader* getSsdDbReader(){return mReader;}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSsdDbMaker.h,v 1.1 2004/03/12 04:56:55 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSsdDbMaker.h,v 1.2 2004/07/20 13:44:17 croy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StSsdDbMaker,0)   //StAF chain virtual base class for Makers
 };
 

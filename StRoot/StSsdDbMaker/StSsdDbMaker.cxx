@@ -1,12 +1,6 @@
 /***************************************************************************
- *
- * $Id: StSsdDbMaker.cxx,v 1.1 2004/03/12 04:56:55 jeromel Exp $
- *
- * Author: cr
- ***************************************************************************
- *
+ * Author: christelle roy
  * Description: SSD DB access Maker
- *
  **************************************************************************/
 
 #include "StSsdDbMaker.h"
@@ -16,27 +10,30 @@
 #include "St_ObjectSet.h"
 #include "StMessMgr.h"
 
+#include "StSsdDbWriter.hh"
+
 #include "St_SsdDb_Reader.hh"
 #include "St_db_Maker/St_db_Maker.h"
-//#include "StDbUtilities/StCoordinates.hh"  
-// #include "StDbUtilities/StSsdCoordinateTransform.hh"
-
 #include "StSsdUtil/StSsdGeometry.hh"
 #include "StSsdUtil/StSsdEnumerations.hh"
-#include "tables/St_svg_geom_Table.h"
+#include "tables/St_ssdWafersPosition_Table.h"
+#include "tables/St_ssdConfiguration_Table.h"
+#include "tables/St_ssdDimensions_Table.h"
 StSsdDbMaker* gStSsdDbMaker=NULL; 
 St_ObjectSet *ssdSetConfig;
-St_ObjectSet *ssdSetPed;
 St_ObjectSet *ssdSetGeom;
+St_ObjectSet *wafersPositionSetGeom;
 
 ClassImp(StSsdDbMaker)
 //_____________________________________________________________________________
 StSsdDbMaker::StSsdDbMaker(const char *name):StMaker(name)
 {
-  mTimeStamp = "2003-10-01 00:00:01";
+  mTimeStamp    = "2003-10-01 00:00:01";
 
-  m_Reader   = NULL;
+  m_Reader      = NULL;
   gStSsdDbMaker = this;
+  mWriter       = NULL;
+
 }
 
 //_____________________________________________________________________________
@@ -50,17 +47,43 @@ StSsdDbMaker::~StSsdDbMaker()
 //_____________________________________________________________________________
 Int_t StSsdDbMaker::Init()
 {
-  St_svg_geom* SsdGeom=0;
   if (Debug()) gMessMgr->Debug() << "StSsdDbMaker::Init" << endm;
-  cout << " StSsdDbMaker :: Init "<<endl;
 
+
+  // setSsdDbWriter(123456789);
 
   St_DataSet *svtparams = GetInputDB("svt");
   St_DataSetIter       local(svtparams);
-  SsdGeom = (St_svg_geom    *) local("svgpars/geom");
 
-  //svg_geom_st *geom = SsdGeom->GetTable();
-  //  cout<<"StSsdDbMaker :: Init ----> GetNRows Of geom Table = "<<SsdGeom->GetNRows()<<endl;
+  St_ssdWafersPosition* wafersPosition;
+  wafersPosition  = (St_ssdWafersPosition    *) local("ssd/ssdWafersPosition");
+  St_ssdConfiguration* ssdConfiguration;
+  ssdConfiguration  = (St_ssdConfiguration    *) local("ssd/ssdConfiguration");
+  St_ssdDimensions* ssdDimensions;
+  ssdDimensions  = (St_ssdDimensions   *) local("ssd/ssdDimensions");
+  
+  if (wafersPosition) 
+    cout<<"StSsdDbMaker::Init ----> ssdWafersPosition : Nber of Wafers = "<<wafersPosition->GetNRows()<<endl;
+  else
+    gMessMgr->Error() << "No  access to wafer position table " << endm;
+
+  if (ssdConfiguration) 
+    cout<<"StSsdDbMaker::Init ----> ssdConfiguration :  = "<<ssdConfiguration->GetNRows()<<endl;
+  else
+    gMessMgr->Error() << "No  access to ssdConfiguration table " << endm;
+
+
+  // HIER WEITERMACHEN
+
+  ssdConfiguration_st *config = ssdConfiguration->GetTable();
+  cout << "TEST " << ssdConfiguration->GetNRows() << "   TEST 2 : " << config[0].nMaxWafers    <<endl;
+ 
+
+  if (ssdDimensions) 
+    cout<<"StSsdDbMaker::Init ----> ssdDimensions :  = "<<ssdDimensions->GetNRows()<<endl;
+  else
+    gMessMgr->Error() << "No  access to ssdDimensions table " << endm;
+ 
   
   setSsdDb_Reader();
     
@@ -89,21 +112,42 @@ void StSsdDbMaker::setSsdDb_Reader()
   m_Reader = new St_SsdDb_Reader();
 
 
-  St_svg_geom* SsdGeom=0;
-
   St_DataSet *svtparams = GetInputDB("svt");
   St_DataSetIter       local(svtparams);
-  SsdGeom = (St_svg_geom    *) local("svgpars/geom");
-  svg_geom_st *geom = SsdGeom->GetTable();
-
-  m_Reader->setSvgGeom(SsdGeom) ;  
-
-  cout << "St_SsdDbReader :  Nombre d'entree = "<<SsdGeom->GetNRows()<<endl;
   
-  for (int i = 0; i < SsdGeom->GetNRows() ; i++)
-    if (geom[i].id == 7106)
-      cout << "St_SsdDbReader :  wafer = "<<geom[i].id<<" Xcoord = "<<geom[i].x[0]<<endl;
-    
+  St_ssdWafersPosition* wafersPosition;
+  wafersPosition  = (St_ssdWafersPosition    *) local("ssd/ssdWafersPosition");
+  
+  
+  St_ssdConfiguration* ssdConfiguration;
+  ssdConfiguration = (St_ssdConfiguration    *) local("ssd/ssdConfiguration");
+ 
+  St_ssdDimensions* ssdDimensions;
+  ssdDimensions = (St_ssdDimensions    *) local("ssd/ssdDimensions");
+  
+  if (wafersPosition) 
+      m_Reader->setWafersPosition(wafersPosition);
+  else
+      gMessMgr->Error() << "No  access to wafer position table " << endm;
+
+  if(ssdConfiguration)
+    m_Reader->setSsdConfiguration(ssdConfiguration);
+  else    
+    gMessMgr->Error()   << "No  access to ssdConfiguration table " << endm;
+
+  if(ssdDimensions)
+    m_Reader->setSsdDimensions(ssdDimensions);
+  else    
+    gMessMgr->Error()   << "No  access to ssdDimensions table " << endm;
+
+}
+
+
+//_____________________________________________________________________________
+void StSsdDbMaker::setSsdDbWriter(int unixTime)
+{    
+  mUnixTimeStamp = unixTime;
+  mWriter        = new StSsdDbWriter(mUnixTimeStamp);
 }
 
 //_____________________________________________________________________________
@@ -116,53 +160,38 @@ void StSsdDbMaker::setSsdConfig()
 //_____________________________________________________________________________
 void StSsdDbMaker::readSsdConfig()
 {    
+  St_DataSet *svtparams = GetInputDB("svt");
+  St_DataSetIter       local(svtparams);
+    
+  St_ssdConfiguration* ssdConfiguration;
+  ssdConfiguration   = (St_ssdConfiguration    *) local("ssd/ssdConfiguration");
   if (m_Reader)
-    ssdSetConfig->SetObject((TObject*)m_Reader->getConfiguration());
-}
-
-//_____________________________________________________________________________
-void StSsdDbMaker::setSsdPedestals()
-{
-  ssdSetPed = new St_ObjectSet("StSsdPedestal");
-  AddConst(ssdSetPed);  
-}
-
-//_____________________________________________________________________________
-void StSsdDbMaker::readSsdPedestals()
-{
-  if (m_Reader)
-    ssdSetPed->SetObject((TObject*)m_Reader->getPedestals());
+    ssdSetConfig->SetObject((TObject*)m_Reader->getConfiguration(ssdConfiguration));
 }
 
 //_____________________________________________________________________________
 void StSsdDbMaker::setSsdGeometry()
 {
-  ssdSetGeom = new St_ObjectSet("StSsdGeometry");
-  AddConst(ssdSetGeom);  
+  wafersPositionSetGeom = new St_ObjectSet("StSsdGeometry");
+  AddConst(wafersPositionSetGeom);
 }
 
 //_____________________________________________________________________________
 void StSsdDbMaker::readSsdGeometry()
 {
-  St_svg_geom* SsdGeom;
   St_DataSet *svtparams = GetInputDB("svt");
   St_DataSetIter       local(svtparams);
-  SsdGeom = (St_svg_geom    *) local("svgpars/geom");
-  svg_geom_st *geom = SsdGeom->GetTable();
   
-  if (m_Reader) 
-    {
-      ssdSetGeom->SetObject((TObject*)m_Reader->getGeometry(SsdGeom));
-      cout<<" readSsdGeometry...... "<<SsdGeom->GetNRows()<<endl;
-      for (int i = 0; i < SsdGeom->GetNRows() ; i++)
-	{
-	  if (geom[i].id == 7102)
-	    cout << "St_SsdDbReader :: readSsdGeometry :  Test lecture wafer = " 
-		 << geom[i].id   <<" coord = "
-		 << geom[i].x[1] << endl;
-	    
-	}
-    }
+  St_ssdWafersPosition* wafersPosition;
+  wafersPosition  = (St_ssdWafersPosition    *) local("ssd/ssdWafersPosition");
+  
+  St_ssdDimensions* ssdDimensions;
+  ssdDimensions  = (St_ssdDimensions    *) local("ssd/ssdDimensions");
+
+  if (m_Reader && wafersPosition)
+    wafersPositionSetGeom->SetObject((TObject*)m_Reader->getGeometry(wafersPosition));
+  else
+      gMessMgr->Info()<<" SetGeom not done "<<endm;
 }
 
 //_____________________________________________________________________________
@@ -177,7 +206,6 @@ Int_t StSsdDbMaker::Make()
 void StSsdDbMaker::Clear(const char*)
 {
   if (Debug()) gMessMgr->Debug() << "StSsdDaqMaker::Clear" << endm;
-
   StMaker::Clear();
 }
 
