@@ -1,5 +1,9 @@
-// $Id: StFtpcPoint.cc,v 1.6 2000/11/10 18:37:46 oldi Exp $
+// $Id: StFtpcPoint.cc,v 1.7 2002/01/29 11:07:59 oldi Exp $
 // $Log: StFtpcPoint.cc,v $
+// Revision 1.7  2002/01/29 11:07:59  oldi
+// Write() renamed to WriteCluster() resp. WriteTrack() to avoid compiler warnings.
+// As a result the functions TObject::Write() are available again (directly).
+//
 // Revision 1.6  2000/11/10 18:37:46  oldi
 // New constructor added.
 // StThreeVector replaced by TVector3 to be able to use ROOT output (e.g. Write()).
@@ -231,7 +235,7 @@ Int_t StFtpcPoint::ToTable(fcl_fppoint_st *point_st)
 }
 
 
-Int_t StFtpcPoint::Write()
+Int_t StFtpcPoint::WriteCluster()
 {
   // Writes cluster to disc.
   // Does nothing up to now.

@@ -1,5 +1,9 @@
-// $Id: StFtpcPoint.hh,v 1.6 2001/01/25 15:21:51 oldi Exp $
+// $Id: StFtpcPoint.hh,v 1.7 2002/01/29 11:08:03 oldi Exp $
 // $Log: StFtpcPoint.hh,v $
+// Revision 1.7  2002/01/29 11:08:03  oldi
+// Write() renamed to WriteCluster() resp. WriteTrack() to avoid compiler warnings.
+// As a result the functions TObject::Write() are available again (directly).
+//
 // Revision 1.6  2001/01/25 15:21:51  oldi
 // Review of the complete code.
 // Fix of several bugs which caused memory leaks:
@@ -103,7 +107,7 @@ public:
                  StFtpcPoint(fcl_fppoint_st *point_st);         // constructor for data after cluster finding
                  StFtpcPoint(Double_t *x, Int_t row);           // constructor which take an arbitrary point as input
   virtual       ~StFtpcPoint();                                 // destructor
-  virtual Int_t  Write();                                       // writes cluster to disc
+  virtual Int_t  WriteCluster();                                // writes cluster to disc
   virtual Int_t  ToTable(fcl_fppoint_st *point_st);                                       // writes cluster to STAF table
   
   // getter

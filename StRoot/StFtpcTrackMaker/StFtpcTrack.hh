@@ -1,5 +1,9 @@
-// $Id: StFtpcTrack.hh,v 1.8 2001/01/25 15:22:02 oldi Exp $
+// $Id: StFtpcTrack.hh,v 1.9 2002/01/29 11:08:16 oldi Exp $
 // $Log: StFtpcTrack.hh,v $
+// Revision 1.9  2002/01/29 11:08:16  oldi
+// Write() renamed to WriteCluster() resp. WriteTrack() to avoid compiler warnings.
+// As a result the functions TObject::Write() are available again (directly).
+//
 // Revision 1.8  2001/01/25 15:22:02  oldi
 // Review of the complete code.
 // Fix of several bugs which caused memory leaks:
@@ -121,7 +125,7 @@ public:
    Double_t   CalcDca(StFtpcVertex *vertex);                                       // calculation of distance of closest approach (dca) to main vertex
    Double_t   CalcAlpha0();                                                        // calculation of the angle of xt with respect to the x axis
        void   CalcAndSetAlpha0() { this->SetAlpha0(this->CalcAlpha0()); }          // calculates and sets the angle of xt with respect to the x axis
-      Int_t   Write(fpt_fptrack_st *trackTableEntry, Int_t id_start_vertex);       // writes track to table
+      Int_t   WriteTrack(fpt_fptrack_st *trackTableEntry, Int_t id_start_vertex);  // writes track to table
 
   // getter
        TObjArray  *GetHits()             const { return mPoints;                          }
