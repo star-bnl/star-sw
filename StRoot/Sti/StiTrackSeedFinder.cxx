@@ -95,7 +95,7 @@ void StiTrackSeedFinder::clear()
 void StiTrackSeedFinder::addLayer(double refangle, double position)
 {
     const hitvector& vec = mhitstore->hits(refangle, position);
-    miterator.push_back( vec);
+    miterator.push_back( vec.begin(), vec.end() );
     ++mnlayers;
     miterator.init();
     return;
@@ -109,7 +109,8 @@ void StiTrackSeedFinder::print() const
 
 bool StiTrackSeedFinder::hasMore()
 {
-    return ( miterator.current() < miterator.size() );
+    return (miterator!=miterator.end());
+    //return ( miterator.current() < miterator.size() );
 }
 
 //Loop on combinations until we get a valid one
@@ -127,11 +128,11 @@ StiKalmanTrack* StiTrackSeedFinder::next()
     bool go = true;
     StiKalmanTrack* track = 0;
     while (go && hasMore()) {
-	//cout <<"\nCombination "<<it.current()<<" -----------"<<endl;
-	track = makeTrack( miterator() );
+	cout <<"\nCombination  -----------"<<endl;
+	track = makeTrack( *miterator );
 	if (track) {
 	    go=false; //We found a good track, return it.  Else, we keep searching combinations
-	    //cout <<"Found a good track, return it"<<endl;
+	    cout <<"Found a good track, return it"<<endl;
 	}
 	++miterator;
     }
@@ -166,6 +167,9 @@ StiKalmanTrack* StiTrackSeedFinder::makeTrack(const tvector& vec) const
 	//Setup DetectorContainer to inner-most point
 	//This assumes outside in tracking, can be made to switch on direction
 	StiDetectorContainer::instance()->setToDetector( vec.front()->detector() );
+    }
+    else {
+	cout <<"Combination Failed"<<endl;
     }
     //cout <<"\tLeaving"<<endl;
     return track;
