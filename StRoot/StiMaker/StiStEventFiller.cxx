@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 1.13 2002/06/28 23:30:56 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 1.14 2002/08/12 15:29:21 andrewar Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 1.14  2002/08/12 15:29:21  andrewar
+ * Added dedx calculators
+ *
  * Revision 1.13  2002/06/28 23:30:56  calderon
  * Updated with changes debugging for number of primary tracks added.
  * Merged with Claude's latest changes, but restored the tabs, othewise
@@ -75,15 +78,20 @@ using namespace std;
 #include "StPhysicalHelix.hh"
 #include "StThreeVector.hh"
 #include "StThreeVectorF.hh"
+#include "PhysicalConstants.h"
+#include "SystemOfUnits.h"
 
 //StEvent
+#include "StPrimaryVertex.h"
 #include "StEventTypes.h"
+#include "StDetectorId.h"
 
 #include "StEventUtilities/StuFixTopoMap.cxx"
 //Sti
 #include "Sti/StiTrackContainer.h"
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiGeometryTransform.h"
+#include "Sti/StiDedxCalculator.h"
 
 //StiMaker
 #include "StiStEventFiller.h"
@@ -92,11 +100,19 @@ StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mTrkNodeMap()
 {
 	//temp, make sure we're not constructing extra copies...
 	//cout <<"StiStEventFiller::StiStEventFiller()"<<endl;
+  dEdxTpcCalculator.setFractionUsed(.6);
+  dEdxSvtCalculator.setFractionUsed(.6);
+  dEdxTpcCalculator.setDetectorFilter(kTpcId);
+  dEdxSvtCalculator.setDetectorFilter(kSvtId);
+
+  //mResMaker.setLimits(-1.5,1.5,-1.5,1.5,-10,10,-10,10);
+  //mResMaker.setDetector(kSvtId);
 }
 
 StiStEventFiller::~StiStEventFiller()
 {
-	//cout <<"StiStEventFiller::~StiStEventFiller()"<<endl;
+  cout <<"StiStEventFiller::~StiStEventFiller()"<<endl;
+  //mResMaker.writeResiduals();
 }
 
 //Helper functor, gotta live some place else, just a temp. test of StiTrack::stHits() method
@@ -206,14 +222,16 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 	    // filling successful,
 	    // set up relationships between objects
 	    detInfoVec.push_back(detInfo);
-	    trNodeVec.push_back(trackNode);
 	    gTrack->setDetectorInfo(detInfo);
-	    trNodeVec.back()->addTrack(gTrack);
+	    trackNode->addTrack(gTrack);
+	    cout<<"Track Node Entries: "<<trackNode->entries()<<endl;
+	    trNodeVec.push_back(trackNode);
 	    // reuse the utility to fill the topology map
 	    // this has to be done at the end as it relies on
 	    // having the proper track->detectorInfo() relationship
 	    // and a valid StDetectorInfo object.
 	    StuFixTopoMap(gTrack);
+	    cout<<"Tester: Event Track Node Entries: "<<trackNode->entries()<<endl;
 	    mTrkNodeMap.insert(map<const StiKalmanTrack*,StTrackNode*>::value_type (kTrack,trNodeVec.back()) );
 	    if (trackNode->entries(global)<1)
 		cout << "StiStEventFiller::fillEvent() - ERROR - Track Node has no entries!! " << endl;
@@ -255,19 +273,35 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t) 
     
     mEvent = e;
     mTrackStore = t;
+
+    //Added residual maker...aar
     
     StPrimaryVertex*       vertex = mEvent->primaryVertex(0);
     StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo();
-    
-    cout << "original daughters " << vertex->daughters().size() << endl;
+
+    cout <<"Checking Vertex. "
+         <<"Daughters: "<< vertex->numberOfDaughters()<<endl;
+    if(!vertex)
+      {
+	cout <<"Failed to find a primary vertex."<<endl;
+	return (StEvent*)NULL;
+	  
+      }
+    else
+      {
+      cout << "original daughters " << vertex->daughters().size() << endl;
+      }
     
     int skippedCount=0;
     int fillTrackCount=0;
     // loop over StiKalmanTracks
     cout << "Tracks in container " << mTrackStore->size() << endl;
-    for (KalmanTrackMap::const_iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt) {
+    int mTrackN=0;
+    for (KalmanTrackMap::const_iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt,++mTrackN) {
+      cout <<"Current track: "<< mTrackN<<endl;
 	// get track and corresponding StTrackNode
 	const StiKalmanTrack* kTrack = (*trackIt).second;
+	//mResMaker.setTrackResiduals(kTrack);
 	if (kTrack==0) {
 	    cout<< "kTrackLoop: kTrack pointer==0"<<endl;
 	    continue;
@@ -278,23 +312,36 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t) 
 		cout << "skipping track which was not entered in an StTrackNode" << endl;
 	    continue;
 	}
+	cout <<"Tester: Primary Track Map Node Entries: "<<(*itKtrack).second->entries()<<endl;
 	if (kTrack->isPrimary()) {
+	  cout <<"Track is a primary."<<endl;
 	    StTrackNode* currentTrackNode = (*itKtrack).second;
-	    
+		  cout <<"Got Current Node."<<endl;
+		  cout<<"Total entries in track node: "<<currentTrackNode->entries()<<endl;
+	    if (currentTrackNode->entries()>10)
+	       {
+		  cout <<"Track map gone pathalogic. Next track!"<<endl;
+		  continue;
+	       }
 	    if (currentTrackNode->entries(global)<1) {
 		cout << "skipping Node: this node should have a global track but doesn't" << endl;
 		continue;
 	    }
+		  cout <<"Entries >1."<<endl;
 	    // detector info
 	    StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
 	    fillDetectorInfo(detInfo,kTrack);
+		  cout <<"Filled Detector info."<<endl;
+
 	    
 	    // actual filling of StTrack from StiTrack
+	    cout <<"Creating new track"<<endl;
 	    StPrimaryTrack* pTrack = new StPrimaryTrack;
-	    
+
+	    cout <<"Entering try-catch block"<<endl;
 	    try	{
 		fillTrackCount++;
-		// 		cout << "trying to fill track " << fillTrackCount++ << endl;
+		cout << "trying to fill track " << fillTrackCount++ << endl;
 		fillTrack(pTrack,kTrack);
 		
 		// set up relationships between objects
@@ -316,7 +363,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t) 
 		delete detInfo;
 		delete pTrack;
 	    }
-	}
+	}//end if primary
     } // kalman track loop
     cout << "# isPrimary()=true " << fillTrackCount << endl;
     cout << "new vtx  daughters " << vertex->daughters().size() << endl;
@@ -387,25 +434,47 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, const StiTrack* track, bool
     double mom[3];
     node->getGlobalMomentum(mom);
     StThreeVectorF momF(mom[0],mom[1],mom[2]); 
-    
+    cout <<"Global Momentum: "<<momF<<endl;
+
     double bField = -99999;
     // test
     // change: the magnetic field should NEVER be hardwired, this is merely a test to
     // make sure the chain works, must use something else ASAP!!!!
-    if (mEvent->runInfo()!=0) bField = mEvent->runInfo()->magneticField();
+    if (mEvent->runInfo()!=0) 
+      {
+	bField = mEvent->runInfo()->magneticField();
+	bField = bField*tesla*.1;
+      }
     else bField =  0.5; 
+    cout <<"Helix BField: "<<bField<<endl;
+    cout <<"Helix Momentum: "<<helix->momentum(bField).x()
+	                     <<helix->momentum(bField).y()
+	                     <<helix->momentum(bField).z()
+	                     <<endl;
+    cout <<"Old phase: "<<helix->phase();
+    double newPhase = helix->phase() + helix->h()*halfpi;
+    cout <<"New phase: "<<newPhase<<endl;
     StTrackGeometry* geometry = new StHelixModel(helix->charge(bField),
-						 helix->phase(),
+				         	 newPhase,
 						 helix->curvature(),
 						 helix->dipAngle(),
 						 origin, momF,
 						 helix->h());
+    cout <<"Helix: "<<(*helix)<<endl;
     
     delete helix;
     if (outer)
+      {
 	gTrack->setOuterGeometry(geometry);
+
+	cout <<"Helix From Track: "<<gTrack->outerGeometry()->helix()<<endl;
+      }
     else
+      {
 	gTrack->setGeometry(geometry);
+	cout <<"Helix From Track: "<<gTrack->geometry()->helix()<<endl;
+      }
+
     
     return;
 }
@@ -441,13 +510,17 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, const StiTrack* track){
     StiKalmanTrackNode* node = kTrack->getInnerMostHitNode();
     double alpha, xRef, x[5], covM[15], dEdx, chi2node;
     node->get(alpha,xRef,x,covM,dEdx,chi2node);
+    cout <<"GetAlpha: "<<alpha<<" Alpha: "<<node->fAlpha<<endl;
     float chi2[2];
     chi2[0] = chi2node; // change: perhaps use chi2node instead of track->getChi2()?
     chi2[1] = -9999; // change: here goes an actual probability, need to calculate?
     
+    dEdx=dEdxTpcCalculator.getDedx(kTrack);
+    cout <<"TPC dEdx: "<< dEdx << endl;
+
     // @#$%^&
     // need to transform the covariant matrix from double's (Sti) to floats (StEvent)!
-    
+
     float covMFloat[15];
     for (int ind = 0; ind<15; ++ind) covMFloat[ind] = static_cast<float>(covM[ind]);
     
@@ -460,7 +533,7 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, const StiTrack* track){
 }
 
 void StiStEventFiller::fillTrack(StTrack* gTrack, const StiTrack* track){
-    
+  
     //cout << "StiStEventFiller::fillTrack()" << endl;
     // data members from StTrack
     // flags http://www.star.bnl.gov/html/all_l/html/
