@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiAnalysis.cxx,v 1.6 2002/06/12 21:48:43 jklay Exp $                                    
+ * $Id: StHiAnalysis.cxx,v 1.7 2002/06/13 01:14:25 jklay Exp $                                    
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,8 +12,8 @@
  ***************************************************************************
  *
  * $Log: StHiAnalysis.cxx,v $
- * Revision 1.6  2002/06/12 21:48:43  jklay
- * Fixed the way East and West are filled
+ * Revision 1.7  2002/06/13 01:14:25  jklay
+ * Combined Spectra histos into analysis
  *
  * Revision 1.2  2002/04/03 00:23:27  jklay
  * Fixed private member access bugs in analysis code
@@ -351,7 +351,7 @@ StHiAnalysis::initHistograms()
     ew[i].pm[j].h3VtxZEtaGlPtGl->SetZTitle("Global p_{T} (GeV/c)");
 //    ew[i].pm[j].h3VtxZEtaGlPtGl->Sumw2();
 
-    // varying bins spectra
+    // varying bins RAW spectra     
     setName(name,"RawPtGlVarBin0",sEW[i].Data(),sPM[j].Data());
     ew[i].pm[j].h1RawPtGlVarBin0
       = new TH1D(name,name,bins0->GetSize()-1,bins0->GetArray());
@@ -375,6 +375,56 @@ StHiAnalysis::initHistograms()
       = new TH1D(name,name,bins1->GetSize()-1,bins1->GetArray());
     ew[i].pm[j].h1RawPtPrVarBin1->SetXTitle("Primary p_{T} (GeV/c)");
     ew[i].pm[j].h1RawPtPrVarBin1->Sumw2();
+
+    // varying bins ONEOVERPT spectra     
+    setName(name,"OneOverPtGlVarBin0",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h1OneOverPtGlVarBin0
+      = new TH1D(name,name,bins0->GetSize()-1,bins0->GetArray());
+    ew[i].pm[j].h1OneOverPtGlVarBin0->SetXTitle("Global p_{T} (GeV/c)");
+    ew[i].pm[j].h1OneOverPtGlVarBin0->Sumw2();
+
+    setName(name,"OneOverPtGlVarBin1",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h1OneOverPtGlVarBin1
+      = new TH1D(name,name,bins1->GetSize()-1,bins1->GetArray());
+    ew[i].pm[j].h1OneOverPtGlVarBin1->SetXTitle("Global p_{T} (GeV/c)");
+    ew[i].pm[j].h1OneOverPtGlVarBin1->Sumw2();
+
+    setName(name,"OneOverPtPrVarBin0",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h1OneOverPtPrVarBin0
+      = new TH1D(name,name,bins0->GetSize()-1,bins0->GetArray());
+    ew[i].pm[j].h1OneOverPtPrVarBin0->SetXTitle("Primary p_{T} (GeV/c)");
+    ew[i].pm[j].h1OneOverPtPrVarBin0->Sumw2();
+
+    setName(name,"OneOverPtPrVarBin1",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h1OneOverPtPrVarBin1
+      = new TH1D(name,name,bins1->GetSize()-1,bins1->GetArray());
+    ew[i].pm[j].h1OneOverPtPrVarBin1->SetXTitle("Primary p_{T} (GeV/c)");
+    ew[i].pm[j].h1OneOverPtPrVarBin1->Sumw2();
+
+    // varying bins WEIGHTEDMEAN spectra     
+    setName(name,"WeightedMeanPtGlVarBin0",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h1WeightedMeanPtGlVarBin0
+      = new TH1D(name,name,bins0->GetSize()-1,bins0->GetArray());
+    ew[i].pm[j].h1WeightedMeanPtGlVarBin0->SetXTitle("Global p_{T} (GeV/c)");
+    ew[i].pm[j].h1WeightedMeanPtGlVarBin0->Sumw2();
+
+    setName(name,"WeightedMeanPtGlVarBin1",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h1WeightedMeanPtGlVarBin1
+      = new TH1D(name,name,bins1->GetSize()-1,bins1->GetArray());
+    ew[i].pm[j].h1WeightedMeanPtGlVarBin1->SetXTitle("Global p_{T} (GeV/c)");
+    ew[i].pm[j].h1WeightedMeanPtGlVarBin1->Sumw2();
+
+    setName(name,"WeightedMeanPtPrVarBin0",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h1WeightedMeanPtPrVarBin0
+      = new TH1D(name,name,bins0->GetSize()-1,bins0->GetArray());
+    ew[i].pm[j].h1WeightedMeanPtPrVarBin0->SetXTitle("Primary p_{T} (GeV/c)");
+    ew[i].pm[j].h1WeightedMeanPtPrVarBin0->Sumw2();
+
+    setName(name,"WeightedMeanPtPrVarBin1",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h1WeightedMeanPtPrVarBin1
+      = new TH1D(name,name,bins1->GetSize()-1,bins1->GetArray());
+    ew[i].pm[j].h1WeightedMeanPtPrVarBin1->SetXTitle("Primary p_{T} (GeV/c)");
+    ew[i].pm[j].h1WeightedMeanPtPrVarBin1->Sumw2();
                  
     } //PM    
   } //EW
@@ -481,122 +531,109 @@ StHiAnalysis::trackLoop()
     if(CutRc::AcceptEta(track)){
       if(CutRc::AcceptFitPts(track)){
 
-         // sector,dcaxy,pt
 	if(CutRc::AcceptEastSideTrack(track)) {
+         // sector,dcaxy,pt
          ew[0].pm[iCharge].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
          ew[0].pm[iCharge].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
          ew[0].pm[2].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
          ew[0].pm[2].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
-	}
-	if(CutRc::AcceptWestSideTrack(track)) {
-         ew[1].pm[iCharge].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
-         ew[1].pm[iCharge].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
-         ew[1].pm[2].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
-         ew[1].pm[2].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
-	}
-        ew[2].pm[2].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
-        ew[2].pm[2].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
-        ew[2].pm[iCharge].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
-        ew[2].pm[iCharge].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
-
          // dca3d, dcaxy,pt
-	if(CutRc::AcceptEastSideTrack(track)) {
          ew[0].pm[iCharge].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
          ew[0].pm[iCharge].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
          ew[0].pm[2].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
          ew[0].pm[2].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
+         // rebin?
+         ew[0].pm[iCharge].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
+         ew[0].pm[2].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
+         // dcaxy,pt
+         ew[0].pm[iCharge].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
+         ew[0].pm[2].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
 	}
 	if(CutRc::AcceptWestSideTrack(track)) {
+         // sector,dcaxy,pt
+         ew[1].pm[iCharge].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
+         ew[1].pm[iCharge].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
+         ew[1].pm[2].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
+         ew[1].pm[2].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
+         // dca3d, dcaxy,pt
          ew[1].pm[iCharge].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
          ew[1].pm[iCharge].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
          ew[1].pm[2].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
          ew[1].pm[2].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
+         // rebin?
+         ew[1].pm[iCharge].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
+         ew[1].pm[2].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
+         // dcaxy,pt
+         ew[1].pm[iCharge].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
+         ew[1].pm[2].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
 	}
+        // sector,dcaxy,pt
+        ew[2].pm[2].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
+        ew[2].pm[2].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
+        ew[2].pm[iCharge].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
+        ew[2].pm[iCharge].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
+        // dca3d, dcaxy,pt
         ew[2].pm[2].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
         ew[2].pm[2].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
         ew[2].pm[iCharge].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
         ew[2].pm[iCharge].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
+        // rebin?
+        ew[2].pm[2].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
+        ew[2].pm[iCharge].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
+        // dcaxy,pt
+        ew[2].pm[2].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
+        ew[2].pm[iCharge].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
 
         // respt, pt,dcaxy
         // no charge difference
         h3ResPtPrGlPtPrDcaXYGl->Fill(resPtPrGlPr,ptPr,dcaXYGl);
         h3ResPtPrGlPtGlDcaXYGl->Fill(resPtPrGlGl,ptGl,dcaXYGl);
       
-        // rebin?
-	if(CutRc::AcceptEastSideTrack(track)) {
-          ew[0].pm[iCharge].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
-          ew[0].pm[2].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
-	}
-	if(CutRc::AcceptWestSideTrack(track)) {
-          ew[1].pm[iCharge].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
-          ew[1].pm[2].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
-	}
-        ew[2].pm[2].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
-        ew[2].pm[iCharge].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
-        
-        // dcaxy,pt
-	if(CutRc::AcceptEastSideTrack(track)) {
-          ew[0].pm[iCharge].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
-          ew[0].pm[2].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
-	}
-	if(CutRc::AcceptWestSideTrack(track)) {
-          ew[1].pm[iCharge].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
-          ew[1].pm[2].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
-	}
-        ew[2].pm[2].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
-        ew[2].pm[iCharge].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
-
       }//AcceptFitPts(track)
 
       //*********eta and dca cut
       if(CutRc::AcceptSDcaGl(track)){
-        // sector,fit pts, pt
 	if(CutRc::AcceptEastSideTrack(track)) {
+          // sector,fit pts, pt
           ew[0].pm[iCharge].h3PhiPrFitPtsPtPr->Fill(phiPr,fitPts,ptPr);
           ew[0].pm[2].h3PhiPrFitPtsPtPr->Fill(phiPr,fitPts,ptPr);
+	  // sector, all pts, pt
+          ew[0].pm[iCharge].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
+          ew[0].pm[2].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
+          // sector, max pts, pt
+          ew[0].pm[iCharge].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
+          ew[0].pm[2].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
+          // flow, fit pts, pt
+          ew[0].pm[iCharge].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
+          ew[0].pm[2].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
 	}
 	if(CutRc::AcceptWestSideTrack(track)) {
+          // sector,fit pts, pt
           ew[1].pm[iCharge].h3PhiPrFitPtsPtPr->Fill(phiPr,fitPts,ptPr);
           ew[1].pm[2].h3PhiPrFitPtsPtPr->Fill(phiPr,fitPts,ptPr);
+	  // sector, all pts, pt
+          ew[1].pm[iCharge].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
+          ew[1].pm[2].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
+          // sector, max pts, pt
+          ew[1].pm[iCharge].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
+          ew[1].pm[2].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
+          // flow, fit pts, pt
+          ew[1].pm[iCharge].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
+          ew[1].pm[2].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
 	}
+        // sector,fit pts, pt
         ew[2].pm[2].h3PhiPrFitPtsPtPr->Fill(phiPr,fitPts,ptPr);
         ew[2].pm[iCharge].h3PhiPrFitPtsPtPr->Fill(phiPr,fitPts,ptPr);
-    
-        // sector, all pts, pt
-	if(CutRc::AcceptEastSideTrack(track)) {
-         ew[0].pm[iCharge].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
-         ew[0].pm[2].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
-	}
-	if(CutRc::AcceptWestSideTrack(track)) {
-         ew[1].pm[iCharge].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
-         ew[1].pm[2].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
-	}
+	// sector, all pts, pt
         ew[2].pm[2].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
         ew[2].pm[iCharge].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
-
         // sector, max pts, pt
-	if(CutRc::AcceptEastSideTrack(track)) {
-         ew[0].pm[iCharge].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
-         ew[0].pm[2].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
-	}
-	if(CutRc::AcceptWestSideTrack(track)) {
-         ew[1].pm[iCharge].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
-         ew[1].pm[2].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
-	}
         ew[2].pm[2].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
         ew[2].pm[iCharge].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
-      
         // flow, fit pts, pt
-	if(CutRc::AcceptEastSideTrack(track)) {
-         ew[0].pm[iCharge].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
-         ew[0].pm[2].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
-	}
-	if(CutRc::AcceptWestSideTrack(track)) {
-         ew[1].pm[iCharge].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
-         ew[1].pm[2].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
-	}
         ew[2].pm[2].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
         ew[2].pm[iCharge].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
+
       } //dca
     }//eta
 
@@ -632,61 +669,80 @@ StHiAnalysis::trackLoop()
 
     // all cuts
     if(CutRc::Accept(track)){
-      // count and centrality
-//	if(CutRc::AcceptEastSideTrack(track)) {
-//       ew[0].pm[iCharge].h2ZDCCentralityPtPr->Fill(zdcCent,ptPr);
-//       ew[0].pm[2].h2ZDCCentralityPtPr->Fill(zdcCent,ptPr);
-//	}
-//	if(CutRc::AcceptWestSideTrack(track)) {
-//       ew[1].pm[iCharge].h2ZDCCentralityPtPr->Fill(zdcCent,ptPr);
-//       ew[1].pm[2].h2ZDCCentralityPtPr->Fill(zdcCent,ptPr);
-//	}
-//      ew[2].pm[2].h2ZDCCentralityPtPr->Fill(zdcCent,ptPr);
-//      ew[2].pm[iCharge].h2ZDCCentralityPtPr->Fill(zdcCent,ptPr);
+      // count and centrality and spectra
       if(CutRc::AcceptEastSideTrack(track)) {
        ew[0].pm[iCharge].h2CentralityPtPr->Fill(flowCent,ptPr);
        ew[0].pm[2].h2CentralityPtPr->Fill(flowCent,ptPr);
-      }
-      if(CutRc::AcceptWestSideTrack(track)) {
-       ew[1].pm[iCharge].h2CentralityPtPr->Fill(flowCent,ptPr);
-       ew[1].pm[2].h2CentralityPtPr->Fill(flowCent,ptPr);
-      }
-      ew[2].pm[2].h2CentralityPtPr->Fill(flowCent,ptPr);
-      ew[2].pm[iCharge].h2CentralityPtPr->Fill(flowCent,ptPr);
-       
-      if(CutRc::AcceptEastSideTrack(track)) {
+
+	//Global RAW
         ew[0].pm[iCharge].h1RawPtGlVarBin0->Fill(ptGl);
         ew[0].pm[iCharge].h1RawPtGlVarBin1->Fill(ptGl);
         ew[0].pm[2].h1RawPtGlVarBin0->Fill(ptGl);
         ew[0].pm[2].h1RawPtGlVarBin1->Fill(ptGl);
+	//Global ONEOVERPT
+        ew[0].pm[iCharge].h1OneOverPtGlVarBin0->Fill(ptGl,1./ptGl);
+        ew[0].pm[iCharge].h1OneOverPtGlVarBin1->Fill(ptGl,1./ptGl);
+        ew[0].pm[2].h1OneOverPtGlVarBin0->Fill(ptGl,1./ptGl);
+        ew[0].pm[2].h1OneOverPtGlVarBin1->Fill(ptGl,1./ptGl);
+	//Primary RAW 
+        ew[0].pm[iCharge].h1RawPtPrVarBin0->Fill(ptPr);
+        ew[0].pm[iCharge].h1RawPtPrVarBin1->Fill(ptPr);
+        ew[0].pm[2].h1RawPtPrVarBin0->Fill(ptPr);
+        ew[0].pm[2].h1RawPtPrVarBin1->Fill(ptPr);
+	//Primary ONEOVERPT
+        ew[0].pm[iCharge].h1OneOverPtPrVarBin0->Fill(ptPr,1./ptPr);
+        ew[0].pm[iCharge].h1OneOverPtPrVarBin1->Fill(ptPr,1./ptPr);
+        ew[0].pm[2].h1OneOverPtPrVarBin0->Fill(ptPr,1./ptPr);
+        ew[0].pm[2].h1OneOverPtPrVarBin1->Fill(ptPr,1./ptPr);
       }
       if(CutRc::AcceptWestSideTrack(track)) {
+       ew[1].pm[iCharge].h2CentralityPtPr->Fill(flowCent,ptPr);
+       ew[1].pm[2].h2CentralityPtPr->Fill(flowCent,ptPr);
+
+	//Global RAW
         ew[1].pm[iCharge].h1RawPtGlVarBin0->Fill(ptGl);
         ew[1].pm[iCharge].h1RawPtGlVarBin1->Fill(ptGl);
         ew[1].pm[2].h1RawPtGlVarBin0->Fill(ptGl);
         ew[1].pm[2].h1RawPtGlVarBin1->Fill(ptGl);
+	//Global ONEOVERPT
+        ew[1].pm[iCharge].h1OneOverPtGlVarBin0->Fill(ptGl,1./ptGl);
+        ew[1].pm[iCharge].h1OneOverPtGlVarBin1->Fill(ptGl,1./ptGl);
+        ew[1].pm[2].h1OneOverPtGlVarBin0->Fill(ptGl,1./ptGl);
+        ew[1].pm[2].h1OneOverPtGlVarBin1->Fill(ptGl,1./ptGl);
+	//Primary RAW
+        ew[1].pm[iCharge].h1RawPtPrVarBin0->Fill(ptPr);
+        ew[1].pm[iCharge].h1RawPtPrVarBin1->Fill(ptPr);
+        ew[1].pm[2].h1RawPtPrVarBin0->Fill(ptPr);
+        ew[1].pm[2].h1RawPtPrVarBin1->Fill(ptPr);
+	//Primary ONEOVERPT
+        ew[1].pm[iCharge].h1OneOverPtPrVarBin0->Fill(ptPr,1./ptPr);
+        ew[1].pm[iCharge].h1OneOverPtPrVarBin1->Fill(ptPr,1./ptPr);
+        ew[1].pm[2].h1OneOverPtPrVarBin0->Fill(ptPr,1./ptPr);
+        ew[1].pm[2].h1OneOverPtPrVarBin1->Fill(ptPr,1./ptPr);
       }
+      ew[2].pm[2].h2CentralityPtPr->Fill(flowCent,ptPr);
+      ew[2].pm[iCharge].h2CentralityPtPr->Fill(flowCent,ptPr);
+
+      //Global RAW
       ew[2].pm[2].h1RawPtGlVarBin0->Fill(ptGl);
       ew[2].pm[2].h1RawPtGlVarBin1->Fill(ptGl);
       ew[2].pm[iCharge].h1RawPtGlVarBin0->Fill(ptGl);
       ew[2].pm[iCharge].h1RawPtGlVarBin1->Fill(ptGl);
-
-      if(CutRc::AcceptEastSideTrack(track)) {
-       ew[0].pm[iCharge].h1RawPtPrVarBin0->Fill(ptPr);
-       ew[0].pm[iCharge].h1RawPtPrVarBin1->Fill(ptPr);
-       ew[0].pm[2].h1RawPtPrVarBin0->Fill(ptPr);
-       ew[0].pm[2].h1RawPtPrVarBin1->Fill(ptPr);
-      }
-      if(CutRc::AcceptWestSideTrack(track)) {
-       ew[1].pm[iCharge].h1RawPtPrVarBin0->Fill(ptPr);
-       ew[1].pm[iCharge].h1RawPtPrVarBin1->Fill(ptPr);
-       ew[1].pm[2].h1RawPtPrVarBin0->Fill(ptPr);
-       ew[1].pm[2].h1RawPtPrVarBin1->Fill(ptPr);
-      }
+      //Global ONEOVERPT
+      ew[2].pm[2].h1OneOverPtGlVarBin0->Fill(ptGl,1./ptGl);
+      ew[2].pm[2].h1OneOverPtGlVarBin1->Fill(ptGl,1./ptGl);
+      ew[2].pm[iCharge].h1OneOverPtGlVarBin0->Fill(ptGl,1./ptGl);
+      ew[2].pm[iCharge].h1OneOverPtGlVarBin1->Fill(ptGl,1./ptGl);
+      //Primary RAW
       ew[2].pm[2].h1RawPtPrVarBin0->Fill(ptPr);
       ew[2].pm[2].h1RawPtPrVarBin1->Fill(ptPr);
       ew[2].pm[iCharge].h1RawPtPrVarBin0->Fill(ptPr);
       ew[2].pm[iCharge].h1RawPtPrVarBin1->Fill(ptPr);
+      //Primary ONEOVERPT
+      ew[2].pm[2].h1OneOverPtPrVarBin0->Fill(ptPr,1./ptPr);
+      ew[2].pm[2].h1OneOverPtPrVarBin1->Fill(ptPr,1./ptPr);
+      ew[2].pm[iCharge].h1OneOverPtPrVarBin0->Fill(ptPr,1./ptPr);
+      ew[2].pm[iCharge].h1OneOverPtPrVarBin1->Fill(ptPr,1./ptPr);
     }
 
   } // tracks
@@ -735,7 +791,15 @@ StHiAnalysis::finishHistograms()
   h1EtaCut->SetBinContent(1,CutRc::mEta[0]);
   h1EtaCut->SetBinContent(2,CutRc::mEta[1]);
 
-//Can specifiy ranges or do normalizations, etc.
+  //Make weighted mean distributions...
+  for (int iEW = 0; iEW < 3; iEW++) {
+    for (int iPM = 0; iPM < 3; iPM++) {
+      ew[iEW].pm[iPM].h1WeightedMeanPtGlVarBin0->Divide(ew[iEW].pm[iPM].h1RawPtGlVarBin0,ew[iEW].pm[iPM].h1OneOverPtGlVarBin0);
+      ew[iEW].pm[iPM].h1WeightedMeanPtGlVarBin1->Divide(ew[iEW].pm[iPM].h1RawPtGlVarBin1,ew[iEW].pm[iPM].h1OneOverPtGlVarBin1);
+      ew[iEW].pm[iPM].h1WeightedMeanPtPrVarBin0->Divide(ew[iEW].pm[iPM].h1RawPtPrVarBin0,ew[iEW].pm[iPM].h1OneOverPtPrVarBin0);
+      ew[iEW].pm[iPM].h1WeightedMeanPtPrVarBin1->Divide(ew[iEW].pm[iPM].h1RawPtPrVarBin1,ew[iEW].pm[iPM].h1OneOverPtPrVarBin1);
+    }
+  }
 
 }
 //______________

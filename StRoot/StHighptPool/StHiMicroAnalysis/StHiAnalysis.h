@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiAnalysis.h,v 1.3 2002/06/12 21:48:43 jklay Exp $                                    
+ * $Id: StHiAnalysis.h,v 1.4 2002/06/13 01:14:25 jklay Exp $                                    
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,8 +12,8 @@
  ***************************************************************************
  * 
  * $Log: StHiAnalysis.h,v $
- * Revision 1.3  2002/06/12 21:48:43  jklay
- * Fixed the way East and West are filled
+ * Revision 1.4  2002/06/13 01:14:25  jklay
+ * Combined Spectra histos into analysis
  *
  * Revision 1.1  2002/04/02 20:05:18  jklay
  * Bums analysis tools for highpt uDSTs
@@ -98,10 +98,21 @@ class StHiAnalysis : public StHiBaseAnalysis{
     TH3D* h3VtxZEtaPrPtPr; // reality check of the eta vs vertex
     TH3D* h3VtxZEtaGlPtGl;
 
+//Hey, this is everything we need to do the spectra analysis!
     TH1D* h1RawPtGlVarBin0; //
     TH1D* h1RawPtGlVarBin1; //
     TH1D* h1RawPtPrVarBin0; //
     TH1D* h1RawPtPrVarBin1; //
+
+    TH1D* h1OneOverPtGlVarBin0; //
+    TH1D* h1OneOverPtGlVarBin1; //
+    TH1D* h1OneOverPtPrVarBin0; //
+    TH1D* h1OneOverPtPrVarBin1; //
+
+    TH1D* h1WeightedMeanPtGlVarBin0; //	h1Raw/h1OneOverPt
+    TH1D* h1WeightedMeanPtGlVarBin1; //
+    TH1D* h1WeightedMeanPtPrVarBin0; //
+    TH1D* h1WeightedMeanPtPrVarBin1; //
   };
 
   //0 is East 1 is West 2 is Both 
