@@ -22,7 +22,7 @@ class StiHit : public TObject
     return;
   }
   
-  ~StiHit() {};
+    ~StiHit() {};
   
   inline double x() const {return mx;}
   inline double y() const {return my;}

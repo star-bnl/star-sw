@@ -5,8 +5,9 @@
 #include <stdlib.h>
 #include "TObject.h"
 #include "TMath.h"
-#include "StEvent/StMeasuredPoint.h"
-#include "StEvent/StVertex.h"
+
+class StMeasuredPoint;
+class StVertex;
 
 class StiTrack : public TObject
 {
@@ -90,7 +91,7 @@ class StiTrack : public TObject
   int    q;
   float  pt, tanL, tanPhi, svtDedx, tpcDedx, dca, m, chi2;
   int    nPts, nFitPts;
-  StVertex * vertex;
+    StVertex * vertex; //!
   int    status;
 
   ClassDef(StiTrack, 1)
