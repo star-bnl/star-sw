@@ -1,8 +1,13 @@
-MACRO init_egr
+MACRO init
    
 macro/global/import *
 
-message ' Creating egr tables...' 
+*cd [params]/global/egrpars
+*cd /dui
+
+return
+
+***************************************************************
 
 *SCENARIO #1: Real TPC Stand-Alone Tracking
 *Description: Use this when running the TPC only.  EGR will refit the TPC
@@ -55,11 +60,6 @@ message ' Creating egr tables...'
 
 * set egr refitting parameters here
 
-cd [params]/global
-tdm/newtable egr_egrpar egr_egrpar 1
-tdm/table/rowcount egr_egrpar 1
-*
-
 * Either pick scenario or set
 *  useglobal = 1 - Perfect matching between tpc and svt (checks mc_ids)
 *            = 2 - Refit tracks
@@ -74,24 +74,6 @@ tdm/table/rowcount egr_egrpar 1
 *            = 1 Copy unmatched tracks, no refit
 *            = 2 Copy unmatched tracks, refit
 
-
-tdm/table/cell/putvalue 'egr_egrpar[0].scenario' 8
-tdm/table/cell/putvalue 'egr_egrpar[0].mxtry'    10
-tdm/table/cell/putvalue 'egr_egrpar[0].minfit'    2
-tdm/table/cell/putvalue 'egr_egrpar[0].prob'   10 20
-tdm/table/cell/putvalue 'egr_egrpar[0].debug'  1 0 0 0 0 0 0 0 0 
-tdm/table/cell/putvalue 'egr_egrpar[0].svtchicut' 0
-tdm/table/cell/putvalue 'egr_egrpar[0].usetpc' 1
-tdm/table/cell/putvalue 'egr_egrpar[0].usesvt' 1
-tdm/table/cell/putvalue 'egr_egrpar[0].usevert' 0
-tdm/table/cell/putvalue 'egr_egrpar[0].useglobal' 2
-tdm/table/cell/putvalue 'egr_egrpar[0].useemc'    0
-tdm/table/cell/putvalue 'egr_egrpar[0].usetof'    0
-
-
-
-
-RETURN
 
 * ***************************************************************
 
