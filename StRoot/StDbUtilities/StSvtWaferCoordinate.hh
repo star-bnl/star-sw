@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtWaferCoordinate.hh,v 1.2 2000/02/02 23:01:38 calderon Exp $
+ * $Id: StSvtWaferCoordinate.hh,v 1.3 2000/02/02 23:16:00 calderon Exp $
  *
  * Author:  Manuel CBS Oct 1999
  *
@@ -11,6 +11,9 @@
  ************************************************************************
  *
  * $Log: StSvtWaferCoordinate.hh,v $
+ * Revision 1.3  2000/02/02 23:16:00  calderon
+ * remove using namespace std
+ *
  * Revision 1.2  2000/02/02 23:01:38  calderon
  * Changes for CC5
  * Tests withs StTpcDb still going.
@@ -28,10 +31,6 @@
 #ifndef ST_SVT_WAFER_COORDINATE_HH
 #define ST_SVT_WAFER_COORDINATE_HH
 #include <iostream.h>
-
-#if !defined(ST_NO_NAMESPACES)
-using namespace std;
-#endif
 
 class StSvtWaferCoordinate
 { 
