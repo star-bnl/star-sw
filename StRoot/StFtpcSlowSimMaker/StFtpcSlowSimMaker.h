@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.h,v 1.10 2003/02/28 13:00:27 jcs Exp $
+// $Id: StFtpcSlowSimMaker.h,v 1.11 2003/07/03 13:25:50 fsimon Exp $
 // $Log: StFtpcSlowSimMaker.h,v $
+// Revision 1.11  2003/07/03 13:25:50  fsimon
+// Added database access for cathode offset information.
+//
 // Revision 1.10  2003/02/28 13:00:27  jcs
 // for embedding, calculate temperature,pressure corrections using values from offline database
 //
@@ -70,13 +73,14 @@ class St_ftpcGas;
 class St_ftpcElectronics;
 class St_ftpcSlowSimGas;
 class St_ftpcSlowSimPars;
+class St_ftpcInnerCathode;
 
 class TH1F;
 class TH2F;
 
 class StFtpcSlowSimMaker : public StMaker {
  private:
-  // static Char_t m_VersionCVS = "$Id: StFtpcSlowSimMaker.h,v 1.10 2003/02/28 13:00:27 jcs Exp $";
+  // static Char_t m_VersionCVS = "$Id: StFtpcSlowSimMaker.h,v 1.11 2003/07/03 13:25:50 fsimon Exp $";
   // Int_t         m_mode;        // mode 1 = primaries;
    St_db_Maker *mDbMaker;                         //!
    St_ftpcClusterPars   *m_clusterpars;           //!
@@ -97,6 +101,7 @@ class StFtpcSlowSimMaker : public StMaker {
    St_ftpcDriftField    *m_driftfield;            //!
    St_ftpcGas           *m_gas;                   //!
    St_ftpcElectronics   *m_electronics;           //! 
+   St_ftpcInnerCathode  *m_cathode;               //!
  
   void                  MakeHistograms();// Histograms for FTPC slow simulator
   
@@ -112,7 +117,7 @@ class StFtpcSlowSimMaker : public StMaker {
   virtual Int_t  Make();
   // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcSlowSimMaker.h,v 1.10 2003/02/28 13:00:27 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcSlowSimMaker.h,v 1.11 2003/07/03 13:25:50 fsimon Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StFtpcSlowSimMaker, 1)   //StAF chain virtual base class for Makers
 };
