@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFpdMaker.cxx,v 1.1 2002/01/16 20:21:07 akio Exp $
+ * $Id: StFpdMaker.cxx,v 1.2 2002/10/17 02:03:10 akio Exp $
  *
  * Author: AKIO OGAWA
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StFpdMaker.cxx,v $
+ * Revision 1.2  2002/10/17 02:03:10  akio
+ * modification along with StEvent modification for 2003
+ *
  * Revision 1.1  2002/01/16 20:21:07  akio
  * first version
  *
@@ -129,7 +132,8 @@ Int_t StFpdMaker::Make(){
   for (unsigned int i=0;i<fpdCollection->numberOfScalers();i++){
     fpdCollection->setScaler(i,fpdReader->GetScl(i));
   }
-  for (unsigned int i=0;i<bbcTriggerDetector.numberOfPMTs();i++){
+  //  for (unsigned int i=0;i<bbcTriggerDetector.numberOfPMTs();i++){
+  for (unsigned int i=0;i<32;i++){
     bbcTriggerDetector.setAdc(i,fpdReader->GetBbcAdc(i));
     bbcTriggerDetector.setTdc(i,fpdReader->GetBbcAdc(i+32));
   }
