@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StGeant2LcpTreeMaker.cxx,v 1.2 2004/01/26 22:49:37 perev Exp $
+// $Id: StGeant2LcpTreeMaker.cxx,v 1.3 2004/02/24 21:33:23 balewski Exp $
 
 #include <math.h>
 #include <TFile.h>
@@ -116,7 +116,7 @@ void StGeant2LcpTreeMaker::InitRunFromMake  (int runNumber){
     printf(" %s::Init(RunNumber=%d) WARN : TTRee NOT created\n",GetName(),runID);
     tree=0;
   }
-
+return;
 }  
 
 //________________________________________________
@@ -265,6 +265,9 @@ particle_st* StGeant2LcpTreeMaker::findGeantLcp( St_particle    *tab) {
 
 
 // $Log: StGeant2LcpTreeMaker.cxx,v $
+// Revision 1.3  2004/02/24 21:33:23  balewski
+// *** empty log message ***
+//
 // Revision 1.2  2004/01/26 22:49:37  perev
 // WarnOff
 //
