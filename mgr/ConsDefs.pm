@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.55 2003/09/09 13:46:49 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.56 2003/09/09 13:52:28 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -166,10 +166,10 @@
 #	$CXXFLAGS    .= " -Werror";# warning==error;
 #	$CXXFLAGS    .= " -fnonnull-objects";
 	if ( defined( $ARG{NODEBUG} ) or $NODEBUG ) {
-	    if ($STAR_HOST_SYS =~ /^gcc/){
+	    if ($STAR_HOST_SYS =~ /gcc/){
 		# this naming convention starts at gcc 3.2 which happens to
 		# have a change in the options
-		$DEBUG = "-O -g -farch=pentium -fcpu=pentium -falign-loops=2";
+		$DEBUG = "-O -g -march=pentium -mcpu=pentium -falign-loops=2";
 		$DEBUG.= " -falign-jumps=2 -falign-functions=2";
 		$FDEBUG = "-O -g";
 	    } else {
