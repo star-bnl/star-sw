@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiI.hh,v 3.3 2001/11/05 23:41:07 genevb Exp $
+ * $Id: StXiI.hh,v 3.4 2001/11/28 05:14:59 genevb Exp $
  *
  * Author: Gene Van Buren, BNL, 24-Apr-2001
  *
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StXiI.hh,v $
+ * Revision 3.4  2001/11/28 05:14:59  genevb
+ * Additional decay angle functions
+ *
  * Revision 3.3  2001/11/05 23:41:07  genevb
  * Add more dEdx, B field info, careful of changes to TTree unrolling
  *
@@ -30,6 +33,8 @@
 static const Float_t M_OMEGA_2 = pow(M_OMEGA_MINUS,2);
 static const Float_t M_XI_2 = pow(M_XI_MINUS,2);
 static const Float_t M_KAON_MINUS_2 = pow(M_KAON_MINUS,2);
+
+enum StXiDaughter {bachelor, v0};
 
 
 class StXiI : public virtual StV0I {
@@ -81,6 +86,15 @@ public:
   virtual Float_t mtXi();                   // Transverse mass assuming (anti)Xi
   virtual Float_t mtm0Omega();              // mt-m0 assuming (anti)Omega
   virtual Float_t mtm0Xi();                 // mt-m0 assuming (anti)Xi
+
+  // Cosines of decay and polarization angles for different particle hypotheses
+  virtual Float_t decayCosThetaBachelorXi();    // xi    - bachelor
+  virtual Float_t decayCosThetaV0Xi();          // xi    - V0 
+  virtual Float_t decayCosThetaBachelorOmega(); // omega - bachelor
+  virtual Float_t decayCosThetaV0Omega();       // omega - V0
+  // This helper function can be used for decayCosTheta of any hypothesis:
+  // m1 = parent mass, m2 = daughter mass, type = bachelor/v0 daughter
+  virtual Float_t dCTXi(Float_t m1, Float_t m2, StXiDaughter type);
 
 // ************************************************************************
 // The next few functions are presently used only by MC
@@ -279,6 +293,30 @@ inline Float_t StXiI::MomV0AlongXi() {
             momV0Y()*momXiY() + 
             momV0Z()*momXiZ()) / sqrt(mPtot2Xi);
   return 0.;
+}
+
+inline Float_t StXiI::decayCosThetaBachelorXi() {
+  return dCTXi(M_XI_MINUS,M_PION_MINUS,bachelor);
+}
+
+inline Float_t StXiI::decayCosThetaV0Xi() {
+  return dCTXi(M_XI_MINUS,M_LAMBDA,v0);
+}
+
+inline Float_t StXiI::decayCosThetaBachelorOmega() {
+  return dCTXi(M_OMEGA_MINUS,M_KAON_MINUS,bachelor);
+}
+
+inline Float_t StXiI::decayCosThetaV0Omega() {
+  return dCTXi(M_OMEGA_MINUS,M_LAMBDA,v0);
+}
+
+inline Float_t StXiI::dCTXi(Float_t m1, Float_t m2, StXiDaughter type) {
+  return ( (type == bachelor) ?
+    StDecayAngle::decayCosTheta(momXiX(),momXiY(),momXiZ(),m1,
+              momBachelorX(),momBachelorY(),momBachelorZ(),m2) :
+    StDecayAngle::decayCosTheta(momXiX(),momXiY(),momXiZ(),m1,
+                                momV0X(),momV0Y(),momV0Z(),m2) );
 }
 
 #endif

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0I.hh,v 3.3 2001/11/05 23:41:06 genevb Exp $
+ * $Id: StV0I.hh,v 3.4 2001/11/28 05:14:59 genevb Exp $
  *
  * Author: Gene Van Buren, BNL, 24-Apr-2001
  *
@@ -13,6 +13,9 @@
  ***********************************************************************
  *
  * $Log: StV0I.hh,v $
+ * Revision 3.4  2001/11/28 05:14:59  genevb
+ * Additional decay angle functions
+ *
  * Revision 3.3  2001/11/05 23:41:06  genevb
  * Add more dEdx, B field info, careful of changes to TTree unrolling
  *
@@ -29,8 +32,7 @@
 #include "phys_constants.h"
 #include <math.h>
 #include "StStrangeEvMuDst.hh"
-#include "TMath.h"
-#include "TLorentzVector.h"
+#include "StDecayAngle.hh"
 
 #ifndef StTrackTopologyMap_hh
 #include "StEvent/StTrackTopologyMap.h"
@@ -109,12 +111,19 @@ public:
   virtual Float_t mtm0Lambda();           // mt-m0 assuming lambda
   virtual Float_t mtm0K0Short();          // mt-m0 assuming k-short
 
-  virtual Float_t decayCosThetaLambda();  // Cosine of decay angle lambda hypo.
-  virtual Float_t decayCosThetaAntiLambda(); // Cosine of decay angle antilambda hypothesis
-  virtual Float_t decayCosThetaK0Short(); // Cosine of decay angle k-short hypo
-  virtual Float_t polCosThetaLambda();    // Cosine of polzn. angle lambda hypothesis
-  virtual Float_t polCosThetaAntiLambda(); // Cosine of polzn. angle antilambda hypothesis
-  virtual Float_t polCosThetaK0Short();   // Cosine of polzn. angle k0 hypo.
+  // Cosines of decay and polarization angles for different particle hypotheses
+  virtual Float_t decayCosThetaK0Short();       // k-short    - pos. daughter
+  virtual Float_t decayCosThetaLambda();        // lambda     - pos. daughter
+  virtual Float_t decayCosThetaAntiLambda();    // antilambda - neg. daughter
+  virtual Float_t polCosThetaLambda();          // lambda     - pos. daughter
+  virtual Float_t polCosThetaAntiLambda();      // antilambda - neg. daughter
+  virtual Float_t decayCosThetaPosLambda();     // lambda     - pos. daughter
+  virtual Float_t decayCosThetaNegLambda();     // lambda     - neg. daughter
+  virtual Float_t decayCosThetaNegAntiLambda(); // antilambda - neg. daughter
+  virtual Float_t decayCosThetaPosAntiLambda(); // antilambda - pos. daughter
+  // This helper function can be used for decayCosTheta of any hypothesis:
+  // m1 = parent mass, m2 = daughter mass, charge = positive/negative daughter
+  virtual Float_t dCTV0(Float_t m1, Float_t m2, StChargeSign charge);
 
 // ************************************************************************
 // The next few functions are presently used only by MC
@@ -375,55 +384,52 @@ inline Float_t StV0I::mtm0K0Short() {
   return (mtK0Short()-M_KAON_0_SHORT);
 }
 
-inline Float_t StV0I::decayCosThetaLambda() {
-  TLorentzVector parent, posDaughter;
-  parent.SetXYZM(momV0X(),momV0Y(),momV0Z(),M_LAMBDA);
-  posDaughter.SetXYZM(momPosX(),momPosY(),momPosZ(),M_PROTON);
-  posDaughter.Boost(-parent.BoostVector());
-  return TMath::Cos(posDaughter.Vect().Angle(parent.Vect()));
+inline Float_t StV0I::decayCosThetaK0Short() {    // default: use pos. daughter
+  return dCTV0(M_KAON_0_SHORT,M_PION_PLUS,positive);
 }
 
-inline Float_t StV0I::decayCosThetaAntiLambda() {
-  TLorentzVector parent, posDaughter;
-  parent.SetXYZM(momV0X(),momV0Y(),momV0Z(),M_LAMBDA);
-  posDaughter.SetXYZM(momPosX(),momPosY(),momPosZ(),M_PION_PLUS);
-  posDaughter.Boost(-parent.BoostVector());
-  return TMath::Cos(posDaughter.Vect().Angle(parent.Vect()));
+inline Float_t StV0I::decayCosThetaLambda() {     // default: use pos. daughter
+  return decayCosThetaPosLambda();
 }
 
-inline Float_t StV0I::decayCosThetaK0Short() {
-  TLorentzVector parent, posDaughter;
-  parent.SetXYZM(momV0X(),momV0Y(),momV0Z(),M_KAON_0_SHORT);
-  posDaughter.SetXYZM(momPosX(),momPosY(),momPosZ(),M_PION_PLUS);
-  posDaughter.Boost(-parent.BoostVector());
-  return TMath::Cos(posDaughter.Vect().Angle(parent.Vect()));
+inline Float_t StV0I::decayCosThetaAntiLambda() { // default: use neg. daughter
+  return decayCosThetaNegAntiLambda();
 }
 
-inline Float_t StV0I::polCosThetaLambda() {
-  TLorentzVector parent, pos;
-  parent.SetXYZM(momV0X(),momV0Y(),momV0Z(),M_LAMBDA);
-  pos.SetXYZM(momPosX(),momPosY(),momPosZ(),M_PROTON);
-  pos.Boost(-parent.BoostVector());
-  TVector3 beam(0,0,1);
-  return TMath::Cos(pos.Vect().Angle(parent.Vect().Cross(beam)));
+inline Float_t StV0I::polCosThetaLambda() {       // default: use pos. daughter
+  return StDecayAngle::polarityCosTheta(
+    momV0X(),momV0Y(),momV0Z(),M_LAMBDA,
+    momPosX(),momPosY(),momPosZ(),M_PROTON);
 }
 
-inline Float_t StV0I::polCosThetaAntiLambda() {
-  TLorentzVector parent, neg;
-  parent.SetXYZM(momV0X(),momV0Y(),momV0Z(),M_LAMBDA);
-  neg.SetXYZM(momNegX(),momNegY(),momNegZ(),M_PROTON);
-  neg.Boost(-parent.BoostVector());
-  TVector3 beam(0,0,1);
-  return TMath::Cos(neg.Vect().Angle(parent.Vect().Cross(beam)));
+inline Float_t StV0I::polCosThetaAntiLambda() {   // default: use neg. daughter
+  return StDecayAngle::polarityCosTheta(
+    momV0X(),momV0Y(),momV0Z(),M_LAMBDA,
+    momNegX(),momNegY(),momNegZ(),M_PROTON);
 }
 
-inline Float_t StV0I::polCosThetaK0Short() {
-  TLorentzVector parent, pos;
-  parent.SetXYZM(momV0X(),momV0Y(),momV0Z(),M_KAON_0_SHORT);
-  pos.SetXYZM(momPosX(),momPosY(),momPosZ(),M_PION_PLUS);
-  pos.Boost(-parent.BoostVector());
-  TVector3 beam(0,0,1);
-  return TMath::Cos(pos.Vect().Angle(parent.Vect().Cross(beam)));
+inline Float_t StV0I::decayCosThetaPosLambda() {
+  return dCTV0(M_LAMBDA,M_PROTON,positive);
+}
+
+inline Float_t StV0I::decayCosThetaNegLambda() {
+  return dCTV0(M_LAMBDA,M_PION_MINUS,negative);
+}
+
+inline Float_t StV0I::decayCosThetaNegAntiLambda() {
+  return dCTV0(M_ANTILAMBDA,M_ANTIPROTON,negative);
+}
+
+inline Float_t StV0I::decayCosThetaPosAntiLambda() {
+  return dCTV0(M_ANTILAMBDA,M_PION_PLUS,positive);
+}
+
+inline Float_t StV0I::dCTV0(Float_t m1, Float_t m2, StChargeSign charge) {
+  return ( (charge == positive) ?
+    StDecayAngle::decayCosTheta(momV0X() ,momV0Y() ,momV0Z() ,m1,
+                                momPosX(),momPosY(),momPosZ(),m2) :
+    StDecayAngle::decayCosTheta(momV0X() ,momV0Y() ,momV0Z() ,m1,
+                                momNegX(),momNegY(),momNegZ(),m2) );
 }
 
 inline void StV0I::Clear() {
