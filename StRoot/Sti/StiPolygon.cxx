@@ -12,7 +12,7 @@
 //Sti
 #include "StiPolygon.h"
 
-ClassImp(StiPolygon)
+//ClassImp(StiPolygon)
     
 StiPolygon::StiPolygon()
 {

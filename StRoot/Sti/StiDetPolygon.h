@@ -19,7 +19,7 @@
 #define StiDetPolygon_HH
 
 //Temp
-#include "TObject.h"
+//#include "TObject.h"
 
 #include <map>
 #include "StiPolygon.h"
@@ -48,9 +48,12 @@ public:
     //Add a detector to the polygon
     void push_back(StiDetector*);
 
+    void clear();
+    void clearAndDestroy();
+
     //return pointer to detector for a given side
     StiDetector* detector(unsigned int side);
-    //return pointer to detector closes to this angle
+    //return pointer to detector closest to this angle
     StiDetector* detector(double angle);
 
     //Utility
@@ -62,7 +65,7 @@ protected:
     det_polygon_map msidemap; //!
     
 private:
-    ClassDef(StiDetPolygon, 1)
+    //ClassDef(StiDetPolygon, 1)
 };
 
 #endif
