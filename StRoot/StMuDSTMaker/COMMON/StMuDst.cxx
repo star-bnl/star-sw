@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.16 2003/10/14 14:35:53 laue Exp $
+ * $Id: StMuDst.cxx,v 1.17 2003/10/20 22:55:39 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -266,6 +266,9 @@ StTrack* StMuDst::createStTrack(StMuTrack* track) {
   t->setFitTraits(*traits);
   delete traits;  
   t->setNumberOfPossiblePoints(track->nHitsPoss());
+
+  // set the topology map
+  t->setTopologyMap( track->topologyMap() );
   
   return t;
 }
@@ -276,6 +279,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.17  2003/10/20 22:55:39  laue
+ * added filling of the topology map in the createStTrack function
+ *
  * Revision 1.16  2003/10/14 14:35:53  laue
  * Alex Suaide EMC updates
  *
