@@ -72,13 +72,14 @@ C<----------------------------------------------------------------------
 #include "math_constants.inc"
 C ---------------------------------------------------------------------
 
-      RECORD  /track_pointers/ gtrk(mxtrack)
+      RECORD  /track_pointers/ gtrk(1)
 
       INTEGER i,j,jj,iret,itrk,ient,imatch
       INTEGER igtrk,itpct,isvtt,ipriv,iglob,ishit,ithit
-      INTEGER tpcmc(mxtrack),lasthit,ifirst
+      INTEGER tpcmc(1),lasthit,ifirst
       INTEGER*4 egr_refit_track,egr_load_globtrk
-      INTEGER svt(mxtrack),tpc(mxtrack)
+      INTEGER svt(1),tpc(1),mxtrack
+      INTEGER malloc
       INTEGER imsg,imsgw
       INTEGER imsg1,imsg2,imsg3,imsg4,imsg5,imsg6,imsg7,imsg8
       CHARACTER*132 errmsg,msg
@@ -87,6 +88,12 @@ C ---------------------------------------------------------------------
       DATA imsg4,imsg5,imsg6,imsg7,imsg8 /5*0/
 
 C ---------------------------------------------------------------------
+
+
+      pointer (gtrk_p, gtrk)
+      pointer (tpcmc_p,tpcmc)
+      pointer (svt_p, svt)
+      pointer (tpc_p,tpc)
 
       write(msg,'(A30)') ' EGR_REFITTER-I: started. '
       call message(msg,1,imsg)
@@ -102,6 +109,19 @@ CCC  L. Ray, 9/16/98
 
       write(6,997) 
 997   format(2x,'Initializing gtrk in egr_fitter.F')
+
+
+      mxtrack = svt_track_h.nok + tptrack_h.nok
+      if( tpeval_h.nok .gt. tptrack_h.nok) then
+         mxtrack = svt_track_h.nok + tpeval_h.nok
+      endif
+      i = abs(loc(gtrk(2))-loc(gtrk(1)))
+      gtrk_p = malloc(mxtrack*i)
+      tpcmc_p = malloc(mxtrack*4)
+      svt_p = malloc(mxtrack*4)
+      tpc_p = malloc(mxtrack*4)
+
+
 
       do i = 1,mxtrack
          gtrk(i).nhit         = 0
@@ -896,7 +916,7 @@ CCC  L.Ray - 9/16/98
                continue 
             else 
                write(6,998) i
-998   Format(5x,'BAD Value of globtrk(i=',I7,').invpt detected - set to -999999')
+998   Format(5XFx,'BAD Value of globtrk(i=',I7,').invpt detected - set to -999999')
                globtrk(i).invpt = -999999.
                globtrk(i).iflag = -999
             end if  
@@ -904,6 +924,12 @@ CCC  L.Ray - 9/16/98
       end if
              
       egr_fitter = STAFCV_OK
+
+      call free(gtrk_p)
+      call free(tpcmc_p)
+      call free(svt_p)
+      call free(tpc_p)
+
       
       return
       end

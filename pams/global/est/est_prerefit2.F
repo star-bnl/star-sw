@@ -16,6 +16,8 @@ C innermost (ie from tpc to main vertex)
 
 C     Local variables
 
+      integer mxtrack
+      PARAMETER (mxtrack=30000)
       RECORD /track_pointers/ gtrk(mxtrack)
       
       INTEGER sgn,itrk

@@ -46,7 +46,7 @@ C_____________________________________________________________________
 
 C     Local variables
 
-      RECORD /track_pointers/ gtrk(mxtrack)
+      RECORD /track_pointers/ gtrk(1)
       
       INTEGER igtrk,sgn,lasthit,firsthit,iglob,itpct,isvtt
       INTEGER imsg,ipriv

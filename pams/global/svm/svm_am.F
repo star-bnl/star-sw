@@ -265,33 +265,135 @@ ccc
       integer  jtpc1,j5,jtmp,k,kp,ksvt,ksw,ktr,ktpc,ktrset
       integer  l,loop_count,loop_1,loop_2,m,nbad,nmat
       integer  nunasg,nsvt,ntpc,pidsvt,pidtpc
-      integer NO_TKS_MAX
+      integer NO_TKS_MAX, TRKS_MAX
 
-      parameter (NO_TKS_MAX=30000)
+      integer   malloc
+      parameter (TRKS_MAX=1)
       
-      dimension jtmp(NO_TKS_MAX),j5(5),chitmp(NO_TKS_MAX),chi5(5)
-      dimension idsvt(NO_TKS_MAX),psvt(6,NO_TKS_MAX)
-      dimension pidsvt(NO_TKS_MAX),pmsvt(NO_TKS_MAX)
-      dimension zersvt(NO_TKS_MAX),persvt(NO_TKS_MAX)
-      dimension zsvt(NO_TKS_MAX),phisvt(NO_TKS_MAX)
-      dimension dirsvt(3,NO_TKS_MAX),eangsv(NO_TKS_MAX)
-      dimension idtpc(NO_TKS_MAX),ptpc(6,NO_TKS_MAX)
-      dimension pidtpc(NO_TKS_MAX),pmtpc(NO_TKS_MAX),zertpc(NO_TKS_MAX)
-      dimension pertpc(NO_TKS_MAX),ztpc(NO_TKS_MAX),phitpc(NO_TKS_MAX)
-      dimension dirtpc(3,NO_TKS_MAX),eangtp(NO_TKS_MAX)
-      dimension ichk(NO_TKS_MAX),jchk(NO_TKS_MAX)
+      dimension jtmp(TRKS_MAX),j5(5),chitmp(TRKS_MAX),chi5(5)
+      dimension idsvt(TRKS_MAX),psvt(6,TRKS_MAX)
+      dimension pidsvt(TRKS_MAX),pmsvt(TRKS_MAX)
+      dimension zersvt(TRKS_MAX),persvt(TRKS_MAX)
+      dimension zsvt(TRKS_MAX),phisvt(TRKS_MAX)
+      dimension dirsvt(3,TRKS_MAX),eangsv(TRKS_MAX)
+      dimension idtpc(TRKS_MAX),ptpc(6,TRKS_MAX)
+      dimension pidtpc(TRKS_MAX),pmtpc(TRKS_MAX),zertpc(TRKS_MAX)
+      dimension pertpc(TRKS_MAX),ztpc(TRKS_MAX),phitpc(TRKS_MAX)
+      dimension dirtpc(3,TRKS_MAX),eangtp(TRKS_MAX)
+      dimension ichk(TRKS_MAX),jchk(TRKS_MAX)
       dimension ang(3),td(3),cosphi(3),zint(3),tmcs(3),
-     1 chisq(NO_TKS_MAX,5),jtpc(NO_TKS_MAX,5),ntpc(NO_TKS_MAX),
-     2 iflag(NO_TKS_MAX),jflag(NO_TKS_MAX),nsvt(NO_TKS_MAX),
-     3 isvt(NO_TKS_MAX,5),jtpc1(NO_TKS_MAX),isvt1(NO_TKS_MAX),
-     4 iskip(NO_TKS_MAX),jskip(NO_TKS_MAX),pin(6),
+     1 chisq(TRKS_MAX,5),jtpc(TRKS_MAX,5),ntpc(TRKS_MAX),
+     2 iflag(TRKS_MAX),jflag(TRKS_MAX),nsvt(TRKS_MAX),
+     3 isvt(TRKS_MAX,5),jtpc1(TRKS_MAX),isvt1(TRKS_MAX),
+     4 iskip(TRKS_MAX),jskip(TRKS_MAX),pin(6),isvt2(TRKS_MAX),
      5 pout(7),pcov(6,6),ptmp(6),dirvec(3),partal(3,6),
      6 poserr(3),nbad(2),nmat(2),nunasg(2),
-     7 loop_1(NO_TKS_MAX),loop_2(NO_TKS_MAX),chisav(NO_TKS_MAX),
-     8 isvt2(NO_TKS_MAX),chisav_2(NO_TKS_MAX)
+     7 loop_1(30000),loop_2(30000),chisav(30000),
+     8   chisav_2(30000)
 
 c
+
+      pointer (isvt2_p,isvt2)
+      pointer (jtmp_p,jtmp)
+      pointer (chitmp_p,chitmp)
+      pointer (idsvt_p,idsvt)
+      pointer (psvt_p,psvt)
+      pointer (pidsvt_p,pidsvt)
+      pointer (pmsvt_p,pmsvt)
+      pointer (zersvt_p,zersvt)
+      pointer (persvt_p,persvt)
+      pointer (zsvt_p,zsvt)
+      pointer (phisvt_p,phisvt)
+      pointer (zertpc_p,zertpc)
+      pointer (dirsvt_p,dirsvt)
+      pointer (eangsv_p,eangsv)
+      pointer (pmtpc_p,pmtpc)
+      pointer (idtpc_p,idtpc)
+      pointer (ptpc_p,ptpc)
+      pointer (pidtpc_p,pidtpc)
+      pointer (pertpc_p,pertpc)
+      pointer (ztpc_p,ztpc)
+      pointer (phitpc_p,phitpc)
+      pointer (dirtpc_p,dirtpc)
+      pointer (eangtp_p,eangtp)
+      pointer (ichk_p,ichk)
+      pointer (jchk_p,jchk)
+      pointer (chisq_p,chisq)
+      pointer (jtpc_p,jtpc)
+      pointer (ntpc_p,ntpc)
+      pointer (iflag_p,iflag)
+      pointer (jflag_p,jflag)
+      pointer (nsvt_p,nsvt)
+      pointer (isvt_p,isvt)
+      pointer (jtpc1_p,jtpc1)
+      pointer (isvt1_p,isvt1)
+      pointer (iskip_p,iskip)
+      pointer (jskip_p,jskip)
+      pointer (loop_1_p,loop_1)
+      pointer (loop_2_p,loop_2)
+      pointer (chisav_p, chisav)
+      pointer (chisav_2_p,chisav_2)
+
+      evtin_h.nok = 0
+
+      if( svtin_h.nok .eq. 0 )then
+         print *,'No svt tracks leaving'
+         svm_am = STAFCV_BAD
+         return
+      endif
+      
+      if( tpcin_h.nok .eq. 0 ) then
+         print *,'No tpc tracks leaving'
+         svm_am = STAFCV_BAD
+         return
+      endif        
+
       print *,'Begin matching'
+
+      NO_TKS_MAX= svtin_h.nok + tpcin_h.nok
+
+
+      jtmp_p = malloc(NO_TKS_MAX*4)
+      chitmp_p = malloc(NO_TKS_MAX*4)
+      idsvt_p = malloc(NO_TKS_MAX*4)
+      psvt_p = malloc(NO_TKS_MAX*4)
+      pidsvt_p = malloc(NO_TKS_MAX*4)
+      pmsvt_p = malloc(NO_TKS_MAX*4)
+      zersvt_p = malloc(NO_TKS_MAX*4)
+      persvt_p = malloc(NO_TKS_MAX*4)
+      zsvt_p = malloc(NO_TKS_MAX*4)
+      phisvt_p = malloc(NO_TKS_MAX*4)
+      dirsvt_p = malloc(NO_TKS_MAX*4)
+      eangsv_p = malloc(NO_TKS_MAX*4)
+      idtpc_p = malloc(NO_TKS_MAX*4)
+      ptpc_p  = malloc(NO_TKS_MAX*4)
+      pidtpc_p = malloc(NO_TKS_MAX*4)
+      pmtpc_p = malloc(NO_TKS_MAX*4)
+      zertpc_p = malloc(NO_TKS_MAX*4)
+      pertpc_p = malloc(NO_TKS_MAX*4)
+      ztpc_p = malloc(NO_TKS_MAX*4)
+      phitpc_p = malloc(NO_TKS_MAX*4)
+      dirtpc_p = malloc(NO_TKS_MAX*4)
+      eangtp_p = malloc(NO_TKS_MAX*4)
+      ichk_p = malloc(NO_TKS_MAX*4)
+      jchk_p = malloc(NO_TKS_MAX*4)
+      chisq_p = malloc(NO_TKS_MAX*4)
+      jtpc_p = malloc(NO_TKS_MAX*4)
+      ntpc_p = malloc(NO_TKS_MAX*4)
+      iflag_p = malloc(NO_TKS_MAX*4)
+      jflag_p = malloc(NO_TKS_MAX*4)
+      nsvt_p = malloc(NO_TKS_MAX*4)
+      isvt_p = malloc(NO_TKS_MAX*4)
+      jtpc1_p = malloc(NO_TKS_MAX*4)
+      isvt1_p = malloc(NO_TKS_MAX*4)
+      iskip_p = malloc(NO_TKS_MAX*4)
+      jskip_p = malloc(NO_TKS_MAX*4)
+      isvt2_p = malloc(NO_TKS_MAX*4)
+      chisav_p = malloc(NO_TKS_MAX*4)
+      loop_1_p =  malloc(NO_TKS_MAX*4)
+      loop_2_p = malloc(NO_TKS_MAX*4)
+      chisav_2_p =  malloc(NO_TKS_MAX*4)
+
 c
 ccc
 ccc   set parameters:
@@ -397,7 +499,8 @@ ccc
       ksvt = ksvt + 1
       if(ksvt .gt. NO_TKS_MAX) then
          svm_am = STAFCV_BAD
-         return
+         goto 999
+         
       end if
       pin(1) = svtin(i).r0
       pin(2) = svtin(i).phi0/rad
@@ -571,7 +674,7 @@ ccc
       ktpc = ktpc + 1
       if(ktpc .gt. NO_TKS_MAX) then
          svm_am = STAFCV_BAD
-         return
+         goto 999
       end if
       pin(1) = tpcin(i).r0
       pin(2) = tpcin(i).phi0/rad_tpc
@@ -1054,7 +1157,7 @@ ccc
       ktr = ktr + 1
       if(ktr .gt. evtin_h.maxlen) then
       svm_am = STAFCV_BAD
-      return
+      goto 999
       end if
       evtin(ktr).id = ktr
       evtin(ktr).idsvt = idsvt(i)
@@ -1075,8 +1178,53 @@ ccc
 409   format(5x,'matching results loaded into evt_match: ',i8,
      1  ' matches found')
       evtin_h.nok = ktr
-      
+
       svm_am = STAFCV_OK
+
+ 999  continue
+    
+      call free(jtmp_p)
+      call free(chitmp_p)
+      call free(idsvt_p)
+      call free(psvt_p)
+      call free(pidsvt_p)
+      call free(pmsvt_p)
+      call free(zersvt_p)
+      call free(persvt_p)
+      call free(zsvt_p)
+      call free(phisvt_p)
+      call free(dirsvt_p)
+      call free(eangsv_p)
+      call free(idtpc_p)
+      call free(ptpc_p) 
+      call free(pidtpc_p)
+      call free(pmtpc_p)
+      call free(zertpc_p)
+      call free(pertpc_p)
+      call free(ztpc_p)
+      call free(phitpc_p)
+      call free(dirtpc_p)
+      call free(eangtp_p)
+      call free(ichk_p)
+      call free(jchk_p)
+      call free( chisq_p)
+      call free(jtpc_p)
+      call free(ntpc_p)
+      call free(iflag_p)
+      call free(jflag_p)
+      call free(nsvt_p)
+      call free(isvt_p)
+      call free(jtpc1_p)
+      call free(isvt1_p)
+      call free(iskip_p)
+      call free(jskip_p)
+      call free(isvt2_p)
+      call free(chisav_p)
+      call free(chisav_2_p)
+      call free(loop_1_p)
+      call free(loop_2_p)
+
+
       return
       end
       subroutine cnvrt(pin,pout,q,bmag,fac1,pi)
