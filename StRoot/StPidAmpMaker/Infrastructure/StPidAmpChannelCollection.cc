@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannelCollection.cc,v 1.5 2000/05/01 16:59:25 aihong Exp $
+ * $Id: StPidAmpChannelCollection.cc,v 1.6 2000/05/05 19:20:44 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannelCollection.cc,v $
+ * Revision 1.6  2000/05/05 19:20:44  aihong
+ * let StPidAmpNetOut::Get*ParArray() returns pointer instead of obj.
+ *
  * Revision 1.5  2000/05/01 16:59:25  aihong
  * clean up
  *
@@ -589,11 +592,11 @@ void StPidAmpChannelCollection::writeBGBands2Disk(){
     theNet=(*(theChannel->netVector()))[j];
     StPidAmpNetOut* theNetOut=new StPidAmpNetOut(theNet->netOut());
 
-    TArrayD bandPar=(theNet->netOut()).GetBandParArray();
+    TArrayD bandPar=*((theNet->netOut()).GetBandParArray());
          
    if (bandPar.GetSize()>=NBandParam) {
          for (int i=0; i<NFitBandParam; i++)
-         bandPar.AddAt((mBGNet->netOut()).GetBandParArray().At(i),i);//refresh bandPar.
+         bandPar.AddAt(((mBGNet->netOut()).GetBandParArray())->At(i),i);//refresh bandPar.
    }
 
      TArrayD dummyArray;
