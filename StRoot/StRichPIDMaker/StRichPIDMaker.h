@@ -1,11 +1,16 @@
 /**********************************************************
- * $Id: StRichPIDMaker.h,v 2.13 2001/01/30 16:38:44 horsley Exp $
+ * $Id: StRichPIDMaker.h,v 2.14 2001/02/01 17:55:30 horsley Exp $
  *
  * Description:
  *  StRrsMaker is the main module
  *  StRichRawData. It has the standard Maker functions:
  *
  *  $Log: StRichPIDMaker.h,v $
+ *  Revision 2.14  2001/02/01 17:55:30  horsley
+ *  set energy loss in CTB at 20 MeV (default)
+ *  ifdef'd out the TrackEntryClass
+ *  StRichTrack::fastEnough() has materialsDB input for wavelenght's
+ *
  *  Revision 2.13  2001/01/30 16:38:44  horsley
  *  updated PID maker for next production run, included new class for TTree
  *
@@ -97,9 +102,9 @@ using std::vector;
 #include "StDaqLib/L3/L3.Banks.hh"
 #endif
 
-
+#ifdef myPrivateVersion	
 #include "TreeEntryClasses.h"
-
+#endif
 
 
 // SCL
@@ -241,9 +246,10 @@ private:
   TNtuple* geantPixelNtuple;   //!
   TNtuple* geantCloseHitNtuple;   //!
 
+#ifdef myPrivateVersion	
   TTree* myTree; 
   TrackEntry* m_Track; 
-
+#endif
 
   //
   // brian

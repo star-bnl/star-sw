@@ -1,5 +1,6 @@
 // TreeEntryClasses.cxx
-// M.L. Miller, Yale Software, 7/00
+// M. Horsley 
+// basis borrowed from M.L. Miller
 
 #include "TreeEntryClasses.h"
 #include "StRichTrack.h"
@@ -13,6 +14,9 @@
 #include "StRichPhotonInfo.h"
 
 #include "StParticleTypes.hh"
+
+#include "SystemOfUnits.h"
+#include "PhysicalConstants.h"
 //---------------------------------------------
 ClassImp(HitEntry)
 HitEntry::HitEntry() {};

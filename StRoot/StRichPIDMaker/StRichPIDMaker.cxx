@@ -1,10 +1,15 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.35 2001/01/31 13:25:23 horsley Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.36 2001/02/01 17:55:29 horsley Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.36  2001/02/01 17:55:29  horsley
+ * set energy loss in CTB at 20 MeV (default)
+ * ifdef'd out the TrackEntryClass
+ * StRichTrack::fastEnough() has materialsDB input for wavelenght's
+ *
  * Revision 2.35  2001/01/31 13:25:23  horsley
  * minimum  number of fitpoints = 25
  *
@@ -255,15 +260,16 @@ using std::max;
 #include "TObject.h"
 #include "TClonesArray.h"
 
+#ifdef myPrivateVersion 
 #include "TreeEntryClasses.h"
-
+#endif
 
 // magnetic field map
 //#include "StarCallf77.h"
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.35 2001/01/31 13:25:23 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.36 2001/02/01 17:55:29 horsley Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -732,6 +738,7 @@ Int_t StRichPIDMaker::Make() {
 	m_Track->clear();
 #endif		
       }
+
       else {
 	cout << "StRichPIDMaker::Make()\n";
 	cout << "\tCannot fill the PidTrait to the StTrack" << endl;
@@ -3033,15 +3040,16 @@ void StRichPIDMaker::initNtuples() {
   file->SetFormat(1);
   file->SetCompressionLevel(9);
   
+#ifdef myPrivateVersion	
   cout << "StRichPIDMaker::initNtuples   --> creating mStRichUstTrack. " << endl;
-  m_Track = new TrackEntry();
-
-  
+  m_Track = new TrackEntry();  
   myTree = new TTree("myTree","rich pid analysis tree");
   myTree->SetAutoSave(10000000);
   int bufsize = 2.0*64000;
   int split = 1;
   myTree->Branch("TrackBranch","TrackEntry",&m_Track,bufsize,split);
+#endif
+
 
   
 #ifdef myRICH_WITH_MC
