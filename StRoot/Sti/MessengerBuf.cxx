@@ -26,7 +26,7 @@ int MessengerBuf::dispatchMessage(const char *szMessage, streamsize iLen){
   // keep track of which unique streams (not routing bits) we have
   // written to
   unsigned int nMessageTypes = MessageType::getNtypes();
-  bool abStreamUsed[nMessageTypes];
+  bool *abStreamUsed = new bool[nMessageTypes];
   for(unsigned int iMessageType = 0; iMessageType<nMessageTypes; 
       iMessageType++){ abStreamUsed[iMessageType] = false; }
 
@@ -56,5 +56,6 @@ int MessengerBuf::dispatchMessage(const char *szMessage, streamsize iLen){
     }
   }
 
+  delete [] abStreamUsed;
   return 0;
 } // dispatchMessage

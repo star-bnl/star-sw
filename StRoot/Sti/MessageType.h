@@ -8,7 +8,13 @@
 
 #include <string>
 #include <map>
+#include <iostream>
 
+using std::map;
+using std::string;
+using std::ostream;
+using std::cout;
+using std::cerr;
 
 // stuff to make adding new messages easy
 #define ADD_MESSAGE(MSG)    \
@@ -59,10 +65,10 @@ ADD_MESSAGE(SeedFinder);
     static inline unsigned int getNtypes(){ return s_nTypes; }
 
     /// returns the MessageType with the given index, or NULL if none exists
-    static inline MessageType *getTypeByIndex(unsigned int iIndex);
+    static MessageType *getTypeByIndex(unsigned int iIndex);
 
     /// returns the MessageType with the given code, or NULL if none exists
-    static inline MessageType *getTypeByCode(unsigned int iCode);
+    static MessageType *getTypeByCode(unsigned int iCode);
 
 protected:
 
