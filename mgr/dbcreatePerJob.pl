@@ -104,7 +104,7 @@ my $filename;
 
 ### insert first line to JobStatusT table get last ID 
 
-   $sql="insert into $cpJobStatusT set ";    
+   $sql="insert into $JobStatusT set ";    
    $sql.="jobID='$startId',"; 
    $sql.="prodSeries='$startSer'";
     print "$sql\n" if $debugOn;
@@ -154,7 +154,7 @@ my $filename;
   $jobIn_no = 0; 
   for ($ii=0; $ii< scalar(@Sets); $ii++)  { 
 
- $sql="SELECT dataset, fName, Nevents FROM $cpFileCatalogT WHERE fName LIKE '%fzd' AND dataset = '$Sets[$ii]' AND hpss = 'Y'";
+ $sql="SELECT dataset, fName, Nevents FROM $FileCatalogT WHERE fName LIKE '%fzd' AND dataset = '$Sets[$ii]' AND hpss = 'Y'";
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
           $cursor->execute;
@@ -305,7 +305,7 @@ print "Jobfilename : ", $mjobFname, " % ", $msumFile, "\n";
 
 ###delete from $JobStatusT inserted JobID
 
-    $sql="delete from $cpJobStatusT WHERE ";    
+    $sql="delete from $JobStatusT WHERE ";    
     $sql.="jobID='$startId' AND "; 
     $sql.="prodSeries='$startSer'";
      print "$sql\n" if $debugOn;
@@ -319,7 +319,7 @@ print "Jobfilename : ", $mjobFname, " % ", $msumFile, "\n";
 ################################################################################
  sub fillJSTable {
 
-   $sql="insert into $cpJobStatusT set ";
+   $sql="insert into $JobStatusT set ";
    $sql.="jobID='$mjobID',";
    $sql.="prodSeries='$mprodSr',";
    $sql.="jobfileName='$mjobFname',";
@@ -338,7 +338,7 @@ print "Jobfilename : ", $mjobFname, " % ", $msumFile, "\n";
 ###############################################################################
  sub fillJRelTable {
 
-   $sql="insert into $cpjobRelationsT set ";
+   $sql="insert into $jobRelationsT set ";
    $sql.="JobID='$mjobID',";
    $sql.="prodSeries='$mprodSr',";
    $sql.="inputFile='$mflName'"; 
