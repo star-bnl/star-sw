@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.h,v 1.2 2000/03/29 20:52:13 genevb Exp $
+// $Id: StStrangeMuDstMaker.h,v 1.3 2000/04/05 20:23:53 genevb Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 1.3  2000/04/05 20:23:53  genevb
+// Introduce creating sub-Micro DSTs, dynamic expansion of clones arrays as needed, SetNoKeep() function
+//
 // Revision 1.2  2000/03/29 20:52:13  genevb
 // Added StKinkMuDst, replaced arrays
 //
@@ -23,8 +26,9 @@ class StV0MuDst;
 class StXiMuDst;
 class StKinkMuDst;
 class TClonesArray;
+class TArrayI;
 
-enum StrangeEnum {StrangeNoFile, StrangeWrite, StrangeRead};
+enum StrangeEnum {StrangeNoKeep, StrangeNoFile, StrangeWrite, StrangeRead};
 
 class StStrangeMuDstMaker : public StMaker {
  public: 
@@ -32,6 +36,7 @@ class StStrangeMuDstMaker : public StMaker {
   virtual ~StStrangeMuDstMaker();
   void SetRead (char* eFile=0, char* vFile=0, char* xFile=0, char* kFile=0);
   void SetWrite(char* eFile=0, char* vFile=0, char* xFile=0, char* kFile=0);
+  void SetNoKeep();
   void DoV0(Bool_t doIt=kTRUE);
   void DoXi(Bool_t doIt=kTRUE);
   void DoKink(Bool_t doIt=kTRUE);
@@ -51,7 +56,19 @@ class StStrangeMuDstMaker : public StMaker {
   virtual Int_t Make();
   virtual void  Clear(Option_t *option="");
   virtual Int_t Finish();
+  // Functions for sub-dsts:
+  virtual void SubDst(StStrangeMuDstMaker* maker);
+  virtual void SubDst(const char* maker_name);
+  virtual void SelectEvent();          // selects whole event for sub DST
+  virtual void SelectV0(Int_t i=-1);   // use i<0 to specify whole event
+  virtual void SelectXi(Int_t i=-1);   // use i<0 to specify whole event
+  virtual void SelectKink(Int_t i=-1); // use i<0 to specify whole event
  protected:
+  virtual void InitReadDst();
+  virtual void InitCreateDst();
+  virtual Int_t MakeReadDst();
+  virtual Int_t MakeCreateDst();
+  virtual void CreateSubDst();
   void SetFiles(char* eFile, char* vFile, char* xFile, char* kFile);
   Int_t OpenFile();
   TTree* tree;                   //!
@@ -68,6 +85,19 @@ class StStrangeMuDstMaker : public StMaker {
   TClonesArray* v0ClonesArray;   //!
   TClonesArray* xiClonesArray;   //!
   TClonesArray* kinkClonesArray; //!
+  StStrangeMuDstMaker* dstMaker; //!
+  // Arrays of muDst indices to copy
+  TArrayI* v0Selections;         //!
+  TArrayI* xiSelections;         //!
+  TArrayI* kinkSelections;       //!
+  // Totals for entire set
+  Int_t nV0Entries;
+  Int_t nXiEntries;
+  Int_t nKinkEntries;
+  // Totals for events
+  Int_t v0Entries;
+  Int_t xiEntries;
+  Int_t kinkEntries;
  private:
   ClassDef(StStrangeMuDstMaker,1)
 };
@@ -88,4 +118,8 @@ inline TClonesArray* StStrangeMuDstMaker::GetKinkClonesArray()
             { return kinkClonesArray; }
 inline TTree* StStrangeMuDstMaker::GetTree()
             { return tree; }
+inline void StStrangeMuDstMaker::SubDst(StStrangeMuDstMaker* maker)
+            { dstMaker = maker; }
+inline void StStrangeMuDstMaker::SubDst(const char* maker_name)
+            { SubDst((StStrangeMuDstMaker*) GetMaker(maker_name)); }
 #endif
