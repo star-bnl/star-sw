@@ -17,7 +17,7 @@
 
 #include "StDetectorId.h"
 #include "TH2.h"
-
+#include <math.h>
 ClassImp(StSvtdEdxMaker)
 
 //___________________________________________________________________________________________
@@ -215,7 +215,7 @@ Int_t StSvtdEdxMaker::Make()
 	              u_ab_z*waferGeom->n(2) ;
 	  
 	  
-	  pathLength[index]        = fabs(0.03/cos_theta);
+	  pathLength[index]        = fabs((float)(0.03/cos_theta));
 	  
 	  spacePointsCharge[index] = (ionization[index]/pathLength[index]);
 	  
