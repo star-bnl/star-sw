@@ -3,6 +3,7 @@
 
 // change log
 // 02-Jun-99 MJL fixed test on hypersector arg of getBankTPCSECP
+// 11-Jun-99 MJL merged PEDR PedRMS readers from RAW version
 
 TPCV2P0_PADK_SR::TPCV2P0_PADK_SR(int s, TPCV2P0_Reader *det)
 {
@@ -115,13 +116,27 @@ ADCRawReader *TPCV2P0_Reader::getADCRawReader(int sector)
 PedestalReader *TPCV2P0_Reader::getPedestalReader(int sector)
 {
   //  cout << "getTPCV2P0_P_SR" << endl;
-  return NULL;
+  TPCV2P0_PEDR_SR *ped = new TPCV2P0_PEDR_SR(sector, this);
+  if(!ped->initialize())
+    {
+      delete ped;
+      ped = NULL;
+    }
+
+  return (PedestalReader *)ped;
 }
 
 PedestalRMSReader *TPCV2P0_Reader::getPedestalRMSReader(int sector)
 {
-  cout << "getTPCV2P0_PRMS_SR" << endl;
-  return NULL;
+  // cout << "getTPCV2P0_PRMS_SR" << endl;
+  TPCV2P0_PRMS_SR *rms = new TPCV2P0_PRMS_SR(sector, this);
+  if(!rms->initialize())
+    {
+      delete rms;
+      rms = NULL;
+    }
+  
+  return (PedestalRMSReader *)rms;
 }
 
 GainReader *TPCV2P0_Reader::getGainReader(int sector)

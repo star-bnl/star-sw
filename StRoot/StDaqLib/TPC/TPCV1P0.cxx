@@ -116,13 +116,27 @@ ADCRawReader *TPCV1P0_Reader::getADCRawReader(int sector)
 PedestalReader *TPCV1P0_Reader::getPedestalReader(int sector)
 {
   //  cout << "getTPCV1P0_P_SR" << endl;
-  return NULL;
+  TPCV1P0_PEDR_SR *ped = new TPCV1P0_PEDR_SR(sector, this);
+  if(!ped->initialize())
+    {
+      delete ped;
+      ped = NULL;
+    }
+
+  return (PedestalReader *)ped;
 }
 
 PedestalRMSReader *TPCV1P0_Reader::getPedestalRMSReader(int sector)
 {
-  cout << "getTPCV1P0_PRMS_SR" << endl;
-  return NULL;
+  //  cout << "getTPCV1P0_PRMS_SR" << endl;
+  TPCV1P0_PRMS_SR *rms = new TPCV1P0_PRMS_SR(sector, this);
+  if(!rms->initialize())
+    {
+      delete rms;
+      rms = NULL;
+    }
+  
+  return (PedestalRMSReader *)rms;
 }
 
 GainReader *TPCV1P0_Reader::getGainReader(int sector)
