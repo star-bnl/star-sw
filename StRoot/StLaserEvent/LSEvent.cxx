@@ -144,21 +144,6 @@ void LSEvent::SetHeader(Int_t i, Int_t run, Int_t date)
    fNpixel = 0;
    fEvtHdr.Set(i, run, date);
 }
-//______________________________________________________________________________
-void LSEvent::SetLastTrack(Int_t nlast)
-{
-   fTracks->SetLast(nlast);
-}
-//______________________________________________________________________________
-void LSEvent::SetLastHit(Int_t nlast)
-{
-   fHits->SetLast(nlast);
-}
-//______________________________________________________________________________
-void LSEvent::SetLastPixel(Int_t nlast)
-{
-   fPixels->SetLast(nlast);
-}
 
 //______________________________________________________________________________
 Track::Track(Int_t tid, Int_t nfit, Float_t ax, Float_t az,

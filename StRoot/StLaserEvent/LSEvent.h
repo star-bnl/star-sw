@@ -71,13 +71,10 @@ public:
    void          AddTrack(Int_t tid,Int_t nfit, Float_t ax, Float_t az,
                      Float_t x0, Float_t y0, Float_t z0,
                      Float_t Chixy, Float_t Chizy);
-   void          SetLastTrack(Int_t nlast);
    void          AddHit(Float_t q,Float_t x,Float_t y,Float_t z, 
                         Int_t row, Int_t track, Int_t flag);
-   void          SetLastHit(Int_t nlast);
    void          AddPixel(Int_t row,Int_t pad,Int_t time,Int_t adc,
                          Float_t x,Float_t y,Float_t z);
-   void          SetLastPixel(Int_t nlast);
 
    Int_t         GetNtrack() const { return fNtrack; }
    Int_t         GetNhit() const { return fNhit; }
