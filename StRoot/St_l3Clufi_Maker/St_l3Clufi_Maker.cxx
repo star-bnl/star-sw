@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.11 2000/02/24 01:55:24 flierl Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.12 2000/03/03 22:42:52 flierl Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.12  2000/03/03 22:42:52  flierl
+// Improved coordinate transformation.
+//
 // Revision 1.11  2000/02/24 01:55:24  flierl
 // i960 timing built in.
 // output just with debug option.
@@ -76,6 +79,8 @@
 #include "St_l3banks_2_tphits.h"
 #include "TStopwatch.h"
 #include <string.h>
+#include "St_l3_Coordinates.h"
+#include "St_l3_Coordinate_Transformer.h"
 
 extern TStopwatch i960[18];
 
