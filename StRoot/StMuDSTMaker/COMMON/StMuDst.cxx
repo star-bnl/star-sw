@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.21 2004/04/02 03:24:53 jeromel Exp $
+ * $Id: StMuDst.cxx,v 1.22 2004/04/06 00:25:35 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -259,6 +259,13 @@ StEvent* StMuDst::createStEvent() {
     StPhmdCollection *PMD = mPmdUtil->getPmd(pmd);
     if(PMD) ev->setPhmdCollection(PMD);
   }
+  // now get the TOF stuff and put it in the StEvent
+  StTofCollection *tofcoll = new StTofCollection();
+  int nTofData = tofArrays[muTofData]->GetEntries();
+  for(int i=0;i<nTofData;i++) {
+    tofcoll->addData(tofData(i));
+  }
+  ev->setTofCollection(tofcoll);
 
   // now create, fill and add new StTriggerIdCollection to the StEvent
   StTriggerIdCollection* triggerIdCollection = new StTriggerIdCollection();
@@ -335,6 +342,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.22  2004/04/06 00:25:35  jeromel
+ * Missing TofCollection addition
+ *
  * Revision 1.21  2004/04/02 03:24:53  jeromel
  * Changes implements PMD and TOF.  TOF is clearly incomplete.
  *
