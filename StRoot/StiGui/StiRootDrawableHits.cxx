@@ -26,7 +26,7 @@ StiRootDrawableHits::StiRootDrawableHits() :
     mpoly->SetMarkerColor(mcolor);
     mpoly->ResetBit(kCanDelete);
 
-    mname = "Unnamed RootDrawableHits"; //Default name
+    setName("Unnamed RootDrawableHits"); //Default name
     mPointsForRoot = new double[mArraySize];
 }
 
@@ -103,7 +103,3 @@ void StiRootDrawableHits::setVisibility(bool val)
     return;
 }
 
-const char* StiRootDrawableHits::name() const
-{
-    return mname;
-}

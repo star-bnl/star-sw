@@ -10,7 +10,7 @@ StiRootDrawableHitContainer::StiRootDrawableHitContainer()
 {
     cout <<"StiRootDrawableHitContainer::StiRootDrawableHitContainer()"<<endl;
     setMarkerSize(.5);
-    mname = "StiRootDrawableHitContainer";
+    setName("StiRootDrawableHitContainer");
     StiDisplayManager::instance()->addDrawable(this);
 }
 

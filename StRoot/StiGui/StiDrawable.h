@@ -7,6 +7,9 @@
 #ifndef StiDrawable_HH
 #define StiDrawable_HH
 
+#include <string>
+using std::string;
+
 #include "StThreeVector.hh"
 
 class StiDrawable
@@ -19,8 +22,9 @@ public:
     virtual void update() = 0;
     virtual void setColor(int val) = 0;
     virtual void setVisibility(bool val) = 0;
-    
-    virtual const char* name() const = 0;
+
+    void setName(const string&);
+    const string& name() const;
 
     void setRemoved(bool);
     bool canBeRemoved() const;
@@ -30,7 +34,18 @@ public:
 protected:
     StThreeVector<double> mposition; //Global position of center of volume
     bool mremoved_each_event;
+    string mName;
 };
+
+inline void StiDrawable::setName(const string& val)
+{
+    mName = val;
+}
+
+inline const string& StiDrawable::name() const
+{
+    return mName;
+}
 
 inline bool StiDrawable::canBeRemoved() const
 {

@@ -22,7 +22,6 @@ protected:
     //Implement StiRootDrawable interface
     virtual void draw();
     virtual void update();
-    virtual const char* name() const;
 
     //Overide StiDetector methods
     virtual void build();

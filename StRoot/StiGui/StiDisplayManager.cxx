@@ -165,7 +165,7 @@ void StiDisplayManager::setInvisible(const StiDrawable* val)
 void StiDisplayManager::addDrawable(StiDrawable* tempval)
 {
     string name = tempval->name();
-    //    cout <<"Adding detector: "<<name<<endl;
+    cout <<"Adding detector: "<<name<<endl;
     mmap.insert( stiDrawableMapValType( name, tempval ) );
 
     //Objects must be added to the main node
