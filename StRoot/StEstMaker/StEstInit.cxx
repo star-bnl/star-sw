@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstInit.cxx,v 1.3 2001/01/28 22:18:27 lmartin Exp $
+ * $Id: StEstInit.cxx,v 1.4 2001/01/31 16:45:25 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StEstInit.cxx,v $
+ * Revision 1.4  2001/01/31 16:45:25  lmartin
+ * mParams[]->debug replaced by mDebug.
+ * phi and z params for StEstIndexGeom remove from StEstParams.
+ *
  * Revision 1.3  2001/01/28 22:18:27  lmartin
  * References to the data member mEvalTrack of StEstHit object removed.
  *
@@ -95,7 +99,7 @@ int StEstTracker::BranchInit(){
     if (mTrack[i]==NULL)
       cerr << "ERROR StEstMaker::Init mTrack[i]==NULL" <<endl;
     else {
-      if(mParams[0]->debug>3)
+      if(mDebugLevel>3)
 	cout<<" New track has been created #"<<i<<endl;
       branch = new StEstBranch(NULL, long(mParams[0]->maxsvthits));
       if (branch==NULL)
@@ -108,7 +112,7 @@ int StEstTracker::BranchInit(){
 	branch->SetHelix(helix);
 	branch->JoinTrack(mTrack[i],0);
 	branch->SetDebugLevel(0);
-	if(mParams[0]->debug>3)
+	if(mDebugLevel>3)
 	  cout<<" Branch added"<<endl;
 	StThreeVector<double> a(mVertex->mXG->z(),mVertex->mXG->y(),mVertex->mXG->z());
   	if (mTPCTrack[i]->GetFlag()>=0) {
@@ -121,7 +125,7 @@ int StEstTracker::BranchInit(){
 	    RefitBranch(branch,NULL,-1,1,&fitstatus);
 	  else
 	    RefitBranch(branch,NULL,-1,0,&fitstatus);
-	if(mParams[0]->debug>3)
+	if(mDebugLevel>3)
 	  cout<<" Branch refitted"<<endl;
 	  //	  branch->mTrack->mTPCTrack->mChiSq = branch->GetChiSq();
 	  //	  branch->mTrack->mTPCTrack->mChiSqCir = branch->GetChiSqCir();
@@ -145,7 +149,7 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
 			  St_scs_spt*   Stscsspt)
 {
 
-  if (mParams[0]->debug>2) 
+  if (mDebugLevel>2) 
     cout << "SVTInit **** START ****"<<endl;  
 
   long il, jl, kl, maxl, lay, shape;
@@ -161,7 +165,7 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
   scs_spt_st*   scsspt;
   svg_shape_st*    svgshape;
 
-  if (mParams[0]->debug>2) 
+  if (mDebugLevel>2) 
     cout << "SVTInit **** Getting data from tables ***"<<endl;  
 
 
@@ -173,18 +177,17 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
   scsspt   = Stscsspt->GetTable();
 
 
-  if (mParams[0]->debug>0) 
+  if (mDebugLevel>0) 
     cout << "SVTInit **** Creating "<<mNWafers<<" wafers ****"<<endl;  
-  mIndexGeom = new StEstIndexGeom(mParams[0]->nphibins, mParams[0]->nzbins);
+  mIndexGeom = new StEstIndexGeom(mNPhiBins,mNZBins);
   mIndexWaf  =  new StEstWafer*[mNWafers];
-  //  cout<<"--------------------> StEstInit : mIndexWaf="<<mIndexWaf<<endl;
   if(!mIndexWaf){
     cerr<<"ERROR!!! not enough memory"<<endl;
     cerr<<"StEstMaker::SVTInit mIndexWaf = new StEstWafer*["<<mNWafers<<"];"<<endl;
     return 1;
   }
 
-  if (mParams[0]->debug>2) 
+  if (mDebugLevel>2) 
     cout << "SVTInit **** Loop over the wafers **** : "<<mNWafers<<endl;  
 
   // We scan once the scs_spt table the count the number of hits in each 
@@ -213,29 +216,29 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
     // fill object mIndexGeom
     lay=mIndexWaf[il]->GetLayer();
 
-    zmin = (long)floor((mIndexWaf[il]->GetX()->z() - svgshape[shape].shape[1])/mParams[0]->zbin) + mParams[0]->nzbins/2;
-    zmax = (long)floor((mIndexWaf[il]->GetX()->z() + svgshape[shape].shape[1])/mParams[0]->zbin) + mParams[0]->nzbins/2;
+    zmin = (long)floor((mIndexWaf[il]->GetX()->z() - svgshape[shape].shape[1])/mZBin) + mNZBins/2;
+    zmax = (long)floor((mIndexWaf[il]->GetX()->z() + svgshape[shape].shape[1])/mZBin) + mNZBins/2;
     phi0 = ( atan2(mIndexWaf[il]->GetX()->y(),mIndexWaf[il]->GetX()->x()) + M_PI)*C_DEG_PER_RAD;
     r = sqrt(mIndexWaf[il]->GetX()->x() * mIndexWaf[il]->GetX()->x() + 
 	     mIndexWaf[il]->GetX()->y() * mIndexWaf[il]->GetX()->y());
     dphi=atan(svgshape[shape].shape[0]/r)*C_DEG_PER_RAD;
-    pmin= (long)floor((phi0-dphi)/mParams[0]->phibin);
+    pmin= (long)floor((phi0-dphi)/mPhiBin);
     if(pmin<0)
-      pmin+=mParams[0]->nphibins;
-    pmax= (long)floor((phi0+dphi)/mParams[0]->phibin);
-    if(pmax>=mParams[0]->nphibins) 
-      pmax-=mParams[0]->nphibins;
+      pmin+=mNPhiBins;
+    pmax= (long)floor((phi0+dphi)/mPhiBin);
+    if(pmax>=mNPhiBins) 
+      pmax-=mNPhiBins;
     
     jl=pmin-1;
     do{
       jl++;
-      if(jl>=mParams[0]->nphibins)
+      if(jl>=mNPhiBins)
 	jl=0;
       for(kl=zmin; kl<=zmax; kl++)
 	mIndexGeom->setWafTab(jl,kl,lay,mIndexWaf[il]);
     }while(jl!=pmax);
     
-    if (mParams[0]->debug>3) 
+    if (mDebugLevel>3) 
       if ((il%10)==0)
 	cout << "Wafer #"<<svggeom[il].id<<" coord: "<<mIndexWaf[il]->GetX()->x()<<"  "<<mIndexWaf[il]->GetX()->y()<<"  "<<mIndexWaf[il]->GetX()->z()<<endl;  
 
@@ -246,7 +249,7 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
   // 08/01/00 change to match the new svt ladder numbering scheme.
   // the first svt sub-layer now contains only ladders 2,4,6,8 (before 1,2,3,4)
   // the second sub-layer contains only the ladders 1,3,5,7 (before 1,2,3,4)
-  if (mParams[0]->debug>2) 
+  if (mDebugLevel>2) 
     cout << "SVTInit **** Finding neighbouring wafers ****"<<endl;  
 
   for (il=0; il<mNWafers; il++) {
@@ -332,7 +335,7 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
 
   // get SVT hits for each wafer
 
-  if (mParams[0]->debug>2) 
+  if (mDebugLevel>2) 
     cout << "SVTInit **** Creating Hit objects ****"<<endl;  
 
 
@@ -386,10 +389,10 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
       }
     }
 
-  if(mParams[0]->debug>0)
+  if(mDebugLevel>0)
     cout << "SVTInit **** Maximum number of hits per wafer=" << maxwaf << " ****" <<endl;
   
-  if(mParams[0]->debug>0)
+  if(mDebugLevel>0)
     cout << "SVTInit *** STOP ***"<<endl;  
   
   return 0;
@@ -398,7 +401,7 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
 int StEstTracker::TPCInit(St_tpt_track* Sttptrack,
 			  St_tcl_tphit* Sttphit){
 
-  if(mParams[0]->debug>1)
+  if(mDebugLevel>1)
     cout << "TPCInit *** START ***"<<endl;  
 
   long il, jl, kl, maxl;
@@ -453,7 +456,7 @@ int StEstTracker::TPCInit(St_tpt_track* Sttptrack,
   for (il=0;il<MaxIndex+1;il++)
     mTptIndex[il] = -1;
 
-  if(mParams[0]->debug>2)
+  if(mDebugLevel>2)
     cout << "TPCInit **** Creating TPC tracks ****"<<endl;  
 
   StHelix *hel;
@@ -501,7 +504,7 @@ int StEstTracker::TPCInit(St_tpt_track* Sttptrack,
 
   // loop filing the St_TPCTrack with the TPC hits
   // flip the order of the tpc hits....
-  if(mParams[0]->debug>2)
+  if(mDebugLevel>2)
     cout << "*** INIT - Filling the TPC tracks with the hits ***"<<endl;  
   maxl=Sttphit->GetNRows();
   for(il=0; il<maxl; il++) {
@@ -537,7 +540,7 @@ int StEstTracker::TPCInit(St_tpt_track* Sttptrack,
     }
   }
 
-  if(mParams[0]->debug>2)
+  if(mDebugLevel>2)
     cout << "TPCInit **** STOP ***"<<endl;  
   
   return 0;	
@@ -557,7 +560,7 @@ int StEstTracker::SetupMc(St_scs_spt* Stscsspt,
 
 
   // EvalInit start
-  if(mParams[0]->debug>2) cout << "EvalInit start" <<endl;
+  if(mDebugLevel>2) cout << "EvalInit start" <<endl;
 
   // translation table (mcid -> est_id)
   Eval_id_mctrk2est_Track = new long[mNTPCTrack*10];
@@ -675,12 +678,12 @@ int StEstTracker::SetupMc(St_scs_spt* Stscsspt,
     }
   }
   
-  if(mParams[0]->debug>0) cout << "Number of SVT/SSD hits without TPC tracks :"<<IsolatedSvtHits<<endl;
-  if(mParams[0]->debug>0) cout << "EvalInit STOP" <<endl;
+  if(mDebugLevel>0) cout << "Number of SVT/SSD hits without TPC tracks :"<<IsolatedSvtHits<<endl;
+  if(mDebugLevel>0) cout << "EvalInit STOP" <<endl;
 
   //EvalInit STOP
 
-  if(mParams[0]->debug>3) { //to check TPC flag 
+  if(mDebugLevel>3) { //to check TPC flag 
     for (i=0;i<mNTPCTrack;i++) {
       j=0;
       while (Eval_mchits[i][j] !=NULL)
