@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.80 2003/12/09 01:40:15 oldi Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.81 2003/12/12 02:34:40 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -1153,7 +1153,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.80 2003/12/09 01:40:15 oldi Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.81 2003/12/12 02:34:40 oldi Exp $");
 
   return StMaker::Init();
 }
@@ -1273,12 +1273,12 @@ void StFlowAnalysisMaker::FillEventHistograms() {
 	}
 	
 	else { // mV1Ep1Ep2 == kTRUE && order == 1
-	  psiSubCorr = mPsiSub[Flow::nSels*k][0] + mPsiSub[Flow::nSels*k+1][0] - 2*mPsi[k][1];
+	  psiSubCorr = mPsiSub[Flow::nSels*k][0] + mPsiSub[Flow::nSels*k+1][0] - 2.*mPsi[k][1];
 	}
 
 	histFull[k].mHistCos->Fill(order, (float)cos(order * psiSubCorr));
 	if (psiSubCorr < 0.) psiSubCorr += twopi / order;
-	if (psiSubCorr > twopi / order) psiSubCorr -= twopi / order; // for v1Ep1Ep2 which gives -twopi < psiSubCorr < 2*twopi
+	if (psiSubCorr > twopi / order) psiSubCorr -= twopi / order; // for v1Ep1Ep2 which gives -twopi < psiSubCorr < 2.*twopi
 	histFull[k].histFullHar[j].mHistPsiSubCorr->Fill(psiSubCorr);
       }
 
@@ -1580,7 +1580,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	    wt *= (pt < pFlowEvent->PtWgtSaturation()) ? pt : pFlowEvent->PtWgtSaturation();  // pt weighting going constant
 	  }
 	  float etaAbs = fabs(eta);
- 	  if (pFlowEvent->EtaWgt() && oddHar && etaAbs > 1.) {
+	  if (pFlowEvent->EtaWgt() && oddHar && etaAbs > 1.) {
 	    wt *= etaAbs;
 	  }
 
@@ -1651,13 +1651,13 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  if (oddHar && eta < 0.) phiWgt *= -1.; // restore value
 
 	  // Remove autocorrelations
-	  TVector2 Q_i;
 	  if (!pFlowEvent->EtaSubs()) {
+	    TVector2 Q_i;
 	    if (order > 3. && !oddHar) { // 2nd harmonic event plane
-	      Q_i.Set(phiWgt * cos(phi * 2), phiWgt * sin(phi * 2));
+	      Q_i.Set(phiWgt * cos(phi * 2.), phiWgt * sin(phi * 2.));
 	      TVector2 mQ_i = mQ[k][1] - Q_i;
-	      psi_i = mQ_i.Phi() / 2;
-	      if (psi_i < 0.) psi_i += twopi / 2;
+	      psi_i = mQ_i.Phi() / 2.;
+	      if (psi_i < 0.) psi_i += twopi / 2.;
 	    } else {
 	      Q_i.Set(phiWgt * cos(phi * order), phiWgt * sin(phi * order));
 	      TVector2 mQ_i = mQ[k][j] - Q_i;
@@ -1665,24 +1665,26 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	      if (psi_i < 0.) psi_i += twopi / order;
 	    }
 	  }
-	   
-	  // Remove autocorrelations of the second order 'particles' which are used for v1{EP1,EP2}.
-	  if (mV1Ep1Ep2 == kTRUE && order == 1) {
-	    StFlowSelection usedForPsi2 = *pFlowSelect;
-	    usedForPsi2.SetHarmonic(1);
-	    if (usedForPsi2.Select(pFlowTrack)) { // particle was used for Psi2
-	      Q_i.Set(phiWgt * cos(phi * 2), phiWgt * sin(phi * 2));
-	      TVector2 mQ_i = mQ[k][1] - Q_i;
-	      psi_2 = mQ_i.Phi() / 2;
-	      if (psi_2 < 0.) psi_2 += twopi / 2.;
-	    }
-	    else { // particle was not used for Psi2
-	      psi_2 = mPsi[k][1];
-	    }
+	}
+	  
+	// Remove autocorrelations of the second order 'particles' which were used for v1{EP1,EP2}.
+	if (mV1Ep1Ep2 == kTRUE && order == 1) {
+	  StFlowSelection usedForPsi2 = *pFlowSelect;
+	  usedForPsi2.SetHarmonic(1);
+	  usedForPsi2.SetSubevent(-1);
+	  if (usedForPsi2.Select(pFlowTrack)) {
+	    double phiWgt = pFlowEvent->PhiWeight(k, 1, pFlowTrack);
+	    TVector2 Q_i(phiWgt * cos(phi * 2.), phiWgt * sin(phi * 2.));
+	    TVector2 mQ_i = mQ[k][1] - Q_i;
+	    psi_2 = mQ_i.Phi() / 2.;
+	    if (psi_2 < 0.) psi_2 += twopi / 2.;	  
+	  }
+	  else { // particle was not used for Psi2 
+	    psi_2 = mPsi[k][1];
 	  }
 	}
 
-       	// Caculate v for all particles selected for correlation analysis
+       	// Calculate v for all particles selected for correlation analysis
 	if (pFlowSelect->SelectPart(pFlowTrack)) {
 	  corrMultN++;
 	  float v;
@@ -1690,7 +1692,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	    v = cos(order * (phi - psi_i))/perCent;
 	  }
 	  else { // mV1Ep1Ep2 == kTRUE && order == 1
-	    v = cos(phi + psi_i - 2*psi_2)/perCent;
+	    v = cos(phi + psi_i - 2.*psi_2)/perCent;
 	  }
 	  float vFlip = v;
 	  if (eta < 0 && oddHar) vFlip *= -1;
@@ -1927,32 +1929,32 @@ Int_t StFlowAnalysisMaker::Finish() {
 	  // calculate resolution of second order event plane first
 	  double res2, res2error;
 	  if (histFull[k].mHistCos->GetBinContent(2) > 0.) {
-	    if (pFlowEvent->EtaSubs()) { // sub res only
-	      res2 = ::sqrt(histFull[k].mHistCos->GetBinContent(2));
-	      res2error = histFull[k].mHistCos->GetBinError(2) / (2. * res2);
+	    if (histFull[k].mHistCos->GetBinContent(2) > 0.92) { // resolution saturates
+	      res2 = 0.99;
+	      res2error = 0.007;
 	    } else {
-	      if (histFull[k].mHistCos->GetBinContent(2) > 0.92) { // resolution saturates
-		res2 = 0.99;
-		res2error = 0.007;
-	      } else {
-		double deltaRes2Sub = 0.005;  // differential for the error propagation
-		double res2Sub = ::sqrt(histFull[k].mHistCos->GetBinContent(2));
-		double res2SubErr = histFull[k].mHistCos->GetBinError(2) / (2. * res2Sub);
-		double chiSub2 = chi(res2Sub);
-		double chiSub2Delta = chi(res2Sub + deltaRes2Sub);
-		res2 = resEventPlane(::sqrt(2.) * chiSub2); // full event plane res.
-		double mRes2Delta = resEventPlane(::sqrt(2.) * chiSub2Delta);
-		res2error = res2SubErr * fabs((double)res2 - mRes2Delta) 
-		  / deltaRes2Sub;
-	      }
-	    } 
+	      double deltaRes2Sub = 0.005;  // differential for the error propagation
+	      double res2Sub = ::sqrt(histFull[k].mHistCos->GetBinContent(2));
+	      double res2SubErr = histFull[k].mHistCos->GetBinError(2) / (2. * res2Sub);
+	      double chiSub2 = chi(res2Sub);
+	      double chiSub2Delta = chi(res2Sub + deltaRes2Sub);
+	      res2 = resEventPlane(::sqrt(2.) * chiSub2); // full event plane res.
+	      double mRes2Delta = resEventPlane(::sqrt(2.) * chiSub2Delta);
+	      res2error = res2SubErr * fabs((double)res2 - mRes2Delta) 
+		/ deltaRes2Sub;
+	    }
 	  } else {
 	    res2 = 0.;
 	    res2error = 0.;
 	  }
 	  // now put everything together with first order event plane
 	  mRes[k][j]    = ::sqrt(cosPair[k][0]*res2);
-	  mResErr[k][j] = 1./(2.*mRes[k][j]) * ::sqrt(cosPairErr[k][0]*cosPairErr[k][0] + res2error*res2error); // Gaussian error propagation
+	  mResErr[k][j] = 1./(2.*mRes[k][j]) * ::sqrt(res2*res2*cosPairErr[k][0]*cosPairErr[k][0] + cosPair[k][0]*cosPair[k][0]*res2error*res2error); // Gaussian error propagation
+	  if (!pFlowEvent->EtaSubs()) {
+	    // correct for full event plane resolution
+	    mRes[k][j] *= ::sqrt(2.);
+	    mResErr[k][j] *= ::sqrt(2.);
+	  }
 	} else if (pFlowEvent->EtaSubs()) { // sub res only
 	  resSub = ::sqrt(cosPair[k][j]);
 	  resSubErr = cosPairErr[k][j] / (2. * resSub);
@@ -2224,6 +2226,9 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.81  2003/12/12 02:34:40  oldi
+// Removal of some major bugs in the v1{EP1,EP2} method.
+//
 // Revision 1.80  2003/12/09 01:40:15  oldi
 // Removed 'inline' of some functions to cope with new compiler.
 //
