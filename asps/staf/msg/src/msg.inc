@@ -75,6 +75,7 @@
 	INTEGER MSG_Counts	!Occurance-counts for each defined prefix.
 	INTEGER MSG_Lookups     !Slow-lookup-counts for each defined prefix.
 	INTEGER MSG_CPU_Mark    !CPU usage at Mark -- see MSG_Mark in msglib.f .
+	INTEGER MSG_CPU_Delta   !"Delta" CPU usage -- see MSG_Mark in msglib.f .
 	INTEGER MSG_CPU_Total   !"Total" CPU usage -- see MSG_Mark in msglib.f .
 	INTEGER MSG_Count_limit !Occurance-count at which each defined prefix is disabled.
 	INTEGER MSG_Abort_limit !Occurance-count at which each defined prefix causes an abort.
@@ -88,6 +89,7 @@
 	COMMON /MSG_I/ MSG_Counts(      MSG_Nprefixes_max_P )
 	COMMON /MSG_I/ MSG_Lookups(     MSG_Nprefixes_max_P )
 	COMMON /MSG_I/ MSG_CPU_Mark(    MSG_Nprefixes_max_P )
+	COMMON /MSG_I/ MSG_CPU_Delta(   MSG_Nprefixes_max_P )
 	COMMON /MSG_I/ MSG_CPU_Total(   MSG_Nprefixes_max_P )
 	COMMON /MSG_I/ MSG_Count_limit( MSG_Nprefixes_max_P )
 	COMMON /MSG_I/ MSG_Abort_limit( MSG_Nprefixes_max_P )
