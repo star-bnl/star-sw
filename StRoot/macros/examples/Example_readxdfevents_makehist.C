@@ -1,5 +1,8 @@
-// $Id: Example_readxdfevents_makehist.C,v 1.3 1999/06/24 20:24:57 kathy Exp $ 
+// $Id: Example_readxdfevents_makehist.C,v 1.4 1999/07/29 19:57:14 kathy Exp $ 
 // $Log: Example_readxdfevents_makehist.C,v $
+// Revision 1.4  1999/07/29 19:57:14  kathy
+// get working for current version
+//
 // Revision 1.3  1999/06/24 20:24:57  kathy
 // updated comment lines at top
 //
@@ -20,7 +23,7 @@
 
 
 void Example_readxdfevents_makehist(const Char_t *InputXdfFile=
- "/disk00000/star/test/rcf013_05_49evts_h_dst.xdf")
+"/disk00000/star/test/new/tfs_Solaris/year_2a/psc0208_01_40evts_dst.xdf")
 {
  
  gSystem.Load("St_base");
@@ -29,7 +32,6 @@ void Example_readxdfevents_makehist(const Char_t *InputXdfFile=
 
  St_XDFFile f1;
  f1.OpenXDF(InputXdfFile);
-// "/disk00000/star/test/rcf013_05_49evts_h_dst.xdf");
 
  St_DataSet *record;
  record = f1.NextEventGet();
@@ -39,11 +41,11 @@ void Example_readxdfevents_makehist(const Char_t *InputXdfFile=
  TFile *hist_outfile = 0;
  const Char_t *root_file = "Kathy_hist.root";
  hist_outfile = new TFile(root_file,"RECREATE");
- TH1F *h1 = new TH1F("h1","my first hist",100,-0.1,0.1);
+
+ TH1F *h1 = new TH1F("h1","my first hist",100,-100.,100.);
 
  St_DataSet *recorde=0;
  Int_t ijk=0;
-
 
  while (recorde=f1.NextEventGet())
   {
@@ -73,12 +75,14 @@ void Example_readxdfevents_makehist(const Char_t *InputXdfFile=
 
 }
 
-cout << " ==> finished loop" << endl;
+ cout << " ==> finished loop" << endl;
 
- TPostScript ps("MyHist.ps",111);
  TCanvas *c1 = new TCanvas("c1"," from table dst/vertex",200,10,600,880);
+ TPostScript ps("MyHist.ps",111);
+
  h1->Draw();
  c1->Update();
+
  hist_outfile->Write();
  hist_outfile->ls();
 

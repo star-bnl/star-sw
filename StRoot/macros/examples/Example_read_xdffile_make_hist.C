@@ -1,5 +1,8 @@
-// $Id: Example_read_xdffile_make_hist.C,v 1.3 1999/06/03 23:34:50 kathy Exp $
+// $Id: Example_read_xdffile_make_hist.C,v 1.4 1999/07/29 19:57:14 kathy Exp $
 // $Log: Example_read_xdffile_make_hist.C,v $
+// Revision 1.4  1999/07/29 19:57:14  kathy
+// get working for current version
+//
 // Revision 1.3  1999/06/03 23:34:50  kathy
 // got macros working with current files
 //
@@ -14,6 +17,7 @@
 //   then make a histogram and write to output ps file
 //=======================================================================
 //
+void Example_read_xdffile_make_hist()
 {
  // load libraries
  gSystem.Load("St_base");
@@ -22,7 +26,8 @@
  // create instance of St_XDFFile called f1
  // use method OpenXDF of St_XDFFile with instance f1 to open input file
  St_XDFFile f1;
- f1.OpenXDF("/disk00000/star/mdc1_test_data/mdc1_year2a_psc079_01_46evts_dst.xdf");
+ f1.OpenXDF("/disk00000/star/test/new/tfs_Solaris/year_2a/psc0208_01_40evts_dst.xdf");
+//rcf013_05_49evts_h_dst.xdf");
  // create a pointer to an St_DataSet called record
  St_DataSet *record;
  St_DataSet *recorde;
