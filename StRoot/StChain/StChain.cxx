@@ -5,7 +5,7 @@
 //                                                                      //
 // Main class to control the StChain program.                           //
 //                                                                      //
-// This class is a complete redesign of the Fortran program StChain.    //
+// This class was done on the base of Begin_html <a href="http://root.cern.ch/root/Atlfast.html"> ATLFAST </a>End_Html C++ class library           //
 // This class is a general framework for programs that needs to:        //
 //    - Initialise some parameters                                      //
 //    - Loop on events                                                  //
@@ -23,18 +23,9 @@
 //                                                                      //
 //    Maker name        Save in Tree                                    //
 //    ==========        ============                                    //
-//    MCMaker             NO                                            //
-//    ClusterMaker        YES                                           //
-//    ElectronMaker       YES                                           //
-//    MuonMaker           YES                                           //
-//    PhotonMaker         YES                                           //
-//    JetMaker            YES                                           //
-//    TrackMaker          NO                                            //
-//    TriggerMaker        YES                                           //
-//    MiscMaker           YES                                           //
 //                                                                      //
-// Makers must derive from the base class ATLFMaker.                    //
-// ATLFMaker provides a common interface to all Makers.                 //
+// Makers must derive from the base class StMaker.                      //
+// StMaker provides a common interface to all Makers.                   //
 // Each Maker is responsible for defining its own parameters and        //
 // histograms.                                                          //
 // Each Maker has its own list of histograms.                           //
@@ -58,27 +49,34 @@
 //
 //   // Open the root output file
 //   TFile file("StChain.root","recreate","StChain root file",2);
+//   St_XDFFile xdffile_in("StChain_in.xdf","r"); // Open XDF file to read  event
+//   St_XDFFile xdffile_out("StChain.xdf","w");     // Open XDF file to write event
 //   
-//   StChain StChain("StChain");     // create main object to run StChain
+//   StChain chain("StChain");     // create main object to run StChain
+//   St_xdfin_Maker xdfin("Xdfin","test"); // create xdfin object to run in StChain
+//   chain.SetInputXDFile(&xdffile_in);      // pass file to xdfin
 //
 //   User user;           // create an object of the User class defined in user.C
 //
-//   StChain.Init();      // Initialise event (maker histograms,etc)
-//   StChain.MakeTree();  // Create the Root tree
+//   chain.Init();      // Initialise event (maker histograms,etc)
+//   chain.MakeTree();  // Create the Root tree
 //
 //   gROOT->LoadMacro("user.C");  // compile/interpret user file
 //
 //   for (Int_t i=0; i<nevents; i++) {
 //      if (i%100 == 0) printf("In loop:%d\n",i);
-//      StChain.Make(i);       // Generate and reconstruct event
+//      chain.Make(i);       // Generate and reconstruct event
 //      user.FillHistograms(); // User has possibility to decide if store event here!
-//      StChain.FillTree();
-//      StChain.Clear();       // Clear all event lists
+//      chain.FillTree();
+//||    chain.FillXDF(xdffile_out); 
+//||    xdffile.NextEventPut(chain.DataSet()); 
+//      chain.Clear();       // Clear all event lists
 //   }
-//   StChain.Finish();
+//   chain.Finish();
 //
 //   // save objects in Root file
-//   StChain.Write();  //save main StChain object (and run parameters)
+//   chain.Write();  //save main StChain object (and run parameters)
+//   xdffile_out.CloseXDF();  
 //}
 //========================================================================
 //                                                                      //
@@ -113,8 +111,8 @@
 //
 //class TH1F;
 //class StChain;
-//class ATLFClusterMaker;
-//class ATLFPhotonMaker;
+//class StClusterMaker;
+//class StPhotonMaker;
 //
 //class User {
 //
@@ -169,8 +167,9 @@
 #include <TTree.h>
 #include <TBrowser.h>
 #include <TClonesArray.h>
-
+#include "St_XDFFile.h"
 #include "StChain.h"
+#include "StMaker.h"
 // #include "stHistBrowser.h"
 // #include "StVirtualDisplay.h"
 
@@ -221,6 +220,17 @@ StChain::~StChain()
 //______________________________________________________________________________
 void StChain::Browse(TBrowser *b)
 {
+// Browse includes the various maker-made objects into the standard ROOT TBrowser
+// The following picture can be done with just a staement like
+//
+//  TBrowser b("Event",event);  
+//
+// where the "event" variable should be defined somewhere in the user's code as 
+//
+//          St_DataSet *event;
+//
+// Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/ChainBrowser.gif"> </P> End_Html 
+//
 
   if( b == 0) return;
 
@@ -233,7 +243,8 @@ void StChain::Browse(TBrowser *b)
   StMaker *maker;
   while ((maker = (StMaker*)next())) {
      b->Add(maker,maker->GetName());
-   }
+  }
+  b->Add(m_DataSet,m_DataSet->GetName()); 
 }
 
 //_____________________________________________________________________________
@@ -247,7 +258,23 @@ void StChain::Clear(Option_t *option)
    }
 //   if (m_Display) m_Display->Clear();
 }
-
+//_____________________________________________________________________________
+St_DataSet *StChain::DataSet(Char_t *makername)
+{
+// find the maker by name and return its dataset
+ St_DataSet *set = 0;
+ if (makername) {
+  set = 0;
+  if (m_Makers) {
+     TIter next(m_Makers);
+     StMaker *xdfin;
+     while (xdfin = (StMaker*) next()){if (!strcmp(xdfin->GetName(),makername)) break;}
+     if (xdfin) set = xdfin->DataSet(); 
+   }
+ }
+ return set;
+}
+ 
 //_____________________________________________________________________________
 void StChain::Draw(Option_t *option)
 {
@@ -256,7 +283,7 @@ void StChain::Draw(Option_t *option)
 #if 0
     // Check if the Event Display object has been created
    if (!m_Display) {
-      Error("Draw","You must create an ATLFDisplay object first");
+      Error("Draw","You must create an StDisplay object first");
       return;
    }
 
@@ -270,7 +297,7 @@ void StChain::GetEvent(Int_t event)
 //    Read event from Tree
    if (m_Tree) m_Tree->GetEvent(event);
    m_Event = event;
-}
+} 
 
 //_____________________________________________________________________________
 void StChain::Init()
@@ -279,6 +306,21 @@ void StChain::Init()
    TIter next(m_Makers);
    StMaker *maker;
    TObject *objfirst, *objlast;
+   if (! m_DataSet) m_DataSet = new St_DataSet(GetName()); 
+   if (m_File) {
+     St_DataSet *set = m_File->NextEventGet(); // Get Run parameters
+     if (set) {
+       if (strcmp(set->GetName(),"run")==0){
+          m_DataSet->Add(set); 
+          if (m_RunIter) m_RunIter->Reset(set);
+          else           m_RunIter = new St_DataSetIter (set);
+       }
+       else {
+        Warning("Init","The first record has no \"Run\" dataset");
+        delete set;
+       }
+     }
+   }
    while ((maker = (StMaker*)next())) {
      // save last created histogram in current Root directory
       objlast = gDirectory->GetList()->Last();
@@ -286,15 +328,24 @@ void StChain::Init()
      // Initialise maker
       maker->Init();
 
-     // Add Maker histograms in Maker list of histograms
+     // Add the Maker histograms in the Maker histograms list
       if (objlast) objfirst = gDirectory->GetList()->After(objlast);
       else         objfirst = gDirectory->GetList()->First();
       while (objfirst) {
          maker->Histograms()->Add(objfirst);
          objfirst = gDirectory->GetList()->After(objfirst);
       }
+     
+     if (m_DataSet) {
+       // Create the new DataSet for each new type of the maker if any
+       St_DataSetIter next(m_DataSet);
+       next.Cd(GetName());
+       const Char_t *makertype = maker->GetTitle();
+       // Test the special case
+       if (makertype && strlen(makertype))
+          next.Mkdir(maker->GetTitle());
+     }
    }
-
 }
 
 //_____________________________________________________________________________
@@ -333,6 +384,12 @@ void StChain::FillTree()
 
   // Now ready to fill the Root Tree
    if(m_Tree) m_Tree->Fill();
+}
+//_____________________________________________________________________________
+void StChain::FillXDF(St_XDFFile &file)
+{
+//  Put current event into XDF file
+   if (&file && m_DataSet) file.NextEventPut(m_DataSet);
 }
 
 //_____________________________________________________________________________
@@ -386,7 +443,39 @@ Int_t StChain::Make(Int_t i)
    StMaker *maker;
    while ((maker = (StMaker*)next())) {
       ret = maker->Make();
+      printf("%s %i\n",maker->GetName(),ret);
       if (ret < 0) return ret;
+
+      if (m_DataSet) {
+        St_DataSetIter nextset(m_DataSet);
+        
+        // Add the result of the maker into the "its" branch of the main dataset
+        nextset.Cd(GetName());
+
+        // The name of the sub dataset is defined via the maker title
+        const Char_t *makertype = maker->GetTitle();
+        // Test the special case
+        if (makertype && strlen(makertype)) {
+           St_DataSet *set=nextset(makertype); 
+           if (set) set->Add(maker->DataSet());
+           else 
+              Error("Make","There is directory to collect the maker \"%s\" (type \"%s\") results"
+                          ,maker->GetName(),makertype);
+        }
+        else { 
+          // special case:
+          //   replace the root dataset if any
+          St_DataSet *topset = maker->DataSet();        // Get the maker top dataset
+          if (topset) {
+            const Char_t *topsetname   = topset->GetName();   // Poll its name up
+            St_DataSet *chainset = nextset(topsetname); // Look up the dataset with the same name
+            if (chainset) 
+                 delete chainset;                       // Delete the obsolete dataset            
+            m_DataSet->Add(topset);                     // add the new dataset instead
+          }        
+        }
+        m_DataSet->ls(2);
+      }
    }
    return 0;
 }
@@ -414,6 +503,7 @@ void StChain::Finish()
    while ((maker = (StMaker*)next())) {
       maker->Finish();
    }
+   if (m_DataSet) delete m_DataSet; m_DataSet = 0;
 }
 
 //_____________________________________________________________________________
@@ -480,6 +570,7 @@ void StChain::SortDown(Int_t n1, Float_t *a, Int_t *index, Bool_t down)
    }
 }
 //______________________________________________________________________________
+#ifdef WIN32
 void StChain::Streamer(TBuffer &R__b)
 {
    // Stream an object of class StChain.
@@ -510,3 +601,4 @@ void StChain::Streamer(TBuffer &R__b)
 //      m_HistBrowser.Streamer(R__b);
    }
 }
+#endif

@@ -25,6 +25,7 @@ StMaker::StMaker()
    m_Fruits     = 0;
    m_Clones     = 0;
    m_IsClonable = kTRUE;
+   m_DataSet    = 0;
 }
 
 //_____________________________________________________________________________
@@ -36,14 +37,16 @@ StMaker::StMaker(const char *name, const char *title)
    m_Histograms = new TList();
    m_Clones     = 0;
    m_IsClonable = kTRUE;
-   
+   m_DataSet    = 0;
+   gStChain->Makers()->Add(this);  
 }
 
 //_____________________________________________________________________________
 StMaker::~StMaker()
 {
-  delete m_Fruits;
-  delete m_Clones;
+  if (m_Fruits)  {delete m_Fruits;  m_Fruits = 0;}
+  if (m_Clones)  {delete m_Clones;  m_Clones = 0;}
+  if (m_DataSet) {delete m_DataSet; m_DataSet = 0;}
 }
 
 //______________________________________________________________________________
@@ -52,8 +55,10 @@ void StMaker::Browse(TBrowser *b)
 //  Insert Maker objects in the list of objects to be browsed.
 
   char name[64];
-  if( b == 0  || m_Fruits == 0) return;
-  TObject *obj;
+  if( b == 0) return;
+  if (m_Histograms) b->Add(m_Histograms,"Histograms");
+  if (m_Fruits == 0) return;
+   TObject *obj;
 
 // If m_Fruits is a ClonesArray, insert all the objects in the list
 // of browsable objects
@@ -63,13 +68,14 @@ void StMaker::Browse(TBrowser *b)
      for (Int_t i=0;i<nobjects;i++) {
         obj = clones->At(i);
         sprintf(name,"%s_%d",obj->GetName(),i);
-        if (strstr(name,"ATLF")) b->Add(obj, &name[4]);
-        else                     b->Add(obj, &name[0]);
+        if (strstr(name,"St")) b->Add(obj, &name[4]);
+        else                   b->Add(obj, &name[0]);
      }
 // m_Fruits points to an object in general. Insert this object in the browser
   } else {
       b->Add( m_Fruits, m_Fruits->GetName());
   }
+
 }
 
 //_____________________________________________________________________________
@@ -174,6 +180,7 @@ void StMaker::SetChainAddress(TChain *chain)
 }
 
 //______________________________________________________________________________
+#ifdef WIN32
 void StMaker::Streamer(TBuffer &R__b)
 {
    // Stream an object of class StMaker.
@@ -200,3 +207,4 @@ void StMaker::Streamer(TBuffer &R__b)
       R__b << m_Histograms;
    }
 }
+#endif

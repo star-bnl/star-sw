@@ -27,13 +27,18 @@ protected:
    TObject       *m_Clones;      //Pointer to clones of fruits
    TString        m_BranchName;  //Name of branch (if any)
    TList         *m_Histograms;  //Pointer to list supporting Maker histograms
+   St_DataSet    *m_DataSet;     //Pointer to the Maker's dataset
 
 public:
+
+   enum {kSTAFCV_BAD, kSTAFCV_OK} EModule_return_Status;
+
                   StMaker();
-                  StMaker(const char *name, const char *title);
+                  StMaker(const char *name, const char *title="");
    virtual       ~StMaker();
    virtual void   Browse(TBrowser *b);
    virtual void   Clear(Option_t *option="");
+   virtual St_DataSet *DataSet() {return m_DataSet;}
    virtual void   Draw(Option_t *option="");
    virtual void   Finish();
    TList         *Histograms() {return m_Histograms;}
