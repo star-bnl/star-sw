@@ -169,10 +169,17 @@ bool StiLocalTrackSeedFinder::extrapolate()
 
   //Get the next detector plane:
     
-  double dr = hit2->x()-hit1->x();
-  double dy = hit2->y()-hit1->y();
-  double dz = hit2->z()-hit1->z();
-  if (dr==0.) //// || dy==0. || dz==0.) 
+  double r1 = hit1->x();
+  double y1 = hit1->y();
+  double z1 = hit1->z();
+  double r2 = hit2->x();
+  double y2 = hit2->y();
+  double z2 = hit2->z();
+
+  double dr = r2-r1;
+  double dy = y2-y1;
+  double dz = z2-z1;
+  if (fabs(dr) <1.e-3) //// || dy==0. || dz==0.) 
     throw logic_error("StiLocalTrackSeedFinder::extrapolate() -E- Seed aborted because dr==0 ");
   //Now look for a hit in the next layer in:
   _detectorContainer->setToDetector( hit2->detector() );
@@ -196,9 +203,7 @@ bool StiLocalTrackSeedFinder::extrapolate()
   //double m_ry = dr/dy;
   //double b_ry = hit2->x() - m_ry * hit2->y();
   //double y3 = (r3 - b_ry) / m_ry;
-  double m_ryInv = dy/dr;
-  double b_ry = hit2->x() - hit2->y()/m_ryInv;
-  double y3 = (r3 - b_ry) * m_ryInv;
+  double y3 = y1 + dy/dr*(r3-r1);
 
   //Now calculate the projection of window onto that plane:
   double beta_ry = atan2(dr, dy);
@@ -209,13 +214,11 @@ bool StiLocalTrackSeedFinder::extrapolate()
   if (tanplus_ry==0. || tanminus_ry==0.) 
     cout<<"StiLocalTrackSeedFidner::extrapolate(). -W- tanplus_ry==0. || tanminus_ry==0."<<endl;
   
-  double y3_minus = (r3-hit1->x())/tanplus_ry + hit1->y();
-  double y3_plus = (r3-hit1->x())/tanminus_ry + hit1->y();
+  double y3_minus = (r3-r1)/tanplus_ry  + y1;
+  double y3_plus  = (r3-r1)/tanminus_ry + y1;
   //Next, r-z plane
-  double m_rzInv = dz/dr;
-  double b_rz = hit2->x() - hit2->z()/m_rzInv;
-  double z3 = (r3 - b_rz) * m_rzInv;
-    
+  double z3 = z1 + dz/dr*(r3-r1);
+
   double beta_rz = atan2(dr, dz);
   double rho_rz = ::sqrt(dr*dr + dz*dz);
   double alpha_rz = atan2(_pars._extrapDeltaZ, 2.*rho_rz);
@@ -223,8 +226,8 @@ bool StiLocalTrackSeedFinder::extrapolate()
   double tanminus_rz = tan(beta_rz-alpha_rz);
   if (tanplus_rz==0. || tanminus_rz==0.) 
     cout<<"StiLocalTrackSeedFidner::extrapolate(). -W- tanplus_rz==0. || tanminus_rz==0."<<endl;
-  double z3_minus = (r3-hit1->x())/tanplus_rz + hit1->z();
-  double z3_plus = (r3-hit1->x())/tanminus_rz + hit1->z();
+  double z3_minus = (r3-r1)/tanplus_rz  + z1;
+  double z3_plus =  (r3-r1)/tanminus_rz + z1;
   /*
     cout<<"beta_ry: "<<beta_ry<<" alpha_ry: "<<alpha_ry
     <<" y3+: "<<y3_plus<<" y3: "<<y3<<" y3-: "<<y3_minus<<endl
@@ -248,6 +251,7 @@ bool StiLocalTrackSeedFinder::extrapolate()
   _seedHits.push_back(closestHit);
   return true;
 }
+
 
 /// Initialize a kalman track on the basis of hits held in _seedHits
 /// 
