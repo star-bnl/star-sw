@@ -3,6 +3,9 @@
  **************************************************************************
  *
  * $Log: StSsdPointMaker.cxx,v $
+ * Revision 1.5  2005/03/18 10:16:34  lmartin
+ * positionSize argument added to the initLadders method
+ *
  * Revision 1.4  2004/11/04 15:10:19  croy
  * use the IAttr(".histos") to control histogramming and modification of the SsdHitCollection creation
  *
@@ -255,10 +258,12 @@ Int_t StSsdPointMaker::Make()
   
   StDbTable* positionTable = maccess -> addDbTable("ssdWafersPosition");
   mDbMgr->fetchDbTable(positionTable);
+  int positionSize = 0;
   ssdWafersPosition_st *position  = (ssdWafersPosition_st*) positionTable->GetTable() ;
   if (!position) 
     gMessMgr->Error() << "No  access to ssdWafersPosition database" << endm;
-
+  else
+    positionSize= positionTable->GetNRows();
   StDbTable* dimensionsTable = maccess -> addDbTable("ssdDimensions");
   mDbMgr->fetchDbTable(dimensionsTable);
   ssdDimensions_st *dimensions  = (ssdDimensions_st*) dimensionsTable->GetTable() ;
@@ -275,7 +280,7 @@ Int_t StSsdPointMaker::Make()
   cout<<"####        SSD BARREL INITIALIZATION        ####"<<endl;  
   StSsdBarrel *mySsd = new StSsdBarrel(dimensions,config);
   //mySsd->initLadders(m_wafpos); 
-  mySsd->initLadders(position);
+  mySsd->initLadders(position,positionSize);
   int stripTableSize = mySsd->readStripFromTable(spa_strip);
   cout<<"####        NUMBER OF SPA STRIPS "<<stripTableSize<<"        ####"<<endl;
   //  mySsd->writeNoiseToFile(spa_strip);
