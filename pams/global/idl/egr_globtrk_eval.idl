@@ -5,8 +5,8 @@
    struct egr_globtrk_eval{
        long      id;         /* primary key = globtrk.id */
        long      mc_pid;     /* Geant PID code # for good MC track */
-       long      svt_seg;    /* =0 no SVT seg, =1 MC ok, = -1 MC not ok */
-       long      tpc_seg;    /* =0 no tpc seg, =1 MC ok, = -1 MC not ok */
+       long      svt_seg;    /* =0 no SVT seg, = MC id MC ok, = -1 bad trk */
+       long      tpc_seg;    /* =0 no tpc seg, =MC id MC ok, = -1 bad trk */
        float     deta_svt[2];/* pseudorap diff. at SVT. (1)-mag, (2)-% */
        float     deta_tpc[2];/* pseudorap diff. at TPC. (1)-mag, (2)-% */
        float     deta_vrt[2];/* pseudorap diff at vertex. (1)-mag, (2)-% */
@@ -21,5 +21,5 @@
        float     dpz_tpc[2]; /* pz diff. at TPC. (1)-mag, (2)-% */
        float     dpz_vrt[2]; /* pz diff. at vertex. (1)-mag, (2)-% */
    };
-/*  Last mod. for egr_globtrk_eval: $Date: 1997/12/31 14:33:28 $ */
+/*  Last mod. for egr_globtrk_eval: $Date: 1998/10/09 13:55:42 $ */
 
