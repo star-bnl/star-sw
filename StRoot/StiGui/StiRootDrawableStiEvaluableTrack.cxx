@@ -44,7 +44,7 @@ void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
 	return;
     }
 
-    cout <<"Momentum:\t"<<msttrack->geometry()->momentum().mag()<<endl;
+    //cout <<"Momentum:\t"<<msttrack->geometry()->momentum().mag()<<endl;
 
    //Draw primary vertex if this track belongs to one
    StPrimaryTrack* temp = dynamic_cast<StPrimaryTrack*>(msttrack);
