@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.5 2001/02/07 19:16:29 caines Exp $
+ * $Id: StEstMaker.cxx,v 1.6 2001/02/16 15:17:43 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.6  2001/02/16 15:17:43  lmartin
+ * SSD off by default. cout replaced by gMessMgr.
+ *
  * Revision 1.5  2001/02/07 19:16:29  caines
  * Fix sun non compilation for non-fixed size array
  *
@@ -30,6 +33,7 @@
  * First CVS commit
  *
  **************************************************************************/
+#include "StMessMgr.h"
 #include "StEstMaker.h"
 #include "StEstTracker.h"
 #include "StEstParams.hh"
@@ -40,11 +44,9 @@
 #include "tables/St_svg_config_Table.h"
 #include "tables/St_scs_spt_Table.h"
 #include "tables/St_egr_egrpar_Table.h"
-/* #include "tables/St_g2t_vertex_Table.h" */
 #include "tables/St_tpt_track_Table.h" 
 #include "tables/St_tcl_tphit_Table.h" 
 #include "tables/St_tte_eval_Table.h" 
-/* #include "tables/St_tte_mctrk_Table.h" */
 #include "tables/St_stk_track_Table.h" 
 #include "tables/St_sgr_groups_Table.h" 
 #include "tables/St_svm_evt_match_Table.h" 
@@ -52,24 +54,23 @@
 ClassImp(StEstMaker)
 
 StEstMaker::StEstMaker(const char* name):StMaker(name) {
-  cout<<"-------------------------------------------------------------> StEstMaker Constructor "<<endl;
+
 }
 
 StEstMaker::~StEstMaker() {
-  cout<<"-------------------------------------------------------------> StEstMaker Destructor "<<endl;
+
 }
 
 Int_t StEstMaker::Finish() {
-  cout<<"StEstMaker::Finish() ****START****"<<endl;
+
   return StMaker::Finish();
-  cout<<"StEstMaker::Finish() ****STOP****"<<endl;
+
 }
 
 Int_t StEstMaker::Init(){
-  cout<<"-------------------------------------------------------------> StEstMaker Init "<<endl;
   int i,j;
 
-  cout<<"**** StEstMaker::StEstMaker() ****Init"<<endl;
+  gMessMgr->Info("StEstMaker::Init START");
 
   // creating the egr_par table.
   m_egr_egrpar = new St_egr_egrpar("egr_egrpar",1); {
@@ -129,11 +130,9 @@ Int_t StEstMaker::Init(){
       mParams[i]->onoff[j] = 1;
       mParams[i]->share[j] = 5;
     }
-    //    mParams[i]->onoff[3] = 0;
+    mParams[i]->onoff[3] = 0;
     mParams[i]->nbranch[3] = 3;
     mParams[i]->nbranch[2] = 2;
-    //    mParams[i]->nbranch[3] = 1;
-    //    mParams[i]->nbranch[2] = 1;
     mParams[i]->nbranch[1] = 1;
     mParams[i]->nbranch[0] = 1;
 
@@ -215,10 +214,10 @@ Int_t StEstMaker::Init(){
   for (i=0;i<mNSuperPass;i++) mSegments[i] = new StEstSegments;
 
   mSegments[0]->chisqcut = 300;
-  mSegments[0]->minhits=4;
+  mSegments[0]->minhits=3;
   mSegments[0]->rminTPC=500;
   mSegments[0]->minTPChits=0;
-  mSegments[0]->slay[3]=2;
+  mSegments[0]->slay[3]=1;
   mSegments[0]->slay[2]=2;
   mSegments[0]->slay[1]=2;
   mSegments[0]->slay[0]=2;
@@ -263,7 +262,7 @@ Int_t StEstMaker::Init(){
   
 
   PrintSettings();
-  cout<<"**** StEstMaker::StEstMaker() **** INIT STOP"<<endl;
+  gMessMgr->Info("StEstMaker::Init STOP");
   return kStOK;
 
 }
@@ -271,120 +270,35 @@ Int_t StEstMaker::Init(){
 void StEstMaker::PrintSettings() {
   // Print the tracking parameter settings.
 
-  long j,k;
+  long j;
 
-  cout<<"-----------------------------------------------------------------"<<endl;
-  cout<<"\t\t\t SETTINGS OF THE Pt PASSES\t\t\t|"<<endl;
-  cout<<"-----------------------------------------------------------------"<<endl;
-  cout<<"number of passes "<<mNPass;
-  for (j=0;j<mNPass;j++) cout<<"\t| "<<j;
-  cout<<"\t|"<<endl;
-  cout<<"-----------------------------------------------------------------"<<endl;
-  cout<<"ptmin\t\t";
-  for (j=0;j<mNPass;j++) cout<<"\t| "<<mParams[j]->ptmin;
-  cout<<"\t|"<<endl;
-  cout<<"ptmax\t\t";
-  for (j=0;j<mNPass;j++) cout<<"\t| "<<mParams[j]->ptmax;
-  cout<<"\t|"<<endl;
-  cout<<"-----------------------------------------------------------------"<<endl;
-  for (k=0;k<4;k++)
-    {
-      cout<<"layer "<<k<<" lin. geom. cut";
-      for (j=0;j<mNPass;j++) cout<<"\t| "<<mParams[j]->geomcutl[k];
-      cout<<"\t|"<<endl;
-    }
-  cout<<"-----------------------------------------------------------------"<<endl;
-  for (k=0;k<4;k++)
-    {
-      cout<<"layer "<<k<<" cir. geom. cut";
-      for (j=0;j<mNPass;j++) cout<<"\t| "<<mParams[j]->geomcutw[k];
-      cout<<"\t|"<<endl;
-    }
-  cout<<"-----------------------------------------------------------------"<<endl;
-  cout<<"layer 0123 on(1)/off(0)";
-  for (j=0;j<mNPass;j++) {
-    cout<<"\t| ";
-    for (k=0;k<4;k++) cout<<mParams[j]->onoff[k];
-  }
-  cout<<"\t|"<<endl;
-  cout<<"-----------------------------------------------------------------"<<endl;
-  for (k=0;k<4;k++)
-    {
-      cout<<"layer "<<k<<" ring of neighb.";
-      for (j=0;j<mNPass;j++) cout<<"\t| "<<mParams[j]->nneighbours[k];
-      cout<<"\t|"<<endl;
-    }
-  cout<<"-----------------------------------------------------------------"<<endl;
-  for (k=0;k<4;k++)
-    {
-      cout<<"layer "<<k<<" branching";
-      for (j=0;j<mNPass;j++) cout<<"\t| "<<mParams[j]->nbranch[k];
-      cout<<"\t|"<<endl;
-    }
-  cout<<"-----------------------------------------------------------------"<<endl;
-  for (k=0;k<4;k++)
-    {
-      cout<<"layer "<<k<<" total branching";
-      for (j=0;j<mNPass;j++) cout<<"\t| "<<mParams[j]->ntotbranch[k];
-      cout<<"\t|"<<endl;
-    }
-  cout<<"-----------------------------------------------------------------"<<endl;
-  for (k=0;k<4;k++)
-    {
-      cout<<"layer "<<k<<" hit sharing";
-      for (j=0;j<mNPass;j++) cout<<"\t| "<<mParams[j]->share[k];
-      cout<<"\t|"<<endl;
-    }
-  cout<<"-----------------------------------------------------------------"<<endl;
-  cout<<"max tpc hits in tracks";
-  for (j=0;j<mNPass;j++) cout<<"\t| "<<mParams[j]->maxtpchits;
-  cout<<"\t|"<<endl;
-  cout<<"max svt hits in tracks";
-  for (j=0;j<mNPass;j++) cout<<"\t| "<<mParams[j]->maxsvthits;
-  cout<<"\t|"<<endl;
-  cout<<"max number of branches";
-  for (j=0;j<mNPass;j++) cout<<"\t| "<<mParams[j]->maxbranches;
-  cout<<"\t|"<<endl;
-  cout<<"-----------------------------------------------------------------"<<endl;
-  cout<<endl;
-  cout<<"-------------------------------------------------------------------------------"<<endl;
-  cout<<"\t\t SETTINGS OF THE SEGMENT SUPERPASSES\t\t\t\t|"<<endl;
-  cout<<"-------------------------------------------------------------------------------"<<endl;
-  cout<<"number of superpasses "<<mNSuperPass;
-  for (j=0;j<mNSuperPass;j++) cout<<"\t| "<<j;
-  cout<<"\t|"<<endl;
-  cout<<"-------------------------------------------------------------------------------"<<endl;
-  cout<<"chisq cut\t";
-  for (j=0;j<mNSuperPass;j++) cout<<"\t| "<<mSegments[j]->chisqcut;
-  cout<<"\t|"<<endl;
-  cout<<"min TPC hits\t";
-  for (j=0;j<mNSuperPass;j++) cout<<"\t| "<<mSegments[j]->minTPChits;
-  cout<<"\t|"<<endl;
-  cout<<"TPCtrack max orig.(x,y)";
-  for (j=0;j<mNSuperPass;j++) cout<<"\t| "<<mSegments[j]->rminTPC;
-  cout<<"\t|"<<endl;
-  cout<<"-------------------------------------------------------------------------------"<<endl;
-  cout<<"min SVT/SSD hits  ";
-  for (j=0;j<mNSuperPass;j++) {
-    cout<<"\t| ";
-    cout<<mSegments[j]->minhits;
-    }
-  cout<<"\t|"<<endl;
-  cout<<"hit in layer 0123";
-  for (j=0;j<mNSuperPass;j++)
-    {
-    cout<<"\t| ";
-    for (k=0;k<4;k++) cout<<mSegments[j]->slay[k];
-    }
-  cout<<"\t|"<<endl;
-  cout<<"requiered (2) possible(1) excluded (0) \t\t\t\t\t\t|"<<endl;
-  cout<<"-------------------------------------------------------------------------------"<<endl;
+  gMessMgr->Info()<<"*********** Main Est Settings ************** \t\t\t\t"<<endm;
+  gMessMgr->Info()<<"layer 0123 on(1)/off(0) : "
+		  <<mParams[0]->onoff[0]<<" "
+		  <<mParams[0]->onoff[1]<<" "
+		  <<mParams[0]->onoff[2]<<" "
+		  <<mParams[0]->onoff[3]<<"\t\t\t\t\t"<<endm;
+  gMessMgr->Info()<<"number of passes : "<<mNPass<<"\t\t\t\t\t\t\t"<<endm;
+  gMessMgr->Info()<<"See StEstMaker.cxx for more details on the pass parameters \t\t"<<endm;
+  gMessMgr->Info()<<"number of superpasses : "<<mNSuperPass<<"\t\t\t\t\t\t"<<endm;
+  gMessMgr->Info()<<"pass min hits(SVT) hitpattern max chi min hits(TPC) max r0(TPC) \t"<<endm;
+
+  for (j=0;j<mNSuperPass;j++) 
+    gMessMgr->Info()<<"  "<<j<<"\t"
+		    <<mSegments[j]->minhits<<"\t\t"
+		    <<mSegments[j]->slay[0] 
+		    <<mSegments[j]->slay[1] 
+		    <<mSegments[j]->slay[2] 
+		    <<mSegments[j]->slay[3]<<"\t"
+		    <<mSegments[j]->chisqcut<<"\t\t"
+		    <<mSegments[j]->minTPChits<<"\t"
+		    <<mSegments[j]->rminTPC<<"\t\t"<<endm;
+  gMessMgr->Info()<<"******************************************** \t\t\t\t"<<endm;
 }
 
 
 Int_t StEstMaker::Make() {
   PrintInfo();
-  cout<<"-------------------------------------------------------------> StEstMaker Make "<<endl;
 
   const Int_t maxNofTracks = 50000;
 
@@ -417,17 +331,14 @@ Int_t StEstMaker::Make() {
   
   if(!Stsvggeom)  Stsvggeom = (St_svg_geom *)local("svgpars/geom");
   if (!Stsvggeom) return kStWarn;
-  cout<<"svggeom="<<Stsvggeom->GetNRows()<<endl;
 
   St_svg_shape*   Stsvgshape =0;
   Stsvgshape = (St_svg_shape *)local("svgpars/shape");
   if (!Stsvgshape) return kStWarn;
-  cout<<"svgshape="<<Stsvgshape->GetNRows()<<endl;
   
   St_svg_config*   Stsvgconf =0;
   Stsvgconf = (St_svg_config *)local("svgpars/config");
   if (!Stsvgconf) return kStWarn;
-  cout<<"svgconf="<<Stsvgconf->GetNRows()<<endl;
 
   //Getting the SVT/SDD hit table
   St_scs_spt*   Stscsspt=0;
@@ -435,10 +346,9 @@ Int_t StEstMaker::Make() {
 
   Stscsspt = (St_scs_spt *)svt->Find("scs_spt");
   if (!Stscsspt) { 
-    cout<<"No SVT/SSD hits !"<<endl;
+    gMessMgr->Warning("No SVT/SSD hits !");
     return kStWarn;
   }
-  cout<<"scs_spt="<<Stscsspt->GetNRows()<<endl;
   
   //Getting the TPC hit table
   St_tcl_tphit*   Sttphit=0;
@@ -447,7 +357,6 @@ Int_t StEstMaker::Make() {
   Sttphit = (St_tcl_tphit *)tpc->Find("tphit");
   if (!Sttphit) return kStWarn;
 
-  cout<<"tphit="<<Sttphit->GetNRows()<<endl;
   //Getting the TPC track table
   St_tpt_track*   Sttptrack=0;
   tpc  = GetInputDS("tpc_tracks");
@@ -455,7 +364,6 @@ Int_t StEstMaker::Make() {
   Sttptrack = (St_tpt_track *)tpc->Find("tptrack");
   if (!Sttptrack) return kStWarn;
 
-  cout<<"tptrack="<<Sttptrack->GetNRows()<<endl;
 
   //Getting the TPC evaluation table
   St_tte_eval*   Stevaltrk=0;
@@ -468,16 +376,13 @@ Int_t StEstMaker::Make() {
     Stg2tvertex = (St_g2t_vertex *)geant->Find("g2t_vertex");
   }
   if ((!Stevaltrk||!Stg2ttrack||!Stg2tvertex)&&mIdealTracking==1) {
-    cout<<"Warning Evaluation table(s) not found ! IdealTracking reset to 0"<<endl;
+    gMessMgr->Warning("Evaluation table(s) not found ! IdealTracking reset to 0");
     mIdealTracking=0;
   }
 
-  cout<<"mNPass="<<mNPass<<endl;
-  cout<<"mNSuperPass="<<mNSuperPass<<endl;
-  cout<<"mIdealTracking="<<mIdealTracking<<endl;
-  cout<<"mDebugLevel="<<mDebugLevel<<endl;
+  gMessMgr->Info()<<"IdealTracking="<<mIdealTracking<<" DebugLevel="<<mDebugLevel<<endm;
 
-  // Making a Tracker
+  gMessMgr->Info()<<"StEstMaker : Constructing a Tracker"<<endm;
   StEstTracker* Tracker = new StEstTracker(mNPass,
 					   mNSuperPass,
 					   mIdealTracking,
@@ -486,33 +391,38 @@ Int_t StEstMaker::Make() {
 					   mSegments,
 					   m_egr_egrpar,
 					   m_egrpar_h);
-  // Making the StEstWafer and StEstHit objects
+
+  gMessMgr->Info()<<"StEstMaker : Making the Wafer and Hit objects"<<endm;
   Tracker->SVTInit(Stsvggeom,
 		   Stsvgshape,
 		   Stsvgconf,
 		   Stscsspt);
-  // Making the StEstVertex object
+
+  gMessMgr->Info()<<"StEstMaker : Making a Vertex object"<<endm;
   Tracker->VertexSetup(preVertex);
 
-  // Making the StTrack and StTPCTrack objects
+
+  gMessMgr->Info()<<"StEstMaker : Making the Track objects"<<endm;
   Tracker->TPCInit(Sttptrack,Sttphit);
   Tracker->BranchInit();
-  // Preparing the evaluation information
-  if (mIdealTracking==1) Tracker->SetupMc(Stscsspt,
-					  Stevaltrk,
-					  Stg2ttrack,
-					  Stg2tvertex);
-  // Doing the tracking
+
+  if (mIdealTracking==1) {
+    gMessMgr->Info()<<"StEstMaker : Preparing the evaluation"<<endm;
+    Tracker->SetupMc(Stscsspt,
+		     Stevaltrk,
+		     Stg2ttrack,
+		     Stg2tvertex);
+  }
+
+  gMessMgr->Info()<<"StEstMaker : Doing the tracking"<<endm;
   Tracker->DoTracking();
-  // Saving the tracks formed into tables
+
+  gMessMgr->Info()<<"StEstMaker : Saving into tables"<<endm;
   Tracker->EsttoGlobtrk(svttrk,
 			svtgrps,
 			EstMatch);
-  cout<<"svttrk="<<svttrk->GetNRows()<<endl;
-  cout<<"svtgrps="<<svtgrps->GetNRows()<<endl;
-  cout<<"EstMatch="<<EstMatch->GetNRows()<<endl;
 
-  // Cleaning and deleting the objects
+  gMessMgr->Info()<<"StEstMaker : Cleaning up"<<endm;
   Tracker->CleanUp();
   delete Tracker;
   return kStOK;
