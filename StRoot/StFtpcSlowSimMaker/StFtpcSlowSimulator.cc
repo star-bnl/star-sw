@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimulator.cc,v 1.3 2001/01/11 17:37:25 jcs Exp $
+// $Id: StFtpcSlowSimulator.cc,v 1.4 2001/03/06 23:36:24 jcs Exp $
 // $Log: StFtpcSlowSimulator.cc,v $
+// Revision 1.4  2001/03/06 23:36:24  jcs
+// use database instead of params
+//
 // Revision 1.3  2001/01/11 17:37:25  jcs
 // replace math.h with PhysicalConstants.h
 //
@@ -24,17 +27,20 @@
 #include "StFtpcRawWriter.hh"
 #include "StFtpcClusterMaker/StFtpcGeantReader.hh"
 #include "StFtpcClusterMaker/StFtpcParamReader.hh"
+#include "StFtpcClusterMaker/StFtpcDbReader.hh"
 
 #ifndef DEBUG
 #define DEBUG 0
 #endif
 
 StFtpcSlowSimulator::StFtpcSlowSimulator(StFtpcGeantReader *geantReader,
-					 StFtpcParamReader *paramReader, 
+					 StFtpcParamReader *paramReader,
+                                         StFtpcDbReader *dbReader,
 					 StFtpcRawWriter *rawWriter)
 {
   mGeant = geantReader;
   mParam = paramReader;
+  mDb    = dbReader;
   mWriter = rawWriter;
 }
 
@@ -45,7 +51,7 @@ int StFtpcSlowSimulator::simulate()
     if(DEBUG) cout << "Begin Initialization..." << endl;
 
     // setup fields
-    StFtpcSlowSimField *field = new StFtpcSlowSimField(mParam); // define the field
+    StFtpcSlowSimField *field = new StFtpcSlowSimField(mParam, mDb); // define the field
     if(DEBUG) field->Output();                  // write out field 
 
     // setup readout
@@ -54,7 +60,7 @@ int StFtpcSlowSimulator::simulate()
 			  *mParam->numberOfPads()
 			  *mParam->numberOfTimebins()];      
     
-    StFtpcSlowSimReadout *rdout = new StFtpcSlowSimReadout(mParam, ADC, field);
+    StFtpcSlowSimReadout *rdout = new StFtpcSlowSimReadout(mParam, mDb, ADC, field);
     // create readout
     if(DEBUG) rdout->Print();
 
@@ -233,7 +239,7 @@ int StFtpcSlowSimulator::simulate()
                 << endl;
         }
 	StFtpcSlowSimCluster *clus = 
-	  new StFtpcSlowSimCluster(mParam, field, electron, rad_off, pad_off, 
+	  new StFtpcSlowSimCluster(mParam, mDb, field, electron, rad_off, pad_off, 
 				   rad, phi, drift_time, irow);
 
 	clus->DriftDiffuse(field); // transport the cluster

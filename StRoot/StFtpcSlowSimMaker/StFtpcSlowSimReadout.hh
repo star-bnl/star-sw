@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimReadout.hh,v 1.1 2000/11/23 10:16:43 hummler Exp $
+// $Id: StFtpcSlowSimReadout.hh,v 1.2 2001/03/06 23:36:19 jcs Exp $
 // $Log: StFtpcSlowSimReadout.hh,v $
+// Revision 1.2  2001/03/06 23:36:19  jcs
+// use database instead of params
+//
 // Revision 1.1  2000/11/23 10:16:43  hummler
 // New FTPC slow simulator in pure maker form
 //
@@ -21,6 +24,7 @@
 class StFtpcSlowSimCluster;
 class StFtpcSlowSimField;
 class StFtpcParamReader;
+class StFtpcDbReader;
 extern  int Locate(const int npt, const float* x, const float xx);
 
 //
@@ -31,6 +35,7 @@ class StFtpcSlowSimReadout
 {
 public:
   StFtpcSlowSimReadout(StFtpcParamReader *paramReader,
+                       StFtpcDbReader *dbReader,
 		       float *adcIn, const StFtpcSlowSimField *field);
   ~StFtpcSlowSimReadout();
   void Avalanche(const StFtpcSlowSimCluster *cl);      
@@ -68,6 +73,7 @@ private:
   
   struct raset1 uc;
   StFtpcParamReader *mParam;
+  StFtpcDbReader *mDb;
 
   int mMaxAdc;            // maximum ADC value from parameters
   int mGaussIntSteps;     // steps for gauss calculation from par's

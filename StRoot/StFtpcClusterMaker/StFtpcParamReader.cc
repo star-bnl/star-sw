@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.cc,v 1.12 2001/01/27 20:07:46 jcs Exp $
+// $Id: StFtpcParamReader.cc,v 1.13 2001/03/06 23:34:12 jcs Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.13  2001/03/06 23:34:12  jcs
+// use database instead of params
+//
 // Revision 1.12  2001/01/27 20:07:46  jcs
 // change name of parameter
 //
@@ -41,55 +44,12 @@
 #include <math.h>
 #include "StMessMgr.h"
 
-StFtpcParamReader::StFtpcParamReader(St_fcl_ampoff *ampoff,
-				     St_fcl_ampslope *ampslope,
-				     St_fcl_timeoff *timeoff,
-				     St_fcl_padtrans *padtrans,
-				     St_fcl_det *det,
-				     St_fcl_zrow *zrow,
+StFtpcParamReader::StFtpcParamReader(St_fcl_det *det,
 				     St_ffs_gaspar *gaspar)
 {
-  // just copy calibration table start to pointers
-  mAmplitudeOffset = (Float_t *) &(ampoff->GetTable()->offset);
-  mAmplitudeSlope = (Float_t *) &(ampslope->GetTable()->slope);
-  mTimeOffset = (Float_t *) &(timeoff->GetTable()->offset);
-  mNumberOfCalibrationValues = ampoff->GetNRows();
-  if(mNumberOfCalibrationValues == ampslope->GetNRows())
-    mNumberOfCalibrationValues = ampslope->GetNRows();
-  if(mNumberOfCalibrationValues == timeoff->GetNRows())
-    mNumberOfCalibrationValues = timeoff->GetNRows();
 
-  // padtrans table has to be copied to be accessible as separate arrays
-  mNumberOfPadtransBins = padtrans->GetNRows();
+  mNumberOfMagboltzBins = 761;
   mNumberOfPadrowsPerSide = 10;
-  mPadtransEField = new Float_t[mNumberOfPadtransBins];
-  mPadtransVDrift = 
-    new Float_t[mNumberOfPadrowsPerSide*mNumberOfPadtransBins];
-  mPadtransDeflection = 
-    new Float_t[mNumberOfPadrowsPerSide*mNumberOfPadtransBins];
-  mPadtransdVDriftdP = 
-    new Float_t[mNumberOfPadrowsPerSide*mNumberOfPadtransBins];
-  mPadtransdDeflectiondP = 
-    new Float_t[mNumberOfPadrowsPerSide*mNumberOfPadtransBins];
-  Int_t i, j;
-  fcl_padtrans_st *padtransTable = padtrans->GetTable();
-  // store padtrans table for writing back in destructor
-  mPadtransTable=padtransTable;
-  for(i=0; i<mNumberOfPadtransBins; i++)
-    {
-      mPadtransEField[i] = padtransTable[i].e;
-      for(j=0; j<mNumberOfPadrowsPerSide; j++)
-	{
-	  mPadtransVDrift[j+mNumberOfPadrowsPerSide*i] = 
-	    padtransTable[i].v[j];
-	  mPadtransDeflection[j+mNumberOfPadrowsPerSide*i] = 
-	    padtransTable[i].psi[j];
-	  mPadtransdVDriftdP[j+mNumberOfPadrowsPerSide*i] = 
-	    padtransTable[i].dv_dp[j];
-	  mPadtransdDeflectiondP[j+mNumberOfPadrowsPerSide*i] = 
-	    padtransTable[i].dpsi_dp[j];
-	}
-    }
 
   // det table exists only once, just copy
   fcl_det_st *detTable = det->GetTable();
@@ -143,9 +103,6 @@ StFtpcParamReader::StFtpcParamReader(St_fcl_ampoff *ampoff,
   mPercentCO2 = detTable->percent_co2;
   mPercentNe = detTable->percent_ne;
   mPercentHe = detTable->percent_he;
-
-  //  just copy zrow table start to pointer
-  mPadrowZPosition = (Float_t *) &(zrow->GetTable()->z);
 
   //  temporarily set Ftpc fast simulator geometry parameters until in data base
   mPhiOrigin = 90.;
@@ -186,9 +143,7 @@ StFtpcParamReader::StFtpcParamReader(St_fcl_ampoff *ampoff,
 
 StFtpcParamReader::StFtpcParamReader(St_fss_gas *gas,
 				     St_fss_param *param,
-				     St_fcl_padtrans *padtrans,
-				     St_fcl_det *det,
-				     St_fcl_zrow *zrow)
+				     St_fcl_det *det)
 {
   // fss gas table has to be copied to be accessible as separate arrays
   mNumberOfFssGasValues = gas->GetNRows();
@@ -198,7 +153,7 @@ StFtpcParamReader::StFtpcParamReader(St_fss_gas *gas,
   mFssGasDiffusionY = new Float_t[mNumberOfFssGasValues];
   mFssGasDiffusionZ = new Float_t[mNumberOfFssGasValues];
   mFssGasLorentzAngle = new Float_t[mNumberOfFssGasValues];
-  Int_t i,j;
+  Int_t i;
   fss_gas_st *gasTable = gas->GetTable();
   for(i=0; i<mNumberOfFssGasValues; i++)
     {
@@ -229,37 +184,8 @@ StFtpcParamReader::StFtpcParamReader(St_fss_gas *gas,
   mSigmaPadResponseFuntion = paramTable->readout_sigma_prf;
   mReadoutShaperTime = paramTable->readout_shaper_time;
  
-  
-  // padtrans table has to be copied to be accessible as separate arrays
-  mNumberOfPadtransBins = padtrans->GetNRows();
+  mNumberOfMagboltzBins = 761;
   mNumberOfPadrowsPerSide = 10;
-  mPadtransEField = new Float_t[mNumberOfPadtransBins];
-  mPadtransVDrift = 
-    new Float_t[mNumberOfPadrowsPerSide*mNumberOfPadtransBins];
-  mPadtransDeflection = 
-    new Float_t[mNumberOfPadrowsPerSide*mNumberOfPadtransBins];
-  mPadtransdVDriftdP = 
-    new Float_t[mNumberOfPadrowsPerSide*mNumberOfPadtransBins];
-  mPadtransdDeflectiondP = 
-    new Float_t[mNumberOfPadrowsPerSide*mNumberOfPadtransBins];
-  fcl_padtrans_st *padtransTable = padtrans->GetTable();
-  // store padtrans table for writing back in destructor
-  mPadtransTable=padtransTable;
-  for(i=0; i<mNumberOfPadtransBins; i++)
-    {
-      mPadtransEField[i] = padtransTable[i].e;
-      for(j=0; j<mNumberOfPadrowsPerSide; j++)
-	{
-	  mPadtransVDrift[j+mNumberOfPadrowsPerSide*i] = 
-	    padtransTable[i].v[j];
-	  mPadtransDeflection[j+mNumberOfPadrowsPerSide*i] = 
-	    padtransTable[i].psi[j];
-	  mPadtransdVDriftdP[j+mNumberOfPadrowsPerSide*i] = 
-	    padtransTable[i].dv_dp[j];
-	  mPadtransdDeflectiondP[j+mNumberOfPadrowsPerSide*i] = 
-	    padtransTable[i].dpsi_dp[j];
-	}
-    }
 
   // det table exists only once, just copy
   fcl_det_st *detTable = det->GetTable();
@@ -314,9 +240,6 @@ StFtpcParamReader::StFtpcParamReader(St_fss_gas *gas,
   mPercentNe = detTable->percent_ne;
   mPercentHe = detTable->percent_he;
 
-  //  just copy zrow table start to pointer
-  mPadrowZPosition = (Float_t *) &(zrow->GetTable()->z);
-
 //   cout << "StFtpcParamReader constructed from StFtpcSlowSimMaker tables" << endl;  
 }
 
@@ -324,36 +247,11 @@ StFtpcParamReader::StFtpcParamReader(St_fss_gas *gas,
 
 StFtpcParamReader::~StFtpcParamReader()
 {
-  // write padtrans array back to table
-  Int_t i,j;
-  if(mPadtransTable!=NULL)
-    {
-      for(i=0; i<mNumberOfPadtransBins; i++)
-	{
-	  mPadtransTable[i].e = mPadtransEField[i];
-	  for(j=0; j<mNumberOfPadrowsPerSide; j++)
-	    {
-	      mPadtransTable[i].v[j] =
-		mPadtransVDrift[j+mNumberOfPadrowsPerSide*i]; 
-	      mPadtransTable[i].psi[j] =
-		mPadtransDeflection[j+mNumberOfPadrowsPerSide*i]; 
-	      mPadtransTable[i].dv_dp[j] =
-		mPadtransdVDriftdP[j+mNumberOfPadrowsPerSide*i]; 
-	      mPadtransTable[i].dpsi_dp[j] =
-		mPadtransdDeflectiondP[j+mNumberOfPadrowsPerSide*i]; 
-	    }
-	}
-    }
 
   // write back det table entries that have set functions:
   mDetTable->p_normalized = mNormalizedNowPressure;
 
   // delete allocated memory
-  delete[] mPadtransEField;
-  delete[] mPadtransVDrift;
-  delete[] mPadtransDeflection;
-  delete[] mPadtransdVDriftdP;
-  delete[] mPadtransdDeflectiondP;
   delete[] mFssGasEField;
   delete[] mFssGasVDrift;
   delete[] mFssGasDiffusionX;
@@ -362,180 +260,6 @@ StFtpcParamReader::~StFtpcParamReader()
   delete[] mFssGasLorentzAngle;
 
 //   cout << "StFtpcParamReader destructed" << endl;
-}
-
-Float_t StFtpcParamReader::amplitudeOffset(Int_t i)
-{
-  if(i>=0 && i<mNumberOfCalibrationValues)
-    {
-      return mAmplitudeOffset[i];
-    }
-  else
-    {
-      gMessMgr->Message("StFtpcParamReader: amplitudeOffset index out of range, using 0", "W", "OST");
-      return mAmplitudeOffset[0];
-    }
-}
-
-Float_t StFtpcParamReader::amplitudeSlope(Int_t i)
-{
-  if(i>=0 && i<mNumberOfCalibrationValues)
-    {
-      return mAmplitudeSlope[i];
-    }
-  else
-    {
-      gMessMgr->Message("StFtpcParamReader: amplitudeSlope index out of range, using 0", "W", "OST");
-      return mAmplitudeSlope[0];
-    }
-}
-
-Float_t StFtpcParamReader::timeOffset(Int_t i)
-{
-  if(i>=0 && i<mNumberOfCalibrationValues)
-    {
-      return mTimeOffset[i];
-    }
-  else
-    {
-      gMessMgr->Message("StFtpcParamReader: timeOffset index out of range, using 0", "W", "OST");
-      return mTimeOffset[0];
-    }
-}
-
-Float_t StFtpcParamReader::padtransEField(Int_t i) 
-{
-  if(i>=0 && i<mNumberOfPadtransBins)
-    {
-      return mPadtransEField[i];
-    }
-  else
-    {
-      gMessMgr->Message("StFtpcParamReader: padtransEField index out of range, using 0", "W", "OST");
-      return mPadtransEField[0];
-    }
-}
-
-Float_t StFtpcParamReader::padtransVDrift(Int_t i, Int_t padrow) 
-{
-  if(i>=0 && i<mNumberOfPadtransBins && padrow>=0 && padrow<mNumberOfPadrowsPerSide)
-    {
-      return mPadtransVDrift[padrow+mNumberOfPadrowsPerSide*i];
-    }
-  else
-    {
-      gMessMgr->Message("StFtpcParamReader: padtransVDrift index out of range, using 0", "W", "OST");
-      return mPadtransVDrift[0];
-    }
-}
-
-Float_t StFtpcParamReader::padtransDeflection(Int_t i, Int_t padrow) 
-{
-  if(i>=0 && i<mNumberOfPadtransBins && padrow>=0 && padrow<mNumberOfPadrowsPerSide)
-    {
-      return mPadtransDeflection[padrow+mNumberOfPadrowsPerSide*i];
-    }
-  else
-    {
-      gMessMgr->Message("StFtpcParamReader: padtransDeflection index out of range, using 0", "W", "OST");
-      return mPadtransDeflection[0];
-    }
-}
-
-Float_t StFtpcParamReader::padtransdVDriftdP(Int_t i, Int_t padrow) 
-{
-  if(i>=0 && i<mNumberOfPadtransBins && padrow>=0 && padrow<mNumberOfPadrowsPerSide)
-    {
-      return mPadtransdVDriftdP[padrow+mNumberOfPadrowsPerSide*i];
-    }
-  else
-    {
-      gMessMgr->Message("StFtpcParamReader: padtransdVDriftdP index out of range, using 0", "W", "OST");
-      return mPadtransdVDriftdP[0];
-    }
-}
-
-Float_t StFtpcParamReader::padtransdDeflectiondP(Int_t i, Int_t padrow) 
-{
-  if(i>=0 && i<mNumberOfPadtransBins && padrow>=0 && padrow<mNumberOfPadrowsPerSide)
-    {
-      return mPadtransdDeflectiondP[padrow+mNumberOfPadrowsPerSide*i];
-    }
-  else
-    {
-      gMessMgr->Message("StFtpcParamReader: padtransdDeflectiondP index out of range, using 0", "W", "OST");
-      return mPadtransdDeflectiondP[0];
-    }
-}
-
-Int_t StFtpcParamReader::setPadtransEField(Int_t i, Float_t newvalue) 
-{
-  if(i>=0 && i<mNumberOfPadtransBins)
-    {
-      mPadtransEField[i]=newvalue;
-      return 1;
-    }
-  else
-    {
-      gMessMgr->Message("StFtpcParamReader: padtransEField index out of range, not changed", "W", "OST");
-      return 0;
-    }
-}
-
-Int_t StFtpcParamReader::setPadtransVDrift(Int_t i, Int_t padrow, Float_t newvalue) 
-{
-  if(i>=0 && i<mNumberOfPadtransBins && padrow>=0 && padrow<mNumberOfPadrowsPerSide)
-    {
-      mPadtransVDrift[padrow+mNumberOfPadrowsPerSide*i]=newvalue;
-      return 1;
-    }
-  else
-    {
-      gMessMgr->Message("StFtpcParamReader: padtransVDrift index out of range, not changed", "W", "OST");
-      return 0;
-    }
-}
-
-Int_t StFtpcParamReader::setPadtransDeflection(Int_t i, Int_t padrow, Float_t newvalue) 
-{
-  if(i>=0 && i<mNumberOfPadtransBins && padrow>=0 && padrow<mNumberOfPadrowsPerSide)
-    {
-      mPadtransDeflection[padrow+mNumberOfPadrowsPerSide*i]=newvalue;
-      return 1;
-    }
-  else
-    {
-      gMessMgr->Message("StFtpcParamReader: padtransDeflection index out of range, not changed", "W", "OST");
-      return 0;
-    }
-}
-
-Int_t StFtpcParamReader::setPadtransdVDriftdP(Int_t i, Int_t padrow, Float_t newvalue) 
-{
-  if(i>=0 && i<mNumberOfPadtransBins && padrow>=0 && padrow<mNumberOfPadrowsPerSide)
-    {
-      mPadtransdVDriftdP[padrow+mNumberOfPadrowsPerSide*i]=newvalue;
-      return 1;
-    }
-  else
-    {
-      gMessMgr->Message("StFtpcParamReader: padtransdVDriftdP index out of range, not changed", "W", "OST");
-      return 0;
-    }
-}
-
-Int_t StFtpcParamReader::setPadtransdDeflectiondP(Int_t i, Int_t padrow, Float_t newvalue) 
-{
-  if(i>=0 && i<mNumberOfPadtransBins && padrow>=0 && padrow<mNumberOfPadrowsPerSide)
-    {
-      mPadtransdDeflectiondP[padrow+mNumberOfPadrowsPerSide*i]=newvalue;
-      return 1;
-    }
-  else
-    {
-      gMessMgr->Message("StFtpcParamReader: padtransdDeflectiondP index out of range, not changed", "W", "OST");
-      return 0;
-    }
 }
 
 Float_t StFtpcParamReader::padDiffusionErrors(Int_t i) 
@@ -561,19 +285,6 @@ Float_t StFtpcParamReader::timeDiffusionErrors(Int_t i)
     {
       gMessMgr->Message("StFtpcParamReader: timeDiffusionErrors index out of range, using 0", "W", "OST");
       return mTimeDiffusionErrors[0];
-    }
-}
-
-Float_t StFtpcParamReader::padrowZPosition(Int_t i) 
-{
-  if(i>=0 && i<mNumberOfPadrows)
-    {
-      return mPadrowZPosition[i];
-    }
-  else
-    {
-      gMessMgr->Message("StFtpcParamReader: padrowZPosition index out of range, using 0", "W", "OST");
-      return mPadrowZPosition[0];
     }
 }
 

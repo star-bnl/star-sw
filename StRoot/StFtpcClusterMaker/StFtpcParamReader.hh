@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.hh,v 1.12 2001/01/27 20:07:47 jcs Exp $
+// $Id: StFtpcParamReader.hh,v 1.13 2001/03/06 23:34:16 jcs Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.13  2001/03/06 23:34:16  jcs
+// use database instead of params
+//
 // Revision 1.12  2001/01/27 20:07:47  jcs
 // change name of parameter
 //
@@ -42,12 +45,7 @@
 #include <sys/types.h>
 #include "TObject.h"
 
-#include "tables/St_fcl_padtrans_Table.h"
-#include "tables/St_fcl_ampslope_Table.h"
-#include "tables/St_fcl_ampoff_Table.h"
-#include "tables/St_fcl_timeoff_Table.h"
 #include "tables/St_fcl_det_Table.h"
-#include "tables/St_fcl_zrow_Table.h"
 #include "tables/St_ffs_gaspar_Table.h"
 #include "tables/St_fss_gas_Table.h"
 #include "tables/St_fss_param_Table.h"
@@ -61,21 +59,11 @@ class StFtpcParamReader : public TObject
 protected:
   //STAF table pointers stored for writing back in destructor
   //set to NULL if not set in constructor
-  fcl_padtrans_st *mPadtransTable;
   fcl_det_st *mDetTable;
 
   //ClusterFinder parameters (also used by other classes)
-  Float_t *mAmplitudeOffset;
-  Float_t *mAmplitudeSlope;
-  Float_t *mTimeOffset;
-  Int_t mNumberOfCalibrationValues;
-  Int_t mNumberOfPadtransBins;
+  Int_t mNumberOfMagboltzBins;
   Int_t mNumberOfPadrowsPerSide;
-  Float_t *mPadtransEField;
-  Float_t *mPadtransVDrift;
-  Float_t *mPadtransDeflection;
-  Float_t *mPadtransdVDriftdP;
-  Float_t *mPadtransdDeflectiondP;
   Int_t mFirstPadrowToSearch;
   Int_t mLastPadrowToSearch;
   Int_t mFirstSectorToSearch;
@@ -125,7 +113,6 @@ protected:
   Float_t mPercentCO2;
   Float_t mPercentNe;
   Float_t mPercentHe;
-  Float_t *mPadrowZPosition;
   //FastSimulator parameters
   Int_t mOrderOfFastEstimates;
   Float_t *mVDriftEstimates;
@@ -174,31 +161,15 @@ protected:
   
 public:
   // constructor used by StFtpcClusterMaker:
-  StFtpcParamReader(St_fcl_ampoff *ampoff,
-		    St_fcl_ampslope *ampslope,
-		    St_fcl_timeoff *timeoff,
-		    St_fcl_padtrans *padtrans,
-		    St_fcl_det *det,
-		    St_fcl_zrow *zrow,
+  StFtpcParamReader(St_fcl_det *det,
 		    St_ffs_gaspar *gaspar);
   // constructor used by StFtpcSlowSimMaker:
   StFtpcParamReader(St_fss_gas *gas,
 		    St_fss_param *param,
-		    St_fcl_padtrans *padtrans,
-		    St_fcl_det *det,
-		    St_fcl_zrow *zrow);
+		    St_fcl_det *det);
   ~StFtpcParamReader();
-  Float_t amplitudeOffset(Int_t i);
-  Float_t amplitudeSlope(Int_t i);
-  Float_t timeOffset(Int_t i);
-  Float_t padtransEField(Int_t i); 
-  Float_t padtransVDrift(Int_t i, Int_t padrow); 
-  Float_t padtransDeflection(Int_t i, Int_t padrow); 
-  Float_t padtransdVDriftdP(Int_t i, Int_t padrow); 
-  Float_t padtransdDeflectiondP(Int_t i, Int_t padrow); 
   Float_t padDiffusionErrors(Int_t i); 
   Float_t timeDiffusionErrors(Int_t i); 
-  Float_t padrowZPosition(Int_t i); 
   Float_t vDriftEstimates(Int_t i); 
   Float_t tDriftEstimates(Int_t i); 
   Float_t sigmaRadialEstimates(Int_t i); 
@@ -212,16 +183,10 @@ public:
   Float_t fssGasDiffusionZ(Int_t i);
   Float_t fssGasLorentzAngle(Int_t i);
   // parameter set functions
-  Int_t setPadtransEField(Int_t i, Float_t newvalue); 
-  Int_t setPadtransVDrift(Int_t i, Int_t padrow, Float_t  newvalue); 
-  Int_t setPadtransDeflection(Int_t i, Int_t padrow, Float_t  newvalue); 
-  Int_t setPadtransdVDriftdP(Int_t i, Int_t padrow, Float_t  newvalue); 
-  Int_t setPadtransdDeflectiondP(Int_t i, Int_t padrow, Float_t  newvalue); 
   Int_t setNormalizedNowPressure(Float_t f) {mNormalizedNowPressure=f; return 1;}
 
   // inline get functions
-  Int_t numberOfCalibrationValues() {return mNumberOfCalibrationValues;}
-  Int_t numberOfPadtransBins() {return mNumberOfPadtransBins;}
+  Int_t numberOfMagboltzBins() {return mNumberOfMagboltzBins;}
   Int_t numberOfPadrowsPerSide() {return mNumberOfPadrowsPerSide;}
   Int_t firstPadrowToSearch() {return mFirstPadrowToSearch;}
   Int_t lastPadrowToSearch() {return mLastPadrowToSearch;}
@@ -304,11 +269,4 @@ public:
 };
 
 #endif
-
-
-
-
-
-
-
 

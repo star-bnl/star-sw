@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.2 2001/01/11 18:28:53 jcs Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.3 2001/03/06 23:36:16 jcs Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.3  2001/03/06 23:36:16  jcs
+// use database instead of params
+//
 // Revision 1.2  2001/01/11 18:28:53  jcs
 // use PhysicalConstants.h instead of math.h, remove print statement
 //
@@ -26,16 +29,19 @@
 #include "StFtpcSlowSimCluster.hh"
 #include "StFtpcSlowSimReadout.hh"
 #include "StFtpcClusterMaker/StFtpcParamReader.hh"
+#include "StFtpcClusterMaker/StFtpcDbReader.hh"
 
 #ifndef DEBUG
 #define DEBUG 0
 #endif
 
 StFtpcSlowSimReadout::StFtpcSlowSimReadout(StFtpcParamReader *paramReader,
+                                           StFtpcDbReader *dbReader,
 					   float *adcIn, 
 					   const StFtpcSlowSimField *field)
 {
   mParam=paramReader;
+  mDb=dbReader;
   mRandomNumberGenerator = mParam->randomNumberGenerator();
   number_plane = mParam->numberOfPadrowsPerSide();
   pad_pitch = mParam->padPitch();

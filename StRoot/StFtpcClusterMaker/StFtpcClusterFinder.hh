@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.hh,v 1.7 2001/01/25 15:25:30 oldi Exp $
+// $Id: StFtpcClusterFinder.hh,v 1.8 2001/03/06 23:33:46 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.hh,v $
+// Revision 1.8  2001/03/06 23:33:46  jcs
+// use database instead of params
+//
 // Revision 1.7  2001/01/25 15:25:30  oldi
 // Fix of several bugs which caused memory leaks:
 //  - Some arrays were not allocated and/or deleted properly.
@@ -22,7 +25,7 @@
 
 #ifndef STAR_StFtpcClusterFinder
 #define STAR_StFtpcClusterFinder
-// #define DEBUG 1
+//#define DEBUG 1
 /*#define DEBUGFILE 1*/
 
 
@@ -31,16 +34,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "fcl_det.h"
-#include "fcl_zrow.h"
-#include "fcl_padtrans.h"
-#include "fcl_timeoff.h"
-#include "fcl_ampoff.h"
-#include "fcl_ampslope.h"
 #include "TObjArray.h"
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDAQMaker/StDAQReader.h"
 #include "StDAQMaker/StFTPCReader.h"
 #include "StFtpcParamReader.hh"
+#include "StFtpcDbReader.hh"
 
 #define TRUE 1
 #define FALSE 0
@@ -107,10 +106,12 @@ class StFtpcClusterFinder
   TObjArray *mPoint;
   StFTPCReader *mReader; 
   StFtpcParamReader *mParam;
+  StFtpcDbReader *mDb;
 
  public:
   StFtpcClusterFinder(StFTPCReader *reader, 
 		      StFtpcParamReader *paramReader, 
+                      StFtpcDbReader    *dbReader,
 		      TObjArray *pointarray);
   ~StFtpcClusterFinder();
   int search();

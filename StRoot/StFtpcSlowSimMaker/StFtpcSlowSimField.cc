@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimField.cc,v 1.3 2001/01/11 18:28:44 jcs Exp $
+// $Id: StFtpcSlowSimField.cc,v 1.4 2001/03/06 23:36:01 jcs Exp $
 // $Log: StFtpcSlowSimField.cc,v $
+// Revision 1.4  2001/03/06 23:36:01  jcs
+// use database instead of params
+//
 // Revision 1.3  2001/01/11 18:28:44  jcs
 // use PhysicalConstants.h instead of math.h, remove print statement
 //
@@ -23,10 +26,13 @@
 
 #include "StFtpcSlowSimField.hh"
 #include "StFtpcClusterMaker/StFtpcParamReader.hh"
+#include "StFtpcClusterMaker/StFtpcDbReader.hh"
 
-StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader)
+StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader,
+                                       StFtpcDbReader *dbReader)
 {
   mParam=paramReader;
+  mDb = dbReader;
   // inplementation of drift information from fcl_padtrahns, which is
   // more precise than that in fss_gas (includes calculated magfield)
   // there's a job to do: fuse both tables into one!
@@ -103,7 +109,7 @@ StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader)
   
   radTimesField = mParam->radiusTimesField();
   nPadrowPositions = mParam->numberOfPadrowsPerSide();
-  nMagboltzBins = mParam->numberOfPadtransBins();
+  nMagboltzBins = mParam->numberOfMagboltzBins();
   preciseEField = new float[nMagboltzBins];
   inverseDriftVelocity = new float[nMagboltzBins*nPadrowPositions];
   preciseLorentzAngle = new float[nMagboltzBins*nPadrowPositions];
@@ -111,15 +117,15 @@ StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader)
   float deltaP = mParam->normalizedNowPressure()-mParam->standardPressure();
   for(int i=0; i<nMagboltzBins; i++)
     {
-      preciseEField[i] = mParam->padtransEField(i);
+      preciseEField[i] = mDb->magboltzEField(i);
       for(int j=0; j<nPadrowPositions; j++)
 	{
 	  inverseDriftVelocity[i+nMagboltzBins*j] = 
-	    1/ (mParam->padtransVDrift(i,j)
-		+ deltaP * mParam->padtransdVDriftdP(i,j));
+	    1/ (mDb->magboltzVDrift(i,j)
+		+ deltaP * mDb->magboltzdVDriftdP(i,j));
 	  preciseLorentzAngle[i+nMagboltzBins*j] = 
-	    mParam->padtransDeflection(i,j) 
-	    + deltaP * mParam->padtransdDeflectiondP(i,j);
+	    mDb->magboltzDeflection(i,j) 
+	    + deltaP * mDb->magboltzdDeflectiondP(i,j);
 	}
     }
   EFieldMin=preciseEField[0];

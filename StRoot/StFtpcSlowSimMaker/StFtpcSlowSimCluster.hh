@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimCluster.hh,v 1.1 2000/11/23 10:16:43 hummler Exp $
+// $Id: StFtpcSlowSimCluster.hh,v 1.2 2001/03/06 23:35:58 jcs Exp $
 // $Log: StFtpcSlowSimCluster.hh,v $
+// Revision 1.2  2001/03/06 23:35:58  jcs
+// use database instead of params
+//
 // Revision 1.1  2000/11/23 10:16:43  hummler
 // New FTPC slow simulator in pure maker form
 //
@@ -16,6 +19,7 @@
 
 class StFtpcSlowSimField;
 class StFtpcParamReader;
+class StFtpcDbReader;
 
 //
 //  class cluster will diffuse and drift a cluster of electrons 
@@ -26,6 +30,7 @@ class StFtpcSlowSimCluster
 public:
   
   StFtpcSlowSimCluster(StFtpcParamReader *paramReader,
+                       StFtpcDbReader *dbReader,
 		       StFtpcSlowSimField *field,
 		       const float el, const float rad_offset, 
 		       const float pad_offset, const float r, 
