@@ -1,5 +1,8 @@
-* $Id: control.g,v 1.16 2000/08/10 23:54:45 nevski Exp $
+* $Id: control.g,v 1.17 2001/05/02 16:44:51 nevski Exp $
 * $Log: control.g,v $
+* Revision 1.17  2001/05/02 16:44:51  nevski
+* forecast EOD with IQUEST(11) passed to IQUEST(99)
+*
 * Revision 1.16  2000/08/10 23:54:45  nevski
 * 1st EVNT entry checked on CONTROL SIMU=1 only
 *
@@ -43,6 +46,8 @@
 * do not allow run without geometry
       Iprin = ISLFLAG('CONT','PRIN')
       Isimu = ISLFLAG('CONT','SIMU')
+* forecast next End_of_data - IQUEST(11) is set to 0 when last event is read:
+      IQUEST(99) = IQUEST(11)
 
       if (JVOLUM<=0) STOP ' NO GEOMETRY LOADED '
       if (JHEAD <=0) then
