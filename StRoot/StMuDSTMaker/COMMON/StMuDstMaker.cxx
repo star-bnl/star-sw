@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.54 2004/04/14 17:15:56 subhasis Exp $
+ * $Id: StMuDstMaker.cxx,v 1.55 2004/04/15 00:25:49 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -554,6 +554,7 @@ void StMuDstMaker::read(){
     }
     mStMuDst->set(this);
     //  mEventCounter++;
+    fillHddr();
   }
   return;
 }
@@ -1060,9 +1061,43 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
   if (mProbabilityPidAlgorithm)
     mProbabilityPidAlgorithm->readParametersFromFile(flnm.str());
 }
+//-----------------------------------------------------------------------
+void StMuDstMaker::fillHddr()
+{
+
+  
+  StMuEvent 		*me = mStMuDst->event();
+  StEventInfo 		&ei = me->eventInfo();
+  StRunInfo 		&ri = me->runInfo();
+  StEvtHddr *hd = GetEvtHddr();
+
+  hd->SetRunNumber(ei.runId())	;
+  hd->SetEventType(ei.type().Data());
+  hd->SetTriggerMask(ei.triggerMask())	;
+//hd->SetInputTriggerMask(???);
+  hd->SetBunchCrossingNumber(ei.bunchCrossingNumber(0),ei.bunchCrossingNumber(1));
+  hd->SetCenterOfMassEnergy(ri.centerOfMassEnergy());
+//hd->SetBImpact  (float b)  	;
+//hd->SetPhiImpact(float p)  	;
+//hd->SetPhImpact (float p)  	;
+//hd->SetAEast(int a)		;
+//hd->SetZEast(int z)		;
+//hd->SetAWest(int a)		;
+//hd->SetZWest(int z)		;
+//hd->SetLuminosity(float lu)	;
+  hd->SetGMTime((unsigned int)ei.time());
+  hd->SetProdDateTime(ri.productionTime());
+//hd->SetIventNumber(int iv)	;
+  hd->SetEventSize(ei.eventSize());
+  hd->SetEventNumber(ei.id())	;
+//hd->SetGenerType(int g);
+}
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.55  2004/04/15 00:25:49  perev
+ * fillHddr() added to fill time stamp ...
+ *
  * Revision 1.54  2004/04/14 17:15:56  subhasis
  * Xin's TOF reinclusion
  *
