@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.hh,v 1.2 1999/01/15 22:54:02 wenaus Exp $
+ * $Id: StTrack.hh,v 1.3 1999/01/30 23:03:16 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StTrack.hh,v $
- * Revision 1.2  1999/01/15 22:54:02  wenaus
- * version with constructors for table-based loading
+ * Revision 1.3  1999/01/30 23:03:16  wenaus
+ * table load intfc change; include ref change
+ *
+ * Revision 1.5  1999/02/15 16:17:04  wenaus
+ * fix double& -> double referencing bug
  *
  * Revision 1.4  1999/02/12 02:01:20  wenaus
  * New track constructor to load helix params independently of table
@@ -22,7 +25,7 @@
  * Revision 1.3  1999/01/30 23:03:16  wenaus
  * table load intfc change; include ref change
  *
-#include "StTables/dst_track.h"
+ * Revision 1.2  1999/01/15 22:54:02  wenaus
  * version with constructors for table-based loading
  *
  **************************************************************************/

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedx.hh,v 1.2 1999/01/15 22:53:32 wenaus Exp $
+ * $Id: StDedx.hh,v 1.3 1999/01/30 23:03:10 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StDedx.hh,v $
+ * Revision 1.3  1999/01/30 23:03:10  wenaus
+ * table load intfc change; include ref change
+ *
  * Revision 1.2  1999/01/15 22:53:32  wenaus
  * version with constructors for table-based loading
  *
@@ -21,7 +24,7 @@
 #ifndef StDedx_hh
 #define StDedx_hh
 
-#include "StTables/dst_dedx.h"
+#include "tables/dst_dedx.h"
 
 class StDedx {
 public:

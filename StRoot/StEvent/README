@@ -6,6 +6,9 @@ Package coordinator: Thomas Ullrich
 Modification history
 ====================
 
+01/30/1999 T. Wenaus
+  - minor changes to table loader constructor interfaces
+  - StTables/ => tables/ which is understood by standard makefiles
 01/15/1999 T. Wenaus
   - table-based constructors added throughout so event can be loaded 
     from Objy or ROOT via tables

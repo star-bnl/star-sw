@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.hh,v 1.3 1999/01/27 13:04:50 ullrich Exp $
+ * $Id: StV0Vertex.hh,v 1.4 1999/01/30 23:03:18 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,10 +13,13 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.hh,v $
- * Revision 1.3  1999/01/27 13:04:50  ullrich
- * Renamed data member and access functions: xxxToV0 into xxxToPrimaryVertex.
- * This is the right meaning according to P. Jones.
+ * Revision 1.4  1999/01/30 23:03:18  wenaus
+ * table load intfc change; include ref change
  *
+ * Revision 1.5  1999/02/18 15:41:42  ullrich
+ * Momemtum of daughter tracks added.
+ *
+ * Revision 1.4  1999/01/30 23:03:18  wenaus
  * table load intfc change; include ref change
  *
  * Revision 1.3  1999/01/27 13:04:50  ullrich
@@ -24,7 +27,7 @@
  * This is the right meaning according to P. Jones.
  *
  * Revision 1.2  1999/01/15 22:54:16  wenaus
-#include "StTables/dst_v0_vertex.h"
+ * version with constructors for table-based loading
  *
  **************************************************************************/
 #include "StEvent/StVertex.hh"

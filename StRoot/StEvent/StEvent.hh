@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.hh,v 1.2 1999/01/15 22:53:40 wenaus Exp $
+ * $Id: StEvent.hh,v 1.3 1999/01/30 23:03:11 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.hh,v $
- * Revision 1.2  1999/01/15 22:53:40  wenaus
- * version with constructors for table-based loading
+ * Revision 1.3  1999/01/30 23:03:11  wenaus
+ * table load intfc change; include ref change
+ *
+ * Revision 1.4  1999/02/23 21:20:06  ullrich
+ * Modified EMC hit collections.
  *
  * Revision 1.3  1999/01/30 23:03:11  wenaus
  * table load intfc change; include ref change
@@ -37,13 +40,13 @@ using namespace std;
 #include "StEvent/StSvtHitCollection.hh"
 #include "StEvent/StTpcHitCollection.hh"
 #include "StEvent/StEmcTowerHitCollection.hh"
-#include "StTables/dst_event_header.h"
-#include "StTables/dst_event_summary.h"
+#include "StEvent/StEmcPreShowerHitCollection.hh"
+#include "StEvent/StSmdPhiHitCollection.hh"
 #include "StEvent/StSmdEtaHitCollection.hh"
 #include "StEvent/StL0Trigger.hh"
 #include "StEvent/StTriggerDetectorCollection.hh"
 #if !defined(ST_NO_NAMESPACES)
-    StEvent(StRun*, dst_event_header_st*, dst_event_summary_st*);
+using namespace std;
 #endif
 
 class StEvent {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.hh,v 1.2 1999/01/15 22:53:46 wenaus Exp $
+ * $Id: StHit.hh,v 1.3 1999/01/30 23:03:13 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StHit.hh,v $
- * Revision 1.2  1999/01/15 22:53:46  wenaus
- * version with constructors for table-based loading
+ * Revision 1.3  1999/01/30 23:03:13  wenaus
+ * table load intfc change; include ref change
+ *
+ * Revision 1.3  1999/01/30 23:03:13  wenaus
+ * table load intfc change; include ref change
  *
  * Revision 1.2  1999/01/15 22:53:46  wenaus
  * version with constructors for table-based loading
@@ -22,7 +25,7 @@
  **************************************************************************/
 #ifndef StHit_hh
 #define StHit_hh
-#include "StTables/dst_point.h"
+
 #include <iostream.h>
 #include "StThreeVector.hh"
 #include "tables/dst_point.h"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRunSummary.hh,v 1.2 1999/01/15 22:53:51 wenaus Exp $
+ * $Id: StRunSummary.hh,v 1.3 1999/01/30 23:03:15 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StRunSummary.hh,v $
- * Revision 1.2  1999/01/15 22:53:51  wenaus
- * version with constructors for table-based loading
+ * Revision 1.3  1999/01/30 23:03:15  wenaus
+ * table load intfc change; include ref change
+ *
+ * Revision 1.3  1999/01/30 23:03:15  wenaus
+ * table load intfc change; include ref change
  *
  * Revision 1.2  1999/01/15 22:53:51  wenaus
  * version with constructors for table-based loading
@@ -23,7 +26,7 @@
 #ifndef StRunSummary_hh
 #define StRunSummary_hh
 using namespace std;
-#include "StTables/dst_run_summary.h"
+#include <string>
 #include <time.h>
 #include "StEvent/StTHDefs.hh"
 #include "tables/dst_run_summary.h"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRun.cc,v 1.2 1999/01/15 22:53:49 wenaus Exp $
+ * $Id: StRun.cc,v 1.3 1999/01/30 23:03:14 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,13 +13,16 @@
  ***************************************************************************
  *
  * $Log: StRun.cc,v $
+ * Revision 1.3  1999/01/30 23:03:14  wenaus
+ * table load intfc change; include ref change
+ *
  * Revision 1.2  1999/01/15 22:53:49  wenaus
  * version with constructors for table-based loading
  *
  **************************************************************************/
 #include "StEvent/StRun.hh"
 
-static const char rcsid[] = "$Id: StRun.cc,v 1.2 1999/01/15 22:53:49 wenaus Exp $";
+static const char rcsid[] = "$Id: StRun.cc,v 1.3 1999/01/30 23:03:14 wenaus Exp $";
 
 StRun::StRun()
 {
@@ -33,16 +36,16 @@ StRun::StRun()
     mSummary = 0;
 }
 
-StRun::StRun(dst_run_header_st* runHdr, dst_run_summary_st* runSum)
+StRun::StRun(dst_run_header_st& runHdr, dst_run_summary_st& runSum)
 {
-    mType = runHdr->event_type;
-    mId = runHdr->run_id;
-    mTriggerMask = runHdr->trig_mask;
-    mCenterOfMassEnergy = runHdr->sqrt_s;
-    mEastA = runHdr->east_a;
-    mEastZ = runHdr->east_z;
-    mWestA = runHdr->west_a;
-    mWestZ = runHdr->west_z;
+    mType = runHdr.event_type;
+    mId = runHdr.run_id;
+    mTriggerMask = runHdr.trig_mask;
+    mCenterOfMassEnergy = runHdr.sqrt_s;
+    mEastA = runHdr.east_a;
+    mEastZ = runHdr.east_z;
+    mWestA = runHdr.west_a;
+    mWestZ = runHdr.west_z;
     mSummary = 0;
 }
 

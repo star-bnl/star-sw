@@ -1,10 +1,12 @@
 /***************************************************************************
  *
- * $Id: StVertex.hh,v 1.3 1999/01/27 12:53:39 ullrich Exp $
+ * $Id: StVertex.hh,v 1.4 1999/01/30 23:03:18 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
  * History:
+ * 01/30/1999 T. Wenaus  Add index method to allow indexed access when in
+ *                       a list
  * 15/01/1999 T. Wenaus  Add table-based constructor
  ***************************************************************************
  *
@@ -13,8 +15,11 @@
  ***************************************************************************
  *
  * $Log: StVertex.hh,v $
- * Revision 1.3  1999/01/27 12:53:39  ullrich
- * Made setType() virtual. See StV0Vertex for reason.
+ * Revision 1.4  1999/01/30 23:03:18  wenaus
+ * table load intfc change; include ref change
+ *
+ * Revision 1.5  1999/02/17 11:04:52  ullrich
+ * Added numberOfDaughters() and daughter(i) methods.
  *
  * Revision 1.4  1999/01/30 23:03:18  wenaus
  * table load intfc change; include ref change
@@ -25,7 +30,7 @@
  * Revision 1.2  1999/01/15 22:54:22  wenaus
  * version with constructors for table-based loading
  *
-#include "StTables/dst_vertex.h"
+ **************************************************************************/
 #ifndef StVertex_hh
 #define StVertex_hh
 #include "StEvent/StEnumerations.hh"
@@ -45,6 +50,7 @@ public:
     int operator!=(const StVertex&) const;
     StVecPtrGlobalTrack&        daughters();
     unsigned int                numberOfDaughters();
+    StGlobalTrack*              daughter(unsigned int);
     const StGlobalTrack*        parent();
     const StThreeVector<float>& position();
     const StThreeVector<float>& positionError();
@@ -52,8 +58,10 @@ public:
     float                       chiSquared();         
     long                        index() {return mIndex;};
 
+    virtual void setType(StVertexType);           
     void setParent(StGlobalTrack* );         
     void setPosition(const StThreeVector<float>&);       
+    void setPositionError(const StThreeVector<float>&);  
     void setQualityBitmask(unsigned long); 
     void setChiSquared(float);     
     void setIndex(long ii) {mIndex = ii;};
