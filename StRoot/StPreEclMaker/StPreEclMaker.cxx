@@ -1,7 +1,10 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.24 2003/09/02 17:58:50 perev Exp $
+// $Id: StPreEclMaker.cxx,v 1.25 2003/10/08 15:42:15 suaide Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.25  2003/10/08 15:42:15  suaide
+// Changes to allow for clustering using hits with calibrationType<128
+//
 // Revision 1.24  2003/09/02 17:58:50  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -295,7 +298,7 @@ Int_t StPreEclMaker::Make()
       }
     }
 
-    if(ecmpreecl == 0) return kStWarn;
+    if(ecmpreecl == 0) return kStOk;
 
   }
   
@@ -325,7 +328,9 @@ Int_t StPreEclMaker::Make()
         cc->setCheckClusters(kCheckClustersOkConf[i]);
 //      cc->printConf();
   	    if(cc->findClusters()!= kStOK) if(mPrint) cout<<"***** ERR: StEmcClusterCollection: No hits\n";
+        if(mPrint) cout<<"Filling histograms\n";
         MakeHistograms(i,cc); // Fill QA histgrams
+        if(mPrint) cout<<"Filling StEvent\n";
         fillStEvent(i,cc);
       }      
       if(Debug()<2) delete cc;
@@ -334,6 +339,7 @@ Int_t StPreEclMaker::Make()
   
   //AddData(new St_ObjectSet("PreEclEmcCollection",ecmpreecl));  // comments 14-oct-2001
   //cout <<"***** New EmcCollection on local .data\n";
+  if(mPrint) cout<<"Exiting StPreEclMaker::Make()\n";
     
   return kStOK;
 }
@@ -506,7 +512,7 @@ StPreEclMaker::SetClusterConditions(char *cdet,Int_t sizeMax,
 void 
 StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.24 2003/09/02 17:58:50 perev Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.25 2003/10/08 15:42:15 suaide Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
