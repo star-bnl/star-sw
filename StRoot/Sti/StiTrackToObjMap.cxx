@@ -63,6 +63,7 @@ void StiTrackToObjMap::analyze(Filter<StiTrack> * filter, StiHit * vertex)
     }
   double analyzed = 0;
   double accepted = 0;
+
   double acceptedPrimary = 0;
   double matched1  = 0;
   double matched2  = 0;
@@ -70,6 +71,7 @@ void StiTrackToObjMap::analyze(Filter<StiTrack> * filter, StiHit * vertex)
   double matchedPrimary1  = 0;
   double matchedPrimary2  = 0;
   double matchedPrimary3  = 0;
+
   for(StiTrackToObjMap::iterator iter=begin();iter!=end(); ++iter)
     {
       //cout << "StiTrackToObjMap::analyze() -I- loop "<<endl;          
@@ -90,6 +92,7 @@ void StiTrackToObjMap::analyze(Filter<StiTrack> * filter, StiHit * vertex)
 	  StiTrackToIntMap * trackToIntMap = iter->second;
 	  if (trackToIntMap && nPtsFirst>0)
 	    {
+
 	      //cout << "Number of cnadidates:"<<trackToIntMap->getSize()<<endl;
 	      nCommon = trackToIntMap->getBestTrackHitCount();
 	      ratio = nCommon/nPtsFirst;
@@ -102,10 +105,12 @@ void StiTrackToObjMap::analyze(Filter<StiTrack> * filter, StiHit * vertex)
 		  if (nCommon>5 && ratio>0.5) ++matchedPrimary2;
 		  if (nCommon>5 && ratio>0.75) ++matchedPrimary3;
 		}
+
 	    }
 	  else cout << " BUG!" <<endl;
 	}
     }  
+
     if (accepted>0)
       cout << "Analysis Results:" << endl
 	   << "   analyzed: " << analyzed << endl
@@ -126,4 +131,5 @@ void StiTrackToObjMap::analyze(Filter<StiTrack> * filter, StiHit * vertex)
     else
       cout << "Primaries Results"<<endl
 	   << "  accepted primaries" << acceptedPrimary << endl;
+
 }
