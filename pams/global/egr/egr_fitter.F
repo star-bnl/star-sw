@@ -91,8 +91,6 @@ C ---------------------------------------------------------------------
       DATA imsg,imsgw,imsg1,imsg2,imsg3 /5*0/
       DATA imsg4,imsg5,imsg6,imsg7,imsg8 /5*0/
 
-C--->>>>>>>>>> 
-      REAL gseed, gtanl, ginvpt, glength
 
 C ---------------------------------------------------------------------
 
@@ -151,13 +149,13 @@ C  hit information of all the hits to be used in the fitting procedure.
 C  First, it will be filled with the outermost hits, or the TPC hits.
 C  Abort if the TPC is needed but there are no TPC tracks
 
-         if (tptrack_h.nok.eq.0 .or. tptrack_h.nok.gt.mxtrack) then
-            call message('EGR_REFITTER-W: None or too many TPC 
+         if (tptrack_h.nok.gt.mxtrack) then
+            call message('EGR_REFITTER-W: Too many TPC 
      +           track - aborted.',1,imsgw)
             egr_fitter=STAFCV_BAD
            return
          endif
-         
+ 
          do i=1,tptrack_h.nok ! Reset number of hits counter
             gtrk(i).nhit = 0
             gtrk(i).ntpc = 0
@@ -643,22 +641,11 @@ C     Adjust for ssd later
                     globtrk(iglob).x_last(1) = svt_spt(lasthit).x(1)
                     globtrk(iglob).x_last(2) = svt_spt(lasthit).x(2)
                     globtrk(iglob).x_last(3) = svt_spt(lasthit).x(3)
-C----->>>>  new calculation of .length   S.Margetis
-                  gseed = sqrt((globtrk(iglob).x_last(1) 
-     +                - globtrk(iglob).x_first(1))**2 +
-     +                 (globtrk(iglob).x_last(2) 
-     +                - globtrk(iglob).x_first(2))**2)
 
-                  gtanl = globtrk(iglob).tanl
-                  ginvpt= globtrk(iglob).invpt
-            call egr_trk_length(gseed,gtanl,ginvpt,bfield(3),glength)
-                  globtrk(iglob).length=glength
-C---<<<<<<<
-                  if (globtrk(iglob).length.gt.99999.9) then
-                     globtrk(iglob).length=99999.9
-                  endif
+                    globtrk(iglob).length=99999.9
+                    
                     globtrk(iglob).impact = 0
-CSM                    globtrk(iglob).id_start_vertex = 0
+C     SM                    globtrk(iglob).id_start_vertex = 0
                     globtrk(iglob).curvature = abs(C_D_CURVATURE*bfield(3)*
      +                   globtrk(iglob).invpt)
                     globtrk(iglob).method = 2**kHelix2StepId+2**7
