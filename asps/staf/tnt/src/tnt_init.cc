@@ -27,7 +27,9 @@ tntFactory *tnt;
 */
 int tnt_init()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("TNT:Initializing. ");
+#endif
 
 /*- Define the TNT KUIP commands. -*/
    tnt_def_();
@@ -48,12 +50,16 @@ int tnt_init()
 */
 int tnt_start()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("TNT:Starting. ");
+#endif
 
 /*- Create the TNT Factory. -*/
    tnt = new tntFactory("tnt");
 
+#ifndef QUIET_ASP
    EML_MESSAGE("TNT:Started. ");
+#endif
    return TRUE;
 }
 
@@ -67,7 +73,9 @@ int tnt_start()
 */
 int tnt_stop()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("TNT:Stopping. ");
+#endif
 
 /*- Delete the TNT Factory.
    tnt->lock(FALSE);
