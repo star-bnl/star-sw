@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtXDFReader.h,v 1.2 2000/02/18 22:01:55 laue Exp $
+ * $Id: StHbtXDFReader.h,v 1.3 2000/02/26 19:06:12 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -93,8 +93,8 @@ private:
   pdgIdList* mAcceptedMothers;   //!
   pdgIdList* mAcceptedDaughters; //!
 
-  const char* mDataSetName;
-  const char* mParticleTableDirectory;
+  const char* mDataSetName; //!
+  const char* mParticleTableDirectory; //!
   
 
  protected:

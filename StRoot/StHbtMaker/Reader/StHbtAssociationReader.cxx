@@ -19,7 +19,7 @@
 #include "StParticleTypes.hh"
 #include "StTpcDedxPidAlgorithm.h"
 
-#include <typeinfo>
+//#include <typeinfo>
 #include <cmath>
 
 #include "SystemOfUnits.h"   // has "tesla" in it

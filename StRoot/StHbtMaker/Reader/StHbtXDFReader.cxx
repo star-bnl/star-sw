@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtXDFReader.cxx,v 1.1 2000/02/13 17:19:27 laue Exp $
+ * $Id: StHbtXDFReader.cxx,v 1.2 2000/02/26 19:06:12 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -19,7 +19,6 @@
 #include "StParticleTable.hh"
 #include "StParticleTypes.hh"
 
-#include <typeinfo>
 #include <math.h>
 #include <list>
 
