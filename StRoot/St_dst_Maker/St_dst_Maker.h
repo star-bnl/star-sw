@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.h,v 1.9 1999/07/15 13:57:56 perev Exp $
+// $Id: St_dst_Maker.h,v 1.10 1999/11/15 17:44:04 lbarnby Exp $
 // $Log: St_dst_Maker.h,v $
+// Revision 1.10  1999/11/15 17:44:04  lbarnby
+// Add ctb,emc,l3,rich monitor soft tables (empty for now)
+//
 // Revision 1.9  1999/07/15 13:57:56  perev
 // cleanup
 //
@@ -73,11 +76,14 @@ class St_dst_Maker : public StMaker {
    virtual Int_t  Make();
    virtual Int_t  Filler();
    virtual void   SetSelection(const Char_t **sel ){fSelect=sel;};
-   
+
+
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_dst_Maker.h,v 1.9 1999/07/15 13:57:56 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_dst_Maker.h,v 1.10 1999/11/15 17:44:04 lbarnby Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
 
    ClassDef(St_dst_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
 #endif
+
