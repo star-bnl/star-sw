@@ -112,7 +112,6 @@ show
   // finally after so many lines we arrive at the good stuff
 
   ttm = new  EEmcTTMMaker ("TTM",muDstMk,eemcDbMk);
-  ttm->SetFileName(outFile);
   ttm->Summary(cout);    // 
 
   StMuDebug::setLevel(0);
