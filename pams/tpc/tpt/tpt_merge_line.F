@@ -62,7 +62,7 @@ C
       LOGICAL more
 
 
-      DATA xalimit, yalimit, zalimit, psilimit, tanllimit /1.5, 1.5, 1.5, 4.0, .2/
+      DATA xalimit,yalimit,zalimit,psilimit,tanllimit/1.5,1.5,1.5,0.5,.01/
 
 C loop over all the tracks and calculate parameters at the closest
 C approach to the origin
@@ -103,9 +103,11 @@ c     loop over and try to merge
               if(track(ltr2).flag.gt.0.and.
      >           abs(merge(i).ya-merge(j).ya).lt.yalimit.and.
      >           abs(merge(i).za-merge(j).za).lt.zalimit.and.
-     >           (abs(track(ltr1).psi-track(ltr2).psi).lt.psilimit.or.
-     >           abs(abs(track(ltr1).psi-track(ltr2).psi)-180.0).lt.psilimit).and.
-     >           abs(abs(track(ltr1).tanl)-abs(track(ltr2).tanl)).lt.tanllimit) then
+     >           ((abs(track(ltr1).psi-track(ltr2).psi).lt.psilimit.and.
+     >           abs(track(ltr1).tanl-track(ltr2).tanl).lt.tanllimit)
+     >           .or.
+     >           (abs(abs(track(ltr1).psi-track(ltr2).psi)-180.0).lt.psilimit.and.
+     >           abs(track(ltr1).tanl+track(ltr2).tanl).lt.tanllimit))) then
 c                we've got a match
                  more =.false.
 c                oreder them so that they span in the direction where they span most
@@ -162,4 +164,5 @@ c                get rid of the second track
          enddo
          endif
       enddo
+      tpt_merge_line= STAFCV_OK
       end
