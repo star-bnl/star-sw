@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.cxx,v 2.5 2000/02/10 16:32:19 ullrich Exp $
+ * $Id: StVertex.cxx,v 2.6 2000/03/08 14:29:54 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVertex.cxx,v $
- * Revision 2.5  2000/02/10 16:32:19  ullrich
- * flag changed from unsigned to signed long
+ * Revision 2.6  2000/03/08 14:29:54  ullrich
+ * New method probChiSquared() added.
  *
  * Revision 2.5  2000/02/10 16:32:19  ullrich
  * flag changed from unsigned to signed long
@@ -43,13 +43,14 @@ using std::copy;
 
 ClassImp(StVertex)
 
-static const char rcsid[] = "$Id: StVertex.cxx,v 2.5 2000/02/10 16:32:19 ullrich Exp $";
+static const char rcsid[] = "$Id: StVertex.cxx,v 2.6 2000/03/08 14:29:54 ullrich Exp $";
 
 StVertex::StVertex()
 {
     mType = kUndefinedVtxId;
     mFlag = 0;
-    mChiSquared = 0;
+    mChiSquared     = 0;
+    mProbChiSquared = 0;
     mParent = 0;
     fill_n(mCovariantMatrix, 6, 0);
 }
@@ -59,7 +60,8 @@ StVertex::StVertex(const dst_vertex_st& v)
     mType = kUndefinedVtxId;
     mFlag = v.iflag;
     copy(v.covar+0, v.covar+6, mCovariantMatrix);
-    mChiSquared = v.chisq[0];
+    mChiSquared     = v.chisq[0];
+    mProbChiSquared = v.chisq[1];
     mParent = 0;
     mPosition.setX(v.x);
     mPosition.setY(v.y);
@@ -88,6 +90,9 @@ StVertex::flag() const { return mFlag; }
 
 Float_t
 StVertex::chiSquared() const { return mChiSquared; }
+
+Float_t
+StVertex::probChiSquared() const { return mProbChiSquared; }
 
 StMatrixF
 StVertex::covariantMatrix() const
@@ -122,6 +127,9 @@ StVertex::setCovariantMatrix(Float_t val[6]) { copy(val, val+6, mCovariantMatrix
 
 void
 StVertex::setChiSquared(Float_t val) { mChiSquared = val; }
+
+void
+StVertex::setProbChiSquared(Float_t val) { mProbChiSquared = val; }
 
 void
 StVertex::setParent(StTrack* val) { mParent = val; }
