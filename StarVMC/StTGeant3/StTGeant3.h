@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: StTGeant3.h,v 1.2 2004/07/22 18:09:20 perev Exp $ */
+/* $Id: StTGeant3.h,v 1.3 2005/03/09 18:35:35 perev Exp $ */
 
 //////////////////////////////////////////////// 
 //  C++ interface to Geant3 basic routines    // 
@@ -22,6 +22,7 @@
 #include "TMCProcess.h" 
 #include "TMCParticleType.h"
 #include "TGeoMCGeometry.h" 
+#include "StMCPath.h" 
 
 //______________________________________________________________
 //
@@ -546,7 +547,16 @@ public:
   StTGeant3(); 
   StTGeant3(const char *title, Int_t isrg=1,Int_t nwgeant=0); 
   virtual ~StTGeant3();
+  
   static Int_t Mode()  {return fgMode;}
+
+   virtual Int_t NofVolDaughters(const char*) const {return 0;}
+   virtual const char* VolDaughterName(const char*, int) const {return 0;}
+   virtual Int_t VolDaughterCopyNo(const char*, int) const{return 0;}
+   virtual void StopRun(){}
+   virtual void ForceDecayTime(float){}
+   virtual const char* CurrentVolPath(){return 0;}
+   virtual Bool_t SecondariesAreOrdered() const {return 0;}
   
   virtual void LoadAddress(); 
   static  void InitBridge();
@@ -564,6 +574,10 @@ public:
   Int_t NextVolUp(Text_t *name, Int_t &copy);
   Int_t CurrentVolID(Int_t &copy) const;
   Int_t CurrentVolOffID(Int_t off, Int_t &copy) const;
+  Int_t CurrentVolOffID(Int_t off, Int_t &copy, Int_t &idx, Int_t &ndx) const;
+  ULong64_t CurrentPathID() const;
+  StMCPath  CurrentPath()   const;
+  Int_t SetCurrentPath(ULong64_t P);
   const char* CurrentVolName() const;
   const char *CurrentVolOffName(Int_t off) const;
   Int_t VolId(const Text_t *name) const;
@@ -603,13 +617,14 @@ public:
   void  SetMaxStep(Double_t maxstep);
   void  SetMaxNStep(Int_t maxnstp);
   Int_t GetMaxNStep() const;
-  void SetCut(const char* cutName, Double_t cutValue);
-  void SetProcess(const char* flagName, Int_t flagValue);
+  Bool_t SetCut(const char* cutName, Double_t cutValue);
+  Bool_t SetProcess(const char* flagName, Int_t flagValue);
+  Int_t GetLevel() const;
   const char *GetPath();
   const char *GetNodeName();
-  void DefineParticle(Int_t pdg, const char* name, TMCParticleType type,
-                   Double_t mass, Double_t charge, Double_t lifetime);
-  void DefineIon(const char* name, Int_t Z, Int_t A, Int_t Q, 
+  Bool_t DefineParticle(Int_t pdg, const char* name, TMCParticleType type,
+                        Double_t mass, Double_t charge, Double_t lifetime);
+  Bool_t DefineIon(const char* name, Int_t Z, Int_t A, Int_t Q, 
                    Double_t excEnergy, Double_t mass);
   virtual TString   ParticleName(Int_t pdg) const;	  
   virtual Double_t  ParticleMass(Int_t pdg) const;	  
@@ -894,7 +909,7 @@ static void Bgrndm (Float_t *r, const Int_t &n);
   virtual void BuildPhysics();
   virtual void Init();
   virtual void ProcessEvent();
-  virtual void ProcessRun(Int_t nevent);
+  Bool_t  ProcessRun(Int_t nevent);
   virtual void AddParticlesToPdgDataBase() const;
 
   // 
@@ -1004,7 +1019,7 @@ private:
   void  G3Gsposp(const char *name, Int_t nr, const char *mother,  
                     Double_t x, Double_t y, Double_t z, Int_t irot, const char *konly, Float_t *upar, Int_t np); 
 
-  ClassDef(StTGeant3,1)  //C++ interface to Geant basic routines 
+  ClassDef(StTGeant3,0)  //C++ interface to Geant basic routines 
 }; 
 
 #endif //ROOT_StTGeant3

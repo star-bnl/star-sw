@@ -1,4 +1,4 @@
-// $Id: StMCRootManager.cxx,v 1.1.1.1 2004/07/17 20:02:55 perev Exp $
+// $Id: StMCRootManager.cxx,v 1.2 2005/03/09 18:35:34 perev Exp $
 //
 // Geant4 novice ExampleN01 adapted to Virtual Monte Carlo 
 //
@@ -96,12 +96,13 @@ void  StMCRootManager::Register(const char* name,  void* clonesAddress)
 // Creates a branch of the given name and associates it with
 // the given address.
 // ---
-
+#if 0
   if (!fTree->GetBranch(name)) 
     fTree->Branch(name, clonesAddress, 32000, 99);
   else  
     fTree->GetBranch(name)->SetAddress(clonesAddress);
-}
+#endif
+  }
 
 //_____________________________________________________________________________
 void  StMCRootManager::Register(const char* name, const char* className, 
@@ -110,11 +111,12 @@ void  StMCRootManager::Register(const char* name, const char* className,
 // Creates a branch of the given name and associates it with
 // the given address.
 // ---
-
+#if 0
   if (!fTree->GetBranch(name)) 
     fTree->Branch(name, className, objAddress, 32000, 99);
   else  
     fTree->GetBranch(name)->SetAddress(objAddress);
+#endif
 }
 
 //_____________________________________________________________________________

@@ -27,14 +27,14 @@
  }
 */
 
-#include "Z.h"
+#include "zebra/Z.h"
 #include "TString.h"
 
 //  	Codes of G3 shapes
 typedef enum {BOX=1,TRD1,TRD2,TRAP,TUBE,TUBS,CONE,CONS,SPHE,PARA,
 		PGON,PCON,ELTU,HYPE,GTRA=28,CTUB} shapes_e;
 //  	Names of G3 shapes
-static const char *NAPES[]= {0,
+const char *NAPES[]= {0,
 "BOX ","TRD1","TRD2","TRAP","TUBE","TUBS","CONE","CONS","SPHE","PARA",
 "PGON","PCON","ELTU","HYPE","____","____","____","____","____","____"
 "____","____","____","____","____","____","____","GTRA","CTUB","____"};
@@ -84,13 +84,23 @@ public:
   float NPAR;
   float NATT;
   float PARS[99];
-float  *GetPars()	{return (NPAR)? PARS:0;}  
-float  *GetAtts()	{return (NATT)? PARS+int(NPAR):0;}  
-JDiv_t *GetJDiv()	{return (NIN<0)? (JDiv_t*)Link(-1):0;} 
-JPos_t *GetJPos(int in) {return (NIN<0 || in>NIN)? 0:(JPos_t*)Link(in);}
+float   *GetPars()	{return (NPAR)? PARS:0;}  
+float   *GetAtts()	{return (NATT)? PARS+int(NPAR):0;}  
+JDiv_t  *GetJDiv()	{return (NIN<0)? (JDiv_t*)Link(-1):0;} 
+JPos_t  *GetJPos(int in) {return (NIN<0 || in>NIN)? 0:(JPos_t*)Link(-in);}
+int      SubVoluID(int idx,int &copy);
 TString GetName(){return TString((char*)&GetID(),4);}
 };
-
+//________________________________________________________________________________
+class JFan_t : public Z_t {
+public:
+Z_t *GetObj(int idx) const  {return Link(-idx);}
+int  GetIdx (const char *name) 
+         { int hame=0; memcpy(&hame,name,4); return GetIdx(hame);}		
+int  GetIdx (int hame) const
+         { int n=GetND(); for (int i=1;i<=n;i++){if (iDat[i]==hame) return i;};return 0;}
+TString GetNam(int idx){return TString((char*)&iDat[idx],4);}
+};		
 //________________________________________________________________________________
 class JDiv_t : public Z_t {
 public:
@@ -112,4 +122,21 @@ public:
   float NPAR;
   float PARS[99];
 };
+// inlines
+inline int JVolu_t::SubVoluID(int idx,int &copy)
+{
+   copy = 0;
+   if (NIN==0) return 0;
+   if (NIN>0) {//Normal case
+     JPos_t *pos = (JPos_t*)Link(-idx);
+     if (!pos) return 0;
+     copy = (int)pos->NR;
+     return (int)pos->IVO;
+   } else { //division case
+     JDiv_t *div = (JDiv_t*)Link(-1);
+     if (!div) return 0;
+     copy = idx;
+     return (int)div->IVO;
+   }
+}
 #endif //G3Z_H

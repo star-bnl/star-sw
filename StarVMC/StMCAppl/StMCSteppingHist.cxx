@@ -1,4 +1,4 @@
-// $Id: StMCSteppingHist.cxx,v 1.1.1.1 2004/07/17 20:02:55 perev Exp $
+// $Id: StMCSteppingHist.cxx,v 1.2 2005/03/09 18:35:34 perev Exp $
 //
 //
 // Class StMCSteppingHist
@@ -19,6 +19,7 @@
 #include "TGeoBBox.h"
 #include "TGeoTube.h"
 
+#include "StTGeant3.h"
 StMCSteppingHist *StMCSteppingHist::fThis=0;
 int Kount[10]={0,0,0,0,0,0,0,0,0,0};
 
@@ -96,6 +97,8 @@ int StMCSteppingHist::Fun()
      Error("Case","Unexpected case %x == %s",fCase,fCasName.Data());
      Assert(0);
   }
+  ULong_t u = ((StTGeant3*)fMC)->CurrentPathID();
+  //printf( " U = %lu\n", u);
   return 0;
 }		
 //_____________________________________________________________________________
