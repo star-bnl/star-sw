@@ -31,9 +31,6 @@ public:
     //Singleton Access
     static StiDetectorContainer* instance();
     static void kill();
-
-    //Temporary, MLM 7/30/01
-    data_node* root() const {return mroot;}
     
     //Build functions
     virtual void buildDetectors(const char* buildDirectory, data_node_factory* nodefactory,
@@ -41,7 +38,6 @@ public:
 
     //Action
     void reset(); //full internal reset of interator structure
-//    void clearAndDestroy();
     
     //Navigation
 
@@ -66,6 +62,11 @@ public:
     
     //Set iterators to the position nearest this guy
     void setToDetector(double position, double angle);
+
+    //Starting points for outside-in tracking
+    void nextStartPoint(); //++    
+    //void previousStartPoint(); //---   
+    bool hasMoreStartPoints() const; //Done yet?
     
     //Utilities
     void print() const;
@@ -79,6 +80,14 @@ private:
     //iterators
     data_node_vec::const_iterator mradial_it;
     data_node_vec::const_iterator mphi_it;
+
+private:
+    void findStartPoints();
+    void setToStartPoint(data_node* node);
+    data_node_vec mstartvec;  //vector of starting points for outside in tracking
+    data_node_vec::const_iterator mstart_it;
+
+private:
     
     //Singleton Management
     StiDetectorContainer();

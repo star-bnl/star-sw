@@ -123,4 +123,13 @@ inline T gFindClosestOrderKey(T begin, T end, double findThis)
     return where;
 }
 
+template <class T>
+struct SameData
+{
+    T* thedata;
+    bool operator()(const StiCompositeTreeNode<T>* rhs) {
+	return (thedata == rhs->getData());
+    }
+};
+
 #endif
