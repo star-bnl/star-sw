@@ -1,8 +1,5 @@
-// $Id: StBFChain.cxx,v 1.19 1999/11/02 18:50:21 didenko Exp $
+// $Id: StBFChain.cxx,v 1.16 1999/10/14 14:43:25 fisyak Exp $
 // $Log: StBFChain.cxx,v $
-// Revision 1.19  1999/11/02 18:50:21  didenko
-// changes reference from St_fcl_Maker to StFtpcClusterMaker
-//
 // Revision 1.16  1999/10/14 14:43:25  fisyak
 // Ad casts
 //
@@ -159,7 +156,7 @@ Char_t *ChainComments[] = {
   "St_stk_Maker   \tin Chain",
   "FTPC           \tin Chain (St_[fcl+fpt]_Maker)",
   "St_fss_Maker   \tin Chain",
-  "StFtpcClusterMaker   \tin Chain",
+  "St_fcl_Maker   \tin Chain",
   "St_fpt_Maker   \tin Chain",
   "St_ems_Maker   \tin Chain",
   "St_emc_Maker   \tin Chain",
@@ -314,7 +311,7 @@ Int_t StBFChain::Load()
   if (GetOption(kFTPC)) {
     gSystem->Load("St_ftpc");
     if (GetOption(kFSS)) gSystem->Load("St_fss_Maker");
-    if (GetOption(kFCL)) gSystem->Load("StFtpcClusterMaker");
+    if (GetOption(kFCL)) gSystem->Load("St_fcl_Maker");
     if (GetOption(kFPT)) gSystem->Load("St_fpt_Maker");
   }
   if (GetOption(kEMS) || GetOption(kEMC)) {
@@ -471,7 +468,7 @@ Int_t StBFChain::Load()
   // L O C A L    R E C O N S T R U C T I O
   if (GetOption(kTCL)) New ("St_tcl_Maker","tpc_hits");
   if (GetOption(kSRS)) New("St_srs_Maker","svt_hits");
-  if (GetOption(kFCL)) New("StFtpcClusterMaker","ftpc_hits");  
+  if (GetOption(kFCL)) New("St_fcl_Maker","ftpc_hits");  
   // T R A C K I N G
   if (GetOption(kTPT)) New("St_tpt_Maker","tpc_tracks");
   if (GetOption(kSTK)) New("St_stk_Maker","svt_tracks");

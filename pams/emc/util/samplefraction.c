@@ -8,11 +8,11 @@
 #include "emc_def.h"
 #include "samplefrac_def.h"
 
-float samplefraction_(int *det, float *eta)
+float samplefraction_(int det, float eta)
 {
   float x;
-  x = fabs(*eta);
-  switch(*det)
+  x = fabs(eta);
+  switch(det)
   {
   case BEMC:
       return P0BEMC  + P1BEMC*x  + P2BEMC*x*x;
@@ -25,7 +25,7 @@ float samplefraction_(int *det, float *eta)
   case EEMC: case EPRS: case ESMDE: case ESMDP:
   default:
     /*    puts("*** samplefraction: detector number is invalid"); */
-    printf("*** samplefraction: detector number is invalid = %d \n",*det);
+    printf("*** samplefraction: detector number is invalid = %d \n",det);
     return 0.0;
   }
 }

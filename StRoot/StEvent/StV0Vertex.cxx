@@ -1,8 +1,11 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.cxx,v 2.1 1999/10/28 22:28:01 ullrich Exp $
+ * $Id: StV0Vertex.cxx,v 1.4 1999/04/28 22:27:39 fisyak Exp $
  *
- * Author: Thomas Ullrich, Sep 1999
+ * Author: Thomas Ullrich, Jan 1999
+ *
+ * History:
+ * 15/01/1999 T. Wenaus  Add table-based constructor
  ***************************************************************************
  *
  * Description:
@@ -10,153 +13,99 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.cxx,v $
- * Revision 2.1  1999/10/28 22:28:01  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 1.4  1999/04/28 22:27:39  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.4  1999/04/28 22:27:39  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.7  1999/04/13 23:27:21  genevb
+ * Slightly refined vertex code, updated V0, Xi vertex documentation
+ *
+ * Revision 1.6  1999/04/09 19:34:03  genevb
+ * Added vertex daughter functionality
+ *
+ * Revision 1.5  1999/02/21 20:32:48  genevb
+ * Improve StV0Vertex code
+ *
+ * Revision 1.4  1999/02/18 15:42:09  ullrich
+ * Momemta of daughter tracks added.
+ *
+ * Revision 1.3  1999/01/27 13:05:05  ullrich
+ * Renamed data member and access functions: xxxToV0 into xxxToPrimaryVertex.
+ * This is the right meaning according to P. Jones.
+ *
+ * Revision 1.2  1999/01/15 22:54:15  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 2.1  1999/10/28 22:28:01  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+#include <iostream.h>
  *
- * Revision 2.0  1999/10/12 18:43:23  ullrich
- * Completely Revised for New Version
- *
- **************************************************************************/
 #include <algorithm>
-#include "StV0Vertex.h"
-#include "StTrack.h"
-#include "StTrackGeometry.h"
-#include "tables/St_dst_vertex_Table.h"
-#include "tables/St_dst_v0_vertex_Table.h"
-
+static const Char_t rcsid[] = "$Id: StV0Vertex.cxx,v 1.4 1999/04/28 22:27:39 fisyak Exp $";
+#include "tables/dst_v0_vertex.h"
 ClassImp(StV0Vertex)
+#include "tables/St_dst_vertex_Table.h"
+StV0Vertex::StV0Vertex() : 
+ StVertex()
 
-static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.1 1999/10/28 22:28:01 ullrich Exp $";
-
-StV0Vertex::StV0Vertex()
-{
+    mType = V0;			// always
+    mDcaDaughtersToPrimaryVertex[negativeTrack] = 0;
+    mDcaDaughtersToPrimaryVertex[positiveTrack] = 0;
+    mMomentumOfDaughters[negativeTrack] = StThreeVectorF();
+    mMomentumOfDaughters[positiveTrack] = StThreeVectorF();
+    mDcaDaughters = 0;
     mType = kV0VtxId;
     mDaughters.resize(2);
     mDaughters[negative] = 0;
-    mDaughters[positive] = 0;
+StV0Vertex::StV0Vertex(dst_v0_vertex_st* v0vtx, dst_vertex_st* vtx) :
+ StVertex(vtx)
     fill_n(mDcaDaughtersToPrimaryVertex, 2, 0);
-    mDcaDaughters             = 0;
-    mDcaParentToPrimaryVertex = 0;
-}
-
-StV0Vertex::StV0Vertex(const dst_vertex_st& vtx, const dst_v0_vertex_st& v0vtx) : StVertex(vtx)
-{
-    mType = kV0VtxId;
-    mDaughters.resize(2);
-    mDaughters[negative] = 0;
-    mDaughters[positive] = 0;
-    mDcaDaughtersToPrimaryVertex[negative] = v0vtx.dcan;
-    mDcaDaughtersToPrimaryVertex[positive] = v0vtx.dcap;
-    mMomentumOfDaughters[negative].setX(v0vtx.neg_px);
-    mMomentumOfDaughters[negative].setY(v0vtx.neg_py);
+    mType = V0;			// always
+    mDcaDaughtersToPrimaryVertex[negativeTrack] = v0vtx->dcan;
+    mDcaDaughtersToPrimaryVertex[positiveTrack] = v0vtx->dcap;
+    mMomentumOfDaughters[negativeTrack].setX(v0vtx->neg_px);
+    mMomentumOfDaughters[negativeTrack].setY(v0vtx->neg_py);
+    mMomentumOfDaughters[negativeTrack].setZ(v0vtx->neg_pz);
+    mMomentumOfDaughters[positiveTrack].setX(v0vtx->pos_px);
+    mMomentumOfDaughters[positiveTrack].setY(v0vtx->pos_py);
+    mMomentumOfDaughters[positiveTrack].setZ(v0vtx->pos_pz);
+    mDcaDaughters = v0vtx->dcapn;
+    mDcaParentToPrimaryVertex = v0vtx->dcav0;
     mMomentumOfDaughters[negative].setZ(v0vtx.neg_pz);
     mMomentumOfDaughters[positive].setX(v0vtx.pos_px);
     mMomentumOfDaughters[positive].setY(v0vtx.pos_py);
     mMomentumOfDaughters[positive].setZ(v0vtx.pos_pz);
-    mDcaDaughters = v0vtx.dcapn;
-    mDcaParentToPrimaryVertex = v0vtx.dcav0;
-}
-
-StV0Vertex::~StV0Vertex() { /* noop */ }
-
-StObject*
-StV0Vertex::clone() { return new StV0Vertex(*this); }
-
-StVertexId
-StV0Vertex::type() const { return kV0VtxId; }
-
-UInt_t
-StV0Vertex::numberOfDaughters() const { return 2; }
-
-StTrack*
-StV0Vertex::daughter(UInt_t i)
-{
-    return i < 2 ?  mDaughters[i] : 0;
-}
-
-const StTrack*
-StV0Vertex::daughter(UInt_t i) const
-{
-    return i < 2 ?  mDaughters[i] : 0;
-}
-
-StPtrVecTrack
-StV0Vertex::daughters(StTrackFilter& filter)
-{
-    StPtrVecTrack vec;
-    for (int i=0; i<2; i++)
+StGlobalTrack* StV0Vertex::daughter(StTrackSign sign, Double_t B)
         if (filter(mDaughters[i])) vec.push_back(mDaughters[i]);
-    return vec;
-}
-
-void
-StV0Vertex::addDaughter(StTrack* track)
+    Int_t i = 0;
+    Int_t agree = 1;
+    if (sign == negativeTrack) agree = -1;
+    while (i < numberOfDaughters()) {
+      StGlobalTrack* ithDaughter = StVertex::daughter(i++);
+      // Check for charge and field sign agreement
+      if ( (agree * ithDaughter->helix().charge(B)) > 0) return ithDaughter;
 {
+    return 0;
     if (track) {
         if (track->geometry()->charge() > 0)
-            mDaughters[positive] = track;
-        else
+void StV0Vertex::setDcaDaughterToPrimaryVertex(StTrackSign sign, Float_t val)
             mDaughters[negative] = track;
-    }
-}
-
-void
-StV0Vertex::removeDaughter(StTrack* t)
-{
-    if (t == mDaughters[positive]) mDaughters[positive] = 0;
-    if (t == mDaughters[negative]) mDaughters[negative] = 0;
-}
-
-StTrack*
-StV0Vertex::daughter(StChargeSign sign)
-{
-    return mDaughters[sign];
-}
-
-const StTrack*
-StV0Vertex::daughter(StChargeSign sign) const
-{
-    return mDaughters[sign];
-}
-
-Float_t
-StV0Vertex::dcaDaughterToPrimaryVertex(StChargeSign sign) const
-{
-    return mDcaDaughtersToPrimaryVertex[sign];
-}
-
-const StThreeVectorF&
-StV0Vertex::momentumOfDaughter(StChargeSign sign) const
-{
-    return mMomentumOfDaughters[sign];
-}
-
-StThreeVectorF
-StV0Vertex::momentum() const
-{
-    return (mMomentumOfDaughters[negative] +
-            mMomentumOfDaughters[positive]);
-}
-
-Float_t
-StV0Vertex::dcaDaughters() const { return mDcaDaughters; }
-
-Float_t
-StV0Vertex::dcaParentToPrimaryVertex() const { return mDcaParentToPrimaryVertex; }
-
-void
-StV0Vertex::setDcaDaughterToPrimaryVertex(StChargeSign sign, Float_t val)
-{
     mDcaDaughtersToPrimaryVertex[sign] = val;
 }
 
-void
-StV0Vertex::setMomentumOfDaughter(StChargeSign sign, const StThreeVectorF& v)
+void StV0Vertex::setMomentumOfDaughter(StTrackSign sign, const StThreeVectorF& v)
 {
     mMomentumOfDaughters[sign] = v;
+
+StThreeVectorF
+void StV0Vertex::setDcaDaughters(Float_t val) { mDcaDaughters = val; }
+    return (mMomentumOfDaughters[negative] +
+void StV0Vertex::setDcaParentToPrimaryVertex(Float_t val) { mDcaParentToPrimaryVertex = val; }
+
+void StV0Vertex::setType(StVertexType)
+{
+    cerr << "StV0Vertex::setType(): change of type not allowed, class has fixed type." << endl;
 }
 
 void

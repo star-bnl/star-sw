@@ -1,10 +1,7 @@
 //*CMZ :          13/08/98  18.27.27  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   13/08/98 
-// $Id: St_DataSet.h,v 1.37 1999/10/28 16:24:29 fine Exp $
+// $Id: St_DataSet.h,v 1.36 1999/09/04 00:28:01 fine Exp $
 // $Log: St_DataSet.h,v $
-// Revision 1.37  1999/10/28 16:24:29  fine
-// St_DataSet major correction: it may be built with TList (default) or with TObjArray
-//
 // Revision 1.36  1999/09/04 00:28:01  fine
 // St_Table::NaN from VP and gloabl dataset have been introduced
 //
@@ -33,13 +30,12 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
  
-
+//*KEEP,TList.
 #include "TList.h"
-#include "TObjArray.h"
-
+//*KEEP,TNamed.
 #include "TNamed.h"
 #include "TNode.h"
-
+//*KEND.
  
 class St_DataSetIter;
 class TBrowser;
@@ -48,7 +44,6 @@ class StBufferAbc;
 //----- dataset flags
 enum ESetBits {
      kMark        = BIT(22)   // if object is marked
-    ,kArray       = BIT(20)   // if object has StObjArray inside
 };
 
 enum EBitOpt { 
@@ -74,12 +69,10 @@ class St_DataSet : public TNamed
 {
  friend class St_DataSetIter;
  friend class St_DataSetTree;
- private:
-    void operator=(const St_DataSet &){}
  protected: 
     static St_DataSet  *fgMainSet; // pointer the main dataset;    
-    St_DataSet         *fParent;   // pointer to mother of the directory
-    TSeqCollection     *fList;     // List of the the the objects included into this dataset
+    St_DataSet  *fParent; // pointer to mother of the directory
+    TList       *fList;   // List of the the the objects included into this dataset
     virtual void SetMother(TObject *mother) {SetParent((St_DataSet*)mother);}
     St_DataSet(const Char_t *name,const Char_t *title):
     TNamed(name,title),fParent(0),fList(0){} // to support TDictionary
@@ -87,21 +80,16 @@ class St_DataSet : public TNamed
     static EDataSetPass SortIt(St_DataSet *ds);
     static EDataSetPass SortIt(St_DataSet *ds,void *user);
     St_DataSet *GetRealParent();
-    void MakeCollection();
-
      
  public:
  
-    St_DataSet(const Char_t *name="", St_DataSet *parent=0,  Bool_t arrayFlag = kFALSE);
+    St_DataSet(const Char_t *name="", St_DataSet *parent=0);
     St_DataSet(const St_DataSet &src,EDataSetPass iopt=kAll);
     St_DataSet(TNode &src); 
     virtual ~St_DataSet();
     virtual void         Add(St_DataSet *dataset);
-    virtual void         AddAt(St_DataSet *dataset,Int_t idx=0);
-    virtual void         AddAtAndExpand(St_DataSet *dataset, Int_t idx=0);
     virtual void         AddFirst(St_DataSet *dataset);
     virtual void         AddLast(St_DataSet *dataset);
-            St_DataSet  *At(Int_t idx) const;
     virtual Int_t        Audit(Option_t *opt=0){if(opt){/*touch*/};return 0;};
     virtual void         Browse(TBrowser *b);
     virtual TObject     *Clone();
@@ -111,9 +99,7 @@ class St_DataSet : public TNamed
     virtual St_DataSet  *FindByPath(const Char_t *path) const;
     virtual St_DataSet  *FindByName(const Char_t *name,const Char_t *path="",Option_t *opt="") const;
     virtual St_DataSet  *First() const;
-            TObjArray   *GetObjArray() const { return (TObjArray *)fList; }
-            TSeqCollection *GetCollection() const { return (TSeqCollection *)fList; }
-            TList       *GetList()   const { return (TList *)fList; }
+            TList       *GetList()   const { return fList; }
     virtual Int_t        GetListSize() const;
     static  St_DataSet  *GetMainSet(){ return fgMainSet;}
             TObject     *GetMother() const { return (TObject*)GetParent();}
@@ -125,7 +111,6 @@ class St_DataSet : public TNamed
     virtual EDataSetPass Pass(EDataSetPass ( *callback)(St_DataSet *,void*),void *user,Int_t depth=0);
     virtual Int_t        Purge(Option_t *opt="");   
     virtual void         Remove(St_DataSet *set);
-    virtual St_DataSet  *RemoveAt(Int_t idx);
     virtual void         SetLock(Int_t lock);
     virtual void         SetMother(St_DataSet *parent=0){SetParent(parent);};
     virtual void         SetObject(TObject *obj){printf("***DUMMY PutObject***%p\n",obj);}
@@ -133,10 +118,9 @@ class St_DataSet : public TNamed
     virtual void         SetWrite();
     virtual void         Shunt(St_DataSet *newParent=0);
     virtual void         Sort();			//Sort objects in lexical order
-    virtual Bool_t       IsEmpty() const;
-    virtual Bool_t       IsFolder() const {return kTRUE;}
+    virtual Bool_t       IsFolder() {return kTRUE;}
     virtual Bool_t       IsLocked() const ;
-    virtual Bool_t       IsMarked() const ;
+    virtual Bool_t       IsMarked();
     virtual Bool_t       IsThisDir(const Char_t *dirname,int len=-1,int ignorecase=0) const ;
     virtual St_DataSet  *Last() const;
     virtual void         ls(Option_t *option="")  const;      // Option "*" means print all levels
@@ -153,13 +137,14 @@ class St_DataSet : public TNamed
     ClassDef(St_DataSet,1)
 };
 
-inline void        St_DataSet::Add(St_DataSet *dataset){ AddLast(dataset); }
-inline void        St_DataSet::AddMain(St_DataSet *set){ if (fgMainSet && set) fgMainSet->AddFirst(set);}
-inline St_DataSet *St_DataSet::At(Int_t idx) const {return fList ? (St_DataSet *)fList->At(idx) : 0;  }
-inline Int_t       St_DataSet::GetListSize() const {return (fList) ? fList->GetSize():0;}
-inline Bool_t      St_DataSet::IsMarked() const { return TestBit(kMark); }
-inline void        St_DataSet::Mark()     { Mark(kMark,kSet); }
-inline void        St_DataSet::UnMark()   { Mark(kMark,kReset); }
-inline void        St_DataSet::Mark(UInt_t flag,EBitOpt reset){ SetBit(flag,reset); }
+inline void      St_DataSet::Add(St_DataSet *dataset){ AddLast(dataset); }
+inline void      St_DataSet::AddMain(St_DataSet *set){ if (fgMainSet && set) fgMainSet->AddFirst(set);}
+inline Int_t     St_DataSet::GetListSize() const {TList *tl=GetList(); return (tl) ? tl->GetSize():0;}
+inline Bool_t    St_DataSet::IsMarked() { return TestBit(kMark); }
+inline void      St_DataSet::Mark()     { Mark(kMark,kSet); }
+inline void      St_DataSet::UnMark()   { Mark(kMark,kReset); }
+inline void      St_DataSet::Mark(UInt_t flag,EBitOpt reset){ SetBit(flag,reset); }
+
+
 
 #endif

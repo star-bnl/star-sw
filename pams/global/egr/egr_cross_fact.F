@@ -50,9 +50,8 @@ C______________________________________________________________________
          vglobal(3) = 0.0
          iret= tgc_global_to_local_p(isect,vglobal,vlocal)
 
-         cf = (vlocal(2))**2/(vlocal(2)**2+vlocal(1)**2)
-         theta=atand(vlocal(1)/vlocal(2))
-
+         cf = abs(vlocal(1)/vlocal(2))
+         theta = atan(cf)
       endif
       egr_cross_fact = 0
       end

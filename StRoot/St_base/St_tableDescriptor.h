@@ -1,9 +1,6 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.h,v 1.6 1999/10/28 00:32:55 fine Exp $
+// $Id: St_tableDescriptor.h,v 1.5 1999/09/07 19:30:29 fine Exp $
 // $Log: St_tableDescriptor.h,v $
-// Revision 1.6  1999/10/28 00:32:55  fine
-// method At() has been removed
-//
 // Revision 1.5  1999/09/07 19:30:29  fine
 // table descriptor access has been changed. All tables are affected and must be re-compiled
 //
@@ -38,6 +35,7 @@ class St_tableDescriptor : public St_Table {
     St_tableDescriptor(const St_Table *parentTable);
    ~St_tableDescriptor();
     tableDescriptor_st *GetTable(){ return (tableDescriptor_st *)s_Table;}                                            
+    virtual  const void *At(Int_t i) const;
              void        LearnTable(const St_Table *parentTable);
              const Char_t *GetColumnName(Int_t columnIndex)        const;
              const Int_t GetColumnByName(const Char_t *columnName=0) const;
@@ -60,6 +58,13 @@ class St_tableDescriptor : public St_Table {
              void        SetColumnType(EColumnType type,Int_t column);
     ClassDef(St_tableDescriptor,0)
 };
+
+//______________________________________________________________________________
+inline const void *St_tableDescriptor::At(Int_t i) const
+{
+   if (!BoundsOk("St_tableDescriptor::At", i)) return 0;
+   return (const void *)(((tableDescriptor_st *)s_Table)+i);
+}
 
 //______________________________________________________________________________
 inline  const Char_t *St_tableDescriptor::GetColumnName(Int_t column)const{return ((tableDescriptor_st *)At(column))->m_ColumnName;}

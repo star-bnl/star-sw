@@ -1,14 +1,5 @@
-// $Id: StKinkMaker.cxx,v 1.23 1999/10/25 21:46:52 wdeng Exp $
+// $Id: StKinkMaker.cxx,v 1.20 1999/09/24 01:23:36 fisyak Exp $
 // $Log: StKinkMaker.cxx,v $
-// Revision 1.23  1999/10/25 21:46:52  wdeng
-// More iflag options
-//
-// Revision 1.22  1999/09/30 13:34:27  wdeng
-// Diminish the degree or radian bug
-//
-// Revision 1.21  1999/09/29 18:56:39  wdeng
-// Accommodated to dst_track and dst_vertex change
-//
 // Revision 1.20  1999/09/24 01:23:36  fisyak
 // Reduced Include Path
 //
@@ -102,7 +93,6 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define degToRad     C_RAD_PER_DEG               
   
 #define MAXNUMOFTRACKS 10000
-#define SIZETRKIDCHECK 1000
 
 ClassImp(StKinkMaker)
   
@@ -189,7 +179,7 @@ Int_t StKinkMaker::Make(){
   Int_t numOfGlbtrk = globtrk->GetNRows();
   Int_t tkf_limit = numOfGlbtrk/10 + 100;
   
-  St_dst_tkf_vertex *kinkVertex  = (St_dst_tkf_vertex *) primaryI("kinkVertex");
+  St_dst_tkf_vertex *kinkVertex  = (St_dst_tkf_vertex *) matchI("kinkVertex");
   if(!kinkVertex) {
     kinkVertex = new St_dst_tkf_vertex("kinkVertex", tkf_limit);
     AddData(kinkVertex);
@@ -221,11 +211,8 @@ Int_t StKinkMaker::Make(){
 	Int_t    h     = (B*dstTrackPtr->icharge > 0 ? -1 : 1);
 	Float_t phase = dstTrackPtr->psi*degree-h*pi/2;
 	Float_t pt    = (1./dstTrackPtr->invpt)*GeV;
-	Float_t curvature = dstTrackPtr->curvature;
-	Float_t x0 = dstTrackPtr->r0 * cos(dstTrackPtr->phi0 * degToRad);
-	Float_t y0 = dstTrackPtr->r0 * sin(dstTrackPtr->phi0 * degToRad);
-	Float_t z0 = dstTrackPtr->z0;
-	StThreeVectorD origin(x0, y0, z0);  
+	Float_t curvature = fabs(c_light*nanosecond/meter*dstTrackPtr->icharge*B/tesla)/(pt/GeV);
+	StThreeVectorD origin(dstTrackPtr->x0, dstTrackPtr->y0, dstTrackPtr->z0);  
 	
 	tempTrack = new StKinkLocalTrack(dstTrackPtr,
 					 curvature/meter,
@@ -284,7 +271,8 @@ Int_t StKinkMaker::Make(){
  	  if( numOfSolution == 0 ) continue;
 	  if( numOfSolution == 1 ) 
 	    {
-	      Float_t radius2D = sqrt(xCords[0]*xCords[0] + yCords[0]*yCords[0]);
+	      Float_t radius2D = sqrt(xCords[0]*xCords[0] +
+				      yCords[0]*yCords[0]);
 	      if( (radius2D < tkfpar->vertexRMin2D) || 	  
 		  (radius2D > tkfpar->vertexRMax2D) )  continue;
 	      xtarget = xCords[0];	    
@@ -292,8 +280,10 @@ Int_t StKinkMaker::Make(){
 	    }
 	  if ( numOfSolution == 2 )
 	    {
-	      Float_t radiusOne2D = sqrt(xCords[0]*xCords[0] + yCords[0]*yCords[0]);
-	      Float_t radiusTwo2D = sqrt(xCords[1]*xCords[1] + yCords[1]*yCords[1]);
+	      Float_t radiusOne2D = sqrt(xCords[0]*xCords[0] +
+					 yCords[0]*yCords[0]);
+	      Float_t radiusTwo2D = sqrt(xCords[1]*xCords[1] +
+					 yCords[1]*yCords[1]);
 	      if( (radiusOne2D > tkfpar->vertexRMin2D) && 	  
 		  (radiusOne2D < tkfpar->vertexRMax2D) &&
 		  (radiusTwo2D > tkfpar->vertexRMin2D) && 	  
@@ -387,77 +377,6 @@ Int_t StKinkMaker::Make(){
     }
   trackArray->Delete();
   gMessMgr->Info() << " Found " << kinkCandidate << " kink candidates " << endm;
-
-  // Check if two or more parents (daughters) have the same dst_track id. 
-  // Refill iflag entry of dst_vertex as -1 (-2) if necessary. This also works for real data.
-
-  TObjArray* trkIdChkArray = new TObjArray(SIZETRKIDCHECK);
-  StKinkTrkIdCheck *trkIdChk1;
-  StKinkTrkIdCheck *trkIdChk2;
- 
-  dst_tkf_vertex_st *kinkVtxStart = kinkVertex->GetTable();
-  dst_vertex_st     *dstVtxStart = vertex->GetTable();
-
-  for(Int_t lv1=0; lv1<kinkVertex->GetNRows()-1; lv1++) {
-    dst_tkf_vertex_st *kinkVtxPtr1 = kinkVtxStart + lv1;
-
-    for(Int_t lv2=lv1+1; lv2<kinkVertex->GetNRows(); lv2++) {
-      dst_tkf_vertex_st *kinkVtxPtr2 = kinkVtxStart + lv2;
-      
-      if( kinkVtxPtr1->idp == kinkVtxPtr2->idp ) {
-        trkIdChk1 = new StKinkTrkIdCheck();
-        trkIdChk2 = new StKinkTrkIdCheck();
-
-        trkIdChk1->setCommonIdp(1);
-        trkIdChk1->setPosInKinkVtx(lv1);
-
-        trkIdChk2->setCommonIdp(1);
-        trkIdChk2->setPosInKinkVtx(lv2);
-
-        trkIdChkArray->Add(trkIdChk1);
-        trkIdChkArray->Add(trkIdChk2);
-      }
-      
-      if( kinkVtxPtr1->idd == kinkVtxPtr2->idd ) {
-        trkIdChk1 = new StKinkTrkIdCheck();
-        trkIdChk2 = new StKinkTrkIdCheck();
-
-        trkIdChk1->setCommonIdd(1);
-        trkIdChk1->setPosInKinkVtx(lv1);
-
-        trkIdChk2->setCommonIdd(1);
-        trkIdChk2->setPosInKinkVtx(lv2);
-
-        trkIdChkArray->Add(trkIdChk1);
-        trkIdChkArray->Add(trkIdChk2);
-      }
-
-    }
-  }
-
-  for( i = 0; i <=trkIdChkArray->GetLast(); i++)
-    {
-      StKinkTrkIdCheck* trkIdChk3 = (StKinkTrkIdCheck*)trkIdChkArray->At(i);
-
-      if( trkIdChk3->commonIdp() == 1 ) {
-        Int_t posInKinkVtx = trkIdChk3->posInKinkVtx();
-        dst_tkf_vertex_st *tkfVtx = kinkVtxStart + posInKinkVtx;
-        Int_t dstVtxId = tkfVtx->id_vertex;
-        dst_vertex_st *dstVtx = dstVtxStart + dstVtxId -1;
-        dstVtx->iflag = -1;
-      }
-             
-      if( trkIdChk3->commonIdd() == 1 ) {
-        Int_t posInKinkVtx = trkIdChk3->posInKinkVtx();
-        dst_tkf_vertex_st *tkfVtx = kinkVtxStart + posInKinkVtx;
-        Int_t dstVtxId = tkfVtx->id_vertex;
-        dst_vertex_st *dstVtx = dstVtxStart + dstVtxId -1;
-        dstVtx->iflag = -2;
-      }
-    
-    }
-
-  trkIdChkArray->Delete();
   
   return kStOK; 
 }
@@ -539,25 +458,23 @@ void StKinkMaker::FillTableRow()
   kinkVtxRow.pd[2] = daughterMoment.z();
 	  
   kinkVtxRow.theta = decayAngle;
-
-  dstVtxRow.vtx_id      = kKinkVtxId;
-  dstVtxRow.n_daughters = 1;    
-  dstVtxRow.id          = dstVtxIndex + 1;
-  FillIflag();
-  dstVtxRow.det_id      = 100*myTrack1->DetId() + myTrack2->DetId();
-  dstVtxRow.id_aux_ent  = kinkVtxIndex + 1;
- 
+  
+  
+  dstVtxRow.id       = dstVtxIndex + 1;
+  dstVtxRow.det_id   = 100*myTrack1->DetId() + myTrack2->DetId();
   dstVtxRow.x        = mKinkVertex.x();
   dstVtxRow.y        = mKinkVertex.y();
   dstVtxRow.z        = mKinkVertex.z();
-  dstVtxRow.covar[0] = 0.;
-  dstVtxRow.covar[1] = 0.;
-  dstVtxRow.covar[2] = 0.;
-  dstVtxRow.covar[3] = 0.;
-  dstVtxRow.covar[4] = 0.;
-  dstVtxRow.covar[5] = 0.;
-  dstVtxRow.chisq[0]    = 0.;
-  dstVtxRow.chisq[1]    = 0.;
+  dstVtxRow.sigma[0] = 0.;
+  dstVtxRow.sigma[1] = 0.;
+  dstVtxRow.sigma[2] = 0.;
+  dstVtxRow.pchi2    = 0.;
+  dstVtxRow.id_aux_ent = kinkVtxIndex + 1;
+  
+  FillIflag();
+
+  dstVtxRow.vtx_id      = kKinkVtxId;
+  dstVtxRow.n_daughters = 1;
 
 }
 
@@ -623,7 +540,7 @@ void StKinkMaker::FillIflag()
 	Int_t stopIdParent;
 	Int_t startIdDaughter;	
 	Int_t vertexGeProc; 
-	// Int_t numDaughter;
+	Int_t numDaughter;
 	
 	St_DataSet *geant = GetDataSet("geant"); 
 	St_DataSetIter geantI(geant);         
@@ -662,32 +579,15 @@ void StKinkMaker::FillIflag()
 	g2tVertexPtr = g2tVertexStart + (startIdDaughter -1);
 	
 	vertexGeProc = g2tVertexPtr->ge_proc;
-	// numDaughter = g2tVertexPtr->n_daughter;
+	numDaughter = g2tVertexPtr->n_daughter;
 	
-	dstVtxRow.iflag = -10;
-
-	if( stopIdParent != startIdDaughter ) {
-	  dstVtxRow.iflag = 0;
-	} else {
-	  if( vertexGeProc == 12 ) {
-	    dstVtxRow.iflag = -3;
+	if( stopIdParent==startIdDaughter  && ( parentPid==11 || parentPid==12 )
+	    && vertexGeProc==5  && numDaughter==2 )
+	  {
+	    dstVtxRow.iflag = 1;
+	  } else {
+	    dstVtxRow.iflag = 0;
 	  }
-
-	  if( vertexGeProc != 12 && vertexGeProc != 5 ) {
-	    dstVtxRow.iflag = -4;
-	  }
-	  
-	  if( vertexGeProc == 5 ) {
-	    if( parentPid == kinkVtxRow.pidp ) {
-	      dstVtxRow.iflag = 1;
-	    } else {
-	      dstVtxRow.iflag = 100 * parentPid + 1;
-	    }
-	  }
-	}                    
-
-	if( parentMcId == daughterMcId )  dstVtxRow.iflag = -9;
-
 	goto PROPERFILL;
       }
     }

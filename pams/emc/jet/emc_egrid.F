@@ -77,11 +77,11 @@ C---- Initialize nok counter and variable arrays
       emin=emc_egrid_par(1).chrg_eta_min
       emax=emc_egrid_par(1).chrg_eta_max
       if(emin.lt.-2.0) then
-         write(*,*)'emc_egrid: chrg_eta_min should be >-2.0 Ignored' 
+         write(*,*)"emc_egrid: chrg_eta_min should be >-2.0 Ignored" 
          emin=-2.0
       endif
            if(emin.gt.2.0) then
-         write(*,*)'emc_egrid: chrg_eta_max should be <2.0 Ignored'
+         write(*,*)"emc_egrid: chrg_eta_max should be <2.0 Ignored"
          emax=2.0
       endif
           
@@ -161,16 +161,15 @@ C*- get tracks from DST_TRACK table
       do ihit = 1, dst_track_h.nok       ! Loop over input tracks
          trk_qual=(dst_track(ihit).chisq(1)+
      +             dst_track(ihit).chisq(2))/2.0
+     +            /float(dst_track(ihit).ndegf)
          if(trk_qual.le.trk_qual_cut)then
             trkchar = float(dst_track(ihit).icharge)
             pt      = 1.0/dst_track(ihit).invpt
             pz      = pt*dst_track(ihit).tanl
             p_tot   = sqrt(pt**2 + pz**2)
             crad    = pt/abs(trkchar*C_D_CURVATURE*b_field)
-            x_strt  = dst_track(ihit).r0
-     +           *cos(dst_track(ihit).phi0*C_RAD_PER_DEG)
-            y_strt  = dst_track(ihit).r0
-     +           *sin(dst_track(ihit).phi0*C_RAD_PER_DEG)
+            x_strt  = dst_track(ihit).x0
+            y_strt  = dst_track(ihit).y0
             cap_phi0= dst_track(ihit).psi*C_RAD_PER_DEG+trkchar*C_PI_2
             xc      = x_strt - crad*cos(cap_phi0)
             yc      = y_strt - crad*sin(cap_phi0)
@@ -220,9 +219,8 @@ c*-Subtract expected energy deposit from charged track
                else
                   goto 10    ! the track didn't hit emc
                endif
-               if(id(idet,mod,ebin,sub).eq.0) then 
-                  nout=nout+1    ! No EMC hits for track, then give negative energy
-*
+               if(id(idet,mod,ebin,sub).eq.0) then ! No EMC hits for track,
+                  nout=nout+1                      ! then give negative energy
                   if(nout .gt. emc_energy_h.maxlen)then
                      write(*,*) '***EMC_EGRID:Need more memory in EMC_ENERGY'
                      EMC_EGRID=STAFCV_BAD
@@ -261,9 +259,11 @@ c*-Subtract expected energy deposit from charged track
 
 C*-Project Tracks back to the primary Vertex. Calculate Energy
 C*-of charged tracks and load energy into eta-phi grid at Vertex
-            trak(1)  = dst_track(ihit).r0
-            trak(2)  = trak(1)*dst_track(ihit).phi0   
-     +           *C_RAD_PER_DEG !r0*phi0
+            trak(1)  = sqrt(dst_track(ihit).x0**2
+     +                     +dst_track(ihit).y0**2)    !r0
+            trak(2)  = trak(1)
+     +               *ATAN2(dst_track(ihit).x0,dst_track(ihit).y0)
+     +               *C_RAD_PER_DEG                      !r0*phi0
             trak(3)  = dst_track(ihit).z0 !z0
             trak(4)  = dst_track(ihit).psi*C_RAD_PER_DEG !psi
             trak(5)  = dst_track(ihit).tanl !tanl
@@ -334,7 +334,7 @@ C*-Calculate (phi,eta) bin for Track at vertex
          endif                  ! good tracks
  100     continue
       enddo                     ! End loop over input tracks
-c      
+      
       write(*,*) 'EMC_EGRID done :',nout,' grid wrote out' 
       write(*,*) 'EMC_EGRID done : Total energy = ', etot
       emc_energy_h.nok = nout

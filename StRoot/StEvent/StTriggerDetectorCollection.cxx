@@ -1,8 +1,8 @@
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.cxx,v 2.1 1999/10/28 22:27:58 ullrich Exp $
+ * $Id: StTriggerDetectorCollection.cxx,v 1.5 1999/06/24 17:33:00 fisyak Exp $
  *
- * Author: Thomas Ullrich, Sep 1999
+ * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
  *
  * Description:
@@ -10,48 +10,42 @@
  ***************************************************************************
  *
  * $Log: StTriggerDetectorCollection.cxx,v $
- * Revision 2.1  1999/10/28 22:27:58  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 1.5  1999/06/24 17:33:00  fisyak
+ * Replace Collection by value to Collection by pointer for TBrowser
+ *
+ * Revision 1.5  1999/06/24 17:33:00  fisyak
+ * Replace Collection by value to Collection by pointer for TBrowser
+ *
+ * Revision 1.4  1999/04/28 22:27:38  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.2  1999/01/15 22:54:13  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 2.0  1999/10/12 18:43:18  ullrich
  * Completely Revised for New Version
- *
  **************************************************************************/
-#include "StTriggerDetectorCollection.h"
-#include "tables/St_dst_TrgDet_Table.h"
+static const Char_t rcsid[] = "$Id: StTriggerDetectorCollection.cxx,v 1.5 1999/06/24 17:33:00 fisyak Exp $";
+#include "tables/dst_TrgDet.h"
 
-static const char rcsid[] = "$Id: StTriggerDetectorCollection.cxx,v 2.1 1999/10/28 22:27:58 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerDetectorCollection.cxx,v 1.5 1999/06/24 17:33:00 fisyak Exp $";
+StTriggerDetectorCollection::StTriggerDetectorCollection():
+mCtbCounters(new StVecPtrCtbCounter),
+mMwcSectors(new StVecPtrMwcSector),
+mVpdCounters(new StVecPtrVpdCounter),
+mZdcSegments(new StVecPtrZdcSegment),
+mVpdSummary(new StVpdSummary),
+mZdcSummary(new StZdcSummary)
+{ /* noop */ };
 
-ClassImp(StTriggerDetectorCollection)
-
-StTriggerDetectorCollection::StTriggerDetectorCollection() {/* noop */}
-
-StTriggerDetectorCollection::StTriggerDetectorCollection(const dst_TrgDet_st& t) :
-    mCtb(t), mMwc(t), mVpd(t), mZdc(t) {/* noop */}
-
-StTriggerDetectorCollection::~StTriggerDetectorCollection() {/* noop */}
-
-StCtbTriggerDetector&
-StTriggerDetectorCollection::ctb() { return mCtb; }
-
-const StCtbTriggerDetector&
-StTriggerDetectorCollection::ctb() const { return mCtb; }
-
-StMwcTriggerDetector&
-StTriggerDetectorCollection::mwc() { return mMwc; }
-
-const StMwcTriggerDetector&
-StTriggerDetectorCollection::mwc() const { return mMwc; }
-
-StVpdTriggerDetector&
-StTriggerDetectorCollection::vpd() { return mVpd; }
-
-const StVpdTriggerDetector&
-StTriggerDetectorCollection::vpd() const { return mVpd; }
-
-StZdcTriggerDetector&
-StTriggerDetectorCollection::zdc() { return mZdc; }
-
+StTriggerDetectorCollection::~StTriggerDetectorCollection() {
+  SafeDelete(mCtbCounters);
+  SafeDelete(mMwcSectors);
+  SafeDelete(mVpdCounters);
+  SafeDelete(mZdcSegments);
+  SafeDelete(mVpdSummary);
+  SafeDelete(mZdcSummary);
+};
 const StZdcTriggerDetector&
 StTriggerDetectorCollection::zdc() const { return mZdc; }
 

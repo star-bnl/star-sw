@@ -155,6 +155,7 @@ C     iterations exceeded
 C
       do while (ntry.le.egrpar(1).mxtry.and..not.enough)
          ncir = 0            ! counts number of points used in the fit
+         cf = -1.0
 
 C     load the fitting arrays for the primary vertex
 
@@ -196,9 +197,9 @@ c                     previous line is a hard wired 100 micron SVT resolution
 C Load the fitting arrays with the TPC points
 
          if (itpct.ne.0) then
-            cf = -1.0
+
             do i=gtrk(igtrk).ntpc,1,-1
-               
+
 C     load the working arrays for the fitting subroutines
 C     omit points that were marked as outliers
 
@@ -215,16 +216,19 @@ C     calculate correction to the error, coming from the crossing angle
                   iret = egr_cross_fact(tphit(ient).row,xcir(ncir),
      +                 ycir(ncir),xold,yold,cf,theta)
                   
-                  if(i.eq.gtrk(igtrk).ntpc) then
+                  if(ncir.eq.1) then
                      ient1 = ient
-                  else if(i.eq.gtrk(igtrk).ntpc-1) then
-                     wcir(ncir-1) = wcir(ncir-1)/cf
+                  else if(ncir.eq.2) then
+                     wcir(1) = wcir(1)/cf
                   endif
                   xold = xcir(ncir)
                   yold = ycir(ncir)
                   wcir(ncir) = wcir(ncir)/cf
-                  wlin(ncir) = 1.0/tphit(ient).dz**2
-                  
+                  if (i.eq.gtrk(igtrk).ntpc+1) then
+                     wlin(ncir) = 0
+                  else
+                     wlin(ncir) = 1.0/tphit(ient).dz**2
+                  endif
                   pnt(ncir)  = i ! pointer that identifies outliers
                endif
             enddo   ! i

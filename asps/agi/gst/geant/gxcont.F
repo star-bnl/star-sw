@@ -1,10 +1,7 @@
 *
-* $Id: gxcont.F,v 1.3 1999/10/18 16:45:59 nevski Exp $
+* $Id: gxcont.F,v 1.2 1998/04/16 16:59:48 fisyak Exp $
 *
 * $Log: gxcont.F,v $
-* Revision 1.3  1999/10/18 16:45:59  nevski
-* pgf->g77
-*
 * Revision 1.2  1998/04/16 16:59:48  fisyak
 * 2nd pass with gstar
 *
@@ -59,8 +56,8 @@
       CHARACTER*32 CHPATL,CHPAR,Cmate,Cpart,Cvec
       External     IGIWTY
 * the following is a part of the GCDRAW keeps, forgotten in the official code
-*      Integer      MyISel
-*      real         zzfu,zzfv
+      Integer      MyISel
+      real         zzfu,zzfv
       Logical      First_QNEXT/.true./
 **
 **    ------------------------------------------------------------------

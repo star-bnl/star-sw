@@ -1,8 +1,5 @@
-// $Id: StBFChain.h,v 1.6 1999/10/28 01:57:17 fisyak Exp $
+// $Id: StBFChain.h,v 1.5 1999/10/12 23:13:31 fisyak Exp $
 // $Log: StBFChain.h,v $
-// Revision 1.6  1999/10/28 01:57:17  fisyak
-// Add ParseString
-//
 // Revision 1.5  1999/10/12 23:13:31  fisyak
 // Add AddBefore and AddAfter methods
 //
@@ -82,7 +79,6 @@ class StBFChain : public StChain {
    virtual Int_t       AddAB (const Char_t *after="",const StMaker *maker=0,const Int_t Opt=1); 
    virtual Int_t       AddAfter  (const Char_t *after, const StMaker *maker) {return AddAB (after,maker);} 
    virtual Int_t       AddBefore (const Char_t *before,const StMaker *maker) {return AddAB (before,maker,-1);} 
-   virtual Int_t       ParseString (const TString &tChain, TString *Opt[]);
    void                SetFlags(const Char_t *Chain="gstar tfs"); // *MENU*
    void                Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0); // *MENU
    virtual void        SetXdfOut(St_XDFFile *xdf=0) {xdf_out = xdf;}
@@ -91,9 +87,9 @@ class StBFChain : public StChain {
    virtual Int_t       Finish();
    virtual TFile      *GetTFile() {return m_TFile;}
    virtual St_XDFFile *GetXdfOut() {return xdf_out;}
-   virtual Bool_t      GetOption(Int_t k);
+   Bool_t              GetOption(Int_t k);
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.6 1999/10/28 01:57:17 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.5 1999/10/12 23:13:31 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StBFChain, 0)   //StBFChain control class
 };
 #endif

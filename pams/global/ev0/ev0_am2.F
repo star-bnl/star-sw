@@ -42,7 +42,7 @@ C<----------------------------------------------------------------------
 #include "math_constants.inc"
 #include "StDetectorId.inc"
 
-      INTEGER nok,detect_id_i,points(3)
+      INTEGER nok
       INTEGER i
 
       CHARACTER*132 m132
@@ -83,34 +83,15 @@ C convert to Tesla
         nok=0
         if((globtrk_h.nok).eq.0) return
         DO i=1,globtrk_h.nok
-
-C     Only write tracks that have more than a certain number of hits in a detector
-
-           if( globtrk(i).det_id .eq. kTpcId )then
-              detect_id_i = 1
-              points(1) = globtrk(i).n_point - (1000 * int(globtrk(i).n_point/1000))
-           elseif( globtrk(i).det_id .eq. kSvtId .or.
-     +             trak(i).det_id .eq.  kSsdSvtId .or.
-     )             trak(i).det_id .eq. kSsdId )then
-              detect_id_i = 2
-              points(2) = ((((globtrk(i).n_point - (10000 * int(globtrk(i).n_point/10000)) - points(1))/1000)) 
-     +        + (int(globtrk(i).n_point/10000)))
-           else
-              detect_id_i = 3
-              points(3) = (points(1) + points(2))
-           endif
-
-           IF(points(detect_id_i) .ge. ev0par(detect_id_i).n_point) then
-
-              if (globtrk(i).iflag .gt. 0 .and. 
-     +             globtrk(i).det_id .eq. kTpcId .or.
-     +             globtrk(i).det_id .eq. kSvtId .or.  
-     +             globtrk(i).det_id .eq. kSsdId .or.
-     +             globtrk(i).det_id .eq. kTpcSsdId .or.
-     +             globtrk(i).det_id .eq. kTpcSvtId .or.
-     +             globtrk(i).det_id .eq. kTpcSsdSvtId .or.
-     +             globtrk(i).det_id .eq. kSsdSvtId) then
-                 IF(nok .ge. trak_h.maxlen)   then
+           if (globtrk(i).iflag .gt. 0 .and. 
+     +          globtrk(i).det_id .eq. kTpcId .or.
+     +          globtrk(i).det_id .eq. kSvtId .or.  
+     +          globtrk(i).det_id .eq. kSsdId .or.
+     +          globtrk(i).det_id .eq. kTpcSsdId .or.
+     +          globtrk(i).det_id .eq. kTpcSvtId .or.
+     +          globtrk(i).det_id .eq. kTpcSsdSvtId .or.
+     +          globtrk(i).det_id .eq. kSsdSvtId) then
+             IF(nok .ge. trak_h.maxlen)   then
                 call StError('Internal track table too small quiting')
                 EV0_AM2= STAFCV_BAD
                 return
@@ -118,69 +99,68 @@ C     Only write tracks that have more than a certain number of hits in a detect
              nok=nok+1
              trak(nok).id  = globtrk(i).id
              trak(nok).det_id = globtrk(i).det_id
-             trak(nok).r0   = globtrk(i).r0
-             trak(nok).phi  = globtrk(i).phi0*C_RAD_PER_DEG
+             trak(nok).r0   = sqrt(globtrk(i).x0**2+globtrk(i).y0**2)
+             trak(nok).phi  = atan2(globtrk(i).y0,globtrk(i).x0)
              trak(nok).z0   = globtrk(i).z0
              trak(nok).psi   = globtrk(i).psi*C_RAD_PER_DEG !degrees to radians
-             trak(nok).tanl= globtrk(i).tanl
-             trak(nok).rc = 1./(C_D_CURVATURE*bfield(3)*10.
-     +            *globtrk(i).invpt)
-             trak(nok).q  = float(globtrk(i).icharge)
-             call ev0_circle_param(trak(nok).r0,xc,
-     +            trak(nok).rc,bfield(3))
-             trak(nok).xc(1) = xc(1)
-             trak(nok).xc(2) = xc(2)
-             trak(nok).pid = globtrk(i).pid
-             trak(nok).sagitta = globtrk(i).length**2/(8*trak(nok).rc)
-             trak(nok).dca = globtrk(i).impact
-          endif
-       endif
-      ENDDO
- 35   CONTINUE
-      
-      trak_h.nok = nok
-      write(m132,*) ' No. of trak rows is:',trak_h.nok
-      call StInfo(m132)
+              trak(nok).tanl= globtrk(i).tanl
+              trak(nok).rc = 1./(C_D_CURVATURE*bfield(3)*10.
+     +             *globtrk(i).invpt)
+              trak(nok).q  = float(globtrk(i).icharge)
+              call ev0_circle_param(trak(nok).r0,xc,
+     +             trak(nok).rc,bfield(3))
+              trak(nok).xc(1) = xc(1)
+              trak(nok).xc(2) = xc(2)
+              trak(nok).pid = globtrk(i).id_global_pid
+              trak(nok).sagitta = globtrk(i).length**2/(8*trak(nok).rc)
+              trak(nok).dca = globtrk(i).impact
+           endif
+        ENDDO
+ 35     CONTINUE
+                
+        trak_h.nok = nok
+        write(m132,*) ' No. of trak rows is:',trak_h.nok
+        call StInfo(m132)
 c     
 c     call reconstruction program
 c     
-      CALL V0_RECONSTRUCT2(trak_h, trak,
-     +     ev0par_h,ev0par,
-     +     vertex_h,vertex,
-     +     ev0out_h,ev0out,
-     +     bfield)
-c     
-c     call analysis (clean up) module, ev0par(1).iflag=1
-c     
-      
-      if( ev0out_h.nok .gt. ev0out_h.maxlen )then
-         ev0out_h.nok = ev0out_h.maxlen
-         EV0_AM2= STAFCV_BAD
-         return
-      endif
-      if( vertex_h.nok .gt. vertex_h.maxlen) then
-         vertex_h.nok = vertex_h.maxlen
-         EV0_AM2 = STAFCV_BAD
-         return
-      endif
-      
-C     V0_CLEAN does nothing??? - gvb (2/25/99)
-C     IF( ev0par(1).iflag.eq.1) THEN
-C     CALL V0_CLEAN(ev0out_h,ev0out)
-C     ENDIF
-      
-      
-      trak_h.nok = 0
+        CALL V0_RECONSTRUCT2(trak_h, trak,
+     +       ev0par_h,ev0par,
+     +       vertex_h,vertex,
+     +       ev0out_h,ev0out,
+     +       bfield)
+c
+c call analysis (clean up) module, ev0par(1).iflag=1
+c
+
+        if( ev0out_h.nok .gt. ev0out_h.maxlen )then
+           ev0out_h.nok = ev0out_h.maxlen
+           EV0_AM2= STAFCV_BAD
+           return
+        endif
+        if( vertex_h.nok .gt. vertex_h.maxlen) then
+           vertex_h.nok = vertex_h.maxlen
+           EV0_AM2 = STAFCV_BAD
+           return
+        endif
+
+C V0_CLEAN does nothing??? - gvb (2/25/99)
+C       IF( ev0par(1).iflag.eq.1) THEN
+C          CALL V0_CLEAN(ev0out_h,ev0out)
+C       ENDIF
+        
+
+        trak_h.nok = 0
 C     return a normal success code
-      
-      write(m132,*) 'Found ',ev0out_h.nok,' v0 candidates'
-      call StInfo(m132)
-      EV0_AM2=STAFCV_OK
- 999  CONTINUE
-      RETURN
-      END
-      
-      
+        
+        write(m132,*) 'Found ',ev0out_h.nok,' v0 candidates'
+        call StInfo(m132)
+        EV0_AM2=STAFCV_OK
+ 999    CONTINUE
+        RETURN
+        END
+
+
 
 
 

@@ -1,12 +1,6 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.40 1999/10/28 16:24:35 fine Exp $
+// $Id: St_Table.h,v 1.38 1999/09/24 21:56:08 fisyak Exp $
 // $Log: St_Table.h,v $
-// Revision 1.40  1999/10/28 16:24:35  fine
-// St_DataSet major correction: it may be built with TList (default) or with TObjArray
-//
-// Revision 1.39  1999/10/28 00:32:55  fine
-// method At() has been removed
-//
 // Revision 1.38  1999/09/24 21:56:08  fisyak
 // Add operator [] for particular table (VF)
 //
@@ -21,7 +15,7 @@
 //
 // Revision 1.34  1999/08/20 13:22:25  fine
 // new method St_Table::Draw
-//.
+//
 // Revision 1.33  1999/08/12 16:41:31  fine
 // Clean up
 //
@@ -180,7 +174,7 @@ public:
   
    virtual     void       Adopt(Int_t n, void *array);
    virtual     void       AddAt(const void *c, Int_t i);
-              const void *At(Int_t i) const;
+   virtual     const void *At(Int_t i) const;
    virtual     void       Browse(TBrowser *b);
    virtual     void       CopySet(St_Table &array);
    virtual     void       Draw(Option_t *opt);

@@ -1,10 +1,7 @@
 *
-* $Id: mzrelb.F,v 1.5 1999/10/18 16:46:03 nevski Exp $
+* $Id: mzrelb.F,v 1.4 1998/06/05 20:55:39 perev Exp $
 *
 * $Log: mzrelb.F,v $
-* Revision 1.5  1999/10/18 16:46:03  nevski
-* pgf->g77
-*
 * Revision 1.4  1998/06/05 20:55:39  perev
 * AGI commit
 *
@@ -27,7 +24,7 @@ C-    Relocator for links in banks
 C--------------    End CDE                             --------------
 #if (defined(CERNLIB_QTRHOLL))&&(!defined(CERNLIB_A6M))
       DIMENSION    NAMESR(2)
-      DATA  NAMESR / 4HMZRE, 4HLB .  /
+      DATA  NAMESR / 4HMZRE, 4HLB   /
 #endif
 #if (defined(CERNLIB_QTRHOLL))&&(defined(CERNLIB_A6M))
       DATA  NAMESR / 6HMZRELB /

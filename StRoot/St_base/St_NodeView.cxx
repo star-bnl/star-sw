@@ -265,7 +265,7 @@ St_NodeView::St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition,ED
 
   TIter next(list);
   Bool_t optSel    = (iopt == kStruct);
-//  Bool_t optAll    = (iopt == kAll);
+  Bool_t optAll    = (iopt == kAll);
   Bool_t optMarked = (iopt == kMarked);
   Int_t thisLevel = level + 1;
   while ( (position = (St_NodePosition *)next()) ) {
@@ -432,7 +432,7 @@ Int_t St_NodeView::DistancetoPrimitive(Int_t px, Int_t py)
 //   if ( TestBit(kSonsInvisible) ) return dist;
  
 //*-*- Loop on all sons
-   TSeqCollection *fNodes =  GetCollection();
+   TList *fNodes =  GetList();
    Int_t nsons = fNodes?fNodes->GetSize():0;
    Int_t dnode = dist;
    if (nsons) {
@@ -670,7 +670,7 @@ void St_NodeView::Paint(Option_t *option)
 ////---   if ( thisNode->TestBit(kSonsInvisible) ) return;
  
 //*-*- Paint all sons
-  TSeqCollection *Nodes =  GetCollection();
+  TList *Nodes =  GetList();
   Int_t nsons = Nodes?Nodes->GetSize():0;
 
   if(!nsons) return;

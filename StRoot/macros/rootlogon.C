@@ -1,8 +1,5 @@
-// $Id: rootlogon.C,v 1.15 1999/11/02 18:12:15 fine Exp $
+// $Id: rootlogon.C,v 1.14 1999/09/20 23:03:04 fisyak Exp $
 // $Log: rootlogon.C,v $
-// Revision 1.15  1999/11/02 18:12:15  fine
-// STAR_Demos.C has been removed from rootlogon.C
-//
 // Revision 1.14  1999/09/20 23:03:04  fisyak
 // Set default O0
 //
@@ -52,7 +49,7 @@
    ((TRint*)gROOT->GetApplication())->SetPrompt( gPrompt.Data()); // Redefine prompt
 
    printf("\nWelcome to the ROOT tutorials\n\n");
-   //  printf("\nType \".x STAR_Demos.C\" to get a toolbar from which to execute the STAR demos\n");
+   printf("\nType \".x STAR_Demos.C\" to get a toolbar from which to execute the STAR demos\n");
    printf("\nType \".x demos.C\" to get a toolbar from which to execute the demos\n");
    printf("\nType \".x demoshelp.C\" to see the help window\n\n");
    {

@@ -1,8 +1,11 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.1 1999/10/28 22:25:47 ullrich Exp $
+ * $Id: StHit.cxx,v 1.5 1999/05/03 01:36:18 fisyak Exp $
  *
- * Author: Thomas Ullrich, Sept 1999
+ * Author: Thomas Ullrich, Jan 1999
+ *
+ * History:
+ * 15/01/1999 T. Wenaus  Add table-based constructor
  ***************************************************************************
  *
  * Description:
@@ -10,163 +13,80 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
- * Revision 2.1  1999/10/28 22:25:47  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 1.5  1999/05/03 01:36:18  fisyak
+ * Add Print
+ *
+ * Revision 1.5  1999/05/03 01:36:18  fisyak
+ * Add Print
+ *
+ * Revision 1.4  1999/04/28 22:27:33  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.4  1999/03/23 21:51:49  ullrich
+ * Removed table-based constructor.
+ *
+ * Revision 1.3  1999/01/30 23:03:12  wenaus
+ * table load intfc change; include ref change
+ *
+ * Revision 1.2  1999/01/15 22:53:45  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 2.3  2000/06/01 21:38:53  ullrich
  * Added member mFlag and access member flag() and setFlag().
+#include "StGlobalTrack.h"
+#include "StGlobalTrack.h"
  *
- * Revision 2.2  2000/05/19 18:33:14  ullrich
- * Minor changes (add const) to cope with modified StArray.
- *
- * Revision 2.1  1999/10/28 22:25:47  ullrich
+static const Char_t rcsid[] = "$Id: StHit.cxx,v 1.5 1999/05/03 01:36:18 fisyak Exp $";
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.0  1999/10/12 18:42:17  ullrich
  * Completely Revised for New Version
  *
  **************************************************************************/
-#include "StHit.h"
 #include "StTrack.h"
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.1 1999/10/28 22:25:47 ullrich Exp $";
-
-ClassImp(StHit)
-StHit::StHit()
+	     const StThreeVectorF& e,
+	     Float_t q, UChar_t c)
+    : mPosition(p), mPositionError(e), mCharge(q), mTrackRefCount(c)
 {
-    mFlag = 0;
-    mCharge = 0;
+    : StMeasuredPoint(p), mPositionError(e), mHardwarePosition(hp),
+      mCharge(q), mTrackRefCount(c)
     mHardwarePosition = 0;
-    mTrackRefCount = 0;
-}
-
-StHit::StHit(const StThreeVectorF& p,
-             const StThreeVectorF& e,
-{ /* noop */ }
+Int_t StHit::operator==(const StHit& h) const
+    
 {
-    mFlag = 0;
-}
-
+           h.mCharge   == mCharge;
 StHit::~StHit() { /* noop */ }
 
-StObject*
-StHit::clone() { return new StHit(*this); }
+Int_t StHit::operator!=(const StHit& h) const
    
     return h.mPosition == mPosition &&
         h.mPositionError == h.mPositionError &&
         h.mCharge           == mCharge &&
-        h.mHardwarePosition == mHardwarePosition;
-           h.mCharge           == mCharge &&
-           h.mHardwarePosition == mHardwarePosition &&
-	   h.mFlag             == mFlag;
-}
+void StHit::setPosition(const StThreeVectorF& val) { mPosition = val; }
 
-Int_t
-StHit::operator!=(const StHit& h) const
-{
-    return !(*this == h);  // use operator==()
-}
-
-void
-StHit::setCharge(Float_t val) { mCharge = val; }
-
-void
-StHit::setFlag(UChar_t val) { mFlag = val; }
+void StHit::setPositionError(const StThreeVectorF& val) { mPositionError = val; }
     
-void
-StHit::setHardwarePosition(ULong_t val) { mHardwarePosition = val; }
-
-void
-StHit::setPositionError(const StThreeVectorF& e) { mPositionError = e; }
-
-UChar_t
-StHit::flag() const { return mFlag; }
-
-UChar_t
-StHit::trackReferenceCount() const { return mTrackRefCount; }
-
-StDetectorId
-StHit::detector() const
-{
-    unsigned int id = bits(0, 4);
-    switch (id) {
-    case kTpcId:
-        return kTpcId;
-    case kSvtId:
-        return kSvtId;
-    case kRichId:
-        return kRichId;
-    case kFtpcWestId:
-        return kFtpcWestId;
-    case kFtpcEastId:
-        return kFtpcEastId;
-    case kTofPatchId:
-        return kTofPatchId;
-    case kCtbId:
-        return kCtbId;
-    case kSsdId:
-        return kSsdId;
-    case kBarrelEmcTowerId:
-        return kBarrelEmcTowerId;
-    case kBarrelEmcPreShowerId:
-        return kBarrelEmcPreShowerId;
-    case kBarrelSmdEtaStripId:
-        return kBarrelSmdEtaStripId;
-    case kBarrelSmdPhiStripId:
-        return kBarrelSmdPhiStripId;
-    case kEndcapEmcTowerId:
-        return kEndcapEmcTowerId;
-    case kEndcapEmcPreShowerId:
-        return kEndcapEmcPreShowerId;
-    case kEndcapSmdEtaStripId:
-        return kEndcapSmdEtaStripId;
-    case kEndcapSmdPhiStripId:
-        return kEndcapSmdEtaStripId;
-    case kZdcWestId:
-        return kZdcWestId;
-    case kZdcEastId:
-        return kZdcEastId;
-    case kMwpcWestId:
-        return kMwpcWestId;
-    case kMwpcEastId:
-        return kMwpcEastId;
-    case kTpcSsdId:
+void StHit::setCharge(Float_t val) { mCharge = val; }
         return kTpcSsdId;
-    case kTpcSvtId:
-        return kTpcSvtId;
-    case kTpcSsdSvtId:
-        return kTpcSsdSvtId;
-    case kSsdSvtId:
+void StHit::setTrackReferenceCount(UChar_t val) { mTrackRefCount = val; }
+    
+ostream& operator<<(ostream& os, const StHit& h)
         return kSsdSvtId;
-    case kUnknownId:
-    default:
-        return kUnknownId;
-    }
-}
+    os << "Position: " << h.position() << endl;
+    os << "Error:    " << h.positionError() << endl;
+    os << "Charge:   " << h.charge() << endl;
+    os << "RefCount: " << h.trackReferenceCount() << endl;
+    return os;
 
-StThreeVectorF
-StHit::positionError() const { return mPositionError; }
-   
+//______________________________________________________________________________
+void StHit::Print(Option_t *opt)
 StMatrixF
-StHit::covariantMatrix() const
-{
-    StMatrixF m(3,3);
-    m(1,1) = mPositionError.x()*mPositionError.x();
-    m(2,2) = mPositionError.y()*mPositionError.y();
-    m(3,3) = mPositionError.z()*mPositionError.z();
-    return m;
-}
+  cout << *this << endl;
 
-StPtrVecTrack
-StHit::relatedTracks(const StSPtrVecTrackNode& nodes, StTrackType type)
-        StTrackNode *node = nodes[i];
-    StPtrVecTrack vec;
-    StPtrVecHit hvec; 
-    StDetectorId id = this->detector();
-
-    for (unsigned int i=0; i<nodes.size(); i++) {
+//______________________________________________________________________________
         const StTrackNode *node = nodes[i];
         unsigned int ntracks = node->entries(type);
         for (unsigned int k=0; k<ntracks; k++) {

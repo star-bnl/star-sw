@@ -25,7 +25,5 @@
 #pragma link C++ class St_Table3Points;
 #pragma link C++ class St_TableElementDescriptor;
 #pragma link C++ class St_tableDescriptor-;
-#pragma link C++ class St_vector3-;
-#pragma link C++ class vector3_st-!;
 #pragma link C++ enum  EReturnCodes;
 #endif

@@ -3,6 +3,7 @@
 #include "fpt_fptrack.idl"
 #include "fcl_fppoint.idl"
 #include "dst_track.idl"
+#include "dst_track_aux.idl"
 #include "dst_point.idl"
 #include "dst_vertex.idl"
 #include "dst_dedx.idl"
@@ -12,6 +13,7 @@ interface fill_ftpc_dst  : amiModule {
                 ( in    fpt_fptrack           fptrack
                 , in    fcl_fppoint           fppoint
                 , out   dst_track             dst_track
+                , out   dst_track_aux         dst_track_aux
                 , out   dst_point             dst_point
                 , out   dst_vertex            dst_vertex
                 , out   dst_dedx              dst_dedx 

@@ -15,7 +15,6 @@ my $SO_PKG = $PKG . "." . $env->{SUFSOLIB};# print "SO_PKG = $SO_PKG\n";
 my $LIBPKG = $PKG . "." . $env->{SUFLIB};
 $CPPPATH = $env->{CPPPATH} . ":#asps/agi:" . $env->{ENV}->{CERN_ROOT} . "/include:";
 $CPPFLAGS = $env->{CPPFLAGS} . " -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON -DSTAF ";
-if ($STAR_SYS =~ /egcs$/) {$CPPFLAGS .= " -DPrivateMalloc";}
 print "build root4star with cons\n";
 print "CPPPATH = \t$CPPPATH \nCPPFLAGS = \t$CPPFLAGS\n";
 my $CXXFLAGS = $env->{CXXFLAGS};

@@ -1,8 +1,5 @@
-* $Id: mountain_finder.F,v 1.10 1999/10/09 22:46:35 nevski Exp $
+* $Id: mountain_finder.F,v 1.9 1999/10/07 03:21:34 snelling Exp $
 * $Log: mountain_finder.F,v $
-* Revision 1.10  1999/10/09 22:46:35  nevski
-* pgf->g77 cleanup
-*
 * Revision 1.9  1999/10/07 03:21:34  snelling
 * changes related to StMessage
 *
@@ -175,7 +172,7 @@ c
         integer nbuck_max             ! Max range of time buckets
         integer nbuck                 ! Total number of time buckets
         integer nclpix_max            ! Max. pixels in cluster
-c liq        integer nmax_max              ! maximum number of local maxima
+cliq        integer nmax_max              ! maximum number of local maxima
         integer npads_max             ! Largest number of pads in any row
         integer n_allow               ! Most possible pixels in a cluster
 c
@@ -183,7 +180,7 @@ c
         parameter (nbuck_max = 511)
         parameter (nbuck = 512)
         parameter (nclpix_max=10000)
-c liq        parameter (nmax_max=100)
+cliq        parameter (nmax_max=100)
         parameter (npads_max=182)
         parameter (n_allow = npads_max * nbuck)
 c

@@ -71,7 +71,6 @@ C per wafer
       real       cov(3), de(2), x(3)
       real       list(2,300)
       save       first
-      real       cosd
 
 
 C     RETURN:

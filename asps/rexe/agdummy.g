@@ -51,7 +51,6 @@ Replace[LIST #;] with [ #1 _
  ]
 +CDE,GCFLAG.
   Integer  SystemF,Ix/0/;  Real x/0.0/;  Double Precision d/0.D0/
-  complex a/1/,b/1/
   list external;
 * make sure that real calls will never be done even if this routine is called
   Ix = Ix+1;  if (Ix<=0) Return;
@@ -61,10 +60,9 @@ Replace[LIST #;] with [ #1 _
   d  = dsind(d)+dasind(d)+dcosd(d)+dacosd(d)+dtand(d)+datand(d)+datan2d(d,d)
   x  = mod(Ix,ix+1)+amod(x,x+1)+dmod(d,d+1.)
   x=ifromc(' '); c=cfromi(0)
-  p_loc_hit  = malloc(4)
+ 
 * now fake calls to library - no need for arguments
   list ref;
-  a = a/ix
 *
   END
  

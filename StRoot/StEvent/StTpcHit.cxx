@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.cxx,v 2.1 1999/10/28 22:27:07 ullrich Exp $
+ * $Id: StTpcHit.cxx,v 1.7 1999/09/24 01:23:02 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,95 +10,109 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.cxx,v $
- * Revision 2.1  1999/10/28 22:27:07  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 1.7  1999/09/24 01:23:02  fisyak
+ * Reduced Include Path
+ *
+ * Revision 1.7  1999/09/24 01:23:02  fisyak
+ * Reduced Include Path
+ *
+ * Revision 1.6  1999/08/25 12:50:07  ullrich
+ * Buf fixed in unpacking the charge.
+ *
+ * Revision 1.5  1999/06/27 22:45:28  fisyak
+ * Merge StRootEvent and StEvent
+ *
+ * Revision 1.4  1999/05/05 22:36:42  fisyak
+ * restore relatedTracks
+ *
+ * Revision 1.3  1999/04/28 22:27:36  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.3  1999/03/23 21:51:09  ullrich
+ * Added table-based class specific constructor.
+ *
+ * Revision 1.2  1999/01/15 22:53:58  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 2.5  1999/12/01 15:56:28  ullrich
  * Renamed xxxInCluster() methods to xxxInHit()
- *
- * Revision 2.4  1999/11/11 10:19:52  ullrich
+#include "StGlobalTrack.h"
+#include "StGlobalTrack.h"
+#include "dst_point.h"
  * Inlined sector() and padrow().
- *
- * Revision 2.3  1999/11/09 19:35:25  ullrich
+static const Char_t rcsid[] = "$Id: StTpcHit.cxx,v 1.7 1999/09/24 01:23:02 fisyak Exp $";
+#include "tables/dst_point.h"
  * Memory now allocated using StMemoryPool via overloaded new/delete
  *
+StCollectionImp(TpcHit)
  * Revision 2.2  1999/11/04 21:41:00  ullrich
- * Added missing default constructor
- *
- * Revision 2.1  1999/10/28 22:27:07  ullrich
+	           const StThreeVectorF& e,
+	           Float_t q, UChar_t c)  : StHit(p, e, q, c)
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
-#include "StTpcHit.h"
-#include "StTrack.h"
+StTpcHit::StTpcHit(dst_point_st* pt)
+{    
+    //
+    // Decode position. cf. pams/global/dst/dst_point_filler.F
+    //                      pams/global/dst/dst_point_unpack.F
+    //   
+    if (!pt) {                 // nothing to be done
+	mCharge = 0;
+	mTrackRefCount = 0;
+	return;
+    }
+
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.1 1999/10/28 22:27:07 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcHit.cxx,v 1.7 1999/09/24 01:23:02 fisyak Exp $";
 
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 
-ClassImp(StTpcHit)
-
+    const ULong_t tpcdq = pt->charge/(1L<<16);
+    const ULong_t tpcq  = pt->charge - tpcdq*(1L<<16);
 StTpcHit::StTpcHit() { /* noop */ }
 
 StTpcHit::StTpcHit(const StThreeVectorF& p,
                    const StThreeVectorF& e,
                    ULong_t hw, Float_t q, UChar_t c)
     : StHit(p, e, hw, q, c)
-{ /* noop */ }
-
-StTpcHit::StTpcHit(const dst_point_st& pt)
-{
-    //
-    // Unpack charge:
-    // The charge is decoded together with its error.
+    const Float_t mapFactor  = 2380;   
+    ULong_t tpcy11 = pt->position[0]/(1L<<20);
+    ULong_t tpcz   = pt->position[1]/(1L<<10);
+    ULong_t tpcx   = pt->position[0] - (1L<<20)*tpcy11;
+    ULong_t tpcy10 = pt->position[1] - (1L<<10)*tpcz;
+    ULong_t tpcy   = tpcy11 + (1L<<10)*tpcy10;	
+    mPosition.setX(Float_t(tpcx)/mapFactor - maxRange); 
     // Currently only the charge is used but the corresponding
     // error can easily be added.
     //
     const ULong_t tpcdq = pt.charge/(1L<<16);
     const ULong_t tpcq  = pt.charge - tpcdq*(1L<<16);
     mCharge = Float_t(tpcq)/(1<<25);
-
-    //
-    // Unpack position in xyz
-    //
+    tpcy11 = pt->pos_err[0]/(1L<<20);
+    tpcz   = pt->pos_err[1]/(1L<<10);
+    tpcx   = pt->pos_err[0] - (1L<<20)*tpcy11;
+    tpcy10 = pt->pos_err[1] - (1L<<10)*tpcz;
     const Float_t maxRange   = 220;
-    const Float_t mapFactor  = 2380;
+    mPositionError.setX(Float_t(tpcx)/(1L<<17)); 
     ULong_t tpcy11 = pt.position[0]/(1L<<20);
     ULong_t tpcz   = pt.position[1]/(1L<<10);
-    ULong_t tpcx   = pt.position[0] - (1L<<20)*tpcy11;
-    ULong_t tpcy10 = pt.position[1] - (1L<<10)*tpcz;
-    ULong_t tpcy   = tpcy11 + (1L<<10)*tpcy10;
-    mPosition.setX(Float_t(tpcx)/mapFactor - maxRange);
-    mPosition.setY(Float_t(tpcy)/mapFactor - maxRange);
-    mPosition.setZ(Float_t(tpcz)/mapFactor - maxRange);
+}
+
+StVecPtrGlobalTrack StTpcHit::relatedTracks(const StTrackCollection& c)
+{
+    StVecPtrGlobalTrack  result;
+    StGlobalTrack        *track;
+    StTrackConstIterator iter;
     
-    //
-    // Unpack error on position in xyz
-    //
-    tpcy11 = pt.pos_err[0]/(1L<<20);
-    tpcz   = pt.pos_err[1]/(1L<<10);
-    tpcx   = pt.pos_err[0] - (1L<<20)*tpcy11;
-    tpcy10 = pt.pos_err[1] - (1L<<10)*tpcz;
-    tpcy   = tpcy11 + (1L<<10)*tpcy10;
-    mPositionError.setX(Float_t(tpcx)/(1L<<17));
-    mPositionError.setY(Float_t(tpcy)/(1L<<17));
-    mPositionError.setZ(Float_t(tpcz)/(1L<<17));
-
-    //
-    // The hardware position stays at it is
-    //
-    mHardwarePosition = pt.hw_position;
-}
-
-StTpcHit::sector() const
-{
-    return bits(4, 5)-1;   // bits 4-8
-}
-
-ULong_t
-StTpcHit::padrow() const
-{
-    return bits(9, 6)-1;   // bits 9-14
+    for (iter = c.begin(); iter != c.end(); iter++) {
+	track = *iter;
+	const StVecPtrTpcHit &hits = track->tpcHits();
+	//	if (find(hits.begin(), hits.end(), this) != hits.end())
+	if (hits.FindObject(this))
+	    result.push_back(track);
+    }
+    return result;
 }
 
 ULong_t

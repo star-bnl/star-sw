@@ -1,8 +1,5 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.19 1999/10/15 00:53:52 nevski Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.18 1999/10/07 03:21:38 snelling Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
-* Revision 1.19  1999/10/15 00:53:52  nevski
-* pgf->g77 cleanup
-*
 * Revision 1.18  1999/10/07 03:21:38  snelling
 * changes related to StMessage
 *
@@ -222,7 +219,7 @@ c
         real adc_ipix           ! ADC for pixel
         real adc_sum            ! ADC sum in cluster
         real b                  ! Intercept of linear fit
-        real badness            ! 'Badness' of linear fit
+        real badness            ! "Badness" of linear fit
         real d_rvec(nbuck)      ! temp array
         real d_rvec_cor(nbuck)  ! SCA noise
         real d_rvec_uncor(nbuck) ! SAS noise

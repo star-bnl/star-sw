@@ -1,10 +1,7 @@
 *
-* $Id: mzpush.F,v 1.5 1999/10/18 16:46:02 nevski Exp $
+* $Id: mzpush.F,v 1.4 1998/06/05 20:55:37 perev Exp $
 *
 * $Log: mzpush.F,v $
-* Revision 1.5  1999/10/18 16:46:02  nevski
-* pgf->g77
-*
 * Revision 1.4  1998/06/05 20:55:37  perev
 * AGI commit
 *
@@ -31,7 +28,7 @@ C--------------    End CDE                             --------------
       CHARACTER    *(*) CHOPT
 #if (defined(CERNLIB_QTRHOLL))&&(!defined(CERNLIB_A6M))
       DIMENSION    NAMESR(2)
-      DATA  NAMESR / 4HMZPU, 4HSH .  /
+      DATA  NAMESR / 4HMZPU, 4HSH   /
 #endif
 #if (defined(CERNLIB_QTRHOLL))&&(defined(CERNLIB_A6M))
       DATA  NAMESR / 6HMZPUSH /

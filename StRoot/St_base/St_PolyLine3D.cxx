@@ -14,6 +14,8 @@
 #include "TVirtualPad.h"
 //*KEEP,TPostScript.
 #include "TPostScript.h"
+//*KEEP,TGXW.
+#include "TGXW.h"
 //*KEEP,TPoint.
 #include "TPoint.h"
 //*KEEP,TGLKernelABC,T=C++.

@@ -2,23 +2,8 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.16 1999/10/29 23:23:26 caines Exp $
+// $Id: StPrimaryMaker.cxx,v 1.11 1999/09/13 23:28:33 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
-// Revision 1.16  1999/10/29 23:23:26  caines
-// Removed scenario methods
-//
-// Revision 1.15  1999/10/27 19:31:16  nystrand
-// Added call to lmv
-//
-// Revision 1.14  1999/10/19 00:11:30  fisyak
-// Remove aux tables
-//
-// Revision 1.13  1999/09/30 13:34:21  wdeng
-// Diminish the degree or radian bug
-//
-// Revision 1.12  1999/09/29 20:29:06  wdeng
-// Accommodate dst_track and dst_vertex change
-//
 // Revision 1.11  1999/09/13 23:28:33  caines
 // Changed egrpars so doesn't use SVT only tracks by default
 //
@@ -56,10 +41,6 @@
 #include "TMath.h"
 #include "StPrimaryMaker.h"
 
-#include "math_constants.h"
-
-#include "StVertexId.h"
-
 #include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
@@ -69,8 +50,6 @@
 #include "global/St_evr_am_Module.h"
 #include "global/St_egr_fitter_Module.h"
 #include "global/St_track_propagator_Module.h"
-
-long lmv(St_dst_track *track, St_dst_vertex *vertex);
 
 //class St_tcl_tpcluster;
 //class St_scs_cluster;
@@ -133,6 +112,7 @@ Int_t StPrimaryMaker::Init(){
   {  
     egr_egrpar_st row;
     memset(&row,0,m_egr_egrpar->GetRowSize());
+    row.scenario =  0;
     row.mxtry =    10;
     row.minfit =    5;
     row.prob[0] =   2;
@@ -162,6 +142,7 @@ Int_t StPrimaryMaker::Make(){
   St_dst_track     *globtrk  = (St_dst_track *) matchI("globtrk");
   St_svm_evt_match *evt_match = (St_svm_evt_match *) matchI("evt_match");
   St_dst_track     *primtrk     = 0;   
+  St_dst_track_aux *primtrk_aux = 0;   
   St_dst_vertex *vertex = new St_dst_vertex("vertex",1); 
   AddData(vertex);   
   
@@ -210,21 +191,11 @@ Int_t StPrimaryMaker::Make(){
     if( !stk_track){ stk_track = new St_stk_track("stk_tracks",5000); AddGarb(stk_track);}
   } 
   
-
-  // Switch to Low Multiplicity Primary Vertex Finder for multiplicities < 15
-  long NGlbTrk = tptrack->GetNRows();
-  if( NGlbTrk < 15 ){
-    // lmv
-    if(Debug()) gMessMgr->Debug() << "run_lmv: calling lmv" << endm;
-    iRes = lmv(globtrk,vertex);
-    //   ================================================
-  }
-  else{    
-    // evr
-    if(Debug()) gMessMgr->Debug() << "run_evr: calling evr_am" << endm;
-    iRes = evr_am(m_evr_evrpar,globtrk,vertex);
-    //	 ================================================
-  }
+  // evr
+  if(Debug()) gMessMgr->Debug() << "run_evr: calling evr_am" << endm;
+  
+  iRes = evr_am(m_evr_evrpar,m_egr_egrpar,globtrk,vertex);
+  //	 ================================================
   
   if (iRes !=kSTAFCV_OK) return kStWarn;
   
@@ -255,21 +226,18 @@ Int_t StPrimaryMaker::Make(){
   dst_track_st *glob  = globtrk->GetTable();
   dst_track_st *glob2 = globtrk2->GetTable();
   dst_vertex_st *vrtx = vertex->GetTable();
-  if( vrtx->vtx_id != kEventVtxId || vrtx->iflag != 1){
+  if( vrtx->vtx_id != 1 || vrtx->iflag != 1){
     for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,vrtx++){
-      if( vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1 ) break;
+      if( vrtx->vtx_id == 1 && vrtx->iflag == 1 ) break;
     }
   }
-  if (vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1) {
+  if (vrtx->vtx_id == 1 && vrtx->iflag == 1) {
     
     Float_t *v0 = &vrtx->x;
     for( Int_t no_rows=0; no_rows<globtrk2->GetNRows() &&
                           no_rows<globtrk->GetNRows(); no_rows++, glob++,glob2++)
       {
-	Float_t xStart = glob2->r0 * cos(glob2->phi0 * C_RAD_PER_DEG);
-	Float_t yStart = glob2->r0 * sin(glob2->phi0 * C_RAD_PER_DEG);
-	Float_t zStart = glob2->z0;
-	double qwe = pow(xStart-v0[0],2)+pow(yStart-v0[1],2)+pow(zStart-v0[2],2);
+	double qwe = pow(glob2->x0-v0[0],2)+pow(glob2->y0-v0[1],2)+pow(glob2->z0-v0[2],2);
 	
 	glob->impact = TMath::Sqrt(qwe);
       }
@@ -281,13 +249,15 @@ Int_t StPrimaryMaker::Make(){
       int nglob = globtrk->GetNRows();
       primtrk = new St_dst_track("primtrk",nglob);
       AddData(primtrk);
+      primtrk_aux = new St_dst_track_aux("primtrk_aux",nglob);
+      AddData(primtrk_aux);
       
       if(Debug())
         gMessMgr->Debug() << "Calling EGR_fitter - Second time" << endm;
       
       iRes = egr_fitter (tphit,    vertex,       tptrack,  evaltrk,
 			 scs_spt,m_egr2_egrpar,stk_track,groups,
-			 evt_match,primtrk);
+			 evt_match,primtrk,primtrk_aux);
       //	   ======================================================
       
       if (iRes !=kSTAFCV_OK) iMake = kStWarn;

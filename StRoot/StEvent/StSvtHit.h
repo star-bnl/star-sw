@@ -1,8 +1,8 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.h,v 2.1 1999/10/28 22:26:44 ullrich Exp $
+ * $Id: StSvtHit.h,v 1.5 1999/05/03 01:36:18 fisyak Exp $
  *
- * Author: Thomas Ullrich, Sep 1999
+ * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
  *
  * Description:
@@ -10,36 +10,62 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.h,v $
- * Revision 2.1  1999/10/28 22:26:44  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 1.5  1999/05/03 01:36:18  fisyak
+ * Add Print
+ *
+ * Revision 1.5  1999/05/03 01:36:18  fisyak
+ * Add Print
+ *
+ * Revision 1.4  1999/05/02 00:00:17  fisyak
+ * Add default ctors
+ *
+ * Revision 1.3  1999/04/28 22:27:36  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.6  1999/03/23 21:51:16  ullrich
+ * Added table-based class specific constructor.
+ *
+ * Revision 1.5  1999/03/04 18:17:21  ullrich
+ * Namespace std not used if ST_NO_NAMESPACES defined
+ *
+ * Revision 1.4  1999/03/04 15:57:02  wenaus
+ * add std namespace for Sun CC5 compatibility
+ *
+ * Revision 1.3  1999/01/26 16:33:17  wenaus
+ * StXXXHit table constructors
+ *
+ * Revision 1.2  1999/01/15 22:53:55  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 2.4  1999/11/11 11:03:57  ullrich
  * Inlined layer(), sector() and ladder().
  *
- * Revision 2.3  1999/11/09 19:35:22  ullrich
+class StVecPtrGlobalTrack;
+class StGlobalTrackCollection;
+#include "StArray.h"
  * Memory now allocated using StMemoryPool via overloaded new/delete
+#include "StGlobalTrack.h"
  *
  * Revision 2.2  1999/11/04 21:40:57  ullrich
+#if !defined(ST_NO_NAMESPACES)
+using namespace std;
+#endif
+
  * Added missing default constructor
  *
- * Revision 2.1  1999/10/28 22:26:44  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
- *
- * Revision 2.0  1999/10/12 18:42:45  ullrich
- * Completely Revised for New Version
- **************************************************************************/
-#ifndef StSvtHit_hh
-#define StSvtHit_hh
-
-#include "StHit.h"
-#include "StMemoryPool.hh"
-class dst_point_st;
-
-class StSvtHit : public StHit {
+  StSvtHit(){/* noop */};
+  StSvtHit(const StThreeVectorF&,
+	   const StThreeVectorF&,
+	   Float_t, UChar_t = 0);
+  StSvtHit(dst_point_st*);
+#ifndef __CINT__    
+  StVecPtrGlobalTrack relatedTracks(const StGlobalTrackCollection&);
+#endif
+  ClassDef(StSvtHit,1)  //StSvtHit structure
 public:
+StCollectionDef(SvtHit)
+
     StSvtHit();
-    StSvtHit(const StThreeVectorF&,
-             const StThreeVectorF&,
 
     ULong_t layer() const;
     ULong_t ladder() const;

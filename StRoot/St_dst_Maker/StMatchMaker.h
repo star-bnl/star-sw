@@ -5,11 +5,8 @@
 //                                                                      //
 // StMatchMaker virtual base class for Maker                            //
 //                                                                      //
-// $Id: StMatchMaker.h,v 1.6 1999/10/29 23:23:26 caines Exp $
+// $Id: StMatchMaker.h,v 1.5 1999/07/15 13:57:53 perev Exp $
 // $Log: StMatchMaker.h,v $
-// Revision 1.6  1999/10/29 23:23:26  caines
-// Removed scenario methods
-//
 // Revision 1.5  1999/07/15 13:57:53  perev
 // cleanup
 //
@@ -38,9 +35,38 @@ class StMatchMaker : public StMaker {
   
  private:
   Bool_t drawinit;
-  // static Char_t m_VersionCVS = "$Id: StMatchMaker.h,v 1.6 1999/10/29 23:23:26 caines Exp $";
+  // static Char_t m_VersionCVS = "$Id: StMatchMaker.h,v 1.5 1999/07/15 13:57:53 perev Exp $";
   // egr
-
+  Int_t         m_scenario;   
+  //#1: Real TPC Stand-Alone Tracking: Use this when running the TPC only.  
+  //    EGR will refit the TPC tracks, reproducing the parameters in tptrack.
+  //#2: Perfect TPC Stand-Alone Tracking: Use this when running the TPC only.  
+  //    EGR will perform a direct copy of tptrack into globtrk.
+  //#3: Real SVT Stand-Alone Tracking: Use this when running the SVT only.  
+  //    EGR will refit the SVT tracks, reproducing the parameters in svt_track, sort of.
+  //#4: Perfect SVT Stand-Alone Tracking: Use this when running the SVT only.  
+  //    EGR will copy the svt_track table directly into globtrk.
+  //#5: Fit TPC tracks to the event vertex: Will refit the TPC tracks including 
+  //    the event vertex point.
+  //#6: Real SVT+TPC Matched Tracking: Refits the SVT and TPC tracks matched 
+  //    by the svm matcher. Copies only tracks with a TPC track in it to globtrk.
+  //#7: Perfect SVT+TPC Tracking: Copies SVT and TPC tracks matched using the 
+  //    Monte Carlo ID. Copies only tracks with a TPC track in it to globtrk. Mtm from
+  //    tpc track, angles from svt track
+  //#8: Improved Real SVT+TPC Matched Tracking: Refits the SVT and TPC tracks 
+  //    matched by the svm matcher. Fills globtrk with all matched SVT+TPC tracks, 
+  //    followed by all eftover TPC tracks, followed by all leftover SVT tracks with a
+  //    chi-square(1) fit better than epar.svtchicut
+  //#9: Improved Perfect SVT+TPC Tracking: Refits the SVT and TPC tracks matched using 
+  //    the Monte Carlo ID. Fills globtrk with all matched SVT+TPC tracks, followed by 
+  //    all leftover TPC tracks, followed by all leftover SVT tracks with a chi-square(1) 
+  //    fit better than epar.svtchicut
+  //#10:Refits the SVT and TPC matched tracks followed by unmatched tracks
+  //    Fills globtrk with all matched SVT+TPC tracks, followed by all
+  //    leftover TPC tracks copied from tpctrack.
+  //    The matched tracks are straight copies of svt_track but with
+  //    the 1/pt value taken from tptrack.
+  //#11:Description Perfect SVT/TPC matching (M.C.). Only tracks w/ TPC into 
   Int_t         m_svtchicut;  // = 0 all unmatched svt tracks copied
   Int_t         m_useglobal;  
   // = 1 - Perfect matching between tpc and svt (checks mc_ids)
@@ -72,6 +98,7 @@ class StMatchMaker : public StMaker {
   virtual       ~StMatchMaker();
   virtual Int_t  Init();
   virtual Int_t  Make();
+  virtual void   Set_scenario (Int_t m = 8){m_scenario  = m;} // *MENU*
   virtual void   Set_svtchicut(Int_t m = 0){m_svtchicut = m;} // *MENU*
   virtual void   Set_useglobal(Int_t m = 2){m_useglobal = m;} // *MENU*
   virtual void   Set_usesvt   (Int_t m = 1){m_usesvt    = m;} // *MENU*
@@ -79,7 +106,7 @@ class StMatchMaker : public StMaker {
   virtual void   Set_usevert  (Int_t m = 0){m_usevert   = m;} // *MENU*
   virtual void   Set_flag     (Int_t m = 0){m_flag = m;}      // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMatchMaker.h,v 1.6 1999/10/29 23:23:26 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMatchMaker.h,v 1.5 1999/07/15 13:57:53 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StMatchMaker, 1)   //StAF chain virtual base class for Makers
 };

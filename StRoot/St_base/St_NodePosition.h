@@ -1,9 +1,6 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98   
-// $Id: St_NodePosition.h,v 1.18 1999/10/28 16:24:31 fine Exp $
+// $Id: St_NodePosition.h,v 1.17 1999/09/27 23:45:43 fine Exp $
 // $Log: St_NodePosition.h,v $
-// Revision 1.18  1999/10/28 16:24:31  fine
-// St_DataSet major correction: it may be built with TList (default) or with TObjArray
-//
 // Revision 1.17  1999/09/27 23:45:43  fine
 // Several methods to calculate errors were introduced
 //
@@ -74,7 +71,9 @@ class TRotMatrix;
   
 class St_NodePosition  : public TObject /*, public St_DefineSet */ {
  protected:
-   Double_t        fX[3];        //X offset with respect to parent object
+   Double_t        fX;           //X offset with respect to parent object
+   Double_t        fY;           //Y offset with respect to parent object
+   Double_t        fZ;           //Z offset with respect to parent object
    TRotMatrix     *fMatrix;      //Pointer to rotation matrix
    St_Node        *fNode;        //Refs pointer to the node defined
    UInt_t          fId;          // Unique ID of this position
@@ -82,8 +81,8 @@ class St_NodePosition  : public TObject /*, public St_DefineSet */ {
  public:
         St_NodePosition(St_Node *node=0,Double_t x=0, Double_t y=0, Double_t z=0, TRotMatrix *matrix=0);
         St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t z, const Text_t *matrixname);
-        St_NodePosition(const St_NodePosition&pos): fMatrix(pos.GetMatrix()),fNode(pos.GetNode()),fId(pos.GetId())
-                                                    {for (int i=0;i<3;i++) fX[i] = pos.GetX(i);}
+        St_NodePosition(const St_NodePosition&pos):fX(pos.GetX()),fY(pos.GetY()),fZ(pos.GetZ()),
+                                 fMatrix(pos.GetMatrix()),fNode(pos.GetNode()),fId(pos.GetId()){;}
         virtual ~St_NodePosition(){;}
         virtual void        Browse(TBrowser *b);
         virtual Float_t    *Errmx2Master(const Float_t *localError, Float_t *masterError);
@@ -100,9 +99,9 @@ class St_NodePosition  : public TObject /*, public St_DefineSet */ {
 	const   Option_t    *GetOption() const { return GetNode()?GetNode()->GetOption():0;}
         virtual const Char_t *GetName() const { return GetNode() ? GetNode()->GetName():IsA()->GetName();}
 	Int_t               GetVisibility() const {return GetNode()?GetNode()->GetVisibility():0;}
-        virtual Double_t    GetX(Int_t indx=0) const {return fX[indx];}
-        virtual Double_t    GetY() const {return fX[1];}
-        virtual Double_t    GetZ() const {return fX[2];}
+        virtual Double_t    GetX() const {return fX;}
+        virtual Double_t    GetY() const {return fY;}
+        virtual Double_t    GetZ() const {return fZ;}
         virtual UInt_t      GetId() const {return fId;}
         Bool_t              IsFolder() {return GetNode()?kTRUE:kFALSE;}
 //        Bool_t              IsFolder() {return kFALSE;}
@@ -117,11 +116,11 @@ class St_NodePosition  : public TObject /*, public St_DefineSet */ {
         virtual void        SetLineAttributes(); // *MENU*
         virtual void        SetMatrix(TRotMatrix *matrix=0) {fMatrix = matrix;}
         virtual void        SetNode(St_Node *node){ fNode = node;}
-        virtual void        SetPosition( Double_t x=0, Double_t y=0, Double_t z=0) {fX[0]=x; fX[1]=y; fX[2]=z;}
+        virtual void        SetPosition( Double_t x=0, Double_t y=0, Double_t z=0) {fX=x; fY=y; fZ=z;}
         virtual void        SetVisibility(Int_t vis=1); // *MENU*
-        virtual void        SetX(Double_t x){ fX[0]  =  x;}
-        virtual void        SetY(Double_t y){ fX[1]  =  y;}
-        virtual void        SetZ(Double_t z){ fX[2]  =  z;}
+        virtual void        SetX(Double_t x){ fX  =  x;}
+        virtual void        SetY(Double_t y){ fY  =  y;}
+        virtual void        SetZ(Double_t z){ fZ  =  z;}
         virtual void        SetId(UInt_t id){fId  = id;}
 //        virtual void        UpdateMatrix();
 //        virtual void        UpdateTempMatrix(Double_t *dx1,Double_t *rmat1

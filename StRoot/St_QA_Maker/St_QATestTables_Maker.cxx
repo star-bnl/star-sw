@@ -1,8 +1,5 @@
-// $Id: St_QATestTables_Maker.cxx,v 1.4 1999/09/29 16:46:26 kathy Exp $
+// $Id: St_QATestTables_Maker.cxx,v 1.3 1999/09/23 16:04:31 kathy Exp $
 // $Log: St_QATestTables_Maker.cxx,v $
-// Revision 1.4  1999/09/29 16:46:26  kathy
-// changed code so it would compile in .dev due to changes in DST tables - I even used cons instead of makel - wow! - I just changed variables or commented out some histograms that use now-non-existant variables so it would compile - later I will go through and redefine histograms as needed
-//
 // Revision 1.3  1999/09/23 16:04:31  kathy
 // change paths for include files to standard way according to Yuri's request
 //
@@ -31,6 +28,9 @@
 #include "TMath.h"
 #include "St_QATestTables_Maker.h"
 
+// tables currently in 99e,99f
+#include "tables/St_dst_event_summary_Table.h"
+#include "tables/St_dst_event_header_Table.h"
 #include "tables/St_dst_track_Table.h" 
 
 #include "StChain.h"
@@ -154,6 +154,22 @@ void St_QATestTables_Maker::TestTables_testGlobtrk(St_DataSet *dst){
 	 Float_t pT = -999.;
 	 pT = 1./TMath::Abs(t->invpt);
  
+	 //      Float_t lmevpt = log10(pT*1000.0);
+	 //      Float_t theta = asin(1.) - atan(t->tanl);
+	 //      Float_t eta   =-log(tan(theta/2.));
+	 // 	 Float_t gmom  = pT/sin(theta);
+	 //      Float_t lmevmom = log10(gmom*1000.0); 
+	 //	 Float_t chisq0 = t->chisq[0];
+	 //	 Float_t chisq1 = t->chisq[1]; 
+	 //	 Float_t degoffree = t->n_fit_point;
+	 //	 Float_t chisq0_p = chisq0/(degoffree-3);
+	 //	 Float_t chisq1_p = chisq1/(degoffree-2);
+	 //      Float_t nfitntot = (float(t->n_fit_point))/(float(t->n_point));
+	 //      Float_t xdif =  (t->x_first[0])-(t->x0);
+         //      Float_t ydif =  (t->x_first[1])-(t->y0);
+         //      Float_t zdif =  (t->x_first[2])-(t->z0);
+         //      Float_t radf = pow((t->x_first[0]),2) + pow((t->x_first[1]),2);
+         //       radf = sqrt(radf);
          if (pT==-999.){ cout << " strange pT in globtrk " << endl; }
 	 if (pT >= 0 && pT <= 5)
          {
@@ -195,7 +211,22 @@ void St_QATestTables_Maker::TestTables_testPrimtrk(St_DataSet *dst){
         number_good_trk_prim++;
 	Float_t pT = -999.;
 	pT = 1./TMath::Abs(t->invpt);
-
+	// Float_t lmevpt = log10(pT*1000.0);
+	//Float_t theta = asin(1.) - atan(t->tanl);
+	//Float_t eta   =-log(tan(theta/2.));
+	//Float_t gmom  = pT/sin(theta);
+        //Float_t lmevmom = log10(gmom*1000.0); 
+	//Float_t chisq0 = t->chisq[0];
+	//Float_t chisq1 = t->chisq[1]; 
+	//Float_t degoffree = t->n_fit_point;
+	//Float_t chisq0_p = chisq0/(degoffree-3);
+	//Float_t chisq1_p = chisq1/(degoffree-2);
+        //Float_t nfitntot = (float(t->n_fit_point))/(float(t->n_point));
+        //Float_t xdif = (t->x_first[0]) - (t->x0);
+        //Float_t ydif = (t->x_first[1]) - (t->y0);
+        //Float_t zdif = (t->x_first[2]) - (t->z0);
+        //Float_t radf = pow((t->x_first[0]),2) + pow((t->x_first[1]),2);
+        //        radf = sqrt(radf); 
         if (pT==-999.){ cout << " strange pT in primtrk " << endl;} 
         if(pT >= 0 && pT <= 5) 
 	  {
@@ -260,7 +291,7 @@ void St_QATestTables_Maker::TestTablesFinish(){
 //---------------------------------------------------------------------------------------
 void St_QATestTables_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QATestTables_Maker.cxx,v 1.4 1999/09/29 16:46:26 kathy Exp $\n");
+  printf("* $Id: St_QATestTables_Maker.cxx,v 1.3 1999/09/23 16:04:31 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();

@@ -1,9 +1,6 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_NodePosition.cxx,v 1.22 1999/10/28 16:24:31 fine Exp $
+// $Id: St_NodePosition.cxx,v 1.21 1999/09/29 00:31:51 fine Exp $
 // $Log: St_NodePosition.cxx,v $
-// Revision 1.22  1999/10/28 16:24:31  fine
-// St_DataSet major correction: it may be built with TList (default) or with TObjArray
-//
 // Revision 1.21  1999/09/29 00:31:51  fine
 // RMath class has been repleaced with StCL one
 //
@@ -125,7 +122,7 @@ ClassImp(St_NodePosition)
  
 //______________________________________________________________________________
 St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t z, const Text_t *matrixname)
-: fMatrix(0),fNode(node),fId(0)
+: fNode(node),fX(x),fY(y),fZ(z),fMatrix(0),fId(0)
 {
 //*-*-*-*-*-*-*-*-*-*-*Node normal constructor*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 //*-*                  ======================
@@ -137,7 +134,6 @@ St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t 
 //*-*
 //*-*    This new node is added into the list of sons of the current node
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-   fX[0] = x; fX[1] =y; fX[2] = z;
    if (!node) return;
    static Int_t counter = 0;
    counter++;
@@ -150,7 +146,7 @@ St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t 
  
 //______________________________________________________________________________
 St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t z, TRotMatrix *matrix)
-               : fMatrix(matrix),fNode(node),fId(0)
+               : fNode(node),fX(x),fY(y),fZ(z),fMatrix(matrix),fId(0)
 {
 //*-*-*-*-*-*-*-*-*-*-*Node normal constructor*-*-*-*-*-*-*-*-*-*-*
 //*-*                  ================================
@@ -162,7 +158,6 @@ St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t 
 //*-*
 //*-*    This new node is added into the list of sons of the current node
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 
-   fX[0] = x; fX[1] = y; fX[2] = z;
    if (!fMatrix) fMatrix = St_Node::GetIdentity();
 }
 //______________________________________________________________________________
@@ -175,8 +170,8 @@ void St_NodePosition::Browse(TBrowser *b)
         TShape *shape = GetNode()->GetShape();
         b->Add(GetNode(),shape?shape->GetName():GetNode()->GetName());
    }
-//    if( GetCollection() ) {
-//       GetCollection()->Browse( b );
+//    if( GetList() ) {
+//       GetList()->Browse( b );
 //    }
    else {
        Draw();
@@ -296,14 +291,33 @@ Double_t *St_NodePosition::Local2Master(const Double_t *local, Double_t *master,
   if (!fMatrix ||  fMatrix == St_Node::GetIdentity() || !(matrix = fMatrix->GetMatrix()) ) 
   {
     trans = master;
-    for (int i =0; i < nPoints; i++,local += 3, master += 3) StCL::vadd(local,fX,master,3);
+    for (int i =0; i < nPoints; i++) {
+      master[0] = GetX() + local[0];
+      master[1] = GetY() + local[1]; 
+      master[2] = GetZ() + local[2];
+      local += 3; master += 3;
+    }
   }
   else 
   {
+    Double_t x,y,z;
     trans = master;
-    for (int i =0; i < nPoints; i++, local += 3, master += 3) {
-      StCL::mxmpy(matrix,local,master,3,3,1);
-      StCL::vadd(master,fX,master,3);      
+    for (int i =0; i < nPoints; i++) {
+      x = GetX()
+            + local[0]*matrix[0]
+            + local[1]*matrix[3]
+            + local[2]*matrix[6];
+      y = GetY()
+            + local[0]*matrix[1]
+            + local[1]*matrix[4]
+            + local[2]*matrix[7];
+
+      z = GetZ()
+            + local[0]*matrix[2]
+            + local[1]*matrix[5]
+            + local[2]*matrix[8];
+      master[0] = x; master[1] = y; master[2] = z;                 
+      local += 3; master += 3;
     }
   }
   return trans;
@@ -325,17 +339,33 @@ Float_t *St_NodePosition::Local2Master(const Float_t *local, Float_t *master, In
   if (!fMatrix ||  fMatrix == St_Node::GetIdentity() || !(matrix = fMatrix->GetMatrix()) ) 
   {
     trans = master;
-    for (int i =0; i < nPoints; i++,local += 3, master += 3) StCL::vadd(local,fX,master,3);
+    for (int i =0; i < nPoints; i++) {
+      master[0] = GetX() + local[0];
+      master[1] = GetY() + local[1]; 
+      master[2] = GetZ() + local[2];
+      local += 3; master += 3;
+    }
   }
   else 
   {
+    Double_t x,y,z;
     trans = master;
-    for (int i =0; i < nPoints; i++, local += 3, master += 3) {
-      Double_t dlocal[3];   Double_t dmaster[3];
-      StCL::ucopy(local,dlocal,3);
-      StCL::mxmpy(matrix,dlocal,dmaster,3,3,1);
-      StCL::vadd(dmaster,fX,dmaster,3);      
-      StCL::ucopy(dmaster,master,3);
+    for (int i =0; i < nPoints; i++) {
+      x = GetX()
+            + local[0]*matrix[0]
+            + local[1]*matrix[3]
+            + local[2]*matrix[6];
+      y = GetY()
+            + local[0]*matrix[1]
+            + local[1]*matrix[4]
+            + local[2]*matrix[7];
+
+      z = GetZ()
+            + local[0]*matrix[2]
+            + local[1]*matrix[5]
+            + local[2]*matrix[8];
+      master[0] = x; master[1] = y; master[2] = z;                 
+      local += 3; master += 3;
     }
   }
   return trans;
@@ -352,6 +382,7 @@ void St_NodePosition::Paint(Option_t *)
 //_______________________________________________________________________
 void St_NodePosition::Print(Option_t *option)
 {
+  St_Node *myNode = GetNode();
   cout << " Node: " <<   GetNode()->GetName() << endl;
   cout << " Position: x=" <<
           GetX() << " : y=" << 
@@ -382,7 +413,7 @@ St_NodePosition *St_NodePosition::Reset(St_Node *node,Double_t x, Double_t y, Do
 //*-*    x,y,z   are the offsets of the volume with respect to his mother
 //*-*    matrix  is the pointer to the rotation matrix
 //*-*
-//*-*    This method is to re-use the memory this object without delete/create steps
+//*-*    This method is to re-use the mempry this object without delete/creae steps
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 
    fNode = node;
    SetPosition(x,y,z);
@@ -422,11 +453,11 @@ void St_NodePosition::UpdatePosition(Option_t *)
   TPadView3D *view3D=gPad->GetView3D();
 //*-*- Update translation vector and rotation matrix for new level
   if (gGeometry->GeomLevel() && fMatrix) {
-     gGeometry->UpdateTempMatrix(fX[0],fX[1],fX[2]
+     gGeometry->UpdateTempMatrix(fX,fY,fZ
                                 ,fMatrix->GetMatrix()
                                 ,fMatrix->IsReflection());
      if (view3D)
-        view3D->UpdatePosition(fX[0],fX[1],fX[2],fMatrix);
+        view3D->UpdatePosition(fX,fY,fZ,fMatrix);
   }
 }
 
