@@ -6,11 +6,11 @@ MACRO run_srs
         [data]/svt/hits/srs_result _
         [geant_Event]/g2t_svt_hit _
         [data]/svt/hits/scs_spt _
-        [geometry]/svt/geom _
-        [geometry]/svt/config _
-        [geometry]/svt/shape _
-        [params]/svt/srs_srspar _
-        [params]/svt/srs_direct _
-        [geometry]/svt/srs_activea 
+        [params]/svt/svgpars/geom _
+        [params]/svt/svgpars/config _
+        [params]/svt/svgpars/shape _
+        [params]/svt/srspars/srs_srspar _
+        [params]/svt/srspars/srs_direct _
+        [params]/svt/srspars/srs_activea 
    
 RETURN

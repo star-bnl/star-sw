@@ -1,10 +1,32 @@
-MACRO run_stk 
+* 8/10/98 K. Turner - put temporary vertex info in here
+* ****************************************************************
+ 
+ macro vtx
+   
+ macro/global/import *
+         
+ message ' !!! run_stk: vertex not found,  filled from MC ***'
+ 
+  cd [data]/global/vertices
+  tdm/newtable stk_vtx stk_vtx 1
+  tdm/table/rowcount stk_vtx 1
+  tdm/table/cell/putvalue 'stk_vtx[0].id' 1
+  tdm/table/cell/putvalue 'stk_vtx[0].flag' 1
+  tdm/table/cell/putvalue 'stk_vtx[0].t' 0
+  tdm/table/cell/putvalue 'stk_vtx[0].x' 0.0 0.0 0.0
+  tdm/table/cell/putvalue 'stk_vtx[0].cov' 0.0 0.0 0.0 0.0 0.0 0.0 
+  cd /dui
+  
+return
+ 
+* ******************************************************************
+ MACRO run
    
    macro/global/import *
 
 
    ami/mod/call stk_am _
-        [params]/svt/stk_stkpar _
+        [params]/svt/stkpars/stk_stkpar _
         [geant_Event]/g2t_track _
         [geant_Event]/g2t_event _
         [geant_Event]/g2t_vertex _
@@ -17,9 +39,9 @@ MACRO run_stk
         [data]/svt/tracks/mcgroups _
         [data]/svt/tracks/stk_mctrack _
         [data]/svt/tracks/stk_mckine _
-        [params]/svt/stk_filler _
-        [geometry]/svt/config _
-        [geometry]/svt/geom 
+        [params]/svt/stkpars/stk_filler _
+        [params]/svt/svgpars/config _
+        [params]/svt/svgpars/geom 
 
    if (staf_status(1).ne.stafcv_ok) then
                 message 'Problem on return from STK_AM'

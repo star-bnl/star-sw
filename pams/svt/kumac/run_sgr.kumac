@@ -1,10 +1,10 @@
 
-MACRO run_sgr  
+MACRO run  
   
   macro/global/import *
 
   ami/mod/call stk_am_init _
-                [params]/svt/stk_stkpar _
+                [params]/svt/stkpars/stk_stkpar _
 	        [data]/svt/tracks/groups _
                 [data]/svt/tracks/stk_track _
                 [data]/svt/tracks/stk_kine _
@@ -19,7 +19,7 @@ MACRO run_sgr
   
   ami/mod/call sgr_am _
         [data]/global/vertices/stk_vtx _
-	[geometry]/svt/geom _
+	[params]/svt/svgpars/geom _
         [data]/svt/hits/scs_spt _
         [data]/svt/tracks/groups _ 
         [params]/svt/pix_info _

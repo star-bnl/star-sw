@@ -1,7 +1,8 @@
  
 ******************** Create Tables ***************************
  
-macro sgr
+ macro sgr
+   
 macro/global/import *
 * Book groups tables
  cd [data]/svt/tracks
@@ -9,7 +10,8 @@ macro/global/import *
  tdm/newtable groups sgr_groups 30000
  tdm/newtable mcgroups sgr_groups 30000
  cd /dui
-return
+ 
+ return
  
 ***************************************************************
  

@@ -1,14 +1,20 @@
-**************************************************************************
+* 8/10/98 K. Turner
+* *************************************************************************
 **************************************************************************
 * This kumac initializes the SGR (Svt Grouping tracker) module
 **************************************************************************
  
 * ******************* Create Tables ***************************
  
+ macro init
 macro/global/import *
-exec create_tables_svt#sgr
+  
+  exec create_tables_svt#sgr
+  
 * Book  pix_info table
-cd [params]/svt/
+  
+  cd [params]/svt
+  
 tdm/newtable pix_info sgr_pixmap 4
 tdm/table/rowcount pix_info 4
  
@@ -55,6 +61,7 @@ tdm/table/cell/putvalue 'pix_info[3].ZMax' 20
 
 cd /dui
  
+ return
 * ********************************************************
 
 
