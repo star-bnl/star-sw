@@ -1,4 +1,4 @@
-// $Id: bfc_tfs.C,v 1.7 1999/03/02 15:49:04 fisyak Exp $
+// $Id: bfc_tfs.C,v 1.8 1999/03/02 16:09:43 fisyak Exp $
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -89,7 +89,7 @@ bfc_tfs(const Int_t Nevents=1000,
   geant->Do(cmd.Data());
   //  geant->Do("mode tpce prin 1 digi 2");   // make tpc_hit in local coordinates
   St_calib_Maker       *calib = new St_calib_Maker("calib","calib"); 
-  //  St_ems_Maker         *emc_raw = new St_ems_Maker("emc_raw","event/raw_data/emc");
+  St_ems_Maker         *emc_raw = new St_ems_Maker("emc_raw","event/raw_data/emc");
   //  St_emc_Maker         *emc_hits = new St_emc_Maker("emc_hits","event/data/emc/hits");
   St_tcl_Maker         *tpc_hits = new St_tcl_Maker("tpc_hits","event/data/tpc/hits");
   St_srs_Maker         *svt_hits = new St_srs_Maker("svt_hits","event/data/svt/hits");
