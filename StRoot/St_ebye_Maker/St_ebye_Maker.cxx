@@ -1,5 +1,8 @@
-// $Id: St_ebye_Maker.cxx,v 1.1 1998/08/05 14:33:36 fisyak Exp $
+// $Id: St_ebye_Maker.cxx,v 1.2 1998/08/07 19:26:10 dhammika Exp $
 // $Log: St_ebye_Maker.cxx,v $
+// Revision 1.2  1998/08/07 19:26:10  dhammika
+// event by event chain in root
+//
 // Revision 1.1  1998/08/05 14:33:36  fisyak
 // Add ebye
 //
@@ -23,7 +26,8 @@
 
 #include "St_sca_switch_Table.h"
 #include "St_sca_filter_const_Table.h"
-#include "St_dst_track_Table.h"
+#include "St_foo_dst_event_summary_Table.h"
+#include "St_foo_dst_track_Table.h"
 
 #include "St_particle_Table.h"
 
@@ -67,7 +71,7 @@ void St_ebye_Maker::Init(){
 // sca_init#make_tables
 //   Char_t *tcl_pars = "${STAR}/params/sca/scaconst.xdf";
 //   Char_t *ebye_pars = "${STAR}/params/sca/scaconst.xdf";
-   Char_t *ebye_pars = "/afs/rhic/star/packages/SL98f/params/sca/scaconst.xdf";
+   Char_t *ebye_pars = "/afs/rhic/star/packages/SL98f/params/ebye/scaconst.xdf";
    St_XDFFile::GetXdFile(ebye_pars,params);
    ebye = local("ebye");
    if (!ebye) { 
@@ -109,14 +113,14 @@ Int_t St_ebye_Maker::Make(){
    m_DataSet->Add(m_sca_ensemble_ave);
 
    St_DataSetIter local(gStChain->DataSet());
-   m_dsttrack = (St_dst_track *) local("output/trkout");
+   m_dst_event_summary = (St_foo_dst_event_summary *) local("output/sumout");
+   m_dsttrack = (St_foo_dst_track *) local("output/trkout");
    if (!m_dsttrack || !m_dsttrack->HasData()) {
       return kSTAFCV_BAD;
    }
 
-  m_particle = new St_particle("particle",1);
-  iret = sca_filter(m_dsttrack
-                   ,m_particle
+  iret = sca_filter(m_dst_event_summary 
+                   ,m_dsttrack
                    ,m_sca_filter_const
                    ,m_sca_switch
                    ,m_sca_const
@@ -139,7 +143,7 @@ Int_t St_ebye_Maker::Make(){
 //_____________________________________________________________________________
 void St_ebye_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_ebye_Maker.cxx,v 1.1 1998/08/05 14:33:36 fisyak Exp $\n");
+  printf("* $Id: St_ebye_Maker.cxx,v 1.2 1998/08/07 19:26:10 dhammika Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
@@ -167,14 +171,14 @@ void St_ebye_Maker::SetEntropy(Bool_t flag){
    sca_switch->useEntropy   = flag;
 }
 //_____________________________________________________________________________
-void St_ebye_Maker::SetmakePrior(Bool_t flag=kFALSE){
+void St_ebye_Maker::SetmakePrior(Bool_t flag){
    if (!m_sca_switch) return;
 // Set switches to make propir
    sca_switch_st *sca_switch = m_sca_switch->GetTable();
    sca_switch->makePrior    = flag;
 }
 //_____________________________________________________________________________
-void St_ebye_Maker::SetdoAnalysis(Bool_t flag=kFALSE){
+void St_ebye_Maker::SetdoAnalysis(Bool_t flag){
    if (!m_sca_switch) return;
 // Set switches to make propir
    sca_switch_st *sca_switch = m_sca_switch->GetTable();
