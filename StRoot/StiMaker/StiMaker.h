@@ -29,7 +29,7 @@ class StiDynamicTrackFilter;
 class StiIOBroker;
 class StiToolkit;
 class StiStEventFiller;
-
+class StiSimpleTrackFilter;
 
 class StiMaker : public StMaker {
  public:
@@ -42,7 +42,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.45 2002/04/16 13:11:30 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.46 2002/08/23 18:16:50 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -85,9 +85,6 @@ private:
     StiToolkit  * toolkit;
     StiKalmanTrackFinder * tracker;
     
-    //Tracker
-    //StiKalmanTrackFinder* mtracker; //!
-    
     //TrackFilter
     StiDynamicTrackFilter* mFilter; //!
     
@@ -98,8 +95,10 @@ private:
     StMcEvent* mMcEvent; //!
     StMcEventMaker* mMcEventMaker; //!
     StAssociationMaker* mAssociationMaker; //!
-    ClassDef(StiMaker, 1)
 
+    StiSimpleTrackFilter * trackFilter;
+    ClassDef(StiMaker, 1)
+      
 };
 
 //inlines
