@@ -43,7 +43,6 @@ void StTpcDeviantSpectraAnalysis::bookHistograms() {
   mDedxvsP->Sumw2();
 
   string hlab2DSpectraDev = hlab2DSpectra+"Deviant";
-
   hlab2DSpectraDev = hlab2DSpectraDev + mTitle;
   const char* h2DSpectraDev = hlab2DSpectraDev.c_str(); 
   m2DSpectraDeviant = new TH3D(h2DSpectraDev,
@@ -121,7 +120,7 @@ void StTpcDeviantSpectraAnalysis::fillHistograms(StEvent& event) {
 		double E = sqrt(p*p+mMassPid*mMassPid);
 		double pz = mom.z();
 		double y = 0.5*log((E+pz)/(E-pz));
-		double pseudoy = 0.;
+		double pseudoy = 0.5*log((p+pz)/(p-pz));
                 double xvalue=-1000.;
 		double yvalue=0.;
 		if (mAbscissa == kRapidity) {
@@ -136,6 +135,7 @@ void StTpcDeviantSpectraAnalysis::fillHistograms(StEvent& event) {
 		  yvalue = mt;
 		} 
 		m2DSpectraDeviant->Fill(xvalue,yvalue,deviant,weight);
+		mPIDDeviant->Fill(deviant);
 	    }
        }       
   }   
@@ -164,8 +164,8 @@ void StTpcDeviantSpectraAnalysis::writeHistograms(){
 
   const char* outputName = ((*this).getTitle()+".root").c_str();
   TFile* analysisOutputFile = new TFile(outputName,"RECREATE");
-  m2DSpectraDeviant->Write(outputName);
-  mPIDDeviant->Write(outputName);
+  m2DSpectraDeviant->Write();
+  mPIDDeviant->Write();
   delete analysisOutputFile;
 }
 
