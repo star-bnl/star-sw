@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.52 2003/12/12 02:29:40 oldi Exp $
+// $Id: doFlowEvents.C,v 1.53 2003/12/19 21:23:43 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -437,7 +437,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
   // flow.hist.root file.
   if (cumMaker) {
     TFile cumFile("flow.cumulant.root", "READ");
-    if (cumFile->IsOpen()) { 
+    if (cumFile.IsOpen()) { 
       cumFile.ReadAll();
     } else {
       cout << "### Can't find file flow.cumulant.root" << endl;
@@ -445,7 +445,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
   }
   if (spMaker) {
     TFile spFile("flow.scalar.root", "READ");
-    if (spFile->IsOpen()) { 
+    if (spFile.IsOpen()) { 
       spFile.ReadAll();
     } else {
       cout << "### Can't find file flow.scalar.root" << endl;
@@ -456,7 +456,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
   } else {
     TFile anaFile("flow.hist.root", "RECREATE");
   }
-  if (anaFile->IsOpen()) {
+  if (anaFile.IsOpen()) {
     if (cumMaker) cumFile.GetList()->Write();
     if (spMaker)   spFile.GetList()->Write();
     //anaFile->ls();
@@ -561,6 +561,9 @@ void doFlowEvents(const Int_t nevents, Bool_t phiWgtOnly) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.53  2003/12/19 21:23:43  posk
+// Changed File->IsOpen() to File.IsOpen().
+//
 // Revision 1.52  2003/12/12 02:29:40  oldi
 // Minor code clean-ups. Some comments added.
 //
