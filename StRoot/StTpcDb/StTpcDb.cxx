@@ -50,6 +50,7 @@ temp = (StDbDataSet*)mk->GetData("StarDb");
 
 PadPlane=0;
 WirePlane=0;
+slowControlSim=0;
 dimensions=0;
  for (int i=0;i<24;i++){
    gain[i]=0;
@@ -63,6 +64,7 @@ StTpcDb::~StTpcDb() {
 delete PadPlane;
 delete WirePlane;
 delete dimensions;
+delete slowControlSim;
 delete gain;
 delete t0;
 gStTpcDb = 0;
@@ -106,6 +108,19 @@ StTpcDimensionsI* StTpcDb::Dimensions(){
    dimensions = (StTpcDimensionsI*)wptemp; 
   }
  return dimensions;
+}
+
+StTpcSlowControlSimI* StTpcDb::SlowControlSim(){
+  if (slowControlSim==0){            // get wire plane from data base
+   StDbDataSet* wp = (StDbDataSet*)tpc_calibrations->Find("tpcSlowControlSim");
+   StDbTableI* table=wp->GetDbObject();
+   tpcSlowControlSim* tpd;
+   tpd=(tpcSlowControlSim*)table->GetTable(); 
+   StRTpcSlowControlSim* wptemp = new StRTpcSlowControlSim();
+   wptemp->AddData(tpd);
+   slowControlSim = (StTpcSlowControlSimI*)wptemp; 
+  }
+ return slowControlSim;
 }
 
 StTpcGainI* StTpcDb::Gain(int sector){
