@@ -1,5 +1,8 @@
-# $Id: MakeFun.mk,v 1.3 1999/01/20 02:16:50 fisyak Exp $
+# $Id: MakeFun.mk,v 1.4 1999/09/22 15:26:52 fisyak Exp $
 # $Log: MakeFun.mk,v $
+# Revision 1.4  1999/09/22 15:26:52  fisyak
+# Add definition of STAR_MAKE_HOME
+#
 # Revision 1.3  1999/01/20 02:16:50  fisyak
 # Active STAR_HOST_SYS for egcs
 #
@@ -31,6 +34,9 @@
 
 
 
+ifndef STAR_MAKE_HOME
+  STAR_MAKE_HOME := $(STAR)/mgr
+endif
 
 include $(STAR)/mgr/MakeEnv.mk
 include $(STAR)/mgr/MakeArch.mk

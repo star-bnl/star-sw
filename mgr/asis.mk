@@ -24,14 +24,17 @@ SOURCES   := $(strip $(subst  . , ,$(SOURCES)))
 SRC       := $(strip $(foreach dir, $(SOURCES), $(shell test -r $(CERN_DIR)/$(dir) && echo $(dir))))
 DIRS      := $(strip $(foreach dir, $(SRC), $(shell test -d $(CERN_DIR)/$(dir) && echo $(dir))))
 src       := $(strip $(filter-out $(DIRS),$(SRC)))
+src       := $(filter-out %.gz %.tar %.Z,$(src))
 dirs      := $(filter-out alpha_% hp700_ux90 rs_aix% sgi_% sun4c_%,$(DIRS))
 ifneq (,$(strip $(dirs)))
 dirs      :=$(filter-out alpha_% rs_aix% sgi%,$(dirs))
 ifeq ($(RHIC_DIR),$(RHIC_ASIS))
-skip_list :=a10_sr104 a68_sr104 alpha_% amiga_aux20 bin cern convex% cray% etc hp700_ux101 hp700_ux807 hp700_ux90 
+skip_list :=adm packages
+skip_list += a10_sr104 a68_sr104 alpha_% amiga_aux20 bin cern convex% cray% etc hp700_ux101 hp700_ux807 hp700_ux90 
 skip_list += i386_linux1 incoming mac% next_mach30 pc_% pmax_ul43 pub rs_aix% scratch sgi% specific 
 skip_list += src sun4c% sun4m% unicos61 usr var vax% vm_cms ymp%
 dirs      :=$(filter-out $(skip_list),$(dirs))
+dirs      :=hp_ux102
 endif
 dir_tags  := $(addprefix tags_,$(dirs))
 endif

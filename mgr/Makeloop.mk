@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.95  1999/09/22 15:26:53  fisyak
+#  Add definition of STAR_MAKE_HOME
+#
 #  Revision 1.94  1999/08/24 13:27:29  fisyak
 #  Fix St_Tables name
 #
@@ -361,13 +364,10 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/08/24 13:27:29 $ 
+#           Last modification $Date: 1999/09/22 15:26:53 $ 
 #  default setings
 # Current Working Directory
 #
-ifndef STAR_MAKE_HOME
-  STAR_MAKE_HOME := $(STAR)/mgr
-endif
 
 include $(STAR_MAKE_HOME)/MakeEnv.mk
 include $(STAR_MAKE_HOME)/MakeDirs.mk

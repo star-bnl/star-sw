@@ -1,5 +1,8 @@
-# $Id: MakeEnv.mk,v 1.19 1999/08/24 13:27:28 fisyak Exp $
+# $Id: MakeEnv.mk,v 1.20 1999/09/22 15:26:52 fisyak Exp $
 # $Log: MakeEnv.mk,v $
+# Revision 1.20  1999/09/22 15:26:52  fisyak
+# Add definition of STAR_MAKE_HOME
+#
 # Revision 1.19  1999/08/24 13:27:28  fisyak
 # Fix St_Tables name
 #
@@ -187,6 +190,9 @@ ifdef STAF_SYS
 
 endif
 # Makefiles
+ifndef STAR_MAKE_HOME
+  STAR_MAKE_HOME := $(STAR)/mgr
+endif
 include $(STAR_MAKE_HOME)/MakeArch.mk
 ifndef MakePam
   MakePam := $(STAR_MAKE_HOME)/MakePam.mk -r
