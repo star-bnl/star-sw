@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.16 2000/08/13 18:32:59 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.17 2000/08/15 19:41:32 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.17  2000/08/15 19:41:32  ward
+// Configuration via m_mode of which event types are skipped.
+//
 // Revision 1.16  2000/08/13 18:32:59  ward
 // Returns kStErr for laser events.
 //
@@ -201,7 +204,7 @@ Int_t St_trg_Maker::SanityCheck() {
 int St_trg_Maker::Daq(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger *dst2,
       St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
 
-  char *ptr;
+  char *oo,*ptr,isLaser=0,isPhysics=0;
   fVictorPrelim=(StDAQReader*)(herb->GetObject()); assert(fVictorPrelim);
   fVictor=fVictorPrelim->getTRGReader(); assert(fVictor);
   assert(fVictor->thereIsTriggerData()); // We had bfc.C(" l0 "), but we have no TRG bank in
@@ -215,9 +218,15 @@ int St_trg_Maker::Daq(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger *ds
   GraceSlick=(MarilynMonroe_t*)ptr;
   Int_t Iret = SanityCheck();
   if (Iret !=  kStOK) return Iret;
-  if(GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd==0x9001) {
-     printf("Laser event detected in St_trg_Maker, returning kStErr.\n");
-     return kStErr; // Laser event, skip it.
+  if(GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd==0x9001) isLaser=7;
+  if(GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd>>12==2) isPhysics=7;
+  if (m_Mode) {
+    if((m_Mode & 1 && !isPhysics) || (m_Mode & 2 && !isLaser)) {
+      oo="";
+      if(isPhysics) oo="physics"; if(isLaser) oo="laser";
+      printf("St_trg_Maker, we have a  %s event, returning kStErr.\n",oo);
+      return kStErr; // Skip this event.
+    }
   }
   // dumpDataToScreenAndExit();
   VpdDaq(dst1);       // The function
