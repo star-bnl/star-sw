@@ -7,14 +7,5 @@ StiFtpcDetectorBuilder::StiFtpcDetectorBuilder(bool active)
 StiFtpcDetectorBuilder::~StiFtpcDetectorBuilder()
 {}
 
-void StiFtpcDetectorBuilder::loadDb()
-{}
-
-void StiFtpcDetectorBuilder::buildMaterials()
-{}
-
-void StiFtpcDetectorBuilder::buildShapes()
-{}
-
-void StiFtpcDetectorBuilder::buildDetectors()
+void StiFtpcDetectorBuilder::buildDetectors(StMaker &source)
 {}
