@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.h,v 1.9 2000/10/24 22:36:47 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.h,v 1.10 2000/12/18 23:22:58 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,14 +11,8 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.h,v $
- * Revision 1.9  2000/10/24 22:36:47  aihong
- * pass if no parameter file read
- *
- * Revision 1.8  2000/09/11 17:08:29  aihong
- * add geantID access
- *
- * Revision 1.7  2000/08/23 01:18:14  aihong
- * remove a bug
+ * Revision 1.10  2000/12/18 23:22:58  aihong
+ * big revision. eta bin and centrality bin added
  *
  * Revision 1.6  2000/08/16 12:46:07  aihong
  * bug killed
@@ -41,26 +35,17 @@
 
 
 #include "TString.h"
-#include "TObjArray.h"
-#include "TMap.h"
-//#include "TGraph.h"
 #include "TVectorD.h"
 
 
-//#include "tables/St_tpcDedxPidAmpDb_Table.h"
 #include "StEventTypes.h"
 #include "StParticleTable.hh"
 #include "StParticleTypes.hh"
-#include "StEventUtilities/StPidAmpNetOut.h"
-#include "StEventUtilities/StuObjPidReport.h"
 
 class StEvent;
-class StPidAmpNetOut;
-class StuObjPidReport;
 class TString;
-class TObject;
-class TObjArray;
-
+class TVectorD;
+class TF1;
 
 
 class StuProbabilityPidAlgorithm : public StPidAlgorithm {
@@ -78,136 +63,135 @@ class StuProbabilityPidAlgorithm : public StPidAlgorithm {
 
       StParticleDefinition* getParticle(int i);
 
+
       int mostLikelihoodParticleGeantID()    const;
       int secondLikelihoodParticleGeantID()  const;     
       int thirdLikelihoodParticleGeantID()   const;
-
       int getParticleGeantID(int i)          const;
-      
+
       double getProbability(int i);
       double mostLikelihoodProbability();
       double secondLikelihoodProbability();
       double thirdLikelihoodProbability();
   
+      double beingPionMinusProb()  const { return  mPionMinusProb;}
+      double beingElectronProb()   const { return  mElectronProb; }
+      double beingKaonMinusProb()  const { return  mKaonMinusProb;}
+      double beingAntiProtonProb() const { return  mAntiProtonProb;}
+     
+      double beingPionPlusProb()   const { return  mPionPlusProb; }
+      double beingPositronProb()   const { return  mPositronProb; }
+      double beingKaonPlusProb()   const { return  mKaonPlusProb; }
+      double beingProtonProb()     const { return  mProtonProb; }
+
       bool isExtrap();
 
       StParticleDefinition*
       operator() (const StTrack&, const StSPtrVecTrackPidTraits&);
-
       
       static void setDedxMethod(StDedxMethod method);
-             //use what dedx to perform the job.
-      static void setDynamicallyCalculatePID();//set a tag.
-    
+
       static void readParametersFromFile(TString fileName);
       //      static void readParametersFromTable(St_Table* tb);
                   //from data base.
-      static void printParameters();
-
-
-     static  void   fillReportObjArray(TString fileName);
-
-     /*     
-     static  void   debug(double theDedx, double theRig, double theNHits, double thePt, int theCharge, double theDca);
-     static  void   debug2(double theDedx, double theRig, int theNHits, double thePt, int theCharge, double theDca);
-     */
-
-
 
  private:
      
-     void    fillPIDByLookUpTable(int myCharge, double myDca, int myNhits, double myPt, double myDedx, double myRig);
-     void    fillPIDByCalculation(int myCharge, double myDca, int myNhits, double myPt, double myDedx, double myRig);
+   void fillPIDByLookUpTable(double myCentrality, double myDca, int myCharge, double myRig, double myEta, int myNhits, double myDedx);
+
+     void    fillPIDHypothis();
+ 
 
 
-     static  double bandCenter(double rig, TArrayD* bandPars);
-     static  double bandCenter(double rig, int NChannel, int NType);
-
-     static  double resolution(double rig, TArrayD* linrPars,TArrayD* bandPars);
-     static  double resolution(double rig, int NChannel, int NType);
-
-     static  double peak(double rig, TArrayD* ampPars);
-     static  double peak(double rig, int NChannel, int NType);
-
-     static  double tossTail(double rig);
-
-
-     static  double amplitude(double dedx, double rig, TArrayD* bandPars, TArrayD* linrPars, TArrayD* ampPars);
-     static  double amplitude(double dedx, double rig, int NChannel, int NType);
-
-      static void readAType(StParticleDefinition* def, Float_t* mean, Float_t* amp,Float_t* sig,Float_t cal,TObjArray*  theChannel);
-      //      static void refreshParameters(St_Table* theTable);
-
-     static  bool   tagExtrap(double rig, double dedx,TObjArray* channelLevel);
-
-     static  void   fill(double* probAry, int* pidAry, double prob, StPidAmpNetOut* netOut); 
-     static  double lowRigReso(double xa, double xb, double ya, double yb,double theX);
-     static  void   setBins4Table();
-     static  void   setRanges4Table(TVectorD* theSetting);
-
-
-      void   fill(double prob, StPidAmpNetOut* netOut);
+      void   fill(double prob, int geantId);
       void   fillAsUnknown();
       void   lowRigPID(double rig,double dedx,int theCharge);
-
+      double getCentrality(int theMult);
+      int    getCentralityBin(double theCent);
+      int    getCalibPosition(double theEta, int theNHits);
+      void   setCalibrations(double theEta, int theNhits);
 
       StParticleTable* table;
 
-      int      PID[3];
-      double   mProb[3];
+      int      PID[4];
+      double   mProb[4];
 
       bool     mExtrap;
 
-      StEvent* mEvent; //!
+      StEvent* mEvent; 
 
-     static    double   mNoise;
-     static    double   mDedxStart;
-     static    double   mDedxEnd;
-     static    double   mRigStart;
-     static    double   mRigEnd;
-     static    double   mNHitsStart;
-     static    double   mNHitsEnd;
-     static    double   mPtStart;
-     static    double   mPtEnd;
-     static    double   mDcaCutPoint; //just 2 bins for dca
+    double          mPionMinusProb;
+    double          mElectronProb;
+    double          mKaonMinusProb;
+    double          mAntiProtonProb;
+    double          mPionPlusProb;
+    double          mPositronProb;
+    double          mKaonPlusProb;
+    double          mProtonProb;
 
-    static  bool     mTurnOnNoise;
-    static  bool     mDynamicallyCalculatePID;
-    static  bool     mHasParameterFile;
-    static  double   mDedxBinWidth;
-    static  double   mRigBinWidth; //do not let NBins exceed 999.
-    static  double   mPtBinWidth; //not implemented yet.
-    static  double   mNHitsBinWidth;
-      
-    static  int      mNDedxBins;
-    static  int      mNRigBins;
-    static  int      mNNhitsBins;
-    static  int      mNPtBins;
-    static  int      mNDcaBins;
-    static  int      mNChargeBins;
+    /////////////
+
+
+   static int thisMultBins;
+   static int thisDcaBins;
+   static int thisChargeBins;
+
+
+   static int thisPBins;
+   static int thisEtaBins;
+   static int thisNHitsBins;
+
+////////////////////////
+
+   static double  thisDedxStart;
+   static double  thisDedxEnd;
+   static double  thisPStart;
+   static double  thisPEnd;
+   static double  thisEtaStart;
+   static double  thisEtaEnd;
+   static double  thisNHitsStart;
+   static double  thisNHitsEnd;
+
 
   static  StDedxMethod mDedxMethod;
-  static  TObjArray    mDataSet;
-  //array of Channel datas. be initialize by readParametersFromFile
-  static  TObjArray    mMaxllFuncSet; 
-  static  TObjArray    mLinearFuncSet;
-  static  TObjArray    mBetheBlochFuncSet; 
+
+  static TVectorD*     mEAmp;
+  static TVectorD*     mECenter;
+  static TVectorD*     mESigma;
+
+  static TVectorD*     mPiAmp;
+  static TVectorD*     mPiCenter;
+  static TVectorD*     mPiSigma;
+
+  static TVectorD*     mKAmp;
+  static TVectorD*     mKCenter;
+  static TVectorD*     mKSigma;
+
+  static TVectorD*     mPAmp;
+  static TVectorD*     mPCenter;
+  static TVectorD*     mPSigma;
 
 
- //parallel sturcture with mDataSet, 
-  //but there functions taken parameters from mFuncSet.
+  static TVectorD*     mEqualyDividableRangeStartSet;
+  static TVectorD*     mEqualyDividableRangeEndSet;
+  static TVectorD*     mEqualyDividableRangeNBinsSet;
+  static TVectorD*     mNoEqualyDividableRangeNBinsSet;
 
-  static TObjArray*    mTheReportTable;
-  static TVectorD*     mTheRangeSettingVector;
+  static TVectorD*     mMultiBinEdgeSet;  // % central
+  static TVectorD*     mDcaBinEdgeSet;    // in centimeter
+
+  static TVectorD*     mBBScale; //BetheBloch scale par.
+  static TVectorD*     mBBOffSet; //BetheBolch offset par.
+
+  TF1*        myBandBGFcn;
 
 };
-
 
 inline   int StuProbabilityPidAlgorithm::mostLikelihoodParticleGeantID()    const { return PID[0];}
 inline   int StuProbabilityPidAlgorithm::secondLikelihoodParticleGeantID()  const { return PID[1];}     
 inline   int StuProbabilityPidAlgorithm::thirdLikelihoodParticleGeantID()   const { return PID[2];}  
 inline   int StuProbabilityPidAlgorithm::getParticleGeantID(int i)          const {
-          if (i<3 && i>=0) return PID[i]; else return -1;}
+          if (i<4 && i>=0) return PID[i]; else return -1;}
 
 #endif
 
