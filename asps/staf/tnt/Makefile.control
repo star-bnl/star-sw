@@ -1,17 +1,27 @@
-# Sample Makefile.control - You should customize this file.
+# Makefile.control - user control of SLMakefiles
+#? - Customize this file to control SLMakefile behavior.
+#? - Always run "make config" after changing this file.
+#? - SLM uses default values for any undefined (commented) variables.
+######################################################################
 #
-# Specify the ASPs and PAMs upon which this package depends.
-ASPS := tnt ami dio dui tdm soc
+# Specify ASPs and PAMs upon which this package depends.
+ASPS := tnt ami dio dui tdm spx soc
 PAMS := pam
 #
 # Specify special user libraries against which to link.
-USER_LIBS := -ldsu -ldsl -lasu
+#USER_LIBS := -ldsu -ldsl -lasu
 #
 # Choose flags controlling make.
 DEBUG := TRUE
-#SHARE := TRUE
-MOTIF := TRUE
+IRIX := IRIX
+ifneq ($(IRIX),$(shell uname))
+SHARE := FALSE
+endif
+#MOTIF := TRUE
 #
-# Specify which CERN libraries against which to link, or take default.
-CERNLIBS := pawlib graflib grafX11 packlib mathlib kernlib
+# Specify which CERN libraries against which to link.
+#CERNLIBS := pawlib graflib grafX11 packlib mathlib kernlib
+#
+# Specify binaries to install.
+#INSTALL_BIN_FILES :=
 #

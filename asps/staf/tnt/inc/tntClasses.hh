@@ -31,51 +31,24 @@ public:
    virtual char * title ();
    virtual long entryCount ();
    virtual long columnCount ();
-   virtual char * zebraDir ();
 
 //:----------------------------------------------- INTERFACE METHODS  --
-   virtual char * tag (long iColumn);
-   virtual STAFCV_T getFromTable (tdmTable* table);
-   virtual STAFCV_T putToTable (tdmTable* table);
+   virtual STAFCV_T fill (tdmTable* table);
+   virtual STAFCV_T append (tdmTable* table);
+   virtual STAFCV_T clear ();
+   virtual STAFCV_T export (tdmTable* table);
    virtual STAFCV_T show ();
    virtual STAFCV_T print (long ifirst, long nrows);
 
 protected:
 //:----------------------------------------------- PROT VARIABLES     --
    long myHid;
+   char *rowBuffer;
 
 //:----------------------------------------------- PROT FUNCTIONS     --
-//:**NONE**
-
-private:
-//:----------------------------------------------- PRIV VARIABLES     --
-//:**NONE**
-//:----------------------------------------------- PRIV FUNCTIONS     --
-//:**NONE**
-};
-
-//:#####################################################################
-//:=============================================== CLASS              ==
-class tntRWNtuple: public virtual tntNtuple {
-
-public:
-//:----------------------------------------------- CTORS & DTOR       --
-   tntRWNtuple();
-   tntRWNtuple(long hid);
-   virtual ~tntRWNtuple();
-//:----------------------------------------------- ATTRIBUTES         --
-// *** NONE ***
-//:----------------------------------------------- INTERFACE METHODS  --
-   virtual STAFCV_T getFromTable (tdmTable* table);
-   virtual STAFCV_T putToTable (tdmTable* table);
-   virtual STAFCV_T show ();
-   virtual STAFCV_T print (long ifirst, long nrows);
-
-protected:
-//:----------------------------------------------- PROT VARIABLES     --
-//:**NONE**
-//:----------------------------------------------- PROT FUNCTIONS     --
-//:**NONE**
+   virtual char * tag (long iColumn);
+   virtual STAFCV_T getDataFromTable(tdmTable* table);
+   virtual STAFCV_T putDataToTable(tdmTable* table);
 
 private:
 //:----------------------------------------------- PRIV VARIABLES     --
@@ -92,25 +65,33 @@ public:
 //:----------------------------------------------- CTORS & DTOR       --
    tntCWNtuple();
    tntCWNtuple(long hid, tdmTable* t);
+   tntCWNtuple(long hid);
    virtual ~tntCWNtuple();
 //:----------------------------------------------- ATTRIBUTES         --
    virtual long blockCount ();
 
 //:----------------------------------------------- INTERFACE METHODS  --
+   virtual char * blockChform (long iBlock);
    virtual char * blockName (long iBlock);
-   virtual long blockElementCount (long iBlock);
-   virtual NT_TYPE_CODE_T columnType (long iColumn);
    
-   virtual STAFCV_T getFromTable (tdmTable* table);
-   virtual STAFCV_T putToTable (tdmTable* table);
+//:- OVERRIDE virutal FUNCTIONS
+   virtual STAFCV_T fill (tdmTable* table);
+   virtual STAFCV_T append (tdmTable* table);
+   virtual STAFCV_T clear ();
+   virtual STAFCV_T export (tdmTable* table);
    virtual STAFCV_T show ();
    virtual STAFCV_T print (long ifirst, long nrows);
 
 protected:
 //:----------------------------------------------- PROT VARIABLES     --
-//:**NONE**
+   int numBlocks;
+   char **blockNames;
+   char **chforms;
+   char *dslSpec;
+
 //:----------------------------------------------- PROT FUNCTIONS     --
-//:**NONE**
+   long blockOffset(long iblock);
+   unsigned char isCharBlock(long iblock);
 
 private:
 //:----------------------------------------------- PRIV VARIABLES     --
@@ -129,19 +110,10 @@ public:
    tntFactory(const char * name);
    virtual ~tntFactory();
 //:----------------------------------------------- ATTRIBUTES         --
-   virtual char * gName ();
+//: **NONE**
 
 //:----------------------------------------------- INTERFACE METHODS  --
    virtual char * list();
-   virtual STAFCV_T paw ();
-   virtual STAFCV_T save (const char * filname);
-   virtual STAFCV_T share (const char * gname);
-
-   virtual STAFCV_T deleteRWNtuple (long hid);
-   virtual STAFCV_T findRWNtuple (long hid, tntRWNtuple*& ntuple);
-   virtual STAFCV_T getRWNtuple (IDREF_T id, tntRWNtuple*& ntuple);
-   virtual STAFCV_T newRWNtuple (long hid, const char * spec);
-   virtual STAFCV_T createRWNtuple (long hid, tdmTable* table);
 
    virtual STAFCV_T deleteCWNtuple (long hid);
    virtual STAFCV_T findCWNtuple (long hid, tntCWNtuple*& ntuple);
@@ -164,7 +136,6 @@ private:
 
 //:---------------------------------------------------------------------
 CORBA_TIE(tntNtuple)
-CORBA_TIE(tntRWNtuple)
 CORBA_TIE(tntCWNtuple)
 CORBA_TIE(tntFactory)
 

@@ -19,8 +19,10 @@
 #endif
 
 /*-------------------------------------------- TYPEDEFS             --*/
-enum NT_TYPE_CODE_T {
-   NT_TYPE_CHAR4,
+/*-- 
+#ifndef NT_TYPE_CODE_T
+typedef enum nt_type_code_t {
+   NT_TYPE_CHAR,
    NT_TYPE_LOGICAL,
    NT_TYPE_LONG,
    NT_TYPE_U_LONG,
@@ -29,7 +31,9 @@ enum NT_TYPE_CODE_T {
    NT_TYPE_FLOAT,
    NT_TYPE_DOUBLE,
    NT_TYPE_UNKNOWN
-};
+}NT_TYPE_CODE_T;
+#endif ** NT_TYPE_CODE_T **
+--*/
 
 /*-------------------------------------------- GLOBALS              --*/
 /*-------------------------------------------- PROTOTYPES           --*/
@@ -55,20 +59,20 @@ extern CC_P void kam_tntcwntuple_puttable_();
 extern CC_P void kam_tntcwntuple_show_();
 extern CC_P void kam_tntcwntuple_print_();
 /*-*/
-extern CC_P int kam_tnt_count();
-extern CC_P int kam_tnt_list();
-extern CC_P int kam_tnt_paw();
-extern CC_P int kam_tnt_share();
-extern CC_P int kam_tnt_newcwntuple();
-extern CC_P int kam_tntcwntuple_hid();
-extern CC_P int kam_tntcwntuple_title();
-extern CC_P int kam_tntcwntuple_entrycount();
-extern CC_P int kam_tntcwntuple_colcount();
-extern CC_P int kam_tntcwntuple_zebradir();
-extern CC_P int kam_tntcwntuple_gettable();
-extern CC_P int kam_tntcwntuple_puttable();
-extern CC_P int kam_tntcwntuple_show();
-extern CC_P int kam_tntcwntuple_print();
+extern CC_P STAFCV_T tnt_count();
+extern CC_P STAFCV_T tnt_list();
+extern CC_P STAFCV_T tnt_paw();
+extern CC_P STAFCV_T tnt_share();
+extern CC_P STAFCV_T tnt_newcwntuple(long hid, char* tname);
+extern CC_P STAFCV_T tntcwntuple_hid(long hid);
+extern CC_P STAFCV_T tntcwntuple_title(long hid);
+extern CC_P STAFCV_T tntcwntuple_entrycount(long hid);
+extern CC_P STAFCV_T tntcwntuple_colcount(long hid);
+extern CC_P STAFCV_T tntcwntuple_zebradir(long hid);
+extern CC_P STAFCV_T tntcwntuple_gettable(long hid, char* tname);
+extern CC_P STAFCV_T tntcwntuple_puttable(long hid, char* tname);
+extern CC_P STAFCV_T tntcwntuple_show(long hid);
+extern CC_P STAFCV_T tntcwntuple_print(long hid);
 #endif /*NOKUIP*/
 
 #endif /* TNT_TYPES_H */
