@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.12 2000/02/07 16:43:37 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.13 2000/03/06 21:47:56 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.13  2000/03/06 21:47:56  calderon
+ * Add Lee's V0 example
+ *
  * Revision 1.12  2000/02/07 16:43:37  calderon
  * Find the first hit wherever it may be, instead of assuming a sector and padrow.
  *
@@ -184,18 +187,26 @@ Int_t StMcAnalysisMaker::Make()
 {
     // Get the pointers we need, we have to use the titles we gave them in the
     // macro.  I just used the defaults.
+
+    // StEvent
     StEvent* rEvent = 0;
     rEvent = (StEvent*) GetInputDS("StEvent");
 
+    // StMcEvent
     StMcEvent* mEvent = 0;
     mEvent = ((StMcEventMaker*) gStChain->Maker("MCEvent"))->currentMcEvent();
+
+    // StAssociationMaker
     StAssociationMaker* assoc = 0;
     assoc = (StAssociationMaker*) gStChain->Maker("Associations");
 
+    // the Multimaps...
     rcTpcHitMapType* theHitMap = 0;
     theHitMap = assoc->rcTpcHitMap();
     rcTrackMapType* theTrackMap = 0;
     theTrackMap = assoc->rcTrackMap();
+    mcV0MapType* theMcV0Map = 0;
+    theMcV0Map = assoc->mcV0Map(); 
 
     // Example: look at the position of the primary vertex
     //          Map is not needed for this, but it's a good check,
@@ -401,6 +412,29 @@ Int_t StMcAnalysisMaker::Make()
 	 mcHitIt != partner->tpcHits().end();
 	 mcHitIt++) coordMcPartner->Fill((*mcHitIt)->position().x(),(*mcHitIt)->position().y());
     
+    //Example: Print out position of V0 vertices that have been associated.
+    //         (LSB)
+    StSPtrVecMcVertex& mcVertices = mEvent->vertices();
+    StV0Vertex* rcV0Partner;
+    StMcVertexIterator mcVertexIt;
+
+    //Loop over all MC vertices
+    for (mcVertexIt = mcVertices.begin(); mcVertexIt != mcVertices.end();
+	 mcVertexIt++){
+	// Get the upper and lower bounds.
+	pair<mcV0MapIter,mcV0MapIter> mcV0Bounds = theMcV0Map->equal_range(*mcVertexIt);
+
+	// Print out MC vertex position if there is an associated V0.
+	if (mcV0Bounds.first != mcV0Bounds.second) 
+	    cout << "Position of MC V0 vertex: " << (*mcVertexIt)->position() << endl;
+
+	//Now loop over the bounds      
+	for(mcV0MapIter mcV0MapIt = mcV0Bounds.first;
+	    mcV0MapIt != mcV0Bounds.second; ++mcV0MapIt){
+	    rcV0Partner = (*mcV0MapIt).second;
+	    cout << "Position of rc V0 vertex: " << rcV0Partner->position() << endl;
+	}
+    }
 
     
     
