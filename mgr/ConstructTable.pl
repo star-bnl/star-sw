@@ -34,7 +34,7 @@ public:
   St_' . $stem . '(Text_t *name) : St_Table(name,sizeof(' . $stem . '_st)) {SetType("' . $stem . '");}
   St_' . $stem . '(Int_t n): St_Table("' . $stem . '",n,sizeof(' . $stem . '_st)) {SetType("' . $stem . '");}
   St_' . $stem . '(Text_t *name,Int_t n): St_Table(name,n,sizeof(' . $stem . '_st)) {SetType("' . $stem . '");}
-  ' . $stem . '_st *GetTable(Int_t i=0) const { return ((' . $stem . '_st *)s_Table)+i;}
+  ' . $stem . '_st *GetTable(Int_t i=0) const { return ((' . $stem . '_st *)GetArray())+i;}
   ' . $stem . '_st &operator[](Int_t i){ assert(i>=0 && i < GetNRows()); return *GetTable(i); }
   const ' . $stem . '_st &operator[](Int_t i) const { assert(i>=0 && i < GetNRows()); 
 						      return *((const ' . $stem . '_st *)(GetTable(i))); }
@@ -190,7 +190,7 @@ void St_g2t_rch_hit::Streamer(TBuffer &R__b)
       Version_t R__v = R__b.ReadVersion(); if (R__v) { }
       St_Table::StreamerTable(R__b);
       if (*s_MaxIndex <= 0) return; 
-      char *row= s_Table;
+      char *row = (char *)GetArray();
       for (Int_t indx=0;indx<*s_MaxIndex;indx++,row += GetRowSize()) {
         tableDescriptor_st *nextCol = GetRowDescriptors()->GetTable();
         Int_t maxColumns = GetNumberOfColumns();
