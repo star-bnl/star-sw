@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.3  1999/02/20 17:49:57  ward
+// Fixed bug in setting of SeqModBreak.
+//
 // Revision 1.2  1999/02/19 16:32:21  fisyak
 // rename h-file and access name to Trs
 //
@@ -264,7 +267,7 @@ int St_tpcdaq_Maker::Output() {
           startTimeBin=listOfSequences[iseq].startTimeBin;
           if(prevStartTimeBin> startTimeBin) { mErr=__LINE__; return 7; }
           prevStartTimeBin=startTimeBin; seqLen=listOfSequences[iseq].length;
-          if(startTimeBin<0x100) timeWhere=iseq+1; else timeOff=0x101;
+          if(startTimeBin<=0x100) timeWhere=iseq+1; else timeOff=0x101;
 // printf("bbb startTimeBin=%3d, timeOff=%3d\n",startTimeBin,timeOff);
           SeqWrite(raw_seq_gen,seqR,(startTimeBin-timeOff),seqLen);
           nSeqThisPadRow++;
@@ -332,7 +335,8 @@ Int_t St_tpcdaq_Maker::Make() {
 void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.2 1999/02/19 16:32:21 fisyak Exp $ \n");
+  printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.3 1999/02/20 17:49:57 ward Exp $ \n");
   // printf("* %s *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if(gStChain->Debug()) StMaker::PrintInfo();
