@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.12 2001/05/23 00:14:52 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 2.13 2001/05/24 01:48:13 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.13  2001/05/24 01:48:13  lansdell
+// qa_shift histograms updated
+//
 // Revision 2.12  2001/05/23 00:14:52  lansdell
 // more changes for qa_shift histograms
 //
@@ -72,6 +75,12 @@
 #include "StEmcUtil/StEmcMath.h"
 
 static StEmcGeom* emcGeom[4];
+// These are the mean z positions of the FTPC padrows (1-20).
+// The width of each padrow in z is 2 cm.
+static float ftpcPadrowZPos[20] = {162.75,171.25,184.05,192.55,205.35,
+				   213.85,226.65,235.15,247.95,256.45,
+				   -162.75,-171.25,-184.05,-192.55,-205.35,
+				   -213.85,-226.65,-235.15,-247.95,-256.45};
 
 ClassImp(StEventQAMaker)
 
@@ -171,6 +180,8 @@ void StEventQAMaker::MakeHistGlob() {
 
   StSPtrVecTrackNode &theNodes = event->trackNodes();
   Int_t cnttrk=0;
+  Int_t cnttrkT=0;
+  Int_t cnttrkTS=0;
   Int_t cnttrkg=0;
   Int_t cnttrkgT=0;
   Int_t cnttrkgTS=0;
@@ -183,11 +194,13 @@ void StEventQAMaker::MakeHistGlob() {
     if (!globtrk) continue;
     cnttrk += theNodes[i]->entries(global);
     hists->m_globtrk_iflag->Fill(globtrk->flag());
+    const StTrackTopologyMap& map=globtrk->topologyMap();
+    if (map.trackTpcOnly()) cnttrkT++;
+    if (map.trackTpcSvt()) cnttrkTS++;
     if (globtrk->flag()>0) {
       StTrackGeometry* geom = globtrk->geometry();
       StTrackFitTraits& fTraits = globtrk->fitTraits();
       StTrackDetectorInfo* detInfo = globtrk->detectorInfo();
-      const StTrackTopologyMap& map=globtrk->topologyMap();
 
       n_glob_good++;
       cnttrkg++;
@@ -265,11 +278,14 @@ void StEventQAMaker::MakeHistGlob() {
       hists->m_dcaToBeamZ1->Fill(dcaToBeam.z());
       hists->m_dcaToBeamZ2->Fill(dcaToBeam.z());
       hists->m_dcaToBeamZ3->Fill(dcaToBeam.z());
-      hists->m_zDcaTanl->Fill(dcaToBeam.z(),TMath::Tan(geom->dipAngle()));
-      if (map.trackTpcOnly())
+      if (map.trackTpcOnly()) {
+	hists->m_zDcaTanl->Fill(dcaToBeam.z(),TMath::Tan(geom->dipAngle()));
 	hists->m_zDcaZf->Fill(dcaToBeam.z(),firstPoint.z());
-      if (map.trackTpcSvt() && radf>40)
+      }
+      if (map.trackTpcSvt() && radf>40) {
+	hists->m_zDcaTanl->Fill(dcaToBeam.z(),TMath::Tan(geom->dipAngle()));
 	hists->m_zDcaZf->Fill(dcaToBeam.z(),firstPoint.z());
+      }
       hists->m_zDcaPsi->Fill(dcaToBeam.z(),geom->psi()/degree);
       if (origin.phi() < 0)
         hists->m_zDcaPhi0->Fill(dcaToBeam.z(),360+origin.phi()/degree);
@@ -556,6 +572,27 @@ void StEventQAMaker::MakeHistGlob() {
 	//transformer(globalHitPosition,planeCoord);
         //hists->m_glb_planefF->Fill(planeCoord.plane());  
 
+	if (fabs(firstPoint.z()-ftpcPadrowZPos[10])<=1)
+	  hists->m_glb_planefF->Fill(11,0.);
+	if (fabs(firstPoint.z()-ftpcPadrowZPos[11])<=1)
+	  hists->m_glb_planefF->Fill(12,0.);
+	if (fabs(firstPoint.z()-ftpcPadrowZPos[12])<=1)
+	  hists->m_glb_planefF->Fill(13,0.);
+	if (fabs(firstPoint.z()-ftpcPadrowZPos[13])<=1)
+	  hists->m_glb_planefF->Fill(14,0.);
+	if (fabs(firstPoint.z()-ftpcPadrowZPos[14])<=1)
+	  hists->m_glb_planefF->Fill(15,0.);
+	if (fabs(firstPoint.z()-ftpcPadrowZPos[15])<=1)
+	  hists->m_glb_planefF->Fill(16,0.);
+	if (fabs(firstPoint.z()-ftpcPadrowZPos[16])<=1)
+	  hists->m_glb_planefF->Fill(17,0.);
+	if (fabs(firstPoint.z()-ftpcPadrowZPos[17])<=1)
+	  hists->m_glb_planefF->Fill(18,0.);
+	if (fabs(firstPoint.z()-ftpcPadrowZPos[18])<=1)
+	  hists->m_glb_planefF->Fill(19,0.);
+	if (fabs(firstPoint.z()-ftpcPadrowZPos[19])<=1)
+	  hists->m_glb_planefF->Fill(20,0.);
+
 	// east and west in separate histograms
         hists->m_pointFE->Fill(detInfo->numberOfPoints());
         hists->m_max_pointFE->Fill(globtrk->numberOfPossiblePoints());
@@ -601,6 +638,28 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_chisq0F->Fill(chisq0,1.);
         hists->m_glb_impactF->Fill(logImpact,1.);
         hists->m_glb_impactrF->Fill(globtrk->impactParameter(),1.);
+
+	if (fabs(firstPoint.z()-ftpcPadrowZPos[0])<=1)
+	  hists->m_glb_planefF->Fill(1,1.);
+	if (fabs(firstPoint.z()-ftpcPadrowZPos[1])<=1)
+	  hists->m_glb_planefF->Fill(2,1.);
+	if (fabs(firstPoint.z()-ftpcPadrowZPos[2])<=1)
+	  hists->m_glb_planefF->Fill(3,1.);
+	if (fabs(firstPoint.z()-ftpcPadrowZPos[3])<=1)
+	  hists->m_glb_planefF->Fill(4,1.);
+	if (fabs(firstPoint.z()-ftpcPadrowZPos[4])<=1)
+	  hists->m_glb_planefF->Fill(5,1.);
+	if (fabs(firstPoint.z()-ftpcPadrowZPos[5])<=1)
+	  hists->m_glb_planefF->Fill(6,1.);
+	if (fabs(firstPoint.z()-ftpcPadrowZPos[6])<=1)
+	  hists->m_glb_planefF->Fill(7,1.);
+	if (fabs(firstPoint.z()-ftpcPadrowZPos[7])<=1)
+	  hists->m_glb_planefF->Fill(8,1.);
+	if (fabs(firstPoint.z()-ftpcPadrowZPos[8])<=1)
+	  hists->m_glb_planefF->Fill(9,1.);
+	if (fabs(firstPoint.z()-ftpcPadrowZPos[9])<=1)
+	  hists->m_glb_planefF->Fill(10,1.);
+
 	// east and west in separate histograms
         hists->m_pointFW->Fill(detInfo->numberOfPoints());
         hists->m_max_pointFW->Fill(globtrk->numberOfPossiblePoints());
@@ -629,8 +688,8 @@ void StEventQAMaker::MakeHistGlob() {
   hists->m_globtrk_tot->Fill(cnttrk); 
   hists->m_globtrk_good->Fill(cnttrkg);
   hists->m_globtrk_good_sm->Fill(cnttrkg);
-  hists->m_globtrk_good_tot->Fill((Float_t)cnttrkgT/(Float_t)cnttrk,1.);
-  hists->m_globtrk_good_tot->Fill((Float_t)cnttrkgTS/(Float_t)cnttrk,0.);
+  hists->m_globtrk_good_tot->Fill((Float_t)cnttrkgT/(Float_t)cnttrkT,1.);
+  hists->m_globtrk_good_tot->Fill((Float_t)cnttrkgTS/(Float_t)cnttrkTS,0.);
   hists->m_globtrk_goodTTS->Fill(cnttrkgTTS);
   hists->m_globtrk_goodF->Fill(cnttrkgFE,cnttrkgFW);
 }

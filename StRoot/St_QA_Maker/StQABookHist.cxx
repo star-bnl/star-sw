@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.11 2001/05/23 00:14:52 lansdell Exp $
+// $Id: StQABookHist.cxx,v 2.12 2001/05/24 01:48:13 lansdell Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.12  2001/05/24 01:48:13  lansdell
+// qa_shift histograms updated
+//
 // Revision 2.11  2001/05/23 00:14:52  lansdell
 // more changes for qa_shift histograms
 //
@@ -175,6 +178,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_glb_zfF=0;
   m_glb_zfFE=0; 
   m_glb_zfFW=0;
+  m_glb_planefF=0;
   m_glb_f0=0;
   m_glb_rzf0=0;
   m_glb_radfT=0;
@@ -582,7 +586,7 @@ void StQABookHist::BookHistGlob(){
   m_globtrk_iflag    = QAH::H1F("QaGtrkFlag","globtrk: iflag - all ",200,-999.,1001.);
   m_globtrk_good     = QAH::H1F("QaGtrkGood","globtrk: tot good tracks - all",40,0.,10000.);
   m_globtrk_good_sm  = QAH::H1F("QaGtrkGoodsm","globtrk: tot good tracks - all",40,0.,500.);
-  m_globtrk_good_tot = QAH::MH1F("QaGtrkGoodTot","globtrk: ratio tpc, svt good tracks/all good tracks",50,0,1,2);
+  m_globtrk_good_tot = QAH::MH1F("QaGtrkGoodTot","globtrk: ratio good tracks (tpc,tpc+svt) to all tracks (tpc,tpc+svt)",50,0,1,5);
   m_globtrk_good_tot->Rebin(0,"TPC+SVT/total");
   m_globtrk_good_tot->Rebin(1,"TPC/total");
   m_globtrk_good_tot->SetStats(kFALSE);
@@ -596,7 +600,7 @@ void StQABookHist::BookHistGlob(){
   m_dcaToBeamZ1      = QAH::H1F("QaGtrkDcaBeamZ1","globtrk: z-DCA to Beam Axis, coarse scale",100,-200,0);
   m_dcaToBeamZ2      = QAH::H1F("QaGtrkDcaBeamZ2","globtrk: z-DCA to Beam Axis, coarse scale",100,0,200);
   m_dcaToBeamZ3      = QAH::H1F("QaGtrkDcaBeamZ3","globtrk: z-DCA to Beam Axis, near z=0",80,-20,20);
-  m_zDcaTanl         = QAH::H2F("QaGtrkZdcaTanl","globtrk: z-DCA to Beam Axis vs tanl",80,-20,20,32,-4,4);
+  m_zDcaTanl         = QAH::H2F("QaGtrkZdcaTanl","globtrk: z-DCA to Beam Axis vs tanl, tpc,tpc+svt",80,-20,20,32,-4,4);
   m_zDcaZf           = QAH::H2F("QaGtrkZdcaZf","globtrk: z-DCA to Beam Axis vs z-first",80,-20,20,50,-300,300);
   m_zDcaPsi          = QAH::H2F("QaGtrkZdcaPsi","globtrk: z-DCA to Beam Axis vs psi",80,-20,20,64,0,360);
   m_zDcaPhi0         = QAH::H2F("QaGtrkZdcaPhi0","globtrk: z-DCA to Beam Axis vs azimuth (phi0) at start",80,-20,20,64,0,360);
@@ -642,7 +646,7 @@ void StQABookHist::BookHistGlob(){
   m_glb_impactrTTS->Rebin(0,"TPC+SVT");
   m_glb_impactrTTS->Rebin(1,"TPC");
   m_glb_impactrTTS->SetStats(kFALSE);
-  m_fpoint_lengthTTS = QAH::H2F("QaGtrkFitPntLengthTTS","globtrk: N fit pnts vs length, tpc,tpc+svt",
+  m_fpoint_lengthTTS = QAH::H2F("QaGtrkFitPntLTTS","globtrk: N fit pnts vs length, tpc,tpc+svt",
 				25,0.,250.,25,0.,50.);
   m_fpoint_lengthTTS->SetXTitle("trk length");
   m_fpoint_lengthTTS->SetYTitle("Npoints on trk");
@@ -813,7 +817,7 @@ void StQABookHist::BookHistGlob(){
   m_glb_yf0TS    = QAH::H1F("QaGtrkYf0TS",    "globtrk: y of first hit - on helix at start, tpc+svt",50,-5.,5.);
   m_glb_zfTS     = QAH::H1F("QaGtrkZfTS",     "globtrk: z of first hit on trk, svt", 50,-30.,30.);
   m_glb_zf0TS    = QAH::H1F("QaGtrkZf0TS",    "globtrk: z of first hit - on helix at start, tpc+svt",50,-5.,5.);
-  m_glb_radfTS   = QAH::H1F("QaGtrkRTS",      "globtrk: radial position of first hit, tpc+svt", 50,0.,200.);
+  m_glb_radfTS   = QAH::H1F("QaGtrkRTS",      "globtrk: radial position of first hit, tpc+svt",80,4.,200.);
   m_glb_rzf0TS   = QAH::MH1F("QaGtrkRZf0TS",  "globtrk: first point: hit - helix, tpc+svt",60,-3.,3.,2);
   m_glb_rzf0TS->Rebin(0,"#pm #sqrt{ x_{dif}^{2}+y_{dif}^{2}}");
   m_glb_rzf0TS->Rebin(1,"z_{dif}");
@@ -944,6 +948,10 @@ void StQABookHist::BookHistGlob(){
   m_glb_zfF->Rebin(0,"East");
   m_glb_zfF->Rebin(1,"West");
   m_glb_zfF->SetStats(kFALSE);
+  m_glb_planefF = QAH::MH1F("QaGtrkPlanefF",  "globtrk: plane of first hit on trk, ftpc",20,0.5,20.5,2);
+  m_glb_planefF->Rebin(0,"East");
+  m_glb_planefF->Rebin(1,"West");
+  m_glb_planefF->SetStats(kFALSE);
   m_glb_radfF   = QAH::MH1F("QaGtrkRF",       "globtrk: radial position of first hit, ftpc",35,0.,35.,2);
   m_glb_radfF->Rebin(0,"East");
   m_glb_radfF->Rebin(1,"West");
@@ -1239,7 +1247,7 @@ void StQABookHist::BookHistPrim(){
   m_primtrk_xf_yfTS = QAH::H2F("QaPtrkXfYfTS",  "primtrk: Y vs X of first hit on trk, tpc+svt", 40,-200.,200.,40,-200.,200.);
     m_primtrk_xf_yfTS->SetXTitle("x first");
     m_primtrk_xf_yfTS->SetYTitle("y first");
-  m_ptanl_zfTS = QAH::H2F("QaPtrkTanlzfTS","primtrk: tanl(dip) versus zfirst-zvtx, svt",50,-50.,50.,60,-3.,3.);
+  m_ptanl_zfTS = QAH::H2F("QaPtrkTanlzfTS","primtrk: tanl(dip) versus zfirst-zvtx, svt",70,-35.,35.,60,-3.,3.);
     m_ptanl_zfTS->SetXTitle("zfirst-zvtx");
     m_ptanl_zfTS->SetYTitle("tanl");
   m_pmom_trklengthTS = QAH::H2F("QaPtrkPVsTrkLTS","primtrk: log mom vs trk length, tpc+svt",50,70.,350.,40,1.,4.);
@@ -1570,7 +1578,6 @@ void StQABookHist::BookHistEMC(){
     name  = detname[i] + "Adc";
     title = tit + detname[i] + " ADC dist.";
     m_emc_adc[i]  = QAH::H1F(name,title, 5001, -0.5, 5000.5);
-    if(i==2) 
 
     name   = detname[i] + "Energy";
     title  = tit + detname[i] + " energy dist.";
@@ -1670,7 +1677,7 @@ void StQABookHist::BookHistEMC(){
     m_emc_point_trmom[i]= QAH::H1F(name,title,100,0.,10.);
   }
 
-  m_emc_point_flag= QAH::H1F(" Point Flag "," Point Flag ",5,0.5,5.5);
+  m_emc_point_flag= QAH::H1F(" Point Flag","Point Flag",5,0.5,5.5);
 
 }
 //_____________________________________________________________________________
