@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.79  1999/06/24 18:00:20  fisyak
+#  Take out StDaqLib for sun
+#
 #  Revision 1.78  1999/06/16 12:37:03  fisyak
 #  Changes for egcs-1.1.2 on Solaris
 #
@@ -313,7 +316,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/06/16 12:37:03 $ 
+#           Last modification $Date: 1999/06/24 18:00:20 $ 
 #  default setings
 # Current Working Directory
 #
@@ -379,11 +382,12 @@ endif
    SUBDIRS := $(filter-out StPeCMaker, $(SUBDIRS))
 #  ifneq (,$(findstring $(STAR_SYS),hp_ux102 ))
 #    SUBDIRS := $(filter-out StTrsMaker, $(SUBDIRS))
-#    SUBDIRS := $(filter-out StEventReaderMaker, $(SUBDIRS)) 
 #    SUBDIRS := $(filter-out StEvent, $(SUBDIRS)) 
 #  endif
+#    SUBDIRS := $(filter-out StEventReaderMaker, $(SUBDIRS)) 
+ SUBDIRS := $(filter-out StEventReaderMaker, $(SUBDIRS)) 
  ifneq (,$(findstring $(STAR_SYS),sun4x_56 hp_ux102))
-    SUBDIRS := $(filter-out StDaqLib StNoiseMaker, $(SUBDIRS))
+    SUBDIRS := $(filter-out StDaqLib StNoiseMaker StPadDisplayMaker StDisplayMaker StEventReaderMaker, $(SUBDIRS))
 #    SUBDIRS := $(filter-out StFtpcV0Maker, $(SUBDIRS))
  endif
   ifdef PKG
