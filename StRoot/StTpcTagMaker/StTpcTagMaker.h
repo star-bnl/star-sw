@@ -1,4 +1,8 @@
+// $Id: StTpcTagMaker.h,v 1.2 2000/05/24 00:20:39 sakrejda Exp $
 // $Log: StTpcTagMaker.h,v $
+// Revision 1.2  2000/05/24 00:20:39  sakrejda
+// $Id added at the top
+//
 // Revision 1.1  2000/05/24 00:07:02  sakrejda
 // Maker to fill TPC reconstruction quality flags created
 //
@@ -51,11 +55,11 @@
 //class St_stk_stkpar;
 class StTpcTagMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StTpcTagMaker.h,v 1.1 2000/05/24 00:07:02 sakrejda Exp $";
+// static Char_t  m_VersionCVS = "$Id: StTpcTagMaker.h,v 1.2 2000/05/24 00:20:39 sakrejda Exp $";
  
  protected:
  public: 
-                  StTpcTagMaker(const char *name="TLA");
+                  StTpcTagMaker(const char *name="TpcTag");
    virtual       ~StTpcTagMaker();
    virtual Int_t Init();
    virtual Int_t  Make();
@@ -63,7 +67,7 @@ class StTpcTagMaker : public StMaker {
 // virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcTagMaker.h,v 1.1 2000/05/24 00:07:02 sakrejda Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcTagMaker.h,v 1.2 2000/05/24 00:20:39 sakrejda Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTpcTagMaker, 1)   //StAF chain virtual base class for Makers
 };
