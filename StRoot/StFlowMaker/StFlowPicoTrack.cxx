@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoTrack.cxx,v 1.9 2001/12/12 21:36:20 posk Exp $
+// $Id: StFlowPicoTrack.cxx,v 1.10 2001/12/18 19:22:35 posk Exp $
 //
 // Author: Raimond Snellings, March 2000
 //
@@ -10,6 +10,8 @@
 
 #include "StFlowPicoTrack.h"
 #include <math.h>
+// Needed for Solaris, which does not have fabs():
+#define ABS(x) (x>0?x:-x)
 
 ClassImp(StFlowPicoTrack)
 
@@ -51,21 +53,25 @@ StFlowPicoTrack::StFlowPicoTrack(StFlowPicoTrack *track) : TObject() {
   mTopologyMap1 = track->TopologyMap1();
 
   pid = track->PidPion();
-  if (fabs(pid) > maxInt) pid = maxInt; mPidPion     = (Int_t)(pid*1000.); 
+  if (ABS(pid) > maxInt) pid = maxInt; mPidPion     = (Int_t)(pid*1000.); 
   pid = track->PidProton();
-  if (fabs(pid) > maxInt) pid = maxInt; mPidProton   = (Int_t)(pid*1000.); 
+  if (ABS(pid) > maxInt) pid = maxInt; mPidProton   = (Int_t)(pid*1000.); 
   pid = track->PidKaon();
-  if (fabs(pid) > maxInt) pid = maxInt; mPidKaon     = (Int_t)(pid*1000.); 
+  if (ABS(pid) > maxInt) pid = maxInt; mPidKaon     = (Int_t)(pid*1000.); 
   pid = track->PidDeuteron();
-  if (fabs(pid) > maxInt) pid = maxInt; mPidDeuteron = (Int_t)(pid*1000.); 
+  if (ABS(pid) > maxInt) pid = maxInt; mPidDeuteron = (Int_t)(pid*1000.); 
   pid = track->PidElectron();
-  if (fabs(pid) > maxInt) pid = maxInt; mPidElectron = (Int_t)(pid*1000.); 
+  if (ABS(pid) > maxInt) pid = maxInt; mPidElectron = (Int_t)(pid*1000.); 
 
 }
 
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoTrack.cxx,v $
+// Revision 1.10  2001/12/18 19:22:35  posk
+// "proton" and "antiproton" changed to "pr+" and "pr-".
+// Compiles on Solaris.
+//
 // Revision 1.9  2001/12/12 21:36:20  posk
 // For Solaris compatability, added: #include <math.h>
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.h,v 1.14 2001/11/09 21:11:00 posk Exp $
+// $Id: StFlowSelection.h,v 1.15 2001/12/18 19:22:38 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -50,7 +50,7 @@ class StFlowSelection : public StObject {
   
  private:
 
-  // pi-, pi+, pi, k+, k-, pbar, proton, d, dbar, e+, e-
+  // pi-, pi+, pi, k+, k-, k, pr+, pr-, pr, d+, d-, d, e+, e-, e
   Char_t  mPidPart[10];                      // PID for particles wrt plane
   Float_t mPtPart[2];                        // for parts. wrt plane
   Float_t mPPart[2];                         // for parts. wrt plane
@@ -128,6 +128,10 @@ inline void StFlowSelection::SetSubevent(const Int_t& subN) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.h,v $
+// Revision 1.15  2001/12/18 19:22:38  posk
+// "proton" and "antiproton" changed to "pr+" and "pr-".
+// Compiles on Solaris.
+//
 // Revision 1.14  2001/11/09 21:11:00  posk
 // Switched from CERNLIB to TMath. Little q is now normalized.
 //

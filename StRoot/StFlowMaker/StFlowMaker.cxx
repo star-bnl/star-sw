@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.63 2001/12/11 21:33:55 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.64 2001/12/18 19:22:15 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -154,6 +154,16 @@ Int_t StFlowMaker::Make() {
   if (!pFlowEvent) { flowEventMult = 0; }
   else { flowEventMult = pFlowEvent->FlowEventMult(); }
 
+  int runID = pFlowEvent->RunID();
+  if (runID != mRunID) {
+    double beamEnergy = pFlowEvent->CenterOfMassEnergy();
+    short beamMassE   = pFlowEvent->BeamMassNumberEast();
+    short beamMassW   = pFlowEvent->BeamMassNumberWest();
+    gMessMgr->Info() << "##### FlowMaker: " << runID << ", " << beamEnergy
+		     << " GeV/c " << beamMassE << " + " << beamMassW << endm;
+    mRunID = runID;
+  }
+
   if (Debug()) StMaker::PrintInfo();
   
   return kStOK;
@@ -186,7 +196,7 @@ Int_t StFlowMaker::Init() {
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.63 2001/12/11 21:33:55 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.64 2001/12/18 19:22:15 posk Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -1301,6 +1311,10 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.64  2001/12/18 19:22:15  posk
+// "proton" and "antiproton" changed to "pr+" and "pr-".
+// Compiles on Solaris.
+//
 // Revision 1.63  2001/12/11 21:33:55  posk
 // Went from one to four sets of histograms for making the event plane isotropic.
 // StFlowEvent::PhiWeight() has changed arguments and return value.

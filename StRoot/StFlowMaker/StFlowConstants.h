@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.10 2001/12/11 21:33:41 posk Exp $
+// $Id: StFlowConstants.h,v 1.11 2001/12/18 19:21:59 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -42,6 +42,7 @@ class Flow{
   static Float_t etaMax;
   static Float_t ptMin;
   static Float_t ptMax;
+  static Float_t ptMaxPart;
 
   ClassDef(Flow,1)               // macro for rootcint
 };
@@ -51,6 +52,10 @@ class Flow{
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.11  2001/12/18 19:21:59  posk
+// "proton" and "antiproton" changed to "pr+" and "pr-".
+// Compiles on Solaris.
+//
 // Revision 1.10  2001/12/11 21:33:41  posk
 // Went from one to four sets of histograms for making the event plane isotropic.
 // StFlowEvent::PhiWeight() has changed arguments and return value.

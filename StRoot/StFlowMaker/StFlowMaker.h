@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.27 2001/12/11 21:34:06 posk Exp $
+//  $Id: StFlowMaker.h,v 1.28 2001/12/18 19:22:29 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -58,7 +58,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.27 2001/12/11 21:34:06 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.28 2001/12/18 19:22:29 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -80,6 +80,7 @@ private:
   Bool_t           mPicoEventRead;            // switch for pico-DST
   UInt_t           mPicoEventCounter;         // number of Bytes in pico event
   Bool_t           mOnePhiWgt;                // use old phi weights
+  Int_t            mRunID;                    // last run ID
   Int_t            ReadPhiWgtFile();          // get the weight file
   Int_t            InitPicoEventWrite();      // open pico-DST
   Int_t            InitPicoEventRead();       // open pico-DST
@@ -133,6 +134,10 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.28  2001/12/18 19:22:29  posk
+//  "proton" and "antiproton" changed to "pr+" and "pr-".
+//  Compiles on Solaris.
+//
 //  Revision 1.27  2001/12/11 21:34:06  posk
 //  Went from one to four sets of histograms for making the event plane isotropic.
 //  StFlowEvent::PhiWeight() has changed arguments and return value.

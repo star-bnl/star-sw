@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.27 2001/12/11 21:33:43 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.28 2001/12/18 19:22:02 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -662,10 +662,10 @@ void StFlowEvent::SetPidsDeviant() {
 	!bElectron && !bPositron) { strcpy(pid, "pi-"); } 
     if (!bPiPlus && !bPiMinus && bProton && !bAntiProton && 
 	!bKplus && !bKminus && !bDeuteron && !bAntiDeuteron && 
-	!bElectron && !bPositron) { strcpy(pid, "proton"); } 
+	!bElectron && !bPositron) { strcpy(pid, "pr+"); } 
     if (!bPiPlus && !bPiMinus && !bProton && bAntiProton && 
 	!bKplus && !bKminus && !bDeuteron && !bAntiDeuteron && 
-	!bElectron && !bPositron) { strcpy(pid, "pbar"); } 
+	!bElectron && !bPositron) { strcpy(pid, "pr-"); } 
     if (!bPiPlus && !bPiMinus && !bProton && !bAntiProton && 
 	bKplus && !bKminus && !bDeuteron && !bAntiDeuteron && 
 	!bElectron && !bPositron) { strcpy(pid, "k+"); } 
@@ -674,10 +674,10 @@ void StFlowEvent::SetPidsDeviant() {
 	!bElectron && !bPositron) { strcpy(pid, "k-"); } 
     if (!bPiPlus && !bPiMinus && !bProton && !bAntiProton && 
 	!bKplus && !bKminus && bDeuteron && !bAntiDeuteron && 
-	!bElectron && !bPositron) { strcpy(pid, "d"); } 
+	!bElectron && !bPositron) { strcpy(pid, "d+"); } 
     if (!bPiPlus && !bPiMinus && !bProton && !bAntiProton && 
 	!bKplus && !bKminus && !bDeuteron && bAntiDeuteron && 
-	!bElectron && !bPositron) { strcpy(pid, "dbar"); } 
+	!bElectron && !bPositron) { strcpy(pid, "d-"); } 
     if (!bPiPlus && !bPiMinus && !bProton && !bAntiProton && 
 	!bKplus && !bKminus && !bDeuteron && !bAntiDeuteron && 
 	bElectron && !bPositron) { strcpy(pid, "e-"); } 
@@ -711,10 +711,10 @@ void StFlowEvent::SetPidsProb() {
       { strcpy(pid, "pi-"); } 
     if (pFlowTrack->MostLikelihoodPID() == 14 &&  
 	pFlowTrack->MostLikelihoodProb() > 0.9)
-      { strcpy(pid, "proton"); } 
+      { strcpy(pid, "pr+"); } 
     if (pFlowTrack->MostLikelihoodPID() == 15 &&  
 	pFlowTrack->MostLikelihoodProb() > 0.9)
-      { strcpy(pid, "pbar"); } 
+      { strcpy(pid, "pr-"); } 
     if (pFlowTrack->MostLikelihoodPID() == 11 &&  
 	pFlowTrack->MostLikelihoodProb() > 0.9)
       { strcpy(pid, "k+"); } 
@@ -723,10 +723,10 @@ void StFlowEvent::SetPidsProb() {
       { strcpy(pid, "k-"); } 
     if (pFlowTrack->MostLikelihoodPID() == 45 &&  
 	pFlowTrack->MostLikelihoodProb() > 0.9)
-      { strcpy(pid, "d"); } 
+      { strcpy(pid, "d+"); } 
 //      if (pFlowTrack->MostLikelihoodPID() == &&  
 //  	pFlowTrack->MostLikelihoodProb() > 0.9)
-//      { strcpy(pid, "dbar"); } 
+//      { strcpy(pid, "d-"); } 
     if (pFlowTrack->MostLikelihoodPID() == 3 &&  
 	pFlowTrack->MostLikelihoodProb() > 0.9)
       { strcpy(pid, "e-"); } 
@@ -824,6 +824,10 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.28  2001/12/18 19:22:02  posk
+// "proton" and "antiproton" changed to "pr+" and "pr-".
+// Compiles on Solaris.
+//
 // Revision 1.27  2001/12/11 21:33:43  posk
 // Went from one to four sets of histograms for making the event plane isotropic.
 // StFlowEvent::PhiWeight() has changed arguments and return value.
