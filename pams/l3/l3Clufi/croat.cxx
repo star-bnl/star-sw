@@ -239,14 +239,17 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 				
 
 #ifdef DECONVOLUTE_TIME
-			    /* this is a goto label ... */
-			redo: ;
-
-			    // divide one pixelsequenz into two in case we found a change of sign in slope 
-			    if(start_new > -1) 
+			    if( rowAbs[i] != 13 )
 				{
-				    start=start_new ;
-				    start_new = -1 ;
+				   // this is a goto label ... 
+				   redo: ;
+				
+				   // divide one pixelsequenz into two in case we found a change of sign in slope 
+				   if(start_new > -1) 
+				       {
+					   start=start_new ;
+					   start_new = -1 ;
+				       }
 				}
 #endif
 			    // average and charge 0 
@@ -260,12 +263,17 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 
 
 #ifdef DECONVOLUTE_TIME
-			    // flags = 0 
-			    last_falling = flags = 0 ;
-			    
+			    if( rowAbs[i] != 13 )
+				{
+				    // flags = 0 
+				    last_falling = flags = 0 ;
+				}
 #endif
 #ifdef DECONVOLUTE_PAD
-			    flags = 0 ;
+			    if( rowAbs[i] != 13 )
+				{
+				    flags = 0 ;
+				}
 #endif
 			
 			    // block to introduce new variables 
@@ -287,17 +295,20 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 					aa = *val1++ ;
 				
 #ifdef DECONVOLUTE_TIME 
-					// check if last pixel in this sequenz is bigger or smaller than this
-					if(aa > last_a) 
+					if( rowAbs[i] != 13 )
 					    {
-						if(last_falling) 
+						// check if last pixel in this sequenz is bigger or smaller than this
+						if(aa > last_a) 
 						    {
-							start_new = start ;
-							break ;
+							if(last_falling) 
+							    {
+								start_new = start ;
+								break ;
+							    }
 						    }
+						else last_falling = 1;
+						last_a = aa ;
 					    }
-					else last_falling = 1;
-					last_a = aa ;
 #endif
 					
 					// 8 to 10 bit conversion :  as late as possible
@@ -311,7 +322,10 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 				    } // loop over sequenz 
 			    }// block to introduce new variables 
 #ifdef DECONVOLUTE_TIME
-			    if(start_new > 0) flags = FLAG_DOUBLE_T ;
+			    if( rowAbs[i] != 13 )
+				{
+				    if(start_new > 0) flags = FLAG_DOUBLE_T ;
+				}
 #endif
 			    // calculate mean in time direction for this sequenz 
 			    if(charge) 
@@ -383,20 +397,23 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 					    /*LOG(DBG,"after - pres_cou1 %d [%d]",pres_cou1,pres_cou2,0,0,0) ;*/
 				    
 #ifdef DECONVOLUTE_PAD
-					    if(charge > rr->scharge) 
+					    if( rowAbs[i] != 13 )
 						{
-						    if(rr->falling) 
-							{ 
-							    /* previous state was falling*/
-							    flags |= FLAG_DOUBLE_PAD ;
-							    rr_tmp->flags |= flags ;
-							    /* and create a new one*/
-							    break ;    
+						    if(charge > rr->scharge) 
+							{
+							    if(rr->falling) 
+								{ 
+								    /* previous state was falling*/
+								    flags |= FLAG_DOUBLE_PAD ;
+								    rr_tmp->flags |= flags ;
+								    /* and create a new one*/
+								    break ;    
+								}
 							}
-						}
-					    else 
-						{
-						    rr->falling = 1 ;	/* falling */
+						    else 
+							{
+							    rr->falling = 1 ;	/* falling */
+							}
 						}
 #endif
 
@@ -444,8 +461,11 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 
 
 #ifdef DECONVOLUTE_TIME
-			    // maybe we still have to do something
-			    if(start_new>=0) goto redo ;
+			    if( rowAbs[i] != 13 )
+				{
+				    // maybe we still have to do something
+				    if(start_new>=0) goto redo ;
+				}
 #endif
 			}	/* for loop : CPPs on this pad */
 		}    /* for loop : minpad to maxpad */
@@ -492,6 +512,13 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 
 		     // reject one_pad clusters
 		    if(resx[j].flags & FLAG_ONEPAD)
+		    {
+		      //printf("one pad rejected\n") ;
+		      continue ;
+		    }
+
+		    // reject clusters with not enough charge
+		    if(resx[j].charge < MIN_CHARGE)
 		    {
 		      //printf("one pad rejected\n") ;
 		      continue ;
