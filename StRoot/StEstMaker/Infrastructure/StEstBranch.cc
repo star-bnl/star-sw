@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstBranch.cc,v 1.3 2001/01/26 10:16:45 lmartin Exp $
+ * $Id: StEstBranch.cc,v 1.4 2001/02/23 13:01:10 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstBranch.cc,v $
+ * Revision 1.4  2001/02/23 13:01:10  lmartin
+ * cout replaced by gMessMgr.
+ *
  * Revision 1.3  2001/01/26 10:16:45  lmartin
  * Minor changes. Unused mLastLay data member removed. Short description of the data members added.
  *
@@ -20,6 +23,7 @@
  * First CVS commit
  *
  **************************************************************************/
+#include "StMessMgr.h"
 #include "StEstBranch.hh"
 #include "StEstWafer.hh"
 #include "StEstHit.hh"
@@ -41,60 +45,62 @@ StEstBranch::StEstBranch(StEstTrack *tr,
   mNFit       = nf;
   mIsGood     = isgood;
 
-  if (mMaxHits==0) cout << "ERROR StEstBranch::StEstBranch  mMaxHits=0"<<endl;
-  if (mDebugLevel>0) cout << "StEstBranch::StEstBranch ***START***" << endl;
+  if (mMaxHits==0) gMessMgr->Error()<<"ERROR StEstBranch::StEstBranch  mMaxHits=0"<<endm;
+  if (mDebugLevel>0) gMessMgr->Info()<<"StEstBranch::StEstBranch ***START***"<<endm;
   if (mNHits>mMaxHits)
-    cout << "ERROR StEstBranch::StEstBranch mNHits>mMaxHits"<<endl;
+    gMessMgr->Error()<<"ERROR StEstBranch::StEstBranch mNHits>mMaxHits"<<endm;
 
   mHits = new StEstHit*[mMaxHits];
   mDist = new double[mMaxHits];
 
   if (mHits==NULL) 
-    cout << "ERROR StEstBranch::StEstBranch not enough memory mHits=NULL" << endl;
+    gMessMgr->Error()<<"ERROR StEstBranch::StEstBranch not enough memory mHits=NULL"<<endm;
 
   if (hit!=NULL) {
     if (mDebugLevel>0) 
-      cout << "mNHits = " << mNHits <<endl;
+      gMessMgr->Info()<<"mNHits = "<<mNHits<<endm;
 
     for (i=0;i<mNHits;i++) {
 
       if (mDebugLevel>0)
-	cout << "  i = " << i << "  hit[i] = "<<hit[i]<<endl;
+	gMessMgr->Info()<<"  i = "<<i<<"  hit[i] = "<<hit[i]<<endm;
 
       mHits[i] = hit[i];
       mDist[i] = dist[i];
-      if (mDebugLevel>0) {
-	cout << "  StEstBranch::StEstBranch mHits["<<i<<"]->GetNBranch()="<<endl;
-	cout <<mHits[i]->GetNBranch()<<endl;
-      }
-      if (mHits[i]->GetDebugLevel()>0) {
-	cout << "  StEstBranch before JoinBranch : hit_id,NBranch,MaxBranches,NShare,MaxShare ";
-	cout <<mHits[i]->GetId()<<" "<<mHits[i]->GetNBranch()<<" "<<mHits[i]->GetMaxBranches()<<" "<<mHits[i]->GetNShare()<<" "<<mHits[i]->GetMaxShare()<<endl;
-      }
-      mHits[i]->JoinBranch(this,tr);
-      if (mHits[i]->GetDebugLevel()>0) {
-	cout << "  StEstBranch after JoinBranch : hit_id,NBranch,MaxBranches,NShare,MaxShare ";
-	cout <<mHits[i]->GetId()<<" "<<mHits[i]->GetNBranch()<<" "<<mHits[i]->GetMaxBranches()<<" "<<mHits[i]->GetNShare()<<" "<<mHits[i]->GetMaxShare()<<endl;
-      }
       if (mDebugLevel>0)
-	cout << "  StEstBranch::StEstBranch mHits["<<i<<"]->GetNBranch()="<< mHits[i]->GetNBranch()<<endl;
+	gMessMgr->Info()<<"StEstBranch::StEstBranch mHits["<<i<<"]->GetNBranch()="
+			<<mHits[i]->GetNBranch()<<endm;
+      if (mHits[i]->GetDebugLevel()>0)
+	gMessMgr->Info()<<"StEstBranch before JoinBranch : hit_id,NBranch,MaxBranches,NShare,MaxShare "
+			<<mHits[i]->GetId()<<" "<<mHits[i]->GetNBranch()<<" "<<mHits[i]->GetMaxBranches()
+			<<" "<<mHits[i]->GetNShare()<<" "<<mHits[i]->GetMaxShare()<<endm;
+      
+      mHits[i]->JoinBranch(this,tr);
+
+      if (mHits[i]->GetDebugLevel()>0)
+	gMessMgr->Info()<<"StEstBranch before JoinBranch : hit_id,NBranch,MaxBranches,NShare,MaxShare "
+			<<mHits[i]->GetId()<<" "<<mHits[i]->GetNBranch()<<" "<<mHits[i]->GetMaxBranches()
+			<<" "<<mHits[i]->GetNShare()<<" "<<mHits[i]->GetMaxShare()<<endm;
+      if (mDebugLevel>0)
+	gMessMgr->Info()<<"StEstBranch::StEstBranch mHits["<<i<<"]->GetNBranch()="
+			<< mHits[i]->GetNBranch()<<endm;
     }
   }
 
   if (tr!=NULL) {  
     mTrack = tr;
     if(tr->AddBranch(this)==1)
-      cerr << "ERROR!!! StEstBranch::StEstBranch tr->AddBranch(this)==1 too many branches for track";
+      gMessMgr->Error()<<"StEstBranch::StEstBranch tr->AddBranch(this)==1 too many branches for track"<<endm;
   }
 
   mHelix = NULL;
 
-  if (mDebugLevel>0) cout << "StEstBranch::StEstBranch ***STOP***" << endl;
+  if (mDebugLevel>0) gMessMgr->Info()<<"StEstBranch::StEstBranch ***STOP***"<<endm;
 }
 
   
 StEstBranch::~StEstBranch() {
-  if (mDebugLevel>0) cout << endl<<"StEstBranch::~StEstBranch ***START***" << endl;
+  if (mDebugLevel>0) gMessMgr->Info()<<"StEstBranch::~StEstBranch ***START***"<<endm;
   for (int i=mNHits-1;i>=0;i--) {
     mHits[i]->LeaveBranch(this);
   }
@@ -102,22 +108,22 @@ StEstBranch::~StEstBranch() {
     delete mHelix;
   delete [] mDist;
   delete [] mHits;
-  if (mDebugLevel>0) cout << "StEstBranch::~StEstBranch ***STOP***" << endl;
+  if (mDebugLevel>0) gMessMgr->Info()<<"StEstBranch::~StEstBranch ***STOP***"<<endm;
 };
 
 
 StEstHit* StEstBranch::GetHit(long int nr) {
   if(nr>=mNHits) {
-    cerr << "ERROR StEstBranch::GetHit  nr>=mNHits"<<endl;
+    gMessMgr->Error()<<"ERROR StEstBranch::GetHit  nr>=mNHits"<<endm;
     return NULL;
   }
   if(nr>=mMaxHits) {
-    cout << "ERROR StEstBranch::GetHit  nr>=mMaxHits"<<endl;
-    cout << "      nr= "<<nr<<" mNHits= "<<mNHits<<" mMaxHits= "<<mMaxHits<<endl;
+    gMessMgr->Error()<<"ERROR StEstBranch::GetHit  nr>=mMaxHits"<<endm;
+    gMessMgr->Error()<<"      nr= "<<nr<<" mNHits= "<<mNHits<<" mMaxHits= "<<mMaxHits<<endm;
     return NULL;
   }
   if(nr<0) {
-    cerr << "ERROR StEstBranch::GetHit  nr<0"<<endl;
+    gMessMgr->Error()<<"ERROR StEstBranch::GetHit  nr<0"<<endm;
     return NULL;
   }
   return mHits[nr];
@@ -134,7 +140,7 @@ StEstBranch* StEstBranch::Duplicate() {
   // assigned here.
     
   StEstBranch *br = new StEstBranch(mTrack, mMaxHits, mNFit, mNHits, mHits, mDist, mIsGood);
-  if(br==NULL) cerr << "ERROR StEstBranch::Duplicate br=NULL" << endl;
+  if(br==NULL) gMessMgr->Error()<<"ERROR StEstBranch::Duplicate br=NULL"<<endm;
   else {
     br->SetChiSq(this->GetChiSq());
     br->SetChiSqCir(this->GetChiSqCir());
@@ -151,17 +157,17 @@ StEstBranch* StEstBranch::Duplicate() {
 }
   
 void StEstBranch::LeaveTrack() {
-  if (mDebugLevel>0) cout <<"StEstBranch::LeaveTrack ***START***" <<endl;
+  if (mDebugLevel>0) gMessMgr->Info()<<"StEstBranch::LeaveTrack ***START***" <<endm;
   long int i;
   for (i=0;i<mTrack->GetNBranches();i++) {
     if (mTrack->GetBranch(i) == this) {
-      cout<<"LeaveTrack this="<<this<<" i="<<i<<endl;
+      gMessMgr->Info()<<"LeaveTrack this="<<this<<" i="<<i<<endm;
       mTrack->RemoveBranch(i);
       mTrack = NULL;
       break;
     }
   }	
-  if (mDebugLevel>0) cout <<"StEstBranch::LeaveTrack ***STOP***" <<endl;
+  if (mDebugLevel>0) gMessMgr->Info()<<"StEstBranch::LeaveTrack ***STOP***"<<endm;
 }
 
 
@@ -175,7 +181,7 @@ int StEstBranch::JoinTrack(StEstTrack *tr, int IsIdeal) {
   // list of branches.
 
   long i;
-  if (mDebugLevel>0) cout <<"StEstBranch::JoinTrack ***START****"<<endl;
+  if (mDebugLevel>0) gMessMgr->Info()<<"StEstBranch::JoinTrack ***START****"<<endm;
 
   if (IsIdeal==0) {
     if (!tr->CheckAvailability()) {
@@ -187,7 +193,7 @@ int StEstBranch::JoinTrack(StEstTrack *tr, int IsIdeal) {
 	  // ok=1;
 	}
 	else {
-	  if (mDebugLevel>0) cout <<"StEstBranch::JoinTrack ***STOP*** 1"<<endl;
+	  if (mDebugLevel>0) gMessMgr->Info()<<"StEstBranch::JoinTrack ***STOP*** 1"<<endm;
 	  return 1;
 	}
       }
@@ -204,27 +210,26 @@ int StEstBranch::JoinTrack(StEstTrack *tr, int IsIdeal) {
       tr->AddFindableBranch(this);
     mTrack=tr;
   }
-  if (mDebugLevel>0) cout <<"StEstBranch::JoinTrack ***STOP*** 2"<<endl;
+  if (mDebugLevel>0) gMessMgr->Info()<<"StEstBranch::JoinTrack ***STOP*** 2"<<endm;
   return 0;
 }
 
 int StEstBranch::AddHit(StEstHit *hit, double dist) {
-  if (mDebugLevel>0) cout <<"StEstBranch::AddHit ***START***"<<endl;
+  if (mDebugLevel>0) gMessMgr->Info()<<"StEstBranch::AddHit ***START***"<<endm;
   if(mNHits>=mMaxHits){
-    cout<<"ERROR StEstBranch::AddHit mNHits ("<<mNHits<<") >=mMaxHits ("<<mMaxHits<<")"<<endl;
+    gMessMgr->Error()<<"ERROR StEstBranch::AddHit mNHits ("<<mNHits<<") >=mMaxHits ("<<mMaxHits<<")"<<endm;
     return 1;
   }
   mHits[mNHits] = hit; 
   mDist[mNHits] = dist;
   mNHits++;
 
-  if (mDebugLevel>0) cout << "  ADD HIT check mNHits: "<<mNHits<<endl;
+  if (mDebugLevel>0) gMessMgr->Info()<<"ADD HIT check mNHits: "<<mNHits<<endm;
   for (int i=0; i<mNHits; i++) {
-    if (mDebugLevel>0) cout << "  " << i << "\t" <<mHits[i];
-    if (mHits[i] == NULL && mDebugLevel>0) cout << "<-- HIT NULL!"<<endl;
-    else if (mDebugLevel>0) cout <<endl;
+    if (mHits[i] == NULL && mDebugLevel>0) gMessMgr->Info()<<"  "<<i<<"\t"<<mHits[i]<<"<-- HIT NULL!"<<endm;
+    else if (mDebugLevel>0) gMessMgr->Info()<<"  "<<i<<"\t"<<mHits[i]<<endm;
   }
-  if (mDebugLevel>0) cout <<"StEstBranch::AddHit ***STOP***"<<endl;
+  if (mDebugLevel>0) gMessMgr->Info()<<"StEstBranch::AddHit ***STOP***"<<endm;
   return 0;
 }
 
@@ -232,18 +237,18 @@ int StEstBranch::RemoveHit(long int nr) {
   
 
   int i;
-  if (mDebugLevel>0) cout <<"StEstBranch:RemoveHit v1 ***START***"<<endl;
+  if (mDebugLevel>0) gMessMgr->Info()<<"StEstBranch:RemoveHit v1 ***START***"<<endm;
 
   if(nr>=mMaxHits) {
-    cerr << "ERROR StEstBranch::RemoveHit  nr>=mMaxHits"<<endl;
+    gMessMgr->Error()<<"StEstBranch::RemoveHit  nr>=mMaxHits"<<endm;
     return  1;
   }
   if(nr>=mNHits) {
-    cerr << "ERROR StEstBranch::RemoveHit  nr>=mNHits"<<endl;
+    gMessMgr->Error()<<"StEstBranch::RemoveHit  nr>=mNHits"<<endm;
     return  1;
   }
   if(nr<0) {
-    cerr << "ERROR StEstBranch::RemoveHit  nr<0" << endl;
+    gMessMgr->Error()<<"StEstBranch::RemoveHit  nr<0"<<endm;
     return  1;
   }
   if (mNHits>0) { //?
@@ -255,20 +260,15 @@ int StEstBranch::RemoveHit(long int nr) {
     mDist[mNHits-1] = 0;
     mNHits--;  
 
-    if (mDebugLevel>0) cout << "  mNHits: "<<mNHits<<endl;
-    for (i=0; i<mNHits; i++) {
-      if (mDebugLevel>0) cout << "  " << i << "\t"<<mHits[i];
-      if (mHits[i] == NULL) {
-	if (mDebugLevel>0) cout << "<-- HIT NULL!" <<endl;
-	cerr << "ERROR!!! StEstBranch::RemoveHit HIT NULL!"<<endl;
-      }
-      else if (mDebugLevel>0) cout <<endl;
-    }
-    if (mDebugLevel>0) cout <<"StEstBranch:RemoveHit v1 ***STOP***"<<endl;
+    for (i=0; i<mNHits; i++)
+      if (mHits[i] == NULL)
+	gMessMgr->Error()<<"StEstBranch::RemoveHit HIT "<<i<<" of "<<mNHits<<"  IS NULL!"<<endm;
+    
+    if (mDebugLevel>0) gMessMgr->Info()<<"StEstBranch:RemoveHit v1 ***STOP***"<<endm;
     return 0;
   }
   else {
-    if (mDebugLevel>0) cout <<"StEstBranch:RemoveHit v1 ***STOP***"<<endl;
+    if (mDebugLevel>0) gMessMgr->Error()<<"StEstBranch:RemoveHit v1 ***STOP*** mNHits=0"<<endm;
     return 1;
   }
 }
@@ -276,7 +276,7 @@ int StEstBranch::RemoveHit(long int nr) {
 
 int StEstBranch::RemoveHit(StEstHit* hit) {
   
-  if (mDebugLevel>0) cout <<"StEstBranch:RemoveHit v2 ***START***"<<endl;
+  if (mDebugLevel>0) gMessMgr->Info()<<"StEstBranch:RemoveHit v2 ***START***"<<endm;
   if (mNHits>0) { 
     int i=0;
     while(mHits[i] != hit && i<mNHits) i++;
@@ -289,24 +289,20 @@ int StEstBranch::RemoveHit(StEstHit* hit) {
       mDist[mNHits-1] = 0;
       mNHits--;
 
-      if (mDebugLevel>0) cout << "  mNHits: "<<mNHits<<endl;
-      for (i=0; i<mNHits; i++) {
-	if (mDebugLevel>0) cout <<i<<"\t"<<mHits[i];
-	if (mHits[i] == NULL) cout << "<-- HIT NULL!"<<endl;
-	else if (mDebugLevel>0) cout <<endl;
-      }
-      if (mDebugLevel>0) cout <<"StEstBranch:RemoveHit v2 ***STOP*** 1 "<<endl;
+      for (i=0; i<mNHits; i++)
+	if (mHits[i] == NULL)
+	  gMessMgr->Error()<<"StEstBranch::RemoveHit HIT "<<i<<" of "<<mNHits<<"  IS NULL!"<<endm;
+      
+      if (mDebugLevel>0) gMessMgr->Info()<<"StEstBranch:RemoveHit v2 ***STOP*** 1"<<endm;
      return 0;
     }
     else {
-      cout <<"ERROR!!! RemoveHit "<<hit<<"  - no such hit in the branch"<<endl;
-      cout <<"StEstBranch:RemoveHit v2 ***STOP*** 2 "<<endl;
+      gMessMgr->Error()<<"StEstBranch:RemoveHit v2 ***STOP*** 2 : hit"<<hit<<" not in the branch"<<endm;
       return 1;
     }
   }
   else {
-    cout << "ERROR!!! StEstBranch::RemoveHit mNhits<=0" << endl;
-    cout <<"StEstBranch:RemoveHit v2 ***STOP*** 3 "<<endl;
+    gMessMgr->Error()<<"StEstBranch:RemoveHit v2 ***STOP*** 3 mNHits<=0"<<endm;
     return 1;
   }
 }
