@@ -11,7 +11,7 @@ str : libstr.a
 
 dbg : libstr_dbg.a
 
-doc : strlib.f strlib$(ARCH_TAG).f strmth.f strplot.f strterm$(ARCH_TAG) str_file.f str_parse.f str_time.f
+doc : strlib.f strlib$(ARCH_TAG).f strmth.f strplot.f strterm$(ARCH_TAG).f str_file.f str_parse.f str_time.f
 	cd ../doc; docfor ../src/strlib.f;    mv buttons.html strlib.html;    cd ../src
 	cd ../doc; docfor ../src/strmth.f;    mv buttons.html strmth.html;    cd ../src
 	cd ../doc; docfor ../src/strplot.f;   mv buttons.html strplot.html;   cd ../src
