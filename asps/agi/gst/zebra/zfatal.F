@@ -1,12 +1,15 @@
 *
-* $Id: zfatal.F,v 1.1 1998/04/10 15:31:13 fisyak Exp $
+* $Id: zfatal.F,v 1.2 1998/04/16 16:11:49 fisyak Exp $
 *
 * $Log: zfatal.F,v $
+* Revision 1.2  1998/04/16 16:11:49  fisyak
+* put gstar in cvs
+*
 * Revision 1.1  1998/04/10 15:31:13  fisyak
 * Move gstar into CVS
 *
 *
-#include "graflib/dzdoc/dzdoc/pilot.h"
+#include "packlib/zebra/zebra/pilot.h
 *CMZ :  1.30/00 01/04/97  18.15.21  by  Pavel Nevski
 *-- Author :    Pavel Nevski   16/03/97
       SUBROUTINE ZFATAL

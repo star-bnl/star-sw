@@ -1,12 +1,15 @@
 *
-* $Id: mzwork.F,v 1.1 1998/04/10 15:31:10 fisyak Exp $
+* $Id: mzwork.F,v 1.2 1998/04/16 16:11:47 fisyak Exp $
 *
 * $Log: mzwork.F,v $
+* Revision 1.2  1998/04/16 16:11:47  fisyak
+* put gstar in cvs
+*
 * Revision 1.1  1998/04/10 15:31:10  fisyak
 * Move gstar into CVS
 *
 *
-#include "graflib/dzdoc/dzdoc/pilot.h"
+#include "packlib/zebra/zebra/pilot.h
 *CMZ :          06/12/97  11.43.18  by  Pavel Nevski
 *-- Author :
       SUBROUTINE MZWORK (IXSTOR,DFIRST,DLAST,IFLAGP)

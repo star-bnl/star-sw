@@ -1,12 +1,15 @@
 *
-* $Id: mzrelb.F,v 1.1 1998/04/10 15:31:09 fisyak Exp $
+* $Id: mzrelb.F,v 1.2 1998/04/16 16:11:46 fisyak Exp $
 *
 * $Log: mzrelb.F,v $
+* Revision 1.2  1998/04/16 16:11:46  fisyak
+* put gstar in cvs
+*
 * Revision 1.1  1998/04/10 15:31:09  fisyak
 * Move gstar into CVS
 *
 *
-#include "graflib/dzdoc/dzdoc/pilot.h"
+#include "packlib/zebra/zebra/pilot.h
 *CMZ :          25/03/98  17.50.48  by  Pavel Nevski
 *-- Author :
       SUBROUTINE MZRELB

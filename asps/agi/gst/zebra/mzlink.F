@@ -1,12 +1,15 @@
 *
-* $Id: mzlink.F,v 1.1 1998/04/10 15:31:08 fisyak Exp $
+* $Id: mzlink.F,v 1.2 1998/04/16 16:11:43 fisyak Exp $
 *
 * $Log: mzlink.F,v $
+* Revision 1.2  1998/04/16 16:11:43  fisyak
+* put gstar in cvs
+*
 * Revision 1.1  1998/04/10 15:31:08  fisyak
 * Move gstar into CVS
 *
 *
-#include "graflib/dzdoc/dzdoc/pilot.h"
+#include "packlib/zebra/zebra/pilot.h
 *CMZ :          20/11/97  23.58.03  by  Pavel Nevski
 *-- Author :
       SUBROUTINE MZLINK (IXSTOR,CHNAME,LAREA,LREF,LREFL)

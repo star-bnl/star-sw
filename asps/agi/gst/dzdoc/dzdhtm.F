@@ -1,12 +1,15 @@
 *
-* $Id: dzdhtm.F,v 1.1 1998/04/10 15:31:05 fisyak Exp $
+* $Id: dzdhtm.F,v 1.2 1998/04/16 16:11:38 fisyak Exp $
 *
 * $Log: dzdhtm.F,v $
+* Revision 1.2  1998/04/16 16:11:38  fisyak
+* put gstar in cvs
+*
 * Revision 1.1  1998/04/10 15:31:05  fisyak
 * Move gstar into CVS
 *
 *
-#include "graflib/dzdoc/dzdoc/pilot.h"
+#include "packlib/zebra/zebra/pilot.h
 *CMZ :  1.30/00 28/05/96  23.54.26  by  Unknown
 *-- Author :    Otto Schaile   14/02/96
 *******************************************************************
