@@ -5,13 +5,17 @@
 **:  
 **:<------------------------------------------------------------------*/
 #include "ctc.h"
-
-extern "C" long ctc_(
+//
+//  Function definitions
+//
+extern "C" void    MessageOut( const char *msg );
+//
+extern "C" long ctc_driver_(
   TABLE_HEAD_ST   *ctrl_h,       CTC_CTRL_ST   *ctrl  ,
-  TABLE_HEAD_ST   *histos_h,     CTC_HISTOS_ST *histos  ,
   TABLE_HEAD_ST   *extra_h,      CTE_EXTRA_ST  *extra ,
   TABLE_HEAD_ST   *raw_h,        CTU_RAW_ST    *raw ,
-  TABLE_HEAD_ST   *cal_h,        CTG_CAL_ST    *cal )
+  TABLE_HEAD_ST   *histos_h,     CTC_HISTOS_ST *histos  ,
+  TABLE_HEAD_ST   *slat_h,       CTG_SLAT_ST   *slat )
 {
 /*:>--------------------------------------------------------------------
 **: ROUTINE:    ctc_
@@ -30,8 +34,8 @@ extern "C" long ctc_(
 **:      OUT:
 **:             histos    - Stores calibration histos
 **:           histos_h    - header structure for histos
-**:                cal    - CTB calibration table
-**:              cal_h    - header Structure for cal
+**:               slat    - CTB slat table (includes calibration)
+**:             slat_h    - header Structure for slat
 **: 
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
