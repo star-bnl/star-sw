@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.25 2000/01/11 15:28:32 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.26 2000/01/13 22:10:03 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.26  2000/01/13 22:10:03  kathy
+// change histogram scales for angles so they can be used for DST tables & StEvent
+//
 // Revision 1.25  2000/01/11 15:28:32  kathy
 // limits on residual histograms changed; St_QA_Maker changed to give proper inputs to routine prop_one_track which is from pams/global/egr - NOTE! Now St_QA_Maker class requires that you load the St_global librarycvs -n update!
 //
@@ -572,7 +575,7 @@ void StQABookHist::BookHistGlob(){
   m_glb_ratiomT = QAH1F("QaGtrkRnmT",    "globtrk: ratio Nfit/max pnt, tpc", 55, 0., 1.1);
   m_glb_chargeT = QAH1F("QaGtrkChrgT",   "globtrk: charge, tpc ", 20,-2.,2.);
   m_glb_r0T     = QAH1F("QaGtrkR0T",     "globtrk: radius at start (cm), tpc ", 50,0.,200.);
-  m_glb_phi0T   = QAH1F("QaGtrkPhi0T",   "globtrk: azimuth ang at start (deg), tpc ", 64,0.,360.);
+  m_glb_phi0T   = QAH1F("QaGtrkPhi0T",   "globtrk: azimuth ang at start (deg), tpc ", 64,-360.,360.);
   m_glb_z0T     = QAH1F("QaGtrkZ0T",     "globtrk: z-coord at start (cm), tpc ", 50, -300.,300.);
   m_glb_curvT   = QAH1F("QaGtrkCurvT",   "globtrk: curvature (1/cm), tpc ", 50,0.,.1);
   m_glb_xfT     = QAH1F("QaGtrkXfT",     "globtrk: x of first hit on trk, tpc", 50,-200.,200.);
@@ -583,7 +586,7 @@ void StQABookHist::BookHistGlob(){
   m_glb_zf0     = QAH1F("QaGtrkZf0",     "globtrk: z of first hit - on helix at start, tpc",60,-3.,3.);
   m_glb_radfT   = QAH1F("QaGtrkRT",      "globtrk: radial position of first hit, tpc", 50,0.,200.);
   m_lengthT     = QAH1F("QaGtrkLengthT", "globtrk: track length, tpc", 50,0.,300.);
-  m_psiT        = QAH1F("QaGtrkPsiT",    "globtrk: psi, tpc", 64, 0.,360.);
+  m_psiT        = QAH1F("QaGtrkPsiT",    "globtrk: psi, tpc (deg)", 64, 0.,360.);
   m_tanlT       = QAH1F("QaGtrkTanlT",   "globtrk: tanl, tpc",32,-4.,4.);
   m_glb_thetaT  = QAH1F("QaGtrkThetaT",  "globtrk: theta (degrees), tpc",36,0.,180.);
   m_etaT        = QAH1F("QaGtrkEtaT",    "globtrk: eta, tpc",40,-2.,2.);
@@ -670,7 +673,7 @@ void StQABookHist::BookHistGlob(){
      m_nfptonpt_etaT->SetYTitle("Ratio Nfitpnt/Npnt");
 
 
-  m_psi_phiT = QAH2F("QaGtrkPsiPhiT","globtrk: psi vs phi, tpc",36,0.,360,36,0,360.);
+  m_psi_phiT = QAH2F("QaGtrkPsiPhiT","globtrk: psi vs phi, tpc",36,-360.,360.,36,0,360.);
      m_psi_phiT->SetXTitle("phi");
      m_psi_phiT->SetYTitle("psi");
 
@@ -684,7 +687,7 @@ void StQABookHist::BookHistGlob(){
   m_glb_ratiomTS = QAH1F("QaGtrkRnmTS",    "globtrk: ratio Nfit/max pnt, tpc+svt", 55, 0., 1.1);
   m_glb_chargeTS = QAH1F("QaGtrkChrgTS",   "globtrk: charge, tpc+svt ", 20,-2.,2.);
   m_glb_r0TS     = QAH1F("QaGtrkR0TS",     "globtrk: radius at start (cm), tpc+svt", 50,0.,200.);
-  m_glb_phi0TS   = QAH1F("QaGtrkPhi0TS",   "globtrk: azimuth ang at start (deg), tpc+svt", 36,0.,360.);
+  m_glb_phi0TS   = QAH1F("QaGtrkPhi0TS",   "globtrk: azimuth ang at start (deg), tpc+svt", 64,-360.,360.);
   m_glb_z0TS     = QAH1F("QaGtrkZ0TS",     "globtrk: z-coord at start (cm), tpc+svt", 50, -300.,300.);
   m_glb_curvTS   = QAH1F("QaGtrkCurvTS",   "globtrk: curvature (1/cm), tpc+svt", 50,0.,.1);
   m_glb_xfTS     = QAH1F("QaGtrkXfTS",     "globtrk: x of first hit on trk, tpc+svt", 50,-200.,200.);
@@ -695,7 +698,7 @@ void StQABookHist::BookHistGlob(){
   m_glb_zf0TS    = QAH1F("QaGtrkZf0TS",    "globtrk: z of first hit - on helix at start, tpc+svt",50,-5.,5.);
   m_glb_radfTS   = QAH1F("QaGtrkRTS",      "globtrk: radial position of first hit, tpc+svt", 50,0.,200.);
   m_lengthTS     = QAH1F("QaGtrkLengthTS", "globtrk: track length, tpc+svt", 50,0.,300.);
-  m_psiTS        = QAH1F("QaGtrkPsiTS",    "globtrk: psi, tpc+svt", 36, 0.,360.);
+  m_psiTS        = QAH1F("QaGtrkPsiTS",    "globtrk: psi, tpc+svt (deg) ", 64, 0.,360.);
   m_tanlTS       = QAH1F("QaGtrkTanlTS",   "globtrk: tanl, tpc+svt",32,-4.,4.);
   m_glb_thetaTS  = QAH1F("QaGtrkThetaTS",  "globtrk: theta (degrees), tpc+svt",36,0.,180.);
   m_etaTS        = QAH1F("QaGtrkEtaTS",    "globtrk: eta, tpc+svt",40,-2.,2.);
@@ -781,7 +784,7 @@ void StQABookHist::BookHistGlob(){
      m_nfptonpt_etaTS->SetXTitle("eta");
      m_nfptonpt_etaTS->SetYTitle("Ratio Nfitpnt/Npnt");
 
-  m_psi_phiTS = QAH2F("QaGtrkPsiPhiTS","globtrk: psi vs phi, tpc+svt",36,0.,360,36,0,360.);
+  m_psi_phiTS = QAH2F("QaGtrkPsiPhiTS","globtrk: psi vs phi, tpc+svt",36,-360.,360.,36,0,360.);
      m_psi_phiTS->SetXTitle("phi");
      m_psi_phiTS->SetYTitle("psi");
 
