@@ -1,6 +1,9 @@
 //*-- Author : Jan Balewski 
-// $Id: StSpinSortMaker.cxx,v 1.1 2001/04/13 18:04:34 balewski Exp $
+// $Id: StSpinSortMaker.cxx,v 1.2 2001/04/19 15:33:17 balewski Exp $
 // $Log: StSpinSortMaker.cxx,v $
+// Revision 1.2  2001/04/19 15:33:17  balewski
+// *** empty log message ***
+//
 // Revision 1.1  2001/04/13 18:04:34  balewski
 // *** empty log message ***
 //
@@ -39,7 +42,7 @@ ClassImp(StSpinSortMaker)
 StSpinSortMaker::StSpinSortMaker(const char *name):StMaker(name){
  //  const char *name -  the name of this constructor
   printf("CCCCCCCCCCCCCCC Constructor of class=%s= executed\n", name);
-  Setup("X", 100, 0., 100.);
+  Setup("A",50,0.,100.);
 }
 //_____________________________________________________________________________
 StSpinSortMaker::~StSpinSortMaker(){

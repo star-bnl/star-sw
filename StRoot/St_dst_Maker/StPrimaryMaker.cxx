@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.55 2001/04/17 21:26:41 wdeng Exp $
+// $Id: StPrimaryMaker.cxx,v 1.56 2001/04/19 15:32:42 balewski Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.56  2001/04/19 15:32:42  balewski
+// *** empty log message ***
+//
 // Revision 1.55  2001/04/17 21:26:41  wdeng
 // Replug in egr_primfit.
 //
@@ -303,6 +306,9 @@ Int_t StPrimaryMaker::Init(){
     m_egr2_egrpar->AddAt(&row,0);
   }
   AddRunCont(m_egr2_egrpar);
+
+  if(m_Mode>0) ppLMVuse((float)m_Mode); // initialize ppLMV
+
    // few histos for monitoring of ppLMV
    { 
      int i;

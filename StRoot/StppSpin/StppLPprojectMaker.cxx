@@ -1,7 +1,10 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: StppLPprojectMaker.cxx,v 1.3 2001/04/12 15:19:09 balewski Exp $
+// $Id: StppLPprojectMaker.cxx,v 1.4 2001/04/19 15:33:19 balewski Exp $
 // $Log: StppLPprojectMaker.cxx,v $
+// Revision 1.4  2001/04/19 15:33:19  balewski
+// *** empty log message ***
+//
 // Revision 1.3  2001/04/12 15:19:09  balewski
 // *** empty log message ***
 //
@@ -49,10 +52,18 @@ Int_t StppLPprojectMaker::Init(){
 //_____________________________________________________________________________
 Int_t StppLPprojectMaker::Make(){
   cout <<" Mmmmmmmmmmmmmmmmmmmmmm   start maker ::"<<GetName() <<" mode="<<m_Mode<<endl;
-  assert(JspinID);
 
+  int spinID=1; // default value
+  //assert(JspinID);
+  if(JspinID) {
+    spinID=*JspinID;
+  }
+  else {
+    printf("%s-maker WARN, default value of spinID=%d used\n",GetName(),spinID);
+  }
+	   
   StEvent *stEvent= (StEvent *) GetInputDS("StEvent");  assert(stEvent);
-  printf("JspinID=%d, eveID=%d\n",*JspinID,(int)stEvent->id());
+  printf("spinID=%d, eveID=%d\n",spinID,(int)stEvent->id());
   StppMiniDst *my=StppMiniDst::GetppMiniDst(this); assert(my); 
   printf("ppMiniDst back: pT=%f \n",my->rLP.pt);
   if(my->rLP.pt<0) return kStOK; //not valid event
@@ -76,17 +87,17 @@ Int_t StppLPprojectMaker::Make(){
  }
  
  hst[1]->Fill(my->rLP.pt); // all input events 
- hst[2]->Fill(*JspinID);
+ hst[2]->Fill(spinID);
  ((TH2F *)hst[3])->Fill(my->rLP.nPrim,nCL/1000.);
  hst[4]->Fill(my->rLP.psi);
 
  
- // check validity of JspinID
- assert(*JspinID>=0);
- assert(*JspinID<MxSpinID);
+ // check validity of spinID
+ assert(spinID>=0);
+ assert(spinID<MxSpinID);
  
  // spin-sorted  PHI-distributios
- hpol[*JspinID]->Fill(my->rLP.psi);
+ hpol[spinID]->Fill(my->rLP.psi);
  
  
 #if 0 //tmp
