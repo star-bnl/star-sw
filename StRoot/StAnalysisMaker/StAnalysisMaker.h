@@ -1,6 +1,9 @@
-// $Id: StAnalysisMaker.h,v 1.7 1999/08/06 20:21:52 kathy Exp $
+// $Id: StAnalysisMaker.h,v 1.8 1999/08/09 19:38:32 kathy Exp $
 //
 // $Log: StAnalysisMaker.h,v $
+// Revision 1.8  1999/08/09 19:38:32  kathy
+// checkin Curtis' changes that print out the event # with each set of QAInfo stuff
+//
 // Revision 1.7  1999/08/06 20:21:52  kathy
 // back to old version that didn't write out QA info file, but now added QAInfo tag in front of information that QA team wants in summarizeEvent.cc - will also add a few more lines of output to summarizeEvent.cc soon
 //
@@ -59,7 +62,7 @@ class StEvent;
 
   // Maker generates a tag
   HighPtTag_st* theTag; //!
-
+  Int_t nevents;
 
 protected:
 
@@ -77,13 +80,12 @@ public:
   HighPtTag_st* tag() {return theTag;};
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 1.7 1999/08/06 20:21:52 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 1.8 1999/08/09 19:38:32 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StAnalysisMaker, 1)
     Int_t nevents;
 
     
-
     ClassDef(StAnalysisMaker,1)
 };
 #endif

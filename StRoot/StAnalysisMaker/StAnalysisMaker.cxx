@@ -1,5 +1,8 @@
-// $Id: StAnalysisMaker.cxx,v 1.12 1999/08/06 21:25:33 fisyak Exp $
+// $Id: StAnalysisMaker.cxx,v 1.13 1999/08/09 19:38:32 kathy Exp $
 // $Log: StAnalysisMaker.cxx,v $
+// Revision 1.13  1999/08/09 19:38:32  kathy
+// checkin Curtis' changes that print out the event # with each set of QAInfo stuff
+//
 // Revision 1.12  1999/08/06 21:25:33  fisyak
 // Switch to StMessager
 //
@@ -61,9 +64,9 @@
 #include "StRun.h"
 #include "StEvent.h"
 #include "StAnalysisMaker.h"
-static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.12 1999/08/06 21:25:33 fisyak Exp $";
+static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.13 1999/08/09 19:38:32 kathy Exp $";
 #include "StMessMgr.h"
-void summarizeEvent(StEvent& event);
+//  Proptotypes of little functions which perform
 //  specific analysis tasks.
 //
 void summarizeEvent(StEvent& event, Int_t &nevents);
@@ -74,7 +77,7 @@ Int_t StAnalysisMaker::Make() {
   StEvent& ev = *mEvent;
 
   // OK, we've got the event. Pass it and process it.
-  summarizeEvent(ev); 
+  summarizeEvent(ev,nevents); 
   long ntk = countPrimaryTracks(ev);
   gMessMgr->Info() << " StAnalysisMaker.cxx -- Primary tracks: " << ntk << endl;
 
@@ -91,8 +94,8 @@ void tagFiller(StEvent& event, HighPtTag_st& hptTag);
 StAnalysisMaker::StAnalysisMaker(const Char_t *name) : StMaker(name) {
   drawinit = kFALSE;
   theTag = 0;
+  nevents = 0;
 }
-
 
 StAnalysisMaker::~StAnalysisMaker() {
 }
