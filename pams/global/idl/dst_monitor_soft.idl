@@ -31,16 +31,22 @@
   float  hit_frac_svt;       /* Frac. hits used in SVT               */
   float  hit_frac_ftpc[2];   /* Frac. hits used in FTPC, east/west   */
   float  avg_trkL_tpc[2];    /* Avg. track length (cm) TPC, <0,.ge.0 */
+                             /* -OR- Avg. # pts assigned,   <0,.ge.0 */
   float  avg_trkL_svt;       /* Avg. track length (cm) SVT           */
+                             /* -OR- Avg. # pts assigned             */ 
   float  avg_trkL_ftpc[2];   /* Avg. track length (cm) FTPC,east/west*/
   float  res_pad_tpc[2];     /* Avg. resid, pad direct, TPC <0,.ge.0 */
+                             /* -OR- Avg. chisq(1) of fit,  <0,.ge.0 */
   float  res_drf_tpc[2];     /* Avg. resid, drift dir,  TPC <0,.ge.0 */
+                             /* -OR- Avg. chisq(2) of fit,  <0,.ge.0 */
   float  res_pad_svt;        /* Avg. residual, pad direction, SVT    */
+                             /* -OR- Avg. chisq(1) of fit,           */
   float  res_drf_svt;        /* Avg. resid., drift direction, SVT    */
+                             /* -OR- Avg. chisq(2) of fit,           */
   float  res_pad_ftpc[2];    /* Avg. residual, pad direction,FTPC E/W*/
   float  res_drf_ftpc[2];    /* Avg. resid., drift direction,FTPC E/W*/
   long   prim_vrtx_qual[10]; /* Primary vertex fit quality parameters*/
   long   prim_vrtx_ntrk;     /* # tracks used in primary vertex fit  */
   float  cpu_time[20];       /* cpu time for various modules (sec)   */
  } ;
-/*  Last mod. for dst_monitor_soft:   $Date: 1998/06/03 13:52:01 $ */
+/*  Last mod. for dst_monitor_soft:   $Date: 1998/08/12 16:34:59 $ */
