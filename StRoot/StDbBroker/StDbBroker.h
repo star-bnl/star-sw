@@ -5,7 +5,7 @@
 
 #include "Rtypes.h"
 
-/* needed for GetComments only */
+/* needed for GetComments only   */
 class St_Table;
 /*this is a temporary quick-and-dirty class for db access*/
 class StDbBroker  {
@@ -13,7 +13,7 @@ class StDbBroker  {
       enum EColumnType {kNAN, kFloat, kInt, kLong, kShort, kDouble, kUInt
                              ,kULong, kUShort, kUChar, kChar };
      struct Descriptor{
-     char name[20];		//variable name 
+     char name[32];		//variable name 
      int firstDimension;		//first dimension, if this is an array
      int secondDimension;	//second dimension
      int offset;			//variable offset

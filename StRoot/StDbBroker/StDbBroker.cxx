@@ -6,7 +6,7 @@
 
 #include "TString.h"
 
-//needed for GetComments
+// needed for GetComments
 #include "TROOT.h"
 #include "TBuffer.h"
 #include "TClass.h"
@@ -18,7 +18,7 @@
 #include "Api.h"
 #include "StDbBroker.h"
 
-
+//
 ClassImp(StDbBroker)
 //______________________________________________________________________________
 //the only remaining St_Table dependence is in this function 
