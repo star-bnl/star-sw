@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstBranch.hh,v 1.4 2001/07/15 20:31:33 caines Exp $
+ * $Id: StEstBranch.hh,v 1.5 2004/11/12 23:20:26 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstBranch.hh,v $
+ * Revision 1.5  2004/11/12 23:20:26  caines
+ * Initialization fixes
+ *
  * Revision 1.4  2001/07/15 20:31:33  caines
  * Fixes from Insure++ debugging
  *
@@ -36,6 +39,8 @@ class StEstBranch {
   
 protected:
   
+  char MemBegin[1];
+
   StEstTrack* mTrack; // pointer to the mother track
   StEstHit**  mHits; // list of pointers to the hits in the branch
   StHelix* mHelix; // pointer to the branch helix
@@ -52,6 +57,7 @@ protected:
   int mIsGood; // The branch matches the ideal branch pattern at a given step
   int mIsGoodOld; //The branch matches the ideal branch pattern at the previous step
   int mHitPosition; //Rank of the selected hit according to the hits-projection distance
+  char MemEnd[1];
   
 public :
   StEstBranch(StEstTrack* tr=NULL, long maxhits=1, long nf=0, long nh=0, StEstHit** hit=NULL, double *dist=0, int isgood=1);
