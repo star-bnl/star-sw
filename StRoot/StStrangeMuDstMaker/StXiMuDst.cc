@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiMuDst.cc,v 3.3 2001/11/05 23:41:07 genevb Exp $
+ * $Id: StXiMuDst.cc,v 3.4 2003/08/26 22:36:28 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 30-Mar-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StXiMuDst.cc,v $
+ * Revision 3.4  2003/08/26 22:36:28  genevb
+ * Calculate Xi momenta at/near primary vertex
+ *
  * Revision 3.3  2001/11/05 23:41:07  genevb
  * Add more dEdx, B field info, careful of changes to TTree unrolling
  *
@@ -44,6 +47,12 @@
 #include "StTrackFitTraits.h"
 #include "StStrangeEvMuDst.hh"
 #include "StDedxPidTraits.h"
+#include "phys_constants.h"
+#include "SystemOfUnits.h"
+#include "StPhysicalHelixD.hh"
+
+StPhysicalHelixD XiHelix;
+StThreeVectorD temp3VD;
 
 ClassImp(StXiMuDst)
 
@@ -101,4 +110,34 @@ Long_t StXiMuDst::detectorIdXi() {
 
 Long_t StXiMuDst::detectorIdPars() {
   return 1;  // Currently, only one set of parameters actually used
+}
+
+void StXiMuDst::setXiHelix() {
+  double pt        = ptXi();
+  double bcharge   = mCharge*(mEvent->magneticField());
+  double curvature = TMath::Abs(bcharge)*C_D_CURVATURE/pt;
+  double dip       = TMath::ATan(momXiZ()/pt);
+  int    h         = ((bcharge > 0) ? -1 : 1);
+  double phase     = TMath::ATan2(momXiY(),momXiX()) - (h*TMath::PiOver2());
+  temp3VD.setX(mDecayVertexXiX);
+  temp3VD.setY(mDecayVertexXiY);
+  temp3VD.setZ(mDecayVertexXiZ);
+  XiHelix.setParameters(curvature,dip,phase,temp3VD,h);
+}
+
+StPhysicalHelixD& StXiMuDst::helixXi() {
+  setXiHelix();
+  return XiHelix;
+}
+
+TVector3 StXiMuDst::momXiAtPrimVertex() {
+  setXiHelix();
+  temp3VD.setX(mEvent->primaryVertexX());
+  temp3VD.setY(mEvent->primaryVertexY());
+  temp3VD.setZ(mEvent->primaryVertexZ());
+
+  // actually the momentum at the DCA to the primary vertex
+  temp3VD = XiHelix.momentumAt(XiHelix.pathLength(temp3VD),
+    mEvent->magneticField()*kilogauss);
+  return TVector3(temp3VD.x(),temp3VD.y(),temp3VD.z());
 }

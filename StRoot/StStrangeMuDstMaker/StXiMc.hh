@@ -23,28 +23,40 @@ public:
   Int_t V0Index();
   void SetV0Index(Int_t index);
 
-  Int_t   charge() const;              // Particle charge
-  Float_t decayVertexXiX() const;      // Coordinate of decay vertex
-  Float_t decayVertexXiY() const;
-  Float_t decayVertexXiZ() const;
-  Float_t momBachelorX() const;        // Momentum components of bachelor
-  Float_t momBachelorY() const;
-  Float_t momBachelorZ() const;
-  Float_t momXiX() const;              // Momentum components of Xi/Omega
-  Float_t momXiY() const;
-  Float_t momXiZ() const;
+  /// Particle charge
+  Int_t   charge() const;
 
-  Float_t decayVertexV0X() const {return 999.;} // Coordinates of decay vertex
-  Float_t decayVertexV0Y() const {return 999.;}
+  Float_t decayVertexXiX() const;
+  Float_t decayVertexXiY() const;      /// Coordinate of decay vertex
+  Float_t decayVertexXiZ() const;
+
+  Float_t momBachelorX() const;
+  Float_t momBachelorY() const;        /// Momentum components of bachelor
+  Float_t momBachelorZ() const;
+
+  /// Momentum of Xi/Omega at decay vertex
+  TVector3 momXi();
+  Float_t momXiX();
+  Float_t momXiY();             /// Momentum components of Xi/Omega at decay vertex
+  Float_t momXiZ();
+
+  /// Momentum of Xi/Omega at primary vertex
+  TVector3 momXiAtPrimVertex();
+  Float_t momXiAtPrimVertexX();
+  Float_t momXiAtPrimVertexY(); /// Momentum components of Xi/Omega at primary vertex
+  Float_t momXiAtPrimVertexZ();
+
+  Float_t decayVertexV0X() const {return 999.;}
+  Float_t decayVertexV0Y() const {return 999.;} /// Coordinates of decay vertex
   Float_t decayVertexV0Z() const {return 999.;}
-  Float_t momPosX() const {return 999;} // Momentum components of pos. daughter
-  Float_t momPosY() const {return 999;}
+  Float_t momPosX() const {return 999;}
+  Float_t momPosY() const {return 999;} /// Momentum components of pos. daughter
   Float_t momPosZ() const {return 999;}
-  Float_t momNegX() const {return 999;} // Momentum components of neg. daughter
-  Float_t momNegY() const {return 999;}
+  Float_t momNegX() const {return 999;}
+  Float_t momNegY() const {return 999;} /// Momentum components of neg. daughter
   Float_t momNegZ() const {return 999;}
-  Float_t momV0X()  const {return 999;} // Momentum components of V0
-  Float_t momV0Y()  const {return 999;}
+  Float_t momV0X()  const {return 999;}
+  Float_t momV0Y()  const {return 999;} /// Momentum components of V0
   Float_t momV0Z()  const {return 999;}
 
   /// Returns the decay process for the vertex,
@@ -64,19 +76,31 @@ inline Float_t StXiMc::decayVertexXiZ() const {return positionZ();}
 inline Float_t StXiMc::momBachelorX() const {return daughterMomentumX();}
 inline Float_t StXiMc::momBachelorY() const {return daughterMomentumY();}
 inline Float_t StXiMc::momBachelorZ() const {return daughterMomentumZ();}
-inline Float_t StXiMc::momXiX() const {return parentMomentumX();}
-inline Float_t StXiMc::momXiY() const {return parentMomentumY();}
-inline Float_t StXiMc::momXiZ() const {return parentMomentumZ();}
+inline TVector3 StXiMc::momXi()
+  {return TVector3(momXiX(), momXiY(), momXiZ());}
+inline Float_t StXiMc::momXiX() {return parentMomentumX();}
+inline Float_t StXiMc::momXiY() {return parentMomentumY();}
+inline Float_t StXiMc::momXiZ() {return parentMomentumZ();}
+inline TVector3 StXiMc::momXiAtPrimVertex()
+  {return TVector3(momXiAtPrimVertexX(), momXiAtPrimVertexY(), momXiAtPrimVertexZ());}
+inline Float_t StXiMc::momXiAtPrimVertexX() {return parentPrimMomentumX();}
+inline Float_t StXiMc::momXiAtPrimVertexY() {return parentPrimMomentumY();}
+inline Float_t StXiMc::momXiAtPrimVertexZ() {return parentPrimMomentumZ();}
 inline Int_t   StXiMc::V0Index() {return v0;}
 inline void    StXiMc::SetV0Index(Int_t index) {v0=index;}
 inline Int_t   StXiMc::geantIdParent() const {return StKinkMc::geantIdParent();}
 inline Int_t   StXiMc::decayMode() const {return StKinkMc::decayMode();}
+
+
 #endif
 
 
 /***********************************************************************
- * $Id: StXiMc.hh,v 3.5 2003/06/01 04:25:19 genevb Exp $
+ * $Id: StXiMc.hh,v 3.6 2003/08/26 22:36:28 genevb Exp $
  * $Log: StXiMc.hh,v $
+ * Revision 3.6  2003/08/26 22:36:28  genevb
+ * Calculate Xi momenta at/near primary vertex
+ *
  * Revision 3.5  2003/06/01 04:25:19  genevb
  * Update ClassDef version for altered inheritance
  *

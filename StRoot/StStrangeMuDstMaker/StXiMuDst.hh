@@ -13,6 +13,7 @@
 #include "StXiI.hh"
 
 class StXiVertex;
+class StPhysicalHelixD;
 
 class StXiMuDst : public virtual StXiI, public StV0MuDst {
 public:
@@ -35,9 +36,15 @@ public:
   UShort_t keyBachelor() const;
   StTrackTopologyMap& topologyMapBachelor();
 
-  Float_t momXiX() const;              // Momentum components of Xi/Omega
-  Float_t momXiY() const;
-  Float_t momXiZ() const;
+  TVector3 momXi();                    //  Momentum components of Xi/Omega at decay vertex
+  Float_t momXiX();
+  Float_t momXiY();                    /// Momentum components of Xi/Omega at decay vertex
+  Float_t momXiZ();
+
+  TVector3 momXiAtPrimVertex();        //  Momentum components of Xi/Omega at primary vertex
+  Float_t momXiAtPrimVertexX();
+  Float_t momXiAtPrimVertexY();        /// Momentum components of Xi/Omega at primary vertex
+  Float_t momXiAtPrimVertexZ();
 
   Float_t chi2Xi() const;              // Chi square of Xi
   Float_t clXi()   const;              // Confidence level of Xi
@@ -49,6 +56,8 @@ public:
   Float_t errDedxBachelor() const;     // Error on mean of dE/dX of bachelor
   UShort_t numDedxBachelor() const;    // Number of dE/dX points for bachelor
   Float_t lenDedxBachelor() const;     // Length of dE/dX track for bachelor
+
+  StPhysicalHelixD& helixXi();         // helix of the Xi track
 
 protected:
   Int_t   mCharge;                     // Written out
@@ -73,6 +82,7 @@ protected:
   Float_t mClBachelor;
 
   void    FillXi(StXiVertex*);
+  void    setXiHelix();
 
   Float_t mDedxBachelor;
   Float_t mErrDedxBachelor;
@@ -100,9 +110,14 @@ inline Float_t StXiMuDst::dcaBachelorToPrimVertex() const
 inline Float_t StXiMuDst::momBachelorX() const { return mMomBachelorX; }
 inline Float_t StXiMuDst::momBachelorY() const { return mMomBachelorY; }
 inline Float_t StXiMuDst::momBachelorZ() const { return mMomBachelorZ; }
-inline Float_t StXiMuDst::momXiX() const { return mMomBachelorX + momV0X(); }
-inline Float_t StXiMuDst::momXiY() const { return mMomBachelorY + momV0Y(); }
-inline Float_t StXiMuDst::momXiZ() const { return mMomBachelorZ + momV0Z(); }
+inline TVector3 StXiMuDst::momXi()
+             {return TVector3(momXiX(), momXiY(), momXiZ());}
+inline Float_t StXiMuDst::momXiX() { return mMomBachelorX + momV0X(); }
+inline Float_t StXiMuDst::momXiY() { return mMomBachelorY + momV0Y(); }
+inline Float_t StXiMuDst::momXiZ() { return mMomBachelorZ + momV0Z(); }
+inline Float_t StXiMuDst::momXiAtPrimVertexX() { return momXiAtPrimVertex().X(); }
+inline Float_t StXiMuDst::momXiAtPrimVertexY() { return momXiAtPrimVertex().Y(); }
+inline Float_t StXiMuDst::momXiAtPrimVertexZ() { return momXiAtPrimVertex().Z(); }
 inline UShort_t StXiMuDst::keyBachelor() const { return mKeyBachelor; }
 inline StTrackTopologyMap& StXiMuDst::topologyMapBachelor()
              { return mTopologyMapBachelor; }
@@ -121,8 +136,11 @@ inline Float_t StXiMuDst::lenDedxBachelor() const
 
 
 /***********************************************************************
- * $Id: StXiMuDst.hh,v 3.5 2003/05/30 21:20:20 genevb Exp $
+ * $Id: StXiMuDst.hh,v 3.6 2003/08/26 22:36:28 genevb Exp $
  * $Log: StXiMuDst.hh,v $
+ * Revision 3.6  2003/08/26 22:36:28  genevb
+ * Calculate Xi momenta at/near primary vertex
+ *
  * Revision 3.5  2003/05/30 21:20:20  genevb
  * doxygen savvy, encoding of FTPC mults, change virtual funcs
  *
