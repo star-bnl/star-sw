@@ -101,11 +101,11 @@ myBool Array(
   else *off=0;
   return TRUE;
 }
-myBool TableValue(int *dType,char *cptr,float *fv,long *iv,size_t row,
+myBool TableValue(int *dType,char *uu,float *fv,long *iv,size_t row,
   size_t colNum,DS_DATASET_T *tp,int subscript) {
   /* Either fv or iv is filled in.  Caller knows which from dType.  This
   ** function is the workhorse for getting numbers from the current table. */
-  int off; size_t rowSize;
+  int ii,off; size_t colSize,rowSize;
   char *pData,*tn;
   size_t dim;             /* 0 for x, 1 for x[], and 2 for x[][]. */
   size_t arraysize;       /* x[arraysize] */
@@ -132,9 +132,18 @@ myBool TableValue(int *dType,char *cptr,float *fv,long *iv,size_t row,
   } else if(!strcmp(tn,"double")) {
     *fv=*((double*)(pData+off*sizeof(double))); *dType=FLOAT;
   } else if(!strcmp(tn,"char")) {
+    if(!dsColumnSize(&colSize,tp,colNum)) Err(229);
     if(!dsTableRowSize(&rowSize,tp)) Err(223);
     /* use row size for char strings, but sizeof() for others July 25 1995 */
-    /* gStr[100] */ strncpy(cptr,(char*)(pData+off*rowSize),98);
+
+    /* Aug 27 1995  off should never be anything but zero for char arrays,
+    ** since we don't access the chars individually. */
+    if(off!=0) Err(772);
+
+    /* gStr[100] */ strncpy(uu,(char*)(pData+off*rowSize),98);
+    if(colSize<98) uu[colSize]='\0';
+    for(ii=strlen(uu)-1;ii>=0;ii--) { if(uu[ii]<32||uu[ii]>126) uu[ii]=' '; }
+    for(ii=strlen(uu)-1;ii>=0;ii--) { if(uu[ii]!=' ') break; uu[ii]='\0'; }
     *dType=STRING;
   } else {
     PP"This table contains a data type (%s)\n",tn);
@@ -385,6 +394,8 @@ void ColumnList(char *header,
           Format(7,minString,minFloat); Format(7,maxString,maxFloat);
           Format(7,stdString,stdFloat); Format(7,aveString,aveFloat);
         }
+      } else {
+        if(jj==1) MinMax(0,pp,whichCol,jj-1); /* to set gDataType */
       }
       strcpy(totalName,cc);
       if(gDataType!=STRING&&dimensionality==1) sprintf(ss,"(%d",jj);
@@ -400,7 +411,7 @@ void ColumnList(char *header,
         PP"lineCnt=%d, maxLines=%d.\n",lineCnt,ml); gDone=7; return;
       }
       tlm[lineCnt]=ii; /* see 6gg */
-      subscript[lineCnt]=jj-1;
+      subscript[lineCnt]=jj-1; /* www */
       strcat(xx,"\n"); /* using the SLACK */
       lineCnt++;
       if(gDataType==STRING) break; /* asi is len of string 66d */
