@@ -1,7 +1,6 @@
-// $Id: StChainSpy.cxx,v 1.1 1998/10/07 18:44:00 perev Exp $
+// $Id: StChainSpy.cxx,v 1.2 1998/12/09 14:33:38 fisyak Exp $
 
 #include "StChainSpy.h"
-StFarmSpy gSpy;
 ClassImp(StChainSpy)
 
 //_____________________________________________________________________________

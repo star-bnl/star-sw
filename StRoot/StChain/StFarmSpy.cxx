@@ -3,6 +3,7 @@
 
 
 int StFarmSpy::fgError  = -1998;
+StFarmSpy *StFarmSpy::fgSpy = 0;
 TSocket *StFarmSpy::fgSocket = NULL;
 
 //	StFarmSpy IMPLEMENTATION
@@ -28,6 +29,8 @@ void StFarmSpy::StartJob(const char *JobName
                ,int Ierr,const char *Comm)
 { 
   char buf[1024]; char *cc = buf;
+
+  if (!fgSpy) fgSpy = new StFarmSpy();
   if (fgError) return;
   int JobId = gSystem->GetPid();
   

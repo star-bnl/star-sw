@@ -38,6 +38,6 @@ public:
 
   static TSocket *fgSocket;	// Spy socket
   static int fgError;		// Spy error, if non zero all calls ignored
-
+  static StFarmSpy *fgSpy;
 };
 #endif /*_StFarmSpy_hh_*/
