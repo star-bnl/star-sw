@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.23  1999/04/09 23:30:04  ward
+// Version tag, Alan Funt.
+//
 // Revision 1.22  1999/04/09 23:29:08  ward
 // Does not waste huge amounts of table space.
 //
@@ -383,7 +386,7 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
 Int_t St_tpcdaq_Maker::Make() {
   int ii,errorCode;
   mErr=0;
-  printf("I am Desi and Lucy. St_tpcdaq_Maker::Make().\n");
+  printf("I am Alan Funt. St_tpcdaq_Maker::Make().\n");
   errorCode=GetEventAndDecoder();
   printf("GetEventAndDecoder() = %d\n",errorCode);
   if(errorCode) {
@@ -404,7 +407,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.22 1999/04/09 23:29:08 ward Exp $ \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.23 1999/04/09 23:30:04 ward Exp $ \n");
   printf("**************************************************************\n");
   if(Debug()) StMaker::PrintInfo();
 }
