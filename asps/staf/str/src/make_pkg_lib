@@ -25,18 +25,29 @@ if ("`alias mv `" == "mv -i") then
    unalias mv
 endif
 #
+echo $STAR_ARCH
 if ( "$STAR_ARCH" == "sun4" ) then
    setenv ARCH_TAG    "_sun"
    setenv ARFLAGS     " lqv "
    setenv FFLAGS      " -xl -e -c "
    setenv FFLAGS_DBG  " -xl -e -c -g "
+   setenv CC          "acc"
    setenv CCFLAGS     " -c -DSUN "
    setenv CCFLAGS_DBG " -c -g -DSUN "
+else if ( "$STAR_ARCH" == "sun4os5" ) then
+   setenv ARCH_TAG    "_sun"
+   setenv ARFLAGS     " lqv "
+   setenv FFLAGS      " -xl -e -c "
+   setenv FFLAGS_DBG  " -xl -e -c -g "
+   setenv CC          "cc"
+   setenv CCFLAGS     " -Xc -c -DSUN "
+   setenv CCFLAGS_DBG " -Xc -c -g -DSUN "
 else if ( "$STAR_ARCH" == "hpux" ) then
    setenv ARCH_TAG    "_hpu"
    setenv ARFLAGS     " lqv "
    setenv FFLAGS      " -w +e +es -c +ppu "
    setenv FFLAGS_DBG  " -w +e +es -c -g +ppu "
+   setenv CC          "cc"
    setenv CCFLAGS     " -c -Aa -DHPUX "
    setenv CCFLAGS_DBG " -c -Aa -g -DHPUX "
    setenv _HPUX_SOURCE "/usr/include"
@@ -45,24 +56,34 @@ else if ( "$STAR_ARCH" == "irix" ) then
    setenv ARFLAGS     " slqv "
    setenv FFLAGS      " -extend_source -c -O -w "
    setenv FFLAGS_DBG  " -extend_source -c -g -w "
+   setenv CC          "cc"
    setenv CCFLAGS     " -c -O -ansi -fullwarn -v -prototypes -DIRIX "
    setenv CCFLAGS_DBG " -c -g -ansi -fullwarn -v -prototypes -DIRIX "
 #
 #  INCLUDES under irix require this step...
 #
    cd ../src
+else if ( "$STAR_ARCH" == "osf1" ) then
+   setenv ARCH_TAG    "_osf"
+   setenv ARFLAGS     " slqv "
+   setenv FFLAGS      " -extend_source -c -O -w "
+   setenv FFLAGS_DBG  " -extend_source -c -g -w "
+   setenv CC          "cc"
+   setenv CCFLAGS     " -c -O -ansi -fullwarn -v -DOSF1 "
+   setenv CCFLAGS_DBG " -c -g -ansi -fullwarn -v -DOSF1 "
 else if ( "$STAR_ARCH" == "aix" ) then
    setenv ARCH_TAG    "_aix"
    setenv ARFLAGS     " slqv "
-   setenv FFLAGS      " -c -w -Pk -Wp,-tr=NV,-INTL,-SV=A,-CTYPLSS -qextname -qsave -qfixed=132 -qctyplss -qintlog "
-   setenv FFLAGS_DBG  " -g -c -w -Pk -Wp,-tr=NV,-INTL,-SV=A,-CTYPLSS -qextname -qsave -qfixed=132 -qctyplss -qintlog "
+   setenv FFLAGS      " -c -w -qextname -qsave -qfixed=132 -qctyplss -qintlog -qxlfag=oldtab "
+   setenv FFLAGS_DBG  " -c -g -w -qextname -qsave -qfixed=132 -qctyplss -qintlog -qxlfag=oldtab "
+   setenv CC          "cc"
    setenv CCFLAGS     " -c -O -qlanglvl=ansi -v -DAIX "
    setenv CCFLAGS_DBG " -c -g -qlanglvl=ansi -v -DAIX "
-   alias f77 xlf
+   alias f77 xlf23
 endif
-if( -e make_flags.csh ) then
-	source ../lib/make_flags.csh
-endif
+#if( -e make_flags.csh ) then
+#	source ../lib/make_flags.csh
+#endif
 #
 if( $1 == "" ) then
         set PKG = ( `(pwd | awk -F/ '{i=NF-1;print $i}')` )
@@ -106,12 +127,12 @@ if( $PKG != "tas" ) then
 	gen_include_dir_names $STAR_ROOT/$STAR_LEVEL/sys/tas/inc
 endif
 #
-echo "Executing '"make -e all"' on ../src"
 echo "architecture tag is $ARCH_TAG"
 echo "f77 flags are $FFLAGS and f77 debug flags are $FFLAGS_DBG"
 echo "cc  flags are $CCFLAGS and cc debug flags are $CCFLAGS_DBG"
 cd ../src
-make -e all
+echo "Executing '"make -e -f Makefile all"' on ../src"
+make -e -f ../src/Makefile all
 echo "Moving all .a files to ../lib/$STAR_ARCH"
 mv *.a ../lib/$STAR_ARCH
 #
@@ -125,13 +146,6 @@ endif
 #
 #
 echo "cleaning up include file links.."
-rmlink *
-rmlink ../lib/*
+rm -f ../lib/*_inc
 #
 echo "Done at `date`"
-
-
-
-
-
-
