@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.300 2002/08/23 14:32:24 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.301 2002/10/01 20:46:48 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -22,6 +22,7 @@
 #include "St_dst_Maker/StPrimaryMaker.h"
 #include "St_dst_Maker/StVertexMaker.h"
 #include "StStrangeMuDstMaker/StStrangeMuDstMaker.h"
+#include "StDbUtilities/StMagUtilities.h"
 #include "StMessMgr.h"
 //_____________________________________________________________________
 Bfc_st BFC1[] = {
@@ -189,6 +190,7 @@ Bfc_st BFC1[] = {
   {"OECap"       ,""  ,"","",""                                    ,"","EndCap (curved) correction",kFALSE},
   {"OIFC"        ,""  ,"","",""                                         ,"","Field Cage correction",kFALSE},
   {"OSpaceZ"     ,""  ,"","",""                                      ,"","Space Charge corrections",kFALSE},
+  {"OSpaceZ2"    ,""  ,"","",""                                   ,"","Space Charge corrections R2",kFALSE},
   {"AlignSectors",""  ,"","",""          ,"","Activate Sector Alignment correction in St_tpt_Maker",kFALSE},
 
   {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
@@ -1123,14 +1125,15 @@ Int_t StBFChain::Instantiate()
 	    }
 	    // Other options introduced in October 2001 for distortion corrections
 	    // studies and year1 re-production. Those are OR additive to the mask.
-	    if( GetOption("OBmap") ){	      mask |=   16; }
-	    if( GetOption("OPr13") ){	      mask |=   32; }
-	    if( GetOption("OTwist") ){	      mask |=   64; }
-	    if( GetOption("OClock") ){	      mask |=  128; }
-	    if( GetOption("OCentm") ){	      mask |=  256; }
-	    if( GetOption("OECap") ){	      mask |=  512; }
-	    if( GetOption("OIFC") ){	      mask |= 1024; }
-	    if( GetOption("OSpaceZ") ){	      mask |= 2048; }
+	    if( GetOption("OBmap") ){	      mask |=   (kBMap          < 1); }
+	    if( GetOption("OPr13") ){	      mask |=   (kPadrow13      < 1); }
+	    if( GetOption("OTwist") ){	      mask |=   (kTwist         < 1); }
+	    if( GetOption("OClock") ){	      mask |=   (kClock         < 1); }
+	    if( GetOption("OCentm") ){	      mask |=   (kMembrane      < 1); }
+	    if( GetOption("OECap") ){	      mask |=   (kEndcap        < 1); }
+	    if( GetOption("OIFC") ){	      mask |=   (kIFCShift      < 1); }
+	    if( GetOption("OSpaceZ") ){	      mask |=   (kSpaceCharge   < 1); }
+	    if( GetOption("OSpaceZ2") ){      mask |=   (kSpaceChargeR2 < 1); }
 
 	    (void) printf("StBFChain: ExB The option passed will be %d 0x%X\n",mask,mask);
 	    mk->SetMode(mask);
