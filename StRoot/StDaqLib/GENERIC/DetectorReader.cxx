@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.16 2004/02/18 20:31:14 ward Exp $
+ * $Id: DetectorReader.cxx,v 1.17 2004/08/07 02:43:32 perev Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -12,6 +12,9 @@
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
+ * Revision 1.17  2004/08/07 02:43:32  perev
+ * more test for corruption added
+ *
  * Revision 1.16  2004/02/18 20:31:14  ward
  * There was a big mess.  I am trying to fix it.
  *
@@ -209,12 +212,15 @@ TRG_Reader *getTRGReader(EventReader *er)
   Bank_TRGP *pTRGP;
   pTRGP = (Bank_TRGP *)er->findBank("TRGP");
   if (pTRGP)  {
-    if (!pTRGP->test_CRC())  printf("CRC error in TRGP: %s %d\n",
-					__FILE__,__LINE__) ;
-    if (pTRGP->swap() < 0)   printf("swap error in TRGP: %s %d\n",
-					__FILE__,__LINE__) ;
+    if (!pTRGP->test_CRC())  {printf("CRC error in TRGP: %s %d\n",
+					__FILE__,__LINE__) ; return 0;}
+    if (pTRGP->swap() < 0)   {printf("swap error in TRGP: %s %d\n",
+					__FILE__,__LINE__) ; return 0;}
     pTRGP->header.CRC = 0;
-    return new TRG_Reader(er,pTRGP);
+    TRG_Reader *r = new TRG_Reader(er,pTRGP);
+    if (!r->GetErr()) return r;
+    delete r;
+    return 0;
   }
   return FALSE;
 }

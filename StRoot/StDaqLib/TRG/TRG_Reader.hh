@@ -67,6 +67,13 @@ public:
   int swapHerb2bytes(short unsigned int *data,int number);
   int swapHerb4bytes(unsigned int  *data,int number);
   int swapHerb4bytes(unsigned long *data,int number);
+
+  int swapHerb2bytes(short *data,int number)
+     {return swapHerb2bytes((unsigned short*)data,number);}
+  int swapHerb4bytes(int   *data,int number)
+     {return swapHerb4bytes((unsigned int  *)data,number);}
+  int swapHerb4bytes(long  *data,int number)
+     {return swapHerb4bytes((unsigned long *)data,number);}
   int HerbSwap();           //!
   int HerbSwap2000();       //!
   int HerbSwap2003(char*);  //!
@@ -84,10 +91,12 @@ public:
   Bank_TRGD *pBankTRGD;     // Making this public saves 2 large layers of accessor functions.
   int YearOfData(char *);   //!
   int S_mode;               //!
+  int GetErr(){return mErr;}
 
 protected:
   EventReader *ercpy;       // copy of EventReader pointer
   Bank_TRGP *pBankTRGP;     // Bank Pointers
+  int mErr;                 //!
 
 private:
   void dumpWordsToScreenInHexAndExit(int); //!

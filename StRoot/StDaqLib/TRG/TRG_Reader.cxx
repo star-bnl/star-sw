@@ -65,6 +65,7 @@ int TRG_Reader::YearOfData(char *data) {
 
 
 TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
+  mErr = 0;
   pBankTRGP=pTRGP; //copy into class data member for use by other methods
   ercpy=er; // squirrel away pointer eventreader for our friends
   if(!pBankTRGP->test_CRC()) { 
@@ -72,38 +73,42 @@ TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
   }
   if(pBankTRGP->swap()<0) { 
     // Use default swap.
+    mErr = 1;
     printf("swap error: %s %d\n",__FILE__,__LINE__); 
   }
   pBankTRGP->header.CRC=0;
   pBankTRGD=(Bank_TRGD*) ((unsigned int)pBankTRGP + 4*pBankTRGP->theData.offset);
   assert(pBankTRGD);
 
-  if(!pBankTRGD->test_CRC()) printf("CRC error: %s %d\n",__FILE__,__LINE__); 
+  if(!pBankTRGD->test_CRC()) {
+    mErr=2;
+    printf("CRC error: %s %d\n",__FILE__,__LINE__); 
+  }
   char *ptr=(char*)pBankTRGD; ptr+=40; /* Skip the 10-word TRGD bank header. */ 
 
   switch(YearOfData(ptr)) {
     case 2000:
       gs2000=(MarilynMonroe2000*)ptr;
       // SanityCheck2000(1);
-      if(pBankTRGD->HerbSwap2000()<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
+      if(pBankTRGD->HerbSwap2000()   <0) { mErr = 2000; printf("Swap error %s %d.\n",__FILE__,__LINE__); }
       break;
 
     case 2001:
       gs=(MarilynMonroe*)ptr;
       // SanityCheck(1);
-      if(pBankTRGD->HerbSwap()<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
+      if(pBankTRGD->HerbSwap()       <0) { mErr = 2001; printf("Swap error %s %d.\n",__FILE__,__LINE__); }
       break;
 
     case 2003:
       S_mode = 0;
       // SanityCheck2003(ptr,S_mode);
-      if(pBankTRGD->HerbSwap2003(ptr)<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
+      if(pBankTRGD->HerbSwap2003(ptr)<0) { mErr = 2003; printf("Swap error %s %d.\n",__FILE__,__LINE__); }
       break;
 
     case 2004:
       S_mode = 0;
       // SanityCheck2004(ptr,S_mode);
-      if(pBankTRGD->HerbSwap2004(ptr)<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
+      if(pBankTRGD->HerbSwap2004(ptr)<0) { mErr = 2004; printf("Swap error %s %d.\n",__FILE__,__LINE__); }
       break;
 
     default: assert(0);
