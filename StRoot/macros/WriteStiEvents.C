@@ -5,6 +5,10 @@
 //
 //  A. Rose, M. Calderon
 // $Log: WriteStiEvents.C,v $
+// Revision 1.3  2002/09/19 05:47:21  jeromel
+// Make it read dst.root and produce _sti.event.root + embedding flag added
+// (suggestion by Lee).
+//
 // Revision 1.2  2002/09/16 22:57:25  jeromel
 // Would work better without the return ...
 //
@@ -23,8 +27,20 @@
 //
 // 
 
+// backward compatibility
 void WriteStiEvents(Int_t nevents=1,
 		    bool simulated = true,
+	            const Char_t *Mainfile = "/star/data22/ITTF/EvalData/MCFiles/auau200/rcf0183_12_300evts.geant.root"
+		    )
+{
+  cout << "Please, use the 4 parameter method ..." << endl;
+  WriteStiEvents(nevents,simulated,false,Mainfile);
+}
+
+
+void WriteStiEvents(Int_t nevents=1,
+		    bool simulated = true,
+		    bool usedst = false,
 	            const Char_t *Mainfile = "/star/data22/ITTF/EvalData/MCFiles/auau200/rcf0183_12_300evts.geant.root"
 		    )
 {
@@ -47,6 +63,7 @@ void WriteStiEvents(Int_t nevents=1,
     gSystem->Load("StDbBroker");
     gSystem->Load("StDbUtilities");
     gSystem->Load("StTpcDb");
+    if(usedst) gSystem->Load("StEventMaker");
     gSystem->Load("StDetectorDbMaker");
     gSystem->Load("StTreeMaker");
     gSystem->Load("StSvtClassLibrary");
@@ -63,11 +80,12 @@ void WriteStiEvents(Int_t nevents=1,
     IOMk->SetBranch("*",0,"0");	//deactivate all branches
     //IOMk->SetBranch("dstBranch",0,"r");
     //IOMk->SetBranch("runcoBranch",0,"r");
-    IOMk->SetBranch("eventBranch",0,"r");
+    if(usedst) IOMk->SetBranch("dstBranch",0,"r");
+    else       IOMk->SetBranch("eventBranch",0,"r");
     IOMk->SetBranch("geantBranch",0,"r");
 
     dbaseMk = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb");
-    if (simulated) dbaseMk-> SetDateTime(20010801,000000);  
+    if (simulated) dbaseMk->SetDateTime(20010801,000000);  
     tpcDbMk  = new StTpcDbMaker("tpcDb");
     svtDbMk  = new StSvtDbMaker("svtDb");
     detDbMk = new StDetectorDbMaker("detDb");
@@ -167,7 +185,9 @@ void WriteStiEvents(Int_t nevents=1,
     cout << "!!!! doEvents: will write out .event.root file !!" << endl << endl;
 
     TString *ofile = new TString(Mainfile);
-    ofile->ReplaceAll(".event.root","_sti.event.root");
+    if (usedst) ofile->ReplaceAll(".dst.root","_sti.event.root");
+    else        ofile->ReplaceAll(".event.root","_sti.event.root");
+
     cout << "Output file is " << ofile->Data() << endl;
     //return;
 
