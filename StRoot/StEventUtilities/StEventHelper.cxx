@@ -570,7 +570,7 @@ ClassImp(StFilterABC)
 
 int StFilterABC::fgDial=0;
 //______________________________________________________________________________
-StFilterABC::StFilterABC(const char *name):TNamed(name,""),fActive(kTRUE)
+StFilterABC::StFilterABC(const char *name,bool active):TNamed(name,""),fActive(active)
 {
 #ifdef OLDDISPLAY
    char cbuf[200];
@@ -609,7 +609,7 @@ void   StFilterABC::Update()
    
 //______________________________________________________________________________
 ClassImp(StFilterDef)
-StFilterDef::StFilterDef(const char *name):StFilterABC(name)
+StFilterDef::StFilterDef(const char *name,bool active):StFilterABC(name,active)
 {
   SetDefs();
   
@@ -631,6 +631,7 @@ const char  **StFilterDef::GetNams() const
    "  PtMax        ",
    "  QMin         ",
    "  QMax         ", 
+   "  EncodedMethod",
    0};
   return nams;
 }
@@ -651,6 +652,8 @@ const float  *StFilterDef::GetDefs() const
    /*  PtMax       =*/  999.00,
    /*  QMin        =*/   -1   ,
    /*  QMax        =*/   +1   ,
+   /* Encoded method*/   -1   ,     // The default value -1 menas all
+
    0};
   return defs;   
 }   
@@ -667,30 +670,33 @@ Int_t StFilterDef::AcceptCB(StPoints3DABC *pnt)
 
 
    z = pnt->GetZ(0);				
-   cut = 2;
+   cut++;
    if (fZMin >z || z > fZMax)				goto SKIP;	
 
    x = pnt->GetX(0);
    y = pnt->GetY(0);
    r2xy = x*x+y*y;
-   cut = 3;
+   cut++;
    if (fRxyMin*fRxyMin > r2xy || r2xy > fRxyMax*fRxyMax)goto SKIP;
    phid = atan2(y,x)*(180./M_PI);
-   cut = 4;
+   cut++;
    if (fPhiMin > phid || phid > fPhiMax) 		goto SKIP;
    to = pnt->GetObject();
    if (!to) 						return 1;
    if (!to->InheritsFrom(StTrack::Class()))		return 1;
    trk = (StTrack*)to;
    len = trk->length();
-   cut = 5;
+   cut++;
    if (fLenMin >len || len > fLenMax)			goto SKIP;	
    pt = trk->geometry()->momentum().perp();
-   cut = 6;
+   cut++;
    if (fPtMin >pt || pt > fPtMax)			goto SKIP;	
    q = trk->geometry()->charge();
-   cut = 7;
+   cut++;
    if (fQMin >q || q > fQMax)				goto SKIP;	
+   cut++;
+   if ( (int(fEncodedMethod) != -1) && (trk->encodedMethod() != int(fEncodedMethod)) )
+      goto SKIP;
    return 1;   
 
 SKIP: return 0;
@@ -700,7 +706,7 @@ SKIP: return 0;
 
 //______________________________________________________________________________
 ClassImp(StMuDstFilterHelper)
-StMuDstFilterHelper::StMuDstFilterHelper(const char *name):StFilterABC(name)
+StMuDstFilterHelper::StMuDstFilterHelper(const char *name,bool active):StFilterABC(name,active)
 {
   mBB = new BetheBloch();
   SetDefs();
@@ -713,7 +719,6 @@ StMuDstFilterHelper::~StMuDstFilterHelper()
 const char  **StMuDstFilterHelper::GetNams() const
 {
   static const char *nams[] = {
-    " EncodedMethod       ",
     " pCutHigh            ",  
     " nHitsCutHighP       ",
     " pCutLow             ",
@@ -731,7 +736,6 @@ const char  **StMuDstFilterHelper::GetNams() const
 const float  *StMuDstFilterHelper::GetDefs() const
 {
   static const float defs[] = {
-    /* encoded method      */ -1,     // Th default value -1 menas all
     /* pCutHigh            */ 2.0,    // high momentum cut for RICH/Upsilon candidates 
     /* nHitsCutHighP       */ 10,     // nHits cut for all tracks
     /* pCutLow             */ 0.2,    // low momentum cut
@@ -764,69 +768,44 @@ Int_t StMuDstFilterHelper::AcceptCB(const StTrack* track) {
   int chargeOK = 0;
   int dedxOK = 0;
 
-  // check encoded method
-  if ( (int(fEncodedMethod) != -1) && (track->encodedMethod() != int(fEncodedMethod)) ){
-    cout << "Rejecting fEncodedMethod = " << track->encodedMethod() << endl;
-    return 0;
-  } else {
-    cout << "Accepting fEncodedMethod = " << track->encodedMethod() << endl;
-  }
+  float magnitude = track->geometry()->momentum().magnitude();
+  int   nPoints   = track->detectorInfo()->numberOfPoints();
 
-  // next: take all tracks above fpCutHigh
-  if (track->geometry()->momentum().magnitude() > pCutHigh   &&
-      track->detectorInfo()->numberOfPoints() >= nHitsCutHighP){
-    cout << "Accepting momentum > pCutHigh=" << pCutHigh 
-	 << " and Nhits > nHitsCutHighP=" << nHitsCutHighP << endl;
-    iret = 1;
-  }
-
-  // otherwise: take only neg. tracks in a certain dEdx-range
+  if  (   magnitude > pCutHigh && nPoints >= nHitsCutHighP)   iret = 1;
   else {
-    cout << "Checking pCut           " << track->geometry()->momentum().magnitude() << endl;
-    cout << "Checking numberOfPoints " << track->detectorInfo()->numberOfPoints()   << endl;
+     if ( magnitude > pCutLow  && nPoints >= nHitsCutLowP ) 
+     {
+        // check charge
+        if (chargeForLowP==0) 
+           chargeOK = 1;
+        else if (track->geometry()->charge() == chargeForLowP) 
+           chargeOK = 1;
 
-        if ( track->detectorInfo()->numberOfPoints() >= nHitsCutLowP &&
-	     track->geometry()->momentum().magnitude() > pCutLow) {
-	      // check charge
-	      if (chargeForLowP==0) 
-		    chargeOK = 1;
-	      else if (track->geometry()->charge() == chargeForLowP) 
-		    chargeOK = 1;
+        // check dEdx
+        //	      if (mBB==0) mBB = new BetheBloch();
+        float dedxHigh = dEdxFractionCutHigh * mBB->Sirrf(magnitude/dEdxMassCutHigh);
+        float dedxLow  = dEdxFractionCutLow  * mBB->Sirrf(magnitude/dEdxMassCutLow);
+        float dedx     = 0;
 
-	      // check dEdx
-	      //	      if (mBB==0) mBB = new BetheBloch();
-	      float p = track->geometry()->momentum().magnitude();
-	      float dedxHigh = dEdxFractionCutHigh * mBB->Sirrf(p/dEdxMassCutHigh);
-	      float dedxLow  = dEdxFractionCutLow * mBB->Sirrf(p/dEdxMassCutLow);
-	      float dedx     = 0;
-
-	      // display information
-	      cout << "dEdxFractionCutHigh="  << dEdxFractionCutHigh << " => dedxHigh=" << dedxHigh << endl;
-	      cout << "dEdxFractionCutLow ="  << dEdxFractionCutLow  << " => dedxLow =" << dedxLow  << endl;
-
-	      // get track dEdx
-	      const StSPtrVecTrackPidTraits& traits = track->pidTraits();
-	      StDedxPidTraits* dedxPidTr;
-	      for (unsigned int itrait = 0; itrait < traits.size(); itrait++){
-		    dedxPidTr = 0;
-		    if (traits[itrait]->detector() == kTpcId) {
-		          StTrackPidTraits* thisTrait = traits[itrait];
-			  dedxPidTr = dynamic_cast<StDedxPidTraits*>(thisTrait);
-			  if (dedxPidTr && dedxPidTr->method() == kTruncatedMeanId) {
-			        // adjust L3 dE/dx by a factor of 2 to match offline
-			        dedx = 2 * dedxPidTr->mean();
-			  }
-		    }
-	      }
-	      cout << "dEdx               ="  << dedx << endl;
-	      if (dedx > dedxHigh && dedx > dedxLow) 
-		    dedxOK = 1;
-
-	      cout << "Final check for select. Charge=" << chargeOK << " dEdx=" << dedxOK << endl;
-
-	      // final answer
-	      iret = chargeOK * dedxOK;
-	} // if (pCutLow && nHitsCutLowP)
+        // get track dEdx
+        const StSPtrVecTrackPidTraits& traits = track->pidTraits();
+        StDedxPidTraits* dedxPidTr;
+        for (unsigned int itrait = 0; itrait < traits.size(); itrait++){
+           dedxPidTr = 0;
+           if (traits[itrait]->detector() == kTpcId) {
+              StTrackPidTraits* thisTrait = traits[itrait];
+              dedxPidTr = dynamic_cast<StDedxPidTraits*>(thisTrait);
+              if (dedxPidTr && dedxPidTr->method() == kTruncatedMeanId) {
+                 // adjust L3 dE/dx by a factor of 2 to match offline
+                 dedx = 2 * dedxPidTr->mean();
+              }
+           }
+        }
+        if (dedx > dedxHigh && dedx > dedxLow) 
+           dedxOK = 1;
+        // final answer
+        iret = chargeOK * dedxOK;
+     } // if (pCutLow && nHitsCutLowP)
   }
   return iret;
 }

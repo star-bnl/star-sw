@@ -145,7 +145,7 @@ private:
 //______________________________________________________________________________
 class StFilterABC : public TNamed {  	//base class for StEvent filters
 public:
-   StFilterABC(const char *name);
+   StFilterABC(const char *name,bool active=true);
    ~StFilterABC(){};
 
    virtual float        *GetPars() const	= 0;
@@ -176,7 +176,7 @@ inline Int_t StFilterABC::Accept(StPoints3DABC *pnt)
 
 class StFilterDef : public StFilterABC { // An example of default filter
 public:
-   		StFilterDef(const char *name);
+   		StFilterDef(const char *name,bool active=true);
                ~StFilterDef(){};
 virtual float        *GetPars() const {return (float*)(&fFirst+1);}
 virtual const float  *GetDefs() const;
@@ -200,6 +200,7 @@ private:
   float fPtMax       ;
   float fQMin        ;
   float fQMax        ; 
+  float fEncodedMethod;  // encoding method
   float fLast;
 
 ClassDef(StFilterDef,0)
@@ -208,7 +209,7 @@ ClassDef(StFilterDef,0)
 
 class StMuDstFilterHelper : public StFilterABC { // An example of default filter
 public:
-   		StMuDstFilterHelper(const char *name);
+   		StMuDstFilterHelper(const char *name,bool active=true);
                ~StMuDstFilterHelper();
 virtual float        *GetPars() const {return (float*)(&fFirst+1);}
 virtual const float  *GetDefs() const;
@@ -223,7 +224,6 @@ protected:
 
 private:
   float fFirst; 
-  float fEncodedMethod;  // encoding method
   float fpCutHigh;       // high momentum cut for RICH/Upsilon candidates 
   float fnHitsCutHighP;  // nHits cut for all tracks
 
