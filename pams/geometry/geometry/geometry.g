@@ -11,7 +11,8 @@
 ***************************************************************************
    Implicit   none
    Logical    cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,upst,rich,
-              zcal,mfld,mwc,pse,tof,t25,t1,four,ems,on/.true./,off/.false./
+              zcal,mfld,mwc,pse,tof,t25,t1,four,ems,alpipe,
+              on/.true./,off/.false./
    real       Par(1000),field,dcay(5),shift(2)
    Integer    LENOCC,LL,IDEB,Nsi,i,j,l,nmod(2)
    character  Commands*4000
@@ -38,7 +39,7 @@ replace[;ON#{#;] with [
 *
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
    {mwc,four,pse}=on      "MultiWire Chambers, 4th Si layer, pseudopadrows"   
-   {tof,t25,t1,ems,rich}=off          "TimeOfFlight, EM calorimeter Sector"
+   {tof,t25,t1,ems,rich,alpipe}=off   "TimeOfFlight, EM calorimeter Sector"
    field=5;  Nsi=7;                                    "defaults constants"
    Commands=' '
 *
@@ -64,7 +65,7 @@ If LL>1
   on HELP       { you may select the following keywords: ;
                   <W>;('---------------:----------------------------- ');
                   <W>;('Configurations : complete,tpc_only,field_only ');
-                  <W>;('               : year_1a,b,c;  year_2a        ');
+                  <W>;('               : year_1a,s,b,c;  year_2a      ');
                   <W>;('Geant Physics  : Hadr_on, Hadr_off, Decay_Only');
                   <W>;('Geometry Detail: mwc_off, pse_off, 4th_off    ');
                   <W>;('Magnetic Field : Field_on/off, field=value    ');
@@ -74,6 +75,8 @@ If LL>1
                   <W>;('--------------------------------------------- ');
                 }  
   on COMPLETE   { Complete STAR geometry;                             tof=on; }
+  on YEAR_1S    { starting in summer: TPC, CONE, AL pipe;          alpipe=on;
+                                         {ftpc,vpdd,calb,ecal}=off;    Nsi=0; }
   on YEAR_1A    { poor approximation to year1: TPC+CTB+FTPC;      
                                               {vpdd,calb,ecal}=off;    Nsi=0; }
   on YEAR_1B    { better year1: TPC+CTB+FTPC+calo patch+RICH, no svt; 
@@ -118,6 +121,9 @@ If LL>1
 *
    if (rich) ItCKOV = 1
    if (cave) Call cavegeo
+   If (LL>1) call AgDETP new ('PIPE')
+   if (alpipe) call AgDETP add ('pipg.BeLeng=', 0, 1)
+   if (alpipe) call AgDETP add ('pipg.S1Leng=',230,1)
    if (pipe) Call pipegeo
    if (upst) Call upstgeo
 
