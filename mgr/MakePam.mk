@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.121 1999/09/24 22:18:28 fisyak Exp $
+# $Id: MakePam.mk,v 1.122 1999/09/26 19:16:02 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.122  1999/09/26 19:16:02  fisyak
+# Merge directory structures with cons
+#
 # Revision 1.121  1999/09/24 22:18:28  fisyak
 # Add new Table method (VF), fix bug in VPATH
 #
@@ -367,18 +370,18 @@ NAMES_CDF:= $(basename $(subst $(SRC_DIR),,$(FILES_CDF)))
 FILES_IDT := $(notdir $(wildcard $(OUT_DIR)/pams/$(DOMAIN)/idl/*.idl $(STAR)/pams/$(DOMAIN)/idl/*.idl))
 ifneq (,$(FILES_IDM))
   FILES_ICC := $(addprefix $(GEN_DIR)/, $(subst .idl,_i.cc,  $(notdir $(FILES_IDM))))
-  FILES_IH  := $(addprefix $(GEN_DIR)/, $(subst .idl,.h,     $(notdir $(FILES_IDM))))
-  FILES_INC := $(addprefix $(GEN_DIR)/, $(subst .idl,.inc,   $(notdir $(FILES_IDM))))
+  FILES_IH  := $(addprefix $(GEN_INC)/, $(subst .idl,.h,     $(notdir $(FILES_IDM))))
+  FILES_INC := $(addprefix $(GEN_INC)/, $(subst .idl,.inc,   $(notdir $(FILES_IDM))))
   FILES_MOD := $(addprefix $(GEN_DIR)/St_,$(subst .idl,_Module.cxx, $(notdir $(FILES_IDM))))
-  FILES_MHH := $(addprefix $(GEN_DIR)/St_,$(subst .idl,_Module.h  , $(notdir $(FILES_IDM))))
+  FILES_MHH := $(addprefix $(GEN_DIR_INC)/St_,$(subst .idl,_Module.h  , $(notdir $(FILES_IDM))))
   FILES_ALL_MOD := $(FILES_SYM) $(FILES_ICC) $(FILES_IH) $(FILES_INC) $(FILES_MOD) $(FILES_MHH)
   FILES_IDT += $(foreach IDM, $(FILES_IDM), $(shell $(STIC) -T -q $(STICFLAGS) $(IDM))) 
 endif    
 FILES_IDT := $(sort $(FILES_IDT))
 #._________________________ Tables _____________________________________________
 ifneq (,$(FILES_IDT))
-  FILES_TAH := $(addprefix $(GEN_TAB_INC)/, $(addsuffix .h,   $(sort $(basename $(notdir $(FILES_IDT))))))
-  FILES_TAI := $(addprefix $(GEN_TAB_INC)/, $(addsuffix .inc, $(sort $(basename $(notdir $(FILES_IDT))))))
+  FILES_TAH := $(addprefix $(GEN_INC)/, $(addsuffix .h,   $(sort $(basename $(notdir $(FILES_IDT))))))
+  FILES_TAI := $(addprefix $(GEN_INC)/, $(addsuffix .inc, $(sort $(basename $(notdir $(FILES_IDT))))))
   FILES_TAB := $(addprefix $(GEN_TAB)/St_, $(addsuffix _Table.cxx, $(sort $(basename $(notdir $(FILES_IDT))))))
   FILES_THH := $(addprefix $(GEN_TAB_INC)/St_, $(addsuffix _Table.h, $(sort $(basename $(notdir $(FILES_IDT))))))
   FILES_ALL_TAB := $(FILES_SYT) $(FILES_TAH) $(FILES_TAI) $(FILES_TAB) $(FILES_THH)
@@ -501,12 +504,12 @@ include $(FILES_D)
   endif
 #--------  idm, idl --------
   ifneq (,$(FILES_ALL_TAB))
-$(FILES_TAH) : $(GEN_TAB_INC)/%.h : %.idl
+$(FILES_TAH) : $(GEN_INC)/%.h : %.idl
 	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -H -q $(STEM).idl; \
-        $(CP) $(STEM).h $(GEN_TAB_INC)/$(STEM).h
-$(FILES_TAI) : $(GEN_TAB_INC)/%.inc : %.idl
+        $(CP) $(STEM).h $(GEN_INC)/$(STEM).h
+$(FILES_TAI) : $(GEN_INC)/%.inc : %.idl
 	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -H -q $(STEM).idl; \
-        $(CP) $(STEM).inc $(GEN_TAB_INC)/$(STEM).inc
+        $(CP) $(STEM).inc $(GEN_INC)/$(STEM).inc
     ifndef NOROOT
 #------------------------------------------- ---------------------------------
 #$(FILES_TAB) : $(GEN_TAB)/St_%_Table.cxx : $(GEN_TAB_INC)/%.h
@@ -543,15 +546,15 @@ $(OBJ_DIR)/%.$(O): %.cdf
 $(FILES_ICC) : $(GEN_DIR)/%_i.cc : %.idl
 	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); \
 	$(MV) $(STEM)_i.cc $(GEN_DIR)/; 
-$(FILES_IH)  : $(GEN_DIR)/%.h    : %.idl
+$(FILES_IH)  : $(GEN_INC)/%.h    : %.idl
 	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); \
-	$(MV) $(STEM).h $(GEN_DIR)/; 
-$(FILES_INC) : $(GEN_DIR)/%.inc  : %.idl
+	$(MV) $(STEM).h $(GEN_INC)/; 
+$(FILES_INC) : $(GEN_INC)/%.inc  : %.idl
 	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); \
-	$(MV) $(STEM).inc $(GEN_DIR)/; 
-$(FILES_MHH) : $(GEN_DIR)/St_%_Module.h  : %.idl
+	$(MV) $(STEM).inc $(GEN_INC)/; 
+$(FILES_MHH) : $(GEN_DIR_INC)/St_%_Module.h  : %.idl
 	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); \
-	$(MV) St_$(STEM)_Module.h $(GEN_DIR)/; 
+	$(MV) St_$(STEM)_Module.h $(GEN_DIR_INC)/; 
 $(FILES_MOD) : $(GEN_DIR)/St_%_Module.cxx : %.idl
 	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); \
 	$(MV) St_$(STEM)_Module.cxx $(GEN_DIR)/; 
