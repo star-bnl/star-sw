@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.23 2001/03/21 17:54:30 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.24 2001/03/21 18:16:13 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.24  2001/03/21 18:16:13  aihong
+ * constructor without StEvent added
+ *
  * Revision 1.23  2001/03/21 17:54:30  aihong
  * add processPIDAsFunction()
  *
@@ -105,6 +108,44 @@ StuProbabilityPidAlgorithm::StuProbabilityPidAlgorithm(StEvent& ev):
    myBandBGFcn->SetParameters(&myPars[0]);
 
 }
+
+//-------------------------------
+StuProbabilityPidAlgorithm::StuProbabilityPidAlgorithm(): 
+               mPionMinusProb(0.),
+               mElectronProb(0.),
+               mKaonMinusProb(0.),
+               mAntiProtonProb(0.),
+               mPionPlusProb(0.),
+               mPositronProb(0.),
+               mKaonPlusProb(0.),
+	       mProtonProb(0.){
+
+
+      PID[0]=-1;//should be sth.standard say unIdentified.
+      PID[1]=-1;     
+      PID[2]=-1;
+      PID[3]=-1;
+
+      mProb[0]=0;
+      mProb[1]=0;
+      mProb[2]=0;
+      mProb[3]=0;
+
+     table = StParticleTable::instance();
+
+     mExtrap=false;
+
+	//init funtions
+  myBandBGFcn
+     =new TF1("myBandBGFcn",BetheBlochFunction, 0.,5., 7); 
+
+  Double_t myPars[7]
+        ={ 1.072, 0.3199, 1.66032e-07, 1, 1, 2.71172e-07, 0.0005 };
+
+   myBandBGFcn->SetParameters(&myPars[0]);
+
+}
+
 //-------------------------------
 StuProbabilityPidAlgorithm::~StuProbabilityPidAlgorithm(){
   /* no op */
