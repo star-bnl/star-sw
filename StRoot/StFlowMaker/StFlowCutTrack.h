@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.hh,v 1.5 1999/12/21 01:10:57 posk Exp $
+// $Id: StFlowCutTrack.h,v 1.1 2000/03/02 23:02:43 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Nov 1999
 //
@@ -12,7 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Log: StFlowCutTrack.hh,v $
+// $Log: StFlowCutTrack.h,v $
+// Revision 1.1  2000/03/02 23:02:43  posk
+// Changed extensions from .hh and .cc to .h and .cxx .
+//
 // Revision 1.5  1999/12/21 01:10:57  posk
 // Added more quantities to StFlowEvent.
 //
@@ -69,7 +72,7 @@ class StFlowCutTrack {
   static UInt_t  mFitOverMaxCutN;            // number not accepted
   static Float_t mFitOverMaxCuts[2];         // range
 
-  //ClassDef(StFlowCutTrack,1)               // macro for rootcint
+  ClassDef(StFlowCutTrack,1)               // macro for rootcint
 }; 
 
 inline UInt_t StFlowCutTrack::EtaSymPos() { return mEtaSymPosN; }

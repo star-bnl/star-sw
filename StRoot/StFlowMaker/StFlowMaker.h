@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.hh,v 1.10 2000/02/29 22:00:55 posk Exp $
+//  $Id: StFlowMaker.h,v 1.1 2000/03/02 23:02:54 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -12,7 +12,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Log: StFlowMaker.hh,v $
+//  $Log: StFlowMaker.h,v $
+//  Revision 1.1  2000/03/02 23:02:54  posk
+//  Changed extensions from .hh and .cc to .h and .cxx .
+//
 //  Revision 1.10  2000/02/29 22:00:55  posk
 //  Made SetPhiWeight inline, changed ImpactPar to Dca, etc.
 //
@@ -47,13 +50,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef StFlowMaker_HH
-#define StFlowMaker_HH
+#ifndef StFlowMaker_H
+#define StFlowMaker_H
 #include <iostream.h>
 #include <stdlib.h>
 #include "StMaker.h"
 #include "TString.h"
-#include "StFlowConstants.hh"
+#include "StFlowConstants.h"
 class StEvent;
 class StPrimaryTrack;
 class StParticleDefinition;

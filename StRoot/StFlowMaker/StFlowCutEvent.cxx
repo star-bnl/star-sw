@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.8 2000/02/29 22:00:51 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.9 2000/03/02 23:02:38 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.9  2000/03/02 23:02:38  posk
+// Changed extensions from .hh and .cc to .h and .cxx .
+//
 // Revision 1.8  2000/02/29 22:00:51  posk
 // Made SetPhiWeight inline, changed ImpactPar to Dca, etc.
 //
@@ -42,8 +45,8 @@
 #include <iostream.h>
 #include <iomanip.h>
 #include <stdlib.h>
-#include "StFlowCutEvent.hh"
-#include "StFlowCutTrack.hh"
+#include "StFlowCutEvent.h"
+#include "StFlowCutTrack.h"
 #include "StEvent.h"
 #include "StEventTypes.h"
 #include "PhysicalConstants.h"
@@ -51,7 +54,7 @@
 #include "StThreeVectorF.hh"
 #define PR(x) cout << "##### FlowCutEvent: " << (#x) << " = " << (x) << endl;
 
-//ClassImp(StFlowCutEvent)
+ClassImp(StFlowCutEvent)
 
 //-----------------------------------------------------------------------
 

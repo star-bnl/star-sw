@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.hh,v 1.10 2000/02/29 22:00:54 posk Exp $
+// $Id: StFlowEvent.h,v 1.1 2000/03/02 23:02:50 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -9,7 +9,10 @@
 //
 //////////////////////////////////////////////////////////////////////
 //
-// $Log: StFlowEvent.hh,v $
+// $Log: StFlowEvent.h,v $
+// Revision 1.1  2000/03/02 23:02:50  posk
+// Changed extensions from .hh and .cc to .h and .cxx .
+//
 // Revision 1.10  2000/02/29 22:00:54  posk
 // Made SetPhiWeight inline, changed ImpactPar to Dca, etc.
 //
@@ -47,16 +50,16 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#ifndef StFlowEvent_hh
-#define StFlowEvent_hh
+#ifndef StFlowEvent_h
+#define StFlowEvent_h
 #include <iostream.h>
 #include <stdlib.h>
-#include "StFlowTrackCollection.hh"
-#include "StFlowConstants.hh"
+#include "StFlowTrackCollection.h"
+#include "StFlowConstants.h"
 #include "StThreeVectorF.hh"
 #include "Rtypes.h"
 #include "SystemOfUnits.h"
-class TVector2;
+#include "TVector2.h"
 
 class StFlowEvent{
 
@@ -77,8 +80,8 @@ public:
   Float_t        Psi(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
   StFlowTrackCollection* TrackCollection() const;
 
-  void SetEtaCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
-  void SetPtCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
+  static void SetEtaCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
+  static void SetPtCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
   void SetSelections();
   void SetPids();
   void PrintSelectionList();
@@ -88,9 +91,9 @@ public:
   void SetCentrality(const UInt_t&);
   void SetVertexPos(const StThreeVectorF&);
   void SetPhiWeight(const Flow::PhiWgt_t &pPhiWgt);
-  void SetPiPlusCut(Float_t lo, Float_t hi);
-  void SetPiMinusCut(Float_t lo, Float_t hi);
-  void SetProtonCut(Float_t lo, Float_t hi);
+  static void SetPiPlusCut(Float_t lo, Float_t hi);
+  static void SetPiMinusCut(Float_t lo, Float_t hi);
+  static void SetProtonCut(Float_t lo, Float_t hi);
 
   // For I/O of this object -- functions defined in StHbtIO.cc
   friend ostream& operator<<(ostream& out, StFlowEvent& ev);
@@ -114,6 +117,7 @@ private:
   StFlowEvent*           pFlowEvent;         //!
   StFlowTrackCollection* pTrackCollection;   //!
 
+  ClassDef(StFlowEvent,1)                    // macro for rootcint
 };
 
 inline StFlowTrackCollection* StFlowEvent::TrackCollection() const {

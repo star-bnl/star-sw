@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.hh,v 1.2 1999/12/16 18:05:21 posk Exp $
+// $Id: StFlowConstants.h,v 1.1 2000/03/02 23:02:36 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //////////////////////////////////////////////////////////////////////
@@ -8,7 +8,10 @@
 // Description: constants for the flow makers
 //////////////////////////////////////////////////////////////////////
 //
-// $Log: StFlowConstants.hh,v $
+// $Log: StFlowConstants.h,v $
+// Revision 1.1  2000/03/02 23:02:36  posk
+// Changed extensions from .hh and .cc to .h and .cxx .
+//
 // Revision 1.2  1999/12/16 18:05:21  posk
 // Fixed Linux compatability again.
 //
@@ -18,10 +21,13 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#ifndef StFlowConstants_hh
-#define StFlowConstants_hh
+#ifndef StFlowConstants_h
+#define StFlowConstants_h
+#include "Rtypes.h"
 
-struct Flow{
+class Flow{
+
+ public:
 
   enum { nHars    =  6, 
 	 nSels    =  2,
@@ -30,6 +36,8 @@ struct Flow{
 
   typedef Double_t PhiWgt_t[nSels][nHars][nPhiBins];
 
+  ClassDef(Flow,1)               // macro for rootcint
 };
 
 #endif
+

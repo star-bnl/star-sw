@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrackCollection.hh,v 1.4 2000/01/31 22:17:00 posk Exp $
+// $Id: StFlowTrackCollection.h,v 1.1 2000/03/02 23:03:00 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,7 +10,10 @@
 //
 //////////////////////////////////////////////////////////////////////
 //
-// $Log: StFlowTrackCollection.hh,v $
+// $Log: StFlowTrackCollection.h,v $
+// Revision 1.1  2000/03/02 23:03:00  posk
+// Changed extensions from .hh and .cc to .h and .cxx .
+//
 // Revision 1.4  2000/01/31 22:17:00  posk
 // CC5 compliant.
 //
@@ -30,9 +33,9 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#ifndef StFlowTrackCollection_hh
-#define StFlowTrackCollection_hh
-#include "StFlowTrack.hh"
+#ifndef StFlowTrackCollection_h
+#define StFlowTrackCollection_h
+#include "StFlowTrack.h"
 #include <vector>
 
 #if !defined(ST_NO_NAMESPACES)

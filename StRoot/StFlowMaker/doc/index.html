@@ -23,14 +23,15 @@ for <a href="http://www.star.bnl.gov/STAR/html/star_computing.html">STAR</a>
 environment, c++ programs have been written to analyze STAR data for anisotropic
 (directed and elliptic) flow. This document is a road map to the available
 documentation and is kept <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowMaker/doc/">updated</a>.
-The software consists of 2.3k lines of code in 16 files in three directories.
+The software consists of 2.3k lines of code in 17 files in three directories.
 The three "maker" modules are called from the STAR software chain and described
 in the overview <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowMaker/doc/HTML_Presentation/index.htm">presentation</a>.
 The presentation is also available as a <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowMaker/doc/Presentation.ps">postscript</a>
 file together with an overview <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowMaker/doc/Diagram.ps">diagram</a>
 using the Unified Modeling Language. The chain of three makers is run by
 the macro <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/macros/examples/doFlowEvents.C">doFlowEvents.C</a>
-.
+. In this macro parameters can be set for the event cuts, track cuts, event
+plane selections, and PID selections.
 <p><b><a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/">StFlowMaker</a></b>
 is the interface with the STAR DST. It creates the microDST <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowEvent.cc">StFlowEvent</a>
 from <a href="http://www.star.bnl.gov/star/starlib/doc/www/html/comp_l/root/html/StEvent.html">StEvent</a>

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.17 2000/02/29 22:00:54 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.18 2000/03/02 23:02:53 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.18  2000/03/02 23:02:53  posk
+// Changed extensions from .hh and .cc to .h and .cxx .
+//
 // Revision 1.17  2000/02/29 22:00:54  posk
 // Made SetPhiWeight inline, changed ImpactPar to Dca, etc.
 //
@@ -68,19 +71,20 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include <math.h>
-#include "StFlowMaker.hh"
-#include "StFlowEvent.hh"
+#include "StFlowMaker.h"
+#include "StFlowEvent.h"
 #include "StEvent.h"
 #include "StEventTypes.h"
-#include "StFlowCutEvent.hh"
-#include "StFlowCutTrack.hh"
+#include "StFlowCutEvent.h"
+#include "StFlowCutTrack.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "StThreeVector.hh"
 #include "TFile.h"
-#include "StFlowConstants.hh"
-#include "StParticleDefinition.hh"
-#include "StParticleTable.hh"
+#include "StFlowConstants.h"
+#include "StPionPlus.hh"
+#include "StPionMinus.hh"
+#include "StProton.hh"
 #include "StTpcDedxPidAlgorithm.h"
 #define PR(x) cout << "##### FlowMaker: " << (#x) << " = " << (x) << endl;
 
@@ -116,7 +120,7 @@ Int_t StFlowMaker::Make() {
 //-----------------------------------------------------------------------
 
 void StFlowMaker::PrintInfo() {
-  cout << "$Id: StFlowMaker.cxx,v 1.17 2000/02/29 22:00:54 posk Exp $" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.18 2000/03/02 23:02:53 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 
 }
@@ -159,7 +163,7 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
   TDirectory* dirSave = gDirectory;
   TFile* pPhiWgtFile = new TFile("flowPhiWgt.hist.root", "READ");
   if (!pPhiWgtFile->IsOpen()) {
-    cout << "##### Can't open PhiWgt file" << endl;
+    cout << "##### No PhiWgt file. Will set weights = 1." << endl;
   }
   gDirectory = dirSave;
 
@@ -224,7 +228,6 @@ void StFlowMaker::FillFlowEvent() {
   int goodTracks = 0;
   const StSPtrVecPrimaryTrack& tracks = pEvent->primaryVertex(0)->daughters();
   StSPtrVecPrimaryTrackIterator itr = 0;
-  StParticleDefinition* particle;
   StTpcDedxPidAlgorithm tpcDedxAlgo;
   Float_t nSigma;
 
@@ -242,18 +245,13 @@ void StFlowMaker::FillFlowEvent() {
       pFlowTrack->SetChi2(pTrack->fitTraits().chi2());
       pFlowTrack->SetFitPts(pTrack->fitTraits().numberOfFitPoints());
       pFlowTrack->SetMaxPts(pTrack->numberOfPossiblePoints());
-      const StParticleDefinition* guess = pTrack->pidTraits(tpcDedxAlgo);
-#if !defined(__CC5__)
-      particle =  StParticleTable::instance()->findParticle("pi+");
-      nSigma = (float)tpcDedxAlgo.numberOfSigma(particle);
+      pTrack->pidTraits(tpcDedxAlgo);       // initialize
+      nSigma = (float)tpcDedxAlgo.numberOfSigma(StPionPlus::instance());
       pFlowTrack->SetPidPiPlus(nSigma);
-      particle =  StParticleTable::instance()->findParticle("pi-");
-      nSigma = (float)tpcDedxAlgo.numberOfSigma(particle);
+      nSigma = (float)tpcDedxAlgo.numberOfSigma(StPionMinus::instance());
       pFlowTrack->SetPidPiMinus(nSigma);
-      particle =  StParticleTable::instance()->findParticle("proton");
-      nSigma = (float)tpcDedxAlgo.numberOfSigma(particle);
+      nSigma = (float)tpcDedxAlgo.numberOfSigma(StProton::instance());
       pFlowTrack->SetPidProton(nSigma);
-#endif
       pFlowEvent->TrackCollection()->push_back(pFlowTrack);
       goodTracks++;
     }
