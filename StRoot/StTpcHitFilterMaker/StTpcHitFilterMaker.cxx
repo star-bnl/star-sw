@@ -1,5 +1,8 @@
-// $Id: StTpcHitFilterMaker.cxx,v 1.1 2001/03/22 19:55:30 hardtke Exp $
+// $Id: StTpcHitFilterMaker.cxx,v 1.2 2001/04/12 22:04:56 hardtke Exp $
 // $Log: StTpcHitFilterMaker.cxx,v $
+// Revision 1.2  2001/04/12 22:04:56  hardtke
+// Add option for setting large hit errors
+//
 // Revision 1.1  2001/03/22 19:55:30  hardtke
 // Initial version of hit filtering maker
 //
@@ -35,6 +38,8 @@ ClassImp(StTpcHitFilterMaker)
  minrow = 1;
  maxrow = 45;
  membrane_cut = -10;
+ BigErrorsInner = kFALSE;
+ BigErrorsOuter = kFALSE;
 }
 //----------------------------------------------------------------------------
 StTpcHitFilterMaker::~StTpcHitFilterMaker(){}
@@ -59,6 +64,9 @@ Int_t StTpcHitFilterMaker::Make(){
   float xhit;
   float yhit;
   float zhit;
+  float delx;
+  float dely;
+  float delz;
   int sectorhit;
   int rowhit;
   int iflaghit;
@@ -71,6 +79,19 @@ Int_t StTpcHitFilterMaker::Make(){
 	xhit = spc -> x;    
 	yhit = spc -> y;    
 	zhit = spc -> z;
+        delx = spc -> dx;
+        dely = spc -> dy;
+        delz = spc -> dz;
+        if (rowhit<=13&&BigErrorsInner) {
+	  spc->dx = 100*delx;
+          spc->dy = 100*dely;
+          spc->dz = 100*delz;
+        }
+        if (rowhit>13&&BigErrorsOuter) {
+	  spc->dx = 100*delx;
+          spc->dy = 100*dely;
+          spc->dz = 100*delz;
+        }
 	if(zhit>z_max||zhit<z_min||rowhit<minrow||rowhit>maxrow||(!RowOn[rowhit-1])||(!SectorOn[sectorhit-1]) ){
 	 if (iflaghit>=0) iflaghit = -123;
 	   spc->flag = iflaghit;  //remove hit for tracking
@@ -236,6 +257,16 @@ void StTpcHitFilterMaker::WestOff(){
   for (int i=1;i<=12;i++){
     DisableSector(i);
   }
+}
+//-----------------------------------------------------------------------------
+void StTpcHitFilterMaker::RidiculousErrorsInner(){
+  gMessMgr->Info() << "StTpcHitFilterMaker::Setting Huge Errors in Inner section " <<  endm;
+  BigErrorsInner = kTRUE;
+}
+//-----------------------------------------------------------------------------
+void StTpcHitFilterMaker::RidiculousErrorsOuter(){
+  gMessMgr->Info() << "StTpcHitFilterMaker::Setting Huge Errors in Outer section " <<  endm;
+  BigErrorsOuter = kTRUE;
 }
 
 
