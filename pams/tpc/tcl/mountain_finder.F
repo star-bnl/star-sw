@@ -1,5 +1,8 @@
-* $Id: mountain_finder.F,v 1.2 1998/03/17 16:57:17 sakrejda Exp $
+* $Id: mountain_finder.F,v 1.3 1999/02/26 22:54:41 sakrejda Exp $
 * $Log: mountain_finder.F,v $
+* Revision 1.3  1999/02/26 22:54:41  sakrejda
+* protection against empty clusters added
+*
 * Revision 1.2  1998/03/17 16:57:17  sakrejda
 * temporary protection from NaN - RB is preparing a better one
 *
@@ -209,6 +212,7 @@ c
         integer peak_list(nmax_max)   ! Maxima index list sorted by peak height
         integer track_pix(npads_max,nbuck_max) ! Track ID for MC data
         integer valley                ! Minima along ridge connecting maxima
+        integer ierr
 
         real dt                       ! Change in TDC, relative to peak
         real dp                       ! Change in pad, relative to peak
@@ -228,7 +232,7 @@ C-----------------------------------------------------------------------
         save allowed
 c
 C-----------------------------------------------------------------------
-
+        ierr = 0
         i_minimum_height=tclpar(1).mf_min
         iclosest_pad=tclpar(1).mf_cpad
         iclosest_tdc=tclpar(1).mf_ctim
@@ -396,7 +400,7 @@ c
      +        phi,track,
      +        mu1,mu2,mu3,mu4,mu5,
      +        npads, irow, isec,
-     +        ipad_lo, ipad_hi, itdc_lo, itdc_hi)
+     +        ipad_lo, ipad_hi, itdc_lo, itdc_hi, ierr)
          goto 999
       end if
 c
@@ -697,7 +701,8 @@ c Fit the peak:
      +           phi(i),track(i),
      +           mu1(i),mu2(i),mu3(i),mu4(i),mu5(i),
      +           npads, irow, isec,
-     +           ipad_lo_temp, ipad_hi_temp, itdc_lo_temp, itdc_hi_temp)
+     +           ipad_lo_temp, ipad_hi_temp, itdc_lo_temp, itdc_hi_temp,
+     +           ierr)
          else
 c
 c Should *not* be possible...

@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.9 1998/12/17 19:33:02 sakrejda Exp $
+* $Id: tph.F,v 1.10 1999/02/26 22:54:43 sakrejda Exp $
 * $Log: tph.F,v $
+* Revision 1.10  1999/02/26 22:54:43  sakrejda
+* protection against empty clusters added
+*
 * Revision 1.9  1998/12/17 19:33:02  sakrejda
 * unused geometry tables deleted from the header
 *
@@ -368,7 +371,8 @@ c ??? Check index?
                  write(6,*) itdc_lo,'itdc_lo'
                  itdc_lo=1
               endif
- 
+
+              nhits =0 
 	      call tph_fit_cluster(tclpar,nseq, nclspix, npix_seq,
      +             ipad, itdc, iadc, itrk, 
      +             white_noise, filtered_noise, nhits,

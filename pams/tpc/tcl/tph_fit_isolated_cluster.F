@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.8 1998/12/04 19:47:46 hardtke Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.9 1999/02/26 22:54:45 sakrejda Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.9  1999/02/26 22:54:45  sakrejda
+* protection against empty clusters added
+*
 * Revision 1.8  1998/12/04 19:47:46  hardtke
 * remove stop when ADCSUM = 0. Print warning instead
 *
@@ -29,7 +32,7 @@
      +     white_noise, filtered_noise,
      +     qq,x,dx,prf,z,dz,zrf,phi,track,
      +     mu1,mu2,mu3,mu4,mu5,
-     +     npads, irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
+     +     npads, irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi, ierr)
 
 C-----------------------------------------------------------------------
 
@@ -147,6 +150,7 @@ c passed outputs
         real x(*)                     ! Position along row (pad units)
         real z(*)                     ! Position along drift (bucket units)
         real zrf(*)                   ! Width along z
+        integer ierr                  ! Error flag
 C-----------------------------------------------------------------------
 c local variables:
 c 
@@ -218,6 +222,7 @@ C-----------------------------------------------------------------------
         save bucket_length_in
         save bucket_length_out
 C-----------------------------------------------------------------------
+        ierr = 0
 
 c set up the identity vector for x (pad) calculation
         if (first) then
@@ -275,6 +280,7 @@ C time direction no longer a projection - WAL 13 Feb 98
          write(6,*) 'Hey -- ADCSUM=0!!!!'
          write(6,*) 'number of pixels in cluster = ',nclspix
          write(6,*) 'ADC vaulues = ',(iadc(ir),ir=1,nclspix)
+         ierr = 1
          return
         endif
 c mal 30aug97 - maybe a problem with decon=0 running - does this 

@@ -1,5 +1,8 @@
-* $Id: tph_fit_cluster.F,v 1.1 1998/01/27 00:49:15 fisyak Exp $
+* $Id: tph_fit_cluster.F,v 1.2 1999/02/26 22:54:44 sakrejda Exp $
 * $Log: tph_fit_cluster.F,v $
+* Revision 1.2  1999/02/26 22:54:44  sakrejda
+* protection against empty clusters added
+*
 * Revision 1.1  1998/01/27 00:49:15  fisyak
 * Split sources
 *
@@ -117,11 +120,13 @@ c    integer nhits_nnet        ! neural net estimator function
                                 ! of #hits in cluster
 
         logical look_for_many         ! Look for mult. hits in cluster
+        integer ierr                  ! error flag for called subroutines
 c----------------------------------------------------------------
 c functions:
 c
         logical triage_cuts
 c----------------------------------------------------------------
+      ierr = 0
 
 c*** skip the neural net for now..... mal 21jun95
 ***        nhits = nhits_nnet(nseq,nclspix,npix_seq,ipad,itdc,iadc)
@@ -149,8 +154,9 @@ c ??? Direct write is forbidden
      +           ipad, itdc, iadc, itrk,
      +           white_noise, filtered_noise,
      +           qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
-     +           npads, irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
-            nhits=1
+     +           npads, irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi,
+     +           ierr)
+            if(ierr.eq.0) nhits=1
          endif
 c
 c remove the following after done using it--
@@ -166,8 +172,8 @@ c  calls to tph_fit_isolated_cluster!! - fixed mal
      +        ipad, itdc, iadc, itrk,
      +        white_noise, filtered_noise,
      +        qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
-     +        npads, irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
-         nhits=1
+     +        npads, irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi, ierr)
+         if (ierr.eq.0) nhits=1
       endif
       
       return
