@@ -174,10 +174,9 @@ STAFCV_T duiFactory:: df (char *markerString) {
 }
 //----------------------------------
 #define DUI_PATH_SIZE 150
-STAFCV_T duiFactory:: duRecurse (char *searchtype,char *name,
-      char *path,int indent,DS_DATASET_T *pDS,
+STAFCV_T duiFactory:: duRecurse (char *path,int indent,DS_DATASET_T *pDS,
       long minsize,int control) {
-  bool_t isDataset; DS_DATASET_T *pDS2; char *dsType,*dsName,printIt;
+  bool_t isDataset; DS_DATASET_T *pDS2; char *dsName;
   static callCnt=0;
   int newlen,ii; char *dname,path2[DUI_PATH_SIZE+1],buf[17];
   size_t iEntry,numEntries,rowsize,nrows;
@@ -189,12 +188,11 @@ STAFCV_T duiFactory:: duRecurse (char *searchtype,char *name,
     sprintf(path2,"%s/%s",path,dsName);
   } else {
     if(!dsTableName(&dsName,pDS)) EML_ERROR(CANT_GET_NAME_OF_TBL);
-    if(!dsTableTypeName(&dsType,pDS)) EML_ERROR(CANT_GET_TYPE_OF_TBL);
   }
   if(isDataset) {
     if(!dsDatasetEntryCount(&numEntries,pDS)) EML_ERROR(DATASET_ERROR);
     if(!dsDatasetName(&dname,pDS)) EML_ERROR(DATASET_ERROR);
-    if(!searchtype&&control==0) {  // searchtype==NULL for DUI/FIND
+    if(control==0) {
       printf("%s/%s ",path,dname);
       for(ii=57-strlen(path)-strlen(dname);ii>=0;ii--) {
         printf("%c",(callCnt%3==0)?'-':' ');
@@ -204,29 +202,20 @@ STAFCV_T duiFactory:: duRecurse (char *searchtype,char *name,
     callCnt++;
     for(iEntry=0;iEntry<numEntries;iEntry++) {
       if(!dsDatasetEntry(&pDS2,pDS,iEntry)) EML_ERROR(DATASET_ERROR);
-      if(duRecurse(searchtype,name,path2,
-           indent,pDS2,minsize,control)!=STAFCV_OK) EML_ERROR(DATASET_ERROR);
+      if(duRecurse(path2,indent,pDS2,minsize,control)!=STAFCV_OK) 
+          EML_ERROR(DATASET_ERROR);
     }
   } else { /* is a table */
     if(!dsTableRowSize(&rowsize,pDS)) EML_ERROR(DATASET_ERROR);
     if(!dsTableMaxRowCount(&nrows,pDS)) EML_ERROR(DATASET_ERROR);
-    if(control==0&&(long)(nrows*rowsize)>=minsize) {
-      if(searchtype&&name) {
-        printIt=0;
-        if(!strcmp(searchtype,"name")&&sutMatchWild(name,dsName)) printIt=7;
-        if(!strcmp(searchtype,"type")&&sutMatchWild(name,dsType)) printIt=7;
-      } else {
-        printIt=7;
+    if( control==0 && (long)(nrows*rowsize)>=minsize ) {
+      printf("%s/%s ",path,dsName);
+      duiSprinfWithCommas(buf,(long)(nrows*rowsize));
+      for(ii=56-strlen(buf)-strlen(path)-strlen(dsName);ii>=0;ii--) {
+        printf("%c",(callCnt%3==0)?'-':' ');
       }
-      if(printIt) {
-        printf("%s/%s ",path,dsName);
-        duiSprinfWithCommas(buf,(long)(nrows*rowsize));
-        for(ii=56-strlen(buf)-strlen(path)-strlen(dsName);ii>=0;ii--) {
-          printf("%c",(!searchtype&&callCnt%3==0)?'-':' ');
-        }
-        printf(" %s bytes  %6d rows\n",buf,nrows); callCnt++;
-        totBytes+=nrows*rowsize;
-      }
+      printf(" %s bytes  %6d rows\n",buf,nrows); callCnt++;
+      totBytes+=nrows*rowsize;
     }
     if(control==1) {
       if(!preciousList) { printf("Error 66u. Crash imminent.\n"); exit(2); }
@@ -255,7 +244,7 @@ STAFCV_T duiFactory:: rm_nonprecious () {
 
   if(!findNode_ds("/dui",pDS)) EML_ERROR(OBJECT_NOT_FOUND);
 
-  duRecurse(NULL,NULL,"",0,pDS,0,2);   /* build current_list */
+  duRecurse("",0,pDS,0,2);   /* build current_list */
 
   aCurrentTable=strtok(current_list,"\n");
   while(aCurrentTable) {
@@ -282,7 +271,7 @@ STAFCV_T duiFactory:: precious () {
   preciousList=(char*)MALLOC(1);
   preciousList[0]=0;
   if(!findNode_ds("/dui",pDS)) EML_ERROR(OBJECT_NOT_FOUND);
-  duRecurse(NULL,NULL,"",0,pDS,0,1);
+  duRecurse("",0,pDS,0,1);
   printf("Precious files:\n");
   fputs(preciousList,stdout);
   EML_SUCCESS(STAFCV_OK);
@@ -300,8 +289,7 @@ void duiFactory:: duiSprinfWithCommas(char *out,long in) {
   *(p++)=0;
 }
 //----------------------------------
-STAFCV_T duiFactory:: du (char *searchtype, char *name,
-      const char * dirPath,long minsize) {
+STAFCV_T duiFactory:: du (const char * dirPath,long minsize) {
 
    DS_DATASET_T *pDS=NULL; int i; char buf[50];
 
@@ -316,14 +304,11 @@ STAFCV_T duiFactory:: du (char *searchtype, char *name,
    FREE(p);
    for(i=strlen(path2)-1;i>=0;i--) { if(path2[i]=='/') { path2[i]=0; break; } }
    totBytes=0;
-   if(duRecurse(searchtype,name,path2,0,pDS,minsize,0)!=STAFCV_OK) {
+   if(duRecurse(path2,0,pDS,minsize,0)!=STAFCV_OK) {
      EML_ERROR(CANNOT_TRAVERSE_TREE);
    }
-   FREE(path2);
-   if(!searchtype) {  // searchtype is NULL for DUI/DU, non-NULL for DUI/FIND
-     duiSprinfWithCommas(buf,(long)totBytes);
-     printf("                                     Total bytes %11s\n",buf);
-   }
+   FREE(path2); duiSprinfWithCommas(buf,(long)totBytes);
+   printf("                                     Total bytes %11s\n",buf);
    if(minsize>0) {
       printf("Only tables of size >= %ld bytes are listed above.\n",minsize);
    }

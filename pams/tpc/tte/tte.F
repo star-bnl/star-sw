@@ -1,8 +1,5 @@
-* $Id: tte.F,v 1.17 1998/07/22 18:31:23 sakrejda Exp $
+* $Id: tte.F,v 1.16 1998/07/10 20:45:55 sakrejda Exp $
 * $Log: tte.F,v $
-* Revision 1.17  1998/07/22 18:31:23  sakrejda
-* added check on mc hits that were not used to create reconstructed hits
-*
 * Revision 1.16  1998/07/10 20:45:55  sakrejda
 * take care of cases where a reconstructed hit cannot be matched with a mc hit
 *
@@ -360,15 +357,14 @@ c            find out whether this point was used in a reconstructed hit
 c            find it's location in the index table
              index_mc=list_index_mc(g2t_hit(ip).id)
              if(index_mc.ne.0) then
-c            this point was used to create a hit
-c            it could be that hit simulation was not ran for that sector
-             if(tindex(index_mc).key2.gt.0) then
+c              this point was used to create a hit
 c              but it could have been deleted later on in the process of
 c              merging and filtering.....
 c              so check whether we have this id on a list of reconstructed
 c              hits
                if(list_hits(tindex(index_mc).key2).gt.0) then
-                 if(tindex(index_mc).key2.gt.hit_size) then
+                 if(tindex(index_mc).key2.gt.hit_size.or.
+     >             tindex(index_mc).key2.lt.1) then
                    tte=STAFCV_BAD
                    write(m132(1),*) 'TTE-I6 long_list not long enough,'
      >                              //'hit_size ='
@@ -401,7 +397,6 @@ c                  memorize the id of a reconstructed hit
 *                 call Message (m132, 1, idI10 )
                   ndrop = ndrop+1
                endif
-             endif
              endif
            endif
            ip= g2t_hit(ip).next_tr_hit_p

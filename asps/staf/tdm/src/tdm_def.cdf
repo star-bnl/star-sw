@@ -15,7 +15,7 @@
 >GUIDANCE
 Table_and_Dataset_Memory commands.
 .
- #(@)$Id: tdm_def.cdf,v 1.19 1998/07/21 04:58:46 ward Exp $
+ #(@)$Id: tdm_def.cdf,v 1.18 1998/07/18 18:13:38 ward Exp $
  Edited by Bill Love on 23-24 Feb 1998
 .
 TDM is an Analysis Service Package (ASP) for the Standard Analysis
@@ -984,10 +984,10 @@ BUGS:
 >ACTION kam_tdmtable_typename_%C
 **
 ** ---------------------------------------------------------------------
-** TDM/TABLE/DUMP TABLE NROWS IFIRST NAMEOFFILE COLUMNLIST
+** TDM/TABLE/DUMP SOREF NROWS IFIRST NAMEOFFILE COLUMNLIST
 >COMMAND DUMP
 >PARAMETERS
-TABLE 'name of table' C
+SOREF 'name of table' C
 NROWS   'Number of rows to dump' I D=10
 IFIRST  'First row to dump' I D=0
 NAMEOFFILE 'Name of output file' C

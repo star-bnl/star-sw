@@ -1,8 +1,5 @@
-* $Id: tph_weighted_mean.F,v 1.2 1998/07/22 23:15:33 hardtke Exp $
+* $Id: tph_weighted_mean.F,v 1.1 1998/01/27 00:49:18 fisyak Exp $
 * $Log: tph_weighted_mean.F,v $
-* Revision 1.2  1998/07/22 23:15:33  hardtke
-* fix NaN bug in tphit table
-*
 * Revision 1.1  1998/01/27 00:49:18  fisyak
 * Split sources
 *
@@ -45,9 +42,6 @@ C
 C     27dec95 - mal - calculate uncertainty in mean using
 C                     correlated and uncorrelated uncertainty in y
 C
-C     22Jul98 - DH  - check to make sure mom2 is positive before taking 
-C                     square root.
-C
 C   Error conditions : 
 C   ================
 C
@@ -87,12 +81,7 @@ C-----------------------------------------------------------------------
           mom2 = mom2 + x(ipt)*(x(ipt)*y(ipt))
 	enddo
 	mom1 = mom1 / ysum
-        mom2 = mom2/ysum - mom1**2
-        if (mom2.ge.0.) then
-         mom2=sqrt(mom2)
-        else
-         mom2 = 0.
-        endif
+        mom2 = sqrt(mom2/ysum - mom1**2)
 c
 c the uncertainty from the correlated noise and uncorrelated noise
 c  is estimated below...

@@ -29,11 +29,8 @@ echo '<hr>'                                                 >> index.html
 # list of all modules
  foreach domain ($all_dom)
    set dom_idl = `find $STAR/pams/$domain -name "*.idl"`
-   set nw = `echo $dom_idl | wc -w`
-   if ($nw != 0) then
-     set dom_idm = `egrep -l 'interface' $dom_idl`
-     set dom_idt = `egrep -l 'struct '   $dom_idl`
-   endif
+   set dom_idm = `egrep -l 'interface' $dom_idl`
+   set dom_idt = `egrep -l 'struct '   $dom_idl`
    echo '<H3><a name="'$domain'">Domain '$domain'</a>'                      >> index.html
    set count = 0
    set DOC = $STAR/pams/$domain/doc

@@ -47,41 +47,41 @@ tdm/table/cell/putvalue 'shape[0].shape'  3. 3.0 0.0150
 * general configuration
 *
 message "initalizing config table..."
-tdm/table/cell/putvalue 'config[0].cap_nshape'  3 
-tdm/table/cell/putvalue 'config[0].cap_shape_id'  1 
-tdm/table/cell/putvalue 'config[0].cap_trackmed'  1 
-tdm/table/cell/putvalue 'config[0].frame_trackmed'  10
-tdm/table/cell/putvalue 'config[0].layer_drift' 1 1 1 1 1 1  
-tdm/table/cell/putvalue 'config[0].n_ladder' 4 4 6 6 8 8 
 tdm/table/cell/putvalue 'config[0].n_layer'      6
+tdm/table/cell/putvalue 'config[0].n_ladder' 4 4 6 6 8 8 
 tdm/table/cell/putvalue 'config[0].n_wafer' 4 4 6 6 7 7 
-tdm/table/cell/putvalue 'config[0].be_support_thick' 0.015 0.015 0.015 0.015 0.015 0.015 
-tdm/table/cell/putvalue 'config[0].be_support_width' 0.3 0.3 0.3 0.3 0.3 0.3 
-tdm/table/cell/putvalue 'config[0].cap_position'  29.5
-tdm/table/cell/putvalue 'config[0].cap_shape' 5. 16. 1.
-tdm/table/cell/putvalue 'config[0].frame_al_length' 29. 29. 29. 29. 29. 29. 
-tdm/table/cell/putvalue 'config[0].frame_al_thick' 0.013 0.013 0.013 0.013 0.013 0.013 
-tdm/table/cell/putvalue 'config[0].frame_al_width' 1. 1. 1. 1. 1. 1. 
-tdm/table/cell/putvalue 'config[0].frame_cs_length' 29. 29. 29. 29. 29. 29. 
-tdm/table/cell/putvalue 'config[0].frame_cs_thick' 0.075 0.075 0.075 0.075 0.075 0.075 
-tdm/table/cell/putvalue 'config[0].frame_cs_width' 1. 1. 1. 1. 1. 1. 
-tdm/table/cell/putvalue 'config[0].frame_length' 29. 29. 29. 29. 29. 29. 
-tdm/table/cell/putvalue 'config[0].frame_si_length' 29. 29. 29. 29. 29. 29. 
-tdm/table/cell/putvalue 'config[0].frame_si_thick' 0.015 0.015 0.015 0.015 0.015 0.015 
-tdm/table/cell/putvalue 'config[0].frame_si_width' .2 .2 .2 .2 .2 .2 
-tdm/table/cell/putvalue 'config[0].frame_thick' 0.103 0.103 0.103 0.103 0.103 0.103 
-tdm/table/cell/putvalue 'config[0].frame_width' 1. 1. 1. 1. 1. 1. 
-tdm/table/cell/putvalue 'config[0].layer_back' 0.0075 0.0075 0.0075 0.0075 0.0075 0.0075
+tdm/table/cell/putvalue 'config[0].layer_drift' 1 1 1 1 1 1  
+tdm/table/cell/putvalue 'config[0].layer_shape' 1 1 1 1 1 1 
+tdm/table/cell/putvalue 'config[0].layer_radius' 6.125 7.185 10.185 11.075 13.995 14.935 
+tdm/table/cell/putvalue 'config[0].layer_phioff' 0. 45.0 0.0 30.0 0.0 22.5 
 tdm/table/cell/putvalue 'config[0].layer_lateral' 0. 0. 0. 0. 0. 0.
 tdm/table/cell/putvalue 'config[0].layer_longi' 0. 0. 0. 0. 0. 0.
-tdm/table/cell/putvalue 'config[0].layer_phioff' 0. 45.0 0.0 30.0 0.0 22.5 
 tdm/table/cell/putvalue 'config[0].layer_radial' 0. 0. 0. 0. 0. 0. 
-tdm/table/cell/putvalue 'config[0].layer_radius' 6.125 7.185 10.185 11.075 13.995 14.935 
-tdm/table/cell/putvalue 'config[0].layer_shape' 1 1 1 1 1 1 
-tdm/table/cell/putvalue 'config[0].size' 5.0 16.0 30.0
-tdm/table/cell/putvalue 'config[0].water_channel_thick' 0.05 0.05 0.05 0.05 0.05 0.05
-tdm/table/cell/putvalue 'config[0].water_channel_width' .95 .95 .95 .95 .95 .95
 tdm/table/cell/putvalue 'config[0].x' 0. 0. 0.
+tdm/table/cell/putvalue 'config[0].size' 5.0 16.0 30.0
+tdm/table/cell/putvalue 'config[0].frame_trackmed'  10
+tdm/table/cell/putvalue 'config[0].frame_width' 1. 1. 1. 1. 1. 1. 
+tdm/table/cell/putvalue 'config[0].frame_thick' 0.103 0.103 0.103 0.103 0.103 0.103 
+tdm/table/cell/putvalue 'config[0].frame_length' 29. 29. 29. 29. 29. 29. 
+tdm/table/cell/putvalue 'config[0].layer_back' 0.0075 0.0075 0.0075 0.0075 0.0075 0.0075
+tdm/table/cell/putvalue 'config[0].frame_si_width' .2 .2 .2 .2 .2 .2 
+tdm/table/cell/putvalue 'config[0].frame_si_thick' 0.015 0.015 0.015 0.015 0.015 0.015 
+tdm/table/cell/putvalue 'config[0].frame_si_length' 29. 29. 29. 29. 29. 29. 
+tdm/table/cell/putvalue 'config[0].frame_al_width' 1. 1. 1. 1. 1. 1. 
+tdm/table/cell/putvalue 'config[0].frame_al_thick' 0.013 0.013 0.013 0.013 0.013 0.013 
+tdm/table/cell/putvalue 'config[0].frame_al_length' 29. 29. 29. 29. 29. 29. 
+tdm/table/cell/putvalue 'config[0].frame_cs_width' 1. 1. 1. 1. 1. 1. 
+tdm/table/cell/putvalue 'config[0].frame_cs_thick' 0.075 0.075 0.075 0.075 0.075 0.075 
+tdm/table/cell/putvalue 'config[0].frame_cs_length' 29. 29. 29. 29. 29. 29. 
+tdm/table/cell/putvalue 'config[0].be_support_width' 0.3 0.3 0.3 0.3 0.3 0.3 
+tdm/table/cell/putvalue 'config[0].be_support_thick' 0.015 0.015 0.015 0.015 0.015 0.015 
+tdm/table/cell/putvalue 'config[0].water_channel_width' .95 .95 .95 .95 .95 .95
+tdm/table/cell/putvalue 'config[0].water_channel_thick' 0.05 0.05 0.05 0.05 0.05 0.05
+tdm/table/cell/putvalue 'config[0].cap_trackmed'  1 
+tdm/table/cell/putvalue 'config[0].cap_shape_id'  1 
+tdm/table/cell/putvalue 'config[0].cap_nshape'  3 
+tdm/table/cell/putvalue 'config[0].cap_shape' 5. 16. 1.
+tdm/table/cell/putvalue 'config[0].cap_position'  29.5
  
  
  cd /dui

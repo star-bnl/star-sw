@@ -1,4 +1,4 @@
-* sets standard geant parameter for "decay only" running
+* sets standard geant parameter for "physics on" running
 * should be called before "make geometry"
 *
 * pmj 7/4/98

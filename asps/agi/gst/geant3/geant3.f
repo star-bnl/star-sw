@@ -1983,7 +1983,7 @@ C------------------------------------------------------------------
       O(L+9)=J
 99999 RETURN
       END
-*CMZ :          30/04/98  15.39.15  by  Pavel Nevski
+*CMZ :          13/12/97  08.40.14  by  Pavel Nevski
 *-- Author :
 C------------------------------------------------------------------
       SUBROUTINE CCCARD(K)
@@ -2015,7 +2015,6 @@ C------------------------------------------------------------------
          GOTO 99999
       END IF
       CL='   '
-      C1='   '
       K0=0
       K1=0
       K2=0
@@ -2065,8 +2064,8 @@ C------------------------------------------------------------------
 270   OPEN (O(9),FILE='../inc/'//PILE(1:M)//'.inc',STATUS='OLD',FORM='FO
      *RMATTED',ERR=180)
       GOTO 99999
-180   IF (CC.NE.'[]')WRITE(O(58),*)'*WARNING! INCLUDE FILE NOT FOUND: '
-     *,CL(1:K0)
+180   IF (CC.NE.'[]') WRITE(O(58),*)
+     *   ' *WARNING! INCLUDE FILE NOT FOUND: ',CL(1:K0)
       O(9)=O(O(50))
       O(50)=O(50)-1
 C (WARN I T1,TMX);
@@ -2194,7 +2193,8 @@ C+SELF.
       CALLNXTCRD
 99999 RETURN
       END
-*CMZ :          30/04/98  06.06.00  by  Pavel Nevski
+*CMZ :          25/03/98  16.10.20  by  Pavel Nevski
+*CMZ :  1.00/00 19/09/95  15.17.28  by  Pavel Nevski
 *-- Author :
 C------------------------------------------------------------------
       SUBROUTINE RAW
@@ -2210,38 +2210,38 @@ C------------------------------------------------------------------
      *1,0,38,107,1,1,0,46,107,24,0/
       DATA (BOO2(K),K=0,26)/26,24,24,24,24,8,0,3,-1,107,0,0,0,-2,107,0,
      *0,0,-1,107,0,0,0,-2,107,24,0/
-20    IF(O(769).EQ.ICHAR('0 '))GOTO21
-         CALLRW(0,O(9),769,769+114)
-      GOTO 20
-21    CONTINUE
-C  wN M(R1,R1+21);  wN F(R1,R1+21);
+ 
+1     CALLRW(0,O(9),769,769+114)
+      if (o(769).ne.ichar('0')) go to 1
+C      CALLRW(23,O(56),405,405+21)
+C      CALLRW(23,O(57),405,405+21)
 CMAKE INPUT AND OUTPUT SAME
-      DO 31 K = 769,868
+      DO 21 K = 769,868
          O(K-100)=O(K)
-31    CONTINUE
-      DO 41 K = 1,100
+21    CONTINUE
+      DO 31 K = 1,100
          J=O(669+K-1)
          O(969+J) = K-1
-41    CONTINUE
+31    CONTINUE
       O(31)=4
       O(34)=4175
-      DO 51 K = 1,10
+      DO 41 K = 1,10
          O(K+100)=K+100
          O(K+110)=K+110
          O(100-K)=-K
-51    CONTINUE
+41    CONTINUE
 C              BLANK BAT BLB TRM LPR RPR LSB RSB LCB RCB
       CALLDUMDUM(76, 47, 81, 80, 79, 38, 46, 78, 84, 85, 86)
       O(86)=48
       O(87)=82
-      DO 61 K = 0,5
+      DO 51 K = 0,5
          BOO1(K) = BOO1(K)+K1
          BOO2(K) = BOO2(K)+K1+100
-61    CONTINUE
-      DO 71 K = 0,26
+51    CONTINUE
+      DO 61 K = 0,26
          O(K+K1) = BOO1(K)
          O(K+100+K1) = BOO2(K)
-71    CONTINUE
+61    CONTINUE
       CALLDEFINE(K1+8)
       CALLDEFINE(K1+108)
       P(46)=101
@@ -2414,8 +2414,8 @@ C ARGUMENTS are: Input string, Output string, Output lengt=
       MUSER=1
 99999 RETURN
       END
-
-*CMZ :          30/04/98  06.39.37  by  Pavel Nevski
+ 
+*CMZ :          06/11/97  12.14.26  by  Pavel Nevski
 *-- Author :
 C------------------------------------------------------------------
       SUBROUTINE NXTCRD
@@ -2424,65 +2424,43 @@ C------------------------------------------------------------------
       COMMON /NAMO/O
       DATA LL/0/,KEEP/0/
       INTEGER FS(8)/8*0/
-      CHARACTER*8 CF/'   '/
-      DATA SS/0/,FRC/0/
+      CHARACTER*8 CF/'    '/
       O(62)=0
       IF(O(52).EQ.2) CALLMESAGE(16,1,0,0)
       IBK=ICHAR('   ')
-20    IF (SS.EQ.0) THEN
-         IF (O(52).EQ.1) THEN
-            O(52)=0
-            O(9)=O(O(50))
-            O(50)=O(50)-1
-            CALLMESAGE(13,4,U,U)
-            IF (O(9).EQ.0) THEN
-               O(52)=2
-               O(15)=1
-               O(12)=O(43)
-               O(O(12))=O(79)
-               GOTO 99999
-            END IF
-         END IF
-         CALLRW(0,O(9),405,O(38))
-         IF (O(52).EQ.1) THEN
-            O(12)=537
-            O(237)=O(76)
-            DO 31 T = 537,O(43)
-               O(T)=47
-31          CONTINUE
-            IF (O(15).EQ.0 .AND. KEEP.GT.0 .AND. O(55).EQ.85) THEN
-               KEEP=KEEP-1
-               O(537)=86
-               LL=0
-               FRC=0
-               GOTO40
-            END IF
-            GOTO20
-         END IF
-C       this is a BREAK-LINE condition only   -  insert a ';;' line and
-C   wait
-         F1=O(969+O(405))
-         F2=O(969+O(405+1))
-         IF (FRC.EQ.0 .AND. ( F1.EQ.45.OR.F1.EQ.80.OR. (F1.EQ.83.OR.F1.
-     *   EQ.12.OR.F1.EQ.54 ) .AND. (37.LE.F2).AND.(F2.LE.50))) THEN
-            O(12)=537
-            O(237)=O(76)
-            DO 51 T = 538,O(43)
-               O(T)=47
-51          CONTINUE
-            O(537)=O(79)
-            O(538)=O(79)
-            SS=1
+20    IF (O(52).EQ.1) THEN
+         O(52)=0
+         O(9)=O(O(50))
+         O(50)=O(50)-1
+         CALLMESAGE(13,4,U,U)
+         IF (O(9).EQ.0) THEN
+            O(52)=2
+            O(15)=1
+            O(12)=O(43)
+            O(O(12))=O(79)
             GOTO 99999
          END IF
       END IF
-      SS=0
+      CALLRW(0,O(9),405,O(38))
+      IF (O(52).EQ.1) THEN
+         O(12)=537
+         DO 31 T = 537,O(43)
+            O(T)=47
+31       CONTINUE
+         IF (O(15).EQ.0 .AND. KEEP.GT.0 .AND. O(55).EQ.85) THEN
+            KEEP=KEEP-1
+            O(537)=86
+            LL=0
+            GOTO40
+         END IF
+         GOTO20
+      END IF
 C Shift line to D positions to generate ';'(TRM) automatically
       D=MAX(O(43)-O(36),0)
-      IF (O(969+O(405)).EQ.50.OR. O(15).GT.0) D=0
-      DO 61 K = 537,537+D
+      IF (O(969+O(405)).EQ.50 .OR. O(15).GT.0) D=0
+      DO 51 K = 537,537+D
          O(K)=47
-61    CONTINUE
+51    CONTINUE
       BF=537-405+D
       R2=405
       TF=0
@@ -2490,7 +2468,7 @@ C Shift line to D positions to generate ';'(TRM) automatically
       CALLVZERO(FS,8)
       CF='  '
 C convert to internal code and get first four letters in capital (FS)
-      DO 71 K = 405,O(38)
+      DO 61 K = 405,O(38)
          T=O(969+O(K))
          O(K+BF)=T
          IF (O(K).NE.IBK) THEN
@@ -2502,64 +2480,68 @@ C convert to internal code and get first four letters in capital (FS)
 C      TF is the 6th symbol
             IF (MF.EQ.1 .AND. K-405.EQ.5) TF=T
          END IF
-71    CONTINUE
+61    CONTINUE
 C+SEQN;
       O(12)=537
       O(237)=O(76)
       CALLCLTOU(CF)
-      FRC=0
 Cprevious last symbol
       LO=LL
 C new last symbol
       TL=R2+BF
-C pure comment line
       LL=O(TL)
-      IF (O(538).EQ.45.OR.O(538).EQ.80.OR.(O(538).EQ.83.OR.O(538).EQ.12.
-     *OR.O(538).EQ.54 ) .AND. (37.LE.O(538+1)).AND.(O(538+1).LE.50))
-     *THEN
-         FRC=1
-         O(12)=O(43)
-         LL=1
-         IF(O(25).EQ.0)GOTO20
-         GOTO40
-      END IF
+C Recognize comment line
       IF (D.GT.0) THEN
-C    Recognize complex continuation lines
-C    first, remove the explicit continuation sign from the current line
-         IF ( O(TL).EQ.37 .OR. O(TL).EQ.93 ) O(TL)=47
-C    possible continuations: $_(,.=-+/*) ... <>|&^?\
-         O(537)=O(79)
-C   FORTRAN continuation (6th symbol): ,.=-+ >|& or </* preceeded by ,.=
-C   -+
-C   F
-         IF (TF.GT.35) THEN
-            IF (((39.LE.TF).AND.(TF.LE.43)) .OR. (88.LE.TF).AND.(TF.LE.
-     *      90)) THEN
-               O(537)=47
-               O(537+6)=47
-C         F
-            ELSE IF ((((44.LE.TF).AND.(TF.LE.45)).OR.TF.EQ.87) .AND. (
-     *      39.LE.LO).AND.(LO.LE.45)) THEN
-               O(537)=47
-               O(537+6)=47
-            END IF
-         END IF
-C   MORTRAN continuation: line ends with =-+,_\; or starts with { or ELS
-C   E after }
-         IF (LO.GT.35.OR.FS(1).EQ.78) THEN
-            IF (((41.LE.LO).AND.(LO.LE.43)).OR.(LO.EQ.37.OR.LO.EQ.93.OR.
-     *      LO.EQ.39.OR.LO.EQ.79.OR.FS(1).EQ.78).OR. (LO.EQ.84.AND.CF(1:
-     *      4).EQ.'ELSE')) THEN
-               O(537)=47
-            END IF
-C    Recognize 'free-stile' comment line starting with * not in a first
-C   position
-         END IF
-         IF (( O(537).EQ.O(79) .OR. LO.EQ.O(79) ) .AND. FS(1).EQ.45)
-     *   THEN
+         IF (O(538).EQ.45 .OR. (O(538).EQ.83 .OR. O(538).EQ.12 .OR. O(
+     *   538).EQ.54 ) .AND. (37.LE.O(538+1)).AND.(O(538+1).LE.50)) THEN
+            O(537)=O(79)
             O(538)=82
             O(TL+1)=82
+C      first, remove the explicit continuation sign from the current lin
+C      e
             LL=47
+         ELSE
+            IF ( O(TL).EQ.37 .OR. O(TL).EQ.93 ) O(TL)=47
+C       possible continuations: $_(,.=-+/*) ... <>|&^?\
+            O(537)=O(79)
+C      FORTRAN continuation (6th symbol): ,.=-+ >|& or </* preceeded by
+C      ,.=-+
+C      F
+            IF (TF.GT.35) THEN
+               IF (((39.LE.TF).AND.(TF.LE.43)) .OR. (88.LE.TF).AND.(TF.
+     *         LE.90)) THEN
+                  O(537)=47
+                  O(537+6)=47
+C            F
+               ELSE IF ((((44.LE.TF).AND.(TF.LE.45)).OR.TF.EQ.87) .AND.
+     *         (39.LE.LO).AND.(LO.LE.45)) THEN
+                  O(537)=47
+                  O(537+6)=47
+               END IF
+            END IF
+C      MORTRAN continuation: line ends with =-+,_\; or starts with { or
+C      ELSE after }
+            IF (LO.GT.35.OR.FS(1).EQ.78) THEN
+               IF (((41.LE.LO).AND.(LO.LE.43)).OR.(LO.EQ.37.OR.LO.EQ.93.
+     *         OR.LO.EQ.39.OR.LO.EQ.79.OR.FS(1).EQ.78).OR. (LO.EQ.84.
+     *         AND.CF(1:4).EQ.'ELSE')) THEN
+                  O(537)=47
+               END IF
+C       Recognize comment line
+            END IF
+            IF (O(537).EQ.O(79) .OR. LO.EQ.O(79)) THEN
+               IF (FS(1).EQ.45) THEN
+                  O(538)=82
+                  O(TL+1)=82
+                  LL=47
+               END IF
+               IF (O(538).EQ.12 .AND. (37.LE.O(538+1)).AND.(O(538+1).LE.
+     *         50)) THEN
+                  O(538)=82
+                  O(TL+1)=82
+                  LL=47
+               END IF
+            END IF
          END IF
       END IF
       IF (O(537).EQ.50) THEN
@@ -2608,64 +2590,64 @@ C       FRT=1
          END IF
       END IF
 40    IF (O(21).EQ.1) THEN
-         DO 81 J = 238,254
+         DO 71 J = 238,254
             O(J)=O(76)
-81       CONTINUE
+71       CONTINUE
          IF (O(30).EQ.1) THEN
             J=LLONG(238,O(19),10,0)
          ELSE IF (O(30).EQ.2) THEN
-            DO 91 J = 1,8
+            DO 81 J = 1,8
                O(237+J)=O(O(43)+J)
-91          CONTINUE
+81          CONTINUE
          END IF
-         IF (O(68).NE.0) O(247)=33
+         IF (O(68).NE.0)O(247)=33
          O(249)=O(55)
+C   IF (QCHR==) print *,' Geant Warning: literal expression not closed i
+C   n line '
          J=LLONG(250,O(11),10,0)
-         IF (O(55).EQ.48) PRINT *,' Geant Warning: literal expression no
-     *t closed in line '
          IF (O(53).EQ.0) THEN
             W=254
 C      NMX
-            DO 101 K = 1,R2-405+D
+            DO 91 K = 1,R2-405+D
                W=W+1
                O(W)=O(536+K)
-101         CONTINUE
+91          CONTINUE
             CALLRW(18,O(56),237,W)
          ELSE
             I=MOD(MAX0(O(53)*O(11),0),90)
             L=537
             M=O(43)
-110         IF(O(L).NE.O(76).OR.L.EQ.M)GOTO111
+100         IF(O(L).NE.O(76).OR.L.EQ.M)GOTO101
                L=L+1
+            GOTO 100
+101         CONTINUE
+110         IF(O(M).NE.O(76).OR.L.EQ.M)GOTO111
+               M=M-1
             GOTO 110
 111         CONTINUE
-120         IF(O(M).NE.O(76).OR.L.EQ.M)GOTO121
-               M=M-1
-            GOTO 120
-121         CONTINUE
-130         CONTINUE
+120         CONTINUE
                W=255
-               DO 141 Y = 1,I
+               DO 131 Y = 1,I
                   O(W)=O(76)
                   W=W+1
-141            CONTINUE
-150            IF(W.GT.368 .OR. L.GT.M)GOTO151
+131            CONTINUE
+140            IF(W.GT.368 .OR. L.GT.M)GOTO141
                   O(W)=O(L)
                   W=W+1
                   L=L+1
-               GOTO 150
-151            CONTINUE
+               GOTO 140
+141            CONTINUE
                CALLRW(18,O(56),237,W-1)
-               IF(L.GT.M)GOTO131
-               DO 161 K = 237,255
+               IF(L.GT.M)GOTO121
+               DO 151 K = 237,255
                   O(K)=O(76)
-161            CONTINUE
-            GOTO 130
-131         CONTINUE
+151            CONTINUE
+            GOTO 120
+121         CONTINUE
          END IF
       END IF
       IF (O(15).EQ.1 .AND. O(537).NE.50 .AND. O(537).NE.83 .AND. O(537).
-     *NE.79 .OR. FRC.EQ.1) THEN
+     *NE.79) THEN
          CALLRW(23,O(57),405,R2)
          GOTO20
       END IF

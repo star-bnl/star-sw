@@ -15,7 +15,7 @@
 >GUIDANCE
 Dataset_Unix_like_Interface commands.
 .
- #(@)$Id: dui_def.cdf,v 1.14 1998/07/21 04:58:41 ward Exp $  Edited by Bill Love - 24 Feb 1998
+ #(@)$Id: dui_def.cdf,v 1.13 1998/07/09 11:29:12 ward Exp $  Edited by Bill Love - 24 Feb 1998
 .
 DUI is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -283,34 +283,6 @@ BUGS:
    None known.
 .
 >ACTION kam_dui_du_%C
-**
-** ---------------------------------------------------------------------
-** DUI/FIND SEARCH NAME
->COMMAND FIND
->PARAMETERS
-SEARCH 'Either "type" or "name".' C
-NAME   'Table name or a table-type name.' C
->GUIDANCE
-Lists tables according to either table-name or table-type criteria.
-Usage should be clear from the examples below.
-.
-Examples:
-
-   DUI/FIND name t*
-   lists tables with names beginning with t.
-
-   DUI/FIND name *
-   list all tables
-
-   DUI/FIND type tte_mctrk
-   lists all tables of type tte_mctrk.
-
-   DUI/FIND type tte_*
-   lists all tracking evaluation tables
-
-   DUI/FIND type *
-   lists all tables
->ACTION kam_dui_find_%C
 **
 ** ---------------------------------------------------------------------
 ** DUI/LN SOURCE TARGET

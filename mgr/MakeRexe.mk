@@ -38,8 +38,7 @@ FSL := $(FOR72) $(FFLAGS)   $(CPPFLAGS)   $(SOFLAGS)
 
 #	OUT dirs
 OBJ_DIR := $(OUT_DIR)/.$(STAF_ARCH)/obj/rex
-EXE_DIR := $(OUT_DIR)/.$(STAF_ARCH)/bin
-####EXE_DIR := $(ROOTSYS)/bin
+EXE_DIR := $(ROOTSYS)/bin
 
 ifAFS_OUT := $(strip $(filter /afs/%, $(OUT_DIR)))
 ifdef ifAFS_OUT

@@ -83,11 +83,8 @@ endif
 ifdef STAF
   ASPs := msg tdm spx  asu top tnt ami dio dui dsl dsu tls soc
   ASPsLib := $(addprefix -l,$(ASPs))
-
   ifdef HPUX
-ifndef ASPS_SHARED
-    ASPsLib := $(addprefix $(STAF_SYS_LIB)/lib,$(addsuffix .a,$(ASPs)))
-endif
+    ASPsLib := $(subst -lsoc,$(STAF_SYS_LIB)/libsoc.a,$(ASPsLib))
   endif
   ALL_EXE_LIBS +=    -L$(STAF_SYS_LIB) $(ASPsLib)
 endif
