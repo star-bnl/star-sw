@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.19 2003/09/23 16:08:41 perev Exp $
+// $Id: StppEvent.cxx,v 1.20 2003/09/23 16:42:39 perev Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.20  2003/09/23 16:42:39  perev
+// {} in case added
+//
 // Revision 1.19  2003/09/23 16:08:41  perev
 // some inits added
 //
@@ -288,10 +291,10 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
 	switch(trackChoice){
 	case 0: exnode = &(event->trackNodes()); type=primary; break;
 	case 1: exnode = &(event->trackNodes()); type=global;  break;
-	case 2:
+	case 2: {
 	    StL3Trigger* l3 = event->l3Trigger();
 	    if(l3) exnode = &(l3->trackNodes());
-	    type=global;
+	    type=global;}
 	    break;
         default: assert(0);
 	}    
