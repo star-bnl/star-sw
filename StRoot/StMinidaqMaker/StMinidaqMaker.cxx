@@ -1,5 +1,8 @@
-// $Id: StMinidaqMaker.cxx,v 1.14 1999/05/13 20:58:24 liq Exp $
+// $Id: StMinidaqMaker.cxx,v 1.15 1999/06/18 21:35:06 perev Exp $
 // $Log: StMinidaqMaker.cxx,v $
+// Revision 1.15  1999/06/18 21:35:06  perev
+// Fix BEGIN_RUN. Add Init in Make
+//
 // Revision 1.14  1999/05/13 20:58:24  liq
 // set protections on table indexs
 //
@@ -89,6 +92,7 @@ StMinidaqMaker::StMinidaqMaker(const char *name):StMaker(name),
 m_Params(0)
 
 {
+   m_init = 0;
    m_first_sector=1;
    m_last_sector=no_of_sectors;
 }
@@ -97,6 +101,17 @@ StMinidaqMaker::~StMinidaqMaker(){
 }
 //_____________________________________________________________________________
 Int_t StMinidaqMaker::Init() {
+  int i,l;
+
+  if (m_init >=2) return 0;
+  
+  St_DataSet *begin_run = GetDataSet("BEGIN_RUN");
+  if (!begin_run) {
+     if (!m_init++) return 0;
+     assert (begin_run);}
+  m_init = 2;
+
+
   //Tell me I am here
   cout<<"Init miniDAQ maker"<<endl;
   // access to tsspar
@@ -150,12 +165,10 @@ Int_t StMinidaqMaker::Init() {
    //
      if(Debug()) cout<<"just before the loop"<<endl;
 
-     St_DataSet     *begin_run = GetDataSet("BEGIN_RUN");
-     assert (begin_run);
      St_DataSetIter gaintables(begin_run);
      
 
-     for(Int_t i=0; i<24;i++) {
+     for(i=0; i<24;i++) {
        St_DataSet *sector = new St_DataSet("Sector");
        sector->Add(new St_raw_row("gain_row_in",13));
        sector->Add(new St_raw_row("gain_row_out",32));
@@ -185,7 +198,7 @@ Int_t StMinidaqMaker::Init() {
          Int_t number_of_sectors = -1;
          Int_t list_of_sectors[24];
          type_index_st *it = m_it->GetTable();
-         for(Int_t l=0; l < m_it->GetNRows();l++){
+         for(l=0; l < m_it->GetNRows();l++){
              if( it->sector != current_sector){
              current_sector= it->sector;
              number_of_sectors +=1;
@@ -229,6 +242,7 @@ Int_t StMinidaqMaker::Init() {
 //_____________________________________________________________________________
 Int_t StMinidaqMaker::Make(){
 //  PrintInfo();
+  Init();
   cout<<"begin to make StMinidaqMaker"<<endl;
   TransferData(); //transfer data from TPC_DATA dataset to event/raw_data/tpc/
   cout<<"end of StMinidaqMaker"<<endl;
@@ -417,7 +431,7 @@ void StMinidaqMaker::TransferData(){
 //_____________________________________________________________________________
 void StMinidaqMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StMinidaqMaker.cxx,v 1.14 1999/05/13 20:58:24 liq Exp $\n");
+  printf("* $Id: StMinidaqMaker.cxx,v 1.15 1999/06/18 21:35:06 perev Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
