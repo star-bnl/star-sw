@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.143 2004/01/15 23:29:56 jeromel Exp $
+# $Id: Construct,v 1.144 2004/02/17 19:19:30 jeromel Exp $
 use Env;
 use lib $ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -171,7 +171,7 @@ if ( !$param::quiet ) {
 PrintHash($env,"\$env->{") if ($param::debug);
 my @subdirs = ();
 # install includes
-my @DirsWithIncludes = glob "asps/*/.includes_for_export.flg asps/*/*/.includes_for_export.flg StDb/*/.includes_for_export.flg StRoot/*/.includes_for_export.flg";
+my @DirsWithIncludes = glob "asps/*/.includes_for_export.flg asps/*/*/.includes_for_export.flg StDb/*/.includes_for_export.flg StRoot/*/.includes_for_export.flg StRoot/*/include/.includes_for_export.flg";
 @DirsWithIncludes = map File::Basename::dirname($_), @DirsWithIncludes;
 my @DirsIdlInc = glob "pams/*/idl pams/*/inc";
 print "DirsWithIncludes = @DirsWithIncludes @DirsIdlInc\n" if ($param::debug);
