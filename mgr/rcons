@@ -1,0 +1,15 @@
+#!/bin/csh
+
+#
+# Remove file depence for makers from
+# the STAR environment
+#
+
+setenv NODEBUG 1
+starver $STAR_LEVEL 
+cons -r $*
+
+unsetenv NODEBUG
+starver $STAR_LEVEL 
+cons -r $*
+
