@@ -44,6 +44,8 @@ endif
 all: $(RHIC_SOURCES) $(dir_tags)
 $(RHIC_DIR)/%:$(CERN_DIR)/%
 	@echo "Update file $(RHIC_ASIS)/$(rhic_dir)/$(STEM) from $(CERN_ASIS)/$(cern_dir)/$(STEM)"
+	if [ -d $(RHIC_ASIS)/$(rhic_dir)/$(STEM) ]; then rm -r $(RHIC_ASIS)/$(rhic_dir)/$(STEM); fi
+	if [ -r $(RHIC_ASIS)/$(rhic_dir)/$(STEM) ]; then chmod +w  $(RHIC_ASIS)/$(rhic_dir)/$(STEM); fi
 	cd $(CERN_ASIS); tar cvf - $(cern_dir)/$(STEM) | (cd $(RHIC_ASIS); tar xvf -);
 tags_%:
 	@echo "Update directory $(STEM) from $(CERN_DIR)"
