@@ -7,7 +7,7 @@ void Load() {
     if (gSystem.Load("xdf2root"))     printf(" Loading DLL \"xdf2root\" failed \n");
     if (gSystem.Load("St_Tables"))    printf(" Loading DLL \"St_Tables\" failed \n");
 }
-void TestSorter(Char_t *xdffilename="/afs/rhic/star/packages/pro/StRoot/macros/data/test.xdf",const Char_t *col="phep[3]")
+void TestSorter(Char_t *xdffilename="/afs/rhic/star/data/samples/test.xdf",const Char_t *col="phep[3]")
 {
  //   Read XDF file
     Load();
@@ -21,9 +21,12 @@ void TestSorter(Char_t *xdffilename="/afs/rhic/star/packages/pro/StRoot/macros/d
        TString colName = col;
        sorter = new St_TableSorter(*table,colName,1,5);  
        table->Print(0,6);
+       int cols = sorter->GetFirstRow() + sorter->GetNRows() -1;
        cout << " Result of the ordering the table: " << endl 
-            << "<" << sorter->GetTableName() <<" : " << sorter->GetTableType() << "[" << sorter->GetFirstRow() << "]> - "
-            << "<" << sorter->GetTableName() <<" : " << sorter->GetTableType() << "[" << sorter->GetFirstRow() + sorter->GetNRows() -1 << "]> "
+            << "<" << sorter->GetTableName() <<" : " << sorter->GetTableType() << "[" << sorter->GetFirstRow() << "]> - "	    
+            << "<" << sorter->GetTableName() 
+	    <<" : " << sorter->GetTableType() 
+	    << "[" << cols << "]> "
             << " along: \"" << sorter->GetName() << "\" column" << endl;
        int i;
 
