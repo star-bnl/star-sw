@@ -5,7 +5,7 @@
 *
 
 *********************************************************
- MACRO run_filter
+ MACRO filter
    macro/global/import *
      
      ami/module/call sca_filter_
@@ -20,7 +20,7 @@ RETURN
 *********************************************************
  
 
-MACRO run_runsca 
+MACRO runsca 
   macro/global/import *
     
     ami/module/call sca_runsca_
