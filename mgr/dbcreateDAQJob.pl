@@ -185,7 +185,7 @@ my $jbset;
       my $flname = ($$jobDnm)->fileN;
       my $jfile = $flname;
        next if ($flname =~ /st_pedestal/);
-       
+       next if ($flname =~ /st_test/);       
        $jfile =~ s/.daq//g;
 
         foreach my $optDchain (@jobDOpt) {
