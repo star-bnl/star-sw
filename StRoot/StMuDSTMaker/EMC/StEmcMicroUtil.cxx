@@ -485,6 +485,7 @@ void StEmcMicroUtil::processMicroEventInfo()
   
   ZDC.setAdcSum(east,mMicroEvent->getZDCe());
   ZDC.setAdcSum(west,mMicroEvent->getZDCw());
+	ZDC.setAdcSum((Float_t)(mMicroEvent->getZDCe()+mMicroEvent->getZDCw()));
   ZDC.setVertexZ(mMicroEvent->getZVertexZDC());
   
   for(Int_t i=0;i<300;i++)
