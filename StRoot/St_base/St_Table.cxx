@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.81 1999/09/08 00:18:08 fisyak Exp $ 
+// $Id: St_Table.cxx,v 1.82 1999/09/13 13:13:21 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.82  1999/09/13 13:13:21  fine
+// One blank has been deleted to Draw method comment in place
+//
 // Revision 1.81  1999/09/08 00:18:08  fisyak
 // Add implementation for copy ctor of StObjArray
 //
@@ -363,7 +366,6 @@ TH1  *St_Table::Draw(TCut varexp, TCut selection, Option_t *option, Int_t nentri
 //______________________________________________________________________________
 TH1 *St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *option,Int_t nentries, Int_t firstentry)
 {
-
 //*-*-*-*-*-*-*-*-*-*-*Draw expression varexp for specified entries-*-*-*-*-*
 //*-*                  ===========================================
 //
