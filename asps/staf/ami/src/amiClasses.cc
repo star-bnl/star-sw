@@ -1,4 +1,4 @@
-static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.18 1998/05/13 00:02:22 dave Exp $";
+// static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.19 1998/05/18 13:03:36 dave Exp $";
 //:Copyright 1995, Lawrence Berkeley National Laboratory
 //:>--------------------------------------------------------------------
 //:FILE:        amiClasses.C
@@ -27,7 +27,7 @@ amiInvoker:: amiInvoker(const char * name, long rank
 		, const STRING_SEQ_T& specs)
 		: socObject(name, "amiInvoker") {
    myPtr = (SOC_PTR_T)this;
-   if( rank != specs._length){
+   if( rank != (long)specs._length){
       EML_WARNING(BAD_MODULE_RANK);
       myRank=-1; /*-AMI_E_NO_MODULE_RANK-*/
       return;
@@ -66,7 +66,7 @@ char * amiInvoker::  listing () {
    char* cc = NULL;
    cc = (char*)MALLOC(79);
    memset(cc,0,79);
-   sprintf(cc,"%s %d arg.s",c,rank());
+   sprintf(cc,"%s %ld arg.s",c,rank());
    FREE(c);
    return cc;
 }
@@ -86,7 +86,7 @@ STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
    STAFCV_T status;
 
 //- Check number of tables in sequence.
-   if( tbl._length != rank() ){
+   if ((long)tbl._length != rank()) {
       EML_CONTEXT("ERROR: PAM = (%s) \n",name());
       EML_ERROR(WRONG_PAM_RANK);
    }
@@ -97,7 +97,7 @@ STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
       h = new TABLE_HEAD_ST* [tbl._length];
       d = new char* [tbl._length];
    }
-   for( i=0;i<tbl._length;i++ ){
+   for( i=0;i<(int)tbl._length;i++ ){
 //- Check types of tables in sequence.
       if( !((tbl._buffer[i])->isType(myTblSpecs[i])) ){
 	 EML_CONTEXT("ERROR: table #%d (%s) is wrong type\n",i
@@ -119,7 +119,7 @@ STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
    status = ami_pamSwitch(myRank, myPamFtn, h, d);
 
 //- Setting NOK for tables.
-   for( i=0;i<tbl._length;i++ ){
+   for( i=0;i<(int)tbl._length;i++ ){
       (tbl._buffer[i])->rowCount(h[i]->nok);
    }
 //- Deleteing TAS-structures.
@@ -157,7 +157,12 @@ char * amiInvoker:: tableSpec (long ntbl) {
 }
 
 //----------------------------------
-AMI_IO_MODE_T amiInvoker:: tableMode (long ntbl) {
+AMI_IO_MODE_T 
+amiInvoker::tableMode (long ntbl) 
+{
+  // Just to hush pedantic compilers
+  static void *pn = &ntbl;
+  
    return AMI_UPDATE_MODE; //HACK - This is temporary
 }
 
@@ -219,7 +224,7 @@ STAFCV_T amiBroker:: callInvoker (const char * name
    char *table_name=NULL;
    long table_size=1;
    long b;
-   for( int i=0;i<tnames._length;i++ ){
+   for( int i=0;i<(int)tnames._length;i++ ){
 //- Break up "name(size)" into "name" and size.
       c = tnames._buffer[i];
       cc = strchr(tnames._buffer[i],'(');
@@ -228,7 +233,7 @@ STAFCV_T amiBroker:: callInvoker (const char * name
       table_name = (char*)MALLOC(b +1); memset(table_name,0,b+1);
       strncpy(table_name,tnames._buffer[i],b); 
       table_name[b]=0; /* hjw 19Feb98 */
-      if( b < strlen(tnames._buffer[i]) ){
+      if( b < (long)strlen(tnames._buffer[i]) ){
 	 table_size = atoi(tnames._buffer[i] + b + 1);
       }
       else {
