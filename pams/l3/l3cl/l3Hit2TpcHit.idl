@@ -1,0 +1,21 @@
+/*      l3 cluster finding
+*
+*       Module: l3cl
+*       description: Level 3 cluster finder
+*/
+
+#include "PAM.idl"
+#include "l3Geom.idl"
+#include "sl3Hit.idl"
+#include "tcl_tphit.idl"
+
+interface l3Hit2TpcHit: amiModule {
+        STAFCV_T call
+                ( in	l3Geom		l3Geom
+                , in 	sl3Hit		sl3Hit
+                , out   tcl_tphit    	tpHit
+                );
+};
+/* Last mod. for l3cl: 09/17/98 cs */
+
+
