@@ -1,7 +1,10 @@
 /*
- * $Id: acmain.cc,v 1.2 1998/06/23 00:45:19 perev Exp $
+ * $Id: acmain.cc,v 1.3 1998/06/23 21:01:15 perev Exp $
  *
  * $Log: acmain.cc,v $
+ * Revision 1.3  1998/06/23 21:01:15  perev
+ * cleanup of getarg for linux
+ *
  * Revision 1.2  1998/06/23 00:45:19  perev
  * getarg fix
  *
@@ -18,6 +21,7 @@
 /*****************************************************/
 /*                    m a i n                        */
 /*****************************************************/
+#include <stdio.h>
 #include <string.h>
 #include <math.h>
 int        __argc_save=0;	// Pgf77
@@ -36,6 +40,7 @@ extern "C"  int   MAIN__();
 extern "C"  void  FTN_INITRAP();
 #endif
 extern "C"  int   getarg_ (int*, char*, int);
+extern "C"  int   iargc_ ();
 extern "C"  void  k_setar (int , char** );
 extern "C"  void  asuMallocInit();
 extern "C"  void  asuStack(void *);
@@ -55,8 +60,14 @@ int main    (int argc, char *argv[])
   asuMallocInit();
   agmain_();
 }
- 
+
+#ifndef Linux 
 int getarg_ (int *k, char *args, int n)
-{ int i=0;   if (*k<__argc_save) i=strlen(__argv_save[*k]);  if (i>n) i=n;
-  strncpy(args,__argv_save[*k],i);   memset (args+i,' ',n-i); return 0;
+{ int i=0;  memset (args,' ',n); 
+if (*k<__argc_save) i=strlen(__argv_save[*k]);  if (i>n) i=n;
+  strncpy(args,__argv_save[*k],i);   
 }
+int iargc_() { return __argc_save;}
+
+
+#endif
