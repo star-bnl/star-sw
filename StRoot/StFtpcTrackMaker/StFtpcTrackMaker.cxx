@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.45 2003/05/20 18:34:57 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.46 2003/07/04 14:09:31 fsimon Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.46  2003/07/04 14:09:31  fsimon
+// SlowSimulator now rotates hits: Check for simulated hits before rotation
+// commented out.
+//
 // Revision 1.45  2003/05/20 18:34:57  oldi
 // Cuts for vertex estimation introduced (globDca < 1 cm, multiplicity >= 200).
 //
@@ -470,25 +474,28 @@ Int_t StFtpcTrackMaker::Make()
   
   // coordinate transformation due to rotation and shift of TPC with respect to the magnet (= global coordinate system) 
   
-  // get geant information to evaluate if this event is simulated
-  St_DataSet *geant = GetInputDS("geant");  
-  St_DataSetIter geantI(geant);
   
-  if (!geantI("g2t_ftp_hit")) {
-    // not a simulated event
+  // now (07042003) the simulator also rotates the hits, so this check is no longer needed. Commented out! fsimon
+
+  // get geant information to evaluate if this event is simulated
+  //St_DataSet *geant = GetInputDS("geant");  
+  //St_DataSetIter geantI(geant);
+  
+  //if (!geantI("g2t_ftp_hit")) {
+  // not a simulated event
     
-    fcl_fppoint_st *point_st = fcl_fppoint->GetTable();
+  fcl_fppoint_st *point_st = fcl_fppoint->GetTable();
     
-    TObjArray *clusters = tracker->GetClusters();
-    StFtpcPoint *point;
+  TObjArray *clusters = tracker->GetClusters();
+  StFtpcPoint *point;
     
-    // loop over all clusters
-    for (Int_t i = 0; i < clusters->GetEntriesFast(); i++) {
-      point = (StFtpcPoint *)clusters->At(i);
-      point->TransformFtpc2Global();
-      point->ToTable(&(point_st[i]));   
-    }
+  // loop over all clusters
+  for (Int_t i = 0; i < clusters->GetEntriesFast(); i++) {
+    point = (StFtpcPoint *)clusters->At(i);
+    point->TransformFtpc2Global();
+    point->ToTable(&(point_st[i]));   
   }
+  //} 
   
   // momentum fit, dE/dx calculation, write tracks to tables
   St_fpt_fptrack *fpt_fptrack = new St_fpt_fptrack("fpt_fptrack", tracker->GetNumberOfTracks());
@@ -662,7 +669,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.45 2003/05/20 18:34:57 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.46 2003/07/04 14:09:31 fsimon Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
