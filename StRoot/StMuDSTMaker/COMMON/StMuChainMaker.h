@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.h,v 1.6 2002/05/04 23:56:29 laue Exp $
+ * $Id: StMuChainMaker.h,v 1.7 2002/11/18 14:29:31 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** @class StMuChainMaker
@@ -19,7 +19,7 @@ class StMuChainMaker  {
   StMuChainMaker(const char* name="MuDst");
   virtual ~StMuChainMaker();
 
-  string** subFilter(string filter);
+  void subFilter(string filter);
   TChain* make(string dir, string file, string filter, int maxFiles=10);
   void fromList(string file,int maxFiles);
   void fromFile(string file, int maxFiles);
@@ -32,11 +32,11 @@ class StMuChainMaker  {
  private:
   TChain *mChain;
   StMuDbReader* mDbReader;
-  string** mSubFilters;
+  string mSubFilters[100];
   string mTreeName;
   int mFileCounter;
   
-  bool pass(string file, string**  filters);
+  bool pass(string file, string*  filters);
   void add(string file);
 
 ClassDef(StMuChainMaker,0)
@@ -47,6 +47,9 @@ ClassDef(StMuChainMaker,0)
 /***************************************************************************
  *
  * $Log: StMuChainMaker.h,v $
+ * Revision 1.7  2002/11/18 14:29:31  laue
+ * update for Yuri's new StProbPidTraits
+ *
  * Revision 1.6  2002/05/04 23:56:29  laue
  * some documentation added
  *

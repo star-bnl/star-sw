@@ -1,9 +1,17 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.5 2002/09/19 21:54:01 laue Exp $
+ * $Id: StMuTrack.h,v 1.6 2002/11/18 14:29:32 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
+
+/** @class StMuTrack
+ * Class holding the track properties
+ * All unitis are in standard STAR units: GeV,cm
+ * Please keep in mind, for primary tracks the first measured point is the primary vertex.
+ * This affects dca, length calculations, inner helix.
+*/
+
 
 #ifndef StMuTrack_h
 #define StMuTrack_h
@@ -12,6 +20,7 @@
 #include "StMuEvent.h"
 #include "StMuHelix.h"
 #include "StMuUtilities.h"
+#include "StMuProbPidTraits.h"
 
 
 #include "StEvent/StTrackTopologyMap.h"
@@ -36,51 +45,52 @@ class StuProbabilityPidAlgorithm;
 
 
 class StMuTrack : public TObject {
-public:
-  StMuTrack(){/* no-op*/};
-  StMuTrack(const StEvent*, const StTrack*, int index2Global=-2, int index2RichSpectra=-2, bool l3=false);
-  
-  short id() const;
-  short type() const;
-  short flag() const;
-  int index2Global() const;
-  int index2RichSpectra() const;
-  StMuTrack* globalTrack() const;
-  StRichSpectra* richSpectra() const;
-  unsigned short nHits() const;
-  unsigned short  nHitsPoss() const;
-  unsigned short  nHitsDedx() const;
-  unsigned short  nHitsFit() const;
-  double pidProbElectron() const;
-  double pidProbPion() const;
-  double pidProbKaon() const;
-  double pidProbProton() const;
-  double nSigmaElectron() const;
-  double nSigmaPion() const;
-  double nSigmaKaon() const;
-  double nSigmaProton() const;
-  double dEdx() const;
-  double chi2() const;
-  double chi2prob() const;
-  double chi2xy() const;
-  double chi2z() const;
-  double pt() const;
-  double phi() const;
-  double eta() const;
-  double length() const;
-  double lengthMeasured() const;
-  StTrackTopologyMap topologyMap() const;
-  Short_t charge() const;
-  StThreeVectorF p() const;
-  StThreeVectorF momentum() const;
-  StThreeVectorF dca() const;
-  StThreeVectorF dcaGlobal() const;
-  StThreeVectorF firstPoint() const;
-  StThreeVectorF lastPoint() const;
-  StPhysicalHelixD helix() const;  
-  StPhysicalHelixD outerHelix() const;
-  static void setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm*);
-  static void setProbabilityPidCentrality(double cent);
+ public:
+    StMuTrack(){/* no-op*/}; ///< default constructor
+    StMuTrack(const StEvent*, const StTrack*, int index2Global=-2, int index2RichSpectra=-2, bool l3=false); ///< constructor from StEvent and StTrack
+    short id() const; ///< Returns the track id(or key), is unique for a track node, i.e. global and primary tracks have the same id.
+    short type() const; ///< Returns the track type: 0=global, 1=primary, etc (see StEvent manual for type information) 
+    short flag() const; ///< Returns flag, (see StEvent manual for type information) 
+    /// Returns index of associated global track. If not in order can be set with StMuDst::fixTrackIndeces() (but is taken care of in StMuDstReader.)  
+    int index2Global() const;
+    int index2RichSpectra() const; ///< Returns index of associated rich spectra.
+    StMuTrack* globalTrack() const; ///< Returns pointer to associated global track. Null pointer if no global track available.
+    StRichSpectra* richSpectra() const; ///< Returns pointer to associated rich spectra. Null pointer if no global track available.
+    unsigned short nHits() const;      ///< Return number of hits on track.
+    unsigned short  nHitsPoss() const; ///< Return number of possible hits on track.
+    unsigned short  nHitsDedx() const; ///< Return number of hits used for dEdx. 
+    unsigned short  nHitsFit() const;  ///< Return number of hits used in fit. 
+    double pidProbElectron() const; ///< Returns Aihong's probability of being an electron.
+    double pidProbPion() const;     ///< Returns Aihong's probability of being a pion.
+    double pidProbKaon() const;     ///< Returns Aihong's probability of being a kaon.
+    double pidProbProton() const;   ///< Returns Aihong's probability of being a proton.
+    double nSigmaElectron() const;  ///< Returns Craig's distance to the calculated dE/dx band for electrons in units of sigma.
+    double nSigmaPion() const;      ///< Returns Craig's distance to the calculated dE/dx band for pions in units of sigma.
+    double nSigmaKaon() const;      ///< Returns Craig's distance to the calculated dE/dx band for kaons in units of sigma.
+    double nSigmaProton() const;    ///< Returns Craig's distance to the calculated dE/dx band for protons in units of sigma.
+    double dEdx() const; ///< Returns measured dE/dx value.
+    double chi2() const;     ///< Returns chi2 of fit.       
+    double chi2prob() const; ///< Returns probability of fit.
+    double chi2xy() const;   ///< Returns chi2 of fit.         ATTENTIONS: does not return xy chi2 (historic)        
+    double chi2z() const;    ///< Returns probability of fit.  ATTENTIONS: does not return z chi2 (historic)        
+    double pt() const;   ///< Returns pT at point of dca to primary vertex.
+    double phi() const;  ///< Returns phi at point of dca to primary vertex.
+    double eta() const;  ///< Returns pseudo rapidity at point of dca to primary vertex.
+    double length() const; ///< Returns length of track (cm) from primary vertex to last measured point.
+    double lengthMeasured() const;  ///< Returns length of track (cm) from first to last measured point.
+    StTrackTopologyMap topologyMap() const; ///< Returns topology map.
+    Short_t charge() const;  ///< Returns charge. 
+    StThreeVectorF p() const; ///< Returns 3-momentum at dca to primary vertex.
+    StThreeVectorF momentum() const; ///< Returns 3-momentum at dca to primary vertex.
+    StThreeVectorF dca() const; ///< Returns 3D distance of closest approach to primary vertex.
+    StThreeVectorF dcaGlobal() const; ///< Returns 3D distance of closest approach to primary vertex of associated global track.
+    StThreeVectorF firstPoint() const; ///< Returns positions of first measured point.
+    StThreeVectorF lastPoint() const; ///< Returns positions of last measured point.
+    StPhysicalHelixD helix() const; ///< Returns inner helix (first measured point)
+    StPhysicalHelixD outerHelix() const; ///< Returns outer helix (last measured point)
+    StMuProbPidTraits probPidTraits() const; ///< Returns Yuri Fisyac new pid probabilities. 
+    static void setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm*); ///< Sets the StuProbabilityPidAlgorithm. Important in order to calculate Aihong's pids.
+    static void setProbabilityPidCentrality(double cent); ///< Sets the centrality for calculating Aihong's pid.
 private:
   Short_t mId;
   Short_t mType;
@@ -113,17 +123,18 @@ private:
   StThreeVectorF mLastPoint;
   StMuHelix mHelix;
   StMuHelix mOuterHelix;
+  StMuProbPidTraits mProbPidTraits; ///< Class holding the new Yuri Fisyac pid probabilities.
 
-  void setIndex2Global(size_t i) {mIndex2Global=i;}
-  void setIndex2RichSpectra(size_t i) {mIndex2RichSpectra=i;}
-  StThreeVectorD dca(const StEvent*, const StTrack*);
-  StThreeVectorD momentumAtPrimaryVertex(const StEvent* event, const StTrack* track);
-
-  static StuProbabilityPidAlgorithm* mProbabilityPidAlgorithm;
-  static double mProbabilityPidCentrality;
+  void setIndex2Global(size_t i) {mIndex2Global=i;} ///< Set index of associated global track.
+  void setIndex2RichSpectra(size_t i) {mIndex2RichSpectra=i;} ///< Set index of associated rich spectra.
+  StThreeVectorD dca(const StEvent*, const StTrack*); ///< Helper function: Calculates dca from a given StTrack and the primary vertex taken from StEvent
+  StThreeVectorD momentumAtPrimaryVertex(const StEvent* event, const StTrack* track); ///< Helper function: Calculates the momentum at dca a given StTrack and the primary vertex taken from StEvent.
+  void fillMuProbPidTraits(const StEvent*, const StTrack*); ///< Helper function to fill all the different pid values 
+  static StuProbabilityPidAlgorithm* mProbabilityPidAlgorithm; ///< StuProbabilityPidAlgorithm, we will use the same algorithm for all tracks
+  static double mProbabilityPidCentrality; ///< Centrality for Aihong's pid prob calculations. Will set when new StMuEvent is made from StEvent
 
   friend class StMuDst;
-  ClassDef(StMuTrack,3)
+  ClassDef(StMuTrack,4)
 };
 
 inline short StMuTrack::id() const {return mId;}
@@ -161,6 +172,7 @@ inline StThreeVectorF StMuTrack::firstPoint() const {return mFirstPoint;}
 inline StThreeVectorF StMuTrack::lastPoint() const {return mLastPoint;}
 //!inline StPhysicalHelixD StMuTrack::helix() const {return mHelix;}
 //!inline StPhysicalHelixD StMuTrack::outerHelix() const {return mOuterHelix;}
+inline StMuProbPidTraits StMuTrack::probPidTraits() const { return mProbPidTraits;} ///< Returns Yuri Fisyac new pid probabilities. 
 inline void StMuTrack::setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm* p) { mProbabilityPidAlgorithm=p;}
 inline void StMuTrack::setProbabilityPidCentrality(double cent) { mProbabilityPidCentrality = cent;}
 
@@ -173,6 +185,9 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.6  2002/11/18 14:29:32  laue
+ * update for Yuri's new StProbPidTraits
+ *
  * Revision 1.5  2002/09/19 21:54:01  laue
  * fix bug in length() method
  *
