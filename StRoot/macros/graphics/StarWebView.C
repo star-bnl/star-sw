@@ -10,7 +10,7 @@
   Bool_t NT=kFALSE;
   if (strcmp(gSystem.GetName(),"WinNT") == 0 ) NT=kTRUE; 
   TCanvas Star("Star","Star",400,600);
-  // Pick the geomtery fle from the remote Web site at CERN: http://root.cern.ch
+  // Pick the geomtery file from the remote Web site at CERN: http://root.cern.ch
   gBenchmark->Start("pick");
   TWebFile f("http://root.cern.ch/files/star.root");
   gBenchmark->Show("pick");
