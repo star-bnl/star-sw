@@ -1,5 +1,8 @@
-* $Id: bfc_mdc.kumac,v 1.18 1998/08/12 15:48:29 kathy Exp $
+* $Id: bfc_mdc.kumac,v 1.19 1998/08/24 23:36:45 kathy Exp $
 * $Log: bfc_mdc.kumac,v $
+* Revision 1.19  1998/08/24 23:36:45  kathy
+* cleaned up
+*
 * Revision 1.18  1998/08/12 15:48:29  kathy
 * more comments; combine geomtype+phystype into gstar_settings, use gstar_settings=field_only as default when not running gstar
 *
@@ -316,7 +319,7 @@ MACRO bfc_mdc _
  *****************************************
  *  MAIN EVENT LOOP 
  *****************************************
- message $cptime
+ message cpu time = $cptime
  
 * now split up output files into reasonable sizes
 * must create output file names for each type
