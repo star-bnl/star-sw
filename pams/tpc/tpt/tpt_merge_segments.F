@@ -1,5 +1,8 @@
-* $Id: tpt_merge_segments.F,v 1.2 1998/01/27 00:35:50 fisyak Exp $
+* $Id: tpt_merge_segments.F,v 1.3 1998/04/06 19:20:01 sakrejda Exp $
 * $Log: tpt_merge_segments.F,v $
+* Revision 1.3  1998/04/06 19:20:01  sakrejda
+* quiks replaced by tls_Quick_Sort_r in merging routine
+*
 * Revision 1.2  1998/01/27 00:35:50  fisyak
 * Split sources
 *
@@ -26,6 +29,13 @@ C
 #include "tcl_tphit.inc"
 #include "tpt_pars.inc"
 #include "tpt_mxhit.inc"
+C______________________________________________________________________
+c
+c Define local structure to sort radius
+      STRUCTURE /track_merge/
+                integer lpnt           ! location of a track with given radius
+                real    rad            ! radius of a track
+      END STRUCTURE
 
 C______________________________________________________________________
       RECORD /table_head_st/    track_h
@@ -35,11 +45,10 @@ C______________________________________________________________________
       RECORD /track_pointers/   trk(*)
       RECORD /table_head_st/    tpar_h
       RECORD /tpt_pars_st/      tpar(*)
+
+      RECORD /track_merge/      merge(mxtrack)
 C_________________________________________________________________
-      REAL rad(0:mxtrack)
-      INTEGER lpnt(0:mxtrack),ltot
-      COMMON /sortr/rad,lpnt,ltot
-      EXTERNAL tpt_rad_move,tpt_rad_comp
+      INTEGER ltot,tls_Quick_Sort_r,iret
       INTEGER i,j,k,l,lxj,lxi,next,c,m,n,ipass
       REAL id,radd,long,tracks,hits,dis,min(4),cuta,cutb
       INTEGER firsti,lasti,firstj,lastj
@@ -59,11 +68,12 @@ c The array lpnt will point to each of these tracks in order.
       do i=1,track_h.nok
          if(trk(i).flag.ge.0) then
             ltot=ltot+1
-            rad(ltot)=abs(trk(i).p(2))
-            lpnt(ltot)=i
+            merge(ltot).rad=abs(trk(i).p(2))
+            merge(ltot).lpnt=i
          endif
       enddo
-      call qiks(1,ltot,tpt_rad_move,tpt_rad_comp)
+      iret=tls_Quick_Sort_r(track_h.nok, merge(1).rad, merge(2).rad, merge)
+
 
 c Minimum difference values for merging tracks 
 c (min(1)=rr,min(2)=average of acent & bcent, min(3)=ltan, min(4)=phi0):
@@ -77,14 +87,14 @@ c Loop over track radii in order. Check if radii match. Go on if yes.
 c radd is the larger of the radii being compared.
       do i=1,ltot-1
          j=i+1
-         lxi=lpnt(i)
+         lxi=merge(i).lpnt
          if(trk(lxi).flag.gt.0) then
-         radi = rad(i)
-         radj = rad(j)
+         radi = merge(i).rad
+         radj = merge(j).rad
          do while ((abs(radj-radi)/radi.lt.min(1)).and.(j.le.ltot)) 
-          lxj=lpnt(j)
+          lxj=merge(j).lpnt
           if(trk(lxj).flag.gt.0) then
-            radd=rad(i)
+            radd=merge(i).rad
 c           Now compare the average of the differences of the 
 c           centers of the helices
             cuta = abs(trk(lxi).p(3)-trk(lxj).p(3))
@@ -216,10 +226,10 @@ c                 Finally got it, now make sure the tracks are not parallel.
                         if (tpar(ipass).debug(8).eq.1) then
                            write(6,*) '**Merged ','dist= ',mindist,
      +                          'drow= ',rowdiff
-                           write(6,111) i,lxi,trk(lxi).nhit,rad(i),
+                           write(6,111) i,lxi,trk(lxi).nhit,merge(i).rad,
      +                          trk(lxi).p(3),trk(lxi).p(4),trk(lxi).
      +                          p(7),trk(lxi).p(5)
-                           write(6,111) j,lxj,trk(lxj).nhit,rad(j),
+                           write(6,111) j,lxj,trk(lxj).nhit,merge(j).rad,
      +                          trk(lxj).p(3),trk(lxj).p(4),trk(lxj).
      +                          p(7),trk(lxj).p(5)
  111                       format(3(1x,i5),5(1x,f10.5))
@@ -307,7 +317,7 @@ c                 Finally got it, now make sure the tracks are not parallel.
             endif   ! cuta,b
           endif! track that passes the radius criterion already merged 
           j=j+1
-          if(j.le.ltot) radj = rad(j)
+          if(j.le.ltot) radj = merge(j).rad
          enddo   ! rad
       endif ! .flag<0 (track already merged)
       enddo   ! i  
