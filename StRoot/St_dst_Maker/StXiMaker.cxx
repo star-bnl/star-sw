@@ -2,8 +2,11 @@
 //                                                                      //
 // StXiMaker class                                                    //
 //                                                                      //
-// $Id: StXiMaker.cxx,v 1.18 2001/03/05 17:16:17 genevb Exp $
+// $Id: StXiMaker.cxx,v 1.19 2002/01/31 18:07:49 genevb Exp $
 // $Log: StXiMaker.cxx,v $
+// Revision 1.19  2002/01/31 18:07:49  genevb
+// Switch to using database for cut parameters
+//
 // Revision 1.18  2001/03/05 17:16:17  genevb
 // Reduce vertex table buffer size slightly
 //
@@ -85,47 +88,18 @@ StXiMaker::~StXiMaker(){
 }
 //_____________________________________________________________________________
 Int_t StXiMaker::Init(){
-
-  if (!m_exiaux) m_exiaux = new St_exi_aux("exi_aux",1);
-  //  m_exipar = (St_exi_exipar *)  params("exipars/exipar");
-  m_exipar = new St_exi_exipar("exipar",3);
-  {
-    exi_exipar_st row;
-    //
-    memset(&row,0,m_exipar->GetRowSize());
-    // TPC only cuts
-    row.use_pid	 =          0; // logical flag to control usage of global pid ;
-    row.dca_max	 =        0.8; // cut on dca between the two tracks ;
-    row.bxi_max	 =        0.8; // cut on impact param. of xi from prim. vertex ;
-    row.rv_xi	 =          2; // cut on min. dist. of decay from prim. vertex ;
-    row.rv_v0	 =          5; // cut on min. dist. of decay from prim. vertex ;
-    row.dmass	 =       0.01; // v0 mass cut +/- [dmass] ;
-    row.bpn_v0	 =          2; // cut on v0 pion daught. impact param. ;
-    row.pchisq	 =          0; // cut on chi^2 probability of vertex fit;
-    m_exipar->AddAt(&row,0);
-    memset(&row,0,m_exipar->GetRowSize());
-    //SVT only cuts
-    row.use_pid	 =          0; // logical flag to control usage of global pid ;
-    row.dca_max	 =          0; // cut on dca between the two tracks ;
-    row.bxi_max	 =          0; // cut on impact param. of xi from prim. vertex ;
-    row.rv_xi	 =        999; // cut on min. dist. of decay from prim. vertex ;
-    row.rv_v0	 =        999; // cut on min. dist. of decay from prim. vertex ;
-    row.dmass	 =          0; // v0 mass cut +/- [dmass] ;
-    row.bpn_v0	 =        999; // cut on v0 pion daught. impact param. ;
-    row.pchisq	 =          0; // cut on chi^2 probability of vertex fit;
-    m_exipar->AddAt(&row,1);
-    memset(&row,0,m_exipar->GetRowSize());
-    // SVT+TPC cuts
-    row.use_pid	 =          0; // logical flag to control usage of global pid ;
-    row.dca_max	 =        0.8; // cut on dca between the two tracks ;
-    row.bxi_max	 =        0.8; // cut on impact param. of xi from prim. vertex ;
-    row.rv_xi	 =          2; // cut on min. dist. of decay from prim. vertex ;
-    row.rv_v0	 =          5; // cut on min. dist. of decay from prim. vertex ;
-    row.dmass	 =       0.01; // v0 mass cut +/- [dmass] ;
-    row.bpn_v0	 =          2; // cut on v0 pion daught. impact param. ;
-    row.pchisq	 =          0; // cut on chi^2 probability of vertex fit;
-    m_exipar->AddAt(&row,2);
+  TDataSet* dbDataSet = GetDataBase("global/vertices");
+  if (!dbDataSet) {
+    gMessMgr->Error("StXiMaker::Init(): could not find appropriate database");
+    return kStErr;
   }
+  m_exipar = (St_exi_exipar*) (dbDataSet->FindObject("exipar"));
+  if (!m_exipar) {
+    gMessMgr->Error("StXiMaker::Init(): could not find exipar in database");
+    return kStErr;
+  }
+  if (!m_exiaux) m_exiaux = new St_exi_aux("exi_aux",1);
+
   AddRunCont(m_exipar);
   return StMaker::Init();
 }

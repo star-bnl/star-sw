@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.32 2001/03/06 17:17:19 genevb Exp $
+// $Id: StV0Maker.cxx,v 1.33 2002/01/31 18:07:49 genevb Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.33  2002/01/31 18:07:49  genevb
+// Switch to using database for cut parameters
+//
 // Revision 1.32  2001/03/06 17:17:19  genevb
 // Increased vertex table buffer size
 //
@@ -120,9 +123,9 @@ Int_t rsize,rvsize,lastV0;
 
 ClassImp(StV0Maker)
   
-  //_____________________________________________________________________________
-  StV0Maker::StV0Maker(const char *name):StMaker(name),
-  m_ev0par(0)
+//_____________________________________________________________________________
+StV0Maker::StV0Maker(const char *name):StMaker(name),
+m_ev0par(0)
 {
   m_ev0EvalOn=kFALSE;
 }
@@ -131,58 +134,18 @@ StV0Maker::~StV0Maker(){
 }
 //_____________________________________________________________________________
 Int_t StV0Maker::Init(){
-  m_ev0par2 = new St_ev0_ev0par2("ev0par2",3); // For finding V0s, even for Xis
-  m_ev0parT = new St_ev0_ev0par2("ev0parT",3); // For trimming to pure V0s
-  {
-    ev0_ev0par2_st row;
-    memset(&row,0,m_ev0par2->GetRowSize());
-  // TPC only cuts
-    row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
-    row.dca	 =        0.8; // cut on dca between the two tracks ;
-    row.dcav0	 =        0.8; // cut on dca(impact parameter) of V0 from event vertex ;
-    row.dlen	 =        2.0; // cut on dist. of decay from prim. vertex ;
-    row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
-    row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
-    row.dcapnmin=         0.7; // Min. value of tracks at interaction ;
-    if (m_Mode == 1) {
-      row.dcapnmin=       0.0; // Min. value of tracks at interaction for ev03;
-    }
-    row.n_point  =         11; // Min. number of TPC hits on a track ;
-    m_ev0parT->AddAt(&row,0);
-    row.dcav0	 =        2.5; // cut on dca(impact parameter) of V0 from event vertex ;
-    row.dcapnmin=         0.4; // Min. value of tracks at interaction ;
-    m_ev0par2->AddAt(&row,0);
-    memset(&row,0,m_ev0par2->GetRowSize());
-  //SVT only cuts
-    row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
-    row.dca	 =        0.8; // cut on dca between the two tracks ;
-    row.dcav0	 =        1.5; // cut on dca(impact parameter) of V0 from event vertex ;
-    row.dlen	 =      10000; // cut on dist. of decay from prim. vertex ;
-    row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
-    row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
-    row.dcapnmin=         100; // Min. value of tracks at interaction ;
-    row.n_point  =          1; // Min. number of SVT hits on a track ;
-    m_ev0parT->AddAt(&row,1);
-    row.dcav0	 =        2.5; // cut on dca(impact parameter) of V0 from event vertex ;
-    row.dcapnmin=         100; // Min. value of tracks at interaction ;
-    m_ev0par2->AddAt(&row,1);
-    memset(&row,0,m_ev0par2->GetRowSize());
-  // SVT+TPC cuts
-    row.iflag	 =          0; // Controls execution flow, i.e. evaluate done now or not. ;
-    row.dca	 =        0.8; // cut on dca between the two tracks ;
-    row.dcav0	 =        0.7; // cut on dca(impact parameter) of V0 from event vertex ;
-    row.dlen	 =        0.6; // cut on dist. of decay from prim. vertex ;
-    row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
-    row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
-    row.dcapnmin =        0.7; // Min. value of tracks at interaction ;
-    row.n_point  =         11; // Min. number of SVT+TPC hits on a track ;
-    m_ev0parT->AddAt(&row,2);
-    row.dcav0	 =        2.5; // cut on dca(impact parameter) of V0 from event vertex ;
-    row.dcapnmin=         0.4; // Min. value of tracks at interaction ;
-    m_ev0par2->AddAt(&row,2);
+  TDataSet* dbDataSet = GetDataBase("global/vertices");
+  if (!dbDataSet) {
+    gMessMgr->Error("StV0Maker::Init(): could not find appropriate database");
+    return kStErr;
   }
+  m_ev0par2 = (St_ev0_ev0par2*) (dbDataSet->FindObject("ev0par2"));
+  if (!m_ev0par2) {
+    gMessMgr->Error("StV0Maker::Init(): could not find ev0par2 in database");
+    return kStErr;
+  }
+
   AddRunCont(m_ev0par2);
-  
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -336,7 +299,7 @@ void StV0Maker::Trim(){
     dst_tkf_vertex = 0;
 
   Int_t ixi = dst_xi_vertex->GetNRows() - 1;
-  ev0_ev0par2_st* pars = m_ev0parT->GetTable(0);
+  ev0_ev0par2_st* pars = m_ev0par2->GetTable(3);
   rsize = dst_v0_vertex->GetRowSize();
   rvsize = vertex->GetRowSize();
 
