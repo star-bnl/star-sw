@@ -112,47 +112,6 @@ void StiControlBar::printDetector()
     StiDetectorContainer::instance()->print();
 }
 
-TControlBar* StiControlBar::makeControlBar()
-{
-    TControlBar* bar = new TControlBar("vertical","Sti Control Panel");
-    
-    //Add Buttons:
-    bar->AddButton("Dump Display Manager","StiControlBar::printDisplayManager()",
-		   "Show contents of the Display Manager");
-    bar->AddButton("Dump Detector","StiControlBar::printDetector()","Show contents of Detector Container");
-    bar->AddSeparator();
-    
-    bar->AddButton("All Visible","StiControlBar::setVisible()","Set All Drawables to Visible State");
-    bar->AddButton("All Invisible","StiControlBar::setInvisible()","Set All Drawables to Invisible State");
-    
-    bar->AddButton("Svt Visible","StiControlBar::setSvtVisible()","Set Svt Drawables to Visible State");    
-    bar->AddButton("Svt Invisible","StiControlBar::setSvtInvisible()","Set Svt Drawables to Invisible State");
-    
-    bar->AddButton("Tpc Visible","StiControlBar::setTpcVisible()","Set Tpc Drawables to Visible State");    
-    bar->AddButton("Tpc Invisible","StiControlBar::setTpcInvisible()","Set Tpc Drawables to Invisible State");
-    
-    bar->AddButton("Reset", "StiControlBar::resetStiGuiForEvent()","Reset Sti For Next Event");
-    bar->AddButton("Step",  "StiControlBar::doNextStiGuiAction()","Step Through Next Action");
-    bar->AddButton("Event Step","StiControlBar::stepToNextEvent()","Step Through to Next Event");
-
-    //Detector navigation
-    bar->AddButton("Set Sector","StiControlBar::setSector()","Set to top of sector");
-    bar->AddButton("Set Sector and Padrow","StiControlBar::setSectorAndPadrow()",
-		   "Set to sector, padrow");
-    bar->AddButton("Show Current Detector","StiControlBar::showCurrentDetector()","Highlight Current Detector");
-    bar->AddButton("Padrow Step (Plus)","StiControlBar::padrowStepPlus()","Step Radially to Next Padrow Out");
-    bar->AddButton("Padrow Step (Minus)","StiControlBar::padrowStepMinus()","Step Radially to Next Padrow In");
-    bar->AddButton("Sector Step (Plus)","StiControlBar::sectorStepPlus()","Step Clockwise to Next Sector");
-    bar->AddButton("Sector Step (Minus)","StiControlBar::sectorStepMinus()",
-		   "Step Counter-clockwise to next sector");
-
-    //Chain management
-    bar->AddSeparator();
-    bar->AddButton("Finish","StiControlBar::finish()","Call StChain::Finish()");
-
-    bar->Show();
-    return bar;
-};
 
 void StiControlBar::setSector()
 {
@@ -163,7 +122,7 @@ void StiControlBar::setSector()
       double sector;
       cin >>sector;
       cout <<"Setting to  sector:\t"<<sector<<endl;
-      StiDetectorLayerContainer& rdet = *(StiDetectorLayerContainer::instance());
+      StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
       rdet.setRefDetector(sector);
       const StiDetector* layer = *rdet;
       if (!layer) {
@@ -188,7 +147,7 @@ void StiControlBar::setSectorAndPadrow()
       cin >>padrow;
       
       cout <<"Setting to  sector:\t"<<sector<<"\tpadrow:\t"<<padrow<<endl;
-      StiDetectorLayerContainer& rdet = *(StiDetectorLayerContainer::instance());
+      StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
       rdet.setRefDetector(sector, padrow);
       const StiDetector* layer = *rdet;
       if (!layer) {
@@ -200,85 +159,115 @@ void StiControlBar::setSectorAndPadrow()
     */
 }
 
-void StiControlBar::padrowStepPlus()
+void StiControlBar::moveOut()
 {
-    cout <<"Function Not Currently Implemented"<<endl;
-    /*
-      StiControlBar::setCurrentDetectorToDefault();
-      StiDetectorLayerContainer& rdet = *(StiDetectorLayerContainer::instance());
-      rdet.padrowStepPlus();
-      StiControlBar::showCurrentDetector();
-    */
+    //cout <<"Function Not Currently Implemented"<<endl;
+    StiControlBar::setCurrentDetectorToDefault();
+    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+    rdet.moveOut();
+    StiControlBar::showCurrentDetector();
 }
 
-void StiControlBar::padrowStepMinus()
+void StiControlBar::moveIn()
 {
-    cout <<"Function Not Currently Implemented"<<endl;
-    /*
-      StiControlBar::setCurrentDetectorToDefault();
-      StiDetectorLayerContainer& rdet = *(StiDetectorLayerContainer::instance());
-      rdet.padrowStepMinus();
-      StiControlBar::showCurrentDetector();
-    */
+    //cout <<"Function Not Currently Implemented"<<endl;
+    StiControlBar::setCurrentDetectorToDefault();
+    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+    rdet.moveIn();
+    StiControlBar::showCurrentDetector();
 }
             
-void StiControlBar::sectorStepPlus()
+void StiControlBar::movePlusPhi()
 {
-    cout <<"Function Not Currently Implemented"<<endl;
-    /*
-      StiControlBar::setCurrentDetectorToDefault();
-      StiDetectorLayerContainer& rdet = *(StiDetectorLayerContainer::instance());
-      rdet.sectorStepPlus();
-      StiControlBar::showCurrentDetector();
-    */
+    //cout <<"Function Not Currently Implemented"<<endl;
+    StiControlBar::setCurrentDetectorToDefault();
+    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+    rdet.movePlusPhi();
+    StiControlBar::showCurrentDetector();
 }
 
-void StiControlBar::sectorStepMinus()
+void StiControlBar::moveMinusPhi()
 {
-    cout <<"Function Not Currently Implemented"<<endl;
-    /*
-      StiControlBar::setCurrentDetectorToDefault();
-      StiDetectorLayerContainer& rdet = *(StiDetectorLayerContainer::instance());
-      rdet.sectorStepMinus();
-      StiControlBar::showCurrentDetector();
-    */
+    //cout <<"Function Not Currently Implemented"<<endl;
+    StiControlBar::setCurrentDetectorToDefault();
+    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+    rdet.moveMinusPhi();
+    StiControlBar::showCurrentDetector();
 }
 
 void StiControlBar::showCurrentDetector()
 {
-    cout <<"Function Not Currently Implemented"<<endl;
-    /*
-      StiDetectorLayerContainer& rdet = *(StiDetectorLayerContainer::instance());
-      const StiDrawableDetector* constlayer = dynamic_cast<const StiDrawableDetector*>(*rdet);
-      //Bad, but it's the only way around it:
-      StiDrawableDetector* layer = const_cast<StiDrawableDetector*>(constlayer);
-      if (!layer) {
-      cout <<"Error! StiControlBar::showCurrentDetector(): Failed to get drawable detector"<<endl;
-      return;
-      }
-      layer->setVisibility(true);
-      layer->setColor(2);
-      
-      cout<<*layer<<endl;
-      StiDisplayManager::instance()->draw();
-      StiDisplayManager::instance()->update();
-    */
+    //cout <<"Function Not Currently Implemented"<<endl;
+    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+    StiDrawableDetector* layer = dynamic_cast<StiDrawableDetector*>(*rdet);
+    
+    if (!layer) {
+	cout <<"Error! StiControlBar::showCurrentDetector(): Failed to get drawable detector"<<endl;
+	return;
+    }
+    layer->setVisibility(true);
+    layer->setColor(2);
+    
+    cout<<*layer<<endl;
+    StiDisplayManager::instance()->draw();
+    StiDisplayManager::instance()->update();
+    
     return;
 }
 
 void StiControlBar::setCurrentDetectorToDefault()
 {
-    cout <<"Function Not Currently Implemented"<<endl;
-    /*
-      //cout <<"setCurrentDetectorToDefault()"<<endl;
-      StiDetectorLayerContainer& rdet = *(StiDetectorLayerContainer::instance());
-      const StiDrawableDetector* constlayer = dynamic_cast<const StiDrawableDetector*>(*rdet);
-      StiDrawableDetector* layer = const_cast<StiDrawableDetector*>(constlayer);
-      if (!layer) {
-      cout <<"Error! StiControlBar::setCurrentDetectorToDefault(): Failed to get drawable detector"<<endl;
-      return;
-      }
-      layer->setColor(1)
-    */
+    //cout <<"Function Not Currently Implemented"<<endl;
+    //cout <<"setCurrentDetectorToDefault()"<<endl;
+    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+    StiDrawableDetector* layer = dynamic_cast<StiDrawableDetector*>(*rdet);
+    if (!layer) {
+	cout <<"Error! StiControlBar::setCurrentDetectorToDefault(): Failed to get drawable detector"<<endl;
+	return;
+    }
+    layer->setColor(1);
 }
 
+TControlBar* StiControlBar::makeControlBar()
+{
+    TControlBar* bar = new TControlBar("vertical","Sti Control Panel");
+    
+    //Add Buttons:
+    bar->AddButton("Dump Display Manager","StiControlBar::printDisplayManager()",
+		   "Show contents of the Display Manager");
+    bar->AddButton("Dump Detector","StiControlBar::printDetector()","Show contents of Detector Container");
+    bar->AddSeparator();
+    
+    bar->AddButton("All Visible","StiControlBar::setVisible()","Set All Drawables to Visible State");
+    bar->AddButton("All Invisible","StiControlBar::setInvisible()","Set All Drawables to Invisible State");
+    
+    bar->AddButton("Svt Visible","StiControlBar::setSvtVisible()","Set Svt Drawables to Visible State");    
+    bar->AddButton("Svt Invisible","StiControlBar::setSvtInvisible()","Set Svt Drawables to Invisible State");
+    
+    bar->AddButton("Tpc Visible","StiControlBar::setTpcVisible()","Set Tpc Drawables to Visible State");    
+    bar->AddButton("Tpc Invisible","StiControlBar::setTpcInvisible()","Set Tpc Drawables to Invisible State");
+    
+    bar->AddButton("Reset", "StiControlBar::resetStiGuiForEvent()","Reset Sti For Next Event");
+    bar->AddButton("Step",  "StiControlBar::doNextStiGuiAction()","Step Through Next Action");
+    bar->AddButton("Event Step","StiControlBar::stepToNextEvent()","Step Through to Next Event");
+
+    //Detector navigation
+    bar->AddButton("Show Current Detector","StiControlBar::showCurrentDetector()","Highlight Current Detector");
+    
+    bar->AddButton("Move Out","StiControlBar::moveOut()","Step Radially to Next Padrow Out");
+    bar->AddButton("Move In","StiControlBar::moveIn()","Step Radially to Next Padrow In");
+    
+    bar->AddButton("Move Around (Plus)","StiControlBar::movePlusPhi()","Step positive in global phi");
+    bar->AddButton("Move Around (Minus)","StiControlBar::moveMinusPhi()","Step negative in global phi");
+
+    bar->AddButton("Set Sector","StiControlBar::setSector()","Set to top of sector");
+    bar->AddButton("Set Sector and Padrow","StiControlBar::setSectorAndPadrow()",
+		   "Set to sector, padrow");
+
+    //Chain management
+    bar->AddSeparator();
+    bar->AddButton("Finish","StiControlBar::finish()","Call StChain::Finish()");
+
+    bar->Show();
+    return bar;
+};

@@ -38,12 +38,15 @@ public:
     //Navigate through detector (should be sub-menued/cascaded)
     static void setCurrentDetectorToDefault();
     static void showCurrentDetector(); //Show the current
+    
     static void setSector(); //call StiDetectorLayerContainer::setSector(int)
     static void setSectorAndPadrow(); //call StiDetectorLayerContainer::setSector(int sector, int padrow)
-    static void padrowStepMinus();
-    static void padrowStepPlus();
-    static void sectorStepMinus();
-    static void sectorStepPlus();
+    
+    static void moveIn();
+    static void moveOut();
+    
+    static void movePlusPhi();
+    static void moveMinusPhi();
     
 
     //General access
