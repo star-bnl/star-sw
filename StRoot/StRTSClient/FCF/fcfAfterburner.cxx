@@ -369,26 +369,32 @@ int fcfAfterburner::compare(u_int *p1[3], u_int *p2[3])
 	u_int match ;
 	fcfAfterburner after ;
 	fcfHit h1, h2 ;
-	static u_char marray[2][10000] ;
+	static u_char marray[2][10000] ;	// the size could be a problem!
 	int i ;
 	int ret = 0 ;	// return number of mismatches
 	int save_merge, save_cuts ;
 
-	// save the original steering variables
+	// save the original steering variables...
 	save_merge = do_merge ;
 	save_cuts = do_cuts ;
-	
+
+	// ...and reset the merging and cutting to 0 so that we
+	// can compare "raw" data
+
+	do_merge = do_cuts = 0 ;
+	after.do_merge = after.do_cuts ;
+
 	memset(marray,0,sizeof(marray)) ;
 
 	burn(p1) ;
 	matched1 = count1 = 0 ;
 
-	do_merge = do_cuts = 0 ;
+
 	while(next(&h1)) {
 		
 		match = 0 ;
 		after.burn(p2) ;	// reset!
-		after.do_merge = after.do_cuts = 0 ;
+
 		count2 = 0 ;
 		while(after.next(&h2)) {
 			if(marray[1][count2]) {
@@ -416,10 +422,12 @@ int fcfAfterburner::compare(u_int *p1[3], u_int *p2[3])
 	i = 0 ;
 	while(next(&h1)) {
 		if(marray[0][i] == 0) {	// unmatched
-			if((h1.f & FCF_BROKEN_EDGE) && h1.c <= 10) {
-				;
-			}
-			else {
+// Tonko: following taken out but left as comments in case we need it
+//			if((h1.f & FCF_BROKEN_EDGE) && h1.c <= 10) {
+//				;
+//			}
+//			else {
+			{
 			        if(verbose) print_hit("UNMATCHED 1",&h1) ;
 				ret++;
 			}
@@ -431,10 +439,12 @@ int fcfAfterburner::compare(u_int *p1[3], u_int *p2[3])
 	i = 0 ;
 	while(after.next(&h1)){
 		if(marray[1][i] == 0) {	// unmatched
-			if(h1.f & (FCF_DEAD_EDGE | FCF_ROW_EDGE)) {
-				;
-			}
-			else {
+// Tonko: following taken out but left as comments in case we need it
+//			if(h1.f & (FCF_DEAD_EDGE | FCF_ROW_EDGE)) {
+//				;
+//			}
+//			else {
+			{
 			        if(verbose) print_hit("UNMATCHED 2",&h1) ;
 				ret++;
 			}
