@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.52 2000/01/30 02:00:31 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.53 2000/03/09 22:00:33 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -54,8 +54,9 @@
 #include "StArray.h"
 #include "tables/St_tpt_track_Table.h"
 
-#include "StThreeVector.hh"
-#include "StHelixD.hh"
+// #include "StThreeVector.hh"
+// #include "StHelixD.hh"
+#include "StTrackChair.h"
 
 // #include "StEvent.h"
 #include <TCanvas.h>
@@ -735,8 +736,9 @@ Int_t StEventDisplayMaker::MakeTable(const Char_t **positions)
 {
   StVirtualEventFilter *filter = 0;
   Int_t tableCounter = 0;
-
-  if (strcmp(m_Table->GetType(),"tpt_track")) {
+//  StTrackChair &tracks = *StTrackChair::Instance(m_Table);
+//  if (!(&tracks)) {
+  if (StTrackChair::IsTrack(m_Table)==-1) {
     filter = (StVirtualEventFilter *)m_FilterArray->At(kTable);
     if (!filter || filter->IsOn() ) {
        tableCounter += MakeTableHits(m_Table,filter,positions[1],&positions[2]);
@@ -746,40 +748,34 @@ Int_t StEventDisplayMaker::MakeTable(const Char_t **positions)
   else {
     filter = (StVirtualEventFilter *)m_FilterArray->At(kTptTrack);
     if (!filter || filter->IsOn() ) {
-       tableCounter += MakeTableTracks(m_Table,filter);
+       StTrackChair tracks(m_Table);
+       tableCounter += MakeTableTracks(&tracks,filter);
        if (Debug()) printf(" St_Table:tpc_Track %d \n", tableCounter);
     }
   }
   return tableCounter;
 }
-
 //_____________________________________________________________________________
-Int_t StEventDisplayMaker::MakeTableTracks(const St_Table *points,StVirtualEventFilter *filter)
+Int_t StEventDisplayMaker::MakeTableTracks(const StTrackChair *points,StVirtualEventFilter *filter)
 {
   Int_t i = 0;
   Int_t trackCounter = 0;
-  if (points && points->GetNRows() ) {
-    St_tpt_track *tptTrack = (St_tpt_track *)points;
-    tpt_track_st *track = tptTrack->GetTable();
+  Int_t nRows = 0;
+  if (points && (nRows = points->GetNRows()) ) {
     Color_t trackColor = kRed;
     Style_t trackStyle = 1;
     Size_t trackSize  = 2;
-    for (i = 0; i < points->GetNRows();i++ ){
+    for (i = 0; i < nRows; i++ ){
       filter = (StVirtualEventFilter *)m_FilterArray->At(kTptTrack);
       if (!filter || filter->IsOn() ) {
-        // --------------------- tracks filter ------------------------------------ //
-        if (filter) trackColor =  filter->Channel(tptTrack,i,trackSize,trackStyle);  //
-        // ------------------------------------------------------------------------ //
+        // ------------------------------ tracks filter ------------------------------------ //
+        if (filter) trackColor =  filter->Channel(points->GetTable(),i,trackSize,trackStyle);//
+        // ----------------------------------------------------------------------------------//
         if (trackColor > 0) {
-           tpt_track_st &t = *(track+i);
-           const float pi2 = 3.1415926/2.;
-           const float rad = pi2/90.;
-           float angle =  t.phi0 * rad;
-           int h = t.q > 0 ? -1 : 1;  
-           StThreeVectorD vector(t.r0*cos(angle),t.r0*sin(angle),t.z0);
-           StHelixD *helix  = new  StHelixD(t.curvature, atan(t.tanl), t.psi*rad-h*pi2, vector, h);           
-	   Int_t nSteps = Int_t(28*t.length*t.curvature + 1); 
-	   Float_t step = t.length / nSteps;
+           StHelixD *helix  = points->MakeHelix(i);
+           Float_t      len = points->Length(i);
+	   Int_t nSteps = Int_t(28*len*points->Curvature(i) + 1); 
+	   Float_t step = len / nSteps;
            StHelix3DPoints *tracksPoints  = new StHelix3DPoints(helix,step,nSteps);
            m_TrackCollector->Add(tracksPoints);    // Collect to remove  
            St_PolyLineShape *tracksShape   = new St_PolyLineShape(tracksPoints,"L");
@@ -800,7 +796,6 @@ Int_t StEventDisplayMaker::MakeTableTracks(const St_Table *points,StVirtualEvent
   }
   return trackCounter;
 }
-
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFilter *filter
                                         ,const Char_t *keyColumn,const Char_t *keyPositions[]
@@ -971,6 +966,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.53  2000/03/09 22:00:33  fine
+// StTrackChair class to draw any track-like table: tpt_track, dst_track has been introduced
+//
 // Revision 1.52  2000/01/30 02:00:31  fine
 // Some adjustment to new ROOT (2.23/11
 //
