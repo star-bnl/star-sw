@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtPedSub.cc,v 1.3 2000/07/16 22:32:23 caines Exp $
+ * $Id: StSvtPedSub.cc,v 1.4 2000/08/21 12:57:30 caines Exp $
  *
  * Author: Helen Caines
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtPedSub.cc,v $
+ * Revision 1.4  2000/08/21 12:57:30  caines
+ * Now opens and reads in ped using CalibMaker
+ *
  * Revision 1.3  2000/07/16 22:32:23  caines
  * Now also saves RAW data
  *
@@ -24,59 +27,18 @@
 
 #include "StSvtPedSub.h"
 #include "StSequence.hh"
-#include "StSvtClassLibrary/StSvtData.hh"
 #include "StSvtClassLibrary/StSvtHybridData.hh"
 #include "StSvtClassLibrary/StSvtHybridPed.hh"
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
-#include "TFile.h"
-#include "StChain.h"
-#include "StMessMgr.h"
-#include <iostream.h>
 
 
-StSvtPedSub::StSvtPedSub()
+StSvtPedSub::StSvtPedSub( StSvtHybridCollection *PedPointer)
 {
   mPed = NULL;
-  mSvtPed = NULL;
+  mSvtPed = PedPointer;
 }
 
-//_________________________________________________________________________
 
-StSvtPedSub::~StSvtPedSub()
-{
-  delete mPed;
-}
-
-//_________________________________________________________________________
-int StSvtPedSub::ReadFromFile(char* fileName, StSvtData* fSvtData)
-{
-  TFile *file = new TFile(fileName);
-  char name[20];
-
-  mSvtPed = new StSvtHybridCollection(fSvtData->getConfiguration());
-
-
-  for (int barrel = 1;barrel <= fSvtData->getNumberOfBarrels();barrel++) {
-    for (int ladder = 1;ladder <= fSvtData->getNumberOfLadders(barrel);ladder++) {
-      for (int wafer = 1;wafer <= fSvtData->getNumberOfWafers(barrel);wafer++) {
-    	for (int hybrid = 1;hybrid <= fSvtData->getNumberOfHybrids();hybrid++) {
-
-	  if (fSvtData->getHybridIndex(barrel, ladder, wafer, hybrid) < 0) continue;
-
-	  sprintf(name,"Ped_%d_%d_%d_%d",barrel, ladder, wafer, hybrid);
-	  mPed = (StSvtHybridPed*)file->Get(name);
-	  	  
-	  if (mPed)
-	    (*mSvtPed)[mSvtPed->getHybridIndex(barrel, ladder, wafer, hybrid)] = mPed;
-	}
-      }
-    }
-  }
-
-  file->Close();
-
-  return kStOK;
-}
 
 //_____________________________________________________________________________
 
@@ -118,21 +80,10 @@ int StSvtPedSub::SubtractPed( StSvtHybridData* fData, int Index, int PedOffset)
     }
   }
   
-  return kStOK;
+  return 0;
 }
   
 
 //_____________________________________________________________________________
-int StSvtPedSub::Clear()
-{
-
-  if (mSvtPed) {
-    mSvtPed->Delete();
-    mSvtPed = NULL;
-    mPed = NULL;
-  }
-
-  return kStOK;
-}
 
 

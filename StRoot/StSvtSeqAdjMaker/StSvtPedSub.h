@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtPedSub.h,v 1.1 2000/06/15 20:04:54 caines Exp $
+ * $Id: StSvtPedSub.h,v 1.2 2000/08/21 12:57:31 caines Exp $
  *
  * Author: Helen Caines
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtPedSub.h,v $
+ * Revision 1.2  2000/08/21 12:57:31  caines
+ * Now opens and reads in ped using CalibMaker
+ *
  * Revision 1.1  2000/06/15 20:04:54  caines
  * Initial versions of sequence adjusting codes
  *
@@ -21,7 +24,6 @@
 
 
 class StSvtHybridPed;
-class StSvtData;
 class StSvtHybridData;
 class StSvtHybridCollection;
 
@@ -34,12 +36,11 @@ class StSvtPedSub
   
  public: 
   
-  StSvtPedSub();
+  StSvtPedSub(StSvtHybridCollection *PedPointer);
   ~StSvtPedSub();
 
-  int ReadFromFile(char* fileName, StSvtData* fSvtData);
   int SubtractPed( StSvtHybridData* fData, int Index, int PedOffset);
-  int Clear();
+
 
 };
 
