@@ -1,5 +1,8 @@
-// $Id: StAnalysisMaker.cxx,v 1.6 1999/03/30 15:33:43 wenaus Exp $
+// $Id: StAnalysisMaker.cxx,v 1.7 1999/05/01 00:54:59 perev Exp $
 // $Log: StAnalysisMaker.cxx,v $
+// Revision 1.7  1999/05/01 00:54:59  perev
+// Clear removed delet m_DataSet
+//
 // Revision 1.6  1999/03/30 15:33:43  wenaus
 // eliminate obsolete branch methods
 //
@@ -41,7 +44,7 @@
 #include "StEvent/StRun.hh"
 #include "StEvent/StEvent.hh"
 
-static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.6 1999/03/30 15:33:43 wenaus Exp $";
+static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.7 1999/05/01 00:54:59 perev Exp $";
 #include "StMessMgr.h"
 void summarizeEvent(StEvent& event);
 //  specific analysis tasks.
@@ -81,17 +84,14 @@ StAnalysisMaker::Init()
 {
 void StAnalysisMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StAnalysisMaker.cxx,v 1.6 1999/03/30 15:33:43 wenaus Exp $\n");
+  printf("* $Id: StAnalysisMaker.cxx,v 1.7 1999/05/01 00:54:59 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
 
 void StAnalysisMaker::Clear(Option_t *opt) {
-  if (theTag) {
-    delete theTag;
-    theTag = 0;
-  }
-  SafeDelete(m_DataSet);
+  delete theTag; theTag = 0;
+  StMaker::Clear();
     tagFiller(ev,*theTag);
 
 Int_t StAnalysisMaker::Finish() {
