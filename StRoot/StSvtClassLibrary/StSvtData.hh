@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtData.hh,v 1.5 2001/10/24 16:48:50 munhoz Exp $
+ * $Id: StSvtData.hh,v 1.6 2004/01/26 23:14:14 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtData.hh,v $
+ * Revision 1.6  2004/01/26 23:14:14  perev
+ * Leak off
+ *
  * Revision 1.5  2001/10/24 16:48:50  munhoz
  * adding capability to retrieve t0 and first SCA
  *
@@ -62,7 +65,6 @@ public:
   int getUnixTime() {return mUnixTime;}
 
 protected:
-  StSvtHybridData* mData; // Hybrid Data Object
 
   int mRunNumber;   // Run Number
   int mEventNumber; // Event Number

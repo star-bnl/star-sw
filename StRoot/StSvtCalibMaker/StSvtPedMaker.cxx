@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtPedMaker.cxx,v 1.7 2003/12/01 00:53:10 caines Exp $
+ * $Id: StSvtPedMaker.cxx,v 1.8 2004/01/26 23:12:55 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtPedMaker.cxx,v $
+ * Revision 1.8  2004/01/26 23:12:55  perev
+ * Leak off
+ *
  * Revision 1.7  2003/12/01 00:53:10  caines
  * Dont follow zero pointer if raw data not there
  *
@@ -66,6 +69,7 @@ ClassImp(StSvtPedMaker)
   fData     = NULL;     
 
   fSvtStat  = NULL;  
+  fSvtStat2 = NULL;
   fSvtPed   = NULL;   
   fSvtPedRms= NULL;   
   fSvtData  = NULL;    
@@ -76,11 +80,13 @@ ClassImp(StSvtPedMaker)
 StSvtPedMaker::~StSvtPedMaker()
 {
   delete fStat;     
+  
   delete fPed;      
   delete fPedRms;      
   delete fData;     
 
   delete fSvtStat;  
+  delete fSvtStat2;  
   //  delete fSvtPed;   
   //delete fSvtData;    
 }
@@ -194,7 +200,6 @@ Int_t StSvtPedMaker::SetSvtPed2ndOrd()
 
   fSvtPed2 = new StSvtHybridCollection(mConfig->getConfiguration());
   fPedSet2->SetObject((TObject*)fSvtPed2);
-  assert(fSvtPed2);
 
   return kStOK;
 }
@@ -281,10 +286,11 @@ Int_t StSvtPedMaker::AddStat()
 	    }
 	  */
 
-	  fStat = (StSvtHybridStat*)fSvtStat->at(fSvtStat->getHybridIndex(barrel, ladder, wafer, hybrid));
+          int idx = fSvtStat->getHybridIndex(barrel, ladder, wafer, hybrid);
+	  fStat = (StSvtHybridStat*)fSvtStat->at(idx);
 	  if (!fStat) {
 	    fStat = new StSvtHybridStat(barrel, ladder, wafer, hybrid);
-	    fSvtStat->at(fSvtStat->getHybridIndex(barrel, ladder, wafer, hybrid)) = fStat;
+	    fSvtStat->put_at(fStat,idx);
 	  }
 	  
 	  anodeList = NULL;
@@ -383,10 +389,11 @@ Int_t StSvtPedMaker::AddStat2ndOrd()
 	  // end of skip
 	  */
 
-	  fStat2 = (StSvtHybridStat2*)fSvtStat2->at(fSvtStat2->getHybridIndex(barrel, ladder, wafer, hybrid));
+          int idx = fSvtStat2->getHybridIndex(barrel, ladder, wafer, hybrid);
+	  fStat2 = (StSvtHybridStat2*)fSvtStat2->at(idx);
 	  if (!fStat2) {
 	    fStat2 = new StSvtHybridStat2(barrel, ladder, wafer, hybrid);
-	    fSvtStat2->at(fSvtStat2->getHybridIndex(barrel, ladder, wafer,hybrid)) = fStat2;
+	    fSvtStat2->put_at(fStat2,idx);
 	  }
 	  
 	  anodeList = NULL;
@@ -438,23 +445,28 @@ Int_t StSvtPedMaker::CalcPed()
     	for (int hybrid = 1;hybrid <= fSvtData->getNumberOfHybrids();hybrid++) {
 
 	  if (fSvtData->getHybridIndex(barrel, ladder, wafer, hybrid) < 0) continue;
+	  fStat = (StSvtHybridStat*)fSvtStat->at(fSvtStat->getHybridIndex(barrel, ladder, wafer, hybrid));
+	  if (!fStat) continue;
 
-	  fPed = (StSvtHybridPed*)fSvtPed->at(fSvtPed->getHybridIndex(barrel, ladder, wafer, hybrid));
+          int idxPed = fSvtPed->getHybridIndex(barrel, ladder, wafer, hybrid);
+	  fPed = (StSvtHybridPed*)fSvtPed->at(idxPed);
 
 	  if (!fPed) {
 	    fPed = new StSvtHybridPed(barrel, ladder, wafer, hybrid);
 	    fPed->setType(fType);
-	  }
+	    fSvtPed->put_at(fPed,idxPed);
+          }
 
+          int idxRms=0;
 	  if (fSvtPedRms) {
-	    fPedRms = (StSvtHybridPixels*)fSvtPedRms->at(fSvtPedRms->getHybridIndex(barrel, ladder, wafer, hybrid));
-	    if (!fPedRms)
+            idxRms = fSvtPedRms->getHybridIndex(barrel, ladder, wafer, hybrid);
+	    fPedRms = (StSvtHybridPixels*)fSvtPedRms->at(idxRms);
+	    if (!fPedRms) {
 	      fPedRms = new StSvtHybridPixels(barrel, ladder, wafer, hybrid);
+              fSvtPedRms->put_at(fPedRms,idxRms);
+            }
 	  }
 
-	  fStat = (StSvtHybridStat*)fSvtStat->at(fSvtStat->getHybridIndex(barrel, ladder, wafer, hybrid));
-
-	  if (!fStat) continue;
 
 	  for (int anode=1; anode<=fPed->getNumberOfAnodes();anode++) {
 	    for (int time=0; time<fPed->getNumberOfTimeBins();time++) {
@@ -474,10 +486,6 @@ Int_t StSvtPedMaker::CalcPed()
 
 	  // cout << "rms = " << fPed->getRMS() << endl;
 
-	  fSvtPed->at(fSvtPed->getHybridIndex(barrel, ladder, wafer, hybrid))= fPed;	   
-
-	  if (fSvtPedRms)
-	    fSvtPedRms->at(fSvtPedRms->getHybridIndex(barrel, ladder, wafer, hybrid))= fPedRms;	   
 	}
       }
     }
@@ -618,9 +626,9 @@ Int_t StSvtPedMaker::ReadFromFile(const char* fileName)
 	  fPed = (StSvtHybridPed*)file->Get(name);
 	  
 	  if (fPed) {
-	    if (fSvtPed->at(fSvtPed->getHybridIndex(barrel, ladder, wafer, hybrid)))
-	      delete fSvtPed->at(fSvtPed->getHybridIndex(barrel, ladder, wafer, hybrid));
-	    fSvtPed->at(fSvtPed->getHybridIndex(barrel, ladder, wafer, hybrid)) = fPed;
+            int idx = fSvtPed->getHybridIndex(barrel, ladder, wafer, hybrid);
+	    delete fSvtPed->at(idx); fSvtPed->at(idx)=0;
+	    fSvtPed->put_at(fPed,idx);
 	  }
 	}
       }
@@ -655,9 +663,9 @@ Int_t StSvtPedMaker::ReadRMSFromFile(const char* fileName)
 	  fPedRms = (StSvtHybridPixels*)file->Get(name);
  	  
 	  if (fPedRms) {
-	    if (fSvtPedRms->at(fSvtPedRms->getHybridIndex(barrel, ladder, wafer, hybrid)))
-	      delete fSvtPedRms->at(fSvtPedRms->getHybridIndex(barrel, ladder, wafer, hybrid));
-	    fSvtPedRms->at(fSvtPedRms->getHybridIndex(barrel, ladder, wafer, hybrid)) = fPedRms;
+            int idx = fSvtPedRms->getHybridIndex(barrel, ladder, wafer, hybrid);
+	    delete fSvtPedRms->at(idx); fSvtPedRms->at(idx)=0;
+	    fSvtPedRms->put_at(fPedRms,idx);
 	    
 	  }
 	}
@@ -710,7 +718,7 @@ Int_t StSvtPedMaker::Finish()
 void StSvtPedMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtPedMaker.cxx,v 1.7 2003/12/01 00:53:10 caines Exp $\n");
+  printf("* $Id: StSvtPedMaker.cxx,v 1.8 2004/01/26 23:12:55 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

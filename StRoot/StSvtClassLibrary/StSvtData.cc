@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtData.cc,v 1.6 2003/09/02 17:59:06 perev Exp $
+ * $Id: StSvtData.cc,v 1.7 2004/01/26 23:13:28 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtData.cc,v $
+ * Revision 1.7  2004/01/26 23:13:28  perev
+ * Leak off
+ *
  * Revision 1.6  2003/09/02 17:59:06  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -68,9 +71,6 @@ StSvtData::StSvtData(StSvtConfig* config, int run, int event, int trigger, int t
 
 StSvtData::~StSvtData()
 {
- for(int i=0; i<getTotalNumberOfHybrids(); i++){
-     delete (StSvtHybridObject*)at(i);
-  }
 }
 
 StSvtData::StSvtData(const StSvtData& data):StSvtHybridCollection(data.mConfig)
