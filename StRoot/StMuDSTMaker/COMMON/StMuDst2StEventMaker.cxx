@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst2StEventMaker.cxx,v 1.4 2003/08/04 14:38:10 laue Exp $
+ * $Id: StMuDst2StEventMaker.cxx,v 1.5 2003/08/28 13:01:45 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDst2StEventMaker.h"
@@ -14,7 +14,7 @@
 #include "StEvent/StTpcDedxPidAlgorithm.h"
 
 
-StMuDst2StEventMaker::StMuDst2StEventMaker(const char* self ,const char* muDstMakerName) : StMaker(muDstMakerName) {
+StMuDst2StEventMaker::StMuDst2StEventMaker(const char* self ,const char* muDstMakerName) : StMaker(self) {
   mMuDstMaker = (StMuDstMaker*)GetMaker(muDstMakerName);
 }
 
@@ -130,6 +130,9 @@ ClassImp(StMuDst2StEventMaker)
 /***************************************************************************
  *
  * $Log: StMuDst2StEventMaker.cxx,v $
+ * Revision 1.5  2003/08/28 13:01:45  laue
+ * now passing proper maker name to the call of the StMaker(name) constructor
+ *
  * Revision 1.4  2003/08/04 14:38:10  laue
  * Alex Suaide's updated for the EMC. Now EEMC is included.
  *
