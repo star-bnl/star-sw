@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.16 2002/03/26 23:10:09 ullrich Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.17 2002/04/01 20:13:56 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
+ * Revision 2.17  2002/04/01 20:13:56  jeromel
+ * Heuu !! if (theBetheBloch) delete ...
+ *
  * Revision 2.16  2002/03/26 23:10:09  ullrich
  * Changed instantiaton of BetheBloch.
  *
@@ -81,7 +84,7 @@
 #include "BetheBloch.h"
 
 static BetheBloch *theBetheBloch = 0;
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.16 2002/03/26 23:10:09 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.17 2002/04/01 20:13:56 jeromel Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -99,7 +102,7 @@ StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
 
 StTpcDedxPidAlgorithm::~StTpcDedxPidAlgorithm()
 {
-    delete theBetheBloch;
+  if(theBetheBloch) delete theBetheBloch;
 }
 
 StParticleDefinition*
