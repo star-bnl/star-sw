@@ -359,7 +359,6 @@ foreach my $dir ("StRoot","pams") {
     my @subdirS = readdir DIR;
     closedir DIR; #print "subdirS = @subdirS\n";
     foreach my $sub_dir (@subdirS) {
-      # skip unwanted directories
       my $sub_DIR = $dir . "/" . $sub_dir; #print "sub_DIR = $sub_DIR\n";
       if (-d $sub_DIR) {
 	if ($sub_dir =~ /^macros$/     ||
@@ -442,10 +441,10 @@ foreach my $dir ("StRoot","pams") {
 	    }
 	  }
 	}
-	if ($sub_dir !~ /^sim$/ && $sub_dir !~ /^gen$/) {
-	  if ($SKIP_DIRS && $SKIP_DIRS =~ $sub_dir) {next;}
-	  push @subdirs, $sub_DIR;# print "================== add $sub_DIR\n";
-	}
+	if ($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/) {next;} 
+	if ($SKIP_DIRS && $SKIP_DIRS =~ $sub_dir) {next;}
+	if ($STAR_HOST_SYS =~ /^hp_ux102$/ &&  $sub_dir =~ /StHbtMaker/) {next;}
+	push @subdirs, $sub_DIR;# print "================== add $sub_DIR\n";
       }
     }
   }
