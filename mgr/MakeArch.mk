@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.81  1999/08/14 00:37:35  fisyak
+#  New Cons stuff
+#
 #  Revision 1.80  1999/07/20 00:24:55  fisyak
 #  Remove Objy
 #
@@ -218,7 +221,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/07/20 00:24:55 $ 
+#             Last modification $Date: 1999/08/14 00:37:35 $ 
 #. default setings
 
 MAKE  := gmake
@@ -304,7 +307,8 @@ CPPFLAGS += $(UNAMES)
 endif
 
 
-MKDEPFLAGS:= -MG -MM -w -nostdinc
+#MKDEPFLAGS:= -MG -MM -w -nostdinc
+MKDEPFLAGS:= -MM -w -nostdinc
 
 MAKEDEPEND = $(GCC) $(MKDEPFLAGS)
 ROOTCINT   =rootcint
