@@ -1,11 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMuL3Filter.cxx,v 1.1 2002/03/08 17:04:18 laue Exp $
+ * $Id: StMuL3Filter.cxx,v 1.2 2002/03/20 16:04:12 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
 
 #include "StMuL3Filter.h"
+#include "StMuDebug.h"
 #include "StEvent/StTrack.h"
 #include "StEvent/StTrackGeometry.h"
 #include "StEvent/StTrackDetectorInfo.h"
@@ -21,11 +22,20 @@ bool StMuL3Filter::accept( const StEvent* e) { cout << "StMuL3Filter::accept( co
 bool StMuL3Filter::accept( const StV0Vertex* v) { cout << "StMuL3Filter::accept(const StV0Vertex* v) not overwritten, returning true" << endl; return true;}
 bool StMuL3Filter::accept( const StXiVertex* x) { cout << "StMuL3Filter::accept(const StXiVertex* x) not overwritten, returning true" << endl; return true;}
 bool StMuL3Filter::accept( const StKinkVertex* k) { cout << "StMuL3Filter::accept(const StKinkVertex* k) not overwritten, returning true" << endl; return true;}
+ 
 
+StMuL3Filter::StMuL3Filter()  {
+  DEBUGMESSAGE3("");
+  cerr << "StMuL3Filter::StMuL3Filter(): called. Next BetheBloch instance is made." << endl;
+  mBB = new BetheBloch();
+  cerr << "StMuL3Filter::StMuL3Filter(): did you see the BetheBloch warning?" << endl;
+}
 
+StMuL3Filter::~StMuL3Filter()  {
+  delete mBB;
+}
 
 bool StMuL3Filter::accept(const StTrack* track) {
-  static BetheBloch* bb = 0;
   
   float pCutHigh        = 2.0;    // high momentum cut for RICH/Upsilon candidates 
   int   nHitsCutHighP   = 10;     // nHits cut for all tracks
@@ -61,10 +71,10 @@ bool StMuL3Filter::accept(const StTrack* track) {
 		    chargeOK = 1;
 
 	      // check dEdx
-	      if (bb==0) bb = new BetheBloch();
+	      //	      if (mBB==0) mBB = new BetheBloch();
 	      float p = track->geometry()->momentum().magnitude();
-	      float dedxHigh = dEdxFractionCutHigh * bb->Sirrf(p/dEdxMassCutHigh);
-	      float dedxLow = dEdxFractionCutLow * bb->Sirrf(p/dEdxMassCutLow);
+	      float dedxHigh = dEdxFractionCutHigh * mBB->Sirrf(p/dEdxMassCutHigh);
+	      float dedxLow = dEdxFractionCutLow * mBB->Sirrf(p/dEdxMassCutLow);
 
 	      float dedx = 0;
 	      // get track dEdx
@@ -97,6 +107,9 @@ bool StMuL3Filter::accept(const StTrack* track) {
 /***************************************************************************
  *
  * $Log: StMuL3Filter.cxx,v $
+ * Revision 1.2  2002/03/20 16:04:12  laue
+ * minor changes, mostly added access functions
+ *
  * Revision 1.1  2002/03/08 17:04:18  laue
  * initial revision
  *

@@ -10,9 +10,11 @@ selection in a limited way.
 To use this class, just do:
 
   StEmcFilter *filter = new StEmcFilter();<br>
-  filter->FILTERPARAM = value; <br>
-  if(filter->Accept(StEvent pointer)) .... event is accepted <br>
-  if(filter->Accept(StTrack pointer)) .... track is accepted <br>
+  filter->setFILTERPARAM(value); <br>
+  if(filter->accept(StEvent*)) .... event is accepted <br>
+  if(filter->accept(StTrack*)) .... track is accepted <br>
+  filter->initEmcTowers(StEvent*)
+  if(filter->accept(module, eta, sub)) .... tower is accepted <br>
   
 It is also possible to use this filter to make track identification based on
 dE/dX information. To do this just write:
@@ -22,40 +24,6 @@ dE/dX information. To do this just write:
   filter->GetTrackId(StTrack pointer, mass, geant_id);
   
 The geant_id is obtained based on the dE/dX cuts set in the filter.
-
-The cuts available now are:
-  - Event selection
-    - EmcPresent = requires EMC data on event (kTRUE, kFALSE). Default value is kTRUE.
-    - HaveVertex = requires a valid vertex (kTRUE, kFALSE). Default is kTRUE.
-    - HavePrimaries = requires at least one primary track (kTRUE, kFALSE). Default is kTRUE.
-    - ZVertexCut = Z Vertex threshold in cm. Default is 20 cm.
-    - EmcETotalMin = minimum energy on EMC in GeV. Default is 0.
-    - EmcETotalMax = maximum energy on EMC in GeV. Default is 100000.
-    - MinMult = minimum multiplicity. Default is 0.
-    - MaxMult = maximum multiplicity. Default is 100000.
-    - BField = just set the BField value for track projection in tesla. Default is 0.5 tesla.
-    - AddTriggeMask(trigger_mask) = adds one trigger mask for trigger selection. Can add up to 20 masks. Default is all trigger masks.
-  - Track selection
-    - DCACut = DCA cut on track in cm. Default is 300000.
-    - PtCut = transverse momentm cut (GeV/c). Default is 0.
-    - EtaMin = minimum eta of the track (momentum). Default is -10000.
-    - EtaMax = maximum eta of the track (momentum). Default is +10000.
-    - FitPoinsCut = number of fit points in the track. Default is 0.
-    - MustProjectEmc = requires that the track is projected on a valid EMC tower (kTRUE, kFALSE). Default is kTRUE.
-  - dE/dX cuts
-    - dEdXScale = scale factor to BetheBlock function to maker proper dE/dX selection. Default is 1.
-    - PointsdEdX = minimum number of points to make dE/dX id. Default is 0.
-    - dEdXPMax = maximum momentum to make dE/dX id. Default is 1 GeV/c.
-    - dEdXCut = minimum dE/dX value to make dE/dX id. Default is 0.
-    - dEdXNSigma = maximum number of sigmas to get a valid dE/dX id.
-  - StMcTracks (those cuts are applied only for Monte Carlo tracks from StMcEvent)
-    - OnlyHadrons = select only hadronic tracks (kTRUE, kFALSE). pi0 is excluded from the list. Default is kTRUE
-    - McChargeType = select the McTrack by charge type (kNEGATIVE, kNEUTRAL, kPOSITIVE, kCHARGED, kALL). Default is kALL.
-    - McMustProjectEmc = requires that the McTrack is projected on a valid EMC tower (kTRUE, kFALSE). Default is kTRUE.
-    - McPtCut = transverse momentm cut (GeV/c). Default is 0.
-    - McEtaMin = minimum eta of the McTrack (momentum). Default is -10000.
-    - McEtaMax = maximum eta of the McTrack (momentum). Default is +10000.
-
 */
 #ifndef StEmcFilter_HH
 #define StEmcFilter_HH
@@ -63,7 +31,6 @@ The cuts available now are:
 #include "tables/St_emcRunning_Table.h"
 #include "tables/St_smdRunning_Table.h"
 #include <iostream.h>
-#include "TArrayF.h"
 
 #define NTOWER 4800
 
@@ -163,94 +130,148 @@ class StEmcFilter: public TObject
     void            msg(char* a,char* b) {if(mPrintLog) cout <<"StEmcFiletr:: "<<a<<" rejected: "<<b<<endl; }
     
   public:
-                StEmcFilter();                        ///< StEmcFilter constructor
-                ~StEmcFilter();                       ///< StEmcFilter destructor
+                		StEmcFilter();                        ///< StEmcFilter constructor
+                		~StEmcFilter();                       ///< StEmcFilter destructor
 
-    void        initEmcTowers(StEvent*,Int_t=0);      ///< Use this function before using accept(), getNTracksTower() and getPtTower() methods for towers. This initializes all vectors necessary to these methods.
+    void        		initEmcTowers(StEvent*,Int_t=0);      ///< Use this function before using accept(), getNTracksTower() and getPtTower() methods for towers. This initializes all vectors necessary to these methods.
                 
-    Bool_t      accept(StEvent*);                     ///< Returns kTRUE/kFALSE if StEvent is accepted
-    Bool_t      accept(StTrack*);                     ///< Returns kTRUE/kFALSE if StTrack is accepted
-    Bool_t      accept(StMcEvent*);                   ///< Returns kTRUE/kFALSE if StMcEvent is accepted
-    Bool_t      accept(StMcTrack*);                   ///< Returns kTRUE/kFALSE if StMcTrack is accepted
-    Bool_t      accept(StV0Vertex*);                  ///< Returns kTRUE/kFALSE if StV0vertex is accepted
-    Bool_t      accept(Int_t);                        ///< Returns kTRUE/kFALSE if tower with correspondent id is accepted;
-    Bool_t      accept(Int_t,Int_t,Int_t);            ///< Returns kTRUE/kFALSE if tower with correspondent module, eta and sub is accepted;
+    Bool_t      		accept(StEvent*);                     ///< Returns kTRUE/kFALSE if StEvent is accepted
+    Bool_t      		accept(StTrack*);                     ///< Returns kTRUE/kFALSE if StTrack is accepted
+    Bool_t      		accept(StMcEvent*);                   ///< Returns kTRUE/kFALSE if StMcEvent is accepted
+    Bool_t      		accept(StMcTrack*);                   ///< Returns kTRUE/kFALSE if StMcTrack is accepted
+    Bool_t      		accept(StV0Vertex*);                  ///< Returns kTRUE/kFALSE if StV0vertex is accepted
+    Bool_t      		accept(Int_t);                        ///< Returns kTRUE/kFALSE if tower with correspondent id is accepted;
+    Bool_t      		accept(Int_t,Int_t,Int_t);            ///< Returns kTRUE/kFALSE if tower with correspondent module, eta and sub is accepted;
     
-    Int_t       getNTracksTower(Int_t);               ///< Returns number of tracks pointing to the tower with given id
-    Int_t       getNTracksTower(Int_t,Int_t,Int_t);   ///< Returns number of tracks pointing to the tower with given module, eta, sub
+    Int_t       		getNTracksTower(Int_t);               ///< Returns number of tracks pointing to the tower with given id
+    Int_t       		getNTracksTower(Int_t,Int_t,Int_t);   ///< Returns number of tracks pointing to the tower with given module, eta, sub
 
-    Float_t     getPtTower(Int_t);                    ///< Returns the total pt from projected tracks in tower with id    
-    Float_t     getPtTower(Int_t,Int_t,Int_t);        ///< Returns the total pt from projected tracks in tower with with module, eta, sub    
+    Float_t     		getPtTower(Int_t);                    ///< Returns the total pt from projected tracks in tower with id    
+    Float_t     		getPtTower(Int_t,Int_t,Int_t);        ///< Returns the total pt from projected tracks in tower with with module, eta, sub    
 
-    EmcStatus   getEmcStatus(Int_t,Int_t);            ///< Return EMC status (kGOOD, kBAD, kOTHER) for a given detector and bin.
+    EmcStatus   		getEmcStatus(Int_t,Int_t);            ///< Return EMC status (kGOOD, kBAD, kOTHER) for a given detector and bin.
         
-    Bool_t      getTrackId(StTrack*,Float_t&,Int_t&); ///< Return track id based on dE/dX
-    Bool_t      getTrackId(StTrack*,Float_t&,Int_t&,TArrayF); ///< Return track id based on dE/dX and nsigma for each particle
-    Float_t     getEmcETotal(StEvent*);               ///< Return total energy on EMC
+    Bool_t      		getTrackId(StTrack*,Float_t&,Int_t&); ///< Return track id based on dE/dX
+    Bool_t      		getTrackId(StTrack*,Float_t&,Int_t&,Float_t*); ///< Return track id based on dE/dX and nsigma for each particle
+    Float_t     		getEmcETotal(StEvent*);               ///< Return total energy on EMC
     
-    Float_t     getFraction(Int_t,Int_t,Int_t=0);     ///< Return fraction of EMC live on a given detector and eta bin
-    Float_t     getWestFraction(Int_t=1);             ///< Return fraction of EMC live on west side of STAR
-    Float_t     getEastFraction(Int_t=1);             ///< Return fraction of EMC live on east side of STAR
-    Float_t     getTotalFraction(Int_t=1);            ///< Return fraction of EMC live on STAR
-    
-    void        printCuts();                          ///< Print filter parameters
-    
-    void        setBemcStatus(St_emcRunning* st)  { mBemcRunning = st; }   ///< Set tower status (need to get the table from database)
-    void        setBprsStatus(St_emcRunning* st)  { mBprsRunning = st; }   ///< Set pre-shower status (need to get the table from database)
-    void        setBsmdeStatus(St_smdRunning* st) { mBsmdeRunning = st; }  ///< Set SMD-eta status (need to get the table from database)
-    void        setBsmdpStatus(St_smdRunning* st) { mBsmdpRunning = st; }  ///< Set SMD-phi status (need to get the table from database)
-    
-    // event cuts (only ZVertex is applied to McEvent for a while)
-    void        setPrintLog(Bool_t a)             { mPrintLog = a; }       ///< Print log if event is rejected.
-    void        setEmcPresent(Bool_t a)           { mEmcPresent = a; }     ///< requires EMC data on event (kTRUE, kFALSE). Default value is kTRUE.
-    void        setHaveVertex(Bool_t a)           { mHaveVertex = a; }     ///< requires a valid vertex (kTRUE, kFALSE). Default is kTRUE.
-    void        setHavePrimaries(Bool_t a)        { mHavePrimaries = a; }  ///< requires at least one primary track (kTRUE, kFALSE). Default is kTRUE.
-    void        setZVertexCut(Float_t a)          { mZVertexCut = a; }     ///< Z Vertex threshold in cm. Default is 20 cm.
-    void        setEmcETotalMin(Float_t a)        { mEmcETotalMin = a; }   ///< minimum energy on EMC in GeV. Default is 0.
-    void        setEmcETotalMax(Float_t a)        { mEmcETotalMax = a; }   ///< maximum energy on EMC in GeV. Default is 100000.
-    void        setMinMult(Float_t a)             { mMinMult = a; }        ///< minimum multiplicity. Default is 0.
-    void        setMaxMult(Float_t a)             { mMaxMult = a; }        ///< maximum multiplicity. Default is 100000.
-    void        setBField(Float_t a)              { mBField = a; }         ///< just set the BField value for track projection in tesla. Default is 0.5 tesla.
-    void        addTriggerMask(UInt_t mask)       { mTriggerMask[mNTriggerMask++] = mask; } ///< adds one trigger mask for trigger selection. Can add up to 20 masks. Default is all trigger masks.
-    void        clearTriggerMask()                { mNTriggerMask = 0; }   ///< Resets trigger masks.
-    
-    // tracks cuts
-    void        setDCACut(Float_t a)              { mDCACut = a; }         ///< DCA cut on track in cm. Default is 300000.
-    void        setPtCut(Float_t a)               { mPtCut = a; }          ///< transverse momentm cut (GeV/c). Default is 0.
-    void        setPtCutMax(Float_t a)            { mPtCutMax = a; }       ///< maximumum transverse momentm cut (GeV/c). Default is 1000.
-    void        setEtaMin(Float_t a)              { mEtaMin = a; }         ///< minimum eta of the track (momentum). Default is -10000.
-    void        setEtaMax(Float_t a)              { mEtaMax = a; }         ///< maximum eta of the track (momentum). Default is +10000.
-    void        setFitPointsCut(Int_t a)          { mFitPointsCut = a; }   ///< number of fit points in the track. Default is 0.
-    void        setMustProjectEmc(Bool_t a)       { mMustProjectEmc = a; } ///< requires that the track is projected on a valid EMC tower (kTRUE, kFALSE). Default is kTRUE.
-    
-    // dE/dX cuts
-    void        setdEdXScale(Float_t a)           { mdEdXScale = a; }      ///< scale factor to BetheBlock function to maker proper dE/dX selection. Default is 1.
-    void        setPointsdEdX(Int_t a)            { mPointsdEdX = a; }     ///< minimum number of points to make dE/dX id. Default is 0.
-    void        setdEdXPMax(Float_t a)            { mdEdXPMax = a; }       ///< maximum momentum to make dE/dX id. Default is 1 GeV/c.
-    void        setdEdXCut(Float_t a)             { mdEdXCut = a; }        ///< minimum dE/dX value to make dE/dX id. Default is 0.
-    void        setdEdXNSigma(Float_t a)          { mdEdXNSigma = a; }     ///< maximum number of sigmas to get a valid dE/dX id.
-    
-    // V0 Vertex cuts
-    void        setV0Pt(Float_t a)                { mV0Pt = a; }                ///< Set minimum pt for V0
-    void        setV0TrackProjectOnEmc(Bool_t a)  { mV0TrackProjectOnEmc = a; } ///< At least one of the tracks should project on EMC patch. Default is kTRUE.
+    Float_t     		getFraction(Int_t,Int_t,Int_t=0);     ///< Return fraction of EMC live on a given detector and eta bin
+    Float_t     		getWestFraction(Int_t=1);             ///< Return fraction of EMC live on west side of STAR
+    Float_t     		getEastFraction(Int_t=1);             ///< Return fraction of EMC live on east side of STAR
+    Float_t     		getTotalFraction(Int_t=1);            ///< Return fraction of EMC live on STAR
 
-    // EMC tower cuts
-    void        setMaxTracksPerTower(Int_t a)     { mMaxTracksPerTower = a; }   ///< maximum number of tracks projected in tower
-    void        setEMin(Float_t a)                { mEMin = a; }                ///< minimum energy in the tower
-    void        setEMax(Float_t a)                { mEMax = a; }                ///< maximum energy in the tower
-    void        setPtMin(Float_t a)               { mPtMin = a; }               ///< minimum pt sum from tracks in the tower
-    void        setPtMax(Float_t a)               { mPtMax = a; }               ///< maximum pt sum from tracks in the tower
-    void        setPNeighbor(Bool_t a)            { mPNeighbor = a; }           ///< Primary neighbors clear (3x3). Default is kTRUE
-    void        setSNeighbor(Bool_t a)            { mSNeighbor = a; }           ///< Seconday neighbors clear (5x5). Default is kFALSE
-    void        setTNeighbor(Bool_t a)            { mTNeighbor = a; }           ///< Terciary neighbors clear (7x7). Default is kFALSE
+    St_emcRunning*  getBemcStatus()  { return mBemcRunning; }   ///< get tower status (need to get the table from database)
+    St_emcRunning*  getBprsStatus()  { return mBprsRunning; }   ///< get pre-shower status (need to get the table from database)
+    St_smdRunning*  getBsmdeStatus() { return mBsmdeRunning; }  ///< get SMD-eta status (need to get the table from database)
+    St_smdRunning*  getBsmdpStatus() { return mBsmdpRunning; }  ///< get SMD-phi status (need to get the table from database)
     
-    // MC Tracks cuts 
-    void        setOnlyHadrons(Bool_t a)          { mOnlyHadrons = a; }        ///< select only hadronic tracks (kTRUE, kFALSE). pi0 is excluded from the list. Default is kTRUE
-    void        setMcChargeType(McCharge a)       { mMcChargeType = a; }       ///< select the McTrack by charge type (kNEGATIVE, kNEUTRAL, kPOSITIVE, kCHARGED, kALL). Default is kALL.
-    void        setMcMustProjectEmc(Bool_t a)     { mMcMustProjectEmc = a; }   ///< requires that the McTrack is projected on a valid EMC tower (kTRUE, kFALSE). Default is kTRUE.
-    void        setMcPtCut(Float_t a)             { mMcPtCut = a; }            ///< transverse momentm cut (GeV/c). Default is 0.
-    void        setMcEtaMin(Float_t a)            { mMcEtaMin = a; }           ///< minimum eta of the McTrack (momentum). Default is -10000.
-    void        setMcEtaMax(Float_t a)            { mMcEtaMax = a; }           ///< maximum eta of the McTrack (momentum). Default is +10000.
+    // get event cuts 
+    Bool_t        	getEmcPresent()          { return mEmcPresent; }     ///< requires EMC data on event (kTRUE, kFALSE). Default value is kTRUE.
+    Bool_t        	getHaveVertex()          { return mHaveVertex; }     ///< requires a valid vertex (kTRUE, kFALSE). Default is kTRUE.
+    Bool_t        	getHavePrimaries()       { return mHavePrimaries; }  ///< requires at least one primary track (kTRUE, kFALSE). Default is kTRUE.
+    Float_t       	getZVertexCut()          { return mZVertexCut; }     ///< Z Vertex threshold in cm. Default is 20 cm.
+    Float_t       	getEmcETotalMin()        { return mEmcETotalMin; }   ///< minimum energy on EMC in GeV. Default is 0.
+    Float_t       	getEmcETotalMax()        { return mEmcETotalMax; }   ///< maximum energy on EMC in GeV. Default is 100000.
+    Float_t       	getMinMult()             { return mMinMult; }        ///< minimum multiplicity. Default is 0.
+    Float_t       	getMaxMult()             { return mMaxMult; }        ///< maximum multiplicity. Default is 100000.
+    Float_t       	getBField()              { return mBField; }         ///< just get the BField value for track projection in tesla. Default is 0.5 tesla.
+    
+    // get tracks cuts
+    Float_t       	getDCACut()              { return mDCACut; }         ///< DCA cut on track in cm. Default is 300000.
+    Float_t       	getPtCut()               { return mPtCut; }          ///< transverse momentm cut (GeV/c). Default is 0.
+    Float_t       	getPtCutMax()            { return mPtCutMax; }       ///< maximumum transverse momentm cut (GeV/c). Default is 1000.
+    Float_t       	getEtaMin()              { return mEtaMin; }         ///< minimum eta of the track (momentum). Default is -10000.
+    Float_t       	getEtaMax()              { return mEtaMax; }         ///< maximum eta of the track (momentum). Default is +10000.
+    Int_t         	getFitPointsCut()        { return mFitPointsCut; }   ///< number of fit points in the track. Default is 0.
+    Bool_t        	getMustProjectEmc()      { return mMustProjectEmc; } ///< requires that the track is projected on a valid EMC tower (kTRUE, kFALSE). Default is kTRUE.
+    
+    // get dE/dX cuts
+    Float_t       	getdEdXScale()           { return mdEdXScale; }      ///< scale factor to BetheBlock function to maker proper dE/dX selection. Default is 1.
+    Int_t       		getPointsdEdX()          { return mPointsdEdX; }     ///< minimum number of points to make dE/dX id. Default is 0.
+    Float_t       	getdEdXPMax()            { return mdEdXPMax; }       ///< maximum momentum to make dE/dX id. Default is 1 GeV/c.
+    Float_t       	getdEdXCut()             { return mdEdXCut; }        ///< minimum dE/dX value to make dE/dX id. Default is 0.
+    Float_t       	getdEdXNSigma()          { return mdEdXNSigma; }     ///< maximum number of sigmas to get a valid dE/dX id.
+    
+    // get V0 Vertex cuts
+    Float_t       	getV0Pt()                { return mV0Pt; }                ///< get minimum pt for V0
+    Bool_t      		getV0TrackProjectOnEmc() { return mV0TrackProjectOnEmc; } ///< At least one of the tracks should project on EMC patch. Default is kTRUE.
+
+    // get EMC tower cuts
+    Int_t       		getMaxTracksPerTower()   { return mMaxTracksPerTower; }   ///< maximum number of tracks projected in tower
+    Float_t       	getEMin()                { return mEMin; }                ///< minimum energy in the tower
+    Float_t       	getEMax()                { return mEMax; }                ///< maximum energy in the tower
+    Float_t       	getPtMin()               { return mPtMin; }               ///< minimum pt sum from tracks in the tower
+    Float_t       	getPtMax()               { return mPtMax; }               ///< maximum pt sum from tracks in the tower
+    Bool_t        	getPNeighbor()           { return mPNeighbor; }           ///< Primary neighbors clear (3x3). Default is kTRUE
+    Bool_t        	getSNeighbor()           { return mSNeighbor; }           ///< Seconday neighbors clear (5x5). Default is kFALSE
+    Bool_t        	getTNeighbor()           { return mTNeighbor; }           ///< Terciary neighbors clear (7x7). Default is kFALSE
+    
+    // get MC Tracks cuts 
+    Bool_t        	getOnlyHadrons()         { return mOnlyHadrons; }        ///< select only hadronic tracks (kTRUE, kFALSE). pi0 is excluded from the list. Default is kTRUE
+    McCharge        getMcChargeType()        { return mMcChargeType; }       ///< select the McTrack by charge type (kNEGATIVE, kNEUTRAL, kPOSITIVE, kCHARGED, kALL). Default is kALL.
+    Bool_t        	getMcMustProjectEmc()    { return mMcMustProjectEmc; }   ///< requires that the McTrack is projected on a valid EMC tower (kTRUE, kFALSE). Default is kTRUE.
+    Float_t       	getMcPtCut()             { return mMcPtCut; }            ///< transverse momentm cut (GeV/c). Default is 0.
+    Float_t       	getMcEtaMin()            { return mMcEtaMin; }           ///< minimum eta of the McTrack (momentum). Default is -10000.
+    Float_t       	getMcEtaMax()            { return mMcEtaMax; }           ///< maximum eta of the McTrack (momentum). Default is +10000.
+    
+    void        		printCuts();                          ///< Print filter parameters
+    
+    void        		setBemcStatus(St_emcRunning* st)  { mBemcRunning = st; }   ///< Set tower status (need to get the table from database)
+    void        		setBprsStatus(St_emcRunning* st)  { mBprsRunning = st; }   ///< Set pre-shower status (need to get the table from database)
+    void        		setBsmdeStatus(St_smdRunning* st) { mBsmdeRunning = st; }  ///< Set SMD-eta status (need to get the table from database)
+    void        		setBsmdpStatus(St_smdRunning* st) { mBsmdpRunning = st; }  ///< Set SMD-phi status (need to get the table from database)
+    
+    // set event cuts (only ZVertex is applied to McEvent for a while)
+    void        		setPrintLog(Bool_t a)             { mPrintLog = a; }       ///< Print log if event is rejected.
+    void        		setEmcPresent(Bool_t a)           { mEmcPresent = a; }     ///< requires EMC data on event (kTRUE, kFALSE). Default value is kTRUE.
+    void        		setHaveVertex(Bool_t a)           { mHaveVertex = a; }     ///< requires a valid vertex (kTRUE, kFALSE). Default is kTRUE.
+    void        		setHavePrimaries(Bool_t a)        { mHavePrimaries = a; }  ///< requires at least one primary track (kTRUE, kFALSE). Default is kTRUE.
+    void        		setZVertexCut(Float_t a)          { mZVertexCut = a; }     ///< Z Vertex threshold in cm. Default is 20 cm.
+    void        		setEmcETotalMin(Float_t a)        { mEmcETotalMin = a; }   ///< minimum energy on EMC in GeV. Default is 0.
+    void        		setEmcETotalMax(Float_t a)        { mEmcETotalMax = a; }   ///< maximum energy on EMC in GeV. Default is 100000.
+    void        		setMinMult(Float_t a)             { mMinMult = a; }        ///< minimum multiplicity. Default is 0.
+    void        		setMaxMult(Float_t a)             { mMaxMult = a; }        ///< maximum multiplicity. Default is 100000.
+    void        		setBField(Float_t a)              { mBField = a; }         ///< just set the BField value for track projection in tesla. Default is 0.5 tesla.
+    void        		addTriggerMask(UInt_t mask)       { mTriggerMask[mNTriggerMask++] = mask; } ///< adds one trigger mask for trigger selection. Can add up to 20 masks. Default is all trigger masks.
+    void        		clearTriggerMask()                { mNTriggerMask = 0; }   ///< Resets trigger masks.
+    
+    // set tracks cuts
+    void        		setDCACut(Float_t a)              { mDCACut = a; }         ///< DCA cut on track in cm. Default is 300000.
+    void        		setPtCut(Float_t a)               { mPtCut = a; }          ///< transverse momentm cut (GeV/c). Default is 0.
+    void        		setPtCutMax(Float_t a)            { mPtCutMax = a; }       ///< maximumum transverse momentm cut (GeV/c). Default is 1000.
+    void        		setEtaMin(Float_t a)              { mEtaMin = a; }         ///< minimum eta of the track (momentum). Default is -10000.
+    void        		setEtaMax(Float_t a)              { mEtaMax = a; }         ///< maximum eta of the track (momentum). Default is +10000.
+    void        		setFitPointsCut(Int_t a)          { mFitPointsCut = a; }   ///< number of fit points in the track. Default is 0.
+    void        		setMustProjectEmc(Bool_t a)       { mMustProjectEmc = a; } ///< requires that the track is projected on a valid EMC tower (kTRUE, kFALSE). Default is kTRUE.
+    
+    // set dE/dX cuts
+    void        		setdEdXScale(Float_t a)           { mdEdXScale = a; }      ///< scale factor to BetheBlock function to maker proper dE/dX selection. Default is 1.
+    void        		setPointsdEdX(Int_t a)            { mPointsdEdX = a; }     ///< minimum number of points to make dE/dX id. Default is 0.
+    void        		setdEdXPMax(Float_t a)            { mdEdXPMax = a; }       ///< maximum momentum to make dE/dX id. Default is 1 GeV/c.
+    void        		setdEdXCut(Float_t a)             { mdEdXCut = a; }        ///< minimum dE/dX value to make dE/dX id. Default is 0.
+    void        		setdEdXNSigma(Float_t a)          { mdEdXNSigma = a; }     ///< maximum number of sigmas to get a valid dE/dX id.
+    
+    // set V0 Vertex cuts
+    void        		setV0Pt(Float_t a)                { mV0Pt = a; }                ///< Set minimum pt for V0
+    void        		setV0TrackProjectOnEmc(Bool_t a)  { mV0TrackProjectOnEmc = a; } ///< At least one of the tracks should project on EMC patch. Default is kTRUE.
+
+    // set EMC tower cuts
+    void        		setMaxTracksPerTower(Int_t a)     { mMaxTracksPerTower = a; }   ///< maximum number of tracks projected in tower
+    void        		setEMin(Float_t a)                { mEMin = a; }                ///< minimum energy in the tower
+    void        		setEMax(Float_t a)                { mEMax = a; }                ///< maximum energy in the tower
+    void        		setPtMin(Float_t a)               { mPtMin = a; }               ///< minimum pt sum from tracks in the tower
+    void        		setPtMax(Float_t a)               { mPtMax = a; }               ///< maximum pt sum from tracks in the tower
+    void        		setPNeighbor(Bool_t a)            { mPNeighbor = a; }           ///< Primary neighbors clear (3x3). Default is kTRUE
+    void        		setSNeighbor(Bool_t a)            { mSNeighbor = a; }           ///< Seconday neighbors clear (5x5). Default is kFALSE
+    void        		setTNeighbor(Bool_t a)            { mTNeighbor = a; }           ///< Terciary neighbors clear (7x7). Default is kFALSE
+    
+    // set MC Tracks cuts 
+    void        		setOnlyHadrons(Bool_t a)          { mOnlyHadrons = a; }        ///< select only hadronic tracks (kTRUE, kFALSE). pi0 is excluded from the list. Default is kTRUE
+    void        		setMcChargeType(McCharge a)       { mMcChargeType = a; }       ///< select the McTrack by charge type (kNEGATIVE, kNEUTRAL, kPOSITIVE, kCHARGED, kALL). Default is kALL.
+    void        		setMcMustProjectEmc(Bool_t a)     { mMcMustProjectEmc = a; }   ///< requires that the McTrack is projected on a valid EMC tower (kTRUE, kFALSE). Default is kTRUE.
+    void        		setMcPtCut(Float_t a)             { mMcPtCut = a; }            ///< transverse momentm cut (GeV/c). Default is 0.
+    void        		setMcEtaMin(Float_t a)            { mMcEtaMin = a; }           ///< minimum eta of the McTrack (momentum). Default is -10000.
+    void        		setMcEtaMax(Float_t a)            { mMcEtaMax = a; }           ///< maximum eta of the McTrack (momentum). Default is +10000.
     
 
     ClassDef(StEmcFilter,1)

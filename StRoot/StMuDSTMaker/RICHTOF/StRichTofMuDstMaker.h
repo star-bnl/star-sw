@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichTofMuDstMaker.h,v 1.2 2002/03/10 17:59:33 dunlop Exp $
+ * $Id: StRichTofMuDstMaker.h,v 1.4 2002/03/18 23:53:51 dunlop Exp $
  *
  * Author: Thomas Ullrich, Oct 2000
  ***************************************************************************
@@ -11,6 +11,12 @@
  ***************************************************************************
  *
  * $Log: StRichTofMuDstMaker.h,v $
+ * Revision 1.4  2002/03/18 23:53:51  dunlop
+ * GetCVS()
+ *
+ * Revision 1.3  2002/03/18 22:06:34  dunlop
+ * Modified lambda cuts to match ones made by StRichPIDMaker and StRichSpectraMaker
+ *
  * Revision 1.2  2002/03/10 17:59:33  dunlop
  * More clever with removing of RICH collection and pid traits when not wanted.
  *
@@ -107,6 +113,7 @@ private:
     double mLambdaLastHitCut;
     double mLambdaPathCut;
     double mLambdaFitPointsCut;
+    double mLambdaEtaCut;
     
     double mLambdaPCut;
     
@@ -114,9 +121,12 @@ private:
     static const unsigned int mRichMaskInActionWord = 0x20;
     
     
+virtual const char *GetCVS() const	{
+    static const char cvs[]=
+	"Tag $Name:  $ $Id: StRichTofMuDstMaker.h,v 1.4 2002/03/18 23:53:51 dunlop Exp $ built "__DATE__" "__TIME__ ;
+    return cvs;
+}
 
-
-    
     ClassDef(StRichTofMuDstMaker,1)
 };
 

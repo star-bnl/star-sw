@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichTofMuDstMaker.cxx,v 1.6 2002/03/10 20:28:42 dunlop Exp $
+ * $Id: StRichTofMuDstMaker.cxx,v 1.8 2002/03/18 22:06:33 dunlop Exp $
  *
  * Author: Thomas Ullrich, Oct 2000
  ***************************************************************************
@@ -11,6 +11,12 @@
  ***************************************************************************
  *
  * $Log: StRichTofMuDstMaker.cxx,v $
+ * Revision 1.8  2002/03/18 22:06:33  dunlop
+ * Modified lambda cuts to match ones made by StRichPIDMaker and StRichSpectraMaker
+ *
+ * Revision 1.7  2002/03/17 02:12:15  dunlop
+ * Remove FTPC tracks that project to (wide) tof cuts
+ *
  * Revision 1.6  2002/03/10 20:28:42  dunlop
  * Tweak logic of removing events
  *
@@ -110,17 +116,23 @@ Int_t StRichTofMuDstMaker::Init()
     cout <<"L3 P cut " << mL3PCut << endl;
     cout <<"L3 Path Cut " << mRichPathCut << endl;
     
-    mPadPlaneCut = 2.0*centimeter;
-    mRadiatorCut = 2.0*centimeter;
-    mLambdaLastHitCut = 140.*centimeter;
+    mPadPlaneCut = 1.0*centimeter;
+    mRadiatorCut = 1.0*centimeter;
+    mLambdaLastHitCut = 100.*centimeter;
     mLambdaPathCut = 500*centimeter;
+    mLambdaFitPointsCut = 20;
+    mLambdaEtaCut = 0.5;
+    
     mLambdaPCut = 1.2;
+    
     cout << "mPadPlaneCut " << mPadPlaneCut << endl;
     cout << "mRadiatorCut " << mRadiatorCut << endl;
     cout << "mLambdaLastHitCut " << mLambdaLastHitCut << endl;
     cout << "mLambdaPathCut " << mLambdaPathCut << endl;
-    cout << "mLambdaPCut " << mLambdaPCut << endl;
-    
+   cout << "mLambdaFitPointsCut " << mLambdaFitPointsCut << endl;
+    cout << "mLambdaEtaCut " << mLambdaEtaCut << endl;
+     cout << "mLambdaPCut " << mLambdaPCut << endl;
+     
     
     return StMaker::Init();
 }
@@ -418,6 +430,8 @@ bool StRichTofMuDstMaker::accept(StEvent* event)
 bool StRichTofMuDstMaker::acceptTof(StTrack* track)
 {    
     if (!track) return false;
+    if (track->topologyMap().trackFtpcEast() || track->topologyMap().trackFtpcWest()) return false;
+    
     if (track->flag() <=0) return false;
     
     // Check only if the tof accepts the event
@@ -452,6 +466,9 @@ bool StRichTofMuDstMaker::acceptTof(StTrack* track)
 bool StRichTofMuDstMaker::acceptRich(StTrack* track) 
 {
     
+    if (!track) return false;
+    
+    if (track->topologyMap().trackFtpcEast() || track->topologyMap().trackFtpcWest()) return false;
     if (!mEventAcceptedRich) return false;
     
     if (!(track->pidTraits(kRichId).size())) return false;
@@ -723,7 +740,8 @@ bool StRichTofMuDstMaker::acceptLambdaDaughter(StTrack* track)
     if (gt->geometry()->momentum().mag()<mLambdaPCut) {
 	return false;
     }
-
+    if (fabs(gt->geometry()->momentum().pseudoRapidity()) > mLambdaEtaCut) return false;
+    
 
     if (gt->detectorInfo()->lastPoint().perp()<mLambdaLastHitCut) return false;
     if (gt->fitTraits().numberOfFitPoints() < mLambdaFitPointsCut) return false;

@@ -1,5 +1,8 @@
-// $Id: StSvtClusterMaker.cxx,v 1.7 2001/10/06 00:09:00 caines Exp $
+// $Id: StSvtClusterMaker.cxx,v 1.8 2002/03/20 00:33:32 munhoz Exp $
 // $Log: StSvtClusterMaker.cxx,v $
+// Revision 1.8  2002/03/20 00:33:32  munhoz
+// temporary fix for memory leaks and new vertex finder params for pp
+//
 // Revision 1.7  2001/10/06 00:09:00  caines
 // Fix deleting that was already done by clear so no longer crashes on exit
 //
@@ -69,9 +72,9 @@ Int_t StSvtClusterMaker::Init(){
  if (Debug()) gMessMgr->Debug() << "In StSvtClusterMaker::Init() ..."  << 
 		 GetName() << endm;
  
- //if( GetSvtRawData()) gMessMgr->Warning() << "No SVT Raw data..."  << endm;
+ if( GetSvtRawData()) gMessMgr->Warning() << "No SVT Raw data..."  << endm;
 		 
- //SetSvtCluster();
+ SetSvtCluster();
  mClusterFinder = new StSvtClusterFinder();
 
   return StMaker::Init();
@@ -96,7 +99,8 @@ Int_t StSvtClusterMaker::GetSvtRawData(){
 Int_t StSvtClusterMaker::SetSvtCluster()
 {
   mClusterSet = new St_ObjectSet("StSvtCluster");
-  AddData(mClusterSet);  
+  //AddData(mClusterSet);  
+  AddConst(mClusterSet);  
   SetOutput(mClusterSet); //Declare for output
 
   
@@ -118,7 +122,7 @@ Int_t StSvtClusterMaker::Make(){
    gMessMgr->Warning() << " Problem with SVt raw in ClusterMaker" << endm;
    return kStWarn;
  }
- SetSvtCluster();
+ // SetSvtCluster();
  SetHybridClusters();
    
  return kStOK;

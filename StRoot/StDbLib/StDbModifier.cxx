@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbModifier.cxx,v 1.2 2002/03/13 22:14:53 porter Exp $
+ * $Id: StDbModifier.cxx,v 1.3 2002/03/15 22:08:07 porter Exp $
  *
  * Author: Masashi Kaneta, updated by R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbModifier.cxx,v $
+ * Revision 1.3  2002/03/15 22:08:07  porter
+ * fixed retval in modifier
+ *
  * Revision 1.2  2002/03/13 22:14:53  porter
  * added variable length table defautls for simplifying writes of l3 counters to db
  *
@@ -249,10 +252,11 @@ Int_t StDbModifier::WriteDataToDB()
     mgr->setStoreTime(fTimestamp);
   }
 
-  mgr -> storeDbTable(dbtable);             // Fetch the data 
+  int retVal=0;
+  if(mgr -> storeDbTable(dbtable)) retVal=1;             // Fetch the data 
   if(eidList) delete [] eidList;
 
-  return 1;
+  return retVal;
 }
 
 //_____________________________________________________________________________

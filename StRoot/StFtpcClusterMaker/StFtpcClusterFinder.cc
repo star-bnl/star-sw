@@ -1,6 +1,13 @@
-// $Id: StFtpcClusterFinder.cc,v 1.30 2002/03/08 16:32:34 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.32 2002/03/22 08:58:46 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.32  2002/03/22 08:58:46  jcs
+// invert cluster pad number in FTPC East
+// convert cluster cartestian coordinates for FTPC west into STAR global coordinate system
+//
+// Revision 1.31  2002/03/22 08:52:52  jcs
+// correct memory leaks found by Insure
+//
 // Revision 1.30  2002/03/08 16:32:34  jcs
 // initialize bSlope to prevent nan's
 //
@@ -1856,15 +1863,28 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
                +(pDeflection[iRow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)]
                -pDeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower])/2;
 
+
   /* calculate phi angle from pad position */
   Peak->Phi = mDb->radiansPerBoundary() / 2 
     + (Peak->PadPosition + 0.5) * mDb->radiansPerPad()
     + PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
 			   + mDb->radiansPerBoundary())+halfpi;
 
+   /* Invert pad number (== Peak->PadPosition) for FTPC East  */
+   /* (not yet understood where and why pad numbers were inverted) */
+   if (iRow >= 10) {
+       Peak->Phi = mDb->radiansPerBoundary() / 2 
+         + (160.0 - Peak->PadPosition)* mDb->radiansPerPad()
+         + PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
+         + mDb->radiansPerBoundary())+halfpi;
+   }
 
   /* transform to cartesian */
   Peak->x = Peak->Rad*cos(Peak->Phi);
+  /* Peak->x = -Peak->x to transform FTPC West into STAR global coordinate system */
+  if (iRow <10) {
+     Peak->x = -Peak->x;
+  }
   Peak->y = Peak->Rad*sin(Peak->Phi);
   Peak->z = mDb->padrowZPosition(iRow);
   return TRUE;

@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.26 2002/03/12 21:23:47 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.27 2002/03/20 14:17:57 fisyak Exp $
 #include <iostream.h>
 #include <time.h>
 #include "StdEdxMaker.h"
@@ -350,7 +350,7 @@ Int_t StdEdxMaker::Init(){
 			  nBinbg,bglow,bgup,nBinxL,xLlow,xLup,nBinz,zlow,zup);
       }
       TDatime t1(2001,6,1,0,0,0); UInt_t i1 = t1.Convert();
-      TDatime t2(2002,1,1,0,0,0); UInt_t i2 = t2.Convert();
+      TDatime t2(2002,2,1,0,0,0); UInt_t i2 = t2.Convert();
       Int_t Nt = (i2 - i1)/(3600); // eac hour 
       Time   = new TH2F("Time","log(dE/dx)_{uncorrected} - log(I(pi)) versus Date& Time", 
 			Nt,i1,i2, 200,-5.,5.);
@@ -1018,8 +1018,8 @@ void StdEdxMaker::Histogramming(StTrackChair *globtrkC, Int_t iglob) {
   Double_t Pred[NHYPS], PredBB[NHYPS];
   Double_t date = GetDateTime().Convert();
   for (int l = 0; l < NHYPS; l++) {
-    //    Pred[l] = 1.e-6*BetheBloch::Sirrf(p/Masses[l],TrackLength,l==3); 
-    Pred[l] = 1.e-6*BetheBloch::Sirrf(p/Masses[l],60.,l==3); 
+    Pred[l] = 1.e-6*BetheBloch::Sirrf(p/Masses[l],TrackLength,l==3); 
+    //    Pred[l] = 1.e-6*BetheBloch::Sirrf(p/Masses[l],60.,l==3); 
     PredBB[l] = BB(p/Masses[l]);
   }
   if (Pred[2] <= 0) {

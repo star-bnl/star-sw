@@ -73,8 +73,11 @@ void StDetectorDbRichScalers::update(StMaker* maker){
     
 };
 
-/// Default destructor. Does nothing 
-StDetectorDbRichScalers::~StDetectorDbRichScalers(){};
+/// Default destructor
+StDetectorDbRichScalers::~StDetectorDbRichScalers(){
+  delete sInstance;
+  sInstance = 0;
+};
 
 /// CTB West
 double StDetectorDbRichScalers::getCTBWest(){

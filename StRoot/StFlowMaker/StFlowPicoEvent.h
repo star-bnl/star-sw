@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.h,v 1.13 2002/02/05 07:19:38 snelling Exp $
+// $Id: StFlowPicoEvent.h,v 1.14 2002/03/15 16:43:22 snelling Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -36,6 +36,7 @@ class StFlowPicoEvent : public TObject {
   UInt_t        MultEta()    const { return mMultEta; }
 
   UInt_t        Centrality() const { return mCentrality; }
+  UInt_t        CalcCentrality(); 
   Float_t       VertexX()    const { return mVertexX; }
   Float_t       VertexY()    const { return mVertexY; }
   Float_t       VertexZ()    const { return mVertexZ; }
@@ -105,6 +106,9 @@ class StFlowPicoEvent : public TObject {
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.h,v $
+// Revision 1.14  2002/03/15 16:43:22  snelling
+// Added a method to recalculate the centrality in StFlowPicoEvent
+//
 // Revision 1.13  2002/02/05 07:19:38  snelling
 // Quick fix for problems with backward compatibility (changed ClassDef back)
 //

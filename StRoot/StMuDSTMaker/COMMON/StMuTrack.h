@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.1 2002/03/08 17:04:18 laue Exp $
+ * $Id: StMuTrack.h,v 1.2 2002/03/20 16:04:12 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -39,41 +39,41 @@ public:
   StMuTrack(){/* no-op*/};
   StMuTrack(const StEvent*, const StTrack*, int index2Global=-2, int index2RichSpectra=-2, bool l3=false);
   
-  Short_t id();
-  Short_t type();
-  Short_t flag();
-  Int_t index2Global();
-  Int_t index2RichSpectra();
-  StMuTrack* globalTrack();
-  StRichSpectra* richSpectra();
-  UChar_t nHits();
-  UChar_t  nHitsPoss();
-  UChar_t  nHitsDedx();
-  UChar_t  nHitsFit();
-  Float_t pidProbElectron();
-  Float_t pidProbPion();
-  Float_t pidProbKaon();
-  Float_t pidProbProton();
-  Float_t nSigmaElectron();
-  Float_t nSigmaPion();
-  Float_t nSigmaKaon();
-  Float_t nSigmaProton();
-  Float_t dEdx();
-  Float_t chi2xy();
-  Float_t chi2z();
-  Float_t pt();
-  Float_t phi();
-  Float_t eta();
-  StTrackTopologyMap topologyMap();
-  Float_t charge();
-  StThreeVectorF p();
-  StThreeVectorF momentum();
-  StThreeVectorF dca();
-  StThreeVectorF dcaGlobal();
-  StThreeVectorF firstPoint();
-  StThreeVectorF lastPoint();
-  StPhysicalHelixD helix();  
-  StPhysicalHelixD outerHelix();
+  short id() const;
+  short type() const;
+  short flag() const;
+  int index2Global() const;
+  int index2RichSpectra() const;
+  StMuTrack* globalTrack() const;
+  StRichSpectra* richSpectra() const;
+  unsigned short nHits() const;
+  unsigned short  nHitsPoss() const;
+  unsigned short  nHitsDedx() const;
+  unsigned short  nHitsFit() const;
+  double pidProbElectron() const;
+  double pidProbPion() const;
+  double pidProbKaon() const;
+  double pidProbProton() const;
+  double nSigmaElectron() const;
+  double nSigmaPion() const;
+  double nSigmaKaon() const;
+  double nSigmaProton() const;
+  double dEdx() const;
+  double chi2xy() const;
+  double chi2z() const;
+  double pt() const;
+  double phi() const;
+  double eta() const;
+  StTrackTopologyMap topologyMap() const;
+  Short_t charge() const;
+  StThreeVectorF p() const;
+  StThreeVectorF momentum() const;
+  StThreeVectorF dca() const;
+  StThreeVectorF dcaGlobal() const;
+  StThreeVectorF firstPoint() const;
+  StThreeVectorF lastPoint() const;
+  StPhysicalHelixD helix() const;  
+  StPhysicalHelixD outerHelix() const;
   static void setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm*);
   static void setProbabilityPidCentrality(double cent);
 private:
@@ -121,46 +121,46 @@ private:
   ClassDef(StMuTrack,3)
 };
 
-inline Short_t StMuTrack::id() {return mId;}
-inline Short_t StMuTrack::type() {return mType;}
-inline Short_t StMuTrack::flag() {return mFlag;}
-inline Int_t StMuTrack::index2Global() {return mIndex2Global;}
-inline Int_t StMuTrack::index2RichSpectra() {return mIndex2RichSpectra;}
-inline UChar_t StMuTrack::nHits() {return mNHits;}
-inline UChar_t  StMuTrack::nHitsPoss() {return mNHitsPoss;}
-inline UChar_t  StMuTrack::nHitsDedx() {return mNHitsDedx;}
-inline UChar_t  StMuTrack::nHitsFit() {return mNHitsFit;}
-inline Float_t StMuTrack::pidProbElectron() {return unPack(mPidProbElectron,__PROB_SCALE__);}
-inline Float_t StMuTrack::pidProbPion()     {return unPack(mPidProbPion,    __PROB_SCALE__);}
-inline Float_t StMuTrack::pidProbKaon()     {return unPack(mPidProbKaon,    __PROB_SCALE__);}
-inline Float_t StMuTrack::pidProbProton()   {return unPack(mPidProbProton,  __PROB_SCALE__);}
-inline Float_t StMuTrack::nSigmaElectron()  {return unPack(mNSigmaElectron, __SIGMA_SCALE__);}
-inline Float_t StMuTrack::nSigmaPion()      {return unPack(mNSigmaPion,     __SIGMA_SCALE__);}
-inline Float_t StMuTrack::nSigmaKaon()      {return unPack(mNSigmaKaon,     __SIGMA_SCALE__);}
-inline Float_t StMuTrack::nSigmaProton()    {return unPack(mNSigmaProton,   __SIGMA_SCALE__);}
-inline Float_t StMuTrack::dEdx() {return mdEdx;}
-inline Float_t StMuTrack::chi2xy() {return mChiSqXY;}
-inline Float_t StMuTrack::chi2z() {return mChiSqZ;}
-inline StTrackTopologyMap StMuTrack::topologyMap() {return mTopologyMap;}
-inline Float_t StMuTrack::charge() {return mHelix.q();}
-inline Float_t StMuTrack::pt() {return mPt;}
-inline Float_t StMuTrack::eta() {return mEta;}
-inline Float_t StMuTrack::phi() {return mPhi;}
-inline StThreeVectorF StMuTrack::p() {return mP;}
-inline StThreeVectorF StMuTrack::momentum() {return mP;}
-inline StThreeVectorF StMuTrack::dca() {return mDCA;}
-inline StThreeVectorF StMuTrack::dcaGlobal() {return mDCAGlobal;}
-inline StThreeVectorF StMuTrack::firstPoint() {return mFirstPoint;}
-inline StThreeVectorF StMuTrack::lastPoint() {return mLastPoint;}
-inline StPhysicalHelixD StMuTrack::helix() {return StPhysicalHelixD(mHelix.p(),mHelix.origin(), mHelix.b(), mHelix.q());}  
-inline StPhysicalHelixD StMuTrack::outerHelix() {return StPhysicalHelixD(mOuterHelix.p(),mOuterHelix.origin(), mOuterHelix.b(), mOuterHelix.q());}  
-//!inline StPhysicalHelixD StMuTrack::helix() {return mHelix;}
-//!inline StPhysicalHelixD StMuTrack::outerHelix() {return mOuterHelix;}
+inline short StMuTrack::id() const {return mId;}
+inline short StMuTrack::type() const {return mType;}
+inline short StMuTrack::flag() const {return mFlag;}
+inline int StMuTrack::index2Global() const {return mIndex2Global;}
+inline int StMuTrack::index2RichSpectra() const {return mIndex2RichSpectra;}
+inline unsigned short StMuTrack::nHits() const {return mNHits;}
+inline unsigned short  StMuTrack::nHitsPoss() const {return mNHitsPoss;}
+inline unsigned short  StMuTrack::nHitsDedx() const {return mNHitsDedx;}
+inline unsigned short  StMuTrack::nHitsFit() const {return mNHitsFit;}
+inline double StMuTrack::pidProbElectron() const {return unPack(mPidProbElectron,__PROB_SCALE__);}
+inline double StMuTrack::pidProbPion() const     {return unPack(mPidProbPion,    __PROB_SCALE__);}
+inline double StMuTrack::pidProbKaon() const     {return unPack(mPidProbKaon,    __PROB_SCALE__);}
+inline double StMuTrack::pidProbProton() const   {return unPack(mPidProbProton,  __PROB_SCALE__);}
+inline double StMuTrack::nSigmaElectron() const  {return unPack(mNSigmaElectron, __SIGMA_SCALE__);}
+inline double StMuTrack::nSigmaPion() const      {return unPack(mNSigmaPion,     __SIGMA_SCALE__);}
+inline double StMuTrack::nSigmaKaon() const      {return unPack(mNSigmaKaon,     __SIGMA_SCALE__);}
+inline double StMuTrack::nSigmaProton() const    {return unPack(mNSigmaProton,   __SIGMA_SCALE__);}
+inline double StMuTrack::dEdx() const {return mdEdx;}
+inline double StMuTrack::chi2xy() const {return mChiSqXY;}
+inline double StMuTrack::chi2z() const {return mChiSqZ;}
+inline StTrackTopologyMap StMuTrack::topologyMap() const {return mTopologyMap;}
+inline short StMuTrack::charge() const {return mHelix.q();}
+inline double StMuTrack::pt() const {return mPt;}
+inline double StMuTrack::eta() const {return mEta;}
+inline double StMuTrack::phi() const {return mPhi;}
+inline StThreeVectorF StMuTrack::p() const {return mP;}
+inline StThreeVectorF StMuTrack::momentum() const {return mP;}
+inline StThreeVectorF StMuTrack::dca() const {return mDCA;}
+inline StThreeVectorF StMuTrack::dcaGlobal() const {return mDCAGlobal;}
+inline StThreeVectorF StMuTrack::firstPoint() const {return mFirstPoint;}
+inline StThreeVectorF StMuTrack::lastPoint() const {return mLastPoint;}
+inline StPhysicalHelixD StMuTrack::helix() const {return StPhysicalHelixD(mHelix.p(),mHelix.origin(), mHelix.b()*kilogauss, mHelix.q());}  
+inline StPhysicalHelixD StMuTrack::outerHelix() const {return StPhysicalHelixD(mOuterHelix.p(),mOuterHelix.origin(), mOuterHelix.b()*kilogauss, mOuterHelix.q());}  
+//!inline StPhysicalHelixD StMuTrack::helix() const {return mHelix;}
+//!inline StPhysicalHelixD StMuTrack::outerHelix() const {return mOuterHelix;}
 inline void StMuTrack::setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm* p) { mProbabilityPidAlgorithm=p;}
 inline void StMuTrack::setProbabilityPidCentrality(double cent) { mProbabilityPidCentrality = cent;}
 
-inline StMuTrack* StMuTrack::globalTrack() { return (mIndex2Global>=0) ? (StMuTrack*)StMuDst::array(muGlobal)->UncheckedAt(mIndex2Global) :0;}
-inline StRichSpectra* StMuTrack::richSpectra() { return (mIndex2RichSpectra>=0) ? (StRichSpectra*)StMuDst::array(muRich)->UncheckedAt(mIndex2RichSpectra) : 0;}
+inline StMuTrack* StMuTrack::globalTrack() const { return (mIndex2Global>=0) ? (StMuTrack*)StMuDst::array(muGlobal)->UncheckedAt(mIndex2Global) :0;}
+inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectra>=0) ? (StRichSpectra*)StMuDst::array(muRich)->UncheckedAt(mIndex2RichSpectra) : 0;}
 
 
 #endif
@@ -168,6 +168,9 @@ inline StRichSpectra* StMuTrack::richSpectra() { return (mIndex2RichSpectra>=0) 
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.2  2002/03/20 16:04:12  laue
+ * minor changes, mostly added access functions
+ *
  * Revision 1.1  2002/03/08 17:04:18  laue
  * initial revision
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.24 2001/11/21 01:57:29 long Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.25 2002/04/29 21:42:15 hardtke Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.25  2002/04/29 21:42:15  hardtke
+ * change normalFactor back to 1.0
+ *
  * Revision 1.24  2001/11/21 01:57:29  long
  * adding log message for 3/2001 long;
  * delete empty command line
@@ -360,7 +363,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 
     int PadsAtRow;
     double sigma_xpad2;
-    double InOuterFactor=1.0075,normalFactor=1.4 ;
+    double InOuterFactor=1.0075,normalFactor=1.0 ;
     double charge_fraction[7]; 
     int wire_index;
     double *SignalSum;

@@ -67,8 +67,11 @@ unsigned int StDetectorDbClock::getRunNumber(){
     return value;
 };
 
-/// Default destructor, does nothing
-StDetectorDbClock::~StDetectorDbClock(){};
+/// Default destructor
+StDetectorDbClock::~StDetectorDbClock(){
+  delete sInstance;
+  sInstance = 0;
+};
 
 /// Returns Frequency at the begining of the run
 double StDetectorDbClock::getFrequencyEntry(unsigned int entry){

@@ -52,8 +52,11 @@ StDetectorDbTpcVoltages::StDetectorDbTpcVoltages(){
     mTable = 0;
 };
 	
-/// Default destructor, does nothing
-StDetectorDbTpcVoltages::~StDetectorDbTpcVoltages(){};
+/// Default destructor
+StDetectorDbTpcVoltages::~StDetectorDbTpcVoltages(){
+  delete sInstance;
+  sInstance = 0;
+};
 
 /// Gets cathode voltages
 double StDetectorDbTpcVoltages::getCathodeVoltage(){

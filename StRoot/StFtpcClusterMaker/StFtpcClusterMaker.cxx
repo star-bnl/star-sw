@@ -1,5 +1,12 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.36 2002/03/14 10:53:42 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.38 2002/03/22 08:52:52 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.38  2002/03/22 08:52:52  jcs
+// correct memory leaks found by Insure
+//
+// Revision 1.37  2002/03/20 11:44:35  jcs
+// forgot to uncomment delete step when reactivating StFtpcChargeStep - caused
+// memory leak
+//
 // Revision 1.36  2002/03/14 10:53:42  jcs
 // turn ftpc timebin charge step histograms back on
 //
@@ -344,6 +351,8 @@ Int_t StFtpcClusterMaker::Make()
 
       if (!ftpcReader->checkForData()) {
 	gMessMgr->Message("", "W", "OST") << "No FTPC data available!" << endm;
+        delete paramReader;
+        delete dbReader;
 	return kStWarn;
       }
 
@@ -351,6 +360,8 @@ Int_t StFtpcClusterMaker::Make()
       StDetectorDbFTPCGas * gas = StDetectorDbFTPCGas::instance();
       if ( !gas ){
           gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC Online database: Conditions"<<endm;
+          delete paramReader;
+          delete dbReader;
           return kStWarn;
       }
       // Barometric Pressure
@@ -454,7 +465,7 @@ Int_t StFtpcClusterMaker::Make()
       }
 	
     delete fcl;
-    //delete step;
+    delete step;
     if (using_FTPC_slow_simulator) delete ftpcReader;
   }
   else {     

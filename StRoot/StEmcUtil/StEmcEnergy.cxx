@@ -32,7 +32,9 @@ ClassImp(StEmcEnergy)
 //------------------------------------------------------------------------------
 StEmcEnergy::StEmcEnergy():TObject()
 {
-  setBfield(0.5);
+  mInternalFilter=kTRUE;
+	mEmcFilter = new StEmcFilter();
+	setBfield(0.5);
   setQ0Factor(0.163);
   mBemcGeom = StEmcGeom::getEmcGeom("bemc");    
   setEval(evalOff);
@@ -101,7 +103,8 @@ void StEmcEnergy::energyInBtow()
 //------------------------------------------------------------------------------
 void StEmcEnergy::chHadEnergyInBtow()
 {  
-  for (UInt_t i=1; i<4800; i++) mChHadEnergyInBtow[i]=0;
+  mNTracks=0;
+	for (UInt_t i=1; i<4800; i++) mChHadEnergyInBtow[i]=0;
 
   StSPtrVecTrackNode& trackNodes = mEvent->trackNodes();
 
@@ -131,7 +134,8 @@ void StEmcEnergy::chHadEnergyInBtow()
         mBemcGeom->getId(m, e, s, id);
         if (mEmcFilter->getEmcStatus(1,id)==kGOOD)
         {  
-          Float_t dist;
+          mNTracks++;
+					Float_t dist;
           Int_t nTowersdEta = 0, nTowersdPhi = 0;
           Int_t towerId=0, towerNdx = -1;
 
@@ -408,3 +412,18 @@ Float_t StEmcEnergy::dEToTotaldE(StMcCalorimeterHit* hit, const char* detname)
   }
   return hitEnergy;
 }
+//------------------------------------------------------------------------------
+void StEmcEnergy::setEmcFilter(StEmcFilter* filter)
+{ 
+	if(mInternalFilter && mEmcFilter) delete mEmcFilter;
+	mEmcFilter = filter; 
+	mInternalFilter=kFALSE;
+}
+//------------------------------------------------------------------------------
+void StEmcEnergy::setBfield(Float_t Bfield)  
+{ 
+	mBfield = Bfield; 
+	if(mEmcFilter) mEmcFilter->setBField(Bfield);
+}
+
+

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.72 2002/03/14 18:51:50 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.73 2002/03/15 16:43:22 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -191,7 +191,7 @@ Int_t StFlowMaker::Init() {
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.72 2002/03/14 18:51:50 snelling Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.73 2002/03/15 16:43:22 snelling Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -562,37 +562,11 @@ void StFlowMaker::FillFlowEvent() {
 
   pFlowEvent->SetMultEta(goodTracksEta);
 
-  int nhmin = pFlowEvent->UncorrNegMult();
-  int nhplus = pFlowEvent->UncorrPosMult();
-  int ncharge = nhmin + nhplus;
- 
-  if (pFlowEvent->CenterOfMassEnergy() >= 199.) {
-    if (fabs(pFlowEvent->MagneticField()) >= 4.) {
-      if (Debug()) gMessMgr->Info() << 
-		     "FlowMaker: SetCentrality; " << 
-		     "Full field, full energy, ncharge is: " 
-				    << ncharge << endm;
-      pFlowEvent->SetCentralityYear2AuAuFull(ncharge);
-    }
-    else {  
-      if (Debug()) gMessMgr->Info() << 
-		     "FlowMaker: SetCentrality; " << 
-		     "Full field, full energy, ncharge is: " 
-				    << ncharge << endm;
-      pFlowEvent->SetCentralityYear2AuAuHalf(ncharge);
-    }
-  }
-  else {
-    if (Debug()) gMessMgr->Info() << 
-		   "FlowMaker: SetCentrality; " << 
-		   "Full field, 130 GeV, goodTracks are: " 
-				  << goodTracksEta << endm;
-    pFlowEvent->SetCentrality(goodTracksEta);
-  }
+  pFlowEvent->SetCentrality();
 
   (pFlowEvent->ProbPid()) ? pFlowEvent->SetPidsProb() : 
     pFlowEvent->SetPidsDeviant();
-  
+
   pFlowEvent->TrackCollection()->random_shuffle();
 
   pFlowEvent->SetSelections();
@@ -723,7 +697,7 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
   }
 
   pFlowEvent->SetMultEta(goodTracksEta);
-  pFlowEvent->SetCentrality(goodTracksEta);
+  pFlowEvent->SetCentrality();
   pFlowEvent->TrackCollection()->random_shuffle();
   pFlowEvent->SetSelections();
   pFlowEvent->MakeSubEvents();
@@ -942,7 +916,7 @@ Bool_t StFlowMaker::FillFromPicoVersion0DST(StFlowPicoEvent* pPicoEvent) {
   
   // Recreate centrality
   pFlowEvent->SetMultEta(goodTracksEta);
-  pFlowEvent->SetCentrality(goodTracksEta);
+  pFlowEvent->SetCentrality();
   
   return kTRUE;
 }
@@ -962,7 +936,7 @@ Bool_t StFlowMaker::FillFromPicoVersion1DST(StFlowPicoEvent* pPicoEvent) {
 					  pPicoEvent->VertexY(),
 					  pPicoEvent->VertexZ()) );
   pFlowEvent->SetMultEta(pPicoEvent->MultEta());
-  pFlowEvent->SetCentrality(pPicoEvent->MultEta());
+  pFlowEvent->SetCentrality();
   pFlowEvent->SetRunID(pPicoEvent->RunID());
   pFlowEvent->SetCTB(pPicoEvent->CTB());
   pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
@@ -1023,12 +997,12 @@ Bool_t StFlowMaker::FillFromPicoVersion2DST(StFlowPicoEvent* pPicoEvent) {
   pFlowEvent->SetVertexPos( StThreeVectorF(pPicoEvent->VertexX(),
 					   pPicoEvent->VertexY(),
 					   pPicoEvent->VertexZ()) );
-  pFlowEvent->SetMultEta(pPicoEvent   ->MultEta());
-  pFlowEvent->SetCentrality(pPicoEvent->MultEta());
-  pFlowEvent->SetRunID(pPicoEvent     ->RunID());
-  pFlowEvent->SetCTB(pPicoEvent       ->CTB());
-  pFlowEvent->SetZDCe(pPicoEvent      ->ZDCe());
-  pFlowEvent->SetZDCw(pPicoEvent      ->ZDCw());
+  pFlowEvent->SetMultEta(pPicoEvent->MultEta());
+  pFlowEvent->SetCentrality();
+  pFlowEvent->SetRunID(pPicoEvent->RunID());
+  pFlowEvent->SetCTB(pPicoEvent->CTB());
+  pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
+  pFlowEvent->SetZDCw(pPicoEvent->ZDCw());
   
   int goodTracks = 0;
   // Fill FlowTracks
@@ -1088,12 +1062,12 @@ Bool_t StFlowMaker::FillFromPicoVersion3DST(StFlowPicoEvent* pPicoEvent) {
   pFlowEvent->SetVertexPos(StThreeVectorF(pPicoEvent->VertexX(),
 					  pPicoEvent->VertexY(),
 					  pPicoEvent->VertexZ()) );
-  pFlowEvent->SetMultEta(pPicoEvent   ->MultEta());
-  pFlowEvent->SetCentrality(pPicoEvent->MultEta());
-  pFlowEvent->SetRunID(pPicoEvent     ->RunID());
-  pFlowEvent->SetCTB(pPicoEvent       ->CTB());
-  pFlowEvent->SetZDCe(pPicoEvent      ->ZDCe());
-  pFlowEvent->SetZDCw(pPicoEvent      ->ZDCw());
+  pFlowEvent->SetMultEta(pPicoEvent->MultEta());
+  pFlowEvent->SetCentrality();
+  pFlowEvent->SetRunID(pPicoEvent->RunID());
+  pFlowEvent->SetCTB(pPicoEvent->CTB());
+  pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
+  pFlowEvent->SetZDCw(pPicoEvent->ZDCw());
   
   int goodTracks = 0;
   // Fill FlowTracks
@@ -1159,7 +1133,7 @@ Bool_t StFlowMaker::FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent) {
 					  pPicoEvent->VertexY(),
 					  pPicoEvent->VertexZ()) );
   pFlowEvent->SetMultEta(pPicoEvent->MultEta());
-  pFlowEvent->SetCentrality(pPicoEvent->MultEta());
+  pFlowEvent->SetCentrality();
   pFlowEvent->SetRunID(pPicoEvent->RunID());
   pFlowEvent->SetL0TriggerWord(pPicoEvent->L0TriggerWord());
 
@@ -1251,9 +1225,6 @@ Bool_t StFlowMaker::FillFromPicoVersion5DST(StFlowPicoEvent* pPicoEvent) {
   pFlowEvent->SetVertexPos(StThreeVectorF(pPicoEvent->VertexX(),
 					  pPicoEvent->VertexY(),
 					  pPicoEvent->VertexZ()) );
-  pFlowEvent->SetMultEta(pPicoEvent->MultEta());
-
-
 
   pFlowEvent->SetRunID(pPicoEvent->RunID());
   pFlowEvent->SetL0TriggerWord(pPicoEvent->L0TriggerWord());
@@ -1262,34 +1233,8 @@ Bool_t StFlowMaker::FillFromPicoVersion5DST(StFlowPicoEvent* pPicoEvent) {
   pFlowEvent->SetMagneticField(pPicoEvent->MagneticField());
   pFlowEvent->SetBeamMassNumberEast(pPicoEvent->BeamMassNumberEast());
   pFlowEvent->SetBeamMassNumberWest(pPicoEvent->BeamMassNumberWest());
-
-
-  int nhmin = pFlowEvent->UncorrNegMult();
-  int nhplus = pFlowEvent->UncorrPosMult();
-  int ncharge = nhmin + nhplus;
-  if (pFlowEvent->CenterOfMassEnergy() >= 199.) {
-    if (fabs(pFlowEvent->MagneticField()) >= 4.) {
-      if (Debug()) gMessMgr->Info() << 
-		     "FlowMaker: SetCentrality; " << 
-		     "Full field, full energy, ncharge is: " 
-				    << ncharge << endm;
-      pFlowEvent->SetCentralityYear2AuAuFull(ncharge);
-    }
-    else {  
-      if (Debug()) gMessMgr->Info() << 
-		     "FlowMaker: SetCentrality; " << 
-		     "Full field, full energy, ncharge is: " 
-				    << ncharge << endm;
-      pFlowEvent->SetCentralityYear2AuAuHalf(ncharge);
-    }
-  }
-  else {
-    if (Debug()) gMessMgr->Info() << 
-		   "FlowMaker: SetCentrality; " << 
-		   "Full field, 130 GeV, goodTracks are: " 
-				  << pPicoEvent->MultEta() << endm;
-    pFlowEvent->SetCentrality(pPicoEvent->MultEta());
-  }
+  pFlowEvent->SetMultEta(pPicoEvent->MultEta());
+  pFlowEvent->SetCentrality();
 
 
 
@@ -1488,6 +1433,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.73  2002/03/15 16:43:22  snelling
+// Added a method to recalculate the centrality in StFlowPicoEvent
+//
 // Revision 1.72  2002/03/14 18:51:50  snelling
 // Added new centralities
 //

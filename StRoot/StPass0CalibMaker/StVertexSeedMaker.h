@@ -1,7 +1,7 @@
 /*!
  * \class StVertexSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StVertexSeedMaker.h,v 1.3 2002/01/28 22:16:33 genevb Exp $
+ * \version $Id: StVertexSeedMaker.h,v 1.4 2002/03/20 00:40:43 genevb Exp $
  *
  * calculates mean primary vertex positions from
  * suitable events to use as seeds in finding better       
@@ -29,12 +29,15 @@ class StVertexSeedMaker : public StMaker {
    virtual void PrintInfo();
    virtual void Clear(Option_t *option);
    virtual Int_t Finish();
-   virtual void fitData();
+   virtual Int_t Aggregate(Char_t* dir=0);
+
+   virtual void FitData();
+   virtual void FindResult(Bool_t checkDb=kTRUE);
    int GetValidityDate();
    int GetValidityTime();
    void UseEventDateTime();
    void UseFillDateTime();
-   St_vertexSeed* vertexSeedTable();
+   St_vertexSeed* VertexSeedTable();
    void WriteTableToFile();     //Write drift velocity table (assumes correct trigger offset)
    void SetMinEntries(int entries);  //minimum number of valid events for seed
    void SetMaxX0Err(float err);  //maximum allowed error for x0 
@@ -45,13 +48,15 @@ class StVertexSeedMaker : public StMaker {
    void SetVertexZmin(float zmin);  //Set min z vertex for seed calculation
    void SetVertexR2max(float r2max);  //Set max r^2 vertex for seed calculation
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.3 2002/01/28 22:16:33 genevb Exp $ built "__DATE__" "__TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.4 2002/03/20 00:40:43 genevb Exp $ built "__DATE__" "__TIME__ ;
      return cvs;
    }
 
  protected:
+   void Reset();
    Int_t FillAssumed();
    void FillDateTime();
+   void GetFillDateTime();
    Bool_t BetterErrors();
    Bool_t ChangedValues();
 
@@ -105,3 +110,11 @@ inline void StVertexSeedMaker::SetVertexZmin(float zmin){zVertexMin = zmin;}
 inline void StVertexSeedMaker::SetVertexR2max(float r2max){r2VertexMax = r2max;}
 
 #endif
+
+// $Id: StVertexSeedMaker.h,v 1.4 2002/03/20 00:40:43 genevb Exp $
+// $Log: StVertexSeedMaker.h,v $
+// Revision 1.4  2002/03/20 00:40:43  genevb
+// Addition of Aggregate feature, minor updates
+//
+//
+//

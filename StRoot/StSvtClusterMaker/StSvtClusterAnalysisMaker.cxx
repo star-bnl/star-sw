@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.17 2002/01/05 21:45:18 caines Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.18 2002/03/20 00:33:32 munhoz Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.18  2002/03/20 00:33:32  munhoz
+ * temporary fix for memory leaks and new vertex finder params for pp
+ *
  * Revision 1.17  2002/01/05 21:45:18  caines
  * Inlcude t0 correction in hit
  *
@@ -128,9 +131,9 @@ Int_t StSvtClusterAnalysisMaker::Init()
   mNoEvents=0;
   
   GetSvtRawEvent();
-  //GetSvtEvent();
-  //GetSvtCluster();
-  //SetSvtAnalysis();
+  GetSvtEvent();
+  GetSvtCluster();
+  SetSvtAnalysis();
 
    
   mTotalNumberOfHybrids = mSvtRawEventColl->getTotalNumberOfHybrids();
@@ -200,7 +203,8 @@ Int_t StSvtClusterAnalysisMaker::GetSvtPixels()
 Int_t StSvtClusterAnalysisMaker::SetSvtAnalysis()
 {
   mSvtAnalSet = new St_ObjectSet("StSvtAnalResults");
-  AddData(mSvtAnalSet);  
+  //AddData(mSvtAnalSet);  
+  AddConst(mSvtAnalSet);  
   SetOutput(mSvtAnalSet); //Declare for output
 
   mSvtAnalColl = new StSvtHybridCollection(mSvtAdjEvent->getConfiguration());
@@ -287,7 +291,7 @@ Int_t StSvtClusterAnalysisMaker::Make()
     return kStWarn;
   }
 
-  SetSvtAnalysis();
+  //  SetSvtAnalysis();
   SetClusterAnalysis();
 
   if( Debug()) MakeHistograms();

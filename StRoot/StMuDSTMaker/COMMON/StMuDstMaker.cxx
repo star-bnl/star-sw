@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.2 2002/03/08 20:04:31 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.3 2002/03/20 16:04:11 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -63,7 +63,7 @@ StMuDstMaker::StMuDstMaker(ioMode mode, ioNameMode nameMode, const char* dirName
   mDirName(dirName), mFileName(fileName), mFilter(filter), mMaxFiles(maxFiles),
   mTrackType(256), mReadTracks(1), 
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
-  mSplit(99), mCompress(9), mBufferSize(65536*4)
+  mSplit(99), mCompression(9), mBufferSize(65536*4)
 {
   StObject::Class()->IgnoreTObjectStreamer();
   StStrangeMuDst::Class()->IgnoreTObjectStreamer();
@@ -307,7 +307,7 @@ void StMuDstMaker::openWrite(string fileName) {
   
   if (!mCurrentFile) throw StMuExceptionNullPointer("no file openend",PF);
 
-  mCurrentFile->SetCompressionLevel(mCompress);
+  mCurrentFile->SetCompressionLevel(mCompression);
   
   // Create a ROOT Tree and one superbranch
   DEBUGMESSAGE2("now create trees and branches");
@@ -702,7 +702,7 @@ void StMuDstMaker::makeChain(const char* dir, const char* filter, int maxFiles) 
       if(++fileCount >= maxFiles) break;
     }   
   }
-  mChain->AddFriend("StrangeMuDst");
+  //  mChain->AddFriend("StrangeMuDst");
   DEBUGVALUE2(fileCount);
 }
 
@@ -713,6 +713,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.3  2002/03/20 16:04:11  laue
+ * minor changes, mostly added access functions
+ *
  * Revision 1.2  2002/03/08 20:04:31  laue
  * change from two trees to 1 tree per file
  *

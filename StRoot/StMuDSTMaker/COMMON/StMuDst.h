@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.3 2002/03/14 04:12:44 laue Exp $
+ * $Id: StMuDst.h,v 1.4 2002/03/20 16:04:11 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -29,12 +29,9 @@ class StKinkMc;
 
 class StEvent;
 class StTrack;
-class StStrangeEvMuDst;
+class StTrackGeometry;
 
-
-class StV0MuDst;
-class StXiMuDst;
-class StKinkMuDst;
+class StPhysicalHelixD;
 
 #include "TObject.h"
 #include "StMuDstMaker.h"
@@ -56,6 +53,7 @@ public:
   void unset();
   void fixTrackIndices();
   StEvent* createStEvent();
+  StTrackGeometry* trackGeometry(int q, StPhysicalHelixD* h);
   StTrack* createStTrack(StMuTrack*);
 
  private:
@@ -85,8 +83,13 @@ public:
   static StL3AlgorithmInfo* l3AlgoAccept(int i) { return (StL3AlgorithmInfo*)arrays[muAccept]->UncheckedAt(i); }
   static StL3AlgorithmInfo* l3AlgoReject(int i) { return (StL3AlgorithmInfo*)arrays[muReject]->UncheckedAt(i); }
 
+  static StStrangeEvMuDst* strangeEvent() { return (StStrangeEvMuDst*)strangeArrays[smuEv]->UncheckedAt(0); }
   static TClonesArray* v0s() { return strangeArrays[smuV0]; }
   static StV0MuDst* v0s(int i) { return (StV0MuDst*)strangeArrays[smuV0]->UncheckedAt(i); }
+  static TClonesArray* xis() { return strangeArrays[smuXi]; }
+  static StXiMuDst* xis(int i) { return (StXiMuDst*)strangeArrays[smuXi]->UncheckedAt(i); }
+  static TClonesArray* kinks() { return strangeArrays[smuKink]; }
+  static StKinkMuDst* kinks(int i) { return (StKinkMuDst*)strangeArrays[smuKink]->UncheckedAt(i); }
 
     ClassDef(StMuDst,1)
 };
@@ -96,6 +99,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.4  2002/03/20 16:04:11  laue
+ * minor changes, mostly added access functions
+ *
  * Revision 1.3  2002/03/14 04:12:44  laue
  * bug fix: StMuL3EventSummary.cxx
  * update: StMuDst.h StMuDst.cxx
