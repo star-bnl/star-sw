@@ -5,8 +5,11 @@
 // The set of methods to work with the plain matrix / vector
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: RMath.h,v 1.4 1999/09/23 18:32:11 fine Exp $
+// $Id: RMath.h,v 1.5 1999/09/26 02:48:50 fine Exp $
 // $Log: RMath.h,v $
+// Revision 1.5  1999/09/26 02:48:50  fine
+// F112 CERNLIB package (TR matrix) has been added. No micky test yet
+//
 // Revision 1.4  1999/09/23 18:32:11  fine
 // double prec for float matrices was introduced
 //
@@ -89,6 +92,54 @@ class RMath  {
     static void mxmlrt(double *a, double *b, double *c, int ni, int nj);
     static void mxmltr(double *a, double *b, double *c, int ni, int nj);
     static void mxtrp(double *a, double *b, int i, int j);
+
+// * TR pack
+
+       static float *traat(float *a, float *s, int m, int n);
+       static float *tral(float *a, float *u, float *b, int m, int n);
+       static float *tralt(float *a, float *u, float *b, int m, int n);
+       static float *tras(float *a, float *s, float *b, int m, int n);
+       static float *trasat(float *a, float *s, float *r__, int m, int n);
+       static float *trata(float *a, float *r__, int m, int n);
+       static float *trats(float *a, float *s, float *b, int m, int n);
+       static float *tratsa(float *a, float *s, float *r__, int m, int n);
+       static float *trchlu(float *a, float *b, int n);
+       static float *trchul(float *a, float *b, int n);
+       static float *trinv(float *t, float *s, int n);
+       static float *trla(float *u, float *a, float *b, int m, int n);
+       static float *trlta(float *u, float *a, float *b, int m, int n);
+       static float *trpck(float *s, float *u, int n);
+       static float *trqsq(float *q, float *s, float *r__, int m);
+       static float *trsa(float *s, float *a, float *b, int m, int n);
+       static float *trsinv(float *g, float *gi, int n);
+       static float *trsmlu(float *u, float *s, int n);
+       static float *trsmul(float *g, float *gi, int n);
+       static float *trupck(float *u, float *s, int m);
+       static float *trsat(float *s, float *a, float *b, int m, int n);
+
+// ---   double version
+
+       static double *traat (double *a, double *s, int m, int n);
+       static double *tral  (double *a, double *u, double *b, int m, int n);
+       static double *tralt (double *a, double *u, double *b, int m, int n);
+       static double *tras  (double *a, double *s, double *b, int m, int n);
+       static double *trasat(double *a, double *s, double *r__, int m, int n);
+       static double *trata (double *a, double *r__, int m, int n);
+       static double *trats (double *a, double *s, double *b, int m, int n);
+       static double *tratsa(double *a, double *s, double *r__, int m, int n);
+       static double *trchlu(double *a, double *b, int n);
+       static double *trchul(double *a, double *b, int n);
+       static double *trinv (double *t, double *s, int n);
+       static double *trla  (double *u, double *a, double *b, int m, int n);
+       static double *trlta (double *u, double *a, double *b, int m, int n);
+       static double *trpck (double *s, double *u, int n);
+       static double *trqsq (double *q, double *s, double *r__, int m);
+       static double *trsa  (double *s, double *a, double *b, int m, int n);
+       static double *trsinv(double *g, double *gi, int n);
+       static double *trsmlu(double *u, double *s, int n);
+       static double *trsmul(double *g, double *gi, int n);
+       static double *trupck(double *u, double *s, int m);
+       static double *trsat (double *s, double *a, double *b, int m, int n);
 
     ClassDef(RMath,0)  //Interface to matrix routines
 
