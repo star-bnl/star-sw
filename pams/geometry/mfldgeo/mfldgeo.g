@@ -9,8 +9,8 @@ Module     MFLDGEO  is the actual GUFLD routine for GSTAR
                        Bdipole,  RmaxDip, ZminDip, ZmaxDip,
                        int nrp, int nzp, rm, zm , BBZ(nzp,nrp),BBR(nzp,nrp) }
       Complex          Brz,BBTOT
-      Integer          Iprin,iz,ir
-      real             Real,Imag,r,z,B0/5.0/ 
+      Integer          Iprin,iz,ir,nz
+      real             Real,Imag,r,z,B0/5.0/,z0 
       Common /brcontr/ Iprin
 * --------------------------------------------------------------------------
 *
@@ -38,9 +38,12 @@ Module     MFLDGEO  is the actual GUFLD routine for GSTAR
    if (mflg_version<=1) return
 *
    call mflddat
+   call mfldmap
+
    do iz = 1,mflg_nzp
    {  do ir = 1,mflg_nrp
       {  z    = mflg_zm/mflg_nzp*(iz-.5)
+         if (mflg_version>=3) z=-mflg_zm + 2*z
          r    = mflg_rm/mflg_nrp*(ir-.5)
          brz  = BBTOT(z,r)*mflg_Bfield/B0
          mflg.BBZ(iz,ir) = Real(Brz)
@@ -56,7 +59,7 @@ end
       structure MFLG { version,  Bfield,  RmaxInn, ZmaxInn,
                        Bdipole,  RmaxDip, ZminDip, ZmaxDip,
                        int nrp, int nzp, rm, zm , BBZ(nzp,nrp),BBR(nzp,nrp) }
-      real         x(3),F(3),dr/0/,dz/0/,Br,BZ,r,a
+      real         x(3),F(3),dr/0/,dz/0/,Br,BZ,r,z,a
       Integer      Ievent_old/-1/,ir,iz
       logical      first/.true./
 *
@@ -68,11 +71,13 @@ end
          Call RbPOPD
          if (mflg_Nrp>0) dr=mflg_Rm/mflg_Nrp
          if (mflg_Nzp>0) dz=mflg_Zm/mflg_Nzp
+         if (mflg_version>=3) dz=2*dz
       endif
 *
       F = {0,0,0}
       r = sqrt(x(1)*x(1)+x(2)*x(2))
-      a = abs(x(3))
+      z = x(3)
+      a = abs(z)
       if (mflg_version==1 ) then
 
          If ( r < mflg_RmaxInn & a < mflg_ZmaxInn ) F(3) = mflg_Bfield
@@ -80,10 +85,10 @@ end
       else if (mflg_version>1 ) then
 
          if (r<mflg_Rm & a<mflg_Zm) then
-*            ir   = nint(r/dr)
-*            iz   = nint(a/dz)
-             ir   = 1+r/dr
-             iz   = 1+a/dz
+            ir   = 1+r/dr
+            iz   = 1+a/dz
+            if (mflg_version>=3) iz=1+(z+mflg_Zm)/dz
+
             Br   = mflg.BBR(iz,ir)
             Bz   = mflg.BBZ(iz,ir)
             If (r>0) then
@@ -102,35 +107,106 @@ end
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
       Function  BBTOT (z,r)
-+CDE,typing.
++CDE, TYPING,GCUNIT,GCBANK,AGCLINK.
+      structure MFLG { version,  Bfield,  RmaxInn, ZmaxInn }
+
       common    structure BFLD 
                 { version, char code, date, int kz, 
                   rmaxx, zmaxx, rrm, zz1, zz2 }
       common    structure BFIT 
                 { int nr, int nzc, int nzs, rmax, zmax,
                   bzcorn, zterm(20), rterm(20), bn(20) }
-      complex   BBTOT,BBINTER,BBEXTER,zero/0/
-      real      z, r, az, d/0/
+      common    structure BMAP 
+                { int Nr, int Nz, int Np, RR(nr), ZZ(nz), PP(Np),
+                  BBR(Nr,Nz), BBZ(Nr,Nz), BBP(Nr,Nz) }
+      Complex   BBTOT,BSINTER,BBINTER,BBEXTER,zero/0/
+      Real      z, r, az, rm, d/0/,zmax/0/,rmax/0/
+      Integer   Istat /0/
       logical   first /.true./
 *
       if (first) then
          call  RBPUSHD
+         USE  /detm/mfld/MFLG        stat=istat
          USE  /detm/mfld/BFLD
-         USE   BFIT  
-         CALL  RBPOPD
+         USE             BFIT  
+         USE  /detm/mfld/MFLM/BMAP   
+         CALL  RBPOPD       
          d     = bfld_zmaxx-bfld_zz1
+         zmax  = bmap.zz(bmap_nz)
+         rmax  = bmap.rr(bmap_nr)
          first =.false.
       endif
 
       if   bfld_version<1    { BBTOT = zero; return  }
 *
-      az = abs(z)  
-      if      az<bfld_zz1    { BBTOT = BBINTER(az,r) }
-      elseif  az>bfld_zz2    { BBTOT = zero          }
-      elseif  az>bfld_zmaxx  { BBTOT = BBEXTER(az,r) }
-      else  { BBTOT = ((bfld_zmaxx-az)*BBINTER(az,r) +
-     >                 (az-bfld_zz1)*BBEXTER(az,r))/d} 
+      az   = abs(z)  
+      if mflg_version <= 2  
+      {
+        if      az<bfld_zz1    { BBTOT = BBINTER(az,r) }
+        elseif  az>bfld_zz2    { BBTOT = zero          }
+        elseif  az>bfld_zmaxx  { BBTOT = BBEXTER(az,r) }
+        else  { BBTOT = ((bfld_zmaxx-az)*BBINTER(az,r) +
+     >                   (az-bfld_zz1)*BBEXTER(az,r))/d} 
+      }
+      else
+      { rm = min(r,rmax)    
+        if      az<bfld_zz1    { BBTOT = BSINTER(z,rm) }
+        elseif  az>bfld_zz2    { BBTOT = zero          }
+        elseif  az>zmax        { BBTOT = BBEXTER(az,r) }
+        elseif   R>rmax        { BBTOT = BBEXTER(az,r) }
+        else  { BBTOT = ((zmax-az)*BSINTER(z,rm)+(az-bfld_zz1)*BBEXTER(az,r))/
+     >                                     (zmax-bfld_zz1)} 
+      }
+
       BBTOT=BBTOT/1000.
+      end
+
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+      Function BSINTER(z,r)
+*     measured field map interpolation
++CDE, TYPING,GCUNIT,GCBANK,AGCLINK.
+      common structure BMAP { int Nr, int Nz, int Np, RR(nr), ZZ(nz), PP(Np),
+                                          BBR(Nr,Nz), BBZ(Nr,Nz), BBP(Nr,Nz) }
+      complex          BSINTER,zero/0/
+      Real             z,r,r1,r2,zi,br1,br2,bz1,bz2,br,bz,wz1,wz2,dz/0/
+      Integer          ir,iz
+      Logical          first/.true./
+
+      if (first) then
+         USE MFLDGEO/MFLM/BMAP
+         first = .false.
+         dz = (bmap.zz(bmap_nz)-bmap.zz(1))/bmap_nz
+      endif
+
+      BSINTER=zero
+      if (z<bmap.zz(1) | z>bmap.zz(bmap_nz) | R>bmap.rr(bmap_nr)) return
+ 
+      do ir=1,bmap_Nr
+         if (R<=bmap.rr(ir)) break
+      enddo
+      zi=(z-bmap.zz(1))/dz
+      iz=min(zi+1,bmap_nz-1)
+      wz1=iz-zi;  wz2=1-wz1;
+
+      if (ir>1) then
+         r1  = bmap.rr(ir-1)  
+         br1 = bmap.bbr(ir-1,iz)*wz1+ bmap.bbr(ir-1,iz+1)*wz2
+         bz1 = bmap.bbz(ir-1,iz)*wz1+ bmap.bbz(ir-1,iz+1)*wz2
+      else
+         r1  =-bmap.rr(1)    
+         br1 =-bmap.bbr(1,iz)*wz1   - bmap.bbr(1,iz+1)*wz2
+         bz1 = bmap.bbz(1,iz)*wz1   + bmap.bbz(1,iz+1)*wz2
+      endif
+      r2 =bmap.rr(ir)
+      br2=bmap.bbr(ir,iz)*wz1+bmap.bbr(ir,iz+1)*wz2
+      bz2=bmap.bbz(ir,iz)*wz1+bmap.bbz(ir,iz+1)*wz2
+
+      br=(br1*(r2-r)+br2*(r-r1))/(r2-r1)
+      bz=(bz1*(r2-r)+bz2*(r-r1))/(r2-r1)
+
+      BSINTER = CMPLX(Bz,Br)
+
       end
 
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -144,18 +220,19 @@ end
                        bzcorn, zterm(20), rterm(20), bn(20) }
       complex          BBINTER,BEVALB,zero/0/
       integer          Iprin,mr,mz,n,ir,iz,nn/0/
-      real             r,z,ri,zi,dr/5./, dz/5./, dd/1/
+      real             r,z,za,ri,zi,dr/5./, dz/5./, dd/1/
       common /brcontr/ iprin      
 
+      za=abs(z)
       BBINTER=zero
-      if (z>bfld_zmaxx | R>bfld_rmaxx) return
+      if (za>bfld_zmaxx | R>bfld_rmaxx) return
  
       n =0
       mz=dd*(r-bfit_rmax)/dr; mz=max(mz,0)
-      mr=dd*(z-bfit_zmax)/dz; mr=max(mr,0)
+      mr=dd*(za-bfit_zmax)/dz; mr=max(mr,0)
       do iz=-mz,mz
       { do ir=-mr,mr
-        {  ri=r+dr*ir;    zi=z+dz*iz
+        {  ri=r+dr*ir;    zi=za+dz*iz
            if (mz>0&ir>0 | mr>0&iz>0 | ri<0 | zi<0 ) next 
            if (zi>bfld_zmaxx | ri>bfld_rmaxx)        next
            n+=1;  BBINTER+=BEVALB(zi,ri)
@@ -216,14 +293,15 @@ end
       structure BDAT { int N, Zi, Ri(20), Bzi(20), Bri(20) }
       structure BDOT { int N, Zi, Ri(20), Bzi(20), Bri(20) }
       complex   BBEXTER, zero/0/
-      real      z,r,wz,br,bz,wr1,wr2,br1,br2,bz1,bz2
+      real      a,z,r,wz,br,bz,wr1,wr2,br1,br2,bz1,bz2
       integer   JBBB,ier,ir1,ir2,nz/0/,iprin
       common /brcontr/ iprin      
 *
-      Unless bdot_Zi <= z&z <= bdat_Zi 
+      a=abs(z)
+      Unless bdot_Zi <= a&a <= bdat_Zi 
       {  call  RBPUSHD
-         if z<=bdot_Zi { nz=0; Bdat_Zi=0; }
-         for (ier=0;  z>=bdat_zi & Ier==0;) 
+         if a<=bdot_Zi { nz=0; Bdat_Zi=0; }
+         for (ier=0;  a>=bdat_zi & Ier==0;) 
          {
             call   UCOPY (bank_BDAT,bank_BDOT,len_BDAT)
             nz+=1; USE /detm/mfld/BFLD/BDAT(nz) Stat=ier 
@@ -246,7 +324,7 @@ end
       Br2 = wr2*bdat_Bri(ir2)+(1-wr2)*bdat_Bri(ir2+1)
       Bz2 = wr2*bdat_Bzi(ir2)+(1-wr2)*bdat_Bzi(ir2+1)
 
-      wz  = (bdat_Zi-z)/(bdat_Zi-bdot_Zi)
+      wz  = (bdat_Zi-a)/(bdat_Zi-bdot_Zi)
       Br  = wz*Br1+(1-wz)*Br2      
       Bz  = wz*Bz1+(1-wz)*Bz2      
       BBEXTER = cmplx(Bz,Br)
