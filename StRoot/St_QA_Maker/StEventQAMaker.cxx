@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.31 2000/02/11 04:30:56 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.32 2000/03/13 20:15:24 uid3118 Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.32  2000/03/13 20:15:24  uid3118
+// changed globtrk, primtrk det. id to come from first element of pidTraits() vector to match table output; include tracks with iflag=100 as good global tracks
+//
 // Revision 1.31  2000/02/11 04:30:56  lansdell
 // removed hit detector id loops from MakeHistPoint
 //
@@ -222,11 +225,11 @@ void StEventQAMaker::MakeHistGlob() {
 // from Helen on 14 Jul 1999 - she now fills chisq0,1 with chisq/dof
 // so it doesn't need to be calculated here 
 
-      for (UInt_t k=0; k<globtrk->pidTraits().size(); k++)
-	m_det_id->Fill(globtrk->pidTraits()[k]->detector());
+      // read the det id for the first element of the pidTraits vector -CPL
+      m_det_id->Fill(globtrk->pidTraits()[0]->detector());
 
 // now fill all TPC histograms ------------------------------------------------
-      if (globtrk->flag()>100 && globtrk->flag()<200) {
+      if (globtrk->flag()>=100 && globtrk->flag()<200) {
 
 // these are TPC only
 	m_glb_xf0->Fill(dif.x());
@@ -538,8 +541,9 @@ void StEventQAMaker::MakeHistPrim() {
 	                     primtrk->geometry()->helix().at(s);
         Float_t radf = primtrk->detectorInfo()->firstPoint().perp();
 
-	for (UInt_t k=0; k<primtrk->pidTraits().size(); k++)
-	  m_pdet_id->Fill(primtrk->pidTraits()[k]->detector());
+	// read the det id for the first element of the pidTraits vector -CPL
+	m_pdet_id->Fill(primtrk->pidTraits()[0]->detector());
+
 	m_ppoint->Fill(primtrk->detectorInfo()->numberOfPoints());
 	m_pmax_point->Fill(primtrk->numberOfPossiblePoints());
 	m_pfit_point->Fill(primtrk->fitTraits().numberOfFitPoints());
