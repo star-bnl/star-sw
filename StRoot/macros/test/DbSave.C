@@ -1,4 +1,4 @@
-void DbTest(){
+void DbSave(){
 
   // Baseline shared libraries
   gSystem->Load("St_base");
@@ -23,11 +23,10 @@ void DbTest(){
   // choose timestamp 
   dbMk->SetDateTime(19990101,10000);
 
-  TDataSet *p = dbMk->GetDataBase("Calibrations/tpc");
-//  p->ls(99);
-  TTable *tb = p->Find("tpc/tpcDriftVelocity");
-  printf("NRows=%d\n",tb->GetNRows());
-  tb->Print(0,1);  
+  p = dbMk->GetDataBase("Calibrations/tpc");
+  p->ls(99);
+  dbMk->Save("Calibrations/tpc");
+  
 
 }
 
