@@ -138,7 +138,8 @@
 *                      dchkt - executes pams/global/kumac/dst_chk_tabl.kumac 
 *                              used to write out info from dst
 *                      dwntp - executes pams/global/kumac/dst_wr_ntup.kumac
-*                              used to write out ntuples from dst tables
+*                             used to write out ntuples from dst tables
+* 10/8/98 K. Turner - update ftpc kumacs
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -300,25 +301,25 @@ macro bfc_init _
          exec init_spr#init
       (ffs) 
 	    exec create_tables_ftpc#ffs_tables
-	    exec ffs_init#init
+	    exec init_ffs#init
       (fss) 
 	    exec create_tables_ftpc#fss_tables
-	    exec fss_init#init
+	    exec init_fss#init
       (fcl) 
 	    exec create_tables_ftpc#fcl_tables
-	    exec fcl_init#init
+	    exec init_fcl#init
     (fpt_f)
 	    exec create_tables_ftpc#fpt_tables
-	    exec fpt_init#init
+	    exec init_fpt#init
     (fte_f)
 	    exec create_tables_ftpc#fte_tables
-            exec fte_init#init
+            exec init_fte#init
     (fpt_s)
             exec create_tables_ftpc#fpt_tables
-            exec fpt_init#init
+            exec init_fpt#init
     (fte_s)
             exec create_tables_ftpc#fte_tables
-            exec fte_init#init	    
+            exec init_fte#init	    
       (svm) 
             exec create_tables_global#svm
             exec init_svm#init
@@ -602,13 +603,13 @@ return
 		 goto NEXT_EVENT
                endif
     (tte_e)    exec tte_run#run_tte
-      (ffs)    exec ffs_run#run 
-      (fss)    exec fss_run#run
-      (fcl)    exec fcl_run#run
-    (fpt_f)    exec fpt_run#run_fast_sim
-    (fte_f)    exec fte_run#run_fast_sim
-    (fpt_s)    exec fpt_run#run_slow_sim
-    (fte_s)    exec fte_run#run_slow_sim
+      (ffs)    exec run_ffs#run 
+      (fss)    exec run_fss#run
+      (fcl)    exec run_fcl#run
+    (fpt_f)    exec run_fpt#run_fast_sim
+    (fte_f)    exec run_fte#run_fast_sim
+    (fpt_s)    exec run_fpt#run_slow_sim
+    (fte_s)    exec run_fte#run_slow_sim
       (svm)    exec run_svm#run_svm
       (evr)    exec run_evr#run
       (egr)    exec run_egr#egr	
