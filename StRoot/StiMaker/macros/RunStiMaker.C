@@ -64,7 +64,8 @@ void RunStiMaker(Int_t nevents=1,
     ioMaker->SetBranch("runcoBranch",0,"r");  //activate runco Branch
     
     const char* calibDB = "MySQL:StarDb";
-    St_db_Maker* calibMk = new St_db_Maker("StarDb",calibDB);
+    const char* paramsDB = "$STAR/StatDb";
+    St_db_Maker* calibMk = new St_db_Maker("StarDb",calibDB,paramsDB);
     calibMk->SetDateTime("year_1h");
     calibMk->SetDebug();
     
