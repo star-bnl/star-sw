@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.3 1998/08/07 19:34:55 fisyak Exp $
+// $Id: St_tpt_Maker.cxx,v 1.4 1998/08/14 15:25:41 fisyak Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.4  1998/08/14 15:25:41  fisyak
+// Move out tpg from run
+//
 // Revision 1.3  1998/08/07 19:34:55  fisyak
 // Add St_run_Maker
 //
@@ -56,8 +59,11 @@ void St_tpt_Maker::Init(){
    if (tpgpar){
        St_DataSetIter partable(tpgpar);
        m_tpg_pad_plane = (St_tpg_pad_plane *) partable("tpg_pad_plane");
-       if (!(m_tpg_pad_plane)) 
-       printf("tpc/tpgpar is not initialized. Please add run_Maker to your chain\n");
+       if (!m_tpg_pad_plane) {
+         cout << " St_run_Maker:tpg_pad_plane does not exist" << endl;
+         cout << "TPC geometry parameter tables are incomplete."<< endl;
+         SafeDelete(tpgpar);
+       }
    }
 // tpt parameters
    St_DataSet *tptpars = local("tpc/tptpars");
@@ -104,7 +110,7 @@ Int_t St_tpt_Maker::Make(){
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.3 1998/08/07 19:34:55 fisyak Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.4 1998/08/14 15:25:41 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
