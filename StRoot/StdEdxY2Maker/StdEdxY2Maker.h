@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.h,v 1.13 2004/07/21 14:13:56 fisyak Exp $
+// $Id: StdEdxY2Maker.h,v 1.14 2004/07/29 22:30:49 fisyak Exp $
 #ifndef STAR_StdEdxY2Maker
 #define STAR_StdEdxY2Maker
 
@@ -15,14 +15,14 @@
 #include "StTpcDb/StTpcdEdxCorrection.h" 
 #include "StThreeVectorF.hh"
 #include "StThreeVectorD.hh" 
+#include "tables/St_trigDetSums_Table.h"
 class Bichsel;
 class StGlobalTrack;
 class TMinuit; 
 class StEvent;
 class StGlobalCoordinate;
 class TH2D;
-class St_trigDetSums;
-class trigDetSums;
+
 class StdEdxY2Maker : public StMaker {
  public: 
   enum  EMode {kOldClusterFinder       ,
@@ -62,7 +62,7 @@ class StdEdxY2Maker : public StMaker {
   static  void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.13 2004/07/21 14:13:56 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.14 2004/07/29 22:30:49 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
  private:
