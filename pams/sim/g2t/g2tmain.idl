@@ -16,6 +16,9 @@
 #include "g2t_mwc_hit.idl"  
 #include "g2t_ctf_hit.idl"
 #include "g2t_emc_hit.idl"  
+#include "g2t_smd_hit.idl"  
+#include "g2t_eem_hit.idl"  
+#include "g2t_esm_hit.idl"  
 #include "g2t_ftp_hit.idl"  
 #include "g2t_vpd_hit.idl"
 
