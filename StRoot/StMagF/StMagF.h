@@ -28,7 +28,8 @@ public:
   virtual void Field(Float_t *x, Float_t *b);
   virtual EField Type() {return fMap;}
   virtual void ReadField() {}
-  
+  virtual void SetFactor(Float_t value) {fFactor = value;}
+  virtual Float_t GetFactor() { return fFactor;}
   ClassDef(StMagF,1)  //Base class for all STAR MagField
 };
 
@@ -87,16 +88,4 @@ public:
   
   ClassDef(StMagFCM,1)  //Class for all STAR MagField with Constant Mesh
 };
-
-#endif
-#ifdef __CINT__
-
-#pragma link off all globals;
-#pragma link off all classes;
-#pragma link off all functions;
-
-#pragma link C++ class StMagF;
-#pragma link C++ class StMagFC;
-#pragma link C++ class StMagFCM;
-
 #endif
