@@ -1,10 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.37 2001/12/18 19:27:37 posk Exp $
+// $Id: plot.C,v 1.38 2002/01/14 23:42:57 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
-// Description:  Macro to plot histograms made by StFlowAnalysisMaker.
+// Description:  Macro to plot histograms made by StFlowAnalysisMaker and
+//                 StFlowScalarProdMaker.
 //               If selN = 0 plot all selections and harmonics.
 //               First time type .x plot.C() to see the menu.
 //               Run Number appended to "ana" is entered in the bottom, left box.
@@ -130,7 +131,13 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_v2D_Sel",
     "Flow_vEta_Sel",
     "Flow_vPt_Sel",
-    "Flow_q_Sel"
+    "Flow_q_Sel",
+    "Flow_vObs2D_ScalarProd_Sel",
+    "Flow_vObsEta_ScalarProd_Sel",
+    "Flow_vObsPt_ScalarProd_Sel",
+    "Flow_v2D_ScalarProd_Sel",
+    "Flow_vEta_ScalarProd_Sel",
+    "Flow_vPt_ScalarProd_Sel"
   };
   const int nNames = sizeof(baseName) / sizeof(char*);
   const int nSingles = 46 + 1;
@@ -236,7 +243,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   } else {                        // one graph from a multi graph page
     int firstK = selN -1, firstJ = harN -1, lastK = selN, lastJ = harN;
   }
-  TLine* lineZeroY  = new TLine(-4.5, 0., 4.5, 0.);
+  TLine* lineZeroY  = new TLine(-etaMax, 0., etaMax, 0.);
   TLine* lineYcm    = new TLine(Ycm, -10., Ycm, 10.);
   TLine* lineOnePhi = new TLine(0., 1., phiMax, 1.);
   for (int j = firstJ; j < lastJ; j++) {
@@ -623,6 +630,9 @@ static Double_t qDist(double* q, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.38  2002/01/14 23:42:57  posk
+// Renamed ScalerProd histograms. Moved print commands to FlowMaker::Finish().
+//
 // Revision 1.37  2001/12/18 19:27:37  posk
 // "proton" and "antiproton" replaced by "pr+" and "pr-".
 //

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCumulant.C,v 1.3 2001/12/18 19:27:44 posk Exp $
+// $Id: plotCumulant.C,v 1.4 2002/01/14 23:43:06 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Nov 2001
 // Description:  Macro to plot histograms made by StFlowCumulantMaker.
@@ -54,6 +54,7 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t selN=2, Int_t orderN=0, Int_t ha
   };
   const int nNames = sizeof(baseName) / sizeof(char*);
   const int nSingles =  4;
+  float Ycm = 0.0;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -95,7 +96,7 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t selN=2, Int_t orderN=0, Int_t ha
     }
     cout << "-1: \t All" << endl;                         // print menu
     for (int i = 0; i < nNames; i++) {
-      cout << i+1 << ":\t " << shortName[i] << endl;
+      cout << i+1 << ":\t " << baseName[i] << endl;
     }
     cout << "     page number? ";
     fgets(tmp, sizeof(tmp), stdin);
@@ -104,12 +105,10 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t selN=2, Int_t orderN=0, Int_t ha
   if (pageNumber > 0 && pageNumber <= nSingles) {         // plot singles
     singleGraph = kTRUE;
     multiGraph  = kFALSE;
+    strcpy(shortName[pageNumber-1], baseName[pageNumber-1]); 
   }
   pageNumber--;
   cout << "  graph name= " << shortName[pageNumber] << endl;
-
-  // set constants
-  float Ycm     =   0.0;
 
   // set row and column numbers
   int columns = nOrders;
@@ -259,6 +258,9 @@ void plotCumulantAll(Int_t nNames, Int_t orderN, Int_t selN, Int_t harN, Int_t f
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCumulant.C,v $
+// Revision 1.4  2002/01/14 23:43:06  posk
+// Renamed ScalerProd histograms. Moved print commands to FlowMaker::Finish().
+//
 // Revision 1.3  2001/12/18 19:27:44  posk
 // "proton" and "antiproton" replaced by "pr+" and "pr-".
 //

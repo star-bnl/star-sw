@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.59 2001/12/18 19:27:06 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.60 2002/01/14 23:42:21 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -21,7 +21,7 @@
 #include "StFlowTagMaker/StFlowTagMaker.h"
 #include "StFlowMaker/StFlowConstants.h"
 #include "StFlowMaker/StFlowSelection.h"
-#include "StFlowMaker/StFlowCutTrack.h"
+//#include "StFlowMaker/StFlowCutTrack.h"
 #include "StEnumerations.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
@@ -33,7 +33,7 @@
 #include "TH3.h"
 #include "TProfile.h"
 #include "TProfile2D.h"
-#include "TF1.h"
+//#include "TF1.h"
 #include "TOrdCollection.h"
 #include "StMessMgr.h"
 #include "TMath.h"
@@ -1055,7 +1055,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.59 2001/12/18 19:27:06 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.60 2002/01/14 23:42:21 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1572,6 +1572,8 @@ Int_t StFlowAnalysisMaker::Finish() {
   // PhiWgt histogram collection
   TOrdCollection* phiWgtHistNames = new TOrdCollection(Flow::nSels*Flow::nHars);
 
+  cout << endl << "##### Analysis Maker:" << endl;
+
   // Calculate resolution from sqrt(mHistCos)
   double cosPair[Flow::nSels][Flow::nHars];
   double cosPairErr[Flow::nSels][Flow::nHars];
@@ -1764,14 +1766,7 @@ Int_t StFlowAnalysisMaker::Finish() {
   phiWgtNewFile.Close();
   delete phiWgtHistNames;
 
-  // Print the selection object details
-  pFlowSelect->PrintList();
-
   delete pFlowSelect;
-
-  cout << endl;
-  gMessMgr->Summary(3);
-  cout << endl;
 
   return StMaker::Finish();
 }
@@ -1779,6 +1774,9 @@ Int_t StFlowAnalysisMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.60  2002/01/14 23:42:21  posk
+// Renamed ScalerProd histograms. Moved print commands to FlowMaker::Finish().
+//
 // Revision 1.59  2001/12/18 19:27:06  posk
 // "proton" and "antiproton" replaced by "pr+" and "pr-".
 //

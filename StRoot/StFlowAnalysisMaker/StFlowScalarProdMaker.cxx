@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowScalarProdMaker.cxx,v 1.2 2001/12/21 17:01:59 aihong Exp $
+// $Id: StFlowScalarProdMaker.cxx,v 1.3 2002/01/14 23:42:52 posk Exp $
 //
 // Authors: Method proposed by Art and Sergei, code written by Aihong
 //          Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -19,7 +19,7 @@
 #include "StFlowMaker/StFlowEvent.h"
 #include "StFlowMaker/StFlowConstants.h"
 #include "StFlowMaker/StFlowSelection.h"
-#include "StFlowMaker/StFlowCutTrack.h"
+//#include "StFlowMaker/StFlowCutTrack.h"
 #include "StEnumerations.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
@@ -28,11 +28,11 @@
 #include "TString.h"
 #include "TH1.h"
 #include "TH2.h"
-#include "TH3.h"
+//#include "TH3.h"
 #include "TProfile.h"
 #include "TProfile2D.h"
-#include "TF1.h"
-#include "TOrdCollection.h"
+//#include "TF1.h"
+//#include "TOrdCollection.h"
 #include "StMessMgr.h"
 #include "TMath.h"
 #define PR(x) cout << "##### FlowScalarProdAnalysis: " << (#x) << " = " << (x) << endl;
@@ -47,8 +47,7 @@ StFlowScalarProdMaker::StFlowScalarProdMaker(const Char_t* name): StMaker(name),
 }
 
 StFlowScalarProdMaker::StFlowScalarProdMaker(const Char_t* name,
-					 const StFlowSelection& flowSelect) :
-  StMaker(name), MakerName(name) {
+    const StFlowSelection& flowSelect) : StMaker(name), MakerName(name) {
   pFlowSelect = new StFlowSelection(flowSelect); //copy constructor
 }
 
@@ -92,21 +91,15 @@ Int_t StFlowScalarProdMaker::Init() {
   xLabel = "Pseudorapidity";
   if (strlen(pFlowSelect->PidPart()) != 0) { xLabel = "Rapidity"; }
 
-  
-
-  
   TString* histTitle;
 
-
+  // for each selection
   for (int k = 0; k < Flow::nSels; k++) {
     char countSels[2];
     sprintf(countSels,"%d",k+1);
 
-    // for each selection
-
-
     // resolution
-    histTitle = new TString("Flow_Res_Sel");
+    histTitle = new TString("Flow_Res_ScalarProd_Sel");
     histTitle->Append(*countSels);
     histFull[k].mHistRes = new TProfile(histTitle->Data(), histTitle->Data(),
       Flow::nHars, 0.5, (float)(Flow::nHars) + 0.5, -1.*FLT_MAX, FLT_MAX, "");
@@ -115,7 +108,7 @@ Int_t StFlowScalarProdMaker::Init() {
     delete histTitle;
 
     // vObs
-    histTitle = new TString("Flow_vObs_Sel");
+    histTitle = new TString("Flow_vObs_ScalarProd_Sel");
     histTitle->Append(*countSels);
     histFull[k].mHist_vObs = new TProfile(histTitle->Data(), histTitle->Data(),
       Flow::nHars, 0.5, (float)(Flow::nHars) + 0.5, -100., 100., "");
@@ -129,7 +122,7 @@ Int_t StFlowScalarProdMaker::Init() {
       sprintf(countHars,"%d",j+1);
 
       // Flow observed
-      histTitle = new TString("Flow_vObs2D_Sel");
+      histTitle = new TString("Flow_vObs2D_ScalarProd_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
@@ -141,7 +134,7 @@ Int_t StFlowScalarProdMaker::Init() {
       delete histTitle;
 
       // Flow observed profiles
-      histTitle = new TString("Flow_vObsEta_Sel");
+      histTitle = new TString("Flow_vObsEta_ScalarProd_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
@@ -152,7 +145,7 @@ Int_t StFlowScalarProdMaker::Init() {
       histFull[k].histFullHar[j].mHist_vObsEta->SetYTitle("v (%)");
       delete histTitle;
 
-      histTitle = new TString("Flow_vObsPt_Sel");
+      histTitle = new TString("Flow_vObsPt_ScalarProd_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
@@ -165,8 +158,8 @@ Int_t StFlowScalarProdMaker::Init() {
     }
   }
 
-  gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.2 2001/12/21 17:01:59 aihong Exp $");
+  gMessMgr->SetLimit("##### FlowScalerProdAnalysis", 2);
+  gMessMgr->Info("##### FlowScalerProdAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.3 2002/01/14 23:42:52 posk Exp $");
 
   return StMaker::Init();
 }
@@ -176,7 +169,8 @@ Int_t StFlowScalarProdMaker::Init() {
 //-----------------------------------------------------------------------
 
 void StFlowScalarProdMaker::FillFromFlowEvent() {
-  // Get event quantities from StFlowEvent
+  // Get Q vectors from StFlowEvent
+
   for (int k = 0; k < Flow::nSels; k++) {
     pFlowSelect->SetSelection(k);
     for (int j = 0; j < Flow::nHars; j++) {
@@ -186,8 +180,8 @@ void StFlowScalarProdMaker::FillFromFlowEvent() {
 	int i = Flow::nSels*k + n;
 	// sub-event quantities
         mQSub[i][j]=pFlowEvent->Q(pFlowSelect);
-     }
-
+      }
+      
       pFlowSelect->SetSubevent(-1);
       // full event quantities
       mQ[k][j]    = pFlowEvent->Q(pFlowSelect);
@@ -199,13 +193,15 @@ void StFlowScalarProdMaker::FillFromFlowEvent() {
 //-----------------------------------------------------------------------
 
 void StFlowScalarProdMaker::FillEventHistograms() {
+  // The scaler product of the subevent Q vectors
 
   for (int k = 0; k < Flow::nSels; k++) {
     for (int j = 0; j < Flow::nHars; j++) {
       float order  = (float)(j+1);
 
-
-      histFull[k].mHistRes->Fill(order, (mQSub[Flow::nSels*k + 0][j].X()) * (mQSub[Flow::nSels*k + 1][j].X()) + (mQSub[Flow::nSels*k + 0][j].Y()) * (mQSub[Flow::nSels*k + 1][j].Y()) ); 
+      histFull[k].mHistRes->Fill(order, (mQSub[Flow::nSels*k + 0][j].X()) * 
+	  (mQSub[Flow::nSels*k + 1][j].X()) + (mQSub[Flow::nSels*k + 0][j].Y()) 
+				 * (mQSub[Flow::nSels*k + 1][j].Y()) ); 
 
     }
   }
@@ -216,7 +212,6 @@ void StFlowScalarProdMaker::FillEventHistograms() {
 
 void StFlowScalarProdMaker::FillParticleHistograms() {
   // Fill histograms from the particles
-
 
   // Initialize Iterator
   StFlowTrackCollection* pFlowTracks = pFlowEvent->TrackCollection();
@@ -233,40 +228,25 @@ void StFlowScalarProdMaker::FillParticleHistograms() {
     for (int k = 0; k < Flow::nSels; k++) {
       pFlowSelect->SetSelection(k);
       for (int j = 0; j < Flow::nHars; j++) {
-	bool oddHar = (j+1) % 2;
 	pFlowSelect->SetHarmonic(j);
-	double order  = (double)(j+1);
 
-	  // Get phiWgt
-	  double phiWgt = pFlowEvent->PhiWeight(k, j, pFlowTrack);
-
-	  double phiWgtRaw = phiWgt;
-	  if (pFlowEvent->PtWgt()) { // remove pt weighting
-	    phiWgtRaw /= (pt < 2.) ? pt : 2.;
-	  }
-	  if (oddHar && eta < 0.) phiWgtRaw /= -1.;
-
-
-	  TVector2 q_i;
-	  TVector2 mQ_i=mQ[k][j];
-          TVector2 q_i_unit;
-
-          q_i.Set(phiWgt * cos(phi * order), phiWgt * sin(phi * order));
-
-
-
-	  // Remove autocorrelations
-          if ( (pFlowSelect->SelectPart(pFlowTrack)) && 
-               (pFlowSelect->Select(pFlowTrack)) ) 
-	     mQ_i = mQ_i - q_i;
-
-
-          q_i_unit.Set(cos(phi*order),sin(phi*order));
-
-       	// Caculate v for all particles selected for correlation analysis
 	if (pFlowSelect->SelectPart(pFlowTrack)) {
-
-	  float v = (mQ_i.X()*q_i_unit.X()+mQ_i.Y()*q_i_unit.Y());
+	  bool oddHar = (j+1) % 2;
+	  double order  = (double)(j+1);
+	  TVector2 q_i;
+	  TVector2 mQ_i = mQ[k][j];
+          TVector2 q_i_unit;
+	  
+	  // Remove autocorrelations
+	  if (pFlowSelect->Select(pFlowTrack)) {
+	    double phiWgt = pFlowEvent->PhiWeight(k, j, pFlowTrack);
+	    q_i.Set(phiWgt * cos(phi * order), phiWgt * sin(phi * order));
+	    mQ_i = mQ_i - q_i;
+	  }
+	  	  
+	  // Caculate v for all particles selected
+          q_i_unit.Set(cos(phi*order), sin(phi*order));
+	  float v = (mQ_i.X()*q_i_unit.X() + mQ_i.Y()*q_i_unit.Y());
 	  float vFlip = v;
 	  if (eta < 0 && oddHar) vFlip *= -1;
 	  if (strlen(pFlowSelect->PidPart()) != 0) { 
@@ -280,7 +260,6 @@ void StFlowScalarProdMaker::FillParticleHistograms() {
 	  histFull[k].histFullHar[j].mHist_vObsPt-> Fill(pt, vFlip);
 	  histFull[k].mHist_vObs->Fill(order, vFlip);
 	  
-
 	}
       }
     }  
@@ -293,15 +272,20 @@ void StFlowScalarProdMaker::FillParticleHistograms() {
 
 Int_t StFlowScalarProdMaker::Finish() {
   // Calculates resolution and mean flow values
+
   TString* histTitle;
 
   double content;
   double error;
   double totalError;
+
+  cout << endl << "##### Scaler Product Maker:" << endl;
+
   for (int k = 0; k < Flow::nSels; k++) {
     char countSels[2];
     sprintf(countSels,"%d",k+1);
-    // Creat the 1D v histogram
+
+    // Create the 1D v histogram
     histTitle = new TString("Flow_v_ScalarProd_Sel");
     histTitle->Append(*countSels);
     histFull[k].mHist_v = 
@@ -317,10 +301,9 @@ Int_t StFlowScalarProdMaker::Finish() {
       sprintf(countHars,"%d",j+1);
 
       mRes[k][j] = sqrt(histFull[k].mHistRes->GetBinContent(j+1))*2.*perCent;
-
       mResErr[k][j] = sqrt(histFull[k].mHistRes->GetBinError(j+1))*2.*perCent; 
 
-	// Creat the v 2D histogram
+	// Create the v 2D histogram
       histTitle = new TString("Flow_v2D_ScalarProd_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
@@ -334,7 +317,7 @@ Int_t StFlowScalarProdMaker::Finish() {
       delete histTitle;
       AddHist(histFull[k].histFullHar[j].mHist_v2D);
 
-      // Creat the 1D v histograms
+      // Create the 1D v histograms
       histTitle = new TString("Flow_vEta_ScalarProd_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
@@ -359,11 +342,8 @@ Int_t StFlowScalarProdMaker::Finish() {
       delete histTitle;
       AddHist(histFull[k].histFullHar[j].mHist_vPt);
 
-      // Calulate v = vObs / Resolution
+      // Calulate v = vObs / Resolution or Q.u/(2sqrt(<Q_a.Q_b>))
       if (mRes[k][j]) {
-	cout << "##### Resolution of the " << j+1 << "th harmonic = " << 
-	  mRes[k][j] << " +/- " << mResErr[k][j] 
-	     << endl;
 	// The systematic error of the resolution is not folded in.
 	histFull[k].histFullHar[j].mHist_v2D-> Scale(1. / mRes[k][j]);
 	histFull[k].histFullHar[j].mHist_vEta->Scale(1. / mRes[k][j]);
@@ -397,15 +377,7 @@ Int_t StFlowScalarProdMaker::Finish() {
   GetHistList()->Write();
   histFile.Close();
   
-
-  // Print the selection object details
-  pFlowSelect->PrintList();
-
   delete pFlowSelect;
-
-  cout << endl;
-  gMessMgr->Summary(3);
-  cout << endl;
 
   return StMaker::Finish();
 }
@@ -413,6 +385,9 @@ Int_t StFlowScalarProdMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowScalarProdMaker.cxx,v $
+// Revision 1.3  2002/01/14 23:42:52  posk
+// Renamed ScalerProd histograms. Moved print commands to FlowMaker::Finish().
+//
 // Revision 1.2  2001/12/21 17:01:59  aihong
 // minor changes
 //
