@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.hh,v 1.17 2002/09/25 19:23:25 rcwells Exp $
+ *  StHbtPair.hh,v 1.17
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,8 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.hh,v $
- * Revision 1.17  2002/09/25 19:23:25  rcwells
- * Added const to emissionAngle()
+ * Revision 1.18  2002/11/19 23:33:18  renault
+ * Enable average separation calculation for all combinaisons of
+ * V0 daughters and tracks
  *
  * Revision 1.16  2002/02/28 14:18:36  rcwells
  * Added emissionAngle function to StHbtPair
@@ -156,9 +157,31 @@ public:
   // assumption is important for the Event Mixing-- it is not a mistake. - MALisa
   double NominalTpcExitSeparation() const;
   double NominalTpcEntranceSeparation() const;
-
   double NominalTpcAverageSeparation() const;
+  // adapted calculation of Entrance/Exit/Average Tpc separation to V0 daughters
+  double TpcExitSeparationTrackV0Pos() const;
+  double TpcEntranceSeparationTrackV0Pos() const;
+  double TpcAverageSeparationTrackV0Pos() const; 
 
+  double TpcExitSeparationTrackV0Neg() const;
+  double TpcEntranceSeparationTrackV0Neg() const;
+  double TpcAverageSeparationTrackV0Neg() const; 
+
+  double TpcExitSeparationV0PosV0Pos() const;
+  double TpcEntranceSeparationV0PosV0Pos() const;
+  double TpcAverageSeparationV0PosV0Pos() const; 
+
+  double TpcExitSeparationV0PosV0Neg() const;
+  double TpcEntranceSeparationV0PosV0Neg() const;
+  double TpcAverageSeparationV0PosV0Neg() const; 
+ 
+  double TpcExitSeparationV0NegV0Pos() const;
+  double TpcEntranceSeparationV0NegV0Pos() const;
+  double TpcAverageSeparationV0NegV0Pos() const; 
+  
+  double TpcExitSeparationV0NegV0Neg() const;
+  double TpcEntranceSeparationV0NegV0Neg() const;
+  double TpcAverageSeparationV0NegV0Neg() const; 
 
   double pInv() const;
   double KStar() const;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.23 2002/09/25 19:23:25 rcwells Exp $
+ *  StHbtPair.cc,v 1.23
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -12,13 +12,16 @@
  *    Correlation Functions
  *
  ***************************************************************************
- *
- * $Log: StHbtPair.cc,v $
  * Revision 1.23  2002/09/25 19:23:25  rcwells
  * Added const to emissionAngle()
  *
  * Revision 1.22  2002/04/22 22:48:11  laue
- * corrected calculation of opening angle
+ * corrected calculation of opening angle 
+ **
+ * $Log: StHbtPair.cc,v $
+ * Revision 1.24  2002/11/19 23:33:10  renault
+ * Enable average separation calculation for all combinaisons of
+ * V0 daughters and tracks
  *
  * Revision 1.21  2002/02/28 14:18:36  rcwells
  * Added emissionAngle function to StHbtPair
@@ -164,7 +167,7 @@ double StHbtPair::rap() const
   return (tmp);
 }
 //_________________
-double StHbtPair::emissionAngle() const {
+double StHbtPair::emissionAngle()const {
   double pxTotal = this->fourMomentumSum().x();
   double pyTotal = this->fourMomentumSum().y();
   double angle = atan2(pyTotal,pxTotal)*180.0/3.1415926536;
@@ -491,7 +494,12 @@ double StHbtPair::NominalTpcAverageSeparation() const {
 }
 
 double StHbtPair::OpeningAngle() const {
-  return 57.296* mTrack1->FourMomentum().vect().angle( mTrack2->FourMomentum().vect() );
+ return 57.296* mTrack1->FourMomentum().vect().angle( mTrack2->FourMomentum().vect() );
+//   StHbtThreeVector p1 = mTrack1->FourMomentum().vect();
+//   StHbtThreeVector p2 = mTrack2->FourMomentum().vect();
+//   return 57.296*(p1.phi()-p2.phi());
+//   //double dAngInv = 57.296*acos((p1.dot(p2))/(p1.mag()*p2.mag()));
+//   //return (dAngInv);
 }
 //_________________
 
@@ -790,3 +798,133 @@ void StHbtPair::calcMergingPar() const{
     mWeightedAvSep = -1.;
   }
 }
+//________________V0 daughters exit/entrance/average separation calc.
+//_______1st part is a track 2nd is a V0 considering Pos daughter
+double StHbtPair::TpcExitSeparationTrackV0Pos() const {
+  StHbtThreeVector diff = mTrack1->NominalTpcExitPoint() - mTrack2->TpcV0PosExitPoint();
+  return (diff.mag());
+}
+
+double StHbtPair::TpcEntranceSeparationTrackV0Pos() const {
+  StHbtThreeVector diff = mTrack1->NominalTpcEntrancePoint() - mTrack2->TpcV0PosEntrancePoint();
+  return (diff.mag());
+}
+
+double StHbtPair::TpcAverageSeparationTrackV0Pos() const {
+  StHbtThreeVector diff;
+  double AveSep = 0.0;
+  for (int ipt=0; ipt<9; ipt++){// change tpy<11 by ipt<9 
+    diff = mTrack1->mNominalPosSample[ipt] - mTrack2->mTpcV0PosPosSample[ipt];
+    AveSep += diff.mag();
+  }
+  AveSep = AveSep/9.0;
+  return (AveSep);
+}
+//_______1st part is a track 2nd is a V0 considering Neg daughter
+double StHbtPair::TpcExitSeparationTrackV0Neg() const {
+  StHbtThreeVector diff = mTrack1->NominalTpcExitPoint() - mTrack2->TpcV0NegExitPoint();
+  return (diff.mag());
+}
+
+double StHbtPair::TpcEntranceSeparationTrackV0Neg() const {
+  StHbtThreeVector diff = mTrack1->NominalTpcEntrancePoint() - mTrack2->TpcV0NegEntrancePoint();
+  return (diff.mag());
+}
+
+double StHbtPair::TpcAverageSeparationTrackV0Neg() const {
+  StHbtThreeVector diff;
+  double AveSep = 0.0;// change ipt<11 by ipt <9 because TpcV0NegPosSample[ipt]=nan
+  for (int ipt=0; ipt<9; ipt++){
+    diff = mTrack1->mNominalPosSample[ipt] - mTrack2->mTpcV0NegPosSample[ipt];
+    AveSep += diff.mag();
+  }
+  AveSep = AveSep/9.0;
+  return (AveSep);
+}
+//_______1st part is a V0 considering Pos daughter 2nd is a V0 considering Pos daughter
+double StHbtPair::TpcExitSeparationV0PosV0Pos() const {
+  StHbtThreeVector diff = mTrack1->TpcV0PosExitPoint() - mTrack2->TpcV0PosExitPoint();
+  return (diff.mag());
+}
+
+double StHbtPair::TpcEntranceSeparationV0PosV0Pos() const {
+  StHbtThreeVector diff = mTrack1->TpcV0PosEntrancePoint() - mTrack2->TpcV0PosEntrancePoint();
+  return (diff.mag());
+}
+
+double StHbtPair::TpcAverageSeparationV0PosV0Pos() const {
+  StHbtThreeVector diff;
+  double AveSep = 0.0;
+  for (int ipt=0; ipt<9; ipt++){
+    diff = mTrack1->mTpcV0PosPosSample[ipt] - mTrack2->mTpcV0PosPosSample[ipt];
+    AveSep += diff.mag();
+  }
+  AveSep = AveSep/9.0;
+  return (AveSep);
+}
+//_______1st part is a V0 considering Pos daughter 2nd is a V0 considering Neg daughter
+double StHbtPair::TpcExitSeparationV0PosV0Neg() const {
+  StHbtThreeVector diff = mTrack1->TpcV0PosExitPoint() - mTrack2->TpcV0NegExitPoint();
+  return (diff.mag());
+}
+
+double StHbtPair::TpcEntranceSeparationV0PosV0Neg() const {
+  StHbtThreeVector diff = mTrack1->TpcV0PosEntrancePoint() - mTrack2->TpcV0NegEntrancePoint();
+  return (diff.mag());
+}
+
+double StHbtPair::TpcAverageSeparationV0PosV0Neg() const {
+  StHbtThreeVector diff;
+  double AveSep = 0.0;
+  for (int ipt=0; ipt<9; ipt++){
+    //    cout <<"" << << endl;
+    diff = mTrack1->mTpcV0PosPosSample[ipt] - mTrack2->mTpcV0NegPosSample[ipt];
+    AveSep += diff.mag();
+  }
+  AveSep = AveSep/9.0;
+  return (AveSep);
+}
+//_______1st part is a V0 considering Neg daughter 2nd is a V0 considering Pos daughter
+// this is to check the upper case
+double StHbtPair::TpcExitSeparationV0NegV0Pos() const {
+  StHbtThreeVector diff = mTrack1->TpcV0NegExitPoint() - mTrack2->TpcV0PosExitPoint();
+  return (diff.mag());
+}
+
+double StHbtPair::TpcEntranceSeparationV0NegV0Pos() const {
+  StHbtThreeVector diff = mTrack1->TpcV0NegEntrancePoint() - mTrack2->TpcV0PosEntrancePoint();
+  return (diff.mag());
+}
+
+double StHbtPair::TpcAverageSeparationV0NegV0Pos() const {
+  StHbtThreeVector diff;
+  double AveSep = 0.0;
+  for (int ipt=0; ipt<9; ipt++){
+    diff = mTrack1->mTpcV0NegPosSample[ipt] - mTrack2->mTpcV0PosPosSample[ipt];
+    AveSep += diff.mag();
+  }
+  AveSep = AveSep/9.0;
+  return (AveSep);
+}
+//_______1st part is a V0 considering Neg daughter 2nd is a V0 considering Neg daughter
+double StHbtPair::TpcExitSeparationV0NegV0Neg() const {
+  StHbtThreeVector diff = mTrack1->TpcV0NegExitPoint() - mTrack2->TpcV0NegExitPoint();
+  return (diff.mag());
+}
+
+double StHbtPair::TpcEntranceSeparationV0NegV0Neg() const {
+  StHbtThreeVector diff = mTrack1->TpcV0NegEntrancePoint() - mTrack2->TpcV0NegEntrancePoint();
+  return (diff.mag());
+}
+
+double StHbtPair::TpcAverageSeparationV0NegV0Neg() const {
+  StHbtThreeVector diff;
+  double AveSep = 0.0;
+  for (int ipt=0; ipt<9; ipt++){
+    diff = mTrack1->mTpcV0NegPosSample[ipt] - mTrack2->mTpcV0NegPosSample[ipt];
+    AveSep += diff.mag();
+  }
+  AveSep = AveSep/9.0;
+  return (AveSep);
+}
+//________________end V0 daughters exit/entrance/average separation calc.
