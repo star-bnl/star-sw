@@ -88,7 +88,7 @@
 * editted 8/31/98 K. Turner - broke up event and run summary and header kumacs
 *                             and now add new module to chain:
 *                                 drhd - dst run header table
-*
+* 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -100,7 +100,7 @@
 
 * import global macros
    macro/global/import *
-   
+
 *  THESE NEXT 4 MUST BE DONE IN THIS ORDER!!!!
    message ' *** SET GEOMETRY in gstar:  -->   ' [gstar_settings]
    message '        !!! split_off is hardwired into this kumac !!! '
@@ -320,7 +320,7 @@ ABEND:
   macro/global/import *
   test = [chain]
   nw = $words([test])
-  
+
   do i = 1, [nw]
    mod = $word([test],[i],1)
    message ' !!! bfc_util ==> process event for chain value: ' [mod]
@@ -454,6 +454,7 @@ ABEND:
    
   enddo
   asu/malloc/stats 
+
  ABEND:
  NEXT_EVENT:
  EOF:
@@ -473,6 +474,7 @@ macro bfc_finish _
   vec/cre totime r 0
   do i = 1, [nw]
     mod = $word([test],[i],1)
+    message ' !!! bfc_util ==> finish for chain value: ' [mod]
     CASE [mod] in 
      (g2tin)  exec input_g2t_file#close
      (rgst)  ge/rz/cd //PAWC; hi/list;  | show histograms
@@ -480,6 +482,7 @@ macro bfc_finish _
             if [output_xdf_file]="" then
                  message "Empty output file"
             else
+	      
               exec write_table_to_file#write outfile [run]
               exec write_table_to_file#close outfile;
             endif
