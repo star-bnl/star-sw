@@ -96,32 +96,38 @@ public:
     double getWindowY() const;
     double getWindowZ() const;
 
+    double pitchAngle() const;
+    double crossAngle() const;
+
     /// Return center of helix circle in global coordinates
     StThreeVector<double> getHelixCenter() const;
+
+    void setError(pair<double, double> p);
 
     // static methods
     
 
-		static void   setParameters(StiKalmanTrackFinderParameters *parameters)
-			{
-				pars = parameters;
-			}
+    static void   setParameters(StiKalmanTrackFinderParameters *parameters)
+      {
+	pars = parameters;
+      }
     friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
 
-		// we have many friends...
-		friend class StiKalmanTrack;
-		friend class StiKalmanTrackLessThan;
-		friend class StiKalmanTrackFinder;
-		friend class StiKalmanTrackFitter;
-		friend class StiKTNXLessThan;
-		friend class StreamX;
-		friend class StiGeometryTransform;
-		friend class StiLocalTrackMerger;
-		friend class StiMaterialInteraction;
-		friend class StiTrackContainer;
-		friend class StiEvaluator;
-		friend class StiEventAssociator;
-
+    /*
+    // we have many friends...
+    friend class StiKalmanTrack;
+    friend class StiKalmanTrackLessThan;
+    friend class StiKalmanTrackFinder;
+    friend class StiKalmanTrackFitter;
+    friend class StiKTNXLessThan;
+    friend class StreamX;
+    friend class StiGeometryTransform;
+    friend class StiLocalTrackMerger;
+    friend class StiMaterialInteraction;
+    friend class StiTrackContainer;
+    friend class StiEvaluator;
+    friend class StiEventAssociator;
+    */
 
     /// rotation angle of local coordinates wrt global coordinates
     double fAlpha;
@@ -138,6 +144,7 @@ public:
     /// tangent of the track momentum dip angle
     double fP4;
     
+      
     /// covariance matrix of the track parameters
     double fC00;                       
     double fC10, fC11;                 
@@ -147,7 +154,11 @@ public:
     double fChi2;
     float  fdEdx;           // dE/dx 
     float  pathLength;
-    
+
+
+    // local error assigned to the y and z position of the hit.
+    float  eyy,ezz;
+
     int hitCount;
     int nullCount;
     int contiguousHitCount;
@@ -158,7 +169,7 @@ public:
  protected:   
     static bool  recurse;
     
-		static StiKalmanTrackFinderParameters * pars;
+    static StiKalmanTrackFinderParameters * pars;
     
     //const StiDetector * targetDet; // not persistent
     static int   shapeCode;
@@ -172,7 +183,32 @@ public:
     static double x1,x2,y1,z1,dx,r1,r2,c1,c2,c1sq,c2sq,x0,y0;
     static double radThickness, density;
     static double gasDensity,matDensity,gasRL,matRL;
+    static bool   useCalculatedHitError;
 };
+
+inline double StiKalmanTrackNode::getTanL() const
+{
+  return fP4;
+}
+
+inline double StiKalmanTrackNode::pitchAngle() const
+{
+  return atan(fP4);
+}
+
+inline double StiKalmanTrackNode::crossAngle() const
+{
+  return asin(fP3*fX-fP2);
+}
+
+
+
+inline void StiKalmanTrackNode::setError(pair<double, double> p)
+{
+  eyy = p.first*p.first;
+  ezz = p.second*p.second;
+}
+
 
 //stl helper functor
 
