@@ -18,13 +18,15 @@
  
 class  TBranch;
 class  TTree;
+class  TFile;
 
 class St_io_Maker : public StMaker {
  private:
    Bool_t drawinit;
    Bool_t fSplit;    // flag of the "split" mode
-// static Char_t  m_VersionCVS = "$Id: St_io_Maker.h,v 1.6 1999/02/25 17:14:14 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_io_Maker.h,v 1.7 1999/02/28 23:23:20 fine Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
+   TFile         *m_TreeRootFile;   //! ROOT file to keep TTRee object in their.
    TObjArray     *m_ListOfBranches; //!
 
  
@@ -47,6 +49,8 @@ class St_io_Maker : public StMaker {
            Int_t      NextEventGet(Int_t nevent);
    virtual void       PrintInfo();
    virtual Int_t      SetActive();
+//   virtual Int_t      SetFile(const Char_t *rootFileName);
+
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
    ClassDef(St_io_Maker, 1)   //StAF chain virtual base class for Makers
 };
