@@ -234,7 +234,7 @@ void MiniChain::setupOutput(const char * filePrefix,
   TString miniMcName= infile;
   //get rid of any directory part...
   if(miniMcName.Last('/')!=-1) miniMcName.Remove(0,miniMcName.Last('/')+1);
-  miniMcName.Prepend("Sti_");
+  //miniMcName.Prepend("Sti_");
 
   TString eventName=templateFile;
   if(!useExplicitName)
