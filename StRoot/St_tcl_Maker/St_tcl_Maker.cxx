@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.57 2000/02/23 23:04:29 hardtke Exp $
+// $Id: St_tcl_Maker.cxx,v 1.58 2000/02/25 17:57:05 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.58  2000/02/25 17:57:05  fisyak
+// Set proper include path
+//
 // Revision 1.57  2000/02/23 23:04:29  hardtke
 // get tpg tables from tpcDB
 //
@@ -195,8 +198,8 @@
 #include "tables/St_tcl_tpcluster_Table.h"
 #include "tables/St_tcl_tp_seq_Table.h"
 #include "tables/St_tcc_morphology_Table.h"
-#include "tpc/St_tpg_pad_plane_Table.h"
-#include "tpc/St_tpg_detector_Table.h"
+#include "tables/St_tpg_pad_plane_Table.h"
+#include "tables/St_tpg_detector_Table.h"
 #include "tpc/St_tcl_Module.h"
 #include "tpc/St_tph_Module.h"
 #include "tpc/St_xyz_newtab_Module.h"
@@ -547,7 +550,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.57 2000/02/23 23:04:29 hardtke Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.58 2000/02/25 17:57:05 fisyak Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
