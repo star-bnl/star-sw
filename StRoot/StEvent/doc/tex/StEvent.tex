@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.9 1999/12/03 18:42:17 ullrich Exp $
+% $Id: StEvent.tex,v 2.10 1999/12/06 23:01:54 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -143,8 +143,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.9 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/03 18:42:17 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.10 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/06 23:01:54 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -168,8 +168,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.9 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/03 18:42:17 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.10 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/06 23:01:54 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -177,17 +177,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.9 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/03 18:42:17 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.10 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/06 23:01:54 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.9 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/03 18:42:17 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.10 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/06 23:01:54 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.9 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/03 18:42:17 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.10 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/06 23:01:54 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -202,8 +202,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.9 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/03 18:42:17 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.10 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/06 23:01:54 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -1798,24 +1798,24 @@ track->pidTraits(tpcDedx);
 cout << tpcDedx.traits()->mean() << endl;
 cout << tpcDedx.traits()->errorOnMean() << endl;
 \end{verbatim}
-\texttt{StMeasuredPoint}.  So all the position related stuff comes
+
 This code uses very few lines. The code in \texttt{MyTpcAlgo} is
 highly re-usable and whoever uses the PID algorithm saves a lot of
 typing.
-of tracks which use the hits, and a method which returns a list of
+
 \index{StTpcDedxPidAlgorithm} In \StEvent\ there is actually one
 concrete PID algorithm implemented: \texttt{StTpcDedxPidAlgorithm}.
-references to its hits.
+The algorithm used stems from Craig Ogilvie.  It filters out the TPC
 dE/dx object (StDedxPidTraits) and returns the most probable particle,
 but also keeps all the information selected. The additional methods
 now make use of the stored information and let you work with the
-        \caption{}
+object after the select/filter operation is done. It is much more
 complicated then the examples shown here but the basic idea is the
 same. See \ref{sec:StTpcDedxPidAlgorithm} for details.
 
 \subsection{Vertices}
 \label{sec:vertices}
-tracks which uses a given hit:
+\index{vertices} \index{StVertex} \index{StMeasuredPoint}
 \index{StPrimaryVertex} \index{StV0Vertex} \index{StXiVertex}
 \index{StKinkVertex}
 
@@ -1847,10 +1847,15 @@ classes are:
 The UML diagram for the vertices classes is shown in
 Fig.~\ref{fig:vertex}.
 
-\index{TPC hits} \index{TPC sectors and rows} \index{StTpcHit}
-\index{sectors} \index{rows} Each hit returns its position in global
-coordinates. Besides that many hit classes also provide information on
-their \emph{local} coordinates. For the TPC hits that means that there
+\index{TPC hits}
+\index{TPC sectors and rows}
+\index{StTpcHit}
+\index{sectors}
+\index{rows}
+Each hit returns its position in global
+coordinates. In addition hit classes also provide information on
+their \emph{local} coordinates through methods which
+decode a detector specific data word. For the TPC hits there
 are methods to return the sector number (0-23) and row number (0-44).
 Please read section \ref{sec:conventionsNumbering} if you are puzzled
 about the numbering scheme.  There are two additional member functions
@@ -1860,17 +1865,17 @@ function has an optional argument \texttt{primaryVertex(unsigned int
 \texttt{event->primaryVertex(0)}. If there is more than one you have
 to give the index.\\
 The primary vertices are ordered according to the number of daughters
-        \caption{Class diagrams of the TPC hit storage scheme.}
+(i.e.~primary tracks) they hold. The first in the list is always the
 the vertex with the most daughter tracks. \index{primary vertices, order of}
 \begin{figure}[htb]
     \begin{center}
         \includegraphics{vertex.eps}
-The organization of the hit storage is such that the hits are ordered
+        \caption{Vertex class diagrams and their dependencies.}
         \label{fig:vertex}
-That means the collection you get (by pointer) from
-StEvent::tpcHitCollection() holds a collection of sectors
-(StTpcSectorHitCollection) which itself holds a collection of padrows
-(StTpcPadrowHitCollection). Each padrow finally contains the list of
+    \end{center}
+\end{figure}
+
+All secondary vertices \texttt{StV0Vertex}, \texttt{StXiVertex}, and
 \texttt{StKinkVertex}, store only references to their daughter tracks
 but they do not own them. In the reconstruction phase the daughter
 tracks are actually refitted with the vertex constraint but do not
@@ -1890,10 +1895,14 @@ collections are \texttt{StEvent::v0Vertices()},
         \includegraphics[height=0.7\textheight]{cartoon3.eps}
         \caption{Abstraction from a hierarchy}
     \end{center}
-    cout << theHits[i]->charge() << endl << endl;
+\end{figure}
+
+\subsection{Hits}
+\index{hits} \index{StMeasuredPoint} The base class for all concrete
+hit classes is \texttt{StHit} which itself inherits from
 \texttt{StMeasuredPoint}. So all the 'position' related stuff comes
 with the measured point: position, position errors, and a covariant
-The whole collection (\texttt{StTpcHitCollection}) and each sector
+error matrix.  \texttt{StHit} adds what all hits have in common such
 as a charge, a detector ID, a track reference count, i.e. the number
 of tracks which use the hit, and a method to return the list of
 tracks which reference the hit.  The list of tracks is created on the
@@ -1905,22 +1914,195 @@ references to their hits.
         \caption{The \texttt{StHit} class and its subclasses and superclasses.}
         \label{fig:hits}
     \end{center}
+\end{figure}
+
+Here an example on how to obtain a list of all global and primary
+tracks which use a given hit:
+\begin{verbatim}
+void f(StHit& hit, StEvent& event)
+The FTPC hit class \texttt{StFtpcHit} is very similar to the TPC version.
+However, because of the different detector geometry the hits are stored
+according to planes (0--19) and then sectors (0--5). This is depicted in
+Fig.~\ref{fig:ftpc}. Other than the TPC hit the FTPC hit has a method to return
+the size of the hit in time direction (\texttt{timebinsInHit()}) but no method
+to return the number of pixels per hit. See \ref{sec:StFtpcHit} for details. 
+        << gvec.size() << " global tracks and "
         << pvec.size() << "primary tracks."
 
    cout << "The momenta of the tracks are:" << endl;
-        \caption{}
+   int i;
    for (i=0; i<gvec.size(); i++)
        cout << gvec[i]->geometry()->momentum() << endl;
    for (i=0; i<pvec.size(); i++)
+       cout << pvec[i]->geometry()->momentum() << endl;
+}
+
+\end{verbatim}
+
+Needless to say that \texttt{StHit} is an abstract class. The concrete
+classes are: \texttt{StTpcHit}, \texttt{StSvtHit}, and
+\texttt{StFtpcHit}. The class diagram in Fig.~\ref{fig:hits} shows
+their relation. In the following we describe the different classes in
+detail.
+
+\subsubsection{TPC hits}
+\index{TPC hits} \index{TPC sectors and rows} \index{StTpcHit}
+\index{sectors} \index{rows} Each hit returns its position in global
+coordinates. In addition hit classes also provide information on their
+\emph{local} coordinates through methods which decode a detector
+specific data word. For the TPC hits there are methods to return the
+sector number (1-24) and row number (1-45).  Please read section
+\ref{sec:conventionsNumbering} about the difficulties with numbering
+schemes starting at 1.  There are two additional member functions
+\texttt{padsInHit()} and \texttt{pixelsInHit()} which return
+information on the number of pads and pixels used to compose the hit.
+See \ref{sec:StTpcHit} for details.
+\begin{figure}[htb]
     \begin{center}
 const int isec = 3;
+const int irow = 24;
+        \label{fig:tpc}
+    \end{center}
+\end{figure}
+
+The hits are stored in a tree-like structure organized
+has up to 7 wafers. Consequently the \texttt{StSvtHit} class provides method to
+The collection you obtain (by pointer) via
+returns 0--2, \texttt{layer()} returns 0--5, \texttt{ladder()} returns 0--7,
+and \texttt{wafer()} returns 0--6. If you are puzzled why we start to count at
+0 you better have a look at section \ref{sec:conventionsNumbering}.
+hits in this padrow. This is illustrated in the class diagrams in
+Fig.~\ref{fig:tpc}. You get the idea when you look at the following
+example:
+\begin{verbatim}
+const int isec = 3;    // 4th sector
+\index{SVT hits}
+\index{StSvtHit}
+\index{ladder}
+\index{layer}
 \index{wafer}
 The SVT consist of 6 layers (or 3 barrels) with up to 8 ladders each. Each ladder
 has up to 7 wafers. Consequently the \texttt{StSvtHit} class provides methods to
-        \caption{}
+return the local coordinates exactly in these ``units'': \texttt{barrel()}
 returns 1--3, \texttt{layer()} returns 1--6, \texttt{ladder()} returns 1--8,
 and \texttt{wafer()} returns 1--7. If you are puzzled why these numbers start at
 1 have a look at section \ref{sec:conventionsNumbering}.
+Because of the more detailed local coordinates
+there is not enough space to store any further details on the hits as it is the case
+for the TPC and FTPC.
+The SVT hits are stored in a tree organized as shown in Fig.~\ref{fig:svt}. 
+The top collection (\texttt{StSvtHitCollection}), the layer collection
+(\texttt{StSvtLayerHitCollection}), and the 
+(\texttt{StSvtLadderHitCollection}) provide a method to return the number
+of hits stored in the referring subcomponent (\texttt{numberOfHits()}).
+The hits are stored per wafer.
+\texttt{numberOfHits()} which returns just that, the number of all TPC
+hits and the number of hits in the corresponding sector.
+
+        \caption{Class diagrams of the SVT hit storage scheme: layer/ladder/wafer.}
+residual studies and can be better integrated into the reconstruction
+phase than a long flat list of hits. The disadvantage is that looping
+over \emph{all} hits does require somewhat more code but selecting
+hits in certain rows or sectors is easy and very efficient.
+
+\subsubsection{FTPC hits}
+\index{FTPC hits}
+const int ilayer   = 1;
+const int iladder  = 2;
+\index{sectors}
+\index{planes}
+cout << "layer " << ilayer << " contains "
+\end{verbatim}
+
+\subsubsection{SVT hits}
+\index{SVT hits} \index{StSvtHit} \index{ladder, SVT} \index{layer, SVT}
+\index{wafer, SVT} \index{barrel, SVT}
+
+The SVT consist of 3 barrels (6 layers) with up to 16 (8) ladders
+each. Each ladder has up to 7 wafers. Consequently the
+\texttt{StSvtHit} class provides methods to return the local
+coordinates exactly in these ``units'': \texttt{barrel()} returns
+1--3, \texttt{layer()} returns 1--6, \texttt{ladder()} returns 1--16,
+and \texttt{wafer()} returns 1--7. If you are puzzled why these
+numbers start at 1 have a look at section
+\ref{sec:conventionsNumbering}.  Because of the more detailed local
+coordinates there is not enough space to store any further details on
+the hits as it is the case for the TPC and FTPC.  The SVT hits are
+stored in a tree organized as shown in Fig.~\ref{fig:svt}.  The top
+collection (\texttt{StSvtHitCollection}) contains 3 barrel
+collections.  Each barrel collection
+(\texttt{StSvtBarrelHitCollection}) contains up to 16 ladder
+collections and each (\texttt{StSvtLadderHitCollection}) contains up
+const int ibarrel  = 1;
+const int iladder  = 10;
+const int iwafer   = 3;
+(\texttt{numberOfHits()}) to return the number of hits stored in the
+referring subcomponent. 
+\begin{figure}[htb]
+    \begin{center}
+        \includegraphics{svt.eps}
+        \caption{Class diagrams of the SVT hit storage scheme: barrel/ladder/wafer.}
+        \label{fig:svt}
+    \end{center}
+\end{figure}
+
+The following is the equivalent example to the two previous ones but for the SVT hits.
+The scheme is always the same:
+\begin{verbatim}
+const int ibarrel  = 1;  // 2nd barrel
+const int iladder  = 10; // 11th ladder
+const int iwafer   = 3;  // 4th layer
+
+cout << "barrel " << ibarrel << " contains "
+
+     << ", wafer " << iwafer << " contains "
+     << theHits.size() << " hits" << endl;
+
+for (int i=0; i<theHits.size(); i++) {
+    cout << theHits[i]->position() << endl;
+    cout << theHits[i]->charge() << endl;
+    assert(theHits[i]->barrel() == ibarrel);
+    assert(theHits[i]->wafer() == iwafer);
+}
+
+\end{verbatim}
+
+
+\subsubsection{SSD hits}
+\index{SSD hits} \index{StSsdHit} \index{ladder, SSD} \index{wafer, SSD}
+
+The SSD consist of one layer of 20 ladders with 16 wafers each.  The
+\texttt{StSsdHit} class therefore provides the two methods
+\texttt{ladder()} and \texttt{wafer()} which return the appropriate
+'hardware' coordinate. Note that the numbering starts at 1 (see
+Sec.~\ref{sec:conventionsNumbering}).  In addition the class has
+member functions to return the strip number and the cluster size of
+the p and n side, respectively.  The SSD hits are stored in a tree
+organized similar to the SVT (Fig.~\ref{fig:svt}) but without the
+barrel collection (there's only one).  The hits are stored per wafer.
+
+The following is the equivalent example to the previous ones but for the SSD hits.
+Again the same scheme:
+\begin{verbatim}
+const int iladder  = 2;
+const int iwafer   = 3;
+
+cout << "The SSD has  " 
+     << event->ssdHitCollection()->numberOfHits()
+     << " hits" << endl;
+
+StSPtrVecSsdHit& theHits =
+event->ssdHitCollection()->ladder(iladder)->wafer(iwafer).hits();
+
+cout << "ladder " << iladder
+\begin{figure}[htb]
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{cartoon7.eps}
+        \caption{Mechanisms are the means whereby objects collaborate
+            to provide some higher level behaviour.}
+    \end{center}
+\end{figure}
+     << ", wafer " << iwafer << " contains "
      << theHits.size() << " hits" << endl;
 
 for (int i=0; i<theHits.size(); i++) {
@@ -1955,7 +2137,15 @@ void fillPoints(vector<StMeasuredPoint*> vec, StTrack *track)
     StTrackDetectorInfo* info = track->detectorInfo();
     if (info) 
        for (int i=0; i<info->hits().size(); i++)
-definition in the header file.  \clearpage
+            vec.push_back(info->hits()[i])
+
+\clearpage
+
+  if (!mEvent) {
+    cout << "No StEvent*\n";
+    cout << "Can not continue. Aborting..." << endl;
+    return kStWarn;
+  }
 
   //
   // Get the StRichCollection
@@ -1975,9 +2165,11 @@ definition in the header file.  \clearpage
     cout << "Aborting...\n" << endl;
     return kStWarn;
   }
+
   StSPtrVecRichHit& theRichHits = theRichCollection->getRichHits();
 
   //
+  // Get the Global Tracks
   //
   StSPtrVecTrackNode& theTrackNodes = mEvent->trackNodes();
 \end{verbatim}
@@ -2014,6 +2206,7 @@ with
     through \StEvent\ in a graphical data browser.
     \texttt{StEventMaker::event()} actually returns an instance of
     StBrowsableEvent not StEvent.
+\item[Related Classes] \texttt{StBrowsableEvent} is derived from
     \texttt{StEvent}.
 \item[Public\\ Constructors]
     \verb+StBrowsableEvent();+\\
@@ -2034,12 +2227,17 @@ with
 \end{verbatim}
 Only the entry point \texttt{event} has to be replaced by \texttt{event->l3trigger()}.
 but can more complex ones as pointers to \texttt{StTrack} objects for example.
+One could imagine to have a class \texttt{StMyPair} which links two tracks which form
 a pair to name just one of many applications. 
 
 \clearpage
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
 %    Reference Manual
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\part{Reference Manual}
 \clearpage
 
 \section{Class References} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2075,9 +2273,7 @@ definition in the header file.
     \verb+Float_t sigma() const;+\\
     Returns the sigma of the dE/dx value.
 
-
-    \verb+StDedxMethod method() const;+\\
-    
+\label{sec:StContainers}
 \begin{Entry}
 
 \item[Summary] Definitions of all container types used in \StEvent.
@@ -2142,9 +2338,11 @@ definition in the header file.
     \verb+void setSizeAtDetector(const StDetectorId, const Float_t);+\\
     \verb+StPtrVecEmcCluster& cluster(const StDetectorId);+\\
     \verb+const StPtrVecEmcCluster& cluster(const StDetectorId) const;+\\
+    \verb+void addCluster(const StDetectorId, const StEmcCluster*);+\\
     \verb+StPtrVecEmcPoint& neighbor();+\\
     \verb+const StPtrVecEmcPoint& neighbor() const;+\\
     \verb+void addNeighbor(const StEmcPoint*);+\\
+    \verb+Int_t nTracks() const;+\\
     \verb+StPtrVecTrack& track();+\\
     \verb+const StPtrVecTrack& track() const;+\\
     \verb+void addTrack(StTrack*);+\\
@@ -2165,9 +2363,8 @@ definition in the header file.
 \item[Public\\ Constructors]
     \verb+StEmcRawHit();+\\
     \verb+StEmcRawHit(StDetectorId, UInt_t, UInt_t, UInt_t, UInt_t);+\\
-    \verb+ULong_t bunchCrossingNumber() const;+\\
-    
-    
+    \verb+StEmcRawHit(StDetectorId, UInt_t, UInt_t, UInt_t, UInt_t, Float_t);+\\
+\item[Public Member\\ Functions]
     \verb+StDetectorId detector() const;+\\
     \verb+UInt_t module() const;+\\
     \verb+UInt_t eta() const;+\\
@@ -2190,20 +2387,14 @@ definition in the header file.
 \item[Synopsis]
     \verb+#include "StEmcSoftwareMonitor.h"+\\
     \verb+class StEmcSoftwareMonitor;+\\
-    
-    
 \item[Description]
 \item[Related Classes]
 \item[Public\\ Constructors]
     \verb+StEmcSoftwareMonitor();+\\
-    DST this pointer is \texttt{NULL}. You better check for this.
-    
-    
+\end{Entry}
 \clearpage
 \begin{Entry}
 \item[Summary] Header file which contains all enumeration types used
-    
-    
     in \StEvent.
 \item[Synopsis]
     \verb+#include "StEnumerations.h"+\\
@@ -2236,8 +2427,6 @@ definition in the header file.
     \texttt{St\_DataSet}.
 \item[Public\\ Constructors]
     \verb+StEvent();+\\
-    
-
     
     \verb+StEvent(const event_header_st&,+\\
     defaults to the first (\texttt{i=0}).
@@ -2348,23 +2537,23 @@ definition in the header file.
     \verb+static bool removeTriggerDetectorCollection(StEvent*);+\\
     \verb+static bool removeL3Trigger(StEvent*);+\\
     \verb+static bool removeV0Vertices(StEvent*);+\\
+    has to be called after the rejected tracks are removed.
     Do not remove the TPC hits via \texttt{removeTpcHitCollection()}
     if you use this method.
 \end{Entry}
+\clearpage
 
 \subsection{StEventSummary}
 \index{StEventSummary|textbf}
     Returns sector number running from 0--5.
 \begin{Entry}
-    
-
 \item[Summary]
     Returns plane number running from 0--19.
     
     
     \verb+#include "StEventSummary.h"+\\
-    \verb+ULong_t padsInCluster() const;+\\
-    \verb+ULong_t timebinsInCluster() const;+\\
+    \verb+class StEventSummary;+\\
+\item[Description]
 \item[Related Classes]
 \item[Public\\ Constructors]
     \verb+StEventSummary();+\\
@@ -2445,6 +2634,7 @@ definition in the header file.
     \verb+#include "StFtpcHit.h"+\\
     \verb+class StFtpcHit;+\\
 \item[Description]
+\item[Related Classes]
 \item[Public\\ Constructors]
     \verb+StFtpcHit();+\\
 
@@ -2462,6 +2652,7 @@ definition in the header file.
 
     \verb+ULong_t padsInHit() const;+\\
     \verb+ULong_t timebinsInHit() const;+\\
+\end{Entry}
 \clearpage
 
 
@@ -2521,18 +2712,12 @@ definition in the header file.
     
     \verb+StFtpcSectorHitCollection* sector(UInt_t i);+\\
     \verb+const StFtpcSectorHitCollection* sector(UInt_t i) const;+\\
-    
-    
     Returns the \texttt{i}'th sector, where \texttt{i =
         0--(numberOfSectors()-1).}
 \end{Entry}
-    
-    
 \clearpage
 
 
-    
-    
 \subsection{StFtpcSectorHitCollection}
 \index{StFtpcSectorHitCollection|textbf}
 \label{sec:StFtpcSectorHitCollection}
@@ -2574,19 +2759,37 @@ definition in the header file.
     \verb+Long_t n_pts_ftpc[2];+\\
     Total number of space points in FTPC, east/west.
     
+    \verb+Long_t n_trk_ftpc[2];+\\
+    Total number of tracks in FTPC east/west .
     
     \verb+Float_t chrg_ftpc_tot[2];+\\
+    Total charge deposited in FTPC, east/west.
     
     \verb+Float_t hit_frac_ftpc[2];+\\
+    Fraction of hits used in FTPC, east/west.
     
+    \verb+Float_t avg_trkL_ftpc[2];+\\
     Average track length (cm) FTPC, east/west \\
     or average number of points assigned.
+    
     \verb+Float_t res_pad_ftpc[2];+\\
+    Average residual, pad direction, FTPC east/west.
+    
     \verb+Float_t res_drf_ftpc[2];+\\
+    Average residual, drift direction, FTPC east/west.
+\end{Entry}
 \clearpage
+
+
 \subsection{StFunctional}
+    Curvature in m$^{-1}$.
+\label{sec:StFunctional}
 \begin{Entry}
+\item[Summary]
+\item[Synopsis]
     \verb+#include "StFunctional.h"+\\
+\item[Description]
+\end{Entry}
 \clearpage
 
 
@@ -3388,9 +3591,15 @@ definition in the header file.
     \verb+ULong_t padsInHit() const;+\\
     
     \verb+ULong_t pixelsInHit() const;+\\
+\end{Entry}
+\clearpage
 
-    \verb+StTpcPadrowHitCollection* padrow(UInt_t);+\\
+
+\subsection{StTpcHitCollection}
+\index{StTpcHitCollection|textbf}
 \label{sec:StTpcHitCollection}
+\begin{Entry}
+\item[Summary]
 \item[Synopsis]
     \verb+#include "StTpcHitCollection.h"+\\
     \verb+class StTpcHitCollection;+\\
@@ -3556,10 +3765,22 @@ definition in the header file.
     \verb+Bool_t finderScheme(StTrackFinderScheme) const;+\\
 
 
-    \verb+UShort_t numberOfFitPoints(StDetectorId) const;+\\
+    Total number of points used for the fit.
+    aproach, of the track to the primary vertex.
+    
+    \verb+Float_t length() const;+\\
+
     Returns the number of points on the track in
+    \emph{all} detectors.
+    
+
+    \verb+StTrackGeometry* geometry();+\\
     \item \texttt{lastPoint()}
-    \verb+Double_t chi2(UInt_t = 0) const;+\\
+    \item \texttt{numberOfPoints()}
+    \item \texttt{numberOfPoints(StDetectorId)}
+    \end{itemize}
+    In this case the topology map (see \ref{sec:StTrackTopologyMap})
+    is the only source left to get more detailed info on hits.
     
     
     use \texttt{numberOfReferencedPoints()} (see below).
@@ -4034,11 +4255,19 @@ icon that represents a class.
 \end{figure}
 This icon is shown in Fig.~\ref{fig:umlClassIcon}.  A class icon is
 simply a rectangle divided into three compartments. The topmost
+compartment contains the name of the class. The middle compartment
+contains a list of attributes (member variables), and the bottom
+compartment contains a list of operations (member functions).  In many
+diagrams, the bottom two compartments are omitted. Even when they are
+present, they typically do not show every attribute and operations.
+The goal is to show only those attributes and operations that are
+useful for the particular diagram.  There is typically never a need to
 show every attribute and operation of a class on any diagram.
 \begin{figure}[htb]
     \begin{center}
         \includegraphics{umlClass.eps}
         \caption{Hit2D class. Attributes and operations are shown.}
+        \label{fig:umlClass}
     \end{center}
 \end{figure}
 Fig.~\ref{fig:umlClass} shows a typical UML description of a class
