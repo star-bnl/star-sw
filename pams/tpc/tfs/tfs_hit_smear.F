@@ -1,5 +1,8 @@
-* $Id: tfs_hit_smear.F,v 1.1 1998/01/27 01:47:23 fisyak Exp $
+* $Id: tfs_hit_smear.F,v 1.2 1998/03/03 23:03:14 hardtke Exp $
 * $Log: tfs_hit_smear.F,v $
+* Revision 1.2  1998/03/03 23:03:14  hardtke
+* use constants files
+*
 * Revision 1.1  1998/01/27 01:47:23  fisyak
 * Split sources
 *
@@ -45,30 +48,9 @@ C     Apr 10, 1997           Modefied by Bill Love to set correct errors
 C                            in hit smearing.
 C     Jun 18, 1997           Modified by Dhammika W. to fix a bug in 
 C                            z-coordinate  smearing.
+C     Mar 2, 1998    DH      Remove list of unused constants
 C
 C-----------------------------------------------------------------------
-      REAL CPI, C2PI, CPI2, CLIGHT, ELMASS, CROOT2, DTORAD
-      REAL BCONV
-C
-      PARAMETER ( CPI    = 3.141592654, 
-     >            C2PI   = 6.283185307,
-     >            CPI2   = 1.570796327,
-     >            CROOT2 = 1.414213562, 
-     >            DTORAD = 0.017453293,
-     >            BCONV  = 0.002998,
-     >            CLIGHT = 2.99792458E+10, 
-     >            ELMASS = 0.5110034)
-C
-C     General physical constants
-C     CPI = pi
-C     C2PI = 2*pi
-C     CPI2 = pi/2
-C     CLIGHT = Velocity of light (cm/sec)
-C     ELMASS = electron mass  (MeV)
-C     CROOT2 = sqrt(2)
-C     DTORAD = Conv. factor degrees to radians
-C     BCFGEV = Conv. factor:     pt(GeV) = BCFGEV*radius(cm)
-C     BCFMEV = Conv. factor:     pt(MeV) = BCFMEv*radius(cm)
 
       INTEGER	SECT
 
