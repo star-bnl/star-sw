@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.1 2003/04/16 17:47:41 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.2 2003/05/21 03:58:44 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.2  2003/05/21 03:58:44  ullrich
+ * Added more methods to retrieve spin bits.
+ *
  * Revision 2.1  2003/04/16 17:47:41  ullrich
  * Initial Revision.
  *
@@ -26,7 +29,7 @@ public:
     
     virtual void dump() const = 0;   //dump data into text
     
-    // versison and data type information
+    // version and data type information
     virtual int year() const;                          // year of the data
     virtual unsigned int version() const = 0;          // TrgDataType Version Number 
     virtual unsigned int numberOfPreXing() const = 0;  // # of pre xing data for detectors
@@ -37,12 +40,22 @@ public:
     virtual unsigned int triggerWord() const = 0;
     virtual unsigned int actionWord() const = 0;  
     virtual unsigned int busyStatus() const;
+    virtual unsigned int bunchCounterHigh() const;
+    virtual unsigned int bunchCounterLow() const;
     virtual unsigned int bunchId48Bit() const;
     virtual unsigned int bunchId7Bit() const;
     virtual unsigned int spinBit() const;
+    virtual unsigned int spinBitYellowFilled() const;
+    virtual unsigned int spinBitYellowUp() const;
+    virtual unsigned int spinBitYellowDown() const;
+    virtual unsigned int spinBitYellowUnpol() const;
+    virtual unsigned int spinBitBlueFilled() const;
+    virtual unsigned int spinBitBlueUp() const;
+    virtual unsigned int spinBitBlueDown() const;
+    virtual unsigned int spinBitBlueUnpol() const;
   
     // high level DSM infos
-    virtual unsigned short tcuBits() const;
+    virtual unsigned short tcuBits() const = 0;
     virtual unsigned short lastDSM(int channel) const;
     virtual unsigned short vertexDSM(int channel) const;
     virtual unsigned short ctbLayer1DSM(int channel) const;
@@ -96,10 +109,19 @@ protected:
 //
 inline int StTriggerData::year() const {return mYear;}
 inline unsigned int StTriggerData::busyStatus() const {return 0;}
+inline unsigned int StTriggerData::bunchCounterHigh() const {return 0;}
+inline unsigned int StTriggerData::bunchCounterLow() const {return 0;}
 inline unsigned int StTriggerData::bunchId48Bit() const {return 0;}
 inline unsigned int StTriggerData::bunchId7Bit() const {return 0;}
 inline unsigned int StTriggerData::spinBit() const {return 0;}
-inline unsigned short StTriggerData::tcuBits() const {return 0;};
+inline unsigned int StTriggerData::spinBitYellowFilled() const {return 0;}
+inline unsigned int StTriggerData::spinBitYellowUp() const {return 0;}
+inline unsigned int StTriggerData::spinBitYellowDown() const {return 0;}
+inline unsigned int StTriggerData::spinBitYellowUnpol() const {return 0;}
+inline unsigned int StTriggerData::spinBitBlueFilled() const {return 0;}
+inline unsigned int StTriggerData::spinBitBlueUp() const {return 0;}
+inline unsigned int StTriggerData::spinBitBlueDown() const {return 0;}
+inline unsigned int StTriggerData::spinBitBlueUnpol() const {return 0;}
 inline unsigned short StTriggerData::lastDSM(int channel) const {return 0;};
 inline unsigned short StTriggerData::vertexDSM(int channel) const {return 0;}
 inline unsigned short StTriggerData::ctbLayer1DSM(int channel) const {return 0;}
