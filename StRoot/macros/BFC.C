@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: BFC.C,v 1.1 1999/08/06 15:00:40 fisyak Exp $
+// $Id: BFC.C,v 1.2 1999/08/06 18:58:18 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -473,9 +473,6 @@ void Load(){
     gSystem->Load("St_g2r"); 
     gSystem->Load("St_geant_Maker");
   }
-  if (ChainFlags[kMINIDAQ]) {
-    gSystem->Load("StMinidaqMaker");
-  }
 
   if (ChainFlags[kTPC]) {
     gSystem->Load("St_tpc");
@@ -489,6 +486,9 @@ void Load(){
     else {
       if (ChainFlags[kTSS]) gSystem->Load("St_tss_Maker");
     }
+  }
+  if (ChainFlags[kMINIDAQ]) {
+    gSystem->Load("StMinidaqMaker");
   }
   if (ChainFlags[kFTPC]) {
     gSystem->Load("St_ftpc");
