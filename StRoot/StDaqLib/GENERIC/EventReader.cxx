@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.10 1999/09/02 21:47:08 fisyak Exp $
+ * $Id: EventReader.cxx,v 1.11 1999/11/20 00:13:09 fisyak Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -16,11 +16,12 @@
  * 20-Jul-99 MJL add alternate constructor for EventReader with name of logfile
  * 20-Jul-99 MJL add alternate getEventReader with name of logfile
  * 20-Jul-99 MJL add overloaded printEventInfo(FILE *)
+ * 29-Aug-99 MJL if((MMAPP = (char *) mmap(0, ...  for HP platform
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
- * Revision 1.10  1999/09/02 21:47:08  fisyak
- * HP corrections
+ * Revision 1.11  1999/11/20 00:13:09  fisyak
+ * Micheal LeVine update
  *
  * Revision 1.9  1999/07/28 16:08:23  levine
  * modify EventReader so that ENDR does not cause error exit
@@ -312,7 +313,7 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
     if(ret < 0) ERROR(ERR_FILE);
 
     DATAP = NULL;
-    if((MMAPP = (char *) mmap(0, datap.EventLength * 4, PROT_READ | PROT_WRITE,
+    if((MMAPP = (char *)mmap(0, datap.EventLength * 4, PROT_READ | PROT_WRITE,
 		      MAP_PRIVATE, fd, mmap_offset)) == (caddr_t) -1)
       ERROR(ERR_MEM);
     
@@ -489,7 +490,7 @@ char * EventReader::findBank(char *bankid)
   
     // position independent pointers to lower banks, variable DATAP length
   int len = pBankDATAP->header.BankLength - sizeof(Bank_Header)/4;
-  len -= ((INT32 *)&pBankDATAP->TPC -  (INT32 *)&pBankDATAP->EventLength)/4;
+  len -= ((INT32 )&pBankDATAP->TPC -  (INT32 )&pBankDATAP->EventLength)/4;
   len /= sizeof(Pointer)/4;
   Bank_Header *pBank;
   Pointer *ptr = &pBankDATAP->TPC;
