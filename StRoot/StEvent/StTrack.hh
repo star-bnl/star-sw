@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.hh,v 1.5 1999/02/15 16:17:04 wenaus Exp $
+ * $Id: StTrack.hh,v 1.6 1999/02/24 12:49:01 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StTrack.hh,v $
- * Revision 1.5  1999/02/15 16:17:04  wenaus
- * fix double& -> double referencing bug
+ * Revision 1.6  1999/02/24 12:49:01  ullrich
+ * Added argument (h) to constructor needed to instatiate helix
  *
  * Revision 1.7  1999/03/23 21:47:39  ullrich
  * Member function made virtual
@@ -46,7 +46,8 @@ class StVertex;
 class StTrack {
 public:
     StTrack();
-            StThreeVector<double>& origin);
+    virtual ~StTrack();
+    StTrack(dst_track_st*);
     StTrack(dst_track_st* trk,
             double curvature,
             double dip,

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.hh,v 1.6 1999/02/23 21:23:59 ullrich Exp $
+ * $Id: StGlobalTrack.hh,v 1.7 1999/02/24 12:49:06 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.hh,v $
- * Revision 1.6  1999/02/23 21:23:59  ullrich
- * Removed obsolete EMC/SMD hit information (future cluster).
+ * Revision 1.7  1999/02/24 12:49:06  ullrich
+ * Added argument (h) to constructor needed to instatiate helix
  *
  * Revision 1.10  1999/03/23 21:47:37  ullrich
  * Member function made virtual
@@ -53,7 +53,8 @@ using namespace std;
 #include "StEvent/StTrackPidTraits.hh"
 #include "tables/dst_track.h"
 
-                  StThreeVector<double>& origin);
+#if !defined(ST_NO_NAMESPACES)
+using namespace std;
 #endif
 
 class StGlobalTrack : public StTrack {

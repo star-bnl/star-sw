@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cc,v 1.4 1999/02/15 16:17:03 wenaus Exp $
+ * $Id: StTrack.cc,v 1.5 1999/02/24 12:48:59 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StTrack.cc,v $
- * Revision 1.4  1999/02/15 16:17:03  wenaus
- * fix double& -> double referencing bug
+ * Revision 1.5  1999/02/24 12:48:59  ullrich
+ * Added argument (h) to constructor needed to instatiate helix
  *
  * Revision 1.4  1999/02/15 16:17:03  wenaus
  * fix double& -> double referencing bug
@@ -28,7 +28,7 @@
  **************************************************************************/
 #include "StEvent/StTrack.hh"
 
-static const char rcsid[] = "$Id: StTrack.cc,v 1.4 1999/02/15 16:17:03 wenaus Exp $";
+static const char rcsid[] = "$Id: StTrack.cc,v 1.5 1999/02/24 12:48:59 ullrich Exp $";
 
 StTrack::StTrack() : mHelix(0, 0, 0, StThreeVector<double>())
 {
@@ -47,8 +47,9 @@ StTrack::StTrack(dst_track_st* trk,
                  double curvature,
                  double dip,
                  double phase,
-                 StThreeVector<double>& origin) : mFitTraits(trk),
-  mHelix(curvature, dip, phase, origin)
+                 StThreeVector<double>& origin,
+		 int h) : mFitTraits(trk),
+  mHelix(curvature, dip, phase, origin, h)
 {  
 }
 
