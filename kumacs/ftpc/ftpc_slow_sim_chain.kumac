@@ -8,12 +8,15 @@
 *             (you'll get pams - fss,fcl,fpt,fte)
 *    -   exec ftpc_slow_sim_chain
 *
+*   editted 07/09/98 by Janet Seyboth
+*                    Correct method of reading in padtans file
 *
 ****************************************************************************
 
 macro ftpc_slow_sim_chain_
        input_g2t_file=/afs/rhic/star/users/jcs/public/auau_gstar_g2t.tab_
        output_file=ftpc_slow_sim_pipealu_1.tab_
+       padtrans_file=/afs/rhic/star/users/jcs/public/fcl_padtrans.tab_
        gas_file=/afs/rhic/star/users/jcs/public/gas.dat_
        nskip=0_
        nevents=1
@@ -59,16 +62,9 @@ $STAR/pams/trg/kumac
 * initialize input tables
 
  exec fss_init
- exec fcl_init
+ exec fcl_init [padtrans_file]
  exec fpt_init
  exec fte_init
-
-* Read in fcl_padtrans table
-
- exec read_table_from_file#init padtrans_in /afs/rhic/star/users/jcs/public/fcl_padtrans.tab
-* exec read_table_from_file#init padtrans_in /home/iws112/jcs/SL98d/fcl_padtrans.tab
-  exec read_table_from_file#read padtrans_in [params]
-  exec read_table_from_file#close padtrans_in
 
 * Initialize input data stream
   exec input_g2t_file#init [input_g2t_file]
