@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   29/06/99  (E-mail: fine@bnl.gov)
-// $Id: St_geom_Maker.cxx,v 1.7 1999/07/15 13:58:10 perev Exp $
+// $Id: St_geom_Maker.cxx,v 1.8 1999/07/16 15:23:17 fisyak Exp $
 // $Log: St_geom_Maker.cxx,v $
+// Revision 1.8  1999/07/16 15:23:17  fisyak
+// Switch TWebFile => TFile
+//
 // Revision 1.7  1999/07/15 13:58:10  perev
 // cleanup
 //
@@ -68,7 +71,9 @@
 #include "St_geom_Maker.h"
 
 #include "TWebFile.h"
+#include "TFile.h"
 #include "TGeometry.h"
+#include "TSystem.h"
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -102,10 +107,14 @@ Int_t St_geom_Maker::Init() {
 //  reading STAR GEANT geometry database
 //--
   PrintInfo();
-
+#if 0
   TString fileName = "http://www.star.bnl.gov/~fine/";
   fileName += GetName();
   TWebFile *f =  new TWebFile(fileName.Data());
+#endif
+  TString fileName = "$STAR/StDb/geometry/star.root.y1a";
+  gSystem->ExpandPathName(fileName);
+  TFile    *f = new TFile(fileName);
   // read STAR geometry database remotely
   TGeometry *star = (TGeometry *)f->Get("STAR");
   star->SetName("STARGEOMNODE");
