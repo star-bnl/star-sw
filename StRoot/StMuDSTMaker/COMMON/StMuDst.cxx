@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.1 2002/03/08 17:04:17 laue Exp $
+ * $Id: StMuDst.cxx,v 1.2 2002/03/14 04:12:55 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -50,6 +50,18 @@ void StMuDst::set(StMuDstMaker* maker) {
   }
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
     strangeArrays[i] = maker->mStrangeArrays[i];
+  }
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDst::set(TClonesArray** theArrays, TClonesArray** theStrangeArrays) {
+  DEBUGMESSAGE2("");
+  for ( int i=0; i<__NARRAYS__; i++) {
+    arrays[i] = theArrays[i];
+  }
+  for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
+    strangeArrays[i] = theStrangeArrays[i];
   }
 }
 //-----------------------------------------------------------------------
@@ -118,14 +130,14 @@ StEvent* StMuDst::createStEvent() {
   for (int i=0; i<nGlobals; i++) {
     int id = globalTracks(i)->id();
     if (nodes[id]==0) nodes[id] = new StTrackNode();
-    nodes[id]->addTrack( createStGlobalTrack(globalTracks(i)) );
+    nodes[id]->addTrack( createStTrack(globalTracks(i)) );
   }
   /// add primary tracks to tracknodes and primary vertex
   int nPrimaries = arrays[muPrimary]->GetEntries();
   for (int i=0; i<nPrimaries; i++) {
     int id = primaryTracks(i)->id();
     if (nodes[id]==0) nodes[id] = new StTrackNode();
-    StPrimaryTrack* t = createStPrimaryTrack(primaryTracks(i));
+    StTrack* t = createStTrack(primaryTracks(i));
     nodes[id]->addTrack( t );
     vp->addDaughter( t );
   }
@@ -135,7 +147,7 @@ StEvent* StMuDst::createStEvent() {
   } 
   /// do the same excercise for the l3 tracks
   /// we do this later
-  /// we do this later
+  /// we do this laterb
   /// we do this later
   
   // add global tracks to tracknodes
@@ -149,22 +161,25 @@ StEvent* StMuDst::createStEvent() {
 }
 
 
-StPrimaryTrack* StMuDst::createStPrimaryTrack(StMuTrack*) {
-  StPrimaryTrack* t = new StPrimaryTrack();
+StTrack* StMuDst::createStTrack(StMuTrack* track) {
+  StTrack* t;
+  if (track->type() == primary) t = new StPrimaryTrack();
+  if (track->type() == global) t = new StGlobalTrack();
+  t->setFlag( track->flag() );
+
   return t;
 }
 
-StGlobalTrack* StMuDst::createStGlobalTrack(StMuTrack*) {
-  StGlobalTrack* t = new StGlobalTrack();
-  
-  return t;
-}
 
 ClassImp(StMuDst)
 
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.2  2002/03/14 04:12:55  laue
+ * bug fix: StMuL3EventSummary.cxx
+ * update: StMuDst.h StMuDst.cxx
+ *
  * Revision 1.1  2002/03/08 17:04:17  laue
  * initial revision
  *
