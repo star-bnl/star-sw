@@ -9,6 +9,9 @@
 //class StTinyRcTrack;
 //class StTinyMcTrack;
 //class StMiniMcPair;
+#ifndef ST_NO_NAMESPACES
+using namespace std;
+#endif
 
 const float geomCut=198.;	//Central membrane info?
 
