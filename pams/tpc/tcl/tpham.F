@@ -19,7 +19,9 @@ C
       INTEGER FUNCTION TPHAM( tclpar_h, tclpar
      +,			      tsspar_h, tsspar
      +,                       detector_h, detector
+     +,                       sector_h, sector
      +,                       pad_plane_h, pad_plane
+     +,                       wire_plane_h, wire_plane
      +,                       tppixel_h, tppixel
      +,                       tpmcpix_h, tpmcpix
      +,                       tpseqh, tpseq 
@@ -34,8 +36,12 @@ C     tsspar_h:
 C     tsspar:
 C     detector_h:
 C     detector:
+C     sector_h:
+C     setctor:
 C     pad_plane_h:
 C     pad_plane:
+C     wire_plane_h:
+C     wire_plane:
 C     tpppixel_h
 C     tppixel:
 C     tpmcpix_h
@@ -145,16 +151,6 @@ c        mean has been shown to be independent of lambda and diffusion,
 c        and the value is related to the shaper response function.  The
 c        value is no longer hard-wired in fit_isolated_cluster, but
 c        is subtracted at the top level
-c
-c     7mar96
-c      - update to work with gstar and new geometry routines.
-c      - old version, which works fine with old geant and geometry routines
-c        is stored as tpham.F.pre_gstar
-c
-c     4apr96
-c      - we finally get rid of the convention in which the pad is numbered
-c	 *in the sector*.  Now it is the pad number in the row...
-c
 C
 C   Error conditions : 
 C   ================
@@ -167,8 +163,12 @@ C-----------------------------------------------------------------------
 
 #include "tpg_detector_pars.inc"
 #include "tpg_detector_st.inc"
+#include "tpg_sector_pars.inc"
+#include "tpg_sector_st.inc"
 #include "tpg_pad_plane_pars.inc"
 #include "tpg_pad_plane_st.inc"
+#include "tpg_wire_plane_pars.inc"
+#include "tpg_wire_plane_st.inc"
 
 #include "tss_tppixel_pars.inc"
 #include "tss_tppixel_st.inc"
@@ -190,8 +190,12 @@ C-----------------------------------------------------------------------
 
       RECORD/ table_head_st/ detector_h
       RECORD/ detector_row_st/ detector(*)
+      RECORD/ table_head_st/ sector_h
+      RECORD/ sector_row_st/ sector(*)
       RECORD/ table_head_st/ pad_plane_h
       RECORD/ pad_plane_row_st/ pad_plane(*)
+      RECORD/ table_head_st/ wire_plane_h
+      RECORD/ wire_plane_row_st/ wire_plane(*)
 
       RECORD/ table_head_st/ tppixel_h
       RECORD/ tppixel_row_st/ tppixel(*)
@@ -211,7 +215,14 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 c
 c        functions
-      integer tgc_row_to_y,tgc_pad_to_x,tgc_local_to_global
+
+         logical tpg_global_to_local
+     +,          tpg_global_to_local_p
+     +,          tpg_pad_of_x
+     +,          tpg_local_to_global
+
+         double precision tpg_row_to_y
+     +,                   tpg_pad_to_x
 
 c
 C-----------------------------------------------------------------------
@@ -224,12 +235,13 @@ C-----------------------------------------------------------------------
         integer itrk(nclpix_max)
 	integer npix_seq(300)
 
-        integer isec,irow,nhits,ihit
+        integer isec,irow,krow,nhits,ihit
 
         integer jtpcl, nclspix
 
         integer mxrow
         parameter (mxrow = 45)
+        integer id_pad(mxrow)
 
         integer ntim, nseq, jseq
 
@@ -240,7 +252,7 @@ C-----------------------------------------------------------------------
         real white_noise,filtered_noise
         real de_scale
 
-        real invec(3),outvec(3)
+        double precision invec(3),outvec(3)
 
         logical first, lstat
 
@@ -264,9 +276,9 @@ C-----------------------------------------------------------------------
         data first/.true./
 C-----------------------------------------------------------------------
 	integer ichek	! mal -** temp
-        integer istatus
+        integer iisec,iirow,jjsec
 
-	save first,time_bucket,time_bin
+	save first,time_bucket,time_bin,id_pad	
 
 c
 c       set status
@@ -274,12 +286,22 @@ c
         tpham = tucod_ok
 
         if(first)then
+c
+c           make id_pad array...
+c
            first = .false.
+           id_pad(1) = 0
+           do irow = 2, mxrow
+              id_pad(irow) = id_pad(irow-1)
+     +             + pad_plane(1).npads(irow-1)
+           enddo
 c     
 c->         constants...
 c
            time_bucket = detector(1).drift_length/tsspar(1).ntime
            time_bin = time_bucket/tsspar(1).v_drift
+c           rms_noise = sqrt((tsspar(1).white_rms/tsspar(1).scale)**2 +
+c     +          (tsspar(1).sca_rms/tsspar(1).scale)**2+1.0) ! add 1 for digit
            
         endif
 
@@ -297,9 +319,16 @@ c	   if (mod(jtpcl,ichek).eq.1) write(13,*)'cluster #',jtpcl	! mal
            jseq = tpcluster(jtpcl).jseq
            isec = tpcluster(jtpcl).tpc_row/100
            irow = tpcluster(jtpcl).tpc_row-isec*100
+c     note-- now, sector=1..24, row=1..45  mal 30mar95
+c           if(mod(isec,2).eq.0)then
+c              krow = irow + pad_plane(1).nrow_in
+c           else
+c              krow = irow
+c           endif
+           krow=irow
            if(nseq.ge.tclpar(1).min_nseq)then
 
-              call tph_get_cls_data(jseq, nseq, irow
+              call tph_get_cls_data(jseq, nseq, id_pad, krow
      +,                             tpseqh, tpseq 
      +,                             tppixel_h, tppixel
      +,                             tpmcpix_h, tpmcpix
@@ -323,6 +352,16 @@ c
            endif
 
 
+c now I have to deal with tpg convention....
+c it wants sector=1..48, row=1..13 for inner, 1..32 for outer sector
+c mal 30mar95
+           if (irow.gt.pad_plane(1).nrow_in) then ! outer sector
+              iisec=isec*2
+              iirow=irow-pad_plane(1).nrow_in
+           else
+              iisec=isec*2-1
+              iirow=irow
+           endif
 c
 c          perhaps consistency with simulation demands use of pad_sep_in/out ???
 c	   yes, I think so - mal
@@ -330,11 +369,11 @@ c
            if(irow.gt.pad_plane(1).nrow_in)then
               pad_width = pad_plane(1).pad_sep_out
               de_scale = tsspar(1).ave_ion_pot*tsspar(1).scale
-     +             /(tsspar(1).gain_out*tsspar(1).wire_coupling_out)
+     +             /tsspar(1).gain_out
            else
               pad_width = pad_plane(1).pad_sep_in
               de_scale = tsspar(1).ave_ion_pot*tsspar(1).scale
-     +             /(tsspar(1).gain_in*tsspar(1).wire_coupling_in)
+     +             /tsspar(1).gain_in
            endif
 
 
@@ -355,7 +394,7 @@ c  to cluster in TPCLUSTER table....
 	      tphit(tphith.nok).id = tphith.nok		! mal 17jan95
               tphit(tphith.nok).cluster = jtpcl
               tphit(tphith.nok).nseq = nseq
-              tphit(tphith.nok).row = 100*isec+irow     	! mal 30mar95
+              tphit(tphith.nok).row = 100*isec+krow     	! mal 30mar95
               tphit(tphith.nok).q     = q(ihit)
               tphit(tphith.nok).x     = x(ihit)
               tphit(tphith.nok).dx    = dx(ihit)
@@ -372,30 +411,36 @@ c     finally, transform everything to global coordinates !
 c     
 c     account for "lower-edge" binning in z coordinate
 c     
-              invec(3)=tphit(tphith.nok).z*time_bucket
+              invec(3)=dble(tphit(tphith.nok).z*time_bucket)
               
 c     correct (in average way) for time-offset -- (this is not beautiful)
 c     22jun95 mal
-c     the offset is shown to be (notebook2 p110, + files..) (n+1)*tau, where
-c      n is the (effective) number of stages in the amplifier, and tau is the
-c      (effective) time constant.  For STAR, n=2, and tau is set by tss.
+cccc  invec(3) = invec(3) - 0.88 now we do this in fit_isolated_cluster
+c the offset is shown to be (notebook2 p110, + files..) (n+1)*tau, where
+c  n is the (effective) number of stages in the amplifier, and tau is the
+c  (effective) time constant.  For STAR, n=2, and tau is set by tss.
               if (tclpar(1).tfit.eq.0) ! average value used
      +             invec(3) = invec(3) - 
-     +             3.0*tsspar(1).tau*tsspar(1).v_drift
+     +             dble(3.0*tsspar(1).tau*tsspar(1).v_drift)
+              
+              invec(2)=tpg_row_to_y(iirow,iisec)
               
               
-              istatus = tgc_row_to_y(float(irow),
-     +             invec(2),pad_plane_h,pad_plane)
-                            
-              istatus = tgc_pad_to_x(tphit(tphith.nok).x,
-     +             float(irow),invec(1),pad_plane_h,pad_plane)
-
-              istatus = tgc_local_to_global(isec,invec,outvec)
-
-                            
-              tphit(tphith.nok).x = outvec(1)
-              tphit(tphith.nok).y = outvec(2)
-              tphit(tphith.nok).z = outvec(3) 
+c     
+c     mal 13dec94 - tpg_pad_to_x wants pad passed as integer which screws me
+c     up, so I just do tpg's job explicitly...
+c     invec(1)=tpg_pad_to_x(tphit(tphith.nok).x,irow,isec)  
+              invec(1) = sector(iisec).xrow(iirow) + 
+     +             (tphit(tphith.nok).x-1.0)*sector(iisec).pad_x_space
+              
+              lstat=tpg_local_to_global(iisec,invec,outvec)
+              
+              if (.not.lstat)
+     +             write(6,*)'TPHAM - GLOBAL TRANSFORM FAILED'
+              
+              tphit(tphith.nok).x = real(outvec(1))
+              tphit(tphith.nok).y = real(outvec(2))
+              tphit(tphith.nok).z = real(outvec(3))
               
 c     
 c     zrf in units of time bins --> cm
@@ -465,6 +510,20 @@ c  this should be understood and fixed, but for now....
 
 c also put q (magnitude of hit) into units of energy loss
               tphit(tphith.nok).q = tphit(tphith.nok).q * de_scale
+
+c     here, at the very end, I make up for the sins of Bob Hackenburg, who
+c     spurns convention, and makes the fast and slow simulator routes have
+c     different conventions for sector numbering... best if this becomes
+c     unneccesary!!!!!!!!!! 26may95 mal
+              jjsec=tphit(tphith.nok).row
+              jjsec=(jjsec-irow)/100
+              if (jjsec.le.12) then
+                 jjsec=jjsec+12
+              else
+                 jjsec=jjsec-12
+              endif
+              tphit(tphith.nok).row=jjsec*100+irow
+ccccccccc
               
            ENDDO
 
@@ -478,7 +537,7 @@ c
 
 
 C-----------------------------------------------------------------------
-        Subroutine tph_get_cls_data(jseq, nseq, irow
+        Subroutine tph_get_cls_data(jseq, nseq, id_pad, irow
      +,                            tpseqh, tpseq 
      +,                            tppixel_h, tppixel
      +,                            tpmcpix_h, tpmcpix
@@ -493,6 +552,7 @@ C   Input arguments  (One to a line with definition after ! )
 C
 C     jseq:
 C     nseq:
+C     id_pad:
 C     irow:
 C     tpseqh:
 C     tpseq:
@@ -528,12 +588,6 @@ C			in each sequence
 C
 C   30mar95 now sector=1..24,row=1..45
 C
-c   9apr96 -- malisa 
-c	account for the fact that data is stored such that tdc=0..511
-c	NOT 1..512.  The rest of the hitfinder assumes minimum tdc
-c	is 1.  This is the only routine where tdc information is unpacked,
-c	so I just add one to it here...
-c
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
@@ -562,7 +616,7 @@ C-----------------------------------------------------------------------
         integer lvmax,iucomp
 
         integer iadc(*),itdc(*),ipad(*)
-        integer itrk(*)
+        integer id_pad(*), itrk(*)
         integer jseq,nseq,nclspix,irow
 	integer npix_seq(*)
 C-----------------------------------------------------------------------
@@ -614,6 +668,37 @@ c          for MC data!
 c
            ktrk = tpmcpix(jpix).mcid
            itrk(iclspix) = ktrk
+c this below is a good way to do it but save it for after deconvolution
+c           if(ntrk.gt.0 .and. ntrk.lt.maxtrk)then
+c              mtrk = iucomp(ktrk,ltrk,ntrk)
+c              if(mtrk.eq.0 .and. ntrk.lt.maxtrk)then
+c                 ntrk = ntrk + 1
+c                 ltrk(ntrk) = ktrk
+c                 nocc(ntrk) = 1.
+c              elseif(mtrk.gt.0 .and. mtrk.le.maxtrk)then
+c                 nocc(mtrk) = nocc(mtrk) + 1.
+c              else
+c                 id = 0
+c                 call message('TPHAM-I-GCD--A, ntrk.gt.maxtrk',1,id)
+c                 return
+c              endif
+c           elseif(ntrk.eq.0)then
+c              ntrk = ntrk + 1
+c              ltrk(ntrk) = ktrk
+c              nocc(ntrk) = 1.
+c           else
+c              id = 0
+c              call message('TPHAM-I-GCD--B, ntrk.gt.maxtrk',1,id)
+c	      write(6,*)ntrk,maxtrk,ktrk
+c              return
+c           endif
+
+c           iadc(iclspix) = real(idatum(1))
+c
+c           tdc_lo = iand(idatum(2),botmask)
+c           tdc_hi = ibits(idatum(2),14,2)*'100'X
+c           itdc(iclspix) = real(tdc_lo + tdc_hi) 
+c           kseqpix = iand(idatum(2),seqmask)/'100'X
 c new way to unpack data
            kseqpix = ldatum/numseq_factor
            itdc(iclspix) = (ldatum - numseq_factor*kseqpix)/
@@ -621,9 +706,7 @@ c new way to unpack data
            iadc(iclspix) = ldatum - numseq_factor*kseqpix 
      +		- tdc_factor*itdc(iclspix)
 
-           itdc(iclspix) = itdc(iclspix)+1 ! added 9apr96 malisa
-
-           ipad(iclspix) = tpseq(kseq).secpad
+           ipad(iclspix) = tpseq(kseq).secpad-id_pad(irow)
 
 	   iseq_num = iseq_num+1
 	   npix_seq(iseq_num) = kseqpix
@@ -639,17 +722,35 @@ c new way to unpack data
 c              iadc(iclspix) = real(idatum(1))
               itdc(iclspix) = itdc(iclspix-1)+1
               iadc(iclspix) = ldatum - numseq_factor*kseqpix 
-     +		- tdc_factor*(itdc(iclspix)-1)
+     +		- tdc_factor*itdc(iclspix)
               ipad(iclspix) = ipad(iclspix-1)
 c
 c             for MC data!
 c
               ktrk = tpmcpix(jpix).mcid
               itrk(iclspix) = ktrk
+c this below is a good way to do it... save it for after deconvolution
+c              mtrk = iucomp(ktrk,ltrk,ntrk)
+c              if(mtrk.eq.0 .and. ntrk.lt.maxtrk)then
+c                 ntrk = ntrk + 1
+c                 ltrk(ntrk) = ktrk
+c                 nocc(ntrk) = 1.
+c              elseif(mtrk.gt.0 .and. mtrk.le.maxtrk)then
+c                 nocc(mtrk) = nocc(mtrk) + 1.
+c              else
+c                 id = 0
+c                 call message('TPHAM-I-GCD--C, ntrk.gt.maxtrk',1,id)
+c                 return
+c              endif
+
            enddo
         enddo
 
         nclspix = iclspix
+c        imax = lvmax(nocc,ntrk)
+c        itrk = ltrk(imax)
+
+c	write(13,*)'ntrk,iclspix for this cluster.....',ntrk,iclspix	! mal -** temp
 
         return
         end
@@ -1691,3 +1792,707 @@ c  is estimated below...
 
 	return
 	end
+
+
+c ****** what follows here are old routines no longer in use ******
+c********************************************************************
+
+
+C-----------------------------------------------------------------------
+	Subroutine tph_lin_fit(x, y, dy, npts,
+     +			       slope, dslope,
+     +			       intercept, dintercept)
+C-----------------------------------------------------------------------
+
+      IMPLICIT NONE
+
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     x		- x coordinate of each point
+C     y		- y(x) distribution to fit to line
+C     dy	- uncertainty in y
+C     npts	- number of samples in distribution
+C
+C   Output arguments : 
+C
+C     slope	- slope of best fit line
+C     dslope	- uncertainty in slope
+C     intercept - y-intercept of best fit line
+C     dintercept- uncertainty in intercept
+C
+C  Returns:
+C       Contained in the output arguments...
+C     
+C   Functional Description : 
+C
+C	returns slope and intercept of best fit line to (x,y,dy) data
+C
+C   Originally written 25 November 1994 by Mike Lisa
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
+C
+C-----------------------------------------------------------------------
+	real x(*),y(*),dy(*)
+	integer npts
+	real slope,intercept,dslope,dintercept
+C-----------------------------------------------------------------------
+	real sxx,sxy,sx,sy,s,denom
+	integer ipt
+C-----------------------------------------------------------------------
+
+        sxx = 0.0
+        sxy = 0.0
+        sx = 0.0
+        sy = 0.0
+        s = 0.0
+        do ipt=1,npts
+           sxx = sxx + x(ipt)*x(ipt)/dy(ipt)**2
+           sxy = sxy + x(ipt)*y(ipt)/dy(ipt)**2
+           sx  = sx  + x(ipt)/dy(ipt)**2
+           sy  = sy  + y(ipt)/dy(ipt)**2
+           s   = s   + 1/dy(ipt)**2
+        enddo
+        denom = s*sxx-sx*sx
+        slope = (s*sxy - sx*sy)/denom
+        intercept = (sxx*sy - sx*sxy)/denom
+        dslope = sqrt(s/denom)
+        dintercept = sqrt(sxx/denom)
+
+	return
+	end
+
+
+      integer function nhits_nnet(nseq,nclspix,npix_seq,ipad,itdc,iadc)
+c
+c this is an experimental neural net function that should return the number of hits
+c  that have contributed to a given cluster *****
+c
+c
+C     nseq:	number of sequences in cluster
+C     nclspix:	number of pixels in cluster
+C     npix_seq: number of pixels in each sequence in cluster
+C     ipad:	for each pixel, what is pad #
+C     itdc:	for each pixel, what is bucket #
+C     iadc:	for each pixel, what is adc value
+c
+      implicit none
+c this include file contains neural net architecture
+#include "tcl_nnet.inc"
+      
+      integer nseq,nclspix
+      integer ipad(*),itdc(*),iadc(*)
+      integer npix_seq(*)
+
+      integer minpad,maxpad,mintdc,maxtdc
+      integer ix,iy,ig,ng,nsamp
+      parameter(ng=12,nsamp=12)
+      real g(1:ng)
+      real a(1:nsamp,1:nsamp)   ! for passing to correlated moments routine
+      real f_nnet
+      integer ipic
+
+      nhits_nnet = 1            ! this is the default value
+      
+c (1) pack cluster in array a...
+c find minimum and maximum pad, time bucket #
+      do ix=1,nsamp
+         do iy=1,nsamp
+            a(ix,iy) = 0.0
+         enddo
+      enddo
+      minpad=9999
+      maxpad=-9999
+      mintdc=9999
+      maxtdc=-9999
+      do ipic=1,nclspix
+         if (ipad(ipic).lt.minpad) minpad=ipad(ipic)
+         if (ipad(ipic).gt.maxpad) maxpad=ipad(ipic)
+         if (itdc(ipic).lt.mintdc) mintdc=itdc(ipic)
+         if (itdc(ipic).gt.maxtdc) maxtdc=itdc(ipic)
+      enddo
+      if ((maxpad-minpad+1).gt.nsamp) then
+         write(6,*)'ERROR - nsamp too small (pad)'
+         return
+      endif
+      if ((maxtdc-mintdc+1).gt.nsamp) then
+         write(6,*)'ERROR - nsamp too small (tdc)'
+         return
+      endif
+      do ipic=1,nclspix
+         ix = ipad(ipic) - minpad + 1
+         iy = itdc(ipic) - mintdc + 1
+         a(ix,iy) = iadc(ipic)
+      enddo
+
+c (2) calculate reduced correlated moments (net preprocessor)      
+      call calculate_correlated_moments(a,nsamp,g,ng)
+      do ig=1,ng                ! correlated moments are net input
+         s(0,ig) = g(ig)
+      enddo
+
+c (3) process through net
+      do il=1,n_layer
+         do in=1,nneur(il)
+            sum = 0.0
+            do jn=1,nneur(il-1)
+               sum = sum + w(il,in,jn)*s(il-1,jn)
+            enddo
+            s(il,in) = f_nnet(sum - t(il,in),il)
+         enddo
+      enddo
+
+      nhits_nnet = nint(s(n_layer,1))
+      
+      end
+
+c----------------------------------------------
+      real function f_nnet(x,l)
+      implicit none
+      real x
+      integer l
+c     transfer function, which depends on layer
+      goto (1,2,3) l
+ 1    f_nnet = tanh(x)
+      return
+ 2    f_nnet = tanh(x)
+      return
+ 3    f_nnet = x
+      return
+      end
+c----------------------------------------------
+
+
+
+      subroutine calculate_correlated_moments(a,nsamp,g,ng)
+      implicit none
+      integer nsamp,ng
+      integer nsamp_i,nsamp_j
+      integer iprime,jprime,ipq_combo
+      real a(1:nsamp,1:nsamp),g(1:ng)
+      integer ip,im,m,i,j,index1,index2,iq
+      integer ik,k
+      real gmom,asum,ave_j,ave_i
+c     
+c     based on p116 in STAR notebook
+c     
+      
+      nsamp_i = nsamp
+      nsamp_j = nsamp
+      
+      do ipq_combo=1,3
+         if (ipq_combo.eq.1) then
+            ip = 2
+            iq = 0
+            index1 = 0
+         elseif (ipq_combo.eq.2) then
+            ip = 0
+            iq = 2
+            index1=4
+         elseif (ipq_combo.eq.3) then
+            ip = 2
+            iq = 2
+            index1=8
+         endif
+         index2 = 0
+         do im=0,2,2
+            m = nsamp_i/2**im
+            do ik=0,2,2
+               k = nsamp_i/2**ik
+               index2=index2+1
+c     ok, now we have decided what is p,q and m,k... now calculate G_(p,q)(m,k)
+               gmom = 0.0
+               do i=1,nsamp_i-m+1
+                  do j=1,nsamp_j-k+1
+                     asum = 0.0
+                     ave_i = 0.0
+                     ave_j = 0.0
+                     do iprime=i,i+m-1
+                        do jprime=j,j+k-1
+                           asum = asum + a(iprime,jprime)
+                           ave_i = ave_i+iprime*a(iprime,jprime)
+                           ave_j = ave_j+jprime*a(iprime,jprime)
+                        enddo
+                     enddo
+                     if (asum.gt.0.0) then
+                        ave_i = ave_i/asum
+                        ave_j = ave_j/asum
+                        do iprime=i,i+m-1
+                           do jprime=j,j+k-1
+                              gmom = gmom + 
+     +                             (float(iprime)-ave_i)**ip *
+     +                             (float(jprime)-ave_j)**iq *
+     +                             a(iprime,jprime)/asum
+                           enddo
+                        enddo
+                     endif
+                  enddo
+               enddo
+c     scale it pretty now...
+               gmom = ((float(m)/float(nsamp_i))*
+     +              (float(k)/float(nsamp_j))*
+     +              gmom)**(1.0/float((ip+1)*(iq+1)))
+               g(index1+index2) = gmom
+            enddo
+         enddo
+      enddo
+      return
+      end
+
+
+
+
+C-----------------------------------------------------------------------
+        Subroutine tph_calc_cntr_of_grvty(nclspix, ipad, itdc, iadc
+     +,                            tphith, tphit )
+C-----------------------------------------------------------------------
+
+      IMPLICIT NONE
+
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     nclspix:
+C     ipad:
+C     itdc:
+C     iadc:
+C
+C   Output arguments : 
+C
+C     tphith:
+C     tphit:
+C
+C  Returns:
+C       Contained in the output arguments...
+C     
+C   Functional Description : 
+C    This subroutine calculates the center of gravity of the data 
+C    presented in the caller arrays.
+C
+C   Moved into TAS 12-Apr-1994   Richard Morse
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
+C-----------------------------------------------------------------------
+#include "tas_structures.inc"
+#include "tas_user_codes.inc"
+
+#include "tcl_tphit_pars.inc"
+#include "tcl_tphit_st.inc"
+
+C-----------------------------------------------------------------------
+
+      RECORD/ table_head_st/ tphith
+      RECORD/ tphit_row_st/ tphit(*)
+
+C-----------------------------------------------------------------------
+        real vmax
+
+        real iadc(*),itdc(*),ipad(*)
+        integer nclspix
+C-----------------------------------------------------------------------
+        integer ipix
+        real    sum,tdc,pad,tdc2,pad2
+        real    max_adc
+C-----------------------------------------------------------------------
+        sum = 0.
+        tdc = 0.
+        pad = 0.
+        tdc2 = 0.
+        pad2 = 0.
+
+        do ipix = 1, nclspix
+           sum = sum + iadc(ipix)
+           pad = pad + ipad(ipix)*iadc(ipix)
+           tdc = tdc + itdc(ipix)*iadc(ipix)
+        enddo
+        pad = pad/sum
+        tdc = tdc/sum
+
+        tphit(tphith.nok).q = sum
+c       max_adc = vmax(iadc,nclspix)
+c       tphit(tphith.nok).q = max_adc
+
+        tphit(tphith.nok).x = pad
+        tphit(tphith.nok).z = tdc
+
+        do ipix = 1, nclspix
+           pad2 = pad2 + iadc(ipix)*(ipad(ipix)-pad)**2
+           tdc2 = tdc2 + iadc(ipix)*(itdc(ipix)-tdc)**2
+        enddo
+
+        tphit(tphith.nok).prf = pad2/sum
+        tphit(tphith.nok).zrf = tdc2/sum
+
+        return
+        end
+
+C-----------------------------------------------------------------------
+        Subroutine tph_proj_pad(jseq, nseq, id_pad, irow
+     +,                            tpseqh, tpseq 
+     +,                            tppixel_h, tppixel
+     +,                            ipad, iadc)
+C-----------------------------------------------------------------------
+
+      IMPLICIT NONE
+
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     jseq:
+C     nseq:
+C     id_pad:
+C     irow:
+C     tpseqh:
+C     tpseq:
+C     tppixel_h:
+C     tppixel:
+C
+C   Output arguments : 
+C
+C     ipad:
+C     iadc:
+C
+C  Returns:
+C       Contained in the output arguments...
+C     
+C   Functional Description : 
+C    This subroutine projects pixel data presented in the 
+C    caller arrays onto the pad dimension.
+C
+C   Moved into TAS 12-Apr-1994   Richard Morse
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
+C-----------------------------------------------------------------------
+#include "tas_structures.inc"
+#include "tas_user_codes.inc"
+
+#include "tss_tppixel_pars.inc"
+#include "tss_tppixel_st.inc"
+
+#include "tcl_tpseq_pars.inc"
+#include "tcl_tpseq_st.inc"
+
+C-----------------------------------------------------------------------
+
+      RECORD/ table_head_st/ tppixel_h
+      RECORD/ tppixel_row_st/ tppixel(*)
+
+      RECORD/ table_head_st/ tpseqh
+      RECORD/ tpseq_row_st/ tpseq(*)
+
+C-----------------------------------------------------------------------
+        real iadc(*),ipad(*)
+        integer id_pad(*)
+        integer jseq,nseq,irow,nclspix
+C-----------------------------------------------------------------------
+        integer ldatum
+c        integer*2 idatum(2),tdc_lo,tdc_hi
+c        equivalence(idatum(1),ldatum)
+c        integer*2 seqmask,botmask
+c data now packed in new way.... malisa 24mar95
+        integer nseq_factor/'100000'X/
+        integer tdc_factor/'400'X/
+        integer itdc
+
+        integer kseq,kpix,kseqpix
+        integer jpix,iclspix,indx
+        integer iseq
+
+C-----------------------------------------------------------------------
+c        data seqmask/'3F00'X/,botmask/'FF'X/
+C-----------------------------------------------------------------------
+
+        iseq = 0
+
+        do kseq = jseq, jseq+nseq-1
+           iseq = iseq + 1
+           jpix = tpseq(kseq).jpix
+
+           ldatum = tppixel(jpix).datum
+           kseqpix = ldatum/nseq_factor
+           itdc = (ldatum - kseqpix*nseq_factor)/tdc_factor
+c           iadc(iseq) = real(idatum(1))
+           iadc(iseq) = real(ldatum - kseqpix*nseq_factor -
+     +		 itdc*tdc_factor)
+
+           ipad(iseq) = real(tpseq(kseq).secpad-id_pad(irow))
+
+c           kseqpix = iand(idatum(2),seqmask)/'100'X
+
+           do indx = 2, kseqpix
+              ldatum = tppixel(jpix+indx-1).datum
+              itdc = (ldatum - kseqpix*nseq_factor)/tdc_factor
+              iadc(iseq) = iadc(iseq) + real(ldatum - 
+     +		kseqpix*nseq_factor - itdc*tdc_factor)
+           enddo
+
+        enddo
+
+        return
+        end
+
+C-----------------------------------------------------------------------
+        Real Function tph_calc_prf_sigma(nseq, ipad, iadc)
+C-----------------------------------------------------------------------
+      IMPLICIT NONE
+
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     nseq:
+C     ipad:
+C     iadc:
+C
+C   Output arguments : 
+C
+C  Returns:
+C       The response width, in units of pixels, of the data 
+C       presented in the caller arrays.
+C     
+C   Functional Description : 
+C    This function returns the response width, in units of 
+C    pixels, of the data presented in the caller arrays 
+C    under the assumption of a Gaussian response function.
+C    
+C
+C   Moved into TAS 12-Apr-1994   Richard Morse
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
+C-----------------------------------------------------------------------
+
+      integer lvmax
+C-----------------------------------------------------------------------
+        real iadc(*),ipad(*)
+        integer nseq
+C-----------------------------------------------------------------------
+        integer imax, id
+        real    x,y,pad_width
+C-----------------------------------------------------------------------
+
+        pad_width = 0.
+        imax = lvmax(iadc,nseq)
+
+        if(imax.ge.2 .and. imax.lt.nseq)then
+           x = iadc(imax)**2
+           y = iadc(imax-1)*iadc(imax+1)
+           pad_width = 1./log(x/y)
+        elseif(imax .eq. 1)then
+c
+c          the peak of the pulse is on the "leftmost" edge of a pad row
+c          should use calculated pad-response width and 2-pad position
+c          estimate
+c
+           id = 0
+           call message('TPHAM-I-PRFS imax=1; leftmost'
+     +,                 1, id)
+        elseif(imax .eq. nseq)then
+c
+c          the peak of the pulse is on the "rightmost" edge of a pad row
+c          should use calculated pad-response width and 2-pad position
+c          estimate
+c
+           id = 0
+           call message('TPHAM-I-PRFS imax=nseq; rightmost'
+     +,                 1, id)
+        else
+           id = 0
+           call message('TPHAM-E-PRFS error in 3 pad prf calculation'
+     +,                 1, id)
+        endif
+
+        tph_calc_prf_sigma = pad_width
+
+        return
+        end
+
+C-----------------------------------------------------------------------
+        Real Function tph_calc_prf_pos(nseq, ipad, iadc, sigma)
+C-----------------------------------------------------------------------
+      IMPLICIT NONE
+
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     nseq:
+C     ipad:
+C     iadc:
+C     sigma:
+C
+C   Output arguments : 
+C
+C
+C  Returns:
+C       The response centroid, in units of pixels, of the data 
+C       presented in the caller arrays.
+C     
+C   Functional Description : 
+C    This function returns the response centroid, in units of 
+C    pixels, of the data presented in the caller arrays 
+C    under the assumption of a Gaussian response function.
+C    
+C
+C   Moved into TAS 12-Apr-1994   Richard Morse
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
+C-----------------------------------------------------------------------
+      integer lvmax
+
+
+C-----------------------------------------------------------------------
+        real iadc(*),ipad(*)
+        integer nseq
+        real sigma
+C-----------------------------------------------------------------------
+        integer imax
+        real    p1,p2,p3
+        real    c1,c2,c3
+        real    pad
+        integer id
+C-----------------------------------------------------------------------
+
+        tph_calc_prf_pos = 0.
+        imax = lvmax(iadc,nseq)
+
+        if(imax.ge.2 .and. imax.lt.nseq)then
+           c1 = iadc(imax-1)
+           c2 = iadc(imax)
+c          c3 = iadc(imax+1)
+
+           p1 = ipad(imax-1)
+           p2 = ipad(imax)
+c          p3 = ipad(imax+1)
+
+           tph_calc_prf_pos = (p1+p2)/2.-sigma*log(c1/c2)
+        elseif(imax .eq. 1)then
+c
+c          the peak of the pulse is on the "leftmost" edge of a pad row
+c          should use calculated pad-response width and 2-pad position
+c          estimate
+c
+           id = 0
+           call message('TPHAM-I-PRFP imax=1; leftmost'
+     +,                 1, id)
+        elseif(imax .eq. nseq)then
+c
+c          the peak of the pulse is on the "rightmost" edge of a pad row
+c          should use calculated pad-response width and 2-pad position
+c          estimate
+c
+           id = 0
+           call message('TPHAM-I-PRFP imax=nseq; rightmost'
+     +,                 1, id)
+        else
+           id = 0
+           call message('TPHAM-E-PRFP error in 3 pad prf calculation'
+     +,                 1, id)
+           return
+        endif
+
+        return
+        end
+
+C-----------------------------------------------------------------------
+        Subroutine tph_proj_tim(nclspix, ipad, itdc, iadc, ntim)
+C-----------------------------------------------------------------------
+
+      IMPLICIT NONE
+
+C   Input arguments  (One to a line with definition after ! ) 
+C
+C     nclspix:
+C     ipad:
+C     itdc:
+C
+C   Output arguments : 
+C
+C     itdc:
+C     ntim:
+C
+C  Returns:
+C       Contained in the output arguments...
+C     
+C   Functional Description : 
+C    This subroutine projects pixel data presented in the 
+C    caller arrays onto the time dimension.
+C
+C   Moved into TAS 12-Apr-1994   Richard Morse
+C   Copyright 1994    Lawrence Berkeley Laboratory
+c   
+c   modificattions:
+c   ==============
+C
+C   Error conditions : 
+C   ================
+C-----------------------------------------------------------------------
+        real vmin,vmax
+
+        real iadc(*),itdc(*),ipad(*)
+        integer nclspix, ntim
+C-----------------------------------------------------------------------
+
+        real rndx, min_time, max_time
+        integer nbuck
+        parameter (nbuck = 100)
+        real ladc(nbuck),ltdc(nbuck)
+
+        integer ldatum
+        integer*2 idatum(2)
+        equivalence(idatum(1),ldatum)
+        integer*2 seqmask,botmask
+
+        integer indx
+C-----------------------------------------------------------------------
+        data seqmask/'3F00'X/,botmask/'FF'X/
+C-----------------------------------------------------------------------
+
+        min_time = vmin(itdc,nclspix)
+        max_time = vmax(itdc,nclspix)
+
+        ntim = int(max_time-min_time)
+
+        if((max_time-min_time).gt.4.)then
+           return
+        endif
+c
+c       if need be, perform time axis projection...
+c
+        do rndx = min_time, max_time
+           ltdc(int(rndx-min_time+1.)) = rndx
+           ladc(int(rndx-min_time+1.)) = 0.
+        enddo
+
+        do indx = 1, nclspix
+           ladc(int(itdc(indx)-min_time+1.))
+     +      = ladc(int(itdc(indx)-min_time+1.))+iadc(indx)
+        enddo
+c
+c       now put the projected spectrum into "standard" arrays
+c
+        do rndx = min_time, max_time
+           iadc(int(rndx-min_time+1.))=ladc(int(rndx-min_time+1.))
+           itdc(int(rndx-min_time+1.))=ltdc(int(rndx-min_time+1.))
+        enddo
+
+        return
+        end
+
