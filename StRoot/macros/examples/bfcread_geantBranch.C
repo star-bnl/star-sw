@@ -1,4 +1,4 @@
-// $Id: bfcread_geantBranch.C,v 1.4 2000/03/23 19:54:35 kathy Exp $
+// $Id: bfcread_geantBranch.C,v 1.5 2000/04/12 16:13:41 kathy Exp $
 // $Log $
 
 //======================================================================
@@ -23,7 +23,7 @@ StChain *chain;
 void bfcread_geantBranch(
  Int_t nevents=2, 
  const char *MainFile=
- "/afs/rhic/star/data/samples/gstar.dst.root",
+ "/afs/rhic/star/data/samples/gstar.geant.root",
  const char *fname="qa_geant.out") 
 {
 //
@@ -41,8 +41,9 @@ void bfcread_geantBranch(
 
     gSystem->Load("St_base");
     gSystem->Load("StChain");
-    gSystem->Load("St_Tables");
+    gSystem->Load("libsim_Tables");
     gSystem->Load("StIOMaker");
+
 
 //  Setup top part of chain
     chain = new StChain("bfc");

@@ -1,5 +1,8 @@
-// $Id: bfcread_dstBranch.C,v 1.4 2000/03/20 17:50:40 kathy Exp $
+// $Id: bfcread_dstBranch.C,v 1.5 2000/04/12 16:13:40 kathy Exp $
 // $Log: bfcread_dstBranch.C,v $
+// Revision 1.5  2000/04/12 16:13:40  kathy
+// have changed so that macro loads only table libraries needed instead of all table libraries
+//
 // Revision 1.4  2000/03/20 17:50:40  kathy
 // fix all macros so that they set all branches on that are needed - otherwise won't work with soft links
 //
@@ -34,7 +37,12 @@ void bfcread_dstBranch(
 //
     gSystem->Load("St_base");
     gSystem->Load("StChain");
-    gSystem->Load("St_Tables");
+
+  gSystem->Load("libglobal_Tables");
+  gSystem->Load("libgen_Tables");
+  gSystem->Load("libsim_Tables");
+  gSystem->Load("libtpc_Tables");
+
     gSystem->Load("StIOMaker");
 
 //  Setup top part of chain

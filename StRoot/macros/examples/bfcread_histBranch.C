@@ -1,4 +1,4 @@
-// $Id: bfcread_histBranch.C,v 1.2 2000/03/20 17:50:41 kathy Exp $
+// $Id: bfcread_histBranch.C,v 1.3 2000/04/12 16:13:41 kathy Exp $
 // $Log $
 
 //======================================================================
@@ -25,7 +25,6 @@ void bfcread_histBranch(
 //
     gSystem->Load("St_base");
     gSystem->Load("StChain");
-    gSystem->Load("St_Tables");
     gSystem->Load("StIOMaker");
 
 //  Setup top part of chain
