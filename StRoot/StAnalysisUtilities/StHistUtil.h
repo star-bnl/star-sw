@@ -1,5 +1,8 @@
-//! $Id: StHistUtil.h,v 1.4 2000/01/28 17:53:42 lansdell Exp $
+//! $Id: StHistUtil.h,v 1.5 2000/06/23 14:31:53 kathy Exp $
 //! $Log: StHistUtil.h,v $
+//! Revision 1.5  2000/06/23 14:31:53  kathy
+//! put 2 new methods in: CopyHists (must be used first), AddHists
+//!
 //! Revision 1.4  2000/01/28 17:53:42  lansdell
 //! split overlay method into Overlay1D and Overlay2D
 //!
@@ -80,6 +83,9 @@ class StHistUtil {
 
   StMaker       *m_PntrToMaker;    //! pointer to an St_Maker, so can find histograms
 
+  static const Int_t    maxHistCopy=500;      //! size of array of new histograms 
+  TH1            *newHist[maxHistCopy]; //! array of new histograms that other will be copied into
+
 
  protected:
 
@@ -90,6 +96,8 @@ class StHistUtil {
   virtual Int_t   DrawHists(Char_t *dirName="QA");
   virtual Int_t   ListHists(Char_t *dirName="QA");
   virtual TList*  FindHists(Char_t *dirName="QA");
+  virtual Int_t   CopyHists(TList  *dirList);
+  virtual Int_t   AddHists(TList  *dirList, Int_t nHistCopy=0);
 
   virtual void    SetDefaultLogYList(Char_t *dirName="QA");
   virtual Int_t   AddToLogYList(const Char_t *HistName="");
@@ -121,7 +129,7 @@ class StHistUtil {
   
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.4 2000/01/28 17:53:42 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.5 2000/06/23 14:31:53 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };

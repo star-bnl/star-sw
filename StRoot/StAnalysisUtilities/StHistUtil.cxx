@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.16 2000/05/25 03:47:09 lansdell Exp $
+// $Id: StHistUtil.cxx,v 1.17 2000/06/23 14:31:52 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.17  2000/06/23 14:31:52  kathy
+// put 2 new methods in: CopyHists (must be used first), AddHists
+//
 // Revision 1.16  2000/05/25 03:47:09  lansdell
 // changed default logy list to reflect new QA histograms
 //
@@ -538,6 +541,110 @@ Int_t StHistUtil::ListHists(Char_t *dirName)
 
   cout << " ListHists: Total No. Histograms Booked  = " << histReadCount <<endl;
   return histReadCount;
+}
+
+
+//_____________________________________________________________________________
+
+
+Int_t StHistUtil::CopyHists(TList *dirList)
+{  
+  cout << " **** Now in StHistUtil::CopyHists **** " << endl;
+
+  if (!dirList) cout << " StHistUtil::CopyHists - histogram Pointer not set! " << endl;
+
+// create array of pointers to the new histograms I will create
+ Int_t ilg = 0;
+ cout << " StHistUtil::CopyHists - max # hist to copy (hardwired) = " << 
+   maxHistCopy << endl;
+ for (ilg=0;ilg<maxHistCopy;ilg++) {
+      newHist[ilg]=0;
+ }
+
+  Int_t ijk=0;
+  Int_t histCopyCount = 0;
+
+  if (dirList){
+   TIter nextObj(dirList);
+   TObject *obj = 0;
+    while ((obj = nextObj())) {    
+     if (obj->InheritsFrom("TH1")) {
+       histCopyCount++;         
+       if (ijk<maxHistCopy){
+         newHist[ijk] = ((TH1 *)obj->Clone());
+       } // if ijk
+       ijk++;
+     }   // if obj
+    }    // while obj
+  }      // if dirList
+
+  cout << " ListHists: Total No. Histograms Copied  = " << 
+        histCopyCount <<endl;
+
+// Now see if we can find these copies:
+ // Int_t imk = 0;
+ //for (imk=0;imk<histCopyCount;imk++) {
+ //  if (newHist[imk]->InheritsFrom("TH1")) {       
+ //        cout << " !!! NEW Type: " << newHist[imk]->ClassName() << 
+ //             ", Name: "    << newHist[imk]->GetName() << 
+ //             ", Title: "   << newHist[imk]->GetTitle() << 
+ //	    ", Max: " << ((TH1 *)newHist[imk])->GetMaximum() << endl; 
+ //  }
+ //} 
+
+  return histCopyCount;
+}
+
+//_____________________________________________________________________________
+
+
+Int_t StHistUtil::AddHists(TList *dirList,Int_t numHistCopy)
+{  
+  cout << " **** Now in StHistUtil::AddHists **** " << endl;
+  cout << " num hists to copy = " << numHistCopy << endl;
+
+  if (!dirList) cout << 
+        " StHistUtil::AddHists - histogram Pointer not set! " << endl;
+
+
+  Int_t histAddCount = 0;
+
+  if (dirList){
+   TIter nextObj(dirList);
+   Int_t histReadCount = 0;
+   TObject *obj = 0;
+
+    while ((obj = nextObj())) {    
+     if (obj->InheritsFrom("TH1")) {
+      
+// now want to add these histograms to the copied ones:
+      Int_t imk = 0;
+      for (imk=0;imk<numHistCopy;imk++) {
+       if (strcmp( (newHist[imk]->GetName()), (obj->GetName()) )==0) {       
+	 //	cout << "  ---- hist num to add --- " << imk << endl;
+         newHist[imk]->Add((TH1 *)obj);
+         histAddCount++;
+         cout << " !!! Added histograms with Name: "
+	      << newHist[imk]->GetName() <<  endl;
+
+         if (strcmp(newHist[imk]->GetName(),"TabQaEvsumTrkTot")==0) {       
+	   newHist[imk]->Draw();
+           gPad->Update();
+         } // if strcmp -- to draw
+
+       } // strcmp
+      }  // loop over imk
+     }   // if obj inherits from th1
+    }    //while
+
+  } //dirlist
+
+
+  cout << " StHistUtil::AddHists: Total No. Histograms Added  = " << 
+        histAddCount <<endl;
+
+
+  return histAddCount;
 }
 
 //_____________________________________________________________________________
