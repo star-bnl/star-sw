@@ -1,4 +1,4 @@
-// $Id: EETowCompatMatchMaker.h,v 1.3 2004/01/06 17:45:10 zolnie Exp $
+// $Id: EETowCompatMatchMaker.h,v 1.4 2004/01/13 22:46:01 zolnie Exp $
 
 #ifndef STAR_EETowCompatMatchMaker
 #define STAR_EETowCompatMatchMaker
@@ -8,10 +8,10 @@
  * \class  EETowCompatMatchMaker
  * \author Piotr A. Zolnierczuk
  * \date   2003/12/08
- * \brief  EEMC tower calibration using TPC tracks (basically translation of zniwo)
+ * \brief  EEMC tower calibration using TPC tracks (compatible mode)
  *
  * This a MuDST based class to get tower calibration from matching TPC tracks
- *
+ * (basically translation of zniwo)
  */                                                                      
 
 
@@ -35,12 +35,11 @@ class EEmcGeomSimple;
 class StMuDstMaker;
 class StEEmcDbMaker;
 
-//
 const int kCompatTTM_MaxTracks  = 1024;
 const int kCompatTTM_MaxTrigger =   32;
 
+/// structure to hold the results from EETowCompatMatchMaker
 struct CompatTTM {
-
   int   numtracks;
   int   sector[kCompatTTM_MaxTracks];
   int   subsec[kCompatTTM_MaxTracks];
@@ -83,7 +82,9 @@ struct CompatTTM {
 
 class EETowCompatMatchMaker : public StMaker {
  public: 
+  /// enum to select ADC mode
   enum ADCMode_t { kRawAdc, kPedSub, kPedAndGain };
+
 
   EETowCompatMatchMaker(const char   *self      ="EETowCompatMatchMaker",
 		       StMuDstMaker  *mumaker = NULL,
@@ -151,7 +152,7 @@ class EETowCompatMatchMaker : public StMaker {
   //  StMaker jumbo mumbo
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: EETowCompatMatchMaker.h,v 1.3 2004/01/06 17:45:10 zolnie Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: EETowCompatMatchMaker.h,v 1.4 2004/01/13 22:46:01 zolnie Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -163,6 +164,9 @@ class EETowCompatMatchMaker : public StMaker {
 
 
 // $Log: EETowCompatMatchMaker.h,v $
+// Revision 1.4  2004/01/13 22:46:01  zolnie
+// before erase
+//
 // Revision 1.3  2004/01/06 17:45:10  zolnie
 // close to release
 //

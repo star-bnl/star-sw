@@ -1,5 +1,5 @@
 // *-- Author : Piotr A. Zolnierczuk
-// $Id: EETowCompatMatchMaker.cxx,v 1.5 2004/01/06 21:33:51 zolnie Exp $
+// $Id: EETowCompatMatchMaker.cxx,v 1.6 2004/01/13 22:46:00 zolnie Exp $
 
 #include "TFile.h"
 #include "TTree.h"
@@ -364,9 +364,9 @@ EETowCompatMatchMaker::matchTrack(
 				  const int ssec, 
 				  const int etabin,
 				  TVector3& dr,
-				  Float_t  deta, 
-				  Float_t  dphi, 
-				  Float_t  dz) 
+				  float    deta, 
+				  float    dphi, 
+				  float    dz) 
 {
   // extrapolate to Z
   TVector3 r(0.0,0.0,0.0);
@@ -429,6 +429,9 @@ EETowCompatMatchMaker::extrapolateToZ(const StMuTrack *track, const double   z, 
 
 
 // $Log: EETowCompatMatchMaker.cxx,v $
+// Revision 1.6  2004/01/13 22:46:00  zolnie
+// before erase
+//
 // Revision 1.5  2004/01/06 21:33:51  zolnie
 // release
 //
