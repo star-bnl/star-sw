@@ -227,7 +227,7 @@ The StPidAmpManager can hold multiple ChannelCollections. Thus if a user want co
 <br>#include "StuProbabilityPidAlgorithm.h"
 <br>
 <br><font color=green>//put the following line some where before your event loop:</font>
-<br>StuProbabilityPidAlgorithm::readInputFile("nhitsBin_0_10_20_45_ptBin_0_Inf_dcaBin_0_2_50000_Amp.root");<font color=green>//read in the parameters.</font>
+<br>StuProbabilityPidAlgorithm::readParametersFromFile("nhitsBin_0_10_20_45_ptBin_0_Inf_dcaBin_0_2_50000_Amp.root");<font color=green>//read in the parameters.</font>
 <br>
 <br><font color=green>//inside your event loop (but outside the track loop): </font>
 <br>StuProbabilityPidAlgorithm myPID(event);<font color=green>   //define a functor.</font>
