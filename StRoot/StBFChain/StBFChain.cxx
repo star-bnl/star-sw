@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.22 1999/11/07 02:26:22 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.23 1999/11/08 16:45:41 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.23  1999/11/08 16:45:41  fisyak
+// Fix typo in tpc chain
+//
 // Revision 1.22  1999/11/07 02:26:22  fisyak
 // Clean ups
 //
@@ -157,7 +160,7 @@ BfcItem BFC[] = {
   {"NoEvent"     ,""  ,"","-event,-analysis"      ,"","","Switch Off StEvent and StAnalysis Makers",kFALSE},
   {"GEANT","geant","","","St_geant_Maker","St_Tables,geometry,St_g2r,St_geant_Maker"
                                                                                 ,"initailize GEANT",kFALSE}, 
-  {"TPC"         ,"db,tpc","","db,-tss,-trs,tcl,tpt"              ,"StMaker","St_Tables,StChain","",kFALSE},
+  {"TPC"         ,"tpc"    ,""   ,"db,-tss,-trs,tcl,tpt"          ,"StMaker","St_Tables,StChain","",kFALSE},
   {"TSS"         ,"tpc_raw","tpc","-trs"            ,"St_tss_Maker","libtls,St_tpc,St_tss_Maker","",kFALSE},  
   {"TRS"         ,"tpc_raw","tpc","-tss,tpc_daq"     ,"StTrsMaker","StarClassLibrary,StTrsMaker","",kFALSE},
   {"MINIDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE}, 
@@ -165,7 +168,7 @@ BfcItem BFC[] = {
   {"TFS"         ,""  ,"","tpc,-trs,-tss","",""     ,"use TFS       (no St_[tss_ and no Trs]Maker)",kFALSE},
   {"TCL"         ,"tpc_hits","tpc",""               ,"St_tcl_Maker","libtls,St_tpc,St_tcl_Maker","",kFALSE},
   {"TPT"         ,"tpc_tracks","tpc",""   ,"St_tpt_Maker","St_Tables,libtls,St_tpc,St_tpt_Maker","",kFALSE},
-  {"SVT"         ,"svt","","srs,stk"                              ,"St_Tables,StMaker","StChain","",kFALSE},
+  {"SVT"         ,"svt"     ,""     ,"srs,stk"                    ,"St_Tables,StMaker","StChain","",kFALSE},
   {"SRS"         ,"svt_hits","svt",""               ,"St_srs_Maker","libtls,St_svt,St_srs_Maker","",kFALSE},
   {"STK"         ,"svt_tracks","svt",""             ,"St_stk_Maker","libtls,St_svt,St_stk_Maker","",kFALSE},
   {"FTPC"        ,"ftpc"  ,"","-fss,fcl,fpt"                      ,"St_Tables,StMaker","StChain","",kFALSE},
