@@ -15,7 +15,7 @@ int tls_index_sort_ii_(int* nrows,char *el1, char *el2, int* index, int* ind_siz
   int size;
   
   size = el2 - el1;
-  QSortTable(el1,el1, *nrows, size, 0x30);
+  QSortTable(el1,index, *nrows, size, 0x30);
   return 3585;
 }
 int tls_index_sort_i_(int* nrows,char *el1, char *el2, int* index, int* ind_size)
@@ -23,7 +23,7 @@ int tls_index_sort_i_(int* nrows,char *el1, char *el2, int* index, int* ind_size
   int size;
   
   size = el2 - el1;
-  QSortTable(el1,el1, *nrows, size, 0x31);
+  QSortTable(el1,index, *nrows, size, 0x31);
   return 3585;
 }
 int tls_index_sort_r_(int* nrows,char *el1, char *el2, int* index, int* ind_size)
@@ -31,7 +31,7 @@ int tls_index_sort_r_(int* nrows,char *el1, char *el2, int* index, int* ind_size
   int size;
   
   size = el2 - el1;
-  QSortTable(el1,el1, *nrows, size, 0x32);
+  QSortTable(el1,index, *nrows, size, 0x32);
   return 3585;
 }
 int tls_index_sort_d_(int* nrows,char *el1, char *el2, int* index, int* ind_size)
@@ -39,7 +39,7 @@ int tls_index_sort_d_(int* nrows,char *el1, char *el2, int* index, int* ind_size
   int size;
   
   size = el2 - el1;
-  QSortTable(el1,el1, *nrows, size, 0x33);
+  QSortTable(el1,index, *nrows, size, 0x33);
   return 3585;
 }
 
