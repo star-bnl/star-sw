@@ -12,7 +12,7 @@ struct tpcCorrection {
                 // type = 1 TChebyshev poly in range [min,max] => [-1,1]
                 // type = 2 shifted  TChebyshev poly in range [min,max] => [ 0,1]
                 // type = 10 (== log(1. + OffSet/x) + poly(x,npar)
-  long   index; // row index
+  long   idx; // row index
   long   nrows; // total no. of real rows in the table; For Db interface (where nrows = 50)
   long   npar;  // npar < 0, X = exp(x) paramterization
   double OffSet;// use for type = 10 (== log(1. + OffSet/x) + poly(x,npar)
