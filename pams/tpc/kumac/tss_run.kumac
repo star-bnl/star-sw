@@ -26,7 +26,6 @@ macro run tpc_sector_first tpc_sector_last
    
    ami/module/call tss_
         [params]/tpc/tsspars/tsspar_
-        [geometry]/tpc/tpgpar/tpg_detector_
         [geometry]/tpc/tpgpar/tpg_pad_plane_
         [geant_Event]/g2t_tpc_hit_
         [geant_Event]/g2t_track_
