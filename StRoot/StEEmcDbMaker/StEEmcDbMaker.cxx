@@ -1,7 +1,10 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.9 2003/04/25 14:42:00 jeromel Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.10 2003/04/27 23:08:13 balewski Exp $
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.10  2003/04/27 23:08:13  balewski
+// clean up of daq-reader
+//
 // Revision 1.9  2003/04/25 14:42:00  jeromel
 // Minor change in messaging
 //
@@ -228,17 +231,34 @@ Int_t  StEEmcDbMaker::InitRun  (int runumber){
 //__________________________________________________
 
 void  StEEmcDbMaker::mReloadDb  (){
-
-  int found=0;
   int i;
-  printf("%s::reloadDb use TimeStamp from:  %p or %p \n",GetName(),GetMaker("StarDb"),GetMaker("db"));
+  printf("%s::reloadDb using TimeStamp from 'StarDb'=%d or 'db'=%p \n",GetName(),GetMaker("StarDb"),GetMaker("db"));
+  
+  // clear old DB tables  ...................
+  nFound=0;
+  
+  for(i=0; i<mNSector; i++) {// clear old data
+    mDbADCconf[i]=0;
+    mDbPMTconf[i]=0;
+    mDbPMTcal [i]=0;
+    mDbPMTped [i]=0;
+    mDbsectorID[i]=-1;
+  }
+  
+  for(i=0; i<EEindexMax; i++)
+    mDbItem1[i].clear();
+  
+  int j;
+  for(i=0;i<mxAdcCrate;i++)
+    for(j=0;j<mxAdcChan;j++)
+      mLookup[i][j]=0;
+  
 
   St_db_Maker* mydb = (St_db_Maker*)GetMaker("StarDb");
   if(mydb==0) mydb = (St_db_Maker*)GetMaker("db");
   assert(mydb);
-  TDatime aa;
-  
-  if(myTimeStampDay==0) {    
+   
+  if(myTimeStampDay==0) { // use oryginal timestamp of event   
 #if 0
     StEvent *stEvent= (StEvent *) GetInputDS("StEvent"); 
     assert(stEvent); 
@@ -253,7 +273,7 @@ void  StEEmcDbMaker::mReloadDb  (){
     //  int time0; // (sec) GMT of the first event
     //  time0=fEvtHddr->GetUTime( ); //<<==== this is used by DB
 
-  } else {
+  } else { // WARN only if you wish to overwrite the global time stamp 
     printf("replace  TimeStampDay to %d \n",myTimeStampDay);
     mydb->SetDateTime(myTimeStampDay,0); // set ~day & ~hour by hand
   }
@@ -261,35 +281,18 @@ void  StEEmcDbMaker::mReloadDb  (){
 
 
   printf("JB: access DB info, first time, use timeStamp=\n  ");
+  TDatime aa;
   aa=mydb->GetDateTime();
   aa.Print();
   
   TDataSet *eedb=GetDataBase("Calibrations/eemc");
   if(eedb==0) {
-    printf(" \n\nCould not find Calibrations/eemc\n\n");
-    // do not assert() ; return
+    printf(" \n\n%s::InitRun()  Could not find Calibrations/eemc\n\n",GetName());
+    return ;
     // down-stream makers should check for presence of dataset
-    assert(eedb);
   }
   eedb->ls(2);
 
-  // clear old DB tables  ...................
-  
-  for(i=0; i<mNSector; i++) {// clear old data
-    mDbADCconf[i]=0;
-    mDbPMTconf[i]=0;
-    mDbPMTcal [i]=0;
-    mDbPMTped [i]=0;
-    mDbsectorID[i]=-1;
-  }
-
-  for(i=0; i<EEindexMax; i++)
-    mDbItem1[i].clear();
-
-  int j;
-  for(i=0;i<mxAdcCrate;i++)
-    for(j=0;j<mxAdcChan;j++)
-      mLookup[i][j]=0;
 
   int is;
   for(is=0; is< mNSector; is++) {
@@ -307,47 +310,51 @@ void  StEEmcDbMaker::mReloadDb  (){
       assert(ds1->GetNRows()==1); // DB TABLE HAS ONLY ONE ROW
       mDbADCconf[is]=(eemcDbADCconf_st *) ds1->GetArray();
       assert(mDbADCconf[is]); // db error if not delivered
+      printf("\n  comm='%s'\n",mDbADCconf[is]->comment);
       mCleanDbNames(mDbADCconf[is]->name, EEMCDbMaxAdcName);   
-      found++;
+      nFound++;
     } else {
       printf("Not Found in DB, continue \n");
     }
 
     sprintf(name,"%s/eemcPMTconf",secTx);//.................
-    printf("request=%s=\n",name);
+    printf("request=%s==>",name);
     St_eemcDbPMTconf *ds2= (St_eemcDbPMTconf *)eedb->Find(name);
     if(ds2) {
       assert(ds2->GetNRows()==1);  // DB TABLE HAS ONLY ONE ROW
       mDbPMTconf[is]=(eemcDbPMTconf_st *) ds2->GetArray();
       assert(mDbPMTconf[is]); // db error
+      printf("\n  comm='%s'\n",mDbPMTconf[is]->comment);
       mCleanDbNames(mDbPMTconf[is]->name, EEMCDbMaxAdcName);
-      found++;
+      nFound++;
     } else {
       printf("Not Found in DB : %s , continue \n",name);
     }
 
     sprintf(name,"%s/eemcPMTcal",secTx); //.................
-    printf("request=%s=\n",name);
+    printf("request=%s==>",name);
     St_eemcDbPMTcal *ds3= (St_eemcDbPMTcal *)eedb->Find(name);
     if(ds3) {
       assert(ds3->GetNRows()==1);  // DB TABLE HAS ONLY ONE ROW
       mDbPMTcal[is]=(eemcDbPMTcal_st *) ds3->GetArray();
       assert(mDbPMTcal[is]); // db error
+      printf("\n  comm='%s'\n",mDbPMTcal[is]->comment);
       mCleanDbNames(mDbPMTcal[is]->name, EEMCDbMaxAdcName);
-      found++;
+      nFound++;
     } else {
       printf("Not Found in DB : %s , continue \n",name);
     }
 
     sprintf(name,"%s/eemcPMTped",secTx); //.................
-    printf("request=%s=\n",name);
+    printf("request=%s==>",name);
     St_eemcDbPMTped *ds4= (St_eemcDbPMTped *)eedb->Find(name);
     if(ds4) {
       assert(ds4->GetNRows()==1);  // DB TABLE HAS ONLY ONE ROW
       mDbPMTped[is]=(eemcDbPMTped_st *) ds4->GetArray();
       assert(mDbPMTped[is]); // db error
+      printf("\n  comm='%s'\n",mDbPMTped[is]->comment);
       mCleanDbNames(mDbPMTped[is]->name, EEMCDbMaxAdcName);
-      found++;
+      nFound++;
     } else {
       printf("Not Found in DB : %s , continue \n",name);
     }
@@ -355,8 +362,8 @@ void  StEEmcDbMaker::mReloadDb  (){
 
   } // end of loop over sectors
 
-  printf("Found %d EEMC related tables for the present time stamp\n",found);
-  assert(found); // no relevant records were in db, makes no sense to use this maker for any work
+  printf("%s::InitRun()  Found %d EEMC related tables for the present time stamp\n",GetName(),nFound);
+  if(nFound<=0) printf("WARN : no relevant records were in db, makes no sense to use this maker for any work, JB\n");
 }
  
 //__________________________________________________
