@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.95 2000/04/20 17:26:30 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.96 2000/05/25 03:52:11 lansdell Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.96  2000/05/25 03:52:11  lansdell
+// mirrored globtrk histograms for primtrk; removed ev0_eval, vertex: detector id histograms; added generator pT for TPC (|eta|<1), vertex: radial position histograms; merged vertex methods
+//
 // Revision 1.95  2000/04/20 17:26:30  kathy
 // fix to remove compilation warnings due to unused variables - see Victor's email to starsofi recently
 //
@@ -323,7 +326,6 @@
 #include "tables/St_dst_tkf_vertex_Table.h"    // kinkVertex
 #include "tables/St_particle_Table.h"          // particle
 #include "tables/St_g2t_rch_hit_Table.h"       // g2t_rch_hit
-#include "tables/St_ev0_eval_Table.h"          // ev0_eval
 #include "tables/St_tpt_track_Table.h"         // l3Track
 
 // tables  from geant
@@ -923,8 +925,9 @@ void St_QA_Maker::MakeHistPrim(){
 	Float_t chisq0 = t->chisq[0];
 	Float_t chisq1 = t->chisq[1]; 
         Float_t nfitntot = (Float_t(trkfpnt))/(Float_t(trkpnt));
-
+        Float_t nfitnmax = (Float_t(trkfpnt))/(Float_t(trkmpnt));
         Float_t logImpact = TMath::Log10(t->impact); 
+        Float_t logCurvature = TMath::Log10(t->curvature); 
 
 
 
@@ -954,59 +957,200 @@ void St_QA_Maker::MakeHistPrim(){
                        TMath::Power((t->x_first[1]),2);
                 radf = TMath::Sqrt(radf); 
 
+
+// from Lanny on 2 Jul 1999 9:56:03
+//1. x0,y0,z0 are coordinates on the helix at the starting point, which
+//   should be close to the first TPC hit position assigned to the track.
+//   The latter, different quantity is in x_first[3].
+
+// from Helen on 14 Jul 1999 - she now fills chisq0,1 with chisq/dof
+// so it doesn't need to be calculated here 
+		
  	m_pdet_id->Fill(t->det_id);
-	m_ppoint->Fill(trkpnt);
-	m_pmax_point->Fill(trkmpnt);
-	m_pfit_point->Fill(trkfpnt);
-        m_prim_charge->Fill(t->icharge);
-        m_prim_xf->Fill(t->x_first[0]);
-        m_prim_yf->Fill(t->x_first[1]);
-        m_prim_zf->Fill(t->x_first[2]);
+
+//  now fill all TPC histograms ------------------------------------------------
+        if (t->iflag>=100 && t->iflag<200 ) {
+
+// these are tpc only
         m_prim_xf0->Fill(xdif);
         m_prim_yf0->Fill(ydif);
         m_prim_zf0->Fill(zdif);
-        m_prim_radf->Fill(radf);
-        m_prim_ratio->Fill(nfitntot);
-	m_ppsi->Fill(t->psi);
-        m_ptanl->Fill(t->tanl);
-        m_prim_theta->Fill(thetad);
-	m_peta->Fill(eta);
-	m_ppT->Fill(pT);
-        m_pmom->Fill(gmom);
-	m_plength->Fill(t->length);
-        m_prim_impact->Fill(logImpact);
-        m_prim_impactr->Fill(t->impact);
-       	m_pchisq0->Fill(chisq0);
-	m_pchisq1->Fill(chisq1);
+        m_prim_impactT->Fill(logImpact);
+        m_prim_impactrT->Fill(t->impact);
+	
+// these are tpc & ftpc
+	m_ppointT->Fill(trkpnt);
+	m_pmax_pointT->Fill(trkmpnt);
+	m_pfit_pointT->Fill(trkfpnt);
+        m_prim_chargeT->Fill(t->icharge);
+        m_prim_r0T->Fill(t->r0);
+        m_prim_phi0T->Fill(t->phi0);
+        m_prim_z0T->Fill(t->z0);
+        m_prim_curvT->Fill(logCurvature);
+        m_prim_xfT->Fill(t->x_first[0]);
+        m_prim_yfT->Fill(t->x_first[1]);
+        m_prim_zfT->Fill(t->x_first[2]);
+        m_prim_radfT->Fill(radf);
+        m_prim_ratioT->Fill(nfitntot);
+        m_prim_ratiomT->Fill(nfitnmax);
+	m_ppsiT->Fill(t->psi);
+        m_ptanlT->Fill(t->tanl);
+        m_prim_thetaT->Fill(thetad);
+	m_petaT->Fill(eta);
+	m_ppTT->Fill(pT);
+        m_pmomT->Fill(gmom);
+	m_plengthT->Fill(t->length);
+	m_pchisq0T->Fill(chisq0);
+	m_pchisq1T->Fill(chisq1);
+	
+// these are for tpc & ftpc
+        m_primtrk_xf_yfT->Fill(t->x_first[0],t->x_first[1]);
+        m_peta_trklengthT->Fill(eta,t->length);
+	m_pnpoint_lengthT->Fill(t->length,Float_t(trkpnt));
+	m_pfpoint_lengthT->Fill(t->length,Float_t(trkfpnt));
+	
+// these are tpc only
+	m_ppT_eta_recT->Fill(eta,lmevpt);
+        m_ptanl_zfT->Fill(t->x_first[2],t->tanl);
+	m_pmom_trklengthT->Fill(t->length,lmevmom);
+	m_pchisq0_momT->Fill(lmevmom,chisq0);
+	m_pchisq1_momT->Fill(lmevmom,chisq1);
+	m_pchisq0_etaT->Fill(eta,chisq0);
+	m_pchisq1_etaT->Fill(eta,chisq1);
+	m_pchisq0_dipT->Fill(t->tanl,chisq0);
+	m_pchisq1_dipT->Fill(t->tanl,chisq1);
+	m_pchisq0_zfT->Fill(t->x_first[2],chisq0);
+	m_pchisq1_zfT->Fill(t->x_first[2],chisq1);
+        m_pnfptonpt_momT->Fill(lmevmom,nfitntot);
+        m_pnfptonpt_etaT->Fill(eta,nfitntot);
+        m_ppsi_phiT->Fill(t->phi0,t->psi);
+        }
 
-	m_ppT_eta_rec->Fill(eta,lmevpt);
-        m_primtrk_xf_yf->Fill(t->x_first[0],t->x_first[1]);
-        m_ptanl_zf->Fill(t->x_first[2],t->tanl);
-	m_pmom_trklength->Fill(t->length,lmevmom);
-        m_peta_trklength->Fill(eta,t->length);
-	m_pnpoint_length->Fill(t->length,Float_t(trkpnt));
-	m_pfpoint_length->Fill(t->length,Float_t(trkfpnt));
-	m_pchisq0_mom->Fill(lmevmom,chisq0);
-	m_pchisq1_mom->Fill(lmevmom,chisq1);
-	m_pchisq0_eta->Fill(eta,chisq0);
-	m_pchisq1_eta->Fill(eta,chisq1);
-	m_pchisq0_dip->Fill(t->tanl,chisq0);
-	m_pchisq1_dip->Fill(t->tanl,chisq1);
-	m_pchisq0_zf->Fill(t->x_first[2],chisq0);
-	m_pchisq1_zf->Fill(t->x_first[2],chisq1);
-        m_pnfptonpt_mom->Fill(lmevmom,nfitntot);
-        m_pnfptonpt_eta->Fill(eta,nfitntot);
 
+//  now fill all TPC+SVT histograms ------------------------------------------------
+        if (t->iflag>=500 && t->iflag<600 ) {
+
+        m_prim_xf0TS->Fill(xdif);
+        m_prim_yf0TS->Fill(ydif);
+        m_prim_zf0TS->Fill(zdif);
+        m_prim_impactTS->Fill(logImpact);
+        m_prim_impactrTS->Fill(t->impact);
+	
+	m_ppointTS->Fill(trkpnt);
+	m_pmax_pointTS->Fill(trkmpnt);
+	m_pfit_pointTS->Fill(trkfpnt);
+        m_prim_chargeTS->Fill(t->icharge);
+        m_prim_r0TS->Fill(t->r0);
+        m_prim_phi0TS->Fill(t->phi0);
+        m_prim_z0TS->Fill(t->z0);
+        m_prim_curvTS->Fill(logCurvature);
+        m_prim_xfTS->Fill(t->x_first[0]);
+        m_prim_yfTS->Fill(t->x_first[1]);
+        m_prim_zfTS->Fill(t->x_first[2]);
+        m_prim_radfTS->Fill(radf);
+        m_prim_ratioTS->Fill(nfitntot);
+        m_prim_ratiomTS->Fill(nfitnmax);
+	m_ppsiTS->Fill(t->psi);
+        m_ptanlTS->Fill(t->tanl);
+        m_prim_thetaTS->Fill(thetad);
+	m_petaTS->Fill(eta);
+	m_ppTTS->Fill(pT);
+        m_pmomTS->Fill(gmom);
+	m_plengthTS->Fill(t->length);
+	m_pchisq0TS->Fill(chisq0);
+	m_pchisq1TS->Fill(chisq1);
+	
+        m_primtrk_xf_yfTS->Fill(t->x_first[0],t->x_first[1]);
+        m_peta_trklengthTS->Fill(eta,t->length);
+	m_pnpoint_lengthTS->Fill(t->length,Float_t(trkpnt));
+	m_pfpoint_lengthTS->Fill(t->length,Float_t(trkfpnt));
+	
+	m_ppT_eta_recTS->Fill(eta,lmevpt);
+        m_ptanl_zfTS->Fill(t->x_first[2],t->tanl);
+	m_pmom_trklengthTS->Fill(t->length,lmevmom);
+	m_pchisq0_momTS->Fill(lmevmom,chisq0);
+	m_pchisq1_momTS->Fill(lmevmom,chisq1);
+	m_pchisq0_etaTS->Fill(eta,chisq0);
+	m_pchisq1_etaTS->Fill(eta,chisq1);
+	m_pchisq0_dipTS->Fill(t->tanl,chisq0);
+	m_pchisq1_dipTS->Fill(t->tanl,chisq1);
+	m_pchisq0_zfTS->Fill(t->x_first[2],chisq0);
+	m_pchisq1_zfTS->Fill(t->x_first[2],chisq1);
+        m_pnfptonpt_momTS->Fill(lmevmom,nfitntot);
+        m_pnfptonpt_etaTS->Fill(eta,nfitntot);
+        m_ppsi_phiTS->Fill(t->phi0,t->psi);
+        }
+
+/* The following is for the FTPC, which doesn't do primary tracking yet.
+//  now fill all FTPC East histograms ------------------------------------------------
+        if (t->iflag>700 && t->iflag<800 && t->det_id==5) {
+	
+// these are tpc & ftpc
+	m_ppointFE->Fill(trkpnt);
+	m_pmax_pointFE->Fill(trkmpnt);
+	m_pfit_pointFE->Fill(trkfpnt);
+        m_prim_chargeFE->Fill(t->icharge);
+        m_prim_xfFE->Fill(t->x_first[0]);
+        m_prim_yfFE->Fill(t->x_first[1]);
+        m_prim_zfFE->Fill(t->x_first[2]);
+        m_prim_radfFE->Fill(radf);
+        m_prim_ratioFE->Fill(nfitntot);
+        m_prim_ratiomFE->Fill(nfitnmax);
+	m_ppsiFE->Fill(t->psi);
+	m_petaFE->Fill(eta);
+	m_ppTFE->Fill(pT);
+        m_pmomFE->Fill(gmom);
+	m_plengthFE->Fill(t->length);
+	m_pchisq0FE->Fill(chisq0);
+	m_pchisq1FE->Fill(chisq1);
+	
+// these are for tpc & ftpc
+	m_ppT_eta_recFE->Fill(eta,lmevpt);
+        m_primtrk_xf_yfFE->Fill(t->x_first[0],t->x_first[1]);
+        m_peta_trklengthFE->Fill(eta,t->length);
+	m_pnpoint_lengthFE->Fill(t->length,Float_t(trkpnt));
+	m_pfpoint_lengthFE->Fill(t->length,Float_t(trkfpnt));	
+
+        }
+
+//  now fill all FTPC West histograms ------------------------------------------------
+        if (t->iflag>700 && t->iflag<800 && t->det_id==4) {
+
+// these are tpc & ftpc
+	m_ppointFW->Fill(trkpnt);
+	m_pmax_pointFW->Fill(trkmpnt);
+	m_pfit_pointFW->Fill(trkfpnt);
+        m_prim_chargeFW->Fill(t->icharge);
+        m_prim_xfFW->Fill(t->x_first[0]);
+        m_prim_yfFW->Fill(t->x_first[1]);
+        m_prim_zfFW->Fill(t->x_first[2]);
+        m_prim_radfFW->Fill(radf);
+        m_prim_ratioFW->Fill(nfitntot);
+        m_prim_ratiomFW->Fill(nfitnmax);
+	m_ppsiFW->Fill(t->psi);
+	m_petaFW->Fill(eta);
+	m_ppTFW->Fill(pT);
+        m_pmomFW->Fill(gmom);
+	m_plengthFW->Fill(t->length);
+	m_pchisq0FW->Fill(chisq0);
+	m_pchisq1FW->Fill(chisq1);
+	
+// these are for tpc & ftpc
+	m_ppT_eta_recFW->Fill(eta,lmevpt);
+        m_primtrk_xf_yfFW->Fill(t->x_first[0],t->x_first[1]);
+        m_peta_trklengthFW->Fill(eta,t->length);
+	m_pnpoint_lengthFW->Fill(t->length,Float_t(trkpnt));
+	m_pfpoint_lengthFW->Fill(t->length,Float_t(trkfpnt));	        
+        }
+*/
       }
     }
     m_primtrk_good->Fill(cnttrkg);
     m_primtrk_good_sm->Fill(cnttrkg);
-  }       
+  }
 }
 
 //_____________________________________________________________________________
-
-
 void St_QA_Maker::MakeHistGen(){
   if (Debug()) cout << " *** in St_QA_Maker - filling particle histograms " << endl;
   St_DataSetIter dstI(dst);
@@ -1045,6 +1189,8 @@ void St_QA_Maker::MakeHistGen(){
 
 	    m_H_pT_eta_gen->Fill(eta, Glmevpt);
 	    m_H_pT_gen->Fill((Float_t) pT);
+	    if (fabs(eta) < 1)
+	      m_H_pT_genT->Fill((Float_t) pT);
 	    m_H_eta_gen->Fill(eta);
 	    m_H_vtxx->Fill(p->vhep[0]);
 	    m_H_vtxy->Fill(p->vhep[1]);
@@ -1061,49 +1207,6 @@ void St_QA_Maker::MakeHistGen(){
 }
 
 //_____________________________________________________________________________
-
-
-void St_QA_Maker::MakeHistV0(){
-  if (Debug()) cout << " *** in St_QA_Maker - filling dst_v0_vertex histograms " << endl;
-
-  St_DataSetIter dstI(dst);         
-  
-  St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex *) dstI["dst_v0_vertex"];
-
-  if (dst_v0_vertex) {
-    dst_v0_vertex_st *v0 = dst_v0_vertex->GetTable();
-
-    Int_t cntrows=0;
-    cntrows = dst_v0_vertex->GetNRows();
-    m_v0->Fill(cntrows);
-
-    Float_t m_prmass2 = proton_mass_c2*proton_mass_c2;
-    Float_t m_pimass2 = (pion_minus_mass_c2*pion_minus_mass_c2);
-
-    for (Int_t k=0; k<dst_v0_vertex->GetNRows(); k++, v0++){
-      Float_t e1a = v0->pos_px*v0->pos_px +  v0->pos_py*v0->pos_py
-	+ v0->pos_pz*v0->pos_pz;
-      Float_t e2 = v0->neg_px*v0->neg_px +  v0->neg_py*v0->neg_py
-	+ v0->neg_pz*v0->neg_pz;
-      Float_t e1 = e1a + m_prmass2;  
-      e2 += m_pimass2;
-      e1 = TMath::Sqrt(e1);
-      e2 = TMath::Sqrt(e2);
-      Float_t p = (v0->neg_px+v0->pos_px)*(v0->neg_px+v0->pos_px)
-	+  (v0->neg_py+v0->pos_py)*(v0->neg_py+v0->pos_py)
-	+ (v0->neg_pz+v0->pos_pz)*(v0->neg_pz+v0->pos_pz);
-      Float_t inv_mass_la = TMath::Sqrt((e1+e2)*(e1+e2) - p);
-      e1 = e1a + m_pimass2;
-      e1 = TMath::Sqrt(e1);
-      Float_t inv_mass_k0 = TMath::Sqrt((e1+e2)*(e1+e2) - p);
-      m_ev0_lama_hist->Fill(inv_mass_la);
-      m_ev0_k0ma_hist->Fill(inv_mass_k0);   
-    }
-  }
-}
-
-//_____________________________________________________________________________
-
 void St_QA_Maker::MakeHistPID(){
   if (Debug()) cout << " *** in St_QA_Maker - filling PID histograms " << endl;
   
@@ -1157,107 +1260,127 @@ void St_QA_Maker::MakeHistPID(){
 }
 
 //_____________________________________________________________________________
-
-
 void St_QA_Maker::MakeHistVertex(){
+
+  Float_t m_prmass2 = proton_mass_c2*proton_mass_c2;
+  Float_t m_pimass2 = (pion_minus_mass_c2*pion_minus_mass_c2);
+
   if (Debug()) cout << " *** in St_QA_Maker - filling vertex histograms " << endl;
-
   St_DataSetIter dstI(dst);
-
   St_dst_vertex      *vertex     = (St_dst_vertex *) dstI["vertex"];
   
   if (vertex) {
-
-    Int_t cntrows=0;
-    cntrows = vertex->GetNRows();
-    m_v_num->Fill(cntrows);
-    m_v_num_sm->Fill(cntrows);
-
+    m_v_num->Fill(vertex->GetNRows());
+    m_v_num_sm->Fill(vertex->GetNRows());
     dst_vertex_st  *t   = vertex->GetTable();
-    for (Int_t i = 0; i < vertex->GetNRows(); i++,t++){
 
+    for (Int_t i = 0; i < vertex->GetNRows(); i++,t++){
       if (t->iflag==1 && t->vtx_id==kEventVtxId){      // plot of primary vertex only
-	m_pv_detid->Fill(t->det_id); 
 	m_pv_vtxid->Fill(t->vtx_id);
 	if (!isnan(double(t->x))) m_pv_x->Fill(t->x);     
 	if (!isnan(double(t->y))) m_pv_y->Fill(t->y);     
 	if (!isnan(double(t->z))) m_pv_z->Fill(t->z);     
 	m_pv_pchi2->Fill(t->chisq[0]);
+	m_pv_r->Fill(t->x*t->x + t->y*t->y);
       }
-      else {                                              // plot of 2ndary vertex only
-      m_v_detid->Fill(t->det_id); 
+      else {                                           // plot of 2ndary vertices only
       m_v_vtxid->Fill(t->vtx_id);
       if (!isnan(double(t->x))) m_v_x->Fill(t->x);     
       if (!isnan(double(t->y))) m_v_y->Fill(t->y);     
       if (!isnan(double(t->z))) m_v_z->Fill(t->z);     
       m_v_pchi2->Fill(t->chisq[0]); 
+      m_v_r->Fill(t->x*t->x + t->y*t->y);
       }
     }
   }
-}
 
-//_____________________________________________________________________________
-void St_QA_Maker::MakeHistXi(){
+  // V0 vertices
+  if (Debug()) cout << " *** in St_QA_Maker - filling dst_v0_vertex histograms " << endl;
+  St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex *) dstI["dst_v0_vertex"];
+
+  if (dst_v0_vertex) {
+    dst_v0_vertex_st *v0 = dst_v0_vertex->GetTable();
+    m_v0->Fill(dst_v0_vertex->GetNRows());
+
+    for (Int_t k=0; k<dst_v0_vertex->GetNRows(); k++, v0++){
+      Float_t e1a = v0->pos_px*v0->pos_px +  v0->pos_py*v0->pos_py
+	+ v0->pos_pz*v0->pos_pz;
+      Float_t e2 = v0->neg_px*v0->neg_px +  v0->neg_py*v0->neg_py
+	+ v0->neg_pz*v0->neg_pz;
+      Float_t e1 = e1a + m_prmass2;  
+      e2 += m_pimass2;
+      e1 = TMath::Sqrt(e1);
+      e2 = TMath::Sqrt(e2);
+      Float_t p = (v0->neg_px+v0->pos_px)*(v0->neg_px+v0->pos_px)
+	+  (v0->neg_py+v0->pos_py)*(v0->neg_py+v0->pos_py)
+	+ (v0->neg_pz+v0->pos_pz)*(v0->neg_pz+v0->pos_pz);
+      Float_t inv_mass_la = TMath::Sqrt((e1+e2)*(e1+e2) - p);
+      e1 = e1a + m_pimass2;
+      e1 = TMath::Sqrt(e1);
+      Float_t inv_mass_k0 = TMath::Sqrt((e1+e2)*(e1+e2) - p);
+
+      m_ev0_lama_hist->Fill(inv_mass_la);
+      m_ev0_k0ma_hist->Fill(inv_mass_k0);   
+    }
+  }
+
+  // Xi vertices
   if (Debug()) cout << " *** in St_QA_Maker - filling dst_xi_vertex histograms " << endl;
-    
-  St_DataSetIter dstI(dst);           
-
   St_dst_xi_vertex *dst_xi = (St_dst_xi_vertex*) dstI["dst_xi_vertex"];
+
   if (dst_xi) {
-
-    Int_t cntrows=0;
-    cntrows = dst_xi->GetNRows();
-    m_xi_tot->Fill(cntrows);
-
-    St_dst_v0_vertex *dst_v0 = (St_dst_v0_vertex*)
-dstI["dst_v0_vertex"];
+    m_xi_tot->Fill(dst_xi->GetNRows());
+    St_dst_v0_vertex *dst_v0 = (St_dst_v0_vertex*) dstI["dst_v0_vertex"];
     if (!dst_v0) {
       cout << "Error! No V0 table found for Xi's.";
-      return;
     }
+    else {
+      dst_xi_vertex_st *xi = dst_xi->GetTable();
+      dst_v0_vertex_st *v0sav = dst_v0->GetTable();
+      Int_t v0last = dst_v0->GetNRows() - 1;
+      dst_v0_vertex_st *v0end = dst_v0->GetTable(v0last);
+      Float_t m_lamass2 = (lambda_mass_c2*lambda_mass_c2);
+      Float_t m_pimass2 = (pion_minus_mass_c2*pion_minus_mass_c2);
 
-    dst_xi_vertex_st *xi = dst_xi->GetTable();
-    dst_v0_vertex_st *v0sav = dst_v0->GetTable();
-    Int_t v0last = dst_v0->GetNRows() - 1;
-    dst_v0_vertex_st *v0end = dst_v0->GetTable(v0last);
-    Float_t m_lamass2 = (lambda_mass_c2*lambda_mass_c2);
-    Float_t m_pimass2 = (pion_minus_mass_c2*pion_minus_mass_c2);
+      for (Int_t k=0; k<dst_xi->GetNRows(); k++, xi++){
+	dst_v0_vertex_st *v0 = v0sav;
+	
+	while ((v0 != v0end) && (v0->id != xi->id_v0)) v0++;
+	if (v0->id != xi->id_v0) {
+	  cout << "Error! V0 associated with Xi not found." << endl;
+	  break;
+	}
 
-    for (Int_t k=0; k<cntrows; k++, xi++){
-      dst_v0_vertex_st *v0 = v0sav;
+	Float_t px = v0->pos_px+v0->neg_px;
+	Float_t py = v0->pos_py+v0->neg_py;
+	Float_t pz = v0->pos_pz+v0->neg_pz;
+	Float_t e1 = px*px + py*py + pz*pz;
+	e1 +=  m_lamass2;
+	Float_t e2 = xi->px_b*xi->px_b +  xi->py_b*xi->py_b
+	  + xi->pz_b*xi->pz_b;
+	e2 += m_pimass2;
+	e1 = sqrt(e1);
+	e2 = sqrt(e2);
+	Float_t e3 = e1 + e2;
+	px += xi->px_b;
+	py += xi->py_b;
+	pz += xi->pz_b;
+	Float_t psq =  px*px + py*py + pz*pz;
+	Float_t inv_mass_xi = sqrt(e3*e3 - psq);
 
-      while ((v0 != v0end) && (v0->id != xi->id_v0)) v0++;
-      if (v0->id != xi->id_v0) {
-        cout << "Error! V0 associated with Xi not found." << endl;
-        return;
+	m_xi_ma_hist->Fill(inv_mass_xi);
       }
-
-      Float_t px = v0->pos_px+v0->neg_px;
-      Float_t py = v0->pos_py+v0->neg_py;
-      Float_t pz = v0->pos_pz+v0->neg_pz;
-
-      Float_t e1 = px*px + py*py + pz*pz;
-      e1 +=  m_lamass2;
-
-      Float_t e2 = xi->px_b*xi->px_b +  xi->py_b*xi->py_b
-        + xi->pz_b*xi->pz_b;
-      e2 += m_pimass2;
-
-      e1 = sqrt(e1);
-      e2 = sqrt(e2);
-      Float_t e3 = e1 + e2;
-
-      px += xi->px_b;
-      py += xi->py_b;
-      pz += xi->pz_b;
-
-      Float_t psq =  px*px + py*py + pz*pz;
-      Float_t inv_mass_xi = sqrt(e3*e3 - psq);
-
-      m_xi_ma_hist->Fill(inv_mass_xi);
     }
-
   }
+
+  // Kink vertices
+  if (Debug()) cout << " *** in St_QA_Maker - filling kink histograms " << endl;
+  St_dst_tkf_vertex *pt = (St_dst_tkf_vertex*) dstI["kinkVertex"];
+
+  if (pt) {
+    m_kink_tot->Fill(pt->GetNRows());
+  }
+
 }
 
 //_____________________________________________________________________________
@@ -1310,42 +1433,6 @@ void St_QA_Maker::MakeHistPoint(){
 
 }
 
-
-//_____________________________________________________________________________
-void St_QA_Maker::MakeHistKink(){
-  if (Debug()) cout << " *** in St_QA_Maker - filling kink histograms " << endl;
-
-  St_DataSetIter dstI(dst);           
-
-  St_dst_tkf_vertex *pt = (St_dst_tkf_vertex*) dstI["kinkVertex"];
-  if (pt) {
-
-    Int_t cntrows=0;
-    cntrows = pt->GetNRows();
-    m_kink_tot->Fill(cntrows);
-
-  }
-
-}
-
-
-//_____________________________________________________________________________
-void St_QA_Maker::MakeHistV0Eval(){
-  if (Debug()) cout << " *** in St_QA_Maker - filling ev0_eval histograms " << endl;
-
-  St_DataSetIter dstI(dst);           
-
-  St_ev0_eval *pt = (St_ev0_eval*) dstI["ev0_eval"];
-  if (pt) {
-
-    Int_t cntrows=0;
-    cntrows = pt->GetNRows();
-    m_v0eval_tot->Fill(cntrows);
-
-  }
-
-}
-
 //_____________________________________________________________________________
 void St_QA_Maker::MakeHistRich(){
   if (Debug()) cout << " *** in St_QA_Maker - filling Rich histograms " << endl;
@@ -1365,8 +1452,6 @@ void St_QA_Maker::MakeHistRich(){
 
 
 //_____________________________________________________________________________
-
-
 void St_QA_Maker::MakeHistEval(){
   if (Debug()) cout << " *** in St_QA_Maker - filling geant,reco eval histograms " << endl;
 

@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.40 2000/03/28 19:19:20 fine Exp $
+//! $Id: St_QA_Maker.h,v 1.41 2000/05/25 03:52:11 lansdell Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.41  2000/05/25 03:52:11  lansdell
+//! mirrored globtrk histograms for primtrk; removed ev0_eval, vertex: detector id histograms; added generator pT for TPC (|eta|<1), vertex: radial position histograms; merged vertex methods
+//!
 //! Revision 1.40  2000/03/28 19:19:20  fine
 //! Adjuested to ROOT 2.24
 //!
@@ -160,7 +163,7 @@
 
 class St_QA_Maker : public StQABookHist {
  private:
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.40 2000/03/28 19:19:20 fine Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.41 2000/05/25 03:52:11 lansdell Exp $";
 
   St_DataSet *dst;        //! Pointer to current dataset - dst
   
@@ -179,19 +182,15 @@ class St_QA_Maker : public StQABookHist {
   virtual void   MakeHistDE();
   virtual void   MakeHistPrim();
   virtual void   MakeHistGen();
-  virtual void   MakeHistV0();
   virtual void   MakeHistPID();
   virtual void   MakeHistVertex();
-  virtual void   MakeHistXi();
   virtual void   MakeHistPoint();
-  virtual void   MakeHistKink();
-  virtual void   MakeHistV0Eval();
   virtual void   MakeHistRich();
   virtual void   MakeHistEval();
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.40 2000/03/28 19:19:20 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.41 2000/05/25 03:52:11 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(St_QA_Maker, 1)   //StAF chain virtual base class for Makers
     };
