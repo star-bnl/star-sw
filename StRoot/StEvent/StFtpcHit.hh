@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHit.hh,v 1.5 1999/03/04 18:17:02 ullrich Exp $
+ * $Id: StFtpcHit.hh,v 1.6 1999/03/23 21:51:05 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.hh,v $
- * Revision 1.5  1999/03/04 18:17:02  ullrich
- * Namespace std not used if ST_NO_NAMESPACES defined
+ * Revision 1.6  1999/03/23 21:51:05  ullrich
+ * Added table-based class specific constructor.
  *
  * Revision 1.5  1999/03/04 18:17:02  ullrich
  * Namespace std not used if ST_NO_NAMESPACES defined
@@ -29,10 +29,11 @@
 #ifndef StFtpcHit_hh
 #define StFtpcHit_hh
 
-#include <vector>
 #include "StEvent/StHit.hh"
 #include "StEvent/StTrackCollection.hh"
 #include "StEvent/StVecPtrGlobalTrack.hh"
+class dst_point_st;
+
 #if !defined(ST_NO_NAMESPACES)
 using namespace std;
 #endif
@@ -42,7 +43,7 @@ public:
     StFtpcHit(const StThreeVector<float>&,
 	      const StThreeVector<float>&,
 	      float, unsigned char = 0);
-    StFtpcHit(dst_point_st* pt) : StHit(pt) {};
+    StFtpcHit(dst_point_st*);
     
     StVecPtrGlobalTrack relatedTracks(const StTrackCollection&);
 };
