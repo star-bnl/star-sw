@@ -4,7 +4,7 @@
 #ifndef SmdGains_h
 #define SmdGains_h
 /*******************************************************
- * $Id: SmdGains.h,v 1.1 2004/09/11 04:57:34 balewski Exp $
+ * $Id: SmdGains.h,v 1.2 2004/09/14 19:38:44 balewski Exp $
  *******************************************************
  This code should run only on histogram files, not on events, JB
  *
@@ -63,7 +63,7 @@ class SmdGains :public TObject{
  public:  
   SmdGains();
   virtual ~SmdGains(){};
-  void set( TObjArray * hL, int se, char uv){ HList=hL; sectID=5, planeUV=uv;}; 
+  void set( TObjArray * hL, int se, char uv){ HList=hL; sectID=se, planeUV=uv;}; 
   void plTGraph(char *shpFunc="pol1",int ig=1); // plot & fit tGraphs
   void plFGC();
 
@@ -74,7 +74,7 @@ class SmdGains :public TObject{
   void avrRelNGain( int str1,int ns);
   void avrMipNEne(int str1,int ns, float &mpv, float &empv); // sum MIP ene (from 2 strips) of ns strips
 
-  void open(char *);
+  TFile* open(TString);
   void init();
   void finish(int k=0);
   void doSlopesOnly(float fac=1.);
@@ -91,6 +91,9 @@ class SmdGains :public TObject{
 
 /*****************************************************************
  * $Log: SmdGains.h,v $
+ * Revision 1.2  2004/09/14 19:38:44  balewski
+ * new version, SMD calib is now too complicated
+ *
  * Revision 1.1  2004/09/11 04:57:34  balewski
  * cleanup
  *

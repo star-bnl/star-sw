@@ -1,4 +1,4 @@
-// $Id: SmdGains.cxx,v 1.1 2004/09/11 04:57:34 balewski Exp $
+// $Id: SmdGains.cxx,v 1.2 2004/09/14 19:38:43 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -36,7 +36,7 @@ SmdGains::SmdGains(){
   // limits for expo fit
   adcMin=40;
   adcMax=100;
-  minSum=100;
+  minSum=50;
   maxRelEr=0.2; // maximal relative error at any stage of calculations
   minMipEne=0.3;// (MeV) lower/upper thres for Landau Ene fit
   maxMipEne=4;
@@ -53,7 +53,7 @@ void SmdGains::init(){
   plCore=tt1;
 
   //............... histos ............
-  hA[0]=new TH1F("sum"+plCore,plCore+" Integral from raw spectra; strip ID; total counts",290,0.5,289.5);
+  hA[0]=new TH1F("sum"+plCore,plCore+" Integral from raw spectra; strip ID; total counts",290,0.5,290.5);
    hA[1]=new TH1F("Lm"+plCore,plCore+" Mean of Landau fit to average MIP ene (2strip); MPV (MeV)",30,.5,2);
   hA[2]=new TH1F("Lw"+plCore,plCore+" Width of Landau fit to average MIP ene (2strip); Width=sigma (MeV)",20,0,1);
   hA[3]=new TH1F("fgc"+plCore,plCore+" Final Gain Correction",100,0.5,1.5);
@@ -95,9 +95,10 @@ void SmdGains::init(){
 
 //--------------------------------------------------
 //--------------------------------------------------
-void SmdGains::open(char *fn) {
+TFile* SmdGains::open(TString fn) {
   fdIn=new TFile(fn);
   assert(fdIn->IsOpen());
+  return fdIn;
 }
 
 
@@ -107,7 +108,7 @@ void SmdGains::open(char *fn) {
 void SmdGains::doGainCorr(int str1, int str2, int ns){
 
   TGraphErrors  *gr= grA[1];
-  printf("working on %s, average over %d-strips\n",gr->GetName(),ns);
+  printf("doGainCorr() for %s, average over %d-strips\n",gr->GetName(),ns);
   TString nn=gr->GetName();
   nn="C"+nn;
 
@@ -132,7 +133,7 @@ void SmdGains::doOneStripEne(int str1, int str2,char *shpFunc){
   int ns=str2-str1+1;
   assert(str1>0 && ns>0);
   sprintf(tit,"%02d%c%03d+%d",sectID,planeUV,str1,ns);
-  printf("working on %s\n",tit);
+  printf("doOneStripEne() for %s\n",tit);
 
   int i;
   int nOK=0, nTot=0;
@@ -180,11 +181,11 @@ float SmdGains:: oneStripEne( int str1, int pl){
   float sum=hs->Integral();
   printf("%s --> sum=%.1f ",hs->GetName(),sum );
 
-  if(sum<50) {printf("\n"); return 999;}
+  if(sum<50) {printf(" ignored-1\n"); return 999;}
   if(sum>200)
-    hs->Rebin(4);
+    hs->Rebin(2);//was 4
   else
-    hs->Rebin(6);
+    hs->Rebin(3);//was 6
   hs->Fit("landau","RQ","", minMipEne/2., maxMipEne);
   TF1* f=hs->GetFunction("landau");  assert(f);
   f->SetLineColor(kRed);
@@ -199,7 +200,11 @@ float SmdGains:: oneStripEne( int str1, int pl){
   printf("MPV=%.2f +/- %.2f (%.1f%c) \n",par[1],epar[1],rerr*100.,37);
 
   StripG *s=&str[str1-1];
-  if(rerr>maxRelEr || par[1]<0) {  s->flag+=16; return 888; }
+  if(rerr>maxRelEr || par[1]<0 ||rerr<0.01) {
+    printf("    ignored-2\n");
+    s->flag+=16;
+    return 888;
+  }
   s->mpv1=par[1];
   s->empv1=epar[1];
   //s->print();
@@ -216,7 +221,6 @@ float SmdGains:: oneStripEne( int str1, int pl){
 
   return rerr;
 }
-
 
 
 //-----------------------------------------
@@ -269,10 +273,15 @@ void SmdGains:: avrRelNGain( int str1,int ns){
     //    s->print();
     float agc= mpEne/idealMipEne;
     float er2=empEne/mpEne/agc;
+    if(agc<=0) {
+      agc=1;
+      er2=0;
+    }
 
     float rgc=1;
     float er1=maxRelEr;
-    if(s->empv1>0) {
+    //tmp
+    if(0&&s->empv1>0) {
       rgc=s->mpv1/avr1Ene;
       er1=s->empv1/s->mpv1/rgc;
     }
@@ -290,19 +299,15 @@ void SmdGains:: avrRelNGain( int str1,int ns){
     int n=grg->GetN();
     grg->SetPoint(n,s->id,s->gc);
     grg->SetPointError(n,0,s->egc);
-
     
     hA[3]->Fill(s->gc);
     hA[4]->Fill(s->egc);
 
-    printf("strip=%d agc=%.2f rgc=%.3f -->gc=%.3f +/- %.3f (%.1f%c) %c\n",i,agc, rgc,gc,egc,rer,37,tag);
+    printf("%s%d agc=%.2f rgc=%.3f -->gc=%.3f +/- %.3f (%.1f%c) %c\n",plCore.Data(),i,agc, rgc,gc,egc,rer,37,tag);
     // printf("#2 %s%03d %.3f %.3f (%.1f%c) %c \n",plCore.Data(),s->id,s->gc,s->egc,rer,37,tag);
   }
 
-
-
 }
-
 
 
 //-----------------------------------------
@@ -336,7 +341,7 @@ void SmdGains:: avrMipNEne( int str1,int ns, float &mpv, float &empv){
   hs->Draw();
   HList->Add(hs);
   float sum=hs->Integral();
-  hs->Rebin();
+  //  hs->Rebin();
   if(sum<150)  hs->Rebin();
 
   //printf("%s --> sum=%.1f\n",hs->GetName(),sum );
@@ -359,7 +364,7 @@ void SmdGains:: avrMipNEne( int str1,int ns, float &mpv, float &empv){
   if(par[1]>0) rerr=empv/mpv;
   hs->SetAxisRange(0,5.);
   float mean=hs->GetMean();
-  printf("MPV=%.2f +/- %.2f (%.1f%c) r=%.2f m=%.2f \n",mpv,empv,rerr*100.,37,mean/mpv,mean);
+  printf("%s MPV=%.2f +/- %.2f (%.1f%c) r=%.2f m=%.2f \n",hs->GetName(),mpv,empv,rerr*100.,37,mean/mpv,mean);
   
   if(rerr>maxRelEr)  {
     for(i=str1;i<str1+ns;i++) {
@@ -420,22 +425,13 @@ void SmdGains:: plFGC(){
 
 //-----------------------------------------
 //-----------------------------------------
-//
-//   O L D 
-//
-//-----------------------------------------
-//-----------------------------------------
-
-
-//-----------------------------------------
-//-----------------------------------------
 
 void SmdGains::fitSlopes(int str1, int str2) {
   char tit[100];
   int ns=str2-str1+1;
   assert(str1>0 && ns>0);
   sprintf(tit,"%02d%c%03d+%d",sectID,planeUV,str1,ns);
-  printf("working on %s\n",tit);
+  printf("fitSlopes() %s\n",tit);
   
   if(c1) {
     c1->Divide(3,3);
@@ -451,17 +447,19 @@ void SmdGains::fitSlopes(int str1, int str2) {
     StripG *s=&str[i-1];
     sprintf(tit,"a%s%03d",plCore.Data(),i);
     TH1F* h= (TH1F*)fdIn->Get(tit); assert(h);
+    // h->Rebin(4);
     HList->Add(h);
     c1->cd(k+1);
-    h->Draw(); gPad->SetLogy();
     h->SetAxisRange(adcMin,adcMax);
     float sum=h->Integral();
-    h->SetAxisRange(-5,1.5*adcMax);
-    //    printf(" %s sum=%f\n",h->GetName(),sum);
+    h->SetAxisRange(-25,1.5*adcMax);
+    //printf(" %s sum=%f\n",h->GetName(),sum);
+    
     hA[0]->Fill(i,sum);
     s->sum1=(int)sum;
-    h->Draw(); h->SetLineColor(kBlue);
+    h->Draw(); h->SetLineColor(kBlue);gPad->SetLogy();
     h->SetMinimum(.9);    h->SetMaximum(10000);
+    //if(sum<4*minSum)  h->Rebin();
 
     Lx=h->GetListOfFunctions();    assert(Lx);
     ln=new TLine(adcMin,0,adcMin,30000); ln->SetLineColor(kMagenta); Lx->Add(ln);
@@ -484,7 +482,7 @@ void SmdGains::fitSlopes(int str1, int str2) {
 }
 
 
-#if 0
+
 //-------------------------------------------------
 //-------------------------------------------------
 void SmdGains:: doSlopesOnly(float fac){
@@ -495,22 +493,20 @@ void SmdGains:: doSlopesOnly(float fac){
   for(i=0;i<mxS;i++) {
     StripG *s=str+i;
     if(s->sl<0){ // calculate is possible
-      s->g=-fac/s->sl;
-      s->eg=s->esl*s->g/fabs(s->sl);
+      s->gc=-fac/s->sl;
+      s->egc=s->esl*s->gc/fabs(s->sl);
     }
-    if(s->eg>maxRelEr *s->g) {
+    if(s->egc>maxRelEr *s->gc) {
       s->flag+=4;
-      s->g=s->eg=0;
+      s->gc=s->egc=0;
     }
 
     int n=gr->GetN();
-    gr->SetPoint(n,s->id,s->g);
-    gr->SetPointError(n,0,s->eg);
+    gr->SetPoint(n,s->id,s->gc);
+    gr->SetPointError(n,0,s->egc);
   }
   
 }
-
-#endif
 
 //-------------------------------------------------
 //-------------------------------------------------
@@ -541,7 +537,7 @@ void SmdGains::saveGains(FILE *fd) {
       rer=100.*s->egc/s->gc;
     else
       nBad++;
-    fprintf(fd,"%s%03d %.1f %.1f (%.1f%d) sum1=%d flag=0x%0x mpv1=%.1f %.1f\n",plCore.Data(),s->id,s->gc,s->egc,rer,37,s->sum1,s->flag,s->mpv1,s->empv1);
+    fprintf(fd,"%s%03d %.1f %.1f (%.1f%c) sum1=%d flag=0x%0x mpv1=%.1f %.1f\n",plCore.Data(),s->id,s->gc,s->egc,rer,37,s->sum1,s->flag,s->mpv1,s->empv1);
   }
   fprintf(fd,"#nBad =%d\n",nBad);
 }
@@ -593,6 +589,9 @@ void StripG::print(){
 
 /*****************************************************************
  * $Log: SmdGains.cxx,v $
+ * Revision 1.2  2004/09/14 19:38:43  balewski
+ * new version, SMD calib is now too complicated
+ *
  * Revision 1.1  2004/09/11 04:57:34  balewski
  * cleanup
  *

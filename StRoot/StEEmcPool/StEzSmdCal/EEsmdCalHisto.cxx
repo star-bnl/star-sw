@@ -1,4 +1,4 @@
-// $Id: EEsmdCalHisto.cxx,v 1.9 2004/09/11 04:57:34 balewski Exp $
+// $Id: EEsmdCalHisto.cxx,v 1.10 2004/09/14 19:38:43 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -246,15 +246,15 @@ void EEsmdCal::addSmdMipEbarsToHisto (int col, char cU) {
     const EEmcDbItem *x=dbS[iU][iStr];
     //   printf("iU=%c iStr=%d\n",iU,iStr);
     if(x==0) continue;
-    if(x->gain<=0) continue;
 
     if((h->GetName()[0])=='a') {// one more hack
       char tt3[500];
       sprintf(tt3,"%s, tube=%s",h->GetTitle(),x->tube);
       h->SetTitle(tt3);
-      //printf("%s\n",h->GetTitle());
+      // printf("%s %p %s\n",h->GetTitle(),h,h->GetName());
     }
 
+    if(x->gain<=0) continue;
     TList *L=h->GetListOfFunctions();    
     float adcC=smdAvrMipE*x->gain;
     if((h->GetName()[0])>'b')  adcC=smdAvrMipE*1000.; // now in MeV
@@ -279,6 +279,7 @@ void EEsmdCal::histoGains(){
     for(istrip=0;istrip<MaxSmdStrips;istrip++) {
       const EEmcDbItem *x=dbS[iuv][istrip];
       if(x==0) continue;
+      if(x->fail) continue;
       if(x->gain<=0) continue;
       hA[16+iuv]->Fill(x->strip,x->gain);
       // dig out MAPMT pixel
@@ -301,7 +302,9 @@ void EEsmdCal::histoGains(){
       for(iPhi=0;iPhi<MaxPhiBins;iPhi++){
 	const EEmcDbItem *x=dbT[iT][iEta][iPhi];
 	if(x==0) continue;
-	// dig out MAPMT pixel
+	if(x->fail) continue;
+	if(x->gain<=0) continue;
+	// dig out the MAPMT pixel
 	const char *tube=x->tube+2;
 	assert(tube[0]=='P');
 	int pmt=atoi(tube+3);
@@ -369,12 +372,12 @@ void EEsmdCal::initAuxHisto(){
   
   //..................
   sprintf(tt1,"xy%02d",sectID);
-  sprintf(tt2,"MIP position , UxV only, plane %02dUorV; X(cm); Y(cm) ",sectID);
-  h2=new TH2F(tt1,tt2,100,-40,160,100,-250,-50);
+  sprintf(tt2,"MIP position , UxV only, sect=%02d; X(cm); Y(cm) ",sectID);
+  h2=new TH2F(tt1,tt2,500,-250,250,250,-250,-0);
   hA[21]=(TH1F*)h2;
   
   sprintf(tt1,"xy%02dm",sectID);
-  sprintf(tt2,"MIP position, best MIP, plane %02d; X(cm); Y(cm) ",sectID);
+  sprintf(tt2,"MIP position, best MIP, sect=%02d; X(cm); Y(cm) ",sectID);
   h2=new TH2F(tt1,tt2,500,-250,250,250,-250,-0);
   hA[22]=(TH1F*)h2;
   
