@@ -561,11 +561,11 @@ if ( $#sourcesT > -1 ) {
     script::Keep $SO_PKGT;
     LinkedModule $env3 $SO_PKGT, @sourcesT;
     Install $env3 $LIB, $SO_PKGT;
-    if ($env3->{Packages}->{ROOT}->{RLIBMAP} and $SO_MAPT and $#LinkDefs > -1) {
-      Command $env3 [ $SO_MAPT ], ($LIB . "/" . $SO_PKGT, @LinkDefs), 
-      qq($env3->{Packages}->{ROOT}->{RLIBMAP} -r %> -l %1 -c %2); 
-      Install $env3 $LIB, $SO_MAPT;
-    }
+#    if ($env3->{Packages}->{ROOT}->{RLIBMAP} and $SO_MAPT and $#LinkDefs > -1) {
+#      Command $env3 [ $SO_MAPT ], ($LIB . "/" . $SO_PKGT, @LinkDefs), 
+#      qq($env3->{Packages}->{ROOT}->{RLIBMAP} -r %> -l %1 -c %2); 
+#      Install $env3 $LIB, $SO_MAPT;
+#    }
 }
 
 if ( $#src > -1 ) {
@@ -585,12 +585,12 @@ if ( $#src > -1 ) {
       script::Keep $SO_PKG;
       LinkedModule $env2 $SO_PKG, @src;
       Install $env2 $LIB,         $SO_PKG;
-#      print "$env2->{Packages}->{ROOT}->{RLIBMAP} and $SO_MAP and $LinkDefs\n";
-      if ($env2->{Packages}->{ROOT}->{RLIBMAP} and $SO_MAP and $#LinkDefs > -1) {
-	Command $env2 [ $SO_MAP ], ($LIB . "/" . $SO_PKG, @LinkDefs), 
-	qq($env2->{Packages}->{ROOT}->{RLIBMAP} -r %> -l %1 -c %2); 
-	Install $env2 $LIB, $SO_MAP;
-      }
+##      print "$env2->{Packages}->{ROOT}->{RLIBMAP} and $SO_MAP and $LinkDefs\n";
+#      if ($env2->{Packages}->{ROOT}->{RLIBMAP} and $SO_MAP and $#LinkDefs > -1) {
+#	Command $env2 [ $SO_MAP ], ($LIB . "/" . $SO_PKG, @LinkDefs), 
+#	qq($env2->{Packages}->{ROOT}->{RLIBMAP} -r %> -l %1 -c %2); 
+#	Install $env2 $LIB, $SO_MAP;
+#      }
 #      print "SO_PKG = $SO_PKG SO_PKG_PLAIN = $SO_PKG_PLAIN $#PlainObj PlainObj = @PlainObj\n";
       if ($SO_PKG ne $SO_PKG_PLAIN and $#PlainObj > -1) {#print "============================\n";
 	script::Keep $SO_PKG_PLAIN;
