@@ -23,8 +23,8 @@
 #error An attempt to redefine the LOGGERMESSAGE macro
 #else
 #  define LOGGERMESSAGE(MESSAGELEVEL)                                    \
-   if (StMessMgr::CurrentMessager()->is__NAME2__(MESSAGELEVEL,Enabled)() \
-   StMessMgr::CurrentMessager()->MESSAGELEVEL("",__FUNCTION__, __LINE__) 
+   if (StMessMgr::CurrentMessager()->_NAME3_(is,MESSAGELEVEL,Enabled)()) \
+   StMessMgr::CurrentMessager()->MESSAGELEVEL("","O",__FUNCTION__, __LINE__) 
 
 #  define LOG_INFO  LOGGERMESSAGE(Info)
 #  define LOG_WARN  LOGGERMESSAGE(Warning)
@@ -282,4 +282,4 @@ inline ostream& operator-(StMessMgr&) {
 
 #endif
 
-// $Id: StMessMgr.h,v 1.3 2004/11/03 01:32:40 fine Exp $
+// $Id: StMessMgr.h,v 1.4 2004/11/03 16:03:30 fine Exp $
