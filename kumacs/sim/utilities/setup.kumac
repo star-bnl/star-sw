@@ -130,9 +130,13 @@ endif
 *----------------------------------------------------------------------
 * set some common STAR defaults (change these at your peril)
 * 
-*subevent       200  | split each event into subevents of 200 tracks
 
-mess Subevent splitting not active
+if [PLATFORM] = T3E then
+   subevent       200  | split each event into subevents of 200 tracks
+   mess T3E: Split each event into subevents of 200 tracks
+else
+   mess Subevent splitting not active
+endif
 
 * save all secondaries that generate hits in inner detectors
 
