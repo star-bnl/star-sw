@@ -1,5 +1,8 @@
-// $Id: StMessMgr.h,v 1.11 2000/06/07 00:05:35 genevb Exp $
+// $Id: StMessMgr.h,v 1.12 2001/05/14 20:53:20 genevb Exp $
 // $Log: StMessMgr.h,v $
+// Revision 1.12  2001/05/14 20:53:20  genevb
+// Add features to examine memory use, switch from TDatime to time_t
+//
 // Revision 1.11  2000/06/07 00:05:35  genevb
 // Added FixOn(), enforcing no limits on a specific message type/string
 //
@@ -97,6 +100,9 @@ class StMessMgr : public ostrstream {
    virtual       void FixOn(const char* str) =0;
    virtual       void NoLimits() =0;
    virtual       void Summary(size_t nTerms=1) =0;
+   virtual       void MemorySummary() =0;
+   virtual       void MemoryOn() =0;
+   virtual       void MemoryOff() =0;
    virtual        int AddType(const char* type, const char* text) =0;
    virtual        int ListTypes() =0;
 
