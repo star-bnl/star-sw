@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.h,v 1.2 2004/04/13 16:58:37 chunhuih Exp $
+ * $Id: StEStructBinning.h,v 1.3 2004/06/10 17:09:22 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -28,7 +28,7 @@
 #define EBYE_ETA_BINS 26
 #define EBYE_MT_BINS 40
 #define EBYE_DELTAMT_BINS 26
-#define EBYE_YT_BINS 1
+#define EBYE_YT_BINS 28
 
 #define EBYE_DPHI_BINS 26
 #define EBYE_DETA_BINS 26
@@ -297,7 +297,11 @@ inline float StEStructBinning::deltaMtVal(int ideltaMt){
 /***********************************************************************
  *
  * $Log: StEStructBinning.h,v $
+ * Revision 1.3  2004/06/10 17:09:22  msd
+ * Quick-fixed EBYE_YT_BINS.  Better implementation of cut-binning on the way...
+ *
  * Revision 1.2  2004/04/13 16:58:37  chunhuih
+ *
  * changed a set of binning functions, so that when the variable is below the
  * minimum of the binning range, the function returns the correct overflow bin
  * index.
