@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.12 2001/02/12 21:15:55 yepes Exp $
+// $Id: StPeCMaker.cxx,v 1.13 2001/02/13 16:33:58 yepes Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.13  2001/02/13 16:33:58  yepes
+// fix problem on Sun
+//
 // Revision 1.12  2001/02/12 21:15:55  yepes
 // New version of StPeCMaker, lots of changes
 //
@@ -76,7 +79,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.12 2001/02/12 21:15:55 yepes Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.13 2001/02/13 16:33:58 yepes Exp $";
 
 
 ClassImp(StPeCMaker)
@@ -100,7 +103,7 @@ Int_t StPeCMaker::Init() {
   TString uDstFileName("StPecMaker.uDst.root");    
   StIOMaker* pIOMaker = (StIOMaker*)GetMaker("IO");
   if ( pIOMaker) {
-      char* temp = 0 ;
+      TString temp = 0 ;
       temp = strrchr(pIOMaker->GetFile(),'/') ;
       if ( temp ) uDstFileName = temp+1 ;
   }
