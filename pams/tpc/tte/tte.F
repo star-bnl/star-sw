@@ -1,5 +1,8 @@
-* $Id: tte.F,v 1.30 1999/07/21 14:01:50 sakrejda Exp $
+* $Id: tte.F,v 1.31 1999/08/17 00:06:20 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.31  1999/08/17 00:06:20  sakrejda
+* max id of rec hit is inferred EITHER from the hit table OR the index table
+*
 * Revision 1.30  1999/07/21 14:01:50  sakrejda
 * typo in the error message fixed, an s was accidentally cut off in  big_id_of_rec_hits
 *
@@ -331,7 +334,9 @@ c     write(6,*) 'number of mc hits used to create tfs hits = ',ng2t
 
 
       do i=1,hit_h.nok
-
+         if(hit(i).id.gt.big_id_of_rec_hits) then
+               big_id_of_rec_hits = hit(i).id
+         endif
       end do
 c
 c     allocate memory for list_hits
