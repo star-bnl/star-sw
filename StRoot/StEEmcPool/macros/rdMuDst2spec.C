@@ -14,20 +14,10 @@ int rdMuDst2spec(
 	  char* file    = "R50530.MuDst.root",
 	  Int_t nFiles  = 1, 
 	  char* inDir   = "./",
-	  int nEve=5 )
-{ 
+	  int nEve=5 ){ 
 
-  file    = "R5086033e.MuDst.root";
-  //file    = "R5015034x.MuDst.root";
-
-  //inDir  = "/star/data05/scratch/balewski/outITTF/MC-AuAu200hijing/";
-
-  //file="rcf1207_0*evts-*.MuDst.root";
-
-  //inDir  = "/star/data34/reco/production62GeV/ReversedFullField/P04id_1/2004/092/";
-  //file="st_physics_5092036_raw_4010010.MuDst.root";
-    
-
+  inDir   = "/star/data40/reco/production62GeV/ReversedFullField/P04id/2004/090/";
+  file="st_physics_5090009_raw_4040021.MuDst.root";
 
   initHisto();
 
@@ -48,11 +38,11 @@ int rdMuDst2spec(
   // Now we add Makers to the chain...   
   muMk = new StMuDstMaker(0,0,inDir,file,"MuDst.root",nFiles);
   
-  myDb=new StEEmcDbMaker("eemcDb");
   St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
+  myDb=new StEEmcDbMaker("eemcDb");
 
   // myMk1->setSectors(1,8);
-  myDb->setTimeStampDay(20040320);  // format: yyyymmdd
+  //  myDb->setTimeStampDay(20040320);  // format: yyyymmdd
   //myMk1->setPreferedFlavor("set-b","eemcPMTcal");
 
 
@@ -104,7 +94,6 @@ printEEtower( StMuEmcCollection* emc ) {
   for (i=0; i< emc->getNEndcapTowerADC(); i++) {
     emc->getEndcapTowerADC(i,adc,sec,sub,eta);
     //  if (adc<=0) continue; // print only non-zero values
-    nh++;
     // printf("i=%d  Tower %2.2dT%c%2.2d   adc=%4d\n",i,sec,sub+'A'-1,eta,adc );
     //    printf("  Tower isec=%d ieta=%d isub=%d    adc=%4d\n",sec,eta, sub,adc );
     //int adcX=1000+ (eta-1) + (sub-1)*12 +(sec-1)*60;    assert(adc==adcX );
@@ -112,15 +101,17 @@ printEEtower( StMuEmcCollection* emc ) {
 
     // fill some histo
     int irad=sub -1 + 5*(sec-1) +60 *(eta-1);
-    EEmcDbItem *x=myDb->getTail(sec,'A'+sub-1,eta,'T');
+    EEmcDbItem *x=myDb->getTile(sec,'A'+sub-1,eta,'T');
     if(x==0) continue;
+    if(x->fail) continue;
     //printf("x=%p ped=%f gain=%f\n",x,x->ped, x->gain);
     if(adc<x->thr) continue;
+    nh++;
     adc-=x->ped;
     if(adc>20) hr[0]->Fill(irad);
     ((TH2F*) hd[0])->Fill(irad,adc);
   }
-  printf("  Total %d towers with ADC>0\n",nh);
+  printf("  Total %d towers with ADC>Thr & !fail \n",nh);
 }
 
 
@@ -140,8 +131,9 @@ printEEpre( StMuEmcCollection* emc ) {
     //printf("i=%d  pre/post(%d) %2.2d%c%c%2.2d : energy=%f  adc=%d\n",i,pre,sec,pre+'P'-1,sub+'A'-1,eta,hit->getEnergy(),adc);
    
     // fill some histo
-    EEmcDbItem *x=myDb->getTail(sec,'A'+sub-1,eta,'P'+pre-1);
+    EEmcDbItem *x=myDb->getTile(sec,'A'+sub-1,eta,'P'+pre-1);
     if(x==0) continue;
+    if(x->fail) continue;
     if(adc<x->thr) continue;
     adc-=x->ped;
     int irad=sub -1 + 5*(sec-1) +60 *(eta-1);  
@@ -167,6 +159,7 @@ printEEsmd( StMuEmcCollection* emc ) {
       // fill some histo
       EEmcDbItem *x=myDb->getByStrip(sec,uv,strip);
       if(x==0) continue;
+      if(x->fail) continue;
       if(adc<x->thr) continue;
       adc-=x->ped;
       
