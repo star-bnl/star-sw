@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.26 1999/10/28 16:06:58 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.27 1999/12/07 19:47:02 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.27  1999/12/07 19:47:02  genevb
+// Increased length of mess ptr list for Linux
+//
 // Revision 1.26  1999/10/28 16:06:58  genevb
 // Fixed bug in C msg_enable routine - same as earlier fix for StMessage routines
 //
@@ -117,7 +120,7 @@ static char nullMess[] = "Null message!!!";
 static size_t maxMessLength = 1024;
 #ifdef LINUX
 static int sMessLength;
-static const int maxLOMP = 1024;
+static const int maxLOMP = 65536;
 static const int maxLOMP1 = (maxLOMP-1);
 static char* listOfMessPtrs[maxLOMP];
 static size_t listOfMessLens[maxLOMP];
@@ -661,7 +664,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.26 1999/10/28 16:06:58 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.27 1999/12/07 19:47:02 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
