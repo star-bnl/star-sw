@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.6 1999/11/03 21:35:35 kathy Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.7 1999/11/05 16:30:16 kathy Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.7  1999/11/05 16:30:16  kathy
+// minor changes to documentation in macro
+//
 // Revision 1.6  1999/11/03 21:35:35  kathy
 // small fixes for use of StIOMaker - had it wrong before
 //
@@ -36,29 +39,10 @@
 //         psFile - output postscript filename
 //
 // standard Maker names in bfc ==>
-//  geant
-//  db
-//  calib
-//  emc_raw
-//  tpc_hits
-//  svt_hits
-//  ftpc_hits
-//  tpc_tracks
-//  svt_tracks
-//  ftpc_tracks
-//  ctf
-//  mwc
-//  trg
-//  global
-//  match
-//  primary
-//  v0
-//  xi
-//  kink
-//  dst
-//  StEventMaker
-//  analysis
-//  QA
+//   (but if you run your own Maker here, then use whatever name you give it)
+//  are listed at 
+// http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/St_QA_Maker/doc/
+//
 //
 //======================================================================
 
