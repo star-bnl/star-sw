@@ -2,9 +2,12 @@
 #ifndef EEmcL3Tracks_h
 #define EEmcL3Tracks_h
 /*********************************************************************
- * $Id: EEmcL3Tracks.h,v 1.5 2003/05/30 20:37:09 zolnie Exp $
+ * $Id: EEmcL3Tracks.h,v 1.6 2003/05/30 21:07:52 zolnie Exp $
  *********************************************************************
  * $Log: EEmcL3Tracks.h,v $
+ * Revision 1.6  2003/05/30 21:07:52  zolnie
+ * added track length and number of points
+ *
  * Revision 1.5  2003/05/30 20:37:09  zolnie
  * added L3 track flag to EEmcHelix
  *
@@ -35,29 +38,33 @@
 
 class EEmcHelix : public TObject {
 public:
-  EEmcHelix() { mOx=mOy=mOz=mPx=mPy=mPz=0.0; mQ=0; mB=0.0; };
-  EEmcHelix(Float_t x , Float_t y ,Float_t z, Float_t px,Float_t py,Float_t pz,
-	    Int_t   q , Float_t B);
+  EEmcHelix() { mOx=mOy=mOz=mPx=mPy=mPz=mLength=mB=0.0; mQ=mPoints=mFlag=0; };
+  EEmcHelix(Float_t x, Float_t y, Float_t z, Float_t px, Float_t py, Float_t pz,
+	    Int_t   q, Float_t B, Int_t  np, Float_t l , Int_t mFlag);
   EEmcHelix(const EEmcHelix &h);
 
   void  setOrigin  (Float_t x ,Float_t y ,Float_t z ) { mOx=x; mOy=y; mOz=z; }
   void  setMomentum(Float_t px,Float_t py,Float_t pz) { mPx=px;mPy=py;mPz=pz;}
   void  setQ       (Int_t   q )                       { mQ = q;  }
   void  setB       (Float_t B )                       { mB = B;  } 
-  void  setFlag    (Int_t   f )                       { mFlag = f;}
+  void  setFlag    (Int_t   f )                       { mFlag   = f; }
+  void  setPoints  (Int_t   n )                       { mPoints = n; }
+  void  setLength  (Float_t l )                       { mLength = l; }
 
   void  getOrigin  (Float_t &x,Float_t &y,Float_t &z) const {x=mOx;y=mOy;z=mOz;}
   void  getMomentum(Float_t &x,Float_t &y,Float_t &z) const {x=mPx;y=mPy;z=mPz;}
 
-  Float_t Ox()   const { return mOx;  }
-  Float_t Oy()   const { return mOy;  }
-  Float_t Oz()   const { return mOz;  }
-  Float_t Px()   const { return mPx;  }
-  Float_t Py()   const { return mPy;  }
-  Float_t Pz()   const { return mPz;  }
-  Int_t   Q ()   const { return mQ;   }
-  Float_t B ()   const { return mB;   } 
-  Int_t   Flag() const { return mFlag;}
+  Float_t Ox()     const { return mOx;  }
+  Float_t Oy()     const { return mOy;  }
+  Float_t Oz()     const { return mOz;  }
+  Float_t Px()     const { return mPx;  }
+  Float_t Py()     const { return mPy;  }
+  Float_t Pz()     const { return mPz;  }
+  Int_t   Q ()     const { return mQ;   }
+  Float_t B ()     const { return mB;   } 
+  Int_t   Points() const { return mFlag;}
+  Float_t Length() const { return mFlag;}
+  Int_t   Flag()   const { return mFlag;}
 
   void    print(FILE *fd) const;
   
@@ -70,7 +77,10 @@ private:
   Float_t mPz;  // z momentum at origin
   Float_t mB;   // field
   Int_t   mQ;   // charge
+  Int_t   mPoints;
+  Float_t mLength;
   Int_t   mFlag;// 0==primary, 1==secondary
+  
 
   ClassDef(EEmcHelix,3)   
 };
