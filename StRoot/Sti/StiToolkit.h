@@ -49,6 +49,7 @@ class 	StiTrackMerger;
 class   StiVertexFinder;
 class   StAssociationMaker;
 class   EditableParameter;
+class   StiResidualCalculator;
 
 /** 
  * @class StiToolkit
@@ -75,15 +76,17 @@ public:
   virtual StiTrackContainer     * getMcTrackContainer()=0;
   
   // service and convenience class objects.
-  virtual StiDetectorFinder    * getDetectorFinder()=0;
-  virtual StiTrackSeedFinder   * getTrackSeedFinder()=0;
-  virtual StiTrackFinder       * getTrackFinder()=0;
-  virtual StiTrackFitter       * getTrackFitter()=0;
-  virtual StiTrackMerger       * getTrackMerger()=0;
-	virtual StiVertexFinder      * getVertexFinder()=0;
-  virtual StAssociationMaker * getAssociationMaker()=0;
-  virtual void setAssociationMaker(StAssociationMaker * a)=0;
+  virtual StiDetectorFinder     * getDetectorFinder()=0;
+  virtual StiTrackSeedFinder    * getTrackSeedFinder()=0;
+  virtual StiTrackFinder        * getTrackFinder()=0;
+  virtual StiTrackFitter        * getTrackFitter()=0;
+  virtual StiTrackMerger        * getTrackMerger()=0;
+  virtual StiVertexFinder       * getVertexFinder()=0;
+  virtual StAssociationMaker    * getAssociationMaker()=0;
+  virtual StiResidualCalculator * getResidualCalculator()=0;
   virtual StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * getHitLoader()=0;
+
+  virtual void setAssociationMaker(StAssociationMaker * a)=0;
   virtual void add(StiDetectorGroup<StEvent,StMcEvent>* detectorGroup)=0;
   
   virtual void setGuiEnabled(bool )=0;

@@ -1,11 +1,14 @@
 //StiResidualMaker.h
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.h,v 2.2 2003/04/29 18:48:33 pruneau Exp $
+ * $Id: StiResidualCalculator.h,v 2.3 2003/04/30 15:38:57 pruneau Exp $
  *
  * Author: Andrew Rose, Wayne State University, October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.h,v $
+ * Revision 2.3  2003/04/30 15:38:57  pruneau
+ * Integrating StiResidualCalculator into the main stream.
+ *
  * Revision 2.2  2003/04/29 18:48:33  pruneau
  * *** empty log message ***
  *
@@ -51,17 +54,14 @@ class StiNeverActiveFunctor;
 class StiResidualCalculator: public StiResiduals
 {
    public:
-     StiResidualCalculator(StiHitContainer*, StiDetectorBuilder*);
+     StiResidualCalculator(StiHitContainer*);
      ~StiResidualCalculator(){/*noop*/};
-
-     void initDetector(StiDetectorBuilder*);
-
+     void initialize(StiDetectorBuilder*);
      void calcResiduals(StiTrackContainer*);
-
      void Write(char* outfile);
-
    private:
      int  Init();
+     void initDetector(StiDetectorBuilder*);
      int  trackResidue(const StiTrack *track);
      int  trackResidue(const StiKalmanTrack *track);
      void FillHist(double z, double y,

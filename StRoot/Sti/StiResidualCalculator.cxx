@@ -1,7 +1,7 @@
 //StiResidualCalculator.cxx
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.cxx,v 2.2 2003/04/29 18:48:33 pruneau Exp $
+ * $Id: StiResidualCalculator.cxx,v 2.3 2003/04/30 15:38:56 pruneau Exp $
  *
  * \class  StiResidualCalculator provides a utility for determining the
  *         track residuals.
@@ -9,6 +9,9 @@
  * \date   October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.cxx,v $
+ * Revision 2.3  2003/04/30 15:38:56  pruneau
+ * Integrating StiResidualCalculator into the main stream.
+ *
  * Revision 2.2  2003/04/29 18:48:33  pruneau
  * *** empty log message ***
  *
@@ -56,22 +59,19 @@ class TH3D;
 class TFile;
 
 //Constructor
-StiResidualCalculator::StiResidualCalculator(StiHitContainer *hitC, StiDetectorBuilder *detBuilder)
+StiResidualCalculator::StiResidualCalculator(StiHitContainer *hitC)
   :candidateHits(hitC)
 {
   candidates.clear();
-  
-  cout <<"StiResidualCalculator::StiResidualCalculator created "
-       <<endl;
-
-  //Okay detector, init hists
+  cout <<"StiResidualCalculator::StiResidualCalculator created "<<endl;
   int check=Init();
   if(check<1) cout <<"StiResidualCalculator::StiResidualCalculator "
 		   <<"Error while initializing histograms."<<endl;
+}
 
-  if(detBuilder) initDetector(detBuilder);
-  
-  return;
+void StiResidualCalculator::initialize(StiDetectorBuilder*detBuilder)
+{
+  initDetector(detBuilder);
 }
 
 void StiResidualCalculator::initDetector(StiDetectorBuilder *detBuilder)
