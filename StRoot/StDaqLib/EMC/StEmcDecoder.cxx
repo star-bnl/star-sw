@@ -14,12 +14,21 @@ StEmcDecoder::StEmcDecoder(unsigned int date,unsigned int time)
   //cout <<"TIME USED FOR DECODER = "<<date<<" "<<time<<endl;
   Init(date,time);
   // reverse order for tower
-  for (int i=0;i<30;i++) Crate_TDC[TDC_Crate[i]-1]=i;
-  for (int RDO=0;RDO<4800;RDO++)
+  for(int i=0;i<30;i++) Crate_TDC[TDC_Crate[i]-1]=i;
+  for(int RDO=0;RDO<4800;RDO++)
   {
     int id=0;
     if(GetTowerIdFromDaqId(RDO,id)==1) ReverseOrder[id-1]=RDO;
   }
+	for(int BOX=1;BOX<=60;BOX++) for(int P=1;P<=80;P++)
+	{
+		int id=0;
+		if(GetTowerIdFromPMTBox(BOX,P,id)==1) 
+		{
+			ReversePMT_Box[id-1][0] = BOX;
+			ReversePMT_Box[id-1][1] = P;
+		}
+	}
   
   // reverse order for SMD
   int det,m,e,s;
@@ -109,6 +118,11 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
     for(int i=0;i<30;i++) TDC_Crate[i]=TDC_Crate_tmp[i];      
     goto SMD;
   }
+	
+	{
+		int PMT_tmp[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+		for(int i=0;i<60;i++) PMT_Box[i]=PMT_tmp[i];
+	}
    
 
   ///////////////////////////////////////////////////////////////////////
@@ -308,6 +322,39 @@ int StEmcDecoder::GetDaqIdFromTowerId(int TowerId,int& RDO)
   if(TowerId<1 || TowerId >4800) return 0; // 0 is bad
   
   RDO = ReverseOrder[TowerId-1];
+  
+  return 1;
+}
+//--------------------------------------------------------
+/*!
+\param TowerId is the software id for towers
+\param PMT is the PMT box number (1-60)
+\param Position is the position inside the box (1-80)
+*/
+int StEmcDecoder::GetPMTBoxFromTowerId(int TowerId,int& PMT, int& Position)
+{
+  if(TowerId<1 || TowerId >4800) return 0; // 0 is bad
+  
+  PMT = ReversePMT_Box[TowerId-1][0];
+  Position = ReversePMT_Box[TowerId-1][1];
+  
+  return 1;
+}
+//--------------------------------------------------------
+/*!
+\param PMT is the PMT box number (1-60)
+\param Position is the position inside the box (1-80)
+\param TowerId is the software id for towers
+*/
+int StEmcDecoder::GetTowerIdFromPMTBox(int PMT, int Position, int& TowerId)
+{
+  if(PMT<1 || PMT >60) return 0; // 0 is bad
+  if(Position<1 || Position >80) return 0; // 0 is bad
+  
+  int start = PMT_Box[PMT-1];
+	int row = (Position-1)/20;
+	
+	
   
   return 1;
 }
