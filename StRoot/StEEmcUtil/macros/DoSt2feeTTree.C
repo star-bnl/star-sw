@@ -3,9 +3,9 @@
 class StChain;
 StChain *chain=0;
 
-void DoSt2feeTTree(Int_t nevents=2){
+void DoSt2feeTTree(Int_t nevents=10){
   //char *fname="/star/data22/MC/balewski/pp4run3/minb200-10k.event.root";
-char *fname="out3.event.root";
+char *fname="mc2003-90.event.root";
 char *fileT="myOut.root"; // output TTree
 
   //

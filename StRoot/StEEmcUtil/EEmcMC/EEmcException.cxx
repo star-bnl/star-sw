@@ -1,5 +1,9 @@
-// $Id: EEmcException.cxx,v 1.1 2003/02/20 05:14:07 balewski Exp $
+// $Id: EEmcException.cxx,v 1.2 2003/02/20 20:13:20 balewski Exp $
 // $Log: EEmcException.cxx,v $
+// Revision 1.2  2003/02/20 20:13:20  balewski
+// fixxy
+// xy
+//
 // Revision 1.1  2003/02/20 05:14:07  balewski
 // reorganization
 //
@@ -20,18 +24,18 @@
 #include "EEmcException.h"
 
 
-EEmcException::EEmcException() 
+EEmcException1::EEmcException1() 
 {
   mErrno = kEEmcUnknownError;
-  cerr << "EEmcException:  unknown exception" << endl;
+  cerr << "EEmcException1:  unknown exception" << endl;
 };
 
 
 
-EEmcException::EEmcException(const EEmcErrno_t e, const char *msg, const int value)
+EEmcException1::EEmcException1(const EEmcErrno_t e, const char *msg, const int value)
 {
   mErrno = e;
-  cerr << "EEmcException: ";
+  cerr << "EEmcException1: ";
   if(msg!=NULL) cerr << msg ;
   cerr << " (errno=" << mErrno << ")" ;
   cerr << " value=" << value << endl;

@@ -19,11 +19,11 @@ enum EEmcErrno_t {
 };
 
 
-class EEmcException {
+class EEmcException1 {
 public:
 
-  EEmcException();
-  EEmcException(const EEmcErrno_t e, const char *msg=NULL, const int value=0);
+  EEmcException1();
+  EEmcException1(const EEmcErrno_t e, const char *msg=NULL, const int value=0);
 
   EEmcErrno_t getErrno() { return mErrno; };
 

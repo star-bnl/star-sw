@@ -1,5 +1,9 @@
-// $Id: EEmcMCData.cxx,v 1.1 2003/02/20 05:14:07 balewski Exp $
+// $Id: EEmcMCData.cxx,v 1.2 2003/02/20 20:13:20 balewski Exp $
 // $Log: EEmcMCData.cxx,v $
+// Revision 1.2  2003/02/20 20:13:20  balewski
+// fixxy
+// xy
+//
 // Revision 1.1  2003/02/20 05:14:07  balewski
 // reorganization
 //
@@ -155,10 +159,10 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
   
   // get info from event header
   if( (g2t_event=(St_g2t_event *) myMk->GetDataSet("g2t_event")) == NULL ) 
-    throw EEmcException(kEEmcMCMissingEventHeader,"missing MC event header");
+    throw EEmcException1(kEEmcMCMissingEventHeader,"missing MC event header");
 
   if( (event_head= g2t_event->GetTable()) == NULL )
-    throw EEmcException(kEEmcMCMissingEventHeader,"missing MC event header table");
+    throw EEmcException1(kEEmcMCMissingEventHeader,"missing MC event header table");
 
   mEventID=event_head->n_event;
 
@@ -210,7 +214,7 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
 	break;
       default:
 	Warning("readEventFromChain","unknown depth %d",depth);
-	throw EEmcException(kEEmcMCErr1,"invalid depth for tower tails");
+	throw EEmcException1(kEEmcMCErr1,"invalid depth for tower tails");
 	break;
       }
       
@@ -222,7 +226,7 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
       // printf("depth=%d nH=%d\n",depth,mLastHit);
 
       if(mLastHit>=mSize && !expandMemory() ) 
-	throw EEmcException(kEEmcMCErr1,"failed expandMemory() for tower tails");
+	throw EEmcException1(kEEmcMCErr1,"failed expandMemory() for tower tails");
 
     }
   }
@@ -249,7 +253,7 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
       Short_t phi   = ivid/kEEmcSmdPhiId;  ivid %= kEEmcSmdPhiId;
       Short_t plane = ivid/kEEmcSmdPlaneId;ivid %= kEEmcSmdPlaneId;
       Short_t strip = ivid/kEEmcSmdStripId;ivid %= kEEmcSmdStripId;  
-
+      
       Assert(ivid==0);
 
       switch(phi) { /* FIXME ONE DAY */
@@ -289,7 +293,7 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
       }
       if(det!=kEEmcMCSmdVStripId && det!=kEEmcMCSmdUStripId ) { 
 	Warning("readEventFromChain","unknown smd layer %d %d-%d-%d-%d",det,half,phi,plane,strip);
-	throw EEmcException(kEEmcMCErr1,"invalid depth for SMD");
+	throw EEmcException1(kEEmcMCErr1,"invalid depth for SMD");
       }
 
       sec = phi;
@@ -297,6 +301,7 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
       Assert( 0<sec   && sec  <=kEEmcNumSectors );
       Assert( 0<strip && strip<=kEEmcNumStrips  );
 
+      printf("Smd hit->volume_id=%d hit->de=%g sec=%d  U/V=%d, strip=%d\n",hit->volume_id,hit->de,sec, det,strip );
       // fill in
       mHit[mLastHit].detector = det;
       mHit[mLastHit].sector   = sec;
@@ -305,7 +310,7 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
 
       mLastHit++;
       if(mLastHit>=mSize && !expandMemory() ) 
-	throw EEmcException(kEEmcMCErr1,"failed expandMemory() for SMD strips");
+	throw EEmcException1(kEEmcMCErr1,"failed expandMemory() for SMD strips");
     }
   }
 
@@ -454,10 +459,8 @@ Int_t EEmcMCData::write(EEeventDst *EEeve) {
     // Info("EEmcMCData().write(TTree)","depth=%2d sector=%2d sub=%2d eta=%2d energy=%f", h->depth,h->sec,h->ssec,h->eta,h->de);
 
     int secID=h->sector;
-    EEsectorDst *EEsec= (EEsectorDst *)EEeve->getSec(secID);
-    if(EEsec==0) { // add new sector if needed
-      EEsec= (EEsectorDst *)EEeve->addSectorDst(secID);
-    }
+    EEsectorDst *EEsec= (EEsectorDst *)EEeve->getSec(secID,1);
+    assert(EEsec);
 
     // temporary projection,  JB
 
@@ -476,7 +479,7 @@ Int_t EEmcMCData::write(EEeventDst *EEeve) {
     case kEEmcMCSmdVStripId:
       EEsec->addSmdVHit(h->strip,h->de);  break;
     default:
-      throw EEmcException(kEEmcMCInvalidDepth,"invalid MC depth");
+      throw EEmcException1(kEEmcMCInvalidDepth,"invalid MC depth");
       break;
     }
       
