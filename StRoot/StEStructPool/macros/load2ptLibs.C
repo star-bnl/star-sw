@@ -17,6 +17,7 @@ void load2ptLibs(){
     gSystem->Load("StEStructPoolEventMaker");
     gSystem->Load("StEStructPoolAnalysisMaker");
     gSystem->Load("StEStructPoolCorrelations");
+    gSystem->Load("StEStructPoolFluctuations");
 
 
 };
