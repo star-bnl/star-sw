@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.h,v 1.7 2004/04/08 16:49:31 fisyak Exp $
+// $Id: StdEdxY2Maker.h,v 1.8 2004/05/14 20:20:27 fisyak Exp $
 #ifndef STAR_StdEdxY2Maker
 #define STAR_StdEdxY2Maker
 
@@ -49,7 +49,7 @@ class StdEdxY2Maker : public StMaker {
   StThreeVectorD      *mNormal[24];     //!
   StThreeVectorD      *mRowPosition[24][45][3]; //!
   St_tpcGainMonitor   *m_tpcGainMonitor;//!
-  Int_t                m_ClusterFinder; //! old == 0; new != 0
+  Int_t                m_OldClusterFinder; //! old == 1; new == 0
   Int_t                m_Calibration;   //!
   Int_t                m_DoNotCorrectdEdx; //!
   TMinuit             *m_Minuit;        //!
@@ -67,14 +67,14 @@ class StdEdxY2Maker : public StMaker {
   Double_t CalcCorrection(const tpcCorrection_st *cor,const Double_t x);
   void    Histogramming(StGlobalTrack* gTrack);
   void    QAPlots(StGlobalTrack* gTrack = 0);
-  void    BadHit(const StThreeVectorF &xyz);
+  void    BadHit(Int_t iFlag, const StThreeVectorF &xyz);
   void    DoFitZ(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ);
   void    PrintdEdx(Int_t iop = 0);
   static  void Landau(Double_t x, Double_t *val);
   static  void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.7 2004/04/08 16:49:31 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.8 2004/05/14 20:20:27 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
