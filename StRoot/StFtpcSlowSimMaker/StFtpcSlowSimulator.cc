@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimulator.cc,v 1.8 2001/04/20 13:04:25 jcs Exp $
+// $Id: StFtpcSlowSimulator.cc,v 1.9 2001/04/25 13:38:00 jcs Exp $
 // $Log: StFtpcSlowSimulator.cc,v $
+// Revision 1.9  2001/04/25 13:38:00  jcs
+// remove obsolete comment
+//
 // Revision 1.8  2001/04/20 13:04:25  jcs
 // this is the routine in which I changed the if/else statements for
 // calculating the polar coordinates to avoid problems with optimizing
@@ -136,10 +139,6 @@ int StFtpcSlowSimulator::simulate()
 	  ++de_zero;
 	}
 
-
-//	// TEMPORARY FIX: pad length = 1 in gstar  JCS
-//	de = de*20.;
-//	// TEMPORARY FIX: pad length = 1 in gstar JCS
 	if(DEBUG)
 	  cout << "Now processing hit " << i << endl;
 	int irow= mGeant->geantVolume(i);
