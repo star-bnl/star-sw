@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.26 2003/02/19 15:38:10 jeromel Exp $
+ * $Id: StMuDstMaker.cxx,v 1.27 2003/02/20 15:29:42 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -512,8 +512,8 @@ void StMuDstMaker::closeWrite(){
     cout << " ##### " << endl;
   }
   if (mTTree) mTTree->AutoSave(); 
-  if (mCurrentFile) mCurrentFile->Close();
   mTTree = 0;
+  if (mCurrentFile) mCurrentFile->Close();
   mCurrentFile = 0;
 }
 //-----------------------------------------------------------------------
@@ -884,6 +884,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.27  2003/02/20 15:29:42  laue
+ * StMuTriggerIdCollection added
+ *
  * Revision 1.26  2003/02/19 15:38:10  jeromel
  * Modifications made to account for the new location of the PIDTable file.
  * The setProbabilityPidFile() method has been modified to take care of a default
