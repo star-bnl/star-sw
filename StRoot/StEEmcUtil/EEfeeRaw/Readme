@@ -1,0 +1,2 @@
+This class  serves as a temporary storage of EEMC events, taken with the
+stand alone miniDAQ. It could be also saved as TTree .
