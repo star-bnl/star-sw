@@ -144,9 +144,26 @@ void RunStiMaker(Int_t nevents=1,
 
     stiIO->setDoTrackFit(doFit);
 
+    //Set Local Track Seed Finder (LTSF) run-time values
+    stiIO->setLTSFZWindow(5.);
+    stiIO->setLTSFYWindow(2.);
+    stiIO->setLTSFSeedLength(4);
+    stiIO->setLTSFUseVertex(true);
+    
+    //Add sectors:
+    for (unsigned int sector=1; sector<=12; ++sector) {
+	stiIO->addLTSFSector(sector);
+    }
+    //Add padrows;
+    //for (unsigned int padrow=1; padrow<=45; ++padrow) {
+    for (unsigned int padrow=15; padrow<=45; padrow+=5) {
+	stiIO->addLTSFPadrow(padrow);
+    }
+    
     //This line has to match the corresponding enumeration in StiIOBroker.h
     enum SeedFinderType {kUndefined=0, kComposite=1, kEvaluable=2};
     stiIO->setSeedFinderType(kEvaluable);
+    //stiIO->setSeedFinderType(kComposite);
 
     stiIO->setSimulated(simulated);
     anaMk->setEvaluationFileName(outfile);
