@@ -1,12 +1,13 @@
 #export SHELL := csh
-ifndef INSTALL
+ifndef BASE_DIR
 BASE_DIR := $(shell pwd)
 INSTALL := -ln -s
 INSTALL := cp
 endif
 #
+# make -f Makefile.user install_slm
 install_slm:
 	$(INSTALL) $(BASE_DIR)/SLM_DIR/* $(SLM_DIR)
 #
-stafGen: $(SRCM_DIR)/stafGen.cc
+stafGen: $(SRCMDIR)/stafGen.cc
 	$(CXX) -o $@ $^
