@@ -11,7 +11,7 @@ CC:<--------------------------------------------------------------------
       INTEGER*4 FUNCTION DST_POINT_UNPACK(
      1         tcl_tphit_h,         tcl_tphit ,
      2           scs_spt_h,           scs_spt ,
-     2       fcl_fppoint_h,       fcl_fppoint ,
+*     2       fcl_fppoint_h,       fcl_fppoint ,
      3         dst_point_h,         dst_point ) 
       IMPLICIT NONE
 #include "dst_point_unpack.inc"
@@ -82,14 +82,15 @@ CC:  Set TPC and SVT and FTPC post-DST space point table # rows to zero:
 
       tcl_tphit_h.nok = 0
       scs_spt_h.nok   = 0
-      fcl_fppoint_h.nok = 0
+*      fcl_fppoint_h.nok = 0
 
 CC:  Loop thru all space points in dst_point and unpack the information
 CC:  and load into tcl_tphit and scs_spt and fcl_fppoint:
 
       IF (dst_point_h.nok .gt. 0 .and. tcl_tphit_h.maxlen .ge. 1
      1    .and. scs_spt_h.maxlen .ge. 1 
-     1    .and. fcl_fppoint_h.maxlen .ge. 1) then
+*     1    .and. fcl_fppoint_h.maxlen .ge. 1
+     1) then
          do i = 1,dst_point_h.nok
 
 CC:  Determine which detector this space point is located in>>>
@@ -230,7 +231,7 @@ c               scs_spt(scs_spt_h.nok).flag      = 0
                Return
             end if
   
-
+#if 0
          else if(detid.eq.4 .or. detid.eq.5) then  !  Fill FTPC space points
 
             if(fcl_fppoint_h.nok .lt. fcl_fppoint_h.maxlen) then
@@ -285,7 +286,7 @@ c               scs_spt(scs_spt_h.nok).flag      = 0
                DST_POINT_UNPACK = STAFCV_BAD
                Return
             end if
-
+#endif
          Else
             write(6,10) detid
 10          Format(2x,'In DST_POINT_UNPACK detid = ',I10,
