@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.cxx,v 1.17 2000/07/03 04:10:28 snelling Exp $
+ * $Id: StQACosmicMaker.cxx,v 1.18 2000/07/04 01:15:08 snelling Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the data from the tables (hitfinding, tracking etc.)
  *
  * $Log: StQACosmicMaker.cxx,v $
+ * Revision 1.18  2000/07/04 01:15:08  snelling
+ * change to make ntuple write out even if tables last event are empty
+ *
  * Revision 1.17  2000/07/03 04:10:28  snelling
  * Fixed bug in ntuple (changed :: to :)
  *
@@ -86,7 +89,7 @@ Int_t StQACosmicMaker::Make() {
 
 void StQACosmicMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StQACosmicMaker.cxx,v 1.17 2000/07/03 04:10:28 snelling Exp $\n");
+  printf("* $Id: StQACosmicMaker.cxx,v 1.18 2000/07/04 01:15:08 snelling Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -96,9 +99,9 @@ void StQACosmicMaker::PrintInfo() {
 
 Int_t StQACosmicMaker::Finish() {
 
-  if (brestpt && btphit && btptrack) {calcResHistograms();}
-  if (btphit && btptrack) {calcChargeHistograms();}
-  if (bWriteTNtupleOn && brestpt && btphit && btptrack) {writeOutTNtuple();}
+  if (bWriteHistogramsOn) {calcResHistograms();}
+  if (bWriteHistogramsOn) {calcChargeHistograms();}
+  if (bWriteTNtupleOn) {writeOutTNtuple();}
   if (bWriteHistogramsOn) {writeOutHistograms();}
   
   return StMaker::Finish();
