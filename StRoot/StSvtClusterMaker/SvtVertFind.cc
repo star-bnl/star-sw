@@ -90,7 +90,8 @@ int sft_process_event ( long Nspt,  scs_spt_st    *staf_spt,
  
    for (jspt = 0; jspt < Nspt; jspt++)
    {
-     if (staf_spt[jspt].id_wafer < 7000 && staf_spt[jspt].flag<4) {
+     if (staf_spt[jspt].id_wafer < 7000 && staf_spt[jspt].flag<4 &&
+	 staf_spt[jspt].de[1] > 15) {
 
 	 spt[ispt].x[0]  = (double)staf_spt[jspt].x[0];
 	 spt[ispt].x[1]  = (double)staf_spt[jspt].x[1];
@@ -164,8 +165,8 @@ sft_vf_ntrack(double z0)
 
       for (ispt = 0; ispt < spt_n; ispt++)
       {
-         x   = spt[ispt].x[0];
-         y   = spt[ispt].x[1];
+         x   = spt[ispt].x[0]+0.27;
+         y   = spt[ispt].x[1]-0.5;
          z   = spt[ispt].x[2];
          r   = sqrt (x * x + y * y);          /*xc = fatan2(y,x)   */
 
