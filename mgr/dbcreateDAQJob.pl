@@ -23,7 +23,7 @@ my $debugOn=0;
 my @SetD = (
              "daq/2000/06",
              "daq/2000/07", 
-
+             "daq/2000/08", 
 );
 
 my $prodPeriod = "P00he"; 
