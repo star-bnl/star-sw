@@ -1,4 +1,4 @@
-// static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.26 1998/09/25 03:24:51 fisyak Exp $";
+// static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.27 1998/10/02 17:47:43 perev Exp $";
 //:Copyright 1995, Lawrence Berkeley National Laboratory
 //:>--------------------------------------------------------------------
 //:FILE:        amiClasses.C
@@ -204,6 +204,9 @@ unsigned char amiBroker :: implementsInterface (const char * iface) {
 STAFCV_T amiBroker:: callInvoker (const char * name
 		, const STRING_SEQ_T& tnames) {
 
+  static int NaNflag = 0;
+  if (! NaNflag)  NaNflag = (getenv("STAF_NaN_OFF")) ? -1:1;
+
 //- Find the correct invoker.
    amiInvoker* invoker=NULL;
    if( NULL == (invoker = findInvoker(name)) ){
@@ -261,21 +264,25 @@ STAFCV_T amiBroker:: callInvoker (const char * name
       if( table_name ){FREE(table_name); table_name = NULL;}
    }
 //- Check Input Tables;
+   
 
+   
    int ierr; 
-   for (i=0 ;i<(int)tnames._length;i++ ){
-     ierr = tables._buffer[i]->NaN(); 
-     if (ierr)  printf("MODULE %s ***ERROR*** Bad input Table %s\n",
-               name,tables._buffer[i]->Name());}
+   if (NaNflag==1) {
+     for (i=0 ;i<(int)tnames._length;i++ ){
+       ierr = tables._buffer[i]->NaN(); 
+       if (ierr)  printf("MODULE %s ***ERROR*** Bad input Table %s\n",
+                 name,tables._buffer[i]->Name());}}
 
 //- Call the actual invoker object.
    STAFCV_T status = invoker->call(tables);/*fix memory leak -akio*/
 
 //- Check Output Tables;
-   for (i=0 ;i<(int)tnames._length;i++ ){
-     ierr = tables._buffer[i]->NaN(); 
-     if (ierr)  printf("MODULE %s ***ERROR*** Bad Output Table %s\n",
-               name,tables._buffer[i]->Name());}
+   if (NaNflag==1) {
+     for (i=0 ;i<(int)tnames._length;i++ ){
+       ierr = tables._buffer[i]->NaN(); 
+       if (ierr)  printf("MODULE %s ***ERROR*** Bad Output Table %s\n",
+                  name,tables._buffer[i]->Name());}}
 
    delete[] tables._buffer;                  /*fix memory leak -akio*/
 
