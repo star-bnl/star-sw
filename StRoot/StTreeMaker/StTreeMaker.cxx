@@ -21,10 +21,15 @@ StTreeMaker::StTreeMaker(const char *name, const char *ioFile,const char *treeNa
   fFile = ioFile; fIOMode="0";fTree=0;fFinished=0;
   fBfcStatus = new St_dst_bfc_status("BfcStatus",100);
   AddConst(fBfcStatus);
-  
-  if ( treeName ) {
-    fTreeName=treeName;
-  } else {
+  fTreeName = treeName;
+  if (! fTreeName ) {
+    TDataSet *parent = GetParent();
+    if (parent) {
+      StIOInterFace *grandparent = (StIOInterFace *) parent->GetParent();
+      if (grandparent) fTreeName = grandparent->GetTreeName();
+    }
+  }
+  if ( !fTreeName ) {
     Warning("StTreeMaker", "%s default treeName == bfcTree is used",name);
     fTreeName = "bfcTree";
   }
@@ -385,6 +390,7 @@ Int_t StTreeMaker::Save()
   brSave->Close();
   brSave->SetFile((const char*)savePath);
   brSave->WriteEvent((ULong_t)(-2));	
+  fTree->Close("keep");
   brSave->Close();
   brSave->Clear(); 
   brSave->SetFile((const char*)regPath); 
