@@ -14,7 +14,6 @@ using std::string;
 
 //StiEvaluator
 #include "TreeEntryClasses.h"
-#include "../Sti/StiEvaluator.h"
 
 //forward declarations (must #include these in the source file)
 class StiTrackContainer;
