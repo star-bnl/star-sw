@@ -2,7 +2,7 @@
 #define ROOT_StFileI
 
 #include "TNamed.h"
-
+#include "assert.h"
  
 const UInt_t kUMAX = (UInt_t)(-1);
 
@@ -12,21 +12,20 @@ public:
   StUKey(const char *name=0,UInt_t *uk=0,int nk=1);
   StUKey(const char *name,UInt_t uk);
   StUKey(UInt_t uRun,UInt_t uEvent=0);
- ~StUKey(){}
-  StUKey &operator=( const StUKey &from);
-  StUKey &operator=( UInt_t from);
-  StUKey &operator=( Int_t from){return *this=(UInt_t)from; return *this;}
-  StUKey &operator=( const char *from);
-  void    Update(const StUKey &from,const char *name=0);
-  void    SetName(const char *name){fName=name;} 
-  const char *GetName() const {return fName;} 
-  TString GetKey() const; 
-  void    SetKey(const char *key);
-  void    SetUrr(const UInt_t *key,int nk);
-  UInt_t  GetSum() const;
-  Int_t   EOK()    const { return fUrr[0]==kUMAX;}
-  Int_t   IsNull() const { return !fUrr[0];}
-  
+  virtual ~StUKey(){}
+  virtual  StUKey &operator=( const StUKey &from);
+  virtual  StUKey &operator=( UInt_t from);
+  virtual  StUKey &operator=( Int_t from){return *this=(UInt_t)from; return *this;}
+  virtual  StUKey &operator=( const char *from);
+  virtual  void    Update(const StUKey &from,const char *name=0);
+  virtual  void    SetName(const char *name){fName=name;} 
+  virtual  const char *GetName() const {return fName;} 
+  virtual  TString GetKey() const; 
+  virtual  void    SetKey(const char *key);
+  virtual  void    SetUrr(const UInt_t *key,int nk);
+  virtual  UInt_t  GetSum() const;
+  virtual  Int_t   EOK()    const { return fUrr[0]==kUMAX;}
+  virtual  Int_t   IsNull() const { return !fUrr[0];}
 private:
   TString fName;
   Int_t fNUrr;
@@ -59,6 +58,7 @@ public:
   virtual Int_t GetNextEvent(UInt_t *NextEventNumber)
                 {*NextEventNumber=0;return 0;}
   virtual StUKey GetNextEvent();
+  virtual  void Rewind(){assert(0);};
 protected:
  Int_t fDebug;
  

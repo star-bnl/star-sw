@@ -53,6 +53,12 @@ StIOMaker::~StIOMaker()
 {
   delete fFileSet;fFileSet= 0;
 }
+//_____________________________________________________________________________
+void StIOMaker::Rewind()
+{
+  Close();
+  if (fFileSet) fFileSet->Rewind();
+}
 
 //_____________________________________________________________________________
 Int_t StIOMaker::Init()

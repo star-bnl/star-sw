@@ -661,7 +661,7 @@ ClassImp(StFile)
  StFile::StFile(const char** fileList):StFileI("StFile")
 {
   fDS = new TDataSet();
-  fIter = 0; fKeyIter = 0;
+  fIter = -1; fKeyIter = 0;
   SetTitle(" nbranches=1 ");
   AddFile(fileList);
 }
@@ -669,29 +669,20 @@ ClassImp(StFile)
  StFile::~StFile()
 {
   delete fDS;   	fDS      = 0;
-  delete fIter; 	fIter    = 0;
+  fIter    = -1;
   delete fKeyIter;	fKeyIter = 0;
 }
 //_____________________________________________________________________________
 Int_t StFile::GetNextBundle()
 {
-  if (!fIter) fIter = new TDataSetIter(fDS);
-  return !(fIter->Next());
-}
-//_____________________________________________________________________________
-void StFile::RefreshIter()
-{
-  if (!fIter) return;
-
-  TDataSetIter *it = new TDataSetIter(fDS);
-  for (; *(*it) && *(*it)!=*(*fIter);it->Next()) {}
-  delete fIter;
-  fIter = it;
+  if (!fDS)	return 1;
+  TDataSet *d = fDS->At(fIter+1);
+  if (!d  )     return 1;
+  fIter++;      return 0;
 }
 //_____________________________________________________________________________
 Int_t StFile::GetNBundles()
 {
-  if (!fIter) fIter = new TDataSetIter(fDS);
   return fDS->GetListSize();
 }
 //_____________________________________________________________________________
@@ -702,7 +693,7 @@ Int_t StFile::GetNFiles()
 //_____________________________________________________________________________
 TDataSet *StFile::GetFileDS(Int_t idx)
 {
-  TDataSet *fam = (TDataSet *)**fIter;
+  TDataSet *fam = fDS->At(fIter);
   if (!fam) return 0;
   TDataSet *df = fam->At(idx);
   if (!df) return 0;
@@ -784,7 +775,6 @@ Int_t StFile::AddFile(const Char_t *file,const Char_t *branch)
   ds->SetTitle(tit);
 
 
-  RefreshIter();
   if (GetDebug()) printf("<%s::AddFile> Added file %s %s\n",
                   ClassName(),ds->GetName(),ds->GetTitle());
 
@@ -846,8 +836,8 @@ Int_t StFile::AddEvent(UInt_t r,UInt_t e)
 StUKey StFile::GetNextEvent()
 {
   StUKey uk(kUMAX);
-  if (!fIter) 		return uk;
-  TDataSet *dsfam = **fIter;
+  if (!fDS) 		return uk;
+  TDataSet *dsfam = fDS->At(fIter); 
   if (!dsfam) 		return uk;
   uk = 0;
   TDataSet *dskeys = (TDataSet*)dsfam->GetObject();

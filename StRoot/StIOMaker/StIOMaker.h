@@ -34,6 +34,7 @@ public:
            void   SetMaxEvent(Int_t mx=10000000){fMaxEvent=mx;fNumEvent=0;};
    void   SetFileSet(StFileI *fileSet){fFileSet = fileSet;};
    virtual Int_t Skip(int nskip);
+   virtual void  Rewind();
 protected:
 
 void Build(StFileI *fileSet,const char *treeName);
@@ -52,7 +53,7 @@ StIOInterFace *Load();
    Int_t  fCase    ;		//! case 1=root,2=xdf,3=mdc2,4=daq
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIOMaker.h,v 1.7 2000/04/03 23:54:41 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIOMaker.h,v 1.8 2000/08/07 22:42:29 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StIOMaker, 1)   //StAR chain virtual base class for Makers
 };

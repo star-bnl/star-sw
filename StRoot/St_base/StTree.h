@@ -137,14 +137,14 @@ public:
   virtual const Char_t *GetFormat(Int_t idx=0);
   virtual Int_t GetNextBundle();
   virtual StUKey GetNextEvent();
+  virtual void Rewind(){fIter = -1; delete fKeyIter; fKeyIter =0;}
   
 protected:
   void SetInfo(TDataSet *ds);
-  void RefreshIter();
   const Char_t *GetAttr(TDataSet *ds,const char *att);
   TDataSet *GetFileDS(int idx);
   TDataSet *fDS;
-  TDataSetIter *fIter; 
+  Int_t    fIter; 
   TDataSetIter *fKeyIter; 
   ClassDef(StFile,1)
 };
