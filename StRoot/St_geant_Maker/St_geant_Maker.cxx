@@ -1,8 +1,8 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.73 2002/08/26 14:21:21 jeromel Exp $
+// $Id: St_geant_Maker.cxx,v 1.74 2002/10/16 20:39:23 kopytin Exp $
 // $Log: St_geant_Maker.cxx,v $
-// Revision 1.73  2002/08/26 14:21:21  jeromel
-// changing 'PHMD' to 'PHMH'
+// Revision 1.74  2002/10/16 20:39:23  kopytin
+// Added code to read out BBC GSTAR tables. Needed by StBbcSimulationMaker
 //
 // Revision 1.72  2002/06/17 16:12:43  perev
 // fix wrong geant time
@@ -296,6 +296,7 @@
 #include "g2t/St_g2t_zdc_Module.h"
 #include "g2t/St_g2t_vpd_Module.h"
 #include "g2t/St_g2t_pmd_Module.h"
+#include "g2t/St_g2t_bbc_Module.h"
 #include "StarCallf77.h" 
 #ifdef F77_NAME
 #define    geometry	 F77_NAME(geometry,GEOMETRY)
@@ -523,6 +524,7 @@ Int_t St_geant_Maker::Make()
 //	     ===============================
     }
 
+
     geant3->Gfnhit("TPCH","TPAD", nhits);
     if (nhits>0){ 
       St_g2t_tpc_hit *g2t_tpc_hit = new St_g2t_tpc_hit("g2t_tpc_hit",nhits);
@@ -531,6 +533,7 @@ Int_t St_geant_Maker::Make()
       iRes = g2t_tpc(g2t_track,g2t_tpc_hit);
 //	     ==============================
     }
+    
 
     geant3->Gfnhit("TPCH","TMSE", nhits);
     if (nhits>0) { 
@@ -564,6 +567,7 @@ Int_t St_geant_Maker::Make()
 //           ==============================
     }
 
+
     geant3->Gfnhit("RICH","RGAP", nhit1);
     geant3->Gfnhit("RICH","RCSI", nhit2);
     geant3->Gfnhit("RICH","FREO", nhit3);
@@ -576,7 +580,7 @@ Int_t St_geant_Maker::Make()
       iRes = g2t_rch(g2t_track,g2t_rch_hit);
 //           ==============================
     }
-    
+
     //---------------------- calorimeters -------------------------//
     geant3->Gfnhit("CALH","CSUP", nhits);
     if (nhits>0) {
@@ -636,6 +640,17 @@ Int_t St_geant_Maker::Make()
       iRes = g2t_zdc(g2t_track,g2t_zdc_hit);
 //           ==============================
     }
+
+
+    geant3->Gfnhit("BBCH","BPOL", nhits);
+    if (nhits>0) 
+      {
+	St_g2t_ctf_hit *g2t_bbc_hit = new St_g2t_ctf_hit("g2t_bbc_hit",nhits);
+	m_DataSet->Add(g2t_bbc_hit);
+	iRes = g2t_bbc(g2t_track,g2t_bbc_hit);
+//           ==============================
+      }
+
 //------------------------all bloody detectors done--------------------//
 #if 0
     Char_t *g2t = "g2t_";
