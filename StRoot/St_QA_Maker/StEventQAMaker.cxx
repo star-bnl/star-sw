@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.38 2000/06/02 01:11:51 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.39 2000/06/02 19:59:58 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.39  2000/06/02 19:59:58  lansdell
+// added null pointer check for MakeHistRich
+//
 // Revision 1.38  2000/06/02 01:11:51  lansdell
 // added several x,y,z-dca to beam axis histograms
 //
@@ -1068,7 +1071,8 @@ void StEventQAMaker::MakeHistRich() {
 
   if (Debug()) cout << " *** in StEventQAMaker - filling Rich histograms " << endl;
 
-  m_rich_tot->Fill(event->softwareMonitor()->rich()->mult_rich_tot);
+  if (event->softwareMonitor()->rich())
+    m_rich_tot->Fill(event->softwareMonitor()->rich()->mult_rich_tot);
 }
 
 //_____________________________________________________________________________
