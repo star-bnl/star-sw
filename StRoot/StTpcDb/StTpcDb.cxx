@@ -89,7 +89,7 @@ gStTpcDb = 0;
 StTpcPadPlaneI* StTpcDb::PadPlaneGeometry(){
   if (!PadPlane){            // get pad plane from data base
    const int dbIndex = kGeometry;
-   St_DataSet *tpd = tpc[dbIndex]->Find("TPCPadPlanes");
+   St_DataSet *tpd = tpc[dbIndex]->Find("tpcPadPlanes");
    if (!tpd) {
      gMessMgr->Message("StTpcDb::Error Finding Tpc Pad Planes","E");
      return 0;
@@ -103,7 +103,7 @@ StTpcPadPlaneI* StTpcDb::PadPlaneGeometry(){
 StTpcWirePlaneI* StTpcDb::WirePlaneGeometry(){
   if (!WirePlane){            // get wire plane from data base
    const int dbIndex = kGeometry;
-   St_DataSet* tpd = tpc[dbIndex]->Find("TPCWirePlanes");
+   St_DataSet* tpd = tpc[dbIndex]->Find("tpcWirePlanes");
    if (!(tpd && tpd->HasData()) ){
     gMessMgr->Message("StTpcDb::Error Finding Tpc Wire Planes","E");
     return 0;
@@ -117,7 +117,7 @@ StTpcWirePlaneI* StTpcDb::WirePlaneGeometry(){
 StTpcDimensionsI* StTpcDb::Dimensions(){
   if (!dimensions){            // get wire plane from data base
    const int dbIndex = kGeometry;
-   St_DataSet* tpd = tpc[dbIndex]->Find("TPCDimensions");
+   St_DataSet* tpd = tpc[dbIndex]->Find("tpcDimensions");
    if (!(tpd && tpd->HasData()) ){
     gMessMgr->Message("StTpcDb::Error Finding Tpc Dimensions","E");
     return 0;
@@ -145,7 +145,7 @@ StTpcSlowControlSimI* StTpcDb::SlowControlSim(){
 StTpcElectronicsI* StTpcDb::Electronics(){
   if (!electronics){            // get electronics from data base
    const int dbIndex = kGeometry;
-   St_DataSet* tpd = tpc[dbIndex]->Find("TPCElectronics");
+   St_DataSet* tpd = tpc[dbIndex]->Find("tpcElectronics");
    if (!(tpd && tpd->HasData()) ){
     gMessMgr->Message("StTpcDb::Error Finding Tpc Electronics","E");
     return 0;
@@ -205,3 +205,8 @@ StTpcT0I* StTpcDb::T0(int sector){
 St_Table *StTpcDb::getTpcTable(int i){
   return (St_Table *)tpc[i];
 }
+
+
+
+
+
