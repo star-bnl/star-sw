@@ -4,6 +4,8 @@
 
 //Hit class to be used for the ITTF tracker
 
+// Ignore me
+
 /*! \class StiHit
   StiHit is a simple class that encapsulates a three dimensional position
   measurement in the STAR detector.  The measurement is represented in a frame
