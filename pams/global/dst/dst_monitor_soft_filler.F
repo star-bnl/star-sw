@@ -24,10 +24,10 @@ CC:<--------------------------------------------------------------------
      8           ctu_cor_h,           ctu_cor ,
      9        dst_vertex_h,        dst_vertex ,
      9   dst_event_summary_h, dst_event_summary ,
-     9   dst_monitor_soft_ftpc_h,  dst_monitor_soft_ftpc , 
-     9   dst_monitor_soft_global_h,  dst_monitor_soft_global , 
-     9   dst_monitor_soft_svt_h,  dst_monitor_soft_svt , 
-     9   dst_monitor_soft_tpc_h,  dst_monitor_soft_tpc ) 
+     9   dms_ftpc_h,          dms_ftpc , 
+     9   dms_global_h,        dms_global , 
+     9   dms_svt_h,           dms_svt , 
+     9   dms_tpc_h,           dms_tpc ) 
 
       IMPLICIT NONE
 #include "dst_monitor_soft_filler.inc"
@@ -65,14 +65,14 @@ CC:  dst_event_summary   - DST event summary
 CC:  dst_event_summary_h - Header Structure for dst_event_summary
 CC:       INOUT:
 CC:         OUT:
-CC:  dst_monitor_soft_ftpc    - DST reconstruction software monitor info.
-CC:  dst_monitor_soft_ftpc_h   - Header Structure for dst_monitor_soft_ftpc
-CC:  dst_monitor_soft_global  - DST reconstruction software monitor info.
-CC:  dst_monitor_soft_global_h - Header Structure for dst_monitor_soft_global
-CC:  dst_monitor_soft_svt     - DST reconstruction software monitor info.
-CC:  dst_monitor_soft_svt_h    - Header Structure for dst_monitor_soft_svt
-CC:  dst_monitor_soft_tpc     - DST reconstruction software monitor info.
-CC:  dst_monitor_soft_tpc_h    - Header Structure for dst_monitor_soft_tpc
+CC:  dms_ftpc    - DST reconstruction software monitor info.
+CC:  dms_ftpc_h   - Header Structure for dms_ftpc
+CC:  dms_global  - DST reconstruction software monitor info.
+CC:  dms_global_h - Header Structure for dms_global
+CC:  dms_svt     - DST reconstruction software monitor info.
+CC:  dms_svt_h    - Header Structure for dms_svt
+CC:  dms_tpc     - DST reconstruction software monitor info.
+CC:  dms_tpc_h    - Header Structure for dms_tpc
 CC: RETURNS:    STAF Condition Value
 CC:>--------------------------------------------------------------------
 
@@ -90,22 +90,22 @@ CC:  Local Variable Type Declarations:
       parameter (zmin = -200.0)
       parameter (zstep = 40.0)
 
-CC:  Set (all) dst_monitor_soft_h***.nok to 1 row:
+CC:  Set (all) dms_h***.nok to 1 row:
 
 CC: emc and ctb not ready to go in yet (LSB)
-CC:      dst_monitor_soft_ctb-tof_h.nok = 1
-CC:      dst_monitor_soft_emc_h.nok = 1
-      dst_monitor_soft_ftpc_h.nok = 1
-      dst_monitor_soft_global_h.nok = 1
-      dst_monitor_soft_svt_h.nok = 1
-      dst_monitor_soft_tpc_h.nok = 1
+CC:      dms_ctb-tof_h.nok = 1
+CC:      dms_emc_h.nok = 1
+      dms_ftpc_h.nok = 1
+      dms_global_h.nok = 1
+      dms_svt_h.nok = 1
+      dms_tpc_h.nok = 1
 
 CC:  Set all unused (at this time) monitor values to zero
 
-      dst_monitor_soft_ftpc(1).n_clus_ftpc(1)          = 0
-      dst_monitor_soft_ftpc(1).n_clus_ftpc(2)          = 0
+      dms_ftpc(1).n_clus_ftpc(1)          = 0
+      dms_ftpc(1).n_clus_ftpc(2)          = 0
 CC: Monitor table for emc not ready yet (LSB)
-CC:      dst_monitor_soft_emc(1).energy_emc              = 0.0
+CC:      dms_emc(1).energy_emc              = 0.0
 
 CC: CPU time no longer appears? (LSB)
 CC:      do i = 1,20
@@ -124,11 +124,11 @@ CC:     1                    dst_event_summary(1).prod_run
 
 CC:  Fill TPC cluster summary information:
 
-      dst_monitor_soft_tpc(1).n_clus_tpc_tot = tcl_tpcluster_h.nok
+      dms_tpc(1).n_clus_tpc_tot = tcl_tpcluster_h.nok
 
       do i = 1,24
-         dst_monitor_soft_tpc(1).n_clus_tpc_in(i)  = 0
-         dst_monitor_soft_tpc(1).n_clus_tpc_out(i) = 0
+         dms_tpc(1).n_clus_tpc_in(i)  = 0
+         dms_tpc(1).n_clus_tpc_out(i) = 0
       end do
 
       if(tcl_tpcluster_h.nok .gt. 0) then
@@ -137,11 +137,11 @@ CC:  Fill TPC cluster summary information:
             if(secnum.ge.1 .and. secnum.le.24) then
                padrow = tcl_tpcluster(i).tpc_row - 100*secnum
                if(padrow.ge.1 .and. padrow.le.13) then
-                  dst_monitor_soft_tpc(1).n_clus_tpc_in(secnum) =
-     1            dst_monitor_soft_tpc(1).n_clus_tpc_in(secnum) + 1
+                  dms_tpc(1).n_clus_tpc_in(secnum) =
+     1            dms_tpc(1).n_clus_tpc_in(secnum) + 1
                else if(padrow.ge.14 .and. padrow.le.45) then
-                  dst_monitor_soft_tpc(1).n_clus_tpc_out(secnum) =
-     1            dst_monitor_soft_tpc(1).n_clus_tpc_out(secnum) + 1
+                  dms_tpc(1).n_clus_tpc_out(secnum) =
+     1            dms_tpc(1).n_clus_tpc_out(secnum) + 1
                end if
             end if
          end do
@@ -150,18 +150,18 @@ CC:  Fill TPC cluster summary information:
 CC:  Fill SVT cluster summary information: 
 
 CC: should be clusters per layer in n_clus_svt(1-4), how? (LSB)
-      dst_monitor_soft_svt(1).n_clus_svt(1) = scs_cluster_h.nok 
-      dst_monitor_soft_svt(1).n_clus_svt(2) = 0 
-      dst_monitor_soft_svt(1).n_clus_svt(3) = 0 
-      dst_monitor_soft_svt(1).n_clus_svt(4) = 0 
+      dms_svt(1).n_clus_svt(1) = scs_cluster_h.nok 
+      dms_svt(1).n_clus_svt(2) = 0 
+      dms_svt(1).n_clus_svt(3) = 0 
+      dms_svt(1).n_clus_svt(4) = 0 
 
 CC:  Fill TPC reconstructed space points summary information:
 
-      dst_monitor_soft_tpc(1).n_pts_tpc_tot = tcl_tphit_h.nok
+      dms_tpc(1).n_pts_tpc_tot = tcl_tphit_h.nok
 
       do i = 1,24
-         dst_monitor_soft_tpc(1).n_pts_tpc_in(i)  = 0
-         dst_monitor_soft_tpc(1).n_pts_tpc_out(i) = 0
+         dms_tpc(1).n_pts_tpc_in(i)  = 0
+         dms_tpc(1).n_pts_tpc_out(i) = 0
       end do
 
       if(tcl_tphit_h.nok .gt. 0) then
@@ -170,11 +170,11 @@ CC:  Fill TPC reconstructed space points summary information:
                if(secnum.ge.1 .and. secnum.le.24) then
                   padrow = tcl_tphit(i).row - 100*secnum
                   if(padrow.ge.1 .and. padrow.le.13) then
-                     dst_monitor_soft_tpc(1).n_pts_tpc_in(secnum) =
-     1               dst_monitor_soft_tpc(1).n_pts_tpc_in(secnum) + 1
+                     dms_tpc(1).n_pts_tpc_in(secnum) =
+     1               dms_tpc(1).n_pts_tpc_in(secnum) + 1
                   else if(padrow.ge.14 .and. padrow.le.45) then
-                     dst_monitor_soft_tpc(1).n_pts_tpc_out(secnum) =
-     1               dst_monitor_soft_tpc(1).n_pts_tpc_out(secnum) + 1
+                     dms_tpc(1).n_pts_tpc_out(secnum) =
+     1               dms_tpc(1).n_pts_tpc_out(secnum) + 1
                   end if
                end if
          end do
@@ -183,10 +183,10 @@ CC:  Fill TPC reconstructed space points summary information:
 CC:  Fill SVT reconstructed space points summary information:
 
 CC: should be points per layer in n_pts_svt(1-4), how? (LSB)
-      dst_monitor_soft_svt(1).n_pts_svt(1) = scs_spt_h.nok
-      dst_monitor_soft_svt(1).n_pts_svt(2) = 0
-      dst_monitor_soft_svt(1).n_pts_svt(3) = 0
-      dst_monitor_soft_svt(1).n_pts_svt(4) = 0
+      dms_svt(1).n_pts_svt(1) = scs_spt_h.nok
+      dms_svt(1).n_pts_svt(2) = 0
+      dms_svt(1).n_pts_svt(3) = 0
+      dms_svt(1).n_pts_svt(4) = 0
 
 CC:  Fill TPC charge deposition monitor quantities:
 CC:
@@ -195,12 +195,12 @@ CC:  separate total charge dep. into 10 bins along z-axis (drift direction);
 CC:  report total charge deposition in inner/outer sectors
 
       do i = 1,10
-         dst_monitor_soft_tpc(1).chrg_tpc_drift(i) = 0.0
+         dms_tpc(1).chrg_tpc_drift(i) = 0.0
       end do
-      dst_monitor_soft_tpc(1).chrg_tpc_tot = 0.0
+      dms_tpc(1).chrg_tpc_tot = 0.0
       do i = 1,24
-         dst_monitor_soft_tpc(1).chrg_tpc_in(i)  = 0.0
-         dst_monitor_soft_tpc(1).chrg_tpc_out(i) = 0.0
+         dms_tpc(1).chrg_tpc_in(i)  = 0.0
+         dms_tpc(1).chrg_tpc_out(i) = 0.0
       end do
 
 CC:  Setup z coordinate bins:
@@ -217,21 +217,21 @@ CC:  Accumulate total charge deposition in TPC in 10 z-bins:
             zindex = int((tcl_tphit(i).z - zmin)/zstep + 1.000001)
             if(zindex .le. 0) zindex = 1
             if(zindex .gt. 10) zindex = 10
-            dst_monitor_soft_tpc(1).chrg_tpc_drift(zindex) = 
-     1      dst_monitor_soft_tpc(1).chrg_tpc_drift(zindex) + tcl_tphit(i).q
-            dst_monitor_soft_tpc(1).chrg_tpc_tot = 
-     1      dst_monitor_soft_tpc(1).chrg_tpc_tot + tcl_tphit(i).q
+            dms_tpc(1).chrg_tpc_drift(zindex) = 
+     1      dms_tpc(1).chrg_tpc_drift(zindex) + tcl_tphit(i).q
+            dms_tpc(1).chrg_tpc_tot = 
+     1      dms_tpc(1).chrg_tpc_tot + tcl_tphit(i).q
 
                secnum = tcl_tphit(i).row/100
                if(secnum.ge.1 .and. secnum.le.24) then
                   padrow = tcl_tphit(i).row - 100*secnum
                   if(padrow.ge.1 .and. padrow.le.13) then
-                     dst_monitor_soft_tpc(1).chrg_tpc_in(secnum) = 
-     1               dst_monitor_soft_tpc(1).chrg_tpc_in(secnum) + 
+                     dms_tpc(1).chrg_tpc_in(secnum) = 
+     1               dms_tpc(1).chrg_tpc_in(secnum) + 
      2                  tcl_tphit(i).q
                   else if(padrow.ge.14 .and. padrow.le.45) then
-                     dst_monitor_soft_tpc(1).chrg_tpc_out(secnum) =
-     1               dst_monitor_soft_tpc(1).chrg_tpc_out(secnum) +
+                     dms_tpc(1).chrg_tpc_out(secnum) =
+     1               dms_tpc(1).chrg_tpc_out(secnum) +
      2                  tcl_tphit(i).q
                   end if
                end if
@@ -242,95 +242,95 @@ CC:  Fill total charge deposition in SVT in the assigned space points
 
 CC: Again have changed to total charge per layer for now goes into (LSB)
 CC: the chrg_svt_tot(1) variable
-      dst_monitor_soft_svt(1).chrg_svt_tot(1) = 0.0
-      dst_monitor_soft_svt(1).chrg_svt_tot(2) = 0.0
-      dst_monitor_soft_svt(1).chrg_svt_tot(3) = 0.0
-      dst_monitor_soft_svt(1).chrg_svt_tot(4) = 0.0
+      dms_svt(1).chrg_svt_tot(1) = 0.0
+      dms_svt(1).chrg_svt_tot(2) = 0.0
+      dms_svt(1).chrg_svt_tot(3) = 0.0
+      dms_svt(1).chrg_svt_tot(4) = 0.0
 
       if(scs_spt_h.nok .gt. 0) then
          do i = 1,scs_spt_h.nok
-            dst_monitor_soft_svt(1).chrg_svt_tot(1) =
-     1      dst_monitor_soft_svt(1).chrg_svt_tot(1) + scs_spt(i).de(1)
+            dms_svt(1).chrg_svt_tot(1) =
+     1      dms_svt(1).chrg_svt_tot(1) + scs_spt(i).de(1)
          end do
       end if
 
 CC:  Sum the total number of tracks thru the CTB slats
 
 CC:  ctb-tof table not ready for DST yet (LSB)
-CC:      dst_monitor_soft_ctb-tof(1).mult_ctb_tot = 0
+CC:      dms_ctb-tof(1).mult_ctb_tot = 0
 
 CC:      if(ctu_cor_h.nok .gt. 0) then
 CC:         do i = 1,ctu_cor_h.nok
-CC:            dst_monitor_soft_ctb-tof(1).mult_ctb_tot = 
-CC:     1      dst_monitor_soft_ctb-tof(1).mult_ctb_tot + ctu_cor(i).n
+CC:            dms_ctb-tof(1).mult_ctb_tot = 
+CC:     1      dms_ctb-tof(1).mult_ctb_tot + ctu_cor(i).n
 CC:         end do
 CC:      end if
 
 CC:  Sum numbers of TPC tracks, average number of assigned space points
 CC:  per TPC track, and average fitting chi-square per TPC track.
 
-      dst_monitor_soft_tpc(1).n_trk_tpc(1) = 0
-      dst_monitor_soft_tpc(1).n_trk_tpc(2) = 0
-      dst_monitor_soft_tpc(1).avg_trkL_tpc(1) = 0.0
-      dst_monitor_soft_tpc(1).avg_trkL_tpc(2) = 0.0
-      dst_monitor_soft_tpc(1).res_pad_tpc(1)  = 0.0
-      dst_monitor_soft_tpc(1).res_pad_tpc(2)  = 0.0
-      dst_monitor_soft_tpc(1).res_drf_tpc(1)  = 0.0
-      dst_monitor_soft_tpc(1).res_drf_tpc(2)  = 0.0
+      dms_tpc(1).n_trk_tpc(1) = 0
+      dms_tpc(1).n_trk_tpc(2) = 0
+      dms_tpc(1).avg_trkL_tpc(1) = 0.0
+      dms_tpc(1).avg_trkL_tpc(2) = 0.0
+      dms_tpc(1).res_pad_tpc(1)  = 0.0
+      dms_tpc(1).res_pad_tpc(2)  = 0.0
+      dms_tpc(1).res_drf_tpc(1)  = 0.0
+      dms_tpc(1).res_drf_tpc(2)  = 0.0
 
       if(tpt_track_h.nok .gt. 0) then
          do i = 1,tpt_track_h.nok
             if(tpt_track(i).flag .ge. 0) then
                if(tpt_track(i).tanl .ge. 0.0) then
-                  dst_monitor_soft_tpc(1).n_trk_tpc(2) = 
-     1            dst_monitor_soft_tpc(1).n_trk_tpc(2) + 1
-                  dst_monitor_soft_tpc(1).avg_trkL_tpc(2) = 
-     1            dst_monitor_soft_tpc(1).avg_trkL_tpc(2) +
+                  dms_tpc(1).n_trk_tpc(2) = 
+     1            dms_tpc(1).n_trk_tpc(2) + 1
+                  dms_tpc(1).avg_trkL_tpc(2) = 
+     1            dms_tpc(1).avg_trkL_tpc(2) +
      2               float(tpt_track(i).nrec)
-                  dst_monitor_soft_tpc(1).res_pad_tpc(2) =
-     1               dst_monitor_soft_tpc(1).res_pad_tpc(2) +
+                  dms_tpc(1).res_pad_tpc(2) =
+     1               dms_tpc(1).res_pad_tpc(2) +
      2               tpt_track(i).chisq(1)
-                  dst_monitor_soft_tpc(1).res_drf_tpc(2) =
-     1               dst_monitor_soft_tpc(1).res_drf_tpc(2) +
+                  dms_tpc(1).res_drf_tpc(2) =
+     1               dms_tpc(1).res_drf_tpc(2) +
      2               tpt_track(i).chisq(2)
                else if(tpt_track(i).tanl .lt. 0.0) then
-                  dst_monitor_soft_tpc(1).n_trk_tpc(1) = 
-     1            dst_monitor_soft_tpc(1).n_trk_tpc(1) + 1
-                  dst_monitor_soft_tpc(1).avg_trkL_tpc(1) = 
-     1            dst_monitor_soft_tpc(1).avg_trkL_tpc(1) +
+                  dms_tpc(1).n_trk_tpc(1) = 
+     1            dms_tpc(1).n_trk_tpc(1) + 1
+                  dms_tpc(1).avg_trkL_tpc(1) = 
+     1            dms_tpc(1).avg_trkL_tpc(1) +
      2               float(tpt_track(i).nrec)
-                  dst_monitor_soft_tpc(1).res_pad_tpc(1) =
-     1               dst_monitor_soft_tpc(1).res_pad_tpc(1) +
+                  dms_tpc(1).res_pad_tpc(1) =
+     1               dms_tpc(1).res_pad_tpc(1) +
      2               tpt_track(i).chisq(1)
-                  dst_monitor_soft_tpc(1).res_drf_tpc(1) =
-     1               dst_monitor_soft_tpc(1).res_drf_tpc(1) +
+                  dms_tpc(1).res_drf_tpc(1) =
+     1               dms_tpc(1).res_drf_tpc(1) +
      2               tpt_track(i).chisq(2)
 
                end if
             end if
          end do
         
-         if(dst_monitor_soft_tpc(1).n_trk_tpc(1) .gt. 0) then
-            dst_monitor_soft_tpc(1).avg_trkL_tpc(1) =
-     1         dst_monitor_soft_tpc(1).avg_trkL_tpc(1)/ 
-     2         dst_monitor_soft_tpc(1).n_trk_tpc(1)
-            dst_monitor_soft_tpc(1).res_pad_tpc(1) = 
-     1         dst_monitor_soft_tpc(1).res_pad_tpc(1)/
-     2         dst_monitor_soft_tpc(1).n_trk_tpc(1)
-            dst_monitor_soft_tpc(1).res_drf_tpc(1) = 
-     1         dst_monitor_soft_tpc(1).res_drf_tpc(1)/
-     2         dst_monitor_soft_tpc(1).n_trk_tpc(1)
+         if(dms_tpc(1).n_trk_tpc(1) .gt. 0) then
+            dms_tpc(1).avg_trkL_tpc(1) =
+     1         dms_tpc(1).avg_trkL_tpc(1)/ 
+     2         dms_tpc(1).n_trk_tpc(1)
+            dms_tpc(1).res_pad_tpc(1) = 
+     1         dms_tpc(1).res_pad_tpc(1)/
+     2         dms_tpc(1).n_trk_tpc(1)
+            dms_tpc(1).res_drf_tpc(1) = 
+     1         dms_tpc(1).res_drf_tpc(1)/
+     2         dms_tpc(1).n_trk_tpc(1)
          end if
-         if(dst_monitor_soft_tpc(1).n_trk_tpc(2) .gt. 0) then
-            dst_monitor_soft_tpc(1).avg_trkL_tpc(2) =
-     1         dst_monitor_soft_tpc(1).avg_trkL_tpc(2)/ 
-     2         dst_monitor_soft_tpc(1).n_trk_tpc(2)
-            dst_monitor_soft_tpc(1).res_pad_tpc(2) = 
-     1         dst_monitor_soft_tpc(1).res_pad_tpc(2)/
-     2         dst_monitor_soft_tpc(1).n_trk_tpc(2)
-            dst_monitor_soft_tpc(1).res_drf_tpc(2) = 
-     1         dst_monitor_soft_tpc(1).res_drf_tpc(2)/
-     2         dst_monitor_soft_tpc(1).n_trk_tpc(2)
+         if(dms_tpc(1).n_trk_tpc(2) .gt. 0) then
+            dms_tpc(1).avg_trkL_tpc(2) =
+     1         dms_tpc(1).avg_trkL_tpc(2)/ 
+     2         dms_tpc(1).n_trk_tpc(2)
+            dms_tpc(1).res_pad_tpc(2) = 
+     1         dms_tpc(1).res_pad_tpc(2)/
+     2         dms_tpc(1).n_trk_tpc(2)
+            dms_tpc(1).res_drf_tpc(2) = 
+     1         dms_tpc(1).res_drf_tpc(2)/
+     2         dms_tpc(1).n_trk_tpc(2)
 
          end if
 
@@ -341,48 +341,48 @@ CC:  points per track, and average fitting chi-square per SVT track.
 CC:  Include chisq outlier rejection, i.e. do not include stk_track().chisq(1)
 CC:  or stk_track().chisq(2) .gt. 100 in the following averages.
 
-      dst_monitor_soft_svt(1).n_trk_svt = 0
-      dst_monitor_soft_svt(1).avg_trkL_svt = 0.0
-      dst_monitor_soft_svt(1).res_pad_svt  = 0.0
-      dst_monitor_soft_svt(1).res_drf_svt  = 0.0
+      dms_svt(1).n_trk_svt = 0
+      dms_svt(1).avg_trkL_svt = 0.0
+      dms_svt(1).res_pad_svt  = 0.0
+      dms_svt(1).res_drf_svt  = 0.0
       n_svt_trk_pad = 0
       n_svt_trk_drf = 0
 
       if(stk_track_h.nok .gt. 0) then
          do i = 1,stk_track_h.nok
             if(stk_track(i).flag .gt. 0) then
-               dst_monitor_soft_svt(1).n_trk_svt =
-     1         dst_monitor_soft_svt(1).n_trk_svt + 1
-               dst_monitor_soft_svt(1).avg_trkL_svt =
-     1            dst_monitor_soft_svt(1).avg_trkL_svt +
+               dms_svt(1).n_trk_svt =
+     1         dms_svt(1).n_trk_svt + 1
+               dms_svt(1).avg_trkL_svt =
+     1            dms_svt(1).avg_trkL_svt +
      2            stk_track(i).nspt
                if(stk_track(i).chisq(1) .le. 100.0) then
                   n_svt_trk_pad = n_svt_trk_pad + 1
-                  dst_monitor_soft_svt(1).res_pad_svt =
-     1               dst_monitor_soft_svt(1).res_pad_svt +
+                  dms_svt(1).res_pad_svt =
+     1               dms_svt(1).res_pad_svt +
      2               stk_track(i).chisq(1)
                end if
                if(stk_track(i).chisq(2) .le. 100.0) then
                   n_svt_trk_drf = n_svt_trk_drf + 1
-                  dst_monitor_soft_svt(1).res_drf_svt =
-     1               dst_monitor_soft_svt(1).res_drf_svt +
+                  dms_svt(1).res_drf_svt =
+     1               dms_svt(1).res_drf_svt +
      2               stk_track(i).chisq(2)
                end if
             end if
          end do
 
-         if(dst_monitor_soft_svt(1).n_trk_svt .gt. 0) then
-            dst_monitor_soft_svt(1).avg_trkL_svt =
-     1         dst_monitor_soft_svt(1).avg_trkL_svt/
-     2         dst_monitor_soft_svt(1).n_trk_svt
+         if(dms_svt(1).n_trk_svt .gt. 0) then
+            dms_svt(1).avg_trkL_svt =
+     1         dms_svt(1).avg_trkL_svt/
+     2         dms_svt(1).n_trk_svt
             if(n_svt_trk_pad .gt. 0) then
-               dst_monitor_soft_svt(1).res_pad_svt = 
-     1            dst_monitor_soft_svt(1).res_pad_svt/
+               dms_svt(1).res_pad_svt = 
+     1            dms_svt(1).res_pad_svt/
      2            n_svt_trk_pad
             end if
             if(n_svt_trk_drf .gt. 0) then 
-               dst_monitor_soft_svt(1).res_drf_svt =
-     1            dst_monitor_soft_svt(1).res_drf_svt/
+               dms_svt(1).res_drf_svt =
+     1            dms_svt(1).res_drf_svt/
      2            n_svt_trk_drf
             end if 
          end if
@@ -397,8 +397,8 @@ CC:
          track_index(i) = 0
       end do
 
-      dst_monitor_soft_global(1).n_trk_match(1) = 0
-      dst_monitor_soft_global(1).n_trk_match(2) = 0
+      dms_global(1).n_trk_match(1) = 0
+      dms_global(1).n_trk_match(2) = 0
 
       if(tpt_track_h.nok .gt. 0) then
          do i = 1,tpt_track_h.nok
@@ -420,11 +420,11 @@ CC:  tanl .ge. 0 and .lt. 0
                if(tpc_trk_row .gt. 0 .and. tpc_trk_row .le.
      1            tpt_track_h.nok) then
                   if(tpt_track(tpc_trk_row).tanl .ge. 0.0) then
-                     dst_monitor_soft_global(1).n_trk_match(2) =
-     1               dst_monitor_soft_global(1).n_trk_match(2) + 1
+                     dms_global(1).n_trk_match(2) =
+     1               dms_global(1).n_trk_match(2) + 1
                   else if(tpt_track(tpc_trk_row).tanl .lt. 0.0) then
-                     dst_monitor_soft_global(1).n_trk_match(1) =
-     1               dst_monitor_soft_global(1).n_trk_match(1) + 1
+                     dms_global(1).n_trk_match(1) =
+     1               dms_global(1).n_trk_match(1) + 1
                   end if
                end if
             end if
@@ -440,8 +440,8 @@ CC:           point fractions are computed with respect to the total
 CC:           number of space points; thus causing the TPC hit fractions
 CC:           to both be of order 0.5 .
 
-      dst_monitor_soft_tpc(1).hit_frac_tpc(1) = 0.0
-      dst_monitor_soft_tpc(1).hit_frac_tpc(2) = 0.0
+      dms_tpc(1).hit_frac_tpc(1) = 0.0
+      dms_tpc(1).hit_frac_tpc(2) = 0.0
 
       if(tcl_tphit_h.nok .gt. 0) then
          do i = 1,tcl_tphit_h.nok
@@ -452,57 +452,57 @@ CC:           to both be of order 0.5 .
                if(tpc_trk_row .gt. 0 .and. tpc_trk_row .le.
      1            tpt_track_h.nok) then
                   if(tpt_track(tpc_trk_row).tanl .ge. 0.0) then
-                     dst_monitor_soft_tpc(1).hit_frac_tpc(2) =
-     1               dst_monitor_soft_tpc(1).hit_frac_tpc(2) + 1.0
+                     dms_tpc(1).hit_frac_tpc(2) =
+     1               dms_tpc(1).hit_frac_tpc(2) + 1.0
                   else if(tpt_track(tpc_trk_row).tanl .lt. 0.0) then
-                     dst_monitor_soft_tpc(1).hit_frac_tpc(1) =
-     1               dst_monitor_soft_tpc(1).hit_frac_tpc(1) + 1.0
+                     dms_tpc(1).hit_frac_tpc(1) =
+     1               dms_tpc(1).hit_frac_tpc(1) + 1.0
                   end if
                end if
             end if
          end do
-         dst_monitor_soft_tpc(1).hit_frac_tpc(1) =
-     1   dst_monitor_soft_tpc(1).hit_frac_tpc(1)/float(tcl_tphit_h.nok)
-         dst_monitor_soft_tpc(1).hit_frac_tpc(2) =
-     1   dst_monitor_soft_tpc(1).hit_frac_tpc(2)/float(tcl_tphit_h.nok)
+         dms_tpc(1).hit_frac_tpc(1) =
+     1   dms_tpc(1).hit_frac_tpc(1)/float(tcl_tphit_h.nok)
+         dms_tpc(1).hit_frac_tpc(2) =
+     1   dms_tpc(1).hit_frac_tpc(2)/float(tcl_tphit_h.nok)
       end if
 
 CC:  Fraction of SVT hits used in SVT tracks
 CC:  Hit fraction should now be per layer also. How to do this? (LSB)
 
-      dst_monitor_soft_svt(1).hit_frac_svt(1) = 0.0
-      dst_monitor_soft_svt(1).hit_frac_svt(2) = 0.0
-      dst_monitor_soft_svt(1).hit_frac_svt(3) = 0.0
-      dst_monitor_soft_svt(1).hit_frac_svt(4) = 0.0
+      dms_svt(1).hit_frac_svt(1) = 0.0
+      dms_svt(1).hit_frac_svt(2) = 0.0
+      dms_svt(1).hit_frac_svt(3) = 0.0
+      dms_svt(1).hit_frac_svt(4) = 0.0
 
       if(scs_spt_h.nok .gt. 0) then
          do i = 1,scs_spt_h.nok
             if(scs_spt(i).id_track .ne. 0) then
-               dst_monitor_soft_svt(1).hit_frac_svt(1) = 
-     1         dst_monitor_soft_svt(1).hit_frac_svt(1) + 1.0
+               dms_svt(1).hit_frac_svt(1) = 
+     1         dms_svt(1).hit_frac_svt(1) + 1.0
             end if
          end do
-         dst_monitor_soft_svt(1).hit_frac_svt(1) =
-     1      dst_monitor_soft_svt(1).hit_frac_svt(1)/
+         dms_svt(1).hit_frac_svt(1) =
+     1      dms_svt(1).hit_frac_svt(1)/
      2                          float(scs_spt_h.nok)
       end if
 
 CC:  Fill FTPC monitor information
 
-      dst_monitor_soft_ftpc(1).n_pts_ftpc(1)           = 0
-      dst_monitor_soft_ftpc(1).n_pts_ftpc(2)           = 0
-      dst_monitor_soft_ftpc(1).chrg_ftpc_tot(1)        = 0.0
-      dst_monitor_soft_ftpc(1).chrg_ftpc_tot(2)        = 0.0
-      dst_monitor_soft_ftpc(1).n_trk_ftpc(1)           = 0
-      dst_monitor_soft_ftpc(1).n_trk_ftpc(2)           = 0
-      dst_monitor_soft_ftpc(1).hit_frac_ftpc(1)        = 0.0
-      dst_monitor_soft_ftpc(1).hit_frac_ftpc(2)        = 0.0
-      dst_monitor_soft_ftpc(1).avg_trkL_ftpc(1)        = 0.0
-      dst_monitor_soft_ftpc(1).avg_trkL_ftpc(2)        = 0.0
-      dst_monitor_soft_ftpc(1).res_pad_ftpc(1)         = 0.0
-      dst_monitor_soft_ftpc(1).res_pad_ftpc(2)         = 0.0
-      dst_monitor_soft_ftpc(1).res_drf_ftpc(1)         = 0.0
-      dst_monitor_soft_ftpc(1).res_drf_ftpc(2)         = 0.0
+      dms_ftpc(1).n_pts_ftpc(1)           = 0
+      dms_ftpc(1).n_pts_ftpc(2)           = 0
+      dms_ftpc(1).chrg_ftpc_tot(1)        = 0.0
+      dms_ftpc(1).chrg_ftpc_tot(2)        = 0.0
+      dms_ftpc(1).n_trk_ftpc(1)           = 0
+      dms_ftpc(1).n_trk_ftpc(2)           = 0
+      dms_ftpc(1).hit_frac_ftpc(1)        = 0.0
+      dms_ftpc(1).hit_frac_ftpc(2)        = 0.0
+      dms_ftpc(1).avg_trkL_ftpc(1)        = 0.0
+      dms_ftpc(1).avg_trkL_ftpc(2)        = 0.0
+      dms_ftpc(1).res_pad_ftpc(1)         = 0.0
+      dms_ftpc(1).res_pad_ftpc(2)         = 0.0
+      dms_ftpc(1).res_drf_ftpc(1)         = 0.0
+      dms_ftpc(1).res_drf_ftpc(2)         = 0.0
 
 CC:   Loop over FTPC space points
     
@@ -518,11 +518,11 @@ CC:         or in FTPC East
                iftpc = 2
             end if
 CC:         Count total number of space points in FTPC West and in FTPC East
-            dst_monitor_soft_ftpc(1).n_pts_ftpc(iftpc) =
-     1         dst_monitor_soft_ftpc(1).n_pts_ftpc(iftpc) + 1
+            dms_ftpc(1).n_pts_ftpc(iftpc) =
+     1         dms_ftpc(1).n_pts_ftpc(iftpc) + 1
 CC:         Accumulate total charge deposition in FTPC West and in FTPC East
-            dst_monitor_soft_ftpc(1).chrg_ftpc_tot(iftpc) =
-     1         dst_monitor_soft_ftpc(1).chrg_ftpc_tot(iftpc) +
+            dms_ftpc(1).chrg_ftpc_tot(iftpc) =
+     1         dms_ftpc(1).chrg_ftpc_tot(iftpc) +
      2                                   fcl_fppoint(i).charge
          end do
       end if
@@ -550,8 +550,8 @@ CC:        or in FTPC East
 
 CC:        Count total number of reconstructed tracks in FTPC West and East
 
-           dst_monitor_soft_ftpc(1).n_trk_ftpc(iftpc) =
-     1         dst_monitor_soft_ftpc(1).n_trk_ftpc(iftpc) + 1
+           dms_ftpc(1).n_trk_ftpc(iftpc) =
+     1         dms_ftpc(1).n_trk_ftpc(iftpc) + 1
 
 CC:        Count number of hits used in FTPC West and East
 
@@ -559,54 +559,54 @@ CC:        Count number of hits used in FTPC West and East
 
 CC:        Accumulate residual, pad direction for FTPC West and East
 
-           dst_monitor_soft_ftpc(1).res_pad_ftpc(iftpc) =
-     1        dst_monitor_soft_ftpc(1).res_pad_ftpc(iftpc) +
+           dms_ftpc(1).res_pad_ftpc(iftpc) =
+     1        dms_ftpc(1).res_pad_ftpc(iftpc) +
      2                                fpt_fptrack(i).chisq(1)
 
 CC:        Accumulate residual, drift direction for FTPC West and East
 
-           dst_monitor_soft_ftpc(1).res_drf_ftpc(iftpc) =
-     1        dst_monitor_soft_ftpc(1).res_drf_ftpc(iftpc) +
+           dms_ftpc(1).res_drf_ftpc(iftpc) =
+     1        dms_ftpc(1).res_drf_ftpc(iftpc) +
      2                                fpt_fptrack(i).chisq(2)
 
          end do 
-      print *," res_pad_ftpc = ",dst_monitor_soft_ftpc(1).res_pad_ftpc(1),
-     1            dst_monitor_soft_ftpc(1).res_pad_ftpc(2)
-      print *," res_drf_ftpc = ",dst_monitor_soft_ftpc(1).res_drf_ftpc(1),
-     1            dst_monitor_soft_ftpc(1).res_drf_ftpc(2)
+      print *," res_pad_ftpc = ",dms_ftpc(1).res_pad_ftpc(1),
+     1            dms_ftpc(1).res_pad_ftpc(2)
+      print *," res_drf_ftpc = ",dms_ftpc(1).res_drf_ftpc(1),
+     1            dms_ftpc(1).res_drf_ftpc(2)
  
 CC:      Compute fraction of space points used in FTPC West and East
 
-         dst_monitor_soft_ftpc(1).hit_frac_ftpc(1) = 
-     1       float(nhits(1))/float(dst_monitor_soft_ftpc(1).n_pts_ftpc(1))
-         dst_monitor_soft_ftpc(1).hit_frac_ftpc(2) = 
-     1        float(nhits(2))/float(dst_monitor_soft_ftpc(1).n_pts_ftpc(2))
+         dms_ftpc(1).hit_frac_ftpc(1) = 
+     1       float(nhits(1))/float(dms_ftpc(1).n_pts_ftpc(1))
+         dms_ftpc(1).hit_frac_ftpc(2) = 
+     1        float(nhits(2))/float(dms_ftpc(1).n_pts_ftpc(2))
 
 CC:      Compute average number of space points per reconstructed track
 CC:      used in FTPC West and East
 
-         dst_monitor_soft_ftpc(1).avg_trkL_ftpc(1) = 
-     1        float(nhits(1))/float(dst_monitor_soft_ftpc(1).n_trk_ftpc(1))
-         dst_monitor_soft_ftpc(1).avg_trkL_ftpc(2) =
-     1        float(nhits(2))/float(dst_monitor_soft_ftpc(1).n_trk_ftpc(2))
+         dms_ftpc(1).avg_trkL_ftpc(1) = 
+     1        float(nhits(1))/float(dms_ftpc(1).n_trk_ftpc(1))
+         dms_ftpc(1).avg_trkL_ftpc(2) =
+     1        float(nhits(2))/float(dms_ftpc(1).n_trk_ftpc(2))
 
 CC:      Compute average residual, pad direction for FTPC West and East
 
-         dst_monitor_soft_ftpc(1).res_pad_ftpc(1) =
-     1    dst_monitor_soft_ftpc(1).res_pad_ftpc(1)/
-     2        dst_monitor_soft_ftpc(1).n_trk_ftpc(1)
-         dst_monitor_soft_ftpc(1).res_pad_ftpc(2) =
-     1    dst_monitor_soft_ftpc(1).res_pad_ftpc(2)/
-     2        dst_monitor_soft_ftpc(1).n_trk_ftpc(2)
+         dms_ftpc(1).res_pad_ftpc(1) =
+     1    dms_ftpc(1).res_pad_ftpc(1)/
+     2        dms_ftpc(1).n_trk_ftpc(1)
+         dms_ftpc(1).res_pad_ftpc(2) =
+     1    dms_ftpc(1).res_pad_ftpc(2)/
+     2        dms_ftpc(1).n_trk_ftpc(2)
 
 CC:      Compute average residual, drift direction for FTPC West and East
 
-         dst_monitor_soft_ftpc(1).res_drf_ftpc(1) =
-     1    dst_monitor_soft_ftpc(1).res_drf_ftpc(1)
-     2        /dst_monitor_soft_ftpc(1).n_trk_ftpc(1)
-         dst_monitor_soft_ftpc(1).res_drf_ftpc(2) =
-     1    dst_monitor_soft_ftpc(1).res_drf_ftpc(2)
-     2       /dst_monitor_soft_ftpc(1).n_trk_ftpc(2)
+         dms_ftpc(1).res_drf_ftpc(1) =
+     1    dms_ftpc(1).res_drf_ftpc(1)
+     2        /dms_ftpc(1).n_trk_ftpc(1)
+         dms_ftpc(1).res_drf_ftpc(2) =
+     1    dms_ftpc(1).res_drf_ftpc(2)
+     2       /dms_ftpc(1).n_trk_ftpc(2)
 
       end if
  
@@ -617,10 +617,10 @@ CC: prim_vrtx_qual not in any of new monitor_soft tables (LSB)
 CC:      do i = 1,10
 CC:         dst_monitor_soft(1).prim_vrtx_qual(i) = 0
 CC:      end do
-      dst_monitor_soft_global(1).prim_vrtx_ntrk = 0
-      dst_monitor_soft_global(1).prim_vrtx_chisq = 0
+      dms_global(1).prim_vrtx_ntrk = 0
+      dms_global(1).prim_vrtx_chisq = 0
       do i = 1,6
-         dst_monitor_soft_global(1).prim_vrtx_cov(i) = 0
+         dms_global(1).prim_vrtx_cov(i) = 0
       end do
 
       if(dst_vertex_h.nok .gt. 0) then
@@ -631,18 +631,18 @@ CC:               dst_monitor_soft(1).prim_vrtx_qual(1) =
 CC:     1            dst_vertex(i).iflag
 CC:               dst_monitor_soft(1).prim_vrtx_qual(2) =
 CC:     1            int(dst_vertex(i).pchi2)
-               dst_monitor_soft_global(1).prim_vrtx_ntrk = 
+               dms_global(1).prim_vrtx_ntrk = 
      1            dst_vertex(i).n_daughters
-               dst_monitor_soft_global(1).prim_vrtx_chisq =
+               dms_global(1).prim_vrtx_chisq =
      1            dst_vertex(i).chisq(1)
                do j = 1,6
-                  dst_monitor_soft_global(1).prim_vrtx_cov(j) =
+                  dms_global(1).prim_vrtx_cov(j) =
      1                dst_vertex(i).covar(j)
                end do
             end if
          end do
       end if
-CC:  Successful completion of dst_monitor_soft_filler PAM
+CC:  Successful completion of dms_filler PAM
 
 
       DST_MONITOR_SOFT_FILLER=STAFCV_OK

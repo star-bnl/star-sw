@@ -42,8 +42,7 @@
   float  energy_emc_eta[10]; /* EMC energy (or raw ADC sum) for eta bins   */
   float  energy_emc_phi[10]; /* EMC energy (or raw ADC sum) for phi bins   */
   float  prim_vrtx[3];      /* Primary vrtx x,y,z-position -SCS(cm)        */
-  float  mag_field[4];      /* Magnetic field used by TPC, SVT-SSD,        */
-                            /* FTPC-East and FTPC-West, respect. in Tesla  */
+  float  field;      /* Magnetic field at 0,0,0                     */
  } ;
-/*  Last mod. for dst_event_summary:   $Date: 1999/10/01 02:14:06 $ */
+/*  Last mod. for dst_event_summary:   $Date: 1999/10/05 02:49:22 $ */
 
