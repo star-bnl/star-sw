@@ -12,7 +12,7 @@
    tpc_sector_first=1 _
    tpc_sector_last=24 _
    gstar_settings=' field_only' _
-   domain=' geometry tpc svt global ' _
+   domain=' geometry tpc ctf svt global ' _
    chain=' evin tpg svg tcl tcl_e tpt tid tte_e sgr drhd dehd svm evr egr ev0 ddedx dpnt desum dmsft drsum evout' _
    skip=0 _
    first=1 _
