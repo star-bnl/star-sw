@@ -1,4 +1,4 @@
-* $Id: g2t_volume_id.g,v 1.40 2002/11/27 21:50:39 potekhin Exp $
+* $Id: g2t_volume_id.g,v 1.41 2003/01/06 23:48:44 geurts Exp $
 *  g2t_volume_id.g,v 
 *
 * Revision 1.38  2002/10/16 19:12:44  kopytin
@@ -67,6 +67,7 @@
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
       Integer          endcap,zslice,innour,lnumber,wafer,lsub,phi_30d
       Integer          section,tpgv,tpss,tpad,isdet,ladder,is,nladder
+      Integer          module,layer
       Integer          nEndcap,nFpd,depth,shift,nv
       Integer          itpc/0/,ibtf/0/,ical/0/,ivpd/0/,ieem/0/,isvt/0/
 *
@@ -80,7 +81,7 @@
       Structure  SVTG  {version}
       Structure  TPCG  {version}
       Structure  VPDG  {version}
-      Structure  BTOG  {version, int choice, posit1 }
+      Structure  BTOG  {version, int choice, posit1, posit2 }
       Structure  CALG  {version, int Nmodule(2), int NetaT, int MaxModule, 
                                  int Nsub, int NetaSMDp, int NPhistr,
       	                         int Netfirst, int Netsecon}
@@ -106,7 +107,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           if (itpc>=0) print *,' g2t_volume_id: TPC version =',tpcg_version
           if (ivpd>=0) print *,'              : VPD version =',vpdg_version
           if (ibtf>=0) print *,'              : TOF version =',btog_version,
-     >                         ' choice  =',btog_choice,btog_posit1
+     >                         ' choice  =',btog_choice,btog_posit1,btog_posit2
           if (ical>=0) print *,'              : CALB patch  =',calg_nmodule
           if (ieem>=0) print *,'              : ECAL version=',emcg_version, 
                                ' onoff   =',emcg_onoff,emcg_FillMode
@@ -221,7 +222,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
            else
               print *,' g2t_volume_id : choice not coded yet '
            endif        
-        elseif (btog_version==3) then
+        elseif (btog_version>=3) then
 *          For simulations after 28-sep-00, before it was version 2
            if (btog_choice==2) then      ! Full TOF
              rileft     = numbv(1)       !     west(1)/east(2)
@@ -235,7 +236,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
              innout     = numbv(2)       !     4wide/5wide section
              sub_sector = numbv(3)       !     theta-tray
              section    = numbv(4)       !     phi-tray
-           elseif (btog_choice==4) then  !  TOFp (single tray)
+           elseif (btog_choice<=6) then  !  TOFp (single tray)
              rileft     = 2              !     east (pre-set)
              sector     = btog_posit1    !     tray (pre-set)
              innout     = numbv(1)       !     4wide/5wide section
@@ -269,6 +270,22 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           print *,' g2t_volume_id : TOF version not coded yet'
           print *,' g2t_volume_id : btog_version=',btog_version
         endif
+
+* ------- TOFr detector (single tray) --------------
+      else If (Csys=='tfr') then   ! TOFr
+         if (btog_choice==5) then      !  single tray
+            rileft     = 2               !  east (pre-set)
+            sector     = btog_posit2     !  tray (pre-set)
+            module     = numbv(1)        !  module (eta)
+            layer      = numbv(2)        !  layer (phi, get from hit position)
+         else if (btog_choice==6) then ! full TOFr
+             rileft     = numbv(1)       !  west(1)/east(2)
+             sector     = numbv(2)       !  tray(1-60)
+             module     = numbv(3)       !  module (eta)
+             layer      = numbv(4)       !  layer (phi, get from hit position)
+         endif
+         volume_id = layer +10*(module +100*(sector+100*rileft) )
+
 
       else If (Csys=='ctb') then
 *5*

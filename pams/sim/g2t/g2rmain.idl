@@ -24,6 +24,7 @@
 #include "btof_ctbb.idl"
 #include "btof_toff.idl"
 #include "btof_tray.idl"
+#include "btof_modr.idl"
 #include "calb_calg.idl"
 #include "cave_cave.idl"
 #include "ecal_eetr.idl"

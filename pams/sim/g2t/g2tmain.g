@@ -1,5 +1,8 @@
-* $Id: g2tmain.g,v 1.40 2001/07/03 23:15:57 nevski Exp $
+* $Id: g2tmain.g,v 1.41 2003/01/06 23:48:44 geurts Exp $
 * $Log: g2tmain.g,v $
+* Revision 1.41  2003/01/06 23:48:44  geurts
+* new code for TOFr response simulation
+*
 * Revision 1.40  2001/07/03 23:15:57  nevski
 * forward pion detector added
 *
@@ -115,6 +118,11 @@ created   22 april 98
      spec  = 'ctf'        ! specification type
      csys  = 'BTOF'       ! Geant Subsystem
      cdet  = 'BCSB'       ! Sensitive detector
+   fill dete       ! star subsystem
+     ctab  = 'tfr'        ! table name
+     spec  = 'ctf'        ! specification type
+     csys  = 'BTOF'       ! Geant Subsystem
+     cdet  = 'BRSG'       ! Sensitive detector
    fill dete       ! star subsystem
      ctab  = 'ctb'        ! table name
      spec  = 'ctf'        ! specification type
