@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtHistoCollector.cxx,v 1.1 2000/09/05 14:21:10 laue Exp $
+ * $Id: StHbtHistoCollector.cxx,v 1.2 2000/09/05 14:43:21 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@bnl.gov
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StHbtHistoCollector.cxx,v $
+ * Revision 1.2  2000/09/05 14:43:21  laue
+ * cast changed from TH1D to TH1D&
+ *
  * Revision 1.1  2000/09/05 14:21:10  laue
  * NEW !! A histogram class (CTH, inherited from TH?Ds) that puts itself into
  * a list (StHbtHistoCollector) at instantiation time. This provides an easy
@@ -51,17 +54,17 @@ void StHbtHistoCollector::Clear() {
 
 void StHbtHistoCollector::Write() { 
   for (CTH1DIterator iter=m1DList.begin(); iter!=m1DList.end(); iter++) {
-    TH1D temp( (TH1D)(**iter) );
+    TH1D temp( (TH1D&)(**iter) );
       temp.SetDirectory(0);
       temp.Write();
   }
   for (CTH2DIterator iter=m2DList.begin(); iter!=m2DList.end(); iter++) {
-    TH2D temp( (TH2D)(**iter) );
+    TH2D temp( (TH2D&)(**iter) );
       temp.SetDirectory(0);
       temp.Write();
   }
   for (CTH3DIterator iter=m3DList.begin(); iter!=m3DList.end(); iter++) {
-    TH3D temp( (TH3D)(**iter) );
+    TH3D temp( (TH3D&)(**iter) );
       temp.SetDirectory(0);
       temp.Write();
   }
