@@ -17,7 +17,12 @@ The main differences between two makers are:
 Modification history (reverse chronological)
 ====================
 
-2-Feb-2001  A.Pavlinov.
+22-mar-2001 A.Pavlinov
+- Clean up for MDC4.
+  Added method for comparing  of deposit energy hits for 
+  "OLD" and "NEW" simulator.
+
+02-Feb-2001  A.Pavlinov.
 - New function Browse() and cleanup for new version of BFC.
 
 Oct-2000  A.Pavlinov.
