@@ -1,5 +1,5 @@
 //*******************************************************/
-// $Id: trsDataBase.cc,v 1.1 1998/11/10 17:11:59 fisyak Exp $
+// $Id: trsDataBase.cc,v 1.2 1999/01/26 20:40:08 lasiuk Exp $
 //
 // Author: brian, October 1998
 //
@@ -7,6 +7,9 @@
 //          a data base and reference its components.
 //
 // $Log: trsDataBase.cc,v $
+// Revision 1.2  1999/01/26 20:40:08  lasiuk
+// magnetic field db
+//
 // Revision 1.1  1998/11/10 17:11:59  fisyak
 // Put Brian trs versin into StRoot
 //
@@ -79,7 +82,7 @@ int main (int argc,char* argv[])
     scDb->print();
     
     StMagneticField *magDb =
-	StSimpleMagneticField::instance(scFile.c_str());
+	StSimpleMagneticField::instance(magFile.c_str());
     
 //     string gas("Ar");
 //     StTrsDeDx myEloss(gas);
