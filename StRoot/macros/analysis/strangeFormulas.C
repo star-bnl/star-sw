@@ -1,7 +1,10 @@
-// $Id: strangeFormulas.C,v 1.6 2000/04/13 19:33:44 genevb Exp $
+// $Id: strangeFormulas.C,v 1.7 2000/04/19 15:11:15 genevb Exp $
 // $Log: strangeFormulas.C,v $
+// Revision 1.7  2000/04/19 15:11:15  genevb
+// Streamlined adding TTreeFormulas
+//
 // Revision 1.6  2000/04/13 19:33:44  genevb
-// StRoot/macros/analysis/
+// Removed redundant formulas
 //
 // Revision 1.5  2000/04/13 18:30:26  genevb
 // Better handling of backward compatibility
@@ -56,23 +59,34 @@
 TTree* strangeFormulas(const char* fname=0);
 TTree* strangeFormulas(TFile* fptr);
 Int_t strangeFormulas(TTree* tree);
+void formulate(const char* name, const char* formula);
+
+TTree* strangeTree=0;
+TSeqCollection* ListofFuncs=gROOT->GetListOfFunctions();
+
+//-----------------------------------------------------
+
+void formulate(const char* name, const char* formula) {
+  TTreeFormula* f1 = new TTreeFormula(name,formula,strangeTree);
+  ListofFuncs->Add(f1);
+}
 
 TTree* strangeFormulas(const char* fname) {
-  TFile *a1;
+  TFile *fptr;
   if (!fname) {
-    a1 = new TFile("evMuDst.root");    // Default filename for root of TTree
+    fptr = new TFile("evMuDst.root");    // Default filename for root of TTree
   } else {
-    a1 = new TFile(fname);
+    fptr = new TFile(fname);
   }
-  TTree* m1 = strangeFormulas(a1);
-  return m1;
+  strangeTree = strangeFormulas(fptr);
+  return strangeTree;
 }
 
 TTree* strangeFormulas(TFile* fptr) {
   if (!fptr) return 0;
-  TTree* m1 = (TTree*) fptr->Get("StrangeMuDst");
-  strangeFormulas(m1);
-  return m1;
+  strangeTree = (TTree*) fptr->Get("StrangeMuDst");
+  strangeFormulas(strangeTree);
+  return strangeTree;
 }
 
 Int_t strangeFormulas(TTree* tree) {
@@ -82,6 +96,7 @@ Int_t strangeFormulas(TTree* tree) {
     gSystem->Load("libTreePlayer");
   }
 
+  strangeTree = tree;
   char name[256];
   char expr[2048];
   char track[32];
@@ -90,8 +105,7 @@ Int_t strangeFormulas(TTree* tree) {
   TString tstr;
 
   TFormula *f0=0;
-  TTreeFormula *f1=0;
-  Int_t initialFormulas = gROOT->GetListOfFunctions()->GetSize();
+  Int_t initialFormulas = ListofFuncs->GetSize();
   
   // Mass formulas
   f0 = new TFormula("mLambda","1.11563");
@@ -103,177 +117,135 @@ Int_t strangeFormulas(TTree* tree) {
   f0 = new TFormula("mPiMinus","0.139568");
   f0 = new TFormula("mKaonMinus","0.493646");
   
+
   // Event
-  f1 = new TTreeFormula("Event.run()",
-    "Event.mRun",tree);
-  gROOT->GetListOfFunctions()->Add(f1);
-  f1 = new TTreeFormula("Event.event()",
-    "Event.mEvent",tree);
-  gROOT->GetListOfFunctions()->Add(f1);
-  f1 = new TTreeFormula("Event.primaryVertexX()",
-    "Event.mPrimaryVertexX",tree);
-  gROOT->GetListOfFunctions()->Add(f1);
-  f1 = new TTreeFormula("Event.primaryVertexY()",
-    "Event.mPrimaryVertexY",tree);
-  gROOT->GetListOfFunctions()->Add(f1);
-  f1 = new TTreeFormula("Event.primaryVertexZ()",
-    "Event.mPrimaryVertexZ",tree);
-  gROOT->GetListOfFunctions()->Add(f1);
+  printf("Loading event formulas...\n");
+  formulate("Event.run()",
+    "Event.mRun");
+  formulate("Event.event()",
+    "Event.mEvent");
+  formulate("Event.primaryVertexX()",
+    "Event.mPrimaryVertexX");
+  formulate("Event.primaryVertexY()",
+    "Event.mPrimaryVertexY");
+  formulate("Event.primaryVertexZ()",
+    "Event.mPrimaryVertexZ");
   
   // V0
   if (tree->GetBranch("V0")) {
+    printf("Loading V0 formulas...\n");
   
-    f1 = new TTreeFormula("V0.decayLengthV0()",
-      "sqrt(sq(V0.mDecayVertexV0X-Event.mPrimaryVertexX)+sq(V0.mDecayVertexV0Y-Event.mPrimaryVertexY)+sq(V0.mDecayVertexV0Z-Event.mPrimaryVertexZ))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.decayVertexV0X()",
-      "V0.mDecayVertexV0X",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.decayVertexV0Y()",
-      "V0.mDecayVertexV0Y",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.decayVertexV0Z()",
-      "V0.mDecayVertexV0Z",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.dcaV0Daughters()",
-      "V0.mDcaV0Daughters",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.dcaV0ToPrimVertex()",
-      "V0.mDcaV0ToPrimVertex",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.dcaPosToPrimVertex()",
-      "V0.mDcaPosToPrimVertex",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.dcaNegToPrimVertex()",
-      "V0.mDcaNegToPrimVertex",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.momPosX()",
-      "V0.mMomPosX",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.momPosY()",
-      "V0.mMomPosY",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.momPosZ()",
-      "V0.mMomPosZ",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.momNegX()",
-      "V0.mMomNegX",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.momNegY()",
-      "V0.mMomNegY",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.momNegZ()",
-      "V0.mMomNegZ",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.Ptot2Pos()",
-      "(sq(V0.mMomPosX)+sq(V0.mMomPosY)+sq(V0.mMomPosZ))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.Ptot2Neg()",
-      "(sq(V0.mMomNegX)+sq(V0.mMomNegY)+sq(V0.mMomNegZ))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.momV0X()",
-      "(V0.mMomPosX+V0.mMomNegX)",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.momV0Y()",
-      "(V0.mMomPosY+V0.mMomNegY)",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.momV0Z()",
-      "(V0.mMomPosZ+V0.mMomNegZ)",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.Pt2V0()",
-      "(sq(V0.momV0X())+sq(V0.momV0Y()))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.Ptot2V0()",
-      "(V0.Pt2V0()+sq(V0.momV0Z()))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    // The following formula uses 6 values:
+    formulate("V0.decayLengthV0()",
+      "sqrt(sq(V0.mDecayVertexV0X-Event.mPrimaryVertexX)+sq(V0.mDecayVertexV0Y-Event.mPrimaryVertexY)+sq(V0.mDecayVertexV0Z-Event.mPrimaryVertexZ))");
+
+    // The following formulas use 1 value:
+    formulate("V0.decayVertexV0X()",
+      "V0.mDecayVertexV0X");
+    formulate("V0.decayVertexV0Y()",
+      "V0.mDecayVertexV0Y");
+    formulate("V0.decayVertexV0Z()",
+      "V0.mDecayVertexV0Z");
+    formulate("V0.dcaV0Daughters()",
+      "V0.mDcaV0Daughters");
+    formulate("V0.dcaV0ToPrimVertex()",
+      "V0.mDcaV0ToPrimVertex");
+    formulate("V0.dcaPosToPrimVertex()",
+      "V0.mDcaPosToPrimVertex");
+    formulate("V0.dcaNegToPrimVertex()",
+      "V0.mDcaNegToPrimVertex");
+    formulate("V0.momPosX()",
+      "V0.mMomPosX");
+    formulate("V0.momPosY()",
+      "V0.mMomPosY");
+    formulate("V0.momPosZ()",
+      "V0.mMomPosZ");
+    formulate("V0.momNegX()",
+      "V0.mMomNegX");
+    formulate("V0.momNegY()",
+      "V0.mMomNegY");
+    formulate("V0.momNegZ()",
+      "V0.mMomNegZ");
+    
+    formulate("V0.Ptot2Pos()",
+      "(sq(V0.mMomPosX)+sq(V0.mMomPosY)+sq(V0.mMomPosZ))");
+    formulate("V0.Ptot2Neg()",
+      "(sq(V0.mMomNegX)+sq(V0.mMomNegY)+sq(V0.mMomNegZ))");
+    formulate("V0.momV0X()",
+      "(V0.mMomPosX+V0.mMomNegX)");
+    formulate("V0.momV0Y()",
+      "(V0.mMomPosY+V0.mMomNegY)");
+    formulate("V0.momV0Z()",
+      "(V0.mMomPosZ+V0.mMomNegZ)");
+    formulate("V0.Pt2V0()",
+      "(sq(V0.momV0X())+sq(V0.momV0Y()))");
+    formulate("V0.Ptot2V0()",
+      "(V0.Pt2V0()+sq(V0.momV0Z()))");
 
     // The following momentum component formulas use 15 values:
-    f1 = new TTreeFormula("V0.MomPosAlongV0()",
-      "(((V0.mMomPosX*V0.momV0X())+(V0.mMomPosY*V0.momV0Y())+(V0.mMomPosZ*V0.momV0Z()))/sqrt(V0.Ptot2V0()))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.MomNegAlongV0()",
-      "(((V0.mMomNegX*V0.momV0X())+(V0.mMomNegY*V0.momV0Y())+(V0.mMomNegZ*V0.momV0Z()))/sqrt(V0.Ptot2V0()))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    formulate("V0.MomPosAlongV0()",
+      "(((V0.mMomPosX*V0.momV0X())+(V0.mMomPosY*V0.momV0Y())+(V0.mMomPosZ*V0.momV0Z()))/sqrt(V0.Ptot2V0()))");
+    formulate("V0.MomNegAlongV0()",
+      "(((V0.mMomNegX*V0.momV0X())+(V0.mMomNegY*V0.momV0Y())+(V0.mMomNegZ*V0.momV0Z()))/sqrt(V0.Ptot2V0()))");
 
-    f1 = new TTreeFormula("V0.alphaV0()",
-    //  "((V0.MomPosAlongV0()-V0.MomNegAlongV0())/(V0.MomPosAlongV0()+V0.MomNegAlongV0()))",tree);
+    formulate("V0.alphaV0()",
+    //  "((V0.MomPosAlongV0()-V0.MomNegAlongV0())/(V0.MomPosAlongV0()+V0.MomNegAlongV0()))");
     // The above fails for exceeding 50 value limit. The following uses 30:
-      "1.-(2./(1.+(V0.MomPosAlongV0()/V0.MomNegAlongV0())))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+      "1.-(2./(1.+(V0.MomPosAlongV0()/V0.MomNegAlongV0())))");
     // The following formula uses 18 values:
-    f1 = new TTreeFormula("V0.ptArmV0()",
-      "sqrt(V0.Ptot2Pos()-sq(V0.MomPosAlongV0()))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    formulate("V0.ptArmV0()",
+      "sqrt(V0.Ptot2Pos()-sq(V0.MomPosAlongV0()))");
 
     // The following energy formulas use 6 values:
-    f1 = new TTreeFormula("V0.eLambda()",
-      "sqrt(V0.Ptot2V0()+sq(mLambda))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.eK0Short()",
-      "sqrt(V0.Ptot2V0()+sq(mK0Short))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.ePosProton()",
-      "sqrt(V0.Ptot2Pos()+sq(mProton))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.eNegAntiProton()",
-      "sqrt(V0.Ptot2Neg()+sq(mAntiProton))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.ePosPion()",
-      "sqrt(V0.Ptot2Pos()+sq(mPiPlus))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.eNegPion()",
-      "sqrt(V0.Ptot2Neg()+sq(mPiMinus))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    formulate("V0.eLambda()",
+      "sqrt(V0.Ptot2V0()+sq(mLambda))");
+    formulate("V0.eK0Short()",
+      "sqrt(V0.Ptot2V0()+sq(mK0Short))");
+    formulate("V0.ePosProton()",
+      "sqrt(V0.Ptot2Pos()+sq(mProton))");
+    formulate("V0.eNegAntiProton()",
+      "sqrt(V0.Ptot2Neg()+sq(mAntiProton))");
+    formulate("V0.ePosPion()",
+      "sqrt(V0.Ptot2Pos()+sq(mPiPlus))");
+    formulate("V0.eNegPion()",
+      "sqrt(V0.Ptot2Neg()+sq(mPiMinus))");
 
     // The following mass formulas use 12 values:
-    f1 = new TTreeFormula("V0.massLambda()",
-      "sqrt(sq(V0.ePosProton()+V0.eNegPion())-V0.Ptot2V0())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.massAntiLambda()",
-      "sqrt(sq(V0.eNegAntiProton()+V0.ePosPion())-V0.Ptot2V0())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.massK0Short()",
-      "sqrt(sq(V0.ePosPion()+V0.eNegPion())-V0.Ptot2V0())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    formulate("V0.massLambda()",
+      "sqrt(sq(V0.ePosProton()+V0.eNegPion())-V0.Ptot2V0())");
+    formulate("V0.massAntiLambda()",
+      "sqrt(sq(V0.eNegAntiProton()+V0.ePosPion())-V0.Ptot2V0())");
+    formulate("V0.massK0Short()",
+      "sqrt(sq(V0.ePosPion()+V0.eNegPion())-V0.Ptot2V0())");
     
     // The following rapidity formulas use 8 values:
-    f1 = new TTreeFormula("V0.rapLambda()",
-    //  "0.5*log((V0.eLambda()+V0.momV0Z())/(V0.eLambda()-V0.momV0Z()))",tree);
+    formulate("V0.rapLambda()",
+    //  "0.5*log((V0.eLambda()+V0.momV0Z())/(V0.eLambda()-V0.momV0Z()))");
     // Can optimize for TTreeFormula:
-      "0.5*log(1.+(2./((V0.eLambda()/V0.momV0Z())-1.)))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.rapK0Short()",
-    //  "0.5*log((V0.eK0Short()+V0.momV0Z())/(V0.eK0Short()-V0.momV0Z()))",tree);
+      "0.5*log(1.+(2./((V0.eLambda()/V0.momV0Z())-1.)))");
+    formulate("V0.rapK0Short()",
+    //  "0.5*log((V0.eK0Short()+V0.momV0Z())/(V0.eK0Short()-V0.momV0Z()))");
     // Can optimize for TTreeFormula:
-      "0.5*log(1.+(2./((V0.eK0Short()/V0.momV0Z())-1.)))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+      "0.5*log(1.+(2./((V0.eK0Short()/V0.momV0Z())-1.)))");
 
     // The following cTau formulas use 24 values:
-    f1 = new TTreeFormula("V0.cTauLambda()",
-      "V0.massLambda()*V0.decayLengthV0()/sqrt(V0.Ptot2V0())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.cTauK0Short()",
-      "V0.massK0Short()*V0.decayLengthV0()/sqrt(V0.Ptot2V0())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    formulate("V0.cTauLambda()",
+      "V0.massLambda()*V0.decayLengthV0()/sqrt(V0.Ptot2V0())");
+    formulate("V0.cTauK0Short()",
+      "V0.massK0Short()*V0.decayLengthV0()/sqrt(V0.Ptot2V0())");
     
-    f1 = new TTreeFormula("V0.ptPos()",
-      "sqrt(sq(V0.mMomPosX)+sq(V0.mMomPosY))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.ptotPos()",
-      "sqrt(V0.Ptot2Pos())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.ptNeg()",
-      "sqrt(sq(V0.mMomNegX)+sq(V0.mMomNegY))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.ptotNeg()",
-      "sqrt(V0.Ptot2Neg())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.ptV0()",
-      "sqrt(V0.Pt2V0())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.ptotV0()",
-      "sqrt(V0.Ptot2V0())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    formulate("V0.ptPos()",
+      "sqrt(sq(V0.mMomPosX)+sq(V0.mMomPosY))");
+    formulate("V0.ptotPos()",
+      "sqrt(V0.Ptot2Pos())");
+    formulate("V0.ptNeg()",
+      "sqrt(sq(V0.mMomNegX)+sq(V0.mMomNegY))");
+    formulate("V0.ptotNeg()",
+      "sqrt(V0.Ptot2Neg())");
+    formulate("V0.ptV0()",
+      "sqrt(V0.Pt2V0())");
+    formulate("V0.ptotV0()",
+      "sqrt(V0.Ptot2V0())");
     
     // Track topology maps, with function names like
     // "V0.topologyMapNeg.*()" and "V0.topologyMapPos.*()"
@@ -289,42 +261,36 @@ Int_t strangeFormulas(TTree* tree) {
           int m = l*32 + j;
           sprintf(name,"V0.topologyMap%s.bit(%d)\0",track,m);
           sprintf(expr,"(V0.mTopologyMap%s.mMap%d/(2^%d))&1\0",track,l,j);
-          f1 = new TTreeFormula(name,expr,tree);
-          gROOT->GetListOfFunctions()->Add(f1);
+          formulate(name,expr);
         }
 
         // data(i), i=0,1, uses only 1 value.
         sprintf(name,"V0.topologyMap%s.data(%d)",track,l);
 	sprintf(expr,"V0.mTopologyMap%s.mMap%d",track,l);
-        f1 = new TTreeFormula(name,expr,tree);
-        gROOT->GetListOfFunctions()->Add(f1);
+        formulate(name,expr);
       }
 
       // ftpcFormat()
       sprintf(ftpc,"V0.topologyMap%s.ftpcFormat()",track);
       sprintf(expr,"V0.topologyMap%s.bit(63)",track);
-      f1 = new TTreeFormula(ftpc,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(ftpc,expr);
 
       // primaryVertexUsed()
       sprintf(name,"V0.topologyMap%s.primaryVertexUsed()",track);
       sprintf(expr,"V0.topologyMap%s.bit(0)",track);
-      f1 = new TTreeFormula(name,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,expr);
 
       // turnAroundFlag()
       sprintf(name,"V0.topologyMap%s.turnAroundFlag()",track);
       sprintf(expr,"V0.topologyMap%s.bit(62)",track);
-      f1 = new TTreeFormula(name,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,expr);
 
       // hasHitInSvtLayer(i), i=1,6
       for (int j=1; j<7; j++) {
         sprintf(name,"V0.topologyMap%s.hasHitInSvtLayer(%d)",track,j);
         sprintf(temp,"V0.topologyMap%s.bit(%d)\0",track,j);
         sprintf(expr,"(!%s)&&(%s)\0",ftpc,temp);
-        f1 = new TTreeFormula(name,expr,tree);
-        gROOT->GetListOfFunctions()->Add(f1);
+        formulate(name,expr);
 	
         tstr += temp;
         if (j<6) tstr += "+";
@@ -333,15 +299,13 @@ Int_t strangeFormulas(TTree* tree) {
       // numOfSvtHits(), uses 6 values
       sprintf(name,"V0.topologyMap%s.numOfSvtHits()\0",track);
       sprintf(expr,"(!%s)*(%s)\0",ftpc,tstr.Data());
-      f1 = new TTreeFormula(name,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,expr);
       tstr = "";
       
       // hasHitInSsd()
       sprintf(name,"V0.topologyMap%s.hasHitInSsd()",track);
       sprintf(expr,"V0.topologyMap%s.bit(7)",track);
-      f1 = new TTreeFormula(name,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,expr);
 
       sprintf(temp,"(!%s)*(\0",ftpc);
       tstr = temp;
@@ -352,8 +316,7 @@ Int_t strangeFormulas(TTree* tree) {
 	int m = j+8;
         sprintf(temp,"V0.topologyMap%s.bit(%d)\0",track,m);
         sprintf(expr,"(!%s)&&(%s)\0",ftpc,temp);
-        f1 = new TTreeFormula(name,expr,tree);
-        gROOT->GetListOfFunctions()->Add(f1);
+        formulate(name,expr);
 	
         tstr += temp;
         if (j<44) tstr += "+";
@@ -362,337 +325,259 @@ Int_t strangeFormulas(TTree* tree) {
       // numOfTpcHits(), uses 45 values.
       sprintf(name,"V0.topologyMap%s.numOfTpcHits()\0",track);
       tstr += ")";
-      f1 = new TTreeFormula(name,tstr.Data(),tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,tstr.Data());
       tstr = "";
 
       // hasHitInMwpc()
       sprintf(name,"V0.topologyMap%s.hasHitInMwpc()",track);
       sprintf(expr,"V0.topologyMap%s.bit(53)",track);
-      f1 = new TTreeFormula(name,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,expr);
 
       // hasHitInCtb()
       sprintf(name,"V0.topologyMap%s.hasHitInCtb()",track);
       sprintf(expr,"V0.topologyMap%s.bit(54)",track);
-      f1 = new TTreeFormula(name,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,expr);
 
       // hasHitInTofPatch()
       sprintf(name,"V0.topologyMap%s.hasHitInTofPatch()",track);
       sprintf(expr,"V0.topologyMap%s.bit(55)",track);
-      f1 = new TTreeFormula(name,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,expr);
 
       // hasHitInRich()
       sprintf(name,"V0.topologyMap%s.hasHitInRich()",track);
       sprintf(expr,"V0.topologyMap%s.bit(56)",track);
-      f1 = new TTreeFormula(name,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,expr);
 
       // hasHitInBarrelEmc()
       sprintf(name,"V0.topologyMap%s.hasHitInBarrelEmc()",track);
       sprintf(expr,"V0.topologyMap%s.bit(57)",track);
-      f1 = new TTreeFormula(name,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,expr);
 
       // hasHitInEndcapEmc()
       sprintf(name,"V0.topologyMap%s.hasHitInEndcapEmc()",track);
       sprintf(expr,"V0.topologyMap%s.bit(58)",track);
-      f1 = new TTreeFormula(name,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,expr);
     } } // End topology maps
 
   }  // End of V0
   
   // Xi
   if (tree->GetBranch("Xi")) {
-  
+    printf("Loading Xi formulas...\n");
+
     f0 = new TFormula("mXiMinus","1.32133");
     f0 = new TFormula("mOmegaMinus","1.67243");
 
     // First, the Xi's get all the same functions that the V0's get...
-    f1 = new TTreeFormula("Xi.decayLengthV0()",
-      "sqrt(sq(Xi.mDecayVertexV0X-Event.mPrimaryVertexX)+sq(Xi.mDecayVertexV0Y-Event.mPrimaryVertexY)+sq(Xi.mDecayVertexV0Z-Event.mPrimaryVertexZ))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.decayVertexV0X()",
-      "Xi.mDecayVertexV0X",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.decayVertexV0Y()",
-      "Xi.mDecayVertexV0Y",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.decayVertexV0Z()",
-      "Xi.mDecayVertexV0Z",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.dcaV0Daughters()",
-      "Xi.mDcaV0Daughters",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.dcaV0ToPrimVertex()",
-      "Xi.mDcaV0ToPrimVertex",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.dcaPosToPrimVertex()",
-      "Xi.mDcaPosToPrimVertex",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.dcaNegToPrimVertex()",
-      "Xi.mDcaNegToPrimVertex",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.momPosX()",
-      "Xi.mMomPosX",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.momPosY()",
-      "Xi.mMomPosY",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.momPosZ()",
-      "Xi.mMomPosZ",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.momNegX()",
-      "Xi.mMomNegX",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.momNegY()",
-      "Xi.mMomNegY",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.momNegZ()",
-      "Xi.mMomNegZ",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.Ptot2Pos()",
-      "(sq(Xi.mMomPosX)+sq(Xi.mMomPosY)+sq(Xi.mMomPosZ))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.Ptot2Neg()",
-      "(sq(Xi.mMomNegX)+sq(Xi.mMomNegY)+sq(Xi.mMomNegZ))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.momV0X()",
-      "(Xi.mMomPosX+Xi.mMomNegX)",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.momV0Y()",
-      "(Xi.mMomPosY+Xi.mMomNegY)",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.momV0Z()",
-      "(Xi.mMomPosZ+Xi.mMomNegZ)",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.Pt2V0()",
-      "(sq(Xi.momV0X())+sq(Xi.momV0Y()))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.Ptot2V0()",
-      "(Xi.Pt2V0()+sq(Xi.momV0Z()))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    // The following formula uses 6 values:
+    formulate("Xi.decayLengthV0()",
+      "sqrt(sq(Xi.mDecayVertexV0X-Event.mPrimaryVertexX)+sq(Xi.mDecayVertexV0Y-Event.mPrimaryVertexY)+sq(Xi.mDecayVertexV0Z-Event.mPrimaryVertexZ))");
+
+    // The following formulas use 1 value:
+    formulate("Xi.decayVertexV0X()",
+      "Xi.mDecayVertexV0X");
+    formulate("Xi.decayVertexV0Y()",
+      "Xi.mDecayVertexV0Y");
+    formulate("Xi.decayVertexV0Z()",
+      "Xi.mDecayVertexV0Z");
+    formulate("Xi.dcaV0Daughters()",
+      "Xi.mDcaV0Daughters");
+    formulate("Xi.dcaV0ToPrimVertex()",
+      "Xi.mDcaV0ToPrimVertex");
+    formulate("Xi.dcaPosToPrimVertex()",
+      "Xi.mDcaPosToPrimVertex");
+    formulate("Xi.dcaNegToPrimVertex()",
+      "Xi.mDcaNegToPrimVertex");
+    formulate("Xi.momPosX()",
+      "Xi.mMomPosX");
+    formulate("Xi.momPosY()",
+      "Xi.mMomPosY");
+    formulate("Xi.momPosZ()",
+      "Xi.mMomPosZ");
+    formulate("Xi.momNegX()",
+      "Xi.mMomNegX");
+    formulate("Xi.momNegY()",
+      "Xi.mMomNegY");
+    formulate("Xi.momNegZ()",
+      "Xi.mMomNegZ");
+
+    formulate("Xi.Ptot2Pos()",
+      "(sq(Xi.mMomPosX)+sq(Xi.mMomPosY)+sq(Xi.mMomPosZ))");
+    formulate("Xi.Ptot2Neg()",
+      "(sq(Xi.mMomNegX)+sq(Xi.mMomNegY)+sq(Xi.mMomNegZ))");
+    formulate("Xi.momV0X()",
+      "(Xi.mMomPosX+Xi.mMomNegX)");
+    formulate("Xi.momV0Y()",
+      "(Xi.mMomPosY+Xi.mMomNegY)");
+    formulate("Xi.momV0Z()",
+      "(Xi.mMomPosZ+Xi.mMomNegZ)");
+    formulate("Xi.Pt2V0()",
+      "(sq(Xi.momV0X())+sq(Xi.momV0Y()))");
+    formulate("Xi.Ptot2V0()",
+      "(Xi.Pt2V0()+sq(Xi.momV0Z()))");
 
     // The following momentum component formulas use 15 values:
-    f1 = new TTreeFormula("Xi.MomPosAlongV0()",
-      "(((Xi.mMomPosX*Xi.momV0X())+(Xi.mMomPosY*Xi.momV0Y())+(Xi.mMomPosZ*Xi.momV0Z()))/sqrt(Xi.Ptot2V0()))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.MomNegAlongV0()",
-      "(((Xi.mMomNegX*Xi.momV0X())+(Xi.mMomNegY*Xi.momV0Y())+(Xi.mMomNegZ*Xi.momV0Z()))/sqrt(Xi.Ptot2V0()))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    formulate("Xi.MomPosAlongV0()",
+      "(((Xi.mMomPosX*Xi.momV0X())+(Xi.mMomPosY*Xi.momV0Y())+(Xi.mMomPosZ*Xi.momV0Z()))/sqrt(Xi.Ptot2V0()))");
+    formulate("Xi.MomNegAlongV0()",
+      "(((Xi.mMomNegX*Xi.momV0X())+(Xi.mMomNegY*Xi.momV0Y())+(Xi.mMomNegZ*Xi.momV0Z()))/sqrt(Xi.Ptot2V0()))");
 
-    f1 = new TTreeFormula("Xi.alphaV0()",
-    //  "((Xi.MomPosAlongV0()-Xi.MomNegAlongV0())/(Xi.MomPosAlongV0()+Xi.MomNegAlongV0()))",tree);
+    formulate("Xi.alphaV0()",
+    //  "((Xi.MomPosAlongV0()-Xi.MomNegAlongV0())/(Xi.MomPosAlongV0()+Xi.MomNegAlongV0()))");
     // The above fails for exceeding 50 value limit. The following uses 30:
-      "1.-(2./(1.+(Xi.MomPosAlongV0()/Xi.MomNegAlongV0())))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+      "1.-(2./(1.+(Xi.MomPosAlongV0()/Xi.MomNegAlongV0())))");
     // The following formula uses 18 values:
-    f1 = new TTreeFormula("Xi.ptArmV0()",
-      "sqrt(Xi.Ptot2Pos()-sq(Xi.MomPosAlongV0()))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    formulate("Xi.ptArmV0()",
+      "sqrt(Xi.Ptot2Pos()-sq(Xi.MomPosAlongV0()))");
 
     // The following energy formulas use 6 values:
-    f1 = new TTreeFormula("Xi.eLambda()",
-      "sqrt(Xi.Ptot2V0()+sq(mLambda))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.eK0Short()",
-      "sqrt(Xi.Ptot2V0()+sq(mK0Short))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.ePosProton()",
-      "sqrt(Xi.Ptot2Pos()+sq(mProton))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.eNegAntiProton()",
-      "sqrt(Xi.Ptot2Neg()+sq(mAntiProton))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.ePosPion()",
-      "sqrt(Xi.Ptot2Pos()+sq(mPiPlus))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.eNegPion()",
-      "sqrt(Xi.Ptot2Neg()+sq(mPiMinus))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    formulate("Xi.eLambda()",
+      "sqrt(Xi.Ptot2V0()+sq(mLambda))");
+    formulate("Xi.eK0Short()",
+      "sqrt(Xi.Ptot2V0()+sq(mK0Short))");
+    formulate("Xi.ePosProton()",
+      "sqrt(Xi.Ptot2Pos()+sq(mProton))");
+    formulate("Xi.eNegAntiProton()",
+      "sqrt(Xi.Ptot2Neg()+sq(mAntiProton))");
+    formulate("Xi.ePosPion()",
+      "sqrt(Xi.Ptot2Pos()+sq(mPiPlus))");
+    formulate("Xi.eNegPion()",
+      "sqrt(Xi.Ptot2Neg()+sq(mPiMinus))");
 
     // The following mass formulas use 12 values:
-    f1 = new TTreeFormula("Xi.massLambda()",
-      "sqrt(sq(Xi.ePosProton()+Xi.eNegPion())-Xi.Ptot2V0())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.massAntiLambda()",
-      "sqrt(sq(Xi.eNegAntiProton()+Xi.ePosPion())-Xi.Ptot2V0())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.massK0Short()",
-      "sqrt(sq(Xi.ePosPion()+Xi.eNegPion())-Xi.Ptot2V0())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    formulate("Xi.massLambda()",
+      "sqrt(sq(Xi.ePosProton()+Xi.eNegPion())-Xi.Ptot2V0())");
+    formulate("Xi.massAntiLambda()",
+      "sqrt(sq(Xi.eNegAntiProton()+Xi.ePosPion())-Xi.Ptot2V0())");
+    formulate("Xi.massK0Short()",
+      "sqrt(sq(Xi.ePosPion()+Xi.eNegPion())-Xi.Ptot2V0())");
     
     // The following rapidity formulas use 8 values:
-    f1 = new TTreeFormula("Xi.rapLambda()",
-    //  "0.5*log((Xi.eLambda()+Xi.momV0Z())/(Xi.eLambda()-Xi.momV0Z()))",tree);
+    formulate("Xi.rapLambda()",
+    //  "0.5*log((Xi.eLambda()+Xi.momV0Z())/(Xi.eLambda()-Xi.momV0Z()))");
     // Can optimize for TTreeFormula:
-      "0.5*log(1.+(2./((Xi.eLambda()/Xi.momV0Z())-1.)))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.rapK0Short()",
-    //  "0.5*log((Xi.eK0Short()+Xi.momV0Z())/(Xi.eK0Short()-Xi.momV0Z()))",tree);
+      "0.5*log(1.+(2./((Xi.eLambda()/Xi.momV0Z())-1.)))");
+    formulate("Xi.rapK0Short()",
+    //  "0.5*log((Xi.eK0Short()+Xi.momV0Z())/(Xi.eK0Short()-Xi.momV0Z()))");
     // Can optimize for TTreeFormula:
-      "0.5*log(1.+(2./((Xi.eK0Short()/Xi.momV0Z())-1.)))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+      "0.5*log(1.+(2./((Xi.eK0Short()/Xi.momV0Z())-1.)))");
 
     // The following cTau formulas use 24 values:
-    f1 = new TTreeFormula("Xi.cTauLambda()",
-      "Xi.massLambda()*Xi.decayLengthV0()/sqrt(Xi.Ptot2V0())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.cTauK0Short()",
-      "Xi.massK0Short()*Xi.decayLengthV0()/sqrt(Xi.Ptot2V0())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    formulate("Xi.cTauLambda()",
+      "Xi.massLambda()*Xi.decayLengthV0()/sqrt(Xi.Ptot2V0())");
+    formulate("Xi.cTauK0Short()",
+      "Xi.massK0Short()*Xi.decayLengthV0()/sqrt(Xi.Ptot2V0())");
     
-    f1 = new TTreeFormula("Xi.ptPos()",
-      "sqrt(sq(Xi.mMomPosX)+sq(Xi.mMomPosY))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.ptotPos()",
-      "sqrt(Xi.Ptot2Pos())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.ptNeg()",
-      "sqrt(sq(Xi.mMomNegX)+sq(Xi.mMomNegY))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.ptotNeg()",
-      "sqrt(Xi.Ptot2Neg())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.ptV0()",
-      "sqrt(Xi.Pt2V0())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.ptotV0()",
-      "sqrt(Xi.Ptot2V0())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    formulate("Xi.ptPos()",
+      "sqrt(sq(Xi.mMomPosX)+sq(Xi.mMomPosY))");
+    formulate("Xi.ptotPos()",
+      "sqrt(Xi.Ptot2Pos())");
+    formulate("Xi.ptNeg()",
+      "sqrt(sq(Xi.mMomNegX)+sq(Xi.mMomNegY))");
+    formulate("Xi.ptotNeg()",
+      "sqrt(Xi.Ptot2Neg())");
+    formulate("Xi.ptV0()",
+      "sqrt(Xi.Pt2V0())");
+    formulate("Xi.ptotV0()",
+      "sqrt(Xi.Ptot2V0())");
 
 
     // Now, finally get to the unique Xi formulas:
-    f1 = new TTreeFormula("Xi.charge()",
-      "Xi.mCharge",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.decayVertexXiX()",
-      "Xi.mDecayVertexXiX",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.decayVertexXiY()",
-      "Xi.mDecayVertexXiY",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.decayVertexXiZ()",
-      "Xi.mDecayVertexXiZ",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.dcaXiDaughters()",
-      "Xi.mDcaXiDaughters",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.dcaXiToPrimVertex()",
-      "Xi.mDcaXiToPrimVertex",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.dcaBachelorToPrimVertex()",
-      "Xi.mDcaBachelorToPrimVertex",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.momBachelorX()",
-      "Xi.mMomBachelorX",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.momBachelorY()",
-      "Xi.mMomBachelorY",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.momBachelorZ()",
-      "Xi.mMomBachelorZ",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.momXiX()",
-      "Xi.mMomBachelorX+Xi.momV0X()",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.momXiY()",
-      "Xi.mMomBachelorY+Xi.momV0Y()",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.momXiZ()",
-      "Xi.mMomBachelorZ+Xi.momV0Z()",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.keyBachelor()",
-      "Xi.mKeyBachelor",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.decayLengthXi()",
-      "sqrt(sq(Xi.mDecayVertexXiX-Event.mPrimaryVertexX)+sq(Xi.mDecayVertexXiY-Event.mPrimaryVertexY)+sq(Xi.mDecayVertexXiZ-Event.mPrimaryVertexZ))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.Ptot2Bachelor()",
-      "(sq(Xi.mMomBachelorX)+sq(Xi.mMomBachelorY)+sq(Xi.mMomBachelorZ))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.Pt2Xi()",
-      "(sq(Xi.momXiX())+sq(Xi.momXiY()))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.Ptot2Xi()",
-      "(Xi.Pt2Xi()+sq(Xi.momXiZ()))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    // The following formula uses 6 values:
+    formulate("Xi.decayLengthXi()",
+      "sqrt(sq(Xi.mDecayVertexXiX-Event.mPrimaryVertexX)+sq(Xi.mDecayVertexXiY-Event.mPrimaryVertexY)+sq(Xi.mDecayVertexXiZ-Event.mPrimaryVertexZ))");
+
+    // The following formulas use 1 value:
+    formulate("Xi.charge()",
+      "Xi.mCharge");
+    formulate("Xi.decayVertexXiX()",
+      "Xi.mDecayVertexXiX");
+    formulate("Xi.decayVertexXiY()",
+      "Xi.mDecayVertexXiY");
+    formulate("Xi.decayVertexXiZ()",
+      "Xi.mDecayVertexXiZ");
+    formulate("Xi.dcaXiDaughters()",
+      "Xi.mDcaXiDaughters");
+    formulate("Xi.dcaXiToPrimVertex()",
+      "Xi.mDcaXiToPrimVertex");
+    formulate("Xi.dcaBachelorToPrimVertex()",
+      "Xi.mDcaBachelorToPrimVertex");
+    formulate("Xi.momBachelorX()",
+      "Xi.mMomBachelorX");
+    formulate("Xi.momBachelorY()",
+      "Xi.mMomBachelorY");
+    formulate("Xi.momBachelorZ()",
+      "Xi.mMomBachelorZ");
+    formulate("Xi.momXiX()",
+      "Xi.mMomBachelorX+Xi.momV0X()");
+    formulate("Xi.momXiY()",
+      "Xi.mMomBachelorY+Xi.momV0Y()");
+    formulate("Xi.momXiZ()",
+      "Xi.mMomBachelorZ+Xi.momV0Z()");
+    formulate("Xi.keyBachelor()",
+      "Xi.mKeyBachelor");
+
+    formulate("Xi.Ptot2Bachelor()",
+      "(sq(Xi.mMomBachelorX)+sq(Xi.mMomBachelorY)+sq(Xi.mMomBachelorZ))");
+    formulate("Xi.Pt2Xi()",
+      "(sq(Xi.momXiX())+sq(Xi.momXiY()))");
+    formulate("Xi.Ptot2Xi()",
+      "(Xi.Pt2Xi()+sq(Xi.momXiZ()))");
 
     // The following momentum component formulas use 21 and 24 values:
-    f1 = new TTreeFormula("Xi.MomBachelorAlongXi()",
-       "(((Xi.mMomBachelorX*Xi.momXiX())+(Xi.mMomBachelorY*Xi.momXiY())+(Xi.mMomBachelorZ*Xi.momXiZ()))/sqrt(Xi.Ptot2Xi()))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.MomV0AlongXi()",
-       "(((Xi.momV0X()*Xi.momXiX())+(Xi.momV0Y()*Xi.momXiY())+(Xi.momV0Z()*Xi.momXiZ()))/sqrt(Xi.Ptot2Xi()))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    formulate("Xi.MomBachelorAlongXi()",
+       "(((Xi.mMomBachelorX*Xi.momXiX())+(Xi.mMomBachelorY*Xi.momXiY())+(Xi.mMomBachelorZ*Xi.momXiZ()))/sqrt(Xi.Ptot2Xi()))");
+    formulate("Xi.MomV0AlongXi()",
+       "(((Xi.momV0X()*Xi.momXiX())+(Xi.momV0Y()*Xi.momXiY())+(Xi.momV0Z()*Xi.momXiZ()))/sqrt(Xi.Ptot2Xi()))");
 
-    f1 = new TTreeFormula("Xi.alphaXi()",
-    //  "(Xi.mCharge*(Xi.MomBachelorAlongXi()-Xi.MomV0AlongXi())/(Xi.MomBachelorAlongXi()+Xi.MomV0AlongXi()))",tree);
+    formulate("Xi.alphaXi()",
+    //  "(Xi.mCharge*(Xi.MomBachelorAlongXi()-Xi.MomV0AlongXi())/(Xi.MomBachelorAlongXi()+Xi.MomV0AlongXi()))");
     // The above fails for exceeding 50 value limit. The following uses 46:
-      "Xi.mCharge*(1.-(2./(1.+(Xi.MomBachelorAlongXi()/Xi.MomV0AlongXi()))))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+      "Xi.mCharge*(1.-(2./(1.+(Xi.MomBachelorAlongXi()/Xi.MomV0AlongXi()))))");
     // The following formula uses 30 values:
-    f1 = new TTreeFormula("Xi.ptArmXi()",
-      "sqrt(Xi.Ptot2V0()-sq(Xi.MomV0AlongXi()))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    formulate("Xi.ptArmXi()",
+      "sqrt(Xi.Ptot2V0()-sq(Xi.MomV0AlongXi()))");
 
     // The following energy formulas use 9 values:
-    f1 = new TTreeFormula("Xi.eXi()",
-      "sqrt(Xi.Ptot2Xi()+sq(mXiMinus))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.eOmega()",
-      "sqrt(Xi.Ptot2Xi()+sq(mOmegaMinus))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.eBachelorPion()",
-      "sqrt(Xi.Ptot2Bachelor()+sq(mPiMinus))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.eBachelorKaon()",
-      "sqrt(Xi.Ptot2Bachelor()+sq(mKaonMinus))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    formulate("Xi.eXi()",
+      "sqrt(Xi.Ptot2Xi()+sq(mXiMinus))");
+    formulate("Xi.eOmega()",
+      "sqrt(Xi.Ptot2Xi()+sq(mOmegaMinus))");
+    formulate("Xi.eBachelorPion()",
+      "sqrt(Xi.Ptot2Bachelor()+sq(mPiMinus))");
+    formulate("Xi.eBachelorKaon()",
+      "sqrt(Xi.Ptot2Bachelor()+sq(mKaonMinus))");
 
     // The following mass formulas use 18 values:
-    f1 = new TTreeFormula("Xi.massXi()",
-      "sqrt(sq(Xi.eLambda()+Xi.eBachelorPion())-Xi.Ptot2Xi())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.massOmega()",
-      "sqrt(sq(Xi.eLambda()+Xi.eBachelorKaon())-Xi.Ptot2Xi())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    formulate("Xi.massXi()",
+      "sqrt(sq(Xi.eLambda()+Xi.eBachelorPion())-Xi.Ptot2Xi())");
+    formulate("Xi.massOmega()",
+      "sqrt(sq(Xi.eLambda()+Xi.eBachelorKaon())-Xi.Ptot2Xi())");
     
     // The following rapidity formulas use 12 values:
-    f1 = new TTreeFormula("Xi.rapXi()",
-    //  "0.5*log((Xi.eXi()+Xi.momXiZ())/(Xi.eXi()-Xi.momXiZ()))",tree);
+    formulate("Xi.rapXi()",
+    //  "0.5*log((Xi.eXi()+Xi.momXiZ())/(Xi.eXi()-Xi.momXiZ()))");
     // Can optimize for TTreeFormula:
-      "0.5*log(1.+(2./((Xi.eXi()/Xi.momXiZ())-1.)))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.rapOmega()",
-    //  "0.5*log((Xi.eOmega()+Xi.momXiZ())/(Xi.eOmega()-Xi.momXiZ()))",tree);
+      "0.5*log(1.+(2./((Xi.eXi()/Xi.momXiZ())-1.)))");
+    formulate("Xi.rapOmega()",
+    //  "0.5*log((Xi.eOmega()+Xi.momXiZ())/(Xi.eOmega()-Xi.momXiZ()))");
     // Can optimize for TTreeFormula:
-      "0.5*log(1.+(2./((Xi.eOmega()/Xi.momXiZ())-1.)))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+      "0.5*log(1.+(2./((Xi.eOmega()/Xi.momXiZ())-1.)))");
 
     // The following cTau formulas use 33 values:
-    f1 = new TTreeFormula("Xi.cTauXi()",
-      "Xi.massXi()*Xi.decayLengthXi()/sqrt(Xi.Ptot2Xi())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.cTauOmega()",
-      "Xi.massOmega()*Xi.decayLengthXi()/sqrt(Xi.Ptot2Xi())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    formulate("Xi.cTauXi()",
+      "Xi.massXi()*Xi.decayLengthXi()/sqrt(Xi.Ptot2Xi())");
+    formulate("Xi.cTauOmega()",
+      "Xi.massOmega()*Xi.decayLengthXi()/sqrt(Xi.Ptot2Xi())");
     
-    f1 = new TTreeFormula("Xi.ptBachelor()",
-      "sqrt(sq(Xi.mMomBachelorX)+sq(Xi.mMomBachelorY))",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.ptotBachelor()",
-      "sqrt(Xi.Ptot2Bachelor())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.ptXi()",
-      "sqrt(Xi.Pt2Xi())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.ptotXi()",
-      "sqrt(Xi.Ptot2Xi())",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
+    formulate("Xi.ptBachelor()",
+      "sqrt(sq(Xi.mMomBachelorX)+sq(Xi.mMomBachelorY))");
+    formulate("Xi.ptotBachelor()",
+      "sqrt(Xi.Ptot2Bachelor())");
+    formulate("Xi.ptXi()",
+      "sqrt(Xi.Pt2Xi())");
+    formulate("Xi.ptotXi()",
+      "sqrt(Xi.Ptot2Xi())");
 
     // Track topology maps, with function names like
     // "Xi.topologyMapNeg.*()", Xi.topologyMapPos.*(),
@@ -710,42 +595,36 @@ Int_t strangeFormulas(TTree* tree) {
           int m = l*32 + j;
           sprintf(name,"Xi.topologyMap%s.bit(%d)\0",track,m);
           sprintf(expr,"(Xi.mTopologyMap%s.mMap%d/(2^%d))&1\0",track,l,j);
-          f1 = new TTreeFormula(name,expr,tree);
-          gROOT->GetListOfFunctions()->Add(f1);
+          formulate(name,expr);
         }
 
         // data(i), i=0,1, uses only 1 value.
         sprintf(name,"Xi.topologyMap%s.data(%d)",track,l);
 	sprintf(expr,"Xi.mTopologyMap%s.mMap%d",track,l);
-        f1 = new TTreeFormula(name,expr,tree);
-        gROOT->GetListOfFunctions()->Add(f1);
+        formulate(name,expr);
       }
 
       // ftpcFormat()
       sprintf(ftpc,"Xi.topologyMap%s.ftpcFormat()",track);
       sprintf(expr,"Xi.topologyMap%s.bit(63)",track);
-      f1 = new TTreeFormula(ftpc,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(ftpc,expr);
 
       // primaryVertexUsed()
       sprintf(name,"Xi.topologyMap%s.primaryVertexUsed()",track);
       sprintf(expr,"Xi.topologyMap%s.bit(0)",track);
-      f1 = new TTreeFormula(name,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,expr);
 
       // turnAroundFlag()
       sprintf(name,"Xi.topologyMap%s.turnAroundFlag()",track);
       sprintf(expr,"Xi.topologyMap%s.bit(62)",track);
-      f1 = new TTreeFormula(name,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,expr);
 
       // hasHitInSvtLayer(i), i=1,6
       for (int j=1; j<7; j++) {
         sprintf(name,"Xi.topologyMap%s.hasHitInSvtLayer(%d)",track,j);
         sprintf(temp,"Xi.topologyMap%s.bit(%d)\0",track,j);
         sprintf(expr,"(!%s)&&(%s)\0",ftpc,temp);
-        f1 = new TTreeFormula(name,expr,tree);
-        gROOT->GetListOfFunctions()->Add(f1);
+        formulate(name,expr);
 	
         tstr += temp;
         if (j<6) tstr += "+";
@@ -754,15 +633,13 @@ Int_t strangeFormulas(TTree* tree) {
       // numOfSvtHits(), uses 6 values
       sprintf(name,"Xi.topologyMap%s.numOfSvtHits()\0",track);
       sprintf(expr,"(!%s)*(%s)\0",ftpc,tstr.Data());
-      f1 = new TTreeFormula(name,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,expr);
       tstr = "";
       
       // hasHitInSSD()
       sprintf(name,"Xi.topologyMap%s.hasHitInSSD()",track);
       sprintf(expr,"Xi.topologyMap%s.bit(7)",track);
-      f1 = new TTreeFormula(name,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,expr);
 
       sprintf(temp,"(!%s)*(\0",ftpc);
       tstr = temp;
@@ -773,8 +650,7 @@ Int_t strangeFormulas(TTree* tree) {
 	int m = j+8;
         sprintf(temp,"Xi.topologyMap%s.bit(%d)\0",track,m);
         sprintf(expr,"(!%s)&&(%s)\0",ftpc,temp);
-        f1 = new TTreeFormula(name,expr,tree);
-        gROOT->GetListOfFunctions()->Add(f1);
+        formulate(name,expr);
 	
         tstr += temp;
         if (j<44) tstr += "+";
@@ -783,53 +659,48 @@ Int_t strangeFormulas(TTree* tree) {
       // numOfTpcHits(), uses 45 values.
       sprintf(name,"Xi.topologyMap%s.numOfTpcHits()\0",track);
       tstr += ")";
-      f1 = new TTreeFormula(name,tstr.Data(),tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,tstr.Data());
       tstr = "";
 
       // hasHitInMwpc()
       sprintf(name,"Xi.topologyMap%s.hasHitInMwpc()",track);
       sprintf(expr,"Xi.topologyMap%s.bit(53)",track);
-      f1 = new TTreeFormula(name,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,expr);
 
       // hasHitInCtb()
       sprintf(name,"Xi.topologyMap%s.hasHitInCtb()",track);
       sprintf(expr,"Xi.topologyMap%s.bit(54)",track);
-      f1 = new TTreeFormula(name,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,expr);
 
       // hasHitInTofPatch()
       sprintf(name,"Xi.topologyMap%s.hasHitInTofPatch()",track);
       sprintf(expr,"Xi.topologyMap%s.bit(55)",track);
-      f1 = new TTreeFormula(name,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,expr);
 
       // hasHitInRich()
       sprintf(name,"Xi.topologyMap%s.hasHitInRich()",track);
       sprintf(expr,"Xi.topologyMap%s.bit(56)",track);
-      f1 = new TTreeFormula(name,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,expr);
 
       // hasHitInBarrelEmc()
       sprintf(name,"Xi.topologyMap%s.hasHitInBarrelEmc()",track);
       sprintf(expr,"Xi.topologyMap%s.bit(57)",track);
-      f1 = new TTreeFormula(name,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,expr);
 
       // hasHitInEndcapEmc()
       sprintf(name,"Xi.topologyMap%s.hasHitInEndcapEmc()",track);
       sprintf(expr,"Xi.topologyMap%s.bit(58)",track);
-      f1 = new TTreeFormula(name,expr,tree);
-      gROOT->GetListOfFunctions()->Add(f1);
+      formulate(name,expr);
+
     } } // End topology maps
 
   }  // End of Xi
 
   // Kink
   if (tree->GetBranch("Kink")) {
+    printf("Loading Kink formulas...\n");
   }  // End of Kink
   
-  Int_t finalFormulas = gROOT->GetListOfFunctions()->GetSize();
+  Int_t finalFormulas = ListofFuncs->GetSize();
   return (finalFormulas-initialFormulas);
 }
