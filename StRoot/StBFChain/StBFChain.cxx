@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.268 2002/02/10 22:13:08 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.269 2002/02/13 17:26:10 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -307,11 +307,10 @@ Bfc_st BFC[] = {
 
 
   {"Ftpc"        ,"ftpcChain"  ,"","ftpcT,fcl,fpt,Fglobal,Fprimary"         ,"StMaker","StChain","",kFALSE},
-  //{"ppFtpc"      ,"ftpcChain"  ,"","ftpcT,fcl,ppfpt,Fglobal,Fprimary"       ,"StMaker","StChain","",kFALSE},
-  {"fss"    ,"ftpc_raw","ftpcChain","SCL,Simu",        "StFtpcSlowSimMaker","StFtpcSlowSimMaker","",kFALSE},
+  {"fss"    ,"ftpc_raw","ftpcChain","SCL,Simu", 
+                                    "StFtpcSlowSimMaker","StFtpcSlowSimMaker","FTPC Slow simulator",kFALSE},
   {"Fcl"    ,"ftpc_hits","ftpcChain","SCL"
-                                  ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,StFtpcClusterMaker","",kFALSE},
-  //{"fpt"         ,"ftpc_tracks","ftpcChain","SCL"         ,"StFtpcTrackMaker","StFtpcTrackMaker","",kFALSE},
+               ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,StFtpcClusterMaker","FTPC cluster finder",kFALSE},
 
 
   {"emcY2"    ,"emcY2","","geant,emc_T,tpc_T,db,calib,emcSim,PreEcl,epc"      ,"StMaker","StChain",
@@ -333,11 +332,12 @@ Bfc_st BFC[] = {
   {"V0"          ,"v0","globalChain","SCL,globT,tls","StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Xi"          ,"xi","globalChain","SCL,globT,tls","StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Kink"   ,"kink","globalChain","SCL,globT,tls","StKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"fpt"      ,"ftpc_tracks","globalChain","SCL"          ,"StFtpcTrackMaker","StFtpcTrackMaker","",kFALSE},
+  {"fpt"      ,"ftpc_tracks","globalChain","SCL"          
+                                          ,"StFtpcTrackMaker","StFtpcTrackMaker","FTPC Track Maker",kFALSE},
   {"Fglobal"    ,"fglobal","globalChain","SCL,tables,tls"
-                                                   ,"StFtpcGlobalMaker","St_global,St_dst_Maker","",kFALSE},
+                 ,"StFtpcGlobalMaker","St_global,St_dst_Maker","FTPC track refit, fills dst_tracks",kFALSE},
   {"Fprimary"    ,"fprimary","globalChain","SCL,tables,tls"
-                                                  ,"StFtpcPrimaryMaker","St_global,St_dst_Maker","",kFALSE},
+                  ,"StFtpcPrimaryMaker","St_global,St_dst_Maker","FTPC track refit + dca selection",kFALSE},
 
   {"dst"         ,"dst","globalChain","dstOut,SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT,svt_T"
                                                  ,"St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
