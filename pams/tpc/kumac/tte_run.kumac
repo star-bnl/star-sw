@@ -68,7 +68,36 @@ message 'start run_tte'
 return
 
 ************************************************************ 
+
+macro run_tte_hit_match
+macro/global/import *
+
+message 'start run_tte_hit_match'
+
+alias/create STAFCV_OK  1
+alias/create STAFCV_BAD 0
+
+cd /dui
+  tdm/table/rowcount [data]/tpc/hits/index 0
+
+
+ ami/module/call tte_hit_match _
+               [geant]/Event/g2t_tpc_hit _
+               [data]/tpc/hits/index _
+               [params]/tpc/tclpars/type _
+               [data]/tpc/hits/tphit 
+
+ if ( staf_status(1) .ne. STAFCV_OK) then
+   message 'Problem with tte_hit_match..'
+   goto RTRN
+   endif
  
+ RTRN:
+
+ message 'finish run_tte_hit_match'
+
+return
+
 
 
 
