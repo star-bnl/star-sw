@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.82 2000/02/02 16:35:23 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.83 2000/02/03 22:02:32 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.83  2000/02/03 22:02:32  kathy
+// adding histograms for Akio - needed smaller ranges of some of them for use by peripheral collisions group
+//
 // Revision 1.82  2000/02/02 16:35:23  kathy
 // fixing some histograms - booking params
 //
@@ -349,11 +352,15 @@ void St_QA_Maker::MakeHistEvSum(){
 
       m_trk_tot_gd->Fill(trk_good/trk_tot); 
       m_glb_trk_tot->Fill(tt->glb_trk_tot);
+      m_glb_trk_tot_sm->Fill(tt->glb_trk_tot);
       m_glb_trk_plusminus->Fill(trk_plus/trk_minus);
-      m_vert_total->Fill(tt->n_vert_total);
+      m_glb_trk_plusminus_sm->Fill(trk_plus/trk_minus);
       m_glb_trk_prim->Fill(tt->glb_trk_prim);
-
+      m_glb_trk_prim_sm->Fill(tt->glb_trk_prim);
+      m_vert_total->Fill(tt->n_vert_total);
+      m_vert_total_sm->Fill(tt->n_vert_total);
       m_mean_pt->Fill(tt->mean_pt);
+      m_mean_pt_sm->Fill(tt->mean_pt);
       m_mean_eta->Fill(tt->mean_eta);
       m_rms_eta->Fill(tt->rms_eta);
 
@@ -379,6 +386,7 @@ void St_QA_Maker::MakeHistGlob(){
     Int_t cnttrkg=0;
     cnttrk = globtrk->GetNRows();
     m_globtrk_tot->Fill(cnttrk);
+    m_globtrk_tot_sm->Fill(cnttrk);
 
     for (Int_t i = 0; i < globtrk->GetNRows(); i++,t++){
 
@@ -752,6 +760,7 @@ void St_QA_Maker::MakeHistGlob(){
       }
     }
     m_globtrk_good->Fill(cnttrkg);
+    m_globtrk_good_sm->Fill(cnttrkg);
   }       
 }
 
@@ -1099,6 +1108,7 @@ void St_QA_Maker::MakeHistVertex(){
     Int_t cntrows=0;
     cntrows = vertex->GetNRows();
     m_v_num->Fill(cntrows);
+    m_v_num_sm->Fill(cntrows);
 
     dst_vertex_st  *t   = vertex->GetTable();
     for (Int_t i = 0; i < vertex->GetNRows(); i++,t++){

@@ -1,5 +1,8 @@
-//! $Id: StQABookHist.h,v 1.15 2000/01/31 22:15:25 kathy Exp $ 
+//! $Id: StQABookHist.h,v 1.16 2000/02/03 22:02:31 kathy Exp $ 
 //! $Log: StQABookHist.h,v $
+//! Revision 1.16  2000/02/03 22:02:31  kathy
+//! adding histograms for Akio - needed smaller ranges of some of them for use by peripheral collisions group
+//!
 //! Revision 1.15  2000/01/31 22:15:25  kathy
 //! added Gene's code to make mass plot for Xi's in table and StEvent versions
 //!
@@ -62,7 +65,7 @@ class TH2F;
 class StQABookHist : public StMaker {
  public:
 
-//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.15 2000/01/31 22:15:25 kathy Exp $";
+//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.16 2000/02/03 22:02:31 kathy Exp $";
 
 //! Histograms booking constants
   static const Int_t nxpT;
@@ -123,24 +126,29 @@ class StQABookHist : public StMaker {
   static const Float_t cmaxdedx; 
   
   // for method MakeEvSum - from table event_summary
-  TH1F     *m_trk_tot_gd;         //! number of good global tracks divided by total
+  TH1F     *m_trk_tot_gd;         //! num of good trks over total - global
   TH1F     *m_glb_trk_tot;        //! # tracks total from globtrk
+  TH1F     *m_glb_trk_tot_sm;     //! # tracks total from globtrk, small range
   TH1F     *m_glb_trk_plusminus;  //! # trks pos/neg. 
+  TH1F     *m_glb_trk_plusminus_sm; //! # trks pos/neg., small range 
   TH1F     *m_glb_trk_prim;       //! # trks from primaries
+  TH1F     *m_glb_trk_prim_sm;    //! # trks from primaries, small range
   TH1F     *m_vert_total;         //! total number of vertices
-  //  TH1F     *m_vert_V0;        //! number of V0 vertices
+  TH1F     *m_vert_total_sm;      //! total number of vertices, small range
   TH1F     *m_mean_pt;            //! mean pt value
+  TH1F     *m_mean_pt_sm;         //! mean pt value, small range
   TH1F     *m_mean_eta;           //! mean eta value 
   TH1F     *m_rms_eta;            //! rms eta value 
-  //  TH1F     *m_T_average;      //! mean Temp
   TH1F     *m_prim_vrtx0;         //! primary vrtx x position
   TH1F     *m_prim_vrtx1;         //! primary vrtx y position
   TH1F     *m_prim_vrtx2;         //! primary vrtx z position
-  //  TH1F     *m_vrtx_chisq;     //! primary vrtx chisq
+
   
   // for method MakeGlob - from table globtrk
-  TH1F     *m_globtrk_tot;   //! # tracks in table
-  TH1F     *m_globtrk_good;  //! # tracks in table with iflag>0 
+  TH1F     *m_globtrk_tot;    //! # tracks in table
+  TH1F     *m_globtrk_tot_sm; //! # tracks in table, small range
+  TH1F     *m_globtrk_good;   //! # tracks in table with iflag>0 
+  TH1F     *m_globtrk_good_sm;//! # tracks in table with iflag>0,small range
   TH1F     *m_globtrk_iflag; //! iflag value
   TH1F     *m_det_id;        //! detector id of track
 
@@ -304,8 +312,10 @@ class StQABookHist : public StMaker {
   
 
 // for method MakeHistPrim - from table primtrk
-  TH1F     *m_primtrk_tot;   //! # tracks in table
-  TH1F     *m_primtrk_good;  //! # tracks in table with iflag>0 
+  TH1F     *m_primtrk_tot;    //! # tracks in table
+  TH1F     *m_primtrk_tot_sm; //! # tracks in table, small range
+  TH1F     *m_primtrk_good;   //! # tracks in table with iflag>0
+  TH1F     *m_primtrk_good_sm;//! # tracks in table with iflag>0, small range
   TH1F     *m_primtrk_iflag; //! iflag value
   TH1F     *m_pdet_id;       //! detector id of track
   TH1F     *m_ppoint;        //! number of points on the track
@@ -358,7 +368,9 @@ class StQABookHist : public StMaker {
   TH1F     *m_H_vtxy;     //! production vertex (mm)
   TH1F     *m_H_vtxz;     //! production vertex (mm)
   TH1F     *m_H_npart;    //! total num particles generated
-  TH1F     *m_H_ncpart;   //! number of charged e,mu,proton,kaon,pion
+  TH1F     *m_H_npart_sm; //! total num particles generated, small rnage
+  TH1F     *m_H_ncpart;   //! num chg e,mu,proton,kaon,pion
+  TH1F     *m_H_ncpart_sm;//! num chg e,mu,proton,kaon,pion, small range
   
   // for MakeHistV0 - from table dst_v0_vertex
   TH1F     *m_v0;            //! # v0 vertices
@@ -371,6 +383,7 @@ class StQABookHist : public StMaker {
   
   // for method MakeHistVertex - from table dst_vertex
   TH1F     *m_v_num;   //! number of vertices
+  TH1F     *m_v_num_sm;//! number of vertices,small range
   TH1F     *m_v_detid; //! detector id where vertex was found 
   TH1F     *m_v_vtxid; //! vertex type
   TH1F     *m_v_x;     //! vertex coordinates in
@@ -475,7 +488,7 @@ class StQABookHist : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.15 2000/01/31 22:15:25 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.16 2000/02/03 22:02:31 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StQABookHist, 1)   //needed for all code that will be used in CINT
     };
