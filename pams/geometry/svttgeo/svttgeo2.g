@@ -1,6 +1,19 @@
-* $Id: svttgeo2.g,v 1.2 2003/09/12 20:46:36 potekhin Exp $
+* $Id: svttgeo2.g,v 1.3 2003/09/17 22:27:05 potekhin Exp $
 *
 * $Log: svttgeo2.g,v $
+* Revision 1.3  2003/09/17 22:27:05  potekhin
+* Lots more corrections to the material in the SVT and probably the
+* final version:
+*
+* 1) Corrected the cross section of the carbon support struts
+* 2) Outer shield support cage
+* 3) Water feeds from the manifold to the PCBs modeled as straight
+* segments close to PCBs as well as smeared cones of material (water
+* and plastic) closer to the manifolds
+* 4) The sizes of these cones as well of those modeling cables
+* have been adjusted
+* 5) The PCBs themselves were left same as in the previous check-in
+*
 * Revision 1.2  2003/09/12 20:46:36  potekhin
 * Still work in progress -- added the first cut
 * of the model for the water feeds from the manifold to the boards.
@@ -46,14 +59,14 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
                        SELE,SWCH,SWCW,SWCS,SBOI,SAGP,SDYE,SECA,SIRP,
                        SIRT,SOER,SCON,SROD,SGRA,
                        STAP,STAC,SHLA,SHLB,SHMA,SHMB,SWHO,SHWA,
-                       SCMY,SCAL,SWMM,SWMB,SWCP,SWCU,SWCL,SWCD,SWCF,
+                       SCMY,SCAL,SWMM,SWMB,SWRP,SXRL,SYRU,  ! SYTD,SWCF,
                        SWMT,SWMS,SWMW,SOTB,SITB,
                        SBRG,SBRM,SBRI,SOES,SIES,SOSM,SISM,SCRW,
                        SGLA,SFMO,SFLM,SFDM,SFSW,SFSD,SFSM,
                        SFSS,SFCP,SFCF,SFCT,SFCX,SFCW,
                        SBSP,SAKM,SCKM,SBSR,SBCR,SBRX,SBRL,
                        SBMM,SBMO,SBMI,SMRD,SALM,SISH,SSSH,SOSH,
-                       SCBM,SCBL,SFED,SOUM,SOUR
+                       SCBM,SCBL,SFED,SPLS,SOUM,SOUR
 *
       structure SVTG { Version,   Nlayer,    RsizeMin,  RsizeMax,
 		       ZsizeMax,  Angoff}
@@ -105,8 +118,8 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
                        AlMeshId, AlMeshOd, AlMshThk, AlMshPos} 
 *     
       structure SCBP { Layer,Len,Rmin1,Rmax1,Rmin2,Rmax2,Vol}
-      structure SFEP { Layer,Len,Rmin1,Rmax1,Rmin2,Rmax2,Vol}
-      structure SWCX { Version,Length,dR, offset, wall, rOffset}
+      structure SFEP { Layer,Len,Rmin1,Rmax1,Rmin2,Rmax2,Vol,VolPlast}
+      structure SWCX { Layer,Length,dR, offset, rad, wall, rOffset}
       structure SOUP { Version,Length,Rout,dR,Phi1,Phi2,DiamOut, DiamIn}
 
       Integer        iLayer,s,side,ilad,iwaf,i,j
@@ -115,7 +128,7 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
       Real           xpos,ypos,zpos,clearance,rin,rou,elethk,tabLen,radmax
       Real           endrng_z,brack_z,screw_z,ir_rmin,ang,wafpckLen,dthk,radtilt
       Real           xbuf, phi, xbuf1, xbuf2
-      Real           yPCB, A, CuThk, sq
+      Real           yPCB, A, CuThk, sq, tube_angle
       Real           radii(6), rad_cones_in(5),rad_cones_out(5), rad_offset, shield_phi(4)
       Integer        i_phi
 
@@ -166,8 +179,8 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
       Cone1zmn  = 52.23      ! Cone z min (parts 1,2,3,4 in increasing z)
       RodLen    = 110.8      ! Length of support rods
       RodDist   = 17.5       ! Distance of support rod od from beam axis 
-      RodID     = 3.5        ! ID of Be support rods
-      RodOD     = 3.81       ! OD of Be support rods
+      RodID     = 2.5        ! ID of Carbon support rods (approx)
+      RodOD     = 3.05       ! OD of Carbon support rods (approx)
       Con1IdMn  = 15.67      ! Minimum id of cone 1 
       Con3IdMn  = 21.67      ! Minimum id of cone 3 (TBD)
       Con4IdMn  = 37.4       ! Minimum id of cone 4 (TBD)
@@ -335,9 +348,9 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
       AlMshPos  = 53.5      ! Aluminum shield mesh z position
    EndFill
 *
-   do i=1,5
-     rad_cones_out(i)=SWAM_Rmin+(i-1)*(SWAM_Rmax-SWAM_Rmin)/4.0
-     rad_cones_in(i) =radii(1) +(i-1)*(radii(6)-radii(1))/4.0
+   do i=1,4
+     rad_cones_in(i) = 8.5+2.60*(i-1)
+     rad_cones_out(i)=15.0+0.85*(i-1)
    enddo
 
    Fill SCBP                ! Cabling
@@ -359,63 +372,51 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
       Layer=3               ! Layer
       Rmin1=rad_cones_in(3) ! Min radius closer to wafers
       Rmin2=rad_cones_out(3)! Min radius further from wafers
-      Vol  =4.05+2.02       ! Volume of copper, LV+HV cables
+      Vol  =4.05+2.02+3.67+1.69        ! Volume of copper, LV+HV cables -- 3+4 layers coalesce
    EndFill
 *
-* These cabling layers go to the upper surface of the manifold,
-* hence the different Rmin2
+*
    Fill SCBP                ! Cabling
-      Layer=4               ! Layer
+      Layer=4               ! Layer (former 5th)
       Rmin1=rad_cones_in(4) ! Min radius closer to wafers
       Rmin2=rad_cones_out(4)! Min radius further from wafers
-      Vol  =3.67+1.69       ! Volume of copper, LV+HV cables
-   EndFill
-*
-   Fill SCBP                ! Cabling
-      Layer=5               ! Layer
-      Rmin1=rad_cones_in(5) ! Min radius closer to wafers
-      Rmin2=rad_cones_out(5)! Min radius further from wafers
       Vol  =6.95+2.43       ! Volume of copper, LV+HV cables
    EndFill
 ***********************************************
    Fill SFEP                ! Water feed
       Layer=1               ! Layer
-      Len  =1.85             ! Length
-      Rmin1=0.5*(rad_cones_in(2)+rad_cones_in(1))     ! Min radius closer to wafers
-      Rmin2=0.5*(rad_cones_out(2)+rad_cones_out(1))   ! Min radius further from wafers
-      Vol  =50       ! Volume of water
+      Len  =1.85            ! Length
+      Rmin1=0.5*(rad_cones_in(1) +rad_cones_in(2))    ! Min radius closer to wafers
+      Rmin2=0.5*(rad_cones_out(1)+rad_cones_out(2))   ! Min radius further from wafers
+      Vol  =16.0            ! Volume of water
+      VolPlast  =38.4       ! Volume of plastic
    EndFill
 *
    Fill SFEP                ! Water feed
       Layer=2               ! Layer
-      Rmin1=0.5*(rad_cones_in(3)+rad_cones_in(4))     ! Min radius closer to wafers
-      Rmin2=0.5*(rad_cones_out(3)+rad_cones_out(4))   ! Min radius further from wafers
-      Vol  =60       ! Volume of water
+      Rmin1=0.5*(rad_cones_in(2) +rad_cones_in(3))    ! Min radius closer to wafers
+      Rmin2=0.5*(rad_cones_out(2)+rad_cones_out(3))   ! Min radius further from wafers
+      Vol  =24.0            ! Volume of water
+      VolPlast  =57.6       ! Volume of plastic
    EndFill
 *
    Fill SFEP                ! Water feed
       Layer=3               ! Layer
-      Rmin1=0.5*(rad_cones_in(4)+rad_cones_in(5))     ! Min radius closer to wafers
-      Rmin2=0.5*(rad_cones_out(4)+rad_cones_out(5))   ! Min radius further from wafers
-      Vol  =70       ! Volume of water
+      Rmin1=0.5*(rad_cones_in(3) +rad_cones_in(4))    ! Min radius closer to wafers
+      Rmin2=0.5*(rad_cones_out(3)+rad_cones_out(4))   ! Min radius further from wafers
+      Vol  =32       ! Volume of water
+      VolPlast  =76.8      ! Volume of plastic
    EndFill
 *
-   Fill SFEP                ! Water feed
-      Layer=4               ! Layer
-      Rmin1=rad_cones_in(5)+1     ! Min radius closer to wafers
-      Rmin2=rad_cones_out(5)+0.5   ! Min radius further from wafers
-      Vol  =200       ! Volume of water
-   EndFill
 ***********************************************
-   Fill SWCX                ! Circular water distribution pipes (2)
-      Version=1             ! version
-      Length =2.7           ! of the ring in the Z direction
-      dR     =1.3           ! thickness
-*      Length =2.35          ! of the ring in the Z direction
-*      dR     =1.5           ! thickness
-      offset =1.5           ! from the edge of the ladder support, inward
-      rOffset=0.5           ! Radial offset
-      wall   =0.3           ! thisckness of the plastic pipe wall
+   Fill SWCX                ! Segments of the water distribution pipes
+      Layer=1               ! version
+      Length =2.8           ! of the ring in the Z direction
+      dR     =0.72          ! thickness of the mother layer
+      rad    =0.2           ! inner plastic tube radius
+      offset =-2.0          ! from the edge of the ladder support, inward
+      rOffset=1.0           ! Radial offset
+      wall   =0.16          ! thickness of the plastic pipe wall
    EndFill
 *
    Fill SOUP                ! Mother of the outer shielding cage, parameters
@@ -515,11 +516,11 @@ Block SVTT is the mother of all SVT volumes
       brack_z=swca_Length/2+ssup_ERJzdis
       screw_z=endrng_z+0.5*(brack_z-endrng_z)
       Create    SOES " Volume to hold outer endring screws"
-      Position  SOES z= screw_z
-      Position  SOES z=-screw_z
+      Position  SOES z= screw_z konly='MANY'
+      Position  SOES z=-screw_z konly='MANY'
       Create    SIES " Volume to hold inner endring screws"
-      Position  SIES z= screw_z
-      Position  SIES z=-screw_z
+      Position  SIES z= screw_z konly='MANY'
+      Position  SIES z=-screw_z konly='MANY'
 * 
 * Water manifold
 *
@@ -569,7 +570,11 @@ Block SVTT is the mother of all SVT volumes
          endif
          USE SVTL layer=ilayer
          Create   SLYD  " layer mother " 
-	 Position SLYD
+         if(ilayer.eq.2.or.ilayer.eq.4.or.ilayer.eq.6) then
+	   Position SLYD konly='MANY'
+         else
+	   Position SLYD
+         endif
       EndDo
 * 
 * The first (test) layer
@@ -605,9 +610,20 @@ Block SVTT is the mother of all SVT volumes
       Position SCBM x=0.0 y=0.0 z=-(SWAM_Zmin-SCBP_Len) ThetaZ=180.0
 
 * Circular water feeds
-      Create SWCL
-      Position SWCL x=0.0 y =0.0 z= SWCA_Length/2.0-SWCX_offset
-      Position SWCL x=0.0 y =0.0 z=-SWCA_Length/2.0+SWCX_offset
+      use svtl layer=6
+      Create SXRL
+      Position SXRL x=0.0 y =0.0 z= SWCA_Length/2.0-SWCX_Length/2.0-SWCX_offset konly='MANY'
+      Position SXRL x=0.0 y =0.0 z=-SWCA_Length/2.0+SWCX_Length/2.0+SWCX_offset konly='MANY'
+
+      use svtl layer=4
+      Create SXRL
+      Position SXRL x=0.0 y =0.0 z= SWCA_Length/2.0-SWCX_Length/2.0-SWCX_offset konly='MANY'
+      Position SXRL x=0.0 y =0.0 z=-SWCA_Length/2.0+SWCX_Length/2.0+SWCX_offset konly='MANY'
+
+      use svtl layer=2
+      Create SXRL
+      Position SXRL x=0.0 y =0.0 z= SWCA_Length/2.0-SWCX_Length/2.0-SWCX_offset konly='MANY'
+      Position SXRL x=0.0 y =0.0 z=-SWCA_Length/2.0+SWCX_Length/2.0+SWCX_offset konly='MANY'
 
 * Outer shileding structure
       Create SOUM
@@ -621,91 +637,86 @@ EndBlock
 *
 *******************************************************************************
 *
-Block SWCL is the mother of the circular water pipes
+Block SXRL is the mother of the circular water pipes
       Material Air
-      Attribute SWCL seen=0 colo=1
-
-      USE SVTL Layer=6
+      Attribute SXRL seen=0 colo=1
 
       Shape TUBE _
-      rmin=SWCX_rOffset+SVTL_Radius-SWCX_wall _
-      rmax=SWCX_rOffset+SVTL_Radius+SWCX_dR+SWCX_wall _
-      dz=(SWCX_Length/2.0)+2.0*SWCX_wall
+      rmin=SWCX_rOffset+SVTL_Radius _
+      rmax=SWCX_rOffset+SVTL_Radius+SWCX_dR _
+      dz=SWCX_Length/2.0
 
-      Create SWCP
-      Position SWCP x=0.0 y =0.0 z= SWCX_Length/4.0 + SWCX_wall
-      Position SWCP x=0.0 y =0.0 z=-SWCX_Length/4.0 - SWCX_wall
-      Create and Position SWCU
-      Create and Position SWCD
+      Create SWRP
+      Create SYRU
 
-      Create SWCF
-      Position SWCF x=0.0 y=0.0 z= SWCX_Length/2.0 + SWCX_wall*1.5
-      Position SWCF x=0.0 y=0.0 z=-SWCX_Length/2.0 - SWCX_wall*1.5
-      Position SWCF x=0.0 y=0.0 z= SWCX_wall/2.0
-      Position SWCF x=0.0 y=0.0 z=-SWCX_wall/2.0
+      do i_phi=1,4*SVTL_Nladder
+         tube_angle=(pi/(2.0*SVTL_Nladder))*(i_phi-0.5)
+
+         Position SWRP _
+         x=cos(tube_angle)*(SVTL_radius+SWCX_rOffset+SWCX_dR/2.0) _
+         y=sin(tube_angle)*(SVTL_radius+SWCX_rOffset+SWCX_dR/2.0) _
+         z=0.0
+
+         Position SYRU _
+         x=cos(tube_angle)*(SVTL_radius+SWCX_rOffset+SWCX_dR/2.0) _
+         y=sin(tube_angle)*(SVTL_radius+SWCX_rOffset+SWCX_dR/2.0) _
+         z=0.0
+
+      enddo
 
 EndBlock
 *******************************************************************************
 *
-Block SWCP is an approximation of water in the circular pipe, a rectangular one
+Block SWRP is an approximation of water in the circular pipe, a rectangular one
       Material Water
-      Attribute SWCP    seen=1    colo=4
-      USE SVTL Layer=6
-* we approximate the two adjacent circular round tubes with
-* two rectangular ones, of same combined cross section:
-* 1.5x2.35cm total, for both
+      Attribute SWRP    seen=1    colo=4
 
-      Shape TUBE rmin=SWCX_rOffset+SVTL_Radius _
-                 rmax=SWCX_rOffset+SVTL_Radius+SWCX_dR _
-                 dz=SWCX_Length/4.0
+      Shape TUBE rmin=0.0 rmax=SWCX_rad dz=SWCX_Length/2.0
 
 EndBlock
 *
 *******************************************************************************
 *
-Block SWCU is an approximation of the upper wall of the water pipe
+Block SYRU is the  wall of the water pipe
       Component C      A=12  Z=6  W=1
       Component H2     A=1   Z=1  W=2
       Mixture   CH2    Dens=0.935
 
-      Attribute SWCP    seen=1    colo=4
-      USE SVTL Layer=6
-      Shape TUBE _
-      rmin=SWCX_rOffset+SVTL_Radius+SWCX_dR _
-      rmax=SWCX_rOffset+SVTL_Radius+SWCX_dR+SWCX_wall _
-      dz=SWCX_Length/2.0+2.0*SWCX_wall
+      Attribute SYRU    seen=1    colo=4
+      Shape TUBE rmin=SWCX_rad rmax=SWCX_rad+SWCX_wall dz=SWCX_Length/2.0
+
 
 EndBlock
 *
 *******************************************************************************
 *
-Block SWCD is an approximation of the lower wall of the water pipe
-      Component C      A=12  Z=6  W=1
-      Component H2     A=1   Z=1  W=2
-      Mixture   CH2    Dens=0.935
+*Block SYTD is an approximation of the lower wall of the water pipe
+*      Component C      A=12  Z=6  W=1
+*      Component H2     A=1   Z=1  W=2
+*      Mixture   CH2    Dens=0.935
 
-      Attribute SWCP    seen=1    colo=4
-      USE SVTL Layer=6
-      Shape TUBE _
-      rmin=SWCX_rOffset+SVTL_Radius-SWCX_wall _
-      rmax=SWCX_rOffset+SVTL_Radius _
-      dz=SWCX_Length/2.0+2.0*SWCX_wall
-
-EndBlock
+*      Attribute SYTD    seen=1    colo=4
+*
+*      Shape TUBE _
+*      rmin=SWCX_rOffset+SVTL_Radius-SWCX_wall _
+*      rmax=SWCX_rOffset+SVTL_Radius _
+*      dz=SWCX_Length/2.0+2.0*SWCX_wall
+*
+*EndBlock
 *
 *******************************************************************************
 *
-Block SWCF is an approximation of the side wall of the water pipe
-      Component C      A=12  Z=6  W=1
-      Component H2     A=1   Z=1  W=2
-      Mixture   CH2    Dens=0.935
+*Block SWCF is an approximation of the side wall of the water pipe
+*      Component C      A=12  Z=6  W=1
+*      Component H2     A=1   Z=1  W=2
+*      Mixture   CH2    Dens=0.935
+*
+*      Attribute SWCF    seen=1    colo=4
+*
+*      Shape TUBE _
+*      rmin=SWCX_rOffset+SVTL_Radius  rmax=SWCX_rOffset+SVTL_Radius+SWCX_dR dz=SWCX_wall/2.0
 
-      Attribute SWCP    seen=1    colo=4
-      USE SVTL Layer=6
-      Shape TUBE _
-      rmin=SWCX_rOffset+SVTL_Radius  rmax=SWCX_rOffset+SVTL_Radius+SWCX_dR dz=SWCX_wall/2.0
-
-EndBlock
+*EndBlock
 *******************************************************************************
 *
 Block SOUM is the mother of the array of the outer shileding support tubes
@@ -945,16 +956,19 @@ Block SCBM is the mother for the bundle of cables going from PCBs
 
 * The bundles of cables connecting PCBs with the transition boards:
 
-      Do ilayer=1,5
+      Do ilayer=1,4
          Use SCBP Layer=ilayer
          create SCBL "bundles of cables"
          Position SCBL x=0.0 y=0.0 z=0.0
       enddo
 
-      Do ilayer=1,4
+      Do ilayer=1,3
          Use SFEP Layer=ilayer
-         create SFED "bundles of cables"
+         create SFED "bundles of water pipes"
          Position SFED x=0.0 y=0.0 z=0.0
+
+         create SPLS "plastic of the water pipes"
+         Position SPLS x=0.0 y=0.0 z=0.0
       enddo
 
 
@@ -963,7 +977,7 @@ EndBlock
 *
 Block SCBL is the bundle of cables going from PCBs to manifolds
       Material  Copper
-      Attribute SCBL   Seen=1   Colo=4
+      Attribute SCBL   Seen=1   Colo=3
 
       sq=SCBP_Len**2/(SCBP_Rmin2-SCBP_Rmin1)**2
       A=3.1415*(SCBP_Rmin1**2+SCBP_Rmin2**2)*sqrt(1+sq)
@@ -980,21 +994,40 @@ Block SCBL is the bundle of cables going from PCBs to manifolds
 endblock
 *------------------------------------------------------------------------------
 *
-Block SFED is the bundle of cables going from PCBs to manifolds
+Block SFED is the watrer in the bundle of pipes going to manifolds
       Material  Water
-      Attribute SFED   Seen=1   Colo=2
+      Attribute SFED   Seen=1   Colo=1
 
       sq=SFEP_Len**2/(SFEP_Rmin2-SFEP_Rmin1)**2
       A=3.1415*(SFEP_Rmin1**2+SFEP_Rmin2**2)*sqrt(1+sq)
 
       CuThk=(SFEP_Vol/A)*sqrt(1.0+1.0/sq)
-*      write(*,*) 'A, Th=',A,CuThk
 
       SHAPE     CONE   Dz  =SFEP_Len,
                        Rmn1=SFEP_Rmin1,
                        Rmx1=SFEP_Rmin1+CuThk,
                        Rmn2=SFEP_Rmin2,
                        Rmx2=SFEP_Rmin2+CuThk
+*
+endblock
+*------------------------------------------------------------------------------
+*
+Block SPLS is the plastic walls of the bundle of pipes going to manifolds
+      Component C      A=12  Z=6  W=1
+      Component H2     A=1   Z=1  W=2
+      Mixture   CH2    Dens=0.935
+      Attribute SPLS   Seen=1   Colo=6
+
+      sq=SFEP_Len**2/(SFEP_Rmin2-SFEP_Rmin1)**2
+      A=3.1415*(SFEP_Rmin1**2+SFEP_Rmin2**2)*sqrt(1+sq)
+
+      CuThk=(SFEP_Vol/A)*sqrt(1.0+1.0/sq)
+
+      SHAPE     CONE   Dz  =SFEP_Len,
+                       Rmn1=SFEP_Rmin1+0.2,
+                       Rmx1=SFEP_Rmin1+0.2+CuThk,
+                       Rmn2=SFEP_Rmin2+0.2,
+                       Rmx2=SFEP_Rmin2+0.2+CuThk
 *
 endblock
 *------------------------------------------------------------------------------
@@ -1232,7 +1265,7 @@ EndBlock
 *
 * ****************************************************************************
 *
-Block SROD is the SVT Be support rod
+Block SROD is the SVT Carbon composite support rod
       Material  Carbon
       Attribute SROD  Seen=1  Colo=2
       Shape     TUBE   rmin=ssup_RodID/2,
