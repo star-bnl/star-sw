@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.12 2000/06/20 16:34:26 snelling Exp $
+//  $Id: StFlowMaker.h,v 1.13 2000/06/30 14:48:34 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -13,6 +13,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.13  2000/06/30 14:48:34  posk
+//  Using MessageMgr, changed Eta Symmetry cut.
+//
 //  Revision 1.12  2000/06/20 16:34:26  snelling
 //  fixed cout/streamer problem for mPhiWgt under Solaris
 //
@@ -104,7 +107,6 @@ public:
   virtual       ~StFlowMaker();
 
   Int_t         Init();
-  void          PrintInfo();
   Int_t         Make();
   Int_t         Finish();
   StFlowEvent*  FlowEventPointer() const;
@@ -117,7 +119,7 @@ public:
   void          SetNanoEventFileName(const Char_t* name="flownanoevent.root");
   void          SetPicoEventFileName(const Char_t* name="flowpicoevent.root");
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.12 2000/06/20 16:34:26 snelling Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.13 2000/06/30 14:48:34 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
