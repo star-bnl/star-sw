@@ -6,14 +6,14 @@ TPad *pad=0;
 //==========================
 //==========================
 
-void plPi0Solo( int page=1,char *dd="C/") {
+void plPi0Solo( int page=1) {
   int pr=0;
 
-  TString fName="all" ;
-  fName="mc12";
+  TString fName="soloPi0" ;
+  //  fName="mc12";
   
-  TString outDir="outPi0/"; 
-  //  outDir="/auto/pdsfdv34/starspin/balewski/calib2004/outPi0";  outDir+=dd;
+  TString outDir="./"; 
+  //  outDir="/auto/pdsfdv34/starspin/balewski/calib2004/outPi0"; 
  
   gROOT->Reset();
 
@@ -55,8 +55,6 @@ void plPi0Solo( int page=1,char *dd="C/") {
   pad = new TPad("pad1", "apd1",0.0,0.0,1,.95);
   pad->Draw();
 
-
- //fd->ls();
   gStyle->SetOptStat(11111     );
 
   switch(page) {
