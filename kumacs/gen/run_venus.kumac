@@ -35,11 +35,12 @@ $STAR/pams/gen/kumac
    
 RNDM  5289287  6745221
  
+message ' !!! Venus expects file optns.ven to be in top directory !!!!! '
+ 
 exec write_table_to_file#init ofile [file]
  
 exec init_ven#init
- 
- 
+  
 * loop over event
  
 DO i=1,[Nevents]
