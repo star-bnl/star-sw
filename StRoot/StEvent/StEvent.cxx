@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.4 2000/01/13 21:06:22 lasiuk Exp $
+ * $Id: StEvent.cxx,v 2.5 2000/02/11 16:14:00 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 2.4  2000/01/13 21:06:22  lasiuk
- * add rich pixel info/containers
+ * Revision 2.5  2000/02/11 16:14:00  ullrich
+ * Primary vertices automatically sorted in addPrimaryVertex().
  *
  * Revision 2.12  2000/05/22 21:47:12  ullrich
  * Added RICH collection and related methods.
@@ -29,6 +29,7 @@
  * Add Dataset browser to StEvent browser
  *
  * Revision 2.8  2000/04/18 17:31:28  perev
+ * StEvent::Browse overload of TDataSet:;One
  *
  * Revision 2.7  2000/03/29 16:54:11  ullrich
  * Added L3 trigger.
@@ -38,10 +39,15 @@
  *
  * Revision 2.5  2000/02/11 16:14:00  ullrich
  * Primary vertices automatically sorted in addPrimaryVertex().
+ *
  * add rich pixel info/containers
  *
  * Revision 2.3  2000/01/05 16:02:25  ullrich
  * SSD hits added to StEvent.
+ *
+ * Revision 2.2  1999/11/04 13:30:40  ullrich
+ * Added constructor without summary table
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.0  1999/10/12 18:41:53  ullrich
 
@@ -49,11 +55,11 @@
 #include <typeinfo>
 #include <algorithm>
 #include "StEvent.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.4 2000/01/13 21:06:22 lasiuk Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.4 2000/01/13 21:06:22 lasiuk Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.5 2000/02/11 16:14:00 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.5 2000/02/11 16:14:00 ullrich Exp $";
 #include "StTpcHitCollection.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.4 2000/01/13 21:06:22 lasiuk Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.4 2000/01/13 21:06:22 lasiuk Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.5 2000/02/11 16:14:00 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.5 2000/02/11 16:14:00 ullrich Exp $";
 #include "StFtpcHitCollection.h"
 #include "StEmcCollection.h"
 #include "StRichCollection.h"
@@ -61,8 +67,8 @@ static const char rcsid[] = "$Id: StEvent.cxx,v 2.4 2000/01/13 21:06:22 lasiuk E
 #include "StTriggerDetectorCollection.h"
 #include "StPrimaryVertex.h"
 #include "StL0Trigger.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.4 2000/01/13 21:06:22 lasiuk Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.4 2000/01/13 21:06:22 lasiuk Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.5 2000/02/11 16:14:00 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.5 2000/02/11 16:14:00 ullrich Exp $";
 #include "tables/St_dst_event_summary_Table.h"
 #include "tables/St_dst_summary_param_Table.h"
 #ifndef ST_NO_NAMESPACES
@@ -83,7 +89,7 @@ using std::swap;
     mV0Vertices = 0;
     mXiVertices = 0;
     mKinkVertices = 0;
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.4 2000/01/13 21:06:22 lasiuk Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.5 2000/02/11 16:14:00 ullrich Exp $";
 void
 StEvent::initToZero()
 
@@ -316,7 +322,21 @@ StEvent::setRichPixelCollection(StRichPixelCollection* val)
     if (mRichCollection) delete mRichCollection;
     mRichCollection = val;
 {
-    mPrimaryVertices.push_back(vertex);
+    _lookupAndSet(val, mContent);
+}
+
+    if (mContent[mRichCollection]) delete mContent[mRichCollection];
+    if (mL0Trigger) delete mL0Trigger;
+    mL0Trigger = val;
+{
+	mPrimaryVertices.push_back(vertex);
+	
+	//
+	//  Sort new entry.
+	//  Vertices are ordered according to number
+	//  of daughter tracks in descending order.
+}
+	for (int i=mPrimaryVertices.size()-1; i>0; i--) {
             if (mPrimaryVertices[i]->numberOfDaughters() > mPrimaryVertices[i-1]->numberOfDaughters()) 
 		swap(mPrimaryVertices[i], mPrimaryVertices[i-1]);
 	    else
