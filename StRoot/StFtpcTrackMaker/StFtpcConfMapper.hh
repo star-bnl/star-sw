@@ -1,8 +1,5 @@
-// $Id: StFtpcConfMapper.hh,v 1.14 2002/09/04 13:44:22 oldi Exp $
+// $Id: StFtpcConfMapper.hh,v 1.13 2002/04/29 15:49:50 oldi Exp $
 // $Log: StFtpcConfMapper.hh,v $
-// Revision 1.14  2002/09/04 13:44:22  oldi
-// Typos fixed.
-//
 // Revision 1.13  2002/04/29 15:49:50  oldi
 // All tracking parameters moved to StFtpcTrackingParameters.cc/hh.
 // In a future version the actual values should be moved to an .idl file (the
@@ -138,8 +135,8 @@ private:
   // Cuts
   Double_t mMaxAngleTracklet[2];  // limit of angle between to pieces of a tracklet
   Double_t mMaxAngleTrack[2];     // limit of angle between to pieces of a track
-  Double_t mMaxCircleDist[2];     // limit of distance of a new cluster to the circle fit of a track
-  Double_t mMaxLengthDist[2];     // limit of distance of a new cluster to the length fit of a track
+  Double_t mMaxCircleDist[2];     // limit of angle phi between to subsequent clusters of one track
+  Double_t mMaxLengthDist[2];     // limit of pseudorapidity eta between to subsequent clusters of one track
   
   // Tracking informtion
   Int_t mMainVertexTracks; // number of tracks coming from the main vertex
@@ -154,7 +151,7 @@ private:
 
   // setter
   void SetEtaMin(Double_t f) { mEtaMin = f; }  // sets min. value for eta
-  void SetEtaMax(Double_t f) { mEtaMax = f; }  // sets max. value for eta
+  void SetEtaMAx(Double_t f) { mEtaMax = f; }  // sets max. value for eta
   void CalcEtaMinMax();                        // calculates the min. and max. value for eta
 
   void SetTrackletLength(Int_t f)        { mTrackletLength[0] = mTrackletLength[1] = f;     }  // sets tracklet lengths (both the same)

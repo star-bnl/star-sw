@@ -48,10 +48,11 @@ St_controlEmcSimulatorMaker* controlMaker; controlEmcSimulatorMaker_st* controlT
 St_controlEmcPmtSimulator* pmtSimulator; controlEmcPmtSimulator_st* pmtTable;
 
 TDataSet* calibDB=0, *statusDB=0, *status=0, *ped=0;
-St_emcRunning* statusEmc=0; // status for BEMC  or BPRS
+St_emcRunning* statusEmc=0;   // status for BEMC  or BPRS
 emcRunning_st* statusEmcRec=0;
-St_smdRunning* statusSmd=0; // status for BSMDE or BSMDP
+St_smdRunning* statusSmd=0;   // status for BSMDE or BSMDP
 smdRunning_st* statusSmdRec=0;
+Int_t emcDbDate = 20010924; // 24-09-2001(day-month-year) - date after that emc DB data exist 
 
 StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name)
 {
@@ -94,18 +95,21 @@ Int_t StEmcSimulatorMaker::Init()
       mHistControl = controlTable->hist;
       SetDebug(controlTable->debug);
       gMessMgr->SetLimit("StEmcSimulator",Int_t(controlTable->messLimit));
-      // Db for calibration 
+      // Db for calibration
+      mDbMaker     = (St_db_Maker*)GetMaker("db");
+      Int_t dbDate = mDbMaker->GetDateTime().GetDate();
       Int_t detInDb=0;
       for(Int_t i=0; i<4; i++) {
-         if (controlTable->keyDB[i]) {
+         if (controlTable->keyDB[i] && dbDate>emcDbDate) {
             detInDb++;
             if((Int_t)mDB < controlTable->keyDB[i]) mDB = controlTable->keyDB[i];
+         } else {
+	    controlTable->keyDB[i] = 0;   // push to no DB mode 
          }
          printf("<I> key for DB : det %2i keyDB %i\n", i+1, controlTable->keyDB[i]); 
       }
       if(mDB) {
         gMessMgr->Info()<<"Calibration db in action for " << detInDb << " detector(s)"<<endm; 
-        mDbMaker = (St_db_Maker*)GetMaker("db");
         if(mDbMaker) {
 	  // 10-sep-2002 - I can not do that because it changes the global time stamp 
 	  //           printf("Time stamp from control table : date %i time %i \n",
@@ -887,8 +891,14 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.11 2002/09/10 16:51:32 pavlinov Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.13 2002/09/17 18:37:01 pavlinov Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.13  2002/09/17 18:37:01  pavlinov
+// mDbMaker was zero
+//
+// Revision 1.12  2002/09/16 22:14:50  pavlinov
+// No DB for EMC before 24-09-2001
+//
 // Revision 1.11  2002/09/10 16:51:32  pavlinov
 // Discard line with mDbMaker->SetDateTime
 //

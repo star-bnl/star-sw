@@ -34,7 +34,6 @@ class StEMCReader
   int getSMD_TIMEBIN(int fiber,            unsigned int& TimeBin);
   int NSmdHits();
   int NTowerHits();
-  EMC_Reader* getBemcReader(); // From Alex P. Suaide at Wayne State University, Aug 28 2002.
 
  protected:
   EMC_Reader *fEMCImpReader;

@@ -200,7 +200,7 @@ if ($coll) { # order h-files with Collections
       next if ! $class;
       my $h = $class_hfile{$class};
       next if ! $h;
-      my $hh = " " . basename($h) . " "; 
+      my $hh = basename($h); 
       next if $h_files =~ /$hh/; 
       my $hd =  $class_hfile_depens_on{$class};
       if ($hd) { my @hds = split /:/, $hd; 	       	#print "h: $h => $hd => @hds\n";
@@ -215,7 +215,7 @@ if ($coll) { # order h-files with Collections
 	       }
       							#print "class $class h = $h depends on $hd\n";# if $hd;
       next if $hd;
-      $h_files .= $hh; $add++;			#print "add $hh : $h_files\n";
+      $h_files .= " " . $hh; $add++;			#print "add $hh : $h_files\n";
     }
     if (!$add) {$done = 1;}
   }
@@ -233,8 +233,8 @@ for my $class (@classes) {	#loop over classes
       next;
   }
 
-  my $hh = " " . basename($h) . " "; 				#print "hh = $hh\n";
-  if ($h_files !~ /$hh/ )  {$h_files .= $hh;}
+  my $hh = basename($h); 				#print "hh = $hh\n";
+  if (!grep(/$hh/,$h_files)) {$h_files .= " " . $hh;}
 }#end loop over classes
 
 							#print "h_files= $h_files\n";

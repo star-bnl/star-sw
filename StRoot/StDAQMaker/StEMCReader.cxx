@@ -119,8 +119,3 @@ int StEMCReader::NSmdHits()
  {
    return fEMCImpReader->NSmdHits();
  }
- 
-EMC_Reader* StEMCReader::getBemcReader()
-{
-  return fEMCImpReader;
-}

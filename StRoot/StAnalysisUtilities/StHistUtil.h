@@ -1,8 +1,5 @@
-// $Id: StHistUtil.h,v 2.2 2002/09/06 02:51:34 genevb Exp $
+// $Id: StHistUtil.h,v 2.1 2000/08/25 22:06:50 genevb Exp $
 // $Log: StHistUtil.h,v $
-// Revision 2.2  2002/09/06 02:51:34  genevb
-// Remove limit on maximum number of histograms that can be copied
-//
 // Revision 2.1  2000/08/25 22:06:50  genevb
 // Added histo descriptor in top right
 //
@@ -61,8 +58,8 @@ class StHistUtil {
   TList*  m_ListOfLogX; //! list of histogram names that will be drawn with logX scale
   TList*  m_ListOfPrint;//! list of histogram names that will be drawn,printed
   StMaker* m_PntrToMaker;//! pointer to an St_Maker, so can find histograms
-  Int_t   maxHistCopy;  //! size of array of new histograms
-  TH1**   newHist;      //! array of new histograms that other will be copied into
+  static  const Int_t maxHistCopy=512; //! size of array of new histograms 
+  TH1*    newHist[maxHistCopy]; //! array of new histograms that other will be copied into
   Bool_t  debug;
 
 
@@ -113,7 +110,7 @@ class StHistUtil {
   
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.2 2002/09/06 02:51:34 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.1 2000/08/25 22:06:50 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };

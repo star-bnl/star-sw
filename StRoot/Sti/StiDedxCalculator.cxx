@@ -38,6 +38,14 @@ void StiDedxCalculator::getDedx(const StiKalmanTrack* track,
     //We assume that the vector contains only nodes with hits!!!!!
     vector<StiKalmanTrackNode*> nodes = track->getNodes(mDetector); //Claude t.b.d.
 
+     if(nodes.size()==0)
+      {
+	nPointsUsed=0.;
+	dEdx=DBL_MAX;
+	dEdxE=DBL_MAX;
+	return;
+      }
+   
     //Transform each node to a double=dedx of it's hit
     //I did it in one line because it should be a little faster than
     //a loop, since the call to NodeDedxCalculator() should be
@@ -50,10 +58,11 @@ void StiDedxCalculator::getDedx(const StiKalmanTrack* track,
     
     //sort in ascending order
     sort(mVector.begin(), mVector.end(), less<double>() );
-    nPointsUsed = mFraction*static_cast<double>( mVector.size() );
+    // nPointsUsed needs to be an int, this needs to be fixed
+    nPointsUsed = mFraction*static_cast<double>( mVector.size() ); 
     double sum = accumulate(mVector.begin(),
 			    mVector.begin()+static_cast<int>(nPointsUsed), 0.);
-    if(nPointsUsed>=0.)
+    if(nPointsUsed>0.)
       {
         dEdx=sum/nPointsUsed;
         dEdxE=DBL_MAX;
@@ -63,6 +72,7 @@ void StiDedxCalculator::getDedx(const StiKalmanTrack* track,
         dEdx=DBL_MAX;
         dEdxE=DBL_MAX;
       }
+    
 }
 
 double NodeDedxCalculator::operator()(const StiKalmanTrackNode *mNode)
@@ -77,11 +87,32 @@ double NodeDedxCalculator::operator()(const StiKalmanTrackNode *mNode)
 
  
   //line aproximation
-    double dedx= (mNode->getHit()->getEloss())/
-                  sqrt((mNode->getDetector()->getShape()->getThickness()
-                   *(1.+(mNode->fP4)*(mNode->fP4))));
+    // dx = thickness * cos(lambda) * sin(crossing angle);
+//     double dedx= (mNode->getHit()->getEloss())/
+//                   (mNode->getDetector()->getShape()->getThickness()*
+//                    sqrt(1.+1./((mNode->fP4)*(mNode->fP4))));
 
-
+//     double dedx= (mNode->getHit()->getEloss())/
+//                   (mNode->getDetector()->getShape()->getThickness()* sin(mNode->crossAngle()) * cos(mNode->pitchAngle()) );
+    double sinCrossAngle = (mNode->fP3)*(mNode->fX)-(mNode->fP2);
+    double cosCrossAngle = sqrt(1.-sinCrossAngle*sinCrossAngle);
+    double tanDipAngle = (mNode->fP4);
+    double cosDipAngle = sqrt(1./(1.+tanDipAngle*tanDipAngle));
+    double dedx = (mNode->getHit()->getEloss())/
+	(mNode->getDetector()->getShape()->getThickness() / cosCrossAngle / cosDipAngle);
+    if(dedx<0.){
+       cout <<"Eloss: " << mNode->getHit()->getEloss()<<endl;
+       cout <<"sinCrossAngle: "<<sinCrossAngle<<endl;
+       cout <<"cosDipAngle: "<<cosDipAngle<<endl;
+       cout <<"Dedx: "<<dedx<<endl;
+       const StiDetector* det = mNode->getHit()->detector();
+       cout<<"Detector: " <<det->getName()<<endl
+	   <<endl;
+       cout <<"Detector is active:"
+	    <<mNode->getHit()->detector()->isActive()
+	    <<endl;
+    }
+    
   //curve calculation
 //     dedx=(mNode->getHit()->getEloss())/
 //       (2.*(mNode->fP3)*
