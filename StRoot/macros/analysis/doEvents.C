@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.91 2004/07/21 17:31:12 fine Exp $
+// $Id: doEvents.C,v 1.92 2004/08/10 15:50:27 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -29,6 +29,27 @@
 //
 // example multi-ROOT file invocation:
 // .x doEvents.C(9999,"some_directory/*.dst.root")
+//
+// example using the Grid Collector
+// 1) process first ten events generated, request is embedded in this file
+// .x doEvents.C(10, "GC")
+//
+// 2) specify the request as a string argument (analyze the event branch of
+//    selected data from production P02gg).  First argument 0 (or smaller)
+//    indicates that all events satisfying the condition will be analyzed.
+// .x doEvents.C(0, "select event where Production=P02gg and NV0>2000")
+//
+//  The rules for constructing valid conditions are as follows
+//  a) simple conditions can be joined together with logical operator "AND",
+//     "OR", "XOR" and "!" (for NOT).
+//  b) a simple condition is a range such as 'v1 < name' and 'v1 <= name <
+//     v2'.  The supported range operators are >, >=, <, <=, == and !=.
+//     The name is the name of a leaf of the ROOT tree in tag.root files.
+//     In case, a leaf of a ROOT tree contains many values, the name to
+//     be used are of the form leaf_name[0], leaf_name[1], and so on.
+//  c) only '==' operation is supported for string attributes, to avoid a
+//     string literal be mistaken as a name of an attribute, it can be
+//     quoted either with "" or with ''.
 //
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -108,6 +129,10 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
   //
   // First load some shared libraries we need
   //
+  // Load MuDst Stuff           WMZ 7/27/04
+    gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C"); 
+    loadSharedLibraries();
+
   gSystem->Load("libGeom");
   gSystem->Load("libTable");
   gSystem->Load("St_base");
@@ -127,6 +152,8 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
   gSystem->Load("StEventUtilities");
   gSystem->Load("StMagF");
   gSystem->Load("StAnalysisMaker");
+// Load StMuAnalysysMaker                 WMZ 7/27/04
+  gSystem->Load("StMuAnalysisMaker");
 
 
   //		DB ON
@@ -148,27 +175,86 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     gSystem->Load("StTableUtilities");
     gSystem->Load("StEventDisplayMaker");
   }
-
+  // Four levels of debug (0, 1, 2, 3) for MuDst      WMZ 7/27/04
+     StMuDebug::setLevel(0);
   //
   // Handling depends on whether file is a ROOT file or XDF file
   //
   chain  = new StChain("StChain");
   delete setFiles; setFiles =0;
 
-  if (fileList) {	//Normal case
-    setFiles= new StFile(fileList);
-  } else        {	//Grand Challenge
-    gSystem->Load("StChallenger");
-    setFiles = StChallenger::Challenge();
-    setFiles->SetDebug();
-    const char *Argv[]= {
-      "-s","dst runco",                                // list of components needed
-      "-q","numberOfPrimaryTracks>1500",               // example of user query
-      "-c","/afs/rhic/star/incoming/GCA/daq/stacs.rc"  // pointer to GC servers for daq
-    };
-    Int_t Argc=sizeof(Argv)/4;
-    setFiles->Init(Argc,Argv);
-  }
+    TString mainBranch;
+    if (fileList == 0 || fileList[0] == 0 || isspace(fileList[0][0])) {
+	// Grid Collector: case I -- user needs to modify Argv
+	gSystem->Load("StGridCollector");
+	StGridCollector *req = StGridCollector::Create();
+	req->SetDebug(5);
+	const char *Argv[]= {
+	    "-s","MuDst",                        // also main branch
+	    "-q","production=P03ia and NV0>2000",   // conditions on events
+        };
+	Int_t Argc = sizeof(Argv)/4;
+	Int_t ierr = req->Init(Argc, Argv);
+	if (0 != ierr) {
+	    std::cout << "doEvents.C can not initialize the Grid Collector "
+		      << "with \"";
+	    for (Int_t i=0; i < Argc; ++i)
+		std::cout << " " << Argv[i];
+	    std::cout << "\"\nError code is " << ierr << std::endl;
+	    return; // initialization failure
+	}
+	if (nEvents <= 0) {
+	    nEvents = req->GetNEvents();
+	    if (req->GetDebug() > 0)
+		std::cout << "INFO: actual number of events " << nEvents
+			  << std::endl;
+	}
+	setFiles = req;
+	mainBranch = "MuDstBranch"; // modify this match "-s" option in Argv
+    }
+    else if (strncmp(fileList[0], "GC ", 3) == 0 ||
+	     strncmp(fileList[0], "from ", 5) == 0 ||
+	     strncmp(fileList[0], "where ", 6) == 0 ||
+	     strncmp(fileList[0], "select ", 7) == 0) {
+	// Grid Collector: case II -- user has specified the options on
+	// command line
+	gSystem->Load("StGridCollector");
+	StGridCollector *req = StGridCollector::Create();
+	req->SetDebug(5);
+	Int_t ierr = req->Init(fileList[0]);
+	if (0 != ierr) { // parse the arguments
+	    std::cout << "doEvents.C can not initialize the Grid Collector "
+		      << "with argument \"" << fileList[0]
+		      << "\"\nError code is " << ierr
+		      << std::endl;
+	    return;
+	}
+	if (nEvents <= 0) {
+	    nEvents = req->GetNEvents();
+	    if (req->GetDebug() > 0)
+		std::cout << "INFO: actual number of events " << nEvents
+			  << std::endl;
+	}
+	setFiles = req;
+	mainBranch = req->GetCompName();
+	mainBranch += "Branch";
+    }
+    else {	// Normal case -- user has specified a list of files
+	setFiles = new StFile(fileList);
+	char line[999]; strcpy(line,fileList[0]);
+	if (*line=='@') {
+	    TString command("grep '.root' "); command += line+1;
+	    FILE *pipe = gSystem->OpenPipe(command.Data(),"r");
+	    if (pipe) {fgets(line,999,pipe);line[strlen(line)-1] = 0;}
+	    fclose(pipe);
+	}
+	mainBranch = line;
+	//    printf("fileList[0] %s %s\n",line,mainBranch.Data());
+	mainBranch.ReplaceAll(".root","");
+	int idot = strrchr((char*)mainBranch,'.') - mainBranch.Data();
+	mainBranch.Replace(0,idot+1,"");
+	mainBranch += "Branch";
+    }
  
   //   		Geant maker  for EventDisplay
   if (eventDisplay) {
@@ -179,24 +265,14 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
   }
 
 
-  TString mainBranch;
-  if (fileList && fileList[0]) {
-    char line[999]; strcpy(line,fileList[0]);
-    if (*line=='@') {
-      TString command("grep '.root' "); command += line+1;
-      FILE *pipe = gSystem->OpenPipe(command.Data(),"r");
-      if (pipe) {fgets(line,999,pipe);line[strlen(line)-1] = 0;}
-      fclose(pipe);
-    }
-    mainBranch = line;
-    // printf("fileList[0] %s %s\n",line,mainBranch.Data());
-    mainBranch.ReplaceAll(".root","");
-    int idot = strrchr((char*)mainBranch,'.') - mainBranch.Data();
-    mainBranch.Replace(0,idot+1,"");
-    mainBranch+="Branch";
+  if (!mainBranch.IsNull()) {
     printf("*** mainBranch=%s ***\n",mainBranch.Data());
   }
 
+//  For MuDst, the input string fTreeName which is defined in StIOInterface.h 
+//  is used to pass a SAVE flag. To save selected  events of MuDst, instance 
+//  a new StIOMaker class as follows,                // WMZ 7/27/04
+//  StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"MuSave");
   StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");	//deactivate all branches
@@ -223,6 +299,8 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
   //  Sample analysis maker
   //
   StAnalysisMaker *analysisMaker = new StAnalysisMaker("analysis");
+//  Sample analysis maker for MuDst               WMZ 7/27/04
+//  StMuAnalysisMaker *analysisMaker = new StMuAnalysisMaker("analysis");
 
 
   /////////////////////////////////////////////////////////////////////
@@ -345,6 +423,9 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.92  2004/08/10 15:50:27  perev
+// Added GridCollector functionality
+//
 // Revision 1.91  2004/07/21 17:31:12  fine
 // The default coloring filter has been added to doEvents macro and StEventHeler class
 //
