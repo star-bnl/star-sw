@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.78 2003/01/17 16:26:13 fine Exp $
+// $Id: doEvents.C,v 1.79 2003/01/17 17:14:06 fine Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -122,13 +122,14 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     gSystem->Load("StAnalysisMaker");
     
 //		DB ON
-    if (tflag.Contains("dbon")) {
-
+    if (tflag.Contains("dbon") || eventDisplay ) {
+      gSystem->Load("libtpc_Tables");
       gSystem->Load("StDbLib.so");
       gSystem->Load("StDbBroker.so");
       gSystem->Load("libStDb_Tables.so");
       gSystem->Load("St_db_Maker.so");
       gSystem->Load("StTpcDb");
+      gSystem->Load("StDetectorDbMaker");
      }
 
 //   		Special libraries for EventDisplay
@@ -317,8 +318,11 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.79  2003/01/17 17:14:06  fine
+// fix: StEventMaker was not loaded properly
+//
 // Revision 1.78  2003/01/17 16:26:13  fine
-// chnage display default parameters
+//  chnage display default parameters
 //
 // Revision 1.77  2002/11/26 02:30:29  perev
 // EventLoop added
