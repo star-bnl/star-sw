@@ -1,5 +1,10 @@
-* $Id: tpt_merge_segments.F,v 1.10 1999/09/14 00:53:12 liq Exp $
+* $Id: tpt_merge_segments.F,v 1.11 1999/11/03 03:25:28 sakrejda Exp $
 * $Log: tpt_merge_segments.F,v $
+* Revision 1.11  1999/11/03 03:25:28  sakrejda
+* When two tracks were merged, hits were ordered on track one by one.
+* Those that were already placed, were marked as such, but were not removed
+* from the further considerations. This problem was fixed.
+*
 * Revision 1.10  1999/09/14 00:53:12  liq
 * add tpt_mxdim.inc, use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
 *
@@ -91,12 +96,13 @@ c The array lpnt will point to each of these tracks in order.
       mpnt = mxpnt
       ltot = 0
       do i=1,track_h.nok
-         if(trk(i).flag.ge.0.and.abs(trk(i).p(2)).lt.120.0) then
+         if(trk(i).flag.ge.0) then
             ltot=ltot+1
             merge(ltot).rad=abs(trk(i).p(2))
             merge(ltot).lpnt=i
          endif
       enddo
+      if(ltot.eq.0) go to 999
       iret=tls_Quick_Sort_r(ltot, merge(1).rad, merge(2).rad, merge)
 
 
@@ -129,7 +135,7 @@ C           >> USE Eq. 2.1.29 of Tracking Memo. Do not try to merge tracks
 C           >> with different curvature (charge). (JN 980406)
             qij=trk(lxi).p(2)*trk(lxj).p(2)
             meanrad=0.5*(radi+radj)
-            varb=0.5*(cuta/meanrad + cutb/meanrad)
+            varb=0.5*(cuta + cutb)/meanrad
 C            if (cuta.lt.6.0.and.cutb.lt.6.0) then
 c           come back to it! sometimes merging tracks with different signs
 c           makes some sence
@@ -151,8 +157,7 @@ c                 are not merged.
                   do isort=1,trk(lxi).nhit
                      ipoint = trk(lxi).ipnt(isort)
                      if (ipoint.ne.0) then
-                           itrack = int(hit(ipoint).track/1000)
-                           ips = hit(ipoint).track-itrack*1000
+                           ips = mod(hit(ipoint).track,1000)
                            if (ips.lt.lowpnt) then
                               lowpnt = ips
                               firsti = ipoint
@@ -170,8 +175,7 @@ c                 are not merged.
                   do isort=1,trk(lxj).nhit
                      ipoint = trk(lxj).ipnt(isort)
                      if (ipoint.ne.0) then
-                           itrack = int(hit(ipoint).track/1000)
-                           ips = hit(ipoint).track-itrack*1000
+                           ips = mod(hit(ipoint).track,1000)
                            if (ips.lt.lowpnt) then
                               lowpnt = ips
                               firstj = ipoint
@@ -280,6 +284,7 @@ c                 >> USE PARAMETER min(5) (JN 980406)
 *                          Find hit with the next largest radius:
                            do n=1,trk(lxj).nhit
                               id=trk(lxj).ipnt(n)
+                              if(id.gt.0) then
                               dis=hit(trk(lxj).ipnt(n)).x**2+
      +                             hit(trk(lxj).ipnt(n)).y**2+
      +                             hit(trk(lxj).ipnt(n)).z**2
@@ -289,10 +294,12 @@ c                 >> USE PARAMETER min(5) (JN 980406)
                                  hits=n
                                  next=id
                               endif
+                              endif
                            enddo 
                   
                            do n=1,trk(lxi).nhit
                               id=trk(lxi).ipnt(n)
+                              if(id.gt.0) then
                               dis=hit(trk(lxi).ipnt(n)).x**2+
      +                             hit(trk(lxi).ipnt(n)).y**2+
      +                             hit(trk(lxi).ipnt(n)).z**2
@@ -301,6 +308,7 @@ c                 >> USE PARAMETER min(5) (JN 980406)
                                  tracks=lxi
                                  hits=n
                                  next=id
+                              endif
                               endif
                            enddo                   
 *                          Write the hit to its new track:
@@ -358,5 +366,6 @@ c                 >> USE PARAMETER min(5) (JN 980406)
       endif ! .flag<0 (track already merged)
       enddo   ! i  
 c
+ 999  continue
       tpt_merge_segments = STAFCV_OK
       end
