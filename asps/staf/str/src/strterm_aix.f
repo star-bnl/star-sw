@@ -1,14 +1,14 @@
-*
+
 	SUBROUTINE STRTERM(MSG,LINES,LUN)
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) MSG(*) !Character string to be output.
 	INTEGER LINES !Number of lines in MSG to output.
 	INTEGER LUN !Logical unit on which to output (terminal).
 
-*  Description:
+*  Description:  Output with preceding line feed and following carriage-return.
 *	Output a one-or-more-line message on a terminal with
 *	machine-independent carriage-control on a terminal.
 
@@ -21,16 +21,16 @@
 
 	RETURN
 	END
-*
+*
 	SUBROUTINE STRTERM_NOCR(MSG,LUN)
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) MSG !Character string to be output.
 	INTEGER LUN !Logical unit on which to output (terminal).
 
-*  Description:
+*  Description:  Output with a preceding line feed, but no following carriage return.
 *	Output a one-line message without a following carriage return
 *	on a terminal.
 
@@ -39,16 +39,16 @@
 
 	RETURN
 	END
-*
+*
 	SUBROUTINE STRTERM_NOLF(MSG,LUN)
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) MSG !Character string to be output.
 	INTEGER LUN !Logical unit on which to output (terminal).
 
-*  Description:
+*  Description:  Output without a preceding line feed, but with a following carriage return.
 *	Output a one-line message without a preceding line feed
 *	on a terminal.
 
@@ -63,16 +63,16 @@
 
 	RETURN
 	END
-*
+*
 	SUBROUTINE STRTERM_NOLFCR(MSG,LUN)
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) MSG !Character string to be output.
 	INTEGER LUN !Logical unit on which to output (terminal).
 
-*  Description:
+*  Description:  Output without a preceding line feed or a following carriage return.
 *	Output a one-line message without a preceding line feed
 *	or a following carriage-return on a terminal.
 
@@ -87,4 +87,4 @@
 
 	RETURN
 	END
-*
+*
