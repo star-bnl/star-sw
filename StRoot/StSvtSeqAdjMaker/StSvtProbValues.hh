@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtProbValues.hh,v 1.3 2000/11/30 20:45:56 caines Exp $
+ * $Id: StSvtProbValues.hh,v 1.4 2001/05/01 00:23:58 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtProbValues.hh,v $
+ * Revision 1.4  2001/05/01 00:23:58  caines
+ * Update h files for use with zsp data
+ *
  * Revision 1.3  2000/11/30 20:45:56  caines
  * Dynamically calc prob values, use database
  *
@@ -30,18 +33,17 @@ public:
    StSvtProbValues();
    ~StSvtProbValues();
    
-   void  SetProbValue(float sigma=0);
+   void   SetProbValue(float sigma=0);
    double GetProbValue(int adc);
-   
+   double GetSigma();
 private:
    double mSigma;
    double mProb[MAX_ADC_COUNTS];
 
-  //ClassDef(StSvtProbValues,1)
-
+ 
 };
 
 inline double StSvtProbValues::GetProbValue(int adc){ return mProb[adc]; }
-
+inline double StSvtProbValues::GetSigma( ){ return mSigma; }
 #endif
 
