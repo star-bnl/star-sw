@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.h,v 1.16 2000/08/31 22:32:37 laue Exp $
+ * $Id: StStandardHbtEventReader.h,v 1.17 2001/02/08 22:38:26 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.h,v $
+ * Revision 1.17  2001/02/08 22:38:26  laue
+ * Reader can now switch between different track types: primary is default
+ *
  * Revision 1.16  2000/08/31 22:32:37  laue
  * Readers updated for new StHbtEvent version 3.
  *
@@ -111,9 +114,12 @@
 #include "StHbtMaker/Base/StHbtEventReader.hh"
 #include "StHbtMaker/Reader/StHbtTagReader.h"
 
+
 #include "StMaker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
+
+#include "StEvent/StEnumerations.h"
 #include "StStrangeMuDstMaker/StStrangeMuDstMaker.h"
 
 class StPionPlus;
@@ -131,6 +137,8 @@ private:
 
   StHbtTagReader* mTheTagReader;  //! this tag reader opens a tags.root file 
 
+  StTrackType mTrackType;
+
  protected:
 
 public:
@@ -147,6 +155,8 @@ public:
   void SetTheTagReader(StHbtTagReader*);
   StHbtTagReader* TheTagReader();
 
+  StTrackType TrackType(); 
+  void SetTrackType(StTrackType);
 #ifdef __ROOT__
   ClassDef(StStandardHbtEventReader, 1)
 #endif
@@ -158,6 +168,8 @@ inline void StStandardHbtEventReader::SetTheV0Maker(StStrangeMuDstMaker* maker){
 inline StStrangeMuDstMaker* StStandardHbtEventReader::TheV0Maker(){return mTheV0Maker;}
 inline void StStandardHbtEventReader::SetTheTagReader(StHbtTagReader* maker){mTheTagReader=maker;}
 inline StHbtTagReader* StStandardHbtEventReader::TheTagReader(){return mTheTagReader;}
+inline StTrackType StStandardHbtEventReader::TrackType() { return mTrackType;}
+inline void StStandardHbtEventReader::SetTrackType(StTrackType t) { mTrackType=t;}
 
 #endif
 
