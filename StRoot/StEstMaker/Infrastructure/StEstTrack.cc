@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrack.cc,v 1.6 2003/09/18 22:47:50 caines Exp $
+ * $Id: StEstTrack.cc,v 1.7 2003/10/11 02:51:21 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTrack.cc,v $
+ * Revision 1.7  2003/10/11 02:51:21  perev
+ * Cleanup+bugfix: test for zer pointer, initialization added.
+ *
  * Revision 1.6  2003/09/18 22:47:50  caines
  * Fix initialization ofr new RH system
  *
@@ -40,6 +43,7 @@ StEstTrack::StEstTrack(long maxbranch, StEstTPCTrack *tr=NULL) {
   mTPCTrack  = tr;
   mNBranch   = 0;
   mBranch    = new StEstBranch*[mMaxBranch];
+  memset(mBranch,0,mMaxBranch*sizeof(void*));
   mIdealPattern=0;
   mIdealNHits=0;
   mIdealBranch=NULL;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrackSelection.cxx,v 1.13 2003/04/30 20:36:55 perev Exp $
+ * $Id: StEstTrackSelection.cxx,v 1.14 2003/10/11 02:51:20 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTrackSelection.cxx,v $
+ * Revision 1.14  2003/10/11 02:51:20  perev
+ * Cleanup+bugfix: test for zer pointer, initialization added.
+ *
  * Revision 1.13  2003/04/30 20:36:55  perev
  * Warnings cleanup. Modified lines marked VP
  *
@@ -151,21 +154,27 @@ void StEstTracker::ChooseBestBranch(StEstTrack *tr, int overPass) {
 
   int i;
   double chimin=100000000, chi;
-  int chinr = 0;
-  StEstBranch *br_best;
+  int chinr = -1;
+  StEstBranch *br_best=0;
 
   for (i=0;i<tr->GetNBranches();i++) {
-    chi = tr->GetBranch(i)->GetChiSq()/tr->GetBranch(i)->GetNHits();
-      if (chi<chimin) {
+    StEstBranch *br = tr->GetBranch(i);
+    if(!br)	continue;
+    int nhits = br->GetNHits();
+    if(!nhits) 	continue;
+    chi = br->GetChiSq()/nhits;
+    if (chi<chimin) {
 	chimin = chi;
 	chinr  = i;
-      }
-      if (tr->GetNBranches()>1 && tr->GetBranch(i)->GetNHits()==0) gMessMgr->Error()<<"StEstMaker::ChooseBestBranch  branch with no hit while track with >1 branch  track= "<<tr->mTPCTrack->mId<<endm;    
+        br_best==br;
+    }
+    if (tr->GetNBranches()>1 && tr->GetBranch(i)->GetNHits()==0) gMessMgr->Error()<<"StEstMaker::ChooseBestBranch  branch with no hit while track with >1 branch  track= "<<tr->mTPCTrack->mId<<endm;    
   }
 
-  br_best=tr->GetBranch(chinr);
-  tr->SetBranch(chinr,tr->GetBranch(0));
-  tr->SetBranch(0,br_best);
+  if (br_best) {
+    tr->SetBranch(chinr,tr->GetBranch(0));
+    tr->SetBranch(0,br_best);
+  }
   int brmax = tr->GetNBranches();
   for (i=brmax-1;i>0;i--) tr->RemoveBranch(i);
 
