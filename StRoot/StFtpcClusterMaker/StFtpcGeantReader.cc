@@ -1,6 +1,9 @@
-// $Id: StFtpcGeantReader.cc,v 1.1 2000/09/18 14:27:42 hummler Exp $
+// $Id: StFtpcGeantReader.cc,v 1.2 2003/10/07 12:40:29 jcs Exp $
 //
 // $Log: StFtpcGeantReader.cc,v $
+// Revision 1.2  2003/10/07 12:40:29  jcs
+// created member functions to extract ftpc plane and sector number from the GEANT volume id
+//
 // Revision 1.1  2000/09/18 14:27:42  hummler
 // add StFtpcGeantReader
 //
@@ -64,6 +67,17 @@ Int_t StFtpcGeantReader::geantVolume(Int_t i)
       gMessMgr->Message("StFtpcGeantReader: geantVolume index out of range, using 0", "W", "OST");
       return hitTable[0].volume_id;
     }
+}
+Int_t StFtpcGeantReader::geantPlane(Int_t GeantVolume)
+{
+  // from the Geant VolumeId, the plane number {1,20} (West,East)
+
+  return (GeantVolume/1000 -1)*10 + GeantVolume/10 % 100; 
+}
+Int_t StFtpcGeantReader::geantSector(Int_t GeantVolume)
+{
+  // from the Geant VolumeId, the sector number {1,6} 
+  return GeantVolume%10 ; 
 }
 
 Float_t StFtpcGeantReader::energyLoss(Int_t i)

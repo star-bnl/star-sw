@@ -1,6 +1,9 @@
-// $Id: StFtpcGeantReader.hh,v 1.1 2000/09/18 14:27:46 hummler Exp $
+// $Id: StFtpcGeantReader.hh,v 1.2 2003/10/07 12:40:29 jcs Exp $
 //
 // $Log: StFtpcGeantReader.hh,v $
+// Revision 1.2  2003/10/07 12:40:29  jcs
+// created member functions to extract ftpc plane and sector number from the GEANT volume id
+//
 // Revision 1.1  2000/09/18 14:27:46  hummler
 // add StFtpcGeantReader
 //
@@ -41,6 +44,8 @@ public:
   Int_t nextTrackHit(Int_t i);
   Int_t track(Int_t i);
   Int_t geantVolume(Int_t i);
+  Int_t geantPlane(Int_t geantVolume); // from the Geant VolumeId, the plane number {1,20} (West,East)
+  Int_t geantSector(Int_t geantVolume);// from the Geant VolumeId, the sector number {1,6} (West,East)
   Float_t energyLoss(Int_t i);
   Float_t segmentLength(Int_t i);
   Float_t pLocalX(Int_t i);
