@@ -1,10 +1,14 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.42 2001/05/16 20:05:05 dunlop Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.43 2001/05/29 22:04:08 dunlop Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.43  2001/05/29 22:04:08  dunlop
+ * Made sure to clear mListOfRichTracks, even if event doesn't pass cuts.
+ * Removes segvio
+ *
  * Revision 2.42  2001/05/16 20:05:05  dunlop
  * Modified to also write into StEvent high pt hits.
  *
@@ -299,7 +303,7 @@ using std::less;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.42 2001/05/16 20:05:05 dunlop Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.43 2001/05/29 22:04:08 dunlop Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -525,6 +529,9 @@ Int_t StRichPIDMaker::Make() {
 	    mRichTracks = mListOfStRichTracks.size();
 	}
     }
+    else { // need to clear the list: persistent across events
+	this->clearTrackList();
+    }
     
 
     //
@@ -572,24 +579,28 @@ Int_t StRichPIDMaker::Make() {
 		typedef map < unsigned short, StTrack*, less<unsigned short>, allocator < OS_PAIR<unsigned short, StTrack* > > trackKeyToTrackMapType;
 #endif
 		trackKeyToTrackMapType trackKeyToTrack;
-		
-		for (ii=0; ii<mListOfStRichTracks.size(); ++ii) {
-		    StTrackNode* theTrackNode = mListOfStRichTracks[ii]->getStTrack()->node();
-		    for (size_t jj=0; jj<theTrackNode->entries(); ++jj) {
-			
-			StTrack* currentTrack = theTrackNode->track(jj);
-			
-			if(!currentTrack->detectorInfo()) {
-			    cout << "StRichPIDMaker::Make()\n";
-			    cout << "\tWARNING: No detectorInfo()\n";
+
+		if (goodRichEvent) {
+		    
+		    for (ii=0; ii<mListOfStRichTracks.size(); ++ii) {
+			StTrackNode* theTrackNode = mListOfStRichTracks[ii]->getStTrack()->node();
+			for (size_t jj=0; jj<theTrackNode->entries(); ++jj) {
+			    
+			    StTrack* currentTrack = theTrackNode->track(jj);
+			    
+			    if(!currentTrack->detectorInfo()) {
+				cout << "StRichPIDMaker::Make()\n";
+				cout << "\tWARNING: No detectorInfo()\n";
 			    cout << "\tassocciated with the track.  Continuing..." << endl;
 			    continue;
+			    }
+			    trackKeyToTrack.insert(make_pair(currentTrack->key(),currentTrack));
+			    
+			    break;
 			}
-			trackKeyToTrack.insert(make_pair(currentTrack->key(),currentTrack));
-			
-			break;
 		    }
 		}
+		
 		// Now the global tracks that high pt wants.
 		StSPtrVecTrackNode& theNodes = rEvent->trackNodes();
 		for (size_t nodeIndex = 0; nodeIndex<theNodes.size(); ++nodeIndex) {
