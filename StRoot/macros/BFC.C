@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: BFC.C,v 1.3 1999/09/08 00:42:48 fisyak Exp $
+// $Id: BFC.C,v 1.4 1999/09/16 17:08:55 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -11,7 +11,7 @@
 #include "TRegexp.h"
 #include "TSystem.h"
 #include "StRoot/St_base/St_DataSet.h"
-#include "StChain.h"
+#include "StRoot/StChain/StChain.h"
 #include "StRoot/xdf2root/St_XDFFile.h"
 #include "StRoot/StMagF/StMagF.h"
 #include "StRoot/StIOMaker/StIOMaker.h"
@@ -464,6 +464,7 @@ void Load(){
   gSystem->Load("StUtilities");
   //  gSystem->Load("libmsg");
   gSystem->Load("libtls");
+  gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
   if (ChainFlags[kFieldOff] || ChainFlags[kFieldOn] || ChainFlags[kHalfField])
        gSystem->Load("StMagF");
@@ -630,6 +631,9 @@ void BFC(const Int_t First,
   if (chain && ChainFlags[kDEBUG]) chain->SetDebug();
   //  Create the makers to be called by the current chain
   const char *mainDB = "$STAR/StDb/params";
+  //DbInit from StDbBroker.so checks that mysql db1 server is accessible
+  if (StDbBroker::DbInit("params")==0) mainDB = "MySQL:params";
+  printf ("QAInfo: Main DataBase == %s\n",mainDB);
   dbMk = new St_db_Maker("db",mainDB);
   if (dbMk && ChainFlags[kDEBUG]) dbMk->SetDebug();
   if (ChainFlags[kSD97]) { dbMk->SetDateTime("sd97");}
