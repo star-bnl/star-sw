@@ -1,0 +1,473 @@
+<html>
+<title>StMessMgr</title>
+<pre>
+
+     ***************************************************************
+     ***************************************************************
+     ****      StMessMgr:  The STAR offline message manager     ****
+     ***************************************************************
+     ***************************************************************
+
+
+Table of Contents:
+
+Section I. Basic usage: creating a message
+<a href="#i1">I-1.   C++ and CINT usage</a>
+<a href="#i2">I-2.   Fortran usage</a>
+<a href="#i3">I-3.   C usage</a>
+
+Section II. Advanced features
+<a href="#ii1">II-1.  Message summary</a>
+<a href="#ii2">II-2.  Specifying options and output streams</a>
+<a href="#ii3">II-3.  Non-accounted messages</a>
+<a href="#ii4">II-4.  Turning off printing of message prefix</a>
+<a href="#ii5">II-5.  Turning off printing of the leading "St"</a>
+<a href="#ii6">II-6.  Turning on printing of the time-date stamp</a>
+<a href="#ii7">II-7.  Access to the current message</a>
+<a href="#ii8">II-8.  Finding a message</a>
+<a href="#ii9">II-9.  Finding a list of messages</a>
+<a href="#ii10">II-10. Finding messages within a list</a>
+<a href="#ii11">II-11. Printing a list of messages</a>
+<a href="#ii12">II-12. Formatting output</a>
+<a href="#ii13">II-13. Limiting message counts</a>
+<a href="#ii14">II-14. Memory usage management</a>
+
+Section III. Code Flow
+<a href="#iii1">III-1. Flow diagram</a>
+</pre>
+<hr size=5>
+<pre>
+
+
+Section I.
+***************************************************
+********* Basic usage: creating a message *********
+***************************************************
+
+</pre>
+<hr align=left width="50%">
+<a name="i1">*** I-1.   C++ and CINT usage</a>
+<pre>
+
+In C++ programs, one must include StMessMgr.h.
+A global pointer (gMessMgr) points to the single message managing class.
+A generic message is created as follows:
+
+  gMessMgr->Message("This is the text of the message.");
+    or
+  char* myText = "hello";
+  gMessMgr->Message(myText);
+
+The default action here is to create an "Info" message. "Info" is
+one of five predefined message types (the other four are "Warning",
+"Error", "Debug", and "QAInfo" - Debug messages are by default
+switched off; see section II-11). The type of the message can
+be specified as a second field in the message declaration:
+
+  gMessMgr->Message("This is an error message.","E");
+
+The message type is specified with a single letter:
+"E" = "Error"
+"I" = "Info"
+"W" = "Warning"
+"D" = "Debug"
+"Q" = "QAInfo"
+Additional message types can be declared with AddType():
+
+  gMessMgr->AddType("F","Fatal");
+  gMessMgr->Message("Crashing now...","F");
+
+The second field in the AddType() call specifies the text
+string that will be printed out with each message of this
+type. The available types can be listed with ListTypes();
+AddType() returns an integer which indicates the total number
+of types defined so far, or equals zero if the letter specified
+to represent the new type is already taken.
+
+A shortcut has been provided for declaration of the three
+pre-defined types which is not available for new types:
+
+  gMessMgr->Info("Hello world.");
+    is the same as
+  gMessMgr->Message("Hello world.","I");
+
+Similarly, Error(), Warning(), Debug(), and QAInfo() also exist.
+
+If you would like to add variables to your message output,
+you can use the stream version of the message declaration:
+
+  gMessMgr->Info() << "The number is: " << 3.42 << endm;
+
+  gMessMgr->Message("","W") << big_num << " seems too big." << endm;
+
+  gMessMgr->Info() << "This is going to be too long to fit...";
+  *gMessMgr << "...on one line" << endm;
+
+  gMessMgr->Error() << "Alarm #" << alarmNo << "!!!";
+  gMessMgr->Print();
+
+In the first example above, nothing was specified by the call to Info().
+The message is declared afterwards and is terminated by "endm" (similar
+to "endl" for cout). The second example shows how to use the stream
+version for non-predefined types where the type must be specified - to
+do so, the message inside the Message() call must be empty (""). In order
+to append to the message which is already being built, one can continue
+using the << operator by starting with *gMessMgr as shown in the third
+example. The fourth example shows another way of ending the message and
+printing it to the output: gMessMgr->Print(). Without the use of either
+"endm" or Print() on a streamed message, the message is not yet terminated
+and any subsequent new message calls will write over the current one.
+
+Finally, for those who want similar output to cout and cerr, there are
+out() and err() functions. Their usage is like Info() and Error(), but
+no option strings are allowed; the options are fixed to output no prefixes
+or suffixes, the message is not accounted, and output is to stdout and sterr
+respectively. They still retain the advantage of message limiting capabilities
+over cout and cerr.
+
+  gMessMgr->out("I did it.");
+  gMessMgr->err() << "Uh oh. I wasn't expecting n=" << n << endm;
+
+
+____NEW_SHORTCUTS____
+
+Now there are shortcuts for some of our favorite messages. The forms
+of the shortcuts were chosen such that they will work in CINT as well
+as in C++.
+
+  gMessMgr->Info()   =>  ++gMess
+  gMessMgr->Error()  =>  --gMess
+  gMessMgr->out()    =>   ~gMess
+  gMessMgr->err()    =>   -gMess
+
+Here are a couple usage examples:
+
+  ~gMess << "This is like doing cout!" << endm;
+  ++gMess << "Here is an StInfo message." << endm;
+  --gMess << "Big bad error number " << ErrNum << endm;
+
+Enjoy!
+
+
+</pre>
+<hr align=left width="50%">
+<a name="i2">*** I-2.   Fortran usage</a>
+<pre>
+
+No special statements are needed in fortran to include message
+functionality. Messages are declared with a call as follows:
+
+  call StMessage('message text','I','O')
+
+Where the second and third strings are message types and options respectively.
+In Fortran, there is no defaulting of parameters, so all parameters must be
+entered. The message types are as described above. New message types
+can be declared with StMessAddType():
+
+  call StMessAddType('A','Abort')
+
+The five predefined types also have associated declaration calls:
+
+  call StInfo('info text')
+  call StError('error message')
+  call StWarning('better not')
+  call StDebug('value above zero')
+  call QAInfo('12 histograms filled')
+
+and
+
+  call StInfoOpt('info text','O')
+  call StErrorOpt('error message','E')
+  call StWarningOpt('better not','E')
+  call StDebugOpt('value above zero','O')
+  call QAInfoOpt('12 histograms filled','OTS')
+
+The first set do not take option strings and are equivalent to the second
+set with the option strings shown (which are the defaults for C++).
+
+Format statements can also be used with character strings:
+
+  character*60 myString
+  ...
+  write(myString,300) 5.6, 6
+  300 format('This first number is ',F5.2,' and the second ',I3)
+  call StInfo(myString)
+
+Notice that using a large number for the character string will cause
+spaces to be printed which may cause the string to wrap around lines.
+
+For backwards compatibility with the MSG package, the following routines
+have been supplied:
+
+  message(message,lines,id)    (the id parameter is unused)
+  msg_enabled(message,id)      (the id parameter is unused)
+  msg_enable(message)
+  msg_disable(message)
+
+</pre>
+<hr align=left width="50%">
+<a name="i3">*** I-3.   C usage</a>
+<pre>
+
+For C, one must have "extern" statements stating that the routines to
+use have been defined externally. This can be done by hand or by simply
+including the StMessageManager.h file. All the C routines are identical
+to the FORTRAN routines except that they have an underscore ("_") at the
+end of the subroutine name. Otherwise they are identical.
+
+Also, for C, one more routine has been provided: MessageOut(message)
+just to maintain some compatibility with the MSG package. This routine
+does not have an extern statement in StMessageManager.h at the moment.
+
+
+</pre>
+<hr size=5>
+<pre>
+
+Section II.
+*************************************
+********* Advanced features *********
+*************************************
+
+</pre>
+<hr align=left width="50%">
+<a name="ii1">*** II-1.  Message summary</a>
+<pre>
+
+A message summary can be displayed with:
+
+  gMessMgr->Summary(n)
+
+This function compares messages by type and by the first n "tokens"
+(text separated by spaces) of their message strings. By default, n=1.
+Using n=0 would summarize messages by type. Example output looks like:
+
+    ***** StMessageManager message summary *****
+  StInfo: Starting job...................................................... 1
+  QAInfo: Requested chain bfc is : P2001.................................... 1
+  StInfo: Starting an event............................................... 579
+    ***** StMessageManager memory usage = 8019 bytes (8 kb) *****
+
+</pre>
+<hr align=left width="50%">
+<a name="ii2">*** II-2.  Specifying options and output streams</a>
+<pre>
+
+Message declarations have a third field (second field for the predefined
+declarations) for an options string. By default, this string contains only
+the letter "O". This means that when the message is printed, it will go
+to stdout (like cout). One can also specify the letter "E" so that the
+message goes to stderr (like cerr). One can even use both: "OE". Any
+given set of options are valid for that single message only.
+
+</pre>
+<hr align=left width="50%">
+<a name="ii3">*** II-3.  Non-accounted messages</a>
+<pre>
+
+Using the additional option "-" means that a message will not be stored
+by the message manager. This means it will not show up in subsequent
+summaries or finds. The message will, however, be printed to the stdout
+or stderr if (and only if) "O" and/or "E" is included in the option
+string.
+
+</pre>
+<hr align=left width="50%">
+<a name="ii4">*** II-4.  Turning off printing of message prefix</a>
+<pre>
+
+Option "P" causes the message to be printed without adding any prefix
+to the text. Remember, "O" or "E" must also be in the option string
+for the printout. The out() and err() message calls do this by default.
+
+</pre>
+<hr align=left width="50%">
+<a name="ii5">*** II-5.  Turning off printing of the leading "St"</a>
+<pre>
+
+Use the option "S". Remember, "O" or "E" must also be in the option
+string for the printout. QAInfo messages by default have this option.
+
+</pre>
+<hr align=left width="50%">
+<a name="ii6">*** II-6.  Turning on printing of the time-date stamp</a>
+<pre>
+
+Use the option "T". Remember, "O" or "E" must also be in the option
+string for the printout. Debug messages by default have this option.
+
+</pre>
+<hr align=left width="50%">
+<a name="ii7">*** II-7.  Access to the current message</a>
+<pre>
+
+A global pointer, gMessage, exists as a pointer to the last StMessage.
+StMessage allows access to the attributes of a message:
+
+  gMessage->GetType();        // message type
+  gMessage->GetMessage();     // message text string
+  gMessage->GetOptions();     // message options
+  gMessage->GetTime();        // time-date stamp
+  gMessage->Print();          // outputs a message
+
+</pre>
+<hr align=left width="50%">
+<a name="ii8">*** II-8.  Finding a message</a>
+<pre>
+
+The message manager can find the first message whose text string contains
+matches for up to four search strings:
+
+  StMessage* myMess = gMessMgr->FindMessage("dst","full");
+
+</pre>
+<hr align=left width="50%">
+<a name="ii9">*** II-9.  Finding a list of messages</a>
+<pre>
+
+Message lists in the form of a vector of StMessage pointers are called
+a messVec. A list of messages can be found which match up to four strings:
+
+  messVec* myList = gMessMgr->FindMessageList("sun","moon","planet");
+
+</pre>
+<hr align=left width="50%">
+<a name="ii10">*** II-10. Finding messages within a list</a>
+<pre>
+
+Both FindMessage() and FindMessageList() take a fifth argument which is
+messVec pointer.
+
+  messVec* smallList = gMessMgr->FindMessageList("my","big","fat","hat",bigList);
+
+</pre>
+<hr align=left width="50%">
+<a name="ii11">*** II-11. Printing a list of messages</a>
+<pre>
+
+
+Call PrintList() with a pointer to the messVec list of messages:
+
+  gMessMgr->PrintList(myList);
+
+  gMessMgr->PrintList(gMessMgr->FindMessageList("TPC Gain"));
+
+</pre>
+<hr align=left width="50%">
+<a name="ii12">*** II-12. Formatting output</a>
+<pre>
+
+StMessMgr is an ostream, like cout. It can therefore be used
+to format, like cout:
+
+  gMessMgr->Info() << "Here, n=";
+  gMessMgr->width(5)
+  *gMessMgr << x << endm;
+
+Notice that once an StMessage gets printed (either by a Print() call
+or the use of "endm"), a message is closed to further streamed input.
+
+One should not forget that character strings can also be formatted by
+sprintf() before adding them to a message.
+
+</pre>
+<hr align=left width="50%">
+<a name="ii13">*** II-13. Limiting message counts</a>
+<pre>
+
+The message manager provides message limiting in two ways:
+
+  gMessMgr->SetLimit("full disk",10);    // by message string
+  gMessMgr->SetLimit("I",150);           // by message type
+
+Notice that the only thing that differentiates these calls is
+that a single letter for the first argument means a message type
+limit. The message string limit affects all messages which contain
+the string. A "limit reached" message is output with the last printed
+message.
+
+Limits can be changed again after being set once. The exact same string
+or type must be specified. GetLimit(string/type) will return a current
+limit. ListLimits() will print out all the limits.
+
+A negative limit removes limiting, and a limit of -5 fixes this type to
+never be limited (despite any subsequent calls to SetLimit()).
+There are also a few shortcuts to limiting message counts:
+- RemoveLimit(string/type) sets the limit on a string/type to -1, thereby
+  effectively removing the limit.
+- SwitchOff(string/type) sets the limit to zero. This is the default case
+  for type "D", debug messages - one can use SwitchOn("D") to enable them.
+- SwitchOn(string/type) sets the limit to -1, removing any limit.
+- FixOn(string/type) sets the limit to -5, removing any limit (ever).
+- NoLimits() turns off ALL message limiting. This is useful for debugging,
+  but can result in a large amount of messages that had been previously
+  hidden.
+
+</pre>
+<hr align=left width="50%">
+<a name="ii14">*** II-14. Memory usage management</a>
+<pre>
+
+A summary of the memory usage by the stored messages can be displayed
+like this:
+
+  gMessMgr->MemorySummary();
+
+This information is also by default displayed at the end of a message
+summary. If it is important for the memory manager not to use memory
+by storing messages, there are functions for turning off/on the storage
+of subsequent message calls:
+
+  gMessMgr->MemoryOff();
+  gMessMgr->MemoryOn();
+
+Note that any messages created while storage is off will be
+non-accounted messages.
+
+</pre>
+<hr size=5>
+<pre>
+
+Section III.
+*************************************
+************* Code Flow *************
+*************************************
+
+</pre>
+<hr align=left width="50%">
+<a name="iii1">*** III-1. Flow Diagram</a>
+<pre>
+
+         message call
+  StMessageManager::Message()
+              |
+              V
+         fill buffer
+         operator<<()  <--.
+              |   \        \
+              |    \_______/
+              V
+  message termination (endm)
+  StMessageManager::Print()
+              |
+              V
+StMessageManager::BuildMessage()
+              |
+              V
+        new StMessage
+              |
+              V
+     put together output  ------------>  check message limits
+      StMessage::Print()              StMessageCounter::CheckLimit()
+              |
+              V
+   return to message manager
+              |
+              V
+    message to be accounted? -----> StMessageManager::messList.push_back()
+              |
+              V
+           finished
+
+</pre>
+</html>
