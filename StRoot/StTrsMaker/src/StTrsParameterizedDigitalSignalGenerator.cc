@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id $
+ * $Id :StTrsParameterizedDigitalSignalGenerator.cc ,v1.1 1999/10/01 17:15:00 long Exp $$
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsParameterizedDigitalSignalGenerator.cc,v $
+ * Revision 1.2  1999/10/04 15:56:55  long
+ * add 10 to 8 bit transformation
+ *
  * Revision 1.1  1999/10/04 15:45:27  long
  * add 10 to 8 bit transformation
  *
