@@ -22,17 +22,17 @@ my $debugOn=0;
 
 my @SetD = (
 #             "daq/2000/01",
-#             "daq/2000/02",
-#             "daq/2000/03",
-#             "daq/2000/04",
+             "daq/2000/02",
+             "daq/2000/03",
+             "daq/2000/04",
 #             "daq/2000/05",
              "daq/2000/06",
-             "daq/2000/07", 
+#             "daq/2000/07", 
 
 );
 
 my $prodPeriod = "P00hd"; 
-my @chName = ("p00h1", "p00h2");              
+my @chName = ("p00h2", "p00h1");              
 my $chainDir = "daq";
 
 ###Set directories to be created for jobfiles
