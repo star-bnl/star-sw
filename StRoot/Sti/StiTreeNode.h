@@ -43,6 +43,10 @@ class StiTreeNode
 
   virtual void setParent(StiTreeNode * newParent)=0;
 
+  virtual void           setDepth(int depth)=0;
+  virtual int            getDepth() const =0;
+
+  
 };
 
 #endif

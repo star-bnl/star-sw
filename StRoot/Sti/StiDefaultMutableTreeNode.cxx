@@ -54,6 +54,28 @@ StiDefaultMutableTreeNode::StiDefaultMutableTreeNode(bool allowsChild)
   initialize(allowsChild);
 }
 
+
+void StiDefaultMutableTreeNode::reset()
+{
+  initialize(true);
+  children.clear();
+}
+
+void StiDefaultMutableTreeNode::set(int depth)
+{
+  mDepth = depth;
+}
+
+void StiDefaultMutableTreeNode::setAsCopyOf(const StiDefaultMutableTreeNode * node)
+{
+  mDepth = node->mDepth;
+  parent = node->parent;
+  allowsChildren = node->allowsChildren;
+  children = node->children;
+}
+
+
+
 void StiDefaultMutableTreeNode::initialize(bool allowsChild)
 {
   //-------------------------------------------------------------------------------
@@ -109,6 +131,7 @@ void StiDefaultMutableTreeNode::insert(StiTreeNode * newChild, int childIndex)
       oldParent->remove(newChild);
     }
   newChild->setParent(this);
+  newChild->setDepth(1+mDepth);
   
   // insert the child at the end of the queue for now....
   children.push_back(dynamic_cast<StiDefaultMutableTreeNode *>(newChild));
@@ -458,20 +481,16 @@ bool StiDefaultMutableTreeNode::isNodeRelated(StiDefaultMutableTreeNode *  aNode
 }
 
 
-//--------------------------------------------------------------
-// Returns the depth of the tree rooted at this node -- the longest
-// distance from this node to a leaf.  If this node has no children,
-// returns 0.  This operation is much more expensive than
-// <code>getLevel()</code> because it must effectively traverse the entire
-// tree rooted at this node.
-//
-// @see	#getLevel
-// @return	the depth of the tree whose root is this node
-//--------------------------------------------------------------
-int StiDefaultMutableTreeNode::getDepth() 
+int StiDefaultMutableTreeNode::getDepth() const
 {
-  cout << "StiDefaultMutableTreeNode::getDepth() - WARNING - not coded" << endl;
-  return -1;
+  // Returns the depth of this node relative to the root of the tree.
+  // If this node is the root, this should be 0;
+  return mDepth;
+}
+
+void StiDefaultMutableTreeNode::setDepth(int d)
+{
+  mDepth = d;
 }
 
 //--------------------------------------------------------------

@@ -446,10 +446,10 @@ void StiGeometryTransform::operator() (const StSsdHit* ssdhit, StiHit* stihit){
 void StiGeometryTransform::operator() (const StiHit* stihit, StSsdHit* ssdhit){
 }
 
-void StiGeometryTransform::operator() (const StiTrackNode *pTrackNode,
+void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
                                        StHelix *pHelix){
 
-  cout << "StiTrackNode: x=" << pTrackNode->fX 
+  cout << "StiKalmanTrackNode: x=" << pTrackNode->fX 
        << ", alpha=" << pTrackNode->fAlpha
        << ", y=" << pTrackNode->fP0
        << ", z=" << pTrackNode->fP1

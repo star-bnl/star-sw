@@ -143,8 +143,8 @@ int StiKalmanTrackFinder::findTrack(StiTrack * t)
   //                internal error has occured.
   //-----------------------------------------------------------------
   StiKalmanTrack * tt = dynamic_cast<StiKalmanTrack *> (t);
-  StiTrackNode * lastNode = tt->getLastNode();
-  followTrackAtNode(t, lastNode);
+  StiKalmanTrackNode * lastNode = tt->getLastNode();
+  followTrackAtNode(tt, lastNode);
   lastNode = findBestBranch(lastNode);
   pruneNodes(lastNode);
   tt->setLastNode(lastNode);
@@ -152,13 +152,14 @@ int StiKalmanTrackFinder::findTrack(StiTrack * t)
   return StiConstants::Ok;
 }
 
-bool StiKalmanTrackFinder::followTrackAtNode(StiTrack * t, StiTrackNode * node)
+bool StiKalmanTrackFinder::followTrackAtNode(StiKalmanTrack * t, StiKalmanTrackNode * node)
 {
   // swim the current branch of the track down into the detector
   // propagate through inactive volume and stop/return when an active volume 
   // is reached.
 
-  StiDetector * sDet = node->getDetector();
+  //const
+  StiDetector * sDet = node->getHit()->detector();
   geometryContainer->setToDetector(sDet);
   geometryContainer->moveIn();
   StiDetector * tDet = **geometryContainer;
@@ -224,7 +225,7 @@ bool StiKalmanTrackFinder::followTrackAtNode(StiTrack * t, StiTrackNode * node)
     }
 
   bool addedNode;
-  StiTrackNode * extraNode = 0; // broken!!!!!!!
+  StiKalmanTrackNode * extraNode = 0; // broken!!!!!!!
   if (foundDet)
     {
       if (!tDet->isActive())
@@ -246,8 +247,8 @@ bool StiKalmanTrackFinder::followTrackAtNode(StiTrack * t, StiTrackNode * node)
     }
 }
 
-bool StiKalmanTrackFinder::propagateTrackAtNodeTo(StiTrack     * t, 
-						  StiTrackNode * node, 
+bool StiKalmanTrackFinder::propagateTrackAtNodeTo(StiKalmanTrack     * t, 
+						  StiKalmanTrackNode * node, 
 						  StiDetector  * sDet,
 						  StiDetector  * tDet)
 {
@@ -373,16 +374,16 @@ bool StiKalmanTrackFinder::propagateTrackAtNodeTo(StiTrack     * t,
   return true;
 }
 
-bool StiKalmanTrackFinder::exploreTrackAtNode(StiTrack     * t, 
-					      StiTrackNode * parentNode, 
-					      StiTrackNode * wNode)
+bool StiKalmanTrackFinder::exploreTrackAtNode(StiKalmanTrack     * t, 
+					      StiKalmanTrackNode * parentNode, 
+					      StiKalmanTrackNode * wNode)
 {
   // consider all points that could match the current track specified by wNode
   // add/follow  all hits that have a chi2 smaller than maxChi2ForSelection
 
   double yWindow,zWindow;
   double chi2;
-  StiTrackNode * newNode;
+  StiKalmanTrackNode * newNode;
   bool addedNode = false;
 
   StiHit * workHit = wNode->getHit();
@@ -412,12 +413,12 @@ bool StiKalmanTrackFinder::exploreTrackAtNode(StiTrack     * t,
   return addedNode;
 }
 
-bool StiKalmanTrackFinder::followBestTrackAtNode(StiTrack * t, StiTrackNode * node, StiTrackNode * wNode)
+bool StiKalmanTrackFinder::followBestTrackAtNode(StiKalmanTrack * t, StiKalmanTrackNode * node, StiKalmanTrackNode * wNode)
 {
   double         yWindow,zWindow, chi2, bestChi2;
   StiHit       * hit;
   StiHit       * bestHit;
-  StiTrackNode * newNode;
+  StiKalmanTrackNode * newNode;
   bool addedNode = false;
 
   StiHit * workHit = wNode->getHit();
@@ -453,7 +454,7 @@ bool StiKalmanTrackFinder::followBestTrackAtNode(StiTrack * t, StiTrackNode * no
   return addedNode;
 }
  
-double StiKalmanTrackFinder::getPredictedChi2(const StiTrackNode * node, 
+double StiKalmanTrackFinder::getPredictedChi2(const StiKalmanTrackNode * node, 
 					      const StiHit       *hit) const 
 {
   //-----------------------------------------------------------------
@@ -486,8 +487,8 @@ double StiKalmanTrackFinder::getPredictedChi2(const StiTrackNode * node,
 }
 
 
-StiTrackNode * StiKalmanTrackFinder::updateTrackAtNode(StiTrackNode * node, 
-						       StiTrackNode * wNode, 
+StiKalmanTrackNode * StiKalmanTrackFinder::updateTrackAtNode(StiKalmanTrackNode * node, 
+						       StiKalmanTrackNode * wNode, 
 						       StiHit       * hit,
 						       double chisq)
 {
@@ -496,11 +497,13 @@ StiTrackNode * StiKalmanTrackFinder::updateTrackAtNode(StiTrackNode * node,
   // to invoke a new instance of trackNode as a copy of wNode, update its track parameters
   // and add it as a child to "node". Return the newNode if all works, null otherwise.
 
-  StiTrackNode * nNode = trackNodeFactory->getObject();
+  StiKalmanTrackNodeFactory * f = dynamic_cast<StiKalmanTrackNodeFactory * >(trackNodeFactory);
+
+  StiKalmanTrackNode * nNode = f->getObject();
   if (!nNode)
     {
       cout << "StiKalmanTrackFinder::updateTrackAtNode(...) - Severe Error " << endl
-	   << "      - trackNodeFactory failed to return a StiTrackNode" << endl;
+	   << "      - trackNodeFactory failed to return a StiKalmanTrackNode" << endl;
       return 0;
     }
 
@@ -566,7 +569,7 @@ StiTrackNode * StiKalmanTrackFinder::updateTrackAtNode(StiTrackNode * node,
 }
 
 //_____________________________________________________________________________
-int StiKalmanTrackFinder::rotate(StiTrackNode * node, double alpha)
+int StiKalmanTrackFinder::rotate(StiKalmanTrackNode * node, double alpha)
 {
   //-----------------------------------------------------------------
   // This function rotates by an angle alpha the track representation by alpha
@@ -636,28 +639,28 @@ int StiKalmanTrackFinder::rotate(StiTrackNode * node, double alpha)
 }
 
 //_____________________________________________________________________________
-void StiKalmanTrackFinder::removeNodeFromTrack(StiTrackNode * node, StiTrack* track)
+void StiKalmanTrackFinder::removeNodeFromTrack(StiKalmanTrackNode * node, StiKalmanTrack* track)
 {
   // Remove given node from given track. 
 }
 
-void StiKalmanTrackFinder::pruneNodes(StiTrackNode * node)
+void StiKalmanTrackFinder::pruneNodes(StiKalmanTrackNode * node)
 {
   // Prune unnecessary nodes on the track starting at given node. 
   // All siblings of the given node, are removed, and iteratively
   // all siblings of its parent are removed from the parent of the
   // parent, etc.
 
-  StiTrackNode * parent = dynamic_cast<StiTrackNode *>(node->getParent());
+  StiKalmanTrackNode * parent = dynamic_cast<StiKalmanTrackNode *>(node->getParent());
   while (parent)
     {
       parent->removeAllChildrenBut(node);
       node = parent;
-      parent = dynamic_cast<StiTrackNode *>(node->getParent());
+      parent = dynamic_cast<StiKalmanTrackNode *>(node->getParent());
     }
 }
 
-StiTrackNode * StiKalmanTrackFinder::findBestBranch(StiTrackNode * node)
+StiKalmanTrackNode * StiKalmanTrackFinder::findBestBranch(StiKalmanTrackNode * node)
 {
   // starting at given node, find the best branch and return the end node.
   // Only the leafs are looked at. Basically, the best track is taken as 
@@ -665,13 +668,13 @@ StiTrackNode * StiKalmanTrackFinder::findBestBranch(StiTrackNode * node)
   // of the best branch.
   float chi2;
   float bestChi2;
-  StiTrackNode * bestNode;
-  StiTrackNode * leaf;
+  StiKalmanTrackNode * bestNode;
+  StiKalmanTrackNode * leaf;
   
-  leaf = dynamic_cast<StiTrackNode *>(node->getFirstLeaf());
+  leaf = dynamic_cast<StiKalmanTrackNode *>(node->getFirstLeaf());
   bestChi2 = leaf->fChi2;
   bestNode = leaf;
-  leaf =  dynamic_cast<StiTrackNode *>(leaf->getNextLeaf());
+  leaf =  dynamic_cast<StiKalmanTrackNode *>(leaf->getNextLeaf());
   while (leaf)
     {
       chi2 = leaf->fChi2;
@@ -680,13 +683,13 @@ StiTrackNode * StiKalmanTrackFinder::findBestBranch(StiTrackNode * node)
 	  bestChi2 = chi2;
 	  bestNode = leaf;
 	}
-      leaf = dynamic_cast<StiTrackNode *>(leaf->getNextLeaf());
+      leaf = dynamic_cast<StiKalmanTrackNode *>(leaf->getNextLeaf());
     }
   return bestNode;
 }
 
 //_____________________________________________________________________________
-bool StiKalmanTrackFinder::extendToMainVertex(StiTrackNode * node)
+bool StiKalmanTrackFinder::extendToMainVertex(StiKalmanTrackNode * node)
 {
   //-----------------------------------------------------------------
   // This function propagates tracks to the "vertex".
@@ -700,7 +703,7 @@ bool StiKalmanTrackFinder::extendToMainVertex(StiTrackNode * node)
   return true; // requires work here...
 }
 
-double StiKalmanTrackFinder::getYWindow(StiTrackNode * n, StiHit * h) const 
+double StiKalmanTrackFinder::getYWindow(StiKalmanTrackNode * n, StiHit * h) const 
 {
   double rv, sy2a, sy2b;
   sy2a = n->fC00;  // syy of the track at this node
@@ -713,7 +716,7 @@ double StiKalmanTrackFinder::getYWindow(StiTrackNode * n, StiHit * h) const
   return rv;
 }
 
-double StiKalmanTrackFinder::getZWindow(StiTrackNode * n, StiHit * h) const 
+double StiKalmanTrackFinder::getZWindow(StiKalmanTrackNode * n, StiHit * h) const 
 {
   double rv, sz2a, sz2b;
   sz2a = n->fC11;  // szz of the track at this node

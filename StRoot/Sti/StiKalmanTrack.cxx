@@ -4,12 +4,12 @@
 //Sti
 #include "StiHit.h"
 #include "StiDefaultMutableTreeNode.h"
-#include "StiTrackNode.h"
+#include "StiKalmanTrackNode.h"
 #include "StiKalmanTrack.h"
 
 ostream& operator<<(ostream&, const StiHit&);
 
-StiKalmanTrack::StiTrackNodeFactory* StiKalmanTrack::trackNodeFactory = 0;
+StiTrackNodeFactory* StiTrack::trackNodeFactory = 0;
 
 void StiKalmanTrack::reset()
 {
@@ -101,36 +101,40 @@ double  StiKalmanTrack::getDca3(StiTrack *t)   const
 }
 
 
-StiTrackNode * StiKalmanTrack::addHit(StiHit *h)
+StiKalmanTrackNode * StiKalmanTrack::addHit(StiHit *h)
 {
   // Add a hit to this track
   // If the current lastNode is non null
-  //   Insert the given hit in a StiTrackNode instance
+  //   Insert the given hit in a StiKalmanTrackNode instance
   //   Add the new node as a child to the current last node
   //   Make the new node the last node of this track
   // Else 
-  //   Insert the given hit in a StiTrackNode instance
+  //   Insert the given hit in a StiKalmanTrackNode instance
   //   Set firstNode and lastNode equal to the new node
 
   if (lastNode!=0)
     {
-      StiTrackNode * n = trackNodeFactory->getObject();
+      StiKalmanTrackNodeFactory * f = dynamic_cast<StiKalmanTrackNodeFactory*>(trackNodeFactory);
+      StiKalmanTrackNode * n = f->getObject();
       n->setHit(h);
+      n->fX = h->x();
       lastNode->add(n);
       lastNode = n;
       return n;
     }
   else 
     {
-      firstNode  = trackNodeFactory->getObject();
+      StiKalmanTrackNodeFactory * f = dynamic_cast<StiKalmanTrackNodeFactory*>(trackNodeFactory);
+      firstNode  = f->getObject();
       firstNode->setHit(h);
+      firstNode->fX = h->x();
       lastNode = firstNode;  // that's the only node on this track
       return firstNode;
     }
 
 }
 
-StiTrackNode * StiKalmanTrack::insertHit(StiHit *hInserted, StiHit * targetParent)
+StiKalmanTrackNode * StiKalmanTrack::insertHit(StiHit *hInserted, StiHit * targetParent)
 {
   // Add a hit to this track right after the given hit
   // Note that this method is slow because it needs to 
@@ -140,7 +144,8 @@ StiTrackNode * StiKalmanTrack::insertHit(StiHit *hInserted, StiHit * targetParen
   // It is further assumed that the targetParent has at most
   // one child.
 
-  StiTrackNode * n = trackNodeFactory->getObject();
+  StiKalmanTrackNodeFactory * f = dynamic_cast<StiKalmanTrackNodeFactory*>(trackNodeFactory);
+  StiKalmanTrackNode * n = f->getObject();
   n->setHit(hInserted);
   if (targetParent==0)
     {
@@ -157,7 +162,7 @@ StiTrackNode * StiKalmanTrack::insertHit(StiHit *hInserted, StiHit * targetParen
     }
   else
     {
-      StiTrackNode * pn = findHit(targetParent);
+      StiKalmanTrackNode * pn = findHit(targetParent);
       if (pn==0)
 	{
 	  cout << " - StiKalmanTrack::insertHit() - ERROR - Attempting to insert hit after another which" << endl 
@@ -165,7 +170,7 @@ StiTrackNode * StiKalmanTrack::insertHit(StiHit *hInserted, StiHit * targetParen
 	}
       else
 	{
-	  StiTrackNode * cn = dynamic_cast<StiTrackNode *> (pn->getFirstChild());
+	  StiKalmanTrackNode * cn = dynamic_cast<StiKalmanTrackNode *> (pn->getFirstChild());
 	  if (cn!=0)
 	    {
 	      pn->remove(cn);
@@ -188,16 +193,16 @@ void StiKalmanTrack::removeHit(StiHit *h)
   // remove the given hit (and node) from this track
   // It is assume that the hit has at most one child
   
-  StiTrackNode * n = findHit(h);
+  StiKalmanTrackNode * n = findHit(h);
   if (n!=0)
     {
       // the hit belongs to this track, let's remove it
-      StiTrackNode * cn = dynamic_cast<StiTrackNode *> (n->getFirstChild());
+      StiKalmanTrackNode * cn = dynamic_cast<StiKalmanTrackNode *> (n->getFirstChild());
 
       if (cn==0)
 	{
 	  // no child, this is the last hit
-	  StiTrackNode * pn = dynamic_cast<StiTrackNode *> (n->getParent());
+	  StiKalmanTrackNode * pn = dynamic_cast<StiKalmanTrackNode *> (n->getParent());
 	  if (pn==0)
 	    {
 	      // no parent, this is the first hit
@@ -213,7 +218,7 @@ void StiKalmanTrack::removeHit(StiHit *h)
       else
 	{
 	  // child exist
-	  StiTrackNode * pn = dynamic_cast<StiTrackNode *> (n->getParent());
+	  StiKalmanTrackNode * pn = dynamic_cast<StiKalmanTrackNode *> (n->getParent());
 	  if (pn==0)
 	    {
 	      // no parent, this is the first hit
@@ -234,7 +239,7 @@ void StiKalmanTrack::removeHit(StiHit *h)
     }
 }
 
-StiTrackNode * StiKalmanTrack::findHit(StiHit * h)
+StiKalmanTrackNode * StiKalmanTrack::findHit(StiHit * h)
 {
   if (firstNode==0)
     return 0;
@@ -244,10 +249,10 @@ StiTrackNode * StiKalmanTrack::findHit(StiHit * h)
 	{
 	  return firstNode;
 	}
-      StiTrackNode * n = firstNode;
+      StiKalmanTrackNode * n = firstNode;
       while (n->getChildCount()>0)
 	{
-	  n = dynamic_cast<StiTrackNode *> (n->getFirstChild());
+	  n = dynamic_cast<StiKalmanTrackNode *> (n->getFirstChild());
 	  if (h==n->getHit())
 	    {
 	      return firstNode;
@@ -281,73 +286,132 @@ StiHit * StiKalmanTrack::getHit(int index)
   return 0;
 }
 
-void StiKalmanTrack::initialize(double alpha, double x[5], double e[15], const hitvector & v)
+void StiKalmanTrack::initialize(double alpha, 
+				double eta,
+				double curvature,
+				double tanl,
+				const hitvector & v)
 {
-    //cout <<"StiKalmanTrack::initialize(double, double[5], double[15], hitvector)"<<endl;
-    if (!trackNodeFactory) {
-	cout <<"StiKalmanTrack::initialize()\tERROR:\ttrackNodeFactory==0.  Abort"<<endl;
+  //cout <<"StiKalmanTrack::initialize()"<<endl;
+  if (!trackNodeFactory) 
+    {
+      cout <<"StiKalmanTrack::initialize()\tERROR:\ttrackNodeFactory==0.  Abort"<<endl;
     }
+  
+  hitvector::const_iterator it;
+  StiKalmanTrackNode * newNode;
+  StiHit * hit;
+  // state[0] = y  ordinate
+  // state[1] = z  position along beam axis
+  // state[2] = eta=C*x0
+  // state[3] = C  (local) curvature of the track
+  // state[4] = tan(l) 
+  double state[5];  
+  double error[15];
+  state[2]=eta;
+  state[3]=curvature;
+  state[4]=tanl;
+  //e[0] = fC00;
+  //e[1] = fC10;
+  //e[2] = fC11;
+  //e[3] = fC20;
+  //e[4] = fC21;
+  //e[5] = fC22;
+  //e[6] = fC30;
+  //e[7] = fC31;
+  //e[8] = fC32;
+  //e[9] = fC33;
+  //e[10] = fC40;
+  //e[11] = fC41;
+  //e[12] = fC42;
+  //e[13] = fC43;
+  //e[14] = fC44;
+  error[0] = 1.;
+  error[1] = 0.;
+  error[2] = 1.;
+  error[3] = 0.;
+  error[4] = 0.;
+  error[5] = 1.;
+  error[6] = 0.;
+  error[7] = 0.;
+  error[8] = 0.;
+  error[9] = 1.;
+  error[10] = 0.;
+  error[11] = 0.;
+  error[12] = 0.;
+  error[13] = 0.;
+  error[14] = 1.;
 
-    /*
-      cout <<"alpha: "<<alpha<<endl;
-      cout <<"Passed State"<<endl;
-      for (int i=0; i<5; ++i) {
-      cout <<"x["<<i<<"]:\t"<<x[i]<<endl;
-      }
-      for (int i=0; i<15; ++i) {
-      cout <<"e["<<i<<"]:\t"<<e[i]<<endl;
-      }
-    */
-    
-    hitvector::const_iterator it;
-    StiTrackNode * newNode;
-    StiHit * hit;
-    for (it=v.begin(); it!=v.end(); ++it) {
-	//cout <<"Adding Hit: "<<(*(*it))<<endl;
-	newNode = addHit(*it);
-	//cout <<"Hit Added, setting parameters"<<endl;
-	newNode->set(x,e,hit->x(),alpha);
-	//cout <<"Parameters set"<<endl;
-    }
+  int i =0;
+  for (it=v.begin(); it!=v.end(); ++it) {
+    hit = *it;
+    //cout <<"Adding Hit: "<<(*(*it))<<endl;
+    //newNode = addHit(hit); this is done in the set call below...
+    state[0] = hit->y(); 
+    state[1] = hit->z(); 
+    newNode->set(i, hit, alpha, hit->x(), state,error, 0., 0.);
+    i++;
+  }
 }
 
-void StiKalmanTrack::getStateNear(double x, double &xx, double state[5], double error[15])
+StiKalmanTrackNode * StiKalmanTrack::getNodeNear(double x) const
 {
   if (firstNode==0)  // no node in this track, return a null state and error
-    {
-      for (int i=0;i<5;i++)
-	state[i] = 0.;
-      for (int i=0;i<15;i++)
-	error[i] = 0.;
-      return;
-    }
+      return 0;
   StiDefaultMutableTreeNodeVector* nodes  = firstNode->breadthFirstEnumeration();
   double minDist  = 1.E10;
   double diff;
-  StiTrackNode * bestNode = firstNode;
+  StiKalmanTrackNode * bestNode = firstNode;
   StiDefaultMutableTreeNodeIterator it;
   for (it=nodes->begin(); it!=nodes->end(); it++)
     {
-      StiTrackNode * node = dynamic_cast<StiTrackNode *>(*it);
+      StiKalmanTrackNode * node = dynamic_cast<StiKalmanTrackNode *>(*it);
       diff = node->fX - x; if (diff<0) diff = -diff;
+      //cout << "======> x:" << node->fX << endl;
+      //cout << "======> diff :" << diff << endl;
       if (diff<minDist) 
 	{
 	  minDist = diff;
 	  bestNode = firstNode;
 	}
     }
-  xx = bestNode->fX;
-  bestNode->getState(state, error);  
   delete nodes;
+  return bestNode;
 }
 
-StThreeVector<double> StiKalmanTrack::getPointNear(double x)
+StThreeVector<double> StiKalmanTrack::getPointNear(double x) const
 {
-  double xx;
-  double state[5];
-  getStateNear(x,xx,state,0);
-  return (StThreeVector<double>(xx, state[0], state[1]));
-  //point[0] = xx;
-  //point[1] = state[0];
-  //point[2] = state[1];
+  // returns point in local coordinates
+  double xx,yy,zz;
+  StiKalmanTrackNode * node = getNodeNear(x);
+  if (node==0)
+    return StThreeVector<double>(0.,0.,0.);
+  else 
+    {
+      xx = node->fX;
+      yy = node->fP0;
+      zz = node->fP1;
+      return (StThreeVector<double>(xx, yy,zz));
+    }
+}
+
+StThreeVector<double> StiKalmanTrack::getGlobalPointNear(double x) const
+{
+  // returns point in local coordinates
+  double xx,yy,zz;
+  StiKalmanTrackNode * node = getNodeNear(x);
+  if (node==0)
+    return StThreeVector<double>(0.,0.,0.);
+  else 
+    {
+      xx = node->fX;
+      yy = node->fP0;
+      zz = node->fP1;
+      double alpha = node->fAlpha;
+      double ca = cos(alpha);
+      double sa = sin(alpha);
+      double gx = ca*xx-sa*yy;
+      double gy = sa*xx+ca*yy;
+      return (StThreeVector<double>(gx,gy, zz));
+    }
 }
