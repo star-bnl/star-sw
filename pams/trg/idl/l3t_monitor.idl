@@ -5,6 +5,6 @@ struct l3t_monitor  {
    short      sector       ;     // sector processed
    long       nPoints      ;     // # of space points in sector
    long       nTracks      ;     // # of reconstructed tracks 
-   float      time         ;     // Time required for processing
+   float      sTime        ;     // Time required for processing
 };
 

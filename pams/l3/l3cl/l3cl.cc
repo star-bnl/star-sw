@@ -52,6 +52,10 @@ extern "C" long type_of_call l3cl_(
   init_pointers();
   init_table();
   init_other();
+//
+//    Set hit memory to 0
+//
+  memset(hit, 0, hit_h->maxlen * sizeof(TCL_TPHIT_ST));
 
 
   while( pad_pointer <= &(pad[(pad_h->nok)-1]) )  {

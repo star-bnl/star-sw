@@ -10,6 +10,7 @@
 #include "tcl_tphit.h"
 #include "tpt_track.h"
 #include "FTFinder.h"
+#include "TrackerFrame.h"
 #include "FTF_Mc_Track.h"
 
 FTFinder      tracker ;
@@ -41,11 +42,11 @@ extern "C" long type_of_call ftf_tpc_(
 //
 //    Set parameters
 //
+  tracker.para.setDefaults ( ) ;
   ftfSetParameters ( para ) ;
 //
 //    Reset tracker
 //
-  tracker.para.setDefaults ( ) ;
   tracker.reset ( ) ;
 //
 //   Check there is something coming in
@@ -144,11 +145,11 @@ extern "C" long type_of_call ftf_tpc_(
 //   Check sector
 //
         sector = (short)(tphit[i].row/100) ;
-        if ( sector < para->FirstSector || sector > para->LastSector ) continue ;
         if ( sector < 13 && tphit[i].z < 0 ) {
            if ( sector == 12 ) sector = 24 ;
            else sector = 24 - sector ;
         }
+        if ( sector < para->FirstSector || sector > para->LastSector ) continue ;
         sectorIndex = sector - para->FirstSector ;
 //
 //   Check # hits in sector
@@ -209,7 +210,7 @@ extern "C" long type_of_call ftf_tpc_(
         monitor[monCounter].sector  = sector + 1 ;
         monitor[monCounter].nPoints = nSectorHits[sectorIndex] ;
         monitor[monCounter].nTracks = tracker.n_tracks - nTracksLast ;
-        monitor[monCounter].time    = sectorTime ;
+        monitor[monCounter].sTime   = sectorTime ;
         monCounter++ ;
         monitor_h->nok = monCounter ;
      }
@@ -259,7 +260,8 @@ extern "C" long type_of_call ftf_tpc_(
     tptrack[counter].r0       = tracker.track[i].r0      ; 
     tptrack[counter].tanl     = tracker.track[i].tanl    ; 
     tptrack[counter].z0       = tracker.track[i].z0      ; 
-    tptrack[counter].hitid    = 0      ; 
+    tptrack[counter].hitid    = tracker.track[i].last_hit->id    ; 
+ // tptrack[counter].hitid    = 0    ; 
     tptrack[counter].dedx[0]  = tracker.track[i].dedx ;
     tptrack[counter].dedx[1]  = 0.F ;
 
