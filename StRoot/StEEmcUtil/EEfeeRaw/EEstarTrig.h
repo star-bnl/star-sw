@@ -1,10 +1,13 @@
 #ifndef EEstarTrig_h
 #define EEstarTrig_h
 /*********************************************************************
- * $Id: EEstarTrig.h,v 1.3 2003/05/29 21:42:11 zolnie Exp $
+ * $Id: EEstarTrig.h,v 1.4 2003/05/29 21:43:54 zolnie Exp $
  *********************************************************************
  * container for STAR trigger data
  * $Log: EEstarTrig.h,v $
+ * Revision 1.4  2003/05/29 21:43:54  zolnie
+ * back to Jas order
+ *
  * Revision 1.3  2003/05/29 21:42:11  zolnie
  * add file destriptor to print() method
  *
@@ -60,7 +63,7 @@ class EEstarTrig : public TObject {
   u_short bbcTimeDiff() const { return VTX[3] & 0x1ff; }
   EEstarTrig();
   virtual ~EEstarTrig();
-  void  print(FILE *stdout, int k=0) const;
+  void  print(int k=0, FILE *fd=stdout) const;
   void  clear();
   ClassDef(EEstarTrig,2) 
 
