@@ -1,0 +1,44 @@
+\documentclass{revtex4}
+\usepackage{graphicx}
+
+\newcommand{ \be }{\begin{equation}}
+\newcommand{ \ee }{\end{equation}}
+\newcommand{ \bea }{\begin{eqnarray}}
+\newcommand{ \eea }{\end{eqnarray}}
+\newcommand{ \la }{\langle}
+\newcommand{ \ra }{\rangle}
+
+\begin{document}
+
+\section{Track Length Determination}
+
+The class {\em StiKalmanTrack} implements the method 
+{\em double getTrackLength() const} defined in the 
+abstract interface {\em StiTrack} to calculate and return 
+the track length. 
+
+The track length is defined as the path length between the 
+outer and inner (first and last) points assigned on a track.
+
+It is assumed for practical purposes that the track does not 
+loop inside the detector. The track determination proceeds as follows:
+
+\begin{itemize}
+\item Obtain the positions of the first ($\vec{P}_1$) and 
+last ($\vec{P}_2$) points on the track. 
+\item Determine the longitudinal and transverse distance, 
+$\Delta z=\vec{P}_{1,z} - \vec{P}_{2,z}$,
+and $d=\sqrt{(\vec{P}_{1,x} - \vec{P}_{2,x})^2+
+(\vec{P}_{1,y} - \vec{P}_{2,y})^2}$
+\item Determine the transverse path length, $s$, based on the 
+curvature, $C=1/R$, of the track at the inner point with 
+the following expression:
+
+\be
+s = 2 R {\rm arcsin}(Cd/2)
+\ee
+
+\item Determine and return the full length $L=\sqrt{\Delta z^2+s^2}$.
+\end{itemize}
+
+\end{document}
