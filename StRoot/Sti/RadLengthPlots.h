@@ -6,8 +6,7 @@
 class RadLengthPlots : public StiHistograms
 {
  public:
-  RadLengthPlots();
-  RadLengthPlots(const string & name, const string & description);
+  RadLengthPlots(const string & name="R", const string & description="Radiation Length Plots");
   ~RadLengthPlots();
   void initialize();
   void fill(StiTrackContainer* mTrackStore);

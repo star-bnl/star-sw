@@ -1,20 +1,29 @@
 #include "Stiostream.h"
+#include "Sti/Base/Factory.h"
 #include "Sti/StiDetector.h"
-#include "Sti/StiShape.h"
+#include "Sti/StiPlanarShape.h"
+#include "Sti/StiDiskShape.h"
+#include "Sti/StiPlacement.h"
 #include "Sti/StiMaterial.h"
 #include "Sti/StiDetectorBuilder.h"
 #include "Sti/StiToolkit.h"
+#include "Sti/StiNeverActiveFunctor.h"
+#include "Sti/StiElossCalculator.h"
 #include "StThreeVector.hh"
 #include "StMaker.h"
+
+StiDetectorBuilder* StiDetectorBuilder::fCurrentDetectorBuilder = 0;
 
 StiDetectorBuilder::StiDetectorBuilder(const string & name,bool active, const string & inputFile)
   : Named(name+"Builder"),
     _groupId(-1),
     _active(active),
     _detectorFactory( StiToolkit::instance()->getDetectorFactory() ),
-		_inputFile(inputFile)
+    _inputFile(inputFile),
+     _gasMat(0)
 {
   cout << "StiDetectorBuilder::StiDetectorBuilder() - INFO - Instantiating builder named:"<<name<<endl;
+  fCurrentDetectorBuilder = this;
 }
 
 StiDetectorBuilder::~StiDetectorBuilder()
@@ -69,20 +78,7 @@ StiShape * StiDetectorBuilder::add(StiShape *shape)
 
 StiDetector * StiDetectorBuilder::add(unsigned int row, unsigned int sector, StiDetector *detector)
 {
-  if (row>_nRows)
-    {
-      string message = "StiDetectorBuilder::add() - ERROR - argument row out of bound:";
-      message+=row;
-      message+=">";
-      message+=_nRows;
-      throw runtime_error(message.c_str());
-    }
-  if (sector>_nSectors[row])
-    {
-      string message = "StiDetectorBuilder::add() - ERROR - argument sector out of bound";
-      throw runtime_error(message.c_str());
-    }
-  //cout<<"StiDetectorBuilder::add() - INFO - Row:"<<row<<" Sector:"<<sector<<" Name:"<<detector->getName()<<endl;
+  setNSectors(row,sector+1);
   _detectors[row][sector] = detector;
   return add(detector);
 }
@@ -111,4 +107,107 @@ void StiDetectorBuilder::build(StMaker& source)
 void StiDetectorBuilder::buildDetectors(StMaker& source)
 {}
 
+//________________________________________________________________________________
+void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
+  cout << "StiDetectorBuilder::AverageVolume -I TGeoPhysicalNode\t" << nodeP->GetName() << endl;
+  TGeoVolume   *volP   = nodeP->GetVolume();
+  TGeoMaterial *matP   = volP->GetMaterial(); matP->Print("");
+  TGeoShape    *shapeP = nodeP->GetShape(); cout << "New Shape\t"; StiVMCToolKit::PrintShape(shapeP);
+  TGeoHMatrix  *hmat   = nodeP->GetMatrix(); hmat->Print("");
+  Double_t PotI = StiVMCToolKit::GetPotI(matP);
+  StiMaterial *matS = add(new StiMaterial(matP->GetName(),
+						matP->GetZ(),
+						matP->GetA(),
+						matP->GetDensity(),
+						matP->GetDensity()*matP->GetRadLen(),
+						PotI));
+  Double_t ionization = matS->getIonization();
+  StiElossCalculator *ElossCalculator = new StiElossCalculator(matS->getZOverA(), ionization*ionization);
+  StiShape     *sh     = findShape(volP->GetName());
+  Double_t     *xyz    = hmat->GetTranslation();
+  Double_t     *rot    = hmat->GetRotationMatrix();
+  Double_t      Phi    = 0;
+  //  Double_t xc,yc,zc,rc,rn, nx,ny,nz,yOff;
+  StiPlacement *pPlacement = 0;
+  if (xyz[0]*xyz[0] + xyz[1]*xyz[1] < 1.e-3 && 
+      TMath::Abs(rot[0]*rot[0] + rot[4]*rot[4] + rot[8]*rot[8] - 3) < 1e-5 &&
+      (shapeP->TestShapeBit(TGeoShape::kGeoTubeSeg) ||
+       shapeP->TestShapeBit(TGeoShape::kGeoTube))) {
+    TGeoTube *shapeC = (TGeoTube *) shapeP;
+    Double_t Rmax = shapeC->GetRmax();
+    Double_t Rmin = shapeC->GetRmin();
+    Double_t dZ   = shapeC->GetDz();
+    Double_t radius = (Rmin + Rmax)/2;
+    Double_t dPhi = 2*TMath::Pi();
+    
+    if (shapeP->TestShapeBit(TGeoShape::kGeoTubeSeg)) {
+      TGeoTubeSeg *shapeS = (TGeoTubeSeg *) shapeP;
+      Phi =  TMath::DegToRad()*(shapeS->GetPhi2() + shapeS->GetPhi1())/2;
+      Phi =  StiVMCToolKit::Nice(Phi);
+      dPhi = TMath::DegToRad()*(shapeS->GetPhi2() - shapeS->GetPhi1());
+    }
+    if (! sh) {// I assume that the shape name is unique
+      sh = new StiDiskShape(volP->GetName(),// Name
+			    dZ,             // halfDepth
+			    Rmax-Rmin,      // thickness
+			    Rmax,           // outerRadius
+			    dPhi);          // openingAngle
+      add(sh);
+    }
+    pPlacement = new StiPlacement;
+    pPlacement->setZcenter(xyz[2]);
+    pPlacement->setLayerRadius(radius);
+    pPlacement->setLayerAngle(Phi);
+    pPlacement->setRegion(StiPlacement::kMidRapidity);
+    pPlacement->setNormalRep(Phi,radius, 0); 
+  }
+  else {// BBox
+    TGeoBBox *box = (TGeoBBox *) shapeP;
+    if (! sh) {
+      sh = new StiPlanarShape(volP->GetName(),// Name
+			      box->GetDZ(),   // halfDepth
+			      box->GetDX(),   // thickness
+			      box->GetDY());  // halfWidth
+      add(sh);
+    }
+    // rot = {r0, r1, r2,
+    //        r3, r4, r5,
+    //        r6, r7, r8}
+    double nx = rot[3];// 
+    double ny = rot[4];
+    //      double nz = rot[5];
+    double nt = sqrt(nx*nx+ny*ny);
+    double xc = xyz[0];
+    double yc = xyz[1];
+    double zc = xyz[2];
+    double rc = sqrt(xc*xc+yc*yc);
+    //    double rn = (xc*nx + yc*ny)/nt;
+    // create unique detector properties (placement & name)
+    Double_t  dPhi = acos((xc*nx+yc*ny)/(rc*nt));
+    Double_t  phiC = atan2(yc,xc);
+    Double_t  phiN = atan2(ny,nx);
+    dPhi = phiC-phiN;
+    //    Double_t yOff = sqrt(rc*rc-rn*rn);
+    pPlacement = new StiPlacement;
+    pPlacement->setZcenter(zc);
+    pPlacement->setLayerRadius(rc);
+    pPlacement->setLayerAngle(phiC);
+    pPlacement->setRegion(StiPlacement::kMidRapidity);
+    pPlacement->setCenterRep(phiC, rc, -dPhi); 
+  }
+  assert(pPlacement);
+  StiDetector *pDetector = getDetectorFactory()->getInstance();
+  pDetector->setName(nodeP->GetName());
+  pDetector->setIsOn(false);
+  pDetector->setIsActive(new StiNeverActiveFunctor);
+  pDetector->setIsContinuousMedium(false);
+  pDetector->setIsDiscreteScatterer(true);
+  pDetector->setShape(sh);
+  pDetector->setPlacement(pPlacement); 
+  pDetector->setGas(getGasMat());
+  pDetector->setMaterial(matS);
+  pDetector->setElossCalculator(ElossCalculator);
+  Int_t layer = getNRows();
+  add(layer+1,0,pDetector);
+}
 

@@ -105,5 +105,3 @@ StiDetectorBuilder * StiMasterDetectorBuilder::get(const string & name)
     }
 	throw runtime_error("StiMasterDetectorBuilder::get(const string & name) -E- Requested object not found");
 }
-
-

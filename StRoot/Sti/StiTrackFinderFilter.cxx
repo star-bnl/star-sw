@@ -25,7 +25,7 @@ bool StiTrackFinderFilter::accept(const StiTrack *track) const
   int fitNpts = track->getFitPointCount();
   //cout << " | ";
   if (npts<1 || fitNpts<1) return false;
-  double ratio = fitNpts/npts;
+  //  double ratio = fitNpts/npts;
   if (npts>_minPtsCount && fitNpts>_minFitPtsCount) // && ratio>_minFitToPtsRatio)
     {
       //cout << " $";

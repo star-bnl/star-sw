@@ -84,7 +84,7 @@ public:
   static StiTrackFinder * getTrackFinder();
   static StiTrackFitter * getTrackFitter();
 
-  StiTrack()    
+  StiTrack() : mId(0)   
 		{ /* nops */  }
   virtual ~StiTrack()  { /* nops */  }
   virtual void fit(int direction=kOutsideIn); 
@@ -130,14 +130,16 @@ public:
   // Convenience Accessor using a switch
   virtual double  getValue(int key) const;
   virtual bool isPrimary() const=0;
-
+  virtual void   setId(int m = 0) {mId = m;}
+  virtual int    getId() const {return mId;}
+  virtual int    getId() {return mId;}
   virtual bool extendToVertex(StiHit* vertex)=0;
   //	virtual bool extendToVertex(StiHit* vertex, const StiDetector * alternate)=0;
 
  protected:
   static StiTrackFinder * trackFinder;
   static StiTrackFitter * trackFitter;
-  
+  int             mId;
   friend ostream& operator<<(ostream& os, const StiTrack& track);
 };
 

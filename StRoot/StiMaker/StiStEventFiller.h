@@ -1,12 +1,15 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.12 2004/10/26 06:45:41 perev Exp $
+ * $Id: StiStEventFiller.h,v 2.13 2005/02/07 18:34:17 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.13  2005/02/07 18:34:17  fisyak
+ * Add VMC dead material
+ *
  * Revision 2.12  2004/10/26 06:45:41  perev
  * version V2V
  *
@@ -128,7 +131,7 @@ class StiTrack;
 class StiKalmanTrack;
 class StHelix;
 class StHelixModel;
-class StPhysicalHelixD;
+#include "StPhysicalHelixD.hh"
 
 /*! \class StiStEventFiller
     StiStEventFiller is a utilitity class meant to properly convert StiKalmanTrack

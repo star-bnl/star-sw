@@ -11,6 +11,7 @@ class StiStarDetectorBuilder : public StiDetectorBuilder
   StiStarDetectorBuilder(bool active, const string & inputFile);
   virtual ~StiStarDetectorBuilder(); 
   virtual void buildDetectors(StMaker&s);	
+  void         useVMCGeometry();
  protected:
   StiMaterial         * _pipeMaterial;
   StiMaterial         * _vacuumMaterial;

@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.51 2005/01/17 03:56:56 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 2.52 2005/02/07 18:34:16 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.52  2005/02/07 18:34:16  fisyak
+ * Add VMC dead material
+ *
  * Revision 2.51  2005/01/17 03:56:56  pruneau
  * change track container to vector
  *
@@ -790,7 +793,16 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
 					      node->getGlobalMomentumF(), 
 					      node->getHelicity());
 
-  //cout <<"Helix: "<<geometry->helix()<<endl;
+#if 0
+  if (outer) cout << "Outer";
+  else       cout << "Inner";
+  cout << "\tPoints\t" << track->getPointCount();
+  if (node->getDetector()) cout << "\tDetector: " << node->getDetector()->getGroupId();
+  cout << "\tHelix: " <<geometry->helix() << endl; 
+  cout << "\t xCenter = " << geometry->helix().xcenter() << "\t yCenter = " << geometry->helix().ycenter()<<endl;
+  cout << "\t getMomentum = " << node->getMomentum() << "\t" << node->getP() << endl;
+  cout << "\t getGlobalMomentum = " << node->getGlobalMomentum() << "\t" << node->getP() << endl;
+#endif
   if (outer)
     gTrack->setOuterGeometry(geometry);
   else

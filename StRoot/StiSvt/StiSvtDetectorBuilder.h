@@ -12,13 +12,16 @@ class StiSvtDetectorBuilder : public StiDetectorBuilder
 	StiSvtDetectorBuilder(bool active, const string & inputFile);
 	virtual ~StiSvtDetectorBuilder(); 
 	virtual void loadDS(TDataSet&);
-  virtual void loadFS(ifstream& inFile);
+	virtual void loadFS(ifstream& inFile);
 
 	virtual void buildDetectors(StMaker& source);	
 	virtual void setDefaults();
-
+	virtual void useVMCGeometry();		
+	void    setSiMat(StiMaterial     *m) {_siMat = m;}
+	void    setHybridMat(StiMaterial *m) {_hybridMat = m;}
+	StiMaterial *getSiMat()    {return _siMat;}
+	StiMaterial *getHybridMat(){return _hybridMat;}
  protected:
-	StiMaterial    * _gasMat;
 	StiMaterial    * _siMat;
 	StiMaterial    * _hybridMat;
 	StiPlanarShape * _waferShape[6];

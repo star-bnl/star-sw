@@ -32,7 +32,7 @@ using namespace std;
 #include "StSsdDbMaker/St_SsdDb_Reader.hh"
 
 StiSsdDetectorBuilder::StiSsdDetectorBuilder(bool active, const string & inputFile)
-    : StiDetectorBuilder("Ssd",active,inputFile)
+    : StiDetectorBuilder("Ssd",active,inputFile), _siMat(0), _hybridMat(0)
 {
     // Hit error parameters : it is set to 20 microns, in both x and y coordinates 
     _trackingParameters.setName("SsdTrackingParameters");
@@ -52,6 +52,7 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
     //load(_inputFile, source);
 
     setNRows(nRows);
+    if (StiVMCToolKit::GetVMC()) {useVMCGeometry();}
     //assert(gStSsdDbMaker);
     if (!gStSsdDbMaker) {
 	throw runtime_error("StiSsdDetectorBuilder::loadDb() - ERROR - gStSsdDbMaker==0");
@@ -89,8 +90,11 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
       all SSD materials (average).
     */
     //gMessMgr->Info() << "StiSsdDetectorBuilder::buildMaterials() - I - Started "<<endm;
-    _gasMat     = add(new StiMaterial("SsdAir",7.3, 14.61, 0.001205, 30420.*0.001205, 7.3*12.e-9));
-    _siMat      = add(new StiMaterial("SsdSi",14., 28.0855, 2.33, 21.82, 14.*12.*1e-9));
+    if (! _gasMat)
+      _gasMat     = add(new StiMaterial("SsdAir",7.3, 14.61, 0.001205, 30420.*0.001205, 7.3*12.e-9));
+    if (! _siMat)
+      _siMat      = add(new StiMaterial("SsdSi",14., 28.0855, 2.33, 21.82, 14.*12.*1e-9));
+    if (! _hybridMat)
     _hybridMat  = add(new StiMaterial("SsdHyb",14., 28.0855, 2.33, 21.82, 14.*12.*1e-9));
 
     double ionization = _siMat->getIonization();
@@ -253,4 +257,57 @@ void StiSsdDetectorBuilder::setDefaults()
     cout << _trackingParameters << endl;
     cout << _hitCalculator <<endl;
     cout << "StiSsdDetectorBuilder::setDefaults() -I- Done" << endl;
+}
+//________________________________________________________________________________
+void StiSsdDetectorBuilder::useVMCGeometry() {
+  cout << "StiSsdDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
+  SetCurrentDetectorBuilder(this);
+  struct Material_t {
+    Char_t *name;
+    StiMaterial    **p;
+  };
+  Material_t map[] = {
+    {"AIR", &_gasMat},
+    {"SILICON", &_siMat},
+    {"SILICON", &_hybridMat}
+  };
+  Int_t M = sizeof(map)/sizeof(Material_t);
+  for (Int_t i = 0; i < M; i++) {
+    const TGeoMaterial *mat =  gGeoManager->GetMaterial(map[i].name); 
+    if (! mat) continue;
+    Double_t PotI = StiVMCToolKit::GetPotI(mat);
+    *map[i].p = add(new StiMaterial(mat->GetName(),
+				    mat->GetZ(),
+				    mat->GetA(),
+				    mat->GetDensity(),
+				    mat->GetDensity()*mat->GetRadLen(),
+				    PotI));
+  }
+  const VolumeMap_t SsdVolumes[] = { 
+  // SSD
+  //  {"SFMO", "the mother of all Silicon Strip Detector volumes","HALL_1/CAVE_1/SVTT_1/SFMO_1","",""},
+  {"SCMP","SSD mounting plate inserted in the cone","HALL_1/CAVE_1/SVTT_1/SFMO_1/SCMP_1-8","",""},
+  {"SCVM","SSD V-shape mouting piece","HALL_1/CAVE_1/SVTT_1/SFMO_1/SCVM_1-8/*","",""},
+  {"SSLT","the linking (sector to the cone) tube","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSLT_1-8","",""},
+  {"SSLB","the linking (sector to the cone)","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSLB_1-8","",""},
+  {"SSRS","the side of the small rib","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSRS_1-4","",""},
+  {"SSRT","the top of the side rib","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSRT_1-4","",""},
+  {"SSSS","Side parts of the small sectors","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSSS_1-4","",""},
+  {"SSST","Top parts of the small sectors","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSST_1-4","",""},
+  //  {"SFLM","the mother of the ladder","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/*","",""}, 
+  {"SFSM","the structure mother volume","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFSM_1/*","",""},
+  {"SFDM","the detectors and adcs mother volume","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFDM_1/*","",""}
+  //  {"SFSD","the strip detector",      "HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFDM_1/SFSW_1-16/SFSD_1","ssd",""},// <+++
+  };
+  Int_t NoSsdVols = sizeof(SsdVolumes)/sizeof(VolumeMap_t);
+  TString pathT("HALL_1/CAVE_1/SVTT_1/SFMO_1");
+  TString path("");
+  for (Int_t i = 0; i < NoSsdVols; i++) {
+    gGeoManager->RestoreMasterVolume(); 
+    gGeoManager->CdTop();
+    gGeoManager->cd(pathT); path = pathT;
+    TGeoNode *nodeT = gGeoManager->GetCurrentNode();
+    if (! nodeT) continue;;
+    StiVMCToolKit::LoopOverNodes(nodeT, path, SsdVolumes[i].name, MakeAverageVolume);
+  }
 }

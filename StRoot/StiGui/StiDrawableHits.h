@@ -11,7 +11,7 @@ using std::vector;
 #include "StiDrawable.h"
 
 class StiHit;
-class StThreeVectorD;
+#include "StThreeVectorD.hh"
 
 #ifndef __CINT__
 typedef double ThreeDimPoint_t; //we'll have to change this if we ever leave root

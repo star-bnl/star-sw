@@ -15,12 +15,14 @@ public:
     virtual void buildDetectors(StMaker&s);
     /// returns the azimuthal angle [-pi, pi) for tpc sector [1-24]
     double phiForTpcSector(unsigned int iSector) const;
-		double phiForSector(unsigned int iSector,     unsigned int nSectors) const;
-		double phiForWestSector(unsigned int iSector, unsigned int nSectors) const;
-		double phiForEastSector(unsigned int iSector, unsigned int nSectors) const;
-		virtual void loadDS(TDataSet&ds);
-		virtual void loadFS(ifstream &);	
-		virtual void setDefaults();
+    double phiForSector(unsigned int iSector,     unsigned int nSectors) const;
+    double phiForWestSector(unsigned int iSector, unsigned int nSectors) const;
+    double phiForEastSector(unsigned int iSector, unsigned int nSectors) const;
+    virtual void loadDS(TDataSet&ds);
+    virtual void loadFS(ifstream &);	
+    virtual void setDefaults();
+    void         useVMCGeometry();		
+    //    virtual void AverageVolume(TGeoPhysicalNode *nodeP);
  protected:
     int rdoForPadrow(int iPadrow);
     StiMaterial * _gas;
@@ -34,12 +36,12 @@ public:
 /// Get the azimuthal angle of the given sector
 inline double StiTpcDetectorBuilder::phiForTpcSector(unsigned int sector) const
 {
-  if(sector<0 || sector>=_nSectors[0])
+  if(sector<0 || sector>=12)
     {
       cout << "phiForTpcSector(" << sector << "): invalid sector" << endl;
       throw runtime_error("StiTpcDetectorBuilder::phiForTpcSector - ERROR - Invalid Sector");
     }
-  return phiForSector(sector, _nSectors[0]);
+  return phiForSector(sector, 12);
 } // phiForTpcSector
 
 /// nSectors is the number of sectors in 360 degrees (one half of the

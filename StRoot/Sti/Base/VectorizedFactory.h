@@ -38,7 +38,8 @@ public:
     int getIncrementalSize() const;
     int getMaxIncrementCount() const;
     int getCurrentSize() const;
-    
+    int getCurrentEntry() const {return _currentEntry;}
+
     static const int defaultMaxIncrementCount; // 10
     static const int defaultIncrementSize;     // 5000
     static const int defaultOriginalSize;      // 100000
@@ -54,6 +55,7 @@ private:
     int _originalSize;
     int _incrementalSize;
     int _maxIncrementCount;
+    int _currentEntry;
     int _incrementCount;
 
     t_vector _container;
@@ -85,6 +87,7 @@ VectorizedFactory<Concrete,Abstract>::VectorizedFactory(const string& name,
      _originalSize(original),
      _incrementalSize(incremental),
      _maxIncrementCount(maxInc),
+     _currentEntry(0),
      _incrementCount(0)
 {
   cout << "VectorizedFactory<Concrete,Abstract>::VectorizedFactory() - INFO - "<<endl
@@ -121,6 +124,7 @@ inline Abstract* VectorizedFactory<Concrete,Abstract>::getInstance()
       throw logic_error("VectorizedFactory::getInstance() -F- Too many expension requests");
       }
     }
+  _currentEntry++;
   return *_current++;
 }
 
@@ -128,6 +132,7 @@ template <class Concrete, class Abstract>
 void VectorizedFactory<Concrete,Abstract>::reset()  
 {
   _current = _container.begin();
+  _currentEntry = 0;
 }
 
 template <class Concrete, class Abstract> 
@@ -179,6 +184,7 @@ void VectorizedFactory<Concrete,Abstract>::clear()
     _container.clear();
     _incrementCount = 0;
     _current = _container.begin();
+    _currentEntry = 0;   
 }
 
 /// Destroy this factory by deleting all object instances it owns, and resetting internal variables
@@ -200,6 +206,7 @@ void VectorizedFactory<Concrete,Abstract>::instantiate(int n)
   cout << "VectorizedFactory<"<<getName()<<">::instantiate("<<n<<") -I- Size:"<<_container.size()
   <<"(" << sizeof(Concrete)*_container.size()<<"bytes)";
   int currentDistance = _current-_container.begin();
+  _currentEntry = currentDistance;
   _container.reserve( _container.size()+n );
   for (int i=0;i<n; ++i) {
     _container.push_back( new Concrete() );

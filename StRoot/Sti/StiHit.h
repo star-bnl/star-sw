@@ -47,8 +47,8 @@
 #include "StiPlacement.h"
 #include "StMeasuredPoint.h"
 #include "StThreeVectorF.hh"
+#include "StMatrixF.hh"
 #define HITMESSENGER *(Messenger::instance(MessageType::kHitMessage))
-class StMatrixF;
 
 
 

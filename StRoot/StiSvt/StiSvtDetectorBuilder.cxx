@@ -11,7 +11,7 @@
 #include "Sti/Base/Messenger.h"
 #include "Sti/Base/Factory.h"
 #include "Sti/StiPlanarShape.h"
-#include "Sti/StiCylindricalShape.h"
+#include "Sti/StiDiskShape.h"
 #include "Sti/StiMaterial.h"
 #include "Sti/StiPlacement.h"
 #include "Sti/StiDetector.h"
@@ -24,6 +24,27 @@
 #include "tables/St_HitError_Table.h"
 
 /*
+  Geant names: SVTT the mother of all SVT volumes
+               SFMO: is the mother of all Silicon Strip Detector volumes
+	       SOUM: Outer shileding structure
+	       SXR[L,1,2]: Circular water feeds
+	       SCBM: Mother of All Cables
+	       SALM: aluminum shield mesh
+	       SOSH: SVT outer shield "
+	       SISH: SVT inner shield "
+	       SLY[D,1,2,3,4,5]: layer mother
+	       SROD: Support rod
+	       SBSP: Beampipe support mother
+	       SCON: Support cone mother
+	       SBWC: water manifold to support cone bracket mother
+	       SWMM: water manifold mother
+	       SIES: Volume to hold inner endring screws
+	       SOES: Volume to hold outer endring screws
+	       SBRG: Bracket joining the end rungs
+	       SOER: outer end ring
+	       SIRT: inner end ring tube piece 
+               SIRP: inner end ring polygon piece 
+
   SVT Layer and Ladder Naming Convention
   Hardware       StiSvtBuilder
   ----------------------------------
@@ -67,8 +88,9 @@
     6     13       5     6
     6     15       5     7
  */
+
 StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active, const string & inputFile)
-  : StiDetectorBuilder("Svt",active,inputFile)
+  : StiDetectorBuilder("Svt",active,inputFile), _siMat(0), _hybridMat(0)
 {
   _trackingParameters.setName("svtTrackingParameters");
   _calc.setName("svtHitError");
@@ -94,9 +116,10 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 	if (!dataSet)	throw runtime_error("StiSvtDetectorBuilder::loadDb() -E- dataSet==0 while getting StSvtGeometry");
   _geometry = static_cast<StSvtGeometry*>(dataSet->GetObject());
   if (!_geometry) throw runtime_error("StiSvtDetectorBuilder::loadDb() -E- _geometry==0");
-
-	nRows = 2* _config->getNumberOfBarrels();
+  nRows = 2* _config->getNumberOfBarrels();
   setNRows(nRows);
+  if (StiVMCToolKit::GetVMC()) {useVMCGeometry();}
+  
   cout << "SVT Number of  Rows : "<<2* _config->getNumberOfBarrels()<<endl
 			 << "  Layer#  numberOfLadders      Radius" << endl;
   for (int layer=0;layer<nRows;layer++)
@@ -104,9 +127,12 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 				 << _geometry->getBarrelRadius(layer+1) << endl;
 
   cout << "StiSvtDetectorBuilder::buildDetectors() -I- Define Svt Materials" << endl;
-  _gasMat    = add(new StiMaterial("Air",7.3, 14.61, 0.001205, 30420.*0.001205, 7.3*12.e-9));
-  _siMat     = add(new StiMaterial("Si",     14.,      28.0855,   2.33,     21.82,           14.*12.*1e-9) );
-  _hybridMat = add(new StiMaterial("Hybrid", 14.,      28.0855,   2.33,     21.82,           14.*12.*1e-9) );
+  if (! _gasMat) 
+    _gasMat    = add(new StiMaterial("Air",7.3, 14.61, 0.001205, 30420.*0.001205, 7.3*12.e-9));
+  if (! _siMat)
+    _siMat     = add(new StiMaterial("Si",     14.,      28.0855,   2.33,     21.82,           14.*12.*1e-9) );
+  if (! _hybridMat)
+    _hybridMat = add(new StiMaterial("Hybrid", 14.,      28.0855,   2.33,     21.82,           14.*12.*1e-9) );
   cout << "StiSvtDetectorBuilder::buildDetectors() -I- Define Svt Shapes" << endl;
 
   double ionization = _siMat->getIonization();
@@ -122,10 +148,12 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 					      2.*_geometry->getWaferThickness(),
 					      _geometry->getWaferWidth() );
       add(_waferShape[layer]);
+#if 0
       // Hybrids
       sprintf(name, "Svt/Layer_%d/Hybrids", layer);
       _hybridShape[layer] = new StiPlanarShape(name,nWafers*_geometry->getWaferLength(),0.1, 1.);
       add(_hybridShape[layer]);
+#endif
     } // for layer
   
   for (int layer=0;layer<nRows;layer++)
@@ -146,7 +174,7 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
       // i.e. not a regular polygon.
       float fGapRadius = fLadderRadius*cos(fHalfGapPhi)/cos(fHalfLadderPhi);
       //   finally half the gap distance
-      float fHalfGap = fGapRadius*tan(fHalfGapPhi);
+      //      float fHalfGap = fGapRadius*tan(fHalfGapPhi);
       // determine the radius for the detector (ladders + hybrids)
       float fLayerRadius = (fLadderRadius + fGapRadius)/2.;
 
@@ -201,7 +229,7 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 	  pLadder->setElossCalculator(siElossCalculator);
 
 	  add(layer,ladder,pLadder);
-	  
+#if 0	  
 	  double offset = _hybridShape[layer]->getHalfWidth() - fHalfGap;
 	  double rHybrid = rc*cos(dPhi)*cos(fHalfGapPhi)/cos(fHalfLadderPhi);
 	  // hybrid 1
@@ -238,6 +266,7 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 	  pHybrid2->setPlacement(pPlacement);
 	  pHybrid2->setElossCalculator(siElossCalculator);
 	  add(pHybrid2);
+#endif
 	} // for ladder
     } // for layer
 }
@@ -270,4 +299,80 @@ void StiSvtDetectorBuilder::setDefaults()
   cout << _trackingParameters << endl;
   cout << _calc<<endl;
   cout << "StiSvtDetectorBuilder::setDefaults() -I- Done" << endl;
+}
+//________________________________________________________________________________
+void StiSvtDetectorBuilder::useVMCGeometry() {
+  cout << "StiSvtDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
+  SetCurrentDetectorBuilder(this);
+  struct Material_t {
+    Char_t *name;
+    StiMaterial    **p;
+  };
+  Material_t map[] = {
+    {"AIR", &_gasMat},
+    {"SILICON", &_siMat},
+    {"SILICON", &_hybridMat}
+  };
+  Int_t M = sizeof(map)/sizeof(Material_t);
+  for (Int_t i = 0; i < M; i++) {
+    const TGeoMaterial *mat =  gGeoManager->GetMaterial(map[i].name); 
+    if (! mat) continue;
+    Double_t PotI = StiVMCToolKit::GetPotI(mat);
+    *map[i].p = add(new StiMaterial(mat->GetName(),
+				    mat->GetZ(),
+				    mat->GetA(),
+				    mat->GetDensity(),
+				    mat->GetDensity()*mat->GetRadLen(),
+				    PotI));
+  }
+  const VolumeMap_t SvtVolumes[] = { 
+    {"SOUM", "Outer shileding structure","HALL_1/CAVE_1/SVTT_1/SOUM_1/*","",""},
+    {"SXRL", "Circular water feeds","HALL_1/CAVE_1/SVTT_1/SXRL_1-2/*","",""}, 
+    {"SXR1", "Circular water feeds","HALL_1/CAVE_1/SVTT_1/SXR1_3-4/*","",""}, 
+    {"SXR2", "Circular water feeds","HALL_1/CAVE_1/SVTT_1/SXR2_5-6/*","",""},
+    {"SCBM", "Mother of All Cables","HALL_1/CAVE_1/SVTT_1/SCBM_1-2/*","",""},
+    {"SCBL", "The bundles of cables connecting PCBs with the transition boards","HALL_1/CAVE_1/SVTT_1/SCBM_1-2/SCBL_1","",""},
+    {"SCB1", "The bundles of cables connecting PCBs with the transition boards","HALL_1/CAVE_1/SVTT_1/SCBM_1-2/SCB1_2","",""},
+    {"SCB2", "The bundles of cables connecting PCBs with the transition boards","HALL_1/CAVE_1/SVTT_1/SCBM_1-2/SCB2_3","",""},
+    {"SCB3", "The bundles of cables connecting PCBs with the transition boards","HALL_1/CAVE_1/SVTT_1/SCBM_1-2/SCB3_4","",""},
+    {"SFED", "bundles of water pipes","HALL_1/CAVE_1/SVTT_1/SCBM_1-2/SFED_1","",""},
+    {"SFE1", "bundles of water pipes","HALL_1/CAVE_1/SVTT_1/SCBM_1-2/SFE1_2","",""},
+    {"SFE2", "bundles of water pipes","HALL_1/CAVE_1/SVTT_1/SCBM_1-2/SFE2_3","",""},
+    {"SPLS", "plastic of the water pipes","HALL_1/CAVE_1/SVTT_1/SCBM_1-2/SPLS_1","",""},
+    {"SPL1", "plastic of the water pipes","HALL_1/CAVE_1/SVTT_1/SCBM_1-2/SPL1_2","",""},
+    {"SPL2", "plastic of the water pipes","HALL_1/CAVE_1/SVTT_1/SCBM_1-2/SPL2_3","",""},
+    {"SALM", "aluminum shield mesh","HALL_1/CAVE_1/SVTT_1/SALM_1-2","",""},
+    {"SOSH", "SVT outer shield","HALL_1/CAVE_1/SVTT_1/SOSH_1","",""},
+    {"SISH", "SVT inner shield","HALL_1/CAVE_1/SVTT_1/SISH_1","",""},
+    {"SLYD", "layer mother","HALL_1/CAVE_1/SVTT_1/SLYD_1/*","",""},
+    {"SLY1", "layer mother","HALL_1/CAVE_1/SVTT_1/SLY1_2/*","",""},
+    {"SLY2", "layer mother","HALL_1/CAVE_1/SVTT_1/SLY2_3/*","",""},
+    {"SLY3", "layer mother","HALL_1/CAVE_1/SVTT_1/SLY3_4/*","",""},
+    {"SLY4", "layer mother","HALL_1/CAVE_1/SVTT_1/SLY4_5/*","",""},
+    {"SLY5", "layer mother","HALL_1/CAVE_1/SVTT_1/SLY5_6/*","",""},
+    //  {"SVTD", "an active wafer volume","HALL_1/CAVE_1/SVTT_1/SLY*/SLS*/SLD*/STL*/STS*/SVTD_1","svt","SVTD"}, // <+++
+    {"SROD", "Support rod","HALL_1/CAVE_1/SVTT_1/SROD_1-2","",""},
+    {"SBSP", "Beampipe support mother","HALL_1/CAVE_1/SVTT_1/SBSP_1-2","",""},
+    //  {"SCON", "Support cone mother","HALL_1/CAVE_1/SVTT_1/SCON_1-2/*","",""},
+    {"SBWC", "water manifold to support cone bracket mother","HALL_1/CAVE_1/SVTT_1/SBWC_1-2/*","",""},
+    {"SWMM", "water manifold mother","HALL_1/CAVE_1/SVTT_1/SWMM_1-2/*","",""},
+    {"SIES", "Volume to hold inner endring screws","HALL_1/CAVE_1/SVTT_1/SIES_1-2/*","",""},
+    {"SOES", "Volume to hold outer endring screws","HALL_1/CAVE_1/SVTT_1/SOES_1-2/*","",""},
+    {"SBRG", "Bracket joining the end rungs","HALL_1/CAVE_1/SVTT_1/SBRG_1-2/*","",""},
+    {"SOER", "outer end ring","HALL_1/CAVE_1/SVTT_1/SBRG_1-2/*","",""},
+    {"SIRT", "inner end ring tube piece ","HALL_1/CAVE_1/SVTT_1/SIRT_1-2","",""},
+    {"SIRP", "inner end ring polygon piece ","HALL_1/CAVE_1/SVTT_1/SIRP_1-2","",""},
+    {"STAC", "twinax cable approximation, copper","HALL_1/CAVE_1/SVTT_1/SCON_1/STAC_1-2","",""}
+  };
+  Int_t NoSvtVols = sizeof(SvtVolumes)/sizeof(VolumeMap_t);
+  TString pathT("HALL_1/CAVE_1/SVTT_1");
+  TString path("");
+  for (Int_t i = 0; i < NoSvtVols; i++) {
+    gGeoManager->RestoreMasterVolume(); 
+    gGeoManager->CdTop();
+    gGeoManager->cd(pathT); path = pathT;
+    TGeoNode *nodeT = gGeoManager->GetCurrentNode();
+    if (! nodeT) continue;;
+    StiVMCToolKit::LoopOverNodes(nodeT, path, SvtVolumes[i].name, MakeAverageVolume);
+  }
 }

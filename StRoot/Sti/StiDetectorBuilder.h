@@ -11,6 +11,7 @@
 #include "Sti/Base/Named.h"
 #include "Sti/Base/Loadable.h"
 #include "StThreeVector.hh"
+#include "StiVMCToolKit.h"
 class StiDetector;
 class StiMaterial;
 class StiShape;
@@ -72,7 +73,16 @@ public:
   void setTrackingParameters(const TrackingParameters_st & pars);
   void setTrackingParameters(const StiTrackingParameters & pars);
   StiTrackingParameters & getTrackingParameters();
-
+  Factory<StiDetector>* getDetectorFactory() {return _detectorFactory;}
+  void SetCurrentDetectorBuilder(StiDetectorBuilder *m) {fCurrentDetectorBuilder = m;}
+  static StiDetectorBuilder *GetCurrentDetectorBuilder() {return fCurrentDetectorBuilder;}
+  static  void MakeAverageVolume(TGeoPhysicalNode *nodeP) {
+    if (fCurrentDetectorBuilder) fCurrentDetectorBuilder->AverageVolume(nodeP);
+  }
+  virtual void AverageVolume(TGeoPhysicalNode *nodeP);
+  virtual void useVMCGeometry() {}
+  void    setGasMat(StiMaterial    *m) {_gasMat = m;}
+  StiMaterial *getGasMat()   {return _gasMat;}
  protected:
  
   int                 _groupId;
@@ -81,19 +91,19 @@ public:
   shapeMap            mShapeMap;
   detectorMap         mDetectorMap;
   detectorIterator    mDetectorIterator; 
-  unsigned int        _nRows;
-  vector< unsigned int> _nSectors;
   vector< vector<StiDetector*> > _detectors;
   Factory<StiDetector>*_detectorFactory;
   StiTrackingParameters _trackingParameters;
-	string _inputFile;
+  string _inputFile;
+  static StiDetectorBuilder* fCurrentDetectorBuilder;
+  StiMaterial    * _gasMat;
 };
 
 ///Returns the number of active rows in the detector
 ///Rows can be counted radially or longitudinally
 inline unsigned int  StiDetectorBuilder::getNRows() const
 {
-  return _nRows;
+  return _detectors.size();
 }
 
 ///Returns the number of sectors (or segments) in a the
@@ -101,51 +111,28 @@ inline unsigned int  StiDetectorBuilder::getNRows() const
 ///distributed.
 inline unsigned int  StiDetectorBuilder::getNSectors(unsigned int row) const
 {
-  if (row>_nRows)
+  if (row>_detectors.size())
     {
       string message = "StiDetectorBuilder::getNSectors() - ERROR - argument row out of bound:";
       message+=row;
       message+=">";
-      message+=_nRows;
+      message+=_detectors.size();
       throw runtime_error(message.c_str());
     }
-  return _nSectors[row];
+  return _detectors[row].size();
 }
 
 ///Sets the number of the number of rows of active
 ///detectors.
 inline void StiDetectorBuilder::setNRows(unsigned int nRows)
 {
-  if (nRows==0 || nRows>100)
-    { 
-      string message = "StiDetectorBuilder::setNSectors() - ERROR - argument nRow==0 ||nRow>100; nRow:";
-      message+=nRows;
-      throw runtime_error(message.c_str());
-    }
-  _nRows = nRows;
-  _nSectors = vector< unsigned int >(_nRows);
-  _detectors = vector< vector<StiDetector*>  >(_nRows);
-} 
- 
+  if (_detectors.size() < nRows) _detectors.resize(nRows);
+}
+
 inline void StiDetectorBuilder::setNSectors(unsigned int row, unsigned int nSectors)
 {
-  if (row>_nRows)
-    { 
-      string message = "StiDetectorBuilder::setNSectors() - ERROR - row==";
-      message+=row;
-      message+=">_nRows==";
-      message+=_nRows;
-      throw runtime_error(message.c_str());
-    }
-  if (nSectors==0 || nSectors>100)
-    { 
-      string message = "StiDetectorBuilder::setNSectors() - ERROR - nSectors==";
-      message+=nSectors;
-      message+="seems inappropriate...";
-      throw runtime_error(message.c_str());
-    }
-  _nSectors[row] = nSectors;
-  _detectors[row] = vector<StiDetector*>(nSectors);
+  setNRows(row+1);
+  if (_detectors[row].size() < nSectors) _detectors[row].resize(nSectors);
 }
 
 inline double StiDetectorBuilder::nice(double angle) const 
@@ -157,12 +144,12 @@ inline double StiDetectorBuilder::nice(double angle) const
 
 inline  StiDetector * StiDetectorBuilder::getDetector(unsigned int row, unsigned int sector) const
 {
-  if (row>_nRows)
+  if (row>_detectors.size())
     {
       string message = "StiDetectorBuilder::getDetector() - ERROR - argument row out of bound:";
       throw runtime_error(message.c_str());
     }
-  if (sector>_nSectors[row])
+  if (sector>_detectors[row].size())
     {
       string message = "StiDetectorBuilder::getDetector() - ERROR - argument sector out of bound";
       throw runtime_error(message.c_str());
@@ -173,17 +160,8 @@ inline  StiDetector * StiDetectorBuilder::getDetector(unsigned int row, unsigned
 
 inline  void StiDetectorBuilder::setDetector(unsigned int row, unsigned int sector, StiDetector *detector)
 {
-  if (row>_nRows)
-    {
-      string message = "StiDetectorBuilder::setDetector() - ERROR - argument row out of bound:";
-      throw runtime_error(message.c_str());
-    }
-  if (sector>_nSectors[row])
-    {
-      string message = "StiDetectorBuilder::setDetector() - ERROR - argument sector out of bound";
-      throw runtime_error(message.c_str());
-    }
-  _detectors[row][sector] = detector;
+  setNSectors(row+1,sector+1);
+   _detectors[row][sector] = detector;
 }
 
 inline void StiDetectorBuilder::setGroupId(int id)

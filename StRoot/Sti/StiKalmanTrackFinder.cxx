@@ -52,7 +52,7 @@ void StiKalmanTrackFinder::initialize()
   _trackContainer    = _toolkit->getTrackContainer();
   _mcTrackContainer  = _toolkit->getMcTrackContainer();
   _vertexFinder      = _toolkit->getVertexFinder();
-	/*
+  /*
   StiDefaultTrackFilter * trackFilter = new StiDefaultTrackFilter("FinderTrackFilter","Reconstructed Track Filter");
   trackFilter->add( new EditableParameter("nPtsUsed","Use nPts", 1., 1., 0., 1., 1.,
                                           Parameter::Boolean, StiTrack::kPointCount) );
@@ -63,8 +63,8 @@ void StiKalmanTrackFinder::initialize()
   trackFilter->add(new EditableParameter("lengthUsed","Use Length", 1., 1., 0.,1.,1.,Parameter::Boolean, StiTrack::kTrackLength));
   trackFilter->add(new EditableParameter("lengthMin", "Min Length", 0., 0., -300.,   300.,2,Parameter::Double, StiTrack::kTrackLength));
   trackFilter->add(new EditableParameter("lengthMax", "Max Length", 300.,  300., -300.,   300.,2,Parameter::Double, StiTrack::kTrackLength));
-_trackFilter = trackFilter;
-	*/
+  _trackFilter = trackFilter;
+  */
   _trackFilter = new StiTrackFinderFilter();
   //_toolkit->setFinderTrackFilter(_trackFilter);
   cout << "StiKalmanTrackFinder::initialize() -I- Done"<<endl;
@@ -293,17 +293,20 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
 /// Return Ok      if operation was successful
 bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_error, logic_error
 {
+#ifdef Sti_DEBUG
+  if (t) cout << *t << endl;
+#endif  
   //cout << "SKTF::find(StiTrack * t) -I- Started" << endl;
   const double degToRad = 3.1415927/180.;
   const double radToDeg = 180./3.1415927;
   const double ref1  = 50.*degToRad;
-  const double ref2  = 2.*3.1415927-ref1;
+  //  const double ref2  = 2.*3.1415927-ref1;
   const double ref1a  = 110.*degToRad;
-  const double ref2a  = 2.*3.1415927-ref1a;
+  //  const double ref2a  = 2.*3.1415927-ref1a;
 
   StiKalmanTrackNode * leadNode;
   StiKalmanTrackNode testNode;
-  bool debug= false;
+  static bool debug= false;
   if (lastMove>100) debug=false;
   int nAdded       = 0;
   int position;
@@ -337,9 +340,7 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
   if (debug) cout <<endl<< "lead node:" << *leadNode<<endl<<"lead det:"<<*leadDet<<endl;;
   while ( (direction==kOutsideIn)? rlayer!=_detectorContainer->rendRadial() : layer!=_detectorContainer->endRadial() )
     {
-      debug = false;
-      double angle;
-      double radius;
+      //      debug = false;
       vector<StiDetectorNode*>::const_iterator sector;
       vector<StiDetector*> detectors;
       if (debug) cout << endl<<"lead node:" << *leadNode<<endl<<" lead det:"<<*leadDet;
@@ -353,19 +354,20 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 	  double angle  = detector->getPlacement()->getNormalRefAngle();
 	  double radius = detector->getPlacement()->getNormalRadius();
 	  //double diff = fabs(leadAngle-angle);
-	  double diff = fabs(projAngle-angle);
-	  if (radius>50)
-	    {
-	      if (diff<ref1 || diff>ref2) detectors.push_back(detector);
-	    }
-	  else if (radius>4.2)
-	    {
-	      if (diff<ref1a || diff>ref2a) detectors.push_back(detector);
-	    }
-	  else
-	    {
-	      if (diff<ref1 || diff>ref2) detectors.push_back(detector);
-	    }
+	  Int_t shapeCode = detector->getShape()->getShapeCode();
+	  Double_t OpenAngle = ref1;
+	  if (shapeCode >= kCylindrical) 
+	    OpenAngle = ((StiCylindricalShape *) detector->getShape())->getOpeningAngle();
+	  else {
+	    if (radius <= 50 && radius>4.2)  OpenAngle = ref1a;
+	  }
+	  Double_t Diff = projAngle-angle;
+	  if (Diff >  2*TMath::Pi()) Diff -= 2*TMath::Pi();
+	  if (Diff < -2*TMath::Pi()) Diff += 2*TMath::Pi();
+	  double diff = TMath::Abs(Diff);
+	  if (diff <= OpenAngle) {
+	    detectors.push_back(detector);
+	  }
 	  ++sector;
 	}
       //if (radius<4.5) debug = true; else debug=false;
@@ -395,7 +397,7 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 		}
 	      else 
 		{
-		  if (debug) cout << "position<=kEdgeZplus";
+		  if (debug) cout << "position " << position << "<=kEdgeZplus";
 		  testNode.setDetector(tDet);
 		  bool active = tDet->isActive(testNode.getY(),testNode.getZ());
 		  if (debug) cout << " vol active:" << active<<endl;
