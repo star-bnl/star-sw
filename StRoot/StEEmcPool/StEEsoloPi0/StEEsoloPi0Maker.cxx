@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEsoloPi0Maker.cxx,v 1.4 2004/05/07 21:38:38 balewski Exp $
+// $Id: StEEsoloPi0Maker.cxx,v 1.5 2004/08/09 20:28:31 balewski Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -74,13 +74,14 @@ Int_t StEEsoloPi0Maker::Make(){
   clear();
 
   //............. trigger sort
-  getTrig();
+  if( !getTrig()) return;
   n1++;
 
 
   //................. CTB sort
   float sum=getCtbSum();
-  if(sum<75 || sum > 800) return kStOK; 
+  sum=sum;
+  //tmp  if(sum<75 || sum > 800) return kStOK; 
   n2++;
     
 
@@ -197,7 +198,7 @@ Int_t StEEsoloPi0Maker::getEEmcAdc(){
 
 //________________________________________________
 //________________________________________________
-void StEEsoloPi0Maker::getTrig(){
+bool StEEsoloPi0Maker::getTrig(){
   
   printf("%s::getTrig() is called ..........\n",StMaker::GetName());
  
@@ -215,17 +216,19 @@ void StEEsoloPi0Maker::getTrig(){
 
   printf("\n\n ==================== processing eventID %d nPrim=%d nTrig=%d==============\n", info.id(),nPrim, trgId.size());
 
-
+  uint myId=15007;
+  bool isGood=false;
   uint i;
   for(i = 0; i < trgId.size() ; i++){
     printf("i=%d id=%d\n",i,trgId[i]);
+    if(trgId[i]==myId) isGood=true;
   }
   
   // StL0Trigger &trig=muEve->l0Trigger();
   
   
   //StEventSummary &smry=muEve->eventSummary();
-  
+  return isGood;
 }
 
 //________________________________________________
@@ -254,6 +257,9 @@ float StEEsoloPi0Maker::getCtbSum(){
 }
 
 // $Log: StEEsoloPi0Maker.cxx,v $
+// Revision 1.5  2004/08/09 20:28:31  balewski
+// add trig selection
+//
 // Revision 1.4  2004/05/07 21:38:38  balewski
 // gamma finder with SMD
 //
