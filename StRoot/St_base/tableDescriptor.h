@@ -1,6 +1,7 @@
 /* tableDescriptor.h */
 #ifndef TABLEDESCRIPTOR_H
 #define TABLEDESCRIPTOR_H
+// $Id: tableDescriptor.h,v 1.6 2000/01/12 18:07:25 fine Exp $"
 #ifdef NORESTRICTIONS
 # define TABLEDESCRIPTOR_SPEC   \
  "struct tableDescriptor {      \
@@ -52,4 +53,8 @@ typedef struct tableDescriptor_st {
     unsigned int m_Dimensions;  /* The number of the dimensions for array                                */
     Int_t        m_Type;        /* The data type of the selected column                                  */
 } TABLEDESCRIPTOR_ST;
+// $Log: tableDescriptor.h,v $
+// Revision 1.6  2000/01/12 18:07:25  fine
+// cvs symbols have been added and copyright class introduced
+//"
 #endif /* TABLEDESCRIPTOR_H */

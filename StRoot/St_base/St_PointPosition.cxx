@@ -1,6 +1,6 @@
 // Class St_PointPosition converts St_NodePostion objects
 // into St_vector3 table one to be saved with MySQL data-base
-
+// $Id: St_PointPosition.cxx,v 1.2 2000/01/12 18:07:24 fine Exp $
 #include "St_DataSetIter.h"
 #include "St_PointPosition.h"
 #include "TRotMatrix.h"
@@ -65,4 +65,11 @@ void St_PointPosition::UpdatePosition(St_NodePosition *pos) {
    pos->SetPosition(translation->point[0],translation->point[1],translation->point[2]);
  }
 }
+
+//_____________________________________________________________________________
+// $Log: St_PointPosition.cxx,v $
+// Revision 1.2  2000/01/12 18:07:24  fine
+// cvs symbols have been added and copyright class introduced
+//
+//_____________________________________________________________________________
 

@@ -1,6 +1,6 @@
 //*CMZ :          29/04/99  16.25.33  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   24/04/99
- 
+// $Id: St_PointsArray3D.cxx,v 1.6 2000/01/12 18:07:24 fine Exp $ 
 #include <fstream.h>
 #include <iostream.h>
  
@@ -317,3 +317,11 @@ void St_PointsArray3D::Streamer(TBuffer &b)
       fOption.Streamer(b);
    }
 }
+
+//_______________________________________________________________________
+// $Log: St_PointsArray3D.cxx,v $
+// Revision 1.6  2000/01/12 18:07:24  fine
+// cvs symbols have been added and copyright class introduced
+//
+//_______________________________________________________________________
+

@@ -4,6 +4,7 @@
 //                                                                      //
 // StVirtualEventFilter virtual base class to create the variuous       //
 // user-defined fikters for StEventDiplayMaker's objects                //
+// $Id: StVirtualEventFilter.cxx,v 1.8 2000/01/12 18:07:22 fine Exp $
 // This class defines the intreface to define a graphics attribute:     //
 // like: color, size and style                                          //
 // At the same time colr = 0 means the event supplied did not pass      //
@@ -48,4 +49,12 @@ Int_t StVirtualEventFilter::Channel(const StVertex *,Size_t &,Style_t &)
 //_____________________________________________________________________________
 Int_t StVirtualEventFilter::Channel(const St_Table *,Int_t rowNumber,Size_t &,Style_t &)
 { return GetFlag()? (kGreen+rowNumber)%20 : 0 ;}
+
+//_____________________________________________________________________________
+// $Log: StVirtualEventFilter.cxx,v $
+// Revision 1.8  2000/01/12 18:07:22  fine
+// cvs symbols have been added and copyright class introduced
+//
+//_____________________________________________________________________________
+
 

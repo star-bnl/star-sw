@@ -19,35 +19,7 @@
 // * purpose.  It is provided "as is" without express or implied warranty.
 // ************************************************************************
 
-// $Id: St_DataSet.h,v 1.40 1999/11/10 00:49:25 fine Exp $
-// $Log: St_DataSet.h,v $
-// Revision 1.40  1999/11/10 00:49:25  fine
-// comment was changed
-//
-// Revision 1.39  1999/11/06 19:09:45  fisyak
-// Clean up for Valery
-//
-// Revision 1.38  1999/11/04 18:01:19  fine
-// Copyright text introduced
-//
-// Revision 1.37  1999/10/28 16:24:29  fine
-// St_DataSet major correction: it may be built with TList (default) or with TObjArray
-//
-// Revision 1.36  1999/09/04 00:28:01  fine
-// St_Table::NaN from VP and gloabl dataset have been introduced
-//
-// Revision 1.35  1999/08/06 15:24:35  fine
-// UnMark method has been introduced
-//
-// Revision 1.34  1999/07/23 13:26:06  fine
-// Several new methods to mark the datasets have been introduced
-//
-// Revision 1.33  1999/06/26 01:40:55  fisyak
-// Add Valery's abstract buffer
-//
-// Revision 1.32  1999/06/09 22:08:53  fine
-// Comment clean up
-//
+// $Id: St_DataSet.h,v 1.41 2000/01/12 18:07:23 fine Exp $
 #ifndef ROOT_St_DataSet
 #define ROOT_St_DataSet
  
@@ -190,4 +162,37 @@ inline void        St_DataSet::Mark()     { Mark(kMark,kSet); }
 inline void        St_DataSet::UnMark()   { Mark(kMark,kReset); }
 inline void        St_DataSet::Mark(UInt_t flag,EBitOpt reset){ SetBit(flag,reset); }
 
+// $Log: St_DataSet.h,v $
+// Revision 1.41  2000/01/12 18:07:23  fine
+// cvs symbols have been added and copyright class introduced
+//
+// Revision 1.40  1999/11/10 00:49:25  fine
+// comment was changed
+//
+// Revision 1.39  1999/11/06 19:09:45  fisyak
+// Clean up for Valery
+//
+// Revision 1.38  1999/11/04 18:01:19  fine
+// Copyright text introduced
+//
+// Revision 1.37  1999/10/28 16:24:29  fine
+// St_DataSet major correction: it may be built with TList (default) or with TObjArray
+//
+// Revision 1.36  1999/09/04 00:28:01  fine
+// St_Table::NaN from VP and gloabl dataset have been introduced
+//
+// Revision 1.35  1999/08/06 15:24:35  fine
+// UnMark method has been introduced
+//
+// Revision 1.34  1999/07/23 13:26:06  fine
+// Several new methods to mark the datasets have been introduced
+//
+// Revision 1.33  1999/06/26 01:40:55  fisyak
+// Add Valery's abstract buffer
+//
+// Revision 1.32  1999/06/09 22:08:53  fine
+// Comment clean up
+//
+
+R__EXTERN const char *gCoPyRiGhT[];
 #endif

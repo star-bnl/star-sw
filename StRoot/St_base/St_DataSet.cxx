@@ -1,32 +1,28 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
+const char *gCoPyRiGhT[] = {
+     "STAR dataset C++ base class library:",
+     "Copyright(c) 1997~2000  [BNL] Brookhaven National Laboratory, Valeri Fine  (fine@bnl.gov). All right reserved",
+     "************************************************************************",
+     "This program is distributed in the hope that it will be useful,",
+     "but WITHOUT ANY WARRANTY; without even the implied warranty of",
+     "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+     "",
+     "Permission to use, copy, modify and distribute this software and its",
+     "documentation for any purpose is hereby granted without fee,",
+     "provided that the above copyright notice appear in all copies and",
+     "that both that copyright notice and this permission notice appear",
+     "in supporting documentation.  Brookhaven National Laboratory makes no",
+     "representations about the suitability of this software for any",
+     "purpose.  It is provided \"as is\" without express or implied warranty.",
+     "************************************************************************" 
+};
 
-// Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
-// $Id: St_DataSet.cxx,v 1.56 1999/10/29 23:11:19 fine Exp $
-// $Log: St_DataSet.cxx,v $
-// Revision 1.56  1999/10/29 23:11:19  fine
-// compilation error for Sun fixed
-//
-// Revision 1.55  1999/10/28 16:24:29  fine
-// St_DataSet major correction: it may be built with TList (default) or with TObjArray
-//
-// Revision 1.54  1999/09/24 23:31:37  perev
-// Add title update in St_DataSet::Update
-//
-// Revision 1.53  1999/09/04 00:28:01  fine
-// St_Table::NaN from VP and gloabl dataset have been introduced
-//
-// Revision 1.52  1999/07/23 13:26:06  fine
-// Several new methods to mark the datasets have been introduced
-//
-// Revision 1.51  1999/06/26 01:40:55  fisyak
-// Add Valery's abstract buffer
-//
-// Revision 1.50  1999/06/09 22:08:53  fine
-// Comment clean up
-//
-
+const char *Id = {
+    "$Id: St_DataSet.cxx,v 1.57 2000/01/12 18:07:22 fine Exp $"
+};
 #include <iostream.h>
+#include "TSystem.h"
 #include "St_DataSetIter.h"
 #include "St_DataSet.h"
 #include "StBufferAbc.h"
@@ -738,4 +734,44 @@ void St_DataSet::Sort()
 }
 //______________________________________________________________________________
 Int_t St_DataSet::Streamer(StBufferAbc &){return 0;}
+
+class Copyright {public: Copyright(const Char_t *id=0){
+  if (gSystem->Getenv("No_Copyright") || 
+     ( gSystem->Getenv("STAR") && !gSystem->Getenv("Copyright")) ) return;
+  Int_t i = 0;
+  cout <<  " " << gCoPyRiGhT[i++] << endl 
+       <<  " " << id << endl
+       <<  " " << gCoPyRiGhT[i++] << endl;
+  if (gSystem->Getenv("Copyright") && id) { 
+    Int_t lCopy = sizeof(gCoPyRiGhT)/4;
+    for (Int_t l =i; l < lCopy; l++) cout << " " << gCoPyRiGhT[l] << endl;
+  }}};
+static Copyright St_DataSetLibraryCopyright(Id);
+
+//______________________________________________________________________________
+// $Log: St_DataSet.cxx,v $
+// Revision 1.57  2000/01/12 18:07:22  fine
+// cvs symbols have been added and copyright class introduced
+//
+// Revision 1.56  1999/10/29 23:11:19  fine
+// compilation error for Sun fixed
+//
+// Revision 1.55  1999/10/28 16:24:29  fine
+// St_DataSet major correction: it may be built with TList (default) or with TObjArray
+//
+// Revision 1.54  1999/09/24 23:31:37  perev
+// Add title update in St_DataSet::Update
+//
+// Revision 1.53  1999/09/04 00:28:01  fine
+// St_Table::NaN from VP and gloabl dataset have been introduced
+//
+// Revision 1.52  1999/07/23 13:26:06  fine
+// Several new methods to mark the datasets have been introduced
+//
+// Revision 1.51  1999/06/26 01:40:55  fisyak
+// Add Valery's abstract buffer
+//
+// Revision 1.50  1999/06/09 22:08:53  fine
+// Comment clean up
+//______________________________________________________________________________
 
