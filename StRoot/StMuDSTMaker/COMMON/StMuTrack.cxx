@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.15 2004/08/11 00:51:54 mvl Exp $
+ * $Id: StMuTrack.cxx,v 1.16 2004/08/12 01:34:25 mvl Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -71,10 +71,8 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, int index2Globa
   } 
 
   mNHitsPoss = track->numberOfPossiblePoints();
+
   int tpc_hits;
-  // This only handles new data. 
-  // Need to think of backward compatibiltiy mode (old StEvent)
-  // Also what about initialisation for odl MuDst files?
   mNHitsPossTpc=0;
   if (track->numberOfPossiblePoints(kTpcId)==track->numberOfPossiblePoints(kFtpcEastId)) {
     // backward compatibility mode, figure out which TPC points are in
@@ -163,13 +161,13 @@ unsigned short StMuTrack::nHitsPoss(StDetectorId det) const {
   // New situation: decode point counts
   switch (det) {
   case kTpcId:
-    return ((mNHitsPossTpc & 0xC0)==0)*mNHitsPoss;
+    return ((mNHitsPossTpc & 0xC0)==0)*mNHitsPossTpc;
     break;
   case kFtpcEastId:
-    return ((mNHitsPossTpc & 0xC0)==0x40)*(mNHitsPoss & 0x3F);
+    return ((mNHitsPossTpc & 0xC0)==0x40)*(mNHitsPossTpc & 0x3F);
     break;
   case kFtpcWestId:
-    return ((mNHitsPossTpc & 0xC0)==0x80)*(mNHitsPoss & 0x3F);
+    return ((mNHitsPossTpc & 0xC0)==0x80)*(mNHitsPossTpc & 0x3F);
     break;
   case kSvtId:
     return (mNHitsPossInner & 0x7);
@@ -195,13 +193,13 @@ unsigned short StMuTrack::nHitsFit(StDetectorId det) const {
   // New situation: decode point counts
   switch (det) {
   case kTpcId:
-    return ((mNHitsFitTpc & 0xC0)==0)*mNHitsFit;
+    return ((mNHitsFitTpc & 0xC0)==0)*mNHitsFitTpc;
     break;
   case kFtpcEastId:
-    return ((mNHitsFitTpc & 0xC0)==0x40)*(mNHitsFit & 0x3F);
+    return ((mNHitsFitTpc & 0xC0)==0x40)*(mNHitsFitTpc & 0x3F);
     break;
   case kFtpcWestId:
-    return ((mNHitsFitTpc & 0xC0)==0x80)*(mNHitsFit & 0x3F);
+    return ((mNHitsFitTpc & 0xC0)==0x80)*(mNHitsFitTpc & 0x3F);
     break;
   case kSvtId:
     return (mNHitsFitInner & 0x7);
@@ -289,6 +287,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.16  2004/08/12 01:34:25  mvl
+ * Fixed typo when extracting number of fitted, possible points per tpc
+ *
  * Revision 1.15  2004/08/11 00:51:54  mvl
  * Added topologyMap check for nHitsFit(StDetectorId) and nHitsPoss(StDetectorId) to better handle existing MuDst
  *
