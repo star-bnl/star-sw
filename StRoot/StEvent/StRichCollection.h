@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichCollection.h,v 2.1 2000/05/22 21:48:17 ullrich Exp $
+ * $Id: StRichCollection.h,v 2.2 2001/02/22 21:04:17 lasiuk Exp $
  *
  * Author: Brian Lasiuk, May 2000
  ***************************************************************************
@@ -12,6 +12,10 @@
  ***************************************************************************
  *
  * $Log: StRichCollection.h,v $
+ * Revision 2.2  2001/02/22 21:04:17  lasiuk
+ * keep the tracks that fly through the RICH in
+ * the collection
+ *
  * Revision 2.1  2000/05/22 21:48:17  ullrich
  * Initial Revision.
  *
@@ -41,10 +45,13 @@ public:
     const StSPtrVecRichHit&      getRichHits() const;
     StSPtrVecRichHit&            getRichHits();
 
+    const StPtrVecTrack&      getTracks() const;
+    StPtrVecTrack&            getTracks();
+
     void addPixel(const StRichPixel*);
     void addCluster(const StRichCluster*);
     void addHit(const StRichHit*);
-
+    void addTrack(const StTrack*);
 
     Bool_t pixelsPresent()   const;
     Bool_t clustersPresent() const;
@@ -54,6 +61,8 @@ private:
     StSPtrVecRichPixel     mRichPixels;
     StSPtrVecRichCluster   mRichClusters;
     StSPtrVecRichHit       mRichHits;
+
+    StPtrVecTrack          mTracks;
     
     ClassDef(StRichCollection, 1)
 };

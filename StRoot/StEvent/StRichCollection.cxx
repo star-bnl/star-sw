@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichCollection.cxx,v 2.1 2000/05/22 21:48:14 ullrich Exp $
+ * $Id: StRichCollection.cxx,v 2.2 2001/02/22 21:04:16 lasiuk Exp $
  *
  * Author: Brian Lasiuk, May 2000
  ***************************************************************************
@@ -11,13 +11,17 @@
  ***************************************************************************
  *
  * $Log: StRichCollection.cxx,v $
+ * Revision 2.2  2001/02/22 21:04:16  lasiuk
+ * keep the tracks that fly through the RICH in
+ * the collection
+ *
  * Revision 2.1  2000/05/22 21:48:14  ullrich
  * Initial Revision.
  *
  **************************************************************************/
 #include "StRichCollection.h"
 
-static const char rcsid[] = "$Id: StRichCollection.cxx,v 2.1 2000/05/22 21:48:14 ullrich Exp $";
+static const char rcsid[] = "$Id: StRichCollection.cxx,v 2.2 2001/02/22 21:04:16 lasiuk Exp $";
 
 ClassImp(StRichCollection)
     
@@ -62,6 +66,18 @@ StRichCollection::getRichHits()
     return mRichHits;
 }
 
+const StPtrVecTrack&
+StRichCollection::getTracks() const
+{
+    return mTracks;
+}
+
+StPtrVecTrack&
+StRichCollection::getTracks()
+{
+    return mTracks;
+}
+
 void
 StRichCollection::addPixel(const StRichPixel* aPix)
 {
@@ -78,6 +94,12 @@ void
 StRichCollection::addHit(const StRichHit* aHit)
 {
     mRichHits.push_back(aHit);
+}
+
+void
+StRichCollection::addTrack(const StTrack* track)
+{
+    mTracks.push_back(track);
 }
 
 Bool_t
