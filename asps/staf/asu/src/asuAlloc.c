@@ -16,6 +16,14 @@ void asuAllocStats(void)
 }
 
 /*--------------------------------------------------------------------*/
+int asuAllocDebugLevel(int level)
+{
+	static int debugLevel = 0;
+	if(0 <= level) debugLevel = level;
+	return debugLevel;
+}
+
+/*--------------------------------------------------------------------*/
 void *asuAlloc(size_t size)
 {
 	return asuRealloc(NULL, size);

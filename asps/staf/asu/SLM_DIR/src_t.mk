@@ -30,10 +30,10 @@ src_show:
 #
 $(CDFTYPES): $(CDFDIR)/%_def.cdf
 	cp $(dir $<)/$@ $@
-	cat $@ >> .sources_generated
+	echo $@ >> .sources_generated
 $(IDLTYPES): $(IDLDIR)/%.idl
 	cp $(dir $<)/$@ $@
-	cat $@ >> .sources_generated
+	echo $@ >> .sources_generated
 #
 .sources_generated:
 	touch $@

@@ -26,10 +26,10 @@ inc_show:
 #
 %.h: $(IDLDIR)/%.h
 	cp $< $@
-	cat $@ >> .includes_generated
+	echo $@ >> .includes_generated
 %.inc: $(IDLDIR)/%.inc
 	cp $< $@
-	cat $@ >> .includes_generated
+	echo $@ >> .includes_generated
 #
 %_load.h:
 	egrep -h '^STAFCV_T ' $(SRCDIR)/*_i.cc \
