@@ -1,15 +1,19 @@
 /***************************************************************************
  *
- * $Id: StRichCerenkovHistogram.cxx,v 1.2 2001/11/21 20:36:06 lasiuk Exp $
+ * $Id: StRichCerenkovHistogram.cxx,v 1.3 2001/12/19 20:18:38 lasiuk Exp $
  *
  * Author:  bl Mar 2, 2001
  ***************************************************************************
  *
  * Description: RICH offline software:
  *              for use in Cerenkov Ray Tracing Algorithm
+ * old version ~/test
  ***************************************************************************
  *
  * $Log: StRichCerenkovHistogram.cxx,v $
+ * Revision 1.3  2001/12/19 20:18:38  lasiuk
+ * Changeover in algorithm of isolating the Cherenkov angle
+ *
  * Revision 1.2  2001/11/21 20:36:06  lasiuk
  * azimuth angle calculation, trace and retracing algorithms, rotation
  * matrices, clean up intersection calculation.  Addition of quick
@@ -35,10 +39,9 @@ using std::accumulate;
 using std::max_element;
 #endif
 
-StRichCerenkovHistogram::StRichCerenkovHistogram(int numbBins)
-    : mNumberOfBins(numbBins)
+StRichCerenkovHistogram::StRichCerenkovHistogram()
 {
-    cout << "StRichCerenkovHistogram::StRichCerenkovHistogram(int)\n";
+    cout << "StRichCerenkovHistogram::StRichCerenkovHistogram()\n" << endl;
     this->init();
 }
 
@@ -49,45 +52,45 @@ StRichCerenkovHistogram::~StRichCerenkovHistogram() {/*nopt*/}
 void StRichCerenkovHistogram::init()
 {
     cout << "StRichCerenkovHistogram::init()" << endl;
-    mHistogram.clear();
-    mHistogram.resize(mNumberOfBins);
-    PR(mHistogram.size());
 
-    mResults.resize(eNumberOfHistoCuts);
-    mAngleRange = 50.*degree;
-    
-    mBinSize    = mAngleRange/mHistogram.size();
-
-
-    mCalculationDone = false;
+    this->clearData();
     
     //
     // constant angle default
     //
-    mPhi        = 0.*degree;
+    mPhiCut     = 0.*degree;
+    mWindowSize = 40.*milliradian;
+    
     mDoPhiCut   = false;
+}
 
-    mThreshold      = 0;
-    mDoThresholdCut = false;
+// ----------------------------------------------------
+bool StRichCerenkovHistogram::setCerenkovQuantities(pair<double,double> quant)
+{
+    cout << "StRichCerenkovHistogram::setCerenkovQuantities()" << endl;
+    PR(mCerenkovQuantities.size());
+    mCerenkovQuantities.push_back(quant);
+
+    PR(mCerenkovQuantities.back().first/degree);
+    PR(mCerenkovQuantities.back().second);
+    return true;
 }
 
 // ----------------------------------------------------
 bool StRichCerenkovHistogram::addEntry(StRichCerenkovPhoton gamma)
 {
-//      cout << "StRichCerenkovHistogram::addEntry()" << endl;
-//     PR(gamma);
-//      PR(gamma.theta()/degree);
-//      PR(gamma.phi()/degree)
-//     PR(mBinSize);
-//     PR(mBinSize/degree);
-    
-    size_t bin = this->whichBin(gamma.theta());
-//     PR(bin);
-    if( bin< mHistogram.size() ) {
-	mHistogram[bin].push_back(gamma);
-	return true;
-    }
-    return false;
+    cout << "StRichCerenkovHistogram::addEntry()" << endl;
+    PR(gamma);
+//     PR(gamma.theta()/degree);
+//     PR(gamma.phi()/degree);
+
+    if(gamma.theta()>mLargestTheta)  mLargestTheta = gamma.theta();
+    if(gamma.theta()<mSmallestTheta) mSmallestTheta = gamma.theta();
+    mHistogram.push_back(gamma);
+
+    PR(mSmallestTheta/degree);
+    PR(mLargestTheta/degree);
+    return true;
 }
 
 // ----------------------------------------------------
@@ -95,150 +98,76 @@ void StRichCerenkovHistogram::clearData()
 {
     cout << "StRichCerenkovHistogram::clearData()" << endl;
     PR(mHistogram.size());
-    size_t ii;
-    for(ii=0; ii<mHistogram.size(); ii++) {
-	mHistogram[ii].clear();
-    }
+    mHistogram.clear();
 
-    cout << "try results" << endl;
+    PR(mCerenkovQuantities.size());
+    mCerenkovQuantities.clear();
+
     PR(mResults.size());
-    for(ii=0; ii<mResults.size(); ii++) {
-	mResults[ii].clear();
-    }
-    cout << "done" << endl;
+    mResults.clear();
+    
+
+    mSmallestTheta = 90.*degree;
+    mLargestTheta = 0;
+
+    mCerenkovAngle = 0;
+    mNumberOfPhotons = 0;
+    
     mCalculationDone = false;
 }
 
+
+
+
+
+
 // ----------------------------------------------------
-int StRichCerenkovHistogram::rawEntries(int thresh) const {
+bool StRichCerenkovHistogram::checkHypothesis() {
 
-    int sum = 0;
+    cout << "StRichCerenkovHistogram::checkHypothesis()" << endl;
+    PR(mCerenkovAngle/degree);
+    //
+    // loop over the hypothesis
+    // first is the angle
+    // second is the fraction
+    //
 
-    for(size_t ii=0; ii< mHistogram.size(); ii++) {
+    vector<double> counts;
+    counts.resize(3); counts[0] = 0; counts[1] = 0; counts[2]=0;
+    for(size_t ii=0; ii<mCerenkovQuantities.size(); ii++) {
+	double angle = mCerenkovQuantities[ii].first;
+	cout << ii << "\tangle=" << angle/degree << endl;
+	if(angle > 1) {
+	    cout << "StRichCerenkovHistogram::checkHypothesis() BAD (" << ii << ")" << endl;
+	    continue;
+	}
+
+	//
+	//
+	// Calculate 1,2,3 sigma effects
+	//
+	//
 	
-	int entries = mHistogram[ii].size();
-	entries = max(0, entries-thresh);
-	sum += entries;
+// 	for(size_t jj=0; jj<mHistogram.size(); jj++) {
+
+// 	    double theta = mHistogram[jj].theta();
+// 	    PR(theta/degree);
+// 	    PR(windowSize/degree);
+// 	    if( (angle>(theta-mWindowSize)) && (angle<(theta+mWindowSize)) ) {
+// 		counts[ii] += this->weight(theta);
+// 	    }
+	    
+// 	}
     }
-    return sum;
+
+    //
+    //
+    // Reassigne if it is not compatible
+    //
+    //
+	
+    return true;
 }
-// ----------------------------------------------------
-int StRichCerenkovHistogram::binEntries(size_t bin) const {
-
-    //cout << "StRichCerenkovHistogram::binEntries()" << endl;
-    int entries = 0;
-    if(bin>=0 && bin <mHistogram.size()) {
-
-	entries = (mDoPhiCut) ? this->countPhi(bin) : mHistogram[bin].size();
-
-	if(mDoThresholdCut) {
-	    entries = max(0, (entries-mThreshold));
-	}
-    }
-    else {
-	cout << "StRichCerenkovHistogram::binEntries()\n";
-	cout << "\tWARNING (" << bin << ") not a valid bin" << endl;
-    }
-    
-    return entries;
-}
-
-// ----------------------------------------------------
-int StRichCerenkovHistogram::numberOfEntries() const {
-
-    int sum = 0;
-    
-    for(size_t ii=0; ii<mHistogram.size(); ii++) {
-	sum += this->binEntries(ii);
-    }
-
-    return sum;
-}
-
-// ----------------------------------------------------
-double StRichCerenkovHistogram::binValue(size_t i) const {
-
-    double value = 0;
-    if(i<mHistogram.size()) {
-	value = (mBinSize * (.5+i));
-    }
-    else {
-	cout << "StRichCerenkovHistogram::binValue()\n";
-	cout << "\tWARNING: Bad Bin (" << i << ")" << endl;
-    }
-    
-    return value;
-}
-
-// ----------------------------------------------------
-int StRichCerenkovHistogram::countPhi(int bin) const {
-
-    //cout << "StRichCerenkovHistogram::countPhi()" << endl;
-
-    // Assume that bin is checked already
-    int entries = 0;
-    for(size_t ii=0; ii<mHistogram[bin].size(); ii++) {
-
-	if( fabs(mHistogram[bin][ii].phi()) > mPhi) {
-	    entries += 1;
-	}
-
-    }
-    return entries;
-}
-
-// ----------------------------------------------------
-size_t StRichCerenkovHistogram::whichBin(double value) const {
-
-    // assume value is in radians already
-    //PR(bin);
-    return static_cast<size_t>(floor( (value)/mBinSize ));
-
-}
-
-// ----------------------------------------------------
-double StRichCerenkovHistogram::pedestal() const {
-
-    double pedestal = 0;
-    double sum = 0.;
-    double numberOfBins = 0.;
-    for(size_t ii=0; ii<mHistogram.size(); ii++) {
-
-	int entries = this->binEntries(ii);
-
-	if(entries) {
-	    sum += entries;
-	    numberOfBins +=1.;
-	}
-
-    }
-    
-    if(numberOfBins) {
-	pedestal = (sum/numberOfBins);
-    }
-    
-    return pedestal;
-}
-
-// ----------------------------------------------------
-double StRichCerenkovHistogram::pedestalSigma() const {
-
-    double sum = 0.;
-    double numberOfBins = 0.;
-    for(size_t ii=0; ii<mHistogram.size(); ii++) {
-
-	int entries = this->binEntries(ii);
-
-	if(entries) {
-	    sum += sqr(entries);
-	    numberOfBins +=1.;
-	}
-
-    }
-
-    return ( (sum/numberOfBins) - sqr(this->pedestal()));
-}
-
 
 // ----------------------------------------------------
 double StRichCerenkovHistogram::mean() const {
@@ -246,13 +175,11 @@ double StRichCerenkovHistogram::mean() const {
     double sum = 0;
     double numberOfEntries = 0;
     double mean = 0;
-    
-    for(size_t ii=0; ii<mHistogram.size(); ii++) {
 
-	double entries = this->binEntries(ii);
+    numberOfEntries = mHistogram.size();
+    for(size_t ii=0; ii<numberOfEntries; ii++) {
 
-	numberOfEntries += entries;
-	sum += (entries)*(this->binValue(ii));
+	sum += mHistogram[ii].theta();
 
     }
 
@@ -267,14 +194,11 @@ double StRichCerenkovHistogram::mean() const {
 double StRichCerenkovHistogram::secondMoment() const {
 
     double sum = 0;
-    double numberOfEntries = 0;
+    double numberOfEntries = mHistogram.size();
     double secondMoment = 0;
-    
     for(size_t ii=0; ii<mHistogram.size(); ii++) {
 
-	double entries = this->binEntries(ii);
-	numberOfEntries += entries;
-	sum += (entries)*sqr(this->binValue(ii));
+	sum += sqr(mHistogram[ii].theta());
 
     }
 
@@ -298,24 +222,6 @@ double StRichCerenkovHistogram::rms() const {
 }
 
 // ----------------------------------------------------
-double StRichCerenkovHistogram::mostProbable() const {
-
-    double maxEntries = 0;
-    double maxBin  = 0;
-
-    for(size_t ii=0; ii< mHistogram.size(); ii++) {
-
-	double numberOfEntries = this->binEntries(ii);
-	if(numberOfEntries >= maxEntries) {
-	    maxEntries = numberOfEntries;
-	    maxBin = ii;
-	}
-	
-    }
-    return (this->binValue(maxBin));
-}
-
-// ----------------------------------------------------
 double StRichCerenkovHistogram::bestAngle() {
 
     //
@@ -323,265 +229,175 @@ double StRichCerenkovHistogram::bestAngle() {
     // 38.9 => that is saturated
     //
 
-    bool oldThresholdCut = mDoThresholdCut;
-    bool oldPhiCut = mDoPhiCut;
-    
-    double pedestal = floor(this->pedestal());
-
-    this->setThreshold(static_cast<int>(pedestal));
-    this->doThresholdCut(true);
-
-    double theBestAngle = this->mean(); 
-    this->doCuts(oldThresholdCut, oldPhiCut);
-
-    return theBestAngle;
+    return 0.0;
 }
 
+
+
+
+
 // ----------------------------------------------------
-double StRichCerenkovHistogram::truncatedAngle() {
+void StRichCerenkovHistogram::calculateSlidingWindow() {
 
-//     PR(this->bestAngle());
-//     PR(mBinSize);
-
-    int centralBin = this->whichBin(this->bestAngle());
-    //cout << "centralBin= " << centralBin;
-    double width = floor( (this->sigma())/(mBinSize) );
+    cout << "StRichCerenkovHistogram::calculateSlidingWindow()" << endl;
+    PR(mWindowSize/milliradian);
     
-    double sum = 0;
-    double numberOfEntries = 0;
-    double truncatedAngle = 0.;
-    for(size_t ii=static_cast<size_t>(centralBin-width);
-	ii<=static_cast<size_t>(centralBin+width); ii++) {
-	
-	double entries = this->binEntries(ii);
-	
-	numberOfEntries += entries;
-	sum += entries*(this->binValue(ii));
+    double lowerBound = (mSmallestTheta-mWindowSize/2);
+    StRichWindowHistogram result(mWindowSize, mPhiCut);
 
+    
+    do { //
+	 // Initialization for each bin calculation
+	 //
+ 	double binValue  = 0;
+ 	double binSigma  = 0;
+
+	double upperBound = lowerBound+mWindowSize;
+	PR(lowerBound/degree);
+	PR(upperBound/degree);
+
+	double moment1=0;
+	double moment2=0;
+	double sumWeight=0;
+
+	for(size_t ii=0; ii< mHistogram.size(); ii++) {
+
+	    double theta = mHistogram[ii].theta();
+
+	    PR(theta/degree);
+	    if((theta>=lowerBound) && (theta<upperBound) ) {
+		cout << "add->" << theta/degree << endl;
+		double weight = this->weight(theta);
+		moment1 += weight*theta;
+		moment2 += weight*sqr(theta);
+		sumWeight += weight;
+		
+	    }
+	} // for loop
+
+	//
+	// put it in...
+	PR(sumWeight);
+	PR(moment1);
+	PR(moment2);
+
+	if(sumWeight) {
+	    binValue = moment1/sumWeight;
+	    binSigma = (moment2/sumWeight) - sqr(binValue);
+	}
+	else {
+	    binValue = lowerBound+mWindowSize/2.;
+	}
+	
+	result.addEntry(StRichWindowBin(binValue,sumWeight,binSigma));
+ 	PR(binValue/degree);
+	//
+	//
+	cout << "increase" << endl;
+	lowerBound += mWindowSize;
+	PR(lowerBound/degree);
+
+    } while (lowerBound<mLargestTheta);
+
+    PR(mResults.size());
+    mResults.push_back(result);
+    PR(mResults.size());
+}
+
+
+// ----------------------------------------------------
+void StRichCerenkovHistogram::evaluate() {
+
+    cout << "StRichCerenkovHistogram::evaluate()" << endl;
+    size_t ii;
+    for(ii=0; ii<mResults.size(); ii++) {
+	mResults[ii].process();
     }
 
-    if(numberOfEntries) {
-	truncatedAngle = sum/numberOfEntries;
-    }
-
-    return truncatedAngle;
+    //
+    // Assign the Cherenkov angle
+    //
+    //
+    // compare phiCut and noPhiCut values
+    //
+    PR(mResults[0].maxBin());
+    mCerenkovAngle = mResults[0].maxBin()->mAngle;
+    mCerenkovSigma = mResults[0].maxBin()->mSigma;
+    mNumberOfPhotons = mResults[0].maxBin()->mWeight;
+    
+    PR(mCerenkovAngle/degree);
+    PR(mCerenkovSigma/degree);
+    PR(mNumberOfPhotons);
 }
 
 // ----------------------------------------------------
 void StRichCerenkovHistogram::calculate() {
 
-    bool oldThresholdCut = mDoThresholdCut;
-    bool oldPhiCut       = mDoPhiCut;
-
-    //doCuts(theshold, phi);
-
-    //
-    // NO CUTS
-    //
-
-    this->doCuts(false, false);
-//     cout << "thold= "     << mThreshold       << "(" << mDoThresholdCut << ")"
-// 	 << " phi= "      << (mPhi/degree)    << "(" << mDoPhiCut       << ")"
-// 	 << " Pedestal= " << this->pedestal() << "\n";
-    mResults[eNoCuts].push_back(this->mean());
-    mResults[eNoCuts].push_back(this->sigma());
-    mResults[eNoCuts].push_back(this->mostProbable());
-    mResults[eNoCuts].push_back(this->bestAngle());
-    mResults[eNoCuts].push_back(this->truncatedAngle());
-    mResults[eNoCuts].push_back(this->pedestal());
-    mResults[eNoCuts].push_back(static_cast<double>(this->numberOfEntries()));
-
-    //
-    // THRESHOLD ONLY
-    //
-
-    this->doCuts(true, false);
-//     cout << "thold= "     << mThreshold       << "(" << mDoThresholdCut << ")"
-// 	 << " phi= "      << (mPhi/degree)    << "(" << mDoPhiCut       << ")"
-// 	 << " Pedestal= " << this->pedestal() << "\n";
-    mResults[eTHOnly].push_back(this->mean());
-    mResults[eTHOnly].push_back(this->sigma());
-    mResults[eTHOnly].push_back(this->mostProbable());
-    mResults[eTHOnly].push_back(this->bestAngle());
-    mResults[eTHOnly].push_back(this->truncatedAngle());
-    mResults[eTHOnly].push_back(this->pedestal());
-    mResults[eTHOnly].push_back(this->numberOfEntries());
+    cout << "StRichCerenkovHistogram::calculate()\n";
     
-    //
-    // PHI ONLY
-    //
+    PR(mSmallestTheta/degree);
+    PR(mLargestTheta/degree);
 
-    this->doCuts(false, true);
-//     cout << "thold= "     << mThreshold       << "(" << mDoThresholdCut << ")"
-// 	 << " phi= "      << (mPhi/degree)    << "(" << mDoPhiCut       << ")"
-// 	 << " Pedestal= " << this->pedestal() << "\n";
-    mResults[ePhiOnly].push_back(this->mean());
-    mResults[ePhiOnly].push_back(this->sigma());
-    mResults[ePhiOnly].push_back(this->mostProbable());
-    mResults[ePhiOnly].push_back(this->bestAngle());
-    mResults[ePhiOnly].push_back(this->truncatedAngle());
-    mResults[ePhiOnly].push_back(this->pedestal());
-    mResults[ePhiOnly].push_back(this->numberOfEntries());
-    
-    //
-    // TH and PHI
-    //
+    double initialWindowSize = 40.*milliradian;
+    this->setWindowSize(initialWindowSize);
+    PR(mWindowSize/milliradian);
 
-    this->doCuts(true, true);
-//     cout << "thold= "     << mThreshold       << "(" << mDoThresholdCut << ")"
-// 	 << " phi= "      << (mPhi/degree)    << "(" << mDoPhiCut       << ")"
-// 	 << " Pedestal= " << this->pedestal() << "\n";
-    mResults[eTHPhi].push_back(this->mean());
-    mResults[eTHPhi].push_back(this->sigma());
-    mResults[eTHPhi].push_back(this->mostProbable());
-    mResults[eTHPhi].push_back(this->bestAngle());
-    mResults[eTHPhi].push_back(this->truncatedAngle());
-    mResults[eTHPhi].push_back(this->pedestal());
-    mResults[eTHPhi].push_back(this->numberOfEntries());
+    PR(mResults.size());
+    this->calculateSlidingWindow();
+    PR(mResults.size());
     
-    this->doCuts(oldThresholdCut, oldPhiCut);
+    cout << "StRichCerenkovHistogram  Sliding window done" << endl;
+
+    //
+    // Assign a Cherenkov angle based on the
+    // collection of Rich Cherekov Windows
+    //
+    this->evaluate();
+
+    //
+    // secondary check
+    //
+    this->setWindowSize(initialWindowSize);
+    this->checkHypothesis();
+
+
     mCalculationDone = true;
 }
 
 // ----------------------------------------------------
 double StRichCerenkovHistogram::cerenkovAngle(unsigned short *flag) {
 
-    if(!mCalculationDone) this->calculate();
-
-    double cerenkovAngle = 0.;
-
     ///
     // should be in init
-    double mfraction = .50;
-    double mdeviation = 2.*degree;
+//     double mfraction = .50;
+//     double mdeviation = 2.*degree;
    
-    //
-    // Phi cut no threshold:
-    double fraction =
-	(mResults[ePhiOnly][eNumberOfEntries])/(mResults[eNoCuts][eNumberOfEntries]);
-    if(fraction < mfraction) {
-	cout << "StRichCerenkovHistogram::cerenkovAngle\n";
-	cout << "BAD FRACTION" << endl;
-	*flag = 1;
-    }
-
-    if( mResults[eNoCuts][eSigmaAngle] <  mResults[ePhiOnly][eSigmaAngle]) {
-    	cout << "StRichCerenkovHistogram::cerenkovAngle\n";
-	cout << "BAD SIGMA" << endl;
-	*flag = 1;
-    }
-
-    double deviation = 
-	fabs(mResults[ePhiOnly][eMostProbableAngle] - mResults[ePhiOnly][eBestAngle]);
-
-    if(deviation>mdeviation) {
-    	cout << "StRichCerenkovHistogram::cerenkovAngle\n";
-	cout << "BAD DEVIATION" << endl;
-	*flag = 1;
-    }
-    
-    cerenkovAngle = mResults[ePhiOnly][eBestAngle];
-    return cerenkovAngle;
+    return mCerenkovAngle;
 }
 
-// ----------------------------------------------------
+// ---------------------------------------------------
 double StRichCerenkovHistogram::cerenkovSigma() const
 {
-    return mResults[ePhiOnly][eSigmaAngle];
-}
-
-// ----------------------------------------------------
-double StRichCerenkovHistogram::cerenkovMostProbable() const
-{
-    return mResults[ePhiOnly][eMostProbableAngle];
+    return mCerenkovSigma;
 }
 
 // ----------------------------------------------------
 void StRichCerenkovHistogram::status() {
 
-    if(!mCalculationDone) this->calculate();
-    
-    bool oldThresholdCut = mDoThresholdCut;
-    bool oldPhiCut = mDoPhiCut;
-
-    cout << "StRichCerenkovHistogram::status()" << endl;
-    cout << "===============================================" << endl;
-    cout << "Bin    value  count    phi<" << (this->phi()/degree) << endl;
-    cout << "===============================================" << endl;
-    for(size_t ii=0; ii<mHistogram.size(); ii++) {
-	this->doCuts(false,false);
-	cout << ii << "\t"
-	     << (this->binValue(ii)/degree) << "\t"
-	     << (this->binEntries(ii)) << "\t";
-	this->doCuts(false,true);
-	cout << (this->binEntries(ii)) << endl;
+    if(!mCalculationDone) {
+	cout << "StRichCerenkovHistogram::status()" << endl;
+	cout << "Must Call calculate() first" << endl;
+	return;
     }
-    cout << "===========================================" << endl;
-    this->doCuts(false,false);
-    cout << "\t\t" << (this->numberOfEntries()) << "\t";
-    this->doCuts(false,true);
-    cout << this->numberOfEntries() << endl;
-    this->doCuts(oldThresholdCut, oldPhiCut);
     cout << "-------------------------------------------------------" << endl;
-    cout << "                Most       Best   Truncated" << endl;
-    cout << "Mean    Sigma  Probable    Angle    Angle      Entries"   << endl;
+    cout << "Bin Value   All Counts    Phi Cut"   << endl;
     cout << "-------------------------------------------------------" << endl;
 
     cout.width(8);
     cout.precision(4);
-    //
-    // NO CUTS
-    //
-    cout << "T/H= "      << mThreshold       << "(0) "
-	 << "phi= "      << (mPhi/degree)    << "(0) "
-	 << "Pedestal= " << mResults[eNoCuts][ePedestal] << "\n";
-    cout << (mResults[eNoCuts][eMeanAngle]/degree) << "\t"
-	 << (mResults[eNoCuts][eSigmaAngle]/degree) << "\t"
-	 << (mResults[eNoCuts][eMostProbableAngle]/degree) << "\t"
-	 << (mResults[eNoCuts][eBestAngle]/degree) << "\t"
-	 << (mResults[eNoCuts][eTruncatedAngle]/degree) << "\t"
-	 << (mResults[eNoCuts][eNumberOfEntries]) << endl;
-
-    //
-    // THRESHOLD CUT ONLY
-    //
-    cout << "T/H= "     << mThreshold       << "(1) "
-	 << "phi= "     << (mPhi/degree)    << "(0) "
-	 << "Pedestal= " << mResults[eTHOnly][ePedestal] << "\n";
-    cout << (mResults[eTHOnly][eMeanAngle]/degree) << "\t"
-	 << (mResults[eTHOnly][eSigmaAngle]/degree) << "\t"
-	 << (mResults[eTHOnly][eMostProbableAngle]/degree) << "\t"
-	 << (mResults[eTHOnly][eBestAngle]/degree) << "\t"
-	 << (mResults[eTHOnly][eTruncatedAngle]/degree) << "\t"
-	 << (mResults[eTHOnly][eNumberOfEntries]) << endl;
-    
-    //
-    // PHI CUT ONLY
-    //
-    cout << "T/H= "      << mThreshold       << "(0)"
-	 << "phi= "      << (mPhi/degree)    << "(1)"
-	 << "Pedestal= " << mResults[ePhiOnly][ePedestal] << "\n";
-    cout << (mResults[ePhiOnly][eMeanAngle]/degree) << "\t"
-	 << (mResults[ePhiOnly][eSigmaAngle]/degree) << "\t"
-	 << (mResults[ePhiOnly][eMostProbableAngle]/degree) << "\t"
-	 << (mResults[ePhiOnly][eBestAngle]/degree) << "\t"
-	 << (mResults[ePhiOnly][eTruncatedAngle]/degree) << "\t"
-	 << (mResults[ePhiOnly][eNumberOfEntries]) << endl;
-
-    //
-    // PHI & THRESHOLD CUT ONLY
-    //
-    cout << "T/H= "       << mThreshold       << "(1)"
-	 << " phi= "      << (mPhi/degree)    << "(1)"
-	 << " Pedestal= " << mResults[eTHPhi][ePedestal] << "\n";
-    cout << (mResults[eTHPhi][eMeanAngle]/degree) << "\t"
-	 << (mResults[eTHPhi][eSigmaAngle]/degree) << "\t"
-	 << (mResults[eTHPhi][eMostProbableAngle]/degree) << "\t"
-	 << (mResults[eTHPhi][eBestAngle]/degree) << "\t"
-	 << (mResults[eTHPhi][eTruncatedAngle]/degree) << "\t"
-	 << (mResults[eTHPhi][eNumberOfEntries]) << endl;
-
-
+    for(size_t ii=0; ii<mResults.size(); ii++) {
+	mResults[ii].status();
+    }
     cout.precision(6);
     cout.width(0);
     cout << "===========================================" << endl;
