@@ -10,7 +10,7 @@ macro fill
 * 
 *    Define tables
 *
-cd [params]/mwcpars
+cd [params]/mwc/mwcpars
 newtable mpar mwc_mpar 1
 *
 *     Set values
@@ -27,3 +27,13 @@ tdm/table/cell/putvalue 'mpar[0].wires'              1
 cd /dui
  
  return
+
+
+
+
+
+
+
+
+
+
