@@ -1,7 +1,6 @@
-
 /*************************************************************************** 
  *
- * $Id: StEventMaker.cxx,v 2.7 1999/11/17 14:10:27 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.8 1999/11/23 17:14:19 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.7  1999/11/17 14:10:27  ullrich
- * Added more checks to protect from corrupted table data.
+ * Revision 2.8  1999/11/23 17:14:19  ullrich
+ * Forgot to fill PID traits. Fixed now.
  *
  * Revision 2.27  2000/05/26 11:36:19  ullrich
  * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
@@ -73,9 +72,9 @@
  *
  * Revision 2.9  1999/12/07 18:58:39  ullrich
  * Modified to get rid of some warnings on Linux
-    doPrintRunInfo    = kFALSE; 
-    doPrintEventInfo  = kFALSE;
-    doPrintMemoryInfo = kTRUE;
+ *
+ * Revision 2.8  1999/11/23 17:14:19  ullrich
+#include <vector> 
  *
  * Revision 2.7  1999/11/17 14:10:27  ullrich
  * Added more checks to protect from corrupted table data.
@@ -85,7 +84,7 @@
     doPrintRunInfo    = kTRUE;  // TMP 
     doPrintEventInfo  = kTRUE;  // TMP
  *
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.7 1999/11/17 14:10:27 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.8 1999/11/23 17:14:19 ullrich Exp $";
  * Delete hit if it cannot be added to collection.
  *
  * Revision 2.3  1999/11/08 17:04:59  ullrich
@@ -122,10 +121,10 @@ static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.7 1999/11/17 14:10:27 ull
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.7 1999/11/17 14:10:27 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.8 1999/11/23 17:14:19 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.7 1999/11/17 14:10:27 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.8 1999/11/23 17:14:19 ullrich Exp $";
 
 ClassImp(StEventMaker)
     doPrintEventInfo  = kFALSE;
@@ -307,7 +306,7 @@ StEventMaker::makeEvent()
 
     else
         mCurrentEvent = new StEvent;
-
+    
     //
     //  Setup the software monitors.
     //
@@ -354,6 +353,29 @@ StEventMaker::makeEvent()
             ptrack->setDetectorInfo(vecGlobalTracks[id]->detectorInfo());
 
     //
+
+    //  Like the global tracks, they are kept in a vector (vecPrimaryTracks)
+	id = dstPrimaryTracks[i].id_start_vertex ? dstPrimaryTracks[i].id_start_vertex/10 : 0;
+	if (!id) {
+	    nfailed++;
+	    continue;
+	}
+    //  assign the tracks to the right primary vertex in case there is more
+    //  than one.
+    //  A primary track is only stored if it has a valid primary vertex.
+    //
+    //  New: there's a slight problem with the detector info. The detector
+    //       info might be different for the global and the referring primary
+	    info = vecGlobalTracks[id]->detectorInfo();
+    //       in StTrackDetectorInfo. In this case we have to create a new
+	    //  Check if the existing detector info is still ok for the
+	    //  primary track. If not we have to create a new one.
+	    //  See also comments above on existing problems with this.
+	    //
+	    StThreeVectorF firstPoint(dstPrimaryTracks[i].x_first);
+	    StThreeVectorF lastPoint(dstPrimaryTracks[i].x_last);
+	    if (firstPoint != info->firstPoint() || lastPoint != info->lastPoint()) {
+		info = new StTrackDetectorInfo(dstPrimaryTracks[i]);
 		detectorInfo.push_back(info);
 	    }
 	    ptrack->setDetectorInfo(info);
@@ -896,15 +918,23 @@ StEventMaker::makeEvent()
 	    for (j=0; !gotOneHit && j<svtColl->layer(k)->numberOfLadders(); j++)
 		for (i=0; !gotOneHit && i<svtColl->layer(k)->ladder(j)->numberOfWafers(); i++)
 		    if (svtColl->layer(k)->ladder(j)->wafer(i)->hits().size()) {
+			svtColl->layer(k)->ladder(j)->wafer(i)->hits()[0]->Dump();
 	gotOneHit = kFALSE;
 	for (k=0; !gotOneHit && k<svtColl->numberOfBarrels(); k++)
-	track->geometry()->Dump();
+	    for (j=0; !gotOneHit && j<svtColl->barrel(k)->numberOfLadders(); j++)
+		for (i=0; !gotOneHit && i<svtColl->barrel(k)->ladder(j)->numberOfWafers(); i++)
 		    if (svtColl->barrel(k)->ladder(j)->wafer(i)->hits().size()) {
 			svtColl->barrel(k)->ladder(j)->wafer(i)->hits()[0]->Dump();
-	track->detectorInfo()->Dump();
+        
+		    }
     if (svtColl) {
         nhits = svtColl->numberOfHits();
-	track->node()->Dump();
+        cout << "# of hits in collection = " << nhits << endl;
+        gotOneHit = kFALSE;
+        for (k=0; !gotOneHit && k<svtColl->numberOfBarrels(); k++)
+            for (j=0; !gotOneHit && j<svtColl->barrel(k)->numberOfLadders(); j++)
+    
+    }
 	cout << "collection size = " << richPixels->size() << endl;
 	richPixels->Dump();
 	
