@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.58 2001/04/23 17:08:28 didenko Exp $
+// $Id: St_tpt_Maker.cxx,v 1.59 2001/04/23 17:31:52 wdeng Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.59  2001/04/23 17:31:52  wdeng
+// Create a temporary sorted tcl_tphit table for function estimateVertexZ. Delete it after calling the function.
+//
 // Revision 1.58  2001/04/23 17:08:28  didenko
 // restore right revision
 //
@@ -194,6 +197,8 @@
 #include "TH2.h"
 #include "TH3.h"
 #include "TNtuple.h"
+#include "TTableSorter.h"
+#include "TTableIter.h"
 #include "tables/St_type_index_Table.h"
 #include "tables/St_dst_vertex_Table.h"
 #include "StDbUtilities/StMagUtilities.h"
@@ -302,9 +307,35 @@ Int_t St_tpt_Maker::Make(){
   if (! tphit) return kStWarn;
   printf(" Input hit table size is %d\n\n",(int)tphit->GetNRows());
 
-// cluster vertex
+  // cluster vertex 
+  // 1). First create a temporary St_tcl_tphit table, which is a copy of 'tphit' table
+  //     but sorted by the entry 'row'.
+  // 2). Call function 'estimateVertexZ' with this temporary table.
+  // 3). Output cluster vertex.
+
   Float_t vertexZ, relativeHeight=0;
-  estimateVertexZ(tphit, vertexZ, relativeHeight); 
+  St_tcl_tphit* tphit4VertexZ = new St_tcl_tphit("tphit4VertexZ",tphit->GetNRows());
+  TString row("row");
+  TTableSorter* tphitSorted = new TTableSorter(*tphit,row);
+
+  tcl_tphit_st* tphitSrcStart = tphit->GetTable();
+  tcl_tphit_st* tphitSrcPtr;
+  tcl_tphit_st* tphitDesPtr = tphit4VertexZ->GetTable();
+  Int_t tphitRowSize = sizeof(tcl_tphit_st);
+  for(Short_t i=101; i<=2445; i++) {
+    TTableIter nextHit(tphitSorted,i);
+    Int_t j=0;
+    while( (j=nextHit())>=0) {
+      tphitSrcPtr = tphitSrcStart + j;
+      ::memcpy(tphitDesPtr, tphitSrcPtr, tphitRowSize);
+      tphitDesPtr++;
+    }
+  }
+  tphit4VertexZ->SetNRows( tphit->GetNRows() );
+
+  estimateVertexZ(tphit4VertexZ, vertexZ, relativeHeight); 
+  delete tphit4VertexZ;
+  delete tphitSorted;
 
   dst_vertex_st dstVertexRow;
   ::memset(&dstVertexRow, 0, sizeof(dstVertexRow));
@@ -317,7 +348,7 @@ Int_t St_tpt_Maker::Make(){
   St_dst_vertex  *clusterVertex = new St_dst_vertex("clusterVertex",1); 
   m_DataSet->Add(clusterVertex);
   clusterVertex->AddAt(&dstVertexRow, 0);
-//
+  // end of cluster vertex finding
 
   St_tcl_tpc_index *index = (St_tcl_tpc_index *) gime("index");
   if (!index) {index = new St_tcl_tpc_index("index",10*maxNofTracks);  m_DataSet->Add(index);}
