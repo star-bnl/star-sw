@@ -584,24 +584,6 @@ CC:  Fill primary vertex monitor information
             end if
          end do
       end if
-
-      print *,"  n_clus_ftpc = ",dst_monitor_soft(1).n_clus_ftpc(1),
-     1          dst_monitor_soft(1).n_clus_ftpc(2)
-      print *," n_pts_ftpc = ",dst_monitor_soft(1).n_pts_ftpc(1),
-     1           dst_monitor_soft(1).n_pts_ftpc(2)
-      print *," chrg_ftpc_tot = ",dst_monitor_soft(1).chrg_ftpc_tot(1),
-     1           dst_monitor_soft(1).chrg_ftpc_tot(2)
-      print *," n_trk_ftpc = ",dst_monitor_soft(1).n_trk_ftpc(1),
-     1           dst_monitor_soft(1).n_trk_ftpc(2)
-      print *," nhits = ",nhits(1),nhits(2)
-      print *," hit_frac_ftpc = ",dst_monitor_soft(1).hit_frac_ftpc(1),
-     1           dst_monitor_soft(1).hit_frac_ftpc(2)
-      print *," avg_trkL_ftpc = ",dst_monitor_soft(1).avg_trkL_ftpc(1),
-     1            dst_monitor_soft(1).avg_trkL_ftpc(2)
-      print *," res_pad_ftpc = ",dst_monitor_soft(1).res_pad_ftpc(1),
-     1            dst_monitor_soft(1).res_pad_ftpc(2)
-      print *," res_drf_ftpc = ",dst_monitor_soft(1).res_drf_ftpc(1),
-     1            dst_monitor_soft(1).res_drf_ftpc(2)
 CC:  Successful completion of dst_monitor_soft_filler PAM
 
 
