@@ -169,6 +169,11 @@
 *                      the ntuple file
 * 
 * 11/6/98 K.Turner - implement  tfc_r chain for Iwona & Li Qun
+*  
+* 11/8/98 (approx) I. Sakrejda - implement "mdin" chain for reading in
+*                                MiniDaq data & corrections to "tfc_r"
+* 
+* 11/10/98 K. Turner - fixes to ems,emc, jet chains for Akio
 * 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
@@ -712,7 +717,7 @@ return
 	       exec ftf_run
       (ems)    exec run_ems#ems_interface2
 	       exec run_ems#dep_e_toadc
-	       exec run_cal#energy_to_adc
+	       exec run_cal#emc_adc_sim
       (emc)    exec run_cal#adc_to_energy
       (jet)    exec run_jet#egrid
                exec run_jet#erj
