@@ -265,6 +265,7 @@ Int_t StiMaker::Init()
     TrackNodeTest *pTest = new TrackNodeTest();
     pTest->doTest();
 */
+
     //StiCompositeSeedFinder
     mcompseedfinder = new StiCompositeSeedFinder();
     mcompseedfinder->setFactory(mkalmantrackfactory);

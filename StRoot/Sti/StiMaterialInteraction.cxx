@@ -13,6 +13,23 @@
 #include "StThreeVector.hh"
 
 #include <float.h>
+#include <string>
+
+static void StiMaterialInteraction::nameForIntersection(
+    StiIntersection &intersection, string &name){
+  switch(intersection){
+    case kFailed: name = "failed"; break;
+    case kHit: name = "hit"; break;
+    case kEdgePhiPlus: name = "edgePhiPlus"; break;
+    case kEdgeZminus: name = "edgeZminus"; break;
+    case kEdgePhiMinus: name = "edgePhiMinus"; break;
+    case kEdgeZplus: name = "edgeZplus"; break;
+    case kMissPhiPlus: name = "missPhiPlus"; break;
+    case kMissZminus: name = "missZminus"; break;
+    case kMissPhiMinus: name = "missPhiMinus"; break;
+    case kMissZplus: name = "missZplus"; break;
+  }
+} // nameForIntersection
 
 // For now, these methods just test intersection with the central plane
 // of the detector using a straight line projection of the track node.
@@ -54,7 +71,7 @@ StiIntersection StiMaterialInteraction::findPlanarIntersection(
   pNode->getMomentum(adMomentum);
   StThreeVectorD momentum(adMomentum[0], adMomentum[1], adMomentum[2]);
   momentum.rotateZ(pNode->fAlpha);
-  
+
   // get normals to plane in global coords
   StThreeVectorD normal(1., 0., 0.);
   normal.rotateZ(pPlacement->getNormalRefAngle());
@@ -68,10 +85,13 @@ StiIntersection StiMaterialInteraction::findPlanarIntersection(
   double momentumCoefficient = 
       (pPlacement->getNormalRadius() - node.dot(normal))/
       momentum.dot(normal);
-  // physically, we only want a negative coefficient.  We are tracking
-  // outside-in, which means we should be tracking in the negative
-  // momentum direction.
-  //if(momentumCoefficient>0.){ return kFailed; }
+  // If we were only interested in whether or not (and where) there was
+  // an intersection with the given detector, we would require that the
+  // momentum coefficient be negative because we're tracking outside-in.
+  // Since we're intersted in the relative position of any misses, we don't
+  // make the cut:
+  //
+  // if(momentumCoefficient>0.){ return kFailed; }
   StThreeVectorD nodeToIntersection = momentumCoefficient*momentum;
   StThreeVectorD intersection = node + nodeToIntersection;
 
@@ -92,11 +112,6 @@ StiIntersection StiMaterialInteraction::findPlanarIntersection(
       dPathLengthNodeDetector/2.;
 
   double dPathLength = dPathLengthDetector + dPathLengthGap;
-
-  cout << "  pathLengthDetector=" << dPathLengthDetector << endl
-       << "  pathLengthNodeDetector=" << dPathLengthNodeDetector << endl
-       << "  pathLengthGap=" << dPathLengthGap << endl
-       << "  pathLength=" << dPathLength << endl;
 
   // get the weighted density average
   StiMaterial *pGas = pDetector->getGas();
@@ -220,11 +235,6 @@ StiIntersection StiMaterialInteraction::findCylindricalIntersection(
       dPathLengthNodeDetector/2.;
 
   double dPathLength = dPathLengthDetector + dPathLengthGap;
-
-  cout << "  pathLengthDetector=" << dPathLengthDetector << endl
-       << "  pathLengthNodeDetector=" << dPathLengthNodeDetector << endl
-       << "  pathLengthGap=" << dPathLengthGap << endl
-       << "  pathLength=" << dPathLength << endl;
 
   // get the weighted density average
   StiMaterial *pGas = pDetector->getGas();
