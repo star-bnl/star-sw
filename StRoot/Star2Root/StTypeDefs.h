@@ -10,7 +10,7 @@
 #ifndef STAR_baseTypeDef
 #define STAR_baseTypeDef
 
-// $Id: StTypeDefs.h,v 1.2 2000/03/24 20:38:45 fine Exp $
+// $Id: StTypeDefs.h,v 1.3 2000/04/27 17:16:16 fine Exp $
 
 class StCL;
 class TDataSet;
@@ -32,7 +32,7 @@ class TTablePoints;
 class TTableSorter;
 class TTableDescriptor;
  
-typedef StCL             TCL; 
+typedef TCL              StCL; 
 typedef TDataSet         St_DataSet ;
 typedef TDataSetIter     St_DataSetIter;
 typedef TFileSet         St_FileSet;
@@ -53,6 +53,9 @@ typedef TTableSorter     St_TableSorter;
 typedef TTableDescriptor St_tableDescriptor;
 
 // $Log: StTypeDefs.h,v $
+// Revision 1.3  2000/04/27 17:16:16  fine
+// wrong typedef for TCL class fixed
+//
 // Revision 1.2  2000/03/24 20:38:45  fine
 // *** empty log message ***
 //
