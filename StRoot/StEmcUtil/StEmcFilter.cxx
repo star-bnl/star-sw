@@ -203,7 +203,7 @@ Float_t StEmcFilter::getEmcETotal(StEvent * event)
   return ETotal;
 }
 //------------------------------------------------------------------------------/
-void StEmcFilter::initEmcTowers(StEvent *event)
+void StEmcFilter::initEmcTowers(StEvent *event,Int_t mode)
 {
   for(Int_t i=0;i<NTOWER;i++)
   {
@@ -240,29 +240,56 @@ void StEmcFilter::initEmcTowers(StEvent *event)
   }
   
   //checking tracks
-  StSPtrVecTrackNode& trackNodes = event->trackNodes();
-  
-  for (UInt_t i = 0; i < trackNodes.size(); i++)
-  {    
-    StTrack* track = trackNodes[i]->track(0);
-    StThreeVectorD position, momentum;
-    if (mEmcPosition->trackOnEmc(&position, &momentum, track, mBField,mGeo[0]->Radius()))
+  UInt_t ntracks =0;
+  if(mode==0)
+  {
+    StSPtrVecTrackNode& tracks=event->trackNodes();
+    ntracks=tracks.size();
+  }
+  else
+  {
+    if(event->l3Trigger())
     {
-      Float_t eta=position.pseudoRapidity();
-      Float_t phi=position.phi();
-      Int_t m,e,s;
-      mGeo[0]->getBin(phi,eta,m,e,s);
-      if(s==-1) s=1;
-      if(m<1 || m>120) goto NEXT;
-      if(s<1 || s>2  ) goto NEXT;
-      if(e<1 || e>20 ) goto NEXT;
-      Int_t rid;
-      mGeo[0]->getId(m,e,s,rid);
-      if(getEmcStatus(1,rid)==kBAD) goto NEXT;
-      mNTracksTower[rid-1]++;
-      mPtTower[rid-1]+=track->geometry()->momentum().perp();     
+      StSPtrVecTrackNode& tracks =event->l3Trigger()->trackNodes();
+      ntracks=tracks.size();
     }
-    NEXT: continue;
+  }
+    
+  if(ntracks>0) for (UInt_t i = 0; i < ntracks; i++)
+  {    
+    
+    StTrack* track=NULL;
+    if(mode==0) // tpt tracks
+    {
+      StSPtrVecTrackNode& tracks=event->trackNodes();
+      track=tracks[i]->track(0);
+    }
+    else //L3 tracks
+    {
+      StSPtrVecTrackNode& tracks =event->l3Trigger()->trackNodes();
+      track=tracks[i]->track(0);
+    }
+    if(track) 
+    {
+      StThreeVectorD position, momentum;
+      if (mEmcPosition->trackOnEmc(&position, &momentum, track, mBField,mGeo[0]->Radius()))
+      {
+        Float_t eta=position.pseudoRapidity();
+        Float_t phi=position.phi();
+        Int_t m,e,s;
+        mGeo[0]->getBin(phi,eta,m,e,s);
+        if(s==-1) s=1;
+        if(m<1 || m>120) goto NEXT;
+        if(s<1 || s>2  ) goto NEXT;
+        if(e<1 || e>20 ) goto NEXT;
+        Int_t rid;
+        mGeo[0]->getId(m,e,s,rid);
+        if(getEmcStatus(1,rid)==kBAD) goto NEXT;
+        mNTracksTower[rid-1]++;
+        mPtTower[rid-1]+=track->geometry()->momentum().perp();     
+      }
+      NEXT: continue;
+    }
   }
   return;
 }
@@ -428,19 +455,21 @@ Bool_t StEmcFilter::accept(Int_t rid)
   if(mETower[rid-1]<mEMin || mETower[rid-1]>mEMax) return kFALSE;
   if(mPtTower[rid-1]<mPtMin || mPtTower[rid-1]>mPtMax) return kFALSE;
   Int_t size = 0;
-  if(mTNeighbor) { size = 7; goto DOIT;}
-  if(mSNeighbor) { size = 5; goto DOIT;}
-  if(mPNeighbor) size = 3;
+  if(mTNeighbor) { size = 3; goto DOIT;}
+  if(mSNeighbor) { size = 2; goto DOIT;}
+  if(mPNeighbor)   size = 1; 
   DOIT:
   if(size==0) return kTRUE;
-  Int_t half=size/2;
   Float_t eta,phi;
   mGeo[0]->getEtaPhi(rid,eta,phi);
-  for(Int_t i = -half; i<= half; i++)
-    for(Int_t j = -half; j<= half; j++)
+  for(Int_t i = -size; i<= size; i++)
+    for(Int_t j = -size; j<= size; j++)
     {
-      Int_t rid1 = mEmcPosition->getNextTowerId(eta,phi,i,j);
-      if(rid1>0) if(mNTracksTower[rid1-1]>0) return kFALSE;
+      if(i!=0 && j!=0)
+			{
+				Int_t rid1 = mEmcPosition->getNextTowerId(eta,phi,i,j);
+      	if(rid1>0) if(mNTracksTower[rid1-1]>0) return kFALSE;
+			}
     }
   return kTRUE;
 }
@@ -463,6 +492,19 @@ Int_t StEmcFilter::getNTracksTower(Int_t m, Int_t e, Int_t s)
   Int_t rid;
   mGeo[0]->getId(m,e,s,rid);
   return getNTracksTower(rid);
+}
+//------------------------------------------------------------------------------/
+Float_t StEmcFilter::getPtTower(Int_t rid)
+{
+  if(rid<1 && rid>4800) return 0;
+  return mPtTower[rid-1];
+}
+//------------------------------------------------------------------------------/
+Float_t StEmcFilter::getPtTower(Int_t m, Int_t e, Int_t s)
+{
+  Int_t rid;
+  mGeo[0]->getId(m,e,s,rid);
+  return getPtTower(rid);
 }
 //------------------------------------------------------------------------------
 /*!
