@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.33 2002/01/17 01:34:07 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.34 2002/12/20 22:41:30 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.34  2002/12/20 22:41:30  ullrich
+ * Added PMD.
+ *
  * Revision 2.33  2002/01/17 01:34:07  ullrich
  * Fixed the fix in psd() methods.
  *
@@ -138,6 +141,7 @@
 #include "StRunInfo.h"
 #include "StTofCollection.h"
 #include "StFpdCollection.h"
+#include "StPhmdCollection.h"
 #include "StTrackDetectorInfo.h"
 #include "StTriggerDetectorCollection.h"
 #include "StPrimaryVertex.h"
@@ -155,8 +159,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.33 2002/01/17 01:34:07 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.33 2002/01/17 01:34:07 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.34 2002/12/20 22:41:30 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.34 2002/12/20 22:41:30 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -203,6 +207,7 @@ _LOOKUP(StEmcCollection)
 _LOOKUP(StRichCollection)
 _LOOKUP(StTofCollection)
 _LOOKUP(StFpdCollection)
+_LOOKUP(StPhmdCollection)
 _LOOKUP(StL0Trigger)
 _LOOKUP(StL1Trigger)
 _LOOKUP(StL3Trigger)
@@ -530,6 +535,22 @@ StEvent::fpdCollection() const
     StFpdCollection *fpd = 0;
     _lookup(fpd, mContent);
     return fpd;
+}
+
+StPhmdCollection*
+StEvent::phmdCollection()
+{
+    StPhmdCollection *phmd = 0;
+    _lookup(phmd, mContent);
+    return phmd;
+}
+
+const StPhmdCollection*
+StEvent::phmdCollection() const
+{
+    StPhmdCollection *phmd = 0;
+    _lookup(phmd, mContent);
+    return phmd;
 }
 
 StTriggerDetectorCollection*
@@ -946,6 +967,12 @@ StEvent::setFpdCollection(StFpdCollection* val)
 }
 
 void
+StEvent::setPhmdCollection(StPhmdCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+
+void
 StEvent::setTriggerDetectorCollection(StTriggerDetectorCollection* val)
 {
     _lookupAndSet(val, mContent);
@@ -1061,6 +1088,7 @@ void StEvent::statistics()
     cout << "\tStRichCollection:            " << static_cast<void*>(richCollection());
     cout << "\tStTofCollection:             " << static_cast<void*>(tofCollection());
     cout << "\tStFpdCollection:             " << static_cast<void*>(fpdCollection());
+    cout << "\tStPhmdCollection:            " << static_cast<void*>(phmdCollection());
     cout << "\tStL0Trigger:                 " << static_cast<void*>(l0Trigger());
     cout << "\tStL1Trigger:                 " << static_cast<void*>(l0Trigger());
     cout << "\tStL3Trigger:                 " << static_cast<void*>(l3Trigger());
