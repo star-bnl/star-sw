@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.77 1999/08/30 23:15:08 fine Exp $ 
+// $Id: St_Table.cxx,v 1.78 1999/09/01 22:32:54 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.78  1999/09/01 22:32:54  fine
+// St_Table::Fit fixed Rene\'s bug
+//
 // Revision 1.77  1999/08/30 23:15:08  fine
 // St_Table::Fit method has been introduced
 //
@@ -424,7 +427,6 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
 //
 //  Note: Use tree->SetEventList(0) if you do not want use the list as input.
 //
-   printf(" %d %s %s \n",(int) GetNRows(),varexp00,selection);
    if (GetNRows() == 0 || varexp00 == 0 || varexp00[0]==0) return;
    TString  opt;
    Text_t *hdefault = (char *)"htemp";
@@ -495,8 +497,7 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
       }
    }
 //--------------------------------------------------
-    printf(" Draw %s for %s\n", varexp00, selection);
-    printf(" col counter = %d \n",colIndex+1);
+    printf(" Draw %s for <%s>\n", varexp00, selection);
     Char_t *exprFileName = MakeExpression(expressions,colIndex+1);
     if (!exprFileName) return;
 
@@ -666,8 +667,9 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
             h2->SetMarkerSize(GetMarkerSize());
 #endif
             if (!hkeep) {
+               const Int_t kNoStats = BIT(9);
                h2->SetBit(kCanDelete);
-//               h2->SetBit(kNoStats);
+               h2->SetBit(kNoStats);
                h2->SetDirectory(0);
             }
          }
@@ -700,7 +702,6 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
       EntryLoop(exprFileName,action,elist,nentries, firstentry, option);
 //      SetEstimate(oldEstimate);
    }
-  printf(" End of Draw %s %s\n",exprFileName, varexp);
   if (exprFileName) delete [] exprFileName;
   if (hkeep) delete [] varexp;
 }
@@ -739,6 +740,10 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
                           ,Int_t nentries, Int_t firstentry, Option_t *option)
 {
  //
+ // EntryLoop creates a CINT bytecode to evaluate the given expressions for
+ // all table rows in loop and fill the appropriated histograms.
+ //
+ // Solution for Byte code 
  // From: Masaharu Goto <MXJ02154@nifty.ne.jp>
  // To: <fine@bnl.gov>
  // Cc: <rootdev@hpsalo.cern.ch>
@@ -802,7 +807,6 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
 #endif
   
   // Call bytecode in loop
-  printf("first = %d; n =  %d  NRows = %d \n", firstentry, nentries, (int) GetNRows());
 
 #ifdef BYTECODE
 #  define CALLMETHOD callfunc.Exec(0);
@@ -1299,8 +1303,14 @@ void St_Table::Fit(const Text_t *formula ,const Text_t *varexp, const Text_t *se
    delete [] opt;
  
    TH1 *hfit = gCurrentHist;
-   printf("hname=%s, formula=%s, option=%s, goption=%s\n",hfit->GetName(),formula,option,goption);
-   if (hfit) hfit->Fit(formula,option,goption);   
+   if (hfit) {
+      printf("hname=%s, formula=%s, option=%s, goption=%s\n",hfit->GetName(),formula,option,goption);
+      // remove bit temporary 
+      Bool_t canDeleteBit = hfit->TestBit(kCanDelete);
+      if (canDeleteBit)  hfit->ResetBit(kCanDelete);
+      hfit->Fit(formula,option,goption);   
+      if (TestBit(canDeleteBit))   hfit->SetBit(kCanDelete);
+   }
    else      printf("ERROR hfit=0\n");
 }
 
@@ -1963,7 +1973,8 @@ Char_t *St_Table::MakeExpression(const Char_t *expressions[],Int_t nExpressions)
    const Char_t *typeNames[] = {"NAN","float", "int",  "long",  "short",         "double"
                                 ,"unsigned int","unsigned long", "unsigned short","unsigned char"
                                 ,"char"};
-   const char *resID = "results";
+   const char *resID     = "results";
+   const char *addressID = "address";
    Char_t *fileName = GetExpressionFileName();
    if (!fileName) {
        Error("MakeExpression","Can not create a temoprary file");
@@ -1981,7 +1992,7 @@ Char_t *St_Table::MakeExpression(const Char_t *expressions[],Int_t nExpressions)
    St_tableDescriptor *dsc = GetRowDescriptors();
    const tableDescriptor_st *descTable  = dsc->GetTable();
    // Create function
-   str << "void SelectionQWERTY(float *"<<resID<<", float **address)"   << endl;
+   str << "void SelectionQWERTY(float *"<<resID<<", float **"<<addressID<<")"   << endl;
    str << "{"                                                        << endl;
    int i = 0;
    for (i=0; i < dsc->GetNRows(); i++,descTable++ ) {
@@ -2003,7 +2014,7 @@ LETSTRY:
                     str << columnName << " = " ;
     if (isScalar)   str << "*(";
     if (!isFloat)   str << "(" << type << "*)";
-                    str << "address[" << i << "]";
+                    str << addressID << "[" << i << "]";
     if (isScalar)   str << ")" ;
                     str << ";" << endl;
    }
