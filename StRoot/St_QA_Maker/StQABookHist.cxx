@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.37 2003/02/15 21:59:08 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.38 2003/02/19 06:38:29 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.38  2003/02/19 06:38:29  genevb
+// Rework trigger and mult/event class sections
+//
 // Revision 2.37  2003/02/15 21:59:08  genevb
 // dedx lable
 //
@@ -125,6 +128,7 @@
 #include <math.h>
 #include "QAH.h"
 #include "StQABookHist.h"
+#include "StQAMakerBase.h"
 #include "StEmcUtil/others/StEmcMath.h"
 #include "StEmcUtil/others/emcDetectorName.h"
 #include "TROOT.h"
@@ -195,7 +199,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
 
 //  - Zero all histogram pointers
 
-  mNullPrimVtxMult = 0;
+  mNullPrimVtxClass = 0;
 
 // for method MakeGlob - from table globtrk
   m_globtrk_tot=0;
@@ -676,10 +680,10 @@ void StQABookHist::BookHist(Int_t histsSet){
 
   QAH::preString = QAHistType;
 //book histograms --------------
-  if (histsSet > 0) {
-    mNullPrimVtxMult = QAH::H1F("QaNullPrimVtxMult","event primary vertex check",40,-2,2);
-    mNullPrimVtxMult->SetXTitle("has primary vertex? (yes = 1, no = -1)");
-    mNullPrimVtxMult->SetYTitle("# of events");
+  if (histsSet != StQA_MC) {
+    mNullPrimVtxClass = QAH::H1F("QaNullPrimVtxMult","event primary vertex check",40,-2,2);
+    mNullPrimVtxClass->SetXTitle("has primary vertex? (yes = 1, no = -1)");
+    mNullPrimVtxClass->SetYTitle("# of events");
   }
   BookHistPoint();
   BookHistRich();
@@ -691,7 +695,7 @@ void StQABookHist::BookHist(Int_t histsSet){
   BookHistDE();
   BookHistPID();
   BookHistVertex();
-  if (histsSet==0) BookHistEval();
+  if (histsSet==StQA_MC) BookHistEval();
   
 }
 //_____________________________________________________________________________

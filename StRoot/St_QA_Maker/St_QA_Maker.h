@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.h,v 2.1 2001/05/16 20:57:04 lansdell Exp $
+// $Id: St_QA_Maker.h,v 2.2 2003/02/19 06:38:29 genevb Exp $
 // $Log: St_QA_Maker.h,v $
+// Revision 2.2  2003/02/19 06:38:29  genevb
+// Rework trigger and mult/event class sections
+//
 // Revision 2.1  2001/05/16 20:57:04  lansdell
 // new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
 //
@@ -24,6 +27,7 @@ class St_QA_Maker : public StQAMakerBase {
  private:
 
   St_DataSet *dst;        //! Pointer to current dataset - dst
+  Int_t   multiplicity;   // multiplicity of current event
   
 //------------------------------------------------------------------------
   
@@ -47,7 +51,7 @@ class St_QA_Maker : public StQAMakerBase {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 2.1 2001/05/16 20:57:04 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 2.2 2003/02/19 06:38:29 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(St_QA_Maker,0)
 };

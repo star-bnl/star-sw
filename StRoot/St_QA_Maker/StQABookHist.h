@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.13 2002/04/23 01:59:56 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.14 2003/02/19 06:38:29 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.14  2003/02/19 06:38:29  genevb
+// Rework trigger and mult/event class sections
+//
 // Revision 2.13  2002/04/23 01:59:56  genevb
 // Addition of BBC/FPD histos
 //
@@ -70,7 +73,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.13 2002/04/23 01:59:56 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.14 2003/02/19 06:38:29 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -133,8 +136,8 @@ class StQABookHist : public TObject {
 // ************************ Histogram Pointers *****************************
  public:
 
-  TH1F     *mNullPrimVtxMult;   //! primary vertex check (based on
-                                //! (multiplicity for real data)
+  TH1F     *mNullPrimVtxClass;  //! primary vertex check (based on
+                                //! event class for real data)
   
   // for method MakeGlob - from table globtrk
   TH1F     *m_globtrk_fit_prob; //!
