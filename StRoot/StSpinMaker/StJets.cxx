@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.1 2002/12/04 20:28:07 thenry Exp $
+// $Id: StJets.cxx,v 1.2 2003/05/09 19:28:13 thenry Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.2  2003/05/09 19:28:13  thenry
+// No changes.
+//
 // Revision 1.1  2002/12/04 20:28:07  thenry
 // StppuDstMaker was modified to allow multiple jet analysis modules to be
 // run simultaneosly with various parameters while the Maker loads the events
@@ -76,17 +79,18 @@ void StJets::addProtoJet(StProtoJet& pj)
 	    cout <<"StJets::addProtoJet(). ERROR:\tcast to StMuTrackFourVecFailed.  no action"<<endl;
 	    return;
 	}
-	StMuTrack* muTrack = track->particle();
 	int muTrackIndex = track->getIndex();
 	if (muTrackIndex >=0) {
 	    //add to trackToJetIndices
 	    int addAt = mTrackToJetIndices->GetLast()+1;
 	    new ( (*mTrackToJetIndices)[addAt]) TrackToJetIndex( jetIndex, muTrackIndex);
 	}
-	if( muTrack->charge() ) {  // If charge != 0, increment the number of cp
-            nCell++;
+	if(track->particle())
+	    if( track->charge() ) {  // If charge != 0, increment the number of cp
+                nCell++;
 	}
-	charge += muTrack->charge();
+	if(track->particle())
+	    charge += track->particle()->charge();
 	
 	//add in the jet container
 	new((*mJets)[jetIndex]) StJet( pj.e(), pj.px(), pj.py(), pj.pz(), nCell, charge );
