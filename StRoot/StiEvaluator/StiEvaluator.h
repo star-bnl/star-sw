@@ -97,6 +97,11 @@ public:
     TClonesArray& array() const {return *mArray;}
     
     void clear();
+
+    
+    double stiTrackResX;
+    double stiTrackResY;
+    double stiTrackResZ;
     
 private:
     //Counter:
