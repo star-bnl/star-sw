@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridCollection.hh,v 1.4 2001/08/16 21:02:03 munhoz Exp $
+ * $Id: StSvtHybridCollection.hh,v 1.5 2001/10/04 02:56:26 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridCollection.hh,v $
+ * Revision 1.5  2001/10/04 02:56:26  caines
+ * Fix some of the hybrid swapping indexing
+ *
  * Revision 1.4  2001/08/16 21:02:03  munhoz
  * changing StObjArray to StStrArray. StSvtConfig reestructured. New classes for geometry DB
  *
@@ -43,7 +46,7 @@ public:
   int getNumberOfHybrids();
   int getTotalNumberOfHybrids();
   int getHybridIndex(int barrel, int ladder, int wafer, int hybrid);
-
+  int getProperHybridIndex(int barrel, int ladder, int wafer, int hybrid);
   void setConfiguration(const char* config); // Set the SVT configuration
   void setConfiguration(StSvtConfig* config); // Set the SVT configuration
   StSvtConfig* getSvtConfig() {return mSvtConfig;} // Returns the SVT configuration object

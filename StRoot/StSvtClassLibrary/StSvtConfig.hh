@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtConfig.hh,v 1.2 2001/08/24 21:03:03 caines Exp $
+ * $Id: StSvtConfig.hh,v 1.3 2001/10/04 02:56:26 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtConfig.hh,v $
+ * Revision 1.3  2001/10/04 02:56:26  caines
+ * Fix some of the hybrid swapping indexing
+ *
  * Revision 1.2  2001/08/24 21:03:03  caines
  * Do index swapping for year2001 data
  *
@@ -57,6 +60,7 @@ public:
   void setConfiguration(const char* config); // set the SVT configuration
 
   int getHybridIndex(int barrelID, int ladderID, int waferID, int hybridID);
+  int getProperHybridIndex(int barrelID, int ladderID, int waferID, int hybridID);
   int getBarrel(int index);
   int getLadder(int index);
   int getWafer(int index);
