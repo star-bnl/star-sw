@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.91 2004/06/28 22:53:45 potekhin Exp $
+* $Id: geometry.g,v 1.92 2004/07/15 16:30:08 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.92  2004/07/15 16:30:08  potekhin
+* Since the "MITT" detector was updated and became ISTB,
+* this needs to be reflected in the main geometry steering.
+* The new tag replaces MITT1 and is called IST1
+*
 * Revision 1.91  2004/06/28 22:53:45  potekhin
 * The emergence of two new detectors, the Pixel and
 * the other dubbed MITT, necessitates the creation
@@ -355,7 +360,7 @@
 * list of system on/off switches:
    Logical    cave,pipe,svtt,sisd,tpce,ftpc,
               btof,vpdd,magp,calb,ecal,upst,rich,
-              zcal,mfld,bbcm,fpdm,phmd,pixl,mitt
+              zcal,mfld,bbcm,fpdm,phmd,pixl,istb
 
 * Qualifiers:  TPC        TOF         etc
    Logical    mwc,pse,ems,svtw,
@@ -376,7 +381,7 @@
               CorrNum, PhmdConfig,
               BtofConfig, VpddConfig, FpdmConfig,
               SisdConfig, PipeConfig, CalbConfig,
-              PixlConfig, MittConfig
+              PixlConfig, IstbConfig
 
 * configuration variables for tuning the geometry:
 *            BtofConfig  -- tof trays
@@ -386,7 +391,7 @@
 *            CalbConfig  -- barrel calorimeter
 *            FpdmConfig  -- fpd
 *            PixlConfig  -- pixel
-*            MittConfig  -- outer pixel
+*            IstbConfig  -- outer pixel
 
 * CorrNum allows us to control incremental bug fixes in a more
 * organized manner
@@ -430,7 +435,7 @@ replace[;ON#{#;] with [
    CalbConfig  = 0 ! really make use of it starting in y2004
    FpdmConfig  = 0 ! 0 means the original source code
    PixlConfig  = 0 ! 0=no, 1=inside the SVT, 2=inside CAVE
-   MittConfig  = 0 ! 0=no, >1=version
+   IstbConfig  = 0 ! 0=no, >1=version
 
 * Set only flags for the main configuration (everthing on, except for tof),
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
@@ -441,7 +446,7 @@ replace[;ON#{#;] with [
 * "Canonical" detectors are all ON by default,
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
 * whereas some newer stuff is considered optional:
-   {bbcm,fpdm,phmd,pixl,mitt,sisd} = off;
+   {bbcm,fpdm,phmd,pixl,istb,sisd} = off;
 
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows              "
    {ems,rich}=off        " TimeOfFlight, EM calorimeter Sector            "
@@ -585,7 +590,7 @@ If LL>1
                 }
 
 *************************************************************************************************************
-  on MITT1   { New Pixel Based Tracking + correction 3 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
+  on IST1   { New IST Tracking + correction 3 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
 
                      svtt=off; "no SVT at all in this configuration"
                   "tpc: standard, i.e.  "
@@ -619,8 +624,8 @@ If LL>1
                    pixl=on;    " put the pixel detector in"
                    PixlConfig=2;
 * The new MIT detector
-                   mitt=on;  "new pixel based inner tracker"
-                   MittConfig=1;
+                   istb=on;  "new pixel based inner tracker"
+                   IstbConfig=1;
                 }
 
 
@@ -1232,7 +1237,7 @@ If LL>1
    if (pixl.and.PixlConfig==1) Call pixlgeo
    if (pixl.and.PixlConfig==2) Call pixlgeo1
 
-   if (mitt.and.MittConfig>0)  Call mittgeo
+   if (istb.and.IstbConfig>0)  Call istbgeo
 
 ******************************************************************
 * If PHMD is present and a non-zero version of the Photon Multiplicity Detector
