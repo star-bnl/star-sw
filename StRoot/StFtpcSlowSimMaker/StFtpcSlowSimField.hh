@@ -1,5 +1,10 @@
-// $Id: StFtpcSlowSimField.hh,v 1.4 2002/09/13 13:45:23 fsimon Exp $
+// $Id: StFtpcSlowSimField.hh,v 1.5 2003/02/14 16:58:03 fsimon Exp $
 // $Log: StFtpcSlowSimField.hh,v $
+// Revision 1.5  2003/02/14 16:58:03  fsimon
+// Add functionality that allows for different temperature corrections
+// in west and east, important for embedding. Drift tables are created
+// for east and west seperately.
+//
 // Revision 1.4  2002/09/13 13:45:23  fsimon
 // Commented out anglefactor
 //
@@ -27,7 +32,7 @@ class StFtpcDbReader;
 extern  int Locate(const int npt, const float* x, const float xx);
 
 //
-//  class field  will divide radius into grid points and 
+//  class field  will divide radius into grid points and
 //  define efield and gas parameters at grid points.
 //
 class StFtpcSlowSimField
@@ -36,10 +41,10 @@ public:
   StFtpcSlowSimField(StFtpcParamReader *paramReader,
                      StFtpcDbReader    *dbReader);
   ~StFtpcSlowSimField();
-  float Interpolate(const int npt, const float* x, 
-		    const float* y,const int ich, 
+  float Interpolate(const int npt, const float* x,
+		    const float* y,const int ich,
 		    const float xx);
-  float InterpValue(const int npt, const float* x, 
+  float InterpValue(const int npt, const float* x,
 		    const float* y, const float xx);
   void Output() const;     // write out the field value for checking
 
@@ -48,22 +53,30 @@ public:
 
   // GetVelocityZ is inline although too long because it is called in the
   // main drift loop
-  inline void GetVelocityZ(const float inverseRadius, const int padrow, float *inverseVelocity, float *angle)  
+  inline void GetVelocityZ(const float inverseRadius, const int padrow, float *inverseVelocity, float *angle)
     {
+      int fieldPadrow = padrow;
+      if (padrow >= 10) fieldPadrow = padrow - 10; // bField symmetric, no diff east/west !
       float e_now=radTimesField * inverseRadius;
       int iLower= (int)((e_now-EFieldMin)*EFieldStepInverted);
       int iUpper= iLower + 1;
-      int padrowIndex= nMagboltzBins*padrow;
+      int padrowIndex= nMagboltzBins*fieldPadrow;
       float diffUp=preciseEField[iUpper]-e_now;
       float diffDown=e_now-preciseEField[iLower];
       iLower+=padrowIndex;
       iUpper+=padrowIndex;
-      *inverseVelocity = EFieldStepInverted*((inverseDriftVelocity[iUpper])*diffDown + (inverseDriftVelocity[iLower])*diffUp);
-      *angle = EFieldStepInvConverted*((preciseLorentzAngle[iUpper])*diffDown + (preciseLorentzAngle[iLower])*diffUp);//*angleFactor;
-    }    
+      if (padrow < 10) {//west
+      	*inverseVelocity = EFieldStepInverted*((inverseDriftVelocityWest[iUpper])*diffDown + (inverseDriftVelocityWest[iLower])*diffUp);
+      	*angle = EFieldStepInvConverted*((preciseLorentzAngleWest[iUpper])*diffDown + (preciseLorentzAngleWest[iLower])*diffUp);//*angleFactor;
+      }
+      else {
+        *inverseVelocity = EFieldStepInverted*((inverseDriftVelocityEast[iUpper])*diffDown + (inverseDriftVelocityEast[iLower])*diffUp);
+      	*angle = EFieldStepInvConverted*((preciseLorentzAngleEast[iUpper])*diffDown + (preciseLorentzAngleEast[iLower])*diffUp);//*angleFactor;
+      }
+    }
 
   float GetVelAtReadout() const { return  finalVelocity; }
-  
+
   float GetDeltaRadius() const { return del_r; }
 
   float GetInverseDeltaRadius() const { return inverseDeltaRadius; }
@@ -75,7 +88,7 @@ public:
   float GetDiffusionZSqr(const int i) const {return grid_point[i].diff_z;}
 
   float GetDlnvDr(const int i) const {return grid_point[i].dlnv_dr;}
-  
+
 private:
   StFtpcParamReader *mParam;
   StFtpcDbReader *mDb;
@@ -85,7 +98,7 @@ private:
   float twoDeltaRadius; // 2*del_r
   float finalVelocity;
   // variables to handle fcl_padtrans information:
-  int nMagboltzBins; 
+  int nMagboltzBins;
   int nPadrowPositions;
   float EFieldMin;
   float EFieldStep;
@@ -95,10 +108,13 @@ private:
   float innerRadius;
   float outerRadius;
   float *preciseEField;
-  float *inverseDriftVelocity;
-  float *preciseLorentzAngle;
+  // DV and LA needed for east & west seperately to permit different t corrections
+  float *inverseDriftVelocityWest;
+  float *preciseLorentzAngleWest;
+  float *inverseDriftVelocityEast;
+  float *preciseLorentzAngleEast;
   float angleFactor;
-  
+
   struct grid_data {
     float rhit;    // hit radius in cm
     float ef;    // Efield in V/cm
