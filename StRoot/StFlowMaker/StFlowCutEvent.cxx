@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.12 2000/06/01 18:26:32 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.13 2000/06/30 14:48:29 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.13  2000/06/30 14:48:29  posk
+// Using MessageMgr, changed Eta Symmetry cut.
+//
 // Revision 1.12  2000/06/01 18:26:32  posk
 // Increased precision of Track integer data members.
 //
@@ -61,7 +64,7 @@ ClassImp(StFlowCutEvent)
 Int_t    StFlowCutEvent::mMultCuts[2]    = {10, 10000};
 Float_t  StFlowCutEvent::mVertexXCuts[2] = {-1., 1.};
 Float_t  StFlowCutEvent::mVertexYCuts[2] = {-1., 1.};
-Float_t  StFlowCutEvent::mVertexZCuts[2] = {-50., 50.};
+Float_t  StFlowCutEvent::mVertexZCuts[2] = {-100., 100.};
 UInt_t   StFlowCutEvent::mEventN         = 0;     
 UInt_t   StFlowCutEvent::mGoodEventN     = 0;
 UInt_t   StFlowCutEvent::mMultCut        = 0;
@@ -86,15 +89,15 @@ StFlowCutEvent::~StFlowCutEvent() {
 
 Bool_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
   // Returns kTRUE if the event survives all the cuts
-
-  mEventN++;
   
-  // Number of primary vertices
+  // Primary vertix
   Long_t nvtx = pEvent->numberOfPrimaryVertices();
   if (nvtx == 0) return kFALSE;
 
   StPrimaryVertex* pVertex = pEvent->primaryVertex(0);
   if (!pVertex) return kFALSE;
+
+  mEventN++;
 
   // Multiplicity
   Long_t mult = pVertex->numberOfDaughters();
@@ -136,7 +139,7 @@ Bool_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
 
 //-----------------------------------------------------------------------
 
-Bool_t StFlowCutEvent::CheckEtaSymmetry() {
+Bool_t StFlowCutEvent::CheckEtaSymmetry(StEvent* pEvent) {
   // Returns kTRUE if the event survives this Eta symmetry cut
   // Call at the end of the event after doing CheckTrack for each track
   // If kFALSE you should delete the last event
@@ -145,6 +148,14 @@ Bool_t StFlowCutEvent::CheckEtaSymmetry() {
   float etaSymNegN = (float)StFlowCutTrack::EtaSymNeg();
   float etaSym = (etaSymPosN - etaSymNegN) / (etaSymPosN + etaSymNegN);
   StFlowCutTrack::EtaSymClear();
+
+  StPrimaryVertex* pVertex = pEvent->primaryVertex(0);
+  if (!pVertex) return kFALSE;
+  const StThreeVectorF& vertex = pVertex->position();
+  Float_t vertexZ = vertex.z();
+  float etaSymZSlope = 0.003;
+  etaSym += (etaSymZSlope * vertexZ);
+
   if (mEtaSymCuts[1] > mEtaSymCuts[0] && 
       (etaSym < mEtaSymCuts[0] || etaSym >= mEtaSymCuts[1])) {
     mEtaSymCutN++;
@@ -161,7 +172,7 @@ void StFlowCutEvent::PrintCutList() {
   // Prints the list of cuts
 
   cout << "#######################################################" << endl;
-  cout << "# Total Events= " << mEventN << endl;
+  cout << "# Primary Vertex Events= " << mEventN << endl;
   cout << "# Event Cut List:" << endl;
   cout << "#   Mult cuts= " << mMultCuts[0] << ", " << mMultCuts[1]
        << " :\t\t Events Cut= " << mMultCut << endl;

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.h,v 1.2 2000/05/26 21:29:26 posk Exp $
+// $Id: StFlowCutEvent.h,v 1.3 2000/06/30 14:48:30 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -13,6 +13,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.h,v $
+// Revision 1.3  2000/06/30 14:48:30  posk
+// Using MessageMgr, changed Eta Symmetry cut.
+//
 // Revision 1.2  2000/05/26 21:29:26  posk
 // Protected Track data members from overflow.
 //
@@ -52,7 +55,7 @@ class StFlowCutEvent {
   virtual      ~StFlowCutEvent();
 
   static Bool_t CheckEvent(StEvent* pEvent);
-  static Bool_t CheckEtaSymmetry();
+  static Bool_t CheckEtaSymmetry(StEvent* pEvent);
   static void   PrintCutList();
   static void   SetMult(const Int_t lo, const Int_t hi);
   static void   SetVertexX(const Float_t lo, const Float_t hi);

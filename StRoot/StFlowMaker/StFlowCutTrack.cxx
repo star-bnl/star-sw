@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.11 2000/06/01 18:26:34 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.12 2000/06/30 14:48:31 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.12  2000/06/30 14:48:31  posk
+// Using MessageMgr, changed Eta Symmetry cut.
+//
 // Revision 1.11  2000/06/01 18:26:34  posk
 // Increased precision of Track integer data members.
 //
@@ -106,8 +109,8 @@ Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
 
   // Increment counters for Eta symmetry cut
   StThreeVectorD p = pTrack->geometry()->momentum(); 
-  if (p.pseudoRapidity() > 0.) { mEtaSymPosN++; }
-  else { mEtaSymNegN++; }
+  if (p.pseudoRapidity() > 0.) { mEtaSymPosN++;
+  } else { mEtaSymNegN++; }
   mGoodTrackN++;
   return kTRUE;
 }

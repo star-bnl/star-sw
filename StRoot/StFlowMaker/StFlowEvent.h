@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.8 2000/06/20 16:34:25 snelling Exp $
+// $Id: StFlowEvent.h,v 1.9 2000/06/30 14:48:32 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.9  2000/06/30 14:48:32  posk
+// Using MessageMgr, changed Eta Symmetry cut.
+//
 // Revision 1.8  2000/06/20 16:34:25  snelling
 // fixed cout/streamer problem for mPhiWgt under Solaris
 //
@@ -125,7 +128,7 @@ private:
   StThreeVectorF  mVertexPos;                           // primary vertex position
   static Float_t  mEtaCuts[2][Flow::nHars][Flow::nSels];// range absolute values
   static Float_t  mPtCuts[2][Flow::nHars][Flow::nSels]; // range
-  Flow::PhiWgt_t  mPhiWgt;                              //!
+  Flow::PhiWgt_t  mPhiWgt;                              //!flattening weights
   static Float_t  mPiPlusCuts[2];                       // PID cuts
   static Float_t  mPiMinusCuts[2];
   static Float_t  mProtonCuts[2];

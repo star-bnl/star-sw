@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.29 2000/06/01 18:26:36 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.30 2000/06/30 14:48:33 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.30  2000/06/30 14:48:33  posk
+// Using MessageMgr, changed Eta Symmetry cut.
+//
 // Revision 1.29  2000/06/01 18:26:36  posk
 // Increased precision of Track integer data members.
 //
@@ -109,6 +112,7 @@
 #include "StPionMinus.hh"
 #include "StProton.hh"
 #include "StTpcDedxPidAlgorithm.h"
+#include "StMessMgr.h"
 //#include <algorithm>
 #define PR(x) cout << "##### FlowMaker: " << (#x) << " = " << (x) << endl;
 
@@ -166,7 +170,7 @@ Int_t StFlowMaker::Make() {
       if (mFlowEventWrite) pFlowMicroTree->Fill();  // fill the tree
     } else {
       Long_t eventID = pEvent->id();
-      cout << "##### FlowMaker: event " << eventID << " cut" << endl;
+      gMessMgr->Info() << "##### FlowMaker: event " << eventID << " cut" << endm;
     }
 
   } else if (mFlowEventRead) {
@@ -190,23 +194,14 @@ Int_t StFlowMaker::Make() {
     if (mFlowEventWrite) pFlowMicroTree->Fill();  // fill the tree
   }
 
-  //PrintInfo();
   UInt_t flowEventMult;
   if (!pFlowEvent) { flowEventMult = 0;}
   else { flowEventMult = pFlowEvent->FlowEventMult(); }
   PR(flowEventMult);
 
-  return kStOK;
-}
-
-//-----------------------------------------------------------------------
-
-void StFlowMaker::PrintInfo() {
-  cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowMaker.cxx,v 1.29 2000/06/01 18:26:36 posk Exp $" << endl;
-  cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
 
+  return kStOK;
 }
 
 //-----------------------------------------------------------------------
@@ -223,6 +218,10 @@ Int_t StFlowMaker::Init() {
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
   if (mFlowEventWrite) kRETURN += InitFlowEventWrite();
   if (mFlowEventRead)  kRETURN += InitFlowEventRead();
+
+  gMessMgr->SetLimit("##### FlowMaker", 5);
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.30 2000/06/30 14:48:33 posk Exp $");
+  if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
 }
@@ -274,7 +273,7 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
   fileName->Prepend(pFlowSelect->Number());
   TFile* pPhiWgtFile = new TFile(fileName->Data(), "READ");
   if (!pPhiWgtFile->IsOpen()) {
-    cout << "##### FlowMaker: No PhiWgt file. Will set weights = 1." << endl;
+    gMessMgr->Info("##### FlowMaker: No PhiWgt file. Will set weights = 1.");
   }
   delete fileName;
   gDirectory = dirSave;
@@ -365,8 +364,8 @@ void StFlowMaker::FillFlowEvent() {
   }
   
   // Check Eta Symmetry
-  if (!StFlowCutEvent::CheckEtaSymmetry()) {  // if kFALSE delete this event
-    delete pFlowEvent;
+  if (!StFlowCutEvent::CheckEtaSymmetry(pEvent)) {  
+    delete pFlowEvent;             // if kFALSE delete this event
     pFlowEvent = NULL;
     return;
   }
@@ -391,7 +390,7 @@ void StFlowMaker::FillFlowEvent() {
 void StFlowMaker::FillNanoEvent() {
 
   if (!pNanoEvent) {
-    cout << "##### FlowMaker: Warning: No FlowNanoEvent" << endl;
+    gMessMgr->Warning("##### FlowMaker: No FlowNanoEvent");
     return;
   }
 
@@ -417,7 +416,7 @@ void StFlowMaker::FillNanoEvent() {
 void StFlowMaker::FillPicoEvent() {
 
   if (!pPicoEvent) {
-    cout << "##### FlowMaker: Warning: No FlowPicoEvent" << endl;
+    gMessMgr->Warning("##### FlowMaker: No FlowPicoEvent");
     return;
   }
   
@@ -585,17 +584,17 @@ Int_t StFlowMaker::InitNanoEventWrite() {
   pNanoDST = new TFile(mNanoEventFileName,"RECREATE","Flow Nano DST file");
   if (!pNanoDST) {
     cout << "##### FlowMaker: Warning: no NanoEvents file = " << file << endl;
-    return kStWarn;
+    return kStFatal;
   }
 
   pNanoDST->SetCompressionLevel(comp);
-  cout << "##### FlowMaker: NanoEvents file = " << file << endl;
+  gMessMgr->Info() << "##### FlowMaker: NanoEvents file = " << file << endm;
 
   // Create a ROOT Tree and one superbranch
   pFlowTree = new TTree("FlowTree", "Flow Nano Tree");
   if (!pFlowTree) {
     cout << "##### FlowMaker: Warning: No FlowNanoTree" << endl;
-    return kStWarn;
+    return kStFatal;
   }
 
   pFlowTree->SetAutoSave(10000000);  // autosave when 10 Mbyte written
@@ -620,17 +619,17 @@ Int_t StFlowMaker::InitPicoEventWrite() {
   pPicoDST = new TFile(mPicoEventFileName,"RECREATE","Flow Pico DST file");
   if (!pPicoDST) {
     cout << "##### FlowMaker: Warning: no PicoEvents file = " << file << endl;
-    return kStWarn;
+    return kStFatal;
   }
   
   pPicoDST->SetCompressionLevel(comp);
-  cout << "##### FlowMaker: PicoEvents file = " << file << endl;
+  gMessMgr->Info() << "##### FlowMaker: PicoEvents file = " << file << endm;
 
   // Create a ROOT Tree and one superbranch
   pFlowTree = new TTree("FlowTree", "Flow Pico Tree");
   if (!pFlowTree) {
     cout << "##### FlowMaker: Warning: No FlowPicoTree" << endl;
-    return kStWarn;
+    return kStFatal;
   }
 
   pFlowTree->SetAutoSave(10000000);  // autosave when 10 Mbyte written
@@ -651,22 +650,22 @@ Int_t StFlowMaker::InitNanoEventRead() {
   pNanoDST = new TFile(file);
   if (!pNanoDST->IsOpen()) {
     cout << "##### FlowMaker: Warning: no NanoEvents file = " << file << endl;
-    return kStErr;
+    return kStFatal;
   }
 
-  cout << "##### FlowMaker: NanoEvents file = " << file << endl;
+  gMessMgr->Info() << "##### FlowMaker: NanoEvents file = " << file << endm;
 
   // Get the tree, the branch, and the entries
   pFlowTree = (TTree*)pNanoDST->Get("FlowTree");
   if (!pFlowTree) {
     cout << "##### FlowMaker: Warning: No FlowTree" << endl;
-    return kStErr;
+    return kStFatal;
   }
 
   TBranch* branch = pFlowTree->GetBranch("pNanoEvent");
   branch->SetAddress(&pNanoEvent);
   Int_t nEntries = (Int_t)pFlowTree->GetEntries(); 
-  cout << "##### FlowMaker: events in nano-DST file = " << nEntries << endl;
+  gMessMgr->Info() << "##### FlowMaker: events in nano-DST file = " << nEntries << endm;
   
   mNanoEventCounter = 0;
 
@@ -684,22 +683,22 @@ Int_t StFlowMaker::InitPicoEventRead() {
   pPicoDST = new TFile(file);
   if (!pPicoDST->IsOpen()) {
     cout << "##### FlowMaker: Error: no PicoEvents file = " << file << endl;
-    return kStErr;
+    return kStFatal;
   }
 
-  cout << "##### FlowMaker: " << "PicoEvents file = " << file << endl;
+  gMessMgr->Info() << "##### FlowMaker: PicoEvents file = " << file << endm;
 
   // Get the tree, the branch, and the entries
   pFlowTree = (TTree*)pPicoDST->Get("FlowTree");
   if (!pFlowTree) {
     cout << "##### FlowMaker: Error: No FlowTree" << endl;
-    return kStErr;
+    return kStFatal;
   }
 
   TBranch* branch = pFlowTree->GetBranch("pPicoEvent");
   branch->SetAddress(&pPicoEvent);
   Int_t nEntries = (Int_t)pFlowTree->GetEntries(); 
-  cout << "##### FlowMaker: " << "events in Pico-DST file = " << nEntries << endl;
+  gMessMgr->Info() << "##### FlowMaker: events in Pico-DST file = " << nEntries << endm;
 
   mPicoEventCounter = 0;
 
@@ -722,7 +721,7 @@ Int_t StFlowMaker::InitFlowEventWrite() {
   pFlowDST = new TFile("flowevent.root", "RECREATE", "Flow micro DST file");
   if (!pFlowDST) {
     cout << "##### FlowMaker: Warning: no FlowEvents file" << endl;
-    return kStWarn;
+    return kStFatal;
   }
 
   pFlowDST->SetCompressionLevel(comp);
@@ -731,7 +730,7 @@ Int_t StFlowMaker::InitFlowEventWrite() {
   pFlowMicroTree = new TTree("FlowMicroTree", "Flow Micro Tree");
   if (!pFlowMicroTree) {
     cout << "##### FlowMaker: Warning: No FlowMicroTree" << endl;
-    return kStWarn;
+    return kStFatal;
   }
 
   pFlowMicroTree->SetAutoSave(100000000);  // autosave when 100 Mbyte written
@@ -744,7 +743,7 @@ Int_t StFlowMaker::InitFlowEventWrite() {
 
 Int_t StFlowMaker::InitFlowEventRead() {
   pFlowDST = new TFile("flowevent.root", "READ");
-  if (pFlowDST) return kStErr;
+  if (pFlowDST) return kStFatal;
 
   return kStOK;
 }
