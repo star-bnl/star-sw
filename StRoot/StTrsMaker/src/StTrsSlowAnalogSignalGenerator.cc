@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.1 1998/11/10 17:12:27 fisyak Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.2 1998/11/13 21:32:16 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,9 +10,12 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
- * Revision 1.1  1998/11/10 17:12:27  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1998/11/13 21:32:16  lasiuk
+ * adjust charge generated
  *
+ * merge operations for speed up (after profiler0
+ *
+ * Revision 1.10  1999/02/15 03:38:16  lasiuk
  * protection if min()<0
  *
  * Revision 1.9  1999/02/14 20:46:09  lasiuk
@@ -195,7 +198,7 @@ double StTrsSlowAnalogSignalGenerator::imageChargeIntegral(double xo, double yo,
 // 	    exit(0);
  	cout << "Wire Index: " << jj << '\n' << endl;
 // 	case dipole:
-	    // center of Pad that I am over
+    StTpcCoordinateTransform transformer(mGeomDb, mSCDb);
  	//cout << "Wire Index: " << jj << endl;
 // }
 
@@ -205,6 +208,10 @@ double StTrsSlowAnalogSignalGenerator::imageChargeIntegral(double xo, double yo,
 	
 	    PR(currentWire.size());
     StTpcCoordinateTransform transformer(mGeomDb, mSCDb, mElectronicsDb);
+// 	PR(currentWire.size());
+// 	    PR(currentWire.size());
+// 	    ivb PR(ycoord);  // ycoord of Wire
+// 	    ivb PR(currentWire[jj].position());
     if(wireHistogram->min()<0) {
 	cerr << "Wire Plane is empty" << endl;
  	    PR(ycoord);  // ycoord of Wire
@@ -275,16 +282,22 @@ double StTrsSlowAnalogSignalGenerator::imageChargeIntegral(double xo, double yo,
 		    centralPad + mDeltaPad : mGeomDb->numberOfPadsAtRow(irow);
 //  		PR(mPadLimits.first);
 //  		PR(mPadLimits.second);
-		    // pad centroid:     xyCoord
+		    PR(tpcRaw);
+		    PR(xyCoord);
+
 		    if( !(ipad>0 && ipad<mGeomDb->numberOfPadsAtRow(irow)) )
-			signalOnPad(iter->position().x(), ycoord,  // charge location
+			continue;
+#endif
 		    double padWidth, padLength;
 		        iter->numberOfElectrons()*
 		    cout << "  xl " << xl << " xu " << xu << endl;
 		    cout << "  yl " << yl << " yu " << yu << endl;
+
+		    //cout << "  xl " << xl << " xu " << xu << endl;
 		    //cout << "  yl " << yl << " yu " << yu << endl;
 // 		    PR(padLength);
 		    PR(chargeOfSignal);
+		    
 		    transformer(tpcRaw,xyCoord);
 		    PR(chargeOfSignal);
 		    // Integral limits for nearest pad
@@ -422,7 +435,7 @@ double StTrsSlowAnalogSignalGenerator::signalSampler(double t, StTrsAnalogSignal
 //     PR(mGain);
     // ??sort?? ---> not necessary
 // 	    break;
-	    //cout << "row: " << irow << " pad: " << ipad << " timeBin: " << endl;
+// 	case realShaper:
 // 	default:
 // 	    cerr << "Default Function Selected. ERROR!" << endl;
 	    cout << "row: " << irow << " pad: " << ipad << " timeBin: " << endl;
@@ -435,7 +448,7 @@ double StTrsSlowAnalogSignalGenerator::signalSampler(double t, StTrsAnalogSignal
 	    //cout << "row/pad " << irow << '/' << ipad << ' ' << continuousAnalogTimeSequence.size() << endl;
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
     vector<StTrsAnalogSignal> continuousAnalogTimeSequence;
-		    //cout << "pulse Height: " << pulseHeight << endl;
+#else
 	    //cout << "row: " << irow << " pad: " << ipad << " timeBin: " << endl;
 // 		cout << " " << bbb << " " << continuousAnalogTimeSequence[bbb] << endl;
 		    cout << "pulse Height: " << pulseHeight << endl;
@@ -452,7 +465,7 @@ double StTrsSlowAnalogSignalGenerator::signalSampler(double t, StTrsAnalogSignal
  		if(pulseHeight < mSignalThreshold)
  		    continue;
 // 		cout << itbin << " pulse Height: " << pulseHeight << " " << (*mTimeSequenceIterator) << endl;
-
+		    // charge from any signal that is within
 //  		    PR(mTimeSequenceIterator->time()/nanosecond);
 //  		    PR(timeBinT-mTimeSequenceIterator->time()/nanosecond);
 		    // 10 time bins.  This should be a settable
