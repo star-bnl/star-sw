@@ -1,5 +1,5 @@
       INTEGER kUnknownId,kTpcId,kSvtId,kRichId,kFtpcWestId,kFtpcEastId
-      INTEGER kTofPatchId,kCtbId,kSsdId,kBarrelEmcTowerId
+      INTEGER kTofId,kCtbId,kSsdId,kBarrelEmcTowerId
       INTEGER kBarrelEmcPreShowerId,kBarrelSmdEtaStripId
       INTEGER kEndcapEmcTowerId,kEndcapEmcPreShowerId
       INTEGER kBarrelSmdPhiStripId,kZdcWestId,kZdcEastId
@@ -13,7 +13,7 @@
       PARAMETER (kRichId = kRichIdentifier)
       PARAMETER (kFtpcWestId = kFtpcWestIdentifier)
       PARAMETER (kFtpcEastId = kFtpcEastIdentifier)
-      PARAMETER (kTofPatchId = kTofPatchIdentifier)
+      PARAMETER (kTofId = kTofIdentifier)
       PARAMETER (kCtbId = kCtbIdentifier)
       PARAMETER (kSsdId = kSsdIdentifier)
       PARAMETER (kBarrelEmcTowerId = kBarrelEmcTowerIdentifier)
