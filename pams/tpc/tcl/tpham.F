@@ -15,15 +15,16 @@ C                      **   **     **   **
 C                     **                 **
 C----------------------------------------------------------------------
 C
-      INTEGER FUNCTION TPHAM( tclpar_h, tclpar
-     +,			      tsspar_h, tsspar
-     +,                       detector_h, detector
-     +,                       pad_plane_h, pad_plane
-     +,                       tppixel_h, tppixel
-     +,                       tpmcpix_h, tpmcpix
-     +,                       tpseq_h, tpseq 
-     +,                       tpcluster_h, tpcluster 
-     +,                       tphit_h, tphit )
+      INTEGER FUNCTION TPHAM( tclpar_h,        tclpar
+     +,			      tsspar_h,        tsspar
+     +,                       detector_h,      detector
+     +,                       pad_plane_h,     pad_plane
+     +,                       tppixel_h,       tppixel
+     +,                       tpmcpix_h,       tpmcpix
+     +,                       tpseq_h,         tpseq 
+     +,                       tpcluster_h,     tpcluster 
+     +,                       tphit_h,         tphit 
+     +,                       tphit_aux_h,     tphit_aux)
 
       IMPLICIT NONE
 
@@ -208,6 +209,12 @@ c------------ for deconvolution -----------
         real zrf(max_hits_in_cluster)
         real phi(max_hits_in_cluster)
         real track(max_hits_in_cluster)
+        real mu1(max_hits_in_cluster)
+        real mu2(max_hits_in_cluster)
+        real mu3(max_hits_in_cluster)
+        real mu4(max_hits_in_cluster)
+	real mu5(max_hits_in_cluster)
+
         integer fflagg
 
 
@@ -264,7 +271,8 @@ c	   if (mod(jtpcl,ichek).eq.1) write(13,*)'cluster #',jtpcl	! mal
      +             ipad, itdc, iadc, itrk,
      +             white_noise, filtered_noise, nhits,
      +             max_hits_in_cluster,
-     +             qq,x,dx,prf,z,dz,zrf,phi,track,irow)
+     +             qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
+     +             irow)
 
            else
 c
@@ -303,10 +311,10 @@ c  to cluster in TPCLUSTER table....
                  return
               endif
               tphit_h.nok = tphit_h.nok+1
-	      tphit(tphit_h.nok).id = tphit_h.nok		! mal 17jan95
+	      tphit(tphit_h.nok).id = tphit_h.nok ! mal 17jan95
               tphit(tphit_h.nok).cluster = jtpcl
               tphit(tphit_h.nok).nseq = nseq
-              tphit(tphit_h.nok).row = 100*isec+irow     	! mal 30mar95
+              tphit(tphit_h.nok).row = 100*isec+irow ! mal 30mar95
               tphit(tphit_h.nok).q     = qq(ihit)
               tphit(tphit_h.nok).x     = x(ihit)
               tphit(tphit_h.nok).dx    = dx(ihit)
@@ -317,7 +325,7 @@ c  to cluster in TPCLUSTER table....
               tphit(tphit_h.nok).phi   = phi(ihit)
               tphit(tphit_h.nok).track = track(ihit)
               tphit(tphit_h.nok).flag  = fflagg
-
+              
 c     
 c     finally, transform everything to global coordinates !
 c     
@@ -328,8 +336,8 @@ c
 c     correct (in average way) for time-offset -- (this is not beautiful)
 c     22jun95 mal
 c     the offset is shown to be (notebook2 p110, + files..) (n+1)*tau, where
-c      n is the (effective) number of stages in the amplifier, and tau is the
-c      (effective) time constant.  For STAR, n=2, and tau is set by tss.
+c     n is the (effective) number of stages in the amplifier, and tau is the
+c     (effective) time constant.  For STAR, n=2, and tau is set by tss.
               if (tclpar(1).tfit.eq.0) ! average value used
      +             invec(3) = invec(3) - 
      +             3.0*tsspar(1).tau*tsspar(1).v_drift
@@ -337,13 +345,13 @@ c      (effective) time constant.  For STAR, n=2, and tau is set by tss.
               
               istatus = tgc_row_to_y(float(irow),
      +             invec(2),pad_plane_h,pad_plane)
-                            
+              
               istatus = tgc_pad_to_x(tphit(tphit_h.nok).x,
      +             float(irow),invec(1),pad_plane_h,pad_plane)
-
+              
               istatus = tgc_local_to_global(isec,invec,outvec)
-
-                            
+              
+              
               tphit(tphit_h.nok).x = outvec(1)
               tphit(tphit_h.nok).y = outvec(2)
               tphit(tphit_h.nok).z = outvec(3) 
@@ -375,13 +383,13 @@ c     for explanation of what follows, see bottom of notebook p95
      +             abs(tphit(tphit_h.nok).y)/rad
               tphit(tphit_h.nok).dy = dx_prime *
      +             abs(tphit(tphit_h.nok).x)/rad
-
+              
               
 c     while we have these numbers, fill the lambda field of tphit,
 c     with the ansatz that the track comes from (0,0,0)
               tphit(tphit_h.nok).lambda = 
      +             - abs(atand(tphit(tphit_h.nok).z/rad)) ! lambda < 0 always
-
+              
 c     and I can calcualte alpha as well -- see notebook 2, pp 25-32 for
 c     explanation...
               if (tand(tphit(tphit_h.nok).lambda).ne.0.0) then
@@ -403,9 +411,9 @@ c     explanation...
               else
                  tphit(tphit_h.nok).alpha = 0.0
               endif
-
-c also, need a fudge factor for the uncertainties dx dy dz.
-c  this should be understood and fixed, but for now....
+              
+c     also, need a fudge factor for the uncertainties dx dy dz.
+c     this should be understood and fixed, but for now....
               tphit(tphit_h.nok).dx = tphit(tphit_h.nok).dx 
      +             * tclpar(1).dxy_fact
               tphit(tphit_h.nok).dy = tphit(tphit_h.nok).dy 
@@ -413,10 +421,40 @@ c  this should be understood and fixed, but for now....
               tphit(tphit_h.nok).dz = tphit(tphit_h.nok).dz 
      +             * tclpar(1).dz_fact
               
-
-c also put q (magnitude of hit) into units of energy loss
+              
+c     also put q (magnitude of hit) into units of energy loss
               tphit(tphit_h.nok).q = tphit(tphit_h.nok).q * de_scale
               
+              
+C     Added an auxiliary diagnostic hit table to evaluate "various quality
+C     studies" of hit finder.   DSW 08/29/97.
+              tphit_aux_h.nok = tphit_h.nok
+	      tphit_aux(tphit_h.nok).id     = tphit_h.nok		
+              tphit_aux(tphit_h.nok).flag   = tphit(tphit_h.nok).flag
+              tphit_aux(tphit_h.nok).cluster= tphit(tphit_h.nok).cluster
+              tphit_aux(tphit_h.nok).nseq   = tphit(tphit_h.nok).nseq
+              tphit_aux(tphit_h.nok).row    = tphit(tphit_h.nok).row
+              tphit_aux(tphit_h.nok).npads  = int(mu5(ihit))       
+              tphit_aux(tphit_h.nok).x      = tphit(tphit_h.nok).x 
+              tphit_aux(tphit_h.nok).y      = tphit(tphit_h.nok).y
+              tphit_aux(tphit_h.nok).z      = tphit(tphit_h.nok).z 
+              tphit_aux(tphit_h.nok).dx     = tphit(tphit_h.nok).dx 
+              tphit_aux(tphit_h.nok).dy     = tphit(tphit_h.nok).dy 
+              tphit_aux(tphit_h.nok).dz     = tphit(tphit_h.nok).dz 
+              tphit_aux(tphit_h.nok).prf    = tphit(tphit_h.nok).prf 
+              tphit_aux(tphit_h.nok).zrf    = tphit(tphit_h.nok).zrf 
+              tphit_aux(tphit_h.nok).q      = tphit(tphit_h.nok).q 
+              tphit_aux(tphit_h.nok).xave   = mu1(ihit)            
+              tphit_aux(tphit_h.nok).sigma  = mu2(ihit)      
+              tphit_aux(tphit_h.nok).skew   = mu3(ihit)      
+              tphit_aux(tphit_h.nok).kurto  = mu4(ihit)       
+c explicitly put them to zero here-- mal 30aug97
+c              tphit_aux(tphit_h.nok).xave   = 0.0            
+c              tphit_aux(tphit_h.nok).sigma  = 0.0
+c              tphit_aux(tphit_h.nok).skew   = 0.0
+c              tphit_aux(tphit_h.nok).kurto  = 0.0
+              
+
            ENDDO
 
 
@@ -603,7 +641,7 @@ C-----------------------------------------------------------------------
      +     ipad, itdc, iadc, itrk,
      +     white_noise,  filtered_noise, nhits,
      +     max_hits_in_cluster,
-     +     qq,x,dx,prf,z,dz,zrf,phi,track,irow)
+     +     qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,irow)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -674,6 +712,12 @@ c        parameter(max_hits_in_cluster=30)
       real zrf(*)
       real phi(*)
       real track(*)
+      real mu1(*)
+      real mu2(*)
+      real mu3(*)
+      real mu4(*)
+      real mu5(*)
+
 
       logical look_for_many,triage_cuts
 c----------------------------------------------------------------
@@ -694,7 +738,7 @@ c*** skip the neural net for now..... mal 21jun95
      +           ipad, itdc, iadc, itrk,
      +           white_noise, filtered_noise,
      +           nhits,
-     +           qq,x,dx,prf,z,dz,zrf,phi,track)
+     +           qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5)
             if (nhits.gt.max_hits_in_cluster) 
      +           write(6,*)'TPHAM - ERROR! array overrun! - fix this!'
          endif
@@ -702,7 +746,7 @@ c*** skip the neural net for now..... mal 21jun95
             call tph_fit_isolated_cluster(tclpar, nclspix,
      +           ipad, itdc, iadc, itrk,
      +           white_noise, filtered_noise,
-     +           qq,x,dx,prf,z,dz,zrf,phi,track)
+     +           qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5)
             nhits=1
          endif
 c
@@ -713,10 +757,12 @@ c*****************
      +        call ouput_practice(ipad,itdc,iadc,nclspix,irow,nhits)
 c*****************
       else
+c 30aug97 - bug introduced by UW folks - must include the "mu's" in ALL
+c  calls to tph_fit_isolated_cluster!! - fixed mal
          call tph_fit_isolated_cluster(tclpar, nclspix,
      +        ipad, itdc, iadc, itrk,
      +        white_noise, filtered_noise,
-     +        qq,x,dx,prf,z,dz,zrf,phi,track)
+     +        qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5)
          nhits=1
       endif
       
@@ -821,7 +867,7 @@ C-----------------------------------------------------------------------
      +     ipad, itdc, iadc, itrk,
      +     white_noise, filtered_noise,
      +     nhits,
-     +     qq,x,dx,prf,z,dz,zrf,phi,track)
+     +     qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -874,6 +920,12 @@ c passed outputs
       real zrf(*)
       real phi(*)
       real track(*)
+      real mu1(*)
+      real mu2(*)
+      real mu3(*)
+      real mu4(*)
+      real mu5(*)
+
 c local variables
       integer maxpad,maxbuck
       parameter (maxpad=184,maxbuck=1024) ! upped from 512 4jan95
@@ -899,6 +951,7 @@ c the following arrays are for passing to fit_isolated_clusters for
 c  each found mountain top
       real qtemp(1),xtemp(1),dxtemp(1),prftemp(1)
       real ztemp(1),dztemp(1),zrftemp(1),phitemp(1),tracktemp(1)
+      real mu1temp(1),mu2temp(1),mu3temp(1),mu4temp(1),mu5temp(1)
       integer nclspix_temp
       integer ipad_temp(30),itdc_temp(30),iadc_temp(30),itrk_temp(30)
 
@@ -980,12 +1033,20 @@ c if peak:valley test fails, we do not store and just jump to line 19
                         valley=min(valley,height(jpad,ktdc))
                      enddo
                   endif
-                  if (valley.ne.0) then
-                     peak_to_valley = 
-     +                    float(height(jpad,jtdc))/float(valley)
-                     if (peak_to_valley.lt.tclpar(1).mf_pv)
-     +                    goto 19 ! FAILED
-                  endif
+c--------------------------------------------
+c we should NOT be using peak/valley!!!
+c instead use peak-valley (i.e. peak MINUS valley)
+c It was my stupidity.  malisa 4sep97
+c                  if (valley.ne.0) then
+c                     peak_to_valley = 
+c     +                    float(height(jpad,jtdc))/float(valley)
+c                     if (peak_to_valley.lt.tclpar(1).mf_pv)
+c     +                    goto 19 ! FAILED
+c                  endif
+                  peak_to_valley = height(jpad,jtdc)-valley
+                  if (peak_to_valley.lt.tclpar(1).mf_pv)
+     +                 goto 19  ! FAILED
+c--------------------------------------------
                enddo
             endif
 c ok, passed peak:valley test... store this peak
@@ -1034,7 +1095,7 @@ c calculate "positions"...
          call tph_fit_isolated_cluster(tclpar, nclspix,
      +        ipad,itdc,iadc,itrk,
      +        white_noise, filtered_noise,
-     +        qq,x,dx,prf,z,dz,zrf,phi,track)
+     +        qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5)
       else                      ! just use pixels around local maximum
          do imax=1,nmax
             jpad=max_pos(1,imax)
@@ -1057,7 +1118,8 @@ c calculate "positions"...
      +           ipad_temp,itdc_temp,iadc_temp,itrk_temp,
      +           white_noise, filtered_noise,
      +           qtemp,xtemp,dxtemp,prftemp,ztemp,dztemp,zrftemp,
-     +           phitemp,tracktemp)
+     +           phitemp,tracktemp,mu1temp,mu2temp,mu3temp,mu4temp,
+     +           mu5temp)
             qq(imax)     = qtemp(1)
             x(imax)     = xtemp(1)
             dx(imax)    = dxtemp(1)
@@ -1067,6 +1129,11 @@ c calculate "positions"...
             zrf(imax)   = zrftemp(1)
             phi(imax)   = phitemp(1)
             track(imax) = tracktemp(1)
+            mu1(imax)   = mu1temp(1) 
+            mu2(imax)   = mu2temp(1) 
+            mu3(imax)   = mu3temp(1) 
+            mu4(imax)   = mu4temp(1) 
+            mu5(imax)   = mu5temp(1) 
          enddo
       endif
 
@@ -1094,7 +1161,8 @@ C-----------------------------------------------------------------------
       Subroutine tph_fit_isolated_cluster(tclpar, nclspix,
      +				ipad, itdc, iadc, itrk,
      +				white_noise, filtered_noise,
-     +                          qq,x,dx,prf,z,dz,zrf,phi,track)
+     +                          qq,x,dx,prf,z,dz,zrf,phi,track,
+     +                          mu1,mu2,mu3,mu4,mu5)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -1161,7 +1229,11 @@ c passed outputs
         real zrf(*)
         real phi(*)
         real track(*)
-
+        real mu1(*)
+        real mu2(*)
+        real mu3(*)
+        real mu4(*)
+        real mu5(*)
         integer tph_3point_gauss
 
 	real centroid,sigma,uncertainty,sum,dt0
@@ -1191,6 +1263,9 @@ C-----------------------------------------------------------------------
         integer id,indx
 
         logical lookat_mc
+
+        real  rmu(4)
+        integer  ipad_l, ipad_h, pad_n, ir
 C-----------------------------------------------------------------------
 
 c set up the identity vector
@@ -1216,6 +1291,8 @@ c 5) sum up adc contribs from all MC tracks (will check to see who gave most)
         call vzero(time_proj,nbuck_max)
         call vzero(tdc_x_adc,npads_max)
         adc_sum = 0
+        ipad_l = 999
+        ipad_h = -999
         do ipix=1,nclspix
            adc_sum = adc_sum+iadc(ipix)
            pad_proj(ipad(ipix)) = pad_proj(ipad(ipix))+iadc(ipix)
@@ -1224,8 +1301,59 @@ c 5) sum up adc contribs from all MC tracks (will check to see who gave most)
            time_proj(itdc(ipix)) = time_proj(itdc(ipix))+iadc(ipix)
            tdc_x_adc(ipad(ipix)) = tdc_x_adc(ipad(ipix))+
      +          itdc(ipix)*iadc(ipix)
+C----------------------------------------------------------------------
+C     Keep track of the max & min pad numbers in this cluster.
+C     By DSW on July 6,1997 as part of the pad resolution study.
+           if (ipad_l .ge. ipad(ipix) ) then
+              ipad_l = ipad(ipix)
+           endif
+           if (ipad_h .lt. ipad(ipix) ) then
+              ipad_h = ipad(ipix)
+           endif
+C----------------------------------------------------------------------
         enddo
-c q:
+	if (adc_sum.eq.0) stop 'Hey -- ADCSUM=0!!!!'
+
+c mal 30aug97 - maybe a problem with decon=0 running - does this 
+c screw up for very wide clusters??????????
+C------------------------------------------------------------------
+C     Added by DSW on July 6, 1997 to study the pad resolution shootup
+C     at large pad crossing angles.
+	 do ir=1,4
+           rmu(ir) = 0.
+        enddo
+        do pad_n=ipad_l, ipad_h
+           rmu(1)  =  rmu(1) +  pad_proj(pad_n)*pad_n
+        enddo
+        rmu(1) =  float(rmu(1))/float(adc_sum)
+
+C     Calculate  sigma, skewness & kurtosis
+        do ir = 2,4
+           do pad_n=ipad_l, ipad_h
+              rmu(ir) =  rmu(ir) + float(pad_proj(pad_n))*
+     +             (float(pad_n) - rmu(1))**ir
+           enddo
+           rmu(ir) = rmu(ir)/float(adc_sum)
+        enddo
+
+        mu1(1) = rmu(1)
+        mu2(1) = sqrt(rmu(2))
+        mu3(1) = rmu(3)/rmu(2)**1.5
+        mu4(1) = rmu(4)/rmu(2)**2 - 3.
+        mu5(1) = float(ipad_h - ipad_l + 1 )
+C------------------------------------------------------------------
+c mal 30aug97 - just put the damn things to zero-- they seem to be randomly
+c assigned if not!!
+c	mu1(1) = 0.0
+c	mu2(1) = 0.0
+c	mu3(1) = 0.0
+c	mu4(1) = 0.0
+c	mu5(1) = 0.0
+
+
+
+
+c     q:
         qq(1) = adc_sum
 
 c x,dx,prf: - try 3-point gauss... if does not work, do weighted mean
@@ -1240,9 +1368,10 @@ c x,dx,prf: - try 3-point gauss... if does not work, do weighted mean
            endif
            d_rvec_cor(indx) = 0.0
         enddo
-        if (tph_3point_gauss(identity_vector,rvec,d_rvec,
-     +       npads_max,centroid,sigma,uncertainty).ne.1) 
-     +       call tph_weighted_mean(identity_vector,rvec,
+cmal 30aug97        if (tph_3point_gauss(identity_vector,rvec,d_rvec,
+cmal     +       npads_max,centroid,sigma,uncertainty).ne.1) 
+cmal     +       call tph_weighted_mean(identity_vector,rvec,
+            call tph_weighted_mean(identity_vector,rvec,
      +       d_rvec_cor,d_rvec,
      +       npads_max,centroid,sigma,uncertainty)
         x(1) = centroid
@@ -1551,15 +1680,18 @@ C-----------------------------------------------------------------------
            call message('TPH_3POINT_GAUSS bad shape - r213',
      +          1,id)
            return
+	endif
+
+********************** let's try to take it out....**********************
 C
 C From Monte Carlo, if the fitted Gaussian is wider than about 83%
 C of the pad pitch in X, the weighted mean algorithm is more accurate;
 C we return a diagnostic to force its use.  [ 1/sqrt(1.452)=0.83 ].
-	elseif (r213.le.1.452) then
-           id = 0
-           tph_3point_gauss = -2
-           return
-        endif
+C	elseif (r213.le.1.452) then
+C           id = 0
+C           tph_3point_gauss = -2
+C           return
+c        endif
 
 	x0 = (delta/2.0) * log(y3/y1)/r213
 	centroid = x(istart+1) + x0
