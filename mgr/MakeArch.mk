@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.31  1998/09/24 15:43:51  perev
+#  -muldef added for sun
+#
 #  Revision 1.30  1998/09/22 02:21:31  fisyak
 #  Fix NOROOT version
 #
@@ -71,7 +74,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/09/22 02:21:31 $ 
+#             Last modification $Date: 1998/09/24 15:43:51 $ 
 #. default setings
 
 RM := rm -f
@@ -396,7 +399,7 @@ ifneq (,$(findstring $(STAF_ARCH),sun4x_55 sun4x_56))
   CFLAGS   :=  $(DEBUG)  -KPIC 
   CXXFLAGS :=  $(DEBUG)  -KPIC  
   LDFLAGS  :=  $(DEBUG)  -Bstatic 
-  EXEFLAGS :=  $(DEBUG)  -Bdynamic -t 
+  EXEFLAGS :=  $(DEBUG)  -z muldefs -Bdynamic -t 
   SOFLAGS  :=  $(DEBUG) -G
   CLIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
   FLIBS    := -lM77 -lF77 -lsunmath
