@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.18 2000/08/16 01:28:40 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.19 2000/08/19 19:51:55 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.19  2000/08/19 19:51:55  ward
+// Change physics mask from 0x2XXX to 0x4XXX.
+//
 // Revision 1.18  2000/08/16 01:28:40  ward
 // Report TrgActionWd as diagnostic for oo.
 //
@@ -222,7 +225,7 @@ int St_trg_Maker::Daq(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger *ds
   Int_t Iret = SanityCheck();
   if (Iret !=  kStOK) return Iret;
   if(GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd==0x9001) isLaser=7;
-  if(GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd>>12==2) isPhysics=7;
+  if(GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd>>12==4) isPhysics=7;
   if (m_Mode) {
     if((m_Mode & 1 && !isPhysics) || (m_Mode & 2 && !isLaser)) {
       oo="";
