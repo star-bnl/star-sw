@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.h,v 2.3 2000/02/10 16:32:21 ullrich Exp $
+ * $Id: StVertex.h,v 2.4 2000/02/10 18:49:08 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
- * Revision 2.3  2000/02/10 16:32:21  ullrich
- * flag changed from unsigned to signed long
+ * Revision 2.4  2000/02/10 18:49:08  ullrich
+ * Fixed typo introduced at last check-in.
  *
  * Revision 2.4  2000/02/10 18:49:08  ullrich
  * Fixed typo introduced at last check-in.
@@ -60,7 +60,7 @@ public:
     const StTrack*         parent() const;
     virtual UInt_t         numberOfDaughters() const = 0;
     virtual StTrack*       daughter(UInt_t) = 0;
-    virtual void setFlag(ULong_t);
+    virtual const StTrack* daughter(UInt_t) const = 0;
     virtual StPtrVecTrack  daughters(StTrackFilter&) = 0;
 
     virtual void setFlag(Long_t);
