@@ -7,9 +7,9 @@ MACRO ev0_am
 
  ami/mod/call ev0_am _
       	[params]/global/ev0par _
-        [data]/global/tracks/globtrk _
+        [dst]/globtrk _
         [data]/global/vertices/evr_privert _
-        [data]/global/vertices/vertex _
+        [dst]/vertex _
         [data]/global/vertices/ev0out _	
         [data]/global/tracks/ev0track _ 
 	[params]/global/magnetic_field/magf
