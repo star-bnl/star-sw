@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <TITLE>Cons - Software Construction System</TITLE>
-<LINK REV="made" HREF="mailto:root@porky.devel.redhat.com">
+<LINK REV="made" HREF="mailto:lionel.cons@cern.ch">
 </HEAD>
 
 <BODY>
@@ -1319,7 +1319,7 @@ changes due to a directory coming into existence.)
 <P>
 Because Cons relies on the compiler's <CODE>-I</CODE> flags to communicate the order in which repository directories must be
 searched, Cons' handling of repository directories is fundamentally
-incompatible with using double-quotes on the <CODE>#include</CODE> directives in your C source code:
+incompatible with using double-quotes on the <CODE>#include</CODE> directives in any C source code that you plan to modify:
 
 <P>
 <PRE>  #include &quot;file.h&quot;     /* DON'T USE DOUBLE-QUOTES LIKE THIS */
@@ -1331,12 +1331,16 @@ undermines the elaborate <CODE>-I</CODE> options that Cons constructs to make th
 preferred search path.
 
 <P>
-Consequently, when using repository trees in Cons,
-<STRONG>always</STRONG> use angle-brackets for included files:
+Consequently, when using repository trees in Cons, <STRONG>always</STRONG> use angle-brackets for included files in any C source (.c or .h) files that
+you plan to modify locally:
 
 <P>
 <PRE>  #include &lt;file.h&gt;     /* USE ANGLE-BRACKETS INSTEAD */
 </PRE>
+<P>
+Code that will not change can still safely use double quotes on #include
+lines.
+
 <P>
 <HR>
 <H2><A NAME="Repository_List">Repository_List</A></H2>

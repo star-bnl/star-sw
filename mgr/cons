@@ -15,7 +15,7 @@
 
 use vars qw( $CVS_id $CVS_ver $ver_num $ver_rev $version );
 
-$CVS_id = '$Id: cons,v 1.1.1.26 2001/01/24 14:38:26 fisyak Exp $';
+$CVS_id = '$Id: cons,v 1.1.1.27 2001/03/08 16:15:06 fisyak Exp $';
 $CVS_ver = (split(/\s+/, $CVS_id))[2];
 
 $ver_num = "2.3";
@@ -4504,10 +4504,11 @@ in the MD5 signature calculation for the target file, so the target will
 not be recompiled if the compilation command changes due to a directory
 coming into existence.)
 
-Because Cons relies on the compiler's C<-I> flags to communicate the order
-in which repository directories must be searched, Cons' handling of
-repository directories is fundamentally incompatible with using
-double-quotes on the C<#include> directives in your C source code:
+Because Cons relies on the compiler's C<-I> flags to communicate the
+order in which repository directories must be searched, Cons' handling
+of repository directories is fundamentally incompatible with using
+double-quotes on the C<#include> directives in any C source code that
+you plan to modify:
 
   #include "file.h"	/* DON'T USE DOUBLE-QUOTES LIKE THIS */
 
@@ -4516,10 +4517,14 @@ always first search the directory containing the source file.  This
 undermines the elaborate C<-I> options that Cons constructs to make the
 preprocessor conform to its preferred search path.
 
-Consequently, when using repository trees in Cons,
-B<always> use angle-brackets for included files:
+Consequently, when using repository trees in Cons, B<always> use
+angle-brackets for included files in any C source (.c or .h) files that
+you plan to modify locally:
 
   #include <file.h>	/* USE ANGLE-BRACKETS INSTEAD */
+
+Code that will not change can still safely use double quotes on #include
+lines.
 
 
 =head2 Repository_List
