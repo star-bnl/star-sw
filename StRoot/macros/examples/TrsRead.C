@@ -1,8 +1,10 @@
 //
-// $Id: TrsRead.C,v 1.3 2000/01/20 18:18:16 calderon Exp $
+// $Id: TrsRead.C,v 1.4 2000/05/09 20:15:43 kathy Exp $
 //
-
 // $Log: TrsRead.C,v $
+// Revision 1.4  2000/05/09 20:15:43  kathy
+// transfer obsolete macros to /macros/obsolete;  update other macros so that they use standard default inputs plus only few events by default so they'll be easy to run in autoQA macro testing
+//
 // Revision 1.3  2000/01/20 18:18:16  calderon
 // fixed for current TRS in dev.  Current DB in dev is ROOT DB, because
 // Electronics DB from MySQL is not accessible.  When it is, just comment out

@@ -1,5 +1,8 @@
-// $Id: Example_read_dst_write_table_ntup.C,v 1.4 2000/04/18 20:37:25 kathy Exp $
+// $Id: Example_read_dst_write_table_ntup.C,v 1.5 2000/05/09 20:15:43 kathy Exp $
 // $Log: Example_read_dst_write_table_ntup.C,v $
+// Revision 1.5  2000/05/09 20:15:43  kathy
+// transfer obsolete macros to /macros/obsolete;  update other macros so that they use standard default inputs plus only few events by default so they'll be easy to run in autoQA macro testing
+//
 // Revision 1.4  2000/04/18 20:37:25  kathy
 // St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
 //
@@ -25,7 +28,7 @@
 
 
 void Example_read_dst_write_table_ntup(
-  Int_t nevents=3, 
+  Int_t nevents=2, 
   const Char_t *MainFile=
      "/afs/rhic/star/data/samples/gstar.dst.root",
   const Char_t *NtupFile="globtrk_ntup.root")
