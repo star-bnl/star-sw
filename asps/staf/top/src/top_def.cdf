@@ -136,14 +136,23 @@ See HELP TOP for syntax of WHERE.
 >ACTION KAM_TOP_NEWJOIN
 
 ** ---------------------------------------------------------------------
-** TOP/NEWMASK AGENT [ CUTFUNC ]
->COMMAND NEWMASK
+** TOP/NEWCUT AGENT CUTFUNC
+>COMMAND NEWCUT
 >PARAMETERS
-AGENT 'Mask Agent Name' C 
-+
-CUTFUNC 'Original cut function.' C D='-'
+AGENT 'Cut Agent Name' C 
+CUTFUNC 'Cut specification.' C
 >GUIDANCE
-Create and register a new topMask agent.
+Create and register a new topCut agent.
+
+This is the first step in making dynamic table cuts and/or filters.
+
+Example: 
+          TOP/NEWCUT slowPions pid.eq.5.and.invpt.gt.1.12e3
+In this case 'slowPions' is the name of the agent; you will need this
+name in the second step.
+The identifiers 'pid' and 'invpt' are column names.
+
+To apply this cut use either TOP/CUTAGENT/FILTER or TOP/CUTAGENT/CUT.
 .
 >ACTION KAM_TOP_NEWFILTER
 
@@ -161,12 +170,77 @@ Create and register a new topSort agent.
 
 ************************************************************************
 ************************************************************************
+** TOP/CUT_AGENT
+>MENU CUT_AGENT
+>GUIDANCE
+Commands for manipulating cut agents (topCut objects).
+
+** ---------------------------------------------------------------------
+** TOP/CUT_AGENT/FILTER AGENT TABLE1 TABLE2
+>COMMAND FILTER
+>PARAMETERS
+AGENT 'Mask Agent Name' C
+TABLE1 'Source table' C
+TABLE2 'Target table' C
++
+FUNC 'Cut function string' C D='.'
+>GUIDANCE
+If FUNC is not specified:
+.
+Using the cut previously specified with the TOP/NEWCUT command, 
+write a new table named TABLE2 using all the rows of TABLE1
+that pass the cut.
+.
+If FUNC is specified:
+.
+Write a new table named TABLE2 using all the rows of TABLE1 that pass 
+the cut function, creating a new cut agent as a byproduct.
+.
+'AGENT' is the name that you gave to the cuts with TOP/NEWCUT.
+.
+>ACTION KAM_TOPCUT_FILTER
+
+** ---------------------------------------------------------------------
+** TOP/CUT_AGENT/CUT AGENT TABLE1
+>COMMAND CUT
+>PARAMETERS
+AGENT 'Mask Agent Name' C
+TABLE1 'The table to be cut.' C
++
+FUNC 'Cut function string' C D='.'
+>GUIDANCE
+If FUNC is not specified:
+.
+Using the cut previously specified with the TOP/NEWCUT command, 
+remove all the rows from TABLE1 which do not pass the cut.
+.
+If FUNC is specified:
+.
+Remove all the rows from TABLE1 which do not
+pass the cut, creating a new cut agent as a byproduct.
+.
+'AGENT' is the name that you gave to the cut with TOP/NEWCUT.
+.
+>ACTION KAM_TOPCUT_CUT
+
+** ---------------------------------------------------------------------
+** TOP/CUT_AGENT/FUNCTION AGENT
+>COMMAND FUNCTION
+>PARAMETERS
+AGENT 'Mask Agent Name' C
+>GUIDANCE
+Prints the cut associated with the agent.
+Example:  You type 'TOP/CUT_AGENT/FUNCTION slowPions'.
+The computer types 'pid.eq.5 .and. invpt.gt.1.12e3'.
+.
+>ACTION KAM_TOPCUT_FUNCTION
+
+************************************************************************
+************************************************************************
 ** TOP/PROJECT_AGENT
->MENU PROJECT_AGENT
+>MENU \PROJECT_AGENT
 >GUIDANCE
 topProject commands.
-.
-
 ** ---------------------------------------------------------------------
 ** TOP/PROJECT_AGENT/SELECTSPEC AGENT [ SELECT ]
 >COMMAND SELECTSPEC

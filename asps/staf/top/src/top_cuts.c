@@ -7,26 +7,29 @@ typedef int myBool;
 #define PP printf(
 int gDone;
 char gStr[100];
+
 void CutsInit(void) {
   printf("Initializing cuts.\n"); gDone=0;
 }
 void Progress(long jj) {
-  printf("On row %d.\n",jj);
+  if(jj<0) return;
+  if(jj<1000||jj%3300==0) 
+      printf("       I:         %d \n",jj); /* modulus=150n */
 }
 void Say(char *x) {
   printf("%s\n",x);
 }
-void Err(int x) {
+void ErrTop(int x) {
   PP"Error number %d in function TableValue() of file %s.\n",__FILE__);
 }
-myBool Array(
+myBool TopArray(
   DS_DATASET_T *dsPtr, size_t colNum,int tentSubscript,
   int *off, size_t *dim, size_t *array_size_t, char **typeName) {
   /* see comment uu4 */
-  if(!dsColumnTypeName(typeName,dsPtr,colNum))          Err( 17);
-  if(!dsColumnDimCount(dim,dsPtr,colNum))               Err( 18);
-  if(!dsColumnDimensions(array_size_t,dsPtr,colNum))    Err( 19);
-  if(*dim>0) { *off=tentSubscript; if(*off<0||*off>=*array_size_t) Err( 20); }
+  if(!dsColumnTypeName(typeName,dsPtr,colNum))          ErrTop( 17);
+  if(!dsColumnDimCount(dim,dsPtr,colNum))               ErrTop( 18);
+  if(!dsColumnDimensions(array_size_t,dsPtr,colNum))    ErrTop( 19);
+  if(*dim>0) { *off=tentSubscript; if(*off<0||*off>=*array_size_t) ErrTop( 20); }
   else *off=0;
   return TRUE;
 }
@@ -38,9 +41,11 @@ myBool TableValue(int *dType,char *uu,float *fv,long *iv,size_t row,
   char *pData,*tn;
   size_t dim;             /* 0 for x, 1 for x[], and 2 for x[][]. */
   size_t arraysize;       /* x[arraysize] */
-  if(!Array(tp,colNum,subscript,&off,&dim,&arraysize,&tn)) {Err( 21); return 0;}
+  if(!TopArray(tp,colNum,subscript,&off,&dim,&arraysize,&tn)) {
+    ErrTop( 21); return 0;
+  }
   if(!dsCellAddress(&pData,tp,row,colNum)) {
-    /* 961003 Err( 22); */ *fv=0.0; return FALSE;
+    /* 961003 ErrTop( 22); */ *fv=0.0; return FALSE;
   }
   if(!strcmp(tn,  "long")) {
     *iv=*((  long*)(pData+off*sizeof(long))); *dType=INTEGER;
@@ -61,13 +66,13 @@ myBool TableValue(int *dType,char *uu,float *fv,long *iv,size_t row,
   } else if(!strcmp(tn,"double")) {
     *fv=*((double*)(pData+off*sizeof(double))); *dType=FLOAT;
   } else if(!strcmp(tn,"char")) {
-    if(!dsColumnSize(&colSize,tp,colNum)) {Err(229); return 0;}
-    if(!dsTableRowSize(&rowSize,tp)) {Err(223); return 0;}
+    if(!dsColumnSize(&colSize,tp,colNum)) {ErrTop(229); return 0;}
+    if(!dsTableRowSize(&rowSize,tp)) {ErrTop(223); return 0;}
     /* use row size for char strings, but sizeof() for others July 25 1995 */
 
     /* Aug 27 1995  off should never be anything but zero for char arrays,
     ** since we don't access the chars individually. */
-    if(off!=0) {Err(772); return 0;}
+    if(off!=0) {ErrTop(772); return 0;}
 
     /* gStr[100] */ strncpy(uu,(char*)(pData+off*rowSize),98);
     if(colSize<98) uu[colSize]='\0';

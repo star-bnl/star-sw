@@ -87,6 +87,39 @@ private:
 
 //:#####################################################################
 //:=============================================== CLASS              ==
+class topCut : public virtual socObject {
+
+public:
+//:----------------------------------------------- CTORS & DTOR       --
+   topCut();
+   topCut(const char* name, const char* spec);
+   virtual ~topCut();
+//:----------------------------------------------- ATTRIBUTES         --
+char* cutFunction();
+
+//:----------------------------------------------- INTERFACE METHODS  --
+STAFCV_T filter(tdmTable * table1, tdmTable * table2);
+STAFCV_T cut(tdmTable * table1);
+
+protected:
+//:----------------------------------------------- PROT VARIABLES     --
+char * myCutFunction;
+
+//:----------------------------------------------- PROT FUNCTIONS     --
+//:**NONE**
+
+private:
+//:----------------------------------------------- PRIV VARIABLES     --
+//:**NONE**
+//:----------------------------------------------- PRIV FUNCTIONS     --
+STAFCV_T DoCutTable(tdmTable *tbl,char *func,long *irig,
+     long *percentPass);
+STAFCV_T DoFilterTable(tdmTable *src,tdmTable *tgt,char *func,long *irig,
+     long *percentPass);
+};
+
+//:#####################################################################
+//:=============================================== CLASS              ==
 class topFactory : public virtual socFactory {
 
 public:
@@ -95,7 +128,6 @@ public:
    topFactory(const char* name);
    virtual ~topFactory();
 //:----------------------------------------------- ATTRIBUTES         --
-//:**NONE**
 
 //:----------------------------------------------- INTERFACE METHODS  --
    virtual char * list ();
@@ -103,20 +135,38 @@ public:
 //:- Project -----------------------
    virtual STAFCV_T deleteProject (const char * name);
    virtual STAFCV_T findProject (const char * name
-                , topProject*& fileStream);
+                , topProject*& agent);
    virtual STAFCV_T getProject (IDREF_T id
-                , topProject*& fileStream);
+                , topProject*& agent);
    virtual STAFCV_T newProject (const char * name
                 , const char * spec);
 
 //:- Join --------------------------
    virtual STAFCV_T deleteJoin (const char * name);
    virtual STAFCV_T findJoin (const char * name
-                , topJoin*& fileStream);
+                , topJoin*& agent);
    virtual STAFCV_T getJoin (IDREF_T id
-                , topJoin*& fileStream);
+                , topJoin*& agent);
    virtual STAFCV_T newJoin (const char * name
                 , const char * spec, const char * clause);
+//:-  Cut ---------------------------
+   virtual STAFCV_T deleteCut (const char * name);
+   virtual STAFCV_T findCut (const char * name
+                , topCut*& agent);
+   virtual STAFCV_T getCut (IDREF_T id
+                , topCut*& agent);
+   virtual STAFCV_T newCut (const char * name
+                , const char * spec);
+//:-  Mask --------------------------
+/* NOT YET IMPLEMENTED
+   virtual STAFCV_T deleteMask (const char * name);
+   virtual STAFCV_T findMask (const char * name
+                , topMask*& agent);
+   virtual STAFCV_T getMask (IDREF_T id
+                , topMask*& agent);
+   virtual STAFCV_T newMask (const char * name
+                , const char * spec);
+*/
 
 protected:
 //:----------------------------------------------- PROT VARIABLES     --
@@ -134,7 +184,9 @@ private:
 //:---------------------------------------------------------------------
 CORBA_TIE(topProject)
 CORBA_TIE(topJoin)
+CORBA_TIE(topCut)
 CORBA_TIE(topFactory)
 
 #endif /* TOPCLASSES_HH */
 
+/* This is a picture of Adolph:    //:-O   */

@@ -35,8 +35,14 @@ extern CC_P void kam_top_count_();
 extern CC_P void kam_top_list_();
 extern CC_P void kam_top_newproject_();
 extern CC_P void kam_top_newjoin_();
-extern CC_P void kam_top_newfilter_();
 extern CC_P void kam_top_newsort_();
+
+extern CC_P void kam_top_newcut_();
+extern CC_P void kam_topcut_cut_();
+extern CC_P void kam_topcut_filter_();
+extern CC_P void kam_topcut_function_();
+
+
 extern CC_P void kam_topproject_selectspec_();
 extern CC_P void kam_topproject_project_();
 extern CC_P void kam_topproject_reset_();
@@ -49,7 +55,12 @@ extern CC_P STAFCV_T top_count();
 extern CC_P STAFCV_T top_list();
 extern CC_P STAFCV_T top_newproject(char* agent, char* select);
 extern CC_P STAFCV_T top_newjoin(char* agent, char* select, char* where);
-extern CC_P STAFCV_T top_newfilter();
+
+extern CC_P STAFCV_T top_newcut(char *agent,char *cfunc);
+extern CC_P STAFCV_T topcut_cut(char*,char*,char*);
+extern CC_P STAFCV_T topcut_filter(char*,char*,char*,char*);
+extern CC_P STAFCV_T topcut_function(char*);
+
 extern CC_P STAFCV_T top_newsort();
 extern CC_P STAFCV_T topproject_selectspec(char* agent, char* select);
 extern CC_P STAFCV_T topproject_project(char* agent, char* table1, char* table2

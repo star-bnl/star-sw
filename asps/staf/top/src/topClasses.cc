@@ -11,8 +11,13 @@
 
 //:----------------------------------------------- INCLUDES           --
 #include "topClasses.hh"
+#include "tdmClasses.hh"
 #include "top_utils.h"
-
+extern "C" void CutsInit(void);
+extern "C" int dsuDoCuts(size_t nBytes,char *ba,
+    char *cuts,DS_DATASET_T *pTable);
+extern "C" int dsuRowPassedCuts(char *ba,long row);
+extern "C" int IsValidCutFunc(char*);
 //:----------------------------------------------- MACROS             --
 //:----------------------------------------------- PROTOTYPES         --
 extern "C" char* id2name(char* base,long id);
@@ -117,6 +122,179 @@ STAFCV_T topProject:: reset() {
    mySelectSpec = NULL;
    EML_SUCCESS(STAFCV_OK);
 }
+
+//:----------------------------------------------- PROT FUNCTIONS     --
+// **NONE**
+//:----------------------------------------------- PRIV FUNCTIONS     --
+// **NONE**
+
+//:#####################################################################
+//:=============================================== CLASS              ==
+//: topCut
+
+//:----------------------------------------------- CTORS & DTOR       --
+topCut:: topCut()
+		: socObject("NULL","topCut") {
+   myPtr = (SOC_PTR_T)this;
+   myCutFunction = NULL;
+}
+
+//:---------------------------------
+topCut:: topCut(const char * name, const char * func)
+		: socObject(name, "topCut") {
+   myPtr = (SOC_PTR_T)this;
+   int bad=0;
+   if(strlen(func)<3) bad=1;
+   if( !bad ){
+      myCutFunction = (char*)ASUALLOC(strlen(func) +1);
+      strcpy(myCutFunction, func);
+   }
+   else {
+      printf("The cut function you gave me is flawed.  Try again.\n");
+      myCutFunction = NULL;
+   }
+}
+
+//:---------------------------------
+topCut:: ~topCut(){
+   ASUFREE(myCutFunction);
+};
+
+//:----------------------------------------------- ATTRIBUTES         --
+char* topCut:: cutFunction() {
+   char* c=NULL;
+   c = (char*)ASUALLOC(strlen(myCutFunction) +1);
+   strcpy(c,myCutFunction);
+   return c;
+}
+
+//:----------------------------------------------- INTERFACE METHODS  --
+
+STAFCV_T topCut:: DoCutTable(tdmTable *tbl,char *func,
+    long *orig,long *percentPass) {
+  size_t numBytesToTransfer,bytesPerRow,nbytes; long startRow,row;
+  char *bottomNewTbl,*beginningOfTable,*copyThis;
+  long rowCnt=0,colCnt; void *mask;
+  DS_DATASET_T* dsPtr;
+  colCnt=tbl->columnCount();
+  *orig=tbl->rowCount();
+
+  dsPtr=tbl->dslPointer(); // ONLY in a collocated process (CORBA)
+  if(!dsTableRowSize(&bytesPerRow,dsPtr)) EML_ERROR(CANT_FIND_ROW_SIZE);
+  if(!dsTableDataAddress(&beginningOfTable,dsPtr)) EML_ERROR(CANT_FIND_DATA);
+  bottomNewTbl=beginningOfTable;
+
+  nbytes=(size_t)(((*orig)/8)+1); mask=malloc(nbytes);
+  if(!mask) { printf("Could not allocate %d bytes.\n",nbytes); return 0; }
+
+  CutsInit();
+  if(!dsuDoCuts(nbytes,(char*)mask,(char*)func,dsPtr)) {
+    printf("Failure, check your cuts string for syntax errors:\n");
+    printf("%s\n",func);
+    return 0;
+  }
+  startRow=-10;
+  for(row=0;row<*orig+1;row++) { /* The <x+1 is deliberate, to invoke the
+                                 ** else cluase during ending of the loop. */
+    if(row<(*orig)&&dsuRowPassedCuts((char*)mask,row)) {
+      if(row%1557==0) printf("Phase II: %d %% complete.\n",(row*100)/(*orig));
+      rowCnt++; if(startRow<0) startRow=row;
+    } else {
+      if(startRow>=0) {
+        numBytesToTransfer=(size_t)((row-startRow)*bytesPerRow);
+        copyThis=(char*)(beginningOfTable+bytesPerRow*startRow);
+        memcpy((void*)bottomNewTbl,(void*)copyThis,numBytesToTransfer);
+        startRow=-10;
+        bottomNewTbl+=numBytesToTransfer;
+      }
+    }
+  }
+  printf("%d rows passed the cuts.\n",rowCnt);
+  *percentPass=(100.0*rowCnt)/(*orig)+0.5;
+  tbl->rowCount(rowCnt);
+  return 7;
+}
+STAFCV_T topCut:: DoFilterTable(tdmTable *src,
+    tdmTable *tgt,char *func,long *orig,
+    long *percentPass) {
+  size_t numBytesToTransfer,bytesPerRow,nbytes; long startRow,row;
+  char *beginOfSrcTbl,*bottomNewTbl,*copyThis;
+  long numberPass=0,colCnt; void *mask;
+  DS_DATASET_T *dsPtr,*tgtPtr;
+  colCnt=src->columnCount();
+  *orig=src->rowCount();
+
+  dsPtr=src->dslPointer(); // ONLY in a collocated process (CORBA)
+  tgtPtr=tgt->dslPointer(); // ONLY in a collocated process (CORBA)
+  if(!dsTableRowSize(&bytesPerRow,tgtPtr)) EML_ERROR(CANT_FIND_ROW_SIZE);
+
+  nbytes=(size_t)(((*orig)/8)+1); mask=malloc(nbytes);
+  if(!mask) { printf("Could not allocate %d bytes.\n",nbytes); return 0; }
+
+  CutsInit();
+  if(!dsuDoCuts(nbytes,(char*)mask,(char*)func,dsPtr)) {
+    printf("Failure, check your cuts string for syntax errors:\n");
+    printf("%s\n",func);
+    return 0;
+  }
+  startRow=-10;
+  for(row=0;row<*orig;row++) { /* 1st pass, set rowcount new table*/
+    if(dsuRowPassedCuts((char*)mask,row)) (numberPass)++;
+  }
+  tgt->maxRowCount(numberPass);
+  tgt->rowCount((numberPass));
+  if(!dsTableDataAddress(&beginOfSrcTbl,dsPtr)) EML_ERROR(CANT_FIND_DATA);
+  if(!dsTableDataAddress(&bottomNewTbl,tgtPtr)) EML_ERROR(CANT_FIND_DATA);
+  for(row=0;row<(*orig)+1;row++) { /* The <x+1 is deliberate, to invoke the
+                                   ** else clause during ending of the loop. */
+    if(row<(*orig)&&dsuRowPassedCuts((char*)mask,row)) {
+      if(row%1557==0) printf("Phase II: %d %% complete.\n",(row*100)/(*orig));
+      if(startRow<0) startRow=row;
+    } else {
+      if(startRow>=0) {
+        numBytesToTransfer=(size_t)((row-startRow)*bytesPerRow);
+        copyThis=(char*)(beginOfSrcTbl+bytesPerRow*startRow);
+        memcpy((void*)bottomNewTbl,(void*)copyThis,numBytesToTransfer);
+        startRow=-10;
+        bottomNewTbl+=numBytesToTransfer;
+      }
+    }
+  }
+  printf("%d rows passed the cuts.\n",numberPass);
+  *percentPass=(100.0*numberPass)/(*orig)+0.5;
+  return 7;
+}
+STAFCV_T topCut:: filter(tdmTable * tab1, tdmTable * tab2) {
+   long orig,percent;
+   if( NULL == tab1 || NULL == tab2 ){
+      EML_ERROR(INVALID_OBJECT);
+   }
+   /* DS_DATASET_T *pTbl1=tab1->dslPointer(); */
+   /* DS_DATASET_T *pTbl2=tab2->dslPointer(); */
+   tab2->maxRowCount(0);		/* FREE tab2 DATA MEMORY */
+   if( !DoFilterTable(tab1,tab2,myCutFunction,&orig,&percent) ){
+      EML_ERROR(FILTER_FAILURE);
+   }
+   printf("The original table had %d rows.  %d percent of these passed.\n",
+   orig,percent);
+   EML_SUCCESS(STAFCV_OK);
+}
+
+//:---------------------------------
+STAFCV_T topCut:: cut(tdmTable * table1) {
+   long orig,percent;
+   if( NULL == table1 ){
+      EML_ERROR(INVALID_OBJECT);
+   }
+   // CET does not like this.  DS_DATASET_T *pTbl1=table1->dslPointer();
+   if( !DoCutTable(table1,myCutFunction,&orig,&percent) ){
+      EML_ERROR(CUT_FAILURE);
+   }
+   printf("The original table had %d rows.  %d percent of these passed.\n",
+   orig,percent);
+   EML_SUCCESS(STAFCV_OK);
+}
+
 
 //:----------------------------------------------- PROT FUNCTIONS     --
 // **NONE**
@@ -375,6 +553,56 @@ STAFCV_T topFactory:: newJoin (const char * name, const char * spec
    static topJoin* p;
    p = new topJoin(name,spec,clause);
    if( !soc->idObject(name,"topJoin",id) ){
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+   addEntry(id);
+   EML_SUCCESS(STAFCV_OK);
+}
+
+//:- Cut ---------------------------
+STAFCV_T topFactory:: deleteCut (const char * name) {
+   if( !soc->deleteObject(name, "topCut") ){
+      EML_ERROR(CANT_DELETE_OBJECT);
+   }
+   EML_SUCCESS(STAFCV_OK);
+}
+
+//:---------------------------------
+STAFCV_T topFactory:: findCut (const char * name
+		, topCut*& cut) {
+   socObject* obj=NULL;
+   if( !soc->findObject(name,"topCut",obj) ){
+      cut = NULL;   //- ???-leave as is?
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+   cut = TOPCUT(obj);
+   EML_SUCCESS(STAFCV_OK);
+}
+
+//:---------------------------------
+STAFCV_T topFactory:: getCut (IDREF_T id, topCut*& cut) {
+   socObject* obj;
+   if( !soc->getObject(id,obj) ){
+      cut = NULL;
+      EML_ERROR(INVALID_IDREF);
+   }
+   if( 0 != strcmp(obj->type(),"topCut") ){
+      cut = NULL;
+      EML_ERROR(WRONG_OBJECT_TYPE);
+   }
+   cut = TOPCUT(obj);
+   EML_SUCCESS(STAFCV_OK);
+}
+
+//:---------------------------------
+STAFCV_T topFactory:: newCut (const char * name, const char * spec) {
+   IDREF_T id;
+   if( soc->idObject(name,"topCut",id) ){
+      EML_ERROR(DUPLICATE_OBJECT_NAME);
+   }
+   static topCut* p;
+   p = new topCut(name,spec);
+   if( !soc->idObject(name,"topCut",id) ){
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    addEntry(id);

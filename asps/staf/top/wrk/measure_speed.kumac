@@ -43,9 +43,11 @@ message You have two agents:
 function vectorAgent 
 function scalarAgent
 *************************************************************************
-shell date
+**shell date
+ASU/TIME
 *  top/cut_agent/cut scalarAgent scalars
 top/cut_agent/filter scalarAgent scalars fff
-shell date
+ASU/TIME
+**shell date
 message viewdata
 **************************************************************************

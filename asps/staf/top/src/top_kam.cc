@@ -85,15 +85,20 @@ STAFCV_T top_newjoin(char* agent, char* select, char* where)
 }
  
 /*-------------------------------------------------------------------*/
-void kam_top_newfilter_()
+void kam_top_newcut_()
 {
    long npars = ku_npar(); /* no. of KUIP param.s */
-   char *agent = ku_gets(); /* name of mask agent */
-   char *cfunc = ku_gets(); /* cut function */
-        STAFCV_T status = top_newfilter();
+   char *agent = ku_gets(); /* name of cut agent */
+   char *func = ku_gets(); /* cut function */
+
+        STAFCV_T status = top_newcut(agent, func);
 }
-STAFCV_T top_newfilter() {
-EML_ERROR(NOT_YET_IMPLEMENTED);
+STAFCV_T top_newcut(char* agent, char* func)
+{
+   if( !top->newCut(agent, func) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(STAFCV_OK);
 }
  
 /*-------------------------------------------------------------------*/
@@ -339,3 +344,111 @@ STAFCV_T topjoin_reset(char* agent)
    EML_SUCCESS(STAFCV_OK);
 }
 
+/*-------------------------------------------------------------------*/
+void kam_topcut_function_()
+{
+  char *agent = ku_gets();
+  STAFCV_T status = topcut_function(agent);
+}
+STAFCV_T topcut_function(char* agent)
+{
+  topCut* cut=NULL;
+  if( !top->findCut(agent, cut) ){
+    printf("I can't find agent %s.\n",agent);
+    EML_ERROR(OBJECT_NOT_FOUND);
+  }
+  printf("%s\n",cut->cutFunction());
+}
+/*-------------------------------------------------------------------*/
+void kam_topcut_filter_()
+{
+   long npars = ku_npar(); /* no. of KUIP param.s */
+   char *agent = ku_gets(); /* name of cut agent */
+   char *table1 = ku_gets(); /* first input table */
+   char *table2 = ku_gets(); /* output table */
+   char *func = ku_gets(); /* cut function */
+
+        STAFCV_T status = topcut_filter(agent, table1, table2, func);
+}
+STAFCV_T topcut_filter(char* agent, char* table1, char* table2
+	, char* func)
+{
+//- Find or create Mandatory Objects
+   topCut* cut=NULL;
+   if( !top->findCut(agent, cut) ){
+      if(0 == strcmp(".",func))EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      if( !top->newCut(agent, func)
+      ||  !top->findCut(agent,cut)
+      ){
+	 EML_ERROR(KAM_OBJECT_NOT_CREATED);
+      }
+   }
+   tdmTable* tbl1=NULL;
+   if( !tdm->findTable(table1, tbl1) ){
+      printf("I can't find table '%s'.\n",table1);
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   char *spec1 = tbl1->typeSpecifier();
+   tdmTable* tbl2=NULL;
+   if( !tdm->newTable(table2,spec1,0) ) {
+      if( !tdm->findTable(table2, tbl2) ){
+         free(spec1);
+         printf("Could not create new table '%s' with spec '%s'.\n",
+         table2,spec1);
+         EML_ERROR(KAM_CREATE_FAILED);
+      } else {
+         if( !tdm->findTable(table2,tbl2) ) {
+	   free(spec1);
+	   EML_ERROR(KAM_OBJECT_NOT_FOUND);
+         }
+      }
+   }
+   else {
+      if( !tbl2->isType(spec1) ){
+	 EML_ERROR(KAM_BAD_TABLE_TYPE);
+      }
+      tbl2->maxRowCount(0);
+   }
+
+//- filter table
+   if( !cut->filter(tbl1,tbl2) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(STAFCV_OK);
+}
+ 
+/*-------------------------------------------------------------------*/
+void kam_topcut_cut_()
+{
+   long npars = ku_npar(); /* no. of KUIP param.s */
+   char *agent = ku_gets(); /* name of cut agent */
+   char *table1 = ku_gets(); /* first input table */
+   char *func = ku_gets(); /* cut function */
+
+        STAFCV_T status = topcut_cut(agent, table1, func);
+}
+STAFCV_T topcut_cut(char* agent, char* table1,
+	char* func)
+{
+//- Find or create Mandatory Objects
+   topCut* cut=NULL;
+   if( !top->findCut(agent, cut) ){
+      if(0 == strcmp(".",func))EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      if( !top->newCut(agent, func)
+      ||  !top->findCut(agent,cut)
+      ){
+	 EML_ERROR(KAM_OBJECT_NOT_CREATED);
+      }
+   }
+   tdmTable* tbl1=NULL;
+   if( !tdm->findTable(table1, tbl1) ){
+      printf("I can't find table '%s'.\n",table1);
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+
+//- cut table
+   if( !cut->cut(tbl1) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(STAFCV_OK);
+}
