@@ -26,8 +26,7 @@ StHbtCoulomb::StHbtCoulomb() {
   cout << "You have 1 default Coulomb correction!" << endl;
 }
 
-StHbtCoulomb::StHbtCoulomb(const char* readFile, const double& radius,
-			   const double& charge) {
+StHbtCoulomb::StHbtCoulomb(const char* readFile, const double& radius, const double& charge) {
   mFile = readFile;
   mRadius = radius;
   CreateLookupTable(mRadius);
@@ -63,12 +62,6 @@ void StHbtCoulomb::SetChargeProduct(const double& charge) {
   mZ1Z2 = charge;
 }
 
-void StHbtCoulomb::SetMass(const double& mass1, const double& mass2) {
-  cout << " StHbtCoulomb::SetMass() " << endl;
-  mMass1 = mass1;
-  mMass2 = mass2;
-}
-
 void StHbtCoulomb::CreateLookupTable(const double& radius) {
   cout << " StHbtCoulomb::CreateLookupTable() " << endl;
   // Read radii from mFile
@@ -90,9 +83,10 @@ void StHbtCoulomb::CreateLookupTable(const double& radius) {
     cout << "Input correction file opened" << endl;
   }
 
-  char tempstring[2001];
-  float radii[2000];
-  int NRadii = 0;
+  static char tempstring[2001];
+  static float radii[2000];
+  static int NRadii = 0;
+  NRadii = 0;
   if (!mystream.getline(tempstring,2000)) {
     cout << "Could not read radii from file" << endl;
     assert(0);
@@ -104,9 +98,12 @@ void StHbtCoulomb::CreateLookupTable(const double& radius) {
   }
   cout << " Read " << NRadii << " radii from file" << endl;
 
-  double LowRadius = -1.0;
-  double HighRadius = -1.0;
-  int LowIndex = 0;
+  static double LowRadius = -1.0;
+  static double HighRadius = -1.0;
+  static int LowIndex = 0;
+  LowRadius = -1.0;
+  HighRadius = -1.0;
+  LowIndex = 0;
   for(int iii=1; iii<=NRadii-1; iii++) { // Loop to one less than #radii
     if ( radius >= radii[iii] && radius <= radii[iii+1] ) {
       LowRadius = radii[iii];
@@ -122,16 +119,20 @@ void StHbtCoulomb::CreateLookupTable(const double& radius) {
     assert(0);
   }
 
-  double corr[100];           // array of corrections ... must be > NRadii
+  static double corr[100];           // array of corrections ... must be > NRadii
   mNLines = 0;
-  double tempEta = 0;
+  static double tempEta = 0;
+  tempEta = 0;
   while (mystream >> tempEta) {
     for (int i=1; i<=NRadii; i++) {
       mystream >> corr[i];
     }
-      double LowCoulomb = corr[LowIndex];
-      double HighCoulomb = corr[LowIndex+1];
-      double nCorr = ( (radius-LowRadius)*HighCoulomb+(HighRadius-radius)*LowCoulomb )/(HighRadius-LowRadius);
+    static double LowCoulomb = 0;
+    static double HighCoulomb = 0;
+    static double nCorr = 0;
+    LowCoulomb = corr[LowIndex];
+    HighCoulomb = corr[LowIndex+1];
+    nCorr = ( (radius-LowRadius)*HighCoulomb+(HighRadius-radius)*LowCoulomb )/(HighRadius-LowRadius);
       mEta[mNLines] = tempEta;     // Eta
       mCoulomb[mNLines] = nCorr;   // Interpolated Coulomb correction for radius
       mNLines++;
@@ -140,21 +141,23 @@ void StHbtCoulomb::CreateLookupTable(const double& radius) {
   cout << "Lookup Table is created with " << mNLines << " points" << endl;
 }
 
-double StHbtCoulomb::Correction(const double& eta) {
+double StHbtCoulomb::CoulombCorrect(const double& eta) {
   // Interpolates in eta
   if (mRadius < 0.0) {
-    cout << "StHbtCoulomb::Correction(eta) --> Trying to correct for negative radius!" << endl;
-    cerr << "StHbtCoulomb::Correction(eta) --> Trying to correct for negative radius!" << endl;
+    cout << "StHbtCoulomb::CoulombCorrect(eta) --> Trying to correct for negative radius!" << endl;
+    cerr << "StHbtCoulomb::CoulombCorrect(eta) --> Trying to correct for negative radius!" << endl;
     assert(0);
   }
-  int middle=int( (mNLines-1)/2 );
+  static int middle=0;
+  middle=int( (mNLines-1)/2 );
   if (eta*mEta[middle]<0.0) {
-    cout << "StHbtCoulomb::Correction(eta) --> eta: " << eta << " has wrong sign for data file! " << endl;
-    cerr << "StHbtCoulomb::Correction(eta) --> eta: " << eta << " has wrong sign for data file! " << endl;
+    cout << "StHbtCoulomb::CoulombCorrect(eta) --> eta: " << eta << " has wrong sign for data file! " << endl;
+    cerr << "StHbtCoulomb::CoulombCorrect(eta) --> eta: " << eta << " has wrong sign for data file! " << endl;
     assert(0);
   }
 
-  double Corr = -1.0;
+  static double Corr = 0;
+  Corr = -1.0;
   
   if ( (eta>mEta[0]) && (mEta[0]>0.0) ) {
     Corr = mCoulomb[0];
@@ -165,9 +168,12 @@ double StHbtCoulomb::Correction(const double& eta) {
     return (Corr);
   }
   // This is a binary search for the bracketing pair of data points
-  int high = mNLines-1;
-  int low = 0;
-  int width = high-low;
+  static int high = 0;
+  static int low = 0;
+  static int width = 0;
+  high = mNLines-1;
+  low = 0;
+  width = high-low;
   middle = int(width/2.0); // Was instantiated above
   while (middle > 0) {
     if (mEta[low+middle] < eta) {
@@ -185,18 +191,22 @@ double StHbtCoulomb::Correction(const double& eta) {
   }
   // Make sure we found the right one
   if ( (mEta[low] >= eta) && (eta >= mEta[low+1]) ) {
-    double LowEta = mEta[low];
-    double HighEta = mEta[low+1];    
-    double LowCoulomb = mCoulomb[low];
-    double HighCoulomb = mCoulomb[low+1];
+    static double LowEta = 0;
+    static double HighEta = 0;    
+    static double LowCoulomb = 0;
+    static double HighCoulomb = 0;
+    LowEta = mEta[low];
+    HighEta = mEta[low+1];    
+    LowCoulomb = mCoulomb[low];
+    HighCoulomb = mCoulomb[low+1];
     //      cout << LowEta << " *** Eta *** " << HighEta << endl;
     //      cout << LowCoulomb << " *** Coulomb *** " << HighCoulomb << endl;
     Corr = ( (eta-LowEta)*HighCoulomb+(HighEta-eta)*LowCoulomb )/(HighEta-LowEta);
   }
   if (Corr<0.0) {
-    cout << "StHbtCoulomb::Correction(eta) --> No correction" << endl;
+    cout << "StHbtCoulomb::CoulombCorrect(eta) --> No correction" << endl;
     cout << "  Check range of eta in file: Input eta  " << eta << endl;
-    cerr << "StHbtCoulomb::Correction(eta) --> No correction" << endl;
+    cerr << "StHbtCoulomb::CoulombCorrect(eta) --> No correction" << endl;
     cerr << "  Check range of eta in file: Input eta  " << eta << endl;
     assert(0);
   } 
@@ -204,7 +214,7 @@ double StHbtCoulomb::Correction(const double& eta) {
 
 }
 
-double StHbtCoulomb::Correction(const double& eta,
+double StHbtCoulomb::CoulombCorrect(const double& eta,
 				const double& radius) {
   // Checks radii ... input radius and mRadius
   // Calls createLookupTable if neccessary
@@ -213,8 +223,8 @@ double StHbtCoulomb::Correction(const double& eta,
   if (radius < 0.0) {
     if (mRadius < 0.0) {
       // Both radii are negative
-      cout << "StHbtCoulomb::Correction(eta,r) --> input and member radii are negative!" << endl;
-      cerr << "StHbtCoulomb::Correction(eta,r) --> input and member radii are negative!" << endl;
+      cout << "StHbtCoulomb::CoulombCorrect(eta,r) --> input and member radii are negative!" << endl;
+      cerr << "StHbtCoulomb::CoulombCorrect(eta,r) --> input and member radii are negative!" << endl;
       assert(0);
     }
   }
@@ -232,62 +242,92 @@ double StHbtCoulomb::Correction(const double& eta,
   }
 
   // Interpolate in eta
-  double correction = Correction(eta);
-  return (correction);
-}
-
-double StHbtCoulomb::CoulombCorrect(const double& Qinv) {
-  double eta2 = Eta(Qinv);
-  double correction = Correction(eta2);
-  return (correction);
-}
-
-double StHbtCoulomb::CoulombCorrect(const double& Qinv, const double& radius) {
-  double eta2 = Eta(Qinv);
-  double correction = Correction(eta2,radius);
-  return (correction);
-}
-
-double StHbtCoulomb::CoulombCorrect(const double& charge, const double& mass1,
-				    const double& mass2, const double& Qinv) {
-  mZ1Z2 = charge;
-  mMass1 = mass1;
-  mMass2 = mass2;
-  double eta2 = Eta(Qinv);
-  double correction = Correction(eta2);
-  return (correction);
-}
-
-double StHbtCoulomb::CoulombCorrect(const double& charge, const double& mass1,
-				    const double& mass2, const double& Qinv,
-				    const double& radius) {
-  mZ1Z2 = charge;
-  mMass1 = mass1;
-  mMass2 = mass2;
-  double eta2 = Eta(Qinv);
-  double correction = Correction(eta2,radius);
-  return (correction);
+  return ( CoulombCorrect(eta) );
 }
 
 double StHbtCoulomb::CoulombCorrect(const StHbtPair* pair) {
-  mMass1 = pair->track1()->FourMomentum().m();
-  mMass2 = pair->track2()->FourMomentum().m();
-  double Qinv = fabs(pair->qInv());
-  double eta2 = Eta(Qinv);
-  double correction = Correction(eta2);
-  return (correction);
+  return ( CoulombCorrect( Eta(pair) ) );;
 }
 
 double StHbtCoulomb::CoulombCorrect(const StHbtPair* pair, const double& radius) {
-  mMass1 = pair->track1()->FourMomentum().m();
-  mMass2 = pair->track2()->FourMomentum().m();
-  double Qinv = fabs(pair->qInv());
-  double eta2 = Eta(Qinv);
-  double correction = Correction(eta2,radius);
-  return (correction);
+  return ( CoulombCorrect( Eta(pair),radius ) );
 }
-double StHbtCoulomb::Eta(const double& Qinv) {
-  double reducedMass = mMass1*mMass2/(mMass1+mMass2);
-  double temp = mZ1Z2*reducedMass*fine_structure_const/(Qinv/2.0);
-  return (temp);
+
+double StHbtCoulomb::Eta(const StHbtPair* pair) {
+  static double px1,py1,pz1,px2,py2,pz2;
+  static double px1new,py1new,pz1new;
+  static double px2new,py2new,pz2new;
+  static double vx1cms,vy1cms,vz1cms;
+  static double vx2cms,vy2cms,vz2cms;
+  static double VcmsX,VcmsY,VcmsZ;
+  static double dv = 0.0;
+  static double e1,e2,e1new,e2new;
+  static double psi,theta;
+  static double beta,gamma;
+  static double VcmsXnew, VcmsYnew, VcmsZnew;
+
+  px1 = pair->track1()->FourMomentum().px();
+  py1 = pair->track1()->FourMomentum().py();
+  pz1 = pair->track1()->FourMomentum().pz();
+  e1 = pair->track1()->FourMomentum().e();
+  px2 = pair->track2()->FourMomentum().px();
+  py2 = pair->track2()->FourMomentum().py();
+  pz2 = pair->track2()->FourMomentum().pz();
+  e2 = pair->track2()->FourMomentum().e();
+  
+  VcmsX = ( px1+px2 )/( e1+e2 );
+  VcmsY = ( py1+py2 )/( e1+e2 );
+  VcmsZ = ( pz1+pz2 )/( e1+e2 );
+  // Rotate Vcms to x-direction
+  psi = atan(VcmsY/VcmsX);
+  VcmsXnew = VcmsX*cos(psi)+VcmsY*sin(psi);
+  VcmsX = VcmsXnew;
+  theta = atan(VcmsZ/VcmsX);
+  VcmsXnew = VcmsX*cos(theta)+VcmsZ*sin(theta);
+  VcmsX = VcmsXnew;
+  // Gamma and Beta
+  beta = VcmsX;
+  gamma = 1.0/sqrt( 1.0-beta*beta );
+
+  // Rotate p1 and p2 to new frame
+  px1new = px1*cos(psi)+py1*sin(psi);
+  py1new = -px1*sin(psi)+py1*cos(psi);
+  px1 = px1new;
+  px1new = px1*cos(theta)+pz1*sin(theta);
+  pz1new = -px1*sin(theta)+pz1*cos(theta);
+  px1 = px1new;
+  py1 = py1new;
+  pz1 = pz1new;
+
+  px2new = px2*cos(psi)+py2*sin(psi);
+  py2new = -px2*sin(psi)+py2*cos(psi);
+  px2 = px2new;
+  px2new = px2*cos(theta)+pz2*sin(theta);
+  pz2new = -px2*sin(theta)+pz2*cos(theta);
+  px2 = px2new;
+  py2 = py2new;
+  pz2 = pz2new;
+
+  // Lorentz transform the x component and energy
+  e1new = gamma*e1 - gamma*beta*px1;
+  px1new = -gamma*beta*e1 + gamma*px1;
+  e2new = gamma*e2 - gamma*beta*px2;
+  px2new = -gamma*beta*e2 + gamma*px2;
+  px1 = px1new;
+  px2 = px2new;
+
+  // New velocities
+  vx1cms = px1/e1new;
+  vy1cms = py1/e1new;
+  vz1cms = pz1/e1new;
+  vx2cms = px2/e2new;
+  vy2cms = py2/e2new;
+  vz2cms = pz2/e2new;
+
+  // Velocity difference in CMS frame
+  dv = sqrt( (vx1cms-vx2cms)*(vx1cms-vx2cms) +
+	     (vy1cms-vy2cms)*(vy1cms-vy2cms) +
+	     (vz1cms-vz2cms)*(vz1cms-vz2cms) );
+
+  return ( mZ1Z2*fine_structure_const/(dv) );
 }
