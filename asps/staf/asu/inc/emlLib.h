@@ -58,14 +58,20 @@ typedef long EMLCV_T;
 #define EML_CONTEXTSIZE 1024
 
 /*-------------------------------------------- GLOBALS              --*/
+#ifndef  EXTERN
 #ifdef EML_MAIN
 #   define EXTERN
-#   define CEXTERN(id) extern CC_P id; id
 #else
 #   define EXTERN extern
+#endif
+#endif
+#ifndef  CEXTERN
+#ifdef EML_MAIN
+#   define CEXTERN(id) extern CC_P id; id
+#else
 #   define CEXTERN(id) extern CC_P id
 #endif
-
+#endif
 /* pretty err messages */
 CEXTERN(char eml_beep_on);
 CEXTERN(char eml_pretty_on);
