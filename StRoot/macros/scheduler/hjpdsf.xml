@@ -14,7 +14,7 @@
 
     # --------------------------
 
-    # check which site we aruunin on
+    # check which site we are working on
     set BNL=0
     set remoteNode=stargrid02.rcf.bnl.gov 
 
@@ -105,6 +105,8 @@ HIJPARAMETERS
     ${packageDirectoryBin}/hijjet.x
    if (! -f ${HIJINGOUTPUT}) then
       echo "hijjet.x ERROR. The output file was not created. Abort !!! "
+      echo "hijjet.x ERROR. The output file was not created. Abort !!! " >>${localLogFile}
+      echo "</PRE></BODY><HTML>"  >>${localLogFile}
       exit $status
    endif
 
@@ -189,7 +191,7 @@ STAFKUMAC
  # ----
  #   close local Web page
  # ----
-    echo "</PRE></BODY><HTML>"  >${localLogFile}
+    echo "</PRE></BODY><HTML>"  >>${localLogFile}
    ]]>
    </command>  
     <stdout URL="file:./$JOBID.out" />
