@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeCuts.hh,v 3.2 2002/04/30 16:02:47 genevb Exp $
+ * $Id: StStrangeCuts.hh,v 3.3 2003/02/10 15:59:20 genevb Exp $
  *
  * Author: Gene Van Buren, UCLA, 26-May-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeCuts.hh,v $
+ * Revision 3.3  2003/02/10 15:59:20  genevb
+ * Fix bug with adding new cuts
+ *
  * Revision 3.2  2002/04/30 16:02:47  genevb
  * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
  *
@@ -53,10 +56,14 @@ public:
   void UpdateArray(TClonesArray*);
   void ForceUpdateArray();
   void UnknownCuts();
+  void Init();
+  Bool_t Contains(const TObject*);
  protected:
   void AddIfNew(TCut*, Bool_t reverse=kFALSE);
   Bool_t NewCut(const TObject*);
   Bool_t update;
+  StStrangeCuts* additionals;
+  StStrangeCuts* lastResetCuts;
   ClassDef(StStrangeCuts,0)
 };
 
@@ -80,5 +87,7 @@ inline void StStrangeCuts::Reset(const TSeqCollection& oldCuts)
 	    { Reset(&oldCuts); }
 inline void StStrangeCuts::ForceUpdateArray()
 	    { update = kTRUE; }
+inline Bool_t StStrangeCuts::NewCut(const TObject* obj)
+            { return (!(Contains(obj))); }
 
 #endif
