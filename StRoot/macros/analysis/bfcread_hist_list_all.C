@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list_all.C,v 1.7 1999/11/30 19:23:05 kathy Exp $ 
+// $Id: bfcread_hist_list_all.C,v 1.8 1999/12/01 21:30:11 kathy Exp $ 
 // $Log: bfcread_hist_list_all.C,v $
+// Revision 1.8  1999/12/01 21:30:11  kathy
+// added input TopDirTree to bfcread_hist* macros in order to tell which top level directory hist file has since sometimes its not bfcTree; cleaned up print statements in bfcread_dst*hist.C macros; two new macros bfcread_dst_*QA_outhistfile.C added which read dst file and book and fill histograms and write out a new *.hist.root file, instead of just sending hist to postscript - this new *.hist.root file can then be read into bfcread_hist*.C to look at it --- note that topdirtree is different!
+//
 // Revision 1.7  1999/11/30 19:23:05  kathy
 // changed bfcread_dst*.C so that MakerHist is hardwired in instead of being input; wrote better documentation in bfcread_hist*.C so that it explains where top level directory is set
 //
@@ -27,11 +30,12 @@
 //               (such as bfc) and
 //               then lists all histogram branches and the names and
 //               titles of the histograms in the branches
+//
 // inputs: MainFile - *.hist.root file from bfc output
-// 
-// NOTE: assumes that top level directory is bfcTree! If you wrote the
-//   *.hist.root file with something else, then you must change this
-//   in StIOMaker constructor in this macro!!
+//         TopDirTree - top level directory tree in your input hist file
+//                (this is 3rd argument of constructor for StTreeMaker that
+//                 you probably used to write the *.hist.root file)
+//           NOTE: if you ran bfc, then the TopDirTree = bfcTree !!// 
 //
 //=======================================================================
 
@@ -41,10 +45,15 @@ class St_DataSet;
 StChain *chain;
 St_DataSet *Event;
 
-void bfcread_hist_list_all(const char
-*MainFile="/star/rcf/test/dev/tfs_Linux/Wed/year_1b/set0352_01_35evts.hist.root")
-
+void bfcread_hist_list_all(
+  const Char_t *MainFile=
+     "/star/rcf/test/dev/tfs_Linux/Tue/year_1b/set0352_01_35evts.hist.root",
+  const Char_t *TopDirTree="bfcTree")
 {
+  cout << "bfcread_hist_list_all.C, input hist file = " 
+       << MainFile << endl;
+  cout << "bfcread_hist_list_all.C, top level directory in hist file = " 
+       << TopDirTree << endl;
 //
     gSystem->Load("St_base");
     gSystem->Load("StChain");
@@ -54,7 +63,7 @@ void bfcread_hist_list_all(const char
    
 
 // setup chain with IOMaker - can read in .dst.root, .dst.xdf files
-  StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
+  StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,TopDirTree);
   IOMk->SetDebug();
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");                 //deactivate all branches

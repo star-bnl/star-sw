@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.14 1999/11/30 19:23:05 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.15 1999/12/01 21:30:11 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.15  1999/12/01 21:30:11  kathy
+// added input TopDirTree to bfcread_hist* macros in order to tell which top level directory hist file has since sometimes its not bfcTree; cleaned up print statements in bfcread_dst*hist.C macros; two new macros bfcread_dst_*QA_outhistfile.C added which read dst file and book and fill histograms and write out a new *.hist.root file, instead of just sending hist to postscript - this new *.hist.root file can then be read into bfcread_hist*.C to look at it --- note that topdirtree is different!
+//
 // Revision 1.14  1999/11/30 19:23:05  kathy
 // changed bfcread_dst*.C so that MakerHist is hardwired in instead of being input; wrote better documentation in bfcread_hist*.C so that it explains where top level directory is set
 //
@@ -84,15 +87,23 @@ class StChain;
 
 StChain *chain;
 
-void bfcread_dst_QAhist(Int_t nevents=10, 
-             const char *MainFile="/star/rcf/test/dev/tfs_Solaris/Fri/year_1b/set0352_01_35evts.dst.root",
-             const Char_t *psFile="DSTtable_QA_hist.ps",
-             const Char_t *PageTitle="")
+void bfcread_dst_QAhist(
+    Int_t nevents=10, 
+    const Char_t *MainFile=
+      "/star/rcf/test/dev/tfs_Solaris/Fri/year_1b/set0352_01_35evts.dst.root",
+    const Char_t *psFile="DSTtable_QA_hist.ps",
+    const Char_t *PageTitle="")
 {
 //
-  cout << "bfcread_dst_QAhist.C, num events to process " << nevents  << endl;
-  cout << "bfcread_dst_QAhist.C, input file name       " << MainFile << endl;
-  cout << "bfcread_dst_QAhist.C, output psfile name    " << psFile   << endl;
+  cout << "bfcread_dst_QAhist.C, num events to process " 
+       << nevents  << endl;
+  cout << "bfcread_dst_QAhist.C, input file name       " 
+       << MainFile << endl;
+  cout << "bfcread_dst_QAhist.C, output psfile name    " 
+       << psFile   << endl;
+  cout << "bfcread_dst_QAhist.C, page title for histograms = " 
+       << PageTitle << endl;
+
 
   gSystem->Load("St_base");
   gSystem->Load("StChain");
@@ -104,9 +115,9 @@ void bfcread_dst_QAhist(Int_t nevents=10,
 
 // force the directory name for histograms since this macro is 
 // specifically for running St_QA_Maker
-  const Char_t *MakerHist="QA";
+  const Char_t *MakerHistDir="QA";
   cout << "bfcread_dst_QAhist.C, directory of Maker name      " << 
-     MakerHist<< endl;
+     MakerHistDir<< endl;
 
 //  Setup top part of chain
   chain = new StChain("bfc");
@@ -131,7 +142,7 @@ void bfcread_dst_QAhist(Int_t nevents=10,
  
 // method to print out list of histograms - can do this anytime after they're booked
   Int_t NoHist=0;
-  NoHist = HU->ListHists(MakerHist);
+  NoHist = HU->ListHists(MakerHistDir);
   cout << " bfcread_dst_QAhist.C, No. of Hist we have == " << NoHist << endl;
 
 // loop over events:
@@ -158,7 +169,7 @@ void bfcread_dst_QAhist(Int_t nevents=10,
     HU->SetPostScriptFile(psFile);
     HU->SetZones(2,3);
     HU->SetPaperSize();
-    HU->SetDefaultLogYList(MakerHist);
+    HU->SetDefaultLogYList(MakerHistDir);
       if (PageTitle=="") PageTitle=MainFile;
     HU->SetGlobalTitle(PageTitle);
 
@@ -170,7 +181,7 @@ void bfcread_dst_QAhist(Int_t nevents=10,
   cout <<  "bfcread_dst_QAhist.C, passed chain->Finish" << endl ; 
 
 //  Now draw the actual histograms to canvas and to ps file
-    HU->DrawHists(MakerHist);
+    HU->DrawHists(MakerHistDir);
    
 }
  

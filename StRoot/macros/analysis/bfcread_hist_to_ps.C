@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.11 1999/11/30 19:23:06 kathy Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.12 1999/12/01 21:30:11 kathy Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.12  1999/12/01 21:30:11  kathy
+// added input TopDirTree to bfcread_hist* macros in order to tell which top level directory hist file has since sometimes its not bfcTree; cleaned up print statements in bfcread_dst*hist.C macros; two new macros bfcread_dst_*QA_outhistfile.C added which read dst file and book and fill histograms and write out a new *.hist.root file, instead of just sending hist to postscript - this new *.hist.root file can then be read into bfcread_hist*.C to look at it --- note that topdirtree is different!
+//
 // Revision 1.11  1999/11/30 19:23:06  kathy
 // changed bfcread_dst*.C so that MakerHist is hardwired in instead of being input; wrote better documentation in bfcread_hist*.C so that it explains where top level directory is set
 //
@@ -46,14 +49,17 @@
 //                histograms from given input Maker
 //
 // inputs: MainFile - *.hist.root file from bfc output
-//         MakerHist - name of Maker that you want histograms from
+//         MakerHistDir - directory name of Maker that you want histograms 
+//                   from (this will be first input when you did constructor)
+//             -- see standard Maker names note below!
+//         TopDirTree - top level directory tree in your input hist file
+//                (this is 3rd argument of constructor for StTreeMaker that
+//                 you probably used to write the *.hist.root file)
+//           NOTE: if you ran bfc, then the TopDirTree = bfcTree !!
 //         psFile - output postscript file name
 //         PageTitle - title at top of each page - if it's "", then it's
 //                set to MainFile by default
 // 
-// NOTE: assumes that top level directory is bfcTree! If you wrote the
-//   *.hist.root file with something else, then you must change this
-//   in StIOMaker constructor in this macro!!
 //
 // standard Maker names in bfc ==>
 //   (but if you run your own Maker here, then use whatever name you give it)
@@ -72,11 +78,24 @@ StIOMaker *IOMk=0;
 //------------------------------------------------------------------------
 
 void bfcread_hist_to_ps(
-  const Char_t *MainFile="/disk00000/star/test/new/tfs_Solaris/year_1b/set0352_01_35evts.hist.root",
-  const Char_t *MakerHist="QA",
+  const Char_t *MainFile=
+     "/star/rcf/test/dev/tfs_Linux/Tue/year_1b/set0352_01_35evts.hist.root",
+  const Char_t *MakerHistDir="QA",
+  const Char_t *TopDirTree="bfcTree",
   const Char_t *psFile="QA_hist.ps",
   const Char_t *PageTitle="")
 {             
+
+  cout << "bfcread_hist_to_ps.C, input hist file = " 
+       << MainFile << endl;
+  cout << "bfcread_hist_to_ps.C, directory name for hist = " 
+       << MakerHistDir << endl;
+  cout << "bfcread_hist_to_ps.C, top level directory in hist file = " 
+       << TopDirTree << endl;
+  cout << "bfcread_hist_to_ps.C, output ps file  = " 
+       << psFile << endl;
+  cout << "bfcread_hist_to_ps.C, page title for histograms = " 
+       << PageTitle << endl;
 
 //
     gSystem->Load("St_base");
@@ -86,10 +105,8 @@ void bfcread_hist_to_ps(
     gSystem->Load("StarClassLibrary");
     gSystem->Load("St_QA_Maker");
 
-
-
 // setup chain with IOMaker - can read in .dst.root, .dst.xdf files
-  StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
+  StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,TopDirTree);
   IOMk->SetDebug();
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
@@ -118,7 +135,7 @@ void bfcread_hist_to_ps(
 // - can do this anytime after they're booked
 // - default is to print out QA hist branch
    Int_t NoHist=0;
-   NoHist = HU->ListHists(MakerHist);
+   NoHist = HU->ListHists(MakerHistDir);
    cout << " in bfcread_hist_list: Num of Hist = " << NoHist << endl;
       
 // Set the default canvas style to plain (so it won't print out grey!)
@@ -129,7 +146,7 @@ void bfcread_hist_to_ps(
     HU->SetPostScriptFile(psFile);
     HU->SetZones(2,3);
     HU->SetPaperSize();
-    HU->SetDefaultLogYList(MakerHist);
+    HU->SetDefaultLogYList(MakerHistDir);
       if (PageTitle=="") PageTitle=MainFile;
     HU->SetGlobalTitle(PageTitle);
 
@@ -138,7 +155,7 @@ void bfcread_hist_to_ps(
    cout <<" bfcread_hist_to_ps.C, Number hist to plot with log scale = " << numLog << endl;
 
 //  Now draw the actual histograms to canvas and to ps file
-    HU->DrawHists(MakerHist);
+    HU->DrawHists(MakerHistDir);
    
    cout <<" bfcread_hist_to_ps.C, end of macro" << endl;
 

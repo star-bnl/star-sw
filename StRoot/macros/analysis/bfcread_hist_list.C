@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list.C,v 1.10 1999/11/30 19:23:05 kathy Exp $ 
+// $Id: bfcread_hist_list.C,v 1.11 1999/12/01 21:30:11 kathy Exp $ 
 // $Log: bfcread_hist_list.C,v $
+// Revision 1.11  1999/12/01 21:30:11  kathy
+// added input TopDirTree to bfcread_hist* macros in order to tell which top level directory hist file has since sometimes its not bfcTree; cleaned up print statements in bfcread_dst*hist.C macros; two new macros bfcread_dst_*QA_outhistfile.C added which read dst file and book and fill histograms and write out a new *.hist.root file, instead of just sending hist to postscript - this new *.hist.root file can then be read into bfcread_hist*.C to look at it --- note that topdirtree is different!
+//
 // Revision 1.10  1999/11/30 19:23:05  kathy
 // changed bfcread_dst*.C so that MakerHist is hardwired in instead of being input; wrote better documentation in bfcread_hist*.C so that it explains where top level directory is set
 //
@@ -39,11 +42,13 @@
 //               then prints list of histograms from given input Maker
 //
 // inputs: MainFile - *.hist.root file from bfc output
-//         MakerHist - name of Maker that you want histograms from
-// 
-// NOTE: assumes that top level directory is bfcTree! If you wrote the
-//   *.hist.root file with something else, then you must change this
-//   in StIOMaker constructor in this macro!!
+//         MakerHistDir - directory name of Maker that you want histograms 
+//                   from (this will be first input when you did constructor)
+//             -- see standard Maker names note below!
+//         TopDirTree - top level directory tree in your input hist file
+//                (this is 3rd argument of constructor for StTreeMaker that
+//                 you probably used to write the *.hist.root file)
+//            NOTE: if you ran bfc, then the TopDirTree = bfcTree !!
 //
 // standard Maker names in bfc ==>
 //   (but if you run your own Maker here, then use whatever name you give it)
@@ -63,9 +68,18 @@ StIOMaker *IOMk=0;
 //------------------------------------------------------------------------
 
 void bfcread_hist_list(
-  const Char_t *MainFile="/star/rcf/test/dev/tfs_Linux/Wed/year_1b/set0352_01_35evts.hist.root",
-  const Char_t *MakerHist="tpc_hits")
+  const Char_t *MainFile=
+    "/star/rcf/test/dev/tfs_Linux/Tue/year_1b/set0352_01_35evts.hist.root",
+  const Char_t *MakerHistDir="QA",
+  const Char_t *TopDirTree="bfcTree")
 {
+
+  cout << "bfcread_hist_list.C, input hist file = " 
+       << MainFile << endl;
+  cout << "bfcread_hist_list.C, directory name for hist = " 
+       << MakerHistDir << endl;
+  cout << "bfcread_hist_list.C, top level directory in hist file = " 
+       << TopDirTree << endl;
 
 //
     gSystem->Load("St_base");
@@ -76,7 +90,7 @@ void bfcread_hist_list(
     gSystem->Load("St_QA_Maker");
 
 // setup chain with IOMaker - can read in .dst.root, .dst.xdf files
-  StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
+  StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,TopDirTree);
   IOMk->SetDebug();
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
@@ -105,7 +119,7 @@ void bfcread_hist_list(
 // - can do this anytime after they're booked
 // - default is to print out QA hist branch
    Int_t NoHist=0;
-   NoHist = HU->ListHists(MakerHist);
+   NoHist = HU->ListHists(MakerHistDir);
    cout << " in bfcread_hist_list: Num of Hist = " << NoHist << endl;
       
 }
