@@ -1,5 +1,8 @@
-// $Id: rootlogoff.C,v 1.9 2004/01/23 21:55:07 perev Exp $
+// $Id: rootlogoff.C,v 1.10 2004/02/11 23:23:36 perev Exp $
 // $Log: rootlogoff.C,v $
+// Revision 1.10  2004/02/11 23:23:36  perev
+// avoid ROOT warning
+//
 // Revision 1.9  2004/01/23 21:55:07  perev
 // delete chain only in .DEV
 //
@@ -31,12 +34,10 @@
 {
 class StMaker;
 namespace rootlogoff {
-TClass *tclassMk=0;
 ::StMaker *mk=0;
 }
 
-rootlogoff::tclassMk = gROOT->GetClass("StMaker",0);
-if (rootlogoff::tclassMk && rootlogoff::tclassMk->GetClassInfo()) 
+if (TClassTable::GetDict("StMaker")) 
 {
   rootlogoff::mk = StMaker::GetChain();
   if (rootlogoff::mk) {
