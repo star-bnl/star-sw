@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.27 2001/02/09 23:07:16 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.28 2001/09/13 16:54:54 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.28  2001/09/13 16:54:54  porter
+ * propogate falvor by table through the brokery
+ *
  * Revision 1.27  2001/02/09 23:07:16  porter
  * replaced several ostrstream into buffer for root+solarisCC5 iostream
  * with ostrstream creating the buffer
@@ -366,6 +369,17 @@ void StDbBroker::SetFlavor(const char* flavor){
   if(m_Tree)m_Tree->setFlavor(m_flavor);
 
 }
+
+//____________________________________________________________________________
+void StDbBroker::SetTableFlavor(const char* flavor, int tabID, int parID)
+{
+  StDbNode* anode = m_Nodes->getNode(tabID);
+  StDbTable* node=dynamic_cast<StDbTable*>(anode);
+
+  if(!node) return;
+  node->setFlavor(flavor);
+}
+
 
 //____________________________________________________________________________
 void * StDbBroker::Use(int tabID, int parID)

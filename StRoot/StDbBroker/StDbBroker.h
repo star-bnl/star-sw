@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.19 2001/01/22 18:40:25 porter Exp $
+ * $Id: StDbBroker.h,v 1.20 2001/09/13 16:54:54 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.20  2001/09/13 16:54:54  porter
+ * propogate falvor by table through the brokery
+ *
  * Revision 1.19  2001/01/22 18:40:25  porter
  * Added a wrapper for StMessage so one can use it in StDbLib
  *
@@ -155,6 +158,7 @@ struct oldDescriptor {
     //    int Init(const char *dbname);// return 0 if OK
 
     void * Use();
+    void   SetTableFlavor(const char* flavor, int tabID, int parID);
     void * Use(int tabID, int parID);
 
     char  **GetComments(St_Table *parentTable);
