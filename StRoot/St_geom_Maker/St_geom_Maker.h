@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   29/06/99  (E-mail: fine@bnl.gov)
-// $Id: St_geom_Maker.h,v 1.1 1999/06/29 20:50:34 fine Exp $
+// $Id: St_geom_Maker.h,v 1.2 1999/06/30 16:27:43 fine Exp $
 // $Log: St_geom_Maker.h,v $
+// Revision 1.2  1999/06/30 16:27:43  fine
+// Comments make up
+//
 // Revision 1.1  1999/06/29 20:50:34  fine
-// Maker to provide a St_node geom structure for others
+//  Maker to provide a St_node geom structure for others
 //
 
 #ifndef STAR_St_geom_Maker
@@ -10,17 +13,52 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// St_geom_Maker virtual base class for Maker                            //
+// St_geom_Maker class for Makers                                       //
 //                                                                      //
-//  Submit any problem with this code via begin_html <A HREF="http://www.rhic.bnl.gov/STAR/html/comp_l/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html
+// This maker is to initialize the STAR GEANT geometry description.     //
+// "Geometry description" is an instance of the St_Node class derived   //
+// from St_DataSet class.                                               //
+//                                                                      //
+// This means one can apply St_DataSetIter and TBrowser to navigate it  //
+// One can get a pointer to the top level St_Node object named "HALL"   //
+//                               via                                    //
+// St_Node *hallNode = (St_Node *)StMaker::GetDataSet("HALL") method    //
+//                                                                      //
+// It is assumed the St_geom_Maker object was instantiated and          //
+// initialized by  the the top level StChain object                     //
+// (see $STAR/StRoot/macros/graphics/PadBrowser.C macro as a pattern    //
+//                                                                      //
+// To get the ROOT Browser and graphics view of the full structure      //
+// one try:                                                             //
+// ____________________________________________________________________ //
+//                                                                      //
+//  root [0] gSystem->Load("St_base");
+//  root [1] gSystem->Load("StChain");
+//  root [2] gSystem->Load("St_geom_Maker");
+//  root [3] St_geom_Maker geomMaker;
+//  root [4] geomMaker.Init();
+//  
+//  root [5] TBrowser b("HALL",geomMaker.GetDataSet("HALL"));
+// begin_html  <P ALIGN=CENTER> <IMG SRC="gif/geomMakerBrowse.gif" ></P> end_html
+//  root [6] ((St_Node *)geomMaker.GetDataSet("HALL"))->Draw();
+// begin_html  <P ALIGN=CENTER> <IMG SRC="gif/geomMakerPad.gif" ></P> end_html
+//  root [7] // One can add two extra lines to get "Control Panel"
+//  root [8] .x PadControlPanel.C
+// begin_html  <P ALIGN=CENTER> <IMG SRC="gif/PadControlPanel.gif" ></P> end_html
+//  root [9] // Plot 3D axice as follows:
+//  root [10] St_PolyLine3D::Axis();
+// ____________________________________________________________________ //
 //
+//  Submit any problem with this code via begin_html <A HREF="http://www.rhic.bnl.gov/STAR/html/comp_l/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html
+//                                                                      //
 //////////////////////////////////////////////////////////////////////////
+
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
 class St_geom_Maker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: St_geom_Maker.h,v 1.1 1999/06/29 20:50:34 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_geom_Maker.h,v 1.2 1999/06/30 16:27:43 fine Exp $";
  
  protected:
  public: 
