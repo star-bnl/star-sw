@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.29 2000/12/14 19:20:48 horsley Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.30 2000/12/14 21:09:06 horsley Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.30  2000/12/14 21:09:06  horsley
+ * fixed  error in filling ntuple with StTrack's momentum
+ *
  * Revision 2.29  2000/12/14 19:20:48  horsley
  * added event run id to dist ntuple,
  *
@@ -235,7 +238,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.29 2000/12/14 19:20:48 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.30 2000/12/14 21:09:06 horsley Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -1419,9 +1422,9 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	distHits[13] = central.y();
 	
 
-	distHits[14] = track->geometry()->momentum().x();
-	distHits[15] = track->geometry()->momentum().y();
-	distHits[16] = track->geometry()->momentum().z();
+	distHits[14] = currentTrack->getStTrack()->geometry()->momentum().x();
+	distHits[15] = currentTrack->getStTrack()->geometry()->momentum().y();
+	distHits[16] = currentTrack->getStTrack()->geometry()->momentum().z();
 
 
 	// Track incident angle
