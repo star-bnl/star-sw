@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.h,v 1.15 1998/10/31 00:21:57 fisyak Exp $
+// $Id: St_XDFFile.h,v 1.16 1998/12/12 02:40:24 fisyak Exp $
 // $Log: St_XDFFile.h,v $
+// Revision 1.16  1998/12/12 02:40:24  fisyak
+// New dsl
+//
 // Revision 1.15  1998/10/31 00:21:57  fisyak
 // Add record counter
 //
@@ -36,7 +39,7 @@
 #include "Rtypes.h"
 #include "TSocket.h"
 #ifndef __CINT__
-#include "dstype.h"
+#include "dsxdr.h"
 #else
 typedef void XDR;
 typedef void DS_DATASET_T; 
