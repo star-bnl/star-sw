@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.cxx,v 1.3 2000/03/15 21:49:59 fisyak Exp $
+// $Id: StMagFMaker.cxx,v 1.4 2000/06/19 12:49:36 fisyak Exp $
 // $Log: StMagFMaker.cxx,v $
+// Revision 1.4  2000/06/19 12:49:36  fisyak
+// Resolve ambiguity between geometry/agufld and StMagF agufld by renaming agufld => lovefield
+//
 // Revision 1.3  2000/03/15 21:49:59  fisyak
 // Change to RunLog
 //
@@ -23,7 +26,7 @@
 #include <iostream.h>
 #include "StMagFMaker.h"
 #include "StChain.h"
-#include "St_DataSetIter.h"
+#include "TDataSetIter.h"
 #include "StMagF/StMagF.h"
 #include "tables/St_MagFactor_Table.h"
 
@@ -36,7 +39,7 @@ StMagFMaker::~StMagFMaker(){}
 //_____________________________________________________________________________
 Int_t StMagFMaker::Init(){
   if (!fMagFactor) {
-    St_DataSet *RunLog = GetDataBase("RunLog");
+    TDataSet *RunLog = GetDataBase("RunLog");
     fMagFactor = (St_MagFactor *) RunLog->Find("MagFactor"); assert(fMagFactor);
   }
   Float_t Scale = (*fMagFactor)[0].ScaleFactor;
