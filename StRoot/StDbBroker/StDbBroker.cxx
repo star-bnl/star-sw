@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.34 2001/12/21 04:55:31 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.35 2002/01/15 17:15:36 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.35  2002/01/15 17:15:36  porter
+ * moved timestamp translation to a separate method
+ *
  * Revision 1.34  2001/12/21 04:55:31  porter
  * changed some ostrstream usage for insure tests
  *
@@ -441,41 +444,40 @@ void * StDbBroker::Use(int tabID, int parID)
     fetchStatus=mgr->fetchDbTable(node);
   }
 
-  if(fetchStatus){ 
+  // success or failure yields an endtime ... so get it.
+  char* thisTime;
+  m_endTimeStamp = node->getEndTime();
+  thisTime = node->getEndDateTime();
+  makeDateTime(thisTime,m_EndDate,m_EndTime);
+
+  if(fetchStatus){  
 
     m_nRows= node->GetNRows();
     pData  = node->GetTableCpy(); // gives the "malloc'd version"
 
-
-    // reformat timestamp for StRoot
-    char* thisTime;
     m_beginTimeStamp = node->getBeginTime();
     thisTime = node->getBeginDateTime();
-    char* tmp1 = new char[strlen(thisTime)+1];
-    char* tmp2 = new char[strlen(thisTime)+1];
-    strcpy(tmp1,thisTime);
-    strcpy(tmp2,tmp1);  tmp1[8]='\0'; tmp2+=8;
+    makeDateTime(thisTime,m_BeginDate,m_BeginTime);
 
-    m_BeginDate = (UInt_t)atoi(tmp1);
-    m_BeginTime = (UInt_t)atoi(tmp2);
-    delete [] tmp1; tmp2-=8; delete [] tmp2;
-
-    m_endTimeStamp = node->getEndTime();
-    thisTime = node->getEndDateTime();
-    tmp1 = new char[strlen(thisTime)+1];
-    tmp2 = new char[strlen(thisTime)+1];
-    strcpy(tmp1,thisTime);
-    strcpy(tmp2,tmp1); tmp1[8]='\0';tmp2+=8;
-
-    m_EndDate = (UInt_t)atoi(tmp1);
-    m_EndTime = (UInt_t)atoi(tmp2);
-    delete [] tmp1; tmp2-=8; delete [] tmp2;
   } else {
     SetZombie(true);
   }
 
-
 return pData;
+}
+
+//_____________________________________________________________________________
+void StDbBroker::makeDateTime(const char* dateTime,UInt_t& iDate,UInt_t& iTime){
+
+    char* tmp1 = new char[strlen(dateTime)+1];
+    char* tmp2 = new char[strlen(dateTime)+1];
+    strcpy(tmp1,dateTime);
+    strcpy(tmp2,tmp1); tmp1[8]='\0';tmp2+=8;
+
+    iDate = (UInt_t)atoi(tmp1);
+    iTime = (UInt_t)atoi(tmp2);
+    delete [] tmp1; tmp2-=8; delete [] tmp2;
+
 }
 
 //_____________________________________________________________________________

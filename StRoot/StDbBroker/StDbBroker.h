@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.24 2001/10/30 20:43:29 porter Exp $
+ * $Id: StDbBroker.h,v 1.25 2002/01/15 17:15:36 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.25  2002/01/15 17:15:36  porter
+ * moved timestamp translation to a separate method
+ *
  * Revision 1.24  2001/10/30 20:43:29  porter
  * timestamp set for failure on query by runNumber
  *
@@ -165,7 +168,8 @@ struct oldDescriptor {
     int           buildNodes(StDbConfigNode* node, int pID);
 
     Bool_t         m_isZombie;
-   
+    
+    void          makeDateTime(const char* dateTime, UInt_t& iDate, UInt_t& iTime); 
 
   public:
 
