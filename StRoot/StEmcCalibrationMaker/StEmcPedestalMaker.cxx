@@ -158,7 +158,7 @@ void StEmcPedestalMaker::calcPedestals()
 		if(h) {delete h; h = 0;}
   }
   cout <<"nGood = "<<ngood<<"  nBad = "<<nbad<<"  neg Ped = "<<nped<<"  bad rms = "<<nrms<<"  large res = "<<nchi<<endl;
-  return kTRUE;
+  return;
    
 }
 //_____________________________________________________________________________
