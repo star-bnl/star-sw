@@ -8,6 +8,7 @@
 #include <cmath>
 
 #include "StiDetector.h"
+#include "StiDetPolygonSide.h"
 #include "StiDetPolygon.h"
 
 //ClassImp(StiDetPolygon)
@@ -71,7 +72,8 @@ void StiDetPolygon::setToAngle(double angle)
 StiDetector* StiDetPolygon::detector(unsigned int side) const
 {
     det_polygon_map::const_iterator where = msidemap.find(side);
-    return (where!=msidemap.end()) ? (*where).second : 0;
+    //return (where!=msidemap.end()) ? (*where).second : 0;
+    return (where!=msidemap.end()) ? (*where).second->detector() : 0;
 }
 
 //iterate through side container
@@ -104,7 +106,8 @@ void StiDetPolygon::operator--()
 
 StiDetector* StiDetPolygon::operator*() const
 {
-    return (mcurrent != msidemap.end()) ? (*mcurrent).second : 0;
+    return (mcurrent != msidemap.end()) ? (*mcurrent).second->detector() : 0;
+    //return (mcurrent != msidemap.end()) ? (*mcurrent).second : 0;
 }
 
 
@@ -125,7 +128,12 @@ void StiDetPolygon::push_back(StiDetector* layer)
 	//cout <<"Calling Side in Debug Mode"<<endl;
 	//theside = side(phi, true);
     }
-    msidemap.insert( det_polygon_map_ValType( theside,layer ) );
+
+    StiDetPolygonSide* detside = new StiDetPolygonSide();
+    detside->setDetector(layer);
+    
+    //msidemap.insert( det_polygon_map_ValType( theside,layer ) );
+    msidemap.insert( det_polygon_map_ValType( theside, detside ) );
     return;
 }
 

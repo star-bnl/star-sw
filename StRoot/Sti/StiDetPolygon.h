@@ -25,12 +25,14 @@
 #include "StiPolygon.h"
 
 class StiDetector;
+class StiDetPolygonSide;
 
 class StiDetPolygon : public StiPolygon
 {
 public:
 
-    typedef multimap<unsigned int, StiDetector*> det_polygon_map;
+    //typedef multimap<unsigned int, StiDetector*> det_polygon_map;
+    typedef multimap<unsigned int, StiDetPolygonSide*> det_polygon_map;
     typedef det_polygon_map::value_type det_polygon_map_ValType;
     
     StiDetPolygon();
