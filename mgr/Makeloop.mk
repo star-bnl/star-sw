@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.32  1998/12/01 01:53:29  fisyak
+#  Merge with NT
+#
 #  Revision 1.31  1998/11/27 20:01:38  fisyak
 #  put l3 after trg (bug in usage of idl)
 #
@@ -172,21 +175,20 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/11/27 20:01:38 $ 
+#           Last modification $Date: 1998/12/01 01:53:29 $ 
 #  default setings
 # Current Working Directory
 #
-CWD := $(shell pwd)
 ifdef SILENT
 .SILENT:
 endif       
 
 ifdef STAF_MAKE_HOME
- include $(STAF_MAKE_HOME)/MakeEnv.mk
- include $(STAF_MAKE_HOME)/MakeArch.mk
+  include $(STAF_MAKE_HOME)/MakeEnv.mk
+  include $(STAF_MAKE_HOME)/MakeArch.mk
 else
- include $(STAR)/mgr/MakeEnv.mk
- include $(STAR)/mgr/MakeArch.mk
+  include $(STAR)/mgr/MakeEnv.mk
+  include $(STAR)/mgr/MakeArch.mk
 endif
 
 EMPTY      :=
@@ -196,6 +198,7 @@ TWO        :=2
 THREE      :=3
 FOUR       :=4
 FIVE       :=5
+
 ifndef MakePam
   MakePam :=$(strip $(wildcard $(CWD)/mgr/MakePam.mk))
 endif
@@ -262,6 +265,9 @@ endif
 ifneq (,$(findstring $(STAR_SYS),sgi_64 ))
 #        SUBDIRS := $(filter-out trg, $(SUBDIRS))
 endif
+ifdef NT
+SUBDIRS := $(filter-out db, $(SUBDIRS)) 
+endif
 SUBDIRS := $(filter-out l3, $(SUBDIRS)) $(filter l3, $(SUBDIRS))
 ifneq (,$(findstring $(STAR_SYS),hp_ux102 ))
          SUBDIRS := $(filter-out tcc, $(SUBDIRS))
@@ -300,7 +306,7 @@ all:
 	@echo "Please run make in parent directory"
 else                           
 ifndef ROOT_DIR                 
-	override ROOT_DIR := $(shell cd $(ROOT_DIR); pwd)
+	override ROOT_DIR := $(subst /.,,$(wildcard $(ROOT_DIR)/.))
 endif                          
 ifeq ($(NAME),$(PKG))          
 	SUBDIRS :=
@@ -313,8 +319,10 @@ ifndef NOROOT
 ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/base))
 BASE := St_base 
 endif
+ifndef NT
 ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/xdf2root))
 XDF2ROOT := xdf2root
+endif
 endif
 ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/.share/tables))
 StRoot += St_Tables
@@ -326,6 +334,7 @@ Makers  :=  $(notdir $(wildcard $(ROOT_DIR)/StRoot/St_*_Maker))
 Makers  :=  $(filter-out St_ebye_Maker, $(Makers))
 Makers  :=  $(filter-out St_laser_Maker, $(Makers))
 Makers  :=  $(filter-out St_mev_Maker, $(Makers))
+Makers  :=  $(filter-out St_hbt_Maker, $(Makers))
 ifneq ($(EMPTY),$(findstring i386_linux2, $(STAR_SYS)) )
 Makers  :=  $(filter-out St_trs_Maker, $(Makers))
 endif
@@ -340,20 +349,20 @@ all:  $(BASE) $(XDF2ROOT)  $(TARGETS) $(StRoot)
 ifndef NOROOT
 ROOT:      St_base xdf2root St_Makers StChain St_Tables
 St_base:
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/base     SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.$(So)
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/base     SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/St_base.$(So)
 xdf2root:
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/xdf2root SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/xdf2root.$(So) 
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/xdf2root SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/xdf2root.$(So) 
 St_Makers: $(Makers)
 StChain:   
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StChain  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/StChain.$(So)
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StChain  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/StChain.$(So)
 St_Tables:
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables   SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_Tables.$(So) NODEBUG=YES
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables   SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/St_Tables.$(So) NODEBUG=YES
 ifneq ($(EMPTY),$(findstring $(STAR_LEVEL),dev))
 St_TablesDoc: 
 	root.exe -b -q MakeHtmlTables.cxx
 endif
 St_%_Maker: 
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/St_$(STEM)_Maker  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_$(STEM)_Maker.$(So)
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/St_$(STEM)_Maker  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/St_$(STEM)_Maker.$(So)
 endif
 %_all:  $(BASE)
 	$(MAKE)  -f $(Makeloop) -C $(STEM) $(MAKFLAGS) 
@@ -373,7 +382,7 @@ clean_obj: $(addsuffix _clean_obj, $(SUBDIRS))
 %_clean_obj: 
 	$(MAKE)  -f $(Makeloop) -C $(STEM) clean $(MAKFLAGS) 
 else # I have no subdirs
-PKG     := $(notdir $(shell pwd))
+PKG     := $(notdir $(shell $(PWD)))
 GEN_DIR := $(ROOT_DIR)/.share/$(PKG)
 GEN_TAB := $(DIR_GEN)/tables
 .PHONY               : default clean clean_lib clean_share clean_obj test
@@ -391,6 +400,7 @@ endif
 endif
 test: test_level
 test_level:
+	@echo "PWD       = |"$(PWD)"|"
 	@echo "LEVEL     = |"$(LEVEL)"|"
 	@echo "SUBDIRS   = |"$(SUBDIRS)"|"
 	@echo "INP_DIR   = |"$(INP_DIR)"|"
