@@ -1,12 +1,14 @@
 //TpcHitVecUtilites.h
 //M.L. Miller, Yale Software, 8/00
-
+#ifdef NEVER
 #ifndef TpcHitVecUtilities_HH
 #define TpcHitVecUtilities_HH
 
 #include <vector>
 
+#ifndef ST_NO_NAMESPACES
 using std::vector;
+#endif
 
 //Forward Declarationis
 class StTrack;
@@ -41,3 +43,4 @@ struct zHitLessThan {
 };
 
 #endif
+#endif // NEVER

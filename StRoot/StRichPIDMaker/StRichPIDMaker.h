@@ -1,11 +1,14 @@
 /**********************************************************
- * $Id: StRichPIDMaker.h,v 2.16 2001/02/22 21:06:05 lasiuk Exp $
+ * $Id: StRichPIDMaker.h,v 2.17 2001/04/25 00:31:59 lasiuk Exp $
  *
  * Description:
  *  StRrsMaker is the main module
  *  StRichRawData. It has the standard Maker functions:
  *
  *  $Log: StRichPIDMaker.h,v $
+ *  Revision 2.17  2001/04/25 00:31:59  lasiuk
+ *  HP changes
+ *
  *  Revision 2.16  2001/02/22 21:06:05  lasiuk
  *  fill the new StEvent structures in PidTraits, and richCollection
  *  dca code now included
@@ -107,7 +110,7 @@ using std::vector;
 //#include "StRichTrackFilter.h"
 #include "StRichTrackingControl.h"
 #include "StRichMcSwitch.h"
-#include "TpcHitVecUtilities.h"
+//#include "TpcHitVecUtilities.h"
 
 #ifdef RICH_WITH_L3_TRACKS
 #include "StDaqLib/L3/L3.Banks.hh"
@@ -278,7 +281,7 @@ private:
   //
   TNtuple* distup; //!
   
-  TpcHitVecUtilities* util; //!
+  //TpcHitVecUtilities* util; //!
   bool     kWriteNtuple;    //!
   
       
