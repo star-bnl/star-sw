@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsRawDataEvent.hh,v 1.1 1999/02/04 18:36:32 lasiuk Exp $
+ * $Id: StTrsRawDataEvent.hh,v 1.2 1999/02/10 04:27:36 lasiuk Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsRawDataEvent.hh,v $
+ * Revision 1.2  1999/02/10 04:27:36  lasiuk
+ * TObject
+ *
  * Revision 1.1  1999/02/04 18:36:32  lasiuk
  * Initial Revision
  *
@@ -36,8 +39,11 @@ public:
     unsigned long size();
 
 public:
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
     vector<StTrsDigitalSector*> mSectors;
-    
+#else
+    vector<StTrsDigitalSector*, allocator<StTrsDigitalSector*> > mSectors;
+#endif
 };
 
 #endif
