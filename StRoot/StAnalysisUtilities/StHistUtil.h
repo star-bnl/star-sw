@@ -1,5 +1,8 @@
-//! $Id: StHistUtil.h,v 1.3 2000/01/27 18:30:12 kathy Exp $
+//! $Id: StHistUtil.h,v 1.4 2000/01/28 17:53:42 lansdell Exp $
 //! $Log: StHistUtil.h,v $
+//! Revision 1.4  2000/01/28 17:53:42  lansdell
+//! split overlay method into Overlay1D and Overlay2D
+//!
 //! Revision 1.3  2000/01/27 18:30:12  kathy
 //! add Curtis' new method which reads in 2 histograms and overlays them - Overlay2Hists
 //!
@@ -103,7 +106,8 @@ class StHistUtil {
   virtual Int_t   RemoveFromPrintList(const Char_t *HistName="");
   virtual Int_t   ExaminePrintList();
 
-  virtual Int_t   Overlay2Hists(Char_t *dirName,Char_t *inHist1,Char_t *inHist2);
+  virtual Int_t   Overlay1D(Char_t *dirName,Char_t *inHist1,Char_t *inHist2);
+  virtual Int_t   Overlay2D(Char_t *dirName,Char_t *inHist1,Char_t *inHist2);
 
 // Inline methods
   virtual void    SetHistsNamesDraw(const Char_t *firstName="*", const Char_t *lastName="*");
@@ -117,7 +121,7 @@ class StHistUtil {
   
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.3 2000/01/27 18:30:12 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.4 2000/01/28 17:53:42 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };

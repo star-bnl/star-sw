@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.4 2000/01/27 18:30:12 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.5 2000/01/28 17:53:41 lansdell Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.5  2000/01/28 17:53:41  lansdell
+// split overlay method into Overlay1D and Overlay2D
+//
 // Revision 1.4  2000/01/27 18:30:12  kathy
 // add Curtis' new method which reads in 2 histograms and overlays them - Overlay2Hists
 //
@@ -1202,17 +1205,15 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 
 //_____________________________________________________________________________
 
-// Method Overlay2Hists
-//    - takes two histograms and overlays them
-//    - only considers TH1F and TH2F histogram types
+// Method Overlay1D
+//    - takes two TH1F histograms and overlays them
 
-Int_t StHistUtil::Overlay2Hists(Char_t *dirName,Char_t *inHist1,
-				Char_t *inHist2) {
+Int_t StHistUtil::Overlay1D(Char_t *dirName,Char_t *inHist1,
+			    Char_t *inHist2) {
 
-  cout << " **** Now in StHistUtil::Overlay2Hists **** " << endl;
+  cout << " **** Now in StHistUtil::Overlay1D **** " << endl;
 
   Int_t n1dHists = 0;
-  Int_t n2dHists = 0;
 
 // get the TList pointer to the histograms
   TList  *dirList = 0;
@@ -1231,8 +1232,6 @@ Int_t StHistUtil::Overlay2Hists(Char_t *dirName,Char_t *inHist1,
 // temporary holder histograms
   TH1F *hist1f1 = new TH1F;
   TH1F *hist1f2 = new TH1F;
-  TH2F *hist2f1 = new TH2F;
-  TH2F *hist2f2 = new TH2F;
 
 // use = here instead of ==, because we are setting obj equal to nextObj
 // and then seeing if it's T or F
@@ -1257,27 +1256,10 @@ Int_t StHistUtil::Overlay2Hists(Char_t *dirName,Char_t *inHist1,
 	    n1dHists++;
 	  }
 	}
-	if (obj->ClassName() == (TString)"TH2F") {
-	  if (obj->GetName() == (TString)inHist1) {
-	    *hist2f1 = *(TH2F *)obj;
-	    n2dHists++;
-	  }
-	  if (obj->GetName() == (TString)inHist2) {
-	    *hist2f2 = *(TH2F *)obj;
-	    n2dHists++;
-	  }
-	}
+	else
+	  cout << " ERROR: histogram not of type TH1F !!!" << endl;
       }
     }
-  }
-
-  if (n1dHists || n2dHists) {
-// create a new canvas and pad to write to
-    TCanvas *newCanvas = new TCanvas("c1","Combined Histogram",600,780);
-    TPad *newPad = new TPad("p1","Combined Histogram",0.02,0.02,0.98,0.98);
-    newCanvas->Draw();
-    newPad->Draw();
-    newPad->cd();
   }
 
 // if the two histograms exist, overlay them
@@ -1290,8 +1272,35 @@ Int_t StHistUtil::Overlay2Hists(Char_t *dirName,Char_t *inHist1,
     hist1f1->SetStats(kFALSE);
     hist1f2->SetStats(kFALSE);
 
-// draw the histograms
     hist1f1->SetTitle(hist1f1->GetTitle()+(TString)" and "+hist1f2->GetTitle());
+
+// create a new canvas
+    TCanvas *newCanvas = new TCanvas("c1d","Combined 1D Histogram",600,780);
+    newCanvas->Draw();
+
+// set global title which goes at top of each page of histograms
+    const Char_t *gtitle = m_GlobalTitle.Data();
+
+// write title at top of canvas
+    TPaveLabel *Ltitle = new TPaveLabel(0.1,0.96,0.9,1.0,(char *)gtitle,"br");
+    Ltitle->SetFillColor(18);
+    Ltitle->SetTextFont(32);
+    Ltitle->SetTextSize(0.5);
+    Ltitle->Draw();
+
+// now put in date & time at bottom right of canvas
+    TDatime HistTime;
+    const Char_t *myTime = HistTime.AsString();
+    TPaveLabel *Ldatetime = new TPaveLabel(0.7,0.01,0.95,0.03,myTime,"br");
+    Ldatetime->SetTextSize(0.6);
+    Ldatetime->Draw();
+
+// create a pad
+    TPad *newPad = new TPad("p1d","Combined 1D Histogram",0.02,0.04,0.98,0.93);
+    newPad->Draw();
+    newPad->cd();
+
+// draw the histograms
     hist1f1->Draw();
     hist1f2->Draw("Same");
 
@@ -1307,7 +1316,69 @@ Int_t StHistUtil::Overlay2Hists(Char_t *dirName,Char_t *inHist1,
     return kStOk;
   }
 
-// not really sure a 2D overlay is necessary -CPL
+  return kStErr;
+}
+
+//_____________________________________________________________________________
+
+// Method Overlay2D
+//    - takes two TH2F histograms and overlays them
+
+Int_t StHistUtil::Overlay2D(Char_t *dirName,Char_t *inHist1,
+			    Char_t *inHist2) {
+
+  cout << " **** Now in StHistUtil::Overlay2D **** " << endl;
+
+  Int_t n2dHists = 0;
+
+// get the TList pointer to the histograms
+  TList  *dirList = 0;
+  dirList = FindHists(dirName);
+
+// check that directory exists
+  if (!dirList)
+    return kStErr;
+
+  cout << "Histogram directory exists -> Find and overlay histograms" << endl;
+// Now want to loop over all histograms
+// Create an iterator
+  TIter nextObj(dirList);
+  TObject *obj = 0;
+
+// temporary holder histograms
+  TH2F *hist2f1 = new TH2F;
+  TH2F *hist2f2 = new TH2F;
+
+// use = here instead of ==, because we are setting obj equal to nextObj
+// and then seeing if it's T or F
+  while ((obj = nextObj())) {
+
+// now check if obj is a histogram and see if it matches input name
+    if (obj->InheritsFrom("TH1")) {
+      if (obj->GetName() == (TString)inHist1 ||
+	  obj->GetName() == (TString)inHist2) {
+	cout << " Found Histogram: Type '" << obj->ClassName() << "', Name '"
+	     << obj->GetName() << "', Title '" << obj->GetTitle() << "'"
+	     << endl;
+
+// check on type of histogram and make copies
+	if (obj->ClassName() == (TString)"TH2F") {
+	  if (obj->GetName() == (TString)inHist1) {
+	    *hist2f1 = *(TH2F *)obj;
+	    n2dHists++;
+	  }
+	  if (obj->GetName() == (TString)inHist2) {
+	    *hist2f2 = *(TH2F *)obj;
+	    n2dHists++;
+	  }
+	}
+	else
+	  cout << " ERROR: histogram is not of type TH2F !!!" << endl;
+      }
+    }
+  }
+
+// if the two histograms exist, overlay them
   if (n2dHists == 2) {
     //hist2f1->SetFillColor(4);
     //hist2f1->SetFillStyle(3006);
@@ -1317,8 +1388,35 @@ Int_t StHistUtil::Overlay2Hists(Char_t *dirName,Char_t *inHist1,
     hist2f1->SetStats(kFALSE);
     hist2f2->SetStats(kFALSE);
 
-// draw the histograms
     hist2f1->SetTitle(hist2f1->GetTitle()+(TString)" and "+hist2f2->GetTitle());
+
+// set global title which goes at top of each page of histograms
+    const Char_t *gtitle = m_GlobalTitle.Data();
+
+// create a new canvas and pad to write to
+    TCanvas *newCanvas = new TCanvas("c2d","Combined 2D Histogram",600,780);
+    newCanvas->Draw();
+
+// write title at top of canvas
+    TPaveLabel *Ltitle = new TPaveLabel(0.1,0.96,0.9,1.0,(char *)gtitle,"br");
+    Ltitle->SetFillColor(18);
+    Ltitle->SetTextFont(32);
+    Ltitle->SetTextSize(0.5);
+    Ltitle->Draw();
+
+// now put in date & time at bottom right of canvas
+    TDatime HistTime;
+    const Char_t *myTime = HistTime.AsString();
+    TPaveLabel *Ldatetime = new TPaveLabel(0.7,0.01,0.95,0.03,myTime,"br");
+    Ldatetime->SetTextSize(0.6);
+    Ldatetime->Draw();
+
+// create a pad
+    TPad *newPad = new TPad("p2d","Combined 2D Histogram",0.02,0.04,0.98,0.93);
+    newPad->Draw();
+    newPad->cd();
+
+// draw the histograms
     hist2f1->Draw("Surf3Fb");
     hist2f2->Draw("Surf3FbSame");
 
@@ -1338,11 +1436,3 @@ Int_t StHistUtil::Overlay2Hists(Char_t *dirName,Char_t *inHist1,
 }
 
 //_____________________________________________________________________________
-
-
-
-
-
-
-
-
