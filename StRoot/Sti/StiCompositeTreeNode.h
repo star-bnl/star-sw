@@ -60,16 +60,21 @@
 #define StiCompositeTreeNode_H
 
 #include <iostream>
+#include <iterator>
 #include <vector>
 #include <string>
 #include <algorithm>
 
-using std::find;
-using std::vector;
-using std::string;
-using std::cout;
-using std::ostream;
-using std::endl;
+using namespace std;
+
+/*
+  using std::find;
+  using std::vector;
+  using std::string;
+  using std::cout;
+  using std::ostream;
+  using std::endl;
+*/
 
 /*! This is used to eager-cache information for sorting and/or traversal of
   the tree.
@@ -145,7 +150,7 @@ public:
 
     ///Provide random access iterator to the beginning of the vector of children
     vec_type::iterator begin() {return mVec.begin();}
-    
+        
     ///Provide random access iterator to the end of the vector of children.
     vec_type::iterator end() {return mVec.end();}
 
@@ -309,7 +314,8 @@ inline void StiCompositeTreeNode<T>::setParent(StiCompositeTreeNode* val)
   StiCompositeTreeNode<T>::vec_type::iterator where = node->whereInParent(); \n
   if (where!=node->end()) {\\you're ok \n
   }
-  <\code> 
+  <\code>
+  
   template <class T>
   StiCompositeTreeNode<T>::vec_type::iterator //return type
   StiCompositeTreeNode<T>::whereInParent()
@@ -323,7 +329,7 @@ inline void StiCompositeTreeNode<T>::setParent(StiCompositeTreeNode* val)
   {
   return mVec.begin();
   }
-  
+
   template <class T>
   StiCompositeTreeNode<T>::vec_type::iterator //return type
   StiCompositeTreeNode<T>::end()

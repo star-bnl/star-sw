@@ -2,9 +2,6 @@
 //M.L. Miller (Yale Software)
 //12/01
 
-#ifndef StiKTNVerticalIterator_HH
-#define StiKTNVerticalIterator_HH
-
 /*! \class StiKTNVerticalIterator
   This class is an STL compliant forward iterator that will traverse from
   the leaf of a tree upward to a root.
@@ -15,11 +12,22 @@
   \note StiKTNVertIterator is a non-virtual class.
 */
 
-#include <iterator.h>
-using namespace std;
-#include "StiKalmanTrackNode.h"
+#ifndef StiKTNVerticalIterator_HH
+#define StiKTNVerticalIterator_HH
 
-class StiKTNVertIterator : public forward_iterator<StiKalmanTrackNode, int>
+#include <iterator>
+using namespace std;
+
+#include "StiKalmanTrackNode.h"
+typedef StiKalmanTrackNode KTN_t;
+
+//This is a temp hack to get around old gcc ansi-non-compliant STL implementation
+class StiKTNVertIterator
+#ifndef GNU_GCC
+    : public iterator<forward_iterator_tag, KTN_t, ptrdiff_t, KTN_t*, KTN_t&>
+#else
+    : public forward_iterator<KTN_t, int>
+#endif
 {
 public:
     
