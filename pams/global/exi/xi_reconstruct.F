@@ -1,6 +1,6 @@
 C
       INTEGER FUNCTION XI_RECONSTRUCT(nok,idd,trak,
-     +                                ev0par_h,ev0par,
+     +                                exipar_h,exipar,
      +                                mvertex_h,mvertex,
      +                                ev0out_h,ev0out,
      +                                exiout_h,exiout   )
@@ -14,10 +14,10 @@ C   Created  MARCH-1994	  S. Margetis
 C   Error conditions	: None-Yet
 C   Status		: Tested with svt_hits
 C----------------------------------------------------------------------
-#include "/star/starlib/star/dev/sys/inc/tas_structures.inc"
-#include "/star/starlib/star/dev/sys/inc/tas_user_codes.inc"
-#include "ev0_ev0par_pars.inc"
-#include "ev0_ev0par_st.inc"
+#include "tas_structures.inc"
+#include "tas_user_codes.inc"
+#include "exi_exipar_pars.inc"
+#include "exi_exipar_st.inc"
 #include "evr_privert_pars.inc"
 #include "evr_privert_st.inc"
 #include "ev0_ev0out_pars.inc"
@@ -25,8 +25,8 @@ C----------------------------------------------------------------------
 #include "exi_exiout_pars.inc"
 #include "exi_exiout_st.inc"
 C----------------------------------------------------------------------
-      RECORD/ table_head_st/ ev0par_h
-      RECORD/ ev0par_row_st/ ev0par(*)
+      RECORD/ table_head_st/ exipar_h
+      RECORD/ exipar_row_st/ exipar(*)
       RECORD/ table_head_st/ mvertex_h
       RECORD/ privert_row_st/ mvertex(*)
       RECORD/ table_head_st/ ev0out_h
@@ -59,7 +59,7 @@ C---------------
       INTEGER 	ev0_flag(maxtr),pid(maxtr)
       INTEGER  	ntracks,ntracx,jk,itrc,vidc,itr(maxtr),vid(maxtr)
       INTEGER	jump(maxtr),ev0_hits,index
-      REAL	dr,mass1(3),mass2(3),charge(maxtr),pi,ph,pst1(3),pst2(3)
+      REAL	dr,mass1(4),mass2(4),charge(maxtr),pi,ph,pst1(3),pst2(3)
       REAL	vert(maxtr,3),pvert(maxtr,3),true,rv,xv0(3)
       REAL	qrg(maxtr),phig(maxtr),tanlg(maxtr),zcom(2)
       REAL      x0(maxtr),y0(maxtr),z0(maxtr),dx,RG32
@@ -75,8 +75,8 @@ C---------------
       DATA MASST/7*0.0005,.139567,.139567
      +,            3*0.493667,2*.93828,.93828
      +,            35*0./
-      DATA MASS1/0.139567,.93828,.139567/
-      DATA MASS2/0.139567,.139567,.93828/
+      DATA MASS1/0.139567,.139567,0.4936,0.4936/
+      DATA MASS2/4*1.11563/
       DATA QQT/0.,1.,-1.,0.,1.,-1.,0. ,1.,-1.,0.,1.,-1.,0.
      +,        1.,-1.,35*0./
 *
@@ -208,20 +208,20 @@ C----two possible intersection points ---------------------------
                 exiout(ok).idba=trak(i).id
                 exiout(ok).idv0=ev0out(j).id
 C--calculate Armenteros variables---
-        	call track_mom(trk1,0,pst1)
-                pdotp=pst1(1)*pp(1)+pst1(2)*pp(2)+pst1(3)*pp(3)   !dot product of p+ and p(v0)
-                ndotp=pv0(1)*pp(1)+pv0(2)*pp(2)+pv0(3)*pp(3)     !dot product of v0 and p(Xi)
+c        	call track_mom(trk1,0,pst1)
+c                pdotp=pst1(1)*pp(1)+pst1(2)*pp(2)+pst1(3)*pp(3)   !dot product of p+ and p(v0)
+c                ndotp=pv0(1)*pp(1)+pv0(2)*pp(2)+pv0(3)*pp(3)     !dot product of v0 and p(Xi)
                 pxi  =sqrt(pp(1)*pp(1)+pp(2)*pp(2)+pp(3)*pp(3)) 
-                ppar=pdotp/pxi
-                npar=ndotp/pxi
-                pper=sqrt(pst1(1)*pst1(1)+pst1(2)*pst1(2)+pst1(3)*pst1(3)-ppar*ppar)
-                exiout(ok).pt=pper
-                exiout(ok).alpha=(ppar-npar)/(ppar+npar)
+c                ppar=pdotp/pxi
+c                npar=ndotp/pxi
+c                pper=sqrt(pst1(1)*pst1(1)+pst1(2)*pst1(2)+pst1(3)*pst1(3)-ppar*ppar)
+c                exiout(ok).pt=pper
+c                exiout(ok).alpha=(ppar-npar)/(ppar+npar)
 *
 *---if blind run test all mass hypothesis
 *
 
-                DO ll=1,3
+                DO ll=1,4
                 IF(id.eq.0) THEN
                 massl(1)=mass1(ll)
                 massl(2)=mass2(ll)
@@ -237,13 +237,13 @@ C--calculate proper lifetime assuming that particle originated at main vertex
                 exiout(ok).tau(ll)=inv_mass*rv/pxi     
                 exiout(ok).tmin(ll)=inv_mass*rv_cut/pxi
 c--calculate cos(theta_c.m.)
-                env0 = sqrt(pv0*pv0+inv_mass*inv_mass)
-                bv0  =pv0/env0
-                gv0  =env0/inv_mass
-                ep   =sqrt(pst1(1)*pst1(1)+pst1(2)*pst1(2)+
-     +                     pst1(3)*pst1(3)+massl(1)*massl(1))
-                ppar_cm=gv0*(ppar-bv0*ep)
-                exiout(ok).cos_th_cm(ll)=cos(atan2(pper,ppar_cm))
+c                env0 = sqrt(pv0*pv0+inv_mass*inv_mass)
+c                bv0  =pv0/env0
+c                gv0  =env0/inv_mass
+c                ep   =sqrt(pst1(1)*pst1(1)+pst1(2)*pst1(2)+
+c     +                     pst1(3)*pst1(3)+massl(1)*massl(1))
+c                ppar_cm=gv0*(ppar-bv0*ep)
+c                exiout(ok).cos_th_cm(ll)=cos(atan2(pper,ppar_cm))
 c
                  IF(id.ne.0) GOTO 30            !blind or not?
                 ENDDO
