@@ -28,7 +28,7 @@ class StSsdBarrel
   StSsdBarrel& operator=(const StSsdBarrel  originalBarrel);
 
   void  initLadders(St_ssdWafersPosition *wafpos);
-  void  initLadders(ssdWafersPosition_st *position);
+  void  initLadders(ssdWafersPosition_st *position, int positionSize);
 //   int   readDeadStripFromTable(table_head_st *condition_db_h, sdm_condition_db_st *condition_db); 
   int   readStripFromTable(St_spa_strip *spa_strip);
   int   readNoiseFromTable(St_sdm_calib_db *spa_noise, StSsdDynamicControl *dynamicControl);

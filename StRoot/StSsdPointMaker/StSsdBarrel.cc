@@ -66,10 +66,10 @@ void StSsdBarrel::initLadders(St_ssdWafersPosition *wafpos)
 }
 
 
-void StSsdBarrel::initLadders(ssdWafersPosition_st *position)
+void StSsdBarrel::initLadders(ssdWafersPosition_st *position, int positionSize)
 {
   for (int iLad = 0; iLad < mNLadder; iLad++)
-      mLadders[iLad]->initWafers(position);
+    mLadders[iLad]->initWafers(position,positionSize);
 }
 
 // int StSsdBarrel::readDeadStripFromTable(table_head_st *condition_db_h, sdm_condition_db_st *condition_db)
