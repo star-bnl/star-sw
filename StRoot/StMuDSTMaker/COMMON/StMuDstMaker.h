@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.31 2004/04/15 00:26:14 perev Exp $
+ * $Id: StMuDstMaker.h,v 1.32 2004/04/20 18:42:40 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -14,6 +14,7 @@ using namespace std;
 
 #include "StMaker.h"
 #include "StChain.h"
+#include "StIOInterFace.h"
 #include "St_DataSetIter.h"
 
 #include "StMuArrays.h"
@@ -83,7 +84,7 @@ class TClonesArray;
    not know what "StMaker" and "StChain" mean.
    
 */
-class StMuDstMaker : public StMaker {
+class StMuDstMaker : public StIOInterFace {
  public:
     /// Default constructor
     StMuDstMaker(const char* name="MuDst");
@@ -92,10 +93,10 @@ class StMuDstMaker : public StMaker {
 		 const char* name="MuDst" );
     ~StMuDstMaker();
     
-  int Init();
-  void Clear(Option_t *option="");
-  int Make();
-  int Finish();
+  virtual int Init();
+  virtual void Clear(Option_t *option="");
+  virtual int Make();
+  virtual int Finish();
 
   /// Set the track filter used for all tracks (except the L3 tracks) when creating muDsts from StEvent and writing to disk.
   void setTrackFilter(StMuCut* c);
@@ -140,12 +141,12 @@ class StMuDstMaker : public StMaker {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.31 2004/04/15 00:26:14 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.32 2004/04/20 18:42:40 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
 
-private:
+protected:
   enum ioMode {ioRead, ioWrite};
   /** Specifies the way the output file name is contructed when creating muDsts. 
       ioFix = use filename specified in when calling the constructor, right in the 
@@ -198,21 +199,20 @@ private:
   StuProbabilityPidAlgorithm* mProbabilityPidAlgorithm;
 
   
-  template<class T> 
-  void saveDelete(T* t) { if (t!=0) delete t; t=0;}    
+#define saveDelete(t) { delete t; t=0;}    
 
   //! protected:
   
-  void openWrite(string fileName);
-  void write();
-  void closeWrite();
+virtual void openWrite(string fileName);
+virtual   void write();
+virtual   void closeWrite();
  
   void streamerOff();
 
-  void openRead();
-  void read();
-  void setBranchAddresses();
-  void closeRead();
+virtual   int openRead();
+virtual   void read();
+void setBranchAddresses();
+virtual   void closeRead();
 
   void setBranchAddresses(TChain*);
 
@@ -268,22 +268,17 @@ private:
   friend class StMuDst;
   friend class StMuDstFilterMaker;
     
-  TClonesArray* arrays[__NARRAYS__];//->
   TClonesArray* mArrays[__NARRAYS__];//->
 
-  TClonesArray* strangeArrays[__NSTRANGEARRAYS__];//->
   TClonesArray* mStrangeArrays[__NSTRANGEARRAYS__];//->
 
-  TClonesArray* emcArrays[__NEMCARRAYS__];//->
   TClonesArray* mEmcArrays[__NEMCARRAYS__];//->
 
-  TClonesArray* pmdArrays[__NPMDARRAYS__];//->
   TClonesArray* mPmdArrays[__NPMDARRAYS__];//->
 
-  TClonesArray* tofArrays[__NTOFARRAYS__];//->
   TClonesArray* mTofArrays[__NTOFARRAYS__];//->
 
-  ClassDef(StMuDstMaker, 2)
+  ClassDef(StMuDstMaker, 0)
 }; 
 
 inline StMuDst* StMuDstMaker::muDst() { return mStMuDst;}
@@ -317,6 +312,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.32  2004/04/20 18:42:40  perev
+ * remove redundant arrays
+ *
  * Revision 1.31  2004/04/15 00:26:14  perev
  * fillHddr() added to fill time stamp ...
  *

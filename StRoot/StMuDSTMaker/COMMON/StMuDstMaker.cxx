@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.55 2004/04/15 00:25:49 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.56 2004/04/20 18:42:47 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -83,7 +83,7 @@ ClassImp(StMuDstMaker)
    a new production version.
    Also, the standard track and l3 track filters are set.
  */
-StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
+StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
   mStEvent(0), mStMuDst(0), mStStrangeMuDstMaker(0),
   mIOMaker(0), mTreeMaker(0),
   mIoMode(1), mIoNameMode((int)ioTreeMaker),
@@ -126,18 +126,17 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
 
 void StMuDstMaker::zeroArrays()
 {
-  int i;
-  for (  i=0; i < __NARRAYS__; i++) {        arrays[i] = 0;         mArrays[i] = 0;        }
-  for (  i=0; i < __NSTRANGEARRAYS__; i++) { strangeArrays[i] = 0;  mStrangeArrays[i] = 0; }
-  for (  i=0; i < __NEMCARRAYS__; i++){      emcArrays[i] = 0;      mEmcArrays[i] = 0;     }
-  for (  i=0; i < __NPMDARRAYS__; i++){      pmdArrays[i] = 0;      mPmdArrays[i] = 0;     }
-  for (  i=0; i < __NTOFARRAYS__; i++){      tofArrays[i] = 0;      mTofArrays[i] = 0;     }
+  memset(mArrays       ,0,sizeof(mArrays       ));
+  memset(mStrangeArrays,0,sizeof(mStrangeArrays));
+  memset(mEmcArrays    ,0,sizeof(mEmcArrays    ));
+  memset(mPmdArrays    ,0,sizeof(mPmdArrays    ));
+  memset(mTofArrays    ,0,sizeof(mTofArrays    ));
 }
 
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const char* fileName, const char* filter, int maxFiles, const char* name) : StMaker(name),
+StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const char* fileName, const char* filter, int maxFiles, const char* name) : StIOInterFace(name),
   mStEvent(0), mStMuDst(0), mStStrangeMuDstMaker(0),
   mIOMaker(0), mTreeMaker(0),
   mIoMode(mode), mIoNameMode(nameMode),
@@ -160,8 +159,6 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   mEmcUtil = new StMuEmcUtil();
   mPmdUtil = new StMuPmdUtil();
   mTofUtil = new StMuTofUtil();
-  if ( ! mStMuDst || ! mEmcUtil || ! mPmdUtil  || ! mTofUtil )
-    throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",__PRETTYF__);
 
   createArrays();
 
@@ -210,27 +207,27 @@ void  StMuDstMaker::streamerOff() {
 void StMuDstMaker::createArrays() {
   /// regular stuff
   for ( int i=0; i<__NARRAYS__; i++) {
-    DEBUGVALUE2(arrays[i]);
-    mArrays[i]= clonesArray(arrays[i],StMuArrays::arrayTypes[i],StMuArrays::arraySizes[i],StMuArrays::arrayCounters[i]);
-    DEBUGVALUE2(arrays[i]);
+    DEBUGVALUE2(mArrays[i]);
+    clonesArray(mArrays[i],StMuArrays::arrayTypes[i],StMuArrays::arraySizes[i],StMuArrays::arrayCounters[i]);
+    DEBUGVALUE2(mArrays[i]);
   }
   /// from strangeness group
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
-    mStrangeArrays[i]= clonesArray(strangeArrays[i],StMuArrays::strangeArrayTypes[i],StMuArrays::strangeArraySizes[i],StMuArrays::strangeArrayCounters[i]);
+    clonesArray(mStrangeArrays[i],StMuArrays::strangeArrayTypes[i],StMuArrays::strangeArraySizes[i],StMuArrays::strangeArrayCounters[i]);
   }
   /// from emcness group
   for ( int i=0; i<__NEMCARRAYS__; i++) {
-    mEmcArrays[i]= clonesArray(emcArrays[i],StMuArrays::emcArrayTypes[i],StMuArrays::emcArraySizes[i],StMuArrays::emcArrayCounters[i]);
+    clonesArray(mEmcArrays[i],StMuArrays::emcArrayTypes[i],StMuArrays::emcArraySizes[i],StMuArrays::emcArrayCounters[i]);
   }
   /// from pmd group
   for ( int i=0; i<__NPMDARRAYS__; i++) {
-    mPmdArrays[i]= clonesArray(pmdArrays[i],StMuArrays::pmdArrayTypes[i],StMuArrays::pmdArraySizes[i],StMuArrays::pmdArrayCounters[i]);
+    clonesArray(mPmdArrays[i],StMuArrays::pmdArrayTypes[i],StMuArrays::pmdArraySizes[i],StMuArrays::pmdArrayCounters[i]);
   }
   // from Tof group
   for ( int i=0; i<__NTOFARRAYS__; i++) {
-    mTofArrays[i]= clonesArray(tofArrays[i],StMuArrays::tofArrayTypes[i],StMuArrays::tofArraySizes[i],StMuArrays::tofArrayCounters[i]);
+    clonesArray(mTofArrays[i],StMuArrays::tofArrayTypes[i],StMuArrays::tofArraySizes[i],StMuArrays::tofArrayCounters[i]);
   }
-  mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays,mTofArrays);
+  mStMuDst->set(this);
   // commecnted to include tof again (subhasis) 
   // mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays);
 }
@@ -309,12 +306,10 @@ void StMuDstMaker::clear(TClonesArray* &t, int& counter,int del)
 //-----------------------------------------------------------------------
 TClonesArray* StMuDstMaker::clonesArray(TClonesArray*& p, const char* type, int size, int& counter) {
   DEBUGMESSAGE2("");
-  if (!p) {
-    DEBUGVALUE2(type);
-    p = new TClonesArray(type, size);
-    counter=0;
-  }
-  if (!p) throw StMuExceptionNullPointer("could not create TClonesArray",__PRETTYF__);
+  if (p) return p;
+  DEBUGVALUE2(type);
+  p = new TClonesArray(type, size);
+  counter=0;
   return p;
 }
 //-----------------------------------------------------------------------
@@ -476,9 +471,11 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
     chain->SetBranchStatus("*",0);
     TString ts;
     for ( int i=0; i<__NARRAYS__; i++) {
-      chain->SetBranchAddress(StMuArrays::arrayNames[i],&mArrays[i]);
       ts = StMuArrays::arrayNames[i]; ts +="*";
       chain->SetBranchStatus (ts,1);
+      chain->SetBranchAddress(StMuArrays::arrayNames[i],&mArrays[i]);
+      TBranch *tb = chain->GetBranch(StMuArrays::arrayNames[i]);
+      assert(tb->GetAddress()== (char*)&mArrays[i]);
     }
 
     // strange stuff
@@ -515,15 +512,13 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuDstMaker::openRead() {
+int StMuDstMaker::openRead() {
   DEBUGVALUE2(mDirName.c_str());
   DEBUGVALUE2(mFileName.c_str());
   DEBUGVALUE2(mFilter.c_str());
 
-  StMuChainMaker* chainMaker = new StMuChainMaker("MuDst");
-  mChain = chainMaker->make(mDirName, mFileName, mFilter, mMaxFiles);
-
-  delete chainMaker;
+  StMuChainMaker chainMaker("MuDst");
+  mChain = chainMaker.make(mDirName, mFileName, mFilter, mMaxFiles);
 
   if (mChain){
     DEBUGVALUE3(mChain);
@@ -533,6 +528,7 @@ void StMuDstMaker::openRead() {
     //mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays);
   }
 
+  return 0;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -1095,6 +1091,9 @@ void StMuDstMaker::fillHddr()
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.56  2004/04/20 18:42:47  perev
+ * remove redundant arrays
+ *
  * Revision 1.55  2004/04/15 00:25:49  perev
  * fillHddr() added to fill time stamp ...
  *
