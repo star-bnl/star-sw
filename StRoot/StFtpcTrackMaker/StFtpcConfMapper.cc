@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.cc,v 1.14 2001/07/12 08:29:02 oldi Exp $
+// $Id: StFtpcConfMapper.cc,v 1.15 2001/09/19 21:01:28 jcs Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.15  2001/09/19 21:01:28  jcs
+// change track finding and fitting settings
+//
 // Revision 1.14  2001/07/12 08:29:02  oldi
 // New constructor introduced to be able to use only cluster which were
 // found to be good in a previous run.
@@ -169,7 +172,6 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, Double_t vertexP
 
   mHit = new TObjArray(n_clusters);    // create TObjArray
   mHitsCreated = (Bool_t)true;
-
   {for (Int_t i = 0; i < n_clusters; i++) {
     mHit->AddAt(new StFtpcConfMapPoint(point_st++, mVertex), i);
     ((StFtpcConfMapPoint *)mHit->At(i))->SetHitNumber(i);
@@ -359,13 +361,20 @@ void StFtpcConfMapper::MainVertexTracking()
   }
   
   // settings
-  SetMaxDca(1.);
-  MainVertexSettings(3, 5, 1, 2, 1, 1);
+  SetMaxDca(2.5);  //Test
+  MainVertexSettings(3, 5, 1, 2, 1, 1);  //Markus
+  //MainVertexSettings(3, 5, 1, 2, 1, 3);    //loose cuts
   SetVertexConstraint(true);
 
   // cuts
-  SetTrackletCuts(0.007, true);
-  SetTrackCuts(0.007, 0.03, 30, true);
+  SetTrackletCuts(0.02, true);  //Test
+  //SetTrackletCuts(0.007, true);  //Markus
+  //SetTrackletCuts(0.03, true); //loose cuts
+
+
+  SetTrackCuts(0.06, 0.03, 30, true); //Test
+  //SetTrackCuts(0.007, 0.03, 30, true);  //Markus
+  //SetTrackCuts(0.07, 0.3, 50, true);  //loose cuts
 
   ClusterLoop();
  
