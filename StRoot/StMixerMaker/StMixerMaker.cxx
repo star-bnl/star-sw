@@ -530,7 +530,7 @@ Int_t StMixerMaker::Make() {
     // Digitize the Signals
     //
     // First make a sector where the data can go...
-    aDigitalSector = new StTrsDigitalSector(mGeometryDb);
+    StTrsDigitalSector  *aDigitalSector = new StTrsDigitalSector(mGeometryDb);
     
     // Point to the object you want to fill
     //
@@ -561,7 +561,10 @@ Int_t StMixerMaker::Make() {
 void StMixerMaker::Clear(Option_t *opt)
 {
   if (mAllTheDataMixer) mAllTheDataMixer->clear();
-  if (aDigitalSector) aDigitalSector->clear();
+  if (tdr1) delete tdr1;
+  tdr1 = 0;
+  if (tdr2) delete tdr2;
+  tdr1 = 0;
   StMaker::Clear();
 }
 
@@ -578,12 +581,8 @@ Int_t StMixerMaker::Finish()
   mSector2 = 0;
   if (mAllTheDataMixer) delete mAllTheDataMixer;
   mAllTheDataMixer = 0;
-  if (tdr1) delete tdr1;
-  tdr1 = 0;
-  if (tdr2) delete tdr2;
-  tdr1 = 0;
-  if (aDigitalSector) delete aDigitalSector;
-  aDigitalSector = 0;
+  if (mDigitalSignalGenerator) delete mDigitalSignalGenerator;
+  mDigitalSignalGenerator = 0;    
   return kStOK;
 }
 
