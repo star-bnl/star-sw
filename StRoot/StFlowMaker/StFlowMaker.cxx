@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.103 2005/02/10 21:04:57 aihong Exp $
+// $Id: StFlowMaker.cxx,v 1.104 2005/02/11 23:24:31 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -256,7 +256,7 @@ Int_t StFlowMaker::Init() {
   // init message manager
   gMessMgr->MemoryOn();
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.103 2005/02/10 21:04:57 aihong Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.104 2005/02/11 23:24:31 posk Exp $");
 
   if (Debug()) gMessMgr->Info() << "FlowMaker: Init()" << endm;
 
@@ -1762,6 +1762,15 @@ Bool_t StFlowMaker::FillFromMuDST() {
   pFlowEvent->SetZDCSMD_PsiWeightFull(mZDCSMD_PsiWgtFull);
   pFlowEvent->SetZDCSMD_BeamCenter(mZDCSMDCenterEx,mZDCSMDCenterEy,mZDCSMDCenterWx,mZDCSMDCenterWy);
 
+  // Set centrality
+  pFlowEvent->SetRunID(pMuEvent->runId());
+  pFlowEvent->SetCenterOfMassEnergy(pMuEvent->runInfo().centerOfMassEnergy());
+  pFlowEvent->SetMagneticField(pMuEvent->runInfo().magneticField());
+  pFlowEvent->SetUncorrNegMult(pMuEvent->refMultNeg());
+  pFlowEvent->SetUncorrPosMult(pMuEvent->refMultPos());
+  pFlowEvent->SetMultEta(pMuEvent->refMult()); 
+  pFlowEvent->SetCentrality(); 
+
   FillFromMuVersion0DST();
 
   // Check Eta Symmetry
@@ -1797,14 +1806,11 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
 
   pFlowEvent->SetEventID(pMuEvent->eventId());
   pFlowEvent->SetVertexPos(pMuEvent->primaryVertexPosition());
-  pFlowEvent->SetRunID(pMuEvent->runId());
-  pFlowEvent->SetCenterOfMassEnergy(pMuEvent->runInfo().centerOfMassEnergy());
 
   if (pMuEvent->runId() > 4000000 ) { // After year 4 trigger collections are used
     pFlowEvent->SetL0TriggerWord(StFlowCutEvent::TriggersFound());  // triggerWord is now obsolete
   } else { pFlowEvent->SetL0TriggerWord(pMuEvent->l0Trigger().triggerWord()); }
 
-  pFlowEvent->SetMagneticField(pMuEvent->runInfo().magneticField());
   pFlowEvent->SetBeamMassNumberEast(pMuEvent->runInfo().beamMassNumber(east));
   pFlowEvent->SetBeamMassNumberWest(pMuEvent->runInfo().beamMassNumber(west));
   pFlowEvent->SetCTB(pMuEvent->ctbMultiplicity());
@@ -1841,10 +1847,6 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
   UInt_t origMult = pMuEvent->eventSummary().numberOfGoodPrimaryTracks(); //???
   pFlowEvent->SetOrigMult(origMult);
   PR(origMult);
-  pFlowEvent->SetUncorrNegMult(pMuEvent->refMultNeg());
-  pFlowEvent->SetUncorrPosMult(pMuEvent->refMultPos());
-  pFlowEvent->SetMultEta(pMuEvent->refMult()); 
-  pFlowEvent->SetCentrality(); 
   
   int goodTracks = 0;
   // Fill FlowTracks
@@ -2267,6 +2269,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.104  2005/02/11 23:24:31  posk
+// SetCentrality works for year4.
+//
 // Revision 1.103  2005/02/10 21:04:57  aihong
 // test mProbPid of StFlowEvent before launch calculation pid on fly
 //
