@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RandFlat.h,v 1.1 1999/01/30 03:59:00 fisyak Exp $
+ * $Id: RandFlat.h,v 1.2 1999/09/02 11:35:25 ullrich Exp $
  *
  * Author: Gabriele Cosmo - Created: 5th September 1995
  *         modified for SCL bl
@@ -24,8 +24,8 @@
  ***************************************************************************
  *
  * $Log: RandFlat.h,v $
- * Revision 1.1  1999/01/30 03:59:00  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/09/02 11:35:25  ullrich
+ * Changed order of data member to avoid warnings on Linux
  *
  * Revision 1.1  1999/01/30 03:59:00  fisyak
  * Root Version of StarClassLibrary
@@ -168,17 +168,17 @@ private:
   //     on _each_ architecture.
   //   (Aim: the random generators should be machine-independent).
 
-  static const unsigned long MSB; 
-  static const HepInt MSBBits;
-
-  unsigned long randomInt;
-  unsigned long firstUnusedBit;
-  static unsigned long staticRandomInt;
-  static unsigned long staticFirstUnusedBit;
-  
   HepRandomEngine* localEngine;
   HepBoolean deleteEngine;
 
+  unsigned long randomInt;
+  unsigned long firstUnusedBit;
+
+  static const HepInt MSBBits;
+  static const unsigned long MSB; 
+
+  static unsigned long staticRandomInt;
+  static unsigned long staticFirstUnusedBit;  
 };
 
 inline RandFlat::RandFlat(HepRandomEngine & anEngine)
