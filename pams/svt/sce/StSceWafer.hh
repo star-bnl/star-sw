@@ -1,6 +1,6 @@
 #ifndef STSCEWAFER_HH
 #define STSCEWAFER_HH
-#include <stdiostream.h>
+#include <iostream.h>
 #include <stdlib.h>
 #include <math.h>
 #include "sce_am.h"
