@@ -132,7 +132,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    $CPPPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{QT}->{INCDIR};
 	    $LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{QT}->{LIBDIR}; 
 	    #$LIBS ... should come loaded from ROOT 
-	    $CXXFLAGS.= " " . $env->{Packages}->{QT}->{FLAGS}; 
+	    $CXXFLAGS.= " " . $env->{Packages}->{QT}->{FLAGS};
+#	    $LIBS .= " " . $env->{Packages}->{QT}->{LIBS};
 	}
     } elsif ( $pkg =~ m/^St.*Db/ ) {
 	$CPPPATH .= $main::PATH_SEPARATOR .  $env->{Packages}->{MYSQL}->{INCDIR};
@@ -254,7 +255,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       $CPPPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{Logger}->{INCDIR};
       $LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{Logger}->{LIBDIR};
       $LIBS    .= " " . $env->{Packages}->{Logger}->{LIBS};
-      print "CPPPATH = $CPPPATH\n";
     }
 
     if ( $STAR_SYS =~ /^sun4x_5.$/ ) { $CXXFLAGS .= " -ptr" . $obj_dir; }
