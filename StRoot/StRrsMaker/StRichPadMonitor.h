@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichPadMonitor.h,v 1.4 2000/04/05 16:02:13 lasiuk Exp $
+ * $Id: StRichPadMonitor.h,v 1.5 2000/05/17 22:20:40 lasiuk Exp $
  * Description:
  *  First aTtempt at a simple Pad Monitor.
  *  Runs only in ROOT
@@ -7,6 +7,9 @@
  ***************************************************************
  *
  * $Log: StRichPadMonitor.h,v $
+ * Revision 1.5  2000/05/17 22:20:40  lasiuk
+ * charge from the pixel
+ *
  * Revision 1.4  2000/04/05 16:02:13  lasiuk
  * GEANT info now drawable
  *
@@ -39,12 +42,11 @@ using std::vector;
 
 #include "StRichG2TInfo.h"
 
-#include "StRchMaker/StRichHit.h"
-
 class StRichPadMonitorText;
 class StRichGeometryDb;
 class StRichCoordinateTransform;
 class StRichSinglePixel;
+class StRichSimpleHit;
 class StRichSingleMCPixel;
 class StRichDrawableTPad;
 
@@ -69,7 +71,7 @@ public:
     void drawPad(const StRichSinglePixel&);
     void drawG2T(const StRichG2TInfo&);
     void drawGeantGroup(int track, int color=1);
-    void drawHit(StRichHit*);
+    void drawHit(StRichSimpleHit*);
 
     // Controls
     //void removeGeantPoints();

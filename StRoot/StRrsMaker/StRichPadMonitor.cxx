@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichPadMonitor.cxx,v 1.4 2000/04/05 16:02:09 lasiuk Exp $
+ * $Id: StRichPadMonitor.cxx,v 1.5 2000/05/17 22:20:40 lasiuk Exp $
  * Description:
  *  First aTtempt at a simple Pad Monitor.
  *  Runs only in ROOT
@@ -7,6 +7,9 @@
  *****************************************************************
  *
  * $Log: StRichPadMonitor.cxx,v $
+ * Revision 1.5  2000/05/17 22:20:40  lasiuk
+ * charge from the pixel
+ *
  * Revision 1.4  2000/04/05 16:02:09  lasiuk
  * GEANT info now drawable
  *
@@ -37,7 +40,7 @@
 #include "StRichDrawableTG2T.h"
 // #include "StRichTControl.h"
 
-//#include "StRichDrawableTHit.h"
+#include "StRchMaker/StRichSimpleHit.h"
 #include "StRchMaker/StRichDrawableTHit.h"
 #include "StRichPadMonitorText.h"
 
@@ -149,7 +152,7 @@ void StRichPadMonitor::drawColorBox()
     for(int ii=0; ii<1024; ii++) {
 	upperY = lowerY + .07; 
 	mColorBoxes.Add(new TBox(lowerX,lowerY,upperX,upperY));
-	((TBox*)mColorBoxes.Last())->SetFillColor(GetColorAttribute(ii));
+	((TBox*)mColorBoxes.Last())->SetFillColor(GetColorAttribute(static_cast<double>(ii)));
 	((TBox*)mColorBoxes.Last())->Draw();
 	if((ii == 10) || (ii == 50) || (ii == 100) || (ii == 200) || (ii == 500) || (ii == 1000)) {
 	    mTextLabels.Add( new TPaveText((lowerX-7),(lowerY-2),(lowerX-2),(lowerY+1)) );
@@ -245,7 +248,7 @@ void StRichPadMonitor::drawPad(const StRichSingleMCPixel& mcPad)
     double xl,xu,yl,yu;
     calculatePadPosition(&mcPad,&xl,&yl,&xu,&yu);
     StRichDrawableMCTPad* dtp = new StRichDrawableMCTPad(xl,yl,xu,yu,&mcPad);
-    dtp->SetFillColor(GetColorAttribute(mcPad.amplitude())); // scale by ADC color
+    dtp->SetFillColor(GetColorAttribute(mcPad.charge())); // scale by ADC color
     dtp->SetLineColor(2);  // black
     dtp->Draw();
     mAllFilledPads.Add(dtp);
@@ -258,7 +261,7 @@ void StRichPadMonitor::drawPad(const StRichSinglePixel& pad)
     double xl,xu,yl,yu;
     calculatePadPosition(&pad,&xl,&yl,&xu,&yu);
     StRichDrawableTPad* dtp = new StRichDrawableTPad(xl,yl,xu,yu,&pad);
-    dtp->SetFillColor(GetColorAttribute(pad.amplitude())); // scale by ADC color
+    dtp->SetFillColor(GetColorAttribute(pad.charge())); // scale by ADC color
     dtp->SetLineColor(2);  // black
     dtp->Draw();
     mAllFilledPads.Add(dtp);
@@ -302,7 +305,7 @@ void StRichPadMonitor::drawGeantGroup(int trackp, int color)
      this->update();
 }
 
-void StRichPadMonitor::drawHit(StRichHit* hit)
+void StRichPadMonitor::drawHit(StRichSimpleHit* hit)
 {
 #ifndef SUN
     // Letter
@@ -327,7 +330,7 @@ void StRichPadMonitor::addPad(StRichSinglePixel* pad)
     dtp->SetLineWidth(1);
     dtp->SetLineColor(2);  // black
     //dtp->SetFillStyle(0);
-    dtp->SetFillColor(GetColorAttribute(pad->amplitude())); // scale by ADC color
+    dtp->SetFillColor(GetColorAttribute(pad->charge())); // scale by ADC color
 //     mAllFilledPads.push_back(dtp);    
     mAllFilledPads.Add(dtp);    
 }
@@ -382,7 +385,7 @@ void StRichPadMonitor::drawRing()
 	cout << "\tNo Points to Plot." << endl;
     }
     else {
-	    for(int ii=1; ii<mXPoints.size(); ii++) {
+	    for(unsigned  ii=1; ii<mXPoints.size(); ii++) {
 // 		cout << "pts: "
 // 		     << (mXPoints[ii-1]) << " "
 // 		     << (mYPoints[ii-1]) << " "
