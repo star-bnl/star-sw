@@ -4,6 +4,7 @@
 *   Description: define coefficients for transition from deposit energy
 *                to ADC only for BEMC
 *                  Pavlinov Aleksei.
+* Corr. 23-sep-1998 => Add. variation of pedestal
 **************************************************************************** 
 */
    struct control_toadc {
@@ -12,6 +13,7 @@
      float energy;   /* Max energy in BEMC tower (~60 GeV/c)*/
      float dep_mip;  /* MIP deposit energy in Sc.layers at zero angle */ 
      float nphe_mip; /* The number of PHE for MIP at zero angle */ 
+     float rms_ped;  /* Variation of pedestal in adc channel */
      float c1;       /* Transition coefficient from Dep.Energy to ADC=> */
                      /* ( = sampfrac*bemc_adcbits) / energy   */
      float c2;       /* Transition coefficient from Dep.Energy to NPHE=>*/
