@@ -26,38 +26,22 @@ class StiRootDisplayManager : public StiDisplayManager
 public:
     friend class nobody;
     
+    static const int skeletonView;
+    static const int zoomSkeletonView;
+
     typedef multimap<string, StiDrawable*> stidrawablemap;
     typedef stidrawablemap::value_type stiDrawableMapValType;
-    
     //Singleton access
     static StiDisplayManager* instance(TCanvas* c1=0);
-
-    //Action
     void addDrawable(StiDrawable*);
-    //clean up after each event (e.g., remove tracks)
     void reset();
-    
     void cd();
     void update();
     void draw();
-    //void draw(StiDrawable*); //Update just this object
-
-    void setInvisible();
-    void setInvisible(const StiDrawable*);
-    void setVisible();
-    void setVisible(const StiDrawable*);
-    
-    void setSkeletonView();
-    void setZoomSkeletonView();
-
-    void setTpcVisible();
-    void setTpcInvisible();
-    void setSvtVisible();
-    void setSvtInvisible();
-    void setIfcVisible();
-    void setIfcInvisible();
-
-    //Utility
+    void setVisible(bool value);
+    void setVisible(const StiDrawable*, bool value);
+    void setVisible(const char * name, bool value);
+    void setView(int view);
     void print() const;
 
 protected:
