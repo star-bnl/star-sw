@@ -32,6 +32,9 @@ enum  EBufSizes { kChar1Byte   =sizeof(Char_t)
                  ,kDouble8Bytes=sizeof(Double_t)
                 } ; 
 
+enum ETableBits {
+    kIsNotOwn         = BIT(31)   // if the St_Table wrapper doesn't own the STAF table                                 // As result of the Update() method for example
+};
 class G__DataMemberInfo;
 class St_XDFFile;
 

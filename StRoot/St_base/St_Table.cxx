@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.16 1998/09/21 15:43:02 fine Exp $ 
+// $Id: St_Table.cxx,v 1.17 1998/09/23 02:48:13 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.17  1998/09/23 02:48:13  fine
+// The bit kIsNotOwn has been introduced to avoid clash with kCanDelete used with St_DataSet
+//
 // Revision 1.16  1998/09/21 15:43:02  fine
 // St_Table::Update bug has been fixed
 //
@@ -215,7 +218,7 @@ void St_Table::Delete()
 {
   if (s_Table)
   {
-    if (! TestBit(kCanDelete)) free(s_Table);
+    if (! TestBit(kIsNotOwn)) free(s_Table);
     s_Table = 0;
    *s_MaxIndex = 0;
     fN = 0;
@@ -936,9 +939,9 @@ void St_Table::Update(St_DataSet *set, UInt_t opt)
       Adopt(table->GetSize(),table->GetArray());
      *s_TableHeader   = *(table->GetHeader());
       // mark that object lost the STAF table and can not delete it anymore
-      table->SetBit(kCanDelete);
+      table->SetBit(kIsNotOwn);
       // mark we took over of this STAF table
-      ResetBit(kCanDelete);
+      ResetBit(kIsNotOwn);
     }
     else
        Error("Update",
