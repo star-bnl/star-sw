@@ -100,6 +100,6 @@ StiKalmanTrack* StiRDLocalTrackSeedFinder::makeTrack(StiHit* hit)
 void StiRDLocalTrackSeedFinder::getNewState()
 {
     mMessenger <<"StiRDLocalTrackSeedFinder::getNewState()"<<endl;
-    const StiIOBroker* broker = StiIOBroker::instance();
+    //const StiIOBroker* broker = StiIOBroker::instance();
     StiLocalTrackSeedFinder::getNewState();
 }
