@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.27 2004/07/01 17:49:07 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.28 2004/10/20 17:53:11 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.28  2004/10/20 17:53:11  jhthomas
+ * Add StGetSpaceChargeMode() function
+ *
  * Revision 1.27  2004/07/01 17:49:07  jhthomas
  * Add Event by Event SpaceCharge form GVB.  Start adding incomplete/unfinished work on Endcaps from JT.
  *
@@ -144,6 +147,7 @@ class StMagUtilities {
   virtual void    GetSpaceCharge ()   ;
   virtual void    GetSpaceChargeR2 () ;  
   virtual void    GetShortedRing ()   ;  
+  virtual Int_t   GetSpaceChargeMode();
 
   virtual void    CommonStart ( Int_t mode ) ;
   virtual void    ReadField ( ) ;
