@@ -6,10 +6,10 @@
 */
 
 	struct tpt_res{
-		long	trk;
-		long	hit;
-		float	resy;
-		float	resz;
+		long	trk;	/* track id */
+		long	hit;    /* hit id*/
+		float	resy;   /* residuum along the padrow */
+		float	resz;   /* residuum in the drift direction */
 };
 
-/* Last mod. for tpt_res: $Date: 1997/12/31 14:34:12 $ */
+/* Last mod. for tpt_res: $Date: 1998/12/11 19:19:56 $ */
