@@ -86,6 +86,16 @@ void StiDisplayManager::draw()
     return;
 }
 
+void StiDisplayManager::reset()
+{
+    for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
+	if ((*it).second->canBeRemoved()) {
+	    mmap.erase(it);
+	}
+    }
+    
+}
+
 void StiDisplayManager::update()
 {
     mcanvas->Update();

@@ -22,10 +22,24 @@ public:
     
     virtual const char* name() const = 0;
 
+    void setRemoved(bool);
+    bool canBeRemoved() const;
+    
     const StThreeVector<double>& position() {return mposition;}
     
 protected:
     StThreeVector<double> mposition; //Global position of center of volume
+    bool mremoved_each_event;
 };
+
+inline bool StiDrawable::canBeRemoved() const
+{
+    return mremoved_each_event;
+}
+
+inline void StiDrawable::setRemoved(bool val)
+{
+    mremoved_each_event = val;
+}
 
 #endif

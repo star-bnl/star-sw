@@ -41,7 +41,7 @@ void StiRootDrawableHits::fillHitsForDrawing()
     mpoly->ResetBit(kCanDelete);
 
     for (const_hit_vector::const_iterator it=begin(); it!=end(); ++it) {
-	const StThreeVectorD& pos = (*it)->stHit()->position();
+	const StThreeVectorD& pos = (*it)->globalPosition();
 	mpoly->SetNextPoint( pos.x(), pos.y(), pos.z() );
     }
     return;

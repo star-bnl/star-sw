@@ -8,7 +8,7 @@
 //Sti
 #include "StiDrawable.h"
 
-StiDrawable::StiDrawable()
+StiDrawable::StiDrawable() : mremoved_each_event(false)
 {
 }
 
