@@ -1,6 +1,10 @@
 //*CMZ :          13/08/98  18.27.27  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   13/08/98 
-
+// $Id: St_DataSet.h,v 1.32 1999/06/09 22:08:53 fine Exp $
+// $Log: St_DataSet.h,v $
+// Revision 1.32  1999/06/09 22:08:53  fine
+// Comment clean up
+//
 #ifndef ROOT_St_DataSet
 #define ROOT_St_DataSet
  
