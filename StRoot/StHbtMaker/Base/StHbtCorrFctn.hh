@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtCorrFctn.hh,v 1.3 1999/12/03 22:24:33 lisa Exp $
+ * $Id: StHbtCorrFctn.hh,v 1.4 2000/02/13 17:13:09 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtCorrFctn.hh,v $
+ * Revision 1.4  2000/02/13 17:13:09  laue
+ * EventBegin() and EventEnd() functions implemented
+ *
  * Revision 1.3  1999/12/03 22:24:33  lisa
  * (1) make Cuts and CorrFctns point back to parent Analysis (as well as other way). (2) Accommodate new PidTraits mechanism
  *
@@ -27,10 +30,9 @@
 #ifndef StHbtCorrFctn_hh
 #define StHbtCorrFctn_hh
 
-//#include<string>
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
-
 #include "StHbtMaker/Infrastructure/StHbtPair.hh"
+#include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 
 class StHbtCorrFctn{
 
@@ -38,12 +40,13 @@ public:
   StHbtCorrFctn(){/* no-op */};
   virtual ~StHbtCorrFctn(){/* no-op */};
 
-  //  virtual string Report() = 0;
   virtual StHbtString Report() = 0;
 
   virtual void AddRealPair(const StHbtPair*) = 0;
   virtual void AddMixedPair(const StHbtPair*) = 0;
 
+  virtual void EventBegin(const StHbtEvent*) { /* no-op */ }
+  virtual void EventEnd(const StHbtEvent*) { /* no-op */ }
   virtual void Finish() = 0;
 
   // the following allows "back-pointing" from the CorrFctn to the "parent" Analysis
