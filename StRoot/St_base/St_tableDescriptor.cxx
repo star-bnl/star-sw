@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   09/08/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.cxx,v 1.13 2000/02/29 22:13:56 fine Exp $
+// $Id: St_tableDescriptor.cxx,v 1.14 2000/03/05 04:11:48 fine Exp $
 #include <stdlib.h> 
 #include "St_tableDescriptor.h"
 #include "St_Table.h"
@@ -50,60 +50,35 @@ St_tableDescriptor::~St_tableDescriptor()
 #ifdef NORESTRICTIONS
   if (!IsZombie()) {
     for (Int_t i=0;i<GetNRows();i++) {
-      Char_t *name = (Char_t *)GetColumnName(i);
+      Char_t *name = (Char_t *)ColumnName(i);
       if (name) delete [] name; 
-      UInt_t  *indxArray = (UInt_t *)GetIndexArray(i);
+      UInt_t  *indxArray = (UInt_t *)IndexArray(i);
       if (indxArray) delete [] indxArray; 
     }
   }
 #endif
 }
 //____________________________________________________________________________
-Int_t St_tableDescriptor::Compare(St_tableDescriptor *compTable)
-{
-  Int_t diffCols = GetNumberOfColumns() - compTable->GetNumberOfColumns();
-  if (diffCols) return diffCols;
-  Int_t counter = 0;
-  for (UInt_t i = 0; i < GetNumberOfColumns(); i++){
-      if (strcmp(GetColumnName(i),compTable->GetColumnName(i))) {
-           printf(" mistmatch names of the %d-th cols. Should be: \"%s\", got:  \"%s\"\n", 
-                   i, GetColumnName(i),compTable->GetColumnName(i));
-           counter++; 
-           continue;
-      }
-#if 0
-      UInt_t     *GetIndexArray(Int_t columnIndex)          const;
-      UInt_t      GetOffset(Int_t columnIndex)              const;
-      UInt_t      GetColumnSize(Int_t columnIndex)          const;
-      UInt_t      GetTypeSize(Int_t columnIndex)            const;
-      UInt_t      GetDimensions(Int_t columnIndex)          const;
-      EColumnType GetColumnType(Int_t columnIndex)          const;
-#endif
-  }
-  return counter;
-}
-
-//____________________________________________________________________________
 TString St_tableDescriptor::CreateLeafList() const 
 {
   // Create a list of leaf to be useful for TBranch::TBranch ctor
   const Char_t TypeMapTBranch[]="\0FIISDiisbBC";
-  Int_t maxRows = GetNumberOfColumns();
+  Int_t maxRows = NumberOfColumns();
   TString string;
   for (Int_t i=0;i<maxRows;i++){
     if (i) string += ":";
-    Int_t nDim = GetDimensions(i);
+    Int_t nDim = Dimensions(i);
     if (nDim) {
-       UInt_t *indx = GetIndexArray(i);
+       UInt_t *indx = IndexArray(i);
        if (indx) {
-         const Char_t *colName = GetColumnName(i);
+         const Char_t *colName = ColumnName(i);
          Char_t digBuffer[100];       
          for (Int_t j=0;j<nDim;j++) {
 	   for (UInt_t l=0;l<indx[j];l++){
 	     if (l) string += ":";
 	     sprintf(digBuffer,"%s_%d",colName, l);
 	     string += digBuffer;
-	     if (l==0) { string += "/"; string += TypeMapTBranch[GetColumnType(i)];}
+	     if (l==0) { string += "/"; string += TypeMapTBranch[ColumnType(i)];}
 	   }
          }
        }
@@ -113,9 +88,9 @@ TString St_tableDescriptor::CreateLeafList() const
          break;
       }
     } else {
-      string += GetColumnName(i);
+      string += ColumnName(i);
       string += "/";
-      string += TypeMapTBranch[GetColumnType(i)];
+      string += TypeMapTBranch[ColumnType(i)];
     }
   }
   return string;
@@ -143,11 +118,11 @@ void St_tableDescriptor::LearnTable(TClass *classPtr)
 //
 //  This is to introduce an artificial restriction demanded by STAR database group
 //
-//    1. the name may be 19 symbols at most
-//    2. the number the dimension is 2 at most
+//    1. the name may be 31 symbols at most
+//    2. the number the dimension is 3 at most
 //
 //  To lift this restriction one has to provide -DNORESTRICTIONS CPP symbol and
-//  recompile code.
+//  recompile code (and debug code NOW!)
 //
 
   if (!classPtr) return;
@@ -216,58 +191,102 @@ void St_tableDescriptor::LearnTable(TClass *classPtr)
     AddAt(&elementDescriptor,columnIndex); columnIndex++;
   }
 }
+
+//______________________________________________________________________________
+Int_t St_tableDescriptor::UpdateOffsets(const St_tableDescriptor *newDescriptor)
+{
+  //                  "Schema evolution"
+  // Method updates the offsets with a new ones from another descritor
+  //
+  Int_t maxColumns = NumberOfColumns();
+  Int_t mismathes = 0;
+
+  if (   (UInt_t(maxColumns) == newDescriptor->NumberOfColumns()) 
+      && (memcmp(GetArray(),newDescriptor->GetArray(),sizeof(tableDescriptor_st)*GetNRows()) == 0)
+     ) return mismathes; // everything fine for sure !
+
+  // Something wrong here, we have to check things piece by piece
+  for (Int_t colCounter=0; colCounter < maxColumns; colCounter++) 
+  {
+    Int_t colNewIndx = newDescriptor->ColumnByName(ColumnName(colCounter));
+    // look for analog
+    if (    colNewIndx >=0
+         && Dimensions(colCounter) == newDescriptor->Dimensions(colNewIndx) 
+         && ColumnType(colCounter) == newDescriptor->ColumnType(colNewIndx)
+       )  {
+      SetOffset(newDescriptor->Offset(colNewIndx),colCounter); 
+      if (colNewIndx != colCounter) {
+        printf("Schema evolution: \t%d column of the \"%s\" table has been moved to %d-th column\n",
+        colCounter,ColumnName(colCounter),colNewIndx);  
+        mismathes++;
+      }
+    }
+    else {
+      printf("Schema evolution: \t%d column of the \"%s\" table has been lost\n",
+        colCounter,ColumnName(colCounter));  
+      printf(" Indx = %d, name = %s \n", colNewIndx, ColumnName(colCounter));
+      SetOffset(-1,colCounter);
+      mismathes++;
+    }
+  } 
+  return mismathes;
+}
 //____________________________________________________________________________
-const Int_t St_tableDescriptor::GetColumnByName(const Char_t *columnName) const 
+const Int_t St_tableDescriptor::ColumnByName(const Char_t *columnName) const 
 { 
+ // Find the column index but the column name
  const tableDescriptor_st *elementDescriptor = ((St_tableDescriptor *)this)->GetTable();
  Int_t i = -1;
  if (!elementDescriptor) return i;
  Int_t nRows = GetNRows();
  if (nRows) {
-   for (Int_t ii=0; ii < nRows; ii++)
-     if (strcmp(columnName,elementDescriptor->m_ColumnName) == 0) break;
+   for (i=0; i < nRows; i++,elementDescriptor++) 
+     if (strcmp(columnName,elementDescriptor->m_ColumnName) == 0) break;   
  }
  if (i==nRows) i = -1;
  return i;
 }
 //____________________________________________________________________________
-Int_t St_tableDescriptor::GetOffset(const Char_t *columnName) const 
+Int_t St_tableDescriptor::Offset(const Char_t *columnName) const 
 {  
-  Int_t indx = GetColumnByName(columnName);
-  if (indx >= 0 ) indx = GetOffset(indx);
+  Int_t indx = ColumnByName(columnName);
+  if (indx >= 0 ) indx = Offset(indx);
   return indx;
 }
 //____________________________________________________________________________
-Int_t St_tableDescriptor::GetColumnSize(const Char_t *columnName) const 
+Int_t St_tableDescriptor::ColumnSize(const Char_t *columnName) const 
 { 
-  Int_t indx = GetColumnByName(columnName);
-  if (indx >= 0 ) indx = GetColumnSize(indx);
+  Int_t indx = ColumnByName(columnName);
+  if (indx >= 0 ) indx = ColumnSize(indx);
   return indx;
 }
 //____________________________________________________________________________
-Int_t St_tableDescriptor::GetTypeSize(const Char_t *columnName) const 
+Int_t St_tableDescriptor::TypeSize(const Char_t *columnName) const 
 {
-  Int_t indx = GetColumnByName(columnName);
-  if (indx >= 0 ) indx = GetTypeSize(indx);
+  Int_t indx = ColumnByName(columnName);
+  if (indx >= 0 ) indx = TypeSize(indx);
   return indx;
 }
 //____________________________________________________________________________
-Int_t St_tableDescriptor::GetDimensions(const Char_t *columnName) const 
+Int_t St_tableDescriptor::Dimensions(const Char_t *columnName) const 
 {
-  Int_t indx = GetColumnByName(columnName);
-  if (indx >= 0 ) indx = GetDimensions(indx);
+  Int_t indx = ColumnByName(columnName);
+  if (indx >= 0 ) indx = Dimensions(indx);
   return indx;
 }
 //____________________________________________________________________________
-St_Table::EColumnType St_tableDescriptor::GetColumnType(const Char_t *columnName) const 
+St_Table::EColumnType St_tableDescriptor::ColumnType(const Char_t *columnName) const 
 {
-  Int_t indx = GetColumnByName(columnName);
-  if (indx >= 0 ) indx = GetColumnType(indx);
+  Int_t indx = ColumnByName(columnName);
+  if (indx >= 0 ) indx = ColumnType(indx);
   return EColumnType(indx);
 }
 
 //____________________________________________________________________________
 // $Log: St_tableDescriptor.cxx,v $
+// Revision 1.14  2000/03/05 04:11:48  fine
+// Automatic schema evolution for St_Table has been activated
+//
 // Revision 1.13  2000/02/29 22:13:56  fine
 // Compare method fixed
 //
