@@ -3,10 +3,10 @@
 
 	IMPLICIT NONE
 
-*  Input/output argument:
+*  Input/output:
 	INTEGER SEED !Integer seed, set at least once by caller,
 *                     modified "randomly" each time within this routine.
-*  Return value:  Random number from a gaussian distribution, with a mean
+*  Returns:  Random number from a gaussian distribution, with a mean
 *                 of 0 and a sigma of 1.
 
 	DOUBLE PRECISION f
@@ -19,13 +19,13 @@
 	RETURN
 	END
 *
-	SUBROUTINE STRFIT(GENERAL_ERRORS,COUNTING_ERRORS,TRACE_LUN
-     1	              ,Niter_max
-     1	              ,FITF,NPTS,NPAR,X,Y,WY,DA,A,FLAMDA,SA,CHI2)
+	SUBROUTINE STRFIT( GENERAL_ERRORS, COUNTING_ERRORS, TRACE_LUN
+     1	              , Niter_max
+     1	              , FITF, NPTS, NPAR, X, Y, WY, DA, A, FLAMDA, SA, CHI2 )
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	LOGICAL GENERAL_ERRORS  !If TRUE, the Y errors (weights) are set
                                 !by the calling routine and found in WY.
                                 !GENERAL_ERRORS overrides COUNTING_ERRORS.
@@ -43,18 +43,18 @@
 	DOUBLE PRECISION WY(*)  !The ordinates' weights, if GENERAL_ERRORS
 	DOUBLE PRECISION DA(*)  !The differentiation step-size for the "A".
 
-*  Input/Output arguments:
+*  Input/Outputs:
 	DOUBLE PRECISION A(*)   !The adjustable parameters for FITF,
                                 !initialized by the caller.
 	DOUBLE PRECISION FLAMDA !The "mixing" parameter, initialized externally
                                 !to 1, typically, and determines the relative
                                 !mix between the two "types" of fits used
                                 !here;  varied as fit improves.  See Bevington.
-*  Output arguments:
+*  Outputs:
 	DOUBLE PRECISION SA(*)  !The fit-error-estimates in the A.
 	DOUBLE PRECISION CHI2   !The final Chi-2 per dof of the fit.
 
-*  Functional description:
+*  Description:
 *	Fit a function, FITF, to a set of data, (X,Y), with weights WY, and
 *	variable parameters A.  From a set of routines in "Data reduction
 *	and Error Analysis for the Physical Sciences", P.R. Bevington,
@@ -143,8 +143,9 @@
 	RETURN
 	END
 *
-	SUBROUTINE STRFIT_DERIV(FITF,X,IPT,A,DA,NPAR,DERIV)
+	SUBROUTINE STRFIT_DERIV( FITF, X, IPT, A, DA, NPAR, DERIV )
 
+*  Brief description:  Calculate parameter-derivatives for general fit routine.
 *	From P. R. Bevington.
 
 	IMPLICIT NONE
@@ -175,9 +176,9 @@
 	RETURN
 	END
 *
-	SUBROUTINE STRFIT_ITER
-     1	          (FITF,X,Y,WY,NPTS,NPAR,A,DA,SA,FLAMDA,CHISQR)
+	SUBROUTINE STRFIT_ITER( FITF, X, Y, WY, NPTS, NPAR, A, DA, SA, FLAMDA, CHISQR )
 
+*  Brief description:  Perform one iteration for general fit routine.
 *	This is a FORTRAN-77 (and modified) version of the subroutine
 *	described on page 238 of P. R. Bevington's Data Reduction and Error
 *	Analysis for the Physical Sciences.
@@ -330,6 +331,9 @@
 	DOUBLE PRECISION X(*),Y(*),WY(*),A(*)
 	INTEGER NPTS,NPAR
 
+*  Brief description:  Calculate chi-squared per DOF for general fit routine.
+*	From P. R. Bevington.
+
 	DOUBLE PRECISION CHI2,D
 	INTEGER I
 
@@ -349,25 +353,28 @@
 	RETURN
 	END
 *
-	LOGICAL FUNCTION STRFIT_MATINV(NORDER,ORDERED,ARRAY)
+	LOGICAL FUNCTION STRFIT_MATINV( NORDER, ORDERED, ARRAY )
 
 	IMPLICIT NONE
 
 	INTEGER NPAR_MAX
 	PARAMETER (NPAR_MAX=100) !This must match in STRFIT_ITER.
 
-*  Input arguments:
+*  Inputs:
 	INTEGER NORDER !Size of matrix to be inverted.
 	LOGICAL ORDERED !If .TRUE., the pivot-strategy (ordering) is skipped.
 
-*  Input/Output argument:
+*  Input/Output:
 	DOUBLE PRECISION ARRAY(NPAR_MAX,NPAR_MAX) !Initialized by caller to
 	                                          !hold matrix to be inverted.
 	                                          !Returns as inverted matrix.
-*  Return values:
+*  Returns:
 *	.TRUE. if the matrix was successfully inverted.
 *	.FALSE. if not (eg, degenerative).
 
+*  Brief description:  Invert a matrix.
+
+*  Description:
 *	This subroutine is a very close copy of the one found in
 *	appendix B-2 of P. R. Bevington.
 *	Converted to FORTRAN 77  June, 1987.
@@ -476,14 +483,15 @@
 	RETURN
 	END
 *
-	DOUBLE PRECISION FUNCTION STRFIT_F_SAMPLE(X,I,A)
-
-*	Evaluate the fit-function at point X(I) using parameters A.
+	DOUBLE PRECISION FUNCTION STRFIT_F_SAMPLE( X, I, A )
 
 	IMPLICIT NONE
 
-	DOUBLE PRECISION X(*),A(*)
+	DOUBLE PRECISION X(*), A(*)
 	INTEGER I
+
+*  Description:
+*	 Evaluate the fit-function at point X(I) using parameters A.
 
 *	Sample function - quadratic:
 	STRFIT_F_SAMPLE=A(1)+(A(2)+A(3)*X(I))*X(I)

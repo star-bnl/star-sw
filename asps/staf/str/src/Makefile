@@ -5,8 +5,7 @@ FFLAGS_DBG   = -c -g -w
 CCFLAGS      = -c -O -ansi -fullwarn -v -prototypes
 CCFLAGS_DBG  = -c -g -ansi -fullwarn -v -prototypes
 
-all : libstr.a 
-#all : libstr.a libstr_dbg.a
+all : libstr.a libstr_dbg.a
 
 str : libstr.a
 

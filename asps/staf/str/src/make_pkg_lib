@@ -35,8 +35,8 @@ if ( "$STAR_ARCH" == "sun4" ) then
 else if ( "$STAR_ARCH" == "hpux" ) then
    setenv ARCH_TAG    "_hpu"
    setenv ARFLAGS     " lqv "
-   setenv FFLAGS      " -w +e +es -c +ppu "
-   setenv FFLAGS_DBG  " -w +e +es -c -g +ppu "
+   setenv FFLAGS      " +e +es -c +ppu "
+   setenv FFLAGS_DBG  " +e +es -c -g +ppu "
    setenv CCFLAGS     " -c -DHPUX "
    setenv CCFLAGS_DBG " -c -g -DHPUX "
 else if ( "$STAR_ARCH" == "irix" ) then
@@ -51,14 +51,6 @@ else if ( "$STAR_ARCH" == "irix" ) then
 #  INCLUDES under irix require this step...
 #
    cd ../src
-else if ( "$STAR_ARCH" == "aix" ) then
-   setenv ARCH_TAG    "_aix"
-   setenv ARFLAGS     " slqv "
-   setenv FFLAGS      " -c -w -Pk -Wp,-tr=NV,-INTL,-SV=A,-CTYPLSS -qextname -qsave -qfixed=132 -qctyplss -qintlog "
-   setenv FFLAGS_DBG  " -g -c -w -Pk -Wp,-tr=NV,-INTL,-SV=A,-CTYPLSS -qextname -qsave -qfixed=132 -qctyplss -qintlog "
-   setenv CCFLAGS     " -c -O -qlanglvl=ansi -v -DAIX "
-   setenv CCFLAGS_DBG " -c -g -qlanglvl=ansi -v -DAIX "
-   alias f77 xlf
 endif
 if( -e make_flags.csh ) then
 	source ../lib/make_flags.csh

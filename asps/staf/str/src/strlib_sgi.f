@@ -3,6 +3,7 @@
 
 	SUBROUTINE STRCPU(TCPU)
 	INTEGER TCPU
+*  Brief Description:  Get current CPU usage.
 	INTEGER MCLOCK
 	INTEGER NATCPU_T0
 	COMMON/NATCPU/NATCPU_T0
@@ -15,6 +16,7 @@
 
 	SUBROUTINE STRCPUQ(TCPU) !Quad (64-bit) version.
 	INTEGER TCPU(2)
+*  Brief Description:  Get current CPU usage, quad-word.
 	INTEGER MCLOCK
 	INTEGER NATCPU_T0
 	COMMON/NATCPU/NATCPU_T0
@@ -27,7 +29,7 @@
 	END
 
 	SUBROUTINE STRCPU0
-*	"Initialize" CPU elapsed time counter.
+*  Brief Description: "Initialize" CPU elapsed time counter.
 	IMPLICIT NONE
 	INTEGER NATCPU_T0
 	COMMON/NATCPU/NATCPU_T0
@@ -40,7 +42,8 @@
 
 	IMPLICIT NONE
 
-*  Return value:
+*  Brief Description: Return native CPU clock ticks-per_second.
+*  Returns:
 *	Native cpu clock ticks-per-second.
 
 	STRCPUTPS=100 !On SGI, it's 100 per second.
@@ -49,6 +52,9 @@
 	END
 
 	SUBROUTINE STRDATE(YEAR,MONTH,DAY)
+
+*  Brief Description: Handles a call to the SGI time routine.
+*  Description:
 *	Handles a call to the SGI time routine.
 *	"TIME" gives seconds since 01-Jan-1970, midnight.
 	IMPLICIT NONE
@@ -114,7 +120,8 @@
 *  Input/Output:
 	INTEGER I32
 
-*  Compatibility routine.  See STRDEC_ENDIAN_HALF.
+*  Description:
+*	Compatibility routine.  See STRDEC_ENDIAN_HALF.
 
 	CALL STRDEC_ENDIAN_HALF(I32)
 
@@ -128,7 +135,7 @@
 *  Input/Output:
 	INTEGER I32
 
-*  Functional description:
+*  Description:
 *	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
 *	DEC-style.  On SGI (here), the swapping is done.
@@ -164,7 +171,7 @@
 *  Input/Output:
 	INTEGER Block(*) !Block of 32-bit words in to be reordered.
 
-*  Functional description:
+*  Description:
 *	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
 *	DEC-style.  On SGI (here), the swapping is done.
@@ -203,7 +210,7 @@
 *  Input/Output:
 	INTEGER I32
 
-*  Functional description:
+*  Description:
 *	Swap the two 16-bit half-words in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
 *	DEC-style.  On SGI (here), the swapping is done.
@@ -223,6 +230,7 @@
 
 	INTEGER FUNCTION STRDEC_IBITS(DATA,BIT0,BITS)
 
+*  Description:
 *	Do an IBITS, but make it act like DEC.
 
 	IMPLICIT NONE
@@ -241,7 +249,7 @@
 *  Input argument:
 	INTEGER LUN !FORTRAN Logical Unit of device (file) to be "flushed".
 
-*  Functional Description:
+*  Description:
 *	Do whatever platform-dependent operations are necessary to cause all
 *	pending output for the specified LUN to be sent to the actual device
 *	or file represented by the LUN, "flushing" out that device's buffer.
@@ -260,6 +268,7 @@
 
 	SUBROUTINE STRMOVE(COUNT,SOURCE,DEST)
 
+*  Description:
 *	SGI interface routine to (equivalent) to LIB$MOVC3.
 *	COUNT is a 32-bit word-count, not a byte-count.
 
@@ -278,6 +287,7 @@
 	END
 *
 	SUBROUTINE STRMSEC(MSECS)
+*  Description:
 *	Standard interface routine to return milliseconds since midnight.
 	IMPLICIT NONE
 	INTEGER MSECS
@@ -290,6 +300,7 @@
 
 	LOGICAL FUNCTION STRMSEC_DELAY(MSECS)
 
+*  Description:
 *	Standard interface routine to delay the specified time in
 *	milliseconds.
 *	Returns .TRUE. for success, .FALSE. for failure, such as
@@ -350,7 +361,7 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	INTEGER LUN !Logical unit on which to open file.
 	CHARACTER*(*) FILENAME !Name of file.
 	CHARACTER*(*) STATUS_CARG !"STATUS=" character argument
@@ -370,7 +381,7 @@
 	INTEGER MAXREC_IARG !"MAXREC=" integer argument.
 	LOGICAL READONLY_FLAG !No-op on SGI.
 
-*  Functional Description:
+*  Description:
 *	Provides a machine-dependent (native) OPEN routine, intended
 *	to be called only from STROPEN (qv).
 
@@ -597,6 +608,8 @@
 *
 	SUBROUTINE STRTIME(HOUR,MIN,SEC)
 	IMPLICIT NONE
+*  Description:
+*	Get the EST time.  This should be generalized.
 	INTEGER HOUR,MIN,SEC
 	INTEGER ITIME,SECS,DAYS
 	INTEGER TIME
@@ -620,7 +633,7 @@
 
 	INTEGER Ireal !Integer-cast of a Host-style floating number.
 
-*  Functional description:
+*  Description:
 
 *	This is the IEEE version, which works for any host using the
 *	IEEE floating-representation.
@@ -695,7 +708,7 @@
 
 	INTEGER Ireal !Integer-cast of a DEC-style floating number.
 
-*  Functional description:
+*  Description:
 
 *	This is the generic version, which works anywhere on 32-bit
 *	floating numbers.
