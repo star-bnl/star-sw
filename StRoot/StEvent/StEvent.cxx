@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.34 2002/12/20 22:41:30 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.35 2003/01/30 18:36:31 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.35  2003/01/30 18:36:31  ullrich
+ * Added hooks for StTriggerIdCollection.
+ *
  * Revision 2.34  2002/12/20 22:41:30  ullrich
  * Added PMD.
  *
@@ -144,6 +147,7 @@
 #include "StPhmdCollection.h"
 #include "StTrackDetectorInfo.h"
 #include "StTriggerDetectorCollection.h"
+#include "StTriggerIdCollection.h"
 #include "StPrimaryVertex.h"
 #include "StL0Trigger.h"
 #include "StL1Trigger.h"
@@ -159,8 +163,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.34 2002/12/20 22:41:30 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.34 2002/12/20 22:41:30 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.35 2003/01/30 18:36:31 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.35 2003/01/30 18:36:31 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -212,6 +216,7 @@ _LOOKUP(StL0Trigger)
 _LOOKUP(StL1Trigger)
 _LOOKUP(StL3Trigger)
 _LOOKUP(StTriggerDetectorCollection)
+_LOOKUP(StTriggerIdCollection)
 _LOOKUP(StSPtrVecTrackDetectorInfo)
 _LOOKUP(StSPtrVecTrackNode)
 _LOOKUP(StSPtrVecPrimaryVertex)
@@ -565,6 +570,22 @@ const StTriggerDetectorCollection*
 StEvent::triggerDetectorCollection() const
 {
     StTriggerDetectorCollection *trg = 0;
+    _lookup(trg, mContent);
+    return trg;
+}
+
+StTriggerIdCollection*
+StEvent::triggerIdCollection()
+{
+    StTriggerIdCollection *trg = 0;
+    _lookup(trg, mContent);
+    return trg;
+}
+
+const StTriggerIdCollection*
+StEvent::triggerIdCollection() const
+{
+    StTriggerIdCollection *trg = 0;
     _lookup(trg, mContent);
     return trg;
 }
@@ -979,6 +1000,12 @@ StEvent::setTriggerDetectorCollection(StTriggerDetectorCollection* val)
 }
 
 void
+StEvent::setTriggerIdCollection(StTriggerIdCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+
+void
 StEvent::setL0Trigger(StL0Trigger* val)
 {
     _lookupAndSet(val, mContent);
@@ -1093,6 +1120,7 @@ void StEvent::statistics()
     cout << "\tStL1Trigger:                 " << static_cast<void*>(l0Trigger());
     cout << "\tStL3Trigger:                 " << static_cast<void*>(l3Trigger());
     cout << "\tStTriggerDetectorCollection: " << static_cast<void*>(triggerDetectorCollection());
+    cout << "\tStTriggerIdCollection:       " << static_cast<void*>(triggerIdCollection());
     cout << "\tStPrimaryVertex:             " << static_cast<void*>(primaryVertex(0));
     cout << "\tnumberOfPrimaryVertices:     " << numberOfPrimaryVertices() << endl;
     cout << "\tStCalibrationVertex:         " << static_cast<void*>(calibrationVertex(0));
