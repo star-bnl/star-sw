@@ -19,6 +19,7 @@
 #include "tables/St_emcCalibration_Table.h"
 #include "tables/St_emcEqualization_Table.h"
 #include "tables/St_emcMipCalib_Table.h"
+#include "TRandom.h"
 
 //#define StEmcCalibrationMaker_DEBUG
 
@@ -40,7 +41,19 @@ class StEmcCalibrationMaker : public StMaker
            Float_t zVertexMax;
            Float_t zVertex;
            Float_t ptMip;
+           Float_t miptemp;
+           Float_t equaltemp;
+           Float_t evnumber;
+           Float_t avg;
+           Float_t sigma;
            
+           Int_t   firstEventTime;
+           Int_t   lastEventTime;
+           Int_t   firstEventRun;
+           Int_t   lastEventRun;
+           Int_t   firstEventDate;
+           Int_t   lastEventDate;
+
            Int_t   runMode;
            Int_t   EqStatus;
            Int_t   MipStatus;
@@ -50,10 +63,9 @@ class StEmcCalibrationMaker : public StMaker
            Float_t m_equalStep;
            Float_t m_calibStep;
            Int_t   nTracks;
-                               
-  protected:
       
-  public: 
+   public:
+   
                    StEmcCalibrationMaker(const char *name="EmcCalibration");
    virtual        ~StEmcCalibrationMaker();
    virtual Int_t   Init();
