@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_files_add.C,v 2.8 2000/06/23 23:16:12 lansdell Exp $
+// $Id: bfcread_hist_files_add.C,v 2.9 2000/06/29 05:04:24 lansdell Exp $
 // $Log: bfcread_hist_files_add.C,v $
+// Revision 2.9  2000/06/29 05:04:24  lansdell
+// now outputs .hist.root file with particular maker's histograms (need to update to do all histogram branches)
+//
 // Revision 2.8  2000/06/23 23:16:12  lansdell
 // now reads .hist.root file list from text file; be sure to use nevents <= the number of .hist.root files
 //
@@ -65,7 +68,7 @@ class StHistUtil;
 //------------------------------------------------------------------------
 
 void bfcread_hist_files_add(
-  int nevents=3,
+  int nevents=2,
   const Char_t *fileName="fileList.txt",
   const Char_t *outHistFile="kathy",
   const Char_t *MakerHistDir="QA",
@@ -178,25 +181,22 @@ void bfcread_hist_files_add(
 
 
 // constructor 
-   //   StHistMaker   *HM  = new StHistMaker;
-   //  HM->SetHArray(kathyArray);
-   // need HM->SetHArraySize 
+  StHistMaker *HM  = new StHistMaker;
+  HM->SetHArray(kathyArray);
+  // need HM->SetHArraySize 
 
 // output hist.root file:
-   //StTreeMaker* treeMk = new StTreeMaker("tree",outHistFile,TopDirTreeOut);
-   //  treeMk->SetIOMode("w");
-   // treeMk->SetBranch("histBranch");
 
-   //HM->Init();
-   // treeMk->Init();
-   // HM->Make();
-   // treeMk->Make();
+  cout << " MakerHistDir : " << MakerHistDir << endl;
+  StTreeMaker* treeMk = new StTreeMaker(MakerHistDir,outHistFile,TopDirTree);
+  treeMk->SetIOMode("w");
+  treeMk->SetBranch("histBranch");
+
+  HM->Init();
+  treeMk->Init();
+  HM->Make();
+  treeMk->Make();
+  HM->Finish();
+  treeMk->Finish();
 
 } // end of the macro!
- 
-
-
-
-
-
-
