@@ -1,8 +1,13 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.6 2000/09/08 21:48:00 suaide Exp $
+// $Id: StPreEclMaker.cxx,v 1.7 2000/09/08 22:55:06 suaide Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.7  2000/09/08 22:55:06  suaide
+// some modifications to compile on Solaris
+//
 // Revision 1.6  2000/09/08 21:48:00  suaide
+//
+//
 // See README for details
 //
 // Revision 1.5  2000/08/24 22:11:35  suaide
@@ -57,18 +62,8 @@
 
 // added for StEvent
 
-#include "StEvent.h" 
-#include "StEventTypes.h"
-#include "St_ObjectSet.h"
-#include "StEmcCollection.h"
-#include "StEmcDetector.h"
-#include "StEmcModule.h"
-#include "StEmcRawHit.h"
-#include "StEmcClusterCollection.h"
-#include "StEmcCluster.h"
-#include "StEmcPoint.h"
-#include "StEnumerations.h"
-#include "StContainers.h"
+#include "StEvent/StEvent.h" 
+#include "StEvent/StEventTypes.h"
 
 
 ClassImp(StPreEclMaker)
@@ -385,7 +380,7 @@ void StPreEclMaker::SetClusterConditions(char *cdet,Int_t mSizeMax,
 //_____________________________________________________________________________
 void StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.6 2000/09/08 21:48:00 suaide Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.7 2000/09/08 22:55:06 suaide Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

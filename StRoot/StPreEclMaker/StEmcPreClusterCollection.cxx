@@ -2,7 +2,12 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.cxx,v $
+// Revision 1.6  2000/09/08 22:55:05  suaide
+// some modifications to compile on Solaris
+//
 // Revision 1.5  2000/09/08 21:47:59  suaide
+//
+//
 // See README for details
 //
 // Revision 1.4  2000/08/24 22:11:34  suaide
@@ -55,8 +60,8 @@
 #include "StEmcPreClusterCollection.h"
 #include <math.h>
 #include "emc_def.h"
-#include "StEvent.h" 
-#include "StEventTypes.h"
+#include "StEvent/StEvent.h" 
+#include "StEvent/StEventTypes.h"
 #include "StEmcUtil/StEmcGeom.h"
 ClassImp(StEmcPreClusterCollection)
 
@@ -524,7 +529,7 @@ Int_t StEmcPreClusterCollection::applyProfile(Int_t mod,TArrayI ne)
       // finished doing combinations on clusters
     }
   } 
-  
+  return 0;  
 }
 //_____________________________________________________________________________
 Float_t StEmcPreClusterCollection::calcChiSqrt(Int_t nc,TArrayF en,TArrayF xavg,Int_t nh,TArrayF x,TArrayF y)
