@@ -1,5 +1,8 @@
-// $Id: makedoc.C,v 1.35 1999/06/04 01:46:09 fine Exp $
+// $Id: makedoc.C,v 1.36 1999/06/07 22:56:45 fisyak Exp $
 // $Log: makedoc.C,v $
+// Revision 1.36  1999/06/07 22:56:45  fisyak
+// Add EventRead
+//
 // Revision 1.35  1999/06/04 01:46:09  fine
 // New examples have been included
 //
@@ -136,10 +139,10 @@
                        ,"St_AttributesABC", "St_Table3Points","St_TablePoints"
                        ,"St_io_Maker",   "StHelix3DPoints", "StHits3DPoints"
                        ,"StObjArray",    "StHit",            "StHelixD"
-                       ,"StTrack"
+                       ,"StTrack",       "St_TableElementDescriptor"
                        ,"St_srs_Maker",  "St_xdfin_Maker"
                       };
-  Int_t nclass = 31;
+  Int_t nclass = 32;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("//sol/afs_rhic/star/packages/dev/inc/table_header.h");
