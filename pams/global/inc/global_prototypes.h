@@ -1,3 +1,5 @@
+#ifndef global_prototypes_hh
+#define global_prototypes_hh
 /* External routines*/
 #include "StarCallf77.h"
 #define gufld F77_NAME(gufld,GUFLD)
@@ -11,5 +13,5 @@ extern "C" {
   void prop_vzero_geom_(float *, float *, float *, float *, float *, float*, float *, long *);
   float prop_one_track( float * ,  float * , float * );
            }
-
+#endif
 

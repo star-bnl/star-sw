@@ -1,3 +1,5 @@
+#ifndef StVerexDefinitions_hh
+#define StVerexDefinitions_hh
 
 /* Numbering scheme for detectors
 **   Unknown Vertex  0
@@ -14,5 +16,5 @@
 #define kXiDecayIdentifier             3
 #define kKinkDecayIdentifier           4
 #define kOtherTypeIdentifier           5
-
+#endif
 

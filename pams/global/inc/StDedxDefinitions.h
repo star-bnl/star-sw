@@ -1,4 +1,5 @@
-
+#ifndef StDedxDefinitions_hh
+#define StDedxDefinitions_hh
 /* Numbering scheme for dEdx 'methods'
 **   Unknown Method          0
 **   TruncatedMean           1
@@ -15,5 +16,5 @@
 #define kLikelihoodFitIdentifier             3
 #define kWeightedTruncatedMeanIdentifier     4
 #define kOtherMethodIdentifier               5
-
+#endif
 

@@ -1,3 +1,5 @@
+#ifndef StDetectorId_hh
+#define StDetectorId_hh
 #include "StDetectorDefinitions.h"
 enum StDetectorId {
   kUnknownId = kUnknownIdentifier,
@@ -26,7 +28,7 @@ enum StDetectorId {
   kTpcSsdSvtId = kTpcSsdSvtIdentifier,        
   kSsdSvtId    = kSsdSvtIdentifier  
 };
-
+#endif
 
 
 
