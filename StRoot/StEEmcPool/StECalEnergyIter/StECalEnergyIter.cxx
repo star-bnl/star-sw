@@ -8,6 +8,7 @@
 #include "StEEmcDbMaker/EEmcDbItem.h"
 
 
+bool StECalEnergyIter::mIsSimu = false;
 
 StECalEnergyIter::StECalEnergyIter(StMuEmcCollection *emCol, int det,
 				   StEEmcDbMaker *eedb, bool flag) 
@@ -77,6 +78,7 @@ bool StECalEnergyIter::next(float &e, int &adc, int &adclessped,
     {
       float acorr = adc - dbitem->ped;
       e = acorr/dbitem->gain;
+      if ( mIsSimu && mdetector == eemc ) e *= 1.25;
       adclessped = (int) floor(acorr + 0.5);
     }
 
