@@ -35,7 +35,7 @@ macro filter
 *
  do ni=[n1],[n2]
     file=gsrun.[ni].fz; if ($fexist([file]).eq.0) goto nextl
-    gfile pz [file]
+    gfile p [file]
     if ([len].gt.950)  then
        mm=[mm]+1
        output=[name]_0[mm]
