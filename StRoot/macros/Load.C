@@ -1,5 +1,8 @@
-// $Id: Load.C,v 1.13 2000/06/09 20:07:16 fisyak Exp $
+// $Id: Load.C,v 1.14 2000/06/16 21:49:32 fisyak Exp $
 // $Log: Load.C,v $
+// Revision 1.14  2000/06/16 21:49:32  fisyak
+// take care about libStar
+//
 // Revision 1.13  2000/06/09 20:07:16  fisyak
 // Remove duplication
 //
@@ -30,6 +33,7 @@
 //=======================================================================
 
 void Load(){
+    if (gClassTable->GetID("TTable") < 0) gSystem->Load("libStar");
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("StUtilities");
