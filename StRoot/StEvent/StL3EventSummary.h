@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL3EventSummary.h,v 2.3 2001/11/14 23:29:35 struck Exp $
+ * $Id: StL3EventSummary.h,v 2.4 2001/11/28 18:52:57 struck Exp $
  *
  * Author: Christof Struck, July 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StL3EventSummary.h,v $
+ * Revision 2.4  2001/11/28 18:52:57  struck
+ * updated classdef version
+ *
  * Revision 2.3  2001/11/14 23:29:35  struck
  * minor changes in 'unbiasedTrigger' function, trigger word added for debugging purposes
  *
@@ -76,7 +79,7 @@ private:
     StPtrVecL3AlgorithmInfo   mL3AcceptAlgorithms;
     StSPtrVecL3AlgorithmInfo  mL3Algorithms;
 
-    ClassDef(StL3EventSummary,1)
+    ClassDef(StL3EventSummary,2)
 };
 
 
