@@ -1,5 +1,9 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.13 2003/01/14 12:58:25 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.14 2003/01/29 12:10:27 fsimon Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.14  2003/01/29 12:10:27  fsimon
+// Change call of StFtpcRawWriter to allow for switch for inversion of ASIC 2
+// in FTPC E (error in Y2001-2002 DAQ mapping)
+//
 // Revision 1.13  2003/01/14 12:58:25  jcs
 // use Geometry_ftpc/ftpcAsicMap to control corrections for error in Y2001-2002
 // FTPC asic mapping
@@ -237,12 +241,6 @@ Int_t StFtpcSlowSimMaker::Make(){
     StFtpcGeantReader *geantReader = new StFtpcGeantReader(g2t_vertex,
 							   g2t_track,
 							   g2t_ftp_hit);
-    //cout <<" create data writer \n";
- 
-    // create data writer
-    StFtpcRawWriter *dataWriter = new StFtpcRawWriter(fcl_ftpcndx,
-						      fcl_ftpcsqndx,
-						      fcl_ftpcadc);
     // cout << "create FTPC database reader\n";
     //create FTPC database reader
     StFtpcDbReader *dbReader = new StFtpcDbReader(m_dimensions,
@@ -266,6 +264,15 @@ Int_t StFtpcSlowSimMaker::Make(){
                                                            m_slowsimpars);
 
 
+    //cout <<" create data writer \n";
+ 
+    // create data writer
+    StFtpcRawWriter *dataWriter = new StFtpcRawWriter(fcl_ftpcndx,
+						      fcl_ftpcsqndx,
+						      fcl_ftpcadc,
+						      dbReader->Asic2EastNotInverted());
+
+
     //cout <<"Create SlowSimulator \n";
 
     StFtpcSlowSimulator *slowsim = new StFtpcSlowSimulator(geantReader,
@@ -273,6 +280,7 @@ Int_t StFtpcSlowSimMaker::Make(){
                                                            dbReader,
 							   dataWriter);
  
+
     gMessMgr->Info() << "FTPC SlowSimulator starting... " <<endm;
     Int_t Res_fss = slowsim->simulate();
 
