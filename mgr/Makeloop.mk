@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.97  1999/09/27 21:07:56  fisyak
+#  add quiet option
+#
 #  Revision 1.96  1999/09/23 00:26:48  fisyak
 #  Add default STAR_MAKE_HOME
 #
@@ -367,7 +370,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/09/23 00:26:48 $ 
+#           Last modification $Date: 1999/09/27 21:07:56 $ 
 #  default setings
 # Current Working Directory
 #
@@ -415,7 +418,9 @@ ifndef SUBDIRS
 endif
 #          I have subdrs
 .PHONY               :  all $(BASE)  $(St_Tables) test clean clean_lib clean_share clean_obj
-all:    $(BASE) $(addsuffix _loop, $(SUBDIRS))  $(addsuffix _$(branch),$(PKG)) $(St_Tables)
+all:    include $(BASE) $(addsuffix _loop, $(SUBDIRS))  $(addsuffix _$(branch),$(PKG)) $(St_Tables)
+include:
+	cd $(ROOT_DIR); cons +include;
 $(BASE): 
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/$(BASE) depend NODEPEND=1999
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/$(BASE)
