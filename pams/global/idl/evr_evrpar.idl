@@ -2,9 +2,7 @@
 *   Table: evr_evrpar
 */
  struct evr_evrpar {
-       long      match;      /* use TPC-SVT matched tracks */
-       long      minhit;     /* minimum no. of hits */
-       long      use;        /* which tracks are used */
+       float     vcut;       /* distance below where track is marked as default primary */
        float     cut2;       /* select tracks for 2nd vertex fit */
        float     cut3;       /* select tracks for 3rd vertex fit */
        float     cutxy;      /* select tracks for vertex fitting */
@@ -12,6 +10,6 @@
        float     ptmin;      /* minimum pt of individual tracks */
    } ;
 
-/*  Last mod. for evrpar: $Date: 1997/12/31 14:33:28 $ */
+/*  Last mod. for evrpar: $Date: 1998/12/10 17:09:22 $ */
 
 

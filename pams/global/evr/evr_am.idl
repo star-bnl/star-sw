@@ -5,20 +5,16 @@
 
 #include "PAM.idl"
 #include "evr_evrpar.idl"
-#include "tpt_track.idl"
-#include "stk_track.idl"
+#include "egr_egrpar.idl"
 #include "dst_track.idl"
-#include "svm_evt_match.idl"
 #include "dst_vertex.idl"
 
 interface evr_am : amiModule {
         STAFCV_T call
                 ( in       evr_evrpar      evrpar
-                , in       tpt_track       tptrack
-                , in       stk_track       svt_track 
+                , in       egr_egrpar      egrpar
                 , inout    dst_track       globtrk 
-                , in       svm_evt_match   evt_match
                 , inout    dst_vertex      privert
         );
 };
-/* Last mod. for evr_am: $Date: 1998/07/07 17:42:48 $  */
+/* Last mod. for evr_am: $Date: 1998/12/10 17:09:20 $  */
