@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.2 1999/07/28 20:27:30 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.3 1999/07/29 15:08:33 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.3  1999/07/29 15:08:33  calderon
+ * Include Mom. Resolution example (Histograms & Ntuple)
+ *
  * Revision 1.2  1999/07/28 20:27:30  calderon
  * Version with SL99f libraries
  *
@@ -20,6 +23,7 @@
 #include "TCanvas.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TNtuple.h"
 
 #include "StMcAnalysisMaker.h"
 #include "PhysicalConstants.h"
@@ -82,9 +86,11 @@ StMcAnalysisMaker::StMcAnalysisMaker(const char *name, const char *title):StMake
     //  StMcAnalysisMaker Constructor
     // - zero all pointers defined in the header file
     mAssociationCanvas = 0;
+    mMomResolution  = 0;
     mHitResolution  = 0;   
     coordRec        = 0;  
-    coordMcPartner  = 0;  
+    coordMcPartner  = 0;
+    mTrackNtuple    = 0;
 }
 
 //_________________________________________________
@@ -93,9 +99,11 @@ StMcAnalysisMaker::~StMcAnalysisMaker()
     //  StMcAnalysisMaker Destructor
     //  delete the histograms
     SafeDelete(mAssociationCanvas);
+    SafeDelete(mMomResolution);
     SafeDelete(mHitResolution);
     SafeDelete(coordRec);
     SafeDelete(coordMcPartner);
+    SafeDelete(mTrackNtuple);
 }
 
 //_________________________________________________
@@ -136,6 +144,14 @@ Int_t StMcAnalysisMaker::Make()
     trackMapType* theTrackMap = 0;
     theTrackMap = assoc->trackMap();
 
+    // Example: look at the position of the primary vertex
+    //          Map is not needed for this, but it's a good check,
+    //          tracking will not be good if primary vertex was not well placed.
+
+    cout << "Position of Primary Vertex from StEvent:" << endl;
+    cout << rEvent->primaryVertex()->position() << endl;
+    cout << "Position of Primary Vertex from StMcEvent:" << endl;
+    cout << mEvent->primaryVertex()->position() << endl;
     
     // Example: look at hits associated with 1st REC hit in Tpc Hit collection.
 
@@ -212,6 +228,78 @@ Int_t StMcAnalysisMaker::Make()
     cout << abs((*trackBounds.first).second->partnerMcTrack()->momentum()) << "]" << endl;
     cout << "These tracks have " << (*trackBounds.first).second->commonHits() << " hits in common." << endl;
 
+
+    // Example: Make a histogram of the momentum resolution of the event
+    //          Make an Ntuple with rec & monte carlo mom, mean hit difference, and # of common hits
+    StGlobalTrack* recTrack;
+    StMcTrack*     mcTrack;
+    StThreeVectorF p;
+    StThreeVectorF pmc;
+    float diff =0;
+    if (mMomResolution!=0) {
+	delete mMomResolution;
+	mMomResolution=0;
+    }
+    mMomResolution = new TH1F("Mom. Resolution","(|p| - |pmc|)/|p|",100,-1.,1.);
+    mMomResolution->SetXTitle("Resolution (%)");
+
+    
+    
+    if (mTrackNtuple!=0) {
+	delete mTrackNtuple;
+	mTrackNtuple=0;
+    }
+    char* vars = "px:py:pz:p:pxrec:pyrec:pzrec:prec:commHits:hitDiffX:hitDiffY:hitDiffZ";
+    float* values = new float[12];
+    mTrackNtuple = new TNtuple("Track Ntuple","Track Pair Info",vars);
+    
+    cout << "Defined Momentum Res. Histogram & Ntuple" << endl;
+    for (trackMapIter tIter=theTrackMap->begin();
+	 tIter!=theTrackMap->end(); ++tIter){
+	
+	recTrack = (*tIter).first;
+	if ((*tIter).second->commonHits()<10) continue;
+	mcTrack = (*tIter).second->partnerMcTrack();
+
+	s = recTrack->helix().pathLength(recTrack->startVertex()->position());
+	p = recTrack->helix().momentumAt(s, B);
+	for (int j=0; j<3; j++) values[j+4] = p[j];
+	values[7]=p.mag();
+	pmc = mcTrack->momentum();
+	for (int j=0; j<3; j++) values[j] = pmc[j];
+	values[3]=pmc.mag();
+	diff = (p.mag() - pmc.mag())/p.mag();
+	mMomResolution->Fill(diff,1.);
+	values[8]=(*tIter).second->commonHits();
+	// Loop to get Mean hit position diff.
+	StThreeVectorF rHitPos(0,0,0);
+	StThreeVectorF mHitPos(0,0,0);
+	
+	for (unsigned int hi=0; hi<recTrack->tpcHits().size(); hi++) {
+
+	    StTpcHit* rHit = recTrack->tpcHits()[hi];
+	    
+	    pair<tpcHitMapIter,tpcHitMapIter> rBounds = theHitMap->equal_range(rHit);
+	    for (tpcHitMapIter hIter=rBounds.first; hIter!=rBounds.second; hIter++) {
+		StMcTpcHit* mHit = (*hIter).second;
+		if (mHit->parentTrack() != mcTrack) continue;
+		rHitPos += rHit->position();
+		mHitPos += mHit->position();
+	    }// Associated Hits Loop.
+	
+	} // Hits of rec. Track Loop
+	
+	rHitPos /=(float) (*tIter).second->commonHits();
+	mHitPos /=(float) (*tIter).second->commonHits();
+	for (int j=0; j<3; j++) values[9+j] = rHitPos[j] - mHitPos[j];
+	mTrackNtuple->Fill(values);
+
+    } // Tracks in Map Loop
+    cout << "Finished Track Loop, Made Ntuple" << endl;
+    //delete vars;
+    delete values;
+
+
     // Example: Make 2 Histograms
     // - x and y positions of the hits from the reconstructed track.
     // - x and y positions of the hits from the  Monte Carlo  track.
@@ -248,8 +336,6 @@ Int_t StMcAnalysisMaker::Make()
     
     
     mAssociationCanvas = new TCanvas("mAssociationCanvas", "Histograms");
-    //mAssociationCanvas->SetLogy();
-    //mNumberOfPings->Draw();
 
     return kStOK;
 }

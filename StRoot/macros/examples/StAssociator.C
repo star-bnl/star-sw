@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.5 1999/07/28 21:29:34 calderon Exp $
+// $Id: StAssociator.C,v 1.6 1999/07/29 15:08:36 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.6  1999/07/29 15:08:36  calderon
+// Include Mom. Resolution example (Histograms & Ntuple)
+//
 // Revision 1.5  1999/07/28 21:29:34  calderon
 // Modified event loop: use 'if' and 'goto' to avoid using 'for'
 //
@@ -106,11 +109,16 @@ const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/ha
 
     myCanvas->cd(3);
     gPad->SetLogy(0);
+    examples->mMomResolution->Draw();
+
+    myCanvas->cd(4);
+    gPad->SetLogy(0);
     examples->coordRec->Draw();
 
     myCanvas->cd(4);
     gPad->SetLogy(0);
-    examples->coordMcPartner->Draw();
+    examples->coordMcPartner->SetMarkerColor(2);
+    examples->coordMcPartner->Draw("same");
     
     //chain->Finish(); // This should call the Finish() method in ALL makers,
                      // comment it out if you want to keep the objects
