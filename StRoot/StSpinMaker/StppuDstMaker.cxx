@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StppuDstMaker.cxx,v 1.11 2003/09/22 14:28:25 akio Exp $
+ * $Id: StppuDstMaker.cxx,v 1.12 2003/10/16 19:48:37 akio Exp $
  * 
  * Author: Akio Ogawa June 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StppuDstMaker.cxx,v $
+ * Revision 1.12  2003/10/16 19:48:37  akio
+ * updates for 2003
+ *
  * Revision 1.11  2003/09/22 14:28:25  akio
  * Fix for RH8.0 and FPD layer1 info to ntuple
  *
@@ -157,11 +160,13 @@ Int_t StppuDstMaker::Init(const Char_t *filename)
     uDstFileName.ReplaceAll(":MuDst",".spinDst.root");
     cout << "StppuDstMaker: spiunDst output file: " << uDstFileName << endl;
     
+#ifdef _SPINDSTOUT_
     //open udst file
     m_outfile = new TFile(uDstFileName,"recreate");
     //  m_outfile->SetFormat(1);
     m_outfile->SetCompressionLevel(1);
-    
+#endif
+
     //create udst & its branches
     ppuDst  = new TTree("uDst","ppSpinuDst",99);
     printf("***StppuDstMaker::Init*** Creating TTree\n");
@@ -316,20 +321,26 @@ Int_t StppuDstMaker::Make() {
 
 Int_t StppuDstMaker::Finish()
 {
+
+#ifdef _SPINDSTOUT_
   m_outfile->Write();
   m_outfile->Close();
+#endif
 
 #ifdef _2002ntuple_
   finishfpdpi0_();
 #endif
+
 #ifdef _2003ntuple_
   finishntp2003_();
 #endif
+
   cout << "=================================================================\n";
   cout << "StppuDstger statistics:\n";
   cout << "events with StppuDstger data: " << mGoodCounter << endl;
   cout << "events without StppuDstger data: " << mBadCounter << endl;
   cout << "=================================================================\n";    
+  if(ppEvent) delete ppEvent;
   StMaker::Finish();
   return kStOK;
 }

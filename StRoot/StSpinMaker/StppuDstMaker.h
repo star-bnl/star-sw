@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StppuDstMaker.h,v 1.7 2003/09/07 03:49:05 perev Exp $
+ * $Id: StppuDstMaker.h,v 1.8 2003/10/16 19:48:37 akio Exp $
  * $Log: StppuDstMaker.h,v $
+ * Revision 1.8  2003/10/16 19:48:37  akio
+ * updates for 2003
+ *
  * Revision 1.7  2003/09/07 03:49:05  perev
  * gcc 3.2 + WarnOff
  *
@@ -48,6 +51,7 @@
 #include "StMaker.h"
 #include "StppJetAnalyzer.h"
 
+//#defile _SPINDSTOUT_
 //#define _2002ntuple_
 #define _2003ntuple_
 //#define _GEANT_
@@ -80,7 +84,7 @@ class StppuDstMaker : public StMaker {
   Int_t Make();
   Int_t Finish(); 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StppuDstMaker.h,v 1.7 2003/09/07 03:49:05 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StppuDstMaker.h,v 1.8 2003/10/16 19:48:37 akio Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
