@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.29 2000/02/29 16:41:57 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.30 2000/03/01 05:54:59 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.30  2000/03/01 05:54:59  genevb
+// Further refinements to FORTRAN routines
+//
 // Revision 1.29  2000/02/29 16:41:57  genevb
 // Fortran-compliant interface
 //
@@ -123,7 +126,6 @@ static char oOpt[] = "O";
 static char otsOpt[] = "OTS";
 static char eOpt[] = "E";
 static char nullMess[] = "Null message!!!";
-static size_t maxMessLength = 1024;
 #ifdef LINUX
 static int sMessLength;
 static const int maxLOMP = 65536;
@@ -183,100 +185,52 @@ void type_of_call Message_(const char* mess, int* lines, int*, size_t len) {
 }
 //________________________________________
 void type_of_call Msg_Enable_(const char* mess, size_t len) {
-  char* mess2 = const_cast<char*> (mess);
   size_t messlen = strlen(mess);
-  if (messlen > len) {
-    mess2 = new char[(messlen+1)];
-    strncpy(mess2,mess,messlen);
-    mess2[messlen] = 0;
+  if ((len>1) && (messlen > len)) {
+    char* mess2 = new char[(len+1)];
+    strncpy(mess2,mess,len);
+    mess2[len] = 0;
+    gMessMgr->SwitchOn(mess2);
+    delete [] mess2;
+  } else {
+    gMessMgr->SwitchOn(mess);
   }
-  gMessMgr->SwitchOn(mess2);
 }
 //________________________________________
 int type_of_call Msg_Enabled_(const char* mess, int*, size_t len) {
-  char* mess2 = const_cast<char*> (mess);
   size_t messlen = strlen(mess);
-  if (messlen > len) {
-    mess2 = new char[(messlen+1)];
-    strncpy(mess2,mess,messlen);
-    mess2[messlen] = 0;
+  int ret_val = 1;
+  if ((len>1) && (messlen > len)) {
+    char* mess2 = new char[(len+1)];
+    strncpy(mess2,mess,len);
+    mess2[len] = 0;
+    if ((gMessMgr->GetLimit(mess2))==0) ret_val = 0;
+    delete [] mess2;
+  } else {
+    if ((gMessMgr->GetLimit(mess))==0) ret_val = 0;
   }
-  if ((gMessMgr->GetLimit(mess2))==0) return 0;
-  return 1;
+  return ret_val;
 }
 //________________________________________
 void type_of_call Msg_Disable_(const char* mess, size_t len) {
-  char* mess2 = const_cast<char*> (mess);
   size_t messlen = strlen(mess);
-  if (messlen > len) {
-    mess2 = new char[(messlen+1)];
-    strncpy(mess2,mess,messlen);
-    mess2[messlen] = 0;
+  if ((len>1) && (messlen > len)) {
+    char* mess2 = new char[(len+1)];
+    strncpy(mess2,mess,len);
+    mess2[len] = 0;
+    gMessMgr->SwitchOff(mess2);
+    delete [] mess2;
+  } else {
+    gMessMgr->SwitchOff(mess);
   }
-  gMessMgr->SwitchOff(mess2);
 }
 //________________________________________
 void type_of_call MessageOut( const char *msg, int* lines, size_t len ) {
   Message_(msg,lines,0,len);
 }
 //________________________________________
-void type_of_call StMessage_(const char* mess, const char* type,
-                             const char* opt, size_t len1,
-			     size_t len2, size_t len3) {
-#ifdef LINUX
-  sMessLength = len1;
-#endif
-  if (mess[0]==0) {
-    gMessMgr->Message(nullMess,"E",eOpt);
-    return;
-  }
-
-  size_t type1 = (size_t) type;
-  size_t opt1 = (size_t) opt;
-
-  size_t messlen = strlen(mess);
-  char* mess2 = new char[(messlen+1)];
-  strncpy(mess2,mess,messlen);
-  mess2[messlen] = 0;
-  
-  if ((len1>1) && (messlen > len1) && (type1 > maxMessLength)) mess2[len1] = 0;
-
-  size_t typelen = strlen(type);
-  char* type2=const_cast<char*> (type);
-  int del_type=0;
-
-  if ((messlen>=type1) || (len2<=0)) {
-    type2=emptyString;
-    if (messlen > type1) mess2[type1]=0;
-  } else if (typelen > len2) {
-    type2 = new char[(len2+1)];
-    strncpy(type2,type,len2);
-    type2[len2]=0;
-    del_type = 1;
-  }
-  
-  char* opt2=const_cast<char*> (opt);
-  int del_opt=0;
-
-  if ((messlen>=opt1) || ((messlen+1)==opt1) ||
-      (opt1==1) || (len3<=0)) {
-    opt2=oOpt;
-    if (messlen > opt1) mess2[opt1]=0;
-  } else if ((opt) && (strlen(opt) > len3)) {
-    opt2 = new char[(len3+1)];
-    strncpy(opt2,opt,len3);
-    opt2[len3]=0;
-    del_opt = 1;
-  }
-
-  gMessMgr->Message(mess2,type2,opt2);
-  delete [] mess2;
-  if (del_type) delete [] type2;
-  if (del_opt) delete [] opt2;
-}
-//________________________________________
-void type_of_call StCaller_(const char* mess, const char* opt,
-                            size_t len, const char* typString) {
+void type_of_call StCaller(const char* mess, const char* typString,
+                           const char* opt, size_t len) {
 #ifdef LINUX
   sMessLength = len;
 #endif
@@ -286,43 +240,23 @@ void type_of_call StCaller_(const char* mess, const char* opt,
   }
 
   size_t messlen = strlen(mess);
-
+  if ((len>1) && (messlen > len)) messlen = len;
   char* mess2 = new char[(messlen+1)];
   strncpy(mess2,mess,messlen);
   mess2[messlen] = 0;
   
-  if ((len>1) && (messlen > len)) mess2[len] = 0;
-
   gMessMgr->Message(mess2,typString,opt);
   delete [] mess2;
 }
 //________________________________________
-void type_of_call StCallerOpt_(const char* mess, const char* opt,
-                               size_t len1, size_t len2,
-                               const char* typString, char* optString) {
-#ifdef LINUX
-  sMessLength = len1;
-#endif
-  if (mess[0]==0) {
-    gMessMgr->Message(nullMess,"E",eOpt);
-    return;
-  }
-
-  size_t messlen = strlen(mess);
-  size_t opt1 = (size_t) opt;
-
-  char* mess2 = new char[(messlen+1)];
-  strncpy(mess2,mess,messlen);
-  mess2[messlen] = 0;
-  
-  if ((len1>1) && (messlen > len1) && (opt1>maxMessLength)) mess2[len1] = 0;
-
+void type_of_call StCallerOpt(const char* mess, const char* typString,
+                              const char* opt, size_t len1, size_t len2,
+                              char* optString) {
   char* opt2=const_cast<char*> (opt);
   int del_opt=0;
 
-  if ((messlen>=opt1) || (len2<=0)) {
+  if (len2<=0) {
     opt2=optString;
-    if (messlen > opt1) mess2[opt1]=0;
   } else if (strlen(opt) > len2) {
     opt2 = new char[(len2+1)];
     strncpy(opt2,opt,len2);
@@ -330,54 +264,72 @@ void type_of_call StCallerOpt_(const char* mess, const char* opt,
     del_opt = 1;
   }
 
-  gMessMgr->Message(mess2,typString,opt2);
-  delete [] mess2;
+  StCaller(mess,typString,opt2,len1);
   if (del_opt) delete [] opt2;
 }
 //________________________________________
+void type_of_call StMessage_(const char* mess, const char* type,
+                             const char* opt, size_t len1,
+			     size_t len2, size_t len3) {
+  char* type2=const_cast<char*> (type);
+  int del_type=0;
+
+  if (len2<=0) {
+    type2=emptyString;
+  } else if (strlen(type) > len2) {
+    type2 = new char[(len2+1)];
+    strncpy(type2,type,len2);
+    type2[len2]=0;
+    del_type = 1;
+  }
+
+  StCallerOpt(mess,type2,opt,len1,len3,oOpt);
+  if (del_type) delete [] type2;
+}
+//________________________________________
 void type_of_call StInfo_(const char* mess, size_t len) {
-  StCaller_(mess,oOpt,len,"I");
+  StCaller(mess,"I",oOpt,len);
 }
 //________________________________________
 void type_of_call StWarning_(const char* mess, size_t len) {
-  StCaller_(mess,eOpt,len,"W");
+  StCaller(mess,"W",eOpt,len);
 }
 //________________________________________
 void type_of_call StError_(const char* mess, size_t len) {
-  StCaller_(mess,eOpt,len,"E");
+  StCaller(mess,"E",eOpt,len);
 }
 //________________________________________
 void type_of_call StDebug_(const char* mess, size_t len) {
-  StCaller_(mess,oOpt,len,"D");
+  StCaller(mess,"D",oOpt,len);
 }
 //________________________________________
 void type_of_call QAInfo_(const char* mess, size_t len) {
-  StCaller_(mess,otsOpt,len,"Q");
+  StCaller(mess,"Q",otsOpt,len);
 }
 //________________________________________
 void type_of_call StInfoOpt_(const char* mess, const char* opt,
                              size_t len1, size_t len2) {
-  StCallerOpt_(mess,opt,len1,len2,"I",oOpt);
+  StCallerOpt(mess,"I",opt,len1,len2,oOpt);
 }
 //________________________________________
 void type_of_call StWarningOpt_(const char* mess, const char* opt,
                                 size_t len1, size_t len2) {
-  StCallerOpt_(mess,opt,len1,len2,"W",eOpt);
+  StCallerOpt(mess,"W",opt,len1,len2,eOpt);
 }
 //________________________________________
 void type_of_call StErrorOpt_(const char* mess, const char* opt,
                               size_t len1, size_t len2) {
-  StCallerOpt_(mess,opt,len1,len2,"E",eOpt);
+  StCallerOpt(mess,"E",opt,len1,len2,eOpt);
 }
 //________________________________________
 void type_of_call StDebugOpt_(const char* mess, const char* opt,
                               size_t len1, size_t len2) {
-  StCallerOpt_(mess,opt,len1,len2,"D",oOpt);
+  StCallerOpt(mess,"D",opt,len1,len2,oOpt);
 }
 //________________________________________
 void type_of_call QAInfoOpt_(const char* mess, const char* opt,
                              size_t len1, size_t len2) {
-  StCallerOpt_(mess,opt,len1,len2,"Q",otsOpt);
+  StCallerOpt(mess,"Q",opt,len1,len2,otsOpt);
 }
 //________________________________________
 void type_of_call StMessAddType_(const char* type, const char* text,
@@ -730,7 +682,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.29 2000/02/29 16:41:57 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.30 2000/03/01 05:54:59 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
