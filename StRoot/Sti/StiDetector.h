@@ -8,6 +8,7 @@
 #define STI_DETECTOR_HH
 
 #include <string>
+using std::string;
 
 class StiMaterial;
 class StiShape;
@@ -33,7 +34,7 @@ public:
     StiShape* getShape() const { return shape; }
     StiPlacement* getPlacement() const { return placement; }
 
-    const char* getName() const {return name;}
+    const string& getName() const {return name;}
     
     // mutators
     void setIsOn(bool val) {on = val;}
@@ -47,11 +48,10 @@ public:
     void setShape(StiShape *val){ shape = val; }
     void setPlacement(StiPlacement *val){ placement = val; }
 
-    void setName(const char *val){	strncpy(name, val, 99);}
+    void setName(const string& val){ name=val;}
 
     //action
-    virtual void build(const char* infile);  //for now, build from SCL parsable ascii file
-    virtual void write(const char* szFileName);
+    virtual void build();  //for now, build from SCL parsable ascii file
 
     virtual void copy(StiDetector &detector);
     
@@ -72,7 +72,7 @@ protected:
     StiShape     *shape;
     StiPlacement *placement;
 
-    char name[100];  //Name of the class, a char to avoid template problems
+    string name;
 
 };
 

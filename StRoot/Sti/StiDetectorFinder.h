@@ -24,7 +24,7 @@ public:
     friend class nobody; //Avoid compiler warnings for singleton design
 
     void addDetector(StiDetector *pDetector);
-    StiDetector* findDetector(const char *szName);
+    StiDetector* findDetector(const string& szName);
 
     static StiDetectorFinder *instance();
     static void kill();

@@ -1,7 +1,7 @@
 
 #include "Exception.h"
 
-Exception::Exception(const char * t)
+Exception::Exception(const string& t)
 {
   text = t;
 }

@@ -18,7 +18,7 @@ class StiObjectFactory : public StiFactory
 				   defaultOriginalSize=10000};
     typedef vector<T*> t_vector;
 
-    StiObjectFactory( const char* newName, int original=-1, int incremental=-1, int maxInc=-1)
+    StiObjectFactory( const string& newName, int original=-1, int incremental=-1, int maxInc=-1)
 	: StiFactory(newName)
     {
 	originalSize          = original>0    ? original    : defaultOriginalSize;

@@ -21,25 +21,25 @@ void StiDetectorBuilder::fillNext(StiDetector *detector){
   if(hasMore()){
     StiDetector *pDetector = (mDetectorIterator++)->second;
     detector->copy(*pDetector);
-    detector->build(NULL);
+    detector->build();
   }
 } // fillNext()
 
-StiMaterial* StiDetectorBuilder::findMaterial(const char *szName) const{
+StiMaterial* StiDetectorBuilder::findMaterial(const string& szName) const{
   
   materialMap::const_iterator where = mMaterialMap.find(NameMapKey(szName));
   return (where!= mMaterialMap.end()) ? (*where).second : 0;
 
 } // findMaterial()
 
-StiShape* StiDetectorBuilder::findShape(const char *szName) const{
+StiShape* StiDetectorBuilder::findShape(const string& szName) const{
 
   shapeMap::const_iterator where = mShapeMap.find(NameMapKey(szName));
   return (where!=mShapeMap.end()) ? (*where).second: 0;
 
 } // findShape()
 
-StiDetector* StiDetectorBuilder::findDetector(const char *szName) const{
+StiDetector* StiDetectorBuilder::findDetector(const string& szName) const{
 
   detectorMap::const_iterator where = mDetectorMap.find(NameMapKey(szName));
   return (where!=mDetectorMap.end()) ? (*where).second: 0;

@@ -22,7 +22,7 @@
 ostream& operator<<(ostream&, const StiDetector&);
 
 //Nested class StiSeedFinderRep
-StiCompositeSeedFinder::StiSeedFinderRep::StiSeedFinderRep(StiTrackSeedFinder* sf, const char* path)
+StiCompositeSeedFinder::StiSeedFinderRep::StiSeedFinderRep(StiTrackSeedFinder* sf, const string& path)
     : mSeedFinder(sf), mBuildPath(path)
 {
     mMinSector = mMaxSector = mMinPadrow = mMaxPadrow = kNotInitialized;
@@ -34,10 +34,10 @@ void StiCompositeSeedFinder::StiSeedFinderRep::build()
 {
     cout <<"StiCompositeSeedFinder::StiSeedFinderRep::build()"<<endl;
     cout <<"\tBuildPath:\t"<<mBuildPath<<endl;
-    StGetConfigValue(mBuildPath, "MinPadrow", mMinPadrow);
-    StGetConfigValue(mBuildPath, "MaxPadrow", mMaxPadrow);
-    StGetConfigValue(mBuildPath, "MinSector", mMinSector);
-    StGetConfigValue(mBuildPath, "MaxSector", mMaxSector);
+    StGetConfigValue(mBuildPath.c_str(), "MinPadrow", mMinPadrow);
+    StGetConfigValue(mBuildPath.c_str(), "MaxPadrow", mMaxPadrow);
+    StGetConfigValue(mBuildPath.c_str(), "MinSector", mMinSector);
+    StGetConfigValue(mBuildPath.c_str(), "MaxSector", mMaxSector);
     cout <<"\tMinPadrow: "<<mMinPadrow;
     cout <<"\tMaxPadrow: "<<mMaxPadrow;
     cout <<"\tMinSector: "<<mMinSector;
@@ -194,14 +194,14 @@ bool StiCompositeSeedFinder::incrementRep()
 
 void StiCompositeSeedFinder::buildOuterSeedFinder(StiTrackSeedFinder* sf)
 {
-    const char* path = "StRoot/StiMaker/RunTimeParameters/OuterSeedFinder.txt";
+    const string path = "StRoot/StiMaker/RunTimeParameters/OuterSeedFinder.txt";
     mRepVec.push_back( StiSeedFinderRep(sf, path) );
     mCurrentRep = mRepVec.begin();
 }
 
 void StiCompositeSeedFinder::buildInnerSeedFinder(StiTrackSeedFinder* sf)
 {
-    const char* path = "StRoot/StiMaker/RunTimeParameters/InnerSeedFinder.txt";
+    const string path = "StRoot/StiMaker/RunTimeParameters/InnerSeedFinder.txt";
     mRepVec.push_back( StiSeedFinderRep(sf, path) );
     mCurrentRep = mRepVec.begin();
 }

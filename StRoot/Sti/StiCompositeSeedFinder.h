@@ -7,6 +7,8 @@
 
 #include <vector>
 using std::vector;
+#include <string>
+using std::string;
 
 #include "StiSeedFinder.h"
 
@@ -24,7 +26,7 @@ public:
 	typedef vector<StiDetectorVec_t>  IntDetectorMap_t;
 	typedef IntDetectorMap_t::const_iterator IntDetectorMapIterator_t;
     
-	StiSeedFinderRep(StiTrackSeedFinder*, const char* buildPath);
+	StiSeedFinderRep(StiTrackSeedFinder*, const string& buildPath);
 	virtual ~StiSeedFinderRep() {};
 
 	void reset(); //Reset to beginning for each new event
@@ -42,7 +44,7 @@ public:
 	StiSeedFinderRep(); //Not implemented
 	
 	StiTrackSeedFinder* mSeedFinder;
-	const char* mBuildPath;
+	string mBuildPath;
 
 	//For start point stuff (for now, assume TPC only for starting points, change later)
 	int mMinSector;

@@ -8,7 +8,7 @@ class Exception
 {
  public:
 
-  Exception(const char *s);
+  Exception(const string& s);
   virtual ~Exception();
   friend ostream & operator << (ostream &ostr, Exception &e);
 
