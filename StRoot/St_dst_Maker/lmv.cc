@@ -1,5 +1,8 @@
-// $Id: lmv.cc,v 1.3 1999/11/12 02:28:24 nystrand Exp $
+// $Id: lmv.cc,v 1.4 1999/11/17 01:18:28 nystrand Exp $
 // $Log: lmv.cc,v $
+// Revision 1.4  1999/11/17 01:18:28  nystrand
+// Modified the filling of the dst vertex table
+//
 // Revision 1.3  1999/11/12 02:28:24  nystrand
 // Update to include events with SVT tracks
 //
@@ -52,7 +55,7 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 //#include "StMagF.h"
 
 
-//static const char rcsid[] = "$Id: lmv.cc,v 1.3 1999/11/12 02:28:24 nystrand Exp $";
+//static const char rcsid[] = "$Id: lmv.cc,v 1.4 1999/11/17 01:18:28 nystrand Exp $";
 
 long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
 {
@@ -108,7 +111,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
   double ptinv,psi,tanl;
   double px,py,pz;
   StThreeVectorD XVertex=(0.0,0.0,0.0);
-  double chi2, chi2pdof;
+  double chi2=0.0, chi2pdof;
 
   long Ntrk = track->GetNRows();
   if( Ntrk <= 1 ){
@@ -120,9 +123,9 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
 
   long i_non_tpc=0;
   dst_track_st *glb_track_pointer = track->GetTable();
-  dst_track_st *sec_pointer;
-  sec_pointer = new dst_track_st;
-  sec_pointer = glb_track_pointer;
+  dst_track_st *sec_pointer = glb_track_pointer;
+  //  dst_track_st  *sec_pointer = new dst_track_st;
+  //  sec_pointer = glb_track_pointer;
   for (long l=0; l<Ntrk; l++){
 
     // First point on Helix
@@ -145,9 +148,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
     pz   = (1./ptinv)*tanl;
     StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
     
-    StPhysicalHelixD *TrkHlxPtr; 
-    TrkHlxPtr = new StPhysicalHelixD(MomFstPt, origin, bfield*tesla, qtrk);
-    StPhysicalHelixD TrkHlx = *TrkHlxPtr;
+    StPhysicalHelixD TrkHlx(MomFstPt, origin, bfield*tesla, qtrk);
 
     long NPoints = glb_track_pointer->n_point;
     if(NPoints > MinTrkPoints){
@@ -464,7 +465,6 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
     }
   } // End While Loop
 
-
   chi2pdof = chi2/(helices.size()-1);
 
   long IVertex = 1; //By definition
@@ -489,34 +489,35 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
   }
 
   // Fill the dst_vertex table
-  long Nvtx = vertex->GetNRows();
-  if( Nvtx <= 0 ){cout<<"lvm: Problem, NPrimaryVertices = "<<Nvtx<<endl;}
+  Int_t nrows = 1;
+  vertex->SetNRows(nrows);
   dst_vertex_st *dst_vertex_pointer = vertex->GetTable();
-  dst_vertex_pointer[IVertex].vtx_id      = 1;
-  dst_vertex_pointer[IVertex].n_daughters = helices.size();
-  dst_vertex_pointer[IVertex].id          = 1;
-  dst_vertex_pointer[IVertex].iflag       = 1;
+  dst_vertex_pointer->vtx_id      = 1;
+  dst_vertex_pointer->n_daughters = helices.size();
+  dst_vertex_pointer->id          = 1;
+  dst_vertex_pointer->iflag       = 1;
   if( Is_SVT = 1){
-    dst_vertex_pointer[IVertex].det_id    = kTpcSsdSvtIdentifier; 
+    dst_vertex_pointer->det_id    = kTpcSsdSvtIdentifier; 
   }
   else{
-    dst_vertex_pointer[IVertex].det_id    = kTpcIdentifier; //TPC track by definition
+    dst_vertex_pointer->det_id    = kTpcIdentifier; //TPC track by definition
   }
-  dst_vertex_pointer[IVertex].id_aux_ent  = 0;
-  dst_vertex_pointer[IVertex].x           = XVertex.x();
-  dst_vertex_pointer[IVertex].y           = XVertex.y();
-  dst_vertex_pointer[IVertex].z           = XVertex.z();
-  dst_vertex_pointer[IVertex].covar[0]    = sqrt(C11);
-  dst_vertex_pointer[IVertex].covar[1]    = sqrt(C12);
-  dst_vertex_pointer[IVertex].covar[2]    = sqrt(C22);
-  dst_vertex_pointer[IVertex].covar[3]    = sqrt(C13);
-  dst_vertex_pointer[IVertex].covar[4]    = sqrt(C23);
-  dst_vertex_pointer[IVertex].covar[5]    = sqrt(C33);
-  dst_vertex_pointer[IVertex].chisq[0]    = chi2pdof;
-  dst_vertex_pointer[IVertex].chisq[1]    = 1.0; // Need to find the prob func in Root
+  dst_vertex_pointer->id_aux_ent  = 0;
+  dst_vertex_pointer->x           = XVertex.x();
+  dst_vertex_pointer->y           = XVertex.y();
+  dst_vertex_pointer->z           = XVertex.z();
+  dst_vertex_pointer->covar[0]    = C11;
+  dst_vertex_pointer->covar[1]    = C12;
+  dst_vertex_pointer->covar[2]    = C22;
+  dst_vertex_pointer->covar[3]    = C13;
+  dst_vertex_pointer->covar[4]    = C23;
+  dst_vertex_pointer->covar[5]    = C33;
+  dst_vertex_pointer->chisq[0]    = chi2pdof;
+  dst_vertex_pointer->chisq[1]    = 1.0; // Need to find the prob func in Root
 
   return kStOK;
 }
+
 
 
 
