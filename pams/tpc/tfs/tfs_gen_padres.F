@@ -1,5 +1,8 @@
-* $Id: tfs_gen_padres.F,v 1.7 1998/07/02 19:11:29 sakrejda Exp $
+* $Id: tfs_gen_padres.F,v 1.8 1998/08/25 21:15:01 sakrejda Exp $
 * $Log: tfs_gen_padres.F,v $
+* Revision 1.8  1998/08/25 21:15:01  sakrejda
+* correction to always output cossing and dip angle in degrees, STAR convention
+*
 * Revision 1.7  1998/07/02 19:11:29  sakrejda
 * B field obtained via gufld call
 *
@@ -188,7 +191,11 @@ C
                endif
 c
                theta = C_PI_2 - abs(alpha) ! angle wrt pad row
-               tphit(k).alpha = alpha
+c              output angle should be in degree,but the angle in tfs is 
+c              in radiu
+c              ******Qun Li  21/08/98
+c              tphit(k).alpha = alpha !output angle should be in degree
+               tphit(k).alpha = alpha*C_DEG_PER_RAD 
                
 C     calculate the dip angle
                
@@ -198,11 +205,17 @@ C     flag hit for discarding
                   tphit(k).flag = tphit(k).flag + 3
                   go to 100
                endif
+
 C     Note: diptan = 1. / ( tangent of the dip angle )
 C     it is coded this way to avoid overflow when pz = 0
                diptan          = abs(pz)/ pbend
-               tphit(k).lambda = atan( diptan )
-               lambda          = tphit(k).lambda
+
+c     output angle should be in degree,but the angle in tfs is in radiu
+c     ******Qun Li  21/08/98
+c              tphit(k).lambda = atan( diptan )
+c              lambda          = tphit(k).lambda
+               tphit(k).lambda = atand( diptan )
+               lambda          = tphit(k).lambda*C_RAD_PER_DEG
 
 C     Modefy the code to accommodate zero B-filed magnitude.
 C     Added a piece of code to handle zero B-field case.
