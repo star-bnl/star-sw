@@ -9,8 +9,8 @@ class StiHit;
 //Structure for hit map key
 struct HitMapKey {
     bool operator==(const HitMapKey&) const;
-    unsigned int sector;
-    unsigned int padrow;
+    double refangle;
+    double position;
 };
 
 //Functor for ordering hit map key

@@ -7,5 +7,5 @@
 
 ostream& operator<<(ostream& os, const StiHit& hit)
 {
-    return os <<hit.sector()<<"\t"<<hit.padrow()<<"\t"<<hit.x()<<"\t"<<hit.y()<<"\t"<<hit.z();
+    return os <<hit.refangle()<<"\t"<<hit.position()<<"\t"<<hit.x()<<"\t"<<hit.y()<<"\t"<<hit.z();
 }

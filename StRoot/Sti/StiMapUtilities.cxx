@@ -8,27 +8,27 @@
 
 //------------------------------ Hit Map Utilities ----------------------------
 
-//Equality defined by same sector and padrow
+//Equality defined by same refangle and position
 bool HitMapKey::operator==(const HitMapKey& key2) const
 {
-  return (this->sector==key2.sector && this->padrow==key2.padrow);
+  return (this->refangle==key2.refangle && this->position==key2.position);
 }
 
-//Return true if key2 < key1.  Order first by sector, then by padrow.
+//Return true if key2 < key1.  Order first by refangle, then by position.
 bool MapKeyLessThan::operator() (const HitMapKey& key1, const HitMapKey& key2) const
 {
     bool val = false;
-    if (key1.sector > key2.sector) {val =  false;}
-    if (key1.sector < key2.sector) {val = true;}
-    if (key1.sector == key2.sector) {
-	if (key1.padrow > key2.padrow) {val = false;}
-	if (key1.padrow < key2.padrow) {val = true;}
-	if (key1.padrow == key2.padrow) {val = false;}
+    if (key1.refangle > key2.refangle) {val =  false;}
+    if (key1.refangle < key2.refangle) {val = true;}
+    if (key1.refangle == key2.refangle) {
+	if (key1.position > key2.position) {val = false;}
+	if (key1.position < key2.position) {val = true;}
+	if (key1.position == key2.position) {val = false;}
     }
     return val;
 }
 
-//Order by distance along padrow, then by z
+//Order by distance along position, then by z
 bool StiHitLessThan::operator() (const StiHit* lhs, const StiHit* rhs) const
 {
     bool val;
@@ -41,7 +41,7 @@ bool StiHitLessThan::operator() (const StiHit* lhs, const StiHit* rhs) const
     return val;
 }
 
-//Order by distance along padrow
+//Order by distance along position
 bool StidHitLessThan::operator() (const StiHit* lhs, const StiHit* rhs) const
 {
     return (lhs->y() < rhs->y()) ? true : false;
@@ -82,7 +82,7 @@ bool DetectorMapKey::operator<(const DetectorMapKey& key2) const
 //----------------------- Streamers -------------------------------------------------
 ostream& operator<<(ostream& os, const HitMapKey& a)
 {
-    return os <<a.sector<<"\t"<<a.padrow;
+    return os <<a.refangle<<"\t"<<a.position;
 }
 
 ostream& operator<<(ostream& os, const DetectorMapKey& a)
