@@ -22,9 +22,9 @@ void SetResiduals()
 }
 
 
-void RunStiEvaluation(const char* evalFName="~mmiller/Evaluation.root",
-		      const char* histFName="~mmiller/EvalHists.root",
-		      const char* postFName="~mmiller/EvalHists.ps",
+void RunStiEvaluation(const char* evalFName="Evaluation.root",
+		      const char* histFName="EvalHists.root",
+		      const char* postFName="EvalHists.ps",
 		      Int_t debug = 0)
 {
   //File stuff - input/output files open and setup
