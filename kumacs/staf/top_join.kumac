@@ -68,7 +68,7 @@ NEWJOIN jn2 '{q.x x2, q.y y2, p.p g}' '{id}'
 
 MESS
 MESS **************************************************
-MESS *** selectspec doesn't work if defined        ****
+MESS *** selectspec does not work if defined       ****
 MESS *** with a ! get a seg. violation             ****
 MESS **************************************************
 
