@@ -163,7 +163,7 @@ Replace [READ[DIGIT](#)#;] with _
    }
    else If Index(Line,'event')>0 & itr+ivt==0     
    { *              OLD text format
-     i=Index(Line,'event');  line(i:i+6)='  ';
+     i=Index(Line,'event');  line(i:i+5)='  ';
      read1 (line,*) Ntrac,Ieven; (' gstar_ReadOld: ',i8,' event# ',i6)
      call VZERO(vert,4); call AgSVERT(vert,-1,-Igate,Ubuf,0,nv)
      do itr=1,Ntrac
