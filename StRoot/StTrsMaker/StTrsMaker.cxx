@@ -1,6 +1,11 @@
-// $Id: StTrsMaker.cxx,v 1.27 1999/03/23 03:37:26 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.28 1999/03/24 22:16:24 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.28  1999/03/24 22:16:24  lasiuk
+// ROOT deletes the dataSet so you have to make
+// a new one each time thru Make().  Don't check the
+// pointers!
+//
 // Revision 1.27  1999/03/23 03:37:26  lasiuk
 // incorporate ROOT dataSets for DB initialization
 // move construction and destruction of "mAllthedata"
@@ -159,7 +164,7 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.27 1999/03/23 03:37:26 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.28 1999/03/24 22:16:24 lasiuk Exp $";
 
 ClassImp(StTrsMaker)
 
@@ -183,9 +188,12 @@ Int_t StTrsMaker::Init()
   St_DataSet *TrsPars = GetDataBase("params/tpc/trspars");
   assert(TrsPars);
   // should use dynamic_cast when available
-  geometryDataSet    *Geometry    = static_cast<geometryDataSet*>(TrsPars->Find("Trs/Geometry"));
-  electronicsDataSet *Electronics = static_cast<electronicsDataSet*>(TrsPars->Find("Trs/Electronics"));
-  slowcontrolDataSet *SlowControl = static_cast<slowcontrolDataSet*>(TrsPars->Find("Trs/SlowControl"));
+  geometryDataSet *Geometry    =
+      static_cast<geometryDataSet*>(TrsPars->Find("Trs/Geometry"));
+  electronicsDataSet *Electronics =
+      static_cast<electronicsDataSet*>(TrsPars->Find("Trs/Electronics"));
+  slowcontrolDataSet *SlowControl =
+      static_cast<slowcontrolDataSet*>(TrsPars->Find("Trs/SlowControl"));
 
 #ifdef ROOT_DATABASE_PARAMETERS
   mGeometryDb =
@@ -322,7 +330,9 @@ Int_t StTrsMaker::Init()
    //
    // Output is into an StTpcRawDataEvent* vector<StTrsDigitalSector*>
    // which is accessible via the StTrsUnpacker
-   mUnPacker = new StTrsUnpacker;
+   mUnPacker=0;
+   mAllTheData=0;
+   //mUnPacker = new StTrsUnpacker;
 
    //
    // Maker Initialization
@@ -355,10 +365,13 @@ void StTrsMaker::whichSector(int volId, int* isDet, int* sector, int* padrow){
 }
 Int_t StTrsMaker::Make(){
     //  PrintInfo();
-    //
-    // Make the event to put the data
-    mAllTheData =
-	new StTrsRawDataEvent();
+
+    // Somehow this isn't quite right.  The new maker schem deletes
+    // the data set each time through the loop, so an "event" and
+    // a "reader" must be created each time...The maker shouldn't have
+    // to do that...
+    mUnPacker = new StTrsUnpacker();
+    mAllTheData = new StTrsRawDataEvent();
     
     //Do not use this unless you really know what you are
     // doing...
@@ -389,13 +402,13 @@ Int_t StTrsMaker::Make(){
     *theTuple << "sec"  << "row" << "pad"
 	      << "x"   << "y"   << "z"
 	      << "amp" << "t" << book;
-
+    
     //
     const int tupleSize2 = 8;
     float tuple2[tupleSize2];
     StHbookTuple *secTuple  =
 	new StHbookTuple("raw_data", tupleSize2);
-
+    
     *secTuple << "sec" << "row"
 	      << "x"  << "y"  << "z"
 	      << "xr" << "yr" << "zr" << book;
@@ -662,7 +675,6 @@ Int_t StTrsMaker::Make(){
 // 	PR(mAllTheData->mSectors.size());
 	
 	mAllTheData->mSectors[(currentSectorProcessed-1)] = aDigitalSector;
-	
 	// Clear and reset for next sector:
 	mWireHistogram->clear();
 	mSector->clear();
@@ -756,17 +768,16 @@ Int_t StTrsMaker::Make(){
     } // Loop over sectors
 #endif
   
-    cout << "Got to the end of the maker" << endl;
+    //cout << "Got to the end of the maker" << endl;
 #ifdef HISTOGRAM
     cout << "Save and close " << endl;
     hbookFile->saveAndClose();
 #endif    
-    // Pass the decoder and data
-//     if (m_DataSet) delete m_DataSet;
-//     m_DataSet =  new St_DataSet(GetName());
+    // CAUTION: ROOT is resposible for the memory at this point
+    // ROOT deletes m_DataSet in the chain after every event.
     m_DataSet->Add(new St_ObjectSet("Event", mAllTheData));
     m_DataSet->Add(new St_ObjectSet("Decoder", mUnPacker));
-  PR(mAllTheData->mSectors.size());
+
     return kStOK;
 }
 
@@ -796,7 +807,7 @@ Int_t StTrsMaker::Finish()
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.27 1999/03/23 03:37:26 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.28 1999/03/24 22:16:24 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
