@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.19 2003/10/30 20:07:32 perev Exp $
+ * $Id: StTrack.cxx,v 2.20 2003/10/31 16:00:04 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.20  2003/10/31 16:00:04  ullrich
+ * Added setKey() method.
+ *
  * Revision 2.19  2003/10/30 20:07:32  perev
  * Check of quality added
  *
@@ -83,7 +86,7 @@
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.19 2003/10/30 20:07:32 perev Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.20 2003/10/31 16:00:04 ullrich Exp $";
 
 StTrack::StTrack()
 {
@@ -312,6 +315,9 @@ StTrack::node() { return mNode; }
 
 void
 StTrack::setFlag(short val) { mFlag = val; }
+
+void
+StTrack::setKey(unsigned short val) { mKey = val; }
 
 void
 StTrack::setEncodedMethod(unsigned short val) { mEncodedMethod = val; }
