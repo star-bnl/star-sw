@@ -1,5 +1,8 @@
-* $Id: tpt_load_track.F,v 1.22 2000/06/23 18:39:05 margetis Exp $
+* $Id: tpt_load_track.F,v 1.23 2000/06/23 22:20:48 sakrejda Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.23  2000/06/23 22:20:48  sakrejda
+* Charge set to 0 if no field.
+*
 * Revision 1.22  2000/06/23 18:39:05  margetis
 * full update on nmax routine with simpler/better calculation and magnet off handling
 *
@@ -151,6 +154,7 @@ C     inverse of the pt
       call gufld(xlocal,bfield)
       if((abs(bfield(3)).lt.0.1.and.tpar(ipass).lfit.eq.0)
      >.or.tpar(ipass).lfit.eq.1)then
+        track(ipt).q = 0
         track(ipt).invp = 0.001
         track(ipt).cov(1) = 0.0
         track(ipt).cov(3) = 0.0
