@@ -1,5 +1,8 @@
-//! $Id: StHistUtil.h,v 1.6 2000/06/23 15:26:22 kathy Exp $
+//! $Id: StHistUtil.h,v 1.7 2000/06/23 15:53:00 kathy Exp $
 //! $Log: StHistUtil.h,v $
+//! Revision 1.7  2000/06/23 15:53:00  kathy
+//! change hardwared max num copied histograms to 512
+//!
 //! Revision 1.6  2000/06/23 15:26:22  kathy
 //! added method to return the copied array & it's size
 //!
@@ -86,7 +89,7 @@ class StHistUtil {
 
   StMaker       *m_PntrToMaker;    //! pointer to an St_Maker, so can find histograms
 
-  static const Int_t    maxHistCopy=500;      //! size of array of new histograms 
+  static const Int_t    maxHistCopy=512;      //! size of array of new histograms 
   TH1            *newHist[maxHistCopy]; //! array of new histograms that other will be copied into
 
 
@@ -134,7 +137,7 @@ class StHistUtil {
   
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.6 2000/06/23 15:26:22 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.7 2000/06/23 15:53:00 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
