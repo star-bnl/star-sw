@@ -1,4 +1,10 @@
+* $Id: btofgeo2.g,v 1.5 2002/12/05 04:46:30 geurts Exp $
+*
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
+* $Log: btofgeo2.g,v $
+* Revision 1.5  2002/12/05 04:46:30  geurts
+* incl. cvs tags
+*
 *
 *******************************************************************************
 Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system 
