@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_Table3PackedPoints.cxx,v 1.2 2000/01/24 22:56:46 fine Exp $
+// $Id: St_Table3PackedPoints.cxx,v 1.3 2000/01/24 23:06:09 fine Exp $
 
 #include <assert.h>
 
@@ -41,7 +41,7 @@ static Float_t factor(Float_t &range,Int_t detId)
 
   const Float_t factors[]   = {2380 , 23800 , 2380, 0, 0, 0, 0, 16000 };
   const Float_t ranges[]    = { 220 ,  22   ,  270, 0, 0, 0, 0,  40   };
-  assert(detId <= sizeof(factors)/4);
+  assert(detId <= Int_t(sizeof(factors)/4));
   Float_t ret = factors[1];
   range =  ranges[1];
   if (detId) {
@@ -147,6 +147,9 @@ Float_t *St_Table3PackedPoints::GetXYZ(Float_t *xyz,Int_t idx, Int_t num) const
 }
 //____________________________________________________________________________
 // $Log: St_Table3PackedPoints.cxx,v $
+// Revision 1.3  2000/01/24 23:06:09  fine
+// Linux warning removed
+//
 // Revision 1.2  2000/01/24 22:56:46  fine
 // new packing schema for ssd introduced
 //
