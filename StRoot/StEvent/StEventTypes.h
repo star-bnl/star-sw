@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.6 2000/03/29 16:54:19 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.7 2000/04/26 20:29:50 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
- * Revision 2.6  2000/03/29 16:54:19  ullrich
- * Added L3 trigger.
+ * Revision 2.7  2000/04/26 20:29:50  ullrich
+ * Removed obsolete StBrowsableEvent.
  *
  * Revision 2.8  2000/05/22 21:43:06  ullrich
  * Add RICH related containers.
@@ -36,7 +36,6 @@
  * SSD hits added to StEvent.
  *
  * Revision 2.1  1999/10/13 19:43:04  ullrich
-#include "StBrowsableEvent.h"
  * Initial Revision
  *
  **************************************************************************/
