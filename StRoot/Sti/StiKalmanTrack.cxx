@@ -334,18 +334,18 @@ void StiKalmanTrack::initialize(double curvature,
       return;
     }
   StiObjectFactoryInterface<StiKalmanTrackNode> * fac 
-		= dynamic_cast<StiObjectFactoryInterface<StiKalmanTrackNode> *>(trackNodeFactory);
+    = dynamic_cast<StiObjectFactoryInterface<StiKalmanTrackNode> *>(trackNodeFactory);
   if (!fac) 
-		{
+    {
       cout <<"StiKalmanTrack::initialize(). ERROR:\tfactory cast failed.  Seg-fault"<<endl;
-		}
+    }
   
   //StThreeVectorD stiOrigin;
   double alpha,alphaP,eta;  
   hitvector::const_iterator it;
   double state[5];  
   double error[15];
-
+  
   //cout <<"\tSet state[3], state[4]"<<endl;
   // These are constant for all hits
   state[3]=curvature;
@@ -357,7 +357,7 @@ void StiKalmanTrack::initialize(double curvature,
   error[3] = 0.; error[4] = 0.; error[5] = 1.;  
   error[6] = 0.; error[7] = 0.; error[8] = 0.;  error[9]  = 1.;  
   error[10]= 0.; error[11] = 0.;error[12] = 0.; error[13] = 0.;  error[14] = 1.;
-
+  
   // do the transfer here
   StiKalmanTrackNode * node  = 0;
   StiKalmanTrackNode * pNode = 0;
@@ -365,42 +365,42 @@ void StiKalmanTrack::initialize(double curvature,
   //cout <<"\tAdd Hits"<<endl;
   for (it=v.begin(); it!=v.end(); ++it)
     {
-			//cout <<"===========Adding Hit: "<<(*(*it))<<endl;
+      //cout <<"===========Adding Hit: "<<(*(*it))<<endl;
       StiDetector* layer = (*it)->detector();
       if (!layer) {
-				cout <<"StiKalmanTrack::initialize() ERROR:\tHit has null detector.  Seg-fault"<<endl;
+	cout <<"StiKalmanTrack::initialize() ERROR:\tHit has null detector.  Seg-fault"<<endl;
       }
       alpha = layer->getPlacement()->getNormalRefAngle();
       node = fac->getObject();
       if (node==0)
-				{
-					cout << "StiKalmanTrack::initialize() - Severe Error - "
-							 << "trackNodeFactor returned null object" << endl;
-					return;
-				}
+	{
+	  cout << "StiKalmanTrack::initialize() - Severe Error - "
+	       << "trackNodeFactor returned null object" << endl;
+	  return;
+	}
       node->reset();
       if (pNode==0)
-				alphaP = -99999.; // no parent, set crazy value
+	alphaP = -99999.; // no parent, set crazy value
       else
-				alphaP = pNode->fAlpha; // value of the parent
+	alphaP = pNode->fAlpha; // value of the parent
       if (alphaP!=alpha)
-				{
-				    StThreeVectorD temp = origin;
-						cout << "OG:" << temp << endl;
-				    temp.rotateZ(-alpha);
-						cout << "OL:" << temp << endl;
-				    eta = curvature*temp.x();
-				}
+	{
+	  StThreeVectorD temp = origin;
+	  cout << "OG:" << temp << endl;
+	  temp.rotateZ(-alpha);
+	  cout << "OL:" << temp << endl;
+	  eta = curvature*temp.x();
+	}
       state[0] = (*it)->y(); 
       state[1] = (*it)->z(); 
       state[2] = eta;
       node->set(i, (*it), alpha, (*it)->x(), state,error, 0., 0.);
       if (pNode==0) 
-				firstNode = node;
+	firstNode = node;
       else
-				{
-					pNode->add(node);
-				}
+	{
+	  pNode->add(node);
+	}
       pNode = node;
       i++;
     }
@@ -410,9 +410,9 @@ void StiKalmanTrack::initialize(double curvature,
 StiKalmanTrackNode * StiKalmanTrack::getNodeNear(double x) const
 {
   if (firstNode==0)  // no node in this track, return a null state and error
-      return 0;
-	//cout << "StiKalmanTrack::getNodeNear(" << x << ") called" << endl;
-	//cout << *firstNode << endl;
+    return 0;
+  //cout << "StiKalmanTrack::getNodeNear(" << x << ") called" << endl;
+  //cout << *firstNode << endl;
   StiDefaultMutableTreeNodeVector* nodes  = firstNode->breadthFirstEnumeration();
   double minDist  = 1.E10;
   double xx, diff;
@@ -421,14 +421,14 @@ StiKalmanTrackNode * StiKalmanTrack::getNodeNear(double x) const
   for (it=nodes->begin(); it!=nodes->end(); it++)
     {
       StiKalmanTrackNode * node = dynamic_cast<StiKalmanTrackNode *>(*it);
-			xx = node->fX;
+      xx = node->fX;
       diff = xx-x; if (diff<0) diff = -diff;
       //cout << "===> x/diff:" << xx << "\t" << diff << endl;
       if (diff<minDist) 
-				{
-					minDist = diff;
-					bestNode = node;
-				}
+	{
+	  minDist = diff;
+	  bestNode = node;
+	}
     }
   delete nodes;
   return bestNode;
@@ -470,3 +470,35 @@ StThreeVector<double> StiKalmanTrack::getGlobalPointNear(double x) const
       return (StThreeVector<double>(gx,gy, zz));
     }
 }
+
+StThreeVector<double> StiKalmanTrack::getMomentumNear(double x)
+{
+  StiKalmanTrackNode * node = getNodeNear(x);
+  double p[3];
+  double e[6];
+  node->getMomentum(p,e);
+  StThreeVector<double> p3(p[0],p[1],p[2]);
+  p3.rotateZ(node->fAlpha);
+  return p3;
+}
+
+StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin()
+{
+  double px,py,pz;
+  px = 0;
+  py = 0;
+  pz = 0;
+  StiObjectFactoryInterface<StiKalmanTrackNode> * f 
+    = dynamic_cast<StiObjectFactoryInterface<StiKalmanTrackNode>*>(trackNodeFactory);
+  StiKalmanTrackNode * n = f->getObject();
+  n->reset();
+  n->setState(lastNode);
+  n->propagate(0,0,0);
+  double p[3];
+  double e[6];
+  n->getMomentum(p,e);
+  StThreeVector<double> p3(p[0],p[1],p[2]);
+  p3.rotateZ(n->fAlpha);
+  return p3;
+}
+

@@ -46,7 +46,7 @@ class StiKalmanTrack : public StiTrack
   virtual double  getDca2(StiTrack *t)   const;   // distance of closest approach to given track - 2D calc
   virtual double  getDca3(StiTrack *t)   const;   // distance of closest approach to given track - 3D calc
   
-  
+
   // Methods of this class
   StiKalmanTrackNode * getFirstNode()  const { return firstNode; };
   StiKalmanTrackNode * getLastNode()   const { return lastNode;  };
@@ -74,7 +74,9 @@ class StiKalmanTrack : public StiTrack
   StiKalmanTrackNode *  getNodeNear(double x) const;
   StThreeVector<double> getPointNear(double x) const;
   StThreeVector<double> getGlobalPointNear(double x) const;
-  
+  StThreeVector<double> getMomentumAtOrigin();
+  StThreeVector<double> getMomentumNear(double x);
+
 protected:
     
   static StiObjectFactoryInterface<StiKalmanTrackNode> * trackNodeFactory;

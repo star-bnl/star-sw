@@ -220,13 +220,13 @@ void StiKalmanTrackNode::getMomentum(double p[3], double e[6]) const
   
   pt = kField/c;
   sinPhi = c*fX-fP2;
-	double ss = sinPhi*sinPhi;
-	if (ss>1.)
-		{
-			cout << "StiKalmanTrackNode::getMomentum - sin(phi)^2 > 1" << endl;
-			cout << " c/fx/fP2/sin(phi):" << c << "\t" << fX << "\t" << fP2 << "\t" << sinPhi << endl;
-			ss = 1.;
-		}
+  double ss = sinPhi*sinPhi;
+  if (ss>1.)
+    {
+      cout << "StiKalmanTrackNode::getMomentum - sin(phi)^2 > 1" << endl;
+      cout << " c/fx/fP2/sin(phi):" << c << "\t" << fX << "\t" << fP2 << "\t" << sinPhi << endl;
+      ss = 1.;
+    }
   cosPhi = sqrt(1-ss);
   p[0] = pt*cosPhi;
   p[1] = pt*sinPhi;
