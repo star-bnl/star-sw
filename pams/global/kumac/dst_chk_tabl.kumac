@@ -52,9 +52,9 @@
    d_vertex=$format(staf_result(1),i10)
    string6 =  --> rowcount vertex        = [d_vertex]
    
- tdm/table/rowcount  event/data/global/dst/ev0out
+ tdm/table/rowcount  event/data/global/dst/dst_v0_vertex
    d_ev0out=$format(staf_result(1),i10)
-   string7 =  --> rowcount ev0out        = [d_ev0out]
+   string7 =  --> rowcount dst_v0_vertex        = [d_ev0out]
    
  tdm/table/rowcount  event/data/global/dst/dst_dedx
    d_dst_dedx=$format(staf_result(1),i10)
