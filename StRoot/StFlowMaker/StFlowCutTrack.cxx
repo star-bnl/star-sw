@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.31 2002/03/12 02:33:19 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.32 2002/04/05 12:10:57 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -38,7 +38,8 @@ Float_t StFlowCutTrack::mPtTpcCuts[2]      = {0.1, 8.};
 Float_t StFlowCutTrack::mPtFtpcCuts[2]     = {0.1, 8.};
 Float_t StFlowCutTrack::mEtaTpcCuts[2]     = {-1.3, 1.3};
 Int_t   StFlowCutTrack::mChgTpcCuts[2]     = {0, 0};
-Float_t StFlowCutTrack::mEtaFtpcCuts[4]    = {-4.0, -2.7, 2.7, 4.0};
+Float_t StFlowCutTrack::mEtaFtpcCuts[4]    = {-0.2, -0.1, 0.1, 0.2};   // exclude FTPC tracks
+//Float_t StFlowCutTrack::mEtaFtpcCuts[4]    = {-4.0, -2.7, 2.7, 4.0}; // default settings to include FTPC tracks
 
 UInt_t  StFlowCutTrack::mTrackN            = 0;     
 UInt_t  StFlowCutTrack::mTpcTrackN         = 0;     
@@ -445,6 +446,9 @@ void StFlowCutTrack::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.32  2002/04/05 12:10:57  oldi
+// Default values for FTPC eta cuts changed. FTPC is excluded now.
+//
 // Revision 1.31  2002/03/12 02:33:19  posk
 // Now makes pico files in SL02c.
 //
