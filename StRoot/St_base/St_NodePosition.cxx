@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_NodePosition.cxx,v 1.18 1999/07/09 01:56:38 fine Exp $
+// $Id: St_NodePosition.cxx,v 1.19 1999/09/22 03:51:50 fine Exp $
 // $Log: St_NodePosition.cxx,v $
+// Revision 1.19  1999/09/22 03:51:50  fine
+// New method and RMath class to manage different transformation have been introduced
+//
 // Revision 1.18  1999/07/09 01:56:38  fine
 // New method to contrsuct sub views and manage visibilities
 //
@@ -219,7 +222,7 @@ Text_t *St_NodePosition::GetObjectInfo(Int_t, Int_t)
 
  
 //______________________________________________________________________________
-void St_NodePosition::Local2Master(Double_t *local, Double_t *master)
+Double_t *St_NodePosition::Local2Master(const Double_t *local, Double_t *master, Int_t nPoints)
 {
 //*-*-*-*-*Convert one point from local system to master reference system*-*-*
 //*-*      ==============================================================
@@ -228,19 +231,89 @@ void St_NodePosition::Local2Master(Double_t *local, Double_t *master)
 //  and translation vector for this node must have been computed.
 //  This is automatically done by the Paint functions.
 //  Otherwise St_NodePosition::UpdateMatrix should be called before.
+  Double_t *matrix = 0;
+  Double_t *trans = 0;
+  if (!fMatrix ||  fMatrix == St_Node::GetIdentity() || !(matrix = fMatrix->GetMatrix()) ) 
+  {
+    trans = master;
+    for (int i =0; i < nPoints; i++) {
+      master[0] = GetX() + local[0];
+      master[1] = GetY() + local[1]; 
+      master[2] = GetZ() + local[2];
+      local += 3; master += 3;
+    }
+  }
+  else 
+  {
+    Double_t x,y,z;
+    trans = master;
+    for (int i =0; i < nPoints; i++) {
+      x = GetX()
+            + local[0]*matrix[0]
+            + local[1]*matrix[3]
+            + local[2]*matrix[6];
+      y = GetY()
+            + local[0]*matrix[1]
+            + local[1]*matrix[4]
+            + local[2]*matrix[7];
+
+      z = GetZ()
+            + local[0]*matrix[2]
+            + local[1]*matrix[5]
+            + local[2]*matrix[8];
+      master[0] = x; master[1] = y; master[2] = z;                 
+      local += 3; master += 3;
+    }
+  }
+  return trans;
 }
  
 //______________________________________________________________________________
-void St_NodePosition::Local2Master(Float_t *local, Float_t *master)
+Float_t *St_NodePosition::Local2Master(const Float_t *local, Float_t *master, Int_t nPoints)
 {
-//*-*-*-*-*Convert one point from local system to master reference system*-*-*
+//*-*-*-*Convert nPoints points from local system to master reference system*-*-*
 //*-*      ==============================================================
 //
 //  Note that before invoking this function, the global rotation matrix
 //  and translation vector for this node must have been computed.
 //  This is automatically done by the Paint functions.
 //  Otherwise St_NodePosition::UpdateMatrix should be called before.
- 
+//
+  Double_t *matrix = 0;
+  Float_t *trans = 0;
+  if (!fMatrix ||  fMatrix == St_Node::GetIdentity() || !(matrix = fMatrix->GetMatrix()) ) 
+  {
+    trans = master;
+    for (int i =0; i < nPoints; i++) {
+      master[0] = GetX() + local[0];
+      master[1] = GetY() + local[1]; 
+      master[2] = GetZ() + local[2];
+      local += 3; master += 3;
+    }
+  }
+  else 
+  {
+    Double_t x,y,z;
+    trans = master;
+    for (int i =0; i < nPoints; i++) {
+      x = GetX()
+            + local[0]*matrix[0]
+            + local[1]*matrix[3]
+            + local[2]*matrix[6];
+      y = GetY()
+            + local[0]*matrix[1]
+            + local[1]*matrix[4]
+            + local[2]*matrix[7];
+
+      z = GetZ()
+            + local[0]*matrix[2]
+            + local[1]*matrix[5]
+            + local[2]*matrix[8];
+      master[0] = x; master[1] = y; master[2] = z;                 
+      local += 3; master += 3;
+    }
+  }
+  return trans;
 }
   
 //______________________________________________________________________________
