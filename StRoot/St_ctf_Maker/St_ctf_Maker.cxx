@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.cxx,v 1.6 1999/02/23 01:09:47 fisyak Exp $
+// $Id: St_ctf_Maker.cxx,v 1.7 1999/02/23 21:25:42 llope Exp $
 // $Log: St_ctf_Maker.cxx,v $
+// Revision 1.7  1999/02/23 21:25:42  llope
+// fixed histograms, added 1/beta vs p
+//
 // Revision 1.6  1999/02/23 01:09:47  fisyak
 // Add Bill Llope dst tables
 //
@@ -51,6 +54,7 @@
 #include "ctf/St_ctu_Module.h"
 #include "ctf/St_fill_dst_tof_Module.h"
 #include "TH1.h"
+#include "TH2.h"
 
 ClassImp(St_ctf_Maker)
 
@@ -91,8 +95,14 @@ Int_t St_ctf_Maker::Init(){
   m_cts_ctb          = (St_cts_mpara    *) params("ctf/cts/cts_ctb");
   m_cts_tof          = (St_cts_mpara    *) params("ctf/cts/cts_tof");
   // Create Histograms  
-  m_adc              = new TH1F("abc","CTB ADC counters",100,0,100);
-  m_tdc              = new TH1F("tdc","CTB TDC counters",100,0,100);
+  m_adcc  = new TH1F("ctf_ctb_adcs","CTB ADCs",96,0,1024);
+  m_adct  = new TH1F("ctf_tof_adcs","TOF ADCs",96,0,1024);
+  m_tsvsp = new TH2F("ctf_tof_tsvsp","TOF 1/beta vs. Ptrk",80,0.1,4.1,100,0.,10.);
+  m_tsvsp->SetXTitle("TPC track momentum (GeV/c)");
+  m_tsvsp->SetYTitle("1/beta from TOFp");
+  m_tsvsp1= new TH2F("ctf_tof_tsvsp1","TOF 1/beta vs. Ptrk",80,0.1,4.1,100,0.,10.);
+  m_tsvsp1->SetXTitle("TPC track momentum (GeV/c)");
+  m_tsvsp1->SetYTitle("1/beta from TOFp, slat Nhits=1");
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -110,13 +120,10 @@ Int_t St_ctf_Maker::Make(){
       Int_t Res_cts_ctb = cts(g2t_ctb_hit, g2t_track,
 			      m_ctb,  m_ctb_slat, m_ctb_slat_phi, m_ctb_slat_eta, m_cts_ctb,
 			      ctb_event, ctb_mslat, ctb_raw);
-      
-      Int_t Res_ctu_ctb =  ctu(m_ctb,  m_ctb_slat,
-			       ctb_raw, ctb_cor);
-      ctu_raw_st *raw = ctb_raw->GetTable();
+      Int_t Res_ctu_ctb = ctu(m_ctb,  m_ctb_slat, ctb_raw, ctb_cor);
+      ctu_raw_st *raw   = ctb_raw->GetTable();
       for (Int_t i=0; i<ctb_raw->GetNRows();i++,raw++){
-	m_adc->Fill((Float_t) raw->adc);
-	m_tdc->Fill((Float_t) raw->tdc);
+        m_adcc->Fill((Float_t) raw->adc);
       }
     }
     St_g2t_ctf_hit *g2t_tof_hit = (St_g2t_ctf_hit *) geant("g2t_tof_hit");
@@ -132,30 +139,40 @@ Int_t St_ctf_Maker::Make(){
       St_tpt_track  *tptrack = 0;
       St_tte_mctrk  *mctrk   = 0;
       if (tpc_tracks) {
-	St_DataSetIter tpcI(tpc_tracks);
-	tptrack = (St_tpt_track *) tpcI["tptrack"];
-	mctrk   = (St_tte_mctrk *) tpcI["mctrk"];
+         St_DataSetIter tpcI(tpc_tracks);
+         tptrack = (St_tpt_track *) tpcI["tptrack"];
+         mctrk   = (St_tte_mctrk *) tpcI["mctrk"];
       }
       St_DataSet *global = gStChain->DataSet("global");
       St_dst_vertex     *vertex      = 0;
       if (global) {
-	St_DataSetIter globalI(global);
-	vertex  = (St_dst_vertex *) globalI["dst/vertex"];
+         St_DataSetIter globalI(global);
+         vertex  = (St_dst_vertex *) globalI["dst/vertex"];
       }
       if (g2t_track && tptrack && mctrk && vertex ) {
-	St_dst_tof_trk *dst_tof_trk = new St_dst_tof_trk("dst_tof_trk",1000);
-	m_DataSet->Add(dst_tof_trk);
-	St_dst_tof_evt *dst_tof_evt = new St_dst_tof_evt("dst_tof_evt",1);
-	m_DataSet->Add(dst_tof_evt);
-	Int_t Res_fill_dst_tof = fill_dst_tof(g2t_tof_hit,g2t_track,
+         St_dst_tof_trk *dst_tof_trk = new St_dst_tof_trk("dst_tof_trk",1000);
+         m_DataSet->Add(dst_tof_trk);
+         St_dst_tof_evt *dst_tof_evt = new St_dst_tof_evt("dst_tof_evt",1);
+         m_DataSet->Add(dst_tof_evt);
+         Int_t Res_fill_dst_tof = fill_dst_tof(g2t_tof_hit,g2t_track,
 					      tptrack,mctrk,vertex,
 					      m_tof,m_tof_slat,
 					      m_tof_slat_phi,m_tof_slat_eta,
 					      m_cts_tof,tof_mslat,
 					      dst_tof_trk,dst_tof_evt);
+         dst_tof_trk_st *dst = dst_tof_trk->GetTable();
+         for (Int_t i=0; i<dst_tof_trk->GetNRows();i++,dst++){
+           m_tsvsp->Fill(dst->ptot,dst->ts_mtime);
+           if (dst->n_hits == 1) {
+            m_tsvsp1->Fill(dst->ptot,dst->ts_mtime);
+           }
+         }
       }	 
-      Int_t Res_ctu_tof =  ctu(m_tof,  m_tof_slat,
-			       tof_raw, tof_cor);
+      Int_t Res_ctu_tof = ctu(m_tof,  m_tof_slat, tof_raw, tof_cor);
+      ctu_raw_st *raw   = tof_raw->GetTable();
+      for (Int_t i=0; i<tof_raw->GetNRows();i++,raw++){
+        m_adct->Fill((Float_t) raw->adc);
+      }
     }
   }
   return kStOK;
@@ -163,7 +180,7 @@ Int_t St_ctf_Maker::Make(){
 //_____________________________________________________________________________
 void St_ctf_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_ctf_Maker.cxx,v 1.6 1999/02/23 01:09:47 fisyak Exp $\n");
+  printf("* $Id: St_ctf_Maker.cxx,v 1.7 1999/02/23 21:25:42 llope Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
