@@ -166,8 +166,8 @@ FILES_SRM := $(filter     $(QWE2),$(FILES_SRM) )
 ifeq ($(PKGNAME),str)
  UNDERSCORES := $(wildcard $(SRC_DIR)/*_*)
  NOUNDERSCOR := $(filter-out $(UNDERSCORES),$(FILES_SRC))
- ONLYOSFID   := $(wildcard $(SRC_DIR)/*_$(OSFID).c $(SRC_DIR)/*_$(OSFID).f )
- FILES_SRC := $(NOUNDERSCOR) $(ONLYOSFID)
+ ONLYSTRID   := $(wildcard $(SRC_DIR)/*_$(STRID).c $(SRC_DIR)/*_$(STRID).f )
+ FILES_SRC := $(NOUNDERSCOR) $(ONLYSTRID)
 endif
 
 
@@ -229,6 +229,8 @@ FILES_DIDLM :=$(addsuffix .didlm, $(addprefix $(DEP_DIR)/,$(basename $(notdir $(
 
 MY_LIB := $(LIB_DIR)/lib$(PKGNAME).a 
 MY_SO  := $(LIB_DIR)/lib$(PKGNAME).$(So)
+MY_NEW_SO := $(LIB_DIR)/lib$(PKGNAME)_NEW.$(So)
+MY_OLD_SO := $(wildcard $(MY_SO))
 
 #	for SDD only
 ifdef PKG_SDD
@@ -258,10 +260,11 @@ exe : $(FILES_EXE)
 #	Very special case: STIC creation
 #	********************************
 #
-$(BIN_DIR)/stic:        $(OBJ_DIR)/idl-yacc.o $(OBJ_DIR)/templateStuff.o
-	$(LD) $(LDFLAGS) -o $(ALL_TAGS) $(ALL_DEPS) $(YACCLIB) $(LEXLIB) 
+$(BIN_DIR)/stic:        idl-yacc.o templateStuff.o
+	$(LD) $(LDFLAGS) -o $(ALL_TAGS) $(addprefix $(OBJ_DIR)/,idl-yacc.o templateStuff.o) \
+	      $(YACCLIB) $(LEXLIB) 
 #
-$(OBJ_DIR)/idl-yacc.o :  $(SRC_DIR)/idl.l $(SRC_DIR)/idl.y
+idl-yacc.o :  $(SRC_DIR)/idl.l $(SRC_DIR)/idl.y
 	cd $(TMP_DIR);\
         $(RM) idl-yacc.c;\
 	$(YACC) -v $(SRC_DIR)/idl.y;\
@@ -281,7 +284,7 @@ else
 	> idl-lex.c;
 endif
 	cd $(TMP_DIR); $(RM) lex.yy.c;\
-        $(CC) $(CFLAGS) -I. -I$(SRC_DIR) -c idl-yacc.c -o $(ALL_TAGS)
+        $(CC) $(CFLAGS) -I. -I$(SRC_DIR) -c idl-yacc.c -o $(OBJ_DIR)/idl-yacc.o
 #
 ###############################################################################
 $(filter-out $(BIN_DIR)/stic,$(FILES_EXE)) : $(FILES_A)
@@ -313,8 +316,12 @@ $(MY_LIB) : $(FILES_O)
 	touch $(MY_LIB)
 
 $(MY_SO) : $(FILES_O)
-	$(SO) $(SOFLAGS) -o $(LIB_DIR)/lib$(PKGNAME).$(So) $(addprefix $(OBJ_DIR)/,$(FILES_O))
-
+	$(SO) $(SOFLAGS) -o $(MY_NEW_SO) $(addprefix $(OBJ_DIR)/,$(FILES_O))
+ifdef MY_OLD_SO
+	$(MV) $(MY_SO) $(MY_SO).BAK
+endif
+	$(MV) $(MY_NEW_SO) $(MY_SO)
+	
 $(SRC_GEN_DIR)/%.c : %.cdf
 	kuipc -c $(ALL_DEPS) $(SRC_GEN_DIR)/$(STEM).c
 
@@ -335,7 +342,7 @@ $(SRC_GEN_DIR)%.c : %.y
 %.o : %.F 
 	$(FC)  -c $(CPPFLAGS) $(FFLAGS) $(INCLUDES)  $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 
-/%.o : %.f 
+%.o : %.f 
 	$(FC)  -c $(CPPFLAGS) $(FFLAGS) $(INCLUDES)  $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 
 $(SRC_GEN_DIR)/%-lex.c : $(SRC_DIR)/%.l 
