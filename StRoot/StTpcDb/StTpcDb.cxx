@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.25 2000/08/09 13:00:03 hardtke Exp $
+ * $Id: StTpcDb.cxx,v 1.26 2000/08/09 14:54:54 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.26  2000/08/09 14:54:54  hardtke
+ * Add Clear option, set trigger table pointer to 0 after each event
+ *
  * Revision 1.25  2000/08/09 13:00:03  hardtke
  * Add protections to make sure trigger table is filled before using
  *
@@ -116,6 +119,11 @@ StTpcDb::StTpcDb(StMaker* maker) {
  if (maker) GetDataBase(maker);
  gMessMgr->SetLimit("StRTpcPadPlane::Invalid Pad number",20);
  gStTpcDb = this;
+}
+
+void StTpcDb::Clear(){
+  trigtype = 0;
+  return;
 }
 
 //_____________________________________________________________________________

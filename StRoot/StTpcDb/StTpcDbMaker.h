@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.h,v 1.8 2000/04/11 16:06:26 hardtke Exp $
+ * $Id: StTpcDbMaker.h,v 1.9 2000/08/09 14:54:54 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.h,v $
+ * Revision 1.9  2000/08/09 14:54:54  hardtke
+ * Add Clear option, set trigger table pointer to 0 after each event
+ *
  * Revision 1.8  2000/04/11 16:06:26  hardtke
  * improve speed of tpc_row_par and tpc_global_to_sector
  *
@@ -122,12 +125,13 @@ class StTpcDbMaker : public StMaker {
    virtual       ~StTpcDbMaker();
    virtual Int_t Init();
    virtual Int_t  Make();
+   virtual void Clear(const char *opt);
    virtual void Update_tpg_pad_plane();
    virtual void Update_tpg_detector();
    virtual StTpcDb* tpcDbInterface() const;    //! return m_TpcDb
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.8 2000/04/11 16:06:26 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.9 2000/08/09 14:54:54 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTpcDbMaker, 1)   //StAF chain virtual base class for Makers
 };
