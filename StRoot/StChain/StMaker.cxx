@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.34 1999/05/06 21:27:10 perev Exp $
+// $Id: StMaker.cxx,v 1.35 1999/05/06 22:15:32 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.35  1999/05/06 22:15:32  perev
+// fix objLast should not be included in StMaker::Init
+//
 // Revision 1.34  1999/05/06 21:27:10  perev
 // StMaker remove his from hdirectory
 //
@@ -89,7 +92,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.34 1999/05/06 21:27:10 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.35 1999/05/06 22:15:32 perev Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -113,7 +116,6 @@ StMaker::StMaker(const char *name,const char *):St_DataSet(name,".maker")
    m_Inputs  =  new St_ObjectSet(".aliases" );Add(m_Inputs);
    AddHist(0); m_Histograms = GetHistList();
    gStChain = this; //?????????????????????????????????????????????????????
-
 }
 
 //_____________________________________________________________________________
@@ -360,11 +362,10 @@ St_DataSet *StMaker::GetDataBase(const char* logInput)
 //_____________________________________________________________________________
 void StMaker::Clear(Option_t *option)
 {
-if(option){};
-if (m_DataSet) m_DataSet->Delete();
+  if(option){};
+  if (m_DataSet) m_DataSet->Delete();
 
 }
-
 //_____________________________________________________________________________
 Int_t StMaker::Init()
 {   
@@ -394,6 +395,7 @@ Int_t StMaker::Init()
       while((objHist=nextHist())) {// loop over gDirectory
         if (!ready && objHist!=objLast)		continue;
         ready = 1999;
+        if (objHist==objLast)			continue;
         if (!objHist->InheritsFrom("TH1")) 	continue;
 
 // 		Move the histogram from the ROOT list into the "maker's" list
@@ -511,8 +513,6 @@ Int_t        StMaker::GetRunNumber() const
    Warning("GetRunNumber"," EvtHddr not found");
    return 0;
 }
-
-
 //_____________________________________________________________________________
 TDatime  StMaker::GetDateTime() const 
 {
@@ -521,7 +521,9 @@ TDatime  StMaker::GetDateTime() const
    Warning("GetDateTime"," EvtHddr not found");
    TDatime td; return td;   
 }
+//_____________________________________________________________________________
 Int_t    StMaker::GetDate()  const {return GetDateTime().GetDate();}
+//_____________________________________________________________________________
 Int_t    StMaker::GetTime()  const {return GetDateTime().GetTime();}
 //_____________________________________________________________________________
 const Char_t *StMaker::GetEventType() const
@@ -583,7 +585,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
 
   TString classname = ClassName();
 
-  THtml html;
+  if (!gHtml) gHtml = new THtml;
 
   // Define the set of the subdirectories with the STAR class sources
   //                       | --------------  | ----------  | ------------------ |
@@ -625,12 +627,12 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
 
   gSystem->ExpandPathName(lookup);
   lookup.ReplaceAll("//StRoot/","/StRoot/");
-  html.SetSourceDir(lookup);
+  gHtml->SetSourceDir(lookup);
 
   TString odir = outdir;
 //  odir.ReplaceAll("$(STAR)",STAR);
   gSystem->ExpandPathName(odir);
-  html.SetOutputDir(odir);
+  gHtml->SetOutputDir(odir);
 
   // Create the list of the classes defined with the loaded DLL's to be documented
 
@@ -651,11 +653,11 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   TClass header1("table_head_st",1,"table_header.h","table_header.h");
 
   // Update the docs of the base classes
-  if (baseClasses) for (i=0;i<nclass;i++) html.MakeClass(classes[i]);
+  if (baseClasses) for (i=0;i<nclass;i++) gHtml->MakeClass(classes[i]);
 
   // Create the doc for this class
   printf(" Making html for <%s>\n",c);
-  html.MakeClass((Char_t *)c);
+  gHtml->MakeClass((Char_t *)c);
 //   Loop on all makers
    TList *tl = GetMakeList();
    if (tl) {
