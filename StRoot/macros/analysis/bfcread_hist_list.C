@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list.C,v 1.15 2000/01/19 16:29:51 kathy Exp $ 
+// $Id: bfcread_hist_list.C,v 1.16 2000/02/14 20:30:40 kathy Exp $ 
 // $Log: bfcread_hist_list.C,v $
+// Revision 1.16  2000/02/14 20:30:40  kathy
+// removing unneeded macros; updating documentation in bfcread macros
+//
 // Revision 1.15  2000/01/19 16:29:51  kathy
 // update macros to use default input files in /afs/rhic/star/data/samples
 //
@@ -66,6 +69,11 @@
 //   (but if you run your own Maker here, then use whatever name you give it)
 //  are listed at 
 //  http://www.star.bnl.gov/STAR/html/comp_l/train/tut/bfc_maker_names.html
+//
+//
+// Documentation on StHistUtil class is at:
+//   http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StAnalysisUtilities/doc/
+//
 //======================================================================
 
 

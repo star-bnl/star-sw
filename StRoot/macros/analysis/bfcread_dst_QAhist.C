@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.25 2000/02/07 19:46:36 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.26 2000/02/14 20:30:40 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.26  2000/02/14 20:30:40  kathy
+// removing unneeded macros; updating documentation in bfcread macros
+//
 // Revision 1.25  2000/02/07 19:46:36  kathy
 // add read from geant Branch so that geant table histograms can be filled in St_QA_Maker
 //
@@ -116,6 +119,15 @@
 //   (but if you run your own Maker here, then use whatever name you give it)
 //  are listed at 
 //  http://www.star.bnl.gov/STAR/html/comp_l/train/tut/bfc_maker_names.html
+//
+//
+//
+// Documentation on St_QA_Maker class is at:
+//   http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/St_QA_Maker/doc/
+//
+// Documentation on StHistUtil class is at:
+//   http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StAnalysisUtilities/doc/
+//  
 //======================================================================
 
 class StChain;

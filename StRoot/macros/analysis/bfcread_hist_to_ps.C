@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.19 2000/01/26 19:28:15 kathy Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.20 2000/02/14 20:30:41 kathy Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.20  2000/02/14 20:30:41  kathy
+// removing unneeded macros; updating documentation in bfcread macros
+//
 // Revision 1.19  2000/01/26 19:28:15  kathy
 // put in call to method SetDefaultLogXList
 //
@@ -89,6 +92,10 @@
 //   (but if you run your own Maker here, then use whatever name you give it)
 //  are listed at 
 //  http://www.star.bnl.gov/STAR/html/comp_l/train/tut/bfc_maker_names.html
+//
+//
+// Documentation on StHistUtil class is at:
+//   http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StAnalysisUtilities/doc/
 //
 //======================================================================
 
