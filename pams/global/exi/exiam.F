@@ -419,8 +419,8 @@ c*** pgj: fill exiaux table if present (note: default allocation is 1)
 
                 if( exiaux_h.maxlen .eq. 1 ) then
                   if( first ) then
-                    call
-     >                StWarning('EXI - exi_aux table will not be filled')
+c                   call
+c    >                StWarning('EXI - exi_aux table will not be filled')
                     first = .false.
                   endif
                 elseif( n_xi .le. exiaux_h.maxlen ) then
