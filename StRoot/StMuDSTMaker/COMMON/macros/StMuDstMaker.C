@@ -76,12 +76,13 @@ ioMaker->SetIOMode("r");
 ioMaker->SetDebug();
 ioMaker->SetBranch("*",0,"0");         //deactivate all branches
 ioMaker->SetBranch("eventBranch",0,"r"); //activate evt.root Branch
+ioMaker->SetBranch("runcoBranch",0,"r"); //activate evt.root Branch
 
 // ***********************
 // the StStrangeMuDstMaker
 // ***********************
 
- StStrangeMuDstMaker* v0dst = new StStrangeMuDstMaker("StrangeMaker");
+ StStrangeMuDstMaker* v0dst = new StStrangeMuDstMaker("strangeMuDst");
  v0dst->DoV0(); //Set v0MiniDstMaker to find only v0s
  v0dst->DoXi(); //Set v0MiniDstMaker to find only v0s
  v0dst->DoKink(); //Set v0MiniDstMaker to find only v0s
@@ -95,11 +96,15 @@ ioMaker->SetBranch("eventBranch",0,"r"); //activate evt.root Branch
 // *********
 
  StMuDstMaker* maker = new StMuDstMaker(1,1,dirName);
+//  maker->setSplit(500);
+//  maker->setBufferSize(4000);
  maker->setProbabilityPidFile("/afs/rhic/star/users/aihong/www/PIDTableP01gl.root");
 
  StMuL3Filter* l3Filter = new StMuL3Filter(); maker->setL3TrackFilter(l3Filter);
  StMuFilter* filter = new StMuFilter();       maker->setTrackFilter(filter);
-
+//  filter->addEncodedMethod(32770);
+//  filter->addEncodedMethod(8,7);
+ StMuDebug::setLevel(2);
 
  chain->Init(); // This should call the Init() method in ALL makers
  chain->PrintInfo();
