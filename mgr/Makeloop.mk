@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.90  1999/08/16 16:31:33  fisyak
+#  Simplify Makefiles
+#
 #  Revision 1.89  1999/08/14 00:37:35  fisyak
 #  New Cons stuff
 #
@@ -346,7 +349,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/08/14 00:37:35 $ 
+#           Last modification $Date: 1999/08/16 16:31:33 $ 
 #  default setings
 # Current Working Directory
 #
@@ -373,34 +376,24 @@ ifndef SUBDIRS
   SUBDIRS := $(filter StChain, $(SUBDIRS)) $(filter-out StChain, $(SUBDIRS)) 
   SUBDIRS := $(filter-out ctf, $(SUBDIRS)) $(filter ctf, $(SUBDIRS)) 
   SUBDIRS := $(filter St_base, $(SUBDIRS)) $(filter-out St_base, $(SUBDIRS)) 
-  ifneq (,$(findstring sim, $(SUBDIRS)))
-    SUBDIRS := $(filter-out sim, $(SUBDIRS))
-    DIRS    := $(subst /.,,$(strip $(wildcard sim/*/.)))
-    SUBDIRS += $(filter-out sim/CVS sim/kumac sim/idl sim/inc,$(DIRS))
-  endif
-  ifneq (,$(findstring gen, $(SUBDIRS)))
-    SUBDIRS := $(filter-out gen, $(SUBDIRS))
-    DIRS    := $(subst /.,,$(strip $(wildcard gen/*/.)))
-    SUBDIRS += $(filter-out gen/CVS gen/kumac gen/inc gen/idl,$(DIRS))
-  endif
   ifdef NT
     SUBDIRS := $(filter-out db sim g2t gstar dig trg strange, $(SUBDIRS))
   endif
   SUBDIRS := $(filter-out global, $(SUBDIRS)) $(filter global, $(SUBDIRS))
   SUBDIRS := $(filter util, $(SUBDIRS)) $(filter-out util, $(SUBDIRS)) 
-  SUBDIRS := $(filter-out StDisplay, $(SUBDIRS))
-  SUBDIRS := $(filter-out vpd par crs egz fri g2x mev StHbtMaker StAssociationMaker, $(SUBDIRS))
-    SUBDIRS := $(filter-out StMcAnalysisMaker,  $(SUBDIRS))
- ifneq (,$(findstring $(STAR_SYS),sun4x_56 hp_ux102))
+  ifneq (,$(findstring $(STAR_SYS),sun4x_56 hp_ux102))
     SUBDIRS := $(filter-out StPeCMaker StHbtMaker, $(SUBDIRS))
- endif
-ifdef SKIP_LIB
+  endif
+  ifdef SKIP_LIB
     SUBDIRS := $(filter-out $(SKIP_LIB),  $(SUBDIRS))
-endif
-ifdef SKIP_DIRS
+  endif
+  ifdef SKIP_DIRS
     SUBDIRS := $(filter-out $(SKIP_DIRS),  $(SUBDIRS))
-endif
-  ifdef PKG
+  endif
+  ifneq (,$(findstring $(PKG),sim gen))
+   PKG :=
+  endif
+  ifneq (,$(strip $(PKG)))
     SUBDIRS:=
   endif
 endif
@@ -458,6 +451,7 @@ test_level:
 	@echo "CWD       = |"$(CWD)"|"
 	@echo "NAME      = |"$(NAME)"|"
 	@echo "ROOT_DIR  = |"$(ROOT_DIR)"|"
+	@echo "ROOT_LVL  = |"$(ROOT_LVL)"|"
 	@echo "DOM_DIR   = |"$(DOM_DIR)"|"
 	@echo "TARGETS   = |"$(TARGETS)"|"
 	@echo "Makeloop  = |"$(Makeloop)"|"	
@@ -477,4 +471,7 @@ test_level:
 	@echo "SYS_DIR   = |"$(SYS_DIR)"|"
 	@echo "SRC_DIR   = |"$(SRC_DIR)"|"
 	@echo "PKG       = |"$(PKG)"|"
+	@echo "DOMAIN    = |"$(DOMAIN)"|"
 	@echo "NAME      = |"$(NAME)"|"
+	@echo "branch    = |"$(branch)"|"
+	@echo "PAMS      = |"$(PAMS)"|"

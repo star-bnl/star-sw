@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.105 1999/08/15 19:09:05 fisyak Exp $
+# $Id: MakePam.mk,v 1.106 1999/08/16 16:31:33 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.106  1999/08/16 16:31:33  fisyak
+# Simplify Makefiles
+#
 # Revision 1.105  1999/08/15 19:09:05  fisyak
 # keep objects for pams
 #
@@ -194,64 +197,25 @@ endif
 ASU_MALLOC_OFF :=YES
 
 include $(STAR_MAKE_HOME)/MakeEnv.mk
-ifeq (,$(findstring $(LEVEL),0 1))
-  ifndef OUT_DIR
-    OUT_DIR := $(word 1, $(subst /pams, ,$(INP_DIR)))
+include $(STAR_MAKE_HOME)/MakeDirs.mk
+ifndef OUT_DIR
+  OUT_DIR := $(word 1, $(subst /pams, ,$(INP_DIR)))
+endif
+ifeq (,$(strip $(filter /%,$(OUT_DIR))))
+  override OUT_DIR := $(CWD)/$(OUT_DIR)
+endif
+IDLS    := $(wildcard $(SRC_DIR)/*.idl $(SRC_DIR)/*/*.idl)
+ifneq (,$(IDLS))       
+  FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(IDLS))
+  NAMES_IDM := $(basename $(notdir $(FILES_IDM)))
+  SRC_DIRR  := $(addprefix $(STAR), $(subst $(OUT_DIR),,$(SRC_DIR)))
+  IDLSS     := $(wildcard $(SRC_DIRR)/*.idl $(SRC_DIRR)/*/*.idl)
+  ifneq (,$(IDLSS))
+    FILES_IDMS:= $(shell egrep -l 'interface.*:.*amiModule' $(IDLSS))
   endif
-  ifeq (,$(strip $(filter /%,$(OUT_DIR))))
-    override OUT_DIR := $(CWD)/$(OUT_DIR)
-  endif
-
-
-  PKG     := $(notdir $(INP_DIR))
-  D       := $(subst /, ,$(subst $(OUT_DIR),,$(INP_DIR)))
-  DOMAIN  := $(word 2, $(D))
-  ifeq ($(DOMAIN),gen)
-    DOMAIN  := $(word 3, $(D))
-  endif
-  ifeq ($(DOMAIN),sim)
-    DOMAIN  := $(word 3, $(D))
-  endif
-  ifneq (,$(DOMAIN)$(PKG)) 
-    SRC_DIR := $(INP_DIR)
-    SYS_DIR := $(OUT_DIR)/.$(STAR_HOST_SYS)
-    ifndef NODEBUG
-      LIB_DIR := $(SYS_DIR)/lib
-      DEP_DIR := $(SYS_DIR)/dep/$(DOMAIN)
-      OBJ_DIR := $(SYS_DIR)/obj/$(DOMAIN)
-    else
-      LIB_DIR := $(SYS_DIR)/LIB
-      DEP_DIR := $(SYS_DIR)/DEP/$(DOMAIN)
-      OBJ_DIR := $(SYS_DIR)/OBJ/$(DOMAIN)
-    endif
-    export LIB_DIR	#especially for .rootrc
-    DIR_GEN := $(OUT_DIR)/.share
-    GEN_TMP := $(DIR_GEN)/tmp
-    GEN_TAB := $(DIR_GEN)/tables
-    GEN_DIR := $(DIR_GEN)/$(DOMAIN)
-    DOM_DIRS:= $(filter-out CVS, $(notdir $(wildcard $(OUT_DIR)/pams/*)))
-#.
-    check_out   := $(shell test -d $(OUT_DIR) || mkdir -p $(OUT_DIR)) 
-    check_sys   := $(shell test -d $(SYS_DIR) || mkdir -p $(SYS_DIR)) 
-    check_lib   := $(shell test -d $(LIB_DIR) || mkdir -p $(LIB_DIR))
-    check_obj   := $(shell test -d $(OBJ_DIR) || mkdir -p $(OBJ_DIR))
-    check_dep   := $(shell test -d $(DEP_DIR) || mkdir -p $(DEP_DIR))
-    check_gen   := $(shell test -d $(DIR_GEN) || mkdir -p $(DIR_GEN))
-    check_neg   := $(shell test -d $(GEN_DIR) || mkdir -p $(GEN_DIR))
-    check_tab   := $(shell test -d $(GEN_TAB) || mkdir -p $(GEN_TAB))
-    check_tmp   := $(shell test -d $(GEN_TMP) || mkdir -p $(GEN_TMP))
-    IDLS    := $(wildcard $(SRC_DIR)/*.idl $(SRC_DIR)/*/*.idl)
-    ifneq (,$(IDLS))       
-      FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(IDLS))
-      NAMES_IDM := $(basename $(notdir $(FILES_IDM)))
-      SRC_DIRR  := $(addprefix $(STAR), $(subst $(OUT_DIR),,$(SRC_DIR)))
-      IDLSS     := $(wildcard $(SRC_DIRR)/*.idl $(SRC_DIRR)/*/*.idl)
-      ifneq (,$(IDLSS))
-        FILES_IDMS:= $(shell egrep -l 'interface.*:.*amiModule' $(IDLSS))
-      endif
-      NAMES_IDMS:= $(filter-out $(NAMES_IDM), $(basename $(notdir $(FILES_IDMS))))
-    endif
-    FILES_G  := $(wildcard $(SRC_DIR)/*.g $(SRC_DIR)/*/*.g)
+  NAMES_IDMS:= $(filter-out $(NAMES_IDM), $(basename $(notdir $(FILES_IDMS))))
+endif
+FILES_G  := $(wildcard $(SRC_DIR)/*.g $(SRC_DIR)/*/*.g)
 #_________________________________________________________________________
 SUFFIXES := .c .cc .C .cxx .f .F .g .h .hh .hpp .inc .idl
 sources := $(strip $(sort $(dir $(foreach s, $(SUFFIXES), $(wildcard $(SRC_DIR)/*$(s) $(SRC_DIR)/*/*$(s) $(SRC_DIR)/*/*/*$(s))))))
@@ -268,16 +232,16 @@ INC_NAMES := $(addprefix StRoot/,St_base StChain StUtilities xdf2root StarClassL
 #                            StarClassLibrary/include
 INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) $(ROOT_DIR) 
 ifneq ($(ROOT_DIR),$(STAR))
-INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES)))) $(STAR)
+  INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES)))) $(STAR)
 endif
 #INC_DIRS:= $(wildcard $(OUT_DIR)/pams/*/inc $(STAR)/pams/*/inc)
 DINCINT  :=  -DROOT_CINT $(filter-out -DST_NO_TEMPLATE_DEF_ARGS, $(CPPFLAGS)) $(ROOTCINTD) $(INCINT)
 ifeq ($(STAR_HOST_SYS),sun4x_56)
-CXXFLAGS +=-ptr$(OBJ_DIR)
+  CXXFLAGS +=-ptr$(OBJ_DIR)
 endif
 VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_TAB) $(OBJ_DIR) $(IDL_DIRS) $(INC_DIRS)
 ifneq (,$(FILES_IDM))
-VPATH   += $(GEN_DIR)
+  VPATH   += $(GEN_DIR)
 endif
 define MAKE_TABLE_CXX
 	@$(RM) $(GEN_TAB)/St_$(STEM)_Table.cxx;\
@@ -330,7 +294,7 @@ INCLUDES += -I. -I../ -I/usr/include -I$(STAF_SYS_INCS) \
             -I$(CERN_ROOT)/include
 
 ifneq ($(OUT_DIR),$(STAR))        
-INCLUDES += -I$(STAR)/.share/$(DOMAIN) -I$(STAR)/.share/tables
+  INCLUDES += -I$(STAR)/.share/$(DOMAIN) -I$(STAR)/.share/tables
 endif                          
 CPPFLAGS += $(INCLUDES)
 FFLAGS   += -DCERNLIB_TYPE
@@ -351,30 +315,27 @@ NAMES_CDF:= $(basename $(notdir $(FILES_CDF)))
 #.________________________  modules ____________________________________________
 FILES_IDT := $(notdir $(wildcard $(OUT_DIR)/pams/$(DOMAIN)/idl/*.idl $(STAR)/pams/$(DOMAIN)/idl/*.idl))
 ifneq (,$(FILES_IDM))
-FILES_ICC := $(addprefix $(GEN_DIR)/, $(subst .idl,_i.cc,  $(notdir $(FILES_IDM))))
-FILES_IH  := $(addprefix $(GEN_DIR)/, $(subst .idl,.h,     $(notdir $(FILES_IDM))))
-FILES_INC := $(addprefix $(GEN_DIR)/, $(subst .idl,.inc,   $(notdir $(FILES_IDM))))
-FILES_MOD := $(addprefix $(GEN_DIR)/St_,$(subst .idl,_Module.cxx, $(notdir $(FILES_IDM))))
-FILES_MHH := $(addprefix $(GEN_DIR)/St_,$(subst .idl,_Module.h  , $(notdir $(FILES_IDM))))
-FILES_ALL_MOD := $(FILES_SYM) $(FILES_ICC) $(FILES_IH) $(FILES_INC) $(FILES_MOD) $(FILES_MHH)
-#list :=  $(STIC) -T -q $(STICFLAGS) 
-FILES_IDT += $(foreach IDM, $(FILES_IDM), $(shell $(STIC) -T -q $(STICFLAGS) $(IDM))) 
+  FILES_ICC := $(addprefix $(GEN_DIR)/, $(subst .idl,_i.cc,  $(notdir $(FILES_IDM))))
+  FILES_IH  := $(addprefix $(GEN_DIR)/, $(subst .idl,.h,     $(notdir $(FILES_IDM))))
+  FILES_INC := $(addprefix $(GEN_DIR)/, $(subst .idl,.inc,   $(notdir $(FILES_IDM))))
+  FILES_MOD := $(addprefix $(GEN_DIR)/St_,$(subst .idl,_Module.cxx, $(notdir $(FILES_IDM))))
+  FILES_MHH := $(addprefix $(GEN_DIR)/St_,$(subst .idl,_Module.h  , $(notdir $(FILES_IDM))))
+  FILES_ALL_MOD := $(FILES_SYM) $(FILES_ICC) $(FILES_IH) $(FILES_INC) $(FILES_MOD) $(FILES_MHH)
+  FILES_IDT += $(foreach IDM, $(FILES_IDM), $(shell $(STIC) -T -q $(STICFLAGS) $(IDM))) 
 endif    
 FILES_IDT := $(sort $(FILES_IDT))
-#FILES_IDT := $(shell  for IDM in $(FILES_IDM) ;  do [$(list) $(IDM)] ; done ) 
-#            for name [ in word; ] do list ; done                       
 #._________________________ Tables _____________________________________________
 ifneq (,$(FILES_IDT))
-FILES_TAH := $(addprefix $(GEN_TAB)/, $(addsuffix .h,   $(sort $(basename $(notdir $(FILES_IDT))))))
-FILES_TAI := $(addprefix $(GEN_TAB)/, $(addsuffix .inc, $(sort $(basename $(notdir $(FILES_IDT))))))
-FILES_TAB := $(addprefix $(GEN_TAB)/St_, $(addsuffix _Table.cxx, $(sort $(basename $(notdir $(FILES_IDT))))))
-FILES_THH := $(addprefix $(GEN_TAB)/St_, $(addsuffix _Table.h, $(sort $(basename $(notdir $(FILES_IDT))))))
-FILES_ALL_TAB := $(FILES_SYT) $(FILES_TAH) $(FILES_TAI) $(FILES_TAB) $(FILES_THH)
+  FILES_TAH := $(addprefix $(GEN_TAB)/, $(addsuffix .h,   $(sort $(basename $(notdir $(FILES_IDT))))))
+  FILES_TAI := $(addprefix $(GEN_TAB)/, $(addsuffix .inc, $(sort $(basename $(notdir $(FILES_IDT))))))
+  FILES_TAB := $(addprefix $(GEN_TAB)/St_, $(addsuffix _Table.cxx, $(sort $(basename $(notdir $(FILES_IDT))))))
+  FILES_THH := $(addprefix $(GEN_TAB)/St_, $(addsuffix _Table.h, $(sort $(basename $(notdir $(FILES_IDT))))))
+  FILES_ALL_TAB := $(FILES_SYT) $(FILES_TAH) $(FILES_TAI) $(FILES_TAB) $(FILES_THH)
 endif
 FILES_O  := $(strip $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_F) $(NAMES_C) $(NAMES_CC))))
 ifndef NODEPEND                
-FILES_D  := $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_O)))))
-FILES_DM := $(addprefix $(GEN_DIR)/, $(addsuffix .didl, $(NAMES_IDM)))                         
+  FILES_D  := $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_O)))))
+  FILES_DM := $(addprefix $(GEN_DIR)/, $(addsuffix .didl, $(NAMES_IDM)))                         
 endif                          
 FILES_O  += $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O),   $(notdir $(basename $(FILES_ICC)))))
 NAMES_O   = $(notdir $(FILES_O))
@@ -383,38 +344,39 @@ ifneq (,$(strip $(FILES_IDM) $(FILES_G) $(FILES_CDF)))
   SL_PKG  := $(LIB_DIR)/$(PKG).sl
   QWE  := $(sort $(wildcard $(SL_PKG).*))
   SL_NEW := $(SL_PKG).1000
-ifneq (,$(QWE))
-  NQWE := $(words $(QWE))
-  QWE  := $(word $(NQWE),$(QWE))
-  QWE  := $(subst $(SL_PKG).,,$(QWE))
-  QWE  := $(shell expr $(QWE) + 1)
-  SL_NEW := $(SL_PKG).$(QWE)
-endif
+  ifneq (,$(QWE))
+    NQWE := $(words $(QWE))
+    QWE  := $(word $(NQWE),$(QWE))
+    QWE  := $(subst $(SL_PKG).,,$(QWE))
+    QWE  := $(shell expr $(QWE) + 1)
+    SL_NEW := $(SL_PKG).$(QWE)
+  endif
 endif
 ifneq (,$(NAMES_IDM))          
-FILES_init  := $(addprefix $(OBJ_DIR)/, $(PKG)_init.$(O))
+  FILES_init  := $(addprefix $(OBJ_DIR)/, $(PKG)_init.$(O))
 endif                      
 ifneq (,$(NAMES_CDF))          
-FILES_O    += $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_CDF)))
+  FILES_O    += $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_CDF)))
 endif                          
 ifneq (,$(NAMES_G))            
-FILES_OG    := $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_G)))
-FILES_O     += $(FILES_OG) 
-FILES_D     += $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_OG)))))
-endif
+  FILES_OG    := $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_G)))
+  FILES_O     += $(FILES_OG) 
+  FILES_D     += $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_OG)))))
 endif
 ifneq (,$(NAMES_CC))            
-FILES_SL    += $(filter-out $(FILES_o), $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_CC))))
-FILES_D     += $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_CC)))))
+  FILES_SL    += $(filter-out $(FILES_o), $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_CC))))
+  FILES_D     += $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_CC)))))
 endif                          
 ifneq (,$(NAMES_CXX))            
-FILES_SL    += $(filter-out $(FILES_o), $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_CXX))))
-FILES_D     += $(addprefix $(DEP_DIR)/,$(addsuffix .d, $(basename $(notdir $(FILES_CXX)))))
+  FILES_SL    += $(filter-out $(FILES_o), $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_CXX))))
+  FILES_D     += $(addprefix $(DEP_DIR)/,$(addsuffix .d, $(basename $(notdir $(FILES_CXX)))))
 endif                          
 ifneq (,$(strip $(FILES_O) $(FILES_OG)))
-LIB_PKG := $(LIB_DIR)/lib$(DOMAIN).$(A)
+  LIB_PKG := $(LIB_DIR)/lib$(DOMAIN).$(A)
+endif
 ifndef LIBRARIES
   LIBRARIES := $(LIB_PKG)	               
+endif
 ifneq ($(STAR_PATH),$(OUT_DIR))
   ifneq ($(LIB_PKG),)
     LIBRARIES += $(wildcard  $(STAR_LIB)/lib$(PKG).$(A))
@@ -424,34 +386,33 @@ qwe     := $(shell test ! -f $(LIB_PKG) ||  $(AR) $(ARFLAGS) $(LIB_PKG))
 #OBJS    := $(LIB_PKG)($(NAMES_O))
 OBJS    := $(FILES_O);
 ifeq (,$(strip $(LIB_PKG) $(SL_PKG)))
-all:
+  all:
 	@echo Nothing to do for package $(PKG)
 else
 #-------------------------------rules-------------------------------
 # phony - not a file
 .PHONY               : MakeInc lib sl_lib depend clean test
 all                  : MakeInc $(LIB_PKG) $(SL_PKG) 
-ifndef NOROOT
+  ifndef NOROOT
 MakeInc  : $(FILES_ALL_TAB) $(FILES_ALL_MOD) 
-else
+  else
 MakeInc  : $(FILES_TAI) $(FILES_TAH)
-endif
+  endif
 # all files:
-ifneq (,$(strip $(FILES_O) $(FILES_SL) $(FILES_OG) $(FILES_init))) 
+  ifneq (,$(strip $(FILES_O) $(FILES_SL) $(FILES_OG) $(FILES_init))) 
 #                 I have NO idl- and NO g-files
-ifneq ($(FILES_O),)    
+    ifneq ($(FILES_O),)    
 $(LIB_PKG):$(OBJS) 
 	$(AR) $(ARFLAGS) $(LIB_PKG) $(FILES_O); 
-#$(RM) $(FILES_O)
-endif                          
-ifneq ($(strip $(FILES_SL) $(FILES_OG) $(FILES_init)),)   
+    endif                          
+    ifneq ($(strip $(FILES_SL) $(FILES_OG) $(FILES_init)),)   
 $(SL_PKG): $(FILES_SL) $(FILES_OG) $(FILES_init) $(LIB_PKG) $(wildcard $(OBJ_DIR)/Templates.DB/*.$(O))
 	$(SO) $(SOFLAGS) $(FILES_SL) $(FILES_OG) $(FILES_init)  -o $(SL_NEW)  $(LIBRARIES) $(SL_EXTRA_LIB)
 	$(RM) $(SL_PKG)
 	$(LN) $(SL_NEW) $(SL_PKG)
 	@echo "           Shared library " $(SL_PKG) " has been created"   
 #--------- module --------- 
-ifneq ($(NAMES_IDM),)           
+      ifneq ($(NAMES_IDM),)           
 $(OBJ_DIR)/$(PKG)_init.$(O): $(FILES_IDM)  
 	@if [ -f $(GEN_DIR)/$(PKG)_init.cc ]; then  rm $(GEN_DIR)/$(PKG)_init.cc ; fi
 	@echo '/* '$(PKG)' package interface to STAF */' > $(GEN_DIR)/$(PKG)_init.cc
@@ -470,70 +431,27 @@ $(OBJ_DIR)/$(PKG)_init.$(O): $(FILES_IDM)
 	@echo '                       return 1; }'      >> $(GEN_DIR)/$(PKG)_init.cc
 	@echo 'int  $(PKG)_stop () { return 1; }'       >> $(GEN_DIR)/$(PKG)_init.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(GEN_DIR)/$(PKG)_init.cc -o $(ALL_TAGS)
-endif                           
-endif                           # NO idl- or g-files
+      endif                           
+    endif                           # NO idl- or g-files
 #_________________dependencies_____________________________
-ifndef NODEPEND
-ifneq (,$(strip $(FILES_DM)))
+    ifndef NODEPEND
+      ifneq (,$(strip $(FILES_DM)))
 include $(FILES_DM)
-endif                               # 
-ifneq (,$(strip $(FILES_D))) 
+      endif                               # 
+      ifneq (,$(strip $(FILES_D))) 
 include $(FILES_D)
-endif                               #
-endif                            # end if of FILES_O FILES_SL
-endif
+      endif                               #
+    endif                            # end if of FILES_O FILES_SL
+  endif
 #--------  idm, idl --------
-ifneq (,$(FILES_ALL_TAB))
+  ifneq (,$(FILES_ALL_TAB))
 $(FILES_TAH) : $(GEN_TAB)/%.h : %.idl
-	$(CP) $(1ST_DEPS) $(GEN_TAB)/ ; cd $(GEN_TAB); $(STIC) -H -q $(STICFLAGS) $(STEM).idl; $(RM) $(STEM).idl
+	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -H -q $(STEM).idl; \
+        $(CP) $(STEM).h $(GEN_TAB)/$(STEM).h
 $(FILES_TAI) : $(GEN_TAB)/%.inc : %.idl
-	$(CP) $(1ST_DEPS) $(GEN_TAB)/ ; cd $(GEN_TAB); $(STIC) -H -q $(STICFLAGS) $(STEM).idl; $(RM) $(STEM).idl
-ifndef NOROOT
-ifdef NEVER
-$(GEN_TAB)/.rootrc:
-	@echo '# ROOT Environment settings are handled via the class TEnv. To see' > $(ALL_TAGS)
-	@echo '# which values are active do: gEnv->Print(). '>>  $(ALL_TAGS)
-	@echo '# Path used by dynamic loader to find shared libraries and macros '>>  $(ALL_TAGS)
-	@echo '# Paths are different for Unix and Windows. The example shows the defaults'>>  $(ALL_TAGS)
-	@echo '# for all ROOT applications for either Unix or Windows.'>>  $(ALL_TAGS)
-	@echo 'Unix.*.Root.DynamicPath:    .:$$(LIB_DIR):.$$(STAR_HOST_SYS)/lib:$$(STAR_LIB):$$(STAF_LIB)'>>  $(ALL_TAGS)
-	@echo 'Unix.*.Root.MacroPath:      .:./StRoot/macros:$$(STAR)/StRoot/macros:$$(STAR)/StRoot/test:$$(STAR)/.share/tables:$$(ROOTSYS)/macros'>>  $(ALL_TAGS)
-	@echo 'WinNT.*.Root.DynamicPath:   ./;$$(ROOTSYS)/star/bin;$(AFS_RHIC)/star/packages/dev/.intel_wnt/bin;$$(ROOTSYS);$$(ROOTSYS)/bin;$$(PATH)'>>  $(ALL_TAGS)
-	@echo 'WinNT.*.Root.MacroPath:     ./;$$(home)/root/macros;$$(ROOTSYS)/tutorials;$$(ROOTSYS)/star/macros;$(AFS_RHIC)/star/packages/dev/.intel_wnt/bin;$$(ROOTSYS)/macros'>>  $(ALL_TAGS)
-	@echo '# Show where library or macro is found (in path specified above)'>>  $(ALL_TAGS)
-	@echo 'Root.ShowPath:           false'>>  $(ALL_TAGS)
- 
-	@echo '# Activate memory statistics (size and cnt is used to trap allocation of'>>  $(ALL_TAGS)
-	@echo '# blocks of a certain size after cnt times)'>>  $(ALL_TAGS)
-	@echo 'Root.MemStat:            0'>>  $(ALL_TAGS)
-	@echo 'Root.MemStat.size:      -1'>>  $(ALL_TAGS)
-	@echo 'Root.MemStat.cnt:       -1'>>  $(ALL_TAGS)
-	@echo 'Root.ObjectStat:         1'>>  $(ALL_TAGS)
- 
-	@echo '# Rint (interactive ROOT executable) specific alias, logon and logoff macros'>>  $(ALL_TAGS)
-	@echo 'Rint.History:             /dev/null'>>  $(ALL_TAGS)
-
-$(FILES_TAB) : $(GEN_TAB)/St_%_Table.cxx : $(GEN_TAB)/%.h $(GEN_TAB)/.rootrc
-	@echo "{" >   $(GEN_TAB)/$(STEM).C;
-	@echo "   gSystem->Load(\"St_base\");" >> $(GEN_TAB)/$(STEM).C;
-	@echo "#pragma Ccomment on"  >> $(GEN_TAB)/$(STEM).C;
-	@echo "G__loadfile(\"$(GEN_TAB)/$(STEM).h\");" >> $(GEN_TAB)/$(STEM).C;
-	@echo "St_Table tabs(\"$(STEM)\",1);" >> $(GEN_TAB)/$(STEM).C;
-	@echo "tabs.StafStreamer();" >> $(GEN_TAB)/$(STEM).C;
-	@echo "}" >> $(GEN_TAB)/$(STEM).C;
-#	cat $(GEN_TAB)/$(STEM).C;
-	cd $(GEN_TAB); root.exe -b  $(STEM).C -q > /dev/null; $(RM) $(STEM).C
-$(FILES_THH) : $(GEN_TAB)/St_%_Table.h : $(GEN_TAB)/%.h $(GEN_TAB)/.rootrc 
-	@echo "{" >   $(GEN_TAB)/$(STEM).C;
-	@echo "   gSystem->Load(\"St_base\");" >> $(GEN_TAB)/$(STEM).C;
-	@echo "#pragma Ccomment on"  >> $(GEN_TAB)/$(STEM).C;
-	@echo "G__loadfile(\"$(GEN_TAB)/$(STEM).h\");" >> $(GEN_TAB)/$(STEM).C;
-	@echo "St_Table tabs(\"$(STEM)\",1);" >> $(GEN_TAB)/$(STEM).C;
-	@echo "tabs.StafStreamer();" >> $(GEN_TAB)/$(STEM).C;
-	@echo "}" >> $(GEN_TAB)/$(STEM).C;
-#	cat $(GEN_TAB)/$(STEM).C;
-	cd $(GEN_TAB); root.exe -b $(STEM).C -q  > /dev/null ; $(RM) $(STEM).C
-endif
+	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -H -q $(STEM).idl; \
+        $(CP) $(STEM).inc $(GEN_TAB)/$(STEM).inc
+    ifndef NOROOT
 #------------------------------------------- ---------------------------------
 #$(FILES_TAB) : $(GEN_TAB)/St_%_Table.cxx : $(GEN_TAB)/%.h
 $(GEN_TAB)/St_%_Table.cxx:
@@ -541,8 +459,8 @@ $(GEN_TAB)/St_%_Table.cxx:
 #$(FILES_THH) : $(GEN_TAB)/St_%_Table.h : $(GEN_TAB)/%.h
 $(GEN_TAB)/St_%_Table.h:
 	$(MAKE_TABLE_H)
-endif #NOROOT
-endif #ALL_TAB
+    endif #NOROOT
+  endif #ALL_TAB
 #--- compilation -
 $(OBJ_DIR)/%.$(O):%.g
 	$(CP) $(1ST_DEPS) $(OBJ_DIR); cd $(OBJ_DIR); $(GEANT3) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).F
@@ -559,67 +477,29 @@ $(OBJ_DIR)/%.$(O): %.cdf
 	$(KUIPC) $(KUIPC_FLAGS) $(1ST_DEPS) $(OBJ_DIR)/$(STEM).c
 	$(CC)  $(CPPFLAGS) $(CFLAGS)   -c $(OBJ_DIR)/$(STEM).c $(COUT) $(OBJ_DIR)/$(STEM).$(O); \
 #_______________________dependencies_________________________________
-ifneq (,$(FILES_IDM))
+  ifneq (,$(FILES_IDM))
 $(FILES_ICC) : $(GEN_DIR)/%_i.cc : %.idl
-	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);
-	cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); 
-	cd $(GEN_TMP); $(MV) $(STEM)_i.cc  $(STEM).h $(STEM).inc $(GEN_DIR)/; 
-ifndef NOROOT
-	cd $(GEN_TMP); $(MV) St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/;
-endif
-#	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;
-	$(RM) *.h *.inc *.template *.cxx; 
+	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); \
+	$(MV) $(STEM)_i.cc $(GEN_DIR)/; 
 $(FILES_IH)  : $(GEN_DIR)/%.h    : %.idl
-	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);
-	cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); 
-	cd $(GEN_TMP); $(MV) $(STEM)_i.cc  $(STEM).h $(STEM).inc $(GEN_DIR)/; 
-ifndef NOROOT
-	cd $(GEN_TMP); $(MV) St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/;
-endif
-#	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         
-	$(RM) *.h *.inc *.template *.cxx;
+	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); \
+	$(MV) $(STEM).h $(GEN_DIR)/; 
 $(FILES_INC) : $(GEN_DIR)/%.inc  : %.idl
-	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);
-	cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); 
-	cd $(GEN_TMP); $(MV) $(STEM)_i.cc  $(STEM).h $(STEM).inc $(GEN_DIR)/; 
-ifndef NOROOT
-#	cd $(GEN_TMP); $(MV) St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/;
-endif
-#	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         
-	$(RM) *.h *.inc *.template *.cxx;
+	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); \
+	$(MV) $(STEM).inc $(GEN_DIR)/; 
 $(FILES_MHH) : $(GEN_DIR)/St_%_Module.h  : %.idl
-	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);
-	cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); 
-	cd $(GEN_TMP); $(MV) $(STEM)_i.cc  $(STEM).h $(STEM).inc $(GEN_DIR)/; 
-ifndef NOROOT
-#	cd $(GEN_TMP); $(MV) St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/;
-endif
-#	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         
-	$(RM) *.h *.inc *.template *.cxx;
+	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); \
+	$(MV) St_$(STEM)_Module.h $(GEN_DIR)/; 
 $(FILES_MOD) : $(GEN_DIR)/St_%_Module.cxx : %.idl
-	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);
-	cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS);
-	cd $(GEN_TMP); $(MV) $(STEM)_i.cc  $(STEM).h $(STEM).inc $(GEN_DIR)/; 
-ifndef NOROOT
-	cd $(GEN_TMP); $(MV) St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/;
-endif
-#	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         
-	$(RM) *.h *.inc *.template *.cxx;
-$(GEN_DIR)/%.didl $(GEN_DIR)/%_i.cc $(GEN_DIR)/%.h $(GEN_DIR)/%.inc: %.idl
-	$(RM)  $(GEN_DIR)/$(STEM)_i.cc
-	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ;
-	cd $(GEN_TMP); $(STIC) -q $(STICFLAGS) $(1ST_DEPS); 
-	$(MAKEDEPEND)    -x c $(STICFLAGS) $(1ST_DEPS) | \
+	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); \
+	$(MV) St_$(STEM)_Module.cxx $(GEN_DIR)/; 
+$(GEN_DIR)/%.didl: %.idl
+	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; $(RM)  $(GEN_DIR)/$(STEM).didl; \
+        $(MAKEDEPEND) -x c $(STICFLAGS) $(1ST_DEPS) | \
         sed -e 's/$(STEM)\.idl\.$(O)/$(subst .,\., $(subst /,\/, $(GEN_DIR)))\/$(STEM)\.didl/g' \
-        > $(GEN_DIR)/$(STEM).didl; 
-	cd $(GEN_TMP); $(STIC) -q $(STICFLAGS) $(1ST_DEPS) >>  $(GEN_DIR)/$(STEM).didl; 
-	cd $(GEN_TMP); $(MV) $(STEM)_i.cc  $(STEM).h $(STEM).inc $(GEN_DIR)/; 
-#	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         
-	$(RM) *.h *.inc *.template;
-endif #IDM
-endif
-endif
-endif
+        > $(GEN_DIR)/$(STEM).didl;  
+	cd $(GEN_TMP); $(STIC) -q $(STICFLAGS) $(1ST_DEPS) >>  $(GEN_DIR)/$(STEM).didl;
+  endif #IDM
 include $(STAR_MAKE_HOME)/MakeDep.mk
 #-----cleaning------------------------------
 clean: clean_obj clean_lib clean_dep

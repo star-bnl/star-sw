@@ -1,5 +1,8 @@
-# $Id: MakeEnv.mk,v 1.15 1999/08/04 23:56:51 fisyak Exp $
+# $Id: MakeEnv.mk,v 1.16 1999/08/16 16:31:32 fisyak Exp $
 # $Log: MakeEnv.mk,v $
+# Revision 1.16  1999/08/16 16:31:32  fisyak
+# Simplify Makefiles
+#
 # Revision 1.15  1999/08/04 23:56:51  fisyak
 # Remove default rules
 #
@@ -216,24 +219,41 @@ NAME    := $(notdir $(INP_DIR))
 MAKFLAGS := $(filter-out w, $(MAKEFLAGS))
 # define level pams -> domain -> package from *.idl and *.g files
 #======================= level ===========================
-PAMS    := $(findstring /pams,$(INP_DIR))
 ifndef PAMS
-  PAMS    := $(findstring /StRoot,$(INP_DIR))
+  ifneq (,$(findstring /pams,$(INP_DIR)))
+    PAMS    :=pams
+    branch  :=pams
+  endif
 endif
 ifndef PAMS
-  PAMS    := $(findstring /.share,$(INP_DIR))
+  ifneq (,$(findstring /StRoot,$(INP_DIR)))
+    PAMS    :=StRoot
+    branch  :=$(PAMS)
+  endif
+endif
+ifndef PAMS 
+  ifneq (,$(findstring /.share,$(INP_DIR)))
+    PAMS    :=.share
+    branch  :=pams
+  endif
 endif
 ifndef PAMS
-  PAMS    := $(findstring /StEvent,$(INP_DIR))
+  ifneq (,$(findstring /asps,$(INP_DIR)))
+    PAMS    :=asps
+    branch  :=$(PAMS)
+  endif
 endif
-ifndef PAMS
-  PAMS    := $(findstring /asps,$(INP_DIR))
+ROOT_DIR:=$(word 1,$(subst $(PAMS), ,$(INP_DIR)))
+D       := $(subst /, ,$(subst $(ROOT_DIR),,$(INP_DIR)))
+DOMAIN  := $(word 2, $(D))
+ifneq (,$(findstring $(DOMAIN),gen sim))
+  DOMAIN  := $(word 3, $(D))
 endif
-ROOT_DIR:= $(word 1,$(subst $(PAMS), ,$(INP_DIR)))
-LEVEL   := $(words  $(subst /, ,$(subst $(ROOT_DIR),, $(INP_DIR))))
-branch  := $(subst /,,$(PAMS))
+ROOT_LVL:=$(subst $(ROOT_DIR),,$(INP_DIR))
+LEVEL   := $(words  $(subst /, ,$(subst $(ROOT_DIR),,$(INP_DIR))))
+branch  := $(subst /,,$(branch))
 ifndef DOMAIN
-DOMAIN  := $(notdir $(DOM_DIR))                          
+DOMAIN  := $(notdir $(DOM_DIR))
 endif
 ifndef OUT_DIR
   OUT_DIR := $(ROOT_DIR)
@@ -241,11 +261,7 @@ endif
 ifeq (,$(strip $(filter /%,$(OUT_DIR))))
   override OUT_DIR := $(CWD)/$(OUT_DIR)
 endif
-ifeq ($(LEVEL), $(ONE))  #default is domain
-   ifeq (/StEvent,$(PAMS))
-    PKG :=StEvent
-   endif
-endif
+PKG   :=
 ifeq ($(LEVEL), $(TWO))  #default is domain
     DOM_DIR := $(CWD)
     PKG     := $(notdir $(DOM_DIR))

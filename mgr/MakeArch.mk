@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.82  1999/08/16 16:31:31  fisyak
+#  Simplify Makefiles
+#
 #  Revision 1.81  1999/08/14 00:37:35  fisyak
 #  New Cons stuff
 #
@@ -221,7 +224,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/08/14 00:37:35 $ 
+#             Last modification $Date: 1999/08/16 16:31:31 $ 
 #. default setings
 
 MAKE  := gmake
@@ -707,16 +710,6 @@ endif
 ifeq (,$(strip $(filter /%,$(INPDIR))))
   override INPDIR := $(CWD)/$(INPDIR)
 endif
-#	ROOT DIR (Not a Rene ROOT)
-PAMS    := $(findstring /pams,$(INPDIR))
-ifndef PAMS
-  PAMS    := $(findstring /StRoot,$(INPDIR))
-endif
-ifndef PAMS
-  PAMS    := $(findstring /.share,$(INPDIR))
-endif
-ROOTDIR:= $(word 1,$(subst $(PAMS), ,$(INPDIR)))
-CPPFLAGS += -I$(ROOTDIR)
 
 
 ifndef FOR72 
