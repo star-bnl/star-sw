@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.23 2001/10/25 23:00:24 hardtke Exp $
+ * $Id: StMagUtilities.cxx,v 1.24 2001/12/11 00:12:36 jeromel Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.24  2001/12/11 00:12:36  jeromel
+ * Added comments a-la-doxygen to test this documentation scheme.
+ *
  * Revision 1.23  2001/10/25 23:00:24  hardtke
  * Use database to get a few parameters in StMagUtilities (including twist)
  *
@@ -60,22 +63,24 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-// 
-// StMagUtilities - Jim Thomas 10 October 2000
-// A package of Bfield routines and distortion corrections for STAR.  
-// Methods included to read the correct Bfield map and scale it 
-// according to a scale factor provided during instantiation.
-// All corrections automatically adjust themselves for different
-// B field settings and E field settings.  Even reversed fields. 
-// An enumerated argument provided at the time of instantiation selects
-// a constant field (map=1) or the interpolation grid (map=2).
-// Work in kGauss, cm - but note that the Bfield maps on disk are in gauss, cm.
-//
-// To do:  
-// Pull parameters out of DB rather than from #define.  kChain version and Standalone version.
-// Add a routine to distort the track if we are given a Geant Vector full of points == a track
-// Add simulated B field map in the regions where the field is not mapped.
-//
+/*! \class StMagUtilities 
+    \author Jim Thomas 10 October 2000
+
+   A package of Bfield routines and distortion corrections for STAR.  
+   Methods included to read the correct Bfield map and scale it 
+   according to a scale factor provided during instantiation.
+   All corrections automatically adjust themselves for different
+   B field settings and E field settings.  Even reversed fields. 
+   <p>
+   An enumerated argument provided at the time of instantiation selects
+  a constant field (map=1) or the interpolation grid (map=2).
+   Work in kGauss, cm - but note that the Bfield maps on disk are in gauss, cm.
+   <p>
+   To do: <br>
+   Pull parameters out of DB rather than from #define.  kChain version and Standalone version.
+   Add a routine to distort the track if we are given a Geant Vector full of points == a track
+   Add simulated B field map in the regions where the field is not mapped.
+*/
 
 #define  nZ               57            // Standard STAR B field Map. Number of Z points in table
 #define  nR               28            // Number of R points in table
@@ -107,9 +112,9 @@ static Float_t  eRadius[neR], ePhiList[nePhi], eZList[neZ]  ;
 
 ClassImp(StMagUtilities)
 
+/// StMagUtilities constructor
 StMagUtilities::StMagUtilities( )
-
-{                                           // StMagUtilities constructor
+{                                           
 
   Float_t  B[3], X[3] = { 0, 0, 0 } ;
 
@@ -135,10 +140,9 @@ StMagUtilities::StMagUtilities( )
 
 }
 
-
+/// StMagUtilities constructor - temporary kludge in lieu of DB
 StMagUtilities::StMagUtilities( Int_t mode, StTpcDb* dbin )
-
-{                                           // StMagUtilities constructor - temporary kludge in lieu of DB
+{                                           
 
   Float_t  B[3], X[3] = { 0, 0, 0 } ;
   SetDb(dbin);
@@ -166,9 +170,9 @@ StMagUtilities::StMagUtilities( Int_t mode, StTpcDb* dbin )
 
 }
 
+/// StMagUtilities constructor - stand alone version with hardwired constants
 StMagUtilities::StMagUtilities( Int_t mode)
-
-{                                           // StMagUtilities constructor - stand alone version with hardwired constants
+{                                           
 
   Float_t  B[3], X[3] = { 0, 0, 0 } ;
   //initialize parameters to hard-wired values
@@ -195,15 +199,15 @@ StMagUtilities::StMagUtilities( Int_t mode)
 
 }
 
-
+/// StMagUtilities constructor
 StMagUtilities::StMagUtilities( const EBField map=kMapped, const Float_t factor, Int_t mode)       
-{                                           // StMagUtilities constructor
+{                                           
 
   if ( gMap == kUndefined ) 
     {
       gFactor = factor ;
       gMap = map ;                          // Do once & select the requested map (mapped or constant)
-      Init( mode ) ;                           // Read the Magnetic and Electric Field Data Files, set constants
+      Init( mode ) ;                        // Read the Magnetic and Electric Field Data Files, set constants
     }
    
   if ( gMap != map || factor != gFactor ) 
@@ -217,6 +221,7 @@ StMagUtilities::StMagUtilities( const EBField map=kMapped, const Float_t factor,
 
 void StMagUtilities::SetDb(StTpcDb* dbin) {thedb = dbin;}
 
+/// Initialization method. This will also sort the options received by the tpt maker
 void StMagUtilities::Init ( Int_t mode )
 
 {
@@ -266,14 +271,9 @@ void StMagUtilities::Init ( Int_t mode )
 
 }
 
-//________________________________________
-//
-// Main Entry Point for requests for B field in Cartesian coordinates
-//
-//________________________________________
 
-void StMagUtilities::BField( const Float_t x[3], Float_t B[3] )
-
+/// Main Entry Point for requests for B field in Cartesian coordinates
+void StMagUtilities::BField( const Float_t x[], Float_t B[] )
 {                          
 
   Float_t r, z, Br_value, Bz_value ;
@@ -298,8 +298,8 @@ void StMagUtilities::BField( const Float_t x[3], Float_t B[3] )
 
 }
 
+/// 3D BField correction
 void StMagUtilities::B3DField( const Float_t x[3], Float_t B[3] )
-
 {                          
 
   Float_t r, z, phi, Br_value, Bz_value, Bphi_value ;
@@ -329,12 +329,8 @@ void StMagUtilities::B3DField( const Float_t x[3], Float_t B[3] )
 
 }
 
-//________________________________________
-//
-// Main Entry Point for requests for B field in Radial coordinates
-//
-//________________________________________
 
+/// Main Entry Point for requests for B field in Radial coordinates
 void StMagUtilities::BrBzField( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value )
 
 {
@@ -355,18 +351,15 @@ void StMagUtilities::BrBz3DField( const Float_t r, const Float_t z, const Float_
 
 }
 
-//________________________________________
-//
-// Main Entry Point for requests to Undo the E and B field distortions
-//
-//________________________________________
 
-void StMagUtilities::UndoDistortion( const Float_t x[3], Float_t Xprime[3] )
+/// Main Entry Point for requests to Undo the E and B field distortions
+
+void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] )
 
 {
-    // Control by flags JCD Oct 4, 2001
+  // Control by flags JCD Oct 4, 2001
   Float_t Xprime1[3], Xprime2[3] ;
-// Set it up
+  // Set it up
   for (unsigned int i=0; i<3; ++i) {
       Xprime1[i] = x[i];
   }
@@ -423,7 +416,7 @@ void StMagUtilities::UndoDistortion( const Float_t x[3], Float_t Xprime[3] )
 
 //________________________________________
 //
-// Main Entry Point for requests to Do the E and B field distortions (for simulations)
+/// Main Entry Point for requests to Do the E and B field distortions (for simulations)
 //
 //________________________________________
 
@@ -443,7 +436,6 @@ void StMagUtilities::DoDistortion( const Float_t x[3], Float_t Xprime[3] )
 
 
 void StMagUtilities::UndoBDistortion( const Float_t x[3], Float_t Xprime[3] )
-
 {
 
   Double_t ah ;                             // ah carries the sign opposite of E (for forward integration)
@@ -482,7 +474,6 @@ void StMagUtilities::UndoBDistortion( const Float_t x[3], Float_t Xprime[3] )
 #define NPOINTS 22                                  // Number of points on the Z interpolation grid
 
 void StMagUtilities::FastUndoBDistortion( const Float_t x[3], Float_t Xprime[3] )
-
 {
  
   static  Int_t   DoOnce = 0 ;
@@ -1241,15 +1232,11 @@ Float_t StMagUtilities::Interpolate( const Float_t Xarray[], const Float_t Yarra
 }
 
 
-//________________________________________
 
-
+/// Search an ordered table by starting at the most recently used point
 void StMagUtilities::Search( Int_t N, Float_t Xarray[], Float_t x, Int_t &low )
 
 {
-
-  // Search an ordered table by starting at the most recently used point
-
   Long_t middle, high ;
   Int_t  ascend = 0, increment = 1 ;
 
@@ -1300,19 +1287,4 @@ void StMagUtilities::Search( Int_t N, Float_t Xarray[], Float_t x, Int_t &low )
   return ;
        
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
