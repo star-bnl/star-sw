@@ -45,7 +45,7 @@ public:
   //  virtual Int_t GetTrackerUsage(){return UseTracker;}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.2 2004/03/04 07:23:01 cmironov Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.3 2004/03/18 20:52:02 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  private:
@@ -66,10 +66,7 @@ public:
   protected:
   
   void FillEvent(StTrackGeometry *myDaughterGeometry1, 
-                 StTrackGeometry *myParentGeometry11,
-                 StTrack *mDaughterTrackCandidate,
-                 const StThreeVectorD &mParentMomentum,
-                 const StThreeVectorD &mDaughterMomentum);
+                 StTrackGeometry *myParentGeometry11);
   
   bool acceptTrack(StTrack *tr, int mITTFflag, Int_t mUseTracker);
  

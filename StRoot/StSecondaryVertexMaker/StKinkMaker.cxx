@@ -402,7 +402,7 @@ Int_t StKinkMaker::Make(){//called for each event
 
  kinkCandidate++;		  
 
-  FillEvent(myDaughterGeometry1,myParentGeometry11,mDaughterTrackCandidate,mParentMoment,mDaughterMoment);  
+  FillEvent(myDaughterGeometry1,myParentGeometry11);
   kinkVertices.push_back(kinkVertex);
   
    }//loop j.. daughters
@@ -417,7 +417,7 @@ Int_t StKinkMaker::Make(){//called for each event
 
 //============_ fill event ===============================================================
 
-  void StKinkMaker::FillEvent(StTrackGeometry *myDaughterGeometry1,StTrackGeometry *myParentGeometry11,StTrack *mDaughterTrackCandidate,const StThreeVectorD &mParentMomentum,const StThreeVectorD &mDaughterMomentum){
+  void StKinkMaker::FillEvent(StTrackGeometry *myDaughterGeometry1,StTrackGeometry *myParentGeometry11){
 
   kinkVertex = new StKinkVertex();
   StThreeVectorF pMomMinusdMom = mParentMoment - mDaughterMoment;
@@ -502,6 +502,7 @@ Int_t StKinkMaker::Make(){//called for each event
   //set momentum
   kinkVertex->setParentMomentum(mParentMoment);
   kinkVertex->setDaughterMomentum(mDaughterMoment);
+  kinkVertex->setParent(mParentTrackCandidate);
 
   //set dcay angle	  
   kinkVertex->setDecayAngle(mDecayAngle);
