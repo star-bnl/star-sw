@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.25 2000/04/24 17:24:54 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.26 2000/04/26 21:08:44 yepes Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -76,8 +76,10 @@
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "St_XDFFile.h"
+#include "StDedxDefinitions.h"
 #include "tpc/St_tpt_Module.h"
 #include "tables/St_dst_track_Table.h"
+#include "tables/St_dst_dedx_Table.h"
 #include "FtfSl3.h"
 #include "gl3Conductor.h"
 #include "gl3GeneralHistos.h"
@@ -137,6 +139,8 @@ Int_t St_l3t_Maker::Make(){
 //
 //   Depending on m_Mode the online or offline makers are used.
 //
+  //m_Mode = 2;
+
    if ( m_Mode == 0 ) {
       if ( MakeOnLine() == kStWarn ) return MakeOffLine();
       return kStOk ;
@@ -156,6 +160,8 @@ Int_t St_l3t_Maker::Make(){
  //_____________________________________________________________________________
 Int_t St_l3t_Maker::MakeOnLine(){
 
+
+   printf("run my l3t_maker-->>\n");
 
 // get l3 dataset
    St_DataSet* sec_bank_set = 0 ;
@@ -206,7 +212,7 @@ Int_t St_l3t_Maker::MakeOnLine(){
 //
 //    Create hit table to store L3 clusters in offline format
 //
-   int maxHits = 300000 ;
+   int maxHits = 500000 ;
    int nHits = 0 ;
    int token ;
    St_tcl_tphit *hitS = new St_tcl_tphit("l3Hit",maxHits); 
@@ -320,8 +326,8 @@ Int_t St_l3t_Maker::MakeOnLine(){
 	      fprintf ( stderr, " St_l3t_Maker:MakeOnLine: %d larger than max in hit table \n", nHits ) ;
 	      break ;
 	 }
-      }
-   }
+      } //for ( int j = 0 ; j < tracker.nHits ; j++ )
+   } //for(Int_t secIndex=1;secIndex<=12; secIndex++)
 
    //
    //  Read event in gl3Event
@@ -336,18 +342,25 @@ Int_t St_l3t_Maker::MakeOnLine(){
    //
    int nTracks = 1;
    if ( eventP ) nTracks = max(1,eventP->getNTracks());   
-   St_dst_track *trackS = new St_dst_track("l3Track",nTracks); 
+   St_dst_track *trackS = new St_dst_track("l3Track", nTracks);
+   St_dst_dedx  *dedxS  = new St_dst_dedx("l3Dedx", nTracks); 
    m_DataSet->Add(trackS);
+   m_DataSet->Add(dedxS);
    fprintf(stderr," %s on-line found Ntracks=%d\n",GetName(),nTracks);
 
    //
-   dst_track_st*  track  = (dst_track_st *)trackS->GetTable(); 
+   dst_track_st *track     = (dst_track_st *)trackS->GetTable(); 
+   dst_dedx_st  *trackDedx = (dst_dedx_st *)dedxS->GetTable();
    //
    //   Copy gl3 to dst_track_st table
    //
+   int nTracksWithDedx;
+   nTracksWithDedx = 0;
+
    if ( eventP ) {
-      gl3Track*     gTrk ;
-      dst_track_st* tTrk ;
+      gl3Track     *gTrk ;
+      dst_track_st *tTrk ;
+      dst_dedx_st  *tDedx;
       for ( int i = 0 ; i < (int)eventP->getNTracks() ; i++ ) {
          gTrk = eventP->getTrack(i);
          if ( !gTrk ) continue ;
@@ -355,7 +368,7 @@ Int_t St_l3t_Maker::MakeOnLine(){
          tTrk->id       = gTrk->id ;
          tTrk->invpt    = 1./fabs(gTrk->pt);
          tTrk->n_point  = gTrk->nHits ;
-         tTrk->icharge  = (long)(gTrk->pt/fabs(gTrk->pt));
+         tTrk->icharge  = gTrk->q ;
          tTrk->chisq[0] = gTrk->chi2[0] ;
          tTrk->chisq[1] = gTrk->chi2[1] ;
          tTrk->length   = gTrk->length ;
@@ -364,9 +377,22 @@ Int_t St_l3t_Maker::MakeOnLine(){
          tTrk->r0       = gTrk->r0   ;
          tTrk->tanl     = gTrk->tanl ;
          tTrk->z0       = gTrk->z0   ;
+
+	 // fill dst_dedx table only for those tracks which have valid dedx information
+	 if ( gTrk->dedx!=0 ) {
+	       tDedx = &(trackDedx[nTracksWithDedx]);
+	       tDedx->id_track = gTrk->id;
+	       tDedx->method   = kTruncatedMeanIdentifier;
+	       tDedx->dedx[0]  = gTrk->dedx ;
+	       tDedx->dedx[1]  = 0;
+	       tDedx->ndedx    = gTrk->nDedx;
+	       nTracksWithDedx++;
+	 }
+
       }
    }
    trackS->SetNRows(nTracks);
+   dedxS->SetNRows(nTracksWithDedx);
    hitS->SetNRows(nHits);
    MakeHistograms();
   
@@ -410,6 +436,7 @@ Int_t St_l3t_Maker::MakeOffLine(){
 //   Fill ftf hit table
 //
    for ( int i = 0 ; i < nHits ; i++ ) {
+      tracker.hit[i].sector = (short) ceil(hit[i].row/100);
       tracker.hit[i].row = hit[i].row%100 ;
       tracker.hit[i].x   = hit[i].x ;
       tracker.hit[i].y   = hit[i].y ;
@@ -418,6 +445,7 @@ Int_t St_l3t_Maker::MakeOffLine(){
       tracker.hit[i].dy  = hit[i].dy ;
       tracker.hit[i].dz  = hit[i].dz ;
       tracker.hit[i].q   = hit[i].q  ;
+      tracker.hit[i].flags = hit[i].flag;
       tracker.hit[i].track = 0 ;
    }
    tracker.nHits   = nHits ;
@@ -426,7 +454,7 @@ Int_t St_l3t_Maker::MakeOffLine(){
 //   Process data 
 
    tracker.process();
-  
+
 //   Generate output table
   
    int nTracks = max(1,tracker.nTracks);   
@@ -456,6 +484,8 @@ Int_t St_l3t_Maker::MakeOffLine(){
       tTrk->r0       = fTrk->r0   ;
       tTrk->tanl     = fTrk->tanl ;
       tTrk->z0       = fTrk->z0   ;
+//       tTrk->dedx[0]  = fTrk->dedx ;
+//       tTrk->ndedx    = fTrk->nDedx;
    }
 //
 //     Store track info
