@@ -134,12 +134,12 @@ macro bfc_init _
     (evout) if output_xdf_file="" then
               message "empty output file"
             else
-	      exec write_table_to_file#init evout [output_xdf_file]
+	      exec write_table_to_file#init outfile [output_xdf_file]
               if (STAF_STATUS(1).ne. STAFCV_OK) then
                 message "Cannot open output file"
                 goto eof
               endif
-              exec write_table_to_file#write evout [run]         
+              exec write_table_to_file#write outfile [run]         
             endif
       (*)   message " !!! bfc_util: No initialization for package " [mod]
     ENDCASE
@@ -229,7 +229,7 @@ EOF:
     (evout)    if [output_xdf_file]="" then
                  message "Empty output file"
                else
-		 exec write_table_to_file#write evout [event]
+		 exec write_table_to_file#write outfile [event]
 	       endif
         (*)    message " !!! bfc_util: No process stage for package " [mod]
       if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
@@ -266,7 +266,7 @@ macro bfc_finish _
      (g2tin)  exec input_g2t_file#close
       (rgst)  ge/rz/cd //PAWC;
 	        hi/list;  | show histograms
-     (evout) exec write_table_to_file#close evout;
+     (evout) exec write_table_to_file#close outfile;
       (*) message " !!! bfc_util#bfc_finish No final stage for package " [mod]
     ENDCASE
   enddo
