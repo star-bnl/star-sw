@@ -33,7 +33,7 @@ char gPs[PS],gSumCol[100];
 #define NOTUSED 0
 #define XtCP XtCallbackProc
 #define TEXT_SIZE_PART_1 400
-#define TEXT_SIZE_PART_2 14000
+#define TEXT_SIZE_PART_2 34000
 #define TEXT_SIZE_PART_3 50000
 int gNPs,gNWin,gNGraphicsUp,gHistWhLine;
 size_t gLast;

@@ -30,13 +30,15 @@
 #include <Xm/ScrollBar.h>
 #include <Xm/ScrolledW.h>
 #include <Xm/SelectioB.h>
+#define TXTOUT "table.dump"
 #define EXTERN extern
 #include "brow.h"
 #include "x.h"
 #define CUTS_WIDTH 50
 /******************************************************  GLOBALS  **/
 extern int gNDs;
-int gTruncateStrings=7;
+int gToFile,gTruncateStrings=7;
+FILE *gDump;
 int gLastWhWin=-10,gDone2,gDone;
 myBool gBlurb2,gBlurb1;
 char *gBlurb7="Click on the abbreviation (to\n\
@@ -724,7 +726,11 @@ void RunValue(size_t row) {
     }
     strcat(buf,tt2);
   }
-  if(fo>0) { strcat(buf,"\n"); Write(buf,gRunWhWin);  }
+  if(fo>0) {
+    strcat(buf,"\n");
+    if(gToFile) { if(gDump) fprintf(gDump,"%s",buf); }
+    else Write(buf,gRunWhWin);
+  }
   else if(gRunNRowsDone==0) SayError0();
 }
 void OneLnPerRowCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
@@ -736,18 +742,29 @@ void OneLnPerRowCB(Widget w,caddr_t cld,caddr_t cad) { /* see Comment 8b */
   gLastWhWin=whWin;
   gRunWhWin=whWin; if(gWin[whWin]->win_type!=WIN_TYPE_TABLE) Err(128);
   switch(whAct) {
-    case 0: strcpy(act,"Value"); runFunc=RunValue; break;
+    case 0: strcpy(act,"Value"); runFunc=RunValue; gToFile=0;
+      gDump=NULL; break;
+    case 1: strcpy(act,"Value"); runFunc=RunValue; gToFile=7; 
+      gDump=fopen(TXTOUT,"w");
+      if(gDump)
+          fprintf(gDump,"%s\n",XmTextGetString(gWin[whWin]->txtWidWriteH));
+      break;
     default: Err(129);
   }
   sprintf(gSumCol,"%6s ",act); /* for passing to runFunc */
   gRunNRowsDone=0;
   RunTheRows(FALSE,whWin,runFunc);
+  if(gDump) fclose(gDump);
   if(gRunNRowsDone==0&&gDone2<10) {
     Say("No rows were\nselected by \"ROW SELECTION\".");
+  } else {
+    if(whAct==1) {
+      sprintf(act,"Your output file is %s.\n",TXTOUT); Say(act);
+    }
   }
   whActS=whAct; whWinS=whWin;
 }
-/* Comment 8b: OneLnAllRowsCB is the callback for "half" the Action menu
+/* Comment 8b: OneLnAllRowsCB is the callback for many of the Action menu
    items.  It decodes the client data into whWin and whAct, selects which
    function pointer should be passed to RunTheRows, handles auxiliary output
    like writing the number of rows used and the cuts string, and loops over
@@ -992,7 +1009,8 @@ void CreateMenuItems(Widget mbar,int type) {
   }
   if(type==WIN_TYPE_TABLE) {
     mpane=XmCreatePulldownMenu(mbar,"a2",args,0);
-    MakeMenuItem(0,mpane,"Show value(s).",             (XtCP)OneLnPerRowCB);
+    MakeMenuItem(0,mpane,"Show  value(s).",             (XtCP)OneLnPerRowCB);
+    MakeMenuItem(1,mpane,"Write value(s) to .txt file.",(XtCP)OneLnPerRowCB);
     MakeMenuItem(0,mpane,"Show average.",              (XtCP)OneLnAllRowsCB);
     MakeMenuItem(1,mpane,"How many rows are selected?",(XtCP)OneLnAllRowsCB);
     MakeMenuItem(2,mpane,"Show 1d histogram.",         (XtCP)OneLnAllRowsCB);
