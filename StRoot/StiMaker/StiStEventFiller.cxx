@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.7 2003/03/13 15:15:52 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 2.8 2003/03/13 16:01:48 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.8  2003/03/13 16:01:48  pruneau
+ * remove various cout
+ *
  * Revision 2.7  2003/03/13 15:15:52  pruneau
  * various
  *
@@ -579,6 +582,7 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, const StiTrack* track)
   gTrack->setEncodedMethod(mStiEncoded);
   double impactParam = impactParameter(track);
 
+  /*
   const StiKalmanTrack * kktrack = static_cast<const StiKalmanTrack *>(track);
   if (kktrack->isPrimary())
     {
@@ -588,8 +592,10 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, const StiTrack* track)
       dy = node->_p0 - node->getHit()->y();
       dz = node->_p1 - node->getHit()->z();
       d = sqrt(dy*dy+dz*dz);
-      cout << " impact par:"<< impactParam <<" dy:"<<dy<<" dz:"<<dz <<" sqrt(dy^2+dz^2):"<<d<<endl;
+      //cout << " impact par:"<< impactParam <<" dy:"<<dy<<" dz:"<<dz <<" sqrt(dy^2+dz^2):"<<d<<endl;
     }
+  */
+
   gTrack->setImpactParameter(impactParam );//gTrack->setImpactParamter(track->getDca(vertex)); // change: need to calculate impact parameter or use 	gTrack->setLength(track->getTrackLength());
   int maxPoints = track->getMaxPointCount();
   gTrack->setNumberOfPossiblePoints(static_cast<unsigned short>(maxPoints));
@@ -666,7 +672,7 @@ float StiStEventFiller::impactParameter(const StiTrack* track)
 
   const StThreeVectorF& vxF = mEvent->primaryVertex()->position();
   StThreeVector<double> vxD(vxF.x(),vxF.y(),vxF.z());
-  cout << "primary vertex " << vxD << endl;
+  //cout << "primary vertex " << vxD << endl;
 
   //StPhysicalHelix physical(fabs(node->getCurvature()),
   //		   node->getDipAngle(), 
