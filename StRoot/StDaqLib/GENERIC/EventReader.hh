@@ -5,7 +5,7 @@
 //   change log
 // 06-June-99 MJL added EventInfo struct, changed method getEventInfo()
 // 06-June-99 MJL added printEventInfo()
-
+// 17-June-99 Herb Ward changed the dimension of errstr0 from 50 to 250
 #include <sys/types.h>
 
 #include <string>
@@ -270,7 +270,7 @@ protected:
   virtual int AttachBuffers(ConfigReader *, int sector)=0;
 
   int errnum;
-  char errstr0[50];
+  char errstr0[250];
 
 private:
   EventReader *er;
@@ -323,7 +323,7 @@ private:
   long next_event_offset;
 
   int errnum;
-  char errstr0[50];
+  char errstr0[250];
   int runnum;
   // later storage for detector buffers
 };
