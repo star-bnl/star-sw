@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TMemStat.cxx,v 1.1 2001/06/01 02:44:01 perev Exp $
+ * $Id: TMemStat.cxx,v 1.2 2001/06/05 22:11:34 perev Exp $
  *
  ***************************************************************************
  *
@@ -68,6 +68,9 @@ void TMemStat::Print(const char *) const
 //______________________________________________________________________________
 void TMemStat::Summary()
 {
+
+   double dmin=1.e+33,daver=0,dmax=-1.e+33,drms=0,dtally=0,dmp;
+
    if(!fgList) return;
    fgList->Sort();
    printf("%40s%12s%12s%12s%12s\n"
@@ -75,8 +78,23 @@ void TMemStat::Summary()
    {for(int i=0;i<40+4*12;i++) printf("=");} printf("\n");
    
    TListIter next(fgList); TMemStat *m;
-   while((m = (TMemStat*)next())) {m->Print();}
-
+   while((m = (TMemStat*)next())) 
+   {
+     if(!m->fTally)	continue;
+     m->Print();
+     dtally++;
+     if (m->fMin < dmin) dmin=m->fMin;
+     if (m->fMax > dmax) dmax=m->fMax;
+     dmp = m->fAver/m->fTally;
+     daver += dmp; 
+     drms  += dmp*dmp;
+   }
+   if(!dtally) return;
+   {for(int i=0;i<40+4*12;i++) printf("-");} printf("\n");
+   daver /=dtally;
+   drms = sqrt(fabs(drms/dtally-daver*daver));
+   printf("%40s(%d)%12.6f%12.6f%12.6f%12.6f\n"
+        ,"Toatal",(int)dtally,dmin,daver,dmax,drms);
    {for(int i=0;i<40+4*12;i++) printf("=");} printf("\n");
 
 }
