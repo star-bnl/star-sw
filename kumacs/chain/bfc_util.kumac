@@ -106,6 +106,7 @@
 *                           - change emc to ems in chain 
 * editted 9/14/98 K. Turner - new chain variable dstin to read in dst
 *                             file and put tables in correct directories
+* editted 9/15/98 Y. Fisyak - fixed "fzin" so it gets to EOF properly
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -406,8 +407,8 @@ ABEND:
               cd [dir]; dio/stream/getevent inev 
               if (staf_status(1).ne.STAFCV_OK) goto EOF
             endfor
-     (fzin) trig 1 
-     (rgst) trig 1
+     (fzin) trig 1; if ($iquest(1) <>0) goto EOF	     
+     (rgst) trig 1; if ($iquest(1) <>0) goto EOF	     
      (rg2t) cd [geantE]
           for/call g2t
           cd /dui
@@ -521,7 +522,6 @@ ABEND:
 
 
    if (STAF_STATUS(1).ne. STAFCV_OK) goto ABEND
-	     
    sigma v[mod] = v[mod] + abs($cptime)
    sigma t[mod] = t[mod] + v[mod]
    string = '---<bfc>---'//[mod]//': Event  '//$format([ievent],i6)//$format(v[mod],f12.5)//$format(t[mod],f12.5)
