@@ -1,7 +1,10 @@
 //
-// $Id: StEpcMaker.h,v 1.2 2000/08/29 20:12:44 subhasis Exp $
+// $Id: StEpcMaker.h,v 1.3 2001/04/24 22:50:37 subhasis Exp $
 //
 // $Log: StEpcMaker.h,v $
+// Revision 1.3  2001/04/24 22:50:37  subhasis
+// clusters attached to Points, QA hists are made for all category separately
+//
 // Revision 1.2  2000/08/29 20:12:44  subhasis
 // Modified to accept StEvent input and writing out StEvent output for Emc
 //
@@ -56,27 +59,28 @@ private:
   void MakeHistograms();   // Filling QA Histograms
 
 protected:
-  //Point Energy spectra
-  TH1F *m_point_energy;
-  //Point Eta spectra
-  TH1F *m_point_eta;
-  //Point Phi spectra
-  TH1F *m_point_phi;
-  //Point SigmaEta spectra
-  TH1F *m_point_sigeta;
-  //Point SigmaPhi spectra
-  TH1F *m_point_sigphi;
-  //Point DeltaEta spectra
-  TH1F *m_point_deleta;
-  //Point DeltaPhi spectra
-  TH1F *m_point_delphi;
-  //Point TrMom spectra
-  TH1F *m_point_trmom;
-  //Point Flag spectra
-  TH1F *m_point_flag;
-  //Emc Point multiplicity
-  TH1F *m_emc_points;
 
+  //Point Energy spectra
+
+  TH1F* m_point_energy[4];   //!
+  //Point Eta spectra
+  TH1F *m_point_eta[4];      //!
+  //Point Phi spectra
+  TH1F *m_point_phi[4];      //!
+  //Point SigmaEta spectra
+  TH1F *m_point_sigeta[4];   //!
+  //Point SigmaPhi spectra
+  TH1F *m_point_sigphi[4];   //!
+  //Point DeltaEta spectra
+  TH1F *m_point_deleta[4];   //!
+  //Point DeltaPhi spectra
+  TH1F *m_point_delphi[4];   //!
+  //Point TrMom spectra
+  TH1F *m_point_trmom[4];    //!
+  //Emc Point multiplicity
+  TH1F *m_emc_points[4];     //!
+  //Point Flag spectra
+  TH1F *m_point_flag;        //!
 public: 
   StEpcMaker(const char *name="epc");
   virtual ~StEpcMaker();
@@ -87,7 +91,7 @@ public:
 
   
   virtual const char *GetCVS()
-  {static const char cvs[]="Tag $Name:  $ $Id: StEpcMaker.h,v 1.2 2000/08/29 20:12:44 subhasis Exp $ built "__DATE__" "__TIME__ ; return cvs;}  
+  {static const char cvs[]="Tag $Name:  $ $Id: StEpcMaker.h,v 1.3 2001/04/24 22:50:37 subhasis Exp $ built "__DATE__" "__TIME__ ; return cvs;}  
 
   ClassDef(StEpcMaker, 1)// EMC-Track match maker
 };
