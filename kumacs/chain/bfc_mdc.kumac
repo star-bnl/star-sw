@@ -1,5 +1,8 @@
-* $Id: bfc_mdc.kumac,v 1.7 1998/07/22 15:04:35 kathy Exp $
+* $Id: bfc_mdc.kumac,v 1.8 1998/07/22 15:05:43 kathy Exp $
 * $Log: bfc_mdc.kumac,v $
+* Revision 1.8  1998/07/22 15:05:43  kathy
+* fixed for correct gstar kumacs
+*
 * Revision 1.7  1998/07/22 15:04:35  kathy
 * fixed for correct gstar kumacs
 *
@@ -149,15 +152,15 @@
 * 
 * 
 MACRO bfc_mdc _
-   TOP=/scr22/kathy/testj6 _
+   TOP=$STAR _
    tpc_sector_first=1 _
-   tpc_sector_last=1 _
+   tpc_sector_last=24 _
    geomtype=all _
    phystype=on _
    domain='geometry sim/g2t sim/gstar tpc svt global' _
    chain='evgin rgst rg2t svg tpg srs tss '_ 
    first=401 _
-   no_events=1 _
+   no_events=20 _
    no_in_bunch=200 _
    nsplit=20 _
    prefix_in=/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2 _
