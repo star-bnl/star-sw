@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.cxx,v 1.6 2001/12/18 19:27:27 posk Exp $
+// $Id: StFlowCumulantMaker.cxx,v 1.7 2001/12/21 17:01:59 aihong Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -8,8 +8,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Description:  Maker to analyze Flow using the latest cumulant method.
-//                refer to Phy. Rev. C63 (2001) 054906 (new new method)
-//                and      Phy. Rev. C62 (2000) 034902 (old new method)
+//                refer to Phy. Rev. C63 (2001) 054906 (old new method)
+//                and      Phy. Rev. C64 (2001) 054901 (new new method)
 //                all Eq. numbers are from new method paper if not specified.
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -90,6 +90,10 @@ Int_t StFlowCumulantMaker::Make() {
 
 Int_t StFlowCumulantMaker::Init() {
   // Book histograms
+  float ptMaxPart = Flow::ptMaxPart;
+  if (pFlowSelect->PtMaxPart()) {
+    ptMaxPart = pFlowSelect->PtMaxPart();
+  }
 
   xLabel = "Pseudorapidity";
   if (strlen(pFlowSelect->PidPart()) != 0) { xLabel = "Rapidity"; }  
@@ -167,7 +171,7 @@ Int_t StFlowCumulantMaker::Init() {
 	histFull[k].histFullHar[j].mHistCumul2D[ord] =	
 	  new TProfile2D(histTitle->Data(),histTitle->Data(), Flow::nEtaBins,
 			 Flow::etaMin, Flow::etaMax, Flow::nPtBins, Flow::ptMin,
-			 Flow::ptMax, -1.*FLT_MAX, FLT_MAX, "");
+			 ptMaxPart, -1.*FLT_MAX, FLT_MAX, "");
 	histFull[k].histFullHar[j].mHistCumul2D[ord]->SetXTitle((char*)xLabel.Data());
 	histFull[k].histFullHar[j].mHistCumul2D[ord]->SetYTitle("Pt (GeV)");
 	delete histTitle;
@@ -192,23 +196,28 @@ Int_t StFlowCumulantMaker::Init() {
 	histTitle->Append(*countHars);
 	histFull[k].histFullHar[j].mHistCumulPt[ord] =  
 	  new TProfile(histTitle->Data(), histTitle->Data(), Flow::nPtBins,
-		       Flow::ptMin, Flow::ptMax, -1.*FLT_MAX, FLT_MAX, "");
+		       Flow::ptMin, ptMaxPart, -1.*FLT_MAX, FLT_MAX, "");
 	histFull[k].histFullHar[j].mHistCumulPt[ord]->SetXTitle("Pt (GeV/c)");
 	delete histTitle;
 	
       }
       
-      histFull[k].histFullHar[j].mCumulDiffG0Denom2D = 
+      histFull[k].histFullHar[j].mCumulG0Denom2D = 
 	new TProfile2D*[Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax];
-      histFull[k].histFullHar[j].mCumulDiffG0DenomEta = 
+      histFull[k].histFullHar[j].mCumulG0DenomEta = 
 	new TProfile*[Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax];
-      histFull[k].histFullHar[j].mCumulDiffG0DenomPt = 
+      histFull[k].histFullHar[j].mCumulG0DenomPt = 
 	new TProfile*[Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax];
+      histFull[k].histFullHar[j].mCumulG0Denom = 
+	new TProfile*[Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax];
+
+
       
       // For each cumulant order * qMax orders
       for (int pq  = 0; pq < Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax; pq++) { 
 	
-	TString* histTitleDiffDenomPt; // for read in
+	TString* histTitleIntegratedDenom; //for read in
+
 	
 	int cumulIndex = (pq/Flow::nCumulDiff_qMax) + 1; // like 1,2,3. (for cumulant order 2,4,6) not begining with 0. This is "p" in Eq. (B1).
         int qIndex        = pq%Flow::nCumulDiff_qMax; // like 0,1,..._qMax-1  begin with 0. This is "q" in Eq. (B3).
@@ -226,13 +235,13 @@ Int_t StFlowCumulantMaker::Init() {
 	histTitle->Append(*countSels);
 	histTitle->Append("_Har");
 	histTitle->Append(*countHars);
-	histFull[k].histFullHar[j].mCumulDiffG0Denom2D[pq] =
+	histFull[k].histFullHar[j].mCumulG0Denom2D[pq] =
 	  new TProfile2D(histTitle->Data(),histTitle->Data(), Flow::nEtaBins,
 			 Flow::etaMin, Flow::etaMax, Flow::nPtBins, Flow::ptMin,
 			 Flow::ptMax,-1.*FLT_MAX, FLT_MAX, "");
-	histFull[k].histFullHar[j].mCumulDiffG0Denom2D[pq]->
+	histFull[k].histFullHar[j].mCumulG0Denom2D[pq]->
 	  SetXTitle((char*)xLabel.Data());
-	histFull[k].histFullHar[j].mCumulDiffG0Denom2D[pq]->SetYTitle("Pt (GeV)");
+	histFull[k].histFullHar[j].mCumulG0Denom2D[pq]->SetYTitle("Pt (GeV)");
 	delete histTitle;
 	
 	histTitle = new TString("Flow_CumulDenomEta_Order");
@@ -243,10 +252,10 @@ Int_t StFlowCumulantMaker::Init() {
 	histTitle->Append(*countSels);
 	histTitle->Append("_Har");
 	histTitle->Append(*countHars);
-	histFull[k].histFullHar[j].mCumulDiffG0DenomEta[pq] =
+	histFull[k].histFullHar[j].mCumulG0DenomEta[pq] =
 	  new TProfile(histTitle->Data(),histTitle->Data(), Flow::nEtaBins,
 		       Flow::etaMin, Flow::etaMax, -1.*FLT_MAX, FLT_MAX, "");
-	histFull[k].histFullHar[j].mCumulDiffG0DenomEta[pq]->
+	histFull[k].histFullHar[j].mCumulG0DenomEta[pq]->
 	  SetXTitle((char*)xLabel.Data());
 	delete histTitle;
 	
@@ -258,50 +267,60 @@ Int_t StFlowCumulantMaker::Init() {
 	histTitle->Append(*countSels);
 	histTitle->Append("_Har");
 	histTitle->Append(*countHars);
-	histFull[k].histFullHar[j].mCumulDiffG0DenomPt[pq] = 
+	histFull[k].histFullHar[j].mCumulG0DenomPt[pq] = 
 	  new TProfile(histTitle->Data(),histTitle->Data(), Flow::nPtBins,
 		       Flow::ptMin, Flow::ptMax, -1.*FLT_MAX, FLT_MAX, "");
-	histFull[k].histFullHar[j].mCumulDiffG0DenomPt[pq]->SetXTitle("Pt (GeV/c)");
-	histTitleDiffDenomPt = new TString(histTitle->Data());
+	histFull[k].histFullHar[j].mCumulG0DenomPt[pq]->SetXTitle("Pt (GeV/c)");
 	delete histTitle;
 	
+
+      histTitle = new TString("Flow_");
+      histTitle->Append("CumulDenom_Order");
+      histTitle->Append(*theCumulOrderChar);
+      histTitle->Append("_GenFcnqIdx");
+      histTitle->Append(*qIndexOrderChar);
+      histTitle->Append("_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mCumulG0Denom[pq] = 
+            new TProfile(histTitle->Data(),histTitle->Data(), 1,0., 1., -1.*FLT_MAX, FLT_MAX, "");
+      histFull[k].histFullHar[j].mCumulG0Denom[pq]->SetYTitle("<G>");
+      histTitleIntegratedDenom = new TString(histTitle->Data());
+      delete histTitle;
+
+
+
+
+
+
+
+
 	// Open the file and get the histograms 
 	// do not move this section [ROOT bug] 
 // 	TFile f;
 // 	if(!noDenomFileWarned) f("denominator.root","R");
 	TFile f("denominator.root","R");
 	if (f.IsOpen()) {
-	  f.cd();
-	  
-	  TProfile* tempDenomPtProfile = 
-	    dynamic_cast<TProfile*>(f.Get(histTitleDiffDenomPt->Data()));
-	  if (!tempDenomPtProfile) {
-	    gMessMgr->Info() << "##### FlowCumulantAnalysis: denominator.root does not contain " << histTitleDiffDenomPt->Data() << endm;
-	    return kStFatal;
-	  }
-	  delete  histTitleDiffDenomPt;     
-	  
-	  double tempDenomInteg = 0.;
-	  double tempDenomIntegNoZeroBins = 0.;
-	  
-	  for (int theBin = 0; theBin < tempDenomPtProfile->GetNbinsX(); theBin++) {
-	    if (tempDenomPtProfile->GetBinContent(theBin)) {
-	      tempDenomInteg += (tempDenomPtProfile->GetBinContent(theBin))*
-		(tempDenomPtProfile->GetBinEntries(theBin));
-	      tempDenomIntegNoZeroBins += tempDenomPtProfile->GetBinEntries(theBin);
-	    }
-	  } // could use TProfile::GetMean(2), but it seems there is bug in ROOT.
-	  histFull[k].histFullHar[j].mCumulDiffG0DenomRead[pq]
-	    = tempDenomInteg/tempDenomIntegNoZeroBins;
-	  
-	  f.Close();
+
+            f.cd();
+      TProfile* tempDenomPtProfile = 
+         (TProfile *)f.Get(histTitleIntegratedDenom->Data());
+      delete  histTitleIntegratedDenom;     
+
+      histFull[k].histFullHar[j].mCumulG0DenomRead[pq]
+        = tempDenomPtProfile->GetBinContent(1);
+
+           f.Close();
 	  
 	} else {
+
 	  if(!noDenomFileWarned) {
 	    gMessMgr->Info("##### FlowCumulantAnalysis:denominator.root is not present, assumming this run is just for producing denominator.root. That means cumulant flow result in flow.cumulant.root is nonsense for this run. ");
 	    noDenomFileWarned = kTRUE;
 	  }
-	  histFull[k].histFullHar[j].mCumulDiffG0DenomRead[pq] = 1.; 
+	  histFull[k].histFullHar[j].mCumulG0DenomRead[pq] = 1.; 
+
 	}
 	
 	double theTempPhi = twopi*((double)qIndex) /
@@ -333,7 +352,7 @@ Int_t StFlowCumulantMaker::Init() {
   }
   
   gMessMgr->SetLimit("##### FlowCumulantAnalysis", 2);
-  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.6 2001/12/18 19:27:27 posk Exp $");
+  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.7 2001/12/21 17:01:59 aihong Exp $");
 
   return StMaker::Init();
 }
@@ -408,12 +427,15 @@ void StFlowCumulantMaker::FillParticleHistograms() {
   // Selections have to be consistent between here and the loop.
 
   double* theEvtCrossTerm[Flow::nSels][Flow::nHars];
+  double* theCrossterm[Flow::nSels][Flow::nHars];
   double  theSqrtOfSumWgtSqr[Flow::nSels][Flow::nHars];
   
   for (int k = 0; k < Flow::nSels; k++) {
     for (int j = 0; j < Flow::nHars; j++) { 
-      theEvtCrossTerm[k][j] = 
+       theEvtCrossTerm[k][j] = 
 	new double[Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax];
+       theCrossterm[k][j]    = 
+        new double[Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax];
     }
   }
 
@@ -433,6 +455,8 @@ void StFlowCumulantMaker::FillParticleHistograms() {
 	  (pFlowEvent->G_New( pFlowSelect,
 			      histFull[k].histFullHar[j].mDiffXz[pq],
 			      histFull[k].histFullHar[j].mDiffYz[pq] )) ;
+	theCrossterm[k][j][pq] =theEvtCrossTerm[k][j][pq];
+        histFull[k].histFullHar[j].mCumulG0Denom[pq]->Fill(0.5,theEvtCrossTerm[k][j][pq]);
       } 
     }
   }
@@ -496,33 +520,34 @@ void StFlowCumulantMaker::FillParticleHistograms() {
 				    float(Flow::nCumulDiff_qMax)); // cos() in (B7)
 	    double theSinTerm = sin(twopi*float(qIndex)*float(m_M) /
 				    float(Flow::nCumulDiff_qMax)); // sin() in (B7)
-	    double theCrossterm = theEvtCrossTerm[k][j][pq]; // Gn(Zp,q) in (B6)
 	    	    
 	    if ( (pFlowSelect->SelectPart(pFlowTrack)) && 
 		 (pFlowSelect->Select(pFlowTrack)) ) { // remove autocorrelation
-	      
 	      if (mOldMethod) {           
-		theCrossterm /= exp( (phiWgt/theSqrtOfSumWgtSqr[k][j]) *(2.*histFull[k].histFullHar[j].mDiffXz[pq]*cos(phi*order) + 2.*histFull[k].histFullHar[j].mDiffYz[pq]*sin(phi*order) ) );
+		theCrossterm[k][j][pq] =theEvtCrossTerm[k][j][pq]/ exp( (phiWgt/theSqrtOfSumWgtSqr[k][j]) *(2.*histFull[k].histFullHar[j].mDiffXz[pq]*cos(phi*order) + 2.*histFull[k].histFullHar[j].mDiffYz[pq]*sin(phi*order) ) );
 	      } else {
-		theCrossterm /= (1. + (phiWgt/mMult[k][j]) *(2.*histFull[k].histFullHar[j].mDiffXz[pq]*cos(phi*order) + 2.*histFull[k].histFullHar[j].mDiffYz[pq]*sin(phi * order) ) ); // the argument in the last paragraph in page 9. 
+		theCrossterm[k][j][pq] =theEvtCrossTerm[k][j][pq]/ (1. + (phiWgt/mMult[k][j]) *(2.*histFull[k].histFullHar[j].mDiffXz[pq]*cos(phi*order) + 2.*histFull[k].histFullHar[j].mDiffYz[pq]*sin(phi * order) ) ); // the argument in the last paragraph in page 9. 
 	      }
 	    }
+
+	    // for writting out the denominator in (B6)
+	    histFull[k].histFullHar[j].mCumulG0Denom2D[pq]->
+	      Fill(yOrEta, pt, theCrossterm[k][j][pq]); 
+	    histFull[k].histFullHar[j].mCumulG0DenomPt[pq]->
+	      Fill(pt, theCrossterm[k][j][pq]); 
+	    histFull[k].histFullHar[j].mCumulG0DenomEta[pq]->
+	      Fill(yOrEta, theCrossterm[k][j][pq]);  
+
 	    
-	    double theXpq = (theCrossterm*cos(float(m_M) * order * phi)) / // (B6)
-	      histFull[k].histFullHar[j].mCumulDiffG0DenomRead[pq]; 
-	    double theYpq = (theCrossterm*sin(float(m_M) * order * phi)) / // (B6)
-	      histFull[k].histFullHar[j].mCumulDiffG0DenomRead[pq];
+	    double theXpq = (theCrossterm[k][j][pq]*cos(float(m_M) * order * phi)) / // (B6)
+	      histFull[k].histFullHar[j].mCumulG0DenomRead[pq]; 
+	    double theYpq = (theCrossterm[k][j][pq]*sin(float(m_M) * order * phi)) / // (B6)
+	      histFull[k].histFullHar[j].mCumulG0DenomRead[pq];
 	    
 	    Dp[theCumulOrder-1] += 
 	      theCoeff*(theCosTerm*theXpq + theSinTerm*theYpq); // (B7)
 	    
-	    // for writting out the denominator in (B6)
-	    histFull[k].histFullHar[j].mCumulDiffG0Denom2D[pq]->
-	      Fill(yOrEta, pt, theCrossterm); 
-	    histFull[k].histFullHar[j].mCumulDiffG0DenomPt[pq]->
-	      Fill(pt, theCrossterm); 
-	    histFull[k].histFullHar[j].mCumulDiffG0DenomEta[pq]->
-	      Fill(yOrEta, theCrossterm);  
+
 	  }
 	  
 	  if (m_M==1) {
@@ -652,9 +677,11 @@ Int_t StFlowCumulantMaker::Finish() {
       
       // add Xpq Ypq denominator to write out file list
       for (int pq = 0; pq < Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax; pq++) {
-	XpqYpqDenomNames->AddLast(histFull[k].histFullHar[j].mCumulDiffG0Denom2D[pq]);
-	XpqYpqDenomNames->AddLast(histFull[k].histFullHar[j].mCumulDiffG0DenomPt[pq]);
-	XpqYpqDenomNames->AddLast(histFull[k].histFullHar[j].mCumulDiffG0DenomEta[pq]);
+	XpqYpqDenomNames->AddLast(histFull[k].histFullHar[j].mCumulG0Denom2D[pq]);
+	XpqYpqDenomNames->AddLast(histFull[k].histFullHar[j].mCumulG0DenomPt[pq]);
+	XpqYpqDenomNames->AddLast(histFull[k].histFullHar[j].mCumulG0DenomEta[pq]);
+	XpqYpqDenomNames->AddLast(histFull[k].histFullHar[j].mCumulG0Denom[pq]);
+
       }
       cumulInteg1[j] = // (B5)
 	(3.*CpInteg[1-1] -
@@ -730,11 +757,19 @@ Int_t StFlowCumulantMaker::Finish() {
 	meanIntegV2[j] = q2[j];              // <Q**2>for 2-part , m=2
 	meanIntegV3[j] = pow(q4[j],3./4.);   // <Q**3>for 4-part,  m=1
 	meanIntegV4[j] = q4[j];              // <Q**4>for 4-part,  m=2
+       
+	if (q2[j]<0.) cout<<" Sel"<<k+1<<", <Q**2> less than zero ! v"<<j+1<<" from 2 particle correlation failed."<<endl;
+	if (q4[j]<0.) cout<<" Sel"<<k+1<<", <Q**4> less than zero ! v"<<j+1<<" from 4 particle correlation failed."<<endl;
+         
       } else { // new method
 	meanIntegV[j]  = sqrt(cumulInteg1[j]);           // <v>    for 2-part,  m=1
 	meanIntegV2[j] = cumulInteg1[j];                 // <v**2> for 2-part , m=2
 	meanIntegV3[j] = pow(-1.*cumulInteg2[j], 3./4.); // <v**3> 4-part,  m=1
 	meanIntegV4[j] = -1.*cumulInteg2[j];             // <v**4> 4-part,  m=2
+
+        if (meanIntegV2[j]<0.) cout<<" Sel"<<k+1<<", <V**2> less than zero ! v"<<j+1<<" from 2 particle correlation failed."<<endl;
+        if (meanIntegV4[j]<0.) cout<<" Sel"<<k+1<<", <V**4> less than zero ! v"<<j+1<<" from 4 particle correlation failed."<<endl;
+
       }
       
       if (m_M==1) {
@@ -762,11 +797,9 @@ Int_t StFlowCumulantMaker::Finish() {
     
     if (m_M==1) {
       
-      //TH1D* histOfMeanIntegV;
       TH1D* histOfMeanIntegV = new TH1D(*(histFull[k].mHist_v[0]));
       histOfMeanIntegV->Reset();
       
-      //TH1D* histOfMeanIntegV3;
       TH1D* histOfMeanIntegV3 = new TH1D(*(histFull[k].mHist_v[1]));
       histOfMeanIntegV3->Reset();
       
@@ -792,11 +825,9 @@ Int_t StFlowCumulantMaker::Finish() {
       
     } else if (m_M==2) {
       
-      //TH1D* histOfMeanIntegV2;
       TH1D* histOfMeanIntegV2 = new TH1D(*(histFull[k].mHist_v[0]));
       histOfMeanIntegV2->Reset();
       
-      //TH1D* histOfMeanIntegV4;
       TH1D* histOfMeanIntegV4 = new TH1D(*(histFull[k].mHist_v[1]));
       histOfMeanIntegV4->Reset();
       
@@ -808,6 +839,17 @@ Int_t StFlowCumulantMaker::Finish() {
       }
       histFull[k].mHist_v[0]->Multiply(histOfMeanIntegV2);
       histFull[k].mHist_v[1]->Multiply(histOfMeanIntegV4);
+
+      //force to be zero if the value is "nan"
+      for (int ord = 0; ord < Flow::nCumulDiffOrders; ord++){
+	for (int j=0; j<histFull[k].mHist_v[ord]->GetNbinsX(); j++) {
+          if ( !(histFull[k].mHist_v[ord]->GetBinContent(j) < FLT_MAX &&
+                 histFull[k].mHist_v[ord]->GetBinContent(j) > -1.*FLT_MAX) ){
+	    histFull[k].mHist_v[ord]->SetBinContent(j,0.);
+	    histFull[k].mHist_v[ord]->SetBinError(j,0.);
+	  }
+	}
+      }
 
       for (int j = 1; j < Flow::nHars+1; j++) {
 	cout << "##### 2-part v" << j << " = (" 
@@ -834,9 +876,10 @@ Int_t StFlowCumulantMaker::Finish() {
   for (int k = 0; k < Flow::nSels; k++) {
     for (int j = 0; j < Flow::nHars; j++) {
       for (int pq = 0; pq <  Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax; pq++) {
-	hisList->Remove(histFull[k].histFullHar[j].mCumulDiffG0Denom2D[pq]);
-	hisList->Remove(histFull[k].histFullHar[j].mCumulDiffG0DenomPt[pq]);
-	hisList->Remove(histFull[k].histFullHar[j].mCumulDiffG0DenomEta[pq]);
+	hisList->Remove(histFull[k].histFullHar[j].mCumulG0Denom2D[pq]);
+	hisList->Remove(histFull[k].histFullHar[j].mCumulG0DenomPt[pq]);
+	hisList->Remove(histFull[k].histFullHar[j].mCumulG0DenomEta[pq]);
+	hisList->Remove(histFull[k].histFullHar[j].mCumulG0Denom[pq]);
       }
     }
   }
@@ -866,6 +909,9 @@ Int_t StFlowCumulantMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.cxx,v $
+// Revision 1.7  2001/12/21 17:01:59  aihong
+// minor changes
+//
 // Revision 1.6  2001/12/18 19:27:27  posk
 // "proton" and "antiproton" replaced by "pr+" and "pr-".
 //

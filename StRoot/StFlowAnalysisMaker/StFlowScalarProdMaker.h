@@ -1,9 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowScalarProdMaker.h,v 1.1 2001/12/18 23:46:47 aihong Exp $
+// $Id: StFlowScalarProdMaker.h,v 1.2 2001/12/21 17:01:59 aihong Exp $
 //
 // Authors: method proposed by Art and Sergei, code written by Aihong
-//
+//          Frame adopted from Art and Raimond's StFlowAnalysisMaker.
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Description:  Maker to analyze Flow using the scalar product method
@@ -41,7 +41,7 @@ public:
   Int_t    Make();
   Int_t    Finish();
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowScalarProdMaker.h,v 1.1 2001/12/18 23:46:47 aihong Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowScalarProdMaker.h,v 1.2 2001/12/21 17:01:59 aihong Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -93,6 +93,9 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowScalarProdMaker.h,v $
+// Revision 1.2  2001/12/21 17:01:59  aihong
+// minor changes
+//
 // Revision 1.1  2001/12/18 23:46:47  aihong
 // install scalar product method
 //
