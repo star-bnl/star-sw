@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.25 1999/04/16 14:22:00 fisyak Exp $
+// $Id: StMaker.cxx,v 1.26 1999/04/30 14:58:41 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.26  1999/04/30 14:58:41  perev
+// cd() added to StMaker class
+//
 // Revision 1.25  1999/04/16 14:22:00  fisyak
 // replace break in Makers loop from ==kStErr to >kStWarn to account EOF
 //
@@ -65,7 +68,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.25 1999/04/16 14:22:00 fisyak Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.26 1999/04/30 14:58:41 perev Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -86,6 +89,7 @@ StMaker::StMaker(const char *name,const char *):St_DataSet(name,".maker")
    m_DataSet  = new St_ObjectSet(".data") ;Add(m_DataSet);
    m_ConstSet = new St_ObjectSet(".const");Add(m_ConstSet);
    m_GarbSet  = new St_ObjectSet(".garb" );Add(m_GarbSet);
+   m_Inputs  =  new St_ObjectSet(".aliases" );Add(m_Inputs);
    AddHist(0); m_Histograms = GetHistList();
    gStChain = this; //?????????????????????????????????????????????????????
 
@@ -138,7 +142,7 @@ void StMaker::SetDirObj(TObject *obj,const char *dir)
   set->SetObject(obj);
 }
 //______________________________________________________________________________
-void   StMaker::AddObj(TObject *obj,const char *dir)
+St_ObjectSet *StMaker::AddObj(TObject *obj,const char *dir)
 { 
   assert (dir[0]=='.');
   St_ObjectSet *set = (St_ObjectSet*)Find(dir);
@@ -150,17 +154,65 @@ void   StMaker::AddObj(TObject *obj,const char *dir)
     list = new TList();
     set->SetObject((TObject*)list);}
   if (obj) list->Add(obj);
+  return set;
 }
 //______________________________________________________________________________
-void   StMaker::AddData(St_DataSet *ds, const char* dir)
+St_DataSet *StMaker::AddData(St_DataSet *ds, const char* dir)
 { 
-  assert(!m_DataSet || ds!=m_DataSet);
-  St_DataSet *set = GetDataSet(dir);
+  assert (dir); assert(dir[0]=='.');
+  St_DataSet *set = Find(dir);
   if (!set) { // No dir, make it
-    set = (St_ObjectSet*) new St_ObjectSet(dir);
-    Add(set);}
-  set->Add(ds);
+    set = new St_ObjectSet(dir); Add(set);}
+  if (ds) set->Add(ds);
+  return set;
 }
+//______________________________________________________________________________
+St_DataSet  *StMaker::GetData(const char *name, const char* dir) const
+{ 
+  St_DataSet *set = Find(dir);
+  if (!set) return 0;
+  return set->Find(name);
+}
+//______________________________________________________________________________
+void StMaker::AddAlias(const char* log, const char* act,const char* dir)
+{
+  St_DataSet *ali = new St_DataSet(log); 
+  ali->SetTitle(act);
+  AddData(ali,dir);
+}
+//______________________________________________________________________________
+void StMaker::SetAlias(const char* log, const char* act,const char* dir)
+{ 
+  St_DataSet *ali = GetData(log,dir);
+  if (ali) {
+    if (!strcmp(act,ali->GetTitle())) return;
+  } else {
+    ali = new St_DataSet(log); AddData(ali,dir);
+  }
+  ali->SetTitle(act);
+
+  if (GetDebug()) 
+    printf("<%s(%s)::SetAlias> %s = %s\n",ClassName(),GetName(),log,act);
+}
+//______________________________________________________________________________
+void StMaker::SetOutput(const char* log,St_DataSet *ds)
+{
+  int idx;
+  const char* logname = log;
+  if (!logname || !logname[0]) logname = ds->GetName();
+  TString act = ds->Path();
+  while ((idx=act.Index(".make/"))>=0) act.Replace(0,idx+6,"");  
+  SetOutput(logname,act); 
+}
+
+//______________________________________________________________________________
+void StMaker::SetOutputAll(St_DataSet *ds)
+{
+  St_DataSet *set;
+  St_DataSetIter next(ds);
+  while ((set = next())) SetOutput(set);
+}
+
 //______________________________________________________________________________
 TList *StMaker::GetMakeList() const
 { St_DataSet *ds = Find(".make");
@@ -168,79 +220,77 @@ TList *StMaker::GetMakeList() const
   return ds->GetList();
 }
 //______________________________________________________________________________
-void StMaker::SetInput(const char* logInput,const char* actInput)
+TString StMaker::GetAlias(const char* log,const char* dir) const
 {
-//	defines relations between logical input and actual input names
-  TNamed *inp = new TNamed(logInput,actInput);
-  if (!m_Inputs) m_Inputs = new TList();
-  m_Inputs->Add(inp);
+  TString act;
+  int nspn = strcspn(log," /");
+  act.Prepend(log,nspn);
+  St_DataSet *in = GetData(act,dir);
+  act ="";
+  if (in) {act = in->GetTitle(); act += log+nspn;}
+  return act;
 }
 //______________________________________________________________________________
-TString StMaker::GetInput(const char* logInput) const
+St_DataSet *StMaker::GetDataSet(const char* logInput,
+                                const StMaker *uppMk,
+                                const StMaker *dowMk) const
 {
-  TString actInput;
-  if (! m_Inputs) return actInput;
-  int nspn = strcspn(logInput," /");
-  actInput.Prepend(logInput,nspn);
-  TNamed *in = (TNamed*)m_Inputs->FindObject(actInput);
-  actInput ="";
-  if (in) {actInput = in->GetTitle(); actInput += logInput+nspn;}
-  return actInput;
-}
-//______________________________________________________________________________
-St_DataSet *StMaker::GetDataSet(const char* logInput) const
-{
-const char *subdirs[] = {".data",".const",0};
-
-TString actInput,makerName,findString;
-St_DataSet *dataset;
-StMaker    *parent;
-int icol,idat,nspn;
+St_DataSetIter nextMk(0);
+TString actInput,findString,tmp;
+St_DataSet *dataset,*dir;
+StMaker    *parent,*mk;
+int icol;
   actInput = GetInput(logInput);
   if (actInput.IsNull()) actInput = logInput;
+  
+//	if I was called from THIS maker no sence to search here
+  if (!uppMk && !dowMk) 	goto DOWN;
 
 //		Direct try
   dataset = Find(actInput);
   if (dataset) return dataset;
 
 //		Not so evident, do some editing
+  
+  
   icol = actInput.Index(":");
-  idat = actInput.Index("/.");
-
-  const char *dir;
-  for ( int idir=0;(dir=subdirs[idir]);idir++)
-  { 
-
-    if (icol<0 && idat < 0) {
-
-  //		MAKER/Dataset -> .make/MAKER/.data/Dataset
-      findString = ".make/";
-      nspn = strcspn((const char*)actInput,"/ ");
-      findString.Append(actInput,nspn);
-      findString +="/"; findString +=dir;
-      findString.Append((const char*)actInput+nspn);
-      dataset = Find(findString);  
-      if (dataset) return dataset;
-    }
-
-
-  //		AAA/BBB/CCC -> .make/*/.data/AAA/BBB/CCC
-  //		AAA:BBB/CCC -> .make/AAA/.data/BBB/CCC
-    makerName="*";
-    if (icol>=0) makerName.Replace(0,9999,actInput,icol);
-    findString = ".make/"; findString += makerName; 
-    findString+="/";findString+=dir; findString+="/";
-    findString += (const char*)actInput+icol+1;
-
-    dataset = Find(findString);  
+  if (icol>=0) {//there is maker name is hidden
+    tmp.Replace(0,999,actInput,icol);
+    if (tmp != GetName()) 	goto DOWN;
+    tmp = actInput; tmp.Replace(0,icol+1,"");
+    dataset = Find(tmp);
     if (dataset) return dataset;
-  }//end for over dirs
+  }
+
+  if (actInput.Contains("/.")) 	goto DOWN;
+
+  dataset = m_DataSet->Find(actInput);
+  if (dataset) return dataset;
+  dataset = m_ConstSet->Find(actInput);
+  if (dataset) return dataset;
+
+
+//	Try to search DOWN
+DOWN: if (!(dir = Find(".make"))) goto UP;
+
+  nextMk.Reset(dir);
+  while ((mk = (StMaker*)nextMk()))
+  {
+    if (mk==dowMk) continue;
+    dataset = mk->GetDataSet(actInput,this,0);
+    if (dataset) return dataset;
+  }
+
+//     Try to search UP
+UP: if (uppMk) return 0;
 
   parent = GetMaker(this);         if (!parent) return 0;
-  dataset = parent->GetInputDS(actInput);
-  if (!dataset && GetDebug()) //Print Warning message
-    Warning("GetInputDS"," \"%s\" Not Found ***\n",(const char*)actInput);
-  return dataset;
+  dataset = parent->GetDataSet(actInput,0,this);
+  if (dataset) return dataset;
+
+  if (!dowMk && GetDebug()) //Print Warning message
+    Warning("GetDataSet"," \"%s\" Not Found ***\n",(const char*)actInput);
+  return 0;
 
 }
 //______________________________________________________________________________
