@@ -1,3 +1,9 @@
+* $Id: g2t_get_kine.F,v 1.12 2000/01/13 02:57:04 nevski Exp $
+* $Log: g2t_get_kine.F,v $
+* Revision 1.12  2000/01/13 02:57:04  nevski
+* particle-track relation corrected
+*
+*
 CC:>-----+---------+---------+---------+---------+---------+---------+---------+
 CC: FILE:        g2t_get_kine.F
 CC: AUTHOR:      narod
@@ -20,7 +26,7 @@ CC:>-----+---------+---------+---------+---------+---------+---------+---------+
      >          Nd, Id, NBytPW, LabelV, LabelT, Label1, IHEAD(1000)
       Parameter (Lbuf=200,NBytPW=4)
       INTEGER   NBUF, NtBeam, NtTarg, Ipart, eg_label, Parent, NwHead,
-     >          Iv0, Ip0, Mecat, Meca, Ivol, N_parent, numed, Jv, Kv 
+     >          Iv0, Ip0, Mecat, Meca, Ivol, N_parent, numed, Jv, Kv, Md
       REAL      VMOD, VDIST, Pvert(4), Vert(3), Ubuf(Lbuf), Par(50),
      >          Amass, Tlife, Charge, Tofg, Pt, tet, Eta, rap, 
      >          d,P(4),V(3),am,time,Vcut/0.0010/
@@ -161,18 +167,20 @@ c       p_vert(iv).daughter_p - filled by tracks ! first daughter in linked list
           if (Iv.eq.1) NUMPRIM = NUMPRIM+1
           NUMFINS = NUMFINS + 1
 *
+          md=0
  61       LabelT  = LabelT + 1 
           call AgNZGETP(1,1,LabelT,ISTAT,IDPDG,P,AM,MOTH,TIME,IDAU,V)
           if (ISTAT.gt.1) go to 61
           Label1  = 99999
           if (ISTAT.eq.1) then
-             Label1  = LabelT
-             D       = VDIST(Pvert,P,3)
-             if (D.gt.0) then
-                print *,' g2t_warning - particle and kine differ'
-                print *,'   Ikine=',It,',   Eg=',LabelT
+             if (VDIST(Pvert,P,3).gt.0) then
+                md = md+1
+                go to 61
              endif
+             Label1  = LabelT
           endif
+          if (md.gt.0 .and. Label1.eq.99999) print *,' g2t_warning -',
+     >          ' particle and kine differ: Ikine=',It,',  Eg=',LabelT
 *          
           Pt      = VMOD (Pvert,2)
           Eta     = Pvert(3)
