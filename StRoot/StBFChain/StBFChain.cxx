@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.351 2003/08/01 15:00:45 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.352 2003/08/06 00:23:14 lbarnby Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -770,6 +770,8 @@ Bfc_st BFC2[] = {
   {"tpc_T"       ,""  ,"","",""                                  ,"libtpc_Tables","Load tpc_Tables",kFALSE},
   {"trg_T"       ,""  ,"","",""                                  ,"libtrg_Tables","Load trg_Tables",kFALSE},
   {"vpd_T"       ,""  ,"","",""                                  ,"libvpd_Tables","Load vpd_Tables",kFALSE},
+  {"SvtIT"       ,""  ,"","",""                                         ,"","ITTF: track using SVT",kFALSE},
+  {"FtpcIT"      ,""  ,"","",""                               ,"","ITTF: build and track with FTPC",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Utilities   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -930,7 +932,7 @@ Bfc_st BFC2[] = {
   {"Event"       ,"","","StEvent,tpcDB","StEventMaker","StBichsel,StDetectorDbMaker,StEventMaker",
                                                                                "<StEvent creation>",kFALSE},
   {"Sti"         ,"Sti","","SCL,StEvent,tables","StiMaker",
-              "StSvtDbMaker,StTpcDb,libGui,Sti,StiGui,StiMaker,StiTpc,StiSvt,StiEmc","ITTF tracker",kFALSE},
+      "StSvtDbMaker,StTpcDb,libGui,Sti,StiGui,StiMaker,StiTpc,StiSvt,StiEmc,StiFtpc","ITTF tracker",kFALSE},
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StBichsel,StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
@@ -1295,12 +1297,17 @@ Int_t StBFChain::Instantiate()
 	    // ready to set options and parameters
 	    tk->setGuiEnabled(kFALSE);
 	    tk->setMcEnabled(kFALSE);
-	    pars->doStEventInput=kTRUE; //We always want to have this I think?
-	    cout << "Sti Parameters (seen in bfc)" << *pars << endl;
+	    pars->doStEventInput=kTRUE; // We always want to have this I think?
+	    pars->useSvt=kTRUE; // SVT used in IT but not active. ?? Pre-2001 data, will build only 1 ladder?
+	    if (GetOption("SvtIT")) pars->activeSvt=kTRUE;
+	    if (GetOption("FtpcIT")){
+	      pars->useFtpc=kTRUE;
+	      pars->activeFtpc=kTRUE;
+	    }
+	    cout << "Sti Parameters (seen in bfc):" << endl;
+	    cout << *pars << endl;
 
 	    if (GetOption("Simu")) tk->setMcEnabled(kTRUE);
-
-
 	  }
 
 	  if (GetOption("ppOpt") ) {                         // pp specific stuff
