@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPIDTraits.cxx,v 1.2 2000/05/19 19:06:10 horsley Exp $
+ * $Id: StRichPIDTraits.cxx,v 2.0 2000/08/09 16:26:19 gans Exp $
  *
  * Author: Matt Horsley, March 30, 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPIDTraits.cxx,v $
+ * Revision 2.0  2000/08/09 16:26:19  gans
+ * Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
+ *
  * Revision 1.2  2000/05/19 19:06:10  horsley
  * many revisions here, updated area calculation ring calc, ring, tracks , etc...
  *
@@ -23,7 +26,7 @@
 
 ClassImp(StRichPIDTraits)
 
-static const char rcsid[] = "$Id: StRichPIDTraits.cxx,v 1.2 2000/05/19 19:06:10 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDTraits.cxx,v 2.0 2000/08/09 16:26:19 gans Exp $";
 
 StRichPIDTraits::StRichPIDTraits() { }
 

@@ -1,13 +1,16 @@
 /**********************************************************
- * $Id: StRichRings.cxx,v 1.3 2000/06/16 02:37:12 horsley Exp $
+ * $Id: StRichRings.cxx,v 2.0 2000/08/09 16:26:20 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRings.cxx,v $
- *  Revision 1.3  2000/06/16 02:37:12  horsley
- *  many additions, added features to pad plane display (MIPS, rings, etc)
- *  along with Geant info. Added StMcRichTrack. Modified access to hit collection.
+ *  Revision 2.0  2000/08/09 16:26:20  gans
+ *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
+ *
+ *  Revision 2.1  2000/09/29 01:35:38  horsley
+ *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
+ *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
  *
  *  Revision 1.3  2000/06/16 02:37:12  horsley
  *  many additions, added features to pad plane display (MIPS, rings, etc)

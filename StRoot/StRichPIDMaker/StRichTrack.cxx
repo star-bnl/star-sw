@@ -1,14 +1,17 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 1.3 2000/06/16 02:37:12 horsley Exp $
+ * $Id: StRichTrack.cxx,v 2.0 2000/08/09 16:26:21 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
- *  Revision 1.3  2000/06/16 02:37:12  horsley
- *  many additions, added features to pad plane display (MIPS, rings, etc)
- *  along with Geant info. Added StMcRichTrack. Modified access to hit collection.
+ *  Revision 2.0  2000/08/09 16:26:21  gans
+ *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
  *
+ *  return copy instead of reference
+ *
+ *  Revision 2.6  2000/11/07 14:13:24  lasiuk
+ *  add possibility of .4*px/pz correction to the track extrapolation
  *
  *  Revision 2.5  2000/11/01 17:43:10  lasiuk
  *  default arguments initialization in c'tor.  Addition of init() member
@@ -20,6 +23,7 @@
  *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
  *
  *  Revision 1.1  2000/04/03 19:36:09  horsley
+ *  initial revision
  **********************************************************/
 #include <math.h>
 #include <string>
@@ -35,50 +39,167 @@
 #include "StRrsMaker/StRichRawCoordinate.h"
 #include "StRrsMaker/StRichLocalCoordinate.h"
 using std::sort;
-
-StRichTrack::StRichTrack(StTrack* tpcTrack, double magField)  {
-  
-  mStTrack = tpcTrack;
-
-  mAssociatedMIPCharge = 0;
-  mAssociatedMIP.setX(-999);
-  mAssociatedMIP.setY(-999);
-  mAssociatedMIP.setZ(-999);
-
-  // define system parameters
-  myGeometryDb = StRichGeometryDb::getDb();  
-  myMaterialsDb = StRichMaterialsDb::getDb();  
-  coordinateTransformation = StRichCoordinateTransform::getTransform(myGeometryDb);
-  momentumTransformation   = StRichMomentumTransform::getTransform(myGeometryDb);
-  
-    double xCorrection = 0.;
-  StThreeVectorD richNormal(myGeometryDb->normalVectorToPadPlane().x(),
-			    myGeometryDb->normalVectorToPadPlane().y(),
 			    myGeometryDb->normalVectorToPadPlane().z());
   
-  // need to include mwpc gap correction, 
-  // origin is located in center of gap, not on padplane --> 2 mm
-  double anodeDistanceToPadPlane = myGeometryDb->anodeToPadSpacing();
-  StRichLocalCoordinate edgeOfRichRadiator_Local(0.0,
-						 0.0,
-						 myGeometryDb->proximityGap() +
-						 myGeometryDb->quartzDimension().z() +
-						 myGeometryDb->radiatorDimension().z());
-						       
-  // MIP is measured at anode position
-  StRichLocalCoordinate richAnodeWirePlane_Local(0.0, 0.0, 0.0 + anodeDistanceToPadPlane);	
+    
+    
+    
+    mStTrack = 0;
+    mL3Track = track;
+    
+    mAssociatedMIPCharge = 0;
+    mAssociatedMIP.setX(-999);
+    mAssociatedMIP.setY(-999);
+    mAssociatedMIP.setZ(-999);
+    
+    mPidTrait      = 0;
+    mMagneticField = magField;
+    mStTrack       = 0;
+    mL3Track       = track; 
+    mAssociatedMIP = 0;
+{
+    
+    StThreeVectorD richNormal(myGeometryDb->normalVectorToPadPlane().x(),
+    myGeometryDb = StRichGeometryDb::getDb();  
+    myMaterialsDb = StRichMaterialsDb::getDb();  
+    coordinateTransformation = StRichCoordinateTransform::getTransform(myGeometryDb);
+    momentumTransformation   = StRichMomentumTransform::getTransform(myGeometryDb);
+    
+    StThreeVectorF richNormal(myGeometryDb->normalVectorToPadPlane().x(),
+			      myGeometryDb->normalVectorToPadPlane().y(),
+			      myGeometryDb->normalVectorToPadPlane().z());
+  mL3Track  = 0; 
+#endif  
+
+  this->init();
   
-  StGlobalCoordinate edgeOfRichRadiator_Global;
-  (*coordinateTransformation)(edgeOfRichRadiator_Local,edgeOfRichRadiator_Global);
+  // define system parameters
+    
+  this->setMomentum(mom);
+  this->setImpactPoint(imp);
+}
 
-  StGlobalCoordinate richAnodeWirePlane_Global;
+#ifdef RICH_WITH_L3_TRACKS
+StRichTrack::StRichTrack(globalTrack *track, double magField)
+      mMagneticField(magField), mL3Track(track),
+    
+{
+    StRichLocalCoordinate richAnodeWirePlane_Local(0.0, 0.0, 0.0 + anodeDistanceToPadPlane);	
+    // define system parameters
+    // need to include mwpc gap correction, 
+    // origin is located in center of gap, not on padplane --> 2 mm
+    (*coordinateTransformation)(richAnodeWirePlane_Local,richAnodeWirePlane_Global);
+						   0.0,
+						   myGeometryDb->proximityGap() +
+						   myGeometryDb->quartzDimension().z() +
+
+						   myGeometryDb->radiatorDimension().z());
+    
+    // MIP is measured at anode position
+			    track->q);
+    
+    
+						   0.,
+						   0.+anodeDistanceToPadPlane);	
+    StGlobalCoordinate edgeOfRichRadiator_Global;
+    (*coordinateTransformation)(edgeOfRichRadiator_Local,
+				edgeOfRichRadiator_Global);
+    
+    StGlobalCoordinate richAnodeWirePlane_Global;
+    (*coordinateTransformation)(richAnodeWirePlane_Local,
+				richAnodeWirePlane_Global);
+    
+
+    // L3 Stuff
+    
+    
+    if (mPathLengthAtRadiator<10e10) {
+	tpcMom = mHelix.momentumAt(mPathLengthAtRadiator,magField*kilogauss);
+	
+    double z0=track->z0;
+    StThreeVector<double> tpcMomentum(tpcMom.x(), tpcMom.y(), tpcMom.z());
+    
+    double px=track->pt * cos(track->psi);
+    double py=track->pt * sin(track->psi);
+    double pz=track->pt * track->tanl;
+
+    StThreeVectorD tpcMom(0,0,0);
+			    StThreeVectorD(x0,y0,z0),
+			    magField*kilogauss,
+			    track->q);    
+    
+    StThreeVector<double> tpcMomentum(tpcMom.x(), tpcMom.y(), tpcMom.z());    
+    
+    StThreeVectorD rp(richAnodeWirePlane_Global.position().x(),
+    StThreeVector<double> richLocalMomentum(0,0,0);
+		      richAnodeWirePlane_Global.position().z());
+    
+    double mPathLengthAtRadiator  = mHelix.pathLength(rr,richNormal);
+    double mPathLengthAtPadPlane  = mHelix.pathLength(rp,richNormal);
+    
+    if (mPathLengthAtPadPlane < 10e10) {
+	tpcMom = mHelix.momentumAt(mPathLengthAtRadiator,magField*kilogauss);	
+    }
+	globalImpactPointAtAnodeWirePlane.position().setZ(mHelix.z(mPathLengthAtPadPlane));
+	
+	(*coordinateTransformation)(globalImpactPointAtAnodeWirePlane,localImpactPointAtAnodeWirePlane);
+
+    (*coordinateTransformation)(globalImpactPoint,richTransformedImpactPoint);
+    double xCorrection = 0.;
+    }
+    // correction to the x position of the impact point
+    // If this correction is really due to the effect of
+    setCharge(mHelix.h());
+    
+    // this may not be appropriate in the L3 unless we
+    double xCorrection = 0.4*(mMomentumAtPadPlane.x()/mMomentumAtPadPlane.z());
+    //double xCorrection = 0.;
+    // pad plane intersection (projected MIP)
+    StGlobalCoordinate    globalImpactPointAtAnodeWirePlane(-999,-999,-999);
+    StRichLocalCoordinate localImpactPointAtAnodeWirePlane(-999,-999,-999);  
+    setUnCorrectedMomentum(richLocalMomentum);
+    
+    mStTrack = tpcTrack;
+  
+    mAssociatedMIPCharge = 0;
+    mAssociatedMIP.setX(-999);
+    mAssociatedMIP.setY(-999);
+    mAssociatedMIP.setZ(-999);
+StRichTrack::StRichTrack(StTrack* tpcTrack, double magField)  {
+ 
+    myGeometryDb = StRichGeometryDb::getDb();  
+    mPidTrait      = 0;
+    mMagneticField = magField;
+    mAssociatedMIP = 0;
+	    .setX(localImpactPointAtAnodeWirePlane.position().x()-xCorrection);
+    
+    StThreeVectorD richNormal(myGeometryDb->normalVectorToPadPlane().x(),
+			      myGeometryDb->normalVectorToPadPlane().y(),
+			      myGeometryDb->normalVectorToPadPlane().z());
+  
+    
+    mRichNormal.setX(myGeometryDb->normalVectorToPadPlane().x());
+    double anodeDistanceToPadPlane = myGeometryDb->anodeToPadSpacing();
+    mRichNormal.setZ(myGeometryDb->normalVectorToPadPlane().z());
+    
+    // define system parameters
+
+    StThreeVector<double> padPlaneMomentum(ppMomentum.x(),ppMomentum.y(),ppMomentum.z());
+
+        
+    StRichLocalCoordinate richAnodeWirePlane_Local(0.0, 0.0, 0.0 + anodeDistanceToPadPlane);	
+    
+						   myGeometryDb->proximityGap() +
+						   myGeometryDb->quartzDimension().z() +
+						   myGeometryDb->radiatorDimension().z());
+    
   (*coordinateTransformation)(richAnodeWirePlane_Local,richAnodeWirePlane_Global);
-
+    return mPionList; 
   StPhysicalHelixD  mHelix = tpcTrack->geometry()->helix();
   StThreeVectorD rr(edgeOfRichRadiator_Global.position().x(),
 		    edgeOfRichRadiator_Global.position().y(),
 		    edgeOfRichRadiator_Global.position().z());
-
+    return mKaonList; 
   StThreeVectorD rp(richAnodeWirePlane_Global.position().x(),
 		    richAnodeWirePlane_Global.position().y(),
 		    richAnodeWirePlane_Global.position().z());
@@ -106,7 +227,8 @@ StRichTrack::StRichTrack(StTrack* tpcTrack, double magField)  {
   StRichLocalCoordinate richTransformedImpactPoint(-999,-999,-999);
   (*coordinateTransformation)(globalImpactPoint,richTransformedImpactPoint);
 
-   
+  StThreeVectorD ppMomentum(0,0,0);
+  
   // pad plane intersection (projected MIP)
   StGlobalCoordinate    globalImpactPointAtAnodeWirePlane(-999,-999,-999);
   StRichLocalCoordinate localImpactPointAtAnodeWirePlane(-999,-999,-999);  
@@ -116,8 +238,15 @@ StRichTrack::StRichTrack(StTrack* tpcTrack, double magField)  {
     globalImpactPointAtAnodeWirePlane.position().setZ(mHelix.z(mPathLengthAtPadPlane));
     
     (*coordinateTransformation)(globalImpactPointAtAnodeWirePlane,localImpactPointAtAnodeWirePlane);
+    delete mProtonList[l];
+    ppMomentum =  mHelix.momentumAt(mPathLengthAtPadPlane,magField*kilogauss);
+    mProtonList[l] = 0;
+   
     mKaonList.clear();
   
+  StThreeVector<double> padPlaneMomentum(ppMomentum.x(),ppMomentum.y(),ppMomentum.z());
+  momentumTransformation->localMomentum(padPlaneMomentum,mMomentumAtPadPlane);
+    
   setCharge(mHelix.h());
   setMomentum(richLocalMomentum);
   setImpactPoint(richTransformedImpactPoint.position());
@@ -140,7 +269,7 @@ void StRichTrack::assignMIP(const StSPtrVecRichHit* hits) {
     double smallestResidual=10e10;
     double testThisResidual=0;
     mAssociatedMIPCharge = 0;
-    for (StSPtrVecRichHitIterator hitIndex = hits->begin(); hitIndex != hits->end(); ++hitIndex) {  		
+    for (StSPtrVecRichHitConstIterator hitIndex = hits->begin(); hitIndex != hits->end(); ++hitIndex) {  		
       testThisResidual = sqrt( ((*hitIndex)->local().x()-mProjectedMIP.x())*
 			       ((*hitIndex)->local().x()-mProjectedMIP.x()) +
 			       ((*hitIndex)->local().y()-mProjectedMIP.y())*
@@ -212,7 +341,9 @@ StThreeVector<double> StRichTrack::getMomentum() {
   return mMomentum;
 }
 
-
+StThreeVector<double> StRichTrack::getMomentumAtPadPlane() {
+  return mMomentumAtPadPlane;
+}
 double StRichTrack::getTheta() {
   return mTheta;}
 
@@ -242,6 +373,16 @@ StTrack* StRichTrack::getStTrack() {
   return mStTrack;
 }
 // 	}
+	    highestAmplitude = candidateHits[0].first->charge();
+
+	}
+	    
+
+    }
+    //
+    
+	cout << "StRichTrack::associateMIP()\n";
+    return -999;
 
 double StRichTrack::getUnCorrectedTheta() { return mUnCorrectedTheta;}
 double StRichTrack::getUnCorrectedPhi()   { return mUnCorrectedPhi;}
@@ -253,12 +394,48 @@ double StRichTrack::getZVertex(){
 #ifdef RICH_WITH_L3_TRACKS
     globalTrack* track = this->getL3Track();
     if(track)
-      return 1;}
+	return track->z0-track->tanl*track->r0*cos(track->psi-track->phi0);
+#endif
     return -999;
 }
 
 
+bool StRichTrack::isGood(StParticleDefinition* particle)
+{
 void StRichTrack::setPhi(double phi) { mPhi = phi;}
+    bool goodTrack;
+    
+void StRichTrack::setUnCorrectedTheta(double the) {mUnCorrectedTheta=the;}
+    StRichRingPoint InnerRing(this,eInnerRing);
+void StRichTrack::setUnCorrectedPhi(double phi) {mUnCorrectedPhi=phi;}
+    InnerRing.setParticleType(particle);
+    
+    
+    StThreeVector<double> otemp;
+    StThreeVector<double> itemp;
+void StRichTrack::setUnCorrectedProjectedMIP(StThreeVectorF& point) {mUnCorrectedProjectedMIP=point;}
+void StRichTrack::setUnCorrectedMomentum(StThreeVectorF& point) {mUnCorrectedMomentum=point;}
+    bool iStatus = InnerRing.getPoint(M_PI,itemp);
+    bool oStatus = OuterRing.getPoint(M_PI,otemp);
+void StRichTrack::useUnCorrected() {
+    
+    if(iStatus && oStatus)
+	goodTrack = true;
+    else
+	goodTrack = false;
+    /*
+    cout << "--------------------------------------" << endl;
+    cout << "mGoodTrack = " << mGoodTrack << endl;
+    cout << "iStatus = "<< iStatus << " oStatus = " << oStatus << endl;
+    cout << "otemp = " << otemp << endl;
+    cout << "itemp = " << itemp << endl;
+    cout << "theta = " << this->getTheta()/degree << endl;
+    cout << "momentum = " << this->getMomentum() << endl;
+    cout << "--------------------------------------" << endl;
+    */
+  setImpactPoint(mUnCorrectedImpactPoint);
+    setTheta(acos(normalVector.dot(momentum)/momentum.mag()));}
+  
   
   double startLamda = 170.0;
   double endLamda   = 200.0;

@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichMaterialsDbInterface.h,v 1.1 2000/04/03 19:36:08 horsley Exp $
+ * $Id: StRichMaterialsDbInterface.h,v 2.0 2000/08/09 16:26:18 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMaterialsDbInterface.h,v $
+ *  Revision 2.0  2000/08/09 16:26:18  gans
+ *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
+ *
  *  Revision 1.1  2000/04/03 19:36:08  horsley
  *  initial revision
  *

@@ -1,14 +1,17 @@
 /**********************************************************
- * $Id: StRichRingCalculator.cxx,v 1.3 2000/06/16 02:37:12 horsley Exp $
+ * $Id: StRichRingCalculator.cxx,v 2.0 2000/08/09 16:26:20 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingCalculator.cxx,v $
- *  Revision 1.3  2000/06/16 02:37:12  horsley
- *  many additions, added features to pad plane display (MIPS, rings, etc)
- *  along with Geant info. Added StMcRichTrack. Modified access to hit collection.
+ *  Revision 2.0  2000/08/09 16:26:20  gans
+ *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
  *
+ *  for individual photons, modified minimization routine to correct boundary
+ *  problems
+ *
+ *  Revision 2.2  2000/09/29 17:55:51  horsley
  *  fixed bug in Minimization routine, included StMagF stuff (commented out)
  *  changed StRichRingPoint  HUGE_VALUE   ---> MAXFLOAT for default value
  *
@@ -41,15 +44,24 @@
   delete mInnerRing;
   delete mOuterRing;
   delete mMeanRing;
-double StRichRingCalculator::calculateArea(double cut) {
+double StRichRingCalculator::calculateArea(double cut, bool gapCorrection) {
+  delete mMeanMinimization;
+    delete mMeanMinimization;
 
-  StRichArea areaCalc(mInnerRing,mOuterRing);
     mInnerMinimization = 0;
+double StRichRingCalculator::calculateArea(double cut=0, bool gapCorrection=true) {
+
+}
+
+  mTotalAngle = areaCalc.getTotalAngle();
   double area = areaCalc.calculateArea(cut);
-  
+  mTotalConstantAngle = areaCalc.getTotalConstantAngle();
   }
 
   // clear vector of points
+vector<StThreeVector<double> >& StRichRingCalculator::getPtsToDraw() {
+  return vectorOfPtsToDraw;
+}
   vectorOfPtsToDraw     = areaCalc.getPtsToDraw();
   mTotalAngleOnPadPlane = areaCalc.getTotalAngleOnPadPlane();
 double StRichRingCalculator::getTotalArea() {
@@ -80,9 +92,10 @@ StRichRingPoint* StRichRingCalculator::getRing(StRichRingDefinition ringType) {
   return 0;
 
 void StRichRingCalculator::setParticleType(StParticleDefinition* particle) {
-   mInnerRing->setParticleType(particle);
-   mOuterRing->setParticleType(particle);
-   mMeanRing->setParticleType(particle);
+ 
+double StRichRingCalculator::getRingWidth() {
+    if (ringType==eMeanRing)   return  mMeanRing;
+    return 0;
 }
 double StRichRingCalculator::getRingWidth() const {
 void StRichRingCalculator::setParticleType(StParticleDefinition* particle) { 

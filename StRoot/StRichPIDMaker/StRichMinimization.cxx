@@ -1,13 +1,16 @@
 /**********************************************************
- * $Id: StRichMinimization.cxx,v 1.3 2000/05/22 15:14:44 horsley Exp $
+ * $Id: StRichMinimization.cxx,v 2.0 2000/08/09 16:26:18 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMinimization.cxx,v $
- *  Revision 1.3  2000/05/22 15:14:44  horsley
- *  modified StRichRings, StRichTDrawableRings to comply with sun compiler
+ *  Revision 2.0  2000/08/09 16:26:18  gans
+ *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
  *
+ *
+ *  Revision 2.2  2000/09/29 17:55:51  horsley
+ *  fixed bug in Minimization routine, included StMagF stuff (commented out)
  *  changed StRichRingPoint  HUGE_VALUE   ---> MAXFLOAT for default value
  *
  *  Revision 2.1  2000/09/29 01:35:37  horsley

@@ -1,12 +1,15 @@
 /**********************************************************
- * $Id: StRichMinimization.h,v 1.1 2000/04/03 19:36:08 horsley Exp $
+ * $Id: StRichMinimization.h,v 2.0 2000/08/09 16:26:18 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMinimization.h,v $
- *  Revision 1.1  2000/04/03 19:36:08  horsley
- *  initial revision
+ *  Revision 2.0  2000/08/09 16:26:18  gans
+ *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
+ *
+ *  Revision 2.2  2000/10/19 18:11:12  lasiuk
+ *  definition of degree
  *
  *  Revision 2.1  2000/09/29 01:35:37  horsley
  *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities

@@ -1,12 +1,15 @@
 /**********************************************************
- * $Id: StRichMaterialsDb.cxx,v 1.2 2000/05/19 19:06:10 horsley Exp $
+ * $Id: StRichMaterialsDb.cxx,v 2.0 2000/08/09 16:26:18 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMaterialsDb.cxx,v $
- *  Revision 1.2  2000/05/19 19:06:10  horsley
- *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
+ *  Revision 2.0  2000/08/09 16:26:18  gans
+ *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
+ *
+ *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
+ *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
  *
  *  Revision 1.2  2000/05/19 19:06:10  horsley
  *  many revisions here, updated area calculation ring calc, ring, tracks , etc...

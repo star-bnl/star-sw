@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichMaterialsDb.h,v 1.2 2000/05/19 19:06:10 horsley Exp $
+ * $Id: StRichMaterialsDb.h,v 2.0 2000/08/09 16:26:18 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMaterialsDb.h,v $
+ *  Revision 2.0  2000/08/09 16:26:18  gans
+ *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
+ *
  *  Revision 1.2  2000/05/19 19:06:10  horsley
  *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
  *
