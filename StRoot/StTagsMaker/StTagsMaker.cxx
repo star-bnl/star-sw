@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.14 2004/08/17 20:52:11 perev Exp $
+// $Id: StTagsMaker.cxx,v 1.15 2004/11/24 04:05:26 jeromel Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.15  2004/11/24 04:05:26  jeromel
+// Small leak of one newds fixed
+//
 // Revision 1.14  2004/08/17 20:52:11  perev
 // Replace St_DataSet ==> TDataSet
 //
@@ -183,13 +186,16 @@ EDataSetPass StTagsMaker::GetTags (TDataSet* ds)
     name = TString(ds->GetTitle());
     TTable &tab = *((TTable *)ds); 
     address = tab[0];
-  }
-  else if (strstr(Name,"EvtHddr")){   
+
+  } else if (strstr(Name,"EvtHddr")){   
     name = TString("EvtHddr_st");
     cl = new TClass(name.Data(),1,"StEvtHddr.h","StEvtHddr.h");
     if (cl) address = cl->New();
+
+  } else {
+    SafeDelete(newds);
+    return kContinue;
   }
-  else return kContinue;
 
   // create separate branch for each tag (or array of tags)
   cl = gROOT->GetClass(name.Data());
