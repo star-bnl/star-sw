@@ -202,7 +202,7 @@ void StiKalmanTrackFinder::findTrack(StiTrack * t) throw ( Exception)
   lastNode = followTrackAt(lastNode);
   pruneNodes(lastNode);
   tt->setLastNode(lastNode);
-  extendToMainVertex(lastNode);
+  //extendToMainVertex(lastNode);
 }
 
 StiKalmanTrackNode *
@@ -249,76 +249,76 @@ StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) throw (Exception)
       // scan layer for connecting hits
       scanningDone = false;
       while (!scanningDone)
-	{
-	  visitedDet++;
-	  tNode = trackNodeFactory->getObject();
-		tNode->reset();
-	  position = tNode->propagate(sNode, tDet); // 
-	  if (position==kFailed) return sNode;
-	  if (tDet->isActive())  // active vol, look for hits
-	    {
-	      if (position<=kEdgeZplus)
-		{
-		  hitContainer->setDeltaD(5.); //yWindow);
-		  hitContainer->setDeltaZ(5.); //zWindow);
-		  hitContainer->setRefPoint(tNode->fAlpha,
-					    tNode->fX,
-					    tNode->fP0,
-					    tNode->fP1);
-		  while (hitContainer->hasMore())
-		    {
-		      tNode->setHit(hitContainer->getHit());
-		      chi2 = tNode->evaluateChi2();
-		      if (chi2<maxChi2ForSelection && chi2 < bestChi2)
-			{
-			  bestChi2 = chi2;
-			  bestNode = tNode;
-			}
-		    } // searching best hit
-		  if (position==kHit)
-		    scanningDone = true;
-		}
-	    }
-	  else  // inactive, keep only if position==0
-	    {
-	      if (position<=kEdgeZplus)
-		scanningDone = true;
-	    }
-	  
-	  if (!scanningDone)
-	    {
-	      // try a different detector on the same layer
-	      if (position==kEdgePhiPlus || position==kMissPhiPlus)
-		detectorContainer->movePlusPhi();
-	      else if (position==kEdgePhiMinus || position==kMissPhiMinus)
-		detectorContainer->moveMinusPhi();
-	      else
-		scanningDone = true;
-	    }
-	}
+				{
+					visitedDet++;
+					tNode = trackNodeFactory->getObject();
+					tNode->reset();
+					position = tNode->propagate(sNode, tDet); // 
+					if (position==kFailed) return sNode;
+					if (tDet->isActive())  // active vol, look for hits
+						{
+							if (position<=kEdgeZplus)
+								{
+									hitContainer->setDeltaD(5.); //yWindow);
+									hitContainer->setDeltaZ(5.); //zWindow);
+									hitContainer->setRefPoint(tNode->fAlpha,
+																						tNode->fX,
+																						tNode->fP0,
+																						tNode->fP1);
+									while (hitContainer->hasMore())
+										{
+											tNode->setHit(hitContainer->getHit());
+											chi2 = tNode->evaluateChi2();
+											if (chi2<maxChi2ForSelection && chi2 < bestChi2)
+												{
+													bestChi2 = chi2;
+													bestNode = tNode;
+												}
+										} // searching best hit
+									if (position==kHit)
+										scanningDone = true;
+								}
+						}
+					else  // inactive, keep only if position==0
+						{
+							if (position<=kEdgeZplus)
+								scanningDone = true;
+						}
+					
+					if (!scanningDone)
+						{
+							// try a different detector on the same layer
+							if (position==kEdgePhiPlus || position==kMissPhiPlus)
+								detectorContainer->movePlusPhi();
+							else if (position==kEdgePhiMinus || position==kMissPhiMinus)
+								detectorContainer->moveMinusPhi();
+							else
+								scanningDone = true;
+						}
+				}
       
       if (bestChi2<maxChi2ForSelection && bestNode)
-	{
-	  // found hit(s), update track info, 
-	  // update counters.
-	  tNode->updateNode();
-	  sNode->add(tNode);
-	  sNode = tNode;  // the new source node
-	  hitCount++;
-	  contiguousHitCount++;
-	  if (contiguousHitCount>minContiguousHitCountForNullReset)
-	    contiguousNullCount = 0;
-	}
+				{
+					// found hit(s), update track info, 
+					// update counters.
+					tNode->updateNode();
+					sNode->add(tNode);
+					sNode = tNode;  // the new source node
+					hitCount++;
+					contiguousHitCount++;
+					if (contiguousHitCount>minContiguousHitCountForNullReset)
+						contiguousNullCount = 0;
+				}
       else
-	{
-	  // update null counters
-	  contiguousNullCount++;
-	  nullCount++;
-	  if (nullCount>maxNullCount ||
-	      contiguousNullCount>maxContiguousNullCount)
-	    trackDone = true;
-	}
-
+				{
+					// update null counters
+					contiguousNullCount++;
+					nullCount++;
+					if (nullCount>maxNullCount ||
+							contiguousNullCount>maxContiguousNullCount)
+						trackDone = true;
+				}
+			
       
       detectorContainer->moveIn();
       StiDetector * newDet = **detectorContainer;

@@ -101,6 +101,7 @@ void StiKalmanTrackNode::set(int   depth,
 
 void StiKalmanTrackNode::setState(const StiKalmanTrackNode * node)
 {
+	fAlpha = node->fAlpha;
   fX   = node->fX;
   // state matrix
   fP0  = node->fP0;
@@ -389,15 +390,17 @@ double StiKalmanTrackNode::getPt() const
 int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode, 
 																	StiDetector * tDet)	throw (Exception)
 {
+
   int position = 0;
 	setState(pNode);
   StiPlacement * tPlace = tDet->getPlacement();
   double tAlpha = tPlace->getNormalRefAngle();
   double dAlpha = tAlpha - fAlpha;
-  if (dAlpha>1e-2)   // perform rotation if needed
+	cout << " Propagate : tAlpha/fAlpha :" << tAlpha << "\t" << fAlpha << endl;
+  if (dAlpha>1e-4)   // perform rotation if needed
 		{
 			cout << " doing rotation <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
-			rotate(dAlpha);
+			rotate(-dAlpha);
 		}
   double x, x0, rho;
   position = StiMaterialInteraction::findIntersection(pNode,tDet,x,x0,rho);
@@ -528,8 +531,9 @@ StiKalmanTrackNode::evaluateChi2() 	throw ( Exception)
   double tmp=r00; r00=r11; r11=tmp; r01=-r01;  
   double dy=hit->y() - fP0;
   double dz=hit->z() - fP1;
-	fChi2 = (dy*r00*dy + 2*r01*dy*dz + dz*r11*dz)/det;
-	return fChi2;
+	double chi2inc = (dy*r00*dy + 2*r01*dy*dz + dz*r11*dz)/det;
+	fChi2 += chi2inc;
+	return chi2inc;
 }
 
 void StiKalmanTrackNode::updateNode() throw (Exception)

@@ -373,34 +373,35 @@ void StiKalmanTrack::initialize(double curvature,
       alpha = layer->getPlacement()->getNormalRefAngle();
       node = fac->getObject();
       if (node==0)
-	{
-	  cout << "StiKalmanTrack::initialize() - Severe Error - "
-	       << "trackNodeFactor returned null object" << endl;
-	  return;
-	}
+				{
+					cout << "StiKalmanTrack::initialize() - Severe Error - "
+							 << "trackNodeFactor returned null object" << endl;
+					return;
+				}
       node->reset();
       if (pNode==0)
-	alphaP = -99999.; // no parent, set crazy value
+				alphaP = -99999.; // no parent, set crazy value
       else
-	alphaP = pNode->fAlpha; // value of the parent
+				alphaP = pNode->fAlpha; // value of the parent
       if (alphaP!=alpha)
-	{
-	  StThreeVectorD temp = origin;
-	  cout << "OG:" << temp << endl;
-	  temp.rotateZ(-alpha);
-	  cout << "OL:" << temp << endl;
-	  eta = curvature*temp.x();
-	}
+				{
+					cout << "=================alphaP/alpha:" << alphaP << "\t" << alpha << endl;
+					StThreeVectorD temp = origin;
+					cout << "OG:" << temp << endl;
+					temp.rotateZ(-alpha);
+					cout << "OL:" << temp << endl;
+					eta = curvature*temp.x();
+				}
       state[0] = (*it)->y(); 
       state[1] = (*it)->z(); 
       state[2] = eta;
       node->set(i, (*it), alpha, (*it)->x(), state,error, 0., 0.);
       if (pNode==0) 
-	firstNode = node;
+				firstNode = node;
       else
-	{
-	  pNode->add(node);
-	}
+				{
+					pNode->add(node);
+				}
       pNode = node;
       i++;
     }
@@ -432,6 +433,23 @@ StiKalmanTrackNode * StiKalmanTrack::getNodeNear(double x) const
     }
   delete nodes;
   return bestNode;
+}
+
+StThreeVector<double>
+StiKalmanTrack::getHitPositionNear(double x) const
+{
+	/*
+		Returns the hit position associated with the node nearest to the given "x" value.
+	*/
+  StiKalmanTrackNode * node = getNodeNear(x);
+  if (node==0)
+    return StThreeVector<double>(0.,0.,0.);
+  else 
+    {
+			StiHit * hit = node->getHit();
+			StThreeVectorF pos = hit->globalPosition();
+			return StThreeVector<double>( pos.x(), pos.y(), pos.z() );
+		}
 }
 
 StThreeVector<double> StiKalmanTrack::getPointNear(double x) const

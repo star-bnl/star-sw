@@ -3,6 +3,7 @@
 
 //SCL
 #include "StThreeVector.hh"
+#include "StThreeVectorF.hh"
 
 //STD
 #include <math.h>
@@ -89,6 +90,7 @@ class StiKalmanTrack : public StiTrack
   StThreeVector<double> getGlobalPointNear(double x) const;
   StThreeVector<double> getMomentumAtOrigin();
   StThreeVector<double> getMomentumNear(double x);
+	StThreeVector<double> getHitPositionNear(double x) const;
 
 protected:
     
