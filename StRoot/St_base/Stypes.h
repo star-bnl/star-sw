@@ -6,7 +6,7 @@
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // Stypes                                                               //
-// $Id: Stypes.h,v 1.10 2000/01/12 18:07:24 fine Exp $                                                               
+// $Id: Stypes.h,v 1.11 2000/01/23 20:58:53 fine Exp $                                                               
 // Basic types used by STAF - ROOT interface.                           //
 //                                                                      //
 // This header file contains the set of the macro definitions           //
@@ -82,7 +82,30 @@ void _NAME2_(St_,name)::Streamer(TBuffer &R__b) {                        \
   TableStreamerImp(name)
 
 // $Log: Stypes.h,v $
+// Revision 1.11  2000/01/23 20:58:53  fine
+// new macro ClassDefTable has been introduced
+//
 // Revision 1.10  2000/01/12 18:07:24  fine
-// cvs symbols have been added and copyright class introduced
+//  cvs symbols have been added and copyright class introduced
 //
 #endif 
+
+
+#define ClassDefTable(stem)                       \
+  class _NAME2_(St_,stem) : public St_Table       \
+  {                                               \
+   protected:                                     \
+     static St_tableDescriptor *fgColDescriptors; \
+     virtual St_tableDescriptor *GetDescriptorPointer() const { return fgColDescriptors;}                \
+     virtual void SetDescriptorPointer(St_tableDescriptor *list) const { fgColDescriptors = list;}       \
+  public:                                         \
+    _NAME2_(St_,stem)() : St_Table(_QUOTE_(stem),sizeof(_NAME2_(stem,_st))) {SetType(_QUOTE_(stem));}    \
+    _NAME2_(St_,stem)(Text_t *name) : St_Table(name,sizeof(_NAME2_(stem,_st))) {SetType(_QUOTE_(stem));} \
+    _NAME2_(St_,stem)(Int_t n) : St_Table(_QUOTE_(stem),n,sizeof(_NAME2_(stem,_st))) {SetType(_QUOTE_(stem));}     \
+    _NAME2_(St_,stem)(Text_t *name,Int_t n) : St_Table(name,n,sizeof(_NAME2_(stem,_st))) {SetType(_QUOTE_(stem));} \
+    _NAME2_(stem,_st) *GetTable(Int_t i=0) const { return ((_NAME2_(stem,_st) *)s_Table)+i;}                       \
+    _NAME2_(stem,_st) &operator[](Int_t i){ assert(i>=0 && i < GetNRows()); return *GetTable(i); }                 \
+    const _NAME2_(stem,_st) &operator[](Int_t i) const { assert(i>=0 && i < GetNRows()); return *((const _NAME2_(stem,_st) *)(GetTable(i))); } \
+    ClassDef(_NAME2_(St_,stem),0); /*C++ wrapper for <stem> StAF table */                                   \
+  };                   
+
