@@ -302,8 +302,8 @@ TPC:
 
 
 * Plots and evaluation ----------------------------------------------
-
-  exec run_ev0#ev0_eval2  [ievent] 
+* take out for now - doesn't work 5/1/98 
+*  exec run_ev0#ev0_eval2  [ievent] 
 
 
 * Timing values -------------------------------------------------------
