@@ -221,16 +221,17 @@ Int_t StTreeMaker::Finish()
 { 
   if (fFinished) return 0;
   fFinished = 1999;
-  St_DataSetIter  nextBr(fTree);
-  StBranch *br;
-  fTree->Clear(); 
-  while ((br = (StBranch*)nextBr())) {
-    if (strncmp("hist",br->GetName(),4)) continue;
-    FillHistBranch(br);
+  if (fIOMode[0]!='r')  { //write  mode
+    St_DataSetIter  nextBr(fTree);
+    StBranch *br;
+    fTree->Clear(); 
+    while ((br = (StBranch*)nextBr())) {
+      if (strncmp("hist",br->GetName(),4)) continue;
+      FillHistBranch(br);
+    }
+    fTree->WriteEvent((ULong_t)(-2));	
+    fTree->Clear(); 
   }
-  fTree->WriteEvent((ULong_t)(-2));	
-  fTree->Clear(); 
- 
   Close(); return 0;
 }
 //_____________________________________________________________________________
