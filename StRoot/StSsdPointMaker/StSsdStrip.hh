@@ -6,18 +6,18 @@
 class StSsdStrip
 {
  public:
-  StSsdStrip(int rNStrip, int rDigitSig, int rSigma);
-  StSsdStrip(int rNStrip, int rDigitSig, int rSigma, int *rMcHit);
+  StSsdStrip(int rNStrip, int rDigitSig, float rSigma);
+  StSsdStrip(int rNStrip, int rDigitSig, float rSigma, int *rMcHit);
   ~StSsdStrip();
   void        setPrevStrip(StSsdStrip *rPrevStrip);
   void        setNextStrip(StSsdStrip *rNextStrip);
-  void        setSigma(int rSigma);
+  void        setSigma(float rSigma);
   void        setNStrip(int rNStrip);
   void        setDigitSig(int rDigitSig);
   void        setIdMcHit(int rIdMcHit, int iR);
   int         getNStrip();
   int         getDigitSig();
-  int         getSigma();
+  float         getSigma();
   int         getIdMcHit(int iR);
   StSsdStrip* getPrevStrip();
   StSsdStrip* getNextStrip();
@@ -26,7 +26,7 @@ class StSsdStrip
 private:
   int        mNStrip;
   int        mDigitSig;
-  int        mSigma;
+  float        mSigma;
   int        *mIdMcHit;
   StSsdStrip *mPrevStrip;
   StSsdStrip *mNextStrip;
