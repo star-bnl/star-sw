@@ -57,8 +57,21 @@ StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active, char* baseName)
 
   if(inF)
     {
-      _innerCalc->set(inF);
-      _outerCalc->set(inF);
+      double intrY, driftY, dipY, intrZ,driftZ,dipZ;
+      inF>>intrY;
+      inF>>driftY;
+      inF>>dipY;
+      inF>>intrZ;
+      inF>>driftZ;
+      inF>>dipZ;
+      _innerCalc->set(intrY,driftY,dipY,intrZ,driftZ,dipZ);
+       inF>>intrY;
+      inF>>driftY;
+      inF>>dipY;
+      inF>>intrZ;
+      inF>>driftZ;
+      inF>>dipZ;
+      _outerCalc->set(intrY,driftY,dipY,intrZ,driftZ,dipZ);
     }
   else
     {
@@ -67,6 +80,7 @@ StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active, char* baseName)
       _outerCalc->set(.02, 4.e-3, 0.04,
 		  .02, 3.2e-3, 9.e-2);
     }
+
 
 }
 
