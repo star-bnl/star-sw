@@ -47,7 +47,7 @@ for my $def  (split /\s/,$sources) {		#print "SRC:", $def, "\n";
   open (In, $def) or die "Can't open $def";
   $LinkDefDirName = dirname($def);
 
-  while ($line = <In>) {
+  while ($line = <In>) {# print "$line";
 #  if LinkDef.h file contains "//IncFile=aaa/bbb/ccc.h"
 #  this file included to the list of files to process(VP)
     if (($line  =~ /^\/\/IncFile *=/))	{
@@ -62,15 +62,19 @@ for my $def  (split /\s/,$sources) {		#print "SRC:", $def, "\n";
     if ($line =~ /link off all/) 	{next;}
 
 ##VP      print Out $line;# print $line;
+#    if (!($line =~ / class / || $line =~ / typedef /))		{goto PRINT;}
     if (!($line =~ / class / ))		{goto PRINT;}
 
     my @words = split /([ \(,\)\;\-\!+])/, $line;
+#		my $i=0;	 foreach my $w (@words) {print "$i\t$w\n"; $i++;} 
     if ($words[10] != "class") 		{goto PRINT;}
-    my $class = $words[12];
-    if (!$class) 			{goto PRINT;}
-    if ($class_written{$class})		{next;}
-    push @classes, $class;
-    $class_written{$class} = 1; 	#print "class: $class, written: $class_written{$class}\n";
+    my $class = $words[12]; 
+    my $classG = $class;
+    if ($classG =~ /</) {($classG) = split '<', $classG;} 
+    if (!$classG) 			{goto PRINT;}
+    if ($class_written{$class} and $class eq $classG)		{next;}
+    push @classes, $classG;
+    $class_written{$classG} = 1; 	#print "class: $class, written: $class_written{$class}\n";
 PRINT: print Out $line;
   }
 }
@@ -99,9 +103,17 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
   my $class;
   my $includes = "";
   my $com = 0;
-  while ($line = <In>) {#print $line;
-    next if $line =~ /^\s*\/\//;
-    if ($com && $line =~ /\*\//) {$com = 0; $line =~ s/^*\*\///;}
+  while ($line = <In>) {#    print $line;
+    if ($line =~ /\/\//) {$line =~ s/\/\/.*$//;# print "==> $line";
+			}
+#    next if $line =~ /^\s*\/\//; # c++ comment '//'
+#			print "==> $line";
+    if ($com) {
+      if ($line =~ /\*\//) {$com = 0; $line =~ s/^*\*\///; #print "==> $line";
+			  }
+      else {#print "==> skip\n"; 
+	    next;}
+    }
     if ($line =~ /\/\*/) {
       $com = 1;
       if ($line =~ /\*\//) {
@@ -110,8 +122,7 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
       }
       else {$line =~ s/\/\*.*$//;}
     }
-    next if ($com);
-    if ($line =~ /\/\//) {$line =~ s/\/\/.*$//;}
+#    next if ($com);
     if ($line =~ /\#include/ && $line !~ /(<>)/) {
       (my $inc_h = $line) =~ s/\#include\s//g; chop ($inc_h);
       $inc_h =~ s/\"//g; 		#print "inc_h = $inc_h\n";
@@ -120,7 +131,7 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
 	$includes .= ":" . $inc_hh; 	#print "--includes for $h: $includes\n";
       }
     } 
-    if ($line =~/ClassDef/) {
+    if ($line =~/ClassDef/) { #print "================================ $line \n";
       if ($line =~ /\#\#/) {next;} # ClassDefs in macro definition
       my @words = split /([\(,\-\!\)])/, $line;
       my $class = $words[2];      	#print "=================class = ",$class,"\n";
