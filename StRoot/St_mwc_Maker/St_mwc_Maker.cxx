@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.cxx,v 1.21 2000/12/12 04:51:00 vlmrz Exp $
+// $Id: St_mwc_Maker.cxx,v 1.22 2000/12/14 22:01:19 vlmrz Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.22  2000/12/14 22:01:19  vlmrz
+// *** empty log message ***
+//
 // Revision 1.21  2000/12/12 04:51:00  vlmrz
 // *** empty log message ***
 //
@@ -116,6 +119,7 @@ St_mwc_Maker::~St_mwc_Maker(){
 }
 //______________________________________________________________________________
 St_mwc_Maker::Finish(){
+   return StMaker::Finish();
 }
 //_____________________________________________________________________________
 Int_t St_mwc_Maker::Init(){
@@ -193,7 +197,7 @@ Int_t St_mwc_Maker::Make(){
 //     St_mwc_cor    *cor    = new St_mwc_cor("cor",384);
 
 
-
+ 
    m_DataSet->Add(mevent);
    m_DataSet->Add(sector);
    m_DataSet->Add(raw);
@@ -211,7 +215,7 @@ Int_t St_mwc_Maker::Make(){
    if (!sector)      {printf("sector does not exist\n")     ;return kStWarn;}
    if (!raw)         {printf("raw does not exist\n")        ;return kStWarn;}
 
-
+ 
    Int_t mwc_result = mws(
                           g2t_mwc_hit,
                           m_geom,
