@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.2 2000/08/24 04:26:56 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.3 2000/08/26 20:36:28 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.3  2000/08/26 20:36:28  caines
+ * Adjustments for StSvtCoordinateTransform calls
+ *
  * Revision 1.2  2000/08/24 04:26:56  caines
  * Printout for debugging
  *
@@ -80,7 +83,6 @@ Int_t StSvtHitMaker::Init()
 
  // 		geometry parameters
    m_shape       = (St_svg_shape   *) local("svgpars/shape");
-   m_config      = (St_svg_config  *) local("svgpars/config");
 
    if(  !strncmp(mSvtCluColl->getConfiguration(), "Y1L", strlen("Y1L"))){
    m_geom        = (St_svg_geom    *) local("svgpars/geomy1l");
@@ -90,7 +92,7 @@ Int_t StSvtHitMaker::Init()
    }
 
    if (!m_geom) {
-     if (!(m_shape && m_config)){
+     if (!(m_shape)){
  
        gMessMgr->Error() << "SVT- StSvtHitMaker:svt shapes not exist" << endm;
        return kStWarn;
@@ -181,10 +183,9 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
   srs_srspar_st *srs_par = m_srs_srspar->GetTable();
   svg_geom_st* geom = m_geom->GetTable();
   svg_shape_st* shape = m_shape->GetTable();
-  svg_config_st* config = m_config->GetTable();
   
   StSvtCoordinateTransform* SvtGeomTrans = new StSvtCoordinateTransform();
-  SvtGeomTrans->setParamPointers(&srs_par[0], &geom[0], &config[0], &shape[0]);
+  SvtGeomTrans->setParamPointers(&srs_par[0], &geom[0], &shape[0], mSvtData);
   StSvtLocalCoordinate localCoord(0,0,0);
   StSvtWaferCoordinate waferCoord(0,0,0,0,0,0);
   StGlobalCoordinate globalCoord(0,0,0); 
