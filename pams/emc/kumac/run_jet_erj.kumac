@@ -1,5 +1,4 @@
 MACRO run_jet_erj	[par]='/dui/constants/emc/params' _
-macro/global/import *
                         [jet]='/dui/data/emc/tracks'
 
 MESSAGE '>>>>>>>>>>>>>>>> Calling emc_erj <<<<<<<<<<<<<<<<'
