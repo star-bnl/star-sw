@@ -1,6 +1,9 @@
 #!/usr/local/bin/perl
-# $Id: bfc_cas,v 1.4 2001/04/20 20:14:01 didenko Exp $
+# $Id: bfc_cas,v 1.5 2001/04/20 21:04:43 didenko Exp $
 # $Log: bfc_cas,v $
+# Revision 1.5  2001/04/20 21:04:43  didenko
+# fix syntax
+#
 # Revision 1.4  2001/04/20 20:14:01  didenko
 # fix string
 #
@@ -126,7 +129,7 @@ my $NofEvents = 1000;
 my $outfile;
 #   $outfile = $input_file;
 #   $outfile =~ s/fzd/root/g; 
-$outfile = pds0200_01_1000evts.root;
+$outfile = "pds0200_01_1000evts.root";
 my $N1 = 10;
 my $N2 = 1200;
 
