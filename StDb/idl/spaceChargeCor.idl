@@ -1,0 +1,18 @@
+/*    spaceChargeCor.idl
+*
+*  Table: spaceChargeCor
+*
+*       description: Table for Space Charge correction
+*                    has values for each field setting
+*/ 
+
+
+struct spaceChargeCor { 
+
+   double  fullFieldB;   /* -1 Field  */
+   double  halfFieldB;   /* - 0.5 Field  */
+   double  zeroField;   /*  0 Field */
+   double  halfFieldA;   /* + 0.5 Field */
+   double  fullFieldA;   /* + 1 Field  */
+
+ };  
