@@ -1,5 +1,8 @@
-// $Id: StChargeStepMaker.cxx,v 1.6 2000/08/09 16:06:48 fisyak Exp $
+// $Id: StChargeStepMaker.cxx,v 1.7 2000/08/15 00:25:41 hardtke Exp $
 // $Log: StChargeStepMaker.cxx,v $
+// Revision 1.7  2000/08/15 00:25:41  hardtke
+// require 10 good events before table is written
+//
 // Revision 1.6  2000/08/09 16:06:48  fisyak
 // put tpcDriftVelocity into ./StarDb/Calibrations/tpc
 //
@@ -314,7 +317,7 @@ Int_t StChargeStepMaker::Make() {
 
 void StChargeStepMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StChargeStepMaker.cxx,v 1.6 2000/08/09 16:06:48 fisyak Exp $\n");
+  printf("* $Id: StChargeStepMaker.cxx,v 1.7 2000/08/15 00:25:41 hardtke Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -334,7 +337,12 @@ void StChargeStepMaker::Clear(const char *opt) {
 //-----------------------------------------------------------------------
 
 Int_t StChargeStepMaker::Finish() {
-  WriteTableToFile();
+  if (nresults[1]>10&&nresults[3]>10){  // need some stats for decent result
+    WriteTableToFile();
+    cout << "StChargeStepMaker -- Create tpcDriftVelocityTable" << endl;
+  }
+  else {cout << "StChargeStepMaker -- Insufficient Statistics for Drift Velocity" << endl;
+  }
   return StMaker::Finish();
 }
 
@@ -455,3 +463,7 @@ void StChargeStepMaker::WriteTableToFile(){
   driftTable()->SavePrimitive(*out,"");
   return;
 }
+
+
+
+
