@@ -3,9 +3,12 @@
 // Macro for plotting hits and pixels in combination with bfc.C
 //            plotting both sides of tpc seperately
 //
-// $Id: TwoSideDraw.C,v 1.7 1999/11/23 19:49:54 snelling Exp $
+// $Id: TwoSideDraw.C,v 1.8 1999/12/06 21:49:58 snelling Exp $
 //
 // $Log: TwoSideDraw.C,v $
+// Revision 1.8  1999/12/06 21:49:58  snelling
+// Fixed bug (exchanged x and z)
+//
 // Revision 1.7  1999/11/23 19:49:54  snelling
 // Changed from table draw to loop to fill histograms
 // (Valeri suggestion to speed things up)
@@ -183,11 +186,11 @@ void TwoSideDraw() {
       if (ptg2t[i].volume_id < 2446) {
 	if (ptg2t[i].x[2] > 0) {
 	  hyx_g2t->Fill(ptg2t[i].x[1], ptg2t[i].x[0]);
-	  hzx_g2t->Fill(ptg2t[i].x[1], ptg2t[i].x[0]);
+	  hzx_g2t->Fill(ptg2t[i].x[2], ptg2t[i].x[0]);
 	}
 	else {
 	  nhyx_g2t->Fill(ptg2t[i].x[1], ptg2t[i].x[0]);
-	  nhzx_g2t->Fill(ptg2t[i].x[1], ptg2t[i].x[0]);
+	  nhzx_g2t->Fill(ptg2t[i].x[2], ptg2t[i].x[0]);
 	}
       }
     }
@@ -228,14 +231,14 @@ void TwoSideDraw() {
   pad1->cd();
   
   if (hyx)        hyx->Draw();
-  if (hzx_pixels) hzx_pixels->Draw("box,same");
+  if (hzx_pixels) hyx_pixels->Draw("box,same");
   if (hyx_g2t)    hyx_g2t->Draw("same");
 
   pad2->cd();
   
   if (hzx)        hzx->Draw();
   if (hzx_pixels) hzx_pixels->Draw("box,same");
-  if (hyx_g2t)    hyx_g2t->Draw("same");
+  if (hyx_g2t)    hzx_g2t->Draw("same");
   
   pad3->cd();
   if (nhyx)        nhyx->Draw();
