@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.5 2001/03/30 18:48:26 porter Exp $
+ * $Id: StDbManagerImpl.cc,v 1.6 2001/03/31 15:03:46 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.6  2001/03/31 15:03:46  porter
+ * fix bug in StDbManagerImpl::getDbName accidently introduced yesterday
+ * & added new diagnostic message in MysqlDb
+ *
  * Revision 1.5  2001/03/30 18:48:26  porter
  * modified code to keep Insure from wigging-out on ostrstream functions.
  * moved some messaging into a StDbSql method.
@@ -1391,17 +1395,13 @@ return true;
 char* 
 StDbManagerImpl::getDbName(const char* typeName, const char* domainName){
  
-  int slen = strlen(typeName);
-  int slen2=0;
-  if(strcmp(domainName,"Star") !=0)slen2=strlen(domainName)+1;
-  slen+=slen2+1;
-
-  char* retName = new char[slen];
-  ostrstream dbname(retName,slen);
+  ostrstream dbname;
   dbname<<typeName;
-  if(slen2 != 0)dbname<<"_"<<domainName;
+  if(strcmp(domainName,"Star")!=0)dbname<<"_"<<domainName;
   dbname<<ends;
-
+  char* retName = mstringDup(dbname.str());
+  dbname.freeze(0);
+  
   return retName;
 }
 
