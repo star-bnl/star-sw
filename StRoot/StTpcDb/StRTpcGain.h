@@ -2,21 +2,21 @@
 #define __STRTPCGAIN__
 //#include <TObject.h>
 #include "StTpcGainI.h"
-#include "Calibrations/tpcGainFactors.h"
+#include "tables/St_tpcGainFactors_Table.h"
 
 class StRTpcGain : public StTpcGainI {
 
 private:
 
-  tpcGainFactors* mGain;
+  St_tpcGainFactors* mGain;
   int mSector;
   StTpcPadPlaneI* padplane;
 
 public:
 
-  StRTpcGain(){}
+  StRTpcGain(St_tpcGainFactors* GainIn=0){AddData(GainIn);}
   ~StRTpcGain(){}
-  void AddData(tpcGainFactors* GainIn) {
+  void AddData(St_tpcGainFactors* GainIn) {
       mGain = GainIn;
    }
 
