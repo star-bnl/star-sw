@@ -10,3 +10,4 @@
       PARAMETER (kKalmanFitId = kKalmanFitIdentifier)
       PARAMETER (kLine2StepId = kLine2StepIdentifier)
       PARAMETER (kLine3DId = kLine3DIdentifier)
+      PARAMETER (kL3FitId = kL3FitIdentifier)

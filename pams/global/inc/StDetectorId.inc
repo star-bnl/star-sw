@@ -32,7 +32,6 @@
       PARAMETER (kTpcSvtId    = kTpcSvtIdentifier)
       PARAMETER (kTpcSsdSvtId = kTpcSsdSvtIdentifier)
       PARAMETER (kSsdSvtId    = kSsdSvtIdentifier)
-      PARAMETER (kL3TpcId     = kL3TpcIdentifier)
 
 
 

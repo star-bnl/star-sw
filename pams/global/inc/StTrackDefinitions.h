@@ -27,6 +27,7 @@
 **   Kalman (local helix)         3 
 **   Line 2 Step                  4
 **   Line 3D                      5
+**   L3 Fitter                    6
 **   Spare                    upto 15 (total of 4 bits)
 */
 
@@ -38,5 +39,5 @@
 #define kKalmanFitIdentifier            3
 #define kLine2StepIdentifier            4
 #define kLine3DIdentifier               5
+#define kL3FitIdentifier                6
 #endif
-

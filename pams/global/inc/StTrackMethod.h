@@ -8,6 +8,7 @@ enum StTrackFittingMethod {
   kHelix3DId                 = kHelix3DIdentifier,
   kKalmanFitId               = kKalmanFitIdentifier,
   kLine2StepId               = kLine2StepIdentifier,
-  kLine3DId                  = kLine3DIdentifier
+  kLine3DId                  = kLine3DIdentifier,
+  kL3FitId                   = kL3FitIdentifier
 };
 #endif
