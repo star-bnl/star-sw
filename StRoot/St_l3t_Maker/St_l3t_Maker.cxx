@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.cxx,v 1.3 1999/02/26 17:25:11 kathy Exp $
+// $Id: St_l3t_Maker.cxx,v 1.4 1999/03/12 15:27:32 perev Exp $
 // $Log: St_l3t_Maker.cxx,v $
+// Revision 1.4  1999/03/12 15:27:32  perev
+// New maker schema
+//
 // Revision 1.3  1999/02/26 17:25:11  kathy
 // fix histograms
 //
@@ -27,10 +30,9 @@
 ClassImp(St_l3t_Maker)
   
   //_____________________________________________________________________________
-  St_l3t_Maker::St_l3t_Maker(const char *name, const char *title):
-    StMaker(name,title)
+St_l3t_Maker::St_l3t_Maker(const char *name):
+    StMaker(name)
 {
-  drawinit=kFALSE;
 }
 //_____________________________________________________________________________
 St_l3t_Maker::~St_l3t_Maker(){
@@ -38,13 +40,12 @@ St_l3t_Maker::~St_l3t_Maker(){
 //_____________________________________________________________________________
 Int_t St_l3t_Maker::Init(){
   // Create tables
-  St_DataSetIter       local(gStChain->DataSet("params"));
-  St_DataSet *l3 = local("l3");
-  if (! l3)  l3 = local.Mkdir("l3");
+  St_DataSetIter       local(GetInputDB("params/l3"));
+
 // l3t parameters
   m_sl3TpcPara = new St_sl3TpcPara("sl3Para",1);
+  m_sl3TpcPara->SetNRows(1);
   sl3TpcPara_st   *para  = m_sl3TpcPara->GetTable();
-  table_head_st   *paraH = m_sl3TpcPara->GetHeader();
  
   para[0].infoLevel   =  0 ;
   para[0].FirstSector =   1 ;
@@ -148,11 +149,10 @@ Int_t St_l3t_Maker::Init(){
   para[0].sectorPhiShift[ 2] = 15. ;
   para[0].sectorPhiShift[20] = 15. ;
 //
-  paraH->nok = 1 ;
 //
 //   Add to run/param
 //
-  l3->Add ( m_sl3TpcPara ) ;
+  local.Add( m_sl3TpcPara ) ;
 //
   m_l3_hits_on_track = new TH1F("L3tL3trackNumHits","Number of hits on reconstructed tracks",50,.5,50.5);
   m_l3_azimuth       = new TH1F("L3tL3trackPhi","Azimuthal distribution of tracks",60,0.,360.0);
@@ -163,59 +163,58 @@ Int_t St_l3t_Maker::Init(){
 }
 //_____________________________________________________________________________
 Int_t St_l3t_Maker::Make(){
-  //  PrintInfo();
+  int iMake = kStOK;
   const Int_t maxNofTracks = 20000; 
-  if (!m_DataSet->GetList()) {// If DataSet list empty then create it
-    St_DataSet *tpc_data =  gStChain->DataSet("tpc_hits");
-    if (tpc_data) {// Clusters exist -> do tracking
-      St_DataSetIter next(tpc_data);
-      St_tcl_tphit   *tphit = (St_tcl_tphit     *) next("tphit");
-      Int_t nHits = tphit->GetNRows();
-      St_tcl_tphit   *l3hit = new St_tcl_tphit("l3Hit",nHits);
-      m_DataSet->Add(l3hit);
+
+  St_DataSet *tpc_data =  GetDataSet("tpc_hits");
+  if (tpc_data) {// Clusters exist -> do tracking
+    St_DataSetIter next(tpc_data);
+    St_tcl_tphit   *tphit = (St_tcl_tphit     *) next("tphit");
+    Int_t nHits = tphit->GetNRows();
+    St_tcl_tphit   *l3hit = new St_tcl_tphit("l3Hit",nHits);
+    m_DataSet->Add(l3hit);
 //
 //    Copy tpc table to l3
 //
-      *l3hit = *tphit ;
+    *l3hit = *tphit ;
 //
-      St_tpt_track   *track = new St_tpt_track("l3Track",maxNofTracks); m_DataSet->Add(track);
-      St_sl3Monitor  *mon   = new St_sl3Monitor("sl3Monitor",1000); m_DataSet->Add(mon);
-	
-      Int_t l3out = ftfTpc ( m_sl3TpcPara, l3hit, track, mon ) ;
-    }
+    St_tpt_track   *track = new St_tpt_track("l3Track",maxNofTracks); m_DataSet->Add(track);
+    St_sl3Monitor  *mon   = new St_sl3Monitor("sl3Monitor",1000); m_DataSet->Add(mon);
+
+    Int_t l3out = ftfTpc ( m_sl3TpcPara, l3hit, track, mon ) ;
+    if (l3out != kSTAFCV_OK) iMake = kStWarn;
   }
+
   MakeHistograms(); // tracking histograms
-  return kStOK;
+  return iMake;
 }
 void St_l3t_Maker::MakeHistograms() {
-  // Create an iterator
-  St_DataSetIter l3_tracks(m_DataSet);
-  //Get the table:
-  St_tpt_track *tpr = 0;
-  tpr               = (St_tpt_track *) l3_tracks.Find("track");
-  if (tpr) {
-    tpt_track_st *r = tpr->GetTable();
-    for(Int_t i=0; i<tpr->GetNRows();i++,r++){
-      Int_t flag    = r->flag;
-      Float_t rnrec = r->nrec;
-      Float_t rnfit = r->nfit;
-      printf(" iflag %d ", flag ) ;
-      if(flag>0) {
-        m_l3_hits_on_track->Fill(rnrec);
-        m_l3_azimuth->Fill(r->psi);
-        m_l3_tan_dip->Fill(r->tanl);
-        m_l3_r0->Fill(r->r0);
-      }
-    }
+
+//		Get the table:
+  St_tpt_track *tpr = (St_tpt_track *)m_DataSet->Find("l3Track");
+  if (!tpr) return;
+  tpt_track_st *r = tpr->GetTable();
+  for(Int_t i=0; i<tpr->GetNRows();i++,r++){
+    Int_t flag    = r->flag;
+    Float_t rnrec = r->nrec;
+//Unused    Float_t rnfit = r->nfit;
+    printf(" iflag %d ", flag ) ;
+
+    if(flag<=0) continue;
+
+    m_l3_hits_on_track->Fill(rnrec);
+    m_l3_azimuth->Fill(r->psi);
+    m_l3_tan_dip->Fill(r->tanl);
+    m_l3_r0->Fill(r->r0);
   }
- }
+}
 
 //_____________________________________________________________________________
 void St_l3t_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_l3t_Maker.cxx,v 1.3 1999/02/26 17:25:11 kathy Exp $\n");
+  printf("* $Id: St_l3t_Maker.cxx,v 1.4 1999/03/12 15:27:32 perev Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
+  if (Debug()) StMaker::PrintInfo();
 }
 

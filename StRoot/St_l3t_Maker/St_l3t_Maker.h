@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.h,v 1.3 1999/02/19 17:39:33 fisyak Exp $
+// $Id: St_l3t_Maker.h,v 1.4 1999/03/12 15:27:33 perev Exp $
 // $Log: St_l3t_Maker.h,v $
+// Revision 1.4  1999/03/12 15:27:33  perev
+// New maker schema
+//
 // Revision 1.3  1999/02/19 17:39:33  fisyak
 // change given name of Maker
 //
@@ -40,7 +43,6 @@ class TH1F;
 
 class St_l3t_Maker : public StMaker {
  private:
-    Bool_t drawinit;
     St_sl3TpcPara *m_sl3TpcPara; //! L3 tpc tracking parameters
     void              MakeHistograms();// Histograms for tracking
  protected:
@@ -49,7 +51,7 @@ class St_l3t_Maker : public StMaker {
     TH1F *m_l3_tan_dip;       //!tangent of the dip angle
     TH1F *m_l3_r0;            //!radius for the first point
  public: 
-   St_l3t_Maker(const char *name="l3Tracks", const char *title="event/data/l3/tracks");
+   St_l3t_Maker(const char *name="l3Tracks");
    virtual       ~St_l3t_Maker();
    virtual Int_t Init();
    virtual Int_t  Make();
