@@ -25,14 +25,14 @@ created   22 april 98
 #include "g2t_track.inc"
 #include "g2t_hits.inc"
 *
-      structure GTTC { int version, int nsys , char dir(3) }
+      structure GTTC { int version, int nsys , char edir(3), char rdir(3) }
       structure dete { onoff, char ctab, char spec, char csys, char cdet }
       Integer        G2T_MAIN,AgFHIT0,LENOCC,DUI_CDIR,TDM_MAP_TABLE
       Integer        TDM_NEW_TABLE,AMI_CALL,G2T_NEW_TABLE,AMI_MODULE_CALL
       External       TDM_NEW_TABLE,AMI_CALL,G2T_NEW_TABLE,AMI_MODULE_CALL
       Integer        i,j,ld,nhits,nnhits,Iprin,Istat/-1/,Lout/6/
       Character*16   ctab,ctabo,names(3)
-      Character      o*1,cdir*20,dir*20
+      Character      o*1,cdir*20,edir*20
       Record         /G2T_EVENT_ST/  g2t_event
 *
 *
@@ -41,7 +41,8 @@ If (First) Then
    fill GTTC(1)           ! g2t control
      version = 1                  ! version number
      nsys    = 15                 ! number of subsystems
-     dir     = {'Even','t',' '}   ! output directory name 
+     edir    = {'Even','t',' '}   ! event output directory name 
+     rdir    = {'Run ',' ',' '}   ! run output directory name 
    fill dete       ! star subsystem
      onoff = 1            ! system number
      ctab  = 'svt'        ! table name
@@ -103,25 +104,25 @@ If (First) Then
      csys  = 'ECAL'       ! Geant Subsystem
      cdet  = 'MSEC'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 1            ! system number
+     onoff = 12           ! system number
      ctab  = 'ftp'        ! table name
      spec  = 'ftp'        ! specification type
      csys  = 'FTPC'       ! Geant Subsystem
      cdet  = 'FSEN'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 1            ! system number
+     onoff = 13           ! system number
      ctab  = 'vpd'        ! table name
      spec  = 'vpd'        ! specification type
      csys  = 'VPDD'       ! Geant Subsystem
      cdet  = 'VRAD'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 1            ! system number
+     onoff = 14           ! system number
      ctab  = 'psc'        ! table name
      spec  = '   '        ! specification type
      csys  = 'PMDD'       ! Geant Subsystem
      cdet  = 'VRAD'       ! Sensitive detector
    fill dete       ! star subsystem
-     onoff = 1            ! system number
+     onoff = 15           ! system number
      ctab  = 'pgc'        ! table name
    endfill
 *
@@ -131,12 +132,12 @@ endif
       Use GTTC
 
       o    = CHAR(0)
-      Cdir = gttc_dir(1)//gttc_dir(2)//gttc_dir(3)
+      Cdir = gttc_edir(1)//gttc_edir(2)//gttc_edir(3)
       ld   = Lenocc(cdir)
-      dir  = '/dui/'//Cdir(1:Lenocc(cdir))//o
+      edir = '/dui/'//Cdir(1:Lenocc(cdir))//o
  
-      i = TDM_map_table(dir,'g2t_event'//o,g2t_event_spec//o,1,g2t_event)
-      if (ld>0) i = DUI_CDIR (dir)
+      i = TDM_map_table(edir,'g2t_event'//o,g2t_event_spec//o,1,g2t_event)
+      if (ld>0) i = DUI_CDIR (edir)
       i = TDM_NEW_TABLE ('g2t_vertex'//o,G2T_VERTEX_SPEC//o,NVERTX)
       i = TDM_NEW_TABLE ('g2t_track'//o, G2T_TRACK_SPEC//o, NTRACK)
 
