@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.68 2004/04/06 17:50:47 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.69 2004/04/09 22:11:53 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.69  2004/04/09 22:11:53  suaide
+// small bug fixed
+//
 // Revision 1.68  2004/04/06 17:50:47  suaide
 // ghost pedestal removal procedure introduced
 //
@@ -1067,7 +1070,7 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
           PED = mPed[det][id-1][cap];
 		    }
 		  }
-			PED =(Float_t)((Int_t)(PED)); // calibration is done this way because of histograms
+			//PED =(Float_t)((Int_t)(PED)); // calibration is done this way because of histograms
       Float_t ADCSUB=ADC-PED;
 			Float_t EN=0;
 			Float_t ADCPOWER=1;
