@@ -35,7 +35,7 @@ my $Cinp     = "";
 my $CXXinp   = "";
 
 my $CPP      = "gcc";
-my $CPPFLAGS = "";
+my $CPPFLAGS = ""; #"-I-";
 my $CXX      = "g++";
 my $CXXFLAGS = "-fpic -w";
 my $CXXEXTRA = "";
@@ -63,31 +63,31 @@ my $CERNLIBS = "";
 my $OSFID    = "";
 my $ROOTCINTD= "";
 my $LINKMODULECOM = "%SO %DEBUG %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
-my $LINKCOM = "%LINK %DEBUG %EXEFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
-my $FCCOM    = "%FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS %FCPPPATH -c %< %Fout%>";
-my $GEANT3COM= "%GEANT3 %< -o %<:.F; %FC %FFLAGS %CPPFLAGS %DEBUG %_IFLAGS %FCPPPATH -c %<.F -o %>";
+my $LINKCOM  = "%LINK %DEBUG %EXEFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
+my $FCCOM    = "%FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>";
+my $GEANT3COM= "%GEANT3 %< -o %<.F && %FC %FFLAGS %CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %<.F -o %>";
 my $INCLUDE_PATH  = $INCLUDE;
 $_ = $STAR_HOST_SYS;
 print "System: ", $_,"\n" unless ($param::quiet);
-#if (/^i386_linux2/ || /^i386_redhat50/ || /^i386_redhat51/ ||  /^i386_redhat52/ || /^i386_redhat60/) {
 if (/^i386_/) {
 #    case linux but gcc is EGCS
 #  ====================
-  $OSFID    = "lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
+  $OSFID    = "f2cFortran";
+  $OSFID   .= " lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC";
+  $OSFID   .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
   $CXXFLAGS = "-fPIC -Wall";
 #                                             -fpipe
   $CFLAGS   = "-fPIC -Wall";
-  $CPPFLAGS.= "f2cFortran";
   $LDFLAGS  = "-Wl,-Bstatic";
   $EXEFLAGS = $CXXFLAGS . " -Wl,-Bdynamic";
   $SOFLAGS  = "-shared";  
   if (/^i386_redhat51egcs$/ || /^i386_redhat60egcs$/) {
-    $DEBUG    = "-g -O0";
+    $DEBUG    = "-g";
     $CLIBS    = "-L/usr/X11R6/lib  -lXt -lXpm -lX11 -lm -ldl  -rdynamic";
     $FC       = "g77";
     $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
     $FFLAGS   = "-w %DEBUG -fno-second-underscore -fno-automatic";
-    $FCCOM    = "%FC -E -P %CPPFLAGS %DEBUG %_IFLAGS %FCPPPATH -c %< %Fout%>.g &&"; 
+    $FCCOM    = "%FC -E -P %CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %< %Fout%>.g &&"; 
     $FCCOM   .= "%GEANT3 -v 1 -i %>.g %Fout%>.f &&"; 
     $FCCOM   .= "%FC %FFLAGS -c %>.f %Fout%>";
     my $GEANT3COM= $FCCOM;
@@ -130,29 +130,26 @@ elsif (/^hp_ux102/) {
 }
 elsif (/^sun4x_56_CC5$/) {
   $ROOTCINTD = "-DSOLARIS";
-  $CPPFLAGS  =~ s/SunOS//g;
-  $CPPFLAGS .= " __CC5__";
-  $OSFID     = "CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS ";
-  $OSFID    .= "ST_NO_EXCEPTIONS ST_NO_MEMBER_TEMPLATES ST_NO_NAMESPACES ";
-  $OSFID    .= "ST_NO_NUMERIC_LIMITS ST_NO_TEMPLATE_DEF_ARGS SUN Solaris sun sun4os5 sun4x_56";
+  $OSFID     = "__CC5__";
+  $OSFID    .= "CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS ";
+  $OSFID    .= " SUN Solaris sun sun4os5 sun4x_56";
   $CC        = "/opt/WS5.0/bin/cc";
   $CXX       = "/opt/WS5.0/bin/CC";
   $FC        = "/opt/WS5.0/bin/f77";
-  $CXXFLAGS  = "-KPIC +w  -compat=4";
-  $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L/usr/ucblib -lucb -L/usr/ccs/lib -lgen";
+  $CXXFLAGS  = "-KPIC -I/usr/openwin/include -D__SunOS_5_6 -library=iostream,no_Cstd";
+  $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen";#4 -L/usr/ucblib -lucb -L/usr/ccs/lib -lgen";
   $FLIBS     = "-lM77 -lF77 -lsunmath";
   $FFLAGS    = "-KPIC -w";
   $FEXTEND   = "-e";
-  $CFLAGS    = "-KPIC";
+  $CFLAGS    = "-KPIC -I/usr/openwin/include";
   $LD        = $CXX;
-  $LDFLAGS   = $DEBUG . " -compat=4";
-  $EXEFLAGS  = $LDFLAGS;
+  $EXEFLAGS  = "-library=iostream,no_Cstd";
+  $LDFLAGS   = $EXEFLAGS;
   $SO        = $CXX;
-  $SOFLAGS   = "-G";
+  $SOFLAGS   = "-G";#
 }
 elsif (/^sun4x_55$/ ||  /^sun4x_56$/) {
   $ROOTCINTD = "-DSOLARIS";
-  $CPPFLAGS  =~ s/SunOS//g;
   $OSFID     = "CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS ";
   $OSFID    .= "ST_NO_EXCEPTIONS ST_NO_MEMBER_TEMPLATES ST_NO_NAMESPACES ";
   $OSFID    .= "ST_NO_NUMERIC_LIMITS ST_NO_TEMPLATE_DEF_ARGS SUN Solaris sun sun4os5 sun4x_56";
@@ -234,8 +231,8 @@ $EXPORT = "#.share";
 $FFLAGS .= " -DCERNLIB_TYPE";
 $OSFID .= " " . $STAR_SYS;
 if ($STAR_SYS ne $STAR_HOST_SYS) {$OSFID .= " " . $STAR_HOST_SYS;}
-my $FLAGS = $CPPFLAGS . " " . $OSFID . " CERNLIB_TYPE" . " __ROOT__";
-$CPPFLAGS = "-D" . join (" -D", split (" ",$FLAGS));
+my $FLAGS = $OSFID . " CERNLIB_TYPE" . " __ROOT__";
+$CPPFLAGS .= " -D" . join (" -D", split (" ",$FLAGS));
 if (! $param::quiet) {
   print "STAR     = \t$STAR\n";
   print "DEBUG    = \t$DEBUG\n";
@@ -252,14 +249,20 @@ if (! $param::quiet) {
 my $ROOTLIBS;
 my $RINTLIBS;
 my $ROOTGLIBS;
-$ROOTLIBS    = " -L$ROOTSYS/lib -lNew -lCore -lCint -lHist -lGraf -lGraf3d -lTree";
+$ROOTLIBS    = " -L$ROOTSYS/lib -lNew -lCore -lCint -lPhysics -lMatrix -lHist -lGpad -lGraf -lGraf3d -lTree";
 $RINTLIBS    = " -lRint ";
 my $ROOTSRC = "/afs/rhic/star/ROOT/" . $ROOT_LEVEL . "/ROOT/src";
 $CPPPATH = $INCLUDE . ":#StRoot:" .  $ROOTSRC . ":" . $CERN_ROOT . "/include:". $STAF . "/inc:/opt/star/include";
 $FCPPPATH ="";
 print "CPPPATH  = \t$CPPPATH\n" unless ($param::quiet);
-Repository ($STAR);
-(my $DirPath  = cwd()) =~ s/\/$//g;#print " in DirPath=$DirPath\n" unless ($param::quiet);
+Repository ($STAR);# unless $param::noRepository;
+(my $DirPath  = cwd()) =~ s/\/$//g;
+my @Repo = Repository_List; 
+if ($#Repo > -1) {
+  print "Build directory: $DirPath;" unless ($param::quiet);
+  print "\tRepositories:  \"@Repo\";" unless ($param::quiet);
+  Salt("user"); print "\tSet Salt to \"$param::salt\"\n" unless ($param::quiet);
+}
 my $build  = "." . $STAR_HOST_SYS; print "build for $build\n" unless ($param::quiet);
 $BUILD  = "#" . $build;
 $LIB    = $BUILD . "/lib";
@@ -268,11 +271,6 @@ $OBJ    = $BUILD . "/obj";
 my $obj = $build . "/obj";
 $LIBPATH = $LIB;
 Link $OBJ => $DirPath; print "Link $BUILD => $DirPath\n" unless ($param::quiet);
-my @Repo = Repository_List;# print "Repositories = |@Repo|\n" unless ($param::quiet);
-my @Reps = ($DirPath);
-foreach my $rep (@Repo) {
-  push @Reps, $rep;
-} print "Repositories: @Reps\n"  unless ($param::quiet);
 if ($STAR_HOST_SYS !~ /^intel_wnt/) {
   $CERNLIBS .= " " . `cernlib geant321 pawlib graflib/X11 packlib mathlib kernlib `;
   chop ($CERNLIBS);
@@ -284,7 +282,7 @@ if ($STAR_HOST_SYS !~ /^intel_wnt/) {
 else {
   $CPPPATH  = "";
   $FCPPPATH = "";
-  foreach my $dir ($DirPath, @Reps) {
+  foreach my $dir ($DirPath, @Repo) {
     $INCLUDE_PATH .= ";" . $dir . "/include";
     $INCLUDE_PATH .= ";" . $dir . "/StRoot";
     $INCLUDE_PATH .= ";" . $dir . "/pams";
@@ -316,11 +314,11 @@ $env = new cons(
 		'CFLAGS'       => $CFLAGS,
 		'KUIP'         => $KUIP,
 		'KUIPCOM'      => '%KUIP %< %<.f && %FC %FFLAGS -c %<.f -o %>',
-		'CCCOM'        => '%CC %CFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %Cinp%< %Cout%>',
+		'CCCOM'        => '%CC %CFLAGS %DEBUG %CPPFLAGS %_IFLAGS  -c %Cinp%< %Cout%>',
 		'CXX'          => $CXX,
 		'CXXFLAGS'     => $CXXFLAGS,
 		'CXXEXTRA'     => $CXXEXTRA,
-		'CXXCOM'       => '%CXX %CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS %CXXEXTRA -c %CXXinp%< %Cout%>',
+		'CXXCOM'       => '%CXX %CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS  %CXXEXTRA -c %CXXinp%< %Cout%>',
 		'CLIBS'        => $CLIBS,
 		'FLIBS'        => $FLIBS,
 		'CERNLIBS'     => $CERNLIBS,
@@ -431,10 +429,8 @@ foreach my $dir ("StRoot","pams"){#,"StDb") {
 	  $sub_dir =~ /^StarClassLibrary$/ ||
 	  $sub_dir =~ /^StEvent$/ ||
 	  $sub_dir =~ /^StMcEvent$/ ||
-	  $sub_dir =~ /^StMagF$/ ||
-	  $sub_dir =~ /^StAnalysisUtilities$/ ||
-	  $sub_dir =~ /^StDbLib$/ ||
-	  $sub_dir =~ /^StDbBroker$/){
+	  $sub_dir =~ /^StAnalysisUtilities$/
+	 ) {
 	opendir (DIR, $sub_DIR) or die "Can't open $sub_DIR\n";
 	my @incs = readdir DIR; 
 	closedir DIR; #print "incs = @incs\n";
@@ -469,7 +465,6 @@ foreach my $dir ("StRoot","pams"){#,"StDb") {
 	    }   
 	    next;   
 	  }   
-#	  if ($subsub_dir =~ /^inc$/ || $subsub_dir =~ /^include$/) {
 	  if ($subsub_dir =~ /^inc$/) {
 	    opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";
 	    my @incs = readdir DIR; 
@@ -483,7 +478,7 @@ foreach my $dir ("StRoot","pams"){#,"StDb") {
 	    if ($#incT > -1) {Install $env $INCLUDE, @incT;}
 	    next;
 	  }
-	  if (($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/) && 
+	  if (($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/) &&
 	      $subsub_dir !~ /^g2t$/) {
 	    # one more level for gen & sim
 	    if ($SKIP_DIRS && $SKIP_DIRS =~ $subsub_dir) {
@@ -509,7 +504,7 @@ foreach $dir ("asps/rexe",@subdirs) {#,"cern/geant321","cern/minicern") {
   next if !-d $dir;
   push @Targets, $OBJ . "/" . $dir . "/Conscript";
 }
-print "BUILD  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ\n" unless ($param::quiet);# Targets = @Targets\n";
+print "BUILD  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ\n" unless ($param::quiet); # Targets = @Targets\n
 Export qw( env INCLUDE LIB BIN EXPORT BUILD OBJ MAIN);
 Default qw (   .  );
 Build  @Targets;
