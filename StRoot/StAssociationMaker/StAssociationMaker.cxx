@@ -1,9 +1,23 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.5 1999/07/30 16:19:13 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.6 1999/09/09 23:51:21 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
- * Revision 1.5  1999/07/30 16:19:13  calderon
- * Use value_type typedef for inserting pairs in multimaps, Victor corrected iterators on HP in SL99h, Improved use of const for HP compilation
+ * Revision 1.6  1999/09/09 23:51:21  calderon
+ * Made the following changes:
+ * StAssociationMaker
+ *
+ * -correct definition of multimap for Solaris/ObjectSpace
+ * -clear candidate vector at the end of reconstructed track loop
+ * -remove # of pings histogram
+ *
+ * StLocalHit
+ *
+ * -use math.h instead of cmath because of abs()
+ * -change abs() to fabs() everywhere
+ * -change bool's to int's so Solaris doesn't complain
+ *
+ * -change abs() to fabs() everywhere
+ * -change bool's to int's so Solaris doesn't complain
  *
  * Revision 1.5  1999/07/30 16:19:13  calderon
  * Use value_type typedef for inserting pairs in multimaps, Victor corrected iterators on HP in SL99h, Improved use of const for HP compilation
@@ -18,6 +32,7 @@
 #include <stdlib.h>
 using std::string;
 using std::vector;
+#include "StMcParameterDB.h"
 #include "StTrackPairInfo.hh"
 
 #include "SystemOfUnits.h"
@@ -125,7 +140,7 @@ StAssociationMaker::StAssociationMaker(const char *name, const char *title):StMa
     mTpcHitMap = 0;
     mTrackMap = 0;
     
-    mNumberOfPings  = 0;   
+    //mNumberOfPings  = 0;   
     mTpcLocalHitResolution = 0;   
     mSvtHitResolution      = 0;   
     mFtpcHitResolution     = 0;
@@ -134,24 +149,22 @@ StAssociationMaker::StAssociationMaker(const char *name, const char *title):StMa
 }
 
 //_________________________________________________
-    
+StAssociationMaker::~StAssociationMaker()
     SafeDelete(mTpcHitMap);
     SafeDelete(mTrackMap);
-    SafeDelete(mNumberOfPings);
+    //SafeDelete(mNumberOfPings);
 	SafeDelete(mMcXiMap);
 	cout << "Deleted M.C. Xi Map" << endl;
     }
 }
 
 //_____________________________________________________________________________
-    // StMcEventReaderMaker - Clear,
 
+    cout << "StAssociationMaker::Clear *** " << endl;
     delete mTpcHitMap;
     mTpcHitMap = 0;
     delete mTrackMap;
     mTrackMap = 0;
-    delete mNumberOfPings;
-    mNumberOfPings = 0;
     
 	SafeDelete(mMcXiMap);
 	cout << "Deleted M.C. Xi Map" << endl;
@@ -289,38 +302,25 @@ Int_t StAssociationMaker::Finish()
     const StMcSvtHit* mcValueSvtHit;
     const StMcFtpcHit* mcValueFtpcHit;
     initializedTrackPing.nPingsSvt = 0;
-    vector<trackPing> candidates(1000);
+    vector<trackPing> candidates(100);
     
-    vector<trackPing, allocator<trackPing> > candidates(1000);
+    vector<trackPing, allocator<trackPing> > candidates(100);
     vector<trackPing> candidates(100, initializedTrackPing);
     vector<trackPing, allocator<trackPing> > candidates(100, initializedTrackPing);
     mTrackMap = new trackMapType;
 
-    // Define the Histogram of Number of Pings
-    if (mNumberOfPings!=0) {
-	delete mNumberOfPings;
-	mNumberOfPings =0;
-    }
-    mNumberOfPings = new TH1F("Associated hits","Pings for Rec. Tracks",
-			      51,0,50);
-    mNumberOfPings->SetXTitle("Number of Hits");
-
     // Instantiate the Track map
     mRcTrackMap = new rcTrackMapType;
-
     StTrackIterator recTrackIter;
     for (recTrackIter  = recTracks->begin(); recTrackIter != recTracks->end(); recTrackIter++){
 	// Loop over tracks in StEvent
-	
 	recTrack = *recTrackIter; // For a by-pointer collection we need to dereference once
-
+	if (!(recTrack->numberOfTpcHits())) continue; // If there are no Tpc Hits, skip track.
 	// print out the map
         // cout << "The map is now" << endl << *mTrackMap << endl;
 	rcTrack = dynamic_cast<StGlobalTrack*>(trkNode->track(global));
 	if (!rcTrack || !(rcTrack->detectorInfo()->hits().size()))
-
-	// Clear the candidate vector
-	candidates.clear();
+	    } // mc ftpc hits in multimap
 	const StVecPtrTpcHit& recTpcHits = recTrack->tpcHits();
         StTpcHitIterator recHitIter;
 	for (recHitIter  = recTpcHits.begin();
@@ -331,7 +331,7 @@ Int_t StAssociationMaker::Finish()
 	    bounds = mTpcHitMap->equal_range(keyHit);
 		
 	    for (tpcHitMapIter hmIter=bounds.first; hmIter!=bounds.second; ++hmIter) {
-
+	    boundsFtpc = mRcFtpcHitMap->equal_range(rcKeyFtpcHit);
 		monteCarloHit = (*hmIter).second;
 		trackCand = monteCarloHit->parentTrack();
 		
@@ -339,7 +339,6 @@ Int_t StAssociationMaker::Finish()
 		trackCand = mcValueFtpcHit->parentTrack();
 				
 		// At this point we have a candidate Monte Carlo Track
-		
 		// If there are no candidates, create the first candidate.
 		// If already there, increment its nPings.
 		    candidates[0].mcTrack = trackCand;
@@ -368,14 +367,13 @@ Int_t StAssociationMaker::Finish()
 	} // Hits from Track from StEvent loop
 	
 	// Now we need to associate the tracks that meet the commonHits criterion.
-
 	
-	if (nCandidates>1000) cout << "We Have More than 1000 candidates!!! " << endl;
 	//
+	// Now we need to associate the tracks that meet the commonHits criteria.
+	//
+	
 	if (nCandidates>100) cout << "We Have More than 100 candidates!!! " << endl;
-	  mNumberOfPings->Fill((float) candidates[iCandidate].nPings);
-
-	    
+	for (int iCandidate=0; iCandidate<nCandidates; iCandidate++){
 	  if (candidates[iCandidate].nPings > parDB->reqCommonHits() ){
 	  if (candidates[iCandidate].nPingsTpc  >= parDB->reqCommonHitsTpc() ||
 	      candidates[iCandidate].nPingsSvt  >= parDB->reqCommonHitsSvt() ||
@@ -387,10 +385,11 @@ Int_t StAssociationMaker::Finish()
 	    // print out the map
 	    //cout << "The map is now" << endl << *mRcTrackMap << endl;
 	  }
-	
 	}
 	
-    
+	
+    }// StEvent track loop
+
     // Clear the candidate vector
     
     candidates.clear();

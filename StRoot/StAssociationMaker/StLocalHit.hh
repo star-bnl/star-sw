@@ -19,10 +19,10 @@ public:
     
     void setLocalX(float x) { mLocalX = x;}
     void setGlobalZ(float z){ mGlobalZ = z;}
-    
-    bool operator==(const StLocalHit&) const;
-    bool operator!=(const StLocalHit&) const;
-    
+
+
+    int operator==(const StLocalHit&) const;
+    int operator!=(const StLocalHit&) const;
     
 private:
     float mLocalX;
