@@ -70,9 +70,8 @@ C     Local variables
       sgn = sign(1.0,gtrk(igtrk).p(2))
       globtrk(iglob).psi = gtrk(igtrk).p(5)-sgn*C_PI_2
       globtrk(iglob).psi = globtrk(iglob).psi*C_DEG_PER_RAD  ! to degrees
-      if( globtrk(iglob).psi.gt.180.0) then
-         globtrk(iglob).psi=  globtrk(iglob).psi-360.0
-      elseif( globtrk(iglob).psi .lt. -180.0) then
+      globtrk(iglob).psi = AMOD(globtrk(iglob).psi, 360.0)
+      if( globtrk(iglob).psi .lt. .0) then
          globtrk(iglob).psi = globtrk(iglob).psi + 360.0
       endif
       globtrk(iglob).tanl = gtrk(igtrk).p(7)

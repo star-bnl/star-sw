@@ -1,3 +1,4 @@
+#include "math_constants.h"
 C
       SUBROUTINE   PROP_PROJECT_TRACK(psi,q,pt,tanl,x0,y0,bfld,z0,xp,x)
       IMPLICIT NONE
@@ -33,7 +34,7 @@ CC:>---------------------------------------------------------------------
       INTEGER q,i
       REAL rh,phih,psin
       REAL xp(2),xc(2),x(4)
-      REAL x0,y0,axb,arg,dphih,ds,dz
+      REAL x0,y0,axb,adb,arg,dphih,ds,dz
       REAL x1(2),x2(2),yy1,yy2,zz1,zz2
       REAL a,b,c,ka
       DATA ka / 0.0003 /
@@ -92,9 +93,17 @@ C     calculate the distance ds and the angle between the old and new position
 C
       axb = (x0-xc(1))*(x(2)-xc(2)) - (y0-xc(2))*(x(1)-xc(1))
       arg = axb/(rh*rh)
+      adb = ( x0-xc(1))*(x(1)-xc(1)) + (y0-xc(2))*(x(2)-xc(2))
+      adb = adb/(rh*rh)
       if( arg.ge.1.0) arg = 1.0
       if( arg.le.-1.0) arg = -1.0
-      dphih = asin(arg)
+      if( arg .gt. 0) then
+      dphih=acos(adb)
+      elseif( arg .lt. 0 .and. adb .gt. 0) then
+         dphih = asin(arg)
+      else
+         dphih = C_2PI - acos(adb)
+      endif
       ds = dphih*rh
       dz = ds*tanl
 C
