@@ -8,7 +8,7 @@ class  StChain;
 StChain *chain;
 int total=0;
 
-void RunJetSimuFinder(int nevents = 10,
+void RunJetSimuFinder(int nevents = 100,
 		      const char *dir = "",
 		      const char* file = "/star/data19/reco/pp200/pythia6_203/default/pt15/y2004x/gheisha_on/trs_ii/pds1214_02_5000evts.MuDst.root",
 		      const char *fname="/star/data19/reco/pp200/pythia6_203/default/pt15/y2004x/gheisha_on/trs_ii/pds1214_02_5000evts.geant.root",
@@ -29,6 +29,7 @@ void RunJetSimuFinder(int nevents = 10,
     gSystem->Load("StMcEvent");
     gSystem->Load("StMcEventMaker");
     gSystem->Load("StDaqLib");
+    gSystem->Load("StEmcRawMaker");
     gSystem->Load("StEmcADCtoEMaker");
     gSystem->Load("StEmcUtil");
     gSystem->Load("StDbLib");
@@ -55,7 +56,8 @@ void RunJetSimuFinder(int nevents = 10,
     ioMaker->SetBranch("geantBranch",0,"r");   //activate geant Branch
     ioMaker->SetBranch("eventBranch",0,"r");   //activate event Branch
     //ioMaker->SetDebug();
-  
+    
+
     // Instantiate StMcEventMaker - to get pythia pid from McEvent 
     class StMcEventMaker *mcEventMaker = new StMcEventMaker();
     mcEventMaker->doPrintEventInfo = false;
@@ -69,7 +71,7 @@ void RunJetSimuFinder(int nevents = 10,
     StJetSimuTrigMaker *trig=new StJetSimuTrigMaker("SimuTrig");
     trig->setPrintOption(1);
   
-    //Database -- must set flavor correctly for ideal gains
+    //Database -- must set flavor correctly for ideal gains (this is ok, MLM)
     St_db_Maker *dbMk =new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","StarDb");
     dbMk->SetDateTime(20031120,0);
     dbMk->SetFlavor("sim","bemcPed");
@@ -79,13 +81,9 @@ void RunJetSimuFinder(int nevents = 10,
     dbMk->SetFlavor("sim","eemcPMTcal");
     dbMk->SetFlavor("sim","eemcPIXcal");
 
-    //EmcDb
     StEEmcDbMaker* eemcb = new StEEmcDbMaker("eemcDb");
 
-    //StMuDst2StEventMaker - make StEvent from StMuDst
-    StMuDst2StEventMaker* eventMaker = new StMuDst2StEventMaker("MuDst2StEvent");
-  
-    //get BEMC calibration
+    //get BEMC calibration (this is ok, MLM)
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
 
     //Instantiate Maker with Pythia event record etc for simulation (this guy doesn't break chain, MLM)
@@ -96,7 +94,7 @@ void RunJetSimuFinder(int nevents = 10,
     StJetSimuTreeMaker *stree= new StJetSimuTreeMaker("SimuTree",soutfile);
     stree->setPrintOption(0);
   
-    //Instantiate the StEmcTpcFourPMaker
+    //Instantiate the StEmcTpcFourPMaker (and this is ok, MLM)
     StEmcTpcFourPMaker* emcFourPMaker = new StEmcTpcFourPMaker("EmcTpcFourPMaker", muDstMaker, 30, 30, .3, .3, .003, adc);
     emcFourPMaker->setUseType(StEmcTpcFourPMaker::Hits);//if don't have this line then default is 0 (which is hits)
 
@@ -169,7 +167,7 @@ void RunJetSimuFinder(int nevents = 10,
     pythia_ktpars->setR(1.0);
     pythia_ktpars->setDebug(false);
     emcJetMaker->addAnalyzer(pythiapars, pythia_ktpars, pythiaFourPMaker, "MkPythiaKtJet");
-
+    
     chain->Init();
     chain->PrintInfo();
     chain->ls(3);
