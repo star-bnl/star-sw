@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuProbPidTraits.h,v 1.3 2003/11/07 15:23:26 laue Exp $
+ * $Id: StMuProbPidTraits.h,v 1.4 2003/11/08 14:18:41 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -56,7 +56,7 @@ private:
   float mdEdxTrackLength;
   float mProbabilities[__NPARTICLES__];      ///< array holding the pid probabilities
 
-  ClassDef(StMuProbPidTraits,2)
+  ClassDef(StMuProbPidTraits,3)
 };
 
 inline double StMuProbPidTraits::dEdxFit() const {return mdEdxFit;}
@@ -84,6 +84,9 @@ inline void   StMuProbPidTraits::setNdf(unsigned int i) { mNDF = i; }
 /***************************************************************************
  *
  * $Log: StMuProbPidTraits.h,v $
+ * Revision 1.4  2003/11/08 14:18:41  laue
+ * incrmented ClassDef version numbber
+ *
  * Revision 1.3  2003/11/07 15:23:26  laue
  * added error on dEdx measurements to the StMuProbPidTraits
  *
