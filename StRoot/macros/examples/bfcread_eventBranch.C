@@ -1,5 +1,8 @@
-// $Id: bfcread_eventBranch.C,v 1.2 2000/05/16 19:29:27 kathy Exp $
+// $Id: bfcread_eventBranch.C,v 1.3 2000/05/16 21:00:00 kathy Exp $
 // $Log: bfcread_eventBranch.C,v $
+// Revision 1.3  2000/05/16 21:00:00  kathy
+// clean up
+//
 // Revision 1.2  2000/05/16 19:29:27  kathy
 // update some print statements
 //
@@ -48,7 +51,7 @@ void bfcread_eventBranch(
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StEvent");
-    gSystem->Load("StMagF");
+    //    gSystem->Load("StMagF");
     gSystem->Load("StEventMaker");
     gSystem->Load("StAnalysisMaker");
 
@@ -90,8 +93,6 @@ EventLoop: if (ijk < nevents && !istat) {
 
 // count # events found
     countev++;
-
-    cout << " start event # " << countev << endl;
  
     cout << " QAInfo: event # " << countev  << endl << endl;
     fout << " QAInfo: event # " << countev  << endl << endl;
