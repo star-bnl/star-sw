@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtWaferCoordinate.hh,v 1.4 2000/08/21 16:16:26 calderon Exp $
+ * $Id: StSvtWaferCoordinate.hh,v 1.5 2001/11/06 20:57:03 caines Exp $
  *
  * Author:  Manuel CBS Oct 1999
  *
@@ -11,6 +11,9 @@
  ************************************************************************
  *
  * $Log: StSvtWaferCoordinate.hh,v $
+ * Revision 1.5  2001/11/06 20:57:03  caines
+ * Add function to get barrel number
+ *
  * Revision 1.4  2000/08/21 16:16:26  calderon
  * Helen's first version of Svt Coordinate classes.
  *
@@ -49,6 +52,7 @@ public:
     int operator!=(const StSvtWaferCoordinate&) const;
 
     // access functions
+    const int barrel()      const;
     const int layer()       const;
     const int ladder()      const;
     const int wafer()       const;
@@ -72,6 +76,8 @@ protected:
     double mTimeBucket;
 };
 
+const inline int StSvtWaferCoordinate::barrel() 
+  const {return(((mLayer-1)/2)+1);}
 const inline int StSvtWaferCoordinate::layer()   const {return(mLayer);}
 const inline int StSvtWaferCoordinate::ladder()  const {return(mLadder);}
 const inline int StSvtWaferCoordinate::wafer()   const {return(mWafer);}
