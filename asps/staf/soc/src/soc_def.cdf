@@ -15,7 +15,7 @@
 >GUIDANCE
 Service_and_Object_Catalog commands.
 .
- #(@)$Id: soc_def.cdf,v 1.4 1998/01/03 02:34:20 tull Exp $
+ #(@)$Id: soc_def.cdf,v 1.5 1998/01/24 19:05:36 ward Exp $
 .
 SOC is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -699,12 +699,12 @@ SEE ALSO:
 >ACTION KAM_SOCOBJECT_NAME
 **
 ** ---------------------------------------------------------------------
-** SOC/OBJECT/OID NAME TYPE
+** SOC/OBJECT/OID NAME [ TYPE ]
 >COMMAND OID
 >PARAMETERS
 NAME 'Registered Object Name.' C
 +
-TYPE 'Known Object Type.' C
+TYPE 'Known Object Type.' C D='-'
 >GUIDANCE
 Get the OID attribute of the socObject NAME:TYPE.
 .

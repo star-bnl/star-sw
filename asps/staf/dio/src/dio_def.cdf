@@ -15,7 +15,7 @@
 >GUIDANCE
 Dataset_Input_and_Output commands.
 .
- #(@)$Id: dio_def.cdf,v 1.3 1997/12/22 17:41:12 tull Exp $
+ #(@)$Id: dio_def.cdf,v 1.4 1998/01/24 19:03:51 ward Exp $
 .
 DIO is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -26,10 +26,88 @@ Each ASP is comprised of an object factory interface (eg. dioFactory)
 and zero or more worker object interfaces.
 .
 DIO worker objects include:
-   dioObject - See DIO/OBJECT
-	       - More guidance needed here.
+DIO worker objects include:
+   dioStream - See DIO/STREAM
+      - A generic data stream object. Abstract base class for all dio
+        stream objects.
+   dioFileStream - See DIO/FILESTREAM
+      - A data stream object associated with a disk file.
+   dioSockStream - See DIO/SOCKSTREAM
+      - A data stream object associated with a TCP/IP socket.
+   dioTapeStream - See DIO/TAPESTREAM
+      - A data stream object associated with a magnetic tape device.
+      - NOTICE -- dioTapeStream is not yet implemented.
 .
-More guidance needed here.
+The DIO worker objects handle input to and output from stream-like
+sources of data containing XDF (XDR-based Dataset Format) data.
+.
+Each XDF data stream contains a sequence of unencapsulated DSL datasets
+containing zero or more tables and/or other datasets. For historical
+reasons, an unencapsulated dataset is refered to as an "event".
+However, this is not an accurate term.
+.
+In this ASP, the term event simply refers to a dataset in an XDF stream
+which is not contained within another dataset (ie. is unencapsulated by
+another dataset).
+.
+These "events" can actually refer to real physics events, calibration
+sets, header datasets, etc. The important distinction to be made is
+that each READ or WRITE operation operates on a single dataset and its
+sub-hierarchy (ie. all datasets and tables below the single dataset
+within the overall hierarchy).
+.
+As an example: Consider the following hypothetical hierarchy of
+datasets (lowercase names) and tables (UPPERCASE NAME).
+.
+	      .--EMC_GAIN
+	      |--STAR_BFIELD
+       .--calib/
+       |      |--SVT_GAIN
+       |      `--TPC_STC
+       |         
+   event/
+       |  
+       |                  .----JETS
+       |             .--emc/
+       |             |    `----TOWERS
+       |             |         
+       |             |    .----HITS
+       |             |--svt/
+       |             |    `----TRACKS
+       |             |         
+       |     .---dst_0/
+       |     |       |         
+       |     |       |    .----CLUSTERS
+       |     |       `--tpc/
+       |     |            |----HITS
+       |     |            `----TRACKS
+       |     |                 
+       |     |              .--TRACKS
+       |     |       .--global/
+       |     |---dst_1/
+       `--data/
+	     |---dst_2/
+	     |       |         
+	     |       |    .----KAONS
+	     |       |    |----MUONS
+	     |       `--pid/
+	     |            |----PIONS
+	     |            `----PROTONS
+	     |                 
+	     |     .----EMC_HIT
+	     |     |----SVT_ADC
+	     `---raw/
+		   |----SVT_MAP
+		   |----TPC_ADC
+		   `----TPC_MAP
+.
+If the "event/" dataset is written to or read from an XDF stream, a
+total of 12 datasets and 21 tables will be output or input. If,
+however, the "event/data/raw/" dataset is written to or read from an
+XDF stream, only 1 dataset and 5 tables will be output or input.
+.
+For details of the XDF data format, please see Web pages for the DSL
+package.
 .
 ** ---------------------------------------------------------------------
 ** DIO/COUNT
@@ -171,10 +249,11 @@ ARGUMENTS:
    - More guidance needed here.
 .
    FILE - File name of XDF data file.
-   - More guidance needed here.
+   - Unix file name.
 .
    MODE - Read/write mode
-   - More guidance needed here.
+   - MODE = R - Read Only
+	    W - Write Only
 .
 RETURN:
 .
@@ -184,9 +263,7 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. Create a new dioFilestream with NAME "bob"
-.
-   StAF> DIO/NEWFILESTREAM bob
+EG1. More guidance needed here.
 .
 EXCEPTIONS: 
 .
@@ -229,13 +306,15 @@ ARGUMENTS:
    - More guidance needed here.
 .
    HOST - Host name of remote host.
-   - More guidance needed here.
+   - or TCP/IP address of the host to which to connect.
 .
    PORT - Socket port number.
-   - More guidance needed here.
+   - Service port number to which to connect.
+   - PORT is ignored for MODE == W.
 .
    MODE - Read/write mode
-   - More guidance needed here.
+   - MODE = R - Read Only
+	    W - Write Only
 .
 RETURN:
 .
@@ -245,9 +324,7 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. Create a new dioSockstream with NAME "bob"
-.
-   StAF> DIO/NEWSOCKSTREAM bob
+EG1. More guidance needed here.
 .
 EXCEPTIONS: 
 .
@@ -273,7 +350,7 @@ dioFilestream object commands.
 Commands found under the DIO/FILESTREAM menu can be applied to objects
 which implement the dioFilestream interface.
 .
-More guidance needed here.
+dioFileStream - A data stream object associated with a disk file.
 .
 **
 ** ---------------------------------------------------------------------
@@ -286,9 +363,9 @@ Get the FILENAME attribute of the dioFilestream SOREF.
 .
 DESCRIPTION: 
 .
-FILENAME is a readonly attribute which reflects the value of the FILENAME
-attribute of the dioFilestream SOREF. Readonly attributes cannot be changed
-from the user interface.
+FILENAME is the XDF file on disk from which dioFilestream object SOREF
+reads or to which dioFilestream object SOREF writes.
+Readonly attributes cannot be changed from the user interface.
 .
 NB. Readonly attributes are not necessarily static attributes.
 .
@@ -299,15 +376,11 @@ ARGUMENTS:
 .
 RETURN:
 .
-   The current value of FILENAME is pushed onto the STAF_RESULT stack
-   (see SOC).
+   None.
 .
 EXAMPLES: 
 .
-EG1. Show the current value of the FILENAME attribute of
-    dioFilestream "bob".
-.
-   StAF> DIO/FILESTREAM/FILENAME bob
+EG1. More guidance needed here.
 .
 EXCEPTIONS: 
 .
@@ -333,7 +406,7 @@ dioSockstream object commands.
 Commands found under the DIO/SOCKSTREAM menu can be applied to objects
 which implement the dioSockstream interface.
 .
-More guidance needed here.
+dioSockStream - A data stream object associated with a TCP/IP socket.
 .
 **
 ** ---------------------------------------------------------------------
@@ -348,14 +421,16 @@ Get or set the MAXHANDSHAKES attribute of the dioSockstream SOREF.
 .
 DESCRIPTION: 
 .
-MAXHANDSHAKES is a read-writable attribute which determines the value of
-the MAXHANDSHAKES attribute.
+MAXHANDSHAKES is a read-writable attribute which determines how many
+times to attempt to establish a connection between dioSockstream object
+SOREF and the remote socket before failing.
 .
-To get the current value of MAXHANDSHAKES, leaving MAXHANDSHAKES unchanged, do not
-specify a new value in the optional argument NEW_VALUE.
+To get the current value of MAXHANDSHAKES, leaving MAXHANDSHAKES 
+unchanged, do not specify a new value in the optional argument 
+NEW_VALUE.
 .
-To set a new value of MAXHANDSHAKES, specify the new value as the optional
-argument NEW_VALUE.
+To set a new value of MAXHANDSHAKES, specify the new value as the 
+optional argument NEW_VALUE.
 .
 ARGUMENTS: 
 .
@@ -367,19 +442,22 @@ ARGUMENTS:
 .
 RETURN:
 .
-   The current value of MAXHANDSHAKES is pushed onto the STAF_RESULT stack
-   (see SOC).
+   The current value of MAXHANDSHAKES is pushed onto the STAF_RESULT
+   stack (see SOC).
 .
 EXAMPLES: 
 .
-EG1. Show the current value of the MAXHANDSHAKES attribute of dioSockstream 
-    object "bob".
+EG1. Show the current value of the MAXHANDSHAKES attribute of
+dioSockstream object "bob".
 .
    StAF> DIO/SOCKSTREAM/MAXHANDSHAKES bob
+   More guidance needed here.
 .
-EG2. Set the MAXHANDSHAKES attribute of dioSockstream object "bob" to 123.
+EG2. Set the MAXHANDSHAKES attribute of dioSockstream object "bob" to
+123.
 .
    StAF> DIO/SOCKSTREAM/MAXHANDSHAKES bob 123
+   More guidance needed here.
 .
 EXCEPTIONS: 
 .
@@ -391,6 +469,8 @@ EXCEPTIONS:
 BUGS: 
 .
    None known.
+.
+   N.B.- The server and client handshake protocols must match.
 .
 SEE ALSO: 
 .
@@ -406,11 +486,12 @@ Get the HOST attribute of the dioSockstream SOREF.
 .
 DESCRIPTION: 
 .
-HOST is a readonly attribute which reflects the value of the HOST
-attribute of the dioSockstream SOREF. Readonly attributes cannot be changed
-from the user interface.
+HOST is a readonly attribute which defines the remote host to which to
+connect. 
+Readonly attributes cannot be changed from the user interface.
 .
-NB. Readonly attributes are not necessarily static attributes.
+The HOST attribute has no meaning for a source dioSockStream object
+(ie. MODE = W).
 .
 ARGUMENTS: 
 .
@@ -419,15 +500,15 @@ ARGUMENTS:
 .
 RETURN:
 .
-   The current value of HOST is pushed onto the STAF_RESULT stack
-   (see SOC).
+   None.
 .
 EXAMPLES: 
 .
 EG1. Show the current value of the HOST attribute of
-    dioSockstream "bob".
+    dioSockstream object "bob".
 .
    StAF> DIO/SOCKSTREAM/HOST bob
+   More guidance needed here.
 .
 EXCEPTIONS: 
 .
@@ -439,6 +520,7 @@ EXCEPTIONS:
 BUGS: 
 .
    None known.
+   The HOST attribute has no meaning if MODE = W.
 .
 SEE ALSO: 
 .
@@ -454,11 +536,9 @@ Get the PORT attribute of the dioSockstream SOREF.
 .
 DESCRIPTION: 
 .
-PORT is a readonly attribute which reflects the value of the PORT
-attribute of the dioSockstream SOREF. Readonly attributes cannot be changed
-from the user interface.
-.
-NB. Readonly attributes are not necessarily static attributes.
+PORT is a readonly attribute which defines the service port on the
+remote node to which to connect.
+Readonly attributes cannot be changed from the user interface.
 .
 ARGUMENTS: 
 .
@@ -476,6 +556,7 @@ EG1. Show the current value of the PORT attribute of
     dioSockstream "bob".
 .
    StAF> DIO/SOCKSTREAM/PORT bob
+   More guidance needed here.
 .
 EXCEPTIONS: 
 .
@@ -487,6 +568,8 @@ EXCEPTIONS:
 BUGS: 
 .
    None known.
+.
+   N.B. PORT must be the number of a free port. See man socket.
 .
 SEE ALSO: 
 .
@@ -501,7 +584,8 @@ dioStream object commands.
 Commands found under the DIO/STREAM menu can be applied to objects
 which implement the dioStream interface.
 .
-More guidance needed here.
+dioStream - A generic data stream object. Abstract base class for all
+dio stream objects.
 .
 **
 ** ---------------------------------------------------------------------
@@ -510,15 +594,18 @@ More guidance needed here.
 >PARAMETERS
 SOREF 'dioStream object SORef' C
 >GUIDANCE
-Get the MODE attribute of the dioStream SOREF.
+Get the I/O MODE of the dioStream SOREF.
 .
 DESCRIPTION: 
 .
-MODE is a readonly attribute which reflects the value of the MODE
-attribute of the dioStream SOREF. Readonly attributes cannot be changed
-from the user interface.
+MODE is a readonly attribute which determines whether dioStream object
+SOREF reads from, or writes to its associated data stream.
+Readonly attributes cannot be changed from the user interface.
 .
-NB. Readonly attributes are not necessarily static attributes.
+The valid valuse of MODE are:
+.
+   READONLY - Read Only
+   WRITEONLY - Write Only
 .
 ARGUMENTS: 
 .
@@ -536,6 +623,7 @@ EG1. Show the current value of the MODE attribute of
     dioStream "bob".
 .
    StAF> DIO/STREAM/MODE bob
+   More guidance needed here.
 .
 EXCEPTIONS: 
 .
@@ -558,15 +646,21 @@ SEE ALSO:
 >PARAMETERS
 SOREF 'dioStream object SORef' C
 >GUIDANCE
-Get the STATE attribute of the dioStream SOREF.
+Get the current STATE of the dioStream SOREF.
 .
 DESCRIPTION: 
 .
-STATE is a readonly attribute which reflects the value of the STATE
-attribute of the dioStream SOREF. Readonly attributes cannot be changed
-from the user interface.
+STATE is a readonly attribute which reflects the current state of the 
+dioStream object SOREF.
+Readonly attributes cannot be changed from the user interface.
 .
 NB. Readonly attributes are not necessarily static attributes.
+.
+Valid values of STATE are:
+   OPENED 
+   CLOSED
+   READING
+   WRITING
 .
 ARGUMENTS: 
 .
@@ -584,6 +678,7 @@ EG1. Show the current value of the STATE attribute of
     dioStream "bob".
 .
    StAF> DIO/STREAM/STATE bob
+   More guidance needed here.
 .
 EXCEPTIONS: 
 .
@@ -606,14 +701,17 @@ SEE ALSO:
 >PARAMETERS
 SOREF 'dioStream object SORef' C
 >GUIDANCE
-More guidance needed here.
+Terminate communication with associated data stream.
 .
 DESCRIPTION: 
 .
 CLOSE is a member function of objects which implement the dioStream
-interface.
+interface, including:
 .
-More guidance needed here.
+   dioFileStream - See DIO/FILESTREAM
+      - A data stream object associated with a disk file.
+   dioSockStream - See DIO/SOCKSTREAM
+      - A data stream object associated with a TCP/IP socket.
 .
 ARGUMENTS: 
 .
@@ -628,10 +726,7 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. Invoke the CLOSE method function of dioStream "bob"
-     More guidance needed here.
-.
-   StAF> DIO/STREAM/CLOSE bob 
+EG1. More guidance needed here.
 .
 EXCEPTIONS: 
 .
@@ -656,14 +751,17 @@ SOREF 'dioStream object SORef' C
 +
 DATASET 'In memory dataset name' C D='.'
 >GUIDANCE
-More guidance needed here.
+Read a dataset from an XDF data stream into memory.
 .
 DESCRIPTION: 
 .
 GETEVENT is a member function of objects which implement the dioStream
-interface.
+interface, including:
 .
-More guidance needed here.
+   dioFileStream - See DIO/FILESTREAM
+      - A data stream object associated with a disk file.
+   dioSockStream - See DIO/SOCKSTREAM
+      - A data stream object associated with a TCP/IP socket.
 .
 ARGUMENTS: 
 .
@@ -681,10 +779,7 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. Invoke the GETEVENT method function of dioStream "bob"
-     More guidance needed here.
-.
-   StAF> DIO/STREAM/GETEVENT bob 
+EG1. More guidance needed here.
 .
 EXCEPTIONS: 
 .
@@ -709,14 +804,17 @@ SOREF 'dioStream object SORef' C
 +
 MODE    'Read/write mode' C D='R' R='R,W'
 >GUIDANCE
-More guidance needed here.
+Initiate communication with associated data stream.
 .
 DESCRIPTION: 
 .
 OPEN is a member function of objects which implement the dioStream
-interface.
+interface, including:
 .
-More guidance needed here.
+   dioFileStream - See DIO/FILESTREAM
+      - A data stream object associated with a disk file.
+   dioSockStream - See DIO/SOCKSTREAM
+      - A data stream object associated with a TCP/IP socket.
 .
 ARGUMENTS: 
 .
@@ -734,10 +832,7 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. Invoke the OPEN method function of dioStream "bob"
-     More guidance needed here.
-.
-   StAF> DIO/STREAM/OPEN bob 
+EG1. More guidance needed here.
 .
 EXCEPTIONS: 
 .
@@ -762,12 +857,17 @@ SOREF 'dioStream object SORef' C
 +
 DATASET 'In memory dataset name' C D='.'
 >GUIDANCE
-More guidance needed here.
+Write a dataset from memory to an XDF data stream.
 .
 DESCRIPTION: 
 .
 PUTEVENT is a member function of objects which implement the dioStream
-interface.
+interface, including:
+.
+   dioFileStream - See DIO/FILESTREAM
+      - A data stream object associated with a disk file.
+   dioSockStream - See DIO/SOCKSTREAM
+      - A data stream object associated with a TCP/IP socket.
 .
 More guidance needed here.
 .
@@ -777,7 +877,6 @@ ARGUMENTS:
    - denoting an object implementing the dioStream interface.
 .
    DATASET - In memory dataset name
-   - More guidance needed here.
 .
 RETURN:
 .
@@ -787,10 +886,7 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. Invoke the PUTEVENT method function of dioStream "bob"
-     More guidance needed here.
-.
-   StAF> DIO/STREAM/PUTEVENT bob 
+EG1. More guidance needed here.
 .
 EXCEPTIONS: 
 .

@@ -15,32 +15,25 @@
 >GUIDANCE
 Table_BRowser commands.
 .
- #(@)$Id: tbr_def.cdf,v 1.4 1997/12/22 17:46:53 tull Exp $
+ #(@)$Id: tbr_def.cdf,v 1.5 1998/01/24 19:05:53 ward Exp $
 .
 TBR is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
 into the software bus archictecture of StAF in a CORBA compliant
 interface layer.
 .
-Each ASP is comprised of an object factory interface (eg. tbrFactory)
-and zero or more worker object interfaces.
-.
-TBR worker objects include:
-   tbrObject - See TBR/OBJECT
-	       - More guidance needed here.
-.
-More guidance needed here.
+The TBR package is an ASP-like interface to the Motif Table BRowser.
+It is intended to provide an interactive GUI to view and examine a DSL
+hierarchy.
 .
 ** ---------------------------------------------------------------------
 ** TBR/VIEWDATASET
 >COMMAND VIEWDATASET
 >PARAMETERS
 >GUIDANCE
-More guidance needed here.
+Launch the Motif Table BRowser and view dataset hierarchy.
 .
 DESCRIPTION: 
-.
-VIEWDATASET is a member function of the tbrFactory interface.
 .
 More guidance needed here.
 .
@@ -50,13 +43,9 @@ ARGUMENTS:
 .
 RETURN:
 .
-   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
-   tbrFactory::VIEWDATASET
-   method is pushed onto the STAF_STATUS stack (see SOC).
-.
 EXAMPLES: 
 .
-EG1. More guidance needed here.
+EG1. Launch the Motif Table BRowser and view dataset hierarchy.
 .
    StAF> TBR/VIEWDATASET
 .

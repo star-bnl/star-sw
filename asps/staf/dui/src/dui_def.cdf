@@ -15,7 +15,7 @@
 >GUIDANCE
 Dataset_Unix_like_Interface commands.
 .
- #(@)$Id: dui_def.cdf,v 1.5 1997/12/22 17:41:12 tull Exp $
+ #(@)$Id: dui_def.cdf,v 1.6 1998/01/24 19:04:29 ward Exp $
 .
 DUI is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -26,10 +26,52 @@ Each ASP is comprised of an object factory interface (eg. duiFactory)
 and zero or more worker object interfaces.
 .
 DUI worker objects include:
-   duiObject - See DUI/OBJECT
-	       - More guidance needed here.
+   DUI HAS NO WORKER OBJECTS.
 .
-More guidance needed here.
+The DUI package has only one interface class defined, the duiFactory.
+.
+The duiFactory interface is a subclass of the tdmFactory interface.
+Thus any object factory implementing the duiFactory interface can and
+should assume the role of the tdmFactory in creating and managing in
+memory tables and datasets.
+.
+The Dataset Unix-like Interface of DUI provides a convienient and
+familiar user interface for the navigation, creation, and manipulation
+of dataset objects and table objects.
+.
+tdmDataset objects (C++ representation of DSL datasets) are container
+objects which can contain other tdmDataset objects and/or tdmTable
+objects (C++ representation of DSL tables).
+.
+In DUI, the dataset hierarchy created by the recursive inclusion of
+datasets within one another is presented as a Unix file system-like
+hierarchy which can be navigated with the CD command.
+.
+Thus datasets in DUI are analogous to directories in a Unix file
+system, and tables are analogous to files in a Unix file system.
+.
+In addition to the Unix-like commands of duiFactory, the DUI package
+extends TDM by the introduction of two concepts:
+.
+   1 - Root Dataset
+       - All datasets and tables created within the DUI context are
+         found within a single Unix file system-like hierarchy. The
+	 root dataset is named "/dui" and is created automatically by
+	 the initialization and startup of DUI.
+   2 - Current Working Dataset
+       - At any instant, one dataset within the hierachy is designated
+         (by the history of DUI commands) as the current working
+	 dataset. This CWD determines the evaluation of relative paths
+	 used by DUI commands.
+.
+All DUI commands should take either an absolute path name to a dataset
+or table (ie. /dui/fee/fii/foe/fum) or a relative path name
+(ie. ../../foe/fum).
+.
+With few exceptions, the behavior of DUI commands is a very faithful
+mimicking of the analogous Unix commands (without any additional
+modifier flags). When in doubt, assume that a DUI command will behave
+as you would expect a Unix command to behave.
 .
 ** ---------------------------------------------------------------------
 ** DUI/CD [ PATH ]

@@ -15,7 +15,7 @@
 >GUIDANCE
 Table_OPerators commands.
 .
- #(@)$Id: top_def.cdf,v 1.8 1997/12/22 17:47:48 tull Exp $
+ #(@)$Id: top_def.cdf,v 1.9 1998/01/24 19:06:27 ward Exp $
 .
 TOP is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -26,10 +26,14 @@ Each ASP is comprised of an object factory interface (eg. topFactory)
 and zero or more worker object interfaces.
 .
 TOP worker objects include:
-   topObject - See TOP/OBJECT
-	       - More guidance needed here.
-.
-More guidance needed here.
+   topCut - See TOP/CUT_AGENT
+      - An operator object for selecting rows from a table.
+   topJoin - See TOP/JOIN_AGENT
+      - An operator object for joining row-by-row data from two tables.
+   topProject - See TOP/PROJECT_AGENT
+      - An operator object for selecting columns from a table.
+   topSort - See TOP/SORT_AGENT
+      - An operator object for reordering rows in a table.
 .
 ** ---------------------------------------------------------------------
 ** TOP/COUNT
@@ -161,6 +165,8 @@ Each topCut created by the topFactory shows up as an object
 managed by the topFactory (see TOP/COUNT and TOP/LIST) and
 registered with the socCatalog (see SOC/COUNT and SOC/LIST).
 .
+This is the first step in making table cuts and/or filters.
+.
 ARGUMENTS: 
 .
    NAME - Case-sensitive alphanumeric name for new topCut object.
@@ -169,7 +175,7 @@ ARGUMENTS:
    - More guidance needed here.
 .
    CUTFUNC - Cut function.
-   - More guidance needed here.
+   - A FORTRAN-like string defining a criterion on a table row.
 .
 RETURN:
 .
@@ -179,9 +185,16 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. Create a new topCut with NAME "bob"
+EG1. Create a new topCut.
 .
-   StAF> TOP/NEWCUT bob
+   StAF> TOP/NEWCUT slowPions pid.eq.5.and.invpt.gt.1.12e3
+.
+In this case 'slowPions' is the name of the topCut object.
+You will need this name in the second step.
+The identifiers 'pid' and 'invpt' are column names.
+.
+For the second step, use either TOP/CUT_AGENT/FILTER or 
+TOP/CUT_AGENT/CUT.
 .
 EXCEPTIONS: 
 .
@@ -194,7 +207,7 @@ BUGS:
 .
 SEE ALSO: 
 .
-   TOP/CUT
+   TOP/CUT_AGENT
 .
 >ACTION KAM_TOP_NEWCUT
 **
@@ -223,10 +236,10 @@ ARGUMENTS:
    - More guidance needed here.
 .
    SELECT - Selection specification.
-   - More guidance needed here.
+          - See TOP/PROJECT for syntax of SELECT.
 .
    WHERE - Where clause specification.
-   - More guidance needed here.
+         - See TOP/JOIN for syntax of WHERE.
 .
 RETURN:
 .
@@ -236,9 +249,11 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. Create a new topJoin with NAME "bob"
+EG1. Create a new topJoin with NAME "bob" 
+which will join all columns of two tables with the function
+(table1.primaryKey == table2.foriegnKey).
 .
-   StAF> TOP/NEWJOIN bob
+   StAF> TOP/NEWJOIN bob ! '{primaryKey foriegnKey}' 
 .
 EXCEPTIONS: 
 .
@@ -251,7 +266,7 @@ BUGS:
 .
 SEE ALSO: 
 .
-   TOP/JOIN
+   TOP/JOIN_AGENT
 .
 >ACTION KAM_TOP_NEWJOIN
 **
@@ -279,7 +294,7 @@ ARGUMENTS:
    - More guidance needed here.
 .
    SELECT - Selection specification.
-   - More guidance needed here.
+          - See TOP/PROJECT for syntax of SELECT.
 .
 RETURN:
 .
@@ -331,7 +346,6 @@ ARGUMENTS:
    - More guidance needed here.
 .
    COLUMN - Column name upon which to sort.
-   - More guidance needed here.
 .
 RETURN:
 .
@@ -341,9 +355,9 @@ RETURN:
 .
 EXAMPLES: 
 .
-EG1. Create a new topSort with NAME "bob"
+EG1. Create a new topSort which will sort tables on column "id".
 .
-   StAF> TOP/NEWSORT bob
+   StAF> TOP/NEWSORT bob id
 .
 EXCEPTIONS: 
 .
@@ -356,7 +370,7 @@ BUGS:
 .
 SEE ALSO: 
 .
-   TOP/SORT
+   TOP/SORT_AGENT
 .
 >ACTION KAM_TOP_NEWSORT
 **
@@ -364,51 +378,56 @@ SEE ALSO:
 ** TOP/CUT_AGENT
 >MENU CUT_AGENT
 >GUIDANCE
-topCut_agent object commands.
+topCut object commands.
 .
 Commands found under the TOP/CUT_AGENT menu can be applied to objects
-which implement the topCut_agent interface.
+which implement the topCut interface.
 .
-More guidance needed here.
+The CUT (or FILTER) operation in TOP is analogous to the cut operation
+on NTuples in PAW. It eliminates rows from a table which do not satisfy
+some criterion expressed as a function of the column variables of that
+table.
+.
+The distinction between CUT and FILTER is whether a new table is
+created (FILTER) with rows that pass the cut criterion or rows within
+the input table which do not pass the cut criterion are removed (CUT).
 .
 **
 ** ---------------------------------------------------------------------
 ** TOP/CUT_AGENT/FUNCTION SOREF
 >COMMAND FUNCTION
 >PARAMETERS
-SOREF 'topCut_agent object SORef' C
+SOREF 'topCut object SORef' C
 >GUIDANCE
-Get the FUNCTION attribute of the topCut_agent SOREF.
+Get the FUNCTION attribute of the topCut SOREF.
 .
 DESCRIPTION: 
 .
-FUNCTION is a readonly attribute which reflects the value of the FUNCTION
-attribute of the topCut_agent SOREF. Readonly attributes cannot be changed
-from the user interface.
-.
-NB. Readonly attributes are not necessarily static attributes.
+FUNCTION is a readonly attribute which defines the criterion upon which
+to select valid rows from a table. Readonly attributes cannot be
+changed from the user interface.
 .
 ARGUMENTS: 
 .
    SOREF - Stringified Object REFerence (see SOC).
-   -  denoting an object implementing the topCut_agent interface.
+   -  denoting an object implementing the topCut interface.
 .
 RETURN:
 .
-   The current value of FUNCTION is pushed onto the STAF_RESULT stack
-   (see SOC).
+   None.
 .
 EXAMPLES: 
 .
 EG1. Show the current value of the FUNCTION attribute of
-    topCut_agent "bob".
+    topCut "bob".
 .
-   StAF> TOP/CUT_AGENT/FUNCTION bob
+   StAF> TOP/CUT_AGENT/FUNCTION slowPions
+   pid.eq.5 .and. invpt.gt.1.12e3
 .
 EXCEPTIONS: 
 .
    OBJECT_NOT_FOUND - No object specified by SOREF can be found which
-      implements the topCut_agent interface.
+      implements the topCut interface.
       (See SOC/BIND to dynamically bind the proper resources, or
       rebuild executable with the proper resources statically linked.)
 .
@@ -424,40 +443,45 @@ SEE ALSO:
 ** TOP/CUT_AGENT/CUT SOREF TABLE [ CUTFUNC ]
 >COMMAND CUT
 >PARAMETERS
-SOREF 'topCut_agent object SORef' C
+SOREF 'topCut object SORef' C
 TABLE   'tdmTable name' C
 +
 CUTFUNC 'Cut function' C D='.'
 >GUIDANCE
-More guidance needed here.
+Eliminate rows from a table which fail the cut function.
 .
 DESCRIPTION: 
 .
-CUT is a member function of objects which implement the topCut_agent
-interface.
+If FUNC is not specified:
 .
-More guidance needed here.
+Using the cut previously specified with the TOP/NEWCUT command,
+remove all the rows from TABLE1 which do not pass the cut.
+.
+If FUNC is specified:
+.
+Remove all the rows from TABLE1 which do not
+pass the cut, creating a new cut agent as a byproduct.
 .
 ARGUMENTS: 
 .
    SOREF - Stringified Object REFerence (see SOC).
-   - denoting an object implementing the topCut_agent interface.
+   - denoting an object implementing the topCut interface.
 .
    TABLE - tdmTable name.
-   - More guidance needed here.
+   - The table to be cut.
 .
    CUTFUNC - Cut function.
-   - More guidance needed here.
+   - A cut function with which to create a new topCut object.
 .
 RETURN:
 .
    Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
-   topCut_agent::CUT
+   topCut::CUT
    method is pushed on the STAF_STATUS stack (see SOC).
 .
 EXAMPLES: 
 .
-EG1. Invoke the CUT method function of topCut_agent "bob"
+EG1. Invoke the CUT method function of topCut "bob"
      More guidance needed here.
 .
    StAF> TOP/CUT_AGENT/CUT bob 
@@ -465,7 +489,7 @@ EG1. Invoke the CUT method function of topCut_agent "bob"
 EXCEPTIONS: 
 .
    OBJECT_NOT_FOUND - No object specified by SOREF can be found which
-      implements the topCut_agent interface.
+      implements the topCut interface.
       (See SOC/BIND to dynamically bind the proper resources, or
       rebuild executable with the proper resources statically linked.)
 .
@@ -481,52 +505,58 @@ SEE ALSO:
 ** TOP/CUT_AGENT/FILTER SOREF TABLE1 TABLE2 [ CUTFUNC ]
 >COMMAND FILTER
 >PARAMETERS
-SOREF 'topCut_agent object SORef' C
+SOREF 'topCut object SORef' C
 TABLE1  'tdmTable name of input table' C
 TABLE2  'tdmTable name of output table' C
 +
 CUTFUNC 'Cut function' C D='.'
 >GUIDANCE
-More guidance needed here.
+Fill output table with rows from input table passing cut function.
 .
 DESCRIPTION: 
 .
-FILTER is a member function of objects which implement the topCut_agent
-interface.
+If FUNC is not specified:
 .
-More guidance needed here.
+Using the cut previously specified with the TOP/NEWCUT command,
+write a new table named TABLE2 using all the rows of TABLE1
+that pass the cut.
+.
+If FUNC is specified:
+.
+Write a new table named TABLE2 using all the rows of TABLE1 that pass
+the cut function, creating a new cut agent as a byproduct.
 .
 ARGUMENTS: 
 .
    SOREF - Stringified Object REFerence (see SOC).
-   - denoting an object implementing the topCut_agent interface.
+   - denoting an object implementing the topCut interface.
 .
    TABLE1 - tdmTable name of input table.
-   - More guidance needed here.
 .
    TABLE2 - tdmTable name of output table.
-   - More guidance needed here.
+          - If TABLE2 does not exist, it will be created with the
+	    same columns TABLE1.
 .
    CUTFUNC - Cut function.
-   - More guidance needed here.
+   - A cut function with which to create a new topCut object.
 .
 RETURN:
 .
    Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
-   topCut_agent::FILTER
+   topCut::FILTER
    method is pushed on the STAF_STATUS stack (see SOC).
 .
 EXAMPLES: 
 .
-EG1. Invoke the FILTER method function of topCut_agent "bob"
-     More guidance needed here.
+EG1. FILTER rows from tb1 into tb2 where x > 1000.
 .
-   StAF> TOP/CUT_AGENT/FILTER bob 
+   StAF> TOP/CUT_AGENT/FILTER bigx tb1 tb2 x.gt.1000
+   More guidance needed here.
 .
 EXCEPTIONS: 
 .
    OBJECT_NOT_FOUND - No object specified by SOREF can be found which
-      implements the topCut_agent interface.
+      implements the topCut interface.
       (See SOC/BIND to dynamically bind the proper resources, or
       rebuild executable with the proper resources statically linked.)
 .
@@ -542,51 +572,94 @@ SEE ALSO:
 ** TOP/JOIN_AGENT
 >MENU \JOIN_AGENT
 >GUIDANCE
-topJoin_agent object commands.
+topJoin object commands.
 .
 Commands found under the TOP/JOIN_AGENT menu can be applied to objects
-which implement the topJoin_agent interface.
+which implement the topJoin interface.
 .
-More guidance needed here.
+A JOIN (or FASTJOIN) operation in TOP is analogous to a join operation
+in any Relational DataBase system. A topJoin object combindes data
+from two tables into a third table on a row-by-row basis subject to a 
+condition on one or more column variables as defined by a where clause
+specification string.
+.
+In TOP, the join method function of a topJoin object actually performs
+a join and a project. Hence, the JOIN (or FASTJOIN) command takes both
+a Where Clause *and* a Selection Specification (see TOP/PROJECT).
+.
+    +--------------------------------------+
+    | Where Clause                         |
+    +--------------------------------------+
+    A where clause is used to define the condition for joining
+    rows of two tables in a join (and project).
+.
+    The syntax of a where clause has the format:
+        '{' join_pair_specifier ',' ... '}'
+    where a join_pair_specifier is of the form:
+        column_specifier
+    or:
+        column_specifier <WHITE_SPACE> column_specifier
+    where the two column_specifier's MUST come from different tables
+    and where a column_specifier is of the form:
+        column_name
+    or:
+        table_name '.' column_name
+.
+    If a where clause is applied for a join (and project), the
+    output table will contain rows composed of data from both 
+    tables where both tables have equal (INTEGER) values in the
+    specified columns (eg. equal primary-key/foreign-key pairs).
+.
+    If no where clause is applied for a join (and project) the join
+    will occur on all (INTEGER) columns with the same name in both
+    tables.
+.
+    Examples:
+        '{id}'
+        '{pkey fkey}'
+        '{tab1.pkey tab2.fkey}'
+        '{g2t_vertex.id g2t_track.start_vertex_p}'
 .
 **
 ** ---------------------------------------------------------------------
 ** TOP/JOIN_AGENT/SELECTSPEC SOREF
 >COMMAND SELECTSPEC
 >PARAMETERS
-SOREF 'topJoin_agent object SORef' C
+SOREF 'topJoin object SORef' C
 >GUIDANCE
-Get the SELECTSPEC attribute of the topJoin_agent SOREF.
+Get the SELECTSPEC attribute of the topJoin SOREF.
 .
 DESCRIPTION: 
 .
-SELECTSPEC is a readonly attribute which reflects the value of the SELECTSPEC
-attribute of the topJoin_agent SOREF. Readonly attributes cannot be changed
+SELECTSPEC is a readonly attribute which defines the mapping of input
+table columns to output table columns for JOIN (or FASTJOIN) operations
+performed by the topJoin SOREF. Readonly attributes cannot be changed
 from the user interface.
 .
-NB. Readonly attributes are not necessarily static attributes.
+SELECTSPEC is the SQL-like Selection Specification string for a topJoin
+object.  See TOP/PROJECT for syntax of Selection Specification strings.
 .
 ARGUMENTS: 
 .
    SOREF - Stringified Object REFerence (see SOC).
-   -  denoting an object implementing the topJoin_agent interface.
+   -  denoting an object implementing the topJoin interface.
 .
 RETURN:
 .
-   The current value of SELECTSPEC is pushed onto the STAF_RESULT stack
-   (see SOC).
+   None.
 .
 EXAMPLES: 
 .
 EG1. Show the current value of the SELECTSPEC attribute of
-    topJoin_agent "bob".
+topJoin "bob".
 .
    StAF> TOP/JOIN_AGENT/SELECTSPEC bob
+   More guidance needed here.
 .
 EXCEPTIONS: 
 .
    OBJECT_NOT_FOUND - No object specified by SOREF can be found which
-      implements the topJoin_agent interface.
+      implements the topJoin interface.
       (See SOC/BIND to dynamically bind the proper resources, or
       rebuild executable with the proper resources statically linked.)
 .
@@ -595,6 +668,7 @@ BUGS:
    None known.
 .
 SEE ALSO: 
+   TOP/PROJECT
 .
 >ACTION KAM_TOPJOIN_AGENT_SELECTSPEC
 **
@@ -602,39 +676,41 @@ SEE ALSO:
 ** TOP/JOIN_AGENT/WHERECLAUSE SOREF
 >COMMAND WHERECLAUSE
 >PARAMETERS
-SOREF 'topJoin_agent object SORef' C
+SOREF 'topJoin object SORef' C
 >GUIDANCE
-Get the WHERECLAUSE attribute of the topJoin_agent SOREF.
+Get the WHERECLAUSE attribute of the topJoin SOREF.
 .
 DESCRIPTION: 
 .
-WHERECLAUSE is a readonly attribute which reflects the value of the WHERECLAUSE
-attribute of the topJoin_agent SOREF. Readonly attributes cannot be changed
-from the user interface.
+WHERECLAUSE is a readonly attribute which defines hows rows of two
+tables match for JOIN (or FASTJOIN) operations performed by topJoin
+SOREF. Readonly attributes cannot be changed from the user interface.
 .
-NB. Readonly attributes are not necessarily static attributes.
+WHERECLAUSE is the SQL-like Where Clause string for a topJoin object.
+See TOP/JOIN for syntax of Where Clause strings.
 .
 ARGUMENTS: 
 .
    SOREF - Stringified Object REFerence (see SOC).
-   -  denoting an object implementing the topJoin_agent interface.
+   -  denoting an object implementing the topJoin interface.
 .
 RETURN:
 .
-   The current value of WHERECLAUSE is pushed onto the STAF_RESULT stack
-   (see SOC).
+   None.
 .
 EXAMPLES: 
 .
 EG1. Show the current value of the WHERECLAUSE attribute of
-    topJoin_agent "bob".
+topJoin "bob".
+
 .
    StAF> TOP/JOIN_AGENT/WHERECLAUSE bob
+   More guidance needed here.
 .
 EXCEPTIONS: 
 .
    OBJECT_NOT_FOUND - No object specified by SOREF can be found which
-      implements the topJoin_agent interface.
+      implements the topJoin interface.
       (See SOC/BIND to dynamically bind the proper resources, or
       rebuild executable with the proper resources statically linked.)
 .
@@ -643,6 +719,7 @@ BUGS:
    None known.
 .
 SEE ALSO: 
+   TOP/JOIN
 .
 >ACTION KAM_TOPJOIN_AGENT_WHERECLAUSE
 **
@@ -650,7 +727,7 @@ SEE ALSO:
 ** TOP/JOIN_AGENT/FASTJOIN SOREF TABLE1 TABLE2 TABLE3 [ SELECT WHERE ]
 >COMMAND FASTJOIN
 >PARAMETERS
-SOREF 'topJoin_agent object SORef' C
+SOREF 'topJoin object SORef' C
 TABLE1  'tdmTable name of 1st input table' C
 TABLE2  'tdmTable name of 2nd input table' C
 TABLE3  'tdmTable name of output table' C
@@ -658,52 +735,72 @@ TABLE3  'tdmTable name of output table' C
 SELECT  'Selection specification' C D='-'
 WHERE   'Where clause specification' C D='-'
 >GUIDANCE
-More guidance needed here.
+Join two sorted tables to fill a third.
 .
 DESCRIPTION: 
 .
-FASTJOIN is a member function of objects which implement the topJoin_agent
+FASTJOIN is a member function of objects which implement the topJoin
 interface.
 .
-More guidance needed here.
+You can read about joining in a book on relational databases
+(eg, an SQL reference book).
+You can use the same JOIN agent with either JOIN or FASTJOIN.
+FASTJOIN works the same as JOIN, except as noted below.
+.
+It runs very fast (proportional to n instead of n squared).
+Eg, two 10,000 row tables that previously took 20 minutes will
+run in 0.12 seconds.
+.
+You must first sort each table on its corresponding
+column in the WHERE clause of FASTJOIN.
+You can sort the tables easily with TOP/SORT_AGENT/SORT.
+This sort is based on a fancy sorting algorithm (quicksort),
+and runs very fast.
+.
+The WHERE parameter must be simple, ie,
+'{' column_name <WHITE_SPACE> column_name '}'.
+No commas, no periods.
+The first  column_name is for the first  table.
+The second column_name is for the second table.
 .
 ARGUMENTS: 
 .
    SOREF - Stringified Object REFerence (see SOC).
-   - denoting an object implementing the topJoin_agent interface.
+   - denoting an object implementing the topJoin interface.
 .
    TABLE1 - tdmTable name of 1st input table.
-   - More guidance needed here.
 .
    TABLE2 - tdmTable name of 2nd input table.
-   - More guidance needed here.
 .
    TABLE3 - tdmTable name of output table.
-   - More guidance needed here.
+	  - Result of JOIN operation.
+          - If TABLE3 does not exist, it will be created with the
+	    proper columns as defined by topJoin object SOREF.
 .
    SELECT - Selection specification.
-   - More guidance needed here.
+	  - See TOP/PROJECT for syntax of SELECT.
+          - If topJoin object SOREF does not exist, create it with
+	    selection specification string SELECT.
 .
    WHERE - Where clause specification.
-   - More guidance needed here.
+	 - See TOP/JOIN for syntax of WHERE.
+         - If topJoin object SOREF does not exist, create it with
+	   where clause string WHERE.
 .
 RETURN:
 .
    Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
-   topJoin_agent::FASTJOIN
+   topJoin::FASTJOIN
    method is pushed on the STAF_STATUS stack (see SOC).
 .
 EXAMPLES: 
 .
-EG1. Invoke the FASTJOIN method function of topJoin_agent "bob"
-     More guidance needed here.
-.
-   StAF> TOP/JOIN_AGENT/FASTJOIN bob 
+EG1. More guidance needed here.
 .
 EXCEPTIONS: 
 .
    OBJECT_NOT_FOUND - No object specified by SOREF can be found which
-      implements the topJoin_agent interface.
+      implements the topJoin interface.
       (See SOC/BIND to dynamically bind the proper resources, or
       rebuild executable with the proper resources statically linked.)
 .
@@ -712,6 +809,8 @@ BUGS:
    None known.
 .
 SEE ALSO: 
+   TOP/PROJECT
+   TOP/JOIN
 .
 >ACTION KAM_TOPJOIN_AGENT_FASTJOIN
 **
@@ -719,7 +818,7 @@ SEE ALSO:
 ** TOP/JOIN_AGENT/JOIN SOREF TABLE1 TABLE2 TABLE3 [ SELECT WHERE ]
 >COMMAND JOIN
 >PARAMETERS
-SOREF 'topJoin_agent object SORef' C
+SOREF 'topJoin object SORef' C
 TABLE1  'tdmTable name of 1st input table' C
 TABLE2  'tdmTable name of 2nd input table' C
 TABLE3  'tdmTable name of output table' C
@@ -727,52 +826,53 @@ TABLE3  'tdmTable name of output table' C
 SELECT  'Selection specification' C D='-'
 WHERE   'Where clause specification' C D='-'
 >GUIDANCE
-More guidance needed here.
+Join two unsorted tables row-by-row to fill a third.
 .
 DESCRIPTION: 
 .
-JOIN is a member function of objects which implement the topJoin_agent
+JOIN is a member function of objects which implement the topJoin
 interface.
 .
-More guidance needed here.
+See TOP/JOIN for details.
 .
 ARGUMENTS: 
 .
    SOREF - Stringified Object REFerence (see SOC).
-   - denoting an object implementing the topJoin_agent interface.
+   - denoting an object implementing the topJoin interface.
 .
    TABLE1 - tdmTable name of 1st input table.
-   - More guidance needed here.
 .
    TABLE2 - tdmTable name of 2nd input table.
-   - More guidance needed here.
 .
    TABLE3 - tdmTable name of output table.
-   - More guidance needed here.
+          - Result of JOIN operation.
+          - If TABLE3 does not exist, it will be created with the
+	    proper columns as defined by topJoin object SOREF.
 .
    SELECT - Selection specification.
-   - More guidance needed here.
+          - See TOP/PROJECT for syntax of SELECT.
+          - If topJoin object SOREF does not exist, create it with
+	    selection specification string SELECT.
 .
    WHERE - Where clause specification.
-   - More guidance needed here.
+         - See TOP/JOIN for syntax of WHERE.
+         - If topJoin object SOREF does not exist, create it with
+	   where clause specification string WHERE.
 .
 RETURN:
 .
    Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
-   topJoin_agent::JOIN
+   topJoin::JOIN
    method is pushed on the STAF_STATUS stack (see SOC).
 .
 EXAMPLES: 
 .
-EG1. Invoke the JOIN method function of topJoin_agent "bob"
-     More guidance needed here.
-.
-   StAF> TOP/JOIN_AGENT/JOIN bob 
+EG1. More guidance needed here.
 .
 EXCEPTIONS: 
 .
    OBJECT_NOT_FOUND - No object specified by SOREF can be found which
-      implements the topJoin_agent interface.
+      implements the topJoin interface.
       (See SOC/BIND to dynamically bind the proper resources, or
       rebuild executable with the proper resources statically linked.)
 .
@@ -780,7 +880,12 @@ BUGS:
 .
    None known.
 .
+   JOIN can be very slow for large tables. If your tables are sorted,
+   please use FASTJOIN.
+.
 SEE ALSO: 
+   TOP/PROJECT
+   TOP/JOIN
 .
 >ACTION KAM_TOPJOIN_AGENT_JOIN
 **
@@ -788,51 +893,89 @@ SEE ALSO:
 ** TOP/PROJECT_AGENT
 >MENU \PROJECT_AGENT
 >GUIDANCE
-topProject_agent object commands.
+topProject object commands.
 .
-Commands found under the TOP/PROJECT_AGENT menu can be applied to objects
-which implement the topProject_agent interface.
+Commands found under the TOP/PROJECT_AGENT menu can be applied to
+objects which implement the topProject interface.
 .
-More guidance needed here.
+A PROJECT operation in TOP is analogous to a project operation in any
+Relational DataBase system. A topProject object takes as input a table
+with columns a,b,c,e,f and projects it onto a table (new or extant)
+with columns a,e,c (as an example). The definition of the projection is
+contained in a selection specification string.
+.
+    +--------------------------------------+
+    | Selection Specifcation               |
+    +--------------------------------------+
+    A selection specification is used to select columns for a
+    table output from a project (or join and project).
+.
+    The syntax of a selection specification has the format:
+        '{' select_column_specifier ',' .... '}'
+    where a select_column_specifier is of the form:
+        column_specifier
+    or:
+        column_specifier <WHITE_SPACE> new_column_name
+    where a column_specifier is of the form:
+        column_name
+    or:
+        table_name '.' column_name
+.
+    If a selection specification is applied for a project (or a
+    join and project), the output table will contain only those
+    columns specified by the selection specification.
+.
+    If no selection specification is applied for a project (or a 
+    join and project), the output table will contain all columns
+    from the input table(s).
+.
+    Examples:
+        '{x, y, z}'
+        '{x q1, y q2, z q3}'
+        '{intab.x outab.q1, intab.y outab.q2, intab.z outab.q3}'
+        '{g2t_vertex.id vid, g2t_track.ge_pid, g2t_track.n_tpc_hit}'
 .
 **
 ** ---------------------------------------------------------------------
 ** TOP/PROJECT_AGENT/SELECTSPEC SOREF
 >COMMAND SELECTSPEC
 >PARAMETERS
-SOREF 'topProject_agent object SORef' C
+SOREF 'topProject object SORef' C
 >GUIDANCE
-Get the SELECTSPEC attribute of the topProject_agent SOREF.
+Get the SELECTSPEC attribute of the topProject SOREF.
 .
 DESCRIPTION: 
 .
-SELECTSPEC is a readonly attribute which reflects the value of the SELECTSPEC
-attribute of the topProject_agent SOREF. Readonly attributes cannot be changed
-from the user interface.
+SELECTSPEC is a readonly attribute which defines the mapping of input
+table columns to output table columns for PROJECT operations performed
+by the topProject SOREF. Readonly attributes cannot be changed from the
+user interface.
 .
-NB. Readonly attributes are not necessarily static attributes.
+SELECTSPEC is the SQL-like Selection Specification string for a
+topProject object. See TOP/PROJECT for syntax of Selection
+Specification strings.
 .
 ARGUMENTS: 
 .
    SOREF - Stringified Object REFerence (see SOC).
-   -  denoting an object implementing the topProject_agent interface.
+   -  denoting an object implementing the topProject interface.
 .
 RETURN:
 .
-   The current value of SELECTSPEC is pushed onto the STAF_RESULT stack
-   (see SOC).
+   None.
 .
 EXAMPLES: 
 .
 EG1. Show the current value of the SELECTSPEC attribute of
-    topProject_agent "bob".
+topProject "bob".
 .
    StAF> TOP/PROJECT_AGENT/SELECTSPEC bob
+   More guidance needed here.
 .
 EXCEPTIONS: 
 .
    OBJECT_NOT_FOUND - No object specified by SOREF can be found which
-      implements the topProject_agent interface.
+      implements the topProject interface.
       (See SOC/BIND to dynamically bind the proper resources, or
       rebuild executable with the proper resources statically linked.)
 .
@@ -841,6 +984,7 @@ BUGS:
    None known.
 .
 SEE ALSO: 
+   TOP/PROJECT
 .
 >ACTION KAM_TOPPROJECT_AGENT_SELECTSPEC
 **
@@ -848,17 +992,17 @@ SEE ALSO:
 ** TOP/PROJECT_AGENT/PROJECT SOREF TABLE1 TABLE2 [ SELECT ]
 >COMMAND PROJECT
 >PARAMETERS
-SOREF 'topProject_agent object SORef' C
+SOREF 'topProject object SORef' C
 TABLE1  'tdmTable name of input table' C
 TABLE2  'tdmTable name of output table' C
 +
 SELECT  'Selection specification' C D='-'
 >GUIDANCE
-More guidance needed here.
+Project columns of one table onto another.
 .
 DESCRIPTION: 
 .
-PROJECT is a member function of objects which implement the topProject_agent
+PROJECT is a member function of objects which implement the topProject
 interface.
 .
 More guidance needed here.
@@ -866,34 +1010,33 @@ More guidance needed here.
 ARGUMENTS: 
 .
    SOREF - Stringified Object REFerence (see SOC).
-   - denoting an object implementing the topProject_agent interface.
+   - denoting an object implementing the topProject interface.
 .
    TABLE1 - tdmTable name of input table.
-   - More guidance needed here.
 .
    TABLE2 - tdmTable name of output table.
-   - More guidance needed here.
+          - If TABLE2 does not exist, it will be created with the
+	    proper columns as defined by topProject object SOREF.
 .
    SELECT - Selection specification.
-   - More guidance needed here.
+          - See TOP/PROJECT for syntax of SELECT.
+          - If topProject object SOREF does not exist, create it with
+	    selection specification string SELECT.
 .
 RETURN:
 .
    Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
-   topProject_agent::PROJECT
+   topProject::PROJECT
    method is pushed on the STAF_STATUS stack (see SOC).
 .
 EXAMPLES: 
 .
-EG1. Invoke the PROJECT method function of topProject_agent "bob"
-     More guidance needed here.
-.
-   StAF> TOP/PROJECT_AGENT/PROJECT bob 
+EG1. More guidance needed here.
 .
 EXCEPTIONS: 
 .
    OBJECT_NOT_FOUND - No object specified by SOREF can be found which
-      implements the topProject_agent interface.
+      implements the topProject interface.
       (See SOC/BIND to dynamically bind the proper resources, or
       rebuild executable with the proper resources statically linked.)
 .
@@ -909,51 +1052,49 @@ SEE ALSO:
 ** TOP/SORT_AGENT
 >MENU \SORT_AGENT
 >GUIDANCE
-topSort_agent object commands.
+topSort object commands.
 .
 Commands found under the TOP/SORT_AGENT menu can be applied to objects
-which implement the topSort_agent interface.
+which implement the topSort interface.
 .
-More guidance needed here.
+The SORT operation in TOP sorts a table on a single column of the
+table.
 .
 **
 ** ---------------------------------------------------------------------
 ** TOP/SORT_AGENT/COLUMN SOREF
 >COMMAND COLUMN
 >PARAMETERS
-SOREF 'topSort_agent object SORef' C
+SOREF 'topSort object SORef' C
 >GUIDANCE
-Get the COLUMN attribute of the topSort_agent SOREF.
+Get the COLUMN attribute of the topSort SOREF.
 .
 DESCRIPTION: 
 .
-COLUMN is a readonly attribute which reflects the value of the COLUMN
-attribute of the topSort_agent SOREF. Readonly attributes cannot be changed
-from the user interface.
-.
-NB. Readonly attributes are not necessarily static attributes.
+COLUMN is a readonly attribute which defines the sorting order of SORT
+operations performed by the topSort object SOREF. Readonly attributes
+cannot be changed from the user interface.
 .
 ARGUMENTS: 
 .
    SOREF - Stringified Object REFerence (see SOC).
-   -  denoting an object implementing the topSort_agent interface.
+   -  denoting an object implementing the topSort interface.
 .
 RETURN:
 .
-   The current value of COLUMN is pushed onto the STAF_RESULT stack
-   (see SOC).
+   None.
 .
 EXAMPLES: 
 .
-EG1. Show the current value of the COLUMN attribute of
-    topSort_agent "bob".
+EG1. Show the current value of the COLUMN attribute of topSort "bob".
 .
    StAF> TOP/SORT_AGENT/COLUMN bob
+   More guidance needed here.
 .
 EXCEPTIONS: 
 .
    OBJECT_NOT_FOUND - No object specified by SOREF can be found which
-      implements the topSort_agent interface.
+      implements the topSort interface.
       (See SOC/BIND to dynamically bind the proper resources, or
       rebuild executable with the proper resources statically linked.)
 .
@@ -969,43 +1110,39 @@ SEE ALSO:
 ** TOP/SORT_AGENT/SORT SOREF TABLE
 >COMMAND SORT
 >PARAMETERS
-SOREF 'topSort_agent object SORef' C
+SOREF 'topSort object SORef' C
 TABLE   'tdmTable name' C
 >GUIDANCE
-More guidance needed here.
+Sort table on column variable.
 .
 DESCRIPTION: 
 .
-SORT is a member function of objects which implement the topSort_agent
-interface.
-.
-More guidance needed here.
+SORT reorders the rows in a table so that the column denoted by the
+COLUMN attribute of topSort object SOREF is sorted in accending order.
 .
 ARGUMENTS: 
 .
    SOREF - Stringified Object REFerence (see SOC).
-   - denoting an object implementing the topSort_agent interface.
+   - denoting an object implementing the topSort interface.
 .
    TABLE - tdmTable name.
-   - More guidance needed here.
 .
 RETURN:
 .
    Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
-   topSort_agent::SORT
+   topSort::SORT
    method is pushed on the STAF_STATUS stack (see SOC).
 .
 EXAMPLES: 
 .
-EG1. Invoke the SORT method function of topSort_agent "bob"
-     More guidance needed here.
+EG1. More guidance needed here.
 .
    StAF> TOP/SORT_AGENT/SORT bob 
 .
 EXCEPTIONS: 
 .
    OBJECT_NOT_FOUND - No object specified by SOREF can be found which
-      implements the topSort_agent interface.
+      implements the topSort interface.
       (See SOC/BIND to dynamically bind the proper resources, or
       rebuild executable with the proper resources statically linked.)
 .
