@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.h,v 1.6 2000/08/31 18:58:27 posk Exp $
+// $Id: StFlowSelection.h,v 1.7 2000/09/13 00:32:27 snelling Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.h,v $
+// Revision 1.7  2000/09/13 00:32:27  snelling
+// Added selections for particles correlated with reaction plane
+//
 // Revision 1.6  2000/08/31 18:58:27  posk
 // For picoDST, added version number, runID, and multEta for centrality.
 // Added centrality cut when reading picoDST.
@@ -68,6 +71,12 @@ class StFlowSelection : public StObject {
   void    SetPidPart(const Char_t*);
   void    SetPtPart(const Float_t, const Float_t);
   void    SetEtaPart(const Float_t, const Float_t);
+
+  void    SetFitPtsPart(const Int_t, const Int_t);
+  void    SetFitOverMaxPtsPart(const Float_t, const Float_t);
+  void    SetChiSqPart(const Float_t, const Float_t);
+  void    SetDcaPart(const Float_t, const Float_t);
+
   void    SetHarmonic(const Int_t&);
   void    SetSelection(const Int_t&);
   void    SetSubevent(const Int_t&);
@@ -81,6 +90,12 @@ class StFlowSelection : public StObject {
   Char_t  mPidPart[10];                      // PID for particles wrt plane
   Float_t mPtPart[2];                        // pt cuts for parts. wrt plane
   Float_t mEtaPart[2];                       // eta cuts for parts. wrt plane
+
+  Int_t   mFitPtsPart[2];                    // for parts. wrt plane
+  Float_t mFitOverMaxPtsPart[2];             // for parts. wrt plane
+  Float_t mChiSqPart[2];                     // for parts. wrt plane
+  Float_t mDcaPart[2];                       // for parts. wrt plane
+
   Int_t   mHarmonic;
   Int_t   mSelection;
   Int_t   mSubevent;
@@ -122,6 +137,18 @@ inline void StFlowSelection::SetPtPart(Float_t lo, Float_t hi) {
 
 inline void StFlowSelection::SetEtaPart(Float_t lo, Float_t hi) {
   mEtaPart[0] = lo; mEtaPart[1] = hi; }
+
+inline void StFlowSelection::SetFitPtsPart(Int_t lo, Int_t hi) {
+  mFitPtsPart[0] = lo; mFitPtsPart[1] = hi; }
+
+inline void StFlowSelection::SetFitOverMaxPtsPart(Float_t lo, Float_t hi) {
+  mFitOverMaxPtsPart[0] = lo; mFitOverMaxPtsPart[1] = hi; }
+
+inline void StFlowSelection::SetChiSqPart(Float_t lo, Float_t hi) {
+  mChiSqPart[0] = lo; mChiSqPart[1] = hi; }
+
+inline void StFlowSelection::SetDcaPart(Float_t lo, Float_t hi) {
+  mDcaPart[0] = lo; mDcaPart[1] = hi; }
 
 inline void StFlowSelection::SetHarmonic(const Int_t& harN) {
   if (harN < 0 || harN >= Flow::nHars) {
