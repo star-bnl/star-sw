@@ -35,7 +35,7 @@ my @SetG = (
              "auau130/mevsim/vanilla_flow/central/year_1h/hadronic_on",
              "auau130/mevsim/vanilla/central/year_1e/hadronic_on", 
              "auau200/single/default/central/year_1e/hadronic_on",
-             "auau200/rqmd/default/b0_15/year_1h/hadronic_on",
+             "auau200/rqmd/default/b0_14/year_1h/hadronic_on",
              "auau130/mevsim/vanilla_flow/central/year_1e/hadronic_on",
              "auau130/mevsim/vanilla_dynamic/central/year_1e/hadronic_on",
              "auau130/mevsim/vanilla_omega/central/year_1e/hadronic_on",
