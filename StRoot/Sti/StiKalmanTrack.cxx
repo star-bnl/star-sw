@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.48 2004/12/11 04:31:36 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.48 2004/12/11 04:31:36 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.49 2004/12/23 15:06:28 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.49 2004/12/23 15:06:28 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.49  2004/12/23 15:06:28  pruneau
+ * use _alpha instead of getRefAngle while extending to vertex
+ *
  * Revision 2.48  2004/12/11 04:31:36  perev
  * set of bus fixed
  *
@@ -753,10 +756,12 @@ double StiKalmanTrack::getTrackLength() const
 {
   StiKalmanTrackNode * inNode = getInnerMostHitNode(2);
   StThreeVectorD in(inNode->getX(),inNode->getY(),inNode->getZ());
-  in.rotateZ(inNode->getRefAngle());
+  //  in.rotateZ(inNode->getRefAngle());
+  in.rotateZ(inNode->_alpha);
   StiKalmanTrackNode * otNode = getOuterMostHitNode(2);
   StThreeVectorD ot(otNode->getX(),otNode->getY(),otNode->getZ());
-  ot.rotateZ(otNode->getRefAngle());
+  //ot.rotateZ(otNode->getRefAngle());
+  ot.rotateZ(otNode->_alpha);
   StPhysicalHelixD hlx(fabs(inNode->getCurvature()),
 		            inNode->getDipAngle(),
 		            inNode->getPhase(),
@@ -1099,7 +1104,8 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
   bool   check = false;
   //if (xxxx>4.1) check = true;
 
-  localVertex.rotate(sNode->getRefAngle());
+  //localVertex.rotate(sNode->getRefAngle());
+  localVertex.rotate(sNode->_alpha);
   tNode = trackNodeFactory->getInstance();
   if (tNode==0) throw logic_error("SKTF::extendTrackToVertex() -E- tNode==null");
   tNode->reset();
@@ -1246,7 +1252,8 @@ double  StiKalmanTrack::getDca(const StiHit * vertex)    const
   StThreeVectorD originD(node->getX(),node->getY(),node->getZ());
   StThreeVectorD vxDD(vertex->x_g(), vertex->y_g(),vertex->z_g());
   StPhysicalHelixD physicalHelix(0.,0.,0.,originD,-1);
-  originD.rotateZ(node->getRefAngle());
+  //originD.rotateZ(node->getRefAngle());
+  originD.rotateZ(node->_alpha);
   physicalHelix.setParameters(fabs(node->getCurvature()),
 			       node->getDipAngle(),
 			       node->getPhase(),
