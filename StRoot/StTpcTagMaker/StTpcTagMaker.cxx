@@ -1,7 +1,10 @@
 //*-- Author : Iwona Sakrejda
 // 
-// $Id: StTpcTagMaker.cxx,v 1.4 2000/05/25 00:35:36 sakrejda Exp $
+// $Id: StTpcTagMaker.cxx,v 1.5 2000/05/25 05:22:31 sakrejda Exp $
 // $Log: StTpcTagMaker.cxx,v $
+// Revision 1.5  2000/05/25 05:22:31  sakrejda
+// Number of rows (1) set.
+//
 // Revision 1.4  2000/05/25 00:35:36  sakrejda
 // Copying dst_mon_soft_tpc to TpcTag table finished
 //
@@ -57,6 +60,7 @@ Int_t StTpcTagMaker::Make(){
   if (!global) return 0;
   St_DataSetIter gime(global);
   St_dst_mon_soft_tpc *tpc_mon_data =(St_dst_mon_soft_tpc *) gime("mon_soft_tpc");
+  if (!tpc_mon_data) return 0;
   dst_mon_soft_tpc_st *tpc_mon_data_st = (dst_mon_soft_tpc_st *)tpc_mon_data->GetTable();
 
   // Create a data set and add the table to it.
@@ -93,6 +97,7 @@ Int_t StTpcTagMaker::Make(){
   tagtab_st->res_pad_tpc[1] = tpc_mon_data_st->res_pad_tpc[1];
   tagtab_st->res_drf_tpc[0] = tpc_mon_data_st->res_drf_tpc[0];
   tagtab_st->res_drf_tpc[1] = tpc_mon_data_st->res_drf_tpc[1];
+  tagtab->SetNRows(1);
  return kStOK;
 }
 
