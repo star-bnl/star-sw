@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.10 1999/12/15 18:40:59 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.11 2000/01/24 14:39:27 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.11  2000/01/24 14:39:27  perev
+ * FTPC (HolmMade) is added
+ *
  * Revision 1.10  1999/12/15 18:40:59  perev
  * Keep undeleted all DAQ wrapper classes
  *
@@ -36,6 +39,7 @@
  *
  **************************************************************************/
 #include "StDAQReader.h"
+#include "StFTPCReader.h"
 #include "Stypes.h"
 #include "StDaqLib/GENERIC/EventReader.hh"
 
@@ -67,6 +71,7 @@ StDAQReader::StDAQReader(const char *file)
   memset(fEventInfo,0,sizeof(DAQEventInfo));
   assert(sizeof(DAQEventInfo)==sizeof(EventInfo));
   setTPCVersion();
+  setFTPCVersion();
 
   if(file && file[0]) open(file);
 }
@@ -118,6 +123,7 @@ int StDAQReader::readEvent()
   *fEventInfo = fEventReader->getEventInfo();
 
   if (fTPCReader) fTPCReader->Update();
+  if (fFTPCReader) fFTPCReader->Update();
 
   return 0;
 }
@@ -140,6 +146,9 @@ int StDAQReader::skipEvent(int nskip)
 //_____________________________________________________________________________
 void StDAQReader::setTPCVersion(const char* vers)
 {strcpy(fTPCVersion,vers);} 
+//_____________________________________________________________________________
+void StDAQReader::setFTPCVersion(const char* vers)
+{strcpy(fFTPCVersion,vers);} 
 
 //_____________________________________________________________________________
   int StDAQReader::getRunNumber()   const { return fEventReader->runno();}
@@ -184,6 +193,14 @@ StRICHReader *StDAQReader::getRICHReader()
     fRICHReader = ::getRICHReader(fEventReader);
   }
   return fRICHReader;
+}
+//_____________________________________________________________________________
+StFTPCReader *StDAQReader::getFTPCReader() 
+{
+  if (!fFTPCReader) {
+    fFTPCReader = new StFTPCReader(this);
+  }
+  return fFTPCReader;
 }
 //_____________________________________________________________________________
 void StDAQReader::printEventInfo()
