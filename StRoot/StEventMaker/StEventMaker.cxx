@@ -1,5 +1,8 @@
-// $Id: StEventMaker.cxx,v 1.5 1999/05/22 17:59:01 perev Exp $
+// $Id: StEventMaker.cxx,v 1.6 1999/06/11 17:43:57 perev Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.6  1999/06/11 17:43:57  perev
+// remove StRun from .const
+//
 // Revision 1.5  1999/05/22 17:59:01  perev
 // Can read also mdc2 and last format
 //
@@ -99,8 +102,11 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-// $Id: StEventMaker.cxx,v 1.5 1999/05/22 17:59:01 perev Exp $
+// $Id: StEventMaker.cxx,v 1.6 1999/06/11 17:43:57 perev Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.6  1999/06/11 17:43:57  perev
+// remove StRun from .const
+//
 // Revision 1.5  1999/05/22 17:59:01  perev
 // Can read also mdc2 and last format
 //
@@ -211,7 +217,7 @@
 #endif
 #include "StEventMaker/StRootEventManager.hh"
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.5 1999/05/22 17:59:01 perev Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.6 1999/06/11 17:43:57 perev Exp $";
 #include "StEventManager.hh"
  * Revision 2.23  2000/05/22 21:53:41  ullrich
 const long detid_tpc = 1;
@@ -289,9 +295,6 @@ Int_t StEventMaker::Make(){
   }
   if (doLoad) {
     currentRun = new StRun(*dstRunHeader);
-#ifndef TRANSIENT_STEVENT
-      AddConst(currentRun);
-#endif
   }
  * Revised to build new StEvent version
   
@@ -710,7 +713,7 @@ void StEventMaker::setEventManager(StEventManager* mgr)
 //_____________________________________________________________________________
 void StEventMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StEventMaker.cxx,v 1.5 1999/05/22 17:59:01 perev Exp $\n");
+  printf("* $Id: StEventMaker.cxx,v 1.6 1999/06/11 17:43:57 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
