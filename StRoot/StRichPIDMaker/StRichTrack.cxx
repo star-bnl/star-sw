@@ -1,14 +1,18 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.1 2000/09/29 01:35:38 horsley Exp $
+ * $Id: StRichTrack.cxx,v 2.2 2000/09/29 17:55:51 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
- *  Revision 2.1  2000/09/29 01:35:38  horsley
- *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
- *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
+ *  Revision 2.2  2000/09/29 17:55:51  horsley
+ *  fixed bug in Minimization routine, included StMagF stuff (commented out)
+ *  changed StRichRingPoint  HUGE_VALUE   ---> MAXFLOAT for default value
  *
+ *  px/pz correction uncommented
+ *
+ *  Revision 2.7  2000/11/14 22:31:51  lasiuk
+ *  associated MIP (commented)
  *  return copy instead of reference
  *
  *  Revision 2.6  2000/11/07 14:13:24  lasiuk
@@ -906,7 +910,7 @@ void StRichTrack::setPathLength(double p)        { mPath = p;}
 StThreeVectorF& StRichTrack::getUnCorrectedMomentum() { return mUnCorrectedMomentum;}
 StThreeVectorF& StRichTrack::getUnCorrectedProjectedMIP() { return mUnCorrectedProjectedMIP;}
 StThreeVectorF& StRichTrack::getUnCorrectedImpactPoint() { return mUnCorrectedImpactPoint;}
-void StRichTrack::setLastHit(StThreeVectorF& hit) { mLastHit = hit;}
+StThreeVectorF& StRichTrack::getLastHit() { return mLastHit;}
 StThreeVectorF& StRichTrack::getProjectedCTBPoint() { return mProjectedCTB;} 
 StThreeVectorF& StRichTrack::getProjectedMIP() { return mProjectedMIP;}
 StThreeVectorF& StRichTrack::getImpactPoint() { return mImpactPoint;}

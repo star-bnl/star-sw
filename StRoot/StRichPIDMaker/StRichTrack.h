@@ -1,14 +1,18 @@
 /**********************************************************
- * $Id: StRichTrack.h,v 2.1 2000/09/29 01:35:38 horsley Exp $
+ * $Id: StRichTrack.h,v 2.2 2000/09/29 17:55:51 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.h,v $
- *  Revision 2.1  2000/09/29 01:35:38  horsley
- *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
- *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
+ *  Revision 2.2  2000/09/29 17:55:51  horsley
+ *  fixed bug in Minimization routine, included StMagF stuff (commented out)
+ *  changed StRichRingPoint  HUGE_VALUE   ---> MAXFLOAT for default value
  *
+ *  Revision 2.4  2000/10/19 01:13:23  horsley
+ *  added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
+ *  added normal distance sigma cut on hits, quartz and radiator pathlengths
+ *  for individual photons, modified minimization routine to correct boundary
  *  problems
  *
  *  Revision 2.3  2000/10/03 19:26:02  horsley
@@ -135,7 +139,7 @@ class StRichTrack {
   virtual void  setImpactPoint(StThreeVectorF& impact);
   virtual void  setProjectedMIP(StThreeVectorF& mip);
   virtual void  setPathLength(double p);
-  virtual void  setLastHit(StThreeVectorF& );
+
   virtual void  setMaxGap(int);
   virtual void  setMaxChain(int);
   virtual void  setFirstRow(int);
