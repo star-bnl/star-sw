@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.14 2003/01/29 17:24:37 oldi Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.15 2003/05/20 18:35:04 oldi Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.15  2003/05/20 18:35:04  oldi
+// Cuts for vertex estimation introduced (globDca < 1 cm, multiplicity >= 200).
+//
 // Revision 1.14  2003/01/29 17:24:37  oldi
 // Message added which will be printed when StMagUtilities is initialized.
 //
@@ -98,9 +101,11 @@ inline Double_t StFtpcTrackingParams::MaxVertexPosZWarning() { return mMaxVertex
 inline Double_t StFtpcTrackingParams::MaxVertexPosZError()   { return mMaxVertexPosZError;   }
 
 // Vertex reconstruction
-inline    Int_t StFtpcTrackingParams::HistoBins() { return mHistoBins; }
-inline Double_t StFtpcTrackingParams::HistoMin()  { return mHistoMin;  }
-inline Double_t StFtpcTrackingParams::HistoMax()  { return mHistoMax;  }
+inline    Int_t StFtpcTrackingParams::HistoBins()    { return mHistoBins;    }
+inline Double_t StFtpcTrackingParams::HistoMin()     { return mHistoMin;     }
+inline Double_t StFtpcTrackingParams::HistoMax()     { return mHistoMax;     }
+inline Double_t StFtpcTrackingParams::MaxDcaVertex() { return mMaxDcaVertex; }
+inline    Int_t StFtpcTrackingParams::MinNumTracks() { return mMinNumTracks; }
 
 // Tracker
 inline Int_t StFtpcTrackingParams::RowSegments() { return mRowSegments; }
@@ -290,9 +295,11 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
   mMaxVertexPosZError   = 100 * centimeter;
 
   // Vertex reconstruction
-  mHistoBins = 300;
-  mHistoMin  = -75. * centimeter;
-  mHistoMax  =  75. * centimeter;
+  mHistoBins    = 300;
+  mHistoMin     = -75. * centimeter;
+  mHistoMax     =  75. * centimeter;
+  mMaxDcaVertex =   1. * centimeter;
+  mMinNumTracks = 200; // must be >0 !
 
   // Tracker
   mRowSegments =  20;
@@ -514,10 +521,13 @@ Int_t StFtpcTrackingParams::InitTrackingParams(ftpcTrackingPars_st *trackParsTab
     mMaxVertexPosZError   = trackParsTable->maxVertexPosZError   * centimeter;
     
     // Vertex reconstruction
-    mHistoBins = trackParsTable->histoBins;
-    mHistoMin  = trackParsTable->histoMin * centimeter;
-    mHistoMax  = trackParsTable->histoMax * centimeter;
-    
+    mHistoBins    = trackParsTable->histoBins;
+    mHistoMin     = trackParsTable->histoMin * centimeter;
+    mHistoMax     = trackParsTable->histoMax * centimeter;
+    mMaxDcaVertex = 1. * centimeter;
+    mMinNumTracks = 200;  // must be >0 !
+
+
     // Tracker
     mRowSegments = trackParsTable->rowSegments;
     mPhiSegments = trackParsTable->phiSegments;
@@ -861,6 +871,8 @@ void StFtpcTrackingParams::PrintParams() {
   gMessMgr->Message("", "I", "OST") << "# of histogram bins.............: " << mHistoBins << endm; 
   gMessMgr->Message("", "I", "OST") << "lower boundary of histogram (cm): " << mHistoMin << endm; 
   gMessMgr->Message("", "I", "OST") << "upper boundary of histogram (cm): " << mHistoMax << endm; 
+  gMessMgr->Message("", "I", "OST") << "Dca cut (cm)....................: " << mMaxDcaVertex << endm; 
+  gMessMgr->Message("", "I", "OST") << "min. # of tracks required.......: " << mMinNumTracks << endm; 
   
   gMessMgr->Message("", "I", "OST") << endm;
   gMessMgr->Message("", "I", "OST") << "Tracker settings" << endm;
