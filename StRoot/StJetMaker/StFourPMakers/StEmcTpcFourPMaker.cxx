@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.4 2004/10/25 22:19:09 mmiller Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.5 2004/10/28 19:44:24 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -134,7 +134,9 @@ StEmcTpcFourPMaker::StEmcTpcFourPMaker(const char* name,
     
 }
 
-Int_t StEmcTpcFourPMaker::Make() {
+Int_t StEmcTpcFourPMaker::Make()
+{
+
     SetDepRatios();
     cout <<" Start StEmcTpcFourPMaker :: "<< GetName() <<" mode="<<m_Mode<<endl;   
     binmap.clearall();
@@ -222,7 +224,16 @@ Int_t StEmcTpcFourPMaker::Make() {
     assert(tables);
 
     //Now loop on emc data
-    StEmcCollection *emc = uDst->emcCollection();
+    StEmcCollection *emc = 0;
+    StEvent* event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
+    if (event) {
+	cout <<"StEmcTpcFourPMaker::Make()\tRetrieve StEmcCollection from StEvent"<<endl;
+	emc = event->emcCollection();
+    }
+    else {
+	cout <<"StEmcTpcFourPMaker::Make()\tRetrieve StEmcCollection from StMuDst"<<endl;
+	emc = uDst->emcCollection();
+    }
     assert(emc);
 
     // now it is like StEvent, getting energies for towers

@@ -107,8 +107,8 @@ void RunJetFinder2(int nevents=100,
     ktpars->setDebug(false);
     emcJetMaker->addAnalyzer(anapars, ktpars, emcFourPMaker, "MkKtJet");
     
-    chain->Init();
     chain->PrintInfo();
+    chain->Init();
 
     cout <<"\tLoop on branches"<<endl;
 
