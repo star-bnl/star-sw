@@ -3,9 +3,13 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
   Created  30-03-99
   Author   W.B.Christie
 
-* $Id: pipegeo.g,v 1.9 2004/01/22 00:26:48 potekhin Exp $
+* $Id: pipegeo.g,v 1.10 2004/02/11 22:32:21 potekhin Exp $
 *
 * $Log: pipegeo.g,v $
+* Revision 1.10  2004/02/11 22:32:21  potekhin
+* correct a typo in the standard pipe positioning, ThetaZ=180 was
+* erroneously missing
+*
 * Revision 1.9  2004/01/22 00:26:48  potekhin
 * Allow for optional positioning with MANY
 *
@@ -196,7 +200,7 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
          Position PIPE in CAVE  ThetaZ=180 Konly='MANY'
       else ! deault, no need to 'MANY'
          Position PIPE in CAVE
-         Position PIPE in CAVE
+         Position PIPE in CAVE  ThetaZ=180
       endif
 *
 * -----------------------------------------------------------------------------
