@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.9  1999/03/31 00:38:29  fisyak
+// Replace search for Event and Decoder
+//
 // Revision 1.8  1999/03/25 22:39:10  ward
 // getPadList does not set padlist when npad==0
 //
@@ -322,14 +325,13 @@ timeOff     pad         SeqWrite SeqWrite m              0x100
 ------------------------------------------------------------------------*/
 // BBB Brian don't forget LinArray[] ("DAQ to Offline").
 Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
- St_DataSetIter trs(GetDataSet("Trs"));            
 #ifdef TRS_SIMPLE
  mEvent=NULL;
- St_ObjectSet *decoder=(St_ObjectSet*)trs("Decoder"); if(!decoder) return 22;
+ St_ObjectSet *decoder=(St_ObjectSet*)GetDataSet("Decoder"); if(!decoder) return 22;
  mUnpacker=(StTrsSimpleMaker*)(decoder->GetObject()); if(!mUnpacker) return 24;
 #else
- St_ObjectSet *trsEvent=(St_ObjectSet*)trs("Event"); if(!trsEvent) return 1;
- St_ObjectSet *decoder=(St_ObjectSet*)trs("Decoder"); if(!decoder) return 2;
+ St_ObjectSet *trsEvent=(St_ObjectSet*)GetDataSet("Event"); if(!trsEvent) return 1;
+ St_ObjectSet *decoder=(St_ObjectSet*) GetDataSet("Decoder"); if(!decoder) return 2;
  mUnpacker=(StTrsUnpacker*)(decoder->GetObject());  if(!mUnpacker) return 4;
  mEvent=(StTpcRawDataEvent*)(trsEvent->GetObject());   if(!mEvent) return 3;
 #endif
@@ -359,7 +361,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.8 1999/03/25 22:39:10 ward Exp $ \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.9 1999/03/31 00:38:29 fisyak Exp $ \n");
   printf("**************************************************************\n");
   if(Debug()) StMaker::PrintInfo();
 }
