@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.12 1998/12/04 15:31:50 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.13 1998/12/16 22:19:19 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.13  1998/12/16 22:19:19  fisyak
+// New tfs
+//
 // Revision 1.12  1998/12/04 15:31:50  fisyak
 // Add g2t_vertex for tcl
 //
@@ -111,7 +114,6 @@ Int_t St_tcl_Maker::Init(){
    St_DataSet *tfspars = local("tpc/tfspars");
    if (tfspars){
      m_tfs_fspar = (St_tfs_fspar *) local("tpc/tfspars/tfs_fspar");
-     m_tfs_bmpar = (St_tfs_bmpar *) local("tpc/tfspars/tfs_bmpar");
      m_tfs_fsctrl= (St_tfs_fsctrl*) local("tpc/tfspars/tfs_fsctrl");
    }
 // Create Histograms    
@@ -188,7 +190,7 @@ Int_t St_tcl_Maker::Make(){
 	 cout << "start tfs_run" << endl;
 
          Int_t Res_tfs_g2t =   tfs_g2t(g2t_tpc_hit, g2t_track, g2t_vertex,
-                                m_tfs_fspar,m_tfs_bmpar,m_tfs_fsctrl,
+                                m_tfs_fspar,m_tfs_fsctrl,
                                 index, m_type, tphit);
 
          if (Res_tfs_g2t !=  kSTAFCV_OK){cout << "Problem running tfs_g2t..." << endl;}
@@ -208,7 +210,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.12 1998/12/04 15:31:50 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.13 1998/12/16 22:19:19 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
