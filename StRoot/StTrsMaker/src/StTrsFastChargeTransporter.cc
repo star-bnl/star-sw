@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsFastChargeTransporter.cc,v 1.9 1999/04/07 15:05:08 lasiuk Exp $
+ * $Id: StTrsFastChargeTransporter.cc,v 1.10 1999/07/09 03:47:56 lasiuk Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,6 +11,10 @@
  **********************************************************************
  *
  * $Log: StTrsFastChargeTransporter.cc,v $
+ * Revision 1.10  1999/07/09 03:47:56  lasiuk
+ * scale the centroid shift of charge distribution by the sqrt of the
+ * number of electrons.  Original code was for single electrons ONLY!
+ *
  * Revision 1.9  1999/04/07 15:05:08  lasiuk
  * typo
  *
@@ -96,13 +100,15 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
     }
     //
     // Diffusion to space out charge on the wire:
+    //
+    double ne = sqrt(seg.charge());
     if (mTransverseDiffusion) {
-	seg.position().setX( (mGaussDistribution.shoot(seg.position().x(), (mSigmaTransverse*sqrt(driftLength)) ) ) );
-	seg.position().setY( (mGaussDistribution.shoot(seg.position().y(), (mSigmaTransverse*sqrt(driftLength)) ) ) );
+	seg.position().setX( (mGaussDistribution.shoot(seg.position().x(), (mSigmaTransverse*sqrt(driftLength)) ) )/ne );
+	seg.position().setY( (mGaussDistribution.shoot(seg.position().y(), (mSigmaTransverse*sqrt(driftLength)) ) )/ne );
     }
     
     if (mLongitudinalDiffusion) {
-	seg.position().setZ( (mGaussDistribution.shoot(driftLength, (mSigmaLongitudinal*sqrt(driftLength)) ) ) );
+	seg.position().setZ( (mGaussDistribution.shoot(driftLength, (mSigmaLongitudinal*sqrt(driftLength)) ) )/ne );
     }
     else {
 	seg.position().setZ(driftLength);
