@@ -2,6 +2,7 @@ CC:>--------------------------------------------------------------------
 CC: FILE:       dst_point_filler.F
 CC: HISTORY:
 CC:             Created on August 20, 1998
+CC:             Modified on June 4, 1999 to load all space points - R.L.Ray
 CC:<--------------------------------------------------------------------
 
       INTEGER*4 FUNCTION DST_POINT_FILLER(
@@ -22,10 +23,8 @@ CC:             table and loads this information into the DST
 CC:             Space Point Table, dst_point.
 CC:             Compression algorithms are used to load these
 CC:             quantities into the dst_point variables.
-CC:             In the present version of this module all space
-CC:             points which are assigned to a final, DST global
-CC:             track, as indicated by the F.keys 'id_globtrk',
-CC:             are loaded into dst_point.
+CC:             In this new version of this module all space
+CC:             points are loaded into dst_point.
 CC:
 CC: AUTHOR:     Lanny Ray - ray@physics.utexas.edu -- 8/20/98
 CC: ARGUMENTS:
@@ -77,13 +76,11 @@ CC:  Set dst_point number of used rows to zero:
 
       dst_point_h.nok = 0
 
-CC:  Loop thru TPC space points; store all points that are assigned
-CC:  to a global track in dst_track:
+CC:  Loop thru TPC space points; store all points
 
       if(tcl_tphit_h.nok .gt. 0 .and. dst_point_h.maxlen .ge. 1) then
          do i = 1,tcl_tphit_h.nok
-            if(tcl_tphit(i).id_globtrk .gt. 0 .and.
-     1         dst_point_h.nok .lt. dst_point_h.maxlen) then
+            if(dst_point_h.nok .lt. dst_point_h.maxlen) then
                dst_point_h.nok = dst_point_h.nok + 1
 
 CC:  Fill hardware position for hit>>>
@@ -188,13 +185,11 @@ CC:  Fill Foreign Key to dst_track table>>>
 
 
 
-CC:  Loop thru SVT space points; store all points that are assigned
-CC:  to a global track in dst_track:
+CC:  Loop thru SVT space points; store all points.
 
       if(scs_spt_h.nok .gt. 0 .and. dst_point_h.maxlen .ge. 1) then
          do i = 1,scs_spt_h.nok
-            if(scs_spt(i).id_globtrk .gt. 0 .and.
-     1         dst_point_h.nok .lt. dst_point_h.maxlen) then
+            if(dst_point_h.nok .lt. dst_point_h.maxlen) then
                dst_point_h.nok = dst_point_h.nok + 1
 
 CC:  Fill hardware position for hit>>>
