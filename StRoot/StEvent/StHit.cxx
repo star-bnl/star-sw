@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.2 2000/05/19 18:33:14 ullrich Exp $
+ * $Id: StHit.cxx,v 2.3 2000/06/01 21:38:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
- * Revision 2.2  2000/05/19 18:33:14  ullrich
- * Minor changes (add const) to cope with modified StArray.
+ * Revision 2.3  2000/06/01 21:38:53  ullrich
+ * Added member mFlag and access member flag() and setFlag().
  *
  * Revision 2.3  2000/06/01 21:38:53  ullrich
  * Added member mFlag and access member flag() and setFlag().
@@ -31,9 +31,10 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.2 2000/05/19 18:33:14 ullrich Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.3 2000/06/01 21:38:53 ullrich Exp $";
 
 ClassImp(StHit)
+
 StHit::StHit()
 {
     mFlag = 0;
@@ -44,7 +45,9 @@ StHit::StHit()
 
 StHit::StHit(const StThreeVectorF& p,
              const StThreeVectorF& e,
-{ /* noop */ }
+             ULong_t hp, Float_t q, UChar_t c)
+    : StMeasuredPoint(p), mHardwarePosition(hp),
+      mCharge(q), mTrackRefCount(c), mPositionError(e)
 {
     mFlag = 0;
 }
@@ -54,10 +57,11 @@ StHit::~StHit() { /* noop */ }
 StObject*
 StHit::clone() { return new StHit(*this); }
    
-    return h.mPosition == mPosition &&
-        h.mPositionError == h.mPositionError &&
-        h.mCharge           == mCharge &&
-        h.mHardwarePosition == mHardwarePosition;
+Int_t
+StHit::operator==(const StHit& h) const
+{
+    return h.mPosition         == mPosition &&
+           h.mPositionError    == h.mPositionError &&
            h.mCharge           == mCharge &&
            h.mHardwarePosition == mHardwarePosition &&
 	   h.mFlag             == mFlag;
@@ -73,6 +77,9 @@ void
 StHit::setCharge(Float_t val) { mCharge = val; }
 
 void
+StHit::setTrackReferenceCount(UChar_t val) { mTrackRefCount = val; }
+    
+void
 StHit::setFlag(UChar_t val) { mFlag = val; }
     
 void
@@ -80,6 +87,9 @@ StHit::setHardwarePosition(ULong_t val) { mHardwarePosition = val; }
 
 void
 StHit::setPositionError(const StThreeVectorF& e) { mPositionError = e; }
+    
+Float_t
+StHit::charge() const { return mCharge; }
 
 UChar_t
 StHit::flag() const { return mFlag; }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSsdHit.cxx,v 2.5 2000/01/05 16:05:37 ullrich Exp $
+ * $Id: StSsdHit.cxx,v 2.6 2000/06/01 21:39:00 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *         Lilian Martin, Dec 1999
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.cxx,v $
- * Revision 2.5  2000/01/05 16:05:37  ullrich
- * Updated for actual use in StEvent. Unpacking changed.
+ * Revision 2.6  2000/06/01 21:39:00  ullrich
+ * Added member mFlag and access member flag() and setFlag().
  *
  * Revision 2.5  2000/01/05 16:05:37  ullrich
  * Updated for actual use in StEvent. Unpacking changed.
@@ -34,7 +34,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.5 2000/01/05 16:05:37 ullrich Exp $";
+static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.6 2000/06/01 21:39:00 ullrich Exp $";
 
 StMemoryPool StSsdHit::mPool(sizeof(StSsdHit));
 
@@ -51,14 +51,12 @@ StSsdHit::StSsdHit(const StThreeVectorF& p,
 StSsdHit::StSsdHit(const dst_point_st& pt)
 {
     //
-    // Unpack charge:
-    // The charge is decoded together with its error.
-    // Currently only the charge is used but the corresponding
-    // error can easily be added.
+    // Unpack charge and status flag
     //
-    const ULong_t ssddq = pt.charge/(1L<<16);
-    const ULong_t ssdq  = pt.charge - ssddq*(1L<<16);
+    const ULong_t iflag = pt.charge/(1L<<16);
+    const ULong_t ssdq  = pt.charge - iflag*(1L<<16);
     mCharge = Float_t(ssdq)/(1<<21);
+    mFlag = static_cast<UChar_t>(iflag);
 
     //
     // Unpack position in xyz
