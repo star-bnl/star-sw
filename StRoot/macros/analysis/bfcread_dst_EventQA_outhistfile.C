@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.16 2001/05/16 20:53:36 lansdell Exp $
+// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.17 2001/05/24 20:10:36 lansdell Exp $
 // $Log: bfcread_dst_EventQA_outhistfile.C,v $
+// Revision 1.17  2001/05/24 20:10:36  lansdell
+// changed DB maker SetDateTime option to year_2b
+//
 // Revision 1.16  2001/05/16 20:53:36  lansdell
 // added StMcEvent to chain
 //
@@ -145,7 +148,7 @@ void bfcread_dst_EventQA_outhistfile(
 // database stuff
   const char* calibDB = "MySQL:StarDb";
   St_db_Maker* calibMk = new St_db_Maker("StarDb",calibDB);
-  calibMk->SetDateTime("year_1h");
+  calibMk->SetDateTime("year_2b");
   calibMk->SetDebug();  
   StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
 
