@@ -7,7 +7,8 @@ use strict;
 use Sys::Hostname;
 my $hostname     = hostname();
 my $dir_log      = "/disk00001/star/MDC3/test";
-my $dir_sim      = "../sum";   
+my $dir_sim      = "../sum";
+my $dir_archive  = "../archive";   
 my @set ;
 my @list;      
 my $job_log;
@@ -18,11 +19,11 @@ chdir $dir_log;
 @list = `ls *evts`;
 foreach my $file (@list) {
        my  $ltime = `mod_time $file`;
-#           print $ltime; 
            if( $ltime > 1200){ 
              parse_log($file);
              timestamp($file);
-         $dummy = `mv $file_sum ../sum`;  
+         $dummy = `mv $file_sum ../sum`;
+         $dummy = `mv $file ../archive`;   
            }             
     }
 exit(0);
@@ -87,7 +88,16 @@ sub parse_log($) {
   
   # dump contents of log file to array for parsing
   my @logfile = <LOGFILE>;
-  
+  my @size_line;
+  my $num_line = 0; 
+  my @maker_size = 0;
+  my @mem_words;
+  my $num_maker = 0;
+  my @maker_name;
+  my @msize_aver = 0; 
+  my @mymaker; 
+  my $i;
+  my $last_maker;
   #---------------------------------------------------------
   
   # parse beginning of file
@@ -96,10 +106,9 @@ sub parse_log($) {
  
   foreach $line (@logfile) {
      chop $line ;
+      $num_line++;
   $error_flag = 0;
     
-    # all done with beginning of file?
-#    last if $line =~ /\*{3} Call St_db_Maker::Init\(\) \*{3}/;
 
     # get command string
     if ( (! $command_string) && $line =~ /Processing (bfc\.C.*)/ ) {
@@ -124,12 +133,30 @@ sub parse_log($) {
     $record_run_options and $run_option_length and $run_option_string .= $line."\n";
     $record_run_options and $run_option_length++;
 
-   
+
+    # get memory size for each Maker
+     if( $line =~ /EndMaker/){
+        $size_line[0] = $logfile[$num_line + 1];   
+        $size_line[1] = $logfile[$num_line + 2]; 
+       @mem_words = split(" ",$size_line[0]);  
+       $maker_size[$num_maker] += $mem_words[4];
+       @mem_words = split(" ",$size_line[1]);
+       @mymaker = split ("::",$mem_words[1]);
+ 
+       $maker_name[$num_maker] = $mymaker[0];
+       $num_maker++;
+       if( $line =~ /tree.EndMaker/){
+         $last_maker = $num_maker;
+         $num_maker = 0; 
+       }
+      }
+  
     # get last event number
     if ( $line =~ /Done with Event no. ([0-9]+)\W+([0-9]+)/ ) {
       $last_event = $1;
 
     } 
+
     # check if job crashed
     if ($line =~ /segmentation violation/) {
              $segmentation_violation = $previous_line;
@@ -138,11 +165,10 @@ sub parse_log($) {
     $previous_line = $line;
     
     #check if job is completed
-    if ( $line =~ /Run completed NULL/) {
+    if ( $line =~ /Run completed/) {
           
           $jrun = "Done";      
 	}
-
   }
 
   #--------------------------------------------------------------------------
@@ -184,7 +210,16 @@ sub parse_log($) {
 
  }
    print(">>>>>>>>>>  Job status:  ", $jrun, "  <<<<<<<<<<\n");
-         
+
+   print '=' x 80, "\n";
+   print(">>> Average memory usage for each Maker at the time of execution <<<\n");
+   print '=' x 80, "\n";
+
+   for ($i = 1; $i < $last_maker; $i++){
+
+   $msize_aver[$i] = $maker_size[$i]/($last_event * 1000);
+   printf("%s :       Memory size =  %10.3f  MB; \n", $maker_name[$i], $msize_aver[$i]);
+   }        
 }
  #--------------------------------------------------------------------------
   
@@ -216,7 +251,7 @@ sub parse_log($) {
      $cpu_time = $words[8] / $no_events;
 
 #    print ($Maker, ": Real Time = ", $real_time," seconds;   Cpu Time = ", $cpu_time, " seconds; \n");
-    printf ("%s : Real Time =  %10f seconds;   Cpu Time = %10f seconds;\n", $Maker, $real_time, $cpu_time);
+    printf ("%s : Real Time =  %10.3f seconds;   Cpu Time = %10.3f seconds;\n", $Maker, $real_time, $cpu_time);
      if ($end_line =~ /bfc/){
         last;
      } 
