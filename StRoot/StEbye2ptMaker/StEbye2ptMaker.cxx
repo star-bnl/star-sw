@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEbye2ptMaker.cxx,v 1.8 2000/12/16 18:41:42 aya Exp $
+ * $Id: StEbye2ptMaker.cxx,v 1.9 2000/12/16 18:54:14 aya Exp $
  *
  * StEbye2ptMaker.cxx
  *
@@ -15,11 +15,9 @@
  ***************************************************************************
  *
  * $Log: StEbye2ptMaker.cxx,v $
- * Revision 1.8  2000/12/16 18:41:42  aya
- * *** empty log message ***
+ * Revision 1.9  2000/12/16 18:54:14  aya
+ * fixed eta cut
  *
- * Revision 1.8  2000/12/15 15:50:50  aya
- * fixed event cuts for eta
  *
  * Revision 1.7  2000/09/20 00:53:50  jgreid
  * fixed sorting to work properly with event cuts
@@ -58,7 +56,7 @@
 using namespace units;
 #endif
 
-static const char rcsid[] = "$Id: StEbye2ptMaker.cxx,v 1.8 2000/12/16 18:41:42 aya Exp $";
+static const char rcsid[] = "$Id: StEbye2ptMaker.cxx,v 1.9 2000/12/16 18:54:14 aya Exp $";
 
 ClassImp(StEbye2ptMaker)
 
