@@ -18,7 +18,7 @@
 #define ST_TRS_PARAMETERIZED_DIGITAL_SIGNAL_GENERATOR_HH
 #include <iostream.h>
 #include "StTrsDigitalSignalGenerator.hh"
-#include "StDaqLib/TPC/trans_table.hh"
+#include "trans_table.hh" 
 class StTrsFastDigitalSignalGenerator : public StTrsDigitalSignalGenerator {
 public:
     ~StTrsFastDigitalSignalGenerator();
@@ -42,3 +42,11 @@ private:
     double     mSimpleConversion;
 };
 #endif
+
+
+
+
+
+
+
+
