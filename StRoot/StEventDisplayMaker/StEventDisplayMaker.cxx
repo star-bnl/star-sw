@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.24 1999/11/04 01:49:47 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.25 1999/11/04 17:59:59 fine Exp $
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.25  1999/11/04 17:59:59  fine
+// several bugs fixed to draw table-objects
+//
 // Revision 1.24  1999/11/04 01:49:47  fine
 // tpt_track drawing is turned On
 //
@@ -774,14 +777,14 @@ Int_t StEventDisplayMaker::MakeTable(const Char_t **positions)
   if (strcmp(m_Table->GetType(),"tpt_track")) {
     filter = (StVirtualEventFilter *)m_FilterArray->At(kTable);
     if (!filter || filter->IsOn() ) {
-       tableCounter = MakeTableHits(m_Table,filter,positions[1],&positions[2]);
+       tableCounter += MakeTableHits(m_Table,filter,positions[1],&positions[2]);
        if (Debug()) printf(" St_Table: %d \n", tableCounter);
     }
   }
   else {
     filter = (StVirtualEventFilter *)m_FilterArray->At(kTptTrack);
     if (!filter || filter->IsOn() ) {
-       tableCounter = MakeTableTracks(m_Table,filter);
+       tableCounter += MakeTableTracks(m_Table,filter);
        if (Debug()) printf(" St_Table:tpc_Track %d \n", tableCounter);
     }
   }
@@ -835,29 +838,26 @@ Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFi
 )
 {
   Int_t totalHits = 0;
-#if 1
   St_Table &ttt = *((St_Table *)points);
   TString tr = keyColumn; 
   if (ttt.GetNRows() ) {
     St_TableSorter *track2Line = new St_TableSorter (ttt,tr);
     m_TableCollector->Add(track2Line);    // Collect to remove  
-    Int_t   hitCounter = 0;
     Color_t hitColor = kGreen;
     Style_t hitStyle = 1;
     Width_t hitSize  = 2;
     Int_t i = 0;
     Int_t nextKeyIndx = 0;
-    for (i=0;i<track2Line->CountKeys();i++) 
-    {
-       const void *newID = track2Line->GetKeyAddress(nextKeyIndx);
-       nextKeyIndx       = track2Line->CountKey(newID,nextKeyIndx,kFALSE); 
-       // -------------------------- hits filter ---------------------------- //
-       if (filter) hitColor =  filter->Filter(track2Line,i,hitSize,hitStyle); //
-       if (filter->IsOff() ) break;                                           //
-       // ------------------------------------------------------------------- //
+    Int_t maxTrackCounter = track2Line->CountKeys();
+    for (i=0;i<maxTrackCounter;i++) 
+    { 
+       // -------------------------- hits filter -------------------------------------- //
+       if (filter) hitColor =  filter->Filter(track2Line,nextKeyIndx,hitSize,hitStyle); //
+       if (filter->IsOff() ) break;                                                     //
+       // ----------------------------------------------------------------------------- //
        if (hitColor > 0) {
            St_Table3Points *hitsPoints =  new St_Table3Points(track2Line,
-                                             newID,
+                                             nextKeyIndx,
                                              keyPositions[0],keyPositions[1],keyPositions[2]);
          m_HitCollector->Add(hitsPoints);    // Collect to remove  
          St_PolyLineShape *hitsShape   = new St_PolyLineShape(hitsPoints);
@@ -868,15 +868,18 @@ Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFi
            thisHit->Mark();
            thisHit->SetVisibility();
          St_NodePosition *pp = m_EventsNode->Add(thisHit); 
-         if (!pp && hitCounter) {
-           printf(" no track position %d\n",hitCounter);
-         }
-         totalHits += nextKeyIndx;
+         Int_t s = hitsPoints->Size();
+         totalHits   += s;
+         nextKeyIndx += s; 
+         if (!pp && totalHits) printf(" no track position %d\n",totalHits);
        }
-     }
-   }
-#endif
-   return totalHits;
+       else {
+         const void *newID = track2Line->GetKeyAddress(nextKeyIndx);
+         nextKeyIndx      += track2Line->CountKey(newID,nextKeyIndx,kFALSE); 
+       }
+    }
+  }
+  return totalHits;
 }
 
 //________________________________
