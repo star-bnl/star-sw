@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.7 1999/11/29 17:32:42 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.8 1999/12/01 00:15:27 didenko Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
- * Revision 2.7  1999/11/29 17:32:42  ullrich
- * Added non-const method pidTraits().
+ * Revision 2.8  1999/12/01 00:15:27  didenko
+ * temporary solution to compile the library
+ *
+ * Revision 2.10  2000/01/20 14:42:40  ullrich
+ * Fixed bug in numberOfPossiblePoints(). Sum was wrong.
  *
  * Revision 2.9  1999/12/01 15:58:08  ullrich
  * New decoding for dst_track::method. New enum added.
@@ -46,7 +49,7 @@
  **************************************************************************/
 #include "StTrack.h"
 #include "tables/St_dst_track_Table.h"
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.7 1999/11/29 17:32:42 ullrich Exp $";
+#include "StParticleDefinition.hh"
 #include "StVertex.h"
 #include "StTrackGeometry.h"
 #include "StTrackDetectorInfo.h"
@@ -55,7 +58,7 @@ static const char rcsid[] = "$Id: StTrack.cxx,v 2.7 1999/11/29 17:32:42 ullrich 
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.7 1999/11/29 17:32:42 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.8 1999/12/01 00:15:27 didenko Exp $";
 
 StTrack::StTrack()
 {
@@ -182,7 +185,7 @@ StTrack::qualityScheme() const
     default:
     case kUndefinedQualityId:
 	return kUndefinedQualityId;
-
+	break;
     }
 }
 #endif
