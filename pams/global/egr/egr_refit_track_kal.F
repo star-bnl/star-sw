@@ -190,9 +190,6 @@ C     Load the fitting arrays with the SVT space points
                   xerr(ncir) = sqrt(svt_spt(isvth).cov(1))
                   yerr(ncir) = sqrt(svt_spt(isvth).cov(2))
                   zerr(ncir) = sqrt(svt_spt(isvth).cov(3))
-                  xerr(ncir) = 0.01;
-                  yerr(ncir) = 0.01;
-                  zerr(ncir) = 0.01;
                endif            ! good spt
             enddo               ! iplane
          endif   ! isvtt
