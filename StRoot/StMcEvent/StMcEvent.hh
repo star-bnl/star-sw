@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.13 2003/12/04 05:56:47 calderon Exp $
+ * $Id: StMcEvent.hh,v 2.14 2004/01/13 21:03:34 fisyak Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.14  2004/01/13 21:03:34  fisyak
+ * Replace iostream by Stiostream.h (for icc)
+ *
  * Revision 2.13  2003/12/04 05:56:47  calderon
  * Inclusion of Endcap EMC hit collection in StMcEvent and
  * of the Endcap hit vector in StMcTrack.
@@ -76,11 +79,7 @@
 #ifndef StMcEvent_hh
 #define StMcEvent_hh
 
-#include <iostream>
-#ifndef ST_NO_NAMESPACES
-using std::ostream;
-using std::cout;
-#endif
+#include "Stiostream.h"
 #include "StMcContainers.hh" 
 #include "TString.h"
 

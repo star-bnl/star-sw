@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.hh,v 2.9 2003/12/04 05:56:47 calderon Exp $
+ * $Id: StMcVertex.hh,v 2.10 2004/01/13 21:03:34 fisyak Exp $
  * $Log: StMcVertex.hh,v $
+ * Revision 2.10  2004/01/13 21:03:34  fisyak
+ * Replace iostream by Stiostream.h (for icc)
+ *
  * Revision 2.9  2003/12/04 05:56:47  calderon
  * Inclusion of Endcap EMC hit collection in StMcEvent and
  * of the Endcap hit vector in StMcTrack.
@@ -53,11 +56,7 @@
 #ifndef StMcVertex_hh
 #define StMcVertex_hh
 #include "StMcContainers.hh"
-#include <iostream>
-#ifndef ST_NO_NAMESPACES
-using std::ostream;
-using std::cout;
-#endif
+#include "Stiostream.h"
 #include <string>
 #ifndef ST_NO_NAMESPACES
 using std::string;

@@ -1,6 +1,9 @@
-// $Id: StMcCalorimeterHit.hh,v 2.4 2003/10/08 20:17:54 calderon Exp $
+// $Id: StMcCalorimeterHit.hh,v 2.5 2004/01/13 21:03:34 fisyak Exp $
 //
 // $Log: StMcCalorimeterHit.hh,v $
+// Revision 2.5  2004/01/13 21:03:34  fisyak
+// Replace iostream by Stiostream.h (for icc)
+//
 // Revision 2.4  2003/10/08 20:17:54  calderon
 // -using <iostream>, std::cout, std::ostream.
 // -changes in FTPC volume Id.
@@ -22,11 +25,8 @@
 #ifndef StMcCalorimeterHit_hh
 #define StMcCalorimeterHit_hh
 
-#include <iostream>
-#ifndef ST_NO_NAMESPACES
-using std::ostream;
-using std::cout;
-#endif
+#include "StObject.h"
+#include "Stiostream.h"
 
 //#include "StMemoryPool.hh"
 
