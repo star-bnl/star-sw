@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.6 2000/06/06 02:58:40 calderon Exp $
+ * $Id: StMcEvent.hh,v 2.7 2003/02/19 03:16:05 calderon Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.7  2003/02/19 03:16:05  calderon
+ * Introduction of Ctb Hit Class and Ctb Hit Collection class, modified
+ * StMcTrack, and StMcEvent accordingly.  Clearing of hits in StMcSvtWaferHitCollection.
+ *
  * Revision 2.6  2000/06/06 02:58:40  calderon
  * Introduction of Calorimeter classes.  Modified several classes
  * accordingly.
@@ -51,6 +55,7 @@
 class StMcTpcHitCollection;
 class StMcFtpcHitCollection;
 class StMcRichHitCollection;
+class StMcCtbHitCollection;
 class StMcSvtHitCollection;
 class StMcEmcHitCollection;
 
@@ -104,6 +109,8 @@ public:
     const StMcFtpcHitCollection*   ftpcHitCollection() const;
     StMcRichHitCollection*         richHitCollection();
     const StMcRichHitCollection*   richHitCollection() const;
+    StMcCtbHitCollection*         ctbHitCollection();
+    const StMcCtbHitCollection*   ctbHitCollection() const;
     
     StMcEmcHitCollection*          bemcHitCollection();
     const StMcEmcHitCollection*    bemcHitCollection() const;
@@ -133,7 +140,8 @@ public:
     void setTpcHitCollection(StMcTpcHitCollection*);               
     void setSvtHitCollection(StMcSvtHitCollection*);               
     void setFtpcHitCollection(StMcFtpcHitCollection*);              
-    void setRichHitCollection(StMcRichHitCollection*);              
+    void setRichHitCollection(StMcRichHitCollection*);
+    void setCtbHitCollection(StMcCtbHitCollection*);              
     void setBemcHitCollection(StMcEmcHitCollection*);              
     void setBprsHitCollection(StMcEmcHitCollection*);              
     void setBsmdeHitCollection(StMcEmcHitCollection*);              
@@ -160,6 +168,7 @@ protected:
     StMcSvtHitCollection*          mSvtHits;
     StMcFtpcHitCollection*         mFtpcHits;
     StMcRichHitCollection*         mRichHits;
+    StMcCtbHitCollection*          mCtbHits;
     StMcEmcHitCollection*          mBemcHits;
     StMcEmcHitCollection*          mBprsHits;
     StMcEmcHitCollection*          mBsmdeHits;
@@ -226,6 +235,11 @@ inline const StMcFtpcHitCollection* StMcEvent::ftpcHitCollection() const { retur
 inline StMcRichHitCollection* StMcEvent::richHitCollection() { return mRichHits;}
 
 inline const StMcRichHitCollection* StMcEvent::richHitCollection() const { return mRichHits;}
+
+inline StMcCtbHitCollection* StMcEvent::ctbHitCollection() { return mCtbHits;}
+
+inline const StMcCtbHitCollection* StMcEvent::ctbHitCollection() const { return mCtbHits;}
+
 
 inline StMcEmcHitCollection* StMcEvent::bemcHitCollection() { return mBemcHits;}
 inline const StMcEmcHitCollection* StMcEvent::bemcHitCollection() const {return mBemcHits;}

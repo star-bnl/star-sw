@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcContainers.cc,v 2.2 2000/03/06 18:05:20 calderon Exp $
+ * $Id: StMcContainers.cc,v 2.3 2003/02/19 03:16:04 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -8,8 +8,20 @@
  * Description: Containers for StMcEvent objects
  *
  ***************************************************************************
+ * $Log: StMcContainers.cc,v $
+ * Revision 2.3  2003/02/19 03:16:04  calderon
+ * Introduction of Ctb Hit Class and Ctb Hit Collection class, modified
+ * StMcTrack, and StMcEvent accordingly.  Clearing of hits in StMcSvtWaferHitCollection.
+ *
+ * Revision 2.3  2003/02/18 00:00:00  gans
+ * Introduction of the CTB classes.  Modified several classes
+ * accordingly.
  *
  * $Log: StMcContainers.cc,v $
+ * Revision 2.3  2003/02/19 03:16:04  calderon
+ * Introduction of Ctb Hit Class and Ctb Hit Collection class, modified
+ * StMcTrack, and StMcEvent accordingly.  Clearing of hits in StMcSvtWaferHitCollection.
+ *
  * Revision 2.2  2000/03/06 18:05:20  calderon
  * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
  * barrel-ladder-wafer.

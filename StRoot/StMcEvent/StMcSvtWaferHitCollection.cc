@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSvtWaferHitCollection.cc,v 2.2 2000/03/06 18:05:23 calderon Exp $
+ * $Id: StMcSvtWaferHitCollection.cc,v 2.3 2003/02/19 03:16:05 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StMcSvtWaferHitCollection.cc,v $
+ * Revision 2.3  2003/02/19 03:16:05  calderon
+ * Introduction of Ctb Hit Class and Ctb Hit Collection class, modified
+ * StMcTrack, and StMcEvent accordingly.  Clearing of hits in StMcSvtWaferHitCollection.
+ *
  * Revision 2.2  2000/03/06 18:05:23  calderon
  * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
  * barrel-ladder-wafer.
@@ -27,7 +31,7 @@
 #include "StMcSvtWaferHitCollection.hh"
 #include "StMcSvtHit.hh"
 
-static const char rcsid[] = "$Id: StMcSvtWaferHitCollection.cc,v 2.2 2000/03/06 18:05:23 calderon Exp $";
+static const char rcsid[] = "$Id: StMcSvtWaferHitCollection.cc,v 2.3 2003/02/19 03:16:05 calderon Exp $";
 
 StMcSvtWaferHitCollection::StMcSvtWaferHitCollection() { /* noop */ }
 
@@ -39,7 +43,7 @@ StMcSvtWaferHitCollection::~StMcSvtWaferHitCollection()
     delete mHits[i];
     mHits[i] = 0;
   }
-
+  mHits.clear();
 }
 
 const StSPtrVecMcSvtHit&

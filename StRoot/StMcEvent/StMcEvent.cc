@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.8 2000/06/06 02:58:40 calderon Exp $
+ * $Id: StMcEvent.cc,v 2.9 2003/02/19 03:16:05 calderon Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.9  2003/02/19 03:16:05  calderon
+ * Introduction of Ctb Hit Class and Ctb Hit Collection class, modified
+ * StMcTrack, and StMcEvent accordingly.  Clearing of hits in StMcSvtWaferHitCollection.
+ *
  * Revision 2.8  2000/06/06 02:58:40  calderon
  * Introduction of Calorimeter classes.  Modified several classes
  * accordingly.
@@ -49,6 +53,7 @@
 #include "StMcTpcHitCollection.hh"
 #include "StMcFtpcHitCollection.hh"
 #include "StMcRichHitCollection.hh"
+#include "StMcCtbHitCollection.hh"
 #include "StMcSvtHitCollection.hh"
 #include "StMcEmcHitCollection.hh"
 #include "StMcContainers.hh" 
@@ -63,8 +68,8 @@
 
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.8 2000/06/06 02:58:40 calderon Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.8 2000/06/06 02:58:40 calderon Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.9 2003/02/19 03:16:05 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.9 2003/02/19 03:16:05 calderon Exp $";
 
 void StMcEvent::initToZero()
 {
@@ -74,13 +79,14 @@ void StMcEvent::initToZero()
     mSvtHits = 0;             
     mFtpcHits = 0;            
     mRichHits = 0;            
-    
+    mCtbHits = 0;
     // Create the collections
     
     mTpcHits  = new StMcTpcHitCollection();
     mSvtHits  = new StMcSvtHitCollection();
     mFtpcHits = new StMcFtpcHitCollection();
     mRichHits = new StMcRichHitCollection();
+    mCtbHits = new StMcCtbHitCollection();
 
     mBemcHits  = new StMcEmcHitCollection();
     mBprsHits  = new StMcEmcHitCollection();
@@ -144,6 +150,9 @@ StMcEvent::~StMcEvent()
     if (mRichHits) delete mRichHits;
     mRichHits=0;
 
+    if (mCtbHits) delete mCtbHits;
+    mCtbHits=0;
+    
     if (mBemcHits) delete mBemcHits;
     mBemcHits=0;
 
