@@ -89,7 +89,8 @@ Int_t St_tpcdaq_Maker::Init() {
 }
 //________________________________________________________________________________
 Int_t St_tpcdaq_Maker::InitRun(Int_t RunNumber) {
-  St_DataSet *herb; int junk;
+  St_DataSet *herb; 
+  //int junk;
   if(mCorrectionMask&0x02) { SetNoiseEliminationStuff(); /*WriteStructToScreenAndExit();*/ }
   if(mCorrectionMask&0x04) {
     TDataSet *tpc_calib  = GetDataBase("Calibrations/tpc");
@@ -102,7 +103,7 @@ Int_t St_tpcdaq_Maker::InitRun(Int_t RunNumber) {
     mNseqLo=kasic[0].n_seq_lo;
     mNseqHi=kasic[0].n_seq_hi;
   }
-  junk=log10to8_table[0]; /* to eliminate the warnings from the compiler. */
+  //junk=log10to8_table[0]; /* to eliminate the warnings from the compiler. */
   if(m_Mode == 0 || m_Mode == 2) { // Update this for embedding.
     herb=GetDataSet("StDAQReader");
     assert(herb);
@@ -887,6 +888,9 @@ char  St_tpcdaq_Maker::SetSequenceMerging(char mergeSequences)
 
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.86  2004/03/15 23:54:46  jeromel
+// Unused var removed (detail)
+//
 // Revision 1.85  2004/03/10 05:51:54  jeromel
 // SetSequenceMerging() implementation (check comments) and note the
 // victor->SetSequenceMerging() usage victor==StTPCReader though method
