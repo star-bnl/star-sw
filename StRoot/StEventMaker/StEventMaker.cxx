@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.26 2000/05/26 11:34:08 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.27 2000/05/26 11:36:19 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,9 +11,8 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.26  2000/05/26 11:34:08  ullrich
- * Skip the attempt of creating an instance of StRun in case
- * no dst dataset is available.
+ * Revision 2.27  2000/05/26 11:36:19  ullrich
+ * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
  *
  * Revision 2.28  2000/08/17 00:38:48  ullrich
  * Allow loading of tpt tracks.
@@ -133,10 +132,10 @@ using std::pair;
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.26 2000/05/26 11:34:08 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.27 2000/05/26 11:36:19 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.26 2000/05/26 11:34:08 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.27 2000/05/26 11:36:19 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -147,7 +146,7 @@ StEventMaker::StEventMaker(const char *name, const char *title) : StMaker(name)
     mEventManager->setMaker(this);
     mCurrentRun = 0;
     mCurrentEvent = 0;
-    doPrintEventInfo  = kTRUE; // TMP
+    mDstSummaryParam = 0;
     doLoadTpcHits     = kTRUE;
     doLoadSvtHits     = kTRUE;
     doLoadSsdHits     = kTRUE;
