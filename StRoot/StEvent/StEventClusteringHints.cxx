@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.7 2001/11/07 21:19:43 ullrich Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.8 2001/12/01 15:41:55 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.8  2001/12/01 15:41:55  ullrich
+ * Added StDetectorState container hints.
+ *
  * Revision 2.7  2001/11/07 21:19:43  ullrich
  * Added L1 trigger.
  *
@@ -35,7 +38,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.7 2001/11/07 21:19:43 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.8 2001/12/01 15:41:55 ullrich Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -48,6 +51,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StRunInfo",                   "evt_header",   2);
     setBranch("StEventInfo",                 "evt_header",   2);
     setBranch("StEventSummary",              "evt_header",   2);
+    setBranch("StDetectorState",             "evt_header",   2);
     setBranch("StEventClusteringHints",      "evt_header",   2);
     setBranch("StSoftwareMonitor",           "evt_header",   2);
     setBranch("StL0Trigger",                 "evt_trigger",  3);
@@ -72,6 +76,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StRunInfo",                   "event", 1);
     setBranch("StEventInfo",                 "event", 1);
     setBranch("StEventSummary",              "event", 1);
+    setBranch("StDetectorState",             "event", 1);
     setBranch("StEventClusteringHints",      "event", 1);
     setBranch("StSoftwareMonitor",           "event", 1);
     setBranch("StEmcCollection",             "event", 1);
