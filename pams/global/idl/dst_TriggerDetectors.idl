@@ -16,4 +16,4 @@
   float     adcZDCWest;     /* Sum west ZDC ADCs                     */
   float     adcZDCsum;      /* Sum ZDC ADCs                          */
 } ;
-/*  Last mod. for dst_TriggerDetectors:   $Date: 1998/06/03 13:52:00 $ */
+/*  Last mod. for dst_TriggerDetectors:   $Date: 1999/08/31 22:18:16 $ */
