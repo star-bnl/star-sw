@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.416 2004/05/14 15:22:01 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.417 2004/05/21 20:44:41 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -365,6 +365,7 @@ Bfc_st BFC1[] = {
                          ,"StppTrigMaker","StppSpin","Add emulation of pp Trigger based on CTB+MWC",kFALSE},
 
   {"tpc"         ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"   ,"StMaker","StChain","",kFALSE},
+  
   {"Trs"         ,"Trs","tpcChain","scl,tpcDB,tpc_daq,Simu"           ,"StTrsMaker","StTrsMaker","",kFALSE},
   {"TrsMini"     ,"","tpcChain","scl,tpcDB,-Trs,-tpc_daq,Simu","StTrsMiniMaker","StTrsMiniMaker","",kFALSE},
 
@@ -734,7 +735,13 @@ Bfc_st BFC2[] = {
 
   {"pp2003"      , "" ,"","B2003,Corr2,ppOpt,-PreVtx,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
            ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
-
+  {"Idst"        ,""  ,"",
+"l0,dst,event,dEdxY2,genvtx,eemcD,tofDat,emcDY2,fpd,Kink2,xi2,svtdEdx,SvtIT,ftpc,trgd,CMuDst,analysis,EventQA" 
+                                                                                          ,"","","",kFALSE},
+  {"I2003"       ,""  ,"","ry2003,tpc_daq,tpcI,fcf,Physics,Idst,beamLine,tags,Tree,evout"
+   ,"",""                                                               ,"Base chain for 2003 ITTF",kFALSE},
+  {"dau2003i"    ,""  ,"","I2003,Corr2,ppOpt,l3onl,svt_daq,SvtD","",""
+                                        ,"Production chain for winter 2003 data dau2003a with ITTF",kFALSE},
 
   // Year 4 chains (2003/2004) *** CHAINS WILL BE RESHAPED AS RUN PROGRESS ***
   {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
@@ -757,7 +764,8 @@ Bfc_st BFC2[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"ITTF"        ,""  ,"",""                    ,"","","Turn on second option block for ITTF chain",kFALSE},
+   //  {"ITTF"        ,""  ,"",""                    ,"","","Turn on second option block for ITTF chain",kFALSE},
+  {"ITTF"        ,""  ,"","Sti,svtDb",                                   "","","Turn on ITTF chain",kFALSE},
   {"SvtHitFilt"     ,"", "","",                                        "","","SVT Hit filter Maker",kFALSE},
   {"NoHits"      ,""  ,"",""                            ,"","","Don't write hits into Event.Branch",kFALSE},
   {"Kalman"      ,""  ,"","geant"                                                         ,"","","",kFALSE},
@@ -924,6 +932,7 @@ Bfc_st BFC2[] = {
                          ,"StppTrigMaker","StppSpin","Add emulation of pp Trigger based on CTB+MWC",kFALSE},
 
   {"tpc"         ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"   ,"StMaker","StChain","",kFALSE},
+  {"tpcI"        ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,TpcHitMover","StMaker","StChain","tpc with ITTF",kFALSE},
   {"Trs"         ,"Trs","tpcChain","scl,tpcDB,tpc_daq,Simu"           ,"StTrsMaker","StTrsMaker","",kFALSE},
   {"TrsMini"     ,"","tpcChain","scl,tpcDB,-Trs,-tpc_daq,Simu","StTrsMiniMaker","StTrsMiniMaker","",kFALSE},
 
@@ -1005,7 +1014,7 @@ Bfc_st BFC2[] = {
                                                                      "Performs vertex seed finding",kFALSE},
   {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil,-dEdxY2", "StdEdxMaker","StdEdxMaker",
                                                                          "Regular dEdx calculation",kFALSE},
-  {"svtdEdx"     ,"svtdEdx","globalChain","globT,tpUtil",         "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
+  {"svtdEdx"     ,"svtdEdx","globalChain","globT,tbUtil",         "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
 
 
   //  Reminder: You are within the ITTF chain definitions
