@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.31 2001/05/22 19:58:42 posk Exp $
+// $Id: doFlowEvents.C,v 1.32 2001/06/07 20:12:12 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -220,13 +220,11 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //flowTagMaker->MakeDoc("./StRoot/StFlowTagMaker", "./html", kFALSE);
   //flowAnalysisMaker->MakeDoc("./StRoot/StFlowAnalysisMaker", "./html", kFALSE);
   
-  //
   // Set write flages and file names
-  //
   //  flowMaker->PicoEventWrite(kTRUE);
   //  flowMaker->SetPicoEventDir("./");
   
-  //  Set Debug status
+  // Set Debug status
   //  flowMaker->SetDebug();
   //  flowTagMaker->SetDebug();
   //  flowAnalysisMaker->SetDebug();
@@ -272,21 +270,29 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
 
   
   // Set the event plane selections
-  //StFlowEvent::SetEtaTpcCut(0.05, 1., 0, 0); // harmonic 1, selection 1
-  //StFlowEvent::SetEtaTpcCut(0.05, 1., 1, 0); // harmonic 2, selection 1
-  //StFlowEvent::SetEtaTpcCut(0.05, 1., 2, 0); // harmonic 3, selection 1
+  //StFlowEvent::SetEtaTpcCut(0.05, 1., 0, 0);  // harmonic 1, selection 1
+  //StFlowEvent::SetEtaTpcCut(0.05, 1., 1, 0);  // harmonic 2, selection 1
+  //StFlowEvent::SetEtaTpcCut(0.05, 1., 2, 0);  // harmonic 3, selection 1
+  //StFlowEvent::SetEtaTpcCut(0.05, 1., 1, 1);  // harmonic 2, selection 2
+  //StFlowEvent::SetEtaFtpcCut(0.05, 1., 1, 1); // harmonic 2, selection 2
+  //StFlowEvent::SetPtTpcCut(0.0, 1., 1, 1);    // harmonic 2, selection 2
+  //StFlowEvent::SetPtFtpcCut(0.0, 1., 1, 1);   // harmonic 2, selection 2
+
+  //StFlowEvent::SetDcaGlobalCut(0., 1.);       // for event plane
+
+  // particles:  pi+, pi-, pi, k+, k-, e-, e+, pbar, proton, d and dbar
+  //StFlowEvent::SetPid("pi");                 // for event plane
 
   // Make Eta subevents
 //   StFlowEvent::SetEtaSubs();
-//   StFlowEvent::SetEtaTpcCut(0.05, 1., 1, 1); // harmonic 2, selection 2
 
   // Use a Pt weight in the event plane calcualtion
-  StFlowEvent::SetPtWgt();
+  StFlowEvent::SetPtWgt(kTRUE);
 
   // Use Aihong's probability PID method
   //  StFlowEvent::SetProbPid();
 
-  // Set the PID windows
+  // Set the PID deviant windows
 //   StFlowEvent::SetPiPlusCut(-3., 3.);
 //   StFlowEvent::SetPiMinusCut(-3., 3.);
 //   StFlowEvent::SetProtonCut(-3., 3.);
@@ -423,6 +429,10 @@ void doFlowEvents(const Int_t nevents)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.32  2001/06/07 20:12:12  posk
+// Added global dca cut for event plane particles.
+// Changed SePtWgt() to SetPtWgt(Bool_t).
+//
 // Revision 1.31  2001/05/22 19:58:42  posk
 // Can take centrality from the shell script.
 // Removed multiple instances feature.
