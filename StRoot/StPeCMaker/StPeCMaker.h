@@ -1,6 +1,9 @@
-// $Id: StPeCMaker.h,v 1.1 1999/04/06 20:47:35 akio Exp $
+// $Id: StPeCMaker.h,v 1.2 1999/04/08 16:37:27 nystrand Exp $
 //
 // $Log: StPeCMaker.h,v $
+// Revision 1.2  1999/04/08 16:37:27  nystrand
+// MakeBranch,SetBranch removed
+//
 // Revision 1.1  1999/04/06 20:47:35  akio
 // The first version
 //
@@ -69,11 +72,8 @@ public:
   virtual void Clear(Option_t *option="");
   virtual Int_t Init();
   virtual Int_t  Make();
-  virtual void   MakeBranch();
   virtual void   PrintInfo();
-  virtual void   SetBranch();
   virtual Int_t  Finish();
-  // friend void findVertex(StEvent& event);
 
   // Tag accessor
   HighPtTag_st* tag() {return theTag;};
