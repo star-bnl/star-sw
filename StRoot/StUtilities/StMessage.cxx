@@ -1,5 +1,8 @@
-// $Id: StMessage.cxx,v 1.11 1999/07/15 05:15:06 genevb Exp $
+// $Id: StMessage.cxx,v 1.12 1999/07/22 00:17:47 genevb Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.12  1999/07/22 00:17:47  genevb
+// make messBuffer static
+//
 // Revision 1.11  1999/07/15 05:15:06  genevb
 // Fixed an odd bug with seekp(0) on an empty stream buffer
 //
@@ -54,7 +57,7 @@ static StMessageCounter* messCounter = StMessageCounter::Instance();
 static int messBuffSize = 1024;
 char* tempPtr = new char[messBuffSize];
 static char* messBuff = strcpy(tempPtr,"Empty\n");
-ostrstream messBuffer(messBuff,messBuffSize,ios::out);
+static ostrstream messBuffer(messBuff,messBuffSize,ios::out);
 
 #ifdef __ROOT__
 ClassImp(StMessage)
@@ -88,11 +91,11 @@ int StMessage::Print(int nChars) {
   static const char* insert2 = " <";
   static const char* insert3 = ">";
   static const char* endofline = "\n";
-  messBuffer.seekp(0);
   int printIt=1;
   if (!nChars) {
     printIt = messCounter->CheckLimit(message,type);
   }
+  messBuffer.seekp(0);
   if (printIt) {
     messBuffer << leader;
     const char* temp(StMessTypeList::Instance()->Text(type));
@@ -134,7 +137,7 @@ int StMessage::Print(int nChars) {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.11 1999/07/15 05:15:06 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.12 1999/07/22 00:17:47 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
