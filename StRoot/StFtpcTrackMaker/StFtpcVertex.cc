@@ -1,5 +1,9 @@
-// $Id: StFtpcVertex.cc,v 1.6 2001/01/25 15:22:39 oldi Exp $
+// $Id: StFtpcVertex.cc,v 1.7 2001/07/12 13:05:02 oldi Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.7  2001/07/12 13:05:02  oldi
+// QA histogram of FTPC vertex estimation is generated.
+// FTPC vertex estimation is stored as pre vertex (id = 301) in any case, now.
+//
 // Revision 1.6  2001/01/25 15:22:39  oldi
 // Review of the complete code.
 // Fix of several bugs which caused memory leaks:
@@ -73,7 +77,7 @@ StFtpcVertex::StFtpcVertex()
 }
 
 
-StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints)
+StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F *vtx_pos)
 {
   // constructor with ftpc points - fits vertex from points
 
@@ -115,8 +119,12 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints)
 	      Float_t rj=rmap[rowIn+20*secI+120*iIn];
 			  
 	      if(rj>ri) {
-		Float_t intersect=(rj*zmap[rowOut]-ri*zmap[rowIn])/(rj-ri);
+		Float_t intersect=(rj*zmap[rowOut]-ri*zmap[rowIn])/(rj-ri);		
 		
+		if (vtx_pos) {
+		  vtx_pos->Fill(intersect);
+		}
+
 		if(intersect>HISTOMIN && intersect<HISTOMAX) {
 		  myhist[int((intersect-HISTOMIN)*hratio)]++;
 		}
@@ -181,7 +189,7 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints)
 }
 
 
-StFtpcVertex::StFtpcVertex(TObjArray *hits)
+StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
 {
   // Constructor with TObjArray of ftpc points - fits vertex from points
 
@@ -230,6 +238,10 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits)
 	      if(rj>ri) {
 		Float_t intersect=(rj*zmap[rowOut]-ri*zmap[rowIn])/(rj-ri);
 		
+		if (vtx_pos) {
+		  vtx_pos->Fill(intersect);
+		}
+
 		if(intersect>HISTOMIN && intersect<HISTOMAX) {
 		  myhist[int((intersect-HISTOMIN)*hratio)]++;
 		}
