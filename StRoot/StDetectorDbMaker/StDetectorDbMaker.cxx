@@ -7,9 +7,6 @@
 #include "StDetectorDbSpaceCharge.h"
 #include "StDetectorDbTpcVoltages.h"
 
-#include "StEvent/StEvent.h"
-#include "StEvent/StDetectorState.h"
-
 ClassImp(StDetectorDbMaker)
 
 //_____________________________________________________________________________
@@ -74,18 +71,6 @@ Int_t StDetectorDbMaker::Make(){
     cout << "Space Charge Correction = " << spaceCharge->getSpaceChargeCoulombs()
 	 << " Coulombs" << endl;
     
-    // Fill StEvent::StDetectorState
-    StEvent* rEvent = 0;
-    rEvent = static_cast<StEvent*>(GetInputDS("StEvent"));
-    if(rEvent){
-	StDetectorState* richState = new StDetectorState(kRichId,scalers->getRichHVStatus());
-
-	if(richState){
-	    rEvent->addDetectorState(richState);
-	}
-	
-    }
-
     return kStOK;
 }
 
