@@ -15,7 +15,7 @@ Tower id starts from 1 and goes to 4800 to match EMC Id
 #define StMuEmcCollection__h
  
 #include "TObject.h"
-#include "TObjArray.h"
+#include "TClonesArray.h"
 #include "StMuEmcHit.h"
 #include "StMuEmcCluster.h"
 #include "StMuEmcPoint.h"
@@ -34,35 +34,31 @@ class StMuEmcCollection: public TObject
     int               getTowerADC(int);    
     int               getNSmdHits(int);
     StMuEmcHit*       getSmdHit(int,int);    
+    int               getNPrsHits();
+    StMuEmcHit*       getPrsHit(int);    
     int               getNClusters(int);
     StMuEmcCluster*   getCluster(int,int);    
     int               getNPoints();
     StMuEmcPoint*     getPoint(int);
         
     void              setTowerADC(int,int);
-    void              addSmdHit(int,StMuEmcHit*);
-    void              addCluster(int,StMuEmcCluster*);
-    void              addPoint(StMuEmcPoint*);
+    void              addSmdHit(int);
+    void              addPrsHit();
+    void              addCluster(int);
+    void              addPoint();
     
-    void              clear(Option_t *option="");
-     
-    void              DeleteThis() { 
-	for ( int i=0; i<2; i++) mSmdHits[i]->Delete(); 
-	for ( int i=0; i<4; i++) mEmcClusters[i]->Delete(); 
-	mEmcPoints->Delete(); 
-    }
+    void              clear(Option_t *option="");     
+    void              DeleteThis() {}
   private:
     void              packbits(unsigned char*, unsigned int, unsigned int, unsigned int);
     unsigned int      unpackbits(unsigned char*, unsigned int, unsigned int);
     
     unsigned char     mTowerADC[7200];
-    short             mNSmdHits[2];
-    short             mNClusters[4];
-    short             mNPoints;
     
-    TObjArray*        mSmdHits[2];
-    TObjArray*        mEmcClusters[4];
-    TObjArray*        mEmcPoints;
+    TClonesArray*     mPrsHits;
+    TClonesArray*     mSmdHits[2];
+    TClonesArray*     mEmcClusters[4];
+    TClonesArray*     mEmcPoints;
     
     ClassDef(StMuEmcCollection,1)
 };

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.24 2003/02/06 18:41:44 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.25 2003/02/07 23:47:53 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -226,7 +226,6 @@ void StMuDstMaker::del(TClonesArray* t, int& counter){
   if (t) { 
     if (t->UncheckedAt(0)) {
       ((StMuEmcCollection*)t->UncheckedAt(0))->DeleteThis();
-      t->Clear();
     }
     counter=0;
   }
@@ -586,14 +585,13 @@ void StMuDstMaker::fillEmc(StEvent* ev) {
   if (!emccol)  return; //throw StMuExceptionNullPointer("no StEmcCollection",PF);
   StTimer timer;
   timer.start();
-  /* This next line is actually creating new instance of StMuEmcCollection,
-   * which is then copied into the TClonesArray. We have to delete this new 
-   * instance after it is copied.
-   */
-  StMuEmcCollection* muEmcColl = mEmcUtil->getMuEmc(emccol); 
+  
+  TClonesArray *tca = mEmcArrays[muEmc];
+  new((*tca)[0]) StMuEmcCollection();
+  StMuEmcCollection* muEmcColl = (StMuEmcCollection*)tca->At(0);
   if (!muEmcColl) throw StMuExceptionNullPointer("no StMuEmcCollection",PF);
-  addType( mEmcArrays[muEmc], *muEmcColl );
-  delete muEmcColl;
+  mEmcUtil->fillMuEmc(muEmcColl,emccol);
+  
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
 }
@@ -871,8 +869,8 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
- * Revision 1.24  2003/02/06 18:41:44  laue
- * second try to kill memory leak
+ * Revision 1.25  2003/02/07 23:47:53  laue
+ * New EMC code. TObject arrays replaced by TClonesArrays (thanks to Alex)
  *
  * Revision 1.23  2003/02/05 22:10:00  laue
  * delete emc collection after being copied (when creating mudst)

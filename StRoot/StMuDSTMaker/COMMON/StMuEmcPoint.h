@@ -12,7 +12,6 @@ EmcDet is defined as follow:
 #define StMuEmcPoint__h
  
 #include "TObject.h"
-#include "TObjArray.h"
 #include "StMuEmcCluster.h"
 
 class StMuEmcPoint: public TObject
@@ -30,11 +29,9 @@ class StMuEmcPoint: public TObject
     float             getEnergy()             { return mEnergy;}         ///< Return Energy of the point
     float             getChiSquare()          { return mChiSquare;}      ///< Return ChiSquare of the point
     
-    StMuEmcCluster*   getCluster(Int_t EmcDet,Int_t ClId) { return (StMuEmcCluster*) mEmc[EmcDet-1]->At(ClId); } ///< Return one cluster of the point
-    int               getNClusters(Int_t EmcDet)          { return mEmc[EmcDet-1]->GetEntries();}                   ///< Return number of cluster of the point for one sub detector
+    StMuEmcCluster*   getCluster(Int_t EmcDet){ return mEmc[EmcDet-1]; } ///< Return one cluster of the point
     
-    void              addCluster(Int_t EmcDet,StMuEmcCluster* cl) { mEmc[EmcDet-1]->AddLast(cl);}
-    
+    void              setCluster(Int_t EmcDet,StMuEmcCluster* cl) { mEmc[EmcDet-1] = cl;}    
     void              setEta(float e)         { mEta = e;}
     void              setPhi(float p)         { mPhi = p;}
     void              setRadius(float r)      { mRadius = r;}
@@ -51,7 +48,7 @@ class StMuEmcPoint: public TObject
     float         mDeltaPhi;
     float         mEnergy;
     float         mChiSquare;    
-    TObjArray*    mEmc[4];
+    StMuEmcCluster* mEmc[4];
         
   ClassDef(StMuEmcPoint,1)
 };

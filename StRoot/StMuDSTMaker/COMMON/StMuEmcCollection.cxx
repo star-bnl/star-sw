@@ -12,38 +12,38 @@ ClassImp(StMuEmcCollection)
 StMuEmcCollection::StMuEmcCollection()
 {    
   for(int i=0;i<7200;i++) mTowerADC[i]=0;
-  mEmcPoints=new TObjArray();
+  mEmcPoints=new TClonesArray("StMuEmcPoint",0);
+  mPrsHits = new TClonesArray("StMuEmcHit",0);
   for(int i=0;i<4;i++) 
   { 
-    if(i<2) mSmdHits[i]=new TObjArray();
-    mEmcClusters[i]=new TObjArray();
+    if(i<2) mSmdHits[i]=new TClonesArray("StMuEmcHit",0);
+    mEmcClusters[i]=new TClonesArray("StMuEmcCluster",0);
   }
 }
 
 StMuEmcCollection::StMuEmcCollection(StMuEmcCollection& o) {
   memcpy( mTowerADC,  o.mTowerADC,  sizeof(mTowerADC)  );
-  memcpy( mNSmdHits,  o.mNSmdHits,  sizeof(mNSmdHits)  );
-  memcpy( mNClusters, o.mNClusters, sizeof(mNClusters) );
-  mNPoints = o.mNPoints;
 
   for ( int i=0; i<2; i++) {
-    mSmdHits[i] = (TObjArray*)o.mSmdHits[i]->Clone();
+    mSmdHits[i] = (TClonesArray*)o.mSmdHits[i]->Clone();
   } 
   for ( int i=0; i<4; i++) {
-    mEmcClusters[i] = (TObjArray*)o.mEmcClusters[i]->Clone();
+    mEmcClusters[i] = (TClonesArray*)o.mEmcClusters[i]->Clone();
   }
-  mEmcPoints = (TObjArray*)o.mEmcPoints->Clone(); 
+  mPrsHits = (TClonesArray*)o.mPrsHits->Clone();
+  mEmcPoints = (TClonesArray*)o.mEmcPoints->Clone(); 
 }
 
 StMuEmcCollection::~StMuEmcCollection()
 {
-  clear();
+  //clear();
   for(int i=0;i<4;i++) 
   {
-    if(i<2) {delete mSmdHits[i]; mSmdHits[i]=NULL;}
-    delete mEmcClusters[i]; mEmcClusters[i]=NULL;
+    if(i<2) {if(mSmdHits[i]) {mSmdHits[i]->Clear(); delete mSmdHits[i]; mSmdHits[i]=NULL;}}
+    if(mEmcClusters[i]) {mEmcClusters[i]->Clear(); delete mEmcClusters[i]; mEmcClusters[i]=NULL;}
   } 
-  delete mEmcPoints;
+  if(mEmcPoints) {mEmcPoints->Clear(); delete mEmcPoints;}
+  if(mPrsHits) {mPrsHits->Clear(); delete mPrsHits;}
 }
 void StMuEmcCollection::clear(Option_t *option)
 {
@@ -54,7 +54,6 @@ void StMuEmcCollection::clear(Option_t *option)
     StMuEmcPoint *point = getPoint(i);
     if(point) delete point;
   }
-  mNPoints=0;
   // deleting clusters and hits
   for(int d=0;d<4;d++)
   {
@@ -63,7 +62,6 @@ void StMuEmcCollection::clear(Option_t *option)
       StMuEmcCluster* cluster = getCluster(d,i);
       if(cluster) delete cluster;
     }
-    mNClusters[d]=0;
   }
   for(int d=2;d<4;d++)
   {
@@ -72,11 +70,16 @@ void StMuEmcCollection::clear(Option_t *option)
       StMuEmcHit* hit = getSmdHit(d,i);
       if(hit) delete hit;
     }
-    mNSmdHits[d]=0;
+  }
+  for(int i=0; i<getNPrsHits();i++)
+  {
+    StMuEmcHit* hit = getPrsHit(i);
+    if(hit) delete hit;
   }
   
   for(int i=0;i<4;i++) mEmcClusters[i]->Clear();
   for(int i=0;i<2;i++) mSmdHits[i]->Clear();
+  mPrsHits->Clear();
   mEmcPoints->Clear();
   return;
 }
@@ -116,33 +119,54 @@ int StMuEmcCollection::getTowerADC(int id)
 int StMuEmcCollection::getNSmdHits(int detector)
 {
   if(detector<3 && detector>4) return 0;
-  return mNSmdHits[detector-3];
+  TClonesArray *tca = mSmdHits[detector-3];
+  return tca->GetEntries();
 }
 StMuEmcHit* StMuEmcCollection::getSmdHit(int detector,int hitId)
 {
   if(detector<3 && detector>4) return NULL;
-  if(hitId<0 || hitId>mNSmdHits[detector-3]) return NULL;
-  return (StMuEmcHit*)mSmdHits[detector-3]->At(hitId);
+  TClonesArray *tca = mSmdHits[detector-3];
+  int counter = tca->GetEntries();
+  if(hitId<0 || hitId>counter) return NULL;
+  return (StMuEmcHit*)tca->At(hitId);
+}
+int StMuEmcCollection::getNPrsHits()
+{
+  TClonesArray *tca = mPrsHits;
+  return tca->GetEntries();
+}
+StMuEmcHit* StMuEmcCollection::getPrsHit(int hitId)
+{
+  TClonesArray *tca = mPrsHits;
+  int counter = tca->GetEntries();
+  if(hitId<0 || hitId>counter) return NULL;
+  return (StMuEmcHit*)tca->At(hitId);
 }
 int StMuEmcCollection::getNClusters(int detector)
 {
   if(detector <1 && detector>4) return 0;
-  return mNClusters[detector-1];
+  TClonesArray *tca =mEmcClusters[detector-1];
+  return tca->GetEntries();
 }
 StMuEmcCluster* StMuEmcCollection::getCluster(int detector,int clusterId)
 {
   if(detector <1 && detector>4) return NULL;
-  if(clusterId<0 || clusterId>mNClusters[detector-1]) return NULL;
-  return (StMuEmcCluster*)mEmcClusters[detector-1]->At(clusterId);
+  TClonesArray *tca =mEmcClusters[detector-1];
+  int counter = tca->GetEntries();
+  if(clusterId<0 || clusterId>counter) return NULL;
+  return (StMuEmcCluster*)tca->At(clusterId);
 }
 int StMuEmcCollection::getNPoints()
 {
-  return mNPoints;
+  TClonesArray *tca =mEmcPoints;
+  return tca->GetEntries();
 }
 StMuEmcPoint* StMuEmcCollection::getPoint(int pointId)
 {
-  if(pointId<0 || pointId>mNPoints) return NULL;
-  return (StMuEmcPoint*)mEmcPoints->At(pointId);
+  TClonesArray *tca =mEmcPoints;
+  int counter = tca->GetEntries();
+  if(pointId<0 || pointId>counter) return NULL;
+  return (StMuEmcPoint*)tca->At(pointId);
 }
 void StMuEmcCollection::setTowerADC(int id,int adc)
 {
@@ -150,24 +174,34 @@ void StMuEmcCollection::setTowerADC(int id,int adc)
   packbits(mTowerADC,adc,12,(unsigned int)(id-1));
   return;
 }
-void StMuEmcCollection::addSmdHit(int detector,StMuEmcHit* hit)
+void StMuEmcCollection::addSmdHit(int detector)
 {
   if(detector<3 && detector>4) return;
-  mSmdHits[detector-3]->AddLast(hit);
-  mNSmdHits[detector-3]++;
+  TClonesArray *tca = mSmdHits[detector-3];
+  int counter = tca->GetEntries();
+  new ((*tca)[counter]) StMuEmcHit();
   return;
 }
-void StMuEmcCollection::addCluster(int detector,StMuEmcCluster* cluster)
+void StMuEmcCollection::addPrsHit()
+{
+  TClonesArray *tca = mPrsHits;
+  int counter = tca->GetEntries();
+  new ((*tca)[counter]) StMuEmcHit();
+  return;
+}
+void StMuEmcCollection::addCluster(int detector)
 {
   if(detector<1 && detector>4) return;
-  mEmcClusters[detector-1]->AddLast(cluster);
-  mNClusters[detector-1]++;
+  TClonesArray *tca =mEmcClusters[detector-1];
+  int counter = tca->GetEntries();
+  new ((*tca)[counter]) StMuEmcCluster();
   return;
 }
-void StMuEmcCollection::addPoint(StMuEmcPoint* point)
+void StMuEmcCollection::addPoint()
 {
-  mEmcPoints->AddLast(point);
-  mNPoints++;
+  TClonesArray *tca =mEmcPoints;
+  int counter = tca->GetEntries();
+  new ((*tca)[counter]) StMuEmcPoint();
   return;
 }
 

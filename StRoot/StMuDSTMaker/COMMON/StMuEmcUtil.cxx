@@ -19,7 +19,21 @@ StMuEmcCollection* StMuEmcUtil::getMuEmc(StEmcCollection *emccol)
 {
   if(!emccol) return NULL;
   StMuEmcCollection* muEmc=new StMuEmcCollection();
+  fillMuEmc(muEmc,emccol);
+  return muEmc;
+}  
+StEmcCollection* StMuEmcUtil::getEmc(StMuEmcCollection* muEmc)
+{
+  if(!muEmc) return NULL;
   
+  StEmcCollection *emc=new StEmcCollection();
+  fillEmc(emc,muEmc);
+  return emc;
+}
+void StMuEmcUtil::fillMuEmc(StMuEmcCollection *muEmc,StEmcCollection *emccol)
+{
+  if(!emccol) return;
+  if(!muEmc) return;
   Int_t HitsId[18000];
       
   // starting by hits;    
@@ -57,15 +71,24 @@ StMuEmcCollection* StMuEmcUtil::getMuEmc(StEmcCollection *emccol)
               if(EmcDet == 1) // towers save only ADC
               {
                 muEmc->setTowerADC(rid,adc);
-              }
-              if(EmcDet==3|| EmcDet==4)
+              }              
+              if(EmcDet==2) //pre shower
               {
-                StMuEmcHit* muHit = new StMuEmcHit();          
+                muEmc->addPrsHit();
+                StMuEmcHit* muHit = muEmc->getPrsHit(muEmc->getNPrsHits()-1);          
                 muHit->setId(rid);
                 muHit->setAdc(adc);
                 muHit->setEnergy(energy);
                 muHit->setCalType(cal);      
-                muEmc->addSmdHit(EmcDet,muHit);
+              }
+              if(EmcDet==3|| EmcDet==4)
+              {
+                muEmc->addSmdHit(EmcDet);
+                StMuEmcHit* muHit = muEmc->getSmdHit(EmcDet,muEmc->getNSmdHits(EmcDet)-1);          
+                muHit->setId(rid);
+                muHit->setAdc(adc);
+                muHit->setEnergy(energy);
+                muHit->setCalType(cal);      
               }
             }
           }      
@@ -79,7 +102,8 @@ StMuEmcCollection* StMuEmcUtil::getMuEmc(StEmcCollection *emccol)
         if(totalcluster>0)
           for(Int_t j=0;j<totalcluster;j++)
           {
-            StMuEmcCluster *muCl=new StMuEmcCluster();
+            muEmc->addCluster(EmcDet);
+            StMuEmcCluster *muCl=muEmc->getCluster(EmcDet,muEmc->getNClusters(EmcDet)-1);
           
             muCl->setEta(cluster[j]->eta());
             muCl->setPhi(cluster[j]->phi());
@@ -102,7 +126,6 @@ StMuEmcCollection* StMuEmcUtil::getMuEmc(StEmcCollection *emccol)
               if(EmcDet==1) index=rid;
               if(index!=-1) muCl->setHitId(k,index);
             }
-            muEmc->addCluster(EmcDet,muCl);
           }
       }  // if detector->cluster
     } // if detector
@@ -116,7 +139,8 @@ StMuEmcCollection* StMuEmcUtil::getMuEmc(StEmcCollection *emccol)
     {
       StEmcPoint* point=points[p];
       StThreeVectorF position=point->position();
-      StMuEmcPoint *muPt=new StMuEmcPoint();
+      muEmc->addPoint();
+      StMuEmcPoint *muPt=muEmc->getPoint(muEmc->getNPoints()-1);
       muPt->setEta(position.pseudoRapidity());
       muPt->setPhi(position.phi());
       muPt->setRadius(sqrt(position.x()*position.x()+position.y()*position.y()));
@@ -141,26 +165,25 @@ StMuEmcCollection* StMuEmcUtil::getMuEmc(StEmcCollection *emccol)
             StMuEmcCluster *cl=muEmc->getCluster(det,j);
             if(eta == cl->getEta() && phi==cl->getPhi())
             {
-              muPt->addCluster(det,cl);
+              muPt->setCluster(det,cl);
               goto cont;
             }
           }
           cont: continue;
         }
       } // loop detector
-      muEmc->addPoint(muPt);
     } // loop points
 
   }// npoint >0
   
-  return muEmc;
+  return;
 
 }
-StEmcCollection* StMuEmcUtil::getEmc(StMuEmcCollection* muEmc)
+void StMuEmcUtil::fillEmc(StEmcCollection* emc,StMuEmcCollection* muEmc)
 {
-  if(!muEmc) return NULL;
+  if(!muEmc) return;
+  if(!emc) return;
   
-  StEmcCollection *emc=new StEmcCollection();
   for(Int_t i=0;i<4;i++)
   {
     Int_t det=i+1;
@@ -171,6 +194,7 @@ StEmcCollection* StMuEmcUtil::getEmc(StMuEmcCollection* muEmc)
     // hits
     Int_t nh=0;
     if (det==1) nh = 4800; 
+    if (det==2) nh=muEmc->getNPrsHits();
     if (det==3||det==4) nh=muEmc->getNSmdHits(det);
     //cout <<"Number of hits for detector "<<det<<" = "<<nh<<endl;
     for(Int_t j=0;j<nh;j++)
@@ -185,7 +209,17 @@ StEmcCollection* StMuEmcUtil::getEmc(StMuEmcCollection* muEmc)
         energy = 0;
         cal = 0;
         if(a==0) save = kFALSE;
+      }      
+      if(det==2) //prs
+      {
+        StMuEmcHit* hit=muEmc->getPrsHit(j);
+        rid=hit->getId();
+        mGeo[det-1]->getBin(rid,m,e,s);
+        a=hit->getAdc();
+        cal=hit->getCalType();
+        energy=hit->getEnergy();
       }
+
       if(det==3||det==4) //smd
       {
         StMuEmcHit* hit=muEmc->getSmdHit(det,j);
@@ -232,6 +266,11 @@ StEmcCollection* StMuEmcUtil::getEmc(StMuEmcCollection* muEmc)
           if(det==1) // towers
           {
             rid = hid;
+          }          
+          if(det==2) //prs
+          {
+            StMuEmcHit *hit=muEmc->getPrsHit(hid);
+            rid = hit->getId();
           }
           if(det==3||det==4)
           {
@@ -284,9 +323,9 @@ StEmcCollection* StMuEmcUtil::getEmc(StMuEmcCollection* muEmc)
     for(Int_t j=0;j<4;j++) // looking for clusters
     {
       Int_t det = j+1;
-      if(point->getNClusters(det)>0) for(Int_t l=0;l<point->getNClusters(det);l++)
+      StMuEmcCluster *cl=point->getCluster(det);
+      if(cl)
       {
-        StMuEmcCluster *cl=point->getCluster(det,l);
         Float_t eta=cl->getEta();
         Float_t phi=cl->getPhi();
         Float_t e=cl->getEnergy();
@@ -302,5 +341,5 @@ StEmcCollection* StMuEmcUtil::getEmc(StMuEmcCollection* muEmc)
   }
   // set emc collection
   
-  return emc;
+  return;
 }
