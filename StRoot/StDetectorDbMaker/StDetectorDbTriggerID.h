@@ -16,6 +16,8 @@ struct defaultTrgLvl_st;
 class ostream;
 #endif
 
+enum { kDbTriggerBadID = 999 };
+
 class StDetectorDbTriggerID{
 public:
     static StDetectorDbTriggerID*  instance();
