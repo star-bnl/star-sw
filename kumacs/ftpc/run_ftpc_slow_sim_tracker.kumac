@@ -64,7 +64,7 @@
 * BEGINNING STUFF 
 ***********************************************************
    
- exec $STAR/kumacs/util/setup_defaults domain=[domain]
+ exec $STAR/kumacs/util/setup_defaults 
    
  exec setup#setup 
  
