@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.7 2001/02/10 20:44:25 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.8 2001/04/03 15:24:53 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -578,7 +578,7 @@ int StSvtCoordinateTransform::IsOnWaferZ(   const StThreeVector<double>& GlobalP
 
   GlobaltoLocal(GlobalPosition, LocalPosition, HardWarePos, -1);
 
-  if( LocalPosition.position().y() > -3. && LocalPosition.position().y() < 3.)
+  if( LocalPosition.position().y() > -3.1525 && LocalPosition.position().y() < 3.1525)
     return 1;
   else
     return 0;
@@ -596,8 +596,8 @@ int StSvtCoordinateTransform::IsOnWaferR(   const StThreeVector<double>& GlobalP
   GlobaltoLocal(GlobalPosition, LocalPosition, HardWarePos, -1);
 
 
-  if( LocalPosition.position().x() > -3.    &&
-      LocalPosition.position().x() < 3.     &&
+  if( LocalPosition.position().x() > -3.1525    &&
+      LocalPosition.position().x() < 3.1525     &&
       LocalPosition.position().z() > -.05   &&
       LocalPosition.position().z() < .05    )
     return 1;
