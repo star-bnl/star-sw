@@ -23,6 +23,7 @@ public:
    virtual Int_t  Init();
    virtual Int_t  Make();
    virtual void   PrintInfo();
+   virtual void   Skip(Int_t Nskip=1);
    ClassDef(St_xdfin_Maker, 0)   //StAF chain virtual base class for Makers
 };
 

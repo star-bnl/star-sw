@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.23 1999/03/17 02:02:58 fisyak Exp $
+// $Id: St_tpt_Maker.cxx,v 1.24 1999/03/20 23:30:00 perev Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.24  1999/03/20 23:30:00  perev
+// new maker schema
+//
 // Revision 1.23  1999/03/17 02:02:58  fisyak
 // New scheme
 //
@@ -290,12 +293,12 @@ Int_t St_tpt_Maker::Make(){
     St_DataSet *tpc_hits = GetInputDS("tpc_hits");
     if (tpc_hits) {
       St_DataSetIter tpc_data(tpc_hits);
-      n_hit      = (St_tcl_tphit *) tpc_data["hits/tphit"];
-      n_clus     = (St_tcl_tpcluster *)  tpc_data["hits/tpcluster"];
-      n_hitau    = (St_tcl_tphit_aux *) tpc_data["hits/tphitau"];
+      n_hit      = (St_tcl_tphit *) tpc_data["tphit"];
+      n_clus     = (St_tcl_tpcluster *)  tpc_data["tpcluster"];
+      n_hitau    = (St_tcl_tphit_aux *) tpc_data["tphitau"];
     }
     if(n_hit){
-      St_tpt_track * n_track    = (St_tpt_track *) tpc_tracks["tracks/tptrack"];
+      St_tpt_track * n_track    = (St_tpt_track *) tpc_tracks["tptrack"];
       tcl_tphit_st *h = n_hit->GetTable(); 
       for (int i = 0;i<n_hit->GetNRows();i++,h++){
 	tcl_tphit_aux_st *au =  n_hitau->GetTable();
@@ -335,7 +338,7 @@ Int_t St_tpt_Maker::Make(){
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.23 1999/03/17 02:02:58 fisyak Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.24 1999/03/20 23:30:00 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
