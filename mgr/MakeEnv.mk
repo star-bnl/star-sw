@@ -47,7 +47,9 @@ endif
 
 UNAMES := $(shell uname -s)
 UNAMER := $(shell uname -r)
+ifneq ($(UNAMES),HP-UX)
 UNAMEP := $(shell uname -p)
+endif
 UNAMESRP := $(UNAMES)_$(UNAMER)_$(UNAMEP)
 #
 # Determine TULL_ARCH variable.

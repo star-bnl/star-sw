@@ -1,9 +1,6 @@
 #  $Log: MakeArch.mk,v $
-#  Revision 1.4  1998/06/22 19:03:50  didenko
-#  Remove libraries
-#
-#  Revision 1.3  1998/06/22 00:36:27  fisyak
-#  cleanup for SL98c_1
+#  Revision 1.5  1998/06/27 14:57:28  fisyak
+#  Add hp, move Debug flag to MakeArch.mk
 #
 #  Revision 1.10  1998/05/19 16:36:38  perev
 #  Makefiles
@@ -26,7 +23,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/06/22 19:03:50 $ 
+#             Last modification $Date: 1998/06/27 14:57:28 $ 
 #. default setings
 
 RM := rm -f
@@ -48,9 +45,9 @@ CERN_LEVEL :=pro
 MOTIF :=YES
 GCC      :=  gcc
 CC       :=  $(GCC)
-CFLAGS   := -g -fpic -w
+CFLAGS   := $(DEBUG) -fpic -w
 CXX      :=  g++
-CXXFLAGS := -g -fpic -w
+CXXFLAGS := $(DEBUG) -fpic -w
 FC 	 := f77
 AR       := ar
 ARFLAGS  := rvu
@@ -72,6 +69,15 @@ YACC     := yacc
 YACCLIB  := -ly
 LEX      := lex
 LEXLIB   := -ll
+
+DEBUG := -g
+ifdef NODEBUG
+  DEBUG :=
+endif
+ifdef nodebug
+  DEBUG :=
+endif
+
 ifneq (,$(findstring $(STAF_ARCH),intel_wnt))
 #  case WIN32
 #  ====================
@@ -113,8 +119,8 @@ ifneq (,$(findstring $(STAF_ARCH),rs_aix31 rs_aix32 rs_aix41))
 
   OSFID :=aix AIX CERNLIB_IBMRT CERNLIB_UNIX CERNLIB_QMIBM
   ifdef GCC.
-    CXXFLAGS := -g  -fsigned-char -w  
-    CFLAGS  := -g  -fsigned-char -w 
+    CXXFLAGS := $(DEBUG)  -fsigned-char -w  
+    CFLAGS  := $(DEBUG)  -fsigned-char -w 
     LDFLAGS  := 
     SOFLAGS  :=  -shared 
     CLIBS  :=  -lXm -lXt -lX11 -lg++ -lm -lld
@@ -124,15 +130,15 @@ ifneq (,$(findstring $(STAF_ARCH),rs_aix31 rs_aix32 rs_aix41))
     LD     := $(CXX)
     SO     := ???
     SOFLAGS := ???
-    CXXFLAGS := -g -w -qchars=signed -qnoro -qnoroconst 
-    CFLAGS  := -g -w -qchars=signed -qnoro -qnoroconst 
+    CXXFLAGS := $(DEBUG) -w -qchars=signed -qnoro -qnoroconst 
+    CFLAGS  := $(DEBUG) -w -qchars=signed -qnoro -qnoroconst 
     LDFLAGS  := 
     CLIBS  :=  -lXm -lXt -lX11  -lld  -lm -lc -lcurses
   endif
 
   FC         = xlf
   FLIBS   := -lxlf90 -lxlf
-  FFLAGS  := -g -qextname  -qrndsngl -qcharlen=6000 
+  FFLAGS  := $(DEBUG) -qextname  -qrndsngl -qcharlen=6000 
   FEXTEND := -e
 endif 
 
@@ -145,16 +151,16 @@ ifneq (,$(findstring $(STAF_ARCH),i386_linux2 i386_redhat50))
   FC       := pgf77
   LD       := $(CXX)
   SO	   := $(CXX)
-  CXXFLAGS := -g -fPIC
-  CFLAGS   := -g -fPIC
+  CXXFLAGS := $(DEBUG) -fPIC
+  CFLAGS   := $(DEBUG) -fPIC
   CPPFLAGS += f2cFortran
   LDFLAGS  := -Wl,-Bstatic
   EXEFLAGS := -Wl,-Bdynamic  
   SOFLAGS  := -shared  
 ##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lg++ -lpgc -lm -ldl -rdynamic
-  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -L/usr/lib -lcrypt -lg++ -lpgc -lm -ldl  -rdynamic
+  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -L/usr/lib -lXt -lXpm -lX11 -lcrypt -lg++ -lpgc -lm -ldl  -rdynamic
   FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
-  FFLAGS   := -DPGI  -g
+  FFLAGS   := -DPGI  $(DEBUG)
   FEXTEND  := -Mextend
   YACC     := bison -y
   YACCLIB  := 
@@ -179,7 +185,7 @@ ifneq (,$(findstring $(STAF_ARCH),alpha_osf1 alpha_osf32c alpha_dux40))
     LD     :=$(CXX)
     SO     :=$(CXX)
     CXXFLAGS := -w -D__osf__ -D__alpha -Dcxxbug -DALPHACXX 
-    CFLAGS  := -g -w  
+    CFLAGS  := $(DEBUG) -w  
     LDFLAGS  := 
     SOFLAGS  :=  -call_shared -expect_unresolved '*'
     CLIBS  :=  -lXm -lXt -lX11 -lm -lPW -lm -lm_4sqrt -lots -lc
@@ -206,7 +212,7 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
 
   endif
 
-  ifdef ACC.
+  ifndef noACC.
     CXX     := aCC
     CC      := cc
     LD      := $(CXX)
@@ -267,7 +273,6 @@ ifneq (,$(findstring $(STAF_ARCH),sgi_64 ))
   CXXFLAGS  :=  -n32 -fullwarn
   LD        :=   $(CXX)
   LDFLAGS   :=  -n32 -multigot
-  EXEFLAGS  :=  $(LDFLAGS) -Wl,-nltgot,123 -Wl,-m  
   SO        :=   $(CXX)
   SOFLAGS   :=  -n32 -shared -multigot
   CLIBS     :=  -lsun  -lm -lc -lPW -lXext -lmalloc
@@ -286,13 +291,13 @@ ifneq (,$(findstring $(STAF_ARCH),sun4x_55 sun4x_56))
   SO  := $(CXX)
   FC  := /opt/SUNWspro/bin/f77
 
-  FFLAGS   :=  -g  -KPIC -w 
+  FFLAGS   :=  $(DEBUG)  -KPIC -w 
   FEXTEND  :=  -e
-  CFLAGS   :=  -g  -KPIC 
-  CXXFLAGS :=  -g  -KPIC 
-  LDFLAGS  :=  -g  -Bstatic
-  EXEFLAGS :=  -g  -Bdynamic
-  SOFLAGS  :=   -G
+  CFLAGS   :=  $(DEBUG)  -KPIC 
+  CXXFLAGS :=  $(DEBUG)  -KPIC 
+  LDFLAGS  :=  $(DEBUG)  -Bstatic
+  EXEFLAGS :=  $(DEBUG)  -Bdynamic
+  SOFLAGS  :=  $(DEBUG) -G
   CLIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
   FLIBS    := -lM77 -lF77 -lsunmath
 endif
@@ -306,13 +311,13 @@ ifneq (,$(findstring $(STAF_ARCH),sunx86_55))
   SO       := $(CXX)
   FC       := /opt/SUNWspro/bin/f77
   LD       := $(CXX)
-  FFLAGS   :=  -g -KPIC  
+  FFLAGS   :=  $(DEBUG) -KPIC  
   FEXTEND  := -e
-  CFLAGS   :=  -g -KPIC +w2 -I/usr/dt/share/include -I/usr/openwin/share/include
+  CFLAGS   :=  $(DEBUG) -KPIC +w2 -I/usr/dt/share/include -I/usr/openwin/share/include
   CXXFLAGS :=  $(CFLAGS)
-  LDFLAGS  :=  -g  -z muldefs -Bstatic
-  EXEFLAGS :=  -g  -z muldefs -Bdynamic
-  SOFLAGS  :=  -g  -G
+  LDFLAGS  :=  $(DEBUG)  -z muldefs -Bstatic
+  EXEFLAGS :=  $(DEBUG)  -z muldefs -Bdynamic
+  SOFLAGS  :=  $(DEBUG)  -G
   CLIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
   FLIBS    := -lM77 -lF77 -lsunmath
 
@@ -327,4 +332,14 @@ FC  := $(FC) $(FEXTEND)
 ifeq ($(EXEFLAGS),NONE)
   EXEFLAGS := $(LDFLAGS)
 endif
+ifndef NODEBUG                 
+FFLAGS   += -g
+CFLAGS   += -g
+CXXFLAGS += -g
+CPPFLAGS += -DDEBUG
+else
+FFLAGS   += -O
+CFLAGS   += -O
+CXXFLAGS += -O
+endif                          
 

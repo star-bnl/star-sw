@@ -3,7 +3,12 @@ ifndef STAF_MAKE_HOME
 endif
 
 include $(STAF_MAKE_HOME)/MakeEnv.mk
+ifndef NODEBUG                 
 include $(STAF_MAKE_HOME)/MakeArch.mk
+else
+include $(STAF_MAKE_HOME)/MakeArch.mk NODEBUG=yes
+endif                          
+
 
 ifdef SILENT
   .SILENT:
@@ -86,16 +91,6 @@ CPPFLAGG :=  -I$(STAR)/.share/$(DOMAIN) -I$(STAR)/.share/tables
 endif                          
 FFLAGS   += -DCERNLIB_TYPE
 #                                   -I$(CERN_ROOT)/src/geant321 
-ifndef NODEBUG                 
-FFLAGS   += -g
-CFLAGS   += -g
-CXXFLAGS += -g
-CPPFLAGS += -DDEBUG
-else
-FFLAGS   += -O
-CFLAGS   += -O
-CXXFLAGS += -O
-endif                          
 #                 I have idl- or g-files
 FILES_CC := $(wildcard $(addsuffix /*.cc, $(SRC_DIRS)))
 FILES_CXX:= $(wildcard $(addsuffix /*.cxx, $(SRC_DIR)))
