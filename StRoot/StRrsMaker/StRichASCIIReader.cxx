@@ -1,12 +1,15 @@
 /******************************************************
- * $Id: StRichASCIIReader.cxx,v 1.1 2000/01/27 17:06:00 lasiuk Exp $
+ * $Id: StRichASCIIReader.cxx,v 1.2 2000/01/28 20:35:46 lasiuk Exp $
  *
  * Description:
  *******************************************************
  * $Log: StRichASCIIReader.cxx,v $
- * Revision 1.1  2000/01/27 17:06:00  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/28 20:35:46  lasiuk
+ * inline removed from .cxx files
  *
+ * Revision 1.3  2000/02/08 16:20:20  lasiuk
+ * for standalone __ROOT__ defn'd.
+ * switch order of arguments, remove quadrant algebra
  *
  * Revision 1.2  2000/01/28 20:35:46  lasiuk
  * inline removed from .cxx files
@@ -50,6 +53,7 @@ int StRichASCIIReader::operator()(StRichGHit& hit )
 	return 0;
     }
     else {
+	return 1;
     }
 }
  
@@ -78,7 +82,7 @@ int StRichASCIIReader::whichVolume(int val)
         break;
     default:
         mGV = string("");
-inline int StRichASCIIReader::read() 
+        cerr << "StRchMaker::whicVolume() UNKNOWN Volume" << endl;
         break;
     }
     int volumeNumber = (val - (volume*1000));
@@ -100,14 +104,14 @@ int StRichASCIIReader::read()
 //     PR(mVolume);
      PR(mTof);
      PR(mdE);
-inline void StRichASCIIReader::switchQuads(int mNvl )
+     PR(mdS);
      PR(mVolume);
 
 void StRichASCIIReader::switchQuads(int q)
 {
     //
     //  Changes the quadrants disposition
-    switch(mNvl) {
+    //  It also changes any undefined quad value to 0
     //
     
     switch(q) {
