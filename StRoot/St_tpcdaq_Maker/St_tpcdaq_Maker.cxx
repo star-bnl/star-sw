@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.12  1999/04/05 16:51:11  ward
+// Now expects time bins 0-511 from Trs, and not 1-512.
+//
 // Revision 1.11  1999/04/02 22:45:21  ward
 // Temp patch to prevent startTimeBin<1 or >512.
 //
@@ -281,14 +284,14 @@ int St_tpcdaq_Maker::Output() {
           numPadsWithSignal++; 
           if(ipadrow>=13) dataOuter[isect-1]=7; else dataInner[isect-1]=7;
         } else continue; // So we don't write meaningless rows in pad table.
-        timeOff=1; offIntoPixTbl=pixR; timeWhere=0; prevStartTimeBin=-123;
+        timeOff=0; offIntoPixTbl=pixR; timeWhere=0; prevStartTimeBin=-123;
         for(iseq=0;iseq<nseq;iseq++) {
           startTimeBin=listOfSequences[iseq].startTimeBin;
-          if(startTimeBin<1) startTimeBin=1;        // bbb ??? Correct ???
-          if(startTimeBin>512) startTimeBin=512;    // bbb ??? Correct ???
+          if(startTimeBin<0) startTimeBin=0;
+          if(startTimeBin>511) startTimeBin=511;
           if(prevStartTimeBin> startTimeBin) { mErr=__LINE__; return 7; }
           prevStartTimeBin=startTimeBin; seqLen=listOfSequences[iseq].length;
-          if(startTimeBin<=0x100) timeWhere=iseq+1; else timeOff=0x101;
+          if(startTimeBin<=0x100) timeWhere=iseq+1; else timeOff=0x100;
 // printf("BBB startTimeBin=%3d, timeOff=%3d, diff = %x\n",startTimeBin,timeOff,
                         // startTimeBin-timeOff);
           SeqWrite(raw_seq_gen,seqR,(startTimeBin-timeOff),seqLen);
@@ -366,7 +369,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.11 1999/04/02 22:45:21 ward Exp $ \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.12 1999/04/05 16:51:11 ward Exp $ \n");
   printf("**************************************************************\n");
   if(Debug()) StMaker::PrintInfo();
 }
