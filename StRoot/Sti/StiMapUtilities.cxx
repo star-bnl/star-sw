@@ -12,6 +12,7 @@
 #include "StGetConfigValue.hh"
 
 //Sti
+#include "StiIOBroker.h"
 #include "Messenger.h"
 #include "StiHit.h"
 #include "StiMapUtilities.h"
@@ -111,36 +112,25 @@ bool NameMapKey::operator<(const NameMapKey& key2) const{
   return( name < key2.name );
 }
 
+StTpcPadrowHitFilter::StTpcPadrowHitFilter()
+    : mMinPadrow(0), mMaxPadrow(0)
+{
+}
+
+void StTpcPadrowHitFilter::getNewState()
+{
+    StiIOBroker* broker = StiIOBroker::instance();
+    mMinPadrow = broker->tphfMinPadrow();
+    mMaxPadrow = broker->tphfMaxPadrow();
+    //cout <<"StTpcPadrowHitFilter::getNewState()\t"
+    //<<"minPadrow: "<<mMinPadrow<<"\tmaxPadrow: "<<mMaxPadrow<<endl;
+}
+
 bool StTpcPadrowHitFilter::operator()(const StTpcHit& hit) const
 {
     return ( (hit.padrow()>=mMinPadrow) && (hit.padrow()<=mMaxPadrow) );
 }
 
-void StTpcPadrowHitFilter::build(const string& buildPath)
-{
-    *(Messenger::instance(MessageType::kHitMessage)) <<"StTpcPadrowHitFilter::build()"<<endl;
-    if (mBuilt==true) {
-	*(Messenger::instance(MessageType::kHitMessage)) <<"StTpcPadrowHitFilter::build(). ERROR:\tAlread built!  Abort."<<endl;
-	return;
-    }
-    
-    if (buildPath=="empty") {
-	*(Messenger::instance(MessageType::kHitMessage)) <<"StTpcPadrowHitFilter::build(). ERROR:\t"
-					    << "buildPath==empty.  Abort."<<endl;
-	return;
-    }
-    StGetConfigValue(buildPath.c_str(), "mMinPadrow", mMinPadrow);
-    StGetConfigValue(buildPath.c_str(), "mMaxPadrow", mMaxPadrow);
-    
-    if (mMinPadrow==999 || mMaxPadrow==999) {
-	*(Messenger::instance(MessageType::kHitMessage)) <<"StTpcPadrowHitFilter::build(). ERROR:\t"
-					    <<"members not initialized.  ABORT"<<endl;
-	return;
-    }
-    *(Messenger::instance(MessageType::kHitMessage)) <<"\tMinPadrow:\t"<<mMinPadrow
-					<<"\tMaxPadrow:\t"<<mMaxPadrow<<endl;
-    mBuilt=true;
-}
 
 //----------------------- Streamers -------------------------------------------------
 ostream& operator<<(ostream& os, const HitMapKey& a)

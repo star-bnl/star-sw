@@ -22,6 +22,7 @@ using std::for_each;
 #include "StAssociationMaker/StAssociationMaker.h"
 
 //Sti
+#include "StiIOBroker.h"
 #include "StiPlacement.h"
 #include "StiDetector.h"
 #include "StiDetectorContainer.h"
@@ -42,12 +43,18 @@ ostream& operator<<(ostream&, const StiHit&);
 StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder(StAssociationMaker* assoc)
     : StiSeedFinder(),
       mAssociationMaker(assoc), mMcEvent(0), mTpcHitFilter(0),
+      mIOBroker(StiIOBroker::instance()), mSubject(StiIOBroker::instance()),
       mLowerBound(0), mMaxHits(0)
 {
     mMessenger <<"StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder()"<<endl;
     if (!assoc) {
 	mMessenger <<"\tERROR:\tAssociationMaker==0.  Undefined Behavior"<<endl;
     }
+
+    mSubject->attach(this);
+    mTpcHitFilter = new StTpcPadrowHitFilter();
+    getNewState();
+
 }
 
 StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder()
@@ -56,6 +63,10 @@ StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder()
     if (mTpcHitFilter) {
 	delete mTpcHitFilter;
 	mTpcHitFilter=0;
+    }
+
+    if (mSubject) {
+	mSubject->detach(this);
     }
 }
 
@@ -89,57 +100,21 @@ void StiEvaluableTrackSeedFinder::setEvent(StMcEvent* mcevt)
     return;
 }
 
-/*! A call to build builds the internal state from the text file specified by
-  buildPath.  If buildPath is not initialized, warning messages are streamed and
-  behavior of the seed-finder object is undefined.
-*/    
+void StiEvaluableTrackSeedFinder::getNewState()
+{
+    //cout <<"StiEvaluableTrackSeedFinder::getNewState()"<<endl;
+    //cout <<"\n\n ------------------- StiIOBroker ----------------------- \n\n"<<*mIOBroker<<endl;
+
+    mLowerBound = mIOBroker->etsfLowerBound();
+    mMaxHits = mIOBroker->etsfMaxHits();
+    mLowerBound = mIOBroker->etsfLowerBound();
+    //cout <<"maxHits: "<<mMaxHits<<"\tlowerBound: "<<mLowerBound<<endl;
+    mTpcHitFilter->getNewState();
+}
+
 void StiEvaluableTrackSeedFinder::build()
 {
-    mMessenger <<"StiEvalaubleTrackSeedFinder::build()"<<endl;
-    if (mBuildPath=="empty") {
-	mMessenger <<"StiEvalaubleTrackSeedFinder::build(). ERROR:\tmBuildPath==empty.  ABORT"<<endl;
-	return;
-    }
-
-    if (mBuilt) {
-	mMessenger <<"StiEvalaubleTrackSeedFinder::build(). ERROR:\talready built!.  ABORT"<<endl;
-	return;
-    }
-
-    mMessenger <<"StiEvalaubleTrackSeedFinder::build().  Build from:\t"<<mBuildPath<<endl;
-
-    StGetConfigValue(mBuildPath.c_str(), "lowerBound", mLowerBound);
-    if (mLowerBound==0) {
-	mMessenger <<"StiEvalaubleTrackSeedFinder::build(). ERROR:\t";
-	mMessenger <<"lowerBound==0.  ABORT"<<endl;
-	return;
-    }
-
-    StGetConfigValue(mBuildPath.c_str(), "mMaxHits", mMaxHits);
-    if (mMaxHits==0) {
-	mMessenger <<"StiEvaluableTrackSeedFinder::build(). ERROR:\t";
-	mMessenger <<"maxHits==0 Abort"<<endl;
-	return;
-    }
-
-    string hitFilterType="empty";
-    StGetConfigValue(mBuildPath.c_str(), "hitFilterType", hitFilterType);
-    if (hitFilterType=="empty") {
-	mMessenger <<"StiEvalaubleTrackSeedFinder::build(). ERROR:\tmhitFilterType==empty.  ABORT"<<endl;
-	return;
-    }
-    else if (hitFilterType=="StTpcPadrowHitFilter") {
-	mTpcHitFilter = new StTpcPadrowHitFilter();
-    }
-    else {
-	mMessenger <<"StiEvalaubleTrackSeedFinder::build(). ERROR:t";
-	mMessenger <<"unkown hitfilter type: "<<hitFilterType<<".  ABORT"<<endl;
-	return;
-    }
-    mTpcHitFilter->build(mBuildPath);
-
-    mMessenger <<"lowerBound:\t"<<mLowerBound<<"\tmaxHits:\t"<<mMaxHits<<endl;
-    mBuilt=true;
+    mMessenger <<"StiEvalaubleTrackSeedFinder::build(). No Action"<<endl;
 }
 
 /*! A call to hasMore() simply checks if there are more seeds to be generated.

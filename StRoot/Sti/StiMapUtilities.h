@@ -12,6 +12,7 @@ using std::string;
 class StHit;
 class StiHit;
 class StTpcHit;
+class StiIOBroker;
 
 //Structure for hit map key
 struct HitMapKey {
@@ -75,21 +76,21 @@ class StTpcHitFilter
 public:
     virtual ~StTpcHitFilter() {};
     virtual bool operator()(const StTpcHit&) const = 0;
-    virtual void build(const string&) =0;
+    virtual void getNewState()=0;
 };
 
 class StTpcPadrowHitFilter : public StTpcHitFilter
 {
 public:
-    StTpcPadrowHitFilter()
-	: mMinPadrow(999), mMaxPadrow(999), mBuilt(false) {};
+    StTpcPadrowHitFilter();
     virtual ~StTpcPadrowHitFilter() {};
+
     virtual bool operator()(const StTpcHit&) const;
-    virtual void build(const string&);
+    virtual void getNewState();
+    
 private:
     unsigned int mMinPadrow;
     unsigned int mMaxPadrow;
-    bool mBuilt;
 };
 
 #endif
