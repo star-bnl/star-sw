@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.50 2003/04/26 04:19:15 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.51 2003/06/20 00:12:51 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -143,7 +143,7 @@
     #  ============================================================
     # Platform support should be concentrated here
     #  ============================================================
-    if (/^i386_/) {
+    if (/^i386_/ || /^rh/) {
         #
         # Case linux
         #
