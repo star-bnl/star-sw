@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.23 1999/02/12 22:27:35 ogilvie Exp $
+// $Id: St_glb_Maker.cxx,v 1.24 1999/02/13 20:22:31 caines Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.24  1999/02/13 20:22:31  caines
+// Added exi and temp dir for when svt not there
+//
 // Revision 1.23  1999/02/12 22:27:35  ogilvie
 // added in spectra/pid QA histograms
 //
@@ -101,10 +104,9 @@
 #include "global/St_evr_am_Module.h"
 #include "global/St_egr_fitter_Module.h"
 #include "global/St_track_propagator_Module.h"
-//#include "global/St_ev0_am_Module.h"
 #include "global/St_ev0_am2_Module.h"
-//#include "global/St_ev0_dst_Module.h"
 #include "global/St_ev0_eval2_Module.h"
+#include "global/St_exiam_Module.h"
 #include "global/St_dst_dedx_filler_Module.h"
 #include "global/St_fill_ftpc_dst_Module.h"
 #include "global/St_dst_monitor_soft_filler_Module.h"
@@ -208,8 +210,6 @@ Int_t St_glb_Maker::Init(){
   egr2_egrpar->useglobal = 0;
 
   //ev0   
-  //  m_ev0par = (St_ev0_ev0par *)  params("global/ev0pars/ev0par");
-  //  m_magf   = (St_mft_control *) params("global/magnetic_field/magf");  
   m_ev0par2 = (St_ev0_ev0par2 *)  params("global/ev0pars/ev0par2");
   if (!m_ev0par2) {
     m_ev0par2 = new St_ev0_ev0par2("ev0par2",3);
@@ -219,32 +219,74 @@ Int_t St_glb_Maker::Init(){
   Int_t l;
   // TPC only cuts
 
-  ev0par2->dca =   0.8;
-  ev0par2->dcav0 = 0.3;
-  ev0par2->dlen =  2.;
-  ev0par2->alpha_max = 1.2;
-  ev0par2->ptarm_max = 0.3;
-  ev0par2->dcapnmin = 0.3;
+  ev0par2->dca        =  0.8;
+  ev0par2->dcav0      =  0.3;
+  ev0par2->dlen       =  2.;
+  ev0par2->alpha_max  = 1.2;
+  ev0par2->ptarm_max  = 0.3;
+  ev0par2->dcapnmin   = 0.3;
   ev0par2++;
 
   //SVT only cuts
 
-  ev0par2->dca =   0.8;
-  ev0par2->dcav0 = 0.3;
-  ev0par2->dlen =  10000.;
-  ev0par2->alpha_max = 1.2;
-  ev0par2->ptarm_max = 0.3;
-  ev0par2->dcapnmin = 100;
+  ev0par2->dca        = 0.8;
+  ev0par2->dcav0      = 0.3;
+  ev0par2->dlen       = 10000.;
+  ev0par2->alpha_max  = 1.2;
+  ev0par2->ptarm_max  = 0.3;
+  ev0par2->dcapnmin   = 100;
   ev0par2++;
 
   // SVT+TPC cuts
-  ev0par2->dca =   0.8;
-  ev0par2->dcav0 = 0.3;
-  ev0par2->dlen =  0.6;
-  ev0par2->alpha_max = 1.2;
-  ev0par2->ptarm_max = 0.3;
-  ev0par2->dcapnmin = 0.3;
+  ev0par2->dca        = 0.8;
+  ev0par2->dcav0      = 0.3;
+  ev0par2->dlen       = 0.6;
+  ev0par2->alpha_max  = 1.2;
+  ev0par2->ptarm_max  = 0.3;
+  ev0par2->dcapnmin   = 0.3;
+  //exi
+  if (!m_exiaux) m_exiaux = new St_exi_aux("exi_aux",1);
+  m_exipar = (St_exi_exipar *)  params("global/exipars/exipar");
+  if (!m_exipar) {
+    m_exipar = new St_exi_exipar("exipar",3);
+    params("global/exipars")->Add(m_exipar);
+  }
+  exi_exipar_st *exipar = m_exipar->GetTable();
+  // TPC only cuts
 
+  exipar->use_pid = 0;
+  exipar->dca_max = 1.;
+  exipar->bxi_max = 1.;
+  exipar->rv_xi   = 2.;
+  exipar->rv_v0   = 5.;
+  exipar->dmass   = 0.01;
+  exipar->bpn_v0  = 2.;
+  exipar->pchisq  = 0.;
+  exipar++;
+
+  //SVT only cuts
+
+  exipar->use_pid = 0;
+  exipar->dca_max = 0.;
+  exipar->bxi_max = 0.;
+  exipar->rv_xi   = 999.;
+  exipar->rv_v0   = 999.;
+  exipar->dmass   = 0.;
+  exipar->bpn_v0  = 999.;
+  exipar->pchisq  = 0.;
+  exipar++;
+
+  // SVT+TPC cuts
+
+  exipar->use_pid = 0;
+  exipar->dca_max = 1.;
+  exipar->bxi_max = 1.;
+  exipar->rv_xi   = 2.;
+  exipar->rv_v0   = 5.;
+  exipar->dmass   = 0.01;
+  exipar->bpn_v0  = 2.;
+  exipar->pchisq  = 0.;
+  exipar++;
   
   // Create Histograms    
   m_pT_eta_rec = new TH2F("pT_eta_rec","pT versus eta (reconstructed)",
@@ -261,7 +303,8 @@ Int_t St_glb_Maker::Init(){
   m_tlength = new TH1F("tlenght","dst track length",100,0.,200.);
   m_chi2xd  = new TH1F("chi2xd","x chisq/degf",100,0.,10.);
   m_chi2yd  = new TH1F("chi2yd","y chisq/degf",100,0.,10.);
-  m_lameffm  = new TH1F("lameffm","Lambda effective mass",100,0.8,1.20);
+  m_ev0_lama_hist  = new TH1F("ev0_lama_hist","Lambda mass",100,1.05,1.25);
+  m_ev0_k0ma_hist  = new TH1F("ev0_k0ma_hist","k0 mass",100,.4,.6);
   // Spectra/pid histograms. C.Ogilvie
   Int_t np = 100;
   Int_t ndedx = 100;
@@ -281,6 +324,8 @@ Int_t St_glb_Maker::Make(){
   St_DataSetIter global(m_DataSet);         // data/global
   St_DataSet  *dst_loc = global("dst");
   if (! dst_loc) dst_loc = global.Mkdir("dst");
+  // Make a temp dir. to hold SVT stuff when the SVT isnt there
+  St_DataSet  *temp = global.Mkdir("temp");
   St_DataSetIter dst(dst_loc);
 
   St_dst_track      *globtrk     = (St_dst_track     *) dst("globtrk");
@@ -288,8 +333,8 @@ Int_t St_glb_Maker::Make(){
   St_dst_track      *primtrk     = (St_dst_track     *) dst("primtrk");
   St_dst_track_aux  *primtrk_aux = (St_dst_track_aux *) dst("primtrk_aux");
   St_dst_vertex     *vertex      = (St_dst_vertex    *) dst("vertex");
-  //  St_ev0_aux        *ev0out      = (St_ev0_aux       *) dst("ev0out");
-  St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex    *) dst("dst_v0_vertex");  
+  St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex    *) dst("dst_v0_vertex"); 
+   St_dst_xi_vertex  *dst_xi_vertex = (St_dst_xi_vertex    *) dst("dst_xi_vertex");
   St_dst_dedx       *dst_dedx    = (St_dst_dedx      *) dst("dst_dedx");
   St_dst_point      *point       = (St_dst_point     *) dst("point");
   St_dst_event_header  *event_header  = (St_dst_event_header  *) dst("event_header");
@@ -334,9 +379,8 @@ Int_t St_glb_Maker::Make(){
     stk_track = (St_stk_track  *) svt_tracks("stk_track");
     groups    = (St_sgr_groups *) svt_tracks("groups");
   }
-  else {
-    stk_track = new St_stk_track("stk_track",1);
-  }
+  if (!stk_track) {stk_track = new St_stk_track("stk_track",1); temp->Add(stk_track);}
+  if (!groups) {groups = new St_sgr_groups("groups",1); temp->Add(groups);}
 
   St_DataSet         *svthits = gStChain->DataSet("svt_hits");
   St_scs_spt     *scs_spt     = 0;
@@ -346,6 +390,7 @@ Int_t St_glb_Maker::Make(){
     scs_spt      = (St_scs_spt     *) svt_hits("scs_spt");
     scs_cluster = (St_scs_cluster *) svt_hits("scs_cluster");
   }
+  if (!scs_spt) {scs_spt = new St_scs_spt("scs_spt",1); temp->Add(scs_spt);}
   // What is [data]/svt/hits/scs_cluster ?
   if (! scs_cluster) scs_cluster = new St_scs_cluster("scs_cluster",1); 
   St_DataSet  *global_track = global("tracks");
@@ -455,9 +500,7 @@ Int_t St_glb_Maker::Make(){
     dst.Add(ev0track2);
     if (vertex->GetNRows() != 1) {vertex->SetNRows(1);} 
     Int_t Res_ev0 = ev0_am2(m_ev0par2,globtrk,vertex,dst_v0_vertex,ev0track2);
-    //ev0d No longer needed
-    //Int_t Res_ev0d = ev0_dst(ev0out,dst_v0_vertex);
-    //if (Res_ev0d != kSTAFCV_OK) {cout << " Problem on return from EV0_DST " << endl;}
+    if (Res_ev0 != kSTAFCV_OK) {cout << " Problem on return from EV0 " << endl;}
 #if 0
     //  ev0_eval2
     if (stk_track && tptrack && evaltrk) {
@@ -477,6 +520,14 @@ Int_t St_glb_Maker::Make(){
       }
     }
 #endif
+    // exi
+    cout << "Calling exi..."<< endl;
+    if (! dst_xi_vertex) {
+      dst_xi_vertex = new St_dst_xi_vertex("dst_xi_vertex",10000);
+      dst.Add(dst_xi_vertex);
+    }
+    Int_t Res_exi = exiam(m_exipar,globtrk,vertex,dst_v0_vertex,dst_xi_vertex,m_exiaux);
+    if (Res_exi != kSTAFCV_OK) {cout << " Problem on return from EXI " << endl;}
     // dst 
     // dst_dedx_filler
     if (tptrack && stk_track) {
@@ -630,19 +681,26 @@ Int_t St_glb_Maker::Make(){
   // V0
   if (dst_v0_vertex) {
     dst_v0_vertex_st *v0 = dst_v0_vertex->GetTable();
+    Float_t m_prmass2 = proton_mass_c2*proton_mass_c2;
+    Float_t m_pimass2 = (0.139567*0.139567);
     for (Int_t k=0; k<dst_v0_vertex->GetNRows(); k++, v0++){
-      Float_t e1 = v0->pos_px*v0->pos_px +  v0->pos_py*v0->pos_py
+      Float_t e1a = v0->pos_px*v0->pos_px +  v0->pos_py*v0->pos_py
 	+ v0->pos_pz*v0->pos_pz;
       Float_t e2 = v0->neg_px*v0->neg_px +  v0->neg_py*v0->neg_py
 	+ v0->neg_pz*v0->neg_pz;
-      e1 += proton_mass_c2*proton_mass_c2;
-      e2 += (0.139567*0.139567);
+      Float_t e1 = e1a + m_prmass2;  
+      e2 += m_pimass2;
       e1 = TMath::Sqrt(e1);
       e2 = TMath::Sqrt(e2);
       Float_t p = v0->neg_px+v0->pos_px +  v0->neg_py+v0->pos_py +
 	v0->neg_pz+v0->pos_pz;
-      Float_t inv_mass_la = TMath::Sqrt((e1+e2)*(e1+e2) - p*p);
-      m_lameffm->Fill(inv_mass_la);
+      Float_t p2 = p*p;
+      Float_t inv_mass_la = TMath::Sqrt((e1+e2)*(e1+e2) - p2);
+      e1 = e1a + m_pimass2;
+      e1 = TMath::Sqrt(e1);
+      Float_t inv_mass_k0 = TMath::Sqrt((e1+e2)*(e1+e2) - p2);
+      m_ev0_lama_hist->Fill(inv_mass_la);
+      m_ev0_k0ma_hist->Fill(inv_mass_k0);   
     }
   }
   // spectra-PID diagnostic histograms
@@ -674,12 +732,15 @@ Int_t St_glb_Maker::Make(){
 	}
       cout << " run_dst: finished filling dedx histograms" << endl;
   }
+
+  // delete temp dir which holds fake svt when its not there
+  SafeDelete(temp);
   return kStOK;
 }
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.23 1999/02/12 22:27:35 ogilvie Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.24 1999/02/13 20:22:31 caines Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
