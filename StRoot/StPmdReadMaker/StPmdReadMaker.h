@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.h,v 1.3 2004/03/11 11:29:41 subhasis Exp $
+ *$Id: StPmdReadMaker.h,v 1.4 2004/03/23 08:52:03 subhasis Exp $
  *
  *  StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Pmd Data Reader to store hits in StEvent
  ***************************************************************************
  * $Log: StPmdReadMaker.h,v $
+ * Revision 1.4  2004/03/23 08:52:03  subhasis
+ * several changes (Board Detail by hand etc) for first production
+ *
  * Revision 1.3  2004/03/11 11:29:41  subhasis
  * Changes made for PMD run config
  *
@@ -68,7 +71,7 @@ class StPmdReadMaker : public StMaker {
   
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPmdReadMaker.h,v 1.3 2004/03/11 11:29:41 subhasis Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StPmdReadMaker.h,v 1.4 2004/03/23 08:52:03 subhasis Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
   
@@ -102,7 +105,7 @@ class StPmdReadMaker : public StMaker {
   
   ClassDef(StPmdReadMaker, 1)   
     };
-    inline void  StPmdReadMaker::SetPmdPrint(Bool_t var) {mPmdPrint = var;}
+inline void  StPmdReadMaker::SetPmdPrint(Bool_t var) {mPmdPrint = var;}
 inline void  StPmdReadMaker::SetCalibFlag(Bool_t var) {mCalibFlag = var;}
 inline void  StPmdReadMaker::SetChainThreshold(Float_t var) {mChainTh = var;}
 #endif 
