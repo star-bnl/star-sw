@@ -1,5 +1,8 @@
-// $Id: StHFillObject.cxx,v 1.2 1999/11/19 20:33:27 genevb Exp $
+// $Id: StHFillObject.cxx,v 1.3 1999/12/02 03:20:19 perev Exp $
 // $Log: StHFillObject.cxx,v $
+// Revision 1.3  1999/12/02 03:20:19  perev
+// cast's for CC5
+//
 // Revision 1.2  1999/11/19 20:33:27  genevb
 // Fixed a new/delete problem with Root & Char_t strings
 //
@@ -369,7 +372,7 @@ Double_t StHFillFormula::Eval()
 //     pos++; tab[pos-1] = param_calc[action-100000];
 // New code
        pos++;
-       Char_t* bracket = strchr(fExpr[i],'[');
+       Char_t* bracket = (Char_t *)strchr(fExpr[i],'[');
        if (bracket) {
           int arrayOffset = atoi(++bracket);
           Long_t paramPtrL = (Long_t) param_calc[action-100000];

@@ -1,8 +1,11 @@
 //*CMZ :          23/02/99  18.27.27  by Gene Van Buren ( genevb@bnl.gov)
 //*-- Author :    Gene Van Buren ( genevb@bnl.gov)   23/02/99
 //
-// $Id: St_TableNtuple.cxx,v 1.1 1999/09/08 16:36:54 genevb Exp $
+// $Id: St_TableNtuple.cxx,v 1.2 1999/12/02 03:20:20 perev Exp $
 // $Log: St_TableNtuple.cxx,v $
+// Revision 1.2  1999/12/02 03:20:20  perev
+// cast's for CC5
+//
 // Revision 1.1  1999/09/08 16:36:54  genevb
 // Move St_TableNtuple from xdf2root to StAnalysisUtilities
 //
@@ -244,8 +247,9 @@ Int_t St_TableNtuple::AddXDFFile(St_XDFFile &f, Char_t *dataset, Char_t *tname, 
 //
   if (!(strcmp(tname,"same"))) tname = dataset;
   St_DataSet *event=0;
-
-  for (Int_t i=0; i<(firstEvent-1); i++) {
+  
+  Int_t i=0;
+  for (i=0; i<(firstEvent-1); i++) {
     if (!(event = f.NextEventGet())) return 0;
   }
     
@@ -471,7 +475,7 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
 //_____________________________________________________________________________
 void St_TableNtuple::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_TableNtuple.cxx,v 1.1 1999/09/08 16:36:54 genevb Exp $\n");
+  printf("* $Id: St_TableNtuple.cxx,v 1.2 1999/12/02 03:20:20 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("* Using %d columns from table with:\n",mNvar);
   printf("*   Name: %s\n",GetName());
