@@ -1,5 +1,8 @@
-// $Id: bfcread_eventBranch.C,v 1.6 2000/06/13 01:41:50 lansdell Exp $
+// $Id: bfcread_eventBranch.C,v 1.7 2000/06/20 14:03:05 kathy Exp $
 // $Log: bfcread_eventBranch.C,v $
+// Revision 1.7  2000/06/20 14:03:05  kathy
+// now unpack and print out BfcStatus table, if it exists, from .event.root file
+//
 // Revision 1.6  2000/06/13 01:41:50  lansdell
 // load libglobal_Tables to prevent crash
 //
@@ -22,7 +25,8 @@
 //======================================================================
 // owner:  Kathy Turner
 // what it does:  reads .event.root file produced from bfc 
-
+//                runs StAnalysisMaker
+//
 // Inputs to macro:
 //   nevents  -  # events to process
 //   MainFile - input *.event.root file  (you can use any branch here)
@@ -141,11 +145,28 @@ void bfcread_eventBranch(
              TString deName =  dde->GetName();
              if (deName == "BfcStatus") {
                countevBfc++;
+// Now print out contents of BfcStatus for QA purposes
+                 TDataSetIter bfcstatiter(dde);
+                 St_dst_bfc_status *bfcstat = 
+                  (St_dst_bfc_status *) bfcstatiter.Find("BfcStatus");
+                 dst_bfc_status_st *bth = bfcstat->GetTable();
+//  loop over all rows in table BfcStatus:
+                 Int_t ij = 0;
+                 for (ij=0; ij< bfcstat->GetNRows(); ij++)
+                  {
+		    cout << 
+                      " QAInfo:       BfcStatus table -- row " << ij <<
+		      ", Maker: "     <<  bth[ij]->maker_name <<
+                      " has istat = "  <<  bth[ij]->status << endl;
+		    fout << 
+                      " QAInfo:       BfcStatus table -- row " << ij <<
+		      ", Maker: "     <<  bth[ij]->maker_name <<
+                      " has istat = "  <<  bth[ij]->status << endl;
+                 }     
              }
              elseif (deName == "StEvent") {
                countevSt++;
              }
-
            }
          }
 

@@ -1,5 +1,8 @@
-// $Id: bfcread_dstBranch.C,v 1.16 2000/06/19 16:19:56 kathy Exp $
+// $Id: bfcread_dstBranch.C,v 1.17 2000/06/20 14:03:04 kathy Exp $
 // $Log: bfcread_dstBranch.C,v $
+// Revision 1.17  2000/06/20 14:03:04  kathy
+// now unpack and print out BfcStatus table, if it exists, from .event.root file
+//
 // Revision 1.16  2000/06/19 16:19:56  kathy
 // fixed counthold defnition
 //
@@ -148,7 +151,7 @@ EventLoop: if (iev < nevents && !istat) {
       else {
         countevobjd++;
         Countevobjd++;
-    }
+      }
 
       if (ddb->InheritsFrom("TTable")) { 
 
