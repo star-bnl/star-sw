@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.17 2003/11/03 14:46:16 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.18 2003/11/09 02:06:28 fisyak Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -135,7 +135,7 @@ static TH2D *TdEdxPF = 0, *TdEdxP70 = 0;
 static TH2D *hist70[NHYPS][2], *histz[NHYPS][2];
 static TH2D *hist70B[NHYPS][2], *histzB[NHYPS][2];
 static TProfile *histB[NHYPS][2], *histBB[NHYPS][2]; 
-static TH2D *FitPull = 0;
+static TH2D *FitPull = 0, *Pull70 = 0;
 static TTree *ftree = 0;
 static dEdxTrack *ftrack = 0;
 static TH2D *ffitZ[NHYPS],  *ffitP[NHYPS], *ffitZU = 0, *ffitZU3 = 0, *ffitZA = 0;
@@ -465,6 +465,8 @@ Int_t StdEdxY2Maker::Init(){
 			  Nt,i1,i2, 200,-5.,5.);
       }
       FitPull= new TH2D("FitPull","(zFit - log(I(pi)))/dzFit  versus track length", 
+			150,10.,160, 200,-5.,5.);
+      Pull70 = new TH2D("Pull70","log(I70/I(pi)))/D70  versus track length", 
 			150,10.,160, 200,-5.,5.);
       Center = new TProfile("Center","Tpc Gain Monitor center versus Time",Nt,i1,i2);
       Height = new TProfile("Height","Tpc Gain Monitor height versus Time",Nt,i1,i2);
@@ -1350,6 +1352,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
     Points70B->Fill(N70,TMath::Log(I70/PredB[kPidPion]));
     TPoints70->Fill(TrackLength,TMath::Log(I70/Pred70[kPidPion]));
     TPoints70B->Fill(TrackLength,TMath::Log(I70/Pred70B[kPidPion]));
+    Pull70->Fill(TrackLength,TMath::Log(I70/Pred70B[kPidPion])/D70);
   }
   if (! m_DoNotCorrectdEdx) {
     if (NoFitPoints >= 30 && TrackLength > 40) { 
