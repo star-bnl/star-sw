@@ -6,7 +6,8 @@ ClassImp(StRareTrack)
 
 StRareTrack::StRareTrack(){}
 StRareTrack::StRareTrack(StPrimaryTrack* track){
-  fdca = track->impactParameter();
+  StGlobalTrack* gtrack = static_cast<StGlobalTrack*>((StTrack*)track);
+  fdca = gtrack->impactParameter();
   fnpntpossible = track->numberOfPossiblePoints();
   ftracknumber = track->key();
   fiflag = track->flag();
@@ -42,7 +43,7 @@ StRareTrack::StRareTrack(StPrimaryTrack* track){
 
 }
 
-float StRareTrack::dedxExpected(float mass, float charge) const {
+float StRareTrack::dedxExpected(float mass, float charge = 1) const {
   float real_mom = p()*charge;
   float dedx = charge*charge*dEdx_formula(real_mom,mass);
   return dedx;

@@ -15,8 +15,8 @@ if(!fgRareTracks) fgRareTracks = new TClonesArray("StRareTrack",4000);
 void StRareEvent::FillRareEvent(StEvent* event){
   fRunNumber = event->runId();
   fEventNumber = event->id();
-  //  fmagneticField = event->summary()->magneticField();
-  fmagneticField = 0.25;
+  fmagneticField = event->summary()->magneticField();
+  //  fmagneticField = 0.25;
   //  fnumberOfGoodPrimaryTracks = event->summary()->numberOfGoodPrimaryTracks();
   StEvent& evt = *event;
   fnumberOfGoodPrimaryTracks = uncorrectedNumberOfNegativePrimaries(evt);
