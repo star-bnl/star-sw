@@ -1,6 +1,0 @@
-/* scp_pedm.idl  */
-/* SVT Pedestal  */
-
-struct scp_ped{
-  float avg;
-};
