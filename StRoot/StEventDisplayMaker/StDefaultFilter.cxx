@@ -1,4 +1,4 @@
-// $Id: StDefaultFilter.cxx,v 1.2 2000/08/27 16:55:07 fine Exp $
+// $Id: StDefaultFilter.cxx,v 1.3 2000/08/27 19:30:48 fine Exp $
 #include "iostream.h"
 #include "TH1.h"
 #include "StDefaultFilter.h"
@@ -30,10 +30,10 @@
 // - "colored" cirles represent the hits associated with begin_html <a href="dst_track_st.html">dst/globtrk</a> end_html //
 //   (The color is used to distinguish the hits of one track from others)//
 //                                                                      //
-// - "colored" lines represent the begin_html <a href="dst_track_st.html">dst/primtrk</a> end_html          //
+// - "colored" lines represents the begin_html <a href="dst_track_st.html">dst/primtrk</a> end_html          //
 //    The color index of the track represent the track dedx:            //
-//    begin_html <font color=blue>Blue - small dedx (cool)</font> end_html                                          //
-//    begin_html <font color=red>Red -  the larger dedx (hot)</font> end_html                                      //
+//   begin_html <font color=blue>Blue - small dedx (cool)</font> end_html                                          //
+//   begin_html <font color=red>Red -  the larger dedx (hot)</font> end_html                                      //
 //                                                                      //
 //  Submit any problem with this code via begin_html <A HREF="http://www.star.bnl.gov/STARAFS/comp/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html
 //                                                                      //
@@ -168,7 +168,7 @@ Int_t StDefaultFilter::SubChannel(const TTableSorter *tableObject, Int_t index,S
   Int_t color = 0;
   St_dst_point *hit = (St_dst_point *)tableObject->GetTable();
   assert(hit);
-  dst_point_st &point = *hit->GetTable(index);
+  dst_point_st &point = *hit->GetTable(tableObject->GetIndex(index));
   // Set "small" marker for the "noice" points
   if (point.id_track == 0) {
      style = 1;  
@@ -197,6 +197,9 @@ Int_t StDefaultFilter::SubChannel(St_dst_track   &track, Int_t rowNumber,Size_t 
 
 
 // $Log: StDefaultFilter.cxx,v $
+// Revision 1.3  2000/08/27 19:30:48  fine
+// Bug fix: SubChannel(dst_point) fixed
+//
 // Revision 1.2  2000/08/27 16:55:07  fine
 // Title with Run event number etc
 //
