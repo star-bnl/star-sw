@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.19 2001/06/25 00:45:35 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.20 2001/07/05 13:47:03 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.20  2001/07/05 13:47:03  jcs
+// move debug statement to correct location
+//
 // Revision 1.19  2001/06/25 00:45:35  jcs
 // change DEBUG print statement to print out both soft and hard row/sector info
 //
@@ -185,13 +188,13 @@ int StFtpcClusterFinder::search()
 	  // new sector, set pad buffer so there can be no matches
 	  iPadBuf=-2;
 	  bNewSec=TRUE;
-#ifdef DEBUG
-	  printf("Now on Sector %d, Row %d (iHardSec %d, iHardRow %d)\n",iSec,iRow,iHardSec,iHardRow);
-#endif
 
 	  // calculate hardware (daq) sectors from software position
 	  iHardSec = mDb->numberOfSectors()*(int)(iRow/2) + iSec + 1;
 	  iHardRow = iRow%2 + 1;
+#ifdef DEBUG
+	  printf("Now on Sector %d, Row %d (iHardSec %d, iHardRow %d)\n",iSec,iRow,iHardSec,iHardRow);
+#endif
 
 	  // get list of occupied pads in sector
 	  unsigned char *(padlist[2]);
