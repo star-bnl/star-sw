@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.hh,v 1.13 2000/09/15 21:21:17 fisyak Exp $
+ * $Id: EventReader.hh,v 1.14 2002/01/17 17:29:26 jeromel Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: common definitions for all detectors
@@ -21,6 +21,10 @@
  *
  ***************************************************************************
  * $Log: EventReader.hh,v $
+ * Revision 1.14  2002/01/17 17:29:26  jeromel
+ * Files:  CVS: DetectorReader.cxx EventReader.cxx EventReader.hh CVS: RecHeaderFormats.hh CVS: ----------------------------------------------------------------------
+ * Modifications for FPD support
+ *
  * Revision 1.13  2000/09/15 21:21:17  fisyak
  * No ulong on HP
  *
@@ -124,7 +128,7 @@ struct EventInfo // return from EventReader::getEventInfo()
   unsigned char EMCPresent;
   unsigned char SMDPresent;
   unsigned char FTPCPresent;
-  unsigned char Reserved;
+  unsigned char FPDPresent;
   unsigned char RICHPresent;
   unsigned char TRGDetectorsPresent;
   unsigned char L3Present;

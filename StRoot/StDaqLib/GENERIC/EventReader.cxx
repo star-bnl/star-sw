@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.34 2001/12/30 23:53:42 ward Exp $
+ * $Id: EventReader.cxx,v 1.35 2002/01/17 17:29:26 jeromel Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,10 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.35  2002/01/17 17:29:26  jeromel
+ * Files:  CVS: DetectorReader.cxx EventReader.cxx EventReader.hh CVS: RecHeaderFormats.hh CVS: ----------------------------------------------------------------------
+ * Modifications for FPD support
+ *
  * Revision 1.34  2001/12/30 23:53:42  ward
  * Fixed FTPC pointer errors, and other cleanup.
  *
@@ -617,13 +621,13 @@ EventInfo EventReader::getEventInfo()
   ei.EventSeqNo = dp->EventNumber;
   ei.TrigWord = dp->TriggerWord;
   ei.TrigInputWord = dp->TriggerInWord;
+  printf("EventReader::getEventInfo  detector presence = %x\n",dp->DetectorPresence);
   ei.TPCPresent = (dp->DetectorPresence & 0x1);
   ei.SVTPresent = (dp->DetectorPresence & 0x2);
   ei.TOFPresent = (dp->DetectorPresence & 0x4);
   ei.EMCPresent = (dp->DetectorPresence & 0x8);
-  ei.SMDPresent = (dp->DetectorPresence & 0x10);
+  ei.FPDPresent  = (dp->DetectorPresence & 0x10);
   ei.FTPCPresent = (dp->DetectorPresence & 0x20);
-  ei.Reserved = (dp->DetectorPresence & 0x40);
   ei.RICHPresent = (dp->DetectorPresence & 0x80);
   ei.TRGDetectorsPresent = (dp->DetectorPresence & 0x100);
   ei.L3Present = (dp->DetectorPresence & 0x200);
@@ -649,6 +653,7 @@ void EventReader::printEventInfo()
   if (ei.EMCPresent) printf("EMC ");
   if (ei.SMDPresent) printf("SMD ");
   if (ei.FTPCPresent) printf("FTPC ");
+  if (ei.FPDPresent) printf("FPD ");
   if (ei.RICHPresent) printf("RICH ");
   if (ei.TRGDetectorsPresent) printf("TRG ");
   if (ei.L3Present) printf("L3 ");
@@ -675,6 +680,7 @@ void EventReader::printEventInfo(FILE * fd)
   if (ei.EMCPresent) fprintf(fd,"EMC ");
   if (ei.SMDPresent) fprintf(fd,"SMD ");
   if (ei.FTPCPresent) fprintf(fd,"FTPC ");
+  if (ei.FPDPresent) fprintf(fd,"FPD ");
   if (ei.RICHPresent) fprintf(fd,"RICH ");
   if (ei.TRGDetectorsPresent) fprintf(fd,"TRG ");
   if (ei.L3Present) fprintf(fd,"L3 ");
@@ -796,6 +802,7 @@ void EventReader::WhereAreThePointers(int *beg,int *end,char *xx) {
   if(!strcmp(xx, "FTPSECP")) { *beg=1; *end= 24; }
   if(!strcmp(xx,  "FTPRBP")) { *beg=1; *end=6; }
   if(!strcmp(xx,    "TOFP")) { *beg=1; *end=8; }
+  if(!strcmp(xx,    "FPDP")) { *beg=0; *end=0; } // This is for chekcing data corruptions. Skip for now
   (*beg)--; (*end)--;
   if((*beg)<0||(*end)<0) {
     printf("Please add code to WhereAreThePointers for '%s'.\n",xx);
