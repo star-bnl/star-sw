@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.h,v 1.2 2003/01/17 01:36:16 fine Exp $
+// $Id: StEventControlPanel.h,v 1.3 2003/02/26 04:36:25 fine Exp $
 //
 
 
@@ -25,6 +25,7 @@ class StMaker;
 class TBrowser;
 class StEventDisplayMaker;
 class StEventDisplayInfo;
+class TList;
 
 class QWidget;
 class QButton;
@@ -45,8 +46,8 @@ Q_OBJECT
 #endif
 protected:
    QWidget *fBar;  
-   TObject *fFilter;
-   StFilterDialog *fDialog;
+   TList *fFilter;
+   QWidget  *fDialog;
    TBrowser    *fBrowser;
    QPushButton *fRedrawButton;
    QPushButton *fNextEventButton;

@@ -3,7 +3,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.cxx,v 1.9 2003/02/04 19:32:21 fine Exp $
+// $Id: StEventControlPanel.cxx,v 1.10 2003/02/26 04:36:17 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -82,6 +82,9 @@
 #include <qhbox.h>
 #include <qlayout.h>
 #include <qlabel.h>
+#include <qtabwidget.h> 
+#include <qmessagebox.h>
+
 StChain             *StEventControlPanel::fgChain  = 0;
 StEventDisplayInfo  *StEventControlPanel::fgHlp    = 0;
 StEventDisplayMaker *StEventControlPanel::fgDispMk = 0;
@@ -464,7 +467,8 @@ void StEventControlPanel::Refresh()
 //_______________________________________________________________________________________
 void StEventControlPanel::AddFilter(TObject *filter)
 {   
-   fFilter = filter;
+   if (!fFilter) fFilter = new TList();
+   fFilter->Add(filter);
 }
 //_______________________________________________________________________________________
 void StEventControlPanel::Show()
@@ -477,16 +481,41 @@ void StEventControlPanel::Show()
 void StEventControlPanel::ShowFilter()
 {  // fFilter->Show();
    // Create StFilteDialog
-   StFilterABC &filter = *(StFilterABC *)fFilter;
-   float       *pars    = filter.GetPars();
-   const float *defs    = filter.GetDefs();
-   const char **namval  = filter.GetNams();
-   int flag;
-
-   delete fDialog; // We want to keep the only filter on the screen
-   fDialog = new StFilterDialog(filter.GetName(),namval,defs, pars, &flag); //, flag);
+   if (!fFilter) {
+      QMessageBox::warning ( 0,  "Show Event Filter"
+                                  ,"No filter has been defined yet!"
+                                  , QMessageBox::Ok, QMessageBox::NoButton);
+         return;
+   }
+   int nFilters = fFilter->GetSize();
+   // delete fDialog; // We want to keep the only filter on the screen
+   QTabWidget *tabView = 0;
+   if (nFilters > 1) {
+      // Create tab view
+      tabView = new QTabWidget (0,"filters",Qt::WDestructiveClose | Qt::WStyle_DialogBorder);
+      connect(fDialog,SIGNAL(destroyed()),this,SLOT(Disconnect()));
+      fDialog = tabView;
+   }
+   TIter nextFilter(fFilter);
+   StFilterABC *filter = 0;
+   StFilterDialog *dialog = 0;
+   while ( (filter = (StFilterABC *)nextFilter()) )  {
+      float       *pars    = filter->GetPars();
+      const float *defs    = filter->GetDefs();
+      const char **namval  = filter->GetNams();
+      int flag;
+      dialog = new StFilterDialog(filter->GetName(),namval,defs, pars, &flag); //, flag);
+      if (tabView) {
+        // dialog->reparent(tabView,0); 
+        tabView->addTab(dialog,filter->GetName());
+        connect(dialog,SIGNAL(destroyed()),tabView,SLOT(close()));
+      }
+   }
+   if ( nFilters == 1) fDialog = dialog;
    connect(fDialog,SIGNAL(destroyed()),this,SLOT(Disconnect()));
-   fDialog->Show();
+   // fDialog->Show();
+    fDialog->show();
+    fDialog->raise();
 }
 //_______________________________________________________________________________________
 void StEventControlPanel::ShowVolumeBrowser()
