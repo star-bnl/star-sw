@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.10 2001/06/15 20:37:05 jeromel Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.11 2001/07/24 23:41:52 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -113,7 +113,7 @@ void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StSvtLo
 
 {
 
-  double t0=0;
+  double t0=6;
 
   b.setLayer(a.layer());
   b.setLadder(a.ladder());
@@ -155,7 +155,7 @@ void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StSvtLo
 void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StSvtWaferCoordinate& b)
 {
 
-  double t0=0;
+  double t0=6;
 
   StThreeVector<double> pos(0,0,0);
 
