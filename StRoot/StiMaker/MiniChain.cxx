@@ -20,6 +20,10 @@ using namespace std;
 #include "StTreeMaker/StTreeMaker.h"
 #include "StiGui/EventDisplay.h"
 
+#include "Sti/StiKalmanTrackFinderParameters.h"
+#include "TDataSet.h"
+
+
 ClassImp(MiniChain)
 
 MiniChain::MiniChain()
@@ -30,6 +34,8 @@ MiniChain::MiniChain()
 	  _toolkit(new StiDefaultToolkit())
 { 
   StiToolkit::setToolkit(_toolkit);
+
+
 }
 
 MiniChain::~MiniChain()
