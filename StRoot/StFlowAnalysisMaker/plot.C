@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.9 2000/01/24 23:02:13 posk Exp $
+// $Id: plot.C,v 1.10 2000/01/27 00:04:31 posk Exp $
 //
 // Author: Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker
@@ -9,6 +9,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.10  2000/01/27 00:04:31  posk
+// Corrected error in pt plots.
+//
 // Revision 1.9  2000/01/24 23:02:13  posk
 // Merged updates
 //
@@ -126,8 +129,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
   // input the page number
   while (pageNumber <= nSingles || pageNumber > nNames) {
-    if (pageNumber == -1) {           // plot all
-      plotAll(nNames, selN, harN);
+    if (pageNumber < 0) {           // plot all
+      plotAll(nNames, selN, harN, -pageNumber);
       return;
     }
     if (pageNumber == 1) {            // plot resolution
@@ -229,7 +232,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
  	if (strcmp(shortName[pageNumber],"Flow_v2D")==0 ||
 	    strcmp(shortName[pageNumber],"Flow_vObs2D")==0) {
 	  hist->SetMaximum(20.);
-	  hist->SetMinimum(-5.);
+	  hist->SetMinimum(-20.);
 	  gStyle->SetOptStat(0);
 	} else {
 	  gStyle->SetOptStat(10);
@@ -268,11 +271,15 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	float norm = (float)(hist->GetNbinsX()) / hist->Integral(); 
 	cout << "  Normalized by: " << norm << endl;
 	hist->Scale(norm); // normalize height to one
-	if (strstr(shortName[pageNumber],"Diff")!=0) { 
+	if (strstr(shortName[pageNumber],"Sub")!=0) { 
 	  TF1* funcCos1 = new TF1("funcCos1",
 	    "1+[0]*2/100*cos([1]*x)",0.,twopi);
 	  funcCos1->SetParNames("k=1", "har");
-	  funcCos1->SetParameters(0, j+2); // initial values
+	  if (strstr(shortName[pageNumber],"Diff")!=0) {
+	    funcCos1->SetParameters(0, j+2); // initial values
+	  } else {
+	    funcCos1->SetParameters(0, j+1); // initial values
+	  }
 	  funcCos1->SetParLimits(1, 1, 1); // har is fixed
 	  hist->Fit("funcCos1");
 	  delete funcCos1;
@@ -312,6 +319,14 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
       } else if (strstr(shortName[pageNumber],"Psi")!=0) { // Psi distibutions
 	gStyle->SetOptStat(10);
 	hist->Draw("E1"); 
+      } else if (strstr(shortName[pageNumber],"Eta")!=0) { // Eta distibutions
+	gStyle->SetOptStat(100110);
+	hist->Draw();
+  	lineZeroEta->Draw();
+      } else if (strstr(shortName[pageNumber],"Pt")!=0) {  // Pt distibutions
+	gStyle->SetOptStat(100110);
+	hist->Draw();
+  	lineZeroPt->Draw();
       } else {                                             // all others
 	gStyle->SetOptStat(100110);
 	hist->Draw(); 
@@ -466,9 +481,9 @@ TCanvas* plotSingles(char* shortName){
   return c;
 }
 
-void plotAll(Int_t nNames, Int_t selN = 0, Int_t harN = 0) {
+void plotAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
   char temp[3];
-  for (int i =  1; i < nNames + 1; i++) {
+  for (int i =  first; i < nNames + 1; i++) {
     TCanvas* c = plot(i, selN, harN);
     c->Update();
     cout << "save? y/[n]" << endl;

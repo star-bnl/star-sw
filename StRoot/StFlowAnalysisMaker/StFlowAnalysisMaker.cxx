@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.17 2000/01/24 23:02:11 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.18 2000/01/27 00:04:29 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.18  2000/01/27 00:04:29  posk
+// Corrected error in pt plots.
+//
 // Revision 1.17  2000/01/24 23:02:11  posk
 // Merged updates
 //
@@ -160,7 +163,7 @@ Int_t StFlowAnalysisMaker::Make() {
 
 void StFlowAnalysisMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.17 2000/01/24 23:02:11 posk Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.18 2000/01/27 00:04:29 posk Exp $"
        << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
@@ -187,7 +190,7 @@ Int_t StFlowAnalysisMaker::Init() {
   const float maxPtsMin       =    0.;
   const float maxPtsMax       =  100.; 
   const float fitOverMaxMin   =    0.;
-  const float fitOverMaxMax   =    3.; 
+  const float fitOverMaxMax   =    2.; 
   const float origMultMin     =    0.;
   const float origMultMax     = 4000.; 
   const float totalMultMin    =    0.;
@@ -196,8 +199,8 @@ Int_t StFlowAnalysisMaker::Init() {
   const float multOverOrigMax =    1.; 
   const float vertexZMin      = -100.;
   const float vertexZMax      =  100.; 
-  const float vertexXYMin     =  -1.;
-  const float vertexXYMax     =   1.; 
+  const float vertexXYMin     =   -1.;
+  const float vertexXYMax     =    1.; 
   const float etaSymMin       =  -0.2; 
   const float etaSymMax       =   0.2; 
   const float phiMin          =    0.;
@@ -807,11 +810,13 @@ void StFlowAnalysisMaker::fillParticleHistograms() {
 
        	// Caculate v for all particles
 	float v = cos(order * (phi - psi_i))/perCent;
+	float vFlip = v;
+	if (eta < 0 && (j+1) % 2 == 1) vFlip *= -1;
 	histFull[k].histFullHar[j].mHistSum_v2D->Fill(eta, pt, v);
 	histFull[k].histFullHar[j].mHist_vObsEta->Fill(eta, v);
-	histFull[k].histFullHar[j].mHist_vObsPt->Fill(pt, v);
+	histFull[k].histFullHar[j].mHist_vObsPt->Fill(pt, vFlip);
 	histFull[k].histFullHar[j].mHist_vEta->Fill(eta, v);
-	histFull[k].histFullHar[j].mHist_vPt->Fill(pt, v);
+	histFull[k].histFullHar[j].mHist_vPt->Fill(pt, vFlip);
 
 	// Correlation of Phi of all particles with Psi
 	float phi_i = phi;
@@ -908,8 +913,11 @@ Int_t StFlowAnalysisMaker::Finish() {
       float mult = histFull[k].histFullHar[j].mHistMult->GetMean();
       TF1* func_q = new TF1("qDist", qDist, 0., qMax, 3); // fit q dist
       func_q->SetParNames("v", "mult", "area");
+      //float qMean = histFull[k].histFullHar[j].mHist_q->GetMean();
+      //float vGuess = 100. * sqrt(qMean / mult);
       //func_q->SetParameters(1., mult, area); // initial values
       func_q->SetParameters(10., mult, area); // initial values
+      //func_q->SetParameters(vGuess, mult, area); // initial values
       func_q->SetParLimits(1, 1, 1); // mult is fixed
       func_q->SetParLimits(2, 1, 1); // area is fixed
       histFull[k].histFullHar[j].mHist_q->Fit("qDist", "0");
