@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.h,v 1.9 2002/02/12 15:31:35 lasiuk Exp $
+ * $Id: StRichSpectraMaker.h,v 1.10 2002/02/19 04:26:49 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRichSpectraMaker.h,v $
+ * Revision 1.10  2002/02/19 04:26:49  lasiuk
+ * addition of filling StEvent for inclusion in chain
+ *
  * Revision 1.9  2002/02/12 15:31:35  lasiuk
  * changes to remove formatting of tuple structures
  *
@@ -56,7 +59,8 @@
 using std::pair;
 #endif
 
-//#define RICH_SPECTRA_HISTOGRAM 1
+#define FOR_RECONSTRUCTION 1
+#define RICH_SPECTRA_HISTOGRAM 0
 //RICH_WITH_PAD_MONITOR 1
 
 #ifdef RICH_SPECTRA_HISTOGRAM
@@ -227,7 +231,7 @@ protected:
     
 virtual const char *GetCVS() const	{
     static const char cvs[]=
-	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.9 2002/02/12 15:31:35 lasiuk Exp $ built "__DATE__" "__TIME__ ;
+	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.10 2002/02/19 04:26:49 lasiuk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
 }
 public:

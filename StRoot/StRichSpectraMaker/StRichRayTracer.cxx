@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichRayTracer.cxx,v $
+ * Revision 1.7  2002/02/19 04:26:50  lasiuk
+ * addition of filling StEvent for inclusion in chain
+ *
  * Revision 1.6  2002/02/09 19:03:47  lasiuk
  * float.h header included for 7.2
  *
@@ -79,8 +82,8 @@ void StRichRayTracer::setTrack(StThreeVectorF& pLocal,
     mLocalTrackMomentum           = pLocal;
     mExpectedRadiationPoint       = radiationPoint;
     mExpectedQuartzRadiationPoint = quartzRadiationPoint;
-    PR(mRadiationPlanePoint);
-    PR(mQuartzRadiationPlanePoint);
+//     PR(mRadiationPlanePoint);
+//     PR(mQuartzRadiationPlanePoint);
 
     //
     // this defines the axis from which the
@@ -90,7 +93,7 @@ void StRichRayTracer::setTrack(StThreeVectorF& pLocal,
     
     mAxis = pLocal;
     mAxis.setZ(0.);
-    PR(mAxis);
+//     PR(mAxis);
     
     this->calculateTrackAngle();
 }
@@ -503,7 +506,7 @@ bool  StRichRayTracer::processPhoton(double* angle) {
 	*angle = FLT_MAX;
     }
 
-     PR(mCerenkovAngle/degree);
+//      PR(mCerenkovAngle/degree);
 //     PR(mPhi/degree);
     
     //
@@ -881,13 +884,14 @@ bool StRichRayTracer::checkPlane(StThreeVectorF& pt)
 vector<StThreeVectorF>
 StRichRayTracer::calculatePoints(StThreeVectorF& radPt, double mass)
 {
-    cout << "StRichRayTracer::calculatePoints()" << endl;
+//     cout << "StRichRayTracer::calculatePoints()" << endl;
     vector<StThreeVectorF> pts;
     //
     // track must already be set
     // --> Generate points on the plane for a ring
     //
-    double beta2 = sqr(abs(mLocalTrackMomentum))/(sqr(abs(mLocalTrackMomentum))+sqr(mass));
+    double beta2 =
+	sqr(abs(mLocalTrackMomentum))/(sqr(abs(mLocalTrackMomentum))+sqr(mass));
     double beta = sqrt(beta2);
 
     double nF;
@@ -1018,8 +1022,8 @@ StRichRayTracer::calculatePoints(StThreeVectorF& radPt, double mass)
 	pts.push_back(bottomDetector);
     }
 
-    PR(totalLength);
-    PR(totalLengthOnPlane);
+//     PR(totalLength);
+//     PR(totalLengthOnPlane);
     mLineIntegralOnPlane = totalLengthOnPlane;
     mLineIntegralRatio = totalLengthOnPlane/totalLength;
     
