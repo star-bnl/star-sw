@@ -34,6 +34,9 @@ enum {kStSorted = 0x00100000};
  static ULong_t GetNextKey(TFile *file, const Char_t *name, ULong_t  ukey);
  static TObject *ReadNext (TFile *file, const Char_t *name, ULong_t &ukey);
  static TString &MakeKey  (const Char_t *name, ULong_t ukey);
+ static TString RFIOName  (const char *name);
+ static TFile   *Open     (const char *name, Option_t *option="",const char *title="",Int_t compress=1);
+ static Int_t   IfExi(const char *file);
 };
 
 class StTree;
