@@ -1,9 +1,26 @@
+#ifndef StQACosmicMaker_HH
+#define StQACosmicMaker_HH
+/***************************************************************************
+ *
+ * $Id: StQACosmicMaker.h,v 1.2 1999/08/17 01:44:32 snelling Exp $
+ *
+ * Author: Raimond Snellings, LBNL, Jun 1999
+ * Description:  Maker to QA the Cosmic data (hitfinding, tracking etc.)
+ *
+ * $Log: StQACosmicMaker.h,v $
+ * Revision 1.2  1999/08/17 01:44:32  snelling
+ * changed ntuple projection to normal histogram filling
+ *
+ * Revision 1.2  1999/08/03 17:15:53  snelling
+ * added id tags
+ *
+ *  
+ **************************************************************************/
 #include "StMaker.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TNtuple.h"
 #include "TProfile.h"
-
 
 class StQACosmicMaker : public StMaker {
 
@@ -11,33 +28,24 @@ class StQACosmicMaker : public StMaker {
 
  protected:
 
-  TNtuple *nttpc; //!
-  TProfile *xyresvsalpha_prof; //!
+  TNtuple *mTNtupleTPC; //!
 
-  TH2F *xyresvsalpha_inner; //!
-  TH1D *xyresvsalpha_inner_mean; //!
-  TH1D *xyresvsalpha_inner_sigma; //!
-  TH1D *xyresvsalpha_inner_mag; //!
-  TH1D *xyresvsalpha_inner_chi; //!
+  struct FitHist {
+    TH1D *mXYResVersusAlpha_mean;
+    TH1D *mXYResVersusAlpha_sigma;
+    TH1D *mXYResVersusAlpha_mag;
+    TH1D *mXYResVersusAlpha_chi;
+  };
 
-  TH2F *xyresvsalpha_inner_lowpt; //!
-  TH1D *xyresvsalpha_inner_lowpt_mean; //!
-  TH1D *xyresvsalpha_inner_lowpt_sigma; //!
-  TH1D *xyresvsalpha_inner_lowpt_mag; //!
-  TH1D *xyresvsalpha_inner_lowpt_chi; //!
+  struct ResidualHist;
+  friend struct ResidualHist;
 
-  TH2F *xyresvsalpha_outer; //!
-  TH1D *xyresvsalpha_outer_mean; //!
-  TH1D *xyresvsalpha_outer_sigma; //!
-  TH1D *xyresvsalpha_outer_mag; //!
-  TH1D *xyresvsalpha_outer_chi; //!
+  struct ResidualHist {
+    TH2F *mXYResVersusAlpha;
+    struct FitHist FitHists; 
+  };
 
-  TH2F *xyresvsalpha_outer_lowpt; //!
-  TH1D *xyresvsalpha_outer_lowpt_mean; //!
-  TH1D *xyresvsalpha_outer_lowpt_sigma; //!
-  TH1D *xyresvsalpha_outer_lowpt_mag; //!
-  TH1D *xyresvsalpha_outer_lowpt_chi; //!
-
+  struct ResidualHist ResidualHists[4]; //! 
 
  public: 
 
@@ -47,9 +55,20 @@ class StQACosmicMaker : public StMaker {
   virtual Int_t  Init();
   virtual Int_t  Make();
   virtual void   PrintInfo();
-  virtual void   MakeHistograms();
+  virtual Int_t  initHistograms();
+  virtual Int_t  fillHistograms();
+  virtual Int_t  calcHistograms();
+  virtual Int_t  initTNtuple();
+  virtual Int_t  fillTNtuple();
   virtual Int_t  Finish();
-  ClassDef(StQACosmicMaker, 1)
-    };
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.2 1999/08/17 01:44:32 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
+  ClassDef(StQACosmicMaker, 1) //macro for rootcint
+};
+
+#endif
+
+
 
 
