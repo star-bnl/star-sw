@@ -1,5 +1,11 @@
-/* $Id: phys_constants.h,v 1.3 1998/03/27 14:18:45 fisyak Exp $ */
+#ifndef PHYS_CONSTANTS
+#define PHYS_CONSTANTS
+#if 0
+/* $Id: phys_constants.h,v 1.4 1998/11/30 16:06:10 fisyak Exp $ */
 /* $Log: phys_constants.h,v $
+ * Revision 1.4  1998/11/30 16:06:10  fisyak
+ * Protection versus usage in FORTRAN
+ *
  * Revision 1.3  1998/03/27 14:18:45  fisyak
  * +/- => POS/MIN
  *
@@ -9,8 +15,7 @@
  * Revision 1.1  1998/02/19 15:56:21  fisyak
  * Math. Phys. constants from H.Ward
  * */
-#ifndef PHYS_CONSTANTS
-#define PHYS_CONSTANTS
+#endif
 
 #define C_C_LIGHT           2.99792458e10   /* speed light cm/s */
 #define C_ELECT_CHARGE_MAG  1.60217733e-19  /* electron charge C */

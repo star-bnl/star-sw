@@ -1,10 +1,14 @@
-/* $Id: math_constants.h,v 1.1 1998/02/19 15:56:21 fisyak Exp $ */
+#ifndef MATH_CONSTANTS
+#define MATH_CONSTANTS
+#if 0
+/* $Id: math_constants.h,v 1.2 1998/11/30 16:06:10 fisyak Exp $ */
 /* $Log: math_constants.h,v $
+ * Revision 1.2  1998/11/30 16:06:10  fisyak
+ * Protection versus usage in FORTRAN
+ *
  * Revision 1.1  1998/02/19 15:56:21  fisyak
  * Math. Phys. constants from H.Ward
  * */
-#ifndef MATH_CONSTANTS
-#define MATH_CONSTANTS
 /* 
 ** Most of these were copied from math.h.  The AIX math.h was
 ** different than the other three, so I am simply going to have
@@ -12,7 +16,7 @@
 **
 ** Underscores here often mean 'divided by'.  E.g., PI_2 means pi/2.
 */
-
+#endif
 #define C_DEG_PER_RAD                 57.295779513082320876798155
 #define C_RAD_PER_DEG                 0.017453292519943295769237
 #define C_2PI                         6.28318530717958648
