@@ -84,10 +84,12 @@ static int* one=&One;
 	The message is counted unless counting is disabled.
 	If the prefix in msg is undefined, it is defined at this call and set to
 	the default state for its class (see MsgDefineClass).
+
 	Note that unlike the FORTRAN message call, there is no "Lines" argument;
-	lines are defined with "\n" (newline) characters, and the caller is
-	expected to specify a "\n" character at the end of a message, according
-	to standard C practice.  msg may have as many newlines as desired.
+	lines are defined with "\n" (newline) characters.
+	However, unlike standard C practice, the caller should NOT include a "\n" at
+	the very end, since this interfaces to FORTRAN, which effectively puts a
+	"\n" at the very end.  msg may have as many newlines as desired.
 */
 	message_( msg, one, ID, strlen(msg) );
 	return;
@@ -110,10 +112,12 @@ static int* one=&One;
 	This is the "pure" I/O part of Message.
 	A prefix contained in msg is regarded as simply a part of msg and is ignored as a prefix.
 	No definitions are made here for an undefined prefix.
+
 	Note that unlike the FORTRAN message call, there is no "Lines" argument;
-	lines are defined with "\n" (newline) characters, and the caller is
-	expected to specify a "\n" character at the end of a message, according
-	to standard C practice.  msg[] may have as many newlines as desired.
+	lines are defined with "\n" (newline) characters.
+	However, unlike standard C practice, the caller should NOT include a "\n" at
+	the very end, since this interfaces to FORTRAN, which effectively puts a
+	"\n" at the very end.  msg may have as many newlines as desired.
 */
 	message_out_( msg, one, strlen(msg) );
 	return;
@@ -233,10 +237,12 @@ static int* one=&One;
 	Conditionally display a message msg on standard out and the journal,
 	if enabled by a call to MsgJournalOn.  The message is displayed
 	unless disabled.  The message is counted unless counting is disabled.
+
 	Note that unlike the FORTRAN message call, there is no "Lines" argument;
-	lines are defined with "\n" (newline) characters, and the caller is
-	expected to specify a "\n" character at the end of a message, according
-	to standard C practice.  msg may have as many newlines as desired.
+	lines are defined with "\n" (newline) characters.
+	However, unlike standard C practice, the caller should NOT include a "\n" at
+	the very end, since this interfaces to FORTRAN, which effectively puts a
+	"\n" at the very end.  msg may have as many newlines as desired.
 */
 	msg_display_( msg, one, ID, strlen(msg) );
 	return;
@@ -257,10 +263,12 @@ static int* one=&One;
 	The message may not be disabled.
 	The message is not counted.
 	This is the "pure" I/O part of MsgDisplay.
+
 	Note that unlike the FORTRAN message call, there is no "Lines" argument;
-	lines are defined with "\n" (newline) characters, and the caller is
-	expected to specify a "\n" character at the end of a message, according
-	to standard C practice.  msg[] may have as many newlines as desired.
+	lines are defined with "\n" (newline) characters.
+	However, unlike standard C practice, the caller should NOT include a "\n" at
+	the very end, since this interfaces to FORTRAN, which effectively puts a
+	"\n" at the very end.  msg may have as many newlines as desired.
 */
 	msg_display_out_( msg, one, strlen(msg) );
 	return;
@@ -290,10 +298,12 @@ static int* one=&One;
 	Conditionally display a message msg on standard out and echo it to LUN.
 	The message is displayed unless disabled.
 	The message is counted unless counting is disabled.
+
 	Note that unlike the FORTRAN message call, there is no "Lines" argument;
-	lines are defined with "\n" (newline) characters, and the caller is
-	expected to specify a "\n" character at the end of a message, according
-	to standard C practice.  msg may have as many newlines as desired.
+	lines are defined with "\n" (newline) characters.
+	However, unlike standard C practice, the caller should NOT include a "\n" at
+	the very end, since this interfaces to FORTRAN, which effectively puts a
+	"\n" at the very end.  msg may have as many newlines as desired.
 */
 	msg_display_and_echo_( msg, one, &LUN, ID, strlen(msg) );
 	return;
@@ -314,10 +324,12 @@ static int* one=&One;
 	Display (always) a message msg on standard out and echo it to LUN.
 	The message may not be disabled.
 	The message is not counted.
+
 	Note that unlike the FORTRAN message call, there is no "Lines" argument;
-	lines are defined with "\n" (newline) characters, and the caller is
-	expected to specify a "\n" character at the end of a message, according
-	to standard C practice.  msg may have as many newlines as desired.
+	lines are defined with "\n" (newline) characters.
+	However, unlike standard C practice, the caller should NOT include a "\n" at
+	the very end, since this interfaces to FORTRAN, which effectively puts a
+	"\n" at the very end.  msg may have as many newlines as desired.
 */
 	msg_display_and_echo_out_( msg, one, &LUN, strlen(msg) );
 	return;
@@ -919,9 +931,10 @@ static int* one=&One;
 	of up to 132 characters each, on the journal file, if open & enabled.
 
 	Note that unlike the FORTRAN message call, there is no "Lines" argument;
-	lines are defined with "\n" (newline) characters, and the caller is
-	expected to specify a "\n" character at the end of a message, according
-	to standard C practice.  msg may have as many newlines as desired.
+	lines are defined with "\n" (newline) characters.
+	However, unlike standard C practice, the caller should NOT include a "\n" at
+	the very end, since this interfaces to FORTRAN, which effectively puts a
+	"\n" at the very end.  msg may have as many newlines as desired.
 */
 	msg_to_journal_( msg, one, ID, strlen(msg) );
 	return;
@@ -942,9 +955,10 @@ static int* one=&One;
 	of up to 132 characters each, on the journal file, if open & enabled.
 
 	Note that unlike the FORTRAN message call, there is no "Lines" argument;
-	lines are defined with "\n" (newline) characters, and the caller is
-	expected to specify a "\n" character at the end of a message, according
-	to standard C practice.  msg may have as many newlines as desired.
+	lines are defined with "\n" (newline) characters.
+	However, unlike standard C practice, the caller should NOT include a "\n" at
+	the very end, since this interfaces to FORTRAN, which effectively puts a
+	"\n" at the very end.  msg may have as many newlines as desired.
 */
 	msg_to_journal_out_( msg, one, strlen(msg) );
 	return;
@@ -975,9 +989,10 @@ static int* one=&One;
 	of up to 132 characters each, on LUN.
 
 	Note that unlike the FORTRAN message call, there is no "Lines" argument;
-	lines are defined with "\n" (newline) characters, and the caller is
-	expected to specify a "\n" character at the end of a message, according
-	to standard C practice.  msg may have as many newlines as desired.
+	lines are defined with "\n" (newline) characters.
+	However, unlike standard C practice, the caller should NOT include a "\n" at
+	the very end, since this interfaces to FORTRAN, which effectively puts a
+	"\n" at the very end.  msg may have as many newlines as desired.
 */
 	msg_to_lun_( msg, one, &LUN, ID, strlen(msg) );
 	return;
@@ -1004,9 +1019,10 @@ static int* one=&One;
 	file -- a terrible thing indeed for debugging:
 
 	Note that unlike the FORTRAN message call, there is no "Lines" argument;
-	lines are defined with "\n" (newline) characters, and the caller is
-	expected to specify a "\n" character at the end of a message, according
-	to standard C practice.  msg may have as many newlines as desired.
+	lines are defined with "\n" (newline) characters.
+	However, unlike standard C practice, the caller should NOT include a "\n" at
+	the very end, since this interfaces to FORTRAN, which effectively puts a
+	"\n" at the very end.  msg may have as many newlines as desired.
 */
 
 	msg_to_lun_out_( msg, one, &LUN, strlen(msg) );

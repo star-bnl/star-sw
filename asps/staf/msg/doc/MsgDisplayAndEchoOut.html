@@ -11,9 +11,11 @@
 	Display (always) a message msg on standard out and echo it to LUN.
 	The message may not be disabled.
 	The message is not counted.
+
 	Note that unlike the FORTRAN message call, there is no "Lines" argument;
-	lines are defined with "\n" (newline) characters, and the caller is
-	expected to specify a "\n" character at the end of a message, according
-	to standard C practice.  msg may have as many newlines as desired.
+	lines are defined with "\n" (newline) characters.
+	However, unlike standard C practice, the caller should NOT include a "\n" at
+	the very end, since this interfaces to FORTRAN, which effectively puts a
+	"\n" at the very end.  msg may have as many newlines as desired.
 */
 </pre>
