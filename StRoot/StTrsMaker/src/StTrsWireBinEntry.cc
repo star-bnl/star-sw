@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireBinEntry.cc,v 1.2 1999/01/18 10:18:08 lasiuk Exp $
+ * $Id: StTrsWireBinEntry.cc,v 1.3 2000/02/24 16:38:05 long Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsWireBinEntry.cc,v $
+ * Revision 1.3  2000/02/24 16:38:05  long
+ * add SigmaL,SigmaT for field on
+ *
+ *Revision 1.3  2000/02/23  14:00:08  long
+ * add SigmaL,SigmaT for field on
  * Revision 1.2  1999/01/18 10:18:08  lasiuk
  * constructor by reference
  * set functions by reference
@@ -31,8 +36,8 @@
 StTrsWireBinEntry::StTrsWireBinEntry() { /* nopt */ }
 #endif
 
-StTrsWireBinEntry::StTrsWireBinEntry(StThreeVector<double>& x, float elec)
-    : mPosition(x), mNumberOfElectrons(elec) {/* nopt */ }
+StTrsWireBinEntry::StTrsWireBinEntry(StThreeVector<double>& x, float elec,double SigmaL,double SigmaT)
+    : mPosition(x), mNumberOfElectrons(elec) ,mSigmaL(SigmaL),mSigmaT(SigmaT){/* nopt */ }
 
 StTrsWireBinEntry::~StTrsWireBinEntry() {/* nopt */ }
 
@@ -40,7 +45,8 @@ void StTrsWireBinEntry::scaleNumberOfElectrons(float fac)
 {
     mNumberOfElectrons *= fac;
 }
-
+double StTrsWireBinEntry::sigmaL() {return mSigmaL;}
+double StTrsWireBinEntry::sigmaT() {return mSigmaT;}
 // Non-member function
 ostream& operator<<(ostream& os, const StTrsWireBinEntry& entry)
 {
