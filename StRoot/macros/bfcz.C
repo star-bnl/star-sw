@@ -1,5 +1,8 @@
-// $Id: bfcz.C,v 1.14 1999/04/20 12:56:08 fisyak Exp $
+// $Id: bfcz.C,v 1.15 1999/04/27 21:01:11 snelling Exp $
 // $Log: bfcz.C,v $
+// Revision 1.15  1999/04/27 21:01:11  snelling
+// fixed a few switches
+//
 // Revision 1.14  1999/04/20 12:56:08  fisyak
 // Add ctf/mwc
 //
@@ -16,10 +19,10 @@
 // Macro for running chain with different inputs                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-//  default is g2t data
-//#define MINIDAQ /* TPC minidaq data */
-#define FZIN    /* GEANT fz-file */
-//#define GTRACK  /* GEANT simulation on flight */
+//  default is g2t data 
+//#define MINIDAQ   /* TPC minidaq data */
+//#define FZIN    /* GEANT fz-file */
+#define GTRACK  /* GEANT simulation on flight */
 #ifndef MINIDAQ
 #endif /* GTRACK or FZIN */
 #ifdef FZIN 
@@ -35,22 +38,24 @@
 #define CTEST
 #define StMagF
 #undef FZIN
-#undefine GTRACK
+#undef GTRACK
 #endif /* MINIDAQ */
 #define TPC
-//#define tclPixTransOn
+#define tclPixTransOn // additional flat pixel table
+#define tptResOn // fill table with residuals from tracking
 //#define TRS
 //#define TSS
 #if defined(FZIN) || defined(GTRACK)
-#define FTPC
+//#define FTPC
 //#define FSS
-#define SVT
-#define EMC
-#define CTF
+//#define SVT
+//#define EMC
+//#define CTF
 //#define L3
-#define GLOBAL
+//#define GLOBAL
 #endif  /* new data only FZIN or GTRACK */
 //#define XDFOUT
+
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -133,14 +138,14 @@ void Load(){
 #endif /* GLOBAL */
 }
 
-void bfcz (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
+void bfcz (const Int_t Nevents=1,Char_t *infile=0, Char_t *outfile=0)
 {
   Int_t NoEvents = Nevents;
   // define input file
   if (!infile) {
 #ifdef MINIDAQ
     // laser data
-    *infile ="/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf";
+    infile ="/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf";
 #else /*not MINIDAQ */
 #ifdef FZIN
     // zebra file
@@ -240,8 +245,8 @@ void bfcz (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
   geant = new St_geant_Maker("geant");
   geant->SetNwGEANT(10 000 000);
 #ifdef GTRACK
-  geant->SetIwtype(1);
-  geant->SetDebug();
+  //  geant->SetIwtype(1);
+  //  geant->SetDebug();
   geant->LoadGeometry("detp geometry YEAR_1B");
   geant->Do("subevent 0;");
   // gkine #particles partid ptrange yrange phirange vertexrange 
@@ -257,8 +262,6 @@ void bfcz (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
 #endif /* GTRACK */
   chain->SetInput("geom","geant:geom");
 #endif /* GEANT */
-
-
 
 #ifdef MINIDAQ
   StMagF         *field   = new StMagFC("field","STAR no field",0.00002);
@@ -337,6 +340,10 @@ void bfcz (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
 #ifdef TPC
 //		tpt
   St_tpt_Maker *tptMk 	= new St_tpt_Maker("tpc_tracks");
+#ifdef tptResOn
+  // Turn on the residual table
+  tptMk->tptResOn(); 
+#endif /* tptResOn */
 #ifdef MINIDAQ
  // Turn on the final ntuple.
   tptMk->Set_final(kTRUE);
@@ -372,16 +379,15 @@ void bfcz (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
 #ifdef L3
   St_l3t_Maker         *l3Tracks   = new St_l3t_Maker("l3Tracks");
 #endif
-  St_dst_Maker *dstMk = 0;
 #ifdef GLOBAL
 //		global
+  St_dst_Maker *dstMk = 0;
   St_glb_Maker *glbMk = new St_glb_Maker("global");
   glbMk->SetDebug();
 //		dst
                 dstMk = new St_dst_Maker("dst");
   dstMk->SetDebug();
   St_QA_Maker          *qa         = new St_QA_Maker;  
-#endif  /* GLOBAL */
 //		Tree
   if (dstMk) {
     StTreeMaker *treeMk = new StTreeMaker("tree",FileOut.Data());
@@ -391,6 +397,7 @@ void bfcz (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
     //  treeMk->SetInput("global","global");
     //treeMk->SetInput(".default","Others");
   }
+#endif  /* GLOBAL */
   
   // START the chain (may the force be with you)
   // Create HTML docs of all Maker's involved
@@ -418,4 +425,5 @@ void bfcz (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
   }
   else {b = new TBrowser("BFC chain",chain);}
 }
+
 
