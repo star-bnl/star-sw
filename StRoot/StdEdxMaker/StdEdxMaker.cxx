@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.19 2001/08/07 20:22:00 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.20 2001/09/10 15:42:42 fisyak Exp $
 #include <iostream.h>
 #include "StdEdxMaker.h"
 // ROOT
@@ -456,16 +456,17 @@ Int_t StdEdxMaker::Make(){
   St_DataSet *Dst = GetDataSet("dst"); assert(Dst);
   St_DataSet *dst = Dst->Find(".data/dst");
   if (!dst) dst = Dst;
-  St_dst_dedx *dst_dedx     = (St_dst_dedx *) dst->Find("dst_dedx");
-  SafeDelete(dst_dedx);
   St_dst_track     *globtrk     = (St_dst_track *)  dst->Find("globtrk");
   if (! globtrk) { 
     gMessMgr->Error() << "StdEdxMaker::Make(): global track table is not found " << endm; 
     return kStOK;
   }
   Double_t GMult = globtrk->GetNRows();
-  dst_dedx = new St_dst_dedx("dst_dedx",20000); dst->Add(dst_dedx);
+  St_dst_dedx *dst_dedx     = (St_dst_dedx *) dst->Find("dst_dedx");
+  //  SafeDelete(dst_dedx);
+  if (! dst_dedx) {dst_dedx = new St_dst_dedx("dst_dedx",20000); dst->Add(dst_dedx);}
   St_dst_track     *primtrk     = (St_dst_track *)  dst->Find("primtrk");
+#if 0
   St_stk_track     *stk_track   = (St_stk_track *) GetDataSet("stk_track");
   if (stk_track) {//Silicon if any
     Int_t NoSvtTracks = stk_track->GetNRows();
@@ -481,6 +482,7 @@ Int_t StdEdxMaker::Make(){
       dst_dedx->AddAt(&dedx);
     }
   }
+#endif
   St_dst_point     *point      = (St_dst_point *)  dst->Find("point");
   if (! point) {
     gMessMgr->Error() << "StdEdxMaker::Make(): dst points is not found " 
