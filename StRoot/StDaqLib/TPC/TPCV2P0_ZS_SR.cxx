@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.17 2000/06/22 21:19:16 ward Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.18 2000/07/05 09:17:26 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -35,6 +35,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.18  2000/07/05 09:17:26  ward
+ * Fixed a one-off subscripting err & removed ref to a deleted obj.
+ *
  * Revision 1.17  2000/06/22 21:19:16  ward
  * added stop<start to bad cluster criteria
  *
@@ -433,10 +436,16 @@ int TPCV2P0_ZS_SR::initialize()
 
 TPCV2P0_ZS_SR::~TPCV2P0_ZS_SR()
 {
-  if (detector->ercpy->verbose) cout << "Deleting TPCV2P0_ZS_SR" << endl;
+
+  // Herb commented this Jul 4 2000, because Victor 
+  // deletes the reader object object before calling this function (see 
+  // StDAQReader::readEvent), so that ercpy is not defined.
+  // if (detector->ercpy->verbose) cout << "Deleting TPCV2P0_ZS_SR" << endl;
+
+
   //free memory allocated for Sequence arrays
   for (int row=0; row<TPC_PADROWS; row++) {
-    for (int pad=0; pad<tpcRowLen[row-1]; pad++) {
+    for (int pad=0; pad<tpcRowLen[row]; pad++) { // Herb changed "row-1" to "row", Jul 4 2000.
       void *memaddr = Pad_array[row][pad].seq;
       if (memaddr) free(memaddr);
     }
