@@ -34,8 +34,11 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 3/8/98 03:34:06, \
 
 #include <stdio.h>
 #include <string.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 #include <stdlib.h>
+#ifndef WIN32
 #include <sys/types.h>
 #include <sys/times.h>
 #include <sys/time.h>
@@ -44,6 +47,7 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 3/8/98 03:34:06, \
 
 #include <sys/ipc.h>  /*  Interprocess Communications  -- needed for Shared Memory.  */
 #include <sys/shm.h>  /*  Shared Memory.  */
+#endif
 
 #include <errno.h>
 #include <msg.h>

@@ -1,7 +1,10 @@
 /*
- * $Id: traceqc.c,v 1.8 1998/09/28 03:14:08 nevski Exp $
+ * $Id: traceqc.c,v 1.9 1998/12/11 21:16:38 perev Exp $
  *
  * $Log: traceqc.c,v $
+ * Revision 1.9  1998/12/11 21:16:38  perev
+ * Back to oldDsl
+ *
  * Revision 1.8  1998/09/28 03:14:08  nevski
  * protection against break in break
  *
@@ -33,6 +36,8 @@
 #include <stdio.h>
 #include "PAM.h"
 /* include "kuip/kmenu4.h" */
+int finite(double word);
+
 #define traceqc_  F77_NAME(traceqc,TRACEQC)
 void type_of_call traceqc_()
 {  
@@ -50,6 +55,7 @@ printf (" interrupt trace routine (traceqc) not awailable yet \n");
 #define   pCharFunc  int
 #include  "kuip/kmenu.h"
  
+#if !defined(HPUX) && !defined(Linux)
 void reset_arg_list( KmCommand *cmd )
 {
   extern KmCommand *cmd_current_;
@@ -63,7 +69,7 @@ void reset_arg_list( KmCommand *cmd )
     cmd->argline = 0;            free( (char*)cmd->argoffs );
     cmd->argoffs = 0;
 } }
- 
+#endif  
 void dump_arg_list_ ( )
 {
   extern KmCommand *cmd_current_;
@@ -79,4 +85,7 @@ void dump_arg_list_ ( )
 /*  printf (" *** argument line as entered: \n %s \n", cmd->argline ); */
     printf (" ****************************************************** \n");
 } }
- 
+
+  
+  int finite_ (float *r)  { double d; d=*r; return finite(*r); }
+

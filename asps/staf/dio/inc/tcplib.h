@@ -59,7 +59,7 @@ int tcpStartServer(int serverPort, int *pSocket); /* blocks until connect */
 #define TCPREAD  int (*)(char *, char *, int)             /*JCS*/
 #define TCPWRITE int (*)(char *, char *, int)             /*JCS*/
 #endif
-#endif /*Linux/
+#endif /*Linux*/
 
 #ifndef TCPREAD
 #define TCPREAD  int (*)(int  *, char *, int)

@@ -442,6 +442,7 @@ Modif (to be implemented on request):
 file         'name of the file'               C  D='atlas.his'
 directory    'rz-directory for n-tuples'      C  D='SLUGRZ'
 unit         'logical unit number'            I  D=33
+LRECL        'Record length in words'         I  D=1024
  
 >Guidance
 Open a histogram output file. This file is used to keep

@@ -263,7 +263,7 @@ int asuStack(void *p)
 
 void asuPrintBlok(asuAlloc_t *p){
   int size = p->size;
-  int corr = asuAlloc(p);
+  int corr = asuMallocCorrupt(p);
   printf("%p(%6d) \tEvt=%d \tFile=%s:%d "
     ,p,size,p->event,p->file,p->line);
 

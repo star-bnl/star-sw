@@ -28,7 +28,7 @@ bool_t xdr_dataset_data(XDR *xdrs, DS_DATASET_T *pDataset);
 
   /* Linux has a broken version of xdr.h - x_destroy doesn't take any
      arguments, but the macro XDR_DESTROY passes it one.  */
-#if defined(linux)
+#if defined(linux) && ! defined(i386_redhat51)  /*JCS*/
 #ifdef XDR_DESTROY
 #undef XDR_DESTROY
 #endif
