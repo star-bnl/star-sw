@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtConfig.cc,v 1.4 2001/08/24 21:02:58 caines Exp $
+ * $Id: StSvtConfig.cc,v 1.5 2001/09/06 15:46:13 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtConfig.cc,v $
+ * Revision 1.5  2001/09/06 15:46:13  caines
+ * Swapped to many hybrids on Barrel2 ladder 8 - fixed
+ *
  * Revision 1.4  2001/08/24 21:02:58  caines
  * Do index swapping for year2001 data
  *
@@ -207,7 +210,7 @@ int StSvtConfig::getHybridIndex(int barrelID, int ladderID, int waferID, int hyb
     if( hybridID ==2) index --;
   }
   
-  else if( (barrelID == 2) && (ladderID == 8)){
+  else if( (barrelID == 2) && (ladderID == 8) && (waferID < 4)){
     if( hybridID ==1) index++;
     if( hybridID ==2) index --;
   }
@@ -334,11 +337,6 @@ int StSvtConfig::getHybridIndex(int barrelID, int ladderID, int waferID, int hyb
 
 
 int StSvtConfig::getBarrel(int index){
-
-  int mNumberOfBarrels;                        // Number of Barrels
-  
-  mNumberOfBarrels = getNumberOfBarrels();
-  
   
   int MaxIndex=0; 
   for( int i=0; i< mNumberOfBarrels;i++) {
