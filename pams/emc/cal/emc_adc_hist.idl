@@ -1,0 +1,16 @@
+/* emc_adc_hist.idlm		OGAWA, Akio */
+
+#include "PAM.idl"
+#include "ems_control.idl"
+#include "emc_adc_hist_control.idl"
+#include "emc_adc.idl"
+#include "emc_adc_cal.idl"
+
+interface emc_adc_hist : amiModule {
+	STAFCV_T call
+         (in ems_control          ems_control
+         ,in emc_adc_hist_control emc_adc_hist_control
+	 ,out emc_adc             emc_adc
+	 ,out emc_adc_cal         emc_adc_cal
+	);
+};
