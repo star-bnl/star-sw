@@ -52,19 +52,7 @@ public:
    static BOOL FSFitSz;
 // constructor
 // receives input-tracklist, builds slices, merges tracks and outputs new tracklist via input
-   TMerger(TTrackList* input, BOOL psiclosed)
-   {
-// build dynamic array
-      F2DArray = (TTrackPtrList**) malloc(NumberOfPsiSlices * NumberOfTanLSlices * sizeof(TTrackPtrList*));
-// reset 2d-array
-      for(int y=0; y < NumberOfPsiSlices * NumberOfTanLSlices; y++) F2DArray[y] = NULL;
-// build slices
-      BuildSlices(input);
-// merge tracks
-      Merge(psiclosed);
-// clean tracklist from deleted tracks
-      Clean(input);
-};
+   TMerger(TTrackList* input, BOOL psiclosed);
 //
 // destructor
 // deletes internal lists

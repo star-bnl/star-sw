@@ -16,15 +16,40 @@
 // includes
 #include "TMerger.hpp"
 #include "types.h"
-// types
-
-// class definitions
-
+// 
+// Class constructor
+// receives input-tracklist, builds slices, merges tracks and outputs new tracklist via input
+//
+TMerger::TMerger(TTrackList* input, BOOL psiclosed)
+{
+//
+// build dynamic array
+//
+   F2DArray = (TTrackPtrList**) 
+               malloc(NumberOfPsiSlices * NumberOfTanLSlices * sizeof(TTrackPtrList*));
+//
+// reset 2d-array
+//
+   for(int y=0; y < NumberOfPsiSlices * NumberOfTanLSlices; y++) F2DArray[y] = NULL;
+//
+// build slices
+//
+   BuildSlices(input);
+//
+// merge tracks
+//
+   Merge(psiclosed);
+//
+// clean tracklist from deleted tracks
+//
+   Clean(input);
+};
+//
 // build 3d-array of slices
+//
 void TMerger::BuildSlices(TTrackList* tracks)
 {
 	slist_item it;
-	double psicenter;
 
 	// scan all tracks
 	it = tracks->first();
@@ -47,15 +72,15 @@ void TMerger::BuildSlices(TTrackList* tracks)
 		// calculate slice-coordinates
 		int psislice, tanlslice;
 		
-		psislice = (trackref.GetPsi() - MinSlicePsi) / 
-			(MaxSlicePsi - MinSlicePsi) * NumberOfPsiSlices;
+		psislice = (int)((trackref.GetPsi() - MinSlicePsi) / 
+			(MaxSlicePsi - MinSlicePsi) * NumberOfPsiSlices);
 		if (psislice < 0)
 			psislice = 0;
 		if (psislice >= NumberOfPsiSlices)
 			psislice = NumberOfPsiSlices-1;
 
-		tanlslice = (trackref.GetTanL() - MinSliceTanL) / 
-			(MaxSliceTanL - MinSliceTanL) * NumberOfTanLSlices;
+		tanlslice = int((trackref.GetTanL() - MinSliceTanL) / 
+			(MaxSliceTanL - MinSliceTanL) * NumberOfTanLSlices);
 		if (tanlslice < 0)
 			tanlslice = 0;
 		if (tanlslice >= NumberOfTanLSlices)
