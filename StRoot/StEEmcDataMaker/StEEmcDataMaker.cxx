@@ -1,4 +1,4 @@
-// $Id: StEEmcDataMaker.cxx,v 1.9 2004/03/20 20:25:40 balewski Exp $
+// $Id: StEEmcDataMaker.cxx,v 1.10 2004/03/26 14:20:04 balewski Exp $
 
 #include <Stiostream.h>
 #include <math.h>
@@ -129,7 +129,7 @@ Int_t StEEmcDataMaker::Make(){
     else if (crate->crID>=64 && crate->crID<=111) 
       type='S'; // smd/pre/post
     block.setHead(steemcreader->getEemcHeadBlock(crate->fiber,type));
-    block.setDataArray(steemcreader->getEemcDataBlock(crate->fiber,type));
+    block.setDataArray(steemcreader->getEemcDataBlock(crate->fiber,type),crate->nch);
     
     block.print(0);
 
@@ -208,6 +208,9 @@ Int_t StEEmcDataMaker::Make(){
   }
 
 // $Log: StEEmcDataMaker.cxx,v $
+// Revision 1.10  2004/03/26 14:20:04  balewski
+// fix
+//
 // Revision 1.9  2004/03/20 20:25:40  balewski
 // fix for empty ETOW/ESMD
 //
