@@ -1,10 +1,20 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.38 2004/10/27 03:25:49 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.39 2004/11/08 15:32:54 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.39  2004/11/08 15:32:54  pruneau
+ * 3 sets of modifications
+ * (1) Changed the StiPlacement class to hold keys to both the radial and angle placement. Propagated the use
+ * of those keys in StiSvt StiTpc StiSsd and all relevant Sti classes.
+ * (2) Changed the StiKalmanTrackFinder::find(StiTrack*) function's algorithm for the navigation of the
+ * detector volumes. The new code uses an iterator to visit all relevant volumes. The code is now more robust and compact
+ * as well as much easier to read and maintain.
+ * (3) Changed the chi2 calculation in StiKalmanTrack::getChi2 and propagated the effects of this change
+ * in both StiTrackingPlots and StiStEventFiller classes.
+ *
  * Revision 2.38  2004/10/27 03:25:49  perev
  * Version V3V
  *
@@ -162,6 +172,8 @@ StiMaterial * StiKalmanTrackNode::prevMat = 0;
 bool StiKalmanTrackNode::useCalculatedHitError = true;
 #define MESSENGER *(Messenger::instance(MessageType::kNodeMessage))
 
+int StiKalmanTrackNode::counter = 0;
+
 //_____________________________________________________________
 /// Set the Kalman state of this node to be identical 
 /// to that of the given node.
@@ -176,6 +188,7 @@ void StiKalmanTrackNode::setState(const StiKalmanTrackNode * n)
   _cosCA = n->_cosCA;
   _sinCA = n->_sinCA;
   _refX  = n->_refX;
+  _refAngle  = n->_refAngle;
   _x     = n->_x;
   _p0    = n->_p0;  _p1  = n->_p1;  _p2  = n->_p2; _p3  = n->_p3; _p4  = n->_p4;
   _c00   = n->_c00;
@@ -200,6 +213,7 @@ void StiKalmanTrackNode::setAsCopyOf(const StiKalmanTrackNode * n)
   StiTrackNode::setAsCopyOf(n);
   _x        = n->_x;
   _refX     = n->_refX;
+  _refAngle = n->_refAngle;
   _alpha    = n->_alpha;
   _cosAlpha = n->_cosAlpha;
   _sinAlpha = n->_sinAlpha;
@@ -450,32 +464,31 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   double tAlpha = nice(place->getNormalRefAngle());
   double dAlpha = tAlpha - _alpha;
 	// bail out if the rotation fails...
-  if (fabs(dAlpha)>1e-2) 
+  if (fabs(dAlpha)>0.5e-2) 
     if (rotate(dAlpha)) return -10;
   StiShape * sh = tDet->getShape();
   planarShape = 0;
   cylinderShape = 0;
-  //_refX = place->getLayerRadius(); // wrong. CP OCt 25, 04
-  _refX = place->getNormalRadius();
-  //if (_refX<4.5) cout << "refX<4.5 pNode:"<< *pNode;
+  _refX = place->getLayerRadius();
+  _refAngle = place->getLayerAngle();
+  //_refX = place->getNormalRadius();
+  if (false&&_refX<20.) cout << "Node:refX<4.5 pNode:"<< *pNode;
   position = propagate(place->getNormalRadius(),sh->getShapeCode()); 
-  //if (_refX<4.5) 
-  //  {
-  //    cout << " position after propagate:"<<position;
-  //    cout << *this;
-  //  }
-  if (position<0) 
-    return position;
+  if (false&&_refX<20.) 
+    {
+      cout << " position after propagate:"<<position;
+      cout << *this;
+    }
+  if (position<0) return position;
   position = locate(place,sh);
-  //if (_refX<4.5) 
-  //  {
-  //    cout << " position after locate:"<<position<<endl;
-  //  }
+  if (false&&_refX<20.) 
+    {
+      cout << " position after locate:"<<position<<endl;
+    }
   if (position>kEdgeZplus || position<0) return position;
   propagateError();
   // Multiple scattering
-  if (pars->mcsCalculated && fabs(pars->field)>0 )
-      propagateMCS(pNode,tDet);
+  if (pars->mcsCalculated && fabs(pars->field)>0 )  propagateMCS(pNode,tDet);
   return position;
 }
 
@@ -593,11 +606,23 @@ int StiKalmanTrackNode::nudge()
 /// \note This method must be called ONLY after a call to the propagate method.
 void StiKalmanTrackNode::propagateError()
 {  
+  bool debug = false;//counter<300;
+  if (debug) 
+    {
+      counter++;
+      cout << "Prior Error:"
+	   << "c00:"<<_c00<<endl
+	   << "c10:"<<_c10<<" c11:"<<_c11<<endl
+	   << "c20:"<<_c20<<" c21:"<<_c21<<endl
+	   << "c30:"<<_c30<<" c31:"<<_c31<<endl
+	   << "c40:"<<_c40<<" c41:"<<_c41<<endl;
+    }
+
   //f = F - 1
   double xx=x1+x2;
   double tanCA1=sinCA1/cosCA1;
   double tanCA2=sinCA2/cosCA2;
-  double f02=-dx*(2*sumCos + sumSin*(tanCA1+tanCA2))/(sumCos*sumCos);
+  double f02=-dx*(2*sumCos + sumSin*(tanCA1+tanCA2) )/(sumCos*sumCos);
   double f03= dx*(sumCos*xx + sumSin*(tanCA1*x1+tanCA2*x2))/(sumCos*sumCos);
   double sinCA1plusCA2=sinCA1*cosCA2+sinCA2*cosCA1;
   double f12=-dx*_p4*(2*sinCA1plusCA2 + 
@@ -621,14 +646,18 @@ void StiKalmanTrackNode::propagateError()
   double a00=f02*b20+f03*b30;
   double a01=f02*b21+f03*b31;
   double a11=f12*b21+f13*b31+f14*b41;
-  //*(Messenger::instance(MessageType::kNodeMessage)) 
-  //  <<"SKTN::propagateError() - dx:"<<dx<<" sumCos:"<<sumCos<<" cosCA1:"<<cosCA1<<" cosCA2:"<<cosCA2
-  //  <<" sinCA1:"<<sinCA1<<" sinCA2:"<<sinCA2<<" sumSin:"<<sumSin<<endl;
-  //  <<" sinCA1plusCA2:"<<sinCA1plusCA2<<endl;
-  //  <<" f02:"<<f02<<" f03:"<<f03<<" f12:"<<f12<<" f13:"<<f13<<" f14:"<<f14<<endl;
-  //  <<" b00:"<<b00<<" b01:"<<b01<<" b10:"<<b10<<" b11:"<<b11<<" b20:"<<b20
-  //  <<" b21:"<<b21<<" b30:"<<b30<<" b31:"<<b31<<" b40:"<<b40<<" b41:"<<b41<<endl;
-  //  <<" a00:"<<a00<<" a01:"<<a01<<" a11:"<<a11<<endl;
+  if (debug)
+    {  
+      cout << "SKTN::propagateError()"<<endl
+	   << " dx:"<<dx<<" sumCos:"<<sumCos<<" cosCA1:"<<cosCA1<<" cosCA2:"<<cosCA2
+	   <<" sinCA1:"<<sinCA1<<" sinCA2:"<<sinCA2<<" sumSin:"<<sumSin<<endl
+	   <<" sinCA1plusCA2:"<<sinCA1plusCA2<<endl
+	   <<" f02:"<<f02<<" f03:"<<f03<<endl
+	   <<" f12:"<<f12<<" f13:"<<f13<<" f14:"<<f14<<endl
+	   <<" b00:"<<b00<<" b01:"<<b01<<" b10:"<<b10<<" b11:"<<b11<<" b20:"<<b20
+	   <<" b21:"<<b21<<" b30:"<<b30<<" b31:"<<b31<<" b40:"<<b40<<" b41:"<<b41<<endl
+	   <<" a00:"<<a00<<" a01:"<<a01<<" a11:"<<a11<<endl;
+    }
   //F*C*Ft = C + (a + b + bt)
   _c00 += a00 + 2*b00;
   _c10 += a01 + b01 + b10; 
@@ -638,11 +667,23 @@ void StiKalmanTrackNode::propagateError()
   _c11 += a11 + 2*b11;
   _c21 += b21; 
   _c31 += b31; 
-  _c41 += b41; 
-
-  if(_c00<=0.) _c00=0.;
-  if(_c11<=0.) _c11=0.;
-
+  _c41 += b41;
+  if (debug) 
+    {
+      cout << "Post Error:"
+	   << "c00:"<<_c00<<endl
+	   << "c10:"<<_c10<<" c11:"<<_c11<<endl
+	   << "c20:"<<_c20<<" c21:"<<_c21<<endl
+	   << "c30:"<<_c30<<" c31:"<<_c31<<endl
+	   << "c40:"<<_c40<<" c41:"<<_c41<<endl;
+    }
+  /*
+  if(_c00<=0. || _c11<=0. || _c00>1000. || _c11>1000.)
+    {//xxxxxxxxxxxxxxxxxxx
+      cout << " StiKalmanTrackNode::propagateError() -W- _c00:"<<_c00<<"  _c11:"<<_c11<< " reset"<<endl;
+      _c00=_c11=_c22=_c33=_c44=2.;
+      _c10=_c20=_c21=_c30=_c31=_c32=_c40=_c41=_c42=_c43=0.;
+      }*/
 }
 
 /*! Calculate the effect of MCS on the track error matrix.
@@ -884,7 +925,10 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
       r01=hit->syz()+_c10;  
       r11=hit->szz()+_c11;
     }
-  double det=fabs(r00*r11 - r01*r01);
+  //double det=fabs(r00*r11 - r01*r01); //cp Nov1
+  double det=r00*r11 - r01*r01;
+  if (_c00<=0 || _c11<=0 || det<=0)
+    cout << endl << "evalChi2 c00:"<<_c00<< " c10:"<<_c10<<" c11:"<<_c11<<" det:"<<det<< " eyy:"<<eyy<<" ezz:"<<ezz<<endl;
   if (fabs(det)==0.) throw runtime_error("SKTN::evaluateChi2() Singular matrix !\n");
   double tmp=r00; r00=r11; r11=tmp; r01=-r01;  
   double dy=hit->y()-_p0;
@@ -1097,7 +1141,8 @@ void StiKalmanTrackNode::add(StiKalmanTrackNode * newChild)
 ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
 {
   os << " a:" << 180*n._alpha/M_PI<<" degs"
-     << " xRef:" << n._refX
+     << " refX:" << n._refX
+     << " refAngle:" << n._refAngle
      << " x:" << n._x
      << " p0:" << n._p0 
      << " p1:" << n._p1 
@@ -1110,7 +1155,7 @@ ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
      << " null:"<<n.nullCount;
   StiHit * hit = n.getHit();
   if (hit) 
-    os << " hit:"<<*hit<<endl;
+    os << endl<<" hit:"<<*hit;
   else
     os << endl;
   return os;
@@ -1179,47 +1224,19 @@ int StiKalmanTrackNode::locate(StiPlacement*place,StiShape*sh)
 {
   int position;
   double yOff, yAbsOff, detHW, detHD,edge,innerY, outerY, innerZ, outerZ, zOff, zAbsOff;
-
-  //if (_refX<70. && _refX>57.)
-  //  cout << "_refX:"<<_refX<<" _p0:"<<_p0<<" p1:"<<_p1<<" NormalYoffset:"
-  // << place->getNormalYoffset()<<" zOff:"<< place->getZcenter() ;
-
-	//fast way out for projections going out of fiducial volume
-	if (fabs(_p1)>200. || fabs(_p0)>200. ) position = -1;
-
+  //fast way out for projections going out of fiducial volume
+  if (fabs(_p1)>200. || fabs(_p0)>200. ) position = -1;
   yOff = _p0 - place->getNormalYoffset();
   yAbsOff = fabs(yOff);
   zOff = _p1 - place->getZcenter();
   zAbsOff = fabs(zOff);
-  /*
-  switch (sh->getShapeCode())
-    {
-    case kPlanar:
-      {
-	planarShape = static_cast<StiPlanarShape *>(sh);
-	detHW = planarShape->getHalfWidth();
-	detHD = planarShape->getHalfDepth();
-	//edge  = 4.;//shape->getEdgeHalfWidth();
-	edge  = 0.1*detHW;
-	break;
-      }
-    case kCylindrical:
-      {
-	StiCylindricalShape * cylinderShape = static_cast<StiCylindricalShape *>(sh);
-	break;
-      }
-    default:
-      {
-	throw logic_error("SKTN::locate() - ERROR - Invalid detector shape code");
-      }
-      }*/
   detHW = sh->getHalfWidth();
   detHD = sh->getHalfDepth();
   if (_x<5.)
-    {
-      cout << " detHW:" << detHW << " detHD:"<<detHD<<endl;
-    }
-  edge  = 2.;
+    edge  = 0.5;  
+  else
+    edge  = 2.;
+
   innerY = detHW - edge;
   outerY = innerY + 2*edge;
   innerZ = detHD - edge;
@@ -1229,11 +1246,11 @@ int StiKalmanTrackNode::locate(StiPlacement*place,StiShape*sh)
     position = kHit; 
   else if (yAbsOff>outerY && (yAbsOff-outerY)>(zAbsOff-outerZ))
     // outside detector to positive or negative y (phi)
-		// if the track is essentially tangent to the plane, terminate it.
+    // if the track is essentially tangent to the plane, terminate it.
     if (fabs(_sinCA)>0.9999 || _p4>57.2)
-			return -16;
-		else
-			position = yOff>0 ? kMissPhiPlus : kMissPhiMinus;
+      return -16;
+    else
+      position = yOff>0 ? kMissPhiPlus : kMissPhiMinus;
   else if (zAbsOff>outerZ && (zAbsOff-outerZ)>(yAbsOff-outerY))
     // outside detector to positive or negative z (west or east)
     position = zOff>0 ? kMissZplus : kMissZminus;

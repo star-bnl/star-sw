@@ -132,6 +132,15 @@ inline Filter<StiTrack> * StiKalmanTrackFinder::getTrackFilter()
 }
 
 
+class CloserAngle
+{
+  public:
+  CloserAngle(double refAngle);
+  bool operator()(const StiDetector*lhs, const StiDetector* rhs);
+ protected:
+  double _refAngle;
+};
+
 #endif
 
 

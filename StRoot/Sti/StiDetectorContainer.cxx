@@ -37,11 +37,12 @@ StiDetectorContainer::StiDetectorContainer(const string & name,
 
 StiDetectorContainer::~StiDetectorContainer()
 {
-  cout <<"StiDetectorContainer::~StiDetectorContainer()"<<endl;
+  cout <<"StiDetectorContainer::~StiDetectorContainer() -I- Started"<<endl;
   if (mLeafIt) {
     delete mLeafIt;
     mLeafIt=0;
   }
+  cout <<"StiDetectorContainer::~StiDetectorContainer() -I- Done"<<endl;
 }
 
 void StiDetectorContainer::initialize()
@@ -57,7 +58,7 @@ void StiDetectorContainer::initialize()
   for (bIter=_masterDetectorBuilder->begin(); bIter!=_masterDetectorBuilder->end(); ++bIter)
     {
     string name = (*bIter)->getName();
-    cout << "Detector:"<< name<<endl;
+    //cout << "Detector:"<< name<<endl;
     unsigned int where = name.find("Tpc");
     if (where==name.npos)
       {
@@ -379,74 +380,19 @@ bool RPhiLessThan::operator()(const StiDetector* lhs, const StiDetector* rhs)
 {
   StiPlacement* lhsp = lhs->getPlacement();
   StiPlacement* rhsp = rhs->getPlacement();
-
-  // Center changed to Normal // March 2, 04 by CP
-	/*
-  if (lhsp->getNormalRadius()<rhsp->getNormalRadius())
-    return false;
-  else if (lhsp->getNormalRadius()>rhsp->getNormalRadius())
-    return true;
-  else
-    return (lhsp->getNormalRefAngle()<rhsp->getNormalRefAngle());
-	*/
-
+  if (!lhsp || !rhsp) 
+    {
+      cout << "RPhiLessThan::operator() -E- !lhsp || !rhsp "<<endl;
+      return false;
+    }
   if (lhsp->getLayerRadius()<rhsp->getLayerRadius())
     return false;
   else if (lhsp->getLayerRadius()>rhsp->getLayerRadius())
     return true;
   else
-    return (lhsp->getNormalRefAngle()<rhsp->getNormalRefAngle());
+    return (lhsp->getLayerAngle()<rhsp->getLayerAngle());
 }
 
-
-
-
-
-
-/* remove
-void StiDetectorContainer::setToDetector(double radius)
-{
-  StiOrderKey theKey;
-  theKey.key = radius;
-  //mradial_it = gFindClosestOrderKey(mregion->begin(), mregion->end(), theKey); //change (MLM)
-  mradial_it = gFindClosestOrderKey((*mregion)->begin(), (*mregion)->end(), theKey); //change (MLM)
-
-  //if (mphi_it == mregion->end()) { //change (MLM)
-  if (mphi_it == (*mregion)->end()) { //change (MLM)
-
-    cout <<"StiDetectorContainer::setToDetector(double)\tError:\t";
-    cout <<"Find radius failed"<<endl;
-
-    mradial_it = mregion->begin(); (//change (MLM)
-   }
-mphi_it = (*mradial_it)->begin();
-return;
-   }
-*/
-
-/*!If no detector exists at this position, the iterator is set to the
-innermost layer closest to phi=0, s.t. phi>0.
-*/
-/*
- void StiDetectorContainer::setToDetector(double radius, double angle)
- {
-   //First, set the radius
-   setToDetector(radius);
-
-   //Now set the phi
-   StiOrderKey theKey;
-   theKey.key=angle;
-   mphi_it = gFindClosestOrderKey((*mradial_it)->begin(),
-                                  (*mradial_it)->end(), theKey);
-   if (mphi_it == (*mradial_it)->end()) {
-
-     cout <<"StiDetectorContainer::setToDetector(double, double)\tError:\t";
-     cout <<"Find Phi failed"<<endl;
-
-     mphi_it = (*mradial_it)->begin();
-   }
- }
- */
 
 vector<StiDetector*> & StiDetectorContainer::getDetectors()
 {
@@ -470,6 +416,7 @@ vector<StiDetector*> & StiDetectorContainer::getDetectors(Filter<StiDetector> & 
 
 vector<StiDetector*>::iterator  StiDetectorContainer::begin()
 {
+  cout << "StiDetectorContainer::begin() -I- size:"<<_sortedDetectors.size()<<endl;
   return _sortedDetectors.begin();
 }
 
@@ -480,6 +427,7 @@ vector<StiDetector*>::iterator  StiDetectorContainer::end()
 
 vector<StiDetector*>::const_iterator  StiDetectorContainer::begin() const
 {
+  cout << "StiDetectorContainer::begin() const -I- size:"<<_sortedDetectors.size()<<endl;
   return _sortedDetectors.begin();
 }
 

@@ -28,6 +28,7 @@ void StiMasterDetectorBuilder::build(StMaker&source)
        iter++)
     {
       cout << "StiMasterDetectorBuilder::build() -I- Calling Group Builder named:" << (*iter)->getName()<<endl;
+      if (!*iter) cout <<"   pointer is corrupted!!!!!!!!!!!!!!!!!!!"<<endl;
       (*iter)->build(source);
       nRows+=(*iter)->getNRows();
     }

@@ -90,7 +90,7 @@ public:
   
   double getRefAngle() const 
     {
-      return _alpha;
+      return _refAngle;
     }
   
   double x_g() const;
@@ -201,6 +201,7 @@ public:
   double _cosCA;
   /// local X-coordinate of this track (reference plane)
   double _refX;
+  double _refAngle;
   double _x;   
   /// local Y-coordinate of this track (reference plane)           
   double _p0; 
@@ -227,6 +228,7 @@ public:
   static StiKalmanTrackFinderParameters * pars;
 
  protected:   
+  static int counter;
   static const StiElossCalculator * _elossCalculator;
   const StiDetector * _detector;
   static Messenger &  _messenger;
@@ -253,15 +255,15 @@ inline void StiKalmanTrackNode::reset()
 { 
   StiTrackNode::reset();
   _cosAlpha = 1.;
-  _alpha=_sinAlpha=_sinCA=_cosCA=_refX=_x=_p0=_p1=_p2=_p3=_p4=0.;
+  _alpha=_sinAlpha=_sinCA=_cosCA=_refX=_refAngle=_x=_p0=_p1=_p2=_p3=_p4=0.;
   // diagonal error set to 1
-  _c00=_c11=_c22=_c33=_c44=1.;
+  _c00=_c11=_c22=_c33=_c44=2.;
   // off diagonal set to zero
   _c10=_c20=_c21=_c30=_c31=_c32=_c40=_c41=_c42=_c43=0.;
-  eyy=ezz=0.;
+  eyy=ezz=1.;
   _chi2=1e55;
   hitCount=nullCount=contiguousHitCount=contiguousNullCount = 0;
-	_detector = 0;
+  _detector = 0;
 }
 
 inline double StiKalmanTrackNode::nice(double angle) const
@@ -512,6 +514,7 @@ inline  void StiKalmanTrackNode::initialize(StiHit*h,double alpha, double eta, d
   _hit     = h;
   //_refX    = h->detector()->getPlacement()->getNormalRadius();
   _refX    = h->detector()->getPlacement()->getLayerRadius();
+  _refAngle= h->detector()->getPlacement()->getLayerAngle();
   _x       = h->x();
   _alpha   = alpha;
   _cosAlpha = cos(alpha);
@@ -541,6 +544,7 @@ inline const StiKalmanTrackNode& StiKalmanTrackNode::operator=(const StiKalmanTr
   _sinCA = n._sinCA;
   _cosCA = n._cosCA;
   _refX = n._refX;
+  _refAngle = n._refAngle;
   _x    = n._x;   
   _p0   = n._p0; 
   _p1   = n._p1;

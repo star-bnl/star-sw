@@ -1,11 +1,21 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.41 2004/10/28 19:30:42 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.41 2004/10/28 19:30:42 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.42 2004/11/08 15:32:50 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.42 2004/11/08 15:32:50 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.42  2004/11/08 15:32:50  pruneau
+ * 3 sets of modifications
+ * (1) Changed the StiPlacement class to hold keys to both the radial and angle placement. Propagated the use
+ * of those keys in StiSvt StiTpc StiSsd and all relevant Sti classes.
+ * (2) Changed the StiKalmanTrackFinder::find(StiTrack*) function's algorithm for the navigation of the
+ * detector volumes. The new code uses an iterator to visit all relevant volumes. The code is now more robust and compact
+ * as well as much easier to read and maintain.
+ * (3) Changed the chi2 calculation in StiKalmanTrack::getChi2 and propagated the effects of this change
+ * in both StiTrackingPlots and StiStEventFiller classes.
+ *
  * Revision 2.41  2004/10/28 19:30:42  perev
  * Hack. Infinite Chi2 skipped in Chi2 calculation. Claude??? (VP)
  *
@@ -491,14 +501,17 @@ int StiKalmanTrack::getCharge() const
   return  lastNode->getCharge();
 }
 
-/*! Return the track chi2
-   <h3>Notes</h3> 
-   <ol>
-   <li>Use the chi2 held by the last hit node used in the fit.</li>
-   </ol>
-*/
+/// Return the track chi2 per dof
+/// <p>
+/// The track chi2 is calculated from the incremental chi2 of all nodes carrying a hit that contributed to the fit of the track. 
+/// Note that a hit is not counted as contributing to the fit if its chi2 exceeds "fitpars->getMaxChi2()"
+/// Note that this function returns "-1" if the number of fit points is smaller than 6
 double  StiKalmanTrack::getChi2() const
 {
+  double fitHits   = 0;
+  double trackChi2 = 0;
+  double nodeChi2  = 0;
+  double maxChi2   = fitpars->getMaxChi2();
   double theChi2 = 1.e+60;
   if (firstNode)
     {
@@ -506,20 +519,21 @@ double  StiKalmanTrack::getChi2() const
       StiKTNBidirectionalIterator it;
       for (it=begin();it!=end();it++)
 	{
-	  if (!(*it).getHit()) 	continue;  	//non used node
-          double Chi2 = (*it)._chi2;
-          if (Chi2>10000) 	continue;	//non used node????(VP)
-	    //cout << " Chi2:"<< Chi2<<endl;
-	  theChi2 += Chi2;
+	  if ((*it).getHit())
+	    {
+	      nodeChi2 = (*it)._chi2;
+	      if (nodeChi2<maxChi2) 
+		{
+		  trackChi2 += nodeChi2;
+		  ++fitHits;
+		}
+	    }
 	}
     }
-  return theChi2;
-  /*
-  if (fittingDirection==kOutsideIn)
-    return getInnerMostHitNode()->_chi2;
+  if (fitHits>5)
+    return trackChi2/(fitHits-5.);
   else
-    return getOuterMostHitNode()->_chi2;
-  */
+    return -1.;
 }
 
 
@@ -1095,7 +1109,7 @@ bool StiKalmanTrack::find(int direction)
       setFlag(-1);
       return false;
     }
-  if (outerMostNode->getX()<190. )
+  if (outerMostNode->getX()<185. )
     {
       // swap the track inside-out in preparation for the outward search/extension
       //cout<<"StiKalmanTrack::find(int) -I- Swap track"<<endl;
@@ -1136,6 +1150,8 @@ void StiKalmanTrack::setFitParameters(StiKalmanTrackFitterParameters *parameters
   fitpars = parameters;
 }
 
+///Return all the hits associated with this track, including those with a large incremental
+///chi2 that may not contribute to the fit.
 vector<StiHit*> StiKalmanTrack::getHits()
 {
   vector<StiHit*> hits;

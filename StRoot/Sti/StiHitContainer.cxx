@@ -66,7 +66,8 @@ void StiHitContainer::add(StiHit* hit)
   const StiDetector* det = hit->detector();
   if (!det) 
     throw runtime_error("StiHitContainer::add() -E- Given hit has no associated detector");
-  _key.refangle = det->getPlacement()->getNormalRefAngle();
+  //_key.refangle = det->getPlacement()->getNormalRefAngle();
+  _key.refangle = det->getPlacement()->getLayerAngle();
   //_key.position = det->getPlacement()->getNormalRadius();
   _key.position = det->getPlacement()->getLayerRadius();
   _map[_key].theHitVec.push_back(hit);
@@ -77,9 +78,11 @@ void StiHitContainer::reset()
 {
    HitMapToVectorAndEndType::iterator it;
    vector<StiHit*>::iterator iter;
+   //cout << "StiHitContainer::reset() -i- XXXXXXXXXXXXXXXXXXXXXXXX _map.size() ="<<_map.size()<<endl;
    for (it=_map.begin(); it!=_map.end(); it++) 
      {
        vector<StiHit*> &hits = (*it).second.theHitVec;
+       //cout << ":"<<hits.size();
        for (iter=hits.begin();iter!=hits.end();iter++)
 	 {
 	   (*iter)->setTimesUsed(0);
@@ -121,7 +124,8 @@ unsigned int StiHitContainer::size() const
 
 vector<StiHit*>::iterator StiHitContainer::hitsBegin(const StiDetector* layer)
 {
-    _key.refangle = layer->getPlacement()->getNormalRefAngle();
+  //_key.refangle = layer->getPlacement()->getNormalRefAngle();
+    _key.refangle = layer->getPlacement()->getLayerAngle();
     //_key.position = layer->getPlacement()->getNormalRadius();
     _key.position = layer->getPlacement()->getLayerRadius();
     return _map[_key].theHitVec.begin();
@@ -129,10 +133,11 @@ vector<StiHit*>::iterator StiHitContainer::hitsBegin(const StiDetector* layer)
 
 vector<StiHit*>::iterator StiHitContainer::hitsEnd(const StiDetector* layer)
 {
-    _key.refangle = layer->getPlacement()->getNormalRefAngle();
-    //_key.position = layer->getPlacement()->getNormalRadius();
-    _key.position = layer->getPlacement()->getLayerRadius();
-    return _map[_key].theEffectiveEnd;
+  //_key.refangle = layer->getPlacement()->getNormalRefAngle();
+  _key.refangle = layer->getPlacement()->getLayerAngle();
+  //_key.position = layer->getPlacement()->getNormalRadius();
+  _key.position = layer->getPlacement()->getLayerRadius();
+  return _map[_key].theEffectiveEnd;
 }
 
 

@@ -53,6 +53,7 @@ public:
     float getCenterRadius() const { return centerRadius; }
     float getCenterOrientation() const { return centerOrientation; }
     float getLayerRadius() const { return layerRadius; }
+    float getLayerAngle() const { return _layerAngle; }
     float getZcenter() const { return zCenter; }
     StiRegion getRegion() const {return mRegion;}
 
@@ -60,6 +61,7 @@ public:
     void setNormalRep(float refAngle_, float radius_, float xOffset_);
     void setCenterRep(float refAngle_, float radius_, float orientation_);
     void setLayerRadius(float radius_){ if(radius_>=0) layerRadius = radius_; }
+    void setLayerAngle(float angle){ _layerAngle = angle;}
     void setZcenter(float val){ zCenter = val; }
     void setRegion(StiRegion r) {mRegion = r;}
 
@@ -75,6 +77,7 @@ protected:
 
     // independent radius for ordering
     float layerRadius;
+    float _layerAngle;
 
     float zCenter;
     StiRegion mRegion; // backward, midrapidity, forwrad, default to kUndefined

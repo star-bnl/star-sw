@@ -45,7 +45,8 @@ StiTrack* StiLocalTrackSeedFinder::findTrack()
   StiKalmanTrack* track = 0;  
   if (isReset())
     { 
-      //cout << "StiLocalTrackSeedFinder::findTrack() -I- Getting iterator" << endl;
+      cout << "StiLocalTrackSeedFinder::findTrack() -I- Getting iterator" << endl;
+
       _hitIter = StiSortedHitIterator(_hitContainer,_detectorContainer->begin(),_detectorContainer->end());
     }
   while (_hitIter!=StiSortedHitIterator() && track==0)
@@ -73,9 +74,10 @@ bool StiLocalTrackSeedFinder::extendHit(StiHit& hit)
   _detectorContainer->setToDetector( hit.detector() );
   //Done if the inner most detector is reached.
   if ( _detectorContainer->moveIn()==false ) return false;
-  const StiDetector* newLayer = _detectorContainer->getCurrentDetector(); //**_detectorContainer;
-  StiHit* closestHit = _hitContainer->getNearestHit(newLayer->getPlacement()->getNormalRadius(),
-						    newLayer->getPlacement()->getNormalRefAngle(),
+  const StiDetector* d = _detectorContainer->getCurrentDetector(); //**_detectorContainer;
+  StiPlacement *     p = d->getPlacement();
+  StiHit* closestHit = _hitContainer->getNearestHit(p->getLayerRadius(),
+						    p->getLayerAngle(),
 						    hit.y(), hit.z(),_pars._deltaY, _pars._deltaZ);
   bool returnValue;
   if (closestHit ) 
@@ -230,8 +232,9 @@ bool StiLocalTrackSeedFinder::extrapolate()
     <<" z3+: "<<z3_plus<<" z3: "<<z3<<" z3-: "<<z3_minus<<endl
     <<"query hit container for extension hits"<<endl;
   */
-  StiHit* closestHit = _hitContainer->getNearestHit(r3,
-						    newLayer->getPlacement()->getNormalRefAngle(),
+  StiPlacement * p = newLayer->getPlacement();
+  StiHit* closestHit = _hitContainer->getNearestHit(p->getLayerRadius(),
+						    p->getLayerAngle(),
 						    y3,z3,  
 						    fabs(y3_plus-y3_minus) /2.,
 						    fabs(z3_plus-z3_minus) /2.);

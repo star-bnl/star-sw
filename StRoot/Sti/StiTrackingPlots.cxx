@@ -1,8 +1,18 @@
 /*
- * $Id: StiTrackingPlots.cxx,v 2.14 2004/01/03 19:52:20 andrewar Exp $
+ * $Id: StiTrackingPlots.cxx,v 2.15 2004/11/08 15:32:57 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.cxx,v $
+ * Revision 2.15  2004/11/08 15:32:57  pruneau
+ * 3 sets of modifications
+ * (1) Changed the StiPlacement class to hold keys to both the radial and angle placement. Propagated the use
+ * of those keys in StiSvt StiTpc StiSsd and all relevant Sti classes.
+ * (2) Changed the StiKalmanTrackFinder::find(StiTrack*) function's algorithm for the navigation of the
+ * detector volumes. The new code uses an iterator to visit all relevant volumes. The code is now more robust and compact
+ * as well as much easier to read and maintain.
+ * (3) Changed the chi2 calculation in StiKalmanTrack::getChi2 and propagated the effects of this change
+ * in both StiTrackingPlots and StiStEventFiller classes.
+ *
  * Revision 2.14  2004/01/03 19:52:20  andrewar
  * Added check for valid kalman track cast.
  *
@@ -268,14 +278,11 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 	_nptsVsEtaPtGt200->Fill(eta,nPts);
       else
 	_nptsVsEtaPtLt200->Fill(eta,nPts);
-      if (nPts>5)
-	{
-	  double chi2 = track->getChi2()/(nPts-5);
-	  _chi2->Fill(chi2);
-	  _chi2VsNpts->Fill(nPts,chi2);
-	}
       if (kTrack)
 	{
+	  double chi2 = kTrack->getChi2();
+	  _chi2->Fill(chi2);
+	  _chi2VsNpts->Fill(nPts,chi2);
 	  //cout << "StiTrackPlots::fill() -I- kTrack OK";
 	  double x1 = kTrack->getInnerMostNode()->_x;
 	  //cout << " x1:"<<x1;
