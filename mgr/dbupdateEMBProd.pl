@@ -20,13 +20,6 @@ require "/afs/rhic/star/packages/DEV00/mgr/dbDescriptorSetup.pl";
 my $debugOn=0;
 
 my $DISK1 = "/star/rcf/data06/reco";
-my @DISKR = (
-#              "/star/rcf/data09/reco",
-#              "/star/rcf/data10/reco",
-#              "/star/rcf/data05/reco",
-              "/star/rcf/data07/reco",
-#              "/star/rcf/data06/reco",
-); 
 
 my $prodSr = "P00hg";
 my $jobFDir = "/star/u2e/starreco/" . $prodSr ."/requests/";
@@ -54,7 +47,7 @@ my @EmSet = (
 #              "embedding_alamlopt",
 #              "embedding_lamhipt",
 #              "embedding_lamlopt",
-#              "embedding_phi";
+              "embedding_phi";
                "embedding_pbar",
 );
               
@@ -212,9 +205,6 @@ my $ndbOnFiles = 0;
 my $maccess; 
 my $mdowner; 
 my $flname;
-my $nDiskFiles = 0;
-my $ndir = 0;
-
 
 ##### connect to the DB
 
@@ -483,7 +473,7 @@ my $embType;
         
     if ( ($mfName =~ /$dfile/) &&  ($mjobFname =~ /$embType/) ) {
 
- print "File Name :", $mpath, " % ", $mfName, " % ",$mjobFname, " % ", "Num Events, done :",$mNevts, "\n";     
+ print "File Name :", $mpath, " % ", $mfName, " % ", $embType, " % ",$mjobFname, " % ", "Num Events, done :",$mNevts, "\n";     
     print "updating FileCatalogT table\n";
  
     &fillDbTable();   
