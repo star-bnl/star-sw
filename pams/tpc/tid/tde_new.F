@@ -1,5 +1,8 @@
-* $Id: tde_new.F,v 1.3 1998/06/26 13:42:42 ogilvie Exp $
+* $Id: tde_new.F,v 1.4 1998/07/07 17:21:48 ogilvie Exp $
 * $Log: tde_new.F,v $
+* Revision 1.4  1998/07/07 17:21:48  ogilvie
+* removing hardwired B-field and math const
+*
 * Revision 1.3  1998/06/26 13:42:42  ogilvie
 * adding landau fit option
 *
@@ -41,6 +44,12 @@ C-----------------------------------------------------------------------
 
 C-----------------------------------------------------------------------
 #include "tpt_const.inc"
+#include "phys_constants.inc"
+#include "math_constants.inc"
+
+      real xlocal(3), bfield(3)
+      data xlocal /3*0/
+
       INTEGER tls_Index_Sort_i,tls_Quick_Sort_r      
       INTEGER iret
       INTEGER i,l,itrack,j,irow,isect,tgc_row_par,cros,k,last
@@ -48,7 +57,7 @@ C-----------------------------------------------------------------------
       INTEGER nlocmax,nloctrc,nde_orig,nde_trunc
       REAL    x1,y1,xc,yc,radius,psic,cosl
       REAL    xa,xb,ya,yb,a,b,bi,bo,ai,ao,ds,half_pad
-      REAL    bconv,rowtmp
+      REAL    rowtmp
 C
 c     variables for maximumum likeihood
 c
@@ -64,13 +73,14 @@ c
       INTEGER loc_hit(nlocmax),loc_track(nloctrc)
 
       RECORD  /tde_local/ dedx(ndemax)
-      DATA    bconv /0.00299792458/
+c      DATA    bconv /0.00299792458/
 c      DATA    dtorad /0.0174532925/
 c      DATA    cpi /3.14159265/
       DATA    imsg1 /0/, imsg2 /0/, imsg3 /0/
 
       EXTERNAL landau2
 C-----------------------------------------------------------------------
+
 
 *      call message('TDE_DEDX-I: Execution started',1,imsg1)
 
@@ -107,6 +117,13 @@ C Abort if there are too many TPC tracks to work with
          tde_new=STAFCV_BAD
          return
       endif
+
+      call gufld(xlocal,bfield) 
+      
+c
+c  this only once on initialisation-
+c field is uniform enough in the TPC)
+
 c
 c as a test for the likelihood method
 c book a histigram, fill it, fit, then delete
@@ -117,7 +134,7 @@ c to run this option use
 c      tdpar(1).debug(2)=2
 c      tdpar(1).truncopt=4
 c      tdpar(1).truncfact=0.0
-
+      
 
 C Sort the hit array according to the track number
       
@@ -156,10 +173,16 @@ c
          itrack=hit(loc_hit(l)).track/1000
          j=loc_track(itrack)
 C        calculate center and radius from the track parameters
-         x1 = track(j).r0 * cos(track(j).phi0*dtorad)
-         y1 = track(j).r0 * sin(track(j).phi0*dtorad)
-         radius = 1. / (track(j).invp * 0.5 * bconv)
-         psic = track(j).psi*dtorad + sign(1,track(j).q)*cpi*0.5
+         x1 = track(j).r0 * cos(track(j).phi0*C_RAD_PER_DEG)
+         y1 = track(j).r0 * sin(track(j).phi0*C_RAD_PER_DEG)
+
+c
+c old hardwired B=0.5
+c         radius = 1. / (track(j).invp * 0.5 * bconv)
+c
+         radius=1.0 / (track(j).invp*bfield(3)*C_D_CURVATURE)
+         psic = track(j).psi*dtorad + sign(1,track(j).q)*C_PI*0.5
+
          xc = x1 - radius*cos(psic)
          yc = y1 - radius*sin(psic)
          cosl= sqrt(1.0+track(j).tanl**2)
@@ -197,7 +220,7 @@ C        options based on Jeff Mitchell's
 c              get the parametrisation for the center of a row
 c              (ax + by = 1)
                rowtmp=irow
-               iret  = tgc_row_par(isect,rowtmp,a,b,pad_h,pad)
+               iret  = tgc_row_par(isect,rowtmp,a,b,pad_h,pad) 
 c              calculate the parametrisation for the inner and the outer
 c              boundary of a row
                half_pad = pad(1).pad_len_in*0.5
@@ -240,7 +263,6 @@ c
      >                  (loc_hit(l)).x,
      >                   hit(loc_hit(l)).y,xb,yb)
                endif
-
                
                if(iret1.eq.0.and.iret2.eq.0) then
                   ds=radius*2.0*
@@ -362,7 +384,10 @@ c            hstep(2)=hxmax/100.
             track(j).dedx(2)=hxamp
             call hdelet(hhid,' ')
          endif
-      end do 
+c
+c
+  
+       end do 
 c      if (tdpar(1).debug(2).eq.2) then
 c         call hdelet(hhid)
 c      endif
