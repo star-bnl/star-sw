@@ -2,12 +2,14 @@
 #define STI_DETECTOR_H
 #include <vector>
 #include <string>
+#include <math.h>
+#include <iostream>
 using std::string;
-#include "Named.h"
+#include "Sti/Base/Named.h"
+#include "Sti/StiPlacement.h"
 
 class StiMaterial;
 class StiShape;
-class StiPlacement;
 class StiIsActiveFunctor;
 template<class T> class StiCompositeTreeNode;
 
@@ -20,6 +22,8 @@ class StiDetector : public Named
 {
     
 public:
+
+  friend class StiHit;
 
     // con/destructor
     StiDetector();
@@ -48,7 +52,12 @@ public:
     void setMaterial(StiMaterial *val){ material = val; }
 
     void setShape(StiShape *val){ shape = val; }
-    void setPlacement(StiPlacement *val){ placement = val; }
+    void setPlacement(StiPlacement *val)
+      { 
+	placement = val; 
+	_cos = cos(val->getNormalRefAngle());
+	_sin = sin(val->getNormalRefAngle());
+      }
 
     //action
     virtual void build(){}  //for now, build from SCL parsable ascii file
@@ -60,6 +69,7 @@ public:
     void setTreeNode( StiCompositeTreeNode<StiDetector> * val) {mNode=val;}
     StiCompositeTreeNode<StiDetector> * getTreeNode() const {return mNode;}
     
+    friend ostream& operator<<(ostream&os, const StiDetector & det);
  protected:
     
     /// Toggle switch determining whether this detector is to be added to the detector tree.
@@ -89,9 +99,11 @@ public:
     StiPlacement *placement;
     /// Pointer to the parent detector node.
     StiCompositeTreeNode<StiDetector>  * mNode;
-};
 
-//typedef StiCompositeTreeNode<StiDetector> StiDetectorNode;
-//typedef vector<  StiCompositeTreeNode<StiDetector>  *>  StiDetectorNodeVector;
+    /// Convenience storage of cos(refAngle) 
+    double _cos;
+    /// Convenience storage of sin(refAngle)
+    double _sin;
+};
 
 #endif

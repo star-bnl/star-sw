@@ -64,7 +64,7 @@ using std::vector;
 #include <map>
 using std::map;
 
-#include "Factory.h"
+#include "Sti/Base/Factory.h"
 #include "StiDetector.h"
 #include "StiCompositeLeafIterator.h"
 #include "StiMapUtilities.h"
@@ -74,6 +74,7 @@ using std::map;
 class StiDetector;
 class StiMaterial;
 class Messenger;
+class StiDetectorBuilder;
 
 class StiDetectorContainer
 {
@@ -89,15 +90,11 @@ public:
     ///Kill the current instance.  Use this wisely!
     static void kill();
     
-    ///This calls builds the detector tree given a pointer to the necessary
-    ///factories.
-    virtual void buildDetectors(Factory<StiDetectorNode>* nodefactory,
-				Factory<StiDetector>* detfactory);
+    ///Builds the detector tree given a pointer to the detector builder
+    virtual void build(StiDetectorBuilder * builder);
 
-    //gets
+    /// Get the root detector node of this tree.
     const StiDetectorNode* root() const;
-    
-    //Action
     
     ///This performs a full internal reset of interator structure.
     void reset();
