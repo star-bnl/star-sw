@@ -13,11 +13,24 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <libgen.h>
 #include <ctype.h>
+
 #ifdef AIX
 #include <fnmatch.h>
 #endif /*AIX*/
+
+#ifdef IRIX
+#include <libgen.h>
+#endif /*IRIX*/
+
+#ifdef SOLARIS
+#include <libgen.h>
+#endif /*SOLARIS*/
+
+#ifdef HPUX
+#include <unistd.h>
+#endif /*HPUX*/
+
 #include "sutLib.h"
 #include "asuAlloc.h"
 
@@ -46,9 +59,17 @@ int sutMatchWild(char *pattern,char* string)
 #ifdef AIX
    int flags=0;		/* I DONT KNOW WHAT THIS SHOULD BE */
    return !fnmatch(pattern,string,flags);
-#else
-   return gmatch(string,pattern);
 #endif /*AIX*/
+#ifdef HPUX
+   int flags=0;		/* I DONT KNOW WHAT THIS SHOULD BE */
+   return !fnmatch(pattern,string,flags);
+#endif /*HPUX*/
+#ifdef SOLARIS
+   return gmatch(string,pattern);
+#endif /*SOLARIS*/
+#ifdef IRIX
+   return gmatch(string,pattern);
+#endif /*IRIX*/
 }
 
 /*
