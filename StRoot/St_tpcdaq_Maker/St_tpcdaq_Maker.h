@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.34 2002/10/15 19:24:32 ward Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.35 2003/02/13 17:05:05 ward Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.35  2003/02/13 17:05:05  ward
+// Restored noise elim on request from David Hardtke.
+//
 // Revision 1.34  2002/10/15 19:24:32  ward
 // Stuff for pre-.daq file testing, and better handling of daq_flag.
 //
@@ -123,7 +126,8 @@ class StTpcRawDataEvent;
 class StTpcUnpacker;
 class StSequence;
 class TH1F;
-// Removed Feb 13 2002 on suggestion from Yuri in email with Fabrice.  #define NOISE_ELIM 1
+#define NOISE_ELIM 1 // Removed Feb 13 2002 on suggestion from Yuri in email w/Fabrice.  Replaced Feb 
+                     // 13 2003 on request from Hardtke.
 #define GAIN_CORRECTION
 #define MAXROWPADPERSECTOR 400
 #define BINRANGE 3
@@ -227,7 +231,7 @@ class St_tpcdaq_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.34 2002/10/15 19:24:32 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.35 2003/02/13 17:05:05 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tpcdaq_Maker, 1)   //StAF chain virtual base class for Makers
 };
