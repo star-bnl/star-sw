@@ -1,5 +1,8 @@
-* $Id: tpt_row_sect_pnt.F,v 1.11 1999/05/05 21:52:23 sakrejda Exp $
+* $Id: tpt_row_sect_pnt.F,v 1.12 1999/05/21 02:46:03 sakrejda Exp $
 * $Log: tpt_row_sect_pnt.F,v $
+* Revision 1.12  1999/05/21 02:46:03  sakrejda
+* pointers for malloc initialised - were causing crashes in peripheral events
+*
 * Revision 1.11  1999/05/05 21:52:23  sakrejda
 * local arrays converted to dynamic ones (with malloc)
 *
@@ -99,6 +102,7 @@ C             sort hits in the TPC table according to row/sec field
 C______________________________________________________________________
 
 c     allocate memory for a local array
+      p_rhit = 0
       p_rhit = malloc(hit_h.nok*4)
 
       do i=1,hit_h.nok
