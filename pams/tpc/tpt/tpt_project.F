@@ -1,5 +1,9 @@
-* $Id: tpt_project.F,v 1.18 2000/03/29 03:58:19 sakrejda Exp $
+* $Id: tpt_project.F,v 1.19 2000/04/28 03:12:00 sakrejda Exp $
 * $Log: tpt_project.F,v $
+* Revision 1.19  2000/04/28 03:12:00  sakrejda
+* Track flag saved at the beggining and stored at the end, before it was overwritten in
+* refitting.
+*
 * Revision 1.18  2000/03/29 03:58:19  sakrejda
 * Loading a track moved to the extend segment routine
 *
@@ -137,6 +141,7 @@ c      if(is(2).eq.0) is(2)=12
 c      is(3)      = isect+1
 c      if(is(3).gt.12) is(3)=1
 C
+      save_flag=trk(itrk).flag
       ixpnt = trk(itrk).nhit
       ip_in = trk(itrk).ipnt(ixpnt)
       longrow = hit(ip_in).row
@@ -245,10 +250,8 @@ C              a hit found
                endif
                trk(itrk).nhit = trk(itrk).nhit + 1
              else if(slice_pnt(2,is_pnt).gt.0) then
-               save_flag=trk(itrk).flag
                iret=tpt_fit_track(itrk,trk,hit_h,hit,tpar_h,tpar,tte_skip,ipass)
                if((iret.eq.STAFCV_OK).and.(irow.ne.irow_last)) then
-                  trk(itrk).flag=save_flag
                   irow_last=irow
                   irow=irow-st(mdir)
                   repeat=.true.
@@ -261,7 +264,6 @@ C              a hit found
       end do
       endif
       tte_skip=0
-      save_flag=trk(itrk).flag
       iret=tpt_fit_track(itrk,trk,hit_h,hit,tpar_h,tpar,tte_skip,ipass)
       if(iret.eq.STAFCV_OK) then
          trk(itrk).flag=save_flag
