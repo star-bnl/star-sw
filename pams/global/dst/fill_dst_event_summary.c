@@ -8,24 +8,31 @@
 
 #define  PI_MASS     0.139569
 #define  PT_MIN      0.
-#define  PT_MAX      2.0
+#define  PT_MAX      1.5
+#define  MT_MIN      0.
+#define  MT_MAX      1.5
 #define  ETA_MIN    -2.0
 #define  ETA_MAX     2.0
-#define  PHI_MIN     0.0
-#define  PHI_MAX   360.0 
-#define  NBINS     100
+#define  PHI_MIN  -180.0
+#define  PHI_MAX   180.0 
+#define  NBINS      50
 #define  NRANGE      5
+#define  NPHIRANGE   8
+#define  NETARANGE   3
+
+#ifdef DEBUG
+#undef DEBUG
+#endif
+#define DEBUG 1
 
 float  mt_inverse_slope(double *mt_histo,int iBegin, int iStop);
 
 long  type_of_call fill_dst_event_summary_ (
-  TABLE_HEAD_ST  *dst_run_header_h,    DST_RUN_HEADER_ST     *dstRunHeader,
-  TABLE_HEAD_ST  *dst_event_header_h,  DST_EVENT_HEADER_ST   *dstEventHeader,
-  TABLE_HEAD_ST  *dst_tof_h,           DST_TOF_ST            *dstTof,
-  TABLE_HEAD_ST  *dst_track_h,         DST_TRACK_ST          *dstTrack,
-  TABLE_HEAD_ST  *dst_track_aux_h,     DST_TRACK_AUX_ST      *dstTrackAux,
-  TABLE_HEAD_ST  *dst_vertex_h,        DST_VERTEX_ST         *dstVertex,
-  TABLE_HEAD_ST  *dst_event_summary_h, DST_EVENT_SUMMARY_ST  *dstEventSummary)
+  TABLE_HEAD_ST  *dst_run_header_h,    DST_RUN_HEADER_ST     *dst_runheader,
+  TABLE_HEAD_ST  *dst_event_header_h,  DST_EVENT_HEADER_ST   *dst_eventheader,
+  TABLE_HEAD_ST  *dst_track_h,         DST_TRACK_ST          *dst_track,
+  TABLE_HEAD_ST  *dst_vertex_h,        DST_VERTEX_ST         *dst_vertex,
+  TABLE_HEAD_ST  *dst_event_summary_h, DST_EVENT_SUMMARY_ST  *dst_eventsummary)
 {
   
   /*
@@ -33,7 +40,7 @@ long  type_of_call fill_dst_event_summary_ (
    *:>-------------------------------------------------------------------- 
    *: ROUTINE:     fill_dst_event_summary_
    *: DESCRIPTION: Fill event summary information based on DST global track, 
-   *:              auxiliary track, Tof and vertex tables.
+   *:              and vertex tables.
    *:              
    *:
    *: AUTHOR:      Dhammika Weerasundara -- University of Washington
@@ -41,22 +48,18 @@ long  type_of_call fill_dst_event_summary_ (
    *:
    *: ARGUMENTS:
    *:          IN:
-   *:             dstRunHeader         - DST run header table
-   *:             dst_run_header_h     - Header Structure for dstRunHeader  
-   *:             dstEventHeader       - DST event header table
-   *:             dst_event_header_h   - Header Structure for dstEventHeader
-   *:             dstTof               - DST TOF table
-   *:             dst_tof_h            - Header Structure for dstTof       
-   *:             dstTrack             - DST tracks table       
-   *:             dst_track_h          - Header Structure for dstTrack
-   *:             dstTrackAux          - DST track auxiliary table
-   *:             dst_track_aux_h      - Header Structure for dstTrackAux   
-   *:             dstVertex            - DST vertex table
-   *:             dst_vertex_h         - Header Structure for dstVertex 
+   *:             dst_runheader         - DST run header table
+   *:             dst_run_header_h      - Header Structure for dst_runheader  
+   *:             dst_eventheader       - DST event header table
+   *:             dst_event_header_h    - Header Structure for dst_eventheader
+   *:             dst_track             - DST tracks table       
+   *:             dst_track_h           - Header Structure for dst_track
+   *:             dst_vertex            - DST vertex table
+   *:             dst_vertex_h          - Header Structure for dst_vertex 
    *:       INOUT:
    *:         OUT:
-   *:             dstEventSummary      - DST event summary table 
-   *:             dst_event_summary_h  - Header Structure for dstEventSummary
+   *:             dst_eventsummary      - DST event summary table 
+   *:             dst_event_summary_h   - Header Structure for dst_eventsummary
    *:             
    *:
    *: RETURNS:    STAF Condition Value
@@ -68,234 +71,308 @@ long  type_of_call fill_dst_event_summary_ (
    */
 
   /*  ==================  Local Variables  ======================== */
-  int     irange;
+  int     irange, i;
   int     glb_trk_good, glb_trk_prim, glb_trk_plus, glb_trk_minus;
-  int     itrk, ibin, iptBin, imtBin, ietaBin, iphiBin;
-  int     minBin, maxBin, binRange;
+  int     itrk, ibin, iptbin, imtbin, ietabin, iphibin;
+  int     minbin, maxbin, binrange;
   int     ivtx, vtx_id;
   double  pi, piov2;
   double  *mt_histo, *pt_histo, *eta_histo, *phi_histo;
+  double  *eta1_mt_histo,*eta2_mt_histo,*eta3_mt_histo;
   float   mt_min, mt_max;
-  float   pt_binSize, mt_binSize, eta_binSize, phi_binSize; 
-  float   dmt, deta, mtWeight;
-  float   pt, mt, eta, phi, theta, mean_pt, mean_eta, T_average;
+  float   pt_binsize, mt_binsize, eta_binsize, phi_binsize; 
+  float   dmt, deta1, deta2, mtweight1, mtweight2;
+  float   pt, mt, eta, rms_eta=0 ,phi, theta;
+  float   mean_pt=0, mean_pt2=0, mean_eta=0, t_average=0;
   
-  enum { PRIM=0, K0=1, LAMBDA=2,  ALAMBDA=3, PILEUP=4};
-  
+  enum { PRIMVTX=0, K0=1, LAMBDA=2,  ALAMBDA=3, PILEUP=4};
   
   /* ===========================  Begin Executable Code  =============== */
-  pi = acos(-1.);
-  piov2 = pi/2;
+
+  /* Initialize valid rows in dst_eventsummary table */
+  dst_event_summary_h->nok = 0;
   
-  /* Allocate memory for histograms  */
+  /* Initialize dst_eventsummary table */
+  dst_eventsummary->n_event[0]                = 0;
+  dst_eventsummary->n_event[1]                = 0;
+  dst_eventsummary->prod_run                  = 0;         
+  dst_eventsummary->glb_trk_tot               = 0;
+  dst_eventsummary->glb_trk_good              = 0;
+  dst_eventsummary->glb_trk_prim              = 0;
+  dst_eventsummary->glb_trk_plus              = 0;
+  dst_eventsummary->glb_trk_minus             = 0;
+  dst_eventsummary->n_vert_total              = 0;
+  dst_eventsummary->n_vert_V0                 = 0;
+  dst_eventsummary->n_vert_K0                 = 0;
+  dst_eventsummary->n_vert_Lambda             = 0;
+  dst_eventsummary->n_vert_ALambda            = 0;
+  dst_eventsummary->n_vert_pileup             = 0;
+  dst_eventsummary->mean_pt                   = 0;
+  dst_eventsummary->mean_pt2                  = 0;
+  dst_eventsummary->mean_eta                  = 0;
+  dst_eventsummary->rms_eta                   = 0;
+  dst_eventsummary->T_average                 = 0;
+  dst_eventsummary->prim_vrtx_chisq           = 0;
+  for (irange=0; irange<NRANGE; irange++) {
+    dst_eventsummary->mult_eta[irange]        = 0;
+    dst_eventsummary->mult_pt[irange]         = 0;
+    dst_eventsummary->energy_emc_eta[irange]  = 0;
+    dst_eventsummary->T_mt_bins[irange]       = 0;
+  }
+  for (irange=0; irange<NETARANGE; irange++) {
+    dst_eventsummary->T_eta_bins[irange]      = 0;
+  }
+  for (irange=0; irange<NPHIRANGE; irange++) {
+    dst_eventsummary->mult_phi[irange]        = 0;
+    dst_eventsummary->energy_emc_phi[irange]  = 0;
+  }
+  for (i=0; i<10; i++) {
+  dst_eventsummary->vrtx_qual[i]              = 0;
+  if (i<6)
+    dst_eventsummary->prim_vrtx_cov[i]        = 0;
+  }
+
+  if (!dst_track_h->nok){
+    fprintf(stderr,"FILL_DST_EVENT_SUMMARY: Zero dst tracks...exiting.\n");
+    return STAFCV_BAD;
+  }
+
+  /* Allocate dynamic memory for histograms  */
   if( !(pt_histo  = (double *)malloc(sizeof(double) * NBINS)) )  {
     fprintf(stderr, "Unable to allocate pt_histo...exiting.\n");
     return STAFCV_BAD;
   }
-  if( !(mt_histo  = (double *)malloc(sizeof(double) * NBINS)) )  {
+  if( !(mt_histo       = (double *)malloc(sizeof(double) * NBINS)) )  {
     fprintf(stderr, "Unable to allocate mt_histo...exiting.\n");
     return STAFCV_BAD;
   }
-  if( !(eta_histo  = (double *)malloc(sizeof(double) * NBINS)) )  {
+  if( !(eta_histo      = (double *)malloc(sizeof(double) * NBINS)) )  {
     fprintf(stderr, "Unable to allocate eta_histo...exiting.\n");
     return STAFCV_BAD;
   }
-  if( !(phi_histo  = (double *)malloc(sizeof(double) * NBINS)) )  {
+  if( !(phi_histo      = (double *)malloc(sizeof(double) * NBINS)) )  {
     fprintf(stderr, "Unable to allocate phi_histo...exiting.\n");
     return STAFCV_BAD;
   }
-
-    /*
-      if( !(pt_histo  = new double[NBINS]) )  {
-      fprintf(stderr, "Unable to allocate pt_histo...exiting.\n");
-      return STAFCV_BAD;
-      }
-      if( !(mt_histo  = new double[NBINS]) )  {
-      fprintf(stderr, "Unable to allocate mt_histo...exiting.\n");
-      return STAFCV_BAD;
-      }
-      if( !(eta_histo = new double[NBINS]) )  {
-      fprintf(stderr, "Unable to allocate eta_histo...exiting.\n");
-      return STAFCV_BAD;
-      }
-      if( !(phi_histo = new double[NBINS]) )  {
-      fprintf(stderr, "Unable to allocate phi_histo...exiting.\n");
-      return STAFCV_BAD;
-      }
-    */
-
+  if( !(eta1_mt_histo  = (double *)malloc(sizeof(double) * NBINS)) )  {
+    fprintf(stderr, "Unable to allocate eta1_mt_histo...exiting.\n");
+    return STAFCV_BAD;
+  }
+  if( !(eta2_mt_histo  = (double *)malloc(sizeof(double) * NBINS)) )  {
+    fprintf(stderr, "Unable to allocate eta2_mt_histo...exiting.\n");
+    return STAFCV_BAD;
+  }
+  if( !(eta3_mt_histo  = (double *)malloc(sizeof(double) * NBINS)) )  {
+    fprintf(stderr, "Unable to allocate eta3_mt_histo...exiting.\n");
+    return STAFCV_BAD;
+  }
   /* Reset pt, mt, eta & phi  histograms  */
-  memset (pt_histo,  0, sizeof(double)*NBINS);
-  memset (mt_histo,  0, sizeof(double)*NBINS);
-  memset (eta_histo, 0, sizeof(double)*NBINS);
-  memset (phi_histo, 0, sizeof(double)*NBINS);
+  memset (pt_histo,      0, sizeof(double)*NBINS);
+  memset (mt_histo,      0, sizeof(double)*NBINS);
+  memset (eta_histo,     0, sizeof(double)*NBINS);
+  memset (phi_histo,     0, sizeof(double)*NBINS);
+  memset (eta1_mt_histo, 0, sizeof(double)*NBINS);
+  memset (eta2_mt_histo, 0, sizeof(double)*NBINS);
+  memset (eta3_mt_histo, 0, sizeof(double)*NBINS);
   
   /* Claculate  histogram bin size */
-  mt_min      = sqrt(PT_MIN*PT_MIN + PI_MASS*PI_MASS);
-  mt_max      = sqrt(PT_MAX*PT_MAX + PI_MASS*PI_MASS);
-  pt_binSize  = (PT_MAX-PT_MIN)/NBINS;
-  mt_binSize  = (mt_max-mt_min)/NBINS;
-  eta_binSize = (ETA_MAX - ETA_MIN)/NBINS;
-  phi_binSize = (PHI_MAX - PHI_MIN)/NBINS;
+  pt_binsize  = (PT_MAX  - PT_MIN )/NBINS;
+  mt_binsize  = (MT_MAX  - MT_MIN )/NBINS;
+  eta_binsize = (ETA_MAX - ETA_MIN)/NBINS;
+  phi_binsize = (PHI_MAX - PHI_MIN)/NBINS;
 
   /*  Calculate  the mt bin weight  */
-  deta     = (ETA_MAX - ETA_MIN);
-  dmt      = mt_binSize;
-  mtWeight = 1./(deta*dmt);
-  
-  /* Initialize counters  */
+  deta1       = (ETA_MAX - ETA_MIN);
+  deta2       = 1;
+  dmt         = mt_binsize;
+  mtweight1   = 1./(deta1*dmt);
+  mtweight2   = 1./(deta2*dmt);
+
+  /* Get double precision pi */
+  pi = acos(-1.);
+  piov2 = pi/2;
+
+  /* Initialize global track counters & sum variables  */
   glb_trk_good=glb_trk_prim=glb_trk_plus=glb_trk_minus=0;
+  mean_pt=mean_pt2=mean_eta=rms_eta=0;
   
   /* Fill pt, mt, eta & phi histograms  */
   for (itrk=0; itrk < dst_track_h->nok; itrk++) {/* begin global track loop */
-    /* Fill pt, my, eta & phi  bin multiplicities  */
-    if ( dstTrack[itrk].icharge > 0 )
+    /* Calculate track multiplicities  */
+    if ( dst_track[itrk].icharge > 0 )
       glb_trk_plus++;
-    if ( dstTrack[itrk].icharge < 0 )
+    if ( dst_track[itrk].icharge < 0 )
       glb_trk_minus++;
-    
     /*  Calculate kinematic varialbles */
-    theta = piov2 - atan(dstTrack[itrk].tanl);
+    theta = piov2 - atan(dst_track[itrk].tanl);
     eta   = -log(tan(theta/2.));
-    pt    = 1./dstTrack[itrk].invpt;
-    mt    = sqrt(pt*pt + PI_MASS*PI_MASS);
-    phi   = dstTrack[itrk].psi;
-    
+    pt    = 1./dst_track[itrk].invpt;
+    mt    = sqrt(pt*pt + PI_MASS*PI_MASS)-PI_MASS;
+    phi   = dst_track[itrk].psi;
     /*  Determine appropriate bin number */ 
-    iptBin  = 1 + (int) ((pt - PT_MIN)/pt_binSize);
-    imtBin  = 1 + (int) ((mt - mt_min)/mt_binSize);
-    ietaBin = 1 + (int) ((eta - ETA_MIN)/eta_binSize);
-    iphiBin = 1 + (int) ((phi - PHI_MIN)/phi_binSize);
-    
+    iptbin  =  ((pt - PT_MIN)/pt_binsize);
+    imtbin  =  ((mt - MT_MIN)/mt_binsize);
+    ietabin =  ((eta - ETA_MIN)/eta_binsize);
+    iphibin =  ((phi - PHI_MIN)/phi_binsize);
     /*  Fill histograms.  Protect against going out of range. */
-    if (iptBin<NBINS)
-      phi_histo[iptBin]++;
-    if (ietaBin<NBINS)
-      eta_histo[ietaBin]++;
-    if (iphiBin<NBINS)
-      phi_histo[iphiBin]++;
-    
-    /*  weight the mt bin by  1/(mt*dy*dmt)  */
-    if (imtBin<NBINS)
-      mt_histo[imtBin] += log(mtWeight/mt) ;
-    
+    if (iptbin<NBINS)
+      pt_histo[iptbin]++;    /* pt histogram    */
+    if (ietabin<NBINS)
+      eta_histo[ietabin]++;  /* eta histogram   */
+    if (iphibin<NBINS)  
+      phi_histo[iphibin]++;  /* phi histogram   */
+    /*  weight the mt bin by  1/(mt*dy*dmt)     */
+    if (imtbin<NBINS) {
+       /* log(dN/mt*dy*dmt) histogram */
+      mt_histo[imtbin] += log(mtweight1/mt); 
+      /*  Fill mt historgrams for three eta bins  */
+      if ( -1.5 <= eta && eta < -0.5 )
+	eta1_mt_histo[imtbin] += log(mtweight2/mt);
+      if ( -0.5 <= eta && eta <  0.5 )
+	eta2_mt_histo[imtbin] += log(mtweight2/mt);
+      if (  0.5 <= eta && eta <  1.5 )
+	eta3_mt_histo[imtbin] += log(mtweight2/mt);
+    }
+    /* Sum pt, pt^2, eta, eta^2  for all good global charged tracks*/ 
     mean_pt  += pt;
+    mean_pt2 += pt*pt;
     mean_eta += eta;
+    rms_eta  += eta*eta;
   }/* end of global track loop  */
-  
-  /* Reset  multiplicity counters  */
-  for (irange=0; irange<NRANGE; irange++) {
-    dstEventSummary->mult_eta[irange] = 0;
-    dstEventSummary->mult_pt[irange]  = 0;
-    dstEventSummary->mult_phi[irange] = 0;
-  }
-  
-  binRange = NBINS/NRANGE;  /* NBINS have to be a multiple of NRANGE */
+
+  binrange = NBINS/NRANGE;  /* NBINS have to be a multiple of NRANGE */
+
   /* Fill pt, my, eta & phi  bin multiplicities  */
   for (irange=0; irange<NRANGE; irange++) { /* begin  looping over ranges  */
-    minBin = binRange*irange;
-    maxBin = minBin + binRange;
-    for (ibin=minBin+1; ibin < maxBin; ibin++) {/* begin  looping over bins  */
-      dstEventSummary->mult_pt[irange] +=
-	(int) pt_histo[ibin];         /* Fill pt  bin  multiplicities  */
-      dstEventSummary->mult_eta[irange]+=
-	(int) eta_histo[ibin];        /* Fill eta bin  multiplicities  */
-      dstEventSummary->mult_phi[irange]+=
-	(int) phi_histo[ibin];        /* Fill phi bin  multiplicities  */
+    minbin = binrange*irange;
+    maxbin = minbin + binrange;
+    for (ibin=minbin; ibin < maxbin; ibin++) {/* begin  looping over bins  */
+      dst_eventsummary->mult_pt[irange] +=
+	 pt_histo[ibin];         /* Fill pt  bin  multiplicities  */
+      dst_eventsummary->mult_eta[irange]+=
+	 eta_histo[ibin];        /* Fill eta bin  multiplicities  */
+      dst_eventsummary->mult_phi[irange]+=
+	 phi_histo[ibin];        /* Fill phi bin  multiplicities  */
     }/* end of looping over bins */
-    dstEventSummary->T_bins[irange] = 
-      mt_inverse_slope(mt_histo, minBin+1, maxBin); /* inverse slope */
+
+    /* Fill inverse slope for mt bins   */
+    dst_eventsummary->T_mt_bins[irange] = 
+      mt_inverse_slope(mt_histo, minbin, maxbin); /* mt inverse slope */
+
+    /* Fill mt inverse slope for three eta bins  */
+    switch(irange) {
+    case 0:
+      dst_eventsummary->T_eta_bins[irange] = 
+	mt_inverse_slope(eta1_mt_histo,  0, NBINS ); /* mt inverse slope */
+      break;
+    case 1:
+      dst_eventsummary->T_eta_bins[irange] = 
+	mt_inverse_slope(eta2_mt_histo,  0, NBINS ); /* mt inverse slope */
+      break;
+    case 2:
+      dst_eventsummary->T_eta_bins[irange] = 
+	mt_inverse_slope(eta3_mt_histo,  0, NBINS ); /* mt inverse slope */
+      break;
+    }
   }  /* end of looping over ranges */
+
   
   /*  Fill track multiplicities  */
-  dstEventSummary->glb_trk_tot   = dst_track_h->nok;
-  dstEventSummary->glb_trk_good  = 0;
-  dstEventSummary->glb_trk_prim  = 0;
-  dstEventSummary->glb_trk_plus  = glb_trk_plus;
-  dstEventSummary->glb_trk_minus = glb_trk_minus ;
+  dst_eventsummary->glb_trk_tot   = dst_track_h->nok;
+  dst_eventsummary->glb_trk_good  = glb_trk_good;
+  dst_eventsummary->glb_trk_prim  = glb_trk_prim;
+  dst_eventsummary->glb_trk_plus  = glb_trk_plus;
+  dst_eventsummary->glb_trk_minus = glb_trk_minus ;
   
-  /* Fill mean eta and pt */
-  dstEventSummary->mean_pt  = mean_pt/(float)dst_track_h->nok;
-  dstEventSummary->mean_eta = mean_eta/(float)dst_track_h->nok;
+  /* Fill mean eta, pt, pt^2 and rms_eta */
+  glb_trk_good = dst_track_h->nok;
+  dst_eventsummary->mean_pt  = mean_pt/(float)glb_trk_good;
+  dst_eventsummary->mean_pt2 = mean_pt2/(float)glb_trk_good;
+  dst_eventsummary->mean_eta = mean_eta/(float)glb_trk_good;
+  dst_eventsummary->rms_eta  = sqrt(rms_eta/(float)glb_trk_good);
   
-  
-  /*  Fill inverse slopes  */
-  T_average = mt_inverse_slope(mt_histo, 1, 100); /* use full mt_histo */
-  dstEventSummary->T_average = T_average;  /* average mt inverse slope */
+  /* Fill  average mt inverse slope */
+  t_average = mt_inverse_slope(mt_histo, 0, NBINS ); /* use full mt_histo */
+  dst_eventsummary->T_average = t_average;  /* average mt inverse slope */
 
-  dstEventSummary->n_vert_total = dst_vertex_h->nok;  /* Total # of vertices */
+  /* Fill total # of vertices */
+  dst_eventsummary->n_vert_total = dst_vertex_h->nok;  
 
   /* Count v0 candidates */
   for (ivtx=0;  ivtx<dst_vertex_h->nok; ivtx++)  { /* begin vertex loop */
-    vtx_id = dstVertex[ivtx].vtx_id;  /*  get vertex type */
-    if (!vtx_id)
-      dst_vertex_h->nok++;   /* count total number of V0s  */
+    vtx_id = dst_vertex[ivtx].vtx_id;  /*  get vertex type */
+    if (vtx_id)
+      dst_eventsummary->n_vert_V0++;   /* count total number of V0s  */
     switch (vtx_id) {
-    case PRIM:
+    case PRIMVTX:
       /* Fill Primary vertex information */
-      dstEventSummary->prim_vrtx[0]    = dstVertex[ivtx].x;
-      dstEventSummary->prim_vrtx[1]    = dstVertex[ivtx].y;
-      dstEventSummary->prim_vrtx[2]    = dstVertex[ivtx].z;
-      dstEventSummary->prim_vrtx_chisq = dstVertex[ivtx].pchi2;
+      dst_eventsummary->prim_vrtx[0]    = dst_vertex[ivtx].x;
+      dst_eventsummary->prim_vrtx[1]    = dst_vertex[ivtx].y;
+      dst_eventsummary->prim_vrtx[2]    = dst_vertex[ivtx].z;
+      dst_eventsummary->prim_vrtx_chisq = dst_vertex[ivtx].pchi2;
       break;
       /* Count v0 candidates */
     case K0:
-      dstEventSummary->n_vert_K0++ ;
+      dst_eventsummary->n_vert_K0++ ;
       break;
     case LAMBDA:
-      dstEventSummary->n_vert_Lambda++ ;
+      dst_eventsummary->n_vert_Lambda++ ;
       break;
     case ALAMBDA:
-      dstEventSummary->n_vert_ALambda++ ;
+      dst_eventsummary->n_vert_ALambda++ ;
       break;
     case PILEUP:
-      dstEventSummary->n_vert_pileup++ ;
+      dst_eventsummary->n_vert_pileup++ ;
       break;
     }
   }  /* end of vertex loop  */
 
   
   /*  Fill event ID */
-  dstEventSummary->n_event[0] = dstEventHeader->n_event[0];
-  dstEventSummary->n_event[1] = dstEventHeader->n_event[1];
+  dst_eventsummary->n_event[0] = dst_eventheader->n_event[0];
+  dst_eventsummary->n_event[1] = dst_eventheader->n_event[1];
   
   /* Fill DST production run ID */
-  dstEventSummary->prod_run = dstRunHeader->run_id;
+  dst_eventsummary->prod_run = dst_runheader->run_id;
   
   free (pt_histo);
   free (mt_histo);
   free (eta_histo);
   free (phi_histo);
-  /* delete [] pt_histo;   
-     delete [] mt_histo;   
-     delete [] eta_histo;   
-     delete [] phi_histo;  
-  */
+  free (eta1_mt_histo);
+  free (eta2_mt_histo);
+  free (eta3_mt_histo);
+
+  dst_event_summary_h->nok = 1;
   return STAFCV_OK;
 }  /*  End of fill_dst_event_summary  */
 
 
-float  mt_inverse_slope(double *mt_histo,int iBegin, int iStop)
+float  mt_inverse_slope(double *mthisto,int ibegin, int istop)
 {
   
-  float mtx, mt_min, mt_max, mt_binSize, InvSlope;
-  float S=0, Sx=0, Sy=0, Sxx=0, Sxy=0, Delta=0;
-  int   index;
-  mt_min      = sqrt(PT_MIN*PT_MIN + PI_MASS*PI_MASS);
-  mt_max      = sqrt(PT_MAX*PT_MAX + PI_MASS*PI_MASS);
-  mt_binSize  = (mt_max-mt_min)/NBINS;
-  
-  /*  Do a linear Leat Square fit to  log(dN/mt*dy*dmt) = -mt/T  */
-  for  (index=iBegin; index<iStop;  index++) {
-    mtx  = mt_binSize*(float)index - mt_binSize/2.;
-    Sx  += mtx;
-    Sy  += mt_histo[index];
-    Sxx += mtx*mtx;
-    Sxy += mtx*mt_histo[index];
-    S++;
+  float mtx, mt_min, mt_max, mt_binsize, invslope;
+  float s=0, sx=0, sy=0, sxx=0, sxy=0, delta=0;
+  int   imtbin, index;
+
+  mt_binsize  = (MT_MAX - MT_MIN)/NBINS;
+
+  if (DEBUG){
+    for (imtbin=ibegin; imtbin<istop; imtbin++)
+      fprintf (stderr, "%f ", mthisto[imtbin]);
   }
-  Delta    = S*Sxx - Sx*Sx;
-  InvSlope = fabs ((S*Sxy - Sx*Sy)/Delta);
-  
-  return InvSlope;
+
+  /*  Do a linear Leat Square fit to  log(dN/mt*dy*dmt) = -mt/T  */
+  for  (index=ibegin; index<istop;  index++) {
+    mtx  = mt_binsize*(float)index + mt_binsize/2.;
+    sx  += mtx;
+    sy  += mthisto[index];
+    sxx += mtx*mtx;
+    sxy += mthisto[index]*mtx;
+    s++;
+  }
+  delta    = s*sxx - sx*sx;
+  invslope = fabs ((s*sxy - sx*sy)/delta);
+  invslope = 1./invslope;
+  return invslope;
 } /* end of mt_inverse_slope */
