@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.34 1999/11/18 16:49:30 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.35 1999/11/18 23:42:30 lbarnby Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.35  1999/11/18 23:42:30  lbarnby
+// Allow l3Hit table to be written out when l3Clufi is run
+//
 // Revision 1.34  1999/11/18 16:49:30  fisyak
 // Janet Seyboth fix when there is no globtrk table
 //
@@ -108,7 +111,7 @@
 #include "tables/St_dst_mon_soft_l3_Table.h"
 #include "tables/St_dst_mon_soft_rich_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.34 1999/11/18 16:49:30 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.35 1999/11/18 23:42:30 lbarnby Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -130,6 +133,7 @@ Int_t St_dst_Maker::Init(){
     "geant:",  "particle", "g2t_rch_hit",
     "trg:",    "TrgDet",
     "l3Tracks:","l3Track",
+    "l3Clufi:","l3Hit",
     0};
   
   if (!fSelect) fSelect = todst;   
