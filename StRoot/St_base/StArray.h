@@ -228,8 +228,8 @@ void  push_back(const St ## QWERTY *to){StStrArray::push_back((TObject*)to);}\
 \
 ClassDef(StSPtrVec ## QWERTY,1) \
 };\
-typedef       St ## QWERTY ## Iterator  StPtrVec  ## QWERTY ## Iterator;\
-typedef const_St ## QWERTY ## Iterator  StPtrVec  ## QWERTY ## ConstIterator;\
+typedef       St ## QWERTY ## Iterator  StPtrVec ## QWERTY ## Iterator;\
+typedef const_St ## QWERTY ## Iterator  StPtrVec ## QWERTY ## ConstIterator;\
 typedef       St ## QWERTY ## Iterator  StSPtrVec ## QWERTY ## Iterator;\
 typedef const_St ## QWERTY ## Iterator  StSPtrVec ## QWERTY ## ConstIterator;\
 
