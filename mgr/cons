@@ -13,14 +13,14 @@
 # Regression tests keep the code honest by checking for warnings
 # and "use strict" failures.
 
-# $Id: cons,v 1.1.1.18 2000/11/06 01:05:26 fisyak Exp $
+# $Id: cons,v 1.1.1.19 2000/11/13 01:21:32 fisyak Exp $
 
 use vars qw( $ver_num $ver_rev $version );
 
 $ver_num = "2.1";
 $ver_rev = ".3";
 $version = sprintf "This is Cons %s%s " .
-	    '($Id: cons,v 1.1.1.18 2000/11/06 01:05:26 fisyak Exp $)'. "\n",
+	    '($Id: cons,v 1.1.1.19 2000/11/13 01:21:32 fisyak Exp $)'. "\n",
 	    $ver_num, $ver_rev;
 
 # Cons: A Software Construction Tool.
@@ -1159,8 +1159,15 @@ sub Command {
 
 sub Depends {
     my($env) = shift;
-    my($tgt) = $dir::cwd->lookup($env->_subst(shift));
-    push(@{$tgt->{dep}}, map($dir::cwd->lookup($env->_subst($_)), @_));
+    my($tgt) = $env->_subst(shift);
+    my(@deps) = map($dir::cwd->lookup($env->_subst($_)), @_);
+    if (! ref($tgt)) {
+	$tgt = [ $tgt ];
+    }
+    my($t);
+    foreach $t (map($dir::cwd->lookupfile($_), @$tgt)) {
+	push(@{$t->{dep}}, @deps);
+    }
 }
 
 # Setup a quick scanner for the specified input file, for the
@@ -1886,12 +1893,17 @@ use vars qw( @ISA %scanner );
 BEGIN { @ISA = qw(scan) }
 
 sub find {
-    my($class, $code, $env, $path) = @_;
-    $path = '' if ! defined $path;
-    $scanner{$code,$env,$path} || do {
-	my(@path) = map { $dir::cwd->lookupdir($_) } split(/:/, $path);
+    my($class, $code, $env, $pdirs) = @_;
+    if (! defined $pdirs) {
+	$pdirs = [ ] ;
+    } elsif (ref($pdirs) ne 'ARRAY') {
+	$pdirs = [ split(/$main::PATH_SEPARATOR/o, $pdirs) ];
+    }
+    my(@path) = map { $dir::cwd->lookupdir($_) } @$pdirs;
+    my($spath) = "@path";
+    $scanner{$code,$env,$spath} || do {
 	my($self) = { code => $code, env => $env, path => \@path };
-	$scanner{$code,$env,$path} = bless $self;
+	$scanner{$code,$env,$spath} = bless $self;
     }
 }
 
@@ -5163,6 +5175,16 @@ This may be occasionally useful, especially in cases where no scanner exists
 calculated automatically from a combination of the explicit dependencies set
 up by the method invocation or by scanning source files.
 
+A set of identical dependencies for multiple targets may be specified
+using a reference to a list of targets. In Perl, a list reference can
+be created by enclosing a list in square brackets. Hence the following
+command:
+
+  Depends $env ['foo', 'bar'], 'input_file_1', 'input_file_2';
+
+specifies that both the F<foo> and F<bar> files depend on the listed
+input files.
+
 
 =head2 The C<Ignore> method
 
@@ -5552,8 +5574,12 @@ QuickScan is invoked as follows:
 The subroutine referenced by CODEREF is expected to return a list of
 filenames included directly by FILE. These filenames will, in turn, be
 scanned. The optional PATH argument supplies a lookup path for finding
-FILENAME and/or files returned by the user-supplied subroutine. The
-subroutine is called once for each line in the file, with $_ set to the
+FILENAME and/or files returned by the user-supplied subroutine.  The PATH
+may be a reference to an array of lookup-directory names, or a string of
+names separated by the system's separator character (':' on UNIX systems,
+';' on Windows NT).
+
+The subroutine is called once for each line in the file, with $_ set to the
 current line. If the subroutine needs to look at additional lines, or, for
 that matter, the entire file, then it may read them itself, from the
 filehandle SCAN. It may also terminate the loop, if it knows that no further

@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <TITLE>Cons - Software Construction System</TITLE>
-<LINK REV="made" HREF="mailto:lionel.cons@cern.ch">
+<LINK REV="made" HREF="mailto:root@porky.devel.redhat.com">
 </HEAD>
 
 <BODY>
@@ -2242,6 +2242,17 @@ explicit dependencies set up by the method invocation or by scanning source
 files.
 
 <P>
+A set of identical dependencies for multiple targets may be specified using
+a reference to a list of targets. In Perl, a list reference can be created
+by enclosing a list in square brackets. Hence the following command:
+
+<P>
+<PRE>  Depends $env ['foo', 'bar'], 'input_file_1', 'input_file_2';
+</PRE>
+<P>
+specifies that both the <EM>foo</EM> and <EM>bar</EM> files depend on the listed input files.
+
+<P>
 <HR>
 <H2><A NAME="The_C_Ignore_method">The &lt;CODE&gt;Ignore&lt;/CODE&gt; method</A></H2>
 <P>
@@ -2667,12 +2678,18 @@ QuickScan is invoked as follows:
 The subroutine referenced by CODEREF is expected to return a list of
 filenames included directly by FILE. These filenames will, in turn, be
 scanned. The optional PATH argument supplies a lookup path for finding
-FILENAME and/or files returned by the user-supplied subroutine. The
-subroutine is called once for each line in the file, with <CODE>$_</CODE>
-set to the current line. If the subroutine needs to look at additional
-lines, or, for that matter, the entire file, then it may read them itself,
-from the filehandle SCAN. It may also terminate the loop, if it knows that
-no further include information is available, by closing the filehandle.
+FILENAME and/or files returned by the user-supplied subroutine. The PATH
+may be a reference to an array of lookup-directory names, or a string of
+names separated by the system's separator character (':' on UNIX systems,
+';' on Windows NT).
+
+<P>
+The subroutine is called once for each line in the file, with
+<CODE>$_</CODE> set to the current line. If the subroutine needs to look at
+additional lines, or, for that matter, the entire file, then it may read
+them itself, from the filehandle SCAN. It may also terminate the loop, if
+it knows that no further include information is available, by closing the
+filehandle.
 
 <P>
 Whether or not a lookup path is provided, QuickScan first tries to lookup

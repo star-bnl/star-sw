@@ -1,8 +1,8 @@
 .rn '' }`
-''' $RCSfile: cons.1,v $$Revision: 1.1.1.5 $$Date: 2000/11/06 01:05:27 $
+''' $RCSfile: cons.1,v $$Revision: 1.1.1.6 $$Date: 2000/11/13 01:21:34 $
 '''
 ''' $Log: cons.1,v $
-''' Revision 1.1.1.5  2000/11/06 01:05:27  fisyak
+''' Revision 1.1.1.6  2000/11/13 01:21:34  fisyak
 ''' *** empty log message ***
 '''
 '''
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH CONS 1 "2.1.3" "5/Nov/2000" "Cons - Software Construction System"
+.TH CONS 1 "2.1.3" "12/Nov/100" "Cons - Software Construction System"
 .UC
 .if n .hy 0
 .if n .na
@@ -1754,7 +1754,7 @@ the following suffixes to select a portion of the expanded path name:
 \&  :s    the file name suffix
 \&  :F    the file name stripped of any suffix
 .Ve
-Continuing with the above example, \f(CW%<:f\fR would expand to \f(CWfoo bar baz\fR,
+Continuing with the above example, C<%<:f> would expand to \f(CWfoo bar baz\fR,
 and \f(CW%\fR:d> would expand to \f(CWtest\fR.
 .PP
 It is possible to programmatically rewrite part of the command by
@@ -1997,6 +1997,17 @@ This may be occasionally useful, especially in cases where no scanner exists
 (or is writable) for particular types of files. Normally, dependencies are
 calculated automatically from a combination of the explicit dependencies set
 up by the method invocation or by scanning source files.
+.PP
+A set of identical dependencies for multiple targets may be specified
+using a reference to a list of targets. In Perl, a list reference can
+be created by enclosing a list in square brackets. Hence the following
+command:
+.PP
+.Vb 1
+\&  Depends $env ['foo', 'bar'], 'input_file_1', 'input_file_2';
+.Ve
+specifies that both the \fIfoo\fR and \fIbar\fR files depend on the listed
+input files.
 .Sh "The \f(CWIgnore\fR method"
 The \f(CWIgnore\fR method allows you to ignore explicitly dependencies that
 Cons infers on its own.  It is invoked as follows:
@@ -2326,8 +2337,12 @@ QuickScan is invoked as follows:
 The subroutine referenced by CODEREF is expected to return a list of
 filenames included directly by FILE. These filenames will, in turn, be
 scanned. The optional PATH argument supplies a lookup path for finding
-FILENAME and/or files returned by the user-supplied subroutine. The
-subroutine is called once for each line in the file, with \f(CW$_\fR set to the
+FILENAME and/or files returned by the user-supplied subroutine.  The PATH
+may be a reference to an array of lookup-directory names, or a string of
+names separated by the system's separator character (':\*(R' on UNIX systems,
+\&\*(R';\*(R' on Windows NT).
+.PP
+The subroutine is called once for each line in the file, with \f(CW$_\fR set to the
 current line. If the subroutine needs to look at additional lines, or, for
 that matter, the entire file, then it may read them itself, from the
 filehandle SCAN. It may also terminate the loop, if it knows that no further
