@@ -3,7 +3,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.cxx,v 1.10 2003/02/26 04:36:17 fine Exp $
+// $Id: StEventControlPanel.cxx,v 1.11 2003/02/26 23:50:22 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -480,7 +480,7 @@ void StEventControlPanel::Show()
 //_______________________________________________________________________________________
 void StEventControlPanel::ShowFilter()
 {  // fFilter->Show();
-   // Create StFilteDialog
+   // Create StFilterDialog
    if (!fFilter) {
       QMessageBox::warning ( 0,  "Show Event Filter"
                                   ,"No filter has been defined yet!"
@@ -488,12 +488,11 @@ void StEventControlPanel::ShowFilter()
          return;
    }
    int nFilters = fFilter->GetSize();
-   // delete fDialog; // We want to keep the only filter on the screen
+   delete fDialog; // We want to keep the only filter on the screen
    QTabWidget *tabView = 0;
    if (nFilters > 1) {
       // Create tab view
       tabView = new QTabWidget (0,"filters",Qt::WDestructiveClose | Qt::WStyle_DialogBorder);
-      connect(fDialog,SIGNAL(destroyed()),this,SLOT(Disconnect()));
       fDialog = tabView;
    }
    TIter nextFilter(fFilter);
@@ -504,9 +503,10 @@ void StEventControlPanel::ShowFilter()
       const float *defs    = filter->GetDefs();
       const char **namval  = filter->GetNams();
       int flag;
-      dialog = new StFilterDialog(filter->GetName(),namval,defs, pars, &flag); //, flag);
+      bool *active = filter->GetActive();
+      dialog = new StFilterDialog(filter->GetName(),namval,defs, pars, &flag,active); //, flag);
       if (tabView) {
-        // dialog->reparent(tabView,0); 
+        dialog->reparent(tabView,QPoint(0,0)); 
         tabView->addTab(dialog,filter->GetName());
         connect(dialog,SIGNAL(destroyed()),tabView,SLOT(close()));
       }
