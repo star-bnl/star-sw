@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimulator.cc,v 1.11 2002/04/19 22:24:13 perev Exp $
+// $Id: StFtpcSlowSimulator.cc,v 1.12 2002/06/07 10:35:31 fsimon Exp $
 // $Log: StFtpcSlowSimulator.cc,v $
+// Revision 1.12  2002/06/07 10:35:31  fsimon
+// Additional debug info (tracing of hits)
+//
 // Revision 1.11  2002/04/19 22:24:13  perev
 // fixes for ROOT/3.02.07
 //
@@ -112,6 +115,7 @@ int StFtpcSlowSimulator::simulate()
     int de_zero = 0;
     int n_cross_ang_max = 0;
     int counter=0;
+    
     for ( i=0; i<number_hits; ++i ) 
       {
       
@@ -132,8 +136,7 @@ int StFtpcSlowSimulator::simulate()
 	xx = mGeant->x(i);
 	yy = mGeant->y(i);
 	zz = mGeant->z(i);
-                
-//   Test that current point is within chamber          
+	//   Test that current point is within chamber          
          rad = sqrt ( xx*xx + yy*yy );
         if(rad < r_min || rad > r_max) {
 	  ++rad_rej;
@@ -146,7 +149,7 @@ int StFtpcSlowSimulator::simulate()
 	}
 
 	if(DEBUG)
-	  cout << "Now processing hit " << i << endl;
+	  cout << "Now processing hit " << i << " with xx;yy;zz;px;py;pz :"<< xx << "; " <<yy <<"; "<< zz <<"; "<< px <<"; "<< py <<"; "<< pz << endl;
 
         // Convert geant volume number into FTPC row number
 	int irow= mGeant->geantVolume(i);
@@ -178,7 +181,6 @@ int StFtpcSlowSimulator::simulate()
 
 	//  dip angle with respect to plane defined by z- and phi- axes	
 	dip_ang   = atan(p_perp / pz);
-
         //  cross angle with respect to plane defined by z- and r- axes
 	cross_ang = atan(p_rad / pz);
 	if(cross_ang>halfpi) cross_ang = cross_ang - pi;
@@ -210,9 +212,10 @@ int StFtpcSlowSimulator::simulate()
             else if (yy < 0.0) 
                 phi = 1.5*pi ;
         }
-
-
-         
+	
+	if(DEBUG)
+	  cout << i << " " << xx << " " << yy << " " << zz << " " << rad << " " << phi << endl;
+	
         // define cluster for each accepted hit point
         ++counter;
         drift_time  = -mDb->tZero();                          
@@ -247,7 +250,7 @@ int StFtpcSlowSimulator::simulate()
                 << " track_id = " << mGeant->track(i)+1
                 << " ge_pid = " << mGeant->trackPid(i)
                 << endl;
-        }
+	   }
 	StFtpcSlowSimCluster *clus = 
 	  new StFtpcSlowSimCluster(mParam, mDb, field, electron, rad_off, pad_off, 
 				   rad, phi, drift_time, irow);
@@ -266,12 +269,12 @@ int StFtpcSlowSimulator::simulate()
 
     } // end of loop over hit points
     
-   if (DEBUG) {
+    if (DEBUG) {
        cout << "Total number of hit points tested = " << number_hits << endl;
        cout << "Number of hit points accepted = " << counter << endl;
        cout << "Number of hit points rejected (radius test) = " << rad_rej << endl;
        cout << "Number of hit points rejected (de=0 test) = " << de_zero << endl;
-     //cout << "Number of hit points with cross_ang > cross_ang_max  = " << n_cross_ang_max << endl;
+       cout << "Number of hit points with cross_ang > cross_ang_max  = " << n_cross_ang_max << endl;
        cout << "Writing out ADC array in raw data structure." << endl;
     }
 
