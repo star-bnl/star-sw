@@ -171,8 +171,8 @@ elsif (/^sun4x_56_CC5$/) {
   $CC        = "/opt/WS5.0/bin/cc";
   $CXX       = "/opt/WS5.0/bin/CC";
   $FC        = "/opt/WS5.0/bin/f77";
-  $CXXFLAGS  = "-KPIC -I/usr/openwin/include -D__SunOS_5_6 -library=iostream,no_Cstd";
-#  $CXXFLAGS  = "-KPIC -I/usr/openwin/include -D__SunOS_5_6 -library=iostream";
+# $CXXFLAGS  = "-KPIC -I/usr/openwin/include -D__SunOS_5_6 -library=iostream,no_Cstd";
+  $CXXFLAGS  = "-KPIC -I/usr/openwin/include -D__SunOS_5_6 -library=iostream";
   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen";#4 -L/usr/ucblib -lucb -L/usr/ccs/lib -lgen";
   $FLIBS     = "-L/opt/WS5.0/lib -lM77 -lF77 -lsunmath";
   $FFLAGS    = "-KPIC -w";
@@ -434,7 +434,8 @@ $env = new cons(
 				   '.cc' => 'build::command::cxx',
 				   '.cxx'=> 'build::command::cxx',
 				   '.cpp'=> 'build::command::cxx',
-				   '.cdf'=> 'build::command::kuip'
+				   '.cdf'=> 'build::command::kuip',
+				   '.o'  => 'build::command::user'
 				  },
 		'SUFOBJ'	=> "." . $O,
 		'ENV'	        => { 'PATH' => $PATH,
@@ -555,12 +556,11 @@ foreach my $dir ("pams","StRoot"){#,"StDb") {
 	      print "skip dir: $subsub_dir \t=> $SKIP_DIRS\n";
 	      next;
 	    }
-	    next if ($subsub_dir =~ /tables/);
 	    push @subdirs, $subsub_DIR; #print "================== add $subsub_DIR\n";
 	  }
 	}
       }
-      if ($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/) {next;} 
+#      if ($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/) {next;} 
       if ($SKIP_DIRS && $SKIP_DIRS =~ $sub_dir) {
 	print "skip dir: $sub_dir \t=> $SKIP_DIRS\n";
 	next;
@@ -574,7 +574,7 @@ foreach my $dir ("pams","StRoot"){#,"StDb") {
   }
 }
 my @Targets = ();
-foreach $dir ("asps/rexe",@subdirs) {
+foreach $dir ("asps/rexe","StDb",@subdirs) {
   next if !-d $dir;
   push @Targets, $OBJ . "/" . $dir . "/Conscript";
 }

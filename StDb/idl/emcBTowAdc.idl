@@ -1,0 +1,13 @@
+/*    emcBTowAdc.idl
+*
+*  Table: emcBTowAdc
+*
+*       description:
+*/ 
+
+
+struct emcBTowAdc { 
+
+   float  ch[20][2];   /*   Channel : channel number  */
+
+ };  

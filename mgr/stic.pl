@@ -6,7 +6,7 @@ use File::Copy;
 my $target = shift;
 my @pars = ();
 while (my $par = shift) {
-  if ($par =~ /Root|ROOT|ObjectSpace/) {next;} 
+  if ($par =~ /ROOT|ObjectSpace/) {next;} 
   push @pars, $par;
 }
 my $file = basename($target); 

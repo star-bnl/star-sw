@@ -1,0 +1,13 @@
+/*    emcBarrelAdc.idl
+*
+*  Table: emcBarrelAdc
+*
+*       description:
+*/ 
+
+
+struct emcBarrelAdc { 
+
+   float  ch[20];   /*   Channel : channel number  */
+
+ };  

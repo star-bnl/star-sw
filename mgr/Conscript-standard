@@ -2,22 +2,20 @@
 Import qw ( env INCLUDE LIB BIN  EXPORT BUILD OBJ);
 (my $build = $OBJ) =~ s/\#//g;
 $build =~ s/\\/\//g;# print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
-(my $ObjDir = DirPath '.') =~ s/\\/\//g;# print "ObjDir = $ObjDir\n";
+my $DirPath = DirPath '.';# print "DirPath = $DirPath\n"; 
+(my $ObjDir = $DirPath) =~ s/\\/\//g;# print "ObjDir = $ObjDir\n";
 (my $Dir = $ObjDir) =~ s/$build\///g;# print "Dir = $Dir\n";
 $ObjDir = "#" . $ObjDir; #print "ObjDir = $ObjDir\n";
 (my $obj_dir = $ObjDir) =~ s/^\#//g;# print "obj_dir = $obj_dir\n";
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
-my @Repo = ();
-@Repo = Repository_List unless $param::noRepository; #print "Repositories = |@Repo|\n";
-my $pkg  = basename($Dir);# print "Run cons in $Dir for pkg\n";
+my @Repo = Repository_List unless $param::noRepository; #print "Repositories = |@Repo|\n";
+my $pkg  = basename($Dir);# print "Run cons in $Dir for $PKG\n";
 my $PKG = $pkg;
+if ($pkg =~ /^sim$/ || $pkg =~ /^gen$/) {goto Tables;}
 my $i;
 my @idlML    = find_idlM($Dir);     #$i = 0; foreach my $s (@idlML) {print "i=",$i++," idlM = ",$s,"\n";}
 my @srcL     = find_sources($Dir);  #$i = 0; foreach my $s (@srcL) {print "i=",$i++," src = ",$s,"\n";}
 my @h_filesL = find_hfiles($Dir);   #$i = 0; foreach my $s (@h_files) {print "i=",$i++," h_files = ",$s,"\n";}
-opendir (DIR, $Dir) or die "Can't open $Dir\n";
-my @dirEntries = readdir DIR;
-closedir DIR; #print "dirEntries = @dirEntries\n";
 foreach my $Rep (@Repo) {
   my $RepDir = $Rep . "/" . $Dir;# print "RepDir = $RepDir\n";
   if (-d $RepDir) {
@@ -32,19 +30,8 @@ foreach my $Rep (@Repo) {
 my @src     = sortu (@srcL);# print "src = @src\n";
 my @h_files = sortu (@h_filesL);
 my @idlM    = sortu (@idlML);# print "idlM = @idlM\n";
-#if ($pkg eq "g2r") {#  print "package = $pkg\n";
-#  foreach my $f ("g2t_get_event","g2t_get_kine"){
-#    my $didl = $Dir . "/../g2t/" . $f . ".idl";# print "$didl\n"; 
-#    my $dsrc =  $Dir . "/../g2t/" . $f . ".F";#  print "$dsrc\n";
-#    if (-f $didl && -f $dsrc) {
-##      $didl = "../g2t/" . $f . ".idl"; print "$didl\n"; 
-#      $dsrc = "../g2t/" . $f . ".F";#  print "$dsrc\n";
-##      push @idlM, $didl; print "Add $didl\n";
-#      push @src,  $dsrc;# print "Add $dsrc\n";
-#    }
-#  }
-#}
-my $so_pkg  = "";
+
+#my $so_pkg  = "";
 if ($#idlM > -1) {$PKG = "St_" . $PKG;}
 printf ("Run Conscript-standard in %-30s  for %-20s\n",$Dir, $PKG) unless ($param::quiet);
 my $obj  = $ObjDir;  print "obj = $obj\n" if $param::debug;
@@ -73,9 +60,9 @@ if ($Dir =~ /pams\//) {
 my $LIBPKG = "";
 my @srco = @src;
 if ($Dir =~ /pams\// || $STAR_SYS =~ /^intel_wnt$/) {
-  if ($pkg !~ /tables/ and $STAR_SYS !~ /^i386_redhat60kcc$/) {
-    $so_pkg  = $pkg . ".sl"; print "Ask for $so_pkg at @STAR_SYS\n" if $param::debug;
-  }
+#  if ($pkg !~ /tables/ and $STAR_SYS !~ /^i386_redhat60kcc$/) {
+#    $so_pkg  = $pkg . ".sl"; print "Ask for $so_pkg at @STAR_SYS\n" if $param::debug;
+#  }
   $LIBPKG = "lib" . $pkg . "." . $env->{SUFLIB};
   (my $lib_lib = $LIB) =~ s/^\#//g;
   $LIBS .= " " . $lib_lib . "/" . $LIBPKG;#     print "LIBS    = $LIBS\n" if $param::debug;
@@ -88,12 +75,7 @@ if ($Dir =~ /pams\// || $STAR_SYS =~ /^intel_wnt$/) {
 if ($STAR_SYS =~ /^hp_ux102$/ && $pkg =~ /^St_base$/) {$CPPP .= ":/usr/local/include";}
 my $CXXFLAGS = $env->{CXXFLAGS};
 my $FCCOM    = $env->{FCCOM};
-if ($STAR_SYS =~ /^sun4x_5(5|6)$/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
-#print "STAR_SYS = $STAR_SYS pkg = $pkg\n";
-if ($STAR_SYS =~ /^sun4x_56_CC5$/ and $pkg =~ /^StarClassLibrary$/)
-  {$LIBS  .= "/opt/WS5.0/SC5.0/lib/libCstd.a";}
-if ($STAR_SYS =~ /^sun4x_56_CC5$/ and  $pkg =~ /^StMcEvent$/) 
-  {$LIBS  .= "/opt/WS5.0/SC5.0/lib/libCstd.a /opt/WS5.0/SC5.0/lib/libiostream.a";}
+if ($STAR_SYS =~ /^sun4x_5.$/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
 if ($STAR_SYS =~ /kcc$/)  {$LIBPATH = ""; $LIBS = "";}
 $env2 = $env->clone('CPPPATH'      => $CPPP,
 		    'CXXFLAGS'     => $CXXFLAGS,
@@ -175,17 +157,6 @@ if ($#Defs > -1) {
   foreach my $def (@Defs) {
     push @defs, $share . "/" . basename($def);
   }
-#  my @Mod = ($INCLUDE . "/St_Module.h", 
-#	     $INCLUDE . "/StMaker.h", 
-#	     $INCLUDE . "/StChain.h",
-#	     $INCLUDE . "/St_DataSet.h",
-#	     $INCLUDE . "/St_Table.h",
-#	     $INCLUDE . "/StTree.h",
-#	     $INCLUDE . "/StIOMaker.h",
-#	     $INCLUDE . "/StIOInterFace.h",
-#	     $INCLUDE . "/St_XDFFile.h"
-#	    );
-#  Depends $env2 [@CintFiles], @Mod;
   Command $env2 [@CintFiles], @defs,  qq(RootCint.pl "%>" "%<" "$ROOTCINT_CPPPATH" );
   Install $env2 $ObjDir, @CintFiles;
   (my $cint =  $CintFiles[0]) =~ s/$share/$obj/g;
@@ -198,11 +169,121 @@ if ($#src > -1) {
     my $libpkg = $LIB . "/" . basename($LIBPKG);
     Depends $env2 $SO_PKG, $libpkg;
   }
-  if ($so_pkg) {
-    LinkedModule $env2 $so_pkg, @srco;
-    Install $env2 $LIB, $so_pkg;
-  }
   LinkedModule $env2 $SO_PKG, @src;
   Install $env2 $LIB, $SO_PKG;
-}  
+}
+
+#____________________________________Tables____________________________
+Tables: 
+my @idlL     = find_idl($Dir);  #print "@idlL\n"; 
+foreach my $Rep (@Repo) {
+  my $RepDir = $Rep . "/" . $Dir;# print "RepDir = $RepDir\n";
+  if (-d $RepDir) {
+    my @idlR = find_idl($RepDir);
+    foreach my $i (@idlR) {push @idlL, $i;}
+  }
+}
+my @idlLL   = sortu (@idlL);# print "idl = @idl\n"; 
+
+if ($#idlLL > -1) {
+  my @idlT = ();
+  my @sourcesT = (); 
+  my $objT = $OBJ . "/pams/tables";
+  (my $objT_dir = $objT) =~ s/^\#//g;# print "objT_dir = $objT_dir\n";
+  my $shareT  = "#.share/tables";# print "shareT = $shareT\n";
+  my $includeT = $INCLUDE . "/tables";# print "includeT = $includeT\n";
+  my $SHARET  = $DIR . "/.share/tables";
+#  Link $objT =>  $SHARET; print "Link $objT ===>  $SHARET\n" unless ($param::quiet);
+  foreach my $idl (@idlLL) {#  print "$idl\n";
+#    if (! grep (/idl\//,$idl)) {next;} 
+    #  my $IDL =  $DIR . "/" . $Dir . "/" . $idl;# print "i=",$i++," idl = $idl IDL=$IDL\n";
+    my $IDL = "#" . $Dir . "/" . $idl;# print "i=",$i++," idl = $idl IDL=$IDL\n";
+    my $stem = basename ($IDL, ".idl");# print "stem = $stem\n";
+    my $idlt = $includeT . "/" . basename($idl);
+    push @idlT, $IDL; 
+  }# print "idlT = @idlT\n";
+  if ($#idlT > -1) {
+    my $PKGT = $pkg . "_Tables";
+    my $SO_PKGT = $PKGT . "." . $env->{SUFSOLIB};# print "SO_PKGT = $SO_PKGT\n";
+    my $LIBPKGT = $PKGT . "." . $env->{SUFLIB};
+    if ($Dir !~ /pams\//) {
+      $SO_PKGT = $SO_PKG;
+      $LIBPKGT = $LIBPKG;
+    }
+    else {
+      printf ("Run Conscript-standard in %-30s  for %-20s\n",$Dir, $PKGT) unless ($param::quiet);
+    }
+    Install $env $INCLUDE, @idlT;# print "Install $env $INCLUDE, @idlT\n";
+    #___________________________________
+    my $ROOTCINT_CPP = $INCLUDE . ":" . $INCLUDE . "/tables:" . $shareT . ":" . $env->{ENV}->{ROOTSRC};
+    #   $ROOTCINT_CPP.= ":" . $env->{ENV}->{STAF} . "/inc:" 
+    my $CXXFLAGS = $env->{CXXFLAGS};
+    if ($STAR_SYS =~ /^sun4x_5/) {$CXXFLAGS .= " -ptr" . $objT_dir;}
+    $env3 = $env->clone(
+			'DEBUG'      => ' ',
+			'CPPPATH'    =>$ROOTCINT_CPP,
+			'CXXFLAGS'   => $CXXFLAGS  
+		       );
+    my $cscanner= find scan::cpp($env->{_cwd}, $ROOTCINT_CPP);# print "ROOTCINT_CPP = $ROOTCINT_CPP\n";
+    my $ROOTCINT_CPPPATH = $cscanner->iflags;# print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
+    
+    foreach my $idll (@idlT) { 
+      my $stem     = basename ($idll, ".idl"); #print "stem = $stem; idll: $idll\n";
+      my $dir      = dirname ($idll); #print "dir = $dir\n"; 
+      my $idl      = basename ($idll);
+      my $idlh     = $INCLUDE . "/"    . $stem . ".h";             #print "idlh: $idlh\n";
+      my $idli     = $INCLUDE . "/"    . $stem . ".inc";           #print "idli: $idli\n";
+      my $idlH     = $includeT . "/St_" . $stem . "_Table.h";       #print "idlH: $idlH\n";
+      my $idlC     = $shareT   . "/St_" . $stem . "_Table.cxx";     #print "idlC: $idlC\n";
+      my $LinkDef  = $shareT   . "/"    . $stem . "LinkDef.h";      #print "LinkDef = $LinkDef\n";
+      my $idlCintH = $shareT   . "/St_" . $stem . "_TableCint.h";   #print "idlCintH = $idlCintH\n";
+      my $idlCintC = $shareT   . "/St_" . $stem . "_TableCint.cxx"; #print "idlCintC = $idlCintC\n";
+      (my $IDL = $idll) =~ s/^\#//g;# print "IDL = $IDL\n";
+      if (-r $IDL) { 
+	my @Deps = ($idll);# print "Deps: $Deps[0]\n";
+	if ($STAR_SYS !~ /^intel_wnt$/) {
+	  Command $env3 [$idlh],        @Deps, qq (stic.pl %>  -q %1 );
+	  Command $env3 [$idli],        @Deps, qq (stic.pl %>  -q %1 );
+	  push @Deps, $idlh;
+	  Command $env3 [$idlH],        @Deps, qq (ConstructTable.pl %1 %>);
+	  push @Deps, $idlH;
+	  Command $env3 [$idlC],        @Deps, qq (ConstructTable.pl %1 %>);
+	  Command $env3 [$LinkDef],     @Deps, qq (ConstructTable.pl %1 %>);
+	}
+	@Deps = ();
+	push @Deps, $idlH;
+	push @Deps, $LinkDef;
+	push @Deps, $idlh;
+	push @Deps, $idli;
+	push @Deps, $INCLUDE . "/Stypes.h";
+	push @Deps, $INCLUDE . "/St_Table.h";
+	push @Deps, $INCLUDE . "/St_DataSet.h";
+	push @Deps, $INCLUDE . "/tableDescriptor.h";
+	Depends $env3 [$idlCintH,$idlCintC], $LinkDef;
+	if ($STAR_SYS !~ /^intel_wnt$/) {
+	  Command $env3 [$idlCintC, $idlCintH], @Deps,  
+	  qq (rootcint.pl %>:d -f %>:f -c  "$ROOTCINT_CPPPATH -D__ROOT__" %1:f %2:f);
+	}
+	push @Deps, $idlCintC;
+	push @Deps, $idlCintH;
+	push @Deps, $idlC;
+	my @src  = ($idlC,$idlCintH,$idlCintC);
+	Install $env3 $objT, @src; #print "Install $env3 $objT, @src\n";
+      }
+      my $s;
+      ($s = $idlC)     =~  s/$shareT/$objT/g; push @sourcesT, $s;
+      ($s = $idlCintC) =~  s/$shareT/$objT/g; push @sourcesT, $s;
+    }# print "sourcesT = @sourcesT\n";
+    if ($#sourcesT > -1) {
+      #    if ($STAR_SYS =~ /^intel_wnt$/) {
+      #      Library      $env3 $LIBPKGT, @sourcesT;  
+      #      Install $env3 $LIB, $LIBPKGT;
+      #    }
+      LinkedModule $env3 $SO_PKGT, @sourcesT;
+      Install $env3 $LIB, $SO_PKGT;
+    }
+  }
+}
 #________________________________________________________________________________
+  
+  

@@ -1,0 +1,13 @@
+/*    trgTimeOffset.idl
+*
+*  Table: trgTimeOffset
+*
+*       description:
+*/ 
+
+
+struct trgTimeOffset { 
+
+   float  offset;   /*   micro-seconds  */
+
+ };  
