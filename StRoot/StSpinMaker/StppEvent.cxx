@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.17 2003/09/11 05:49:22 perev Exp $
+// $Id: StppEvent.cxx,v 1.18 2003/09/22 14:28:25 akio Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.18  2003/09/22 14:28:25  akio
+// Fix for RH8.0 and FPD layer1 info to ntuple
+//
 // Revision 1.17  2003/09/11 05:49:22  perev
 // ansi corrs
 //
@@ -213,7 +216,7 @@ void StppEvent::clear(){
 
 #ifndef __CINT__
 Int_t StppEvent::fill(StEvent *event){
-    return fill(event, mudst);
+    return fill(event, NULL);
 }
 
 Int_t StppEvent::fill(StMuDst* uDst){
@@ -222,7 +225,6 @@ Int_t StppEvent::fill(StMuDst* uDst){
 
 Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
     mudst = uDst;
-
     foundJet = false;
 
     for(Int_t anaNum = 0; anaNum < numAnalyzers; anaNum++) {
@@ -549,7 +551,7 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
 	triggerWord = l0->triggerWord();
 	bunchId = l0->bunchCrossingId();
 	bunchId7bit = l0->bunchCrossingId7bit(runN);
-	doubleSpinIndex = l0->spinBits();
+	doubleSpinIndex = l0->spinBits(runN);
 	// unpol bunch xing now will get spin index==15
 	if(runN >= 3020032 && doubleSpinIndex==0 && bunchId7bit%2==1){doubleSpinIndex=15;}
 	// checking bunch ids
@@ -690,6 +692,10 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
 	  ntp2003_.zVertex     = zVertex;
 	  for(int i=0; i<8;   i++) {ntp2003_.VTXDSM[i]=trgd->TrgSum.DSMdata.VTX[i];
 	                            ntp2003_.FPDDSM[i]=trgd->TrgSum.DSMdata.FPD[i];
+				    ntp2003_.FPDENSL1[i]=trgd->rawTriggerDet[0].FPDEastNSLayer1[i];
+				    ntp2003_.FPDETBL1[i]=trgd->rawTriggerDet[0].FPDEastTBLayer1[i];
+				    ntp2003_.FPDWNSL1[i]=trgd->rawTriggerDet[0].FPDWestNSLayer1[i];
+				    ntp2003_.FPDWTBL1[i]=trgd->rawTriggerDet[0].FPDWestTBLayer1[i];
 	                            ntp2003_.FPDTDC[i]=(fpd->tdc())[i];}
 	  for(int i=0; i<16;  i++) {ntp2003_.ZDC[i]=trgd->rawTriggerDet[0].ZDC[i];}
 	  for(int i=0; i<256; i++) {ntp2003_.CTB[i]=trgd->rawTriggerDet[0].CTB[i];

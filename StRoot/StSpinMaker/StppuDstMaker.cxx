@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StppuDstMaker.cxx,v 1.10 2003/09/11 18:14:18 thenry Exp $
+ * $Id: StppuDstMaker.cxx,v 1.11 2003/09/22 14:28:25 akio Exp $
  * 
  * Author: Akio Ogawa June 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StppuDstMaker.cxx,v $
+ * Revision 1.11  2003/09/22 14:28:25  akio
+ * Fix for RH8.0 and FPD layer1 info to ntuple
+ *
  * Revision 1.10  2003/09/11 18:14:18  thenry
  * *** empty log message ***
  *
@@ -245,6 +248,7 @@ Int_t StppuDstMaker::Make() {
       mBadCounter++;
       return kStOK;
     }
+    ppEvent->setMuDst(NULL);
   }
   
   // fill ppEvent 

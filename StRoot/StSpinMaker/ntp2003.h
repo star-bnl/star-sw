@@ -18,6 +18,10 @@ typedef struct{
   int FPDETB[64]; 
   int FPDWNS[112]; 
   int FPDWTB[64]; 
+  int FPDENSL1[8]; 
+  int FPDETBL1[8]; 
+  int FPDWNSL1[8]; 
+  int FPDWTBL1[8]; 
   int FPDADC[256];
   int FPDTDC[8]; 
   int FPDWEST[72]; 
