@@ -39,7 +39,7 @@ BfcItem BFC[] = {
   {"mdc3"        ,""  ,"","cy1h,GeantOut"                               ,"","","MDC3 default chain",kFALSE},
   {"doEvents"    ,""  ,"","xin,event,analysis,FieldOn"                                    ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis"                                  ,"","","",kFALSE},
-  {"Cdefault"    ,""  ,"","tpc,ftpc,rrs,rich,l0,l3,Cdst,qa,tags,Tree"        ,"","","Default chain",kFALSE}, 
+  {"Cdefault"    ,""  ,"","tpc,ftpc,rrs,rich,l0,l3,Cdst,Kalman,qa,tags,Tree" ,"","","Default chain",kFALSE}, 
   {"Cy1a"        ,""  ,"","y1a,Cdefault"                                 ,"","","Turn on chain y1a",kFALSE},
   {"Cy1b"        ,""  ,"","y1b,Cdefault"                                 ,"","","Turn on chain y1b",kFALSE},
   {"Cy1c"        ,""  ,"","y1c,Cdefault"                                 ,"","","Turn on chain y1c",kFALSE},
@@ -146,7 +146,7 @@ BfcItem BFC[] = {
   {"rich"        ,"","","sim_T,globT"                                 ,"StRchMaker","StRchMaker","",kFALSE},
   {"global"      ,"global","","globT,Match,primary,v0,xi,kink,dst,SCL"
                                                          ,"StChainMaker","St_tpc,St_svt,StChain","",kFALSE},
-  {"Match"       ,"match","global","SCL,tpc_T,svt_T,globT,tls,Kalman"
+  {"Match"       ,"match","global","SCL,tpc_T,svt_T,globT,tls"
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Primary"     ,"primary","global","SCL,globT,tls"
                                                ,"StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
@@ -191,7 +191,9 @@ St_db_Maker *CalibrationsMk = 0;
 St_db_Maker *ConditionsMk = 0; 
 St_db_Maker *RunLogMk = 0;
 StMaker *tpcDBMk = 0;
-class StTreeMaker;    StTreeMaker    *treeMk  = 0;
+class StTreeMaker;    
+StTreeMaker    *treeMk  = 0;
+Bool_t kMagF = kFALSE; 
 ClassImp(StBFChain)
 
 //_____________________________________________________________________________
@@ -259,7 +261,7 @@ Int_t StBFChain::Instantiate()
 	  StMaker *chain = GetMaker(fBFC[i].Chain);
 	  if (chain) saveMk = chain->cd();
 	}
-	if (maker == "StMagFC") {
+	if (maker == "StMagFC" && !kMagF) {
 	  Float_t Scale = 1.0;
 	  TString FieldName("STAR Normal field");
 	  if (GetOption("FieldOff"))     {Scale = 0.00002; FieldName = "STAR no field";}
@@ -337,6 +339,7 @@ Int_t StBFChain::Instantiate()
 		geantMk->SetActive(kFALSE);
 	      }
 	      else {
+		kMagF = kTRUE;
 	      }
 	      SetGeantOptions();
 	    }
@@ -490,7 +493,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
     }
   }
   if (!GetOption("geant") && !GetOption("FieldOn") && !GetOption("FieldOff") && 
-      !GetOption("HalfField") && !GetOption("ReverseField"))     SetOption("magF"); 
+      !GetOption("HalfField") && !GetOption("ReverseField") && !kMagF)   SetOption("magF"); 
   if (!GetOption("global") && 
       (GetOption("Match") || GetOption("Primary") || GetOption("V0") ||
        GetOption("Xi")    || GetOption("Kink"))) SetOption("global");
@@ -679,8 +682,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.81 2000/03/15 23:20:12 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.82 2000/03/16 00:28:26 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.82  2000/03/16 00:28:26  fisyak
+// To be sure that we get magnetic field once
+//
 // Revision 1.81  2000/03/15 23:20:12  fisyak
 // Force only instance of geant Maker
 //
