@@ -12,6 +12,7 @@
 * 7/14/98 - K. Turner - added global macros
 * 7/30/98 - K. Turner - change to use new utility kumacs
 * 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk
+* 8/10/98 - K. Turner - fixed for change to tpg_init
 * 
 ************************************************************************
 ************************************************************************
@@ -97,7 +98,8 @@
 * ****************************************************************
   
 * tpc geometry init
-  exec tpg_init#init
+  exec tpg_init#read
+  exec tpg_init#tpg_main
   
 *  tpc slow sim init
     exec create_tables_tpc#tss_old
