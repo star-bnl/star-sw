@@ -1,5 +1,10 @@
-* $Id: pixlgeo1.g,v 1.1 2004/06/28 20:46:33 potekhin Exp $
+* $Id: pixlgeo1.g,v 1.2 2004/06/28 22:51:02 potekhin Exp $
 * $Log: pixlgeo1.g,v $
+* Revision 1.2  2004/06/28 22:51:02  potekhin
+* Cleaned out the extra ladders which were moved to
+* the MIT detector. Based on the original pixel but
+* positioned directly in cave, not inside svt
+*
 * Revision 1.1  2004/06/28 20:46:33  potekhin
 * R&D work with the pixel-based inner tracker (replacing
 * SVT) will require different configurations of the "inner"
@@ -13,7 +18,7 @@ Module PIXLGEO1 is the geometry of the STAR pixel detector
 ******************************************************************************
 +CDE,AGECOM,GCUNIT.
 *
-      real angle,anglePos,angleCorr,raddeg, cylrad, cyllen, cylthk
+      real angle,anglePos,angleCorr,raddeg
       integer nLadder,nSector, nExtraLadder
 
       Content  PXMO, PSEC, PLMO, PLAC, PLPS
@@ -71,7 +76,6 @@ Module PIXLGEO1 is the geometry of the STAR pixel detector
 
       Create   PXMO
       Position PXMO in CAVE
-*      Position PXMO in SVTT
 * -----------------------------------------------------------------------------
 Block PXMO is the mother of the pixel detector volumes
       Material  Air
@@ -87,24 +91,6 @@ Block PXMO is the mother of the pixel detector volumes
           Position PSEC AlphaZ=60.0*(nSector-1) konly='MANY'
       enddo
 
-      cylthk=0.01
-      cylrad=10.0
-      cyllen=16.0
-
-      nExtraLadder=30
-      do nLadder=1,nExtraladder
-         angle=(360.0/nExtraLadder)*nLadder
-
-         anglePos = angle*raddeg
-
-         Create and Position PLMO x=cylrad*cos(anglePos) y=cylrad*sin(anglePos) _
-         z=0.0 AlphaZ=angle-80.0
-       enddo
-
-
-*      Create and Position PLAY
-*      cylrad=20.0
-*      Create and Position PLAY
 
 endblock
 * -----------------------------------------------------------------------------
@@ -168,20 +154,6 @@ Block PLPS is the passive layer of the ladder
       Attribute PLPS   Seen=1  colo=2
       Shape BOX dX=PIXG_LadderWidth/2.0 dY=PIXG_PassiveThk/2.0 Dz=PIXG_TotalLength/2.0
 endblock
-*
-* -----------------------------------------------------------------------------
-*Block PLAY is a cylindrical layer
-*      Material  Silicon
-*      Material  Sensitive  Isvol=1
-*      Attribute PLAY   Seen=1  colo=4
-*
-*      Shape TUBE Rmin=cylrad Rmax=cylrad+cylthk Dz=cyllen/2.0
-
-*      HITS    PLAY   X:.01:S  Y:.01:   Z:.01:     Ptot:16:(0,100),
-*                     cx:10:    cy:10:    cz:10:      Sleng:16:(0,500),
-*                     ToF:16:(0,1.e-6)    Step:.01:   Eloss:16:(0,0.001) 
-
-*endblock
 
       END
 
