@@ -1,110 +1,4 @@
-// $Id: EEmcMCData.cxx,v 1.9 2003/09/17 22:05:36 zolnie Exp $
-// $Log: EEmcMCData.cxx,v $
-// Revision 1.9  2003/09/17 22:05:36  zolnie
-// delete mumbo-jumbo
-//
-// Revision 1.8  2003/09/11 19:41:08  zolnie
-// updates for gcc3.2
-//
-// Revision 1.7  2003/09/02 17:57:56  perev
-// gcc 3.2 updates + WarnOff
-//
-// Revision 1.6  2003/03/26 21:16:59  balewski
-// swap U & V on Wei-Ming request
-//
-// Revision 1.5  2003/03/22 19:37:33  balewski
-// *** empty log message ***
-//
-// Revision 1.4  2003/02/21 15:31:38  balewski
-// do not kill the chain (it is against my will, JB)
-//
-// Revision 1.3  2003/02/20 21:27:06  zolnie
-// added simple geometry class
-//
-// Revision 1.2  2003/02/20 20:13:20  balewski
-// fixxy
-// xy
-//
-// Revision 1.1  2003/02/20 05:14:07  balewski
-// reorganization
-//
-// Revision 1.2  2003/02/14 00:04:39  balewski
-// remove few printouts
-//
-// Revision 1.1  2003/01/28 23:16:07  balewski
-// start
-//
-// Revision 1.21  2002/12/17 19:43:31  balewski
-// remove some dependecies, choose better name for maker
-//
-// Revision 1.20  2002/12/10 19:02:33  balewski
-// fix sector ID according to SN #299
-// tower: volID contains absolute  subsectorID in the range 1-60, subSec #1 is the first subSec of sector 1,  and advances clockwise
-// SMD :  volID contains absolute sector ID from 1-12,
-// it does not matter what geometry has been used (i.e. 4 sectors, lower half or both halfs)
-// The half ID info in volID is redundant now
-//
-// Revision 1.19  2002/12/05 14:21:58  balewski
-// cleanup, time stamp corrected
-//
-// Revision 1.18  2002/12/04 15:03:36  balewski
-// fix: read also just tower or just SMD data
-//
-// Revision 1.17  2002/11/13 21:53:51  zolnie
-// restored "private" DetectorID in EEmcMCData
-//
-// Revision 1.16  2002/11/11 21:22:48  balewski
-// EEMC added to StEvent
-//
-// Revision 1.15  2002/10/03 15:52:25  zolnie
-// updates reflecting changes in *.g files
-//
-// Revision 1.14  2002/10/03 00:30:45  balewski
-// tof taken away
-//
-// Revision 1.13  2002/10/01 14:41:54  balewski
-// SMD added
-//
-// Revision 1.12  2002/10/01 06:03:15  balewski
-// added smd & pre2 to TTree, tof removed
-//
-// Revision 1.11  2002/09/30 21:58:27  zolnie
-// do we understand Oleg? (the depth problem)
-//
-// Revision 1.10  2002/09/30 21:04:02  zolnie
-// SMD updates
-//
-// Revision 1.9  2002/09/30 20:15:55  zolnie
-// Oleg's geometry updates
-//
-// Revision 1.8  2002/09/27 19:05:13  zolnie
-// EEmcMCData updates
-//
-// Revision 1.5  2002/09/25 01:36:13  balewski
-// fixed TOF in geant
-//
-// Revision 1.4  2002/09/24 22:47:35  zolnie
-// major rewrite: SMD incorporated, use constants rather hard coded numbers
-// 	introducing exceptions (rather assert)
-//
-// Revision 1.3  2002/09/20 21:58:13  balewski
-// sum of MC hits over activ detectors
-// produce total tower energy with weight 1 1 1 1
-//
-// Revision 1.2  2002/09/20 15:49:05  balewski
-// add event ID
-//
-// Revision 1.1.1.1  2002/09/19 18:58:54  zolnie
-// Imported sources
-//
-// Revision 1.1.1.1  2002/08/29 19:32:01  zolnie
-// imported sources
-// Revision 1.2  2002/08/28 01:42:59  zolnie
-// version alpha ready
-// Revision 1.1  2002/08/27 16:39:10  zolnie
-// Initial revision
-//
-//
+// $Id: EEmcMCData.cxx,v 1.10 2003/11/12 19:59:13 balewski Exp $
 
 #include "StEventTypes.h"
 
@@ -513,3 +407,112 @@ Int_t EEmcMCData::write(EEeventDst *EEeve) {
   return 0;
 }
 
+// $Log: EEmcMCData.cxx,v $
+// Revision 1.10  2003/11/12 19:59:13  balewski
+// *** empty log message ***
+//
+// Revision 1.9  2003/09/17 22:05:36  zolnie
+// delete mumbo-jumbo
+//
+// Revision 1.8  2003/09/11 19:41:08  zolnie
+// updates for gcc3.2
+//
+// Revision 1.7  2003/09/02 17:57:56  perev
+// gcc 3.2 updates + WarnOff
+//
+// Revision 1.6  2003/03/26 21:16:59  balewski
+// swap U & V on Wei-Ming request
+//
+// Revision 1.5  2003/03/22 19:37:33  balewski
+// *** empty log message ***
+//
+// Revision 1.4  2003/02/21 15:31:38  balewski
+// do not kill the chain (it is against my will, JB)
+//
+// Revision 1.3  2003/02/20 21:27:06  zolnie
+// added simple geometry class
+//
+// Revision 1.2  2003/02/20 20:13:20  balewski
+// fixxy
+// xy
+//
+// Revision 1.1  2003/02/20 05:14:07  balewski
+// reorganization
+//
+// Revision 1.2  2003/02/14 00:04:39  balewski
+// remove few printouts
+//
+// Revision 1.1  2003/01/28 23:16:07  balewski
+// start
+//
+// Revision 1.21  2002/12/17 19:43:31  balewski
+// remove some dependecies, choose better name for maker
+//
+// Revision 1.20  2002/12/10 19:02:33  balewski
+// fix sector ID according to SN #299
+// tower: volID contains absolute  subsectorID in the range 1-60, subSec #1 is the first subSec of sector 1,  and advances clockwise
+// SMD :  volID contains absolute sector ID from 1-12,
+// it does not matter what geometry has been used (i.e. 4 sectors, lower half or both halfs)
+// The half ID info in volID is redundant now
+//
+// Revision 1.19  2002/12/05 14:21:58  balewski
+// cleanup, time stamp corrected
+//
+// Revision 1.18  2002/12/04 15:03:36  balewski
+// fix: read also just tower or just SMD data
+//
+// Revision 1.17  2002/11/13 21:53:51  zolnie
+// restored "private" DetectorID in EEmcMCData
+//
+// Revision 1.16  2002/11/11 21:22:48  balewski
+// EEMC added to StEvent
+//
+// Revision 1.15  2002/10/03 15:52:25  zolnie
+// updates reflecting changes in *.g files
+//
+// Revision 1.14  2002/10/03 00:30:45  balewski
+// tof taken away
+//
+// Revision 1.13  2002/10/01 14:41:54  balewski
+// SMD added
+//
+// Revision 1.12  2002/10/01 06:03:15  balewski
+// added smd & pre2 to TTree, tof removed
+//
+// Revision 1.11  2002/09/30 21:58:27  zolnie
+// do we understand Oleg? (the depth problem)
+//
+// Revision 1.10  2002/09/30 21:04:02  zolnie
+// SMD updates
+//
+// Revision 1.9  2002/09/30 20:15:55  zolnie
+// Oleg's geometry updates
+//
+// Revision 1.8  2002/09/27 19:05:13  zolnie
+// EEmcMCData updates
+//
+// Revision 1.5  2002/09/25 01:36:13  balewski
+// fixed TOF in geant
+//
+// Revision 1.4  2002/09/24 22:47:35  zolnie
+// major rewrite: SMD incorporated, use constants rather hard coded numbers
+// 	introducing exceptions (rather assert)
+//
+// Revision 1.3  2002/09/20 21:58:13  balewski
+// sum of MC hits over activ detectors
+// produce total tower energy with weight 1 1 1 1
+//
+// Revision 1.2  2002/09/20 15:49:05  balewski
+// add event ID
+//
+// Revision 1.1.1.1  2002/09/19 18:58:54  zolnie
+// Imported sources
+//
+// Revision 1.1.1.1  2002/08/29 19:32:01  zolnie
+// imported sources
+// Revision 1.2  2002/08/28 01:42:59  zolnie
+// version alpha ready
+// Revision 1.1  2002/08/27 16:39:10  zolnie
+// Initial revision
+//
+//
