@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.56 1999/06/24 16:42:27 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.57 1999/06/25 22:48:38 caines Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.57  1999/06/25 22:48:38  caines
+// Added ability to perform ev0 evaluation using eval flag
+//
 // Revision 1.56  1999/06/24 16:42:27  fisyak
 // Preserve all space point
 //
@@ -233,6 +236,8 @@ ClassImp(St_glb_Maker)
   m_usetpc    = 1;
   m_usevert   = 0;
   m_flag      = 2;
+  m_ev0EvalOn=kFALSE;
+
 }
 //_____________________________________________________________________________
 St_glb_Maker::~St_glb_Maker(){
@@ -480,7 +485,7 @@ Int_t St_glb_Maker::Make(){
   St_dst_track      *primtrk     = (St_dst_track     *) dst("primtrk");
   St_dst_track_aux  *primtrk_aux = (St_dst_track_aux *) dst("primtrk_aux");
   St_dst_vertex     *vertex      = (St_dst_vertex    *) dst("vertex");
-  St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex *) dst("dst_v0_vertex"); 
+  St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex *) dst("dst_v0_vertex"); St_ev0_eval       *ev0_eval      = (St_ev0_eval      *) dst("ev0_eval");
   St_dst_xi_vertex  *dst_xi_vertex = (St_dst_xi_vertex *) dst("dst_xi_vertex");
   St_dst_dedx       *dst_dedx    = (St_dst_dedx      *) dst("dst_dedx");
   St_dst_point      *point       = (St_dst_point     *) dst("point");
@@ -729,23 +734,24 @@ Int_t St_glb_Maker::Make(){
     
     if (iRes !=kSTAFCV_OK) iMake = kStWarn;
     if (iRes !=kSTAFCV_OK) cout << " Problem on return from EV0 " << endl;
-#if 0      
+   if(m_ev0EvalOn){   
     //ev0_eval2
     if (stk_track && tptrack && evaltrk) {
-      St_ev0_eval *ev0_eval = new St_ev0_eval("ev0_eval",20000);
+
+      ev0_eval = new St_ev0_eval("ev0_eval",20000);
       dst.Add(ev0_eval);
-      St_DataSetIter geant(GetInput("geant"));
-      St_g2t_track   *g2t_track    = (St_g2t_track  *) geant("Event/g2t_track");
-      St_g2t_vertex  *g2t_vertex   = (St_g2t_vertex *) geant("Event/g2t_vertex");
+      St_DataSetIter geant(GetInputDS("geant"));
+      St_g2t_track   *g2t_track    = (St_g2t_track  *) geant("g2t_track");
+      St_g2t_vertex  *g2t_vertex   = (St_g2t_vertex *) geant("g2t_vertex");
       if(Debug()) cout << " Calling ev0_eval2.." << endl;
       Int_t Res_ev0_eval = kSTAFCV_BAD;
       Res_ev0_eval = ev0_eval2(stk_track,tptrack,evaltrk,
-			       vertex,ev0out,ev0_eval,
+			       vertex,dst_v0_vertex,ev0_eval,
 			       g2t_track,g2t_vertex);
       
       if (Res_ev0_eval != kSTAFCV_OK) {cout << "Problem on return from ev0eval2" << endl;}
     }
-#endif      
+   }     // If ev0 evaluation switched on 
     // exi
     if(Debug()) cout << "Calling exi..."<< endl;
     Int_t xi_limit = 2*dst_v0_vertex->GetNRows();
@@ -852,7 +858,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.56 1999/06/24 16:42:27 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.57 1999/06/25 22:48:38 caines Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();

@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.h,v 1.18 1999/03/11 03:12:19 perev Exp $
+// $Id: St_glb_Maker.h,v 1.19 1999/06/25 22:48:39 caines Exp $
 // $Log: St_glb_Maker.h,v $
+// Revision 1.19  1999/06/25 22:48:39  caines
+// Added ability to perform ev0 evaluation using eval flag
+//
 // Revision 1.18  1999/03/11 03:12:19  perev
 // new schema
 //
@@ -95,7 +98,8 @@ class St_glb_Maker : public StMaker {
 
  private:
   Bool_t drawinit;
-  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.18 1999/03/11 03:12:19 perev Exp $";
+  Bool_t m_ev0EvalOn; 	//switch for the evaluation
+  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.19 1999/06/25 22:48:39 caines Exp $";
   // egr
   Int_t         m_scenario;   
   //#1: Real TPC Stand-Alone Tracking: Use this when running the TPC only.  
@@ -180,6 +184,9 @@ class St_glb_Maker : public StMaker {
   virtual void   Set_usetpc   (Int_t m = 1){m_usetpc    = m;} // *MENU*
   virtual void   Set_usevert  (Int_t m = 0){m_usevert   = m;} // *MENU*
   virtual void   Set_flag     (Int_t m = 0){m_flag = m;}      // *MENU*
+  virtual void   ev0Eval(Bool_t flag=kFALSE){m_ev0EvalOn=flag;}
+  virtual void   ev0EvalOn() {ev0Eval(kTRUE);}                       // *MENU*
+  virtual void   ev0EvalOff(){ev0Eval();}                            // *MENU
   ClassDef(St_glb_Maker, 1)   //StAF chain virtual base class for Makers
     };
 
