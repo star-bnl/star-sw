@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.38 2004/11/19 10:21:54 jecc Exp $
+ * $Id: StTpcDb.cxx,v 1.39 2005/03/30 17:56:59 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.39  2005/03/30 17:56:59  fisyak
+ * Fix a bug with flavor handling, StTpcDb has to be instantiated after setting flavor
+ *
  * Revision 1.38  2004/11/19 10:21:54  jecc
  * Initialize pointers
  *
@@ -145,7 +148,7 @@ StTpcDb::StTpcDb(St_DataSet* input) : m_Debug(0) {
      }
  }
  else{
-   gMessMgr->Message("StTpcDb::Error Creating StTpcDb: Need to specify input Da   taSet","E");
+   gMessMgr->Message("StTpcDb::Error Creating StTpcDb: Need to specify input DataSet","E");
  }
  gMessMgr->SetLimit("StRTpcPadPlane::Invalid Pad number",20);
  dvelcounter = 0;

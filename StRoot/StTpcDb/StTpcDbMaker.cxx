@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.34 2004/10/27 21:45:13 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.35 2005/03/30 17:56:59 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.35  2005/03/30 17:56:59  fisyak
+ * Fix a bug with flavor handling, StTpcDb has to be instantiated after setting flavor
+ *
  * Revision 1.34  2004/10/27 21:45:13  fisyak
  * Add debug print for tables Validities, add access to ExB correction
  *
@@ -412,7 +415,6 @@ Int_t StTpcDbMaker::Init(){
 Int_t StTpcDbMaker::InitRun(int runnumber){
     if (m_TpcDb) return 0;
     // Create Needed Tables:    
-    m_TpcDb = new StTpcDb(this);
     TDataSet *RunLog = GetDataBase("RunLog");                              assert(RunLog);
     St_MagFactor *fMagFactor = (St_MagFactor *) RunLog->Find("MagFactor"); assert(fMagFactor);
     Float_t gFactor = (*fMagFactor)[0].ScaleFactor;
@@ -431,12 +433,6 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
      gMessMgr->Info()  << "StTpcDbMaker::Setting Sim Flavor tag for database " << endm;
      SetFlavor("sim","tpcGlobalPosition");
      SetFlavor("sim","tpcSectorPosition");
-   }
-   else {
-     if (m_Mode & 2) {
-       Int_t option = (m_Mode & 0xfffc) >> 2;
-       m_TpcDb->SetExB(new StMagUtilities(gStTpcDb, RunLog, option));
-     }
    }
    if (m_dvtype==0) {
    SetFlavor("ofl+laserDV","tpcDriftVelocity");
@@ -479,6 +475,11 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
    }
   }
 
+  m_TpcDb = new StTpcDb(this); if (Debug()) m_TpcDb->SetDebug(Debug());
+  if (m_Mode & 2) {
+    Int_t option = (m_Mode & 0xfffc) >> 2;
+    m_TpcDb->SetExB(new StMagUtilities(gStTpcDb, RunLog, option));
+  }
   m_tpg_pad_plane = new St_tpg_pad_plane("tpg_pad_plane",1);
   m_tpg_pad_plane->SetNRows(1);
   m_tpg_detector = new St_tpg_detector("tpg_detector",1);
