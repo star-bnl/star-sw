@@ -1,5 +1,8 @@
-* $Id: tpt_row_sect_pnt.F,v 1.12 1999/05/21 02:46:03 sakrejda Exp $
+* $Id: tpt_row_sect_pnt.F,v 1.13 1999/07/19 19:15:56 genevb Exp $
 * $Log: tpt_row_sect_pnt.F,v $
+* Revision 1.13  1999/07/19 19:15:56  genevb
+* Use StMessMgr
+*
 * Revision 1.12  1999/05/21 02:46:03  sakrejda
 * pointers for malloc initialised - were causing crashes in peripheral events
 *
@@ -178,7 +181,7 @@ C       loop through row-sorted list
           irow = mod(rhit(ipnt),100)
           if( isect.lt.1 .or. isect.gt.mxsector .or. irow.lt.1 .or.
      >    irow.gt.mxrow ) then
-          write(m132,*) ' TPTRSP-E1 row,sector info invalid ',
+          write(m132,*) 'TPTRSP-E1 row,sector info invalid ',
      >    isect,irow,mxsector
           call Message( m132, 1, id1 )
           else
@@ -274,7 +277,7 @@ C       loop through row-sorted list
            endif
          end do
       end do
-      write(m132,*) ' TPTRSP-E1 done setting up pointers'
+      write(m132,*) 'TPTRSP-E1 done setting up pointers'
       call Message( m132, 1, id1 )
       tpt_row_sect_pnt=0
       call free(p_rhit)

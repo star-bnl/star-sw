@@ -1,5 +1,8 @@
-* $Id: tpi_pid.F,v 1.6 1999/02/19 21:14:38 ogilvie Exp $
+* $Id: tpi_pid.F,v 1.7 1999/07/19 19:15:51 genevb Exp $
 * $Log: tpi_pid.F,v $
+* Revision 1.7  1999/07/19 19:15:51  genevb
+* Use StMessMgr
+*
 * Revision 1.6  1999/02/19 21:14:38  ogilvie
 * added new method 3 = use weights to calc de/dx
 *
@@ -60,6 +63,7 @@ C-----------------------------------------------------------------------
       REAL     prob_species(4), sep
 
       REAL     prob(4)
+      CHARACTER*132 m132
   
 
 
@@ -73,7 +77,8 @@ C***********************************************************************
       method = parm(1).method(2)
 
 c      method = 0  ! test
-      write(6,*) 'temporary check on method', method
+      write(m132,*) 'TPI_PID - temporary check on method', method
+      call StInfo(m132)
 c
 c a quick loop to see if hypo_h is long enough
 c
@@ -82,8 +87,9 @@ c
          if (dedx(j).det_id.eq.1) n=n+1 ! tpc    
       enddo
       if (hypo_h.nok+4*n.gt.hypo_h.maxlen) then
-             write (6,10)
+             write (m132,10)
  10          format(2x,'adding in tpc dedx deviants would exceed size of hypo')
+             call StWarning(m132)
              tpi_pid = STAFCV_BAD
              return
       endif
@@ -200,8 +206,9 @@ c
                endif
             enddo
             if (found.eq..false.) then
-              write (6,20)
+              write (m132,20)
  20           format(2x,'global track indexed by dst_dedx.id_track not found')
+              call StWarning(m132)
               tpi_pid = STAFCV_BAD
               return
              endif         
@@ -214,7 +221,8 @@ c
                 gl(igl_use).id_hypo_pid = use_this_id
                 current_id = current_id + 1
            else
-                write (6,*) gl(igl_use).id_hypo_pid
+                write (m132,*) gl(igl_use).id_hypo_pid
+                call StInfo(m132)
 		use_this_id = gl(igl_use).id_hypo_pid
 	   endif
 c

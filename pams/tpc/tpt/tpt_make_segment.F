@@ -1,5 +1,8 @@
-* $Id: tpt_make_segment.F,v 1.5 1999/05/05 21:52:15 sakrejda Exp $
+* $Id: tpt_make_segment.F,v 1.6 1999/07/19 19:15:55 genevb Exp $
 * $Log: tpt_make_segment.F,v $
+* Revision 1.6  1999/07/19 19:15:55  genevb
+* Use StMessMgr
+*
 * Revision 1.5  1999/05/05 21:52:15  sakrejda
 * local arrays converted to dynamic ones (with malloc)
 *
@@ -146,8 +149,8 @@ C          check there are hits here
 
              i = slice_pnt(1,is_pnt)
              do ilc = 1,nh1
-               if(tpar(ipass).debug(5).eq.1) write(6,*) 
-     >         'looking for a matching point'
+               if(tpar(ipass).debug(5).eq.1) 
+     >           call StInfo('TPT_MAKE_SEGMENT: looking for a matching point')
                if(hit(i).track.eq.0) then
                  drow = ir2 - ir1
                  if(abs(hit(i).z-zp1)

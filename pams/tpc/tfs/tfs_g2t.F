@@ -1,5 +1,8 @@
-* $Id: tfs_g2t.F,v 1.8 1998/12/13 21:36:12 sakrejda Exp $
+* $Id: tfs_g2t.F,v 1.9 1999/07/19 19:15:48 genevb Exp $
 * $Log: tfs_g2t.F,v $
+* Revision 1.9  1999/07/19 19:15:48  genevb
+* Use StMessMgr
+*
 * Revision 1.8  1998/12/13 21:36:12  sakrejda
 * parameters and constants cleaned up, bmpar removed
 *
@@ -110,7 +113,7 @@ C Local variables
       integer   ind, ierr, iev, nevent,i
       REAL      TIME_NOW, TIME_RD, TIME_POINT, TIME_DISPL
       REAL      TIME_MERGE, TIME_ALL, TIME_SORT
-      character*132 m132       ! for messages
+      character*132 m132(7)       ! for messages
       integer idI1
       data idI1 / 0 /
       save idI1
@@ -122,7 +125,7 @@ C=========================== Begin Executable Code =======================
 
 C     Protect against no Geant hits in the chamber.  DSW  12/18/96
       if ( g2t_hit_h.nok.le.0 )then
-         write (6,'(A)')' No Geant hits in TPC'
+         call StWarning(' No Geant hits in TPC')
          tfs_g2t = STAFCV_BAD
          goto 999
       endif
@@ -199,10 +202,10 @@ C     read-in the Monte-Carlo hit data
      >        tpc_index_h, tpc_index, tpc_index_type_h,
      >        tpc_index_type,ierr)
          If (ierr.gt.0) then
-          write(m132,*) 'TFS-G2T-I1 tphit table too small, needs',
+          write(m132(1),*) 'TFS-G2T-I1 tphit table too small, needs',
      >    ierr
           call Message (m132, 1, idI1 )
-C          write(6,*) 'TFS-G2T-I1 tphit table too small'
+C          call StWarning('TFS-G2T-I1 tphit table too small')
 *          tfs_g2t = STAFCV_BAD
          endif
          CALL TIMED(TIME_NOW)
@@ -255,13 +258,14 @@ C     Increment counter and check if done
          TIME_ALL = TIME_ALL + TIME_NOW
          
          if( ctrl(1).print .ge. 1 ) then
-            WRITE(6,*) ' EVENTS PROCESSED: ',NEVENT_OUT
-            WRITE(6,*) ' TIME_ALL:   ',TIME_ALL,' CPU seconds'
-            WRITE(6,*) ' TIME_RD:    ',TIME_RD,' CPU seconds'
-            WRITE(6,*) ' TIME_SORT : ',TIME_SORT,' CPU seconds'
-            WRITE(6,*) ' TIME_POINT: ',TIME_POINT,' CPU seconds'
-            WRITE(6,*) ' TIME_DISPL: ',TIME_DISPL,' CPU seconds'
-            WRITE(6,*) ' TIME_MERGE: ',TIME_MERGE,' CPU seconds'
+            WRITE(m132(1),*) ' EVENTS PROCESSED: ',NEVENT_OUT
+            WRITE(m132(2),*) ' TIME_ALL:   ',TIME_ALL,' CPU seconds'
+            WRITE(m132(3),*) ' TIME_RD:    ',TIME_RD,' CPU seconds'
+            WRITE(m132(4),*) ' TIME_SORT : ',TIME_SORT,' CPU seconds'
+            WRITE(m132(5),*) ' TIME_POINT: ',TIME_POINT,' CPU seconds'
+            WRITE(m132(6),*) ' TIME_DISPL: ',TIME_DISPL,' CPU seconds'
+            WRITE(m132(7),*) ' TIME_MERGE: ',TIME_MERGE,' CPU seconds'
+            call Message(m132,7,-1)
          endif
          
 C     write out this event - set flag for new event

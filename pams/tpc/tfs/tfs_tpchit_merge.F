@@ -1,5 +1,8 @@
-* $Id: tfs_tpchit_merge.F,v 1.9 1999/01/21 01:47:23 sakrejda Exp $
+* $Id: tfs_tpchit_merge.F,v 1.10 1999/07/19 19:15:49 genevb Exp $
 * $Log: tfs_tpchit_merge.F,v $
+* Revision 1.10  1999/07/19 19:15:49  genevb
+* Use StMessMgr
+*
 * Revision 1.9  1999/01/21 01:47:23  sakrejda
 * ordering of geant hits changed, Victor's assumptions not valid any more, had to correct it
 *
@@ -142,11 +145,11 @@ C     the tpc_index table after tpc hit merging.
       iret = tls_Quick_Sort_i(tpc_index_h.nok,tpc_index(1).key2,
      >     tpc_index(2).key2, tpc_index)
       if(iret.ne.tls_sort_normal_cv)then
-           write(m132,*) 'TFS-MERGE-I2 sorting failed ',iret
+           write(m132,*) 'TFS_MERGE-I2 sorting failed ',iret
            call Message( m132, 1, idI2 )
            return
       else
-           write(m132,*) 'TFS-MERGE-I2 sorting succesfull',iret
+           write(m132,*) 'TFS_MERGE-I2 sorting succesfull',iret
            call Message( m132, 1, idI2 )
       endif
 
@@ -205,7 +208,7 @@ C     check separation in r-phi
                      if (dr.ge.0.) then
                       dr    = sqrt( dr )
                      else
-                      write(m132,*) 'TFS-MERGE-I3 SQRT of negative number '
+                      write(m132,*) 'TFS_MERGE-I3 SQRT of negative number '
      >                          //'set to 0.0  '  
                       call Message( m132, 1, idI3 )
                       dr = 0.
@@ -239,8 +242,9 @@ C     flag with the table-row number of the lowest order hit
  20               continue      ! loop over lth hit
  10            continue         ! loop over kth hit
                if( ctrl(1).print .gt. 2 ) then
-                  write(6,'(a,3i6)') ' sect, row, mergers: ',
+                  write(m132,'(a,3i6)') 'TFS_TPCHIT_MERGE - sect, row, mergers: ',
      &                 i,j,num_marked
+                  call StInfo(m132)
                endif
             enddo               ! end merging itteration
             
@@ -361,7 +365,7 @@ C     add the amplitudes and quadrature the errors
                      if (tphit(l).dq.ge.0.) then
                       tphit(l).dq = sqrt( tphit(l).dq )
                      else
-                      write(m132,*) 'TFS-MERGE-I3 SQRT of negative number '
+                      write(m132,*) 'TFS_MERGE-I3 SQRT of negative number '
      >                          //'set to 0.0  '  
                       call Message( m132, 1, idI3 )
                       tphit(l).dq = 0.
@@ -379,7 +383,7 @@ C     add the amplitudes and quadrature the errors
                      if (tphit(l).dx.ge.0.) then
                       tphit(l).dx = sqrt( tphit(l).dx )
                      else
-                      write(m132,*) 'TFS-MERGE-I3 SQRT of negative number '
+                      write(m132,*) 'TFS_MERGE-I3 SQRT of negative number '
      >                          //'set to 0.0  '  
                       call Message( m132, 1, idI3 )
                       tphit(l).dx = 0.
@@ -388,7 +392,7 @@ C     add the amplitudes and quadrature the errors
                      if (tphit(l).dy.ge.0.) then
                       tphit(l).dy = sqrt( tphit(l).dy )
                      else
-                      write(m132,*) 'TFS-MERGE-I3 SQRT of negative number '
+                      write(m132,*) 'TFS_MERGE-I3 SQRT of negative number '
      >                          //'set to 0.0  '  
                       call Message( m132, 1, idI3 )
                       tphit(l).dy = 0.
@@ -411,7 +415,7 @@ CCC
 C     store the tpc_index table row# & tphit(l).id for this hit
 C     04/16/1997  DSW
                if (ii_rows.eq.0) then
-                  write(*,*) '*** TFS_TPCHIT_MERGE internal ERROR ***'
+                  call StError('TFS_TPCHIT_MERGE - *** internal ERROR ***')
                else
                  irowl = i_rows(1)
                  tpc_index(irowl).key2 = tphit(l).id

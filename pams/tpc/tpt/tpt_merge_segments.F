@@ -1,5 +1,8 @@
-* $Id: tpt_merge_segments.F,v 1.8 1999/05/05 21:52:19 sakrejda Exp $
+* $Id: tpt_merge_segments.F,v 1.9 1999/07/19 19:15:55 genevb Exp $
 * $Log: tpt_merge_segments.F,v $
+* Revision 1.9  1999/07/19 19:15:55  genevb
+* Use StMessMgr
+*
 * Revision 1.8  1999/05/05 21:52:19  sakrejda
 * local arrays converted to dynamic ones (with malloc)
 *
@@ -76,6 +79,7 @@ C_________________________________________________________________
       REAL    dfifj,dfilj,dlifj,dlilj,mindist,mindist2
       REAL    radi,radj
       REAL    varb,varc,meanrad,qij
+      CHARACTER*132 m132
 C______________________________________________________________________
 
 c Order the good tracks according to their helix radius.
@@ -154,7 +158,7 @@ c                 are not merged.
                               lasti = ipoint
                            endif
                      else
-                           write(6,*) 'This is a bug.'
+                           call StError('TPT_MERGE_SEGMENTS - This is a bug.')
                      endif
                   enddo
                   lowpnt = 999
@@ -173,7 +177,7 @@ c                 are not merged.
                               lastj = ipoint
                            endif
                      else
-                           write(6,*) 'This is a bug.'
+                           call StError('TPT_MERGE_SEGMENTS - This is a bug.')
                      endif
                   enddo
 c                 Now that the endpoint hits have been identified, 
@@ -245,17 +249,20 @@ c                 Finally got it, now make sure the tracks are not parallel
 c                 >> USE PARAMETER min(5) (JN 980406)
                   if (mindist.lt.min(5).and.mindist2.lt.min(5).and.
      +                    tpar(ipass).debug(8).eq.1)
-     +                    write(6,*) '*****PARALLEL******'
+     +                    call StInfo('TPT_MERGE_SEGMENTS - *****PARALLEL******')
                   if (mindist.gt.min(5).or.mindist2.gt.min(5)) then 
                         if (tpar(ipass).debug(8).eq.1) then
-                           write(6,*) '**Merged ','dist= ',mindist,
-     +                          'drow= ',rowdiff
-                           write(6,111) i,lxi,trk(lxi).nhit,merge(i).rad,
+                           write(m132,*) 'TPT_MERGE_SEGMENTS - **Merged ',
+     +                          'dist= ',mindist,'drow= ',rowdiff
+                           call StInfo(m132)
+                           write(m132,111) i,lxi,trk(lxi).nhit,merge(i).rad,
      +                          trk(lxi).p(3),trk(lxi).p(4),trk(lxi).
      +                          p(7),trk(lxi).p(5)
-                           write(6,111) j,lxj,trk(lxj).nhit,merge(j).rad,
+                           call StInfo(m132)
+                           write(m132,111) j,lxj,trk(lxj).nhit,merge(j).rad,
      +                          trk(lxj).p(3),trk(lxj).p(4),trk(lxj).
      +                          p(7),trk(lxj).p(5)
+                           call StInfo(m132)
  111                       format(3(1x,i5),5(1x,f10.5))
                         endif
 
@@ -326,8 +333,9 @@ c                 >> USE PARAMETER min(5) (JN 980406)
                         enddo
                         trk(lxi).nhit = ncount
                         if (tpar(ipass).debug(8).eq.1) then
-                           write(6,*) 'New track:'
-                           write(6,*) 'trk(lxi).nhit= ',trk(lxi).nhit
+                           call StInfo('TPT-MERGE-SEGMENTS - New track:')
+                           write(m132,*) 'trk(lxi).nhit= ',trk(lxi).nhit
+                           call StInfo(m132)
                         endif
                         trk(lxj).p(1)=-100
                         trk(lxj).flag=-100

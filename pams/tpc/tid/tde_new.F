@@ -1,5 +1,8 @@
-* $Id: tde_new.F,v 1.16 1999/06/09 14:28:57 ogilvie Exp $
+* $Id: tde_new.F,v 1.17 1999/07/19 19:15:51 genevb Exp $
 * $Log: tde_new.F,v $
+* Revision 1.17  1999/07/19 19:15:51  genevb
+* Use StMessMgr
+*
 * Revision 1.16  1999/06/09 14:28:57  ogilvie
 * *** empty log message ***
 *
@@ -109,6 +112,7 @@ c
       INTEGER hhid, hnbin
       REAL hparam(3),hstep(3),hpmin(3),hpmax(3),hsig(3),hchi2
 
+      CHARACTER*132 m132
 c
       PARAMETER (ndemax=1000)
       PARAMETER (nlocmax=500000)
@@ -190,7 +194,8 @@ c       tdpar(1).truncopt = 5
         nontrunc = 2.*( (1 - tdpar(1).truncfact) - 0.5)
         do i=1, 10
           frachalf(i)=1-erf(i)
-          write(6,*) erf(i),frachalf(i),z(i)
+          write(m132,*) 'TDE_NEW - ',erf(i),frachalf(i),z(i)
+          call StInfo(m132)
         enddo
         ipos = 1
         do while ((erf(ipos).lt.nontrunc).and.ipos.lt.10)
@@ -204,10 +209,11 @@ c       tdpar(1).truncopt = 5
         endif
        endif
       
-      write(6,*) "averaging, truncation methods"
-      write(6,*)  tdpar(1).averaging_method, tdpar(1).truncopt           
+      write(m132,*)  'TDE_NEW - averaging, truncation methods: ',
+     >     tdpar(1).averaging_method, tdpar(1).truncopt   
+      call StInfo(m132)        
       if (tdpar(1).usemerge.ne.0) then
-           write(6,*) "using merged hits!!!"
+           call StInfo('TDE_NEW - using merged hits!!!')
       endif
          
 C Sort the hit array according to the track number
@@ -365,12 +371,14 @@ c
 c check on quality of hit before including it into dedx
 c
 c             if (hit(loc_hit(l)).flag.ne.0) then
-c                write(6,*)'flag',hit(loc_hit(l)).flag ,ds
+c                write(m132,*)'flag',hit(loc_hit(l)).flag ,ds
+c                call StInfo(m132)
 c              endif   
             if (((hit(loc_hit(l)).flag.eq.0).or.(tdpar(1).usemerge.ne.0))
      >       .and.nde.lt.ndemax) then
                if (hit(loc_hit(l)).flag.ne.0) then
-                 write(6,*)'flag',hit(loc_hit(l)).flag ,ds
+                 write(m132,*)'flag',hit(loc_hit(l)).flag ,ds
+                 call StInfo(m132)
                endif  
                     nde=nde+1
 c

@@ -1,5 +1,8 @@
-* $Id: tpt_extend_segments.F,v 1.4 1999/05/05 21:52:10 sakrejda Exp $
+* $Id: tpt_extend_segments.F,v 1.5 1999/07/19 19:15:54 genevb Exp $
 * $Log: tpt_extend_segments.F,v $
+* Revision 1.5  1999/07/19 19:15:54  genevb
+* Use StMessMgr
+*
 * Revision 1.4  1999/05/05 21:52:10  sakrejda
 * local arrays converted to dynamic ones (with malloc)
 *
@@ -77,6 +80,7 @@ C     Local variables
       INTEGER itrack, ihit(mxpnt),ipass
       REAL    save_p(9)
       LOGICAL lfound
+      CHARACTER*132 m132
 C_____________________________________________________________________
 C
 C     collect information on number of hits per track to use it 
@@ -96,8 +100,9 @@ C     find the longest track segment and extend it...
      >          last_track
 
          if(int(tmp(ipos)).ne.trk(ipos).nhit) then
-           write(6,*) 'accounting messed up',
+           write(m132,*) 'TPT_EXTEND_SEGMENTS - accounting messed up',
      >     tmp(ipos),trk(ipos).nhit
+           call StWarning(m132)
          endif
 
          if(int(tmp(ipos)).ge.mxrow)then
@@ -159,9 +164,10 @@ C                      it's a free hit, mark it as used
                        hit(ld).track = ipos*1000+j
                      else if(itrack.ne.ipos) then
                        if(tmp(itrack).eq.-1.0) then
-                         write(6,*)'accounting problems II',
+                         write(m132,*)'TPT_EXTEND_SEGMENTS - accounting problems II',
      >                   hit(ld).track,
      >                   ipos,itrack
+                         call StWarning(m132)
                          read(5,*) tpar(ipass).debug(9)
                        endif
 C                      check which hit it was on the track

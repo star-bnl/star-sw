@@ -1,5 +1,8 @@
-* $Id: tpt_helix_pred.F,v 1.4 1998/12/11 01:54:28 sakrejda Exp $
+* $Id: tpt_helix_pred.F,v 1.5 1999/07/19 19:15:55 genevb Exp $
 * $Log: tpt_helix_pred.F,v $
+* Revision 1.5  1999/07/19 19:15:55  genevb
+* Use StMessMgr
+*
 * Revision 1.4  1998/12/11 01:54:28  sakrejda
 * a call to tgc_global_to_local replaced by tgc_global_to_sector - only the sector information was used
 *
@@ -59,17 +62,21 @@ C______________________________________________________________________
       integer tgc_global_to_sector
       REAL    xp(2),yp(2),as,bs,xav,yav,dr,xglobal(3)
       REAL    dummy
+      CHARACTER*132 m132
 
       np=0
       iret = tgc_row_par(isect,real(irow),as,bs,dummy,dummy)
       if(tpar(ipass).debug(2).eq.1) then
-       write(6,*) 'sector',isect,'row',irow,'a',as,'b',bs
-       write(6,*) trk(itrk).p(3), trk(itrk).p(4), trk(itrk).p(2)
+       write(m132,*) 'TPT_HELIX_PRED - sector',isect,'row',irow,'a',as,'b',bs
+       call StInfo(m132)
+       write(m132,*) trk(itrk).p(3), trk(itrk).p(4), trk(itrk).p(2)
+       call StInfo(m132)
       endif
       iret = tpt_circle_pred(as,bs,trk(itrk).p(3),trk(itrk).p(4),
      >                       abs(trk(itrk).p(2)),np,xp,yp)
       if(tpar(ipass).debug(2).eq.1) then
-       write(6,*) np,xp(1),yp(1),xp(2),yp(2)
+       write(m132,*) np,xp(1),yp(1),xp(2),yp(2)
+       call StInfo(m132)
       endif
       if(iret.ne.0) then
            tpt_helix_pred = 1

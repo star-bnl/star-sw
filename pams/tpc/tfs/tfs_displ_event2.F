@@ -1,5 +1,8 @@
-* $Id: tfs_displ_event2.F,v 1.2 1998/12/13 21:36:10 sakrejda Exp $
+* $Id: tfs_displ_event2.F,v 1.3 1999/07/19 19:15:48 genevb Exp $
 * $Log: tfs_displ_event2.F,v $
+* Revision 1.3  1999/07/19 19:15:48  genevb
+* Use StMessMgr
+*
 * Revision 1.2  1998/12/13 21:36:10  sakrejda
 * parameters and constants cleaned up, bmpar removed
 *
@@ -80,6 +83,7 @@ C Local variables
 
       real drivel, dummy, xlength 
       integer iret, tgc_drift_velocity, tgc_drift_volume_length
+      character*132 m132
 
 C=========================== Begin Executable Code =======================
 c
@@ -99,9 +103,10 @@ C     Trace back from hits to g2t_hits->g2t_track->g2t_vertex
 C     and add time offset of the vertex.
                id0=tpc_index(k).key2
                if(id0.ne.k) then
-                  write(*,*) '***tfs_displ_event2: HELP!!!'
-                  write(*,*) '***tfs_displ_event2: tpc_index.key2 is not in order!!!'
-                  write(*,*) '***tfs_displ_event2: id, key2=',k,id0
+                  call StWarning('TFS_DISPL_EVENT2 - HELP!!!')
+                  call StWarning('TFS_DISPL_EVENT2 - tpc_index.key2 is not in order!!!')
+                  write(m132,*) 'TFS_DISPL_EVENT2 - id, key2=',k,id0
+                  call StWarning(m132)
                endif
                id1=tpc_index(id0).key1
                id2=g2t_hit(id1).track_p

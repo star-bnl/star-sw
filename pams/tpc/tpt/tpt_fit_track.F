@@ -1,5 +1,8 @@
-* $Id: tpt_fit_track.F,v 1.4 1998/07/07 14:30:51 sakrejda Exp $
+* $Id: tpt_fit_track.F,v 1.5 1999/07/19 19:15:54 genevb Exp $
 * $Log: tpt_fit_track.F,v $
+* Revision 1.5  1999/07/19 19:15:54  genevb
+* Use StMessMgr
+*
 * Revision 1.4  1998/07/07 14:30:51  sakrejda
 * pnt defined as integer
 *
@@ -148,13 +151,13 @@ C             calculate the error squared on phi0
                      trk(ipt).flag=ipass
                    else
                      if(tpar(ipass).debug(2).eq.1) then
-                         write(6,*) 'Calling outliers removal'
+                         call StInfo('TPT_TRACK_FIT - Calling outliers removal')
                      endif
                      iret=tpt_find_outlier(ipt,trk
      >                  ,xcir,ycir,zcir,wcir,wlin,ncir,tpar_h,tpar,
      >                   ibad,ipass)
                      if(tpar(ipass).debug(2).eq.1) then
-                        write(6,*) 'Out from the outliers removal'
+                        call StInfo('TPT_TRACK_FIT - Out from the outliers removal')
                      endif
                      if(iret.eq.STAFCV_OK) then
                         good_hit(pnt(ibad))= .false.

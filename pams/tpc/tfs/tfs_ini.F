@@ -1,5 +1,8 @@
-* $Id: tfs_ini.F,v 1.4 1998/12/13 21:36:18 sakrejda Exp $
+* $Id: tfs_ini.F,v 1.5 1999/07/19 19:15:49 genevb Exp $
 * $Log: tfs_ini.F,v $
+* Revision 1.5  1999/07/19 19:15:49  genevb
+* Use StMessMgr
+*
 * Revision 1.4  1998/12/13 21:36:18  sakrejda
 * parameters and constants cleaned up, bmpar removed
 *
@@ -107,14 +110,14 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
       
       ERRFLG = .FALSE.
       if( par(1).nsect .gt. mxsector ) then
-         WRITE(6,'(A)') ' TFS_INI: Fatal error'
-         WRITE(6,'(A)') ' Reason: Number of sectors exceeds MXSECTOR'
+         call StError(' TFS_INI: Fatal error')
+         call StError(' Reason: Number of sectors exceeds MXSECTOR')
          ERRFLG = .TRUE.
          RETURN
       endif
       if( par(1).nrow .gt. mxrow ) then
-         WRITE(6,'(A)') ' TFS_INI: Fatal error'
-         WRITE(6,'(A)') ' Reason: Number of rows exceeds MXROW'
+         call StError(' TFS_INI: Fatal error')
+         call StError(' Reason: Number of rows exceeds MXROW')
          ERRFLG = .TRUE.
          RETURN
       endif
