@@ -82,6 +82,7 @@ const_VecTObjIter end()   const {return fV.end();}
         TObject *&       operator[](Int_t i)       {return fV[i];}
         TObject * const &operator[](Int_t i) const {return fV[i];}
 void    push_back(const TObject * const to){fV.push_back((TObject*)to);}
+        Int_t getEntries() const;
 protected:
 #ifndef __CINT__
 VecTObj fV;

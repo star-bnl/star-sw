@@ -1,5 +1,8 @@
-// $Id: StObject.h,v 1.8 2000/07/30 01:49:03 perev Exp $
+// $Id: StObject.h,v 1.9 2000/09/15 15:11:58 perev Exp $
 // $Log: StObject.h,v $
+// Revision 1.9  2000/09/15 15:11:58  perev
+// Zombie for StEvent
+//
 // Revision 1.8  2000/07/30 01:49:03  perev
 // StObject vers restored
 //
@@ -38,6 +41,8 @@ class StObject : public TObject {
   virtual void Browse(TBrowser *b);
   virtual Bool_t IsFolder();
   virtual TObject *clone() const {return 0;}
-  ClassDef(StObject,1) // Base class for StEvent
+  Int_t   isZombie(){return IsZombie();}
+  void    makeZombie(){MakeZombie();}
+  ClassDef(StObject,2) // Base class for StEvent
 };
 #endif
