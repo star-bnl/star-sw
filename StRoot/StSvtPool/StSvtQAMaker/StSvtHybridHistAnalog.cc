@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridHistAnalog.cc,v 1.1 2004/02/06 02:30:35 munhoz Exp $
+ * $Id: StSvtHybridHistAnalog.cc,v 1.2 2004/05/12 17:47:57 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridHistAnalog.cc,v $
+ * Revision 1.2  2004/05/12 17:47:57  perev
+ * WarnOff
+ *
  * Revision 1.1  2004/02/06 02:30:35  munhoz
  * inserting SVT online monitor
  *
@@ -86,7 +89,7 @@ void StSvtHybridHistAnalog::Fill(float x, int anode)
     histC->Fill(x);
 }
 
-void StSvtHybridHistAnalog::Draw(char* option)
+void StSvtHybridHistAnalog::Draw(const char* option)
 {
   float max, min;
   float bin_c, total_a, total_sq_a, total_b, total_sq_b, total_c, total_sq_c;

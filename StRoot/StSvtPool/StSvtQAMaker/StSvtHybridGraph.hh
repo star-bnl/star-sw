@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridGraph.hh,v 1.1 2004/02/06 02:30:35 munhoz Exp $
+ * $Id: StSvtHybridGraph.hh,v 1.2 2004/05/12 17:47:57 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridGraph.hh,v $
+ * Revision 1.2  2004/05/12 17:47:57  perev
+ * WarnOff
+ *
  * Revision 1.1  2004/02/06 02:30:35  munhoz
  * inserting SVT online monitor
  *
@@ -40,7 +43,7 @@ public:
   void setGraph(TGraph* gr) {graph = gr;}
   void Fill(int nEvents, StSvtHybridCollection* collEvent, StSvtHybridCollection* collData);
   void Fill(int nEvents, TArrayF* collEvent, TArrayF* collData);
-  void Draw(char* option=0);
+  void Draw(const char* option=0);
 
   void setTitle(Text_t* title);
   void setThisTitle(Text_t* title);
