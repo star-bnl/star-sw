@@ -2,8 +2,11 @@
 //  
 // JB 3/30/01 - divorce with MC. Only StEvent is used. No evaluation
 //
-// $Id: StppLPfindMaker.cxx,v 1.2 2001/04/23 15:02:10 balewski Exp $
+// $Id: StppLPfindMaker.cxx,v 1.3 2001/04/23 19:44:26 balewski Exp $
 // $Log: StppLPfindMaker.cxx,v $
+// Revision 1.3  2001/04/23 19:44:26  balewski
+// *** empty log message ***
+//
 // Revision 1.2  2001/04/23 15:02:10  balewski
 // *** empty log message ***
 //
@@ -82,9 +85,9 @@ Int_t StppLPfindMaker::Init()
   // setup params
   EtaCut=1.4; // tracks with larger eta are not considered
 
-  StTreeMaker *treeMk = (StTreeMaker *) GetMaker("outputStream"); 
-  treeMk->IntoBranch("ppDstBranch","dst");//<< ppDst.root file will be produced
-  printf("JB:  %s-maker ppDstBranch created\n",GetName());
+  //StTreeMaker *treeMk = (StTreeMaker *) GetMaker("outputStream"); 
+  //treeMk->IntoBranch("ppDstBranch","dst");//<< ppDst.root file will be produced
+  //printf("JB:  %s-maker ppDstBranch created\n",GetName());
 
   return StMaker::Init();
 }
