@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.18 2001/04/30 22:27:40 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.19 2001/05/06 22:16:35 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  **************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.19  2001/05/06 22:16:35  caines
+ * Fix pointer problem for DAQ Ped files
+ *
  * Revision 1.18  2001/04/30 22:27:40  caines
  * Fix adjusting for ZSP data
  *
@@ -149,7 +152,7 @@ Int_t StSvtSeqAdjMaker::Init()
            
             int index = mSvtRawData->getHybridIndex(barrel,ladder,wafer,hybrid);
             if(index < 0) continue;
-	    if (mSvtPedColl)
+	    if (mSvtPedColl && mSvtPedColl->at(index))
 	      sigma = ((StSvtHybridPed*)mSvtPedColl->at(index))->getRMS();
 	    else
 	      sigma = mProbValue->GetSigma();
