@@ -122,7 +122,8 @@ BfcItem BFC[] = {
   {"tpt"         ,"tpc_tracks","tpc","tpc_T,tls,"          ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
   {"laser"       ,"tpc_tracks","tpc","tdaq,tpc,-tpt"
                                            ,"StLaserEventMaker","StLaserEvent,StLaserEventMaker","",kFALSE},  
-  {"PreVtx"     ,"","","tpt,SCL,sim_T","StPreVertexMaker","St_tpc,St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"PreVtx"     ,"","","tpt,SCL,sim_T,tpc_T,svt_T,ftpcT,globT,ctf_T",
+                                       "StPreVertexMaker","St_tpc,St_svt,St_global,St_dst_Maker","",kFALSE},
   {"svt"         ,"svt","","svt_T,srs,stk"                             ,"StChainMaker","StChain","",kFALSE},
   {"srs"         ,"svt_hits","svt","tls"            ,"St_srs_Maker","St_tpc,St_svt,St_srs_Maker","",kFALSE},
   {"stk"         ,"svt_tracks","svt","tls"          ,"St_stk_Maker","St_tpc,St_svt,St_stk_Maker","",kFALSE},
@@ -677,8 +678,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.84 2000/04/13 23:07:05 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.85 2000/04/15 20:48:11 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.85  2000/04/15 20:48:11  fisyak
+// Add svt for PreVtx
+//
 // Revision 1.84  2000/04/13 23:07:05  fisyak
 // Only one access to Db; add svt maker to output
 //
