@@ -382,9 +382,18 @@ void StiKalmanTrackNode::getGlobalMomentum(double p[3], double e[6]) const
 }
 
 
-
-
-
+/*! Steering routine that propagates the track encapsulated by the given node "pNode" to the given detector "tDet". The propagation involves the following steps.
+ <OL>
+ <LI>Extrapolation of the existing track to the next layer, by "transporting" the
+     track a smaller radius.</LI>
+ <LI>Determine if the extrapolation actually intersects an existing volume.</LI>
+ <LI>Exit with status code if no intersection is found.</LI>
+ <LI>Transport the error matrix to the new radius.</LI>
+ <LI>If mcsCalculated==true, proceed to calculate MCS effects on the error matrix.</LI>
+ <LI>if elossCalculated==true, proceed to calculate Eloss effects on the track parameters.</LI>
+ </OL>
+ <p>Currently, propagate can handle kPlaner and kCylindrical geometries only. An exception is thrown if other geometry shape are used.
+*/
 int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode, 
 				  const StiDetector * tDet)
 {
@@ -429,7 +438,7 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
     {
     case kPlanar:
       {
-	StiPlanarShape * planarShape = static_cast<StiPlanarShape *>(sh);
+	planarShape = static_cast<StiPlanarShape *>(sh);
 	detHW = planarShape->getHalfWidth();
 	detHD = planarShape->getHalfDepth();
 	edge  = 4.;//shape->getEdgeHalfWidth();
@@ -514,16 +523,18 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
       //mass
       //radThickness*density;
       propagateMCS(density,radThickness,pars->massHypothesis);
-
     }
   return position;
 }
 
-/*! Propagate track from given parent node to given vertex.
+/*! Propagate the track encapsulated by pNode to the given vertex. Use this node
+ to represent the track parameters at the vertex.
   <p>
   This method propagates the track from the given parent node
   "pNode" to the given vertex effectively calculating the
-  location (x,y,z) of the track near the given vertex.
+  location (x,y,z) of the track near the given vertex. It use "this" node
+ to represent/hold the track parameters at the vertex.
+<p>
 */
 void StiKalmanTrackNode::propagate(const StiKalmanTrackNode *pNode, const StiHit * vertex)
 {
@@ -535,6 +546,9 @@ void StiKalmanTrackNode::propagate(const StiKalmanTrackNode *pNode, const StiHit
   propagateError();
 }
 
+/*! Calculates the differential energy loss per unit length in the track segment 
+associated with this node.
+*/
 double  StiKalmanTrackNode::evaluateDedx()
 {
   if (hit)
@@ -562,6 +576,8 @@ double  StiKalmanTrackNode::evaluateDedx()
   return dedx;
 }
 
+/*! Work method used to perform the tranport of "this" node from its current "fX" position to the given position "xk". Throws a runtime_error exception if the propagation cannot be carried out.
+ */
 void  StiKalmanTrackNode::propagate(double xk)
 {
   x1=fX;
@@ -589,6 +605,8 @@ void  StiKalmanTrackNode::propagate(double xk)
   fX=x2;
 }
 
+/*! Work method used to perform the transport of "this" node from its current "fX" position to the a cylindtical surface of the given radius.
+ */
 void  StiKalmanTrackNode::propagateCylinder(double L)
 {
   double x_p, x_m, R, x0, y0,r0sq, a, b, sq;
@@ -647,7 +665,7 @@ void  StiKalmanTrackNode::propagateCylinder(double L)
 
 /*! Propagate the track error matrix
   <p>
-  This method must be called ONLY after a call to the propagate method.
+  Note: This method must be called ONLY after a call to the propagate method.
 */
 void StiKalmanTrackNode::propagateError()
 {  
@@ -694,7 +712,8 @@ void StiKalmanTrackNode::propagateMCS(double density, double radThickness, doubl
   double pt = getPt();
   double p2=(1.+tanl*tanl)*pt*pt;
   double m2=massHypo*massHypo;
-  double beta2=p2/(p2 + m2);
+  double e2=p2+m2;
+  double beta2=p2/e2;
   double theta2=14.1*14.1/(beta2*p2*1e6)*d/radThickness*density;
   //double theta2=1.0259e-6*10*10/20/(beta2*p2)*d*density;
   double ey=fP3*fX - fP2, ez=fP4;
@@ -713,7 +732,7 @@ void StiKalmanTrackNode::propagateMCS(double density, double radThickness, doubl
       if (x1 < x2) dE=-dE;
       double cc=fP3;
       cout << "ELOSS: c:" << cc;
-      fP3 = fP3 *(1.- sqrt(p2+m2)/p2*dE);
+      fP3 = fP3 *(1.- sqrt(e2)/p2*dE);
       fP2 = fP2 + fX*(fP3-cc);
     }
 }
