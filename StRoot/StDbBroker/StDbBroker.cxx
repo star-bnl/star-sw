@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.10 2000/01/27 05:56:03 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.11 2000/01/27 20:30:40 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.11  2000/01/27 20:30:40  porter
+ * cleaned up dtor & error logic
+ *
  * Revision 1.10  2000/01/27 05:56:03  porter
  * update for compiling on CC5+HPUX-aCC+KCC
  *
@@ -95,6 +98,14 @@ StDbBroker::StDbBroker(): m_structName(0), m_tableName(0), m_tableVersion(0), m_
 
 } 
 
+//_____________________________________________________________________________
+StDbBroker::~StDbBroker(){
+
+  if(m_Nodes) delete m_Nodes;
+  if(m_Tree) delete m_Tree;
+  if(mgr) delete mgr;
+
+}
 
 //______________________________________________________________________________
 // int StDbBroker::Init(const char *dbname)
@@ -154,6 +165,9 @@ StDbBroker::SetDateTime(UInt_t date, UInt_t time)
 
    mgr->setRequestTime(dateTime);
 
+   //   cout << "ReQuested Time = " << mgr->getDateCheckTime() << endl;
+
+
 }
 
 
@@ -171,9 +185,9 @@ void * StDbBroker::Use(int tabID, int parID)
   void* pData = 0;
 
   StDbNode* anode = m_Nodes->getNode(tabID);
-  if(anode && !anode->IsNode()){
-    StDbTable* node=(StDbTable*)anode;
-    if(!mgr->fetchDbTable(node))return pData;
+  StDbTable* node=0;
+  if(anode && !anode->IsNode())node=(StDbTable*)anode;
+  if(node && mgr->fetchDbTable(node)){
     m_nRows= node->GetNRows();
     pData  = node->GetTableCpy(); // gives the "malloc'd version"
 
@@ -195,6 +209,7 @@ void * StDbBroker::Use(int tabID, int parID)
 
   } else {
 
+    //cout<<"Broker is Returning Null for table = " << node->getMyName()<<endl;
       SetNRows(0);
       SetBeginDate(19950101);
       SetBeginTime(0);

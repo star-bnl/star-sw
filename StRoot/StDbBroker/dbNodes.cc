@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: dbNodes.cc,v 1.2 2000/01/14 14:49:10 porter Exp $
+ * $Id: dbNodes.cc,v 1.3 2000/01/27 20:30:40 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: dbNodes.cc,v $
+ * Revision 1.3  2000/01/27 20:30:40  porter
+ * cleaned up dtor & error logic
+ *
  * Revision 1.2  2000/01/14 14:49:10  porter
  * set verbose level for checking, added $Id & $Logs, & made node container
  * more robust for interactions with StDbLib
@@ -31,6 +34,25 @@ dbNodes::dbNodes(): numNodes(0), curNode(0), maxList(500) {
 
 }
 
+////////////////////////////////////////////////////////
+void
+dbNodes::deleteLists() {
+
+  if(mpids){
+    delete [] mpids;
+    mpids = 0;
+  }
+  
+  nodeVec::iterator itr;
+
+  do {
+    for(itr = mnodes.begin(); itr!=mnodes.end(); ++itr){
+        mnodes.erase(itr);
+        break;
+    }
+  } while (mnodes.begin() != mnodes.end());
+
+}
 ////////////////////////////////////////////////////////
 
 int
@@ -86,6 +108,10 @@ dbNodes::next(){
  return node;
 
 }
+
+
+
+
 
 
 

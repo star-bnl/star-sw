@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: dbNodes.h,v 1.3 2000/01/27 05:56:03 porter Exp $
+ * $Id: dbNodes.h,v 1.4 2000/01/27 20:30:40 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: dbNodes.h,v $
+ * Revision 1.4  2000/01/27 20:30:40  porter
+ * cleaned up dtor & error logic
+ *
  * Revision 1.3  2000/01/27 05:56:03  porter
  * update for compiling on CC5+HPUX-aCC+KCC
  *
@@ -57,7 +60,9 @@ int maxList;
 public:
 
   dbNodes();
-  ~dbNodes() { };
+  ~dbNodes() { deleteLists(); }
+
+  virtual void deleteLists();
 
   virtual int       addNode(StDbNode* node, int parentID); 
   virtual StDbNode* getNode(int index)     ;
