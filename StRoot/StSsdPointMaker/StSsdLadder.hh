@@ -26,7 +26,7 @@ class StSsdLadder
  ~StSsdLadder();
 
   void  initWafers(St_ssdWafersPosition *wafpos);
-  void  initWafers(ssdWafersPosition_st *position);
+  void  initWafers(ssdWafersPosition_st *position, int positionSize);
   int  getLadderNumb();
   int  getWaferPerLadder();
   void debugUnPeu (int monwafer);
