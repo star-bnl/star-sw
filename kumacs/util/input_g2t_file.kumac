@@ -53,7 +53,10 @@ macro/global/import *
   cd /dui
 
   stream/close G2Tfile
-
+  soc/object/oid G2Tfile
+  oid = staf_result(1)
+  soc/deleteoid [oid]
+  
 return
 
 *******************************************************************
