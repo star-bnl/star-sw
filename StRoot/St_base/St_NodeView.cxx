@@ -348,20 +348,10 @@ void St_NodeView::GetLocalRange(Float_t *min, Float_t *max)
 
   TVirtualPad *savePad = gPad;
   //  Create a dummy TPad;
-//  TPad dummyPad;
   TCanvas dummyPad("--Dumm--","dum",1,1);
-//  dummyPad.cd();
   // Assing 3D TView 
   TView view(1);
-//  view.SetRange(mn,mx);
-//  Float_t phi   = 90.0;
-//  Float_t theta = -90.0; 
-//  Int_t iret;
-  // view.SetView(phi, theta, 0, iret);
-//    dummyPad.SetView(&view);
-  // Make it current for a while
-//  gPad = &dummyPad;
-//*-*- Draw Referenced node
+
   gGeometry->SetGeomLevel();
   gGeometry->UpdateTempMatrix();
   view.SetAutoRange(kTRUE);
@@ -507,6 +497,12 @@ const Char_t *sceleton[] = {
 //   cout << " " << endl;
    out << " " << endl;
  }
+}
+//______________________________________________________________________________
+void  St_NodeView::SetLineAttributes()
+{
+  St_Node *thisNode = GetNode();
+  if (thisNode) thisNode->SetLineAttributes();
 }
 
 //______________________________________________________________________________

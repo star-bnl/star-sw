@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_NodePosition.cxx,v 1.16 1999/04/23 22:47:34 fine Exp $
+// $Id: St_NodePosition.cxx,v 1.17 1999/06/05 00:42:31 fine Exp $
 // $Log: St_NodePosition.cxx,v $
+// Revision 1.17  1999/06/05 00:42:31  fine
+// SetLineAttribute methods have been introduced
+//
 // Revision 1.16  1999/04/23 22:47:34  fine
 // Node family has been adjusted for St_PolyLineShape class
 //
@@ -313,7 +316,12 @@ void St_NodePosition::SavePrimitive(ofstream &out, Option_t *option)
 #endif
 
 }
-   
+//______________________________________________________________________________
+void   St_NodePosition::SetLineAttributes()
+{
+  St_Node *thisNode = GetNode();
+  if (thisNode) thisNode->SetLineAttributes();
+}   
 //_______________________________________________________________________
 void St_NodePosition::UpdatePosition(Option_t *)
 {

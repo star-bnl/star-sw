@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98   
-// $Id: St_NodePosition.h,v 1.13 1999/04/23 22:47:34 fine Exp $
+// $Id: St_NodePosition.h,v 1.14 1999/06/05 00:42:32 fine Exp $
 // $Log: St_NodePosition.h,v $
+// Revision 1.14  1999/06/05 00:42:32  fine
+// SetLineAttribute methods have been introduced
+//
 // Revision 1.13  1999/04/23 22:47:34  fine
 // Node family has been adjusted for St_PolyLineShape class
 //
@@ -97,7 +100,7 @@ class St_NodePosition  : public TObject /*, public St_DefineSet */ {
         virtual void        UpdatePosition(Option_t *option="");
         virtual St_NodePosition *Reset(St_Node *node=0,Double_t x=0, Double_t y=0, Double_t z=0, TRotMatrix *matrix=0);
         virtual void        SavePrimitive(ofstream &out, Option_t *option);
-
+        virtual void        SetLineAttributes(); // *MENU*
         virtual void        SetMatrix(TRotMatrix *matrix=0) {fMatrix = matrix;}
         virtual void        SetNode(St_Node *node){ fNode = node;}
         virtual void        SetPosition( Double_t x=0, Double_t y=0, Double_t z=0) {fX=x; fY=y; fZ=z;}

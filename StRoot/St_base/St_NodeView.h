@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98 
-// $Id: St_NodeView.h,v 1.13 1999/05/29 20:52:33 fine Exp $
+// $Id: St_NodeView.h,v 1.14 1999/06/05 00:42:32 fine Exp $
 // $Log: St_NodeView.h,v $
+// Revision 1.14  1999/06/05 00:42:32  fine
+// SetLineAttribute methods have been introduced
+//
 // Revision 1.13  1999/05/29 20:52:33  fine
 // Several method to estimat range of 3D object were introduced
 //
@@ -63,6 +66,7 @@ public:
   virtual TList   *Nodes(){ return GetList();}
   virtual void     Paint(Option_t *option="");
   virtual TString  PathP() const;
+  virtual void     SetLineAttributes(); // *MENU*
   virtual void     SavePrimitive(ofstream &out, Option_t *option="");
   virtual void     SetVisibility(Int_t vis=1); // *MENU*
   virtual void     Sizeof3D() const;
