@@ -1,9 +1,6 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.h,v 1.5 1999/09/07 19:30:29 fine Exp $
+// $Id: St_tableDescriptor.h,v 1.4 1999/08/12 18:53:49 fine Exp $
 // $Log: St_tableDescriptor.h,v $
-// Revision 1.5  1999/09/07 19:30:29  fine
-// table descriptor access has been changed. All tables are affected and must be re-compiled
-//
 // Revision 1.4  1999/08/12 18:53:49  fine
 // clash between St_tableDescriptor::GetSize and St_Table::GetSize resolved
 //
@@ -27,8 +24,9 @@
 class St_tableDescriptor : public St_Table {
   protected:
      static St_tableDescriptor *fgColDescriptors;
-     virtual St_tableDescriptor *GetDescriptorPointer() const { return fgColDescriptors;} 
-     virtual void  SetDescriptorPointer(St_tableDescriptor *list) const { fgColDescriptors = list;}  
+     virtual St_tableDescriptor *GetRowDescriptors() const { return fgColDescriptors?fgColDescriptors:(fgColDescriptors=GetTableDescriptors());}
+     virtual void  SetRowDescriptors(St_tableDescriptor *list) { fgColDescriptors = list;}  
+
      St_tableDescriptor(){;}
   public:                                    
  

@@ -1,38 +1,5 @@
-# $Id: MakePam.mk,v 1.118 1999/09/13 22:19:49 fisyak Exp $
+# $Id: MakePam.mk,v 1.107 1999/08/16 17:03:05 fisyak Exp $
 # $Log: MakePam.mk,v $
-# Revision 1.118  1999/09/13 22:19:49  fisyak
-# Add inlclude and include/tables in CPP path
-#
-# Revision 1.117  1999/09/12 01:47:27  fisyak
-# merge cons and makel tables h-files into include/tables
-#
-# Revision 1.116  1999/09/09 23:02:17  fisyak
-# Suppress library versioning for users
-#
-# Revision 1.115  1999/09/07 21:01:10  fine
-# new macro for Stypes.h TableImpl has been introduced
-#
-# Revision 1.114  1999/09/07 19:31:04  fine
-# table descriptor access has been changed. All tables are affected and must be re-compiled
-#
-# Revision 1.113  1999/09/03 20:44:58  fisyak
-# Fix typo
-#
-# Revision 1.112  1999/09/03 17:49:51  fisyak
-# Make makel and cons compartible in OBJ
-#
-# Revision 1.111  1999/08/22 23:09:35  fisyak
-# remove dir path from library linkage
-#
-# Revision 1.110  1999/08/20 23:07:28  fisyak
-# Fix new StAF include path
-#
-# Revision 1.109  1999/08/20 13:13:30  fisyak
-# Devorce StAF and STAR Library
-#
-# Revision 1.108  1999/08/20 01:42:59  fisyak
-# Devorce StAF and STAR Library
-#
 # Revision 1.107  1999/08/16 17:03:05  fisyak
 # Add protection against empty directories
 #
@@ -267,19 +234,18 @@ SUBDIR2 := $(filter-out $(SUBDIR1), $(subst $(STAR)/pams/,, $(wildcard $(STAR)/p
 INC_DIRS:= $(addprefix $(OUT_DIR)/pams/, $(SUBDIR1)) $(addprefix $(STAR)/pams/, $(SUBDIR2)) 
 INC_DIRS+= $(STAF_UTILS_INCS)
 INC_NAMES := $(addprefix StRoot/,St_base StChain StUtilities xdf2root StarClassLibrary StEvent) \
-              StRoot .share include include/tables .share/$(PKG) pams inc StDb/include
+              StRoot .share .share/tables .share/$(PKG) pams inc 
 #                            StarClassLibrary/include
-INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES))))
+INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) $(ROOT_DIR) 
 ifneq ($(ROOT_DIR),$(STAR))
   INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES)))) $(STAR)
 endif
-INC_DIRS  += $(STAF)/inc $(ROOT_DIR)
 #INC_DIRS:= $(wildcard $(OUT_DIR)/pams/*/inc $(STAR)/pams/*/inc)
 DINCINT  :=  -DROOT_CINT $(filter-out -DST_NO_TEMPLATE_DEF_ARGS, $(CPPFLAGS)) $(ROOTCINTD) $(INCINT)
 ifeq ($(STAR_HOST_SYS),sun4x_56)
   CXXFLAGS +=-ptr$(OBJ_DIR)
 endif
-VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_TAB) $(GEN_TAB_INC) $(OBJ_DIR) $(IDL_DIRS) $(INC_DIRS)
+VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_TAB) $(OBJ_DIR) $(IDL_DIRS) $(INC_DIRS)
 ifneq (,$(FILES_IDM))
   VPATH   += $(GEN_DIR)
 endif
@@ -294,41 +260,43 @@ echo "//                                          ">>$(GEN_TAB)/St_$(STEM)_Table
 echo "/////////////////////////////////////////////////////////////////////////  ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
 echo "                                            ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
 echo "#include \"Stypes.h\"                       ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
-echo "TableImpl($(STEM))                     ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;
+echo "St_tableDescriptor *_NAME2_(St_,$(STEM))::fgColDescriptors = 0; ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
+echo "TableImp($(STEM))                     ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
+echo "TableStreamerImp($(STEM))             ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;
 endef
 define MAKE_TABLE_H
-	@$(RM) 	$(GEN_TAB_INC)/St_$(STEM)_Table.h ;\
-echo "#ifndef STAF_St_$(STEM)_Table         ">$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "#define STAF_St_$(STEM)_Table        ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "                                           ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "#include \"St_Table.h\"                      ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "                                           ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "#include \"$(STEM).h\"                 ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "                                           ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "class St_$(STEM) : public St_Table   ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "{                                          ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "protected:                                 ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "  static St_tableDescriptor *fgColDescriptors;">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "  virtual St_tableDescriptor *GetDescriptorPointer() const { return fgColDescriptors;}">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "  virtual void SetDescriptorPointer(St_tableDescriptor *list) const { fgColDescriptors = list;}">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "public:                                    ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "  St_$(STEM)() : St_Table(\"$(STEM)\",sizeof($(STEM)_st)) {SetType(\"$(STEM)\");}           ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h ;\
-echo "  St_$(STEM)(Text_t *name) : St_Table(name,sizeof($(STEM)_st)) {SetType(\"$(STEM)\");}          ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "  St_$(STEM)(Int_t n): St_Table(\"$(STEM)\",n,sizeof($(STEM)_st)) {SetType(\"$(STEM)\");}   ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "  St_$(STEM)(Text_t *name,Int_t n): St_Table(name,n,sizeof($(STEM)_st)) {SetType(\"$(STEM)\");} ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "  $(STEM)_st *GetTable(){ return ($(STEM)_st *)s_Table;}                                            ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "                                           ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "  ClassDef(St_$(STEM),0) // class particle STAF tables  ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "};                                                            ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "                                                              ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "#endif                                                        ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h
+	@$(RM) 	$(GEN_TAB)/St_$(STEM)_Table.h ;\
+echo "#ifndef STAF_St_$(STEM)_Table         ">$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "#define STAF_St_$(STEM)_Table        ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "                                           ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "#include \"St_Table.h\"                      ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "                                           ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "#include \"$(STEM).h\"                 ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "                                           ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "class St_$(STEM) : public St_Table   ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "{                                          ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "protected:                                 ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  static St_tableDescriptor *fgColDescriptors;">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  virtual St_tableDescriptor *GetRowDescriptors() const { return fgColDescriptors?fgColDescriptors:(fgColDescriptors=GetTableDescriptors());}">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  virtual void  SetRowDescriptors(St_tableDescriptor *list) { fgColDescriptors = list;}">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "public:                                    ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  St_$(STEM)() : St_Table(\"$(STEM)\",sizeof($(STEM)_st)) {SetType(\"$(STEM)\");}           ">>$(GEN_TAB)/St_$(STEM)_Table.h ;\
+echo "  St_$(STEM)(Text_t *name) : St_Table(name,sizeof($(STEM)_st)) {SetType(\"$(STEM)\");}          ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  St_$(STEM)(Int_t n): St_Table(\"$(STEM)\",n,sizeof($(STEM)_st)) {SetType(\"$(STEM)\");}   ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  St_$(STEM)(Text_t *name,Int_t n): St_Table(name,n,sizeof($(STEM)_st)) {SetType(\"$(STEM)\");} ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  $(STEM)_st *GetTable(){ return ($(STEM)_st *)s_Table;}                                            ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "                                           ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  ClassDef(St_$(STEM),0) // class particle STAF tables  ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "};                                                            ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "                                                              ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "#endif                                                        ">>$(GEN_TAB)/St_$(STEM)_Table.h
 endef
 #-------------------------------includes----------------------------
 STICFLAGS =  $(addprefix -I,  $(STAF_SYS_INCS) $(SRC_DIR) $(IDL_DIRS))
 CXXFLAGS   += -DASU_MALLOC_OFF
 
-INCLUDES += -I. -I../ -I/usr/include \
-             $(addprefix -I,$(STAF_SYS_INCS) $(SRC_DIR) $(GEN_TAB_INC) $(GEN_DIR) $(INC_DIRS)) \
+INCLUDES += -I. -I../ -I/usr/include -I$(STAF_SYS_INCS) \
+             $(addprefix -I, $(SRC_DIR) $(GEN_TAB) $(GEN_DIR) $(INC_DIRS)) \
             -I$(CERN_ROOT)/include
 
 ifneq ($(OUT_DIR),$(STAR))        
@@ -344,19 +312,12 @@ FILES_C  := $(wildcard $(addsuffix /*.c , $(SRC_DIRS)))
 FILES_F  := $(wildcard $(addsuffix /*.F , $(SRC_DIRS)))
 FILES_CDF:= $(wildcard $(addsuffix /*.cdf , $(SRC_DIRS)))
 
-#NAMES_G  := $(basename $(notdir $(FILES_G)))
-#NAMES_CC := $(basename $(notdir $(FILES_CC)))
-#NAMES_CXX:= $(filter-out %Cint St_%_Module St_%_Table,$(basename $(notdir $(FILES_CXX))))
-#NAMES_C  := $(basename $(notdir $(FILES_C)))
-#NAMES_F  := $(basename $(notdir $(FILES_F)))
-#NAMES_CDF:= $(basename $(notdir $(FILES_CDF)))
-
-NAMES_G  := $(basename $(subst $(SRC_DIR),,$(FILES_G)))
-NAMES_CC := $(basename $(subst $(SRC_DIR),,$(FILES_CC)))
-NAMES_CXX:= $(filter-out %Cint St_%_Module St_%_Table,$(basename $(subst $(SRC_DIR),,$(FILES_CXX))))
-NAMES_C  := $(basename $(subst $(SRC_DIR),,$(FILES_C)))
-NAMES_F  := $(basename $(subst $(SRC_DIR),,$(FILES_F)))
-NAMES_CDF:= $(basename $(subst $(SRC_DIR),,$(FILES_CDF)))
+NAMES_G  := $(basename $(notdir $(FILES_G)))
+NAMES_CC := $(basename $(notdir $(FILES_CC)))
+NAMES_CXX:= $(filter-out %Cint St_%_Module St_%_Table,$(basename $(notdir $(FILES_CXX))))
+NAMES_C  := $(basename $(notdir $(FILES_C)))
+NAMES_F  := $(basename $(notdir $(FILES_F)))
+NAMES_CDF:= $(basename $(notdir $(FILES_CDF)))
 #.________________________  modules ____________________________________________
 FILES_IDT := $(notdir $(wildcard $(OUT_DIR)/pams/$(DOMAIN)/idl/*.idl $(STAR)/pams/$(DOMAIN)/idl/*.idl))
 ifneq (,$(FILES_IDM))
@@ -371,56 +332,49 @@ endif
 FILES_IDT := $(sort $(FILES_IDT))
 #._________________________ Tables _____________________________________________
 ifneq (,$(FILES_IDT))
-  FILES_TAH := $(addprefix $(GEN_TAB_INC)/, $(addsuffix .h,   $(sort $(basename $(notdir $(FILES_IDT))))))
-  FILES_TAI := $(addprefix $(GEN_TAB_INC)/, $(addsuffix .inc, $(sort $(basename $(notdir $(FILES_IDT))))))
+  FILES_TAH := $(addprefix $(GEN_TAB)/, $(addsuffix .h,   $(sort $(basename $(notdir $(FILES_IDT))))))
+  FILES_TAI := $(addprefix $(GEN_TAB)/, $(addsuffix .inc, $(sort $(basename $(notdir $(FILES_IDT))))))
   FILES_TAB := $(addprefix $(GEN_TAB)/St_, $(addsuffix _Table.cxx, $(sort $(basename $(notdir $(FILES_IDT))))))
-  FILES_THH := $(addprefix $(GEN_TAB_INC)/St_, $(addsuffix _Table.h, $(sort $(basename $(notdir $(FILES_IDT))))))
+  FILES_THH := $(addprefix $(GEN_TAB)/St_, $(addsuffix _Table.h, $(sort $(basename $(notdir $(FILES_IDT))))))
   FILES_ALL_TAB := $(FILES_SYT) $(FILES_TAH) $(FILES_TAI) $(FILES_TAB) $(FILES_THH)
 endif
-FILES_O  := $(strip $(addprefix $(OBJ_DIR), $(addsuffix .$(O), $(NAMES_F) $(NAMES_C) $(NAMES_CC))))
+FILES_O  := $(strip $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_F) $(NAMES_C) $(NAMES_CC))))
 ifndef NODEPEND                
   FILES_D  := $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_O)))))
   FILES_DM := $(addprefix $(GEN_DIR)/, $(addsuffix .didl, $(NAMES_IDM)))                         
 endif                          
 FILES_O  += $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O),   $(notdir $(basename $(FILES_ICC)))))
-DIRS_O    = $(sort $(dir $(FILES_O)))
+NAMES_O   = $(notdir $(FILES_O))
 # *.cc moved to sl $(NAMES_CC)
 ifneq (,$(strip $(FILES_IDM) $(FILES_G) $(FILES_CDF))) 
   SL_PKG  := $(LIB_DIR)/$(PKG).sl
-  ifeq ($(ROOT_DIR),$(STAR))
-    QWE  := $(sort $(wildcard $(SL_PKG).*))
-    SL_NEW := $(SL_PKG).1000
-    ifneq (,$(QWE))
-      NQWE := $(words $(QWE))
-      QWE  := $(word $(NQWE),$(QWE))
-      QWE  := $(subst $(SL_PKG).,,$(QWE))
-      QWE  := $(shell expr $(QWE) + 1)
-      SL_NEW := $(SL_PKG).$(QWE)
-    endif
-  else
-    SL_NEW :=$(SL_PKG).9999
+  QWE  := $(sort $(wildcard $(SL_PKG).*))
+  SL_NEW := $(SL_PKG).1000
+  ifneq (,$(QWE))
+    NQWE := $(words $(QWE))
+    QWE  := $(word $(NQWE),$(QWE))
+    QWE  := $(subst $(SL_PKG).,,$(QWE))
+    QWE  := $(shell expr $(QWE) + 1)
+    SL_NEW := $(SL_PKG).$(QWE)
   endif
 endif
-SL_PKG_NOTDIR := $(notdir $(SL_PKG))
-SL_NEW_NOTDIR := $(notdir $(SL_NEW))
-
 ifneq (,$(NAMES_IDM))          
   FILES_init  := $(addprefix $(OBJ_DIR)/, $(PKG)_init.$(O))
 endif                      
 ifneq (,$(NAMES_CDF))          
-  FILES_O    += $(addprefix $(OBJ_DIR), $(addsuffix .$(O), $(NAMES_CDF)))
+  FILES_O    += $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_CDF)))
 endif                          
 ifneq (,$(NAMES_G))            
-  FILES_OG    := $(addprefix $(OBJ_DIR), $(addsuffix .$(O), $(NAMES_G)))
+  FILES_OG    := $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_G)))
   FILES_O     += $(FILES_OG) 
   FILES_D     += $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_OG)))))
 endif
 ifneq (,$(NAMES_CC))            
-  FILES_SL    += $(filter-out $(FILES_o), $(addprefix $(OBJ_DIR), $(addsuffix .$(O), $(NAMES_CC))))
+  FILES_SL    += $(filter-out $(FILES_o), $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_CC))))
   FILES_D     += $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(basename $(notdir $(FILES_CC)))))
 endif                          
 ifneq (,$(NAMES_CXX))            
-  FILES_SL    += $(filter-out $(FILES_o), $(addprefix $(OBJ_DIR), $(addsuffix .$(O), $(NAMES_CXX))))
+  FILES_SL    += $(filter-out $(FILES_o), $(addprefix $(OBJ_DIR)/, $(addsuffix .$(O), $(NAMES_CXX))))
   FILES_D     += $(addprefix $(DEP_DIR)/,$(addsuffix .d, $(basename $(notdir $(FILES_CXX)))))
 endif                          
 ifneq (,$(strip $(FILES_O) $(FILES_OG)))
@@ -435,6 +389,7 @@ ifneq ($(STAR_PATH),$(OUT_DIR))
   endif                           
 endif                           
 qwe     := $(shell test ! -f $(LIB_PKG) ||  $(AR) $(ARFLAGS) $(LIB_PKG))
+#OBJS    := $(LIB_PKG)($(NAMES_O))
 OBJS    := $(FILES_O);
 ifeq (,$(strip $(LIB_PKG) $(SL_PKG)))
   all:
@@ -458,8 +413,9 @@ $(LIB_PKG):$(OBJS)
     endif                          
     ifneq ($(strip $(FILES_SL) $(FILES_OG) $(FILES_init)),)   
 $(SL_PKG): $(FILES_SL) $(FILES_OG) $(FILES_init) $(LIB_PKG) $(wildcard $(OBJ_DIR)/Templates.DB/*.$(O))
-	$(SO) $(SOFLAGS) $(FILES_SL) $(FILES_OG) $(FILES_init)  -o $(SL_NEW)  $(LIBRARIES) $(SL_EXTRA_LIB) && \
-        $(RM) $(SL_PKG) &&  cd $(LIB_DIR) &&  $(LN) $(SL_NEW_NOTDIR) $(SL_PKG_NOTDIR) 
+	$(SO) $(SOFLAGS) $(FILES_SL) $(FILES_OG) $(FILES_init)  -o $(SL_NEW)  $(LIBRARIES) $(SL_EXTRA_LIB)
+	$(RM) $(SL_PKG)
+	$(LN) $(SL_NEW) $(SL_PKG)
 	@echo "           Shared library " $(SL_PKG) " has been created"   
 #--------- module --------- 
       ifneq ($(NAMES_IDM),)           
@@ -495,41 +451,35 @@ include $(FILES_D)
   endif
 #--------  idm, idl --------
   ifneq (,$(FILES_ALL_TAB))
-$(FILES_TAH) : $(GEN_TAB_INC)/%.h : %.idl
+$(FILES_TAH) : $(GEN_TAB)/%.h : %.idl
 	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -H -q $(STEM).idl; \
-        $(CP) $(STEM).h $(GEN_TAB_INC)/$(STEM).h
-$(FILES_TAI) : $(GEN_TAB_INC)/%.inc : %.idl
+        $(CP) $(STEM).h $(GEN_TAB)/$(STEM).h
+$(FILES_TAI) : $(GEN_TAB)/%.inc : %.idl
 	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -H -q $(STEM).idl; \
-        $(CP) $(STEM).inc $(GEN_TAB_INC)/$(STEM).inc
+        $(CP) $(STEM).inc $(GEN_TAB)/$(STEM).inc
     ifndef NOROOT
 #------------------------------------------- ---------------------------------
-#$(FILES_TAB) : $(GEN_TAB)/St_%_Table.cxx : $(GEN_TAB_INC)/%.h
+#$(FILES_TAB) : $(GEN_TAB)/St_%_Table.cxx : $(GEN_TAB)/%.h
 $(GEN_TAB)/St_%_Table.cxx:
 	$(MAKE_TABLE_CXX)
-#$(FILES_THH) : $(GEN_TAB_INC)/St_%_Table.h : $(GEN_TAB_INC)/%.h
-$(GEN_TAB_INC)/St_%_Table.h:
+#$(FILES_THH) : $(GEN_TAB)/St_%_Table.h : $(GEN_TAB)/%.h
+$(GEN_TAB)/St_%_Table.h:
 	$(MAKE_TABLE_H)
     endif #NOROOT
   endif #ALL_TAB
 #--- compilation -
 $(OBJ_DIR)/%.$(O):%.g
-	test -d $(dir $(OBJ_DIR)/$(STEM)) || mkdir -p $(dir $(OBJ_DIR)/$(STEM)) && echo "mkdir -p $(dir $(OBJ_DIR)/$(STEM))"
-	$(CP) $(1ST_DEPS) $(dir $(OBJ_DIR)/$(STEM)); cd $(dir $(OBJ_DIR)/$(STEM)); $(GEANT3) $(notdir $(1ST_DEPS)) -o  $(OBJ_DIR)/$(STEM).F
+	$(CP) $(1ST_DEPS) $(OBJ_DIR); cd $(OBJ_DIR); $(GEANT3) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).F
 	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(OBJ_DIR)/$(STEM).F  -o  $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.o: %.cxx
-	test -d $(dir $(OBJ_DIR)/$(STEM)) || mkdir -p $(dir $(OBJ_DIR)/$(STEM)) && echo "mkdir -p $(dir $(OBJ_DIR)/$(STEM))"
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.o: %.cc
-	test -d $(dir $(OBJ_DIR)/$(STEM)) || mkdir -p $(dir $(OBJ_DIR)/$(STEM)) && echo "mkdir -p $(dir $(OBJ_DIR)/$(STEM))"
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.$(O): %.F
-	test -d $(dir $(OBJ_DIR)/$(STEM)) || mkdir -p $(dir $(OBJ_DIR)/$(STEM)) && echo "mkdir -p $(dir $(OBJ_DIR)/$(STEM))"
 	$(FC)  $(CPPFLAGS) $(FFLAGS) $(FEXTEND)   -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.$(O): %.c
-	test -d $(dir $(OBJ_DIR)/$(STEM)) || mkdir -p $(dir $(OBJ_DIR)/$(STEM)) && echo "mkdir -p $(dir $(OBJ_DIR)/$(STEM))"
 	$(CC)  $(CPPFLAGS) $(CFLAGS)   -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.$(O): %.cdf
-	test -d $(dir $(OBJ_DIR)/$(STEM)) || mkdir -p $(dir $(OBJ_DIR)/$(STEM)) && echo "mkdir -p $(dir $(OBJ_DIR)/$(STEM))"
 	$(KUIPC) $(KUIPC_FLAGS) $(1ST_DEPS) $(OBJ_DIR)/$(STEM).c
 	$(CC)  $(CPPFLAGS) $(CFLAGS)   -c $(OBJ_DIR)/$(STEM).c $(COUT) $(OBJ_DIR)/$(STEM).$(O); \
 #_______________________dependencies_________________________________
@@ -648,7 +598,6 @@ test_dir:
 	@echo DIR_GEN       = $(DIR_GEN)
 	@echo GEN_DIR       = $(GEN_DIR)
 	@echo GEN_TAB       = $(GEN_TAB)
-	@echo GEN_TAB_INC   = $(GEN_TAB_INC)
 	@echo GEN_TMP       = $(GEN_TMP)
 	@echo DOMAIN        = $(DOMAIN)
 	@echo PGK           = $(PKG) 
@@ -671,5 +620,3 @@ test_dir:
 	@echo FILES_IDMS    = $(FILES_IDMS)
 	@echo NAMES_IDM     = $(NAMES_IDM)
 	@echo NAMES_IDMS    = $(NAMES_IDMS)
-	@echo STAF_SYS_INCS = $(STAF_SYS_INCS)
-	@echo DIRS_O        = $(DIRS_O)

@@ -1,14 +1,5 @@
-// $Id: StMaker.h,v 1.35 1999/09/08 00:13:35 fisyak Exp $
+// $Id: StMaker.h,v 1.32 1999/08/13 01:12:25 fine Exp $
 // $Log: StMaker.h,v $
-// Revision 1.35  1999/09/08 00:13:35  fisyak
-// Add static *GetChain()
-//
-// Revision 1.34  1999/09/03 23:11:48  perev
-// Add .runcont directory
-//
-// Revision 1.33  1999/09/02 22:27:12  fisyak
-// Add SetDEBUG
-//
 // Revision 1.32  1999/08/13 01:12:25  fine
 // StMaker::GetHist has been introduced
 //
@@ -120,7 +111,6 @@ protected:
    St_DataSet     *m_GarbSet;		//!  
    St_DataSet     *m_Inputs;	 	//!list of logInput:ActualInput
    St_DataSet     *m_Ouputs;	 	//!list of logOuput:ActualOuput
-   St_DataSet     *m_RunCont;	 	//!Run Control parameters
    TList          *m_Histograms;	//!list of Histograms
    static StMaker *fgStChain;     	//current pointer to StChain
    Int_t	   m_Mode;		// Integer mode of maker
@@ -159,8 +149,6 @@ public:
    virtual void        	AddConst(St_DataSet *data=0){AddData(data,".const");}
    virtual void        	AddHist(TH1 *h,const char *dir=0);
    virtual void        	AddGarb (St_DataSet *data=0){AddData(data,".garb");};
-   virtual void        	AddRunCont (St_DataSet *data=0){AddData(data,".runcontrol");};
-   virtual void        	AddRunCont (double par,const char* name,const char* comment);
    virtual TList       *GetHistList() const {return (TList*)GetDirObj(".hist");};
    virtual TH1         *GetHist(const Char_t *histName) const {TList *l=GetHistList(); return l?(TH1*)l->FindObject(histName):(TH1*)0;};
    virtual StMaker     *cd(){StMaker *ret = fgStChain; fgStChain=this; return ret;};
@@ -170,7 +158,6 @@ public:
    virtual Int_t  	GetNumber() const ;
    virtual void   	SetNumber(Int_t number) ;
    virtual St_DataSet*  UpdateDB(St_DataSet* ds){if (ds){};return 0;};
-   static  StMaker     *GetChain() {return fgStChain;}
    virtual Int_t        GetEventNumber() const ;
    virtual Int_t        GetRunNumber() const ;
    virtual TDatime      GetDateTime() const;
@@ -209,8 +196,7 @@ public:
 
 //    Setters for flags and switches
 
-   virtual void        	SetDebug(Int_t l=1){m_DebugLevel = l;}   // *MENU*
-   virtual void        	SetDEBUG(Int_t l=1);                     // *MENU*
+   virtual void        	SetDebug(Int_t l=1){m_DebugLevel=l;}     // *MENU*
    virtual void         SetActive(Bool_t k=kTRUE){fActive = k;}  // *MENU*
    virtual void       	SetAlias(const char* log,const char* act,const char* dir=".aliases");
    virtual void       	AddAlias(const char* log,const char* act,const char* dir=".aliases");
@@ -237,7 +223,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.35 1999/09/08 00:13:35 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.32 1999/08/13 01:12:25 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   //StChain virtual base class for Makers
 };

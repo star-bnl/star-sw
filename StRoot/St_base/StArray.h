@@ -33,7 +33,7 @@
 #include "TObjArray.h"
 #include "TNamed.h"
 #include "TArrayI.h"
-#include <assert.h>
+
 class StVectorInt : public TArrayI
 {
 public:
@@ -85,7 +85,7 @@ class StObjArray : public TCollection
 {
 public:
                 StObjArray(Int_t s = TCollection::kInitCapacity){fObjArr = new TObjArray(s,0);};
-                StObjArray(StObjArray& a) {assert(0);}
+                StObjArray(StObjArray& a);
 virtual        ~StObjArray(){delete fObjArr;};
 
             virtual void AddAfter(TObject* after, TObject* obj){fObjArr->AddAfter(after,obj);};

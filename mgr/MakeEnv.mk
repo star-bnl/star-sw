@@ -1,14 +1,5 @@
-# $Id: MakeEnv.mk,v 1.19 1999/08/24 13:27:28 fisyak Exp $
+# $Id: MakeEnv.mk,v 1.16 1999/08/16 16:31:32 fisyak Exp $
 # $Log: MakeEnv.mk,v $
-# Revision 1.19  1999/08/24 13:27:28  fisyak
-# Fix St_Tables name
-#
-# Revision 1.18  1999/08/20 22:59:15  fisyak
-# Fix problem with / in ROOT_DIR
-#
-# Revision 1.17  1999/08/20 13:13:30  fisyak
-# Devorce StAF and STAR Library
-#
 # Revision 1.16  1999/08/16 16:31:32  fisyak
 # Simplify Makefiles
 #
@@ -175,12 +166,12 @@ STAF_ANA := $(strip $(wildcard $(STAF_ANA)))
 
 
 ifdef STAF_SYS
-  STAF_SYS_INCS := $(STAF)/inc $(STAF_SYS)/inc
+  STAF_SYS_INCS := $(STAF_SYS)/inc
 #
 #	default staf libs
   STAF_SYS_LIB := $(STAF_SYS)/.$(STAF_ARCH)/lib
   STAF_SYS_BIN := $(STAF_SYS)/.$(STAF_ARCH)/bin
-  STIC := $(STAF_BIN)/stic
+  STIC := $(STAF_SYS_BIN)/stic
   STAFGEN := $(STAF_SYS_BIN)/stafGen
   PAMIGEN := $(STAF_SYS_BIN)/pamiGen.csh
   MAKE_PAMSWITCH := $(STAF_SYS_BIN)/make_pamSwitch
@@ -252,11 +243,7 @@ ifndef PAMS
     branch  :=$(PAMS)
   endif
 endif
-ifndef PAMS
-ROOT_DIR:=$(INP_DIR)
-else
-ROOT_DIR:=$(word 1,$(subst /$(PAMS), ,$(INP_DIR)))
-endif
+ROOT_DIR:=$(word 1,$(subst $(PAMS), ,$(INP_DIR)))
 D       := $(subst /, ,$(subst $(ROOT_DIR),,$(INP_DIR)))
 DOMAIN  := $(word 2, $(D))
 ifneq (,$(findstring $(DOMAIN),gen sim))
@@ -290,9 +277,7 @@ ifeq ($(LEVEL),$(FOUR)) #subpackage level
     DOM_DIR := $(subst / ,,$(INP_DIR)/../../) )
     PKG     := $(NAME)
 endif
-ifeq (tables,$(PKG))
-PKG :=Tables
-endif
+
 ifdef NT
 BIN_DIR := $(SYS_DIR)/bin
 endif

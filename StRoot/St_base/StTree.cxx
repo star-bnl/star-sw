@@ -72,23 +72,20 @@ Int_t StIO::Write(TFile *file, const Char_t *name, ULong_t  ukey, TObject  *obj)
 //_______________________________________________________________________________
 TObject *StIO::Read(TFile *file, const Char_t *name)
 {
-  TObject *toread=0;
-  TKey *key = 0;
   assert(file);
 
   TFile *bakfile = gFile; TDirectory *bakdir = gDirectory; file->cd();
 
-  if (!gFile) { printf("<StIO::Read> No file open \n"); goto RETURN;}
-    
+  if (!gFile) { 
+    printf("<StIO::Read> No file open \n"); 
+    gFile=bakfile; gDirectory=bakdir;return 0; }
+  TKey *key = 0;
   if (name[0]=='*') 
        key = (TKey*)gDirectory->GetListOfKeys()->First();
   else key = (TKey*)gDirectory->GetListOfKeys()->FindObject(name);
-
-  if (!key)  { printf("<StIO::Read> Key not found\n"); goto RETURN; }
-
-  toread = key->ReadObj();
-
-RETURN: gFile=bakfile; gDirectory=bakdir; return toread;
+  if (!key)   { printf("<StIO::Read> Key not found\n"); return 0; }
+  gFile=bakfile; gDirectory=bakdir;
+  return key->ReadObj();
 }
 //_______________________________________________________________________________
 TObject *StIO::Read(TFile *file, const Char_t *name, ULong_t  ukey)
@@ -221,7 +218,6 @@ void StBranch::Close(const char *)
 { 
   if (!fIOMode) return;
   if (!fTFile) 	return;
-  if (strcmp(".none",GetFile())) return;
   TFile *tf = fTFile;
   fTFile = 0;
   TString ts(tf->GetTitle());
@@ -234,7 +230,6 @@ void StBranch::Close(const char *)
   printf("** <StBranch::Close> Branch=%s \tFile=%s \tClosed **\n"
         ,GetName(),(const char*)fFile); 
   delete tf;
-  SetFile(".none");
 }
 //_______________________________________________________________________________
 const char *StBranch::GetFile()
@@ -255,7 +250,6 @@ Int_t StBranch::Open()
 {
   if (!fIOMode) return 0;
   if (fTFile)   return 0;
-  if (strcmp(".none",GetFile())==0) return 1;
   OpenTFile();
   return 0;
 }  
@@ -267,8 +261,7 @@ Int_t StBranch::WriteEvent(ULong_t ukey)
   SetUKey(ukey);
   if (!fList) 		return kStWarn;	//empty
   if (!fList->First()) 	return kStWarn;	//empty
-  if(Open()) return 1; 
-  fNEvents++;
+  Open(); fNEvents++;
   
   TList *savList = new TList;
   SetParAll(0,savList);
@@ -282,7 +275,7 @@ Int_t StBranch::GetEvent(Int_t mode)
 {
   if (!(fIOMode&1)) return 0;
   Delete(); if (fList) delete fList; fList=0; 
-  if(Open()) return 1; 
+  Open(); 
   if (mode) { fList = (TList*)StIO::ReadNext(fTFile,GetName(),fUKey);
   } else    { fList = (TList*)StIO::Read    (fTFile,GetName(),fUKey);}
   SetParAll(this,0);

@@ -1,10 +1,7 @@
 //*CMZ :          13/08/98  18.27.27  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   13/08/98 
-// $Id: St_DataSet.h,v 1.36 1999/09/04 00:28:01 fine Exp $
+// $Id: St_DataSet.h,v 1.35 1999/08/06 15:24:35 fine Exp $
 // $Log: St_DataSet.h,v $
-// Revision 1.36  1999/09/04 00:28:01  fine
-// St_Table::NaN from VP and gloabl dataset have been introduced
-//
 // Revision 1.35  1999/08/06 15:24:35  fine
 // UnMark method has been introduced
 //
@@ -70,16 +67,14 @@ class St_DataSet : public TNamed
  friend class St_DataSetIter;
  friend class St_DataSetTree;
  protected: 
-    static St_DataSet  *fgMainSet; // pointer the main dataset;    
     St_DataSet  *fParent; // pointer to mother of the directory
     TList       *fList;   // List of the the the objects included into this dataset
     virtual void SetMother(TObject *mother) {SetParent((St_DataSet*)mother);}
     St_DataSet(const Char_t *name,const Char_t *title):
     TNamed(name,title),fParent(0),fList(0){} // to support TDictionary
-    void AddMain(St_DataSet *set);
     static EDataSetPass SortIt(St_DataSet *ds);
+
     static EDataSetPass SortIt(St_DataSet *ds,void *user);
-    St_DataSet *GetRealParent();
      
  public:
  
@@ -101,7 +96,6 @@ class St_DataSet : public TNamed
     virtual St_DataSet  *First() const;
             TList       *GetList()   const { return fList; }
     virtual Int_t        GetListSize() const;
-    static  St_DataSet  *GetMainSet(){ return fgMainSet;}
             TObject     *GetMother() const { return (TObject*)GetParent();}
     virtual TObject     *GetObject() const {printf("***DUMMY GetObject***\n");return 0;}
     virtual St_DataSet  *GetParent() const { return fParent;}
@@ -136,9 +130,8 @@ class St_DataSet : public TNamed
     virtual void         Update(St_DataSet *set,UInt_t opt=0);// Update this dataset with the new one
     ClassDef(St_DataSet,1)
 };
-
+ 
 inline void      St_DataSet::Add(St_DataSet *dataset){ AddLast(dataset); }
-inline void      St_DataSet::AddMain(St_DataSet *set){ if (fgMainSet && set) fgMainSet->AddFirst(set);}
 inline Int_t     St_DataSet::GetListSize() const {TList *tl=GetList(); return (tl) ? tl->GetSize():0;}
 inline Bool_t    St_DataSet::IsMarked() { return TestBit(kMark); }
 inline void      St_DataSet::Mark()     { Mark(kMark,kSet); }

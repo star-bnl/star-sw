@@ -13,71 +13,59 @@ my $O        = "o";
 my $A        = "a";
 my $Cxx      = "cxx";
 my $so       = "so";
-my $EXESUF   = "";
-
-my $SoOUT    = "-o ";
-my $Cout     = "-o ";
-my $Fout     = "-o ";
-my $Lout     = "-o ";
-my $Cinp     = "";
-my $CXXinp   = "";
-
+my $So       = $so;
+my $SoOUT    = "-o";
 my $CPP      = "gcc";
 my $CPPFLAGS = "";
 my $CXX      = "g++";
 my $CXXFLAGS = "-fpic -w";
 my $CC       = "gcc";
-my $CFLAGS   = "-fpic -w";
+my $CFLAGS   = "  -fpic -w";
 my $FC       = "f77";
-my $FFLAGS   = "-KPIC -w -DCERNLIB_TYPE";
+my $FFLAGS   = "  -KPIC -w -DCERNLIB_TYPE";
 my $AR       = "ar";
 my $ARFLAGS  = "rvu";
 my $LD       = $CXX;
-my $LDFLAGS  = $CXXFLAGS;
+my $LDFLAGS  = "";
 my $SO       = $CXX;
 my $SOFLAGS  = "";
 my $EXEFLAGS = "NONE";
-my $STIC     = $STAF_BIN . "/" . "stic";
+my $STIC     = $STAR_BIN . "/" . "stic";
 my $STICFLAGS= "";
-my $GEANT3   = $STAF_BIN . "/" . "geant3";
-my $KUIP     = $CERN_ROOT . "/bin/kuipc";
+my $GEANT3   = $STAR_BIN . "/" . "geant3";
 my $ROOTCINT = $ROOTSYS . "/bin/rootcint";
-my $LIBS     = "";
 my $CLIBS    = "";
 my $FLIBS    = "";
 my $OSFID    = "";
 my $ROOTCINTD= "";
-my $SoLibs   = "";
-my $LINKMODULECOM = "%SO %DEBUG %SOFLAGS %SoOUT%> %< %SoLibs";
-my $INCLUDE_PATH  = $INCLUDE;
-my $LIBPATH  = ""; #$STAR/.$STAR_SYS/lib:$STAF/.$STAF_SYS/lib";#:;#:$CERN_ROOT/lib"; 
+my $CPPPATH  = "";
 $_ = $STAR_SYS;
 print "System: ", $_,"\n";
-#if (/^i386_linux2/ || /^i386_redhat50/ || /^i386_redhat51/ ||  /^i386_redhat52/ || /^i386_redhat60/) {
-if (/^i386_/) {
+if (/^i386_linux2/ || /^i386_redhat50/ || /^i386_redhat51/ ||  /^i386_redhat52/) {
 #    case linux but gcc is EGCS
 #  ====================
   $OSFID    = "lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
   $FC       = "pgf77";
-  $CXXFLAGS = "-fPIC -Wall";
+  $CXXFLAGS = " -fPIC -Wall";
+#  $CPPPATH .= "/usr/local/include/g++:";
 #                                             -fpipe
-  $CFLAGS   = "-fPIC -Wall";
-  $CPPFLAGS.= "f2cFortran";
-  $LDFLAGS  = "-Wl,-Bstatic";
-  $EXEFLAGS = $CXXFLAGS . " -Wl,-Bdynamic";
-  $SOFLAGS  = "-shared";  
+  $CFLAGS   = " -fPIC -Wall";
+  $CPPFLAGS .= " f2cFortran";
+  $LDFLAGS  = " -Wl,-Bstatic";
+  $EXEFLAGS = " -Wl,-Bdynamic";  
+  $SOFLAGS  = " -shared";  
   $CLIBS    = "-L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic";
-  $FLIBS    = "-L/usr/pgi/linux86/lib -lpgftnrtl -lpgc -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
+  $FLIBS    = "-L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
   if (/^i386_linux2/) {$FLIBS   .= " -lI77 -lF77";}
-#  $FLIBS   .= "-lcrypt";
-  $FFLAGS   = "-DPGI";  
+  $FLIBS   .= " -lcrypt";
+  $FFLAGS   = " -DPGI";  
   $FEXTEND  = "-Mextend";
 }
 elsif (/^hp_ux102/) {
 #    case "hp":
 #  ====================
   $OSFID = "HPUX CERNLIB_HPUX CERNLIB_UNIX ST_NO_NAMESPACES ST_NO_EXCEPTIONS";
-#  if (defined(NODEBUG)) {$DEBUG = "-O";}
+  if (defined(NODEBUG)) {$DEBUG = "-O";}
   $OSFID   .= " NEW_ARRAY_ON";
   $CXX      = "aCC";
   $CC       = "cc";
@@ -88,147 +76,69 @@ elsif (/^hp_ux102/) {
   if (defined($SCL_OPTIMISE)){ # from Brian
     $CXXFLAGS .= " +Olibcalls +Onolimit";
   }
-  else {$CXXFLAGS .= " +d";}
-  $LDFLAGS   = "-z -Wl,+s -Wl,-E,+vnocompatwarnings";
-  $EXEFLAGS  = $CXXFLAGS . " " . $LDFLAGS . " -Wl,-N"; 
-  $SOFLAGS   = "-b -z";  
+  else {
+  $CXXFLAGS .= " +d";}
+  $LDFLAGS   = " -z -Wl,+s -Wl,-E,+vnocompatwarnings";
+  $EXEFLAGS  = $LDFLAGS . " -Wl,-N"; 
+  $SOFLAGS   = "  -b -z";  
   $CLIBS     = "-lXm -lXt -lX11 -lm -lPW -ldld";
   $FC        = "fort77";
   $FLIBS     = "/opt/fortran/lib/libU77.a";
-#  $FFLAGS    = "+DA1.0 +ppu +Z  +U77 -K";
-#  $FFLAGS    = "+DA1.0 +ppu +B +Z -K";
-  $FFLAGS    = "-WF,-P +ppu +Z -K";
+  $FFLAGS    = " +DA1.0 +ppu +Z  +U77 -K";
   $FEXTEND   = "+es";
 }
 elsif (/^sun4x_55/ ||  /^sun4x_56/) {
   $ROOTCINTD = "-DSOLARIS";
   $CPPFLAGS  =~ s/SunOS//g;
-  $OSFID     = "CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS ";
-  $OSFID    .= "ST_NO_EXCEPTIONS ST_NO_MEMBER_TEMPLATES ST_NO_NAMESPACES ";
-  $OSFID    .= "ST_NO_NUMERIC_LIMITS ST_NO_TEMPLATE_DEF_ARGS SUN Solaris sun sun4os5 sun4x_56";
+  $OSFID     =  "sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SOLARIS CERNLIB_SUN ST_NO_MEMBER_TEMPLATES ST_NO_NUMERIC_LIMITS";
   $CC        = "/opt/SUNWspro/bin/cc";
-  $CXX       = "/opt/SUNWspro/bin/CC";
+  $CXX       = "/opt/SUNWspro/bin/CC -features=no%castop -features=no%anachronisms";
   $FC        = "/opt/SUNWspro/bin/f77";
-  $CXXFLAGS  = "-KPIC +w -features=no_castop -features=no_anachronisms";
-#  $CLIBS     = "-L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc";
-#  $CLIBS     = "-L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc";
-  $CLIBS     = "-lw -lgen -lsocket -lnsl -lintl";
+  $CXXFLAGS  =  "-KPIC +w";
+  $CLIBS     = "-L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc";
   $FLIBS     = "-lM77 -lF77 -lsunmath";
-  $FFLAGS    = "-KPIC -w";
+  $FFLAGS    =  "  -KPIC -w";
   $FEXTEND   = "-e";
-  $CFLAGS    = "-KPIC";
-  $LD        = $CXX;
-  $LDFLAGS   = "-Bstatic"; 
-  $EXEFLAGS  = "-z muldefs -Bdynamic -t";
-  $SO        = $CXX;
-  $SOFLAGS   = "-G";
-  my $STDHOME= "/afs/rhic/star/packages/ObjectSpace/2.0m";
-  $CXXFLAGS .= " -I" . $STDHOME . " -I" . $STDHOME ."/ospace/std -I" . $STDHOME . "/ospace";
-  $LINKMODULECOM = 
-    "test -d %>:d/Templates.DB && %SO %DEBUG %SOFLAGS %SoOUT%> %<  %>:d/Templates.DB/*.o || %SO %DEBUG %SOFLAGS %SoOUT%> %< %SoLibs";
-}
-elsif (/^intel_wnt/) {
-#  $DEBUG    = "-Zi";
-  $DEBUG    = "";
-  $EXESUF   = ".exe";
-  $O        = "obj";
-  $A        = "lib";
-  $Cxx      = "cxx";
-  $so       = "DLL";
-  $AR       = "set LIB && lib"; print "NT Lib: lib = $lib / LIB = $LIB\n";
-  $ARFLAGS  = "-nologo -MACHINE:IX86";
-  $Cout     = "-Fo";
-  $Fout     = "-Fo";
-  $Lout     = "-out:";
-  $SoOUT    = "-out:";
-  $Cinp     = "-Tc";
-  $CXXinp   = "-Tp";
-  $Copt     = "-O2";
-  $CXXOpt   = "-O2";
-
-  $GEANT3   += $EXESUF;
-  $ROOTCINT += $EXESUF;
-
-  $ROOTCINTD = "-DWIN32";
-  $OSFID     = "VISUAL_CPLUSPLUS CERNLIB_WINNT CERNLIB_MSSTDCALL WIN32 ";
-  $OSFID    .= "ST_NO_NAMESPACES ";
-  $CPP       = "cl";
-  $CC        = "cl";
-#  $CXX       = "set inc && path && cl";
-  $CXX       = "cl";
-  $FC        = "fl32";
-  $CLIBS     = "ws2_32.lib mswsock.lib user32.lib kernel32.lib msvcrt.lib oldnames.lib MSVCIRT.LIB";
-  $FLIBS     = "DFORDLL.LIB";
-  $FFLAGS    =  $DEBUG . " -MD -G5 -fpp -Oxp -nokeep -nologo";
-  $FEXTEND   = "-extend_source";
-  $CFLAGS    =  $DEBUG . " -MD -G5 -nologo -DASU_MALLOC_OFF";
-  $CXXFLAGS  =  $CFLAGS;
+  $CFLAGS    =  " -KPIC";
   $LD        =  $CXX;
-#  $LDFLAGS   =  $DEBUG . $(conlflags); 
-  $SO        =  "link";
-  $SOFLAGS   =  $DEBUG . " -DEBUG -NODEFAULTLIB -INCREMENTAL:NO -NOLOGO -DLL ";
-  $LINKMODULECOM = 
-"BINDEXPLIB.exe %> %< > %>.def && %AR %ARFLAGS %Lout%>.lib  %< -def:%>.def && %SO %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
-  $LIB .= ";" . $ROOTSYS . "\\lib";
-  $LIBS = $ROOTSYS . "/lib/*.lib" . " ws2_32.lib mswsock.lib user32.lib kernel32.lib msvcrt.lib oldnames.lib MSVCIRT.LIB";
+  $LDFLAGS   =  " -Bstatic"; 
+  $SO        =  $CXX;
+  $SOFLAGS   =  " -G";
 }
-
 $MAIN    = cwd();
-$INCLUDE = "#include";
+$INCLUDE = "#inc";
+$LIB     = "";
 $EXPORT = "#.share";
-$FFLAGS .= " -DCERNLIB_TYPE";
 my $FLAGS = $CPPFLAGS . " " . $OSFID . " __ROOT__";
 $CPPFLAGS = "-D" . join (" -D", split (" ",$FLAGS));
-print "STAR     = \t$STAR\n";
-print "CPPFLAGS = \t$CPPFLAGS\n";
-print "FFLAGS   = \t$FFLAGS  \n";
-print "CPP      = \t$CPP    \nCPPFLAGS = \t$CPPFLAGS\n"; 
-print "CC       = \t$CC     \tCCFLAGS  = \t$CFLAGS     \tCLIBS    =\t$CLIBS\n"; 
-print "CXX      = \t$CXX    \tCXXFLAGS = \t$CXXFLAGS\n";
-print "FC       = \t$FC     \nFFLAGS   = \t$FFLAGS     \tFLIBS    =\t$FLIBS\n"; 
-print "LD       = \t$LD     \tLDFLGAS  = \t$LDFLAGS    \nEXEFLAGS =\t$EXEFLAGS\n";
-print "LIBPATH  = \t$LIBPATH\n";
-print "SO       = \t$SO     \tSOFLGAS  = \t$SOFLAGS\n";
-#my $ROOTLIBS    = " -lRint -lNew  -lBase -lCint -lClib -lCont -lFunc";
-my $ROOTLIBS    = " -L$ROOTSYS/lib -lRint -lNew -lBase -lCint -lClib -lCont -lFunc";
-   $ROOTLIBS   .= " -lGraf -lGraf3d -lHist -lHtml -lMatrix -lMeta -lMinuit -lNet";
-   $ROOTLIBS   .= " -lPostscript -lProof -lTree -lUnix -lZip";
-my $ROOTGLIBS   = " -lGpad -lGui -lGX11 -lX3d";
-my $ROOTSRC = "/afs/rhic/star/ROOT/" . $ROOT_LEVEL . "/ROOT/src";
-$CPPPATH = $INCLUDE . ":#StRoot:#pams:" . $INCLUDE . "/tables:" .  $ROOTSRC . ":" . $STAF . "/inc:/opt/star/include:";
-$FCPPPATH = "-I" . $STAR ."/cern/geant321 -I" . $STAR . "/cern/geant321/geant321";
-print "CPPPATH  = \t$CPPPATH\n";
+print "CPPFLAGS = ", $CPPFLAGS, "\n";
+print "CPP =\t",$CPP,";\tCPPFLAGS =\t",$CPPFLAGS,"\n"; 
+print "CC  =\t",$CC,";\tCCFLAGS = \t",$CFLAGS,"\tCLIBS =\t",$CLIBS,"\n"; 
+print "CXX =\t",$CXX,";\tCXXFLAGS = \t",$CXXFLAGS,"\n";
+print "FC  =\t",$FC,";\tFFLAGS = \t",$FFLAGS,"\tFLIBS =\t",$FLIBS,"\n"; 
+print "LD  =\t",$LD,";\t$LDFLGAS = \t",$LDFLAGS,"\n";
+print "SO  =\t",$SO,";\t$SOFLGAS = \t",$SOFLAGS,"\n";
+print "INCLUDE = ",$INCLUDE,"\n";
+(my $inc = $INCLUDE) =~ s/\#//g;
+$CPPPATH .= ".:" . $inc .":StRoot:pams:.share:.share/tables";
+my @includes = ("St_base","StChain","StUtilities","xdf2root","StarClassLibrary","StEvent");
+foreach my $inc (@includes) {
+  $CPPPATH .= ":StRoot/" . $inc;
+}
+$CPPPATH .= ":" . $ROOTSYS . "/src:/opt/star/include";
+$FCPPPATH = "-I.. -I../.. -I" . $CERN_ROOT ."/include -I" . $CERN_ROOT . "/include/geant321";
+print "CPPPATH = ",$CPPPATH,"\n";
+my $DirPath  = cwd();
+print " in DirPath=",$DirPath," FilePath=",$FilePath,"\n";
+print " STAR = ",$STAR,"\n";
+push @Reps, $STAR;
 Repository ($STAR);
-(my $DirPath  = cwd()) =~ s/\/$//g;#print " in DirPath=$DirPath\n";
-my @Repo = Repository_List;# print "Repositories = |@Repo|\n";
-my @Reps = ($DirPath);
-foreach my $rep (@Repo) {
-  push @Reps, $rep;
-} print "Repositories: @Reps\n";
-if ($STAR_SYS !~ /^intel_wnt/) {
-  $LIBS .= " " . `cernlib geant321 pawlib graflib/X11 packlib mathlib kernlib`;
-  chop ($LIBS);
-  $LIBS .=  " " . $ROOTLIBS . " " . $ROOTGLIBS . " -lXpm  ";
-  if ($STAR_SYS !~ /^hp_ux/) {$LIBS .=  " ". $FLIBS . " " . $CLIBS . " ";}
-  chop ($LIBS);
-  print "LIBS     = \t$LIBS\n";
-}
-else {
-  $CPPPATH  = "";
-  $FCPPPATH = "";
-#  dfordll.lib";
-  foreach my $dir ($DirPath, @Reps) {
-    $INCLUDE_PATH .= ";" . $dir . "/include";
-    $INCLUDE_PATH .= ";" . $dir . "/StRoot";
-    $INCLUDE_PATH .= ";" . $dir . "/pams";
-    $INCLUDE_PATH .= ";" . $dir . "/include/tables";
-  }
-  my $ROOTSRC = $AFS_RHIC . "\\star\\ROOT\\" . $ROOT_LEVEL . "\\ROOT\\src";
-  $INCLUDE_PATH .= ";" . $ROOTSRC;
-  $INCLUDE_PATH .= ";" . $STAF . "/inc";
-  $INCLUDE_PATH .= ";" . $CERN_ROOT . "/include";
-}
+my @Repo = Repository_List; print "Repositories = @Repo\n";
+my $STICFLAGS = "-H -q";
 $env = new cons(
+		'STIC'         => $STIC,
+		'STICFLAGS'    => $STICFLAGS,
+		'STICCOM'      => 'cd %<:d;  %STIC %STICFLAGS %_IFLAGS %<', 
 		'CPPPATH'      => $CPPPATH,
 		'CPPFLAGS'     => $CPPFLAGS,
 		'DEBUG'        => $DEBUG,
@@ -236,36 +146,22 @@ $env = new cons(
 		'FFLAGS'       => $FFLAGS,
 		'FEXTEND'      => $FEXTEND,
 		'FCPPPATH'     => $FCPPPATH,
-		'Fout'         => $Fout,
-		'CXXinp'       => $CXXinp,
-		'Cinp'         => $Cinp,
-		'Cout'         => $Cout,
-		'Lout'         => $Lout,
-		'SoOUT'        => $SoOUT,
-		'FCCOM'        => '%FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS %FCPPPATH -c %< %Fout%>',
+		'FCCOM'        => 'cd %<:d; %FC %FFLAGS %DEBUG %FEXTEND %_IFLAGS %FCPPPATH -c %<:f -o %>:f',
 		'GEANT3'       => $GEANT3,
-		'GEANT3COM'    => '%GEANT3 %< -o %<:.F; %FC %FFLAGS %CPPFLAGS %DEBUG %_IFLAGS %FCPPPATH -c %<.F -o %>',
+		'GEANT3COM'    => 'cd %<:d; %GEANT3 %<:f -o %<:f.F; %FC %FFLAGS %DEBUG %_IFLAGS %FCPPPATH -c %<:f.F -o %>:f',
 		'CC'	       => $CC,
 		'CFLAGS'       => $CFLAGS,
-		'KUIP'         => $KUIP,
-		'KUIPCOM'      => '%KUIP %< %<.f && %FC %FFLAGS -c %<.f -o %>',
-		'CCCOM'        => '%CC %CFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %Cinp%< %Cout%>',
+		'CCCOM'        => 'cd %<:d; %CC %CFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %<:f -o %>:f',
 		'CXX'          => $CXX,
 		'CXXFLAGS'     => $CXXFLAGS,
-		'CXXCOM'       => '%CXX %CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %CXXinp%< %Cout%>',
-		'CLIBS'        => $CLIBS,
-		'FLIBS'        => $FLIBS,
-		'LIBS'         => $LIBS,
-		'SoLibs'       => $SoLibs,
+		'CXXCOM'       => 'cd %<:d; %CXX %CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %<:f -o %>:f',
 		'LINK'	       => $LD,
 		'LDFLAGS'      => $LDFLAGS,
-		'EXEFLAGS'     => $EXEFLAGS,
-		'LIBPATH'      => $LIBPATH,
-		'LINKCOM'      => '%LINK %DEBUG %EXEFLAGS %< %_LDIRS %LIBS %Lout%>',
+		'LINKCOM'      => '%LINK %DEBUG %LDFLAGS -o %> %<:f %_LDIRS %LIBS',
 		'SO'           => $SO,
 		'SOFLAGS'      => $SOFLAGS, 
 		'SoOUT'        => $SoOUT,
-		'LINKMODULECOM'=> $LINKMODULECOM,
+		'LINKMODULECOM'=> '%SO %DEBUG %SOFLAGS %SoOUT %> %<',
 		'AR'	       => $AR,
 		'ARFLAGS'      => $ARFLAGS,
 		'ARCOM'        => "%AR %ARFLAGS %> %<;%RANLIB %>",
@@ -273,13 +169,11 @@ $env = new cons(
 		'AS'	       => 'as',
 		'ASFLAGS'      => '',
 		'ASCOM'        => '%AS %%DEBUG ASFLAGS %< -o %>',
-		'LD'	       => $LD,
-		'LDFLAGS'      => $LDFLAGS,
+		'LD'	       => 'ld',
+		'LDFLAGS'      => '',
 		'PREFLIB'      => 'lib',
-		'SUFLIB'       => $A,
-		'SUFLIBS'      => $so . ":" . $A,
-		'SUFSOLIB'     => $so,
-		'SUFEXE'       => $EXESUF,
+		'SUFLIB'       => '.a',
+		'SUFLIBS'      => '.so:.a',
 		'SUFMAP'       => {
 				   '.g'  => 'build::command::geant3',
 				   '.f'  => 'build::command::fc',
@@ -291,201 +185,48 @@ $env = new cons(
 				   '.cc' => 'build::command::cxx',
 				   '.cxx'=> 'build::command::cxx',
 				   '.cpp'=> 'build::command::cxx',
-				   '.cdf'=> 'build::command::kuip'
+				   '.idl'=> 'build::command::stic'
 				  },
-		'SUFOBJ'	=> "." . $O,
+		'SUFOBJ'	=> '.o',
 		'ENV'	        => { 'PATH' => $PATH,
-				     'INCLUDE' => $INCLUDE_PATH,
 				     'ROOTSYS' => $ROOTSYS,
-				     'ROOTSRC' => $ROOTSRC,
 				     'LD_LIBRARY_PATH' => $LD_LIBRARY_PATH,
-				     'LIB'   => $LIB,
 				     'PGI' => $PGI,
 				     'STAR' => $STAR,
-				     'CERN_ROOT' => $CERN_ROOT,
-				     'STAF' => $STAF,
-				     'STAR_BIN' => $STAR_BIN,
-				     'TEMP' => $TEMP,
-				     'TMP'  => $TMP,
-				     'STAR_SYS' => $STAR_SYS
+				     'STAR_BIN' => $STAR_BIN
 				   },
 	       );
-my $build  = "." . $STAR_HOST_SYS; print "build for $build\n";
+#Command $env 
+my $build  = "." . $STAR_HOST_SYS; print "build = $build\n";
+if (! -d $build) {mkdir $build, 0664;}
 $BUILD  = "#" . $build;
 $LIB    = $BUILD . "/lib";
 $BIN    = $BUILD . "/bin"; 
 $OBJ    = $BUILD . "/obj";
 my $obj = $build . "/obj";
 Link $OBJ => $DirPath; print "Link $BUILD => $DirPath\n";
-my @subdirs = ();
-my @incT = ();
-# make Targets and install includes
-foreach my $dir ("StRoot","pams") {
-  if (-d $dir) {
-    opendir (DIR, $dir) or die "Can't open $dir\n";
-    my @subdirS = readdir DIR;
-    closedir DIR; #print "subdirS = @subdirS\n";
-    foreach my $sub_dir (@subdirS) {
-      # skip unwanted directories
-      if ($sub_dir =~ /^macros$/     ||
-#	  $sub_dir =~ /^StPadDisplayMaker$/    ||
-	  $sub_dir =~ /^StTpcDb$/    ||
-	  $sub_dir =~ /^StDbMaker$/    ||
-          $sub_dir =~ /^test$/)  {next;}
-      if ($STAR_SYS =~ /^hp_ux102/ && 
-	  ($sub_dir =~ /^StDbLib$/ ||
-	   $sub_dir =~ /StHbt/)	  ) {next;}
-      if ($STAR_SYS =~ /sun4x/ && $sub_dir =~ /^StAssociationMaker$/) {next;}
-      my $sub_DIR = $dir . "/" . $sub_dir; #print "sub_DIR = $sub_DIR\n";
-      if (-d $sub_DIR) {
-	if ($sub_dir =~  /\./ || $sub_dir =~ /\.\./ || $sub_dir =~ /CVS/ || 
-	    $sub_dir =~ /^html$/ || $sub_dir =~ /^test$/ || $sub_dir =~ /^doc/) {next;}
-	opendir (DIR, $sub_DIR) or die "Can't open $sub_DIR\n";
-	my @subsubdirS = readdir DIR;
-	closedir DIR; #print "subsubdirS = @subsubdirS\n";
-	foreach my $subsub_dir (@subsubdirS) {
-	  my $subsub_DIR = $sub_DIR . "/" . $subsub_dir;
-	  if (-d $subsub_DIR) {
-	    if ($subsub_dir =~  /\./     || $subsub_dir =~ /\.\./  || 
-		$subsub_dir =~ /CVS/     || $subsub_dir =~ /^doc/  ||
-		$subsub_dir =~ /^local/  || $subsub_dir =~ /^run/  ||
-		$subsub_dir =~ /^example/|| $subsub_dir =~ /^kumac/) {next;}
-	    if ($subsub_dir =~ /^idl$/) {   
-               opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";   
-               my @idls = readdir DIR;   
-               closedir DIR; #print "idls = @idls\n";   
-               foreach my $idl (@idls) {   
-                 if ($idl =~ /\.idl$/ ) {   
-                   push @idlT, $subsub_DIR ."/" . $idl; #print "+++ add $idl\n";   
-                 }   
-               }   
-               next;   
-             }   
-
-#	    print "subsub :  $subsub_dir /  $subsub_DIR\n";
-	    if ($subsub_dir =~ /^inc$/ || $subsub_dir =~ /^include$/) {
-	      opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";
-	      my @incs = readdir DIR; 
-	      closedir DIR; #print "incs = @incs\n";
-	      foreach my $inc (@incs) {
-		if ($inc =~ /\.h$/ || $inc =~ /\.hh$/ || $inc =~ /\.hpp$/ || $inc =~ /\.inc$/ ) {
-		  push @incT, $subsub_DIR ."/" . $inc; #print "+++ add $inc\n";
-		}
-	      }
-	      next;
-	    }
-	    if ($subdir =~ /^StHbtMaker$/ ||
-		$subdir =~ /^StDaqLib$/) {# print "subdir ===> $subdir\n";
-	      opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";
-	      my @inchbt = readdir DIR; 
-	      my @incHbt = ();
-	      closedir DIR; #print "incs = @incs\n";
-	      foreach my $inc (@inchbt) {
-		if ($inc =~ /\.h$/ || $inc =~ /\.hh$/ || $inc =~ /\.hpp$/ || $inc =~ /\.inc$/ ) {
-		  push @incHbt, $subsub_DIR ."/" . $inc; #print "+++ add $inc\n";
-		}
-	      }
-	      if ($#incHbt > -1) {
-		my $include_Hbt = $INCLUDE . "/" . $sibsub_dir;# print "Install  $include_Hbt, @incHbt\n";
-		Install $env $include_Hbt, @incHbt; 
-	      }
-	      next;
-	    }
-	    if (($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/) && $subsub_dir !~ /^g2t$/) {
-	      # one more level for gen & sim
-	      push @subdirs, $subsub_DIR; #print "================== add $subsub_DIR\n";
-	    }
-	  }
-	}
-	if ($sub_dir !~ /^sim$/ && $sub_dir !~ /^gen$/) {
-	  push @subdirs, $sub_DIR;# print "================== add $sub_DIR\n";
-	 }
-	if ($sub_dir =~ /^St_base$/ ||
-	    $sub_dir =~ /^StChain$/ ||
-	    $sub_dir =~ /^StUtilities$/ ||
-	    $sub_dir =~ /^StAnalysisUtilities$/ ||
-	    $sub_dir =~ /^xdf2root$/ ||
-	    $sub_dir =~ /^StarClassLibrary$/ ||
-	    $sub_dir =~ /^StEvent$/ ||
-	    $sub_dir =~ /^StMcEvent$/ ||
-	    $sub_dir =~ /^StMagF$/ ||
-	    $sub_dir =~ /^StAnalysisUtilities$/ ||
-	    $sub_dir =~ /^St_geant_Maker$/ ||
-	    $sub_dir =~ /^St_db_Maker$/ ||
-	    $sub_dir =~ /^StDbBroker$/ ||
-	    $sub_dir =~ /^StTreeMaker$/ ||
-	    $sub_dir =~ /^StIOMaker$/ ||
-	    $sub_dir =~ /^StDbLib$/) {
-	  opendir (DIR, $sub_DIR) or die "Can't open $sub_DIR\n";
-	  my @incs = readdir DIR; 
-	  closedir DIR; #print "incs = @incs\n";
-	  foreach my $inc (@incs) {
-	    if ($inc =~ /\.h$/ || $inc =~ /\.hh$/ ||$inc =~ /\.inc$/) { 
-	      push @incT, $sub_DIR ."/" . $inc; #print "+++ add $inc\n";
-	    }
-	  }
-	}
-# special directories exported to include with their directory names
-	next if $sub_dir ne "StMcEventMaker" && $sub_dir ne "StEventMaker";
-#	print "sub_dir ==== $sub_dir ====\n";
-	opendir (DIR, $sub_DIR) or die "Can't open $sub_DIR\n";
-	my @inc_local = readdir DIR; 
-	closedir DIR;# print "incs = @inc_local\n";
-	my @inclTT     = ();
-	foreach my $inc (@inc_local) {
-	  if ($inc =~ /\.h$/ || $inc =~ /\.hh$/ ||$inc =~ /\.inc$/) { 
-	    push @inclTT, $sub_DIR ."/" . $inc; #print "+++ add $inc\n";
-	  }
-	}
-	if ($#inclTT > -1) {
-	  my $include_dir = $INCLUDE . "/" . $sub_dir;# print "Install $include_dir, @inclTT\n";
-	  Install $env $include_dir, @inclTT;
-	}
-      }
-    }
-  }
-}
-my $db_dir  = "StDb/include"; #print "db_dir = $db_dir\n";
-if (-d $db_dir) {
-  opendir (DIR, $db_dir) or die "Can't open $db_dir\n";
-  my @subdirS = readdir DIR; 
-  closedir DIR; #print "subdirS = @subdirS\n";
-  foreach my $sub_dir (@subdirS) {
-    next if ($sub_dir =~  /\./ || $sub_dir =~ /\.\./ || $sub_dir =~ /CVS/); 
-    my $sub_DIR = $db_dir . "/" . $sub_dir;
-    if (-d $sub_DIR) { 
-      opendir (DIR, $sub_DIR) or die "Can't open $sub_DIR\n";
-      my @incDb = readdir DIR;
-      closedir DIR; #print "incDb = @incDb\n";
-      my @incsDb = ();
-      foreach my $inc (@incDb) {
-	next if $inc !~ /\.h$/ && $inc !~ /\.hh$/;
-	push @incsDb, $db_dir . "/" . $sub_dir . "/" . $inc;
-      }
-      if ($#incsDb > -1) {
-	my $inc_sub_dir = $INCLUDE . "/" . $sub_dir; #print "Install in $inc_sub_dir : @incsDb\n";
-	Install $env $inc_sub_dir, @incsDb;
-      } 
-    }
-  }
-}
-#print "subdirs = @subdirs\n";
-#print "incT = @incT\n";
+if (! -d "$obj")   {mkdir $obj, 0664;}
 my @Targets = ();
-foreach $dir ("asps/Rexe","asps/rexe",@subdirs,"cern/geant321","cern/minicern") {
-  next if !-d $dir;
-  push @Targets, $OBJ . "/" . $dir . "/Conscript";
+my @conscripts = ("StRoot/Conscript", "pams/Conscript","pams/tables/Conscript");
+#my @conscripts = ("pams/Conscript","tables/Conscript");
+#my @conscripts = ("pams/Conscript");
+for my $conscript (@conscripts) {
+  if (-f $conscript) {
+    my $target = $OBJ . "/" . $conscript;
+    push @Targets, $target; print "new taret = $target\n";
+  }
 }
-#print "Targets: @Targets\n";
-print "BUILD  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ\n";# Targets = @Targets\n";
+#if (-d "./StRoot") {
+#  my $stroot = $build . "/StRoot";
+#  if (! -f "$stroot") {symlink obj, $stroot; print "symlink obj, $stroot\n";}
+#  $Targets .= "#" . $stroot . "/Conscript";
+#}
+print "BUILD  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ Targets = @Targets\n";
+#Link $OBJ => 'StRoot'; print "Link $OBJ => StRoot\n";
 Export qw( env INCLUDE LIB BIN EXPORT BUILD OBJ MAIN);
-Default qw (   .  );
+#Default qw (   .  );
 Build  @Targets;
-if ($#incT > -1) {Install $env $INCLUDE, @incT;}
-if ($#idlT > -1) {   
-   my $tables = $INCLUDE . "/tables";   
-   Install $env $tables, @idlT;   
- } 
+#Build ( "StRoot/Conscript" );
 #________________________________________________________________________________
 # Builder for a C++ module
 package build::command::cxx;
@@ -508,31 +249,6 @@ sub find {
 # Invoke the associated	 C scanner to get signature of included files.
 sub includes {
 # print "==========\tDebug:","In build::command::cxx-includes- parameters = ", @_, "\n";
-    my($self, $tgt) = @_;
-    $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
-}
-#________________________________________________________________________________
-# Builder for a kuip module
-package build::command::kuip;
-
-BEGIN { @ISA = qw(build::command) }
-
-#________________________________________
-sub find {
-# print "==========\tDebug:","In build::command::kuip-find- parameters = ", @_, "\n";
-    $_[1]->{_kuip} || do {
-	my($class, $env) = @_;
-	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
-	$env->{_IFLAGS} = "%(" . $cscanner->iflags . "%)";
-	my($self) = find build::command($env, $env->{KUIPCOM});
-	$self->{scanner} = $cscanner;
-	bless $env->{_kuip} = $self;
-    }
-}
-#________________________________________
-# Invoke the associated	 C scanner to get signature of included files.
-sub includes {
-# print "==========\tDebug:","In build::command::kuip-includes- parameters = ", @_, "\n";
     my($self, $tgt) = @_;
     $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
 }
@@ -624,8 +340,7 @@ package script;
 *topmode        = *File::Find::topmode;
 *topnlink       = *File::Find::topnlink;
 sub find_sources {
-  my $pwd = cwd();
-  if ($pwd =~ '^/afs/') {$File::Find::dont_use_nlink;}
+  if (defined($AFS)) {$File::Find::dont_use_nlink;}
   @search_files   = ();
   if (-d $_[0]) {
     &File::Find::find(\&wanted, @_);
@@ -702,6 +417,26 @@ sub find_idlM {
   return @search_files;
 }
 #________________________________________
+sub cpppath {
+  my $ENV = $_[0]; 
+  my @cpp = split /:/, $ENV->{CPPPATH};
+  my @repositories = Repository_List;
+  my $PWD = cwd(); # print "cpppath PWD = $PWD\n";
+  my $CPPPATH = "";
+  for my $d (@cpp) {
+    if ($d) {
+      for my $repository ($PWD,@repositories) {
+	if ($repository) {$CPPPATH .= " -I$repository/" . $d;}
+      }
+    }
+  }
+  return $CPPPATH;
+}
+#________________________________________
+sub cppflags {
+  return  cpppath($_[0]) . $ENV->{CPPFLAGS};
+}
+#________________________________________
 sub script::wanted {
   #  print "wanted ",$_,"\n";
   ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
@@ -724,8 +459,8 @@ sub script::wanted {
       /^.*\.cc$/      ||
       /^.*\.cxx$/     ||
       /^.*\.g$/       ||
-      /^.*\.cdf$/       ||
-      /^.*\.F$/) {# print "$name\n";
+#     /^.*\.f$/       ||
+      /^.*\.F$/) {#print "$name\n";
     push @search_files, $name; 
   }
 }
@@ -747,7 +482,7 @@ sub script::wanted_idlM {
 	/^hold$/ ||
 	/^wrk$/)
      ) {$prune = 1; return;}
-  if (/^.*\.idl$/) {# print "$name\n";
+  if (/^.*\.idl$/) {#print "$name\n";
     push @search_files, $name; 
   }
 }
@@ -768,7 +503,7 @@ sub script::wanted_Def {
 	/^local$/    ||
 	/^hold$/     ||
 	/^wrk$/))       {$prune = 1; return;}
-  if (/^.*\.h$/      || /^.*\.hh$/ ) {# print "$name\n"; 
+  if (/^.*\.h$/      || /^.*\.hh$/ ) {#    print "$name\n"; 
 					 push @search_files, $name; }
 }
 #________________________________________
@@ -793,25 +528,4 @@ sub script::wanted_inc {
     if ($name =~ '/inc/' ) {# print "$name\n"; 
       push @search_files, $name; }
   }
-}
-#____________________________________________________________
-sub rmkdir {
-  (my $Dir = $_[0]) =~ s/\\/\//g; 
-  my @terms = split "/", $Dir;
-  my $dir = "";
-  foreach my $term (@terms) {
-    if ($dir) {$dir .= "/";}
-    $dir .= $term;
-    if (!-d $dir && ! mkdir($dir,0755)) {die "$0: can't create directory $path ($!).\n";}
-  }
-}
-#________________________________________
-sub sortu {
-  my $old = "";
-  my @sorted_and_uniq = ();
-  foreach my $name (sort @_) {
-    next if "$old" eq "$name";
-    push @sorted_and_uniq, $name; $old = $name;
-  }
-  return @sorted_and_uniq;
 }

@@ -2,11 +2,8 @@
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
-// $Id: St_DataSet.cxx,v 1.53 1999/09/04 00:28:01 fine Exp $
+// $Id: St_DataSet.cxx,v 1.52 1999/07/23 13:26:06 fine Exp $
 // $Log: St_DataSet.cxx,v $
-// Revision 1.53  1999/09/04 00:28:01  fine
-// St_Table::NaN from VP and gloabl dataset have been introduced
-//
 // Revision 1.52  1999/07/23 13:26:06  fine
 // Several new methods to mark the datasets have been introduced
 //
@@ -145,9 +142,6 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
  
-St_DataSet mainSet("DSMAIN");
-St_DataSet *St_DataSet::fgMainSet = &mainSet;
-
 ClassImp(St_DataSet)
  
 //______________________________________________________________________________
@@ -160,14 +154,6 @@ St_DataSet::St_DataSet(const Char_t *name, St_DataSet *parent) : TNamed(name,"St
    }
    fList =0; fParent=0;
    if (parent) parent->Add(this);
-//   else AddMain(this);
-}
-
-//______________________________________________________________________________
-St_DataSet *St_DataSet::GetRealParent(){
-  St_DataSet *p = GetParent();
-  if (fgMainSet && p == fgMainSet) p = 0;
-  return p;
 }
 //______________________________________________________________________________
 St_DataSet::St_DataSet(const St_DataSet &pattern,EDataSetPass iopt)
@@ -219,8 +205,8 @@ void St_DataSet::AddLast(St_DataSet *dataset)
  
   if (!fList) fList = new TList;
  
-  // Check whether this new child has got any parent yet
-  if (!dataset->GetRealParent()) dataset->SetParent(this);
+  // Check whether this new child has got any partent yet
+  if (!dataset->GetParent()) dataset->SetParent(this);
   fList->AddLast(dataset);
 }
  
@@ -234,7 +220,7 @@ void St_DataSet::AddFirst(St_DataSet *dataset)
        fList = new TList;
  
   // Check whether this new child has got any partent yet
-  if (!dataset->GetRealParent()) dataset->SetParent(this);
+  if (!dataset->GetParent()) dataset->SetParent(this);
   fList->AddFirst(dataset);
 }
 

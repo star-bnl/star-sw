@@ -1,35 +1,5 @@
-// $Id: StMaker.cxx,v 1.70 1999/09/14 17:30:37 fine Exp $
+// $Id: StMaker.cxx,v 1.60 1999/08/06 13:01:37 fisyak Exp $
 // $Log: StMaker.cxx,v $
-// Revision 1.70  1999/09/14 17:30:37  fine
-// some clean ups
-//
-// Revision 1.69  1999/09/13 23:22:53  fine
-// improved version of MakeDoc with MakeAssociatedClassList function
-//
-// Revision 1.68  1999/09/13 16:39:24  fine
-// MakeDoc ExpandPath removed to keep path short
-//
-// Revision 1.67  1999/09/13 13:30:46  fine
-// non-active new method MakeAssociatedClassList to be introduced new release
-//
-// Revision 1.66  1999/09/12 16:54:50  fine
-// StMaker::MakeDoc() adjusted to multi-level makers. Some bug fix also
-//
-// Revision 1.65  1999/09/12 15:02:53  fine
-// Multi-level maker source dirs introduced for MakeDoc method
-//
-// Revision 1.64  1999/09/12 01:42:14  fine
-// StMAker::MakeDoc has been adjusted to the new source tree
-//
-// Revision 1.63  1999/09/08 00:13:35  fisyak
-// Add static *GetChain()
-//
-// Revision 1.62  1999/09/03 23:11:48  perev
-// Add .runcont directory
-//
-// Revision 1.61  1999/09/02 22:27:11  fisyak
-// Add SetDEBUG
-//
 // Revision 1.60  1999/08/06 13:01:37  fisyak
 // Add Active flag
 //
@@ -172,7 +142,6 @@
 // StChain virtual base class for StMaker                              //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -192,7 +161,7 @@
 #include "StChain.h"
 #include "St_Table.h"
 
-#include "StMemoryInfo.hh"
+#include "StarClassLibrary/StMemoryInfo.hh"
 
 StMaker *StMaker::fgStChain = 0;
 Int_t MaxWarnings = 26;
@@ -222,8 +191,7 @@ StMaker::StMaker(const char *name,const char *):St_DataSet(name,".maker"),fActiv
    m_DataSet  = new St_ObjectSet(".data") ;Add(m_DataSet);
    m_ConstSet = new St_ObjectSet(".const");Add(m_ConstSet);
    m_GarbSet  = new St_ObjectSet(".garb" );Add(m_GarbSet);
-   m_Inputs   = new St_ObjectSet(".aliases" );Add(m_Inputs);
-   m_RunCont  = new St_ObjectSet(".runcontrol" );Add(m_RunCont);
+   m_Inputs  =  new St_ObjectSet(".aliases" );Add(m_Inputs);
    AddHist(0); m_Histograms = GetHistList();
    gStChain = this; //?????????????????????????????????????????????????????
 ::doPs(GetName(),"constructor");
@@ -298,18 +266,8 @@ St_ObjectSet *StMaker::AddObj(TObject *obj,const char *dir)
   if (h->InheritsFrom(TH1::Class())) h->SetDirectory(0);
   AddObj(h,".hist");
 }    
-//______________________________________________________________________________
- void StMaker::AddRunCont (double par,const char* name,const char* comment)
-{
-   assert (name && name && comment[0]); 
 
-   St_DataSet *dp = new St_DataSet(name,m_RunCont);
-   TString ts("  // "); ts += comment;
-   char buf[40];
-   sprintf(buf,"%f",par);
-   ts.Replace(0,0,buf);
-   dp->SetTitle((const char*)ts);
-}
+
 
 
 //______________________________________________________________________________
@@ -732,136 +690,14 @@ void StMaker::PrintTimer(Option_t *option)
 }
 
 //_____________________________________________________________________________
-static void MakeAssociatedClassList(const TObject *obj, const Char_t *classDir=0)
-{
- //
- // This function creates the html docs of the classes pointed within
- // <obj> class source directory
- //
- // classDir - the name of the directory to search in
- //
- // Search C++ class declaraion looping over all *.h 
- // with the classDir directory of provided otherwise
- // within  this class source directory
- //
-
-  if (!obj) return;
-  const Char_t *thisDir = classDir;
-  if (thisDir == 0 || thisDir[0] == 0) 
-       thisDir = gSystem->DirName(obj->IsA()->GetImplFileName());
-  const Char_t *thisClassName = obj->IsA()->GetName();
-  // Loop over all *.h files within <thisDir> to find
-  // C++ class declarations
-  void *dirhandle = 0;
-  TString className;
-  if ( (dirhandle = gSystem->OpenDirectory(thisDir)) ) 
-  {
-    const Char_t *n = 0;
-    ifstream headerFile;
-    Char_t inBuffer[128] = {0};
-    Int_t lBuf = sizeof(inBuffer);
-    Char_t *nextSym = inBuffer;
-    Int_t status = 0;
-    const Char_t keyWord[] = "class";
-    const Int_t lKeyWord = sizeof(keyWord);
-
-    while ( (n = gSystem->GetDirEntry(dirhandle)) ) {
-      // look for *.h* files but *Cint.h
-      if (!strstr(n,".h") || strstr(n,"Cint.h") ) continue; 
-      Char_t *fullFile = gSystem->ConcatFileName(thisDir,n);
-      headerFile.open(fullFile);
-      if (headerFile.fail()) continue;
-      while (headerFile.getline(inBuffer,lBuf) && !headerFile.eof()) {
-        nextSym = inBuffer;
-        if (status==0)  status = 1;
-        do {
- /* 
-  ************************************************************
-  *
-  *      |<===========================================+
-  *      |                                            |
-  * $-->(1)<===+                                      |
-  *      | ' ' |                                      |
-  *      |---->|                                      |
-  *      |"class"   ' '                               |
-  *      |------>(2)--->(3)<===+                      |
-  *                      | ' ' |                      |
-  *                      |---->|                      | 
-  *                      | name                       |
-  *                      |------>(4)<===+             |
-  *                               | ' ' |             | 
-  *                               |---->|             | 
-  *                               | ";"               | 
-  *                               |------>(5)-------->|
-  *                               |        | add2list    
-  *                               |  ":"   |
-  *                               |------->|
-  *
-  ************************************************************
-  */
-          switch (status) {
-            case 1: {
-                if (*nextSym == ' ' || *nextSym == '\t') break;    
-                const Char_t *classFound = strstr(nextSym,keyWord);
-                if ( classFound && classFound == nextSym){
-                                                        status = 2;
-                   nextSym += lKeyWord-2;
-                }
-                else                         status = 0;             
-                break;
-              }
-            case 2:                       status = 0;
-              if (*nextSym == ' ' || *nextSym == '\t')  status = 3;
-              break;
-            case 3:
-              if (*nextSym == ' ' || *nextSym == '\t') break;    
-                                           status = 0;
-              if (isalpha(*nextSym)) {
-                 className = *nextSym;
-                 nextSym++;
-                 while (isalnum(*nextSym) || *nextSym == '_' ) { 
-                    className += *nextSym++;            status = 4;
-                 }
-                 nextSym--;
-              }
-              break;
-            case 4:
-              if (*nextSym == ' ' || *nextSym == '\t') break;    
-                                          status = 0;
-              if (*nextSym == 0 || *nextSym == ':' || *nextSym == '{' ||
-                  ( *nextSym == '/' && 
-                    (*(nextSym+1) == '/' || *(nextSym+1) == '*') 
-                  )
-                 )                                      status = 5;                 
-              break;
-            case 5:
-              if (strcmp(thisClassName,className.Data())) {
-                TClass *cl = gROOT->GetClass(className.Data());
-                if (cl && !cl->InheritsFrom("StMaker") ) {
-                    gHtml->MakeClass((Text_t *)className.Data());
-                }
-              }
-            default:                                    status = 1;
-               break;
-          };
-        }   while (*(++nextSym) && status ); // end of buffer
-      } // eof()
-      headerFile.close();
-      delete [] fullFile;
-    } 
-  }  
-}
-//_____________________________________________________________________________
 void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseClasses)
 {
  //
- // MakeDoc - creates the HTML doc for this class and for the base classes
- //           (if baseClasses == kTRUE):
- //
- //         *  St_XDFFile   St_Module      St_Table       *
- //         *  St_DataSet   St_DataSetIter St_FileSet     *
- //         *  StMaker      StChain        StEvent        *
- //         *  St_TLA_Maker                               *
+ // MakeDoc - creates the HTML doc for this class and for the base classes:
+ //           (if baseClasses == kTRUE)
+ //         *  St_XDFFile  St_Module      St_Table       *
+ //         *  St_DataSet  St_DataSetIter St_FileSet     *
+ //         *  StMaker     StChain                       *
  //
  // stardir - the "root" directory to lookup the subdirectories as follows.
  //           = "$(STAR)"             by default
@@ -869,18 +705,15 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
  //           = "$(STAR)/StRoot/html" by default
  //
  //            The following subdirectories are used to look it up:
- //            $(stardir)
  //            $(stardir) + "StRoot/St_base"
  //            $(stardir) + "StRoot/StChain"
  //            $(stardir) + "StRoot/xdf2root"
- //            $(stardir) + "StRoot/StarClassLibrary"
- //            $(stardir) + "StRoot/StEvent"
  //            $(stardir) + ".share/tables"
- //            $(stardir) + "include",
- //            $(stardir) + "include/tables",
+ //            $(stardir) + "StRoot/StUtilities"
+ //            $(stardir) + "inc",
  //            $(stardir) + "StRoot/<this class name>",
  //
- //   where $(stardir) is the input parameter (by default = "$STAR")
+ //   where $(stardir) is the input parameter (by default = "$(afs)/rhic/star/packages/dev/")
  //
  // baseClasses - flag to mark whether the base classes HTML docs will be created as well
  //               = kTRUE by default
@@ -898,7 +731,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   else 
      STAR.ReplaceAll("$(afs)","/afs");
 
-  TString classname = IsA()->GetName();
+  TString classname = ClassName();
 
   if (!gHtml) gHtml = new THtml;
 
@@ -914,22 +747,12 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
                            ,"StRoot/StEvent"         , "StEvent"     ,    "StEvent"
                            ,"StRoot/St_TLA_Maker"    , "St_TLA_Maker",    "St_TLA_Maker"
                            ,".share/tables"          , ""            ,     ""
-                           ,"include"                , ""            ,     ""
-                           ,"include/tables"         , ""            ,     ""
+                           ,"inc"                    , ""            ,     ""
                            };
 
   const Int_t lsource = sizeof(source)/sizeof(const Char_t *);
  
-  TString classDir = gSystem->DirName(IsA()->GetImplFileName());
   TString lookup = STAR;
-  lookup += delim;
-
-  lookup += STAR;
-  lookup += "/";
-  lookup += classDir;
-  lookup += delim;
-
-  lookup += STAR;
   lookup += "/StRoot/";
   lookup += classname;
 
@@ -951,8 +774,14 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
     }
   }
   
-//  const Char_t *c = ClassName();  // This trick has to be done since a bug within ROOT
+  const Char_t *c = ClassName();  // This trick has to be done since a bug within ROOT
 
+  lookup += delim;
+  lookup += STAR;
+  lookup += "/StRoot/";
+  lookup += c;
+
+  gSystem->ExpandPathName(lookup);
   lookup.ReplaceAll("//StRoot/","/StRoot/");
   gHtml->SetSourceDir(lookup);
 
@@ -970,7 +799,8 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
                       };
   Int_t nclass = sizeof(classes)/4;
   // Create the definitions of the classes not derived from TObjects
-  TString header = "$STAF/inc/table_header.h";
+  TString header = STAR;
+  header += "/inc/table_header.h";
 
   gSystem->ExpandPathName(header);
   header.ReplaceAll("//inc/","/inc/");
@@ -981,16 +811,14 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   // Update the docs of the base classes
   static Bool_t makeAllAtOnce = kTRUE;
   if (makeAllAtOnce && baseClasses) { 
-      makeAllAtOnce = kFALSE;
-      //  gHtml->MakeAll();  // VF 10/09/99
-      for (i=0;i<nclass;i++) gHtml->MakeClass(classes[i]);
-      MakeAssociatedClassList(this, classDir.Data());
+     makeAllAtOnce = kFALSE;
+     gHtml->MakeAll(); 
+     for (i=0;i<nclass;i++) gHtml->MakeClass(classes[i]);
   }
 
   // Create the doc for this class
-  printf(" Making html for <%s>\n",classname.Data());
-  gHtml->MakeClass((Char_t *)classname.Data());
-  // Create the associated classes docs
+  printf(" Making html for <%s>\n",c);
+  gHtml->MakeClass((Char_t *)c);
 //   Loop on all makers
    TList *tl = GetMakeList();
    if (tl) {
@@ -1042,7 +870,7 @@ static void doPs(const char *who, const char *where)
 }
 
 //_____________________________________________________________________________
-void StMaker::Streamer(TBuffer &)
+void StMaker::Streamer(TBuffer &b)
 { Error("Streamer"," attempt to write %s\n ",GetName());
   assert(0);
 }
@@ -1066,15 +894,3 @@ StMaker *StMaker::New(const Char_t *classname, const Char_t *name, void *title)
   return maker; 
 }
 
-//_____________________________________________________________________________
-void StMaker::SetDEBUG(Int_t l)
-{
-  m_DebugLevel = l;
-//   Loop on all makers
-   TList *tl = GetMakeList();
-   if (!tl) return;
-   
-   TIter nextMaker(tl);
-   StMaker *maker;
-   while ((maker = (StMaker*)nextMaker())) maker->SetDEBUG(l);
-}

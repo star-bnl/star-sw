@@ -1,11 +1,8 @@
 #!/opt/star/bin/perl
 #
-# $Id: swguide.pl,v 1.7 1999/08/18 13:07:54 wenaus Exp $
+# $Id: swguide.pl,v 1.6 1999/08/08 18:51:31 wenaus Exp $
 #
 # $Log: swguide.pl,v $
-# Revision 1.7  1999/08/18 13:07:54  wenaus
-# Move data files to datapool
-#
 # Revision 1.6  1999/08/08 18:51:31  wenaus
 # Report open failure to page
 #
@@ -44,7 +41,7 @@ $q->param('detail','1') if ( $q->param('detail') eq '');
 $dynamic = $q->param('dynamic');
 if ( $dynamic ne "yes" && $q->param('pkg') eq '' && $q->param('find') eq '') {
     # just display the pre-prepared page
-    $fpath = "/star/datapool/web";
+    $fpath = "/usr/local/apache/htdocs/code";
     $fname = $fpath."/swguide-".$q->param('ver')."-".$q->param('detail').".html";
     if ( -e $fname ) {
         open(FILE,"< $fname");
@@ -90,23 +87,27 @@ foreach $typ (sort keys %okExtensions) {
 print <<END;
 The purpose of this page is to gather together information and
 documentation on all offline software components: source code,
-macros, and scripts. Pointers and comments...
+macros, and scripts.
+<p>
+Pointers and comments...
 <ul>
     <li> The basic package list provides links to the more detailed
     package listing, to README file and documentation area (if
     existing, and they are supposed to exist), and to CVS and
     cross-referenced source code browsers for the package.
     <li> The package list with details adds summary info about
-    the package: responsible person,
-                 file count, line count, date of latest mod,
-    days since latest mod, associated PAM.
-    <li> The full listing lists all details of all packages.
+    the package: currently owner (from the karma file),
+                 file count, line count, date of most recent mod,
+    days since most recent mod, associated PAM.
+    <li> The full listing adds all files (the same level of detail
+    as the individual package listings)
     <li> The file listings report the file version in that release
     (linked to the CVS source), username and date of the most
-    recent CVS commit, and the most recent tag for that file version.
-    Filename is linked to associated class doc if it exists.
+    recent CVS commit, and the most recent tag for that file version
     <li> Ball color indicates time since most recent mod:
     <img src="/images/redball.gif">=2days, <img src="/images/greenball.gif">=2weeks, <img src="/images/blueball.gif">=2months, <img src="/images/whiteball.gif">=older
+    <li> <img src="/STAR/html/comp_l/image/new.gif"> C++ filenames now linked 
+    to the ROOT-generated class doc if it exists
 </ul>
 END
 
@@ -325,19 +326,6 @@ if ( $find eq "" && $pkg eq "" && $showFlag > 0 ) {
             printf("    %-10s   %7d   %7d\n",$typ,$typeCounts{$typ},
                    $typeCountsRecent{$typ});
         }
-    }
-    if ( $ver eq 'dev' ) {
-        open(FSTAT,">/star/datapool/web/swguide-stats.txt");
-        print FSTAT "\n<b>Total files $totfiles</b>";
-        print FSTAT "\n<b>Total lines $totlines</b>";
-        print FSTAT "\n  By type:          All    Last 2 months\n";
-        foreach $typ (sort keys %typeCounts) {
-            if ( $typeCounts{$typ} > 0 ) {
-                printf(FSTAT "    %-10s   %7d   %7d\n",$typ,$typeCounts{$typ},
-                       $typeCountsRecent{$typ});
-            }
-        }
-        close(FSTAT);
     }
 }
 

@@ -1,41 +1,5 @@
-# $Id: MakeDll.mk,v 1.113 1999/09/13 22:19:48 fisyak Exp $
+# $Id: MakeDll.mk,v 1.101 1999/08/16 16:31:32 fisyak Exp $
 # $Log: MakeDll.mk,v $
-# Revision 1.113  1999/09/13 22:19:48  fisyak
-# Add inlclude and include/tables in CPP path
-#
-# Revision 1.112  1999/09/12 01:47:26  fisyak
-# merge cons and makel tables h-files into include/tables
-#
-# Revision 1.111  1999/09/09 23:31:57  fisyak
-# Remove clash between MakeDll and cons in RootCint output
-#
-# Revision 1.110  1999/09/09 23:02:16  fisyak
-# Suppress library versioning for users
-#
-# Revision 1.109  1999/09/02 22:42:06  fisyak
-# typo in StEvent
-#
-# Revision 1.108  1999/09/02 20:14:15  fisyak
-# Cleanup for redhat60
-#
-# Revision 1.107  1999/08/26 16:23:36  fisyak
-# Allow partitial modules build
-#
-# Revision 1.106  1999/08/24 13:27:28  fisyak
-# Fix St_Tables name
-#
-# Revision 1.105  1999/08/22 23:09:35  fisyak
-# remove dir path from library linkage
-#
-# Revision 1.104  1999/08/20 22:59:15  fisyak
-# Fix problem with / in ROOT_DIR
-#
-# Revision 1.103  1999/08/20 13:13:29  fisyak
-# Devorce StAF and STAR Library
-#
-# Revision 1.102  1999/08/20 01:42:58  fisyak
-# Devorce StAF and STAR Library
-#
 # Revision 1.101  1999/08/16 16:31:32  fisyak
 # Simplify Makefiles
 #
@@ -250,9 +214,6 @@ include $(STAR_MAKE_HOME)/MakeDirs.mk
 #
 ifdef PKGNAME
 PKG := $(PKGNAME)
-ifeq (tables,$(PKGNAME))
-PKG :=Tables
-endif
 endif
 ifndef SO_LIB
     SO_LIB := $(LIB_DIR)/$(PKG).$(SOEXT)
@@ -283,16 +244,14 @@ SRC_DIRS  += $(ALL_DIRS)
 endif
 
 # 	Define internal and external includes dirs
-INC_NAMES := $(addprefix StRoot/,St_base StChain StUtilities StAnalysisUtilities \
-	xdf2root StarClassLibrary StEvent  StDbLib) \
-        StRoot .share include include/tables .share/$(PKG) pams inc StDb/include
+INC_NAMES := $(addprefix StRoot/,St_base StChain StUtilities xdf2root StarClassLibrary StEvent) \
+              StRoot .share .share/tables .share/$(PKG) pams inc 
 #                            StarClassLibrary/include
 INC_DIRS  := $(wildcard $(GEN_DIR) $(SRC_DIRS) $(SRC_DIR)/include)
-INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) 
+INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) $(ROOT_DIR) 
 ifneq ($(ROOT_DIR),$(STAR))
 INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES)))) $(STAR)
 endif
-INC_DIRS  += $(STAF)/inc $(ROOT_DIR)
 INCINT    := $(INC_DIRS) $(CERN_ROOT)/include $(ROOTSYS)/src
 FFLAGS   += -DCERNLIB_TYPE
 INC_DIRS  += $(INCINT) $(STAF_UTILS_INCS) 
@@ -328,6 +287,12 @@ FILES_SRC := $(filter-out %/.share/%/*.g, $(FILES_SRC))
 FILES_SRC := $(filter-out %_init.cc %_i.cc, $(FILES_SRC)) 
 FILES_SRC := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_SRC)))
 
+ifeq ($(PKG),xdf2root)
+  FILES_SRC  += $(wildcard $(STAR)/asps/staf/dsl/src/*.c)
+  FILES_SRC := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_SRC)))
+  INPUT_DIRS := $(STAR)/asps/staf/dsl/src
+endif
+
 DOIT := $(strip $(FILES_SRC))
 ifneq (,$(DOIT))
 
@@ -341,9 +306,9 @@ MAKEDIRS := $(shell mkdir -p $(OUTPUT_DIRS))
 
 VPATH =  $(INPUT_DIRS) $(OUTPUT_DIRS)
 
+FILES_TAB  := $(wildcard $(SRC_DIR)/St_*_Table.cxx)
 FILES_MOD  := $(wildcard $(SRC_DIR)/St_*_Module.cxx)
 ifneq (tables,$(PKGNAME))
-FILES_TAB  := $(wildcard $(GEN_TAB_INC)/St_*_Table.cxx)
 #FILES_HH   := $(wildcard $(SRC_DIR)/*.h $(SRC_DIR)/*.hh $(SRC_DIR)/*.h $(SRC_DIR)/*.hh)
 FILES_HH   := $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.h) $(wildcard $(dir)/*.hh))
 FILES_HH := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_HH)))
@@ -425,7 +390,7 @@ ifdef FILES_ORD
     endif
   endif
   ifneq (,$(NAMES_ORD))
-    FILES_CINT_ORD :=$(GEN_DIR)/$(PKG)_OCint.cxx
+    FILES_CINT_ORD :=$(GEN_DIR)/$(PKG)_Cint.cxx
     FILES_ORD_H    :=  $(foreach dir, $(SRC_DIRS), \
                           $(wildcard $(addprefix $(dir)/,$(addsuffix .h,$(NAMES_ORD)) \
                                                          $(addsuffix .hh,$(NAMES_ORD)))))
@@ -457,7 +422,7 @@ FILES_CINT += $(FILES_CINT_ORD) $(FILES_CINT_DEF) $(FILES_CINT_MOD)
 FILES_O := $(addprefix $(OBJ_DIR)/,$(addsuffix .$(O), $(notdir $(basename $(FILES_SRC) $(FILES_ORD) $(FILES_CINT)))))
 FILES_O := $(sort $(FILES_O))
 ifneq (tables,$(PKGNAME))
-STAR_FILES_O := $(wildcard $(STAR_OBJ_DIR)/St_*Table*.$(O)  $(STAR_OBJ_DIR)/St_*Module*.$(O))
+STAR_FILES_O := $(wildcard $(STAR_OBJ_DIR)/St_*Table*.$(O))
 FILTER  := $(addprefix  $(STAR_OBJ_DIR)/,$(notdir $(FILES_O)))
 STAR_FILES_O := $(filter-out $(FILTER),$(STAR_FILES_O))
 endif
@@ -469,21 +434,15 @@ all:
 else
 
 MY_SO  := $(SO_LIB)
-ifeq ($(ROOT_DIR),$(STAR))
   QWE    :=$(strip $(sort $(wildcard $(MY_SO).*)))
   SL_NEW :=$(MY_SO).1000
-  ifneq (,$(QWE))
-    NQWE :=$(words $(QWE))
-    QWE  :=$(word $(NQWE),$(QWE))
-    QWE  :=$(subst $(MY_SO).,,$(QWE))
-    QWE  :=$(shell expr $(QWE) + 1)
-    SL_NEW :=$(MY_SO).$(QWE)
-  endif
-else
-  SL_NEW :=$(MY_SO).9999
+ifneq (,$(QWE))
+  NQWE :=$(words $(QWE))
+  QWE  :=$(word $(NQWE),$(QWE))
+  QWE  :=$(subst $(MY_SO).,,$(QWE))
+  QWE  :=$(shell expr $(QWE) + 1)
+  SL_NEW :=$(MY_SO).$(QWE)
 endif
-MY_SO_NOTDIR := $(notdir $(MY_SO))
-SL_NEW_NOTDIR := $(notdir $(SL_NEW))
 MY_AR  := $(addsuffix .a, $(basename $(MY_SO)))
 #
 
@@ -541,9 +500,9 @@ Libraries : $(MY_SO) $(MY_SO_CINT)
 
 
 $(MY_SO) : $(FILES_O) $(wildcard $(OBJ_DIR)/Templates.DB/*.$(O)) $(STAR_FILES_O) $(LIBRARY)
-	cd $(OBJ_DIR) && \
-        $(SO) $(SOFLAGS) $(SoOUT) $(SL_NEW) $(ALL_DEPS) $(SL_EXTRA_LIB) &&  \
-        $(RM) $(MY_SO) &&  cd $(LIB_DIR) &&  $(LN) $(SL_NEW_NOTDIR) $(MY_SO_NOTDIR) 
+	cd $(OBJ_DIR);  \
+        $(SO) $(SOFLAGS) $(SoOUT) $(SL_NEW) $(ALL_DEPS) $(SL_EXTRA_LIB) ; \
+        $(RM) $(MY_SO); $(LN) $(SL_NEW) $(MY_SO)
 	@echo "           Shared library " $(MY_SO) " has been created"   
 $(OBJ_DIR)/%.$(O) : %.c
 	$(CC)  -c $(CPPFLAGS) $(CFLAGS) $(INCLUDES) $(CINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS)
@@ -697,12 +656,9 @@ test_mk:
 	@echo KUIPC_FLAGS= $(KUIPC_FLAGS)
 	@echo ROOT_DIR  = $(ROOT_DIR)
 	@echo SYS_DIR   = $(SYS_DIR)
-	@echo "TOP_DIR  = |"$(TOP_DIR)"|"
-	@echo "ROOT_DIR = |"$(ROOT_DIR)"|"
 	@echo "DIR_GEN   = |"$(DIR_GEN)"|"
 	@echo "GEN_TMP   = |"$(GEN_TMP)"|"
 	@echo "GEN_TAB   = |"$(GEN_TAB)"|"
-	@echo "GEN_TAB_INC= |"$(GEN_TAB_INC)"|"
 	@echo "LIB_DIR   = |"$(LIB_DIR)"|"
 	@echo "OBJ_DIR   = |"$(OBJ_DIR)"|"
 	@echo "DEP_DIR   = |"$(DEP_DIR)"|"
@@ -712,6 +668,3 @@ test_mk:
 	@echo "NAME      = |"$(NAME)"|"
 	@echo "branch    = |"$(branch)"|"
 	@echo "PAMS      = |"$(PAMS)"|"
-	@echo "STAR      = |"$(STAR)"|"
-	@echo "ROOT_DIR  = |"$(ROOT_DIR)"|"
-	@echo "INC_DIRS  = |"$(INC_DIRS)"|"

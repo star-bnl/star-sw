@@ -1,20 +1,5 @@
-# $Id: MakeDirs.mk,v 1.11 1999/09/12 01:47:25 fisyak Exp $
+# $Id: MakeDirs.mk,v 1.6 1999/08/16 16:31:32 fisyak Exp $
 # $Log: MakeDirs.mk,v $
-# Revision 1.11  1999/09/12 01:47:25  fisyak
-# merge cons and makel tables h-files into include/tables
-#
-# Revision 1.10  1999/09/03 17:49:50  fisyak
-# Make makel and cons compartible in OBJ
-#
-# Revision 1.9  1999/08/24 16:00:10  fisyak
-# Bug in STAR_OBJ_DIR
-#
-# Revision 1.8  1999/08/24 13:27:27  fisyak
-# Fix St_Tables name
-#
-# Revision 1.7  1999/08/20 22:59:14  fisyak
-# Fix problem with / in ROOT_DIR
-#
 # Revision 1.6  1999/08/16 16:31:32  fisyak
 # Simplify Makefiles
 #
@@ -35,28 +20,51 @@
 #
 
 SRC_DIR := $(INP_DIR)
-SYS_DIR := $(ROOT_DIR)/.$(STAR_HOST_SYS)
-LIB_DIR := $(SYS_DIR)/lib
-DEP_DIR := $(SYS_DIR)/dep/$(branch)/$(DOMAIN)
-OBJ_DIR := $(SYS_DIR)/obj/$(branch)/$(DOMAIN)
-ifndef STAR_OBJ_DIR 
-  STAR_OBJ_DIR := $(subst $(ROOT_DIR),$(STAR),$(OBJ_DIR))
-endif
-DIR_GEN := $(ROOT_DIR)/.share
-GEN_TMP := $(DIR_GEN)/tmp
-GEN_TAB := $(DIR_GEN)/tables
-GEN_INC := $(ROOT_DIR)/include
-GEN_TAB_INC := $(GEN_INC)/tables
-GEN_DIR := $(DIR_GEN)/$(DOMAIN)
-DOM_DIRS:= $(filter-out CVS, $(notdir $(wildcard $(ROOT_DIR)/pams/*)))
+SYS_DIR := $(ROOT_DIR).$(STAR_HOST_SYS)
+#ifeq (,$(findstring $(LEVEL),0 1))
+#  PKG     := $(notdir $(INP_DIR))
+#  D       := $(subst /, ,$(subst $(ROOT_DIR),,$(INP_DIR)))
+#  DOMAIN  := $(word 2, $(D))
+#  ifneq (,$(findstring $(DOMAIN),gen sim))
+#    DOMAIN  := $(word 3, $(D))
+#  endif
+  ifndef NODEBUG
+      LIB_DIR := $(SYS_DIR)/lib
+      DEP_DIR := $(SYS_DIR)/dep/$(branch)/$(DOMAIN)
+      OBJ_DIR := $(SYS_DIR)/obj/$(branch)/$(DOMAIN)
+   ifndef STAR_OBJ_DIR 
+      STAR_OBJ_DIR := $(STAR)/.$(STAR_HOST_SYS)/obj/$(branch)/$(PKG)
+   endif
+  else
+      LIB_DIR := $(SYS_DIR)/LIB
+      DEP_DIR := $(SYS_DIR)/DEP/$(branch)/$(DOMAIN)
+    ifndef STAR_OBJ_DIR
+      OBJ_DIR := $(SYS_DIR)/OBJ/$(branch)/$(DOMAIN)
+      STAR_OBJ_DIR := $(STAR)/.$(STAR_HOST_SYS)/OBJ/$(branch)/$(PKG)
+   endif
+  endif
+  ifndef NT
+      TMP_DIR := $(SYS_DIR)/tmp
+  else
+      TMP_DIR := $(TEMP)/tmp
+  endif # /NT/
+  export LIB_DIR	#especially for .rootrc
+  ifdef NT
+      BIN_DIR := $(SYS_DIR)/bin
+  endif
+  DIR_GEN := $(ROOT_DIR).share
+  GEN_TMP := $(DIR_GEN)/tmp
+  GEN_TAB := $(DIR_GEN)/tables
+  GEN_DIR := $(DIR_GEN)/$(DOMAIN)
+  DOM_DIRS:= $(filter-out CVS, $(notdir $(wildcard $(ROOT_DIR)/pams/*)))
 #.
-check_sys   := $(shell test -d $(SYS_DIR)  || mkdir -p $(SYS_DIR)) 
-check_lib   := $(shell test -d $(LIB_DIR)  || mkdir -p $(LIB_DIR))
-check_obj   := $(shell test -d $(OBJ_DIR)  || mkdir -p $(OBJ_DIR))
-check_dep   := $(shell test -d $(DEP_DIR)  || mkdir -p $(DEP_DIR))
-check_gen   := $(shell test -d $(DIR_GEN)  || mkdir -p $(DIR_GEN))
-check_neg   := $(shell test -d $(GEN_DIR)  || mkdir -p $(GEN_DIR))
-check_tab   := $(shell test -d $(GEN_TAB)  || mkdir -p $(GEN_TAB))
-check_tmp   := $(shell test -d $(GEN_TMP)  || mkdir -p $(GEN_TMP))
-check_inc   := $(shell test -d $(GEN_INC)  || mkdir -p $(GEN_INC))
-check_tab_inc   := $(shell test -d $(GEN_TAB_INC)  || mkdir -p $(GEN_TAB_INC))
+      check_out   := $(shell test -d $(ROOT_DIR) || mkdir -p $(ROOT_DIR)) 
+      check_sys   := $(shell test -d $(SYS_DIR)  || mkdir -p $(SYS_DIR)) 
+      check_lib   := $(shell test -d $(LIB_DIR)  || mkdir -p $(LIB_DIR))
+      check_obj   := $(shell test -d $(OBJ_DIR)  || mkdir -p $(OBJ_DIR))
+      check_dep   := $(shell test -d $(DEP_DIR)  || mkdir -p $(DEP_DIR))
+      check_gen   := $(shell test -d $(DIR_GEN)  || mkdir -p $(DIR_GEN))
+      check_neg   := $(shell test -d $(GEN_DIR)  || mkdir -p $(GEN_DIR))
+      check_tab   := $(shell test -d $(GEN_TAB)  || mkdir -p $(GEN_TAB))
+      check_tmp   := $(shell test -d $(GEN_TMP)  || mkdir -p $(GEN_TMP))
+#endif

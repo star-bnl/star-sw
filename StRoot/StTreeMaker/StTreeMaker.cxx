@@ -16,7 +16,7 @@ ClassImp(StTreeMaker)
 StTreeMaker::StTreeMaker(const char *name, const char *ioFile,const char *treeName )
 :StIOInterFace(name,"0")
 {
-  fFile = ioFile; fIOMode="0";fTreeName=treeName;fTree=0;fFinished=0;
+  fFile = ioFile; fIOMode="0";fTreeName=treeName;fTree=0;
 }
 //_____________________________________________________________________________
 StTreeMaker::~StTreeMaker(){
@@ -57,13 +57,6 @@ Int_t StTreeMaker::Init()
       SetOutput(fTree);
       fTree->UpdateFile(fFile);
     }
-
-//   	Set filename for runcontBranch
-    StBranch *h = (StBranch*)fTree->Find("histBranch");
-    StBranch *r = (StBranch*)fTree->Find("runcontBranch");
-    if (h && r) r->SetFile(h->GetFile(),0,1);
-      
-//   
     Open();
     
   } else            { //Write mode  
@@ -220,8 +213,6 @@ void StTreeMaker::UpdateTree(Int_t flag)
 //_____________________________________________________________________________
 Int_t StTreeMaker::Finish()
 { 
-  if (fFinished) return 0;
-  fFinished = 1999;
   St_DataSetIter  nextBr(fTree);
   StBranch *br;
   fTree->Clear(); 
@@ -252,8 +243,7 @@ void StTreeMaker::Clear(Option_t *opt)
 void StTreeMaker::FillHistBranch(StBranch *histBr)
 {
   StMaker *top,*upp;
-  St_DataSet *ds,*par,*dothist,*dotrcp;  
-  const char *bname = histBr->GetName();
+  St_DataSet *ds,*par,*dothist;  
 
   top = this;
   while((upp=GetMaker(top))) top = upp;
@@ -264,11 +254,7 @@ void StTreeMaker::FillHistBranch(StBranch *histBr)
     if (!par)				continue;
     if (strcmp(".make",par->GetName()))	continue;
 
-    TString ts(ds->GetName());
-    if (strncmp(bname,"hist"   ,4)==0) ts +="Hist";
-    if (strncmp(bname,"runcont",7)==0) ts +="RunCont";
-
-
+    TString ts(ds->GetName()); ts +="Hist";
     St_ObjectSet *os = new St_ObjectSet(ts);
     ts = ((StMaker*)ds)->GetCVS();
     if (ts.Contains("StMaker.h")) {// GetCVS not overloaded
@@ -281,19 +267,11 @@ void StTreeMaker::FillHistBranch(StBranch *histBr)
     os->SetTitle(ts);
     histBr->Add(os);
 
-    if (strncmp(bname,"hist"   ,4)==0) {//Hist Branch
-      dothist = ds->Find(".hist");
-      if (!dothist)			continue;
-      TList *tl = (TList*)((St_ObjectSet*)dothist)->GetObject();
-      if (!tl || !tl->First())		continue;
-      os->SetObject(tl);}
-      
-    if (strncmp(bname,"runcont",7)==0) {//Run Control Branch
-      dotrcp = ds->Find(".runcont");
-      if (!dotrcp)			continue;
-      os->Update(dotrcp); dotrcp->Delete();}
-      
-
+    dothist = ds->Find(".hist");
+    if (!dothist)			continue;
+    TList *tl = (TList*)((St_ObjectSet*)dothist)->GetObject();
+    if (!tl || !tl->First())		continue;
+    os->SetObject(tl);
   }
   UpdateTree(2);
 }

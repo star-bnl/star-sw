@@ -30,7 +30,6 @@ int ds2ReallocTable (TABLE_HEAD_ST **h, char** ppData, int newsize){
 int ds2realloctable_(TABLE_HEAD_ST **h, char** ppData, int newsize){
   *ppData = (char *) ReAllocate(*h,newsize); return -1;
 }
-#if 0
 #if WIN32
 void	Message( const char *msg, int *ID ){}
 void	MessageOut( const char *msg ){}
@@ -41,5 +40,4 @@ float type_of_call RG32(int *c){
   rannor_(&a, &b);
   return a;
 }
-#endif
 #endif

@@ -59,27 +59,23 @@ enum EReturnCodes {
    TClass *_NAME2_(St_,name)::fgIsA = 0; \
    _TableInit_(name)
 
-#define TableStreamerImp(name)                                           \
+#define TableImp(name) \
+   void _NAME2_(St_,name)::Dictionary() \
+   { \
+      TClass *c = CreateClass(_QUOTE2_(St_,name), Class_Version(), \
+                              DeclFileName(), ImplFileName(), \
+                              DeclFileLine(), ImplFileLine()); \
+                  CreateClass(_QUOTE2_(name,_st), Class_Version(), \
+                              _QUOTE2_(name,.h), _QUOTE2_(name,.h), \
+                               1,               1 ); \
+      fgIsA = c; \
+   } \
+   _TableImp_(name)
+
+#define TableStreamerImp(name) \
 void _NAME2_(St_,name)::Streamer(TBuffer &R__b) {                        \
    if (!R__b.IsReading()) R__b.WriteVersion(_NAME2_(St_,name)::IsA());   \
    St_Table::Streamer(R__b); }                                             
 
-#define TableImp(name)                                             \
-   void _NAME2_(St_,name)::Dictionary()                            \
-   {                                                               \
-      TClass *c = CreateClass(_QUOTE2_(St_,name), Class_Version(), \
-                              DeclFileName(), ImplFileName(),      \
-                              DeclFileLine(), ImplFileLine());     \
-                  CreateClass(_QUOTE2_(name,_st), Class_Version(), \
-                              _QUOTE2_(name,.h), _QUOTE2_(name,.h),\
-                               1,               1 );               \
-      fgIsA = c;                                                   \
-   }                                                               \
-   _TableImp_(name)
-
-#define TableImpl(name)                                            \
-  St_tableDescriptor *_NAME2_(St_,name)::fgColDescriptors = 0;     \
-  TableImp(name)                                                   \
-  TableStreamerImp(name)
 
 #endif 

@@ -1,19 +1,4 @@
 #  $Log: MakeArch.mk,v $
-#  Revision 1.87  1999/09/09 23:02:16  fisyak
-#  Suppress library versioning for users
-#
-#  Revision 1.86  1999/09/02 20:14:15  fisyak
-#  Cleanup for redhat60
-#
-#  Revision 1.85  1999/09/02 20:11:45  fisyak
-#  Completed Construct with shared dirs
-#
-#  Revision 1.84  1999/08/29 17:21:51  fisyak
-#  Add i386_redhat60
-#
-#  Revision 1.83  1999/08/20 13:13:28  fisyak
-#  Devorce StAF and STAR Library
-#
 #  Revision 1.82  1999/08/16 16:31:31  fisyak
 #  Simplify Makefiles
 #
@@ -239,7 +224,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/09/09 23:02:16 $ 
+#             Last modification $Date: 1999/08/16 16:31:31 $ 
 #. default setings
 
 MAKE  := gmake
@@ -281,7 +266,7 @@ CERN_LEVEL =pro
 CERN_STAF = $(CERN)/$(CERN_LEVEL)
 CERN_ROOT_INCS = $(CERN_ROOT)/include/cfortran 
 
-MAKECERNLIB := cernlib -v $(CERN_LEVEL)
+MAKECERNLIB := cernlib
 
 GCC      :=  gcc
 CXX      :=  g++
@@ -314,8 +299,8 @@ CLIBS    :=
 FLIBS    :=
 
 CPPFLAGS := $(UNAMES) $(STAF_ARCH) $(TULL_ARCH) QUIET_ASP DS_ADVANCED
-STIC       := $(STAF_BIN)/stic
-GEANT3     := $(STAF_BIN)/geant3
+STIC       := $(STAR_BIN)/stic
+GEANT3     := $(STAR_BIN)/geant3
 
 ifndef ASU_MALLOC_OFF
   CPPFLAGS += ASU_MALLOC_ON
@@ -446,7 +431,7 @@ ifneq (,$(findstring $(STAR_SYS),rs_aix31 rs_aix32 rs_aix41))
   FEXTEND := -e
 endif 
 
-ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50 i386_redhat51 i386_redhat52 i386_redhat60))
+ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50 i386_redhat51 i386_redhat52))
 #    case linux but gcc is EGCS
 #  ====================
   LINUX :=YESS
@@ -467,12 +452,18 @@ endif
   LDFLAGS  := $(DEBUG) -Wl,-Bstatic
   EXEFLAGS := $(DEBUG) -Wl,-Bdynamic   
   SOFLAGS  := $(DEBUG) -shared  
-  CLIBS    := -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lm -ldl  -rdynamic 
-  FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl -lpgc -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c -lc
-#  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c
+##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lpgc -lm -ldl -rdynamic
+  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic
+##FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
+#  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -lg2c -lI77
+#  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib -lg2c -lI77 -lF77
+  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c
+# -L/usr/local/lib -L/usr/local/egcs-1.1.1 -L/usr/local/egcs-1.1.1/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.60 -lg2c 
+#  SL_EXTRA_LIB := -L/usr/pgi/linux86/lib -lpgc
 ifneq (,$(findstring $(STAR_SYS),i386_linux2))
   FLIBS   += -lI77 -lF77
 endif
+  FLIBS   += -lcrypt
   FFLAGS   := -DPGI  $(DEBUG)
   FEXTEND  := -Mextend
   YACC     := bison -y
