@@ -51,6 +51,7 @@ class StEmcMixerMaker : public StMaker
     Bool_t        mUseDB;
     Bool_t        mFakeTrackEmbed;
     Bool_t        mDoPrint;
+    Bool_t        mEmbedAll;
 
     TH1F          *m_hit_1;
     TH1F          *m_hit_2;
@@ -83,9 +84,10 @@ class StEmcMixerMaker : public StMaker
     void          setClear(Bool_t a)        { mClear = a; } ///< Set kTRUE to clear EMC clusters and points
     void          setAddFlag(Bool_t a)      { mAddHits = a; } ///< Set kTRUE to embed hits
     void          setFakeTrack(Bool_t a)    { mFakeTrackEmbed = a; } ///< Set kTRUE to merge tracks
+    void          setEmbedAll(Bool_t a)     { mEmbedAll = a; } ///< Set kTRUE to embedd all hits even if the first emcCollection has no hits
     void          setPrint(Bool_t a)        { mDoPrint = a; } ///< Set kTRUE to print debug information
     
-    virtual const char *GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcMixerMaker.h,v 1.3 2003/10/08 17:15:30 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    virtual const char *GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcMixerMaker.h,v 1.4 2004/04/16 15:25:27 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcMixerMaker,0) 
 };
