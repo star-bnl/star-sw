@@ -1,0 +1,12 @@
+/*   rm_padrow.idl
+*   Table: rm_padrow
+*        description: Parameters for the tde dedx module      
+*                  parameters for dE/dx correction.
+*	       be used to compensate padrow variation.
+*/
+    struct rm_padrow {           
+      float    rowCorrect[24][45];
+   } ;
+
+/*  Last mod. for rm_padrow:   778542153 May 20 1999 */
+
