@@ -1,4 +1,4 @@
- macro init 
+ macro write
    macro/global/import *
    cd [params]/emc/cal
    

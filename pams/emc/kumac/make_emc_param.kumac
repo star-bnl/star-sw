@@ -15,9 +15,9 @@
    mkdir jet
    cd /dui
    
-   exec init_ems.kumac
-   exec init_cal.kumac  
-   exec init_jet.kumac  
+   exec init_ems.kumac#write
+   exec init_cal.kumac#write
+   exec init_jet.kumac#write
    exec fake_pedestal
    exec fake_adcslope
    
