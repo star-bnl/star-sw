@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridData.cc,v 1.4 2001/04/30 22:20:42 caines Exp $
+ * $Id: StSvtHybridData.cc,v 1.5 2001/08/24 20:58:35 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridData.cc,v $
+ * Revision 1.5  2001/08/24 20:58:35  caines
+ * Zero Seq and nseq for getSequences
+ *
  * Revision 1.4  2001/04/30 22:20:42  caines
  * Add Anode to setList fn so works with ZSP data
  *
@@ -136,6 +139,9 @@ int StSvtHybridData::getSequences(int anode, int& nSequence, StSequence*& sequen
   // The structure StSequence (from StarClassLibrary) gives the first time bin of the sequence, 
   // the length of the sequence and a pointer for the first ADC of the sequence.
 
+
+  nSequence = 0;
+  sequence = NULL;
   for (int i=0;i<nAnodes;i++) {
 
     if (anodeList[i]==anode) {
