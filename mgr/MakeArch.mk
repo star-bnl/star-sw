@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.58  1999/01/25 23:49:12  fisyak
+#  Add MAKEFLAG
+#
 #  Revision 1.57  1999/01/21 02:18:51  fisyak
 #  Add Wall
 #
@@ -149,7 +152,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/01/21 02:18:51 $ 
+#             Last modification $Date: 1999/01/25 23:49:12 $ 
 #. default setings
 
 MAKE  := gmake
@@ -629,7 +632,7 @@ ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
   FFLAGS   :=  $(DEBUG)  -KPIC -w 
   FEXTEND  :=  -e
   CFLAGS   :=  $(DEBUG)  -KPIC 
-  CXXFLAGS :=  $(DEBUG)  -KPIC -features=castop +w
+  CXXFLAGS :=  $(DEBUG)  -KPIC -features=no%castop -features=no%anachronisms +w
   LDFLAGS  :=  $(DEBUG)  -Bstatic 
   EXEFLAGS :=  $(DEBUG)  -z muldefs -Bdynamic -t 
   SOFLAGS  :=  $(DEBUG) -G

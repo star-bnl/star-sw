@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.76 1999/01/21 02:15:31 fisyak Exp $
+# $Id: MakePam.mk,v 1.77 1999/01/25 23:49:14 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.77  1999/01/25 23:49:14  fisyak
+# Add MAKEFLAG
+#
 # Revision 1.76  1999/01/21 02:15:31  fisyak
 # New StChain w/o automatical streamer generation
 #
@@ -105,6 +108,10 @@
 # Revision 1.40  1998/08/10 23:20:53  fisyak
 # Add test for base and tables
 #
+ifdef SILENT
+  .SILENT:.
+endif
+MAKEFLAGS := $(filter-out w, $(MAKEFLAGS))
 ifndef STAR_MAKE_HOME
   STAR_MAKE_HOME := $(STAR)/mgr
 endif
@@ -114,9 +121,6 @@ ASU_MALLOC_OFF :=YES
 include $(STAR_MAKE_HOME)/MakeEnv.mk
 include $(STAR_MAKE_HOME)/MakeArch.mk
 
-ifdef SILENT
-  .SILENT:
-endif
 #	INPUT DIR
 ifndef INP_DIR
   INP_DIR := $(CWD)
@@ -658,7 +662,7 @@ test_mk:
 	@echo SHELL     = $(SHELL) 
 	@echo MAKELEVEL = $(MAKELEVEL) 
 	@echo MAKEFILE  = $(MAKEFILE) 
-	@echo MAKFLAGS  = $(MAKEFLAGS) 
+	@echo MAKEFLAGS = $(MAKEFLAGS) 
 	@echo SUFFIXES  = $(SUFFIXES) 
 	@echo STIC      = $(STIC) 
 	@echo STICFLAGS	= $(STICFLAGS)
