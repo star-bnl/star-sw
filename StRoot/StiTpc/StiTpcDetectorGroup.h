@@ -12,7 +12,7 @@ class StMcEvent;
 class StiTpcDetectorGroup : public StiDetectorGroup<StEvent,StMcEvent>
 {
   public:
-  StiTpcDetectorGroup(bool active, char* baseName);
+  StiTpcDetectorGroup(bool active);
   ~StiTpcDetectorGroup();
 };
 

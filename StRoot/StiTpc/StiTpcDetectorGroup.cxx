@@ -6,13 +6,11 @@
 #include "StiTpcHitLoader.h"
 #include "StiGui/StiDetectorViews.h"
 
-StiTpcDetectorGroup::StiTpcDetectorGroup(bool active, char* baseName)
+StiTpcDetectorGroup::StiTpcDetectorGroup(bool active)
   : StiDetectorGroup<StEvent,StMcEvent>("TPC",
 			      active?new StiTpcHitLoader():0,
-			      new StiTpcDetectorBuilder(active, baseName),0,0)
-{
-  //_hitLoader->setDetector(_detectorBuilder);
-}
+			      new StiTpcDetectorBuilder(active),0,0)
+{}
 
 StiTpcDetectorGroup::~StiTpcDetectorGroup()
 {}
