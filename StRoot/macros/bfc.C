@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.51 1999/05/12 12:52:38 fisyak Exp $
+// $Id: bfc.C,v 1.52 1999/05/13 20:34:54 snelling Exp $
 // $Log: bfc.C,v $
+// Revision 1.52  1999/05/13 20:34:54  snelling
+// added a ChainFlag for TPC evaluation
+//
 // Revision 1.51  1999/05/12 12:52:38  fisyak
 // be sure that default calls once, add printout
 //
@@ -88,14 +91,14 @@ Int_t NoEvents = 0;
 Bool_t DefaultSet = kFALSE;
 //_____________________________________________________________________
 enum EChainOptions { 
-  kNULL =0 ,
-  kXINDF=1 ,kXOUTDF  ,kGSTAR   ,kMINIDAQ ,kFZIN    ,kGEANT   ,kCTEST   ,
-  kField_On,kNo_Field,kTPC     ,kTSS     ,kTRS     ,kTFS     ,kFPC     
-  ,kFSS    ,kEMC     ,kCTF     ,kL3      ,kRICH    ,kSVT     ,kGLOBAL  ,
+  kNULL =0 ,kEvalTPC ,
+  kXINDF   ,kXOUTDF  ,kGSTAR   ,kMINIDAQ ,kFZIN    ,kGEANT   ,kCTEST   ,
+  kField_On,kNo_Field,kTPC     ,kTSS     ,kTRS     ,kTFS     ,kFPC     ,
+  kFSS     ,kEMC     ,kCTF     ,kL3      ,kRICH    ,kSVT     ,kGLOBAL  ,
   kDST     ,kQA      ,kEVENT   ,kANALYS  ,kTREE    ,kAllEvent,kLAST    
 };
 Char_t *ChainOptions[] = {
-  "NULL    ",
+  "NULL    ","EvalTPC ",
   "XINDF   ","XOUTDF  ","GSTAR   ","MINIDAQ ","FZIN    ","GEANT   ","CTEST   ",
   "FieldOn ","NoField ","TPC     ","TSS     ","TRS     ","TFS     ","FPC     ",
   "FSS     ","EMC     ","CTF     ","L3      ","RICH    ","SVT     ","GLOBAL  ",
@@ -103,6 +106,7 @@ Char_t *ChainOptions[] = {
 };
 Char_t *ChainComments[] = {
   "Nothing to comment",
+  "Turn on TPC evaluation switches",
   "Read XDF input file with g2t",
   "Write dst to XDF file",
   "Run gstar for 10 muon track with pT = 10 GeV in |eta|<1",
@@ -133,7 +137,7 @@ Char_t *ChainComments[] = {
   "Nothing to comment",
 };
 UChar_t  ChainFlags[] = {
-  kFALSE   ,
+  kFALSE   ,kFALSE   ,
   kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,
   kTRUE    ,kFALSE   ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kFALSE  ,
   kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,
@@ -141,7 +145,7 @@ UChar_t  ChainFlags[] = {
 };
 //_____________________________________________________________________
 void SetChainOff(){// set all OFF
-  for (Int_t k = kXINDF;k<=kLAST;k++) ChainFlags[k] = kFALSE;
+  for (Int_t k = kEvalTPC;k<=kLAST;k++) ChainFlags[k] = kFALSE;
 }
 //_____________________________________________________________________
 void SetDefaultChain(){// default for standard chain
@@ -169,7 +173,7 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
   TString tChain(Chain);
   tChain.ToLower(); //printf ("Chain %s\n",tChain.Data());
   SetChainOff();
-  for (k = kXINDF; k<kLAST; k++){
+  for (k = kEvalTPC; k<kLAST; k++){
     opt = TString(ChainOptions[k],3);
     opt.ToLower();
     if (!strstr(tChain.Data(),opt.Data())) continue;
@@ -186,12 +190,14 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
       ChainFlags[kTPC]     = kTRUE;
       ChainFlags[kCTEST]   = kTRUE;
       ChainFlags[kNo_Field]= kTRUE;
+      ChainFlags[kEvalTPC] = kTRUE;
       printf(" Switch off everything but\n");
       printf(" Switch on  %s\n",ChainOptions[kXINDF]);
       printf(" Switch on  %s\n",ChainOptions[kMINIDAQ]);
       printf(" Switch on  %s\n",ChainOptions[kTPC]);
       printf(" Switch on  %s\n",ChainOptions[kCTEST]);
       printf(" Switch on  %s\n",ChainOptions[kNo_Field]);
+      printf(" Switch on  %s\n",ChainOptions[kEvalTPC]);
       break;
     case kGSTAR:
       SetDefaultChain();
@@ -337,12 +343,13 @@ void Load(const Char_t *Chain="tfs"){
 void Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0 ){
   // define input file
   if (!infile) {
-    if (ChainFlags[kMINIDAQ]) 
+    if (ChainFlags[kMINIDAQ])
       infile ="/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf"; // laser data
+      //      infile ="/scratch/sakrejda/tpc_s01w_981021_21h_cos_t7_f3.xdf"; // laser data
     else {
       if (ChainFlags[kFZIN])  
-	infile ="/disk1/star/test/psc0049_08_40evts.fzd";                     // zebra file
-      //                 infile = "/afs/rhic/star/tpc/data/trs_muon_10cmdrift_good.fzd";
+	//infile ="/disk1/star/test/psc0049_08_40evts.fzd";                     // zebra file
+	infile = "/afs/rhic/star/tpc/data/trs_muon_10cmdrift_good.fzd";
       else 
 	if (!ChainFlags[kGSTAR]) 
 	  infile ="/afs/rhic/star/data/samples/hijet-g2t.xdf";	       // g2t xdf file
@@ -496,7 +503,9 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar",Char_t *infile=0, C
     if (dbMktpc){
       cout<<"initializing input for the tpc DB"<<endl;
       //      tclMk->SetInput("params","tpcdb:params");  
-      tclMk->tclPixTransOn();
+    }
+    if (ChainFlags[kEvalTPC]) {//Additional switches
+      tclMk->tclPixTransOn(); //Turn on flat adcxyz table
       tclMk->tclEvalOn(); //Turn on the hit finder evaluation
     }
     tclMk->SetDebug();
@@ -511,12 +520,14 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar",Char_t *infile=0, C
   }
   // T R A C K I N G
   if (ChainFlags[kTPC]) {
-    tptMk 	= new St_tpt_Maker("tpc_tracks");
+    tptMk = new St_tpt_Maker("tpc_tracks");
     if (ChainFlags[kMINIDAQ]) {
-      tptMk->tptResOn();      // Turn on the residual table
       tptMk->Set_final(kTRUE);// Turn on the final ntuple.
     }
     else tptMk->tteEvalOn(); //Turn on the tpc evaluation
+    if (ChainFlags[kEvalTPC]) {//Additional switches
+      tptMk->tptResOn();      // Turn on the residual table
+    }
     tptMk->SetDebug();
   }
   if (ChainFlags[kSVT]) {//		stk
