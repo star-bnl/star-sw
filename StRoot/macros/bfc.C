@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.48 1999/05/10 19:15:41 fisyak Exp $
+// $Id: bfc.C,v 1.49 1999/05/11 12:40:38 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.49  1999/05/11 12:40:38  fisyak
+// Add tree for SL99c
+//
 // Revision 1.48  1999/05/10 19:15:41  fisyak
 // Remove bfc_*.C
 //
@@ -146,7 +149,7 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
   printf ("============= You are in %s ===============\n",STAR_VERSION.Data());
   Int_t k, kgo;
   if (!strlen(Chain)) {
-                               printf ("============= \tPossible Options are: \n");
+                               printf ("============= \tPossible Chain Options are: \n");
     for (k=kXINDF;k<kLAST;k++) printf ("============ %2d \t[-]%s : \t%s \n",k,ChainOptions[k],ChainComments[k]);
     gSystem->Exit(1);
   }
@@ -214,7 +217,7 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
     }
   }
   if (!strcmp("SL99c",STAR_VERSION.Data())) {
-    ChainFlags[kTREE]     = kFALSE;
+    //    ChainFlags[kTREE]     = kFALSE;
     ChainFlags[kEVENT]    = kFALSE;
     ChainFlags[kANALYS]   = kFALSE;
   }
