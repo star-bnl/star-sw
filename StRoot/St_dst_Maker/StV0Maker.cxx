@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.22 2000/05/30 20:31:39 genevb Exp $
+// $Id: StV0Maker.cxx,v 1.23 2000/06/13 13:04:21 genevb Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.23  2000/06/13 13:04:21  genevb
+// Fixed bug with not finding primary vertex
+//
 // Revision 1.22  2000/05/30 20:31:39  genevb
 // Adding ev0_am3 option
 //
@@ -194,11 +197,10 @@ Int_t StV0Maker::Make(){
   
   
   dst_vertex_st *vrtx = vertex->GetTable();
-  if( vrtx->vtx_id != kEventVtxId || vrtx->iflag != 1){
-    for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,vrtx++){
-      if( vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1 ) break;
-    }
-  }
+  for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,vrtx++) {
+  // Above loop runs until primary vertex is found. When found, the code
+  // below is executed, and a "break;" gets out of the for-loop. If no
+  // primary vertex is found, the loop just ends normally, doing nothing.
   if (vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1) {
     // ev0
     if(Debug()) gMessMgr->Info() << "StV0Maker::Make(): Calling ev0..." << endm;
@@ -264,7 +266,9 @@ Int_t StV0Maker::Make(){
         }
       }
     }     // If ev0 evaluation switched on 
-  }  
+    break;
+  } // If-then block if primary vertex found
+  } // For-loop to find primary vertex
   return iMake;
 }
 
