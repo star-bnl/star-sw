@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cc,v 1.6 1999/02/22 03:49:43 wenaus Exp $
+ * $Id: StGlobalTrack.cc,v 1.7 1999/02/22 19:25:18 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cc,v $
- * Revision 1.6  1999/02/22 03:49:43  wenaus
- * more careful deletion handling
+ * Revision 1.7  1999/02/22 19:25:18  genevb
+ * StGlobalTrack constructor had a memory leak
+ *
+ * Revision 1.10  1999/02/24 12:49:04  ullrich
+ * Added argument (h) to constructor needed to instatiate helix
  *
  * Revision 1.9  1999/02/23 21:24:32  ullrich
  * Removed obsolete EMC/SMD hit information (future cluster).
@@ -31,7 +34,7 @@
  * Revision 1.5  1999/02/15 16:17:02  wenaus
  * fix double& -> double referencing bug
  *
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.6 1999/02/22 03:49:43 wenaus Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.7 1999/02/22 19:25:18 genevb Exp $";
  * New track constructor to load helix params independently of table
  *
  * Revision 1.3  1999/02/10 21:50:30  wenaus
@@ -42,13 +45,18 @@ static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.6 1999/02/22 03:49:43 wen
  * Revision 1.2  1999/01/15 22:53:44  wenaus
  * version with constructors for table-based loading
  *
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.6 1999/02/22 03:49:43 wenaus Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.7 1999/02/22 19:25:18 genevb Exp $";
 #include "StEvent/StGlobalTrack.hh"
 StGlobalTrack::StGlobalTrack()
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.6 1999/02/22 03:49:43 wenaus Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.7 1999/02/22 19:25:18 genevb Exp $";
  
 StGlobalTrack::StGlobalTrack() : mPidTraits(*this)
 {
+    mEmcHit = 0;  
+    mSmdHit = 0;  
+                             StThreeVector<double>& origin) : 
+  StTrack(trk, curvature, dip, phase, origin)
+}
 
 StGlobalTrack::StGlobalTrack(dst_track_st* trk,
                              double curvature,
