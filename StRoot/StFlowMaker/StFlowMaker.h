@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.8 2000/05/20 00:55:17 posk Exp $
+//  $Id: StFlowMaker.h,v 1.9 2000/05/23 20:09:46 voloshin Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -13,6 +13,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.9  2000/05/23 20:09:46  voloshin
+//  added StFlowPicoEvent, persistent FlowEvent as plain root TTree
+//
 //  Revision 1.8  2000/05/20 00:55:17  posk
 //  Condensed flownanoevent.root somewhat.
 //
@@ -81,6 +84,8 @@ class StPrimaryTrack;
 class StParticleDefinition;
 class StFlowEvent;
 class StFlowNanoEvent;
+class StFlowPicoTrack;
+class StFlowPicoEvent;
 class StFlowSelection;
 
 class StFlowMaker : public StMaker {
@@ -99,11 +104,14 @@ public:
   StFlowEvent*  FlowEventPointer() const;
   void          NanoEventWrite(Bool_t flag=kFALSE);
   void          NanoEventRead(Bool_t flag=kFALSE);
+  void          PicoEventWrite(Bool_t flag=kFALSE);
+  void          PicoEventRead(Bool_t flag=kFALSE);
   void          FlowEventWrite(Bool_t flag=kFALSE);
   void          FlowEventRead(Bool_t flag=kFALSE);
   void          SetNanoEventFileName(const Char_t* name="flownanoevent.root");
+  void          SetPicoEventFileName(const Char_t* name="flowPicoevent.root");
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.8 2000/05/20 00:55:17 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.9 2000/05/23 20:09:46 voloshin Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -114,31 +122,43 @@ private:
   Char_t           mNanoEventFileName[32];    // nano-DST file name
   Bool_t           mNanoEventWrite;           // switch for nano-DST
   Bool_t           mNanoEventRead;            // switch for nano-DST
+  Char_t           mPicoEventFileName[32];    // nano-DST file name
+  Bool_t           mPicoEventWrite;           // switch for nano-DST
+  Bool_t           mPicoEventRead;            // switch for nano-DST
   Bool_t           mFlowEventWrite;           // switch for StFlowEvent
   Bool_t           mFlowEventRead;            // switch for StFlowEvent
   UInt_t           mNanoEventCounter;         // number of Bytes in nano event
+  UInt_t           mPicoEventCounter;         // number of Bytes in nano event
   StFlowSelection* pFlowSelect;               //! selection object
   Int_t            ReadPhiWgtFile();          // get the weight file
   void             InitNanoEventWrite();      // open nano-DST
   void             InitNanoEventRead();       // open nano-DST
+  void             InitPicoEventWrite();      // open nano-DST
+  void             InitPicoEventRead();       // open nano-DST
   void             InitEventRead();           // open StEvent
   void             InitFlowEventWrite();      // open StFlowEvent
   void             InitFlowEventRead();       // open StFlowEvent
   void             FillFlowEvent();           // fill the flow event
   void             FillNanoEvent();           // fill nano-DST
   Int_t            FillFromNanoDST(const StFlowNanoEvent* pFlowNanoEvent);
+  void             FillPicoEvent();           // fill nano-DST
+  Int_t            FillFromPicoDST(const StFlowPicoEvent* pFlowPicoEvent);
   void             WriteFlowEvent();          // write StFlowEvent
   void             CloseNanoEventWrite();     // Close nano-DST
   void             CloseNanoEventRead();      // Close nano-DST
+  void             ClosePicoEventWrite();     // Close nano-DST
+  void             ClosePicoEventRead();      // Close nano-DST
   void             CloseEventRead();          // close StEvent
   void             CloseFlowEventWrite();     // close StFlowEvent
   void             CloseFlowEventRead();      // close StFlowEvent
   StEvent*         pEvent;                    //! pointer to DST data
   StFlowEvent*     pFlowEvent;                // pointer to micro-DST data
   StFlowNanoEvent* pFlowNanoEvent;            // pointer to nano-DST Event
+  StFlowPicoEvent* pFlowPicoEvent;            // pointer to nano-DST Event
   TTree*           pFlowTree;                 // pointer to nano-DST Tree
   TTree*           pFlowMicroTree;            // pointer to the micro DST Tree
   TFile*           pFlowNanoDST;              //! pointer to nano-DST File
+  TFile*           pFlowPicoDST;              //! pointer to nano-DST File
   TFile*           pFlowDST;                  //! pointer to micro-DST File
 
   ClassDef(StFlowMaker, 1)                    // macro for rootcint
@@ -147,18 +167,27 @@ private:
 inline StFlowEvent* StFlowMaker::FlowEventPointer() const { return pFlowEvent; }
 
 inline void StFlowMaker::FlowEventWrite(Bool_t flag) 
-          { mFlowEventWrite=flag; mFlowEventRead=kFALSE; }
+          { mFlowEventWrite=flag; mFlowEventRead=!flag; }
 
 inline void StFlowMaker::FlowEventRead(Bool_t flag) 
-          { mFlowEventRead=flag; mFlowEventWrite=kFALSE; mNanoEventRead=kFALSE;}
+          { mFlowEventRead=flag;}
 
 inline void StFlowMaker::NanoEventWrite(Bool_t flag) 
-          { mNanoEventWrite=flag; mNanoEventRead=kFALSE; }
+          { mNanoEventWrite=flag;}
+
+inline void StFlowMaker::PicoEventWrite(Bool_t flag) 
+          { mPicoEventWrite=flag; }
 
 inline void StFlowMaker::NanoEventRead(Bool_t flag) 
-          { mNanoEventRead=flag; mNanoEventWrite=kFALSE; mFlowEventRead=kFALSE;}
+          { mNanoEventRead=flag;}
+
+inline void StFlowMaker::PicoEventRead(Bool_t flag) 
+          { mPicoEventRead=flag;}
 
 inline void StFlowMaker::SetNanoEventFileName(const Char_t* name) {
   strncpy(mNanoEventFileName, name, 31); mNanoEventFileName[31] = '\0'; }
+
+inline void StFlowMaker::SetPicoEventFileName(const Char_t* name) {
+  strncpy(mPicoEventFileName, name, 31); mPicoEventFileName[31] = '\0'; }
 
 #endif
