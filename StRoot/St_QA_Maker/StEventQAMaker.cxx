@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.1 2000/09/01 16:59:02 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.2 2000/09/08 18:55:53 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.2  2000/09/08 18:55:53  lansdell
+// turned on FTPC primary track histograms
+//
 // Revision 2.1  2000/09/01 16:59:02  genevb
 // Change for V0 plots
 //
@@ -749,7 +752,6 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_ppsi_phiTS->Fill(phi_deg,psi_deg);
 	}
 
-/* The following are for the FTPC, which doesn't do primary tracking yet.
 // now fill all FTPC East histograms ------------------------------------------
 	if (primtrk->flag()>=700 && primtrk->flag()<800 && primtrk->topologyMap().numberOfHits(kFtpcEastId)>0) {
 
@@ -815,7 +817,6 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_pfpoint_lengthFW->Fill(primtrk->length(),
 				   Float_t(primtrk->fitTraits().numberOfFitPoints()));
 	}
-*/
       }
     }
     hists->m_primtrk_good->Fill(cnttrkg);

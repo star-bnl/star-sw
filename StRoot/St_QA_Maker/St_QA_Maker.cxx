@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 2.1 2000/09/01 16:59:03 genevb Exp $
+// $Id: St_QA_Maker.cxx,v 2.2 2000/09/08 18:55:54 lansdell Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.2  2000/09/08 18:55:54  lansdell
+// turned on FTPC primary track histograms
+//
 // Revision 2.1  2000/09/01 16:59:03  genevb
 // Change for V0 plots
 //
@@ -893,7 +896,6 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_ppsi_phiTS->Fill(t->phi0,t->psi);
         }
 
-/* The following is for the FTPC, which doesn't do primary tracking yet.
 //  now fill all FTPC East histograms ------------------------------------------------
         if (t->iflag>=700 && t->iflag<800 && t->det_id==5) {
 	
@@ -954,7 +956,6 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_pnpoint_lengthFW->Fill(t->length,Float_t(trkpnt));
         hists->m_pfpoint_lengthFW->Fill(t->length,Float_t(trkfpnt));	        
         }
-*/
       }
     }
     hists->m_primtrk_good->Fill(cnttrkg);
