@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_printinfo.C,v 2.1 2000/06/23 18:04:54 kathy Exp $
+// $Id: bfcread_hist_printinfo.C,v 2.2 2002/01/29 20:03:08 genevb Exp $
 // $Log: bfcread_hist_printinfo.C,v $
+// Revision 2.2  2002/01/29 20:03:08  genevb
+// Switched default dir from QA to EventQA
+//
 // Revision 2.1  2000/06/23 18:04:54  kathy
 // new macro that uses new method in StHistUtil to dump hist info (name,entries,mean,rms) to screen & file
 //
@@ -41,7 +44,7 @@ void bfcread_hist_printinfo(
   const Char_t *MainFile=
     "/star/rcf/test/dev/tfs_redhat61/Tue/year_1h/hc_standard/hc_standard.40_evts.hist.root",
   const Char_t *fname="HistInfo.out",
-  const Char_t *MakerHistDir="QA",
+  const Char_t *MakerHistDir="EventQA",
   const Char_t *TopDirTree="bfcTree")
 {
   cout << "bfcread_hist_printinfo.C, input hist file = " 

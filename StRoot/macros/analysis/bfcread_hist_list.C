@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list.C,v 1.20 2000/06/13 18:41:59 kathy Exp $ 
+// $Id: bfcread_hist_list.C,v 1.21 2002/01/29 20:03:08 genevb Exp $ 
 // $Log: bfcread_hist_list.C,v $
+// Revision 1.21  2002/01/29 20:03:08  genevb
+// Switched default dir from QA to EventQA
+//
 // Revision 1.20  2000/06/13 18:41:59  kathy
 // had to move order of library loading for some unknown reason...
 //
@@ -100,7 +103,7 @@ StIOMaker *IOMk=0;
 void bfcread_hist_list(
   const Char_t *MainFile=
     "/afs/rhic/star/data/samples/gstar.hist.root",
-  const Char_t *MakerHistDir="QA",
+  const Char_t *MakerHistDir="EventQA",
   const Char_t *TopDirTree="bfcTree")
 {
 

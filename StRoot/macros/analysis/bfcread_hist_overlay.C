@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_overlay.C,v 1.5 2000/07/26 19:53:45 lansdell Exp $
+// $Id: bfcread_hist_overlay.C,v 1.6 2002/01/29 20:03:08 genevb Exp $
 // $Log: bfcread_hist_overlay.C,v $
+// Revision 1.6  2002/01/29 20:03:08  genevb
+// Switched default dir from QA to EventQA
+//
 // Revision 1.5  2000/07/26 19:53:45  lansdell
 // made changes for creating new QA histograms
 //
@@ -54,7 +57,7 @@ StIOMaker *IOMk=0;
 void bfcread_hist_overlay(
   const Char_t *MainFile=
      "/afs/rhic/star/data/samples/gstar.hist.root",
-  const Char_t *MakerHistDir="QA",
+  const Char_t *MakerHistDir="EventQA",
   const Char_t *TopDirTree="bfcTree",
   const Char_t *PageTitle="")
 {             

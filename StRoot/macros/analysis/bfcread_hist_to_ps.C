@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.26 2000/09/05 19:52:20 lansdell Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.27 2002/01/29 20:03:08 genevb Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.27  2002/01/29 20:03:08  genevb
+// Switched default dir from QA to EventQA
+//
 // Revision 1.26  2000/09/05 19:52:20  lansdell
 // fixed a minor syntax error
 //
@@ -128,7 +131,7 @@ StIOMaker *IOMk=0;
 void bfcread_hist_to_ps(
   const Char_t *MainFile=
      "/afs/rhic/star/data/samples/gstar.hist.root",
-  const Char_t *MakerHistDir="QA",
+  const Char_t *MakerHistDir="EventQA",
   const Char_t *TopDirTree="bfcTree",
   const Char_t *psFile="QA_hist.ps",
   const Char_t *PageTitle="",
