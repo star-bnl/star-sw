@@ -1,0 +1,19 @@
+
+* 8/4/98 - K. Turner - editted to make standard
+* ***************************************************************
+
+ macro sca
+   
+  macro/global/import *
+
+    cd [dst]
+    
+    tdm/newtable dstrack         dst_track 10000
+    
+    cd /dui
+
+return
+
+*---------------------------------*
+*---------------------------------*
+

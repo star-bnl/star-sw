@@ -1,0 +1,34 @@
+* 
+* written by D. Weerasundara -- dhammika@npl.washington.edu
+* modified by L.D. Carr -- lcarr@u.washington.edu
+* 8/4/98 K.Turner - editted to make it standard
+*
+
+*********************************************************
+ MACRO run_filter
+   macro/global/import *
+     
+  ami/module/call sca_filter_
+	[dst]/dstrack  _
+	[evgen]/particle  _
+        [params]/ebye/sca_filter_const _
+	[params]/ebye/sca_switch _
+	[params]/ebye/sca_const _
+	[data]/ebye/sca/sca_in
+RETURN
+ 
+*********************************************************
+ 
+
+MACRO run_runsca 
+  macro/global/import *
+    
+    ami/module/call sca_runsca_
+        [params]/ebye/sca_switch _
+        [params]/ebye/sca_const _
+	[data]/ebye/sca/sca_in _
+	[data]/ebye/sca/sca_ensemble_ave _
+	[data]/ebye/sca/sca_prior _
+	[data]/ebye/sca/sca_out
+RETURN
+*********************************************************
