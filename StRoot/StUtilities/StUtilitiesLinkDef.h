@@ -5,6 +5,5 @@
 #pragma link C++ class StMessTypePair;
 #pragma link C++ class StMessTypeList;
 #pragma link C++ class StMessage;
-#pragma link C++ class StMessageManager;
 #pragma link C++ class StMessageCounter;
 #endif

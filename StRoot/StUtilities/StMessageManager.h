@@ -161,16 +161,16 @@ class StMessageManager : public StMessMgr {
    virtual StMessMgr& Fatal(const char* mess="", const char* opt="E",const char *sourceFileName=0, int lineNumber=-1)
    { return Message(mess, "E", opt,sourceFileName,lineNumber);}
 
-#ifdef __ROOT__
-   ClassDef(StMessageManager,0)
-#endif
 };
 
 
 #endif
 
-// $Id: StMessageManager.h,v 1.24 2004/04/15 16:03:38 fine Exp $
+// $Id: StMessageManager.h,v 1.25 2004/04/15 21:28:02 fine Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.25  2004/04/15 21:28:02  fine
+// Remove the redundant StMessageManager RootCint dictionary. User shoudl use the base StMessMgr class anyway
+//
 // Revision 1.24  2004/04/15 16:03:38  fine
 // move StMessMgr class to St_base and change the interface
 //
