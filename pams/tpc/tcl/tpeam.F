@@ -17,25 +17,25 @@ C
 C----------------------------------------------------------------------
 C
       INTEGER FUNCTION TPEAM( 
-     +                        tphith, tphit 
-     +,                       g2t_trackh,g2t_track
-     +,                       g2t_tpc_hith,g2t_tpc_hit
-     +,                       tssparh, tsspar 
-     +,			      tpclusterh, tpcluster
-     +,			      tpseqh, tpseq
-     +,			      tppixelh, tppixel 
-     +,			      tpmcpixh, tpmcpix 
-     +,			      pad_planeh, pad_plane
-     +,			      detectorh, detector,
+     +                        tphit_h, tphit 
+     +,                       g2t_track_h,g2t_track
+     +,                       g2t_tpc_hit_h,g2t_tpc_hit
+     +,                       tsspar_h, tsspar 
+     +,			      tpcluster_h, tpcluster
+     +,			      tpseq_h, tpseq
+     +,			      tppixel_h, tppixel 
+     +,			      tpmcpix_h, tpmcpix 
+     +,			      pad_plane_h, pad_plane
+     +,			      detector_h, detector,
      +	                      tclpar_h, tclpar,
-     +                        tpc_indexh, tpc_index,
-     +                        tpc_index_typeh, tpc_index_type)
+     +                        tpc_index_h, tpc_index,
+     +                        tpc_index_type_h, tpc_index_type)
 
       IMPLICIT NONE
 
 C   Input arguments  (One to a line with definition after ! ) 
 C
-C     tphith:
+C     tphit_h:
 C     tphit:
 C
 C   Output arguments : 
@@ -92,85 +92,7 @@ c
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
-#include "tas_structures.inc"
-#include "tas_user_codes.inc"
-
-#include "tcl_tphit_pars.inc"
-#include "tcl_tphit_st.inc"
-
-#include "tss_tppixel_pars.inc"
-#include "tss_tppixel_st.inc"
-
-#include "tss_tpmcpix_pars.inc"
-#include "tss_tpmcpix_st.inc"
-
-#include "tcl_tpcluster_pars.inc"
-#include "tcl_tpcluster_st.inc"
-
-#include "tcl_tpseq_pars.inc"
-#include "tcl_tpseq_st.inc"
-
-#include "g2t_g2t_track_pars.inc"
-#include "g2t_g2t_track_st.inc"
-#include "g2t_g2t_tpc_hit_pars.inc"
-#include "g2t_g2t_tpc_hit_st.inc"
-
-#include "tss_tsspar_pars.inc"
-#include "tss_tsspar_st.inc"
-
-#include "tpg_pad_plane_pars.inc"
-#include "tpg_pad_plane_st.inc"
-
-#include "tpg_detector_pars.inc"
-#include "tpg_detector_st.inc"
-
-#include "tcl_tclpar_pars.inc"
-#include "tcl_tclpar_st.inc"
-
-#include "tcl_tpc_index_pars.inc"
-#include "tcl_tpc_index_st.inc"
-
-#include "tcl_tpc_index_type_pars.inc"
-#include "tcl_tpc_index_type_st.inc"
-C-----------------------------------------------------------------------
-      RECORD/ table_head_st/ tphith
-      RECORD/ tphit_row_st/ tphit(*)
-
-      RECORD/ table_head_st/ g2t_trackh
-      RECORD/ g2t_track_row_st/ g2t_track(*)
-      RECORD/ table_head_st/ g2t_tpc_hith
-      RECORD/ g2t_tpc_hit_row_st/ g2t_tpc_hit(*)
-
-      RECORD/ table_head_st/ tssparh
-      RECORD/ tsspar_row_st/ tsspar(*)
-
-      RECORD/ table_head_st/ tpclusterh
-      RECORD/ tpcluster_row_st/ tpcluster(*)
-
-      RECORD/ table_head_st/ tpseqh
-      RECORD/ tpseq_row_st/ tpseq(*)
-      
-      RECORD/ table_head_st/ tppixelh
-      RECORD/ tppixel_row_st/ tppixel(*)
-      
-      RECORD/ table_head_st/ tpmcpixh
-      RECORD/ tpmcpix_row_st/ tpmcpix(*)
-      
-      RECORD/ table_head_st/ pad_planeh
-      RECORD/ pad_plane_row_st/ pad_plane(*)
-      
-      RECORD/ table_head_st/ detectorh
-      RECORD/ detector_row_st/ detector(*)
-
-      RECORD/ table_head_st/ tclpar_h
-      RECORD/ tclpar_row_st/ tclpar(*)
-
-      RECORD/ table_head_st/ tpc_indexh
-      RECORD/ tpc_index_row_st/ tpc_index(*)
-
-      RECORD/ table_head_st/ tpc_index_typeh
-      RECORD/ tpc_index_type_row_st/ tpc_index_type(*)
-
+#include "tpeam.inc"
 C-----------------------------------------------------------------------
 c
 c        functions
@@ -182,8 +104,8 @@ C-----------------------------------------------------------------------
 c
 c        HBOOK variables...
 c
-         common/quest/iquest
-         integer iquest(100)
+ccccc         common/quest/iquest
+ccccc         integer iquest(100)
 
          
          integer nquota,nvar,icycle,nvar2,nvar3,nvar4,nvar5,nvar6
@@ -319,7 +241,7 @@ cc for cleanup -- try to match up ghost and lost hits...
 c
 c        set status
 c
-         tpeam = tucod_ok
+         tpeam = STAFCV_OK
 
          if(first)then
             first = .false.
@@ -382,7 +304,7 @@ c******************** we only want visualization ntuples 500,300,600
 c fill ntuple 500 = pixel information
 	WRITE(6,*)'OFFSETTING PIXELS BY ...',
      +		3.0*tsspar(1).tau*tsspar(1).v_drift
-            do kclus=1,tpclusterh.nok
+            do kclus=1,tpcluster_h.nok
                vec(4)=kclus
                nseq_hit=tpcluster(kclus).nseq
                ktpc_row=tpcluster(kclus).tpc_row
@@ -395,7 +317,7 @@ c fill ntuple 500 = pixel information
                do kseq_count=1,nseq_hit
                   kpad = tpseq(kseq).secpad
                   kstatus=tgc_pad_to_x(float(kpad),float(krow),
-     +                 vec(1),pad_planeh,pad_plane)
+     +                 vec(1),pad_plane_h,pad_plane)
                   kpix = tpseq(kseq).jpix
                   kdatum=tppixel(kpix).datum
                   numpix_seq=kdatum/numpix_factor ! 24mar95 malisa
@@ -420,7 +342,7 @@ c  offset between the pixels and the hits, so offset the pixels too
             enddo
             call hrout(500+ihisto,icycle,' ')
 c fill a much simpler version of ntuple 300, containing no correlation to MC data...
-            do ihit_recon=1,tphith.nok
+            do ihit_recon=1,tphit_h.nok
                vec(1) = tphit(ihit_recon).track ! may be useful some day even w/o MC
                vec(2) = 0.0
                vec(3) = 0.0
@@ -453,7 +375,7 @@ c fill a much simpler version of ntuple 300, containing no correlation to MC dat
             enddo
             call hrout(300+ihisto,icycle,' ')
 c fill ntuple 600, local hit information
-            do khit=1,tphith.nok
+            do khit=1,tphit_h.nok
                vec(3) = tphit(khit).id
                kclus = tphit(khit).cluster
                vec(4) = kclus
@@ -484,13 +406,13 @@ c clear overall pointer list numbers...
             enddo
          enddo
 
-         status=tls_quick_sort_i(tphith.nok,tphit(1).track,
+         status=tls_quick_sort_i(tphit_h.nok,tphit(1).track,
      +        tphit(2).track,tphit)
          if (.not.scv_state(status,'i')) then
             call scv_messages(status,mess)
             write(6,*)' error upon tphit sort'
          endif
-         status=tls_quick_sort_i(g2t_tpc_hith.nok,
+         status=tls_quick_sort_i(g2t_tpc_hit_h.nok,
      +        g2t_tpc_hit(1).track_p,
      +        g2t_tpc_hit(2).track_p,g2t_tpc_hit)
          if (.not.scv_state(status,'i')) then
@@ -501,7 +423,7 @@ c clear overall pointer list numbers...
 c         ihit_recon=0
 c must skip past any reconstructed hits with track=0
 c (these are "ghost" or "noise" hits mal 22jun95)
-         do ihit_recon=1,tphith.nok
+         do ihit_recon=1,tphit_h.nok
             if (tphit(ihit_recon).track.ne.0) goto 19
 c but still store it in overall pointer list
             idummy = int(tphit(ihit_recon).row)
@@ -525,7 +447,7 @@ c
             enddo
          enddo
 
-         do itrk = 1, g2t_trackh.nok
+         do itrk = 1, g2t_track_h.nok
             nhitrk = 0
             nhitrk2 = 0
             nmctrk = 0
@@ -542,7 +464,7 @@ c
 c     build pointers to mc hits on itrk
 c     
  1          ihit_mc=ihit_mc+1
-            if (ihit_mc.gt.g2t_tpc_hith.nok) goto 2
+            if (ihit_mc.gt.g2t_tpc_hit_h.nok) goto 2
             if (g2t_tpc_hit(ihit_mc).track_p.eq.itrk) then
                numbv = g2t_tpc_hit(ihit_mc).volume_id
 c only consider those hits that are actually on padrows (not on
@@ -586,7 +508,7 @@ c
 c     build pointers to reconstructed hits on itrk
 c     
  3          ihit_recon=ihit_recon+1
-            if (ihit_recon.gt.tphith.nok) goto 4
+            if (ihit_recon.gt.tphit_h.nok) goto 4
             if (tphit(ihit_recon).track.eq.itrk) then
                nhitrk = nhitrk + 1
                if(tphit(ihit_recon).row.ge.40)then
@@ -717,12 +639,12 @@ c     nearby reconstructed hit with same MCID
                         if(closest.lt.max_sep_same_mcid)then
 c-------------------------------------------
 c store the correlated pair in the tpc_index table..- ** new 24jul95 mal
-                           tpc_indexh.nok = tpc_indexh.nok+1
-                           tpc_index(tpc_indexh.nok).type = 
+                           tpc_index_h.nok = tpc_index_h.nok+1
+                           tpc_index(tpc_index_h.nok).type = 
      +                          tpc_index_type(1).tphit_mhitstpc
-                           tpc_index(tpc_indexh.nok).key1 =
+                           tpc_index(tpc_index_h.nok).key1 =
      +                          tphit(dtptr(idummy,jdummy)).id
-                           tpc_index(tpc_indexh.nok).key2 = 
+                           tpc_index(tpc_index_h.nok).key2 = 
      +                          g2t_tpc_hit(mcptr(idummy,i_incidence)).id
 c-------------------------------------------                           
                            used_recon_hit(jdummy)=.true.
@@ -842,7 +764,7 @@ c  a ghost entry (if appropriate) in ntuple 300+ihisto after clean-up
             
             call hfn(400+ihisto,vec)
  99         continue
-         enddo                  ! do itrk = 1, g2t_trackh.nok
+         enddo                  ! do itrk = 1, g2t_track_h.nok
          
          call hrout(400+ihisto,icycle,' ')
          call hrout(650+ihisto,icycle,' ')
@@ -909,12 +831,12 @@ c not lost after all..
                      ptr_ghost=maybe_ghost(jdummy,idummy)
 c-------------------------------------------
 c store the correlated pair in the tpc_index table... -- ** new 24jul95 mal
-                     tpc_indexh.nok = tpc_indexh.nok+1
-                     tpc_index(tpc_indexh.nok).type = 
+                     tpc_index_h.nok = tpc_index_h.nok+1
+                     tpc_index(tpc_index_h.nok).type = 
      +                    tpc_index_type(1).tphit_mhitstpc
-                     tpc_index(tpc_indexh.nok).key1 =
+                     tpc_index(tpc_index_h.nok).key1 =
      +                    tphit(ptr_ghost).id
-                     tpc_index(tpc_indexh.nok).key2 = 
+                     tpc_index(tpc_index_h.nok).key2 = 
      +                    g2t_tpc_hit(ptr_lost).id
 c-------------------------------------------
                      vec(5)=tphit(ptr_ghost).x
@@ -963,11 +885,11 @@ c find out how many mc tracks contributed to this hit's cluster...
                   else          ! it really is lost...
 c-------------------------------------------
 c store the correlated pair in the tpc_index table... -- ** new 24jul95 mal
-                     tpc_indexh.nok = tpc_indexh.nok+1
-                     tpc_index(tpc_indexh.nok).type = 
+                     tpc_index_h.nok = tpc_index_h.nok+1
+                     tpc_index(tpc_index_h.nok).type = 
      +                    tpc_index_type(1).tphit_mhitstpc
-                     tpc_index(tpc_indexh.nok).key1 = 0
-                     tpc_index(tpc_indexh.nok).key2 = 
+                     tpc_index(tpc_index_h.nok).key1 = 0
+                     tpc_index(tpc_index_h.nok).key2 = 
      +                    g2t_tpc_hit(mcptr(idummy,i_incidence)).id
 c-------------------------------------------
                      vec(5)=0.0
@@ -1000,12 +922,12 @@ c
                      ptr_ghost=maybe_ghost(i_maybe_ghost,idummy)
 c-------------------------------------------
 c store the correlated pair in the tpc_index table... -- ** new 24jul95 mal
-                     tpc_indexh.nok = tpc_indexh.nok+1
-                     tpc_index(tpc_indexh.nok).type = 
+                     tpc_index_h.nok = tpc_index_h.nok+1
+                     tpc_index(tpc_index_h.nok).type = 
      +                    tpc_index_type(1).tphit_mhitstpc
-                     tpc_index(tpc_indexh.nok).key1 =
+                     tpc_index(tpc_index_h.nok).key1 =
      +                    tphit(ptr_ghost).id
-                     tpc_index(tpc_indexh.nok).key2 = 0
+                     tpc_index(tpc_index_h.nok).key2 = 0
 c-------------------------------------------
                      vec(1)=tphit(ptr_ghost).track
                      vec(2)=0.0
@@ -1127,7 +1049,7 @@ c	goto 119
 
 c actually, fill pixel data for each CLUSTER in ntuple 500+ihisto...
 c  mal 12jul95
-         do kclus=1,tpclusterh.nok
+         do kclus=1,tpcluster_h.nok
             vec(4)=kclus
             nseq_hit=tpcluster(kclus).nseq
             ktpc_row=tpcluster(kclus).tpc_row
@@ -1140,7 +1062,7 @@ c  mal 12jul95
             do kseq_count=1,nseq_hit
                kpad = tpseq(kseq).secpad
                kstatus=tgc_pad_to_x(float(kpad),float(krow),
-     +              vec(1),pad_planeh,pad_plane)
+     +              vec(1),pad_plane_h,pad_plane)
                kpix = tpseq(kseq).jpix
                kdatum=tppixel(kpix).datum
                numpix_seq=kdatum/numpix_factor ! 24mar95 malisa
@@ -1163,7 +1085,7 @@ c  mal 12jul95
 
 c now fill another ntuple (600+ihisto) with "LOCAL" hit coordinates
 
-         do khit=1,tphith.nok
+         do khit=1,tphit_h.nok
             vec(3) = tphit(khit).id
             kclus = tphit(khit).cluster
             vec(4) = kclus
