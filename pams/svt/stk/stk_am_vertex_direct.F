@@ -37,6 +37,7 @@ C     ===================
       external rg32
       real     rg32
       integer ivert
+      character*132 mess
 
 C     RETURN:
 C     =======
@@ -50,7 +51,7 @@ C     =======
 C     EXECUTABLE CODE:
 C     ================
 
-      WRITE(*,*) 'STK_AM_VERTEX_DIRECT: Starting ######################'
+      call StInfo('STK_AM_VERTEX_DIRECT: Starting ######################')
 
       stk_am_vertex_direct = stafcv_ok
 
@@ -65,10 +66,12 @@ c     initialize gaussain random number generator
 
       if (g2t_vertex_h.nok.eq.0) then
          stk_am_vertex_direct = stafcv_bad ! no vertex
-         write(6,1001)
+         write(mess,1001)
+         call StError(mess)
          return
       else if (vtx_direct_h.nok.eq.0) then
-         write(6,1002)
+         write(mess,1002)
+         call StError(mess)
          vtx_direct(1).sx(1) = 0.005  ! 50 microns
          vtx_direct(1).sx(2) = 0.005  ! 50 microns
          vtx_direct(1).sx(3) = 0.005  ! 50 microns
@@ -102,7 +105,7 @@ c     initialize gaussain random number generator
           return
       endif	
 
-      WRITE(*,*) 'STK_AM_VERTEX_DIRECT: Stopping #####################'
+      call StInfo('STK_AM_VERTEX_DIRECT: Stopping #####################')
       STK_AM_VERTEX_DIRECT=STAFCV_OK
       RETURN
       END

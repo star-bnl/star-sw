@@ -121,7 +121,7 @@ c     calculate coefficients
 
       if (d2.gt.d1) then		! use second form
          if (d2.le.dmin) then         ! second form also fails
-            print*,'Failed d2 test in linfit' ! wkw: temporary comment
+            call StError('Failed d2 test in linfit') ! wkw: temporary comment
             chi2  = infinity
             a(1)  = infinity
             a(2)  = infinity
@@ -278,7 +278,7 @@ c     calculate coefficients
 
       if (d2.gt.d1) then		! use second form
          if (d2.le.dmin) then         ! second form also fails
-            print*,'Failed d2 test in linfit' ! wkw: temporary comment
+            call StError('Failed d2 test in linfit') ! wkw: temporary comment
             chi2  = infinity
             a(1)  = infinity
             a(2)  = infinity
@@ -404,6 +404,7 @@ c     ==================
       real    dmin
       parameter (dmin=1.e-10)
       parameter (infinity=-1.e9)
+      character*132 mess
 
 
 c     format
@@ -426,7 +427,8 @@ c     ==========
          da(4) = infinity
          da(5) = infinity
          da(6) = infinity
-         write(6,1001) n
+         write(mess,1001) n
+         call StError(mess)
          return
       end if
       s    = 0.
@@ -474,7 +476,8 @@ c     loop over all relevant points
          da(4) = infinity
          da(5) = infinity
          da(6) = infinity
-         write(6,1001) m
+         write(mess,1001) m
+         call StError(mess)
          return
       end if
 

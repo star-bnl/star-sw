@@ -96,7 +96,7 @@ C     =======
 
 C     Executable Code:
 C     ================
-      WRITE(*,*) 'STK_AM_DIRECT: Starting ##########################'
+      call StInfo( 'STK_AM_DIRECT: Starting ##########################')
       stk_am_direct = stafcv_ok
       
 C     check if the table of space points is empty
@@ -249,7 +249,7 @@ c     now sort groups table by hit position within track
       enddo
       
       
-      WRITE(*,*) 'STK_AM_DIRECT: Stopping ###########################'
+      call StInfo('STK_AM_DIRECT: Stopping ###########################')
       STK_AM_DIRECT=STAFCV_OK
       RETURN
       END

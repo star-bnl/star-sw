@@ -110,7 +110,7 @@ c     =====================
 
 c     error/message
 c     =============
-      character*80 mess
+      character*132 mess
       character msg*132
       integer   msg_id(10)/10*0./
       logical   first
@@ -127,20 +127,22 @@ C     =======
  1001 format(1x,a)
  1002 format(1x,'<W>-stk_am_fit_nespt : not enough space points',
      &     'to fit track')
+ 1003 format(1x,a,i6)
+ 1004 format(1x,a,i6,a,i6)
 
 C     EXECUTABLE CODE:
 C     ================
 
-      WRITE(*,*) 'STK_AM_FIT: Starting ################################'
+      call StInfo('STK_AM_FIT: Starting ################################')
 
       if (stkpar(1).c1norm(1).eq.0) then
-         print*,'Setting chi1 normalization to 1.0'
+         call StError('Setting chi1 normalization to 1.0')
          stkpar(1).c1norm(1)=1.0
          stkpar(1).c1norm(2)=0.0
          stkpar(1).c1norm(3)=1.0
       endif
       if (stkpar(1).c2norm(1).eq.0) then
-         print*,'Setting chi2 normalization to 1.0'
+         call StError('Setting chi2 normalization to 1.0')
          stkpar(1).c2norm(1)=1.0
          stkpar(1).c2norm(2)=0.0
          stkpar(1).c2norm(3)=1.0
@@ -247,11 +249,11 @@ c               write(6,*) ' nspt=',nspt
      +              groups(2).id1,itrack,table_off,nrows)
        
                if( .not. SCV_STATE( ok, 'i')) then
-                  call SCV_MESSAGES( ok, mess )
-                  write(6,*)' in stk_fit:',mess
+                  call StError('Problem in tls search_near')
                endif
                if( nrows .ne. track(itrack).nspt) then
-                  write(6,*) 'nrows=',nrows, 'for track',itrack
+                  write(mess,1004) 'nrows=',nrows, 'for track',itrack
+                  call StError(mess)
                endif
 
                do i = 1, nrows
@@ -465,7 +467,8 @@ c               z0   = z(2) ! new z0 calc follows wkw
                dy0   = dyh + drh*sind(phi)**2
 c               dz0   = dz(2) ! new dz0 calc follows wkw
                dz0   = sqrt(da(1)**2.0+(pha*da(2))**2.0)
-               dr0   = (dx0*x0**2 + dy0*y0**2)/r0**2
+               dr0   = sqrt((dx0*x0**2 + dy0*y0**2))/r0
+ 
                dx0y0 = 0.       ! this is wrong but we will assume it 
                                 ! for the time being.
                dphi0 = 0.       ! by convention
@@ -511,21 +514,22 @@ C               track(itrack).dedx(2)  = 0.    ! error on above
                track(itrack).r0       = r0
                track(itrack).z0       = z0
                track(itrack).flag     = 1     ! primary fit ok
-               track(itrack).cov(1)   = dinvpt
-               track(itrack).cov(2)   = dphi0invpt
-               track(itrack).cov(3)   = dphi0
-               track(itrack).cov(4)   = dr0invpt
-               track(itrack).cov(5)   = dr0phi0
-               track(itrack).cov(6)   = dedx_diff
-               track(itrack).cov(7)   = lowest_dedx
-               track(itrack).cov(8)   = dtanlphi0
-               track(itrack).cov(9)   = dtanlr0
-               track(itrack).cov(10)  = dtanl
-               track(itrack).cov(11)  = dz0invpt
-               track(itrack).cov(12)  = dz0phi0
-               track(itrack).cov(13)  = dz0r0
-               track(itrack).cov(14)  = dz0tanl
-               track(itrack).cov(15)  = dz0
+               track(itrack).cov(1)   = dphi0*dphi0
+               track(itrack).cov(2)   = dphi0*dz0
+               track(itrack).cov(3)   = dphi0*dtanl
+               track(itrack).cov(4)   = dphi0*dpsi
+               track(itrack).cov(5)   = dphi0*pinvpt
+               track(itrack).cov(6)   = dz0*dz0
+               track(itrack).cov(7)   = dz0*dtanl
+               track(itrack).cov(8)   = dz0*dpsi
+               track(itrack).cov(9)   = dz0*dinvpt
+               track(itrack).cov(10)  = dtanl*dtanl
+               track(itrack).cov(11)  = dtanl*dpsi
+               track(itrack).cov(12)  = dtanl*dinvpt
+               track(itrack).cov(13)  = dpsi*dpsi
+               track(itrack).cov(14)  = dpsi*dinvpt
+               track(itrack).cov(15)  = dinvpt*dinvpt
+
                
             else
 
@@ -546,12 +550,12 @@ c              if (nspt.gt.6) nspt=6 ! wkw
                ok = tls_Search_Near_i(groups_h.nok,groups(1).id1,
      +              groups(2).id1,itrack,table_off,nrows)
                if( .not. SCV_STATE( ok, 'i')) then
-                  call SCV_MESSAGES( ok, mess )
-                  write(6,*)' in stk_fit:',mess
+                  CALL StError('Problem in tls_serach_near')
                endif
 #if 0
                if( nrows .ne. track(itrack).nspt) then
-                  write(6,*) 'nrows=',nrows, 'for track',itrack
+                  write(mess,1004) 'nrows=',nrows, 'for track',itrack
+                  call StError(mess)
                endif
 #endif               
                do i = 1, nrows
@@ -766,7 +770,7 @@ c                  z0   = z(2) ! new z0 calc follows wkw
                   dy0   = dyh + drh*sind(phi)**2
 c                  dz0   = dz(2) ! new dz0 calc follows wkw
                   dz0   = sqrt(da(1)**2.0+(pha*da(2))**2.0) ! wkw
-                  dr0   = (dx0*x0**2 + dy0*y0**2)/r0**2
+                  dr0   = sqrt((dx0*x0**2 + dy0*y0**2))/r0**2
                   dx0y0 = 0.       ! this is wrong but we will assume it 
                                    ! for the time being.
                   dphi0 = 0.       ! by convention
@@ -811,21 +815,21 @@ C                  track(itrack).dedx(2)  = 0. ! error on above
                   track(itrack).z0       = z0
                   track(itrack).flag     = 2 ! wkw: well fit sec track 
 c    more than 2 points
-                  track(itrack).cov(1)   = dinvpt
-                  track(itrack).cov(2)   = dphi0invpt
-                  track(itrack).cov(3)   = dphi0
-                  track(itrack).cov(4)   = dr0invpt
-                  track(itrack).cov(5)   = dr0phi0
-                  track(itrack).cov(6)   = dr0
-                  track(itrack).cov(7)   = dtanlinvpt
-                  track(itrack).cov(8)   = dtanlphi0
-                  track(itrack).cov(9)   = dtanlr0
-                  track(itrack).cov(10)  = dtanl
-                  track(itrack).cov(11)  = dz0invpt
-                  track(itrack).cov(12)  = dz0phi0
-                  track(itrack).cov(13)  = dz0r0
-                  track(itrack).cov(14)  = dz0tanl
-                  track(itrack).cov(15)  = dz0
+                  track(itrack).cov(1)   = dphi0*dphi0
+                  track(itrack).cov(2)   = dphi0*dz0
+                  track(itrack).cov(3)   = dphi0*dtanl
+                  track(itrack).cov(4)   = dphi0*dpsi
+                  track(itrack).cov(5)   = dphi0*pinvpt
+                  track(itrack).cov(6)   = dz0*dz0
+                  track(itrack).cov(7)   = dz0*dtanl
+                  track(itrack).cov(8)   = dz0*dpsi
+                  track(itrack).cov(9)   = dz0*dinvpt
+                  track(itrack).cov(10)  = dtanl*dtanl
+                  track(itrack).cov(11)  = dtanl*dpsi
+                  track(itrack).cov(12)  = dtanl*dinvpt
+                  track(itrack).cov(13)  = dpsi*dpsi
+                  track(itrack).cov(14)  = dpsi*dinvpt
+                  track(itrack).cov(15)  = dinvpt*dinvpt
                
                else ! check of fit status (wkw)
 
@@ -861,6 +865,7 @@ C                  track(itrack).dedx(2)  = infinity ! error on above
                   track(itrack).cov(12)  = infinity 
                   track(itrack).cov(13)  = infinity 
                   track(itrack).cov(14)  = infinity 
+                  track(itrack).cov(15)  = infinity
                
                end if ! check of secondary fit status
 
@@ -911,7 +916,7 @@ c      first point
 
       track_h.nok       = itrack-1
 
-      WRITE(*,*) 'STK_AM_FIT: Stopping ###############################'
+      call StInfo('STK_AM_FIT: Stopping ###############################')
       STK_AM_FIT=STAFCV_OK
       RETURN
       END
