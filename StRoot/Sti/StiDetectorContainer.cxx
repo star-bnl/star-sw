@@ -115,37 +115,28 @@ StiDetector* StiDetectorContainer::operator*() const
 
 void StiDetectorContainer::moveIn()
 {
-    //cout <<"moveIn()"<<endl;
     if (mradial_it == mregion->begin() ) {
 	cout <<"StiDetecotrContainer::moveIn()\tNowhere to go"<<endl;
-	//cout <<"leaving moveIn()"<<endl;
 	return;
     }
     else {
 	double oldOrder = (*mphi_it)->getOrderKey();
-	//cout <<"\toldOrder:\t"<<oldOrder<<endl;
 	--mradial_it;
-	//cout <<"--'ed mradial_it"<<endl;
-	//cout <<(*mradial_it)->getName()<<endl;
 	mphi_it = gFindClosestOrderKey((*mradial_it)->begin(), (*mradial_it)->end(), oldOrder);
-	//cout <<"did gFindClosestOrderKey"<<endl;
 	if (mphi_it == (*mradial_it)->end()) {
 	    cout <<"StiDetectorContainer::moveIn()\tError:\tFind Phi failed"<<endl;
 	    mphi_it = (*mradial_it)->begin();
 	}
-	//cout <<"leaving moveIn()"<<endl;
 	return;
     }
 }
 
 void StiDetectorContainer::moveOut()
 {
-    //cout <<"moveOut()"<<endl;
     ++mradial_it;
     if (mradial_it == mregion->end()) {
 	cout <<"StiDetectorContainer::moveOut()\tNowhere to go"<<endl;
 	--mradial_it;
-	//cout <<"leaving moveOut()"<<endl;
 	return;
     }
     else {
@@ -155,31 +146,24 @@ void StiDetectorContainer::moveOut()
 	    cout <<"StiDetectorContainer::moveOut()\tError:\tFind Phi failed"<<endl;
 	    mphi_it = (*mradial_it)->begin();
 	}
-	//cout <<"leaving moveOut()"<<endl;
 	return;
     }
 }
 
 void StiDetectorContainer::movePlusPhi()
 {
-    //cout <<"movePlusPhi()"<<endl;
     ++mphi_it;
     if (mphi_it == (*mradial_it)->end()) { //Wrap around 2pi
-	//cout <<"StiDetectorContainer::movePlusPhi()\tWrap around 2pi"<<endl;
 	mphi_it = (*mradial_it)->begin();
     }
-    //cout <<"leaving movePlusPhi()"<<endl;
 }
 
 void StiDetectorContainer::moveMinusPhi()
 {
-    //cout <<"moveMinusPhi()"<<endl;
     if (mphi_it == (*mradial_it)->begin()) { //Wrap around 2pi
-	//cout <<"StiDetectorContainer::moveMinusPhi()\tWrap around 2pi"<<endl;
 	mphi_it = (*mradial_it)->end();
     }
     --mphi_it;
-    //cout <<"leaving moveMinusPhi()"<<endl;
 }
 
 // Recursively load all detector definition files from the given directory.
@@ -212,7 +196,6 @@ bool StiDetectorContainer::hasMoreStartPoints() const
     data_node_vec::const_iterator last = mstartvec.end();
     --last;
     bool val = (mstart_it < last);
-    //cout <<"hasMoreStartPoints():\t"<<val<<endl;
     return val;
 }
 
@@ -223,14 +206,6 @@ void StiDetectorContainer::nextStartPoint()
 	setToStartPoint(*mstart_it);
     }
 }
-
-//void StiDetectorContainer::previousStartPoint()
-//{
-//  if (mstart_it != mstartvec.begin() ) {
-//--mstart_it;
-//setToStartPoint(*mstart_it);
-//  }
-//}
 
 //Assume that the node is a leaf in phi
 void StiDetectorContainer::setToStartPoint(data_node* node)
@@ -270,10 +245,14 @@ void StiDetectorContainer::findStartPoints()
 	return;
     }
     else {
-	data_node_vec::iterator radial_outside = (mregion->end());
-	--radial_outside;
+	/*
+	  data_node_vec::iterator radial_outside = (mregion->end());
+	  --radial_outside;
+	  //Get last points 
+	  for (data_node_vec::iterator it=(*radial_outside)->begin(); it!=(*radial_outside)->end(); ++it) {
+	*/
 	//Get last points 
-	for (data_node_vec::iterator it=(*radial_outside)->begin(); it!=(*radial_outside)->end(); ++it) {
+	for (data_node_vec::iterator it=mregion->back()->begin(); it!=mregion->back()->end(); ++it) {
 	    mstartvec.push_back(*it);
 	}
     }

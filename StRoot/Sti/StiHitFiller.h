@@ -7,6 +7,8 @@
 #ifndef StiHitFiller_HH
 #define StiHitFiller_HH
 
+#include "StTimer.hh"
+
 #include <iostream.h>
 #include <vector>
 #include <map>
@@ -49,6 +51,7 @@ private:
     
     StEvent* mevent;
     det_id_vector mvec;
+    StTimer mtimer;
 };
 
 ostream& operator<<(ostream&, const StiHitFiller&);

@@ -27,7 +27,6 @@ class StiTrackSeedFinder : public StiSeedFinder
 public:
     typedef StiObjectFactory<StiKalmanTrack> StiKalmanTrackFactory;
 
-    StiTrackSeedFinder(); //Not Implemented
     StiTrackSeedFinder(const StiTrackSeedFinder&); //Not Implemented
     StiTrackSeedFinder(StiHitContainer*);
     virtual ~StiTrackSeedFinder();

@@ -105,8 +105,6 @@ StiGeometryTransform::StiGeometryTransform()
     aSvgShape = dynamic_cast<St_svg_shape *>(local("svgpars/shape"))->GetTable();
     //cout <<"Instantiated aSvgShape"<<endl;
     
-    // instantiate TPC coord x-form
-    //cout <<"We didn't seg-fault!!!!"<<endl;
     //cout <<"instantiate TPC coord x-form"<<endl;
     tpcTransform = new StTpcCoordinateTransform(gStTpcDb);
 
@@ -316,14 +314,15 @@ void StiGeometryTransform::operator() (const StPrimaryVertex* vtx, StiHit* stihi
 
 void StiGeometryTransform::operator() (const StTpcHit* tpchit, StiHit* stihit)
 {
-    //We'll temporarily keep
-    stihit->setStHit(const_cast<StTpcHit*>(tpchit));
 
     //Change if we change numbering scheme
     double refangle = phiForSector( tpchit->sector(), 12 );
     double pos = mpadrowradiusmap[ tpchit->padrow() + 100];
     stihit->setRefangle( refangle );
     stihit->setPosition( pos );
+
+    //We'll temporarily keep
+    stihit->setStHit(const_cast<StTpcHit*>(tpchit));
 
     //Make Tpc hits
     StGlobalCoordinate gHit( tpchit->position() );
@@ -347,33 +346,29 @@ void StiGeometryTransform::operator() (const StTpcHit* tpchit, StiHit* stihit)
 	stihit->setY( -1.*lsHit.position().x() );
     }
 
-    /*
-    double phi=tpchit->position().phi();
-    while (phi<0.) {
-	if (phi<0.) phi+=(2.*M_PI);
+    
+    if (0) {
+	//The errors take for god-damn ever to transform!
+	//Now Transform Errors
+	StMatrixF covMatrix = tpchit->covariantMatrix();
+	stihit->setError( gCovarianceRotation( covMatrix, stihit->refangle() ) );
+	
+	//This is currently performed in the HitFiller to speed things up (MLM, 8/27/01)
+	// find detector for this hit, remembering that we (ITTF) only use
+	// 12 tpc sectors (1-12) instead of separate sectors for the east end
+	StiDetectorFinder *pFinder = StiDetectorFinder::instance();
+	char szBuf[100];
+	int iIttfSector = 12 - (tpchit->sector() - 12)%12;
+	sprintf(szBuf, "Tpc/Padrow_%d/Sector_%d", (int) tpchit->padrow(), iIttfSector);
+	StiDetector* layer = pFinder->findDetector(szBuf);
+	if (!layer) {
+	    cout <<" Error, no layer for sector: "<<tpchit->sector()<<"\tpadrow: "<<tpchit->padrow()<<endl;
+	}
+	else {
+	    stihit->setDetector( layer );
+	}
     }
-    */
-
-    //Now Transform Errors
-    StMatrixF covMatrix = tpchit->covariantMatrix();
-    stihit->setError( gCovarianceRotation( covMatrix, stihit->refangle() ) );
-
-    /*
-      if (tpchit->sector()<13) {
-      cout <<"sector:\t"<<tpchit->sector()<<endl;
-      cout <<covMatrix<<endl;
-      }
-    */
-
-    // find detector for this hit, remembering that we (ITTF) only use
-    // 12 tpc sectors (1-12) instead of separate sectors for the east end
-    StiDetectorFinder *pFinder = StiDetectorFinder::instance();
-    char szBuf[100];
-    int iIttfSector = 12 - (tpchit->sector() - 12)%12;
-    sprintf(szBuf, "Tpc/Padrow_%d/Sector_%d", (int) tpchit->padrow(),
-            iIttfSector);
-    stihit->setDetector( pFinder->findDetector(szBuf) );
-
+    
     return;
 }
 
@@ -406,11 +401,15 @@ void StiGeometryTransform::operator() (const StSvtHit* svthit, StiHit* stihit){
                 svthit->position().y() * cos(dRefAngle) );
 
   // find detector for this hit
-  StiDetectorFinder *pFinder = StiDetectorFinder::instance();
   char szBuf[100];
   sprintf(szBuf, "Svg/Layer_%d/Ladder_%d/Ladder", (int) svthit->layer(),
           (int) (svthit->ladder() + 1)/2);
-  stihit->setDetector( pFinder->findDetector(szBuf) );
+  StiDetector* layer = StiDetectorFinder::instance()->findDetector(szBuf);
+  if (!layer) {
+      cout <<"Error, no detector for layer "<<svthit->layer()<<"\tladder: "<<svthit->ladder()<<"\tABORT"<<endl;
+      return;
+  }
+  stihit->setDetector( layer );
 }
 void StiGeometryTransform::operator() (const StiHit* stihit, StSvtHit* svthit){
 }

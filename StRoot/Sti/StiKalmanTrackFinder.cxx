@@ -41,6 +41,7 @@
 #include "StiTrackFinder.h"
 #include "StiKalmanTrack.h"
 #include "StiTrackSeedFinder.h"
+#include "StiCompositeSeedFinder.h"
 #include "StiTrackFilter.h"
 #include "StiKalmanTrackFinder.h"
 
@@ -69,7 +70,6 @@ void StiKalmanTrackFinder::reset()
   mcsCalculated        = false;
   elossCalculated      = false;
   maxChi2ForSelection  = 5.;
-
 }
 
 bool StiKalmanTrackFinder::isValid(bool debug) const
@@ -80,47 +80,26 @@ bool StiKalmanTrackFinder::isValid(bool debug) const
 //Temporary patch, to test seed finder (MLM, 8/20/01)
 void StiKalmanTrackFinder::doNextAction()
 {
-    //cout <<"StiKalmanTrackFinder::doNextAction()\tNull function call"<<endl;
-    if (trackSeedFinder->hasMore()) {
-	StiKalmanTrack* track = trackSeedFinder->next();
-	if (track) {
-	    cout <<"StiKalmanTrackFinder::doNextAction()\tgot track"<<endl;}
-	else {
-	    cout <<"StiKalmanTrackFinder::doNextAction()\ttrack==0"<<endl;}
+    //Test composite seed finder
+    StiCompositeSeedFinder* sf = dynamic_cast<StiCompositeSeedFinder*>(trackSeedFinder);
+    if (!sf) {
+	cout <<"StiKalmanTrackFinder::doNextAction()\tcast to CompositeSF failed"<<endl;
+	return;
     }
-    else if (geometryContainer->hasMoreStartPoints()) {
-	geometryContainer->nextStartPoint();
-	initSeedFinderForStart();
-	cout <<"StiKalmanTrackFinder::doNextAction()\tSet to next start point"<<endl;
+
+    StiKalmanTrack* track = 0;
+    if (sf->hasMore()) {
+	track = sf->next();
+	cout <<"StiKalmanTrackFinder::doNextAction()\tGot Track: "<<track<<endl;
     }
     else {
-	cout <<"StiKalmanTrackFinder::doNextAction():\tNo more start points"<<endl;
+	cout <<"\tsf->hasMore()==false"<<endl;
     }
-    
     return;
 }
 
 void StiKalmanTrackFinder::initSeedFinderForStart()
 {
-    StiTrackSeedFinder* seedfinder = dynamic_cast<StiTrackSeedFinder*>(trackSeedFinder);
-    if (!seedfinder) {
-	cout <<"StiKalmanTrackFinder::initSeedFinderForStart(): Error!\t cast failed"<<endl;
-	return;
-    }
-    
-    seedfinder->clear();
-    StiDetectorContainer& rdet = (*geometryContainer);
-    //Get Outer 3 layers
-    for (int i=0; i<3; ++i) {
-	StiDetector* layer = *rdet;
-	seedfinder->addLayer( layer->getPlacement()->getCenterRefAngle(),
-			      layer->getPlacement()->getCenterRadius());
-	rdet.moveIn();
-    }
-    
-    for (int i=0; i<3; ++i) {
-	rdet.moveOut();
-    }
     return;
 }
 
