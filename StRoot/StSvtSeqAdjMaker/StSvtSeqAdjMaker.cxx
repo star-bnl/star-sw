@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.11 2000/10/02 13:48:10 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.12 2000/10/31 16:21:59 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  **************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.12  2000/10/31 16:21:59  caines
+ * Set up defaults for paramters in init
+ *
  * Revision 1.11  2000/10/02 13:48:10  caines
  * Adjusting donw hybrid by hybrid
  *
@@ -77,6 +80,19 @@ StSvtSeqAdjMaker::StSvtSeqAdjMaker(const char *name) : StMaker(name)
   anolist = NULL;
   mInvProd = NULL;
   tempSeq1 = new StSequence[128];
+
+
+  // Set up some defaults
+
+  mProbFile = "prob2.dat";
+  mPedFile = "Ped_st_physics_1183020_raw_1.root";
+  mPedOffSet = 100;
+  m_thresh_lo = 101;
+  m_thresh_hi = 105; 
+  m_n_seq_lo  = 2;
+  m_n_seq_hi  = 0;
+  m_inv_prod_lo = 8;
+
 
 }
 
