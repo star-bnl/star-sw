@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.28 2000/04/20 13:31:25 ullrich Exp $
+% $Id: StEvent.tex,v 2.29 2000/04/26 21:01:44 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -21,8 +21,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 2.28  2000/04/20 13:31:25  ullrich
-% Added description of changes to StTrackDetectorInfo.
+% Revision 2.29  2000/04/26 21:01:44  ullrich
+% Removed text for obsolete StBrowsableEvent.
 %
 % Revision 2.34  2000/05/24 15:43:38  ullrich
 % More on the StEventMaker (update).
@@ -175,8 +175,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.28 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/04/20 13:31:25 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.29 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/04/26 21:01:44 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -184,17 +184,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.28 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/04/20 13:31:25 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.29 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/04/26 21:01:44 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.28 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/04/20 13:31:25 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.29 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/04/26 21:01:44 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.28 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/04/20 13:31:25 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.29 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/04/26 21:01:44 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -209,8 +209,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.28 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/04/20 13:31:25 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.29 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/04/26 21:01:44 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -746,8 +746,7 @@ check this from case to case. Don't say you haven't been warned.
 
 For your own analysis (or reconstruction) code you might use the
 standard STL containers together with \StEvent\ provided that you
-    Returns a pointer to the current \texttt{StEvent} object. The
-    object returned is actually of type \texttt{StBrowsableEvent}.
+classes are not processed via \texttt{rootcint}. Since STL containers
 are transient they are more efficient if speed and use less memory if
 this is your concern.
 
@@ -952,7 +951,7 @@ experimental run can contain thousands of events.
         \label{fig:umlRun}
     \end{center}
 \end{figure}
-\index{StBrowsableEvent} \index{StEventSummary}
+Fig.~\ref{fig:umlRun} shows the UML class diagrams for the two
 classes. Pretty simple.  What is not shown is the relation to the
 \texttt{StEvent} class, simply because there is none.  \texttt{StRun}
 and \texttt{StEvent} are completely separate entities. They don't know
@@ -969,7 +968,7 @@ some stuff.
 void printRunInfo(StRun* run)
 {
     if (!run) return;     // Oops, null pointer
-        \caption{Class diagrams for \texttt{StEvent}, \texttt{StBrowsableEvent} and
+
     cout << "run id:                " << run->id() << endl;
     cout << "run type:              " << run->type() << endl;
     cout << "center of mass energy: " << run->centerOfMassEnergy() << endl;
@@ -983,13 +982,6 @@ void printRunInfo(StRun* run)
         cout << "CPU time used:          "
              << run->summary()->cpuSeconds() << endl;
         cout << "average luminosity:     "
-The class \texttt{StBrowsableEvent} inherits from \texttt{StEvent} and
-therefore acts the same way but has some additional features which
-allow a better integration of \StEvent\ into the ROOT framework. Since
-this is of no big importance for the understanding of the data model
-as a whole we refer to section \ref{sec:StEventMaker} and
-\ref{sec:StBrowsableEvent} for more details.
-
              << run->summary()->averageLuminosity() << endl;
         cout << "<pt>:                   "
              << run->summary()->meanPt() << endl;
@@ -2298,35 +2290,6 @@ the user has to replace
 \end{verbatim}
 with
 \begin{verbatim}
-\subsection{StBrowsableEvent}
-\index{StBrowsableEvent|textbf}
-\label{sec:StBrowsableEvent}
-\begin{Entry}
-\item[Summary] Version of \texttt{StEvent} with a higher degree of
-    integration in ROOT.
-\item[Synopsis]
-    \verb+#include "StBrowsableEvent.h"+\\
-    \verb+class StBrowsableEvent;+\\
-\item[Description] \texttt{StBrowsableEvent} adds ROOT specific
-    features to \texttt{StEvent} such as to allow the navigation
-    through \StEvent\ in a graphical data browser.
-    \texttt{StEventMaker::event()} actually returns an instance of
-    StBrowsableEvent not StEvent.
-\item[Related Classes] \texttt{StBrowsableEvent} is derived from
-    \texttt{StEvent}.
-\item[Public\\ Constructors]
-    \verb+StBrowsableEvent();+\\
-
-    \verb+StBrowsableEvent(const event_header_st&,+\\
-    \verb+                 const dst_event_summary_st&,+\\
-    \verb+                 const dst_summary_param_st&);+\\
-
-    \verb+StBrowsableEvent(const event_header_st&);+\\
-\item[Public Member\\ Functions]
-    \verb+void browse(TBrowser*);+\\
-\end{Entry}
-\clearpage
-
      StEvent* event;
      // ...
      event->l3Trigger()->someMethod();
@@ -2696,8 +2659,7 @@ definition in the header file.
 
 
 \subsection{StEmcSoftwareMonitor}
-    \texttt{St\_DataSet}.  \texttt{StBrowsableEvent} is derived from
-    \texttt{StEvent}.
+\index{StEmcSoftwareMonitor|textbf}
 \label{sec:StEmcSoftwareMonitor}
 \begin{Entry}
 \item[Summary]
@@ -2708,6 +2670,10 @@ definition in the header file.
 \item[Related Classes]
 \item[Public\\ Constructors]
     \verb+StEmcSoftwareMonitor();+\\
+    \verb+StEmcSoftwareMonitor(const dst_mon_soft_emc_st&);+\\
+\item[Public Data\\ Member]
+    \verb+Float_t energy_emc;+\\
+    Total energy (or ADC sum) in EMC.
 \end{Entry}
 \clearpage
 
