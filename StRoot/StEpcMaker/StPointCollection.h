@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.h,v $
+// Revision 1.3  2000/12/01 17:05:42  subhasis
+// track matching after assignment, PRS, deltaeta,deltaphi added to StEmcPoint
+//
 // Revision 1.2  2000/08/29 20:13:39  subhasis
 // Modified to accept StEvent input and writing out StEvent output for Emc
 //
@@ -86,27 +89,28 @@ Int_t
              StEmcClusterCollection*,
              StTrackVec &);
 
+virtual Int_t
+  TrackSort(const StTrackVec &) const;
+
 void
-  PointCalc(StEmcClusterCollection*,
-            StEmcClusterCollection*,
-            StEmcClusterCollection*,
-            StEmcClusterCollection*);
+  ClusterSort(StEmcClusterCollection*,
+             StEmcClusterCollection*,
+             StEmcClusterCollection*,
+             StEmcClusterCollection*);
+
+virtual Int_t
+  MatchClusterAndTrack(const StMatchVecClus,
+                       const StMatchVecClus,
+                       const StMatchVecClus,
+                       const StMatchVecClus,
+                       const FloatVector,
+                       const FloatVector,
+                       const FloatVector,
+                       Int_t *);
 
 virtual Int_t
   addPoints(Float_t*);
 
-virtual Int_t
-  GetEmcPointEvent(const StMatchVecClus,
-              const StMatchVecClus,
-              const StMatchVecClus,
-              const FloatVector,
-              const FloatVector,
-              const FloatVector,
-              Int_t *);
-
-virtual Int_t
-  TrackSort(const StTrackVec &) const;
- 
   ClassDef(StPointCollection,1)// Base class for electromagnetic calorimeter Point collection 
 };
 //

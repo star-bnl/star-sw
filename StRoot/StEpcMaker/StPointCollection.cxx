@@ -3,8 +3,11 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.4  2000/12/01 17:06:15  subhasis
+// track matching after assignment, PRS, deltaeta,deltaphi added to StEmcPoint
+//
 // Revision 1.3  2000/08/29 20:33:04  subhasis
-// Modified to accept input from StEvent and writing output to StEvent for Emc
+//  Modified to accept input from StEvent and writing output to StEvent for Emc
 //
 // Revision 1.1  2000/05/15 21:18:33  subhasis
 // initial version
@@ -116,7 +119,7 @@ Int_t
 {
 //Sort BEMC, SMDe, SMDp, PRS clusters according to location 
 
-                    PointCalc(Bemccluster,
+                    ClusterSort(Bemccluster,
                               Bprscluster,
                               Bsmdecluster,
                               Bsmdpcluster);
@@ -143,7 +146,8 @@ Int_t
             for(Int_t is=0;is<Epc::nPhiBin;is++){
 
   if(matchlist_bemc_clus[im][is].size()>0){
-  Int_t testp=GetEmcPointEvent(matchlist_bemc_clus[im][is],
+  Int_t testp=MatchClusterAndTrack(matchlist_bemc_clus[im][is],
+                         matchlist_bprs_clus[im][is],
                          matchlist_bsmde_clus[im][is],
                          matchlist_bsmdp_clus[im][is],
                          HitTrackEta,
@@ -173,7 +177,8 @@ return kStOK;
 }
 //--------------------------------------------------------------------------
 Int_t
-  StPointCollection::GetEmcPointEvent(const StMatchVecClus mvec,
+  StPointCollection::MatchClusterAndTrack(const StMatchVecClus mvec,
+                                 const StMatchVecClus prsvec,
                                  const StMatchVecClus evec,
                                  const StMatchVecClus pvec,
                                  const FloatVector E_tvec,
@@ -192,6 +197,7 @@ Int_t
      Int_t k_track[Epc::nMaxNoOfClinBin][Epc::nMaxNoOfClinBin];
      Float_t totAvg=0.;
      Float_t EmcTot;
+     Float_t PrsTot;
 
         na=evec.size();
         ma=pvec.size();
@@ -239,6 +245,7 @@ Int_t
        na=evec.size();
        ma=pvec.size();
      }
+
      //
      EmcTot=0.0;
   if(mvec.size()>0){
@@ -247,6 +254,18 @@ Int_t
      cl0=(StEmcCluster*)mvec[ims];
      Float_t emen=cl0->energy();
         EmcTot+=emen;
+     }
+   }
+//
+// getting pRS total, for PRS now only total is stored
+//
+     PrsTot=0.0;
+  if(prsvec.size()>0){
+     for (UInt_t ims=0;ims<prsvec.size();ims++){
+     StEmcCluster *clp;
+     clp=(StEmcCluster*)prsvec[ims];
+     Float_t emen=clp->energy();
+        PrsTot+=emen;
      }
    }
   //
@@ -272,7 +291,9 @@ Int_t
 	cl2 = (StEmcCluster*)pvec[ip];
 	break;
       }
-
+/*
+// Earlier track matching was done before assignment of SMD clusters,
+// Now it is done after assignment.
       
 // track matching
       Int_t Trmatch=0;
@@ -298,6 +319,7 @@ Int_t
        }
      }//it loop
      }// etrack size check
+*/
 
           Float_t diff=TMath::Abs((cl1->energy())-(cl2->energy()));
           Float_t summ= (cl1->energy())+(cl2->energy());
@@ -375,6 +397,7 @@ Int_t
 	 PointSigPhi=cl1->sigmaPhi();
 	 PointEnergy=cl1->energy();
 	 PointEnergyinDet[0]=cl1->energy();
+	 PointEnergyinDet[1]=PrsTot;
 	 PointSizeinDet[0]=cl1->sigmaEta();
 	 }
        break;
@@ -390,6 +413,7 @@ Int_t
 	 PointSigPhi=cl2->sigmaPhi();
 	 PointEnergy=cl1->energy()*(EmcTot/totAvg);
 	 PointEnergyinDet[0]=cl2->energy();
+	 PointEnergyinDet[1]=PrsTot;
 	 PointEnergyinDet[2]=cl1->energy();
 	 PointSizeinDet[0]=cl2->sigmaEta();
 	 PointSizeinDet[2]=cl1->sigmaEta();
@@ -407,6 +431,7 @@ Int_t
 	 PointSigPhi=cl2->sigmaPhi();
 	 PointEnergy=cl1->energy()*(EmcTot/totAvg);
 	 PointEnergyinDet[0]=cl1->energy();
+	 PointEnergyinDet[1]=PrsTot;
 	 PointEnergyinDet[3]=cl2->energy();
 	 PointSizeinDet[0]=cl1->sigmaEta();
 	 PointSizeinDet[3]=cl2->sigmaPhi();
@@ -424,6 +449,7 @@ Int_t
 	 PointSigPhi=cl2->sigmaPhi();
 	 PointEnergy=((cl1->energy()+cl2->energy())/2.)*(EmcTot/totAvg);
 	 PointEnergyinDet[0]=EmcTot;
+	 PointEnergyinDet[1]=PrsTot;
 	 PointEnergyinDet[2]=cl1->energy();
 	 PointEnergyinDet[3]=cl2->energy();
 	 PointSizeinDet[2]=cl1->sigmaEta();
@@ -431,7 +457,38 @@ Int_t
 	 }
        break;
      }
+
+
      if((k[i1]-1)>=0){
+
+
+// track matching only for assigned pairs
+
+      Int_t Trmatch=0;
+     Float_t PhitoMatch=PointPhi;
+     Float_t EtatoMatch=PointEta;
+     Int_t MatchFlag=0;
+     if(E_tvec.size()>0){
+     for (it=0;it<E_tvec.size();it++){
+       if(MatchFlag!=1){
+       if(Trcheck[it]!=1){
+       Float_t EtaTrack=E_tvec[it];
+       Float_t PhiTrack=P_tvec[it];
+       if(TMath::Abs(EtatoMatch-EtaTrack)<=StEpcCut::DeltaEta() && TMath::Abs(PhitoMatch-PhiTrack)<=StEpcCut::DeltaPhi()){
+	 Trcheck[it]=1;
+	 TrackMom[i1][k[i1]-1]=M_tvec[it];
+	 DeltaEta[i1][k[i1]-1]=EtatoMatch-EtaTrack;
+	 DeltaPhi[i1][k[i1]-1]=PhitoMatch-PhiTrack;
+	 k_track[i1][k[i1]-1]=it+1;
+	 MatchFlag=1;
+	 Trmatch++;
+        }
+       }
+       }
+     }//it loop
+     }// etrack size check
+// track matching ends
+
 	PointMember[0]=PointEta;
 	//      Float_t tempeta=((StEmcCluster*)mvec[0])->eta();
 	PointMember[1]=PointPhi;
@@ -444,8 +501,10 @@ Int_t
 	PointMember[6]=DeltaEta[i1][k[i1]-1];
 	PointMember[7]=DeltaPhi[i1][k[i1]-1];
 	}
-	if(Category==3){Int_t testadd = addPoints(PointMember);
-	if(testadd==1)cout<<" addPoints not O.K"<<endl;}
+
+        Int_t testadd = addPoints(PointMember);
+	if(testadd==1)cout<<" addPoints not O.K"<<endl;
+
 	// Point in StEvent
 
 	Float_t xp,yp,zp;
@@ -469,6 +528,8 @@ Int_t
 	// Chisquare
 	//	Float_t ChiSquare = 0.0;
 	//I am filling this chisquare with track mom now, so that it can be used for pi0 study , later on we need to do something so that deltaeta, deltaphican be stored.
+// Pro Chisquare to be placed, because deltaeta, deltaphi have got their
+// placeholders.
 
 	Float_t ChiSquare=TrackMom[i1][k[i1]-1];
 
@@ -488,6 +549,11 @@ Int_t
 	// Pointer to matched track "TrackPointer[k_track[i1][k[i1]-1]-1]"
         
 	if(k_track[i1][k[i1]-1]>0){
+// Set deltaEta, DeltaPhi
+
+         point->setDeltaEta(DeltaEta[i1][k[i1]-1]);
+         point->setDeltaPhi(DeltaPhi[i1][k[i1]-1]);
+
 	  //Set track pointer here
 	  point->addTrack(HitTrackPointer[k_track[i1][k[i1]-1]-1]);
 	}
@@ -526,10 +592,13 @@ Int_t
 	 HitTrackPointer.clear();
 
   // Constants
-  double RIN            = 238.0;    // From Alexei, should be replaced by 
+//  double RIN            = 238.0;    // From Alexei, should be replaced by 
+  double RIN            = 231.23;    // From Alexei, should be replaced by 
                                     // SMD radius
   //  double ROUT           =248.0;    // From Alexei
   RIN=BemcGeomIn->Radius();
+
+// Is it SMD radius??
   // Parameters
   //  double Rmincut      = 4.0;
   //  long   MinTrkPoints = 10;
@@ -549,14 +618,13 @@ Int_t
 
 
   helices.clear();
-  // Do the Multiple Scattering
+  // Create Physical Helix
   for(unsigned int jj=0; jj < TrackToFit.size(); jj++){
 StPhysicalHelixD  Helix = TrackToFit[jj]->geometry()->helix();
 helices.push_back(Helix);
   }
 
   //  cout<<" HELIX FILLED ***Size **"<<helices.size()<<endl;
-
 
   for(unsigned int jj=0; jj < helices.size(); jj++){
 //    double lpath_tot = 0.0;
@@ -601,7 +669,17 @@ helices.push_back(Helix);
 	   if(testb==0){ 
 	   HitPhiBin=Int_t(TMath::Abs(eta_hit*10));
               if(HitPhiBin>0){
-       	 if((TMath::Abs(eta_hit*10)-Float_t(HitPhiBin))<=0.01){
+//       	 if((TMath::Abs(eta_hit*10)-Float_t(HitPhiBin))<=0.01){
+// For tracks projected very close to PhiBin boundry and on the increasing
+// order in terms of phibin number sometime do not find proper 
+// BEMC or SMD partner, so assignment becomes a problem.
+// Here all the tracks and later clusters away from phibin boundry by 
+// some (??) distance are placed as member of earlier phibin. This amount 
+// is somehow arbitrary, some proper method to be found. We then need to know
+// how to treat PRS in this context.
+
+
+       	 if((TMath::Abs(eta_hit*10)-Float_t(HitPhiBin))<=0.2){
        	   HitPhiBin--;
        	 }
        }
@@ -617,6 +695,8 @@ helices.push_back(Helix);
   }
 
   /*
+  // Currently we are taking intersection to the INNER cylinder only.
+
            // Getting the intersection on the outer surface of emc
            //
       ifcpath=0.0;
@@ -667,7 +747,7 @@ helices.push_back(Helix);
 }
 //-----------------------------------------------------------------------
 void
- StPointCollection::PointCalc(StEmcClusterCollection* Bemccluster,
+ StPointCollection::ClusterSort(StEmcClusterCollection* Bemccluster,
              StEmcClusterCollection* Bprscluster,
              StEmcClusterCollection* Bsmdecluster,
 	     StEmcClusterCollection* Bsmdpcluster)
@@ -705,7 +785,8 @@ Int_t Ncluster0=Bemccluster->numberOfClusters();
        //
        //       cout<<" EMC module no, phibin**"<<emc_module<<" "<<emc_phi_bin<<endl;
        if(emc_phi_bin>0){
-	 if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<=0.01){
+//	 if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<=0.01){
+	 if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<0.2){
 	   emc_phi_bin--;
 	 }
        }
@@ -737,7 +818,8 @@ Int_t Ncluster1=Bprscluster->numberOfClusters();
        //keeping the cluster very close to phibin boundry to the previous bin
        //
        if(emc_phi_bin>0){
-	 if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<=0.01){
+//	 if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<=0.01){
+	 if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<0.2){
 	   emc_phi_bin--;
 	 }
        }
@@ -772,7 +854,8 @@ Int_t Ncluster2=Bsmdecluster->numberOfClusters();
        //
 	   //       cout<<" SMDE module no, phibin**"<<emc_module<<" "<<emc_phi_bin<<endl;
        if(emc_phi_bin>0){
-	 if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<=0.01){
+//	 if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<=0.01){
+	 if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<.2){
 	   emc_phi_bin--;
 	 }
        }
