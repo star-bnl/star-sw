@@ -17,7 +17,7 @@ created   22 april 98
 *
       structure GTTC { int version, int nsys , char edir(3), char rdir(3) }
       structure dete { onoff, char ctab, char spec, char csys, char cdet }
-      Integer        G2T_MAIN,AgFHIT0,LENOCC,DUI_CDIR,TDM_MAP_TABLE
+      Integer        G2T_MAIN,AgFHIT0,DUI_CDIR,TDM_MAP_TABLE
       Integer        TDM_NEW_TABLE,AMI_CALL,G2T_NEW_TABLE,AMI_MODULE_CALL
       External       TDM_NEW_TABLE,AMI_CALL,G2T_NEW_TABLE,AMI_MODULE_CALL
       Integer        i,j,ld,nhits,nnhits,Iprin,Istat/-1/,Lout/6/
@@ -131,15 +131,17 @@ created   22 april 98
 *     map detm family banks:
       o    = CHAR(0)
       Cdir = gttc_rdir(1)//gttc_rdir(2)//gttc_rdir(3)
-      Call AGSTRUT (' ',Cdir)
+      Ld=0; Do i=1,12 { if (Cdir(i:i)==' '|Cdir(i:i)==o) Break; Ld=i; }
+      If (Ld>0&Cdir!='none')  Call AGSTRUT (' ',Cdir(1:ld))
 *
       Cdir = gttc_edir(1)//gttc_edir(2)//gttc_edir(3)
-      ld   = Lenocc(cdir);  edir = Cdir(1:ld)//o
-      Call TDM_CLEAR_ALL(edir)
+      Ld=0; Do i=1,12 { if (Cdir(i:i)==' '|Cdir(i:i)==o) Break; Ld=i; }
+      edir = Cdir(1:ld)//o;  Call TDM_CLEAR_ALL(edir)
 
       check NVERTX>0
-*     map hepe_gent particle table:
-      call agstrut('/evnt/gene/gent@HEPE',Cdir)
+*     map ghea_* headers and  hepe_* particle tables:
+      call agstrut('/evnt/@HEPE',Edir)
+      call agstrut('/evnt/@GHEA',Edir)
  
       i = TDM_map_table(edir,'g2t_event'//o,g2t_event_spec//o,1,g2t_event)
       if (ld>0) i = DUI_CDIR (edir)
