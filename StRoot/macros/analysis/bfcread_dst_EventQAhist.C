@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.10 2000/01/13 16:55:11 kathy Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.11 2000/01/18 15:09:58 kathy Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.11  2000/01/18 15:09:58  kathy
+// setbranch runco so this branch of file will also be opened
+//
 // Revision 1.10  2000/01/13 16:55:11  kathy
 // updating bfcread_dst*.C macros to use the new methods in StHistUtil which allow printing from a list; also make sure all libraries needed are loaded in the ones running St_QA_Maker; also update documentation
 //
@@ -92,7 +95,6 @@ void bfcread_dst_EventQAhist(
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("St_QA_Maker");  
-
   gSystem->Load("StEvent");
   gSystem->Load("StEventMaker");
 
@@ -102,16 +104,17 @@ void bfcread_dst_EventQAhist(
   chain->SetDebug();
    
 // Input File Maker
-    StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
-
+  StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
+//   also open the runco branch in addition to dst branch (input file)
+  IOMk->SetBranch("runcoBranch",0,"r");
 
 // constructor for other maker (not used in chain)
-   StHistUtil   *HU  = new StHistUtil;
+  StHistUtil   *HU  = new StHistUtil;
 
 // now must set pointer to StMaker so HistUtil can find histograms
 //  with StHistUtil methods
 // -- input any maker pointer but must cast as type StMaker
-   HU->SetPntrToMaker((StMaker *)IOMk);
+  HU->SetPntrToMaker((StMaker *)IOMk);
 
 
 //  add other makers to chain:
@@ -120,9 +123,9 @@ void bfcread_dst_EventQAhist(
 
 
 // --- now execute chain member functions --> Init
-    Int_t iInit = chain->Init();
-    if (iInit) chain->Fatal(iInit,"on init");
-    chain->PrintInfo();
+  Int_t iInit = chain->Init();
+  if (iInit) chain->Fatal(iInit,"on init");
+  chain->PrintInfo();
  
 // method to print out list of histograms - 
 //can do this anytime after they're booked
@@ -149,18 +152,18 @@ void bfcread_dst_EventQAhist(
 // the following methods are already set to default values in St_QA_Maker::Init - now write over them
 
 // Set the default canvas style to plain (so it won't print out grey!)
-    gROOT->SetStyle("Plain");
+  gROOT->SetStyle("Plain");
 //    gStyle->SetOptStat(111111);
 
-    HU->SetHistsNamesDraw("*","*");
-    HU->SetPostScriptFile(psFile);
-    HU->SetZones(2,3);
-    HU->SetPaperSize();
-    HU->SetDefaultLogYList(MakerHistDir);
-      if (PageTitle=="") PageTitle=MainFile;
-    HU->SetGlobalTitle(PageTitle);
+  HU->SetHistsNamesDraw("*","*");
+  HU->SetPostScriptFile(psFile);
+  HU->SetZones(2,3);
+  HU->SetPaperSize();
+  HU->SetDefaultLogYList(MakerHistDir);
+  if (PageTitle=="") PageTitle=MainFile;
+  HU->SetGlobalTitle(PageTitle);
 
-    HU->SetDefaultPrintList(MakerHistDir,PrintList);
+  HU->SetDefaultPrintList(MakerHistDir,PrintList);
 
   Int_t numLog = 0;
   numLog = HU->ExamineLogYList();
@@ -174,7 +177,7 @@ void bfcread_dst_EventQAhist(
   cout <<  "bfcread_dst_EventQAhist.C, passed chain->Finish" << endl ; 
 
 //  Now draw the actual histograms to canvas and to ps file
-    HU->DrawHists(MakerHistDir);
+  HU->DrawHists(MakerHistDir);
    
 }
  
