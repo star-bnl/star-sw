@@ -1,5 +1,11 @@
-// $Id: StFtpcTrackEvaluator.cc,v 1.2 2000/05/11 15:14:51 oldi Exp $
+// $Id: StFtpcTrackEvaluator.cc,v 1.3 2000/06/07 11:09:50 oldi Exp $
 // $Log: StFtpcTrackEvaluator.cc,v $
+// Revision 1.3  2000/06/07 11:09:50  oldi
+// Changed 0 pointers to NULL pointers.
+// In SetupHistos(): avoided exit(-1) if write permission is wrong.
+// Added new functionality (improvement of output histos).
+// Cleanup.
+//
 // Revision 1.2  2000/05/11 15:14:51  oldi
 // Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
 //
@@ -8,7 +14,7 @@
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 11.05.2000
+//----------Last Modified: 07.06.2000
 //----------Copyright:     &copy MDO Production 2000
 
 #include "StFtpcTrackEvaluator.hh"
@@ -48,47 +54,50 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator()
   // Default constructor.
   // Sets the pointers.
 
-  mFilename = 0;
-  mWritePermission = 0;
-  mFile = 0;
+  mFilename = NULL;
+  mWritePermission = NULL;
+  mFile = NULL;
 
-  mNumGeantHits = 0;
-  mNumFoundHits = 0;
-  mNumGeantTracks = 0;
-  mNumFoundTracks = 0;
+  mNumGeantHits = NULL;
+  mNumFoundHits = NULL;
+  mNumGeantTracks = NULL;
+  mNumFoundTracks = NULL;
 
-  mUncleanTracksArr = 0;
-  mSplitTracksArr = 0;
-  mSplitGoodTracksArr = 0;
+  mClusterArr = NULL;
+  mUncleanTracksArr = NULL;
+  mSplitTracksArr = NULL;
+  mSplitGoodTracksArr = NULL;
   
-  mNumFoundVertexTracks = 0;
-  mNumFoundNonVertexTracks = 0;
+  mNumFoundVertexTracks = NULL;
+  mNumFoundNonVertexTracks = NULL;
 
-  mNumLookLikeGoodTracks = 0;
-  mNumElectronTracks = 0;
-  mNumNonVertexTracks = 0;
-  mNumGoodGTracks = 0;
-  mNumGoodFTracks = 0;
-  mGoodPercentage = 0;
-  mNumSplitTracks = 0;
-  mNumSplitGoodTracks = 0;
-  mNumUncleanTracks = 0;
-  mNumLongTracks = 0;
-  mNumLongTrackClusters = 0;
-  mNumShortTracks = 0;
-  mNumShortTrackClusters = 0;
+  mNumLookLikeGoodTracks = NULL;
+  mNumElectronTracks = NULL;
+  mNumNonVertexTracks = NULL;
+  mNumGoodGTracks = NULL;
+  mNumGoodFTracks = NULL;
+  mGoodRatio = NULL;
+  mContamination = NULL;
+  mContaWoSplit = NULL;
+  mNumSplitTracks = NULL;
+  mNumSplitGoodTracks = NULL;
+  mNumUncleanTracks = NULL;
+  mNumLongTracks = NULL;
+  mNumLongTrackClusters = NULL;
+  mNumShortTracks = NULL;
+  mNumShortTrackClusters = NULL;
 
-  mVertex = 0;
+  mVertex = NULL;
 
-  mGeantHits = 0;
-  mFoundHits = 0;
-  mFastSimHits = 0;
-  mGeantTracks = 0;
-  mFoundTracks = 0;
+  mGeantHits = NULL;
+  mFoundHits = NULL;
+  mFastSimHits = NULL;
+  mGeantTracks = NULL;
+  mFoundTracks = NULL;
 
   mObjArraysCreated = (Bool_t)false;
 
-  mFtpcTrackNum = 0;
+  mFtpcTrackNum = NULL;
 
   mSplitTracks = 0;
   mSplitGoodTracks = 0;
@@ -99,86 +108,99 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator()
   mShortTrackClusters = 0;
   mMaxClusters = 0;
 
-  mFHitsOnTrack = 0;
-  mGHitsOnTrack = 0;
-  mNumParents = 0;
+  mGoodGeantPoints = 0;
+  mGoodFoundPoints = 0;
 
-  mNumWrongHitsAll = 0;
-  mNumWrongHits = 0;
+  mNumGoodGeantPoints = NULL;
+  mNumGoodFoundPoints = NULL;
+  mGoodPointRatio = NULL;
 
-  mPtot = 0;
-  mPt = 0;
-  mPx = 0;
-  mPy = 0;
-  mPz = 0;
+  mFHitsOnTrack = NULL;
+  mGHitsOnTrack = NULL;
+  mNumParents = NULL;
 
-  mPtotDiff = 0;
-  mPtDiff = 0;
-  mPxDiff = 0;
-  mPyDiff = 0;
-  mPzDiff = 0;
+  mNumWrongHitsAll = NULL;
+  mNumWrongHits = NULL;
 
-  mPtotAcc = 0;
-  mPtAcc = 0;
-  mPxAcc = 0;
-  mPyAcc = 0;
-  mPzAcc = 0;
+  mPtot = NULL;
+  mPt = NULL;
+  mPx = NULL;
+  mPy = NULL;
+  mPz = NULL;
+
+  mPtotDiff = NULL;
+  mPtDiff = NULL;
+  mPxDiff = NULL;
+  mPyDiff = NULL;
+  mPzDiff = NULL;
+
+  mPtotAcc = NULL;
+  mPtAcc = NULL;
+  mPxAcc = NULL;
+  mPyAcc = NULL;
+  mPzAcc = NULL;
   
-  mEtaNghits = 0;
-  mEtaNfhits = 0;
+  mEtaNghits = NULL;
+  mEtaNfhits = NULL;
 
-  mPtEtaF = 0;
-  mPtEtaGood = 0;
-  mPtEtaBad = 0;
+  mPtEtaF = NULL;
+  mPtEtaFMes = NULL;
+  mPtEtaGood = NULL;
+  mPtEtaBad = NULL;
+  mPtEtaUnclean = NULL;
+  mPtEtaMesUnclean = NULL;
 
-  mPtEtaGoodG = 0;
-  mPtEtaGoodF = 0;
-  mPtEtaGoodPercentage = 0;
-  mPtEtaBadG = 0;
-  mPtEtaBadF = 0;
-  mPtEtaBadPercentage = 0;
+  mPtEtaGoodG = NULL;
+  mPtEtaGoodF = NULL;
+  mPtEtaGoodRatio = NULL;
+  mPtEtaBadG = NULL;
+  mPtEtaBadF = NULL;
+  mPtEtaBadRatio = NULL;
 
-  mPtEtaFVtx = 0;
-  mPtEtaLookLikeGood = 0;
-  mPtEtaContamination = 0;
+  mPtEtaFVtx = NULL;
+  mPtEtaLookLikeGood = NULL;
+  mPtEtaContamination = NULL;
 
-  mGLengthDistTrackAng = 0;
-  mGCircleDistTrackAng = 0;
-  mFLengthDistTrackAng = 0;
-  mFCircleDistTrackAng = 0;
+  mGLengthDistTrackAng = NULL;
+  mGCircleDistTrackAng = NULL;
+  mFLengthDistTrackAng = NULL;
+  mFCircleDistTrackAng = NULL;
 
-  mGTracklAngAll = 0;
-  mGTrackAngAll = 0;
-  mGCircleDistAll = 0;
-  mGLengthDistAll = 0; 
+  mGTracklAngAll = NULL;
+  mGTrackAngAll = NULL;
+  mGCircleDistAll = NULL;
+  mGLengthDistAll = NULL; 
 
-  mDcaFMainVertex = 0;
-  mDcaFNonVertex = 0;
-  mDcaGMainVertex = 0;
-  mDcaGNonVertex = 0;
+  mDcaFMainVertex = NULL;
+  mDcaFNonVertex = NULL;
+  mDcaGMainVertex = NULL;
+  mDcaGNonVertex = NULL;
 
-  mGTrackAng = 0;
-  mGCircleDist = 0;
-  mGLengthDist = 0; 
+  mGTrackAng = NULL;
+  mGCircleDist = NULL;
+  mGLengthDist = NULL; 
 
-  mGCircleLength = 0;
+  mGCircleLength = NULL;
 
-  mFTracklAngAll = 0;
-  mFTrackAngAll = 0;
-  mFCircleDistAll = 0;
-  mFLengthDistAll = 0; 
+  mFTracklAngAll = NULL;
+  mFTrackAngAll = NULL;
+  mFCircleDistAll = NULL;
+  mFLengthDistAll = NULL; 
 
-  mFTrackAng = 0;
-  mFCircleDist = 0;
-  mFLengthDist = 0; 
+  mFTrackAng = NULL;
+  mFCircleDist = NULL;
+  mFLengthDist = NULL; 
 
-  mFCircleLength = 0;
+  mFCircleLength = NULL;
 
-  mParentTrack = 0;
-  mParentTracks = 0;
-  mNumParentTracks = 0;
+  mPRatioDist = NULL;
+  mPRatioDistSplit = NULL;
 
-  mUnclean = 0;
+  mParentTrack = NULL;
+  mParentTracks = NULL;
+  mNumParentTracks = NULL;
+
+  mUnclean = NULL;
 }
 
 
@@ -248,6 +270,7 @@ StFtpcTrackEvaluator::~StFtpcTrackEvaluator()
   
   DeleteHistos();
 
+  delete mClusterArr;
   delete mUncleanTracksArr;
   delete mSplitTracksArr;
   delete mSplitGoodTracksArr;
@@ -307,7 +330,9 @@ void StFtpcTrackEvaluator::DeleteHistos()
   delete mNumNonVertexTracks;
   delete mNumGoodGTracks;
   delete mNumGoodFTracks;
-  delete mGoodPercentage;
+  delete mGoodRatio;
+  delete mContamination;
+  delete mContaWoSplit;
   delete mNumSplitTracks;
   delete mNumSplitGoodTracks;
   delete mNumUncleanTracks;
@@ -315,6 +340,10 @@ void StFtpcTrackEvaluator::DeleteHistos()
   delete mNumLongTrackClusters;
   delete mNumShortTracks;
   delete mNumShortTrackClusters;
+
+  delete mNumGoodGeantPoints;
+  delete mNumGoodFoundPoints;
+  delete mGoodPointRatio;
 
   delete mFHitsOnTrack;
   delete mGHitsOnTrack;
@@ -345,15 +374,18 @@ void StFtpcTrackEvaluator::DeleteHistos()
   delete mEtaNfhits;
 
   delete mPtEtaF;
+  delete mPtEtaFMes;
   delete mPtEtaGood;
   delete mPtEtaBad;
+  delete mPtEtaUnclean;
+  delete mPtEtaMesUnclean;
 
   delete mPtEtaGoodG;
   delete mPtEtaGoodF;
-  delete mPtEtaGoodPercentage;
+  delete mPtEtaGoodRatio;
   delete mPtEtaBadG;
   delete mPtEtaBadF;
-  delete mPtEtaBadPercentage;
+  delete mPtEtaBadRatio;
   
   delete mPtEtaFVtx;
   delete mPtEtaLookLikeGood;
@@ -390,6 +422,9 @@ void StFtpcTrackEvaluator::DeleteHistos()
   delete mFLengthDist;
 
   delete mFCircleLength;
+
+  delete mPRatioDist;
+  delete mPRatioDistSplit;
 
   return;
 }
@@ -437,6 +472,9 @@ void StFtpcTrackEvaluator::Setup(St_DataSet *geant, St_DataSet *ftpc_data)
 {
   // Does all the setup which is common to all constructors.
   
+  mClusterArr = new MIntArray();
+  mClusterArr->SetFill(mFoundHits->GetEntriesFast(), 0);
+
   mUncleanTracksArr = new MIntArray();
   mSplitTracksArr = new MIntArray();
   mSplitGoodTracksArr = new MIntArray();
@@ -467,6 +505,9 @@ void StFtpcTrackEvaluator::Setup(St_DataSet *geant, St_DataSet *ftpc_data)
   mShortTrackClusters = 0;
   mMaxClusters = 0;
 
+  mGoodGeantPoints = 0;
+  mGoodFoundPoints = 0;
+
   if (geant) {
     // GEANT Table found
 
@@ -486,13 +527,18 @@ void StFtpcTrackEvaluator::Setup(St_DataSet *geant, St_DataSet *ftpc_data)
 void StFtpcTrackEvaluator::SetupHistos()
 {
   // Sets up the histograms.
+  
+  if (strcmp(mWritePermission, "RECREATE") !=0 || strcmp(mWritePermission, "UPDATE") != 0) {
+    cerr << "Wrong write permission! Has to be RECREATE or UPDATE. Set to RECREATE." << endl;
+    mWritePermission = "RECREATE";
+  }
 
   if (strcmp(mWritePermission, "RECREATE") == 0) {
     CreateHistos();
   }
 
   else if (strcmp(mWritePermission, "UPDATE") == 0) {
-
+    
     mNumGeantHits = (TH1F *)mFile->Get("num_ghits");
     mNumFoundHits = (TH1F *)mFile->Get("num_fhits");
     mNumGeantTracks = (TH1F *)mFile->Get("num_gtracks");
@@ -514,6 +560,10 @@ void StFtpcTrackEvaluator::SetupHistos()
     mNumShortTracks = (TH1F *)mFile->Get("num_short");
     mNumShortTrackClusters  = (TH1F *)mFile->Get("num_shortclus");
     
+    mNumGoodGeantPoints = (TH1F *)mFile->Get("good_pointsg");
+    mNumGoodFoundPoints = (TH1F *)mFile->Get("good_pointsf");
+    mGoodPointRatio = (TH1F *)mFile->Get("good_points_ratio");
+
     mGHitsOnTrack = (TH1F *)mFile->Get("geant_hits");
     mFHitsOnTrack = (TH1F *)mFile->Get("found_hits");
 
@@ -521,7 +571,9 @@ void StFtpcTrackEvaluator::SetupHistos()
     mNumWrongHits = (TH2F *)mFile->Get("wrong_hits");
     mNumWrongHitsAll = (TH1F *)mFile->Get("wrong_hits_all");
 
-    mGoodPercentage = (TH1F *)mFile->Get("good_percent");
+    mGoodRatio = (TH1F *)mFile->Get("good_ratio");
+    mContamination = (TH1F *)mFile->Get("contamination");
+    mContaWoSplit = (TH1F *)mFile->Get("conta_wo_split");
 
     mPtot = (TH2F *)mFile->Get("ptot");
     mPt = (TH2F *)mFile->Get("pt");
@@ -545,15 +597,18 @@ void StFtpcTrackEvaluator::SetupHistos()
     mEtaNghits = (TH2F *)mFile->Get("eta_ghits");
 
     mPtEtaF = (TH2F *)mFile->Get("pt_etaf");
+    mPtEtaFMes = (TH2F *)mFile->Get("pt_etaf_mes");
     mPtEtaGood = (TH2F *)mFile->Get("pt_eta_good");
     mPtEtaBad = (TH2F *)mFile->Get("pt_eta_bad");
+    mPtEtaUnclean = (TH2F *)mFile->Get("pt_eta_unclean");
+    mPtEtaMesUnclean = (TH2F *)mFile->Get("pt_eta_mes_unclean");
     
     mPtEtaGoodG = (TH2F *)mFile->Get("pt_eta_goodg");
     mPtEtaGoodF = (TH2F *)mFile->Get("pt_eta_goodf");
-    mPtEtaGoodPercentage = (TH2F *)mFile->Get("pt_eta_good_percent");
+    mPtEtaGoodRatio = (TH2F *)mFile->Get("pt_eta_good_ratio");
     mPtEtaBadG = (TH2F *)mFile->Get("pt_eta_badg");
     mPtEtaBadF = (TH2F *)mFile->Get("pt_eta_badf");
-    mPtEtaBadPercentage = (TH2F *)mFile->Get("pt_eta_bad_percent");
+    mPtEtaBadRatio = (TH2F *)mFile->Get("pt_eta_bad_ratio");
 
     mPtEtaFVtx = (TH2F *)mFile->Get("pt_eta_vtxf");
     mPtEtaLookLikeGood = (TH2F *)mFile->Get("pt_eta_loligood");
@@ -590,11 +645,9 @@ void StFtpcTrackEvaluator::SetupHistos()
     mFLengthDist = (TH2F *)mFile->Get("flength_dist");
 
     mFCircleLength = (TH2F *)mFile->Get("fcircle_length");
- }
 
-  else {
-    cout << "Wrong write permission!" << endl;
-    exit(-1);
+    mPRatioDist = (TH2F *)mFile->Get("pratio_dist");
+    mPRatioDistSplit = (TH2F *)mFile->Get("pratio_dist_split");
   }
 
   return;
@@ -618,7 +671,9 @@ void StFtpcTrackEvaluator::CreateHistos()
   mNumNonVertexTracks = new TH1F("num_nvtx", "Non main vertex tracks", 100, 0., 1000.);
   mNumGoodGTracks = new TH1F("num_goodg", "Good geant tracks", 100, 0., 1000.);
   mNumGoodFTracks = new TH1F("num_goodf", "Good found tracks", 100, 0., 1000.);
-  mGoodPercentage = new TH1F("good_percent", "Percentage of good found tracks", 100, 0., 2.);
+  mGoodRatio = new TH1F("good_ratio", "Ratio of good found tracks to goof geant tracks", 100, 0., 2.);
+  mContamination = new TH1F("contamination", "Ratio of loli good tracks to good main vertex tracks", 100, 0., 2.);
+  mContaWoSplit = new TH1F("conta_wo_split", "Ratio of loli good minus split tracks to good main vertex tracks", 100, 0., 2.);
   mNumSplitTracks = new TH1F("num_split", "Split tracks", 100, 0., 300.);
   mNumSplitGoodTracks = new TH1F("num_split_good", "Split good tracks", 100, 0., 300.);
   mNumUncleanTracks = new TH1F("num_unclean", "Unclean tracks", 100, 0., 300.);
@@ -627,6 +682,10 @@ void StFtpcTrackEvaluator::CreateHistos()
 
   mNumShortTrackClusters = new TH1F("num_shortclus", "Clusters on tracks with less than 5 clusters", 100, 0., 12000.);
   mNumLongTrackClusters = new TH1F("num_longclus", "Clusters on tracks with more than 10 clusters", 100, 0., 1600.);
+
+  mNumGoodGeantPoints = new TH1F("good_pointsg", "Number of points on good geant tracks", 100, 0., 40000.);
+  mNumGoodFoundPoints = new TH1F("good_pointsf", "Number of points on good found tracks", 100, 0., 40000.);
+  mGoodPointRatio = new TH1F("good_point_ratio", "Ratio of good points", 100, 0., 1.);
   
   mFHitsOnTrack = new TH1F("found_hits", "Found clusters", 10, 0.5, 10.5);
   mGHitsOnTrack = new TH1F("geant_hits", "Geant clusters", 50, 0.5, 50.5);
@@ -657,15 +716,18 @@ void StFtpcTrackEvaluator::CreateHistos()
   mEtaNfhits = new TH2F("eta_fhits", "Found tracks", 10, 0.5, 10.5, 96, 2.0, 4.4);
 
   mPtEtaF = new TH2F("pt_etaf", "Found tracks", 96, 2.0, 4.4, 50, 0., 5.);
-  mPtEtaGood = new TH2F("pt_eta_good", "Percentage of good tracks", 96, 2.0, 4.4, 50, 0., 5.);
-  mPtEtaBad = new TH2F("pt_eta_bad", "Percentage of bad tracks", 96, 2.0, 4.4, 50, 0., 5.);
+  mPtEtaFMes = new TH2F("pt_etaf_mes", "Found tracks", 96, 2.0, 4.4, 50, 0., 5.);
+  mPtEtaGood = new TH2F("pt_eta_good", "Ratio of good tracks", 96, 2.0, 4.4, 50, 0., 5.);
+  mPtEtaBad = new TH2F("pt_eta_bad", "Ratio of bad tracks", 96, 2.0, 4.4, 50, 0., 5.);
+  mPtEtaUnclean = new TH2F("pt_eta_unclean", "Unclean tracks", 96, 2.0, 4.4, 50, 0., 5.);
+  mPtEtaMesUnclean = new TH2F("pt_eta_mes_unclean", "Unclean tracks", 96, 2.0, 4.4, 50, 0., 5.);
 
   mPtEtaGoodG = new TH2F("pt_eta_goodg", "Good geant tracks", 96, 2.0, 4.4, 50, 0., 5.);
   mPtEtaGoodF = new TH2F("pt_eta_goodf", "Good found tracks", 96, 2.0, 4.4, 50, 0., 5.);
-  mPtEtaGoodPercentage = new TH2F("pt_eta_good_percent", "Percentage of good found tracks", 96, 2.0, 4.4, 50, 0., 5.);
+  mPtEtaGoodRatio = new TH2F("pt_eta_good_ratio", "Ratio of good found tracks", 96, 2.0, 4.4, 50, 0., 5.);
   mPtEtaBadG = new TH2F("pt_eta_badg", "Bad geant tracks", 96, 2.0, 4.4, 50, 0., 5.);
   mPtEtaBadF = new TH2F("pt_eta_badf", "Bad found tracks", 96, 2.0, 4.4, 50, 0., 5.);
-  mPtEtaBadPercentage = new TH2F("pt_eta_bad_percent", "Percentage of bad found tracks", 96, 2.0, 4.4, 50, 0., 5.);
+  mPtEtaBadRatio = new TH2F("pt_eta_bad_ratio", "Ratio of bad found tracks", 96, 2.0, 4.4, 50, 0., 5.);
 
   mPtEtaFVtx = new TH2F("pt_eta_vtxf", "Found tracks with main vertex tag", 96, 2.0, 4.4, 50, 0., 5.);
   mPtEtaLookLikeGood = new TH2F("pt_eta_loligood", "Found tracks looking good but are not", 96, 2.0, 4.4, 50, 0., 5.);
@@ -703,6 +765,8 @@ void StFtpcTrackEvaluator::CreateHistos()
 
   mFCircleLength = new TH2F("fcircle_length", "Found tracks", 100, 0., 40., 100, 0., 0.015);
 
+  mPRatioDist = new TH2F("pratio_dist", "Found track pairs", 100, 0., 2., 37, 0.25, 1.0);
+  mPRatioDistSplit = new TH2F("pratio_dist_split", "Split track pairs", 100, 0., 2., 37, 0.25, 1.0);
 
   ((TAxis *)mNumGeantHits->GetXaxis())->SetTitle("'F# of clusters");
   ((TAxis *)mNumGeantHits->GetYaxis())->SetTitle("'F# of events");
@@ -729,8 +793,12 @@ void StFtpcTrackEvaluator::CreateHistos()
   ((TAxis *)mNumGoodGTracks->GetYaxis())->SetTitle("'F# of events");
   ((TAxis *)mNumGoodFTracks->GetXaxis())->SetTitle("'F# of tracks");
   ((TAxis *)mNumGoodFTracks->GetYaxis())->SetTitle("'F# of events");
-  ((TAxis *)mGoodPercentage->GetXaxis())->SetTitle("% of tracks");
-  ((TAxis *)mGoodPercentage->GetYaxis())->SetTitle("'F# of events");
+  ((TAxis *)mGoodRatio->GetXaxis())->SetTitle("ratio");
+  ((TAxis *)mGoodRatio->GetYaxis())->SetTitle("'F# of events");
+  ((TAxis *)mContamination->GetXaxis())->SetTitle("ratio");
+  ((TAxis *)mContamination->GetYaxis())->SetTitle("'F# of events");
+  ((TAxis *)mContaWoSplit->GetXaxis())->SetTitle("ratio");
+  ((TAxis *)mContaWoSplit->GetYaxis())->SetTitle("'F# of events");
 
   ((TAxis *)mNumSplitTracks->GetXaxis())->SetTitle("'F# of tracks");
   ((TAxis *)mNumSplitTracks->GetYaxis())->SetTitle("'F# of events");
@@ -751,6 +819,13 @@ void StFtpcTrackEvaluator::CreateHistos()
   ((TAxis *)mFHitsOnTrack->GetYaxis())->SetTitle("'F# of found tracks");
   ((TAxis *)mGHitsOnTrack->GetXaxis())->SetTitle("'F# of clusters on track");
   ((TAxis *)mGHitsOnTrack->GetYaxis())->SetTitle("'F# of found tracks");
+
+  ((TAxis *)mNumGoodGeantPoints->GetXaxis())->SetTitle("'F# of clusters");
+  ((TAxis *)mNumGoodGeantPoints->GetYaxis())->SetTitle("'F# of events");
+  ((TAxis *)mNumGoodFoundPoints->GetXaxis())->SetTitle("'F# of clusters");
+  ((TAxis *)mNumGoodFoundPoints->GetYaxis())->SetTitle("'F# of events");
+  ((TAxis *)mGoodPointRatio->GetXaxis())->SetTitle("Ratio");
+  ((TAxis *)mGoodPointRatio->GetYaxis())->SetTitle("'F# of events");
   
   ((TAxis *)mNumParents->GetXaxis())->SetTitle("'F# of parent tracks");
   ((TAxis *)mNumParents->GetYaxis())->SetTitle("'F# of found tracks");
@@ -853,50 +928,67 @@ void StFtpcTrackEvaluator::CreateHistos()
   ((TAxis *)mFCircleLength->GetYaxis())->SetTitle("circle distance");
   ((TAxis *)mFCircleLength->GetZaxis())->SetTitle("'F# of track endings");
 
+  ((TAxis *)mPRatioDist->GetXaxis())->SetTitle("distance [cm]");
+  ((TAxis *)mPRatioDist->GetYaxis())->SetTitle("(p1 + p2) / (p1max + p2max)");
+  ((TAxis *)mPRatioDist->GetZaxis())->SetTitle("'F# of pairs");
+  ((TAxis *)mPRatioDistSplit->GetXaxis())->SetTitle("distance [GeV]");
+  ((TAxis *)mPRatioDistSplit->GetYaxis())->SetTitle("(p1 + p2) / (p1max + p2max)");
+  ((TAxis *)mPRatioDistSplit->GetZaxis())->SetTitle("'F# of pairs");
+
   ((TAxis *)mEtaNghits->GetXaxis())->SetTitle("'F# of geant clusters");
   ((TAxis *)mEtaNghits->GetYaxis())->SetTitle("`h#");
   ((TAxis *)mEtaNfhits->GetXaxis())->SetTitle("'F# of found clusters");
   ((TAxis *)mEtaNfhits->GetYaxis())->SetTitle("`h#");
 
-  ((TAxis *)mPtEtaF->GetXaxis())->SetTitle("`h#");
-  ((TAxis *)mPtEtaF->GetYaxis())->SetTitle("p?'c#! [GeV]");
+  ((TAxis *)mPtEtaF->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaF->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
   ((TAxis *)mPtEtaF->GetZaxis())->SetTitle("'F# of tracks");
 
-  ((TAxis *)mPtEtaGood->GetXaxis())->SetTitle("`h#");
-  ((TAxis *)mPtEtaGood->GetYaxis())->SetTitle("p?'c#! [GeV]");
-  ((TAxis *)mPtEtaGood->GetZaxis())->SetTitle("'F# of tracks");
-  ((TAxis *)mPtEtaBad->GetXaxis())->SetTitle("`h#");
-  ((TAxis *)mPtEtaBad->GetYaxis())->SetTitle("p?'c#! [GeV]");
-  ((TAxis *)mPtEtaBad->GetZaxis())->SetTitle("'F# of tracks");
+  ((TAxis *)mPtEtaFMes->GetXaxis())->SetTitle("`h# (measured)");    
+  ((TAxis *)mPtEtaFMes->GetYaxis())->SetTitle("p?'c#! [GeV] (measured)");
+  ((TAxis *)mPtEtaFMes->GetZaxis())->SetTitle("'F# of tracks");
 
-  ((TAxis *)mPtEtaFVtx->GetXaxis())->SetTitle("`h#");
-  ((TAxis *)mPtEtaFVtx->GetYaxis())->SetTitle("p?'c#! [GeV]");
+  ((TAxis *)mPtEtaGood->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaGood->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
+  ((TAxis *)mPtEtaGood->GetZaxis())->SetTitle("'F# of tracks");
+  ((TAxis *)mPtEtaBad->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaBad->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
+  ((TAxis *)mPtEtaBad->GetZaxis())->SetTitle("'F# of tracks");
+  ((TAxis *)mPtEtaUnclean->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaUnclean->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
+  ((TAxis *)mPtEtaUnclean->GetZaxis())->SetTitle("'F# of tracks");
+  ((TAxis *)mPtEtaMesUnclean->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaMesUnclean->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
+  ((TAxis *)mPtEtaMesUnclean->GetZaxis())->SetTitle("'F# of tracks");
+
+  ((TAxis *)mPtEtaFVtx->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaFVtx->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
   ((TAxis *)mPtEtaFVtx->GetZaxis())->SetTitle("'F# of tracks");
-  ((TAxis *)mPtEtaLookLikeGood->GetXaxis())->SetTitle("`h#");
-  ((TAxis *)mPtEtaLookLikeGood->GetYaxis())->SetTitle("p?'c#! [GeV]");
+  ((TAxis *)mPtEtaLookLikeGood->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaLookLikeGood->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
   ((TAxis *)mPtEtaLookLikeGood->GetZaxis())->SetTitle("'F# of tracks");
-  ((TAxis *)mPtEtaContamination->GetXaxis())->SetTitle("`h#");
-  ((TAxis *)mPtEtaContamination->GetYaxis())->SetTitle("p?'c#! [GeV]");
+  ((TAxis *)mPtEtaContamination->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaContamination->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
   ((TAxis *)mPtEtaContamination->GetZaxis())->SetTitle("'F# of tracks");
 
-  ((TAxis *)mPtEtaGoodG->GetXaxis())->SetTitle("`h#");
-  ((TAxis *)mPtEtaGoodG->GetYaxis())->SetTitle("p?'c#! [GeV]");
+  ((TAxis *)mPtEtaGoodG->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaGoodG->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
   ((TAxis *)mPtEtaGoodG->GetZaxis())->SetTitle("'F# of tracks");
-  ((TAxis *)mPtEtaGoodF->GetXaxis())->SetTitle("`h#");
-  ((TAxis *)mPtEtaGoodF->GetYaxis())->SetTitle("p?'c#! [GeV]");
+  ((TAxis *)mPtEtaGoodF->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaGoodF->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
   ((TAxis *)mPtEtaGoodF->GetZaxis())->SetTitle("'F# of tracks");
-  ((TAxis *)mPtEtaGoodPercentage->GetXaxis())->SetTitle("`h#");
-  ((TAxis *)mPtEtaGoodPercentage->GetYaxis())->SetTitle("p?'c#! [GeV]");
-  ((TAxis *)mPtEtaGoodPercentage->GetZaxis())->SetTitle("% of tracks");
-  ((TAxis *)mPtEtaBadG->GetXaxis())->SetTitle("`h#");
-  ((TAxis *)mPtEtaBadG->GetYaxis())->SetTitle("p?'c#! [GeV]");
+  ((TAxis *)mPtEtaGoodRatio->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaGoodRatio->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
+  ((TAxis *)mPtEtaGoodRatio->GetZaxis())->SetTitle("ratio");
+  ((TAxis *)mPtEtaBadG->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaBadG->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
   ((TAxis *)mPtEtaBadG->GetZaxis())->SetTitle("'F# of tracks");
-  ((TAxis *)mPtEtaBadF->GetXaxis())->SetTitle("`h#");
-  ((TAxis *)mPtEtaBadF->GetYaxis())->SetTitle("p?'c#! [GeV]");
+  ((TAxis *)mPtEtaBadF->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaBadF->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
   ((TAxis *)mPtEtaBadF->GetZaxis())->SetTitle("'F# of tracks");
-  ((TAxis *)mPtEtaBadPercentage->GetXaxis())->SetTitle("`h#");
-  ((TAxis *)mPtEtaBadPercentage->GetYaxis())->SetTitle("p?'c#! [GeV]");
-  ((TAxis *)mPtEtaBadPercentage->GetZaxis())->SetTitle("% of tracks");
+  ((TAxis *)mPtEtaBadRatio->GetXaxis())->SetTitle("`h# (of parent)");
+  ((TAxis *)mPtEtaBadRatio->GetYaxis())->SetTitle("p?'c#! [GeV] (of parent)");
+  ((TAxis *)mPtEtaBadRatio->GetZaxis())->SetTitle("ratio");
 
   ((TAxis *)mGLengthDistTrackAng->GetXaxis())->SetTitle("angle of track endings");
   ((TAxis *)mGLengthDistTrackAng->GetYaxis())->SetTitle("length dist. of last point");
@@ -1006,7 +1098,8 @@ void StFtpcTrackEvaluator::GeantTrackInit(St_g2t_track *g2t_track, St_g2t_ftp_hi
 	  points->AddAt(mGeantHits->At(number), j);
 	  hitnumber->AddAt(number, j);
 	}
-	
+
+	t->CalculateNMax();
 	NumFtpcGeantTracks++;
 
 	if (ftpc_hits>10) {
@@ -1027,6 +1120,7 @@ void StFtpcTrackEvaluator::GeantTrackInit(St_g2t_track *g2t_track, St_g2t_ftp_hi
 	  
 	  if (IsGoodTrack(t)) {
 	    mGoodGTracks++;
+	    mGoodGeantPoints += ftpc_hits;
 	  }
 	}
       }
@@ -1063,7 +1157,7 @@ void StFtpcTrackEvaluator::ParentTrackInit()
   mParent->Set(mFoundTracks->GetEntriesFast());
   mNumParentTracks->SetFill(mFoundTracks->GetEntriesFast()*10, -1);
 
-  Int_t actual_track;
+  Int_t actual_track = -1;
 
   // loop over tracks
   for (Int_t t_counter = 0; t_counter < mFoundTracks->GetEntriesFast(); t_counter++) {
@@ -1114,6 +1208,7 @@ void StFtpcTrackEvaluator::ParentTrackInit()
 		mUncleanTracksArr->AddLast(t_counter);
 		mUncleanTracks++;
 		mUnclean[t_counter] = (Bool_t)true;
+		mPtEtaMesUnclean->Fill(TMath::Abs(((StFtpcTrack *)mFoundTracks->At(t_counter))->GetEta()), ((StFtpcTrack *)mFoundTracks->At(t_counter))->GetPt());
 		actual_track = t_counter;
 	      }
 	    }
@@ -1147,9 +1242,52 @@ void StFtpcTrackEvaluator::EvaluateGoodness(Int_t t_counter)
   StFtpcTrack *track = (StFtpcTrack *)mFoundTracks->At(t_counter);
   StFtpcTrack *parent = (StFtpcTrack *)mGeantTracks->At(mParent->At(t_counter));
   mPtEtaF->Fill(TMath::Abs(parent->GetPseudoRapidity()), parent->GetPt());
+  mPtEtaFMes->Fill(TMath::Abs(track->GetPseudoRapidity()), track->GetPt());
 
+  TObjArray *points = track->GetHits();
+
+  Int_t wrong_hits_on_this_track = 0;
+
+  for (Int_t i=0; i<points->GetEntriesFast(); i++) {
+    StFtpcPoint *p = (StFtpcPoint *)points->At(i);
+    
+    if (mParentTrack->At(t_counter*10+i) == mParent->At(t_counter)) {
+      mClusterArr->AddAt(1, p->GetHitNumber());
+    }
+
+    else {
+      mClusterArr->AddAt(-1, p->GetHitNumber());
+      wrong_hits_on_this_track++;
+
+      if (i == points->GetEntriesFast()-1) {
+	// last point on track was picked up wrong
+	
+	StFtpcConfMapper c;
+
+	Double_t chi2_1[6];
+	Double_t chi2_2[6];
+
+	c.StraightLineFit(track, chi2_1, i);
+	c.StraightLineFit(track, chi2_2, i-1);
+
+	cout << chi2_1[4] << " " << chi2_2[4] << " " << chi2_1[4] - chi2_2[4] << endl;
+	cout << chi2_1[5] << " " << chi2_2[5] << " " << chi2_1[5] - chi2_2[5] << endl << endl;
+      }
+
+    }
+  }
+
+  if (IsUncleanTrack(t_counter)) {
+    mPtEtaUnclean->Fill(TMath::Abs(((StFtpcTrack *)mGeantTracks->At(mParent->At(t_counter)))->GetEta()), ((StFtpcTrack *)mGeantTracks->At(mParent->At(t_counter)))->GetPt());
+    
+    if (IsGoodTrack(parent) && track->ComesFromMainVertex()) {
+      mGoodFoundPoints += (track->GetNumberOfPoints() - wrong_hits_on_this_track);
+    }
+  }
+  
   if (IsGoodTrack(parent) && IsCleanTrack(t_counter) && track->ComesFromMainVertex()) {
     mGoodFTracks++;
+    mGoodFoundPoints += track->GetNumberOfPoints();
     mPtEtaGoodF->Fill(TMath::Abs(parent->GetPseudoRapidity()), parent->GetPt());
   }
 
@@ -1184,8 +1322,8 @@ void StFtpcTrackEvaluator::DivideHistos()
 
   mPtEtaGood->Divide(mPtEtaGoodF, mPtEtaF);
   mPtEtaBad->Divide(mPtEtaBadF, mPtEtaF);
-  mPtEtaGoodPercentage->Divide(mPtEtaGoodF, mPtEtaGoodG);
-  mPtEtaBadPercentage->Divide(mPtEtaBadF, mPtEtaBadG);
+  mPtEtaGoodRatio->Divide(mPtEtaGoodF, mPtEtaGoodG);
+  mPtEtaBadRatio->Divide(mPtEtaBadF, mPtEtaBadG);
   mPtEtaContamination->Divide(mPtEtaLookLikeGood, mPtEtaFVtx);
 
   return;
@@ -1351,7 +1489,9 @@ void StFtpcTrackEvaluator::WriteHistos()
   mNumNonVertexTracks->Write();
   mNumGoodGTracks->Write();
   mNumGoodFTracks->Write();
-  mGoodPercentage->Write();
+  mGoodRatio->Write();
+  mContamination->Write();
+  mContaWoSplit->Write();
   mNumSplitTracks->Write();
   mNumSplitGoodTracks->Write();
   mNumUncleanTracks->Write();
@@ -1362,6 +1502,11 @@ void StFtpcTrackEvaluator::WriteHistos()
 
   mGHitsOnTrack->Write();
   mFHitsOnTrack->Write();
+
+  mNumGoodGeantPoints->Write();
+  mNumGoodFoundPoints->Write();
+  mGoodPointRatio->Write();
+
   mNumParents->Write();
   mNumWrongHits->Write();
   mNumWrongHitsAll->Write();
@@ -1388,15 +1533,18 @@ void StFtpcTrackEvaluator::WriteHistos()
   mEtaNfhits->Write();
 
   mPtEtaF->Write();
+  mPtEtaFMes->Write();
   mPtEtaGood->Write();
   mPtEtaBad->Write();
+  mPtEtaUnclean->Write();
+  mPtEtaMesUnclean->Write();
 
   mPtEtaGoodG->Write();
   mPtEtaGoodF->Write();
-  mPtEtaGoodPercentage->Write();
+  mPtEtaGoodRatio->Write();
   mPtEtaBadG->Write();
   mPtEtaBadF->Write();
-  mPtEtaBadPercentage->Write(); 
+  mPtEtaBadRatio->Write(); 
 
   mPtEtaFVtx->Write();
   mPtEtaLookLikeGood->Write();
@@ -1433,6 +1581,9 @@ void StFtpcTrackEvaluator::WriteHistos()
   mFLengthDist->Write();
 
   mFCircleLength->Write();
+
+  mPRatioDist->Write();
+  mPRatioDistSplit->Write();
 
   return;
 }
@@ -1610,16 +1761,51 @@ void StFtpcTrackEvaluator::CalcSplitTracks()
 {
   // Calculates the number of split tracks and returns it. 
   
+  Double_t ratio;
+  Double_t dist;
+
+  Double_t r1;
+  Double_t r2;
+  Double_t R1;
+  Double_t R2;
+  Double_t phi1;
+  Double_t phi2;
+  Double_t Phi1;
+  Double_t Phi2;
+
   for (Int_t track1 = 0; track1 < mFoundTracks->GetEntriesFast(); track1++) {
     
     for (Int_t track2 = track1+1; track2 < mFoundTracks->GetEntriesFast(); track2++) {
       
-      if (mParent->At(track1) == mParent->At(track2)) { 
+      StFtpcTrack *t1 = (StFtpcTrack *)mFoundTracks->At(track1);
+      StFtpcTrack *t2 = (StFtpcTrack *)mFoundTracks->At(track2);
+     
+      r1 = t1->GetRLast();
+      r2 = t2->GetRLast();
+      phi1 = t1->GetAlphaLast();
+      phi2 = t2->GetAlphaLast();
+      R1 = t1->GetRFirst();
+      R2 = t2->GetRFirst();
+      Phi1 = t1->GetAlphaFirst();
+      Phi2 = t2->GetAlphaFirst();
+      
+      dist = (TMath::Sqrt(r2*r2+r1*r1-2*r1*r2*(TMath::Cos(phi1)*TMath::Cos(phi2)+TMath::Sin(phi1)*TMath::Sin(phi2))) +
+	      TMath::Sqrt(R2*R2+R1*R1-2*R1*R2*(TMath::Cos(Phi1)*TMath::Cos(Phi2)+TMath::Sin(Phi1)*TMath::Sin(Phi2)))) / 2.;
+      ratio = (Double_t)(t1->GetNumberOfPoints() + t2->GetNumberOfPoints()) / (Double_t)(t1->GetNMax() + t2->GetNMax());
+
+      if (!(t1->GetRowsWithPoints() & t2->GetRowsWithPoints()) && (t1->GetHemisphere() == t2->GetHemisphere())) {
+	mPRatioDist->Fill(dist, ratio);
+      }
+      
+      if (mParent->At(track1) == mParent->At(track2)) {
+	
 	mSplitTracksArr->AddLast(track1);
 	mSplitTracksArr->AddLast(track2);
 	mSplitTracks++;
 
-	StFtpcTrack *track = (StFtpcTrack*)mGeantTracks->At(mParent->At(track1));
+	if (ratio) mPRatioDistSplit->Fill(dist, ratio);
+
+	StFtpcTrack *track = (StFtpcTrack *)mGeantTracks->At(mParent->At(track1));
 	
 	if (IsGoodTrack(track) && ((StFtpcTrack*)mFoundTracks->At(track1))->ComesFromMainVertex()) {
 	  mSplitGoodTracksArr->AddLast(track1);
@@ -1692,7 +1878,9 @@ void StFtpcTrackEvaluator::FillEventHistos()
   mNumNonVertexTracks->Fill(GetNumNonVertexTracks());
   mNumGoodGTracks->Fill(GetNumGoodGeantTracks());
   mNumGoodFTracks->Fill(GetNumGoodFoundTracks());
-  mGoodPercentage->Fill(((Float_t)GetNumGoodFoundTracks()-(Float_t)GetNumSplitGoodTracks())/(Float_t)GetNumGoodGeantTracks());
+  mGoodRatio->Fill(((Float_t)GetNumGoodFoundTracks()-(Float_t)GetNumSplitGoodTracks())/(Float_t)GetNumGoodGeantTracks());
+  mContamination->Fill((Float_t)GetNumLookLikeGoodTracks()/(Float_t)GetNumFoundVertexTracks());
+  mContaWoSplit->Fill((Float_t)(GetNumLookLikeGoodTracks()-GetNumSplitGoodTracks())/(Float_t)GetNumFoundVertexTracks());
   mNumSplitTracks->Fill(GetNumSplitTracks());
   mNumSplitGoodTracks->Fill(GetNumSplitGoodTracks());
   mNumUncleanTracks->Fill(GetNumUncleanTracks());
@@ -1700,6 +1888,9 @@ void StFtpcTrackEvaluator::FillEventHistos()
   mNumLongTrackClusters->Fill(GetNumLongTrackClusters());
   mNumShortTracks->Fill(GetNumShortTracks());
   mNumShortTrackClusters->Fill(GetNumShortTrackClusters());
+  mNumGoodGeantPoints->Fill(GetNumGoodGeantPoints());
+  mNumGoodFoundPoints->Fill(GetNumGoodFoundPoints());
+  mGoodPointRatio->Fill((Float_t)GetNumGoodFoundPoints()/(Float_t)GetNumGoodGeantPoints());
 
   return;
 }
@@ -1709,9 +1900,8 @@ void StFtpcTrackEvaluator::ShowTracks()
 {
   // Displays the geant and/or found tracks.
 
-  StFtpcDisplay *display = new StFtpcDisplay(GetFoundHits(), GetFoundTracks(), GetGeantHits(), GetGeantTracks());
-  display->ShowEvalTracks(mSplitTracksArr, mUncleanTracksArr);
-  delete display;
+  StFtpcDisplay display(GetFoundHits(), GetFoundTracks(), GetGeantHits(), GetGeantTracks());
+  display.ShowEvalTracks(mSplitTracksArr, mUncleanTracksArr, mClusterArr);
 
   return;
 }
@@ -1738,6 +1928,9 @@ void StFtpcTrackEvaluator::ClusterInfo()
   cout << "Short track clusters          : " << GetNumShortTrackClusters() << endl;
   cout << "Long track clusters           : " << GetNumLongTrackClusters() << endl;
   cout << "Max. track clusters           : " << GetMaxClusters() << endl;
+  cout << "# of hits on good found tracks: " << GetNumGoodFoundPoints() << endl;
+  cout << "# of hits on good geant tracks: " << GetNumGoodGeantPoints() << endl;
+  cout << "Ratio of good found clusters  : " << (Float_t)GetNumGoodFoundPoints()/(Float_t)GetNumGoodGeantPoints() << endl;
 
   return;
 }
@@ -1766,7 +1959,8 @@ void StFtpcTrackEvaluator::TrackerInfo()
   cout << "Found electron tracks         : " << GetNumElectronTracks() << endl;
   cout << "Found non main vertex tracks  : " << GetNumNonVertexTracks() << endl;
   
-  cout << "% of good geant tracks        : " << ((Float_t)GetNumGoodFoundTracks()-(Float_t)GetNumSplitGoodTracks())/(Float_t)GetNumGoodGeantTracks()*100. << endl;
+  cout << "Ratio of good geant tracks    : " << ((Float_t)GetNumGoodFoundTracks()-(Float_t)GetNumSplitGoodTracks())/(Float_t)GetNumGoodGeantTracks() << endl;
+  cout << "Contamination                 : " << (Float_t)GetNumLookLikeGoodTracks()/(Float_t)GetNumFoundVertexTracks() << endl; 
 
   return;
 }
