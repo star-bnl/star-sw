@@ -130,7 +130,6 @@ class StEmcFilter: public TObject
     Float_t         mMcEtaMin;           
     Float_t         mMcEtaMax;           
     
-    void            msg(char* a,char* b) {if(mPrintLog) cout <<"StEmcFiletr:: "<<a<<" rejected: "<<b<<endl; }
     void            calcCentrality(StEvent*); 
     
   public:

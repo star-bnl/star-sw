@@ -56,6 +56,7 @@ class StEmcEnergy : public TObject
       Float_t   getEmEnergyInBtow(UInt_t);        ///< Return electromagnetic energy in one tower  
                
          void   setEval(evalMetd);                ///< Set evaluation method if using geant
+         void   setRealData(Bool_t);              ///< kTRUE if real data, kFALSE if hijing
          void   setEvent(StEvent*);               ///< Set StEvent pointer
          void   setMcEvent(StMcEvent*);           ///< Set McEvent pointer
          void   setEmcFilter(StEmcFilter*);       ///< Set event filter
@@ -92,7 +93,8 @@ class StEmcEnergy : public TObject
        Float_t   mChHadEt;
        Float_t   mQ0HadEt;
        Float_t   mEmEt;   
-			   Int_t   mNTracks;         
+			   Int_t   mNTracks;  
+        Bool_t   mRealData;
             
        Float_t   mMcChHadEnergyInBtow[4800];
        Float_t   mGeantEmEtInBtow[4800];
@@ -127,6 +129,7 @@ inline Float_t StEmcEnergy::getEmEt(){ return mEmEt; }
 inline   Int_t StEmcEnergy::getNTracks(){ return mNTracks; }
 
 inline void    StEmcEnergy::setEval( evalMetd metd) { mEvalMetd = metd; }
+inline void    StEmcEnergy::setRealData( Bool_t a) { mRealData = a; }
 inline void    StEmcEnergy::setEvent(StEvent* event){ mEvent = event; }
 inline void    StEmcEnergy::setMcEvent(StMcEvent* mcEvent){ mMcEvent = mcEvent; }
 inline void    StEmcEnergy::setTPCEff(Bool_t option)  { mTPCEff = option; }
