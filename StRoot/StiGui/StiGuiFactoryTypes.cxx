@@ -17,6 +17,7 @@ StiRDEvaluableTrackFactory::StiRDEvaluableTrackFactory(const string& newName,int
 
 StiRDEvaluableTrackFactory::~StiRDEvaluableTrackFactory()
 {
+    // cout <<"StiRDEvaluableTrackFactory::~StiRDEvaluableTrackFactory()"<<endl;
 }
 
 void* StiRDEvaluableTrackFactory::makeNewObject() const

@@ -7,10 +7,11 @@
 
 #include "Sti/StiEvaluableTrack.h"
 
-#include "StiRootDrawableLine.h"
+//#include "StiRootDrawableLine.h"
+class StiRootDrawableLine;
+class StiRootDrawableHits;
 
-class StiRootDrawableStiEvaluableTrack :
-    public StiEvaluableTrack, public StiRootDrawableLine
+class StiRootDrawableStiEvaluableTrack : public StiEvaluableTrack
 {
 public:
     StiRootDrawableStiEvaluableTrack();
@@ -21,11 +22,11 @@ public:
     virtual void reset();
     
 protected:
-
-private:
-    void setLineInfo();
-
+    StiRootDrawableLine* mLine;
+    StiRootDrawableHits* mHits;
     
+private:
+    void setLineInfo();    
 };
 
 #endif

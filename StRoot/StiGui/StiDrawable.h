@@ -26,16 +26,31 @@ public:
     void setName(const string&);
     const string& name() const;
 
+    ///Can it be removed from the DisplayManager each event?
     void setRemoved(bool);
     bool canBeRemoved() const;
+    ///Has it been added to the DisplayManager for this event?
+    bool isAdded() const;
+    void setIsAdded(bool);
     
     const StThreeVector<double>& position() {return mposition;}
     
 protected:
     StThreeVector<double> mposition; //Global position of center of volume
     bool mremoved_each_event;
+    bool mIsAddedToDisplay;
     string mName;
 };
+
+inline bool StiDrawable::isAdded() const
+{
+    return mIsAddedToDisplay;
+}
+
+inline void StiDrawable::setIsAdded(bool val)
+{
+    mIsAddedToDisplay=val;
+}
 
 inline void StiDrawable::setName(const string& val)
 {

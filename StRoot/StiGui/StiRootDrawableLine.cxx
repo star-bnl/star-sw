@@ -4,6 +4,7 @@
 
 //SCL
 #include "StThreeVectorD.hh"
+#include "StThreeVector.hh"
 
 //StEvent
 #include "StEventTypes.h"
@@ -16,11 +17,9 @@
 #include "StiRootDrawableLine.h"
 
 StiRootDrawableLine::StiRootDrawableLine() :
-    mline( new StiTPolyLine3D() ), marray(0), mcolor(2), mvisible(true)
+    mline( new StiTPolyLine3D() ), mcolor(2), mvisible(true)
 {
-    marray = new double[0];
-
-    mline->SetPolyLine(0, marray);
+    //mline->SetPolyLine(0, 0);
 
     //mline->SetLineStyle(8);
     //mline->SetLineSize(.5);
@@ -41,7 +40,12 @@ void StiRootDrawableLine::setMarkerStyle(unsigned int val)
 
 void StiRootDrawableLine::setMarkerSize(double val)
 {
-    //    mpoly->SetMarkerSize(10.);
+    //    mpoly->SetMarkerSize(val);
+}
+
+void StiRootDrawableLine::setLineWidth(double val)
+{
+    mline->SetLineStyle(val);
 }
 
 void StiRootDrawableLine::setLineStyle(unsigned int val)
@@ -49,16 +53,20 @@ void StiRootDrawableLine::setLineStyle(unsigned int val)
     mline->SetLineStyle(val);
 }
 
+void StiRootDrawableLine::clearLine()
+{
+    mline->SetPolyLine(0);
+    mline->ResetBit(kCanDelete);
+}
+
 void StiRootDrawableLine::fillHitsForDrawing()
 {
-    mline->SetPolyLine(0, marray);
+    //mline->SetPolyLine(0);
     mline->SetLineColor(mcolor);
     mline->ResetBit(kCanDelete);
 
-    for (const_hit_vector::const_iterator it=begin(); it!=end(); ++it) {
-	const StThreeVectorD& pos = (*it)->stHit()->position();
-	mline->SetNextPoint( pos.x(), pos.y(), pos.z() );
-    }
+    mline->SetPolyLine(size()/3, &(this->operator[](0)));
+    
     return;
 }
 
