@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.13 2000/04/13 22:57:53 calderon Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.14 2000/04/17 20:14:42 calderon Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,10 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.14  2000/04/17 20:14:42  calderon
+ * fix bug, did not remove all use of matrices in last step of
+ * rotation from local sector -> local.
+ *
  * Revision 1.13  2000/04/13 22:57:53  calderon
  * use lookup table of sines and cosines instead of calculating them
  * each time
@@ -567,8 +571,8 @@ StTpcCoordinateTransform::rotateToLocal(const StThreeVector<double>& a,
 				 -x*mSinForSector[sector-1] + a.y()*mCosForSector[sector-1],
 				 0.); // z is done in the next line
 
-    return (sector>12)? (StThreeVector<double>(mResult(1,1),mResult(2,1),a.z()-mDriftDistance))
-                        : (StThreeVector<double>(mResult(1,1),mResult(2,1),-a.z()+mDriftDistance));
+    return (sector>12)? (StThreeVector<double>(result.x(),result.y(),a.z()-mDriftDistance))
+                        : (StThreeVector<double>(result.x(),result.y(),-a.z()+mDriftDistance));
 }
  
 StThreeVector<double> 
