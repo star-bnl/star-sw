@@ -17,7 +17,7 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.cxx,v 2.7 2004/02/01 18:01:53 jeromel Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.8 2004/02/04 01:36:40 jeromel Exp $
  *
  */
 
@@ -99,9 +99,9 @@ StAnalysisMaker::Init()
     //
     mFileName = "/dev/null";    
     mFile =  new TFile(mFileName.c_str(), "RECREATE");
-    cout << "StAnalysisMaker::Init():\n";
-    cout << "\tHistograms will be stored in file '"
-	 <<  mFileName.c_str() << "'" << endl;
+    gMessMgr->Info() << "StAnalysisMaker::Init(): "
+		     << "Histograms will be stored in file '"
+		     <<  mFileName.c_str() << "'" << endm;
     
     //
     //  Define Ntuple.
@@ -141,8 +141,8 @@ StAnalysisMaker::Finish()
     //  A good place for printout and to summarize
     //  the run.
     //
-    cout << "StAnalysisMaker::Finish()\n";
-    cout << "\tProcessed " << mEventCounter << " events." << endl;
+    gMessMgr->Info() << "StAnalysisMaker::Finish() "
+		     << "Processed " << mEventCounter << " events." << endm;
     
     //
     //  Write Ntuple/histos to file and close it.
@@ -152,7 +152,6 @@ StAnalysisMaker::Finish()
       mFile->Close();
     }
     
-
     return kStOK;
 }
 
@@ -171,7 +170,7 @@ StAnalysisMaker::Make()
     StEvent* event;
     event = (StEvent *) GetInputDS("StEvent");
     if (!event){
-      cout << "StAnalysisMaker::Make : No StEvent"  << endl;
+      gMessMgr->Warning() << "StAnalysisMaker::Make : No StEvent" << endm;
       return kStOK;        // if no event, we're done
     }
 
@@ -187,7 +186,7 @@ StAnalysisMaker::Make()
     //  If not we stop here right away.
     //
     if (!accept(event)){
-      cout << "StAnalysisMaker::Make : Event was not accepted"  << endl;
+      gMessMgr->Warning() << "StAnalysisMaker::Make : Event was not accepted" << endm;
       return kStOK;
     }
 
@@ -208,7 +207,7 @@ StAnalysisMaker::Make()
     // Y3 trigger Id dump
     StTriggerIdCollection *trgcol = event->triggerIdCollection();
     if ( ! trgcol ){
-      cout << "StAnalysisMaker::Make : No triggerIdCollection " << endl;
+      gMessMgr->Warning() << "StAnalysisMaker::Make : No triggerIdCollection" << endm;
     } else {
       const StTriggerId *l1 = trgcol->l1();
       const StTriggerId *l2 = trgcol->l2();
@@ -261,7 +260,7 @@ StAnalysisMaker::Make()
     StTriggerDetectorCollection *theTriggers = event->triggerDetectorCollection();
     if (!theTriggers){
       // good idea to check if the data is available at all
-      cout << "StAnalysisMaker::Make : no triggerDetectorCollection" << endl;
+      gMessMgr->Warning() << "StAnalysisMaker::Make : no triggerDetectorCollection" << endm;
       return kStOK;           
     }
     StCtbTriggerDetector &theCtb = theTriggers->ctb();
@@ -338,6 +337,9 @@ bool StAnalysisMaker::accept(StTrack* track)
 
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.8  2004/02/04 01:36:40  jeromel
+ * Minor change for user's education. Use of gMessMgr
+ *
  * Revision 2.7  2004/02/01 18:01:53  jeromel
  * A few message addition
  *
