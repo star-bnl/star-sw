@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: MuEzSoloPi0Maker.cxx,v 1.2 2005/03/01 20:02:15 balewski Exp $
+// $Id: MuEzSoloPi0Maker.cxx,v 1.3 2005/03/11 15:39:49 balewski Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -32,7 +32,7 @@ MuEzSoloPi0Maker::MuEzSoloPi0Maker( const char* self ,const char* muDstMakerName
   assert(mMuDstMaker);
 
   trgAkio=0;
-  nAcceptEve=nTrigEve=nInpEve=0;
+  nAcceptEve=nTrigEve=nInpEve=nCorrEve=0;
   HList=0;
   trigID=0;
   maxCtbSum=0;
@@ -90,7 +90,7 @@ MuEzSoloPi0Maker::InitRun(int runNo){
 Int_t 
 MuEzSoloPi0Maker::Finish(){
   finish();
-  gMessMgr->Message("","I") <<GetName()<<"::Finish() inputEve="<<nInpEve<<" trigFilterEve="<<nTrigEve<<" nAcceptEve="<<nAcceptEve<<endm;
+  gMessMgr->Message("","I") <<GetName()<<"::Finish()\n    inputEve="<<nInpEve<<" trigFilterEve="<<nTrigEve<<" nCorrEve="<<nCorrEve<<" nAcceptEve="<<nAcceptEve<<endm;
   return kStOK;
 }
 
@@ -141,11 +141,17 @@ MuEzSoloPi0Maker::Make(){
   // .... process adata ......
   void *blob=eTrig->trgd->GetArray();
   StTriggerData2005 trgAkio5( (const TrgDataType2005 *)blob);
+
+  if(eETow->doTowerHeadCorruptionTest(trgAkio5.token())) {
+    nCorrEve++;
+    return kStOK;
+  }
   
   int ctbSum=trgAkio5.ctbSum();
   if(maxCtbSum>0 && (ctbSum>maxCtbSum || ctbSum<maxCtbSum/2.))  return kStOK;
   nAcceptEve++;
   
+
   if(unpackMuEzTowers(trgAkio5.token())==false )  return kStOK;
   
   // printf(" ctbSum=%d \n",sum);
@@ -164,24 +170,12 @@ MuEzSoloPi0Maker::unpackMuEzTowers(int token){
 
   // tower
   if(eETow==0) return false; // no ETOW data 
-  int lenCount=0xa4;
-  int errFlag=0;
-  int trigComm=0x4; // physics, 9=laser/LED, 8=??
 
-  int nCr=0;
   int icr;
   for(icr=0;icr<eETow->getNBlocks();icr++) {
     if(eETow->isCrateVoid(icr)) continue;
-    if(eETow->purgeCrateOFF(icr)) continue;
-
-    int crID=icr+1;
-    //........... hader..........
-    eETow->tagHeadValid(icr,token, crID,lenCount,trigComm,errFlag);
-    const UShort_t isSick=eETow ->getCorruption(icr);
-    if (isSick) return false; // abort on first corrupted crate
-    nCr++; // count number of valid crates
+    assert(!eETow ->getCorruption(icr)); // zero-tolerance
     int crateID=eETow->getCrateID(icr);
-
     int chan;
     const UShort_t* data=eETow->data(icr);
     for(chan=0;chan<eETow->sizeData(icr);chan++) {
@@ -212,6 +206,9 @@ MuEzSoloPi0Maker::unpackMuEzTowers(int token){
 
 //---------------------------------------------------
 // $Log: MuEzSoloPi0Maker.cxx,v $
+// Revision 1.3  2005/03/11 15:39:49  balewski
+// use corruption method from muEzt
+//
 // Revision 1.2  2005/03/01 20:02:15  balewski
 // hack to access 2005 trigger data
 //
