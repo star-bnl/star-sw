@@ -27,6 +27,6 @@ interface srs_am : amiModule {
                 , in    srs_activea activea
         );
 };
-/*  Last mod. for srs_am: $Date: 1997/12/31 14:33:33 $ */
+/*  Last mod. for srs_am: $Date: 1998/01/26 22:12:47 $ */
 
 
