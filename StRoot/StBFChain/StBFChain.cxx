@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.405 2004/04/03 02:50:34 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.406 2004/04/04 02:33:18 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -178,12 +178,14 @@ Bfc_st BFC1[] = {
   // Year 4 chains (2003/2004) *** CHAINS WILL BE RESHAPED AS RUN PROGRESS ***
   {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                        ,"Base chain for 2004 (tpc)",kFALSE},
-  {"P2004"       ,""     ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr2,ftpc,trgd,OSpaceZ","",""
+  {"P2004"       ,""     ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr3,ftpc,trgd,OSpaceZ","",""
                 ,"Production chain for winter 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
 
 
   // Other chains/Calibration
-  {"LaserCal",""  ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","","",
+  {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","","",
+                                                                    "Laser Calibration Chain (tcl)",kFALSE},
+  {"LaserCal",""  ,"","db,detDb,tpc_daq,tpcDb,fcf,globT,laser,LaserTest","","",
                                                                           "Laser Calibration Chain",kFALSE},
   {"L3Counter","" ,"","db,detDb,xin,l3count","","",                    "L3 Counter extraction pass",kFALSE},
   {"VtxSeedCal","","",
@@ -238,6 +240,8 @@ Bfc_st BFC1[] = {
                                                       "... AlignSectors,ExB,OBmap,OClock,OPr13 ...",kFALSE},
   {"Corr2"       ,""  ,"","AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC","","",
                                           "... AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC ...",kFALSE},
+  {"Corr3"       ,""  ,"","AlignSectors,ExB,OBmap2D,OClock,OPr13,OTwist,OIFC","","",
+                                        "... AlignSectors,ExB,OBmap2D,OClock,OPr13,OTwist,OIFC ...",kFALSE},
   {"ExB"         ,""  ,"","",""                                       ,"","Activate ExB correction",kFALSE},
   {"EB1"         ,""  ,"","",""                                     ,"","Force ExB configuration 1",kFALSE},
   {"EB2"         ,""  ,"","",""                                     ,"","Force ExB configuration 2",kFALSE},
@@ -727,12 +731,14 @@ Bfc_st BFC2[] = {
   // Year 4 chains (2003/2004) *** CHAINS WILL BE RESHAPED AS RUN PROGRESS ***
   {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                        ,"Base chain for 2004 (tpc)",kFALSE},
-  {"P2004"       ,""     ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr2,ftpc,trgd,OSpaceZ","",""
+  {"P2004"       ,""     ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr3,ftpc,trgd,OSpaceZ","",""
                 ,"Production chain for winter 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
 
 
   // Other chains/Calibration
-  {"LaserCal",""  ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","","",
+  {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","","",
+                                                                    "Laser Calibration Chain (tcl)",kFALSE},
+  {"LaserCal",""  ,"","db,detDb,tpc_daq,tpcDb,fcf,globT,laser,LaserTest","","",
                                                                           "Laser Calibration Chain",kFALSE},
   {"L3Counter","" ,"","db,detDb,xin,l3count","","",                    "L3 Counter extraction pass",kFALSE},
   {"VtxSeedCal","","",
@@ -787,6 +793,8 @@ Bfc_st BFC2[] = {
   {"Corr1"       ,""  ,"","AlignSectors,ExB,OBmap,OClock,OPr13","","",
                                                       "... AlignSectors,ExB,OBmap,OClock,OPr13 ...",kFALSE},
   {"Corr2"       ,""  ,"","AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC","","",
+                                          "... AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC ...",kFALSE},
+  {"Corr3"       ,""  ,"","AlignSectors,ExB,OBmap2D,OClock,OPr13,OTwist,OIFC","","",
                                           "... AlignSectors,ExB,OBmap,OClock,OPr13,OTwist,OIFC ...",kFALSE},
   {"ExB"         ,""  ,"","",""                                       ,"","Activate ExB correction",kFALSE},
   {"EB1"         ,""  ,"","",""                                     ,"","Force ExB configuration 1",kFALSE},
