@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.13 2003/05/14 18:00:24 akio Exp $
+// $Id: StppEvent.cxx,v 1.14 2003/07/07 17:48:13 akio Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.14  2003/07/07 17:48:13  akio
+// adding trigger id mask (daqbits/summary bits/daqTrgId)
+//
 // Revision 1.13  2003/05/14 18:00:24  akio
 // New addition for 2003 data ntuple prodction
 // Also fix a problem with MuTrack creating from StEvent tracks.
@@ -664,6 +667,8 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
 	  ntp2003_.BClo        = trgdata->bunchCounterLow();
 	  ntp2003_.Token       = trgdata->token();
 	  ntp2003_.TrgWd       = trgdata->triggerWord();
+	  ntp2003_.TrgId       = event->triggerIdCollection()->nominal()->mask();
+	  printf("Trigger wd = %d  id=%d\n",ntp2003_.TrgWd,ntp2003_.TrgId);
 	  ntp2003_.prepost     = 0;
 	  ntp2003_.bunchId     = trgdata->bunchId48Bit();
 	  ntp2003_.bunchid7bit = trgdata->bunchId7Bit();

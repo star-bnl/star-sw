@@ -4,6 +4,7 @@ typedef struct{
   int BClo;
   int Token;
   int TrgWd;
+  int TrgId;
   int prepost;
   int bunchId; 
   int bunchid7bit; 
