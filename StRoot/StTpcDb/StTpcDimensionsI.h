@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDimensionsI.h,v 1.2 1999/12/16 22:00:53 hardtke Exp $
+ * $Id: StTpcDimensionsI.h,v 1.3 2000/02/15 22:21:47 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDimensionsI.h,v $
+ * Revision 1.3  2000/02/15 22:21:47  hardtke
+ * Add effective drift distances
+ *
  * Revision 1.2  1999/12/16 22:00:53  hardtke
  * add CVS tags
  *
@@ -43,6 +46,13 @@ public:
   virtual float cathodeInnerRadius()  const = 0;
   virtual float cathodeOuterRadius()  const = 0;
   virtual float cathodeThickness()    const = 0; 
+
+  //TPC distances
+  virtual float innerEffectiveDriftDistance()  const = 0;
+  virtual float outerEffectiveDriftDistance()  const = 0;
+  virtual float gatingGridZ()                  const = 0;
+  virtual float zInnerOffset()                 const = 0;
+  virtual float zOuterOffset()                 const = 0;
 
 ClassDef(StTpcDimensionsI,0)
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.16 2000/02/10 00:29:08 hardtke Exp $
+ * $Id: StTpcDb.cxx,v 1.17 2000/02/15 22:21:47 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.17  2000/02/15 22:21:47  hardtke
+ * Add effective drift distances
+ *
  * Revision 1.16  2000/02/10 00:29:08  hardtke
  * Add tpg functions to StTpcDbMaker, fix a few bugs
  *
@@ -144,15 +147,28 @@ StTpcWirePlaneI* StTpcDb::WirePlaneGeometry(){
 //_____________________________________________________________________________
 StTpcDimensionsI* StTpcDb::Dimensions(){
   if (!dimensions){            // get wire plane from data base
-   const int dbIndex = kGeometry;
+   int dbIndex = kGeometry;
+   St_DataSet *tpd;
+   St_DataSet *geo;
    if (tpc[dbIndex]){
-    St_DataSet* tpd = tpc[dbIndex]->Find("tpcDimensions");
+    tpd = tpc[dbIndex]->Find("tpcDimensions");
     if (!(tpd && tpd->HasData()) ){
      gMessMgr->Message("StTpcDb::Error Finding Tpc Dimensions","E");
      return 0;
     }
-    dimensions =  new StRTpcDimensions((St_tpcDimensions*)tpd);
    }
+   dbIndex = kCalibration;
+   if (tpc[dbIndex]){
+    geo = tpc[dbIndex]->Find("tpcEffectiveGeom");
+    if (!(geo && geo->HasData()) ){
+     gMessMgr->Message("StTpcDb::Error Finding Tpc Effective Geometry","E");
+     return 0;
+    }
+   }
+    StRTpcDimensions* rdimensions =  new StRTpcDimensions((St_tpcDimensions*)tpd,(St_tpcEffectiveGeom*)geo);
+    rdimensions->SetPadPlanePointer(PadPlaneGeometry());
+    rdimensions->SetWirePlanePointer(WirePlaneGeometry());
+    dimensions = (StTpcDimensionsI*)rdimensions;
   }
  return dimensions;
 }
@@ -264,5 +280,10 @@ float StTpcDb::DriftVelocity(){
   float driftvel = 1e6*(*dvel)[0].cathodeDriftVelocityEast;
   return driftvel;
 }
+
+
+
+
+
 
 
