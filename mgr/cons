@@ -9,12 +9,12 @@ use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.32 2000/03/16 23:02:24 fisyak Exp $
+# $Id: cons,v 1.33 2000/04/13 16:34:20 fisyak Exp $
 
 $ver_num = 1.8;
 $ver_rev = "-dev";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.32 2000/03/16 23:02:24 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.33 2000/04/13 16:34:20 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -161,7 +161,7 @@ $0 = $file;
 # Default parameters.
 $param::topfile = 'Construct';	# Top-level construction file.
 $param::defaultConstruct = $STAR . "/mgr/Construct";	# Default construction file.
-$param::defaultConscript = $STAR . "/mgr/Conscript-standard";	# Default construction file.
+#$param::defaultConscript = $STAR . "/mgr/Conscript-standard";	# Default construction file.
 $param::defaultInclude   = 1;   # Force to use default include path
 $param::install = 1;		# Show installations
 $param::build = 1;		# Build targets
@@ -183,6 +183,7 @@ sub showcom {
 
 # Default environment.
 @param::defaults = (
+
      'CC'	    => 'cc',
      'CFLAGS'	    => '',
      'CCCOM'	    => '%CC %CFLAGS %_IFLAGS -c %< -o %>',
@@ -1231,6 +1232,7 @@ sub LinkedModule {
 	       ($progenv, $progenv->{LINKMODULECOM}),
 	       $env->_Objects(map($dir::cwd->lookup($env->_subst($_)), @_)));
 }
+
 sub LinkedTables {
     my($env) = shift;
     my($tgt) = $dir::cwd->lookup($env->_subst(shift));
@@ -2227,8 +2229,8 @@ sub scan {
 
     my(@includes);
 
-    for $name (@$angles) {
-	for $dir (@shortpath) {
+    foreach $name (@$angles) {
+	foreach $dir (@shortpath) {
 	    my($include) = $dir->lookup($name);
 	    if ($include->accessible) {
 		push(@includes, $include) unless $include->ignore;
@@ -2237,10 +2239,10 @@ sub scan {
 	}
     }
 
-    for $name (@$quotes) {
+    foreach $name (@$quotes) {
       my $include_standard = "";
       my $default_include  = "";
-	for $dir(@longpath) {
+	foreach $dir(@longpath) {
 	    my($include) = $dir->lookup($name);
 	    if ($dir->path =~ /^include$/) {
 	      $default_include = $include;
@@ -2257,7 +2259,8 @@ sub scan {
 	    $default_include->path !~ /math\.h$/ &&
 	    $default_include->path !~ /descrip\.h$/ &&
 	    $default_include->path !~ /fortran\.h$/ &&
-	    $default_include->path !~ /not_cern/    
+	    $default_include->path !~ /not_cern/    &&
+	    $default_include->path !~ /compiledata\.h$/    
 	   ) {
 	  push @includes, $default_include;
 	}

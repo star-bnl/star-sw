@@ -1,10 +1,104 @@
 #!/opt/star/bin/perl
-# $Id: Construct,v 1.90 2000/03/07 14:38:18 fisyak Exp $
+# $Id: Construct,v 1.91 2000/04/13 16:38:04 fisyak Exp $
 use Env;
 #use lib qw($STAR . "/mgr"); # Modify perl include path
 use lib $STAR . "/mgr"; # Modify perl include path
 use ConsDefs;
-print "Install includes\n";
+$param::defaultConscript = $STAR . "/mgr/Conscript-standard";	# Default construction file.
+print "Use default Conscript from $param::defaultConscript \n" unless ($param::quiet);
+print "Install includes\n" unless ($param::quiet);  
+my $include = "include";
+my $build  = "." . $STAR_HOST_SYS; print "build for $build\n" unless ($param::quiet);
+if (defined($ARG{LinksCheck})) {
+  print "Clean up links. It takes a time.\n";
+  &File::Find::find (\&wanted_dead,$include) if -d $include;
+  &File::Find::find (\&wanted_dead,$build)   if -d $build;
+}
+$INCLUDE = "#" . $include;
+$EXPORT = "#.share";
+$FFLAGS .= " -DCERNLIB_TYPE";
+$OSFID .= " " . $STAR_SYS;
+my $ROOTLIBS;
+my $RINTLIBS;
+my $ROOTGLIBS;
+$ROOTLIBS    = "-lNew -lCore -lCint -lPhysics -lMatrix -lHist -lGpad -lGraf -lGraf3d -lTree -lGui";
+if (defined($ARG{NoNew}))    {
+  $ROOTLIBS =  "-lCore -lCint -lPhysics -lMatrix -lHist -lGpad -lGraf -lGraf3d -lTree -lGui";      
+  print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
+}
+if (defined($ARG{ROOTLIBS}))    {$ROOTLIBS = $ARG{ROOTLIBS}        ; print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);}
+$RINTLIBS    = "-lRint ";
+$CPPPATH  = $INCLUDE . ":#StRoot:" .  $ROOTSRC;
+$CPPPATH .= ":" . $CERN_ROOT . "/include:/opt/star/include" . $EXTRA_CPPPATH;
+$FCPPPATH ="";
+(my $DirPath  = cwd()) =~ s/\/$//g;
+print "Build directory: $DirPath;" unless ($param::quiet);
+if (defined($ARG{Salt})) {$Salt = $ARG{Salt} ; print "set Salt = $Salt\n" unless ($param::quiet);}
+if ($Salt) {Salt($Salt); print "\tSet Salt to \"$param::salt\"" unless ($param::quiet);}
+(my $DirPath  = cwd()) =~ s/\/$//g; print "DirPath = $DirPath \n" unless ($param::quiet);
+chdir($STAR); my $repository = cwd(); chdir($DirPath); print "repository $repository\n";
+Repository ($repository);# unless $param::noRepository;
+my @Repo = Repository_List; 
+if ($#Repo > -1) {
+  print "\tRepositories:  \"@Repo\";" unless ($param::quiet);
+  if (!$Salt) {$Salt = "user";}
+}
+$BUILD  = "#" . $build;
+if ($DEBUG eq "-g") {
+  $LIB    = $BUILD . "/lib";
+  $BIN    = $BUILD . "/bin"; 
+  $OBJ    = $BUILD . "/obj";
+}
+else {
+  $LIB    = $BUILD . "/LIB";
+  $BIN    = $BUILD . "/BIN"; 
+  $OBJ    = $BUILD . "/OBJ";
+}
+$LIBPATH = $LIB;
+if ($STAR_HOST_SYS !~ /^intel_wnt/) {
+  $CERNLIBS .= " " . `cernlib geant321 pawlib graflib/X11 packlib mathlib kernlib `;
+  chop ($CERNLIBS);
+  $Libraries = $CERNLIBS ." ";
+  $Libraries .=  " ". $FLIBS . " " . $CLIBS . " ";
+  chop ($Libraries);
+}
+else {
+  $CPPPATH  = "";
+  $FCPPPATH = "";
+  foreach my $dir ($DirPath, @Repo) {
+    $INCLUDE_PATH .= ";" . $dir . "/include";
+    $INCLUDE_PATH .= ";" . $dir . "/StRoot";
+    $INCLUDE_PATH .= ";" . $dir . "/pams";
+    $INCLUDE_PATH .= ";" . $dir . "/include/tables";
+  }
+  my $ROOTSRC = $AFS_RHIC . "\\star\\ROOT\\" . $ROOT_LEVEL . "\\ROOT\\src";
+  $INCLUDE_PATH .= ";" . $ROOTSRC;
+  $INCLUDE_PATH .= ";" . $CERN_ROOT . "/include";
+}
+Link $OBJ => $DirPath; print "Link $BUILD => $DirPath\n" unless ($param::quiet);
+print "CPPPATH = $CPPPATH\n";
+$env = new cons(	
+		'CPPPATH'      => $CPPPATH,
+		'Libraries'    => $Libraries,
+		'LIBPATH'      => $LIBPATH,
+		'ROOTLIBS'     => $ROOTLIBS,
+		'ROOTGLIBS'    => $ROOTGLIBS,
+		'RINTLIBS'     => $RINTLIBS,
+	       );
+
+if (! $param::quiet) {
+  print "STAR_SYS = \t$env->{ENV}->{STAR_SYS}\n";
+  print "ROOTSYS  = \t$env->{ENV}->{ROOTSYS}\n";
+  print "DEBUG    = \t$env->{DEBUG}\n";
+  print "CPP      = \t$env->{CPP}   \tCPPFLAGS = \t$env->{CPPFLAGS}\nCPPPATH  = \t$env->{CPPPATH}\n";
+  print "CC       = \t$env->{CC}    \tCFLAGS   = \t$env->{CFLAGS} \tEXTRA_CFLAGS  = \t$env->{EXTRA_CFLAGS}     \tCLIBS    =\t$env->{CLIBS}\n"; 
+  print "CXX      = \t$env->{CXX}    \tCXXFLAGS = \t$env->{CXXFLAGS} \tEXTRA_CXXFLAGS = \t$env->{EXTRA_CXXFLAGS}\n";
+  print "FC       = \t$env->{FC}     \tFFLAGS   = \t$env->{FFLAGS}     \tFLIBS    =\t$env->{FLIBS}\n"; 
+  print "LD       = \t$env->{LD}     \tLDFLAGS  = \t$env->{LDFLAGS} \tEXTRA_LDFLAGS  = \t$env->{EXTRA_LDFLAGS}\n";
+  #    \nEXEFLAGS =\t$env->{EXEFLAGS}\n";
+  print "LIBPATH  = \t$env->{LIBPATH}\tLIBS     = \t$env->{LIBS}       \tLibraries=\t$env->{Libraries}\n";
+  print "SO       = \t$env->{SO}     \tSOFLAGS  = \t$env->{SOFLAGS}\n";
+}
 my @subdirs = ();
 # make Targets and install includes
 foreach my $dir ("pams","StRoot"){#,"StDb") {
@@ -79,12 +173,12 @@ foreach my $dir ("pams","StRoot"){#,"StDb") {
 	  }
 	}
       }
-#      if ($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/) {next;} 
+      #      if ($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/) {next;} 
       if ($SKIP_DIRS && $SKIP_DIRS =~ $sub_dir) {
 	print "skip dir: $sub_dir \t=> $SKIP_DIRS\n";
 	next;
       }
-#      next if ($sub_dir =~ /tables/);
+      #      next if ($sub_dir =~ /tables/);
       if ($STAR_HOST_SYS =~ /^hp_ux102$/ &&  
 	  ($sub_dir =~ /StHbtMaker/ || $sub_dir =~ /StFlow/)) {next;}
       if ($STAR_HOST_SYS =~ /^sun4x_56$/ &&  
@@ -108,8 +202,12 @@ foreach $dir ("asps/rexe","StDb",@subdirs) {
 }
 print "BUILD  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ\n" unless ($param::quiet);  
 print "Targets = @Targets\n" if $param::debug;
-Export qw( env INCLUDE LIB BIN EXPORT BUILD OBJ MAIN);
+Export qw( env INCLUDE LIB BIN EXPORT BUILD OBJ);
 Default qw (   .  );
 Build  @Targets;
 #________________________________________________________________________________
+#________________________________________________________________________________
+sub script::wanted_dead {
+  -l and not -e and print "bigus link: $File::Find::name \t--- remove it\n" and `rm $_`;
+}
 __END__;
