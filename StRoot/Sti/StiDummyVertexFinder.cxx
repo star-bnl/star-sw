@@ -42,5 +42,6 @@ StiHit * StiDummyVertexFinder::findVertex(StEvent * event)
 		  vp.x(),vp.y(),vp.z(),
 		  ve.x()*ve.x(),0.,0.,ve.y()*ve.y(),0.,ve.z()*ve.z());
     }
+  setVertex(vertex);
   return vertex;
 }

@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.27 2003/07/30 19:18:25 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.28 2003/08/02 08:22:43 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.28  2003/08/02 08:22:43  pruneau
+ * best performance so far
+ *
  * Revision 2.27  2003/07/30 19:18:25  pruneau
  * sigh
  *
@@ -85,6 +88,8 @@
 #include "StiPlacement.h"
 #include "StiMaterial.h"
 #include "StiHitErrorCalculator.h"
+#include "StPhysicalHelixD.hh"
+#include "StHelix.hh"
 
 ostream& operator<<(ostream&, const StiHit&);
 
@@ -1018,4 +1023,29 @@ vector<StiHit*> StiKalmanTrack::getHits()
       ++it;
     }
   return hits;
+}
+
+/// Return global dca of the track relative to given vertex or point.
+double  StiKalmanTrack::getDca(const StiHit * vertex)    const
+{
+  StiKalmanTrackNode*	lastNode;
+  StiKalmanTrackNode*	node;
+
+  lastNode = getInnerMostHitNode(); 
+  if (lastNode->_x<2.)
+    node = static_cast<StiKalmanTrackNode*>(lastNode->getParent());
+  else
+    node = lastNode;
+  StThreeVectorD originD(node->getX(),node->getY(),node->getZ());
+  StThreeVectorD vxDD(vertex->x_g(), vertex->y_g(),vertex->z_g());
+  StPhysicalHelixD * physicalHelix = new StPhysicalHelixD(0.,0.,0.,originD,-1);
+  originD.rotateZ(node->getRefAngle());
+  physicalHelix->setParameters(fabs(node->getCurvature()),
+			       node->getDipAngle(),
+			       node->getPhase()-node->getHelicity()*M_PI/2.,
+			       originD,
+			       node->getHelicity());
+  double dca = physicalHelix->distance(vxDD);
+  delete physicalHelix;
+  return dca;
 }

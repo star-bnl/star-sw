@@ -101,6 +101,7 @@ public:
   virtual double  getPseudoRapidity() const=0;   // pseudo rapidity
   virtual double  getPhi()            const=0;   // azimuthal angle
   virtual double  getTanL()           const=0;   // tan(lambda)
+  virtual double  getDca(const StiHit*)const;   // distance of closest approach to main vertex
   virtual double  getDca()            const=0;   // distance of closest approach to main vertex
   virtual double  getDca2(StiTrack *t) const=0;   // distance of closest approach to given track - 2D calc
   virtual double  getDca3(StiTrack *t) const=0;   // distance of closest approach to given track - 3D calc
@@ -124,6 +125,7 @@ public:
   virtual vector<StiHit*> getHits()=0;
   // Convenience Accessor using a switch
   virtual double  getValue(int key) const;
+  virtual bool isPrimary() const=0;
 
 	virtual bool extendToVertex(StiHit* vertex)=0;
 
@@ -134,5 +136,9 @@ public:
   friend ostream& operator<<(ostream& os, const StiTrack& track);
 };
 
-
+//Dummy get global dca method always returns zero
+inline double  StiTrack::getDca(const StiHit*)const
+{
+  return 0;
+}
 #endif

@@ -3,7 +3,8 @@
 
 StiVertexFinder::StiVertexFinder(const string & name)
 	: Named(name),
-		_hitFactory(StiToolkit::instance()->getHitFactory())
+	  _hitFactory(StiToolkit::instance()->getHitFactory()),
+_vertex(0)
 {
 	cout <<"StiVertexFinder::StiVertexFinder() -I- Started :" << name<<endl;
 }

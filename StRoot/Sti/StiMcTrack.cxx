@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include "StiMcTrack.h"
 #include "StMcTrack.hh"
+#include "StMcVertex.hh"
 #include "StThreeVectorF.hh"
 #include "StParticleTable.hh"
 #include "StParticleDefinition.hh"
@@ -220,3 +221,10 @@ long    StiMcTrack::getFlag() const
 }
 
 
+bool StiMcTrack::isPrimary() const
+{
+  const StThreeVectorF & pos = mcTrack->startVertex()->position();
+  float x = pos.x();
+  float y = pos.y();
+  return sqrt(x*x+y*y)<2.;
+}

@@ -44,14 +44,18 @@ void StiLocalTrackSeedFinder::initialize()
 	    cout << "StiLocalTrackSeedFinder::initialize() -F- Parameter factory is null" << endl;
 	    throw logic_error("StiLocalTrackSeedFinder::initialize() -F- Parameter factory is null");
 	}
-    add(f->getInstance()->set("DeltaY",    "Delta-Y",        &mDeltaY,        7., 0.5, 20., 0.1, 0));
+    //cp 7
+    add(f->getInstance()->set("DeltaY",    "Delta-Y",        &mDeltaY,        5., 0.5, 20., 0.1, 0));
+    // cp was 15
     add(f->getInstance()->set("DeltaZ",     "Delta-Z",       &mDeltaZ,       15., 0.5, 20., 0.1, 0));
     add(f->getInstance()->set("SeedLength", "Seed Length",   &mSeedLength,    2,  2, 6, 1, 0));
     add(f->getInstance()->set("extraDeltaY","extra-Delta-Y", &mExtrapDeltaY, 1., 0.5, 10., 0.1, 0));
     add(f->getInstance()->set("extraDeltaZ","extra-Delta-Z", &mExtrapDeltaZ, 2., 0.5, 10., 0.1, 0));
   
-    add(f->getInstance()->set("MaxSkipped","Max Layers Skipped",  &mMaxSkipped, 2, 0, 5, 1, 0));
-    add(f->getInstance()->set("ExtrapMinLength","Min Length of Extrapolation", &mExtrapMinLength , 3, 1, 10, 1, 0));
+    add(f->getInstance()->set("MaxSkipped","Max Layers Skipped",  &mMaxSkipped, 4, 0, 5, 1, 0));
+
+    //cp was 3 in the next line...
+    add(f->getInstance()->set("ExtrapMinLength","Min Length of Extrapolation", &mExtrapMinLength , 2, 1, 10, 1, 0));
     add(f->getInstance()->set("ExtrapMaxLength","Max Length of Extrapolation", &mExtrapMaxLength,  5, 1, 10, 1, 0));
     add(f->getInstance()->set("UseOrigin","Use Origin in Fit", &mUseOrigin, true, 0));
     add(f->getInstance()->set("DoHelixFit","Do Helix Fit",  &mDoHelixFit, true, 0));

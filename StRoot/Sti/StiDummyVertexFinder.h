@@ -7,9 +7,9 @@
 class StiDummyVertexFinder : public StiVertexFinder
 {
  public:
-	StiDummyVertexFinder(const string & name);
-	virtual ~StiDummyVertexFinder();
-  StiHit * findVertex(StEvent * event);
+  StiDummyVertexFinder(const string & name);
+  virtual ~StiDummyVertexFinder();
+  virtual StiHit * findVertex(StEvent * event);
 };
 
 
