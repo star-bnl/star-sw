@@ -5,18 +5,29 @@ macro test file
  ghist star.his
  make  sim/control
 *
-   gfile pz [file]
-   if ($iquest(1)<>0) goto exitm
+ gfile pz [file]
+
 * check physics
-   gclose all
+   physi
 * check geometry
-   fort/file 72 star.ps
-   meta      72 -111
+   fort/file 72 star.ps;  meta  72 -111
    dcut cave x .1 10 10 .03 .03
-   close     72
+
 * fill histigrams
-   trig 1000000
-exitm:
+   trig 1000
+
+   title_global $quote([file])
+   zone 1 3
+   hi/pl 11
+   hi/pl 12
+   hi/pl 13
+   zone 2 2
+   n/pl 1.ntrack
+   n/pl 1.Nvertx
+   n/pl 1.NtpcHit
+   n/pl 1.Ntr10
+
+ meta 0; close 72
  exit  
 return
          
