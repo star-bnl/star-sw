@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.27 1999/07/11 20:40:35 perev Exp $
+// $Id: StChain.h,v 1.28 1999/07/13 02:19:33 perev Exp $
 // $Log: StChain.h,v $
+// Revision 1.28  1999/07/13 02:19:33  perev
+// GetCVS,StEvtHddr,etc...
+//
 // Revision 1.27  1999/07/11 20:40:35  perev
 // Move Clear from StChain to StMaker
 //
@@ -68,61 +71,26 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
-#ifndef ROOT_TTree
-#include "TTree.h"
-#endif
-
-#include "St_DataSet.h"
-
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
 
-#ifndef __CINT__
-#include "TROOT.h"
-#include "TChain.h"
-#include "TTree.h"
-#include "TBrowser.h"
-#include "TClonesArray.h"
-#include "TBenchmark.h"
-#include "St_XDFFile.h"
-#include "St_DataSetIter.h"
-#include "St_FileSet.h"
-#include "StChain.h"
-#include "StMaker.h"
-#endif
 
-class TBrowser;
-class TChain;
-class St_XDFFile; 
 class StChain : public StMaker {
 private:
-   Int_t               m_Version;           //StChain version number
-   Int_t               m_VersionDate;       //StChain version date
-   St_DataSet         *m_RunSet;            //Run
-   TTree              *m_Tree;              //Pointer to the Root tree
-   St_XDFFile         *m_File;              //!Pointer to input file 
-   St_XDFFile         *m_FileOut;           //!Pointer to output file 
+   Int_t               m_Version;    	//StChain version number
+   Int_t               m_VersionDate;   //StChain version date
+   St_DataSet         *m_EvtHddr;     	//Header of event
 public:
                       StChain();
                       StChain(const char *name);
    virtual           ~StChain();
-//BaseUsed   virtual Int_t      Make(int number);
-//BaseUsed   virtual Int_t      Make();
+   virtual Int_t      IsChain() const {return 1;}
    Int_t              GetVersion() {return m_Version;}
    Int_t              GetVersionDate() {return m_VersionDate;}
-   virtual void       PrintInfo();
 
-//		must be in .cxx
-   static const char   *GetCVSIdC();
-
-//		must be here in .h
-   static const char   *GetCVSIdH()
-    {static const char cvs[]="$Id: StChain.h,v 1.27 1999/07/11 20:40:35 perev Exp $";
-     return cvs;};
-
-
+ virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.28 1999/07/13 02:19:33 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StChain, 0)   //StChain control class
 };
 

@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.53 1999/07/12 02:33:09 perev Exp $
+// $Id: StMaker.cxx,v 1.54 1999/07/13 02:19:34 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.54  1999/07/13 02:19:34  perev
+// GetCVS,StEvtHddr,etc...
+//
 // Revision 1.53  1999/07/12 02:33:09  perev
 // Add SetMode
 //
@@ -144,12 +147,8 @@
 StMaker *StMaker::fgStChain = 0;
 Int_t MaxWarnings = 26;
 
-ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
-const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.53 1999/07/12 02:33:09 perev Exp $";
-return cvs;};
 static void doPs(const char *who,const char *where);
 
 //_____________________________________________________________________________
@@ -606,30 +605,31 @@ EDataSetPass StMaker::ClearDS (St_DataSet* ds,void * )
 //_____________________________________________________________________________
 void StMaker::PrintInfo() const
 {
-   printf("*********************************\n");
-   printf("*                               *\n");
-   printf("*     %23s   *\n",GetName());
-   printf("*                               *\n");
-   printf("*********************************\n");
+   const char *cvs = GetCVS();
+   const char *built = strstr(cvs,"built");
+   printf("\n%.*s\n",built-cvs,cvs);
+   printf("%s\n\n",built);
 
+//     Print info for all defined Makers
+   TIter next(GetMakeList());
+   StMaker *maker;
+   while ((maker = (StMaker*)next())) {
+      maker->PrintInfo();
+   }
 }
 //_____________________________________________________________________________
 Int_t        StMaker::GetEventNumber() const 
 {
    StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
-   if (hd) return hd->GetEventNumber();
-   if(!Debug()) return 0;
-   if ((MaxWarnings--) > 0) Warning("GetEventNumber"," EvtHddr not found");
-   return 0;
+   if (!hd) return -1;
+   return hd->GetEventNumber();
 }
 //_____________________________________________________________________________
 Int_t        StMaker::GetRunNumber() const 
 {
    StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
-   if (hd) return hd->GetRunNumber();
-   if(!Debug()) return 0;
-   if ((MaxWarnings--) > 0) Warning("GetRunNumber"," EvtHddr not found");
-   return 0;
+   if (!hd) return -1;
+   return hd->GetRunNumber();
 }
 //_____________________________________________________________________________
 TDatime  StMaker::GetDateTime() const 
@@ -637,10 +637,8 @@ TDatime  StMaker::GetDateTime() const
     
    TDatime td; return td;   
    StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
-   if (hd) return hd->GetDateTime();
-   if(!Debug()) return td;
-   if ((MaxWarnings--) > 0) Warning("GetDateTime"," EvtHddr not found");
-   return td;
+   if (!hd) return td;
+   return hd->GetDateTime();
 }
 //_____________________________________________________________________________
 Int_t    StMaker::GetDate()  const {return GetDateTime().GetDate();}
@@ -650,10 +648,8 @@ Int_t    StMaker::GetTime()  const {return GetDateTime().GetTime();}
 const Char_t *StMaker::GetEventType() const
 {
    StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
-   if (hd) return hd->GetEventType();
-   if(!Debug()) return 0;
-   if ((MaxWarnings--) > 0) Warning("GetEventType"," EvtHddr not found");
-   return 0;
+   if (!hd) return 0;
+   return hd->GetEventType();
 }
 
 //_____________________________________________________________________________

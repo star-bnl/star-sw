@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.28 1999/07/12 17:36:34 perev Exp $
+// $Id: StMaker.h,v 1.29 1999/07/13 02:19:34 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.29  1999/07/13 02:19:34  perev
+// GetCVS,StEvtHddr,etc...
+//
 // Revision 1.28  1999/07/12 17:36:34  perev
 // Spiros request to add error flags
 //
@@ -201,18 +204,13 @@ public:
    static  StMaker     *GetMaker(const St_DataSet *ds)  ;
    static EDataSetPass  ClearDS (St_DataSet* ds,void *user );
 
-//		must be in .cxx
-   static const char   *GetCVSIdC();
-
-//		must be in here in .h
-
 
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
 
 
-  virtual const char *GetCVS()
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.28 1999/07/12 17:36:34 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.29 1999/07/13 02:19:34 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   //StChain virtual base class for Makers
 };

@@ -12,10 +12,10 @@
 #include "St_io_Maker/St_io_Maker.h"
 #include "St_xdfin_Maker/St_xdfin_Maker.h"
 
-enum { kStTREE=1,kStXDF=2,kStMDC2=3 };
-const char  IOFMTS[] = "root xdf  mdc2";
-const char *IOCLAS[] = {0,"StTreeMaker","St_xdfin_Maker","St_io_Maker"};
-const char *IONAME[] = {0,"Root","XDF","MDC2"};
+enum { kStTREE=1,kStXDF=2,kStMDC2=3,kStDAQ=4 };
+const char  IOFMTS[] = "root xdf  mdc2 daq ";
+const char *IOCLAS[] = {0,"StTreeMaker","St_xdfin_Maker","St_io_Maker","StDAQMaker"};
+const char *IONAME[] = {0,"Root","XDF","MDC2","DAQ"};
 
 ClassImp(StIOMaker)
 
@@ -24,9 +24,8 @@ StIOMaker::StIOMaker(const char *name,  const char *iomode,
                      const char *ioFile,const char *treeName)
 :StIOInterFace(name,iomode)
 {
-  fFile = ioFile;
   fFileSet = 0;
-  if (ioFile) { //Make small StFile
+  if (ioFile && ioFile[0]) { //Make small StFile
     fFileSet = new StFile();
     fFileSet->AddFile(ioFile);
   }
@@ -45,7 +44,7 @@ void StIOMaker::Build(StFile *fileSet,const char *treeName)
   SetTreeName(treeName); fCase=0;
   SetMaxEvent();
   fCurrMk = 0;			//!Pointer to current maker
-  fFmtMk[0]=0; fFmtMk[1]=0;fFmtMk[2]=0;
+  memset(fFmtMk,0,sizeof(fFmtMk));
   fFileSet= fileSet;
   
 }
@@ -65,8 +64,13 @@ Int_t StIOMaker::Open()
 {
 
   fNumEvent = 0;
-  
-  assert(fFileSet);
+  if (!fFile.IsNull()) {//File is set
+    if (!fFileSet) fFileSet = new StFile();
+    fFileSet->AddFile(fFile);
+    SetFile("");
+  }
+  if (!fFileSet) return kStEOF;
+
   int nBr = fFileSet->GetNBranches();
 
   for (int iBr=0; iBr<nBr; iBr++) { //branch loop
@@ -111,6 +115,7 @@ AGAIN:
 //_____________________________________________________________________________
 Int_t StIOMaker::MakeRead(){
 
+  if (!fCurrMk) return kStEOF;
   return fCurrMk->Make();
 }    
 //_____________________________________________________________________________
@@ -121,7 +126,11 @@ Int_t StIOMaker::MakeWrite()
 //_____________________________________________________________________________
 Int_t StIOMaker::Finish()
 { 
-  for(int i=0;i<3;i++) if (fFmtMk[i]) fFmtMk[i]->Finish();
+  int n = sizeof(fFmtMk)/sizeof(fFmtMk[0]);
+  for(int i=0;i<n;i++) {
+    if (!fFmtMk[i]) continue;
+    fFmtMk[i]->Finish();
+    delete fFmtMk[i]; fFmtMk[i]=0;}
   return 0;
 }
 //_____________________________________________________________________________
@@ -136,10 +145,6 @@ void StIOMaker::Clear(Option_t *opt)
   fCurrMk->Clear();
 }
 //_____________________________________________________________________________
-void StIOMaker::PrintInfo()
-{
-  if (GetDebug()) printf("StIOMaker\n"); //  %s %s \n",GetName(), GetTitle());
-}
 
 //_____________________________________________________________________________
 StIOInterFace *StIOMaker::Load()
@@ -152,9 +157,9 @@ StIOInterFace *StIOMaker::Load()
   klass = gROOT->GetClass(className);
   
   if (! klass ) {//lib not loaded
-    if (fCase==kStXDF) gSystem->Load("xdf2root.so");
-    ts = className; ts += ".so";
-    gSystem->Load(ts);
+    if (fCase==kStXDF) gSystem->Load("xdf2root");
+    if (fCase==kStDAQ) gSystem->Load("StDaqLib");
+    gSystem->Load(className);
     klass = gROOT->GetClass(className);
   }
   assert (klass);
@@ -171,7 +176,8 @@ StIOInterFace *StIOMaker::Load()
   Mk->SetName(ts);
   Mk->SetIOMode(fIOMode);
   Mk->SetTreeName(fTreeName);
-  Mk->SetFile(fFile);
+  Mk->SetFile(GetFile());
+  SetFile("");
   if (GetDebug()) Mk->SetDebug();
   St_DataSet *brs = Find(".branches");
   if (brs) brs->Shunt(Mk);

@@ -19,8 +19,8 @@
 
 class StIOMaker : public StIOInterFace {
 public:
-   StIOMaker(const char *name,const char *iomode, const char *ioFile="",const char *treeName="bfcTree");
-   StIOMaker(const char *name,const char *iomode, StFile      *fileSet ,const char *treeName="bfcTree");
+   StIOMaker(const char *name="StIO",const char *iomode="r", const char *ioFile="",const char *treeName="bfcTree");
+   StIOMaker(const char *name,       const char *iomode,     StFile      *fileSet ,const char *treeName="bfcTree");
    virtual       ~StIOMaker();
    virtual Int_t  Init();
    virtual Int_t  Make();
@@ -31,13 +31,12 @@ public:
    virtual Int_t  Finish();
    virtual void Clear(Option_t *opt);
    
-   virtual void   PrintInfo();
            void   SetMaxEvent(Int_t mx=10000000){fMaxEvent=mx;fNumEvent=0;};
 
    StFile         *fFileSet;    //!Chain of files
 
    StIOInterFace  *fCurrMk;	//!Pointer to Current Maker
-   StIOInterFace  *fFmtMk[9];	//!Pointers to TreeMaker,xdfin_Maker,St_io_Maker
+   StIOInterFace  *fFmtMk[9];	//!Pointers to TreeMaker,xdfin_Maker,St_io_Maker,StDAQMaker
 
 
    Int_t  fMaxEvent;		//! for debug only
@@ -59,8 +58,12 @@ StIOInterFace *Load();
 
 //	Data members
 
-Int_t  fCase    ;		//! case 1=root,2=xdf,3=mdc2
+Int_t  fCase    ;		//! case 1=root,2=xdf,3=mdc2,4=daq
 
+
+
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StIOMaker.h,v 1.2 1999/07/13 02:19:36 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StIOMaker, 1)   //StAR chain virtual base class for Makers
 };
