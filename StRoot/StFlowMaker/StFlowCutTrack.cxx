@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.36 2003/01/10 16:42:01 oldi Exp $
+// $Id: StFlowCutTrack.cxx,v 1.37 2003/01/14 14:14:09 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -30,6 +30,7 @@ ClassImp(StFlowCutTrack)
 
 //-----------------------------------------------------------------------
 
+Bool_t  StFlowCutTrack::mTpcTrackCut          = kFALSE;
 Int_t   StFlowCutTrack::mFitPtsTpcCuts[2]     = {15, 200};
 Float_t StFlowCutTrack::mFitOverMaxCuts[2]    = {0.52, 1.1}; // greater than one!
 Float_t StFlowCutTrack::mChiSqTpcCuts[2]      = {0., 0.};
@@ -37,7 +38,7 @@ Float_t StFlowCutTrack::mPtTpcCuts[2]         = {0.1, 8.};
 Float_t StFlowCutTrack::mEtaTpcCuts[2]        = {-1.3, 1.3};
 Int_t   StFlowCutTrack::mChgTpcCuts[2]        = {0, 0};
 
-Bool_t  StFlowCutTrack::mFtpcTrackCut         = kTRUE;
+Bool_t  StFlowCutTrack::mFtpcTrackCut         = kFALSE;
 Int_t   StFlowCutTrack::mFitPtsFtpcCuts[2]    = {5, 11};     // greater than ten!
 Float_t StFlowCutTrack::mChiSqFtpcCuts[2]     = {0., 0.};
 Float_t StFlowCutTrack::mDcaFtpcCuts[2]       = {0., 0.};
@@ -72,6 +73,7 @@ UInt_t  StFlowCutTrack::mPtFtpcCutN         = 0;
 UInt_t  StFlowCutTrack::mEtaTpcCutN         = 0;
 UInt_t  StFlowCutTrack::mChgTpcCutN         = 0;
 UInt_t  StFlowCutTrack::mEtaFtpcCutN        = 0;
+UInt_t  StFlowCutTrack::mTpcTrackCutN       = 0;
 UInt_t  StFlowCutTrack::mFtpcTrackCutN      = 0;
 UInt_t  StFlowCutTrack::mChgFtpcCutN        = 0;
 
@@ -118,13 +120,14 @@ Int_t StFlowCutTrack::CheckTrack(StTrack* pTrack) {
 
   mTrackN++;
   
-  if ((map.trackFtpcEast() || map.trackFtpcWest()) && mFtpcTrackCut) {
-    mFtpcTrackCutN++;
-    return kFALSE;
-  }
-
   if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) { 
     // Tpc track, or no topologyMap
+
+    // tpc all cut
+    if (mTpcTrackCut) {
+      mTpcTrackCut++;
+      return kFALSE;
+    }
 
     // pt
     if (mPtTpcCuts[1] > mPtTpcCuts[0] && 
@@ -182,6 +185,12 @@ Int_t StFlowCutTrack::CheckTrack(StTrack* pTrack) {
   else if (map.trackFtpcEast() || map.trackFtpcWest()) {
     // Ftpc track
      
+    // Ftpc all cut
+    if (mFtpcTrackCut) {
+      mFtpcTrackCutN++;
+      return kFALSE;
+    }
+
     // dca
     if (mDcaFtpcCuts[1] > mDcaFtpcCuts[0] && 
 	(dca < mDcaFtpcCuts[0] || dca >= mDcaFtpcCuts[1])) {
@@ -286,14 +295,15 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
 
   mTrackN++;
       
-  if ((map.trackFtpcEast() || map.trackFtpcWest()) && mFtpcTrackCut) {
-    mFtpcTrackCutN++;
-    return kFALSE;
-  }
-
   if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) {
     // Tpc track, or no topologyMap      
-    
+  
+    // Tpc all cut
+    if (mTpcTrackCut) {
+      mTpcTrackCutN++;
+      return kFALSE;
+    }
+
     // pt
     if (mPtTpcCuts[1] > mPtTpcCuts[0] && 
 	(pt < mPtTpcCuts[0] || pt >= mPtTpcCuts[1])) {
@@ -349,7 +359,13 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
 
   else if (map.trackFtpcEast() || map.trackFtpcWest()) { 
     // Ftpc track
-      
+     
+    // Ftpc all cut
+    if (mFtpcTrackCut) {
+      mFtpcTrackCutN++;
+      return kFALSE;
+    }
+
     // dca
     if (mDcaFtpcCuts[1] > mDcaFtpcCuts[0] && 
 	(dca < mDcaFtpcCuts[0] || dca >= mDcaFtpcCuts[1])) {
@@ -454,14 +470,15 @@ Int_t StFlowCutTrack::CheckTrack(StMuTrack* pMuTrack) {
 
   mTrackN++;
       
-  if ((map.trackFtpcEast() || map.trackFtpcWest()) && mFtpcTrackCut) {
-    mFtpcTrackCutN++;
-    return kFALSE;
-  }
-
   if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) { 
     // Tpc track, or no topologyMap
       
+    // Tpc all cut
+    if (mTpcTrackCut) {
+      mTpcTrackCutN++;
+      return kFALSE;
+    }
+
     // pt
     if (mPtTpcCuts[1] > mPtTpcCuts[0] && 
         (pt < mPtTpcCuts[0] || pt >= mPtTpcCuts[1])) {
@@ -518,6 +535,12 @@ Int_t StFlowCutTrack::CheckTrack(StMuTrack* pMuTrack) {
   else if (map.trackFtpcEast() || map.trackFtpcWest()) {
     // Ftpc track
       
+    // Ftpc all cut
+    if (mFtpcTrackCut) {
+      mFtpcTrackCutN++;
+      return kFALSE;
+    }
+
     // dca
     if (mDcaFtpcCuts[1] > mDcaFtpcCuts[0] && 
         (dca < mDcaFtpcCuts[0] || dca >= mDcaFtpcCuts[1])) {
@@ -601,6 +624,15 @@ void StFlowCutTrack::PrintCutList() {
 
   cout << "#######################################################" << endl;
   cout << "# Track Cut List:" << endl;
+
+  if (mTpcTrackCut) {
+    cout << "# Include Tpc tracks= FALSE :\t\t ";
+  } 
+  else {
+    cout << "# Include Tpc tracks= TRUE :\t\t ";
+  }
+  cout << setprecision(3) << (float)mTpcTrackCutN/(float)mTrackN/perCent << "%\t (" 
+       << setprecision(3) << (float)mTpcTrackCutN/(float)mTpcTrackN/perCent << "% Tpc) cut" << endl;
   cout << "#   FitPts (Tpc) cuts= " << mFitPtsTpcCuts[0] << ", " << mFitPtsTpcCuts[1] 
        << " :\t " << setprecision(3) << (float)mFitPtsTpcCutN/(float)mTrackN/perCent 
        << "%\t (" << setprecision(3) << (float)mFitPtsTpcCutN/(float)mTpcTrackN/perCent << "% Tpc) cut" << endl;
@@ -671,6 +703,9 @@ void StFlowCutTrack::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.37  2003/01/14 14:14:09  oldi
+// Possibility to exclude TPC tracks completely (= FTPC only).
+//
 // Revision 1.36  2003/01/10 16:42:01  oldi
 // Several changes to comply with FTPC tracks:
 // - Switch to include/exclude FTPC tracks introduced.

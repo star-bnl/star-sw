@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.79 2003/01/13 20:03:16 aihong Exp $
+// $Id: StFlowMaker.cxx,v 1.80 2003/01/14 14:12:17 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -221,7 +221,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.79 2003/01/13 20:03:16 aihong Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.80 2003/01/14 14:12:17 oldi Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -1594,7 +1594,7 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
   // Fill FlowTracks
   for (Int_t nt=0; nt < pMuTracks->GetEntries(); nt++) {
     StMuTrack* pMuTrack = (StMuTrack*)pMuTracks->UncheckedAt(nt);
-    if (pMuTrack && StFlowCutTrack::CheckTrack(pMuTrack)) {
+    if (pMuTrack && pMuTrack->flag()>0 && StFlowCutTrack::CheckTrack(pMuTrack)) {
       // Instantiate new StFlowTrack
       StFlowTrack* pFlowTrack = new StFlowTrack;
       if (!pFlowTrack) return kFALSE;
@@ -1891,6 +1891,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.80  2003/01/14 14:12:17  oldi
+// Possibility to exclude TPC tracks completely (= FTPC only).
+//
 // Revision 1.79  2003/01/13 20:03:16  aihong
 // let it exclude MuDst files with events less than 5
 //

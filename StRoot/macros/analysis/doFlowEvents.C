@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.43 2003/01/10 16:42:39 oldi Exp $
+// $Id: doFlowEvents.C,v 1.44 2003/01/14 14:12:07 oldi Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -208,6 +208,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   bool spMaker = kFALSE;
   //bool spMaker = kTRUE;
 
+  Bool_t includeTpcTracks  = kTRUE;
   Bool_t includeFtpcTracks = kTRUE;
 
   if (makerName[0]=='\0') { // blank if there is no selection object
@@ -286,6 +287,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 //   StFlowCutEvent::SetTrigger(0.);
   
   // Set the track cuts
+    StFlowCutTrack::IncludeTpcTracks(includeTpcTracks);
 //   StFlowCutTrack::SetFitPtsTpc(0, 0);
 //   StFlowCutTrack::SetFitOverMaxPts(0., 0.);
 //   StFlowCutTrack::SetChiSqTpc(0., 0.);
@@ -504,6 +506,9 @@ void doFlowEvents(const Int_t nevents)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.44  2003/01/14 14:12:07  oldi
+// Possibility to exclude TPC tracks completely (= FTPC only).
+//
 // Revision 1.43  2003/01/10 16:42:39  oldi
 // Several changes to comply with FTPC tracks:
 // - Switch to include/exclude FTPC tracks introduced.
