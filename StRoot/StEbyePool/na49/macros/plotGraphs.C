@@ -9,22 +9,26 @@ void plotGraphs(Char_t* part = "pion") {
 
   // The directories must exist
   Bool_t crossSection = kTRUE;
-
   //Bool_t crossSection = kFALSE;  // yield weighting
-//   if (crossSection) {
-//     Char_t* fileExt = ".root";
-//     Char_t* plotExt = "Plots";
-//   } else {
-//     Char_t* fileExt = "Yield.root";
-//     Char_t* plotExt = "YieldPlots";
-//   }
+  Bool_t pCons = kTRUE;            // with momentum conservation
 
-  if (crossSection) {
-    Char_t* fileExt = "Pcons.root";
-    Char_t* plotExt = "PconsPlots";
+
+  if (pCons) {
+    if (crossSection) {
+      Char_t* fileExt = "Pcons.root";
+      Char_t* plotExt = "PconsPlots";
+    } else {
+      Char_t* fileExt = "PconsYield.root";
+      Char_t* plotExt = "PconsYieldPlots";
+    }
   } else {
-    Char_t* fileExt = "PconsYield.root";
-    Char_t* plotExt = "PconsYieldPlots";
+    if (crossSection) {
+      Char_t* fileExt = ".root";
+      Char_t* plotExt = "Plots";
+    } else {
+      Char_t* fileExt = "Yield.root";
+      Char_t* plotExt = "YieldPlots";
+    }
   }
 
   Char_t pstype[255] = "ps";
@@ -58,21 +62,21 @@ void plotGraphs(Char_t* part = "pion") {
 
   Float_t yMax;
   Float_t yMin;
-  Float_t yRefMax;
-  Float_t yRefMin;
+  Float_t yReflMax;
+  Float_t yReflMin;
   if (pion) {
     yMax    = 4.9;
     yMin    = 2.85;
-    yRefMax = 3.0;
-    yRefMin = 1.1;
+    yReflMax = 3.0;
+    yReflMin = 1.1;
   } else {
     yMax    = 4.75;
     yMin    = 2.85;
-    yRefMax = 3.0;
-    yRefMin = 1.1;
+    yReflMax = 3.0;
+    yReflMin = 1.1;
   }
   Float_t yAllMax = 4.4;
-  Float_t yAllRefMin = 1.4;
+  Float_t yAllReflMin = 1.4;
 
   // pt polynomials with zero intercepts
   TF1* p1 = new TF1("p1", "[0]*x", 0., 1.85);
@@ -86,30 +90,30 @@ void plotGraphs(Char_t* part = "pion") {
   TF1* o3 = new TF1("o3", "pol4", 0.05, 1.85);
   TF1* o4 = new TF1("o4", "pol5", 0.05, 1.85);
 
-  // pt polynomial which goes to zero
-  TF1* n1 = new TF1("n1", "[0]*x + [1]*x*x", 0., 0.08);
+  // pt polynomials which goes to zero
+  TF1* n2 = new TF1("n2", "[0]*x + [1]*x*x", 0., 0.08);
 
   // y for first (f), second (s), and reflected (r)
   TF1* s1 = new TF1("s1", "[0] + [1]*pow(x-2.92,2)", yMin, yMax);
-  TF1* r1 = new TF1("r1", "[0] + [1]*pow(x-2.92,2)", yRefMin, yRefMax);
+  TF1* r1 = new TF1("r1", "[0] + [1]*pow(x-2.92,2)", yReflMin, yReflMax);
   TF1* f1 = new TF1("f1", "[0] + [1]*(x-2.92)", yMin, yMax);
   TF1* s2 = new TF1("s2", "[0] + [1]*pow(x-2.92,2) + [2]*pow(x-2.92,4)", 
     yMin, yMax);
   TF1* r2 = new TF1("r2", "[0] + [1]*pow(x-2.92,2) + [2]*pow(x-2.92,4)",
-    yRefMin, yRefMax);
+    yReflMin, yReflMax);
   TF1* s2All = new TF1("s2All", "[0] + [1]*pow(x-2.92,2) + [2]*pow(x-2.92,4)", 
     yMin, yAllMax);
   TF1* r2All = new TF1("r2All", "[0] + [1]*pow(x-2.92,2) + [2]*pow(x-2.92,4)",
-    yAllRefMin, yRefMax);
+    yAllReflMin, yReflMax);
   TF1* f2 = new TF1("f2", "[0] + [1]*(x-2.92) + [2]*pow(x-2.92,3)", yMin, yMax);
   TF1* f3 = new TF1("f3",
     "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yMin, yMax);
   TF1* r3 = new TF1("r3",
-    "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yRefMin, yRefMax);
+    "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yReflMin, yReflMax);
   TF1* f3All = new TF1("f3All",
     "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yMin, yAllMax);
   TF1* r3All = new TF1("r3All",
-    "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yAllRefMin, yRefMax);
+    "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yAllReflMin, yReflMax);
 
   // centrality polynomials
   TF1* c1 = new TF1("c1", "pol2", 1., 6.);
@@ -120,8 +124,10 @@ void plotGraphs(Char_t* part = "pion") {
   char harText[2];
   char cenText[2];
 
-  // Read input files
+  // Read input files and get Y, Pt, and V histograms
   TH1F *Y[nCen][nHar];
+  TH1F *Pt[nCen][nHar];
+  TH1F *V[nHar];
   TFile *file = new TFile(infile, "READ");
   for (Int_t j = 0; j < nHar; j++) {
     sprintf(harText, "%d", j + 1);
@@ -144,18 +150,6 @@ void plotGraphs(Char_t* part = "pion") {
 	  Y[i][j]->Scale(0.5);
 	}
 	delete histName;
-      }
-    }
-  }
-  nYbins   = Y[7][0]->GetNbinsX();
-  nYbinsMB = Y[0][0]->GetNbinsX();
-  
-  TH1F *Pt[nCen][nHar];
-  for (Int_t j = 0; j < nHar; j++) {
-    sprintf(harText, "%d", j + 1);
-    for (Int_t i = 0; i < nCen; i++) {
-      if (i==0 || i==7 || i==8 || i==9){
-	sprintf(cenText, "%d", i);
 	TString *histName = new TString("Flow_vPt_Sel2_Har");
 	histName->Append(*harText);
 	histName->Append("_Cen");
@@ -171,164 +165,124 @@ void plotGraphs(Char_t* part = "pion") {
 	delete histName;
       }
     }
-  }
-  nPtbins = Pt[7][0]->GetNbinsX();
-    
-  TH1F *V[nHar];
-  for (Int_t j = 0; j < nHar; j++) {
-    sprintf(harText, "%d", j + 1);
     TString *histName = new TString("Flow_v_Sel2_Har");
     histName->Append(*harText);
     V[j] = (TH1F*)file->Get(histName->Data());
     delete histName;
   }
-
-  // Make graphs for Y projection  
-  // flowY[cen][har][reflected]
+  nYbins   = Y[7][0]->GetNbinsX();
+  nYbinsMB = Y[0][0]->GetNbinsX();
+  nPtbins = Pt[7][0]->GetNbinsX();
+    
+  // Make graphs  
+  // flowY[cen][har][reflected=1]
   TGraphErrors *flowY[nCen][nHar][2];
-  for (Int_t i = 0; i < nCen; i++) {
-    for (Int_t j = 0; j < nHar; j++) {
-      for (Int_t k = 0; k < 2; k++) {
-	flowY[i][j][k] = new TGraphErrors();
-      }
-    }
-  }
-  
-  // Make graphs for pt projection
   TGraphErrors *flowPt[nCen][nHar][2];
-  for (Int_t i = 0; i < nCen; i++) {
-    for (Int_t j = 0; j < nHar; j++) {
-      for (Int_t k = 0; k < 2; k++) {
-	flowPt[i][j][k] = new TGraphErrors();
-      }
-    }
-  }
-  
-  // Make graphs for v doubly projected
   TGraphErrors *flowV[nHar];
   for (Int_t j = 0; j < nHar; j++) {
+    for (Int_t i = 0; i < nCen; i++) {
+      if (i==0 || i==7 || i==8 || i==9){
+	for (Int_t k = 0; k < 2; k++) {
+	  flowY[i][j][k] = new TGraphErrors();
+	  flowPt[i][j][k] = new TGraphErrors();
+	}
+      }
+    }
     flowV[j] = new TGraphErrors();
   }
   
-  // Fill graphs with Y projection
   for (Int_t i = 0; i < nCen; i++) {
-    if (!pion && i==0) nYbins = nYbinsMB;
-    for (Int_t j = 0; j < nHar; j++) {
-      if (j) { flip = 1.; }
-      else { flip = -1.; }
-      for (Int_t k = 0; k < nYbins; k++) {
-      if (i==0 || i==7 || i==8 || i==9){
-	  if (Y[i][j]->GetBinCenter(k+1) > yMin && 
-	      //Y[i][j]->GetBinContent(k+1) != 0 &&
-	      Y[i][j]->GetBinError(k+1) < 2) {
-	    flowY[i][j][0]->SetPoint(k, Y[i][j]->GetBinCenter(k+1),
-				       flip * Y[i][j]->GetBinContent(k+1));
-	    flowY[i][j][0]->SetPointError(k, 0., Y[i][j]->GetBinError(k+1));
-	    flowY[i][j][1]->SetPoint(k, 2 * yCM -Y[i][j]->GetBinCenter(k+1),
-				     Y[i][j]->GetBinContent(k+1));
-	    flowY[i][j][1]->SetPointError(k, 0., Y[i][j]->GetBinError(k+1));
+    if (i==0 || i==7 || i==8 || i==9){
+      for (Int_t j = 0; j < nHar; j++) {
+	// Fill graphs with Y projection
+	if (!pion && i==0) nYbins = nYbinsMB;
+	flip = (j) ? 1. : -1.;
+	for (Int_t m = 0; m < nYbins; m++) {
+	  Int_t n = m + 1;
+	  if (Y[i][j]->GetBinCenter(n) > yMin && 
+	      Y[i][j]->GetBinError(n) < 2) {
+	    flowY[i][j][0]->SetPoint(m, Y[i][j]->GetBinCenter(n),
+				     flip * Y[i][j]->GetBinContent(n));
+	    flowY[i][j][0]->SetPointError(m, 0., Y[i][j]->GetBinError(n));
+	    flowY[i][j][1]->SetPoint(m, 2 * yCM -Y[i][j]->GetBinCenter(n),
+				     Y[i][j]->GetBinContent(n));
+	    flowY[i][j][1]->SetPointError(m, 0., Y[i][j]->GetBinError(n));
 	  }
 	}
-//       flowY[i][j][0]->Rebin(2);
-//       flowY[i][j][0]->Scale(0.5);
-//       flowY[i][j][1]->Rebin(2);
-//       flowY[i][j][1]->Scale(0.5);
-      }
-    }
-  }
-  
-  // Fill graphs with Pt projection  - - -  for protons
-  if (!pion) {
-    for (Int_t i = 0; i < nCen; i++) {
-      for (Int_t j = 0; j < nHar; j++) {
-	if (j) { flip = 1.; }
-	else { flip = -1.; }
-	for (Int_t k = 0; k < nPtbins; k++) {
-	  if (i==0 || i==7 || i==8 || i==9){
-	    if (Pt[i][j]->GetBinError(k+1) < 4){
-	      flowPt[i][j][0]->SetPoint(k, Pt[i][j]->GetBinCenter(k+1),
-					flip * Pt[i][j]->GetBinContent(k+1));
-	      flowPt[i][j][0]->SetPointError(k, 0., Pt[i][j]->GetBinError(k+1));
+	// Fill graphs with Pt projection  - - -  for protons
+	if (!pion) {
+	  for (Int_t m = 0; m < nPtbins; m++) {
+	    Int_t n = m + 1;
+	    if (Pt[i][j]->GetBinError(n) < 4){
+	      flowPt[i][j][0]->SetPoint(m, Pt[i][j]->GetBinCenter(n),
+					flip * Pt[i][j]->GetBinContent(n));
+	      flowPt[i][j][0]->SetPointError(m, 0., Pt[i][j]->GetBinError(n));
 	    } else {
-	      flowPt[i][j][0]->SetPoint(k,-1,0);
+	      flowPt[i][j][0]->SetPoint(m,-1,0);
 	    }
-	  } else {
-	    flowPt[i][j][0]->SetPoint(k,-1,0);
 	  }
-	}
-      }
-    }
-  } else {
-    // Fill graphs with Pt projection  - - -  for pions
-    for (Int_t i = 0; i < nCen; i++) {
-      for (Int_t j = 0; j < nHar; j++) {
-	if (j) { flip = 1.; }
-	else { flip = -1.; }	
-	if (i==0 || i==7 || i==8 || i==9){
-	  for (Int_t k = 0; k < 4; k++) {
-	    if (Pt[i][j]->GetBinError(k+1) < 3){
-	      flowPt[i][j][0]->SetPoint(k, Pt[i][j]->GetBinCenter(k+1),
-					flip * Pt[i][j]->GetBinContent(k+1));
-	      flowPt[i][j][0]->SetPointError(k, 0., Pt[i][j]->GetBinError(k+1));
+	} else {
+	// Fill graphs with Pt projection  - - -  for pions
+	  for (Int_t m = 0; m < 8; m++) {
+	    Int_t n = m + 1;
+	    if (Pt[i][j]->GetBinError(n) < 3){
+	      flowPt[i][j][0]->SetPoint(m, Pt[i][j]->GetBinCenter(n),
+					flip * Pt[i][j]->GetBinContent(n));
+	      flowPt[i][j][0]->SetPointError(m, 0., Pt[i][j]->GetBinError(n));
 	    } else {
-	      flowPt[i][j][0]->SetPoint(k,-1,0);
+	      flowPt[i][j][0]->SetPoint(m,-1,0);
 	    }
 	  }	    
 	  Pt[i][j]->Rebin();
 	  Pt[i][j]->Scale(0.5);
-	  for (Int_t k = 4; k < 8; k++) {
-	    if (Pt[i][j]->GetBinError(k+1) < 3){
-	      flowPt[i][j][0]->SetPoint(k, Pt[i][j]->GetBinCenter(k+1),
-					flip * Pt[i][j]->GetBinContent(k+1));
-	      flowPt[i][j][0]->SetPointError(k, 0., Pt[i][j]->GetBinError(k+1));
+	  for (Int_t m = 8; m < 16; m++) {
+	    Int_t n = m/2 + 1;
+	    if (!(m%2) && Pt[i][j]->GetBinError(n) < 3){
+	      flowPt[i][j][0]->SetPoint(m, Pt[i][j]->GetBinCenter(n),
+					flip * Pt[i][j]->GetBinContent(n));
+	      flowPt[i][j][0]->SetPointError(m, 0., Pt[i][j]->GetBinError(n));
 	    } else {
-	      flowPt[i][j][0]->SetPoint(k,-1,0);
+	      flowPt[i][j][0]->SetPoint(m,-1,0);
 	    }
 	  }	    
 	  Pt[i][j]->Rebin();
 	  Pt[i][j]->Scale(0.5);
-	  for (Int_t k = 8; k < 12; k++) {
-	    if (!(k%2)){
-	      if (Pt[i][j]->GetBinError((k/2)+1) < 3) {
-		flowPt[i][j][0]->SetPoint(k, Pt[i][j]->GetBinCenter((k/2)+1),
-			              flip * Pt[i][j]->GetBinContent((k/2)+1));
-		flowPt[i][j][0]->SetPointError(k, 0.,
-					       Pt[i][j]->GetBinError((k/2)+1));
-	      } else {
-		flowPt[i][j][0]->SetPoint(k,-1,0);
-	    }
+	  for (Int_t m = 16; m < 24; m++) {
+	    Int_t n = m/4 + 1;
+	    if (!(m%4) && Pt[i][j]->GetBinError(n) < 3){
+	      flowPt[i][j][0]->SetPoint(m, Pt[i][j]->GetBinCenter(n),
+					flip * Pt[i][j]->GetBinContent(n));
+	      flowPt[i][j][0]->SetPointError(m, 0.,
+					     Pt[i][j]->GetBinError(n));
 	    } else {
-	      flowPt[i][j][0]->SetPoint(k,-1,0);
+	      flowPt[i][j][0]->SetPoint(m,-1,0);
 	    }
 	  }
 	  Pt[i][j]->Rebin();
 	  Pt[i][j]->Scale(0.5);
-	  for (Int_t k = 12; k < 20; k++) {
-	    if (!(k%4)){
-	      if (Pt[i][j]->GetBinError((k/4)+1) < 3) {
-		flowPt[i][j][0]->SetPoint(k, Pt[i][j]->GetBinCenter((k/4)+1),
-				      flip * Pt[i][j]->GetBinContent((k/4)+1));
-		flowPt[i][j][0]->SetPointError(k, 0., 
-					       Pt[i][j]->GetBinError((k/4)+1));
-	      } else {
-		flowPt[i][j][0]->SetPoint(k,-1,0);
-	      }
+	  for (Int_t m = 24; m < 40; m++) {
+	    Int_t n = m/8 + 1;
+	    if (!(m%8) && Pt[i][j]->GetBinError(n) < 3){
+	      flowPt[i][j][0]->SetPoint(m, Pt[i][j]->GetBinCenter(n),
+					flip * Pt[i][j]->GetBinContent(n));
+	      flowPt[i][j][0]->SetPointError(m, 0., 
+					     Pt[i][j]->GetBinError(n));
 	    } else {
-	      flowPt[i][j][0]->SetPoint(k,-1,0);
-	    }  
+	      flowPt[i][j][0]->SetPoint(m,-1,0);
+	    }
 	  }
 	}    
       }
     }
   }
-
+  
   // Fill graphs with v doubly projected
   for (Int_t j = 0; j < nHar; j++) {
-    if (j) { flip = 1.; }
-    else { flip = -1.; }	
-    for (Int_t k = 0; k < 6; k++) {
-      flowV[j]->SetPoint(k, k+1, flip * V[j]->GetBinContent(k+1));
-      flowV[j]->SetPointError(k, 0., V[j]->GetBinError(k+1));
+    flip = (j) ? 1. : -1.;
+    for (Int_t m = 0; m < 6; m++) {
+      Int_t n = m + 1;
+      flowV[j]->SetPoint(m, m+1, flip * V[j]->GetBinContent(n));
+      flowV[j]->SetPointError(m, 0., V[j]->GetBinError(n));
     }
   }
   
@@ -342,10 +296,10 @@ void plotGraphs(Char_t* part = "pion") {
   // Minimum Bias vs. y -------------------- ------------------------
   Char_t title[255] = "Minimum Bias ";
   flowY[0][0][0]->SetTitle(strcat(title, part));
-  flowY[0][0][0]->SetMarkerStyle(20);
-  flowY[0][0][1]->SetMarkerStyle(24);
-  flowY[0][1][0]->SetMarkerStyle(21);
-  flowY[0][1][1]->SetMarkerStyle(25);
+  flowY[0][0][0]->SetMarkerStyle(kFullCircle);
+  flowY[0][0][1]->SetMarkerStyle(kOpenCircle);
+  flowY[0][1][0]->SetMarkerStyle(kFullSquare);
+  flowY[0][1][1]->SetMarkerStyle(kOpenSquare);
   flowY[0][0][0]->SetMarkerColor(kRed);
   flowY[0][0][1]->SetMarkerColor(kRed);
   flowY[0][1][0]->SetMarkerColor(kGreen);
@@ -418,8 +372,8 @@ void plotGraphs(Char_t* part = "pion") {
   // Minimum Bias versus pt -------------------- ---------------------
   sprintf(title, "Minimum Bias ");
   flowPt[0][0][0]->SetTitle(strcat(title, part));
-  flowPt[0][0][0]->SetMarkerStyle(20);
-  flowPt[0][1][0]->SetMarkerStyle(21);
+  flowPt[0][0][0]->SetMarkerStyle(kFullCircle);
+  flowPt[0][1][0]->SetMarkerStyle(kFullSquare);
   flowPt[0][0][0]->SetMarkerColor(kRed);
   flowPt[0][1][0]->SetMarkerColor(kGreen);
   flowPt[0][0][0]->SetMarkerSize(markerSize);
@@ -439,18 +393,16 @@ void plotGraphs(Char_t* part = "pion") {
   hist->SetMinimum(min);
   hist->Draw();
 
-  //gStyle->SetFuncColor(kRed); // does not work
   if (pion) {
     //flowPt[0][0][0]->Draw("PC");
     flowPt[0][0][0]->Fit("o2", "R");
-    flowPt[0][0][0]->Fit("n1", "R+");
+    flowPt[0][0][0]->Fit("n2", "R+");
     flowPt[0][0][0]->Draw("P");
   } else {
     flowPt[0][0][0]->Fit("p3", "R");
     flowPt[0][0][0]->Draw("P");
   }
-  //gStyle->SetFuncColor(kGreen);
-  flowPt[0][1][0]->Fit("p2", "R");
+  flowPt[0][1][0]->Fit("p3", "R");
   flowPt[0][1][0]->Draw("P");
 
   l.SetTextColor(kBlue); 
@@ -467,7 +419,7 @@ void plotGraphs(Char_t* part = "pion") {
   if (pion) {
     l.DrawLatex(0.7,0.45,"v_{1}"); 
     l.SetTextColor(kGreen); 
-    l.DrawLatex(0.7,0.75,"v_{2}");
+    l.DrawLatex(0.7,0.8,"v_{2}");
   } else {
     l.DrawLatex(0.7,0.4,"v_{1}"); 
     l.SetTextColor(kGreen); 
@@ -510,12 +462,7 @@ void plotGraphs(Char_t* part = "pion") {
   hist->SetMinimum(min);
   hist->Draw();
   flowY[0][0][0]->Draw("P");
-  for (Int_t i = 0; i < 3; i++) {
-    for (Int_t k = 0; k < 2; k++) {
-      flowY[2*i][0][k]->Draw("P");
-    }
-  }
-  
+
   legend->Clear();
   legend->SetX1NDC(0.2);
   legend->SetY1NDC(0.17);    
@@ -682,7 +629,7 @@ void plotGraphs(Char_t* part = "pion") {
     if (pion) {
       //flowPt[i][0][0]->Draw("PC");
       flowPt[i][0][0]->Fit("o3", "R");
-      flowPt[i][0][0]->Fit("n1", "R+");
+      flowPt[i][0][0]->Fit("n2", "R+");
       flowPt[i][0][0]->Draw("P");
     } else {
       flowPt[i][0][0]->Fit("p3", "R");
@@ -765,8 +712,8 @@ void plotGraphs(Char_t* part = "pion") {
   if (!Pause()) return;
  
   // v doubly intergated  -------------------------------
-  flowV[0]->SetMarkerStyle(20);
-  flowV[1]->SetMarkerStyle(21);
+  flowV[0]->SetMarkerStyle(kFullCircle);
+  flowV[1]->SetMarkerStyle(kFullSquare);
   flowV[0]->SetMarkerColor(kRed);
   flowV[1]->SetMarkerColor(kGreen);
   flowV[0]->SetMarkerSize(markerSize);

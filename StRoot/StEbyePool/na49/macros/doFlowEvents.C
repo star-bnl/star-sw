@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.3 2001/08/17 22:14:42 posk Exp $
+// $Id: doFlowEvents.C,v 1.4 2001/11/06 18:02:43 posk Exp $
 //
 // Description: 
 // Chain to read events from microDST files into StFlowEvent and analyze.
@@ -32,6 +32,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.4  2001/11/06 18:02:43  posk
+// 40 GeV compatability.
+//
 // Revision 1.3  2001/08/17 22:14:42  posk
 // Updated to also do 40 GeV.
 //
@@ -159,7 +162,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
   //
 
   // Set the event cuts
-//    StFlowCutEvent::SetCent(4, 4);
+//    StFlowCutEvent::SetCent(3, 3);
 //    StFlowCutEvent::SetMult(10, 10000);
 //    StFlowCutEvent::SetFinalMult(6, 10000);
 //    StFlowCutEvent::SetVertexX(-3.6, 3.6);
@@ -208,6 +211,8 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
     StFlowEvent::SetPtCut(0., 0.5, 1, 1);
     StFlowEvent::SetYCut(3., 5., 2, 1); // harmonic 3, selection 2
     StFlowCutEvent::SetEtaSym(0.36, 0.84);
+    //Method using only sin correlation terms for bad acceptance
+    StFlowEvent::SetSinOnly();
   }
 
 //   StFlowEvent::SetMeanSinCosCut(-0.1, 0.1);
@@ -225,6 +230,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
   // Particles for the event plane
   // particles:  pi+, pi-, pi, e-, e+, pbar, proton
   // StFlowEvent::SetPid("p");                    // for all charged particles
+  // StFlowEvent::SetPid("pi-");
 
   // Use probability PID method
   //  StFlowEvent::SetProbPid();

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.6 2001/10/24 21:48:36 posk Exp $
+// $Id: plot.C,v 1.7 2001/11/06 18:02:46 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -16,6 +16,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.7  2001/11/06 18:02:46  posk
+// 40 GeV compatability.
+//
 // Revision 1.6  2001/10/24 21:48:36  posk
 // Improved graphs.
 //
@@ -498,8 +501,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  TLine* lineDiagonal = new TLine(-etaMax, -etaMax, etaMax, etaMax);
 	}
 	gStyle->SetOptStat(0);
-	hist->SetMarkerStyle(21);
-	hist->SetMarkerColor(2);
+	hist->SetMarkerStyle(kFullSquare);
+	hist->SetMarkerColor(kRed);
 	hist->Draw();
 	lineDiagonal->Draw();
       } else if (strstr(shortName[pageNumber],"PidMult")!=0) {  // PID Mult

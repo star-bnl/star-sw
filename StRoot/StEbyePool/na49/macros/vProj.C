@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: vProj.C,v 1.6 2001/10/24 21:46:36 posk Exp $
+// $Id: vProj.C,v 1.7 2001/11/06 18:02:54 posk Exp $
 //
 // Author:       Art Poskanzer, May 2000
 // Description:  Projects v(y,pt) on the y and Pt axes
@@ -18,6 +18,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: vProj.C,v $
+// Revision 1.7  2001/11/06 18:02:54  posk
+// 40 GeV compatability.
+//
 // Revision 1.6  2001/10/24 21:46:36  posk
 // Added conservation of momentum correction. Calculate triply integrated v values.
 //
@@ -28,6 +31,9 @@
 // plotGraphs.C makes the final graphs.
 //
 // $Log: vProj.C,v $
+// Revision 1.7  2001/11/06 18:02:54  posk
+// 40 GeV compatability.
+//
 // Revision 1.6  2001/10/24 21:46:36  posk
 // Added conservation of momentum correction. Calculate triply integrated v values.
 //
@@ -87,7 +93,7 @@ void vProj(char* part = "pion") {
   TH1F*     vY[nPlots][nHars];
   TH1F*     vPt[nPlots][nHars];
   TH1F*     vCen[nHars];
-  TH1F*     vMB;
+  TH1F*     _v;
   TH1F*     yieldCen;
   TH1F*     yieldY[nPlots];
   TH1F*     yieldPt[nPlots];
@@ -357,14 +363,14 @@ void vProj(char* part = "pion") {
   }
 
   // Create the histogram for the triply integrated v
-  histName = new TString("Flow_vMB_Sel");
+  histName = new TString("Flow__v_Sel");
   histName->Append(*selText);
-  vMB = new TH1F(histName->Data(), histName->Data(), nHars, 0.5, 
+  _v = new TH1F(histName->Data(), histName->Data(), nHars, 0.5, 
 		 nHars+0.5);
-  vMB->SetXTitle("Harmonic");
-  vMB->SetYTitle("Flow (%)");
-  vMB->SetMaximum(3.);
-  vMB->SetMinimum(-2.);
+  _v->SetXTitle("Harmonic");
+  _v->SetYTitle("Flow (%)");
+  _v->SetMaximum(3.);
+  _v->SetMinimum(-2.);
   delete histName;
   
   for (int n = 1; n <= nCens; n++) {
@@ -609,8 +615,8 @@ void vProj(char* part = "pion") {
       error   = sqrt(err2Sum) / yieldSum;
     }
     cout<<" Min Bias v"<<j+1<<" = "<<content<<" +/- "<<error<<endl<<endl;
-    vMB->SetBinContent(j+1, content);
-    vMB->SetBinError(j+1, error);
+    _v->SetBinContent(j+1, content);
+    _v->SetBinError(j+1, error);
   }
   
   // save Histograms to file  
@@ -779,8 +785,8 @@ void vProj(char* part = "pion") {
   }
   
   // triply integrated plot
-  NewCanvas(vMB->GetName());
-  vMB->Draw();
+  NewCanvas(_v->GetName());
+  _v->Draw();
   lineZeroHar->Draw();
   if (!Pause()) return;
   

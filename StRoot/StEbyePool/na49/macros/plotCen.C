@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.5 2001/10/24 21:48:41 posk Exp $
+// $Id: plotCen.C,v 1.6 2001/11/06 18:02:49 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -16,6 +16,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.6  2001/11/06 18:02:49  posk
+// 40 GeV compatability.
+//
 // Revision 1.5  2001/10/24 21:48:41  posk
 // Improved graphs.
 //
@@ -471,8 +474,8 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
 	TLine* lineDiagonal = new TLine(-etaMax, -etaMax, etaMax, etaMax);
       }
       gStyle->SetOptStat(0);
-      hist->SetMarkerStyle(21);
-      hist->SetMarkerColor(2);
+      hist->SetMarkerStyle(kFullSquare);
+      hist->SetMarkerColor(kRed);
       hist->Draw();
       lineDiagonal->Draw();
     } else if (strstr(shortName[pageNumber],"CosPhi")!=0) {  // CosPhiLab
