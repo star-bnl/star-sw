@@ -1,6 +1,6 @@
 #include <math.h>
 #include "StEmcSimpleSimulator.h"
-#include "../StEmcUtil/emcInternalDef.h"
+#include "StEmcUtil/emcInternalDef.h"
 
 ClassImp(StEmcSimpleSimulator)
 
@@ -128,8 +128,11 @@ Float_t StEmcSimpleSimulator::getEnergy()
   return e;
 }
 //////////////////////////////////////////////////////////////////////////
-//  $Id: StEmcSimpleSimulator.cxx,v 1.2 2001/04/25 17:24:33 perev Exp $
+//  $Id: StEmcSimpleSimulator.cxx,v 1.3 2001/05/14 01:30:13 pavlinov Exp $
 //  $Log: StEmcSimpleSimulator.cxx,v $
+//  Revision 1.3  2001/05/14 01:30:13  pavlinov
+//  Cleanup
+//
 //  Revision 1.2  2001/04/25 17:24:33  perev
 //  HPcorrs
 //
