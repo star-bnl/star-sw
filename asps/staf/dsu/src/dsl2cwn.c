@@ -172,24 +172,12 @@ long dsl2cwn(DS_DATASET_T *pDataset,long hid)
 		  strcpy(&bspec[strlen(bspec)-1],"");
 		  switch (btype[nb-1]) {
 		     case CHAR_BLOCK: /* should use HBNAMC */
-<<<<<<< dsl2cwn.c
-			HBNAMC(hid,block_name(name,nb-1)
-				   ,pData,bspec);
-			break;
-=======
 		       HBNAMC(hid,block_name(name,nb-1),pData,bspec);
 		       break;
->>>>>>> 1.7
 		     case NUMB_BLOCK:
-<<<<<<< dsl2cwn.c
-			HBNAMC(hid,block_name(name,nb-1)
-				   ,pData,bspec);
-			break;
-=======
 		       pDataI = (int *)pData;
 		       HBNAME(hid,block_name(name,nb-1),pDataI,bspec);
 		       break;
->>>>>>> 1.7
 		     default:
 			break;
 		  }
@@ -213,23 +201,12 @@ long dsl2cwn(DS_DATASET_T *pDataset,long hid)
       strcpy(&bspec[strlen(bspec)-1],"");
       switch (btype[nb-1]) {
 	 case CHAR_BLOCK: /* should use HBNAMC */
-<<<<<<< dsl2cwn.c
-	    HBNAMC(hid,block_name(name,nb-1)
-		       ,pData,bspec);
-	    break;
-=======
 	   HBNAMC(hid,block_name(name,nb-1),pData,bspec);
 	   break;
->>>>>>> 1.7
 	 case NUMB_BLOCK:
-<<<<<<< dsl2cwn.c
-	    HBNAMC(hid,block_name(name,nb-1)
-		       ,pData,bspec);
-=======
 	   pDataI = (int *)pData;
 	   HBNAME(hid,block_name(name,nb-1),pDataI,bspec);
->>>>>>> 1.7
-	    break;
+	   break;
 	 default:
 	    break;
       }
@@ -244,23 +221,12 @@ long dsl2cwn(DS_DATASET_T *pDataset,long hid)
 	       } else {
 		  switch(btype[ib]) {
 		     case CHAR_BLOCK: /* should use HBNAMC */
-<<<<<<< dsl2cwn.c
-			HBNAMC(hid,block_name(name,ib)
-				   ,pData,"$SET");
-			break;
-=======
 		       HBNAMC(hid,block_name(name,ib),pData,"$SET");
 		       break;
->>>>>>> 1.7
 		     case NUMB_BLOCK:
-<<<<<<< dsl2cwn.c
-			HBNAMC(hid,block_name(name,ib)
-				   ,pData,"$SET");
-=======
 		       pDataI = (int *)pData;
 		       HBNAME(hid,block_name(name,ib),pDataI,"$SET");
->>>>>>> 1.7
-			break;
+		       break;
 		     default:
 			break;
 		  }
@@ -394,12 +360,7 @@ char* block_name(char *name,long n)
    bname[ii] = '\0';
    return bname;
 }
-<<<<<<< dsl2cwn.c
 #ifndef linux
-=======
-
-#ifndef linux
->>>>>>> 1.7
 /*
 *:>---------------------------------------------------------------------
 *:ROUTINE:	char* basename
@@ -414,8 +375,4 @@ char* basename(char* filename)
    return strtok((((ss = strrchr(ss,'/')) != NULL) ? ss : filename)
 	   , "/.");
 }
-<<<<<<< dsl2cwn.c
 #endif /* not linux*/
-=======
-#endif
->>>>>>> 1.7
