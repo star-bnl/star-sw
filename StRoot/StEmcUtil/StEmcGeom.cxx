@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.2 2001/03/22 21:50:40 pavlinov Exp $
+ * $Id: StEmcGeom.cxx,v 1.3 2001/03/23 18:59:05 pavlinov Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.3  2001/03/23 18:59:05  pavlinov
+ * delete gROOT definition because exist in TROOT.h
+ *
  * Revision 1.2  2001/03/22 21:50:40  pavlinov
  * Clean up for mdc4
  *
@@ -53,8 +56,6 @@
 #include "emc_def.h"
 
 ClassImp(StEmcGeom)
-
-extern TROOT* gROOT;
 
 const Float_t perr=0.01;
 Float_t rmin, rsmdEta, rsmdPhi;
