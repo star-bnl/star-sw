@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.9 2002/08/27 19:05:56 laue Exp $
+ * $Id: StMuDst.cxx,v 1.10 2002/09/21 00:26:09 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -142,13 +142,13 @@ StEvent* StMuDst::createStEvent() {
   ev->setL0Trigger ( new StL0Trigger(mu->l0Trigger()) );
   //   ev->setL1Trigger ( new StL0Trigger(mu->l0Trigger()) );
   ev->setL3Trigger ( new StL3Trigger() );
-
+  
   StPrimaryVertex* vp  = new StPrimaryVertex();  
   ev->addPrimaryVertex(vp);
   vp->setPosition( mu->eventSummary().primaryVertexPosition() );
 
   /// create an array of pointers to track nodes as a function of trackId 
-  StTrackNode** nodes = new StTrackNode*[StMuArrays::arraySizes[muGlobal]];
+  static StTrackNode** nodes = new StTrackNode*[StMuArrays::arraySizes[muGlobal]];
   for (int i=0; i<StMuArrays::arraySizes[muGlobal]; i++) nodes[i]=0;   // there must be an better way
   // add global tracks to tracknodes
   int nGlobals = arrays[muGlobal]->GetEntries();
@@ -157,6 +157,7 @@ StEvent* StMuDst::createStEvent() {
     if (nodes[id]==0) nodes[id] = new StTrackNode();
     nodes[id]->addTrack( createStTrack(globalTracks(i)) );
   }
+
   /// add primary tracks to tracknodes and primary vertex
   int nPrimaries = arrays[muPrimary]->GetEntries();
   for (int i=0; i<nPrimaries; i++) {
@@ -166,6 +167,8 @@ StEvent* StMuDst::createStEvent() {
     nodes[id]->addTrack( t );
     vp->addDaughter( t );
   }
+
+
   /// add all tracknodes to the event
   for (int i=0; i<StMuArrays::arraySizes[muGlobal]; i++) {
     if (nodes[i]) ev->trackNodes().push_back(nodes[i]);
@@ -175,10 +178,11 @@ StEvent* StMuDst::createStEvent() {
   /// we do this laterb
   /// we do this later
   
-  // add global tracks to tracknodes
+  // add detector states
   int nStates = arrays[muState]->GetEntries();
   for (int i=0; i<nStates; i++) {
-    ev->addDetectorState(detectorStates(i));
+      StDetectorState* det = new StDetectorState(*detectorStates(i));
+      ev->addDetectorState(det);
   }
   
   DEBUGVALUE2(timer.elapsedTime());
@@ -215,6 +219,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.10  2002/09/21 00:26:09  laue
+ * Bug fix in createStEvent() function. Now you can delete the StEvent
+ *
  * Revision 1.9  2002/08/27 19:05:56  laue
  * Minor updates to make the muDst from simulation work
  *
