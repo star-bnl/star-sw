@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeEvMuDst.hh,v 1.2 2000/03/29 20:52:13 genevb Exp $
+ * $Id: StStrangeEvMuDst.hh,v 1.3 2000/03/31 03:20:24 jones Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 19-Aug-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeEvMuDst.hh,v $
+ * Revision 1.3  2000/03/31 03:20:24  jones
+ * Added topology map to V0/Xi; access funcs for each data member
+ *
  * Revision 1.2  2000/03/29 20:52:13  genevb
  * Added StKinkMuDst, replaced arrays
  *
@@ -37,7 +40,9 @@ public:
 
   Int_t   run() const;            // Run number
   Int_t   event() const;          // Event number
-  Float_t primaryVertex(Int_t n); // Primary Vertex Position coordinates
+  Float_t primaryVertexX() const; // Primary Vertex Position coordinates
+  Float_t primaryVertexY() const;
+  Float_t primaryVertexZ() const;
 
 protected:
   Int_t   mRun;                   // These are written out
@@ -55,5 +60,11 @@ inline Int_t   StStrangeEvMuDst::run() const
                { return mRun; }
 inline Int_t   StStrangeEvMuDst::event() const
                { return mEvent; }
+inline Float_t StStrangeEvMuDst::primaryVertexX() const 
+               { return mPrimaryVertexX; }
+inline Float_t StStrangeEvMuDst::primaryVertexY() const 
+               { return mPrimaryVertexY; }
+inline Float_t StStrangeEvMuDst::primaryVertexZ() const 
+               { return mPrimaryVertexZ; }
 
 #endif
