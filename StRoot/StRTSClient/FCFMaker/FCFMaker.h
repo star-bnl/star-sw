@@ -3,11 +3,14 @@
 
 /***************************************************************************
  *
- * $Id: FCFMaker.h,v 1.6 2004/01/26 22:46:54 jml Exp $
+ * $Id: FCFMaker.h,v 1.7 2004/01/27 16:30:15 jml Exp $
  *
  *--------------------------------------------------------------------------
  *
  * $Log: FCFMaker.h,v $
+ * Revision 1.7  2004/01/27 16:30:15  jml
+ * added FCF_ to defines
+ *
  * Revision 1.6  2004/01/26 22:46:54  jml
  * debugging to see gains/t0, only get gains/t0 once, cleaner logging
  *
@@ -67,19 +70,13 @@ class StTpcCoordinateTransform;
 class StTpcHitCollection;
 typedef u_int* j_uintptr;
 
-#define MAX_PADS_EVER 256
-#define MAX_TIMEBINS_EVER 512
-#define MAX_CLUSTERS 6000
+#define FCF_MAX_PADS_EVER 256
+#define FCF_MAX_TIMEBINS_EVER 512
+#define FCF_MAX_CLUSTERS 6000
 
-#ifndef MAX_PADROWS
-#define MAX_PADROWS 45
-#endif
-#ifndef MAX_PADS
-#define MAX_PADS 184
-#endif
-#ifndef MAX_SEQ
-#define MAX_SEQ 32
-#endif
+#define FCF_MAX_PADROWS 45
+#define FCF_MAX_PADS 184
+#define FCF_MAX_SEQ 32
 
 
 // In the tpc_raw dataset, 3 clusters x,y & z the pixels are arranged in memory
@@ -112,7 +109,7 @@ struct StDaqClfcpp {
 }; 
 
 struct StDaqClfCppRow {
-  StDaqClfcpp r[MAX_PADS][MAX_SEQ];
+  StDaqClfcpp r[FCF_MAX_PADS][FCF_MAX_SEQ];
 };
 
 class StRTSClientFCFMaker:public StMaker
@@ -121,16 +118,16 @@ class StRTSClientFCFMaker:public StMaker
   bool ignoreFileClusters;
   bool ignoreRawData;
 
-  StDaqClfCppRow cpp[MAX_PADROWS];       // PADROW, PAD, SEQUENCE (0 based)
+  StDaqClfCppRow cpp[FCF_MAX_PADROWS];       // PADROW, PAD, SEQUENCE (0 based)
 
-  unsigned short croat_adc[MAX_PADS_EVER+1][MAX_TIMEBINS_EVER];
-  unsigned short croat_cpp[MAX_PADS_EVER+1][64];
-  unsigned int croat_adcOff[MAX_PADS_EVER+1];
-  unsigned short croat_cppOff[MAX_PADS_EVER+1];   
+  unsigned short croat_adc[FCF_MAX_PADS_EVER+1][FCF_MAX_TIMEBINS_EVER];
+  unsigned short croat_cpp[FCF_MAX_PADS_EVER+1][64];
+  unsigned int croat_adcOff[FCF_MAX_PADS_EVER+1];
+  unsigned short croat_cppOff[FCF_MAX_PADS_EVER+1];   
   
-  int t0Corr[24][45][MAX_PADS_EVER+1];
-  unsigned int gainCorr[24][45][MAX_PADS_EVER+1];
-  unsigned short startFlags[MAX_PADS_EVER+1];
+  int t0Corr[24][45][FCF_MAX_PADS_EVER+1];
+  unsigned int gainCorr[24][45][FCF_MAX_PADS_EVER+1];
+  unsigned short startFlags[FCF_MAX_PADS_EVER+1];
 
   Int_t BuildCPP(int nrows, 
 		 raw_row_st *row, 

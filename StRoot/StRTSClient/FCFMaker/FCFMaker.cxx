@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.11 2004/01/26 22:46:54 jml Exp $
+ * $Id: FCFMaker.cxx,v 1.12 2004/01/27 16:30:15 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.12  2004/01/27 16:30:15  jml
+ * added FCF_ to defines
+ *
  * Revision 1.11  2004/01/26 22:46:54  jml
  * debugging to see gains/t0, only get gains/t0 once, cleaner logging
  *
@@ -136,10 +139,10 @@ static class fcfAfterburner fcf_after;
 // Three contributions...
 
 // [sector][padrow][result_buffer]
-static u_int croat_out[24][45][(MAX_CLUSTERS + 2) * 2];
+static u_int croat_out[24][45][(FCF_MAX_CLUSTERS + 2) * 2];
 
 // [sector][rb][mz][result_buffer]
-static u_int daq_file_out[24][6][3][(MAX_CLUSTERS + 2) * 2 * 6];
+static u_int daq_file_out[24][6][3][(FCF_MAX_CLUSTERS + 2) * 2 * 6];
 
 // points to the raw data contributing...
 
@@ -257,14 +260,14 @@ Int_t StRTSClientFCFMaker::Init()
   //
   fcf = new fcfClass(TPC_ID,NULL);
 
-  for(int i=0;i<MAX_PADS_EVER+1;i++)
+  for(int i=0;i<FCF_MAX_PADS_EVER+1;i++)
   {
     croat_adcOff[i] = (unsigned int)(&croat_adc[i][0]) - (unsigned int)(&croat_adc[0][0]);
     croat_cppOff[i] = (unsigned int)(&croat_cpp[i][0]) - (unsigned int)(&croat_cpp[0][0]);
   }
   fcf->adcOff = croat_adcOff;
   fcf->cppOff = (short unsigned int *)croat_cppOff;
-  fcf->maxClusters = MAX_CLUSTERS;
+  fcf->maxClusters = FCF_MAX_CLUSTERS;
 
   memset(t0Corr, 0, sizeof(t0Corr));
 
@@ -274,7 +277,7 @@ Int_t StRTSClientFCFMaker::Init()
 
   for(int i=0;i<24;i++) {
     for(int j=0;j<45;j++) {
-      for(int k=0;k<MAX_PADS_EVER+1;k++) gainCorr[i][j][k] = 64;   // == 1.0 !!
+      for(int k=0;k<FCF_MAX_PADS_EVER+1;k++) gainCorr[i][j][k] = 64;   // == 1.0 !!
     }
   }
 
@@ -1029,7 +1032,7 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
     // Write the ADC array for this row...
     for(int pp=fcf->padStart;pp<=fcf->padStop;pp++)
     {
-      for(int ss=0;ss<MAX_SEQ;ss++)
+      for(int ss=0;ss<FCF_MAX_SEQ;ss++)
       {
 	if(cppRow->r[pp-1][ss].offset == 0xffffffff) break;
 	    
@@ -1047,7 +1050,7 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
     // Write the pointers for this row...
     for(int pp=fcf->padStart;pp<=fcf->padStop;pp++)
     {
-      for(int ss=0;ss<MAX_SEQ;ss++)
+      for(int ss=0;ss<FCF_MAX_SEQ;ss++)
       {
 	if(cppRow->r[pp-1][ss].start_bin == 0xffff) break;
 	    
