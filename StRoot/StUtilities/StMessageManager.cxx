@@ -1,13 +1,22 @@
-// $Id: StMessageManager.cxx,v 1.12 1999/07/01 01:24:46 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.13 1999/07/01 15:58:44 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.13  1999/07/01 15:58:44  genevb
+// Fixed linux crash with Summary
+//
 // Revision 1.12  1999/07/01 01:24:46  genevb
 // Fixed FORTRAN character string bug on linux, removed a memory leak from Summary()
+//
+// Revision 1.11  1999/06/30 17:24:50  genevb
+// Better limit management, remove Bool_t
 //
 // Revision 1.10  1999/06/30 04:18:45  genevb
 // Fixes: summary wrap-around, unsigned ints, last character of message, <> for time; no KNOWN remaining bugs
 //
 // Revision 1.9  1999/06/29 23:32:42  genevb
 // Handle multi-line calls to fortran routines better
+//
+// Revision 1.8  1999/06/29 17:37:31  genevb
+// Lots of fixes...
 //
 // Revision 1.7  1999/06/28 15:42:12  genevb
 // Added Debug message class
@@ -29,9 +38,6 @@
 //
 // Revision 1.1  1999/06/23 15:17:52  genevb
 // Introduction of StMessageManager
-//
-//
-// Revision 1.1 1999/01/27 10:28:29 genevb
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -616,11 +622,14 @@ void StMessageManager::Summary(size_t nTerms) {
 //            would give the number of each type of message with no
 //            differentiation based on the message string.
 //
-  size_t max = 67;
+  const size_t mmax = 81;
+  size_t max = mmax - 12;
+  size_t messmax = mmax - 1;
   size_t nMess = messList.size();
   intVector done;
   typedef StVector(char*) CharPtrVec;
   CharPtrVec mType;
+  CharPtrVec messBlocks;
   StVector(CharPtrVec) toks;
   size_t i;
   size_t j;
@@ -633,8 +642,8 @@ void StMessageManager::Summary(size_t nTerms) {
     temp = const_cast<char*> (messList[i]->GetType());
     mType.push_back(temp);
     toks.push_back(*(new CharPtrVec));
-    temp = new char[81];
-    temp = strncpy(temp,(messList[i]->GetMessage()),80);
+    messBlocks.push_back(new char[mmax]);
+    temp = strncpy(messBlocks[i],(messList[i]->GetMessage()),messmax);
     temp = strtok(temp, " ");
     toks[i].push_back(temp);
     while (temp != NULL) {
@@ -675,13 +684,8 @@ void StMessageManager::Summary(size_t nTerms) {
       }
     }
     mType[i] = NULL;
-    for (j=0; j<(toks[i].size()); j++) {
-      temp = toks[i][j];
-      if (temp != NULL) {
-        delete [] temp;
-        toks[i][j] = NULL;
-      }
-    }
+    memset(messBlocks[i],0,mmax);
+    delete [] messBlocks[i];
   }
   return;
 }
@@ -707,7 +711,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.12 1999/07/01 01:24:46 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.13 1999/07/01 15:58:44 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
