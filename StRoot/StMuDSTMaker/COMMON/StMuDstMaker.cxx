@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.28 2003/03/06 01:34:18 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.29 2003/03/25 19:08:06 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -259,6 +259,9 @@ int StMuDstMaker::Init(){
   mIOMaker = (StIOMaker*)GetMaker("IOMaker");
   mTreeMaker = (StTreeMaker*)GetMaker("outputStream");
   mStStrangeMuDstMaker = (StStrangeMuDstMaker*)GetMaker("strangeMuDst");
+  TObjectSet *muDstSet =  AddObj(mStMuDst,".const");   ///< added for Valeri to be able to pick it up in other makers 
+  if (muDstSet ) muDstSet ->SetName("muDst");          ///< added for Valeri to be able to pick it up in other makers 
+
   return 0;
 }
 //-----------------------------------------------------------------------
@@ -886,6 +889,10 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.29  2003/03/25 19:08:06  laue
+ * added StMuDst into TDataSet so that Valeri can pick it up for his
+ * StEventDisplayMaker
+ *
  * Revision 1.28  2003/03/06 01:34:18  laue
  * StAddRunInfoMaker is a make helper maker to add the StRunInfo for the
  * only year1 Au+Au 130GeV data
