@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.42 2002/07/01 16:11:54 posk Exp $
+// $Id: doFlowEvents.C,v 1.43 2003/01/10 16:42:39 oldi Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -208,25 +208,39 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   bool spMaker = kFALSE;
   //bool spMaker = kTRUE;
 
+  Bool_t includeFtpcTracks = kTRUE;
+
   if (makerName[0]=='\0') { // blank if there is no selection object
-    if (anaMaker) StFlowAnalysisMaker*  flowAnalysisMaker = new StFlowAnalysisMaker();
-    if (cumMaker) StFlowCumulantMaker*  flowCumulantMaker = new StFlowCumulantMaker();
-    if (spMaker) StFlowScalarProdMaker* flowScalarProdMaker = new StFlowScalarProdMaker();
+    if (anaMaker) {
+      StFlowAnalysisMaker*  flowAnalysisMaker = new StFlowAnalysisMaker();
+      flowAnalysisMaker->SetHistoRanges(includeFtpcTracks);
+    }
+    if (cumMaker) {
+      StFlowCumulantMaker*  flowCumulantMaker = new StFlowCumulantMaker();
+      flowCumulantMaker->SetHistoRanges(includeFtpcTracks);
+    }
+    if (spMaker) {
+      StFlowScalarProdMaker* flowScalarProdMaker = new StFlowScalarProdMaker();
+      flowScalarProdMaker->SetHistoRanges(includeFtpcTracks);
+    }
   } else {
     if (anaMaker) {
       sprintf(makerName, "FlowAnalysis");
       StFlowAnalysisMaker* flowAnalysisMaker = new 
 	StFlowAnalysisMaker(makerName, flowSelect);
+      flowAnalysisMaker->SetHistoRanges(includeFtpcTracks);
     }
     if (cumMaker) {
       sprintf(makerName, "FlowCumulant");
       StFlowCumulantMaker* flowCumulantMaker = new 
 	StFlowCumulantMaker(makerName, flowSelect);
+      flowCumulantMaker->SetHistoRanges(includeFtpcTracks);
     }
     if (spMaker) {
       sprintf(makerName, "FlowScalarProd");
       StFlowScalarProdMaker* flowScalarProdMaker = new 
 	StFlowScalarProdMaker(makerName, flowSelect);
+      flowScalarProdMaker->SetHistoRanges(includeFtpcTracks);
     }
   }
 
@@ -267,31 +281,51 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 //   StFlowCutEvent::SetVertexX(0., 0.);
 //   StFlowCutEvent::SetVertexY(0., 0.);
 //   StFlowCutEvent::SetVertexZ(0., 0.);
-//   StFlowCutEvent::SetEtaSym(0., 0.);
+//   StFlowCutEvent::SetEtaSymTpc(0., 0.);
+//   StFlowCutEvent::SetEtaSymFtpc(0., 0.);
 //   StFlowCutEvent::SetTrigger(0.);
   
   // Set the track cuts
 //   StFlowCutTrack::SetFitPtsTpc(0, 0);
-//   StFlowCutTrack::SetFitPtsFtpc(0, 0);
 //   StFlowCutTrack::SetFitOverMaxPts(0., 0.);
 //   StFlowCutTrack::SetChiSqTpc(0., 0.);
+//   StFlowCutTrack::SetPtTpc(0., 0.);
+//   StFlowCutTrack::SetEtaTpc(0., 0.);
+//   StFlowCutTrack::SetChgTpc(0., 0.);
+  
+    StFlowCutTrack::IncludeFtpcTracks(includeFtpcTracks);
+//   StFlowCutTrack::SetFitPtsFtpc(0, 0);
 //   StFlowCutTrack::SetChiSqFtpc(0., 0.);
 //   StFlowCutTrack::SetDcaFtpc(0., 0.);
-//   StFlowCutTrack::SetPtTpc(0., 0.);
+//   StFlowCutTrack::SetDcaGlobalFtpc(0., 0.);
 //   StFlowCutTrack::SetPtFtpc(0., 0.);
-//   StFlowCutTrack::SetEtaTpc(0., 0.);
 //   StFlowCutTrack::SetEtaFtpc(0., 0., 0., 0.);
-//   StFlowCutTrack::SetChgTpc(0, 1); // positive tracks
+//   StFlowCutTrack::SetChgFtpc(0, 0);
 
   // Set the event plane selections
+
+  //TPC
 //   StFlowEvent::SetEtaTpcCut(0.05, 1., 0, 0);  // harmonic 1, selection 1
 //   StFlowEvent::SetEtaTpcCut(0.05, 1., 1, 0);  // harmonic 2, selection 1
 //   StFlowEvent::SetEtaTpcCut(0.05, 1., 2, 0);  // harmonic 3, selection 1
 //   StFlowEvent::SetEtaTpcCut(0.05, 1., 1, 1);  // harmonic 2, selection 2
-//   StFlowEvent::SetEtaFtpcCut(0.05, 1., 1, 1); // harmonic 2, selection 2
 //   StFlowEvent::SetPtTpcCut(0.0, 1., 1, 1);    // harmonic 2, selection 2
-//   StFlowEvent::SetPtFtpcCut(0.0, 1., 1, 1);   // harmonic 2, selection 2
-//   StFlowEvent::SetDcaGlobalCut(0., 1.);       // for event plane
+//   StFlowEvent::SetDcaGlobalTpcCut(0., 1.);    // for event plane
+
+  //FTPC
+//   StFlowEvent::SetEtaFtpcCut(0., 10., 0, 0);  // harmonic 1, selection 1
+//   StFlowEvent::SetEtaFtpcCut(0., 10., 1, 0);  // harmonic 2, selection 1
+//   StFlowEvent::SetEtaFtpcCut(0., 10., 2, 0);  // harmonic 3, selection 1
+//   StFlowEvent::SetEtaFtpcCut(0., 10., 0, 1);  // harmonic 1, selection 2
+//   StFlowEvent::SetEtaFtpcCut(0., 10., 1, 1);  // harmonic 2, selection 2
+//   StFlowEvent::SetEtaFtpcCut(0., 10., 2, 1);  // harmonic 3, selection 2 
+//   StFlowEvent::SetPtFtpcCut(0., 10., 0, 0);   // harmonic 1, selection 1
+//   StFlowEvent::SetPtFtpcCut(0., 10., 1, 0);   // harmonic 2, selection 1
+//   StFlowEvent::SetPtFtpcCut(0., 10., 2, 0);   // harmonic 3, selection 1
+//   StFlowEvent::SetPtFtpcCut(0., 10., 0, 1);   // harmonic 1, selection 2
+//   StFlowEvent::SetPtFtpcCut(0., 10., 1, 1);   // harmonic 2, selection 2
+//   StFlowEvent::SetPtFtpcCut(0., 10., 2, 1);   // harmonic 3, selection 2
+//   StFlowEvent::SetDcaGlobalFtpcCut(0., 1.);   // for event plane
 
   // particles:h+, h-, pi+, pi-, pi, k+, k-, k, e-, e+, e, pr-, pr+, pr, d+, d-, and d
 //   StFlowEvent::SetPid("h-");                 // for event plane
@@ -425,7 +459,7 @@ void doFlowEvents(const Int_t nevents)
 
 // PDSF pico files
   // 200 GeV
-  
+
   // P02gcd
 //   Char_t* filePath="/auto/stardata/starspec3/flow_pDST_production_removed_l3_trigged_events/reco/ProductionMinBias/ReversedFullField/P02gc_P02gd/2001/2258044/";
 //   if (nevents < 250) {
@@ -470,6 +504,20 @@ void doFlowEvents(const Int_t nevents)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.43  2003/01/10 16:42:39  oldi
+// Several changes to comply with FTPC tracks:
+// - Switch to include/exclude FTPC tracks introduced.
+//   The same switch changes the range of the eta histograms.
+// - Eta symmetry plots for FTPC tracks added and separated from TPC plots.
+// - PhiWgts and related histograms for FTPC tracks split in FarEast, East,
+//   West, FarWest (depending on vertex.z()).
+// - Psi_Diff plots for 2 different selections and the first 2 harmonics added.
+// - Cut to exclude mu-events with no primary vertex introduced.
+//   (This is possible for UPC events and FTPC tracks.)
+// - Global DCA cut for FTPC tracks added.
+// - Global DCA cuts for event plane selection separated for TPC and FTPC tracks.
+// - Charge cut for FTPC tracks added.
+//
 // Revision 1.42  2002/07/01 16:11:54  posk
 // Removed StFlowTagMaker.
 //

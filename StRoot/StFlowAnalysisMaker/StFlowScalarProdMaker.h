@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowScalarProdMaker.h,v 1.3 2002/01/14 23:42:55 posk Exp $
+// $Id: StFlowScalarProdMaker.h,v 1.4 2003/01/10 16:40:52 oldi Exp $
 //
 // Authors: method proposed by Art and Sergei, code written by Aihong
 //          Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -40,8 +40,9 @@ public:
   Int_t    Init();
   Int_t    Make();
   Int_t    Finish();
+  void     SetHistoRanges(Bool_t ftpc_included = kFALSE);
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowScalarProdMaker.h,v 1.3 2002/01/14 23:42:55 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowScalarProdMaker.h,v 1.4 2003/01/10 16:40:52 oldi Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -83,6 +84,10 @@ private:
 
   TString      MakerName;
 
+  Float_t mEtaMin;
+  Float_t mEtaMax;
+    Int_t mNEtaBins;
+
   ClassDef(StFlowScalarProdMaker, 1)              // macro for rootcint
 };
 
@@ -91,6 +96,20 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowScalarProdMaker.h,v $
+// Revision 1.4  2003/01/10 16:40:52  oldi
+// Several changes to comply with FTPC tracks:
+// - Switch to include/exclude FTPC tracks introduced.
+//   The same switch changes the range of the eta histograms.
+// - Eta symmetry plots for FTPC tracks added and separated from TPC plots.
+// - PhiWgts and related histograms for FTPC tracks split in FarEast, East,
+//   West, FarWest (depending on vertex.z()).
+// - Psi_Diff plots for 2 different selections and the first 2 harmonics added.
+// - Cut to exclude mu-events with no primary vertex introduced.
+//   (This is possible for UPC events and FTPC tracks.)
+// - Global DCA cut for FTPC tracks added.
+// - Global DCA cuts for event plane selection separated for TPC and FTPC tracks.
+// - Charge cut for FTPC tracks added.
+//
 // Revision 1.3  2002/01/14 23:42:55  posk
 // Renamed ScalerProd histograms. Moved print commands to FlowMaker::Finish().
 //

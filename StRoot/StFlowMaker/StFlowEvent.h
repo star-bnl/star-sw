@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.41 2003/01/08 19:26:48 posk Exp $
+// $Id: StFlowEvent.h,v 1.42 2003/01/10 16:42:15 oldi Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -97,8 +97,10 @@ public:
   void SetPhiWeightEast(const Flow::PhiWgt_t &pPhiWgt);
   void SetPhiWeightWest(const Flow::PhiWgt_t &pPhiWgt);
   void SetPhiWeightFarWest(const Flow::PhiWgt_t &pPhiWgt);
+  void SetPhiWeightFtpcFarEast(const Flow::PhiWgtFtpc_t &pPhiWgt);
   void SetPhiWeightFtpcEast(const Flow::PhiWgtFtpc_t &pPhiWgt);
   void SetPhiWeightFtpcWest(const Flow::PhiWgtFtpc_t &pPhiWgt);
+  void SetPhiWeightFtpcFarWest(const Flow::PhiWgtFtpc_t &pPhiWgt);
 #endif
   static void SetEtaTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
   static void SetPtTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
@@ -114,7 +116,8 @@ public:
   static void SetPositronCut(Float_t lo, Float_t hi);
   static void SetDeuteronCut(Float_t lo, Float_t hi);
   static void SetAntiDeuteronCut(Float_t lo, Float_t hi);
-  static void SetDcaGlobalCut(Float_t lo, Float_t hi);
+  static void SetDcaGlobalTpcCut(Float_t lo, Float_t hi);
+  static void SetDcaGlobalFtpcCut(Float_t lo, Float_t hi);
   static void SetProbPid();
   static void SetEtaSubs();
   static void SetPtWgt(Bool_t);
@@ -151,8 +154,10 @@ private:
   Flow::PhiWgt_t      mPhiWgtEast;                               //!flattening weights East
   Flow::PhiWgt_t      mPhiWgtWest;                               //!flattening weights West
   Flow::PhiWgt_t      mPhiWgtFarWest;                            //!flattening weights FarWest
-  Flow::PhiWgtFtpc_t  mPhiWgtFtpcEast;                           //!flattening weights Ftpc east
-  Flow::PhiWgtFtpc_t  mPhiWgtFtpcWest;                           //!flattening weights Ftpc west
+  Flow::PhiWgtFtpc_t  mPhiWgtFtpcFarEast;                        //!flattening weights Ftpc FarEast
+  Flow::PhiWgtFtpc_t  mPhiWgtFtpcEast;                           //!flattening weights Ftpc East
+  Flow::PhiWgtFtpc_t  mPhiWgtFtpcWest;                           //!flattening weights Ftpc West
+  Flow::PhiWgtFtpc_t  mPhiWgtFtpcFarWest;                        //!flattening weights Ftpc FarWest
   static Float_t      mPiPlusCuts[2];                            // PID cuts
   static Bool_t       mPtWgt;                                    // flag for pt weighting
   static Bool_t       mEtaWgt;                                   // flag for y weighting for odd harmonics
@@ -171,7 +176,8 @@ private:
   static Float_t      mAntiDeuteronCuts[2];
   static Float_t      mElectronCuts[2];
   static Float_t      mPositronCuts[2];
-  static Float_t      mDcaGlobalCuts[2];
+  static Float_t      mDcaGlobalTpcCuts[2];
+  static Float_t      mDcaGlobalFtpcCuts[2];
 
   StFlowTrackCollection* pTrackCollection;   //!
 
@@ -246,11 +252,17 @@ inline void StFlowEvent::SetPhiWeightWest(const Flow::PhiWgt_t& pPhiWgtWest) {
 inline void StFlowEvent::SetPhiWeightFarWest(const Flow::PhiWgt_t& pPhiWgtFarWest) {
   memcpy (mPhiWgtFarWest, pPhiWgtFarWest, sizeof(Flow::PhiWgt_t)); }
 
+inline void StFlowEvent::SetPhiWeightFtpcFarEast(const Flow::PhiWgtFtpc_t& pPhiWgtFtpcFarEast) {
+  memcpy (mPhiWgtFtpcFarEast, pPhiWgtFtpcFarEast, sizeof(Flow::PhiWgtFtpc_t)); }
+
 inline void StFlowEvent::SetPhiWeightFtpcEast(const Flow::PhiWgtFtpc_t& pPhiWgtFtpcEast) {
   memcpy (mPhiWgtFtpcEast, pPhiWgtFtpcEast, sizeof(Flow::PhiWgtFtpc_t)); }
 
 inline void StFlowEvent::SetPhiWeightFtpcWest(const Flow::PhiWgtFtpc_t& pPhiWgtFtpcWest) {
   memcpy (mPhiWgtFtpcWest, pPhiWgtFtpcWest, sizeof(Flow::PhiWgtFtpc_t)); }
+
+inline void StFlowEvent::SetPhiWeightFtpcFarWest(const Flow::PhiWgtFtpc_t& pPhiWgtFtpcFarWest) {
+  memcpy (mPhiWgtFtpcFarWest, pPhiWgtFtpcFarWest, sizeof(Flow::PhiWgtFtpc_t)); }
 #endif
 
 inline void StFlowEvent::SetEtaTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)
@@ -325,8 +337,11 @@ inline void StFlowEvent::SetElectronCut(Float_t lo, Float_t hi) {
 inline void StFlowEvent::SetPositronCut(Float_t lo, Float_t hi) { 
   mPositronCuts[0] = lo; mPositronCuts[1] = hi; }
 
-inline void StFlowEvent::SetDcaGlobalCut(Float_t lo, Float_t hi) { 
-  mDcaGlobalCuts[0] = lo; mDcaGlobalCuts[1] = hi; }
+inline void StFlowEvent::SetDcaGlobalTpcCut(Float_t lo, Float_t hi) { 
+  mDcaGlobalTpcCuts[0] = lo; mDcaGlobalTpcCuts[1] = hi; }
+
+inline void StFlowEvent::SetDcaGlobalFtpcCut(Float_t lo, Float_t hi) { 
+  mDcaGlobalFtpcCuts[0] = lo; mDcaGlobalFtpcCuts[1] = hi; }
 
 inline void StFlowEvent::SetCTB(const Float_t ctb) { mCTB = ctb; }
 
@@ -356,6 +371,20 @@ inline void StFlowEvent::SetEtaWgt(Bool_t EtaWgt) { mEtaWgt = EtaWgt; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.42  2003/01/10 16:42:15  oldi
+// Several changes to comply with FTPC tracks:
+// - Switch to include/exclude FTPC tracks introduced.
+//   The same switch changes the range of the eta histograms.
+// - Eta symmetry plots for FTPC tracks added and separated from TPC plots.
+// - PhiWgts and related histograms for FTPC tracks split in FarEast, East,
+//   West, FarWest (depending on vertex.z()).
+// - Psi_Diff plots for 2 different selections and the first 2 harmonics added.
+// - Cut to exclude mu-events with no primary vertex introduced.
+//   (This is possible for UPC events and FTPC tracks.)
+// - Global DCA cut for FTPC tracks added.
+// - Global DCA cuts for event plane selection separated for TPC and FTPC tracks.
+// - Charge cut for FTPC tracks added.
+//
 // Revision 1.41  2003/01/08 19:26:48  posk
 // PhiWgt hists sorted on sign of z of first and last points.
 // Version 6 of pico file.

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.33 2003/01/08 19:26:50 posk Exp $
+//  $Id: StFlowMaker.h,v 1.34 2003/01/10 16:42:31 oldi Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -66,7 +66,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.33 2003/01/08 19:26:50 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.34 2003/01/10 16:42:31 oldi Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -76,8 +76,10 @@ protected:
   Flow::PhiWgt_t       mPhiWgtEast;               //! To make event plane isotropic
   Flow::PhiWgt_t       mPhiWgtWest;               //! To make event plane isotropic
   Flow::PhiWgt_t       mPhiWgtFarWest;            //! To make event plane isotropic
+  Flow::PhiWgtFtpc_t   mPhiWgtFtpcFarEast;        //! To make event plane isotropic
   Flow::PhiWgtFtpc_t   mPhiWgtFtpcEast;           //! To make event plane isotropic
   Flow::PhiWgtFtpc_t   mPhiWgtFtpcWest;           //! To make event plane isotropic
+  Flow::PhiWgtFtpc_t   mPhiWgtFtpcFarWest;        //! To make event plane isotropic
 
 private:
   TString          mEventFileName;            //! IO Maker file name
@@ -169,6 +171,20 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.34  2003/01/10 16:42:31  oldi
+//  Several changes to comply with FTPC tracks:
+//  - Switch to include/exclude FTPC tracks introduced.
+//    The same switch changes the range of the eta histograms.
+//  - Eta symmetry plots for FTPC tracks added and separated from TPC plots.
+//  - PhiWgts and related histograms for FTPC tracks split in FarEast, East,
+//    West, FarWest (depending on vertex.z()).
+//  - Psi_Diff plots for 2 different selections and the first 2 harmonics added.
+//  - Cut to exclude mu-events with no primary vertex introduced.
+//    (This is possible for UPC events and FTPC tracks.)
+//  - Global DCA cut for FTPC tracks added.
+//  - Global DCA cuts for event plane selection separated for TPC and FTPC tracks.
+//  - Charge cut for FTPC tracks added.
+//
 //  Revision 1.33  2003/01/08 19:26:50  posk
 //  PhiWgt hists sorted on sign of z of first and last points.
 //  Version 6 of pico file.

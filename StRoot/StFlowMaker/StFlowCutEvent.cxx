@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.27 2002/06/10 22:50:56 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.28 2003/01/10 16:41:53 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
@@ -28,22 +28,24 @@ ClassImp(StFlowCutEvent)
 
 //-----------------------------------------------------------------------
 
-Int_t    StFlowCutEvent::mCentCuts[2]    = {0, 0};
-Int_t    StFlowCutEvent::mMultCuts[2]    = {10, 10000};
-Float_t  StFlowCutEvent::mVertexXCuts[2] = {-1., 1.};
-Float_t  StFlowCutEvent::mVertexYCuts[2] = {-1., 1.};
-Float_t  StFlowCutEvent::mVertexZCuts[2] = {-75., 75.};
-UInt_t   StFlowCutEvent::mEventN         = 0;     
-UInt_t   StFlowCutEvent::mGoodEventN     = 0;
-UInt_t   StFlowCutEvent::mCentCut        = 0;
-UInt_t   StFlowCutEvent::mMultCut        = 0;
-UInt_t   StFlowCutEvent::mVertexXCut     = 0;
-UInt_t   StFlowCutEvent::mVertexYCut     = 0;
-UInt_t   StFlowCutEvent::mVertexZCut     = 0;
-Float_t  StFlowCutEvent::mEtaSymCuts[2]  = {-3., 3.};
-UInt_t   StFlowCutEvent::mEtaSymCutN     = 0;     
-Float_t  StFlowCutEvent::mTriggerCut     = 0;
-UInt_t   StFlowCutEvent::mTriggerCutN    = 0;
+Int_t    StFlowCutEvent::mCentCuts[2]       = {0, 0};
+Int_t    StFlowCutEvent::mMultCuts[2]       = {10, 10000};
+Float_t  StFlowCutEvent::mVertexXCuts[2]    = {-1., 1.};
+Float_t  StFlowCutEvent::mVertexYCuts[2]    = {-1., 1.};
+Float_t  StFlowCutEvent::mVertexZCuts[2]    = {-75., 75.};
+UInt_t   StFlowCutEvent::mEventN            = 0;     
+UInt_t   StFlowCutEvent::mGoodEventN        = 0;
+UInt_t   StFlowCutEvent::mCentCut           = 0;
+UInt_t   StFlowCutEvent::mMultCut           = 0;
+UInt_t   StFlowCutEvent::mVertexXCut        = 0;
+UInt_t   StFlowCutEvent::mVertexYCut        = 0;
+UInt_t   StFlowCutEvent::mVertexZCut        = 0;
+Float_t  StFlowCutEvent::mEtaSymTpcCuts[2]  = {-3., 3.};
+UInt_t   StFlowCutEvent::mEtaSymTpcCutN     = 0;     
+Float_t  StFlowCutEvent::mEtaSymFtpcCuts[2] = {-5., 5.};
+UInt_t   StFlowCutEvent::mEtaSymFtpcCutN    = 0;     
+Float_t  StFlowCutEvent::mTriggerCut        = 0;
+UInt_t   StFlowCutEvent::mTriggerCutN       = 0;
 
 //-----------------------------------------------------------------------
 
@@ -214,6 +216,20 @@ Bool_t StFlowCutEvent::CheckEvent(StMuEvent* pMuEvent) {
   
   if (!pMuEvent) return kFALSE;
 
+  // Primary vertex
+  // The following lines were introduced to get rid of events without a primary vertex.
+  // These events are possible since the FTPC uses (0., 0., 0.) as a nominal vertex position
+  // if no vertex is found. (This was requested by UPC.) If in such an event tracks are found 
+  // they'll make it into the MuDst. Unfortunately a proper scheme to exclude those events is missing. 
+  // By cutting on the vertex position we eliminated those events. 
+  // THIS WILL REMOVE SIMPLE SIMULATED EVENTS AS WELL!
+  if (pMuEvent->primaryVertexPosition().x() == 0. &&
+      pMuEvent->primaryVertexPosition().y() == 0. &&
+      pMuEvent->primaryVertexPosition().z() == 0.) {
+    // cout << "FlowCutEvent: no Vertex " << endl;
+    return kFALSE;
+  }
+  
   if (!pMuEvent->l3EventSummary().unbiasedTrigger()) {
     // cout << "FlowCutEvent: L3 biased trigger event " << endl;
     return kFALSE;
@@ -315,22 +331,39 @@ Bool_t StFlowCutEvent::CheckEtaSymmetry(StEvent* pEvent) {
   // Call at the end of the event after doing CheckTrack for each track
   // If kFALSE you should delete the last event
 
-  float etaSymPosN = (float)StFlowCutTrack::EtaSymPos();
-  float etaSymNegN = (float)StFlowCutTrack::EtaSymNeg();
-  float etaSym = (etaSymPosN - etaSymNegN) / (etaSymPosN + etaSymNegN);
+  /// Tpc
+  float etaSymPosTpcN = (float)StFlowCutTrack::EtaSymPosTpc();
+  float etaSymNegTpcN = (float)StFlowCutTrack::EtaSymNegTpc();
+  float etaSymTpc = (etaSymPosTpcN - etaSymNegTpcN) / (etaSymPosTpcN + etaSymNegTpcN);
+  // Ftpc
+  float etaSymPosFtpcN = (float)StFlowCutTrack::EtaSymPosFtpc();
+  float etaSymNegFtpcN = (float)StFlowCutTrack::EtaSymNegFtpc();
+  float etaSymFtpc = (etaSymPosFtpcN - etaSymNegFtpcN) / (etaSymPosFtpcN + etaSymNegFtpcN);
   StFlowCutTrack::EtaSymClear();
 
   StPrimaryVertex* pVertex = pEvent->primaryVertex(0);
   if (!pVertex) return kFALSE;
   const StThreeVectorF& vertex = pVertex->position();
   Float_t vertexZ = vertex.z();
-  float etaSymZSlope = 0.003;
-  etaSym += (etaSymZSlope * vertexZ); // correction for acceptance
-  etaSym *= sqrt((double)(etaSymPosN + etaSymNegN)); // corrected for statistics
+  // Tpc
+  float etaSymZSlopeTpc = 0.003;
+  etaSymTpc += (etaSymZSlopeTpc * vertexZ); // correction for acceptance
+  etaSymTpc *= sqrt((double)(etaSymPosTpcN + etaSymNegTpcN)); // corrected for statistics
+  // Ftpc
+  //float etaSymZSlopeFtpc = 0.003;  // Has to be evaluated, still, therefore ...
+  //etaSymFtpc += (etaSymZSlopeFtpc * vertexZ); // ... NOT correctly corrected for acceptance
+  etaSymFtpc *= sqrt((double)(etaSymPosFtpcN + etaSymNegFtpcN)); // corrected for statistics
 
-  if (mEtaSymCuts[1] > mEtaSymCuts[0] && 
-      (etaSym < mEtaSymCuts[0] || etaSym >= mEtaSymCuts[1])) {
-    mEtaSymCutN++;
+  if (mEtaSymTpcCuts[1] > mEtaSymTpcCuts[0] && 
+      (etaSymTpc < mEtaSymTpcCuts[0] || etaSymTpc >= mEtaSymTpcCuts[1])) {
+    mEtaSymTpcCutN++;
+    mGoodEventN--;
+    return kFALSE;
+  }
+
+  else if (mEtaSymFtpcCuts[1] > mEtaSymFtpcCuts[0] && 
+      (etaSymFtpc < mEtaSymFtpcCuts[0] || etaSymFtpc >= mEtaSymFtpcCuts[1])) {
+    mEtaSymFtpcCutN++;
     mGoodEventN--;
     return kFALSE;
   }
@@ -345,19 +378,36 @@ Bool_t StFlowCutEvent::CheckEtaSymmetry(StFlowPicoEvent* pPicoEvent) {
   // Call at the end of the event after doing CheckTrack for each track
   // If kFALSE you should delete the last event
 
-  float etaSymPosN = (float)StFlowCutTrack::EtaSymPos();
-  float etaSymNegN = (float)StFlowCutTrack::EtaSymNeg();
-  float etaSym = (etaSymPosN - etaSymNegN) / (etaSymPosN + etaSymNegN);
+  /// Tpc
+  float etaSymPosTpcN = (float)StFlowCutTrack::EtaSymPosTpc();
+  float etaSymNegTpcN = (float)StFlowCutTrack::EtaSymNegTpc();
+  float etaSymTpc = (etaSymPosTpcN - etaSymNegTpcN) / (etaSymPosTpcN + etaSymNegTpcN);
+  // Ftpc
+  float etaSymPosFtpcN = (float)StFlowCutTrack::EtaSymPosFtpc();
+  float etaSymNegFtpcN = (float)StFlowCutTrack::EtaSymNegFtpc();
+  float etaSymFtpc = (etaSymPosFtpcN - etaSymNegFtpcN) / (etaSymPosFtpcN + etaSymNegFtpcN);
   StFlowCutTrack::EtaSymClear();
 
   Float_t vertexZ = pPicoEvent->VertexZ();
-  float etaSymZSlope = 0.003;
-  etaSym += (etaSymZSlope * vertexZ); // correction for acceptance
-  etaSym *= sqrt((double)(etaSymPosN + etaSymNegN)); // corrected for statistics
+  // Tpc
+  float etaSymZSlopeTpc = 0.003;
+  etaSymTpc += (etaSymZSlopeTpc * vertexZ); // correction for acceptance
+  etaSymTpc *= sqrt((double)(etaSymPosTpcN + etaSymNegTpcN)); // corrected for statistics
+  // Ftpc
+  //float etaSymZSlopeFtpc = 0.003;  // Has to be evaluated, still, therefore ...
+  //etaSymFtpc += (etaSymZSlopeFtpc * vertexZ); // ... NOT correctly corrected for acceptance
+  etaSymFtpc *= sqrt((double)(etaSymPosFtpcN + etaSymNegFtpcN)); // corrected for statistics
 
-  if (mEtaSymCuts[1] > mEtaSymCuts[0] && 
-      (etaSym < mEtaSymCuts[0] || etaSym >= mEtaSymCuts[1])) {
-    mEtaSymCutN++;
+  if (mEtaSymTpcCuts[1] > mEtaSymTpcCuts[0] && 
+      (etaSymTpc < mEtaSymTpcCuts[0] || etaSymTpc >= mEtaSymTpcCuts[1])) {
+    mEtaSymTpcCutN++;
+    mGoodEventN--;
+    return kFALSE;
+  }
+
+  else if (mEtaSymFtpcCuts[1] > mEtaSymFtpcCuts[0] && 
+      (etaSymFtpc < mEtaSymFtpcCuts[0] || etaSymFtpc >= mEtaSymFtpcCuts[1])) {
+    mEtaSymFtpcCutN++;
     mGoodEventN--;
     return kFALSE;
   }
@@ -372,20 +422,37 @@ Bool_t StFlowCutEvent::CheckEtaSymmetry(StMuEvent* pMuEvent) {
   // Call at the end of the event after doing CheckTrack for each track
   // If kFALSE you should delete the last event
 
-  float etaSymPosN = (float)StFlowCutTrack::EtaSymPos();
-  float etaSymNegN = (float)StFlowCutTrack::EtaSymNeg();
-  float etaSym = (etaSymPosN - etaSymNegN) / (etaSymPosN + etaSymNegN);
+  /// Tpc
+  float etaSymPosTpcN = (float)StFlowCutTrack::EtaSymPosTpc();
+  float etaSymNegTpcN = (float)StFlowCutTrack::EtaSymNegTpc();
+  float etaSymTpc = (etaSymPosTpcN - etaSymNegTpcN) / (etaSymPosTpcN + etaSymNegTpcN);
+  // Ftpc
+  float etaSymPosFtpcN = (float)StFlowCutTrack::EtaSymPosFtpc();
+  float etaSymNegFtpcN = (float)StFlowCutTrack::EtaSymNegFtpc();
+  float etaSymFtpc = (etaSymPosFtpcN - etaSymNegFtpcN) / (etaSymPosFtpcN + etaSymNegFtpcN);
   StFlowCutTrack::EtaSymClear();
 
   const StThreeVectorF& vertex = pMuEvent->primaryVertexPosition();
   Float_t vertexZ = vertex.z();
-  float etaSymZSlope = 0.003;
-  etaSym += (etaSymZSlope * vertexZ); // correction for acceptance
-  etaSym *= sqrt((double)(etaSymPosN + etaSymNegN)); // corrected for statistics
+  // Tpc
+  float etaSymZSlopeTpc = 0.003;
+  etaSymTpc += (etaSymZSlopeTpc * vertexZ); // correction for acceptance
+  etaSymTpc *= sqrt((double)(etaSymPosTpcN + etaSymNegTpcN)); // corrected for statistics
+  // Ftpc
+  //float etaSymZSlopeFtpc = 0.003;  // Has to be evaluated, still, therefore ...
+  //etaSymFtpc += (etaSymZSlopeFtpc * vertexZ); // ... NOT correctly corrected for acceptance
+  etaSymFtpc *= sqrt((double)(etaSymPosFtpcN + etaSymNegFtpcN)); // corrected for statistics
 
-  if (mEtaSymCuts[1] > mEtaSymCuts[0] && 
-      (etaSym < mEtaSymCuts[0] || etaSym >= mEtaSymCuts[1])) {
-    mEtaSymCutN++;
+  if (mEtaSymTpcCuts[1] > mEtaSymTpcCuts[0] && 
+      (etaSymTpc < mEtaSymTpcCuts[0] || etaSymTpc >= mEtaSymTpcCuts[1])) {
+    mEtaSymTpcCutN++;
+    mGoodEventN--;
+    return kFALSE;
+  }
+
+  else if (mEtaSymFtpcCuts[1] > mEtaSymFtpcCuts[0] && 
+      (etaSymFtpc < mEtaSymFtpcCuts[0] || etaSymFtpc >= mEtaSymFtpcCuts[1])) {
+    mEtaSymFtpcCutN++;
     mGoodEventN--;
     return kFALSE;
   }
@@ -404,8 +471,6 @@ void StFlowCutEvent::PrintCutList() {
   cout << "# Event Cut List:" << endl;
   cout << "#   Mult cuts= " << mMultCuts[0] << ", " << mMultCuts[1]
        << " :\t Events Cut= " << mMultCut << endl;
-  cout << "#   Trigger cut= " << mTriggerCut
-       << " :\t\t Events Cut= " << mTriggerCutN << endl;
   cout << "#   Centrality cuts= " << mCentCuts[0] << ", " << mCentCuts[1]
        << " :\t Events Cut= " << mCentCut << endl;
   cout << "#   VertexX cuts= " << mVertexXCuts[0] << ", " << mVertexXCuts[1]
@@ -417,9 +482,12 @@ void StFlowCutEvent::PrintCutList() {
   cout << "#   VertexZ cuts= " << mVertexZCuts[0] << ", " << mVertexZCuts[1]
        << " :\t Events Cut= " << mVertexZCut << "\t (" <<  setprecision(3) << 
     (float)mVertexZCut/(float)mEventN/perCent << "% cut)" << endl;
-  cout << "#   EtaSym cuts= " << mEtaSymCuts[0] << ", " << mEtaSymCuts[1] 
-       << " :\t Events Cut= " << mEtaSymCutN << "\t (" <<  setprecision(3) << 
-    (float)mEtaSymCutN/(float)mEventN/perCent << "% cut)" << endl;
+  cout << "#   EtaSymTpc cuts= " << mEtaSymTpcCuts[0] << ", " << mEtaSymTpcCuts[1] 
+       << " :\t Events Cut= " << mEtaSymTpcCutN << "\t (" <<  setprecision(3) << 
+    (float)mEtaSymTpcCutN/(float)mEventN/perCent << "% cut)" << endl;
+  cout << "#   EtaSymFtpc cuts= " << mEtaSymFtpcCuts[0] << ", " << mEtaSymFtpcCuts[1] 
+       << " :\t Events Cut= " << mEtaSymFtpcCutN << "\t (" <<  setprecision(3) << 
+    (float)mEtaSymFtpcCutN/(float)mEventN/perCent << "% cut)" << endl;
   cout << "#   Trigger cut= " << mTriggerCut 
        << " :\t\t Events Cut= " << mTriggerCutN << "\t (" <<  setprecision(3) << 
     (float)mTriggerCutN/(float)mEventN/perCent << "% cut)" << endl;
@@ -432,6 +500,20 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.28  2003/01/10 16:41:53  oldi
+// Several changes to comply with FTPC tracks:
+// - Switch to include/exclude FTPC tracks introduced.
+//   The same switch changes the range of the eta histograms.
+// - Eta symmetry plots for FTPC tracks added and separated from TPC plots.
+// - PhiWgts and related histograms for FTPC tracks split in FarEast, East,
+//   West, FarWest (depending on vertex.z()).
+// - Psi_Diff plots for 2 different selections and the first 2 harmonics added.
+// - Cut to exclude mu-events with no primary vertex introduced.
+//   (This is possible for UPC events and FTPC tracks.)
+// - Global DCA cut for FTPC tracks added.
+// - Global DCA cuts for event plane selection separated for TPC and FTPC tracks.
+// - Charge cut for FTPC tracks added.
+//
 // Revision 1.27  2002/06/10 22:50:56  posk
 // pt and eta weighting now default.
 // DcaGlobalPart default now 0 to 1 cm.

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.10 2001/12/11 22:04:17 posk Exp $
+// $Id: plotCen.C,v 1.11 2003/01/10 16:40:55 oldi Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -48,8 +48,10 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     "Flow_v_Sel",
     "Flow_VertexZ",
     "Flow_VertexXY2D",
-    "Flow_EtaSymVerZ2D",
-    "Flow_EtaSym",
+    "Flow_EtaSymVerZ2D_Tpc",
+    "Flow_EtaSym_Tpc",
+    "Flow_EtaSymVerZ2D_Ftpc",
+    "Flow_EtaSym_Ftpc",
     "Flow_CTBvsZDC2D",
     "Flow_Cent",
     "Flow_OrigMult",
@@ -57,17 +59,18 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     "Flow_MultOverOrig",
     "Flow_MultEta",
     "Flow_MultPart",
-    "Flow_Charge",
-    "Flow_Dca_Ftpc",
+    "Flow_Charge_Tpc",
+    "Flow_Charge_Ftpc",
     "Flow_DcaGlobal_Tpc",
+    "Flow_Dca_Ftpc",
     "Flow_DcaGlobal_Ftpc",
     "Flow_Chi2_Tpc",
     "Flow_Chi2_Ftpc",
     "Flow_FitPts_Tpc",
-    "Flow_FitPts_Ftpc",
     "Flow_MaxPts_Tpc",
-    "Flow_MaxPts_Ftpc",
     "Flow_FitOverMax_Tpc",
+    "Flow_FitPts_Ftpc",
+    "Flow_MaxPts_Ftpc",
     "Flow_FitOverMax_Ftpc",
     //"Flow_EtaPtPhi3D",
     //"Flow_EtaPtPhi2D.PhiEta",
@@ -125,12 +128,12 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
   };
   const int nNames = sizeof(baseName) / sizeof(char*);
   const int nDoubles = 3;
-  const int nSingles = 44 + nDoubles;
+  const int nSingles = 43 + nDoubles;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
   for (int n = 0; n < nNames; n++) {
-    shortName[n] = new char[30];
+    shortName[n] = new char[35];
     strcpy(shortName[n], baseName[n]);
     char* cp = strstr(shortName[n],"_Sel");
     if (cp) *cp = '\0';                                  // truncate
@@ -196,7 +199,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
   sprintf(sel,"%d",selN);
   char har[2];
   sprintf(har,"%d",harN);
-  char* temp = new char[30];                       // construct histName
+  char* temp = new char[35];                       // construct histName
   strcpy(temp,shortName[pageNumber]);
   char* cproj = strstr(temp,".");
   if (cproj) {                                     // a projection
@@ -500,6 +503,20 @@ void plotCenAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.11  2003/01/10 16:40:55  oldi
+// Several changes to comply with FTPC tracks:
+// - Switch to include/exclude FTPC tracks introduced.
+//   The same switch changes the range of the eta histograms.
+// - Eta symmetry plots for FTPC tracks added and separated from TPC plots.
+// - PhiWgts and related histograms for FTPC tracks split in FarEast, East,
+//   West, FarWest (depending on vertex.z()).
+// - Psi_Diff plots for 2 different selections and the first 2 harmonics added.
+// - Cut to exclude mu-events with no primary vertex introduced.
+//   (This is possible for UPC events and FTPC tracks.)
+// - Global DCA cut for FTPC tracks added.
+// - Global DCA cuts for event plane selection separated for TPC and FTPC tracks.
+// - Charge cut for FTPC tracks added.
+//
 // Revision 1.10  2001/12/11 22:04:17  posk
 // Four sets of phiWgt histograms.
 // StFlowMaker StFlowEvent::PhiWeight() changes.

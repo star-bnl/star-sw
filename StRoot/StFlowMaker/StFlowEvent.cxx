@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.35 2003/01/08 19:26:46 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.36 2003/01/10 16:42:09 oldi Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -87,7 +87,8 @@ Float_t StFlowEvent::mDeuteronCuts[2]      = {-3., 3.};
 Float_t StFlowEvent::mAntiDeuteronCuts[2]  = {-3., 3.};
 Float_t StFlowEvent::mElectronCuts[2]      = {-3., 3.};
 Float_t StFlowEvent::mPositronCuts[2]      = {-3., 3.};
-Float_t StFlowEvent::mDcaGlobalCuts[2]     = { 0., 0.};
+Float_t StFlowEvent::mDcaGlobalTpcCuts[2]  = { 0., 0.};
+Float_t StFlowEvent::mDcaGlobalFtpcCuts[2] = { 0., 0.};
 Bool_t  StFlowEvent::mPtWgt                = kTRUE;
 Bool_t  StFlowEvent::mEtaWgt               = kTRUE;
 Bool_t  StFlowEvent::mProbPid              = kFALSE;
@@ -121,7 +122,7 @@ Double_t StFlowEvent::PhiWeight(Int_t selN, Int_t harN,	StFlowTrack*
   // Weight for making the event plane isotropic in the lab.
 
   bool oddHar = (harN+1) % 2;
-  StTrackTopologyMap topologyMap = pFlowTrack->TopologyMap();
+  StTrackTopologyMap map = pFlowTrack->TopologyMap();
   float phi = pFlowTrack->Phi();
   if (phi < 0.) phi += twopi;
   float eta = pFlowTrack->Eta();
@@ -129,8 +130,9 @@ Double_t StFlowEvent::PhiWeight(Int_t selN, Int_t harN,	StFlowTrack*
   Double_t phiWgt;
   int n;
 
-  if (topologyMap.numberOfHits(kTpcId) || // Tpc track, or no topologyMap
-      topologyMap.data(0) == 0 && topologyMap.data(1) == 0) {
+  float vertexZ = mVertexPos.z();
+  if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) { 
+    // Tpc track, or no topologyMap
     n = (int)((phi/twopi)*Flow::nPhiBins);
     if (mOnePhiWgt) {
       phiWgt = mPhiWgt[selN][harN][n];
@@ -147,7 +149,6 @@ Double_t StFlowEvent::PhiWeight(Int_t selN, Int_t harN,	StFlowTrack*
 	phiWgt = mPhiWgtFarEast[selN][harN][n];
       }
     } else {      
-      float vertexZ = mVertexPos.z();
       if (eta > 0. && vertexZ > 0.) {
 	phiWgt = mPhiWgtFarWest[selN][harN][n];
       } else if (eta > 0. && vertexZ < 0.) {
@@ -160,14 +161,24 @@ Double_t StFlowEvent::PhiWeight(Int_t selN, Int_t harN,	StFlowTrack*
     }
   }
 
-  else if (topologyMap.numberOfHits(kFtpcEastId)) { // Ftpc east track
+  else if (map.trackFtpcEast()) { // Ftpc east track == eta < 0.
     n = (int)((phi/twopi)*Flow::nPhiBinsFtpc);
-    phiWgt = mPhiWgtFtpcEast[selN][harN][n];
+    if (vertexZ < 0.) {
+      phiWgt = mPhiWgtFtpcFarEast[selN][harN][n];
+    }
+    else { // vertexZ > 0.
+      phiWgt = mPhiWgtFtpcEast[selN][harN][n];
+    }
   }
   
-  else if (topologyMap.numberOfHits(kFtpcWestId)) { // Ftpc west track
+  else if (map.trackFtpcWest()) { // Ftpc west track == eta > 0.
     n = (int)((phi/twopi)*Flow::nPhiBinsFtpc);
-    phiWgt = mPhiWgtFtpcWest[selN][harN][n];
+    if (vertexZ > 0.) {
+      phiWgt = mPhiWgtFtpcFarWest[selN][harN][n];
+    }
+    else { // vertexZ < 0.
+      phiWgt = mPhiWgtFtpcWest[selN][harN][n];
+    }
   }
 
   if (mPtWgt) {
@@ -467,6 +478,7 @@ void StFlowEvent::SetSelections() {
     StFlowTrack* pFlowTrack = *itr;
     double eta = (double)(pFlowTrack->Eta());
     float  Pt  = pFlowTrack->Pt();
+    StTrackTopologyMap map = pFlowTrack->TopologyMap();
 
     // PID
     if (mPid[0] != '\0') {
@@ -483,16 +495,26 @@ void StFlowEvent::SetSelections() {
 
     // Global DCA
     float gDca = pFlowTrack->DcaGlobal();
-    if (mDcaGlobalCuts[1] > mDcaGlobalCuts[0] &&
-	(gDca < mDcaGlobalCuts[0] || gDca >= mDcaGlobalCuts[1])) continue;
     
+    if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) {
+      // Tpc track or TopologyMap not available)
+      
+      if (mDcaGlobalTpcCuts[1] > mDcaGlobalTpcCuts[0] &&
+	  (gDca < mDcaGlobalTpcCuts[0] || gDca >= mDcaGlobalTpcCuts[1])) continue;
+    }
+
+    else if (map.trackFtpcEast() || map.trackFtpcWest()) {
+      // Ftpc track
+      
+      if (mDcaGlobalFtpcCuts[1] > mDcaGlobalFtpcCuts[0] &&
+	  (gDca < mDcaGlobalFtpcCuts[0] || gDca >= mDcaGlobalFtpcCuts[1])) continue;
+    }
+
     for (int selN = 0; selN < Flow::nSels; selN++) {
       for (int harN = 0; harN < Flow::nHars; harN++) {
 	    
-	  if (pFlowTrack->TopologyMap().numberOfHits(kTpcId) ||  
-	      (pFlowTrack->TopologyMap().data(0) == 0 && 
-	       pFlowTrack->TopologyMap().data(1) == 0)) {
-	    // hits in Tpc or TopologyMap not available
+	  if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) {
+	    // Tpc track or TopologyMap not available
 	    
 	    // Eta
 	    if (mEtaTpcCuts[1][harN][selN] > mEtaTpcCuts[0][harN][selN] && 
@@ -507,9 +529,8 @@ void StFlowEvent::SetSelections() {
 		 Pt >= mPtTpcCuts[1][harN][selN])) continue;
 	  }
 	  
-	  else if (pFlowTrack->TopologyMap().numberOfHits(kFtpcEastId) || 
-		   pFlowTrack->TopologyMap().numberOfHits(kFtpcWestId)) {
-	    // hits in Ftpc
+	  else if (map.trackFtpcEast() || map.trackFtpcWest()) {
+	    // Ftpc track
 	    
 	    // Eta
 	    if (mEtaFtpcCuts[1][harN][selN] > mEtaFtpcCuts[0][harN][selN] && 
@@ -847,8 +868,10 @@ void StFlowEvent::PrintSelectionList() {
   cout << "#######################################################" << endl;
   cout << "# Tracks used for the event plane:" << endl; 
   cout << "# Particle ID= " << mPid << endl; 
-  cout << "# Global Dca cuts= " << mDcaGlobalCuts[0] << ", " 
-       << mDcaGlobalCuts[1] << endl;
+  cout << "# Global Dca Tpc cuts=  " << mDcaGlobalTpcCuts[0] << ", " 
+       << mDcaGlobalTpcCuts[1] << endl;
+  cout << "# Global Dca Ftpc cuts= " << mDcaGlobalFtpcCuts[0] << ", " 
+       << mDcaGlobalFtpcCuts[1] << endl;
   for (int k = 0; k < Flow::nSels; k++) {
     for (int j = 0; j < Flow::nHars; j++) {
       cout << "#  selection= " << k+1 << " harmonic= " 
@@ -870,6 +893,20 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.36  2003/01/10 16:42:09  oldi
+// Several changes to comply with FTPC tracks:
+// - Switch to include/exclude FTPC tracks introduced.
+//   The same switch changes the range of the eta histograms.
+// - Eta symmetry plots for FTPC tracks added and separated from TPC plots.
+// - PhiWgts and related histograms for FTPC tracks split in FarEast, East,
+//   West, FarWest (depending on vertex.z()).
+// - Psi_Diff plots for 2 different selections and the first 2 harmonics added.
+// - Cut to exclude mu-events with no primary vertex introduced.
+//   (This is possible for UPC events and FTPC tracks.)
+// - Global DCA cut for FTPC tracks added.
+// - Global DCA cuts for event plane selection separated for TPC and FTPC tracks.
+// - Charge cut for FTPC tracks added.
+//
 // Revision 1.35  2003/01/08 19:26:46  posk
 // PhiWgt hists sorted on sign of z of first and last points.
 // Version 6 of pico file.

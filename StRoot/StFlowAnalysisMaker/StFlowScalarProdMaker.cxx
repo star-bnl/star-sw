@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowScalarProdMaker.cxx,v 1.7 2002/05/21 18:42:17 posk Exp $
+// $Id: StFlowScalarProdMaker.cxx,v 1.8 2003/01/10 16:40:49 oldi Exp $
 //
 // Authors: Method proposed by Art and Sergei, code written by Aihong
 //          Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -41,11 +41,13 @@ ClassImp(StFlowScalarProdMaker)
 StFlowScalarProdMaker::StFlowScalarProdMaker(const Char_t* name): StMaker(name),
   MakerName(name) {
   pFlowSelect = new StFlowSelection();
+  SetHistoRanges();
 }
 
 StFlowScalarProdMaker::StFlowScalarProdMaker(const Char_t* name,
     const StFlowSelection& flowSelect) : StMaker(name), MakerName(name) {
   pFlowSelect = new StFlowSelection(flowSelect); //copy constructor
+  SetHistoRanges();
 }
 
 //-----------------------------------------------------------------------
@@ -128,7 +130,7 @@ Int_t StFlowScalarProdMaker::Init() {
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObs2D =	new TProfile2D(histTitle->Data(),
-        histTitle->Data(), Flow::nEtaBins, Flow::etaMin, Flow::etaMax, nPtBinsPart, 
+        histTitle->Data(), mNEtaBins, mEtaMin, mEtaMax, nPtBinsPart, 
 		 Flow::ptMin, ptMaxPart, -100., 100., "");
       histFull[k].histFullHar[j].mHist_vObs2D->SetXTitle((char*)xLabel.Data());
       histFull[k].histFullHar[j].mHist_vObs2D->SetYTitle("Pt (GeV)");
@@ -140,7 +142,7 @@ Int_t StFlowScalarProdMaker::Init() {
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObsEta = new TProfile(histTitle->Data(),
-        histTitle->Data(), Flow::nEtaBins, Flow::etaMin, Flow::etaMax, 
+        histTitle->Data(), mNEtaBins, mEtaMin, mEtaMax, 
 							      -100., 100., "");
       histFull[k].histFullHar[j].mHist_vObsEta->SetXTitle((char*)xLabel.Data());
       histFull[k].histFullHar[j].mHist_vObsEta->SetYTitle("v (%)");
@@ -160,7 +162,7 @@ Int_t StFlowScalarProdMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowScalarProd", 2);
-  gMessMgr->Info("##### FlowScalarProdAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.7 2002/05/21 18:42:17 posk Exp $");
+  gMessMgr->Info("##### FlowScalarProdAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.8 2003/01/10 16:40:49 oldi Exp $");
 
   return StMaker::Init();
 }
@@ -383,9 +385,41 @@ Int_t StFlowScalarProdMaker::Finish() {
   return StMaker::Finish();
 }
 
+//-----------------------------------------------------------------------
+
+void StFlowScalarProdMaker::SetHistoRanges(Bool_t ftpc_included) {
+
+    if (ftpc_included) {
+	  mEtaMin = Flow::etaMin;
+	  mEtaMax = Flow::etaMax;
+	mNEtaBins = Flow::nEtaBins;
+    }
+    else {
+	  mEtaMin = Flow::etaMinTpcOnly;
+ 	  mEtaMax = Flow::etaMaxTpcOnly;
+	mNEtaBins = Flow::nEtaBinsTpcOnly;
+    }
+
+    return;
+}
+
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowScalarProdMaker.cxx,v $
+// Revision 1.8  2003/01/10 16:40:49  oldi
+// Several changes to comply with FTPC tracks:
+// - Switch to include/exclude FTPC tracks introduced.
+//   The same switch changes the range of the eta histograms.
+// - Eta symmetry plots for FTPC tracks added and separated from TPC plots.
+// - PhiWgts and related histograms for FTPC tracks split in FarEast, East,
+//   West, FarWest (depending on vertex.z()).
+// - Psi_Diff plots for 2 different selections and the first 2 harmonics added.
+// - Cut to exclude mu-events with no primary vertex introduced.
+//   (This is possible for UPC events and FTPC tracks.)
+// - Global DCA cut for FTPC tracks added.
+// - Global DCA cuts for event plane selection separated for TPC and FTPC tracks.
+// - Charge cut for FTPC tracks added.
+//
 // Revision 1.7  2002/05/21 18:42:17  posk
 // Kirill's correction to minBias.C for bins with one count.
 //
