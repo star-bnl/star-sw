@@ -75,7 +75,7 @@ Int_t StTreeMaker::Init()
     
 //  	Try to get it from Read  StTreeMaker       
     fTree = 0;
-    if (fIOMode[0]=="u") fTree = (StTree*)GetDataSet(GetTreeName());
+    if (fIOMode[0]=='u') fTree = (StTree*)GetDataSet(GetTreeName());
     if (fTree) {		// Fantastic, we found it!!!
 
       StMaker *mk = GetMaker(fTree);  assert(mk);
