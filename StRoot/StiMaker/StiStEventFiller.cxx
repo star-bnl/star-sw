@@ -1,11 +1,19 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.28 2004/03/19 19:33:23 andrewar Exp $
+ * $Id: StiStEventFiller.cxx,v 2.29 2004/03/23 23:12:36 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.29  2004/03/23 23:12:36  calderon
+ * Added an "accept" function to filter unwanted tracks from Sti into StEvent.
+ * The current method just looks for tracks with a negative length, since
+ * these were causing problems for the vertex finder (length was nan).  The
+ * nan's have been trapped (one hopes!) in StiKalmanTrack, and for these
+ * cases the return value is negative, so we can filter them out with a
+ * simple length>0 condition.
+ *
  * Revision 2.28  2004/03/19 19:33:23  andrewar
  * Restored primary filling logic. Now taking parameters at the
  * vertex for Primary tracks.
@@ -387,6 +395,7 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
   for (TrackToTrackMap::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt) 
     {
       StiKalmanTrack* kTrack = static_cast<StiKalmanTrack*>((*trackIt).second);
+      if (!accept(kTrack)) continue; // get rid of riff-raff
       StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
       fillDetectorInfo(detInfo,kTrack);
       // track node where the new StTrack will reside
@@ -477,6 +486,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
       kTrack = static_cast<StiKalmanTrack*>((*trackIt).second);
       if (kTrack==0) 
 	throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- static_cast<StiKalmanTrack*>((*trackIt).second)==0");
+      if (!accept(kTrack)) continue;
       map<StiKalmanTrack*, StTrackNode*>::iterator itKtrack = mTrkNodeMap.find(kTrack);
       if (itKtrack == mTrkNodeMap.end()) 
 	throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- itKtrack == mTrkNodeMap.end()");
@@ -711,6 +721,7 @@ void StiStEventFiller::fillPidTraits(StTrack* gTrack, StiKalmanTrack* track){
 /// 	x=8 -> FTPC+primary 
 void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
 {
+
   //cout << "StiStEventFiller::fillTrack()" << endl;
   if (gTrack->type()==global) {
     gTrack->setFlag(101); //change: make sure flag is ok
@@ -733,12 +744,13 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
   // above is no longer used, instead use kITKalmanfitId as fitter and tpcOther as finding method
 
   gTrack->setEncodedMethod(mStiEncoded);
+
+  gTrack->setLength(track->getTrackLength());// someone removed this, grrrr!!!!
  
   if (gTrack->type()==primary) {
       float impactParam = impactParameter(track);
       gTrack->setImpactParameter(impactParam );
   }
-  gTrack->setLength(track->getTrackLength());// someone removed this, grrrr!!!!
 
   int maxPoints = track->getMaxPointCount();
   gTrack->setNumberOfPossiblePoints(static_cast<unsigned short>(maxPoints));
@@ -748,7 +760,9 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
   fillPidTraits(gTrack, track);
   return;
 }
-
+bool StiStEventFiller::accept(StiKalmanTrack* track) {
+    return (track->getTrackLength()>0); // insert other filters for riff-raff we don't want in StEvent here.
+}
 unsigned short StiStEventFiller::encodedStEventFitPoints(StiKalmanTrack* track) 
 {
   // need to write the fit points in StEvent following the convention
