@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.176 2001/03/06 17:26:49 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.177 2001/03/08 16:49:03 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -926,11 +926,11 @@ void StBFChain::SetDbOptions(){
   else {if (GetOption("Y1h"))  db->SetDateTime("year_1h");
   else {if (GetOption("Y2a"))  db->SetDateTime("year_2a");
   else {if (GetOption("Y2b"))  db->SetDateTime("year_2b"); 
-  else {if (GetOption("gstar"))db->SetDateTime("year_2a");
+  else {if (GetOption("Simu")) db->SetDateTime("year_2b");
   }}}}}}}}}}}}}
 	gMessMgr->QAInfo() << db->GetName() 
 			   << " Maker set time = " 
-			   << db->GetDateTime().GetDate() 
+			   << db->GetDateTime().GetDate() << "." 
 			   << db->GetDateTime().GetTime() << endm;
       if (Idate) {
 	db->SetMaxEntryTime(Idate,Itime);
