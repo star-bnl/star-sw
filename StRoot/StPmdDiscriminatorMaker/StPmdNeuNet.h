@@ -1,7 +1,10 @@
+/*!
+ * \class StPmdNeuNet
+ */
 //////////////////////////////////////////////////////////////////
 //
 //  Neural Network classes :
-//  TNNFormula 
+//  TNNFormula
 //  TNNTree
 //  TNNKernel
 //  TNNControlE
@@ -48,21 +51,21 @@
 
 ////////////////////////////////////////////// the classes /////////////////////////////////////
 
-class StPmdNeuNet : public TNamed 
+class StPmdNeuNet : public TNamed
 {
 
 
  private:
   Int_t  fNHiddL;  // number of hidden layers
-  Float_t **fValues;     //! array of activations 
+  Float_t **fValues;     //! array of activations
   Double_t **fErrors;    //! array of errors
   Double_t **fBiases;    //! array of biases
   Int_t *fNUnits;    //! array of units numbers
   Double_t ***fW;    //! array of weights
-   
-  Int_t  fNTrainEvents;  // number of events for training 
+
+  Int_t  fNTrainEvents;  // number of events for training
   Int_t  fNValidEvents;  // number of events for validation
-//  TNNTree *fValidTree;   // validation tree 
+//  TNNTree *fValidTree;   // validation tree
   Double_t fLearnParam;   // learning parameter
   Float_t fLowerInitWeight;  // minimum weight for initialisation
   Float_t fUpperInitWeight;  // maximum weight for initialisation
@@ -78,11 +81,11 @@ class StPmdNeuNet : public TNamed
   Double_t fFlatSE; // Flat Spot elimination paramater
   Double_t ***fDW;  //! array of delta weights used by backprop momentum
   Double_t **fDB;   //! array of delta biases  used by backprop momentum
-  
+
 
   void GetArrayEvt(Int_t iEvent)
   {
-    Int_t l;      
+    Int_t l;
     for(l=0;l<fNUnits[0];l++)fValues[0][l]=fArrayIn[iEvent][l];
     for(l=0;l<fNUnits[fNHiddL+1];l++)fTeach[l]=fArrayOut[iEvent][l];
   };
@@ -91,25 +94,26 @@ class StPmdNeuNet : public TNamed
   Double_t Error();// compute the error between forward propagation and teaching
   Double_t ErrorO();// compute the error between forward propagation and teaching
   void Error(const char*, const char*, ...) const{}//WarnOff
-  void FreeVW();  
-  void AllocateVW(Int_t nInput, Text_t *hidden, Int_t nOutput);  
-  void SetHidden(Text_t *ttext); 
-  Float_t Alea();  
-  void DeleteArray();  
-  
- protected: 
+  void FreeVW();
+  void ZeroAll();
+  void AllocateVW(Int_t nInput, Text_t *hidden, Int_t nOutput);
+  void SetHidden(Text_t *ttext);
+  Float_t Alea();
+  void DeleteArray();
+
+ protected:
   virtual Double_t Sigmoide(Double_t x)
-  {  
+  {
     if(x> 10.) return 0.99999; // probability MUST be < 1
     if(x<-10.) return 0.;
     return (1./(1.+exp(-x)));
   };
-  virtual Double_t SigPrim(Double_t x){return (x*(1.-x));};   
+  virtual Double_t SigPrim(Double_t x){return (x*(1.-x));};
   StPmdDiscriminatorMaker * m_DiscMaker;
 
  public:
   StPmdNeuNet();
-  StPmdNeuNet(Text_t *name, Int_t nInput=5, Text_t *hidden="6:7:8", Int_t nOutput=4); 
+  StPmdNeuNet(Text_t *name, Int_t nInput=5, Text_t *hidden="6:7:8", Int_t nOutput=4);
   void setDiscMaker(StPmdDiscriminatorMaker*);
   virtual ~StPmdNeuNet(); // destructor
   virtual void SetKernel(Int_t nInput, Text_t *hidden, Int_t nOutput);
@@ -121,10 +125,10 @@ class StPmdNeuNet : public TNamed
   virtual Double_t TrainOneCycle();  // one loop on internal events = one cycle
   virtual void ResetCycles(){fNTrainCycles=0;};
   virtual void Export(Text_t *fileName="exportNN.dat");
-  virtual void Import(Text_t *fileName="exportNN.dat");  
+  virtual void Import(Text_t *fileName="exportNN.dat");
   virtual void SetUseBiases(Bool_t trueForUse=1){fUseBiases=(Double_t)trueForUse;};
   virtual void SetRandomSeed(UInt_t seed=0){fRandom.SetSeed(seed);};
-  virtual UInt_t GetRandomSeed(){return fRandom.GetSeed();};    
+  virtual UInt_t GetRandomSeed(){return fRandom.GetSeed();};
   virtual Bool_t IsTrained(){return fNTrainCycles;};
   virtual Int_t GetNTrainCycles(){return fNTrainCycles;};
   virtual Int_t GetNTrainEvents(){return fNTrainEvents;};
@@ -154,19 +158,19 @@ class StPmdNeuNet : public TNamed
     for(i=0;i<fNUnits[fNHiddL+1];i++)s+=fValues[fNHiddL+1][i];
     return s;
   };
- 
+
   void PrintTrain()
   {
 	  cout<<"Units** "<<fNUnits[fNHiddL+1]<<endl;
 
-    Int_t l;      
+    Int_t l;
     for(l=0;l<fNUnits[fNHiddL+1];l++){
 	    cout<<"teach "<<fTeach[l]<<"Value "<<fValues[fNHiddL+1][l]<<endl;
     }
   }
 
-  //  virtual void SetTrainTree(TNNTree *t);  
-//  virtual void SetValidTree(TNNTree *t);  
+  //  virtual void SetTrainTree(TNNTree *t);
+//  virtual void SetValidTree(TNNTree *t);
   virtual Double_t Valid();
 //  virtual void TrainNCycles(TNNControlE *conte, Int_t period=5, Int_t nCycles=10);
   virtual void TrainNCycles(Int_t nCycles=10);
