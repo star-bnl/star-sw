@@ -26,8 +26,8 @@ my $LD        = $env->{LD}; #!
 my $LDFLAGS   = $env->{LDFLAGS};
 my $CERNLIBS  = $env->{CERNLIBS};
 if ($FC eq 'pgf77') { 
-  $CERNLIBS = `cernlib kernlib`;
-  chomp($CERNLIBS);
+#  $CERNLIBS = `cernlib kernlib`;
+#  chomp($CERNLIBS);
   $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
   $FFLAGS   = $env->{G77FLAGS}; 
   $FEXTEND  = $env->{G77EXTEND};
