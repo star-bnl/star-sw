@@ -1,0 +1,74 @@
+Short Documentation/Examples for StECalEnergyIter class:
+
+In my macro I construct some makers:
+
+  StMuDstMaker *mudst = new StMuDstMaker(0,0,"",fname,".",550);
+  if ( !mudst )
+    {
+      cerr << "Unable to create StMuDstMaker, bailing out!\n";
+      return;
+    }
+  new St_db_Maker("StarDb", "MySQL:StarDb");
+  StEEmcDbMaker *eedb = new StEEmcDbMaker("eemcDb");
+  eedb->setSectors(5,8); // because I am only interested in SMD sectors
+  new StSmdCalMaker(mudst, eedb, outfname, 7, 8, 0, "primaryMaker");
+
+StSmdCalMaker is my private analysis maker.  You will want to do something 
+else.  The important point is that it is passed a pointer to the 
+StEEmcDbMaker in its constructor, and it saves this for future reference.
+
+In the Make() method of my private maker I do the following (note that "mudst",
+all lowercase, is a pointer to the StMuDstMaker which was also passed in
+the constructor of my private maker):
+
+  StMuEmcCollection *emcColl = mudst->muDst()->emcCollection();
+  if ( !emcColl )
+    {
+      std::cout << "No emcCollection(), bailing out\n";
+      return kStOK;
+    }
+
+  for (juv=0; juv<kEEmcNumSmdUVs; juv++)
+    {
+      StECalEnergyIter hitList(emcColl, juv ? esmdv : esmdu, mydb);
+      float e; 
+      int adc, corradc, sec, str, dummyphi; 
+      char dummycdet;
+      while ( hitList(e, adc, corradc, sec, str, dummyphi, dummycdet) )
+        {
+	// do some analysis
+        }
+    }
+
+So, in the constructor you pass a pointer to StMuEmcCollection, an integer. 
+eemc, eprs, esmdu, or esmdv (these are from the standard enum structure 
+which unfortunately has no name), and a pointer to StEEmcDbMaker which you
+saved from your private maker's constructor.  The hitList() or hitList.next() 
+call (the two forms take identical parameters) returns a bool which is true 
+if there is new data or false if you have reached the end of the list from 
+the collection.  If (and only if) this call returns true, there is new data
+written to the reference parameters.  These are:
+
+e -- calibrated energy
+adc -- raw ADC reading
+corradc -- ADC minus pedestal
+sec -- sector number (1-12)
+str -- when you are reading an smd plane, this contains the strip number
+         (1-287); otherwise it contains eta for the tile (1-12)
+dummyphi -- when reading tow/pre/post, this contains the subsector (1-5)
+dummycdet -- one of the characters P, Q, R, T, U, V.  Note that for any
+	detector besides eprs, it is "obvious" which answer you get.
+
+Note that in my code the last two parameters are "dummy" because they are
+not needed or used; they do need to be declared and passed, however.
+(Please let me know if there is a good way around that.)
+
+The important prototypes are:
+
+class StECalEnergyIter {
+ public:
+  StECalEnergyIter(StMuEmcCollection *emCol, int det, StEEmcDbMaker *eedb);
+  bool operator()(float &e, int &adc, int &adclessped, int &sec, 
+                         int &eta, int &phi, char &cdet);
+}
+
