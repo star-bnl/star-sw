@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.26 2000/07/30 02:38:36 long Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.27 2000/07/30 02:59:23 long Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.27  2000/07/30 02:59:23  long
+ * *** empty log message ***
+ *
  * Revision 1.26  2000/07/30 02:38:36  long
  * comment out numberofLevel
  *
@@ -389,12 +392,12 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 				  StMagneticField* magDb,
-				  int subSegments, 
+				  int  numberOfLevels  ,
 				  list<StTrsMiniChargeSegment>* listOfMiniSegments)
 #else
 void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 				  StMagneticField* magDb,
-				  int subSegments,
+				  int  numberOfLevels  ,
 				  list<StTrsMiniChargeSegment,allocator<StTrsMiniChargeSegment> >* listOfMiniSegments)
 #endif
 {
