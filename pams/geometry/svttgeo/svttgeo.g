@@ -910,8 +910,7 @@ Block SHMA is a single mother volume for a water hose on the cone 3
 *
       Create   SWHO  " water hose on cone 3"
       Position SWHO  x=xpos y=0 z=zpos AlphaY=angle
-      Create   SHWA  " hoses water on cone 3"
-      Position SHWA  x=xpos y=0 z=zpos AlphaY=angle
+
 endblock
 *
 *------------------------------------------------------------------------------
@@ -948,8 +947,7 @@ Block SHMB is a single mother volume for a water hose on the cone 4
 *
       Create   SWHO  " water hose on cone 4"
       Position SWHO  x=xpos y=0 z=zpos AlphaY=angle
-      Create   SHWA  " hoses water on cone 4"
-      Position SHWA  x=xpos y=0 z=zpos AlphaY=angle
+ 
 endblock
 *
 *------------------------------------------------------------------------------
@@ -963,9 +961,9 @@ Block SWHO is a water hose
       Mixture   CH2    Dens=0.935
       Attribute SWHO   Seen=1   Colo=3
 *
-      Shape    TUBE rmin=ssup_HosRmn,
-                    rmax=ssup_HosRmx,
-                    dz=0.5*(cone_len-2.0*ssup_HosRmx)
+      Shape    TUBE rmin=0  rmax=ssup_HosRmx  dz=0.5*cone_len
+      Create   SHWA  " hoses water on cone 4"
+      Position SHWA  
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block SHWA is the water in the hose 
@@ -974,9 +972,8 @@ Block SHWA is the water in the hose
       Component H2     A=1   Z=1   W=2
       Component O      A=16  Z=8   W=1
       Mixture   Water  Dens=1.0
-      Shape    TUBE rmin=0,
-                    rmax=ssup_HosRmn,
-                    dz=0.5*(cone_len-2.0*ssup_HosRmx)
+      Shape     TUBE   rmax=ssup_HosRmn
+
 EndBlock
 *
 *------------------------------------------------------------------------------
