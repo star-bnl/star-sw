@@ -1,7 +1,7 @@
 /*:>-------------------------------------------------------------------
 **: FILE:       ftfTpc.cc
+
 **: HISTORY:
-**:             06may1999 tracker.hit[x].track set to zero at initialization, ppy
 **:   
 **:  
 **:<------------------------------------------------------------------*/
@@ -40,9 +40,12 @@ extern "C" long type_of_call ftfTpc_(
 //
 //    Set parameters
 //
-  tracker.nTracks = 0 ;
   tracker.para.setDefaults ( ) ;
   ftfSetParameters ( para ) ;
+//
+//    Reset tracker
+//
+  tracker.reset ( ) ;
 //
 //   Check there is something coming in
 //
@@ -79,9 +82,8 @@ extern "C" long type_of_call ftfTpc_(
      pHit[0] = new FtfHit[tphit_h->nok] ;
 
      for ( int i = 0 ; i < tphit_h->nok ; i++ ) {
-        (pHit[0])[i].id     = i ;
-        tphit[i].track      = 0 ;
-        (pHit[0])[i].track  = 0 ;
+        (pHit[0])[i].id  = i ;
+        tphit[i].track   = 0 ;
         (pHit[0])[i].row = (short)fmod(tphit[i].row,100)   ;
         if ( tphit[i].row == 4600 ) (pHit[0])[i].row = 46 ;
         if ( tphit[i].row == 4600 ) tphit[i].row = 46 ;
@@ -161,16 +163,15 @@ extern "C" long type_of_call ftfTpc_(
         }
 //
         j = nSectorHits[sectorIndex] ;
-        tphit[i].track               = 0 ;
-        (pHit[sectorIndex])[j].id    = i ;
-        (pHit[sectorIndex])[j].track = 0 ;
-        (pHit[sectorIndex])[j].row   = (short)fmod(tphit[i].row,100)   ;
-        (pHit[sectorIndex])[j].x     = tphit[i].x ;
-        (pHit[sectorIndex])[j].y     = tphit[i].y ;
-        (pHit[sectorIndex])[j].z     = tphit[i].z ;
-        (pHit[sectorIndex])[j].dx    = tphit[i].dx ;
-        (pHit[sectorIndex])[j].dy    = tphit[i].dy ;
-        (pHit[sectorIndex])[j].dz    = tphit[i].dz ;
+        tphit[i].track             = 0 ;
+        (pHit[sectorIndex])[j].id  = i ;
+        (pHit[sectorIndex])[j].row = (short)fmod(tphit[i].row,100)   ;
+        (pHit[sectorIndex])[j].x   = tphit[i].x ;
+        (pHit[sectorIndex])[j].y   = tphit[i].y ;
+        (pHit[sectorIndex])[j].z   = tphit[i].z ;
+        (pHit[sectorIndex])[j].dx  = tphit[i].dx ;
+        (pHit[sectorIndex])[j].dy  = tphit[i].dy ;
+        (pHit[sectorIndex])[j].dz  = tphit[i].dz ;
         nSectorHits[sectorIndex]++ ;
      }   
   } // end if for sector by sector logic
@@ -203,38 +204,18 @@ extern "C" long type_of_call ftfTpc_(
 //
      tracker.nHits  = nSectorHits[sectorIndex] ;
      tracker.hit    = pHit[sectorIndex] ;
-     for ( int iSlice = 0 ; iSlice < para->numberTrackingSlices ; iSlice++ ) {
-        if ( sector < 12 ) {
-           tracker.para.etaMin = para->TrackingSlices[iSlice] ;
-           tracker.para.etaMax = para->TrackingSlices[iSlice+1] ;
-        }
-        else {
-           tracker.para.etaMin = -para->TrackingSlices[iSlice+1] ;
-           tracker.para.etaMax = -para->TrackingSlices[iSlice] ;
-        }
-//
-        nTracksLast    = tracker.nTracks ;
-//
-//    Reset tracker
-//
-        tracker.reset ( ) ;
-
-        float sectorTime = tracker.process ( ) ;
-        if ( para->infoLevel > 1 ) {
-           printf ( " Sector %d, Division %d(%f-%f), time %f \n", sector+1, iSlice, 
-                                 tracker.para.etaMin, tracker.para.etaMax, sectorTime ) ;
-        }
+     nTracksLast    = tracker.nTracks ;
+     float sectorTime = tracker.process ( ) ;
 //
 //    Fill monitoring table
 //
-        if ( monCounter < monitor_h->maxlen ) {
-           monitor[monCounter].sector  = sector + 1 ;
-           monitor[monCounter].nPoints = nSectorHits[sectorIndex] ;
-           monitor[monCounter].nTracks = tracker.nTracks - nTracksLast ;
-           monitor[monCounter].sTime   = sectorTime ;
-           monCounter++ ;
-           monitor_h->nok = monCounter ;
-        }
+     if ( monCounter < monitor_h->maxlen ) {
+        monitor[monCounter].sector  = sector + 1 ;
+        monitor[monCounter].nPoints = nSectorHits[sectorIndex] ;
+        monitor[monCounter].nTracks = tracker.nTracks - nTracksLast ;
+        monitor[monCounter].sTime   = sectorTime ;
+        monCounter++ ;
+        monitor_h->nok = monCounter ;
      }
   }
 //
@@ -342,7 +323,6 @@ extern "C" long type_of_call ftfTpc_(
       tracker.para.dphiMerge       = para->SDPsiMaxMerge;
       tracker.para.szErrorScale    = para->ErrorScaleSz;
       tracker.para.xyErrorScale    = para->ErrorScaleXy;
-      tracker.para.zVertex         = para->zVertex;
 
       tracker.para.goBackwards     = 1 ;
 
