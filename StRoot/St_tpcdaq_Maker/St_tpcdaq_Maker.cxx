@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.43  1999/12/07 21:31:54  ward
+// Eliminate 2 compile warnings, as requested by Lidia.
+//
 // Revision 1.42  1999/11/23 22:26:44  ward
 // forward declaration for daq ZeroSuppressedReader
 //
@@ -165,8 +168,9 @@ St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqOrTrs):StMaker(name),
 St_tpcdaq_Maker::~St_tpcdaq_Maker() {
 }
 Int_t St_tpcdaq_Maker::Init() {
-  St_DataSet *herb;
-
+  St_DataSet *herb; int junk;
+  junk=log10to8_table[0]; /* to eliminate the warnings from the compiler. */
+  
   m_seq_startTimeBin  = new TH1F("tpcdaq_startBin" , 
                             "seq vs start bin" , 512 , 1.0 , 512.0 );
   m_seq_sequnceLength = new TH1F("tpcdaq_seqLen" , 
@@ -554,7 +558,7 @@ int St_tpcdaq_Maker::Output() {
               printf("ipadrow=%d, pad-1=%d, fgain=%g\n",ipadrow,pad-1,fGain[ipadrow][pad-1]);
               exit(2);
             }
-            conversion=0.5+fGain[ipadrow][pad-1]*conversion;
+            conversion=(short unsigned int)(0.5+fGain[ipadrow][pad-1]*conversion);
 #endif
 #ifdef HISTOGRAMS
             m_pix_AdcValue->Fill((Float_t)(conversion));
