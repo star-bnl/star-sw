@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.15 2001/04/03 21:04:36 kisiel Exp $
+ * $Id: StHbtParticle.cc,v 1.16 2001/05/25 23:23:59 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,8 +14,13 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
+ * Revision 1.16  2001/05/25 23:23:59  lisa
+ * Added in StHbtKink stuff
+ *
  * Revision 1.15  2001/04/03 21:04:36  kisiel
- * Changes needed to make the Theoretical code
+ *
+ *
+ *   Changes needed to make the Theoretical code
  *   work. The main code is the ThCorrFctn directory.
  *   The most visible change is the addition of the
  *   HiddenInfo to StHbtPair.
@@ -84,16 +89,17 @@
   #include <cmath>
 #endif
 //_____________________
-StHbtParticle::StHbtParticle() : mTrack(0), mV0(0) {
+StHbtParticle::StHbtParticle() : mTrack(0), mV0(0), mKink(0) {
   /* no-op for default */
 }
 //_____________________
 StHbtParticle::~StHbtParticle(){
   if (mTrack) delete mTrack;
   if (mV0) delete mV0;
+  if (mKink) delete mKink;
 }
 //_____________________
-StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass) : mTrack(0), mV0(0) {
+StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass) : mTrack(0), mV0(0), mKink(0) {
   // I know there is a better way to do this...
   mTrack = new StHbtTrack(*hbtTrack);
   StHbtThreeVector temp = hbtTrack->P();
@@ -113,7 +119,7 @@ StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass
   // ***
 }
 //_____________________
-StHbtParticle::StHbtParticle(const StHbtV0* const hbtV0,const double& mass) : mTrack(0), mV0(0) {
+StHbtParticle::StHbtParticle(const StHbtV0* const hbtV0,const double& mass) : mTrack(0), mV0(0), mKink(0) {
   mV0 = new StHbtV0(*hbtV0);
   mMap[0]= 0;
   mMap[1]= 0;
@@ -124,6 +130,17 @@ StHbtParticle::StHbtParticle(const StHbtV0* const hbtV0,const double& mass) : mT
   mFourMomentum.setE(ener);
   //  cout << mPosTrackId << " " << mNegTrackId << " " << hbtV0->idPos() << " " << hbtV0->idNeg() << endl;
   //  mHelix = hbtTrack->Helix(); ?? what to do with mHelix for a Particle coming from a V0?
+}
+//_____________________
+StHbtParticle::StHbtParticle(const StHbtKink* const hbtKink,const double& mass) : mTrack(0), mV0(0) {
+  mKink = new StHbtKink(*hbtKink);
+  mMap[0]= 0;
+  mMap[1]= 0;
+  // I know there is a better way to do this...
+  StHbtThreeVector temp = hbtKink->Parent().P();
+  mFourMomentum.setVect(temp);
+  double ener = sqrt(temp.mag2()+mass*mass);
+  mFourMomentum.setE(ener);
 }
 //_____________________
 const StHbtThreeVector& StHbtParticle::NominalTpcExitPoint() const{

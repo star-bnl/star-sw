@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.hh,v 1.15 2001/04/05 22:25:15 kisiel Exp $
+ * $Id: StHbtTrack.hh,v 1.16 2001/05/25 23:23:59 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StHbtTrack.hh,v $
+ * Revision 1.16  2001/05/25 23:23:59  lisa
+ * Added in StHbtKink stuff
+ *
  * Revision 1.15  2001/04/05 22:25:15  kisiel
- * Correct the problems detected by Insure++.
+ *   Correct the problems detected by Insure++.
  *
  * Revision 1.14  2001/04/03 21:04:36  kisiel
  *
@@ -94,10 +97,18 @@
 #include "StHbtMaker/Base/StHbtHiddenInfo.hh"
 /***/
 
+class StTrack;
+//#ifdef __ROOT__
+//#include "StEvent/StTrack.h"
+//#endif
+
 class StHbtTrack{
 public:
   StHbtTrack(){/* no-op*/};
   StHbtTrack(const StHbtTrack&);// copy constructor
+#ifdef __ROOT__
+  StHbtTrack(const StTrack*, StHbtThreeVector);   // c-tor from StTrack of STAR DSTs
+#endif
   ~StHbtTrack(){/* no-op*/};
 
   char Charge() const;

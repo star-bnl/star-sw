@@ -8,6 +8,7 @@
 #ifndef StHbtIO_cc
 #define StHbtIO_cc
 
+#include "StHbtMaker/Infrastructure/StHbtKink.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0.hh"
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
@@ -238,5 +239,52 @@ istream& operator>>(istream& in,  StHbtEvent& ev){
 
   return in;
 }
+
+//------------------------- StHbtKink -------------------------------
+ostream& operator<<(ostream& out, StHbtKink& knk){
+  return (
+	  out
+	  << knk.mDcaParentDaughter << " "
+	  << knk.mDcaDaughterPrimaryVertex << " "
+	  << knk.mDcaParentPrimaryVertex << " "
+	  << knk.mHitDistanceParentDaughter << " "
+	  << knk.mHitDistanceParentVertex << " "
+	  << knk.mDeltaEnergy[0] << " "
+	  << knk.mDeltaEnergy[1] << " "
+	  << knk.mDeltaEnergy[2] << " "
+	  << knk.mDecayAngle << " "
+	  << knk.mDecayAngleCM << " "
+	  << knk.mDaughter << " "
+	  << knk.mParent << " "
+	  << knk.mPosition.x() << " "
+	  << knk.mPosition.y() << " "
+	  << knk.mPosition.z() 
+	  );
+}
+istream& operator>>(istream& in,  StHbtKink& knk){
+  double x,y,z;
+  in 
+    >> knk.mDcaParentDaughter 
+    >> knk.mDcaDaughterPrimaryVertex 
+    >> knk.mDcaParentPrimaryVertex 
+    >> knk.mHitDistanceParentDaughter
+    >> knk.mHitDistanceParentVertex 
+    >> knk.mDeltaEnergy[0] 
+    >> knk.mDeltaEnergy[1] 
+    >> knk.mDeltaEnergy[2] 
+    >> knk.mDecayAngle 
+    >> knk.mDecayAngleCM 
+    >> knk.mDaughter 
+    >> knk.mParent 
+    >> x
+    >> y
+    >> z;
+  knk.mPosition.setX(x);
+  knk.mPosition.setY(y);
+  knk.mPosition.setZ(z);
+
+  return in;
+}
+
 
 #endif

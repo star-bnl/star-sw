@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.hh,v 1.11 2001/05/15 15:30:16 rcwells Exp $
+ * $Id: StHbtEvent.hh,v 1.12 2001/05/25 23:23:59 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.hh,v $
+ * Revision 1.12  2001/05/25 23:23:59  lisa
+ * Added in StHbtKink stuff
+ *
  * Revision 1.11  2001/05/15 15:30:16  rcwells
  * Added magnetic field to StHbtEvent
  *
@@ -61,6 +64,7 @@
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
+#include "StHbtMaker/Infrastructure/StHbtKinkCollection.hh"
 
 class StHbtTrackCut;
 class StHbtV0Cut;
@@ -86,6 +90,7 @@ public:
   StHbtThreeVector PrimVertPos() const;
   StHbtTrackCollection* TrackCollection() const;
   StHbtV0Collection* V0Collection() const;
+  StHbtKinkCollection* KinkCollection() const;
   double MagneticField() const;
 
   void SetEventNumber(const unsigned short&);
@@ -120,6 +125,7 @@ private:
   StHbtThreeVector mPrimVertPos;
   StHbtTrackCollection* mTrackCollection;
   StHbtV0Collection* mV0Collection;
+  StHbtKinkCollection* mKinkCollection;
   double mMagneticField; // magnetic field in Z direction
 
   friend class StHbtIOBinary;
@@ -152,6 +158,7 @@ inline  float          StHbtEvent::ReactionPlane() const {return mReactionPlane[
 inline  float          StHbtEvent::ReactionPlaneError() const {return mReactionPlane[1];}
 inline StHbtTrackCollection* StHbtEvent::TrackCollection() const {return mTrackCollection;}
 inline StHbtV0Collection* StHbtEvent::V0Collection() const {return mV0Collection;}
+inline StHbtKinkCollection* StHbtEvent::KinkCollection() const {return mKinkCollection;}
 inline StHbtThreeVector StHbtEvent::PrimVertPos() const {return mPrimVertPos;}
 inline double StHbtEvent::MagneticField() const {return mMagneticField;}
 

@@ -18,7 +18,7 @@
 #ifdef __CINT__
 #pragma link C++ enum StHbtParticleType;
 #endif
-enum StHbtParticleType {hbtUndefined, hbtTrack, hbtV0};
+enum StHbtParticleType {hbtUndefined, hbtTrack, hbtV0, hbtKink};
 #endif
 
 /*------------------------------------
