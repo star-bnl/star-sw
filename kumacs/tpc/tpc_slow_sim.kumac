@@ -31,7 +31,8 @@ message ' *** Table to write to ntup --> ' [table]
  
 * global macros
   exec $STAR/kumacs/util/setup_global_macros
-  macro/global/import KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC 
+  macro/global/import _
+         KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC,PARAMS_TPC 
 
 * generic inits
   exec [KUMACS_UTIL]setup_dir
@@ -68,7 +69,8 @@ macro tpc_slow_sim_initialize_
 
     message ' Initializing for tpc slow simulator '
 
-  macro/global/import KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC 
+  macro/global/import _ 
+     KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC,PARAMS_TPC 
 
 
 
@@ -99,7 +101,8 @@ macro tpc_slow_sim_process_event_
 
 
 
-   macro/global/import KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC 
+   macro/global/import _
+      KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC,PARAMS_TPC 
 
    message ' TPC slow sim: Processing Event # ' [nev]
 

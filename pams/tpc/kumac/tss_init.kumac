@@ -4,10 +4,15 @@
 
 macro init tpc_sector_first tpc_sector_last magfield
 
+  macro/global/import _
+         KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC,PARAMS_TPC 
+
+
+
 cd /dui/constants/tpc/params
 
 **set tss parameters
-dio/newfilestream tss /afs/rhic/star/packages/SL98b/params/tpc/tss_pars.xdf r
+dio/newfilestream tss [PARAMS_TPC]tss_pars.xdf r
 dio/stream/getevent  tss
 dio/stream/close     tss
 
