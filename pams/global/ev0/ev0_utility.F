@@ -13,7 +13,7 @@ C   Status		: Tested
 C----------------------------------------------------------------------
       INTEGER iflag
       REAL    trk(6),xc(2),r,beta
-      REAL    x,y,p(3),a,b,xt1,rxp,test
+      REAL    x,y,p(3),a,b,ab,rxp,test
 C--------find the radius and the (hit)x-y coordinates------------------
       IF(trk(1).eq.0.) trk(1)=0.01
       x=trk(1)*cos( trk(2) )
@@ -27,19 +27,22 @@ C--------find the two possible solutions------------------------------
       b = sqrt( r*r/(a*a+1) )
 C     yt1= b + y
 C     yt2=-b + y
-      xt1=-a*b + x
+C     xt1=-a*b + x
 C     xt2= a*b + x
+      ab = a*b
 C-------decide which one is the right one------------------------------
-      rxp=(xt1-x)*p(2) - b*p(1)
+C     rxp=(xt1-x)*p(2) - b*p(1)
+      rxp=-(ab*p(2) + b*p(1))
       test=rxp*trk(6)/r
       IF(test.gt.0.0) THEN
-	xc(1)=xt1
+C	xc(1)=xt1
 C	xc(2)=yt1
+	xc(1)=-ab + x
 	xc(2)= b + y
       ELSE
 C	xc(1)=xt2
 C	xc(2)=yt2
-	xc(1)=a*b + x
+	xc(1)=ab + x
 	xc(2)=-b + y
       ENDIF 	!test.lt.0.0
 C----------------------------------------------------------------------
@@ -435,7 +438,7 @@ C----------------------------------------------------------------------
       REAL	x(2),y(2),om1,om2,ph1,ph2
       REAL	a,b,c,d,dia,dtouch,cut
       REAL	asq_plus_bsq,r1sq_minus_om1sq,r1_dia
-      REAL	ph1_plus_a_sq,ph2_plus_a_sq
+      REAL	ph1_plus_a_sq,ph2_plus_a_sq,om_1,om_2
       REAL	om1_plus_b_sq_minus_r2sq,om2_plus_b_sq_minus_r2sq
 C---clear variables cleared before entering routine--------------------
 c      CALL VZERO(x,2)
@@ -452,9 +455,12 @@ C---check if there is any solution, one or two -----------------------
       IF(d.lt.0.0) GOTO 137
       IF(d.eq.0.0) iflag=3
       d = sqrt(d)
-      om1=( -b*c+abs(a)*d ) / asq_plus_bsq
+C     om1=( -b*c+abs(a)*d ) / asq_plus_bsq
 C     om2=( -b*c-abs(a)*d ) / asq_plus_bsq
-      om2=-om1
+      om_1=-b*c
+      om_2=abs(a)*d
+      om1=( om_1+om_2 ) / asq_plus_bsq
+      om2=( om_1-om_2 ) / asq_plus_bsq
       r1sq_minus_om1sq = r1sq-om1*om1
       IF( r1sq_minus_om1sq.ge.0.) THEN
 C----find the right pair---------------------------------------------
