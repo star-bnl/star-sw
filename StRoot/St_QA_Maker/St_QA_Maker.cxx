@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.19 1999/04/20 01:16:59 fisyak Exp $
+// $Id: St_QA_Maker.cxx,v 1.20 1999/04/21 20:19:18 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.20  1999/04/21 20:19:18  kathy
+// put in comments and cleaned up - works for mdc2 dst in dev now
+//
 // Revision 1.19  1999/04/20 01:16:59  fisyak
 // Add check on. no of tracks in dE/dX
 //
@@ -166,11 +169,13 @@ ClassImp(St_QA_Maker)
   //_____________________________________________________________________________
   St_QA_Maker::St_QA_Maker(const char *name, const char *title):StMaker(name,title)
 {
+
+// First, zero all pointers defined in the header file
   
   // for method MakeEvSum - from table event_summary
-  m_trk_tot_gd = 0;    //! number of good global tracks divided by total
-  m_glb_trk_tot=0;
-  m_glb_trk_gd=0;    //! # tracks good from globtrk
+  m_trk_tot_gd = 0;      //! number of good global tracks divided by total
+  m_glb_trk_tot=0;       //! # tracks total from globtrk
+  m_glb_trk_gd=0;        //! # tracks good from globtrk
   m_glb_trk_plusminus=0; //! # trks pos/neg. 
   
   m_vert_total=0;    //! total number of vertices
@@ -187,7 +192,7 @@ ClassImp(St_QA_Maker)
   
   // for method MakeGlob - from table globtrk
   m_pT=0;            //! pT  reconstructed
-  m_pT_fr=0;            //! pT  reconstructed - full range
+  m_pT_fr=0;         //! pT  reconstructed - full range
   m_eta=0;           //! eta reconstructed
   m_pT_eta_rec=0;    //! pT versus eta Spectra for reconstructed
   m_mom_trklength=0; //! mom vs. trk length
@@ -210,16 +215,16 @@ ClassImp(St_QA_Maker)
   m_dedx1=0;         //! dE/dx [1] 
   
   // for method MakeHistPrim - from table primtrk
-  m_prim_pT=0;          //! pT  recostructed
-  m_prim_eta=0;         //! eta recostructed
-  m_prim_pT_eta_rec=0;  //! pT versus eta Spectra for reconstructed
-  m_prim_tlength=0;     //! dst track length
-  m_prim_chi2xd=0;      //! x chisq/degf
-  m_prim_chi2yd=0;      //! y chisq/degf
-  m_prim_point=0;       //! # points on track
-  m_prim_fit_point=0;   //! # fitted points
-  m_prim_psi=0;         //! psi angle_ 
-  m_prim_det_id=0;        //!
+  m_prim_pT=0;            //! pT  recostructed
+  m_prim_eta=0;           //! eta recostructed
+  m_prim_pT_eta_rec=0;    //! pT versus eta Spectra for reconstructed
+  m_prim_tlength=0;       //! dst track length
+  m_prim_chi2xd=0;        //! x chisq/degf
+  m_prim_chi2yd=0;        //! y chisq/degf
+  m_prim_point=0;         //! # points on track
+  m_prim_fit_point=0;     //! # fitted points
+  m_prim_psi=0;           //! psi angle_ 
+  m_prim_det_id=0;        //! 
   m_prim_mom_trklength=0; //!
   m_prim_npoint_length=0; //!
   m_prim_fpoint_length=0; //!
@@ -228,18 +233,18 @@ ClassImp(St_QA_Maker)
   
   
   // for method MakeHistGen - from table particle
-  m_H_pT_eta_gen=0;  //! pT versus eta Spectra for generated
-  m_H_pT_gen=0;  //! pT Spectra for generated
-  m_H_eta_gen=0;  //! eta Spectra for generated
-  m_H_vtxx=0;     //! production vertex (mm)
-  m_H_vtxy=0;     //! production vertex (mm)
-  m_H_vtxz=0;     //! production vertex (mm)
-  m_H_npart=0;    //! total num particles generated
-  m_H_ncpart=0;   //! number of charged e,mu,proton,kaon,pion
+  m_H_pT_eta_gen=0; //! pT versus eta Spectra for generated
+  m_H_pT_gen=0;     //! pT Spectra for generated
+  m_H_eta_gen=0;    //! eta Spectra for generated
+  m_H_vtxx=0;       //! production vertex (mm)
+  m_H_vtxy=0;       //! production vertex (mm)
+  m_H_vtxz=0;       //! production vertex (mm)
+  m_H_npart=0;      //! total num particles generated
+  m_H_ncpart=0;     //! number of charged e,mu,proton,kaon,pion
   
   // for MakeHistV0 - from table dst_v0_vertex
-  m_ev0_lama_hist=0;//! Lambda mass
-  m_ev0_k0ma_hist=0;//! K0 mass
+  m_ev0_lama_hist=0; //! Lambda mass
+  m_ev0_k0ma_hist=0; //! K0 mass
   
   // for MakeHistPID - from tables primtrk & dst_dedx 
   m_p_dedx_rec=0;   //! dedx vs p
@@ -294,12 +299,15 @@ ClassImp(St_QA_Maker)
   m_ehbs_hits4=0; //! bemc # hits detector 4
   m_ehbs_tnrg4=0; //! bemc tot energy detector 4 
   
-  
+  // for method MakeHistXi
+
+//  Now construct inline functions: 
   drawinit=kFALSE;
+  SetDraw();
+  SetHistsNames();
   SetZones();
   SetPaperSize();
-  SetHistsNames();
-  SetPostScriptFile(); // no PostScripy file "by default"
+  SetPostScriptFile(); // no PostScript file "by default"
 }
 //_____________________________________________________________________________
 St_QA_Maker::~St_QA_Maker(){
@@ -1050,7 +1058,7 @@ void St_QA_Maker::MakeHistEmsHitsBsmd(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.19 1999/04/20 01:16:59 fisyak Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.20 1999/04/21 20:19:18 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
