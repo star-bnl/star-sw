@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.28 1999/05/01 00:53:38 perev Exp $
+// $Id: StMaker.cxx,v 1.29 1999/05/03 22:29:28 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.29  1999/05/03 22:29:28  perev
+// Bug in GetDataSet fix. Thanks to Bill Love
+//
 // Revision 1.28  1999/05/01 00:53:38  perev
 // GetDataSet bug fix NAME == NAME/.data
 //
@@ -71,7 +74,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.28 1999/05/01 00:53:38 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.29 1999/05/03 22:29:28 perev Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -247,7 +250,7 @@ int icol;
   if (actInput.IsNull()) actInput = logInput;
   
 //	if I was called from THIS maker no sence to search here
-  if (!uppMk && !dowMk) 	goto DOWN;
+//VP  if (!uppMk && !dowMk) 	goto DOWN;
 
 //		Direct try
   dataset = 0;
