@@ -9,9 +9,8 @@
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "svt/St_spa_am_Module.h"
-// #include "svt/St_sdm_am_Module.h"
 #include "TFile.h"
-
+#include "StMessMgr.h"
 
 ClassImp(St_spa_Maker)
   
@@ -44,52 +43,25 @@ Int_t St_spa_Maker::Init(){
   m_condition = (St_sdm_condition_db  *)local("ssd/sdm_condition_db");
   m_ctrl      = (St_sls_ctrl          *)local("ssd/sls_ctrl");
 
-  int res = 1;
-  if ((!m_cond_par)||(!m_geom_par)||(!m_cal_par)||(!m_ctrl))
-    {
-      res = 0;
-      cout<<"*** sdm parameter tables are missing ***"<<endl;
-      if (!m_cond_par) cout<<"condition_par is missing"<<endl;
-      if (!m_geom_par) cout<<"geom_par is missing"<<endl;
-      if (!m_cal_par) cout<<"calibration_par is missing"<<endl;
-      if (!m_ctrl) cout<<"sls_ctrl is missing"<<endl;
-      return kStWarn;
-      
-    }
-//   else
-//     {
-//       if ((!m_noise)||(!m_condition))
-// 	{
-// 	  cout<<"******************************************"<<endl;
-// 	  cout<<"***  database is empty for the moment  ***"<<endl;
-// 	  cout<<"******************************************"<<endl;
-// 	  m_noise         = new St_sdm_calib_db("sdm_calib_db",500000);
-// 	  m_condition     = new St_sdm_condition_db("sdm_condition_db",500000);
-// 	  res = sdm_am(m_cond_par, m_geom_par, m_cal_par, m_noise, m_condition);
-// 	  TFile *f1 = new TFile("/afs/in2p3.fr/group/star/users/hippolyt/params/svt/ssd/sdm_calib_db.root","RECREATE");
-//           m_noise->Write();
-// 	  f1->Close();
-// 	  cout<<"***   File sdm_calib_db.root created   ***"<<endl;
-// 	  TFile *f2 = new TFile("/afs/in2p3.fr/group/star/users/hippolyt/params/svt/ssd/sdm_condition_db.root","RECREATE");
-//           m_condition->Write();
-// 	  f2->Close();
-// 	  cout<<"*** File sdm_condition_db.root created ***"<<endl;
-// 	  cout<<"******************************************"<<endl;
-// 	  cout<<"***       database is set up now       ***"<<endl;
-// 	  cout<<"******************************************\n"<<endl;
-          
-// 	}
-//       if(res!=kSTAFCV_OK) 
-// 	{
-// 	  cout<<"*** sdm_calib_db or sdm_condition_db is missing ***"<<endl;
-// 	  return kStWarn;
-// 	}
-//     }
+  if (!m_geom_par) {
+    gMessMgr->Error() << "No  access to geometry parameters" << endm;
+  }   
+  if (!m_cond_par) {
+    gMessMgr->Error() << "No  access to condition parameters" << endm;
+  }   
+  if (!m_cal_par) {
+    gMessMgr->Error() << "No  access to calibration parameters" << endm;
+  }   
+  if (!m_ctrl) {
+    gMessMgr->Error() << "No  access to control parameters" << endm;
+  } 
   return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t St_spa_Maker::Make()
 {
+  if (Debug())  gMessMgr->Debug() << "In St_spa_Maker::Make() ... "
+                               << GetName() << endm;
   // 		Create output tables
   Int_t res = 0; 
   
@@ -101,9 +73,10 @@ Int_t St_spa_Maker::Make()
   res =  spa_am(m_geom_par, m_cal_par, sls_strip, m_ctrl,
 		spa_strip, m_noise, m_condition);
   
-  if(res!=kSTAFCV_OK) return kStWarn;
-  if (Debug()) m_DataSet->ls("*");
-  
+   if(res!=kSTAFCV_OK){
+     gMessMgr->Warning("St_spa_Maker: no output");
+     return kStWarn;
+   }
   
   return kStOK;
 }
@@ -111,11 +84,14 @@ Int_t St_spa_Maker::Make()
 void St_spa_Maker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: St_spa_Maker.cxx,v 1.1 2000/07/21 15:08:56 hippolyt Exp $\n");
+  printf("* $Id: St_spa_Maker.cxx,v 1.2 2000/08/15 19:31:19 hippolyt Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
-
-
-
+//_____________________________________________________________________________
+Int_t St_spa_Maker::Finish() {
+  if (Debug()) gMessMgr->Debug() << "In St_spa_Maker::Finish() ... "
+                               << GetName() << endm; 
+  return kStOK;
+}
 
