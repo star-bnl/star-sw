@@ -35,18 +35,6 @@ memset(&row,0,tableSet->GetRowSize());
     row.threePadWeightedError     =     0.0152; // additional error 3-pad-cluster, w.mean ;
     row.threePadGaussError        =    0.00057; // additional error 3-pad-cluster, gaussfit ;
     row.zDirectionError           =       0.01; // parameter for error in z-direction ;
-    row.normalizedNowPressure     =    1013.25; // normalized air pressure (in hPa) ;
-    row.adjustedAirPressureWest   =    1013.25; // temperature adjusted air pressure for FTPC West 
-    row.adjustedAirPressureEast   =    1013.25; // temperature adjusted air pressure for FTPC East 
-    row.minPressure               =     990.;   // minimum barometric pressure (in hPa);
-    row.maxPressure               =    1040.;   // maximum barometric pressure (in hPa);
-    row.gasTemperatureWest        =      25.8;  // temperature of gas FTPC East ;
-                                                // initially set to default 
-    row.gasTemperatureEast        =      25.1;  // temperature of gas FTPC East ;
-                                                // initially set to default 
-    row.minGasTemperature         =      23.0;  // maximum gas temperature (in centigrade);
-    row.maxGasTemperature         =      30.0;  // maximum gas temperature (in centigrade);
-    // old settings
     row.maxNumSequences           =       160;  // max number of used sequences
     row.maxNumSeqPeaks            =       160;  // max number of peaks per sequence
     row.maxNumPeaks               =       160;  // max number of unfolded peaks per cluster
@@ -58,6 +46,17 @@ memset(&row,0,tableSet->GetRowSize());
     row.maxTimelength             =       100;  // max timelength of cluster
     row.maxPadlength              =       100;  // max padlength of cluster
     row.minTimebin                =         5;  // min timebin for cluster search
+    row.normalizedNowPressure     =    1013.25; // normalized air pressure (in hPa) ;
+    row.adjustedAirPressureWest   =    1013.25; // temperature adjusted air pressure for FTPC West 
+    row.adjustedAirPressureEast   =    1013.25; // temperature adjusted air pressure for FTPC East 
+    row.minPressure               =     990.;   // minimum barometric pressure (in hPa);
+    row.maxPressure               =    1040.;   // maximum barometric pressure (in hPa);
+    row.gasTemperatureWest        =      25.8;  // temperature of gas FTPC East ;
+                                                // initially set to default 
+    row.gasTemperatureEast        =      25.1;  // temperature of gas FTPC East ;
+                                                // initially set to default 
+    row.minGasTemperature         =      23.0;  // maximum gas temperature (in centigrade);
+    row.maxGasTemperature         =      30.0;  // maximum gas temperature (in centigrade);
     
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
