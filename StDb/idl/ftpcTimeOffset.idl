@@ -1,0 +1,13 @@
+/*    ftpcTimeOffset.idl
+*
+*  Table: ftpcTimeOffset
+*
+*       description:
+*/ 
+
+
+struct ftpcTimeOffset { 
+
+   float  offset[960];   /*   time offset for this channel  */
+
+ };  

@@ -9,12 +9,12 @@ use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.30 2000/02/03 20:38:41 fisyak Exp $
+# $Id: cons,v 1.31 2000/02/07 23:10:25 fisyak Exp $
 
 $ver_num = 1.7;
 $ver_rev = "";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.30 2000/02/03 20:38:41 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.31 2000/02/07 23:10:25 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -826,7 +826,13 @@ sub wanted_idlM {
      ) {$prune = 1; return;}
 #    print "=========>$_\n";
   if (/^.*\.idl$/) {# print "name $name\n";
-    push @search_files, $name; 
+    open(SCAN, $_) or die("$0: couldn't open $_ ($!)\n");
+    while (<SCAN>) {
+      next unless /^\s*interface.*:.*amiModule/;
+      push @search_files, $name;
+      last;
+    }
+    close(SCAN);
   }
 }
 #________________________________________
@@ -964,7 +970,13 @@ sub wanted_idl {
 	/^wrk$/)
      ) {$prune = 1; return;}
   if (/^.*\.idl$/) {#print "$name\n";
-    push @search_files, $name; 
+    open(SCAN, $_) or die("$0: couldn't open $_ ($!)\n");
+    while (<SCAN>) {
+      next unless /^\s*struct/;
+      push @search_files, $name;
+      last;
+    }
+    close(SCAN);
   }
 }
 
@@ -1095,8 +1107,8 @@ sub Install_Local {
 sub Objects {
     my($env) = shift;
 # modification from Eric Shienbrood  
-   map($_->{entry}, _Objects($env, map($dir::cwd->lookup($_), @_)))
-#yf    map($_->relpath($dir::cwd), _Objects($env, map($dir::cwd->lookup($_),@_))) 
+#yf   map($_->{entry}, _Objects($env, map($dir::cwd->lookup($_), @_)))
+    map($_->relpath($dir::cwd), _Objects($env, map($dir::cwd->lookup($_),@_))) 
 }
 
 # Called with multiple source file references (or object files).
@@ -1152,6 +1164,16 @@ sub LinkedModule {
     $tgt->bind(find build::command::linkedmodule
 	       ($progenv, $progenv->{LINKMODULECOM}),
 	       $env->_Objects(map($dir::cwd->lookup($env->_subst($_)), @_)));
+}
+sub LinkedTables {
+    my($env) = shift;
+    my($tgt) = $dir::cwd->lookup($env->_subst(shift));
+    my($progenv) = $env->_resolve($tgt);
+    $tgt->bind(find build::command::linkedmodule
+	       ($progenv, $progenv->{LINKMODULECOM}),
+	       $env->_Objects(map(@_, @_)));
+#	       @_);
+#	       $env->_Objects(map($dir::cwd->lookup($env->_subst($_)), @_)));
 }
 
 sub Library {
