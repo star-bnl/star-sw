@@ -1,4 +1,4 @@
-// $Id: bfcread_geantBranch.C,v 1.8 2000/04/20 22:05:24 kathy Exp $
+// $Id: bfcread_geantBranch.C,v 1.9 2000/05/03 18:25:23 kathy Exp $
 // $Log $
 
 //======================================================================
@@ -101,7 +101,7 @@ EventLoop: if (i < nevents && !istat) {
       TDataSetIter tabiter(ds);
       if (ds) {
         countevgds++;
-//        ds->ls(2);  
+
         while (obj = tabiter.Next()) {
 	  cout << " QAInfo: found object: " << obj->GetName() << endl;
 	  fout << " QAInfo: found object: " << obj->GetName() << endl;
@@ -115,9 +115,9 @@ EventLoop: if (i < nevents && !istat) {
             if (tabl) {
               countTable++;
               tottabcntr++;
-              cout << " QAInfo: it's a table with #rows = " 
+              cout << " QAInfo:     it's a table with #rows = " 
                         << tabl->GetNRows() << endl;
-              fout << " QAInfo: it's a table with #rows = " 
+              fout << " QAInfo:     it's a table with #rows = " 
                         << tabl->GetNRows() << endl;
 
 	    } // tabl
