@@ -1,8 +1,13 @@
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// St_scf_Maker class for Makers                                        //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
+ /**************************************************************************
+ * Class      : St_scf_maker.cxx
+ **************************************************************************
+ *
+ * $Log: St_scf_Maker.cxx,v $
+ * Revision 1.3  2002/03/25 20:13:05  suire
+ * Small memory leak fixes, doxygen documentation
+ *
+ *
+ **************************************************************************/
 #include <iostream.h>
 #include <stdlib.h>
 #include "St_scf_Maker.h"
@@ -48,17 +53,17 @@ Int_t St_scf_Maker::Init(){
     gMessMgr->Error() << "No  access to control parameters" << endm;
   } 
 
+
   // 		Create SCF histograms
+  noisDisP = new TH1F("Noise_p","Noise Distribution",25,0,25);
+  snRatioP = new TH1F("SN_p","Signal/Noise (p)",200,0,200);
+  stpClusP = new TH1F("NumberOfStrips_p","Strips per Cluster",8,0,8);
+  totChrgP = new TH1F("ChargeElectron_p","Total Cluster Charge",100,0,300000);
 
-  noisDisP = new TH1F("Noise (p)","Noise Distribution",25,0,25);
-  snRatioP = new TH1F("SN (p)","Signal/Noise (p)",200,0,200);
-  stpClusP = new TH1F("Number of Strips (p)","Strips per Cluster",8,0,8);
-  totChrgP = new TH1F("Charge(electron) (p)","Total Cluster Charge",100,0,300000);
-
-  noisDisN = new TH1F("Noise (n)","Noise Distribution",25,0,25);
-  snRatioN = new TH1F("SN (n)","Signal/Noise",200,0,200);
-  stpClusN = new TH1F("Number of Strips (n)","Strips per Cluster",8,0,8);
-  totChrgN = new TH1F("Charge(electron) (n)","Total Cluster Charge",100,0,300000);
+  noisDisN = new TH1F("Noise_n","Noise Distribution",25,0,25);
+  snRatioN = new TH1F("SN_n","Signal/Noise",200,0,200);
+  stpClusN = new TH1F("NumberOfStrips_n","Strips per Cluster",8,0,8);
+  totChrgN = new TH1F("ChargeElectron_n","Total Cluster Charge",100,0,300000);
 
   return StMaker::Init();
 }
@@ -82,9 +87,8 @@ Int_t St_scf_Maker::Make()
      gMessMgr->Warning("St_scf_Maker: no output");
      return kStWarn;
    }
-  makeScfCtrlHistograms();
-  writeScfCtrlHistograms();
-  
+  makeScfCtrlHistograms();  
+
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -122,33 +126,33 @@ void St_scf_Maker::makeScfCtrlHistograms()
 }
 //_____________________________________________________________________________
 void St_scf_Maker::writeScfCtrlHistograms()
-{
-  ScfCtrlFile = new TFile("event/scfCtrl_histos.root","RECREATE");
+{  
 
+  ScfCtrlFile = new TFile("event/scfCtrl_histos.root","RECREATE");
+  
   noisDisP->Write();
   snRatioP->Write();
   stpClusP->Write();
   totChrgP->Write();
-
+  
   noisDisN->Write();
   snRatioN->Write();
   stpClusN->Write();
   totChrgN->Write();
-
+    
   ScfCtrlFile->Close();
+  
 }
 //_____________________________________________________________________________
 void St_scf_Maker::PrintInfo()
 {
-  printf("**************************************************************\n");
-  printf("* $Id: St_scf_Maker.cxx,v 1.2 2000/08/15 19:34:52 hippolyt Exp $\n");
-  printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
 //_____________________________________________________________________________
 Int_t St_scf_Maker::Finish() {
-  if (Debug()) gMessMgr->Debug() << "In St_spa_Maker::Finish() ... "
+  if (Debug()) gMessMgr->Debug() << "In St_scf_Maker::Finish() ... "
                                << GetName() << endm; 
+  writeScfCtrlHistograms();
   return kStOK;
 }
 

@@ -1,8 +1,13 @@
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// St_scm_Maker class for Makers                                        //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
+ /**************************************************************************
+ * Class      : St_scm_maker.cxx
+ **************************************************************************
+ *
+ * $Log: St_scm_Maker.cxx,v $
+ * Revision 1.3  2002/03/25 20:13:05  suire
+ * Small memory leak fixes, doxygen documentation
+ *
+ *
+ **************************************************************************/
 #include <iostream.h>
 #include <stdlib.h>
 #include "St_scm_Maker.h"
@@ -52,7 +57,7 @@ Int_t St_scm_Maker::Init(){
   } 
 // 		Create SCM histograms
 
-  matchisto = new TH2S("matching Histo","Matching Adc (1p-1n)",50,0,1000,50,0,1000);
+  matchisto = new TH2S("matchingHisto","Matching Adc (1p-1n)",50,0,1000,50,0,1000);
   matchisto->SetXTitle("PSide ADC count");
   matchisto->SetYTitle("NSide ADC count");
   matchisto->SetZTitle("(1p-1n) hits");
@@ -94,7 +99,6 @@ Int_t St_scm_Maker::Make()
    }
 
   makeScmCtrlHistograms();
-  writeScmCtrlHistograms();
 
   return kStOK;
 }
@@ -137,9 +141,6 @@ void St_scm_Maker::writeScmCtrlHistograms()
 //_____________________________________________________________________________
 void St_scm_Maker::PrintInfo()
 {
-  printf("**************************************************************\n");
-  printf("* $Id: St_scm_Maker.cxx,v 1.2 2000/08/15 19:34:52 hippolyt Exp $\n");
-  printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
 
@@ -147,5 +148,6 @@ void St_scm_Maker::PrintInfo()
 Int_t St_scm_Maker::Finish() {
   if (Debug()) gMessMgr->Debug() << "In St_scm_Maker::Finish() ... "
                                << GetName() << endm; 
+  writeScmCtrlHistograms();
   return kStOK;
 }
