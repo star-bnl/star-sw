@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: SVTV1P0.Banks.cxx,v 1.4 2003/09/02 17:55:32 perev Exp $
+ * $Id: SVTV1P0.Banks.cxx,v 1.5 2003/10/28 20:53:38 perev Exp $
  *
  * Author: Marcelo Munhoz, J. Schambach
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: SVTV1P0.Banks.cxx,v $
+ * Revision 1.5  2003/10/28 20:53:38  perev
+ * Linux ==> __linux__
+ *
  * Revision 1.4  2003/09/02 17:55:32  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -79,7 +82,7 @@ int classname(Bank_SVTANODK)::swap()
     return iret;
   else
     iret = swap_raw(header.ByteOrder,&bpADC,12);
-#elif i386
+#elif __i386__
   if(!iret) 
     return 0;
   else if(iret < 0) 

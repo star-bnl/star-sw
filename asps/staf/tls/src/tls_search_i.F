@@ -1,5 +1,8 @@
-* $Id: tls_search_i.F,v 1.1 1998/03/24 00:42:11 fisyak Exp $
+* $Id: tls_search_i.F,v 1.2 2003/10/28 20:58:41 perev Exp $
 * $Log: tls_search_i.F,v $
+* Revision 1.2  2003/10/28 20:58:41  perev
+* Linux ==> __linux__
+*
 * Revision 1.1  1998/03/24 00:42:11  fisyak
 * Clean
 *
@@ -62,7 +65,7 @@ C
    10 CONTINUE
       IF (JHigh.GT.JLow+1) THEN
           JM = (JHigh+JLow)/2
-#ifdef Linux
+#ifdef __linux__
           IF ((key.GT.el1(1+len*(JM-1))) .EQV. Ascend) THEN
 #else
           IF ((key.GT.el1(1+len*(JM-1))) .EQ. Ascend) THEN

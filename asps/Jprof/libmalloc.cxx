@@ -16,8 +16,8 @@
 //  L. David Baron - JP_REALTIME, JPROF_PTHREAD_HACK, and SIGUSR1 handling
 
 
-// The linux glibc hides part of sigaction if _POSIX_SOURCE is defined
-#if defined(linux)
+// The __linux__ glibc hides part of sigaction if _POSIX_SOURCE is defined
+#if defined(__linux__)
 #undef _POSIX_SOURCE
 #endif
 
@@ -84,7 +84,7 @@ static void CrawlStack(malloc_log_entry* me, jmp_buf jb, char* first)
 #ifdef JPROF_PTHREAD_HACK
   int skip = 3;
 #else
-  // This is a linux hack we have to do to figure out where the signal was
+  // This is a __linux__ hack we have to do to figure out where the signal was
   // called from
   me->pcs[numpcs++] = first;
 
@@ -111,7 +111,7 @@ static void CrawlStack(malloc_log_entry* me, jmp_buf jb, char* first)
 
 //----------------------------------------------------------------------
 
-#if defined(linux) || defined(NTO) 
+#if defined(__linux__) || defined(NTO) 
 static void DumpAddressMap()
 {
   // Turn off the timer so we dont get interrupts during shutdown

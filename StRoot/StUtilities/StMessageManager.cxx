@@ -18,7 +18,7 @@
 #include "StMessageManager.h"
 #include "StMessageStream.h"
 #include <string.h>
-#ifdef LINUX
+#ifdef __linux__
 #include <math.h>
 #endif
 
@@ -53,7 +53,7 @@ static char oOpt[] = "O";
 static char otsOpt[] = "OTS";
 static char eOpt[] = "E";
 static char nullMess[] = "Null message!!!";
-#ifdef LINUX
+#ifdef __linux__
 static int sMessLength;
 static const int maxLOMP = 65536;
 static const int maxLOMP1 = (maxLOMP-1);
@@ -88,7 +88,7 @@ void type_of_call Message_(const char* mess, int* lines, int*, size_t len) {
     strcat(mess2,emptyString);
     del_mess = 1;
   } else {
-#ifdef LINUX
+#ifdef __linux__
     sMessLength = len;
 #endif
     if ((len>1) && (messSize > len)) {
@@ -149,7 +149,7 @@ void type_of_call MessageOut( const char *msg ) {
 //________________________________________
 void type_of_call StCaller(const char* mess, const char* typString,
                            const char* opt, size_t len) {
-#ifdef LINUX
+#ifdef __linux__
   sMessLength = len;
 #endif
   if (mess[0]==0) {
@@ -289,7 +289,7 @@ StMessageManager::StMessageManager() : StMessMgr()
   AddType("Q","QAInfo");
   SwitchOff("D");
   MemoryOn();
-#ifdef LINUX
+#ifdef __linux__
   memset(listOfMessPtrs,0,(maxLOMP * sizeof(char*)));
 #endif
   // Initialize buffer with 1024 bytes
@@ -330,7 +330,7 @@ StMessMgr& StMessageManager::Message(const char* mess, const char* type,
   if (!opt) opt = "";
   size_t messSize = strlen(mess);
   if (messSize) {
-#ifdef LINUX
+#ifdef __linux__
     if (sMessLength == 1) {                // Check for re-used mess ptr
       for (int i=lastLOMP; i>=0; i--) {
         if (mess == listOfMessPtrs[i]) {   // mess ptr found
@@ -645,7 +645,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.38 2003/10/10 23:28:43 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.39 2003/10/28 20:58:32 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
@@ -657,8 +657,11 @@ StMessMgr* temp=StMessageManager::Instance();
 StMessMgr& gMess = (*temp);
 
 //_____________________________________________________________________________
-// $Id: StMessageManager.cxx,v 1.38 2003/10/10 23:28:43 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.39 2003/10/28 20:58:32 perev Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.39  2003/10/28 20:58:32  perev
+// Linux ==> __linux__
+//
 // Revision 1.38  2003/10/10 23:28:43  genevb
 // Trust line length argument from Fortran, works better than algorithm now
 //
@@ -693,7 +696,7 @@ StMessMgr& gMess = (*temp);
 // Fixed CC5 warnings, and several other small improvements under the hood
 //
 // Revision 1.27  1999/12/07 19:47:02  genevb
-// Increased length of mess ptr list for Linux
+// Increased length of mess ptr list for __linux__
 //
 // Revision 1.26  1999/10/28 16:06:58  genevb
 // Fixed bug in C msg_enable routine - same as earlier fix for StMessage routines
@@ -711,7 +714,7 @@ StMessMgr& gMess = (*temp);
 // Some workarounds for RedHat6.0
 //
 // Revision 1.21  1999/08/12 22:34:28  genevb
-// Additional crash protection for Linux when omitting parameter strings (opt=strlen(mess))
+// Additional crash protection for __linux__ when omitting parameter strings (opt=strlen(mess))
 //
 // Revision 1.20  1999/08/10 22:07:35  genevb
 // Added QAInfo message types
@@ -720,10 +723,10 @@ StMessMgr& gMess = (*temp);
 // Better protection against empty option strings in FORTRAN
 //
 // Revision 1.18  1999/07/23 16:56:40  genevb
-// Fix extern C prototypes, default options for omitted types, Linux bug with multi-line messages
+// Fix extern C prototypes, default options for omitted types, __linux__ bug with multi-line messages
 //
 // Revision 1.17  1999/07/22 00:19:31  genevb
-// Add MessageOut(), fix Linux bugs with character array lengths passed from FORTRAN
+// Add MessageOut(), fix __linux__ bugs with character array lengths passed from FORTRAN
 //
 // Revision 1.16  1999/07/17 00:23:24  genevb
 // Fixed bug when option fields are empty in FORTRAN, and let type limits be set before types are even added
@@ -735,10 +738,10 @@ StMessMgr& gMess = (*temp);
 // Change default message typing
 //
 // Revision 1.13  1999/07/01 15:58:44  genevb
-// Fixed linux crash with Summary
+// Fixed __linux__ crash with Summary
 //
 // Revision 1.12  1999/07/01 01:24:46  genevb
-// Fixed FORTRAN character string bug on linux, removed a memory leak from Summary()
+// Fixed FORTRAN character string bug on __linux__, removed a memory leak from Summary()
 //
 // Revision 1.11  1999/06/30 17:24:50  genevb
 // Better limit management, remove Bool_t

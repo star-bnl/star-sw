@@ -1,9 +1,12 @@
 *
-* $Id: csinit.F,v 1.3 1999/01/26 00:12:01 fisyak Exp $
+* $Id: csinit.F,v 1.4 2003/10/28 20:58:33 perev Exp $
 *
 * $Log: csinit.F,v $
+* Revision 1.4  2003/10/28 20:58:33  perev
+* Linux ==> __linux__
+*
 * Revision 1.3  1999/01/26 00:12:01  fisyak
-* Pavel correct for Linux
+* Pavel correct for __linux__
 *
 * Revision 1.2  1998/04/16 17:02:19  fisyak
 * 2nd pass with gstar

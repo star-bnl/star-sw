@@ -359,7 +359,7 @@ char* block_name(const char *name,long n)
    memset(bname+ii,' ',8-ii); bname[8]= '\0';
    return bname;
 }
-#ifndef linux
+#ifndef __linux__
 /*
 *:>---------------------------------------------------------------------
 *:ROUTINE:	char* basename
@@ -374,4 +374,4 @@ char* basename(char* filename)
    return strtok((((ss = strrchr(ss,'/')) != NULL) ? ss : filename)
 	   , "/.");
 }
-#endif /* not linux*/
+#endif /* not __linux__*/

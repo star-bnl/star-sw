@@ -1,7 +1,10 @@
 /*
- * $Id: acmain.cc,v 1.10 1998/12/06 01:48:30 perev Exp $
+ * $Id: acmain.cc,v 1.11 2003/10/28 20:58:34 perev Exp $
  *
  * $Log: acmain.cc,v $
+ * Revision 1.11  2003/10/28 20:58:34  perev
+ * Linux ==> __linux__
+ *
  * Revision 1.10  1998/12/06 01:48:30  perev
  * Add noSTAF flags
  *
@@ -24,7 +27,7 @@
  * STAF size and others
  *
  * Revision 1.3  1998/06/23 21:01:15  perev
- * cleanup of getarg for linux
+ * cleanup of getarg for __linux__
  *
  * Revision 1.2  1998/06/23 00:45:19  perev
  * getarg fix
@@ -112,7 +115,7 @@ for (int i=1; i<=argc; i++) { // Search -S <number>
   return 0;
 }
 
-#ifndef Linux 
+#ifndef __linux__ 
 int  type_of_call getarg_ (int *k, char *args, int n)
 { int i=0;  memset (args,' ',n); 
   if (*k>=__argc_save) return 1;
@@ -123,5 +126,5 @@ int  type_of_call getarg_ (int *k, char *args, int n)
 int  type_of_call iargc_() { return __argc_save;}
 
 
-#endif /*not Linux*/
+#endif /*not __linux__*/
 

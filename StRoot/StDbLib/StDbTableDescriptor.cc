@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.22 2003/09/16 22:44:18 porter Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.23 2003/10/28 20:58:31 perev Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.23  2003/10/28 20:58:31  perev
+ * Linux ==> __linux__
+ *
  * Revision 1.22  2003/09/16 22:44:18  porter
  * got rid of all ostrstream objects; replaced with ostringstream+string.
  * modified rules.make and added file stdb_streams.h for standalone compilation
@@ -22,7 +25,7 @@
  * changed limits on flavor tag & made defaults retrieving more readable
  *
  * Revision 1.19  2001/12/05 17:16:35  porter
- * stand-alone make file no longer had "DLINUX" in compile but this is still needed
+ * stand-alone make file no longer had "D__linux__" in compile but this is still needed
  * and returned. Also retrieve elementID list  in query by whereClause for plotting
  * many row instances.
  *
@@ -100,7 +103,7 @@
  * 	5. restructured Node model for better XML support
  *
  * Revision 1.7  1999/12/07 21:25:25  porter
- * some fixes for linux warnings
+ * some fixes for __linux__ warnings
  *
  * Revision 1.6  1999/12/03 19:02:01  porter
  * modified descriptor to accept tableDescriptor once this St_base object
@@ -353,7 +356,7 @@ StDbTableDescriptor::fillSizeAndOffset(char* length, int elementNum){
 
   if(offsetToLast4Bytes<0)offsetToLast4Bytes=0;
 
-#ifdef LINUX
+#ifdef __linux__
   lastType=Stdouble;
 #else
   if(type==Stdouble || type==Stlonglong )padsize = 0;
@@ -400,7 +403,7 @@ void StDbTableDescriptor::endRowPadding(){
   // if the struct contains such an entity, it's size must
   // be divisable by 8.
 
-#ifndef LINUX
+#ifndef __linux__
   if(mhasDouble){
      int checkPadding=mtableSize%8;
      if(checkPadding>0 && checkPadding<5)mtableSize+=4;

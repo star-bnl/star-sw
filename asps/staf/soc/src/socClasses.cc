@@ -6,7 +6,7 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
-#define FILE_VERSION "$Id: socClasses.cc,v 1.34 2002/04/17 21:47:29 perev Exp $"
+#define FILE_VERSION "$Id: socClasses.cc,v 1.35 2003/10/28 20:58:40 perev Exp $"
 
 //:----------------------------------------------- INCLUDES           --
 #include <sys/types.h>
@@ -14,7 +14,7 @@
 #ifdef WIN32
 # include <stdio.h>
 # include <iostream.h>
-#elif !defined(__linux)
+#elif !defined(____linux__)
 # include <sys/stream.h>
 #else
 # include <stream.h>
