@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.h,v 1.2 1999/08/11 14:44:39 fine Exp $
+// $Id: St_tableDescriptor.h,v 1.3 1999/08/12 02:23:30 fine Exp $
 // $Log: St_tableDescriptor.h,v $
+// Revision 1.3  1999/08/12 02:23:30  fine
+// GetRowDescriptor must be const
+//
 // Revision 1.2  1999/08/11 14:44:39  fine
 // name clash with ROOT over enum resolved
 //
@@ -18,12 +21,12 @@
 class St_tableDescriptor : public St_Table {
   protected:
      static St_tableDescriptor *fgColDescriptors;
-     virtual St_tableDescriptor *GetRowDescriptors() { return fgColDescriptors?fgColDescriptors:(fgColDescriptors=GetTableDescriptors());}
+     virtual St_tableDescriptor *GetRowDescriptors() const { return fgColDescriptors?fgColDescriptors:(fgColDescriptors=GetTableDescriptors());}
      virtual void  SetRowDescriptors(St_tableDescriptor *list) { fgColDescriptors = list;}  
 
      St_tableDescriptor(){;}
   public:                                    
-
+ 
     St_tableDescriptor(const St_Table *parentTable);
    ~St_tableDescriptor();
     tableDescriptor_st *GetTable(){ return (tableDescriptor_st *)s_Table;}                                            
