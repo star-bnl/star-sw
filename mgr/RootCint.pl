@@ -14,7 +14,17 @@ my $Cint_cxx = shift;
 my $DirName = dirname($Cint_cxx);# print "DirName = $DirName\n";
 my $LinkDef = $DirName . "/" . "LinkDef.h"; #print "Cint Files :", $Cint_cxx, ",", $Cint_h,",",$LinkDef,"\n";
 my $sources  = shift; #print "sources =", $sources,"\n";
-my $CPPFLAGS = shift; #print "CPPFLAGS = ", $CPPFLAGS, "\n";
+my $CPPFLAGS = shift; print "CPPFLAGS = ", $CPPFLAGS, "\n";
+my @cpps = split / /,$CPPFLAGS;# print "cpps: @cpps \n";
+my $ROOTCINT_CPPPATH = "";
+#print "DirName = $DirName \n";
+(my $dir = $DirName) =~ s/\S*\//\.\.\//g;# print "dir = $dir\n";
+$dir =~ s/\/\S*/\/\.\./g;# print "dir = $dir\n";
+foreach my $c (@cpps) {
+  if ($c  !~ /^-I/ || $c =~ /^-I\//) {$ROOTCINT_CPPPATH .= " " . $c;}
+  else {(my $cc = $c) =~ s/-I//; $cc = "-I" . $dir . "/" . $cc; $ROOTCINT_CPPPATH .= " " . $cc;}
+}
+$CPPFLAGS = $ROOTCINT_CPPPATH;# print "CPPFLAGS = ", $CPPFLAGS, "\n";
 my %class_hfile = (); # class h-file map
 my %class_hfile_depens_on = (); # 
 my %class_written = (); 
@@ -49,7 +59,12 @@ for my $h  (split /\s/,$sources) {#  print "SRC:", $h, "\n";
   next if !$h;
   if ($h =~ /Stypes/)  {$h_files .= " " . basename($h); next;}
   if ($h =~ /LinkDef/) {next;}
-  open (In,$h) or die "Can't open $h";
+#  print "h = $h\n";
+  my $hh = $h;
+  if (!-f $hh) {($hh = $h) =~ s/\.share/StRoot/;}
+  if (!-f $hh) {($hh = $h) =~ s/\.share/asps/;} 
+#  if (!-f $hh) {($hh = $h) =~ s/\.share/asps\/rexe/;} 
+  open (In,$hh) or die "Can't open $hh";
   my $dummy;
   my $class;
   my $includes = "";

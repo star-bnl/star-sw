@@ -11,12 +11,12 @@ use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.34 2000/04/22 20:05:51 fisyak Exp $
+# $Id: cons,v 1.35 2000/05/01 21:08:57 fisyak Exp $
 
 $ver_num = 1.8;
 $ver_rev = "-dev";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.34 2000/04/22 20:05:51 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.35 2000/05/01 21:08:57 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -1009,18 +1009,18 @@ sub find_idl {
   for my $dir (@_) {
     my $i = 0;
     for ($i=0;$i<=$#search_files;$i++) {
-      #      print "i = ",$i, "src =", $search_files[$i],"\n";
+#           print "i = ",$i, "src =", $search_files[$i],"\n";
       my $file = $search_files[$i];
       $file =~ s/$dir\///g;
-      $search_files[$i] = $file;
+      $search_files[$i] = $file; 
     }
   }
-  #  print "find_source found $#search_files + 1 files\n";
+#  print "find_source found $#search_files + 1 files\n";
   return @search_files;
 }
 #________________________________________
 sub wanted_idl {
-  #  print "wanted ",$_,"\n";
+#    print "wanted ",$_,"\n";
   ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
   if ( -d $_ &&
        (/^CVS$/ ||
@@ -2276,19 +2276,20 @@ sub scan {
 sub iflags {
     my($self) = @_;
     my($iflags);
-    my($rflags);
-    my($oflags);
+#    my($rflags);
+#    my($oflags);
     my($dpath);
     # Recognize /I style include directive on Win32
     # <schwarze@isa.de> 1998-05-13
     # Move its invariant calculation outside the loop
     # <knight@baldmt.com> 1998-09-22
     my($flagprefix) = " ${main::FLAG_CHARACTER}I";
-    my $PWD = `pwd`; chomp($PWD);
+#    my $PWD = `pwd`; chomp($PWD);
     for $dpath (map($_->path, @{$self->{path}})) {
-        if ($dpath =~ /^$dir::MATCH_SEPARATOR/) {$oflags .= $flagprefix . $dpath; next;} 
-	$iflags .= $flagprefix . $PWD . "/" . $dpath;
-#	next if File::Spec->file_name_is_absolute($dpath);
+#        if ($dpath =~ /^$dir::MATCH_SEPARATOR/) {$oflags .= $flagprefix . $dpath; next;} 
+#	$iflags .= $flagprefix . $PWD . "/" . $dpath;
+	$iflags .= $flagprefix . $dpath;
+	next if File::Spec->file_name_is_absolute($dpath);
 	if (@param::rpath) {
 	    if ($dpath eq File::Spec->curdir) {
 		foreach my $d (map($_->path, @param::rpath)) {
@@ -2301,7 +2302,8 @@ sub iflags {
 	    }
 	}
     }
-    $iflags . $rflags . $oflags
+    $iflags
+#            . $rflags . $oflags
 }
 
 package File::Spec;
