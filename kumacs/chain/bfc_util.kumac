@@ -89,6 +89,9 @@
 *                             and now add new module to chain:
 *                                 drhd - dst run header table
 * 
+* editted 9/1/98 K. Turner - increment counters nevdsttot,nevdstgood 
+*                            defined in setup.kumac
+* editted 9/1/98 K. Turner - implemented drsum in bfc_finish
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -318,8 +321,11 @@ ABEND:
       chain=' g2tin svg tpg srs tfs sgr spr tpt tte_e svm egr ev0 evout'_
    
   macro/global/import *
+
   test = [chain]
   nw = $words([test])
+
+  nevdsttot = [nevdsttot]+1
 
   do i = 1, [nw]
    mod = $word([test],[i],1)
@@ -455,9 +461,13 @@ ABEND:
   enddo
   asu/malloc/stats 
 
+  nevdstgood = [nevdstgood]+1
+
  ABEND:
  NEXT_EVENT:
  EOF:
+
+ message ' in bfc_util: #events total,good = ', [nevdsttot], [nevdstgood]
  
 return
  
@@ -478,6 +488,8 @@ macro bfc_finish _
     CASE [mod] in 
      (g2tin)  exec input_g2t_file#close
      (rgst)  ge/rz/cd //PAWC; hi/list;  | show histograms
+     (drsum)  exec  finish_dst#dst_run_summary
+              exec  run_dst#dst_run_summary
      (evout,esout) 
             if [output_xdf_file]="" then
                  message "Empty output file"
