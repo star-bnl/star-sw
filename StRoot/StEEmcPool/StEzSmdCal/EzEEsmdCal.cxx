@@ -1,4 +1,4 @@
-// $Id: EzEEsmdCal.cxx,v 1.4 2004/06/29 16:37:41 balewski Exp $
+// $Id: EzEEsmdCal.cxx,v 1.5 2004/07/08 01:20:20 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -38,9 +38,8 @@ EzEEsmdCal::EzEEsmdCal(int sect){
   eEve=0;
   eTrig=0;
   setSector(sect);
-  printf("dfsadfgdsjfs  %d jkfdhshjfdsh d\n",sectID);
 }
-
+ 
 //--------------------------------------------------
 //--------------------------------------------------
 void EzEEsmdCal::init (){
