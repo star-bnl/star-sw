@@ -153,26 +153,20 @@ void StEmcMicroUtil::processStEventTracks()
     // first primary track
     if (pTrack && mDoSavePrimaries)// && pTrack->flag() > 0) 
     {
-      cout << "++++++++++++++++++ 1" << endl;
       totalp++;      
       if(mPFilter->accept(pTrack))
       {
-      cout << "++++++++++++++++++ 2" << endl;
         // Instantiate new StEmcMicroTrack
         StEmcMicroTrack* MicroPTrack = new StEmcMicroTrack();
-      cout << "++++++++++++++++++ 2.1" << endl;
         createTrack(pTrack,MicroPTrack);
-      cout << "++++++++++++++++++ 2.2" << endl;
         if(MicroPTrack) 
         {
-      cout << "++++++++++++++++++ 3" << endl;
           MicroPTrack->setTrackNodeNumber(j);
           mMicroEvent->addPrimaryTrack(MicroPTrack); 
           goodp++;
         }
       }
     }
-      cout << "++++++++++++++++++ 4" << endl;
 
     if (gTrack && mDoSaveGlobals)
     {
