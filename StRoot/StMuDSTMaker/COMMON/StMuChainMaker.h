@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.h,v 1.2 2002/04/11 14:19:30 laue Exp $
+ * $Id: StMuChainMaker.h,v 1.3 2002/04/15 22:29:28 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuChainMaker_hh
@@ -17,9 +17,9 @@ class StMuChainMaker  {
 
   string** subFilter(string filter);
   TChain* make(string dir, string file, string filter, int maxFiles=10);
-  TChain* fromList(string dir, string file,int maxFiles);
-  TChain* fromFile(string dir, string filter, int maxFiles);
-  TChain* fromDir(string dir, string filter, int maxFiles);
+  TChain* fromList(string file,int maxFiles);
+  TChain* fromFile(string file, int maxFiles);
+  TChain* fromDir(string dir, int maxFiles);
 
   string basename(string);
   string dirname(string);
@@ -39,6 +39,9 @@ ClassDef(StMuChainMaker,0)
 /***************************************************************************
  *
  * $Log: StMuChainMaker.h,v $
+ * Revision 1.3  2002/04/15 22:29:28  laue
+ * updates
+ *
  * Revision 1.2  2002/04/11 14:19:30  laue
  * - update for RH 7.2
  * - decrease default arrays sizes
