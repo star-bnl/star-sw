@@ -1,11 +1,24 @@
-# tdm/Makefile.control
+# Makefile.control - user control of SLMakefiles
+#? - Customize this file to control SLMakefile behavior.
+#? - Always run "make config" after changing this file.
+#? - SLM uses default values for any undefined (commented) variables.
+######################################################################
 #
-ASPS += tdm soc
-#PAMS += 
+# Specify ASPs and PAMs upon which this package depends.
+ASPS := tdm spx soc
+#PAMS := pam
 #
-USER_LIBS += -ldsl -lasu
+# Specify special user libraries against which to link.
+#USER_LIBS := -ldsu -ldsl -lasu
 #
+# Choose flags controlling make.
 DEBUG := TRUE
 #SHARE := TRUE
-MOTIF := FALSE
+#MOTIF := TRUE
+#
+# Specify which CERN libraries against which to link.
+#CERNLIBS := pawlib graflib grafX11 packlib mathlib kernlib
+#
+# Specify binaries to install.
+#INSTALL_BIN_FILES :=
 #

@@ -4,6 +4,7 @@
 //:DESCRIPTION: Table & Dataset Memory Orbix-object C++ code
 //:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
 //:BUGS:        -- STILL IN DEVELOPMENT --
+//:HISTORY:     23dec96-v004a-cet- OLD_DSL now an option
 //:HISTORY:     18apr96-v003c-cet- create tdmObject class
 //:HISTORY:     30nov95-v003b-cet- move dui to seperate ASP
 //:HISTORY:     29nov95-v003a-cet- get working with MOAST
@@ -16,6 +17,7 @@
 //:----------------------------------------------- INCLUDES           --
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "asuAlloc.h"
 #include "emlLib.h"
 #include "sutLib.h"
@@ -37,6 +39,7 @@
 extern CC_P void dsuPrintData(FILE *stream , DS_TYPE_CODE_T type
 		, unsigned int count , void *data);
 
+//:#####################################################################
 //:=============================================== CLASS              ==
 // tdmObject
 
@@ -110,6 +113,7 @@ DS_DATASET_T * tdmObject:: dslPointer() {
 
 //:----------------------------------------------- PROT FUNCTIONS     --
 
+//:#####################################################################
 //:=============================================== CLASS              ==
 // tdmTable
 
@@ -257,6 +261,19 @@ char * tdmTable::  typeSpecifier () {
    return c;
 }
 
+//----------------------------------
+// override socObject::listing()
+char * tdmTable::  listing () {
+   char* c = socObject::listing();
+   char* cc = NULL;
+   cc = (char*)ASUALLOC(79);
+   memset(cc,0,79);
+   sprintf(cc,"%s Used/Alloc = %d/%d; rowSize = %d",c,rowCount()
+		,maxRowCount() ,rowSize());
+   ASUFREE(c);
+   return cc;
+}
+
 //:----------------------------------------------- PUB FUNCTIONS      --
 //-02feb96- return result as return value, not argument
 unsigned char tdmTable:: isType (const char * aType) {
@@ -282,11 +299,20 @@ STAFCV_T tdmTable:: printRows (long ifirst, long nrows) {
    if(ifirst < 0 || ii <= ifirst){
       EML_ERROR(INVALID_TABLE_ROW);
    }
+/*- Print Table Header Column Names -*/
    fprintf(stdout," ROW #");
    for( i=0;i<columnCount();i++ ){
       fprintf(stdout,"\t%s",columnName(i));
+      for( long n=1;n<MIN(columnElcount(i),100); n++ ){
+         fprintf(stdout,"\t%s(%d)",columnName(i),n);
+      }
+      if( columnElcount(i) > 100 ){
+	 fprintf(stdout,"\t***%d MORE HEADERS UNPRINTED***"
+			,columnElcount(i)-100);
+      }
    }
    fprintf(stdout,"\n");
+/*- Print Table Data -*/
    pCellData = (char*)pDSthis->p.data;
    pCellData += ifirst*rowSize();
    for( i=ifirst;i<MIN(ii,ifirst+nrows);i++){
@@ -548,6 +574,7 @@ void * tdmTable:: cellAddress(long nrow, long ncol) {
 }
 //:----------------------------------------------- PROT FUNCTIONS     --
 
+//:#####################################################################
 //:=============================================== CLASS              ==
 // tdmDataset
 
@@ -588,11 +615,11 @@ tdmDataset:: tdmDataset(const char* name, long setDim)
 		: socObject(name, "tdmDataset") {
    myPtr = (SOC_PTR_T)this;
    pDSthis = NULL;
-#ifndef	NEW_DSL
-   if( !dsNewDataset(&pDSthis, (char*)name, setDim) ){
-#else	/*NEW_DSL*/
+#ifndef	OLD_DSL
    if( !dsNewDataset(&pDSthis, (char*)name) ){
-#endif	/*NEW_DSL*/
+#else	/*OLD_DSL*/
+   if( !dsNewDataset(&pDSthis, (char*)name, setDim) ){
+#endif	/*OLD_DSL*/
       dsPerror("unable to create dataset pointer");
       pDSthis = NULL;
    }
@@ -634,6 +661,18 @@ long tdmDataset::  maxEntryCount () {
       return -1; /*-TDM_E_BAD_MAXENTRYCOUNT-*/
    }
    return count;
+}
+
+//----------------------------------
+// override socObject::listing()
+char * tdmDataset::  listing () {
+   char* c = socObject::listing();
+   char* cc = NULL;
+   cc = (char*)ASUALLOC(79);
+   memset(cc,0,79);
+   sprintf(cc,"%s Entries = %d",c,entryCount());
+   ASUFREE(c);
+   return cc;
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
@@ -703,6 +742,7 @@ STAFCV_T tdmDataset:: getDescriptor (char *& descriptor) {
 //:----------------------------------------------- PRIV FUNCTIONS     --
 //:**NONE**
 
+//:#####################################################################
 //:=============================================== CLASS              ==
 //: tdmFactory
 
@@ -744,201 +784,148 @@ STAFCV_T tdmFactory:: deleteTable (const char * name) {
 }
 
 //----------------------------------
-STAFCV_T tdmFactory:: findDataset (const char * name
-		, tdmDataset*& dataset ) {
+tdmDataset* tdmFactory:: findDataset (const char * name) {
    socObject* obj=NULL;
-   if( !soc->findObject(name,"tdmDataset",obj) ){
-      dataset = NULL;	//- ???-leave as is?
-      EML_ERROR(OBJECT_NOT_FOUND);
+   if( NULL == (obj = soc->findObject(name,"tdmDataset")) ){
+      return NULL;
    }
-   dataset = (tdmDataset*)(obj->ptr());
-   EML_SUCCESS(STAFCV_OK);
+   tdmDataset *d = TDMDATASET(obj);
+   return d;
 }
 
 //----------------------------------
-STAFCV_T tdmFactory:: findTable (const char * name
-		, tdmTable*& table) {
-   socObject* obj;
-   if( !soc->findObject(name,"tdmTable",obj) ){
-      return FALSE; //BUG-TOO VERBOSE      EML_ERROR(OBJECT_NOT_FOUND);
+tdmTable* tdmFactory:: findTable (const char * name) {
+   socObject* obj=NULL;
+   if( NULL == (obj = soc->findObject(name,"tdmTable")) ){
+      return NULL;
    }
-   table = (tdmTable*)(obj->ptr());
-   EML_SUCCESS(STAFCV_OK);
+   tdmTable *t = TDMTABLE(obj);
+   return t;
 }
 
 //----------------------------------
-STAFCV_T tdmFactory:: getDataset (IDREF_T id, tdmDataset*& dataset) {
+tdmDataset* tdmFactory:: getDataset (IDREF_T id) {
    socObject* obj;
-   if( !soc->getObject(id,obj) ){
-      dataset = NULL;
-      EML_ERROR(INVALID_IDREF);
+   if( (NULL == (obj = soc->getObject(id)))
+   ||  (0 != strcmp(obj->type(),"tdmDataset"))
+   ){
+      return NULL;
    }
-   if( 0 != strcmp(obj->type(),"tdmDataset") ){
-      dataset = NULL;
-      EML_ERROR(WRONG_OBJECT_TYPE);
-   }
-   dataset = (tdmDataset*)(obj->ptr());
-   EML_SUCCESS(STAFCV_OK);
-
+   tdmDataset* d = TDMDATASET(obj);
+   return d;
 }
 
 //----------------------------------
-STAFCV_T tdmFactory:: getTable (IDREF_T id, tdmTable*& table) {
+tdmTable* tdmFactory:: getTable (IDREF_T id) {
    socObject* obj;
-   if( !soc->getObject(id,obj) ){
-      table = NULL;
-      EML_ERROR(INVALID_IDREF);
+   if( (NULL == (obj = soc->getObject(id)))
+   ||  (0 != strcmp(obj->type(),"tdmTable"))
+   ){
+      return NULL;
    }
-   if( 0 != strcmp(obj->type(),"tdmTable") ){
-      table = NULL;
-      EML_ERROR(WRONG_OBJECT_TYPE);
-   }
-   table = (tdmTable*)(obj->ptr());
-   EML_SUCCESS(STAFCV_OK);
+   tdmTable* t = TDMTABLE(obj);
+   return t;
 }
 
 //----------------------------------
 char * tdmFactory:: list () {
-   char *n,*t,nn[30]={0},*nb;
-   socObject* obj;
 
-   printf("\n"
-"+---------------------------------------------------------------------"
-   "\n"
-"|*************** TDM - Table & Dataset Memory listing ****************"
-   "\n"
-"+-------+------------------------------+------------+-----------------"
-   "\n"
-"| IDREF | NAME                         | TYPE       | USED/ALLOCATED  "
-    "\n"
-"+-------+------------------------------+------------+-----------------"
-    "\n");
-   for( int i=0;i<count();i++ ){
-      if( soc->getObject(entry(i),obj) ){
-         if( 0 == strcmp("tdmTable",t=obj->type()) ){
-	    n=obj->name();
-	    if(strlen(n) < 29){
-	       strcpy(nn,n);
-	    }
-	    else {
-	       nb = n + (strlen(n)-25);
-	       sprintf(nn,"...%25s%c",nb,0);
-	    }
-            printf("| %5d | %-28s | %-10s | %d/%d \n"
-                        ,obj->idRef(),nn,t
-                        ,TDMTABLE(obj)->rowCount()
-                        ,TDMTABLE(obj)->maxRowCount());
-	    free(n); free(t);
-         } else if( 0 == strcmp("tdmDataset",obj->type()) ){
-	    n=obj->name();
-	    if(strlen(n) < 29){
-	       strcpy(nn,n);
-	    }
-	    else {
-	       nb = n + (strlen(n)-25);
-	       sprintf(nn,"...%25s%c",nb,0);
-	    }
-            printf("| %5d | %-28s | %-10s | %d/%d \n"
-                        ,obj->idRef(),nn,t
-                        ,TDMDATASET(obj)->entryCount()
-                        ,TDMDATASET(obj)->maxEntryCount());
-	    free(n); free(t);
-         }
-      } else {
-         printf("| %5d | %-15s | %-15s | \n"
-                        ,entry(i),"**DELETED**","**DELETED**");
-	    free(t);
-      }
-   }
-   printf(
-"+-------+------------------------------+------------+-----------------"
-   "\n\n");
+   char *c = socFactory::list();
 
-   return ""; // TEMPORARY HACK
+   char *cc = (char*)ASUALLOC(strlen(c) +1 +162);
+
+   sprintf(cc, 
+                "\n"
+                "+-------------------------------------------"
+                "-----------------------------------\n"
+		"|******************** "
+		"TDM - Table & Dataset Memory listing"
+		" ********************\n"
+                "%s\n",c);
+   ASUFREE(c);
+   return cc;
+
 }
 
 //----------------------------------
-STAFCV_T tdmFactory:: newDataset (const char * name, long setDim) {
+tdmDataset* tdmFactory:: newDataset (const char * name, long setDim) {
    IDREF_T id;
    if( soc->idObject(name,"tdmDataset",id) ){
-      EML_ERROR(DUPLICATE_OBJECT_NAME);
+      return NULL;
    }
    static tdmDataset* p;
    p = new tdmDataset(name,setDim);
    if( !soc->idObject(name,"tdmDataset",id) ){
-      EML_ERROR(OBJECT_NOT_FOUND);
+      return NULL;
    }
    addEntry(id);
-   EML_SUCCESS(STAFCV_OK);
-
+   return p;
 }
 
 //----------------------------------
-STAFCV_T tdmFactory:: newTable (const char * name, const char * spec
+tdmTable* tdmFactory:: newTable (const char * name, const char * spec
 		, long rows) {
    IDREF_T id;
    if( soc->idObject(name,"tdmTable",id) ){
-      EML_ERROR(DUPLICATE_OBJECT_NAME);
+      return NULL;
    }
    static tdmTable* p;
    p = new tdmTable(name,spec,rows);
    if( !soc->idObject(name,"tdmTable",id) ){
-      EML_ERROR(OBJECT_NOT_FOUND);
+      return NULL;
    }
    addEntry(id);
-   EML_SUCCESS(STAFCV_OK);
+   return p;
 }
 
 //----------------------------------
-STAFCV_T tdmFactory:: createDataset (const char * name
-		, DS_DATASET_T *pDS, tdmDataset *& dataset ) {
+tdmDataset* tdmFactory:: createDataset (const char * name
+		, DS_DATASET_T *pDS) {
    IDREF_T id;
    if( soc->idObject(name,"tdmDataset",id) ){
-      EML_ERROR(DUPLICATE_OBJECT_NAME);
+      return NULL;
    }
-   static tdmDataset* p;
-   p = new tdmDataset(name,pDS);
-   if( !findDataset(name,dataset) ){
-      EML_ERROR(OBJECT_NOT_FOUND);
-   }
-   addEntry(dataset->idRef());
-   EML_SUCCESS(STAFCV_OK);
+   static tdmDataset* p = new tdmDataset(name,pDS);
+   addEntry(p->idRef());
+   return p;
 }
 
 //----------------------------------
-STAFCV_T tdmFactory:: createTable (const char * name
-		, DS_DATASET_T *pDS , tdmTable *& table ) {
+tdmTable* tdmFactory:: createTable (const char * name
+		, DS_DATASET_T *pDS) {
    IDREF_T id;
    if( soc->idObject(name,"tdmTable",id) ){
-      EML_ERROR(DUPLICATE_OBJECT_NAME);
+      return NULL;
    }
-   static tdmTable* p;
-   p = new tdmTable(name,pDS);
-   if( !findTable(name,table) ){
-      EML_ERROR(OBJECT_NOT_FOUND);
-   }
-   addEntry(table->idRef());
-   table = p;
-   EML_SUCCESS(STAFCV_OK);
+   static tdmTable* p = new tdmTable(name,pDS);
+   addEntry(p->idRef());
+   return p;
 }
 
 //----------------------------------
 STAFCV_T tdmFactory:: getTypeName (long tid, char *& name) {
-   char *c, *cc;
-   size_t l;
-   int ll;
+   char *spec=NULL;	size_t lspec=0;
+   char *pre=NULL;	size_t lpre=0;
+   char *post=NULL;	size_t lpost=0;
+   char *buff=NULL;	size_t lbuff=0;
 
-   if( !dsTypeSpecifier(&c,&l,(size_t)tid)
-   ||  !(0 == strstr("struct ",c))	/* BUG ????????????????? */
-   ||  !(NULL != (cc = strchr(c,'{')))
-   ||  !(l >= (ll = (int)cc - (int)c))
+   if( !dsTypeSpecifier(&spec,&lspec,(size_t)tid)
+   ||  (0 == (pre = strstr(spec,"struct")))
+   ||  (0 == (post = strstr(spec,"{")))
+   ||  (0 >= (post - pre))
    ){
       name = NULL;
       EML_ERROR(INVALID_TYPE_ID);
    }
-   ll -= 7;
-   name = (char*)ASUALLOC(ll+1);
-   strncpy(name,c+7,ll);
+   buff = (char*)pre;
+   lpre = 6;
+   buff += lpre;
+   while ( !isalnum(buff[0]) && !(buff[0] == '_') ) buff++;
+   lbuff = 0;
+   while ( isalnum(buff[lbuff]) || (buff[lbuff] == '_') ) lbuff++;
+   name = (char*)ASUALLOC(lbuff+1);
+   strncpy(name,buff,lbuff);
+   name[lbuff] = 0;
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -959,22 +946,20 @@ STAFCV_T tdmFactory:: getTypeSpecification (long tid, char *& spec) {
 //----------------------------------
 STAFCV_T tdmFactory:: findTypeSpecification (const char * name
 		, char *& spec) {
-   char *n=NULL;
-   char *nn=NULL;
-   size_t nnl=0;
+   size_t lname=strlen(name);
+   char *nm=NULL;
+   size_t lnm=0;
 
    for(int i=1;;i++){
-      if( !getTypeName(i,n) ){
-	 EML_SUCCESS(STAFCV_OK);
+      if( !getTypeName(i,nm) ){
+         EML_SUCCESS(STAFCV_OK);
       }
-      if( 0<= (nnl = sutStripWhitespace(&nn,n)) ){
-	 if( 0== strncmp(name,nn,nnl) ){
-	    ASUFREE(nn);
-	    getTypeSpecification(i,spec);
-	    EML_SUCCESS(STAFCV_OK);
-	 }
+      if( (0 == strcmp(name,nm)) ){
+         ASUFREE(nm);
+         getTypeSpecification(i,spec);
+         EML_SUCCESS(STAFCV_OK);
       }
-      ASUFREE(nn);
+      ASUFREE(nm);
    }
 }
 

@@ -89,7 +89,6 @@ typedef struct tdm_column_t {
 extern CC_P int tdm_init();
 extern CC_P int tdm_start();
 extern CC_P int tdm_stop();
-extern CC_P void tdm_def_();
 extern CC_P void tdm_printCell(FILE *stream, TDM_CELLDATA_T *data
 		, TDM_COLUMN_T *col);
 extern CC_P int tdm_nameMatch(char *a, char *b);
@@ -101,77 +100,83 @@ extern CC_P int tdm_cvtDst2st(DS_DATASET_T *pT
 #endif /*__cplusplus*/
 
 #ifndef NOKUIP
+extern CC_P void tdm_def_();
+
 extern CC_P void kam_tdm_allocstats_();
-extern CC_P void kam_tdmdataset_name_();
-extern CC_P void kam_tdmdataset_entrycount_();
-extern CC_P void kam_tdmdataset_maxentrycount_();
-extern CC_P void kam_tdmtable_name_();
-extern CC_P void kam_tdmtable_rowcount_();
-extern CC_P void kam_tdmtable_maxrowcount_();
-extern CC_P void kam_tdmtable_colcount_();
-extern CC_P void kam_tdmtable_typename_();
-extern CC_P void kam_tdmtable_specifier_();
-extern CC_P void kam_tdmtable_rowsize_();
-extern CC_P void kam_tdmtable_print_();
-extern CC_P void kam_tdmtable_show_();
 extern CC_P void kam_tdm_count_();
 extern CC_P void kam_tdm_list_();
 extern CC_P void kam_tdm_newdataset_();
 extern CC_P void kam_tdm_newtable_();
 extern CC_P void kam_tdm_type_list_();
 extern CC_P void kam_tdm_type_show_();
-extern CC_P void kam_tdmtable_cell_putvalue_();
-extern CC_P void kam_tdmtable_cell_getvalue_();
-extern CC_P void kam_tdmtable_column_size_();
-extern CC_P void kam_tdmtable_column_elcount_();
-extern CC_P void kam_tdmtable_column_shape_();
-extern CC_P void kam_tdmtable_column_rank_();
-extern CC_P void kam_tdmtable_column_code_();
-extern CC_P void kam_tdmtable_column_type_();
-extern CC_P void kam_tdmtable_column_name_();
-extern CC_P void kam_tdmtable_column_find_();
-extern CC_P void kam_tdmdataset_findentry_();
-extern CC_P void kam_tdmdataset_entryname_();
-extern CC_P void kam_tdmdataset_show_();
-extern CC_P void kam_tdmdataset_addtable_();
 extern CC_P void kam_tdmdataset_adddataset_();
-
-extern CC_P int kam_tdm_allocstats();
-extern CC_P int kam_tdmdataset_name();
-extern CC_P int kam_tdmdataset_entrycount();
-extern CC_P int kam_tdmdataset_maxentrycount();
-extern CC_P int kam_tdmtable_name();
-extern CC_P int kam_tdmtable_rowcount();
-extern CC_P int kam_tdmtable_maxrowcount();
-extern CC_P int kam_tdmtable_colcount();
-extern CC_P int kam_tdmtable_typename();
-extern CC_P int kam_tdmtable_specifier();
-extern CC_P int kam_tdmtable_rowsize();
-extern CC_P int kam_tdmtable_print();
-extern CC_P int kam_tdmtable_show();
-extern CC_P int kam_tdm_count();
-extern CC_P int kam_tdm_list();
-extern CC_P int kam_tdm_newdataset();
-extern CC_P int kam_tdm_newtable();
-extern CC_P int kam_tdm_type_list();
-extern CC_P int kam_tdm_type_show();
-extern CC_P int kam_tdmtable_cell_putvalue();
-extern CC_P int kam_tdmtable_cell_getvalue();
-extern CC_P int kam_tdmtable_column_size();
-extern CC_P int kam_tdmtable_column_elcount();
-extern CC_P int kam_tdmtable_column_shape();
-extern CC_P int kam_tdmtable_column_rank();
-extern CC_P int kam_tdmtable_column_code();
-extern CC_P int kam_tdmtable_column_type();
-extern CC_P int kam_tdmtable_column_name();
-extern CC_P int kam_tdmtable_column_find();
-extern CC_P int kam_tdmdataset_findentry();
-extern CC_P int kam_tdmdataset_entryname();
-extern CC_P int kam_tdmdataset_show();
-extern CC_P int kam_tdmdataset_addtable();
-extern CC_P int kam_tdmdataset_adddataset();
-
+extern CC_P void kam_tdmdataset_addtable_();
+extern CC_P void kam_tdmdataset_entrycount_();
+extern CC_P void kam_tdmdataset_entryname_();
+extern CC_P void kam_tdmdataset_findentry_();
+extern CC_P void kam_tdmdataset_maxentrycount_();
+extern CC_P void kam_tdmdataset_name_();
+extern CC_P void kam_tdmdataset_show_();
+extern CC_P void kam_tdmtable_cell_getvalue_();
+extern CC_P void kam_tdmtable_cell_putvalue_();
+extern CC_P void kam_tdmtable_colcount_();
+extern CC_P void kam_tdmtable_column_code_();
+extern CC_P void kam_tdmtable_column_elcount_();
+extern CC_P void kam_tdmtable_column_find_();
+extern CC_P void kam_tdmtable_column_name_();
+extern CC_P void kam_tdmtable_column_rank_();
+extern CC_P void kam_tdmtable_column_shape_();
+extern CC_P void kam_tdmtable_column_size_();
+extern CC_P void kam_tdmtable_column_type_();
+extern CC_P void kam_tdmtable_maxrowcount_();
+extern CC_P void kam_tdmtable_name_();
+extern CC_P void kam_tdmtable_print_();
+extern CC_P void kam_tdmtable_rowcount_();
+extern CC_P void kam_tdmtable_rowsize_();
+extern CC_P void kam_tdmtable_show_();
+extern CC_P void kam_tdmtable_specifier_();
+extern CC_P void kam_tdmtable_typename_();
 #endif /*NOKUIP*/
+
+extern CC_P STAFCV_T tdm_allocstats();
+extern CC_P STAFCV_T tdm_count();
+extern CC_P STAFCV_T tdm_list();
+extern CC_P STAFCV_T tdm_newdataset(char* name, long dim);
+extern CC_P STAFCV_T tdm_newtable(char* name, char* spec
+		, long rowcount);
+extern CC_P STAFCV_T tdm_type_list(long tid);
+extern CC_P STAFCV_T tdm_type_show(char* name);
+extern CC_P STAFCV_T tdmdataset_adddataset(char* dsname,char* name
+		, long dim);
+extern CC_P STAFCV_T tdmdataset_addtable(char* dsname, char* name
+		, char* spec, long rowcount);
+extern CC_P STAFCV_T tdmdataset_entrycount(char* name);
+extern CC_P STAFCV_T tdmdataset_entryname();
+extern CC_P STAFCV_T tdmdataset_findentry();
+extern CC_P STAFCV_T tdmdataset_maxentrycount(char* name);
+extern CC_P STAFCV_T tdmdataset_name(char* name);
+extern CC_P STAFCV_T tdmdataset_show();
+extern CC_P STAFCV_T tdmtable_cell_getvalue(char* cellSpec);
+extern CC_P STAFCV_T tdmtable_cell_putvalue(char* cellSpec, long nv
+		, char **values);
+extern CC_P STAFCV_T tdmtable_colcount(char* name);
+extern CC_P STAFCV_T tdmtable_column_code();
+extern CC_P STAFCV_T tdmtable_column_elcount();
+extern CC_P STAFCV_T tdmtable_column_find();
+extern CC_P STAFCV_T tdmtable_column_name();
+extern CC_P STAFCV_T tdmtable_column_rank();
+extern CC_P STAFCV_T tdmtable_column_shape();
+extern CC_P STAFCV_T tdmtable_column_size();
+extern CC_P STAFCV_T tdmtable_column_type();
+extern CC_P STAFCV_T tdmtable_maxrowcount(char* name,long maxrowcount);
+extern CC_P STAFCV_T tdmtable_name(char* name);
+extern CC_P STAFCV_T tdmtable_print(char* name, long nrows
+		, long ifirst);
+extern CC_P STAFCV_T tdmtable_rowcount(char* name, long rowcount);
+extern CC_P STAFCV_T tdmtable_rowsize(char* name);
+extern CC_P STAFCV_T tdmtable_show(char* name, char* option);
+extern CC_P STAFCV_T tdmtable_specifier(char* name);
+extern CC_P STAFCV_T tdmtable_typename(char* name);
 
 #endif /* TDM_TYPES_H */
 

@@ -70,7 +70,7 @@ int ds2ReallocTable(TABLE_HEAD_ST** ppHead,char** ppData
 	   dsPerror("ds2ReallocTable: can't reallocate");
 	   return FALSE;
 	}
-	pData = pDat;
+	*ppData = pDat;
 	pHead->maxlen = newCount;
 	return TRUE;
 }

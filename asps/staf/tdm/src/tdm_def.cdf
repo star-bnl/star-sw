@@ -16,10 +16,16 @@
 >MENU TDM
 >GUIDANCE
 Table & Dataset Memory commands.
+$Id: tdm_def.cdf,v 1.2 1997/01/22 06:16:22 tull Exp $
 .
-VERSION v1.00a (30apr96).
+Commands for the Table & Dataset Memory (TDM) ASP.
 .
-Commands for the Table & Dataset Memory ASP.
+The TDM package is a C++ classs library implementation of the DSL
+Package for memory-resident datasets and tables.
+.
+TDM is responsible for memory allocation and management for DSL
+datasets and tables, and management of the data tictionary of table
+types.
 .
 ************************************************************************
 ************************************************************************
@@ -31,6 +37,9 @@ Commands for the Table & Dataset Memory ASP.
 >GUIDANCE
 Show DSL allocation statistics.
 .
+Show the statistics for membory allocation and deallocation of DSL
+tables and datasets.
+.
 >ACTION KAM_TDM_ALLOCSTATS
 
 ** ---------------------------------------------------------------------
@@ -40,6 +49,9 @@ Show DSL allocation statistics.
 >GUIDANCE
 Show count of known TDM objects.
 .
+Show the number of dataset and table objects currently instantiated and
+managed by the TDM object factory.
+.
 >ACTION KAM_TDM_COUNT
 
 ** ---------------------------------------------------------------------
@@ -48,6 +60,9 @@ Show count of known TDM objects.
 >PARAMETERS
 >GUIDANCE
 List all known TDM objects.
+.
+List all dataset and table objects currently instantiated and
+managed by the TDM object factory.
 .
 >ACTION KAM_TDM_LIST
 
@@ -60,6 +75,8 @@ NAME 'tdmDataset name.' C
 DIM 'dataset dimension.' I D=100
 >GUIDANCE
 Create a new tdmDataset.
+.
+Create a new dataset unencapsulated by any other dataset.
 .
 >ACTION KAM_TDM_NEWDATASET
 

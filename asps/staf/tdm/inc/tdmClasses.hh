@@ -71,6 +71,9 @@ public:
    virtual char * typeName ();
    virtual char * typeSpecifier ();
 
+//- OVERRIDE VIRTUAL
+   virtual char * listing();
+
 //:----------------------------------------------- PUB FUNCTIONS      --
 
    virtual unsigned char isType (const char * aType);
@@ -133,6 +136,9 @@ public:
    virtual long entryCount ();
    virtual long maxEntryCount ();
 
+//- OVERRIDE VIRTUAL
+   virtual char * listing();
+
 //:----------------------------------------------- PUB FUNCTIONS      --
    virtual STAFCV_T addDataset (const char * name, long setDim);
    virtual STAFCV_T addTable (const char * name, const char * spec
@@ -171,25 +177,29 @@ public:
 
 //:----------------------------------------------- PUB FUNCTIONS      --
    virtual char * list ();
+/*- Datasets -*/
    virtual STAFCV_T deleteDataset (const char * name);
+   virtual tdmDataset* findDataset (const char * name);
+   virtual tdmDataset* getDataset (IDREF_T id);
+   virtual tdmDataset* newDataset (const char * name, long setDim);
+
+/*- Tables -*/
    virtual STAFCV_T deleteTable (const char * name);
-   virtual STAFCV_T findDataset (const char * name
-                , tdmDataset*& dataset);
-   virtual STAFCV_T findTable (const char * name, tdmTable*& table);
-   virtual STAFCV_T getDataset (IDREF_T id, tdmDataset*& dataset);
-   virtual STAFCV_T getTable (IDREF_T id, tdmTable*& table);
-   virtual STAFCV_T newDataset (const char * name, long setDim);
-   virtual STAFCV_T newTable (const char * name, const char * spec
+   virtual tdmTable* findTable (const char * name);
+   virtual tdmTable* getTable (IDREF_T id);
+   virtual tdmTable* newTable (const char * name, const char * spec
                 , long rows);
 
-   virtual STAFCV_T createDataset (const char * name, DS_DATASET_T *pDS
-		, tdmDataset *& dataset);
-   virtual STAFCV_T createTable (const char * name, DS_DATASET_T *pDS
-		, tdmTable *& table);
+/*- Create from DSL structures -*/
+   virtual tdmDataset* createDataset (const char * name
+		, DS_DATASET_T *pDS);
+   virtual tdmTable* createTable (const char * name, DS_DATASET_T *pDS);
 
+/*- Table type handling -*/
    virtual STAFCV_T getTypeName (long tid, char *& name);
    virtual STAFCV_T getTypeSpecification (long tid, char *& spec);
-   virtual STAFCV_T findTypeSpecification (const char * name, char *& spec);
+   virtual STAFCV_T findTypeSpecification (const char * name
+		, char *& spec);
 
 protected:
 //:----------------------------------------------- PROT VARIABLES     --

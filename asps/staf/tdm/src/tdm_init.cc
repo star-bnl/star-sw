@@ -57,7 +57,12 @@ int tdm_stop()
    delete tdm;
 unecessary -- soc will do it. -*/
 
+#ifndef OLD_DSL
+   dsAllocStats();			/* show allocation stats */
+#else   /*OLD_DSL*/
    dsDatasetAllocStats();		/* show allocation stats */
+#endif  /*OLD_DSL*/
+
    return TRUE;
 }
 
