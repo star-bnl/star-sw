@@ -49,7 +49,7 @@ C---------------
       REAL	pdotp,ndotp,pv0,pv0sq,ppar,npar,pper
       REAL	trk1(6),trk2(6)
       REAL      trk1sav(6),trk2sav(6)
-      REAL      xn1sav(2),xn2sav(2)
+      REAL      xn1sav(2),xn2sav(2),x2,y2,z2,x1,y1,z1,check
       REAL	xcom(2),ycom(2),inv_mass,rmin
       REAL	xp(2),xn1(2),xn2(2),rd,xpp(3),massl(2),pp(3)
       REAL      env0,bv0,gv0,ep,ppar_cm,mainv(3),rap
@@ -197,9 +197,36 @@ c
                  call ev0_project_track(trak(i).xc,trak(i).rc,xp,xn1)
                  call ev0_update_track_param(trak(i).xc,trak(i).rc,
      +                xn1,trak(i).r0,trk1,bfield(3))
+
+C Test for "fake" vertex -> tracks heading away from vertex
+                 call ev0_track_mom(trk1,trak(i).rc,0,
+     +                pst1,bfield(3))
+                 x1 = xn1(1)-mainv(1)
+                 y1 = xn1(2)-mainv(2)
+                 z1 = trk1(3)-mainv(3)
+                 check=(x1*pst1(1))+(y1*pst1(2))+(z1*pst1(3))
+                 IF(check.lt.0.0)then
+                   trk1(3) = 99999.0
+                   go to 11
+                 endif
+
                  call ev0_project_track(trak(j).xc,trak(j).rc,xp,xn2)    
                  call ev0_update_track_param(trak(j).xc,trak(j).rc,
      +                xn2,trak(j).r0,trk2,bfield(3))
+
+C Test for "fake" vertex -> tracks heading away from vertex
+                 call ev0_track_mom(trk2,trak(j).rc,0,
+     +                pst2,bfield(3))
+                 x2 = xn2(1)-mainv(1)
+                 y2 = xn2(2)-mainv(2)
+                 z2 = trk2(3)-mainv(3)
+                 check=(x2*pst2(1))+(y2*pst2(2))+(z2*pst2(3))
+                 IF(check.lt.0.0)then
+                   trk2(3) = 99999.0
+                   go to 11
+                 endif
+
+ 11              continue
                  if( trk1(3) .lt. 99990.0 .and. 
      +                trk2(3) .lt. 99990.0) then
                     rdcheck(jk)=(xn1(1)-xn2(1))**2+(xn1(2)-xn2(2))**2
