@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: StRichOtherAlgorithms.h,v 1.5 2000/03/17 14:54:57 lasiuk Exp $
+ * $Id: StRichOtherAlgorithms.h,v 1.6 2000/04/05 16:01:29 lasiuk Exp $
  *  This file contains two small classes: Randoms encapsulates
  *  random number generation algorithms, such as poisson,
  *  gauss, flat and polia. MyRound rounds doubles to the nearest
@@ -13,8 +13,8 @@
  *  Flat comes from the C++ Standard Library.
  *
  * $Log: StRichOtherAlgorithms.h,v $
- * Revision 1.5  2000/03/17 14:54:57  lasiuk
- * Large scale revisions after ROOT dependent memory leak
+ * Revision 1.6  2000/04/05 16:01:29  lasiuk
+ * poisson(double) added
  *
  * Revision 1.5  2000/03/17 14:54:57  lasiuk
  * Large scale revisions after ROOT dependent memory leak
@@ -39,6 +39,7 @@ public:
     ~Randoms();
 
     int Poisson(int n) const;
+    int Poisson(double n) const;
     double Gauss(double mean =0, double std_dev =1) const;
 
     //int Flat(int n) const { return ((int(rand())/RAND_MAX) * n); }

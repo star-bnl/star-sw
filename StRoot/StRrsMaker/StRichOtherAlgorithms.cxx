@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: StRichOtherAlgorithms.cxx,v 1.1 2000/03/17 14:54:56 lasiuk Exp $
+ * $Id: StRichOtherAlgorithms.cxx,v 1.2 2000/04/05 16:01:25 lasiuk Exp $
  *
  *  Polia Distribution was written according to an algorithm
  *  proposed by Rob Veenhof, from CERN.
@@ -9,8 +9,8 @@
  *  Flat comes from the C++ Standard Library.
  *
  * $Log: StRichOtherAlgorithms.cxx,v $
- * Revision 1.1  2000/03/17 14:54:56  lasiuk
- * Large scale revisions after ROOT dependent memory leak
+ * Revision 1.2  2000/04/05 16:01:25  lasiuk
+ * poisson(double) added
  *
  * Revision 1.1  2000/03/17 14:54:56  lasiuk
  * Large scale revisions after ROOT dependent memory leak
@@ -31,6 +31,11 @@ Randoms::~Randoms()
 { /**/ }
 
 int Randoms::Poisson(int n) const
+{
+    return mPoisson.shoot(n);
+}
+
+int Randoms::Poisson(double n) const
 {
     return mPoisson.shoot(n);
 }
