@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.8 2001/04/30 19:09:27 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.9 2001/05/01 15:17:36 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.9  2001/05/01 15:17:36  genevb
+// Execute EMC code only if EMC libs loaded
+//
 // Revision 2.8  2001/04/30 19:09:27  genevb
 // Catch missing EMC info
 //
@@ -37,6 +40,7 @@
 
 #include "PhysicalConstants.h"
 #include <math.h>
+#include "TROOT.h"
 #include "TMath.h"
 #include "SystemOfUnits.h"
 #include "StQABookHist.h"
@@ -76,7 +80,9 @@ Int_t StEventQAMaker::Init() {
 // StEventQAMaker - Init; book histograms and set defaults for member functions
 
   mHitHist = new HitHistograms("QaDedxAllSectors","dE/dx for all TPC sectors",100,0.,1.e-5,2);
-  for(Int_t i=0; i<4; i++) {emcGeom[i] = new StEmcGeom(i+1);}
+  if ((gROOT->GetClass("StEmcMath")) && (gROOT->GetClass("StEmcGeom"))) {
+    for(Int_t i=0; i<4; i++) {emcGeom[i] = new StEmcGeom(i+1);}
+  }
   return StQAMakerBase::Init();
 }
 
