@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.25 2004/04/08 16:49:31 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.26 2004/04/14 15:57:30 fisyak Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -214,7 +214,7 @@ Int_t StdEdxY2Maker::Init(){
   m_Calibration = m_Mode%10;
   m_DoNotCorrectdEdx = TMath::Abs(m_Mode/100)%10;
   if (m_DoNotCorrectdEdx) gMessMgr->Warning() << "StdEdxY2Maker:: use 'DoNotCorrectdEdx' mode" << endm;
-  if (! m_Calibration) gMessMgr->Warning() << "StdEdxY2Maker:: Calibration Mode" << m_Calibration << endm;
+  if (m_Calibration) gMessMgr->Warning() << "StdEdxY2Maker:: Calibration Mode" << m_Calibration << endm;
   if (! m_Simulation)  {
     m_ClusterFinder = (TMath::Abs(m_Mode)/10)%10;
     if (! m_ClusterFinder) gMessMgr->Warning() << "StdEdxY2Maker:: use old Cluster Finder parameterization" << endm;
@@ -1813,11 +1813,12 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
   static StProton* Proton = StProton::instance();
   static const Double_t Log10E = TMath::Log10(TMath::Exp(1.));
   if (! gTrack) {
-    StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
     TFile *f = 0;
-    if (chain) f = chain->GetTFile();
-    if (f) f->cd();
-   
+    if (m_Calibration) {
+      StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
+      if (chain) f = chain->GetTFile();
+      if (f) f->cd();
+    }
     fZOfBadHits = new TH1D("ZOfBadHits","Z of rejected clusters",100,-210,210);                        
     fZOfGoodHits = new TH1D("ZOfGoodHits","Z of accepted clusters",100,-210,210);                        
     fPhiOfBadHits = new TH1D("PhiOfBadHits","Phi of rejected clusters",100, -TMath::Pi(), TMath::Pi());
