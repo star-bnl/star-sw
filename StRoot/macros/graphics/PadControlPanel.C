@@ -2,8 +2,11 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.C,v 1.3 1999/06/02 22:25:12 fine Exp $
+// $Id: PadControlPanel.C,v 1.4 1999/06/03 00:27:53 fine Exp $
 // $Log: PadControlPanel.C,v $
+// Revision 1.4  1999/06/03 00:27:53  fine
+// 4 view control has been activated
+//
 // Revision 1.3  1999/06/02 22:25:12  fine
 // 4 view command has been introduced
 //
@@ -211,6 +214,8 @@ void MakeFourView(TVirtualPad *pad=0)
 //   |              |             |
 //   |              |             |
 //   ------------------------------
+// begin_html  <P ALIGN=CENTER> <IMG SRC="gif/FourStarView.gif" ></P> end_html
+//
   TVirtualPad *thisPad = pad;
   if (!thisPad) thisPad = gPad;
   TView *view = 0; 
