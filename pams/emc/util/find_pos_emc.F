@@ -16,11 +16,25 @@ c*-
 #include "math_constants.inc"
       RECORD / ems_control_st / ems_control(*)
       integer det,module,ebin,sub,iphi,rl
-      integer nm,ne,ns
+      integer nm,ne,ns, key/0/
       real eta,phi,nphi,r,z
       real offset(2) /1.3089969, 1.8325957/
       real sign(2)   /-1, 1/
+** Must be getted from geometry of BEMC in GEANT => 20-feb-1999
+      real smetawdh /0.9806/, seta1wdh /0.7277/, seta2wdh /0.9398/
+     +   , set12wdh/0.04064/
+      real rsmd(2)  /230.467,232.467/
+      real shift_smde(2)
 
+      if(key.eq.0) then
+        key=1
+        shift_smde(1) = 2.*smetawdh   + seta1wdh    ! The center of first eta strip
+        shift_smde(2) = shift_smde(1) + (seta1wdh+set12wdh)*74*2  
+     +  + (seta1wdh+set12wdh) + (seta2wdh+set12wdh)   ! The center of 76th eta strip
+        write(6,*) ' <I> Shifts for SMDE ', shift_smde
+     +           , ' R for SMD ', rsmd 
+      endif
+**
       phi=0.0
       eta=0.0
       rl=1
@@ -71,14 +85,13 @@ c*-
      +          +ems_control(1).eemc_eta_bin(ebin+1))/2.0
       elseif(det.eq.BSMDE) then                     ! Barrel SMD eta-strip
          if(ebin.le.75) then
-            z=(ebin/75.0-0.5)*0.5
+            z = shift_smde(1)+(seta1wdh+set12wdh)*2*(ebin-1) ! z-poz for center of ebin   
+            r = rsmd(1)
          else
-            z=0.5 + ((ebin-75)/75.0-0.5)
-     +       *ems_control(1).bemc_eta_bin(ebin+1)
+            z = shift_smde(2)+(seta2wdh+set12wdh)*2*(ebin-76)       ! z-poz for center of ebin  
+            r = rsmd(2)  !Temporaly! Has to be check!!!
          endif
-         r=ems_control(1).bemc_inner_r              !Temporaly! Has to be check!!!
-         z=z*ems_control(1).bemc_max_z              !Temporaly! Has to be check!!!
-         eta=-1.0*ALOG(TAN(ATAN2(r,z)/2.0))
+         eta = -1.*ALOG(TAN(ATAN2(r,z)/2.0))*rl
       elseif(det.eq.BSMDP) then                     ! Barrel SMD phi strip
          eta=rl*(ems_control(1).bemc_eta_bin(ebin*2-1)
      +          +ems_control(1).bemc_eta_bin(ebin*2+1))/2.0
@@ -95,4 +108,3 @@ c*-
       
       return
       end
-
