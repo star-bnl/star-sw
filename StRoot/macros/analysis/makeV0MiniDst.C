@@ -1,7 +1,8 @@
-// Using StV0MiniDstMaker to make v0 mini-DST
-// Peter G. Jones, University of Birmingham, p.g.jones@bham.ac.uk
-// $Id: makeV0MiniDst.C,v 1.5 1999/09/02 09:12:26 jones Exp $
+// $Id: makeV0MiniDst.C,v 1.6 2000/01/05 22:18:06 genevb Exp $
 // $Log: makeV0MiniDst.C,v $
+// Revision 1.6  2000/01/05 22:18:06  genevb
+// Put comments in order that QA wants
+//
 // Revision 1.5  1999/09/02 09:12:26  jones
 // Changes reflect new I/O file handling
 //
@@ -17,6 +18,12 @@
 // Revision 1.1  1999/07/13 12:51:01  jones
 // Added macros for making and reading v0 mini-DSTs using StV0MiniDstMaker
 //
+//======================================================
+// owner:  Peter G. Jones, University of Birmingham, p.g.jones@bham.ac.uk
+// what it does:  uses StV0MiniDstMaker to create a V0 mini-DST
+//======================================================
+
+
 
 void load() {
   gSystem->Load("St_base");
