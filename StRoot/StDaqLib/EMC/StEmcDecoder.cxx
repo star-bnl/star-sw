@@ -83,7 +83,8 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
 
   // initial position in the crate
   int Init_Crate_tmp[]={2260,2420,2580,2740,2900,3060,3220,3380,3540,3700,
-                        3860,4020,4180,4340,4500,2180,2020,1860,1700,1540,
+                        3860,4020,4180,4340,4500,
+                        2180,2020,1860,1700,1540,
                         1380,1220,1060,900,740,580,420,260,100,2340};
   for(int i=0;i<30;i++) Init_Crate[i]=Init_Crate_tmp[i];
                        
@@ -256,6 +257,23 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
                           4661,4741,2421,2501,2581,2661,2741,2822,2901,2981,3061,3141,3221,3301,3381,3461,
                           3541,3621,3701,3782,3861,3941,4021,4101,4181,4261,4341,4421,4501,4581};
   for(int i=0;i<60;i++) PsdStart[i] = PsdStart_tmp[i];
+  
+  ///////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////
+  // these tables are for TRIGGER decoding //////////////////////////////
+  
+  if(date>=0)
+  {
+    int TriggerPatch_tmp[30] = {150,160,170,180,190,
+                                200,210,220,230,240,
+                                250,260,270,280,290,
+                                 30, 20, 10,  0,140,
+                                130,120,110,100, 90,
+                                 80, 70, 60, 50, 40};
+    int TriggerSequence_tmp[10] = {0,1,2,3,4,5,6,7,8,9};
+    for(int i=0;i<30;i++)    TriggerPatch[i] = TriggerPatch_tmp[i];                         
+    for(int i=0;i<10;i++)    TriggerSequence[i] = TriggerSequence_tmp[i];                         
+  }
   return;
 }
 //--------------------------------------------------------
@@ -480,6 +498,36 @@ int StEmcDecoder::GetTowerIdFromTDC(int TDC,int tdc_sequency, int& TowerId)
     return 1;
   }
   return 0;
+}
+//--------------------------------------------------------
+/*!
+\param CRATE is the crate number
+\param crate_seq is the position of the tower inside the crate (0 <= crate_seq <=159)
+\param patchId is the software id for towers
+*/
+int StEmcDecoder::GetTriggerPatchFromCrate(int CRATE,int crate_seq, int& patchId)
+{
+  if(CRATE<1 || CRATE>30) return 0;
+  int S = TriggerPatch[CRATE-1];
+  int N = crate_seq/16;
+  patchId = S+TriggerSequence[N];
+  return 1;
+}
+//--------------------------------------------------------
+/*!
+\param PATCH is the software id for towers
+\param CRATE is the crate number
+\param crate_seq is the position of the tower inside the crate (0 <= crate_seq <=159)
+*/
+int StEmcDecoder::GetCrateAndSequenceFromTriggerPatch(int PATCH,int& CRATE,int& crate_seq)
+{
+  if(PATCH<0 || PATCH>299) return 0;
+  int P = PATCH/10;
+  P*=10;
+  for(int i=0;i<30;i++) if(TriggerPatch[i]==P) { CRATE = i+1; break; }
+  int S = PATCH%10;
+  for(int i=0;i<10;i++) if(TriggerSequence[i]==S) { crate_seq = i*16; break;}
+  return 1;
 }
 //--------------------------------------------------------
 /*!
