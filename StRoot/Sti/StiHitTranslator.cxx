@@ -28,8 +28,8 @@ StiHitTranslator::~StiHitTranslator()
 void StiHitTranslator::operator() (const StTpcHit* tpchit, StiHit* stihit)
 {
     //Change if we change numbering scheme
-    stihit->setSector( tpchit->sector() );
-    stihit->setPadrow( tpchit->padrow() );
+    stihit->setRefangle( static_cast<double>( tpchit->sector() ));
+    stihit->setPosition( static_cast<double>( tpchit->padrow() ));
     
     StGlobalCoordinate gHit( tpchit->position() );
     StTpcLocalSectorCoordinate lsHit;

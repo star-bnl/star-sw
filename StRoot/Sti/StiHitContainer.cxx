@@ -41,8 +41,8 @@ StiHitContainer::~StiHitContainer() {};
 
 void StiHitContainer::push_back(StiHit* hit)
 {
-    mkey.sector = hit->sector();
-    mkey.padrow = hit->padrow();
+    mkey.refangle = hit->refangle();
+    mkey.position = hit->position();
     mmap[mkey].push_back(hit);
     return;
 }
@@ -82,10 +82,10 @@ unsigned int StiHitContainer::size() const
     return thesize;
 }
 
-const hitvector& StiHitContainer::hits(unsigned int sector, unsigned int padrow)
+const hitvector& StiHitContainer::hits(double refangle, double position)
 {
-    mkey.sector = sector;
-    mkey.padrow = padrow; 
+    mkey.refangle = refangle;
+    mkey.position = position; 
     return mmap[mkey];
 }
 
@@ -103,8 +103,8 @@ void StiHitContainer::setRefPoint(StiHit* ref)
 {
     mcandidatevec.clear();
     
-    mkey.sector = ref->sector();
-    mkey.padrow = ref->padrow();
+    mkey.refangle = ref->refangle();
+    mkey.position = ref->position();
     mminpoint->setY( ref->y() -mdeltad );
     mmaxpoint->setY( ref->y() +mdeltad );
     
@@ -149,10 +149,10 @@ void StiHitContainer::sortHits()
     return;
 } 
 	
-void StiHitContainer::print(unsigned int sector, unsigned int padrow)
+void StiHitContainer::print(double refangle, double position)
 {
-    mkey.sector = sector;
-    mkey.padrow = padrow;
+    mkey.refangle = refangle;
+    mkey.position = position;
     const hitvector& tempvec = mmap[mkey];
     for (hitvector::const_iterator it=tempvec.begin(); it!=tempvec.end(); it++)    {
 	cout <<*(*it)<<endl;
@@ -160,10 +160,10 @@ void StiHitContainer::print(unsigned int sector, unsigned int padrow)
     return;
 }
 
-void StiHitContainer::print(unsigned int sector, unsigned int padrow, ofstream& myout)
+void StiHitContainer::print(double refangle, double position, ofstream& myout)
 {
-    mkey.sector = sector;
-    mkey.padrow = padrow;
+    mkey.refangle = refangle;
+    mkey.position = position;
     const hitvector& tempvec = mmap[mkey];
     for (hitvector::const_iterator it=tempvec.begin(); it!=tempvec.end(); it++) {
 	myout <<*(*it)<<endl;

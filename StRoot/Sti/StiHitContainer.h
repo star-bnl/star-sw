@@ -46,12 +46,12 @@ public:
     void sortHits();
 
     //Gets
-    const hitvector& hits(unsigned int sector, unsigned int padrow);
+    const hitvector& hits(double refangle, double position);
 
     //Debugging Utilities
     void print() const;
-    void print(unsigned int sector, unsigned int padrow);
-    void print(unsigned int sector, unsigned int padrow, ofstream&);
+    void print(double refangle, double position);
+    void print(double refangle, double position, ofstream&);
     
     //User Query Interface
     void setRefPoint(StiHit* ref);

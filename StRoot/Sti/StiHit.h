@@ -9,6 +9,7 @@
 
 #include "TObject.h"
 
+class StHit;
 class ostream;
 
 class StiHit : public TObject
@@ -27,17 +28,19 @@ class StiHit : public TObject
   inline double x() const {return mx;}
   inline double y() const {return my;}
   inline double z() const {return mz;}
-  inline unsigned int sector() const {return msector;}
-  inline unsigned int padrow() const {return mpadrow;}
+  inline double refangle() const {return mrefangle;}
+  inline double position() const {return mposition;}
+  inline StHit* stHit() const {return msthit;}
   
   inline void setX(double val) {mx=val;}
   inline void setY(double val) {my=val;}
   inline void setZ(double val) {mz=val;}
-  inline void setSector(unsigned int val) {msector=val;}
-  inline void setPadrow(unsigned int val) {mpadrow=val;}
+  inline void setRefangle(double val) {mrefangle=val;}
+  inline void setPosition(double val) {mposition=val;}
+  inline void setStHit(StHit* val) {msthit=val;}
   
   inline bool operator==(const StiHit& rhs) {
-    return ( msector==rhs.msector && mpadrow==rhs.mpadrow &&
+    return ( mrefangle==rhs.mrefangle && mposition==rhs.mposition &&
 	     mx==rhs.mx && my==rhs.my && mz==rhs.mz );
   }
 
@@ -50,18 +53,19 @@ class StiHit : public TObject
  private:
   
   void copyToThis(const StiHit& rhs) {
-    msector = rhs.msector;
-    mpadrow = rhs.mpadrow;
+    mrefangle = rhs.mrefangle;
+    mposition = rhs.mposition;
     mx = rhs.mx;
     my = rhs.my;
     mz = rhs.mz;
   }
   
-  unsigned int msector;
-  unsigned int mpadrow;
+  double mrefangle;
+  double mposition;
   double mx;
   double my;
   double mz;
+  StHit* msthit;
 
 };
 
