@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTPCReader.h,v 1.6 2004/03/04 21:51:27 ward Exp $
+ * $Id: StTPCReader.h,v 1.7 2004/03/10 05:59:04 jeromel Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTPCReader.h,v $
+ * Revision 1.7  2004/03/10 05:59:04  jeromel
+ * Implement SetSequenceMerging(). See comment in St_tpcdaq_Maker
+ *
  * Revision 1.6  2004/03/04 21:51:27  ward
  * Replaced MERGE_SEQUENCES with a StDAQMaker chain parameter, as suggested by Landgraf and Lauret.
  *
@@ -159,6 +162,8 @@ class  StTPCReader
 	// returns false if the pad is not bad.
 
   int Update();
+
+  void SetSequenceMerging (char);
 
 protected:
   int setSector(int sector);
