@@ -1,5 +1,8 @@
-// $Id: St_ebye_Maker.cxx,v 1.3 1998/09/15 20:55:20 fisyak Exp $
+// $Id: St_ebye_Maker.cxx,v 1.4 1998/09/23 20:22:57 fisyak Exp $
 // $Log: St_ebye_Maker.cxx,v $
+// Revision 1.4  1998/09/23 20:22:57  fisyak
+// Prerelease SL98h
+//
 // Revision 1.3  1998/09/15 20:55:20  fisyak
 // Split St_DataSet -> St_DataSet + St_DataSetIter
 //
@@ -40,11 +43,33 @@
 ClassImp(St_ebye_Maker)
 
 //_____________________________________________________________________________
-St_ebye_Maker::St_ebye_Maker(){
+St_ebye_Maker::St_ebye_Maker():
+m_sca_switch(0),
+m_sca_const(0),
+m_sca_filter_const(0),
+m_dst_event_summary(0),
+m_dsttrack(0),
+m_particle(0),
+m_sca_in(0),
+m_sca_out(0),
+m_sca_prior(0),
+m_sca_ensemble_ave(0)
+{
    drawinit=kFALSE;
 }
 //_____________________________________________________________________________
-St_ebye_Maker::St_ebye_Maker(const char *name, const char *title):StMaker(name,title){
+St_ebye_Maker::St_ebye_Maker(const char *name, const char *title):StMaker(name,title),
+m_sca_switch(0),
+m_sca_const(0),
+m_sca_filter_const(0),
+m_dst_event_summary(0),
+m_dsttrack(0),
+m_particle(0),
+m_sca_in(0),
+m_sca_out(0),
+m_sca_prior(0),
+m_sca_ensemble_ave(0)
+{
    drawinit=kFALSE;
 }
 //_____________________________________________________________________________
@@ -146,7 +171,7 @@ Int_t St_ebye_Maker::Make(){
 //_____________________________________________________________________________
 void St_ebye_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_ebye_Maker.cxx,v 1.3 1998/09/15 20:55:20 fisyak Exp $\n");
+  printf("* $Id: St_ebye_Maker.cxx,v 1.4 1998/09/23 20:22:57 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.14 1998/09/16 14:29:33 love Exp $
+// $Id: StChain.cxx,v 1.15 1998/09/23 20:22:51 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.15  1998/09/23 20:22:51  fisyak
+// Prerelease SL98h
+//
 // Revision 1.14  1998/09/16 14:29:33  love
 // St_DataSetIter.h added
 //
@@ -361,7 +364,7 @@ void StChain::Browse(TBrowser *b)
 void StChain::Clear(Option_t *option)
 {
 //    Reset lists of event objects
-   TIter next(m_Makers);
+   TIter next(m_Makers,kIterBackward);
    StMaker *maker;
    while ((maker = (StMaker*)next())) {
       maker->Clear(option);
@@ -465,7 +468,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.14 1998/09/16 14:29:33 love Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.15 1998/09/23 20:22:51 fisyak Exp $    \n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");

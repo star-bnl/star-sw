@@ -12,11 +12,23 @@
 ClassImp(St_srs_Maker)
 
 //_____________________________________________________________________________
-St_srs_Maker::St_srs_Maker(){
+St_srs_Maker::St_srs_Maker():
+m_config(0),
+m_shape(0),
+m_srs_activea(0),
+m_srs_srspar(0),
+m_srs_direct(0)
+{
    drawinit=kFALSE;
 }
 //_____________________________________________________________________________
-St_srs_Maker::St_srs_Maker(const char *name, const char *title):StMaker(name,title){
+St_srs_Maker::St_srs_Maker(const char *name, const char *title):StMaker(name,title),
+m_config(0),
+m_shape(0),
+m_srs_activea(0),
+m_srs_srspar(0),
+m_srs_direct(0)
+{
    drawinit=kFALSE;
 }
 //_____________________________________________________________________________
@@ -70,7 +82,7 @@ Int_t St_srs_Maker::Make(){
 //_____________________________________________________________________________
 void St_srs_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_srs_Maker.cxx,v 1.9 1998/09/15 20:55:25 fisyak Exp $\n");
+  printf("* $Id: St_srs_Maker.cxx,v 1.10 1998/09/23 20:23:08 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.4 1998/09/15 20:55:26 fisyak Exp $
+// $Id: St_stk_Maker.cxx,v 1.5 1998/09/23 20:23:12 fisyak Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.5  1998/09/23 20:23:12  fisyak
+// Prerelease SL98h
+//
 // Revision 1.4  1998/09/15 20:55:26  fisyak
 // Split St_DataSet -> St_DataSet + St_DataSetIter
 //
@@ -38,7 +41,15 @@
 ClassImp(St_stk_Maker)
 
 //_____________________________________________________________________________
-St_stk_Maker::St_stk_Maker(){
+St_stk_Maker::St_stk_Maker():
+m_stk_stkpar(0),
+m_pix_info(0),
+m_stk_vtx(0),
+m_stk_vtx_direct(0),
+m_stk_filler(0),
+m_config(0),
+m_geom(0)
+{
    drawinit=kFALSE;
    m_mode = 2;
    m_method = 2;
@@ -60,7 +71,15 @@ St_stk_Maker::St_stk_Maker(){
    m_ifstk = kFALSE;
 }
 //_____________________________________________________________________________
-St_stk_Maker::St_stk_Maker(const char *name, const char *title):StMaker(name,title){
+St_stk_Maker::St_stk_Maker(const char *name, const char *title):StMaker(name,title),
+m_stk_stkpar(0),
+m_pix_info(0),
+m_stk_vtx(0),
+m_stk_vtx_direct(0),
+m_stk_filler(0),
+m_config(0),
+m_geom(0)
+{
    drawinit=kFALSE;
    m_mode = 2;
    m_method = 2;
@@ -216,7 +235,7 @@ return kSTAFCV_OK;
 //_____________________________________________________________________________
 void St_stk_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_stk_Maker.cxx,v 1.4 1998/09/15 20:55:26 fisyak Exp $\n");
+  printf("* $Id: St_stk_Maker.cxx,v 1.5 1998/09/23 20:23:12 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
