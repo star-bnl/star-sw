@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.h,v 1.9 2000/08/09 14:54:54 hardtke Exp $
+ * $Id: StTpcDbMaker.h,v 1.10 2001/04/19 19:52:48 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.h,v $
+ * Revision 1.10  2001/04/19 19:52:48  hardtke
+ * add tpc_pad_time_offset function and add ifdef for static arrays
+ *
  * Revision 1.9  2000/08/09 14:54:54  hardtke
  * Add Clear option, set trigger table pointer to 0 after each event
  *
@@ -62,6 +65,7 @@
 #define tpc_row_par_ F77_NAME(tpc_row_par,TPC_ROW_PAR)
 #define tpc_global_to_sector_ F77_NAME(tpc_global_to_sector,TPC_GLOBAL_TO_SECTOR)
 #define tpc_sec24_to_sec12_ F77_NAME(tpc_sec24_to_sec12,TPC_SEC24_TO_SEC12)
+#define tpc_pad_time_offset_ F77_NAME(tpc_pad_time_offset,TPC_PAD_TIME_OFFSET)
 extern "C" {
 R__EXTERN int type_of_call numberOfPadsAtRow_(int *);
 }
@@ -104,15 +108,19 @@ R__EXTERN int type_of_call tpc_global_to_sector_(int*, float*);
 extern "C" {
   R__EXTERN int type_of_call tpc_sec24_to_sec12_(int*, int*);
 }
+extern "C" {
+  R__EXTERN int type_of_call tpc_pad_time_offset_(int*, int*, int*, float*);
+}
 #endif
 class StTpcDb;
 class St_tpg_pad_plane;
 class St_tpg_detector;
 //class StTpcCoordinateTransform;
 
-
+#ifdef StTpc_STATIC_ARRAYS
 static float aline[24][45];  //hold parameterization
 static float bline[24][45];  //ax+by=0
+#endif
 
 class StTpcDbMaker : public StMaker {
  private:
@@ -131,7 +139,7 @@ class StTpcDbMaker : public StMaker {
    virtual StTpcDb* tpcDbInterface() const;    //! return m_TpcDb
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.9 2000/08/09 14:54:54 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.10 2001/04/19 19:52:48 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTpcDbMaker, 1)   //StAF chain virtual base class for Makers
 };
