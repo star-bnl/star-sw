@@ -4,6 +4,7 @@
 **:DESCRIPTION:  C++ KUIP Action Modules for TOP-Table OPerators
 **:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
 **:BUGS:         -- STILL IN DEVELOPMENT --
+**:HISTORY:      17jan98-v003b-cet- SPEC,WHERE,CUTF,etc. READONLY
 **:HISTORY:      23oct96-v001a-cet- make it work
 **:HISTORY:      13jun96-v000a-cet- creation
 **:<-------------------------------------------------------------------
@@ -137,7 +138,7 @@ void kam_topsort_agent_column_()
 {
    // long npars = ku_npar();
    char *agent = ku_gets(); /* name of project agent */
-   char *whichColumn = ku_gets(); /* which column to sort with */
+   char *whichColumn;/*17jan98 = ku_gets(); which column to sort with */
 
    STAFCV_T status = topsort_agent_column(agent, whichColumn);
 }
@@ -148,22 +149,15 @@ STAFCV_T topsort_agent_column(char* agent, char* whichCol)
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    char *s=NULL;
-   switch (whichCol[0]) {
-   case '-':
-      printf("TOP:\tThis agent sorts on column '%s'\n",s=sort->whichColumn());
-      FREE(s);
-      break;
-   default:
-      sort->whichColumn(whichCol);
-      break;
-   }
+   printf("TOP:\tThis agent sorts on column '%s'\n",s=sort->whichColumn());
+   FREE(s);
    EML_SUCCESS(STAFCV_OK);
 }
 void kam_topproject_agent_selectspec_()
 {
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of project agent */
-   char *select = ku_gets(); /* selection specification */
+   char *select;/*17jan98 = ku_gets(); selection specification */
 
         STAFCV_T status = topproject_agent_selectspec(agent, select);
 }
@@ -174,16 +168,9 @@ STAFCV_T topproject_agent_selectspec(char* agent, char* select)
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    char *s=NULL;
-   switch (select[0]) {
-   case '-':
-      printf("TOP:\tSelection Specification = (%s) \n"
+   printf("TOP:\tSelection Specification = (%s) \n"
 		,s=proj->selectionSpecification());
-      FREE(s);
-      break;
-   default:
-      proj->selectionSpecification(select);
-      break;
-   }
+   FREE(s);
    EML_SUCCESS(STAFCV_OK);
 }
  
@@ -257,7 +244,7 @@ void kam_topjoin_agent_selectspec_()
 {
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of join agent */
-   char *select = ku_gets(); /* selection specification */
+   char *select;/*17jan98 = ku_gets(); selection specification */
 
         STAFCV_T status = topjoin_agent_selectspec(agent, select);
 }
@@ -268,16 +255,9 @@ STAFCV_T topjoin_agent_selectspec(char* agent, char* select)
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    char *s=NULL;
-   switch (select[0]) {
-   case '-':
-      printf("TOP:\tSelection Specification = (%s) \n"
+   printf("TOP:\tSelection Specification = (%s) \n"
                 ,s=join->selectionSpecification());
-      FREE(s);
-      break;
-   default:
-      join->selectionSpecification(select);
-      break;
-   }
+   FREE(s);
    EML_SUCCESS(STAFCV_OK);
 }
  
@@ -286,7 +266,7 @@ void kam_topjoin_agent_whereclause_()
 {
    long npars = ku_npar(); /* no. of KUIP param.s */
    char *agent = ku_gets(); /* name of join agent */
-   char *where = ku_gets(); /* where clause */
+   char *where;/*17jan98 = ku_gets(); where clause */
 
         STAFCV_T status = topjoin_agent_whereclause(agent, where);
 }
@@ -297,16 +277,9 @@ STAFCV_T topjoin_agent_whereclause(char* agent, char* where)
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    char *s=NULL;
-   switch (where[0]) {
-   case '-':
-      printf("TOP:\tWhere Clause = (%s) \n"
+   printf("TOP:\tWhere Clause = (%s) \n"
                 ,s=join->whereClause());
-      FREE(s);
-      break;
-   default:
-      join->whereClause(where);
-      break;
-   }
+   FREE(s);
    EML_SUCCESS(STAFCV_OK);
 }
  
