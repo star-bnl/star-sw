@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.24 2004/05/10 23:02:47 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.25 2004/06/03 21:02:28 zolnie Exp $
 // doxygen info here
 /** 
  * \class  EEmcTTMMaker
@@ -10,8 +10,8 @@
  * of towers with associated tracks (list of EEmcTTMatch objects)
  *
  * \author Piotr A. Zolnierczuk
- * $Date: 2004/05/10 23:02:47 $
- * $Revision: 1.24 $
+ * $Date: 2004/06/03 21:02:28 $
+ * $Revision: 1.25 $
  *
  * \section ttmakerremarks Remarks
  *
@@ -96,7 +96,7 @@ EEmcTTMMaker::EEmcTTMMaker(
 			   StMuDstMaker  *mumaker,
 			   StEEmcDbMaker *dbmaker
 			   ) 
-  : StMaker(self),mMuDstMaker(mumaker),mEEmcDb(dbmaker) {
+  : StMaker(self),mMuDstMaker(mumaker),mEEmcDb(dbmaker),mGeom(EEmcGeomSimple::Instance()) {
 
   if( mMuDstMaker == NULL )  
     Fatal("EEmcTTMMaker","invalid StMuDstMaker");
@@ -105,8 +105,8 @@ EEmcTTMMaker::EEmcTTMMaker(
     Fatal("EEmcTTMMaker","invalid StEEmcDbMaker");
   
   // simple EEMC geometry description
-  if( (mGeom = new EEmcGeomSimple()) == NULL) 
-    Fatal("EEmcTTMMaker","cannot create EEmcGeomSimple class");
+  //if( (mGeom = new EEmcGeomSimple()) == NULL) 
+  //  Fatal("EEmcTTMMaker","cannot create EEmcGeomSimple class");
 
   //mDebugLevel   = kWarning;
 
@@ -155,7 +155,7 @@ EEmcTTMMaker::EEmcTTMMaker(
 EEmcTTMMaker::~EEmcTTMMaker() {
   if( mTree  !=NULL ) delete mTree;
   if( mFile  !=NULL ) delete mFile;
-  if( mGeom  !=NULL ) delete mGeom;
+  //if( mGeom  !=NULL ) delete mGeom;
 
   if( mMatchList!=NULL ) delete mMatchList;
   if( mTrackList!=NULL ) delete mTrackList;
@@ -205,7 +205,7 @@ EEmcTTMMaker::Init() {
 /// Make()
 Int_t 
 EEmcTTMMaker::Make(){
-
+  static int nDPhi=0;
   mNEvents++;
   //
   mTrackList->Clear(); 
@@ -317,14 +317,16 @@ EEmcTTMMaker::Make(){
     mTowerList->Add(eemcHit);
     eemcMatch->Add(eemcHit);
 
+    double phi0  = mGeom.getPhiMean(sec,sub);  // fast inlines
+    double eta0  = mGeom.getEtaMean(eta);
+    double phiHW = mGeom.getPhiHalfWidth();
+    double etaHW = mGeom.getEtaHalfWidth(eta);
+    double dphi  = 0.0;
+    double deta  = 0.0;
+
     TIter nextTrack(mTrackList);
     while( (track=(StMuTrack *)nextTrack()) != NULL ) {
-      TVector3 tc    = mGeom->getTowerCenter(sec,sub,eta);  // tower center
-      double   phiHW = mGeom->getPhiHalfWidth();
-      double   etaHW = mGeom->getEtaHalfWidth(eta);
-      double   dphi=0.0, deta=0.0;
-      TVector3 r(0.0,0.0,0.0);
-
+      TVector3 r;
       // TODO maybe add tracks that touch the tower for better cleanup
       // of multiple tracks per tower
       bool   matched=false;
@@ -334,8 +336,8 @@ EEmcTTMMaker::Make(){
 	matched=false;
 	if( ! EEmcTTMatch::ExtrapolateToZ(track,z,r)   ) break; // track 'hit' at z
 	// FIXME the matching algorithm implicitely assumes that zpos depths are inside EEMC 
-	dphi = tc.Phi()            - r.Phi()           ;
-	deta = tc.PseudoRapidity() - r.PseudoRapidity();
+	dphi = fmod(phi0 - r.Phi(),TMath::TwoPi()); // fixed , make sure that dphi is within [0,2pi] domain
+	deta =     (eta0 - r.Eta()               ); 
 	if( ! MatchTrack(dphi,deta,phiHW,etaHW) ) break; 
 	matched=true;
       }
@@ -474,6 +476,10 @@ ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm)  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.25  2004/06/03 21:02:28  zolnie
+// fixed subtle bug: when e.g. dphi = +180.(tower center) - -180.0(track)
+//  the match would be rejected - in practice it never happen
+//
 // Revision 1.24  2004/05/10 23:02:47  zolnie
 // EEmcTTMMaker produces now  nanoDST
 //
