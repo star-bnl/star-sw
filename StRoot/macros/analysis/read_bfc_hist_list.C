@@ -1,5 +1,8 @@
-//  
-//  
+// $Id: read_bfc_hist_list.C,v 1.2 1999/06/03 17:55:26 kathy Exp $ 
+// $Log: read_bfc_hist_list.C,v $
+// Revision 1.2  1999/06/03 17:55:26  kathy
+// changed DrawDstHist from using St_io_Maker to Victor's new StIOMaker - actually just copied doEvents to DrawDstHist and hacked it. Fixed comments in read_bfc_hist_list.C
+// 
 
 //=======================================================================
 // owner: Kathy Turner
