@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/opt/star/bin/perl
 use Env;
 if (defined($AFS)) {$File::Find::dont_use_nlink;}
 use File::Basename;
@@ -207,7 +207,7 @@ my $obj = $build . "/obj";
 Link $OBJ => $DirPath; print "Link $BUILD => $DirPath\n";
 if (! -d "$obj")   {mkdir $obj, 0664;}
 my @Targets = ();
-my @conscripts = ("StRoot/Conscript", "pams/Conscript","tables/Conscript");
+my @conscripts = ("StRoot/Conscript", "pams/Conscript","pams/tables/Conscript");
 #my @conscripts = ("pams/Conscript","tables/Conscript");
 #my @conscripts = ("pams/Conscript");
 for my $conscript (@conscripts) {
@@ -224,7 +224,7 @@ for my $conscript (@conscripts) {
 print "BUILD  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ Targets = @Targets\n";
 #Link $OBJ => 'StRoot'; print "Link $OBJ => StRoot\n";
 Export qw( env INCLUDE LIB BIN EXPORT BUILD OBJ MAIN);
-Default qw (   .  );
+#Default qw (   .  );
 Build  @Targets;
 #Build ( "StRoot/Conscript" );
 #________________________________________________________________________________
