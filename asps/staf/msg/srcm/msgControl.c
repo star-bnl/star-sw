@@ -22,14 +22,7 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 10/1/96 14:34:38, 
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
-#ifndef HPUX
-#ifndef AIX
-#ifndef sun
-/*#error  (This is not an error!)   Compiling dlfcn (sgi, sun) version of msgControl  */
-#define DOdlfcn TRUE
-#endif
-#endif
-#endif
+#undef DOdlfcn
 
 #ifdef DOdlfcn
 #include <dlfcn.h>
@@ -121,7 +114,7 @@ void	main( int argc, char*argv[] )
 
 /*	      Regenerate the complete command line, starting with the MsgSetByCommand command:  */
 	      k=0;
-	      msgCommand[0] = NULL;
+	      msgCommand[0] = 0;
 	      for (j=i; j<argc; j++) {
 	        arg = argv[j];
 	        sprintf( &msgCommand[k], "%s ", arg );

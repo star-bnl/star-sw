@@ -1,6 +1,7 @@
 /*	This is the basic msg controls and data-structure include-file:  msgdata.h  */
 /*	Created:  9oct1996   R. Hackenburg                                          */
 
+static const char sccsid_msgDataH[] = "@(#)"__FILE__"\t\t1.55\tCreated 3/8/98 02:07:35, \tcompiled "__DATE__" "__TIME__;
 
 
 

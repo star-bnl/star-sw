@@ -1,4 +1,4 @@
-WidGet file, version 0.3, created:  Thu Nov 20 10:11:15 EST 1997
+WidGet file, version 0.3, created:  Thu Feb 19 18:17:13 EST 1998
 Widget button#10
 	geometry columnspan 4
 	other reqwidth {}
@@ -97,6 +97,34 @@ Widget entry#3
 	configure width 8
 	other comments {}
 	geometry column 4
+Widget button#11
+	geometry columnspan 4
+	other reqwidth {}
+	configure foreground red
+	configure activebackground #ffa831
+	other error {}
+	other tags {}
+	other level {}
+	other help {}
+	configure padx 10
+	configure pady 3
+	configure command { MsgHelp .}
+	other focus .widget.form.can.f.button#11,text,entry
+	other master .frame#1
+	other pathname button#11
+	geometry fill x
+	configure font Helvetica,10,Bold
+	configure background #d88700
+	other tabbing {}
+	other item_name button#11
+	configure activeforeground red
+	configure highlightbackground #d88700
+	geometry row 16
+	other reqheight {}
+	other type button
+	configure text {  Help}
+	other comments {}
+	geometry column 20
 Widget listbox#1
 	other focus .widget.form.can.f.listbox#1,height,entry
 	geometry row 2
@@ -223,6 +251,34 @@ Widget button#3
 	configure justify left
 	other comments {}
 	geometry column 25
+Widget button#4
+	geometry columnspan 4
+	other reqwidth {}
+	configure foreground red
+	configure activebackground #ffa831
+	other error {}
+	other tags {}
+	other level {}
+	other help {}
+	configure padx 10
+	configure pady 3
+	configure command { MsgQuit .}
+	other focus .widget.form.can.f.button#4,text,entry
+	other master .frame#1
+	other pathname button#4
+	geometry fill x
+	configure font Helvetica,10,Bold
+	configure background #d88700
+	other tabbing {}
+	other item_name button#4
+	configure activeforeground red
+	configure highlightbackground #d88700
+	geometry row 16
+	other reqheight {}
+	other type button
+	configure text {  Quit}
+	other comments {}
+	geometry column 25
 Widget label#8
 	geometry row 14
 	geometry columnspan 3
@@ -268,34 +324,6 @@ Widget entry#6
 	configure width 71
 	other comments {}
 	geometry column 4
-Widget button#4
-	geometry columnspan 4
-	other reqwidth {}
-	configure foreground red
-	configure activebackground #ffa831
-	other error {}
-	other tags {}
-	other level {}
-	other help {}
-	configure padx 10
-	configure pady 3
-	configure command { MsgQuit .}
-	other focus .widget.form.can.f.button#4,text,entry
-	other master .frame#1
-	other pathname button#4
-	geometry fill x
-	configure font Helvetica,10,Bold
-	configure background #d88700
-	other tabbing {}
-	other item_name button#4
-	configure activeforeground red
-	configure highlightbackground #d88700
-	geometry row 16
-	other reqheight {}
-	other type button
-	configure text {  Quit}
-	other comments {}
-	geometry column 25
 Widget entry#7
 	geometry columnspan 4
 	configure textvariable ProcessID
@@ -688,9 +716,9 @@ Widget message#2
 	other type message
 	other master .frame#1
 	other pathname message#2
-	other tags {}
 	configure font screen,14
 	geometry fill x
+	other tags {}
 	configure background #9d3d00
 	other level {}
 	other reqwidth {}
@@ -703,6 +731,34 @@ Widget message#2
 	configure relief ridge
 	other tabbing {}
 	other item_name message#2
+Widget checkbutton#5
+	geometry columnspan 4
+	other reqwidth {}
+	configure foreground black
+	configure activebackground #ffa831
+	configure variable AutoUpdateActive
+	other error {}
+	other tags {}
+	other level {}
+	other help {}
+	configure command {MsgAutoUpdateStart .}
+	other focus .widget.form.can.f.checkbutton#5,command,entry
+	other master .frame#1
+	other pathname checkbutton#5
+	geometry fill x
+	configure font Helvetica,10,Bold
+	configure background #d88700
+	configure activeforeground black
+	other tabbing {}
+	other item_name checkbutton#5
+	geometry row 13
+	configure highlightbackground #d88700
+	other reqheight {}
+	other type checkbutton
+	configure text {Auto Update}
+	geometry column 20
+	other comments {}
+	configure relief raised
 Widget message#4
 	other focus .widget.form.can.f.message#4,textvariable,entry
 	geometry row 11
@@ -752,6 +808,28 @@ Widget label#1
 	geometry column 1
 	other tabbing {}
 	other item_name label#1
+Widget label#10
+	other focus .widget.form.can.f.label#10,text,entry
+	geometry row 14
+	geometry columnspan 2
+	configure highlightbackground #d88700
+	other reqheight {}
+	other error {}
+	other type label
+	other master .frame#1
+	configure text Period
+	other pathname label#10
+	configure font Helvetica,10,Bold
+	geometry fill x
+	other tags {}
+	configure background #d88700
+	other level {}
+	other reqwidth {}
+	other help {}
+	other comments {}
+	geometry column 20
+	other tabbing {}
+	other item_name label#10
 Widget label#2
 	geometry row 12
 	geometry columnspan 3
@@ -878,9 +956,9 @@ Widget frame#1
 	other min_row {30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30}
 	other master {}
 	other pathname frame#1
-	other tags {}
 	other resize_column {0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0}
 	geometry fill both
+	other tags {}
 	configure background #d88700
 	other level 1
 	other reqwidth {}
@@ -890,3 +968,28 @@ Widget frame#1
 	geometry column 1
 	other tabbing {}
 	other item_name frame#1
+Widget entry#11
+	geometry columnspan 2
+	configure textvariable AutoUpdatePeriodSecs
+	other reqwidth {}
+	configure foreground white
+	configure cursor {}
+	other error {}
+	other tags {}
+	other level {}
+	other help {}
+	other focus .widget.form.can.f.entry#11,textvariable,entry
+	other master .frame#1
+	other pathname entry#11
+	configure font screen,14
+	geometry fill x
+	configure background #9d3d00
+	other tabbing {}
+	other item_name entry#11
+	configure highlightbackground #d88700
+	geometry row 14
+	other reqheight {}
+	other type entry
+	configure width 7
+	other comments {}
+	geometry column 22

@@ -261,6 +261,21 @@ proc msgui_ui {root args} {
 			-font -*-screen-Medium-R-Normal-*-*-140-*-*-*-*-*-*
 	}
 
+	checkbutton $base.checkbutton#5 \
+		-activebackground #ffa831 \
+		-activeforeground black \
+		-background #d88700 \
+		-command {MsgAutoUpdateStart .} \
+		-foreground black \
+		-highlightbackground #d88700 \
+		-relief raised \
+		-text {Auto Update} \
+		-variable AutoUpdateActive
+	catch {
+		$base.checkbutton#5 configure \
+			-font -*-Helvetica-Bold-R-Normal-*-*-100-*-*-*-*-*-*
+	}
+
 	checkbutton $base.checkbutton#4 \
 		-activebackground #ffa831 \
 		-activeforeground black \
@@ -322,6 +337,27 @@ proc msgui_ui {root args} {
 	catch {
 		$base.button#7 configure \
 			-font -*-Helvetica-Bold-R-Normal-*-*-100-*-*-*-*-*-*
+	}
+
+	label $base.label#10 \
+		-background #d88700 \
+		-highlightbackground #d88700 \
+		-text Period
+	catch {
+		$base.label#10 configure \
+			-font -*-Helvetica-Bold-R-Normal-*-*-100-*-*-*-*-*-*
+	}
+
+	entry $base.entry#11 \
+		-background #9d3d00 \
+		-cursor {} \
+		-foreground white \
+		-highlightbackground #d88700 \
+		-textvariable AutoUpdatePeriodSecs \
+		-width 7
+	catch {
+		$base.entry#11 configure \
+			-font -*-screen-Medium-R-Normal-*-*-140-*-*-*-*-*-*
 	}
 
 	label $base.label#8 \
@@ -419,6 +455,21 @@ proc msgui_ui {root args} {
 			-font -*-screen-Medium-R-Normal-*-*-140-*-*-*-*-*-*
 	}
 
+	button $base.button#11 \
+		-activebackground #ffa831 \
+		-activeforeground red \
+		-background #d88700 \
+		-command { MsgHelp .} \
+		-foreground red \
+		-highlightbackground #d88700 \
+		-padx 10 \
+		-pady 3 \
+		-text {  Help}
+	catch {
+		$base.button#11 configure \
+			-font -*-Helvetica-Bold-R-Normal-*-*-100-*-*-*-*-*-*
+	}
+
 	button $base.button#4 \
 		-activebackground #ffa831 \
 		-activeforeground red \
@@ -503,6 +554,9 @@ proc msgui_ui {root args} {
 	blt_table $base.frame#1 $base.entry#10 	13,16  \
 		-columnspan 3 \
 		-fill x
+	blt_table $base.frame#1 $base.checkbutton#5 	13,20  \
+		-columnspan 4 \
+		-fill x
 	blt_table $base.frame#1 $base.checkbutton#4 	13,25  \
 		-columnspan 4 \
 		-fill x
@@ -517,6 +571,12 @@ proc msgui_ui {root args} {
 		-fill x
 	blt_table $base.frame#1 $base.button#7 	14,12  \
 		-columnspan 3 \
+		-fill x
+	blt_table $base.frame#1 $base.label#10 	14,20  \
+		-columnspan 2 \
+		-fill x
+	blt_table $base.frame#1 $base.entry#11 	14,22  \
+		-columnspan 2 \
 		-fill x
 	blt_table $base.frame#1 $base.label#8 	14,25  \
 		-columnspan 3 \
@@ -540,6 +600,9 @@ proc msgui_ui {root args} {
 		-fill x
 	blt_table $base.frame#1 $base.entry#6 	16,4  \
 		-columnspan 15 \
+		-fill x
+	blt_table $base.frame#1 $base.button#11 	16,20  \
+		-columnspan 4 \
 		-fill x
 	blt_table $base.frame#1 $base.button#4 	16,25  \
 		-columnspan 4 \

@@ -30,7 +30,7 @@
 
 */
 
-static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 10-Oct-1996, \tcompiled "__DATE__" "__TIME__;
+static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 3/8/98 03:34:14, \tcompiled "__DATE__" "__TIME__;
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -42,7 +42,7 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 10-Oct-1996, \tcom
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
-#if !defined(_AIX) && !defined(Linux) && !defined(hpux)
+#ifndef _AIX
 #include <sys/systeminfo.h>
 #endif
 
@@ -57,7 +57,7 @@ extern msgData_t msg;
 
 extern control_t *control;   /* See msgPrivate.c for address assignments of these.  */
 extern prefix_t  *prefix;
-extern class_t   *class;
+extern class_t   *msgClass;
 
 extern FILE *JournalFILE;    /* Journal-file descriptor                          */
 extern int   JournalEnabled; /* Journal-file enabled-flag                        */
@@ -66,8 +66,8 @@ extern int ELAtime0;
 
 extern funcPoint MsgAlarmRoutine;
 
-extern char   m1000[1000];  /*  Some "scratch" message space.  */
-extern char   s1000[1000];  /*  Some "scratch" string space.  */
+static char   m1000[1000];  /*  Some "scratch" message space.  */
+static char   s1000[1000];  /*  Some "scratch" string space.  */
 
 int MsgInitialized = FALSE; /* This is set to TRUE when initialized.  */
 static int AppendReturn   = FALSE; /* Default is to not append carriage return at end of summary lines.  Set to TRUE for gui. */
@@ -173,7 +173,8 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 	, int  severity )  /* Severity level of alarm -- from msg class.                    */
 
 {
-/* Description:	msg interface to application-specified alarm routine. */
+/* Description:	msg interface to application-specified alarm routine.
+*/
 
 	char *sansPrefix=NULL;
 	char Prefix[PREFIX_MAXLEN+1];
@@ -292,23 +293,23 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 	}
 
 	if        ( !strcasecmp( State, "ACTIVE" ) ) {
-	  class[ID].Active   = TRUE;
-	  class[ID].Counting = TRUE;
+	  msgClass[ID].Active   = TRUE;
+	  msgClass[ID].Counting = TRUE;
 	} else if ( !strcasecmp( State, "INACTIVE" ) ) {
-	  class[ID].Active   = FALSE;
-	  class[ID].Counting = FALSE;
+	  msgClass[ID].Active   = FALSE;
+	  msgClass[ID].Counting = FALSE;
 	} else if ( !strcasecmp( State, "COUNTING" ) ) {
-	  class[ID].Active   = FALSE;
-	  class[ID].Counting = TRUE;
+	  msgClass[ID].Active   = FALSE;
+	  msgClass[ID].Counting = TRUE;
 	}
 
-	class[ID].Alarming = FALSE;
-	class[ID].CountLimit = CountLimit;
-	class[ID].AbortLimit = AbortLimit;
-	class[ID].AlarmLevel = 3;
+	msgClass[ID].Alarming = FALSE;
+	msgClass[ID].CountLimit = CountLimit;
+	msgClass[ID].AbortLimit = AbortLimit;
+	msgClass[ID].AlarmLevel = 3;
 
 /*	fprintf(stderr, "MsgDefineClass-D2  Defined class [%s] ID:%d Active:%d Counting:%d Alarming:%d\n", Class, ID
-	      , class[ID].Active, class[ID].Counting, class[ID].Alarming );  */
+	      , msgClass[ID].Active, msgClass[ID].Counting, msgClass[ID].Alarming );  */
 
 	return;
 }
@@ -368,7 +369,8 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 /*  Input:                                          */
 	  const char *Prefix ) /* A message prefix. */
 {
-/*  Description:  Delete the specified prefix.      */
+/*  Description:  Delete the specified prefix.
+*/
 
 	int ID;
 	int i;
@@ -683,7 +685,8 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 /*   Inputs:                                         */
 	  const char *Prefix )  /* A message prefix */
 {
-/* Description:  Enable display and counting of messages with the given prefix. */
+/* Description:  Enable display and counting of messages with the given prefix.
+*/
 
 	int ID;
 	int i;
@@ -739,7 +742,8 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 /*   Inputs:                                                                                */
 	  const char *Prefix )  /* A message prefix */
 {
-/* Description:  Enable alarms of messages with the given prefix.  */
+/* Description:  Enable alarms of messages with the given prefix.
+*/
 
 	int ID;
 	int i;
@@ -836,7 +840,8 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 
 	void	MsgFilePage( FILE *fid )
 {
-/* Description:  Send a form-feed to a file.  */
+/* Description:  Send a form-feed to a file.
+*/
 	MsgToFileOut( "\f", fid );
 	return;
 }
@@ -899,7 +904,8 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 	                                         /*  "s"  shared msg (remove shmid) -- default: not shared           */
 	                 , int   Nevents )       /*  User-suplied number-of-events, to normalize message frequencies */
 {
-/* Description:  MSG package finish -- output message summary, close journal and remove shmid if "s" is specified.   */
+/* Description:  msg package finish: output message summary, close journal and remove shmid if "s" is specified.
+*/
 
 	int ID;
 	int ret;
@@ -959,15 +965,11 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 	  }
  	} else {                  /* Cold-start initialization -- get everything:              */
 	  MsgInitialized = TRUE;
-#if !defined(_AIX) && !defined(Linux) && !defined(hpux)
-	  if ( sysinfo( SI_HOSTNAME, s1000, 1000) < 0 ) s1000[0] = NULL;
-#else
-	  if ( gethostname( s1000, 1000) < 0 ) s1000[0] = NULL;
-#endif
+	  if ( gethostname( s1000, 1000) < 0 ) s1000[0] = 0;
 	  MsgNodeNameSet( s1000 );
 	  if ( switches ) {
 	    if ( strchr( switches, 's' ) ) {
-	      control->shmid = MsgShare( 0 );  /*  Share the msg memory; "0" causes this process's ID to be used. */
+	      control->shmid = MsgShare();  /*  Share the msg memory.  */
 	    }
 	  }
 	  JournalFILE = fopen( "/dev/null", "w" );  /* Ensure that this isn't NULL, or it'll start outputing to standard out.  */
@@ -1051,7 +1053,8 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 
 	FILE*	MsgJournalGet( void )
 {
-/* Description:  Returns the journal file descriptor.  */
+/* Description:  Returns the journal file descriptor.
+*/
 	return(JournalFILE);
 }
 
@@ -1102,7 +1105,8 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 
 	void	MsgJournalPage( void )
 {
-/* Description:  Send a form-feed to the journal file.  */
+/* Description:  Send a form-feed to the journal file.
+*/
 
 	MsgToFileOut( "\f", JournalFILE );
 	return;
@@ -1254,7 +1258,8 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 	, char State[9] )/*  8-character (plus null) state string    */
 	/* (Active, Inactive, Counting, Alarming, !active!, Aborted) */
 {
-/*  Description:  Get the state of a prefix.                         */
+/*  Description:  Get the state of a prefix.
+*/
 
 	int ID;
 
@@ -1288,7 +1293,8 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 	, int Alarming ) /*  TRUE/FALSE:  whether prefix is alarming */
 {
 
-/*  Description:  Set the state of a prefix.                         */
+/*  Description:  Set the state of a prefix.
+*/
 
 	int ID;
 	int DUMactive;
@@ -1481,6 +1487,7 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 	char *com;
 	char *arg[7];
 	char state[9];
+	char c1000[1000];  /*  Some "scratch" string space.  */
 	int counts, countLimit, level, abortLimit;
 	int active, counting, alarming;
 	int i;
@@ -1488,11 +1495,11 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 
 /*	char *strtok (char *s1, const char *s2);  */
 
-	strncpy( s1000, Command, 1000 );  /* make a modifiable copy, for strtok.  */
+	strncpy( c1000, Command, 1000 );  /* make a modifiable copy, for strtok.  */
 
 	error = FALSE;
 	justHelping = FALSE;
-	com = strtok( s1000, " \t\n\f");  /* separators: Space, tab, newline, formfeed */
+	com = strtok( c1000, " \t\n\f");  /* separators: Space, tab, newline, formfeed */
 	if ( !com ) {
 	  error = TRUE;
 	} else if ( !strcasecmp( com, "HELP" ) ) {
@@ -1627,8 +1634,8 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 
 	if (error) {
 
-	  sprintf( s1000, "MsgSetByCommand-E1  Unrecognized command [%s] from:\n%s\n", com, Command );
-	  MessageOut( s1000 );
+	  sprintf( c1000, "MsgSetByCommand-E1  Unrecognized command [%s] from:\n%s\n", com, Command );
+	  MessageOut( c1000 );
 	  MessageOut( "\
   Legal commands are:\n\
      CPU,  GETLINES,  GETNODE,  GETSHMID,  HELP,  LIST    (no arguments)\n\
@@ -1678,7 +1685,8 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 	  const char *Prefix  /* A message prefix. */
 	, int         Level ) /* Level of alarm.  */
 {
-/*  Description:  Set alarm level for a prefix.  */
+/*  Description:  Set alarm level for a prefix.
+*/
 
 	int ID;
 	int i;
@@ -1792,7 +1800,8 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 	int Mode ) /* Whether the mode is to be set TRUE or FALSE.  */
 
 {
-/*  Description:  Set the MSG summary mode for "Aborted" messages.  */
+/*  Description:  Set the MSG summary mode for "Aborted" messages.
+*/
 
 	control->SummaryModeAborted = Mode;
 
@@ -1807,7 +1816,8 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 /*  Input:                                                         */
 	int Mode ) /* Whether the mode is to be set TRUE or FALSE. */
 {
-/*  Description:  Set the MSG summary mode for "Active" messages.  */
+/*  Description:  Set the MSG summary mode for "Active" messages.
+*/
 
 	control->SummaryModeActive = Mode;
 
@@ -1822,7 +1832,8 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 /*  Input:  */
 	int Mode ) /* Whether the mode is to be set TRUE or FALSE.  */
 {
-/*  Description:  Set the MSG summary mode for "Counting" messages.  */
+/*  Description:  Set the MSG summary mode for "Counting" messages.
+*/
 
 	control->SummaryModeCounting = Mode;
 
@@ -1837,7 +1848,8 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 /*  Input:  */
 	int Mode ) /* Whether the mode is to be set TRUE or FALSE. */
 {
-/*  Description:  Set the MSG summary mode for "Inactive" messages.  */
+/*  Description:  Set the MSG summary mode for "Inactive" messages.
+*/
 
 	control->SummaryModeInactive = Mode;
 
@@ -1852,7 +1864,8 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 /*  Input:  */
 	int PageLength ) /* Length of summary page (lines).  */
 {
-/*  Description:  Set the MSG summary table page length.  */
+/*  Description:  Set the MSG summary table page length.
+*/
 
 	control->SummaryPageLength = PageLength;
 
@@ -1867,7 +1880,8 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 /*  Input:   */
 	int Mode ) /* Whether the mode is to be set TRUE or FALSE. */
 {
-/*  Description:  Set the MSG time-stamp mode for stamping CPU changes.  */
+/*  Description:  Set the MSG time-stamp mode for stamping CPU changes.
+*/
 
 	control->TimeStampCPU = Mode;
 
@@ -1889,16 +1903,17 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 /*  Output:                                                          */
 	, char State[9] )/*  8-character (plus null) state string    */
 {
-/*  Description:  Set the ASCII state from the msg flags.            */
+/*  Description:  Set the ASCII state from the msg flags.
+*/
 
 /*	Determine the state:                                         */
 	if ( AbortLimit <= 0 ) {
-	  State[0] = NULL;
+	  State[0] = 0;
 	} else if ( Counts >= AbortLimit ) {
 /*	  This message caused a program termination -- should only be one!  */
 	  strcpy( State, " Aborted" );
 	} else {
-	  State[0] = NULL;
+	  State[0] = 0;
 	}
 
 	if (State[0]) {  /*  (if not NULL, that is.)  */
@@ -2140,31 +2155,31 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 	}
 
 	for ( Iclass = 1;  Iclass <= control->Nclasses; Iclass++ ) {
-	  fgets( class[Iclass].Class, CLASS_MAXLEN+1, fid );
-	  MsgTruncate( class[Iclass].Class, CLASS_MAXLEN );
+	  fgets( msgClass[Iclass].Class, CLASS_MAXLEN+1, fid );
+	  MsgTruncate( msgClass[Iclass].Class, CLASS_MAXLEN );
 
 	  if ( Trace ) {
-	    sprintf( m1000, "   Class[%s] Iclass[%d]", class[Iclass].Class, Iclass );
+	    sprintf( m1000, "   Class[%s] Iclass[%d]", msgClass[Iclass].Class, Iclass );
 	    MessageOut( m1000 );
 	  }
 
 	  fgets( s1000, 999, fid );
 	  MsgTruncate( s1000, 1000 );
 	  sscanf( s1000, "%d%d%d"
-          , &class[Iclass].Active    , &class[Iclass].Counting  , &class[Iclass].Alarming );
+          , &msgClass[Iclass].Active    , &msgClass[Iclass].Counting  , &msgClass[Iclass].Alarming );
 	  if ( Trace ) {
 	    sprintf( m1000, "   Active[%d] Counting[%d] Alarming[%d] line:\n[%s]"
-	           , class[Iclass].Active, class[Iclass].Counting, class[Iclass].Alarming, s1000 );
+	           , msgClass[Iclass].Active, msgClass[Iclass].Counting, msgClass[Iclass].Alarming, s1000 );
 	    MessageOut( m1000 );
 	  }
 
 	  fgets( s1000, 999, fid );
 	  MsgTruncate( s1000, 1000 );
 	  sscanf( s1000, "%d%d%d"
-          , &class[Iclass].CountLimit, &class[Iclass].AbortLimit, &class[Iclass].AlarmLevel );
+          , &msgClass[Iclass].CountLimit, &msgClass[Iclass].AbortLimit, &msgClass[Iclass].AlarmLevel );
 	  if ( Trace ) {
 	    sprintf( m1000, "   CountLimit[%d] AbortLimit[%d] AlarmLevel[%d] line:\n[%s]"
-                   , class[Iclass].CountLimit, class[Iclass].AbortLimit, class[Iclass].AlarmLevel, s1000 );
+                   , msgClass[Iclass].CountLimit, msgClass[Iclass].AbortLimit, msgClass[Iclass].AlarmLevel, s1000 );
 	    MessageOut( m1000 );
 	  }
 	}
@@ -2243,11 +2258,11 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 	}
 
 	for ( Iclass = 1;  Iclass <= control->Nclasses; Iclass++ ) {
-	  fprintf( fid, "%s\n", class[Iclass].Class );
+	  fprintf( fid, "%s\n", msgClass[Iclass].Class );
 	  fprintf( fid, "  %d %d %d  Active, Counting, Alarming\n"
-                 , class[Iclass].Active    , class[Iclass].Counting  , class[Iclass].Alarming );
+                 , msgClass[Iclass].Active    , msgClass[Iclass].Counting  , msgClass[Iclass].Alarming );
 	  fprintf( fid, "  %d %d %d  CountLimit, AbortLimit, AlarmLevel\n"
-                 , class[Iclass].CountLimit, class[Iclass].AbortLimit, class[Iclass].AlarmLevel );
+                 , msgClass[Iclass].CountLimit, msgClass[Iclass].AbortLimit, msgClass[Iclass].AlarmLevel );
 	}
 
 	fclose( fid );
@@ -2261,7 +2276,8 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 
 	void	MsgStateZero( void )
 {
-/* Description:  "Zero" msg's state -- zero all message counts.  */
+/* Description:  "Zero" msg's state -- zero all message counts.
+*/
 
 	int ID;
 
@@ -2283,7 +2299,8 @@ static int AppendReturn   = FALSE; /* Default is to not append carriage return a
 /*  Input: */
 	FILE *fid )  /*  File descriptor of opened file, to write summary to.  */
 {
-/*  Description:  Generate an MSG summary table in a file.  */
+/*  Description:  Generate an MSG summary table in a file.
+*/
 
 	MsgSummaryEventFile( fid, 0 );  /* "0" ==> no column of normalized entries. */
 
@@ -2362,12 +2379,12 @@ Message-Prefix & Truncated Sample of last occurance              Total CPU Usage
 	  if ( N > (int)truncate2 ) N = (int)truncate2;
 	  if ( N > (int)truncate3 ) N = (int)truncate3;
 	  truncate = (char*)N;  /*  leftmost is the one.  */
-	  *truncate = NULL;     /*  Guarrantee NULL-term, maybe truncate if \n, \f or \b is in the sample string.  */
+	  *truncate = 0;     /*  Guarrantee NULL-term, maybe truncate if \n, \f or \b is in the sample string.  */
 
 	  MsgClean( SAMPLE_MAXLEN, Sample );      /*  Clean out any non-printables.  */
 	  EPT = MsgLNB( Sample, SAMPLE_MAXLEN );  /*  Find index to last non-blank.  */
 	  for (  i = EPT+1;  i < SAMPLE_MAXLEN;  Sample[i++]=' ' );
-	  Sample[SAMPLE_MAXLEN] = NULL;  /* NULL termination -- note that Sample is defined [...MAXLEN+1]  */
+	  Sample[SAMPLE_MAXLEN] = 0;  /* NULL termination -- note that Sample is defined [...MAXLEN+1]  */
 
 	  if ( EPT < (SAMPLE_MAXLEN-7) ) {               /* More than 6 blanks.      */
 	    for ( i=SAMPLE_MAXLEN-3; i>=EPT+2; i-=2 ) {  /* Append alternating dots. */
@@ -2409,8 +2426,8 @@ Message-Prefix & Truncated Sample of last occurance              Total CPU Usage
 	           , Sample, Ctot, Cavg, prefix[SID].Counts, prefix[SID].Lookups );
 	    EPT = MsgLNB( s1000, SUMMARY_WIDTH );  /*Find last non-blank.  */
 	    for (  i = EPT+1;  i < SUMMARY_WIDTH;  s1000[i]=' ', Ghost[i++]=' ' );
-	    s1000[SUMMARY_WIDTH] = NULL;  /* NULL termination */
-	    Ghost[SUMMARY_WIDTH] = NULL;  /* NULL termination */
+	    s1000[SUMMARY_WIDTH] = 0;  /* NULL termination */
+	    Ghost[SUMMARY_WIDTH] = 0;  /* NULL termination */
 
 	    for ( i=SAMPLE_MAXLEN-1; i<=EPT-2; i+=2 ) {  /* Fill in with alternating dots. */
 	      if ( !strncmp( "   ", &s1000[i-1], 3 ) ) {  /* Three blanks in a row:  */
@@ -2541,12 +2558,12 @@ Message-Prefix & Truncated Sample of last occurance                  Counts   Co
 	  if ( N > (int)truncate2 ) N = (int)truncate2;
 	  if ( N > (int)truncate3 ) N = (int)truncate3;
 	  truncate = (char*)N;  /*  leftmost is the one.  */
-	  *truncate = NULL;   /*  Guarrantee NULL-term, maybe truncate if \n, \f or \b is in the sample string.  */
+	  *truncate = 0;   /*  Guarrantee NULL-term, maybe truncate if \n, \f or \b is in the sample string.  */
 
 	  MsgClean( SAMPLE_MAXLEN, Sample );      /*  Clean out any non-printables.  */
 	  EPT = MsgLNB( Sample, SAMPLE_MAXLEN );  /*  Find index to last non-blank.  */
 	  for (  i = EPT+1;  i < SAMPLE_MAXLEN;  Sample[i++]=' ' );
-	  Sample[SAMPLE_MAXLEN] = NULL;  /* NULL termination -- note that Sample is defined [...MAXLEN+1]  */
+	  Sample[SAMPLE_MAXLEN] = 0;  /* NULL termination -- note that Sample is defined [...MAXLEN+1]  */
 
 	  if ( EPT < (SAMPLE_MAXLEN-7) ) {               /* More than 6 blanks.      */
 	    for (  i = SAMPLE_MAXLEN-3;  i >= EPT+2;  i -= 2  ) {  /* Append alternating dots. */
@@ -2585,7 +2602,7 @@ Message-Prefix & Truncated Sample of last occurance                  Counts   Co
 	  if ( ListThisMessage ) {  /* List only those selected by the mode flags:  */
 
 	    for ( i=0;  i<8;  i++ ) {  /*  State is output one char at a time, always 8, so eliminate a term. NULL.  */
-	      if ( State[i] == NULL ) State[i] = ' ';
+	      if ( State[i] == 0 ) State[i] = ' ';
 	    }
 
 	    if ( Nevents <= 0 ) {
@@ -2617,8 +2634,8 @@ Message-Prefix & Truncated Sample of last occurance                  Counts   Co
 
 	    EPT = MsgLNB( s1000, SUMMARY_WIDTH );  /*Find last non-blank.  */
 	    for (  i = EPT+1;  i < SUMMARY_WIDTH;  s1000[i]=' ', Ghost[i++]=' ' );
-	    s1000[SUMMARY_WIDTH] = NULL;  /* NULL termination */
-	    Ghost[SUMMARY_WIDTH] = NULL;  /* NULL termination */
+	    s1000[SUMMARY_WIDTH] = 0;  /* NULL termination */
+	    Ghost[SUMMARY_WIDTH] = 0;  /* NULL termination */
 
 	    for ( i=SAMPLE_MAXLEN-1; i<=EPT-2; i+=2 ) {  /* Fill in with alternating dots. */
 	      if ( !strncmp( "   ", &s1000[i-1], 3 ) ) {  /* Three blanks in a row:  */
@@ -2631,7 +2648,7 @@ Message-Prefix & Truncated Sample of last occurance                  Counts   Co
 	        s1000[i] = ' ';
 	      }
 	    }
-	    s1000[SUMMARY_WIDTH] = NULL;  /* NULL termination -- last chance. */
+	    s1000[SUMMARY_WIDTH] = 0;  /* NULL termination -- last chance. */
 	    MsgToFileOut( s1000, fid );
 
 	    PageLine += 1;
@@ -2687,7 +2704,7 @@ Message-Prefix & Truncated Sample of last occurance                  Counts   Co
 	ELA = MsgTime() - ELAtime0;
 	strcpy( Elapsed,  MsgCela(ELA) );
 
-	if ( control->NodeName[0] == NULL ) {   /*  No node name:  */
+	if ( control->NodeName[0] == 0 ) {   /*  No node name:  */
 	  HaveNodeName = FALSE;
 /*	  Don't bother with a time-stamp if it hasn't changed:   */
 	  if ( !strcmp( DateTime, LastDateTime ) ) {  /* No change: */
@@ -2771,7 +2788,7 @@ Message-Prefix & Truncated Sample of last occurance                  Counts   Co
 	ELA = MsgTime() - ELAtime0;
 	strcpy( Elapsed,  MsgCela(ELA) );
 
-	if ( control->NodeName[0] == NULL ) {   /*  No node name:  */
+	if ( control->NodeName[0] == 0 ) {   /*  No node name:  */
 	  sprintf( s1000, "%-23s  Elapsed:%-14s  CPU:%-18s", DateTime, Elapsed, CPUtime );
 	  MsgToFileOut( s1000, fid );
 	} else {
@@ -2943,6 +2960,7 @@ Message-Prefix & Truncated Sample of last occurance                  Counts   Co
 /*  Description:  Write a message to a file, specified by fid, bypassing msg accounting.
 */
 {
+
 	if ( !fid ) { /*  Put it on standard error:  */
 	  fprintf(stderr, "%s\n", msg );
 	  fflush( stderr );
