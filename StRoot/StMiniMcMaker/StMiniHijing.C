@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// $Id: StMiniHijing.C,v 1.4 2002/06/28 22:15:12 calderon Exp $
+// $Id: StMiniHijing.C,v 1.5 2003/07/09 01:07:23 calderon Exp $
 // owner: Manuel Calderon de la Barca Sanchez
 //
 // what it does: reads .geant.root file from hijing data, produces minimc.root file 
@@ -7,6 +7,12 @@
 //                 StMcEventMaker,StAssociationMaker,
 //                 StMiniMcEventMaker
 // $Log: StMiniHijing.C,v $
+// Revision 1.5  2003/07/09 01:07:23  calderon
+// Addition of FTPC reference multiplicity
+// Addition of other multiplicity values for StMiniMcEvent
+// Changes to reflect the use of the setters and getters, no longer
+// access the data members directly.
+//
 // Revision 1.4  2002/06/28 22:15:12  calderon
 // Changes to deal with seg. faults in the file name handling:
 // Conventions:
@@ -33,29 +39,14 @@
 // Revision 1.3  2002/06/07 02:21:59  calderon
 // Protection against empty vector in findFirstLastHit
 // $Log: StMiniHijing.C,v $
+// Revision 1.5  2003/07/09 01:07:23  calderon
+// Addition of FTPC reference multiplicity
+// Addition of other multiplicity values for StMiniMcEvent
+// Changes to reflect the use of the setters and getters, no longer
+// access the data members directly.
+//
 // Revision 1.4  2002/06/28 22:15:12  calderon
 // Changes to deal with seg. faults in the file name handling:
-// Conventions:
-// StMiniMcMaker looks for the input file from the IO maker to figure out
-// if the file has changed.  This is done using TString::Contains() in Make().
-// Usually we will run one file at a time, but in order not to break Bum's scheme of being
-// able to process several files in one go, this is left as is.  However, for
-// embedding, the file name is not enough, in Eric's new scheme there are repeated
-// file names.  This is resolved by adding a prefix to the output file name.  However,
-// this prefix should not be overwritten, so the current code only replaces the
-// string inside the output file name pertaining to the input file name, and leaves
-// the prefix of the output file intact.  This was done for embedding looking for
-// st_physics, and here is where the problem arose: hijing files begin with a different
-// prefix.  To solve this problem, the input file name prefix is now an input parameter
-// in the macro.
-//
-// StMiniEmbed.C and StMiniHijing.C now conform to this convention.  StMiniEmbed.C
-// did not change its prototype, because all embedding files have st_phyics as prefix.
-// StMiniHijing.C changed its prototype, now it takes as an input argument the prefix,
-// but in order not to break Jenn's scripts if she was already using this macro,
-// this parameter was added at the end and defaults to "rcf", which is appropriate
-// for hijing files reconstructed in rcf.
-// and $Id: StMiniHijing.C,v 1.4 2002/06/28 22:15:12 calderon Exp $ plus header comments for the macros
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -75,11 +66,7 @@ void StMiniHijing(Int_t nevents=3,
   gSystem->Load("St_base");
   gSystem->Load("StChain");
 
-  gSystem->Load("libglobal_Tables");
-  gSystem->Load("libgeometry_Tables");
-  gSystem->Load("libsim_Tables");
-  gSystem->Load("libgen_Tables");
-  gSystem->Load("libtpc_Tables");
+  gSystem->Load("St_Tables");
   gSystem->Load("StUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
@@ -109,7 +96,7 @@ void StMiniHijing(Int_t nevents=3,
   ioMaker->SetIOMode("r");
   ioMaker->SetBranch("*",0,"0");                 //deactivate all branches
   ioMaker->SetBranch("geantBranch",0,"r"); //activate geant Branch
-  ioMaker->SetBranch("dstBranch",0,"r"); //activate Event Branch
+  ioMaker->SetBranch("eventBranch",0,"r"); //activate Event Branch
   // ioMaker->SetBranch("runcoBranch",0,"r"); //activate runco Branch
   
   //     const char *mainDB = "MySQL:Geometry_tpc";
@@ -123,8 +110,9 @@ void StMiniHijing(Int_t nevents=3,
   //     StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
   
   // Note, the title "events" is used in the Association Maker, so don't change it.
-  StEventMaker*       eventReader   = new StEventMaker("events","title");
-  eventReader->doPrintMemoryInfo = kFALSE;
+//   StEventMaker*       eventReader   = new StEventMaker("events","title");
+//   eventReader->doPrintMemoryInfo = kFALSE;
+
   StMcEventMaker*     mcEventReader = new StMcEventMaker; // Make an instance...
   //     mcEventReader->doPrintMemoryInfo = kFALSE;
   //     mcEventReader->doUseTpc = kTRUE;
@@ -147,7 +135,7 @@ void StMiniHijing(Int_t nevents=3,
   krap->setDebug(1);
   krap->setGhost();
   krap->setOutDir(outDir);
-  krap->setPtCut(1);
+  krap->setPtCut(0.);
   krap->setFileName(filename);
   krap->setFilePrefix(filePrefix);
 

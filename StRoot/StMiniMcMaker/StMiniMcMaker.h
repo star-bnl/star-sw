@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.h,v 1.5 2002/06/28 22:15:12 calderon Exp $
+ * $Id: StMiniMcMaker.h,v 1.6 2003/07/09 01:07:23 calderon Exp $
  * \file  StMiniMcMaker.h
  * \brief Filling of StMiniMcEvent classes from StMcEvent, StEvent, StAssociationMaker
  * 
@@ -12,6 +12,12 @@
  * manuel calderon de la barca's code.
  *
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.6  2003/07/09 01:07:23  calderon
+ * Addition of FTPC reference multiplicity
+ * Addition of other multiplicity values for StMiniMcEvent
+ * Changes to reflect the use of the setters and getters, no longer
+ * access the data members directly.
+ *
  * Revision 1.5  2002/06/28 22:15:12  calderon
  * Changes to deal with seg. faults in the file name handling:
  * Conventions:
@@ -38,6 +44,12 @@
  * Revision 1.4  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.6  2003/07/09 01:07:23  calderon
+ * Addition of FTPC reference multiplicity
+ * Addition of other multiplicity values for StMiniMcEvent
+ * Changes to reflect the use of the setters and getters, no longer
+ * access the data members directly.
+ *
  * Revision 1.5  2002/06/28 22:15:12  calderon
  * Changes to deal with seg. faults in the file name handling:
  * Conventions:
@@ -60,7 +72,7 @@
  * but in order not to break Jenn's scripts if she was already using this macro,
  * this parameter was added at the end and defaults to "rcf", which is appropriate
  * for hijing files reconstructed in rcf.
- * and $Id: StMiniMcMaker.h,v 1.5 2002/06/28 22:15:12 calderon Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.h,v 1.6 2003/07/09 01:07:23 calderon Exp $ plus header comments for the macros
  *
  */
 
@@ -140,7 +152,6 @@ class StMiniMcMaker : public StMaker{
   void  setOutDir(const char* dir= "./") { mOutDir = dir; }  
   void  setPtCut(Float_t minPt=0, Float_t maxPt=9999) 
     { mMinPt=minPt; mMaxPt=maxPt; }
-  void  setBField(Float_t val=0.25) { mBField=val; }
   void  setFileName(TString& val)      { mInFileName = val; }
   void  setFilePrefix(TString& val)      { mInFilePrefix = val; }
 
@@ -154,8 +165,11 @@ class StMiniMcMaker : public StMaker{
   Bool_t           acceptRaw(StMcTrack*);
   Bool_t           accept(StMcTrack*);
   Bool_t           accept(StTrack*);
+  Bool_t	   acceptGood20(StTrack*);
+  Bool_t	   acceptGood20(StMcTrack*);
   Bool_t           acceptCentrality(StTrack*);
   Bool_t           acceptUncorrected(StTrack*);
+  Bool_t           acceptFTPC(StTrack*);
   Bool_t           ok(StTrack*);
   Bool_t           isSameSign(StTrack*,StMcTrack*);
   Bool_t           acceptPt(StTrack*);
@@ -176,7 +190,12 @@ class StMiniMcMaker : public StMaker{
   Int_t            openFile();
   Int_t            closeFile();
   void             trackLoop();
-  void             fillEventInfo(Int_t nGoodTrack);
+  void             fillEventInfo(Int_t nGoodTrack, Int_t nRcGlobal, Int_t nRcGoodGlobal20,
+				 //Int_t nAcceptedRaw,
+				 Int_t nMcGlobal, Int_t nMcGoodGlobal20,
+				 Int_t nMcNch, Int_t nMcHminus,
+				 Int_t nMcFtpcENch, Int_t nMcFtpcWNch,
+				 Int_t nFtpcEUncorrected, Int_t nFtpcWUncorrected);
   void             fillTrackPairInfo(StMiniMcPair*,
 				     const StMcTrack*,
 				     const StTrack* prTrack, 
@@ -199,7 +218,7 @@ class StMiniMcMaker : public StMaker{
   void             checkSplit(StMcTrack*,StTrack*,Int_t);
   void             checkContam(StMcTrack*,StGlobalTrack*,Int_t);
 
-
+  size_t           getIndex(size_t mult);
   // members
   StMiniMcEvent*   mMiniMcEvent; //! 
   StIOMaker*       mIOMaker;      //!
@@ -227,8 +246,6 @@ class StMiniMcMaker : public StMaker{
   
   Float_t          mMinPt;        //!
   Float_t          mMaxPt;        //!
-
-  Float_t          mBField;       //! in tesla
 
   Int_t            mNSplit; //!
   Int_t            mNRc; //!
