@@ -1,0 +1,41 @@
+/*    ftpcClusterPars
+*
+*  Table: ftpcClusterPars
+*
+*       description: //    FTPC Cluster Finder run and code parameters
+*
+*/
+   struct ftpcClusterPars {
+     // code parameters
+     long gaussFittingFlags;        /* 0=no gaussfit, 1=pad gaussfit, */
+                                    /* 2=time gaussfit, 3=all gaussfit */
+     long minimumClusterMaxADC;     /* cluster minimum peakheight */
+     long numberOfDriftSteps;       /* # of steps in drift map integration */
+     long orderOfDiffusionErrors;   /* order of diffusion errors */
+     float padDiffusionErrors[3];   /* point error[cm] in pad direction as */
+                                    /* function of driftlength up to 2nd order*/
+     float timeDiffusionErrors[3];  /* point error[cm] in time direction as */
+                                    /* function of driftlength up to 2nd order*/
+     float lorentzAngleFactor;      /* lorentz angle correction factor */
+     float dvdpCalcOffset;          /* offset for dv/dp-calculation (in Torr) */
+     float padBadFitError;          /* additional error for bad-fit clusters*/
+     float timeBadFitError;         /* additional error for bad-fit clusters*/
+     float padUnfoldError;          /* additional error for unfolded clusters*/
+     float timeUnfoldError;         /* additional error for unfolded clusters*/
+     float padFailedFitError;       /* additional error for failed-fit clusters*/
+     float timeFailedFitError;      /* additional error for failed-fit clusters*/
+     float padCutoffClusterError;   /* additional error for cut-off clusters*/
+     float timeCutoffClusterError;  /* additional error for cut-off clusters*/
+     float padSaturatedClusterError;       /* additional error for saturated clusters*/
+     float timeSaturatedClusterError;      /* additional error for saturated clusters*/
+     float twoPadWeightedError;     /* additional error 2-pad-cluster, weighted mean */
+     float twoPadGaussError;        /* additional error 2-pad-cluster, gaussfit */
+     float threePadWeightedError;   /* additional error 3-pad-cluster, weighted mean */
+     float threePadGaussError;      /* additional error 3-pad-cluster, gaussfit */
+     float zDirectionError;         /* parameter for error in z-direction */
+
+       // run parameters
+     long directionOfMagnetField;   /* magnetic field direction (+/-1) */
+     float baseTemperature;         /* base temperature for calculations */
+     float normalizedNowPressure;   /* normalized air pressure (in hPa) */
+   };
