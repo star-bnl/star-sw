@@ -1,23 +1,24 @@
 <HTML>
 <HEAD>
   <META NAME="GENERATOR" CONTENT="Adobe PageMill 3.0 Win">
-  <TITLE>StSpectraMaker Introduction</TITLE>
+  <TITLE>StSpectraMaker Design</TITLE>
 </HEAD>
 <BODY>
 
-<P>First some definitions</P>
+<P>Some definitions</P>
 
-<P>StSpectraAnalysis : base class that defines an analysis. Contains key information 
-  that is used to make spectra; an StEfficiency object, the particle type via 
+<P>StSpectraAnalysis : base class that defines an analysis. Contains data members 
+  that are used to make spectra; an StEfficiency object, the particle type via 
   StParticleDefintion, and the centrality definition (not yet implemented). This 
-  is a virtual class.</P>
-<p>An &quot;analyisis&quot; is an instantiation of a class that inherits from 
-  StSpectraAnalysis. The idea is there is one derived class for each PID method, 
-  e.g. for direct dE/dx PID there will be a class called StTpcDedxSpectraAnalysis, 
-  for the number of sigma away from a dE/dx band there is StTpcDeviant SpectraAnalysis. 
-  Individual physicists can develop their own derived classes for their physics 
-  project.</p>
-<p>The framework allows uses to set-up multiple analyses, control the event selection 
+  is a virtual class, but some member functions are implemented for common tasks, 
+  e.g. creating efficiency object. The rest of the member functions define the 
+  interface. </P>
+<p>An &quot;analysis&quot; is an instantiation of a class that inherits from StSpectraAnalysis. 
+  The idea is there is one derived class for each PID method, e.g. for direct 
+  dE/dx PID there will be a class called StTpcDedxSpectraAnalysis, for the number 
+  of sigma away from a dE/dx band there is StTpcDeviant SpectraAnalysis. Individual 
+  physicists can develop their own derived classes for their physics project.</p>
+<p>The framework allows users to set-up multiple analyses, control the event selection 
   (not implented yet), the efficiency and track cuts, the PID algorithm used etc. 
   Currently the output of each analysis is a 3-D histogram in (y,mt,PID_info) 
   which has had all the efficiecncy, decay corrections, normalisations etc.. For 
@@ -43,6 +44,10 @@
   <li>StV0SpectraAnalysis: V0 spectra, <a href="mailto:munhoz@physics.wayne.edu">Marcel 
     Munhoz</a></li>
 </ul>
-<P>&nbsp;
+<P>Classes being developed
+<ul>
+  <li>StTpcDedxSpectraAnalysis: Tpc dedx, Jenn Klay</li>
+  <li>StTpcProbSpectraAnalysis: Tpc probablities, Aihong Tang</li>
+</ul>
 </BODY>
 </HTML>
