@@ -1,12 +1,12 @@
 /**********************************************************
- * $Id: StRichMinimization.h,v 2.2 2000/10/19 18:11:12 lasiuk Exp $
+ * $Id: StRichMinimization.h,v 2.3 2000/11/01 17:40:02 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMinimization.h,v $
- *  Revision 2.2  2000/10/19 18:11:12  lasiuk
- *  definition of degree
+ *  Revision 2.3  2000/11/01 17:40:02  lasiuk
+ *  use of SystemOfUnits for definition of degree
  *
  *  Revision 2.2  2000/10/19 18:11:12  lasiuk
  *  definition of degree
@@ -17,41 +17,41 @@
  *
  *  Revision 1.1  2000/04/03 19:36:08  horsley
  *  initial revision
- *
- *  
- *
  **********************************************************/
-
 #ifndef StRichMinimization_h
 #define StRichMinimization_h
 
-#include "StRichRingPoint.h"
 #include "StThreeVectorF.hh"
+
 #include "StRichTrack.h"
+#include "StRichRingPoint.h"
 
 class  StRichMinimization {
 
 public:
-          StRichMinimization(StRichRingPoint* rp);
-          ~StRichMinimization();
-          StThreeVectorF rotatedMin(StThreeVectorF& point);
-          double getPsi();
-          double getMeanPathInRadiator();
-          double getMeanPathInQuartz();
+    StRichMinimization(StRichRingPoint* rp);
+    ~StRichMinimization();
+    StThreeVectorF rotatedMin(StThreeVectorF& point);
+
+    double getPsi() const;
+    double getMeanPathInRadiator();
+    double getMeanPathInQuartz();
 
 private:
-  // minimization routine
-  double brent(double ax, double bx, double cx, double *xmin);
-  
-  // data members
-  StRichRingPoint* ringPoint;
-  double psi,returnPsi;
-  double minDistance,mTolerance;
-  double mMeanPathInRadiator;
-  double mMeanPathInQuartz;
-  bool status;
-  StThreeVectorF returnThisPoint;
-    double degree;
+    // minimization routine
+    double brent(double ax, double bx, double cx, double *xmin);
+
+private:
+    // data members
+    StRichRingPoint* ringPoint;
+    double mMeanPathInRadiator;
+    double mMeanPathInQuartz;
+    double mTolerance;
+    double psi,returnPsi;
+    double minDistance;
+    bool status;
+    StThreeVectorF returnThisPoint;
 };
 
+inline double StRichMinimization::getPsi() const { return returnPsi;}
 #endif
