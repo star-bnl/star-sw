@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.2 2004/10/13 14:03:24 mmiller Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.3 2004/10/13 15:32:33 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -115,7 +115,6 @@ StEmcTpcFourPMaker::StEmcTpcFourPMaker(const char* name,
     EMCSanityThreshold = 200.0;
     maxPoints = 10000;
     minPointThreshold = .01;
-    towerProxy = new SafetyArray("towerProxy");
 
     SMDR = 2.2625;
     mSMDR = 231.23;
@@ -126,14 +125,7 @@ StEmcTpcFourPMaker::StEmcTpcFourPMaker(const char* name,
     mmpi = .1396;
     mmk = .4937;
     noAbortions = false;
-    simpleCal = false;
-
-    pedSubKludge = false;
-    EtPedSub = 0.0;
-    ADCPedSub = 0;
-
-
-    //adcValHist = new TH1F("PerEventYeild", "ADC Value", 1024, 0.0, 1024.0);
+    
 }
 
 Int_t StEmcTpcFourPMaker::Make() {
@@ -169,211 +161,89 @@ Int_t StEmcTpcFourPMaker::Make() {
     int badflag, ftpc, loweta, higheta, badr, badhits;
     badflag = ftpc = loweta = higheta = badr = badhits = 0;
     
-    for(int i = 0; i < nTracks; i++)
-	{
-	    StMuTrack* track = uDst->primaryTracks(i);
-	    if(track->flag() < 0) {
-		//cout <<"skipping track:\t"<<i<<"\twith flag:\t"<<track->flag()<<endl;
-		++badflag;
-		continue;
-	    }
-	    if (track->topologyMap().trackFtpcEast()==true || track->topologyMap().trackFtpcWest()==true) {
-		//cout <<"skipping track:\t"<<i<<"\twhich is from FTPC"<<endl;
-		++ftpc;
-		continue;
-	    }
-	    if(track->eta() < GetEtaLow()) {
-		//cout <<"skipping track:\t"<<i<<"\twith eta:\t"<<track->eta()<<"\twich is less than:\t"<<GetEtaLow()<<endl;
-		++loweta;
-		continue;
-	    }
-	    if(track->eta() > GetEtaHigh()) {
-		//cout <<"skipping track:\t"<<i<<"\twith eta:\t"<<track->eta()<<"\twich is more than:\t"<<GetEtaHigh()<<endl;
-		++higheta;
-		continue;
-	    }
-	    double pt = track->pt();
-	    double R = pt/(0.3*fabs(mField));
-	    if(R < HSMDR) {// just forget the track if it doesn't get to EMC radius.
-		//cout <<"skipping track:\t"<<i<<"\twith R:\t"<<R<<"\twich is less than:\t"<<HSMDR<<"\t with pt:\t"<<pt<<"\tusing b:\t"<<mField<<endl;
-		++badr;
-		continue;
-	    }
-	    if(static_cast<double>(track->nHits())/static_cast<double>(track->nHitsPoss()) < .51) {
-		//cout <<"skipping track:\t"<<i<<"\twith nHits:\t"<<track->nHits()<<"\tand nHitsPoss:\t"<<track->nHitsPoss()<<endl;
-		++badhits;
-		continue;
-	    }
-	    sumPtTracks += pt;
-	    binmap.insertTrack(track, i);
-	    ++ntkept;
+    for(int i = 0; i < nTracks; i++)	{
+	StMuTrack* track = uDst->primaryTracks(i);
+	if(track->flag() < 0) {
+	    //cout <<"skipping track:\t"<<i<<"\twith flag:\t"<<track->flag()<<endl;
+	    ++badflag;
+	    continue;
 	}
-    cout <<"skipped "<<badflag<<" for flag, "<<ftpc<<" for ftpc, "<<loweta<<" for loweta, "<<higheta<<" for higheta, "<<badr<<" for badr, "<<badhits<<" for hits"<<endl;
+	if (track->topologyMap().trackFtpcEast()==true || track->topologyMap().trackFtpcWest()==true) {
+	    //cout <<"skipping track:\t"<<i<<"\twhich is from FTPC"<<endl;
+	    ++ftpc;
+	    continue;
+	}
+	if(track->eta() < GetEtaLow()) {
+	    //cout <<"skipping track:\t"<<i<<"\twith eta:\t"<<track->eta()<<"\twich is less than:\t"<<GetEtaLow()<<endl;
+	    ++loweta;
+	    continue;
+	}
+	if(track->eta() > GetEtaHigh()) {
+	    //cout <<"skipping track:\t"<<i<<"\twith eta:\t"<<track->eta()<<"\twich is more than:\t"<<GetEtaHigh()<<endl;
+	    ++higheta;
+	    continue;
+	}
+	double pt = track->pt();
+	double R = pt/(0.3*fabs(mField));
+	if(R < HSMDR) {// just forget the track if it doesn't get to EMC radius.
+	    //cout <<"skipping track:\t"<<i<<"\twith R:\t"<<R<<"\twich is less than:\t"<<HSMDR<<"\t with pt:\t"<<pt<<"\tusing b:\t"<<mField<<endl;
+	    ++badr;
+	    continue;
+	}
+	if(static_cast<double>(track->nHits())/static_cast<double>(track->nHitsPoss()) < .51) {
+	    //cout <<"skipping track:\t"<<i<<"\twith nHits:\t"<<track->nHits()<<"\tand nHitsPoss:\t"<<track->nHitsPoss()<<endl;
+	    ++badhits;
+	    continue;
+	}
+	sumPtTracks += pt;
+	binmap.insertTrack(track, i);
+	++ntkept;
+    }
+    cout <<"skipped "<<badflag<<" for flag, "<<ftpc<<" for ftpc, "<<loweta<<" for loweta, "<<higheta<<" for higheta, "
+	 <<badr<<" for badr, "<<badhits<<" for hits"<<endl;
     
     cout <<"Added:\t"<<ntkept<<"\ttracks to the binmap"<<endl;
+
+    
     // Retreive the points
     StEmcCollection *emc = NULL;
-    if(useType != Hits)
-	{ 
-	    if(adc2E == NULL)
-		{
-		    muEmc = uDst->emcCollection();
-		}
-	    else
-		{
-		    if(muEmc != NULL)
-			{
-			    delete muEmc;
-			    muEmc = NULL;
-			}
-		    StMuEmcUtil converter;
-		    StEmcCollection *emc = adc2E->getEmcCollection();
-		    muEmc = converter.getMuEmc(emc);
-		}
-	}
-    else {
-	cout <<"use hits"<<endl;
-	if(adc2E == NULL)	{
-	    muEmc = uDst->emcCollection();
-	    cout << "#1 should be here! "<< endl;
-	}
-	else {
-	    emc = adc2E->getEmcCollection();
-	}
+    if (!adc2E) {
+	cout <<"StEmcTpcFourPMaker::Make().  ERROR. adc2E==0, undefined behavior, so we abort"<<endl;
+	abort();
     }
-    int numPoints = 0;
-    int numClusters = 0;
+    
+    cout <<"use hits"<<endl;
+
+    emc = adc2E->getEmcCollection();
     double twoPi = M_PI*2.0;
-
-    // Add the points
-    if(useType != Hits)
-	{
-	    numPoints = muEmc->getNPoints();
-	    numClusters = muEmc->getNClusters(1);
-	    cout << "NumPoints: " << numPoints << endl;
-	    cout << "NumClusters: " << numClusters << endl;
-	    // This just prints for debugging purposes:
-	    if(useType == Points) for(int i = 0; i < numPoints; i++)
-		{
-		    StMuEmcPoint* point = muEmc->getPoint(i);
-		    cout << "Point[" << i << "] eta: " << point->getEta() - etaShift;
-		    double phi = point->getPhi(); 
-		    while(phi < 0) phi += twoPi;
-		    while(phi > twoPi) phi -= twoPi;
-		    cout << "  phi: " << phi;
-		    cout << "  energy: " << point->getEnergy() << endl;
-		}
-	    if(useType == Clusters) for(int i = 0; i < numClusters; i++)
-		{
-		    StMuEmcCluster* cluster = muEmc->getCluster(1,i);
-		    cout << "Cluster[" << i << "] eta: " << cluster->getEta() - etaShift;
-		    double phi = cluster->getPhi(); 
-		    while(phi < 0) phi += twoPi;
-		    while(phi > twoPi) phi -= twoPi;
-		    cout << "  phi: " << phi;
-		    cout << "  energy: " << cluster->getEnergy() << endl;
-		}
-	    if(useType == Points) for(int i = 0; i < numPoints; i++)
-		{
-		    StMuEmcPoint* point = muEmc->getPoint(i);
-		    binmap.insertPoint(point, i);
-		    sumEMC += point->getEnergy();
-		}
-	    if(useType == Clusters) for(int i = 0; i < numClusters; i++)
-		{
-		    StMuEmcCluster* cluster = muEmc->getCluster(1,i);
-
-		    // now add a fake point to the binmap
-		    StMuEmcPoint& point = fakePoints[i];
-		    point.setEta(cluster->getEta());
-		    point.setPhi(cluster->getPhi());
-		    point.setEnergy(cluster->getEnergy());
-		    binmap.insertPoint(&point, i);
-		    sumEMC += point.getEnergy();
-		}
-	}
-    else {//     useType == Hits
-
-	unsigned int runNumber = uEvent->runNumber();
-	int hitId = 0;
-	StEmcGeom* geom = StEmcGeom::getEmcGeom(detname[0].Data());
-	StBemcData* data = NULL;
-	int numHits = 0;
-	TDataSet *mDb = NULL;
-	emcCalib_st* emccalibtbl = NULL;
-	emcGain_st* emcgaintbl = NULL;
-	emcPed_st* emcpedtbl = NULL;
+    int numHits = 0;
+    StEmcGeom* geom = StEmcGeom::getEmcGeom(detname[0].Data());
       
-	if(adc2E)
-	    {
-		data = adc2E->getBemcData();
-		numHits = data->NTowerHits;
-		cout << "Number Hits: " << numHits<<endl;
-	    }
-	else
-	    {
-		if(!simpleCal)
-		    {
-			mDb = NULL;
-			TString DbName = "Calibrations/emc/y3"+detname[0];
-			mDb = GetInputDB(DbName.Data());
-			if(!mDb) {
-			    cout <<"StEmcTpcFourPMaker::Maker():\tmDb == 0.  return"<<endl;
-			    return kFALSE;
-			}
-			TString TableName;
+    StBemcData* data = adc2E->getBemcData();
+    numHits = data->NTowerHits;
+    cout << "Number Hits: " << numHits<<endl;
 
-			TableName = detname[0] + "Calib";
-			St_emcCalib* cptr = (St_emcCalib*) mDb->Find(TableName.Data());
-			if(cptr) emccalibtbl = cptr->GetTable();
-			if(!emccalibtbl) {
-			    cout <<"StEmcTpcFourPMaker::Maker():\temccalibtbl == 0.  return"<<endl;		
-			    return kFALSE;
-			}
-
-			TableName = detname[0] + "Gain";
-			St_emcGain* gptr = (St_emcGain*) mDb->Find(TableName.Data());
-			if(gptr) emcgaintbl = gptr->GetTable();
-
-			TableName = detname[0] + "Ped";
-			St_emcPed* pptr = (St_emcPed*) mDb->Find(TableName.Data());
-			if(pptr) emcpedtbl = pptr->GetTable();
-			if(!emcpedtbl) {
-			    cout <<"StEmcTpcFourPMaker::Maker():\temccalibtbl == 0.  return"<<endl;		
-			    return kFALSE;
-			}
-		    }
-	    }
-	if(pedSubKludge)
-	    {
-		ADCPedSub = getADCAverage(runNumber, maxHits, towerProxy, 
-					  data, muEmc, simpleCal, mDb, emcgaintbl, emccalibtbl, emcpedtbl, 
-					  EtPedSub, ADCPedSub);
-		cout << "Kludging Pedestal Subtraction: " << ADCPedSub << endl;
-	    }
-	
-	for(hitId = 1; hitId <= maxHits; hitId++) {
-	    float eta, phi, energy;
-	    bool isGood;
-	    getValuesFromHitId(hitId, runNumber, eta, phi, energy, isGood, 
-			       towerProxy, geom, data, muEmc, simpleCal, mDb, emcgaintbl, 
-			       emccalibtbl, emcpedtbl, EtPedSub, ADCPedSub);
-	    if(isGood == false)
-		continue;
-	    while(phi < 0) phi += twoPi;
-	    while(phi > twoPi) phi -= twoPi;
-	  
-	    sumEMC += energy;
-	    if(energy < 0.01) continue;
-	  
-	    // now add a fake point to the binmap
-	    StMuEmcPoint& point = fakePoints[hitId];
-	    point.setEta(eta);
-	    point.setPhi(phi);
-	    point.setEnergy(energy);
-	    binmap.insertPoint(&point, hitId);
-	    //sumEMC += point.getEnergy();
+    for(int hitId = 1; hitId <= maxHits; hitId++) {
+	float eta, phi, energy;
+	geom->getEtaPhi(hitId, eta, phi);
+	if(data->TowerStatus[hitId-1] != 1) {
+	    continue;
 	}
+	energy = data->TowerEnergy[hitId-1];
+
+	while(phi < 0) phi += twoPi;
+	while(phi > twoPi) phi -= twoPi;
+	  
+	sumEMC += energy;
+	if(energy < 0.01) continue;
+	  
+	// now add a fake point to the binmap
+	StMuEmcPoint& point = fakePoints[hitId];
+	point.setEta(eta);
+	point.setPhi(phi);
+	point.setEnergy(energy);
+	binmap.insertPoint(&point, hitId);
+	//sumEMC += point.getEnergy();
     }
 
     // Now Bail if the energy is absurd
@@ -437,19 +307,25 @@ Int_t StEmcTpcFourPMaker::Make() {
 		maxEtValue = et;
 	}
     if(!noAbortions)
-	if(numberPoints > maxPoints)  // If there are too many points
+	if(numberPoints > maxPoints) { // If there are too many points
+	    cout <<"StEmcTpcFourPMaker::Make()\tERROR:\tnumberPoints > maxPoints.  return"<<endl;
 	    return kStOK; // don't try to analyze this event
+	}
     // If it is a hightower trigger event, but somehow the high tower
     // is missing from the points, skip the event to avoid weird emc biases.
     if(!noAbortions)
 	{
 	    const StTriggerId &trigger = uEvent->triggerIdCollection().nominal();
 	    if(trigger.isTrigger(1101) || trigger.isTrigger(2201))
-		if(maxEtValue < 2.5)
+		if(maxEtValue < 2.5) {
+		    cout <<"StEmcTpcFourPMaker::Make()\tERROR:\tmaxEtValue<2.5.  return"<<endl;
 		    return kStOK;
+		}
 	    if(trigger.isTrigger(1102) || trigger.isTrigger(2202))
-		if(maxEtValue < 3.5)
+		if(maxEtValue < 3.5) {
+		    cout <<"StEmcTpcFourPMaker::Make()\tERROR:\tmaxEtValue<3.5.  return"<<endl;
 		    return kStOK;
+		}
 	}
     
     // Add TPC tracks
@@ -518,43 +394,24 @@ Int_t StEmcTpcFourPMaker::Make() {
     // Add neutral pion and eta tracks using the remaining energy in the 
     // reducedPointEnergies array - not coded
 
-    //start = clock();
-    // Add photon tracks using the remainder of the energy in the
-    // reducedPointEnergies array 
-    for(pointMap::iterator point = binmap.moddPoints.begin(); 
-	point != binmap.moddPoints.end(); ++point)
-	{
-	    pointMap::value_type &point_val = *point;
-	    StMuTrackFourVec& newTrack = tPile[index++];
-	    StCorrectedEmcPoint &cPoint = point_val.second;
-	    if(cPoint.P().e() > minPointThreshold)
-		{
-		    newTrack.Init(NULL, cPoint.P(), cPoint.getIndex(), kBarrelEmcTowerId);
-		    //cout <<"InitTrack kBarrelEmcTowerId:\t"<<newTrack<<endl;
-		    tracks.push_back(&newTrack);
-		}
-	}  
-    //stop = clock();
-    //timeLengths[timeindex] += static_cast<double>(stop-start)
-    ///static_cast<double>(CLOCKS_PER_SEC);
-	//cout << "Time to add points for jet finding: " << timeLengths[timeindex++] << endl;
-
-	if(adc2E)
+    // Add photon tracks using the remainder of the energy in thereducedPointEnergies array 
+    for(pointMap::iterator point = binmap.moddPoints.begin(); point != binmap.moddPoints.end(); ++point) {
+	pointMap::value_type &point_val = *point;
+	StMuTrackFourVec& newTrack = tPile[index++];
+	StCorrectedEmcPoint &cPoint = point_val.second;
+	if(cPoint.P().e() > minPointThreshold)
 	    {
-		unsigned int runNumber = uEvent->runNumber();
-		StBemcData* histadcdata = adc2E->getBemcData();
-		for(int hitId = 1; hitId <= maxHits; hitId++)
-		    {
-			if(towerProxy->isGood(runNumber, hitId-1) == false) { 
-			    //cout << "throwing away tower: " << hitId-1 << endl; 
-			    continue; }
-			//adcValHist->Fill(static_cast<double>(histadcdata->TowerADC[hitId-1]));
-		    }
+		newTrack.Init(NULL, cPoint.P(), cPoint.getIndex(), kBarrelEmcTowerId);
+		//cout <<"InitTrack kBarrelEmcTowerId:\t"<<newTrack<<endl;
+		tracks.push_back(&newTrack);
 	    }
-	eventNum = uEvent->eventId();
-	latestrunNum = uEvent->runNumber();
-	aborted = false;
-	return kStOk;
+    }  
+    
+    eventNum = uEvent->eventId();
+    latestrunNum = uEvent->runNumber();
+    aborted = false;
+    cout <<"StEmcTpcFourPMaker::Maker()\tReturning kStOk"<<endl;
+    return kStOk;
 }
 
 Int_t StEmcTpcFourPMaker::Finish()
@@ -564,174 +421,6 @@ Int_t StEmcTpcFourPMaker::Finish()
     evnumstrstrm << latestrunNum << "-" << eventNum << ".root";
     TString numstr(evnumstrstrm.str().c_str());
     name += numstr;
-    //TFile *outfile = new TFile(name, "RECREATE");
-
-    //static_cast<TH1*>(adcValHist)->SetDirectory(static_cast<TDirectory*>(outfile));
-    //outfile->Write();
-    //outfile->Close();
-    //delete outfile;
     return kStOk;
 }
-
-
-bool getValuesFromHitId(int hitId, int runNumber, float &eta, float &phi, 
-			float &energy, bool &isGood, SafetyArray *towerProxy, StEmcGeom *geom, 
-			StBemcData *data, StMuEmcCollection *muEmc, bool simpleCal, 
-			TDataSet *mDb, emcGain_st* emcgaintbl,
-			emcCalib_st* emccalibtbl, emcPed_st* emcpedtbl, double EtPedSub, int ADCPedSub)
-{
-    isGood = true;
-    if(towerProxy->isGood(runNumber, hitId-1) == false) { 
-	isGood = false;
-	return false; }
-    geom->getEtaPhi(hitId, eta, phi);
-    if(data)
-	{
-	    if(data->TowerStatus[hitId-1] != 1) { isGood = false; return false; }
-	    if(simpleCal)
-                {
-		    double et = 0.0125*static_cast<double>(data->TowerADC[hitId-1]-ADCPedSub);
-		    energy = et/sqrt(1.0-tanh(eta)*tanh(eta))-EtPedSub;
-                }
-	    else
-                {
-		    //energy = towerProxy->energyFunction(
-		    // runNumber, 
-		    //			  hitId-1, 
-		    //			  data->TowerADC[hitId-1], 
-		    //			  data->TowerEnergy[hitId-1]);
-		    energy = data->TowerEnergy[hitId-1];
-        
-		}
-	}
-    else // Calibration!!!!  MuDst does not contain energy.
-	{
-
-	    cout <<"Why is there no data???"<<endl;
-	    float ADC = 0; 
-	    float PED = 0;
-	    if(muEmc != NULL)
-		{
-		    ADC = muEmc->getTowerADC(hitId);
-		}
-	    else
-                return false;
-	    if(simpleCal)
-                {
-		    double et = 0.0125*(ADC-ADCPedSub);
-		    energy = et/sqrt(1.0-tanh(eta)*tanh(eta))-EtPedSub;
-                }
-	    else
-                {
-		    if(emccalibtbl == NULL)
-			return false;
-		    PED = static_cast<float>(emcpedtbl[0].AdcPedestal[hitId-1])
-			/100.0;
-		    //PED = static_cast<double>(static_cast<int>(PED));
-		    float ADCSUB = ADC-PED;
-		    energy = 0;
-		    float ADCPOWER = 1;
-		    for(int i = 0; i < 5; i++)
-			{
-			    float c = 0;
-			    c = emccalibtbl[0].AdcToE[hitId-1][i];
-			    energy += c*ADCPOWER;
-			    ADCPOWER *= ADCSUB;
-			}
-		    if(PED <= 0) energy = 0;
-		    float gain = 1;
-		    if(emcgaintbl != NULL)
-			gain = emcgaintbl[0].Gain[hitId-1];
-		    if(gain < .1)  // gain shouldn't have a large or negative effect
-			gain = 1;
-		    //energy *= gain;
-                }
-	}
-    return true;
-}
-
-int getADCAverage(int runNumber, int topIndex, SafetyArray *towerProxy, 
-		  StBemcData *data, StMuEmcCollection *muEmc, bool simpleCal, 
-		  TDataSet *mDb, emcGain_st* emcgaintbl,
-		  emcCalib_st* emccalibtbl, emcPed_st* emcpedtbl, double EtPedSub, int ADCPedSub)
-{
-    double ADCAverage = 0;
-    int count = 0;
-    double energy = 0;
-    double eta = 0;
-    for(int i = 1; i <= topIndex; i++)
-	{
-	    bool isGood = true;
-	    if(towerProxy->isGood(runNumber, i) == false) { 
-		isGood = false;
-		continue; }
-	    if(data)
-		{
-		    if(data->TowerStatus[i-1] != 1) { isGood = false; continue; }
-		    count++;
-		    if(simpleCal)
-			{
-			    double et = 0.0125*static_cast<double>(data->TowerADC[i-1]-ADCPedSub);
-			    energy = et/sqrt(1.0-tanh(eta)*tanh(eta)) - EtPedSub;
-			    ADCAverage += static_cast<double>(data->TowerADC[i-1]-ADCPedSub); 
-			}
-		    else
-			{
-			    energy = towerProxy->energyFunction(
-								runNumber, 
-								i-1, 
-								data->TowerADC[i-1], 
-								data->TowerEnergy[i-1]);
-			    ADCAverage += data->TowerADC[i-1];
-			}
-		}
-	    else // Calibration!!!!  MuDst does not contain energy.
-		{
-		    float ADC = 0; 
-		    float PED = 0;
-		    if(muEmc != NULL)
-			{
-			    ADC = muEmc->getTowerADC(i);
-			}
-		    else
-			return false;
-		    count++;
-		    if(simpleCal)
-			{
-			    double et = 0.0125*(ADC-ADCPedSub);
-			    energy = et/sqrt(1.0-tanh(eta)*tanh(eta))-EtPedSub;
-			    ADCAverage += ADC-ADCPedSub;
-			}
-		    else
-			{
-			    if(emccalibtbl == NULL)
-				continue;
-			    PED = static_cast<float>(emcpedtbl[0].AdcPedestal[i-1])
-				/100.0;
-			    //PED = static_cast<double>(static_cast<int>(PED));
-			    float ADCSUB = ADC-PED;
-			    energy = 0;
-			    float ADCPOWER = 1;
-			    for(int j = 0; j < 5; j++)
-				{
-				    float c = 0;
-				    c = emccalibtbl[0].AdcToE[i-1][j];
-				    energy += c*ADCPOWER;
-				    ADCPOWER *= ADCSUB;
-				}
-			    if(PED <= 0) energy = 0;
-			    float gain = 1;
-			    if(emcgaintbl != NULL)
-				gain = emcgaintbl[0].Gain[i-1];
-			    if(gain < .1)  // gain shouldn't have a large or negative effect
-				gain = 1;
-			    //energy *= gain;
-			    ADCAverage += ADCSUB;
-			}
-		}
-	}
-    return static_cast<int>(ADCAverage/static_cast<double>(count));
-}
-
-
 

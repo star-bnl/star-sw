@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.1 2004/10/12 18:18:03 mmiller Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.2 2004/10/13 15:32:34 mmiller Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.2  2004/10/13 15:32:34  mmiller
+ * Big clean of StEmcTpcFourPMaker, no longer crashes simulation pass!
+ *
  * Revision 1.1  2004/10/12 18:18:03  mmiller
  * Add StFourPMakers subdirectory
  *
@@ -557,19 +560,6 @@ public:
 
 typedef vector<StMuEmcPoint> createdPointVector;
 
-class SafetyArray : public StMaker
-{
-public:
-    SafetyArray(const char* name) : StMaker(name) {};
-    virtual bool isGood(unsigned int runNumber, long index) { return true; };
-    virtual long adcFunction(unsigned int runNumber, long index, 
-			     long adc, double energy) 
-    { return adc; };
-    virtual double energyFunction(unsigned int runNumber, long index, 
-				  long adc, double energy) 
-    { return energy; };
-};
-
 class StEmcTpcFourPMaker : public StFourPMaker {
 public: 
     enum EMCHitType {Hits=0, Clusters=1, Points=2};
@@ -604,7 +594,6 @@ protected:
     StEmcADCtoEMaker* adc2E;
     StMuEmcCollection* muEmc;
     StEmcCollection* emc;
-    SafetyArray* towerProxy;
     int maxHits;
     int numCoincidences;
     double sumPtTracks;
@@ -617,26 +606,11 @@ protected:
     long numberPoints;
     bool aborted;
     bool noAbortions;
-    bool simpleCal;
-
-    bool pedSubKludge;
-    double EtPedSub;
-    int ADCPedSub;
-
+    
 public:
     createdPointVector fakePoints;
     double mPIDR, mKDR, mPRDR, mEDR, mCAD;
     EMCHitType useType;
-
-    // Use 12.5 MeV/c simple ADC calibration (for use with Pythia MC)
-    void UseSimpleADCCal(void) { simpleCal = true; };
-
-    // Use Pedestal subtraction kludge
-    void UsePedSubKludge(void) { pedSubKludge = true; };
-    // Set ADC Pedestal subtraction
-    void SetADCPedSub(int adcSub) { ADCPedSub = adcSub; };
-    // Set Et Pedestal subtraction
-    void SetEtPedSub(double etPedSub) { EtPedSub = etPedSub; };
 
     // Stop abortions, useful for simulated data
     void SetNoAbortions(void) { noAbortions = true; };
@@ -664,27 +638,11 @@ public:
     // If this object decided not to send the tracks+points to the JetFinder
     // because of exceeding above thresholds then isAborted() will return true
     bool isAborted(void) { return aborted; };
-    // Objects of type SafetyArray can be given to the StEmcTpcFourPMaker here
-    // which will make decisions on whether to use individual towers given
-    // the runNumber.  The default one does no descision making.
-    void setTowerProxy(SafetyArray* sa) { towerProxy = sa; };
  
     ClassDef(StEmcTpcFourPMaker,0)
 	};
 
 typedef multimap<double, StMuEmcPoint*, less<double> > DistanceToPointMap;
-
-bool getValuesFromHitId(int hitId, int runNumber, float &eta, float &phi,
-			float &energy, bool &isGood, SafetyArray *towerProxy, StEmcGeom *geom,
-			StBemcData *data, StMuEmcCollection *muEmc, bool simpleCal, 
-			TDataSet *mDb = NULL, emcGain_st* emcgaintbl = NULL, 
-			emcCalib_st* emccalibtbl = NULL, emcPed_st* emcpedtbl = NULL,
-			double EtPedSub = 0.0, int ADCPedSub = 0);
-
-int getADCAverage(int runNumber, int topIndex, SafetyArray *towerProxy,
-		  StBemcData *data, StMuEmcCollection *muEmc, bool simpleCal, TDataSet *mDb, 
-		  emcGain_st* emcgaintbl, emcCalib_st* emccalibtbl, emcPed_st* emcpedtbl,
-		  double EtPedSub = 0.0, int ADCPedSub = 0);
 
 #endif
 
