@@ -1,5 +1,8 @@
-// $Id: StPreVertexMaker.cxx,v 1.6 2000/05/08 20:20:42 wdeng Exp $
+// $Id: StPreVertexMaker.cxx,v 1.7 2000/05/09 19:54:31 wdeng Exp $
 // $Log: StPreVertexMaker.cxx,v $
+// Revision 1.7  2000/05/09 19:54:31  wdeng
+// Copy more entries from tpt_track to local globtpc table. It is needed by lmv according to Akio.
+//
 // Revision 1.6  2000/05/08 20:20:42  wdeng
 // Install a switch to call lmv if the tracks are less than 15. Flag pre-vertex the same numbers as that in evr_am if lmv get called.
 //
@@ -91,21 +94,24 @@ Int_t StPreVertexMaker::Make(){
     Int_t numRowTptrack = tptrack->GetNRows();
     St_dst_track globtpc("globtpc", numRowTptrack);
   
-    tpt_track_st *tptrackTable = tptrack->GetTable();
+    tpt_track_st *tptrackT = tptrack->GetTable();
     dst_track_st globtpcRow;
 
     Int_t counter = 0;
     for( Int_t i=0; i<numRowTptrack; i++) {
-      if( tptrackTable[i].flag < 0 ) continue;
-      globtpcRow.r0      = tptrackTable[i].r0;
-      globtpcRow.phi0    = tptrackTable[i].phi0;
-      globtpcRow.z0      = tptrackTable[i].z0;
-      globtpcRow.psi     = tptrackTable[i].psi;
-      globtpcRow.tanl    = tptrackTable[i].tanl;
-      globtpcRow.invpt   = tptrackTable[i].invp;
-      globtpcRow.iflag   = tptrackTable[i].flag;
+      if( tptrackT[i].flag < 0 ) continue;
+      globtpcRow.r0      = tptrackT[i].r0;
+      globtpcRow.phi0    = tptrackT[i].phi0;
+      globtpcRow.z0      = tptrackT[i].z0;
+      globtpcRow.psi     = tptrackT[i].psi;
+      globtpcRow.tanl    = tptrackT[i].tanl;
+      globtpcRow.invpt   = tptrackT[i].invp;
+      globtpcRow.length  = tptrackT[i].length;
+      globtpcRow.id      = counter+1;
+      globtpcRow.iflag   = tptrackT[i].flag;
       globtpcRow.det_id  = kTpcId;
-      globtpcRow.icharge = tptrackTable[i].q;
+      globtpcRow.n_point = tptrackT[i].nrec;
+      globtpcRow.icharge = tptrackT[i].q;
 
       globtpc.AddAt(&globtpcRow, counter);
       counter++;
