@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.34 2001/01/30 22:13:10 horsley Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.35 2001/01/31 13:25:23 horsley Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.35  2001/01/31 13:25:23  horsley
+ * minimum  number of fitpoints = 25
+ *
  * Revision 2.34  2001/01/30 22:13:10  horsley
  * trajectory correction now default, added trajectory correction comments for log file
  *
@@ -260,7 +263,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.34 2001/01/30 22:13:10 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.35 2001/01/31 13:25:23 horsley Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -294,7 +297,7 @@ void StRichPIDMaker::initCutParameters() {
     mEtaCut       = 0.5; 
     mLastHitCut   = 140.0*centimeter;
     mDcaCut       = 3.0*centimeter;
-    mFitPointsCut = 30;
+    mFitPointsCut = 24;
     mPathCut      = 500*centimeter;
     mPadPlaneCut  = 1.0*centimeter;
     mRadiatorCut  = 1.0*centimeter;
