@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StHbtKink.cc,v 1.2 2001/06/21 19:15:46 laue Exp $
+ * $Id: StHbtKink.cc,v 1.3 2001/09/05 21:55:23 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, 23May2001
  *
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StHbtKink.cc,v $
+ * Revision 1.3  2001/09/05 21:55:23  laue
+ * typo fixed
+ *
  * Revision 1.2  2001/06/21 19:15:46  laue
  * Modified fiels:
  *   CTH.hh : new constructor added
@@ -109,7 +112,7 @@ StHbtKink::StHbtKink( const StHbtTTreeEvent* e, const StHbtTTreeKink* k) {
   mDecayAngleCM = k->mDecayAngleCM;               
   StHbtTrack mDaughter = StHbtTrack(e, &k->mDaughter);      
   StHbtTrack mParent= StHbtTrack(e, &k->mParent);        
-  StHbtThreeVector mPosition = StHbtTreeVector(k->mPositionX,k->mPositionY,k->mPositionZ);  
+  StHbtThreeVector mPosition = StHbtThreeVector(k->mPositionX,k->mPositionY,k->mPositionZ);  
 }
 
 
