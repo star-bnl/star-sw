@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.7 2000/01/14 14:49:10 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.8 2000/01/19 20:21:48 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.8  2000/01/19 20:21:48  porter
+ * change of TableIter to StDbTableIter
+ *
  * Revision 1.7  2000/01/14 14:49:10  porter
  * set verbose level for checking, added $Id & $Logs, & made node container
  * more robust for interactions with StDbLib
@@ -45,7 +48,7 @@
 #include "StDbLib/StDbConfigNode.hh"
 #include "StDbLib/StDbTable.h"
 #include "dbNodes.h"
-#include "StDbLib/TableIter.hh"
+#include "StDbLib/StDbTableIter.hh"
 //
 //ClassImp(StDbBroker)
 //______________________________________________________________________________
@@ -312,7 +315,7 @@ int cID;
 
 // check for tables in this Node
    if( (parentNode->hasData()) ){   
-      TableIter* itr = parentNode->getTableIter();
+      StDbTableIter* itr = parentNode->getStDbTableIter();
       while(!itr->done())cID=m_Nodes->addNode(itr->next(),pID);
       delete itr;
    }
