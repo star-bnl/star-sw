@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.37 2003/10/28 20:35:54 ward Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.38 2003/12/24 13:44:55 fisyak Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.38  2003/12/24 13:44:55  fisyak
+// Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+//
 // Revision 1.37  2003/10/28 20:35:54  ward
 // Chain control of NOISE_ELIM GAIN_CORRECTION ASIC_THRESHOLDS.
 //
@@ -155,7 +158,7 @@ class St_tpcdaq_Maker : public StMaker {
   tpcdaq_noiseElim noiseElim[24]; //!
 
    StTrsDetectorReader* mTdr;  //!
-   ZeroSuppressedReader* mZsr; //!
+   StTrsZeroSuppressedReader* mZsr; //!
    Int_t daq_flag;             //! 
 
    Int_t GetEventAndDecoder();
@@ -184,8 +187,8 @@ class St_tpcdaq_Maker : public StMaker {
    // void FatalError(int);
    void SeqWrite(St_raw_seq *raw_seq_gen,int rownum,
                   int startTimeBin,int numberOfBinsInSequence);
-   void PixelWrite(St_type_shortdata *pixel_data_gen,
-                    int rownum,unsigned short datum);
+   void PixelWrite(St_type_shortdata *pixel_data_gen,St_type_shortdata *pixel_indx_gen,
+                    int rownum,unsigned short datum,unsigned short id);
    void PadWrite(St_raw_pad *raw_pad_gen,int padR,int padOffset,
       int seqOffset,int nseq,int nSeqB4Offset,int pad);
    void RowWrite(St_raw_row *raw_row_gen,int rownumber,
@@ -202,7 +205,9 @@ class St_tpcdaq_Maker : public StMaker {
       St_raw_seq **raw_seq_in,
       St_raw_seq **raw_seq_out,
       St_type_shortdata **pixel_data_in,
-      St_type_shortdata **pixel_data_out);
+      St_type_shortdata **pixel_data_out,
+      St_type_shortdata **pixel_indx_in,
+      St_type_shortdata **pixel_indx_out);
    char *NameOfSector(int isect);
    void PrintErr(int,char);
    int Output();
@@ -210,7 +215,7 @@ class St_tpcdaq_Maker : public StMaker {
    int getPadList(int whichPadRow,unsigned char **padlist);
    int mNseqLo,mNseqHi,mThreshLo,mThreshHi; // ASICS parameters
    void AsicThresholds(float gain,int *nseq,StSequence **lst);
-   int getSequences(float gain,int whichPadRow,int pad,int *nseq,StSequence **seqList);
+   int getSequences(float gain,int whichPadRow,int pad,int *nseq,StSequence **seqList, int ***listOfIds=0);
    void SetDAQFlag(Int_t);
    void SetNoiseEliminationStuff();
    void WriteStructToScreenAndExit();
@@ -229,7 +234,7 @@ class St_tpcdaq_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.37 2003/10/28 20:35:54 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.38 2003/12/24 13:44:55 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tpcdaq_Maker,0)   //StAF chain virtual base class for Makers
 };

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.28 2003/12/17 18:22:01 fisyak Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.29 2003/12/24 13:44:54 fisyak Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
+ * Revision 1.29  2003/12/24 13:44:54  fisyak
+ * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+ *
  * Revision 1.28  2003/12/17 18:22:01  fisyak
  * mIoSectorSpacing has never been defined and this causes that Inner Sector has randomly been ejected
  *
@@ -380,7 +383,7 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin,int sector)
            
 	    if(avalancheFactor<0.5)continue;
             StTrsWireBinEntry
-		theNewSegment(position,0,bin.sigmaL(),sigma,bin.d()); 
+		theNewSegment(position,0,bin.sigmaL(),sigma,bin.d(),bin.id()); 
 	    theNewSegment.setNumberOfElectrons((int)(avalancheFactor+0.5)); 
 	  
 	    // Time Delay

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsMiniChargeSegment.cc,v 1.3 1999/12/08 02:10:42 calderon Exp $
+ * $Id: StTrsMiniChargeSegment.cc,v 1.4 2003/12/24 13:44:53 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsMiniChargeSegment.cc,v $
+ * Revision 1.4  2003/12/24 13:44:53  fisyak
+ * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+ *
  * Revision 1.3  1999/12/08 02:10:42  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -34,12 +37,12 @@
  **************************************************************************/
 #include "StTrsMiniChargeSegment.hh"
 
-StTrsMiniChargeSegment::StTrsMiniChargeSegment(StThreeVector<double> pos, double de, double ds)
-    : mNumberOfElectrons(de), mLength(ds), mPosition(pos) { /*nopt*/ }
+StTrsMiniChargeSegment::StTrsMiniChargeSegment(StThreeVector<double> pos, double de, double ds, int id)
+    : mNumberOfElectrons(de), mLength(ds), mPosition(pos), mId(id) { /*nopt*/ }
 
 StTrsMiniChargeSegment::~StTrsMiniChargeSegment() { /*nopt*/ }
 
 ostream& operator<<(ostream& os, const StTrsMiniChargeSegment& seg)
 {
-    return os << '(' << seg.position() << ", " << seg.charge() << ", " << seg.dl() << ')';
+  return os << "(Pos:" << seg.position() << ",Charge:" << seg.charge() << ",id:" << seg.id() << ")";
 }

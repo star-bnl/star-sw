@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsMiniChargeSegment.hh,v 1.3 2003/09/02 17:59:16 perev Exp $
+ * $Id: StTrsMiniChargeSegment.hh,v 1.4 2003/12/24 13:44:51 fisyak Exp $
  *
  * Author: brian
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsMiniChargeSegment.hh,v $
+ * Revision 1.4  2003/12/24 13:44:51  fisyak
+ * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+ *
  * Revision 1.3  2003/09/02 17:59:16  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -50,7 +53,7 @@
 class StTrsMiniChargeSegment {
 
 public:
-    StTrsMiniChargeSegment(StThreeVector<double>, double, double);
+    StTrsMiniChargeSegment(StThreeVector<double>, double, double, int);
     ~StTrsMiniChargeSegment();
     //StTrsMiniChargeSegment(const StTrsMiniChargeSegment&);
     //StTrsMiniChargeSegment& operator=(const StTrsMiniChargeSegment&);
@@ -65,11 +68,12 @@ public:
     const double                 charge()    const;
 
     void                         setCharge(double);
-
+    int                          id()        const {return mId;}
 private:
     double                   mNumberOfElectrons;
     double                   mLength;
     StThreeVector<double>    mPosition;
+    int                      mId;                  // geant track id
 };
 
 inline StThreeVector<double>&

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMixerMaker.h,v 1.7 2002/03/12 22:36:48 pfachini Exp $
+ * $Id: StMixerMaker.h,v 1.8 2003/12/24 13:44:54 fisyak Exp $
  *
  * Author: Patricia Fachini
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StMixerMaker.h,v $
+ * Revision 1.8  2003/12/24 13:44:54  fisyak
+ * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+ *
  * Revision 1.7  2002/03/12 22:36:48  pfachini
  * Changing Init() to InitRun(int)
  *
@@ -59,7 +62,9 @@ class StTrsDigitalSector;
 
 // Output Data
 class StTrsRawDataEvent;
+#if 0
 class StTrsOstream;
+#endif
 class StTpcRawDataEvent;
 class StSequence;
 
@@ -85,12 +90,12 @@ class StMixerMaker : public StMaker {
     StTrsSector               *mSector1; //!
     StTrsSector               *mSector2; //!
     StTrsDigitalSector        *mDigitalSector; //!
-
+#if 0
     // I/O streams
     char*                        mOutputFileName; //!
     StTrsOstream*                mOutputStreamMixer; //!
     int                          mNumberOfEvents; //!
-
+#endif
     // Output
     StTrsRawDataEvent            *mAllTheDataMixer; //!
    
@@ -112,11 +117,12 @@ class StMixerMaker : public StMaker {
     Char_t   *GetConfig2() {return gConfig2;}
     int   getSequences1(int sector,int row,int pad,int *nseq,StSequence **listOfSequences);//!
     int   getSequences2(int sector,int row,int pad,int *nseq,StSequence **listOfSequences);//!
+#if 0
     int   writeFile(char*, int); //!
-
+#endif
     virtual const char *GetCVS() const
       {
-	static const char cvs[]="Tag $Name:  $ $Id: StMixerMaker.h,v 1.7 2002/03/12 22:36:48 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	static const char cvs[]="Tag $Name:  $ $Id: StMixerMaker.h,v 1.8 2003/12/24 13:44:54 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StMixerMaker, 2)  // StAF chain virtual base class for Makers
 };

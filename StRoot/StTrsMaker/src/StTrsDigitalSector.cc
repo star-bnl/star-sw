@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSector.cc,v 1.8 2000/03/15 23:33:55 calderon Exp $
+ * $Id: StTrsDigitalSector.cc,v 1.9 2003/12/24 13:44:53 fisyak Exp $
  *
  * Author: bl 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSector.cc,v $
+ * Revision 1.9  2003/12/24 13:44:53  fisyak
+ * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+ *
  * Revision 1.8  2000/03/15 23:33:55  calderon
  * Remove extra messages
  *
@@ -82,6 +85,21 @@ void StTrsDigitalSector::clear() // clears only the time bins
 
 // Caution: rowN specifies rowNumber 1..45
 // Below, rowIndex specifies index 0..44
+void StTrsDigitalSector::assignTimeBins(int rowN, int padN, digitalPadData* tbins)
+{
+#ifdef ST_SECTOR_BOUNDS_CHECK
+    if( (rowIndex > 0 && rowIndex <= mData.size()) )
+	if( (padIndex > 0 && padIndex <= mData[rowIndex].size()) )
+#endif
+	    {
+	      mData[(rowN-1)][(padN-1)].clear();
+	      digitalPadDataIterator begin = tbins->begin();
+	      digitalPadDataIterator end   = tbins->end();
+	      for (digitalPadDataIterator iter = begin; iter != end; iter++)
+		mData[(rowN-1)][(padN-1)].push_back(digitalPair(*iter,0));
+	    }
+}
+//________________________________________________________________________________
 void StTrsDigitalSector::assignTimeBins(int rowN, int padN, digitalTimeBins* tbins)
 {
 #ifdef ST_SECTOR_BOUNDS_CHECK

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDetectorReader.cc,v 1.3 2000/03/15 18:08:56 calderon Exp $
+ * $Id: StTrsDetectorReader.cc,v 1.4 2003/12/24 13:44:53 fisyak Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsDetectorReader.cc,v $
+ * Revision 1.4  2003/12/24 13:44:53  fisyak
+ * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+ *
  * Revision 1.3  2000/03/15 18:08:56  calderon
  * ZSR is no longer a singleton.  Two will be needed for mixer chain.
  *
@@ -46,7 +49,7 @@ StTrsDetectorReader::StTrsDetectorReader()
 //     //mTheEvent = 
 // }
 
-StTrsDetectorReader::StTrsDetectorReader(StTpcRawDataEvent* ev, string ver)
+StTrsDetectorReader::StTrsDetectorReader(StTpcRawDataEvent* ev, std::string ver)
     : mVersion(ver), mTheEvent(ev) 
 {
     mZSR = new StTrsZeroSuppressedReader(mTheEvent);
@@ -57,13 +60,13 @@ StTrsDetectorReader::~StTrsDetectorReader()
     delete mZSR;
 }
 
-ZeroSuppressedReader* StTrsDetectorReader::getZeroSuppressedReader(int sector)
+StTrsZeroSuppressedReader* StTrsDetectorReader::getZeroSuppressedReader(int sector)
 {
     if(mZSR->setSector(sector))  return mZSR;
     else return 0;
 	
 }
-
+#if 0
 ADCRawReader* StTrsDetectorReader::getADCRawReader(int sector)
 {
     cerr << "StTrsDetectorReader::getADCRawReader Not Implemented" << endl;
@@ -120,3 +123,4 @@ int StTrsDetectorReader::AttachBuffers(BadChannelReader *, int sector) {return 0
 int StTrsDetectorReader::AttachBuffers(ConfigReader *, int sector) {return 0;}
 
 int StTrsDetectorReader::MemUsed() {return 0;}
+#endif

@@ -1,6 +1,7 @@
+
 /***************************************************************************
  *
- * $Id: StTrsZeroSuppressedReader.hh,v 1.2 2000/03/15 18:08:43 calderon Exp $
+ * $Id: StTrsZeroSuppressedReader.hh,v 1.3 2003/12/24 13:44:52 fisyak Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -31,6 +32,9 @@
  ***************************************************************************
  *
  * $Log: StTrsZeroSuppressedReader.hh,v $
+ * Revision 1.3  2003/12/24 13:44:52  fisyak
+ * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+ *
  * Revision 1.2  2000/03/15 18:08:43  calderon
  * ZSR is no longer a singleton.  Two will be needed for mixer chain.
  *
@@ -38,7 +42,7 @@
  * Made private copy constructor and operator= in StTrsDigitalSector.
  * Renamed DigitalSignalGenerators: Fast -> Old, Parameterized -> Fast
  * and use new "Fast" as default.
- * Added StTrsDetectorReader and StTrsZeroSuppressedReader for DAQ type
+ * Added StTrsZeroSuppressedReader and StTrsZeroSuppressedReader for DAQ type
  * data access.
  *
  ***************************************************************************/
@@ -47,11 +51,16 @@
 
 #include "StSequence.hh"
 #include "StDaqLib/GENERIC/EventReader.hh"
+// struct StTrsSequence : public Sequence {
+//   StTrsSequence() : Sequence(), FirstId(0) {}
+//   int*           FirstId;           // ptr to the first simulated track id in the sequence           
+// };
+
 class StTpcRawDataEvent;
 class StTrsRawDataEvent;
 class StTrsDigitalSector;
 
-class StTrsZeroSuppressedReader : public ZeroSuppressedReader {
+class StTrsZeroSuppressedReader {//: public ZeroSuppressedReader {
 public:
     StTrsZeroSuppressedReader();
     StTrsZeroSuppressedReader(StTpcRawDataEvent*);
@@ -60,10 +69,15 @@ public:
     //StTrsZeroSuppressedReader(StTrsZeroSuppressedReader&);
 
     int getPadList(int padRow, unsigned char **padList);
+  //    int getSequences(int padRow, int Pad, int *nSeq, StTrsSequence*& SeqData);
+    int getSequences(int padRow, int Pad, int *nSeq, StSequence** SeqData, int ***Id);
+    int getSequences(int padRow, int Pad, int *nSeq, StSequence** SeqData);
+    int getSequences(int padRow, int Pad, int *nSeq, Sequence** SeqData, int ***Id);
     int getSequences(int padRow, int Pad, int *nSeq, Sequence** SeqData);
-    //int getSequences(int padRow, int Pad, int *nSeq, StSequence** SeqData);
+#if 0
     int getSpacePts(int, int*, SpacePt**);
     int MemUsed();
+#endif
     int setSector(int);
     void clear();
 
@@ -75,7 +89,7 @@ private:
     int                 mSector;
     StTrsDigitalSector* mTheSector;
     unsigned char*      mPadList;
-    Sequence*         mSequence;
+    StSequence*         mSequence;
     StTrsRawDataEvent*  mTrsEvent;
 
 };

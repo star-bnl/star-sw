@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.hh,v 1.9 2003/09/02 17:59:16 perev Exp $
+ * $Id: StTrsChargeSegment.hh,v 1.10 2003/12/24 13:44:51 fisyak Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.hh,v $
+ * Revision 1.10  2003/12/24 13:44:51  fisyak
+ * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+ *
  * Revision 1.9  2003/09/02 17:59:16  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -92,6 +95,7 @@ public:
     StTrsChargeSegment();
     StTrsChargeSegment(StThreeVector<double>& pos,
 		       StThreeVector<double>& mom,
+		       int    id,                  // geant track id
 		       double de,                  // energy deposited
 		       double ds,                  // pathlength
 		       int    pid = -1,            // pid #
@@ -108,6 +112,7 @@ public:
     const StThreeVector<double>& momentum()          const;
     double                 dE()                const;
     double                 ds()                const;
+    int                    id()                const; 
     int                    pid()               const;
     double                 numberOfElectrons() const;
     
@@ -138,6 +143,7 @@ private:
     StThreeVector<double> mPosition;
     StThreeVector<double> mSector12Position;
     StThreeVector<double> mMomentum;
+    int                   mId;
     double                mDE;
     double                mDs;
     int                   mPid;
@@ -152,6 +158,7 @@ inline const StThreeVector<double>& StTrsChargeSegment::position() const {return
 inline const StThreeVector<double>& StTrsChargeSegment::momentum() const {return mMomentum;}
 inline double StTrsChargeSegment::dE() const {return mDE;}
 inline double StTrsChargeSegment::ds() const {return mDs;}
+inline int StTrsChargeSegment::id()    const {return mId;}
 inline int StTrsChargeSegment::pid() const {return mPid;}
 inline double StTrsChargeSegment::numberOfElectrons() const {return mNumberOfElectrons;}
 

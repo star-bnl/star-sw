@@ -13,9 +13,8 @@
 #include <sys/stat.h>   // For binary file input (the DAQ data file).
 #include <fcntl.h>      // For binary file input (the DAQ data file).
 
-#include <Stiostream.h>
-#include <unistd.h>    // needed for access()/sleep()
 #include "Stiostream.h"
+#include <unistd.h>    // needed for access()/sleep()
 #include <math.h>
 #include <string>
 #include <algorithm>
@@ -60,8 +59,9 @@
 //VP#include "StDaqLib/GENERIC/EventReader.hh"
 #include "StSequence.hh"
 //#include "StDaqLib/TPC/trans_table.hh"
+#if 0
 #include "StTrsMaker/include/StTrsOstream.hh"
-
+#endif
 #include "StDAQMaker/StDAQReader.h"
 
 #include "StDaqLib/TPC/trans_table.hh"
@@ -72,9 +72,9 @@ StDAQReader *daqr2;
 StTPCReader *tpcr2;
 StTrsDetectorReader* tdr1;
 StTrsDetectorReader* tdr2;
-ZeroSuppressedReader* trsZsr;
-ZeroSuppressedReader* trsZsr1;
-ZeroSuppressedReader* trsZsr2;
+StTrsZeroSuppressedReader* trsZsr;
+StTrsZeroSuppressedReader* trsZsr1;
+StTrsZeroSuppressedReader* trsZsr2;
 
 ClassImp(StMixerMaker)
 
@@ -105,14 +105,14 @@ int StMixerMaker::getSequences2(int sector,int row,int pad,int *nseq,StSequence 
     *listOfSequences=(StSequence*)listOfSequencesPrelim;
     return kStOK;
 }
-
+#if 0
 int StMixerMaker::writeFile(char* file, int numEvents)
 {
     mOutputFileName = file;
     mNumberOfEvents = numEvents;
     return kStOK;
 }
-
+#endif
 Int_t StMixerMaker::InitRun(int RunId) {
 
   // The global pointer to the Db is gStTpcDb and it should be created in the macro.  
@@ -135,9 +135,10 @@ Int_t StMixerMaker::InitRun(int RunId) {
   // Construct constant data sets.  This is what is passed downstream
   mAllTheDataMixer = new StTrsRawDataEvent(mGeometryDb->numberOfSectors());
   AddConst(new St_ObjectSet("MixerEvent"  , mAllTheDataMixer));
-
+#if 0
   // Stream Instantiation
   mOutputStreamMixer = new StTrsOstream(mOutputFileName,mNumberOfEvents,mGeometryDb);
+#endif
   return kStOk;
 }
 

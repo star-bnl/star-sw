@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.36 2003/09/02 17:59:19 perev Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.37 2003/12/24 13:44:52 fisyak Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -13,6 +13,9 @@
  *
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.37  2003/12/24 13:44:52  fisyak
+ * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+ *
  * Revision 1.36  2003/09/02 17:59:19  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -169,6 +172,7 @@ StTrsChargeSegment::StTrsChargeSegment()
     : mPosition(0,0,0),
       mSector12Position(mPosition),
       mMomentum(0,0,0),
+      mId(0),
       mDE(0),
       mDs(0),
       mPid(0),
@@ -179,6 +183,7 @@ StTrsChargeSegment::StTrsChargeSegment()
 
 StTrsChargeSegment::StTrsChargeSegment(StThreeVector<double>& pos,
 				       StThreeVector<double>& mom,
+				       int    id,
 				       double de,
 				       double ds,
 				       int    pid,
@@ -186,6 +191,7 @@ StTrsChargeSegment::StTrsChargeSegment(StThreeVector<double>& pos,
     : mPosition(pos),
       mSector12Position(mPosition),
       mMomentum(mom),
+      mId(id),
       mDE(de),
       mDs(ds),
       mPid(pid),  // default is -1
@@ -422,7 +428,7 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 	    
 	    StTrsMiniChargeSegment aMiniSegment(track.at(newPosition),
 						theIonization[i],
-						deltaS);
+						deltaS, mId);
 	    listOfMiniSegments->push_back(aMiniSegment);
 	    
 	    newPosition += deltaS;
@@ -433,7 +439,7 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
     else if(subSegments == 1) {
 	StTrsMiniChargeSegment aSingleMiniSegment(mPosition,
 						  mNumberOfElectrons,
-						  mDs);
+						  mDs, mId);
         
 	if(aSingleMiniSegment.position().z()>0)listOfMiniSegments->push_back(aSingleMiniSegment);
 // 	PR(mPosition);
@@ -597,7 +603,7 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 	    // Take the electrons from the vector
 	    StTrsMiniChargeSegment aMiniSegment(track.at(newPosition),
 						ionizationSegments[(numberOfLevels-1)][i],
-					deltaS);
+					deltaS, mId);
             if(aMiniSegment.position().z()>0)listOfMiniSegments->push_back(aMiniSegment);  //HL,03/2001 protect against negative z.	
 	   
 	    newPosition += deltaS;
@@ -613,7 +619,7 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 	//
 	StTrsMiniChargeSegment aBadMiniSegment(mPosition,
 					       mNumberOfElectrons,
-					       mDs);
+					       mDs, mId);
 	
     }
 }
@@ -745,5 +751,10 @@ double StTrsChargeSegment::binaryPartition(double l, double derelave, double xmi
 // Non-member
 ostream& operator<<(ostream& os, const StTrsChargeSegment& seg)
 {
-    return os << '(' << seg.position() << ", " << seg.momentum() << ", " << seg.dE() << ", " << seg.ds() << ')';
+    return os << "(Pos:" << seg.position() << ", mon:" << seg.momentum() 
+	      << ", id:" << seg.id() 
+	      << ", dE:" << seg.dE() 
+	      << ", dS:" << seg.ds() 
+	      << ", pid:" << seg.pid() 
+	      << ")";
 }
