@@ -2638,6 +2638,21 @@ void KalmanTrackFinderIO::makeNumberEntries()
     fLabel.push_back( new TGLabel(fF.back(), "Max. Search Radius") );
     fF.back()->AddFrame(fLabel.back(), fL2);
 
+    //Search Window SCale
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("SearchWindowScale",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->ktfSearchWindowScale() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESRealFour, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 20);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Search Window Scale") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+
+
     //Toggle for Mcs Calculation
     fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
     fF1->AddFrame(fF.back(), fL2);
@@ -2748,6 +2763,9 @@ void KalmanTrackFinderIO::SetLimits()
 	}
 	else if (name=="MaxSearchRadius") {
 	    broker->setKTFMaxSearchRadius( (*it).second->GetNumber() );
+	}
+	else if (name=="SearchWindowScale") {
+	    broker->setKTFSearchWindowScale( (*it).second->GetNumber() );
 	}
 	else {
 	    cout <<"KalmanTrackFinderIO::SetLimits(). ERROR:\t"

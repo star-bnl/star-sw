@@ -133,9 +133,13 @@ public:
     virtual void setKTFMaxSearchRadius(double);
     virtual double ktfMaxSearchRadius() const;
 
+    virtual void setKTFSearchWindowScale(double);
+    virtual double ktfSearchWindowScale() const;
+
     //Use helix extrapolation (defaults to line)
     virtual void setKTFUseHelixExtrapolation(bool);
     virtual bool ktfUseHelixExtrapolation() const;
+
 
     // LocalTrackMerger (ltm)
 
@@ -184,6 +188,7 @@ protected:
     unsigned int mKTFMaxContiguousNullCount;
     double mKTFMinSearchRadius;
     double mKTFMaxSearchRadius;
+    double mKTFSearchWindowScale;
     bool mKTFUseHelixExtrapolation;
 
     //LocalTrackMerger
@@ -525,10 +530,20 @@ inline void StiRootIOBroker::setKTFMaxSearchRadius(double val)
     mKTFMaxSearchRadius = val;
     notify();
 }
-
 inline double StiRootIOBroker::ktfMaxSearchRadius() const
 {
     return mKTFMaxSearchRadius;
+}
+
+inline void StiRootIOBroker::setKTFSearchWindowScale(double val)
+{
+    mKTFSearchWindowScale = val;
+    notify();
+}
+
+inline double StiRootIOBroker::ktfSearchWindowScale() const
+{
+  return mKTFSearchWindowScale;
 }
 
 inline void StiRootIOBroker::setKTFUseHelixExtrapolation(bool val)
@@ -541,6 +556,7 @@ inline bool StiRootIOBroker::ktfUseHelixExtrapolation() const
 {
     return mKTFUseHelixExtrapolation;
 }
+
 
 inline void StiRootIOBroker::setLTMDeltaR(double val)
 {

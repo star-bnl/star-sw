@@ -11,10 +11,11 @@ void RunStiMaker(Int_t nevents=1,
 		 bool doFit=false, // false->find track only
 		 //const char* outfile = "/star/data22/ITTF/evaluation/Miller/Evaluation.root",
 		 const char* outfile = "Evaluation.root",
-		 bool doProfile=false, // produce profiling output?
+		 bool doProfile=false, // produce profiling output? 
+		 const char* MainFile="/a1/pruneau/data/EvalData/MCNtuple/muon_100_neg.event.root")
 		 
-		 //This file points to 30 events of 10 neg muons w/ pt=.9 
-		 const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/muon_10_neg.event.root")
+  //This file points to 30 events of 10 neg muons w/ pt=.9 
+  //const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/muon_10_neg.event.root")
 		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Fri/year_2001/pp_minbias/pds0200_04_12812evts.event.root")
 		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Fri/year_2001/hc_highdensity/hc_highdensity.16_evts.event.root")
 		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Fri/year_2001/hc_standard/hc_standard.40_evts.event.root")
@@ -167,8 +168,9 @@ void RunStiMaker(Int_t nevents=1,
     stiIO->setKTFMinContiguousHitCount(2);
     stiIO->setKTFMaxNullCount(40);
     stiIO->setKTFMaxContiguousNullCount(25);
-    stiIO->setKTFMinSearchRadius(.1); //cm
-    stiIO->setKTFMaxSearchRadius(10.); //cm
+    stiIO->setKTFMinSearchRadius(.5); //cm
+    stiIO->setKTFMaxSearchRadius(4.); //cm
+    stiIO->setKTFSearchWindowScale(5.); //cm
 	
     //Set Local Track Seed Finder (LTSF) run-time values
     stiIO->setLTSFZWindow(5.);
