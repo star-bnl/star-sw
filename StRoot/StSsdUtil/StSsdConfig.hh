@@ -49,6 +49,7 @@ public:
 
 protected:
   int mStatus[MaxNumberOfLadders]; 
+  int totLadderPresent;        // Number of Present Ladders //////////// A MODIFIER PLUS TARD
   int mNumberOfLadders;        // Number of Present Ladders 
   int mNumberOfWafers;         // Number of Wafers of each Ladder (Barrel dependent)
   int mNumberOfHybrids;        // Number of Hybrids of each Wafer 
