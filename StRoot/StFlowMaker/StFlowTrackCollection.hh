@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrackCollection.hh,v 1.3 2000/01/13 22:19:21 posk Exp $
+// $Id: StFlowTrackCollection.hh,v 1.4 2000/01/31 22:17:00 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrackCollection.hh,v $
+// Revision 1.4  2000/01/31 22:17:00  posk
+// CC5 compliant.
+//
 // Revision 1.3  2000/01/13 22:19:21  posk
 // Updates and corrections.
 //
@@ -33,7 +36,6 @@
 #include <vector>
 
 #if !defined(ST_NO_NAMESPACES)
-//using namespace std;
 using std::vector;
 #endif
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cc,v 1.11 2000/01/24 23:00:59 posk Exp $
+// $Id: StFlowEvent.cc,v 1.12 2000/01/31 22:16:58 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cc,v $
+// Revision 1.12  2000/01/31 22:16:58  posk
+// CC5 compliant.
+//
 // Revision 1.11  2000/01/24 23:00:59  posk
 // Merged updates
 //
@@ -53,7 +56,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include <algorithm>
-#if  defined(__sun) && ! defined(__GNUG__)
+//#if  defined(__sun) && ! defined(__GNUG__)
+//#if defined(__SUNPRO_CC) && __SUNPRO__CC < 0x500
+#if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #include <ospace/stl/src/randgen.cpp>
 #endif
 #include "StFlowEvent.hh"
