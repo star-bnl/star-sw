@@ -25,7 +25,7 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
   memset (&m_Corrections, 0, kTpcAllCorrections*sizeof(dEdxCorrection_t));
   m_Corrections[kAdcCorrection       ] = dEdxCorrection_t("TpcAdcCorrectionB"   ,"ADC/Clutering nonlinearity correction");
   m_Corrections[kTpcSecRow           ] = dEdxCorrection_t("TpcSecRowB"         	,"Gas gain correction for sector/row");
-  m_Corrections[kDrift               ] = dEdxCorrection_t("TpcDriftDistOxygen" 	,"Correction for Electro Attachment due to O2");
+  m_Corrections[kDrift               ] = dEdxCorrection_t("TpcDriftDistOxygen" 	,"Correction for Electron Attachment due to O2");
   m_Corrections[kMultiplicity        ] = dEdxCorrection_t("TpcMultiplicity"     ,"Global track multiplicity dependence");
   m_Corrections[kzCorrection         ] = dEdxCorrection_t("TpcZCorrectionB"    	,"Variation on drift distance");
   m_Corrections[kdXCorrection        ] = dEdxCorrection_t("TpcdXCorrectionB"   	,"dX correction");
@@ -35,7 +35,7 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
   //  m_Corrections[ktpcWaterOut         ] = dEdxCorrection_t("tpcWaterOut"        	,"Dependence of the Gain on Water content");
   //  m_Corrections[kTpcdCharge          ] = dEdxCorrection_t("TpcdCharge"        	,"Dependence of the Gain on total charge accumulated so far");
   //  m_Corrections[kTpcPadTBins         ] = dEdxCorrection_t("TpcPadTBins"        	,"Variation on cluster size");
-  m_Corrections[kSpaceCharge         ] = dEdxCorrection_t("SpaceCharge"        	,"Dependence of the Gain on space charge near the wire");
+  m_Corrections[kSpaceCharge         ] = dEdxCorrection_t("TpcSpaceCharge"      ,"Dependence of the Gain on space charge near the wire");
   m_Corrections[kTpcdEdxCor          ] = dEdxCorrection_t("TpcdEdxCor"         	,"dEdx correction wrt Bichsel parameterization"); 
   m_Corrections[kTpcLengthCorrection ] = dEdxCorrection_t("TpcLengthCorrectionB","Variation on Track length and relative error in Ionization");
 
@@ -47,27 +47,6 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
   mAdc2GeV[0] = tsspar->ave_ion_pot * tsspar->scale /(tsspar->gain_out*tsspar->wire_coupling_out);
   mAdc2GeV[1] = tsspar->ave_ion_pot * tsspar->scale /(tsspar->gain_in *tsspar->wire_coupling_in );
   // 
-#if 0
-  TDataSet *rich_calib  = StMaker::GetChain()->GetDataBase("Calibrations/rich"); 
-  if (! rich_calib ) gMessMgr->Error() << "StTpcdEdxCorrection:: Cannot find Calibrations/rich" << endm;
-  else {
-    St_trigDetSums *l_trigDetSums = (St_trigDetSums *) rich_calib->Find("trigDetSums");
-    if ( ! l_trigDetSums ) gMessMgr->Error() << "StTpcdEdxCorrection:: Cannot find trigDetSums in Calibrations/rich" << endm;
-    else {
-      if (!l_trigDetSums->GetNRows()) gMessMgr->Error() << "StTpcdEdxCorrection:: trigDetSums has not data" << endm;
-      else {
-	trigDetSums_st *l_trig = l_trigDetSums->GetTable();
-	UInt_t date = StMaker::GetChain()->GetDateTime().Convert();
-	if (date < l_trig->timeOffset) {
-	  gMessMgr->Error() << "StTpcdEdxCorrection:: Illegal time for scalers = " 
-			    << l_trig->timeOffset << "/" << date
-			    << " Run " << l_trig->runNumber << "/" << GetRunNumber() << endm;
-	}
-	else SettrigDetSums(l_trigDetSums);
-      }
-    }
-  }
-#endif
   TDataSet *tpc_calib  = StMaker::GetChain()->GetDataBase("Calibrations/tpc"); assert(tpc_calib);
   if (Debug() > 1) tpc_calib->ls(3);
   St_tpcGas *k_tpcGas = (St_tpcGas *) tpc_calib->Find("tpcGas");
@@ -134,27 +113,10 @@ StTpcdEdxCorrection::~StTpcdEdxCorrection() {
 Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) { 
   Double_t dEU = CdEdx.dE;
   Double_t dE  = dEU;
-#if 0
-  Double_t dER = dE;
-  Double_t dEP = dE;
-  Double_t dET = dE;
-  Double_t dEO = dE;
-  Double_t dES = dE;
-  Double_t dEZ = dE;
-  Double_t dEX = dE;
-  Double_t dEM = dE;
-#endif
   Int_t sector            = CdEdx.sector; 
   Int_t row       	  = CdEdx.row;   
   Double_t dx     	  = CdEdx.dx;    
   if (dE <= 0 || dx <= 0) return 3;
-#if 0
-  Int_t pad       	  = CdEdx.pad;   
-  Double_t dx0    	  = CdEdx.dx0;   
-  Double_t x      	  = CdEdx.xyz[0];
-  Double_t y      	  = CdEdx.xyz[1];
-  Double_t z      	  = CdEdx.xyz[2];
-#endif
   
   Double_t ZdriftDistance = CdEdx.ZdriftDistance;
   ESector kTpcOutIn = kTpcOuter;
@@ -233,56 +195,12 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) {
       break;
     }
   ENDL:
-#if 0
-    m_Corrections[k].dE = dE;
-#endif
     CdEdx.C[k].dE = dE;
     CdEdx.C[k].dEdx    = CdEdx.C[k].dE/CdEdx.dx;
     CdEdx.C[k].dEdxL   = TMath::Log(CdEdx.C[k].dEdx);
   }    
   
   memcpy (&CdEdx.dE, &CdEdx.C[kTpcLast].dE, sizeof(dE_t));
-#if 0
-  dER = m_Corrections[kAdcCorrection].dE;
-  dES = m_Corrections[kTpcSecRow].dE;
-  dEP = m_Corrections[ktpcPressure].dE;
-  dET = dE;
-  dEM = dE;
-  dEO = dE;
-  CdEdx.dE      = dE;  // corrected
-  CdEdx.dEdx    = CdEdx.dE/CdEdx.dx;
-  CdEdx.dEdxL   = TMath::Log(CdEdx.dEdx);
-  CdEdx.dEU     = dEU; // uncorrected
-  CdEdx.dER     = dER; // row correction
-  CdEdx.dEM     = dEM; // Multiplicity correction
-  CdEdx.dEP     = dEP; // Pressure
-  CdEdx.dET     = dET; // Time 
-  CdEdx.dEO     = dEO; // Blair O2 
-  CdEdx.dES     = dES; // SecRow 
-  CdEdx.dEZ     = dEZ; // Drift Distance
-  CdEdx.dEX     = dEX; // dE correction
-  CdEdx.ZdriftDistanceO2 = ZdriftDistanceO2;
-  CdEdx.ZdriftDistanceO2W = ZdriftDistanceO2W;
-  CdEdx.dEUdx   = CdEdx.dEU/CdEdx.dx;
-  CdEdx.dEUdxL  = TMath::Log(CdEdx.dEUdx);
-  CdEdx.dERdx   = CdEdx.dER/CdEdx.dx;
-  CdEdx.dERdxL  = TMath::Log(CdEdx.dERdx);
-  CdEdx.dEPdx   = CdEdx.dEP/CdEdx.dx;
-  CdEdx.dEPdxL  = TMath::Log(CdEdx.dEPdx);
-  CdEdx.dETdx   = CdEdx.dET/CdEdx.dx;
-  CdEdx.dEdxLT  = TMath::Log(CdEdx.dETdx);
-  CdEdx.dEOdx   = CdEdx.dEO/CdEdx.dx;
-  CdEdx.dEdxLO  = TMath::Log(CdEdx.dEOdx);
-  CdEdx.dESdx   = CdEdx.dES/CdEdx.dx;
-  CdEdx.dEdxLS  = TMath::Log(CdEdx.dESdx);
-  CdEdx.dEZdx   = CdEdx.dEZ/CdEdx.dx;
-  CdEdx.dEZdxL  = TMath::Log(CdEdx.dEZdx);
-  CdEdx.dEZdx   = CdEdx.dEZ/CdEdx.dx;
-  CdEdx.dEXdx   = CdEdx.dEX/CdEdx.dx;
-  CdEdx.dEXdxL  = TMath::Log(CdEdx.dEXdx);
-  CdEdx.dEMdx   = CdEdx.dEM/CdEdx.dx;
-  CdEdx.dEMdxL  = TMath::Log(CdEdx.dEMdx);
-#endif
   return 0;
 }
 //________________________________________________________________________________
