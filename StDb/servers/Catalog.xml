@@ -44,11 +44,4 @@
 			</HOST>
 		</SERVER>
 	</SITE>
-        <SITE name="LBL">
-               <SERVER SCOPE="User">
-                        <HOST NAME="pdsfdv16.nersc.gov" DBNAME="FileCatalog_LBL" PORT="">
-                                <ACCESS USER="FC_user" PASS="FCatalogPDSFLBNL"/>
-                        </HOST>
-               </SERVER>
-        </SITE>
 </SCATALOG>
