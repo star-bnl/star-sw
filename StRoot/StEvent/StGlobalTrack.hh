@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.hh,v 1.5 1999/02/15 16:17:03 wenaus Exp $
+ * $Id: StGlobalTrack.hh,v 1.6 1999/02/23 21:23:59 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.hh,v $
- * Revision 1.5  1999/02/15 16:17:03  wenaus
- * fix double& -> double referencing bug
+ * Revision 1.6  1999/02/23 21:23:59  ullrich
+ * Removed obsolete EMC/SMD hit information (future cluster).
+ *
+ * Revision 1.10  1999/03/23 21:47:37  ullrich
+ * Member function made virtual
  *
  * Revision 1.9  1999/03/04 18:17:04  ullrich
  * Namespace std not used if ST_NO_NAMESPACES defined
@@ -34,8 +37,6 @@
  * New track constructor to load helix params independently of table
  *
 using namespace std;
-#include "StEvent/StEmcHit.hh"
-#include "StEvent/StSmdHit.hh"
  * table load intfc change; include ref change
  *
  * Revision 1.2  1999/01/15 22:53:45  wenaus
@@ -59,11 +60,7 @@ class StGlobalTrack : public StTrack {
 public:
     StGlobalTrack();
     ~StGlobalTrack();
-    StEmcHit*                 emcHit();
-    StSmdHit*                 smdHit();
     StGlobalTrack(dst_track_st* trk,
-    void setEmcHit(StEmcHit*);       
-    void setSmdHit(StSmdHit*);       
                   double curvature,
                   double dip,
     const StVecPtrTpcHit&     tpcHits() const;
@@ -85,8 +82,6 @@ public:
     void addTpcHit(StTpcHit*);
     void addFtpcHit(StFtpcHit*);
     void addSvtHit(StSvtHit*);
-    StEmcHit*       mEmcHit;
-    StSmdHit*       mSmdHit;
     void removeTpcHit(StTpcHit*);
     void removeFtpcHit(StFtpcHit*);
     void removeSvtHit(StSvtHit*);
@@ -103,10 +98,6 @@ public:
     StDedx*         mFtpcDedx;
     StDedx*         mSvtDedx;       
     StDedx*          mFtpcDedx;
-
-inline StEmcHit* StGlobalTrack::emcHit() { return mEmcHit; }
-
-inline StSmdHit* StGlobalTrack::smdHit() { return mSmdHit; }
     StDedx*          mSvtDedx;       
     StTrackPidTraits mPidTraits;
 };
