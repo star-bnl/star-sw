@@ -42,6 +42,7 @@ Int_t StEmcHandleInput::ProcessInput() {
 
     //
     if(!mTheEmcReader){
+    cout<<"ProcessInput::EmcRead does not exist"<<endl;
     // case 1 , StEvent exist but no daq
         StEmcnoDaqInput * ndaq = new StEmcnoDaqInput(mevent,mTheEmcReader,m_calibdb);
       int stat=ndaq->ProcessInput();
@@ -49,8 +50,10 @@ Int_t StEmcHandleInput::ProcessInput() {
     }
     //case 2 StEvent, emcreader exist
     if(mTheEmcReader){
+    cout<<"ProcessInput::EmcRead "<<endl;
         if(mTheEmcReader->NTowerHits()>0){
 	StEmcTowerInput *tower = new StEmcTowerInput(mevent, mTheEmcReader,m_calibdb);
+
         int stat=tower->ProcessInput();
         if(stat==kStOK){cout<<"Towerinput OK"<<endl;}
 	      }

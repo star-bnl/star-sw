@@ -39,9 +39,9 @@ Int_t StEmcApplyCalib::Calibrate() {
     cout << "ApplyCalib::Calibrate()" << endl;
 
 //Get DB
- cout<<"Getting DB"<<endl;
+ cout<<"Getting CalibDB"<<endl;
     StEmcHandleDB * db=new StEmcHandleDB(m_calibdb);
-    db->ProcessDB(); 
+    db->Process_TowerCalibDB(); 
     cout<<"DB handled"<<endl;
 
 // Get EmcCollection, apply separately for each subdetectors

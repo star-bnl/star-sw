@@ -68,7 +68,8 @@ public:
     virtual Int_t  GetSmdPEquals(Int_t,Int_t,Int_t,Float_t&);
 
     Int_t ProcessDB();
-    Int_t Process_TowerDB();
+    Int_t Process_TowerPedDB();
+    Int_t Process_TowerCalibDB();
     Int_t Process_SmdEDB();
     Int_t Process_SmdPDB();
 
@@ -82,7 +83,7 @@ private:
     emcCalibration_st* m_Smdpcalibdb;  // Calib table for 4 subdetector
 
 
-    emcCalibration_st* m_Towerpedsdb;   //peds table for 4 subdetectors
+    emcCalibration_st* m_TowerPeddb;   //peds table for 4 subdetectors
     emcCalibration_st* m_Smdepedsdb;   //peds table for 4 subdetectors
     emcCalibration_st* m_Smdppedsdb;   //peds table for 4 subdetectors
 
