@@ -1,5 +1,8 @@
-* * $Id: bfc.kumac,v 1.75 1998/11/04 16:50:32 kathy Exp $
+* * $Id: bfc.kumac,v 1.76 1998/11/06 19:32:55 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.76  1998/11/06 19:32:55  kathy
+* allow 2 ntuples to be written to same ntuple file
+*
 * Revision 1.75  1998/11/04 16:50:32  kathy
 * implement ntup2 chain and inputs to bfc macro - now can write 2 ntuples while processing
 *
@@ -276,7 +279,9 @@
 *                               nev_pass = total # events passed the processing
 * 
 * editted 9/24/98 K. Turner - moved BFC information to README file
-*
+* 
+* editted 11/4/98 K. Turner - allow more than 1 ntuple in the ntuple file
+* 
 ****************************************************************
 ***  see README file for explanation of BFC *** 
 *****************************************************************
@@ -307,8 +312,6 @@ MACRO bfc _
    nfile=globtrk.ntup _
    nid=111 _
    ntable=event/data/global/dst/globtrk _
-   nunit2=22 _
-   nfile2=event_summary.ntup _
    nid2=112 _
    ntable2=event/data/global/dst/event_summary _
    cleanup=0
@@ -374,8 +377,6 @@ MACRO bfc _
  macro/global/create nfile            [nfile]
  macro/global/create nid              [nid]
  macro/global/create ntable           [ntable]
- macro/global/create nunit2           [nunit2]
- macro/global/create nfile2           [nfile2]
  macro/global/create nid2             [nid2]
  macro/global/create ntable2          [ntable2]
 	   
