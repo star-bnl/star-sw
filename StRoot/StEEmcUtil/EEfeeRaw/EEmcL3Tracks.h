@@ -2,9 +2,12 @@
 #ifndef EEmcL3Tracks_h
 #define EEmcL3Tracks_h
 /*********************************************************************
- * $Id: EEmcL3Tracks.h,v 1.8 2003/05/31 02:31:30 zolnie Exp $
+ * $Id: EEmcL3Tracks.h,v 1.9 2003/06/02 17:34:35 zolnie Exp $
  *********************************************************************
  * $Log: EEmcL3Tracks.h,v $
+ * Revision 1.9  2003/06/02 17:34:35  zolnie
+ * fixed bug in EEmcHelix
+ *
  * Revision 1.8  2003/05/31 02:31:30  zolnie
  * bring the changes back
  *
@@ -62,30 +65,31 @@ public:
   Float_t Oz()     const { return mOz;  }
   Float_t Px()     const { return mPx;  }
   Float_t Py()     const { return mPy;  }
+  Float_t Pt()     const { return sqrt(mPx*mPx+mPy*mPy);  }
   Float_t Pz()     const { return mPz;  }
   Int_t   Q ()     const { return mQ;   }
   Float_t B ()     const { return mB;   } 
-  Int_t   Points() const { return mFlag;}
-  Float_t Length() const { return mFlag;}
+  Int_t   Points() const { return mPoints;}
+  Float_t Length() const { return mLength;}
   Int_t   Flag()   const { return mFlag;}
 
-  void    print(FILE *fd) const;
+  void    print(FILE *fd=stdout) const;
   
 private:
-  Float_t mOx;  // origin x
-  Float_t mOy;  // origin y
-  Float_t mOz;  // origin z
-  Float_t mPx;  // x momentum at origin
-  Float_t mPy;  // y momentum at origin
-  Float_t mPz;  // z momentum at origin
-  Float_t mB;   // field
-  Int_t   mQ;   // charge
-  Int_t   mPoints;
-  Float_t mLength;
-  Int_t   mFlag;// 0==primary, 1==secondary
+  Float_t mOx;     // origin x
+  Float_t mOy;     // origin y
+  Float_t mOz;     // origin z
+  Float_t mPx;     // x momentum at origin
+  Float_t mPy;     // y momentum at origin
+  Float_t mPz;     // z momentum at origin
+  Float_t mB;      // field
+  Int_t   mQ;      // charge
+  Int_t   mPoints; //
+  Float_t mLength; //
+  Int_t   mFlag;   // 0==primary, 1==secondary
   
 
-  ClassDef(EEmcHelix,3)   
+  ClassDef(EEmcHelix,4)   
 };
 
 class EEmcL3Tracks : public TObject {
