@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.h,v 2.8 2001/09/18 00:16:07 ullrich Exp $
+ * $Id: StEventMaker.h,v 2.9 2001/09/28 22:22:05 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.h,v $
+ * Revision 2.9  2001/09/28 22:22:05  ullrich
+ * Load helix geometry at last point of each track.
+ *
  * Revision 2.8  2001/09/18 00:16:07  ullrich
  * Fill and add StRunInfo.
  *
@@ -64,7 +67,7 @@ public:
        
     virtual const char *GetCVS() const
     {
-	static const char cvs[]="$Id: StEventMaker.h,v 2.8 2001/09/18 00:16:07 ullrich Exp $ built "__DATE__" "__TIME__ ;
+	static const char cvs[]="$Id: StEventMaker.h,v 2.9 2001/09/28 22:22:05 ullrich Exp $ built "__DATE__" "__TIME__ ;
 	return cvs;
     }
 
@@ -82,7 +85,7 @@ public:
 protected:
     Int_t     makeEvent();
     StEvent*  getStEventInstance();
-    
+    void   fillOuterTrackGeometry(StTrack*, const dst_track_st&);    
     void   printEventInfo();
     void   printTrackInfo(StTrack*);
     
