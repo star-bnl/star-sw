@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.40 2002/05/09 16:55:08 munhoz Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.41 2002/09/19 16:17:48 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.41  2002/09/19 16:17:48  caines
+ * Add code to do Juns gain calibration
+ *
  * Revision 1.40  2002/05/09 16:55:08  munhoz
  * add reading bad anodes from DB
  *
@@ -127,6 +130,7 @@
  **************************************************************************/
 
 #include "StChain.h"
+#include "TFile.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "StSequence.hh"
@@ -149,6 +153,8 @@
 #include <fstream.h>
 
 int* anolist; 
+TFile *hfile;
+unsigned long Evt_counts=0;
 
 //___________________________________________________________________________________________
 StSvtSeqAdjMaker::StSvtSeqAdjMaker(const char *name) : StMaker(name)
@@ -166,7 +172,6 @@ StSvtSeqAdjMaker::StSvtSeqAdjMaker(const char *name) : StMaker(name)
   mProbValue = NULL;
   tempSeq1 = new StSequence[128];
 
-
   // Set up some defaults
 
   mPedFile = NULL;
@@ -179,24 +184,37 @@ StSvtSeqAdjMaker::StSvtSeqAdjMaker(const char *name) : StMaker(name)
  
 }
 
-//____________________________________________________________________________________________
+//____________________________________________________________________________
 StSvtSeqAdjMaker::~StSvtSeqAdjMaker(){
-           
 }
-
-//_____________________________________________________________________________________________
-Int_t StSvtSeqAdjMaker::Init()
+//____________________________________________________________________________
+Int_t StSvtSeqAdjMaker::Init(){
+  return  StMaker::Init();  
+}
+//____________________________________________________________________________
+Int_t StSvtSeqAdjMaker::InitRun( int runnumber)
 {
-
-  if(Debug()) gMessMgr->Debug() << "In StSvtSeqAdjMaker::Init() ... "
-                               << GetName() << endm; 
 
   GetSvtRawData();
   
   SetSvtData();
 
   mTotalNumberOfHybrids = mSvtRawData->getTotalNumberOfHybrids();
-  if( Debug())CreateHist(mTotalNumberOfHybrids);	    
+
+  char FileName[100], RunNo[10], EventNo[10];
+
+  sprintf(FileName,"SvtGainCalRun");
+  sprintf(RunNo,"%d", runnumber);
+  sprintf(EventNo,"%d", mSvtRawData->getEventNumber());
+  strcat(FileName, RunNo);
+  strcat(FileName,"_");
+  strcat(FileName, EventNo);
+  strcat(FileName,".root");
+  
+  cout << "Heres my name: " << FileName << endl;
+
+  hfile  = new TFile(FileName,"RECREATE","Demo ROOT file");
+  CreateHist(mTotalNumberOfHybrids);	    
   
   GetSvtPedestals();
 
@@ -209,15 +227,12 @@ Int_t StSvtSeqAdjMaker::Init()
     for (int ladder = 1;ladder <= mSvtRawData->getNumberOfLadders(barrel);ladder++) {
       for (int wafer = 1;wafer <= mSvtRawData->getNumberOfWafers(barrel);wafer++) {
 	for (int hybrid = 1;hybrid <= mSvtRawData->getNumberOfHybrids();hybrid++) {
-           
             int index = mSvtRawData->getHybridIndex(barrel,ladder,wafer,hybrid);
             if(index < 0) continue;
 	    if (mSvtPedColl && mSvtPedColl->at(index))
 	      sigma = ((StSvtHybridPed*)mSvtPedColl->at(index))->getRMS();
 	    else
 	      sigma = mProbValue->GetSigma();
-	    
-	    //gMessMgr->Warning() << "No sigma set for hybrid index " << index << " using defaut sigma = " << sigma << endm;
 	    mProbValue->SetProbValue(sigma);    
 	    mInvProd->SetProbTable(mProbValue);
 	}
@@ -227,10 +242,10 @@ Int_t StSvtSeqAdjMaker::Init()
 
   GetBadAnodes();
   
-  return  StMaker::Init();  
+  return  kStOK;  
 }
 
-//_____________________________________________________________________________
+//____________________________________________________________________________
 
 
 Int_t StSvtSeqAdjMaker::GetSvtRawData()
@@ -251,7 +266,7 @@ Int_t StSvtSeqAdjMaker::GetSvtRawData()
   return kStOK;
 }
 
-//__________________________________________________________________________________________________
+//____________________________________________________________________________
 
 
 Int_t StSvtSeqAdjMaker::GetSvtPedestals()
@@ -279,7 +294,7 @@ Int_t StSvtSeqAdjMaker::GetSvtPedestals()
   return kStOK;
 }
 
-//__________________________________________________________________________________________________
+//__________________________________________________________________________
 
 
 Int_t  StSvtSeqAdjMaker::SetSvtData()
@@ -295,7 +310,7 @@ Int_t  StSvtSeqAdjMaker::SetSvtData()
   return kStOK;
 }
 
-//____________________________________________________________________________
+//__________________________________________________________________________
 
 Int_t StSvtSeqAdjMaker::SetMinAdcLevels( int MinAdc1,  int MinAbove1,
 				         int MinAdc2,   int MinAbove2, int PedOffset){
@@ -311,7 +326,7 @@ Int_t StSvtSeqAdjMaker::SetMinAdcLevels( int MinAdc1,  int MinAbove1,
   return kStOK;
 }
 
-//_______________________________________________________________________________
+//____________________________________________________________________________
 
 Int_t StSvtSeqAdjMaker::SetPedestalFile(const char* pedFile)
 {
@@ -324,7 +339,7 @@ Int_t StSvtSeqAdjMaker::SetPedestalFile(const char* pedFile)
 }
 
 
-//_____________________________________________________________________________
+//____________________________________________________________________________
 
 Int_t StSvtSeqAdjMaker::SetLowInvProd(int LowInvProd)
 {
@@ -333,7 +348,7 @@ Int_t StSvtSeqAdjMaker::SetLowInvProd(int LowInvProd)
   return kStOK; 
 }
 
-////_____________________________________________________________________________
+//___________________________________________________________________________
 
 Int_t StSvtSeqAdjMaker::GetBadAnodes()
 {
@@ -360,22 +375,13 @@ Int_t StSvtSeqAdjMaker::CreateHist(Int_t tNuOfHyb)
    // Create Histograms
 
   
-   mInvProdSeqAdj= new TH1D*[tNuOfHyb];
+   //mInvProdSeqAdj= new TH1D*[tNuOfHyb];
    mRawAdc = new TH1F*[tNuOfHyb];
    mAdcAfter = new TH1F*[tNuOfHyb];
-   mTimeAn = new TH2F*[tNuOfHyb];
+   //mTimeAn = new TH2F*[tNuOfHyb];
 
-   mRawPixel = new TH1F*[6];
-   mRawPixel[0] = new TH1F("rawpixel0","freq Of pixel firing T0 3",128,0.,128.);
-   mRawPixel[1] = new TH1F("rawpixel1","freq Of pixel firing T0 4",128,0.,128.);
-   mRawPixel[2] = new TH1F("rawpixel2","freq Of pixel firing T0 5",128,0.,128.);
-   mRawPixel[3] = new TH1F("rawpixel3","freq Of pixel firing T0 3",128,0.,128.);
-   mRawPixel[4] = new TH1F("rawpixel4","freq Of pixel firing T0 4",128,0.,128.);
-   mRawPixel[5] = new TH1F("rawpixel5","freq Of pixel firing T0 5",128,0.,128.);
- 
-   char invProdTitle_cut[25], RawTitle[25], AdcAfterTitle[25], TimeAnTitle[25];
+   char  RawTitle[25], AdcAfterTitle[25], TimeAnTitle[25];
    char  Index[4];
-   char* prodTitle_cut;
    char* RawTitle_cut;
    char* AdcAf_cut;
    char* TimeAnCh;
@@ -387,35 +393,31 @@ Int_t StSvtSeqAdjMaker::CreateHist(Int_t tNuOfHyb)
             int index = mSvtRawData->getHybridIndex(barrel,ladder,wafer,hybrid);
             if(index < 0) continue;
             
-            sprintf(invProdTitle_cut,"InvProdSeqAdj"); 
             sprintf(RawTitle,"RawAdcIn");
- 	    sprintf(AdcAfterTitle,"AdcAfterCuts");
+ 	    sprintf(AdcAfterTitle,"numOfhitsIn");
 	    sprintf(TimeAnTitle,"TimeAn");
             sprintf(Index,"%d", index);
-            prodTitle_cut = strcat(invProdTitle_cut,Index);
             RawTitle_cut = strcat(RawTitle,Index);
 	    AdcAf_cut = strcat(AdcAfterTitle,Index);
 	    TimeAnCh = strcat(TimeAnTitle,Index);
 
-	    mInvProdSeqAdj[index] = new TH1D(prodTitle_cut,"freqOfInvProd vs log10 of InvProd After Seq Adusting",100,0.,30.);
-	    mRawAdc[index] = new TH1F(RawTitle_cut,"freq Of Adc Values Before Seq Adjusting",150,-50.,100.);
-	    mAdcAfter[index] = new TH1F(AdcAf_cut,"freq Of Adc Values After Seq Adjusting",150,-50.,100.);
-	    mTimeAn[index] = new TH2F(TimeAnCh,"Time vs Anode",240,0,240,128,0,128);
+	    mRawAdc[index] = new TH1F(RawTitle_cut,"Raw ADC for each anode",241,0,241);
+	    mAdcAfter[index] = new TH1F(AdcAf_cut,"Number of hits in each anode",241,0,241);
+	    //mTimeAn[index] = new TH2F(TimeAnCh,"Time vs Anode",240,0,240,128,0,128);
 	}
       }
     }
   }
-
-  mCommonModePitch = new TH1F("ComModPitch","Pitch of Common Mode Noise",120,0,120);
-  mCommonModeCount = new TH1F("comCount","Anodes that fire",240,-0.5,240.5);
+  mOcupancyHisto = new TH1F("OcupancyHisto","Anode Occupancy in an event",129,0,128);
+  EventOccupancy = new TH1F("EventOccup","Event Occupancy",200,0,100000);
 
   return kStOK;
 }
-//_______________________________________________________________________________________________
+
+//____________________________________________________________________________
 
 Int_t StSvtSeqAdjMaker::Make()
 {
-  if (Debug()) gMessMgr->Debug() << " In StSvtSeqAdjMaker::Make()" << GetName() << endm; 
 
   int Anode;
 
@@ -431,15 +433,18 @@ Int_t StSvtSeqAdjMaker::Make()
 
   gMessMgr->Info() << "Working On Event: " << mSvtAdjData->getEventNumber() << endm;
 
-  for(int Barrel = 1;Barrel <= mSvtRawData->getNumberOfBarrels();Barrel++) {    
-    for (int Ladder = 1;Ladder <= mSvtRawData->getNumberOfLadders(Barrel);Ladder++) {      
-      for (int Wafer = 1;Wafer <= mSvtRawData->getNumberOfWafers(Barrel);Wafer++) {
+  
+  Evt_counts=0;
+
+  for(int Barrel = 1;Barrel <= mSvtRawData->getNumberOfBarrels();Barrel++){
+    for (int Ladder = 1;Ladder <= mSvtRawData->getNumberOfLadders(Barrel);Ladder++){
+      for (int Wafer = 1;Wafer <= mSvtRawData->getNumberOfWafers(Barrel);Wafer++){
 	for( int Hybrid = 1;Hybrid <=mSvtRawData->getNumberOfHybrids();Hybrid++){
 
           int index = mSvtRawData->getHybridIndex(Barrel,Ladder,Wafer,Hybrid);
 
 	  if( index < 0) continue;
-	  
+
           mHybridRawData = (StSvtHybridData *)mSvtRawData->at(index);
 
 	  // cout << "mHybridRawData = " << mHybridRawData << endl;
@@ -496,13 +501,11 @@ Int_t StSvtSeqAdjMaker::Make()
 	      else  mCommonModeNoise[TimeBin] =0;
 	      
 	      if( Debug()){
-		mCommonModeCount->Fill(mCommonModeNoiseAn[TimeBin]);
 		if( index < 4 && mCommonModeNoiseAn[TimeBin] > 20){
 		  if( TimeLast < TimeBin-3 && TimeSum > 0){
 		    
 		    TimeAv /= TimeSum;
 		    TimeLast = TimeBin;
-		    mCommonModePitch->Fill(TimeAv-TimeAvSav);
 		    TimeAvSav = TimeAv;
 		    TimeAv = 0;
 		    TimeSum=0;
@@ -513,9 +516,9 @@ Int_t StSvtSeqAdjMaker::Make()
 		    TimeLast = TimeBin;
 		  }
 		}
-	      }
+	      } // End of if If(Debug)
 	    }
-	  }
+	  } // End of If(Common)
 	
 	  for( int iAnode= 0; iAnode<mHybridRawData->getAnodeList(anolist); iAnode++)
             {
@@ -531,32 +534,38 @@ Int_t StSvtSeqAdjMaker::Make()
 
 	      if( doCommon) CommonModeNoiseSub(iAnode);
 	      else SubtractFirstAnode(iAnode);
-	      if (Debug() && !doCommon)MakeHistogramsAdc(mHybridRawData,index,Anode,1);
+	      //if (Debug() && !doCommon)MakeHistogramsAdc(mHybridRawData,index,Anode,1);
 	      //Perform Asic like zero suppression
 	      AdjustSequences1(iAnode, Anode);
 	      
 	      //Perform E896 type zero-suppresion (look for non-noise like signals
 	      if(m_inv_prod_lo){
 		mInvProd->FindInvProducts(mHybridAdjData,iAnode,mPedOffSet);
-		if(Debug())MakeHistogramsProb(index,Anode);
+		// if(Debug())MakeHistogramsProb(index,Anode);
 		AdjustSequences2(iAnode, Anode);
 
 	      }
 	      // Here anode is index to real anode number (1-240)
-	      if(Debug())MakeHistogramsAdc(mHybridAdjData,index,Anode,2);
+	      MakeHistogramsAdc(mHybridAdjData,index,Anode,2);
 	    }
 	  
+
 	  mHybridAdjData->setAnodeList();
 	  mSvtAdjData->put_at(mHybridAdjData,index);
 	}
-		
+
 	mInvProd->ResetBuffer();
       }
     }
   }
+  cout << endl;
+  cout << " Event Occupancy = " << Evt_counts << endl;
+
+  EventOccupancy->Fill((float)Evt_counts);
+  Evt_counts=0;
 
   return kStOK;
-  
+
 }
 
 //_____________________________________________________________________________
@@ -575,7 +584,7 @@ Int_t StSvtSeqAdjMaker::AdjustSequences1(int iAnode, int Anode){
   // int ExtraAfter = 3;
   int ExtraBefore = 0;
   int ExtraAfter = 0;
-  int firstTimeBin, previousEndTimeBin;
+  int firstTimeBin;
 
   //Anode is the index into the anolist array
   
@@ -885,7 +894,7 @@ void StSvtSeqAdjMaker::SubtractFirstAnode(int iAnode){
 
       if( (float)adc[j]-(float)adcMean < 0) adc[j]=0;
       else{
-	adc[j] -=adcMean;
+	adc[j] -= (unsigned char)adcMean;
       }
       j++;
     }
@@ -1010,35 +1019,11 @@ int StSvtSeqAdjMaker::FindBlackAnodes(){
   }
   return mNAnodes;
 }
-//______________________________________________________________________________
-void StSvtSeqAdjMaker::MakeHistogramsProb(int index,int Anode){
-  
-  int mSequence;
-  int stTimeBin,len,status;
-  double tempBuffer = 0;
-
-  StSequence* svtSequence;
-    
-  status = mHybridAdjData->getSequences(Anode,mSequence,svtSequence);
-  
-  for(int mSeq = 0; mSeq < mSequence; mSeq++) 
-    {
-      stTimeBin =svtSequence[mSeq].startTimeBin; 
-      len = svtSequence[mSeq].length;
-      for(int j = 0 ; j < len; j++)
-	{
-	  tempBuffer = mInvProd->GetBuffer(stTimeBin + j);
-	  mInvProdSeqAdj[index]->Fill(tempBuffer);
-	}
-    }
-  
-  //cout<<"******* making histogram finished *******"<<endl; 
-}
-
 
 //_____________________________________________________________________________
 void StSvtSeqAdjMaker::MakeHistogramsAdc(StSvtHybridData* hybridData, int index, int Anode, int Count){
   
+  // Cout is 1 for before CM-Noise subtraction and 2 for after CMN subtraction.
   int mSequence;
   int len,status;
   unsigned char* adc;
@@ -1049,32 +1034,20 @@ void StSvtSeqAdjMaker::MakeHistogramsAdc(StSvtHybridData* hybridData, int index,
   
   status = hybridData->getSequences(Anode,mSequence,svtSequence);
   
+  int numOfPixels=0;
   for(int mSeq = 0; mSeq < mSequence; mSeq++) 
     { 
       adc = svtSequence[mSeq].firstAdc;
       len = svtSequence[mSeq].length;
-      for(int j = 0 ; j < len; j++)
-	{
-	  if( Count ==1) {
-	    mRawAdc[index]->Fill((int)adc[j]-mPedOffSet);
-	    mTimeAn[index]->Fill(Anode,j+svtSequence[mSeq].startTimeBin);
-	    if( (int)adc[j]-mPedOffSet > 5 && hybridData->getTimeZero() >2
-		&& hybridData->getTimeZero() < 6)
-	      
-	    mRawPixel[hybridData->getTimeZero()-3]->Fill(j+svtSequence[mSeq].startTimeBin);
-	  }
-
-	  else {
-	    mAdcAfter[index]->Fill((int)adc[j]-mPedOffSet);
-	    if((int)adc[j]-mPedOffSet > 5 && hybridData->getTimeZero() >2
-		&& hybridData->getTimeZero() < 6){
-	      mRawPixel[hybridData->getTimeZero()]->Fill(j+svtSequence[mSeq].startTimeBin);
-	    }
-	  }
-	}
+      for(int j = 0 ; j < len; j++){
+	mRawAdc[index]->Fill(Anode,(int)adc[j]);
+	//mTimeAn[index]->Fill(Anode,j+svtSequence[mSeq].startTimeBin,(int)adc[j]);
+	mAdcAfter[index]->Fill(Anode);
+	if (adc[j] >0) numOfPixels++;
+	if (adc[j] >0) Evt_counts++;
+      }
     }
-  
-  //cout<<"******* making histogram finished *******"<<endl; 
+  mOcupancyHisto->Fill(numOfPixels);
 }
 
 //_____________________________________________________________________________
@@ -1107,6 +1080,8 @@ Int_t StSvtSeqAdjMaker::Finish(){
   if (Debug()) gMessMgr->Debug() << "In StSvtSeqAdjMaker::Finish() "
 				 << GetName() << endm; 
  
+  hfile->Write();
+  hfile->Close();
   
   return kStOK;
 }

@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.17 2002/05/09 16:55:08 munhoz Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.18 2002/09/19 16:17:49 caines Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.18  2002/09/19 16:17:49  caines
+// Add code to do Juns gain calibration
+//
 // Revision 1.17  2002/05/09 16:55:08  munhoz
 // add reading bad anodes from DB
 //
@@ -87,6 +90,7 @@ class StSvtSeqAdjMaker : public StMaker
   ~StSvtSeqAdjMaker();
 
   virtual Int_t Init();
+  virtual Int_t InitRun( int runnumber);
   virtual Int_t Make();
   virtual Int_t Finish();
 
@@ -129,6 +133,8 @@ class StSvtSeqAdjMaker : public StMaker
 
   const char* mPedFile;   //!
 
+  TH1F* mOcupancyHisto; //!
+  TH1F* EventOccupancy; //!
   TH1D** mInvProdSeqAdj;  //!
   TH1F** mRawAdc;  //!
   TH1F** mAdcAfter;  //!
