@@ -20,6 +20,8 @@ CC:             globtrk  = Track information from egr package; uses the
 CC:                        first instance of the global track table
 CC:                        corresponding to the fit or refit of only the
 CC:                        space points from the tracking detectors.
+CC:             privert  = Information on fixed vertex, if any. For a fixed
+CC:                        primary vertex, the value of both chisq=-1.0.
 CC:         OUT:
 CC:             privert  = Primary Vertex Information
 CC:      UPDATE:
@@ -40,16 +42,33 @@ CC:     Output variables in table privert:
 CC:     ----------------------------------
 CC:     privert().id        = Primary key; value of privert_h.nok when
 CC:                           row is filled
-CC:               iflag     = 1 for normal, successfully found primary vertex
-CC:                             during the 3rd iteration
-CC:                         = -3 for initial seed value
-CC:                         = -2 for first iteration value
-CC:                         = -1 for second iteration value
-CC:                         = -4 for failed fit with Determinant of G = 0.0,
-CC:                              occuring during any iteration.
-CC:                         = -5 for failed error covariance matrix evaluation
-CC:                              during fit with Determinant of E = 0.0,
-CC:                              occuring during any iteration.
+CC:               iflag     = +yx1 for normal, successfully found primary vertex
+CC:                                during the 3rd iteration
+CC:                         = -yx3 for initial seed value
+CC:                         = -yx2 for first iteration value
+CC:                         = -yx1 for second iteration value
+CC:                         = -yx4 for failed fit with Determinant of G = 0.0,
+CC:                                occuring during any iteration.
+CC:                         = -yx5 for failed error covariance matrix evaluation
+CC:                                during fit with Determinant of E = 0.0,
+CC:                                occuring during any iteration.
+CC:                         = -yx6 for failed vertex finding due to too few
+CC:                                tracks occuring anytime after the initial
+CC:                                vertex seed has been found.
+CC:                         = -yx7 for failed vertex finding due to too low
+CC:                                a fraction of selected tracks relative
+CC:                                to the total number of global tracks
+CC:                                occuring anytime after the initial vertex
+CC:                                seed has been found.
+CC:                         = -yx8 for failed vertex finding due to both of
+CC:                                the previous two conditions occuring anytime
+CC:                                after the initial vertex seed has been
+CC:                                found.
+CC:                            x is the event vertex id (for pileups). Zero
+CC:                              means one vertex, x=1 is the next one etc.
+cc:                            y is the det_id for prevertex finding only.
+cc:                            y=0 is not prevertex, y=1 TPC prevertex,
+cc:                            y=2 SVT, y=3 FTPC etc. det_id compliments this info.
 CC:               det_id    = Detectors contributing to all tracks used for
 CC:                           primary vertex finding/fitting:
 CC:                           This quantity, based on the definitions in
@@ -123,31 +142,20 @@ CC:                           vertex finding all the way to the final, third
 CC:                           fit iteration; indicates to the calling
 CC:                           program that event processing should continue.
 CC:                           
-CC:          STAFCV_BAD     - occurs if number of global tracks < 5, or if
-CC:                           number of global tracks < ntrkcut (=50) and
-CC:                           number of selected tracks at any step in the
-CC:                           processing is < 5.  This indicates to the
-CC:                           calling program that the event multiplicity
-CC:                           is too small for this module to work.  An
-CC:                           alternate, small event primary vertex finder
-CC:                           should be called instead of evr_am.  For example,
-CC:                           the peripheral collision group's primary vertex
-CC:                           module.  This return value may also indicate 
-CC:                           that the vertex table (privert) had an
-CC:                           insufficient number of rows such that the
-CC:                           primary vertex could not be written into it.
-CC:                           The calling program should increase the
-CC:                           number of assigned rows to table privert and
-CC:                           call evr_am again.
-CC:                           
-CC:          STAFCV_ERR     - occurs if the number of global tracks => ntrkcut
-CC:                           (equal to 50) and the number of selected tracks
-CC:                           at any step in the processing is < 5.  This
-CC:                           indicates to the calling program that a serious
-CC:                           failure in evr processing has occured, no
-CC:                           primary vertex could be found even though the
-CC:                           event multiplicity was large; event 
-CC:                           processing should be terminated.
+CC:          STAFCV_BAD     - The following error conditions will result
+CC:                           in evr_am returning this STAF condition value:
+CC:                           (1) The number of selected tracks for vertex
+CC:                               finding is less than 5 during any iteration.
+CC:                           (2) The ratio of the number of selected global
+CC:                               tracks to total number of global tracks is
+CC:                               less than 'ntrkratiocut' (set to 0.1) during
+CC:                               any iteration.
+CC:                           (3) The primary vertex table, 'privert', is
+CC:                               already filled to its maximum length and
+CC:                               cannot have new vertex information added.
+CC:                           (4) The detector ID code numbers from
+CC:                               $STAR/pams/global/inc/StDetectorDefinitions.h
+CC:                               are out of the assumed range from 1 to 30.
 CC:                           
 CC: ERROR CONDITIONS    : None-Yet
 CC: STATUS              : Tested
