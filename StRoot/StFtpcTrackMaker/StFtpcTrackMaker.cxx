@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.8 2000/06/26 22:10:44 fisyak Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.9 2000/07/03 12:45:23 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.9  2000/07/03 12:45:23  jcs
+// get (pre)Vertex coordinates directly from (pre)Vertex table instead of from
+// fptpars
+//
 // Revision 1.8  2000/06/26 22:10:44  fisyak
 // remove params
 //
@@ -80,7 +84,7 @@
 ClassImp(StFtpcTrackMaker)
 
 //_____________________________________________________________________________
-StFtpcTrackMaker::StFtpcTrackMaker(const char *name) : StMaker(name), m_fptpar(0), m_fdepar(0)
+StFtpcTrackMaker::StFtpcTrackMaker(const char *name) : StMaker(name),  m_fdepar(0)
 {
   // default constructor
 }
@@ -99,7 +103,6 @@ Int_t StFtpcTrackMaker::Init()
   St_DataSet *ftpcpars = GetInputDB("ftpc");
   assert(ftpcpars);
   St_DataSetIter  gime(ftpcpars);
-  m_fptpar = (St_fpt_fptpar *) gime("fptpars/fptpar");
   m_fdepar = (St_fde_fdepar *) gime("fdepars/fdepar");
   
   // Create Histograms    
@@ -119,7 +122,6 @@ Int_t StFtpcTrackMaker::Make()
   // Here the real stuff happens...
   gMessMgr->Message("", "I", "OST") << "Tracking (FTPC) started..." << endm;
 
-  fpt_fptpar_st *fpt_fptpar = m_fptpar->GetTable();
   St_DataSet *ftpc_data = GetDataSet("ftpc_hits");
   St_fpt_fptrack *fpt_fptrack = NULL;
   
@@ -152,9 +154,6 @@ Int_t StFtpcTrackMaker::Make()
     for (Int_t i = 0; i <preVtx->GetNRows();i++,preVtxPtr++) {
       
       if (preVtxPtr->iflag == 101) {
-	fpt_fptpar->primary_vertex[0] = preVtxPtr->x;
-	fpt_fptpar->primary_vertex[1] = preVtxPtr->y;
-	fpt_fptpar->primary_vertex[2] = preVtxPtr->z;
 	iflag = 101;
 	*gMessMgr << "(preVertex): ";
       }
@@ -168,7 +167,7 @@ Int_t StFtpcTrackMaker::Make()
     StFtpcVertex *vertex = new StFtpcVertex(fcl_fppoint->GetTable(), fcl_fppoint->GetNRows());
 
     if (isnan(vertex->GetZ())) {
-      // handels problem if there are not enough tracks and therefore a vertex cannot be found
+      // handles problem if there are not enough tracks and therefore a vertex cannot be found
       *gMessMgr << endm;
       gMessMgr->Message("", "E", "OST") << "No vertex found! Ftpc tracking stopped!" << endm;
       delete vertex;
@@ -198,10 +197,6 @@ Int_t StFtpcTrackMaker::Make()
       dst_vertex_st *preVtxPtr = preVtx->GetTable();
       preVtxPtr = preVtxPtr + preVtx->GetNRows() - 1;
       
-      fpt_fptpar->primary_vertex[0] = 0.0;
-      fpt_fptpar->primary_vertex[1] = 0.0;
-      fpt_fptpar->primary_vertex[2] = vertex->GetZ();
-      
       // save results in preVertex    
       preVtxPtr->x = 0.0;
       preVtxPtr->y = 0.0;
@@ -215,12 +210,21 @@ Int_t StFtpcTrackMaker::Make()
     delete vertex;
   }
   
-  *gMessMgr << " " << fpt_fptpar->primary_vertex[0] << ", " << fpt_fptpar->primary_vertex[1] << ", " << fpt_fptpar->primary_vertex[2] << "." << endm;
+    dst_vertex_st *preVtxPtr = preVtx->GetTable();
+    
+    for (Int_t i = 0; i <preVtx->GetNRows();i++,preVtxPtr++) {
+      
+      if (preVtxPtr->iflag == 101) {
+        break;
+      }
+    }
+
+  *gMessMgr << " " << preVtxPtr->x << ", " << preVtxPtr->y << ", " << preVtxPtr->z << "." << endm;
   
 
   // check for the position of the main vertex
 
-  Double_t z = TMath::Abs(fpt_fptpar->primary_vertex[2]);
+  Double_t z = TMath::Abs(preVtxPtr->z);
   
   if (z > 50.) {
     
@@ -244,7 +248,7 @@ Int_t StFtpcTrackMaker::Make()
     }
   }
 
-  Double_t vertexPos[3] = {fpt_fptpar->primary_vertex[0], fpt_fptpar->primary_vertex[1], fpt_fptpar->primary_vertex[2]};
+  Double_t vertexPos[3] = {preVtxPtr->x, preVtxPtr->y, preVtxPtr->z};
   StFtpcConfMapper *tracker = new StFtpcConfMapper(fcl_fppoint, vertexPos, Debug());
   
   // settings
@@ -276,7 +280,7 @@ Int_t StFtpcTrackMaker::Make()
   if (fpt_fptrack) delete fpt_fptrack;
   fpt_fptrack = new St_fpt_fptrack("fpt_fptrack", 20000);
   m_DataSet->Add(fpt_fptrack);
-  tracker->FitAndWrite(fpt_fptrack);
+  tracker->FitAndWrite(fpt_fptrack, -preVtxPtr->id);
   
   // dE/dx calculation
   if (Debug()) {
@@ -385,7 +389,7 @@ void StFtpcTrackMaker::PrintInfo()
   // prints some information
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.8 2000/06/26 22:10:44 fisyak Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.9 2000/07/03 12:45:23 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
