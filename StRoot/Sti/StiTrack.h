@@ -74,6 +74,7 @@ public:
   virtual StThreeVector<double> getMomentumAtOrigin() const =0; //3-momentum at first point
   virtual StThreeVector<double> getMomentumNear(double x) =0; //3-momentum at arb. point
   virtual StThreeVector<double> getHitPositionNear(double x) const =0; //3-position at arb. point
+  virtual double  getP()              const=0;   // transverse momentum
   virtual double  getPt()             const=0;   // transverse momentum
   virtual double  getRapidity()       const=0;   // rapidity
   virtual double  getPseudoRapidity() const=0;   // pseudo rapidity
