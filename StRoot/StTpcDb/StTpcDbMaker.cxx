@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.20 2001/04/19 19:52:48 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.21 2001/06/19 23:07:13 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.21  2001/06/19 23:07:13  hardtke
+ * Restore to old functionality using Tpc Local Coordinates
+ *
  * Revision 1.20  2001/04/19 19:52:48  hardtke
  * add tpc_pad_time_offset function and add ifdef for static arrays
  *
@@ -102,7 +105,8 @@ int type_of_call tpc_x_to_pad_(float *row,float *x, float* pad) {
   return 1;
 }
 int type_of_call tpc_global_to_local_(int *isect,float *xglobal, float* xlocal){
-  StGlobalCoordinate global(xglobal[0],xglobal[1],xglobal[2]);
+  //  StGlobalCoordinate global(xglobal[0],xglobal[1],xglobal[2]);
+  StTpcLocalCoordinate global(xglobal[0],xglobal[1],xglobal[2]);
   StTpcLocalSectorCoordinate localSector;
   StTpcPadCoordinate pad;
   StTpcCoordinateTransform transform(gStTpcDb);
@@ -130,7 +134,8 @@ int type_of_call tpc_global_to_local_p_(int *isect,float *xglobal, float* xlocal
   return 1; 
 }
 int type_of_call tpc_local_to_global_(int *isect,float *xlocal, float* xglobal){
-  StGlobalCoordinate global;
+  //  StGlobalCoordinate global;
+  StTpcLocalCoordinate global;
   StTpcLocalSectorCoordinate localSector(xlocal[0],xlocal[1],xlocal[2],*isect);
   StTpcCoordinateTransform transform(gStTpcDb);
   transform(localSector,global); 
@@ -279,7 +284,8 @@ Int_t StTpcDbMaker::Init(){
      int ipad[2] = {20,40};
      StTpcPadCoordinate pad1(i+1, j+1, ipad[0], *time);
      StTpcPadCoordinate pad2(i+1, j+1, ipad[1], *time);
-     StGlobalCoordinate gc1,gc2;
+     //     StGlobalCoordinate gc1,gc2;
+     StTpcLocalCoordinate gc1,gc2;
      StTpcCoordinateTransform transform(gStTpcDb);
      transform(pad1,gc1);
      transform(pad2,gc2);
