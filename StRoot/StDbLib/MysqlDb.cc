@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.13 2001/02/09 23:06:24 porter Exp $
+ * $Id: MysqlDb.cc,v 1.14 2001/03/22 19:39:17 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.14  2001/03/22 19:39:17  porter
+ * make a check to avoid mysql bug on linux where selecting an
+ * unknown database hangs the connection
+ *
  * Revision 1.13  2001/02/09 23:06:24  porter
  * replaced ostrstream into a buffer with ostrstream creating the
  * buffer. The former somehow clashed on Solaris with CC5 iostream (current .dev)
@@ -177,6 +181,8 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
 
   if(mdbName) delete [] mdbName;
   mdbName  = new char[strlen(aDb)+1];     strcpy(mdbName,aDb);
+  char* bDb=(char*)aDb;
+  if(strcmp(aDb," ")==0)bDb=0;
 
   bool tRetVal = false;
   double t0=mqueryLog.wallTime();
@@ -185,10 +191,10 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
     return (bool) StDbManager::Instance()->printInfo("Mysql Init Error=",mysql_error(&mData),dbMErr,__LINE__,__CLASS__,__METHOD__);
 
   char *connString; ostrstream cs;
-  if(mysql_real_connect(&mData,aHost,aUser,aPasswd,aDb,aPort,NULL,0)){ 
+  if(mysql_real_connect(&mData,aHost,aUser,aPasswd,bDb,aPort,NULL,0)){ 
        t0=mqueryLog.wallTime()-t0;
-       cs<< "Server Connecting: DB=" << aDb ;
-       cs<< " , Host=" << aHost <<":"<<aPort<<endl;
+       cs<< "Server Connecting:"; if(bDb)cs<<" DB=" << bDb ;
+       cs<< "  Host=" << aHost <<":"<<aPort<<endl;
        cs<< " --> Connection Time="<<t0<<" sec"<<ends;
        connString = cs.str();
         StDbManager::Instance()->printInfo(connString,dbMConnect,__LINE__,__CLASS__,__METHOD__);
@@ -566,6 +572,7 @@ MysqlDb::setDefaultDb(const char* dbName){
 if(mdbName) delete [] mdbName;
 mdbName=new char[strlen(dbName)+1];
 strcpy(mdbName,dbName);
+if(strcmp(dbName," ")==0)return true;
 
 bool tOk=false;
 unsigned int mysqlError;
