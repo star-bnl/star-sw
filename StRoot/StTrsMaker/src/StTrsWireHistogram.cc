@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.1 1998/11/10 17:12:28 fisyak Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.2 1998/11/13 21:32:38 lasiuk Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,9 +11,12 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
- * Revision 1.1  1998/11/10 17:12:28  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1998/11/13 21:32:38  lasiuk
+ * gains
  *
+ *
+ * Revision 1.7  1999/02/10 18:03:42  lasiuk
+ * gas gain manual setting
  * debug output
  *
  * Revision 1.6  1999/02/10 04:28:29  lasiuk
@@ -117,10 +120,15 @@ StTrsWireHistogram* StTrsWireHistogram::instance(StTpcGeometry* geoDb, StTpcSlow
     double innerSectorBoundary =
     int    wireNumber = static_cast<int>(tmpWire) + offSet; 
     if(yCoordinateOfHit < innerSectorBoundary) { // in inner part of sector
+//     PR(wireNumber);
 	wireLimit = mGeomDb->numberOfInnerSectorAnodeWires() - 1;
-	bin.scaleNumberOfElectrons(avalanche(wireNumber));
+    // Gas Gain
+    PR(mDoGasGain);
+    if(mDoGasGain) {
+        double avalancheFactor = avalanche(wireNumber);
 	PR(avalancheFactor);
-    
+	bin.scaleNumberOfElectrons(avalancheFactor);
+	//bin.scaleNumberOfElectrons(avalanche(wireNumber));
     }
     PR(bin.numberOfElectrons());
 
@@ -133,6 +141,7 @@ StTrsWireHistogram* StTrsWireHistogram::instance(StTpcGeometry* geoDb, StTpcSlow
 	// This means 500 um is 2 mm!
 	{
 	PR(bin.numberOfElectrons());
+	    using namespace units;
 	    double avalancheFactor = avalanche(wireIndex);
 	double increase = 250*micrometer/millimeter*distanceToWire;
 	PR(increase);
@@ -142,11 +151,12 @@ StTrsWireHistogram* StTrsWireHistogram::instance(StTpcGeometry* geoDb, StTpcSlow
     }
 	    // Increase DriftLength Proportional to the Distance from the Wire
     if ((wireNumber) >= 0 &&
- 	cout << "Try add " << endl;
+	(wireNumber) < (mGeomDb->numberOfInnerSectorAnodeWires() +
 			mGeomDb->numberOfOuterSectorAnodeWires()) ) {
 
         cout << "Try add # " << wireNumber <<endl;
 	mSectorWires[wireNumber].push_back(bin);
+#ifndef ST_NO_NAMESPACES
 	///////////////////////////////////////////////
 	// Diagnostic
 	// Remember after Gas Gain
@@ -260,8 +270,8 @@ double StTrsWireHistogram::noFluctuations(int wireNumber) const
 	gaussianMultiplication(iWire) :
 	noFluctuations(iWire);
 	mGaussianDistribution.shoot(mInnerSectorGasGain,.13*mInnerSectorGasGain) :
-    mInnerSectorGasGain = 615.;
-    mOuterSectorGasGain = 1315.;
+	mGaussianDistribution.shoot(mOuterSectorGasGain,.13*mOuterSectorGasGain);
+}
 
 
 double StTrsWireHistogram::exponentialFluctuations(int wireIndex) const
