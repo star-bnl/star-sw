@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BPLCMSFrame3DCorrFctn_SIM.cxx,v 1.2 2000/10/05 23:08:59 lisa Exp $
+ * $Id: BPLCMSFrame3DCorrFctn_SIM.cxx,v 1.3 2000/10/08 17:11:07 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: BPLCMSFrame3DCorrFctn_SIM.cxx,v $
+ * Revision 1.3  2000/10/08 17:11:07  lisa
+ * now toggle between Num and Den at BEGINNING of BPLCMSFrame3DCorrFctn_SIM::AddMixedPair()
+ *
  * Revision 1.2  2000/10/05 23:08:59  lisa
  * Added kT-dependent radii to mixed-event simulator AND implemented AverageSeparation Cut and CorrFctn
  *
@@ -140,8 +143,29 @@ void BPLCMSFrame3DCorrFctn_SIM::AddRealPair(const StHbtPair* pair){
 //____________________________
 void BPLCMSFrame3DCorrFctn_SIM::AddMixedPair(const StHbtPair* pair){
 
+  mToggleNumDen = !mToggleNumDen;  // toggle at the BEGINNING of call instead of end
+                                   // so that SAME pairs go into Num and Den as long as they pass cut
+
+
   if (mPairCut){
-    if (!(mPairCut->Pass(pair))) return;
+    if (!(mPairCut->Pass(pair))){
+//       // mike is checking stuff here
+//       double qOut = fabs(pair->qOutCMS());
+//       double qSide = fabs(pair->qSideCMS());
+//       double qLong = fabs(pair->qLongCMS());
+//       //      if ((qSide > 0.035)||(qLong > 0.035)){
+//       if ((qSide > 0.0)||(qLong > 0.0)){
+// 	cout << qOut << " " << qSide << " " << qLong << " " << 
+// 	  pair->NominalTpcEntranceSeparation() << " " <<
+// 	  pair->track1()->NominalTpcEntrancePoint() << " " <<
+// 	  pair->track2()->NominalTpcEntrancePoint() << endl;
+// 	int ijunk;
+// 	cout << "Enter a junk integer : ";
+// 	cin >> ijunk;
+//       }
+//      // end of checking stuff
+      return;
+    }
   }
 
   double weight=1.0;
@@ -184,7 +208,6 @@ void BPLCMSFrame3DCorrFctn_SIM::AddMixedPair(const StHbtPair* pair){
     CorrWeight *= weight;
     mNumerator->Fill(qOut,qSide,qLong,CorrWeight);
   }
-  mToggleNumDen = !mToggleNumDen;
 
 }
 
