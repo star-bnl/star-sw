@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.22 1998/11/29 20:01:09 fisyak Exp $
+// $Id: StChain.cxx,v 1.23 1998/12/21 19:42:50 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.23  1998/12/21 19:42:50  fisyak
+// Move ROOT includes to non system
+//
 // Revision 1.22  1998/11/29 20:01:09  fisyak
 // Fix typo with Run/run
 //
@@ -227,13 +230,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <TROOT.h>
-#include <TChain.h>
-#include <TTree.h>
-#include <TBrowser.h>
-#include <TClonesArray.h>
-#include <TBenchmark.h>
-#include <TSystem.h>
+#include "TROOT.h"
+#include "TChain.h"
+#include "TTree.h"
+#include "TBrowser.h"
+#include "TClonesArray.h"
+#include "TBenchmark.h"
+#include "TSystem.h"
 #include "St_XDFFile.h"
 #include "St_DataSetIter.h"
 #include "St_FileSet.h"
@@ -261,7 +264,7 @@ StChain::StChain()
 
 //_____________________________________________________________________________
 StChain::StChain(const char *name, const char *title):
-m_VersionCVS("$Id: StChain.cxx,v 1.22 1998/11/29 20:01:09 fisyak Exp $"),
+m_VersionCVS("$Id: StChain.cxx,v 1.23 1998/12/21 19:42:50 fisyak Exp $"),
 m_VersionTag("$Name:  $")
 {
    SetName(name);
@@ -443,7 +446,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.22 1998/11/29 20:01:09 fisyak Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.23 1998/12/21 19:42:50 fisyak Exp $    \n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");

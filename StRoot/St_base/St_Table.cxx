@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.32 1998/12/17 16:57:56 fine Exp $ 
+// $Id: St_Table.cxx,v 1.33 1998/12/21 19:45:47 fisyak Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.33  1998/12/21 19:45:47  fisyak
+// Move ROOT includes to non system
+//
 // Revision 1.32  1998/12/17 16:57:56  fine
 // St_Table: some extra protections have been established (safe "strncat" have replaced the  unsafe  "strncpy")
 //
@@ -77,11 +80,11 @@
 #include <iostream.h>
 #include <iomanip.h>
 
-#include <TROOT.h>
-#include <TBuffer.h>
-#include <TMath.h>
-#include <TClass.h>
-#include <TString.h>
+#include "TROOT.h"
+#include "TBuffer.h"
+#include "TMath.h"
+#include "TClass.h"
+#include "TString.h"
 #include "Api.h"
 #include "TRealData.h"
 #include "TDataMember.h"
@@ -891,7 +894,7 @@ void St_Table::SavePrimitive(ofstream &out, Option_t *)
       out << tableId << "->AddAt(&" << rowId << "," << rowNumber-rowCount <<");" 
           << endl; 
       rowCount -= thisLoopLenth;
-      if (rowCount) cout << "// ------------------ next row -----------------" << endl;
+      //      if (rowCount) cout << "// ------------------ next row -----------------" << endl;
       startRow  = nextRow;
    }
   out << "// ----------------- end of code ---------------" << endl

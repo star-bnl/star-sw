@@ -1,5 +1,8 @@
-// $Id: SavePrimitive.C,v 1.1 1998/12/12 02:38:42 fisyak Exp $
+// $Id: SavePrimitive.C,v 1.2 1998/12/21 19:45:49 fisyak Exp $
 // $Log: SavePrimitive.C,v $
+// Revision 1.2  1998/12/21 19:45:49  fisyak
+// Move ROOT includes to non system
+//
 // Revision 1.1  1998/12/12 02:38:42  fisyak
 // Clean up
 //
@@ -64,7 +67,7 @@
   gSystem->Load("St_Tables");
   gSystem->Load("St_params_Maker");
   //  StChain chain("bfc");
-  const Char_t *Path="/afs/rhic/star/packages/SL98k/StdB/";
+  const Char_t *Path="/afs/rhic/star/packages/dev/StDb/";
   StChain chain("bfc");
 
 //  Create the makers to be called by the current chain
@@ -73,24 +76,32 @@
   int iInit = chain.Init();
   if (iInit) chain.Fatal(iInit,"on init");
   St_DataSet *set=chain.DataSet("params");
-  St_DataSetIter param(set);
+  St_DataSetIter param(set,0);
   param.Cd("params");
   St_DataSet *t = 0;
   //  St_tss_tsspar *tsspar = (St_tss_tsspar *) param("params/tpc/tsspars/tsspar");
   //  tsspar->Print(0);
   TString path = Path;
+  TString dirname=0;
+  Bool_t  go = kFALSE;
   while (t = param()){
     path  = Path;
-    path += t->Path();
+    path += t->Path()->ReplaceAll("params/","");
+    cout << "path = " << path.Data() << endl;
     if (t->HasData()){ // Table
       path += ".C";
+      dirname = gSystem->DirName(path.Data());
+      if (strcmp("/afs/rhic/star/packages/dev/StDb/svt/stkpars",dirname.Data()) == 0) {go = kTRUE;}
+      if (! go) continue;
+      if (!gSystem->OpenDirectory(dirname.Data())) { 
+        if (gSystem->mkdir(dirname.Data())) {
+	  cout << "Directoty " << dirname << " creation failed" << endl;
+	}
+      }
       ofstream *out = new ofstream(path.Data());
       cout << "Open " << path.Data() << endl;
       t->SavePrimitive(*out,"");
       delete out;
-    }
-    else { // DataSet
-      if (gSystem->mkdir(path.Data())) {cout << "Directoty " << path << " creation failed" << endl;}
     }
   }
 }
