@@ -1,0 +1,13 @@
+/*    offset_vs_fee.idl
+*
+*  Table: offset_vs_fee
+*
+*       description:
+*/ 
+
+
+struct offset_vs_fee { 
+
+   short  offset[32];   /*  offset per pin */
+
+ };  
