@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.361 2003/10/25 00:14:36 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.362 2003/10/28 20:47:49 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1254,7 +1254,7 @@ Int_t StBFChain::Instantiate()
 	  if (!geantMk) status = kStErr;
 	  continue;
 	}
-	
+
 	StMaker *mk = 0;
 
 	// Special makers already created or action which
@@ -1277,7 +1277,7 @@ Int_t StBFChain::Instantiate()
 	  if (maker == "StiMaker") {
 	    StiMaker   *stiMk = (StiMaker*) mk;
 
-	    
+
 	    StiToolkit         * tk   = stiMk->getToolkit();
 	    if (! tk)            tk   = new StiDefaultToolkit();
 
@@ -1318,9 +1318,9 @@ Int_t StBFChain::Instantiate()
 	      if( GetOption("fzin")){                        // if fzin, get CTB's from MC
 		cout << "QAInfo: fzin used, setting CTB Mode to 1" << endl;
 		pMk->SetCTBMode(1);
-	      } else if ( GetOption("clearDAQCTB") ){        // remove CTB from DAQ (embedding)                    
+	      } else if ( GetOption("clearDAQCTB") ){        // remove CTB from DAQ (embedding)
 		cout << "QAInfo: clearDAQCTB used, will removed CTB hits from DAQ"  << endl;
-		pMk->SetCTBMode(2);             
+		pMk->SetCTBMode(2);
 	      } else{
 		cout << "QAInfo: Will get CTB from DAQ file" << endl;
 		pMk->SetCTBMode(0);                          // Else get from DAQ
@@ -1424,7 +1424,7 @@ Int_t StBFChain::Instantiate()
 	  }
 
 	  // Turn on alternative V0 method
-	  if (maker == "StV0Maker" && GetOption("Ev03")) mk->SetMode(1); 
+	  if (maker == "StV0Maker" && GetOption("Ev03")) mk->SetMode(1);
 
 	  if (maker == "StEventQAMaker") {
 	    if ( GetOption("alltrigger") ){
@@ -1446,7 +1446,7 @@ Int_t StBFChain::Instantiate()
 	    Ximk->SetV0LanguageUsage(3);
 	    Ximk->SetXiLanguageUsage(5);
 	  }
-	  
+
 	  if (maker == "St_trg_Maker") {
 	    Int_t mode = 0;
 	    if (! GetOption("alltrigger")){
@@ -1480,7 +1480,7 @@ Int_t StBFChain::Instantiate()
 	      // Filter out SVT bad hits, TPC hits not on tracks and all hits if fabs(ZVert)>30
 	      printf("QAInfo: SVT hit filter is ON\n");
 	      StHitFilterMaker *Filtmk=(StHitFilterMaker*)mk;
-	      Filtmk->setPtLowerCut(-99.); 
+	      Filtmk->setPtLowerCut(-99.);
 	      Filtmk->setPtUpperCut(-99.);
 	      Filtmk->setAbsEtaCut(-99);
 	      Filtmk->setAbsZVertCut(30);
@@ -1771,7 +1771,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
     if (!(GetOption("fzin") || GetOption("gstar"))) SetOption("magF");
     if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval");
     if (!GetOption("event")) SetOption("-analysis");
-    if (GetOption("NoDb")) SetOption("-db"); 
+    if (GetOption("NoDb")) SetOption("-db");
   }
   // Print set values
   St_Bfc *Bfc = new St_Bfc("BFChain",NoChainOptions);
