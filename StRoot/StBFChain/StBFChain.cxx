@@ -154,9 +154,6 @@ BfcItem BFC[] = {
                                            ,"StLaserEventMaker","StLaserEvent,StLaserEventMaker","",kFALSE},  
   {"PreVtx"     ,"","tpcChain","tpt,SCL,sim_T,tpc_T,svt_T,ftpcT,globT,ctf_T",
                                        "StPreVertexMaker","St_tpc,St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"emc"    ,"emcChain","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl"      ,"StMaker","StChain","",kFALSE},
-  {"ems"    ,"emc_raw","emcChain","geant,emc_T"    ,"St_ems_Maker","StEvent,St_emc,St_ems_Maker","",kFALSE},
-  {"emh"    ,"emc_hits","emcChain","geant,emc_T,tpc_T"     ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
   {"svt"         ,"svtChain","","svt_T,srs,stk"                             ,"StMaker","StChain","",kFALSE},
   {"srs"         ,"svt_hits","svtChain","tls,Simu"  ,"St_srs_Maker","St_tpc,St_svt,St_srs_Maker","",kFALSE},
   {"svt_daq"     ,"svt_raw","svtChain",""                       ,"StSvtDaqMaker","StSvtDaqMaker","",kFALSE},
@@ -170,7 +167,6 @@ BfcItem BFC[] = {
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","globalChain","SCL,tpc_T,svt_T,globT,tls"
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"Epc"         ,"epc","globalChain","PreEcl,Match"                  ,"StEpcMaker","StEpcMaker","",kFALSE},
   {"Primary"     ,"primary","globalChain","SCL,globT,tls"
                                                ,"StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"V0"          ,"v0","globalChain","SCL,globT,tls","StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
@@ -179,6 +175,10 @@ BfcItem BFC[] = {
   {"dst"         ,"dst","globalChain","SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT","St_dst_Maker" 
                                                                 ,"St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Event"       ,"","","globT,SCL"                       ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
+  {"emc"    ,"emcChain","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl"      ,"StMaker","StChain","",kFALSE},
+  {"ems"    ,"emc_raw","emcChain","geant,emc_T"    ,"St_ems_Maker","StEvent,St_emc,St_ems_Maker","",kFALSE},
+  {"emh"    ,"emc_hits","emcChain","geant,emc_T,tpc_T"     ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
+  {"Epc"         ,"epc","emcChain","PreEcl,Match"                     ,"StEpcMaker","StEpcMaker","",kFALSE},
   {"PreEcl"      ,"preecl","emcChain","emh"                     ,"StPreEclMaker","StPreEclMaker","",kFALSE},
   {"Rrs"         ,"","","sim_T,Simu"                                  ,"StRrsMaker","StRrsMaker","",kFALSE},
   {"rich"        ,"","","sim_T,globT"                      ,"StRchMaker","StRrsMaker,StRchMaker","",kFALSE},
@@ -752,12 +752,9 @@ void StBFChain::SetDataBases(const Char_t* TimeStamp){
     if (fBFC[i].Flag && !strncmp(fBFC[i].Key ,"DbV",3)) 
       sscanf(fBFC[i].Comment,"%d/%d",&Idate,&Itime);
   }
-  TList *tl = GetMakeList();
-  if (!tl) return;
-  
-  TIter nextMaker(tl);
+  StMakerIter nextMaker(this);
   StMaker *maker;
-  while ((maker = (StMaker*)nextMaker())) { 
+  while ((maker = nextMaker.NextMaker())) { 
     if (!strcmp(maker->ClassName(),"St_db_Maker")) {
       St_db_Maker *db = (St_db_Maker *) maker;
       db->SetDateTime(TimeStamp); 
@@ -796,12 +793,11 @@ void StBFChain::SetTreeOptions()
     if (GetOption("srs"))    treeMk->IntoBranch("svt_hitsBranch","svt_hits/.data");
     if (GetOption("stk"))    treeMk->IntoBranch("svt_tracksBranch","svt_tracks/.data");
     if (GetOption("trg"))    treeMk->IntoBranch("trgBranch","ctf mwc trg");
-    if (GetOption("l3t"))    treeMk->IntoBranch("l3tBranch","l3Tracks");
     if (GetOption("global")) treeMk->IntoBranch("globalBranch","global/.data");
   }
   else if (GetOption("GeantOut") && geantMk) treeMk->IntoBranch("geantBranch","geant");
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.119 2000/07/20 20:41:38 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.120 2000/07/21 00:37:32 fisyak Exp $
 //_____________________________________________________________________
