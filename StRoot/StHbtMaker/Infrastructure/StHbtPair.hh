@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.hh,v 1.11 2000/10/26 16:09:16 lisa Exp $
+ * $Id: StHbtPair.hh,v 1.12 2001/01/22 22:56:40 laue Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.hh,v $
+ * Revision 1.12  2001/01/22 22:56:40  laue
+ * Yano-Koonin-Podgoretskii Parametrisation added
+ *
  * Revision 1.11  2000/10/26 16:09:16  lisa
  * Added OpeningAngle PairCut class and method to StHbtPair
  *
@@ -106,6 +109,10 @@ public:
   double qSideBf(double beta=0.0) const;
   double qOutBf(double beta=0.0) const;
   double qLongBf(double beta=0.0) const;
+
+  // Yano-Koonin-Podgoretskii Parametrisation 
+  void qYKPCMS(double& qP, double& qT, double& q0);
+  void qYKPLCMS(double& qP, double& qT, double& q0);
 
   double quality() const;
 

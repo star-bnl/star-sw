@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.14 2000/12/11 21:44:30 rcwells Exp $
+ * $Id: StHbtPair.cc,v 1.15 2001/01/22 22:56:41 laue Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.cc,v $
+ * Revision 1.15  2001/01/22 22:56:41  laue
+ * Yano-Koonin-Podgoretskii Parametrisation added
+ *
  * Revision 1.14  2000/12/11 21:44:30  rcwells
  * Corrected qSideCMS function
  *
@@ -110,6 +113,32 @@ StHbtLorentzVector StHbtPair::fourMomentumDiff() const
 {
   StHbtLorentzVector temp = mTrack1->FourMomentum()-mTrack2->FourMomentum();
   return temp;
+}
+
+// Yano-Koonin-Podgoretskii Parametrisation in CMS
+void StHbtPair::qYKPCMS(double& qP, double& qT, double& q0) {
+  StHbtLorentzVector l1 = mTrack1->FourMomentum();
+  StHbtLorentzVector l2 = mTrack2->FourMomentum();
+  StHbtLorentzVector  l = (l1+l2)/2.;
+  l1.boost(l);
+  l2.boost(l);
+  l = l1-l2;
+  qP = l.z();
+  qT = l.vect().perp();
+  q0 = l.e();
+}
+
+// Yano-Koonin-Podgoretskii Parametrisation in LCMS
+void StHbtPair::qYKPLCMS(double& qP, double& qT, double& q0) {
+  StHbtLorentzVector l1 = mTrack1->FourMomentum();
+  StHbtLorentzVector l2 = mTrack2->FourMomentum();
+  StHbtLorentzVector  l = (l1+l2)/2.; l.setX(0.); l.setY(0.), l.setE(l.vect().massHypothesis(l1.m()+l2.m()) );
+  l1.boost(l);
+  l2.boost(l);
+  l = l1-l2;
+  qP = l.z();
+  qT = l.vect().perp();
+  q0 = l.e();
 }
 
 //_________________
