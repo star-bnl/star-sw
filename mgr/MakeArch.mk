@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.75  1999/06/11 12:47:08  fisyak
+#  Add rtti & exceptions, more fixes for StDaqLib
+#
 #  Revision 1.74  1999/06/10 18:27:08  fisyak
 #  add ST_NO_EXCEPTIONS for HP
 #
@@ -200,7 +203,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/06/10 18:27:08 $ 
+#             Last modification $Date: 1999/06/11 12:47:08 $ 
 #. default setings
 
 MAKE  := gmake
@@ -417,7 +420,7 @@ ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50 i386_redhat51 i386_re
   FOREXE      := g77 -fno-automatic -fno-second-underscore -fugly-complex
   LD       := $(CXX)
   SO	   := $(CXX)
-  CXXFLAGS := $(DEBUG) -fPIC -Wall -fno-rtti -fno-exceptions -fno-for-scope -I/usr/include/g++
+  CXXFLAGS := $(DEBUG) -fPIC -Wall -fno-for-scope -I/usr/include/g++
 #                                             -fpipe
   CFLAGS   := $(DEBUG) -fPIC -Wall
   CPPFLAGS += f2cFortran
