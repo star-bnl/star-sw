@@ -51,11 +51,11 @@ endif
         message 'Calling STE_AM...'
 
         ami/mod/call ste_am _
-                [geant]/Run/g2t_gepart _
-                [geant]/Event/g2t_svt_hit _
-                [geant]/Event/g2t_track _
-                [geant]/Event/g2t_event _
-                [geant]/Event/g2t_vertex _
+                [geant_Run]/g2t_gepart _
+                [geant_Event]/g2t_svt_hit _
+                [geant_Event]/g2t_track _
+                [geant_Event]/g2t_event _
+                [geant_Event]/g2t_vertex _
                 [data]/svt/hits/scs_spt _
                 [data]/global/vertices/stk_vtx _
                 [data]/svt/tracks/groups _

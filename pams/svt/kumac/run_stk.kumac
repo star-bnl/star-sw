@@ -5,9 +5,9 @@ MACRO run_stk
 
    ami/mod/call stk_am _
         [params]/svt/stk_stkpar _
-        [geant]/Event/g2t_track _
-        [geant]/Event/g2t_event _
-        [geant]/Event/g2t_vertex _
+        [geant_Event]/g2t_track _
+        [geant_Event]/g2t_event _
+        [geant_Event]/g2t_vertex _
         [data]/svt/hits/scs_spt _
         [data]/global/vertices/stk_vtx _
         [data]/global/vertices/stk_vtx_direct _
@@ -34,21 +34,21 @@ MACRO eval_stk
   macro/global/import *
     
     ami/mod/call ste_am _
-	 [geant]/Run/g2t_gepart _
-	 [geant]/Event/g2t_svt_hit _
-	 [geant]/Event/g2t_track _
-	 [geant]/Event/g2t_event _
-	 [geant]/Event/g2t_vertex _
+	 [geant_Run]/g2t_gepart _
+	 [geant_Event]/g2t_svt_hit _
+	 [geant_Event]/g2t_track _
+	 [geant_Event]/g2t_event _
+	 [geant_Event]/g2t_vertex _
 	 [data]/svt/hits/scs_spt _
 	 [data]/global/vertices/stk_vtx _
-	        [data]/svt/tracks/groups _
+	 [data]/svt/tracks/groups _
 	 [data]/svt/tracks/stk_track _
 	 [data]/svt/tracks/stk_kine _
 	 [data]/svt/tracks/mcgroups _
 	 [data]/svt/tracks/stk_mctrack _
 	 [data]/svt/tracks/stk_mckine _
-                [data]/svt/tracks/ste_teval _
-                [data]/svt/tracks/ste_teff
+         [data]/svt/tracks/ste_teval _
+         [data]/svt/tracks/ste_teff
 
     if (staf_status(1).ne.stafcv_ok) then
 		message 'Problem on return from STE_AM'
