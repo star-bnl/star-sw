@@ -1,0 +1,23 @@
+$ !
+$ !This file builds both the debug and non-debug versions
+$ !of the msg library, MSGLIB.OLB and MSGLIB_DBG.OLB, on VMS.
+$ !
+$ !Logical definitions:
+$ @MSG_DEFINE
+$ @MSG_INCLUDE_DEFINE
+$ !
+$ !Non-Debug versions:
+$ FORT MSG_REF:MSGLIB
+$ FORT MSG_REF:MSGSUB
+$ LIBRARY/CREATE MSGLIB MSGLIB,MSGSUB
+$ !
+$ !Debug versions:
+$ FORT/LIST/NOOPT/DEBUG MSG_REF:MSGLIB
+$ FORT/LIST/NOOPT/DEBUG MSG_REF:MSGSUB
+$ LIBRARY/CREATE MSGLIB_DBG MSGLIB,MSGSUB
+$ !
+$ !Cleanup:
+$ DELETE/NOCONFIRM MSGLIB.OBJ.*
+$ DELETE/NOCONFIRM MSGSUB.OBJ.*
+$ PURGE/KEEP=1 MSGLIB.LIS
+$ PURGE/KEEP=1 MSGSUB.LIS
