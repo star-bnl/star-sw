@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrNtupleMaker.cxx,v 1.3 2004/04/09 16:13:23 dongx Exp $
+ * $Id: StTofrNtupleMaker.cxx,v 1.4 2004/04/12 16:17:03 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTofrNtupleMaker.cxx,v $
+ * Revision 1.4  2004/04/12 16:17:03  dongx
+ * add AdcLoRes in the ntuple
+ *
  * Revision 1.3  2004/04/09 16:13:23  dongx
  * fix a potential bug causing crash
  *
@@ -67,8 +70,8 @@ ClassImp(StTofrNtupleMaker)
 
 //---------------------------------------------------------------------------
 /// constructor sets default parameters
-StTofrNtupleMaker::StTofrNtupleMaker(const Char_t *name){
-  mTupleFileName="tofntuple.root";
+StTofrNtupleMaker::StTofrNtupleMaker(const Char_t *name="tofrNtuple", const Char_t *outname="tofntuple.root") : StMaker(name) {
+  mTupleFileName=outname;
   setValidAdcRange(1,1200);
   setValidTdcRange(1,2047);
   setOuterTrackGeometry();
@@ -242,9 +245,10 @@ Int_t StTofrNtupleMaker::Make(){
 
   for (int i=0;i<mNPVPD;i++){
     mPvpdAdc[i] = tofData[42+i]->adc();
-    if(mYear3||mYear4) {
-      mPvpdAdc[i] = tofData[54+i]->adc();
-    }
+//     if(mYear3||mYear4) {
+//       mPvpdAdc[i] = tofData[54+i]->adc();
+//     }
+    mPvpdAdcLoRes[i] = tofData[54+i]->adc();
     mPvpdTdc[i] = tofData[42+i]->tdc(); 
   }
 
@@ -264,14 +268,14 @@ Int_t StTofrNtupleMaker::Make(){
     }
   }
 
-  float TdcStart=(TdcSum*5.0e-02-(Ieast-Iwest)*zvtx/2.9979e+01)/(Ieast+Iwest)-7.4;
+  float TdcStart=(TdcSum*5.0e-02-(Ieast-Iwest)*zvtx/2.9979e+01)/(Ieast+Iwest);
   float Tdiff = (TdcSumWest/Iwest-TdcSumEast/Ieast)/2.;
 
   //.........................................................................
   // build pVPD ntuple
   if (!(mTupleFileName=="")){
     int k(0);
-    float tuple[30];
+    float tuple[36];
     tuple[k++] = event->runId();    // the run number
     tuple[k++] = event->id();       // the event number
     tuple[k++] = triggerWord;
@@ -292,6 +296,7 @@ Int_t StTofrNtupleMaker::Make(){
     tuple[k++] = TdcSum;
     for (int i=0;i<mNPVPD;i++) tuple[k++] = mPvpdTdc[i];
     for (int i=0;i<mNPVPD;i++) tuple[k++] = mPvpdAdc[i];
+    for (int i=0;i<mNPVPD;i++) tuple[k++] = mPvpdAdcLoRes[i];
 
     cout << " pVPD update ..." << endl;
     mPvpdTuple->Fill(tuple);
@@ -396,6 +401,9 @@ Int_t StTofrNtupleMaker::Make(){
 	mCellData.ae1 = (int)mPvpdAdc[0]; mCellData.ae2 = (int)mPvpdAdc[1];
 	mCellData.ae3 = (int)mPvpdAdc[2]; mCellData.aw1 = (int)mPvpdAdc[3];
 	mCellData.aw2 = (int)mPvpdAdc[4]; mCellData.aw3 = (int)mPvpdAdc[5];
+	mCellData.ale1 = (int)mPvpdAdcLoRes[0]; mCellData.ale2 = (int)mPvpdAdcLoRes[1];
+	mCellData.ale3 = (int)mPvpdAdcLoRes[2]; mCellData.alw1 = (int)mPvpdAdcLoRes[3];
+	mCellData.alw2 = (int)mPvpdAdcLoRes[4]; mCellData.alw3 = (int)mPvpdAdcLoRes[5];
 	//      }
       mCellData.tray    = thisCell->trayIndex();
       mCellData.module  = thisCell->moduleIndex();
@@ -489,7 +497,8 @@ void StTofrNtupleMaker::bookNtuples(){
   string varList = "run:evt:trgwrd:magfield:zvtx:zvtxchi2:ctbsum"
                    ":zdceast:zdcwest:refmult:nprimary"
                    ":TdcStart:Tdiff:Ieast:Iwest:TdcSumEast:TdcSumWest:TdcSum"
-                   ":te1:te2:te3:tw1:tw2:tw3:ae1:ae2:ae3:aw1:aw2:aw3";
+                   ":te1:te2:te3:tw1:tw2:tw3:ae1:ae2:ae3:aw1:aw2:aw3"
+                   ":ale1:ale2:ale3:alw1:alw2:alw3";
   mPvpdTuple = new TNtuple("pvpd","tofr timing",varList.c_str());
 
   // Tofr calibration ntuple
@@ -508,7 +517,7 @@ void StTofrNtupleMaker::bookNtuples(){
   mCellTuple->Branch("nprimary",&mCellData.nprimary,"nprimary/I");
   mCellTuple->Branch("meanpt",&mCellData.meanpt,"meanpt/F");
   mCellTuple->Branch("pVPDall",&mCellData.TdcStart,"TdcStart/F:Tdiff/F:Ieast/I:Iwest/I:TdcSumEast/F:TdcSumWest/F:TdcSumEast/F:TdcSumWest/F:TdcSum/F");
-  mCellTuple->Branch("pvpd",&mCellData.te1,"te1/I:te2:te3:tw1:tw2:tw3:ae1:ae2:ae3:aw1:aw2:aw3");
+  mCellTuple->Branch("pvpd",&mCellData.te1,"te1/I:te2:te3:tw1:tw2:tw3:ae1:ae2:ae3:aw1:aw2:aw3:ale1:ale2:ale3:alw1:alw2:alw3");
   mCellTuple->Branch("cell",&mCellData.tray,"tray/I:module/I:cell/I:daq/I:tdc/I:adc/I:hitprof/I:matchflag/I:xlocal/F:ylocal/F:zlocal/F:deltay/F");
   mCellTuple->Branch("track",&mCellData.trackId,"trackId/I:charge/I:ntrackpoints/I:nfitpoints/I:dca/F:s:p:pt:px:py:pz:eta:dedx/F:dedxerror/F:cherang/F:dedx_np/I:cherangle_nph/I:nSigE/I:nSigPi/I:nSigK/I:nSigP/I");
 
