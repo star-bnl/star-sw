@@ -31,6 +31,7 @@ public:
     // Reset the vectorized factory. The reset effectively declares
     // all instances owned by this factory as "unused".
     void reset();
+    void clear();
     void initialize();
     void setIncrementalSize(int);
     void setMaxIncrementCount(int);
@@ -43,11 +44,9 @@ public:
     static const int defaultOriginalSize;      // 100000
 
 protected:
-
+    void destroy();
     typedef vector<Abstract*> t_vector;
     virtual void instantiate(int);
-    void destroy();
-
     
 private:
     VectorizedFactory(); //Not implemented
@@ -93,48 +92,36 @@ VectorizedFactory<Concrete,Abstract>::VectorizedFactory(const string& name,
        << "       Original Size :"<< _originalSize<<endl
        << "     IncrementalSize :"<< _incrementalSize<<endl
        << " Max Increment Count :"<< _maxIncrementCount<<endl;
-  initialize();
+  //initialize();
+  reset();
 }
 
 template <class Concrete, class Abstract>
 VectorizedFactory<Concrete,Abstract>::~VectorizedFactory()
 {
-    destroy();
+    clear();
 }
 
 template <class Concrete, class Abstract>
 inline Abstract* VectorizedFactory<Concrete,Abstract>::getInstance()
 {
-  if ( _current < _container.end() ) 
-	return *_current++;
-  else 
+  if (!( _current < _container.end()) )
     {
-      if (_incrementCount< _maxIncrementCount) 
-	{
-	  // expand _container size
-	  instantiate(_incrementalSize);
-// 	  cout << "VectorizedFactory<Concrete,Abstract>::getInstance() - INFO - " << endl
-// 	       << "                Name :"<< _name<<endl
-// 	       << "       Original Size :"<< _originalSize<<endl
-// 	       << "     IncrementalSize :"<< _incrementalSize<<endl
-// 	       << " Max Increment Count :"<< _maxIncrementCount<<endl
-// 	       << "     Increment Count :"<< _incrementCount<<endl
-// 	       << "         Current size:"<< _container.size()<<endl;
-	  return *_current++;
-	}
-      else 
-	{
-// 	  cout << "VectorizedFactory<Concrete,Abstract>::getInstance() - ERROR - " << endl
-// 	       << "                Name :"<< _name<<endl
-// 	       << "       Original Size :"<< _originalSize<<endl
-// 	       << "     IncrementalSize :"<< _incrementalSize<<endl
-// 	       << " Max Increment Count :"<< _maxIncrementCount<<endl
-// 	       << "     Increment Count :"<< _incrementCount<<endl
-// 	       << "         Current size:"<< _container.size()<<endl;
-	
-	  throw runtime_error("VectorizedFactory::getInstance() - FATAL - Too many expension requests");
-	}
+    if (_incrementCount<1)
+      {
+      initialize();
+      }
+    else if (_incrementCount< _maxIncrementCount)
+      {
+      instantiate(_incrementalSize);
+      }
+    else
+      {
+      cout << "VectorizedFactory<"<<getName()<<">getInstance() -F- Too many expension requests - ABORT!" << endl;
+      throw logic_error("VectorizedFactory::getInstance() -F- Too many expension requests");
+      }
     }
+  return *_current++;
 }
 
 template <class Concrete, class Abstract> 
@@ -181,25 +168,37 @@ inline  void VectorizedFactory<Concrete,Abstract>::initialize()
     reset();
 }
 
-/*!  Destroy all object instances owned by this factory.
-     <p>
-     First delete all objects/instances, and then clear the _container.
-*/
+/// Clear this factory by deleting all object instances it owns, and resetting internal variables
+///  <p>
+///  First delete all objects/instances, and then clear the _container. Finally reset internal variables.
+template <class Concrete, class Abstract> 
+void VectorizedFactory<Concrete,Abstract>::clear()
+{
+    for (typename t_vector::iterator it=_container.begin(); it!=_container.end(); ++it) 
+      delete *it;
+    _container.clear();
+    _incrementCount = 0;
+    _current = _container.begin();
+}
+
+/// Destroy this factory by deleting all object instances it owns, and resetting internal variables
+///  <p>
+///  First delete all objects/instances, and then clear the _container. Finally reset internal variables.
 template <class Concrete, class Abstract> 
 void VectorizedFactory<Concrete,Abstract>::destroy()
 {
     for (typename t_vector::iterator it=_container.begin(); it!=_container.end(); ++it) 
       delete *it;
     _container.clear();
-    reset(); 
 }
 
-/*! Instantiate "n" objects of class Concrete and add them to the internal
-    _container.
-*/
+
+/// Instantiate "n" objects of class Concrete and add them to the internal _container.
 template <class Concrete, class Abstract> 
 void VectorizedFactory<Concrete,Abstract>::instantiate(int n) 
 {
+  cout << "VectorizedFactory<"<<getName()<<">::instantiate("<<n<<") -I- Size:"<<_container.size()
+  <<"(" << sizeof(Concrete)*_container.size()<<"bytes)";
   int currentDistance = _current-_container.begin();
   _container.reserve( _container.size()+n );
   for (int i=0;i<n; ++i) {
@@ -207,6 +206,8 @@ void VectorizedFactory<Concrete,Abstract>::instantiate(int n)
   }
   _current = _container.begin()+currentDistance;
   _incrementCount++;
+  cout << " -> "<< _container.size()
+    <<"(" << sizeof(Concrete)*_container.size()<<"bytes)  Done" << endl;
 }
 
 
