@@ -1,5 +1,18 @@
 #ifndef FTFPARA
 #define FTFPARA
+//:>------------------------------------------------------------------
+//: FILE:       FtfPara.h
+//: HISTORY:
+//:             28oct1996 version 1.00
+//:              7dec1998 ppy variable names changed to C++ style
+//:              3jun1999 ppy add fillTracks flag
+//:             11aug1999 ppy add vertexContrainedFit variable
+//:
+//:<------------------------------------------------------------------
+//:>------------------------------------------------------------------
+//: CLASS:       FtfPara
+//: AUTHOR:      ppy - Pablo Yepes, yepes@physics.rice.edu
+//:>------------------------------------------------------------------
 //
 //           fft control parameters                          
 //
@@ -29,6 +42,7 @@
        short     nPhiTrack;       // # Track areas in nphi 
        short     nPrimaryPasses;  // # iterations looking for primaries
        short     nSecondaryPasses;// # iterations looking for secondaries
+       short     vertexConstrainedFit; // 
        short     rowInnerMost;    // Row where end track search 
        short     rowOuterMost;    // Outer most row to consider tin tracking
        short     rowStart;        // Row where start track search
