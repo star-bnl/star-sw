@@ -1,36 +1,29 @@
-// $Id: StEemcRaw.cxx,v 1.1 2004/10/19 23:48:49 suaide Exp $
+// $Id: StEemcRaw.cxx,v 1.2 2004/10/21 00:01:50 suaide Exp $
 
-//#include <Stiostream.h>
 #include <math.h>
 #include <assert.h>
 
 #include <StMessMgr.h>
-//#if 0
 
+#include <StEventTypes.h>
+#include <StEvent.h>
 
-#include "StEventTypes.h"
-#include "StEvent.h"
-//#endif
+#include <StDAQMaker/StEEMCReader.h>
 
+#include <StEEmcDbMaker/StEEmcDbMaker.h>
+#include <StEEmcDbMaker/EEmcDbItem.h>
+#include <StEEmcDbMaker/EEmcDbCrate.h>
+
+#include <StEEmcUtil/EEfeeRaw/EEfeeDataBlock.h>  // for corruption tests
 
 #include "StEemcRaw.h"
-#include "StEmcRawData.h"
-
-#include "StDAQMaker/StDAQReader.h"
-#include "StDAQMaker/StEEMCReader.h"
-
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/EEmcDbItem.h"
-#include "StEEmcDbMaker/EEmcDbCrate.h"
-
-#include "StEEmcUtil/EEfeeRaw/EEfeeDataBlock.h" 
 
 ClassImp(StEemcRaw)
 
 //_____________________________________________________________________
 StEemcRaw::StEemcRaw(){
   mDb=0;
-  // memset(hs,0,sizeof(hs));
+  memset(hs,0,sizeof(hs));
 }
 
 //___________________________________________________________
@@ -42,28 +35,39 @@ StEemcRaw::~StEemcRaw(){
 //____________________________________________________
 //____________________________________________________
 Bool_t   StEemcRaw::make(StEEMCReader *eeReader, StEvent* mEvent){//, StEmcRawData *raw, int token
-  printf("JB make()  ETowRaw\n");
+  //printf("JB make()  EEMC\n");
 
- StEmcRawData *eemcRaw = mEvent->emcCollection()->eemcRawData();
- 
+  if (hs[0]) hs[0]->Fill(0);
+
+  StEmcRawData *eemcRaw = mEvent->emcCollection()->eemcRawData();
 
   StL0Trigger* trg=mEvent->l0Trigger();
-  //assert(trg);
   if (! trg) {
     gMessMgr->Message("","W") <<  GetName()<<"::makeEemc() , l0Trigger data, EEMC not verified, abort all EEMC" << endm;
     return false;
   }
 
   int token=trg->triggerToken();
- 
-  assert(eeReader);
-  assert(mDb);
-  assert(eemcRaw);
   
+  if(!eeReader || !mDb || ! eemcRaw ) {
+    gMessMgr->Message("","W") <<  GetName()<<"::makeEemc() , some pointers are ZERO, code is sick, chain should be aborted, no EEMC data processed,JB :" <<eeReader << mDb << eemcRaw <<endm;
+    return false;
+  }
+
+  if (hs[0]) hs[0]->Fill(1);
+  //::::::::::::::::: copy raw data to StEvent ::::::::::::: 
   if(! copyRawData(eeReader,  eemcRaw) ) return false;
 
+  if(hs[0]) hs[0]->Fill(2);
+
+  //::::::::::::::: assure raw data are sane  :::::::::::::::: 
+
   if( headersAreSick(eemcRaw, token) ) return false;
+  if (hs[0]) hs[0]->Fill(3);
+   
   if( towerDataAreSick( eemcRaw)) return false;
+  if (hs[0]) hs[0]->Fill(3);
+  
   raw2pixels(mEvent);
   return true;
 }
@@ -76,11 +80,8 @@ Bool_t   StEemcRaw::copyRawData(StEEMCReader *eeReader, StEmcRawData *raw){
   int icr;
   for(icr=0;icr<mDb->getNFiber();icr++) {
     const EEmcDbCrate *fiber=mDb-> getFiber(icr);
-    printf("copy EEMC raw: ");fiber->print();
-     // printf("icr=%d \n",icr);
-     raw->createBank(icr,fiber->nHead,fiber->nCh);
-     //printf("aa=%p bb=%p\n",eeReader->getEemcHeadBlock(fiber->fiber,fiber->type),eeReader->getEemcDataBlock(fiber->fiber,fiber->type));
-
+    //printf("copy EEMC raw: ");fiber->print();
+    raw->createBank(icr,fiber->nHead,fiber->nCh);    
     raw->setHeader(icr,eeReader->getEemcHeadBlock(fiber->fiber,fiber->type));
     raw->setData(icr,eeReader->getEemcDataBlock(fiber->fiber,fiber->type));
   }
@@ -108,8 +109,7 @@ Bool_t   StEemcRaw::headersAreSick(StEmcRawData *raw, int token) {
     const EEmcDbCrate *fiber=mDb-> getFiber(icr);
     if(!fiber->useIt) continue; // drop masked out crates
     //printf(" EEMC raw-->pix crID=%d type=%c \n",fiber->crID,fiber->type);
-    //    const  UShort_t* head=raw->header(icr);
-    //assert(head);
+    //    const  UShort_t* head=raw->header(icr); assert(head);
     block.clear();
     block.setHead(raw->header(icr));
 
@@ -125,17 +125,17 @@ Bool_t   StEemcRaw::headersAreSick(StEmcRawData *raw, int token) {
     int sanity=block.isHeadValid(token,fiber->crIDswitch,lenCount,trigCommand,errFlag);
 
     int i;
-    for(i=0;i<8;i++) {// examin all sanity bits
+    for(i=0;i<8;i++) {// examin & histo all sanity bits
       if(!(sanity&(1<<i))) continue;
       totErrBit++;
       int k=icr*10+i;
       //      printf("ic=%d on bit=%d k=%d   %d %d  \n",ic,i,k,1<<i,sn&(1<<i) );
-      //   if (hs[3]) hs[3]->Fill(k);
+      if (hs[3]) hs[3]->Fill(k);
     }
-    gMessMgr->Message("","I") << GetName()<<"::headersAreSick() errors found="<<sanity<<endm;
+    gMessMgr->Message("","I") << GetName()<<"::headersAreSick("<<fiber->name<<"), errors found="<<sanity<<endm;
   }
 
-  // if (hs[4]) hs[4]->Fill(totErrBit);
+  if (hs[4]) hs[4]->Fill(totErrBit);
    
   gMessMgr->Message("","I") << GetName()<<"::headersAreSick() totErrBit="<<totErrBit<< endm;
   return totErrBit;
@@ -147,7 +147,7 @@ Bool_t   StEemcRaw::headersAreSick(StEmcRawData *raw, int token) {
 //____________________________________________________
 Bool_t  StEemcRaw::towerDataAreSick(StEmcRawData* raw){
   const int mxN256one=5;
-  const int mxN256tot=20;
+  const int mxN256tot=20; // may need to be changed for 2005 data with more MAPMT crates, JB
 
   int nGhostTot=0, n256Tot=0;
   int icr;
@@ -167,17 +167,17 @@ Bool_t  StEemcRaw::towerDataAreSick(StEmcRawData* raw){
     n256Tot+=n256;
     if(nGhost>0) {
       int k=icr*10+5;
-      //  if (hs[3]) hs[3]->Fill(k);
+      if (hs[3]) hs[3]->Fill(k);
     }
     if(n256>mxN256one) {
       int k=icr*10+6;
-      // if (hs[3]) hs[3]->Fill(k);
+      if (hs[3]) hs[3]->Fill(k);
     }
     
   }
 
-  //  if(hs[1]) hs[1]->Fill(n256Tot);
-  // if(hs[2]) hs[2]->Fill(nGhostTot);
+  if(hs[1]) hs[1]->Fill(n256Tot);
+  if(hs[2]) hs[2]->Fill(nGhostTot);
 
   gMessMgr->Message("","I") << GetName()<<"::towerDataAreSick() ,total n256="<<n256Tot <<", nGhost="<<nGhostTot<<endm; 
   if(nGhostTot>0)return true;
@@ -192,20 +192,16 @@ Bool_t  StEemcRaw::towerDataAreSick(StEmcRawData* raw){
 void  StEemcRaw::raw2pixels(StEvent* mEvent) {
 
   StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection();
-
-  //  assert(emcC);
   if(emcC==0) {
     gMessMgr->Message("","W") << GetName()<<"::raw2pixels() no emc collection, skip"<<endm;
     return ;
   }
  
   StEmcRawData* raw=emcC->eemcRawData();
-  // assert(raw);
- if (! raw) {
+  if (! raw) {
     gMessMgr->Message("","W") << "StEemcRaw::raw2pixels() no EEMC raw data" << endm;
     return;
   }
-  int mxSector = 12;
 
   // initialize tower/prePost /U/V in StEvent
   
@@ -216,7 +212,7 @@ void  StEemcRaw::raw2pixels(StEvent* mEvent) {
   int det;
   for(det = kEndcapEmcTowerId; det<= kEndcapSmdVStripId; det++){
     emcId[det] = StDetectorId(det);
-    emcDet[det] = new StEmcDetector(emcId[det],mxSector);
+    emcDet[det] = new StEmcDetector(emcId[det],MaxSectors);
     emcC->setDetector(emcDet[det]);
   }
 
@@ -249,7 +245,7 @@ void  StEemcRaw::raw2pixels(StEvent* mEvent) {
       int eta=x->eta;   //range 1-12      
 
       int rawAdc=data[chan];
-      float energy=123.456; // dumm value
+      float energy=123.456; // dumm value, calib & peds are not known
 
       switch(type) { // tw/pre/post/SMD
       case 'T': // towers
@@ -290,107 +286,41 @@ void  StEemcRaw::raw2pixels(StEvent* mEvent) {
     } // end of loop over channels
   }// end of loop over crates 
   
-
    
-  gMessMgr->Message("","I") << GetName()<<"::raw2pixels() finished  nDrop="<< nDrop<<",nMap="<< nMap<<",nTow="<<nTow <<",nPre="<<nPre <<", nSmd="<<nSmd <<endm;
+  gMessMgr->Message("","I") << GetName()<<"::raw2pixels() finished  nDrop chan="<< nDrop<<",nMap="<< nMap<<",nTow="<<nTow <<",nPre="<<nPre <<", nSmd="<<nSmd <<endm;
   
 }
 
 
-
-#if 0
 //__________________________________________________
 //__________________________________________________
 //__________________________________________________
+void StEemcRaw::initHisto(){
+  
+  hs[0]= new TH1F("EndcapHealth","raw data health; X: 0=nEve, 1=raw, 2=OKhead , 3=tower(No ghost/n256)",9,-1.5,7.5);
+  
+  hs[1]= new TH1F("EndcapN256","No. of n256/eve, all header OK",100, -1.5,98.5);
+  hs[2]= new TH1F("EndcapGhost","No. of tower nGhost/eve, all header OK, chan>119",100,-1.5,98.5);
+  
+  hs[3]=new TH1F("EndcapCorrBytes","sanity, crates Tw cr=0-5, Mapmt cr=6-53,  X= bits(cr)+ cr*10;bits: 0=crID, 1=token,2=len,3=trgCom,4=ErrFlg,5=Ghost,6=n256 ",540,-0.5,539.5);
+  
+  hs[4]=new TH1F("EndcapCorrTot","total # of corruption bits in Headers per eve",220,-0.5,219.5);
 
-Int_t StEemcRaw::Init(){
-  if(mDb==0){ 
-    mDb= (StEEmcDbMaker*) GetMaker("eeDb");
-  } 
-  
-  if(mDb==0){  
-    printf("\n\nWARN %s::Init() did not found \"eeDb-maker\", all EEMC data will be ignored\n\n", GetName());
-  } 
-
-  
-  hs[0]= new TH1F("health","raw data health; X: 0=nEve, 1=raw, 2=OKhead , 3=tower(No ghost/n256)",9,-1.5,7.5);
-  
-  hs[1]= new TH1F("n256","No. of n256/eve, all header OK",100, -1.5,98.5);
-  hs[2]= new TH1F("nGhost","No. of tower nGhost/eve, all header OK, chan>119",100,-1.5,98.5);
-  
-  hs[3]=new TH1F("snB","sanity, crates Tw cr=0-5, Mapmt cr=6-53,  X= bits(cr)+ cr*10;bits: 0=crID, 1=token,2=len,3=trgCom,4=ErrFlg,5=Ghost,6=n256 ",540,-0.5,539.5);
-  
-  hs[4]=new TH1F("snT","total # of corruption bits in Headers per eve",220,-0.5,219.5);
-  if (IAttr(".histos")) {
-    // add here what is not needed :)
-  }
-
-  return StMaker::Init();
+  return;
 }
 
 
-//___________________________________________________
-//___________________________________________________
-//___________________________________________________
+// $Log: StEemcRaw.cxx,v $
+// Revision 1.2  2004/10/21 00:01:50  suaide
+// small changes in histogramming and messages for BEMC
+// Complete version for EEMC done by Jan Balewski
+//
+// Revision 1.1  2004/10/19 23:48:49  suaide
+// Initial implementation of the endcap detector done by Jan Balewski
+//
 
-Int_t StEemcRaw::InitRun  (int runNumber){
-  gMessMgr->Message("","I") << GetName()<<"::InitRun("<< runNumber<<") list  DB content"<<endm;
- if(mDb==0){  
-   gMessMgr->Message("","W") << GetName()<<"::InitRun() did not found \"eeDb-maker\", all EEMC data will be ignored\n\n"<<endm;
-  } else if ( mDb->valid()==0 ) {
-    gMessMgr->Message("","W") << GetName()<<"::InitRun()  found \"eeDb-maker\", but without any DB data, all EEMC data will be ignored\n\n"<<endm;
-    mDb=0;
-  } else {
+//.........old pieces of code use for some tests .......................
 
-    //mDb->exportAscii();
-  }
-  return kStOK;
-}
-
-
-//____________________________________________________
-//____________________________________________________
-//____________________________________________________
-Int_t StEemcRaw::Make(){
-  if(mDb==0){  
-    gMessMgr->Message("","W") << GetName()<<"::Make() did not found \"eeDb-maker\" or no DB data for EEMC, all EEMC data will be ignored"<<endm;
-    return kStOK;
-  } 
-  
-  StEvent* mEvent = (StEvent*)GetInputDS("StEvent");
-
-  //assert(mEvent);// fix your chain or open the right event file
-  if (!mEvent){
-    gMessMgr->Message("","W") << "StEemcRaw::Make: No StEvent available" << endm;
-    return kStErr;
-  }
-
-  // printf("\n%s  accesing StEvent ID=%d\n",GetName(),mEvent->id());
-
-  if (hs[0]) hs[0]->Fill(0);
-  //::::::::::::::::: copy raw data to StEvent ::::::::::::: 
-  if(!copyRawData(mEvent)) return kStOK;
-  if(hs[0]) hs[0]->Fill(1);
-
- //::::::::::::::: assure raw data are sane  :::::::::::::::: 
-
- if(headersAreSick(mEvent))   return kStOK;
- if (hs[0]) hs[0]->Fill(2);
-
- if(towerDataAreSick(mEvent))   return kStOK;
- if (hs[0]) hs[0]->Fill(3);
-
-
- //:::::::::::::: store tower/pre/post/smd hits in StEvent
- raw2pixels(mEvent);
-   
- return kStOK;
-  }
-
-
-
-
-#endif
 
 
 #if 0 // test of tower data storage
@@ -440,10 +370,6 @@ Int_t StEemcRaw::Make(){
      }
  }
 
- 
- // printf("%s filling done\n",GetName());
-
-
  for(det = kEndcapEmcTowerId; det<= kEndcapSmdVStripId; det++){
    StEmcDetector* emcDetX= emcC->detector( StDetectorId(det));
    // assert(emcDetX);
@@ -454,14 +380,6 @@ Int_t StEemcRaw::Make(){
  
 #endif
  
-
-// $Log: StEemcRaw.cxx,v $
-// Revision 1.1  2004/10/19 23:48:49  suaide
-// Initial implementation of the endcap detector done by Jan Balewski
-//
-
-//old .......................
-
 
 
 #if 0 // test of new access method  
