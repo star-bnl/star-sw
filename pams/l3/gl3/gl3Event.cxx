@@ -15,7 +15,7 @@ void gl3Event::addTracks ( short sector, int nTrk, type1_track* track1 ) {
    type1_track *trk    = track1 ;
 //
    for ( int i = 0 ; i < nTrk ; i++ ) { 
-      lTrack->set ( trk, bField,
+      lTrack->set ( sector, trk, bField,
                       sectorInfo[sector].xVert, sectorInfo[sector].yVert, 
 		      sectorInfo[sector].rVert, sectorInfo[sector].phiVert ) ; 
 //    lTrack->print();
@@ -33,7 +33,7 @@ void gl3Event::addTracks ( short sector, int nTrk, type2_track* track2 ) {
    type2_track *trk    = track2 ;
 //
    for ( int i = 0 ; i < nTrk ; i++ ) { 
-      lTrack->set ( trk, 
+      lTrack->set ( sector, trk, 
 		      sectorInfo[sector].rVert, sectorInfo[sector].phiVert ) ; 
 //    lTrack->print();
       trk++ ;
@@ -44,13 +44,13 @@ void gl3Event::addTracks ( short sector, int nTrk, type2_track* track2 ) {
 //####################################################################
 //
 //####################################################################
-void gl3Event::addTracks ( int nTrk, type3_track* track3 ) {
+void gl3Event::addTracks ( short sector, int nTrk, type3_track* track3 ) {
 //
    gl3Track*    lTrack = &(track[nTracks]) ;
    type3_track *trk    = track3 ;
 //
    for ( int i = 0 ; i < nTrk ; i++ ) { 
-      lTrack->set ( trk ) ; 
+      lTrack->set ( sector, trk ) ; 
 //    lTrack->print();
       trk++ ;
       lTrack++ ;
@@ -137,7 +137,7 @@ int gl3Event::readSector ( int maxLength, char* buffer ){
    if ( nTracks3 > 0 ) {
       L3_STK3D* headerType3 = (struct L3_STK3D*)pointer3 ;
       type3_track* track3 = headerType3->track ;
-      addTracks ( nTracks3, track3 ) ;
+      addTracks ( sector, nTracks3, track3 ) ;
    }
 // 
    return 0 ;
