@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL0Trigger.h,v 2.4 2002/01/09 15:37:12 ullrich Exp $
+ * $Id: StL0Trigger.h,v 2.5 2002/02/15 00:18:13 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.h,v $
+ * Revision 2.5  2002/02/15 00:18:13  ullrich
+ * Changed signature of bunchCrossingId7bit().
+ *
  * Revision 2.4  2002/01/09 15:37:12  ullrich
  * Bunch crossing id and spin bit extraction functions added.
  *
@@ -58,13 +61,13 @@ public:
     unsigned int    bcDataArraySize() const;
     unsigned short  bcDataArray(unsigned int);
 
-    unsigned int bunchCrossingId7bit();
-    unsigned int bunchCrossingId();
-    int spinBits();
-    int spinBitYellowUp();
-    int spinBitYellowDown();
-    int spinBitBlueUp();
-    int spinBitBlueDown();
+    unsigned int bunchCrossingId7bit(int) const;
+    unsigned int bunchCrossingId() const;
+    int spinBits() const;
+    int spinBitYellowUp() const;
+    int spinBitYellowDown() const;
+    int spinBitBlueUp() const;
+    int spinBitBlueDown() const;
 
     void setMwcCtbMultiplicity(int);
     void setMwcCtbDipole(int);
