@@ -1,4 +1,4 @@
-// $Id: rootlogon.C,v 1.39 2004/02/21 03:04:36 perev Exp $
+// $Id: rootlogon.C,v 1.40 2004/05/12 17:50:26 perev Exp $
 //
 //=======================================================================
 // owner:  Yuri Fisyak
@@ -24,18 +24,19 @@ namespace rootlogon {
   } else {
     printf("*** Float Point Exception is OFF ***\n");
   }
-  // 	Load StarRoot lib.
-  gSystem->Load("StarRoot");
-  if (!strstr(gSystem->GetLibraries(),"libTable")) gSystem->Load("libTable");
 
-  //    G__loadfile("iostream.h");
   TString gPrompt =  gSystem->BaseName(gROOT->GetApplication()->Argv(0));
   gPrompt += " [%d] ";
   ((TRint*)gROOT->GetApplication())->SetPrompt( gPrompt.Data()); // Redefine prompt
     
-  printf("\nWelcome to the ROOT tutorials\n\n");
-  printf("\nType \".x demos.C\" to get a toolbar from which to execute the demos\n");
-  printf("\nType \".x demoshelp.C\" to see the help window\n\n");
+  // 	Load StarRoot lib.
+  gSystem->Load("StarRoot");
+  if (gPrompt.Index("root4star")>=0 
+   && !strstr(gSystem->GetLibraries(),"libTable")) gSystem->Load("libTable");
+
+//  printf("\nWelcome to the ROOT tutorials\n\n");
+//  printf("\nType \".x demos.C\" to get a toolbar from which to execute the demos\n");
+//  printf("\nType \".x demoshelp.C\" to see the help window\n\n");
   printf(" *** Start at Date : %s\n",TDatime().AsString());
 
 
