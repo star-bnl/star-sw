@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.h,v 1.1 2000/03/02 23:02:43 posk Exp $
+// $Id: StFlowCutTrack.h,v 1.2 2000/07/12 17:54:36 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Nov 1999
 //
@@ -13,6 +13,10 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.h,v $
+// Revision 1.2  2000/07/12 17:54:36  posk
+// Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
+// Apply cuts when reading picoevent file.
+//
 // Revision 1.1  2000/03/02 23:02:43  posk
 // Changed extensions from .hh and .cc to .h and .cxx .
 //
@@ -43,6 +47,7 @@
 #include <stdlib.h>
 #include "Rtypes.h"
 class StPrimaryTrack;
+class StFlowPicoTrack;
 
 class StFlowCutTrack {
 
@@ -52,12 +57,15 @@ class StFlowCutTrack {
   virtual       ~StFlowCutTrack();
 
   static Int_t  CheckTrack(StPrimaryTrack* pTrack);
+  static Int_t  CheckTrack(StFlowPicoTrack* pPicoTrack);
   static void   PrintCutList();
   static UInt_t EtaSymPos();
   static UInt_t EtaSymNeg();
   static void   EtaSymClear();
   static void   SetFitPts(Int_t lo, Int_t hi);
   static void   SetFitOverMaxPts(Float_t lo, Float_t hi);
+  static void   SetChiSq(Float_t lo, Float_t hi);
+  static void   SetDca(Float_t lo, Float_t hi);
   
  private:
 
@@ -72,7 +80,13 @@ class StFlowCutTrack {
   static UInt_t  mFitOverMaxCutN;            // number not accepted
   static Float_t mFitOverMaxCuts[2];         // range
 
-  ClassDef(StFlowCutTrack,1)               // macro for rootcint
+  static UInt_t  mChiSqCutN;                 // number not accepted
+  static Float_t mChiSqCuts[2];              // range
+
+  static UInt_t  mDcaCutN;                   // number not accepted
+  static Float_t mDcaCuts[2];                // range
+
+  ClassDef(StFlowCutTrack,1)                 // macro for rootcint
 }; 
 
 inline UInt_t StFlowCutTrack::EtaSymPos() { return mEtaSymPosN; }
@@ -86,5 +100,11 @@ inline void StFlowCutTrack::SetFitPts(Int_t lo, Int_t hi) {
 
 inline void StFlowCutTrack::SetFitOverMaxPts(Float_t lo, Float_t hi) {
   mFitOverMaxCuts[0] = lo; mFitOverMaxCuts[1] = hi; }
+
+inline void StFlowCutTrack::SetChiSq(Float_t lo, Float_t hi) {
+  mChiSqCuts[0] = lo; mChiSqCuts[1] = hi; }
+
+inline void StFlowCutTrack::SetDca(Float_t lo, Float_t hi) {
+  mDcaCuts[0] = lo; mDcaCuts[1] = hi; }
 
 #endif

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.30 2000/06/30 14:48:33 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.31 2000/07/12 17:54:37 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,10 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.31  2000/07/12 17:54:37  posk
+// Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
+// Apply cuts when reading picoevent file.
+//
 // Revision 1.30  2000/06/30 14:48:33  posk
 // Using MessageMgr, changed Eta Symmetry cut.
 //
@@ -191,7 +195,15 @@ Int_t StFlowMaker::Make() {
     pFlowEvent = new StFlowEvent;
     if (!pFlowEvent) return kStOK;
     if (!FillFromPicoDST(pPicoEvent)) return kStEOF; // false if EOF
-    if (mFlowEventWrite) pFlowMicroTree->Fill();  // fill the tree
+    if (!pFlowEvent) return kStOK;    // could have been deleted
+    // Check the event cuts and fill StFlowEvent
+    if (StFlowCutEvent::CheckEvent(pPicoEvent)) {
+      if (!pFlowEvent) return kStOK;  // could have been deleted
+      if (mFlowEventWrite) pFlowMicroTree->Fill();  // fill the tree
+    } else {
+      Int_t eventID = pPicoEvent->EventID();
+      gMessMgr->Info() << "##### FlowMaker: picoevent " << eventID << " cut" << endm;
+    }
   }
 
   UInt_t flowEventMult;
@@ -220,7 +232,7 @@ Int_t StFlowMaker::Init() {
   if (mFlowEventRead)  kRETURN += InitFlowEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.30 2000/06/30 14:48:33 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.31 2000/07/12 17:54:37 posk Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -232,7 +244,7 @@ Int_t StFlowMaker::Finish() {
   // Print the cut lists
   cout << "#######################################################" << endl;
   cout << "##### FlowMaker: Cut Lists" << endl;
-  if (!mFlowEventRead && !mNanoEventRead && !mPicoEventRead) {
+  if (!mFlowEventRead && !mNanoEventRead) {
     StFlowCutEvent::PrintCutList();
     StFlowCutTrack::PrintCutList();
   }
@@ -455,7 +467,7 @@ void StFlowMaker::FillPicoEvent() {
 
 //-----------------------------------------------------------------------
 
-Bool_t StFlowMaker::FillFromNanoDST(const StFlowNanoEvent* pNanoEvent) {
+Bool_t StFlowMaker::FillFromNanoDST(StFlowNanoEvent* pNanoEvent) {
   // Make StFlowEvent from StFlowNanoEvent
 
   if (!pNanoEvent || !pFlowTree->GetEntry(mNanoEventCounter++)) {
@@ -490,7 +502,7 @@ Bool_t StFlowMaker::FillFromNanoDST(const StFlowNanoEvent* pNanoEvent) {
 
 //-----------------------------------------------------------------------
 
-Bool_t StFlowMaker::FillFromPicoDST(const StFlowPicoEvent* pPicoEvent) {
+Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
   // Make StFlowEvent from StFlowPicoEvent
 
   if (!pPicoEvent || !pFlowTree->GetEntry(mPicoEventCounter++)) {
@@ -510,24 +522,39 @@ Bool_t StFlowMaker::FillFromPicoDST(const StFlowPicoEvent* pPicoEvent) {
 
   // Fill FlowTracks
   for (Int_t nt=0; nt<pPicoEvent->GetNtrack(); nt++) {
-    StFlowPicoTrack* ntrack = (StFlowPicoTrack*)pPicoEvent->Tracks()
+    StFlowPicoTrack* pPicoTrack = (StFlowPicoTrack*)pPicoEvent->Tracks()
       ->UncheckedAt(nt);
+    if (pPicoTrack && StFlowCutTrack::CheckTrack(pPicoTrack)) {
       // Instantiate new StFlowTrack
       StFlowTrack* pFlowTrack = new StFlowTrack;
       if (!pFlowTrack) return kFALSE;
-      pFlowTrack->SetPt(ntrack->Pt());
-      pFlowTrack->SetPhi(ntrack->Phi());
-      pFlowTrack->SetEta(ntrack->Eta());
-      pFlowTrack->SetCharge(ntrack->Charge());
-      pFlowTrack->SetDca(ntrack->Dca());
-      pFlowTrack->SetChi2(ntrack->Chi2());
-      pFlowTrack->SetFitPts(ntrack->FitPts());
-      pFlowTrack->SetMaxPts(ntrack->MaxPts());
-      pFlowTrack->SetPidPiPlus(ntrack->PidPiPlus());
-      pFlowTrack->SetPidPiMinus(ntrack->PidPiMinus());
-      pFlowTrack->SetPidProton(ntrack->PidProton());
+      pFlowTrack->SetPt(pPicoTrack->Pt());
+      pFlowTrack->SetPhi(pPicoTrack->Phi());
+      pFlowTrack->SetEta(pPicoTrack->Eta());
+      pFlowTrack->SetCharge(pPicoTrack->Charge());
+      pFlowTrack->SetDca(pPicoTrack->Dca());
+      pFlowTrack->SetChi2(pPicoTrack->Chi2());
+      pFlowTrack->SetFitPts(pPicoTrack->FitPts());
+      pFlowTrack->SetMaxPts(pPicoTrack->MaxPts());
+      pFlowTrack->SetPidPiPlus(pPicoTrack->PidPiPlus());
+      pFlowTrack->SetPidPiMinus(pPicoTrack->PidPiMinus());
+      pFlowTrack->SetPidProton(pPicoTrack->PidProton());
       pFlowEvent->TrackCollection()->push_back(pFlowTrack);
+    }
   }
+    
+  // Check Eta Symmetry
+  if (!StFlowCutEvent::CheckEtaSymmetry(pPicoEvent)) {  
+    delete pFlowEvent;             // if kFALSE delete this event
+    pFlowEvent = NULL;
+    return kTRUE;
+  }
+
+  // For use with STL vector
+//   random_shuffle(pFlowEvent->TrackCollection()->begin(),
+// 		 pFlowEvent->TrackCollection()->end());
+
+  pFlowEvent->TrackCollection()->random_shuffle();
 
   pFlowEvent->SetSelections();
   pFlowEvent->MakeSubEvents();

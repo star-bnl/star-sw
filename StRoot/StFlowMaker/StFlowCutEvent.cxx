@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.13 2000/06/30 14:48:29 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.14 2000/07/12 17:54:33 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,10 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.14  2000/07/12 17:54:33  posk
+// Added chi2 and dca cuts. Multiplied EtaSym by sqrt(mult).
+// Apply cuts when reading picoevent file.
+//
 // Revision 1.13  2000/06/30 14:48:29  posk
 // Using MessageMgr, changed Eta Symmetry cut.
 //
@@ -51,6 +55,7 @@
 #include "StFlowCutEvent.h"
 #include "StFlowCutTrack.h"
 #include "StEvent.h"
+#include "StFlowPicoEvent.h"
 #include "StEventTypes.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
@@ -71,7 +76,7 @@ UInt_t   StFlowCutEvent::mMultCut        = 0;
 UInt_t   StFlowCutEvent::mVertexXCut     = 0;
 UInt_t   StFlowCutEvent::mVertexYCut     = 0;
 UInt_t   StFlowCutEvent::mVertexZCut     = 0;
-Float_t  StFlowCutEvent::mEtaSymCuts[2]  = {-0.15, 0.15};
+Float_t  StFlowCutEvent::mEtaSymCuts[2]  = {-2.5, 2.5};
 UInt_t   StFlowCutEvent::mEtaSymCutN     = 0;     
 
 //-----------------------------------------------------------------------
@@ -88,7 +93,7 @@ StFlowCutEvent::~StFlowCutEvent() {
 //-----------------------------------------------------------------------
 
 Bool_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
-  // Returns kTRUE if the event survives all the cuts
+  // Returns kTRUE if StEvent survives all the cuts
   
   // Primary vertix
   Long_t nvtx = pEvent->numberOfPrimaryVertices();
@@ -139,8 +144,53 @@ Bool_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
 
 //-----------------------------------------------------------------------
 
+Bool_t StFlowCutEvent::CheckEvent(StFlowPicoEvent* pPicoEvent) {
+  // Returns kTRUE if picoevent survives all the cuts
+  
+  if (!pPicoEvent) return kFALSE;
+
+  mEventN++;
+
+  // Multiplicity
+  UInt_t mult = pPicoEvent->OrigMult();
+  if (mMultCuts[1] > mMultCuts[0] && 
+     (mult < mMultCuts[0] || mult >= mMultCuts[1])) {
+    mMultCut++;
+    return kFALSE;
+  }
+   
+  // Vertex x
+  Float_t vertexX = pPicoEvent->VertexX();
+  if (mVertexXCuts[1] > mVertexXCuts[0] &&
+     (vertexX < mVertexXCuts[0] || vertexX >= mVertexXCuts[1])) {
+    mVertexXCut++;
+    return kFALSE;
+  }
+
+  // Vertex y
+  Float_t vertexY = pPicoEvent->VertexY();
+  if (mVertexYCuts[1] > mVertexYCuts[0] &&
+     (vertexY < mVertexYCuts[0] || vertexY >= mVertexYCuts[1])) {
+    mVertexYCut++;
+    return kFALSE;
+  }
+
+  // Vertex z
+  Float_t vertexZ = pPicoEvent->VertexZ();
+  if (mVertexZCuts[1] > mVertexZCuts[0] &&
+     (vertexZ < mVertexZCuts[0] || vertexZ >= mVertexZCuts[1])) {
+    mVertexZCut++;
+    return kFALSE;
+  }
+
+  mGoodEventN++;
+  return kTRUE;
+}
+
+//-----------------------------------------------------------------------
+
 Bool_t StFlowCutEvent::CheckEtaSymmetry(StEvent* pEvent) {
-  // Returns kTRUE if the event survives this Eta symmetry cut
+  // Returns kTRUE if StEvent survives this Eta symmetry cut
   // Call at the end of the event after doing CheckTrack for each track
   // If kFALSE you should delete the last event
 
@@ -154,12 +204,42 @@ Bool_t StFlowCutEvent::CheckEtaSymmetry(StEvent* pEvent) {
   const StThreeVectorF& vertex = pVertex->position();
   Float_t vertexZ = vertex.z();
   float etaSymZSlope = 0.003;
-  etaSym += (etaSymZSlope * vertexZ);
+  etaSym += (etaSymZSlope * vertexZ); // correction for acceptance
+  etaSym *= sqrt((double)(etaSymPosN + etaSymNegN)); // corrected for statistics
 
   if (mEtaSymCuts[1] > mEtaSymCuts[0] && 
       (etaSym < mEtaSymCuts[0] || etaSym >= mEtaSymCuts[1])) {
     mEtaSymCutN++;
     mGoodEventN--;
+    return kFALSE;
+  }
+
+  return kTRUE;
+}
+
+//-----------------------------------------------------------------------
+
+Bool_t StFlowCutEvent::CheckEtaSymmetry(StFlowPicoEvent* pPicoEvent) {
+  // Returns kTRUE if picoevent survives this Eta symmetry cut
+  // Call at the end of the event after doing CheckTrack for each track
+  // If kFALSE you should delete the last event
+
+  float etaSymPosN = (float)StFlowCutTrack::EtaSymPos();
+  float etaSymNegN = (float)StFlowCutTrack::EtaSymNeg();
+  float etaSym = (etaSymPosN - etaSymNegN) / (etaSymPosN + etaSymNegN);
+  StFlowCutTrack::EtaSymClear();
+
+  Float_t vertexZ = pPicoEvent->VertexZ();
+  float etaSymZSlope = 0.003;
+  etaSym += (etaSymZSlope * vertexZ); // correction for acceptance
+  etaSym *= sqrt((double)(etaSymPosN + etaSymNegN)); // corrected for statistics
+
+  if (mEtaSymCuts[1] > mEtaSymCuts[0] && 
+      (etaSym < mEtaSymCuts[0] || etaSym >= mEtaSymCuts[1])) {
+    mEtaSymCutN++;
+    mGoodEventN--;
+//     Int_t eventID = (Int_t)(pEvent->id());
+//     cout << "EventID= " << eventID << ", EtaSym= " << etaSym << ", VertexZ= " << vertexZ << endl;
     return kFALSE;
   }
 
