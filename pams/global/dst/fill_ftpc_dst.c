@@ -198,8 +198,10 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
     dst_track[dst_track_h->nok].covar[14] = 0;
 
 /*  chi-sqare fit */
-    dst_track[dst_track_h->nok].chisq[0]      = fptrack[itrk].chisq[0];
-    dst_track[dst_track_h->nok].chisq[1]      = fptrack[itrk].chisq[1];
+    dst_track[dst_track_h->nok].chisq[0]      = fptrack[itrk].chisq[0]
+          / (dst_track[dst_track_h->nok].n_fit_point - 3);
+    dst_track[dst_track_h->nok].chisq[1]      = fptrack[itrk].chisq[1]
+           / (dst_track[dst_track_h->nok].n_fit_point - 2);
 
 /*  Locate last hit on current track     */
      for (ihit=MAXHITS-1; ihit>=0; ihit--) {
