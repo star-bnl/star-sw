@@ -158,12 +158,12 @@ double StHbtCoulomb::Correction(const double& eta) {
     Corr = mCoulomb[0];
     return (Corr);
   }
-  if ( (eta<mEta[mNLines]) && (mEta[mNLines]<0.0) ) {
-    Corr = mCoulomb[mNLines];
+  if ( (eta<mEta[mNLines-1]) && (mEta[mNLines-1]<0.0) ) {
+    Corr = mCoulomb[mNLines-1];
     return (Corr);
   }
   // This is a binary search for the bracketing pair of data points
-  int high = mNLines;
+  int high = mNLines-1;
   int low = 0;
   int width = high-low;
   middle = int(width/2.0); // Was instantiated above
