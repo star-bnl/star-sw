@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.43 2002/02/25 00:25:44 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.44 2002/03/12 23:31:43 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -222,7 +222,7 @@
         }
         if (/^i386_linux2/) { $FLIBS .= " -lI77 -lF77"; }
 
-        if ( defined( $ARG{INSURE} ) ) {
+        if ( defined($ARG{INSURE}) or defined($ENV{INSURE}) ) {
             print "Use INSURE++\n";
             $CC  = "insure -g -Zoi \"compiler_c gcc\"";
             $CPP = "insure -g -Zoi \"compiler_c gcc\"";
