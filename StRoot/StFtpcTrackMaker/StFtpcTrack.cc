@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.cc,v 1.8 2000/07/18 21:22:16 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.9 2000/09/07 11:35:39 jcs Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.9  2000/09/07 11:35:39  jcs
+// Set flag,id_start_vertex,nrec,nmax,nfit for FTPC primary tracks
+//
 // Revision 1.8  2000/07/18 21:22:16  oldi
 // Changes due to be able to find laser tracks.
 // Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
@@ -484,23 +487,12 @@ Int_t StFtpcTrack::Write(fpt_fptrack_st *trackTableEntry, Int_t id_start_vertex)
 {
   // Writes track to StAF table
   
-  trackTableEntry->nrec = mPoints->GetEntriesFast();
-  trackTableEntry->nfit = trackTableEntry->nrec;
-
-  if(mFromMainVertex) {
-    trackTableEntry->flag = 1;
-    trackTableEntry->id_start_vertex = id_start_vertex;
-  }
-
-  else {
-    trackTableEntry->flag = 0;
-    trackTableEntry->id_start_vertex = 0;
-  }
-  
   for(Int_t k=0; k<10; k++) {
     trackTableEntry->hitid[k] = -1;
   }
   
+  trackTableEntry->nrec = mPoints->GetEntriesFast();
+
   for(Int_t i=0; i<trackTableEntry->nrec; i++) {
     Int_t rowindex = (((StFtpcConfMapPoint *)mPoints->At(i))->GetPadRow());
     
@@ -509,6 +501,24 @@ Int_t StFtpcTrack::Write(fpt_fptrack_st *trackTableEntry, Int_t id_start_vertex)
     }  
     
     trackTableEntry->hitid[rowindex-1] = mPointNumbers->At(i)+1;
+  }
+
+  trackTableEntry->nfit = trackTableEntry->nrec;
+  trackTableEntry->nmax = mNMax;
+
+  if(mFromMainVertex) {
+    trackTableEntry->flag = 1;
+    trackTableEntry->id_start_vertex = id_start_vertex;
+    if (id_start_vertex > 0) {
+       ++trackTableEntry->nrec;
+       ++trackTableEntry->nmax;
+       ++trackTableEntry->nfit;
+    }
+  }
+
+  else {
+    trackTableEntry->flag = 0;
+    trackTableEntry->id_start_vertex = 0;
   }
   
   trackTableEntry->q = mQ;
@@ -524,7 +534,6 @@ Int_t StFtpcTrack::Write(fpt_fptrack_st *trackTableEntry, Int_t id_start_vertex)
   trackTableEntry->theta = mTheta;
   trackTableEntry->curvature = 1/mRadius;
   trackTableEntry->impact = mDca;
-  trackTableEntry->nmax = mNMax;
 
   return 0;
 }
