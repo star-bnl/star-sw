@@ -1,7 +1,10 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.30 2004/09/07 19:30:49 suaide Exp $
+// $Id: StPreEclMaker.cxx,v 1.31 2004/11/25 17:07:41 suaide Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.31  2004/11/25 17:07:41  suaide
+// modifications due to the change in the EmcSimulator
+//
 // Revision 1.30  2004/09/07 19:30:49  suaide
 // small bug fixed
 //
@@ -306,10 +309,13 @@ Int_t StPreEclMaker::Make()
 
     if(ecmpreecl == 0){
     // Try to get from simulator(s) ==============================================
-      simnew = (StEmcSimulatorMaker*)GetMaker("emcRaw");
+      simnew = 0;
+      simnew = (StEmcSimulatorMaker*)GetMaker("EmcSimulator");
+   
       if(simnew) {
+        if(mPrint) cout <<"***** New simulator in chain"<<endl;;
         ecmpreecl = (StEmcCollection*)simnew->getEmcCollection();
-        if(mPrint) cout <<"***** New simulator in chain";
+        if(mPrint) cout <<"***** emcCollection from new Simulator is = "<<ecmpreecl<<endl;
       }
       else {
         simold = (St_ems_Maker*)GetMaker("emc_raw");;
@@ -319,7 +325,7 @@ Int_t StPreEclMaker::Make()
         }
       }
       if(ecmpreecl){ // Emc from simulator(s)  
-        if(mPrint) cout<<" => Get EmcCollection from simulator\n";
+        if(mPrint) cout<<" => Found EmcCollection from simulator. Setting StEvent\n";
 	currevent->setEmcCollection(ecmpreecl);
 	if(simnew) simnew->clearStEventStaf();  // We move StEmcCollection from new simulator to StEvent 
       }
@@ -565,7 +571,7 @@ StPreEclMaker::SetClusterConditions(char *cdet,Int_t sizeMax,
 void 
 StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.30 2004/09/07 19:30:49 suaide Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.31 2004/11/25 17:07:41 suaide Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
