@@ -1,57 +1,9 @@
-//! $Id: StHistUtil.h,v 1.12 2000/07/26 19:57:48 lansdell Exp $
-//! $Log: StHistUtil.h,v $
-//! Revision 1.12  2000/07/26 19:57:48  lansdell
-//! new histograms and functionality added (e.g., overlay several histograms, new printlist option qa_shift)
-//!
-//! Revision 1.11  2000/07/07 03:52:32  genevb
-//! AddHist improvements
-//!
-//! Revision 1.10  2000/06/29 04:46:19  lansdell
-//! removed virtual from inline methods
-//!
-//! Revision 1.9  2000/06/23 20:55:40  kathy
-//! moved #endif to end where it's supposed to be
-//!
-//! Revision 1.8  2000/06/23 18:05:36  kathy
-//! add new method PrintInfoHists which prints info about hist to screen & file -- name,entries,mean,rms
-//!
-//! Revision 1.7  2000/06/23 15:53:00  kathy
-//! change hardwared max num copied histograms to 512
-//!
-//! Revision 1.6  2000/06/23 15:26:22  kathy
-//! added method to return the copied array & it's size
-//!
-//! Revision 1.5  2000/06/23 14:31:53  kathy
-//! put 2 new methods in: CopyHists (must be used first), AddHists
-//!
-//! Revision 1.4  2000/01/28 17:53:42  lansdell
-//! split overlay method into Overlay1D and Overlay2D
-//!
-//! Revision 1.3  2000/01/27 18:30:12  kathy
-//! add Curtis' new method which reads in 2 histograms and overlays them - Overlay2Hists
-//!
-//! Revision 1.2  2000/01/26 19:29:27  kathy
-//! add methods SetDefaultLogXList,AddToLogXList,ExamineLogXList,RemoveFromLogXList - requested by T.Trainor - impact param hists are now draw with LogX scale
-//!
-//! Revision 1.1  2000/01/18 16:42:40  kathy
-//! move StHistUtil class from St_QA_Maker directory and put into StAnalysisUtilities
-//!
-//! Revision 1.5  2000/01/12 16:49:04  kathy
-//! add new methods so that one can set a list which will be used to print,draw a subset of the histograms corresponding to a given maker; new methods are SetDefaultPrintList,AddToPrintList,RemoveFromPrintList,ExaminePrintList; can't test it yet because seems can't find directory of histograms in DEV anymore and there are conflicts in NEW; updates to DrawHist method to use this new list are not done yet
-//!
-//! Revision 1.4  1999/12/07 21:54:15  kathy
-//! added date and time to DrawHist method in StHistUtil class so that this is printed at bottom right of histogram output
-//!
-//! Revision 1.3  1999/11/05 22:26:01  kathy
-//! now allow setting of global title from a method
-//!
-//! Revision 1.2  1999/11/05 21:51:58  kathy
-//! write title at top of each page of histograms in DrawHists method
-//!
-//! Revision 1.1  1999/09/20 20:12:16  kathy
-//! moved the histogram utility methods out of St_QA_Maker and into StHistUtil because they can really be used by any Maker and associated histograms
-//!
-
+// $Id: StHistUtil.h,v 2.0 2000/08/25 15:47:38 genevb Exp $
+// $Log: StHistUtil.h,v $
+// Revision 2.0  2000/08/25 15:47:38  genevb
+// New revision: cleaned up, multiple PS files
+//
+//
 ///////////////////////////////////////////////////////////////////////////////
 // Histogram Utility methods for use with star makers and bfc output
 ///////////////////////////////////////////////////////////////////////////////
@@ -78,12 +30,13 @@ class TCanvas;
 class StMaker;
 class TPaveLabel;
 class TDatime;
+class TPostScript;
 
 class StHistUtil {
 
  private:
   // Data-members to make up the output Canvases and Postscript files
-  TCanvas *m_HistCanvas; //!
+  TCanvas* m_HistCanvas; //!
   Int_t   m_PadColumns;  // Number of the columns (TPad's) on the single Canvas
   Int_t   m_PadRows;     // Number of the columns (TPad's) on the single Canvas
   Int_t   m_PaperWidth;  // Paper size in cm
@@ -91,21 +44,28 @@ class StHistUtil {
   TString m_FirstHistName;
   TString m_LastHistName;
   TString m_PsFileName;  // Name of the PostScipt file to plot hist's out
+  TString m_CurFileName; // Name of the current PostScript file
+  TPostScript* psf;      //! Pointer to the current PostScript file
+  Int_t   m_CurPrefix;
   TString m_GlobalTitle; // Title at top of each page of output
-  TList   *m_ListOfLogY; //! list of histogram names that will be drawn with logY scale
-  TList   *m_ListOfLogX; //! list of histogram names that will be drawn with logX scale
-  TList   *m_ListOfPrint;//! list of histogram names that will be drawn,printed
-  StMaker *m_PntrToMaker;//! pointer to an St_Maker, so can find histograms
-  static const Int_t maxHistCopy=512; //! size of array of new histograms 
-  TH1     *newHist[maxHistCopy]; //! array of new histograms that other will be copied into
+  TList*  m_ListOfLogY; //! list of histogram names that will be drawn with logY scale
+  TList*  m_ListOfLogX; //! list of histogram names that will be drawn with logX scale
+  TList*  m_ListOfPrint;//! list of histogram names that will be drawn,printed
+  StMaker* m_PntrToMaker;//! pointer to an St_Maker, so can find histograms
+  static  const Int_t maxHistCopy=512; //! size of array of new histograms 
+  TH1*    newHist[maxHistCopy]; //! array of new histograms that other will be copied into
+  Bool_t  debug;
 
 
  protected:
+  virtual Bool_t  CheckPSFile(const Char_t* histName);
 
 
  public: 
   StHistUtil();
   virtual        ~StHistUtil();
+  virtual void    SetDebug(Bool_t dbg=kTRUE) { debug=dbg; }
+  virtual Bool_t  Debug() { return debug; }
   virtual Int_t   DrawHists(Char_t *dirName="QA");
   virtual Int_t   ListHists(Char_t *dirName="QA");
   virtual TList*  FindHists(Char_t *dirName="QA");
@@ -144,7 +104,7 @@ class StHistUtil {
   
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.12 2000/07/26 19:57:48 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.0 2000/08/25 15:47:38 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
