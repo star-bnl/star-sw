@@ -1,4 +1,4 @@
-#define AUAUDATA
+#define HIJING
 
 #ifndef __STESTRUCTFLUCTUATIONS__H
 #define __STESTRUCTFLUCTUATIONS__H
