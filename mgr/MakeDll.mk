@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.61 1999/02/09 19:14:49 fisyak Exp $
+# $Id: MakeDll.mk,v 1.62 1999/02/10 14:12:42 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.62  1999/02/10 14:12:42  fisyak
+# Turn on StEventReaderMaker and StTrsMaker
+#
 # Revision 1.61  1999/02/09 19:14:49  fisyak
 # Add objy
 #
@@ -352,7 +355,7 @@ else
 endif
 $(FILES_CINT_ORD) : $(FILES_ORD_H)   
 	$(COMMON_LINKDEF)
-	@for p in $(notdir $(basename $(FILES_ORD_H))); do echo $${p}; \
+	@for p in $(notdir $(basename $(FILES_ORD_H))); do \
                                              echo "#pragma link C++ class $${p};" >> $(LINKDEF) ; \
                                              done
 	@echo "#endif"                                  >> $(LINKDEF);
@@ -388,10 +391,9 @@ endif
 
 $(FILES_CINT_MOD) : $(FILES_MOD_H)
 	$(COMMON_LINKDEF)
-	@for p in $(NAMES_MOD); do echo $${p}; \
-                                             echo "#pragma link C++ class St_$${p}-;" >> $(LINKDEF) ; \
-                                             echo "#pragma link C++ global   $${p};" >> $(LINKDEF) ; \
-                                             done
+	@for p in $(NAMES_MOD); do echo "#pragma link C++ class St_$${p}-;" >> $(LINKDEF) ; \
+                                   echo "#pragma link C++ global   $${p};" >> $(LINKDEF) ; \
+                                done
 	@echo "#endif"                                  >> $(LINKDEF);
 	@$(CAT) $(LINKDEF);
 ifndef NT
