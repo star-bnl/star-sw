@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.16 2003/05/21 18:22:46 ullrich Exp $
+ * $Id: StContainers.h,v 2.17 2003/10/25 00:12:42 fisyak Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
+ * Revision 2.17  2003/10/25 00:12:42  fisyak
+ * Replace BetheBloch::Sirrf by m_Bichsel->GetI70 for nSigma calculations
+ *
  * Revision 2.16  2003/05/21 18:22:46  ullrich
  * Major Revision of ToF classes (F. Geurts)
  *
@@ -97,6 +100,8 @@ class StV0Vertex;
 class StXiVertex;
 class StKinkVertex;
 class StL3AlgorithmInfo;
+class StPhmdHit;
+class StPhmdCluster;
 
 StCollectionDef(Object)
 StCollectionDef(CalibrationVertex)

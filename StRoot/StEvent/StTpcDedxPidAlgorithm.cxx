@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.22 2003/10/21 14:23:23 fisyak Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.23 2003/10/25 00:12:48 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
+ * Revision 2.23  2003/10/25 00:12:48  fisyak
+ * Replace BetheBloch::Sirrf by m_Bichsel->GetI70 for nSigma calculations
+ *
  * Revision 2.22  2003/10/21 14:23:23  fisyak
  * Switch from primary to global track momentum for Nsigma calculations
  *
@@ -100,9 +103,9 @@
 #include "StTrackGeometry.h"
 #include "BetheBloch.h"
 #include "StBichsel/Bichsel.h"
-//VP static Bichsel *m_Bichsel = 0;
+static Bichsel *m_Bichsel = 0;
 static BetheBloch *theBetheBloch = 0;
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.22 2003/10/21 14:23:23 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.23 2003/10/25 00:12:48 fisyak Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -180,13 +183,8 @@ StTpcDedxPidAlgorithm::numberOfSigma(const StParticleDefinition* particle) const
       static_cast<const StGlobalTrack*>( mTrack->node()->track(global));
     if (gTrack && mTraits->length() > 0 ) {
       momentum  = abs(gTrack->geometry()->momentum());
-#ifndef P03ia
-      dedx_expected = 1.e-6*BetheBloch::Sirrf(momentum/particle->mass(),mTraits->length(),
-					      abs(particle->pdgEncoding())==11);
-#else
       if (! m_Bichsel) m_Bichsel = new Bichsel();
       dedx_expected = 1.e-6*m_Bichsel->GetI70(TMath::Log10(momentum/particle->mass()),1.0);
-#endif 
       dedx_resolution = mTraits->errorOnMean();
       if (dedx_resolution <= 0) dedx_resolution = sigmaPidFunction(particle) ;
     }
