@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEnumerations.hh,v 1.5 1999/02/24 02:58:30 ullrich Exp $
+ * $Id: StEnumerations.hh,v 1.6 1999/02/26 14:01:17 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.hh,v $
- * Revision 1.5  1999/02/24 02:58:30  ullrich
- * StDetector now reflects official STAR detector numbers.
+ * Revision 1.6  1999/02/26 14:01:17  ullrich
+ * Removed enumeration StDetector (handled elsewhere).
  *
  * Revision 1.6  1999/02/26 14:01:17  ullrich
  * Removed enumeration StDetector (handled elsewhere).
@@ -38,11 +38,6 @@
 #pragma link C++ enum StBeamDirection;
 #pragma link C++ enum StBeamPolarizationAxis;
 #pragma link C++ enum StVertexType;
-enum StDetector {tpc = 1, svt, ftpcWest, ftpcEast, rich, tof,
-		 barrelEmcTower, barrelEmcPreShower, barrelSmdEta, barrelSmdPhi,
-		 endcapEmcTower, endcapEmcPreShower, endcapSmdEta, endcapSmdPhi,
-                 ctb, ssd, zdcWest, zdcEast, mwpcWest, mwpcEast};
-
 #pragma link C++ enum StTrackSign;
 #endif
 
