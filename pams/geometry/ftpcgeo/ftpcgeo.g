@@ -1,3 +1,10 @@
+* $Id: ftpcgeo.g,v 1.12 2000/01/20 17:17:53 nevski Exp $
+*
+* $Log: ftpcgeo.g,v $
+* Revision 1.12  2000/01/20 17:17:53  nevski
+* forward definition of FSPG moved down to avoid problem on ALPHA
+*
+*
 ******************************************************************************
 Module   FTPCGEO  is the geometry of the Forward TPC in STAR
 * Original version:
@@ -16,7 +23,8 @@ Module   FTPCGEO  is the geometry of the Forward TPC in STAR
 *           removed unused definitions
 *           declare FROM  konly='MANY'
 *           declare FGAS  konly='ONLY'
-* PN. 27-07-98 : FROM position corrected, content declared MANY
+* PN. 27-07-98: FROM position corrected, content declared MANY
+* PN. 20-01-00: forward definition of FSPG moved down to avoid problem on ALPHA
 ******************************************************************************
 +CDE,AGECOM,GCONST,GCUNIT.
 *
@@ -58,7 +66,6 @@ Module   FTPCGEO  is the geometry of the Forward TPC in STAR
         Data     iflaga /0,1,1,2,2/
         Data     iflagb /0,0,1,1,2/
 	Real     position, temp1, temp2, temp3
-        Real     z1,z2
 	Real     frob_x1
 	Integer  Agexist
 *
@@ -352,13 +359,13 @@ Block FGAS is the FTPC gas volume
                 ftpg_DrInAlL2
 	temp2 = ((ftpg_RGasOut-temp1)/2)+temp1
 
-	position FFCE in FGAS _
-                 z=(ftpg_totLen/2+ffcc_StiDia/2+ffcc_BarWidt/2)-5_
+	position FFCE  _
+                 z=(ftpg_totLen/2+ffcc_StiDia/2+ffcc_BarWidt/2)-5 _
                  y=temp2
-	position FFCE in FGAS AlphaZ=-(frbd_Phi3) _
+	position FFCE  AlphaZ=-(frbd_Phi3) _
                  z=(ftpg_totLen/2+ffcc_StiDia/2+ffcc_BarWidt/2)-5 _
                  x=-temp2*cos(pi/6.) y=-temp2*sin(pi/6.)
-	position FFCE in FGAS AlphaZ=frbd_Phi3 _
+	position FFCE  AlphaZ=frbd_Phi3 _
                  z=(ftpg_totLen/2+ffcc_StiDia/2+ffcc_BarWidt/2)-5 _
                  x=temp2*cos(pi/6.)_
                  y=-temp2*sin(pi/6.)
@@ -366,9 +373,9 @@ Block FGAS is the FTPC gas volume
 * Start here to position the FC Rings
 *
         do Iring=17,1,-1
-   	  create FFRA
-	  position FFRA in FGAS z=(ftpg_totLen/2)-5-ffcc_StiDia/2
-	  position FFRA in FGAS z=-ftpg_totLen/2+5+ffcc_StiDia/2
+   	  create   FFRA
+	  position FFRA z=(ftpg_totLen/2)-5-ffcc_StiDia/2
+	  position FFRA z=-ftpg_totLen/2+5+ffcc_StiDia/2
         enddo
 *
 Endblock
@@ -377,7 +384,6 @@ Block FSEN is the sensitive gas volume
       Material  Argon_gas
       Medium    sensitive  ISVOL=1
       attribute FSEN   seen=1  colo=4
-*     attribute FSEN   seen=0  colo=0
 
       temp1=ftpg_RinnerMs+ftpg_DrInAlL1+ _
             ftpg_DrInIsoL+ftpg_DrInAlL2
@@ -634,9 +640,9 @@ Block FSER is the Support End Ring
                    Rmax= fssd_EringRmx,
                    Dz=fssd_EringDZ
 
-	Create and position FSRA in FSER z=fssd_ERPosZ
-	Create and position FSRB in FSER z=0.
-	Create and position FSPG in FSER z=-(fssd_ERPosZ)
+	Create and position FSRA z=fssd_ERPosZ
+	Create and position FSRB 
+	Create and position FSPG z=-(fssd_ERPosZ)
 
 Endblock
 * ----------------------------------------------------------------------------
@@ -656,29 +662,6 @@ Block FSRB is the medium Support End Ring
                    Dz=fssd_MEringDZ
 Endblock
 * ----------------------------------------------------------------------------
-Block FSPG is the inner Support End Ring and the outer support Rings 
-	Material Aluminium
-	Attribute FSPG seen=1 colo=2
-        z1 = -0.5 
-        z2 = 0.5
-        Shape     PGON  Phi1=frbd_Phi4,
-                        Dphi=frbd_Phi13,
-                        Nz=2,  Npdv=6,
-                        zi ={ z1, z2},
-                        rmn={ fssd_PolyIR, fssd_PolyIR},
-                        rmx={ fssd_ERPolyRm, fssd_ERPolyRm}
-      
-       Create and position FSPI in FSPG
-Endblock
-* ----------------------------------------------------------------------------
-Block FSPI is the Hole of the inner Support End Ring
-	Material Air
-	Attribute FSPI seen=1 colo=1
-	Shape TUBE Rmin=ftpg_RinnerMs,
-                   Rmax=ftpg_RGasOut,
-                   Dz=ftpg_SERHole
-Endblock
-* ----------------------------------------------------------------------------
 Block FSSM is the main Support Stucture Module 
 	Material Air
 	Attribute FSSM seen=0 colo=1
@@ -691,30 +674,51 @@ Block FSSM is the main Support Stucture Module
                    Rmax = ftpg_RouterMs,
                    Dz=ftpg_MSRDZ
 
-        Create and position FSPG in FSSM z=fssd_PGonPDZ
-        Create and position FSRI in FSSM
-        Create and position FSPG in FSSM z=-(fssd_PGonPDZ)
+        Create and position FSPG z=fssd_PGonPDZ
+        Create and position FSRI 
+        Create and position FSPG z=-(fssd_PGonPDZ)
 
-        Create and position FSBA in FSSM AlphaZ=frbd_Phi1 y=fssd_SBSDy
-        Create and position FSBA in FSSM AlphaZ=frbd_Phi1 y=-(fssd_SBSDy)
+        Create and position FSBA AlphaZ=frbd_Phi1 y=fssd_SBSDy
+        Create and position FSBA AlphaZ=frbd_Phi1 y=-(fssd_SBSDy)
         
-        Create and position FSBA in FSSM AlphaZ=frbd_Phi11 _
+        Create and position FSBA AlphaZ=frbd_Phi11 _
                              x=fssd_SBSDy*cos(frbd_Phi2*degrad) _
                              y=fssd_SBSDy*sin(frbd_Phi2*degrad)
-        Create and position FSBA in FSSM AlphaZ=frbd_Phi3 _
+        Create and position FSBA AlphaZ=frbd_Phi3 _
                              x=-(fssd_SBSDy*cos(frbd_Phi2*degrad)) _
                              y=fssd_SBSDy*sin(frbd_Phi2*degrad)
-        Create and position FSBA in FSSM AlphaZ=frbd_Phi5 _
+        Create and position FSBA AlphaZ=frbd_Phi5 _
                              x=-(fssd_SBSDy*cos(frbd_Phi2*degrad)) _
                              y=-(fssd_SBSDy*sin(frbd_Phi2*degrad))
-        Create and position FSBA in FSSM AlphaZ=frbd_Phi9 _
+        Create and position FSBA AlphaZ=frbd_Phi9 _
                              x=(fssd_SBSDy*cos(frbd_Phi2*degrad)) _
                              y=-(fssd_SBSDy*sin(frbd_Phi2*degrad))
 
 Endblock
 * ----------------------------------------------------------------------------
+Block FSPG is the inner Support End Ring and the outer support Rings 
+	Material  Aluminium
+	Attribute FSPG seen=1 colo=2
+        Shape     PGON  Phi1=frbd_Phi4,
+                        Dphi=frbd_Phi13,
+                        Nz=2,  Npdv=6,
+                        zi ={ -0.5, 0.5},
+                        rmn={ fssd_PolyIR,   fssd_PolyIR},
+                        rmx={ fssd_ERPolyRm, fssd_ERPolyRm}
+      
+       Create and position FSPI
+Endblock
+* ----------------------------------------------------------------------------
+Block FSPI is the Hole of the inner Support End Ring
+	Material  Air
+	Attribute FSPI seen=1 colo=1
+	Shape TUBE Rmin=ftpg_RinnerMs,
+                   Rmax=ftpg_RGasOut,
+                   Dz=ftpg_SERHole
+Endblock
+* ----------------------------------------------------------------------------
 Block FSRI is the inner Support Ring
-	Material Aluminium
+	Material  Aluminium
 	Attribute FSRI seen=1 colo=1
 	shape TUBE Rmin=ftpg_RGasOut,
                    Rmax=ftpg_RISRing,
