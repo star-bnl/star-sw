@@ -1,7 +1,14 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.5 2000/03/06 18:05:23 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.6 2000/04/06 08:34:56 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.6  2000/04/06 08:34:56  calderon
+ * Version using the particle table:
+ * 1) Constructor for particle_st*
+ * 2) Pointer to parent track from particle table
+ * 3) PDG encoding when track is from particle table
+ * 4) Generator label, used to index entries in the table for debugging
+ *
  * Revision 2.5  2000/03/06 18:05:23  calderon
  * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
  * barrel-ladder-wafer.
@@ -47,8 +54,9 @@ using std::find;
 #include "StParticleDefinition.hh"
 
 #include "tables/St_g2t_track_Table.h"
+#include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.5 2000/03/06 18:05:23 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.6 2000/04/06 08:34:56 calderon Exp $";
 
 StMcTrack::StMcTrack() 
 {
@@ -67,12 +75,25 @@ StMcTrack::StMcTrack(g2t_track_st* trk) {
     mGeantId = trk->ge_pid;
     mKey     = trk->id;
     mParticleDefinition = StParticleTable::instance()->findParticleByGeantId(trk->ge_pid);
+    mEventGenLabel = trk->eg_label;
     
     // The information to fill the collections 
     // is not available directly from the tables.  
     // We need to decode from trk->hit_tpc_p, 
     // trk->hit_svt_p, trk->hit_ftp_p, and trk-next_vtx_trk_p 
     // the actual Collection objects, not just the id's stored in the table.
+}
+
+StMcTrack::StMcTrack(particle_st* trk) {
+    initToZero();
+    mFourMomentum.setPx(trk->phep[0]);
+    mFourMomentum.setPy(trk->phep[1]);
+    mFourMomentum.setPz(trk->phep[2]);
+    mFourMomentum.setE(trk->phep[3]);
+    mParticleDefinition = StParticleTable::instance()->findParticle(trk->idhep);
+    mPdgId = trk->idhep;
+    // This constructor is used for particles coming from the
+    // particle table.
 }
 
 
@@ -91,8 +112,13 @@ void StMcTrack::initToZero()
     mStartVertex  = 0;
     mStopVertex   = 0;
     mParticleDefinition = 0;
-    mIsShower = 0;
-    mGeantId = 0;
+    mGeneratorParent = 0;
+    mIsShower        = 0;
+    mGeantId         = 0;
+    mPdgId           = 0;
+    mKey             = 0;
+    mEventGenLabel   = 0;
+
 }
 
 int StMcTrack::operator==(const StMcTrack& t) const
@@ -140,6 +166,14 @@ void StMcTrack::setShower(char val) { mIsShower = val; }
 
 void StMcTrack::setGeantId(long val) { mGeantId = val; }
 
+void StMcTrack::setPdgId(long val) { mPdgId = val; }
+
+void StMcTrack::setKey(long val) { mKey = val; }
+
+void StMcTrack::setEventGenLabel(long val) { mEventGenLabel = val; }
+
+void StMcTrack::setGeneratorParent(StMcTrack* val) { mGeneratorParent = val; }
+
 void StMcTrack::addTpcHit(StMcTpcHit* hit)
 {
   mTpcHits.push_back(hit);
@@ -153,6 +187,11 @@ void StMcTrack::addFtpcHit(StMcFtpcHit* hit)
 void StMcTrack::addSvtHit(StMcSvtHit* hit)
 {
   mSvtHits.push_back(hit);
+}
+
+void StMcTrack::addRichHit(StMcRichHit* hit)
+{
+  mRichHits.push_back(hit);
 }
 
 void StMcTrack::removeTpcHit(StMcTpcHit* hit)
@@ -171,6 +210,12 @@ void StMcTrack::removeSvtHit(StMcSvtHit* hit)
 {
   StMcSvtHitIterator iter = find(mSvtHits.begin(), mSvtHits.end(), hit);
   if (iter != mSvtHits.end()) mSvtHits.erase(iter);
+}
+
+void StMcTrack::removeRichHit(StMcRichHit* hit)
+{
+  StMcRichHitIterator iter = find(mRichHits.begin(), mRichHits.end(), hit);
+  if (iter != mRichHits.end()) mRichHits.erase(iter);
 }
 
 //void StMcTrack::setTopologyMap(StTrackTopologyMap& val) { mTopologyMap = val; }
