@@ -1,5 +1,9 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.10 2002/06/04 13:54:21 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.11 2002/10/16 12:29:15 fsimon Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.11  2002/10/16 12:29:15  fsimon
+// Include ftpcAmpSlope, ftpcAmpOffset and ftpcTimeOffset in Database access
+// permits usage of gain factors and time offset in the simulator
+//
 // Revision 1.10  2002/06/04 13:54:21  jcs
 // move GetDataBase from Make to InitRun
 //
@@ -68,16 +72,21 @@ ClassImp(StFtpcSlowSimMaker)
 //_____________________________________________________________________________
 StFtpcSlowSimMaker::StFtpcSlowSimMaker(const char *name):
 StMaker(name),
-m_slowsimpars(0),
-m_dimensions(0),
-m_efield(0),
-m_vdrift(0),
-m_deflection(0),
-m_dvdriftdp(0),
-m_ddeflectiondp(0),
-m_gas(0),
-m_driftfield(0),
-m_electronics(0)
+    m_clusterpars(0),
+    m_slowsimgas(0),
+    m_slowsimpars(0),
+    m_dimensions(0),
+    m_efield(0),
+    m_vdrift(0),
+    m_deflection(0),
+    m_dvdriftdp(0),
+    m_ddeflectiondp(0),
+    m_ampslope(0),
+    m_ampoffset(0),
+    m_timeoffset(0),
+    m_driftfield(0),
+    m_gas(0),
+    m_electronics(0)
 {
 }
 //_____________________________________________________________________________
@@ -141,7 +150,8 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
      return kStWarn;
   }
   St_DataSetIter       dblocal_calibrations(ftpc_calibrations_db);
-
+ 
+  
   m_efield     = (St_ftpcEField *)dblocal_calibrations("ftpcEField" );
   m_vdrift     = (St_ftpcVDrift *)dblocal_calibrations("ftpcVDrift" );
   m_deflection = (St_ftpcDeflection *)dblocal_calibrations("ftpcDeflection" );
@@ -150,20 +160,42 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
   m_gas        = (St_ftpcGas *)dblocal_calibrations("ftpcGas");
   m_driftfield = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
   m_electronics = (St_ftpcElectronics *)dblocal_calibrations("ftpcElectronics");
+  
+  // Get Database for gain factors and time offset
+  m_ampslope = (St_ftpcAmpSlope *)dblocal_calibrations("ftpcAmpSlope" );
+  m_ampoffset = (St_ftpcAmpOffset *)dblocal_calibrations("ftpcAmpOffset");
+ 
+  //cout << "Global Dbs read...\n";
+ 
+  //cout << "Getting local Db ..\n";
+  St_DataSet *ftpclocal = GetDataBase("ftpc");  // zum Verwenden der lokalen DB
+  if ( !ftpclocal ){
+     gMessMgr->Warning() << "StFtpcSlowSimMaker::Error Getting local FTPC database: Calibrations"<<endm;
+     return kStWarn;
+  } //assert(ftpc);
+  // cout << "Local Db found, creating iterator...\n";
+ 
+  St_DataSetIter       local(ftpclocal);
+  
+  //cout << "Iterator created ...\n";
+
+  m_timeoffset = (St_ftpcTimeOffset *)local("ftpcTimeOffset");
+ 
+  m_clusterpars  = (St_ftpcClusterPars *)local("ftpcClusterPars");
+  m_slowsimgas   = (St_ftpcSlowSimGas  *)local("ftpcSlowSimGas");
+  m_slowsimpars  = (St_ftpcSlowSimPars *)local("ftpcSlowSimPars");
+
+  //cout << "Local Dbs read...\n";
+ 
+
+ //m_timeoffset = (St_ftpcTimeOffset *)dblocal_calibrations("ftpcTimeOffset");
+ 
   return 0;
 }
 //_____________________________________________________________________________
 Int_t StFtpcSlowSimMaker::Init(){
 
-// get parameters used in code
-  St_DataSet *ftpc = GetDataBase("ftpc");
-  assert(ftpc);
-  St_DataSetIter       local(ftpc);
 
-  m_clusterpars  = (St_ftpcClusterPars *) local("ftpcClusterPars");
-  m_slowsimgas   = (St_ftpcSlowSimGas  *) local("ftpcSlowSimGas");
-  m_slowsimpars  = (St_ftpcSlowSimPars *)local("ftpcSlowSimPars");
-  
   // Create Histograms    
   m_nadc    = new TH1F("fss_total_adc","Total number of adcs in both FTPCs",1000,0.,2000000.);
   m_nsqndx  = new TH1F("fss_sqndx","FTPC raw data sequence index",100,0.,100000.);
@@ -173,7 +205,7 @@ Int_t StFtpcSlowSimMaker::Init(){
 }
 //_____________________________________________________________________________
 Int_t StFtpcSlowSimMaker::Make(){
-
+ 
   St_DataSetIter geant(GetInputDS("geant"));
   St_g2t_vertex  *g2t_vertex  = (St_g2t_vertex *)  geant("g2t_vertex");
   St_g2t_track   *g2t_track   = (St_g2t_track *)   geant("g2t_track");
@@ -188,38 +220,48 @@ Int_t StFtpcSlowSimMaker::Make(){
     St_fcl_ftpcadc   *fcl_ftpcadc  = new St_fcl_ftpcadc("fcl_ftpcadc",2000000);
     local.Add(fcl_ftpcadc);
 
-    // create data reader
+    //cout <<" create data reader \n";
+ 
+   // create data reader
     StFtpcGeantReader *geantReader = new StFtpcGeantReader(g2t_vertex,
 							   g2t_track,
 							   g2t_ftp_hit);
-
+    //cout <<" create data writer \n";
+ 
     // create data writer
     StFtpcRawWriter *dataWriter = new StFtpcRawWriter(fcl_ftpcndx,
 						      fcl_ftpcsqndx,
 						      fcl_ftpcadc);
-    
+    // cout << "create FTPC database reader\n";
+    //create FTPC database reader
+    StFtpcDbReader *dbReader = new StFtpcDbReader(m_dimensions,
+                                                m_efield,
+                                                m_vdrift,
+                                                m_deflection,
+                                                m_dvdriftdp,
+                                                m_ddeflectiondp,
+						m_gas,  
+						m_driftfield,
+                                                m_electronics,
+						m_ampslope,
+                                                m_ampoffset,
+                                                m_timeoffset);
+
+    //cout << "create parameter reader\n";
     // create parameter reader
     StFtpcParamReader *paramReader = new StFtpcParamReader(m_clusterpars,
                                                            m_slowsimgas,
                                                            m_slowsimpars);
- 
-    //create FTPC database reader
-    StFtpcDbReader *dbReader = new StFtpcDbReader(m_dimensions,
-                                                  m_efield,
-                                                  m_vdrift,
-                                                  m_deflection,
-                                                  m_dvdriftdp,
-                                                  m_ddeflectiondp,
-                                                  m_gas,
-                                                  m_driftfield,
-                                                  m_electronics);
+
+
+    //cout <<"Create SlowSimulator \n";
 
     StFtpcSlowSimulator *slowsim = new StFtpcSlowSimulator(geantReader,
 							   paramReader, 
                                                            dbReader,
 							   dataWriter);
  
-    gMessMgr->Message("", "I", "OST") << "start StFtpcSlowSimulator " << endm;
+    gMessMgr->Info() << "FTPC SlowSimulator starting... " <<endm;
     Int_t Res_fss = slowsim->simulate();
 
     delete slowsim;
@@ -233,6 +275,8 @@ Int_t StFtpcSlowSimMaker::Make(){
     }
   }
   MakeHistograms(); // FTPC slow simulator histograms
+  
+  gMessMgr->Info() << "FTPC SlowSimulator done... " <<endm;
   return kStOK;
 }
 //_____________________________________________________________________________
