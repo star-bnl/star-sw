@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.2 2004/06/05 23:38:22 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.3 2004/06/22 16:49:04 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -10,6 +10,8 @@
 #include "tables/St_tpcGas_Table.h"
 //#include "tables/St_trigDetSums_Table.h"
 //#include "tables/St_tpcGainMonitor_Table.h"
+class St_trigDetSums;
+class trigDetSums_st;
 //________________________________________
 class dEdx_t : public TObject {
  public:
@@ -96,10 +98,14 @@ class StTpcdEdxCorrection : public TObject {
     kTpcdEdxCor          ,
     kTpcLengthCorrection ,
     ktpcGas              ,
-    ktpcPressure };
+    ktpcPressure         ,
+    ktpcMethaneIn        ,
+    ktpcGasTemperature        ,
+    ktpcWaterOut 
+  };
     //  ktrigDetSums      ,
     //  ktpcGainMonitor   ,
-  StTpcdEdxCorrection(Int_t Option=0);
+  StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();
   Int_t dEdxCorrection(dEdx_t &dEdx); 
 
@@ -113,8 +119,13 @@ class StTpcdEdxCorrection : public TObject {
   void SetTpcLengthCorrection  (St_tpcCorrection   *m = 0);
   void SettpcGas               (St_tpcGas          *m = 0);
   void SettpcPressure          (St_tpcCorrection   *m = 0);
+  void SettpcMethaneIn         (St_tpcCorrection   *m = 0);
+  void SettpcGasTemperature         (St_tpcCorrection   *m = 0);
+  void SettpcWaterOut         (St_tpcCorrection   *m = 0);
   //  void SettrigDetSums          (St_trigDetSums      *m = 0);
   //  void SettpcGainMonitor       (St_tpcGainMonitor   *m = 0);
+  
+  void SetDebug(Int_t m=0) {m_Debug = m;}
 
   St_TpcSecRowCor   *TpcSecRow()           {return m_TpcSecRow;}
   St_tpcCorrectionC *drift()               {return m_drift;}
@@ -126,9 +137,12 @@ class StTpcdEdxCorrection : public TObject {
   St_tpcCorrectionC *TpcLengthCorrection() {return m_TpcLengthCorrection;}
   St_tpcGas         *tpcGas()              {return m_tpcGas;}
   St_tpcCorrectionC *tpcPressure()         {return m_tpcPressure;}
-  //  St_trigDetSums    *trigDetSums()         {return m_trigDetSums;}
-  //  St_tpcGainMonitor *tpcGainMonitor()      {return m_tpcGainMonitor;}
-
+  St_tpcCorrectionC *tpcMethaneIn()        {return m_tpcMethaneIn;}
+  St_tpcCorrectionC *tpcGasTemperature()        {return m_tpcGasTemperature;}
+  St_tpcCorrectionC *tpcWaterOut()        {return m_tpcWaterOut;}
+  //  St_trigDetSums    *trigDetSums()     {return m_trigDetSums;}
+  //  St_tpcGainMonitor *tpcGainMonitor()  {return m_tpcGainMonitor;}
+  Int_t Debug()                            {return m_Debug;}
  private:
   Int_t                m_Mask;                  //!
   St_TpcSecRowCor     *m_TpcSecRow;            //!
@@ -141,9 +155,14 @@ class StTpcdEdxCorrection : public TObject {
   St_tpcCorrectionC   *m_TpcLengthCorrection;  //!
   St_tpcGas           *m_tpcGas;               //!
   St_tpcCorrectionC   *m_tpcPressure;          //!
-  //  St_trigDetSums      *m_trigDetSums;          //!
-  //  trigDetSums_st      *m_trig;                 //!
+  St_tpcCorrectionC   *m_tpcMethaneIn;         //!
+  St_tpcCorrectionC   *m_tpcGasTemperature;    //!
+  St_tpcCorrectionC   *m_tpcWaterOut;          //!
+  St_trigDetSums      *m_trigDetSums;          //!
+  trigDetSums_st      *m_trig;                 //!
   //  St_tpcGainMonitor   *m_tpcGainMonitor;       //!
+  Double_t             mAdc2GeV[2];            //! Outer/Inner conversion factors from ADC -> GeV
+  Int_t                m_Debug;                //!
   ClassDef(StTpcdEdxCorrection,0)   //StAF chain virtual base class for Makers
 };
 
