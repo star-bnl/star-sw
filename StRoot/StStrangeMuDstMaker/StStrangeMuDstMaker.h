@@ -1,59 +1,10 @@
-// $Id: StStrangeMuDstMaker.h,v 3.8 2002/04/30 16:02:48 genevb Exp $
-// $Log: StStrangeMuDstMaker.h,v $
-// Revision 3.8  2002/04/30 16:02:48  genevb
-// Common muDst, improved MC code, better kinks, StrangeCuts now a branch
-//
-// Revision 3.7  2001/09/14 21:39:02  genevb
-// Adjustments to not depend on order in which maker Clear() is called
-//
-// Revision 3.6  2001/08/23 13:20:56  genevb
-// Many bug workarounds...
-//
-// Revision 3.5  2001/05/04 20:15:14  genevb
-// Common interfaces and reorganization of components, add MC event info
-//
-// Revision 3.4  2000/12/18 21:35:18  genevb
-// Introduced variable buffer-sizing
-//
-// Revision 3.3  2000/09/28 20:16:05  jones
-// Added doT0JitterAbort() optio; added fix to CheckFile in case of no file
-//
-// Revision 3.2  2000/09/07 02:22:10  genevb
-// Added AbortEvent() functionality
-//
-// Revision 3.1  2000/07/17 20:28:40  genevb
-// File size limitation workaround, some under the hood improvements
-//
-// Revision 3.0  2000/07/14 12:56:50  genevb
-// Revision 3 has event multiplicities and dedx information for vertex tracks
-//
-// Revision 2.1  2000/06/09 22:17:11  genevb
-// Allow MC data to be copied between DSTs, other small improvements
-//
-// Revision 2.0  2000/06/02 22:11:54  genevb
-// New version of Strangeness micro DST package
-//
-// Revision 1.5  2000/04/18 02:30:04  genevb
-// Added multi-file capabilities
-//
-// Revision 1.4  2000/04/06 14:51:11  genevb
-// Fixed bug with storing event info when making subDST
-//
-// Revision 1.3  2000/04/05 20:23:53  genevb
-// Introduce creating sub-Micro DSTs, dynamic expansion of clones arrays as needed, SetNoKeep() function
-//
-// Revision 1.2  2000/03/29 20:52:13  genevb
-// Added StKinkMuDst, replaced arrays
-//
-// Revision 1.1  2000/03/29 03:10:07  genevb
-// Introduction of Strangeness Micro DST package
-//
-//
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// StStrangeMuDstMaker strangeness micro DST maker                      //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
+/*!
+  \class StStrangeMuDstMaker
+  
+  StStrangeMuDstMaker strangeness micro DST maker
+
+*/
+
 #ifndef STAR_StStrangeMuDstMaker
 #define STAR_StStrangeMuDstMaker
 #include "StMaker.h"
@@ -186,6 +137,7 @@ class StStrangeMuDstMaker : public StMaker {
   void SetStFiles();
   Int_t OpenFile();
   Int_t CloseFile();
+  Int_t NextReadFile();
   void CheckFile();
 
   Int_t MatchName(const char* name) const;
@@ -279,3 +231,59 @@ inline Int_t StStrangeMuDstMaker::MatchName(const char* name) const
               return 0; }
 
 #endif
+
+//____________________________________________________________________
+//
+// $Id: StStrangeMuDstMaker.h,v 3.9 2002/05/29 19:08:16 genevb Exp $
+// $Log: StStrangeMuDstMaker.h,v $
+// Revision 3.9  2002/05/29 19:08:16  genevb
+// Better handling of improperly closed files
+//
+// Revision 3.8  2002/04/30 16:02:48  genevb
+// Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+//
+// Revision 3.7  2001/09/14 21:39:02  genevb
+// Adjustments to not depend on order in which maker Clear() is called
+//
+// Revision 3.6  2001/08/23 13:20:56  genevb
+// Many bug workarounds...
+//
+// Revision 3.5  2001/05/04 20:15:14  genevb
+// Common interfaces and reorganization of components, add MC event info
+//
+// Revision 3.4  2000/12/18 21:35:18  genevb
+// Introduced variable buffer-sizing
+//
+// Revision 3.3  2000/09/28 20:16:05  jones
+// Added doT0JitterAbort() optio; added fix to CheckFile in case of no file
+//
+// Revision 3.2  2000/09/07 02:22:10  genevb
+// Added AbortEvent() functionality
+//
+// Revision 3.1  2000/07/17 20:28:40  genevb
+// File size limitation workaround, some under the hood improvements
+//
+// Revision 3.0  2000/07/14 12:56:50  genevb
+// Revision 3 has event multiplicities and dedx information for vertex tracks
+//
+// Revision 2.1  2000/06/09 22:17:11  genevb
+// Allow MC data to be copied between DSTs, other small improvements
+//
+// Revision 2.0  2000/06/02 22:11:54  genevb
+// New version of Strangeness micro DST package
+//
+// Revision 1.5  2000/04/18 02:30:04  genevb
+// Added multi-file capabilities
+//
+// Revision 1.4  2000/04/06 14:51:11  genevb
+// Fixed bug with storing event info when making subDST
+//
+// Revision 1.3  2000/04/05 20:23:53  genevb
+// Introduce creating sub-Micro DSTs, dynamic expansion of clones arrays as needed, SetNoKeep() function
+//
+// Revision 1.2  2000/03/29 20:52:13  genevb
+// Added StKinkMuDst, replaced arrays
+//
+// Revision 1.1  2000/03/29 03:10:07  genevb
+// Introduction of Strangeness Micro DST package
+//
