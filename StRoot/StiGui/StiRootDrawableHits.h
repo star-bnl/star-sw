@@ -34,6 +34,8 @@ protected:
     bool mvisible;
     char* mname;
     unsigned int mmarker;
+    double* mPointsForRoot;
+    unsigned int mArraySize; 
     
 private:
 
