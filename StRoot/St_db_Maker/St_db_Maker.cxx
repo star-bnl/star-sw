@@ -76,19 +76,27 @@ Int_t St_db_Maker::Init()
    // recreate a memory resided data-structure
    m_CurrentDir = m_MainDir;
    St_FileSet *fileset = new St_FileSet(m_CurrentDir);
-   fileset->Purge(); ;fileset->Pass(PrepareDB,&m_CurrentDir);
+   fileset->Purge(); 
+   fileset->Pass(PrepareDB,&m_CurrentDir);
+   fileset->Purge(); 
    St_FileSet *Fileset = fileset;
 
    m_CurrentDir = m_UserDir; fileset = 0;
    if (!m_CurrentDir.IsNull()) {
      fileset = new St_FileSet(m_CurrentDir);
-     fileset->Purge();fileset->Pass(PrepareDB,&m_CurrentDir);}
+     fileset->Purge();
+     fileset->Pass(PrepareDB,&m_CurrentDir);
+     fileset->Purge();}
 
    if (fileset) {Fileset->Update(fileset); delete fileset;}
 
    Fileset->Sort();
 
    AddData(Fileset);
+
+   SetOutput(Fileset); //  
+   SetOutputAll(Fileset); //  
+
    if (Debug()) Fileset->ls("*");
 // Create Histograms    
    return StMaker::Init();
@@ -234,7 +242,7 @@ EDataSetPass St_db_Maker::PrepareDB(St_DataSet* ds, void *user)
     if (strncmp("file",filename,4))		continue;  
     filename = set->GetName();
     if (!(dot = strchr(filename,'.'))) 		continue;
-    if (!Kind(filename))			continue;
+    if (!Kind(filename)){ delete set;		continue;}
     set->SetTitle(newTitle);
     lpsname = dot - filename;
     if (strncmp(filename,psname+1,lpsname+1)) {// make new pseudo directory
@@ -253,7 +261,7 @@ void    St_db_Maker::SetUserDir(const Char_t *db)
 //_____________________________________________________________________________
 void St_db_Maker::PrintInfo(){
   printf("***************************************************************\n");
-  printf("* $Id: St_db_Maker.cxx,v 1.4 1999/03/20 22:26:49 perev Exp $\n");
+  printf("* $Id: St_db_Maker.cxx,v 1.5 1999/04/30 15:07:20 perev Exp $\n");
   printf("***************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
