@@ -59,7 +59,17 @@ dui_precious()
 STAFCV_T 
 dui_du()
 {
-   if( !dui->du("/dui",0) ){
+   if( !dui->du(NULL,NULL,"/dui",0) ){
+      EML_FAILURE(METHOD_FAILURE);
+   }
+   EML_SUCCESS(STAFCV_OK);
+}
+
+STAFCV_T 
+dui_find(char *searchtype,char *name)
+{
+   if( !dui->du(searchtype,name,"/dui",0) ){  // du is used for both DUI/DU
+                                              // and DUI/FIND
       EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
