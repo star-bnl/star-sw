@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.11 2001/03/22 20:46:54 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.12 2001/05/04 14:20:05 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.12  2001/05/04 14:20:05  caines
+ * Improved historgramming
+ *
  * Revision 1.11  2001/03/22 20:46:54  caines
  * Comment out some of the QA histograms
  *
@@ -184,16 +187,16 @@ Int_t StSvtHitMaker::Init()
     
     mTimeHitResolution = new TH1F("hitTRes","Delta X for Hits",1000,-2.0,2.0);
     mAnodeHitResolution = new TH1F("hitARes","Delta Z for Hits",1000,-2.0,2.0);
-    mXHitResolution = new TH1F("hitXRes","Delta X for Hits",1000,-.1,.1);
-    mYHitResolution = new TH1F("hitYRes","Delta Y for Hits",1000,-.1,.1);
-    mZHitResolution = new TH1F("hitZRes","Delta Z for Hits",1000,-.1,.1);		      
+    mXHitResolution = new TH1F("hitXRes","Delta X for Hits",1000,-0.1,0.1);
+    mYHitResolution = new TH1F("hitYRes","Delta Y for Hits",1000,-0.1,0.1);
+    mZHitResolution = new TH1F("hitZRes","Delta Z for Hits",1000,-0.1,-0.1);		      
     mHitResolution = new TH2F("hitRes","Delta Z Vs Delta X for Hits",1000,-2.0,2.0,1000,-2.0,2.0);
     
     mTimeHitResolution->SetXTitle("delta X (timebucket)");
-    mAnodeHitResolution->SetYTitle("delta Z (anode)");
+    mAnodeHitResolution->SetXTitle("delta Z (anode)");
     mXHitResolution->SetXTitle("delta X (cm)");
-    mYHitResolution->SetYTitle("delta Y (cm)");
-    mZHitResolution->SetYTitle("delta Z (cm)");
+    mYHitResolution->SetXTitle("delta Y (cm)");
+    mZHitResolution->SetXTitle("delta Z (cm)");
     mHitResolution->SetXTitle("delta X (timebucket)");
     mHitResolution->SetYTitle("delta Z (anode)");
   }
@@ -466,9 +469,13 @@ Int_t StSvtHitMaker::Eval()
                 {
                  diffTime = tim -  mSvtGeantHit->waferCoordinate()[gHit].timebucket();
                  diffAnode = anod - mSvtGeantHit->waferCoordinate()[gHit].anode();
+		 diffX =  mSvtBigHit->svtHit()[clu].position().x() - mSvtGeantHit->globalCoordinate()[gHit].position().x();
+		 diffY =  mSvtBigHit->svtHit()[clu].position().y() - mSvtGeantHit->globalCoordinate()[gHit].position().y();
+		 diffZ =  mSvtBigHit->svtHit()[clu].position().z() - mSvtGeantHit->globalCoordinate()[gHit].position().z();
 		}
                if ((fabs(tim -  mSvtGeantHit->waferCoordinate()[gHit].timebucket()) < fabs(diffTime)) &&
 		   (fabs(anod - mSvtGeantHit->waferCoordinate()[gHit].anode()) < fabs(diffAnode))) {
+		 //Pick closest match
 		 diffTime = tim - mSvtGeantHit->waferCoordinate()[gHit].timebucket();
 		 diffAnode = anod - mSvtGeantHit->waferCoordinate()[gHit].anode();
 		 diffX =  mSvtBigHit->svtHit()[clu].position().x() - mSvtGeantHit->globalCoordinate()[gHit].position().x();
@@ -477,6 +484,7 @@ Int_t StSvtHitMaker::Eval()
 	       }
 	     }
 
+	     //cout << " diffZ= " << diffZ << endl;
              mTimeHitResolution->Fill(diffTime);
              mAnodeHitResolution->Fill(diffAnode);
              mXHitResolution->Fill(diffX);
