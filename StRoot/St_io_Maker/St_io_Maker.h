@@ -14,18 +14,18 @@
 //  Submit any problem with this code via begin_html <A HREF="http://www.rhic.bnl.gov/STAR/html/comp_l/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html  //
 //
 //////////////////////////////////////////////////////////////////////////
-#ifndef StMaker_H
-#include "StMaker.h"
+#ifndef StIOInterFace_H
+#include "StIOInterFace.h"
 #endif
  
 class  TBranch;
 class  TTree;
 class  TFile;
 
-class St_io_Maker : public StMaker {
+class St_io_Maker : public StIOInterFace {
  private:
    Bool_t fSplit;    // flag of the "split" mode
-// static Char_t  m_VersionCVS = "$Id: St_io_Maker.h,v 1.11 1999/03/19 23:54:13 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_io_Maker.h,v 1.12 1999/05/06 21:37:41 perev Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
    TFile         *m_TreeRootFile;   //! ROOT file to keep TTRee object in their.
    TObjArray     *m_ListOfBranches; //!
@@ -44,7 +44,8 @@ class St_io_Maker : public StMaker {
  
  public: 
             St_io_Maker(const char *name="output", const char *title="io_something",Bool_t split=kTRUE,TTree *tree=0);
-   virtual  ~St_io_Maker();
+           void Destructor();
+   virtual  ~St_io_Maker(){Destructor();};
    virtual TObjArray *GetListOfBranches(){return m_ListOfBranches;}
    virtual void       Add(const Char_t *dataName,const Char_t *fileName=0);
    virtual void       Add(TString &dataName,const Char_t *fileName=0);
@@ -71,6 +72,16 @@ class St_io_Maker : public StMaker {
 //   virtual Int_t      SetFile(const Char_t *rootFileName);
 
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
+
+//VP		StIOInterFace part
+   
+   virtual Int_t Open (const char *dummy=0){return Init();};
+   virtual void  Close(const char *dummy=0){Finish();};
+   virtual void  SetFile(const char *file){ AddFile(file);};
+   virtual void  SetBranch(const char *br,const char *file=0,const char *iomode="w")
+   { AddFile(file);};
+
+
    ClassDef(St_io_Maker, 1)   //StAF chain virtual base class for Makers
 };
 

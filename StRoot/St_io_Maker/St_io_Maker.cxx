@@ -73,8 +73,9 @@ ClassImp(St_io_Maker)
 
 //_____________________________________________________________________________
 St_io_Maker::St_io_Maker(const char *name, const char *title,Bool_t split,TTree *tree)
- :StMaker(name,title), fSplit(split)
+ :StIOInterFace(name), fSplit(split)
 {
+   SetTitle(title);
    m_ListOfBranches = 0;
    SetTree(tree);
    m_FileIterator = 0;
@@ -86,7 +87,7 @@ St_io_Maker::St_io_Maker(const char *name, const char *title,Bool_t split,TTree 
    SetMaxEvent();
 }
 //_____________________________________________________________________________
-St_io_Maker::~St_io_Maker()
+void St_io_Maker::Destructor()
 {
  
   if (m_FileIterator) { 
@@ -109,6 +110,10 @@ St_io_Maker::~St_io_Maker()
     delete m_TreeRootFile;
     m_TreeRootFile = 0;
   }
+   m_OffSet       = 0;       // Event offset for multi-volumes tree's
+   m_Entries      = 0;       // Number of the events of the current tree.
+   m_Tree         = 0;
+   SetMaxEvent();
 }
 //_____________________________________________________________________________
 void St_io_Maker::Add(const Char_t *dataName, const Char_t *fileName)
@@ -173,6 +178,7 @@ void St_io_Maker::AddFile(const Char_t *fileName)
   // Create  the list of the ROOT file with TTree object to read from
   if (fileName && strlen(fileName)) {
     if (!m_ListOfFiles) m_ListOfFiles = new TObjArray;
+    if(m_ListOfFiles->FindObject(fileName)) return; // file is already here
     TObjString *obj = new TObjString(fileName);
     cout << " File:" << obj->String() << endl;
     m_ListOfFiles->Add(new TObjString(fileName));
@@ -267,44 +273,6 @@ Bool_t St_io_Maker::IsNewTree(Int_t nevent)
          && ( nevent-m_OffSet == TMath::Min(GetMaxEvent(),m_Entries) ) ;
 }
 
-#if 0
-//_____________________________________________________________________________
-St_DataSet *St_io_Maker::DataSet(const Char_t *set) 
-{
-  //
-  // Looks for "next event" of the branch with the name defined by "set"
-  // returns the St_DataSet pointer of the dataset from that branch if any
-  // 
-  // tries to switch to the new TTree if the current one is exhausted
-  //
-
-   if (!m_ListOfBranches) return 0;
-//   Int_t nevent = fgStChain->GetNumber()-1;
-   Int_t nevent = GetNumber()-1;
-//    cout << "DataSet:  " << nevent << " : " << m_OffSet << " : " << m_Entries << endl;
-   if (  IsNewTree( nevent ) ) {
-       DestroyBranchList();
-       // Let's create it from the TTree if any
-       BuildBranchList(SetNextTree());
-   }
-   TIter next(m_ListOfBranches);
-   StIOHeader *obj = 0;
-   while(obj = (StIOHeader *)next())  
-   {
-      // Find St_DataSet pointer 
-      TString name = obj->GetName();
-      name.ReplaceAll("_Branch","");
-      if (strcmp(name.Data(),set)==0) break;
-   }
-
-   if (obj){
-    if (m_Entries = -1) m_Entries = GetEntries(obj);
-    if (obj->GetEvent(nevent-m_OffSet)) 
-         return (St_DataSet *)(obj->ShuntData());
-   }   
-   return  0;
-}
-#endif /* 0*/
 //_____________________________________________________________________________
 void St_io_Maker::DestroyBranchList()
 {
@@ -348,6 +316,8 @@ Int_t St_io_Maker::Finish()
  else { // delete this list to be able to read the next file
    SafeDelete(m_ListOfBranches)
  }
+
+ Destructor();
  return 0;
 }
 //_____________________________________________________________________________
@@ -466,7 +436,7 @@ TTree *St_io_Maker::MakeTree(const char* name, const char*title)
 //_____________________________________________________________________________
 void St_io_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_io_Maker.cxx,v 1.18 1999/03/20 22:46:12 perev Exp $\n");
+  printf("* $Id: St_io_Maker.cxx,v 1.19 1999/05/06 21:37:41 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
