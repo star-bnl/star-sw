@@ -1,5 +1,8 @@
 #!/bin/csh
 #  $Log: SYS_STAR,v $
+#  Revision 1.2  1998/02/10 00:06:09  fisyak
+#  SL98a second version
+#
 #  Revision 1.1  1998/01/31 23:32:52  fisyak
 #  New Environment variables
 #
@@ -8,12 +11,25 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/01/31 23:32:52 $ 
+#             Last modification $Date: 1998/02/10 00:06:09 $ 
 #
 # Determine SYS_STAR variable.
 #
 if (-e /usr/afsws/bin/sys) then
       setenv SYS_STAR `/usr/afsws/bin/sys`
+      switch ($SYS_STAR)
+	case "hp_ux102":
+	    if (-e /bin/CC) then 
+		setenv SYS_HOST_STAR "${SYS_STAR}"
+	    else
+		if (-e /opt/aCC/bin/aCC) then
+		    setenv SYS_HOST_STAR "${SYS_STAR}_aCC"
+		else
+		    setenv SYS_HOST_STAR "${SYS_STAR}_gcc"
+		endif
+	    endif
+	default:
+      endsw
 else
 set mach_os = ` uname -sr | sed -e 's/ //g' -e 's/\.//g' `
 #

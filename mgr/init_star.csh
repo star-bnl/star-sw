@@ -1,4 +1,7 @@
 #  $Log: init_star.csh,v $
+#  Revision 1.2  1998/02/10 00:06:10  fisyak
+#  SL98a second version
+#
 #  Revision 1.1  1998/01/31 23:32:52  fisyak
 #  New Environment variables
 #
@@ -7,13 +10,14 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/01/31 23:32:52 $ 
+#             Last modification $Date: 1998/02/10 00:06:10 $ 
 #! /bin/csh -f
 #. default setings
 	setenv CC        gcc
-	setenv CFLAGS   -fpic
+	setenv CFLAGS   "-fpic -w"
 	setenv CXX       gcc
-	setenv CXXFLAGS -fpic
+	setenv CXXFLAGS "-fpic -w"
+        setenv STAR_LD_LIBRARY_PATH ""
 switch ($SYS_HOST_STAR)
     case "rs_aix31":
 #  ====================
@@ -64,12 +68,15 @@ switch ($SYS_HOST_STAR)
 	setenv CXXFLAGS  "-w +a1 -z +Z"
 #       setenv CC         cc
 #	setenv CFLAGS    "-w +a1 -z +z"
-	setenv FFLAGS    "+ppu +z -w"
+	setenv FFLAGS    "+ppu -K +z -w"
 	setenv F_EXTENDED +es
-#	setenv LD         CC
-	setenv LDFLAGS   "-b +a1 -z"
-	setenv LD_LIBS    /opt/fortran/lib/libU77.a
-	setenv CC_LIBS   "-L/opt/CC/lib -lC.ansi -lcxx -lcl -lc"
+	setenv CPPFLAGS   -Dextname
+	setenv ARFLAGS     slrv
+	setenv RANLIB      /bin/true
+	setenv LD         CC
+	setenv LDFLAGS   "-b -z"
+	setenv LD_LIBS   "/opt/fortran/lib/libU77.a  -lf"
+	setenv CC_LIBS   "-L/usr/lib -L/lib -L/opt/CC/lib -lC.ansi -lcxx -lcl -lisamstub -lc"
 	setenv CERN_LIBS " "
 #	setenv LIBRARIES " "
     breaksw
@@ -99,9 +106,19 @@ switch ($SYS_HOST_STAR)
 #   breaksw
     case "sgi_53":
 #  ====================
-	setenv FFLAGS     "-Nn20000   -O2"
-	setenv LDFLAGS    "-shared -all"
-        setenv LD_LIBS    "-lXext -lm"
+	setenv FFLAGS     "-Nn20000 -static -trapuv -u -KPIC"
+	setenv F_EXTENDED  -extend_source
+	setenv CC           cc
+	setenv CFLAGS     "-ansi -KPIC -kpicopt -w"
+#	setenv CFLAGS     "-fpic -fPIC -w"
+	setenv CXX         CC
+	setenv CXXFLAGS   "-32 ${CFLAGS} -xansi -w"
+#                                               -use_cfront 
+	setenv ARFLAGS     slrv
+#	setenv LD          ld
+	setenv LD          CC
+	setenv LDFLAGS    "-32 -shared"
+        setenv LD_LIBS    "-lsun -lftn -lm -lc -lPW -lmalloc"
 	    setenv OPSYS IRIX53
     breaksw
     case "sgi_63":
@@ -109,11 +126,16 @@ switch ($SYS_HOST_STAR)
 #   breaksw
     case "sgi_64":
 #  =============-32-=======
+	setenv FFLAGS     "-32 -Nn20000 -static -trapuv -u -KPIC"
+	setenv F_EXTENDED  -extend_source
+	setenv CC           cc
+	setenv CFLAGS     "-32 -ansi -KPIC -kpicopt -w"	
 	setenv CXX          CC
-	setenv CXXFLAGS    -32
-	setenv CFLAGS      -32
-	setenv FFLAGS     "-32 -Nn20000 -O2"
-	setenv LDFLAGS    "-32 -shared -all"
+#	setenv CXXFLAGS   "${CXXFLAGS} -32"
+	setenv CXXFLAGS   "-32 ${CFLAGS} -xansi -use_cfront -w"
+#	setenv CFLAGS     "${CFLAGS} -32"
+	setenv LD          CC
+	setenv LDFLAGS    "-32 -shared"
 	setenv LD_LIBS    "-lXext -lm"
 #	setenv LIBRARIES  " "
 	    setenv OPSYS IRIX64_32
@@ -124,7 +146,8 @@ switch ($SYS_HOST_STAR)
 	setenv CXXFLAGS    -n32
 	setenv CFLAGS      -n32
 	setenv FFLAGS     "-n32 -Nn20000 -O2"
-	setenv LDFLAGS    "-n32 -shared -all"
+	setenv F_EXTENDED  -extend_source
+	setenv LDFLAGS    "-n32 -shared"
 	setenv LD_LIBS    "-lXext -lm"
 	    setenv OPSYS IRIX64_n32
     breaksw
@@ -134,7 +157,8 @@ switch ($SYS_HOST_STAR)
 	setenv CXXFLAGS    -64
 	setenv CFLAGS      -64
 	setenv FFLAGS     "-64 -Nn20000 -O2"
-	setenv LDFLAGS    "-64 -shared -all"
+	setenv F_EXTENDED  -extend_source
+	setenv LDFLAGS    "-64 -shared"
 	setenv LD_LIBS    "-lXext -lm"
 	    setenv OPSYS IRIX64_64
     breaksw
@@ -163,9 +187,27 @@ switch ($SYS_HOST_STAR)
 #   breaksw
     case "sun4m_55":
 #  ====================
-	setenv FFLAGS     "-PIC -Nl100 -Nx1000 -Nq1500"
+#	setenv FFLAGS     "-PIC -Nl100 -Nx1000 -Nq1500"
+#	setenv LDFLAGS     -G
+#	setenv LD_LIBS     -ldl
+#    breaksw
+    case "sun4x_55":
+#  ====================
+    case "sun4x_56":
+#  ====================
+	setenv CPPFLAGS   "-DSUN -DSOLARIS -Dsun"
+	setenv FFLAGS     "-xl -PIC -w"
+	setenv F_EXTENDED  -e
+	setenv CC           gcc
+	setenv CFLAGS     "-ansi -fpic -fPIC -w"
+	setenv CXX         g++
+	setenv CXXFLAGS    -w
+	setenv LD          $CXX
 	setenv LDFLAGS     -G
-	setenv LD_LIBS     -ldl
+	setenv LD_LIBS    "-L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib -lM77 -lF77 -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb"
+#                                                                                    -lsunmath 
+	setenv CC_LIBS    " -L/usr/ucblib -R/usr/ucblib -lm -ldl -lform -lmalloc"
+	setenv STAR_LD_LIBRARY_PATH "/usr/openwin/lib:/vol/pub/netscape-4.0/lib:/usr/dt/lib:/opt/SUNWspro/lib"
     breaksw
     case "sunx86_55":
 #  ====================
@@ -182,3 +224,12 @@ switch ($SYS_HOST_STAR)
 	    setenv OPSYS UNKNOWN
     breaksw
 endsw
+if ($?LD_LIBRARY_PATH == 0) setenv LD_LIBRARY_PATH "$STAR_LD_LIBRARY_PATH" 
+if ( (`echo $LD_LIBRARY_PATH | awk '{print index($0,"/afs/rhic/star/packages")}' `) == 0 ) then
+	setenv LD_LIBRARY_PATH "$STAR_LD_LIBRARY_PATH":"$LD_LIBRARY_PATH"
+endif
+unset STAR_LD_LIBRARY_PATH
+
+
+
+

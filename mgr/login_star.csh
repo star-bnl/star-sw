@@ -1,5 +1,8 @@
 #!/bin/csh
 #  $Log: login_star.csh,v $
+#  Revision 1.2  1998/02/10 00:06:10  fisyak
+#  SL98a second version
+#
 #  Revision 1.1  1998/01/31 23:32:53  fisyak
 #  New Environment variables
 #
@@ -11,7 +14,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/01/31 23:32:53 $ 
+#             Last modification $Date: 1998/02/10 00:06:10 $ 
 # login_star.csh
 #------------------------------------------------------------------#
 # This script will set up the STAR enviroment.                     #
@@ -20,7 +23,7 @@
 umask 002
 set ECHO = 1
 if ($?LEVEL_STAR == 0) setenv LEVEL_STAR dev
-if (($?ROOT_STAR == 1) || ($?prompt == 0)) set ECHO = 0 
+if (($?STAR == 1) || ($?prompt == 0)) set ECHO = 0 
 #
 #       determine the processor architecture...
 #
@@ -30,16 +33,17 @@ set hostname_command = "hostname"
 # Setting some STAR variables
 #
 ########################################################################
-                                                  if ($ECHO) cat    /afs/rhic/star/login/logo 
-setenv DIR_STAR  /afs/rhic/star/packages;         if ($ECHO) echo   "Setting up DIR_STAR  = $DIR_STAR"
-setenv VERSION_STAR `ls -l $DIR_STAR | grep "${LEVEL_STAR} ->" |cut -f2 -d">"`                                                 
-setenv ROOT_STAR $DIR_STAR/dev;                   if ($ECHO) echo   "Setting up ROOT_STAR = $ROOT_STAR"
-source $ROOT_STAR/mgr/SYS_STAR;    
-setenv LIB_STAR  $ROOT_STAR/lib/${SYS_HOST_STAR}; if ($ECHO) echo   "Setting up LIB_STAR  = $LIB_STAR"
-setenv BIN_STAR  $ROOT_STAR/bin/${SYS_HOST_STAR}; if ($ECHO) echo   "Setting up BIN_STAR  = $BIN_STAR"
-setenv PAMS_STAR $ROOT_STAR/pams;                 if ($ECHO) echo   "Setting up PAMS_STAR = $PAMS_STAR"
-setenv CVSROOT   $DIR_STAR/repository;            if ($ECHO) echo   "Setting up CVSROOT   = $CVSROOT"
-#setenv STAR_REF  /afs/rhic/star/starlib/ref;      if ($ECHO) echo   "Setting up STAR_REF  = $STAR_REF"
+                                             if ($ECHO) cat    /afs/rhic/star/login/logo 
+setenv DIR_STAR  /afs/rhic/star/packages;    if ($ECHO) echo   "Setting up DIR_STAR  = $DIR_STAR"
+setenv VERSION_STAR `ls -l $DIR_STAR | grep "${LEVEL_STAR} ->" |cut -f2 -d">"`  
+setenv STAR $DIR_STAR/dev;                   if ($ECHO) echo   "Setting up STAR = $STAR"
+source $STAR/mgr/SYS_STAR;    
+setenv LIB_STAR  $STAR/lib/${SYS_HOST_STAR}; if ($ECHO) echo   "Setting up LIB_STAR  = $LIB_STAR"
+setenv BIN_STAR  $STAR/bin/${SYS_HOST_STAR}; if ($ECHO) echo   "Setting up BIN_STAR  = $BIN_STAR"
+setenv PAMS_STAR $STAR/pams;                 if ($ECHO) echo   "Setting up PAMS_STAR = $PAMS_STAR"
+setenv CVSROOT   $DIR_STAR/repository;       if ($ECHO) echo   "Setting up CVSROOT   = $CVSROOT"
+if ($?STAR_REF == 0) setenv STAR_REF  /afs/rhic/star/starlib/ref;      
+                                             if ($ECHO) echo   "Setting up STAR_REF  = $STAR_REF"
 #
 # Setting WWW STAR homepage
 #
@@ -49,21 +53,22 @@ setenv WWW_HOME "http://www.rhic.bnl.gov/STAR/star.html"
 #       if CERN setup is not done, then do it...
 #
 ########################################################################
-if ($?CERN == 1) unsetenv CERN
-if ($?CERN_LEVEL == 0) then
-  setenv CERN_LEVEL pro
-endif
-if ($?CERN == 0) then 
-    if ($ECHO) echo  "Setting up CERN CERN_LEVEL = $CERN_LEVEL "
+if ($?CERN_ROOT == 0) then
+  if ($?CERN_LEVEL == 0) then
+    setenv CERN_LEVEL pro
+  endif
+  if ($?CERN == 1)  unsetenv CERN
+  if ($ECHO) echo  "Setting up CERN CERN_LEVEL = $CERN_LEVEL "
+    
     setenv CERN /afs/bnl.gov/cern/$SYS_STAR/cern
     setenv MGRTMP $CERN/$CERN_LEVEL/mgr
-    if ( -e $MGRTMP/plienv.csh ) then
+  if ( -e $MGRTMP/plienv.csh ) then
 	# Try to detect if plienv.csh is already executed
 	if ( (`echo $PATH | awk '{print index($0,"/cern/pro/bin")}' `) == 0 ) then
         	if ($ECHO) echo "Executing $MGRTMP/plienv.csh..."
         	source $MGRTMP/plienv.csh
 	endif
-    else
+  else
         if ($ECHO) echo "$MGRTMP/plienv.csh not found, CERN cernlib setup."
         setenv CERN /afs/cern.ch/asis/$SYS_STAR/cern
         if ( -e $CERN/NEW ) then
@@ -79,13 +84,12 @@ if ($?CERN == 0) then
 #       setenv PATH `dropit cern`
         setenv PATH "$CERN_ROOT/mgr:$CERN_ROOT/bin:$PATH"
 #        if ($ECHO) echo "$MGRTMP/plienv.csh not found, no CERN setup."
-    endif
+  endif
 endif
-
 #
 # set path for STAR make utility
 ##########################################################################
-if ($?MGR_STAR == 0) setenv MGR_STAR $ROOT_STAR/mgr
+if ($?MGR_STAR == 0) setenv MGR_STAR $STAR/mgr
 #
 # set library path. Try to detect if STAR_LD_LIBRARY_PATH already included
 #
@@ -94,7 +98,7 @@ if ($?MGR_STAR == 0) setenv MGR_STAR $ROOT_STAR/mgr
 # set manpath. Try to detect if the MANPATH_STAR already included 
 #
 ###########################################################################
-set MANPATH_STAR = "$ROOT_STAR/man:/usr/afsws/man:/afs/rhic/local/man:/usr/local/man:/usr/man"
+set MANPATH_STAR = "$STAR/man:/usr/afsws/man:/afs/rhic/local/man:/usr/local/man:/usr/man"
 if ($?MANPATH == 0) setenv MANPATH "$MANPATH_STAR"
 if ( (`echo $MANPATH | awk '{print index($0,"/afs/rhic/star/man")}' `) == 0 ) then
         setenv MANPATH "$MANPATH_STAR":"$MANPATH"
@@ -105,18 +109,18 @@ unset MANPATH_STAR
 # set path. Try to detect if the STAR_PATH already included
 #
 ###########################################################################
-set STAR_PATH = "/usr/afsws/bin:/usr/afsws/etc:/opt/rhic/bin:/afs/rhic/local/bin:/usr/local/bin:$ROOT_STAR/mgr:$BIN_STAR"
+set STAR_PATH = "/usr/afsws/bin:/usr/afsws/etc:/opt/rhic/bin:/afs/rhic/local/bin:/usr/local/bin:$STAR/mgr:$BIN_STAR"
 # check for /usr/ccs/bin/ld
 if ( -e /usr/ccs/bin/ld ) set STAR_PATH = ( $STAR_PATH':'/usr/ccs/bin /usr/ccs/lib )
-if ( (`echo $PATH | awk '{print index($0,"/afs/rhic/star/bin")}' `) == 0 ) then
+if ( (`echo $PATH | awk '{print index($0,"/afs/rhic/star/packages")}' `) == 0 ) then
         setenv PATH "$STAR_PATH":"$PATH"
 endif
 unset STAR_PATH
-if ( -e $ROOT_STAR/mgr/init_star.csh) source $ROOT_STAR/mgr/init_star.csh
+if ( -e $STAR/mgr/init_star.csh) source $STAR/mgr/init_star.csh
 if ($ECHO) echo   "STAR library version "$VERSION_STAR" has been initiated"
 if ($ECHO) echo   "with `which staf++`"
 unset ECHO
-alias makes "make -f $ROOT_STAR/mgr/Makefile"
-alias maken "make -f $ROOT_STAR/mgr/Makefile.new MAKEFILE=$ROOT_STAR/mgr/Makefile.new"
+alias makes "make -f $STAR/mgr/Makefile"
+
 
 
