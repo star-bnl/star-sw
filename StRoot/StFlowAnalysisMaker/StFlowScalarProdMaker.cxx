@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowScalarProdMaker.cxx,v 1.11 2003/09/02 17:58:11 perev Exp $
+// $Id: StFlowScalarProdMaker.cxx,v 1.12 2004/12/09 23:47:10 posk Exp $
 //
 // Authors: Method proposed by Art and Sergei, code written by Aihong
 //          Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -98,12 +98,10 @@ Int_t StFlowScalarProdMaker::Init() {
 
   // for each selection
   for (int k = 0; k < Flow::nSels; k++) {
-    char countSels[2];
-    sprintf(countSels,"%d",k+1);
 
     // resolution
     histTitle = new TString("Flow_Res_ScalarProd_Sel");
-    histTitle->Append(*countSels);
+    *histTitle += k+1;
     histFull[k].mHistRes = new TProfile(histTitle->Data(), histTitle->Data(),
       Flow::nHars, 0.5, (float)(Flow::nHars) + 0.5, -1.*FLT_MAX, FLT_MAX, "");
     histFull[k].mHistRes->SetXTitle("Harmonic");
@@ -112,7 +110,7 @@ Int_t StFlowScalarProdMaker::Init() {
 
     // vObs
     histTitle = new TString("Flow_vObs_ScalarProd_Sel");
-    histTitle->Append(*countSels);
+    *histTitle += k+1;
     histFull[k].mHist_vObs = new TProfile(histTitle->Data(), histTitle->Data(),
       Flow::nHars, 0.5, (float)(Flow::nHars) + 0.5, -10000., 10000., "");
     histFull[k].mHist_vObs->SetXTitle("Harmonic");
@@ -121,14 +119,12 @@ Int_t StFlowScalarProdMaker::Init() {
     
     // for each harmonic
     for (int j = 0; j < Flow::nHars; j++) {
-      char countHars[2];
-      sprintf(countHars,"%d",j+1);
 
       // Flow observed
       histTitle = new TString("Flow_vObs2D_ScalarProd_Sel");
-      histTitle->Append(*countSels);
+      *histTitle += k+1;
       histTitle->Append("_Har");
-      histTitle->Append(*countHars);
+      *histTitle += j+1;
       histFull[k].histFullHar[j].mHist_vObs2D =	new TProfile2D(histTitle->Data(),
         histTitle->Data(), mNEtaBins, mEtaMin, mEtaMax, nPtBinsPart, 
 		 Flow::ptMin, ptMaxPart, -10000., 10000., "");
@@ -138,9 +134,9 @@ Int_t StFlowScalarProdMaker::Init() {
 
       // Flow observed profiles
       histTitle = new TString("Flow_vObsEta_ScalarProd_Sel");
-      histTitle->Append(*countSels);
+      *histTitle += k+1;
       histTitle->Append("_Har");
-      histTitle->Append(*countHars);
+      *histTitle += j+1;
       histFull[k].histFullHar[j].mHist_vObsEta = new TProfile(histTitle->Data(),
         histTitle->Data(), mNEtaBins, mEtaMin, mEtaMax, 
 							      -10000., 10000., "");
@@ -149,9 +145,9 @@ Int_t StFlowScalarProdMaker::Init() {
       delete histTitle;
 
       histTitle = new TString("Flow_vObsPt_ScalarProd_Sel");
-      histTitle->Append(*countSels);
+      *histTitle += k+1;
       histTitle->Append("_Har");
-      histTitle->Append(*countHars);
+      *histTitle += j+1;
       histFull[k].histFullHar[j].mHist_vObsPt = new TProfile(histTitle->Data(),
         histTitle->Data(), nPtBinsPart, Flow::ptMin, ptMaxPart, -10000., 10000., "");
       histFull[k].histFullHar[j].mHist_vObsPt->SetXTitle("Pt (GeV/c)");
@@ -162,7 +158,7 @@ Int_t StFlowScalarProdMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowScalarProd", 2);
-  gMessMgr->Info("##### FlowScalarProdAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.11 2003/09/02 17:58:11 perev Exp $");
+  gMessMgr->Info("##### FlowScalarProdAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.12 2004/12/09 23:47:10 posk Exp $");
 
   return StMaker::Init();
 }
@@ -285,12 +281,10 @@ Int_t StFlowScalarProdMaker::Finish() {
   cout << endl << "##### Scalar Product Maker:" << endl;
 
   for (int k = 0; k < Flow::nSels; k++) {
-    char countSels[2];
-    sprintf(countSels,"%d",k+1);
 
     // Create the 1D v histogram
     histTitle = new TString("Flow_v_ScalarProd_Sel");
-    histTitle->Append(*countSels);
+    *histTitle += k+1;
     histFull[k].mHist_v = 
       histFull[k].mHist_vObs->ProjectionX(histTitle->Data());
     histFull[k].mHist_v->SetTitle(histTitle->Data());
@@ -300,8 +294,6 @@ Int_t StFlowScalarProdMaker::Finish() {
     AddHist(histFull[k].mHist_v);
 
     for (int j = 0; j < Flow::nHars; j++) {
-      char countHars[2];
-      sprintf(countHars,"%d",j+1);
 
       //Calculate the resolution
       mRes[k][j]    = ::sqrt(histFull[k].mHistRes->GetBinContent(j+1))*2.;
@@ -309,9 +301,9 @@ Int_t StFlowScalarProdMaker::Finish() {
 
       // Create the v 2D histogram
       histTitle = new TString("Flow_v2D_ScalarProd_Sel");
-      histTitle->Append(*countSels);
+      *histTitle += k+1;
       histTitle->Append("_Har");
-      histTitle->Append(*countHars);
+      *histTitle += j+1;
       histFull[k].histFullHar[j].mHist_v2D = 
 	histFull[k].histFullHar[j].mHist_vObs2D->ProjectionXY(histTitle->Data());
       histFull[k].histFullHar[j].mHist_v2D->SetTitle(histTitle->Data());
@@ -323,9 +315,9 @@ Int_t StFlowScalarProdMaker::Finish() {
 
       // Create the 1D v histograms
       histTitle = new TString("Flow_vEta_ScalarProd_Sel");
-      histTitle->Append(*countSels);
+      *histTitle += k+1;
       histTitle->Append("_Har");
-      histTitle->Append(*countHars);
+      *histTitle += j+1;
       histFull[k].histFullHar[j].mHist_vEta = 
 	histFull[k].histFullHar[j].mHist_vObsEta->ProjectionX(histTitle->Data());
       histFull[k].histFullHar[j].mHist_vEta->SetTitle(histTitle->Data());
@@ -335,9 +327,9 @@ Int_t StFlowScalarProdMaker::Finish() {
       AddHist(histFull[k].histFullHar[j].mHist_vEta);
 
       TString* histTitle = new TString("Flow_vPt_ScalarProd_Sel");
-      histTitle->Append(*countSels);
+      *histTitle += k+1;
       histTitle->Append("_Har");
-      histTitle->Append(*countHars);
+      *histTitle += j+1;
       histFull[k].histFullHar[j].mHist_vPt = 
 	histFull[k].histFullHar[j].mHist_vObsPt->ProjectionX(histTitle->Data());
       histFull[k].histFullHar[j].mHist_vPt->SetTitle(histTitle->Data());
@@ -408,6 +400,10 @@ void StFlowScalarProdMaker::SetHistoRanges(Bool_t ftpc_included) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowScalarProdMaker.cxx,v $
+// Revision 1.12  2004/12/09 23:47:10  posk
+// Minor changes in code formatting.
+// Added hist for TPC primary dca to AnalysisMaker.
+//
 // Revision 1.11  2003/09/02 17:58:11  perev
 // gcc 3.2 updates + WarnOff
 //
