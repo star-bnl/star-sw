@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.30 2001/12/21 04:54:46 porter Exp $
+ * $Id: StDbTable.cc,v 1.31 2002/01/30 15:40:48 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.31  2002/01/30 15:40:48  porter
+ * changed limits on flavor tag & made defaults retrieving more readable
+ *
  * Revision 1.30  2001/12/21 04:54:46  porter
  * sped up table definition for emc and changed some ostrstream usage for
  * insure tests
@@ -134,6 +137,9 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.31  2002/01/30 15:40:48  porter
+ * changed limits on flavor tag & made defaults retrieving more readable
+ *
  * Revision 1.30  2001/12/21 04:54:46  porter
  * sped up table definition for emc and changed some ostrstream usage for
  * insure tests
@@ -277,13 +283,13 @@ ClassImp(StDbTable)
 ///////////////////////////////////////////////////////////////
 StDbTable::StDbTable(const char* tableName): StDbNode(tableName) { init();};
 
-StDbTable::StDbTable(const char* tableName, int schemaID): StDbNode(tableName) {  mschemaID=schemaID; }
+StDbTable::StDbTable(const char* tableName, int schemaID): StDbNode(tableName) {  init(); mschemaID=schemaID; }
 
 
 StDbTable::StDbTable(StDbTable& table): StDbNode(table) {
 
  init();
- strncpy(mflavor,table.getFlavor(),sizeof(mflavor));
+ mflavor=table.getFlavor();
  mdefaultFlavor = table.defaultFlavor();
  mprodTime = table.getProdTime();
 
@@ -312,6 +318,7 @@ StDbTable::StDbTable(StDbTable& table): StDbNode(table) {
 }
 
 void StDbTable::init() {
+ mflavor            = 0;
  mstructName        = 0; 
  melementName       = 0;
  mdataTable         = 0; 
@@ -360,11 +367,16 @@ StDbTable::setDefaultFlavor(){ setFlavor(StDbDefaults::Instance()->printFlavor()
 }
 
 /////////////////////////////////////////////////////////////////////
-void 
-StDbTable::setFlavor(const char* flavor) { 
-  if(flavor) strcpy(mflavor,flavor);  
+void  StDbTable::setFlavor(const char* flavor) { 
+  if(!flavor) return;
+  if(mflavor) delete [] mflavor;
+  mflavor=new char[strlen(flavor)+1];
+  strcpy(mflavor,flavor);  
   mdefaultFlavor = StDbDefaults::Instance()->IsDefaultFlavor(mflavor);
 }
+
+char* StDbTable::getFlavor() { return mstrDup(mflavor); }
+
 
 /////////////////////////////////////////////////////////////////////
 void
@@ -514,18 +526,20 @@ StDbTable::createMemory(int nrows) {
   if(mdescriptor && mdescriptor->getNumElements()>0){
     //     if(mrows==0) mrows = 1;
      int len = mrows*mdescriptor->getTotalSizeInBytes();
-     if(mdata)delete [] mdata;
-     mdata=new char[len];
-     memset(mdata,0,len);
-     int max = mdescriptor->getNumElements();
-     char* name;
-     StTypeE type;
-     unsigned int length;
-     char * ptr;
-     for(int i=0; i<max;i++){
-       getElementSpecs(i,ptr,name,length,type);
-       if(type==Stchar)ptr='\0';
-       delete [] name;
+     if(len>0){
+      if(mdata)delete [] mdata;
+      mdata=new char[len];
+      memset(mdata,0,len);
+      int max = mdescriptor->getNumElements();
+      char* name;
+      StTypeE type;
+      unsigned int length;
+      char * ptr;
+      for(int i=0; i<max;i++){
+        getElementSpecs(i,ptr,name,length,type);
+        if(type==Stchar)ptr='\0';
+        delete [] name;
+      }
      }
   } else {
     if(!mname){mname=mstrDup("Unknown");}

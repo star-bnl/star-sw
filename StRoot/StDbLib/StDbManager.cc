@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManager.cc,v 1.27 2001/01/22 18:37:55 porter Exp $
+ * $Id: StDbManager.cc,v 1.28 2002/01/30 15:40:47 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.28  2002/01/30 15:40:47  porter
+ * changed limits on flavor tag & made defaults retrieving more readable
+ *
  * Revision 1.27  2001/01/22 18:37:55  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -183,7 +186,7 @@ StDbManager::printInfo(const char* m1, const char* m2, StDbMessLevel ml, int lin
    ostrstream ms;
    ms<<m1<<" "<<m2<<ends;
    printInfo(ms.str(),ml,lineNumber,className,methodName);
-   delete ms.str();
+   ms.freeze(0);
    return 0;
 }
 
@@ -206,3 +209,13 @@ StDbManager::setUser(const char* userName, const char* pWord){
    mpWord = mstringDup(pWord);
   }
 }
+
+
+
+
+
+
+
+
+
+

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.19 2001/12/05 17:16:35 porter Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.20 2002/01/30 15:40:48 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.20  2002/01/30 15:40:48  porter
+ * changed limits on flavor tag & made defaults retrieving more readable
+ *
  * Revision 1.19  2001/12/05 17:16:35  porter
  * stand-alone make file no longer had "DLINUX" in compile but this is still needed
  * and returned. Also retrieve elementID list  in query by whereClause for plotting
@@ -131,6 +134,7 @@ StDbTableDescriptor::StDbTableDescriptor(int structID, int schemaID){
 void
 StDbTableDescriptor::init(){
 
+mtableSize=0;
 mCur = 0;
 mMax = 100;
 offsetToNextEmptyByte = 0;

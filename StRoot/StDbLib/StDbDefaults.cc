@@ -17,44 +17,21 @@ StDbDefaults::StDbDefaults(){
 }
 
 ////////////////////////////////////////////////////////////////////
-char*
-StDbDefaults::getServerFileName(const dbFindServerMode mode){
+char* StDbDefaults::getServerFileName(const dbFindServerMode mode){
 
-  char* retVal=0;
-  switch (mode) {
-  case userHome:
-    {
-      retVal=getFileName("HOME");
-      break;
-    }
-  case serverEnvVar:
-    {
-      retVal=getFileName(mdbServerVar);
-      break;
-    }
-  case starDefault:
-    {
-      retVal=getFileName("STAR");
-      break;
-    }
-  default:
-    {
-      retVal=getFileName("STAR");
-      break;
-    }
-  }
+  if(mode==userHome) return getFileName("HOME");
+  if(mode==serverEnvVar) return getFileName(mdbServerVar);
+  if(mode==starDefault) return getFileName("STAR");
 
-  return retVal;
+  return NULL;
 };
 
-////////////////////////////////////////////////////////////////////
 
-char*
-StDbDefaults::getFileName(const char* fileName){
+////////////////////////////////////////////////////////////////////
+char* StDbDefaults::getFileName(const char* fileName){
 
   char* nullReturn=0;
   if(!fileName) return nullReturn;
-
  
   ostrstream fn;
 
@@ -70,9 +47,13 @@ StDbDefaults::getFileName(const char* fileName){
     fn<<ends;
   }
 
-  char* retVal= new char[strlen(fn.str())+1];
-  strcpy(retVal,fn.str());
+  char* tmpString = fn.str();
+  char* retVal= new char[strlen(tmpString)+1];
+  strcpy(retVal,tmpString);
   fn.freeze(0);
 
   return retVal;
 }
+
+
+

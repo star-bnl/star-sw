@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbServerImpl.cc,v 1.2 2001/02/08 23:23:56 porter Exp $
+ * $Id: StDbServerImpl.cc,v 1.3 2002/01/30 15:40:48 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbServerImpl.cc,v $
+ * Revision 1.3  2002/01/30 15:40:48  porter
+ * changed limits on flavor tag & made defaults retrieving more readable
+ *
  * Revision 1.2  2001/02/08 23:23:56  porter
  * fixed initialization of schemaID in table & fixed some warnings when
  * compiled with NODEBUG
@@ -43,7 +46,7 @@ StDbServerImpl::StDbServerImpl(const char* name, const char* host, const char* s
 
 StDbServerImpl::StDbServerImpl(StDbServerImpl& server) :  StDbServer(server), mcurrentDb(0){}
 
-StDbServerImpl::~StDbServerImpl() { deleteDataBases(); }
+StDbServerImpl::~StDbServerImpl() {   deleteDataBases(); }
 
 ////////////////////////////////////////////////////
 

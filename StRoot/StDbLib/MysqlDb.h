@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.14 2001/10/24 04:05:08 porter Exp $
+ * $Id: MysqlDb.h,v 1.15 2002/01/30 15:40:47 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.15  2002/01/30 15:40:47  porter
+ * changed limits on flavor tag & made defaults retrieving more readable
+ *
  * Revision 1.14  2001/10/24 04:05:08  porter
  * added long long type to I/O and got rid of obsolete dataIndex table
  *
@@ -121,7 +124,7 @@ public:
   //virtual void Set(const MYSQL_RES *aPnt) {mRes=aPnt;};
   virtual unsigned NbRows () {return mysql_num_rows(mRes);};
   virtual unsigned NbFields () {return mysql_num_fields(mRes);};
-  virtual void Release () {mysql_free_result(mRes);mRes=0;};
+  virtual void Release () {if(mRes)mysql_free_result(mRes);mRes=0;};
   MysqlResult &operator++() {mRow=mysql_fetch_row(mRes);return *this;};
   //  MysqlResult &operator >>(char *aString);
 

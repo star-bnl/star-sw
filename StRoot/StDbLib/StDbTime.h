@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTime.h,v 1.4 2000/02/15 20:27:45 porter Exp $
+ * $Id: StDbTime.h,v 1.5 2002/01/30 15:40:48 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbTime.h,v $
+ * Revision 1.5  2002/01/30 15:40:48  porter
+ * changed limits on flavor tag & made defaults retrieving more readable
+ *
  * Revision 1.4  2000/02/15 20:27:45  porter
  * Some updates to writing to the database(s) via an ensemble (should
  * not affect read methods & haven't in my tests.
@@ -58,20 +61,26 @@ char* mdateTime;
                                          strcpy(mdateTime,dtime);
                                          } else {mdateTime=0;}};
 
-
-  virtual ~StDbTime() { if(mdateTime) delete [] mdateTime; }
+  StDbTime(StDbTime& time)  { munixTime=0; mdateTime=0;
+  if(time.mdateTime){
+    mdateTime=new char[strlen(time.mdateTime)+1];
+    strcpy(mdateTime,time.mdateTime);
+  }
+  munixTime=time.munixTime;
+  }
+  ~StDbTime() { if(mdateTime) delete [] mdateTime; }
 
   void setUnixTime(unsigned int utime) { munixTime = utime;}
-  virtual void setDateTime(const char* dtime) { if(!dtime) return;
+  void setDateTime(const char* dtime) { if(!dtime) return;
                                   if(mdateTime) delete [] mdateTime;
                                   mdateTime=new char[strlen(dtime)+1]; 
                                   strcpy(mdateTime,dtime); };
 
-  virtual void setTime(unsigned int utime, const char* dtime){ 
+  void setTime(unsigned int utime, const char* dtime){ 
                                              setUnixTime(utime);
                                              setDateTime(dtime);}
   unsigned int getUnixTime() { return munixTime; }
-  virtual char* getDateTime(){ return mdateTime; }
+  char* getDateTime(){ return mdateTime; }
 
 };
 
