@@ -17,18 +17,15 @@ class TCanvas;
 class TShape;
 class TVolume;
 class StiDrawable;
-class TPolyMarker3D;
-class StiTPolyMarker3D;
 
 class StiDisplayManager
 {
 public:
-
-	typedef map<string, StiDrawable*> stidrawablemap;
+    typedef multimap<string, StiDrawable*> stidrawablemap;
     typedef stidrawablemap::value_type stiDrawableMapValType;
     
     virtual ~StiDisplayManager();
-
+    
     //Singleton access
     static StiDisplayManager* instance();
     static void kill();
@@ -60,7 +57,7 @@ private:
     static StiDisplayManager* sinstance;
 
     //dx, dy, and dz define the volume within which objects are drawn.  The volume is a rectangle of lengths 2*dx, 2*dy, 2*dz
-    enum StiCanvasSize {kXmin=200, kXmax=800, kYmin=100, kYmax=700};
+    enum StiCanvasSize {kXmin=200, kXmax=600, kYmin=100, kYmax=500};
     enum StiMainVolumeSize {kdx=200, kdy=200, kdz=240};
     
     StiDisplayManager();
@@ -71,7 +68,6 @@ private:
     TCanvas* mcanvas;
     TShape* mzone;
     TVolume* mnode;
-    StiTPolyMarker3D* poly;
 
 };
 
