@@ -1,27 +1,29 @@
 macro make_overlapped_event _
-   N=10 _
+   N=100 _
    dir=/star/data/akio/ _
    input_file=pythia_pp_jet_10gev.fzd _
    background_file=pythia_pp_minbias.fzd _
-   output_file=pythia_pp_jet_10gev_with_overlap_full_L.xdf
+ output_file=pythia_pp_jet_10gev_with_overlap_noback.xdf
+* output_file=pythia_pp_jet_10gev_with_overlap_full_L.xdf
 * output_file=pythia_pp_jet_10gev_with_overlap_design_L.xdf
    
    debug on
 * trace on
    
    gfile PZ [dir][input_file]
-   gfile BZ [dir][background_file]
+*   gfile BZ [dir][background_file]
    
 ***** For "FULL" luminosity
- mode TPCE back 4001400
- mode SVTT back  90190
- mode FTPC back 2001200
- gback 400 400 1.0 100 5
+* mode TPCE back 4001400
+* mode SVTT back  90190
+* mode FTPC back 2001200
+* gback 400 400 1.0 100 5
 ***** For "design" luminosity
 * mode TPCE back 2001200
 * mode SVTT back  45145
 * mode FTPC back 1001100
 * gback 200 200 0.1 200 5
+***** For no back ground
  
    make sim/g2t    
    
@@ -39,3 +41,8 @@ macro make_overlapped_event _
    cd /dui/Event; ls
 
  return
+
+
+
+
+
