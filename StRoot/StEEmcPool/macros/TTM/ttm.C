@@ -13,29 +13,27 @@ class EEmcTower;
 class EEmcTTMatch;
 class EEmcTTMMaker;
 
-StChain       *chain=0;
-EEmcTTMMaker  *ttm  =0;
-StMuDstMaker  *muDstMaker= 0;
+StChain       *chain  = 0;
+EEmcTTMMaker  *ttmMk  = 0;
+StMuDstMaker  *muDstMk= 0;
 
 void
 ttm
 (
- char*  inpDir    = "",                // MuDST directory
- char*  inpFile   = "ttm093.lis",      // MuDST file(s);                      
- char*  outFile   = "ttm093.ndst.root",// output nano dst root file
- Int_t  nFiles    = 75,                // # of MuDST file(s)
- Int_t  nEvents   = -1,                // # of events
- Int_t timeStamp  = 20040331           // format: yyyymmdd
+ char*  inpDir    = "",             // MuDST directory
+ char*  inpFile   = "ttm.lis",      // MuDST file(s);                      
+ char*  outFile   = "ttm.ndst.root",// output nano dst root file
+ Int_t  nFiles    = 150,            // # of MuDST file(s)
+ Int_t  nEvents   = -1		    // # of events
  )
   // NOTES: 
   // 1. StEEmcDbMaker has some limitations so beware of the following
   // ( complaints to appropriate autors) 
   // * StEEmcDbMaker works _only_ for single run , so make sure that
-  //   your *.lis containf files for one run only, otherwise it will crash like Windoza
-  // * remember to adjust dbase timestamp above to match your runs as iStEEmcDbMaker 
-  //   is unable (as of Apr 2004) to read timestamp off a muDST file, what a .....
-  // 2. EEmcTTMMaker main "product" is a list of EEmcTTMatch'es which in turn are 
-  //   EEmcTower plus a list of StMuTrack's that fullfill certain criteria. 
+  //   your *.lis containf files for one run only, otherwise it will crash 
+  //   like Windoza
+  // 2. EEmcTTMMaker main "product" is a list of EEmcTTMatch'es which in turn 
+  //   are EEmcTower plus a list of StMuTrack's that fullfill certain criteria. 
 { 
   // load root/root4star libraries
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
@@ -51,38 +49,36 @@ ttm
   gSystem->Load("StEEmcPoolTTM");
   
   // turn on profiling
-  //gSystem->Setenv("JPROF_FLAGS", "JP_START JP_PERIOD=0.001"); 
-  //gSystem->Load("libJprof"); 
+  gSystem->Setenv("JPROF_FLAGS", "JP_START JP_PERIOD=0.001"); 
+  gSystem->Load("libJprof"); 
   // % jprof `which root4star` jprof-log >jprof.html 
 
   // create the chain    
   chain = new StChain("StChain"); 
   
   // now we add Makers to the chain...  some of that is black magic to me :) 
-  muDstMaker = new StMuDstMaker(0,0,inpDir,inpFile,"",nFiles);  // muDST main chain
-  StMuDbReader  *db          = StMuDbReader::instance();        // need the database
-  StEEmcDbMaker *eemcDbMaker = new StEEmcDbMaker("eemcDb");     // need EEMC database  
-  St_db_Maker   *dbMk        = new St_db_Maker("StarDb", "MySQL:StarDb"); // need more db?
+  muDstMk = new StMuDstMaker(0,0,inpDir,inpFile,"",nFiles); // main chain
+  StMuDbReader  *db       = StMuDbReader::instance();       // the database
+  StEEmcDbMaker *eemcDbMk = new StEEmcDbMaker("eemcDb");    // EEMC database 
+  St_db_Maker   *dbMk     = new St_db_Maker("StarDb", "MySQL:StarDb"); // more?
 
   // now comment in/out/change the below if you want it your way
-  eemcDbMaker->setSectors(1,12);           // request sectors you need (default:1-12)
-  eemcDbMaker->setTimeStampDay(timeStamp); // format: yyyymmdd
-  eemcDbMaker->setPreferedFlavor("onlped","eemcPMTped"); // request alternative db flavor 
+  eemcDbMk->setPreferedFlavor("onlped","eemcPMTped"); // alternative flavor 
 
   // finally after so many lines we arrive at the good stuff
-  ttm = new  EEmcTTMMaker ("TTM",muDstMaker,eemcDbMaker);
-  ttm->SetFileName(outFile);
+  ttmMk = new  EEmcTTMMaker ("TTM",muDstMk,eemcDbMk);
+  ttmMk->SetFileName(outFile);
   //ttm->WriteTree(false);
   // have cuts your way (optional)
-  ttm->SetMaxCTBSum(1000); 
-  ttm->SetMinTrackLength(20.0);
-  ttm->SetMinTrackHits(5);
-  ttm->SetMinTrackPt(0.5);
-  ttm->SetMinTrackEta(0.7);
-  ttm->SetMaxTrackEta(2.2);
-  ttm->SetDeltaEtaCut(0.7); // ! note this is a fraction of tower width in eta
-  ttm->SetDeltaPhiCut(0.7); // ! note this is a fraction of tower width in phi
-  ttm->Summary(cout);       // prints cut summary
+  ttmMk->SetMaxCTBSum(1000); 
+  ttmMk->SetMinTrackLength(20.0);
+  ttmMk->SetMinTrackHits(5);
+  ttmMk->SetMinTrackPt(0.5);
+  ttmMk->SetMinTrackEta(0.7);
+  ttmMk->SetMaxTrackEta(2.2);
+  ttmMk->SetDeltaEtaCut(0.7); // ! note this is a fraction of tower width in eta
+  ttmMk->SetDeltaPhiCut(0.7); // ! note this is a fraction of tower width in phi
+  ttmMk->Summary(cout);       // prints cut summary
 
   StMuDebug::setLevel(0);
   chain->Init();
@@ -103,7 +99,7 @@ ttm
     }
   }
   cerr << endl;
-  ttm->Summary(cerr);
+  ttmMk->Summary(cout);
 }
 
 
