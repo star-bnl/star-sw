@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.3 1999/11/04 13:32:03 ullrich Exp $
+ * $Id: StTrack.h,v 2.4 1999/11/05 15:27:07 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
- * Revision 2.3  1999/11/04 13:32:03  ullrich
- * Added non-const versions of some methods
+ * Revision 2.4  1999/11/05 15:27:07  ullrich
+ * Added non-const versions of several methods
  *
  * Revision 2.6  1999/11/29 17:32:45  ullrich
  * Added non-const method pidTraits().
@@ -61,6 +61,7 @@ public:
     UChar_t                        reconstructionMethod() const;
     StTrackFindingMethod           findingMethod() const;
     StTrackQualityScheme           qualityScheme() const;
+    UShort_t                       encodedMethod() const;
 //    StTrackFindingMethod           findingMethod() const;
 //    StTrackQualityScheme           qualityScheme() const;
     StTrackFittingMethod           fittingMethod() const;
