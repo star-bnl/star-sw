@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.26 2001/07/13 22:53:26 porter Exp $
+ * $Id: StDbTable.cc,v 1.27 2001/08/02 17:37:20 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.27  2001/08/02 17:37:20  porter
+ * fixed problem in fetch by where-clause used in online in StDbSql.cc.
+ * also got rid of warning comparing unsigned int to int.
+ *
  * Revision 1.26  2001/07/13 22:53:26  porter
  * last night's schema-fix was in a switch-case ... I missed one & put it in today
  *
@@ -119,6 +123,10 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.27  2001/08/02 17:37:20  porter
+ * fixed problem in fetch by where-clause used in online in StDbSql.cc.
+ * also got rid of warning comparing unsigned int to int.
+ *
  * Revision 1.26  2001/07/13 22:53:26  porter
  * last night's schema-fix was in a switch-case ... I missed one & put it in today
  *
@@ -766,7 +774,7 @@ float* mfloat; double* mdouble;
         if(!buff->ReadScalar(mchar,commentName))buff->ReadScalar(mchar,name);
         delete [] commentName;
         if(mchar){
-             unsigned int len1=strlen(mchar);
+             int len1=strlen(mchar);
              if(len>len1) len=len1;
              strncpy(ptr,mchar,len);
              delete [] mchar;
