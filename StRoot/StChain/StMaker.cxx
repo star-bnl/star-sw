@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.44 1999/06/11 17:45:57 perev Exp $
+// $Id: StMaker.cxx,v 1.45 1999/06/11 21:50:47 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.45  1999/06/11 21:50:47  perev
+// garb->Delete()
+//
 // Revision 1.44  1999/06/11 17:45:57  perev
 // assert StMaker::Streamer to forbid to write it
 //
@@ -121,7 +124,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.44 1999/06/11 17:45:57 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.45 1999/06/11 21:50:47 perev Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -483,6 +486,8 @@ void StMaker::EndMaker(int ierr)
   if (ierr){};
   St_DataSet *dat = Find(".data");
   if (dat) dat->Pass(ClearDS,0);
+  St_DataSet *gar = Find(".garb");
+  if (gar) gar->Delete();
 
   if (ps[0]) gSystem->Exec(ps);
   
