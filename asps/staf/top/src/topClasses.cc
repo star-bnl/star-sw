@@ -297,7 +297,7 @@ STAFCV_T topCut:: filter(tdmTable * tab1, tdmTable * tab2) {
    if( !DoFilterTable(tab1,tab2,myCutFunction,&orig,&percent) ){
       EML_ERROR(FILTER_FAILURE);
    }
-   printf("Your original table had %d rows.  %d percent of them passed.\n",
+   printf("The original table had %d rows.  %d percent of these passed.\n",
    orig,percent);
    EML_SUCCESS(STAFCV_OK);
 }
@@ -312,7 +312,7 @@ STAFCV_T topCut:: cut(tdmTable * table1) {
    if( !DoCutTable(table1,myCutFunction,&orig,&percent) ){
       EML_ERROR(CUT_FAILURE);
    }
-   printf("Your original table had %d rows.  %d percent of them passed.\n",
+   printf("The original table had %d rows.  %d percent of these passed.\n",
    orig,percent);
    EML_SUCCESS(STAFCV_OK);
 }

@@ -5,3 +5,6 @@
 mytarget:
 	@echo "Put any special make targets in this file."
 #
+##	LDFLAGS += -t -z muldefs
+##	LDFLAGS += -ldl
+#
