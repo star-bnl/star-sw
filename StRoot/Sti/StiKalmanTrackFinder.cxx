@@ -166,6 +166,7 @@ void StiKalmanTrackFinder::findTracks()
         try
         {
           // obtain track seed from seed finder
+static int nCall=0;nCall++;
           track = _trackSeedFinder->findTrack();
           if (!track) break; // no more seeds
           track->find();
@@ -299,6 +300,8 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
 /// Return Ok      if operation was successful
 bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_error, logic_error
 {
+static int nCall=0; nCall++;
+StiKalmanTrackNode::Break(nCall);
 #ifdef TIME_StiKalmanTrackFinder
   StiTimer::fgFindTimer->Start(0);
 #endif  
@@ -319,15 +322,19 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
   int nAdded       = 0;
   int position;
   StiHit * stiHit;
-  double  leadAngle;
+  double  leadAngle,leadRadius;
+  int dirIn = (direction==kOutsideIn);
+
   track = dynamic_cast<StiKalmanTrack *> (t);
   if (!track) throw runtime_error("SKTF::find()\t - ERROR - dynamic_cast<StiKalmanTrack *>  returned 0");
-  leadNode   = track->getLastNode();
+//  leadNode   = track->getLastNode();
+  leadNode = track->getInnOutMostNode(!dirIn,2);
   if (!leadNode) throw runtime_error("SKTF::find() -E- track leadNode ==0");
-  leadDet = leadNode->getDetector();
+  assert(leadNode->isValid());
+  leadDet    = leadNode->getDetector();
   if (!leadDet)  throw runtime_error("SKTF::find() -E- leadDet==0");
-  //leadAngle = leadDet->getPlacement()->getNormalRefAngle();
-  leadAngle = leadDet->getPlacement()->getNormalRefAngle();
+  leadRadius = leadDet->getPlacement()->getNormalRadius();
+  leadAngle  = leadDet->getPlacement()->getNormalRefAngle();
   double xg = leadNode->x_g();
   double yg = leadNode->y_g();
   double projAngle = atan2(yg,xg);
@@ -335,162 +342,164 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
     
   vector<StiDetectorNode*>::const_iterator layer;
   vector<StiDetectorNode*>::const_reverse_iterator rlayer;
-  if (direction==kOutsideIn)
-    {
-      if (debug() > 2) cout <<endl<< "out-in"<<endl;
-      rlayer=_detectorContainer->rbeginRadial(leadDet);      rlayer++;
-    }
-  else
-    {
-      if (debug() > 2) cout <<endl<< "in-out"<<endl;
-      layer=_detectorContainer->beginRadial(leadDet);      layer++;
-    }
+
+  if (dirIn) {
+    if (debug() > 2) cout <<endl<< "out-in"<<endl;
+    rlayer=_detectorContainer->rbeginRadial(leadDet); rlayer++;
+  } else {
+    if (debug() > 2) cout <<endl<< "in-out"<<endl;
+    layer=_detectorContainer->beginRadial(leadDet);    layer++;
+  }
+
   if (debug() > 2) cout <<endl<< "lead node:" << *leadNode<<endl<<"lead det:"<<*leadDet<<endl;
   Int_t reachThePipe = 0;
-  while ( (direction==kOutsideIn)? rlayer!=_detectorContainer->rendRadial() : layer!=_detectorContainer->endRadial() )
+
+  while ((!reachThePipe) && ((dirIn)? rlayer!=_detectorContainer->rendRadial() : layer!=_detectorContainer->endRadial()))
+  {do{//technical do
+#ifdef TIME_StiKalmanTrackFinder
+  StiTimer::fgFindTimer->Start(0);
+#endif  
+    vector<StiDetectorNode*>::const_iterator sector;
+    vector<StiDetector*> detectors;
+    if (debug() > 2) cout << endl<<"lead node:" << *leadNode<<endl<<" lead det:"<<*leadDet;
+
+
+      //find all relevant detectors to visit.
+    sector = (dirIn)? _detectorContainer->beginPhi(rlayer):_detectorContainer->beginPhi(layer);
+    while ( (dirIn)? sector!=_detectorContainer->endPhi(rlayer):sector!=_detectorContainer->endPhi(layer) )
     {
 #ifdef TIME_StiKalmanTrackFinder
   StiTimer::fgFindTimer->Start(0);
 #endif  
-      vector<StiDetectorNode*>::const_iterator sector;
-      vector<StiDetector*> detectors;
-      if (debug() > 2) cout << endl<<"lead node:" << *leadNode<<endl<<" lead det:"<<*leadDet;
-      if (direction==kOutsideIn) 	sector=_detectorContainer->beginPhi(rlayer);
-      else 	sector=_detectorContainer->beginPhi(layer);
+       StiDetector * detector = (*sector)->getData();
+       double angle  = detector->getPlacement()->getNormalRefAngle();
+       double radius = detector->getPlacement()->getNormalRadius();
+       double diff = radius-leadRadius;if (dirIn) diff = -diff;
+//VP       assert(diff>1.e-6);
+       if (diff<-1e-6 && debug()>3) {
+          printf("TrackFinder: Wrong order: (%s).(%g) and (%s).(%g)\n"
+	  ,leadDet->getName().c_str(),leadRadius 
+	  ,detector->getName().c_str(),radius);
+       }
+       
+       
+       Int_t shapeCode = detector->getShape()->getShapeCode();
+       Double_t OpenAngle = ref1;
+       if (shapeCode >= kCylindrical) {
+	 OpenAngle = ((StiCylindricalShape *) detector->getShape())->getOpeningAngle();
+       } else {
+	 if (radius <= 50 && radius>4.2)  OpenAngle = ref1a;
+       }
+       diff = projAngle-angle;
+       if (diff >  M_PI) diff -= 2*M_PI;
+       if (diff < -M_PI) diff += 2*M_PI;
+       diff = fabs(diff);
+       if (diff <= OpenAngle) { detectors.push_back(detector);}
+       ++sector;
+    }
+    int nDets = detectors.size(); 
+    if (debug() > 2 && nDets==0) cout << "no detector of interest on this layer"<<endl;
+    if (!nDets) continue;
+    if (nDets>1) sort(detectors.begin(),detectors.end(),CloserAngle(projAngle) );
+    for (vector<StiDetector*>::const_iterator d=detectors.begin();d!=detectors.end();++d){
+#ifdef TIME_StiKalmanTrackFinder
+  StiTimer::fgFindTimer->Start(0);
+#endif  
+      tDet = *d;
+      if (debug() > 2) {
+	cout << endl<< "target det:"<< *tDet;
+	cout << endl<< "lead angle:" << projAngle*radToDeg 
+	     <<" this angle:" << radToDeg*(*d)->getPlacement()->getNormalRefAngle()<<endl;
+      }
+      //begin tracking here...
+      testNode.reset();
+      testNode.setChi2(1e55);
+      position = testNode.propagate(leadNode,tDet,direction);
 
-      //find all relevant detectors to visit.
-      while ( (direction==kOutsideIn)? sector!=_detectorContainer->endPhi(rlayer):sector!=_detectorContainer->endPhi(layer) )
-	{
-#ifdef TIME_StiKalmanTrackFinder
-  StiTimer::fgFindTimer->Start(0);
-#endif  
-	  StiDetector * detector = (*sector)->getData();
-	  double angle  = detector->getPlacement()->getNormalRefAngle();
-	  double radius = detector->getPlacement()->getNormalRadius();
-	  //double diff = fabs(leadAngle-angle);
-	  Int_t shapeCode = detector->getShape()->getShapeCode();
-	  Double_t OpenAngle = ref1;
-	  if (shapeCode >= kCylindrical) 
-	    OpenAngle = ((StiCylindricalShape *) detector->getShape())->getOpeningAngle();
-	  else {
-	    if (radius <= 50 && radius>4.2)  OpenAngle = ref1a;
-	  }
-	  double diff = projAngle-angle;
-	  if (diff >  M_PI) diff -= 2*M_PI;
-	  if (diff < -M_PI) diff += 2*M_PI;
-	  diff = fabs(diff);
-	  if (diff <= OpenAngle) { detectors.push_back(detector);}
-	  ++sector;
-	}
-      int nDets = detectors.size(); 
-      if (debug() > 2 && nDets==0) cout << "no detector of interest on this layer"<<endl;
-      if (nDets>0)
-	{
-	  if (nDets>1) sort(detectors.begin(),detectors.end(),CloserAngle(projAngle) );
-	  for (vector<StiDetector*>::const_iterator d=detectors.begin();d!=detectors.end();++d)
-	    {
-#ifdef TIME_StiKalmanTrackFinder
-  StiTimer::fgFindTimer->Start(0);
-#endif  
-	      tDet = *d;
-	      if (debug() > 2) {
-		cout << endl<< "target det:"<< *tDet;
-		cout << endl<< "lead angle:" << projAngle*radToDeg 
-		     <<" this angle:" << radToDeg*(*d)->getPlacement()->getNormalRefAngle()<<endl;
-	      }
-	      //begin tracking here...
-	      testNode.reset();
-	      testNode.setChi2(1e50);
-	      position = testNode.propagate(leadNode,tDet,direction);
-	      
-	      // CP Nov 2 Try doubling the chi2 in the SVT
-	      //if (testNode.getX()<40.) maxChi2 = 2* maxChi2;
-	      if(debug() > 2)  cout << "propagate returned:"<<position<<endl<< "testNode:"<<testNode;
-	      if (position<0 || position>kEdgeZplus)
-		{ 
-		  // not reaching this detector layer - stop track
-		  if (debug() > 2) cout << "TRACK DOES NOT REACH CURRENT volume"<<endl;
-		  if (debug() > 1) cout << StiKalmanTrackNode::Comment() << endl;
-		  continue; // will try the next available volume on this layer
-		}
-	      else 
-		{
+      // CP Nov 2 Try doubling the chi2 in the SVT
+      //if (testNode.getX()<40.) maxChi2 = 2* maxChi2;
+      if(debug() > 2)  cout << "propagate returned:"<<position<<endl<< "testNode:"<<testNode;
+      if (position<0 || position>kEdgeZplus) { 
+	// not reaching this detector layer - stop track
+	if (debug() > 2) cout << "TRACK DOES NOT REACH CURRENT volume"<<endl;
+	if (debug() > 1) cout << StiKalmanTrackNode::Comment() << endl;
+	continue; // will try the next available volume on this layer
+      }
 #ifdef TIME_StiKalmanTrackFinder
   StiTimer::fgFindTimer->Stop();
   StiTimer::fgFindTally++;
 #endif  
-		  if (debug() > 2) cout << "position " << position << "<=kEdgeZplus";
-		  testNode.setDetector(tDet);
-		  bool active = tDet->isActive(testNode.getY(),testNode.getZ());
-		  if (debug() > 2) cout << " vol active:" << active<<endl;
-		  // temporary elimination of the SVT
-		  //if (testNode.getX()<40.) active = false;
-		  if (active&&(testNode.getNullCount()<(_pars.maxNullCount+3)&&testNode.getContigNullCount()<(_pars.maxContiguousNullCount+3) ) )
-		    {
-		      double maxChi2 = tDet->getTrackingParameters()->getMaxChi2ForSelection();
-		      if (debug() > 2)cout<<" search hits";
-		      // active detector may have a hit
-		      vector<StiHit*> & candidateHits = _hitContainer->getHits(testNode);//,true);
-		      vector<StiHit*>::iterator hitIter;
-		      if (debug() > 2) cout << " candidates:"<< candidateHits.size();
-		      for (hitIter=candidateHits.begin();hitIter!=candidateHits.end();++hitIter)
-			{
-			  stiHit = *hitIter;
-                          if (stiHit->detector() && stiHit->detector()!=tDet) continue;
-			  chi2 = testNode.evaluateChi2(stiHit);
-			  if (debug() > 2)   cout<< " got chi2:"<< chi2 << " for hit:"<<*stiHit<<endl;
-			  if (chi2>0 && chi2<maxChi2 && chi2<testNode.getChi2())
-			    {
-			      testNode.setHit(stiHit); testNode.setChi2(chi2);
-			      if (debug() > 2) cout << " hit selected"<<endl;
-			    }//chi2 test
-			}// for (hitIter)
-		    }//if(active)
-		  if (debug() > 2) cout << " node to be added to track";
-		  StiKalmanTrackNode * node = _trackNodeFactory->getInstance();
-		  node->reset();
-		  *node = testNode;
-		  sNode = track->add(node);
-		  if (debug()) cout << StiKalmanTrackNode::Comment() << endl;
-		  if (sNode==0) 
-		    {
-		      //node was not actually added to track...
-		      if (debug() > 2) cout << " sNode==0 nudge or update failed...";
-		      continue;
-		      //break;//done with this layer, go to next layer if any
-		    }
-		  if (debug() > 2) cout << " testNode before hit analysis:"<<testNode;
-		  if (node->getHit())
-		    {
-		      if (debug() > 2)cout << " got Hit! "<<endl ;
-		      nAdded++; node->getHitCount()++; node->getContigHitCount()++;
-		      if (node->getContigHitCount()>_pars.minContiguousHitCountForNullReset) node->getContigNullCount() = 0;
-		    }
-		  else if (position>0 || !active) // detectors edge - don't really expect a hit here
-		    {
-		      if (debug() > 2) cout << " position>0 || !active"<<endl;
-		    }
-		  else // there should have been a hit but we found none
-		    {
-		      if (debug() > 2) cout << " no hit but expected one"<<endl;
-		      node->getNullCount()++; node->getContigNullCount()++; node->getContigHitCount()  = 0;
-		    }//node->getHit()
-		  leadNode = sNode;
-		  leadDet  = leadNode->getDetector();
-		  //leadAngle = leadDet->getPlacement()->getNormalRefAngle();
-		  xg = leadNode->x_g();
-		  yg = leadNode->y_g();
-		  projAngle = atan2(yg,xg); 
-		  if (TMath::Sqrt(xg*xg + yg*yg) < 4.2) reachThePipe = 1;
-		  //we added a node on the track, break scan of current layer, and move to next layer
-		  break;
-		}
-	      //end tracking here...
-	    }
-	}
-      if (direction==kOutsideIn && reachThePipe) break;
-      if (direction==kOutsideIn) ++rlayer; else  ++layer;
-    }
+      if (debug() > 2) cout << "position " << position << "<=kEdgeZplus";
+      assert(testNode.isValid());
+      testNode.setDetector(tDet);
+      bool active = tDet->isActive(testNode.getY(),testNode.getZ());
+
+      if (debug() > 2) cout << " vol active:" << active<<endl;
+      int maxNullCount           = _pars.maxNullCount+3;
+      int maxContiguousNullCount = _pars.maxContiguousNullCount+3;
+      double maxChi2 = tDet->getTrackingParameters()->getMaxChi2ForSelection();
+
+      if (active && testNode.getNullCount()<maxNullCount 
+	         && testNode.getContigNullCount()<maxContiguousNullCount+3) {
+
+	if (debug() > 2)cout<<" search hits";
+	// active detector may have a hit
+	vector<StiHit*> & candidateHits = _hitContainer->getHits(testNode);//,true);
+	vector<StiHit*>::iterator hitIter;
+	if (debug() > 2) cout << " candidates:"<< candidateHits.size();
+	for (hitIter=candidateHits.begin();hitIter!=candidateHits.end();++hitIter){
+	  stiHit = *hitIter;
+          if (stiHit->detector() && stiHit->detector()!=tDet) continue;
+	  chi2 = testNode.evaluateChi2(stiHit);
+	  if (debug() > 2)   cout<< " got chi2:"<< chi2 << " for hit:"<<*stiHit<<endl;
+//VP	    if (chi2>0 && chi2<maxChi2 && chi2<testNode.getChi2())
+	  if (chi2>maxChi2) continue;
+//VP	    testNode.setHit(stiHit); testNode.setChi2(chi2);
+	  testNode.hits().add(stiHit,chi2);
+	  if (debug() > 2) cout << " hit selected"<<endl;
+	}// for (hitIter)
+      }//if(active)
+
+      if (debug() > 2) cout << " node to be added to track";
+      StiKalmanTrackNode * node = _trackNodeFactory->getInstance();
+      node->reset();
+      *node = testNode;
+      sNode = track->add(node);
+      if (debug()) cout << StiKalmanTrackNode::Comment() << endl;
+
+      if (sNode==0) { //node was not actually added to track...
+	  if (debug() > 2) cout << " sNode==0 nudge or update failed...";
+	  continue;
+      }
+
+      if (debug() > 2) cout << " testNode before hit analysis:"<<testNode;
+
+      if (node->getHit()){
+	if (debug() > 2)cout << " got Hit! "<<endl ;
+	nAdded++; node->getHitCount()++; node->getContigHitCount()++;
+	if (node->getContigHitCount()>_pars.minContiguousHitCountForNullReset) node->getContigNullCount() = 0;
+
+      } else if (position>0 || !active) {// detectors edge - don't really expect a hit here
+	  if (debug() > 2) cout << " position>0 || !active"<<endl;
+      } else {// there should have been a hit but we found none
+	  if (debug() > 2) cout << " no hit but expected one"<<endl;
+	  node->getNullCount()++; node->getContigNullCount()++; node->getContigHitCount()  = 0;
+      }//node->getHit()
+
+      leadNode = sNode;
+      assert(leadNode->isValid());
+      leadDet  = leadNode->getDetector();
+      leadRadius = leadDet->getPlacement()->getNormalRadius();
+      xg = leadNode->x_g();
+      yg = leadNode->y_g();
+      projAngle = atan2(yg,xg); 
+      if (dirIn && TMath::Sqrt(xg*xg + yg*yg) < 4.2) reachThePipe = 1;
+      //we added a node on the track, break scan of current layer, and move to next layer
+      break;
+    }//End Detectors
+  }while(0);if(dirIn){++rlayer;}else{++layer;}}
+
+//end layers
   if (debug() > 2) cout << "       nAdded:"<< nAdded << endl;
   lastMove++;
 #ifdef TIME_StiKalmanTrackFinder

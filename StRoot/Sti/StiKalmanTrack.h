@@ -167,8 +167,7 @@ class StiKalmanTrack : public StiTrack
    int getPointCount() const;
 
 	 /// Returns the number of hits associated and used in the fit of this track.
-   int getFitPointCount() const;  
-   int getFitPointCount(int detectorId) const;  
+   int getFitPointCount(int detectorId=0) const;  
    
 	 /// Return the number of gaps on this track. 
    int getGapCount() const;
@@ -186,8 +185,7 @@ class StiKalmanTrack : public StiTrack
      accounts for sublayers that are not active, and nominally active volumes 
      that were turned off or had no data for some reason.
     */
-   int getMaxPointCount() const;
-   int getMaxPointCount(int detectorId) const;
+   int getMaxPointCount(int detectorId=0) const;
 
    int getSeedHitCount() const;
    void setSeedHitCount(int c);
@@ -213,21 +211,23 @@ class StiKalmanTrack : public StiTrack
   const StiKTNBidirectionalIterator& end()    const;
 	StiKTNBidirectionalIterator  rbegin() const;
   const StiKTNBidirectionalIterator& rend()   const;
-
+  
    /// Accessor method returns the inner/outer most node associated with the track.
    /// inot: 0=inner, 1=outer; 
-   /// qua : 0=nocheck, 1=with hit inside, 2=and chi2 non infinit
+   /// qua : 0=nocheck, 1=with hit inside, 2=chi2 non infinit
+   /// Same for getNNodes(qua)
    StiKalmanTrackNode * getInnOutMostNode(int inot,int qua)  const;
    /// Accessor method returns the outer most node associated with the track.
-   StiKalmanTrackNode * getOuterMostNode()  const;
+   StiKalmanTrackNode * getOuterMostNode(int qua=0)  const;
    /// Accessor method returns the inner most node associated with the track.
-   StiKalmanTrackNode * getInnerMostNode()   const;
+   StiKalmanTrackNode * getInnerMostNode(int qua=0)   const;
 
    /// Accessor method returns the outer most hit node associated with the track.
-   StiKalmanTrackNode * getOuterMostHitNode(int qua=1)  const;
+   StiKalmanTrackNode * getOuterMostHitNode(int qua=0)  const;
    /// Accessor method returns the inner most hit node associated with the track.
-   StiKalmanTrackNode * getInnerMostHitNode(int qua=1)   const;
-
+   StiKalmanTrackNode * getInnerMostHitNode(int qua=0)   const;
+   int                  getNNodes(int qua=0) const;
+   
    /// Accessor method returns the first node associated with the track.
    StiKalmanTrackNode * getFirstNode()  const { return firstNode; };
    /// Accessor method returns the last node associated with the track.
@@ -618,9 +618,9 @@ inline double StiKalmanTrack::getPrimaryDca() const
    </ol>
 	 \return outer most node on this track
 */
-inline StiKalmanTrackNode * StiKalmanTrack::getOuterMostNode()  const 
+inline StiKalmanTrackNode * StiKalmanTrack::getOuterMostNode(int qua)  const 
 {
-  return (trackingDirection==kOutsideIn)?firstNode:lastNode;
+  return getInnOutMostNode(1,qua);
 }
 
 /*! Accessor method returns the inner most node associated with the track.
@@ -632,27 +632,9 @@ inline StiKalmanTrackNode * StiKalmanTrack::getOuterMostNode()  const
    </ol>
 	 \return outer most node on this track
 */
-inline StiKalmanTrackNode * StiKalmanTrack::getInnerMostNode()   const 
+inline StiKalmanTrackNode * StiKalmanTrack::getInnerMostNode(int qua)   const 
 { 
-  return (trackingDirection==kInsideOut)?firstNode:lastNode;
-}
-
-
-inline StiKalmanTrackNode * StiKalmanTrack::add(StiKalmanTrackNode * node)
-{
-  if (node->getHit())
-    {
-      if (node->nudge()) return 0;
-      int status = node->updateNode();
-      if (status<0) 
-	return 0;
-      else if (status>0) 
-	// remove the hit (CP Oct 21, 04 ) if the track direction has changed from update..
-	node->setHit(0);
-    }
-  lastNode->add(node);
-  lastNode = node;
-  return lastNode;
+  return getInnOutMostNode(0,qua);
 }
 
 #endif
