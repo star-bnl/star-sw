@@ -1,6 +1,6 @@
-// $Id: bfcz.C,v 1.17 1999/05/01 01:47:37 fisyak Exp $
-// $Log: bfcz.C,v $
-// Revision 1.17  1999/05/01 01:47:37  fisyak
+// $Id: bfc_trs.C,v 1.1 1999/05/01 01:47:31 fisyak Exp $
+// $Log: bfc_trs.C,v $
+// Revision 1.1  1999/05/01 01:47:31  fisyak
 // Add new set of bfc s'
 //
 // Revision 1.16  1999/04/29 23:54:18  fisyak
@@ -27,8 +27,8 @@
 //////////////////////////////////////////////////////////////////////////
 //  default is g2t data 
 //#define MINIDAQ   /* TPC minidaq data */
-//#define FZIN    /* GEANT fz-file */
-#define GTRACK  /* GEANT simulation on flight */
+#define FZIN    /* GEANT fz-file */
+//#define GTRACK  /* GEANT simulation on flight */
 #ifndef MINIDAQ
 #endif /* GTRACK or FZIN */
 #ifdef FZIN 
@@ -47,17 +47,17 @@
 #undef GTRACK
 #endif /* MINIDAQ */
 #define TPC
-#define tclPixTransOn // additional flat pixel table
-#define tptResOn // fill table with residuals from tracking
-//#define TRS
+//#define tclPixTransOn // additional flat pixel table
+//#define tptResOn // fill table with residuals from tracking
+#define TRS
 //#define TSS
 #if defined(FZIN) || defined(GTRACK)
-//#define FTPC
-//#define FSS
-//#define SVT
-//#define EMC
-//#define CTF
-//#define L3
+#define FTPC
+#define FSS
+#define SVT
+#define EMC
+#define CTF
+#define L3
 #define GLOBAL
 #define ANALYSIS
 #endif  /* new data only FZIN or GTRACK */
@@ -150,7 +150,7 @@ void Load(){
 #endif /* GLOBAL */
 }
 
-void bfcz (const Int_t Nevents=1,Char_t *infile=0, Char_t *outfile=0)
+void bfc_trs (const Int_t Nevents=1,Char_t *infile=0, Char_t *outfile=0)
 {
   Int_t NoEvents = Nevents;
   // define input file
