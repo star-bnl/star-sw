@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.80 2005/02/03 02:58:47 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.81 2005/02/06 23:27:15 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -73,7 +73,12 @@
     # We make the assumption that STAR_HOST_SYS will contain the string 64_
     # 64 bits test does not suffice. It comes in two flavors with lib and lib64
     # depending of backward 32 support or not. We can extend here later
-    $IS_64BITS     = ($STAR_HOST_SYS =~ m/64_/ && -e "/usr/X11R6/lib64" );
+    $IS_64BITS     = ($STAR_HOST_SYS =~ m/64_/ && -e "/usr/lib64" );
+    if ($IS_64BITS){
+	$LLIB = "lib64";
+    } else {
+	$LLIB = "lib";
+    }
 
 
     $G77           = "g77";
@@ -195,7 +200,9 @@
 	$CERNLIBS .= " " . `$cernl pawlib packlib graflib/X11 packlib mathlib kernlib`;
 	$CERNLIBS =~ s/packlib\./$packl\./g;
 	$CERNLIBS =~ s/kernlib\./$kernl\./g;
-	$CERNLIBS =~ s/$strip//g if ($strip ne "");
+	$CERNLIBS =~ s/$strip//g     if ($strip ne "");
+	$CERNLIBS =~ s/lib /lib64 /g if ($IS_64BITS);
+
 
 	chop($CERNLIBS);
 	print "CERNLIB = $CERNLIBS\n" unless ($param::quiet);
@@ -284,13 +291,9 @@
         $CFLAGS    = "-pipe -fPIC -Wall -Wshadow";
         $SOFLAGS   = "-shared -Wl,-Bdynamic";
 
-	if ( $IS_64BITS ){
-	    $XLIBS     = "-L/usr/X11R6/lib64 -lXpm -lX11";
-	    $CLIBS    .= " -L/usr/X11R6/lib64 -lXt -lXpm -lX11 -lm -ldl  -rdynamic ";
-	} else {
-	    $XLIBS     = "-L/usr/X11R6/lib -lXpm -lX11";
-	    $CLIBS    .= " -L/usr/X11R6/lib -lXt -lXpm -lX11 -lm -ldl  -rdynamic ";
-	}
+	$XLIBS     = "-L/usr/X11R6/$LLIB -lXpm -lX11";
+	$CLIBS    .= " -L/usr/X11R6/$LLIB -lXt -lXpm -lX11 -lm -ldl  -rdynamic ";
+
         $THREAD    = "-lpthread";
         $CRYPTLIBS = "-lcrypt";
         $SYSLIBS   = "-lm -ldl -rdynamic";
@@ -449,21 +452,19 @@
     }
 
     my ($mysqllibdir)=$MYSQLINCDIR;
-    if ( $IS_64BITS ){
-	$mysqllibdir =~ s/include/lib64/;
-    } else {
-	$mysqllibdir =~ s/include/lib/;
-    }
+    
+    $mysqllibdir =~ s/include/$LLIB/;
+
     #print "DEBUG :: $mysqllibdir\n";
     my ($MYSQLLIBDIR,$MYSQLLIB) =
-	script::find_lib($mysqllibdir . " /usr/lib/mysql ".
+	script::find_lib($mysqllibdir . " /usr/$LLIB/mysql ".
 			 $OPTSTAR . "/lib " .  $OPTSTAR . "/lib/mysql ",
 			 "libmysqlclient");
     if ($STAR_HOST_SYS =~ /^rh/ or $STAR_HOST_SYS =~ /^sl/) {
-	$MYSQLLIB .= " -L/usr/lib";
-	if (-r "/usr/lib/libmystrings.a") {$MYSQLLIB .= " -lmystrings";}
-	if (-r "/usr/lib/libssl.a"      ) {$MYSQLLIB .= " -lssl";}
-	if (-r "/usr/lib/libcrypto.a"   ) {$MYSQLLIB .= " -lcrypto";}
+	$MYSQLLIB .= " -L/usr/$LLIB";
+	if (-r "/usr/$LLIB/libmystrings.a") {$MYSQLLIB .= " -lmystrings";}
+	if (-r "/usr/$LLIB/libssl.a"      ) {$MYSQLLIB .= " -lssl";}
+	if (-r "/usr/$LLIB/libcrypto.a"   ) {$MYSQLLIB .= " -lcrypto";}
 	$MYSQLLIB .= " -lz";
     }
     print "Use MYSQLLIBDIR = $MYSQLLIBDIR  \tMYSQLLIB = $MYSQLLIB\n" if $MYSQLLIBDIR && ! $param::quiet;
