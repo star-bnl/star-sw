@@ -15,6 +15,7 @@ extern CC_P int strsplit(const char * str, const char * del, char*** a);
 extern CC_P int strbracket(const char *str, const char * od
 		, const char * cd, char *** a);
 extern CC_P int isInteger(char *c);
+extern CC_P int sutFortran2Cindex(char ** index);
 
 #endif /*SUTLIB_H*/
 

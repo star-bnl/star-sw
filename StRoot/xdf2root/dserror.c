@@ -7,6 +7,7 @@ modification history
 --------------------
 10aug93,whg  written
 24apr95,whg  simple multi-thread version
+22jul97,cet  add dsError
 */
 /*
 DESCRIPTION
@@ -129,7 +130,7 @@ void dsLogError(DS_ERROR_CODE_T code, char *msg, char *file, size_t line)
 	pInfo->line = line;
 	return;
 }
-/******************************************************************************
+/**********************************************************************
 *
 * dsPerror - print info about last error
 *
@@ -144,4 +145,28 @@ void dsPerror(char *str)
 		dsErrorPrint("%s: ", str); 
 	}
 	dsErrorPrint("%s - %s(%d)\n", pInfo->msg, pInfo->file, pInfo->line);
+}
+/**********************************************************************
+*
+* dsError - return info string about last error
+*
+* RETURNS: none
+*/
+const char * dsSerror(char *str)
+{
+	char b[1024];
+	char * buff=b;
+/*xxx	char * s;					*/
+	DS_ERROR_INFO_T *pInfo;
+
+	pInfo = dsErrorInfo();
+	if (str != NULL && *str != '\0') {
+		dsErrorPrint("%s: ", str); 
+	}
+	sprintf(buff,"%s - %s(%d)\n", pInfo->msg, pInfo->file
+			, pInfo->line);
+	return buff;
+/*xxx	s = (char *)malloc(strlen(buff)+1);		*/
+/*xxx	strcpy(s,buff);					*/
+/*xxx	return s;					*/
 }

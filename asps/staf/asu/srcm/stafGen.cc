@@ -113,7 +113,7 @@ int main(int argc, char **argv)
 "***********************************/ \n"
 " \n"
 "/*------------------ INCLUDES ----*/ \n"
-"#include <stream.h> \n"
+"#include <stdio.h> \n"
 "#include <stdlib.h> \n"
 "#include <string.h> \n"
 "#include \"kuip.h\" \n"

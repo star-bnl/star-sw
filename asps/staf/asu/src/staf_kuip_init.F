@@ -15,7 +15,12 @@ C:HISTORY:      18nov96-v001d-mc - Creation
         integer   LENOCC
         common/pawc/pawmem
 
-        if(PAW_INITED()) return
+        integer*4 paw_init_count
+
+	if(paw_init_count().gt.0)then
+		write(*,*)'PAW is already INITed'
+		return
+	endif
 
         write (6,*) 'Initializing hlimit'
         call hlimit(npawmem)
@@ -37,9 +42,17 @@ C:HISTORY:      18nov96-v001d-mc - Creation
 
 C:---------------------------------------------------------------------
       LOGICAL*1 FUNCTION PAW_INITED()
-      LOGICAL*1 FIRSTIME/.TRUE./
-      PAW_INITED = .NOT.FIRSTIME
-      IF(.NOT.FIRSTIME)RETURN
+c     LOGICAL*1 FIRSTIME/.TRUE./
+      integer*4 paw_init_count
+      character*40 foo/'@(#)PAW_INITED 22jul97-1042'/
+c     PAW_INITED = .NOT.FIRSTIME
+c     IF(.NOT.FIRSTIME)RETURN
+	if( paw_init_count() .GT. 0 )then
+	    PAW_INITED = .TRUE.
+	    FIRSTIME = .FALSE.
+	    RETURN
+	endif
+      PAW_INITED = .FALSE.
       FIRSTIME = .FALSE.
       RETURN
       END

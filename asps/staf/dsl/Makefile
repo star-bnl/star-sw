@@ -1,6 +1,7 @@
 BASE_DIR := $(shell pwd)
 HPATH := $(BASE_DIR)/inc
 LPATH := $(BASE_DIR)/lib/$(STAR_ARCH)
+BPATH := $(BASE_DIR)/bin/$(STAR_ARCH)
 INSTALL := -ln -s
 INSTALL := cp
 
@@ -8,11 +9,14 @@ all: dslib dsbin
 
 most: dslib dsbin
 
-dslib:
+dslib: $(LPATH)
 	cd lib; $(MAKE) all
 
-dsbin:
+dsbin: $(BPATH)
 	cd bin; $(MAKE) all
+
+$(LPATH) $(BPATH):
+	mkdir -p $@
 
 clean:
 	cd lib; $(MAKE) clean
