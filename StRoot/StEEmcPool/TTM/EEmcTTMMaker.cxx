@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.23 2004/05/07 22:02:56 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.24 2004/05/10 23:02:47 zolnie Exp $
 // doxygen info here
 /** 
  * \class  EEmcTTMMaker
@@ -10,8 +10,8 @@
  * of towers with associated tracks (list of EEmcTTMatch objects)
  *
  * \author Piotr A. Zolnierczuk
- * $Date: 2004/05/07 22:02:56 $
- * $Revision: 1.23 $
+ * $Date: 2004/05/10 23:02:47 $
+ * $Revision: 1.24 $
  *
  * \section ttmakerremarks Remarks
  *
@@ -112,7 +112,7 @@ EEmcTTMMaker::EEmcTTMMaker(
 
   mFileName = TString(GetName());
   mFileName.ToLower();
-  mFileName += ".root";
+  mFileName += ".ndst.root";
   mFile=NULL;
 
   ResetZPositionsArray();
@@ -139,7 +139,10 @@ EEmcTTMMaker::EEmcTTMMaker(
   //
   mTowerList->SetOwner();
   mMatchList->SetOwner();
-  
+  //
+  mEvInfo = NULL;
+  mEvSumm = NULL;
+  mEvTrig = NULL;
   //
   mTreeOut   = false;
   //
@@ -168,10 +171,14 @@ EEmcTTMMaker::Init() {
   ResetStats();
   //
   mFile = new TFile(mFileName, "RECREATE");   if(!mFile) return kStErr;
-  mTree = new TTree("ttm","MuDST tracks");    if(!mTree) return kStErr;
+  mTree = new TTree("ttm","TPC track to EEmc tower matches");    if(!mTree) return kStErr;
   //
   mTree->Branch("matches","TList",&mMatchList,32768,0);
-  
+  // three exta branches for (nano)dst
+  mTree->Branch("info"    ,"StEventInfo"            ,&mEvInfo ,32768,0);
+  mTree->Branch("summary" ,"StEventSummary"         ,&mEvSumm ,32768,0);
+  mTree->Branch("trigger" ,"StMuTriggerIdCollection",&mEvTrig ,32768,0);
+ 
   // control histos
   mFile->mkdir("histos");
   mFile->cd("histos");
@@ -245,13 +252,13 @@ EEmcTTMMaker::Make(){
     return kStErr;
   }
   
-  //StEventInfo             &evinfo = muEvent->eventInfo();           // event info
+  StEventInfo             &evinfo = muEvent->eventInfo();           // event info
   StEventSummary          &evsumm = muEvent->eventSummary();        // event summary
-  //StL0Trigger             &l0trig = muEvent->l0Trigger();           // L0 trigger info 
-  //StMuTriggerIdCollection &evtrig = muEvent->triggerIdCollection(); // trigger Id's
+  StMuTriggerIdCollection &evtrig = muEvent->triggerIdCollection(); // trigger Id's
 
-  StThreeVectorF vertex = evsumm.primaryVertexPosition();
-
+  mEvInfo = &evinfo;
+  mEvSumm = &evsumm;
+  mEvTrig = &evtrig;
 
   // select "good" tracks
   TIter      nextTrack(tracks);
@@ -284,8 +291,7 @@ EEmcTTMMaker::Make(){
   }
 
   // do the matching
-  int ntrack=0;
-  int goodTowerHits = 0;
+  int ntrack        = 0;
   for (Int_t i=0; i< emc->getNEndcapTowerADC(); i++) { // loop over EEMC hits
     // get endcap hit(s) and use dbase to subtract pedestal and apply gain
     int   adc,sec,sub,eta;  // back to Fortran++ 
@@ -304,14 +310,11 @@ EEmcTTMMaker::Make(){
     adcped = float(adc) - dbi->ped; 
     edep   = (dbi->gain>0.0) ? adcped/dbi->gain : 0.0;
     if(adcped<0.0) continue;
-    goodTowerHits++;
+
     //
     EEmcTower   *eemcHit   = new EEmcTower(sec,sub,eta,adcped,edep);
-
     EEmcTTMatch *eemcMatch = new EEmcTTMatch();
-
     mTowerList->Add(eemcHit);
-
     eemcMatch->Add(eemcHit);
 
     TIter nextTrack(mTrackList);
@@ -345,7 +348,7 @@ EEmcTTMMaker::Make(){
     else 
       delete eemcMatch; // stop leaking 
   }
-  if(mTreeOut) mTree->Fill();
+  if(mTreeOut && ntrack>0) mTree->Fill();
   mNMatched += ntrack;
   return kStOK;
 }
@@ -471,6 +474,9 @@ ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm)  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.24  2004/05/10 23:02:47  zolnie
+// EEmcTTMMaker produces now  nanoDST
+//
 // Revision 1.23  2004/05/07 22:02:56  zolnie
 // fixed a nasty memory leak in EEmcTTMMaker
 //
