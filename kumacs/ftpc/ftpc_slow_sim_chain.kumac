@@ -14,65 +14,98 @@
 macro ftpc_slow_sim_chain_
        input_g2t_file=/afs/rhic/star/users/jcs/public/g2t_pipealu_1.dsl_
        output_file=/afs/rhic/star/users/jcs/public/ftpc_slow_sim_pipealu_1.tab_
+       gas_file=/afs/rhic/star/users/jcs/public/gas.dat_
        nskip=0_
        nevents=1
 
+*
+DEFAULT = _
+./kumacs/util,_
+./kumacs/chain,_
+./pams/emc/kumac,_
+./pams/global/kumac,_
+./pams/svt/kumac,_
+./pams/tpc/kumac,_
+./pams/ftpc/kumac,-
+$STAR/kumacs/util,_
+$STAR/kumacs/chain,_
+$STAR/kumacs/tpc,_
+$STAR/pams/ctf/kumac,_
+$STAR/pams/emc/kumac,_
+$STAR/pams/ftpc/kumac,_
+$STAR/pams/gen/kumac,_
+$STAR/pams/global/kumac,_
+$STAR/pams/mwc/kumac,_
+$STAR/pams/svt/kumac,_
+$STAR/pams/tpc/kumac,_
+$STAR/pams/trg/kumac
+ 
+  
+ def [DEFAULT]
+ message 'Define default kumac search path as' def
+ 
+* generic inits
+  exec setup_dir
 
-* global macros
+  
+* create tables
+  exec create_tables_ftpc#fss_tables
+  exec create_tables_ftpc#fcl_tables
+  exec create_tables_ftpc#fpt_tables
+  exec create_tables_ftpc#fte_tables
 
-exec $STAR/kumacs/util/setup_global_macros
-/macro/global/import KUMACS_UTIL
-/macro/global/import PAMS_FTPC_KUMAC
+     
+* initialize input tables
 
-* Create and initialize input tables
-
-exec [PAMS_FTPC_KUMAC]fss_init
-exec [PAMS_FTPC_KUMAC]fcl_init
-exec [PAMS_FTPC_KUMAC]fpt_init
-exec [PAMS_FTPC_KUMAC]fte_init
+ exec fss_init
+ exec fcl_init
+ exec fpt_init
+ exec fte_init
 
 * Initialize input data stream
-
-exec [KUMACS_UTIL]input_g2t_file#init [input_g2t_file]
+  exec input_g2t_file#init [input_g2t_file]
 
 * Initialize output data stream
+  exec write_table_to_file#init ftpc_slow_out [output_file]
+  message Initialize output data stream [output_file]
 
-DIO/NEWFILESTREAM ftpc_slow_out [output_file] W
-message Initialize output data stream [output_file]
+* Link to gas data file
+shell ln -f -s [gas_file] gas.dat
 
 * Skip events
 
 do i=1,[nskip]
-message Skipping event [i]
-exec [KUMACS_UTIL]input_g2t_file#read
+  message Skipping event [i]
+  exec input_g2t_file#read
 enddo
-message Skipped [nskip] events
+  message Skipped [nskip] events
 
 *  Event loop
 
 message Start processing [nevents] events
 
 do i=1,[nevents]
-* Read in next Event
-message Reading in event [i]
-exec [KUMACS_UTIL]input_g2t_file#read
-* Process next Event
-exec [PAMS_FTPC_KUMAC]fss_run
-exec [PAMS_FTPC_KUMAC]fcl_run
-exec [PAMS_FTPC_KUMAC]fpt_slow_sim_run
-exec [PAMS_FTPC_KUMAC]fte_slow_sim_run
-* Output Event
-cd /dui/data/ftpc
-dio/stream/putevent ftpc_slow_out tracks
-cd
+  * Read in next Event
+    message Reading in event [i]
+    exec input_g2t_file#read
+  * Process next Event
+    exec fss_run
+    exec fcl_run
+    exec fpt_run#run_slow_sim
+    exec fte_run#run_slow_sim
+  * Output Event
+    exec write_table_to_file#write ftpc_slow_out /dui/data/ftpc/tracks
 enddo
 
 * Close input data stream
-dio/stream/close G2Tfile
-
+ exec input_g2t_file#close 
+ 
 * Close output data stream
-dio/stream/close ftpc_slow_out
-
+ exec write_table_to_file#close ftpc_slow_out
+ 
+* Remove gas.tmp
+shell rm gas.tmp
+ 
 message Finished processing [nevents] events
 
 return
