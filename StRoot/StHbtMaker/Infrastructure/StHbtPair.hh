@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.hh,v 1.14 2001/04/03 21:04:36 kisiel Exp $
+ * $Id: StHbtPair.hh,v 1.15 2001/12/14 23:11:30 fretiere Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,8 +14,13 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.hh,v $
+ * Revision 1.15  2001/12/14 23:11:30  fretiere
+ * Add class HitMergingCut. Add class fabricesPairCut = HitMerginCut + pair purity cuts. Add TpcLocalTransform function which convert to local tpc coord (not pretty). Modify StHbtTrack, StHbtParticle, StHbtHiddenInfo, StHbtPair to handle the hit information and cope with my code
+ *
  * Revision 1.14  2001/04/03 21:04:36  kisiel
- * Changes needed to make the Theoretical code
+ *
+ *
+ *   Changes needed to make the Theoretical code
  *   work. The main code is the ThCorrFctn directory.
  *   The most visible change is the addition of the
  *   HiddenInfo to StHbtPair.
@@ -157,6 +162,35 @@ public:
 
   double OpeningAngle() const;
 
+  // Fabrice Private <<<
+  double KStarSide() const;
+  double KStarOut() const;
+  double KStarLong() const;
+
+  float PionPairProbability() const;
+  float ElectronPairProbability() const;
+  float KaonPairProbability() const;
+  float ProtonPairProbability() const;
+  float KaonPionPairProbability() const;
+
+  double dcaInsideTpc() const;
+  double quality2() const;
+
+  double KStarGlobal() const;
+  double CVKGlobal() const;
+  double KStarSideGlobal() const;
+  double KStarOutGlobal() const;
+  double KStarLongGlobal() const;
+
+  void setMergingPar(double aMaxDuInner, double aMaxDzInner,
+		     double aMaxDuOuter, double aMaxDzOuter);
+  void setDefaultHalfFieldMergingPar();
+  void setDefaultFullFieldMergingPar();
+  double getFracOfMergedRow() const;
+  double getClosestRowAtDCA() const;
+  double getWeightedAvSep() const;
+  // >>>
+
 private:
   StHbtParticle* mTrack1;
   StHbtParticle* mTrack2;
@@ -165,18 +199,45 @@ private:
   mutable double mDKSide;
   mutable double mDKOut;
   mutable double mDKLong;
+  mutable double mCVK;
   mutable double kStarCalc;
-
   void calcNonIdPar() const;
+
+  mutable short mNonIdParNotCalculatedGlobal;
+  mutable double mDKSideGlobal;
+  mutable double mDKOutGlobal;
+  mutable double mDKLongGlobal;
+  mutable double kStarCalcGlobal;
+  mutable double mCVKGlobal;
+  void calcNonIdParGlobal() const;
+
+  mutable short mMergingParNotCalculated;
+  mutable double mWeightedAvSep;
+  mutable double mFracOfMergedRow;
+  mutable short mClosestRowAtDCA;
+  static double mMaxDuInner;
+  static double mMaxDzInner;
+  static double mMaxDuOuter;
+  static double mMaxDzOuter;
+  void calcMergingPar() const;
+
+  void resetParCalculated();
+
 };
+
+inline void StHbtPair::resetParCalculated(){
+  mNonIdParNotCalculated=1;
+  mNonIdParNotCalculatedGlobal=1;
+  mMergingParNotCalculated=1;
+}
 
 inline void StHbtPair::SetTrack1(const StHbtParticle* trkPtr){
   mTrack1=(StHbtParticle*)trkPtr;
-  mNonIdParNotCalculated=1;
+  resetParCalculated();
 }
 inline void StHbtPair::SetTrack2(const StHbtParticle* trkPtr){
   mTrack2=(StHbtParticle*)trkPtr;
-  mNonIdParNotCalculated=1;  
+  resetParCalculated();
 }
 
 inline StHbtParticle* StHbtPair::track1() const {return mTrack1;}
@@ -194,5 +255,86 @@ inline double StHbtPair::dKLong() const{
   if(mNonIdParNotCalculated) calcNonIdPar();
   return mDKLong;
 }
+inline double StHbtPair::KStar() const{
+  if(mNonIdParNotCalculated) calcNonIdPar();
+  return kStarCalc;
+}
+inline double StHbtPair::qInv() const {
+  StHbtLorentzVector tDiff = (mTrack1->FourMomentum()-mTrack2->FourMomentum());
+  return ( -1.* tDiff.m());
+}
 
+// Fabrice private <<<
+inline double StHbtPair::KStarSide() const{
+  if(mNonIdParNotCalculated) calcNonIdPar();
+  return mDKSide;//mKStarSide;
+}
+inline double StHbtPair::KStarOut() const{
+  if(mNonIdParNotCalculated) calcNonIdPar();
+  return mDKOut;//mKStarOut;
+}
+inline double StHbtPair::KStarLong() const{
+  if(mNonIdParNotCalculated) calcNonIdPar();
+  return mDKLong;//mKStarLong;
+}
+inline double StHbtPair::CVK() const{
+  if(mNonIdParNotCalculated) calcNonIdPar();
+  return mCVK;
+}
+
+inline double StHbtPair::KStarGlobal() const{
+  if(mNonIdParNotCalculatedGlobal) calcNonIdParGlobal();
+  return kStarCalcGlobal;
+}
+inline double StHbtPair::KStarSideGlobal() const{
+  if(mNonIdParNotCalculatedGlobal) calcNonIdParGlobal();
+  return mDKSideGlobal;//mKStarSide;
+}
+inline double StHbtPair::KStarOutGlobal() const{
+  if(mNonIdParNotCalculatedGlobal) calcNonIdParGlobal();
+  return mDKOutGlobal;//mKStarOut;
+}
+inline double StHbtPair::KStarLongGlobal() const{
+  if(mNonIdParNotCalculatedGlobal) calcNonIdParGlobal();
+  return mDKLongGlobal;//mKStarLong;
+}
+inline double StHbtPair::CVKGlobal() const{
+  if(mNonIdParNotCalculatedGlobal) calcNonIdParGlobal();
+  return mCVKGlobal;
+}
+
+
+inline float StHbtPair::PionPairProbability() const{
+  return (mTrack1->Track()->PidProbPion()) * 
+         (mTrack2->Track()->PidProbPion());
+}
+inline float StHbtPair::ElectronPairProbability() const{
+  return (mTrack1->Track()->PidProbElectron()) * 
+         (mTrack2->Track()->PidProbElectron());
+}
+inline float StHbtPair::KaonPairProbability() const{
+  return (mTrack1->Track()->PidProbKaon()) * 
+         (mTrack2->Track()->PidProbKaon());
+}
+inline float StHbtPair::ProtonPairProbability() const{
+  return (mTrack1->Track()->PidProbProton()) * 
+         (mTrack2->Track()->PidProbProton());
+}
+inline float StHbtPair::KaonPionPairProbability() const{
+  return (mTrack1->Track()->PidProbKaon()) * 
+         (mTrack2->Track()->PidProbPion());
+}
+
+inline double StHbtPair::getFracOfMergedRow() const{
+  if(mMergingParNotCalculated) calcMergingPar();
+  return mFracOfMergedRow;
+}
+inline double StHbtPair::getClosestRowAtDCA() const { 
+  if(mMergingParNotCalculated) calcMergingPar();
+  return mClosestRowAtDCA;
+}
+inline double StHbtPair::getWeightedAvSep() const {
+  if(mMergingParNotCalculated) calcMergingPar();
+  return mWeightedAvSep;
+}
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.19 2001/04/25 18:05:09 perev Exp $
+ * $Id: StHbtPair.cc,v 1.20 2001/12/14 23:11:30 fretiere Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.cc,v $
+ * Revision 1.20  2001/12/14 23:11:30  fretiere
+ * Add class HitMergingCut. Add class fabricesPairCut = HitMerginCut + pair purity cuts. Add TpcLocalTransform function which convert to local tpc coord (not pretty). Modify StHbtTrack, StHbtParticle, StHbtHiddenInfo, StHbtPair to handle the hit information and cope with my code
+ *
  * Revision 1.19  2001/04/25 18:05:09  perev
  * HPcorrs
  *
@@ -81,15 +84,43 @@
 
 #include "StHbtMaker/Infrastructure/StHbtPair.hh"
 
+double StHbtPair::mMaxDuInner = 3;
+double StHbtPair::mMaxDzInner = 4.;
+double StHbtPair::mMaxDuOuter = 4.;
+double StHbtPair::mMaxDzOuter = 6.;
+
+
 StHbtPair::StHbtPair(){
   mTrack1 = 0;
   mTrack2 = 0;
+  setDefaultHalfFieldMergingPar();
 }
 
 StHbtPair::StHbtPair(StHbtParticle* a, StHbtParticle* b)
   : mTrack1(a), mTrack2(b)
-{ }
+{ 
+  setDefaultHalfFieldMergingPar();
+}
 
+void StHbtPair::setDefaultHalfFieldMergingPar(){
+  mMaxDuInner = 3;
+  mMaxDzInner = 4.;
+  mMaxDuOuter = 4.;
+  mMaxDzOuter = 6.;
+}
+void StHbtPair::setDefaultFullFieldMergingPar(){
+  mMaxDuInner = 0.8;
+  mMaxDzInner = 3.;
+  mMaxDuOuter = 1.4;
+  mMaxDzOuter = 3.2;
+}
+void StHbtPair::setMergingPar(double aMaxDuInner, double aMaxDzInner,
+			      double aMaxDuOuter, double aMaxDzOuter){
+  mMaxDuInner = aMaxDuInner;
+  mMaxDzInner = aMaxDzInner;
+  mMaxDuOuter = aMaxDuOuter;
+  mMaxDzOuter = aMaxDzOuter;
+};
 
 StHbtPair::~StHbtPair() {/* no-op */}
 
@@ -375,6 +406,52 @@ double StHbtPair::quality() const {
 
 }
 
+double StHbtPair::quality2() const {
+  unsigned long mapMask0 = 0xFFFFFF00;
+  unsigned long mapMask1 = 0x1FFFFF;
+  unsigned long padRow1To24Track1 = mTrack1->TopologyMap(0) & mapMask0;
+  unsigned long padRow25To45Track1 = mTrack1->TopologyMap(1) & mapMask1;
+  unsigned long padRow1To24Track2 = mTrack2->TopologyMap(0) & mapMask0;
+  unsigned long padRow25To45Track2 = mTrack2->TopologyMap(1) & mapMask1;
+  // AND logic
+  unsigned long bothPads1To24 = padRow1To24Track1 & padRow1To24Track2;
+  unsigned long bothPads25To45 = padRow25To45Track1 & padRow25To45Track2;
+  // XOR logic
+  unsigned long onePad1To24 = padRow1To24Track1 ^ padRow1To24Track2;
+  unsigned long onePad25To45 = padRow25To45Track1 ^ padRow25To45Track2;
+  unsigned long bitI;
+  int ibits;
+  int Quality = 0;
+  double normQual = 0.0;
+  int MaxQuality = mTrack1->NumberOfHits() + mTrack2->NumberOfHits();
+  for (ibits=8;ibits<=31;ibits++) {
+    bitI = 0;
+    bitI |= 1UL<<(ibits);
+    if ( onePad1To24 & bitI ) {
+      Quality++;
+      continue;
+    }
+    //else{
+    //if ( bothPads1To24 & bitI ) Quality--;
+    //}
+  }
+  for (ibits=0;ibits<=20;ibits++) {
+    bitI = 0;
+    bitI |= 1UL<<(ibits);
+    if ( onePad25To45 & bitI ) {
+      Quality++;
+      continue;
+    }
+    //else{
+    //if ( bothPads25To45 & bitI ) Quality--;
+    //}
+  }
+  normQual = (double)Quality/( (double) MaxQuality );
+  return ( normQual );
+
+}
+
+
 double StHbtPair::NominalTpcExitSeparation() const {
   StHbtThreeVector diff = mTrack1->NominalTpcExitPoint() - mTrack2->NominalTpcExitPoint();
   return (diff.mag());
@@ -399,32 +476,12 @@ double StHbtPair::NominalTpcAverageSeparation() const {
 double StHbtPair::OpeningAngle() const {
   StHbtThreeVector p1 = mTrack1->FourMomentum().vect();
   StHbtThreeVector p2 = mTrack2->FourMomentum().vect();
-  double dAngInv = 57.296*acos((p1.dot(p2))/(p1.mag()*p2.mag()));
-  return (dAngInv);
+  return 57.296*(p1.phi()-p2.phi());
+  //double dAngInv = 57.296*acos((p1.dot(p2))/(p1.mag()*p2.mag()));
+  //return (dAngInv);
 }
 //_________________
-double StHbtPair::qInv() const {
-  StHbtLorentzVector tDiff = (mTrack1->FourMomentum()-mTrack2->FourMomentum());
-  return ( -1.* tDiff.m());
-}
 
-double StHbtPair::KStar() const{
-  // Return value calculated in Lednicky's way
-  if(mNonIdParNotCalculated) calcNonIdPar();
-  return kStarCalc;
-  /*
-  const StHbtLorentzVector& tP1 = mTrack1->FourMomentum();
-  StHbtLorentzVector tSum = (tP1+mTrack2->FourMomentum());
-  double tMass = abs(tSum);
-  StThreeVectorD tGammaBeta = (1./tMass)*tSum.vect(); 
-  double tGamma = tSum.e()/tMass;
-  StThreeVectorD tLongMom  = ((tP1.vect()*tGammaBeta)/
-			      (tGammaBeta*tGammaBeta))*tGammaBeta;
-  StLorentzVectorD tK(tGamma*tP1.e() - tP1.vect()*tGammaBeta,
-		      tP1.vect() + (tGamma-1.)*tLongMom - tP1.e()*tGammaBeta);
-  return tK.vect().mag();
-  */
-}
 
 double StHbtPair::KStarFlipped() const {
   StHbtLorentzVector tP1 = mTrack1->FourMomentum();
@@ -445,18 +502,18 @@ double StHbtPair::KStarFlipped() const {
   return tK.vect().mag();
 }
 
-double StHbtPair::CVK() const{
-  const StHbtLorentzVector& tP1 = mTrack1->FourMomentum();
-  StHbtLorentzVector tSum = (tP1+mTrack2->FourMomentum());
-  double tMass = abs(tSum);
-  StThreeVectorD tGammaBeta = (1./tMass)*tSum.vect(); 
-  double tGamma = tSum.e()/tMass;
-  StThreeVectorD tLongMom  = ((tP1.vect()*tGammaBeta)/
-			      (tGammaBeta*tGammaBeta))*tGammaBeta;
-  StLorentzVectorD tK(tGamma*tP1.e() - tP1.vect()*tGammaBeta,
-		      tP1.vect() + (tGamma-1.)*tLongMom - tP1.e()*tGammaBeta);
-  return (tK.vect())*tGammaBeta/tK.vect().magnitude()/tGammaBeta.magnitude();
-}
+//double StHbtPair::CVK() const{
+//const StHbtLorentzVector& tP1 = mTrack1->FourMomentum();
+//StHbtLorentzVector tSum = (tP1+mTrack2->FourMomentum());
+//double tMass = abs(tSum);
+//StThreeVectorD tGammaBeta = (1./tMass)*tSum.vect(); 
+//double tGamma = tSum.e()/tMass;
+//StThreeVectorD tLongMom  = ((tP1.vect()*tGammaBeta)/
+//		      (tGammaBeta*tGammaBeta))*tGammaBeta;
+//StLorentzVectorD tK(tGamma*tP1.e() - tP1.vect()*tGammaBeta,
+//	      tP1.vect() + (tGamma-1.)*tLongMom - tP1.e()*tGammaBeta);
+//return (tK.vect())*tGammaBeta/tK.vect().magnitude()/tGammaBeta.magnitude();
+//}
 
 double StHbtPair::CVKFlipped() const{
   StHbtLorentzVector tP1 = mTrack1->FourMomentum();
@@ -551,5 +608,172 @@ void StHbtPair::calcNonIdPar() const{ // fortran like function! faster?
   
   // fill histogram for out projection ( x - axis )
   mDKOut  = px1C;
+
+  mCVK = (mDKOut*Ptrans + mDKLong*Pz)/kStarCalc/sqrt(Ptrans*Ptrans+Pz*Pz);
 }
 
+
+void StHbtPair::calcNonIdParGlobal() const{ // fortran like function! faster?
+  mNonIdParNotCalculatedGlobal=0;
+  double px1 = mTrack1->Track()->PGlobal().x();
+  double py1 = mTrack1->Track()->PGlobal().y();
+  double pz1 = mTrack1->Track()->PGlobal().z();
+  double Particle1Mass =  mTrack1->FourMomentum().m2();
+  double pE1  = sqrt(Particle1Mass + px1*px1 + py1*py1 + pz1*pz1);
+  Particle1Mass = sqrt(Particle1Mass);
+
+  double px2 = mTrack2->Track()->PGlobal().x();
+  double py2 = mTrack2->Track()->PGlobal().y();
+  double pz2 = mTrack2->Track()->PGlobal().z();
+  double Particle2Mass =  mTrack2->FourMomentum().m2();
+  double pE2  = sqrt(Particle2Mass + px2*px2 + py2*py2 + pz2*pz2);
+  Particle2Mass = sqrt(Particle2Mass);
+
+  double Px = px1+px2;
+  double Py = py1+py2;
+  double Pz = pz1+pz2;
+  double PE = pE1+pE2;
+      
+  double Ptrans = Px*Px + Py*Py;
+  double Mtrans = PE*PE - Pz*Pz;
+  double Pinv =   sqrt(Mtrans - Ptrans);
+  Mtrans = sqrt(Mtrans);
+  Ptrans = sqrt(Ptrans);
+	
+  double QinvL = (pE1-pE2)*(pE1-pE2) - (px1-px2)*(px1-px2) -
+    (py1-py2)*(py1-py2) - (pz1-pz2)*(pz1-pz2);
+
+  double Q = (Particle1Mass*Particle1Mass - Particle2Mass*Particle2Mass)/Pinv;
+  Q = sqrt ( Q*Q - QinvL);
+	  
+  kStarCalcGlobal = Q/2;
+
+  // ad 1) go to LCMS
+  double beta = Pz/PE;
+  double gamma = PE/Mtrans;
+	    
+  double pz1L = gamma * (pz1 - beta * pE1);
+  double pE1L = gamma * (pE1 - beta * pz1);
+  
+  // fill histogram for beam projection ( z - axis )
+  mDKLongGlobal = pz1L;
+
+  // ad 2) rotation px -> Pt
+  double px1R = (px1*Px + py1*Py)/Ptrans;
+  double py1R = (-px1*Py + py1*Px)/Ptrans;
+  
+  //fill histograms for side projection ( y - axis )
+  mDKSideGlobal = py1R;
+
+  // ad 3) go from LCMS to CMS
+  beta = Ptrans/Mtrans;
+  gamma = Mtrans/Pinv;
+  
+  double px1C = gamma * (px1R - beta * pE1L);
+  
+  // fill histogram for out projection ( x - axis )
+  mDKOutGlobal  = px1C;
+
+  mCVKGlobal = (mDKOutGlobal*Ptrans + mDKLongGlobal*Pz)/
+    kStarCalcGlobal/sqrt(Ptrans*Ptrans+Pz*Pz);
+}
+
+
+
+double StHbtPair::dcaInsideTpc() const{
+
+  double tMinDist=NominalTpcEntranceSeparation();
+  double tExit = NominalTpcExitSeparation();
+  tMinDist = (tExit>tMinDist) ? tMinDist : tExit;
+  double tInsideDist;
+  //tMinDist = 999.;
+
+  double rMin = 60.;
+  double rMax = 190.;
+  const StPhysicalHelixD& tHelix1 = mTrack1->Helix();
+  const StPhysicalHelixD& tHelix2 = mTrack2->Helix();
+  // --- One is a line and other one a helix
+  //if (tHelix1.mSingularity != tHelix2.mSingularity) return -999.;
+  // --- 2 lines : don't care right now
+  //if (tHelix1.mSingularity)  return -999.;
+  // --- 2 helix
+  double dx = tHelix2.xcenter() - tHelix1.xcenter();
+  double dy = tHelix2.ycenter() - tHelix1.ycenter();
+  double dd = sqrt(dx*dx + dy*dy);
+  double r1 = 1/tHelix1.curvature();
+  double r2 = 1/tHelix2.curvature();
+  double cosAlpha = (r1*r1 + dd*dd - r2*r2)/(2*r1*dd);
+    
+  double x, y, r;
+  double s;
+  if (fabs(cosAlpha) < 1) {           // two solutions
+    double sinAlpha = sin(acos(cosAlpha));
+    x = tHelix1.xcenter() + r1*(cosAlpha*dx - sinAlpha*dy)/dd;
+    y = tHelix1.ycenter() + r1*(sinAlpha*dx + cosAlpha*dy)/dd;
+    r = sqrt(x*x+y*y);
+    if( r > rMin &&  r < rMax && 
+	fabs(atan2(y,x)-mTrack1->NominalTpcEntrancePoint().phi())< 0.5
+	){ // first solution inside
+      s = tHelix1.pathLength(x, y);
+      tInsideDist=tHelix2.distance(tHelix1.at(s));
+      if(tInsideDist<tMinDist) tMinDist = tInsideDist;
+    }
+    else{ 
+      x = tHelix1.xcenter() + r1*(cosAlpha*dx + sinAlpha*dy)/dd;
+      y = tHelix1.ycenter() + r1*(cosAlpha*dy - sinAlpha*dx)/dd;
+      r = sqrt(x*x+y*y);
+      if( r > rMin &&  r < rMax &&
+	  fabs(atan2(y,x)-mTrack1->NominalTpcEntrancePoint().phi())< 0.5
+	  ) {  // second solution inside
+        s = tHelix1.pathLength(x, y);
+        tInsideDist=tHelix2.distance(tHelix1.at(s));
+        if(tInsideDist<tMinDist) tMinDist = tInsideDist;
+      }     
+    }
+  }
+  return tMinDist;
+}
+
+void StHbtPair::calcMergingPar() const{
+  mMergingParNotCalculated=0;
+
+  double tDu, tDz;
+  int tN = 0;
+  mFracOfMergedRow = 0.;
+  mWeightedAvSep =0.;
+  double tDist;
+  double tDistMax = 200.;
+  for(int ti=0 ; ti<45 ; ti++){
+    if(mTrack1->mSect[ti]==mTrack2->mSect[ti] && mTrack1->mSect[ti]!=-1){
+      tDu = fabs(mTrack1->mU[ti]-mTrack2->mU[ti]);
+      tDz = fabs(mTrack1->mZ[ti]-mTrack2->mZ[ti]);
+      tN++;
+      if(ti<13){
+	mFracOfMergedRow += (tDu<mMaxDuInner && tDz<mMaxDzInner);
+	tDist = sqrt(tDu*tDu/mMaxDuInner/mMaxDuInner+
+		     tDz*tDz/mMaxDzInner/mMaxDzInner);
+	//mFracOfMergedRow += (tDu<mMaxDuInner && tDz<mMaxDzInner);
+      }
+      else{
+	mFracOfMergedRow += (tDu<mMaxDuOuter && tDz<mMaxDzOuter);
+	tDist = sqrt(tDu*tDu/mMaxDuOuter/mMaxDuOuter+
+		     tDz*tDz/mMaxDzOuter/mMaxDzOuter);
+	//mFracOfMergedRow += (tDu<mMaxDuOuter && tDz<mMaxDzOuter);
+      }
+      if(tDist<tDistMax){
+	mClosestRowAtDCA = ti+1;
+	tDistMax = tDist;
+      }
+      mWeightedAvSep += tDist;
+    }
+  }
+  if(tN>0){
+    mWeightedAvSep /= tN;
+    mFracOfMergedRow /= tN;
+  }
+  else{
+    mClosestRowAtDCA = -1;
+    mFracOfMergedRow = -1.;
+    mWeightedAvSep = -1.;
+  }
+}

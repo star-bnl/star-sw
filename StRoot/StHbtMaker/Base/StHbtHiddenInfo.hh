@@ -29,7 +29,12 @@ public:
 // !!! MANDATORY !!!
 // --- Copy the hidden info from StHbtTrack to StHbtParticle
   virtual StHbtHiddenInfo* getParticleHiddenInfo() const =0;
+  virtual StHbtHiddenInfo* clone() const;
 
 };
-  
+
+inline StHbtHiddenInfo* StHbtHiddenInfo::clone() const{
+  return getParticleHiddenInfo();
+}
+
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.hh,v 1.19 2001/07/16 13:16:41 laue Exp $
+ * $Id: StHbtTrack.hh,v 1.20 2001/12/14 23:11:30 fretiere Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,11 +13,8 @@
  ***************************************************************************
  *
  * $Log: StHbtTrack.hh,v $
- * Revision 1.19  2001/07/16 13:16:41  laue
- * new constructor added [ StHbtTrack(const StEvent*, cons StTrack*) ]
- *
- * Revision 1.18  2001/07/12 23:20:42  laue
- * mDCAGlobal,mPGlobal,mPtGlobal added
+ * Revision 1.20  2001/12/14 23:11:30  fretiere
+ * Add class HitMergingCut. Add class fabricesPairCut = HitMerginCut + pair purity cuts. Add TpcLocalTransform function which convert to local tpc coord (not pretty). Modify StHbtTrack, StHbtParticle, StHbtHiddenInfo, StHbtPair to handle the hit information and cope with my code
  *
  * Revision 1.17  2001/06/21 19:15:48  laue
  * Modified fiels:
@@ -117,8 +114,8 @@
 #include "StHbtMaker/Base/StHbtHiddenInfo.hh"
 /***/
 
-class StTrack;
 class StEvent;
+class StTrack;
 class StHbtTTreeTrack;
 class StHbtTTreeEvent;
 
@@ -128,9 +125,9 @@ public:
   StHbtTrack(const StHbtTrack&);// copy constructor
 #ifdef __ROOT__
   StHbtTrack(const StTrack*, StHbtThreeVector);   // c-tor from StTrack of STAR DSTs
-  StHbtTrack(const StEvent*, const StTrack*);   // c-tor from StTrack of STAR DSTs
   StHbtTrack(const StHbtTTreeEvent* ev, const StHbtTTreeTrack* t);
 #endif
+  StHbtTrack(const StEvent*, const StTrack*);
   ~StHbtTrack(){/* no-op*/};
 
   short TrackType() const;
@@ -138,6 +135,7 @@ public:
   short NHits() const;
   short NHitsPossible() const;
   short NHitsDedx() const;
+  const float* NSigma() const; // Fab private
   float NSigmaElectron() const;
   float NSigmaPion() const;
   float NSigmaKaon() const;
@@ -194,7 +192,8 @@ public:
   /* Th stuff */
   void SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo);
   bool ValidHiddenInfo() const;
-  const StHbtHiddenInfo* HiddenInfo() const;
+  // Fab private : (official : const StHbtHiddenInfo* HiddenInfo() const;
+  StHbtHiddenInfo* getHiddenInfo() const;
   /***/
 
   // For I/O of this object -- functions defined in StHbtIO.cc
@@ -234,7 +233,8 @@ private:
   StPhysicalHelixD mHelixGlobal;
 
   /* Th stuff */
-  StHbtHiddenInfo* mHiddenInfo; //!
+  // Fab private : add mutable
+  mutable StHbtHiddenInfo* mHiddenInfo; //!
   /***/
 
   friend class StHbtIOBinary;
@@ -242,5 +242,13 @@ private:
   friend class StHbtTTreeTrack;
 };
 
+inline const float* StHbtTrack::NSigma() const 
+{return &mNSigmaElectron;} // Fab private 
+inline float StHbtTrack::PidProbElectron() const {return mPidProbElectron;}
+inline float StHbtTrack::PidProbPion() const {return mPidProbPion;}
+inline float StHbtTrack::PidProbKaon() const {return mPidProbKaon;}
+inline float StHbtTrack::PidProbProton() const {return mPidProbProton;}
+inline StHbtThreeVector StHbtTrack::PGlobal() const {return mPGlobal;}
+inline float StHbtTrack::PtGlobal() const {return mPtGlobal;}   
 
 #endif

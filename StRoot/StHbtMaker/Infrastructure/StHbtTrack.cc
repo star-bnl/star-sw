@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.cc,v 1.10 2001/11/14 21:07:21 lisa Exp $
+ * $Id: StHbtTrack.cc,v 1.11 2001/12/14 23:11:30 fretiere Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -10,20 +10,8 @@
  *
  ***************************************************************************
  * $Log: StHbtTrack.cc,v $
- * Revision 1.10  2001/11/14 21:07:21  lisa
- * Fixed several small things (mostly discarded const) that caused fatal errors with gcc2.95.3
- *
- * Revision 1.9  2001/09/13 15:03:49  laue
- * bug fix in copy constructor (didn't decode pid probability)
- *
- * Revision 1.7  2001/07/17 20:40:17  laue
- * mNHitsDedx fixed
- *
- * Revision 1.6  2001/07/16 13:16:41  laue
- * new constructor added [ StHbtTrack(const StEvent*, cons StTrack*) ]
- *
- * Revision 1.5  2001/07/12 23:20:43  laue
- * mDCAGlobal,mPGlobal,mPtGlobal added
+ * Revision 1.11  2001/12/14 23:11:30  fretiere
+ * Add class HitMergingCut. Add class fabricesPairCut = HitMerginCut + pair purity cuts. Add TpcLocalTransform function which convert to local tpc coord (not pretty). Modify StHbtTrack, StHbtParticle, StHbtHiddenInfo, StHbtPair to handle the hit information and cope with my code
  *
  * Revision 1.4  2001/06/21 19:15:48  laue
  * Modified fiels:
@@ -84,7 +72,7 @@ StHbtTrack::StHbtTrack(const StHbtTrack& t) { // copy constructor
   mMap[0] = t.mMap[0];
   mMap[1] = t.mMap[1];
   mTrackId = t.mTrackId;
-
+  mHiddenInfo = t.mHiddenInfo;
 };
 //___________________________________________________
 #ifdef __ROOT__
@@ -96,62 +84,6 @@ StHbtTrack::StHbtTrack(const StHbtTrack& t) { // copy constructor
 #include "StarClassLibrary/StParticleTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtTTreeEvent.h" 
 #include "StHbtMaker/Infrastructure/StHbtTTreeTrack.h" 
-
-StHbtTrack::StHbtTrack(const StTrack* ST, StHbtThreeVector PrimaryVertex)
-{
-  StTpcDedxPidAlgorithm PidAlgorithm;
-  // while getting the bestGuess, the pidAlgorithm (StTpcDedxPidAlgorithm) is set up.
-  // pointers to track and pidTraits are set 
-  // So, even though BestGuess will generate a "variable not used" warning, DO NOT DELETE THE NEXT LINE
-  StParticleDefinition* BestGuess = (StParticleDefinition*)ST->pidTraits(PidAlgorithm);
-
-  // the following just point to particle definitions in StEvent
-  StElectron* Electron = StElectron::instance();
-  StPionPlus* Pion = StPionPlus::instance();
-  StKaonPlus* Kaon = StKaonPlus::instance();
-  StProton* Proton = StProton::instance();
-
-  // OK let's go...
-  mHiddenInfo = 0;
-  mTrackType = ST->type();
-  mCharge = ST->geometry()->charge();
-  mNHits = ST->detectorInfo()->numberOfPoints(kTpcId);
-  mNHitsPoss = ST->numberOfPossiblePoints(kTpcId);
-  mNHits = ST->numberOfPossiblePoints(kTpcId);
-  mNHitsDedx = ST->fitTraits().numberOfFitPoints(kTpcId);
-
-  mNSigmaElectron = PidAlgorithm.numberOfSigma(Electron);
-  mNSigmaPion = PidAlgorithm.numberOfSigma(Pion);
-  mNSigmaKaon = PidAlgorithm.numberOfSigma(Kaon);
-  mNSigmaProton = PidAlgorithm.numberOfSigma(Proton);
-  if ( PidAlgorithm.traits() )
-    mdEdx = PidAlgorithm.traits()->mean();
-  else 
-    cout << "StHbtTrack(const StTrack* ST, StHbtThreeVector PrimaryVertex) - no traits " << endl;
-
-  mChiSqXY = ST->fitTraits().chi2(0);
-  mChiSqZ = ST->fitTraits().chi2(1);
-
-  mP = ST->geometry()->momentum();
-  mPt = mP.perp();
-  mHelix = ST->geometry()->helix();
-  double pathlength = ST->geometry()->helix().pathLength(PrimaryVertex);
-  StHbtThreeVector  DCAxyz = ST->geometry()->helix().at(pathlength)-PrimaryVertex;
-  mDCAxy = DCAxyz.perp();
-  mDCAz = DCAxyz.z();
-
-  mHelixGlobal = ST->node()->track(global)->geometry()->helix();
-  double pathlengthGlobal = mHelixGlobal.pathLength(PrimaryVertex);
-  StHbtThreeVector  DCAxyzGlobal = mHelixGlobal.at(pathlengthGlobal)-PrimaryVertex;
-  mDCAxyGlobal = DCAxyzGlobal.perp();
-  mDCAzGlobal = DCAxyzGlobal.z();
-  mPGlobal = ST->node()->track(global)->geometry()->momentum();
-  mPtGlobal = mPGlobal.perp();
-
-  mMap[0] = ST->topologyMap().data(0);
-  mMap[1] = ST->topologyMap().data(1);
-  mTrackId = ST->key();
-}
 
 StHbtTrack::StHbtTrack(const StEvent* EV, const StTrack* ST) {
   StTpcDedxPidAlgorithm PidAlgorithm;
@@ -194,7 +126,12 @@ StHbtTrack::StHbtTrack(const StEvent* EV, const StTrack* ST) {
   mP = mHelix.momentumAt(pathlength,EV->summary()->magneticField()*kilogauss);
   mPt = mP.perp();
 
-  mHelixGlobal = ST->node()->track(global)->geometry()->helix();
+  if(dynamic_cast<const StPrimaryTrack*>(ST)){
+    mHelixGlobal = ST->node()->track(global)->geometry()->helix();
+  }
+  else{
+    mHelixGlobal = mHelix;
+  }
   double pathlengthGlobal = mHelixGlobal.pathLength(primaryVertex);
   StHbtThreeVector  DCAxyzGlobal = mHelixGlobal.at(pathlengthGlobal)-primaryVertex;
   mDCAxyGlobal = DCAxyzGlobal.perp();
@@ -227,6 +164,58 @@ StHbtTrack::StHbtTrack(const StEvent* EV, const StTrack* ST) {
 
 }
 
+StHbtTrack::StHbtTrack(const StTrack* ST, StHbtThreeVector PrimaryVertex)
+{
+  StTpcDedxPidAlgorithm* PidAlgorithm = new StTpcDedxPidAlgorithm();
+  if (!PidAlgorithm) cout << " StHbtTrack::StHbtTrack(StTrack*) - Whoa!! No PidAlgorithm!! " << endl;
+  // while getting the bestGuess, the pidAlgorithm (StTpcDedxPidAlgorithm) is set up.
+  // pointers to track and pidTraits are set 
+  // So, even though BestGuess will generate a "variable not used" warning, DO NOT DELETE THE NEXT LINE
+  StParticleDefinition* BestGuess = (StParticleDefinition*)ST->pidTraits(*PidAlgorithm);
+
+  // the following just point to particle definitions in StEvent
+  StElectron* Electron = StElectron::instance();
+  StPionPlus* Pion = StPionPlus::instance();
+  StKaonPlus* Kaon = StKaonPlus::instance();
+  StProton* Proton = StProton::instance();
+
+ 
+
+  // OK let's go...
+  mHiddenInfo = 0;
+  mTrackType = ST->type();
+  mCharge = ST->geometry()->charge();
+  mNHits = ST->detectorInfo()->numberOfPoints(kTpcId);
+  mNHitsPoss = ST->numberOfPossiblePoints(kTpcId);
+  mNSigmaElectron = PidAlgorithm->numberOfSigma(Electron);
+  mNSigmaPion = PidAlgorithm->numberOfSigma(Pion);
+  mNSigmaKaon = PidAlgorithm->numberOfSigma(Kaon);
+  mNSigmaProton = PidAlgorithm->numberOfSigma(Proton);
+  StDedxPidTraits* tTrait = PidAlgorithm->traits();
+  if(tTrait) {mdEdx = tTrait->mean();}
+  else{
+    mdEdx = 0;
+    cerr << "No pid trait!!!" << endl;
+  }
+
+  mP = ST->geometry()->momentum();
+  mPt = mP.perp();
+
+  double pathlength = ST->geometry()->helix().pathLength(PrimaryVertex);
+  StHbtThreeVector  DCAxyz = ST->geometry()->helix().at(pathlength)-PrimaryVertex;
+  mDCAxy = DCAxyz.perp();
+  mDCAz = DCAxyz.z();
+
+  mChiSqXY = ST->fitTraits().chi2(0);
+  mChiSqZ = ST->fitTraits().chi2(1);
+  mHelix = ST->geometry()->helix();
+  mHelixGlobal = ST->node()->track(global)->geometry()->helix();
+  mMap[0] = ST->topologyMap().data(0);
+  mMap[1] = ST->topologyMap().data(1);
+  mTrackId = ST->key();
+
+}
+
 StHbtTrack::StHbtTrack(const StHbtTTreeEvent* ev, const StHbtTTreeTrack* t) { // copy constructor
   mTrackType = t->mTrackType;
   mTrackId = t->mTrackId;
@@ -254,8 +243,9 @@ StHbtTrack::StHbtTrack(const StHbtTTreeEvent* ev, const StHbtTTreeTrack* t) { //
   mHelixGlobal = StPhysicalHelixD(t->mHelixGlobalC,t->mHelixGlobalDip,t->mHelixGlobalPhase,
 			    StThreeVectorD(t->mHelixGlobalX,t->mHelixGlobalY,t->mHelixGlobalZ),
 			    t->mHelixGlobalH);
+  //ev->mMagneticField
+  //  cout << mHelix << endl;
   mCharge =mHelix.charge(ev->mMagneticField*kilogauss);
-
   StHbtThreeVector vertex(ev->mVertexX,ev->mVertexY,ev->mVertexZ);
   double pathlength = mHelix.pathLength(vertex);
   //  cout << pathlength << endl;
@@ -264,32 +254,57 @@ StHbtTrack::StHbtTrack(const StHbtTTreeEvent* ev, const StHbtTTreeTrack* t) { //
   //  cout << mP << endl;
   mDCAxy = (mHelix.at(pathlength) - vertex).perp();
   mDCAz = (mHelix.at(pathlength) - vertex).z();
-
+  
   double pathlengthGlobal = mHelixGlobal.pathLength(vertex);
   mDCAxyGlobal = (mHelixGlobal.at(pathlengthGlobal) - vertex).perp();
   mDCAzGlobal = (mHelixGlobal.at(pathlengthGlobal) - vertex).z();
   mPGlobal = mHelixGlobal.momentumAt(pathlengthGlobal,ev->mMagneticField*kilogauss);
   mPtGlobal = mPGlobal.perp();
-  
 
-  // On the fly pid probability calculation
-  static unsigned int previousEventNumber = 0;
-  static StHbtAihongPid* hbtAihongPid = StHbtAihongPid::Instance();
-  static StuProbabilityPidAlgorithm* aihongPid = hbtAihongPid->aihongPid();
-  if( (mPidProbElectron+mPidProbPion+mPidProbKaon+mPidProbProton) <= 0.){
-    if (previousEventNumber != ev->mEventNumber) {
-      hbtAihongPid->updateEvent((int)ev->mUncorrectedNumberOfNegativePrimaries);
-      previousEventNumber = ev->mEventNumber;
+
+  // Onfly pid probability calculation
+  int dontskip=0;
+  if(dontskip &&
+     (mPidProbElectron+mPidProbPion+mPidProbKaon+mPidProbProton) <= 0.){
+    static int NotFirst;
+    static StuProbabilityPidAlgorithm AihongsPID;
+    if(!NotFirst){
+      NotFirst=1;
+      StuProbabilityPidAlgorithm::readParametersFromFile("PIDTable.root");
     }
-    hbtAihongPid->updateTrack( (int)mCharge, mP.mag(), mP.pseudoRapidity(), mNHitsDedx, mdEdx);
-    mPidProbElectron= (mCharge>0) ? aihongPid->beingPositronProb() : aihongPid->beingElectronProb() ;
-    mPidProbPion= (mCharge>0) ? aihongPid->beingPionPlusProb() : aihongPid->beingPionMinusProb();
-    mPidProbKaon= (mCharge>0) ? aihongPid->beingKaonPlusProb() : aihongPid->beingKaonMinusProb(); 
-    mPidProbProton=  (mCharge>0) ? aihongPid->beingProtonProb() : aihongPid->beingAntiProtonProb(); 
- }
+    static const StHbtTTreeEvent* evPrev;
+    static double tCent;
+    if(evPrev!=ev){
+      // to be changed
+      int tRefMult = ev->mUncorrectedNumberOfNegativePrimaries;
+      double tCent;
+      if (tRefMult > 225 ) tCent = 0.03;
+      else if (tRefMult > 215 ) tCent = 0.05;
+      else if (tRefMult > 200 ) tCent = 0.07;
+      else if (tRefMult > 180 ) tCent = 0.10;
+      else if (tRefMult > 140 ) tCent = 0.18;
+      else if (tRefMult > 130 ) tCent = 0.20; 
+      else if (tRefMult > 120 ) tCent = 0.23;
+      else if (tRefMult > 115 ) tCent = 0.24;
+      else if (tRefMult > 100 ) tCent = 0.28;
+      else tCent = 0.99;
+      evPrev=ev;
+    }
+    // AihongsPID.processPIDAsFunction(tCent, 0., (int) mCharge,mP.mag(),
+    //			    mP.pseudoRapidity(),mNHitsDedx,mdEdx);
+    mPidProbElectron= mCharge>0 ? AihongsPID.beingPositronProb() : 
+      AihongsPID.beingElectronProb();
+    mPidProbPion= mCharge>0 ? AihongsPID.beingPionPlusProb(): 
+      AihongsPID.beingPionMinusProb();
+    mPidProbKaon= mCharge>0 ? AihongsPID.beingKaonPlusProb(): 
+      AihongsPID.beingKaonMinusProb(); 
+    mPidProbProton=  mCharge>0 ? AihongsPID.beingProtonProb(): 
+      AihongsPID.beingAntiProtonProb(); 
+  }
+  mHiddenInfo = 0;
 };
 
-#endif __ROOT__
+#endif  // __ROOT__
 
 void StHbtTrack::SetTrackType(const short& t){mTrackType=t;}
 void StHbtTrack::SetCharge(const short& ch){mCharge=ch;}
@@ -314,7 +329,9 @@ void StHbtTrack::SetDCAzGlobal(const float& x){mDCAzGlobal = x;}
 void StHbtTrack::SetChiSquaredXY(const float& x){mChiSqXY = x;} 
 void StHbtTrack::SetChiSquaredZ(const float& x){mChiSqZ = x;}   
 void StHbtTrack::SetP(const StHbtThreeVector& p){mP = p;}
-void StHbtTrack::SetPt(const float& pt){mPt = pt;}              
+void StHbtTrack::SetPt(const float& pt){mPt = pt;} 
+void StHbtTrack::SetPGlobal(const StHbtThreeVector& p){mP = p;}
+void StHbtTrack::SetPtGlobal(const float& pt){mPt = pt;} 
 void StHbtTrack::SetHelix(const StPhysicalHelixD& h){mHelix = h;}
 void StHbtTrack::SetHelixGlobal(const StPhysicalHelixD& h){mHelixGlobal = h;}
 void StHbtTrack::SetTopologyMap(const int word, const unsigned int map) { mMap[word]=map;}
@@ -329,20 +346,16 @@ float StHbtTrack::NSigmaElectron() const {return mNSigmaElectron;}
 float StHbtTrack::NSigmaPion() const {return mNSigmaPion;}
 float StHbtTrack::NSigmaKaon() const {return mNSigmaKaon;}
 float StHbtTrack::NSigmaProton() const {return mNSigmaProton;}
-float StHbtTrack::PidProbElectron() const {return mPidProbElectron;}
-float StHbtTrack::PidProbPion() const {return mPidProbPion;}
-float StHbtTrack::PidProbKaon() const {return mPidProbKaon;}
-float StHbtTrack::PidProbProton() const {return mPidProbProton;}
 float StHbtTrack::dEdx() const {return mdEdx;}
 
 float StHbtTrack::DCAxy() const {return mDCAxy;}          
 float StHbtTrack::DCAz() const {return mDCAz;}            
 float StHbtTrack::DCAxyGlobal() const {return mDCAxyGlobal;}          
-float StHbtTrack::DCAzGlobal() const {return mDCAzGlobal;}            
+float StHbtTrack::DCAzGlobal() const {return mDCAzGlobal;}
 float StHbtTrack::ChiSquaredXY() const {return mChiSqXY;} 
 float StHbtTrack::ChiSquaredZ() const {return mChiSqZ;}   
 StHbtThreeVector StHbtTrack::P() const {return mP;}
-float StHbtTrack::Pt() const {return mPt;}                
+float StHbtTrack::Pt() const {return mPt;}              
 const StPhysicalHelixD& StHbtTrack::Helix() const {return mHelix;}
 const StPhysicalHelixD& StHbtTrack::HelixGlobal() const {return mHelixGlobal;}
 unsigned int StHbtTrack::TopologyMap(const unsigned int word) const { return mMap[word];}
@@ -350,4 +363,4 @@ short StHbtTrack::TrackId() const { return mTrackId; }
 
 void StHbtTrack::SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo) {mHiddenInfo=aHiddenInfo;}
 bool StHbtTrack::ValidHiddenInfo() const { if (mHiddenInfo) return true; else return false; }
-const StHbtHiddenInfo* StHbtTrack::HiddenInfo() const {return mHiddenInfo;}
+StHbtHiddenInfo* StHbtTrack::getHiddenInfo() const {return mHiddenInfo;}
