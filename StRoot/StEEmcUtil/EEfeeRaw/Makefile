@@ -5,6 +5,7 @@ SRCS     = $(wildcard EE*.cxx) RootWrapper.cxx
 
 CXX    = g++
 LD     = g++
+AR     = ar rul
 
 DEBUG  =-g -O 
 DEFINES=
@@ -27,6 +28,7 @@ all:	$(LIBNAME)
 
 $(LIBNAME): $(OBJS)
 	$(CXX) $(LDFLAGS) $^ -o lib$(LIBNAME).so
+	$(AR)  lib$(LIBNAME).a $^
 
 clean:
 	-rm -f *.o $(LINK) $(DICT).* lib$(LIBNAME).* 
