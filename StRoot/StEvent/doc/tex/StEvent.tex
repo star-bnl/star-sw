@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.3 1999/11/15 20:29:44 ullrich Exp $
+% $Id: StEvent.tex,v 2.4 1999/11/17 16:13:17 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -20,7 +20,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Log doesn't make much sense yet.
+% $Log
 % Revision 2.33  2000/05/22 22:04:07  ullrich
 % Removed StRichPixelCollection ref section and added description
 % of new RICH methods to class StEvent.
@@ -104,8 +104,8 @@
 % Revision 2.18  2000/02/11 16:23:45  ullrich
 % Add info on order in which primary vertices are stored
 % and added description of StPrimaryVertex::flag().
-  {\LARGE $ $Revision: 2.3 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/15 20:29:44 $ $}  % replaced by cvs with current revision
+%
+% Revision 2.17  2000/01/31 13:40:40  ullrich
 % Added Helens description of iflag (see StTrack::flag()).
 %
 % Revision 2.16  2000/01/27 18:38:30  ullrich
@@ -143,8 +143,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.3 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/15 20:29:44 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.4 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/11/17 16:13:17 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -168,8 +168,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.3 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/15 20:29:44 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.4 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/11/17 16:13:17 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -177,8 +177,8 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.3 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/15 20:29:44 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.4 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/11/17 16:13:17 $ $}  % replaced by cvs with current revision
 \index{header files}
 \index{StEventTypes.h file}
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
@@ -202,7 +202,7 @@ To summarize: All you need when using StEvent is to include
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.3 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.4 $ $}  \\[5mm] % replaced by cvs with current revision
 \index{enumerations}
 \index{constants}
 \index{StDetectorId.h file}
@@ -332,6 +332,10 @@ are \emph{not} guaranteed to exist. You might get a NULL pointer back.
 It is always a good idea to check if you really get what you asked
 for. Dereferencing a NULL pointer can be painful.
 
+As you will see in the reference sections many methods are provided
+in two versions: a constant and a non-constant version. Don't worry
+about the differences. The compiler will always choose the proper
+version.
                              kOtherVtxId};
 
 enum StDedxMethod           {kUndefinedMethodId,
@@ -419,7 +423,7 @@ This however applies for the header files only. Source files are not processed
 via \texttt{rootcint} and therefore all the stuff mentioned above can be used.
 And indeed in the implementation of various \StEvent\ classes we make heavily
 use of STL features.
-\begin{figure}[hbt]
+is a container it might be empty, i.e. it has zero size, but you ask
 for it you get it. Objects returned by pointer, however, are
 \emph{not} guaranteed to exist. You might get a \texttt{NULL} pointer
 back.  It is always a good idea to check if you really get what you
@@ -427,6 +431,34 @@ asked for.  Dereferencing a \texttt{NULL} pointer can be painful.
 
 As you will see in the reference section many methods are provided in
 two versions: a constant and a non-constant version. Don't worry about
+ROOT uses typedefs for the builtin standard C++ types. This is pretty confusing
+but has a good reason when it comes to persistence. This way one can guarantee the
+same size (number of bytes) for the types independent of the platform. 
+The ANSI/ISO standard only requires that:
+\texttt{char} $\le$ \texttt{short} $\le$ \texttt{int} $\le$ \texttt{long} $\le$ \texttt{long long}
+and 
+\texttt{float} $\le$ \texttt{double} $\le$ \texttt{long double}.
+units: cm, GeV and Tesla.  Angles are given in radians\footnote{Note,
+    that here \StEvent\ deviates from STAR guidelines where degrees
+    are declared the official units.}  In order to maintain a coherent
+system of units it is recommended to use the definitions in
+\texttt{SystemOfUnits.h} from the \name{StarClassLibrary}. They allow
+to 'assign' a unit to a given variable by multiplying it with a
+constant named accordingly (centimeter, millimeter, kilometer, Tesla,
+MeV, ...).  The constants ensure that the result after the
+multiplication follows always the STAR system of units.
+
+The following example illustrates their use:
+\begin{verbatim}
+double a = 10*centimeter;
+typedef unsigned char  Bool_t;      //Boolean 
+double c = 1*inch;
+double E1 = 130*MeV;
+double E2 = .1234*GeV;
+
+//
+and speed. It also makes code less portable and readable.
+Don't use them only because you see them used in \StEvent.
 cout << "STAR units:" << endl;
 cout << "a = " << a << " cm" << endl;
 cout << "b = " << b << " cm" << endl;
@@ -634,7 +666,8 @@ with any \StEvent\ class one might find in a container.
     Deletes element referred to by iterator \texttt{iter}.  If applied
     to structural containers the object gets also deleted.
     
-    Returns a pointer to the current StEvent object.
+    Returns a pointer to the current StEvent object. The object
+    returned is actually of type \texttt{StBrowsableEvent}.
     Returns the pointer to the \texttt{i}'th element where \texttt{i}
     runs from 0 to \texttt{size()-1}.
     Returns a pointer to the current StRun object.
@@ -651,10 +684,102 @@ iterators \texttt{StSPtrVecTrackNodeIterator} and
 if they iterate over structural or non-structural containers so there
 are different iterators for \texttt{StSPtrVecTrackNode} and
 \texttt{StPtrVecTrackNode} containers.
+\index{doEvents.C}
+\index{StEventMaker}
+\index{StAnalysisMaker}
+\index{root4star}
+\index{ROOT files}
+\index{XDF files}
+In order to get started it is always a good idea to study a
+simple example which shows the essential steps on how to
+analyse data using \StEvent.
+The procedure starting from scratch to run the provided StEvent usage
+example is
+StPtrVecTrack container;
+float x;
+
+\\ method 1
+for (unsigned int i=0; i<container.size(); i++)
+      x = container[i]->length();
+
+\\ method 2
+for (StPtrVecTrackIterator i = container.begin(); i != container.end(); i++)
+      x = (*i)->length();
+\end{verbatim}
+
+A warning at the end. Although \texttt{StArray} provides a interface
+compatible with the Standard C++ Library (former STL) it is not
+guaranteed that the standard algorithms will work (\texttt{sort},
+\texttt{accumulate}, \texttt{copy}, \texttt{find}, ...). You better
+check this from case to case. Don't say you haven't been warned.
+
+For your own analysis (or reconstruction) code you might use the
+standard STL containers together with \StEvent\ provided that you
+\item[\texttt{StAnalysisMaker}:] Pick up the \texttt{StEvent} event and analyze it
+    (incorporates a few simple examples).
+are transient they are more efficient if speed and use less memory if
+this is your concern.
+specified root directory (see doEvents.C for details), eg. example
+\subsection{Getting StEvent: The StEventMaker}
+\label{sec:StEventMaker}
+\index{StEventMaker}
+
+\StEvent\ is set up and filled in a ``maker'' with the name
+\texttt{StEventMaker}.  This maker reads DST tables stored in memory
+and does all the things to make \StEvent\ nice and useful. How the DST
+gets into memory is another story and is explained in the next section
+    \verb+Bool_t  doPrintRunInfo;+\\
+\begin{Entry}
+    
+\item[Public Data\\ Member]
+    \verb+Bool_t  doLoadTpcHits;+\\
+it yourself you can pick up StAnalysisMaker and modify it piece by
+piece or use it as a template for a Maker of your own that works with
+StEvent:
+    Controls if FTPC hits should be loaded (default=kTRUE).
+    
+    \verb+Bool_t  doLoadSvtHits; +\\
+    Controls if SVT hits should be loaded (default=kTRUE).
+    [and edit and modify]
+    \verb+Bool_t  doLoadTptTracks;+\\
+    Controls if TPT tracks should be loaded (default=kFALSE).
+    [and edit to use your maker]
+    root4star doEvents.C
+    Print or do not print info on the current \StEvent\ event.
+By the time you gain more experience your ``maker'' will become more and
+more sophisticated but the basic idea shown in the example stays the same.
     
     \verb+Bool_t  doPrintMemoryInfo;+\\
     Switch on/off checks on memory usage of \StEvent\
 
+All documentation specific to the various packages is under cvs
+control and stored in the same repository as the source code of the
+package. You will find it usually in a directory called \texttt{doc}.
+In addition to that every package should contain a \texttt{README} and
+a \texttt{index.html} file with further information. (Note the
+``should''.) 
+
+\StEvent\ makes use of various classes from the StarClassLibrary
+(SCL).  Examples are \texttt{StThreeVector}, \texttt{StHelix} and
+\texttt{StParticleDefinition}. You should have a version of the
+corresponding LaTeX manual at hand.\index{SCL} \index{StarClassLibrary}
+    \verb+StRun*    run();+\\
+    Returns a pointer to the current \texttt{StRun} object.  This
+    object gets only updated for a new run, else you will get always
+    the same instance.
+reflects this content (although in a different way and approach) this is
+the place to check if you don't understand the meaning of certain
+variables or methods.  In this manual we cannot go too much into every
+detail.
+mentioned here: Do \emph{not} delete the \texttt{StEvent} or
+And finally you really should have the C++ bible from B.~Stroustrup
+within 100 feet distance from your desk. The more you get into C++ and OO
+the more you will appreciate this book. We already mentioned that
+
+the internal structure you will find things like virtual constructors,
+overloaded new/delete operators and much more.
+Then it is nice to have Bjarnes book around to look things up.
+\clearpage
 
 In order to get started it is always a good idea to study a simple
 \subsection{Run Header} 
@@ -708,10 +833,16 @@ file.
   // 
   StRichCollection* theRichCollection = mEvent->richCollection();
 \item[Summary]
+    Version of  \texttt{StEvent} with a higher degree of integration in ROOT.
     cout << "Aborting...\n" << endl;
     return kStWarn;
   }
 \item[Description]
+    \texttt{StBrowsableEvent} adds ROOT specific
+  //
+  // Get the Hits from the collection
+  //
+  if (!theRichCollection->hitsPresent()) {
 \item[Related Classes]
     \texttt{StBrowsableEvent} is derived from \texttt{StEvent}.
     return kStWarn;
@@ -731,10 +862,14 @@ the StEvent class. It provides a subset of the data member and methods
 from StEvent with respect to TPC hits, track nodes and vertices.  This
 allows, to some extend, to use exactly the same analysis code for the
 \item[Summary]
+    Definitions of all container types used in \StEvent.
 standard offline reconstruction chain.
 The only difference is that
 \item[Description]
-\item[Related Classes]
+   \texttt{StContainers.h} includes \texttt{StArray.h} which contains the guts
+    of the container implementation. In StContainer.h (and .cxx) the appropriate
+    macros are called to declare and define the container types. If a new container
+    type has to be defined it \emph{must} be defined here and only here.
 \end{verbatim}
 with
 \begin{verbatim}
@@ -744,6 +879,7 @@ with
 \begin{Entry}
 \item[Summary] Version of \texttt{StEvent} with a higher degree of
 \item[Summary]
+    Monitors details of the Central Trigger Barrel (CTB) reconstruction.
     \verb+#include "StBrowsableEvent.h"+\\
     \verb+class StBrowsableEvent;+\\
 \item[Description] \texttt{StBrowsableEvent} adds ROOT specific
@@ -764,6 +900,7 @@ with
     \verb+void browse(TBrowser*);+\\
 \end{Entry}
 \item[Summary]
+    Central Trigger Barrel (CTB) data.
 
      StEvent* event;
      // ...
@@ -794,13 +931,23 @@ In general each class has a public:
 \item Copy constructor
 \item Assignment operator
 \item Virtual destructor
-    \verb+StDedxPidTraits(StDetectorId, Short_t,+\\
-    \verb+                UShort_t, Float_t , Float_t);+\\
-    \verb+StDedxPidTraits(const dst_dedx_st&);+\\
+\end{itemize}
+There are a few exceptions from this rule which are explained in the
+referring class reference.
+
+Not every member function listed is explained in detail since many are
+trivial and their names are chosen such that one can easily figure out
+    \texttt{np}, dE/dx mean \texttt{dedx}, and sigma \texttt{sig}.
+omitted throughout the documentation and so is the \texttt{virtual}
 keyword.  The state-of-the-art reference is always the class
 definition in the header file.
+\begin{figure}[htb]
+    \begin{center}
 \item[Summary] Central Trigger Barrel (CTB) data.
-    \verb+Float_t variance() const;+\\
+            a common structure and a common behavior.}
+    \end{center}
+    \verb+Float_t sigma() const;+\\
+    Returns the sigma of the dE/dx value.
 \item[Summary] Definitions of all container types used in \StEvent.
     \verb+#include "StContainers.h"+\\
     \verb+UInt_t numberOfCtbCounters() const;+\\
@@ -830,9 +977,15 @@ definition in the header file.
     \verb+const StSPtrVecEmcRawHit& hits() const;+\\
 \end{Entry}
 \item[Summary]
+    Header file which contains all enumeration types
+    used in \StEvent.
 
 \subsection{StEmcPoint}
 \item[Description]
+    All enumeration types used in \StEvent\ are defined
+    in this header file. It also includes other header files
+    which are common to all STAR code. For a complete list
+    of enum types see section \ref{sec:Enumerations}.
 \item[Synopsis]
     \verb+#include "StEmcPoint.h"+\\
     \verb+class StEmcPoint;+\\
@@ -842,10 +995,20 @@ definition in the header file.
     \verb+StEmcPoint();+\\
     \verb+StEmcPoint(const StThreeVectorF&,+\\
 \item[Summary]
+    Event header and entry point to the \StEvent\ tree.
     \verb+const StThreeVectorF&,+\\
     \verb+ULong_t, Float_t,+\\
     \verb+Float_t, Float_t,+\\
 \item[Description]
+    The class \texttt{StEvent} is the key class to work with
+    the whole \StEvent\ tree. It itself contains data which
+    describes and characterizes the event and gives
+    references and pointers to all information there is in the event.
+    Don't forget to check for \texttt{NULL} pointers if a method returns
+    an object by pointer. Only if a method returns an object by reference
+    \verb+StThreeVectorF size() const;+\\
+    The package StEventMaker (see Sec.~\ref{sec:StEventMaker}) provides
+    a pointer to the current instance of \texttt{StEvent}.
 \item[Related Classes]
     Class \texttt{StEvent} inherits from \texttt{St\_DataSet}.
     \texttt{StBrowsableEvent} is derived from \texttt{StEvent}.
@@ -855,41 +1018,93 @@ definition in the header file.
     \verb+const StPtrVecEmcPoint& neighbor() const;+\\
     \verb+void addNeighbor(const StEmcPoint*);+\\
     \verb+StPtrVecTrack& track();+\\
+    \verb+const StPtrVecTrack& track() const;+\\
     \verb+void addTrack(StTrack*);+\\
 \end{Entry}
+\clearpage
 
+
+    Character string which contains a short description
+    of the type of the event you got.
+\label{sec:StEmcRawHit}
 \begin{Entry}
-    \verb+#include "StEmcRawHit.h"+\\
-\item[Related Classes]
-    \verb+StEmcRawHit(StDetectorId, UInt_t, UInt_t, UInt_t, UInt_t);+\\
-    \verb+ULong_t bunchCrossingNumber() const;+\\
-    \verb+UInt_t module() const;+\\
-    \verb+UInt_t eta() const;+\\
-    \verb+void setId(StDetectorId, UInt_t, UInt_t, UInt_t);+\\
-    \verb+void setAdc(const UInt_t);+\\
-\subsection{StEmcSoftwareMonitor}
-    \texttt{St\_DataSet}.  \texttt{StBrowsableEvent} is derived from
 \item[Summary]
 \item[Synopsis]
+    \verb+#include "StEmcRawHit.h"+\\
+    \verb+class StEmcRawHit;+\\
+\item[Description]
 \item[Related Classes]
 \item[Public\\ Constructors]
+    \verb+StEmcRawHit();+\\
+    \verb+StEmcRawHit(StDetectorId, UInt_t, UInt_t, UInt_t, UInt_t);+\\
+    \verb+ULong_t bunchCrossingNumber() const;+\\
+    \verb+StDetectorId detector() const;+\\
+    \verb+UInt_t module() const;+\\
+    \verb+UInt_t eta() const;+\\
+    Returns pointer to the event summary with many useful
+    information for QA/QC and event characterization.
+    \verb+Float_t energy() const;+\\
+    \verb+void setId(StDetectorId, UInt_t, UInt_t, UInt_t);+\\
+    \verb+void setAdc(const UInt_t);+\\
+    \verb+void setEnergy(const Float_t);+\\
+\end{Entry}
+    gathered during the event reconstruction. Mostly statistic
+    on number of hits, tracks etc.
+
+\subsection{StEmcSoftwareMonitor}
+    \texttt{St\_DataSet}.  \texttt{StBrowsableEvent} is derived from
+    Pointer to the TPC hit collection. If no hits are stored
+    on the DST this pointer is \texttt{NULL}. You better check for this.
+\begin{Entry}
+\item[Summary]
+\item[Synopsis]
+    Pointer to the FTPC hit collection. If no hits are stored
+    on the DST this pointer is \texttt{NULL}. You better check for this.
+\item[Description]
+\item[Related Classes]
+\item[Public\\ Constructors]
+    Pointer to the SVT hit collection. If no hits are stored
+    on the DST this pointer is \texttt{NULL}. You better check for this.
+\clearpage
 \begin{Entry}
 \item[Summary] Header file which contains all enumeration types used
+    in \StEvent.
 \item[Synopsis]
     \verb+#include "StEnumerations.h"+\\
+\item[Description] All enumeration types used in \StEvent\ are defined
+    in this header file. It also includes other header files which are
+    common to all STAR code. For a complete list of enum types see
     section \ref{sec:Enumerations}.
 \end{Entry}
+\clearpage
 
 
+\subsection{StEvent}
 \index{StEvent|textbf}
-    \verb+StPrimaryVertex* primaryVertex(UInt_t = 0);+\\
-    \verb+const StPrimaryVertex* primaryVertex(UInt_t = 0) const;+\\
+    Number of primary vertices (aka event vertices).
+    Usually there is only one but future implementations of the
+    vertex finder will be able to also detect pile-up vertices
+    in which case you better check the number before dealing
+    with the event.
+    \verb+#include "StEvent.h"+\\
+    \verb+class StEvent;+\\
+\item[Description] The class \texttt{StEvent} is the key class to work
+    with the whole \StEvent\ tree. It itself contains data which
+    describes and characterizes the event and gives references and
+    pointers to all information there is in the event.  Don't forget
+    to check for \texttt{NULL} pointers if a method returns an object
     by pointer. Only if a method returns an object by reference
     it is guaranteed to exist.\\
+    The package StEventMaker (see Sec.~\ref{sec:StEventMaker})
+    provides a pointer to the current instance of \texttt{StEvent}.
 \item[Related Classes] Class \texttt{StEvent} inherits from
     \texttt{St\_DataSet}.
+\item[Public\\ Constructors]
+
     
     \verb+StEvent(const event_header_st&,+\\
+    defaults to the first (\texttt{i=0}).
+    Overwrite inherited \texttt{Browse()} method from \texttt{St\_DataSet}.
     Method is invoked from ROOT to allow interactive browsing of \StEvent. 
     
     \verb+Long_t runId() const;+\\
@@ -972,9 +1187,14 @@ definition in the header file.
     \verb+void setTime(Long_t);+\\
 
 \item[Summary]
+    Header files which contains all type definition used in \StEvent.
     \verb+void setBunchCrossingNumber(ULong_t, UInt_t);+\\
 
 \item[Description]
+    Since all \StEvent\ classes contain only the minimum amount of declaration
+    it could become very tedious to find the right set of header files in your application.
+    This header files overcomes this problem. Include it and you are all set.
+    See also section \ref{sec:HeaderFiles}.
     \verb+ULong_t bunchCrossingNumber() const;+\\
     \verb+StEventInfo(const event_header_st&);+\\
 \item[Public Member\\ Functions]
@@ -1022,10 +1242,15 @@ definition in the header file.
     \verb+Float_t meanPt2() const;+\\
     \verb+Float_t meanEta() const;+\\
     \verb+Float_t rmsEta() const;+\\
+    \verb+const StThreeVectorF& primaryVertexPosition() const;+\\
     \verb+UInt_t numberOfBins() const;+\\
+    \verb+Long_t tracksInEtaBin(UInt_t) const;+\\
+    \verb+Long_t tracksInPhiBin(UInt_t) const;+\\
     \verb+Long_t tracksInPtBin(UInt_t) const;+\\
-    \verb+StFtpcPlaneHitCollection* plane(UInt_t);+\\
-    \verb+const StFtpcPlaneHitCollection* plane(UInt_t) const;+\\
+    \verb+Float_t energyInEtaBin(UInt_t) const;+\\
+    \verb+Float_t energyInPhiBin(UInt_t) const;+\\
+    \verb+Float_t lowerEdgeEtaBin(UInt_t) const;+\\
+    Index \texttt{i} runs from 0--(n-1) where n = \texttt{numberOfPlanes()}.
     \verb+Float_t upperEdgePhiBin(UInt_t) const;+\\
     \verb+Float_t lowerEdgePtBin(UInt_t) const;+\\
     \verb+Float_t upperEdgePtBin(UInt_t) const;+\\
@@ -1917,10 +2142,15 @@ definition in the header file.
 \item[Description]
 \item[Related Classes]
 \item[Public\\ Constructors]
+    \verb+StSvtWaferHitCollection();+\\
 \item[Public Member\\ Functions]
+    \verb+StSPtrVecSvtHit& hits();+\\
+    \verb+const StSPtrVecSvtHit& hits() const;+\\
 \end{Entry}
-    \verb+StTpcSectorHitCollection* sector(UInt_t);+\\
-    \verb+const StTpcSectorHitCollection* sector(UInt_t) const;+\\
+\clearpage
+
+
+    Index \texttt{i} runs from 0--(n-1) where n = \texttt{numberOfSectors()}.
 \label{sec:StTpcDedxPidAlgorithm}
 \begin{Entry}
 \item[Summary] Functor which allows to obtain PID information
