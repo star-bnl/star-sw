@@ -21,6 +21,10 @@
      >                iflg(Lnmax), iadr(Nmh)
 *    - - - - - - - - -
 *
+      Real            Hits(Nmh),FHmin(Nmh),FHmax(Nmh),FHbin(Nmh)
+      Character*4     Csys*4/' '/,chit(Nmh)*4
+      Integer         AgFHIT0,ISLFLAG,Iprin,Idigi,i,j,k,nh
+*
       character*4 Gname(Lnmax),Tname(Lnmax)
       data        Lnam/Lnam0/
       data        (Gname(i),i=1,Lnam0) /'id','trac','next','volume',
@@ -28,9 +32,6 @@
      >  'PTOT','R','RR','PHI','THE','ETA','TDR','TOF','SLEN','STEP',
      >  'ETOT','LGAM','LPTO','ELOS','USER','BIRK','DE','NONE','UNKN'/
 *
-      Real            Hits(Nmh),FHmin(Nmh),FHmax(Nmh),FHbin(Nmh)
-      Character*4     Csys*4/' '/,chit(Nmh)*4
-      Integer         AgFHIT0,ISLFLAG,Iprin,Idigi,i,j,k,nh
       External        AgFHIT0,ISLFLAG
 *   
       Iprin = -1
