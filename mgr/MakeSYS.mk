@@ -1,4 +1,7 @@
 #  $Log: MakeSYS.mk,v $
+#  Revision 1.16  1998/06/12 15:45:02  fisyak
+#  LDFLAGS for Linux
+#
 #  Revision 1.15  1998/06/12 12:47:08  fisyak
 #  Add include on Standard tables
 #
@@ -26,7 +29,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/06/12 12:47:08 $ 
+#             Last modification $Date: 1998/06/12 15:45:02 $ 
 #. default setings
 
 RM := rm -f
@@ -142,11 +145,12 @@ ifneq (,$(findstring $(STAF_ARCH),i386_linux2))
   CFLAGS   := -fPIC  -O -Wall
   CPPFLAGS += f2cFortran
 #yf  LDFLAGS  := -Wl,-Bstatic
-LDFLAGS    += -shared -Wl,-soname,libEvent.so
-  SOFLAGS  := -shared 
+LDFLAGS    += -shared 
+  SOFLAGS  := -shared -Wl,-soname,libEvent.so
 #yf  CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lg++ -lpgc -lm -ldl -rdynamic
 ##FLIBS    := -L/usr/pgi/linux86/lib  -lf2c
-  CLIBS    := -lg++ -lm -ldl -rdynamic 
+  CLIBS    := -lg++ -lm -ldl
+#                            -rdynamic 
   FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
   FFLAGS   := -DPGI -w 
   FEXTEND  := -Mextend
