@@ -51,7 +51,9 @@ StSectorAligner::StSectorAligner(StTpcDb* dbin) :
   mVecHit = new StThreeVectorF;   assert(mVecHit);
 
   thedb = dbin;
-
+  lastInnerSectorRow=13;
+  innerSectorRotatePoint=123;
+  outerSectorRotatePoint=123;
 }
 
 //___________
