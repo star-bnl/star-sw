@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.82  1999/07/10 19:06:33  fisyak
+#  Fix St_base
+#
 #  Revision 1.81  1999/07/07 14:08:37  fisyak
 #  Extract dependencies from standard make path, add pathes to StarClassLibrary and MySql
 #
@@ -322,7 +325,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/07/07 14:08:37 $ 
+#           Last modification $Date: 1999/07/10 19:06:33 $ 
 #  default setings
 # Current Working Directory
 #
@@ -393,7 +396,9 @@ endif
 #          I have subdrs
 .PHONY               :  all $(BASE)  $(St_Tables) test clean clean_lib clean_share clean_obj
 all:    $(BASE) $(addsuffix _loop, $(SUBDIRS))  $(addsuffix _$(branch),$(PKG)) $(St_Tables)
-$(BASE): St_base_StRoot
+$(BASE): 
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/$(BASE) depend
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/$(BASE)
 St_TablesDoc: 
 	root.exe -b -q MakeHtmlTables.cxx
 %_loop:
