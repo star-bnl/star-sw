@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.30 2000/11/02 16:33:28 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.31 2001/02/22 05:02:40 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,12 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.31  2001/02/22 05:02:40  ullrich
+ * Added new protected method getStEventInstance().
+ * Modified maker to allow multiple calls of Make() within
+ * one event. If instance already it is re-used and the data
+ * from existing tables gets added.
+ *
  * Revision 2.30  2000/11/02 16:33:28  ullrich
  * Fixed tiny memory leak.
  *
@@ -140,7 +146,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.30 2000/11/02 16:33:28 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.31 2001/02/22 05:02:40 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -371,6 +377,18 @@ StEventMaker::makeRun()
     return kStOK;
 }
 
+StEvent*
+StEventMaker::getStEventInstance()
+{
+    StEvent* exist = (StEvent*) GetInputDS("StEvent");
+    if (exist) {
+        gMessMgr->Info() << "StEventMaker::getStEventInstance(): existing instance found, no new object created." << endm;
+	return exist;
+    }
+    else
+	return new StEvent;
+}
+
 Int_t
 StEventMaker::makeEvent()
 {
@@ -381,8 +399,7 @@ StEventMaker::makeEvent()
     //  error message.
     //
     if (mCreateEmptyInstance) {
-        mCurrentEvent = new StEvent;
-        gMessMgr->Info() << "StEventMaker::makeEvent(): created empty instance of StEvent." << endm;
+        mCurrentEvent = getStEventInstance();
 	return kStOK;
     }
 
@@ -404,17 +421,12 @@ StEventMaker::makeEvent()
     //
     //  Create instance of StEvent, using whatever we got so far.
     //
-    if (dstEventHeader && dstEventSummary && mDstSummaryParam) 
-        mCurrentEvent = new StEvent(*dstEventHeader, *dstEventSummary, *mDstSummaryParam);
-    else if (dstEventHeader)
-        mCurrentEvent = new StEvent(*dstEventHeader);
-    else if (dstEventSummary && mDstSummaryParam) {	
-	mCurrentEvent = new StEvent();
+    mCurrentEvent = getStEventInstance();
+    if (dstEventHeader)
+	mCurrentEvent->setInfo(new StEventInfo(*dstEventHeader));
+    if (dstEventSummary && mDstSummaryParam)
 	mCurrentEvent->setSummary(new StEventSummary(*dstEventSummary, *mDstSummaryParam));
-    }
-    else
-        mCurrentEvent = new StEvent;
-    
+        
     //
     //  Setup the software monitors.
     //
