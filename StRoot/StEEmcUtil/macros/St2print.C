@@ -1,12 +1,15 @@
-//******************************************************************************
+// *****************************************************************************
 class StEmcDetector;
 class StChain;
 class  StEmcRawData;
 class EEfeeDataBlock;
+class Collection;
 StChain *chain=0;
 
-void St2print(Int_t nevents=10,char *fname="R5086033c3.event.root")
+void St2print(Int_t nevents=1,char *fname="R5086033c3.event.root")
 {
+
+  fname="/star/data27/reco/dev/2004/05/st_physics_adc_5135048_raw_2070001.event.root";
   //
   // First load some shared libraries we need
   //    
@@ -86,17 +89,64 @@ void St2print(Int_t nevents=10,char *fname="R5086033c3.event.root")
       //printESMD(emcC->detector(15));
       //     printESMD(emcC->detector(16));
   
-      printRaw(emcC->eemcRawData());
+      // printRaw(emcC->eemcRawData());
+      
+      printRawBEMC(emcC->bemcRawData());
       
 
-    //      goto EventLoop;
+
+    if(iev<=2)      goto EventLoop;
     } // Event Loop
     chain->Finish();
     //    delete myMk2;
    
     
 }
-//******************************************************************************
+
+// ****************************************************************************/
+
+void printRawBEMC(StEmcRawData *raw) {
+
+
+  if(!raw) return;
+
+/*
+data banks
+0 - tower
+1-8 - SMD
+9-12- PSD
+*/
+
+  int NBANK = 13;
+
+  int tot=0;
+
+//for the headers
+ for(int i = 1; i<NBANK;i++) {
+   if(raw->header(i))  {
+     int size = raw->sizeHeader(i);
+     printf("\n======\nBANK=%d header size=%d\n",i,size);
+     for(int j = 0;j<size;j++)  {
+       if(j%16==0) printf("\n");
+       printf("0x%04x ",raw->header(i,j));
+     }
+   }
+
+   if(raw->data(i))   {
+     int size = raw->sizeData(i);
+     printf("\nBANK=%d data size=%d",i,size);
+     for(int j = 0;j<size;j++) {
+       if(j%16==0) printf("\n");
+       printf("0x%04x ",raw->data(i,j));
+       tot++;
+     }
+   } 
+   printf("\n tot=%d\n",tot);
+ }
+}
+
+
+
 //=============================================
 //=============================================
 //=============================================
@@ -122,7 +172,7 @@ printRaw(  StEmcRawData* raw) {
       block.setHead(raw->header(icr));
       block.setDataArray(raw->data(icr),raw->sizeData(icr));
       if(icr>=6) continue; // just towers
-      block.print(1);
+      block.print(0);
       
     }
     
