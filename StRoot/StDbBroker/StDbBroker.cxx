@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.29 2001/10/24 04:05:56 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.30 2001/10/26 15:44:02 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.30  2001/10/26 15:44:02  porter
+ * add query by runNumber
+ *
  * Revision 1.29  2001/10/24 04:05:56  porter
  * added zombie designation per Victor's suggestion
  *
@@ -169,6 +172,7 @@ char **StDbBroker::GetComments(St_Table *parentTable)
 //_____________________________________________________________________________
 StDbBroker::StDbBroker(): m_structName(0), m_tableName(0), m_requestTimeStamp(0), m_tableVersion(0), m_database(0), m_ParentType(0), m_isVerbose(0), m_Nodes(0), m_Tree(0), m_flavor(0), m_prodTime(0) {
 
+  m_runNumber=0;
   mgr=StDbManager::Instance();
   StDbMessService* ms=new StDbWrappedMessenger();
   mgr->setMessenger(ms);
@@ -410,7 +414,17 @@ void * StDbBroker::Use(int tabID, int parID)
   if(!node) return pData;
   if(!node->hasDescriptor())node->setDescriptor(GetTableDescriptor());
 
-  if(!mgr->fetchDbTable(node))SetZombie(true);
+  bool fetchStatus;
+  if(node->getDbType()==dbRunLog && node->getDbDomain() != dbStar){
+    ostrstream rq;
+    rq<<" where runNumber="<<m_runNumber<<ends;
+    fetchStatus=mgr->fetchDbTable(node,rq.str());
+    rq.freeze(0);
+  } else {
+    fetchStatus=mgr->fetchDbTable(node);
+  }
+
+  if(!fetchStatus)SetZombie(true);
 
     m_nRows= node->GetNRows();
     pData  = node->GetTableCpy(); // gives the "malloc'd version"
