@@ -1,11 +1,23 @@
+/*!
+ * \class St_scf_Maker
+ * \author B.Hippolyte, W.Pinganaud   
+ * \date 2000
+ *
+ *  Cluster finder  for the Silicon Strip Detectors
+ * 
+ *  This maker controls the cluster reconstruction in the SSD :
+ *  fired strips are read from a table and associated with
+ *  neighbouring ones to form clusters. Cluster splitting is also
+ *  done at this stage if a local minimum is found inside the 
+ *  cluster.
+ *  The cluster finding is performs independantly on each side
+ *  of a single detector. 
+ *
+ * See documentation at http://star.in2p3.fr/STAR_informatique/hit_reconstruction.html#scf
+ */
 #ifndef STAR_St_scf_Maker
 #define STAR_St_scf_Maker
 
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// St_scf_Maker virtual base class for Maker                            //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
@@ -46,6 +58,19 @@ class St_scf_Maker : public StMaker {
    virtual Int_t  Make();
    virtual Int_t  Finish();
    virtual void   PrintInfo();
+
+   virtual const char *GetCVS()
+     {static const char cvs[]="Tag $Name:  $ $Id: St_scf_Maker.h,v 1.3 2002/03/25 20:13:05 suire Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
    ClassDef(St_scf_Maker, 1)   //StAF chain virtual base class for Makers
 };
 #endif
+
+ /**************************************************************************
+ * 
+ *  $Log: St_scf_Maker.h,v $
+ *  Revision 1.3  2002/03/25 20:13:05  suire
+ *  Small memory leak fixes, doxygen documentation
+ *
+ *
+ **************************************************************************/

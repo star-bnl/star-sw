@@ -1,8 +1,13 @@
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// St_sce_Maker class for Makers                                        //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
+/**************************************************************************
+ * Class      : St_sce_maker.cxx
+ ***************************************************************************
+ *
+ * $Log: St_sce_Maker.cxx,v $
+ * Revision 1.5  2002/03/25 20:14:04  suire
+ * Small memory leak fixes, doxygen documentation
+ *
+ *
+ **************************************************************************/
 #include <iostream.h>
 #include <stdlib.h>
 #include "St_sce_Maker.h"
@@ -45,27 +50,27 @@ Int_t St_sce_Maker::Init(){
     gMessMgr->Error() << "No  access to control parameters" << endm;
   } 
 // 		Create SCM histograms
-  devXl0 = new TH1F("xl [0] (microns)","Xl [0] deviation:",100,-200,200);
+  devXl0 = new TH1F("xl_0","Xl [0] deviation (microns):",100,-200,200);
   devXl0 -> SetYTitle("Nbre of Points");
   devXl0 -> SetXTitle("Deviation (microns)");
 
-  devXl1 = new TH1F("xl [1] (microns)","Xl [1] deviation:",50,-6000,6000);
+  devXl1 = new TH1F("xl_1","Xl [1] deviation (microns):",50,-6000,6000);
   devXl0 -> SetYTitle("Nbre of Points");
   devXl0 -> SetXTitle("Deviation (microns)");
 
-  devNrg = new TH1F("Energy (MeV)","Energy deviation:",50,-50,50);
+  devNrg = new TH1F("Energy","Energy deviation (MeV):",50,-50,50);
   devXl0 -> SetYTitle("Nbre of Points");
   devXl0 -> SetXTitle("Deviation (MeV)");
 
-  devXg0 = new TH1F("xg [0] (microns)","Xg [0] deviation:",100,-200,200);
+  devXg0 = new TH1F("xg_0","Xg [0] deviation (microns):",100,-200,200);
   devXl0 -> SetYTitle("Nbre of Points");
   devXl0 -> SetXTitle("Deviation (microns)");
 
-  devXg1 = new TH1F("xg [1] (microns)","Xg [1] deviation:",100,-200,200);
+  devXg1 = new TH1F("xg_1","Xg [1] deviation (microns):",100,-200,200);
   devXl0 -> SetYTitle("Nbre of Points");
   devXl0 -> SetXTitle("Deviation (microns)");
 
-  devXg2 = new TH1F("xg [2] (microns)","Xg [2] deviation:",50,-6000,6000);
+  devXg2 = new TH1F("xg_2","Xg [2] deviation (microns):",50,-6000,6000);
   devXl0 -> SetYTitle("Nbre of Points");
   devXl0 -> SetXTitle("Deviation (microns)");
 
@@ -100,7 +105,6 @@ Int_t St_sce_Maker::Make()
   showScmStats();
 
   makeScmHistograms();
-  writeScmHistograms();
 
   return kStOK;
 }
@@ -296,7 +300,7 @@ void St_sce_Maker::writeScmHistograms()
 void St_sce_Maker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: St_sce_Maker.cxx,v 1.4 2000/09/11 12:36:02 hippolyt Exp $\n");
+  printf("* $Id: St_sce_Maker.cxx,v 1.5 2002/03/25 20:14:04 suire Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -304,5 +308,6 @@ void St_sce_Maker::PrintInfo()
 Int_t St_sce_Maker::Finish() {
   if (Debug()) gMessMgr->Debug() << "In St_sce_Maker::Finish() ... "
                                << GetName() << endm; 
+  writeScmHistograms();
   return kStOK;
 }

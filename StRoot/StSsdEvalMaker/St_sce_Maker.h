@@ -1,10 +1,19 @@
+/*!
+ * \class St_sce_Maker
+ * \author B.Hippolyte 
+ * \date 2000
+ *
+ *  Evaluation of the reconstruction for the Silicon Strip Detectors
+ * 
+ *  This maker controls the evaluation of the SSD reconstruction :
+ *  the evaluation is perfomed by comparing the geant simulated hits
+ *  to the output of the reconstruction. Efficiency and purity, as well
+ *  as the the space point resolution can be determined. 
+ * 
+ * See documentation at http://star.in2p3.fr/STAR_informatique/hit_reconstruction.html#sce
+ */
 #ifndef STAR_St_sce_Maker
 #define STAR_St_sce_Maker
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// St_sce_Maker virtual base class for Maker                            //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
@@ -47,6 +56,19 @@ class St_sce_Maker : public StMaker {
    virtual Int_t  Make();
    virtual Int_t  Finish();
    virtual void   PrintInfo();
+
+   virtual const char *GetCVS()
+     {static const char cvs[]="Tag $Name:  $ $Id: St_sce_Maker.h,v 1.3 2002/03/25 20:14:04 suire Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
    ClassDef(St_sce_Maker, 1)   //StAF chain virtual base class for Makers
 };
 #endif
+
+ /**************************************************************************
+ *
+ * $Log: St_sce_Maker.h,v $
+ * Revision 1.3  2002/03/25 20:14:04  suire
+ * Small memory leak fixes, doxygen documentation
+ *
+ *
+ **************************************************************************/

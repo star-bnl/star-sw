@@ -1,11 +1,21 @@
+/*!
+ * \class St_scm_Maker
+ * \author B.Hippolyte, W.Pinganaud   
+ * \date 2000
+ *
+ *  Cluster matching  for the Silicon Strip Detectors
+ * 
+ *  This maker controls  the space-point reconstruction in the SSD :
+ *  clusters from each side of a single silicon strip detector
+ *  are associated in different packages types. Solving the
+ *  cluster package give one or several solutions for the hits   
+ *  positions in the silicon strip detector.
+ * 
+ * See documentation at http://star.in2p3.fr/STAR_informatique/hit_reconstruction.html#scm
+ */
 #ifndef STAR_St_scm_Maker
 #define STAR_St_scm_Maker
 
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// St_scm_Maker virtual base class for Maker                            //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
@@ -32,8 +42,8 @@ class St_scm_Maker : public StMaker {
  protected:
 
   TFile *ScmCtrlFile; //!
-  TH2S *matchisto;  //! (1p-1n) packages control matching.
-  TH1S *orthoproj;  //! orthonormal projection and perfect matching deviation.
+  TH2S *matchisto;    //! (1p-1n) packages control matching.
+  TH1S *orthoproj;    //! orthonormal projection and perfect matching deviation.
 
  public: 
                   St_scm_Maker(const char *name="scm_spt");
@@ -42,13 +52,20 @@ class St_scm_Maker : public StMaker {
    virtual Int_t  Make();
    virtual Int_t  Finish();
    virtual void   PrintInfo();
+
+   virtual const char *GetCVS()
+     {static const char cvs[]="Tag $Name:  $ $Id: St_scm_Maker.h,v 1.3 2002/03/25 20:13:05 suire Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
    ClassDef(St_scm_Maker, 1)   //StAF chain virtual base class for Makers
 };
 #endif
 
-
-
-
-
-
+/***************************************************************************
+ *
+ * $Log: St_scm_Maker.h,v $
+ * Revision 1.3  2002/03/25 20:13:05  suire
+ * Small memory leak fixes, doxygen documentation
+ *
+ *
+ **************************************************************************/
 
