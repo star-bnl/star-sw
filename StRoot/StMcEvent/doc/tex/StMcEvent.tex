@@ -2,7 +2,7 @@
 %
 % StMcEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StMcEvent.tex,v 2.8 2003/10/08 20:27:17 calderon Exp $
+% $Id: StMcEvent.tex,v 2.9 2003/12/02 16:42:10 calderon Exp $
 %
 % Authors:Michael A. Lisa
 %         Thomas S. Ullrich
@@ -23,6 +23,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StMcEvent.tex,v $
+% Revision 2.9  2003/12/02 16:42:10  calderon
+% fix a verb statement extending over two lines
+%
 % Revision 2.8  2003/10/08 20:27:17  calderon
 % Update documentation on FTPC, CTB, BEMC hits.
 %
@@ -1110,8 +1113,7 @@ this case the CTB.
 The class to hold these hits is \name{StMcCtbHitCollection}, which holds them in a flat
 array, no further hierarchy.
 \item[Public\\ Constructors]
-    \verb+StMcCtbHit(const StThreeVectorF& x,const StThreeVectorF& p,
-	     const float de, const float ds,  const long key, const long id, StMcTrack* parent)+\\
+    \verb+StMcCtbHit(const StThreeVectorF& x,const StThreeVectorF& p, const float de, const float ds,  const long key, const long id, StMcTrack* parent)+\\
     Create an instance of \name{StMcCtbHit} with position \name{x},
     local momentum \name{p}, energy deposited \name{de}, pathlength \name{ds},
     key and id for proper assignment of pointers and the pointer to the partent track..
