@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.7 1999/08/07 19:42:21 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.8 1999/08/10 17:10:51 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.8  1999/08/10 17:10:51  fisyak
+// Exprot EChainOptions into rootcint
+//
 // Revision 1.7  1999/08/07 19:42:21  fisyak
 // use default ctor for St_tpcdaq_Maker
 //
@@ -41,25 +44,6 @@
 #include "StRoot/StIOMaker/StIOMaker.h"
 
 //_____________________________________________________________________
-enum EChainOptions { 
-  kFIRST   ,
-  kSD97    ,kSD98    ,kY1a     ,kY1b     ,kY1c     ,          // time stamps
-  kES99    ,kER99    ,kY1d     ,kY1e     ,kY2a     ,
-  kEval    ,kOFF     ,kXIN     ,kXOUT    ,kGSTAR   ,          // Chains, options
-  kTDAQ    ,kFZIN    ,kGEANT   ,
-  kFieldOn ,kFieldOff,kHalfField,                             // Magnetic Field
-  kTPC     ,kTSS     ,kTRS     ,kMINIDAQ ,kTFS     ,kTCL     ,kTPT     ,// TPC
-  kSVT     ,kSRS     ,kSTK     ,                              // SVT  
-  kFTPC    ,kFSS     ,kFCL     ,kFPT     ,                    // FTPC
-  kEMS     ,kEMC     ,                                        // EMC
-  kTRG     ,kCTF     ,kMWC     ,kL3T     ,
-  kRICH    ,                                                  // RICH
-  kGLOBAL  ,kMATCH   ,kPRIMARY ,kV0      ,kXI      ,kKINK    ,// Global Chain
-  kDST     ,kEVENT   ,kANALYSIS,kQA      ,                    // Dst
-  kTREE    ,kAllEvent,kDISPLAY ,kLAST    ,                    // StEvent
-  kDEFAULT ,
-  kMakeDoc ,kDEBUG   ,kHIGZ
-};
 Char_t  *ChainOptions[] = {
   "FIRST"
  ,"SD97"   ,"SD98"   ,"Y1a"    ,"Y1b"    ,"Y1c"
