@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.hh,v 1.8 2002/01/30 14:29:10 caines Exp $
+ * $Id: StSvtCoordinateTransform.hh,v 1.9 2002/02/16 21:50:32 jeromel Exp $
  *
  * Author: Helen Caines made this on  April 14 2000
  *
@@ -35,8 +35,8 @@ using std::vector;
 #define SvtLtoG_ F77_NAME(svtltog,SVTLTOG)
 #define SvtGtoL_ F77_NAME(svtgtol,SVTGTOL)
 extern "C" {
-int type_of_call SvtLtoG_(float *x, float *xp, svg_geom_st *geom, int *index);
-int type_of_call SvtGtoL_(float *x, float *xp, svg_geom_st *geom, int *index);
+int type_of_call SvtLtoG_(float *x, float *xp, int *index);
+int type_of_call SvtGtoL_(float *x, float *xp, int *index);
 }
 #endif
 #include "StThreeVector.hh"
@@ -49,6 +49,7 @@ class StSvtLocalCoordinate;
 class StSvtWaferCoordinate;
 class StSvtConfig;
 class StSvtGeometry;
+class StSvtHybridCollection;
 class svg_geom_st;
 class svg_shape_st;
 class srs_srspar_st;
@@ -74,17 +75,19 @@ public:
   // Svt Local <--> Global
   void  operator()(const StSvtLocalCoordinate&, StGlobalCoordinate&);
   void  operator()(const  StGlobalCoordinate& ,StSvtLocalCoordinate&);
-  void  setParamPointers( srs_srspar_st* srspar, svg_geom_st* geom, svg_shape_st* shape, StSvtConfig* config);
-  void  setParamPointers( StSvtGeometry* geom, StSvtConfig* config);
+  void  setParamPointers( srs_srspar_st* srspar, svg_geom_st* geom, svg_shape_st* shape, StSvtConfig* config, StSvtHybridCollection* driftVeloc=NULL);
+  void  setParamPointers( StSvtGeometry* geom, StSvtConfig* config, StSvtHybridCollection* driftVeloc=NULL);
   int  LocaltoGlobal(const StSvtLocalCoordinate&,   StThreeVector<double>& x, int Index);
   int  GlobaltoLocal(const StThreeVector<double>& x , StSvtLocalCoordinate&, int HardWarePos, int Index );
-  double CalcDriftLength(double x);
-  double UnCalcDriftLength(double x);
+  double CalcDriftLength(const StSvtWaferCoordinate&, double x);
+  double UnCalcDriftLength(const StSvtLocalCoordinate&, double x);
   double CalcTransLength(double x);
   double UnCalcTransLength(double x);
   int IsOnWaferZ( const StThreeVector<double>& x, int HardWarePos);
   int IsOnWaferR(const StThreeVector<double>& x, int HardWarePos);
   StTpcCoordinateTransform* TpcTransform;
+  void setDriftVelocity();
+
 private:
   
   //  svg_geom_st *mgeom;
@@ -92,6 +95,7 @@ private:
   //  srs_srspar_st *mparam;
   StSvtConfig *mconfig;
   StSvtGeometry* mgeom;
+  StSvtHybridCollection* mDriftVelocity;
 
 };
 
